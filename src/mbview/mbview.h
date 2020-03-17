@@ -12,13 +12,12 @@
  *    See README file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
 /*
- *
  * Author:	D. W. Caress
  * Date:	October 10,  2002
- *
  */
 
-/*--------------------------------------------------------------------*/
+#ifndef MBVIEW_MBVIEW_H_
+#define MBVIEW_MBVIEW_H_
 
 #ifndef MB_STATUS_DEF
 #include "mb_status.h"
@@ -484,6 +483,7 @@ struct mbview_struct {
 	void (*mbview_picknav_notify)(size_t id);
 	void (*mbview_pickvector_notify)(size_t id);
 	void (*mbview_sensitivity_notify)(void);
+	void (*mbview_colorchange_notify)(size_t id);
 
 	/* active flag */
 	int active;
@@ -590,7 +590,7 @@ struct mbview_struct {
 	float *primary_b;
 	char *primary_stat_color;
 	char *primary_stat_z;
-	int secondary_sameas_primary;
+	bool secondary_sameas_primary;
 	float secondary_nodatavalue;
 	int secondary_nxy;
 	int secondary_n_columns;
@@ -650,11 +650,17 @@ struct mb3dsoundings_sounding_struct {
 	float glx;
 	float gly;
 	float glz;
+  float r;
+  float g;
+  float b;
 	int winx;
 	int winy;
 };
 
 struct mb3dsoundings_struct {
+  /* display flag */
+  bool displayed;
+
 	/* location and scale parameters */
 	double xorigin;
 	double yorigin;
@@ -706,6 +712,7 @@ int mbview_addaction(int verbose, size_t instance, void(mbview_action_notify)(Wi
                      int sensitive, int *error);
 int mbview_addpicknotify(int verbose, size_t instance, int picktype, void(mbview_pick_notify)(size_t), int *error);
 int mbview_setsensitivitynotify(int verbose, size_t instance, void(mbview_sensitivity_notify)(), int *error);
+int mbview_setcolorchangenotify(int verbose, size_t instance, void(mbview_colorchange_notify)(size_t), int *error);
 void mbview_resize(Widget w, XtPointer client_data, XEvent *event, Boolean *unused);
 int mbview_destroy(int verbose, size_t instance, int destroywidgets, int *error);
 int mbview_quit(int verbose, int *error);
@@ -758,6 +765,7 @@ int mbview_projectdistance(size_t instance, double xlon1, double ylat1, double z
                            double *distancelateral, double *distanceoverground, double *slope);
 int mbview_getzdata(size_t instance, double xgrid, double ygrid, int *found, double *zdata);
 int mbview_getzdata(size_t instance, double xgrid, double ygrid, int *found, double *zdata);
+int mbview_colorvalue_instance(size_t instance, double value, float *r, float *g, float *b);
 
 /* mbview_plot.c function prototypes */
 int mbview_reset_glx(size_t instance);
@@ -880,4 +888,5 @@ int mb3dsoundings_set_optimizebiasvalues_notify(int verbose,
 int mb3dsoundings_plot(int verbose, int *error);
 int mb3dsoundings_get_bias_values(int verbose, double *rollbias, double *pitchbias, double *headingbias, double *timelag,
                                   double *snell, int *error);
-/*--------------------------------------------------------------------*/
+
+#endif  // MBVIEW_MBVIEW_H_

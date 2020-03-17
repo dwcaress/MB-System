@@ -75,7 +75,7 @@ e1 = e1fn(es);
 e2 = e2fn(es);
 e3 = e3fn(es);
 
-sincos(lat1,&sinphi,&cosphi);
+gsincos(lat1,&sinphi,&cosphi);
 ms1 = msfnz(e,sinphi,cosphi);
 ml1 = mlfn(e0, e1, e2, e3, lat1);
 
@@ -88,7 +88,7 @@ if (mode != 0)
       p_error("Standard Parallels on opposite sides of equator","eqcon_for");
       return(81);
       }
-   sincos(lat2,&sinphi,&cosphi);
+   gsincos(lat2,&sinphi,&cosphi);
    ms2 = msfnz(e,sinphi,cosphi);
    ml2 = mlfn(e0, e1, e2, e3, lat2);
    if (fabs(lat1 - lat2) >= EPSLN)

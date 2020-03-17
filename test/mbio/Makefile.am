@@ -18,9 +18,25 @@ AM_LDFLAGS += -lpthread
 TESTS =
 check_PROGRAMS =
 
+TESTS += mb_defaults_test
+check_PROGRAMS += mb_defaults_test
+mb_defaults_test_SOURCES = mb_defaults_test.cc
+
+TESTS += mb_error_test
+check_PROGRAMS += mb_error_test
+mb_error_test_SOURCES = mb_error_test.cc
+
 TESTS += mb_format_test
 check_PROGRAMS += mb_format_test
 mb_format_test_SOURCES = mb_format_test.cc
+
+TESTS += mb_mem_test
+check_PROGRAMS += mb_mem_test
+mb_mem_test_SOURCES = mb_mem_test.cc
+
+TESTS += mb_read_init_test
+check_PROGRAMS += mb_read_init_test
+mb_read_init_test_SOURCES = mb_read_init_test.cc
 
 TESTS += mb_time_test
 check_PROGRAMS += mb_time_test

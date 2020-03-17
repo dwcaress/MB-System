@@ -1,6 +1,5 @@
 dnl--------------------------------------------------------------------
 dnl    The MB-system:    configure.ac    12/7/2011
-dnl    $Id$
 dnl
 dnl    Copyright (c) 2011-2019 by
 dnl    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -19,12 +18,16 @@ define([AC_CACHE_LOAD], )
 define([AC_CACHE_SAVE], )
 
 dnl Initialize and set version and version date
-AC_INIT([mbsystem],[5.7.6beta15],[http://listserver.mbari.org/sympa/arc/mbsystem],[mbsystem],[http://www.mbari.org/data/mbsystem/])
+AC_INIT([mbsystem],[5.7.6beta32],[http://listserver.mbari.org/sympa/arc/mbsystem],[mbsystem],[http://www.mbari.org/data/mbsystem/])
 
 AC_CONFIG_MACRO_DIR(m4)
 AC_LANG(C)
 # AC_LANG([C++])
-AC_DEFINE(VERSION_DATE, "21 October 2019", [Set VERSION_DATE define in mb_config.h])
+
+dnl Require c++11
+AX_CXX_COMPILE_STDCXX(11)
+
+AC_DEFINE(VERSION_DATE, "17 March 2020", [Set VERSION_DATE define in mb_config.h])
 
 dnl Check system arch
 AC_CANONICAL_HOST
@@ -33,9 +36,8 @@ AC_DISABLE_OPTION_CHECKING
 AS_ECHO([" "])
 AS_ECHO(["------------------------------------------------------------------------------"])
 AS_ECHO(["    The MB-system:    configure    12/7/2011"])
-AS_ECHO(["    $Id$"])
 AS_ECHO([" "])
-AS_ECHO(["    Copyright (c) 2011-2019 by"])
+AS_ECHO(["    Copyright (c) 2011-2020 by"])
 AS_ECHO(["    D. W. Caress (caress@lamont.ldgo.columbia.edu)"])
 AS_ECHO(["    and D. N. Chayes (dale@lamont.ldgo.columbia.edu)"])
 AS_ECHO(["    Lamont-Doherty Earth Observatory"])
@@ -323,6 +325,8 @@ dnl Check for PROJ library libproj
 AS_ECHO(["Check for PROJ library libproj"])
 GOT_PROJ=no
 FOUND_PROJ_LIB=no
+FOUND_PROJ6=no
+FOUND_PROJ4=no
 AC_ARG_WITH(proj-lib, [ --with-proj-lib=DIR Location of PROJ library],
     [proj_libdir="${withval}"] [GOT_PROJ=yes], [GOT_PROJ=no])
 if test "$GOT_PROJ" = "yes" ; then
@@ -330,32 +334,59 @@ if test "$GOT_PROJ" = "yes" ; then
     AS_ECHO(["PROJ library location specified: $proj_libdir - check if libproj is there..."])
     save_LDFLAGS=$LDFLAGS
     LDFLAGS="$LDFLAGS -L$proj_libdir"
-    AC_CHECK_LIB([proj], [proj_create], [FOUND_PROJ_LIB=yes], [FOUND_PROJ_LIB=no], )
-    if test "$FOUND_PROJ_LIB" = "no"; then
+    AC_CHECK_LIB([proj], [proj_normalize_for_visualization], [FOUND_PROJ_LIB=yes], [FOUND_PROJ_LIB=no], )
+    if test "$FOUND_PROJ_LIB" = "yes"; then
+        FOUND_PROJ6=yes
+        AS_ECHO(["Found PROJ library libproj from version 6.1 or later"])
+    else
         AC_CHECK_LIB([proj], [pj_init_plus], [FOUND_PROJ_LIB=yes], [FOUND_PROJ_LIB=no], )
+        if test "$FOUND_PROJ_LIB" = "yes"; then
+            FOUND_PROJ4=yes
+            AS_ECHO(["Found PROJ library libproj with PROJ4 api available"])
+        fi
     fi
-    LDFLAGS="$save_LDFLAGS"
     if test "$FOUND_PROJ_LIB" = "no"; then
         AC_MSG_ERROR([Did not find libproj according to --with-proj-lib - check the installation!])
     fi
+    LDFLAGS="$save_LDFLAGS"
     libproj_LIBS="-L$proj_libdir -R $proj_libdir -lproj"
     libproj_LDFLAGS="-L$proj_libdir"
 else
     dnl Look for pkg-config PROJ package...
     AS_ECHO(["Look for pkg-config PROJ package..."])
     PKG_CHECK_MODULES([libproj], [proj], [FOUND_PROJ_LIB=yes], [FOUND_PROJ_LIB=no])
+    AC_CHECK_LIB([proj], [proj_normalize_for_visualization], [FOUND_PROJ_LIB=yes], [FOUND_PROJ_LIB=no], )
+    if test "$FOUND_PROJ_LIB" = "yes"; then
+        FOUND_PROJ6=yes
+        AS_ECHO(["Found PROJ library libproj from version 6.1 or later"])
+    else
+        AC_CHECK_LIB([proj], [pj_init_plus], [FOUND_PROJ_LIB=yes], [FOUND_PROJ_LIB=no], )
+        if test "$FOUND_PROJ_LIB" = "yes"; then
+            FOUND_PROJ4=yes
+            AS_ECHO(["Found PROJ library libproj with PROJ4 api available"])
+        fi
+    fi
+    if test "$FOUND_PROJ_LIB" = "no"; then
+        AC_MSG_ERROR([Did not find PROJ library pkg-config package...])
+    fi
     libproj_LIBS="-lproj"
     libproj_LDFLAGS=""
 fi
 if test "$FOUND_PROJ_LIB" = "no" ; then
-    dnl Did not find PROJ library pkg-config package, looking in the usual places...
-    AS_ECHO(["Did not find PROJ library pkg-config package, looking in the usual places..."])
-    AC_CHECK_LIB([proj], [proj_create], [FOUND_PROJ_LIB=yes], [FOUND_PROJ_LIB=no],)
-    if test "$FOUND_PROJ_LIB" = "no"; then
-        AC_CHECK_LIB([proj], [pj_init_plus], [FOUND_PROJ_LIB=yes], [FOUND_PROJ_LIB=no], )
+    dnl Did not find PROJ library pkg-config package, looking in the other usual places...
+    AS_ECHO(["Did not find PROJ library pkg-config package, looking in the other usual places..."])
+    AC_CHECK_LIB([proj], [proj_normalize_for_visualization], [FOUND_PROJ_LIB=yes], [FOUND_PROJ_LIB=no],)
+    if test "$FOUND_PROJ_LIB" = "yes"; then
+      FOUND_PROJ6=yes
+      AS_ECHO(["Found PROJ library libproj from version 6.1 or later"])
+    else
+      AC_CHECK_LIB([proj], [pj_init_plus], [FOUND_PROJ_LIB=yes], [FOUND_PROJ_LIB=no], )
+      if test "$FOUND_PROJ_LIB" = "yes" ; then
+        FOUND_PROJ4=yes
+        AS_ECHO(["Found PROJ library libproj with PROJ4 api available"])
+      fi
     fi
     if test "$FOUND_PROJ_LIB" = "yes" ; then
-        AS_ECHO(["Found PROJ library libproj..."])
         libproj_LIBS="-lproj"
         libproj_LDFLAGS=""
     else
@@ -364,6 +395,7 @@ if test "$FOUND_PROJ_LIB" = "no" ; then
     fi
 fi
 dnl Done checking for PROJ library libproj
+AS_ECHO(["FOUND_PROJ_LIB:$FOUND_PROJ_LIB FOUND_PROJ4:$FOUND_PROJ4 FOUND_PROJ6:$FOUND_PROJ6"])
 
 dnl Check if proj header location specified on the command line
 AS_ECHO(["Check if proj header location specified on the command line"])
@@ -380,36 +412,37 @@ else
 fi
 save_CPPFLAGS=$CPPFLAGS
 save_CFLAGS=$CFLAGS
+if test "$FOUND_PROJ4" = "yes" ; then
+    libproj_CPPFLAGS="$libproj_CPPFLAGS -DUSE_PROJ4_API"
+    dnl Only have PROJ 4 without geodesic calculations, will not build mbsvpselect...
+    AS_ECHO(["Only have PROJ 4 without geodesic calculations, will not build mbsvpselect..."])
+fi
+AM_CONDITIONAL([BUILD_MBSVPSELECT], [test $FOUND_PROJ6 = yes])
 CPPFLAGS="$CPPFLAGS $libproj_CPPFLAGS"
 CFLAGS="$CFLAGS $libproj_CPPFLAGS"
-AC_CHECK_HEADER(proj.h, [FOUND_PROJ6=yes], [FOUND_PROJ6=no],)
-if test "$FOUND_PROJ6" = "yes"; then
+AC_CHECK_HEADER(proj.h, [FOUND_PROJ_HEADER_projh=yes], [FOUND_PROJ_HEADER_projh=no],)
+FOUND_PROJ_HEADERS="no"
+if test "$FOUND_PROJ_HEADER_projh" = "yes"; then
   dnl Found PROJ6 headers
   FOUND_PROJ_HEADERS="yes"
-  AS_ECHO(["Found PROJ6 headers - using the PROJ6 API"])
-else
-  AC_CHECK_HEADER(proj_api.h, [FOUND_PROJ4=yes], [FOUND_PROJ4=no],)
-  if test "$FOUND_PROJ4" = "yes"; then
-    FOUND_PROJ_HEADERS="yes"
-    libproj_CPPFLAGS="$libproj_CPPFLAGS -DUSE_PROJ4_API"
-    AS_ECHO(["Found PROJ4 headers - using the deprecated PROJ4 API"])
+  AS_ECHO(["Found PROJ 5/6 header proj.h"])
+fi
+AC_CHECK_HEADER(proj_api.h, [FOUND_PROJ_HEADER_proj_apih=yes], [FOUND_PROJ_HEADER_proj_apih=no],)
+if test "$FOUND_PROJ_HEADER_proj_apih" = "yes"; then
+  FOUND_PROJ_HEADERS="yes"
+  AS_ECHO(["Found PROJ 4 header proj_api.h"])
+fi
+if test "$FOUND_PROJ_HEADERS" = "no" ; then
+  if test "$GOT_PROJ" = "yes" ; then
+    AS_ECHO(["Did not find PROJ headers according to --with-proj-include - check the installation!"])
+    AC_MSG_ERROR([Did not find PROJ headers according to --with-proj-include - check the installation!])
   else
-    FOUND_PROJ_HEADERS="no"
-    if test "$GOT_PROJ" = "yes" ; then
-      AS_ECHO(["Did not find PROJ headers according to --with-proj-include - check the installation!"])
-      AC_MSG_ERROR([Did not find PROJ headers according to --with-proj-include - check the installation!])
-    else
-      AS_ECHO(["Did not find PROJ headers anywhere, use --with-proj-include to set the location"])
-      AC_MSG_ERROR([Did not find PROJ headers anywhere, use --with-proj-include to set the location])
-    fi
-
+    AS_ECHO(["Did not find PROJ headers anywhere, use --with-proj-include to set the location"])
+    AC_MSG_ERROR([Did not find PROJ headers anywhere, use --with-proj-include to set the location])
   fi
 fi
 CPPFLAGS=$save_CPPFLAGS
 CFLAGS=$save_CFLAGS
-if test "$FOUND_PROJ6" = "yes"; then
-  CFLAGS="$CFLAGS $libproj_CPPFLAGS -DACCEPT_USE_OF_DEPRECATED_PROJ_API_H"
-fi
 dnl Done checking for PROJ library libproj and PROJ headers
 
 dnl Substitute PROJ library and header arguments
@@ -440,7 +473,7 @@ if test -x "$NC_CONF" ; then
     NETCDF_LIB=`echo $libnetcdf_LIBS | sed 's/^-L//;s/\ .*//'`
     libnetcdf_LDFLAGS="-L$NETCDF_LIB"
 else
-    if test "X$enable_netcdf" = "X" || test "X$enable_netcdf" = "Xyes" ; then
+    if test "X$enable_netcdf" = "X" || test "$enable_netcdf" = "yes" ; then
         AC_PATH_PROG([NETCDF], [ncdump], [/usr/local/netcdf/bin/ncdump])
         NETCDF=`dirname $NETCDF`
         NETCDF=`dirname $NETCDF`
@@ -874,11 +907,11 @@ dnl Check if the mbtrn tools should be built
 AS_ECHO(["Check if the mbtrn tools should be built"])
 AC_ARG_ENABLE(mbtrn, [AS_HELP_STRING([--enable-mbtrn], [build mbtrn tools])],
         [build_mbtrn=yes], [build_mbtrn=no])
-AM_CONDITIONAL([BUILD_MBTRN], [test x$build_mbtrn = xyes])
+AM_CONDITIONAL([BUILD_MBTRN], [test $build_mbtrn = yes])
 if test "$build_mbtrn" = "yes" ; then
     dnl Building mbtrn tools
     AS_ECHO(["Building mbtrn tools"])
-    AC_DEFINE(MBTRN_ENABLED, 1, [Build libmbtrn and mbtrnpreprocess])
+    AC_DEFINE(MBTRN_ENABLED, 1, [Build libmbtrn and mbtrnpp])
 else
     dnl Not building mbtrn tools
     AS_ECHO(["Not building mbtrn tools"])
@@ -892,10 +925,10 @@ dnl Check if the mbtnav tools should be built
 AS_ECHO(["Check if the mbtnav tools should be built"])
 AC_ARG_ENABLE(mbtnav, [AS_HELP_STRING([--enable-mbtnav], [build mbtnav tools])],
 [build_mbtnav=yes], [build_mbtnav=no])
-AM_CONDITIONAL([BUILD_MBTNAV], [test x$build_mbtnav = xyes])
+AM_CONDITIONAL([BUILD_MBTNAV], [test $build_mbtnav = yes])
 if test "$build_mbtnav" = "yes" ; then
 dnl Building mbtnav tools
-AS_ECHO(["Building mbtnav tools"])
+AS_ECHO(["Building mbtnav tools (i.e. embed a TRN instance in mbtrnpp)"])
 AC_DEFINE(MBTNAV_ENABLED, 1, [Build libmbtnav])
 else
 dnl Not building mbtnav tools
@@ -910,7 +943,7 @@ dnl Check if the mbsys tools should be built
 AS_ECHO(["Check if the graphical utils should be built"])
 AC_ARG_ENABLE(mbtools, [AS_HELP_STRING([--disable-mbtools], [do not build graphical tools])],
         [build_mbtools=no], [build_mbtools=yes])
-AM_CONDITIONAL([BUILD_MBUTILS], [test x$build_mbtools = xyes])
+AM_CONDITIONAL([BUILD_MBUTILS], [test $build_mbtools = yes])
 if test "$build_mbtools" = "yes" ; then
     dnl Building mbsys tools
     AS_ECHO(["Building graphical tools"])
@@ -929,7 +962,7 @@ dnl Check if programs using PCL should be built
 AS_ECHO(["Check if programs using PCL should be built"])
 AC_ARG_ENABLE(pcltools, [AS_HELP_STRING([--enable-pcltools],
         [build tools using PCL])], [build_pcltools=yes], [build_mbpcltools=no])
-AM_CONDITIONAL([BUILD_PCLTOOLS], [test x$build_pcltools = xyes])
+AM_CONDITIONAL([BUILD_PCLTOOLS], [test $build_pcltools = yes])
 if test "$build_pcltools" = "yes" ; then
     dnl Build tools using PCL
     AS_ECHO(["Build tools using PCL"])
@@ -952,7 +985,7 @@ dnl Check if the testing tools should be built
 AS_ECHO(["Check if the unit tests should be built"])
 AC_ARG_ENABLE(test, [AS_HELP_STRING([--enable-test], [build test tools])],
         [build_test=yes], [build_test=no])
-AM_CONDITIONAL([BUILD_TEST], [test x$build_test = xyes])
+AM_CONDITIONAL([BUILD_TEST], [test $build_test = yes])
 if test "$build_test" = "yes" ; then
     dnl Building unit tests
     AS_ECHO(["Building unit tests"])
@@ -967,7 +1000,7 @@ dnl Configure pthreads.
 dnl Force to yes.
 dnl--------------------------------------------------------------------
 
-AM_CONDITIONAL([HAVE_PTHREADS],[test "xyes" = "xyes"])
+AM_CONDITIONAL([HAVE_PTHREADS],[test "yes" = "yes"])
 AC_SUBST(PTHREAD_CFLAGS)
 AC_SUBST(PTHREAD_LIBS)
 
@@ -1002,6 +1035,7 @@ AC_CONFIG_FILES([\
       src/gsf/Makefile \
       src/mbaux/Makefile \
       src/utilities/Makefile \
+      src/deprecated/Makefile \
       src/gmt/Makefile \
       src/macros/Makefile \
       src/mbedit/Makefile \
@@ -1027,6 +1061,7 @@ AC_CONFIG_FILES([\
       test/Makefile \
       test/mbio/Makefile \
       test/utilities/Makefile \
+      test/deprecated/Makefile \
       ])
 AC_OUTPUT
 
@@ -1039,17 +1074,17 @@ AS_ECHO(["MB-System Configure Summary"])
 AS_ECHO(["------------------------------------------------------------------------------"])
 AS_ECHO(["MB-System will be installed in: ${prefix}"])
 AS_ECHO(["Installation host:              ${host}"])
-if test "x$enable_static" = xyes ; then
+if test $enable_static = yes ; then
     AS_ECHO(["Building Static Libs: Yes"])
 else
     AS_ECHO(["Building Static Libs: No"])
 fi
-if test "x$enable_shared" = xyes ; then
+if test $enable_shared = yes ; then
     AS_ECHO(["Building Shared Libs: Yes"])
 else
     AS_ECHO(["Building Shared Libs: No"])
 fi
-if test x"$hardening" != x"no" ; then
+if test $hardening != no ; then
     AS_ECHO(["Hardening Enabled: Yes"])
     AS_ECHO(["HARDEN_CFLAGS:     $HARDEN_CFLAGS"])
     AS_ECHO(["HARDEN_LDFLAGS:    $HARDEN_LDFLAGS"])
@@ -1058,11 +1093,17 @@ if test x"$hardening" != x"no" ; then
 else
     AS_ECHO(["Hardening Enabled: No"])
 fi
-if test $BYTESWAP = "yes" ; then
+if test $BYTESWAP = yes ; then
     AS_ECHO(["Byteswapping: Enabled"])
 else
     AS_ECHO(["Byteswapping: Disabled"])
 fi
+if test $FOUND_PROJ6 = yes; then
+    AS_ECHO(["PROJ: Using PROJ library libproj with version 6.1 or later API"])
+else
+    AS_ECHO(["PROJ: Using PROJ library libproj with version 4 API (will not build mbsvpselect)"])
+fi
+
 AS_ECHO(["libgmt_CPPFLAGS:     $libgmt_CPPFLAGS"])
 AS_ECHO(["libgmt_LIBS:         $libgmt_LIBS"])
 AS_ECHO(["libgmt_LDFLAGS:      $libgmt_LDFLAGS"])

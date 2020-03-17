@@ -12,22 +12,23 @@
  *    See README file for copying and redistribution conditions.
  *------------------------------------------------------------------------------*/
 /*
- *
  * Author:	D. W. Caress
  * Date:	September 25, 2003
  *
  * Note:	This code was broken out of mbview_callbacks.c, which was
  *		begun on October 7, 2002
- *
  */
 /*------------------------------------------------------------------------------*/
 
-/* Standard includes for builtins. */
+#include <ctype.h>
+#include <math.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <ctype.h>
-#include <math.h>
+
+#include "mb_define.h"
+#include "mb_status.h"
 
 /* Need to include windows.h BEFORE the the Xm stuff otherwise VC14+ barf with conflicts */
 #if defined(_MSC_VER) && (_MSC_VER >= 1800)
@@ -38,7 +39,6 @@
 #include <windows.h>
 #endif
 
-/* Motif required Headers */
 #include <X11/StringDefs.h>
 #include <X11/cursorfont.h>
 #include <Xm/Xm.h>
@@ -58,8 +58,6 @@
 #include "MB3DRouteList.h"
 #include "MB3DNavList.h"
 
-/* OpenGL include files */
-
 #include <GL/gl.h>
 #include <GL/glu.h>
 #ifndef WIN32
@@ -67,17 +65,9 @@
 #endif
 #include "mb_glwdrawa.h"
 
-/* MBIO include files */
-#include "mb_status.h"
-#include "mb_define.h"
-
-/* mbview include */
 #include "mbview.h"
 #include "mbviewprivate.h"
 
-/*------------------------------------------------------------------------------*/
-
-/* local variables */
 static char value_text[MB_PATH_MAXLINE];
 
 /*------------------------------------------------------------------------------*/
@@ -85,16 +75,7 @@ int mbview_setsecondarygrid(int verbose, size_t instance, int secondary_grid_pro
                             float secondary_nodatavalue, int secondary_n_columns, int secondary_n_rows, double secondary_min,
                             double secondary_max, double secondary_xmin, double secondary_xmax, double secondary_ymin,
                             double secondary_ymax, double secondary_dx, double secondary_dy, float *secondary_data, int *error)
-
 {
-	/* local variables */
-	int status = MB_SUCCESS;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
-	int proj_status;
-	char *message;
-
-	/* print starting debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
@@ -112,14 +93,14 @@ int mbview_setsecondarygrid(int verbose, size_t instance, int secondary_grid_pro
 		fprintf(stderr, "dbg2       secondary_xmax:              %f\n", secondary_xmax);
 		fprintf(stderr, "dbg2       secondary_ymin:              %f\n", secondary_ymin);
 		fprintf(stderr, "dbg2       secondary_ymax:              %f\n", secondary_ymax);
-		fprintf(stderr, "dbg2       secondary_dx:                %f\n", secondary_dx);
-		fprintf(stderr, "dbg2       secondary_dy:                %f\n", secondary_dy);
+		fprintf(stderr, "dbg2       secondary_dx:                %g\n", secondary_dx);
+		fprintf(stderr, "dbg2       secondary_dy:                %g\n", secondary_dy);
 		fprintf(stderr, "dbg2       secondary_data:              %p\n", secondary_data);
 	}
 
 	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
+	struct mbview_world_struct *view = &(mbviews[instance]);
+	struct mbview_struct *data = &(view->data);
 
 	/* set values */
 	data->secondary_grid_projection_mode = secondary_grid_projection_mode;
@@ -138,7 +119,7 @@ int mbview_setsecondarygrid(int verbose, size_t instance, int secondary_grid_pro
 	data->secondary_dy = secondary_dy;
 
 	/* allocate required arrays */
-	status = mb_mallocd(verbose, __FILE__, __LINE__, sizeof(float) * data->secondary_nxy, (void **)&data->secondary_data, error);
+	int status = mb_mallocd(verbose, __FILE__, __LINE__, sizeof(float) * data->secondary_nxy, (void **)&data->secondary_data, error);
 	if (status != MB_SUCCESS) {
 		fprintf(stderr, "\nUnable to allocate memory to store secondary grid data\n");
 		fprintf(stderr, "\nProgram terminated in function <%s>.\n", __func__);
@@ -147,7 +128,7 @@ int mbview_setsecondarygrid(int verbose, size_t instance, int secondary_grid_pro
 
 	/* copy grid */
 	memcpy(data->secondary_data, secondary_data, data->secondary_nxy * sizeof(float));
- 
+
 	/* check if secondary grid has same bounds and dimensions as primary grid so
 	    that overlay calculations are trivial */
 	if (data->secondary_n_columns == data->primary_n_columns && data->secondary_n_rows == data->primary_n_rows &&
@@ -162,14 +143,15 @@ int mbview_setsecondarygrid(int verbose, size_t instance, int secondary_grid_pro
 	/* set projection for secondary grid if needed */
 	if (data->secondary_nxy > 0 && data->secondary_grid_projection_mode == MBV_PROJECTION_PROJECTED) {
 		/* set projection for getting lon lat */
-		proj_status = mb_proj_init(mbv_verbose, data->secondary_grid_projection_id, &(view->secondary_pjptr), error);
+		const int proj_status = mb_proj_init(5, data->secondary_grid_projection_id, &(view->secondary_pjptr), error);
 		if (proj_status == MB_SUCCESS)
 			view->secondary_pj_init = true;
-		/*fprintf(stderr,"SECONDARY GRID PROJECTION:%d %p %s\n",
-		view->secondary_pj_init,view->secondary_pjptr,data->secondary_grid_projection_id);*/
+		fprintf(stderr,"SECONDARY GRID PROJECTION:%d %p %s\n",
+		view->secondary_pj_init,view->secondary_pjptr,data->secondary_grid_projection_id);
 
 		/* quit if projection fails */
 		if (proj_status != MB_SUCCESS) {
+			char *message;
 			mb_error(verbose, *error, &message);
 			fprintf(stderr, "\nMBIO Error initializing projection:\n%s\n", message);
 			fprintf(stderr, "\nProgram terminated in <%s>\n", __func__);
@@ -181,7 +163,6 @@ int mbview_setsecondarygrid(int verbose, size_t instance, int secondary_grid_pro
 	/* reset histogram flag */
 	view->secondary_histogram_set = false;
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -190,22 +171,12 @@ int mbview_setsecondarygrid(int verbose, size_t instance, int secondary_grid_pro
 		fprintf(stderr, "dbg2       status:                    %d\n", status);
 	}
 
-	/* return */
 	return (status);
 }
 /*------------------------------------------------------------------------------*/
 int mbview_updatesecondarygrid(int verbose, size_t instance, int secondary_n_columns, int secondary_n_rows, float *secondary_data,
                                int *error)
-
 {
-	/* local variables */
-	int status = MB_SUCCESS;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
-	int first;
-	int k;
-
-	/* print starting debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
@@ -218,15 +189,16 @@ int mbview_updatesecondarygrid(int verbose, size_t instance, int secondary_n_col
 	}
 
 	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
+	struct mbview_world_struct *view = &(mbviews[instance]);
+	struct mbview_struct *data = &(view->data);
+
 
 	/* set value */
 	if (secondary_n_columns == data->secondary_n_columns && secondary_n_rows == data->secondary_n_rows) {
-		first = true;
-		for (k = 0; k < data->secondary_n_columns * data->secondary_n_rows; k++) {
+		bool first = true;
+		for (int k = 0; k < data->secondary_n_columns * data->secondary_n_rows; k++) {
 			data->secondary_data[k] = secondary_data[k];
-			if (first == true && secondary_data[k] != data->secondary_nodatavalue) {
+			if (first && secondary_data[k] != data->secondary_nodatavalue) {
 				data->secondary_min = data->secondary_data[k];
 				data->secondary_max = data->secondary_data[k];
 				first = false;
@@ -246,7 +218,8 @@ int mbview_updatesecondarygrid(int verbose, size_t instance, int secondary_n_col
 	/* reset histogram flag */
 	view->secondary_histogram_set = false;
 
-	/* print output debug statements */
+	const int status = MB_SUCCESS;
+
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -255,21 +228,12 @@ int mbview_updatesecondarygrid(int verbose, size_t instance, int secondary_n_col
 		fprintf(stderr, "dbg2       status:                    %d\n", status);
 	}
 
-	/* return */
 	return (status);
 }
 
 /*------------------------------------------------------------------------------*/
 int mbview_updatesecondarygridcell(int verbose, size_t instance, int secondary_ix, int secondary_jy, float value, int *error)
-
 {
-	/* local variables */
-	int status = MB_SUCCESS;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
-	int k;
-
-	/* print starting debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
@@ -282,17 +246,18 @@ int mbview_updatesecondarygridcell(int verbose, size_t instance, int secondary_i
 	}
 
 	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
+	struct mbview_world_struct *view = &(mbviews[instance]);
+	struct mbview_struct *data = &(view->data);
 
 	/* set value */
 	if (secondary_ix >= 0 && secondary_ix < data->secondary_n_columns && secondary_jy >= 0 && secondary_jy < data->secondary_n_rows) {
 		/* update the cell value */
-		k = secondary_ix * data->secondary_n_rows + secondary_jy;
+		const int k = secondary_ix * data->secondary_n_rows + secondary_jy;
 		data->secondary_data[k] = value;
 	}
 
-	/* print output debug statements */
+	const int status = MB_SUCCESS;
+
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -301,7 +266,6 @@ int mbview_updatesecondarygridcell(int verbose, size_t instance, int secondary_i
 		fprintf(stderr, "dbg2       status:                    %d\n", status);
 	}
 
-	/* return */
 	return (status);
 }
 
@@ -309,14 +273,7 @@ int mbview_updatesecondarygridcell(int verbose, size_t instance, int secondary_i
 int mbview_setsecondarycolortable(int verbose, size_t instance, int secondary_colortable, int secondary_colortable_mode,
                                   double secondary_colortable_min, double secondary_colortable_max,
                                   double overlay_shade_magnitude, double overlay_shade_center, int overlay_shade_mode, int *error)
-
 {
-	/* local variables */
-	int status = MB_SUCCESS;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
-
-	/* print starting debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
@@ -333,8 +290,8 @@ int mbview_setsecondarycolortable(int verbose, size_t instance, int secondary_co
 	}
 
 	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
+	struct mbview_world_struct *view = &(mbviews[instance]);
+	struct mbview_struct *data = &(view->data);
 
 	/* set values */
 	data->secondary_colortable = secondary_colortable;
@@ -371,7 +328,8 @@ int mbview_setsecondarycolortable(int verbose, size_t instance, int secondary_co
 		}
 	}
 
-	/* print output debug statements */
+	const int status = MB_SUCCESS;
+
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -380,25 +338,13 @@ int mbview_setsecondarycolortable(int verbose, size_t instance, int secondary_co
 		fprintf(stderr, "dbg2       status:                    %d\n", status);
 	}
 
-	/* return */
 	return (status);
 }
 
 /*------------------------------------------------------------------------------*/
 
 int mbview_setsecondaryname(int verbose, size_t instance, char *name, int *error)
-
 {
-	/* local variables */
-	int status = MB_SUCCESS;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
-	XmString tmp0;
-	Cardinal ac = 0;
-	Arg args[256];
-	Boolean argok = False;
-
-	/* print starting debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
@@ -409,13 +355,15 @@ int mbview_setsecondaryname(int verbose, size_t instance, char *name, int *error
 	}
 
 	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
+	struct mbview_world_struct *view = &(mbviews[instance]);
+	// struct mbview_struct *data = &(view->data);
 
 	/* set secondary grid labels */
 	if (XtIsManaged(view->mb3dview.mbview_toggleButton_data_secondary)) {
-		ac = 0;
-		tmp0 = (XmString)BX_CONVERT(view->mb3dview.mbview_toggleButton_data_secondary, (char *)name, XmRXmString, 0, &argok);
+		Boolean argok = False;
+		Cardinal ac = 0;
+		XmString tmp0 = (XmString)BX_CONVERT(view->mb3dview.mbview_toggleButton_data_secondary, (char *)name, XmRXmString, 0, &argok);
+		Arg args[256];
 		XtSetArg(args[ac], XmNlabelString, tmp0);
 		if (argok)
 			ac++;
@@ -433,7 +381,8 @@ int mbview_setsecondaryname(int verbose, size_t instance, char *name, int *error
 		XmStringFree((XmString)tmp0);
 	}
 
-	/* print output debug statements */
+	const int status = MB_SUCCESS;
+
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -442,7 +391,6 @@ int mbview_setsecondaryname(int verbose, size_t instance, char *name, int *error
 		fprintf(stderr, "dbg2       status:                    %d\n", status);
 	}
 
-	/* return */
 	return (status);
 }
 

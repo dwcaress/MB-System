@@ -103,9 +103,17 @@ struct mb_info_struct {
 	// int	*mask;
 };
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* MBIO mb_info function prototypes */
 int mb_info_init(int verbose, struct mb_info_struct *mb_info, int *error);
 int mb_get_info(int verbose, char *file, struct mb_info_struct *mb_info, int lonflip, int *error);
 int mb_get_info_datalist(int verbose, char *read_file, int *format, struct mb_info_struct *mb_info, int lonflip, int *error);
+
+#ifdef __cplusplus
+}  /* extern "C" */
+#endif
 
 #endif  /* MB_INFO_H_ */

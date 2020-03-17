@@ -11,7 +11,7 @@
 <CENTER><H3><U>MB-System Unix Manual Page</U></H3></CENTER>
 <PRE>
 <H1>mblist</H1>
-Section:  MB-System 5.0  (1)<BR>Updated:  1 September 2019 <BR><A HREF="#index">Index</A>
+Section:  MB-System 5.0  (1)<BR>Updated:  1 February 2020 <BR><A HREF="#index">Index</A>
 <HR>
 
 <A NAME="lbAB">&nbsp;</A>
@@ -370,8 +370,14 @@ will be output for all sidescan pixels.
 Determines the form of the output. <I>Output_format</I> is a string composed
 of one or more of the following characters:
 <DT><DD>
+<B>%fnv</B>
+Special tag: this is a shortcut for generating &quot;fast navigation&quot; or *.fnv files.
+If the output format is &quot;%fnv&quot; or &quot;%FNV&quot; then the output format
+will be set to the string that is used to generate *.fnv files, which is:
+&quot;tMXYHScRPr=X=Y+X+Y&quot;.
+<DT><DD>
 <B>/</B>
-special character: this causes the value
+Special character: this causes the value
 indicated by the next character to be inverted. This applies only to simple
 numeric values such as depth and
 heading and not to values like time
@@ -379,7 +385,7 @@ strings or positions with hemisphere
 characters.
 <DT><DD>
 <B>-</B>
-special character: this causes the value
+Special character: this causes the value
 indicated by the next character to be
 multiplied by -1. This applies only
 to simple numeric values such as
@@ -388,7 +394,7 @@ like time strings or positions with
 hemisphere characters.
 <DT><DD>
 <B>_</B>
-special character: this causes the position
+Special character: this causes the position
 indicated by the next 'X', 'x', 'Y', or 'y'
 character to be that of the sensor rather
 than the associated seafloor
@@ -396,7 +402,7 @@ depth or backscatter value. This applies only
 to position values.
 <DT><DD>
 <B>@</B>
-special character: this causes the position
+Special character: this causes the position
 or depth of the associated beam or pixel
 indicated by the next 'X', 'Y', 'Z', or 'z' character to be
 reported as the value relative
@@ -404,7 +410,7 @@ to the location of the sensor. This applies only
 to position and depth values.
 <DT><DD>
 <B>^</B>
-special character: this causes the position
+Special character: this causes the position
 value indicated by the next 'X', or 'Y'
 character to be expressed as an easting or
 northing in the projected coordinate system
@@ -416,7 +422,7 @@ longitude of the first data point. This
 applies only to position values.
 <DT><DD>
 <B>=</B>
-special character: this causes the value
+Special character: this causes the value
 indicated by the next character to
 derive from the port-most non-null
 beam or pixel. This applies only
@@ -425,7 +431,7 @@ beams or pixels such as depth, longitude,
 or latitude.
 <DT><DD>
 <B>+</B>
-special character: this causes the value
+Special character: this causes the value
 indicated by the next character to
 derive from the starboard-most non-null
 beam or pixel. This applies only
@@ -456,7 +462,7 @@ for sidescan
 for sonar altitude above the bottom (m)
 <DT><DD>
 <B>c</B>
-for sonar tranducer depth (m)
+for sonar transducer depth (m)
 <DT><DD>
 <B>D</B>
 for bathymetry acrosstrack distance (m)
@@ -8415,7 +8421,7 @@ the <B>-J</B> option, e.g. <B>-J</B><I>UTM10N</I> or <B>-J</B><I>epsg32749</I>.
 </PRE>
 
 <CENTER><P><BR>
-Last Updated: 1 September 2019</P></CENTER>
+Last Updated: 1 February 2020</P></CENTER>
 
 <HR>
 

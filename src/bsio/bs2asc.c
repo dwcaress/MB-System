@@ -81,7 +81,7 @@ int main(int argc, char **argv) {
 	void usage();
 	void pr_bsfhdr(BSFile *), pr_pnghdr(Ping *);
 
-	if ((progname = strrchr(*argv, (int)'/')) != (char *)NULL)
+	if ((progname = strrchr(*argv, (int)'/')) != NULL)
 		progname++;
 	else
 		progname = *argv;
@@ -146,7 +146,7 @@ int main(int argc, char **argv) {
 			if (argc < 2)
 				usage();
 			argc--, argv++;
-			if ((fp = fopen(*argv, "w")) == (FILE *)NULL) {
+			if ((fp = fopen(*argv, "w")) == NULL) {
 				(void)fprintf(stderr, "%s: cannot open file '%s'\n", progname, *argv);
 				exit(BS_OPEN);
 			}
@@ -676,12 +676,12 @@ void pr_bsfhdr(BSFile *bsf) {
 		break;
 	}
 
-	if (bsf->bsf_srcfilenm != (char *)NULL)
+	if (bsf->bsf_srcfilenm != NULL)
 		(void)fprintf(fp, "Source File: %s\n", bsf->bsf_srcfilenm);
 	else
 		(void)fprintf(fp, "Source File: ?\n");
 
-	if (bsf->bsf_log != (char *)NULL)
+	if (bsf->bsf_log != NULL)
 		(void)fprintf(fp, "Log: %s\n", bsf->bsf_log);
 	else
 		(void)fprintf(fp, "Log:\n");

@@ -24,6 +24,7 @@
  */
 
 #include <math.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -142,8 +143,8 @@ int mb_check_info(int verbose, char *file, int lonflip, double bounds[4], int *f
 					*file_in_bounds = false;
 					const double mask_dx = (lon_max - lon_min) / mask_nx;
 					const double mask_dy = (lat_max - lat_min) / mask_ny;
-					for (int i = 0; i < mask_nx && *file_in_bounds == false; i++)
-						for (int j = 0; j < mask_ny && *file_in_bounds == false; j++) {
+					for (int i = 0; i < mask_nx && !*file_in_bounds; i++)
+						for (int j = 0; j < mask_ny && !*file_in_bounds; j++) {
 							int k = i + j * mask_nx;
 							const double lonwest = lon_min + i * mask_dx;
 							const double loneast = lonwest + mask_dx;
@@ -520,7 +521,66 @@ int mb_get_info(int verbose, char *file, struct mb_info_struct *mb_info, int lon
 	return (status);
 }
 /*--------------------------------------------------------------------*/
-int mb_make_info(int verbose, int force, char *file, int format, int *error) {
+
+bool mb_should_make_fbt(int verbose, int format) {
+  bool result = true;
+
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+		fprintf(stderr, "dbg2       format:     %d\n", format);
+	}
+
+  if (format <= 0
+    || format == MBF_SBSIOMRG || format == MBF_SBSIOCEN || format == MBF_SBSIOLSI
+    || format == MBF_SBURICEN || format == MBF_SBURIVAX || format == MBF_SBSIOSWB
+    || format == MBF_HSLDEDMB || format == MBF_HSURICEN || format == MBF_HSURIVAX
+    || format == MBF_SB2000SS || format == MBF_SB2000SB || format == MBF_MSTIFFSS
+    || format == MBF_MBLDEOIH || format == MBF_MBNETCDF || format == MBF_ASCIIXYZ
+    || format == MBF_ASCIIYXZ || format == MBF_ASCIIXYT || format == MBF_ASCIIYXT
+    || format == MBF_HYDROB93 || format == MBF_SEGYSEGY || format == MBF_MGD77DAT
+    || format == MBF_MBARIROV || format == MBF_MBARROV2 || format == MBF_MBPRONAV)
+    result = false;
+
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
+		fprintf(stderr, "dbg2  Return result:\n");
+		fprintf(stderr, "dbg2       result:     %d\n", result);
+	}
+
+	return (result);
+}
+/*--------------------------------------------------------------------*/
+
+bool mb_should_make_fnv(int verbose, int format) {
+  bool result = true;
+
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+		fprintf(stderr, "dbg2       format:     %d\n", format);
+	}
+
+  if (format <= 0
+    || format == MBF_ASCIIXYZ || format == MBF_ASCIIYXZ || format == MBF_ASCIIXYT
+    || format == MBF_ASCIIYXT || format == MBF_HYDROB93 || format == MBF_SEGYSEGY
+    || format == MBF_MGD77DAT || format == MBF_MBARIROV || format == MBF_MBARROV2
+    || format == MBF_NVNETCDF || format == MBF_MBPRONAV)
+    result = false;
+
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
+		fprintf(stderr, "dbg2  Return result:\n");
+		fprintf(stderr, "dbg2       result:     %d\n", result);
+	}
+
+	return (result);
+}
+/*--------------------------------------------------------------------*/
+
+int mb_make_info(int verbose, bool force, char *file, int format, int *error) {
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -558,7 +618,7 @@ int mb_make_info(int verbose, int force, char *file, int format, int *error) {
 	}
 
 	/* make new inf file if not there or out of date */
-	if (force == true || (datmodtime > 0 && datmodtime > infmodtime)) {
+	if (force || (datmodtime > 0 && datmodtime > infmodtime)) {
 		if (verbose >= 1)
 			fprintf(stderr, "\nGenerating inf file for %s\n", file);
 		char command[MB_PATH_MAXLINE];
@@ -570,13 +630,7 @@ int mb_make_info(int verbose, int force, char *file, int format, int *error) {
 	}
 
 	/* make new fbt file if not there or out of date */
-	if ((force || (datmodtime > 0 && datmodtime > fbtmodtime)) && format != MBF_SBSIOMRG && format != MBF_SBSIOCEN &&
-	    format != MBF_SBSIOLSI && format != MBF_SBURICEN && format != MBF_SBURIVAX && format != MBF_SBSIOSWB &&
-	    format != MBF_HSLDEDMB && format != MBF_HSURICEN && format != MBF_HSURIVAX && format != MBF_SB2000SS &&
-	    format != MBF_SB2000SB && format != MBF_MSTIFFSS && format != MBF_MBLDEOIH && format != MBF_MBNETCDF &&
-	    format != MBF_ASCIIXYZ && format != MBF_ASCIIYXZ && format != MBF_ASCIIXYT && format != MBF_ASCIIYXT &&
-	    format != MBF_HYDROB93 && format != MBF_SEGYSEGY && format != MBF_MGD77DAT && format != MBF_MBARIROV &&
-	    format != MBF_MBARROV2 && format != MBF_MBPRONAV) {
+	if ((force || (datmodtime > 0 && datmodtime > fbtmodtime)) && mb_should_make_fbt(verbose, format)) {
 		if (verbose >= 1)
 			fprintf(stderr, "Generating fbt file for %s\n", file);
 		char command[MB_PATH_MAXLINE];
@@ -586,10 +640,7 @@ int mb_make_info(int verbose, int force, char *file, int format, int *error) {
 	}
 
 	/* make new fnv file if not there or out of date */
-	if ((force || (datmodtime > 0 && datmodtime > fnvmodtime)) && format != MBF_ASCIIXYZ && format != MBF_ASCIIYXZ &&
-	    format != MBF_ASCIIXYT && format != MBF_ASCIIYXT && format != MBF_HYDROB93 && format != MBF_SEGYSEGY &&
-	    format != MBF_MGD77DAT && format != MBF_MBARIROV && format != MBF_MBARROV2 && format != MBF_NVNETCDF &&
-	    format != MBF_MBPRONAV) {
+	if ((force || (datmodtime > 0 && datmodtime > fnvmodtime)) && mb_should_make_fnv(verbose, format)) {
 		if (verbose >= 1)
 			fprintf(stderr, "Generating fnv file for %s\n", file);
 		char command[MB_PATH_MAXLINE];
@@ -797,114 +848,106 @@ int mb_get_ffs(int verbose, char *file, int *format, int *error) {
 	return (status);
 }
 /*--------------------------------------------------------------------*/
-int mb_swathbounds(int verbose, int checkgood, double navlon, double navlat, double heading, int nbath, int nss, char *beamflag,
-                   double *bath, double *bathacrosstrack, double *bathalongtrack, double *ss, double *ssacrosstrack,
-                   double *ssalongtrack, int *ibeamport, int *ibeamcntr, int *ibeamstbd, int *ipixelport, int *ipixelcntr,
-                   int *ipixelstbd, int *error) {
+int mb_swathbounds(int verbose, int checkgood, int nbath, int nss,
+                    char *beamflag, double *bathacrosstrack,
+                    double *ss, double *ssacrosstrack,
+                    int *ibeamport, int *ibeamcntr, int *ibeamstbd,
+                    int *ipixelport, int *ipixelcntr, int *ipixelstbd,
+                    int *error) {
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:       %d\n", verbose);
 		fprintf(stderr, "dbg2       checkgood:     %d\n", checkgood);
-		fprintf(stderr, "dbg2       longitude:     %f\n", navlon);
-		fprintf(stderr, "dbg2       latitude:      %f\n", navlat);
-		fprintf(stderr, "dbg2       heading:       %f\n", heading);
 		fprintf(stderr, "dbg2       nbath:         %d\n", nbath);
 		if (verbose >= 3 && nbath > 0) {
-			fprintf(stderr, "dbg3       beam   flag  bath  crosstrack alongtrack\n");
+			fprintf(stderr, "dbg3       beam   flag   crosstrack\n");
 			for (int i = 0; i < nbath; i++)
-				fprintf(stderr, "dbg3       %4d   %3d   %f    %f     %f\n", i, beamflag[i], bath[i], bathacrosstrack[i],
-				        bathalongtrack[i]);
+				fprintf(stderr, "dbg3       %4d   %3d     %f\n", i, beamflag[i], bathacrosstrack[i]);
 		}
 		fprintf(stderr, "dbg2       nss:      %d\n", nss);
 		if (verbose >= 3 && nss > 0) {
-			fprintf(stderr, "dbg3       pixel sidescan crosstrack alongtrack\n");
+			fprintf(stderr, "dbg3       pixel sidescan crosstrack\n");
 			for (int i = 0; i < nss; i++)
-				fprintf(stderr, "dbg3       %4d   %f    %f     %f\n", i, ss[i], ssacrosstrack[i], ssalongtrack[i]);
+				fprintf(stderr, "dbg3       %4d   %f    %f\n", i, ss[i], ssacrosstrack[i]);
 		}
 	}
-
-	/* get coordinate scaling */
-	double mtodeglon;
-	double mtodeglat;
-	mb_coor_scale(verbose, navlat, &mtodeglon, &mtodeglat);
-	/* TODO(schwehr): Remove unless there was supposed to be a use of headingx/headingy. */
-	/* const double headingx = sin(heading * DTR); */
-	/* const double headingy = cos(heading * DTR); */
-
-	/* set starting values */
-	*ibeamport = 0;
-	*ibeamcntr = 0;
-	*ibeamstbd = 0;
-	*ipixelport = 0;
-	*ipixelcntr = 0;
-	*ipixelstbd = 0;
 
 	/* get min max of non-null beams */
-	double xtrackmin = 0.0;
-	double xtrackmax = 0.0;
-	double distmin = 0.0;
-	bool found = false;
-	for (int i = 0; i < nbath; i++) {
-		if ((checkgood && mb_beam_ok(beamflag[i])) || !mb_beam_check_flag_unusable(beamflag[i])) {
-			if (!found) {
-				*ibeamport = i;
-				*ibeamcntr = i;
-				*ibeamstbd = i;
-				xtrackmin = bathacrosstrack[i];
-				distmin = fabs(bathacrosstrack[i]);
-				xtrackmax = bathacrosstrack[i];
-				found = true;
-			}
-			else {
-				if (fabs(bathacrosstrack[i]) < distmin) {
-					*ibeamcntr = i;
-					distmin = fabs(bathacrosstrack[i]);
-				}
-				if (bathacrosstrack[i] < xtrackmin) {
-					*ibeamport = i;
-					xtrackmin = bathacrosstrack[i];
-				}
-				else if (bathacrosstrack[i] > xtrackmax) {
-					*ibeamstbd = i;
-					xtrackmax = bathacrosstrack[i];
-				}
-			}
-		}
-	}
+	*ibeamport = nbath / 2;
+	*ibeamcntr = *ibeamport;
+	*ibeamstbd = *ibeamport;
+  if (nbath > 0 && beamflag != NULL && bathacrosstrack != NULL) {
+  	double xtrackmin = 0.0;
+  	double xtrackmax = 0.0;
+  	double distmin = 0.0;
+  	bool found = false;
+  	for (int i = 0; i < nbath; i++) {
+  		if ((checkgood && mb_beam_ok(beamflag[i])) || !mb_beam_check_flag_unusable(beamflag[i])) {
+  			if (!found) {
+  				*ibeamport = i;
+  				*ibeamcntr = i;
+  				*ibeamstbd = i;
+  				xtrackmin = bathacrosstrack[i];
+  				distmin = fabs(bathacrosstrack[i]);
+  				xtrackmax = bathacrosstrack[i];
+  				found = true;
+  			}
+  			else {
+  				if (fabs(bathacrosstrack[i]) < distmin) {
+  					*ibeamcntr = i;
+  					distmin = fabs(bathacrosstrack[i]);
+  				}
+  				if (bathacrosstrack[i] < xtrackmin) {
+  					*ibeamport = i;
+  					xtrackmin = bathacrosstrack[i];
+  				}
+  				else if (bathacrosstrack[i] > xtrackmax) {
+  					*ibeamstbd = i;
+  					xtrackmax = bathacrosstrack[i];
+  				}
+  			}
+  		}
+  	}
+  }
 
 	/* get min max of non-null pixels */
-	xtrackmin = 0.0;
-	xtrackmax = 0.0;
-	distmin = 0.0;
-	found = false;
-	for (int i = 0; i < nss; i++) {
-		if (ss[i] > 0.0) {
-			if (!found) {
-				*ipixelport = i;
-				*ipixelcntr = i;
-				*ipixelstbd = i;
-				xtrackmin = ssacrosstrack[i];
-				distmin = fabs(ssacrosstrack[i]);
-				xtrackmax = ssacrosstrack[i];
-				found = true;
-			}
-			else {
-				if (fabs(ssacrosstrack[i]) < distmin) {
-					*ipixelcntr = i;
-					distmin = fabs(ssacrosstrack[i]);
-				}
-				if (ssacrosstrack[i] < xtrackmin) {
-					*ipixelport = i;
-					xtrackmin = ssacrosstrack[i];
-				}
-				else if (ssacrosstrack[i] > xtrackmax) {
-					*ipixelstbd = i;
-					xtrackmax = ssacrosstrack[i];
-				}
-			}
-		}
-	}
+	*ipixelport = nss / 2;
+	*ipixelcntr = *ipixelport;
+	*ipixelstbd = *ipixelport;
+  if (nss > 0 && ss != NULL && ssacrosstrack != NULL) {
+  	double xtrackmin = 0.0;
+  	double xtrackmax = 0.0;
+  	double distmin = 0.0;
+  	bool found = false;
+  	for (int i = 0; i < nss; i++) {
+  		if (ss[i] > 0.0) {
+  			if (!found) {
+  				*ipixelport = i;
+  				*ipixelcntr = i;
+  				*ipixelstbd = i;
+  				xtrackmin = ssacrosstrack[i];
+  				distmin = fabs(ssacrosstrack[i]);
+  				xtrackmax = ssacrosstrack[i];
+  				found = true;
+  			}
+  			else {
+  				if (fabs(ssacrosstrack[i]) < distmin) {
+  					*ipixelcntr = i;
+  					distmin = fabs(ssacrosstrack[i]);
+  				}
+  				if (ssacrosstrack[i] < xtrackmin) {
+  					*ipixelport = i;
+  					xtrackmin = ssacrosstrack[i];
+  				}
+  				else if (ssacrosstrack[i] > xtrackmax) {
+  					*ipixelstbd = i;
+  					xtrackmax = ssacrosstrack[i];
+  				}
+  			}
+  		}
+  	}
+  }
 
 	const int status = MB_SUCCESS;
 
@@ -1048,7 +1091,7 @@ int mb_get_info_datalist(int verbose, char *read_file, int *format, struct mb_in
 	/* open file list */
 	char swathfile[MB_PATH_MAXLINE];
 	void *datalist = NULL;
-	int read_data;
+	bool read_data;
 	char dfile[MB_PATH_MAXLINE];
 	int status = MB_SUCCESS;
 	if (read_datalist) {
@@ -1073,7 +1116,7 @@ int mb_get_info_datalist(int verbose, char *read_file, int *format, struct mb_in
 
 	/* loop over all files to be read */
 	int nfile = 0;
-	while (read_data == true) {
+	while (read_data) {
 		/* read inf file */
 		struct mb_info_struct mb_info_file;
 		status = mb_get_info(verbose, swathfile, &mb_info_file, lonflip, error);

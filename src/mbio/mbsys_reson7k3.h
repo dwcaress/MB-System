@@ -273,6 +273,7 @@
 #define R7KHDRSIZE_CalibrationStatus 826
 #define R7KHDRSIZE_CalibratedSideScan 65
 #define R7KHDRSIZE_SnippetBackscatteringStrength 49
+#define R7KRDTSIZE_SnippetBackscatteringStrength 14
 #define R7KHDRSIZE_MB2Status 2088
 #define R7KHDRSIZE_FileHeader 316
 #define R7KRDTSIZE_FileHeader 6
@@ -1158,6 +1159,7 @@ typedef struct s7k3_Bathymetry_struct {
                                           //       for each beam (minimum depth gate)
   f32 max_depth_gate[MBSYS_RESON7K_MAX_SOUNDINGS];  // Maximum two-way travel time to filter point
                                           //       for each beam (maximum depth gate)
+  // TODO(schwehr): Can optionaldata be a bool?
   u32 optionaldata;                             // Flag indicating if bathymetry calculated and
                                           //       values below filled in
                                                   //  0 = No
@@ -2432,7 +2434,11 @@ typedef struct s7k3_SnippetBackscatteringStrength_struct {
                         //  Bit 3: Snippets display min requirements are used
                         //  Bit 4: Minimum window size is required
                         //  Bit 5: Maximum window size is required
-                        //  Bit 6-31: reserved
+                        //  Bit 6: - Footprint areas are included
+                        //  Bit 7: - Generic compensation (not per unit)
+                        //  Bit 8: - Single absorption value used for the whole ping.
+                        //           Otherwise a CTD profile is used
+                        //  Bit 9-31: - Reserved
   f32 absorption;     // Absorption value in dB/km. Only valid when
                       //   control flag bit 8 is set
   u32 reserved[6];  // Reserved for future use
@@ -3526,9 +3532,10 @@ int mbsys_reson7k3_ancilliarysensor(int verbose, void *mbio_ptr, void *store_ptr
                                    double *sensor6, double *sensor7, double *sensor8, int *error);
 int mbsys_reson7k3_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_ptr, int *error);
 int mbsys_reson7k3_checkheader(s7k3_header header);
-int mbsys_reson7k3_makess(int verbose, void *mbio_ptr, void *store_ptr, int source, int pixel_size_set, double *pixel_size,
+int mbsys_reson7k3_makess_source(int verbose, void *mbio_ptr, void *store_ptr, int source, int pixel_size_set, double *pixel_size,
                          int swath_width_set, double *swath_width, int pixel_int, int *error);
-
+int mbsys_reson7k3_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel_size_set, double *pixel_size,
+                         int swath_width_set, double *swath_width, int pixel_int, int *error);
 int mbsys_reson7k3_print_header(int verbose, s7k3_header *header, int *error);
 int mbsys_reson7k3_print_ReferencePoint(int verbose, s7k3_ReferencePoint *ReferencePoint, int *error);
 int mbsys_reson7k3_print_UncalibratedSensorOffset(int verbose, s7k3_UncalibratedSensorOffset *UncalibratedSensorOffset, int *error);

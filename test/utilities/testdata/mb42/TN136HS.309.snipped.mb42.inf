@@ -1,0 +1,52 @@
+
+Swath Data File:      TN136HS.309.snipped.mb42
+MBIO Data Format ID:  42
+Format name:          MBF_SB2100B1
+Informal Description: SeaBeam 2100 series vender format
+Attributes:           SeaBeam 2100, bathymetry, amplitude 
+                      and sidescan, 151 beams bathymetry,
+                      2000 pixels sidescan, binary,
+                      SeaBeam Instruments and L-DEO.
+
+Data Totals:
+Number of Records:                           2
+Bathymetry Data (59 beams):
+  Number of Beams:              118
+  Number of Good Beams:         115     97.46%
+  Number of Zero Beams:           3      2.54%
+  Number of Flagged Beams:        0      0.00%
+Amplitude Data (59 beams):
+  Number of Beams:              118
+  Number of Good Beams:         115     97.46%
+  Number of Zero Beams:           3      2.54%
+  Number of Flagged Beams:        0      0.00%
+Sidescan Data (0 pixels):
+  Number of Pixels:               0
+  Number of Good Pixels:          0      0.00%
+  Number of Zero Pixels:          0      0.00%
+  Number of Flagged Pixels:       0      0.00%
+
+Navigation Totals:
+Total Time:             0.0014 hours
+Total Track Length:     0.0036 km
+Average Speed:          2.6044 km/hr ( 1.4078 knots)
+
+Start of Data:
+Time:  11 05 2001 00:01:44.000000  JD309 (2001-11-05T00:01:44.000000)
+Lon:  -124.501602100     Lat:    40.838493300     Depth:   462.6000 meters
+Speed:  1.4400 km/hr ( 0.7784 knots)  Heading: 324.5000 degrees
+Sonar Depth:    0.0000 m  Sonar Altitude:  462.6000 m
+
+End of Data:
+Time:  11 05 2001 00:01:49.000000  JD309 (2001-11-05T00:01:49.000000)
+Lon:  -124.501632600     Lat:    40.838516200     Depth:   462.4000 meters
+Speed:  0.3600 km/hr ( 0.1946 knots)  Heading: 324.9000 degrees
+Sonar Depth:    0.0000 m  Sonar Altitude:  462.4000 m
+
+Limits:
+Minimum Longitude:    -124.505797065   Maximum Longitude:    -124.497389636
+Minimum Latitude:       40.836260446   Maximum Latitude:       40.840775308
+Minimum Sonar Depth:     0.0000   Maximum Sonar Depth:     0.0000
+Minimum Altitude:      462.4000   Maximum Altitude:      462.6000
+Minimum Depth:         448.2000   Maximum Depth:         468.3000
+Minimum Amplitude:          inf   Maximum Amplitude:          inf

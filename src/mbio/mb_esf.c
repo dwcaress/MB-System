@@ -17,11 +17,10 @@
  *
  * Author:	D. W. Caress
  * Date:	April 10, 2003
- *
- *
  */
 
 #include <math.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -90,10 +89,8 @@ int mb_esf_check(int verbose, char *swathfile, char *esffile, int *found, int *e
             existing esf file will be backed up first.
         If both load and output are false, nothing will be
         done. */
-int mb_esf_load(int verbose, const char *program_name, char *swathfile, int load, int output, char *esffile, struct mb_esf_struct *esf,
+int mb_esf_load(int verbose, const char *program_name, char *swathfile, bool load, int output, char *esffile, struct mb_esf_struct *esf,
                 int *error) {
-	int found;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -118,8 +115,9 @@ int mb_esf_load(int verbose, const char *program_name, char *swathfile, int load
 
 	/* get name of existing or new esffile, then load old edits
 	    and/or open new esf file */
+	int found;  // TODO(schwehr): Make mb_esf_check take a bool.
 	int status = mb_esf_check(verbose, swathfile, esffile, &found, error);
-	if ((load == true && found == true) || output != MBP_ESF_NOWRITE) {
+	if ((load && found) || output != MBP_ESF_NOWRITE) {
 		status = mb_esf_open(verbose, program_name, esffile, load, output, esf, error);
 	}
 	else {
@@ -156,7 +154,7 @@ int mb_esf_load(int verbose, const char *program_name, char *swathfile, int load
             MBP_ESF_APPEND then edit events are appended
             to any existing esf file. Any
             existing esf file will be backed up first. */
-int mb_esf_open(int verbose, const char *program_name, char *esffile, int load, int output, struct mb_esf_struct *esf, int *error) {
+int mb_esf_open(int verbose, const char *program_name, char *esffile, bool load, int output, struct mb_esf_struct *esf, int *error) {
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -196,8 +194,7 @@ int mb_esf_open(int verbose, const char *program_name, char *esffile, int load, 
 	esf->startnextsearch = 0;
 
 	/* load edits from existing esf file if requested */
-	if (load == true) {
-
+	if (load) {
 		/* check that esf file exists */
 		fstat = stat(esffile, &file_status);
 		if (fstat == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR) {
@@ -269,7 +266,7 @@ int mb_esf_open(int verbose, const char *program_name, char *esffile, int load, 
 						status = MB_FAILURE;
 						*error = MB_ERROR_EOF;
 					}
-					else if (esf->byteswapped == true) {
+					else if (esf->byteswapped) {
 						mb_swap_double(&(esf->edit[nedit].time_d));
 						esf->edit[nedit].beam = mb_swap_int(esf->edit[nedit].beam);
 						esf->edit[nedit].action = mb_swap_int(esf->edit[nedit].action);
@@ -322,7 +319,7 @@ int mb_esf_open(int verbose, const char *program_name, char *esffile, int load, 
 		fstat = stat(esffile, &file_status);
 		if (fstat == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR) {
 			/* copy old edit save file to tmp file */
-			if (load == true) {
+			if (load) {
 				sprintf(command, "cp %s %s.tmp\n", esffile, esffile);
 				/* shellstatus = */ system(command);
 				if (output == MBP_ESF_APPEND)
@@ -459,7 +456,7 @@ int mb_esf_fixtimestamps(int verbose, struct mb_esf_struct *esf, double time_d, 
 int mb_esf_apply(int verbose, struct mb_esf_struct *esf, double time_d, int pingmultiplicity, int nbath, char *beamflag,
                  int *error) {
 	int firstedit, lastedit;
-	int apply, action;
+	int action;
 	int beamoffset, beamoffsetmax;
 	char beamflagorg;
 	double maxtimediff;
@@ -526,6 +523,8 @@ int mb_esf_apply(int verbose, struct mb_esf_struct *esf, double time_d, int ping
 			if ((esf->edit[j].beam % MB_ESF_MULTIPLICITY_FACTOR) >= nbath)
 				esf->edit[j].use += 10000;
 		}
+
+		bool apply;
 
 		/* loop over all beams */
 		for (int i = 0; i < nbath; i++) {
@@ -612,7 +611,7 @@ int mb_esf_apply(int verbose, struct mb_esf_struct *esf, double time_d, int ping
 			 * using the -M4 or -M5 commands. If a beam is not set by an edit event,
 			 * set it to the implicit value
 			 */
-			if (apply == false) {
+			if (!apply) {
 				if (esf->mode == MB_ESF_MODE_IMPLICIT_NULL) {
 					beamflag[i] = MB_FLAG_NULL;
 				}
@@ -624,7 +623,7 @@ int mb_esf_apply(int verbose, struct mb_esf_struct *esf, double time_d, int ping
 			}
 
 			/* output change to stream file */
-			if (apply == true && esf->essfp != NULL && beamflag[i] != beamflagorg)
+			if (apply && esf->essfp != NULL && beamflag[i] != beamflagorg)
 				mb_ess_save(verbose, esf, time_d, ibeam, action, error);
 		}
 
@@ -672,7 +671,7 @@ int mb_esf_save(int verbose, struct mb_esf_struct *esf, double time_d, int beam,
 
 	/* write out the edit */
 	if (esf->esffp != NULL) {
-		if (esf->byteswapped == true) {
+		if (esf->byteswapped) {
 			mb_swap_double(&time_d);
 			beam = mb_swap_int(beam);
 			action = mb_swap_int(action);
@@ -725,7 +724,7 @@ int mb_ess_save(int verbose, struct mb_esf_struct *esf, double time_d, int beam,
 
 	/* write out the edit */
 	if (esf->essfp != NULL) {
-		if (esf->byteswapped == true) {
+		if (esf->byteswapped) {
 			mb_swap_double(&time_d);
 			beam = mb_swap_int(beam);
 			action = mb_swap_int(action);
@@ -914,7 +913,7 @@ static const int THRESHOLD = 16; /* Best choice for natural merge cut-off. */
 /*
  * Arguments are as for qsort.
  */
-int mb_mergesort(void *base, size_t nmemb, register size_t size, int (*cmp)(const void *, const void *)) {
+int mb_mergesort(void *base, size_t nmemb, size_t size, int (*cmp)(const void *, const void *)) {
 
 	if (size < PSIZE / 2) { /* Pointers must fit into 2 * size. */
 		/*errno = EINVAL;*/

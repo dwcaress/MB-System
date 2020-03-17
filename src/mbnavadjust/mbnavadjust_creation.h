@@ -18,6 +18,7 @@
 #define MBNA_FILESELECTION_NEW 1
 #define MBNA_FILESELECTION_OPEN 2
 #define MBNA_FILESELECTION_IMPORT 3
+#define MBNA_FILESELECTION_REFERENCE 4
 
 /*
  * Global widget declarations.
@@ -100,6 +101,7 @@ EXTERNAL Widget pushButton_new;
 EXTERNAL Widget pushButton_open;
 EXTERNAL Widget pushButton_close;
 EXTERNAL Widget pushButton_importdata;
+EXTERNAL Widget pushButton_importreference;
 EXTERNAL Widget pushButton_quit;
 EXTERNAL Widget pushButton_showsurveys;
 EXTERNAL Widget pushButton_showblocks; /* NEW */

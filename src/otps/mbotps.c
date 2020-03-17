@@ -56,8 +56,8 @@
  * Date:  April 5,  2018
  */
 
-/* standard include files */
 #include <math.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -65,194 +65,45 @@
 #include <time.h>
 #include <unistd.h>
 
-/* MBIO include files */
 #include "mb_define.h"
-#include "mb_status.h"
 #include "mb_format.h"
 #include "mb_process.h"
+#include "mb_status.h"
 
-/* OTPS installation location include */
+// OTPS installation location include
 #include "otps.h"
 
-/* local defines */
 #define MBOTPS_MODE_POSITION            0x00
 #define MBOTPS_MODE_NAVIGATION          0x01
 #define MBOTPS_MODE_TIDESTATION         0x02
 #define MBOTPS_MODE_NAV_WRT_STATION     0x03
-#define MBOTPS_DEFAULT_MODEL "atlas_v1"
+#define MBOTPS_DEFAULT_MODEL "tpxo9_atlas"
 
-/*--------------------------------------------------------------------*/
-
-int main
-(
-  int argc,
-  char **argv
-)
-{
-  static char program_name[] = "mbotps";
-  static char help_message[] =
-    "MBotps predicts tides using methods and data derived from the OSU Tidal Prediction Software (OTPS) distributions.";
-  static char usage_message[] =
+static char program_name[] = "mbotps";
+static char help_message[] =
+    "MBotps predicts tides using methods and data derived from the "
+    "OSU Tidal Prediction Software (OTPS) distributions.";
+static char usage_message[] =
     "mbotps [-Atideformat -Byear/month/day/hour/minute/second -Ctidestationformat\n"
     "\t-Dinterval -Eyear/month/day/hour/minute/second -Fformat\n"
     "\t-Idatalist -Lopts_path -Ntidestationfile -Ooutput -Potps_location\n"
     "\t-Rlon/lat -S -Tmodel -Utidestationlon/tidestationlat -V]";
-  extern char *optarg;
-  int errflg = 0;
-  int c;
-  int help = 0;
-  int flag = 0;
+/*--------------------------------------------------------------------*/
 
-  /* MBIO status variables */
-  int status = MB_SUCCESS;
+int main(int argc, char **argv) {
   int verbose = 0;
-  int error = MB_ERROR_NO_ERROR;
-  char *message;
-
-  /* MBIO read control parameters */
-  int read_datalist = false;
-  mb_path read_file;
-  void *datalist;
-  int look_processed = MB_DATALIST_LOOK_UNSET;
-  double file_weight;
-  mb_path swath_file;
-  mb_path file;
-  mb_path dfile;
   int format;
   int pings;
   int lonflip;
   double bounds[4];
-  double speedmin;
-  double timegap;
-  int beams_bath;
-  int beams_amp;
-  int pixels_ss;
-
-  /* MBIO read values */
-  void *mbio_ptr = NULL;
-  void *store_ptr = NULL;
-  int kind;
-  int time_i[7];
-  double time_d;
-  double navlon;
-  double navlat;
-  double speed;
-  double heading;
-  double distance;
-  double altitude;
-  double sonardepth;
-  char *beamflag = NULL;
-  double *bath = NULL;
-  double *bathacrosstrack = NULL;
-  double *bathalongtrack = NULL;
-  double *amp = NULL;
-  double *ss = NULL;
-  double *ssacrosstrack = NULL;
-  double *ssalongtrack = NULL;
-  char comment[MB_COMMENT_MAXLINE];
-
-  /* mbotps control parameters */
-  mb_path otps_location_use;
-  int notpsmodels = 0;
-  int nmodeldatafiles = 0;
-  int mbotps_mode = MBOTPS_MODE_POSITION;
-  double tidelon;
-  double tidelat;
-  double btime_d;
-  double etime_d;
   int btime_i[7];
   int etime_i[7];
-  double interval = 300.0;
-  mb_path tide_file;
-  int mbprocess_update = false;
-  int skip_existing = false;
-  int tideformat = 2;
-  int ngood;
+  double speedmin;
+  double timegap;
 
-  /* tide station data */
-  mb_path tidestation_file;
-  double tidestation_lon = 0.0;
-  double tidestation_lat = 0.0;
-  int tidestation_format = 2;
-  int tidestation_ok = false;
-  int ntidestation = 0;
-  double *tidestation_time_d = NULL;
-  double *tidestation_tide = NULL;
-  double *tidestation_model = NULL;
-  double *tidestation_correction = NULL;
-  int time_j[5];
-  int tidestation_stime_i[7], tidestation_etime_i[7];
-  double tidestation_stime_d, tidestation_etime_d;
-  double tidestation_d_min, tidestation_d_max;
-  double tidestation_m_min, tidestation_m_max;
-  double tidestation_c_min, tidestation_c_max;
-  int ihr, intstat, itime;
-  int size;
-  double sec, correction;
-
-  /* time parameters */
-  time_t right_now;
-  char date[32], user[MB_PATH_MAXLINE], *user_ptr, host[MB_PATH_MAXLINE];
-  int pid;
-
-  FILE *tfp, *mfp, *ofp;
-  struct stat file_status;
-  int fstat;
-  double start_time_d;
-  double end_time_d;
-  int istart, iend;
-  int proceed = true;
-  int input_size, input_modtime, output_size, output_modtime;
-  mb_path lltfile = "";
-  mb_path otpsfile = "";
-  mb_path line = "";
-  mb_path predict_tide = "";
-  int otps_model_set = false;
-  mb_path otps_model = "";
-  mb_path modelname = "";
-  mb_path modelfile = "";
-  mb_path modeldatafile = "";
-  int read_data;
-  int ntime;
-  int nread;
-  int nline;
-  int nget;
-  int output;
-  double savetime_d;
-  double lasttime_d;
-  double lastlon;
-  double lastlat;
-  double lon;
-  double lat;
-  double tide;
-  double depth;
-  char *result;
-  int i;
-
-  /* get current default values */
-  status = mb_defaults(verbose,
-    &format,
-    &pings,
-    &lonflip,
-    bounds,
-    btime_i,
-    etime_i,
-    &speedmin,
-    &timegap);
-
-  /* set default input to datalist.mb-1 */
-  strcpy(read_file, "datalist.mb-1");
-
-  /* set default location of the OTPS package */
-  strcpy(otps_location_use, otps_location);
-
-  /* set defaults for the AUV survey we were running on Coaxial Segment, Juan de Fuca Ridge
-      while I wrote this code */
-  sprintf(otps_model, MBOTPS_DEFAULT_MODEL);
-  sprintf(tide_file, "tide_model.txt");
-  tidelon = -129.588618;
-  tidelat = 46.50459;
-  interval = 60.0;
+  int status = mb_defaults(
+      verbose, &format, &pings, &lonflip, bounds, btime_i, etime_i,
+      &speedmin, &timegap);
   btime_i[0] = 2009;
   btime_i[1] = 7;
   btime_i[2] = 31;
@@ -268,195 +119,225 @@ int main
   etime_i[5] = 0;
   etime_i[6] = 0;
 
+  /* set default location of the OTPS package */
+  mb_path otps_location_use;
+  strcpy(otps_location_use, otps_location);
+
+  // Set defaults for the AUV survey we were running on Coaxial Segment, Juan de Fuca Ridge
+  bool otps_model_set = false;
+  mb_path otps_model = MBOTPS_DEFAULT_MODEL;
+  mb_path tide_file = "tide_model.txt";
+  double tidelon = -129.588618;
+  double tidelat = 46.50459;
+  double interval = 60.0;  // TODO(schwehr): Why not the 300.0?
+  int tideformat = 2;
+  int tidestation_format = 2;
+  mb_path read_file = "datalist.mb-1";
+  int mbotps_mode = MBOTPS_MODE_POSITION;
+  bool mbprocess_update = false;
+  mb_path tidestation_file;
+  bool skip_existing = false;
+  double tidestation_lon = 0.0;
+  double tidestation_lat = 0.0;
+
   /* process argument list */
-  while ((c =
-    getopt(argc, argv, "A:a:B:b:C:c:D:d:E:e:F:f:I:i:MmN:n:O:o:P:p:R:r:SST:t:U:u:VvHh")) != -1)
-    switch (c)
-      {
-    case 'H':
-    case 'h':
-      help++;
+  bool help = false;
+  {
+    bool errflg = false;
+    int c;
+    while ((c =
+            getopt(argc, argv, "A:a:B:b:C:c:D:d:E:e:F:f:I:i:MmN:n:O:o:P:p:R:r:SST:t:U:u:VvHh")) != -1)
+      switch (c) {
+        case 'H':
+        case 'h':
+          help = true;
+          break;
+        case 'V':
+        case 'v':
+          verbose++;
+          break;
+        case 'A':
+        case 'a':
+          sscanf(optarg, "%d", &tideformat);
+          if (tideformat != 2)
+            tideformat = 1;
+          break;
+        case 'B':
+        case 'b':
+          sscanf(optarg, "%d/%d/%d/%d/%d/%d",
+                 &btime_i[0], &btime_i[1], &btime_i[2],
+                 &btime_i[3], &btime_i[4], &btime_i[5]);
+          btime_i[6] = 0;
+          break;
+        case 'C':
+        case 'c':
+          sscanf(optarg, "%d", &tidestation_format);
+          if (tidestation_format < 1 || tidestation_format > 4)
+            tidestation_format = 2;
+          break;
+        case 'D':
+        case 'd':
+          sscanf(optarg, "%lf", &interval);
+          break;
+        case 'E':
+        case 'e':
+          sscanf(optarg, "%d/%d/%d/%d/%d/%d",
+                 &etime_i[0], &etime_i[1], &etime_i[2],
+                 &etime_i[3], &etime_i[4], &etime_i[5]);
+          etime_i[6] = 0;
+          break;
+        case 'F':
+        case 'f':
+          sscanf(optarg, "%d", &format);
       break;
-    case 'V':
-    case 'v':
-      verbose++;
-      break;
-    case 'A':
-    case 'a':
-      sscanf(optarg, "%d", &tideformat);
-      if (tideformat != 2)
-        tideformat = 1;
-      break;
-    case 'B':
-    case 'b':
-      sscanf(optarg,
-        "%d/%d/%d/%d/%d/%d",
-        &btime_i[0],
-        &btime_i[1],
-        &btime_i[2],
-        &btime_i[3],
-        &btime_i[4],
-        &btime_i[5]);
-      btime_i[6] = 0;
-      flag++;
-      break;
-    case 'C':
-    case 'c':
-      sscanf(optarg, "%d", &tidestation_format);
-      if (tidestation_format < 1 || tidestation_format > 4)
-        tidestation_format = 2;
-      break;
-    case 'D':
-    case 'd':
-      sscanf(optarg, "%lf", &interval);
-      break;
-    case 'E':
-    case 'e':
-      sscanf(optarg,
-        "%d/%d/%d/%d/%d/%d",
-        &etime_i[0],
-        &etime_i[1],
-        &etime_i[2],
-        &etime_i[3],
-        &etime_i[4],
-        &etime_i[5]);
-      etime_i[6] = 0;
-      flag++;
-      break;
-    case 'F':
-    case 'f':
-      sscanf(optarg, "%d", &format);
-      flag++;
-      break;
-    case 'I':
-    case 'i':
-      sscanf(optarg, "%s", read_file);
-      mbotps_mode = mbotps_mode | MBOTPS_MODE_NAVIGATION;
-      flag++;
-      break;
-    case 'M':
-    case 'm':
-      mbprocess_update = true;
-      break;
-    case 'N':
-    case 'n':
-      sscanf(optarg, "%s", tidestation_file);
-      mbotps_mode = mbotps_mode | MBOTPS_MODE_TIDESTATION;
-      break;
-    case 'O':
-    case 'o':
-      sscanf(optarg, "%s", tide_file);
-      break;
-    case 'P':
-    case 'p':
-      sscanf(optarg, "%s", otps_location_use);
-      break;
-    case 'R':
-    case 'r':
-      sscanf(optarg, "%lf/%lf", &tidelon, &tidelat);
-      break;
-    case 'S':
-    case 's':
-      skip_existing = true;
-      break;
-    case 'T':
-    case 't':
-      sscanf(optarg, "%s", otps_model);
-      otps_model_set = true;
-      break;
-    case 'U':
-    case 'u':
-      sscanf(optarg, "%lf/%lf", &tidestation_lon, &tidestation_lat);
-      break;
-    case '?':
-      errflg++;
+        case 'I':
+        case 'i':
+          sscanf(optarg, "%s", read_file);
+          mbotps_mode = mbotps_mode | MBOTPS_MODE_NAVIGATION;
+          break;
+        case 'M':
+        case 'm':
+          mbprocess_update = true;
+          break;
+        case 'N':
+        case 'n':
+          sscanf(optarg, "%s", tidestation_file);
+          mbotps_mode = mbotps_mode | MBOTPS_MODE_TIDESTATION;
+          break;
+        case 'O':
+        case 'o':
+          sscanf(optarg, "%s", tide_file);
+          break;
+        case 'P':
+        case 'p':
+          sscanf(optarg, "%s", otps_location_use);
+          break;
+        case 'R':
+        case 'r':
+          sscanf(optarg, "%lf/%lf", &tidelon, &tidelat);
+          break;
+        case 'S':
+        case 's':
+          skip_existing = true;
+          break;
+        case 'T':
+        case 't':
+          sscanf(optarg, "%s", otps_model);
+          otps_model_set = true;
+          break;
+        case 'U':
+        case 'u':
+          sscanf(optarg, "%lf/%lf", &tidestation_lon, &tidestation_lat);
+          break;
+        case '?':
+          errflg = true;
       }
 
-  /* if error flagged then print it and exit */
-  if (errflg)
-    {
-    fprintf(stderr, "usage: %s\n", usage_message);
-    fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-    error = MB_ERROR_BAD_USAGE;
-    exit(error);
+    if (errflg) {
+      fprintf(stderr, "usage: %s\n", usage_message);
+      fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
+      exit(MB_ERROR_BAD_USAGE);
     }
+  }
 
-  /* print starting message */
-  if (( verbose == 1) || help)
-    {
+  if (verbose == 1 || help) {
     fprintf(stderr, "\nProgram %s\n", program_name);
     fprintf(stderr, "MB-system Version %s\n", MB_VERSION);
-    }
+  }
 
-  /* if help desired then print it and exit */
-  if (help)
-    {
+  if (help) {
     fprintf(stderr, "\n%s\n", help_message);
     fprintf(stderr, "\nusage: %s\n", usage_message);
-    }
+  }
 
   /* Check for available tide models */
-  if (help || ( verbose > 0) )
-    {
+  if (help || verbose > 0) {
     fprintf(stderr, "\nChecking for available OTPS tide models\n");
-    fprintf(stderr, "OTPS location: %s\nValid OTPS tidal models:\n", otps_location_use);
+    fprintf(stderr, "  OTPS location: %s\n  Default OTPS model name: %s\n  Possible OTPS tidal models:\n",
+            otps_location_use, MBOTPS_DEFAULT_MODEL);
+  }
+
+  int notpsmodels = 0;
+
+  {
+    mb_path command = "";
+    sprintf(command, "/bin/ls -1 %s/DATA | grep Model_ | sed \"s/^Model_//\"", otps_location_use);
+
+    FILE *tfp = popen(command, "r");
+    if (tfp == NULL) {
+      // error = MB_ERROR_OPEN_FAIL;
+      fprintf(stderr, "\nUnable to open ls using popen():\n%s\n", command);
+      fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
+      exit(MB_FAILURE);
     }
-  notpsmodels = 0;
-  sprintf(line, "/bin/ls -1 %s/DATA | grep Model_ | sed \"s/^Model_//\"", otps_location_use);
-  if ((tfp = popen(line, "r")) != NULL)
-    {
+
     /* send relevant input to predict_tide through its stdin stream */
-    while (fgets(line, sizeof(line), tfp))
-      {
+    mb_path line = "";
+    while (fgets(line, sizeof(line), tfp)) {
+      mb_path modelname = "";
       sscanf(line, "%s", modelname);
+      mb_path modelfile = "";
       sprintf(modelfile, "%s/DATA/Model_%s", otps_location_use, modelname);
-      nmodeldatafiles = 0;
+      fprintf(stderr, "    %s", modelname);
 
       /* check the files referenced in the model file */
-      if ((mfp = fopen(modelfile, "r")) != NULL)
-        {
+      int nmodeldatafiles = 0;
+      FILE *mfp = fopen(modelfile, "r");
+      if (mfp != NULL) {
         /* stat the file referenced in each line */
-        while (fgets(modeldatafile, MB_PATH_MAXLINE, mfp) != NULL)
-          {
-          if (strlen(modeldatafile) > 0)
-            modeldatafile[strlen(modeldatafile) - 1] = '\0';
-          if (( (fstat =
-            stat(modeldatafile,
-              &file_status)) == 0) && ( (file_status.st_mode & S_IFMT) != S_IFDIR) )
+        while (fgets(line, sizeof(line), mfp) != NULL) {
+          mb_path modeldatafile = "";
+          sscanf(line, "%s", modeldatafile);
+          if (modeldatafile[0] != '/') {
+            sprintf(line, "%s/%s", otps_location_use, modeldatafile);
+            strcpy(modeldatafile, line);
+          }
+
+          sprintf(command, "/bin/ls -1 %s 2>/dev/null", modeldatafile);
+          FILE *lfp = popen(command, "r");
+          if (fgets(line, sizeof(line), lfp) != NULL
+              && strlen(line) > 0) {
             nmodeldatafiles++;
           }
-        fclose(mfp);
         }
-      if (nmodeldatafiles >= 3)
-        {
-        if (help || ( verbose > 0) )
-          fprintf(stderr, "     %s\n", modelname);
-        if (otps_model_set == false)
-          if (( notpsmodels == 0) || ( strcmp(modelname, MBOTPS_DEFAULT_MODEL) == 0) )
-            strcpy(otps_model, modelname);
-        notpsmodels++;
+        fclose(mfp);
+      }
+      if (help || verbose > 0) {
+        if (nmodeldatafiles >= 3) {
+          fprintf(stderr, " <installed>\n");
+        } else {
+          fprintf(stderr, " <not installed>\n");
         }
       }
+      if (nmodeldatafiles >= 3) {
+        if (!otps_model_set &&
+            (notpsmodels == 0 || strcmp(modelname, MBOTPS_DEFAULT_MODEL) == 0)) {
+            strcpy(otps_model, modelname);
+        }
+        notpsmodels++;
+      }
+    }
 
     /* close the process */
     pclose(tfp);
-    }
-  else
-    {
-    error = MB_ERROR_OPEN_FAIL;
-    fprintf(stderr, "\nUnable to open ls using popen()\n");
+  }
+  if (help || verbose > 0) {
+    fprintf(stderr, "  Number of available OTPS tide models: %d\n", notpsmodels);
+    fprintf(stderr, "Using OTPS tide model:                %s\n", otps_model);
+  }
+
+  /* exit if no valid OTPS models can be found */
+  if (notpsmodels <= 0) {
+    // error = MB_ERROR_OPEN_FAIL;
+    fprintf(stderr, "\nUnable to find a valid OTPS tidal model\n");
     fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
     exit(MB_FAILURE);
-    }
-  if (help || ( verbose > 0) )
-    {
-    fprintf(stderr, "Number of available OTPS tide models: %d\n", notpsmodels);
-    fprintf(stderr, "\nUsing OTPS tide model:            %s\n", otps_model);
-    }
+  }
 
-  /* print starting debug statements */
-  if (verbose >= 2)
-    {
+  if (help)
+    exit(MB_ERROR_NO_ERROR);
+
+  if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  Program <%s>\n", program_name);
     fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
     fprintf(stderr, "dbg2  Control Parameters:\n");
@@ -494,91 +375,93 @@ int main
     fprintf(stderr, "dbg2       tideformat:           %d\n", tideformat);
     fprintf(stderr, "dbg2       format:               %d\n", format);
     fprintf(stderr, "dbg2       read_file:            %s\n", read_file);
-    }
+  }
 
-  /* exit if no valid OTPS models can be found */
-  if (notpsmodels <= 0)
-    {
-    error = MB_ERROR_OPEN_FAIL;
-    fprintf(stderr, "\nUnable to find a valid OTPS tidal model\n");
-    fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-    exit(MB_FAILURE);
-    }
-
-  /* if help was all that was desired then exit */
-  if (help)
-    exit(error);
+  int error = MB_ERROR_NO_ERROR;
+  int ntidestation = 0;
+  mb_path line = "";  // TODO(schwehr): Localize
+  double *tidestation_time_d = NULL;
+  double *tidestation_tide = NULL;
+  double *tidestation_model = NULL;
+  double *tidestation_correction = NULL;
+  int time_i[7];
+  int time_j[5];
+  double sec;
+  double time_d;
+  int ihr;
+  mb_path predict_tide = "";
+  int ngood;
+  double lon;
+  double lat;
+  double depth;
+  double tide;
 
   /* -------------------------------------------------------------------------
    * if specified read in tide station data and calculate model values for the
    * same location and times- the difference is applied as a correction to the
    * model values calculated at the desired locations and times
    * -----------------------------------------------------------------------*/
-  if (mbotps_mode & MBOTPS_MODE_TIDESTATION)
-    {
-
+  if (mbotps_mode & MBOTPS_MODE_TIDESTATION) {
     /* make sure longitude is positive */
     if (tidestation_lon < 0.0)
       tidestation_lon += 360.0;
 
     /* open the tide station data file */
-    if ((tfp = fopen(tidestation_file, "r")) == NULL)
-      {
-      error = MB_ERROR_OPEN_FAIL;
+    FILE *tfp = fopen(tidestation_file, "r");
+    if (tfp == NULL) {
+      // error = MB_ERROR_OPEN_FAIL;
       fprintf(stderr,
         "\nUnable to open tide station file <%s> for writing\n",
         tidestation_file);
       fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
       exit(MB_FAILURE);
-      }
+    }
 
     /* count the lines in the tide station data */
     ntidestation = 0;
-    while ((result = fgets(line, MB_PATH_MAXLINE, tfp)) == line)
-      ntidestation++;
+    {
+      char *result;
+      while ((result = fgets(line, MB_PATH_MAXLINE, tfp)) == line)
+        ntidestation++;
+    }
     rewind(tfp);
 
     /* allocate memory for tide station arrays */
-    size = ntidestation * sizeof(double);
-    status =mb_mallocd(verbose, __FILE__, __LINE__, size, (void **)&tidestation_time_d, &error);
+    const int size = ntidestation * sizeof(double);
+    status = mb_mallocd(verbose, __FILE__, __LINE__, size, (void **)&tidestation_time_d, &error);
     if (error == MB_ERROR_NO_ERROR)
       status = mb_mallocd(verbose, __FILE__, __LINE__, size, (void **)&tidestation_tide, &error);
     if (error == MB_ERROR_NO_ERROR)
       status = mb_mallocd(verbose, __FILE__, __LINE__, size, (void **)&tidestation_model, &error);
     if (error == MB_ERROR_NO_ERROR)
       status = mb_mallocd(verbose, __FILE__, __LINE__, size, (void **)&tidestation_correction, &error);
-    if (error != MB_ERROR_NO_ERROR)
-      {
+    if (error != MB_ERROR_NO_ERROR) {
+      char *message;
       mb_error(verbose, error, &message);
       fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
       fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
       exit(error);
-      }
+    }
 
     /* read the tide station data in the specified format */
     ntidestation = 0;
-    while ((result = fgets(line, MB_PATH_MAXLINE, tfp)) == line)
-      {
-      tidestation_ok = false;
+    char *result;
+    while ((result = fgets(line, MB_PATH_MAXLINE, tfp)) == line) {
+      bool tidestation_ok = false;
 
       /* ignore comments */
-      if (line[0] != '#')
-        {
+      if (line[0] != '#') {
         /* deal with tide station data in form: time_d tide */
-        if (tidestation_format == 1)
-          {
-          nget = sscanf(line,
+        if (tidestation_format == 1) {
+          const int nget = sscanf(line,
             "%lf %lf",
             &tidestation_time_d[ntidestation],
             &tidestation_tide[ntidestation]);
           if (nget == 2)
             tidestation_ok = true;
-          }
-
-        /* deal with tide station data in form: yr mon day hour min sec tide */
-        else if (tidestation_format == 2)
-          {
-          nget = sscanf(line,
+        } else if (tidestation_format == 2) {
+          // deal with tide station data in form: yr mon day hour min sec tide
+          const int nget = sscanf(line,
             "%d %d %d %d %d %lf %lf",
             &time_i[0],
             &time_i[1],
@@ -593,12 +476,9 @@ int main
           tidestation_time_d[ntidestation] = time_d;
           if (nget == 7)
             tidestation_ok = true;
-          }
-
-        /* deal with tide station data in form: yr jday hour min sec tide */
-        else if (tidestation_format == 3)
-          {
-          nget = sscanf(line,
+        } else if (tidestation_format == 3) {
+          /* deal with tide station data in form: yr jday hour min sec tide */
+          const int nget = sscanf(line,
             "%d %d %d %d %lf %lf",
             &time_j[0],
             &time_j[1],
@@ -614,12 +494,9 @@ int main
           tidestation_time_d[ntidestation] = time_d;
           if (nget == 6)
             tidestation_ok = true;
-          }
-
-        /* deal with tide station data in form: yr jday daymin sec tide */
-        else if (tidestation_format == 4)
-          {
-          nget = sscanf(line,
+        } else if (tidestation_format == 4) {
+          /* deal with tide station data in form: yr jday daymin sec tide */
+          const int nget = sscanf(line,
             "%d %d %d %lf %lf",
             &time_j[0],
             &time_j[1],
@@ -637,7 +514,7 @@ int main
         }
 
       /* output some debug values */
-      if ((verbose >= 5) && (tidestation_ok == true))
+      if (verbose >= 5 && tidestation_ok)
         {
         fprintf(stderr, "\ndbg5  New tide point read in program <%s>\n", program_name);
         fprintf(stderr, "dbg5       tide[%d]: %f %f\n", ntidestation,
@@ -652,42 +529,40 @@ int main
         }
 
       /* check for reverses or repeats in time */
-      if (tidestation_ok == true)
-        {
-        if (ntidestation == 0)
-          {
+      if (tidestation_ok) {
+        if (ntidestation == 0) {
           ntidestation++;
-          }
-        else if (tidestation_time_d[ntidestation] > tidestation_time_d[ntidestation - 1])
-          {
+        } else if (tidestation_time_d[ntidestation] > tidestation_time_d[ntidestation - 1]) {
           ntidestation++;
-          }
-        else if ((ntidestation > 0) &&
-          ( tidestation_time_d[ntidestation] <= tidestation_time_d[ntidestation - 1]) &&
-          ( verbose >= 5) )
-          {
+        } else if (ntidestation > 0 &&
+                   tidestation_time_d[ntidestation] <= tidestation_time_d[ntidestation - 1] &&
+                   verbose >= 5) {
           fprintf(stderr, "\ndbg5  Tide time error in program <%s>\n", program_name);
           fprintf(stderr,
-            "dbg5       tide[%d]: %f %f\n",
-            ntidestation - 1,
-            tidestation_time_d[ntidestation - 1],
-            tidestation_tide[ntidestation - 1]);
+                  "dbg5       tide[%d]: %f %f\n",
+                  ntidestation - 1,
+                  tidestation_time_d[ntidestation - 1],
+                  tidestation_tide[ntidestation - 1]);
           fprintf(stderr,
-            "dbg5       tide[%d]: %f %f\n",
-            ntidestation,
-            tidestation_time_d[ntidestation],
-            tidestation_tide[ntidestation]);
-          }
+                  "dbg5       tide[%d]: %f %f\n",
+                  ntidestation,
+                  tidestation_time_d[ntidestation],
+                  tidestation_tide[ntidestation]);
         }
-      strncpy(line, "\0", sizeof(line));
       }
+      strncpy(line, "", sizeof(line));
+    }
     fclose(tfp);
 
     /* now get time and tide model values at the tide station location
        first open temporary file of lat lon time*/
-    pid = getpid();
-    sprintf(lltfile, "tmp_mbotps_llt_%d.txt", pid);
-    sprintf(otpsfile, "tmp_mbotps_llttd_%d.txt", pid);
+    int pid = getpid();
+    mb_path wd = "";
+    getcwd(wd, sizeof(wd));
+    mb_path lltfile = "";
+    mb_path otpsfile = "";
+    sprintf(lltfile, "%s/t%d.txt", wd, pid);
+    sprintf(otpsfile, "%s/u%d.txt", wd, pid);
     if ((tfp = fopen(lltfile, "w")) == NULL)
       {
       error = MB_ERROR_OPEN_FAIL;
@@ -698,7 +573,7 @@ int main
       exit(MB_FAILURE);
       }
     else {
-      for (i = 0; i < ntidestation; i++) {
+      for (int i = 0; i < ntidestation; i++) {
         mb_get_date(verbose, tidestation_time_d[i], time_i);
         fprintf(tfp, "%.6f %.6f %4.4d %2.2d %2.2d %2.2d %2.2d %2.2d\n",
           tidestation_lat, tidestation_lon,
@@ -708,7 +583,7 @@ int main
     }
 
     /* call predict_tide with popen */
-    sprintf(predict_tide, "%s/predict_tide", otps_location_use);
+    sprintf(predict_tide, "cd %s; ./predict_tide", otps_location_use);
     if ((tfp = popen(predict_tide, "w")) == NULL)
       {
       error = MB_ERROR_OPEN_FAIL;
@@ -721,7 +596,7 @@ int main
     fprintf(tfp, "%s/DATA/Model_%s\n", otps_location_use, otps_model);
     fprintf(tfp, "%s\n", lltfile);
     fprintf(tfp, "z\n\nAP\noce\n1\n");
-    /*fprintf(tfp, "z\nm2,s2,n2,k2,k1,o1,p1,q1\nAP\noce\n1\n");*/
+    //fprintf(tfp, "z\nm2,s2,n2,k2,k1,o1,p1,q1\nAP\noce\n1\n");
     fprintf(tfp, "%s\n", otpsfile);
 
     /* close the process */
@@ -737,26 +612,23 @@ int main
       exit(MB_FAILURE);
       }
 
-    nline = 0;
+    int nline = 0;
     ngood = 0;
-    while ((result = fgets(line, MB_PATH_MAXLINE, tfp)) == line)
-      {
+    while ((result = fgets(line, MB_PATH_MAXLINE, tfp)) == line) {
       nline++;
-      if (nline > 6)
-        {
-        nget = sscanf(line,
+      if (nline > 6) {
+        const int nget = sscanf(line,
           "%lf %lf %d.%d.%d %d:%d:%d %lf %lf",
           &lat, &lon,
           &time_i[1], &time_i[2], &time_i[0], &time_i[3], &time_i[4], &time_i[5],
           &tide, &depth);
-        if (nget == 10)
-          {
+        if (nget == 10) {
           tidestation_model[ngood] = tide;
           tidestation_correction[ngood] = tidestation_tide[ngood] - tidestation_model[ngood];
           ngood++;
-          }
         }
       }
+    }
     fclose(tfp);
     if (ngood != ntidestation)
       {
@@ -770,13 +642,15 @@ int main
       }
 
     /* get start end min max of tide station data */
-    tidestation_d_min = 0.0;
-    tidestation_d_max = 0.0;
-    tidestation_m_min = 0.0;
-    tidestation_m_max = 0.0;
-    tidestation_c_min = 0.0;
-    tidestation_c_max = 0.0;
-    for (i = 0; i < ntidestation; i++) {
+    double tidestation_d_min = 0.0;
+    double tidestation_d_max = 0.0;
+    double tidestation_m_min = 0.0;
+    double tidestation_m_max = 0.0;
+    double tidestation_c_min = 0.0;
+    double tidestation_c_max = 0.0;
+    double tidestation_stime_d;
+    double tidestation_etime_d;
+    for (int i = 0; i < ntidestation; i++) {
       if (i == 0) {
         tidestation_d_min = tidestation_tide[i];
         tidestation_d_max = tidestation_tide[i];
@@ -795,12 +669,13 @@ int main
         tidestation_etime_d = tidestation_time_d[i];
       }
     }
+    int tidestation_stime_i[7];
     mb_get_date(verbose, tidestation_stime_d, tidestation_stime_i);
+    int tidestation_etime_i[7];
     mb_get_date(verbose, tidestation_etime_d, tidestation_etime_i);
 
     /* output info on tide station data */
-    if (( verbose > 0) && mbotps_mode & MBOTPS_MODE_TIDESTATION)
-      {
+    if (verbose > 0 && mbotps_mode & MBOTPS_MODE_TIDESTATION) {
       fprintf(stderr, "\nTide station data file:             %s\n", tidestation_file);
       fprintf(stderr, "  Tide station longitude:           %f\n", tidestation_lon);
       fprintf(stderr, "  Tide station latitude:            %f\n", tidestation_lat);
@@ -808,33 +683,74 @@ int main
       fprintf(stderr, "  Tide station data summary:\n");
       fprintf(stderr, "    Number of samples:              %d\n", ntidestation);
       fprintf(stderr,
-        "    Start time:                     %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d\n",
-        tidestation_stime_i[0],
-        tidestation_stime_i[1],
-        tidestation_stime_i[2],
-        tidestation_stime_i[3],
-        tidestation_stime_i[4],
-        tidestation_stime_i[5],
-        tidestation_stime_i[6]);
+              "    Start time:                     %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d\n",
+              tidestation_stime_i[0],
+              tidestation_stime_i[1],
+              tidestation_stime_i[2],
+              tidestation_stime_i[3],
+              tidestation_stime_i[4],
+              tidestation_stime_i[5],
+              tidestation_stime_i[6]);
       fprintf(stderr,
-        "    End time:                       %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d\n",
-        tidestation_etime_i[0],
-        tidestation_etime_i[1],
-        tidestation_etime_i[2],
-        tidestation_etime_i[3],
-        tidestation_etime_i[4],
-        tidestation_etime_i[5],
-        tidestation_etime_i[6]);
+              "    End time:                       %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d\n",
+              tidestation_etime_i[0],
+              tidestation_etime_i[1],
+              tidestation_etime_i[2],
+              tidestation_etime_i[3],
+              tidestation_etime_i[4],
+              tidestation_etime_i[5],
+              tidestation_etime_i[6]);
       fprintf(stderr, "    Minimum values:     %7.3f %7.3f %7.3f\n",
               tidestation_d_min, tidestation_m_min, tidestation_c_min);
       fprintf(stderr, "    Maximum values:     %7.3f %7.3f %7.3f\n",
               tidestation_d_max, tidestation_m_max, tidestation_c_max);
-      }
+    }
 
     /* remove the temporary files */
     unlink(lltfile);
     unlink(otpsfile);
-    }
+  }
+
+  double file_weight;
+  mb_path swath_file;
+  mb_path file;
+  mb_path dfile;
+  int beams_bath;
+  int beams_amp;
+  int pixels_ss;
+
+  void *mbio_ptr = NULL;
+  void *store_ptr = NULL;
+  int kind;
+  double navlon;
+  double navlat;
+  double speed;
+  double heading;
+  double distance;
+  double altitude;
+  double sonardepth;
+  char *beamflag = NULL;
+  double *bath = NULL;
+  double *bathacrosstrack = NULL;
+  double *bathalongtrack = NULL;
+  double *amp = NULL;
+  double *ss = NULL;
+  double *ssacrosstrack = NULL;
+  double *ssalongtrack = NULL;
+  char comment[MB_COMMENT_MAXLINE];
+
+  /* mbotps control parameters */
+  double btime_d;
+  double etime_d;
+
+  /* tide station data */
+  int intstat;
+  int itime;
+  double correction;
+
+  struct stat file_status;
+  bool proceed = true;
+  int input_size, input_modtime, output_size, output_modtime;
 
   /* -------------------------------------------------------------------------
    * calculate tide model  for a single position and time range
@@ -842,9 +758,14 @@ int main
   if (!(mbotps_mode & MBOTPS_MODE_NAVIGATION))
     {
     /* first open temporary file of lat lon time */
-    pid = getpid();
-    sprintf(lltfile, "tmp_mbotps_llt_%d.txt", pid);
-    sprintf(otpsfile, "tmp_mbotps_llttd_%d.txt", pid);
+    int pid = getpid();
+    mb_path wd = "";
+    getcwd(wd, sizeof(wd));
+    mb_path lltfile = "";
+    mb_path otpsfile = "";
+    sprintf(lltfile, "%s/t%d.txt", wd, pid);
+    sprintf(otpsfile, "%s/u%d.txt", wd, pid);
+    FILE *tfp = NULL;
     if ((tfp = fopen(lltfile, "w")) == NULL)
       {
       error = MB_ERROR_OPEN_FAIL;
@@ -862,8 +783,8 @@ int main
     /* loop over the time of interest generating the lat-lon-time values */
     mb_get_time(verbose, btime_i, &btime_d);
     mb_get_time(verbose, etime_i, &etime_d);
-    ntime = 1 + (int)floor((etime_d - btime_d) / interval);
-    for (i = 0; i < ntime; i++)
+    const int ntime = 1 + (int)floor((etime_d - btime_d) / interval);
+    for (int i = 0; i < ntime; i++)
       {
       time_d = btime_d + i * interval;
       mb_get_date(verbose, time_d, time_i);
@@ -883,10 +804,10 @@ int main
     fclose(tfp);
 
     /* call predict_tide with popen */
-    sprintf(predict_tide, "%s/predict_tide", otps_location_use);
-    if ((tfp = popen(predict_tide, "w")) == NULL)
-      {
-      error = MB_ERROR_OPEN_FAIL;
+    sprintf(predict_tide, "cd %s; ./predict_tide", otps_location_use);
+    fprintf(stderr, "Running: %s\n", predict_tide);
+    if ((tfp = popen(predict_tide, "w")) == NULL) {
+      // error = MB_ERROR_OPEN_FAIL;
       fprintf(stderr, "\nUnable to open predict_time program using popen()\n");
       fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
       exit(MB_FAILURE);
@@ -896,28 +817,27 @@ int main
     fprintf(tfp, "%s/DATA/Model_%s\n", otps_location_use, otps_model);
     fprintf(tfp, "%s\n", lltfile);
     fprintf(tfp, "z\n\nAP\noce\n1\n");
-    /*fprintf(tfp, "z\nm2,s2,n2,k2,k1,o1,p1,q1\nAP\noce\n1\n");*/
+    //fprintf(tfp, "z\nm2,s2,n2,k2,k1,o1,p1,q1\nAP\noce\n1\n");
     fprintf(tfp, "%s\n", otpsfile);
 
     /* close the process */
     pclose(tfp);
 
     /* now read results from predict_tide and rewrite them in a useful form */
-    if ((tfp = fopen(otpsfile, "r")) == NULL)
-      {
+    if ((tfp = fopen(otpsfile, "r")) == NULL) {
       error = MB_ERROR_OPEN_FAIL;
       fprintf(stderr, "\nUnable to open predict_time results temporary file <%s>\n",
         otpsfile);
       fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
       exit(MB_FAILURE);
-      }
-    if ((ofp = fopen(tide_file, "w")) == NULL)
-      {
-      error = MB_ERROR_OPEN_FAIL;
+    }
+    FILE *ofp = NULL;
+    if ((ofp = fopen(tide_file, "w")) == NULL) {
+      // error = MB_ERROR_OPEN_FAIL;
       fprintf(stderr, "\nUnable to open tide output file <%s>\n", tide_file);
       fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
       exit(MB_FAILURE);
-      }
+    }
     fprintf(ofp, "# Tide model generated by program %s\n", program_name);
     fprintf(ofp, "# MB-System Version: %s\n", MB_VERSION);
     fprintf(ofp, "# Tide model generated by program %s\n", program_name);
@@ -926,44 +846,42 @@ int main
     fprintf(ofp, "#\n");
     fprintf(ofp, "# OTPSnc tide model: \n");
     fprintf(ofp, "#      %s\n", otps_model);
-    if (tideformat == 2)
-      {
+    if (tideformat == 2) {
       fprintf(ofp, "# Output format:\n");
       fprintf(ofp, "#      year month day hour minute second tide\n");
       fprintf(ofp, "# where tide is in meters\n");
-      }
-    else
-      {
+    } else {
       fprintf(ofp, "# Output format:\n");
       fprintf(ofp, "#      time_d tide\n");
       fprintf(ofp, "# where time_d is in seconds since January 1, 1970\n");
       fprintf(ofp, "# and tide is in meters\n");
-      }
-    right_now = time((time_t *)0);
+    }
+    const time_t right_now = time((time_t *)0);
+    char date[32];
     strcpy(date, ctime(&right_now));
     date[strlen(date) - 1] = '\0';
-    if ((user_ptr = getenv("USER")) == NULL)
+    const char *user_ptr = getenv("USER");
+    if (user_ptr == NULL)
       user_ptr = getenv("LOGNAME");
+    char user[MB_PATH_MAXLINE];
     if (user_ptr != NULL)
       strcpy(user, user_ptr);
     else
       strcpy(user, "unknown");
+    char host[MB_PATH_MAXLINE];
     gethostname(host, MBP_FILENAMESIZE);
     fprintf(ofp, "# Run by user <%s> on cpu <%s> at <%s>\n", user, host, date);
 
     /* loop over tide model values, writing them out in the specified format */
-    nline = 0;
+    int nline = 0;
     ngood = 0;
-    while ((result = fgets(line, MB_PATH_MAXLINE, tfp)) == line)
-      {
+    char *result;
+    while ((result = fgets(line, MB_PATH_MAXLINE, tfp)) == line) {
       nline++;
-      if (( nline == 2) || ( nline == 3) )
-        {
+      if (nline == 2 || nline == 3) {
         fprintf(ofp, "#%s", line);
-        }
-      else if (nline > 6)
-        {
-        nget = sscanf(line,
+      } else if (nline > 6) {
+        const int nget = sscanf(line,
           "%lf %lf %d.%d.%d %d:%d:%d %lf %lf",
           &lat,
           &lon,
@@ -975,8 +893,7 @@ int main
           &time_i[5],
           &tide,
           &depth);
-        if (nget == 10)
-          {
+        if (nget == 10) {
           ngood++;
 
           /* if tide station data have been loaded, interpolate the
@@ -993,9 +910,6 @@ int main
               &error);
             if (intstat == MB_SUCCESS)
               tide += correction;
-/*fprintf(stderr,"TIDE STATION CORRECTION: intstat:%d itime:%dof%d time_d:%f correction:%f
-   tide:%f\n", */
-/*        intstat, itime, ntidestation, time_d, correction, tide); */
             }
 
           /* write out the tide model */
@@ -1016,9 +930,9 @@ int main
             mb_get_time(verbose, time_i, &time_d);
             fprintf(ofp, "%.3f %9.4f\n", time_d, tide);
             }
-          }
         }
       }
+    }
     fclose(tfp);
     fclose(ofp);
 
@@ -1032,30 +946,40 @@ int main
 
   /* -------------------------------------------------------------------------
    * else get tides along the navigation contained in a set of swath files
+   * - accumulate all of the desired nav and time points for all files and
+   *   call predict_tide just once, then break the results up into individual
+   *   *.tde tide files for each swath file.
    * -----------------------------------------------------------------------*/
   else if (mbotps_mode & MBOTPS_MODE_NAVIGATION)
     {
-/*fprintf(stderr,"Doing tide correction for swath navigation\n"); */
+    fprintf(stderr, "\nModel tide for swath data referenced by %s\n", read_file);
+    if (mbotps_mode & MBOTPS_MODE_TIDESTATION && (ntidestation > 0)) {
+      fprintf(stderr, " - Also apply tide station correction\n");
+    }
+    if (mbprocess_update) {
+      fprintf(stderr, " - Set mbprocess parameter files to apply tide correction\n");
+      }
+    fprintf(stderr, "\n");
+
+    /*fprintf(stderr,"Doing tide correction for swath navigation\n"); */
     /* get format if required */
     if (format == 0)
       mb_get_format(verbose, read_file, NULL, &format, &error);
 
     /* determine whether to read one file or a list of files */
-    if (format < 0)
-      read_datalist = true;
+    const bool read_datalist = format < 0;
+    void *datalist;
+    bool read_data;
 
     /* open file list */
-    if (read_datalist == true)
-      {
-      if ((status =
-        mb_datalist_open(verbose, &datalist, read_file, look_processed,
-          &error)) != MB_SUCCESS)
-        {
-        error = MB_ERROR_OPEN_FAIL;
+    if (read_datalist) {
+      const int look_processed = MB_DATALIST_LOOK_UNSET;
+      status = mb_datalist_open(verbose, &datalist, read_file, look_processed, &error);
+      if (status != MB_SUCCESS) {
         fprintf(stderr, "\nUnable to open data list file: %s\n", read_file);
         fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-        exit(error);
-        }
+        exit(MB_ERROR_OPEN_FAIL);
+      }
       if ((status =
         mb_datalist_read(verbose, datalist, file, dfile, &format, &file_weight,
           &error)) == MB_SUCCESS)
@@ -1070,91 +994,75 @@ int main
       read_data = true;
       }
 
-    /* loop over all files to be read */
-    while (read_data == true)
+    /* first open temporary file of lat lon time */
+    int pid = getpid();
+    mb_path wd = "";
+    getcwd(wd, sizeof(wd));
+    mb_path lltfile = "";
+    mb_path otpsfile = "";
+    sprintf(lltfile, "%s/t%d.txt", wd, pid);
+    sprintf(otpsfile, "%s/u%d.txt", wd, pid);
+    FILE *tfp = NULL;
+    if ((tfp = fopen(lltfile, "w")) == NULL)
       {
+      fprintf(stderr,
+        "\nUnable to open temporary lat-lon-time file <%s> for writing\n",
+        lltfile);
+      fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
+      exit(MB_FAILURE);
+      }
+
+    double savetime_d;
+    double lasttime_d;
+    double lastlon;
+    double lastlat;
+    /* loop over all files to be read */
+    while (read_data) {
       /* Figure out if the file needs a tide model - don't generate a new tide
          model if one was made previously and is up to date AND the
          appropriate request has been made */
       proceed = true;
       sprintf(tide_file, "%s.tde", file);
-      if (skip_existing == true)
-        {
-        if (( (fstat =
-          stat(file,
-            &file_status)) == 0) && ( (file_status.st_mode & S_IFMT) != S_IFDIR) )
-          {
+      if (skip_existing) {
+        const int fstat1 = stat(file, &file_status);
+        if (fstat1 == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR) {
           input_modtime = file_status.st_mtime;
           input_size = file_status.st_size;
-          }
-        else
-          {
+        } else {
           input_modtime = 0;
           input_size = 0;
-          }
-        if (( (fstat =
-          stat(tide_file,
-            &file_status)) == 0) && ( (file_status.st_mode & S_IFMT) != S_IFDIR) )
-          {
+        }
+        const int fstat2 = stat(tide_file, &file_status);
+        if (fstat2 == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR) {
           output_modtime = file_status.st_mtime;
           output_size = file_status.st_size;
-          }
-        else
-          {
+        } else {
           output_modtime = 0;
           output_size = 0;
-          }
-        if (( output_modtime > input_modtime) && ( input_size > 0) && ( output_size > 0) )
+        }
+        if (output_modtime > input_modtime && input_size > 0 && output_size > 0)
           proceed = false;
         }
 
       /* skip the file */
-      if (proceed == false)
-        {
+      if (!proceed) {
         /* some helpful output */
-        fprintf(stderr,
-          "\n---------------------------------------\n\nProcessing tides for %s\n\n",
-          file);
-        fprintf(stderr, "Skipped - tide model file is up to date\n\n");
-        }
+        fprintf(stderr, "%s : skipped - tide model file is up to date\n", swath_file);
+      }
 
-      /* generate the tide model */
-      else
-        {
-        /* some helpful output */
-        fprintf(stderr,
-          "\n---------------------------------------\n\nProcessing tides for %s\n\n",
-          file);
-
-        /* note tide station correction */
-        if (mbotps_mode & MBOTPS_MODE_TIDESTATION && (ntidestation > 0)) {
-          fprintf(stderr, "Applying tide station correction\n\n");
-        }
-
-        /* first open temporary file of lat lon time */
-        pid = getpid();
-        strcpy(swath_file, file);
-        sprintf(lltfile, "tmp_mbotps_llt_%d.txt", pid);
-        sprintf(otpsfile, "tmp_mbotps_llttd_%d.txt", pid);
-        if ((tfp = fopen(lltfile, "w")) == NULL)
-          {
-          error = MB_ERROR_OPEN_FAIL;
-          fprintf(stderr,
-            "\nUnable to open temporary lat-lon-time file <%s> for writing\n",
-            lltfile);
-          fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-          exit(MB_FAILURE);
-          }
+      /* add nav points to tidal model list */
+      else {
 
         /* read fnv file if possible */
+        strcpy(swath_file, file);
         mb_get_fnv(verbose, file, &format, &error);
 
         /* initialize reading the swath file */
         if ((status =
           mb_read_init(verbose, file, format, pings, lonflip, bounds, btime_i, etime_i,
             speedmin, timegap, &mbio_ptr, &btime_d, &etime_d, &beams_bath, &beams_amp,
-            &pixels_ss, &error)) !=MB_SUCCESS)
-          {
+            &pixels_ss, &error)) !=MB_SUCCESS) {
+          char *message;
           mb_error(verbose, error, &message);
           fprintf(stderr,
             "\nMBIO Error returned from function <mb_read_init>:\n%s\n",
@@ -1162,86 +1070,98 @@ int main
           fprintf(stderr, "\nMultibeam File <%s> not initialized for reading\n", file);
           fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
           exit(error);
-          }
+        }
 
         /* allocate memory for data arrays */
-        if (error == MB_ERROR_NO_ERROR)
-          status =mb_register_array(verbose,
+        if (error == MB_ERROR_NO_ERROR) {
+          // status =
+          mb_register_array(verbose,
             mbio_ptr,
             MB_MEM_TYPE_BATHYMETRY,
             sizeof(char),
             (void **)&beamflag,
             &error);
-        if (error == MB_ERROR_NO_ERROR)
-          status =
+        }
+        if (error == MB_ERROR_NO_ERROR) {
+          // status =
             mb_register_array(verbose,
             mbio_ptr,
             MB_MEM_TYPE_BATHYMETRY,
             sizeof(double),
             (void **)&bath,
             &error);
-        if (error == MB_ERROR_NO_ERROR)
-          status =
-            mb_register_array(verbose,
+        }
+        if (error == MB_ERROR_NO_ERROR) {
+          // status =
+          mb_register_array(verbose,
             mbio_ptr,
             MB_MEM_TYPE_AMPLITUDE,
             sizeof(double),
             (void **)&amp,
             &error);
-        if (error == MB_ERROR_NO_ERROR)
-          status =
-            mb_register_array(verbose,
+        }
+        if (error == MB_ERROR_NO_ERROR) {
+          // status =
+          mb_register_array(verbose,
             mbio_ptr,
             MB_MEM_TYPE_BATHYMETRY,
             sizeof(double),
             (void **)&bathacrosstrack,
             &error);
-        if (error == MB_ERROR_NO_ERROR)
-          status =
-            mb_register_array(verbose,
+        }
+        if (error == MB_ERROR_NO_ERROR) {
+          // status =
+          mb_register_array(verbose,
             mbio_ptr,
             MB_MEM_TYPE_BATHYMETRY,
             sizeof(double),
             (void **)&bathalongtrack,
             &error);
-        if (error == MB_ERROR_NO_ERROR)
-          status =mb_register_array(verbose,
+        }
+        if (error == MB_ERROR_NO_ERROR) {
+          // status =
+          mb_register_array(verbose,
             mbio_ptr,
             MB_MEM_TYPE_SIDESCAN,
             sizeof(double),
             (void **)&ss,
             &error);
-        if (error == MB_ERROR_NO_ERROR)
-          status =mb_register_array(verbose,
+        }
+        if (error == MB_ERROR_NO_ERROR) {
+          // status =
+          mb_register_array(verbose,
             mbio_ptr,
             MB_MEM_TYPE_SIDESCAN,
             sizeof(double),
             (void **)&ssacrosstrack,
             &error);
-        if (error == MB_ERROR_NO_ERROR)
-          status =mb_register_array(verbose,
+        }
+        if (error == MB_ERROR_NO_ERROR) {
+          // status =
+          mb_register_array(verbose,
             mbio_ptr,
             MB_MEM_TYPE_SIDESCAN,
             sizeof(double),
             (void **)&ssalongtrack,
             &error);
+        }
 
         /* if error initializing memory then quit */
-        if (error != MB_ERROR_NO_ERROR)
-          {
+        if (error != MB_ERROR_NO_ERROR) {
+          char *message;
           mb_error(verbose, error, &message);
           fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
           fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
           exit(error);
-          }
+        }
 
         /* read and use data */
-        nread = 0;
-        while (error <= MB_ERROR_NO_ERROR)
-          {
+        int nread = 0;
+        int nuse = 0;
+        while (error <= MB_ERROR_NO_ERROR) {
           /* reset error */
           error = MB_ERROR_NO_ERROR;
-          output = false;
+          bool output = false;
 
           /* read next data record */
           status = mb_get_all(verbose,
@@ -1272,8 +1192,7 @@ int main
             &error);
 
           /* print debug statements */
-          if (verbose >= 2)
-            {
+          if (verbose >= 2) {
             fprintf(stderr, "\ndbg2  Ping read in program <%s>\n", program_name);
             fprintf(stderr, "dbg2       kind:           %d\n", kind);
             fprintf(stderr, "dbg2       error:          %d\n", error);
@@ -1282,30 +1201,27 @@ int main
 
           /* deal with nav and time from survey data only - not nav, sidescan, or
              subbottom */
-          if (( error <= MB_ERROR_NO_ERROR) && ( kind == MB_DATA_DATA) )
-            {
+          if (error <= MB_ERROR_NO_ERROR && kind == MB_DATA_DATA) {
             /* flag positions and times for output at specified interval */
-            if (( nread == 0) || ( time_d - savetime_d >= interval) )
-              {
+            if (nread == 0 || time_d - savetime_d >= interval) {
               savetime_d = time_d;
               output = true;
-              }
+            }
             lasttime_d = time_d;
             lastlon = navlon;
             lastlat = navlat;
 
             /* increment counter */
             nread++;
-            }
+          }
 
           /* output position and time if flagged or end of file */
-          if (( output == true) || ( error == MB_ERROR_EOF) )
-            {
+          if (output || error == MB_ERROR_EOF) {
             if (lastlon < 0.0)
               lastlon += 360.0;
             mb_get_date(verbose, lasttime_d, time_i);
             fprintf(tfp,
-              "%.6f %.6f %4.4d %2.2d %2.2d %2.2d %2.2d %2.2d\n",
+              "%.6f %.6f %4.4d %2.2d %2.2d %2.2d %2.2d %2.2d %s\n",
               lastlat,
               lastlon,
               time_i[0],
@@ -1313,7 +1229,9 @@ int main
               time_i[2],
               time_i[3],
               time_i[4],
-              time_i[5]);
+              time_i[5],
+              swath_file);
+            nuse++;
             }
           }
 
@@ -1321,189 +1239,238 @@ int main
         status = mb_close(verbose, &mbio_ptr, &error);
 
         /* output read statistics */
-        fprintf(stderr, "%d records read from %s\n", nread, file);
-
-        /* close the llt file */
-        fclose(tfp);
-
-        /* call predict_tide with popen */
-        sprintf(predict_tide, "%s/predict_tide", otps_location_use);
-        if ((tfp = popen(predict_tide, "w")) == NULL)
-          {
-          error = MB_ERROR_OPEN_FAIL;
-          fprintf(stderr, "\nUnable to open predict_time program using popen()\n");
-          fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-          exit(MB_FAILURE);
-          }
-
-        /* send relevant input to predict_tide through its stdin stream */
-        fprintf(tfp, "%s/DATA/Model_%s\n", otps_location_use, otps_model);
-        fprintf(tfp, "%s\n", lltfile);
-        fprintf(tfp, "z\n\nAP\noce\n1\n");
-        /*fprintf(tfp, "z\nm2,s2,n2,k2,k1,o1,p1,q1\nAP\noce\n1\n");*/
-        fprintf(tfp, "%s\n", otpsfile);
-
-        /* close the process */
-        pclose(tfp);
-
-        /* now read results from predict_tide and rewrite them in a useful form */
-        if ((tfp = fopen(otpsfile, "r")) == NULL)
-          {
-          error = MB_ERROR_OPEN_FAIL;
-          fprintf(stderr,
-            "\nUnable to open predict_time results temporary file <%s>\n",
-            otpsfile);
-          fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-          exit(MB_FAILURE);
-          }
-        if ((ofp = fopen(tide_file, "w")) == NULL)
-          {
-          error = MB_ERROR_OPEN_FAIL;
-          fprintf(stderr, "\nUnable to open tide output file <%s>\n", tide_file);
-          fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-          exit(MB_FAILURE);
-          }
-        fprintf(ofp, "# Tide model generated by program %s\n", program_name);
-        fprintf(ofp, "# MB-System Version: %s\n", MB_VERSION);
-        fprintf(ofp, "# Tide model generated by program %s\n", program_name);
-        fprintf(ofp, "# which in turn calls OTPS program predict_tide obtained from:\n");
-        fprintf(ofp, "#     http://www.coas.oregonstate.edu/research/po/research/tide/\n");
-        right_now = time((time_t *)0);
-        strcpy(date, ctime(&right_now));
-        date[strlen(date) - 1] = '\0';
-        if ((user_ptr = getenv("USER")) == NULL)
-          user_ptr = getenv("LOGNAME");
-        if (user_ptr != NULL)
-          strcpy(user, user_ptr);
-        else
-          strcpy(user, "unknown");
-        gethostname(host, MBP_FILENAMESIZE);
-        fprintf(ofp, "# Run by user <%s> on cpu <%s> at <%s>\n", user, host, date);
-
-        /* loop over tide model values, writing them out in the specified format */
-        nline = 0;
-        ngood = 0;
-        while ((result = fgets(line, MB_PATH_MAXLINE, tfp)) == line)
-          {
-          nline++;
-          if (( nline == 2) || ( nline == 3) )
-            {
-            fprintf(ofp, "#%s", line);
-            }
-          else if (nline > 6)
-            {
-            nget = sscanf(line,
-              "%lf %lf %d.%d.%d %d:%d:%d %lf %lf",
-              &lat,
-              &lon,
-              &time_i[1],
-              &time_i[2],
-              &time_i[0],
-              &time_i[3],
-              &time_i[4],
-              &time_i[5],
-              &tide,
-              &depth);
-            if (nget == 10)
-              {
-              ngood++;
-
-              /* if tide station data have been loaded, interpolate the
-               * correction value to apply to the tide model */
-              if (mbotps_mode & MBOTPS_MODE_TIDESTATION && (ntidestation > 0))
-                {
-                intstat = mb_linear_interp(verbose,
-                  tidestation_time_d - 1,
-                  tidestation_correction - 1,
-                  ntidestation,
-                  time_d,
-                  &correction,
-                  &itime,
-                  &error);
-                if (intstat == MB_SUCCESS)
-                  tide += correction;
-// fprintf(stderr,"TIDE STATION CORRECTION: intstat:%d itime:%dof%d time_d:%f correction:%f   tide:%f\n",
-// intstat, itime, ntidestation, time_d, correction, tide);
-                }
-
-              /* write out the tide model */
-              if (tideformat == 2)
-                {
-                fprintf(ofp,
-                  "%4.4d %2.2d %2.2d %2.2d %2.2d %2.2d %9.4f\n",
-                  time_i[0],
-                  time_i[1],
-                  time_i[2],
-                  time_i[3],
-                  time_i[4],
-                  time_i[5],
-                  tide);
-                }
-              else
-                {
-                mb_get_time(verbose, time_i, &time_d);
-                fprintf(ofp, "%.3f %9.4f\n", time_d, tide);
-                }
-              }
-            }
-          }
-        fclose(tfp);
-        fclose(ofp);
-
-        /* remove the temporary files */
-        unlink(lltfile);
-        unlink(otpsfile);
-
-        /* some helpful output */
-        fprintf(stderr, "\nResults are really in %s\n", tide_file);
-
-        /* set mbprocess usage of tide file */
-        if (( mbprocess_update == true) && ( ngood > 0) )
-          {
-          status = mb_pr_update_tide(verbose,
-            swath_file,
-            MBP_TIDE_ON,
-            tide_file,
-            tideformat,
-            &error);
-          fprintf(stderr, "MBprocess set to apply tide correction to %s\n", swath_file);
-          }
+        fprintf(stderr, "%s : model tide at %d of %d records\n", file, nuse, nread);
         }
 
       /* figure out whether and what to read next */
-      if (read_datalist == true)
-        {
+      if (read_datalist) {
         if ((status =
           mb_datalist_read(verbose, datalist, file, dfile, &format, &file_weight,
             &error)) == MB_SUCCESS)
           read_data = true;
         else
           read_data = false;
-        }
-      else
-        {
+      } else {
         read_data = false;
-        }
+      }
 
       /* end loop over files in list */
       }
-    if (read_datalist == true)
+    if (read_datalist)
       mb_datalist_close(verbose, &datalist, &error);
+
+    /* close the llt file */
+    fclose(tfp);
+
+    /* call predict_tide with popen */
+    fprintf(stderr, "\nCalling OTPS predict_tide:\n");
+    fprintf(stderr, "  %s/predict_tide\n", otps_location_use);
+    fprintf(stderr, "  %s/DATA/Model_%s\n", otps_location_use, otps_model);
+    fprintf(stderr, "  Input llt file:   %s\n", lltfile);
+    fprintf(stderr, "  Output otps file: %s\n", otpsfile);
+    fprintf(stderr, "---------------------------------------\n");
+    sprintf(predict_tide, "cd %s; ./predict_tide", otps_location_use);
+    tfp =  popen(predict_tide, "w");
+    if (tfp == NULL) {
+      // error = MB_ERROR_OPEN_FAIL;
+      fprintf(stderr, "\nUnable to open predict_time program using popen()\n");
+      fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
+      exit(MB_FAILURE);
     }
+
+    /* send relevant input to predict_tide through its stdin stream */
+    fprintf(tfp, "%s/DATA/Model_%s\n", otps_location_use, otps_model);
+    fprintf(tfp, "%s\n", lltfile);
+    fprintf(tfp, "z\n\nAP\noce\n1\n");
+    //fprintf(tfp, "z\nm2,s2,n2,k2,k1,o1,p1,q1\nAP\noce\n1\n");
+    fprintf(tfp, "%s\n", otpsfile);
+
+    /* close the process */
+    pclose(tfp);
+
+    fprintf(stderr, "---------------------------------------\n\n");
+
+    /* now read results from predict_tide, correlate with the llt file,
+       and output a tide file for each swath file */
+    if ((tfp = fopen(otpsfile, "r")) == NULL)
+      {
+      error = MB_ERROR_OPEN_FAIL;
+      fprintf(stderr,
+        "\nUnable to open predict_time results temporary file <%s>\n",
+        otpsfile);
+      fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
+      exit(MB_FAILURE);
+      }
+    FILE *lfp = NULL;
+    if ((lfp = fopen(lltfile, "r")) == NULL)
+      {
+      error = MB_ERROR_OPEN_FAIL;
+      fprintf(stderr,
+        "\nUnable to reopen llt temporary file <%s>\n",
+        lltfile);
+      fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
+      exit(MB_FAILURE);
+      }
+
+    /* read through predict_tide output header */
+    mb_path tline2 = "";
+    mb_path tline3 = "";
+
+    {
+    int nline = 0;
+      char *result;
+      while (nline < 7 && (result = fgets(line, MB_PATH_MAXLINE, tfp)) == line) {
+        nline++;
+        if (nline == 2)
+          strncpy(tline2, line, sizeof(tline2));
+        if (nline == 3)
+          strncpy(tline3, line, sizeof(tline3));
+      }
+    }
+
+    /* loop over tide model values, writing them out in the specified format
+       to tide files associated with each swath file */
+    // nline = 0;
+    ngood = 0;
+    FILE *ofp= NULL;
+    mb_path current_swath_file = "";
+    char *result;
+    while ((result = fgets(line, MB_PATH_MAXLINE, tfp)) == line) {
+      bool output_ok = true;
+
+      /* get the next tide value */
+      int nget = sscanf(line, "%lf %lf %d.%d.%d %d:%d:%d %lf %lf",
+          &lat, &lon,
+          &time_i[1], &time_i[2], &time_i[0], &time_i[3], &time_i[4], &time_i[5],
+          &tide, &depth);
+      if (nget == 10) {
+        ngood++;
+      } else {
+        output_ok = false;
+        if (strstr(line, "***** Site is out of model grid OR land *****") != NULL) {
+          fprintf(stderr, "Skipping data: position %f %f is outside the model grid or located on land\n",
+                  lon, lat);
+        }
+      }
+
+      /* if tide station data have been loaded, interpolate the
+       * correction value to apply to the tide model */
+      if (output_ok && mbotps_mode & MBOTPS_MODE_TIDESTATION && (ntidestation > 0)) {
+        intstat = mb_linear_interp(verbose,
+                                    tidestation_time_d - 1,
+                                    tidestation_correction - 1,
+                                    ntidestation,
+                                    time_d,
+                                    &correction,
+                                    &itime,
+                                    &error);
+        if (intstat == MB_SUCCESS)
+          tide += correction;
+      }
+
+      /* get next entry from the llt file and check the associated swath_file
+          if needed open new output tide file */
+      if ((result = fgets(line, MB_PATH_MAXLINE, lfp)) == line) {
+        /* get the corresponding swath file */
+        nget = sscanf(line, "%lf %lf %d %d %d %d %d %d %s",
+                      &lat, &lon,
+                      &time_i[0], &time_i[1], &time_i[2],
+                      &time_i[3], &time_i[4], &time_i[5],
+                      swath_file);
+        if (nget != 9) {
+          output_ok = false;
+        }
+      }
+
+      /* make sure an output tide file is open */
+      if (output_ok) {
+        if (strcmp(current_swath_file, swath_file) != 0) {
+          strncpy(current_swath_file, swath_file, sizeof(current_swath_file));
+          if (ofp != NULL) {
+            fclose(ofp);
+          }
+
+          sprintf(tide_file, "%s.tde", swath_file);
+          fprintf(stderr, "Generating tide file %s\n", tide_file);
+          if ((ofp = fopen(tide_file, "w")) == NULL) {
+            //error = MB_ERROR_OPEN_FAIL;
+            fprintf(stderr, "\nUnable to open tide output file <%s>\n", tide_file);
+            fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
+            exit(MB_FAILURE);
+          }
+          fprintf(ofp, "# Tide model generated by program %s\n", program_name);
+          fprintf(ofp, "# MB-System Version: %s\n", MB_VERSION);
+          fprintf(ofp, "# Tide model generated by program %s\n", program_name);
+          fprintf(ofp, "# which in turn calls OTPS program predict_tide obtained from:\n");
+          fprintf(ofp, "#     http://www.coas.oregonstate.edu/research/po/research/tide/\n");
+          const time_t right_now = time(NULL);
+          char date[32];
+          strcpy(date, ctime(&right_now));
+          date[strlen(date) - 1] = '\0';
+          const char *user_ptr = getenv("USER");
+          if (user_ptr == NULL)
+            user_ptr = getenv("LOGNAME");
+          char user[MB_PATH_MAXLINE];
+          if (user_ptr != NULL)
+            strcpy(user, user_ptr);
+          else
+            strcpy(user, "unknown");
+          char host[MB_PATH_MAXLINE];
+          gethostname(host, MBP_FILENAMESIZE);
+          fprintf(ofp, "# Run by user <%s> on cpu <%s> at <%s>\n", user, host, date);
+          fprintf(ofp, "#%s", tline2);
+          fprintf(ofp, "#%s", tline3);
+
+          /* set mbprocess usage of tide file */
+          if (mbprocess_update) {
+            status = mb_pr_update_tide(verbose,
+              swath_file,
+              MBP_TIDE_ON,
+              tide_file,
+              tideformat,
+              &error);
+          }
+        }
+      }
+
+      /* write out the tide model to swath file tide file */
+      if (output_ok) {
+        if (tideformat == 2) {
+          fprintf(ofp,
+            "%4.4d %2.2d %2.2d %2.2d %2.2d %2.2d %9.4f\n",
+            time_i[0],
+            time_i[1],
+            time_i[2],
+            time_i[3],
+            time_i[4],
+            time_i[5],
+            tide);
+        } else {
+          mb_get_time(verbose, time_i, &time_d);
+          fprintf(ofp, "%.3f %9.4f\n", time_d, tide);
+        }
+      }
+    } // end loop reading tide values output by predict_tide
+
+    fclose(ofp);
+    fclose(lfp);
+    fclose(tfp);
+
+    /* remove the temporary files */
+    unlink(lltfile);
+    unlink(otpsfile);
+  }
 
   /* check memory */
   if (verbose >= 4)
     status = mb_memory_list(verbose, &error);
 
-  /* print output debug statements */
-  if (verbose >= 2)
-    {
+  if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  Program <%s> completed\n", program_name);
     fprintf(stderr, "dbg2  Ending status:\n");
     fprintf(stderr, "dbg2       status:  %d\n", status);
-    }
+  }
 
-  /* end it all */
-  exit(error);
-}  /* main */
+  return(error);
+}
 /*--------------------------------------------------------------------*/

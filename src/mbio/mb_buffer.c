@@ -36,11 +36,10 @@
  *
  * Author:	D. W. Caress
  * Date:	February 25, 1993
- *
- *
  */
 
 #include <math.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -496,7 +495,7 @@ int mb_buffer_get_next_data(int verbose, void *buff_ptr, void *mbio_ptr, int sta
 	}
 
 	/* extract the data */
-	/* if (found) */ {
+	if (found) {
 		char comment[200];
 		int kind;
 		status = mb_buffer_extract(verbose, buff_ptr, mbio_ptr, *id, &kind, time_i, time_d, navlon, navlat, speed, heading, nbath,
@@ -585,7 +584,7 @@ int mb_buffer_get_next_nav(int verbose, void *buff_ptr, void *mbio_ptr, int star
 	}
 
 	/* extract the data */
-	/* if (found == true) */ {
+	if (found) {
 		int kind;
 		status = mb_buffer_extract_nav(verbose, buff_ptr, mbio_ptr, *id, &kind, time_i, time_d, navlon, navlat, speed, heading,
 		                               draft, roll, pitch, heave, error);
@@ -643,10 +642,10 @@ int mb_buffer_extract(int verbose, void *buff_ptr, void *mbio_ptr, int id, int *
 	int status = MB_SUCCESS;
 	char *store_ptr = NULL;
 	if (id < 0 || id >= buff->nbuffer) {
+		*kind = MB_DATA_NONE;
 		status = MB_FAILURE;
 		*error = MB_ERROR_BAD_BUFFER_ID;
-	}
-	else {
+	} else {
 		store_ptr = buff->buffer[id];
 		*kind = buff->buffer_kind[id];
 		*error = MB_ERROR_NO_ERROR;
@@ -730,10 +729,10 @@ int mb_buffer_extract_nav(int verbose, void *buff_ptr, void *mbio_ptr, int id, i
 	int status = MB_SUCCESS;
 	char *store_ptr;
 	if (id < 0 || id >= buff->nbuffer) {
+		*kind = MB_DATA_NONE;
 		status = MB_FAILURE;
 		*error = MB_ERROR_BAD_BUFFER_ID;
-	}
-	else {
+	} else {
 		store_ptr = buff->buffer[id];
 		*kind = buff->buffer_kind[id];
 		*error = MB_ERROR_NO_ERROR;

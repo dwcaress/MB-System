@@ -129,7 +129,7 @@
 
 /* MBIO minimum and maximum error values */
 #define MB_ERROR_MIN -25
-#define MB_ERROR_MAX 16
+#define MB_ERROR_MAX 17
 
 /* MBIO function fatal error values */
 #define MB_ERROR_NO_ERROR 0
@@ -149,6 +149,7 @@
 #define MB_ERROR_BAD_SYSTEM 14
 #define MB_ERROR_BAD_DATA 15
 #define MB_ERROR_MISSING_DATA 16
+#define MB_ERROR_BAD_TIME 17
 
 /* MBIO function nonfatal error values */
 #define MB_ERROR_TIME_GAP -1
@@ -225,7 +226,8 @@ static char *fatal_error_msg[] = {"No error",
                                   "Invalid buffer id",
                                   "Invalid system id - this should not happen!",
                                   "This data file is not in the specified format!",
-                                  "Required data are missing"};
+                                  "Required data are missing",
+                                  "Bad time value"};
 static char *nonfatal_error_msg[] = {
     "No error",
     "Time gap in data",
@@ -391,15 +393,15 @@ static char *unknown_notice_msg[] = {"Unknown notice identifier detritus"};
  */
 
 /* Definitions for FLAG category */
-#define MB_FLAG_NONE 0x00
-#define MB_FLAG_FLAG 0x01
-#define MB_FLAG_NULL 0x01
-#define MB_FLAG_MANUAL 0x04
-#define MB_FLAG_FILTER 0x08
-#define MB_FLAG_FILTER2 0x10
-#define MB_FLAG_SECONDARY 0x20
-#define MB_FLAG_INTERPOLATE 0x40
-#define MB_FLAG_SONAR 0x80
+#define MB_FLAG_NONE        0x00  // =   0
+#define MB_FLAG_FLAG        0x01  // =   1
+#define MB_FLAG_NULL        0x01  // =   1
+#define MB_FLAG_MANUAL      0x04  // =   4
+#define MB_FLAG_FILTER      0x08  // =   8
+#define MB_FLAG_FILTER2     0x10  // =  16
+#define MB_FLAG_SECONDARY   0x20  // =  32
+#define MB_FLAG_INTERPOLATE 0x40  // =  64
+#define MB_FLAG_SONAR       0x80  // = 128
 //#define MB_FLAG_GT_1X_IHO 0x10 // original meaning, deprecated
 //#define MB_FLAG_GT_2X_IHO 0x20 // original meaning, deprecated
 

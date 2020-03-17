@@ -1,7 +1,6 @@
 #!/usr/bin/env perl
 #--------------------------------------------------------------------
 #    The MB-system:     mbm_grd2geovrml.perl              11/7/2001
-$ver = '$Id$';
 #
 #    Copyright (c) 2003-2019 by
 #    Mike McCann (mccann@mbari.org)
@@ -44,7 +43,7 @@ $ver = '$Id$';
 #   --olat 21 --olon -157
 #
 # Additional Options:
-#  [ --nowrz --pallette <pal> --newimage [<type>] --white
+#  [ --nowrz --palette <pal> --newimage [<type>] --white
 #    --zmax <maxclip> --zmin <minclip>
 #    --elevscale <vert_exag> --noview --vrmlurl <base_addr> ]
 #
@@ -54,8 +53,6 @@ $ver = '$Id$';
 #   Moss Landing, CA
 #   November 7, 2001
 #
-# Version:
-#   $Id$
 #
 #
 
@@ -84,7 +81,7 @@ sub usage {
 
     Usage: $0 <grd_file> --tvdir <tvdir> --vrmldir <vrmldir>
            --olat <lat> --olon <lon> --vrmlurl <base_addr>
-           [ --nowrz --pallette <pal> --newimage [<type>] --basename <string>
+           [ --nowrz --palette <pal> --newimage [<type>] --basename <string>
              --white --zmax <maxclip> --zmin <minclip>
              --elevscale <vert_exag> --noview ]
 
@@ -101,7 +98,7 @@ sub usage {
 
     Optional mbm_grd2geovrml parameters:
       --nowrz:      Write geoVRML .wrl files instead of gzipped .wrz
-      --pallette:   Number of Color Lookup Table (1:Haxby,2:High,3:Low,4:Gray)
+      --palette:   Number of Color Lookup Table (1:Haxby,2:High,3:Low,4:Gray)
            <pal>:
       --newimage    Force creation of new image, otherwise uses one in $TMPDIR.
           <type>:   <type> may be a number 1..5 to pass on to the mbm_grdtiff
@@ -173,12 +170,12 @@ $nowrzFlag = 0;
 $noviewFlag = 0;
 $newimageFlag = 0;
 $whiteFlag = 0;
-$pallette = 1;		# See mbm_grdtiff 1:Haxby, 2:High, 3: Low, 4:gray, ...
+$palette = 1;		# See mbm_grdtiff 1:Haxby, 2:High, 3: Low, 4:gray, ...
 $vrmlurl = '';
 if ( ! GetOptions ( 'tvdir=s' => \$tvdir, 'vrmldir=s' => \$vrmldir,
 					'olat=f' => \$olat, 'olon=f' => \$olon,
                     'elevscale=f' => \$elevscale, 'nowrz' => \$nowrzFlag,
-                    'noview' => \$noviewFlag, 'pallette=i' => \$pallette,
+                    'noview' => \$noviewFlag, 'palette=i' => \$palette,
 					'newimage=s' => \$newimage, 'white' => \$whiteFlag,
 					'zmax=f' => \$clipmax, 'zmin=f' => \$clipmin,
 					'vrmlurl=s' => \$vrmlurl,'basename=s' => \$basename ) ) {
@@ -481,7 +478,7 @@ elsif ( $color_mode == 5 ) {
 	$imgType = "shaded by slope magnitude";
 	$DOption = "-D0/1";		# Flips shaping
 }
-$cmd = "mbm_grdtiff -I $grdFile -O$baseFile -W1/${pallette} -G${color_mode} -A0.25/280/15 ${DOption} -Q -V";
+$cmd = "mbm_grdtiff -I $grdFile -O$baseFile -W1/${palette} -G${color_mode} -A0.25/280/15 ${DOption} -Q -V";
 execute($cmd, "Create script to create black NANed $imgType tiff from original grid file");
 
 if ( ! $whiteFlag ) {

@@ -21,11 +21,11 @@
   17 = Equirectangular
   18 = Miller Cylindrical
   19 = Van der Grinten
-  20 = (Hotine) Oblique Mercator 
+  20 = (Hotine) Oblique Mercator
   21 = Robinson
   22 = Space Oblique Mercator (SOM)
   23 = Alaska Conformal
-  24 = Interrupted Goode Homolosine 
+  24 = Interrupted Goode Homolosine
   25 = Mollweide
   26 = Interrupted Mollweide
   27 = Hammer
@@ -67,7 +67,7 @@
 #define WAGIV 28
 #define WAGVII 29
 #define OBEQA 30
-#define USDEF 99 
+#define USDEF 99
 
 /* Define unit code numbers to their names */
 
@@ -122,7 +122,7 @@ long aziminvint( double r_maj, double center_lon, double center_lat,
 long aziminv( double x, double y, double *lon, double *lat);
 
 /* Functions residing in cproj.c */
-void sincos( double val, double *sin_val, double *cos_val);
+void gsincos( double val, double *sin_val, double *cos_val);
 double asinz (double con);
 double msfnz (double eccent, double sinphi, double cosphi);
 double qsfnz (double eccent, double sinphi, double cosphi);
@@ -324,7 +324,7 @@ long tminvint(double r_maj, double r_min, double scale_fact,
 	double false_north);
 long tminv(double x, double y, double *lon, double *lat);
 long untfz(long inunit, long outunit, double *factor);
-long utmforint(double r_maj, double r_min, double scale_fact, long zone); 
+long utmforint(double r_maj, double r_min, double scale_fact, long zone);
 long utmfor(double lon, double lat, double *x, double *y);
 long utminvint(double r_maj, double r_min, double scale_fact, long zone);
 long vandgforint(double r, double center_long, double false_east,

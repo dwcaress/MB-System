@@ -52,7 +52,7 @@ lat_origin = center_lat;
 false_northing = false_north;
 false_easting = false_east;
 
-sincos(center_lat,&sin_p10,&cos_p10);
+gsincos(center_lat,&sin_p10,&cos_p10);
 
 /* Report parameters to the user
   -----------------------------*/
@@ -84,7 +84,7 @@ x -= false_easting;
 y -= false_northing;
 rh = sqrt(x * x + y * y);
 z = 2.0 * atan(rh / (2.0 * r_major));
-sincos(z,&sinz,&cosz);
+gsincos(z,&sinz,&cosz);
 *lon = lon_center;
 if (fabs(rh) <= EPSLN)
    {

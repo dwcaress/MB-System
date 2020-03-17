@@ -111,6 +111,10 @@
 static uint32_t s_trnif_dfl_send_tcp(msock_connection_t *peer, char *msg, int32_t send_len, int *errout)
 {
     uint32_t retval=0;
+    int flags = 0;
+#ifdef MSG_NOSIGNAL
+    flags = MSG_NOSIGNAL;
+#endif
     if(NULL!=peer && NULL!=msg && send_len>0){
         int64_t send_bytes=0;
         int flags=0;
@@ -153,6 +157,10 @@ static int s_trnif_msg_read_dfl(byte *dest, uint32_t readlen, msock_socket_t *so
 static uint32_t s_trnif_dfl_send_udp(netif_t *self,msock_connection_t *peer, char *msg, int32_t send_len, int *errout)
 {
     uint32_t retval=0;
+    int flags = 0;
+#ifdef MSG_NOSIGNAL
+    flags = MSG_NOSIGNAL;
+#endif
     if(NULL!=peer && NULL!=msg && send_len>0){
         int64_t send_bytes=0;
         int flags=0;
@@ -949,5 +957,6 @@ int trnif_msg_pub(netif_t *self, msock_connection_t *peer, char *data, size_t le
         }
     }
     return retval;
+
 }
 // End function

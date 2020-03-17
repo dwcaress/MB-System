@@ -1,14 +1,14 @@
 /* FILENAME      : TerrainNav.h
  * AUTHOR        : Debbie Meduna
  * DATE          : 04/27/09
- * DESCRIPTION   : TerrainNav is used to extract terrain-correlation based 
- *                 estimates of vehicle position and attitude for use in a 
- *                 navigation system.  This class is an interface class between 
+ * DESCRIPTION   : TerrainNav is used to extract terrain-correlation based
+ *                 estimates of vehicle position and attitude for use in a
+ *                 navigation system.  This class is an interface class between
  *                 the vehicle user and the terrain navigation filter classes.
  *
  * DEPENDENCIES  : structDefs.h, myOutput.h, TNavFilter.h, TNavPointMassFilter.h
- *                 TNavParticleFilter.h 
- * 
+ *                 TNavParticleFilter.h
+ *
  * LAST MODIFIED : 11/30/10
  * MODIFIED BY   : Debbie Meduna
  * -----------------------------------------------------------------------------
@@ -30,7 +30,7 @@
 #include "TerrainMapOctree.h"
 #include "TerrainMapDEM.h"
 
-#include <math.h>
+#include <cmath>
 #include <fstream>
 #include <iomanip>
 
@@ -40,11 +40,11 @@ using namespace std;
 #endif*/
 
 
-#ifndef MEAS_BUFFER_SIZE     	//indicates number of meausurements that can 
+#ifndef MEAS_BUFFER_SIZE     	//indicates number of meausurements that can
 #define MEAS_BUFFER_SIZE 200 	//be stored for inclusion.
 #endif
 
-#ifndef MAX_INTERP_TIME      	//max time in seconds allowed between IMU data and 
+#ifndef MAX_INTERP_TIME      	//max time in seconds allowed between IMU data and
 #define MAX_INTERP_TIME 5.0  	//measurement data for interpolation
 #endif
 
@@ -73,7 +73,7 @@ using namespace std;
 #endif                          //(in sec)
 
 #ifndef MAX_VEL_OUTAGE
-#define MAX_VEL_OUTAGE 100.0	//Maximum allowable time of bottom velocity 
+#define MAX_VEL_OUTAGE 100.0	//Maximum allowable time of bottom velocity
 #endif                          //outage (in sec)
 
 #ifndef MAX_FILTER_VAR     			//Variance trigger between TODO: ??? and ???
@@ -81,7 +81,7 @@ using namespace std;
 #endif
 
 #ifndef MIN_FILTER_VAR   				//Variance trigger between TODO: ??? and ???
-#define MIN_FILTER_VAR 0.000000001 //3.0 			//Minimum allowable x/y variance (m^2) //20.0	
+#define MIN_FILTER_VAR 0.000000001 //3.0 			//Minimum allowable x/y variance (m^2) //20.0
 #endif
 
 //TODO: Get rid of MIN_MEAS_VAR?  Not used for anything???
@@ -93,7 +93,7 @@ using namespace std;
 #define VAR_MARGIN 	0.000000000001//5.0//200.0 //100.0//	//Margin on measurement variance
 #endif
 
-//*** TODO: figure out right location for NIS parameters (NIS_WINDOW_LENGTH is used by the filter and 
+//*** TODO: figure out right location for NIS parameters (NIS_WINDOW_LENGTH is used by the filter and
 //is in genFilterDefs.h, MAX_NIS_VALUE is used by TerrainNav and is in TerrainNav.h)
 #ifndef MAX_NIS_VALUE
 #define MAX_NIS_VALUE 	1.4 //4.0//0.1		//Maximum allowable NIS Windowed Average
@@ -113,11 +113,11 @@ class TerrainNavLog;
 
 /*!
  * Class: TerrainNav
- * 
- * This class is used as an interface between a user and the underlying 
- * TNavFilter object which uses a terrain navigation algorithm to compute 
+ *
+ * This class is used as an interface between a user and the underlying
+ * TNavFilter object which uses a terrain navigation algorithm to compute
  * pose estimates based on sonar and inertial sensor measurements.
- * This class's primary purpose is to appropriately handle incoming inertial 
+ * This class's primary purpose is to appropriately handle incoming inertial
  * and sonar measurements, pass them to the underlying TNavFilter object, and
  * return pose estimates when requested by the user.
  *
@@ -125,13 +125,13 @@ class TerrainNavLog;
  *
  *      Generate terrainNav object and estimate structures once at the start:
  *            TerrainNav *tercom = new TerrainNav(mapName, vehicleName,
- *                                               filterType);  
- *	      poseT* tercomEst = new poseT;                        
- *            poseT* currInertialPose = new poseT; 
- *            measT* currMeas = new measT; 
+ *                                               filterType);
+ *	      poseT* tercomEst = new poseT;
+ *            poseT* currInertialPose = new poseT;
+ *            measT* currMeas = new measT;
  *
- *      Incorporate inertial sensor information as it comes in:    
- *  	      tercom->motionUpdate(currInertialPose); 
+ *      Incorporate inertial sensor information as it comes in:
+ *  	      tercom->motionUpdate(currInertialPose);
  *
  *      Incorporate sonar measurements as they come in:
  *            tercom->measUpdate(currMeas, dvl);
@@ -139,30 +139,30 @@ class TerrainNavLog;
  *      Ask for most recent terrain navigation pose estimate:
  *            tercom->estimatePose(tercomEst, mmse);
  *
- *      ***NAVIGATION AND MEASUREMENTS MUST BE ADDED SEQUENTIALLY IN TIME, 
+ *      ***NAVIGATION AND MEASUREMENTS MUST BE ADDED SEQUENTIALLY IN TIME,
  *         OTHERWISE SOME MEASUREMENTS MAY BE SKIPPED***
  *
 
- * 
- * Note: This class can handle various combinations of sonar and 
- * inertial sensor data rates.  If the sonar and inertial sensor measurements 
- * are out of sync, the inertial pose measurements are interpolated to provide 
- * an estimate of the vehicle pose associated with each sonar measurement.  
- * If the sonar data rate is faster than the inertial sensor data rate, sonar 
- * measurements are collected and stored until the next inertial sensor 
+ *
+ * Note: This class can handle various combinations of sonar and
+ * inertial sensor data rates.  If the sonar and inertial sensor measurements
+ * are out of sync, the inertial pose measurements are interpolated to provide
+ * an estimate of the vehicle pose associated with each sonar measurement.
+ * If the sonar data rate is faster than the inertial sensor data rate, sonar
+ * measurements are collected and stored until the next inertial sensor
  * measurement comes in, at which point all collected measurements are added
- * into the navigation filter in sequence. 
+ * into the navigation filter in sequence.
  */
 class TerrainNav
 {
  public:
-    
+
     TerrainNav();
 
   /* Constructor: TerrainNav(mapName)
    * Usage: tercom = new TerrainNav("canyonmap");
    * -------------------------------------------------------------------------*/
-  /*! Initializes a new TerrainNav with terrain map "mapName.txt". The mapping 
+  /*! Initializes a new TerrainNav with terrain map "mapName.txt". The mapping
    * AUV specs and the Point Mass Filter algorithm are used as defaults.
    */
   TerrainNav(char *mapName);
@@ -171,10 +171,10 @@ class TerrainNav
   /* Constructor: TerrainNav(mapName, vehicleName)
    * Usage: tercom = new TerrainNav("canyonmap", "mappingAuv");
    * -------------------------------------------------------------------------*/
-  /*! Sets private variables mapFile = "mapName.txt", vehicleSpecFile = 
-   * "vehicleName.txt", and saveDirectory = NULL, default mapType = 1 (DEM).  
+  /*! Sets private variables mapFile = "mapName.txt", vehicleSpecFile =
+   * "vehicleName.txt", and saveDirectory = NULL, default mapType = 1 (DEM).
    * Makes a call to createFilter(1) to initialize a new TerrainNav
-   * object with default type = 1 (Point Mass Filter). 
+   * object with default type = 1 (Point Mass Filter).
    */
   TerrainNav(char *mapName, char *vehicleSpecs);
 
@@ -182,58 +182,58 @@ class TerrainNav
   /* Constructor: TerrainNav(mapName, vehicleName, filterType)
    * Usage: tercom = new TerrainNav("canyonmap", "mappingAuv", 1);
    * -------------------------------------------------------------------------*/
-  /*! Sets private variables mapFile = "mapName.txt", vehicleSpecFile = 
-   * "vehicleName.txt", and saveDirectory = NULL, default mapType = 1 (DEM).  
+  /*! Sets private variables mapFile = "mapName.txt", vehicleSpecFile =
+   * "vehicleName.txt", and saveDirectory = NULL, default mapType = 1 (DEM).
    * Makes a call to createFilter(filterType) to initialize a new TerrainNav
-   * object with specified type. 
+   * object with specified type.
    */
-  TerrainNav(char *mapName, char *vehicleSpecs, 
+  TerrainNav(char *mapName, char *vehicleSpecs,
 	     const int &filterType);
 
 
   /* Constructor: TerrainNav(mapName, vehicleName, filterType, directory)
    * Usage: tercom = new TerrainNav("canyonmap", "mappingAuv", 1, "/home/");
    * -------------------------------------------------------------------------*/
-  /*! Sets private variables mapFile = "mapName.txt", vehicleSpecFile = 
-   * "vehicleName.txt", and saveDirectory = "directory", default mapType = 1 (DEM).  
+  /*! Sets private variables mapFile = "mapName.txt", vehicleSpecFile =
+   * "vehicleName.txt", and saveDirectory = "directory", default mapType = 1 (DEM).
    * Makes a call to createFilter(filterType) to initialize a new TerrainNav
-   * object with specified type. 
+   * object with specified type.
    */
-  TerrainNav(char *mapName, char *vehicleSpecs, 
+  TerrainNav(char *mapName, char *vehicleSpecs,
 	     const int &filterType, char *directory);
-	     
+
 	 /* Constructor: TerrainNav(mapName, vehicleName, filterType, mapType)
    * Usage: tercom = new TerrainNav("canyonmap", "mappingAuv", 1, 1);
    * -------------------------------------------------------------------------*/
-  /*! Sets private variables mapFile = "mapName.txt", vehicleSpecFile = 
-   * "vehicleName.txt", and mapType = mapType (1 is DEM, 2 is octree).  
+  /*! Sets private variables mapFile = "mapName.txt", vehicleSpecFile =
+   * "vehicleName.txt", and mapType = mapType (1 is DEM, 2 is octree).
    * Makes a call to createFilter(filterType) to initialize a new TerrainNav
-   * object with specified type. 
+   * object with specified type.
    */
-  TerrainNav(char *mapName, char *vehicleSpecs, 
+  TerrainNav(char *mapName, char *vehicleSpecs,
 	     const int &filterType, const int &mapType);
 
 	/* Constructor: TerrainNav(mapName, vehicleName, filterType, mapType, directory)
    * Usage: tercom = new TerrainNav("canyonmap", "mappingAuv", 1, 1, "/home/");
    * -------------------------------------------------------------------------*/
-  /*! Sets private variables mapFile = "mapName.txt", vehicleSpecFile = 
-   * "vehicleName.txt", and saveDirectory = "directory", mapType = mapType 
-   * (1 is DEM, 2 is octree).  
+  /*! Sets private variables mapFile = "mapName.txt", vehicleSpecFile =
+   * "vehicleName.txt", and saveDirectory = "directory", mapType = mapType
+   * (1 is DEM, 2 is octree).
    * Makes a call to createFilter(filterType) to initialize a new TerrainNav
-   * object with specified type. 
+   * object with specified type.
    */
-  TerrainNav(char *mapName, char *vehicleSpecs, 
+  TerrainNav(char *mapName, char *vehicleSpecs,
 	     const int &filterType, const int &mapType, char *directory);
 
   /* Constructor: TerrainNav(map, vehicleSpecs, particles, filter, mapType, dir)
    * Usage: tercom = new TerrainNav("canyon", "mapping", "particles" 1, 1, "/log/");
    * -------------------------------------------------------------------------*/
-  /*! Sets private variables mapFile = "mapName.txt", vehicleSpecFile = 
+  /*! Sets private variables mapFile = "mapName.txt", vehicleSpecFile =
    * "vehicleName.txt", particlesFile = "particles", and saveDirectory = "directory",
-   * mapType = mapType 
-   * (1 is DEM, 2 is octree).  
+   * mapType = mapType
+   * (1 is DEM, 2 is octree).
    * Makes a call to createFilter(filterType) to initialize a new TerrainNav
-   * object with specified type. 
+   * object with specified type.
    */
   TerrainNav(char* mapName, char* vehicleSpecs, char* particles,
              const int& filterType, const int& mapType, char* directory);
@@ -250,49 +250,49 @@ class TerrainNav
    * Usage: tercom->estimatePose(currEstimate, type);
    * -------------------------------------------------------------------------*/
   /*! This is the primary function in the TerrainNav class.  The function takes
-   * in a pointer to a poseT which it fills with the terrain correlation pose 
-   * estimate based on previous measurements.  The time stamp of the pose 
-   * estimate indicates the last update time of the navigation filter.  Type 
-   * indicates the estimator type: 
+   * in a pointer to a poseT which it fills with the terrain correlation pose
+   * estimate based on previous measurements.  The time stamp of the pose
+   * estimate indicates the last update time of the navigation filter.  Type
+   * indicates the estimator type:
    * 1: Maximum Likelihood Estimate
    * 2: Minimum Mean Square Error Estimate.
    */
   virtual void estimatePose(poseT* estimate, const int &type);
 
-		
+
   /* Function: measUpdate
    * Usage: tercom->measUpdate(currMeas, type);
    * -------------------------------------------------------------------------*/
-  /*! Passes the current sonar measurement information along to the TNavFilter 
+  /*! Passes the current sonar measurement information along to the TNavFilter
    * object.  The function takes in a pointer to a measT containing the current
-   * sonar measurement information. It also takes in an integer type variable 
-   * which relates the sonar measurement type as follows: 
+   * sonar measurement information. It also takes in an integer type variable
+   * which relates the sonar measurement type as follows:
    * 1: DVL
    * 2: Multibeam
-   * 3: Single Beam 
+   * 3: Single Beam
    * 4: Homer Relative Measurement
 
    */
   virtual void measUpdate(measT* incomingMeas, const int &type);
 
-   
+
   /* Function: mbUpdate
    * Usage: tercom->mbUpdate(currMeas, type);
    * -------------------------------------------------------------------------*/
-  /*! Passes the current multibeam range information along to the TNavFilter 
+  /*! Passes the current multibeam range information along to the TNavFilter
    * object.  The function takes in a pointer to a mbT containing the current
    * multibeam measurement ranges.
 
    */
   //virtual void mbUpdate(mbT* incomingMeas);
 
-   
+
   /* Function: motionUpdate
    * Usage: tercom->motionUpdate(currEstimate);
    * -------------------------------------------------------------------------*/
-  /*! Passes the current inertial measurement information along 
-   * to the TNavFilter object.  The function takes in a pointer to a poseT 
-   * containing the current inertial measurement information. 
+  /*! Passes the current inertial measurement information along
+   * to the TNavFilter object.  The function takes in a pointer to a poseT
+   * containing the current inertial measurement information.
    */
   virtual void motionUpdate(poseT* incomingNav);
 
@@ -300,9 +300,9 @@ class TerrainNav
   /* Function: outstandingMeas
    * Usage: tercom->outstandingMeas;
    * -------------------------------------------------------------------------*/
-  /*! Returns a boolean indicating if there are any measurements 
+  /*! Returns a boolean indicating if there are any measurements
    * not yet incorporated into the PDF and waiting for more recent inertial
-   * measurement data. 
+   * measurement data.
    */
   virtual inline bool outstandingMeas(){return (this->numWaitingMeas > 0);}
 
@@ -310,7 +310,7 @@ class TerrainNav
   /* Function: lastMeasSuccessful
    * Usage: tercom->lastMeasSuccessful();
    * -------------------------------------------------------------------------*/
-  /*! Returns a boolean indicating if the last sonar measurement 
+  /*! Returns a boolean indicating if the last sonar measurement
    * was successfully incorporated into the filter or not.
    */
   virtual inline bool lastMeasSuccessful(){return this->lastMeasSuccess;}
@@ -319,7 +319,7 @@ class TerrainNav
   /* Function: setInterpMeasAttitude()
    * Usage: tercom->setInterpMeasAttitude(1);
    * -------------------------------------------------------------------------*/
-  /*! Sets a boolean indicating if the sonar measurement attitude 
+  /*! Sets a boolean indicating if the sonar measurement attitude
    * information should be determined from interpolated inertial poses.
    * Default = 0;
    */
@@ -352,7 +352,7 @@ class TerrainNav
   /* Function: isConverged()
    * Usage: converged = tercom->isConverged();
    * ------------------------------------------------------------------------*/
-  /*! Returns a boolean indicating if the terrain navigation filter has 
+  /*! Returns a boolean indicating if the terrain navigation filter has
    * converged to an estimate.
    */
   virtual inline bool isConverged(){return this->tNavFilter->isConverged();}
@@ -373,7 +373,7 @@ class TerrainNav
    * 7DOF system with ALLOW_ATTITUDE_SEARCH=1, DEAD_RECKON=1, SEARCH_GYRO=1
    */
   virtual inline void useLowGradeFilter(){this->tNavFilter->useLowGradeFilter();}
-  
+
 
 //TODO: Currently not using this, all done with ALLOW_ATTITUDE_SEARCH, DEAD_RECKON and SEARCH_GYRO
   /* Function: useHighGradeFilter()
@@ -403,11 +403,11 @@ class TerrainNav
    */
   //old state machine version: void reinitFilter(int newState, bool lowInfoTransition);
   void reinitFilter(bool lowInfoTransition);
-  
+
 	/* Function: setModifiedWeighting(use)
    * Usage: tercom->tNavFilter->setModifiedWeighting(use)
 	 * tercom->tNavFilter->setModifiedWeighting(use) default setting is TRN_WT_NORM
-   * from structDefs.h 
+   * from structDefs.h
    * -------------------------------------------------------------------------*/
   /*! Overwrite boolean useModifiedWeighting with input argument, use.
    */
@@ -418,8 +418,8 @@ class TerrainNav
     logs(TL_OMASK(TL_TERRAIN_NAV, TL_LOG),"TerrainNav::modified weighting set to %i\n",
       use);
   }
-  
-  
+
+
   //TODO delete this
   /* Function: getFilterState()
    * Usage: filterType = tercom->getFilterState();
@@ -444,15 +444,15 @@ class TerrainNav
   //Public structures and components of a TerrainNav object:
   /*********************************************************/
 
-  /*! tNavFilter object used to recursively incorporate vehicle measurements 
+  /*! tNavFilter object used to recursively incorporate vehicle measurements
    according to a terrain navigation algorithm */
   TNavFilter* tNavFilter;
 
-  virtual bool is_connected() { return true; } 
+  virtual bool is_connected() { return true; }
 
   virtual void releaseMap()
   {
-    if (this->terrainMap) delete this->terrainMap; 
+    if (this->terrainMap) delete this->terrainMap;
     this->terrainMap = NULL;
   }
 
@@ -482,11 +482,11 @@ class TerrainNav
    * 2: 8D Particle Filter
    * 3. 3D Extended Kalman Filter
    * 4. 8D Sigma Point (Unscented) Kalman Filter
-   * 
+   *
    * windowVar is used to size the initalization window for the new filter.
-   * 
+   *
    * If the filter object already exists, this function will delete the current
-   * filter object and create a new one with stored saveDirectory, 
+   * filter object and create a new one with stored saveDirectory,
    * vehicleSpecFile and mapFile.
    */
   void createFilter(const int filterType, const double *windowVar);
@@ -499,13 +499,13 @@ class TerrainNav
    */
   void initVariables();
 
-  
+
   /* Helper Function: attemptInitFilter()
    * Usage: attemptInitFilter(initEstimate);
    * -------------------------------------------------------------------------*/
-  /*! Try to initialize the terrain navigation filter, TNavFilter, based on the 
-   * first inertial sensor measurement contained in the initEstimate poseT 
-   * structure. Initialization is only allowed if the following conditions are 
+  /*! Try to initialize the terrain navigation filter, TNavFilter, based on the
+   * first inertial sensor measurement contained in the initEstimate poseT
+   * structure. Initialization is only allowed if the following conditions are
    * met:
    * 1. Vehicle has bottom lock
    * 2. Vehicle has valid velocity measurements
@@ -519,8 +519,8 @@ class TerrainNav
   /* Helper Function: initMotion
    * Usage: initMotion(initEstimate);
    * -------------------------------------------------------------------------*/
-  /*! Initializes the terrain navigation filter, TNavFilter, based on the 
-   * first inertial sensor measurement contained in the initEstimate poseT 
+  /*! Initializes the terrain navigation filter, TNavFilter, based on the
+   * first inertial sensor measurement contained in the initEstimate poseT
    * structure.
    */
   void initMotion(poseT& initEstimate);
@@ -540,22 +540,22 @@ class TerrainNav
    * Usage: computeMeasVariance(currMeas);
    * -------------------------------------------------------------------------*/
   /*! Fills in the covariance array of the "currMeas" measT struct with a %
-   * of the measured range for each beam.  If the covariance array is already 
+   * of the measured range for each beam.  If the covariance array is already
    * filled or the current measurement has no corresponding sensor type, this
-   * function returns without making any changes.  Otherwise, the 
+   * function returns without making any changes.  Otherwise, the
    * percentRangeError property of the corresponding sensor is used to evaluate
    * the variance as follows:  sigma = percentRangeError*range;
    */
   void computeMeasVariance(measT& currMeas);
-  
-  
+
+
   /* Helper Function: checkVelocityValidity
    * Usage: checkVelocityValidity(currPose);
    * -------------------------------------------------------------------------*/
-  /*! Check validity of DVL/INS velocity. If invalid, changes dvlValid flag in 
+  /*! Check validity of DVL/INS velocity. If invalid, changes dvlValid flag in
    * currPose to false.  Validity check is based on the following:
    * 1. velocity is below specified MAX
-   * 2. vehicle x-direction velocity is greater than zero 
+   * 2. vehicle x-direction velocity is greater than zero
    *   (vehicle not stationary)
    * 3. estimated acceleration exceeds specified MAX_ACCEL
    */
@@ -573,14 +573,14 @@ class TerrainNav
    * 4. all but one range measurement are equal
    */
   void checkRangeValidity(measT& currMeas);
-  
+
   /* Helper Function: checkFilterHealth
    * Usage: checkFilterHealth()
    * -------------------------------------------------------------------------*/
   /*! This function checks the health of the filter and calls the reinitFilter()
    * function if necessary.  This checks the health by performing the following
    * checks:
-   *	a. Check if the length of time since the last successful measurement 
+   *	a. Check if the length of time since the last successful measurement
    *		exceeds a set maximum. (uses lastMeasSuccessTime)
    *	b. Check if the x/y uncertainty of the filter exceeds a set maximum.
  	 *		(uses currVar)
@@ -597,22 +597,22 @@ class TerrainNav
   //!integer indicating the current number of unincorporated sonar measurements
   int numWaitingMeas;
 
-  /*!boolean indicating if the previous sonar measurement was successfully 
+  /*!boolean indicating if the previous sonar measurement was successfully
     incoporated into the navigation filter*/
   bool lastMeasSuccess;
 
   /*!array containing the last good velocity measurements and bottom-lock status
     / Velocity is given in the body frame*/
-  double lastValidVel[3]; 
+  double lastValidVel[3];
   bool lastVelBotLock;
-  
+
   //!status of last measurement - only used for testing initialization
   //TODO: why are these limited to 4 beams?
   bool lastMeasValid;
   double lastValidRange[4];
   double lastValidRangeTime[4];
   bool noValidRange[4];
-  
+
   //!last time associated with successful measurement update
   double lastMeasSuccessTime;
 
@@ -621,15 +621,15 @@ class TerrainNav
 
   //!time of last bottom lock velocity
   double lastBottomLockTime;
-    
+
   //!last valid estimated navigation offset
   poseT estNavOffset;
 
-  //!boolean indicating if filter reinitializations are allowed. 
+  //!boolean indicating if filter reinitializations are allowed.
   //Initialized as TRUE but can be set with setFilterReinit
   bool allowFilterReinits;
-  
-  //!boolean indicating if modified weighting should be used. 
+
+  //!boolean indicating if modified weighting should be used.
   //Initialized as FALSE but can be set using setModifiedWeighting
   int useModifiedWeighting;
 
@@ -641,16 +641,16 @@ class TerrainNav
   char* vehicleSpecFile;
   char* particlesFile;
   char* mapFile;
-    
+
   //!type of filter
   int filterType;
-  
+
   //!type of map
   int mapType;
 
   //!terrainMap object containing information about current map being used
   TerrainMap* terrainMap;
-  
+
   //TODO delete this
   //!current state of filter
   //old state machine declaration: int filterState;

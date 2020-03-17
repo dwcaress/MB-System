@@ -75,7 +75,7 @@ if (fabs(fabs(c_lat) - HALF_PI) > EPSLN)
    {
    ind = 1;
    con1 = fac * center_lat; 
-   sincos(con1,&sinphi,&cosphi);
+   gsincos(con1,&sinphi,&cosphi);
    mcs = msfnz(e,sinphi,cosphi);
    tcs = tsfnz(e,con1,sinphi);
    }

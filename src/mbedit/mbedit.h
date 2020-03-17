@@ -22,9 +22,6 @@
  * Date:	October 14, 2009
  */
 
-/*--------------------------------------------------------------------*/
-
-/* function prototypes */
 int mbedit_init(int argc, char **argv, int *startup_file);
 int mbedit_set_graphics(void *xgid, int ncol, unsigned int *pixels);
 int mbedit_set_scaling(int *brdr, int sh_time);
@@ -184,5 +181,3 @@ void BxUnmanageCB(Widget w, XtPointer client, XtPointer call);
 void BxManageCB(Widget w, XtPointer client, XtPointer call);
 void BxPopupCB(Widget w, XtPointer client, XtPointer call);
 XtPointer BX_CONVERT(Widget w, char *from_string, char *to_type, int to_size, Boolean *success);
-
-/*--------------------------------------------------------------------*/

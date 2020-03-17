@@ -51,7 +51,7 @@ lat_origin = center_lat;
 false_northing = false_north;
 false_easting = false_east;
 
-sincos(center_lat,&sin_p12,&cos_p12);
+gsincos(center_lat,&sin_p12,&cos_p12);
 
 /* Report parameters to the user
   -----------------------------*/
@@ -89,7 +89,7 @@ if (rh > (2.0 * HALF_PI * r_major))
    return(125);
    }
 z = rh / r_major;
-sincos(z,&sinz,&cosz);
+gsincos(z,&sinz,&cosz);
 *lon = lon_center;
 if (fabs(rh) <= EPSLN)
    {

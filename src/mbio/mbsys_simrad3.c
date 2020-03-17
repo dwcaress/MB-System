@@ -50,7 +50,6 @@
 
 /*--------------------------------------------------------------------*/
 int mbsys_simrad3_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *error) {
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -59,7 +58,7 @@ int mbsys_simrad3_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *erro
 	}
 
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* allocate memory for data structure */
 	const int status = mb_mallocd(verbose, __FILE__, __LINE__, sizeof(struct mbsys_simrad3_struct), (void **)store_ptr, error);
@@ -91,10 +90,12 @@ int mbsys_simrad3_survey_alloc(int verbose, void *mbio_ptr, void *store_ptr, int
 	}
 
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
-	struct mbsys_simrad3_struct *store = (struct mbsys_simrad3_struct *)store_ptr;
+	// struct mbsys_simrad3_struct *store = (struct mbsys_simrad3_struct *)store_ptr;
+
+	// TODO(schwehr): Is this supposed to alloc something?
 
 	const int status = MB_SUCCESS;
 
@@ -120,7 +121,7 @@ int mbsys_simrad3_extraparameters_alloc(int verbose, void *mbio_ptr, void *store
 	}
 
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	struct mbsys_simrad3_struct *store = (struct mbsys_simrad3_struct *)store_ptr;
@@ -157,7 +158,7 @@ int mbsys_simrad3_wc_alloc(int verbose, void *mbio_ptr, void *store_ptr, int *er
 	}
 
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	struct mbsys_simrad3_struct *store = (struct mbsys_simrad3_struct *)store_ptr;
@@ -234,7 +235,7 @@ int mbsys_simrad3_attitude_alloc(int verbose, void *mbio_ptr, void *store_ptr, i
 	}
 
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	struct mbsys_simrad3_struct *store = (struct mbsys_simrad3_struct *)store_ptr;
@@ -304,7 +305,7 @@ int mbsys_simrad3_netattitude_alloc(int verbose, void *mbio_ptr, void *store_ptr
 	}
 
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	struct mbsys_simrad3_struct *store = (struct mbsys_simrad3_struct *)store_ptr;
@@ -373,7 +374,7 @@ int mbsys_simrad3_heading_alloc(int verbose, void *mbio_ptr, void *store_ptr, in
 	}
 
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	struct mbsys_simrad3_struct *store = (struct mbsys_simrad3_struct *)store_ptr;
@@ -433,7 +434,7 @@ int mbsys_simrad3_ssv_alloc(int verbose, void *mbio_ptr, void *store_ptr, int *e
 	}
 
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	struct mbsys_simrad3_struct *store = (struct mbsys_simrad3_struct *)store_ptr;
@@ -490,7 +491,7 @@ int mbsys_simrad3_tilt_alloc(int verbose, void *mbio_ptr, void *store_ptr, int *
 	}
 
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	struct mbsys_simrad3_struct *store = (struct mbsys_simrad3_struct *)store_ptr;
@@ -558,35 +559,35 @@ int mbsys_simrad3_deall(int verbose, void *mbio_ptr, void **store_ptr, int *erro
 		    (struct mbsys_simrad3_extraparameters_struct *)store->extraparameters;
 		if (extraparameters->xtr_data != NULL)
 			status = mb_freed(verbose, __FILE__, __LINE__, (void **)&(extraparameters->xtr_data), error);
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&(store->extraparameters), error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&(store->extraparameters), error);
 	}
 
 	/* deallocate memory for water column data structure */
 	if (store->wc != NULL)
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&(store->wc), error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&(store->wc), error);
 
 	/* deallocate memory for attitude data structure */
 	if (store->attitude != NULL)
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&(store->attitude), error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&(store->attitude), error);
 
 	/* deallocate memory for network attitude data structure */
 	if (store->netattitude != NULL)
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&(store->netattitude), error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&(store->netattitude), error);
 
 	/* deallocate memory for heading data structure */
 	if (store->heading != NULL)
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&(store->heading), error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&(store->heading), error);
 
 	/* deallocate memory for ssv data structure */
 	if (store->ssv != NULL)
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&(store->ssv), error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&(store->ssv), error);
 
 	/* deallocate memory for tilt data structure */
 	if (store->tilt != NULL)
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&(store->tilt), error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&(store->tilt), error);
 
 	/* deallocate memory for data structure */
-	status = mb_freed(verbose, __FILE__, __LINE__, (void **)store_ptr, error);
+	status &= mb_freed(verbose, __FILE__, __LINE__, (void **)store_ptr, error);
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
@@ -609,8 +610,10 @@ int mbsys_simrad3_zero_ss(int verbose, void *store_ptr, int *error) {
 
 	/* get pointer to data descriptor */
 	struct mbsys_simrad3_struct *store = (struct mbsys_simrad3_struct *)store_ptr;
-	for (int i = 0; i < MBSYS_SIMRAD3_NUM_PING_STRUCTURES; i++) {
-		struct mbsys_simrad3_ping_struct *ping = (struct mbsys_simrad3_ping_struct *)&(store->pings[i]);
+
+	for (int ping_num = 0; ping_num < MBSYS_SIMRAD3_NUM_PING_STRUCTURES; ping_num++) {
+		struct mbsys_simrad3_ping_struct *ping =
+			(struct mbsys_simrad3_ping_struct *)&(store->pings[ping_num]);
 
 		ping->png_ss_read = 0;          /* flag indicating actual reading of sidescan record */
 		ping->png_ss_date = 0;          /* date = year*10000 + month*100 + day
@@ -629,19 +632,19 @@ int mbsys_simrad3_zero_ss(int verbose, void *store_ptr, int *error) {
 		/* TVG law crossover angle (0.1 deg) */
 		ping->png_nbeams_ss = 0; /* number of beams with sidescan */
 		ping->png_npixels = 0;   /* number of pixels of sidescan */
-		for (int i = 0; i < MBSYS_SIMRAD3_MAXBEAMS; i++) {
-			ping->png_sort_direction[i] = 0;
+		for (int beam_num = 0; beam_num < MBSYS_SIMRAD3_MAXBEAMS; beam_num++) {
+			ping->png_sort_direction[beam_num] = 0;
 			/* sorting direction - The first sample in a beam
 			    has lowest range if 1, highest if -- 1. Note
 			    that the ranges in the seabed image datagram
 			    are all two-- way from time of transmit to
 			    time of receive. */
-			ping->png_beam_samples[i] = 0;
+			ping->png_beam_samples[beam_num] = 0;
 			/* number of sidescan samples derived from
 			    each beam */
-			ping->png_start_sample[i] = 0;
+			ping->png_start_sample[beam_num] = 0;
 			/* start sample number */
-			ping->png_ssdetection[i] = 0; /* Detection info:
+			ping->png_ssdetection[beam_num] = 0; /* Detection info:
 			                       This datagram may contain data for beams with and without a
 			                       valid detection. Eight bits (0-7) gives details about the detection:
 			                        A) If the most significant bit (bit7) is zero, this beam has a valid
@@ -672,7 +675,7 @@ int mbsys_simrad3_zero_ss(int verbose, void *store_ptr, int *error) {
 			                            bits 4-6: 3 = rejected
 			                            bits 4-6: 4 = no detection available
 			                            other bits : future use */
-			ping->png_center_sample[i] = 0;
+			ping->png_center_sample[beam_num] = 0;
 			/* center sample number */
 		}
 		for (int i = 0; i < MBSYS_SIMRAD3_MAXRAWPIXELS; i++) {
@@ -712,7 +715,7 @@ int mbsys_simrad3_dimensions(int verbose, void *mbio_ptr, void *store_ptr, int *
 	}
 
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	struct mbsys_simrad3_struct *store = (struct mbsys_simrad3_struct *)store_ptr;
@@ -794,10 +797,10 @@ int mbsys_simrad3_sonartype(int verbose, void *mbio_ptr, void *store_ptr, int *s
 	}
 
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
-	struct mbsys_simrad3_struct *store = (struct mbsys_simrad3_struct *)store_ptr;
+	// struct mbsys_simrad3_struct *store = (struct mbsys_simrad3_struct *)store_ptr;
 
 	/* get sonar type */
 	*sonartype = MB_TOPOGRAPHY_TYPE_MULTIBEAM;
@@ -826,10 +829,10 @@ int mbsys_simrad3_sidescantype(int verbose, void *mbio_ptr, void *store_ptr, int
 	}
 
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
-	struct mbsys_simrad3_struct *store = (struct mbsys_simrad3_struct *)store_ptr;
+	// struct mbsys_simrad3_struct *store = (struct mbsys_simrad3_struct *)store_ptr;
 
 	/* get sidescan type */
 	*ss_type = MB_SIDESCAN_LOGARITHMIC;
@@ -852,35 +855,6 @@ int mbsys_simrad3_preprocess(int verbose,     /* in: verbosity level set on comm
                              void *mbio_ptr,  /* in: see mb_io.h:/^struct mb_io_struct/ */
                              void *store_ptr, /* in: see mbsys_reson7k.h:/^struct mbsys_reson7k_struct/ */
                              void *platform_ptr, void *preprocess_pars_ptr, int *error) {
-	int time_i[7];
-	double time_d;
-	double transmit_time_d, transmit_heading, transmit_heave, transmit_roll, transmit_pitch;
-	double receive_time_d, receive_heading, receive_heave, receive_roll, receive_pitch;
-	double navlon, navlat, sensordepth, speed, heading, roll, pitch, heave, altitude;
-
-	/* transmit and receive array offsets */
-	double tx_x, tx_y, tx_z, tx_h, tx_r, tx_p;
-	double rx_x, rx_y, rx_z, rx_h, rx_r, rx_p;
-
-	/* depth sensor offsets - used in place of heave for underwater platforms */
-	int depthsensor_mode = MBSYS_SIMRAD3_ZMODE_UNKNOWN;
-
-	/* variables for beam angle calculation */
-	mb_3D_orientation tx_align;
-	mb_3D_orientation tx_orientation;
-	double tx_steer;
-	mb_3D_orientation rx_align;
-	mb_3D_orientation rx_orientation;
-	double rx_steer;
-	double reference_heading;
-	double beamAzimuth;
-	double beamDepression;
-	double *pixel_size, *swath_width;
-	mb_u_char detection_mask;
-
-	int interp_status = MB_SUCCESS;
-	int jnav, jsensordepth, jheading, jaltitude, jattitude;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -902,7 +876,7 @@ int mbsys_simrad3_preprocess(int verbose,     /* in: verbosity level set on comm
 	/* get data structure pointers */
 	struct mbsys_simrad3_struct *store = (struct mbsys_simrad3_struct *)store_ptr;
 	struct mbsys_simrad3_ping_struct *ping = (struct mbsys_simrad3_ping_struct *)&(store->pings[store->ping_index]);
-	struct mb_platform_struct *platforms = (struct mb_platform_struct *)platform_ptr;
+	// struct mb_platform_struct *platforms = (struct mb_platform_struct *)platform_ptr;
 	struct mb_preprocess_struct *pars = (struct mb_preprocess_struct *)preprocess_pars_ptr;
 
 	if (verbose >= 2) {
@@ -937,6 +911,9 @@ int mbsys_simrad3_preprocess(int verbose,     /* in: verbosity level set on comm
 
 	/* deal with a survey record */
 	if (store->kind == MB_DATA_DATA) {
+		/* depth sensor offsets - used in place of heave for underwater platforms */
+		int depthsensor_mode = MBSYS_SIMRAD3_ZMODE_UNKNOWN;
+
 		/*--------------------------------------------------------------*/
 		/* get depth sensor mode from the start record
 		    NI => Use heave
@@ -952,7 +929,9 @@ int mbsys_simrad3_preprocess(int verbose,     /* in: verbosity level set on comm
 		/*--------------------------------------------------------------*/
 		/* change timestamp if indicated */
 		/*--------------------------------------------------------------*/
-		if (pars->timestamp_changed == true) {
+		double time_d;
+		int time_i[7];
+		if (pars->timestamp_changed) {
 			time_d = pars->time_d;
 			mb_get_date(verbose, time_d, time_i);
 
@@ -982,40 +961,60 @@ int mbsys_simrad3_preprocess(int verbose,     /* in: verbosity level set on comm
 		time_i[6] = (ping->png_msec % 1000) * 1000;
 		mb_get_time(verbose, time_i, &time_d);
 
-		interp_status = mb_linear_interp_longitude(verbose, pars->nav_time_d - 1, pars->nav_lon - 1, pars->n_nav, time_d, &navlon,
-		                                           &jnav, error);
+		double navlon;
+		double navlat;
+		int jnav;
+    int interp_error = MB_ERROR_NO_ERROR;
+		int interp_status = mb_linear_interp_longitude(verbose, pars->nav_time_d - 1, pars->nav_lon - 1, pars->n_nav, time_d, &navlon,
+		                                           &jnav, &interp_error);
 		if (navlon < -180.0)
 			navlon += 360.0;
 		else if (navlon > 180.0)
 			navlon -= 360.0;
-		interp_status = mb_linear_interp_latitude(verbose, pars->nav_time_d - 1, pars->nav_lat - 1, pars->n_nav, time_d, &navlat,
-		                                          &jnav, error);
-		interp_status =
-		    mb_linear_interp(verbose, pars->nav_time_d - 1, pars->nav_speed - 1, pars->n_nav, time_d, &speed, &jnav, error);
+		interp_status &= mb_linear_interp_latitude(verbose, pars->nav_time_d - 1, pars->nav_lat - 1, pars->n_nav, time_d, &navlat,
+		                                          &jnav, &interp_error);
+		double speed;
+		interp_status &=
+		    mb_linear_interp(verbose, pars->nav_time_d - 1, pars->nav_speed - 1, pars->n_nav, time_d, &speed, &jnav, &interp_error);
 
 		/* interpolate sensordepth */
-		interp_status = mb_linear_interp(verbose, pars->sensordepth_time_d - 1, pars->sensordepth_sensordepth - 1,
-		                                 pars->n_sensordepth, time_d, &sensordepth, &jsensordepth, error);
+		double sensordepth;
+		int jsensordepth;
+		interp_status &= mb_linear_interp(verbose, pars->sensordepth_time_d - 1, pars->sensordepth_sensordepth - 1,
+		                                 pars->n_sensordepth, time_d, &sensordepth, &jsensordepth, &interp_error);
 
 		/* interpolate heading */
-		interp_status = mb_linear_interp_heading(verbose, pars->heading_time_d - 1, pars->heading_heading - 1, pars->n_heading,
-		                                         time_d, &heading, &jheading, error);
+		double heading;
+		int jheading;
+		interp_status &= mb_linear_interp_heading(verbose, pars->heading_time_d - 1, pars->heading_heading - 1, pars->n_heading,
+		                                         time_d, &heading, &jheading, &interp_error);
 		if (heading < 0.0)
 			heading += 360.0;
 		else if (heading >= 360.0)
 			heading -= 360.0;
 
 		/* interpolate altitude */
-		interp_status = mb_linear_interp(verbose, pars->altitude_time_d - 1, pars->altitude_altitude - 1, pars->n_altitude,
-		                                 time_d, &altitude, &jaltitude, error);
+		double altitude;
+		int jaltitude;
+		interp_status &= mb_linear_interp(verbose, pars->altitude_time_d - 1, pars->altitude_altitude - 1, pars->n_altitude,
+		                                 time_d, &altitude, &jaltitude, &interp_error);
 
 		/* interpolate attitude */
-		interp_status = mb_linear_interp(verbose, pars->attitude_time_d - 1, pars->attitude_roll - 1, pars->n_attitude, time_d,
-		                                 &roll, &jattitude, error);
-		interp_status = mb_linear_interp(verbose, pars->attitude_time_d - 1, pars->attitude_pitch - 1, pars->n_attitude, time_d,
-		                                 &pitch, &jattitude, error);
-		interp_status = mb_linear_interp(verbose, pars->attitude_time_d - 1, pars->attitude_heave - 1, pars->n_attitude, time_d,
-		                                 &heave, &jattitude, error);
+		double roll;
+		int jattitude;
+		interp_status &= mb_linear_interp(verbose, pars->attitude_time_d - 1, pars->attitude_roll - 1, pars->n_attitude, time_d,
+		                                 &roll, &jattitude, &interp_error);
+		double pitch;
+		interp_status &= mb_linear_interp(verbose, pars->attitude_time_d - 1, pars->attitude_pitch - 1, pars->n_attitude, time_d,
+		                                 &pitch, &jattitude, &interp_error);
+		double heave;
+		interp_status &= mb_linear_interp(verbose, pars->attitude_time_d - 1, pars->attitude_heave - 1, pars->n_attitude, time_d,
+		                                 &heave, &jattitude, &interp_error);
+
+//		if (interp_status == MB_FAILURE) {
+//			fprintf(stderr, "%s:%4.4d:%s: WARNING: interp error is %d\n",
+//              __FILE__, __LINE__, __func__, *error);
+//		}
 
 		/* insert navigation */
 		ping->png_longitude = 10000000 * navlon;
@@ -1036,139 +1035,158 @@ int mbsys_simrad3_preprocess(int verbose,     /* in: verbosity level set on comm
 		/*--------------------------------------------------------------*/
 		/* get transducer offsets */
 		/*--------------------------------------------------------------*/
+		/* transmit and receive array offsets */
+		// double tx_x, tx_y, tx_z;
+		double tx_h, tx_r, tx_p;
+		// double rx_x, rx_y, rx_z;
+		double rx_h, rx_r, rx_p;
+
 		if (store->par_stc == 0) {
-			tx_x = store->par_s1x;
-			tx_y = store->par_s1y;
-			tx_z = store->par_s1z;
+			// tx_x = store->par_s1x;
+			// tx_y = store->par_s1y;
+			// tx_z = store->par_s1z;
 			tx_h = store->par_s1h;
 			tx_r = store->par_s1r;
 			tx_p = store->par_s1p;
-			rx_x = store->par_s2x;
-			rx_y = store->par_s2y;
-			rx_z = store->par_s2z;
+			// rx_x = store->par_s2x;
+			// rx_y = store->par_s2y;
+			// rx_z = store->par_s2z;
 			rx_h = store->par_s2h;
 			rx_r = store->par_s2r;
 			rx_p = store->par_s2p;
 		}
 		else if (store->par_stc == 1) {
-			tx_x = store->par_s1x;
-			tx_y = store->par_s1y;
-			tx_z = store->par_s1z;
+			// tx_x = store->par_s1x;
+			// tx_y = store->par_s1y;
+			// tx_z = store->par_s1z;
 			tx_h = store->par_s1h;
 			tx_r = store->par_s1r;
 			tx_p = store->par_s1p;
-			rx_x = store->par_s1x;
-			rx_y = store->par_s1y;
-			rx_z = store->par_s1z;
+			// rx_x = store->par_s1x;
+			// rx_y = store->par_s1y;
+			// rx_z = store->par_s1z;
 			rx_h = store->par_s1h;
 			rx_r = store->par_s1r;
 			rx_p = store->par_s1p;
 		}
 		else if (store->par_stc == 2 && ping->png_serial == store->par_serial_1) {
-			tx_x = store->par_s1x;
-			tx_y = store->par_s1y;
-			tx_z = store->par_s1z;
+			// tx_x = store->par_s1x;
+			// tx_y = store->par_s1y;
+			// tx_z = store->par_s1z;
 			tx_h = store->par_s1h;
 			tx_r = store->par_s1r;
 			tx_p = store->par_s1p;
-			rx_x = store->par_s1x;
-			rx_y = store->par_s1y;
-			rx_z = store->par_s1z;
+			// rx_x = store->par_s1x;
+			// rx_y = store->par_s1y;
+			// rx_z = store->par_s1z;
 			rx_h = store->par_s1h;
 			rx_r = store->par_s1r;
 			rx_p = store->par_s1p;
 		}
 		else if (store->par_stc == 2 && ping->png_serial == store->par_serial_2) {
-			tx_x = store->par_s2x;
-			tx_y = store->par_s2y;
-			tx_z = store->par_s2z;
+			// tx_x = store->par_s2x;
+			// tx_y = store->par_s2y;
+			// tx_z = store->par_s2z;
 			tx_h = store->par_s2h;
 			tx_r = store->par_s2r;
 			tx_p = store->par_s2p;
-			rx_x = store->par_s2x;
-			rx_y = store->par_s2y;
-			rx_z = store->par_s2z;
+			// rx_x = store->par_s2x;
+			// rx_y = store->par_s2y;
+			// rx_z = store->par_s2z;
 			rx_h = store->par_s2h;
 			rx_r = store->par_s2r;
 			rx_p = store->par_s2p;
 		}
 		else if (store->par_stc == 3 && ping->png_serial == store->par_serial_1) {
-			tx_x = store->par_s1x;
-			tx_y = store->par_s1y;
-			tx_z = store->par_s1z;
+			// tx_x = store->par_s1x;
+			// tx_y = store->par_s1y;
+			// tx_z = store->par_s1z;
 			tx_h = store->par_s1h;
 			tx_r = store->par_s1r;
 			tx_p = store->par_s1p;
-			rx_x = store->par_s2x;
-			rx_y = store->par_s2y;
-			rx_z = store->par_s2z;
+			// rx_x = store->par_s2x;
+			// rx_y = store->par_s2y;
+			// rx_z = store->par_s2z;
 			rx_h = store->par_s2h;
 			rx_r = store->par_s2r;
 			rx_p = store->par_s2p;
 		}
 		else if (store->par_stc == 3 && ping->png_serial == store->par_serial_2) {
-			tx_x = store->par_s1x;
-			tx_y = store->par_s1y;
-			tx_z = store->par_s1z;
+			// tx_x = store->par_s1x;
+			// tx_y = store->par_s1y;
+			// tx_z = store->par_s1z;
 			tx_h = store->par_s1h;
 			tx_r = store->par_s1r;
 			tx_p = store->par_s1p;
-			rx_x = store->par_s3x;
-			rx_y = store->par_s3y;
-			rx_z = store->par_s3z;
+			// rx_x = store->par_s3x;
+			// rx_y = store->par_s3y;
+			// rx_z = store->par_s3z;
 			rx_h = store->par_s3h;
 			rx_r = store->par_s3r;
 			rx_p = store->par_s3p;
 		}
 		else if (store->par_stc == 4 && ping->png_serial == store->par_serial_1) {
-			tx_x = store->par_s0x;
-			tx_y = store->par_s0y;
-			tx_z = store->par_s0z;
+			// tx_x = store->par_s0x;
+			// tx_y = store->par_s0y;
+			// tx_z = store->par_s0z;
 			tx_h = store->par_s0h;
 			tx_r = store->par_s0r;
 			tx_p = store->par_s0p;
-			rx_x = store->par_s2x;
-			rx_y = store->par_s2y;
-			rx_z = store->par_s2z;
+			// rx_x = store->par_s2x;
+			// rx_y = store->par_s2y;
+			// rx_z = store->par_s2z;
 			rx_h = store->par_s2h;
 			rx_r = store->par_s2r;
 			rx_p = store->par_s2p;
 		}
 		else if (store->par_stc == 4 && ping->png_serial == store->par_serial_2) {
-			tx_x = store->par_s1x;
-			tx_y = store->par_s1y;
-			tx_z = store->par_s1z;
+			// tx_x = store->par_s1x;
+			// tx_y = store->par_s1y;
+			// tx_z = store->par_s1z;
 			tx_h = store->par_s1h;
 			tx_r = store->par_s1r;
 			tx_p = store->par_s1p;
-			rx_x = store->par_s3x;
-			rx_y = store->par_s3y;
-			rx_z = store->par_s3z;
+			// rx_x = store->par_s3x;
+			// rx_y = store->par_s3y;
+			// rx_z = store->par_s3z;
 			rx_h = store->par_s3h;
 			rx_r = store->par_s3r;
 			rx_p = store->par_s3p;
 		}
 
 		/* insert sonardepth if requested */
-		if (depthsensor_mode == MBSYS_SIMRAD3_ZMODE_USE_SENSORDEPTH_ONLY) {
+		// if (depthsensor_mode == MBSYS_SIMRAD3_ZMODE_USE_SENSORDEPTH_ONLY) {
 			// ping->png_xducer_depth = sensordepth;
-		}
-		else {
+		// } else {
 			// ping->png_xducer_depth = 0.5 * (tx_z + rx_z) - store->par_wlz + heave;
-		}
+		// }
+
+		double transmit_heading, transmit_heave, transmit_roll, transmit_pitch;
+		double receive_heading, receive_heave, receive_roll, receive_pitch;
+
+		/* variables for beam angle calculation */
+		mb_3D_orientation tx_align;
+		mb_3D_orientation tx_orientation;
+		double tx_steer;
+		mb_3D_orientation rx_align;
+		mb_3D_orientation rx_orientation;
+		double rx_steer;
+		double beamAzimuth;
+		double beamDepression;
+		double *pixel_size, *swath_width;
 
 		/*--------------------------------------------------------------*/
 		/* calculate corrected ranges, angles, and bathymetry for each beam */
 		/*--------------------------------------------------------------*/
 		for (int i = 0; i < ping->png_nbeams; i++) {
 			/* calculate time of transmit and receive */
-			transmit_time_d = time_d + (double)ping->png_raw_txoffset[ping->png_raw_rxsector[i]];
-			receive_time_d = transmit_time_d + ping->png_raw_rxrange[i];
+			const double transmit_time_d = time_d + (double)ping->png_raw_txoffset[ping->png_raw_rxsector[i]];
+			const double receive_time_d = transmit_time_d + ping->png_raw_rxrange[i];
 
 			/* merge heading from best available source */
-			interp_status = mb_linear_interp_heading(verbose, pars->heading_time_d - 1, pars->heading_heading - 1,
+			interp_status &= mb_linear_interp_heading(verbose, pars->heading_time_d - 1, pars->heading_heading - 1,
 			                                         pars->n_heading, transmit_time_d, &transmit_heading, &jheading, error);
-			interp_status = mb_linear_interp_heading(verbose, pars->heading_time_d - 1, pars->heading_heading - 1,
+			interp_status &= mb_linear_interp_heading(verbose, pars->heading_time_d - 1, pars->heading_heading - 1,
 			                                         pars->n_heading, receive_time_d, &receive_heading, &jheading, error);
 			if (transmit_heading < 0.0)
 				transmit_heading += 360.0;
@@ -1180,7 +1198,7 @@ int mbsys_simrad3_preprocess(int verbose,     /* in: verbosity level set on comm
 				receive_heading -= 360.0;
 
 			/* get attitude from best available source */
-			interp_status = mb_linear_interp(verbose, pars->attitude_time_d - 1, pars->attitude_roll - 1, pars->n_attitude,
+			interp_status &= mb_linear_interp(verbose, pars->attitude_time_d - 1, pars->attitude_roll - 1, pars->n_attitude,
 			                                 transmit_time_d, &transmit_roll, &jattitude, error);
 			if (interp_status == MB_SUCCESS)
 				interp_status = mb_linear_interp(verbose, pars->attitude_time_d - 1, pars->attitude_pitch - 1, pars->n_attitude,
@@ -1188,20 +1206,20 @@ int mbsys_simrad3_preprocess(int verbose,     /* in: verbosity level set on comm
 			if (interp_status == MB_SUCCESS)
 				interp_status = mb_linear_interp(verbose, pars->attitude_time_d - 1, pars->attitude_heave - 1, pars->n_attitude,
 				                                 transmit_time_d, &transmit_heave, &jattitude, error);
-			interp_status = mb_linear_interp(verbose, pars->attitude_time_d - 1, pars->attitude_roll - 1, pars->n_attitude,
+			interp_status &= mb_linear_interp(verbose, pars->attitude_time_d - 1, pars->attitude_roll - 1, pars->n_attitude,
 			                                 receive_time_d, &receive_roll, &jattitude, error);
 			if (interp_status == MB_SUCCESS)
 				interp_status = mb_linear_interp(verbose, pars->attitude_time_d - 1, pars->attitude_pitch - 1, pars->n_attitude,
 				                                 receive_time_d, &receive_pitch, &jattitude, error);
 			if (interp_status == MB_SUCCESS)
-				interp_status = mb_linear_interp(verbose, pars->attitude_time_d - 1, pars->attitude_heave - 1, pars->n_attitude,
+				/* interp_status = */ mb_linear_interp(verbose, pars->attitude_time_d - 1, pars->attitude_heave - 1, pars->n_attitude,
 				                                 receive_time_d, &receive_heave, &jattitude, error);
 
 			/* use sensordepth instead of heave for submerged platforms */
 			if (depthsensor_mode == MBSYS_SIMRAD3_ZMODE_USE_SENSORDEPTH_ONLY) {
-				interp_status = mb_linear_interp(verbose, pars->sensordepth_time_d - 1, pars->sensordepth_sensordepth - 1,
+				/* interp_status = */ mb_linear_interp(verbose, pars->sensordepth_time_d - 1, pars->sensordepth_sensordepth - 1,
 				                                 pars->n_sensordepth, transmit_time_d, &transmit_heave, &jsensordepth, error);
-				interp_status = mb_linear_interp(verbose, pars->sensordepth_time_d - 1, pars->sensordepth_sensordepth - 1,
+				/* interp_status &= */ mb_linear_interp(verbose, pars->sensordepth_time_d - 1, pars->sensordepth_sensordepth - 1,
 				                                 pars->n_sensordepth, receive_time_d, &receive_heave, &jsensordepth, error);
 				heave = transmit_heave;
 			}
@@ -1260,7 +1278,7 @@ int mbsys_simrad3_preprocess(int verbose,     /* in: verbosity level set on comm
 			rx_orientation.roll = receive_roll;
 			rx_orientation.pitch = receive_pitch;
 			rx_orientation.heading = receive_heading;
-			reference_heading = heading;
+			const double reference_heading = heading;
 
 			status = mb_beaudoin(verbose, tx_align, tx_orientation, tx_steer, rx_align, rx_orientation, rx_steer,
 			                     reference_heading, &beamAzimuth, &beamDepression, error);
@@ -1270,7 +1288,7 @@ int mbsys_simrad3_preprocess(int verbose,     /* in: verbosity level set on comm
 				ping->png_azimuth[i] += 360.0;
 
 			/* calculate beamflag */
-			detection_mask = (mb_u_char)ping->png_raw_rxdetection[i];
+			const mb_u_char detection_mask = (mb_u_char)ping->png_raw_rxdetection[i];
 			if (store->sonar == MBSYS_SIMRAD3_M3 && (ping->png_detection[i] & 128) == 128) {
 				ping->png_beamflag[i] = MB_FLAG_NULL;
 				ping->png_raw_rxdetection[i] = ping->png_raw_rxdetection[i] | 128;
@@ -1313,7 +1331,7 @@ int mbsys_simrad3_preprocess(int verbose,     /* in: verbosity level set on comm
 		swath_width = (double *)&mb_io_ptr->saved2;
 		ping->png_pixel_size = 0;
 		ping->png_pixels_ss = 0;
-		status = mbsys_simrad3_makess(verbose, mbio_ptr, store_ptr, false, pixel_size, false, swath_width, 1, error);
+		status &= mbsys_simrad3_makess(verbose, mbio_ptr, store_ptr, false, pixel_size, false, swath_width, 1, error);
 	}
 
 	if (verbose >= 2) {
@@ -1328,26 +1346,6 @@ int mbsys_simrad3_preprocess(int verbose,     /* in: verbosity level set on comm
 }
 /*--------------------------------------------------------------------*/
 int mbsys_simrad3_extract_platform(int verbose, void *mbio_ptr, void *store_ptr, int *kind, void **platform_ptr, int *error) {
-	struct mb_platform_struct *platform;
-	int sensor_multibeam;
-	int multibeam_type;
-	int multibeam_offsets;
-	mb_path multibeam_model;
-	mb_path multibeam_serial;
-	int capability1;
-	int capability2;
-	int num_offsets;
-	int num_time_latency;
-	int position_offset_mode;
-	double position_offset_x;
-	double position_offset_y;
-	double position_offset_z;
-	int attitude_offset_mode;
-	double attitude_offset_heading;
-	double attitude_offset_roll;
-	double attitude_offset_pitch;
-	int isensor;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1359,7 +1357,7 @@ int mbsys_simrad3_extract_platform(int verbose, void *mbio_ptr, void *store_ptr,
 	}
 
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 	struct mbsys_simrad3_struct *store = (struct mbsys_simrad3_struct *)store_ptr;
 
 	int status = MB_SUCCESS;
@@ -1372,26 +1370,32 @@ int mbsys_simrad3_extract_platform(int verbose, void *mbio_ptr, void *store_ptr,
 	/* extract sensor offsets from installation record */
 	if (*platform_ptr != NULL) {
 		/* get pointer to platform structure */
-		platform = (struct mb_platform_struct *)(*platform_ptr);
+		struct mb_platform_struct *platform = (struct mb_platform_struct *)(*platform_ptr);
 
 		/* look for multibeam sensor, add it if necessary */
-		sensor_multibeam = -1;
-		for (isensor = 0; isensor < platform->num_sensors && sensor_multibeam < 0; isensor++) {
+		int sensor_multibeam = -1;
+		for (int isensor = 0; isensor < platform->num_sensors && sensor_multibeam < 0; isensor++) {
 			if (platform->sensors[isensor].type == MB_SENSOR_TYPE_SONAR_MULTIBEAM &&
 			    platform->sensors[isensor].num_offsets == 2) {
 				sensor_multibeam = isensor;
 			}
 		}
+		int capability1;
+		int capability2;
+		// int multibeam_type;
 		if (sensor_multibeam < 0) {
 			/* set sensor 0 (multibeam) */
+			int multibeam_offsets;
 			if (store->par_stc > 1) {
-				multibeam_type = MB_SENSOR_TYPE_SONAR_MULTIBEAM_TWOHEAD;
+				// multibeam_type = MB_SENSOR_TYPE_SONAR_MULTIBEAM_TWOHEAD;
 				multibeam_offsets = 4;
 			}
 			else {
-				multibeam_type = MB_SENSOR_TYPE_SONAR_MULTIBEAM;
+				// multibeam_type = MB_SENSOR_TYPE_SONAR_MULTIBEAM;
 				multibeam_offsets = 2;
 			}
+
+			mb_path multibeam_model;
 			switch (store->sonar) {
 			case MBSYS_SIMRAD3_M3:
 				strcpy(multibeam_model, "M3");
@@ -1477,11 +1481,12 @@ int mbsys_simrad3_extract_platform(int verbose, void *mbio_ptr, void *store_ptr,
 			default:
 				sprintf(multibeam_model, "Unknown sonar model %d", store->sonar);
 			}
+			mb_path multibeam_serial;
 			sprintf(multibeam_serial, "%d", store->par_serial_1);
 			capability1 = MB_SENSOR_CAPABILITY1_NONE;
 			capability2 = MB_SENSOR_CAPABILITY2_TOPOGRAPHY_MULTIBEAM + MB_SENSOR_CAPABILITY2_BACKSCATTER_MULTIBEAM;
-			num_offsets = multibeam_offsets;
-			num_time_latency = 0;
+			const int num_offsets = multibeam_offsets;
+			const int num_time_latency = 0;
 			status =
 			    mb_platform_add_sensor(verbose, (void *)platform, MB_SENSOR_TYPE_SONAR_MULTIBEAM, multibeam_model, "Kongsberg",
 			                           multibeam_serial, capability1, capability2, num_offsets, num_time_latency, error);
@@ -1618,12 +1623,13 @@ int mbsys_simrad3_extract_platform(int verbose, void *mbio_ptr, void *store_ptr,
 			store->par_p1q = 1;
 		if (platform->source_position1 < 0 && store->par_p1q) {
 			/* set sensor 1 (position) */
-			capability1 = MB_SENSOR_CAPABILITY1_POSITION + MB_SENSOR_CAPABILITY1_HEADING;
-			capability2 = MB_SENSOR_CAPABILITY2_NONE;
+			// TODO(schwehr): Bug?
+			// capability1 = MB_SENSOR_CAPABILITY1_POSITION + MB_SENSOR_CAPABILITY1_HEADING;
+			// capability2 = MB_SENSOR_CAPABILITY2_NONE;
 			capability1 = 0;
 			capability2 = 0;
-			num_offsets = 1;
-			num_time_latency = 0;
+			const int num_offsets = 1;
+			const int num_time_latency = 0;
 			status = mb_platform_add_sensor(verbose, (void *)platform, MB_SENSOR_TYPE_POSITION, NULL, NULL, NULL, capability1,
 			                                capability2, num_offsets, num_time_latency, error);
 			if (status == MB_SUCCESS) {
@@ -1634,6 +1640,14 @@ int mbsys_simrad3_extract_platform(int verbose, void *mbio_ptr, void *store_ptr,
 		/* set offsets for position sensor 1 */
 		if (store->par_p1q && platform->source_position1 >= 0 && platform->sensors[platform->source_position1].num_offsets == 1) {
 			/* set offsets based on whether position data are already motion compensated */
+			int position_offset_mode;
+			double position_offset_x;
+			double position_offset_y;
+			double position_offset_z;
+			int attitude_offset_mode;
+			double attitude_offset_heading;
+			double attitude_offset_roll;
+			double attitude_offset_pitch;
 			if (store->par_p1m) {
 				position_offset_mode = MB_SENSOR_POSITION_OFFSET_STATIC;
 				position_offset_x = 0.0;
@@ -1684,12 +1698,13 @@ int mbsys_simrad3_extract_platform(int verbose, void *mbio_ptr, void *store_ptr,
 			store->par_p2q = 1;
 		if (platform->source_position2 < 0 && store->par_p2q) {
 			/* set sensor 2 (position) */
-			capability1 = MB_SENSOR_CAPABILITY1_POSITION + MB_SENSOR_CAPABILITY1_HEADING;
-			capability2 = MB_SENSOR_CAPABILITY2_NONE;
+			// TODO(schwehr): Bug?
+			// capability1 = MB_SENSOR_CAPABILITY1_POSITION + MB_SENSOR_CAPABILITY1_HEADING;
+			// capability2 = MB_SENSOR_CAPABILITY2_NONE;
 			capability1 = 0;
 			capability2 = 0;
-			num_offsets = 1;
-			num_time_latency = 0;
+			const int num_offsets = 1;
+			const int num_time_latency = 0;
 			status = mb_platform_add_sensor(verbose, (void *)platform, MB_SENSOR_TYPE_POSITION, NULL, NULL, NULL, capability1,
 			                                capability2, num_offsets, num_time_latency, error);
 			if (status == MB_SUCCESS) {
@@ -1700,6 +1715,14 @@ int mbsys_simrad3_extract_platform(int verbose, void *mbio_ptr, void *store_ptr,
 		/* set offsets for position sensor 2 */
 		if (store->par_p2q && platform->source_position2 >= 0 && platform->sensors[platform->source_position2].num_offsets == 1) {
 			/* set offsets based on whether position data are already motion compensated */
+			int position_offset_mode;
+			double position_offset_x;
+			double position_offset_y;
+			double position_offset_z;
+			int attitude_offset_mode;
+			double attitude_offset_heading;
+			double attitude_offset_roll;
+			double attitude_offset_pitch;
 			if (store->par_p2m) {
 				position_offset_mode = MB_SENSOR_POSITION_OFFSET_STATIC;
 				position_offset_x = 0.0;
@@ -1750,12 +1773,13 @@ int mbsys_simrad3_extract_platform(int verbose, void *mbio_ptr, void *store_ptr,
 			store->par_p3q = 1;
 		if (platform->source_position3 < 0 && store->par_p3q) {
 			/* set sensor 3 (position) */
-			capability1 = MB_SENSOR_CAPABILITY1_POSITION + MB_SENSOR_CAPABILITY1_HEADING;
-			capability2 = MB_SENSOR_CAPABILITY2_NONE;
+			// TODO(schwehr): Bug?
+			// capability1 = MB_SENSOR_CAPABILITY1_POSITION + MB_SENSOR_CAPABILITY1_HEADING;
+			// capability2 = MB_SENSOR_CAPABILITY2_NONE;
 			capability1 = 0;
 			capability2 = 0;
-			num_offsets = 1;
-			num_time_latency = 0;
+			const int num_offsets = 1;
+			const int num_time_latency = 0;
 			status = mb_platform_add_sensor(verbose, (void *)platform, MB_SENSOR_TYPE_POSITION, NULL, NULL, NULL, capability1,
 			                                capability2, num_offsets, num_time_latency, error);
 			if (status == MB_SUCCESS) {
@@ -1766,6 +1790,14 @@ int mbsys_simrad3_extract_platform(int verbose, void *mbio_ptr, void *store_ptr,
 		/* set offsets for position sensor 3 */
 		if (store->par_p3q && platform->source_position3 >= 0 && platform->sensors[platform->source_position3].num_offsets == 1) {
 			/* set offsets based on whether position data are already motion compensated */
+			int position_offset_mode;
+			double position_offset_x;
+			double position_offset_y;
+			double position_offset_z;
+			int attitude_offset_mode;
+			double attitude_offset_heading;
+			double attitude_offset_roll;
+			double attitude_offset_pitch;
 			if (store->par_p3m) {
 				position_offset_mode = MB_SENSOR_POSITION_OFFSET_STATIC;
 				position_offset_x = 0.0;
@@ -1808,12 +1840,13 @@ int mbsys_simrad3_extract_platform(int verbose, void *mbio_ptr, void *store_ptr,
 
 		/* add depth sensor if needed */
 		if (platform->source_depth1 < 0 && store->par_dsh[0] == 'I' && store->par_dsh[1] == 'N') {
-			capability1 = MB_SENSOR_CAPABILITY1_DEPTH;
-			capability2 = MB_SENSOR_CAPABILITY2_NONE;
+			// TODO(schwehr): Bug?
+			// capability1 = MB_SENSOR_CAPABILITY1_DEPTH;
+			// capability2 = MB_SENSOR_CAPABILITY2_NONE;
 			capability1 = 0;
 			capability2 = 0;
-			num_offsets = 1;
-			num_time_latency = 0;
+			const int num_offsets = 1;
+			const int num_time_latency = 0;
 			status = mb_platform_add_sensor(verbose, (void *)platform, MB_SENSOR_TYPE_PRESSURE, NULL, NULL, NULL, capability1,
 			                                capability2, num_offsets, num_time_latency, error);
 			if (status == MB_SUCCESS) {
@@ -1821,14 +1854,14 @@ int mbsys_simrad3_extract_platform(int verbose, void *mbio_ptr, void *store_ptr,
 			}
 		}
 		if (platform->source_depth1 >= 0 && platform->sensors[platform->source_depth1].num_offsets == 1) {
-			position_offset_mode = MB_SENSOR_POSITION_OFFSET_STATIC;
-			position_offset_x = store->par_dsy;
-			position_offset_y = store->par_dsx;
-			position_offset_z = -store->par_dsz;
-			attitude_offset_mode = MB_SENSOR_ATTITUDE_OFFSET_NONE;
-			attitude_offset_heading = 0.0;
-			attitude_offset_roll = 0.0;
-			attitude_offset_pitch = 0.0;
+			const int position_offset_mode = MB_SENSOR_POSITION_OFFSET_STATIC;
+			const double position_offset_x = store->par_dsy;
+			const double position_offset_y = store->par_dsx;
+			const double position_offset_z = -store->par_dsz;
+			const int attitude_offset_mode = MB_SENSOR_ATTITUDE_OFFSET_NONE;
+			const double attitude_offset_heading = 0.0;
+			const double attitude_offset_roll = 0.0;
+			const double attitude_offset_pitch = 0.0;
 			status = mb_platform_set_sensor_offset(verbose, (void *)platform, platform->source_depth1, 0, position_offset_mode,
 			                                       position_offset_x, position_offset_y, position_offset_z, attitude_offset_mode,
 			                                       attitude_offset_heading, attitude_offset_roll, attitude_offset_pitch, error);
@@ -1842,12 +1875,13 @@ int mbsys_simrad3_extract_platform(int verbose, void *mbio_ptr, void *store_ptr,
 		/* set motion sensor 1, add it if necessary */
 		if (platform->source_rollpitch1 < 0) {
 			/* set sensor 1 (position) */
-			capability1 = MB_SENSOR_CAPABILITY1_ROLLPITCH + MB_SENSOR_CAPABILITY1_HEADING + MB_SENSOR_CAPABILITY1_HEAVE;
-			capability2 = MB_SENSOR_CAPABILITY2_NONE;
+			// TODO(schwehr): Bug?
+			// capability1 = MB_SENSOR_CAPABILITY1_ROLLPITCH + MB_SENSOR_CAPABILITY1_HEADING + MB_SENSOR_CAPABILITY1_HEAVE;
+			// capability2 = MB_SENSOR_CAPABILITY2_NONE;
 			capability1 = 0;
 			capability2 = 0;
-			num_offsets = 1;
-			num_time_latency = 0;
+			const int num_offsets = 1;
+			const int num_time_latency = 0;
 			status = mb_platform_add_sensor(verbose, (void *)platform, MB_SENSOR_TYPE_VRU, NULL, NULL, NULL, capability1,
 			                                capability2, num_offsets, num_time_latency, error);
 			if (status == MB_SUCCESS) {
@@ -1858,14 +1892,14 @@ int mbsys_simrad3_extract_platform(int verbose, void *mbio_ptr, void *store_ptr,
 		/* set motion sensor 1 offsets */
 		if (platform->source_rollpitch1 >= 0 && platform->sensors[platform->source_rollpitch1].num_offsets == 1) {
 			/* set offsets */
-			position_offset_mode = MB_SENSOR_POSITION_OFFSET_STATIC;
-			position_offset_x = store->par_msy;
-			position_offset_y = store->par_msx;
-			position_offset_z = -store->par_msz;
-			attitude_offset_mode = MB_SENSOR_ATTITUDE_OFFSET_STATIC;
-			attitude_offset_heading = store->par_msg;
-			attitude_offset_roll = store->par_msr;
-			attitude_offset_pitch = store->par_msp;
+			const int position_offset_mode = MB_SENSOR_POSITION_OFFSET_STATIC;
+			const double position_offset_x = store->par_msy;
+			const double position_offset_y = store->par_msx;
+			const double position_offset_z = -store->par_msz;
+			int attitude_offset_mode = MB_SENSOR_ATTITUDE_OFFSET_STATIC;
+			const double attitude_offset_heading = store->par_msg;
+			const double attitude_offset_roll = store->par_msr;
+			const double attitude_offset_pitch = store->par_msp;
 			status =
 			    mb_platform_set_sensor_offset(verbose, (void *)platform, platform->source_rollpitch1, 0, position_offset_mode,
 			                                  position_offset_x, position_offset_y, position_offset_z, attitude_offset_mode,
@@ -1881,12 +1915,13 @@ int mbsys_simrad3_extract_platform(int verbose, void *mbio_ptr, void *store_ptr,
 
 		/* set motion sensor 2, add it if necessary */
 		if (platform->source_rollpitch2 < 0) {
-			capability1 = MB_SENSOR_CAPABILITY1_ROLLPITCH + MB_SENSOR_CAPABILITY1_HEADING + MB_SENSOR_CAPABILITY1_HEAVE;
-			capability2 = MB_SENSOR_CAPABILITY2_NONE;
+			// TODO(schwehr): Bug?
+			// capability1 = MB_SENSOR_CAPABILITY1_ROLLPITCH + MB_SENSOR_CAPABILITY1_HEADING + MB_SENSOR_CAPABILITY1_HEAVE;
+			// capability2 = MB_SENSOR_CAPABILITY2_NONE;
 			capability1 = 0;
 			capability2 = 0;
-			num_offsets = 1;
-			num_time_latency = 0;
+			const int num_offsets = 1;
+			const int num_time_latency = 0;
 			status = mb_platform_add_sensor(verbose, (void *)platform, MB_SENSOR_TYPE_VRU, NULL, NULL, NULL, capability1,
 			                                capability2, num_offsets, num_time_latency, error);
 			if (status == MB_SUCCESS) {
@@ -1897,6 +1932,14 @@ int mbsys_simrad3_extract_platform(int verbose, void *mbio_ptr, void *store_ptr,
 		/* set motion sensor 2 offsets */
 		if (platform->source_rollpitch2 >= 0 && platform->sensors[platform->source_rollpitch2].num_offsets == 1) {
 			/* set offsets - same as motion sensor 1 if not specified */
+			int position_offset_mode;
+			double position_offset_x;
+			double position_offset_y;
+			double position_offset_z;
+			int attitude_offset_mode;
+			double attitude_offset_heading;
+			double attitude_offset_roll;
+			double attitude_offset_pitch;
 			if (store->par_nsx != 0.0 || store->par_nsy != 0.0 || store->par_nsz != 0.0 || store->par_nsg != 0.0 ||
 			    store->par_nsr != 0.0 || store->par_nsp != 0.0) {
 				position_offset_mode = MB_SENSOR_POSITION_OFFSET_STATIC;
@@ -1999,8 +2042,8 @@ int mbsys_simrad3_extract_platform(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr, "dbg2       error:		   %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
 		fprintf(stderr, "dbg2       status:		   %d\n", status);
-	}
-	if (verbose >= 2) {
+	// }
+	// if (verbose >= 2) {
 		fprintf(stderr, "dbg2       error:          %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
 		fprintf(stderr, "dbg2       status:         %d\n", status);
@@ -2013,9 +2056,6 @@ int mbsys_simrad3_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kin
                           double *navlat, double *speed, double *heading, int *nbath, int *namp, int *nss, char *beamflag,
                           double *bath, double *amp, double *bathacrosstrack, double *bathalongtrack, double *ss,
                           double *ssacrosstrack, double *ssalongtrack, char *comment, int *error) {
-	double reflscale;
-	double pixel_size;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -2078,7 +2118,7 @@ int mbsys_simrad3_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kin
 		}
 
 		/* read distance and depth values into storage arrays */
-		reflscale = 0.1;
+		const double reflscale = 0.1;
 		*nbath = 0;
 		for (int i = 0; i < ping->png_nbeams; i++) {
 			bath[i] = ping->png_depth[i] + ping->png_xducer_depth;
@@ -2090,7 +2130,7 @@ int mbsys_simrad3_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kin
 		*nbath = ping->png_nbeams;
 		*namp = *nbath;
 		*nss = MBSYS_SIMRAD3_MAXPIXELS;
-		pixel_size = ping->png_pixel_size;
+		const double pixel_size = ping->png_pixel_size;
 		for (int i = 0; i < MBSYS_SIMRAD3_MAXPIXELS; i++) {
 			if (ping->png_ss[i] == EM3_INVALID_SS || (ping->png_ss[i] == EM3_INVALID_AMP && ping->png_ssalongtrack[i] == 0)) {
 				ss[i] = MB_SIDESCAN_NULL;
@@ -2260,8 +2300,6 @@ int mbsys_simrad3_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind,
                          double navlat, double speed, double heading, int nbath, int namp, int nss, char *beamflag, double *bath,
                          double *amp, double *bathacrosstrack, double *bathalongtrack, double *ss, double *ssacrosstrack,
                          double *ssalongtrack, char *comment, int *error) {
-	double reflscale;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -2306,7 +2344,7 @@ int mbsys_simrad3_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind,
 	}
 
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	struct mbsys_simrad3_struct *store = (struct mbsys_simrad3_struct *)store_ptr;
@@ -2345,7 +2383,7 @@ int mbsys_simrad3_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind,
 		ping->png_speed = (int)rint(speed / 0.036);
 
 		/* insert bathymetry and amplitude */
-		reflscale = 0.1;
+		double reflscale = 0.1;
 		if (status == MB_SUCCESS && ping->png_nbeams == 0) {
 			ping->png_nbeams_valid = 0;
 			for (int i = 0; i < nbath; i++) {
@@ -2454,11 +2492,6 @@ int mbsys_simrad3_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind,
 int mbsys_simrad3_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbeams, double *ttimes, double *angles,
                          double *angles_forward, double *angles_null, double *heave, double *alongtrack_offset, double *draft,
                          double *ssv, int *error) {
-	int time_i[7];
-	double ptime_d;
-	double soundspeed;
-	double offset_y;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -2474,7 +2507,7 @@ int mbsys_simrad3_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind
 	}
 
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	struct mbsys_simrad3_struct *store = (struct mbsys_simrad3_struct *)store_ptr;
@@ -2490,6 +2523,7 @@ int mbsys_simrad3_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind
 		struct mbsys_simrad3_ping_struct *ping = (struct mbsys_simrad3_ping_struct *)&(store->pings[store->ping_index]);
 
 		/* get ping time */
+		int time_i[7];
 		time_i[0] = ping->png_date / 10000;
 		time_i[1] = (ping->png_date % 10000) / 100;
 		time_i[2] = ping->png_date % 100;
@@ -2497,6 +2531,7 @@ int mbsys_simrad3_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind
 		time_i[4] = (ping->png_msec % 3600000) / 60000;
 		time_i[5] = (ping->png_msec % 60000) / 1000;
 		time_i[6] = (ping->png_msec % 1000) * 1000;
+		double ptime_d;
 		mb_get_time(verbose, time_i, &ptime_d);
 
 		/* obtain lever arm offset for sonar relative to the position sensor */
@@ -2512,6 +2547,7 @@ int mbsys_simrad3_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind
 		// offset_z = lever_z;
 
 		/* get alongtrack position offset */
+		double offset_y;
 		if (store->par_aps == 0) {
 			offset_y = store->par_p1x;
 		}
@@ -2539,7 +2575,7 @@ int mbsys_simrad3_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind
 
 		/* get travel times, angles */
 		*nbeams = ping->png_nbeams;
-		soundspeed = 0.1 * ((double)ping->png_ssv);
+		// soundspeed = 0.1 * ((double)ping->png_ssv);
 		for (int i = 0; i < ping->png_nbeams; i++) {
 			ttimes[i] = ping->png_range[i];
 			angles[i] = ping->png_depression[i];
@@ -2606,7 +2642,7 @@ int mbsys_simrad3_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kin
 	}
 
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	struct mbsys_simrad3_struct *store = (struct mbsys_simrad3_struct *)store_ptr;
@@ -2685,7 +2721,7 @@ int mbsys_simrad3_pulses(int verbose, void *mbio_ptr, void *store_ptr, int *kind
 	}
 
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	struct mbsys_simrad3_struct *store = (struct mbsys_simrad3_struct *)store_ptr;
@@ -2764,7 +2800,7 @@ int mbsys_simrad3_gains(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
 	}
 
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	struct mbsys_simrad3_struct *store = (struct mbsys_simrad3_struct *)store_ptr;
@@ -2777,7 +2813,7 @@ int mbsys_simrad3_gains(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
 	/* extract data from structure */
 	if (*kind == MB_DATA_DATA) {
 		/* get survey data structure */
-		struct mbsys_simrad3_ping_struct *ping = (struct mbsys_simrad3_ping_struct *)&(store->pings[store->ping_index]);
+		// struct mbsys_simrad3_ping_struct *ping = (struct mbsys_simrad3_ping_struct *)&(store->pings[store->ping_index]);
 
 		/* get transmit_gain (dB) */
 		*transmit_gain = (double)store->run_tran_pow;
@@ -2830,10 +2866,6 @@ int mbsys_simrad3_gains(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
 /*--------------------------------------------------------------------*/
 int mbsys_simrad3_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr, int *kind, double *transducer_depth,
                                    double *altitude, int *error) {
-	double altitude_best;
-	double xtrack_min;
-	int found;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -2843,7 +2875,7 @@ int mbsys_simrad3_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
 	}
 
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	struct mbsys_simrad3_struct *store = (struct mbsys_simrad3_struct *)store_ptr;
@@ -2860,9 +2892,9 @@ int mbsys_simrad3_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
 
 		/* get transducer depth and altitude */
 		*transducer_depth = ping->png_xducer_depth;
-		found = false;
-		altitude_best = 0.0;
-		xtrack_min = 99999999.9;
+		bool found = false;
+		double altitude_best = 0.0;
+		double xtrack_min = 99999999.9;
 		for (int i = 0; i < ping->png_nbeams; i++) {
 			if (mb_beam_ok(ping->png_beamflag[i]) && fabs(ping->png_acrosstrack[i]) < xtrack_min) {
 				xtrack_min = fabs(ping->png_acrosstrack[i]);
@@ -2870,7 +2902,7 @@ int mbsys_simrad3_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
 				found = true;
 			}
 		}
-		if (found == false) {
+		if (!found) {
 			xtrack_min = 99999999.9;
 			for (int i = 0; i < ping->png_nbeams; i++) {
 				if (ping->png_quality[i] > 0 && fabs(ping->png_acrosstrack[i]) < xtrack_min) {
@@ -2880,7 +2912,7 @@ int mbsys_simrad3_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
 				}
 			}
 		}
-		if (found == true)
+		if (found)
 			*altitude = altitude_best;
 		else
 			*altitude = 0.0;
@@ -2923,14 +2955,6 @@ int mbsys_simrad3_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
 int mbsys_simrad3_extract_nnav(int verbose, void *mbio_ptr, void *store_ptr, int nmax, int *kind, int *n, int *time_i,
                                double *time_d, double *navlon, double *navlat, double *speed, double *heading, double *draft,
                                double *roll, double *pitch, double *heave, int *error) {
-	int interp_error = MB_ERROR_NO_ERROR;
-	struct mbsys_simrad3_ping_struct *ping;
-	struct mbsys_simrad3_attitude_struct *attitude;
-	struct mbsys_simrad3_netattitude_struct *netattitude;
-	double atime_d;
-	int atime_i[7];
-	int inav;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -2941,7 +2965,7 @@ int mbsys_simrad3_extract_nnav(int verbose, void *mbio_ptr, void *store_ptr, int
 	}
 
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	struct mbsys_simrad3_struct *store = (struct mbsys_simrad3_struct *)store_ptr;
@@ -2954,7 +2978,8 @@ int mbsys_simrad3_extract_nnav(int verbose, void *mbio_ptr, void *store_ptr, int
 	/* extract data from ping structure */
 	if (*kind == MB_DATA_DATA) {
 		/* get survey data structure */
-		ping = (struct mbsys_simrad3_ping_struct *)&(store->pings[store->ping_index]);
+		struct mbsys_simrad3_ping_struct *ping =
+			(struct mbsys_simrad3_ping_struct *)&(store->pings[store->ping_index]);
 
 		/* just one navigation value */
 		*n = 1;
@@ -3002,7 +3027,8 @@ int mbsys_simrad3_extract_nnav(int verbose, void *mbio_ptr, void *store_ptr, int
 	/* extract data from nav structure */
 	else if (*kind == MB_DATA_NAV || *kind == MB_DATA_NAV1 || *kind == MB_DATA_NAV2 || *kind == MB_DATA_NAV3) {
 		/* get survey data structure */
-		ping = (struct mbsys_simrad3_ping_struct *)&(store->pings[store->ping_index]);
+		struct mbsys_simrad3_ping_struct *ping =
+			(struct mbsys_simrad3_ping_struct *)&(store->pings[store->ping_index]);
 
 		/* just one navigation value */
 		*n = 1;
@@ -3056,12 +3082,13 @@ int mbsys_simrad3_extract_nnav(int verbose, void *mbio_ptr, void *store_ptr, int
 	/* extract data from attitude structure */
 	else if (store->type == EM3_ATTITUDE && store->attitude != NULL) {
 		/* get attitude data structure */
-		attitude = (struct mbsys_simrad3_attitude_struct *)store->attitude;
+		struct mbsys_simrad3_attitude_struct *attitude = (struct mbsys_simrad3_attitude_struct *)store->attitude;
 
 		/* get n */
 		*n = MIN(attitude->att_ndata, MB_ASYNCH_SAVE_MAX);
 
 		/* get attitude time */
+		int atime_i[7];
 		atime_i[0] = attitude->att_date / 10000;
 		atime_i[1] = (attitude->att_date % 10000) / 100;
 		atime_i[2] = attitude->att_date % 100;
@@ -3069,8 +3096,10 @@ int mbsys_simrad3_extract_nnav(int verbose, void *mbio_ptr, void *store_ptr, int
 		atime_i[4] = (attitude->att_msec % 3600000) / 60000;
 		atime_i[5] = (attitude->att_msec % 60000) / 1000;
 		atime_i[6] = (attitude->att_msec % 1000) * 1000;
+		double atime_d;
 		mb_get_time(verbose, atime_i, &atime_d);
 
+		int interp_error = MB_ERROR_NO_ERROR;
 		/* loop over the data */
 		for (int i = 0; i < *n; i++) {
 			/* get time from the data record */
@@ -3092,18 +3121,23 @@ int mbsys_simrad3_extract_nnav(int verbose, void *mbio_ptr, void *store_ptr, int
 			mb_depint_interp(verbose, mbio_ptr, time_d[i], &draft[i], &interp_error);
 		}
 
+//		if (interp_error != MB_ERROR_NO_ERROR) {
+//			fprintf(stderr, "%s:%4.4d:%s: WARNING: interp error is %d\n",
+//              __FILE__, __LINE__, __func__, interp_error);
+//		}
 		/* done translating values */
-	}
+	} else if (store->type == EM3_NETATTITUDE && store->netattitude != NULL) {
+		/* extract data from netattitude structure */
 
-	/* extract data from netattitude structure */
-	else if (store->type == EM3_NETATTITUDE && store->netattitude != NULL) {
 		/* get attitude data structure */
-		netattitude = (struct mbsys_simrad3_netattitude_struct *)store->netattitude;
+		struct mbsys_simrad3_netattitude_struct *netattitude =
+			(struct mbsys_simrad3_netattitude_struct *)store->netattitude;
 
 		/* get n */
 		*n = MIN(netattitude->nat_ndata, MB_ASYNCH_SAVE_MAX);
 
 		/* get attitude time */
+		int atime_i[7];
 		atime_i[0] = netattitude->nat_date / 10000;
 		atime_i[1] = (netattitude->nat_date % 10000) / 100;
 		atime_i[2] = netattitude->nat_date % 100;
@@ -3111,9 +3145,11 @@ int mbsys_simrad3_extract_nnav(int verbose, void *mbio_ptr, void *store_ptr, int
 		atime_i[4] = (netattitude->nat_msec % 3600000) / 60000;
 		atime_i[5] = (netattitude->nat_msec % 60000) / 1000;
 		atime_i[6] = (netattitude->nat_msec % 1000) * 1000;
+		double atime_d;
 		mb_get_time(verbose, atime_i, &atime_d);
 
 		/* loop over the data */
+		int interp_error = MB_ERROR_NO_ERROR;
 		for (int i = 0; i < *n; i++) {
 			/* get time from the data record */
 			time_d[i] = (double)(atime_d + 0.001 * netattitude->nat_time[i]);
@@ -3133,6 +3169,10 @@ int mbsys_simrad3_extract_nnav(int verbose, void *mbio_ptr, void *store_ptr, int
 			/* interpolate the sonar depth */
 			mb_depint_interp(verbose, mbio_ptr, time_d[i], &draft[i], &interp_error);
 		}
+
+//		if (interp_error != MB_ERROR_NO_ERROR) {
+//			fprintf(stderr, "WARNING: interp_error is %d\n", interp_error);
+//		}
 
 		/* done translating values */
 	}
@@ -3158,7 +3198,7 @@ int mbsys_simrad3_extract_nnav(int verbose, void *mbio_ptr, void *store_ptr, int
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       kind:       %d\n", *kind);
 		fprintf(stderr, "dbg2       n:          %d\n", *n);
-		for (inav = 0; inav < *n; inav++) {
+		for (int inav = 0; inav < *n; inav++) {
 			for (int i = 0; i < 7; i++)
 				fprintf(stderr, "dbg2       %d time_i[%d]:     %d\n", inav, i, time_i[inav * 7 + i]);
 			fprintf(stderr, "dbg2       %d time_d:        %f\n", inav, time_d[inav]);
@@ -3192,7 +3232,7 @@ int mbsys_simrad3_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int 
 	}
 
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	struct mbsys_simrad3_struct *store = (struct mbsys_simrad3_struct *)store_ptr;
@@ -3373,7 +3413,7 @@ int mbsys_simrad3_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int t
 	}
 
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	struct mbsys_simrad3_struct *store = (struct mbsys_simrad3_struct *)store_ptr;
@@ -3485,7 +3525,7 @@ int mbsys_simrad3_extract_svp(int verbose, void *mbio_ptr, void *store_ptr, int 
 	}
 
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	struct mbsys_simrad3_struct *store = (struct mbsys_simrad3_struct *)store_ptr;
@@ -3552,7 +3592,7 @@ int mbsys_simrad3_insert_svp(int verbose, void *mbio_ptr, void *store_ptr, int n
 	}
 
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	struct mbsys_simrad3_struct *store = (struct mbsys_simrad3_struct *)store_ptr;
@@ -3584,22 +3624,6 @@ int mbsys_simrad3_insert_svp(int verbose, void *mbio_ptr, void *store_ptr, int n
 }
 /*--------------------------------------------------------------------*/
 int mbsys_simrad3_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_ptr, int *error) {
-	struct mbsys_simrad3_attitude_struct *attitude_store;
-	struct mbsys_simrad3_attitude_struct *attitude_copy;
-	char *attitude_save;
-	struct mbsys_simrad3_netattitude_struct *netattitude_store;
-	struct mbsys_simrad3_netattitude_struct *netattitude_copy;
-	char *netattitude_save;
-	struct mbsys_simrad3_heading_struct *heading_store;
-	struct mbsys_simrad3_heading_struct *heading_copy;
-	char *heading_save;
-	struct mbsys_simrad3_ssv_struct *ssv_store;
-	struct mbsys_simrad3_ssv_struct *ssv_copy;
-	char *ssv_save;
-	struct mbsys_simrad3_tilt_struct *tilt_store;
-	struct mbsys_simrad3_tilt_struct *tilt_copy;
-	char *tilt_save;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -3610,13 +3634,15 @@ int mbsys_simrad3_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_
 	}
 
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointers */
 	struct mbsys_simrad3_struct *store = (struct mbsys_simrad3_struct *)store_ptr;
 	struct mbsys_simrad3_struct *copy = (struct mbsys_simrad3_struct *)copy_ptr;
 
 	int status = MB_SUCCESS;
+
+	char *attitude_save;
 
 	/* check if attitude data needs to be copied */
 	if (store->attitude != NULL) {
@@ -3630,6 +3656,8 @@ int mbsys_simrad3_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_
 		attitude_save = (char *)copy->attitude;
 	}
 
+	char *netattitude_save;
+
 	/* check if netattitude data needs to be copied */
 	if (store->netattitude != NULL) {
 		/* make sure a netattitude data structure exists to
@@ -3641,6 +3669,8 @@ int mbsys_simrad3_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_
 		/* save pointer value */
 		netattitude_save = (char *)copy->netattitude;
 	}
+
+	char *heading_save;
 
 	/* check if heading data needs to be copied */
 	if (store->heading != NULL) {
@@ -3654,6 +3684,8 @@ int mbsys_simrad3_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_
 		heading_save = (char *)copy->heading;
 	}
 
+	char *ssv_save;
+
 	/* check if ssv data needs to be copied */
 	if (store->ssv != NULL) {
 		/* make sure a ssv data structure exists to
@@ -3665,6 +3697,8 @@ int mbsys_simrad3_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_
 		/* save pointer value */
 		ssv_save = (char *)copy->ssv;
 	}
+
+	char *tilt_save;
 
 	/* check if tilt data needs to be copied */
 	if (store->tilt != NULL) {
@@ -3684,40 +3718,44 @@ int mbsys_simrad3_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_
 	/* if needed copy the attitude data structure */
 	if (store->attitude != NULL && status == MB_SUCCESS) {
 		copy->attitude = (struct mbsys_simrad3_attitude_struct *)attitude_save;
-		attitude_store = (struct mbsys_simrad3_attitude_struct *)store->attitude;
-		attitude_copy = (struct mbsys_simrad3_attitude_struct *)copy->attitude;
+		struct mbsys_simrad3_attitude_struct *attitude_store =
+                    (struct mbsys_simrad3_attitude_struct *)store->attitude;
+		struct mbsys_simrad3_attitude_struct *attitude_copy =
+                    (struct mbsys_simrad3_attitude_struct *)copy->attitude;
 		*attitude_copy = *attitude_store;
 	}
 
 	/* if needed copy the netattitude data structure */
 	if (store->netattitude != NULL && status == MB_SUCCESS) {
 		copy->netattitude = (struct mbsys_simrad3_netattitude_struct *)netattitude_save;
-		netattitude_store = (struct mbsys_simrad3_netattitude_struct *)store->netattitude;
-		netattitude_copy = (struct mbsys_simrad3_netattitude_struct *)copy->netattitude;
+		struct mbsys_simrad3_netattitude_struct *netattitude_store =
+                    (struct mbsys_simrad3_netattitude_struct *)store->netattitude;
+		struct mbsys_simrad3_netattitude_struct *netattitude_copy =
+                    (struct mbsys_simrad3_netattitude_struct *)copy->netattitude;
 		*netattitude_copy = *netattitude_store;
 	}
 
 	/* if needed copy the heading data structure */
 	if (store->heading != NULL && status == MB_SUCCESS) {
 		copy->heading = (struct mbsys_simrad3_heading_struct *)heading_save;
-		heading_store = (struct mbsys_simrad3_heading_struct *)store->heading;
-		heading_copy = (struct mbsys_simrad3_heading_struct *)copy->heading;
+		struct mbsys_simrad3_heading_struct *heading_store = (struct mbsys_simrad3_heading_struct *)store->heading;
+		struct mbsys_simrad3_heading_struct *heading_copy = (struct mbsys_simrad3_heading_struct *)copy->heading;
 		*heading_copy = *heading_store;
 	}
 
 	/* if needed copy the ssv data structure */
 	if (store->ssv != NULL && status == MB_SUCCESS) {
 		copy->ssv = (struct mbsys_simrad3_ssv_struct *)ssv_save;
-		ssv_store = (struct mbsys_simrad3_ssv_struct *)store->ssv;
-		ssv_copy = (struct mbsys_simrad3_ssv_struct *)copy->ssv;
+		struct mbsys_simrad3_ssv_struct *ssv_store = (struct mbsys_simrad3_ssv_struct *)store->ssv;
+		struct mbsys_simrad3_ssv_struct *ssv_copy = (struct mbsys_simrad3_ssv_struct *)copy->ssv;
 		*ssv_copy = *ssv_store;
 	}
 
 	/* if needed copy the tilt data structure */
 	if (store->tilt != NULL && status == MB_SUCCESS) {
 		copy->tilt = (struct mbsys_simrad3_tilt_struct *)tilt_save;
-		tilt_store = (struct mbsys_simrad3_tilt_struct *)store->tilt;
-		tilt_copy = (struct mbsys_simrad3_tilt_struct *)copy->tilt;
+		struct mbsys_simrad3_tilt_struct *tilt_store = (struct mbsys_simrad3_tilt_struct *)store->tilt;
+		struct mbsys_simrad3_tilt_struct *tilt_copy = (struct mbsys_simrad3_tilt_struct *)copy->tilt;
 		*tilt_copy = *tilt_store;
 	}
 
@@ -3734,26 +3772,6 @@ int mbsys_simrad3_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_
 /*--------------------------------------------------------------------*/
 int mbsys_simrad3_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel_size_set, double *pixel_size,
                          int swath_width_set, double *swath_width, int pixel_int, int *error) {
-	double ss[MBSYS_SIMRAD3_MAXPIXELS];
-	int ss_cnt[MBSYS_SIMRAD3_MAXPIXELS];
-	double ssacrosstrack[MBSYS_SIMRAD3_MAXPIXELS];
-	double ssalongtrack[MBSYS_SIMRAD3_MAXPIXELS];
-	short *beam_ss;
-	int nbathsort;
-	double bathsort[MBSYS_SIMRAD3_MAXBEAMS];
-	double depthoffset;
-	double reflscale;
-	double pixel_size_calc;
-	double pixel_size_max_swath;
-	double ss_spacing, ss_spacing_use;
-	int pixel_int_use;
-	double angle, xtrackss;
-	double range, beam_foot, beamwidth, sint;
-	int time_i[7];
-	double bath_time_d, ss_time_d;
-	int ss_ok;
-	int first, last, k1, k2;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -3768,13 +3786,18 @@ int mbsys_simrad3_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel
 	}
 
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	struct mbsys_simrad3_struct *store = (struct mbsys_simrad3_struct *)store_ptr;
 
 	/* insert data in structure */
 	if (store->kind == MB_DATA_DATA) {
+		double ss[MBSYS_SIMRAD3_MAXPIXELS];
+		int ss_cnt[MBSYS_SIMRAD3_MAXPIXELS];
+		double ssacrosstrack[MBSYS_SIMRAD3_MAXPIXELS];
+		double ssalongtrack[MBSYS_SIMRAD3_MAXPIXELS];
+
 		/* get survey data structure */
 		struct mbsys_simrad3_ping_struct *ping = (struct mbsys_simrad3_ping_struct *)&(store->pings[store->ping_index]);
 
@@ -3787,13 +3810,14 @@ int mbsys_simrad3_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel
 		}
 
 		/* set scaling parameters */
-		depthoffset = ping->png_xducer_depth;
-		reflscale = 0.1;
+		const double depthoffset = ping->png_xducer_depth;
+		const double reflscale = 0.1;
 
 		/* get raw pixel size */
-		ss_spacing = 750.0 / ping->png_sample_rate;
+		const double ss_spacing = 750.0 / ping->png_sample_rate;
 
 		/* get beam angle size */
+		double beamwidth;
 		if (store->sonar == MBSYS_SIMRAD3_EM1000) {
 			beamwidth = 2.5;
 		}
@@ -3802,10 +3826,13 @@ int mbsys_simrad3_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel
 		}
 		else if (store->run_tran_beam > 0) {
 			beamwidth = 0.1 * store->run_tran_beam;
+		} else {
+			assert(false);
 		}
 
 		/* get median depth */
-		nbathsort = 0;
+		int nbathsort = 0;
+		double bathsort[MBSYS_SIMRAD3_MAXBEAMS];
 		for (int i = 0; i < ping->png_nbeams; i++) {
 			if (mb_beam_ok(ping->png_beamflag[i])) {
 				bathsort[nbathsort] = ping->png_depth[i] + depthoffset;
@@ -3814,17 +3841,19 @@ int mbsys_simrad3_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel
 		}
 
 		/* get sidescan pixel size */
-		if (swath_width_set == false) {
+		if (!swath_width_set) {
 			if (store->run_swath_angle > 0)
 				*swath_width = (double)store->run_swath_angle;
 			else
 				*swath_width = 2.5 + MAX(90.0 - ping->png_depression[0], 90.0 - ping->png_depression[ping->png_nbeams - 1]);
 		}
-		if (pixel_size_set == false && nbathsort > 0) {
+
+		if (!pixel_size_set && nbathsort > 0) {
+			double pixel_size_calc;
 			qsort((char *)bathsort, nbathsort, sizeof(double), (void *)mb_double_compare);
 			pixel_size_calc = 2 * tan(DTR * (*swath_width)) * bathsort[nbathsort / 2] / MBSYS_SIMRAD3_MAXPIXELS;
 			if (store->run_max_swath > 0) {
-				pixel_size_max_swath = 2 * ((double)store->run_max_swath) / ((double)MBSYS_SIMRAD3_MAXPIXELS);
+				const double pixel_size_max_swath = 2 * ((double)store->run_max_swath) / ((double)MBSYS_SIMRAD3_MAXPIXELS);
 				if (pixel_size_max_swath < pixel_size_calc)
 					pixel_size_calc = pixel_size_max_swath;
 			}
@@ -3838,11 +3867,13 @@ int mbsys_simrad3_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel
 			else
 				(*pixel_size) = pixel_size_calc;
 		}
+
 		/* get pixel interpolation */
-		pixel_int_use = pixel_int + 1;
+		const int pixel_int_use = pixel_int + 1;
 
 		/* check that sidescan can be used */
 		/* get times of bath and sidescan records */
+		int time_i[7];
 		time_i[0] = ping->png_date / 10000;
 		time_i[1] = (ping->png_date % 10000) / 100;
 		time_i[2] = ping->png_date % 100;
@@ -3850,6 +3881,7 @@ int mbsys_simrad3_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel
 		time_i[4] = (ping->png_msec % 3600000) / 60000;
 		time_i[5] = (ping->png_msec % 60000) / 1000;
 		time_i[6] = (ping->png_msec % 1000) * 1000;
+		double bath_time_d;
 		mb_get_time(verbose, time_i, &bath_time_d);
 		time_i[0] = ping->png_ss_date / 10000;
 		time_i[1] = (ping->png_ss_date % 10000) / 100;
@@ -3858,8 +3890,10 @@ int mbsys_simrad3_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel
 		time_i[4] = (ping->png_ss_msec % 3600000) / 60000;
 		time_i[5] = (ping->png_ss_msec % 60000) / 1000;
 		time_i[6] = (ping->png_ss_msec % 1000) * 1000;
+		double ss_time_d;
 		mb_get_time(verbose, time_i, &ss_time_d);
-		ss_ok = true;
+
+		bool ss_ok = true;
 		if (ping->png_nbeams < ping->png_nbeams_ss || ping->png_nbeams > ping->png_nbeams_ss + 1) {
 			ss_ok = false;
 			if (verbose > 0)
@@ -3869,18 +3903,21 @@ int mbsys_simrad3_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel
 				        ping->png_nbeams, ping->png_nbeams_ss);
 		}
 
+
+
 		/* loop over raw sidescan, putting each raw pixel into
 		    the binning arrays */
-		if (ss_ok == true)
+		if (ss_ok) {
 			for (int i = 0; i < ping->png_nbeams_ss; i++) {
-				beam_ss = &ping->png_ssraw[ping->png_start_sample[i]];
+				short *beam_ss = &ping->png_ssraw[ping->png_start_sample[i]];
 				if (mb_beam_ok(ping->png_beamflag[i])) {
+					double ss_spacing_use;
 					if (ping->png_beam_samples[i] > 0) {
-						range =
+						const double range =
 						    sqrt(ping->png_depth[i] * ping->png_depth[i] + ping->png_acrosstrack[i] * ping->png_acrosstrack[i]);
-						angle = 90.0 - ping->png_depression[i];
-						beam_foot = range * sin(DTR * beamwidth) / cos(DTR * angle);
-						sint = fabs(sin(DTR * angle));
+						const double angle = 90.0 - ping->png_depression[i];
+						const double beam_foot = range * sin(DTR * beamwidth) / cos(DTR * angle);
+						const double sint = fabs(sin(DTR * angle));
 						if (sint < ping->png_beam_samples[i] * ss_spacing / beam_foot)
 							ss_spacing_use = beam_foot / ping->png_beam_samples[i];
 						else
@@ -3888,7 +3925,7 @@ int mbsys_simrad3_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel
 					}
 					for (int k = 0; k < ping->png_beam_samples[i]; k++) {
 						if (beam_ss[k] != EM3_INVALID_AMP) {
-							xtrackss = ping->png_acrosstrack[i] + ss_spacing_use * (k - ping->png_center_sample[i]);
+							const double xtrackss = ping->png_acrosstrack[i] + ss_spacing_use * (k - ping->png_center_sample[i]);
 							const int kk = MBSYS_SIMRAD3_MAXPIXELS / 2 + (int)(xtrackss / (*pixel_size));
 							if (kk > 0 && kk < MBSYS_SIMRAD3_MAXPIXELS) {
 								ss[kk] += reflscale * ((double)beam_ss[k]);
@@ -3899,10 +3936,11 @@ int mbsys_simrad3_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel
 					}
 				}
 			}
+		}
 
 		/* average the sidescan */
-		first = MBSYS_SIMRAD3_MAXPIXELS;
-		last = -1;
+		int first = MBSYS_SIMRAD3_MAXPIXELS;
+		int last = -1;
 		for (int k = 0; k < MBSYS_SIMRAD3_MAXPIXELS; k++) {
 			if (ss_cnt[k] > 0) {
 				ss[k] /= ss_cnt[k];
@@ -3916,13 +3954,13 @@ int mbsys_simrad3_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel
 		}
 
 		/* interpolate the sidescan */
-		k1 = first;
-		k2 = first;
+		int k1 = first;
+		int k2 = first;
 		for (int k = first + 1; k < last; k++) {
 			if (ss_cnt[k] <= 0) {
 				if (k2 <= k) {
 					k2 = k + 1;
-					while (ss_cnt[k2] <= 0 && k2 < last)
+					while (k2 < last && ss_cnt[k2] <= 0)
 						k2++;
 				}
 				if (k2 - k1 <= pixel_int_use) {

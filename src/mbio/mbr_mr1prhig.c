@@ -178,7 +178,7 @@ int mbr_zero_mr1prhig(int verbose, struct mbf_mr1prhig_struct *data, int *error)
 		}
 
 		/* comment */
-		strncpy(data->comment, "\0", MBF_MR1PRHIG_MAXLINE);
+		strncpy(data->comment, "", MBF_MR1PRHIG_MAXLINE);
 	}
 
 	/* assume success */
@@ -537,7 +537,7 @@ int mbr_mr1prhig_rd_data(int verbose, void *mbio_ptr, int *error) {
 	int status = MB_SUCCESS;
 
 	/* if first time through read file header */
-	if (mb_io_ptr->fileheader == false) {
+	if (!mb_io_ptr->fileheader) {
 		status = mbr_mr1prhig_rd_hdr(verbose, xdrs, data, &mb_io_ptr->hdr_comment, error);
 		if (status == MB_SUCCESS) {
 			mb_io_ptr->fileheader = true;
@@ -919,7 +919,7 @@ int mbr_mr1prhig_wr_data(int verbose, void *mbio_ptr, struct mbf_mr1prhig_struct
 	int status = MB_SUCCESS;
 
 	/* if comment and file header not written */
-	if (mb_io_ptr->fileheader == false && data->kind == MB_DATA_COMMENT) {
+	if (!mb_io_ptr->fileheader && data->kind == MB_DATA_COMMENT) {
 		/* add comment to string mb_io_ptr->hdr_comment
 		    to be be written in file header */
 		lenc = strlen(data->comment);
@@ -928,7 +928,7 @@ int mbr_mr1prhig_wr_data(int verbose, void *mbio_ptr, struct mbf_mr1prhig_struct
 			lenhc = strlen(mb_io_ptr->hdr_comment);
 		len = lenc + lenhc + 1;
 		status = mb_mallocd(verbose, __FILE__, __LINE__, len, (void **)&tmp, error);
-		strcpy(tmp, "\0");
+		strcpy(tmp, "");
 		if (lenhc > 0)
 			strcpy(tmp, mb_io_ptr->hdr_comment);
 		if (lenc > 0)
@@ -939,7 +939,7 @@ int mbr_mr1prhig_wr_data(int verbose, void *mbio_ptr, struct mbf_mr1prhig_struct
 	}
 
 	/* if data and file header not written */
-	else if (mb_io_ptr->fileheader == false && data->kind != MB_DATA_COMMENT) {
+	else if (!mb_io_ptr->fileheader && data->kind != MB_DATA_COMMENT) {
 		/* write file header */
 		status = mbr_mr1prhig_wr_hdr(verbose, xdrs, data, &mb_io_ptr->hdr_comment, error);
 		mb_io_ptr->fileheader = true;
@@ -949,13 +949,13 @@ int mbr_mr1prhig_wr_data(int verbose, void *mbio_ptr, struct mbf_mr1prhig_struct
 	}
 
 	/* if data and file header written */
-	else if (mb_io_ptr->fileheader == true && data->kind == MB_DATA_DATA) {
+	else if (mb_io_ptr->fileheader && data->kind == MB_DATA_DATA) {
 		/* write data */
 		status = mbr_mr1prhig_wr_ping(verbose, xdrs, data, error);
 	}
 
 	/* if not data and file header written */
-	else if (mb_io_ptr->fileheader == true && data->kind != MB_DATA_DATA) {
+	else if (mb_io_ptr->fileheader && data->kind != MB_DATA_DATA) {
 		status = MB_FAILURE;
 		*error = MB_ERROR_BAD_KIND;
 	}

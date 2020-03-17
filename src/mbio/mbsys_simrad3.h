@@ -503,6 +503,7 @@ the water column have been applied. */
 	   as measured by heave  */
 
 	/* raw travel time and angle data version 4 */
+	// TODO(schwehr): bool.
 	int png_raw_read;       /* flag indicating actual reading of raw beam record */
 	int png_raw_date;       /* date = year*10000 + month*100 + day
 	                    Feb 26, 1995 = 19950226 */
@@ -600,6 +601,7 @@ the water column have been applied. */
 	    defined by Xavier Lurton. Others have not yet been defined */
 
 	/* sidescan */
+	// TODO(schwehr): bool.
 	int png_ss_read;          /* flag indicating actual reading of sidescan record */
 	int png_ss_date;          /* date = year*10000 + month*100 + day
 	                      Feb 26, 1995 = 19950226 */
@@ -1357,6 +1359,10 @@ struct mbsys_simrad3_struct {
 	struct mbsys_simrad3_watercolumn_struct *wc;
 };
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* system specific function prototypes */
 int mbsys_simrad3_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *error);
 int mbsys_simrad3_survey_alloc(int verbose, void *mbio_ptr, void *store_ptr, int *error);
@@ -1409,5 +1415,9 @@ int mbsys_simrad3_insert_svp(int verbose, void *mbio_ptr, void *store_ptr, int n
 int mbsys_simrad3_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_ptr, int *error);
 int mbsys_simrad3_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel_size_set, double *pixel_size,
                          int swath_width_set, double *swath_width, int pixel_int, int *error);
+
+#ifdef __cplusplus
+}  /* extern "C" */
+#endif
 
 #endif  /* MBSYS_SIMRAD3_H_ */

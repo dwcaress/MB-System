@@ -1,7 +1,6 @@
 #!/usr/bin/env perl
 #--------------------------------------------------------------------
 #    The MB-system: mbm_xbt.perl   6/18/93
-#    $Id$
 #
 #    Copyright (c) 1993-2019 by
 #    D. W. Caress (caress@mbari.org)
@@ -78,8 +77,6 @@
 #      - move usage message to function
 #
 #
-# Version:
-# $Id$
 #
 #
 #
@@ -279,7 +276,6 @@ sub usage {
 
 
     print "\nUsage: $ProgramName -Ifile \n";
-    print "\nVersion: $Id$\n";
     print "\t[-C -Ssalinity -Fformat -Llatitude -V -H -C]\n\n";
 
     print "\tPerl shellscript to translate various XBT (with -F option) \n";

@@ -21,6 +21,7 @@
  * Date:	March 1, 1993
  */
 
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -529,13 +530,14 @@ int mb_freed(int verbose, const char *sourcefile, int sourceline, void **ptr, in
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       sourcefile: %s\n", sourcefile);
 		fprintf(stderr, "dbg2       sourceline: %d\n", sourceline);
+		fprintf(stderr, "dbg2       *ptr:       %p\n", (void *)ptr);
 		fprintf(stderr, "dbg2       ptr:        %p\n", (void *)*ptr);
 	}
 
 	/* check if pointer is in list */
 	int iptr = -1;
 	for (int i = 0; i < n_mb_alloc; i++)
-		if (mb_alloc_ptr[i] == *ptr)
+		if (ptr != NULL && mb_alloc_ptr[i] == *ptr)
 			iptr = i;
 
 	/* if pointer is in list remove it from list
@@ -561,7 +563,7 @@ int mb_freed(int verbose, const char *sourcefile, int sourceline, void **ptr, in
 
 	/* else deallocate the memory if pointer is non-null and
 	    heap overflow has occurred */
-	else if (mb_alloc_overflow == true && *ptr != NULL) {
+	else if (mb_alloc_overflow && *ptr != NULL) {
 #ifdef MB_MEM_DEBUG
 		fprintf(stderr, "NOTICE: mbm_mem overflow pointer freed %d in function %s\n", *ptr, __func__);
 #endif

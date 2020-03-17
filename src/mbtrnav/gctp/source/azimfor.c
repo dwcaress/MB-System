@@ -55,7 +55,7 @@ lat_origin = center_lat;
 false_northing = false_north;
 false_easting = false_east;
 
-sincos(center_lat,&sin_p12,&cos_p12);
+gsincos(center_lat,&sin_p12,&cos_p12);
 
 /* Report parameters to the user
   -----------------------------*/
@@ -88,7 +88,7 @@ char mess[80];		/* error message buffer				*/
 /* Forward equations
   -----------------*/
 dlon = adjust_lon(lon - lon_center);
-sincos(lat,&sinphi,&cosphi);
+gsincos(lat,&sinphi,&cosphi);
 coslon = cos(dlon);
 g = sin_p12 * sinphi + cos_p12 * cosphi * coslon;
 if (fabs(fabs(g) - 1.0) < EPSLN)

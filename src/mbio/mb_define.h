@@ -23,11 +23,9 @@
 #define MB_DEFINE_H_
 
 #include <stdbool.h>
+#include <stdint.h>
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
+#include <mb_config.h>
 
 #ifdef _WIN32
 	/* https://www.zachburlingame.com/2011/05/resolving-redefinition-errors-betwen-ws2def-h-and-winsock-h/ */
@@ -36,19 +34,6 @@ extern "C" {
 #	endif
 #	include <WinSock2.h>
 #	include <Windows.h>
-
-#	include <mb_config.h>
-#else
-#	ifdef HAVE_CONFIG_H
-#		ifndef MBSYSTEM_CONFIG_DEFINED
-#			include <mb_config.h>
-#		endif
-#	endif
-#endif
-
-/* include for mb_s_char types */
-#if HAVE_STDINT_H
-#include <stdint.h>
 #endif
 
 /* For XDR/RPC */
@@ -58,6 +43,10 @@ extern "C" {
 #ifdef HAVE_RPC_TYPES_H
 #include <rpc/types.h>
 #include <rpc/xdr.h>
+#endif
+
+#ifdef __cplusplus
+extern "C" {
 #endif
 
 /* for Windows */
@@ -153,8 +142,10 @@ typedef char mb_longname[MB_LONGNAME_LENGTH];
 #define MB_NAV_MAX 256
 
 /* file mode (read or write) */
-#define MB_FILEMODE_READ 0
-#define MB_FILEMODE_WRITE 1
+typedef enum {
+  MB_FILEMODE_READ = 0,
+  MB_FILEMODE_WRITE = 1,
+} mb_filemode_enum;
 
 /* types of  files used by swath sonar data formats */
 #define MB_FILETYPE_NORMAL 1
@@ -246,6 +237,8 @@ typedef char mb_longname[MB_LONGNAME_LENGTH];
 /* MBIO core function prototypes */
 int mb_version(int verbose, char *version_string, int *version_id, int *version_major, int *version_minor, int *version_archive,
                int *error);
+int mb_default_defaults(int verbose, int *format, int *pings, int *lonflip, double bounds[4], int *btime_i, int *etime_i,
+                double *speedmin, double *timegap);
 int mb_defaults(int verbose, int *format, int *pings, int *lonflip, double bounds[4], int *btime_i, int *etime_i,
                 double *speedmin, double *timegap);
 int mb_env(int verbose, char *psdisplay, char *imgdisplay, char *mbproject);
@@ -283,15 +276,18 @@ int mb_get_relative_path(int verbose, char *path, char *pwd, int *error);
 int mb_get_shortest_path(int verbose, char *path, int *error);
 int mb_get_basename(int verbose, char *path, int *error);
 int mb_check_info(int verbose, char *file, int lonflip, double bounds[4], int *file_in_bounds, int *error);
-int mb_make_info(int verbose, int force, char *file, int format, int *error);
+bool mb_should_make_fbt(int verbose, int format);
+bool mb_should_make_fnv(int verbose, int format);
+int mb_make_info(int verbose, bool force, char *file, int format, int *error);
 int mb_get_fbt(int verbose, char *file, int *format, int *error);
 int mb_get_fnv(int verbose, char *file, int *format, int *error);
 int mb_get_ffa(int verbose, char *file, int *format, int *error);
 int mb_get_ffs(int verbose, char *file, int *format, int *error);
-int mb_swathbounds(int verbose, int checkgood, double navlon, double navlat, double heading, int nbath, int nss, char *beamflag,
-                  double *bath, double *bathacrosstrack, double *bathalongtrack, double *ss, double *ssacrosstrack,
-                  double *ssalongtrack, int *ibeamport, int *ibeamcntr, int *ibeamstbd, int *ipixelport, int *ipixelcntr,
-                  int *ipixelstbd, int *error);
+int mb_swathbounds(int verbose, int checkgood, int nbath, int nss,
+                  char *beamflag, double *bathacrosstrack,
+                  double *ss, double *ssacrosstrack,
+                  int *ibeamport, int *ibeamcntr, int *ibeamstbd,
+                  int *ipixelport, int *ipixelcntr, int *ipixelstbd, int *error);
 int mb_read_init(int verbose, char *file, int format, int pings, int lonflip, double bounds[4], int btime_i[7], int etime_i[7],
                   double speedmin, double timegap, void **mbio_ptr, double *btime_d, double *etime_d, int *beams_bath,
                   int *beams_amp, int *pixels_ss, int *error);
@@ -371,6 +367,8 @@ int mb_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbe
 int mb_pulses(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbeams, int *pulses, int *error);
 int mb_gains(int verbose, void *mbio_ptr, void *store_ptr, int *kind, double *transmit_gain, double *pulse_length,
              double *receive_gain, int *error);
+int mb_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel_size_set, double *pixel_size,
+                         int swath_width_set, double *swath_width, int pixel_int, int *error);
 int mb_extract_rawssdimensions(int verbose, void *mbio_ptr, void *store_ptr, int *kind, double *sample_interval,
                                int *num_samples_port, int *num_samples_stbd, int *error);
 int mb_extract_rawss(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *sidescan_type, double *sample_interval,
@@ -554,7 +552,8 @@ int mb_xyz_to_takeoff(int verbose, double x, double y, double z, double *theta, 
 int mb_lever(int verbose, double sonar_offset_x, double sonar_offset_y, double sonar_offset_z, double nav_offset_x,
              double nav_offset_y, double nav_offset_z, double vru_offset_x, double vru_offset_y, double vru_offset_z,
              double vru_pitch, double vru_roll, double *lever_x, double *lever_y, double *lever_z, int *error);
-int mb_mergesort(void *base, size_t nmemb, register size_t size, int (*cmp)(const void *, const void *));
+//int mb_mergesort(void *base, size_t nmemb, register size_t size, int (*cmp)(const void *, const void *));
+int mb_mergesort(void *base, size_t nmemb, size_t size, int (*cmp)(const void *, const void *));
 int mb_double_compare(const void *a, const void *b);
 int mb_int_compare(const void *a, const void *b);
 int mb_edit_compare(const void *a, const void *b);
@@ -604,7 +603,11 @@ int mb_proj_init(int verbose, char *projection, void **pjptr, int *error);
 int mb_proj_free(int verbose, void **pjptr, int *error);
 int mb_proj_forward(int verbose, void *pjptr, double lon, double lat, double *easting, double *northing, int *error);
 int mb_proj_inverse(int verbose, void *pjptr, double easting, double northing, double *lon, double *lat, int *error);
-int mb_proj_transform(int verbose, void *pjsrcptr, void *pjdstptr, int npoint, double *x, double *y, double *z, int *error);
+int mb_geod_init(int verbose, double radius_equatorial, double flattening, void **g_ptr, int *error);
+int mb_geod_free(int verbose, void **g_ptr, int *error);
+int mb_geod_inverse(int verbose, void *g_ptr,
+                    double lat1, double lon1, double lat2, double lon2,
+                    double *distance, double *azimuth1, double *azimuth2, int *error);
 
 /* mb_spline function prototypes */
 int mb_spline_init(int verbose, const double *x, const double *y, int n, double yp1, double ypn, double *y2, int *error);

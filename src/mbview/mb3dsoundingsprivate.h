@@ -12,14 +12,14 @@
  *    See README file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
 /*
- *
  * Author:	D. W. Caress
  * Date:	May 25,  2007
- *
- *
  */
 
-/*--------------------------------------------------------------------*/
+// TODO(schwehr): Fold into mb3dsoundings_callbacks.c?
+
+#ifndef MBVIEW_MB3DSOUNDINGSPRIVATE_H_
+#define MBVIEW_MB3DSOUNDINGSPRIVATE_H_
 
 /* OpenGL Error checking */
 /* #define MBS_GETERRORS 1 */
@@ -183,6 +183,7 @@ struct mb3dsoundings_world_struct {
 	int view_flagged;
 	int view_profiles;
 	int view_scalewithflagged;
+	int view_colorbytopo;
 
 	/* last sounding edited */
 	int last_sounding_defined;
@@ -289,6 +290,7 @@ void do_mb3dsdg_action_optimizebiasvalues_t(Widget w, XtPointer client_data, XtP
 void do_mb3dsdg_action_optimizebiasvalues_s(Widget w, XtPointer client_data, XtPointer call_data);
 void do_mb3dsdg_view_boundingbox(Widget w, XtPointer client_data, XtPointer call_data);
 void do_mb3dsdg_view_scalewithflagged(Widget w, XtPointer client_data, XtPointer call_data);
+void do_mb3dsdg_view_colorbytopo(Widget w, XtPointer client_data, XtPointer call_data);
 void do_mb3dsdg_view_reset(Widget w, XtPointer client_data, XtPointer call_data);
 void do_mb3dsdg_mouse_panzoom(Widget w, XtPointer client_data, XtPointer call_data);
 void do_mb3dsdg_mouse_rotate(Widget w, XtPointer client_data, XtPointer call_data);
@@ -308,4 +310,4 @@ XtPointer BX_CONVERT(Widget w, char *from_string, char *to_type, int to_size, Bo
 void BxExitCB(Widget w, XtPointer client, XtPointer call);
 void BxSetValuesCB(Widget w, XtPointer client, XtPointer call);
 
-/*--------------------------------------------------------------------*/
+#endif  // MBVIEW_MB3DSOUNDINGSPRIVATE_H_

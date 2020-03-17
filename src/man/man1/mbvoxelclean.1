@@ -1,4 +1,4 @@
-.TH mbvoxelclean 1 "9 October 2018" "MB-System 5.0" "MB-System 5.0"
+.TH mbvoxelclean 1 "28 February 2018" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbvoxelclean\fP \- 3D density filter.used to flag and unflag swath soundings,
 particularly from lidar sensors.
@@ -64,7 +64,8 @@ The user may specify one or both of the following actions:
   1) Previously unflagged soundings in an empty voxel are flagged as bad.
   2) Previously flagged soundings in a full voxel are unflagged.
 
-This program will also apply specified minimum and maximum range filters.
+This program will also apply specified minimum and maximum range and
+minimum and maximum acrosstrack distance filters.
 If a sounding's flag status is changed, that flagging action is output
 to the edit save file of the swath file containing that sounding. This
 program will create edit save files if necessary, or append to those that
@@ -176,6 +177,22 @@ closer to the sensor than \fImin-range\fP are flagged.
 .br
 If a \fImax-range\fP value is specified, then any unflagged soundings that are
 farther from the sensor than \fImax-range\fP are flagged.
+.TP
+\fB\-\-acrosstrack-minimum\fP=\fImin-acrosstrack\fP
+.br
+If a \fImin-acrosstrack\fP value is specified, then any unflagged soundings that are
+more to port of the sensor than \fImin-acrosstrack\fP are flagged. Because this
+filter is applied as the data are read, before density filtering, use of the
+\fB\-\-unflag-occupied\fP option could result in soundings flagged by this
+minimum acrosstrack filter being unflagged.
+.TP
+\fB\-\-acrosstrack-maximum\fP=\fImax-acrosstrack\fP]";
+.br
+If a \fImax-acrosstrack\fP value is specified, then any unflagged soundings that are
+more to starboard of the sensor than \fImax-acrosstrack\fP are flagged. Because this
+filter is applied as the data are read, before density filtering, use of the
+\fB\-\-unflag-occupied\fP option could result in soundings flagged by this
+maximum acrosstrack filter being unflagged.
 
 .SH EXAMPLES
 Suppose one wishes to filter the soundings in three lidar files in the format

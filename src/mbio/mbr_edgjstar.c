@@ -238,6 +238,14 @@ int mbr_dem_edgjstar(int verbose, void *mbio_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_rt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
+		fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
+	}
+
 	struct mbsys_jstar_message_struct message;
 	struct mbsys_jstar_channel_struct *sbp;
 	struct mbsys_jstar_channel_struct *ss;
@@ -246,16 +254,15 @@ int mbr_rt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	struct mbsys_jstar_dvl_struct *dvl;
 	struct mbsys_jstar_pressure_struct *pressure;
 	struct mbsys_jstar_sysinfo_struct *sysinfo;
-    struct mbsys_jstar_filetimestamp_struct *filetimestamp;
+	struct mbsys_jstar_filetimestamp_struct *filetimestamp;
 	struct mbsys_jstar_comment_struct *comment;
 	struct mbsys_jstar_ssold_struct ssold_tmp;
-	char buffer[MBSYS_JSTAR_SYSINFO_MAX];
-	char nmeastring[MB_COMMENT_MAXLINE];
 	int index;
 	int read_status;
 	int shortspersample;
 	int trace_size;
-	int testx1, testx2, testy1, testy2, obsolete_header;
+	int testx1, testx2, testy1, testy2;
+        bool obsolete_header;
 	double time_d;
 	double navlon, navlat, heading;
 	double speed, sonardepth, altitude;
@@ -266,14 +273,6 @@ int mbr_rt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	double depthofsensor, offset;
 	char **nap, *nargv[25], *string;
 	int nargc;
-
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
-		fprintf(stderr, "dbg2  Input arguments:\n");
-		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
-		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
-		fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
-	}
 
 	/* get pointer to mbio descriptor */
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
@@ -301,6 +300,7 @@ int mbr_rt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	bool done = false;
 	while (!done) {
 		/* read message header */
+		char buffer[MBSYS_JSTAR_SYSINFO_MAX];
 		if ((read_status = fread(buffer, MBSYS_JSTAR_MESSAGE_SIZE, 1, mb_io_ptr->mbfp)) == 1) {
 			/* extract the message header values */
 			index = 0;
@@ -547,7 +547,7 @@ int mbr_rt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 				index += 2;
 
                 /* fix problems created by writing obsolete header */
-                if (obsolete_header == true) {
+                if (obsolete_header) {
                     // set first time value
                     // zero extra position values
                     // move seafloor depth, sonar depth, and altitude values if nonzero
@@ -1498,6 +1498,7 @@ int mbr_rt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 					index++;
 				}
 				nmea->nmea[message.size - 12] = 0;
+				char nmeastring[MB_COMMENT_MAXLINE];
 				strcpy(nmeastring, nmea->nmea);
 
 				time_d = ((double)nmea->seconds) + 0.001 * ((double)nmea->milliseconds);

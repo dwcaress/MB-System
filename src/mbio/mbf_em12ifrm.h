@@ -94,20 +94,20 @@ struct mbf_em12ifrm_struct {
 	double roll_offset;    /* roll offset (degrees) */
 	double pitch_offset;   /* pitch offset (degrees) */
 	double heading_offset; /* heading offset (degrees) */
-	double em100_td;       /* EM-100 tranducer depth (meters) */
-	double em100_tx;       /* EM-100 tranducer fore-aft
+	double em100_td;       /* EM-100 transducer depth (meters) */
+	double em100_tx;       /* EM-100 transducer fore-aft
 	                   offset (meters) */
-	double em100_ty;       /* EM-100 tranducer athwartships
+	double em100_ty;       /* EM-100 transducer athwartships
 	                   offset (meters) */
-	double em12_td;        /* EM-12 tranducer depth (meters) */
-	double em12_tx;        /* EM-12 tranducer fore-aft
+	double em12_td;        /* EM-12 transducer depth (meters) */
+	double em12_tx;        /* EM-12 transducer fore-aft
 	                   offset (meters) */
-	double em12_ty;        /* EM-12 tranducer athwartships
+	double em12_ty;        /* EM-12 transducer athwartships
 	                   offset (meters) */
-	double em1000_td;      /* EM-1000 tranducer depth (meters) */
-	double em1000_tx;      /* EM-1000 tranducer fore-aft
+	double em1000_td;      /* EM-1000 transducer depth (meters) */
+	double em1000_tx;      /* EM-1000 transducer fore-aft
 	                   offset (meters) */
-	double em1000_ty;      /* EM-1000 tranducer athwartships
+	double em1000_ty;      /* EM-1000 transducer athwartships
 	                   offset (meters) */
 	char spare_parameter[128];
 	int survey_line;

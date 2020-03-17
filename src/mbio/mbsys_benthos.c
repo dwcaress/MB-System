@@ -22,8 +22,6 @@
  *
  * Author:	D. W. Caress
  * Date:	2 May 2012 (when the code was brought into the MB-System archive as a read-only i/o module)
- *
- *
  */
 
 #include <math.h>
@@ -37,7 +35,6 @@
 #include "mb_status.h"
 #include "mbsys_benthos.h"
 
-
 /*--------------------------------------------------------------------*/
 int mbsys_benthos_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *error) {
 	if (verbose >= 2) {
@@ -48,7 +45,7 @@ int mbsys_benthos_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *erro
 	}
 
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* allocate memory for data structure */
 	const int status = mb_mallocd(verbose, __FILE__, __LINE__, sizeof(struct mbsys_benthos_struct), store_ptr, error);
@@ -147,8 +144,6 @@ int mbsys_benthos_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *erro
 }
 /*--------------------------------------------------------------------*/
 int mbsys_benthos_deall(int verbose, void *mbio_ptr, void **store_ptr, int *error) {
-	int status = MB_SUCCESS;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -158,7 +153,7 @@ int mbsys_benthos_deall(int verbose, void *mbio_ptr, void **store_ptr, int *erro
 	}
 
 	/* deallocate memory for data structure */
-	status = mb_freed(verbose, __FILE__, __LINE__, (void **)store_ptr, error);
+	const int status = mb_freed(verbose, __FILE__, __LINE__, (void **)store_ptr, error);
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
@@ -182,7 +177,7 @@ int mbsys_benthos_dimensions(int verbose, void *mbio_ptr, void *store_ptr, int *
 	}
 
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	struct mbsys_benthos_struct *store = (struct mbsys_benthos_struct *)store_ptr;
@@ -416,6 +411,11 @@ int mbsys_benthos_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind,
                          double navlat, double speed, double heading, int nbath, int namp, int nss, char *beamflag, double *bath,
                          double *amp, double *bathacrosstrack, double *bathalongtrack, double *ss, double *ssacrosstrack,
                          double *ssalongtrack, char *comment, int *error) {
+	(void)nss;  // Unused arg
+	(void)ss;  // Unused arg
+	(void)ssacrosstrack;  // Unused arg
+	(void)ssalongtrack;  // Unused arg
+
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -455,7 +455,7 @@ int mbsys_benthos_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind,
 	}
 
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	struct mbsys_benthos_struct *store = (struct mbsys_benthos_struct *)store_ptr;
@@ -502,7 +502,7 @@ int mbsys_benthos_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind
 	}
 
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	struct mbsys_benthos_struct *store = (struct mbsys_benthos_struct *)store_ptr;
@@ -570,7 +570,7 @@ int mbsys_benthos_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
 	}
 
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	struct mbsys_benthos_struct *store = (struct mbsys_benthos_struct *)store_ptr;
@@ -633,7 +633,7 @@ int mbsys_benthos_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int 
 	}
 
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	struct mbsys_benthos_struct *store = (struct mbsys_benthos_struct *)store_ptr;
@@ -815,14 +815,13 @@ int mbsys_benthos_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int t
 	}
 
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
-	struct mbsys_benthos_struct *store = (struct mbsys_benthos_struct *)store_ptr;
+	// struct mbsys_benthos_struct *store = (struct mbsys_benthos_struct *)store_ptr;
 
 	/* insert data in structure */
-	if (store->kind == MB_DATA_DATA) {
-	}
+	// if (store->kind == MB_DATA_DATA) {}
 
 	const int status = MB_SUCCESS;
 
@@ -848,7 +847,7 @@ int mbsys_benthos_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_
 	}
 
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointers */
 	struct mbsys_benthos_struct *store = (struct mbsys_benthos_struct *)store_ptr;
@@ -870,19 +869,11 @@ int mbsys_benthos_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_
 	return (status);
 }
 /*--------------------------------------------------------------------*/
-int mbsys_benthos_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel_size_set, double *pixel_size,
-                         int swath_width_set, double *swath_width, int *error) {
-	double ss[MBSYS_BENTHOS_MAXPIXELS];
-	int ss_cnt[MBSYS_BENTHOS_MAXPIXELS];
-	double ssacrosstrack[MBSYS_BENTHOS_MAXPIXELS];
-	double ssalongtrack[MBSYS_BENTHOS_MAXPIXELS];
-	double pixel_size_calc;
-	double ss_spacing;
-	double xtrackss;
-	int groundsamples;
-	double groundrange;
-	int pixel1;
-
+int mbsys_benthos_makess(int verbose, void *mbio_ptr, void *store_ptr,
+                         int pixel_size_set,  // TODO(schwehr): bool
+                         double *pixel_size,
+                         int swath_width_set,  // TODO(schwehr): bool
+                         double *swath_width, int *error) {
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -896,13 +887,18 @@ int mbsys_benthos_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel
 	}
 
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	struct mbsys_benthos_struct *store = (struct mbsys_benthos_struct *)store_ptr;
 
 	/* insert data in structure */
 	if (store->kind == MB_DATA_DATA && store->ssrawstbdsamples > 0 && store->ssrawportsamples > 0) {
+		double ss[MBSYS_BENTHOS_MAXPIXELS];
+		int ss_cnt[MBSYS_BENTHOS_MAXPIXELS];
+		double ssacrosstrack[MBSYS_BENTHOS_MAXPIXELS];
+		double ssalongtrack[MBSYS_BENTHOS_MAXPIXELS];
+
 		/* zero the sidescan */
 		for (int i = 0; i < MBSYS_BENTHOS_MAXPIXELS; i++) {
 			ss[i] = 0.0;
@@ -912,20 +908,20 @@ int mbsys_benthos_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel
 		}
 
 		/* get raw pixel size */
-		ss_spacing = store->ssrawtimeduration / store->ssrawportsamples;
+		const double ss_spacing = store->ssrawtimeduration / store->ssrawportsamples;
 
 		/* get sidescan pixel size */
-		pixel1 = (2.0 * store->bath[0] / (store->png_computedsv * ss_spacing)) + 1;
-		groundsamples = store->ssrawportsamples - pixel1;
+		const int pixel1 = (2.0 * store->bath[0] / (store->png_computedsv * ss_spacing)) + 1;
+		const int groundsamples = store->ssrawportsamples - pixel1;
 
-		groundrange = sqrt(pow(store->ssrawslantrange, 2) - pow(store->bath[0], 2));
+		const double groundrange = sqrt(pow(store->ssrawslantrange, 2) - pow(store->bath[0], 2));
 
-		if (swath_width_set == false) {
+		if (!swath_width_set) {
 			*swath_width = 2.0 * groundrange;
 		}
 
-		if (pixel_size_set == false) {
-			pixel_size_calc = groundrange / groundsamples;
+		if (!pixel_size_set) {
+			const double pixel_size_calc = groundrange / groundsamples;
 
 			if ((*pixel_size) <= 0.0)
 				(*pixel_size) = pixel_size_calc;
@@ -940,6 +936,7 @@ int mbsys_benthos_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel
 		/* loop over the port beams, figuring out
 		    acrosstrack distance for each raw sidescan sample */
 		for (int i = 0; i < store->ssrawportsamples; i++) {
+			double xtrackss;
 			if (i > (store->ssrawportsamples - pixel1)) {
 				xtrackss = 0;
 			}
@@ -952,26 +949,10 @@ int mbsys_benthos_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel
 			ss_cnt[i]++;
 		}
 
-		//		kk = store->ssrawportsamples - 1;
-		//		ipixel = pixel1 + 1;
-		//		for (int i = store->ssrawportsamples - pixel1 - 1; i >= 0; i-- ) {
-		////			double q1 = pow(0.5 * ss_spacing * ipixel * store->png_computedsv, 2);
-		////			double q2 = pow( store->bath[0], 2);
-		////			xtrackss = sqrt(q1 -q2);
-		//			xtrackss = sqrt( pow(0.5 * ss_spacing * ipixel * store->png_computedsv, 2)
-		//					- pow( store->bath[0], 2) );
-		//			ipixel++;
-		//			if (kk > 0) {
-		//				ss[kk]  += store->ssrawport[i];
-		//				ssacrosstrack[kk] = xtrackss;
-		//				ss_cnt[kk]++;
-		//			}
-		//			kk--;
-		//		}
-
 		/* loop over the starboard beams, figuring out
 		    acrosstrack distance for each raw sidescan sample */
 		for (int i = 0; i < store->ssrawstbdsamples; i++) {
+			double xtrackss;
 			if (i < pixel1) {
 				xtrackss = 0;
 			}
@@ -983,74 +964,8 @@ int mbsys_benthos_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel
 			ss_cnt[i + store->ssrawportsamples]++;
 		}
 
-		//		kk = MBSYS_BENTHOS_MAXPIXELS / 2;
-		//		ipixel = pixel1 + 1;
-		//		for (int i = pixel1; i < store->ssrawstbdsamples; i++) {
-		//			xtrackss = sqrt( pow(0.5 * ss_spacing * ipixel * store->png_computedsv, 2)
-		//					- pow( store->bath[0], 2) );
-		//			ipixel++;
-		//			if (kk < MBSYS_BENTHOS_MAXPIXELS) {
-		//				ss[kk] = store->ssrawstbd[i];
-		//				ssacrosstrack[kk] = xtrackss;
-		//				ss_cnt[kk]++;
-		//			}
-		//			kk++;
-		//		}
-
-		/* average the sidescan */
-		//		first = MBSYS_BENTHOS_MAXPIXELS;
-		//		last = -1;
-		//		for (k=0;k<MBSYS_BENTHOS_MAXPIXELS;k++)
-		//		    {
-		//		    if (ss_cnt[k] > 0)
-		//			    {
-		//			    ss[k] /= ss_cnt[k];
-		//			    ssalongtrack[k] /= ss_cnt[k];
-		//			    ssacrosstrack[k]
-		//				    = (k - MBSYS_BENTHOS_MAXPIXELS / 2)
-		//					    * (*pixel_size);
-		//			    first = MIN(first, k);
-		//			    last = k;
-		//			    }
-		//			else
-		//				ss[k] = MB_SIDESCAN_NULL;
-		//		    }
-		//
-		//		/* interpolate the sidescan */
-		//		k1 = first;
-		//		k2 = first;
-		//		for (k=first+1;k<last;k++)
-		//		    {
-		//		    if (ss_cnt[k] <= 0)
-		//			{
-		//			if (k2 <= k)
-		//			    {
-		//			    k2 = k+1;
-		//			    while (ss_cnt[k2] <= 0 && k2 < last)
-		//				k2++;
-		//			    }
-		//			ss[k] = ss[k1]
-		//			    + (ss[k2] - ss[k1])
-		//				* ((double)(k - k1)) / ((double)(k2 - k1));
-		//			ssacrosstrack[k]
-		//				= (k - MBSYS_BENTHOS_MAXPIXELS / 2)
-		//					* (*pixel_size);
-		//			ssalongtrack[k] = ssalongtrack[k1]
-		//			    + (ssalongtrack[k2] - ssalongtrack[k1])
-		//				* ((double)(k - k1)) / ((double)(k2 - k1));
-		//			}
-		//		    else
-		//			{
-		//			k1 = k;
-		//			}
-		//		    }
-		//
 		/* insert the new sidescan into store */
 		store->pixel_size = (*pixel_size);
-		//		if (last > first)
-		//		    store->pixels_ss = MBSYS_BENTHOS_MAXPIXELS;
-		//		else
-		//		    store->pixels_ss = 0;
 		for (int i = 0; i < store->pixels_ss; i++) {
 			store->ss[i] = ss[i];
 			store->ss_alongtrack[i] = ssalongtrack[i];
@@ -1060,14 +975,6 @@ int mbsys_benthos_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel
 		if (verbose >= 2) {
 			fprintf(stderr, "\ndbg2  Sidescan regenerated in <%s>\n", __func__);
 			fprintf(stderr, "dbg2       beams_bath:    %d\n", store->beams_bath);
-			//			for (i=0;i<store->beams_bath;i++)
-			//			  fprintf(stderr,"dbg2       beam:%d  flag:%3d  bath:%10f  amp:%10f  acrosstrack:%10f  alongtrack:%10f\n",
-			//				i,
-			//				store->beamflag[i],
-			//				store->bath[i],
-			//				store->amp[i],
-			//				store->bath_acrosstrack[i],
-			//				store->bath_alongtrack[i]);
 			fprintf(stderr, "dbg2       pixels_ss:  %d\n", MBSYS_BENTHOS_MAXPIXELS);
 			for (int i = 0; i < MBSYS_BENTHOS_MAXPIXELS; i++)
 				fprintf(stderr, "dbg2       pixel:%4d  cnt:%3d  ss:%10f  xtrack:%10f  ltrack:%10f\n", i, ss_cnt[i], ss[i],

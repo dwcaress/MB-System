@@ -28,14 +28,6 @@
 #include "mb_status.h"
 #include "mb_process.h"
 
-#ifdef MBTRN_ENABLED
-#include "r7k-reader.h"
-#include "r7kc.h"
-#include "msocket.h"
-#include "mfile.h"
-#include "merror.h"
-#endif
-
 /* ---------------------------------------------------------------------------*/
 /* Survey Platform definitions and structures for the
  * mb_platform_*() functions */
@@ -129,6 +121,10 @@ const char *mb_platform_type(mb_platform_enum platform);
 #define MB_SENSOR_TYPE_CTD 110
 #define MB_SENSOR_TYPE_PRESSURE 111
 #define MB_SENSOR_TYPE_SOUNDSPEED 120
+
+#ifdef MB_NEED_SENSOR_TYPE
+// TODO(schwehr): Convert these from static header variables to
+// an accessor function.
 static int mb_sensor_type_id[] = {
     MB_SENSOR_TYPE_NONE,                    // 0
     MB_SENSOR_TYPE_SONAR_ECHOSOUNDER,       // 10
@@ -153,7 +149,7 @@ static int mb_sensor_type_id[] = {
     MB_SENSOR_TYPE_PRESSURE,                // 111
     MB_SENSOR_TYPE_SOUNDSPEED,              // 120
 };
-static char *mb_sensor_type_string[] = {"Unknown sensor type",
+static const char *mb_sensor_type_string[] = {"Unknown sensor type",
                                         "Sonar echosounder",
                                         "Sonar multiechosounder",
                                         "Sonar sidescan",
@@ -175,6 +171,7 @@ static char *mb_sensor_type_string[] = {"Unknown sensor type",
                                         "CTD",
                                         "Pressure",
                                         "Soundspeed"};
+#endif  // MB_NEED_SENSOR_TYPE
 
 /* survey platform sensor capability bitmask defines */
 #define MB_SENSOR_CAPABILITY1_NONE 0x00000000          // All bits = 0
@@ -454,7 +451,8 @@ struct mb_io_struct {
   char format_description[MB_DESCRIPTION_LENGTH];
   int numfile;             /* the number of parallel files required for i/o */
   int filetype;            /* type of files used (normal, single normal, xdr, or gsf) */
-  int filemode;            /* file mode (read or write) */
+  mb_filemode_enum filemode;            /* file mode (read or write) */
+  // TODO(schwehr): Bool
   int variable_beams;      /* if true then number of beams variable */
   int traveltime;          /* if true then traveltime and angle data supported */
   int beam_flagging;       /* if true then beam flagging supported */
@@ -597,7 +595,7 @@ struct mb_io_struct {
   double *new_ss_alongtrack;
 
   /* variables for projections to and from projected coordinates */
-  int projection_initialized;
+  int projection_initialized;  // TODO(schwehr): bool
   char projection_id[MB_NAME_LENGTH];
   void *pjptr;
 
@@ -751,6 +749,8 @@ struct mb_io_struct {
   int (*mb_io_insert_rawss)(int verbose, void *mbio_ptr, void *store_ptr, int kind, int sidescan_type, double sample_interval,
                             double beamwidth_xtrack, double beamwidth_ltrack, int num_samples_port, double *rawss_port,
                             int num_samples_stbd, double *rawss_stbd, int *error);
+  int (*mb_io_makess)(int verbose, void *mbio_ptr, void *store_ptr, int pixel_size_set, double *pixel_size,
+                         int swath_width_set, double *swath_width, int pixel_int, int *error);
   int (*mb_io_extract_segytraceheader)(int verbose, void *mbio_ptr, void *store_ptr, int *kind, void *segytraceheader_ptr,
                                        int *error);
   int (*mb_io_extract_segy)(int verbose, void *mbio_ptr, void *store_ptr, int *sampleformat, int *kind,

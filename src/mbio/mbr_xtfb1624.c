@@ -568,7 +568,7 @@ int mbr_xtfb1624_rd_data(int verbose, void *mbio_ptr, int *error) {
 	char line[MBF_XTFB1624_MAXLINE];
 
 	/* read file header if required */
-	if (*fileheaderread == false) {
+	if (!*fileheaderread) {
 		const int read_len = fread(line, 1, MBF_XTFB1624_FILEHEADERLEN, mb_io_ptr->mbfp);
 		if (read_len == MBF_XTFB1624_FILEHEADERLEN) {
 			/* extract data from buffer */
@@ -692,7 +692,7 @@ int mbr_xtfb1624_rd_data(int verbose, void *mbio_ptr, int *error) {
 			/* if NavUnits indicates use of projected coordinates (the format spec
 			    indicates the projection parameters are unused!) assume UTM zone 1N
 			    and set up the projection */
-			if (fileheader->NavUnits == 0 && mb_io_ptr->projection_initialized == false) {
+			if (fileheader->NavUnits == 0 && !mb_io_ptr->projection_initialized) {
 				/* initialize UTM projection */
 				const int utm_zone = (int)(((RTD * 0.0 + 183.0) / 6.0) + 0.5);
 				char projection[MB_NAME_LENGTH];
@@ -1513,7 +1513,7 @@ int mbr_rt_xtfb1624(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		    Assume UTM zone 1N as we have to assume something */
 		double lon;
 		double lat;
-		if (mb_io_ptr->projection_initialized == true) {
+		if (mb_io_ptr->projection_initialized) {
 			mb_proj_inverse(verbose, mb_io_ptr->pjptr, data->pingheader.SensorXcoordinate, data->pingheader.SensorYcoordinate,
 			                &lon, &lat, error);
 		}
@@ -1622,7 +1622,7 @@ int mbr_rt_xtfb1624(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			    - since the projection is initialized, it will be applied when data
 			    are extracted using mb_extract(), mb_extract_nav(), etc., so we have
 			    to reproject the lon lat values to eastings northings for now */
-			if (mb_io_ptr->projection_initialized == true) {
+			if (mb_io_ptr->projection_initialized) {
 				mb_proj_forward(verbose, mb_io_ptr->pjptr, store->png_longitude, store->png_latitude, &(store->png_longitude),
 				                &(store->png_latitude), error);
 			}

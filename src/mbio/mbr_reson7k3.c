@@ -40,6 +40,10 @@
 #include "mb_swap.h"
 #include "mbsys_reson7k3.h"
 
+#ifdef MBTRN_ENABLED
+#include "r7k-reader.h"
+#endif
+
 /* turn on debug statements here */
 //#define MBR_RESON7K3_DEBUG 1
 //#define MBR_RESON7K3_DEBUG2 1
@@ -118,27 +122,6 @@ int mbr_info_reson7k3(int verbose, int *system, int *beams_bath_max, int *beams_
 }
 /*--------------------------------------------------------------------*/
 int mbr_alm_reson7k3(int verbose, void *mbio_ptr, int *error) {
-  int *current_ping;
-  int *last_ping;
-  int *save_flag;
-  int *recordid;
-  int *recordidlast;
-  char **bufferptr;
-  char *buffer;
-  int *bufferalloc;
-  char **buffersaveptr;
-  char *buffersave;
-  int *size;
-  int *nbadrec;
-  int *deviceid;
-  unsigned short *enumerator;
-  int *fileheaders;
-  double *pixel_size;
-  double *swath_width;
-  int *preprocess_pars_set;
-  int *platform_set;
-	struct mb_platform_struct **platform_ptr = NULL;
-
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -146,22 +129,36 @@ int mbr_alm_reson7k3(int verbose, void *mbio_ptr, int *error) {
     fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
   }
 
+  int *current_ping;
+  int *last_ping;
+  int *recordid;
+  int *recordidlast;
+  char **bufferptr;
+  int *bufferalloc;
+  char **buffersaveptr;
+  int *size;
+  int *nbadrec;
+  int *deviceid;
+  unsigned short *enumerator;
+  int *fileheaders;
+  double *pixel_size;
+  double *swath_width;
   struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
   /* allocate memory for data structure */
   mb_io_ptr->structure_size = 0;
   mb_io_ptr->data_structure_size = 0;
   int status = mbsys_reson7k3_alloc(verbose, mbio_ptr, &mb_io_ptr->store_data, error);
-  save_flag = (int *)&mb_io_ptr->save_flag;
+  int *save_flag = (int *)&mb_io_ptr->save_flag;
   current_ping = (int *)&mb_io_ptr->save14;
   last_ping = (int *)&mb_io_ptr->save1;
   recordid = (int *)&mb_io_ptr->save3;
   recordidlast = (int *)&mb_io_ptr->save4;
   bufferptr = (char **)&mb_io_ptr->saveptr1;
-  buffer = (char *)*bufferptr;
+  // char *buffer = (char *)*bufferptr;
   bufferalloc = (int *)&mb_io_ptr->save6;
   buffersaveptr = (char **)&mb_io_ptr->saveptr2;
-  buffersave = (char *)*buffersaveptr;
+  // char *buffersave = (char *)*buffersaveptr;
   size = (int *)&mb_io_ptr->save8;
   nbadrec = (int *)&mb_io_ptr->save9;
   deviceid = (int *)&mb_io_ptr->save10;
@@ -169,9 +166,9 @@ int mbr_alm_reson7k3(int verbose, void *mbio_ptr, int *error) {
   fileheaders = (int *)&mb_io_ptr->save12;
   pixel_size = (double *)&mb_io_ptr->saved1;
   swath_width = (double *)&mb_io_ptr->saved2;
-  preprocess_pars_set = (int *)&mb_io_ptr->save13;
-  platform_set = (int *)&mb_io_ptr->save7;
-  platform_ptr = (struct mb_platform_struct **)&mb_io_ptr->saveptr3;
+  // int *preprocess_pars_set = (int *)&mb_io_ptr->save13;
+  // int *platform_set = (int *)&mb_io_ptr->save7;
+  // struct mb_platform_struct **platform_ptr = (struct mb_platform_struct **)&mb_io_ptr->saveptr3;
 
   *current_ping = -1;
   *last_ping = -1;
@@ -374,9 +371,9 @@ int mbr_reson7k3_wr_FileCatalog(int verbose, int *bufferalloc, char **bufferptr,
       index += 2;
       mb_put_binary_float(true, filecatalogdata->s7kTime.Seconds, &buffer[index]);
       index += 4;
-      buffer[index] = filecatalogdata->s7kTime.Hours;
+      buffer[index] = (char) filecatalogdata->s7kTime.Hours;
       index++;
-      buffer[index] = filecatalogdata->s7kTime.Minutes;
+      buffer[index] = (char) filecatalogdata->s7kTime.Minutes;
       index++;
       mb_put_binary_int(true, filecatalogdata->record_count, &buffer[index]);
       index += 4;
@@ -421,7 +418,6 @@ int mbr_dem_reson7k3(int verbose, void *mbio_ptr, int *error) {
   char *buffer = NULL;
   int *bufferalloc = NULL;
   char **buffersaveptr = NULL;
-  char *buffersave = NULL;
   int *filecatalogoffsetoffset = NULL;
   int *platform_set = NULL;
 	struct mb_platform_struct **platform_ptr = NULL;
@@ -444,7 +440,7 @@ int mbr_dem_reson7k3(int verbose, void *mbio_ptr, int *error) {
   buffer = (char *)*bufferptr;
   bufferalloc = (int *)&mb_io_ptr->save6;
   buffersaveptr = (char **)&mb_io_ptr->saveptr2;
-  buffersave = (char *)*buffersaveptr;
+  // char *buffersave = (char *)*buffersaveptr;
   filecatalogoffsetoffset = (int *)&mb_io_ptr->save5;
   platform_ptr = (struct mb_platform_struct **)&mb_io_ptr->saveptr3;
 
@@ -511,7 +507,7 @@ int mbr_dem_reson7k3(int verbose, void *mbio_ptr, int *error) {
   /* deallocate memory for preprocessing parameters */
   platform_set = (int *)&mb_io_ptr->save7;
   platform_ptr = (struct mb_platform_struct **)&mb_io_ptr->saveptr3;
-  if (*platform_set == true) {
+  if (*platform_set) {
     status = mb_platform_deall(verbose, (void **)platform_ptr, error);
     *platform_set = false;
     *platform_ptr = NULL;
@@ -5838,15 +5834,10 @@ int mbr_reson7k3_rd_CompressedBeamformedMagnitude(int verbose, char *buffer, voi
 int mbr_reson7k3_rd_CompressedWaterColumn(int verbose, char *buffer, void *store_ptr, int *error){
   s7k3_compressedwatercolumndata *compressedwatercolumndata;
   size_t nread;
-  int truncatebeams;
-  int magnitudeonly;
-  int eightbitmagphase;
-  int downsampling;
-  int downsamplingtype;
-  int thirtytwobitdata;
-  int compressionfactorvalid;
-  int segmentnumbersvalid;
-  int firstsamplerxdelay;
+  bool magnitudeonly;
+  bool eightbitmagphase;
+  bool thirtytwobitdata;
+  bool segmentnumbersvalid;
   int time_j[5];
 
   if (verbose >= 2) {
@@ -5896,10 +5887,7 @@ int mbr_reson7k3_rd_CompressedWaterColumn(int verbose, char *buffer, void *store
             limit data. Data is included up to the bottom detection
             point + 10%. This flag has no effect on systems which
             do not perform bottom detection. */
-  if (CompressedWaterColumn->flags & 0x0001)
-    truncatebeams = true;
-  else
-    truncatebeams = false;
+  // bool truncatebeams = CompressedWaterColumn->flags & 0x0001;
 
   /* Flags bit 1 : Include magnitude data only (strip phase) */
   if (CompressedWaterColumn->flags & 0x0002)
@@ -5920,14 +5908,14 @@ int mbr_reson7k3_rd_CompressedWaterColumn(int verbose, char *buffer, void *store
   /* Flags bit 4-7 : Downsampling divisor. Value = ((flags | 0xF0) >> 4). Only
           values 2-16 are valid. This field is ignored if downsampling
           is not enabled (type = “none”). */
-  downsampling = ((CompressedWaterColumn->flags & 0x00F0) >> 4);
+  // int downsampling = (CompressedWaterColumn->flags & 0x00F0) >> 4;
 
   /* Bit 8-11 : Downsampling type:
           0 (0x000) = None
           1 (0x100) = Middle value
           2 (0x200) = Peak value
           3 (0x300) = Average value */
-  downsamplingtype = ((CompressedWaterColumn->flags & 0x0F00) >> 8);
+  // int downsamplingtype = (CompressedWaterColumn->flags & 0x0F00) >> 8;
 
   /* Bit 12 : 32 Bits data */
   if (CompressedWaterColumn->flags & 0x1000)
@@ -5936,10 +5924,7 @@ int mbr_reson7k3_rd_CompressedWaterColumn(int verbose, char *buffer, void *store
     thirtytwobitdata = false;
 
   /* Bit 13 : Compression factor available */
-  if (CompressedWaterColumn->flags & 0x2000)
-    compressionfactorvalid = true;
-  else
-    compressionfactorvalid = false;
+  // bool compressionfactorvalid = CompressedWaterColumn->flags & 0x2000;
 
   /* Bit 14 : Segment numbers available */
   if (CompressedWaterColumn->flags & 0x4000)
@@ -5948,25 +5933,22 @@ int mbr_reson7k3_rd_CompressedWaterColumn(int verbose, char *buffer, void *store
     segmentnumbersvalid = false;
 
   /* Bit 15 : First sample contains RxDelay value. */
-  if (CompressedWaterColumn->flags & 0x8000)
-    firstsamplerxdelay = true;
-  else
-    firstsamplerxdelay = false;
+  // bool firstsamplerxdelay = CompressedWaterColumn->flags & 0x8000;
 
   /* now calculate samplesize */
-  if (thirtytwobitdata == true) {
+  if (thirtytwobitdata) {
     CompressedWaterColumn->magsamplesize = 4;
-    if (magnitudeonly == true)
+    if (magnitudeonly)
       CompressedWaterColumn->phasesamplesize = 0;
     else
       CompressedWaterColumn->phasesamplesize = 1;
   }
   else {
-    if (eightbitmagphase == true)
+    if (eightbitmagphase)
       CompressedWaterColumn->magsamplesize = 1;
     else
       CompressedWaterColumn->magsamplesize = 2;
-    if (magnitudeonly == true)
+    if (magnitudeonly)
       CompressedWaterColumn->phasesamplesize = 0;
     else
       CompressedWaterColumn->phasesamplesize = CompressedWaterColumn->magsamplesize;
@@ -5979,7 +5961,7 @@ int mbr_reson7k3_rd_CompressedWaterColumn(int verbose, char *buffer, void *store
     /* extract CompressedWaterColumn data */
     mb_get_binary_short(true, &buffer[index], &(compressedwatercolumndata->beam_number));
     index += 2;
-    if (segmentnumbersvalid == true) {
+    if (segmentnumbersvalid) {
       compressedwatercolumndata->segment_number = buffer[index];
       index += 1;
     }
@@ -6605,7 +6587,124 @@ int mbr_reson7k3_rd_SnippetBackscatteringStrength(int verbose, char *buffer, voi
   int index = 0;
   int status = mbr_reson7k3_rd_header(verbose, buffer, &index, header, error);
 
-  //Notdone
+  /* extract the data */
+  index = header->Offset + 4;
+  mb_get_binary_long(true, &buffer[index], &(SnippetBackscatteringStrength->serial_number));
+  index += 8;
+  mb_get_binary_int(true, &buffer[index], &(SnippetBackscatteringStrength->ping_number));
+  index += 4;
+  mb_get_binary_short(true, &buffer[index], &(SnippetBackscatteringStrength->multi_ping));
+  index += 2;
+  mb_get_binary_short(true, &buffer[index], &(SnippetBackscatteringStrength->number_beams));
+  index += 2;
+  SnippetBackscatteringStrength->error_flag = buffer[index];
+  index++;
+  mb_get_binary_int(true, &buffer[index], &(SnippetBackscatteringStrength->control_flags));
+  index += 4;
+  mb_get_binary_float(true, &buffer[index], &(SnippetBackscatteringStrength->absorption));
+  index += 4;
+  for (int i = 0; i < 6; i++) {
+    mb_get_binary_int(true, &buffer[index], &(SnippetBackscatteringStrength->reserved[i]));
+    index += 4;
+  }
+
+  /* loop over all beams to get snippet parameters */
+  for (int i = 0; i < SnippetBackscatteringStrength->number_beams; i++) {
+    s7k3_snippetbackscatteringstrengthdata *snippetbackscatteringstrengthdata
+        = &(SnippetBackscatteringStrength->snippetbackscatteringstrengthdata[i]);
+
+    /* extract snippettimeseries data */
+    mb_get_binary_short(true, &buffer[index], &(snippetbackscatteringstrengthdata->beam_number));
+    index += 2;
+    mb_get_binary_int(true, &buffer[index], &(snippetbackscatteringstrengthdata->begin_sample));
+    index += 4;
+    mb_get_binary_int(true, &buffer[index], &(snippetbackscatteringstrengthdata->bottom_sample));
+    index += 4;
+    mb_get_binary_int(true, &buffer[index], &(snippetbackscatteringstrengthdata->end_sample));
+    index += 4;
+
+    /* allocate memory for snippettimeseries if needed */
+    int nalloc = sizeof(float)
+                  * (snippetbackscatteringstrengthdata->end_sample
+                    - snippetbackscatteringstrengthdata->begin_sample + 1);
+    if (status == MB_SUCCESS && snippetbackscatteringstrengthdata->nalloc < nalloc) {
+      snippetbackscatteringstrengthdata->nalloc = nalloc;
+      if (status == MB_SUCCESS)
+        status = mb_reallocd(verbose, __FILE__, __LINE__, snippetbackscatteringstrengthdata->nalloc,
+                             (void **)&(snippetbackscatteringstrengthdata->bs), error);
+      if (status == MB_SUCCESS && SnippetBackscatteringStrength->control_flags & 0x40)
+        status = mb_reallocd(verbose, __FILE__, __LINE__, snippetbackscatteringstrengthdata->nalloc,
+                             (void **)&(snippetbackscatteringstrengthdata->footprints), error);
+      if (status != MB_SUCCESS) {
+        snippetbackscatteringstrengthdata->nalloc = 0;
+      }
+    }
+  }
+
+  /* loop over all beams to get snippet backscatter data */
+  if (status == MB_SUCCESS) {
+    for (int i = 0; i < SnippetBackscatteringStrength->number_beams; i++) {
+      s7k3_snippetbackscatteringstrengthdata *snippetbackscatteringstrengthdata
+          = &(SnippetBackscatteringStrength->snippetbackscatteringstrengthdata[i]);
+      for (int j = 0;
+          j < (snippetbackscatteringstrengthdata->end_sample
+            - snippetbackscatteringstrengthdata->begin_sample + 1);
+          j++) {
+        mb_get_binary_float(true, &buffer[index], &(snippetbackscatteringstrengthdata->bs[j]));
+        index += 4;
+      }
+    }
+
+    /* loop over all beams to get snippet footprint data */
+    if (SnippetBackscatteringStrength->control_flags & 0x40) {
+      for (int i = 0; i < SnippetBackscatteringStrength->number_beams; i++) {
+        s7k3_snippetbackscatteringstrengthdata *snippetbackscatteringstrengthdata
+            = &(SnippetBackscatteringStrength->snippetbackscatteringstrengthdata[i]);
+        for (int j = 0;
+            j < (snippetbackscatteringstrengthdata->end_sample
+              - snippetbackscatteringstrengthdata->begin_sample + 1);
+            j++) {
+          mb_get_binary_float(true, &buffer[index], &(snippetbackscatteringstrengthdata->footprints[j]));
+          index += 4;
+        }
+      }
+    }
+  }
+
+  /* set kind */
+  if (status == MB_SUCCESS) {
+    /* set kind */
+    store->kind = MB_DATA_DATA;
+    store->type = R7KRECID_SnippetBackscatteringStrength;
+
+    /* get the time */
+    int time_j[5];
+    time_j[0] = header->s7kTime.Year;
+    time_j[1] = header->s7kTime.Day;
+    time_j[2] = 60 * header->s7kTime.Hours + header->s7kTime.Minutes;
+    time_j[3] = (int)header->s7kTime.Seconds;
+    time_j[4] = (int)(1000000 * (header->s7kTime.Seconds - time_j[3]));
+    mb_get_itime(verbose, time_j, store->time_i);
+    mb_get_time(verbose, store->time_i, &(store->time_d));
+  }
+  else {
+    store->kind = MB_DATA_NONE;
+  }
+
+/* print out the results */
+#ifdef MBR_RESON7K3_DEBUG
+  fprintf(stderr,
+          "R7KRECID_SnippetBackscatteringStrength:       7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) ping:%d size:%d "
+          "index:%d\n",
+          store->time_i[0], store->time_i[1], store->time_i[2], store->time_i[3], store->time_i[4], store->time_i[5],
+          store->time_i[6], SnippetBackscatteringStrength->ping_number, header->Size, index);
+#endif
+#ifdef MBR_RESON7K3_DEBUG2
+  if (verbose > 0)
+#else
+  if (verbose >= 2)
+#endif
+    mbsys_reson7k3_print_SnippetBackscatteringStrength(verbose, SnippetBackscatteringStrength, error);
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
@@ -6924,7 +7023,7 @@ int mbr_reson7k3_FileCatalog_compare(const void *a, const void *b) {
   }
 
   // deal with two ping records
-  else if (aa->pingrecord == true && bb->pingrecord == true) {
+  else if (aa->pingrecord && bb->pingrecord) {
     // case of records from different pings
     if (aa->time_d < bb->time_d) {
       result = -1;
@@ -7393,9 +7492,9 @@ int mbr_reson7k3_rd_RemoteControlSonarSettings(int verbose, char *buffer, void *
   index += 4;
   mb_get_binary_float(true, &buffer[index], &(RemoteControlSonarSettings->spreading));
   index += 4;
-  buffer[index] = RemoteControlSonarSettings->vernier_operation_mode;
+  buffer[index] = (char) RemoteControlSonarSettings->vernier_operation_mode;
   index ++;
-  buffer[index] = RemoteControlSonarSettings->autofilter_window;
+  buffer[index] = (char) RemoteControlSonarSettings->autofilter_window;
   index ++;
   mb_get_binary_float(true, &buffer[index], &(RemoteControlSonarSettings->tx_offset_x));
   index += 4;
@@ -7978,7 +8077,6 @@ int mbr_reson7k3_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
   s7k3_RawDetection *RawDetection;
   s7k3_SegmentedRawDetection *SegmentedRawDetection;
   int skip;
-  int ping_record;
   int time_j[5];
   size_t read_len;
 
@@ -8023,7 +8121,7 @@ int mbr_reson7k3_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
   *error = MB_ERROR_NO_ERROR;
   while (!done) {
     /* if previously read record stored use it first */
-    if (*save_flag == true) {
+    if (*save_flag) {
       *save_flag = false;
       mbr_reson7k3_chk_header(verbose, mbio_ptr, buffersave, recordid, deviceid, enumerator, size);
       for (int i = 0; i < *size; i++)
@@ -8122,7 +8220,7 @@ Have a nice day...:                              %4.4X | %d\n", store->type, sto
     }
 
     /* check for ping record and ping number */
-    ping_record = false;
+    bool ping_record = false;
     if (status == MB_SUCCESS) {
       if (*recordid == R7KRECID_ProcessedSideScan
           || *recordid == R7KRECID_SonarSettings
@@ -8163,8 +8261,8 @@ Have a nice day...:                              %4.4X | %d\n", store->type, sto
             last ping as fully read */
         if (*last_ping >= 0 && *new_ping >= 0 && *last_ping != *new_ping) {
           /* good ping if bathymetry record is read */
-          if (store->read_RawDetection == true
-              || store->read_SegmentedRawDetection == true) {
+          if (store->read_RawDetection
+              || store->read_SegmentedRawDetection) {
             done = true;
             store->kind = MB_DATA_DATA;
             *save_flag = true;
@@ -8174,11 +8272,11 @@ Have a nice day...:                              %4.4X | %d\n", store->type, sto
               buffersave[i] = buffer[i];
 
             /* get the time */
-            if (store->read_RawDetection == true) {
+            if (store->read_RawDetection) {
               RawDetection = &(store->RawDetection);
               header = &(RawDetection->header);
             }
-            else if (store->read_SegmentedRawDetection == true) {
+            else if (store->read_SegmentedRawDetection) {
               SegmentedRawDetection = &(store->SegmentedRawDetection);
               header = &(SegmentedRawDetection->header);
             }
@@ -8238,10 +8336,10 @@ Have a nice day...:                              %4.4X | %d\n", store->type, sto
         or if no FileCatalog read at start and any non-ping record encountered */
     if (status == MB_SUCCESS && *last_ping >= 0
         && (*recordid == R7KRECID_FileCatalog
-            || (ping_record == false && store->FileCatalog_read.n > 0))) {
+            || (!ping_record && store->FileCatalog_read.n > 0))) {
       /* good ping if bathymetry record is read */
-      if (store->read_RawDetection == true
-          || store->read_SegmentedRawDetection == true) {
+      if (store->read_RawDetection
+          || store->read_SegmentedRawDetection) {
         done = true;
         store->kind = MB_DATA_DATA;
         *save_flag = true;
@@ -8251,11 +8349,11 @@ Have a nice day...:                              %4.4X | %d\n", store->type, sto
           buffersave[i] = buffer[i];
 
         /* get the time */
-        if (store->read_RawDetection == true) {
+        if (store->read_RawDetection) {
           RawDetection = &(store->RawDetection);
           header = &(RawDetection->header);
         }
-        else if (store->read_SegmentedRawDetection == true) {
+        else if (store->read_SegmentedRawDetection) {
           SegmentedRawDetection = &(store->SegmentedRawDetection);
           header = &(SegmentedRawDetection->header);
         }
@@ -8290,7 +8388,7 @@ Have a nice day...:                              %4.4X | %d\n", store->type, sto
     }
 
 #ifdef MBR_RESON7K3_DEBUG2
-    if (status == MB_SUCCESS && !done && *save_flag == false) {
+    if (status == MB_SUCCESS && !done && !*save_flag) {
       fprintf(stderr, "Reading record id: %4.4X  %4.4d | %4.4X  %4.4d | %4.4hX  %4.4d |", *recordid, *recordid, *deviceid,
               *deviceid, *enumerator, *enumerator);
       if (*recordid == R7KRECID_None)
@@ -8886,7 +8984,7 @@ Have a nice day...:                              %4.4X | %d\n", store->type, sto
         // If the FileHeader record indicates the file ends with a FileCatalog
         // record, then jump to the end of file, read the FileCatalog, and jump
         // back to the current location.
-        if (status == MB_SUCCESS && store->FileHeader.optionaldata == true
+        if (status == MB_SUCCESS && store->FileHeader.optionaldata
             && store->FileHeader.file_catalog_size > 0
             && store->FileHeader.file_catalog_offset > 0
             && mb_io_ptr->mbfp != NULL) {
@@ -8894,7 +8992,7 @@ Have a nice day...:                              %4.4X | %d\n", store->type, sto
           int fpos_current = ftell(mb_io_ptr->mbfp);
 
           // move to start of FileCatalog record
-          int fstatus = fseek(mb_io_ptr->mbfp, store->FileHeader.file_catalog_offset, SEEK_SET);
+          /* int fstatus = */ fseek(mb_io_ptr->mbfp, store->FileHeader.file_catalog_offset, SEEK_SET);
 
           // Most of the time the FileHeader.file_catalog_size value is the size
           // of the entire FileCatalog record as per the format spec, but sometimes
@@ -8945,7 +9043,7 @@ Have a nice day...:                              %4.4X | %d\n", store->type, sto
           store->type = R7KRECID_FileHeader;
 
           // reset file position
-          fstatus = fseek(mb_io_ptr->mbfp, fpos_current, SEEK_SET);
+          /* fstatus = */ fseek(mb_io_ptr->mbfp, fpos_current, SEEK_SET);
           *icatalog = 1;
 
         }
@@ -9038,7 +9136,7 @@ Have a nice day...:                              %4.4X | %d\n", store->type, sto
     }
 
 #ifdef MBR_RESON7K3_DEBUG2
-    if (status == MB_SUCCESS && ping_record == true) {
+    if (status == MB_SUCCESS && ping_record) {
       fprintf(stderr,"recordid:%d ping_record:%d last_ping:%d new_ping:%d current_ping:%d done:%d status:%d error:%d\n",
           *recordid, ping_record,*last_ping,*new_ping,*current_ping,done,status,*error);
       fprintf(stderr, "current ping:%d records read: %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d\n",
@@ -9075,14 +9173,14 @@ Have a nice day...:                              %4.4X | %d\n", store->type, sto
 
   /* get file position - check file and socket, use appropriate ftell */
   if (mb_io_ptr->mbfp != NULL) {
-       if (*save_flag == true)
+       if (*save_flag)
           mb_io_ptr->file_bytes = ftell(mb_io_ptr->mbfp) - *size;
       else
           mb_io_ptr->file_bytes = ftell(mb_io_ptr->mbfp);
   }
 #ifdef MBTRN_ENABLED
   else if (mb_io_ptr->mbsp != NULL) {
-      if (*save_flag == true)
+      if (*save_flag)
           mb_io_ptr->file_bytes = r7kr_reader_tell(mb_io_ptr->mbsp) - *size;
       else
           mb_io_ptr->file_bytes = r7kr_reader_tell(mb_io_ptr->mbsp);
@@ -9158,9 +9256,9 @@ int mbr_rt_reson7k3(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
   //      Navigation      1015 MB_DATA_NAV
   //      Position        1003 MB_DATA_NAV1
   //    Sensor depth -
-  //      Navigation      1015 MB_DATA_NAV - IF height_accuracy is reasonable
   //      Depth           1008 MB_DATA_SONARDEPTH - IF depth_descriptor=0 ==> depth to sensor value
-  //      Position        1003 MB_DATA_NAV1 - IF height_accuracy is reasonable
+  //      <not currently used> Navigation      1015 MB_DATA_NAV - IF height_accuracy is reasonable
+  //      <not currently used> Position        1003 MB_DATA_NAV1
   //    Heading -
   //      Navigation      1015 MB_DATA_NAV
   //      Heading         1013 MB_DATA_HEADING
@@ -9186,8 +9284,8 @@ int mbr_rt_reson7k3(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
         mb_io_ptr->nfix = 0;
       }
       mb_navint_add(verbose, mbio_ptr, store->time_d,
-                    (double)(RTD * Navigation->longitude),
-                    (double)(RTD * Navigation->latitude), error);
+                      (double)(RTD * Navigation->longitude),
+                      (double)(RTD * Navigation->latitude), error);
 
       // add heading (clear old data from other sources if needed)
       if (*asynch_source_heading != MB_DATA_NAV) {
@@ -9197,13 +9295,11 @@ int mbr_rt_reson7k3(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
       mb_hedint_add(verbose, mbio_ptr, (double)(store->time_d),
                     (double)(RTD * Navigation->heading), error);
 
-      // add sensordepth (clear old data from other sources if needed)
-      if (*asynch_source_sensordepth != MB_DATA_NAV) {
-        *asynch_source_sensordepth = MB_DATA_NAV;
-        mb_io_ptr->nsonardepth = 0;
+      // add sensordepth if it has been specified
+      if (*asynch_source_sensordepth == MB_DATA_NAV) {
+        mb_depint_add(verbose, mbio_ptr, (double)(store->time_d),
+                        (double)(-Navigation->height), error);
       }
-      mb_depint_add(verbose, mbio_ptr, (double)(store->time_d),
-                      (double)(-Navigation->height), error);
     }
 
     /* save Attitude if Attitude record */
@@ -9245,6 +9341,12 @@ int mbr_rt_reson7k3(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
         mb_navint_add(verbose, mbio_ptr, store->time_d,
                       (double)(RTD * Position->longitude_easting),
                       (double)(RTD * Position->latitude_northing), error);
+      }
+
+      // add sensordepth if it has been specified
+      if (*asynch_source_sensordepth == MB_DATA_NAV1) {
+        mb_depint_add(verbose, mbio_ptr, (double)(store->time_d),
+                        (double)(-Position->height), error);
       }
     }
 
@@ -9321,7 +9423,7 @@ int mbr_rt_reson7k3(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
       Depth = &(store->Depth);
 
       // add sensordepth (clear old data from other sources if needed)
-      if (*asynch_source_sensordepth == MB_DATA_NONE) {
+      if (*asynch_source_sensordepth != MB_DATA_SONARDEPTH) {
         *asynch_source_sensordepth = MB_DATA_SONARDEPTH;
         mb_io_ptr->nsonardepth = 0;
       }
@@ -9355,18 +9457,18 @@ int mbr_rt_reson7k3(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 
   /* if needed calculate bathymetry using preprocess function */
   if (status == MB_SUCCESS && store->kind == MB_DATA_DATA
-      && (  (store->read_RawDetection == true
-              && RawDetection->optionaldata == false)
-            || (store->read_SegmentedRawDetection == true
-              && SegmentedRawDetection->optionaldata == false))) {
+      && ((store->read_RawDetection
+           && !RawDetection->optionaldata)
+          || (store->read_SegmentedRawDetection
+              && !SegmentedRawDetection->optionaldata))) {
     /* get platform model if needed */
-    if (*platform_set == false) {
+    if (!*platform_set) {
       status = mbsys_reson7k3_extract_platform(verbose, mbio_ptr, store_ptr, &store->kind, (void **)platform_ptr, error);
       *platform_set = true;
     }
 
     /* set preprocess parameters if needed - have to update counts of ancilliary data arrays each time */
-    if (*preprocess_pars_set == false) {
+    if (!*preprocess_pars_set) {
       preprocess_pars->target_sensor = 0;
 
       preprocess_pars->timestamp_changed = false;
@@ -9513,7 +9615,7 @@ int mbr_reson7k3_FileCatalog_update(int verbose, void *mbio_ptr, void *store_ptr
   filecatalogdata->s7kTime.Seconds = header->s7kTime.Seconds;
   filecatalogdata->s7kTime.Hours = header->s7kTime.Hours;
   filecatalogdata->s7kTime.Minutes = header->s7kTime.Minutes;
-  if (filecatalogdata->pingrecord == true)
+  if (filecatalogdata->pingrecord)
     filecatalogdata->record_count = 1;
   else
     filecatalogdata->record_count = 0;
@@ -9890,15 +9992,15 @@ int mbr_reson7k3_wr_Position(int verbose, int *bufferalloc, char **bufferptr, vo
     index += 8;
     mb_put_binary_double(true, Position->height, &buffer[index]);
     index += 8;
-    buffer[index] = Position->type;
+    buffer[index] = (char) Position->type;
     index++;
-    buffer[index] = Position->utm_zone;
+    buffer[index] = (char) Position->utm_zone;
     index++;
-    buffer[index] = Position->quality;
+    buffer[index] = (char) Position->quality;
     index++;
-    buffer[index] = Position->method;
+    buffer[index] = (char) Position->method;
     index++;
-    buffer[index] = Position->nsat;
+    buffer[index] = (char) Position->nsat;
     index++;
 
     /* reset the header size value */
@@ -10002,9 +10104,9 @@ int mbr_reson7k3_wr_CustomAttitude(int verbose, int *bufferalloc, char **bufferp
 
     /* insert the data */
     index = header->Offset + 4;
-    CustomAttitude->fieldmask = (mb_u_char)buffer[index];
+    buffer[index] = (char) CustomAttitude->fieldmask;
     index++;
-    CustomAttitude->reserved = (mb_u_char)buffer[index];
+    buffer[index] = (char) CustomAttitude->reserved;
     index++;
     mb_put_binary_short(true, CustomAttitude->n, &buffer[index]);
     index += 2;
@@ -10141,7 +10243,7 @@ int mbr_reson7k3_wr_Tide(int verbose, int *bufferalloc, char **bufferptr, void *
     index += 4;
     mb_put_binary_short(true, Tide->source, &buffer[index]);
     index += 2;
-    buffer[index] = Tide->flags;
+    buffer[index] = (char) Tide->flags;
     index++;
     mb_get_binary_short(true, &buffer[index], &(Tide->gauge));
     index += 2;
@@ -10155,9 +10257,9 @@ int mbr_reson7k3_wr_Tide(int verbose, int *bufferalloc, char **bufferptr, void *
     index += 8;
     mb_get_binary_double(true, &buffer[index], &(Tide->height));
     index += 8;
-    buffer[index] = Tide->type;
+    buffer[index] = (char) Tide->type;
     index++;
-    buffer[index] = Tide->utm_zone;
+    buffer[index] = (char) Tide->utm_zone;
     index++;
 
     /* reset the header size value */
@@ -10337,9 +10439,9 @@ int mbr_reson7k3_wr_MotionOverGround(int verbose, int *bufferalloc, char **buffe
 
     /* insert the data */
     index = header->Offset + 4;
-    MotionOverGround->flags = (mb_u_char)buffer[index];
+    buffer[index] = (char) MotionOverGround->flags;
     index++;
-    MotionOverGround->reserved = (mb_u_char)buffer[index];
+    buffer[index] = (char) MotionOverGround->reserved;
     index++;
     mb_put_binary_short(true, MotionOverGround->n, &buffer[index]);
     index += 2;
@@ -10460,9 +10562,9 @@ int mbr_reson7k3_wr_Depth(int verbose, int *bufferalloc, char **bufferptr, void 
 
     /* insert the data */
     index = header->Offset + 4;
-    Depth->descriptor = (mb_u_char)buffer[index];
+    buffer[index] = (char) Depth->descriptor;
     index++;
-    Depth->correction = (mb_u_char)buffer[index];
+    buffer[index] = (char) Depth->correction;
     index++;
     mb_put_binary_short(true, Depth->reserved, &buffer[index]);
     index += 2;
@@ -10555,9 +10657,9 @@ int mbr_reson7k3_wr_SoundVelocityProfile(int verbose, int *bufferalloc, char **b
 
     /* insert the data */
     index = header->Offset + 4;
-    SoundVelocityProfile->position_flag = (mb_u_char)buffer[index];
+    buffer[index] = (char) SoundVelocityProfile->position_flag;
     index++;
-    SoundVelocityProfile->reserved1 = (mb_u_char)buffer[index];
+    buffer[index] = (char) SoundVelocityProfile->reserved1;
     index++;
     mb_put_binary_short(true, SoundVelocityProfile->reserved2, &buffer[index]);
     index += 2;
@@ -10663,17 +10765,17 @@ int mbr_reson7k3_wr_CTD(int verbose, int *bufferalloc, char **bufferptr, void *s
     index = header->Offset + 4;
     mb_put_binary_float(true, CTD->frequency, &buffer[index]);
     index += 4;
-    buffer[index] = CTD->velocity_source_flag;
+    buffer[index] = (char) CTD->velocity_source_flag;
     index++;
-    buffer[index] = CTD->velocity_algorithm;
+    buffer[index] = (char) CTD->velocity_algorithm;
     index++;
-    buffer[index] = CTD->conductivity_flag;
+    buffer[index] = (char) CTD->conductivity_flag;
     index++;
-    buffer[index] = CTD->pressure_flag;
+    buffer[index] = (char) CTD->pressure_flag;
     index++;
-    buffer[index] = CTD->position_flag;
+    buffer[index] = (char) CTD->position_flag;
     index++;
-    buffer[index] = CTD->validity;
+    buffer[index] = (char) CTD->validity;
     index++;
     mb_put_binary_short(true, CTD->reserved, &buffer[index]);
     index += 2;
@@ -10785,7 +10887,7 @@ int mbr_reson7k3_wr_Geodesy(int verbose, int *bufferalloc, char **bufferptr, voi
     /* insert the data */
     index = header->Offset + 4;
     for (int i = 0; i < 32; i++) {
-      Geodesy->spheroid[i] = (mb_u_char)buffer[index];
+      buffer[index] = (char) Geodesy->spheroid[i];
       index++;
     }
     mb_put_binary_double(true, Geodesy->semimajoraxis, &buffer[index]);
@@ -10793,11 +10895,11 @@ int mbr_reson7k3_wr_Geodesy(int verbose, int *bufferalloc, char **bufferptr, voi
     mb_put_binary_double(true, Geodesy->flattening, &buffer[index]);
     index += 8;
     for (int i = 0; i < 16; i++) {
-      Geodesy->reserved1[i] = (mb_u_char)buffer[index];
+      buffer[index] = (char) Geodesy->reserved1[i];
       index++;
     }
     for (int i = 0; i < 32; i++) {
-      Geodesy->datum[i] = (mb_u_char)buffer[index];
+      buffer[index] = (char) Geodesy->datum[i];
       index++;
     }
     mb_put_binary_int(true, Geodesy->calculation_method, &buffer[index]);
@@ -10819,16 +10921,16 @@ int mbr_reson7k3_wr_Geodesy(int verbose, int *bufferalloc, char **bufferptr, voi
     mb_put_binary_double(true, Geodesy->scale, &buffer[index]);
     index += 8;
     for (int i = 0; i < 35; i++) {
-      Geodesy->reserved2[i] = (mb_u_char)buffer[index];
+      buffer[index] = (char) Geodesy->reserved2[i];
       index++;
     }
     for (int i = 0; i < 32; i++) {
-      Geodesy->grid_name[i] = (mb_u_char)buffer[index];
+      buffer[index] = (char) Geodesy->grid_name[i];
       index++;
     }
-    Geodesy->distance_units = (mb_u_char)buffer[index];
+    buffer[index] = (char) Geodesy->distance_units;
     index++;
-    Geodesy->angular_units = (mb_u_char)buffer[index];
+    buffer[index] = (char) Geodesy->angular_units;
     index++;
     mb_put_binary_double(true, Geodesy->latitude_origin, &buffer[index]);
     index += 8;
@@ -10843,7 +10945,7 @@ int mbr_reson7k3_wr_Geodesy(int verbose, int *bufferalloc, char **bufferptr, voi
     mb_put_binary_int(true, Geodesy->custom_identifier, &buffer[index]);
     index += 4;
     for (int i = 0; i < 50; i++) {
-      Geodesy->reserved3[i] = (mb_u_char)buffer[index];
+      buffer[index] = (char) Geodesy->reserved3[i];
       index++;
     }
 
@@ -11207,7 +11309,7 @@ int mbr_reson7k3_wr_Navigation(int verbose, int *bufferalloc, char **bufferptr, 
 
     /* insert the data */
     index = header->Offset + 4;
-    buffer[index] = (mb_u_char)Navigation->vertical_reference;
+    buffer[index] = (char) Navigation->vertical_reference;
     index++;
     mb_put_binary_double(true, Navigation->latitude, &buffer[index]);
     index += 8;
@@ -11310,7 +11412,7 @@ int mbr_reson7k3_wr_Attitude(int verbose, int *bufferalloc, char **bufferptr, vo
 
     /* insert the data */
     index = header->Offset + 4;
-    buffer[index] = Attitude->n;
+    buffer[index] = (char) Attitude->n;
     index++;
     for (int i = 0; i < Attitude->n; i++) {
       mb_put_binary_short(true, Attitude->delta_time[i], &buffer[index]);
@@ -11577,7 +11679,7 @@ int mbr_reson7k3_wr_Mystery(int verbose, int *bufferalloc, char **bufferptr, voi
     /* insert the data */
     index = header->Offset + 4;
     for (int i = 0; i < R7KHDRSIZE_Mystery; i++) {
-      buffer[index] = Mystery->data[i];
+      buffer[index] = (char) Mystery->data[i];
       index++;
     }
 
@@ -12130,7 +12232,7 @@ int mbr_reson7k3_wr_Configuration(int verbose, int *bufferalloc, char **bufferpt
       mb_put_binary_int(true, device->magic_number, &buffer[index]);
       index += 4;
       for (int j = 0; j < 60; j++) {
-        buffer[index] = device->description[j];
+        buffer[index] = (char) device->description[j];
         index++;
       }
       mb_put_binary_int(true, device->alphadata_card, &buffer[index]);
@@ -12141,7 +12243,7 @@ int mbr_reson7k3_wr_Configuration(int verbose, int *bufferalloc, char **bufferpt
       index += 4;
 
       for (int j = 0; j < device->info_length; j++) {
-        buffer[index] = device->info[j];
+        buffer[index] = (char) device->info[j];
         index++;
       }
     }
@@ -12346,7 +12448,7 @@ int mbr_reson7k3_wr_FirmwareHardwareConfiguration(int verbose, int *bufferalloc,
 
     /* extract the info */
     for (int i = 0; i < FirmwareHardwareConfiguration->info_length; i++) {
-      buffer[index] = FirmwareHardwareConfiguration->info[i];
+      buffer[index] = (char) FirmwareHardwareConfiguration->info[i];
       index++;
     }
 
@@ -12514,7 +12616,7 @@ int mbr_reson7k3_wr_Bathymetry(int verbose, int *bufferalloc, char **bufferptr, 
   *size = MBSYS_RESON7K_RECORDHEADER_SIZE + MBSYS_RESON7K_RECORDTAIL_SIZE;
   *size += R7KHDRSIZE_Bathymetric;
   *size += Bathymetry->number_beams * 17;
-  if (Bathymetry->optionaldata == true) {
+  if (Bathymetry->optionaldata) {
     *size += 45 + Bathymetry->number_beams * 20;
     header->OptionalDataOffset =
         MBSYS_RESON7K_RECORDHEADER_SIZE + R7KHDRSIZE_Bathymetric + Bathymetry->number_beams * 17;
@@ -12565,9 +12667,9 @@ int mbr_reson7k3_wr_Bathymetry(int verbose, int *bufferalloc, char **bufferptr, 
     index += 2;
     mb_put_binary_int(true, Bathymetry->number_beams, &buffer[index]);
     index += 4;
-    buffer[index] = Bathymetry->layer_comp_flag;
+    buffer[index] = (char) Bathymetry->layer_comp_flag;
     index++;
-    buffer[index] = Bathymetry->sound_vel_flag;
+    buffer[index] = (char) Bathymetry->sound_vel_flag;
     index++;
     mb_put_binary_float(true, Bathymetry->sound_velocity, &buffer[index]);
     index += 4;
@@ -12578,7 +12680,7 @@ int mbr_reson7k3_wr_Bathymetry(int verbose, int *bufferalloc, char **bufferptr, 
       index += 4;
     }
     for (int i = 0; i < Bathymetry->number_beams; i++) {
-      buffer[index] = Bathymetry->quality[i];
+      buffer[index] = (char) Bathymetry->quality[i];
       index++;
     }
     for (int i = 0; i < Bathymetry->number_beams; i++) {
@@ -12595,7 +12697,7 @@ int mbr_reson7k3_wr_Bathymetry(int verbose, int *bufferalloc, char **bufferptr, 
     }
 
     /* insert the optional data */
-    if (Bathymetry->optionaldata == true) {
+    if (Bathymetry->optionaldata) {
       mb_put_binary_float(true, Bathymetry->frequency, &buffer[index]);
       index += 4;
       mb_put_binary_double(true, Bathymetry->latitude, &buffer[index]);
@@ -12604,7 +12706,7 @@ int mbr_reson7k3_wr_Bathymetry(int verbose, int *bufferalloc, char **bufferptr, 
       index += 8;
       mb_put_binary_float(true, Bathymetry->heading, &buffer[index]);
       index += 4;
-      buffer[index] = Bathymetry->height_source;
+      buffer[index] = (char) Bathymetry->height_source;
       index++;
       mb_put_binary_float(true, Bathymetry->tide, &buffer[index]);
       index += 4;
@@ -12696,7 +12798,7 @@ int mbr_reson7k3_wr_SideScan(int verbose, int *bufferalloc, char **bufferptr, vo
   *size = MBSYS_RESON7K_RECORDHEADER_SIZE + MBSYS_RESON7K_RECORDTAIL_SIZE;
   *size += R7KHDRSIZE_SideScan;
   *size += 2 * SideScan->number_samples * SideScan->sample_size;
-  if (SideScan->optionaldata == true) {
+  if (SideScan->optionaldata) {
     header->OptionalDataOffset = *size - MBSYS_RESON7K_RECORDTAIL_SIZE;
     *size += 32;
   }
@@ -12745,9 +12847,9 @@ int mbr_reson7k3_wr_SideScan(int verbose, int *bufferalloc, char **bufferptr, vo
     index += 2;
     mb_put_binary_short(true, SideScan->current_beam, &buffer[index]);
     index += 2;
-    buffer[index] = SideScan->sample_size;
+    buffer[index] = (char) SideScan->sample_size;
     index++;
-    buffer[index] = SideScan->data_type;
+    buffer[index] = (char) SideScan->data_type;
     index++;
 
     /* allocate memory if required */
@@ -12768,11 +12870,11 @@ int mbr_reson7k3_wr_SideScan(int verbose, int *bufferalloc, char **bufferptr, vo
     /* extract SideScan data */
     if (SideScan->sample_size == 1) {
       for (int i = 0; i < SideScan->number_samples; i++) {
-        buffer[index] = SideScan->port_data[i];
+        buffer[index] = (char) SideScan->port_data[i];
         index++;
       }
       for (int i = 0; i < SideScan->number_samples; i++) {
-        buffer[index] = SideScan->stbd_data[i];
+        buffer[index] = (char) SideScan->stbd_data[i];
         index++;
       }
     }
@@ -12965,9 +13067,9 @@ int mbr_reson7k3_wr_WaterColumn(int verbose, int *bufferalloc, char **bufferptr,
     index += 2;
     mb_put_binary_int(true, WaterColumn->samples, &buffer[index]);
     index += 4;
-    buffer[index] = WaterColumn->subset_flag;
+    buffer[index] = (char) WaterColumn->subset_flag;
     index++;
-    buffer[index] = WaterColumn->column_flag;
+    buffer[index] = (char) WaterColumn->column_flag;
     index++;
     mb_put_binary_short(true, WaterColumn->reserved2, &buffer[index]);
     index += 2;
@@ -12991,7 +13093,7 @@ int mbr_reson7k3_wr_WaterColumn(int verbose, int *bufferalloc, char **bufferptr,
         for (int j = 0; j < nsamples; j++) {
           if (sample_type_amp == 1) {
             charptr = (char *)wcd->amplitude;
-            buffer[index] = charptr[j];
+            buffer[index] = (char) charptr[j];
             index++;
           }
           else if (sample_type_amp == 2) {
@@ -13006,7 +13108,7 @@ int mbr_reson7k3_wr_WaterColumn(int verbose, int *bufferalloc, char **bufferptr,
           }
           if (sample_type_phase == 1) {
             charptr = (char *)wcd->phase;
-            buffer[index] = charptr[j];
+            buffer[index] = (char) charptr[j];
             index++;
           }
           else if (sample_type_phase == 2) {
@@ -13378,7 +13480,7 @@ int mbr_reson7k3_wr_Image(int verbose, int *bufferalloc, char **bufferptr, void 
     if (Image->color_depth == 1) {
       charptr = (char *)Image->image;
       for (int i = 0; i < Image->width * Image->height; i++) {
-        buffer[index] = charptr[i];
+        buffer[index] = (char) charptr[i];
         index++;
       }
     }
@@ -13708,7 +13810,7 @@ int mbr_reson7k3_wr_DetectionDataSetup(int verbose, int *bufferalloc, char **buf
     index += 4;
     mb_put_binary_int(true, DetectionDataSetup->data_block_size, &buffer[index]);
     index += 4;
-    buffer[index] = DetectionDataSetup->detection_algorithm;
+    buffer[index] = (char) DetectionDataSetup->detection_algorithm;
     index++;
     mb_put_binary_int(true, DetectionDataSetup->detection_flags, &buffer[index]);
     index += 4;
@@ -13724,7 +13826,7 @@ int mbr_reson7k3_wr_DetectionDataSetup(int verbose, int *bufferalloc, char **buf
     index += 4;
     mb_put_binary_float(true, DetectionDataSetup->maximum_nadir_search, &buffer[index]);
     index += 4;
-    buffer[index] = DetectionDataSetup->automatic_filter_window;
+    buffer[index] = (char) DetectionDataSetup->automatic_filter_window;
     index++;
     mb_put_binary_float(true, DetectionDataSetup->applied_roll, &buffer[index]);
     index += 4;
@@ -13855,7 +13957,7 @@ int mbr_reson7k3_wr_Beamformed(int verbose, int *bufferalloc, char **bufferptr, 
     mb_put_binary_int(true, Beamformed->number_samples, &buffer[index]);
     index += 4;
     for (int i = 0; i < 8; i++) {
-      buffer[index] = Beamformed->reserved[i];
+      buffer[index] = (char) Beamformed->reserved[i];
       index++;
     }
     for (int i = 0; i < Beamformed->number_beams; i++) {
@@ -14050,10 +14152,10 @@ int mbr_reson7k3_wr_BITE(int verbose, int *bufferalloc, char **bufferptr, void *
       bitereport = &(BITE->bitereports[i]);
 
       for (int j = 0; j < 64; j++) {
-        buffer[index] = bitereport->source_name[j];
+        buffer[index] = (char) bitereport->source_name[j];
         index++;
       }
-      buffer[index] = bitereport->source_address;
+      buffer[index] = (char) bitereport->source_address;
       index++;
       mb_put_binary_float(true, bitereport->reserved, &buffer[index]);
       index += 4;
@@ -14067,9 +14169,9 @@ int mbr_reson7k3_wr_BITE(int verbose, int *bufferalloc, char **bufferptr, void *
       index += 2;
       mb_put_binary_float(true, s7kTime->Seconds, &buffer[index]);
       index += 4;
-      buffer[index] = s7kTime->Hours;
+      buffer[index] = (char) s7kTime->Hours;
       index++;
-      buffer[index] = s7kTime->Minutes;
+      buffer[index] = (char) s7kTime->Minutes;
       index++;
 
       s7kTime = &(bitereport->uplink_time);
@@ -14079,9 +14181,9 @@ int mbr_reson7k3_wr_BITE(int verbose, int *bufferalloc, char **bufferptr, void *
       index += 2;
       mb_put_binary_float(true, s7kTime->Seconds, &buffer[index]);
       index += 4;
-      buffer[index] = s7kTime->Hours;
+      buffer[index] = (char) s7kTime->Hours;
       index++;
-      buffer[index] = s7kTime->Minutes;
+      buffer[index] = (char) s7kTime->Minutes;
       index++;
 
       s7kTime = &(bitereport->bite_time);
@@ -14091,12 +14193,12 @@ int mbr_reson7k3_wr_BITE(int verbose, int *bufferalloc, char **bufferptr, void *
       index += 2;
       mb_put_binary_float(true, s7kTime->Seconds, &buffer[index]);
       index += 4;
-      buffer[index] = s7kTime->Hours;
+      buffer[index] = (char) s7kTime->Hours;
       index++;
-      buffer[index] = s7kTime->Minutes;
+      buffer[index] = (char) s7kTime->Minutes;
       index++;
 
-      buffer[index] = bitereport->status;
+      buffer[index] = (char) bitereport->status;
       index++;
       mb_put_binary_short(true, bitereport->number_bite, &buffer[index]);
       index += 2;
@@ -14112,10 +14214,10 @@ int mbr_reson7k3_wr_BITE(int verbose, int *bufferalloc, char **bufferptr, void *
         mb_put_binary_short(true, bitefield->field, &buffer[index]);
         index += 2;
         for (int k = 0; k < 64; k++) {
-          buffer[index] = bitefield->name[k];
+          buffer[index] = (char) bitefield->name[k];
           index++;
         }
-        buffer[index] = bitefield->device_type;
+        buffer[index] = (char) bitefield->device_type;
         index++;
         mb_put_binary_float(true, bitefield->minimum, &buffer[index]);
         index += 4;
@@ -14211,7 +14313,7 @@ int mbr_reson7k3_wr_SonarSourceVersion(int verbose, int *bufferalloc, char **buf
     /* insert the data */
     index = header->Offset + 4;
     for (int i = 0; i < 32; i++) {
-      buffer[index] = SonarSourceVersion->version[i];
+      buffer[index] = (char) SonarSourceVersion->version[i];
       index++;
     }
 
@@ -14299,7 +14401,7 @@ int mbr_reson7k3_wr_WetEndVersion8k(int verbose, int *bufferalloc, char **buffer
     /* insert the data */
     index = header->Offset + 4;
     for (int i = 0; i < 32; i++) {
-      buffer[index] = WetEndVersion8k->version[i];
+      buffer[index] = (char) WetEndVersion8k->version[i];
       index++;
     }
 
@@ -14363,7 +14465,7 @@ int mbr_reson7k3_wr_RawDetection(int verbose, int *bufferalloc, char **bufferptr
   *size = MBSYS_RESON7K_RECORDHEADER_SIZE + MBSYS_RESON7K_RECORDTAIL_SIZE;
   *size += R7KHDRSIZE_RawDetection;
   *size += RawDetection->number_beams * RawDetection->data_field_size;
-  if (RawDetection->optionaldata == true) {
+  if (RawDetection->optionaldata) {
     header->OptionalDataOffset = *size - MBSYS_RESON7K_RECORDTAIL_SIZE;
     *size += R7KOPTHDRSIZE_RawDetection
               + RawDetection->number_beams * R7KOPTDATSIZE_RawDetection;
@@ -14412,7 +14514,7 @@ int mbr_reson7k3_wr_RawDetection(int verbose, int *bufferalloc, char **bufferptr
     index += 4;
     mb_put_binary_int(true, RawDetection->data_field_size, &buffer[index]);
     index += 4;
-    buffer[index] = RawDetection->detection_algorithm;
+    buffer[index] = (char) RawDetection->detection_algorithm;
     index++;
     mb_put_binary_int(true, RawDetection->flags, &buffer[index]);
     index += 4;
@@ -14459,7 +14561,7 @@ int mbr_reson7k3_wr_RawDetection(int verbose, int *bufferalloc, char **bufferptr
     }
 
       /* insert the optional data */
-    if (RawDetection->optionaldata == true) {
+    if (RawDetection->optionaldata) {
       mb_put_binary_float(true, RawDetection->frequency, &buffer[index]);
       index += 4;
       mb_put_binary_double(true, RawDetection->latitude, &buffer[index]);
@@ -14468,7 +14570,7 @@ int mbr_reson7k3_wr_RawDetection(int verbose, int *bufferalloc, char **bufferptr
       index += 8;
       mb_put_binary_float(true, RawDetection->heading, &buffer[index]);
       index += 4;
-      buffer[index] = RawDetection->height_source;
+      buffer[index] = (char) RawDetection->height_source;
       index += 1;
       mb_put_binary_float(true, RawDetection->tide, &buffer[index]);
       index += 4;
@@ -14565,7 +14667,7 @@ int mbr_reson7k3_wr_Snippet(int verbose, int *bufferalloc, char **bufferptr, voi
     else
       *size += sizeof(short) * nsample;
   }
-  if (Snippet->optionaldata == true) {
+  if (Snippet->optionaldata) {
     header->OptionalDataOffset = *size - MBSYS_RESON7K_RECORDTAIL_SIZE;
     *size += 24 + 12 * Snippet->number_beams;
   } else {
@@ -14610,9 +14712,9 @@ int mbr_reson7k3_wr_Snippet(int verbose, int *bufferalloc, char **bufferptr, voi
     index += 2;
     mb_put_binary_short(true, Snippet->number_beams, &buffer[index]);
     index += 2;
-    buffer[index] = Snippet->error_flag;
+    buffer[index] = (char) Snippet->error_flag;
     index++;
-    buffer[index] = Snippet->control_flags;
+    buffer[index] = (char) Snippet->control_flags;
     index++;
     mb_put_binary_int(true, Snippet->flags, &buffer[index]);
     index += 4;
@@ -14661,7 +14763,7 @@ int mbr_reson7k3_wr_Snippet(int verbose, int *bufferalloc, char **bufferptr, voi
     }
 
     /* insert optional data - calculated bathymetry */
-    if (Snippet->optionaldata == true) {
+    if (Snippet->optionaldata) {
       header->OptionalDataOffset = index;
 
       mb_put_binary_float(true, Snippet->frequency, &buffer[index]);
@@ -14857,25 +14959,25 @@ int mbr_reson7k3_wr_InstallationParameters(int verbose, int *bufferalloc, char *
     mb_put_binary_short(true, InstallationParameters->firmware_version_len, &buffer[index]);
     index += 2;
     for (int i = 0; i < 128; i++) {
-      buffer[index] = InstallationParameters->firmware_version[i];
+      buffer[index] = (char) InstallationParameters->firmware_version[i];
       index++;
     }
     mb_put_binary_short(true, InstallationParameters->software_version_len, &buffer[index]);
     index += 2;
     for (int i = 0; i < 128; i++) {
-      buffer[index] = InstallationParameters->software_version[i];
+      buffer[index] = (char) InstallationParameters->software_version[i];
       index++;
     }
     mb_put_binary_short(true, InstallationParameters->s7k3_version_len, &buffer[index]);
     index += 2;
     for (int i = 0; i < 128; i++) {
-      buffer[index] = InstallationParameters->s7k3_version[i];
+      buffer[index] = (char) InstallationParameters->s7k3_version[i];
       index++;
     }
     mb_put_binary_short(true, InstallationParameters->protocal_version_len, &buffer[index]);
     index += 2;
     for (int i = 0; i < 128; i++) {
-      buffer[index] = InstallationParameters->protocal_version[i];
+      buffer[index] = (char) InstallationParameters->protocal_version[i];
       index++;
     }
     mb_put_binary_float(true, InstallationParameters->transmit_x, &buffer[index]);
@@ -15225,7 +15327,7 @@ int mbr_reson7k3_wr_CompressedWaterColumn(int verbose, int *bufferalloc, char **
       mb_put_binary_short(true, compressedwatercolumndata->beam_number, &buffer[index]);
       index += 2;
       if (segmentnumbersvalid) {
-        buffer[index] = compressedwatercolumndata->segment_number;
+        buffer[index] = (char) compressedwatercolumndata->segment_number;
         index += 1;
       }
       mb_put_binary_int(true, compressedwatercolumndata->samples, &buffer[index]);
@@ -15304,7 +15406,7 @@ int mbr_reson7k3_wr_SegmentedRawDetection(int verbose, int *bufferalloc, char **
   SegmentedRawDetection->rx_field_size = 32;
   *size += SegmentedRawDetection->n_segments * SegmentedRawDetection->segment_field_size;
   *size += SegmentedRawDetection->n_rx * SegmentedRawDetection->rx_field_size;
-  if (SegmentedRawDetection->optionaldata == true) {
+  if (SegmentedRawDetection->optionaldata) {
     header->OptionalDataOffset = *size - MBSYS_RESON7K_RECORDTAIL_SIZE;
     *size += R7KOPTHDRSIZE_SegmentedRawDetection
               + SegmentedRawDetection->n_rx * R7KOPTDATSIZE_SegmentedRawDetection;
@@ -15386,13 +15488,13 @@ int mbr_reson7k3_wr_SegmentedRawDetection(int verbose, int *bufferalloc, char **
       index += 4;
       mb_put_binary_float(true, segmentedrawdetectiontxdata->rx_beam_width, &buffer[index]);
       index += 4;
-      buffer[index] = segmentedrawdetectiontxdata->detection_algorithm;
+      buffer[index] = (char) segmentedrawdetectiontxdata->detection_algorithm;
       index += 1;
       mb_put_binary_int(true, segmentedrawdetectiontxdata->flags, &buffer[index]);
       index += 4;
       mb_put_binary_float(true, segmentedrawdetectiontxdata->sampling_rate, &buffer[index]);
       index += 4;
-      buffer[index] = segmentedrawdetectiontxdata->tvg;
+      buffer[index] = (char) segmentedrawdetectiontxdata->tvg;
       index += 1;
       mb_put_binary_float(true, segmentedrawdetectiontxdata->rx_bandwidth, &buffer[index]);
       index += 4;
@@ -15422,7 +15524,7 @@ int mbr_reson7k3_wr_SegmentedRawDetection(int verbose, int *bufferalloc, char **
     }
 
       /* insert the optional data */
-    if (SegmentedRawDetection->optionaldata == true) {
+    if (SegmentedRawDetection->optionaldata) {
       mb_put_binary_float(true, SegmentedRawDetection->frequency, &buffer[index]);
       index += 4;
       mb_put_binary_double(true, SegmentedRawDetection->latitude, &buffer[index]);
@@ -15431,7 +15533,7 @@ int mbr_reson7k3_wr_SegmentedRawDetection(int verbose, int *bufferalloc, char **
       index += 8;
       mb_put_binary_float(true, SegmentedRawDetection->heading, &buffer[index]);
       index += 4;
-      buffer[index] = SegmentedRawDetection->height_source;
+      buffer[index] = (char) SegmentedRawDetection->height_source;
       index += 1;
       mb_put_binary_float(true, SegmentedRawDetection->tide, &buffer[index]);
       index += 4;
@@ -15723,7 +15825,7 @@ int mbr_reson7k3_wr_SystemEventMessage(int verbose, int *bufferalloc, char **buf
 
     /* insert the data */
     for (int i = 0; i < SystemEventMessage->message_length; i++) {
-      buffer[index] = SystemEventMessage->message[i];
+      buffer[index] = (char) SystemEventMessage->message[i];
       index++;
     }
 
@@ -16212,7 +16314,20 @@ int mbr_reson7k3_wr_SnippetBackscatteringStrength(int verbose, int *bufferalloc,
   /* figure out size of output record */
   *size = MBSYS_RESON7K_RECORDHEADER_SIZE + MBSYS_RESON7K_RECORDTAIL_SIZE;
   *size += R7KHDRSIZE_SnippetBackscatteringStrength;
-    // Notdone
+  for (int i = 0; i < SnippetBackscatteringStrength->number_beams; i++) {
+    s7k3_snippetbackscatteringstrengthdata *snippetbackscatteringstrengthdata
+            = &(SnippetBackscatteringStrength->snippetbackscatteringstrengthdata[i]);
+
+    *size += R7KRDTSIZE_SnippetBackscatteringStrength;
+    *size += sizeof(float) * (snippetbackscatteringstrengthdata->end_sample
+               - snippetbackscatteringstrengthdata->begin_sample + 1);
+    if (SnippetBackscatteringStrength->control_flags & 0x40) {
+      *size += sizeof(float) * (snippetbackscatteringstrengthdata->end_sample
+                - snippetbackscatteringstrengthdata->begin_sample + 1);
+    }
+  }
+  header->OptionalDataOffset = 0;
+  header->Size = *size;
 
   /* allocate memory to write rest of record if necessary */
   if (*bufferalloc < *size) {
@@ -16236,6 +16351,71 @@ int mbr_reson7k3_wr_SnippetBackscatteringStrength(int verbose, int *bufferalloc,
 
     /* insert the data */
     // Notdone
+
+    /* reset the header size value */
+    mb_put_binary_int(true, ((unsigned int)(index + 4)), &buffer[8]);
+    /* insert the data */
+    index = header->Offset + 4;
+    mb_put_binary_long(true, SnippetBackscatteringStrength->serial_number, &buffer[index]);
+    index += 8;
+    mb_put_binary_int(true, SnippetBackscatteringStrength->ping_number, &buffer[index]);
+    index += 4;
+    mb_put_binary_short(true, SnippetBackscatteringStrength->multi_ping, &buffer[index]);
+    index += 2;
+    mb_put_binary_short(true, SnippetBackscatteringStrength->number_beams, &buffer[index]);
+    index += 2;
+    buffer[index] = (char) SnippetBackscatteringStrength->error_flag;
+    index++;
+    mb_put_binary_int(true, SnippetBackscatteringStrength->control_flags, &buffer[index]);
+    index += 4;
+    mb_put_binary_float(true, SnippetBackscatteringStrength->absorption, &buffer[index]);
+    index += 4;
+    for (int i = 0; i < 6; i++) {
+      mb_put_binary_int(true, SnippetBackscatteringStrength->reserved[i], &buffer[index]);
+      index += 4;
+    }
+
+    /* insert the snippet parameters */
+    for (int i = 0; i < SnippetBackscatteringStrength->number_beams; i++) {
+      s7k3_snippetbackscatteringstrengthdata *snippetbackscatteringstrengthdata
+            = &(SnippetBackscatteringStrength->snippetbackscatteringstrengthdata[i]);
+
+      /* insert snippetbackscatteringstrengthdata data */
+      mb_put_binary_short(true, snippetbackscatteringstrengthdata->beam_number, &buffer[index]);
+      index += 2;
+      mb_put_binary_int(true, snippetbackscatteringstrengthdata->begin_sample, &buffer[index]);
+      index += 4;
+      mb_put_binary_int(true, snippetbackscatteringstrengthdata->bottom_sample, &buffer[index]);
+      index += 4;
+      mb_put_binary_int(true, snippetbackscatteringstrengthdata->end_sample, &buffer[index]);
+      index += 4;
+    }
+
+    /* loop over all beams to insert snippet backscatter data */
+    for (int i = 0; i < SnippetBackscatteringStrength->number_beams; i++) {
+      s7k3_snippetbackscatteringstrengthdata *snippetbackscatteringstrengthdata
+            = &(SnippetBackscatteringStrength->snippetbackscatteringstrengthdata[i]);
+      for (int j = 0;
+          j < (snippetbackscatteringstrengthdata->end_sample - snippetbackscatteringstrengthdata->begin_sample + 1);
+          j++) {
+        mb_put_binary_float(true, snippetbackscatteringstrengthdata->bs[j], &buffer[index]);
+        index += 4;
+      }
+    }
+
+    /* loop over all beams to insert snippet footprint data */
+    if (SnippetBackscatteringStrength->control_flags & 0x40) {
+      for (int i = 0; i < SnippetBackscatteringStrength->number_beams; i++) {
+        s7k3_snippetbackscatteringstrengthdata *snippetbackscatteringstrengthdata
+              = &(SnippetBackscatteringStrength->snippetbackscatteringstrengthdata[i]);
+        for (int j = 0;
+            j < (snippetbackscatteringstrengthdata->end_sample - snippetbackscatteringstrengthdata->begin_sample + 1);
+            j++) {
+          mb_put_binary_float(true, snippetbackscatteringstrengthdata->footprints[j], &buffer[index]);
+          index += 4;
+        }
+      }
+    }
 
     /* reset the header size value */
     mb_put_binary_int(true, ((unsigned int)(index + 4)), &buffer[8]);
@@ -16434,19 +16614,19 @@ int mbr_reson7k3_wr_FileHeader(int verbose, int *bufferalloc, char **bufferptr, 
     mb_put_binary_int(true, FileHeader->number_devices, &buffer[index]);
     index += 4;
     for (int i = 0; i < 64; i++) {
-      buffer[index] = FileHeader->recording_name[i];
+      buffer[index] = (char) FileHeader->recording_name[i];
       index++;
     }
     for (int i = 0; i < 16; i++) {
-      buffer[index] = FileHeader->recording_version[i];
+      buffer[index] = (char) FileHeader->recording_version[i];
       index++;
     }
     for (int i = 0; i < 64; i++) {
-      buffer[index] = FileHeader->user_defined_name[i];
+      buffer[index] = (char) FileHeader->user_defined_name[i];
       index++;
     }
     for (int i = 0; i < 128; i++) {
-      buffer[index] = FileHeader->notes[i];
+      buffer[index] = (char) FileHeader->notes[i];
       index++;
     }
     for (int i = 0; i < FileHeader->number_devices; i++) {
@@ -16458,7 +16638,7 @@ int mbr_reson7k3_wr_FileHeader(int verbose, int *bufferalloc, char **bufferptr, 
     }
 
       /* insert the optional data */
-    if (FileHeader->optionaldata == true) {
+    if (FileHeader->optionaldata) {
       mb_put_binary_int(true, FileHeader->file_catalog_size, &buffer[index]);
       index += 4;
       mb_put_binary_long(true, FileHeader->file_catalog_offset, &buffer[index]);
@@ -17000,17 +17180,17 @@ int mbr_reson7k3_wr_RemoteControlSonarSettings(int verbose, int *bufferalloc, ch
     }
     mb_put_binary_float(true, RemoteControlSonarSettings->alternate_gain, &buffer[index]);
     index += 4;
-    buffer[index] = RemoteControlSonarSettings->vernier_filter;
+    buffer[index] = (char) RemoteControlSonarSettings->vernier_filter;
     index ++;
-    buffer[index] = RemoteControlSonarSettings->reserved3;
+    buffer[index] = (char) RemoteControlSonarSettings->reserved3;
     index ++;
     mb_put_binary_short(true, RemoteControlSonarSettings->custom_beams, &buffer[index]);
     index += 2;
     mb_put_binary_float(true, RemoteControlSonarSettings->coverage_angle, &buffer[index]);
     index += 4;
-    buffer[index] = RemoteControlSonarSettings->coverage_mode;
+    buffer[index] = (char) RemoteControlSonarSettings->coverage_mode;
     index ++;
-    buffer[index] = RemoteControlSonarSettings->quality_filter;
+    buffer[index] = (char) RemoteControlSonarSettings->quality_filter;
     index ++;
     mb_put_binary_float(true, RemoteControlSonarSettings->received_steering, &buffer[index]);
     index += 4;
@@ -17126,25 +17306,25 @@ int mbr_reson7k3_wr_CommonSystemSettings(int verbose, int *bufferalloc, char **b
     index += 4;
     mb_put_binary_int(true, CommonSystemSettings->sequencer_control, &buffer[index]);
     index += 4;
-    buffer[index] = CommonSystemSettings->mru_format;
+    buffer[index] = (char) CommonSystemSettings->mru_format;
     index++;
-    buffer[index] = CommonSystemSettings->mru_baudrate;
+    buffer[index] = (char) CommonSystemSettings->mru_baudrate;
     index++;
-    buffer[index] = CommonSystemSettings->mru_parity;
+    buffer[index] = (char) CommonSystemSettings->mru_parity;
     index++;
-    buffer[index] = CommonSystemSettings->mru_databits;
+    buffer[index] = (char) CommonSystemSettings->mru_databits;
     index++;
-    buffer[index] = CommonSystemSettings->mru_stopbits;
+    buffer[index] = (char) CommonSystemSettings->mru_stopbits;
     index++;
-    buffer[index] = CommonSystemSettings->orientation;
+    buffer[index] = (char) CommonSystemSettings->orientation;
     index++;
-    buffer[index] = CommonSystemSettings->record_version;
+    buffer[index] = (char) CommonSystemSettings->record_version;
     index++;
     mb_put_binary_float(true, CommonSystemSettings->motion_latency, &buffer[index]);
     index += 4;
-    buffer[index] = CommonSystemSettings->svp_filter;
+    buffer[index] = (char) CommonSystemSettings->svp_filter;
     index++;
-    buffer[index] = CommonSystemSettings->sv_override;
+    buffer[index] = (char) CommonSystemSettings->sv_override;
     index++;
     mb_put_binary_short(true, CommonSystemSettings->activeenum, &buffer[index]);
     index += 2;
@@ -17171,7 +17351,7 @@ int mbr_reson7k3_wr_CommonSystemSettings(int verbose, int *bufferalloc, char **b
     mb_put_binary_short(true, CommonSystemSettings->multidetect_reserved[1], &buffer[index]);
     index += 2;
     for (int i = 0;i<4;i++) {
-      buffer[index] = CommonSystemSettings->slave_ip[i];
+      buffer[index] = (char) CommonSystemSettings->slave_ip[i];
       index++;
     }
     mb_put_binary_int(true, CommonSystemSettings->snippet_controlflags, &buffer[index]);
@@ -17184,45 +17364,45 @@ int mbr_reson7k3_wr_CommonSystemSettings(int verbose, int *bufferalloc, char **b
     index += 4;
     mb_put_binary_float(true, CommonSystemSettings->delay_multiplier, &buffer[index]);
     index += 4;
-    buffer[index] = CommonSystemSettings->powersaving_mode;
+    buffer[index] = (char) CommonSystemSettings->powersaving_mode;
     index++;
-    buffer[index] = CommonSystemSettings->flags;
+    buffer[index] = (char) CommonSystemSettings->flags;
     index++;
     mb_put_binary_short(true, CommonSystemSettings->range_blank, &buffer[index]);
     index += 2;
-    buffer[index] = CommonSystemSettings->startup_normalization;
+    buffer[index] = (char) CommonSystemSettings->startup_normalization;
     index++;
-    buffer[index] = CommonSystemSettings->restore_pingrate;
+    buffer[index] = (char) CommonSystemSettings->restore_pingrate;
     index++;
-    buffer[index] = CommonSystemSettings->restore_power;
+    buffer[index] = (char) CommonSystemSettings->restore_power;
     index++;
-    buffer[index] = CommonSystemSettings->sv_interlock;
+    buffer[index] = (char) CommonSystemSettings->sv_interlock;
     index++;
-    buffer[index] = CommonSystemSettings->ignorepps_errors;
+    buffer[index] = (char) CommonSystemSettings->ignorepps_errors;
     index++;
     for (int i = 0;i<15;i++) {
-      buffer[index] = CommonSystemSettings->reserved1[i];
+      buffer[index] = (char) CommonSystemSettings->reserved1[i];
       index++;
     }
     mb_put_binary_int(true, CommonSystemSettings->compressed_wcflags, &buffer[index]);
     index += 4;
-    buffer[index] = CommonSystemSettings->deckmode;
+    buffer[index] = (char) CommonSystemSettings->deckmode;
     index++;
-    buffer[index] = CommonSystemSettings->reserved2;
+    buffer[index] = (char) CommonSystemSettings->reserved2;
     index++;
-    buffer[index] = CommonSystemSettings->powermode_flags;
+    buffer[index] = (char) CommonSystemSettings->powermode_flags;
     index++;
-    buffer[index] = CommonSystemSettings->powermode_max;
+    buffer[index] = (char) CommonSystemSettings->powermode_max;
     index++;
     mb_put_binary_float(true, CommonSystemSettings->water_temperature, &buffer[index]);
     index += 4;
-    buffer[index] = CommonSystemSettings->sensor_override;
+    buffer[index] = (char) CommonSystemSettings->sensor_override;
     index++;
-    buffer[index] = CommonSystemSettings->sensor_dataflags;
+    buffer[index] = (char) CommonSystemSettings->sensor_dataflags;
     index++;
-    buffer[index] = CommonSystemSettings->sensor_active;
+    buffer[index] = (char) CommonSystemSettings->sensor_active;
     index++;
-    buffer[index] = CommonSystemSettings->reserved3;
+    buffer[index] = (char) CommonSystemSettings->reserved3;
     index++;
     mb_put_binary_float(true, CommonSystemSettings->tracker_maxcoverage, &buffer[index]);
     index += 4;
@@ -17731,6 +17911,12 @@ int mbr_reson7k3_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
   // as SystemEventMessage records. After the FileHeader record is written
   // any comments will be written when received.
   //
+  // It is unfortunately possible for 7k files to be found that do not have
+  // a fileheader record - Norbit multibeam data have been generated like this.
+  // Therefore the code should write a Fileheader record the first time
+  // any record other than a comment is passed for writing, even if that first
+  // record is not a Fileheader record.
+  //
   // The FileCatalog output data is stored in the FileCatalog_write
   // structure as the file is written. The FileCatalog record is written
   // when the file is closed, not when the input FileCatalog data are passed
@@ -17746,8 +17932,49 @@ int mbr_reson7k3_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
   // and only a single record is written.
 
   // write FileHeader
-  if (store->type == R7KRECID_FileHeader) {
-    // ensure FileHeader has
+  if (store->type == R7KRECID_FileHeader
+      || (store->kind != MB_DATA_COMMENT && *fileheaders == 0)) {
+    // handle case of missing FileHeader - make sure version is correct
+    if (store->type != R7KRECID_FileHeader) {
+      store->FileHeader.header.Version = 5;
+      store->FileHeader.header.Offset = 60;
+      store->FileHeader.header.SyncPattern = 65535;
+      store->FileHeader.header.Size = 396;
+      store->FileHeader.header.OptionalDataOffset = 1;
+      store->FileHeader.header.OptionalDataIdentifier = 7300;
+      store->FileHeader.header.s7kTime.Year = 0;
+      store->FileHeader.header.s7kTime.Day = 0;
+      store->FileHeader.header.s7kTime.Seconds = 0.0;
+      store->FileHeader.header.s7kTime.Hours = 0;
+      store->FileHeader.header.s7kTime.Minutes = 0;
+      store->FileHeader.header.RecordVersion = 1;
+      store->FileHeader.header.RecordType = 7200;
+      store->FileHeader.header.DeviceId = 7000;
+      store->FileHeader.header.Reserved = 0;
+      store->FileHeader.header.SystemEnumerator = 0;
+      store->FileHeader.header.Reserved2 = 1;
+      store->FileHeader.header.Flags = 0;
+      store->FileHeader.header.Reserved3 = 0;
+      store->FileHeader.header.Reserved4 = 0;
+      store->FileHeader.header.FragmentedTotal = 0;
+      store->FileHeader.header.FragmentNumber = 0;
+      store->FileHeader.file_identifier[0] = 0;
+      store->FileHeader.file_identifier[1] = 0;
+      store->FileHeader.version = 1;
+      store->FileHeader.reserved = 0;
+      store->FileHeader.session_identifier[0] = 0;
+      store->FileHeader.session_identifier[1] = 0;
+      store->FileHeader.record_data_size = 0;
+      store->FileHeader.number_devices = 0;
+      memset(store->FileHeader.recording_name, 0 , sizeof(store->FileHeader.recording_name));
+      memset(store->FileHeader.recording_version, 0 , sizeof(store->FileHeader.recording_version));
+      memset(store->FileHeader.user_defined_name, 0 , sizeof(store->FileHeader.user_defined_name));
+      memset(store->FileHeader.notes, 0 , sizeof(store->FileHeader.notes));
+      store->FileHeader.optionaldata = 1;
+      store->FileHeader.file_catalog_size = 0;
+      store->FileHeader.file_catalog_offset = 0;
+    }
+
 #ifdef MBR_RESON7K3_DEBUG
     fprintf(stderr, "-->R7KRECID_FileHeader:                        %4.4X | %d\n", store->type, store->type);
 #endif
@@ -17800,7 +18027,7 @@ int mbr_reson7k3_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
     /* Write all of the records in memory */
 
     /* Reson 7k sonar settings (record 7000) */
-    if (store->read_SonarSettings == true) {
+    if (store->read_SonarSettings) {
       store->type = R7KRECID_SonarSettings;
 #ifdef MBR_RESON7K3_DEBUG
       fprintf(stderr, "**>R7KRECID_SonarSettings:                     %4.4X | %d\n", store->type, store->type);
@@ -17812,7 +18039,7 @@ int mbr_reson7k3_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
       status = mb_fileio_put(verbose, mbio_ptr, buffer, &write_len, error);
     }
     /* Reson 7k match filter (record 7002) */
-    if (status == MB_SUCCESS && store->read_MatchFilter == true) {
+    if (status == MB_SUCCESS && store->read_MatchFilter) {
       store->type = R7KRECID_MatchFilter;
 #ifdef MBR_RESON7K3_DEBUG
       fprintf(stderr, "**>R7KRECID_MatchFilter:                       %4.4X | %d\n", store->type, store->type);
@@ -17825,7 +18052,7 @@ int mbr_reson7k3_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
     }
 
     /* Reson 7k beam geometry (record 7004) */
-    if (status == MB_SUCCESS && store->read_BeamGeometry == true) {
+    if (status == MB_SUCCESS && store->read_BeamGeometry) {
       store->type = R7KRECID_BeamGeometry;
 #ifdef MBR_RESON7K3_DEBUG
       fprintf(stderr, "**>R7KRECID_BeamGeometry:                    --%4.4X | %d\n", store->type, store->type);
@@ -17838,7 +18065,7 @@ int mbr_reson7k3_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
     }
 
     /* Reson 7k bathymetry (record 7006) */
-    if (status == MB_SUCCESS && store->read_Bathymetry == true) {
+    if (status == MB_SUCCESS && store->read_Bathymetry) {
       store->type = R7KRECID_Bathymetry;
 #ifdef MBR_RESON7K3_DEBUG
       fprintf(stderr, "**>R7KRECID_Bathymetry:                          %4.4X | %d\n", store->type, store->type);
@@ -17851,7 +18078,7 @@ int mbr_reson7k3_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
     }
 
     /* Reson 7k SideScan imagery data (record 7007) */
-    if (status == MB_SUCCESS && store->read_SideScan == true) {
+    if (status == MB_SUCCESS && store->read_SideScan) {
       store->type = R7KRECID_SideScan;
 #ifdef MBR_RESON7K3_DEBUG
       fprintf(stderr, "**>R7KRECID_SideScan:                          %4.4X | %d\n", store->type, store->type);
@@ -17864,7 +18091,7 @@ int mbr_reson7k3_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
     }
 
     /* Reson 7k WaterColumn data (record 7008) */
-    if (status == MB_SUCCESS && store->read_WaterColumn == true) {
+    if (status == MB_SUCCESS && store->read_WaterColumn) {
       store->type = R7KRECID_WaterColumn;
 #ifdef MBR_RESON7K3_DEBUG
       fprintf(stderr, "**>R7KRECID_WaterColumn:                       %4.4X | %d\n", store->type, store->type);
@@ -17877,7 +18104,7 @@ int mbr_reson7k3_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
     }
 
     /* Reson 7k VerticalDepth data (record 7009) */
-    if (status == MB_SUCCESS && store->read_VerticalDepth == true) {
+    if (status == MB_SUCCESS && store->read_VerticalDepth) {
       store->type = R7KRECID_VerticalDepth;
 #ifdef MBR_RESON7K3_DEBUG
       fprintf(stderr, "**>R7KRECID_VerticalDepth:                     %4.4X | %d\n", store->type, store->type);
@@ -17890,7 +18117,7 @@ int mbr_reson7k3_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
     }
 
     /* Reson 7k TVG data (record 7010) */
-    if (status == MB_SUCCESS && store->read_TVG == true) {
+    if (status == MB_SUCCESS && store->read_TVG) {
       store->type = R7KRECID_TVG;
 #ifdef MBR_RESON7K3_DEBUG
       fprintf(stderr, "**>R7KRECID_TVG:                               %4.4X | %d\n", store->type, store->type);
@@ -17903,7 +18130,7 @@ int mbr_reson7k3_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
     }
 
     /* Reson 7k Image data (record 7011) */
-    if (status == MB_SUCCESS && store->read_Image == true) {
+    if (status == MB_SUCCESS && store->read_Image) {
       store->type = R7KRECID_Image;
 #ifdef MBR_RESON7K3_DEBUG
       fprintf(stderr, "**>R7KRECID_Image:                             %4.4X | %d\n", store->type, store->type);
@@ -17916,7 +18143,7 @@ int mbr_reson7k3_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
     }
 
     /* Reson 7k PingMotion (record 7012) */
-    if (status == MB_SUCCESS && store->read_PingMotion == true) {
+    if (status == MB_SUCCESS && store->read_PingMotion) {
       store->type = R7KRECID_PingMotion;
 #ifdef MBR_RESON7K3_DEBUG
       fprintf(stderr, "**>R7KRECID_PingMotion:                        %4.4X | %d\n", store->type, store->type);
@@ -17929,7 +18156,7 @@ int mbr_reson7k3_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
     }
 
     /* Reson 7k DetectionDataSetup (record 7017) */
-    if (status == MB_SUCCESS && store->read_DetectionDataSetup == true) {
+    if (status == MB_SUCCESS && store->read_DetectionDataSetup) {
       store->type = R7KRECID_DetectionDataSetup;
 #ifdef MBR_RESON7K3_DEBUG
       fprintf(stderr, "**>R7KRECID_DetectionDataSetup:                %4.4X | %d\n", store->type, store->type);
@@ -17942,7 +18169,7 @@ int mbr_reson7k3_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
     }
 
     /* Reson 7k Beamformed magnitude and phase data (record 7018) */
-    if (status == MB_SUCCESS && store->read_Beamformed == true) {
+    if (status == MB_SUCCESS && store->read_Beamformed) {
       store->type = R7KRECID_Beamformed;
 #ifdef MBR_RESON7K3_DEBUG
       fprintf(stderr, "**>R7KRECID_Beamformed:                        %4.4X | %d\n", store->type, store->type);
@@ -17955,7 +18182,7 @@ int mbr_reson7k3_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
     }
 
     /* Reson 7k RawDetection (record 7027) */
-    if (status == MB_SUCCESS && store->read_RawDetection == true) {
+    if (status == MB_SUCCESS && store->read_RawDetection) {
       store->type = R7KRECID_RawDetection;
 #ifdef MBR_RESON7K3_DEBUG
       fprintf(stderr, "**>R7KRECID_RawDetection:                      %4.4X | %d\n", store->type, store->type);
@@ -17968,7 +18195,7 @@ int mbr_reson7k3_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
     }
 
     /* Reson 7k Snippet (record 7028) */
-    if (status == MB_SUCCESS && store->read_Snippet == true) {
+    if (status == MB_SUCCESS && store->read_Snippet) {
       store->type = R7KRECID_Snippet;
 #ifdef MBR_RESON7K3_DEBUG
       fprintf(stderr, "**>R7KRECID_Snippet:                           %4.4X | %d\n", store->type, store->type);
@@ -17981,7 +18208,7 @@ int mbr_reson7k3_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
     }
 
     /* Reson 7k CompressedBeamformedMagnitude Data (Record 7041) */
-    if (status == MB_SUCCESS && store->read_CompressedBeamformedMagnitude == true) {
+    if (status == MB_SUCCESS && store->read_CompressedBeamformedMagnitude) {
       store->type = R7KRECID_CompressedBeamformedMagnitude;
 #ifdef MBR_RESON7K3_DEBUG
       fprintf(stderr, "**>R7KRECID_CompressedBeamformedMagnitude:     %4.4X | %d\n", store->type, store->type);
@@ -17994,7 +18221,7 @@ int mbr_reson7k3_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
     }
 
     /* Reson 7k CompressedWaterColumn Data (Record 7042) */
-    if (status == MB_SUCCESS && store->read_CompressedWaterColumn == true) {
+    if (status == MB_SUCCESS && store->read_CompressedWaterColumn) {
       store->type = R7KRECID_CompressedWaterColumn;
 #ifdef MBR_RESON7K3_DEBUG
       fprintf(stderr, "**>R7KRECID_CompressedWaterColumn:             %4.4X | %d\n", store->type, store->type);
@@ -18007,7 +18234,7 @@ int mbr_reson7k3_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
     }
 
     /* Reson 7k SegmentedRawDetection Data (part of Record 7047) */
-    if (status == MB_SUCCESS && store->read_SegmentedRawDetection == true) {
+    if (status == MB_SUCCESS && store->read_SegmentedRawDetection) {
       store->type = R7KRECID_SegmentedRawDetection;
 #ifdef MBR_RESON7K3_DEBUG
       fprintf(stderr, "**>R7KRECID_SegmentedRawDetection:             %4.4X | %d\n", store->type, store->type);
@@ -18020,7 +18247,7 @@ int mbr_reson7k3_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
     }
 
     /* Reson 7k CalibratedBeam Data (Record 7048) */
-    if (status == MB_SUCCESS && store->read_CalibratedBeam == true) {
+    if (status == MB_SUCCESS && store->read_CalibratedBeam) {
       store->type = R7KRECID_CalibratedBeam;
 #ifdef MBR_RESON7K3_DEBUG
       fprintf(stderr, "**>R7KRECID_CalibratedBeam:                    %4.4X | %d\n", store->type, store->type);
@@ -18033,7 +18260,7 @@ int mbr_reson7k3_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
     }
 
     /* Reson 7k CalibratedSideScan Data (part of record 7057) */
-    if (status == MB_SUCCESS && store->read_CalibratedSideScan == true) {
+    if (status == MB_SUCCESS && store->read_CalibratedSideScan) {
       store->type = R7KRECID_CalibratedSideScan;
 #ifdef MBR_RESON7K3_DEBUG
       fprintf(stderr, "**>R7KRECID_CalibratedSideScan:                %4.4X | %d\n", store->type, store->type);
@@ -18046,7 +18273,7 @@ int mbr_reson7k3_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
     }
 
     /* Reson 7k SnippetBackscatteringStrength (Record 7058) */
-    if (status == MB_SUCCESS && store->read_SnippetBackscatteringStrength == true) {
+    if (status == MB_SUCCESS && store->read_SnippetBackscatteringStrength) {
       store->type = R7KRECID_SnippetBackscatteringStrength;
 #ifdef MBR_RESON7K3_DEBUG
       fprintf(stderr, "**>R7KRECID_SnippetBackscatteringStrength:     %4.4X | %d\n", store->type, store->type);
@@ -18059,7 +18286,7 @@ int mbr_reson7k3_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
     }
 
     /* Reson 7k RemoteControlSonarSettings settings (record 7503) */
-    if (status == MB_SUCCESS && store->read_RemoteControlSonarSettings == true) {
+    if (status == MB_SUCCESS && store->read_RemoteControlSonarSettings) {
       store->type = R7KRECID_RemoteControlSonarSettings;
 #ifdef MBR_RESON7K3_DEBUG
       fprintf(stderr, "**>R7KRECID_RemoteControlSonarSettings:      %4.4X | %d\n", store->type, store->type);
@@ -18072,7 +18299,7 @@ int mbr_reson7k3_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
     }
 
     /* Processed sidescan - MB-System extension to s7k3 format (record 3199) */
-    if (status == MB_SUCCESS && store->read_ProcessedSideScan == true) {
+    if (status == MB_SUCCESS && store->read_ProcessedSideScan) {
       store->type = R7KRECID_ProcessedSideScan;
 #ifdef MBR_RESON7K3_DEBUG
       fprintf(stderr, "**>R7KRECID_ProcessedSideScan:                 %4.4X | %d\n", store->type, store->type);
@@ -18796,6 +19023,7 @@ int mbr_register_reson7k3(int verbose, void *mbio_ptr, int *error) {
   mb_io_ptr->mb_io_detects = &mbsys_reson7k3_detects;
   mb_io_ptr->mb_io_gains = &mbsys_reson7k3_gains;
   mb_io_ptr->mb_io_copyrecord = &mbsys_reson7k3_copy;
+  mb_io_ptr->mb_io_makess = &mbsys_reson7k3_makess;
   mb_io_ptr->mb_io_extract_rawss = NULL;
   mb_io_ptr->mb_io_insert_rawss = NULL;
   mb_io_ptr->mb_io_extract_segytraceheader = NULL;
@@ -18843,6 +19071,7 @@ int mbr_register_reson7k3(int verbose, void *mbio_ptr, int *error) {
     fprintf(stderr, "dbg2       insert_svp:         %p\n", (void *)mb_io_ptr->mb_io_insert_svp);
     fprintf(stderr, "dbg2       ttimes:             %p\n", (void *)mb_io_ptr->mb_io_ttimes);
     fprintf(stderr, "dbg2       detects:            %p\n", (void *)mb_io_ptr->mb_io_detects);
+    fprintf(stderr, "dbg2       makess:             %p\n", (void *)mb_io_ptr->mb_io_makess);
     fprintf(stderr, "dbg2       extract_rawss:      %p\n", (void *)mb_io_ptr->mb_io_extract_rawss);
     fprintf(stderr, "dbg2       insert_rawss:       %p\n", (void *)mb_io_ptr->mb_io_insert_rawss);
     fprintf(stderr, "dbg2       extract_segytraceheader: %p\n", (void *)mb_io_ptr->mb_io_extract_segytraceheader);

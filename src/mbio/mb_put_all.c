@@ -21,12 +21,10 @@
  *
  * Author:	D. W. Caress
  * Date:	February 4, 1993
- *
- *
- *
  */
 
 #include <math.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -36,6 +34,7 @@
 #include "mb_status.h"
 
 /*--------------------------------------------------------------------*/
+// TODO(schwehr): Make usevalues a bool
 int mb_put_all(int verbose, void *mbio_ptr, void *store_ptr, int usevalues, int kind, int time_i[7], double time_d, double navlon,
                double navlat, double speed, double heading, int nbath, int namp, int nss, char *beamflag, double *bath,
                double *amp, double *bathacrosstrack, double *bathalongtrack, double *ss, double *ssacrosstrack,
@@ -49,7 +48,7 @@ int mb_put_all(int verbose, void *mbio_ptr, void *store_ptr, int usevalues, int 
 		fprintf(stderr, "dbg2       usevalues:  %d\n", usevalues);
 		fprintf(stderr, "dbg2       kind:       %d\n", kind);
 	}
-	if (verbose >= 2 && usevalues == true && kind != MB_DATA_COMMENT) {
+	if (verbose >= 2 && usevalues && kind != MB_DATA_COMMENT) {
 		fprintf(stderr, "dbg2       time_i[0]:  %d\n", time_i[0]);
 		fprintf(stderr, "dbg2       time_i[1]:  %d\n", time_i[1]);
 		fprintf(stderr, "dbg2       time_i[2]:  %d\n", time_i[2]);
@@ -63,7 +62,7 @@ int mb_put_all(int verbose, void *mbio_ptr, void *store_ptr, int usevalues, int 
 		fprintf(stderr, "dbg2       speed:      %f\n", speed);
 		fprintf(stderr, "dbg2       heading:    %f\n", heading);
 	}
-	if (verbose >= 2 && usevalues == true && kind == MB_DATA_DATA) {
+	if (verbose >= 2 && usevalues && kind == MB_DATA_DATA) {
 		fprintf(stderr, "dbg2       nbath:      %d\n", nbath);
 		if (verbose >= 3 && nbath > 0) {
 			fprintf(stderr, "dbg3       beam  flag  bath  crosstrack alongtrack\n");
@@ -84,7 +83,7 @@ int mb_put_all(int verbose, void *mbio_ptr, void *store_ptr, int usevalues, int 
 				fprintf(stderr, "dbg3       %4d   %f    %f     %f\n", i, ss[i], ssacrosstrack[i], ssalongtrack[i]);
 		}
 	}
-	if (verbose >= 2 && usevalues == true && kind == MB_DATA_COMMENT) {
+	if (verbose >= 2 && usevalues && kind == MB_DATA_COMMENT) {
 		fprintf(stderr, "dbg2       comment:    %s\n", comment);
 	}
 
@@ -93,7 +92,7 @@ int mb_put_all(int verbose, void *mbio_ptr, void *store_ptr, int usevalues, int 
 
 	/* insert values into structure if requested */
 	int status = MB_SUCCESS;
-	if (usevalues == true) {
+	if (usevalues) {
 		status = mb_insert(verbose, mbio_ptr, store_ptr, kind, time_i, time_d, navlon, navlat, speed, heading, nbath, namp, nss,
 		                   beamflag, bath, amp, bathacrosstrack, bathalongtrack, ss, ssacrosstrack, ssalongtrack, comment, error);
 	}

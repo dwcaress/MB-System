@@ -21,7 +21,7 @@ Additional Options:
 \fB\-elevscale\fP \fIvert_exag\fP
 \fB\-nowrz\fP
 \fB\-noview\fP
-\fB\-pallette\fP \fIpal\fP
+\fB\-palette\fP \fIpal\fP
 \fB\-newimage\fP \fItype|file\fP
 \fB\-white\fP
 \fB\-zmax\fP \fImaxclip\fP
@@ -214,7 +214,7 @@ file or specify the \-newimage option.
 or the name of a TIFF file that you wish draped over the bathymetry.
 
 The default type value is 2 for synthetic illumination with Haxby color
-map (this may be modified with the \fB\-pallette\fP option). Use 5 to shade
+map (this may be modified with the \fB\-palette\fP option). Use 5 to shade
 the image by slope value.
 If <type|file> is an image file name then that file is assumed to be
 orthorectified TIFF image (ending in .tif) that is co-registered
@@ -246,18 +246,18 @@ of the standard Haxby colors between 4000 and 3000 meters
 depth use \fB\-zmin \-4000 \-zmax \-3000\fP.
 
 .TP
-.B \-pallette
+.B \-palette
 \fIpal\fP
 
 The number of Color Lookup Table
 that is passed on to the \-W1/ option of mbm_grdtiff(1).
 The default value is 1 \- the Haxby color map.  For reference, the
 color tables values are:
-        \fIpallette\fP = 1:     Haxby colors [default]
-        \fIpallette\fP = 2:     high Intensity colors
-        \fIpallette\fP = 3:     low Intensity colors
-        \fIpallette\fP = 4:     grayscale
-        \fIpallette\fP = 5:     uniform grayscale
+        \fIpalette\fP = 1:     Haxby colors [default]
+        \fIpalette\fP = 2:     high Intensity colors
+        \fIpalette\fP = 3:     low Intensity colors
+        \fIpalette\fP = 4:     grayscale
+        \fIpalette\fP = 5:     uniform grayscale
 .br
 
 

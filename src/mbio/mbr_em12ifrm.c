@@ -144,20 +144,20 @@ int mbr_zero_em12ifrm(int verbose, char *data_ptr, int *error) {
 		data->roll_offset = 0.0;    /* roll offset (degrees) */
 		data->pitch_offset = 0.0;   /* pitch offset (degrees) */
 		data->heading_offset = 0.0; /* heading offset (degrees) */
-		data->em100_td = 0.0;       /* EM-100 tranducer depth (meters) */
-		data->em100_tx = 0.0;       /* EM-100 tranducer fore-aft
+		data->em100_td = 0.0;       /* EM-100 transducer depth (meters) */
+		data->em100_tx = 0.0;       /* EM-100 transducer fore-aft
 		                    offset (meters) */
-		data->em100_ty = 0.0;       /* EM-100 tranducer athwartships
+		data->em100_ty = 0.0;       /* EM-100 transducer athwartships
 		                    offset (meters) */
-		data->em12_td = 0.0;        /* EM-12 tranducer depth (meters) */
-		data->em12_tx = 0.0;        /* EM-12 tranducer fore-aft
+		data->em12_td = 0.0;        /* EM-12 transducer depth (meters) */
+		data->em12_tx = 0.0;        /* EM-12 transducer fore-aft
 		                    offset (meters) */
-		data->em12_ty = 0.0;        /* EM-12 tranducer athwartships
+		data->em12_ty = 0.0;        /* EM-12 transducer athwartships
 		                    offset (meters) */
-		data->em1000_td = 0.0;      /* EM-1000 tranducer depth (meters) */
-		data->em1000_tx = 0.0;      /* EM-1000 tranducer fore-aft
+		data->em1000_td = 0.0;      /* EM-1000 transducer depth (meters) */
+		data->em1000_tx = 0.0;      /* EM-1000 transducer fore-aft
 		                    offset (meters) */
-		data->em1000_ty = 0.0;      /* EM-1000 tranducer athwartships
+		data->em1000_ty = 0.0;      /* EM-1000 transducer athwartships
 		                    offset (meters) */
 		for (int i = 0; i < 128; i++)
 			data->spare_parameter[i] = '\0';
@@ -443,7 +443,6 @@ int mbr_em12ifrm_rd_data(int verbose, void *mbio_ptr, int *error) {
 	int *ss_centisecond;
 	int *ss_ping_number;
 	int *ss_num_beams;
-	int navdone;
 	char *result;
 	char NorS, EorW;
 	int latdeg, londeg;
@@ -623,12 +622,12 @@ int mbr_em12ifrm_rd_data(int verbose, void *mbio_ptr, int *error) {
 			}
 
 			/* use sidescan if saved */
-			if (*save_ss == true && *ss_ping_number == data->ping_number && *ss_swath_id == data->swath_id) {
+			if (*save_ss && *ss_ping_number == data->ping_number && *ss_swath_id == data->swath_id) {
 				done = true;
 			}
 
 			/* initialize sidescan if none saved */
-			else if (*save_ss == false) {
+			else if (!*save_ss) {
 				data->pixels_ssraw = 0;
 				for (int i = 0; i < MBF_EM12IFRM_MAXBEAMS; i++) {
 					beamlist[i] = 0;
@@ -660,7 +659,7 @@ int mbr_em12ifrm_rd_data(int verbose, void *mbio_ptr, int *error) {
 	if (status == MB_SUCCESS && mb_io_ptr->mbfp2 != NULL && !done && *save_data == MB_DATA_NONE) {
 		/* read sidescan until it matches ping number and side */
 		*ss_ping_number = 0;
-		while (!done && *ss_available == true && *ss_ping_number <= data->ping_number) {
+		while (!done && *ss_available && *ss_ping_number <= data->ping_number) {
 			/* read sidescan header from sidescan file */
 			if ((read_status = fread(line, 1, MBF_EM12IFRM_SSHEADER_SIZE, mb_io_ptr->mbfp2)) == MBF_EM12IFRM_SSHEADER_SIZE) {
 				mb_io_ptr->file2_bytes += read_status;
@@ -801,8 +800,8 @@ int mbr_em12ifrm_rd_data(int verbose, void *mbio_ptr, int *error) {
 		mb_get_time(verbose, ptime_i, &ptime_d);
 
 		/* see if nav is needed and potentially available */
-		if (*nav_available == true && (mb_io_ptr->nfix == 0 || mb_io_ptr->fix_time_d[mb_io_ptr->nfix - 1] < ptime_d)) {
-			navdone = false;
+		if (*nav_available && (mb_io_ptr->nfix == 0 || mb_io_ptr->fix_time_d[mb_io_ptr->nfix - 1] < ptime_d)) {
+			bool navdone = false;
 			while (!navdone) {
 				if ((result = fgets(line, MBF_EM12IFRM_RECORD_SIZE, mb_io_ptr->mbfp3)) != line) {
 					navdone = true;
@@ -1138,7 +1137,7 @@ int mbr_rt_em12ifrm(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 				ping->beam_center_sample[i] = 0;
 				ping->beam_start_sample[i] = 0;
 			}
-			if (*save_ss == false) {
+			if (!*save_ss) {
 				ping->pixels_ssraw = data->pixels_ssraw;
 				ping->ss_mode = data->ss_mode;
 				for (int i = 0; i < ping->beams_bath; i++) {

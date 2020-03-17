@@ -8326,6 +8326,9 @@ EncodeEM4ImagerySpecific(unsigned char *sptr, const gsfSensorImagery *sdata)
 static int
 EncodeKMALLImagerySpecific(unsigned char *sptr, const gsfSensorImagery *sdata)
 {
+    // MBSYSTEM MODIFICATION
+    (void)sdata;  // Unused parameter
+
     unsigned char  *p = sptr;
 
    /* The next 32 bytes are our spare for later use */

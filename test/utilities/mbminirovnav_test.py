@@ -40,9 +40,6 @@ class MbminirovnavTest(unittest.TestCase):
     self.assertIn('USBL tracking and CTD day files from the MBARI', output)
     self.assertIn('usage:', output)
     self.assertIn('--rov-dive-start=yyyymmddhhmmss', output)
-    self.assertIn('dbg2', output)
-    self.assertIn('input_nav_file:', output)
-    self.assertIn('rov_dive_end_time_set:', output)
 
   # TODO(schwehr): Add tests of actual usage.
 

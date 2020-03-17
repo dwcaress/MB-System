@@ -1,7 +1,6 @@
 #!/usr/bin/env perl
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_grid.perl	6/11/99
-#    $Id$
 #
 #    Copyright (c) 1999-2019 by
 #    D. W. Caress (caress@mbari.org)
@@ -51,8 +50,6 @@
 #   Moss Landing, CA 95039
 #   June 11, 1999
 #
-# Version:
-#   $Id$
 #
 #
 #
@@ -92,7 +89,6 @@ $bathdef = 		($opt_Z || $opt_z);
 if ($help)
 	{
 	print "\n$program_name:\n";
-	print "\nVersion: $Id$\n";
         print "Macro to generate a shellscript of MB-System commands \n";
         print "which, when executed, will generate a grid or mosaic of the \n";
         print "specified swath sonar data. The grid or mosaic may be of \n";

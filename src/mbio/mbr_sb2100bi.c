@@ -1293,11 +1293,8 @@ int mbr_sb2100bi_rd_sr(int verbose, FILE *mbfp, struct mbsys_sb2100_struct *stor
 /*--------------------------------------------------------------------*/
 int mbr_sb2100bi_rd_data(int verbose, void *mbio_ptr, char *store_ptr, int *error) {
 	int status = MB_SUCCESS;
-	char *label;
-	int *label_save_flag;
 	int type;
 	short record_length;
-	char *record_length_ptr;
 	char record_length_fh_str[8];
 	int record_length_fh;
 
@@ -1316,9 +1313,9 @@ int mbr_sb2100bi_rd_data(int verbose, void *mbio_ptr, char *store_ptr, int *erro
 	FILE *mbfp = mb_io_ptr->mbfp;
 
 	/* get saved values */
-	label = (char *)mb_io_ptr->save_label;
-	label_save_flag = (int *)&mb_io_ptr->save_label_flag;
-	record_length_ptr = (char *)&record_length;
+	char *label = (char *)mb_io_ptr->save_label;
+	int *label_save_flag = (int *)&mb_io_ptr->save_label_flag;
+	// char *record_length_ptr = (char *)&record_length;
 
 	/* initialize everything to zeros */
 	mbr_zero_sb2100bi(verbose, store_ptr, error);
@@ -1329,7 +1326,7 @@ int mbr_sb2100bi_rd_data(int verbose, void *mbio_ptr, char *store_ptr, int *erro
 		/* if no label saved get next record label */
 		status = MB_SUCCESS;
 		*error = MB_ERROR_NO_ERROR;
-		if (*label_save_flag == false) {
+		if (!*label_save_flag) {
 			/* get next 10 bytes */
 			if ((status = fread(&label[0], 10, 1, mbfp)) != 1) {
 				status = MB_FAILURE;
@@ -2219,7 +2216,7 @@ int mbr_sb2100bi_wr_data(int verbose, void *mbio_ptr, char *store_ptr, int *erro
 	int status = MB_SUCCESS;
 
 	/* write file header if not written yet */
-	if (mb_io_ptr->save_flag == false) {
+	if (!mb_io_ptr->save_flag) {
 		status = mbr_sb2100bi_wr_fh(verbose, mbfp, error);
 		mb_io_ptr->save_flag = true;
 	}

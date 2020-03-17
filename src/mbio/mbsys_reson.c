@@ -69,7 +69,7 @@ int mbsys_reson_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *error)
 	store->pitch_offset = 0;      /* pitch offset (degrees) */
 	store->heading_offset = 0;    /* heading offset (degrees) */
 	store->time_delay = 0;        /* positioning system delay (sec) */
-	store->transducer_depth = 0;  /* tranducer depth (meters) */
+	store->transducer_depth = 0;  /* transducer depth (meters) */
 	store->transducer_height = 0; /* reference height (meters) */
 	store->transducer_x = 0;      /* reference fore-aft offset (meters) */
 	store->transducer_y = 0;      /* reference athwartships
@@ -242,6 +242,9 @@ int mbsys_reson_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
                         double *navlat, double *speed, double *heading, int *nbath, int *namp, int *nss, char *beamflag,
                         double *bath, double *amp, double *bathacrosstrack, double *bathalongtrack, double *ss,
                         double *ssacrosstrack, double *ssalongtrack, char *comment, int *error) {
+	(void)ss;  // Unused arg
+	(void)ssacrosstrack;  // Unused arg
+	(void)ssalongtrack;  // Unused arg
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -453,6 +456,10 @@ int mbsys_reson_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, i
                        double navlat, double speed, double heading, int nbath, int namp, int nss, char *beamflag, double *bath,
                        double *amp, double *bathacrosstrack, double *bathalongtrack, double *ss, double *ssacrosstrack,
                        double *ssalongtrack, char *comment, int *error) {
+	(void)nss;  // Unused arg
+	(void)ss;  // Unused arg
+	(void)ssacrosstrack;  // Unused arg
+	(void)ssalongtrack;  // Unused arg
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");

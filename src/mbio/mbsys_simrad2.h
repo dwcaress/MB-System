@@ -1083,6 +1083,10 @@ struct mbsys_simrad2_struct {
 	struct mbsys_simrad2_watercolumn_struct *wc;
 };
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* system specific function prototypes */
 int mbsys_simrad2_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *error);
 int mbsys_simrad2_survey_alloc(int verbose, void *mbio_ptr, void *store_ptr, int *error);
@@ -1134,5 +1138,9 @@ int mbsys_simrad2_insert_svp(int verbose, void *mbio_ptr, void *store_ptr, int n
 int mbsys_simrad2_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_ptr, int *error);
 int mbsys_simrad2_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel_size_set, double *pixel_size,
                          int swath_width_set, double *swath_width, int pixel_int, int *error);
+
+#ifdef __cplusplus
+}  /* extern "C" */
+#endif
 
 #endif  /* MBSYS_SIMRAD2_H_ */

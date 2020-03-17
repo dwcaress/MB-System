@@ -1,32 +1,9 @@
-# Format MBF_GSFGENMB (format 121, Generic Sensor Format, GSF)
+### MB-System
 
-## Introduction
+Source Directory: **src/gsf/**
 
-The libgsf library code is released by Leidos under a LGPL2.1 license, and is
-included directly into the MB-System source code with minor changes. 
+This directory contains the source files for the Generic Sensor Format (GSF) library libgsf. This library has been written and maintained by Leidos (formerly Science Applications International Corporation, or SAIC) through contracts with the U.S. Navy since 1994. Within MB-System, this library is used to support the reading and writing of seafloor mapping data in GSF files as format 121.
 
-Starting with release 5.7.6beta4, command `mbformat -F121` outputs the version of the 
-GSF library embedded in MB-System as a part of the format description.
+The source files have been modified from the Leidos release to achieve portability and conformance to modern C and C++ standards. These source files have been released by Leidos under the terms of the LGPLv2.1, which is different than the GPL3 licensing applied to most of the source files in MB-System distributions. 
 
-## Changes required for integration with MB-System
-
-Three changes are required in gsf.c and gsf_indx.c to avoid redefinition of several 
-key system functions (e.g. fseek); these redefinitions are avoided using a preprocessor 
-command that is only activated in the MB-System build system. The other change is
-to set MAX_GSF_SF_MULT_VALUE in gsf_ft.h from ULONG_MAX to a hard-wired value of
-4294967295. The problem is that this value is used for limiting scaling and
-needs to be the same on every system because four byte insigned integers are 
-always used for the scaled storage. The value of ULONG_MAX varies amongst operating 
-system implementations.
-
-## Updating the source files to be consistent with the rest of the repository
-
-The source files in the Leidos distribution tarballs are in dos text form and have
-odd permissions. When importing a new version from upstream (Leidos), run the following 
-commands before committing the update:
-
-```bash
-dos2unix *.[ch]
-perl -pi -e 's/\s+\n/\n/g' *.[ch]
-chmod 640 *.[ch] *.pdf
-```
+Information about the library, including the history and licensing, can be found in the file **src/gsf/gsf_lib.pdf**.

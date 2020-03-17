@@ -59,13 +59,10 @@ Version 5.0
 --add-crossing=file1:section1/file2:section2
 <BR>
 
---set-tie=file1/file2/xoffset/yoffset/zoffset
+--set-tie=file1[:section1]/file2[:section2]/xoffset/yoffset/zoffset[/xsigma/ysigma/zsigma]
 <BR>
 
---set-tie=file1:section1/file2:section2/xoffset/yoffset/zoffset
-<BR>
-
---set-tie=file1:section1/file2:section2/xoffset/yoffset/zoffset/xsigma/ysigma/zsigma
+--set-tie=file1[:section1]/file2[:section2]///zoffset
 <BR>
 
 --set-tie-xyz=file1:section1/file2:section2
@@ -308,13 +305,22 @@ This option unsets (deletes) the specified global tie in the
 
 <DD>
 This option adds the specified crossing to the <B>MBnavadjust</B> project.
-<DT><B>--set-tie=file1:section1/file2:section2/xoffset/yoffset/zoffset[/xsigma/ysigma/zsigma]</B>
+<DT><B>--set-tie=file1[:section1]/file2[:section2]/[xoffset]/[yoffset]/zoffset[/xsigma/ysigma/zsigma]</B>
 
 <DD>
 This option adds the specified tie to the <B>MBnavadjust</B> project.
 If the corresponding crossing does not already exist, it will be
-created. If the uncertainties in the tie (xsigma, ysigma, zsigma)
+created. If a section is not specified, then it is assumed to be the first value,
+i.e. 0. If the tie offsets are specified but the uncertainties (xsigma, ysigma, zsigma)
 are not specified, then xsigma = ysigma = 10 m and zsigma = 0.5 m are assumed.
+<DT><B>--set-tie=file1[:section1]/file2[:section2]///zoffset</B>
+
+<DD>
+This option modifies the z offset value of the specified tie in the <B>MBnavadjust</B> project.
+If a section is not specified, then it is assumed to be the first value,
+i.e. 0. The specified tie must already exist, and this
+command changes the z offset value while leaving the x and y offsets and the
+uncertainties unchanged.
 <DT><B>--set-tie-xyz=file1:section1/file2:section2</B>
 
 <DD>

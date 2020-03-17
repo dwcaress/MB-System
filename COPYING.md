@@ -8,24 +8,23 @@ source software package for the processing and display of swath sonar data.
 This file is located at the top of the MB-System source code distribution
 directory structure.
 
-Last Updated October 21, 2019
+Last Updated January 16, 2020
 
 -------------------------------------------------------------------------------
 
-MB-System Copyright (C) 1993-2019 by
+MB-System Copyright (C) 1993-2020 by
 
-David W. Caress  
-(caress@mbari.org)  
-Monterey Bay Aquarium Research Institute  
+David W. Caress
+(caress@mbari.org)
+Monterey Bay Aquarium Research Institute
 Moss Landing, CA 95039
 
-Dale N. Chayes (dale@ccom.unh.edu)  
-Center for Coastal & Ocean Mapping/Joint Hydrographic Center  
-University of New Hampshire  
+Dale N. Chayes (dale@ccom.unh.edu)
+Center for Coastal & Ocean Mapping/Joint Hydrographic Center
+University of New Hampshire
 Durham, New Hampshire 03824
-  
-All Rights Reserved  
-All Wrongs Remembered
+
+All Rights Reserved
 
 -------------------------------------------------------------------------------
 
@@ -37,25 +36,18 @@ more restrictive GNU GPL license in order to insure that anyone who distributes
 software based in whole or in part on MB-System also distributes their
 modified MB-System source code and any additional source code.
 
-The file "GPL", also located at the top of the MB-System source code
+The file "GPL.md", also located at the top of the MB-System source code
 distribution directory structure, contains the text of the GNU GPL version 3.
-
-The GNU GPL also prohibits the distribution of proprietary executables linked
-with MB-System libraries unless the source code is also distributed. We waive
-this restriction on distributing proprietary compiled programs for specific
-software products if and only if those software products meet the following
-two conditions:  
-
-1. The software product was created, sold, and delivered to customers using source code derived from MB-System release 4.6 distributions.  
-2. The software product was sold and delivered to customers prior to January 1, 2001.
+This text and associated explanations are available at the GNU Project website
+https://www.gnu.org/licenses/gpl-3.0.en.html
 
 The MB-System distribution includes some source code derived from packages that
 are distributed separately and have been authored by programmers other than the
-MB-System team. This includes:  
+MB-System team. This includes:
 
-* The Generic Sensor Format (GSF) library source located in mbsystem/src/gsf. The GSF package is distributed by the Science Applications International Corporation under contract to the Naval Oceanographic Office.  
-* The SURF API (SAPI) library source located in mbsystem/src/surf. The SAPI package has been released under the GNU General Public License by Atlas Hydrographic.  
-* The MR1PR library source located in mbsystem/src/mr1pr. This package has been openly released by the Hawaii Mapping Research Group.  
+* The Generic Sensor Format (GSF) library source located in mbsystem/src/gsf. The GSF package is maintained and distributed by Leidos Corporation under contract to the United States Naval Oceanographic Office. The current GSF source distribution is made available by Leidos at https://www.leidos.com/products/ocean-marine#gsf using the LGPLv2.1 license.
+* The SURF API (SAPI) library source located in mbsystem/src/surf. The SAPI package was released under the GNU General Public License by Atlas Hydrographic in 2001.
+* The MR1PR library source located in mbsystem/src/mr1pr. This package was openly released by primary author Roger Davis of the Hawaii Mapping Research Group in 2000.
 * The mb_mergesort() function found in mbsystem/src/mbio/mb_esf.c derives from the GNU-Darwin Distribution. This code is released under both the Apple Public Source License Version 1.1 and the BSD license, with original copyright by the Regents of the University of California.
 
 The MB-System does not come with any warranties, nor is it guaranteed to work

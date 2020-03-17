@@ -1,0 +1,50 @@
+
+Swath Data File:      TN136HS.309.snipped.mb171
+MBIO Data Format ID:  171
+Format name:          MBF_HS10JAMS
+Informal Description: Furuno HS-10 multibeam format,
+Attributes:           45 beams bathymetry and amplitude,
+                      ascii, JAMSTEC
+
+Data Totals:
+Number of Records:                           2
+Bathymetry Data (45 beams):
+  Number of Beams:               90
+  Number of Good Beams:          90     100.00%
+  Number of Zero Beams:           0      0.00%
+  Number of Flagged Beams:        0      0.00%
+Amplitude Data (45 beams):
+  Number of Beams:               90
+  Number of Good Beams:          90     100.00%
+  Number of Zero Beams:           0      0.00%
+  Number of Flagged Beams:        0      0.00%
+Sidescan Data (0 pixels):
+  Number of Pixels:               0
+  Number of Good Pixels:          0      0.00%
+  Number of Zero Pixels:          0      0.00%
+  Number of Flagged Pixels:       0      0.00%
+
+Navigation Totals:
+Total Time:             0.0014 hours
+Total Track Length:     0.0023 km
+Average Speed:          1.6734 km/hr ( 0.9045 knots)
+
+Start of Data:
+Time:  11 05 2001 00:01:44.000000  JD309 (2001-11-05T00:01:44.000000)
+Lon:  -124.501600000     Lat:    40.838483333     Depth:   462.0000 meters
+Speed:  0.0000 km/hr ( 0.0000 knots)  Heading: 324.5000 degrees
+Sonar Depth:    0.0000 m  Sonar Altitude:    0.0000 m
+
+End of Data:
+Time:  11 05 2001 00:01:49.000000  JD309 (2001-11-05T00:01:49.000000)
+Lon:  -124.501616667     Lat:    40.838500000     Depth:   462.0000 meters
+Speed:  1.6734 km/hr ( 0.9045 knots)  Heading: 324.9000 degrees
+Sonar Depth:    0.0000 m  Sonar Altitude:    0.0000 m
+
+Limits:
+Minimum Longitude:    -124.504594748   Maximum Longitude:    -124.498706489
+Minimum Latitude:       40.836883208   Maximum Latitude:       40.840053358
+Minimum Sonar Depth:     0.0000   Maximum Sonar Depth:     0.0000
+Minimum Altitude:        0.0000   Maximum Altitude:        0.0000
+Minimum Depth:         450.0000   Maximum Depth:         467.0000
+Minimum Amplitude:       0.0000   Maximum Amplitude:       0.0000

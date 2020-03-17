@@ -117,7 +117,7 @@ double con, n, ml;	/* cone constant, small m			*/
 /* Forward equations
   -----------------*/
 delta_lon = adjust_lon(lon - lon_center);
-sincos(lat, &sin_phi, &cos_phi);
+gsincos(lat, &sin_phi, &cos_phi);
 
 /* This part was in the fortran code and is for the spherical form 
 ----------------------------------------------------------------*/

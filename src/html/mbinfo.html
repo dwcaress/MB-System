@@ -11,7 +11,7 @@
 <CENTER><H3><U>MB-System Unix Manual Page</U></H3></CENTER>
 <PRE>
 <H1>mbinfo</H1>
-Section:  MB-System 5.0  (1)<BR>Updated:  3 June 2013 <BR><A HREF="#index">Index</A>
+Section:  MB-System 5.0  (1)<BR>Updated:  31 December 2019 <BR><A HREF="#index">Index</A>
 <HR>
 
 <A NAME="lbAB">&nbsp;</A>
@@ -28,8 +28,8 @@ Version 5.0
 <H2>SYNOPSIS</H2>
 
 <B>mbinfo</B> [<B>-B</B><I>yr/mo/da/hr/mn/sc</I> <B>-C -E</B><I>yr/mo/da/hr/mn/sc</I>
-<B>-F</B><I>format</I> <B>-G</B> <B>-I</B><I>filename</I>
-<B>-L</B><I>lonflip</I> <B>-M</B><I>londim/latdim</I>
+<B>-F</B><I>format</I> <B>-G</B> <B>-I</B><I>filename</I> <B>-L</B><I>lonflip</I>
+<B>-M</B><I>londim/latdim[/lonmin/lonmax/latmin/latmax]</I>
 <B>-N</B> <B>-O</B> <B>-P</B><I>ping</I>
 <B>-R</B><I>west/east/south/north</I> <B>-S</B><I>speed</I> <B>-W</B>
 <B>-X</B><I>outputformat</I> <B>-V -H</B>]
@@ -50,21 +50,21 @@ than the maximum possible (number of data records times the
 maximum number of data supported for the particular data format)
 for formats supporting variable numbers of beams or pixels.
 Also reported are the numbers and percentages of good, zero,
-and flagged data values (good values are those which are neither
-zero nor flagged as bad).
+and flagged data values. Good values are those which are neither
+zero nor flagged as bad.
 <P>
 An important function of <B>mbinfo</B> is to generate &quot;.inf&quot;
 files that may be parsed by other <B>MB-System</B> programs
 and macros. Programs such as <B>mbgrid</B> and <B>mbmosaic</B>,
 read &quot;.inf&quot; files, when available, to
-determine whether input swath data files actually contain
+determine whether input swath data files contain
 any data in the area of interest. The efficiency of these
 programs is enhanced by their ability to avoid reading files
 with no data in the area to be gridded or mosaiced. Programs
 such as <B>mbm_plot</B> and <B>mbm_grid</B> run <B>mbinfo</B> on
 input files to determine the data bounds. The availability
 of &quot;.inf&quot; files allows this information to be determined without
-having to read through each swath file.To create an &quot;.inf&quot; file, simply direct the
+having to read through each swath file. To create an &quot;.inf&quot; file, simply direct the
 output of <B>mbinfo</B> to a file named by adding the
 suffix &quot;.inf&quot; to the input swath
 data filename. This can also be accomplished using the <B>-O</B>
@@ -89,7 +89,7 @@ and/or windowed in time and space.  Comments in the data
 stream may also be printed out.
 The results are dumped to stdout.
 <P>
-If pings are averaged (<I>pings</I> &gt; 2)
+If pings are averaged (<I>pings</I> &gt; 2),
 <B>mbinfo</B> estimates the variance for each of the bathymetry beams
 and sidescan pixels
 by reading a set number of pings and then finding the
@@ -109,7 +109,10 @@ maximum longitude and latitude of the bounding box, and
 read the data a second time. Each bin in which a sounding or
 pixel falls will be set to 1. After the second reading pass,
 the data location mask will be output at the end of the
-<B>mbinfo</B> output.
+<B>mbinfo</B> output. If the data bounding box is already known, then
+it can be added to the <B>-M</B> command (e.g.
+<B>-M</B><I>londim/latdim[/lonmin/lonmax/latmin/latmax]</I>). In this
+case, the data will only be read once.
 <P>
 <A NAME="lbAF">&nbsp;</A>
 <H2>MB-SYSTEM AUTHORSHIP</H2>
@@ -242,19 +245,23 @@ then the longitude values will be in
 the range from -180 to 180 degrees. If <I>lonflip</I>=1
 then the longitude values will be in
 the range from 0 to 360 degrees.
-Default: <B>mbinfo</B> selects the bext longitude range based
+Default: <B>mbinfo</B> selects the best longitude range based
 on the first data.
 <DT><B>-M</B>
 
 <DD>
-<I>londim/latdim</I>
+<I>londim/latdim[/lonmin/lonmax/latmin/latmax]</I>
 <BR>
 
 The program output can be extended to include a coarse
 mask representing where data lies within the file's bounding
 box. This mask is shown as a table of 0's and 1's, where
 the 1's indicate bins with data. The dimensions of the mask
-are specified with the <B>-M</B><I>londim/latdim</I> option.
+are specified with the <I>londim</I> and <I>latdim</I> values.
+If the data bounding box is not specified by including
+<I>lonmin</I>, <I>lonmax</I>, <I>latmin</I>, and <I>latmax</I>, then
+the data will be read twice, with the bounding box being determined
+during the first read.
 <DT><B>-N</B>
 
 <DD>
@@ -315,7 +322,7 @@ Default: <I>west</I>=-360, east<I>=360</I>, <I>south</I>=-90, <I>north</I>=90.
 
 Sets the minimum speed in km/hr (5.5 kts ~ 10 km/hr) allowed in
 the input data; pings associated with a smaller ship speed will not be
-copied. Default: <I>speed</I> = 0.
+used to calculate statistics. Default: <I>speed</I> = 0.
 <DT><B>-T</B>
 
 <DD>
@@ -545,7 +552,7 @@ obtaining:
 <A NAME="lbAJ">&nbsp;</A>
 <H2>BUGS</H2>
 
-No bugs, only features. Maybe too many features...
+No currently known bugs.
 <P>
 
 <HR>
@@ -565,7 +572,7 @@ No bugs, only features. Maybe too many features...
 </PRE>
 
 <CENTER><P><BR>
-Last Updated: 3 June 2013</P></CENTER>
+Last Updated: 31 December 2019</P></CENTER>
 
 <HR>
 

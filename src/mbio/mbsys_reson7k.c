@@ -98,59 +98,6 @@ int mbsys_reson7k_zero7kheader(int verbose, s7k_header *header, int *error) {
 
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *error) {
-  s7kr_reference *reference;
-  s7kr_sensoruncal *sensoruncal;
-  s7kr_sensorcal *sensorcal;
-  s7kr_position *position;
-  s7kr_customattitude *customattitude;
-  s7kr_tide *tide;
-  s7kr_altitude *altitude;
-  s7kr_motion *motion;
-  s7kr_depth *depth;
-  s7kr_svp *svp;
-  s7kr_ctd *ctd;
-  s7kr_geodesy *geodesy;
-  s7kr_rollpitchheave *rollpitchheave;
-  s7kr_heading *heading;
-  s7kr_surveyline *surveyline;
-  s7kr_navigation *navigation;
-  s7kr_attitude *attitude;
-  s7kr_fsdwss *fsdwsslo;
-  s7kr_fsdwss *fsdwsshi;
-  s7kr_fsdwsb *fsdwsb;
-  s7kr_bluefin *bluefin;
-  s7kr_processedsidescan *processedsidescan;
-  s7kr_volatilesettings *volatilesettings;
-  s7kr_configuration *configuration;
-  s7kr_matchfilter *matchfilter;
-  s7kr_v2firmwarehardwareconfiguration *v2firmwarehardwareconfiguration;
-  s7kr_beamgeometry *beamgeometry;
-  s7kr_calibration *calibration;
-  s7kr_bathymetry *bathymetry;
-  s7kr_backscatter *backscatter;
-  s7kr_beam *beam;
-  s7kr_verticaldepth *verticaldepth;
-  s7kr_tvg *tvg;
-  s7kr_image *image;
-  s7kr_v2pingmotion *v2pingmotion;
-  s7kr_v2detectionsetup *v2detectionsetup;
-  s7kr_v2amplitudephase *v2amplitudephase;
-  s7kr_v2beamformed *v2beamformed;
-  s7kr_v2bite *v2bite;
-  s7kr_v27kcenterversion *v27kcenterversion;
-  s7kr_v28kwetendversion *v28kwetendversion;
-  s7kr_v2detection *v2detection;
-  s7kr_v2rawdetection *v2rawdetection;
-  s7kr_v2snippettimeseries *v2snippettimeseries;
-  s7kr_v2snippet *v2snippet;
-  s7kr_calibratedsnippettimeseries *calibratedsnippettimeseries;
-  s7kr_calibratedsnippet *calibratedsnippet;
-  s7kr_installation *installation;
-  s7kr_systemeventmessage *systemeventmessage;
-  s7kr_fileheader *fileheader;
-  s7kr_remotecontrolsettings *remotecontrolsettings;
-  s7kr_reserved *reserved;
-
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -196,7 +143,7 @@ int mbsys_reson7k_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *erro
     store->time_i[i] = 0;
 
   /* Reference point information (record 1000) */
-  reference = &store->reference;
+  s7kr_reference *reference = &store->reference;
   mbsys_reson7k_zero7kheader(verbose, &reference->header, error);
   reference->offset_x = 0.0;
   reference->offset_y = 0.0;
@@ -204,7 +151,7 @@ int mbsys_reson7k_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *erro
   reference->water_z = 0.0;
 
   /* Sensor uncalibrated offset position information (record 1001) */
-  sensoruncal = &store->sensoruncal;
+  s7kr_sensoruncal *sensoruncal = &store->sensoruncal;
   mbsys_reson7k_zero7kheader(verbose, &sensoruncal->header, error);
   sensoruncal->offset_x = 0.0;
   sensoruncal->offset_y = 0.0;
@@ -214,7 +161,7 @@ int mbsys_reson7k_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *erro
   sensoruncal->offset_yaw = 0.0;
 
   /* Sensor calibrated offset position information (record 1002) */
-  sensorcal = &store->sensorcal;
+  s7kr_sensorcal *sensorcal = &store->sensorcal;
   mbsys_reson7k_zero7kheader(verbose, &sensorcal->header, error);
   sensorcal->offset_x = 0.0;
   sensorcal->offset_y = 0.0;
@@ -224,7 +171,7 @@ int mbsys_reson7k_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *erro
   sensorcal->offset_yaw = 0.0;
 
   /* Position (record 1003) */
-  position = &store->position;
+  s7kr_position *position = &store->position;
   mbsys_reson7k_zero7kheader(verbose, &position->header, error);
   position->datum = 0;
   position->latency = 0.0;
@@ -237,7 +184,7 @@ int mbsys_reson7k_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *erro
   position->method = 0;
 
   /* Custom attitude (record 1004) */
-  customattitude = &store->customattitude;
+  s7kr_customattitude *customattitude = &store->customattitude;
   mbsys_reson7k_zero7kheader(verbose, &customattitude->header, error);
   customattitude->bitfield = 0;
   customattitude->reserved = 0;
@@ -254,7 +201,7 @@ int mbsys_reson7k_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *erro
   customattitude->heaverate = NULL;
 
   /* Tide (record 1005) */
-  tide = &store->tide;
+  s7kr_tide *tide = &store->tide;
   mbsys_reson7k_zero7kheader(verbose, &tide->header, error);
   tide->tide = 0.0;
   tide->source = 0;
@@ -269,12 +216,12 @@ int mbsys_reson7k_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *erro
   tide->utm_zone = 0;
 
   /* Altitude (record 1006) */
-  altitude = &store->altitude;
+  s7kr_altitude *altitude = &store->altitude;
   mbsys_reson7k_zero7kheader(verbose, &altitude->header, error);
   altitude->altitude = 0.0;
 
   /* Motion over ground (record 1007) */
-  motion = &store->motion;
+  s7kr_motion *motion = &store->motion;
   mbsys_reson7k_zero7kheader(verbose, &motion->header, error);
   motion->bitfield = 0;
   motion->reserved = 0;
@@ -289,7 +236,7 @@ int mbsys_reson7k_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *erro
   motion->za = NULL;
 
   /* Depth (record 1008) */
-  depth = &store->depth;
+  s7kr_depth *depth = &store->depth;
   mbsys_reson7k_zero7kheader(verbose, &depth->header, error);
   depth->descriptor = 0;
   depth->correction = 0;
@@ -297,7 +244,7 @@ int mbsys_reson7k_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *erro
   depth->depth = 0.0;
 
   /* Sound velocity profile (record 1009) */
-  svp = &store->svp;
+  s7kr_svp *svp = &store->svp;
   mbsys_reson7k_zero7kheader(verbose, &svp->header, error);
   svp->position_flag = 0;
   svp->reserved1 = 0;
@@ -310,7 +257,7 @@ int mbsys_reson7k_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *erro
   svp->sound_velocity = NULL;
 
   /* CTD (record 1010) */
-  ctd = &store->ctd;
+  s7kr_ctd *ctd = &store->ctd;
   mbsys_reson7k_zero7kheader(verbose, &ctd->header, error);
   ctd->frequency = 0.0;
   ctd->velocity_source_flag = 0;
@@ -332,7 +279,7 @@ int mbsys_reson7k_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *erro
   ctd->absorption = NULL;
 
   /* Geodesy (record 1011) */
-  geodesy = &store->geodesy;
+  s7kr_geodesy *geodesy = &store->geodesy;
   mbsys_reson7k_zero7kheader(verbose, &geodesy->header, error);
   for (int i = 0; i < 32; i++)
     geodesy->spheroid[i] = '\0';
@@ -367,19 +314,19 @@ int mbsys_reson7k_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *erro
     geodesy->reserved3[i] = '\0';
 
   /* Roll pitch heave (record 1012) */
-  rollpitchheave = &store->rollpitchheave;
+  s7kr_rollpitchheave *rollpitchheave = &store->rollpitchheave;
   mbsys_reson7k_zero7kheader(verbose, &rollpitchheave->header, error);
   rollpitchheave->roll = 0.0;
   rollpitchheave->pitch = 0.0;
   rollpitchheave->heave = 0.0;
 
   /* Heading (record 1013) */
-  heading = &store->heading;
+  s7kr_heading *heading = &store->heading;
   mbsys_reson7k_zero7kheader(verbose, &heading->header, error);
   heading->heading = 0.0;
 
   /* Survey Line (record 1014) */
-  surveyline = &store->surveyline;
+  s7kr_surveyline *surveyline = &store->surveyline;
   mbsys_reson7k_zero7kheader(verbose, &surveyline->header, error);
   surveyline->n = 0;
   surveyline->type = 0;
@@ -391,7 +338,7 @@ int mbsys_reson7k_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *erro
   surveyline->longitude = NULL;
 
   /* Navigation (record 1015) */
-  navigation = &store->navigation;
+  s7kr_navigation *navigation = &store->navigation;
   mbsys_reson7k_zero7kheader(verbose, &navigation->header, error);
   navigation->vertical_reference = 0;
   navigation->latitude = 0.0;
@@ -404,7 +351,7 @@ int mbsys_reson7k_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *erro
   navigation->heading = 0.0;
 
   /* Attitude (record 1016) */
-  attitude = &store->attitude;
+  s7kr_attitude *attitude = &store->attitude;
   mbsys_reson7k_zero7kheader(verbose, &attitude->header, error);
   attitude->n = 0;
   attitude->nalloc = 0;
@@ -415,7 +362,7 @@ int mbsys_reson7k_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *erro
   attitude->heading = NULL;
 
   /* Edgetech FS-DW low frequency sidescan (record 3000) */
-  fsdwsslo = &store->fsdwsslo;
+  s7kr_fsdwss *fsdwsslo = &store->fsdwsslo;
   mbsys_reson7k_zero7kheader(verbose, &fsdwsslo->header, error);
   fsdwsslo->msec_timestamp = 0;
   fsdwsslo->ping_number = 0;
@@ -445,7 +392,7 @@ int mbsys_reson7k_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *erro
   }
 
   /* Edgetech FS-DW high frequency sidescan (record 3000) */
-  fsdwsshi = &store->fsdwsshi;
+  s7kr_fsdwss *fsdwsshi = &store->fsdwsshi;
   mbsys_reson7k_zero7kheader(verbose, &fsdwsshi->header, error);
   fsdwsshi->msec_timestamp = 0;
   fsdwsshi->ping_number = 0;
@@ -475,7 +422,7 @@ int mbsys_reson7k_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *erro
   }
 
   /* Edgetech FS-DW subbottom (record 3001) */
-  fsdwsb = &store->fsdwsb;
+  s7kr_fsdwsb *fsdwsb = &store->fsdwsb;
   mbsys_reson7k_zero7kheader(verbose, &fsdwsb->header, error);
   fsdwsb->msec_timestamp = 0;
   fsdwsb->ping_number = 0;
@@ -503,7 +450,7 @@ int mbsys_reson7k_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *erro
   fsdwsb->channel.data = NULL;
 
   /* Bluefin data frames (record 3100) */
-  bluefin = &store->bluefin;
+  s7kr_bluefin *bluefin = &store->bluefin;
   mbsys_reson7k_zero7kheader(verbose, &bluefin->header, error);
   bluefin->msec_timestamp = 0;
   bluefin->number_frames = 0;
@@ -580,7 +527,7 @@ int mbsys_reson7k_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *erro
   }
 
   /* Processed sidescan - MB-System extension to 7k format (record 3199) */
-  processedsidescan = &store->processedsidescan;
+  s7kr_processedsidescan *processedsidescan = &store->processedsidescan;
   mbsys_reson7k_zero7kheader(verbose, &processedsidescan->header, error);
   processedsidescan->serial_number = 0;
   processedsidescan->ping_number = 0;
@@ -598,7 +545,7 @@ int mbsys_reson7k_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *erro
   }
 
   /* Reson 7k volatile sonar settings (record 7000) */
-  volatilesettings = &store->volatilesettings;
+  s7kr_volatilesettings *volatilesettings = &store->volatilesettings;
   mbsys_reson7k_zero7kheader(verbose, &volatilesettings->header, error);
   volatilesettings->serial_number = 0;
   volatilesettings->ping_number = 0;
@@ -641,6 +588,7 @@ int mbsys_reson7k_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *erro
   volatilesettings->reserved = 0;
 
   /* Reson 7k configuration (record 7001) */
+  s7kr_configuration *configuration;
   configuration = &store->configuration;
   mbsys_reson7k_zero7kheader(verbose, &configuration->header, error);
   configuration->serial_number = 0;
@@ -656,7 +604,7 @@ int mbsys_reson7k_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *erro
   }
 
   /* Reson 7k match filter (record 7002) */
-  matchfilter = &store->matchfilter;
+  s7kr_matchfilter *matchfilter = &store->matchfilter;
   mbsys_reson7k_zero7kheader(verbose, &matchfilter->header, error);
   matchfilter->serial_number = 0;
   matchfilter->ping_number = 0;
@@ -665,6 +613,7 @@ int mbsys_reson7k_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *erro
   matchfilter->end_frequency = 0.0;
 
   /* Reson 7k firmware and hardware configuration (record 7003) */
+  s7kr_v2firmwarehardwareconfiguration *v2firmwarehardwareconfiguration;
   v2firmwarehardwareconfiguration = &store->v2firmwarehardwareconfiguration;
   mbsys_reson7k_zero7kheader(verbose, &v2firmwarehardwareconfiguration->header, error);
   v2firmwarehardwareconfiguration->device_count = 0;
@@ -673,7 +622,7 @@ int mbsys_reson7k_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *erro
   v2firmwarehardwareconfiguration->info = NULL;
 
   /* Reson 7k beam geometry (record 7004) */
-  beamgeometry = &store->beamgeometry;
+  s7kr_beamgeometry *beamgeometry = &store->beamgeometry;
   mbsys_reson7k_zero7kheader(verbose, &beamgeometry->header, error);
   beamgeometry->serial_number = 0;
   beamgeometry->number_beams = 0;
@@ -685,7 +634,7 @@ int mbsys_reson7k_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *erro
   }
 
   /* Reson 7k calibration data (record 7005) */
-  calibration = &store->calibration;
+  s7kr_calibration *calibration = &store->calibration;
   mbsys_reson7k_zero7kheader(verbose, &calibration->header, error);
   calibration->serial_number = 0;
   calibration->number_channels = 0;
@@ -695,7 +644,7 @@ int mbsys_reson7k_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *erro
   }
 
   /* Reson 7k bathymetry (record 7006) */
-  bathymetry = &store->bathymetry;
+  s7kr_bathymetry *bathymetry = &store->bathymetry;
   mbsys_reson7k_zero7kheader(verbose, &bathymetry->header, error);
   bathymetry->serial_number = 0;
   bathymetry->ping_number = 0;
@@ -731,7 +680,7 @@ int mbsys_reson7k_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *erro
   bathymetry->nacrossalongerrorno = 0;
 
   /* Reson 7k backscatter imagery data (record 7007) */
-  backscatter = &store->backscatter;
+  s7kr_backscatter *backscatter = &store->backscatter;
   mbsys_reson7k_zero7kheader(verbose, &backscatter->header, error);
   backscatter->serial_number = 0;
   backscatter->ping_number = 0;
@@ -762,7 +711,7 @@ int mbsys_reson7k_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *erro
   backscatter->altitude = 0.0;
 
   /* Reson 7k beam data (record 7008) */
-  beam = &store->beam;
+  s7kr_beam *beam = &store->beam;
   mbsys_reson7k_zero7kheader(verbose, &beam->header, error);
   beam->serial_number = 0;
   beam->ping_number = 0;
@@ -785,7 +734,7 @@ int mbsys_reson7k_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *erro
   }
 
   /* Reson 7k vertical depth (record 7009) */
-  verticaldepth = &store->verticaldepth;
+  s7kr_verticaldepth *verticaldepth = &store->verticaldepth;
   mbsys_reson7k_zero7kheader(verbose, &verticaldepth->header, error);
   verticaldepth->frequency = 0.0;
   verticaldepth->ping_number = 0;
@@ -798,7 +747,7 @@ int mbsys_reson7k_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *erro
   verticaldepth->vertical_depth = 0;
 
   /* Reson 7k tvg data (record 7010) */
-  tvg = &store->tvg;
+  s7kr_tvg *tvg = &store->tvg;
   mbsys_reson7k_zero7kheader(verbose, &tvg->header, error);
   tvg->serial_number = 0;
   tvg->ping_number = 0;
@@ -810,7 +759,7 @@ int mbsys_reson7k_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *erro
   tvg->tvg = NULL;
 
   /* Reson 7k image data (record 7011) */
-  image = &store->image;
+  s7kr_image *image = &store->image;
   mbsys_reson7k_zero7kheader(verbose, &image->header, error);
   image->ping_number = 0;
   image->multi_ping = 0;
@@ -823,7 +772,7 @@ int mbsys_reson7k_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *erro
   image->image = NULL;
 
   /* Ping motion (record 7012) */
-  v2pingmotion = &store->v2pingmotion;
+  s7kr_v2pingmotion *v2pingmotion = &store->v2pingmotion;
   mbsys_reson7k_zero7kheader(verbose, &v2pingmotion->header, error);
   v2pingmotion->serial_number = 0;
   v2pingmotion->ping_number = 0;
@@ -839,7 +788,7 @@ int mbsys_reson7k_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *erro
   v2pingmotion->heave = NULL;
 
   /* Detection setup (record 7017) */
-  v2detectionsetup = &store->v2detectionsetup;
+  s7kr_v2detectionsetup *v2detectionsetup = &store->v2detectionsetup;
   mbsys_reson7k_zero7kheader(verbose, &v2detectionsetup->header, error);
   v2detectionsetup->serial_number = 0;
   v2detectionsetup->ping_number = 0;
@@ -872,7 +821,7 @@ int mbsys_reson7k_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *erro
   }
 
   /* Reson 7k beamformed magnitude and phase data (record 7018) */
-  v2beamformed = &store->v2beamformed;
+  s7kr_v2beamformed *v2beamformed = &store->v2beamformed;
   mbsys_reson7k_zero7kheader(verbose, &v2beamformed->header, error);
   v2beamformed->serial_number = 0;
   v2beamformed->ping_number = 0;
@@ -882,7 +831,7 @@ int mbsys_reson7k_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *erro
   for (int i = 0; i < 32; i++)
     v2beamformed->reserved[i] = 0;
   for (int i = 0; i < MBSYS_RESON7K_MAX_BEAMS; i++) {
-    v2amplitudephase = &v2beamformed->amplitudephase[i];
+    s7kr_v2amplitudephase *v2amplitudephase = &v2beamformed->amplitudephase[i];
     v2amplitudephase->beam_number = 0;
     v2amplitudephase->number_samples = 0;
     v2amplitudephase->nalloc = 0;
@@ -891,26 +840,26 @@ int mbsys_reson7k_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *erro
   }
 
   /* Reson 7k BITE (record 7021) */
-  v2bite = &store->v2bite;
+  s7kr_v2bite *v2bite = &store->v2bite;
   mbsys_reson7k_zero7kheader(verbose, &v2bite->header, error);
   v2bite->number_reports = 0;
   v2bite->nalloc = 0;
   v2bite->reports = NULL;
 
   /* Reson 7k center version (record 7022) */
-  v27kcenterversion = &store->v27kcenterversion;
+  s7kr_v27kcenterversion *v27kcenterversion = &store->v27kcenterversion;
   mbsys_reson7k_zero7kheader(verbose, &v27kcenterversion->header, error);
   for (int i = 0; i < 32; i++)
     v27kcenterversion->version[i] = 0;
 
   /* Reson 7k 8k wet end version (record 7023) */
-  v28kwetendversion = &store->v28kwetendversion;
+  s7kr_v28kwetendversion *v28kwetendversion = &store->v28kwetendversion;
   mbsys_reson7k_zero7kheader(verbose, &v28kwetendversion->header, error);
   for (int i = 0; i < 32; i++)
     v28kwetendversion->version[i] = 0;
 
   /* Reson 7k version 2 detection (record 7026) */
-  v2detection = &store->v2detection;
+  s7kr_v2detection *v2detection = &store->v2detection;
   mbsys_reson7k_zero7kheader(verbose, &v2detection->header, error);
   v2detection->serial_number = 0;
   v2detection->ping_number = 0;
@@ -932,7 +881,7 @@ int mbsys_reson7k_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *erro
   }
 
   /* Reson 7k version 2 raw detection (record 7027) */
-  v2rawdetection = &store->v2rawdetection;
+  s7kr_v2rawdetection *v2rawdetection = &store->v2rawdetection;
   mbsys_reson7k_zero7kheader(verbose, &v2rawdetection->header, error);
   v2rawdetection->serial_number = 0;
   v2rawdetection->ping_number = 0;
@@ -955,7 +904,7 @@ int mbsys_reson7k_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *erro
   }
 
   /* Reson 7k version 2 snippet (record 7028) */
-  v2snippet = &store->v2snippet;
+  s7kr_v2snippet *v2snippet = &store->v2snippet;
   mbsys_reson7k_zero7kheader(verbose, &v2snippet->header, error);
   v2snippet->serial_number = 0;
   v2snippet->ping_number = 0;
@@ -966,7 +915,7 @@ int mbsys_reson7k_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *erro
   for (int i = 0; i < 28; i++)
     v2snippet->reserved[i] = 0;
   for (int i = 0; i < MBSYS_RESON7K_MAX_BEAMS; i++) {
-    v2snippettimeseries = &v2snippet->snippettimeseries[i];
+    s7kr_v2snippettimeseries *v2snippettimeseries = &v2snippet->snippettimeseries[i];
     v2snippettimeseries->beam_number = 0;
     v2snippettimeseries->begin_sample = 0;
     v2snippettimeseries->detect_sample = 0;
@@ -976,7 +925,7 @@ int mbsys_reson7k_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *erro
   }
 
   /* Reson 7k sonar installation parameters (record 7051) */
-  installation = &store->installation;
+  s7kr_installation *installation = &store->installation;
   mbsys_reson7k_zero7kheader(verbose, &installation->header, error);
   installation->frequency = 0.0;
   installation->firmware_version_len = 0;
@@ -1017,7 +966,7 @@ int mbsys_reson7k_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *erro
   installation->waterline_z = 0.0;
 
   /* Reson 7k system event (record 7051) */
-  systemeventmessage = &store->systemeventmessage;
+  s7kr_systemeventmessage *systemeventmessage = &store->systemeventmessage;
   mbsys_reson7k_zero7kheader(verbose, &systemeventmessage->header, error);
   systemeventmessage->serial_number = 0;
   systemeventmessage->event_id = 0;
@@ -1027,7 +976,7 @@ int mbsys_reson7k_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *erro
   systemeventmessage->message = NULL;
 
   /* Reson 7k calibrated snippet (record 7058) */
-  calibratedsnippet = &store->calibratedsnippet;
+  s7kr_calibratedsnippet *calibratedsnippet = &store->calibratedsnippet;
   mbsys_reson7k_zero7kheader(verbose, &calibratedsnippet->header, error);
   calibratedsnippet->serial_number = 0;
   calibratedsnippet->ping_number = 0;
@@ -1035,10 +984,11 @@ int mbsys_reson7k_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *erro
   calibratedsnippet->number_beams = 0;
   calibratedsnippet->error_flag = 0;
   calibratedsnippet->control_flags = 0;
-  for (int i = 0; i < 28; i++)
+  for (int i = 0; i < 6; i++)
     calibratedsnippet->reserved[i] = 0;
   for (int i = 0; i < MBSYS_RESON7K_MAX_BEAMS; i++) {
-    calibratedsnippettimeseries = &calibratedsnippet->calibratedsnippettimeseries[i];
+    s7kr_calibratedsnippettimeseries *calibratedsnippettimeseries =
+        &calibratedsnippet->calibratedsnippettimeseries[i];
     calibratedsnippettimeseries->beam_number = 0;
     calibratedsnippettimeseries->begin_sample = 0;
     calibratedsnippettimeseries->detect_sample = 0;
@@ -1048,7 +998,7 @@ int mbsys_reson7k_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *erro
   }
 
   /* Reson 7k file header (record 7200) */
-  fileheader = &store->fileheader;
+  s7kr_fileheader *fileheader = &store->fileheader;
   mbsys_reson7k_zero7kheader(verbose, &fileheader->header, error);
   for (int i = 0; i < 16; i++)
     fileheader->file_identifier[i] = '\0';
@@ -1072,7 +1022,8 @@ int mbsys_reson7k_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *erro
   }
 
   /* Reson 7k remote control sonar settings (record 7503) */
-  remotecontrolsettings = &store->remotecontrolsettings;
+  s7kr_remotecontrolsettings *remotecontrolsettings =
+      &store->remotecontrolsettings;
   mbsys_reson7k_zero7kheader(verbose, &remotecontrolsettings->header, error);
   remotecontrolsettings->serial_number = 0;
   remotecontrolsettings->ping_number = 0;
@@ -1128,7 +1079,7 @@ int mbsys_reson7k_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *erro
     remotecontrolsettings->reserved2[i] = 0;
 
   /* Reson 7k remote control sonar settings (record 7503) */
-  reserved = &store->reserved;
+  s7kr_reserved *reserved = &store->reserved;
   mbsys_reson7k_zero7kheader(verbose, &reserved->header, error);
   for (int i = 0; i < R7KHDRSIZE_7kReserved; i++)
     reserved->reserved[i] = 0;
@@ -1146,31 +1097,6 @@ int mbsys_reson7k_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *erro
 }
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k_deall(int verbose, void *mbio_ptr, void **store_ptr, int *error) {
-  s7kr_customattitude *customattitude;
-  s7kr_motion *motion;
-  s7kr_svp *svp;
-  s7kr_ctd *ctd;
-  s7kr_surveyline *surveyline;
-  s7kr_attitude *attitude;
-  s7kr_fsdwss *fsdwsslo;
-  s7kr_fsdwss *fsdwsshi;
-  s7kr_fsdwsb *fsdwsb;
-  s7kr_configuration *configuration;
-  s7kr_v2firmwarehardwareconfiguration *v2firmwarehardwareconfiguration;
-  s7kr_backscatter *backscatter;
-  s7kr_beam *beam;
-  s7kr_tvg *tvg;
-  s7kr_image *image;
-  s7kr_v2pingmotion *v2pingmotion;
-  s7kr_v2amplitudephase *amplitudephase;
-  s7kr_v2beamformed *v2beamformed;
-  s7kr_v2bite *v2bite;
-  s7kr_v2snippettimeseries *v2snippettimeseries;
-  s7kr_v2snippet *v2snippet;
-  s7kr_calibratedsnippettimeseries *calibratedsnippettimeseries;
-  s7kr_calibratedsnippet *calibratedsnippet;
-  s7kr_systemeventmessage *systemeventmessage;
-
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1185,153 +1111,154 @@ int mbsys_reson7k_deall(int verbose, void *mbio_ptr, void **store_ptr, int *erro
   int status = MB_SUCCESS;
 
   /* Custom attitude (record 1004) */
-  customattitude = &store->customattitude;
+  s7kr_customattitude *customattitude = &store->customattitude;
   customattitude->n = 0;
   customattitude->nalloc = 0;
   if (customattitude->pitch != NULL)
-    status = mb_freed(verbose, __FILE__, __LINE__, (void **)&(customattitude->pitch), error);
+    status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&(customattitude->pitch), error);
   if (customattitude->roll != NULL)
-    status = mb_freed(verbose, __FILE__, __LINE__, (void **)&(customattitude->roll), error);
+    status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&(customattitude->roll), error);
   if (customattitude->heading != NULL)
-    status = mb_freed(verbose, __FILE__, __LINE__, (void **)&(customattitude->heading), error);
+    status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&(customattitude->heading), error);
   if (customattitude->heave != NULL)
-    status = mb_freed(verbose, __FILE__, __LINE__, (void **)&(customattitude->heave), error);
+    status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&(customattitude->heave), error);
   if (customattitude->pitchrate != NULL)
-    status = mb_freed(verbose, __FILE__, __LINE__, (void **)&(customattitude->pitchrate), error);
+    status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&(customattitude->pitchrate), error);
   if (customattitude->rollrate != NULL)
-    status = mb_freed(verbose, __FILE__, __LINE__, (void **)&(customattitude->rollrate), error);
+    status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&(customattitude->rollrate), error);
   if (customattitude->headingrate != NULL)
-    status = mb_freed(verbose, __FILE__, __LINE__, (void **)&(customattitude->headingrate), error);
+    status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&(customattitude->headingrate), error);
   if (customattitude->heaverate != NULL)
-    status = mb_freed(verbose, __FILE__, __LINE__, (void **)&(customattitude->heaverate), error);
+    status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&(customattitude->heaverate), error);
 
   /* Motion over ground (record 1007) */
-  motion = &store->motion;
+  s7kr_motion *motion = &store->motion;
   motion->n = 0;
   motion->nalloc = 0;
   if (motion->x != NULL)
-    status = mb_freed(verbose, __FILE__, __LINE__, (void **)&(motion->x), error);
+    status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&(motion->x), error);
   if (motion->y != NULL)
-    status = mb_freed(verbose, __FILE__, __LINE__, (void **)&(motion->y), error);
+    status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&(motion->y), error);
   if (motion->z != NULL)
-    status = mb_freed(verbose, __FILE__, __LINE__, (void **)&(motion->z), error);
+    status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&(motion->z), error);
   if (motion->xa != NULL)
-    status = mb_freed(verbose, __FILE__, __LINE__, (void **)&(motion->xa), error);
+    status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&(motion->xa), error);
   if (motion->ya != NULL)
-    status = mb_freed(verbose, __FILE__, __LINE__, (void **)&(motion->ya), error);
+    status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&(motion->ya), error);
   if (motion->za != NULL)
-    status = mb_freed(verbose, __FILE__, __LINE__, (void **)&(motion->za), error);
+    status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&(motion->za), error);
 
   /* Sound velocity profile (record 1009) */
-  svp = &store->svp;
+  s7kr_svp *svp = &store->svp;
   svp->n = 0;
   svp->nalloc = 0;
   if (svp->depth != NULL)
-    status = mb_freed(verbose, __FILE__, __LINE__, (void **)&(svp->depth), error);
+    status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&(svp->depth), error);
   if (svp->sound_velocity != NULL)
-    status = mb_freed(verbose, __FILE__, __LINE__, (void **)&(svp->sound_velocity), error);
+    status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&(svp->sound_velocity), error);
 
   /* CTD (record 1010) */
-  ctd = &store->ctd;
+  s7kr_ctd *ctd = &store->ctd;
   ctd->n = 0;
   ctd->nalloc = 0;
   if (ctd->conductivity_salinity != NULL)
-    status = mb_freed(verbose, __FILE__, __LINE__, (void **)&(ctd->conductivity_salinity), error);
+    status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&(ctd->conductivity_salinity), error);
   if (ctd->temperature != NULL)
-    status = mb_freed(verbose, __FILE__, __LINE__, (void **)&(ctd->temperature), error);
+    status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&(ctd->temperature), error);
   if (ctd->pressure_depth != NULL)
-    status = mb_freed(verbose, __FILE__, __LINE__, (void **)&(ctd->pressure_depth), error);
+    status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&(ctd->pressure_depth), error);
   if (ctd->sound_velocity != NULL)
-    status = mb_freed(verbose, __FILE__, __LINE__, (void **)&(ctd->sound_velocity), error);
+    status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&(ctd->sound_velocity), error);
   if (ctd->absorption != NULL)
-    status = mb_freed(verbose, __FILE__, __LINE__, (void **)&(ctd->absorption), error);
+    status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&(ctd->absorption), error);
 
   /* Survey Line (record 1014) */
-  surveyline = &store->surveyline;
+  s7kr_surveyline *surveyline = &store->surveyline;
   surveyline->n = 0;
   surveyline->nalloc = 0;
   if (surveyline->latitude != NULL)
-    status = mb_freed(verbose, __FILE__, __LINE__, (void **)&(surveyline->latitude), error);
+    status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&(surveyline->latitude), error);
   if (surveyline->longitude != NULL)
-    status = mb_freed(verbose, __FILE__, __LINE__, (void **)&(surveyline->longitude), error);
+    status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&(surveyline->longitude), error);
 
   /* Attitude (record 1016) */
-  attitude = &store->attitude;
+  s7kr_attitude *attitude = &store->attitude;
   attitude->n = 0;
   attitude->nalloc = 0;
   if (attitude->delta_time != NULL)
-    status = mb_freed(verbose, __FILE__, __LINE__, (void **)&(attitude->delta_time), error);
+    status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&(attitude->delta_time), error);
   if (attitude->pitch != NULL)
-    status = mb_freed(verbose, __FILE__, __LINE__, (void **)&(attitude->pitch), error);
+    status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&(attitude->pitch), error);
   if (attitude->roll != NULL)
-    status = mb_freed(verbose, __FILE__, __LINE__, (void **)&(attitude->roll), error);
+    status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&(attitude->roll), error);
   if (attitude->heave != NULL)
-    status = mb_freed(verbose, __FILE__, __LINE__, (void **)&(attitude->heave), error);
+    status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&(attitude->heave), error);
   if (attitude->heading != NULL)
-    status = mb_freed(verbose, __FILE__, __LINE__, (void **)&(attitude->heading), error);
+    status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&(attitude->heading), error);
 
   /* Edgetech FS-DW low frequency sidescan (record 3000) */
-  fsdwsslo = &store->fsdwsslo;
+  s7kr_fsdwss *fsdwsslo = &store->fsdwsslo;
   for (int i = 0; i < 2; i++) {
     fsdwsslo->channel[i].data_alloc = 0;
     if (fsdwsslo->channel[i].data != NULL)
-      status = mb_freed(verbose, __FILE__, __LINE__, (void **)&(fsdwsslo->channel[i].data), error);
+      status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&(fsdwsslo->channel[i].data), error);
   }
 
   /* Edgetech FS-DW high frequency sidescan (record 3000) */
-  fsdwsshi = &store->fsdwsshi;
+  s7kr_fsdwss *fsdwsshi = &store->fsdwsshi;
   for (int i = 0; i < 2; i++) {
     fsdwsshi->channel[i].data_alloc = 0;
     if (fsdwsshi->channel[i].data != NULL)
-      status = mb_freed(verbose, __FILE__, __LINE__, (void **)&(fsdwsshi->channel[i].data), error);
+      status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&(fsdwsshi->channel[i].data), error);
   }
 
   /* Edgetech FS-DW subbottom (record 3001) */
-  fsdwsb = &store->fsdwsb;
+  s7kr_fsdwsb *fsdwsb = &store->fsdwsb;
   fsdwsb->channel.data_alloc = 0;
   if (fsdwsb->channel.data != NULL)
-    status = mb_freed(verbose, __FILE__, __LINE__, (void **)&(fsdwsb->channel.data), error);
+    status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&(fsdwsb->channel.data), error);
 
   /* Reson 7k configuration (record 7001) */
-  configuration = &store->configuration;
+  s7kr_configuration *configuration = &store->configuration;
   for (int i = 0; i < MBSYS_RESON7K_MAX_DEVICE; i++) {
     configuration->device[i].info_length = 0;
     configuration->device[i].info_alloc = 0;
     if (configuration->device[i].info != NULL)
-      status = mb_freed(verbose, __FILE__, __LINE__, (void **)&(configuration->device[i].info), error);
+      status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&(configuration->device[i].info), error);
   }
 
   /* Reson 7k firmware and hardware configuration (record 7003) */
-  v2firmwarehardwareconfiguration = &store->v2firmwarehardwareconfiguration;
+  s7kr_v2firmwarehardwareconfiguration *v2firmwarehardwareconfiguration =
+      &store->v2firmwarehardwareconfiguration;
   if (v2firmwarehardwareconfiguration->info != NULL && v2firmwarehardwareconfiguration->info_alloc > 0)
-    status = mb_freed(verbose, __FILE__, __LINE__, (void **)&(v2firmwarehardwareconfiguration->info), error);
+    status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&(v2firmwarehardwareconfiguration->info), error);
   v2firmwarehardwareconfiguration->info_length = 0;
   v2firmwarehardwareconfiguration->info_alloc = 0;
 
   /* Reson 7k backscatter imagery data (record 7007) */
-  backscatter = &store->backscatter;
+  s7kr_backscatter *backscatter = &store->backscatter;
   backscatter->number_samples = 0;
   backscatter->nalloc = 0;
   if (backscatter->port_data != NULL)
-    status = mb_freed(verbose, __FILE__, __LINE__, (void **)&(backscatter->port_data), error);
+    status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&(backscatter->port_data), error);
   if (backscatter->stbd_data != NULL)
-    status = mb_freed(verbose, __FILE__, __LINE__, (void **)&(backscatter->stbd_data), error);
+    status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&(backscatter->stbd_data), error);
 
   /* Reson 7k beam data (record 7008) */
-  beam = &store->beam;
+  s7kr_beam *beam = &store->beam;
   for (int i = 0; i < MBSYS_RESON7K_MAX_RECEIVERS; i++) {
     beam->snippets[i].begin_sample = 0;
     beam->snippets[i].end_sample = 0;
     beam->snippets[i].nalloc_amp = 0;
     beam->snippets[i].nalloc_phase = 0;
     if (beam->snippets[i].amplitude != NULL)
-      status = mb_freed(verbose, __FILE__, __LINE__, (void **)&(beam->snippets[i].amplitude), error);
+      status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&(beam->snippets[i].amplitude), error);
     if (beam->snippets[i].phase != NULL)
-      status = mb_freed(verbose, __FILE__, __LINE__, (void **)&(beam->snippets[i].phase), error);
+      status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&(beam->snippets[i].phase), error);
   }
 
   /* Reson 7k tvg data (record 7010) */
-  tvg = &store->tvg;
+  s7kr_tvg *tvg = &store->tvg;
   tvg->serial_number = 0;
   tvg->ping_number = 0;
   tvg->multi_ping = 0;
@@ -1340,84 +1267,87 @@ int mbsys_reson7k_deall(int verbose, void *mbio_ptr, void **store_ptr, int *erro
     tvg->reserved[i] = 0;
   tvg->nalloc = 0;
   if (tvg->tvg != NULL)
-    status = mb_freed(verbose, __FILE__, __LINE__, (void **)&(tvg->tvg), error);
+    status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&(tvg->tvg), error);
 
   /* Reson 7k image data (record 7011) */
-  image = &store->image;
+  s7kr_image *image = &store->image;
   image->width = 0;
   image->height = 0;
   image->nalloc = 0;
   if (image->image != NULL)
-    status = mb_freed(verbose, __FILE__, __LINE__, (void **)&(image->image), error);
+    status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&(image->image), error);
 
   /* Reson 7k ping motion (record 7012) */
-  v2pingmotion = &store->v2pingmotion;
+  s7kr_v2pingmotion *v2pingmotion = &store->v2pingmotion;
   v2pingmotion->n = 0;
   v2pingmotion->nalloc = 0;
   if (v2pingmotion->roll != NULL)
-    status = mb_freed(verbose, __FILE__, __LINE__, (void **)&(v2pingmotion->roll), error);
+    status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&(v2pingmotion->roll), error);
   if (v2pingmotion->heading != NULL)
-    status = mb_freed(verbose, __FILE__, __LINE__, (void **)&(v2pingmotion->heading), error);
+    status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&(v2pingmotion->heading), error);
   if (v2pingmotion->heave != NULL)
-    status = mb_freed(verbose, __FILE__, __LINE__, (void **)&(v2pingmotion->heave), error);
+    status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&(v2pingmotion->heave), error);
 
   /* Reson 7k beamformed magnitude and phase data (record 7018) */
-  v2beamformed = &store->v2beamformed;
+  s7kr_v2beamformed *v2beamformed = &store->v2beamformed;
   for (int i = 0; i < MBSYS_RESON7K_MAX_BEAMS; i++) {
-    amplitudephase = &(v2beamformed->amplitudephase[i]);
+    s7kr_v2amplitudephase *amplitudephase = &(v2beamformed->amplitudephase[i]);
     amplitudephase->number_samples = 0;
     amplitudephase->nalloc = 0;
     if (amplitudephase->amplitude != NULL)
-      status = mb_freed(verbose, __FILE__, __LINE__, (void **)&(amplitudephase->amplitude), error);
+      status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&(amplitudephase->amplitude), error);
     if (amplitudephase->phase != NULL)
-      status = mb_freed(verbose, __FILE__, __LINE__, (void **)&(amplitudephase->phase), error);
+      status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&(amplitudephase->phase), error);
   }
 
   /* Reson 7k BITE (record 7021) */
-  v2bite = &store->v2bite;
+  s7kr_v2bite *v2bite = &store->v2bite;
   v2bite->number_reports = 0;
   v2bite->nalloc = 0;
   if (v2bite->reports != NULL)
-    status = mb_freed(verbose, __FILE__, __LINE__, (void **)&(v2bite->reports), error);
+    status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&(v2bite->reports), error);
 
   /* Reson 7k version 2 snippet (record 7028) */
-  v2snippet = &store->v2snippet;
+  s7kr_v2snippet *v2snippet = &store->v2snippet;
   v2snippet->number_beams = 0;
   for (int i = 0; i < MBSYS_RESON7K_MAX_BEAMS; i++) {
-    v2snippettimeseries = &(v2snippet->snippettimeseries[i]);
+    s7kr_v2snippettimeseries *v2snippettimeseries = &(v2snippet->snippettimeseries[i]);
     v2snippettimeseries->beam_number = 0;
     v2snippettimeseries->begin_sample = 0;
     v2snippettimeseries->detect_sample = 0;
     v2snippettimeseries->end_sample = 0;
     v2snippettimeseries->nalloc = 0;
     if (v2snippettimeseries->amplitude != NULL)
-      status = mb_freed(verbose, __FILE__, __LINE__, (void **)&(v2snippettimeseries->amplitude), error);
+      status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&(v2snippettimeseries->amplitude), error);
   }
 
   /* Reson 7k system event (record 7051) */
-  systemeventmessage = &store->systemeventmessage;
+  s7kr_systemeventmessage *systemeventmessage = &store->systemeventmessage;
   systemeventmessage->message_length = 0;
   systemeventmessage->event_identifier = 0;
   systemeventmessage->message_alloc = 0;
   if (systemeventmessage->message != NULL)
-    status = mb_freed(verbose, __FILE__, __LINE__, (void **)&(systemeventmessage->message), error);
+    status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&(systemeventmessage->message), error);
 
   /* Reson 7k calibrated snippet (record 7058) */
-  calibratedsnippet = &store->calibratedsnippet;
+  s7kr_calibratedsnippet *calibratedsnippet = &store->calibratedsnippet;
   calibratedsnippet->number_beams = 0;
   for (int i = 0; i < MBSYS_RESON7K_MAX_BEAMS; i++) {
-    calibratedsnippettimeseries = &(calibratedsnippet->calibratedsnippettimeseries[i]);
+    s7kr_calibratedsnippettimeseries *calibratedsnippettimeseries =
+        &(calibratedsnippet->calibratedsnippettimeseries[i]);
     calibratedsnippettimeseries->beam_number = 0;
     calibratedsnippettimeseries->begin_sample = 0;
     calibratedsnippettimeseries->detect_sample = 0;
     calibratedsnippettimeseries->end_sample = 0;
     calibratedsnippettimeseries->nalloc = 0;
-    if (v2snippettimeseries->amplitude != NULL)
-      status = mb_freed(verbose, __FILE__, __LINE__, (void **)&(calibratedsnippettimeseries->amplitude), error);
+    // TODO(schwehr): This was a bug, yes?
+    // if (v2snippettimeseries->amplitude != NULL)
+    if (calibratedsnippettimeseries->amplitude != NULL)
+      status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&(calibratedsnippettimeseries->amplitude), error);
   }
 
   /* deallocate memory for data structure */
-  status = mb_freed(verbose, __FILE__, __LINE__, (void **)store_ptr, error);
+  status &= mb_freed(verbose, __FILE__, __LINE__, (void **)store_ptr, error);
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
@@ -1458,31 +1388,31 @@ int mbsys_reson7k_print_header(int verbose, s7k_header *header, int *error) {
   fprintf(stderr, "%sStructure Contents:\n", first);
   fprintf(stderr, "%s     Version:                 %d\n", first, header->Version);
   fprintf(stderr, "%s     Offset:                  %d\n", first, header->Offset);
-  fprintf(stderr, "%s     SyncPattern:             %d\n", first, header->SyncPattern);
-  fprintf(stderr, "%s     Size:                    %d\n", first, header->Size);
-  fprintf(stderr, "%s     OffsetToOptionalData:    %d\n", first, header->OffsetToOptionalData);
-  fprintf(stderr, "%s     OptionalDataIdentifier:  %d\n", first, header->OptionalDataIdentifier);
+  fprintf(stderr, "%s     SyncPattern:             %u\n", first, header->SyncPattern);
+  fprintf(stderr, "%s     Size:                    %u\n", first, header->Size);
+  fprintf(stderr, "%s     OffsetToOptionalData:    %u\n", first, header->OffsetToOptionalData);
+  fprintf(stderr, "%s     OptionalDataIdentifier:  %u\n", first, header->OptionalDataIdentifier);
   fprintf(stderr, "%s     s7kTime.Year:            %d\n", first, header->s7kTime.Year);
   fprintf(stderr, "%s     s7kTime.Day:             %d\n", first, header->s7kTime.Day);
   fprintf(stderr, "%s     s7kTime.Seconds:         %f\n", first, header->s7kTime.Seconds);
   fprintf(stderr, "%s     s7kTime.Hours:           %d\n", first, header->s7kTime.Hours);
   fprintf(stderr, "%s     7kTime->Minutes:         %d\n", first, header->s7kTime.Minutes);
   fprintf(stderr, "%s     Reserved:                %d\n", first, header->Reserved);
-  fprintf(stderr, "%s     RecordType:              %d\n", first, header->RecordType);
-  fprintf(stderr, "%s     DeviceId:                %d\n", first, header->DeviceId);
+  fprintf(stderr, "%s     RecordType:              %u\n", first, header->RecordType);
+  fprintf(stderr, "%s     DeviceId:                %u\n", first, header->DeviceId);
   fprintf(stderr, "%s     Reserved2:               %d\n", first, header->Reserved2);
   fprintf(stderr, "%s     SystemEnumerator:        %d\n", first, header->SystemEnumerator);
-  fprintf(stderr, "%s     DataSetNumber:           %d\n", first, header->DataSetNumber);
-  fprintf(stderr, "%s     RecordNumber:            %d\n", first, header->RecordNumber);
+  fprintf(stderr, "%s     DataSetNumber:           %u\n", first, header->DataSetNumber);
+  fprintf(stderr, "%s     RecordNumber:            %u\n", first, header->RecordNumber);
   for (int i = 0; i < 8; i++) {
     fprintf(stderr, "%s     PreviousRecord[%d]:       %d\n", first, i, header->PreviousRecord[i]);
     fprintf(stderr, "%s     NextRecord[%d]:           %d\n", first, i, header->NextRecord[i]);
   }
   fprintf(stderr, "%s     Flags:                   %d\n", first, header->Flags);
   fprintf(stderr, "%s     Reserved3:               %d\n", first, header->Reserved3);
-  fprintf(stderr, "%s     Reserved4:               %d\n", first, header->Reserved4);
-  fprintf(stderr, "%s     FragmentedTotal:         %d\n", first, header->FragmentedTotal);
-  fprintf(stderr, "%s     FragmentNumber:          %d\n", first, header->FragmentNumber);
+  fprintf(stderr, "%s     Reserved4:               %u\n", first, header->Reserved4);
+  fprintf(stderr, "%s     FragmentedTotal:         %u\n", first, header->FragmentedTotal);
+  fprintf(stderr, "%s     FragmentNumber:          %u\n", first, header->FragmentNumber);
 
   const int status = MB_SUCCESS;
 
@@ -1510,11 +1440,8 @@ int mbsys_reson7k_print_reference(int verbose, s7kr_reference *reference, int *e
   mbsys_reson7k_print_header(verbose, &reference->header, error);
 
   /* print Reference point information (record 1000) */
-  const char *first;
-  if (verbose >= 2)
-    first = debug_str;
-  else {
-    first = nodebug_str;
+  const char *first = verbose >= 2 ? debug_str : nodebug_str;
+  if (verbose >= 2) {
     fprintf(stderr, "\n%sMBIO function <%s> called\n", first, __func__);
   }
   fprintf(stderr, "%sStructure Contents:\n", first);
@@ -1638,7 +1565,7 @@ int mbsys_reson7k_print_position(int verbose, s7kr_position *position, int *erro
     fprintf(stderr, "\n%sMBIO function <%s> called\n", first, __func__);
   }
   fprintf(stderr, "%sStructure Contents:\n", first);
-  fprintf(stderr, "%s     datum:                   %d\n", first, position->datum);
+  fprintf(stderr, "%s     datum:                   %u\n", first, position->datum);
   fprintf(stderr, "%s     latency:                 %f\n", first, position->latency);
   fprintf(stderr, "%s     latitude:                %f\n", first, position->latitude);
   fprintf(stderr, "%s     longitude:               %f\n", first, position->longitude);
@@ -1733,7 +1660,7 @@ int mbsys_reson7k_print_tide(int verbose, s7kr_tide *tide, int *error) {
   fprintf(stderr, "%s     source:                     %d\n", first, tide->source);
   fprintf(stderr, "%s     flags:                      %d\n", first, tide->flags);
   fprintf(stderr, "%s     gauge:                      %d\n", first, tide->gauge);
-  fprintf(stderr, "%s     datum:                      %d\n", first, tide->datum);
+  fprintf(stderr, "%s     datum:                      %u\n", first, tide->datum);
   fprintf(stderr, "%s     latency:                    %f\n", first, tide->latency);
   fprintf(stderr, "%s     latitude:                   %f\n", first, tide->latitude);
   fprintf(stderr, "%s     longitude:                  %f\n", first, tide->longitude);
@@ -1897,7 +1824,7 @@ int mbsys_reson7k_print_svp(int verbose, s7kr_svp *svp, int *error) {
   fprintf(stderr, "%s     reserved2:                  %d\n", first, svp->reserved2);
   fprintf(stderr, "%s     latitude:                   %f\n", first, svp->latitude);
   fprintf(stderr, "%s     longitude:                  %f\n", first, svp->longitude);
-  fprintf(stderr, "%s     n:                          %d\n", first, svp->n);
+  fprintf(stderr, "%s     n:                          %u\n", first, svp->n);
   fprintf(stderr, "%s     nalloc:                     %d\n", first, svp->nalloc);
   for (int i = 0; i < svp->n; i++)
     fprintf(stderr, "%s     i:%d depth:%f sound_velocity:%f\n", first, i, svp->depth[i], svp->sound_velocity[i]);
@@ -1947,7 +1874,7 @@ int mbsys_reson7k_print_ctd(int verbose, s7kr_ctd *ctd, int *error) {
   fprintf(stderr, "%s     latitude:                   %f\n", first, ctd->latitude);
   fprintf(stderr, "%s     longitude:                  %f\n", first, ctd->longitude);
   fprintf(stderr, "%s     sample_rate:                %f\n", first, ctd->sample_rate);
-  fprintf(stderr, "%s     n:                          %d\n", first, ctd->n);
+  fprintf(stderr, "%s     n:                          %u\n", first, ctd->n);
   fprintf(stderr, "%s     nalloc:                     %d\n", first, ctd->nalloc);
   for (int i = 0; i < ctd->n; i++)
     fprintf(stderr, "%s     i:%d conductivity_salinity:%f temperature:%f pressure_depth:%f sound_velocity:%f absorption:%f\n",
@@ -1994,8 +1921,8 @@ int mbsys_reson7k_print_geodesy(int verbose, s7kr_geodesy *geodesy, int *error) 
   fprintf(stderr, "%s     flattening:                 %f\n", first, geodesy->flattening);
   fprintf(stderr, "%s     reserved1:                  %s\n", first, geodesy->reserved1);
   fprintf(stderr, "%s     datum:                      %s\n", first, geodesy->datum);
-  fprintf(stderr, "%s     calculation_method:         %d\n", first, geodesy->calculation_method);
-  fprintf(stderr, "%s     number_parameters:          %d\n", first, geodesy->number_parameters);
+  fprintf(stderr, "%s     calculation_method:         %u\n", first, geodesy->calculation_method);
+  fprintf(stderr, "%s     number_parameters:          %u\n", first, geodesy->number_parameters);
   fprintf(stderr, "%s     dx:                         %f\n", first, geodesy->dx);
   fprintf(stderr, "%s     dy:                         %f\n", first, geodesy->dy);
   fprintf(stderr, "%s     dz:                         %f\n", first, geodesy->dz);
@@ -2270,9 +2197,6 @@ int mbsys_reson7k_print_rec1022(int verbose, s7kr_rec1022 *rec1022, int *error) 
 
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k_print_fsdwchannel(int verbose, int data_format, s7k_fsdwchannel *fsdwchannel, int *error) {
-  short *shortptr;
-  unsigned short *ushortptr;
-
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -2298,16 +2222,16 @@ int mbsys_reson7k_print_fsdwchannel(int verbose, int data_format, s7k_fsdwchanne
   fprintf(stderr, "%s     reserved1[0]                %d\n", first, fsdwchannel->reserved1[0]);
   fprintf(stderr, "%s     reserved1[1]                %d\n", first, fsdwchannel->reserved1[1]);
   fprintf(stderr, "%s     reserved1[2]                %d\n", first, fsdwchannel->reserved1[2]);
-  fprintf(stderr, "%s     number_samples:             %d\n", first, fsdwchannel->number_samples);
-  fprintf(stderr, "%s     start_time:                 %d\n", first, fsdwchannel->start_time);
-  fprintf(stderr, "%s     sample_interval:            %d\n", first, fsdwchannel->sample_interval);
+  fprintf(stderr, "%s     number_samples:             %u\n", first, fsdwchannel->number_samples);
+  fprintf(stderr, "%s     start_time:                 %u\n", first, fsdwchannel->start_time);
+  fprintf(stderr, "%s     sample_interval:            %u\n", first, fsdwchannel->sample_interval);
   fprintf(stderr, "%s     range:                      %f\n", first, fsdwchannel->range);
   fprintf(stderr, "%s     voltage:                    %f\n", first, fsdwchannel->voltage);
   fprintf(stderr, "%s     name:                       %s\n", first, fsdwchannel->name);
   fprintf(stderr, "%s     reserved2:                  %s\n", first, fsdwchannel->reserved2);
   fprintf(stderr, "%s     data_alloc:                 %d\n", first, fsdwchannel->data_alloc);
-  shortptr = (short *)fsdwchannel->data;
-  ushortptr = (unsigned short *)fsdwchannel->data;
+  short *shortptr = (short *)fsdwchannel->data;
+  unsigned short *ushortptr = (unsigned short *)fsdwchannel->data;
   for (int i = 0; i < fsdwchannel->number_samples; i++) {
     if (data_format == EDGETECH_TRACEFORMAT_ENVELOPE)
       fprintf(stderr, "%s     data[%d]:                   %d\n", first, i, ushortptr[i]);
@@ -2354,12 +2278,12 @@ int mbsys_reson7k_print_fsdwssheader(int verbose, s7k_fsdwssheader *fsdwssheader
   fprintf(stderr, "%sStructure Contents:\n", first);
   fprintf(stderr, "%s     subsystem:                    %d\n", first, fsdwssheader->subsystem);
   fprintf(stderr, "%s     channelNum:                   %d\n", first, fsdwssheader->channelNum);
-  fprintf(stderr, "%s     pingNum:                      %d\n", first, fsdwssheader->pingNum);
+  fprintf(stderr, "%s     pingNum:                      %u\n", first, fsdwssheader->pingNum);
   fprintf(stderr, "%s     packetNum:                    %d\n", first, fsdwssheader->packetNum);
   fprintf(stderr, "%s     trigSource:                   %d\n", first, fsdwssheader->trigSource);
-  fprintf(stderr, "%s     samples:                      %d\n", first, fsdwssheader->samples);
-  fprintf(stderr, "%s     sampleInterval:               %d\n", first, fsdwssheader->sampleInterval);
-  fprintf(stderr, "%s     startDepth:                   %d\n", first, fsdwssheader->startDepth);
+  fprintf(stderr, "%s     samples:                      %u\n", first, fsdwssheader->samples);
+  fprintf(stderr, "%s     sampleInterval:               %u\n", first, fsdwssheader->sampleInterval);
+  fprintf(stderr, "%s     startDepth:                   %u\n", first, fsdwssheader->startDepth);
   fprintf(stderr, "%s     weightingFactor:              %d\n", first, fsdwssheader->weightingFactor);
   fprintf(stderr, "%s     ADCGain:                      %d\n", first, fsdwssheader->ADCGain);
   fprintf(stderr, "%s     ADCMax:                       %d\n", first, fsdwssheader->ADCMax);
@@ -2368,7 +2292,7 @@ int mbsys_reson7k_print_fsdwssheader(int verbose, s7k_fsdwssheader *fsdwssheader
   fprintf(stderr, "%s     markNumber:                   %d\n", first, fsdwssheader->markNumber);
   fprintf(stderr, "%s     dataFormat:                   %d\n", first, fsdwssheader->dataFormat);
   fprintf(stderr, "%s     reserved:                     %d\n", first, fsdwssheader->reserved);
-  fprintf(stderr, "%s     millisecondsToday:            %d\n", first, fsdwssheader->millisecondsToday);
+  fprintf(stderr, "%s     millisecondsToday:            %u\n", first, fsdwssheader->millisecondsToday);
   fprintf(stderr, "%s     year:                         %d\n", first, fsdwssheader->year);
   fprintf(stderr, "%s     day:                          %d\n", first, fsdwssheader->day);
   fprintf(stderr, "%s     hour:                         %d\n", first, fsdwssheader->hour);
@@ -2379,7 +2303,7 @@ int mbsys_reson7k_print_fsdwssheader(int verbose, s7k_fsdwssheader *fsdwssheader
   fprintf(stderr, "%s     roll:                         %d\n", first, fsdwssheader->roll);
   fprintf(stderr, "%s     heave:                        %d\n", first, fsdwssheader->heave);
   fprintf(stderr, "%s     yaw:                          %d\n", first, fsdwssheader->yaw);
-  fprintf(stderr, "%s     depth:                        %d\n", first, fsdwssheader->depth);
+  fprintf(stderr, "%s     depth:                        %u\n", first, fsdwssheader->depth);
   fprintf(stderr, "%s     temperature:                  %d\n", first, fsdwssheader->temperature);
   for (int i = 0; i < 2; i++)
     fprintf(stderr, "%s     reserved2[%d]:                 %d\n", first, i, fsdwssheader->reserved2[i]);
@@ -2775,10 +2699,10 @@ int mbsys_reson7k_print_volatilesettings(int verbose, s7kr_volatilesettings *vol
   fprintf(stderr, "%s     sample_rate:                %f\n", first, volatilesettings->sample_rate);
   fprintf(stderr, "%s     receiver_bandwidth:         %f\n", first, volatilesettings->receiver_bandwidth);
   fprintf(stderr, "%s     pulse_width:                %f\n", first, volatilesettings->pulse_width);
-  fprintf(stderr, "%s     pulse_type:                 %d\n", first, volatilesettings->pulse_type);
-  fprintf(stderr, "%s     pulse_envelope:             %d\n", first, volatilesettings->pulse_envelope);
+  fprintf(stderr, "%s     pulse_type:                 %u\n", first, volatilesettings->pulse_type);
+  fprintf(stderr, "%s     pulse_envelope:             %u\n", first, volatilesettings->pulse_envelope);
   fprintf(stderr, "%s     pulse_envelope_par:         %f\n", first, volatilesettings->pulse_envelope_par);
-  fprintf(stderr, "%s     pulse_reserved:             %d\n", first, volatilesettings->pulse_reserved);
+  fprintf(stderr, "%s     pulse_reserved:             %u\n", first, volatilesettings->pulse_reserved);
   fprintf(stderr, "%s     max_ping_rate:              %f\n", first, volatilesettings->max_ping_rate);
   fprintf(stderr, "%s     ping_period:                %f\n", first, volatilesettings->ping_period);
   fprintf(stderr, "%s     range_selection:            %f\n", first, volatilesettings->range_selection);
@@ -3115,9 +3039,6 @@ int mbsys_reson7k_print_bathymetry(int verbose, s7kr_bathymetry *bathymetry, int
 }
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k_print_backscatter(int verbose, s7kr_backscatter *backscatter, int *error) {
-  mb_s_char *charptr;
-  short *shortptr;
-  int *intptr;
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -3157,23 +3078,21 @@ int mbsys_reson7k_print_backscatter(int verbose, s7kr_backscatter *backscatter, 
   fprintf(stderr, "%s     data_type:                  %d\n", first, backscatter->data_type);
   fprintf(stderr, "%s     nalloc:                     %d\n", first, backscatter->nalloc);
   if (backscatter->sample_size == 1) {
-    charptr = (mb_s_char *)backscatter->port_data;
+    mb_s_char *charptr = (mb_s_char *)backscatter->port_data;
     for (int i = 0; i < backscatter->number_samples; i++)
       fprintf(stderr, "%s     port backscatter[%d]:  %d\n", first, i, charptr[i]);
     charptr = (mb_s_char *)backscatter->stbd_data;
     for (int i = 0; i < backscatter->number_samples; i++)
       fprintf(stderr, "%s     stbd backscatter[%d]:  %d\n", first, i, charptr[i]);
-  }
-  else if (backscatter->sample_size == 2) {
-    shortptr = (short *)backscatter->port_data;
+  } else if (backscatter->sample_size == 2) {
+    short *shortptr = (short *)backscatter->port_data;
     for (int i = 0; i < backscatter->number_samples; i++)
       fprintf(stderr, "%s     port backscatter[%d]:  %d\n", first, i, shortptr[i]);
     shortptr = (short *)backscatter->stbd_data;
     for (int i = 0; i < backscatter->number_samples; i++)
       fprintf(stderr, "%s     stbd backscatter[%d]:  %d\n", first, i, shortptr[i]);
-  }
-  else if (backscatter->sample_size == 4) {
-    intptr = (int *)backscatter->port_data;
+  } else if (backscatter->sample_size == 4) {
+    int *intptr = (int *)backscatter->port_data;
     for (int i = 0; i < backscatter->number_samples; i++)
       fprintf(stderr, "%s     port backscatter[%d]:  %d\n", first, i, intptr[i]);
     intptr = (int *)backscatter->stbd_data;
@@ -3201,16 +3120,6 @@ int mbsys_reson7k_print_backscatter(int verbose, s7kr_backscatter *backscatter, 
 }
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k_print_beam(int verbose, s7kr_beam *beam, int *error) {
-  s7kr_snippet *snippet;
-  int sample_type_amp;
-  int sample_type_phase;
-  int sample_type_iandq;
-  int sample_type_beamforming;
-  mb_u_char *ucharptramp, *ucharptrphase;
-  unsigned short *ushortptramp, *ushortptrphase;
-  unsigned int *uintptramp, *uintptrphase;
-  short *shortptramp, *shortptrphase;
-  int *intptramp, *intptrphase;
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -3240,28 +3149,30 @@ int mbsys_reson7k_print_beam(int verbose, s7kr_beam *beam, int *error) {
   fprintf(stderr, "%s     row_column_flag:            %d\n", first, beam->row_column_flag);
   fprintf(stderr, "%s     sample_header_id:           %d\n", first, beam->sample_header_id);
   fprintf(stderr, "%s     sample_type:                %d\n", first, beam->sample_type);
-  sample_type_amp = beam->sample_type & 15;
-  sample_type_phase = (beam->sample_type >> 4) & 15;
-  sample_type_iandq = (beam->sample_type >> 8) & 15;
-  sample_type_beamforming = (beam->sample_type >> 12) & 15;
+
+  const int sample_type_amp = beam->sample_type & 15;
+  const int sample_type_phase = (beam->sample_type >> 4) & 15;
+  const int sample_type_iandq = (beam->sample_type >> 8) & 15;
+  const int sample_type_beamforming = (beam->sample_type >> 12) & 15;
   fprintf(stderr, "%s     sample_type amplitude:      %d\n", first, sample_type_amp);
   fprintf(stderr, "%s     sample_type phase:          %d\n", first, sample_type_phase);
   fprintf(stderr, "%s     sample_type I and Q:        %d\n", first, sample_type_iandq);
   fprintf(stderr, "%s     sample_type beamforming:    %d\n", first, sample_type_beamforming);
+
   for (int i = 0; i < beam->number_beams; i++) {
-    snippet = &beam->snippets[i];
+    s7kr_snippet *snippet = &beam->snippets[i];
     fprintf(stderr, "%s     beam[%d]:%d   begin_sample:%d end_sample:%d nalloc_amp:%d nalloc_phase:%d\n", first, i,
             snippet->beam_number, snippet->begin_sample, snippet->end_sample, snippet->nalloc_amp, snippet->nalloc_phase);
-    ucharptramp = (mb_u_char *)snippet->amplitude;
-    ucharptrphase = (mb_u_char *)snippet->phase;
-    ushortptramp = (unsigned short *)snippet->amplitude;
-    ushortptrphase = (unsigned short *)snippet->phase;
-    uintptramp = (unsigned int *)snippet->amplitude;
-    uintptrphase = (unsigned int *)snippet->phase;
-    shortptramp = (short *)snippet->amplitude;
-    shortptrphase = (short *)snippet->phase;
-    intptramp = (int *)snippet->amplitude;
-    intptrphase = (int *)snippet->phase;
+    const mb_u_char *ucharptramp = (mb_u_char *)snippet->amplitude;
+    const mb_u_char *ucharptrphase = (mb_u_char *)snippet->phase;
+    const unsigned short *ushortptramp = (unsigned short *)snippet->amplitude;
+    const unsigned short *ushortptrphase = (unsigned short *)snippet->phase;
+    const unsigned int *uintptramp = (unsigned int *)snippet->amplitude;
+    const unsigned int *uintptrphase = (unsigned int *)snippet->phase;
+    const short *shortptramp = (short *)snippet->amplitude;
+    const short *shortptrphase = (short *)snippet->phase;
+    const int *intptramp = (int *)snippet->amplitude;
+    const int *intptrphase = (int *)snippet->phase;
     for (int j = 0; j <= snippet->end_sample - snippet->begin_sample; j++) {
       fprintf(stderr, "%s     sample[%d]:%d", first, j, snippet->begin_sample + j);
       if (sample_type_amp == 1)
@@ -3341,7 +3252,6 @@ int mbsys_reson7k_print_verticaldepth(int verbose, s7kr_verticaldepth *verticald
 }
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k_print_tvg(int verbose, s7kr_tvg *tvg, int *error) {
-  float *tvg_float;
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -3368,7 +3278,7 @@ int mbsys_reson7k_print_tvg(int verbose, s7kr_tvg *tvg, int *error) {
   for (int i = 0; i < 8; i++)
     fprintf(stderr, "%s     reserved[%d]:                %d\n", first, i, tvg->reserved[i]);
   for (int i = 0; i < tvg->n; i++) {
-    tvg_float = (float *)tvg->tvg;
+    float *tvg_float = (float *)tvg->tvg;
     fprintf(stderr, "%s     tvg[%d]:  %f\n", first, i, tvg_float[i]);
   }
 
@@ -3386,9 +3296,6 @@ int mbsys_reson7k_print_tvg(int verbose, s7kr_tvg *tvg, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k_print_image(int verbose, s7kr_image *image, int *error) {
-  mb_s_char *charptr;
-  short *shortptr;
-  int *intptr;
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -3417,17 +3324,17 @@ int mbsys_reson7k_print_image(int verbose, s7kr_image *image, int *error) {
   fprintf(stderr, "%s     compression:                %d\n", first, image->compression);
   fprintf(stderr, "%s     nalloc:                     %d\n", first, image->nalloc);
   if (image->color_depth == 1) {
-    charptr = (mb_s_char *)image->image;
+    const mb_s_char *charptr = (mb_s_char *)image->image;
     for (int i = 0; i < image->width * image->height; i++)
       fprintf(stderr, "%s     image[%d]:  %hhu\n", first, i, charptr[i]);
   }
   else if (image->color_depth == 2) {
-    shortptr = (short *)image->image;
+    const short *shortptr = (short *)image->image;
     for (int i = 0; i < image->width * image->height; i++)
       fprintf(stderr, "%s     image[%d]:  %hu\n", first, i, shortptr[i]);
   }
   else if (image->color_depth == 4) {
-    intptr = (int *)image->image;
+    const int *intptr = (int *)image->image;
     for (int i = 0; i < image->width * image->height; i++)
       fprintf(stderr, "%s     image[%d]:  %u\n", first, i, intptr[i]);
   }
@@ -3556,7 +3463,6 @@ int mbsys_reson7k_print_v2detectionsetup(int verbose, s7kr_v2detectionsetup *v2d
 }
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k_print_v2beamformed(int verbose, s7kr_v2beamformed *v2beamformed, int *error) {
-  s7kr_v2amplitudephase *v2amplitudephase;
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -3586,7 +3492,7 @@ int mbsys_reson7k_print_v2beamformed(int verbose, s7kr_v2beamformed *v2beamforme
     fprintf(stderr, "%u ", v2beamformed->reserved[i]);
   fprintf(stderr, "\n");
   for (int i = 0; i < v2beamformed->number_beams; i++) {
-    v2amplitudephase = &(v2beamformed->amplitudephase[i]);
+    s7kr_v2amplitudephase *v2amplitudephase = &(v2beamformed->amplitudephase[i]);
     fprintf(stderr, "%s     beam_number:                %d\n", first, v2amplitudephase->beam_number);
     fprintf(stderr, "%s     number_samples:             %d\n", first, v2amplitudephase->number_samples);
     for (int j = 0; j < v2amplitudephase->number_samples; j++) {
@@ -3609,9 +3515,6 @@ int mbsys_reson7k_print_v2beamformed(int verbose, s7kr_v2beamformed *v2beamforme
 }
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k_print_v2bite(int verbose, s7kr_v2bite *v2bite, int *error) {
-  s7kr_v2bitereport *v2bitereport;
-  s7kr_v2bitefield *v2bitefield;
-  s7k_time *s7ktime;
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -3633,12 +3536,12 @@ int mbsys_reson7k_print_v2bite(int verbose, s7kr_v2bite *v2bite, int *error) {
   fprintf(stderr, "%sStructure Contents:\n", first);
   fprintf(stderr, "%s     number_reports:             %u\n", first, v2bite->number_reports);
   for (int i = 0; i < v2bite->number_reports; i++) {
-    v2bitereport = &(v2bite->reports[i]);
+    s7kr_v2bitereport *v2bitereport = &(v2bite->reports[i]);
     fprintf(stderr, "%s     source_name:                %s\n", first, v2bitereport->source_name);
     fprintf(stderr, "%s     source_address:             %u\n", first, v2bitereport->source_address);
     fprintf(stderr, "%s     frequency:                  %f\n", first, v2bitereport->frequency);
     fprintf(stderr, "%s     enumerator:                 %u\n", first, v2bitereport->enumerator);
-    s7ktime = &(v2bitereport->downlink_time);
+    s7k_time *s7ktime = &(v2bitereport->downlink_time);
     fprintf(stderr, "%s     downlink_time:              %4.4d/%3.3d %2.2d:%2.2d:%9.6f\n", first, s7ktime->Year, s7ktime->Day,
             s7ktime->Hours, s7ktime->Minutes, s7ktime->Seconds);
     s7ktime = &(v2bitereport->uplink_time);
@@ -3654,7 +3557,7 @@ int mbsys_reson7k_print_v2bite(int verbose, s7kr_v2bite *v2bite, int *error) {
       fprintf(stderr, "%u ", v2bitereport->bite_status[j]);
     fprintf(stderr, "\n");
     for (int j = 0; j < v2bitereport->number_bite; j++) {
-      v2bitefield = &(v2bitereport->bitefield[j]);
+      s7kr_v2bitefield *v2bitefield = &(v2bitereport->bitefield[j]);
       fprintf(stderr, "%s     reserved[%2d]:               %u\n", first, j, v2bitefield->reserved);
       fprintf(stderr, "%s     name[%2d]:                   %s\n", first, j, v2bitefield->name);
       fprintf(stderr, "%s     device_type[%2d]:            %d\n", first, j, v2bitefield->device_type);
@@ -3852,8 +3755,6 @@ int mbsys_reson7k_print_v2rawdetection(int verbose, s7kr_v2rawdetection *v2rawde
 }
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k_print_v2snippet(int verbose, s7kr_v2snippet *v2snippet, int *error) {
-  s7kr_v2snippettimeseries *v2snippettimeseries;
-
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -3882,7 +3783,7 @@ int mbsys_reson7k_print_v2snippet(int verbose, s7kr_v2snippet *v2snippet, int *e
   for (int i = 0; i < 28; i++)
     fprintf(stderr, "%u ", v2snippet->reserved[i]);
   for (int i = 0; i < v2snippet->number_beams; i++) {
-    v2snippettimeseries = &(v2snippet->snippettimeseries[i]);
+    s7kr_v2snippettimeseries *v2snippettimeseries = &(v2snippet->snippettimeseries[i]);
     fprintf(stderr, "%s     beam: %u begin:%u detect:%u end:%u\n", first, v2snippettimeseries->beam_number,
             v2snippettimeseries->begin_sample, v2snippettimeseries->detect_sample, v2snippettimeseries->end_sample);
     for (int j = 0; j < v2snippettimeseries->end_sample - v2snippettimeseries->begin_sample + 1; j++)
@@ -3904,8 +3805,6 @@ int mbsys_reson7k_print_v2snippet(int verbose, s7kr_v2snippet *v2snippet, int *e
 }
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k_print_calibratedsnippet(int verbose, s7kr_calibratedsnippet *calibratedsnippet, int *error) {
-  s7kr_calibratedsnippettimeseries *calibratedsnippettimeseries;
-
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -3931,16 +3830,23 @@ int mbsys_reson7k_print_calibratedsnippet(int verbose, s7kr_calibratedsnippet *c
   fprintf(stderr, "%s     number_beams:               %u\n", first, calibratedsnippet->number_beams);
   fprintf(stderr, "%s     error_flag:                 %u\n", first, calibratedsnippet->error_flag);
   fprintf(stderr, "%s     control_flags:              %u\n", first, calibratedsnippet->control_flags);
-  for (int i = 0; i < 28; i++)
+  fprintf(stderr, "%s     absorption:                 %f\n", first, calibratedsnippet->absorption);
+  for (int i = 0; i < 6; i++)
     fprintf(stderr, "%s     reserved[%d]:                %u\n", first, i, calibratedsnippet->reserved[i]);
   for (int i = 0; i < calibratedsnippet->number_beams; i++) {
-    calibratedsnippettimeseries = &(calibratedsnippet->calibratedsnippettimeseries[i]);
+    s7kr_calibratedsnippettimeseries *calibratedsnippettimeseries =
+        &(calibratedsnippet->calibratedsnippettimeseries[i]);
     fprintf(stderr, "%s     beam: %u begin:%u detect:%u end:%u\n", first, calibratedsnippettimeseries->beam_number,
             calibratedsnippettimeseries->begin_sample, calibratedsnippettimeseries->detect_sample,
             calibratedsnippettimeseries->end_sample);
     for (int j = 0; j < calibratedsnippettimeseries->end_sample - calibratedsnippettimeseries->begin_sample + 1; j++)
       fprintf(stderr, "%s     snippet amplitude[%d]:%f\n", first, calibratedsnippettimeseries->begin_sample + j,
               calibratedsnippettimeseries->amplitude[j]);
+    if (calibratedsnippet->control_flags & 0x40 && calibratedsnippettimeseries->footprints != NULL) {
+      for (int j = 0; j < calibratedsnippettimeseries->end_sample - calibratedsnippettimeseries->begin_sample + 1; j++)
+        fprintf(stderr, "%s     footprints[%d]:%f\n", first, calibratedsnippettimeseries->begin_sample + j,
+                calibratedsnippettimeseries->footprints[j]);
+      }
   }
 
   const int status = MB_SUCCESS;
@@ -4450,8 +4356,6 @@ int mbsys_reson7k_print_spreadingloss(int verbose, s7kr_spreadingloss *spreading
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k_dimensions(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbath, int *namp, int *nss,
                              int *error) {
-  s7kr_bathymetry *bathymetry;
-
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -4468,7 +4372,7 @@ int mbsys_reson7k_dimensions(int verbose, void *mbio_ptr, void *store_ptr, int *
   /* extract data from structure */
   if (*kind == MB_DATA_DATA) {
     /* get beam and pixel numbers */
-    bathymetry = (s7kr_bathymetry *)&store->bathymetry;
+    s7kr_bathymetry *bathymetry = (s7kr_bathymetry *)&store->bathymetry;
     *nbath = bathymetry->number_beams;
     *namp = *nbath;
     *nss = 0;
@@ -4498,8 +4402,6 @@ int mbsys_reson7k_dimensions(int verbose, void *mbio_ptr, void *store_ptr, int *
 }
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k_pingnumber(int verbose, void *mbio_ptr, unsigned int *pingnumber, int *error) {
-  s7kr_bathymetry *bathymetry;
-
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -4514,7 +4416,7 @@ int mbsys_reson7k_pingnumber(int verbose, void *mbio_ptr, unsigned int *pingnumb
   struct mbsys_reson7k_struct *store = (struct mbsys_reson7k_struct *)mb_io_ptr->store_data;
 
   /* extract data from structure */
-  bathymetry = (s7kr_bathymetry *)&store->bathymetry;
+  s7kr_bathymetry *bathymetry = (s7kr_bathymetry *)&store->bathymetry;
   *pingnumber = bathymetry->ping_number;
 
   const int status = MB_SUCCESS;
@@ -4587,106 +4489,6 @@ int mbsys_reson7k_preprocess(int verbose,     /* in: verbosity level set on comm
                              void *mbio_ptr,  /* in: see mb_io.h:/^struct mb_io_struct/ */
                              void *store_ptr, /* in: see mbsys_reson7k.h:/^struct mbsys_reson7k_struct/ */
                              void *platform_ptr, void *preprocess_pars_ptr, int *error) {
-  struct mb_platform_struct *platform;
-  struct mb_preprocess_struct *pars;
-
-  /* data structure pointers */
-  s7k_header *header;
-  // s7kr_reference      *reference;
-  // s7kr_sensoruncal    *sensoruncal;
-  // s7kr_sensorcal      *sensorcal;
-  // s7kr_position       *position;
-  // s7kr_customattitude    *customattitude;
-  // s7kr_tide        *tide;
-  // s7kr_altitude      *altituderec;
-  // s7kr_motion        *motion;
-  // s7kr_depth        *depth;
-  // s7kr_svp        *svp;
-  // s7kr_ctd        *ctd;
-  // s7kr_geodesy      *geodesy;
-  // s7kr_rollpitchheave   *rollpitchheave;
-  // s7kr_heading      *headingrec;
-  // s7kr_surveyline      *surveyline;
-  // s7kr_navigation      *navigation;
-  // s7kr_attitude      *attitude;
-  // s7kr_fsdwss       *fsdwsslo;
-  // s7kr_fsdwss       *fsdwsshi;
-  // s7kr_fsdwsb       *fsdwsb;
-  // s7k_fsdwchannel     *fsdwchannel;
-  // s7k_fsdwssheader     *fsdwssheader;
-  // s7k_fsdwsegyheader     *fsdwsegyheader;
-  s7kr_bluefin *bluefin;
-  s7kr_volatilesettings *volatilesettings;
-  s7kr_matchfilter *matchfilter;
-  s7kr_beamgeometry *beamgeometry;
-  s7kr_bathymetry *bathymetry;
-  s7kr_backscatter *backscatter;
-  s7kr_beam *beam;
-  // s7kr_v2pingmotion    *v2pingmotion;
-  s7kr_v2detectionsetup *v2detectionsetup;
-  // s7kr_v2beamformed    *v2beamformed;
-  s7kr_verticaldepth *verticaldepth;
-  s7kr_v2detection *v2detection;
-  s7kr_v2rawdetection *v2rawdetection;
-  // s7kr_v2snippet      *v2snippet;
-  // s7kr_calibratedsnippet   *calibratedsnippet;
-  // s7kr_processedsidescan  *processedsidescan;
-  s7kr_image *image;
-  // s7kr_fileheader      *fileheader;
-  // s7kr_installation    *installation;
-  s7kr_remotecontrolsettings *remotecontrolsettings;
-
-  /* control parameters */
-  int ss_source = R7KRECID_None;
-
-  /* kluge parameters */
-  double kluge_beampatternsnellfactor = 1.0;
-  double kluge_soundspeedsnellfactor = 1.0;
-
-  /* Variables for beam angle calculation */
-  mb_3D_orientation tx_align;
-  mb_3D_orientation tx_orientation;
-  double tx_steer;
-  mb_3D_orientation rx_align;
-  mb_3D_orientation rx_orientation;
-  double rx_steer;
-  double reference_heading;
-  double beamAzimuth;
-  double beamDepression;
-
-  s7k_time s7kTime;
-  int time_i[7];
-  int time_j[5];
-  double time_d = 0.0;
-  double navlon = 0.0;
-  double navlat = 0.0;
-  double speed = 0.0;
-  double altitude = 0.0;
-  double sensordepth = 0.0;
-  double heading, headingc, beamheading = 0.0;
-  double roll, rollc, beamroll = 0.0;
-  double pitch, pitchc, beampitch = 0.0;
-  double heave = 0.0;
-  double beamheave;
-  double soundspeed;
-  double soundspeednew;
-  double soundspeedsnellfactor = 1.0;
-  double theta, phi;
-  double rr, xx, zz;
-  double mtodeglon, mtodeglat, headingx, headingy;
-  double dx, dy, dt;
-  int jnav = 0;
-  int jsensordepth = 0;
-  int jheading = 0;
-  int jaltitude = 0;
-  int jattitude = 0;
-  int jsoundspeed = 0;
-  int j1, j2;
-  int interp_status = MB_SUCCESS;
-  int interp_error = MB_ERROR_NO_ERROR;
-  double *pixel_size;
-  double *swath_width;
-
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -4697,7 +4499,6 @@ int mbsys_reson7k_preprocess(int verbose,     /* in: verbosity level set on comm
     fprintf(stderr, "dbg2       preprocess_pars_ptr:        %p\n", (void *)preprocess_pars_ptr);
   }
 
-  /* start successful */
   *error = MB_ERROR_NO_ERROR;
 
   /* check for non-null data */
@@ -4710,17 +4511,21 @@ int mbsys_reson7k_preprocess(int verbose,     /* in: verbosity level set on comm
 
   /* get data structure pointers */
   struct mbsys_reson7k_struct *store = (struct mbsys_reson7k_struct *)store_ptr;
-  platform = (struct mb_platform_struct *)platform_ptr;
-  pars = (struct mb_preprocess_struct *)preprocess_pars_ptr;
+  struct mb_platform_struct *platform = (struct mb_platform_struct *)platform_ptr;
+  struct mb_preprocess_struct *pars = (struct mb_preprocess_struct *)preprocess_pars_ptr;
 
   /* get saved values */
-  pixel_size = (double *)&mb_io_ptr->saved1;
-  swath_width = (double *)&mb_io_ptr->saved2;
+  double *pixel_size = (double *)&mb_io_ptr->saved1;
+  double *swath_width = (double *)&mb_io_ptr->saved2;
 
   bool kluge_beampatternsnell = false;
   bool kluge_soundspeedsnell = false;
   bool kluge_zeroattitudecorrection = false;
   bool kluge_zeroalongtrackangles = false;
+
+  /* kluge parameters */
+  double kluge_beampatternsnellfactor = 1.0;
+  double kluge_soundspeedsnellfactor = 1.0;
 
   /* get kluges */
   for (int i = 0; i < pars->n_kluge; i++) {
@@ -4794,23 +4599,16 @@ int mbsys_reson7k_preprocess(int verbose,     /* in: verbosity level set on comm
 
   /* deal with a survey record */
   if (store->kind == MB_DATA_DATA) {
-    bathymetry = &(store->bathymetry);
-    v2detection = &(store->v2detection);
-    v2detectionsetup = &(store->v2detectionsetup);
-    v2rawdetection = &(store->v2rawdetection);
-    bluefin = &(store->bluefin);
-    volatilesettings = &(store->volatilesettings);
-    matchfilter = &(store->matchfilter);
-    beamgeometry = &(store->beamgeometry);
-    remotecontrolsettings = &(store->remotecontrolsettings);
-    backscatter = &(store->backscatter);
-    beam = &(store->beam);
-    verticaldepth = &(store->verticaldepth);
-    image = &(store->image);
-    bathymetry = &(store->bathymetry);
+
+    s7k_header *header = NULL;
+    int time_i[7];
+    int time_j[5];
+    double time_d = 0.0;
+
+    s7kr_volatilesettings *volatilesettings = &(store->volatilesettings);
 
     /* print out record headers */
-    if (store->read_volatilesettings == true) {
+    if (store->read_volatilesettings) {
       header = &(volatilesettings->header);
       time_j[0] = header->s7kTime.Year;
       time_j[1] = header->s7kTime.Day;
@@ -4824,7 +4622,8 @@ int mbsys_reson7k_preprocess(int verbose,     /* in: verbosity level set on comm
                 "R7KRECID_7kVolatileSonarSettings:  7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d\n",
                 time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6], header->RecordNumber);
     }
-    if (store->read_matchfilter == true) {
+    if (store->read_matchfilter) {
+      s7kr_matchfilter *matchfilter = &(store->matchfilter);
       header = &(matchfilter->header);
       time_j[0] = header->s7kTime.Year;
       time_j[1] = header->s7kTime.Day;
@@ -4838,7 +4637,9 @@ int mbsys_reson7k_preprocess(int verbose,     /* in: verbosity level set on comm
                 "R7KRECID_7kMatchFilter:            7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d\n",
                 time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6], header->RecordNumber);
     }
-    if (store->read_beamgeometry == true) {
+
+    s7kr_beamgeometry *beamgeometry = &(store->beamgeometry);
+    if (store->read_beamgeometry) {
       header = &(beamgeometry->header);
       time_j[0] = header->s7kTime.Year;
       time_j[1] = header->s7kTime.Day;
@@ -4854,7 +4655,10 @@ int mbsys_reson7k_preprocess(int verbose,     /* in: verbosity level set on comm
                 time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6], header->RecordNumber,
                 beamgeometry->number_beams);
     }
-    if (store->read_remotecontrolsettings == true) {
+
+    s7kr_remotecontrolsettings *remotecontrolsettings =
+        &(store->remotecontrolsettings);
+    if (store->read_remotecontrolsettings) {
       header = &(remotecontrolsettings->header);
       time_j[0] = header->s7kTime.Year;
       time_j[1] = header->s7kTime.Day;
@@ -4865,10 +4669,11 @@ int mbsys_reson7k_preprocess(int verbose,     /* in: verbosity level set on comm
       mb_get_time(verbose, time_i, &time_d);
       if (verbose > 1)
         fprintf(stderr,
-                "R7KRECID_7kremotecontrolsettings:  7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d\n",
+                "R7KRECID_7kremotecontrolsettings:  7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%u\n",
                 time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6], header->RecordNumber);
     }
-    if (store->read_backscatter == true) {
+    if (store->read_backscatter) {
+      s7kr_backscatter *backscatter = &(store->backscatter);
       header = &(backscatter->header);
       time_j[0] = header->s7kTime.Year;
       time_j[1] = header->s7kTime.Day;
@@ -4879,12 +4684,13 @@ int mbsys_reson7k_preprocess(int verbose,     /* in: verbosity level set on comm
       mb_get_time(verbose, time_i, &time_d);
       if (verbose > 1)
         fprintf(stderr,
-                "R7KRECID_7kBackscatterImageData:   7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d "
-                "ping:%d samples:%d\n",
+                "R7KRECID_7kBackscatterImageData:   7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%u "
+                "ping:%u samples:%u\n",
                 time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6], header->RecordNumber,
                 backscatter->ping_number, backscatter->number_samples);
     }
-    if (store->read_beam == true) {
+    if (store->read_beam) {
+      s7kr_beam *beam = &(store->beam);
       header = &(beam->header);
       time_j[0] = header->s7kTime.Year;
       time_j[1] = header->s7kTime.Day;
@@ -4895,12 +4701,13 @@ int mbsys_reson7k_preprocess(int verbose,     /* in: verbosity level set on comm
       mb_get_time(verbose, time_i, &time_d);
       if (verbose > 1)
         fprintf(stderr,
-                "R7KRECID_7kBeamData: 7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d ping:%d "
-                "beams:%d samples:%d\n",
+                "R7KRECID_7kBeamData: 7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%u ping:%u "
+                "beams:%d samples:%u\n",
                 time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6], header->RecordNumber,
                 beam->ping_number, beam->number_beams, beam->number_samples);
     }
-    if (store->read_verticaldepth == true) {
+    if (store->read_verticaldepth) {
+      s7kr_verticaldepth *verticaldepth = &(store->verticaldepth);
       header = &(verticaldepth->header);
       time_j[0] = header->s7kTime.Year;
       time_j[1] = header->s7kTime.Day;
@@ -4911,11 +4718,12 @@ int mbsys_reson7k_preprocess(int verbose,     /* in: verbosity level set on comm
       mb_get_time(verbose, time_i, &time_d);
       if (verbose > 1)
         fprintf(stderr,
-                "R7KRECID_7kVerticalDepth: 7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d ping:%d\n",
+                "R7KRECID_7kVerticalDepth: 7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%u ping:%u\n",
                 time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6], header->RecordNumber,
                 verticaldepth->ping_number);
     }
-    if (store->read_image == true) {
+    if (store->read_image) {
+      s7kr_image *image = &(store->image);
       header = &(image->header);
       time_j[0] = header->s7kTime.Year;
       time_j[1] = header->s7kTime.Day;
@@ -4926,16 +4734,18 @@ int mbsys_reson7k_preprocess(int verbose,     /* in: verbosity level set on comm
       mb_get_time(verbose, time_i, &time_d);
       if (verbose > 1)
         fprintf(stderr,
-                "R7KRECID_7kImageData:              7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d "
-                "ping:%d width:%d height:%d\n",
+                "R7KRECID_7kImageData:              7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%u "
+                "ping:%u width:%u height:%u\n",
                 time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6], header->RecordNumber,
                 image->ping_number, image->width, image->height);
     }
+
     if (store->read_bathymetry != true) {
       status = MB_FAILURE;
       *error = MB_ERROR_IGNORE;
-    }
-    else {
+    } else {
+      s7kr_bathymetry *bathymetry = &(store->bathymetry);
+
       header = &(bathymetry->header);
       time_j[0] = header->s7kTime.Year;
       time_j[1] = header->s7kTime.Day;
@@ -4944,10 +4754,11 @@ int mbsys_reson7k_preprocess(int verbose,     /* in: verbosity level set on comm
       time_j[4] = (int)(1000000 * (header->s7kTime.Seconds - time_j[3]));
       mb_get_itime(verbose, time_j, time_i);
       mb_get_time(verbose, time_i, &time_d);
+
       if (verbose > 1)
         fprintf(stderr,
-                "R7KRECID_7kBathymetricData:        7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d "
-                "ping:%d beams:%d\n",
+                "R7KRECID_7kBathymetricData:        7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%u "
+                "ping:%u beams:%u\n",
                 time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6], header->RecordNumber,
                 bathymetry->ping_number, bathymetry->number_beams);
 
@@ -5033,7 +4844,7 @@ int mbsys_reson7k_preprocess(int verbose,     /* in: verbosity level set on comm
 
           /* flagged by sonar */
           if ((bathymetry->quality[i] & 3) == 3
-            && pars->sounding_amplitude_filter == true
+            && pars->sounding_amplitude_filter
             && (double)bathymetry->intensity[i] < pars->sounding_amplitude_threshold) {
             bathymetry->quality[i] += 64;
           }
@@ -5050,14 +4861,16 @@ int mbsys_reson7k_preprocess(int verbose,     /* in: verbosity level set on comm
 
       /* if requested ignore water column data
        * (will not be included in any output file) */
-      if (pars->ignore_water_column == true
-        && store->read_v2beamformed == true)
+      if (pars->ignore_water_column
+        && store->read_v2beamformed)
         store->read_v2beamformed = false;
+
+      s7k_time s7kTime;
 
       /*--------------------------------------------------------------*/
       /* change timestamp if indicated */
       /*--------------------------------------------------------------*/
-      if (pars->timestamp_changed == true) {
+      if (pars->timestamp_changed) {
         time_d = pars->time_d;
         mb_get_date(verbose, time_d, time_i);
         mb_get_jtime(verbose, time_i, time_j);
@@ -5068,99 +4881,125 @@ int mbsys_reson7k_preprocess(int verbose,     /* in: verbosity level set on comm
         s7kTime.Seconds = time_i[5] + 0.000001 * time_i[6];
         if (verbose > 1)
           fprintf(stderr, "Timestamp changed in function %s: "
-                "%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d | ping_number:%d\n",
+                "%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d | ping_number:%u\n",
                 __func__, time_i[0], time_i[1], time_i[2], time_i[3],
                 time_i[4], time_i[5], time_i[6], bathymetry->ping_number);
 
         /* apply the timestamp to all of the relevant data records */
-        if (store->read_volatilesettings == true)
+        if (store->read_volatilesettings)
           store->volatilesettings.header.s7kTime = s7kTime;
-        if (store->read_matchfilter == true)
+        if (store->read_matchfilter)
           store->matchfilter.header.s7kTime = s7kTime;
-        if (store->read_beamgeometry == true)
+        if (store->read_beamgeometry)
           store->beamgeometry.header.s7kTime = s7kTime;
-        if (store->read_remotecontrolsettings == true)
+        if (store->read_remotecontrolsettings)
           store->remotecontrolsettings.header.s7kTime = s7kTime;
-        if (store->read_bathymetry == true)
+        if (store->read_bathymetry)
           store->bathymetry.header.s7kTime = s7kTime;
-        if (store->read_backscatter == true)
+        if (store->read_backscatter)
           store->backscatter.header.s7kTime = s7kTime;
-        if (store->read_beam == true)
+        if (store->read_beam)
           store->beam.header.s7kTime = s7kTime;
-        if (store->read_verticaldepth == true)
+        if (store->read_verticaldepth)
           store->verticaldepth.header.s7kTime = s7kTime;
-        if (store->read_image == true)
+        if (store->read_image)
           store->image.header.s7kTime = s7kTime;
-        if (store->read_v2pingmotion == true)
+        if (store->read_v2pingmotion)
           store->v2pingmotion.header.s7kTime = s7kTime;
-        if (store->read_v2detectionsetup == true)
+        if (store->read_v2detectionsetup)
           store->v2detectionsetup.header.s7kTime = s7kTime;
-        if (store->read_v2beamformed == true)
+        if (store->read_v2beamformed)
           store->v2beamformed.header.s7kTime = s7kTime;
-        if (store->read_v2detection == true)
+        if (store->read_v2detection)
           store->v2detection.header.s7kTime = s7kTime;
-        if (store->read_v2rawdetection == true)
+        if (store->read_v2rawdetection)
           store->v2rawdetection.header.s7kTime = s7kTime;
-        if (store->read_v2snippet == true)
+        if (store->read_v2snippet)
           store->v2snippet.header.s7kTime = s7kTime;
-        if (store->read_calibratedsnippet == true)
+        if (store->read_calibratedsnippet)
           store->calibratedsnippet.header.s7kTime = s7kTime;
-        if (store->read_processedsidescan == true)
+        if (store->read_processedsidescan)
           store->processedsidescan.header.s7kTime = s7kTime;
       }
 
       /*--------------------------------------------------------------*/
       /* interpolate ancillary values  */
       /*--------------------------------------------------------------*/
-      interp_status = mb_linear_interp_longitude(verbose, pars->nav_time_d - 1, pars->nav_lon - 1, pars->n_nav, time_d,
+      int interp_status = MB_SUCCESS;
+      int interp_error = MB_ERROR_NO_ERROR;
+
+      double navlon = 0.0;
+      double navlat = 0.0;
+      int jnav = 0;
+      interp_status &= mb_linear_interp_longitude(verbose, pars->nav_time_d - 1, pars->nav_lon - 1, pars->n_nav, time_d,
                                                  &navlon, &jnav, &interp_error);
-      interp_status = mb_linear_interp_latitude(verbose, pars->nav_time_d - 1, pars->nav_lat - 1, pars->n_nav, time_d,
+      interp_status &= mb_linear_interp_latitude(verbose, pars->nav_time_d - 1, pars->nav_lat - 1, pars->n_nav, time_d,
                                                 &navlat, &jnav, &interp_error);
-      interp_status = mb_linear_interp(verbose, pars->nav_time_d - 1, pars->nav_speed - 1, pars->n_nav, time_d, &speed,
+      double speed = 0.0;
+      interp_status &= mb_linear_interp(verbose, pars->nav_time_d - 1, pars->nav_speed - 1, pars->n_nav, time_d, &speed,
                                        &jnav, &interp_error);
 
       /* interpolate sensordepth */
-      interp_status = mb_linear_interp(verbose, pars->sensordepth_time_d - 1, pars->sensordepth_sensordepth - 1,
+      double sensordepth = 0.0;
+      int jsensordepth = 0;
+      interp_status &= mb_linear_interp(verbose, pars->sensordepth_time_d - 1, pars->sensordepth_sensordepth - 1,
                                        pars->n_sensordepth, time_d, &sensordepth, &jsensordepth, &interp_error);
 
       /* interpolate heading */
-      interp_status = mb_linear_interp_heading(verbose, pars->heading_time_d - 1, pars->heading_heading - 1,
+      int jheading = 0;
+      double heading;
+      interp_status &= mb_linear_interp_heading(verbose, pars->heading_time_d - 1, pars->heading_heading - 1,
                                                pars->n_heading, time_d, &heading, &jheading, &interp_error);
 
       /* interpolate altitude */
-      interp_status = mb_linear_interp(verbose, pars->altitude_time_d - 1, pars->altitude_altitude - 1, pars->n_altitude,
+      int jaltitude = 0;
+      double altitude = 0.0;
+      interp_status &= mb_linear_interp(verbose, pars->altitude_time_d - 1, pars->altitude_altitude - 1, pars->n_altitude,
                                        time_d, &altitude, &jaltitude, &interp_error);
 
       /* interpolate attitude */
-      interp_status = mb_linear_interp(verbose, pars->attitude_time_d - 1, pars->attitude_roll - 1, pars->n_attitude,
+      int jattitude = 0;
+      double roll;
+      interp_status &= mb_linear_interp(verbose, pars->attitude_time_d - 1, pars->attitude_roll - 1, pars->n_attitude,
                                        time_d, &roll, &jattitude, &interp_error);
-      interp_status = mb_linear_interp(verbose, pars->attitude_time_d - 1, pars->attitude_pitch - 1, pars->n_attitude,
+      double pitch;
+      interp_status &= mb_linear_interp(verbose, pars->attitude_time_d - 1, pars->attitude_pitch - 1, pars->n_attitude,
                                        time_d, &pitch, &jattitude, &interp_error);
-      interp_status = mb_linear_interp(verbose, pars->attitude_time_d - 1, pars->attitude_heave - 1, pars->n_attitude,
+      double heave = 0.0;
+      interp_status &= mb_linear_interp(verbose, pars->attitude_time_d - 1, pars->attitude_heave - 1, pars->n_attitude,
                                        time_d, &heave, &jattitude, &interp_error);
 
       /* interpolate soundspeed */
-      interp_status = mb_linear_interp(verbose, pars->soundspeed_time_d - 1, pars->soundspeed_soundspeed - 1, pars->n_soundspeed,
+      int jsoundspeed = 0;
+      double soundspeednew;
+      interp_status &= mb_linear_interp(verbose, pars->soundspeed_time_d - 1, pars->soundspeed_soundspeed - 1, pars->n_soundspeed,
                                        time_d, &soundspeednew, &jsoundspeed, &interp_error);
 
       /* do lever arm correction */
+      double pitchc;
+      double rollc;
+      double headingc;
       if (platform != NULL) {
         /* calculate sonar position position */
-        status = mb_platform_position(verbose, (void *)platform, pars->target_sensor, 0, navlon, navlat, sensordepth,
+        status &= mb_platform_position(verbose, (void *)platform, pars->target_sensor, 0, navlon, navlat, sensordepth,
                                       heading, roll, pitch, &navlon, &navlat, &sensordepth, error);
 
         /* calculate sonar attitude */
-        status = mb_platform_orientation_target(verbose, (void *)platform, pars->target_sensor, 0, heading, roll, pitch,
+        status &= mb_platform_orientation_target(verbose, (void *)platform, pars->target_sensor, 0, heading, roll, pitch,
                                                 &headingc, &rollc, &pitchc, error);
       }
 
       /* get local translation between lon lat degrees and meters */
+      double mtodeglon;
+      double mtodeglat;
       mb_coor_scale(verbose, navlat, &mtodeglon, &mtodeglat);
-      headingx = sin(DTR * headingc);
-      headingy = cos(DTR * headingc);
+      // const double headingx = sin(DTR * headingc);
+      // const double headingy = cos(DTR * headingc);
 
       /* if a valid speed is not available calculate it */
       if (interp_status == MB_SUCCESS && speed <= 0.0) {
+        int j1;
+        int j2;
         if (jnav > 1) {
           j1 = jnav - 2;
           j2 = jnav - 1;
@@ -5169,12 +5008,28 @@ int mbsys_reson7k_preprocess(int verbose,     /* in: verbosity level set on comm
           j1 = jnav - 1;
           j2 = jnav;
         }
-        dx = (pars->nav_lon[j2] - pars->nav_lon[j1]) / mtodeglon;
-        dy = (pars->nav_lat[j2] - pars->nav_lat[j1]) / mtodeglat;
-        dt = (pars->nav_time_d[j2] - pars->nav_time_d[j1]);
+        const double dx = (pars->nav_lon[j2] - pars->nav_lon[j1]) / mtodeglon;
+        const double dy = (pars->nav_lat[j2] - pars->nav_lat[j1]) / mtodeglat;
+        const double dt = (pars->nav_time_d[j2] - pars->nav_time_d[j1]);
         if (dt > 0.0)
           speed = sqrt(dx * dx + dy * dy) / dt;
       }
+
+      mb_3D_orientation tx_align;
+      mb_3D_orientation tx_orientation;
+      mb_3D_orientation rx_align;
+      mb_3D_orientation rx_orientation;
+      double beamAzimuth;
+      double beamDepression;
+
+      double beamheading = 0.0;
+      double beamroll = 0.0;
+      double beampitch = 0.0;
+      double beamheave;
+      s7kr_v2detection *v2detection = &(store->v2detection);
+      s7kr_v2detectionsetup *v2detectionsetup = &(store->v2detectionsetup);
+      s7kr_v2rawdetection *v2rawdetection = &(store->v2rawdetection);
+      s7kr_bluefin *bluefin = &(store->bluefin);
 
       /* if the optional data are not all available, this ping
           is not useful, and is discarded by setting
@@ -5187,7 +5042,7 @@ int mbsys_reson7k_preprocess(int verbose,     /* in: verbosity level set on comm
       /*--------------------------------------------------------------*/
       /* recalculate bathymetry  */
       /*--------------------------------------------------------------*/
-      if (status == MB_SUCCESS && (bathymetry->optionaldata == false || pars->recalculate_bathymetry == true)) {
+      if (status == MB_SUCCESS && (!bathymetry->optionaldata || pars->recalculate_bathymetry)) {
 
         if (verbose >= 2) {
           fprintf(stderr, "\ndbg2 Recalculating bathymetry in %s: 7k ping records read:\n", __func__);
@@ -5214,8 +5069,8 @@ int mbsys_reson7k_preprocess(int verbose,     /* in: verbosity level set on comm
 
         /* initialize all of the beams */
         for (int i = 0; i < bathymetry->number_beams; i++) {
-          if (store->read_v2rawdetection == true ||
-              (store->read_v2detection == true && store->read_v2detectionsetup == true))
+          if (store->read_v2rawdetection ||
+              (store->read_v2detection && store->read_v2detectionsetup))
             bathymetry->quality[i] = 0;
           bathymetry->depth[i] = 0.0;
           bathymetry->acrosstrack[i] = 0.0;
@@ -5241,6 +5096,7 @@ int mbsys_reson7k_preprocess(int verbose,     /* in: verbosity level set on comm
         }
 
         /* get ready to calculate bathymetry */
+        double soundspeed;
         if (volatilesettings->sound_velocity > 0.0)
           soundspeed = volatilesettings->sound_velocity;
         else if (remotecontrolsettings->sound_velocity > 0.0)
@@ -5270,7 +5126,7 @@ int mbsys_reson7k_preprocess(int verbose,     /* in: verbosity level set on comm
           /*
            * v2rawdetection record
            */
-          if (store->read_v2rawdetection == true) {
+          if (store->read_v2rawdetection) {
             for (int i = 0; i < v2rawdetection->number_beams; i++) {
               v2rawdetection->rx_angle[i]
                 = asin(MAX(-1.0, MIN(1.0, kluge_beampatternsnellfactor
@@ -5281,7 +5137,7 @@ int mbsys_reson7k_preprocess(int verbose,     /* in: verbosity level set on comm
           /*
            * v2detection record with or without v2detectionsetup
            */
-          if (store->read_v2detection == true) {
+          if (store->read_v2detection) {
             for (int i = 0; i < v2detection->number_beams; i++) {
               v2detection->angle_x[i]
                 = asin(MAX(-1.0, MIN(1.0, kluge_beampatternsnellfactor
@@ -5292,7 +5148,7 @@ int mbsys_reson7k_preprocess(int verbose,     /* in: verbosity level set on comm
           /*
            * beamgeometry record
            */
-          if (store->read_beamgeometry == true) {
+          if (store->read_beamgeometry) {
             for (int i = 0; i < bathymetry->number_beams; i++) {
               beamgeometry->angle_acrosstrack[i] =
                   asin(MAX(-1.0, MIN(1.0, kluge_beampatternsnellfactor
@@ -5302,6 +5158,7 @@ int mbsys_reson7k_preprocess(int verbose,     /* in: verbosity level set on comm
         }
 
         /* Change the sound speed used to calculate bathymetry */
+        double soundspeedsnellfactor = 1.0;
         if (pars->modify_soundspeed && pars->n_soundspeed > 0) {
           soundspeedsnellfactor = soundspeednew / soundspeed;
           soundspeed = soundspeednew;
@@ -5311,7 +5168,7 @@ int mbsys_reson7k_preprocess(int verbose,     /* in: verbosity level set on comm
         /* if requested apply kluge scaling of sound speed - which means
             changing beam angles by Snell's law and changing the sound
             speed used to calculate bathymetry */
-        if (kluge_soundspeedsnell == true) {
+        if (kluge_soundspeedsnell) {
           /*
            * sound speed
            */
@@ -5329,7 +5186,7 @@ int mbsys_reson7k_preprocess(int verbose,     /* in: verbosity level set on comm
           /*
            * v2rawdetection record
            */
-          if (store->read_v2rawdetection == true) {
+          if (store->read_v2rawdetection) {
             for (int i = 0; i < v2rawdetection->number_beams; i++) {
               v2rawdetection->rx_angle[i] =
                   asin(MAX(-1.0, MIN(1.0, soundspeedsnellfactor
@@ -5340,7 +5197,7 @@ int mbsys_reson7k_preprocess(int verbose,     /* in: verbosity level set on comm
           /*
            * v2detection record with or without v2detectionsetup
            */
-          if (store->read_v2detection == true) {
+          if (store->read_v2detection) {
             for (int i = 0; i < v2detection->number_beams; i++) {
               v2detection->angle_x[i]
                 = asin(MAX(-1.0, MIN(1.0, soundspeedsnellfactor
@@ -5351,7 +5208,7 @@ int mbsys_reson7k_preprocess(int verbose,     /* in: verbosity level set on comm
           /*
            * beamgeometry record
            */
-          if (store->read_beamgeometry == true) {
+          if (store->read_beamgeometry) {
             for (int i = 0; i < bathymetry->number_beams; i++) {
               beamgeometry->angle_acrosstrack[i] =
                   asin(MAX(-1.0, MIN(1.0, soundspeedsnellfactor
@@ -5365,7 +5222,7 @@ int mbsys_reson7k_preprocess(int verbose,     /* in: verbosity level set on comm
           status = mb_platform_orientation_offset(verbose, (void *)platform, pars->target_sensor, 0,
                                                   &(tx_align.heading), &(tx_align.roll), &(tx_align.pitch), error);
 
-          status = mb_platform_orientation_offset(verbose, (void *)platform, pars->target_sensor, 1,
+          status &= mb_platform_orientation_offset(verbose, (void *)platform, pars->target_sensor, 1,
                                                   &(rx_align.heading), &(rx_align.roll), &(rx_align.pitch), error);
         }
 
@@ -5387,8 +5244,12 @@ int mbsys_reson7k_preprocess(int verbose,     /* in: verbosity level set on comm
            different records over the years, so there are several different
            cases that must be handled */
 
+        double reference_heading;
+        double tx_steer;
+        double rx_steer;
+
         /* case of v2rawdetection record */
-        if (store->read_v2rawdetection == true) {
+        if (store->read_v2rawdetection) {
           for (int j = 0; j < v2rawdetection->number_beams; j++) {
             /* beam id */
             const int i = v2rawdetection->beam_descriptor[j];
@@ -5399,7 +5260,7 @@ int mbsys_reson7k_preprocess(int verbose,     /* in: verbosity level set on comm
 
               /* get roll at bottom return time for this beam */
               if (pars->n_attitude > 0) {
-                  interp_status =
+                  /* interp_status &= */
                       mb_linear_interp(verbose, pars->attitude_time_d - 1, pars->attitude_roll - 1, pars->n_attitude,
                        time_d + bathymetry->range[i], &beamroll, &jattitude, &interp_error);
               }
@@ -5409,7 +5270,7 @@ int mbsys_reson7k_preprocess(int verbose,     /* in: verbosity level set on comm
 
               /* get pitch at bottom return time for this beam */
               if (pars->n_attitude > 0) {
-                  interp_status =
+                  /* interp_status &= */
                       mb_linear_interp(verbose, pars->attitude_time_d - 1, pars->attitude_pitch - 1, pars->n_attitude,
                        time_d + bathymetry->range[i], &beampitch, &jattitude, &interp_error);
               }
@@ -5419,7 +5280,7 @@ int mbsys_reson7k_preprocess(int verbose,     /* in: verbosity level set on comm
 
               /* get heading at bottom return time for this beam */
               if (pars->n_heading > 0) {
-                  interp_status = mb_linear_interp_heading(verbose, pars->heading_time_d - 1, pars->heading_heading - 1,
+                  /* interp_status &= */ mb_linear_interp_heading(verbose, pars->heading_time_d - 1, pars->heading_heading - 1,
                                            pars->n_heading, time_d + bathymetry->range[i], &beamheading,
                                            &jheading, &interp_error);
               }
@@ -5429,7 +5290,7 @@ int mbsys_reson7k_preprocess(int verbose,     /* in: verbosity level set on comm
 
               /* get heave at bottom return time for this beam */
               if (pars->n_attitude > 0) {
-                  interp_status = mb_linear_interp(verbose, pars->attitude_time_d - 1, pars->attitude_heave - 1,
+                  /* interp_status &= */ mb_linear_interp(verbose, pars->attitude_time_d - 1, pars->attitude_heave - 1,
                                                pars->n_attitude, time_d + bathymetry->range[i], &beamheave,
                                                &jattitude, &interp_error);
               }
@@ -5460,28 +5321,37 @@ int mbsys_reson7k_preprocess(int verbose,     /* in: verbosity level set on comm
             rx_orientation.pitch = beampitch;
             rx_orientation.heading = beamheading;
             reference_heading = heading;
+//fprintf(stderr,"%s:%4.4d:%s: beam:%d tx:%f %f %f %f rx:%f %f %f %f hdg:%f\n",
+//__FILE__, __LINE__, __func__,
+//j, tx_steer, tx_orientation.roll, tx_orientation.pitch, tx_orientation.heading,
+//rx_steer, rx_orientation.roll, rx_orientation.pitch, rx_orientation.heading,
+//reference_heading);
 
             status = mb_beaudoin(verbose, tx_align, tx_orientation, tx_steer, rx_align, rx_orientation, rx_steer,
                                  reference_heading, &beamAzimuth, &beamDepression, error);
-            theta = 90.0 - beamDepression;
-            phi = 90.0 - beamAzimuth;
+            const double theta = 90.0 - beamDepression;
+            double phi = 90.0 - beamAzimuth;
             if (phi < 0.0)
               phi += 360.0;
 
             /* calculate bathymetry */
-            rr = 0.5 * soundspeed * bathymetry->range[i];
-            xx = rr * sin(DTR * theta);
-            zz = rr * cos(DTR * theta);
+            const double rr = 0.5 * soundspeed * bathymetry->range[i];
+            const double xx = rr * sin(DTR * theta);
+            const double zz = rr * cos(DTR * theta);
             bathymetry->acrosstrack[i] = xx * cos(DTR * phi);
             bathymetry->alongtrack[i] = xx * sin(DTR * phi);
             bathymetry->depth[i] = zz + sensordepth - 0.5 * (heave + beamheave);
             bathymetry->pointing_angle[i] = DTR * theta;
             bathymetry->azimuth_angle[i] = DTR * phi;
+//fprintf(stderr,"%s:%4.4d:%s: beam:%d zxy:%f %f %f  angles:%f %f\n",
+//__FILE__, __LINE__, __func__,
+//j, bathymetry->depth[i], bathymetry->acrosstrack[i], bathymetry->alongtrack[i],
+//bathymetry->pointing_angle[i], bathymetry->azimuth_angle[i]);
           }
         }
 
         /* case of v2detection record with v2detectionsetup */
-        else if (store->read_v2detection == true && store->read_v2detectionsetup == true) {
+        else if (store->read_v2detection && store->read_v2detectionsetup) {
           for (int j = 0; j < v2detection->number_beams; j++) {
             const int i = v2detectionsetup->beam_descriptor[j];
 
@@ -5494,7 +5364,7 @@ int mbsys_reson7k_preprocess(int verbose,     /* in: verbosity level set on comm
                         }
                         else if (pars->n_attitude > 0) {
                             /* get roll at bottom return time for this beam */
-                            interp_status = mb_linear_interp(verbose, pars->attitude_time_d - 1, pars->attitude_roll - 1,
+                            /* interp_status &= */ mb_linear_interp(verbose, pars->attitude_time_d - 1, pars->attitude_roll - 1,
                                                              pars->n_attitude, time_d + bathymetry->range[i], &beamroll,
                                                              &jattitude, &interp_error);
                         }
@@ -5507,7 +5377,7 @@ int mbsys_reson7k_preprocess(int verbose,     /* in: verbosity level set on comm
                             beampitch = 0.0;
                         }
                         else if (pars->n_attitude > 0) {
-                            interp_status =
+                            /* interp_status &= */
                                 mb_linear_interp(verbose, pars->attitude_time_d - 1, pars->attitude_pitch - 1, pars->n_attitude,
                                                  time_d + bathymetry->range[i], &beampitch, &jattitude, &interp_error);
                         }
@@ -5517,7 +5387,7 @@ int mbsys_reson7k_preprocess(int verbose,     /* in: verbosity level set on comm
 
                         /* get heading at bottom return time for this beam */
                         if (pars->n_heading > 0) {
-                            interp_status = mb_linear_interp_heading(verbose, pars->heading_time_d - 1, pars->heading_heading - 1,
+                            /* interp_status &= */ mb_linear_interp_heading(verbose, pars->heading_time_d - 1, pars->heading_heading - 1,
                                                                  pars->n_heading, time_d + bathymetry->range[i], &beamheading,
                                                                  &jheading, &interp_error);
                         }
@@ -5530,7 +5400,7 @@ int mbsys_reson7k_preprocess(int verbose,     /* in: verbosity level set on comm
                             beamheave = 0.0;
                         }
                         else if (pars->n_attitude > 0) {
-                            interp_status = mb_linear_interp(verbose, pars->attitude_time_d - 1, pars->attitude_heave - 1,
+                            /* interp_status &= */ mb_linear_interp(verbose, pars->attitude_time_d - 1, pars->attitude_heave - 1,
                                                              pars->n_attitude, time_d + bathymetry->range[i], &beamheave,
                                                              &jattitude, &interp_error);
                         }
@@ -5564,15 +5434,15 @@ int mbsys_reson7k_preprocess(int verbose,     /* in: verbosity level set on comm
 
             status = mb_beaudoin(verbose, tx_align, tx_orientation, tx_steer, rx_align, rx_orientation, rx_steer,
                                  reference_heading, &beamAzimuth, &beamDepression, error);
-            theta = 90.0 - beamDepression;
-            phi = 90.0 - beamAzimuth;
+            const double theta = 90.0 - beamDepression;
+            double phi = 90.0 - beamAzimuth;
             if (phi < 0.0)
               phi += 360.0;
 
             /* calculate bathymetry */
-            rr = 0.5 * soundspeed * bathymetry->range[i];
-            xx = rr * sin(DTR * theta);
-            zz = rr * cos(DTR * theta);
+            const double rr = 0.5 * soundspeed * bathymetry->range[i];
+            const double xx = rr * sin(DTR * theta);
+            const double zz = rr * cos(DTR * theta);
             bathymetry->acrosstrack[i] = xx * cos(DTR * phi);
             bathymetry->alongtrack[i] = xx * sin(DTR * phi);
             bathymetry->depth[i] = zz + sensordepth - 0.5 * (heave + beamheave);
@@ -5582,7 +5452,7 @@ int mbsys_reson7k_preprocess(int verbose,     /* in: verbosity level set on comm
         }
 
         /* case of v2detection record */
-        else if (store->read_v2detection == true) {
+        else if (store->read_v2detection) {
           /* now loop over the detects */
           for (int i = 0; i < v2detection->number_beams; i++) {
             bathymetry->range[i] = v2detection->range[i];
@@ -5594,7 +5464,7 @@ int mbsys_reson7k_preprocess(int verbose,     /* in: verbosity level set on comm
                         }
                         else if (pars->n_attitude > 0) {
                             /* get roll at bottom return time for this beam */
-                            interp_status = mb_linear_interp(verbose, pars->attitude_time_d - 1, pars->attitude_roll - 1,
+                            /* interp_status &= */ mb_linear_interp(verbose, pars->attitude_time_d - 1, pars->attitude_roll - 1,
                                                              pars->n_attitude, time_d + bathymetry->range[i], &beamroll,
                                                              &jattitude, &interp_error);
                         }
@@ -5607,7 +5477,7 @@ int mbsys_reson7k_preprocess(int verbose,     /* in: verbosity level set on comm
                             beampitch = 0.0;
                         }
                         else if (pars->n_attitude > 0) {
-                            interp_status =
+                            /* interp_status &= */
                                 mb_linear_interp(verbose, pars->attitude_time_d - 1, pars->attitude_pitch - 1, pars->n_attitude,
                                                  time_d + bathymetry->range[i], &beampitch, &jattitude, &interp_error);
                         }
@@ -5617,7 +5487,7 @@ int mbsys_reson7k_preprocess(int verbose,     /* in: verbosity level set on comm
 
                         /* get heading at bottom return time for this beam */
                         if (pars->n_heading > 0) {
-                            interp_status = mb_linear_interp_heading(verbose, pars->heading_time_d - 1, pars->heading_heading - 1,
+                            /* interp_status &= */ mb_linear_interp_heading(verbose, pars->heading_time_d - 1, pars->heading_heading - 1,
                                                                  pars->n_heading, time_d + bathymetry->range[i], &beamheading,
                                                                  &jheading, &interp_error);
                         }
@@ -5630,7 +5500,7 @@ int mbsys_reson7k_preprocess(int verbose,     /* in: verbosity level set on comm
                             beamheave = 0.0;
                         }
                         else if (pars->n_attitude > 0) {
-                            interp_status = mb_linear_interp(verbose, pars->attitude_time_d - 1, pars->attitude_heave - 1,
+                            /* interp_status &= */ mb_linear_interp(verbose, pars->attitude_time_d - 1, pars->attitude_heave - 1,
                                                              pars->n_attitude, time_d + bathymetry->range[i], &beamheave,
                                                              &jattitude, &interp_error);
                         }
@@ -5664,15 +5534,15 @@ int mbsys_reson7k_preprocess(int verbose,     /* in: verbosity level set on comm
 
             status = mb_beaudoin(verbose, tx_align, tx_orientation, tx_steer, rx_align, rx_orientation, rx_steer,
                                  reference_heading, &beamAzimuth, &beamDepression, error);
-            theta = 90.0 - beamDepression;
-            phi = 90.0 - beamAzimuth;
+            const double theta = 90.0 - beamDepression;
+            double phi = 90.0 - beamAzimuth;
             if (phi < 0.0)
               phi += 360.0;
 
             /* calculate bathymetry */
-            rr = 0.5 * soundspeed * bathymetry->range[i];
-            xx = rr * sin(DTR * theta);
-            zz = rr * cos(DTR * theta);
+            const double rr = 0.5 * soundspeed * bathymetry->range[i];
+            const double xx = rr * sin(DTR * theta);
+            const double zz = rr * cos(DTR * theta);
             bathymetry->acrosstrack[i] = xx * cos(DTR * phi);
             bathymetry->alongtrack[i] = xx * sin(DTR * phi);
             bathymetry->depth[i] = zz + sensordepth - 0.5 * (heave + beamheave);
@@ -5695,7 +5565,7 @@ int mbsys_reson7k_preprocess(int verbose,     /* in: verbosity level set on comm
               }
               else if (pars->n_attitude > 0) {
                   /* get roll at bottom return time for this beam */
-                  interp_status = mb_linear_interp(verbose, pars->attitude_time_d - 1, pars->attitude_roll - 1,
+                  /* interp_status &= */ mb_linear_interp(verbose, pars->attitude_time_d - 1, pars->attitude_roll - 1,
                                                    pars->n_attitude, time_d + bathymetry->range[i], &beamroll,
                                                    &jattitude, &interp_error);
               }
@@ -5708,7 +5578,7 @@ int mbsys_reson7k_preprocess(int verbose,     /* in: verbosity level set on comm
                   beampitch = 0.0;
               }
               else if (pars->n_attitude > 0) {
-                  interp_status =
+                  /* interp_status &= */
                       mb_linear_interp(verbose, pars->attitude_time_d - 1, pars->attitude_pitch - 1, pars->n_attitude,
                                        time_d + bathymetry->range[i], &beampitch, &jattitude, &interp_error);
               }
@@ -5718,7 +5588,7 @@ int mbsys_reson7k_preprocess(int verbose,     /* in: verbosity level set on comm
 
               /* get heading at bottom return time for this beam */
               if (pars->n_heading > 0) {
-                  interp_status = mb_linear_interp_heading(verbose, pars->heading_time_d - 1, pars->heading_heading - 1,
+                  /* interp_status &= */ mb_linear_interp_heading(verbose, pars->heading_time_d - 1, pars->heading_heading - 1,
                                                        pars->n_heading, time_d + bathymetry->range[i], &beamheading,
                                                        &jheading, &interp_error);
               }
@@ -5731,7 +5601,7 @@ int mbsys_reson7k_preprocess(int verbose,     /* in: verbosity level set on comm
                   beamheave = 0.0;
               }
               else if (pars->n_attitude > 0) {
-                  interp_status = mb_linear_interp(verbose, pars->attitude_time_d - 1, pars->attitude_heave - 1,
+                  /* interp_status &= */ mb_linear_interp(verbose, pars->attitude_time_d - 1, pars->attitude_heave - 1,
                                                    pars->n_attitude, time_d + bathymetry->range[i], &beamheave,
                                                    &jattitude, &interp_error);
               }
@@ -5765,15 +5635,15 @@ int mbsys_reson7k_preprocess(int verbose,     /* in: verbosity level set on comm
 
               status = mb_beaudoin(verbose, tx_align, tx_orientation, tx_steer, rx_align, rx_orientation, rx_steer,
                                    reference_heading, &beamAzimuth, &beamDepression, error);
-              theta = 90.0 - beamDepression;
-              phi = 90.0 - beamAzimuth;
+              const double theta = 90.0 - beamDepression;
+              double phi = 90.0 - beamAzimuth;
               if (phi < 0.0)
                 phi += 360.0;
 
               /* calculate bathymetry */
-              rr = 0.5 * soundspeed * bathymetry->range[i];
-              xx = rr * sin(DTR * theta);
-              zz = rr * cos(DTR * theta);
+              const double rr = 0.5 * soundspeed * bathymetry->range[i];
+              const double xx = rr * sin(DTR * theta);
+              const double zz = rr * cos(DTR * theta);
               bathymetry->acrosstrack[i] = xx * cos(DTR * phi);
               bathymetry->alongtrack[i] = xx * sin(DTR * phi);
               bathymetry->depth[i] = zz + sensordepth - 0.5 * (heave + beamheave);
@@ -5788,6 +5658,9 @@ int mbsys_reson7k_preprocess(int verbose,     /* in: verbosity level set on comm
         bathymetry->header.OffsetToOptionalData =
             MBSYS_RESON7K_RECORDHEADER_SIZE + R7KHDRSIZE_7kBathymetricData + bathymetry->number_beams * 9;
 
+        /* control parameters */
+        int ss_source = R7KRECID_None;
+
         if (pars->multibeam_sidescan_source == MB_PR_SSSOURCE_SNIPPET)
           ss_source = R7KRECID_7kV2SnippetData;
         else if (pars->multibeam_sidescan_source == MB_PR_SSSOURCE_CALIBRATEDSNIPPET)
@@ -5796,7 +5669,7 @@ int mbsys_reson7k_preprocess(int verbose,     /* in: verbosity level set on comm
           ss_source = R7KRECID_7kBackscatterImageData;
 
         /* regenerate sidescan */
-        status = mbsys_reson7k_makess(verbose, mbio_ptr, store_ptr, ss_source, false, pixel_size, false, swath_width,
+        status &= mbsys_reson7k_makess_source(verbose, mbio_ptr, store_ptr, ss_source, false, pixel_size, false, swath_width,
                                       true, error);
       }
       /*--------------------------------------------------------------*/
@@ -5815,11 +5688,6 @@ int mbsys_reson7k_preprocess(int verbose,     /* in: verbosity level set on comm
 }
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k_extract_platform(int verbose, void *mbio_ptr, void *store_ptr, int *kind, void **platform_ptr, int *error) {
-  struct mb_platform_struct *platform;
-  int sensor_multibeam, sensor_position, sensor_attitude;
-  int ntimelag = 0;
-  int isensor;
-
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -5843,11 +5711,11 @@ int mbsys_reson7k_extract_platform(int verbose, void *mbio_ptr, void *store_ptr,
   /* extract sensor offsets from installation record */
   if (*platform_ptr != NULL) {
     /* get pointer to platform structure */
-    platform = (struct mb_platform_struct *)(*platform_ptr);
+    struct mb_platform_struct *platform = (struct mb_platform_struct *)(*platform_ptr);
 
     /* look for multibeam sensor, add it if necessary */
-    sensor_multibeam = -1;
-    for (isensor = 0; isensor < platform->num_sensors && sensor_multibeam < 0; isensor++) {
+    int sensor_multibeam = -1;
+    for (int isensor = 0; isensor < platform->num_sensors && sensor_multibeam < 0; isensor++) {
       if (platform->sensors[isensor].type == MB_SENSOR_TYPE_SONAR_MULTIBEAM &&
           platform->sensors[isensor].num_offsets == 2) {
         sensor_multibeam = isensor;
@@ -5881,16 +5749,17 @@ int mbsys_reson7k_extract_platform(int verbose, void *mbio_ptr, void *store_ptr,
     }
 
     /* look for position sensor, add it if necessary */
-    sensor_position = -1;
+    int sensor_position = -1;
     if (platform->source_position1 >= 0)
       sensor_position = platform->source_position1;
-    for (isensor = 0; isensor < platform->num_sensors && sensor_position < 0; isensor++) {
+    for (int isensor = 0; isensor < platform->num_sensors && sensor_position < 0; isensor++) {
       if (platform->sensors[isensor].type == MB_SENSOR_TYPE_POSITION && platform->sensors[isensor].num_offsets == 1) {
         sensor_position = isensor;
       }
     }
     if (sensor_position < 0) {
       /* set sensor 1 (position) */
+      const int ntimelag = 0;
       status = mb_platform_add_sensor(verbose, (void *)platform, MB_SENSOR_TYPE_POSITION, NULL, NULL, NULL, 0, 0, 1,
                                       ntimelag, error);
       if (status == MB_SUCCESS) {
@@ -5918,10 +5787,10 @@ int mbsys_reson7k_extract_platform(int verbose, void *mbio_ptr, void *store_ptr,
     }
 
     /* look for attitude sensor, add it if necessary */
-    sensor_attitude = -1;
+    int sensor_attitude = -1;
     if (platform->source_rollpitch1 >= 0)
       sensor_attitude = platform->source_rollpitch1;
-    for (isensor = 0; isensor < platform->num_sensors && sensor_attitude < 0; isensor++) {
+    for (int isensor = 0; isensor < platform->num_sensors && sensor_attitude < 0; isensor++) {
       if ((platform->sensors[isensor].type == MB_SENSOR_TYPE_VRU || platform->sensors[isensor].type == MB_SENSOR_TYPE_IMU ||
            platform->sensors[isensor].type == MB_SENSOR_TYPE_INS) &&
           platform->sensors[isensor].num_offsets == 1) {
@@ -5930,6 +5799,7 @@ int mbsys_reson7k_extract_platform(int verbose, void *mbio_ptr, void *store_ptr,
     }
     if (sensor_attitude < 0) {
       /* set sensor 2 (attitude) */
+      const int ntimelag = 0;
       status =
           mb_platform_add_sensor(verbose, (void *)platform, MB_SENSOR_TYPE_VRU, NULL, NULL, NULL, 0, 0, 1, ntimelag, error);
       if (status == MB_SUCCESS) {
@@ -5986,23 +5856,6 @@ int mbsys_reson7k_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kin
                           double *navlat, double *speed, double *heading, int *nbath, int *namp, int *nss, char *beamflag,
                           double *bath, double *amp, double *bathacrosstrack, double *bathalongtrack, double *ss,
                           double *ssacrosstrack, double *ssalongtrack, char *comment, int *error) {
-  s7kr_bluefin *bluefin;
-  s7kr_processedsidescan *processedsidescan;
-  s7kr_volatilesettings *volatilesettings;
-  s7kr_beamgeometry *beamgeometry;
-  s7kr_bathymetry *bathymetry;
-  s7kr_backscatter *backscatter;
-  s7kr_beam *beam;
-  s7kr_position *position;
-  s7kr_systemeventmessage *systemeventmessage;
-  s7kr_fsdwsb *fsdwsb;
-  s7kr_fsdwss *fsdwsslo;
-  s7kr_fsdwss *fsdwsshi;
-  s7k_fsdwsegyheader *fsdwsegyheader;
-  s7k_fsdwssheader *fsdwssheader;
-  double *pixel_size;
-  double *swath_width;
-
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -6016,22 +5869,26 @@ int mbsys_reson7k_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kin
 
   /* get data structure pointer */
   struct mbsys_reson7k_struct *store = (struct mbsys_reson7k_struct *)store_ptr;
-  bluefin = (s7kr_bluefin *)&store->bluefin;
-  processedsidescan = (s7kr_processedsidescan *)&store->processedsidescan;
-  volatilesettings = (s7kr_volatilesettings *)&(store->volatilesettings);
-  beamgeometry = (s7kr_beamgeometry *)&(store->beamgeometry);
-  bathymetry = (s7kr_bathymetry *)&store->bathymetry;
-  backscatter = (s7kr_backscatter *)&store->backscatter;
-  beam = (s7kr_beam *)&store->beam;
-  position = (s7kr_position *)&store->position;
-  systemeventmessage = (s7kr_systemeventmessage *)&store->systemeventmessage;
-  fsdwsb = &(store->fsdwsb);
-  fsdwsslo = &(store->fsdwsslo);
-  fsdwsshi = &(store->fsdwsshi);
+
+  s7kr_bluefin *bluefin = (s7kr_bluefin *)&store->bluefin;
+  s7kr_processedsidescan *processedsidescan = (s7kr_processedsidescan *)&store->processedsidescan;
+  s7kr_volatilesettings *volatilesettings = (s7kr_volatilesettings *)&(store->volatilesettings);
+  s7kr_beamgeometry *beamgeometry = (s7kr_beamgeometry *)&(store->beamgeometry);
+  s7kr_bathymetry *bathymetry = (s7kr_bathymetry *)&store->bathymetry;
+  // s7kr_backscatter *backscatter = (s7kr_backscatter *)&store->backscatter;
+  // s7kr_beam *beam = (s7kr_beam *)&store->beam;
+  s7kr_position *position = (s7kr_position *)&store->position;
+  s7kr_systemeventmessage *systemeventmessage = (s7kr_systemeventmessage *)&store->systemeventmessage;
+  s7kr_fsdwsb *fsdwsb = &(store->fsdwsb);
+  s7kr_fsdwss *fsdwsslo = &(store->fsdwsslo);
+  s7kr_fsdwss *fsdwsshi = &(store->fsdwsshi);
 
   /* get saved values */
-  pixel_size = (double *)&mb_io_ptr->saved1;
-  swath_width = (double *)&mb_io_ptr->saved2;
+  // double *pixel_size = (double *)&mb_io_ptr->saved1;
+  // double *swath_width = (double *)&mb_io_ptr->saved2;
+
+  s7k_fsdwsegyheader *fsdwsegyheader;
+  s7k_fsdwssheader *fsdwssheader;
 
   /* get data kind */
   *kind = store->kind;
@@ -6049,21 +5906,21 @@ int mbsys_reson7k_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kin
       mb_navint_interp(verbose, mbio_ptr, store->time_d, *heading, *speed, navlon, navlat, speed, error);
 
     /* get heading */
-    if (bathymetry->optionaldata == true)
+    if (bathymetry->optionaldata)
       *heading = RTD * bathymetry->heading;
 
     /* get navigation */
-    if (bathymetry->optionaldata == true && bathymetry->longitude != 0.0 && bathymetry->latitude != 0.0) {
+    if (bathymetry->optionaldata && bathymetry->longitude != 0.0 && bathymetry->latitude != 0.0) {
       *navlon = RTD * bathymetry->longitude;
       *navlat = RTD * bathymetry->latitude;
     }
 
     /* set beamwidths in mb_io structure */
-    if (store->read_volatilesettings == true) {
+    if (store->read_volatilesettings) {
       mb_io_ptr->beamwidth_xtrack = RTD * volatilesettings->receive_width;
       mb_io_ptr->beamwidth_ltrack = RTD * volatilesettings->beamwidth_vertical;
     }
-    else if (store->read_beamgeometry == true) {
+    else if (store->read_beamgeometry) {
       mb_io_ptr->beamwidth_xtrack = RTD * beamgeometry->beamwidth_acrosstrack[beamgeometry->number_beams / 2];
       mb_io_ptr->beamwidth_ltrack = RTD * beamgeometry->beamwidth_alongtrack[beamgeometry->number_beams / 2];
     }
@@ -6166,7 +6023,7 @@ int mbsys_reson7k_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kin
 
     /* extract sidescan */
     *nss = 0;
-    if (store->read_processedsidescan == true) {
+    if (store->read_processedsidescan) {
       *nss = processedsidescan->number_pixels;
       for (int i = 0; i < processedsidescan->number_pixels; i++) {
         ss[i] = processedsidescan->sidescan[i];
@@ -6579,10 +6436,10 @@ int mbsys_reson7k_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind,
 
   struct mbsys_reson7k_struct *store = (struct mbsys_reson7k_struct *)store_ptr;
   s7kr_bluefin *bluefin = (s7kr_bluefin *)&store->bluefin;
-  s7kr_volatilesettings *volatilesettings = (s7kr_volatilesettings *)&store->volatilesettings;
+  // s7kr_volatilesettings *volatilesettings = (s7kr_volatilesettings *)&store->volatilesettings;
   s7kr_bathymetry *bathymetry = (s7kr_bathymetry *)&store->bathymetry;
-  s7kr_backscatter *backscatter = (s7kr_backscatter *)&store->backscatter;
-  s7kr_beam *beam = (s7kr_beam *)&store->beam;
+  // s7kr_backscatter *backscatter = (s7kr_backscatter *)&store->backscatter;
+  // s7kr_beam *beam = (s7kr_beam *)&store->beam;
   s7kr_processedsidescan *processedsidescan = (s7kr_processedsidescan *)&store->processedsidescan;
   s7kr_position *position = (s7kr_position *)&store->position;
   s7kr_systemeventmessage *systemeventmessage = (s7kr_systemeventmessage *)&store->systemeventmessage;
@@ -6675,7 +6532,8 @@ int mbsys_reson7k_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind,
     processedsidescan->number_pixels = nss;
     for (int i = 0; i < processedsidescan->number_pixels; i++) {
       processedsidescan->sidescan[i] = ss[i];
-      processedsidescan->alongtrack[i] = processedsidescan->alongtrack[i];
+      // TODO(schwehr): What was actually intended?
+      // processedsidescan->alongtrack[i] = processedsidescan->alongtrack[i];
     }
     for (int i = processedsidescan->number_pixels; i < MBSYS_RESON7K_MAX_PIXELS; i++) {
       processedsidescan->sidescan[i] = 0.0;
@@ -6817,15 +6675,6 @@ int mbsys_reson7k_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind,
 int mbsys_reson7k_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbeams, double *ttimes, double *angles,
                          double *angles_forward, double *angles_null, double *heave, double *alongtrack_offset, double *draft,
                          double *ssv, int *error) {
-  s7kr_bathymetry *bathymetry;
-  s7kr_depth *depth;
-  s7kr_beamgeometry *beamgeometry;
-  s7kr_attitude *attitude;
-  s7kr_ctd *ctd;
-  s7kr_reference *reference;
-  double heave_use, roll, pitch;
-  double alpha, beta, theta, phi;
-
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -6845,12 +6694,16 @@ int mbsys_reson7k_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind
 
   /* get data structure pointer */
   struct mbsys_reson7k_struct *store = (struct mbsys_reson7k_struct *)store_ptr;
-  bathymetry = (s7kr_bathymetry *)&store->bathymetry;
-  depth = (s7kr_depth *)&store->depth;
-  attitude = (s7kr_attitude *)&store->attitude;
-  ctd = (s7kr_ctd *)&store->ctd;
-  beamgeometry = (s7kr_beamgeometry *)&store->beamgeometry;
-  reference = (s7kr_reference *)&store->reference;
+
+  s7kr_bathymetry *bathymetry = (s7kr_bathymetry *)&store->bathymetry;
+  // s7kr_depth *depth = (s7kr_depth *)&store->depth;
+  // s7kr_attitude *attitude = (s7kr_attitude *)&store->attitude;
+  s7kr_ctd *ctd = (s7kr_ctd *)&store->ctd;
+  s7kr_beamgeometry *beamgeometry = (s7kr_beamgeometry *)&store->beamgeometry;
+  s7kr_reference *reference = (s7kr_reference *)&store->reference;
+
+  double heave_use, roll, pitch;
+  // double alpha, beta, theta, phi;
 
   /* get data kind */
   *kind = store->kind;
@@ -6868,7 +6721,7 @@ int mbsys_reson7k_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind
       *ssv = 1500.0;
 
     /* get attitude data */
-    if (bathymetry->optionaldata == true) {
+    if (bathymetry->optionaldata) {
       heave_use = bathymetry->heave;
     }
     else if (mb_io_ptr->nattitude > 0) {
@@ -6876,7 +6729,7 @@ int mbsys_reson7k_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind
     }
 
     /* get draft */
-    if (bathymetry->optionaldata == true) {
+    if (bathymetry->optionaldata) {
       *draft = -bathymetry->vehicle_height + reference->water_z;
       heave_use = 0.0;
     }
@@ -6892,13 +6745,15 @@ int mbsys_reson7k_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind
     *nbeams = bathymetry->number_beams;
     for (int i = 0; i < bathymetry->number_beams; i++) {
       ttimes[i] = bathymetry->range[i];
-      if (bathymetry->optionaldata == true) {
+      if (bathymetry->optionaldata) {
         angles[i] = RTD * bathymetry->pointing_angle[i];
         angles_forward[i] = RTD * bathymetry->azimuth_angle[i];
       }
       else {
-        alpha = RTD * beamgeometry->angle_alongtrack[i] + bathymetry->pitch;
-        beta = 90.0 - RTD * beamgeometry->angle_acrosstrack[i] + bathymetry->roll;
+        const double alpha = RTD * beamgeometry->angle_alongtrack[i] + bathymetry->pitch;
+        const double beta = 90.0 - RTD * beamgeometry->angle_acrosstrack[i] + bathymetry->roll;
+	double phi;
+	double theta;
         mb_rollpitch_to_takeoff(verbose, alpha, beta, &theta, &phi, error);
         angles[i] = theta;
         angles_forward[i] = phi;
@@ -7049,7 +6904,7 @@ int mbsys_reson7k_gains(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
   if (*kind == MB_DATA_DATA) {
     /* get survey data structure */
     s7kr_volatilesettings *volatilesettings = &(store->volatilesettings);
-    s7k_header *header = &(volatilesettings->header);
+    // s7k_header *header = &(volatilesettings->header);
 
     /* get transmit_gain (dB) */
     *transmit_gain = (double)volatilesettings->power_selection;
@@ -7102,16 +6957,6 @@ int mbsys_reson7k_gains(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr, int *kind, double *transducer_depth,
                                    double *altitudev, int *error) {
-  s7kr_bathymetry *bathymetry;
-  s7kr_depth *depth;
-  s7kr_altitude *altitude;
-  s7kr_attitude *attitude;
-  s7kr_reference *reference;
-  double heave, roll, pitch;
-  double xtrackmin;
-  int altitude_found;
-  char flag;
-
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -7125,11 +6970,13 @@ int mbsys_reson7k_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
 
   /* get data structure pointer */
   struct mbsys_reson7k_struct *store = (struct mbsys_reson7k_struct *)store_ptr;
-  bathymetry = (s7kr_bathymetry *)&store->bathymetry;
-  depth = (s7kr_depth *)&store->depth;
-  attitude = (s7kr_attitude *)&store->attitude;
-  altitude = (s7kr_altitude *)&store->altitude;
-  reference = (s7kr_reference *)&store->reference;
+  s7kr_bathymetry *bathymetry = (s7kr_bathymetry *)&store->bathymetry;
+  // s7kr_attitude *attitude = (s7kr_attitude *)&store->attitude;
+  s7kr_altitude *altitude = (s7kr_altitude *)&store->altitude;
+  // s7kr_depth *depth = (s7kr_depth *)&store->depth;
+  s7kr_reference *reference = (s7kr_reference *)&store->reference;
+
+  double heave, roll, pitch;
 
   /* get data kind */
   *kind = store->kind;
@@ -7139,7 +6986,7 @@ int mbsys_reson7k_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
   /* extract data from structure */
   if (*kind == MB_DATA_DATA) {
     /* get transducer depth and altitude */
-    if (bathymetry->optionaldata == true) {
+    if (bathymetry->optionaldata) {
       *transducer_depth = -bathymetry->vehicle_height + reference->water_z;
     }
     else if (mb_io_ptr->nsonardepth > 0) {
@@ -7155,14 +7002,15 @@ int mbsys_reson7k_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
     }
 
     /* get altitude */
-    altitude_found = false;
+    bool altitude_found = false;
     if (mb_io_ptr->naltitude > 0) {
       mb_altint_interp(verbose, mbio_ptr, store->time_d, altitudev, error);
       altitude_found = true;
     }
-    if (altitude_found == false && bathymetry->optionaldata == true) {
+    if (!altitude_found && bathymetry->optionaldata) {
       /* get depth closest to nadir */
-      xtrackmin = 999999.9;
+      double xtrackmin = 999999.9;
+      char flag;
       for (int i = 0; i < bathymetry->number_beams; i++) {
         if (bathymetry->quality[i] == 0) {
           flag = MB_FLAG_NULL;
@@ -7196,10 +7044,10 @@ int mbsys_reson7k_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
         }
       }
     }
-    if (altitude_found == false && altitude->altitude > 0.0) {
+    if (!altitude_found && altitude->altitude > 0.0) {
       *altitudev = altitude->altitude;
     }
-    else if (altitude_found == false) {
+    else if (!altitude_found) {
       *altitudev = 0.0;
     }
 
@@ -7241,19 +7089,6 @@ int mbsys_reson7k_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
 int mbsys_reson7k_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int time_i[7], double *time_d,
                               double *navlon, double *navlat, double *speed, double *heading, double *draft, double *roll,
                               double *pitch, double *heave, int *error) {
-  s7kr_bathymetry *bathymetry;
-  s7kr_bluefin *bluefin;
-  s7kr_position *position;
-  s7kr_depth *depth;
-  s7kr_attitude *attitude;
-  s7kr_reference *reference;
-  s7kr_navigation *navigation;
-  s7kr_fsdwsb *fsdwsb;
-  s7kr_fsdwss *fsdwsslo;
-  s7kr_fsdwss *fsdwsshi;
-  s7k_fsdwsegyheader *fsdwsegyheader;
-  s7k_fsdwssheader *fsdwssheader;
-
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -7267,21 +7102,23 @@ int mbsys_reson7k_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int 
 
   /* get data structure pointer */
   struct mbsys_reson7k_struct *store = (struct mbsys_reson7k_struct *)store_ptr;
-  bathymetry = (s7kr_bathymetry *)&store->bathymetry;
-  bluefin = (s7kr_bluefin *)&store->bluefin;
-  position = (s7kr_position *)&store->position;
-  depth = (s7kr_depth *)&store->depth;
-  attitude = (s7kr_attitude *)&store->attitude;
-  reference = (s7kr_reference *)&store->reference;
-  navigation = &(store->navigation);
-  fsdwsb = &(store->fsdwsb);
-  fsdwsslo = &(store->fsdwsslo);
-  fsdwsshi = &(store->fsdwsshi);
+  s7kr_bathymetry *bathymetry = (s7kr_bathymetry *)&store->bathymetry;
+  // s7kr_attitude *attitude = (s7kr_attitude *)&store->attitude;
+  s7kr_reference *reference = (s7kr_reference *)&store->reference;
+  s7kr_bluefin *bluefin = (s7kr_bluefin *)&store->bluefin;
+  // s7kr_depth *depth = (s7kr_depth *)&store->depth;
+  s7kr_navigation *navigation = &(store->navigation);
+  s7kr_fsdwsb *fsdwsb = &(store->fsdwsb);
+  s7kr_fsdwss *fsdwsslo = &(store->fsdwsslo);
+  s7kr_fsdwss *fsdwsshi = &(store->fsdwsshi);
 
   /* get data kind */
   *kind = store->kind;
 
   int status = MB_SUCCESS;
+
+  s7k_fsdwssheader *fsdwssheader;
+  s7k_fsdwsegyheader *fsdwsegyheader;
 
   /* extract data from ping structure */
   if (*kind == MB_DATA_DATA) {
@@ -7298,28 +7135,21 @@ int mbsys_reson7k_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int 
       mb_navint_interp(verbose, mbio_ptr, store->time_d, *heading, *speed, navlon, navlat, speed, error);
 
     /* get heading */
-    if (bathymetry->optionaldata == true)
+    if (bathymetry->optionaldata) {
       *heading = RTD * bathymetry->heading;
 
-    /* get navigation */
-    if (bathymetry->optionaldata == true) {
       *navlon = RTD * bathymetry->longitude;
       *navlat = RTD * bathymetry->latitude;
-    }
 
-    /* get draft  */
-    if (bathymetry->optionaldata == true) {
       *draft = -bathymetry->vehicle_height + reference->water_z;
-    }
-    else if (mb_io_ptr->nsonardepth > 0) {
+    } else if (mb_io_ptr->nsonardepth > 0) {
       mb_depint_interp(verbose, mbio_ptr, store->time_d, draft, error);
-    }
-    else {
+    } else {
       *draft = reference->water_z;
     }
 
     /* get attitude  */
-    if (bathymetry->optionaldata == true) {
+    if (bathymetry->optionaldata) {
       *roll = RTD * bathymetry->roll;
       *pitch = RTD * bathymetry->pitch;
       *heave = bathymetry->heave;
@@ -7336,7 +7166,7 @@ int mbsys_reson7k_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int 
   /* extract data from nav structure */
   else if (*kind == MB_DATA_NAV1) {
     /* get position data structure */
-    position = (s7kr_position *)&store->position;
+    s7kr_position *position = (s7kr_position *)&store->position;
 
     /* get time */
     for (int i = 0; i < 7; i++)
@@ -7359,11 +7189,12 @@ int mbsys_reson7k_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int 
 
     /* get draft  */
     if (mb_io_ptr->nsonardepth > 0) {
-      if (mb_io_ptr->nsonardepth > 0)
+      // TODO(schwehr): Was something else intended in the if?
+      // if (mb_io_ptr->nsonardepth > 0)
         mb_depint_interp(verbose, mbio_ptr, store->time_d, draft, error);
       *heave = 0.0;
     }
-    else if (bathymetry->optionaldata == true) {
+    else if (bathymetry->optionaldata) {
       *draft = -bathymetry->vehicle_height + reference->water_z;
       *heave = 0.0;
     }
@@ -7421,14 +7252,14 @@ int mbsys_reson7k_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int 
     /* get heading */
     if (mb_io_ptr->nheading > 0)
       mb_hedint_interp(verbose, mbio_ptr, store->time_d, heading, error);
-    else if (bathymetry->optionaldata == true)
+    else if (bathymetry->optionaldata)
       heading[0] = RTD * bathymetry->heading;
 
     /* get draft  */
     if (mb_io_ptr->nsonardepth > 0) {
       mb_depint_interp(verbose, mbio_ptr, store->time_d, &(draft[0]), error);
     }
-    else if (bathymetry->optionaldata == true) {
+    else if (bathymetry->optionaldata) {
       draft[0] = -bathymetry->vehicle_height + reference->water_z;
     }
     else {
@@ -7439,7 +7270,7 @@ int mbsys_reson7k_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int 
     if (mb_io_ptr->nattitude > 0) {
       mb_attint_interp(verbose, mbio_ptr, store->time_d, &(heave[0]), &(roll[0]), &(pitch[0]), error);
     }
-    else if (bathymetry->optionaldata == true) {
+    else if (bathymetry->optionaldata) {
       roll[0] = RTD * bathymetry->roll;
       pitch[0] = RTD * bathymetry->pitch;
       heave[0] = bathymetry->heave;
@@ -7606,15 +7437,6 @@ int mbsys_reson7k_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int 
 int mbsys_reson7k_extract_nnav(int verbose, void *mbio_ptr, void *store_ptr, int nmax, int *kind, int *n, int *time_i,
                                double *time_d, double *navlon, double *navlat, double *speed, double *heading, double *draft,
                                double *roll, double *pitch, double *heave, int *error) {
-  s7kr_bathymetry *bathymetry;
-  s7kr_bluefin *bluefin;
-  s7kr_position *position;
-  s7kr_depth *depth;
-  s7kr_attitude *attitude;
-  s7kr_reference *reference;
-  s7kr_navigation *navigation;
-  s7kr_rollpitchheave *rollpitchheave;
-
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -7629,14 +7451,14 @@ int mbsys_reson7k_extract_nnav(int verbose, void *mbio_ptr, void *store_ptr, int
 
   /* get data structure pointer */
   struct mbsys_reson7k_struct *store = (struct mbsys_reson7k_struct *)store_ptr;
-  bathymetry = (s7kr_bathymetry *)&store->bathymetry;
-  bluefin = (s7kr_bluefin *)&store->bluefin;
-  position = (s7kr_position *)&store->position;
-  depth = (s7kr_depth *)&store->depth;
-  attitude = (s7kr_attitude *)&store->attitude;
-  reference = (s7kr_reference *)&store->reference;
-  navigation = &(store->navigation);
-  rollpitchheave = &(store->rollpitchheave);
+  s7kr_bathymetry *bathymetry = (s7kr_bathymetry *)&store->bathymetry;
+  s7kr_bluefin *bluefin = (s7kr_bluefin *)&store->bluefin;
+  s7kr_position *position = (s7kr_position *)&store->position;
+  // s7kr_depth *depth = (s7kr_depth *)&store->depth;
+  // s7kr_attitude *attitude = (s7kr_attitude *)&store->attitude;
+  s7kr_reference *reference = (s7kr_reference *)&store->reference;
+  s7kr_navigation *navigation = &(store->navigation);
+  s7kr_rollpitchheave *rollpitchheave = &(store->rollpitchheave);
 
   /* get data kind */
   *kind = store->kind;
@@ -7658,29 +7480,21 @@ int mbsys_reson7k_extract_nnav(int verbose, void *mbio_ptr, void *store_ptr, int
     mb_hedint_interp(verbose, mbio_ptr, store->time_d, &(heading[0]), error);
     mb_navint_interp(verbose, mbio_ptr, store->time_d, heading[0], speed[0], &(navlon[0]), &(navlat[0]), &(speed[0]), error);
 
-    /* get heading */
-    if (bathymetry->optionaldata == true)
+    if (bathymetry->optionaldata) {
       heading[0] = RTD * bathymetry->heading;
 
-    /* get navigation */
-    if (bathymetry->optionaldata == true) {
       navlon[0] = RTD * bathymetry->longitude;
       navlat[0] = RTD * bathymetry->latitude;
-    }
 
-    /* get draft  */
-    if (bathymetry->optionaldata == true) {
       draft[0] = -bathymetry->vehicle_height + reference->water_z;
-    }
-    else if (mb_io_ptr->nsonardepth > 0) {
+    } else if (mb_io_ptr->nsonardepth > 0) {
       mb_depint_interp(verbose, mbio_ptr, store->time_d, &(draft[0]), error);
-    }
-    else {
+    } else {
       draft[0] = reference->water_z;
     }
 
     /* get attitude  */
-    if (bathymetry->optionaldata == true) {
+    if (bathymetry->optionaldata) {
       roll[0] = RTD * bathymetry->roll;
       pitch[0] = RTD * bathymetry->pitch;
       heave[0] = bathymetry->heave;
@@ -7717,7 +7531,7 @@ int mbsys_reson7k_extract_nnav(int verbose, void *mbio_ptr, void *store_ptr, int
       mb_depint_interp(verbose, mbio_ptr, store->time_d, &draft[0], error);
       heave[0] = 0.0;
     }
-    else if (bathymetry->optionaldata == true) {
+    else if (bathymetry->optionaldata) {
       draft[0] = -bathymetry->vehicle_height + reference->water_z;
       heave[0] = 0.0;
     }
@@ -7786,14 +7600,14 @@ int mbsys_reson7k_extract_nnav(int verbose, void *mbio_ptr, void *store_ptr, int
     /* get heading */
     if (mb_io_ptr->nheading > 0)
       mb_hedint_interp(verbose, mbio_ptr, store->time_d, heading, error);
-    else if (bathymetry->optionaldata == true)
+    else if (bathymetry->optionaldata)
       heading[0] = RTD * bathymetry->heading;
 
     /* get draft  */
     if (mb_io_ptr->nsonardepth > 0) {
       mb_depint_interp(verbose, mbio_ptr, store->time_d, &(draft[0]), error);
     }
-    else if (bathymetry->optionaldata == true) {
+    else if (bathymetry->optionaldata) {
       draft[0] = -bathymetry->vehicle_height + reference->water_z;
     }
     else {
@@ -7804,7 +7618,7 @@ int mbsys_reson7k_extract_nnav(int verbose, void *mbio_ptr, void *store_ptr, int
     if (mb_io_ptr->nattitude > 0) {
       mb_attint_interp(verbose, mbio_ptr, store->time_d, &(heave[0]), &(roll[0]), &(pitch[0]), error);
     }
-    else if (bathymetry->optionaldata == true) {
+    else if (bathymetry->optionaldata) {
       roll[0] = RTD * bathymetry->roll;
       pitch[0] = RTD * bathymetry->pitch;
       heave[0] = bathymetry->heave;
@@ -7833,12 +7647,12 @@ int mbsys_reson7k_extract_nnav(int verbose, void *mbio_ptr, void *store_ptr, int
     heading[0] = 0.0;
     if (mb_io_ptr->nheading > 0)
       mb_hedint_interp(verbose, mbio_ptr, store->time_d, &(heading[0]), error);
-    else if (bathymetry->optionaldata == true)
+    else if (bathymetry->optionaldata)
       heading[0] = RTD * bathymetry->heading;
     if (mb_io_ptr->nfix > 0)
       mb_navint_interp(verbose, mbio_ptr, store->time_d, heading[0], speed[0], &(navlon[0]), &(navlat[0]), &(speed[0]),
                        error);
-    else if (bathymetry->optionaldata == true) {
+    else if (bathymetry->optionaldata) {
       navlon[0] = RTD * bathymetry->longitude;
       navlat[0] = RTD * bathymetry->latitude;
     }
@@ -7847,7 +7661,7 @@ int mbsys_reson7k_extract_nnav(int verbose, void *mbio_ptr, void *store_ptr, int
     if (mb_io_ptr->nsonardepth > 0) {
       mb_depint_interp(verbose, mbio_ptr, store->time_d, &(draft[0]), error);
     }
-    else if (bathymetry->optionaldata == true) {
+    else if (bathymetry->optionaldata) {
       draft[0] = -bathymetry->vehicle_height + reference->water_z;
     }
     else {
@@ -7945,8 +7759,8 @@ int mbsys_reson7k_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int t
   struct mbsys_reson7k_struct *store = (struct mbsys_reson7k_struct *)store_ptr;
   s7kr_bathymetry *bathymetry = (s7kr_bathymetry *)&store->bathymetry;
   s7kr_position *position = (s7kr_position *)&store->position;
-  s7kr_depth *depth = (s7kr_depth *)&store->depth;
-  s7kr_attitude *attitude = (s7kr_attitude *)&store->attitude;
+  // s7kr_depth *depth = (s7kr_depth *)&store->depth;
+  // s7kr_attitude *attitude = (s7kr_attitude *)&store->attitude;
   s7kr_reference *reference = (s7kr_reference *)&store->reference;
 
   /* insert data in ping structure */
@@ -8090,8 +7904,8 @@ int mbsys_reson7k_insert_svp(int verbose, void *mbio_ptr, void *store_ptr, int n
   if (store->kind == MB_DATA_VELOCITY_PROFILE) {
     /* allocate memory if necessary */
     if (svp->nalloc < nsvp) {
-      status = mb_reallocd(verbose, __FILE__, __LINE__, nsvp * sizeof(float), (void **)&(svp->depth), error);
-      status = mb_reallocd(verbose, __FILE__, __LINE__, nsvp * sizeof(float), (void **)&(svp->sound_velocity), error);
+      status &= mb_reallocd(verbose, __FILE__, __LINE__, nsvp * sizeof(float), (void **)&(svp->depth), error);
+      status &= mb_reallocd(verbose, __FILE__, __LINE__, nsvp * sizeof(float), (void **)&(svp->sound_velocity), error);
       if (status == MB_SUCCESS) {
         svp->nalloc = nsvp;
       }
@@ -8124,24 +7938,6 @@ int mbsys_reson7k_insert_svp(int verbose, void *mbio_ptr, void *store_ptr, int n
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k_extract_segytraceheader(int verbose, void *mbio_ptr, void *store_ptr, int *kind, void *segytraceheader_ptr,
                                           int *error) {
-  struct mb_segytraceheader_struct *mb_segytraceheader_ptr;
-  s7k_header *header;
-  s7kr_bathymetry *bathymetry;
-  s7kr_bluefin *bluefin;
-  s7kr_fsdwsb *fsdwsb;
-  s7k_fsdwchannel *fsdwchannel;
-  s7k_fsdwsegyheader *fsdwsegyheader;
-  s7kr_ctd *ctd;
-  double dsonardepth, dsonaraltitude, dwaterdepth;
-  int sonardepth, waterdepth;
-  int watersoundspeed;
-  float fwatertime;
-  double longitude, latitude;
-  double speed, heading;
-  double roll, pitch, heave;
-  double xtrackmin;
-  int time_j[5];
-
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -8159,27 +7955,37 @@ int mbsys_reson7k_extract_segytraceheader(int verbose, void *mbio_ptr, void *sto
 
   int status = MB_SUCCESS;
 
+  struct mb_segytraceheader_struct *mb_segytraceheader_ptr;
+  s7kr_bathymetry *bathymetry;
+  s7kr_fsdwsb *fsdwsb;
+  s7k_fsdwchannel *fsdwchannel;
+  double dsonardepth, dsonaraltitude;
+  double longitude, latitude;
+  double speed, heading;
+  double roll, pitch, heave;
+  int time_j[5];
+
   /* extract data from structure */
   if (*kind == MB_DATA_SUBBOTTOM_SUBBOTTOM) {
     /* get relevant structures */
     mb_segytraceheader_ptr = (struct mb_segytraceheader_struct *)segytraceheader_ptr;
     bathymetry = &(store->bathymetry);
-    bluefin = &(store->bluefin);
-    ctd = &(store->ctd);
+    s7kr_bluefin *bluefin = &(store->bluefin);
+    s7kr_ctd *ctd = &(store->ctd);
     fsdwsb = &(store->fsdwsb);
-    header = &(fsdwsb->header);
+    // s7k_header *header = &(fsdwsb->header);
     fsdwchannel = &(fsdwsb->channel);
-    fsdwsegyheader = &(fsdwsb->segyheader);
+    // s7k_fsdwsegyheader *fsdwsegyheader = &(fsdwsb->segyheader);
 
     /* get needed values */
     mb_depint_interp(verbose, mbio_ptr, store->time_d, &dsonardepth, error);
     mb_altint_interp(verbose, mbio_ptr, store->time_d, &dsonaraltitude, error);
-    dwaterdepth = dsonardepth + dsonaraltitude;
+    double dwaterdepth = dsonardepth + dsonaraltitude;
 
     /* if possible get altitude from nadir of multibeam bathymetry */
-    if (bathymetry->optionaldata == true) {
+    if (bathymetry->optionaldata) {
       /* get depth closest to nadir */
-      xtrackmin = 999999.9;
+      double xtrackmin = 999999.9;
       for (int i = 0; i < bathymetry->number_beams; i++) {
         if (((bathymetry->quality[i] & 15) == 15) && fabs((double)bathymetry->acrosstrack[i]) < xtrackmin) {
           dwaterdepth = bathymetry->depth[i];
@@ -8190,15 +7996,16 @@ int mbsys_reson7k_extract_segytraceheader(int verbose, void *mbio_ptr, void *sto
     }
 
     /* get needed values */
-    sonardepth = (int)(100 * dsonardepth);
-    waterdepth = (int)(100 * dwaterdepth);
+    const int sonardepth = (int)(100 * dsonardepth);
+    const int waterdepth = (int)(100 * dwaterdepth);
+    int watersoundspeed;
     if (ctd->n > 0)
       watersoundspeed = (int)(ctd->sound_velocity[ctd->n - 1]);
     else if (bluefin->environmental[0].sound_speed > 0.0)
       watersoundspeed = (int)(bluefin->environmental[0].sound_speed);
     else
       watersoundspeed = 1500;
-    fwatertime = 2.0 * dwaterdepth / ((double)watersoundspeed);
+    const float fwatertime = 2.0 * dwaterdepth / ((double)watersoundspeed);
 
     mb_hedint_interp(verbose, mbio_ptr, store->time_d, &heading, error);
     speed = 0.0;
@@ -8377,15 +8184,6 @@ int mbsys_reson7k_extract_segytraceheader(int verbose, void *mbio_ptr, void *sto
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k_extract_segy(int verbose, void *mbio_ptr, void *store_ptr, int *sampleformat, int *kind, void *segyheader_ptr,
                                float *segydata, int *error) {
-  struct mb_segytraceheader_struct *mb_segytraceheader_ptr;
-  s7k_header *header;
-  s7kr_fsdwsb *fsdwsb;
-  s7k_fsdwchannel *fsdwchannel;
-  s7k_fsdwsegyheader *fsdwsegyheader;
-  short *shortptr;
-  unsigned short *ushortptr;
-  double weight;
-
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -8397,6 +8195,8 @@ int mbsys_reson7k_extract_segy(int verbose, void *mbio_ptr, void *store_ptr, int
     fprintf(stderr, "dbg2       segyheader_ptr:    %p\n", (void *)segyheader_ptr);
     fprintf(stderr, "dbg2       segydata:          %p\n", (void *)segydata);
   }
+
+  struct mb_segytraceheader_struct *mb_segytraceheader_ptr;
 
   /* get data structure pointer */
   struct mbsys_reson7k_struct *store = (struct mbsys_reson7k_struct *)store_ptr;
@@ -8413,15 +8213,15 @@ int mbsys_reson7k_extract_segy(int verbose, void *mbio_ptr, void *store_ptr, int
 
     /* get relevant structures */
     mb_segytraceheader_ptr = (struct mb_segytraceheader_struct *)segyheader_ptr;
-    fsdwsb = &(store->fsdwsb);
-    header = &(fsdwsb->header);
-    fsdwchannel = &(fsdwsb->channel);
-    fsdwsegyheader = &(fsdwsb->segyheader);
-    shortptr = (short *)fsdwchannel->data;
-    ushortptr = (unsigned short *)fsdwchannel->data;
+    s7kr_fsdwsb *fsdwsb = &(store->fsdwsb);
+    // s7k_header *header = &(fsdwsb->header);
+    s7k_fsdwchannel *fsdwchannel = &(fsdwsb->channel);
+    s7k_fsdwsegyheader *fsdwsegyheader = &(fsdwsb->segyheader);
+    short *shortptr = (short *)fsdwchannel->data;
+    unsigned short *ushortptr = (unsigned short *)fsdwchannel->data;
 
     /* get the trace weight */
-    weight = exp(MB_LN_2 * ((double)fsdwsegyheader->weightingFactor));
+    const double weight = exp(MB_LN_2 * ((double)fsdwsegyheader->weightingFactor));
 
     /* extract the data */
     if (fsdwsb->data_format == EDGETECH_TRACEFORMAT_ENVELOPE) {
@@ -8600,8 +8400,8 @@ int mbsys_reson7k_insert_segy(int verbose, void *mbio_ptr, void *store_ptr, int 
   if (store->kind == MB_DATA_SUBBOTTOM_SUBBOTTOM) {
     /* get relevant structures */
     mb_segytraceheader_ptr = (struct mb_segytraceheader_struct *)segyheader_ptr;
-    s7kr_bathymetry *bathymetry = &(store->bathymetry);
-    s7kr_ctd *ctd = &(store->ctd);
+    // s7kr_bathymetry *bathymetry = &(store->bathymetry);
+    // s7kr_ctd *ctd = &(store->ctd);
     s7kr_fsdwsb *fsdwsb = &(store->fsdwsb);
     s7k_header *header = &(fsdwsb->header);
     s7k_fsdwchannel *fsdwchannel = &(fsdwsb->channel);
@@ -8612,15 +8412,13 @@ int mbsys_reson7k_insert_segy(int verbose, void *mbio_ptr, void *store_ptr, int 
     mb_depint_interp(verbose, mbio_ptr, store->time_d, &dsonardepth, error);
     double dsonaraltitude;
     mb_altint_interp(verbose, mbio_ptr, store->time_d, &dsonaraltitude, error);
-    const double dwaterdepth = dsonardepth + dsonaraltitude;
-    int sonardepth = (int)(100 * dsonardepth);
-    int waterdepth = (int)(100 * dwaterdepth);
-    int watersoundspeed;
-    if (ctd->n > 0)
-      watersoundspeed = (int)(ctd->sound_velocity[ctd->n - 1]);
-    else
-      watersoundspeed = 1500;
-    const float fwatertime = 2.0 * 0.01 * ((double)waterdepth) / ((double)watersoundspeed);
+    // const double dwaterdepth = dsonardepth + dsonaraltitude;
+    // int watersoundspeed;
+    // if (ctd->n > 0)
+    //   watersoundspeed = (int)(ctd->sound_velocity[ctd->n - 1]);
+    // else
+    //   watersoundspeed = 1500;
+    // const float fwatertime = 2.0 * 0.01 * ((double)waterdepth) / ((double)watersoundspeed);
     int time_j[5];
     mb_get_jtime(verbose, store->time_i, time_j);
 
@@ -8636,29 +8434,33 @@ int mbsys_reson7k_insert_segy(int verbose, void *mbio_ptr, void *store_ptr, int 
     else
       fsdwsb->ping_number = 0;
     fsdwsb->data_format = mb_segytraceheader_ptr->use;
-    if (mb_segytraceheader_ptr->grp_elev != 0)
-      sonardepth = -mb_segytraceheader_ptr->grp_elev;
-    else if (mb_segytraceheader_ptr->src_elev != 0)
-      sonardepth = -mb_segytraceheader_ptr->src_elev;
-    else if (mb_segytraceheader_ptr->src_depth != 0)
-      sonardepth = mb_segytraceheader_ptr->src_depth;
-    else
-      sonardepth = 0;
-    float factor;
-    if (mb_segytraceheader_ptr->elev_scalar < 0)
-      factor = 1.0 / ((float)(-mb_segytraceheader_ptr->elev_scalar));
-    else
-      factor = (float)mb_segytraceheader_ptr->elev_scalar;
-    if (mb_segytraceheader_ptr->src_wbd != 0)
-      waterdepth = -mb_segytraceheader_ptr->grp_elev;
-    else if (mb_segytraceheader_ptr->grp_wbd != 0)
-      waterdepth = -mb_segytraceheader_ptr->src_elev;
-    else
-      waterdepth = 0;
-    if (mb_segytraceheader_ptr->coord_scalar < 0)
-      factor = 1.0 / ((float)(-mb_segytraceheader_ptr->coord_scalar)) / 3600.0;
-    else
-      factor = (float)mb_segytraceheader_ptr->coord_scalar / 3600.0;
+    // int sonardepth = (int)(100 * dsonardepth);
+    // if (mb_segytraceheader_ptr->grp_elev != 0)
+    //   sonardepth = -mb_segytraceheader_ptr->grp_elev;
+    // else if (mb_segytraceheader_ptr->src_elev != 0)
+    //   sonardepth = -mb_segytraceheader_ptr->src_elev;
+    // else if (mb_segytraceheader_ptr->src_depth != 0)
+    //   sonardepth = mb_segytraceheader_ptr->src_depth;
+    // else
+    //   sonardepth = 0;
+
+    // float factor;
+    // if (mb_segytraceheader_ptr->elev_scalar < 0)
+    //   factor = 1.0 / ((float)(-mb_segytraceheader_ptr->elev_scalar));
+    // else
+    //   factor = (float)mb_segytraceheader_ptr->elev_scalar;
+
+    // int waterdepth = (int)(100 * dwaterdepth);
+    // if (mb_segytraceheader_ptr->src_wbd != 0)
+    //   waterdepth = -mb_segytraceheader_ptr->grp_elev;
+    // else if (mb_segytraceheader_ptr->grp_wbd != 0)
+    //   waterdepth = -mb_segytraceheader_ptr->src_elev;
+    // else
+    //   waterdepth = 0;
+    // if (mb_segytraceheader_ptr->coord_scalar < 0)
+    //   factor = 1.0 / ((float)(-mb_segytraceheader_ptr->coord_scalar)) / 3600.0;
+    // else
+    //   factor = (float)mb_segytraceheader_ptr->coord_scalar / 3600.0;
     fsdwchannel->number_samples = mb_segytraceheader_ptr->nsamps;
     fsdwchannel->sample_interval = mb_segytraceheader_ptr->si_micros;
     time_j[0] = mb_segytraceheader_ptr->year;
@@ -8804,9 +8606,6 @@ int mbsys_reson7k_insert_segy(int verbose, void *mbio_ptr, void *store_ptr, int 
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k_ctd(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nctd, double *time_d, double *conductivity,
                       double *temperature, double *depth, double *salinity, double *soundspeed, int *error) {
-  int time_j[5];
-  int time_i[7];
-
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -8825,7 +8624,7 @@ int mbsys_reson7k_ctd(int verbose, void *mbio_ptr, void *store_ptr, int *kind, i
   /* extract ctd data from bluefin environmental SSV record */
   if (*kind == MB_DATA_SSV) {
     s7kr_bluefin *bluefin = &(store->bluefin);
-    s7k_header *header = &(bluefin->header);
+    // s7k_header *header = &(bluefin->header);
 
     *nctd = 0;
     for (int i = 0; i < bluefin->number_frames; i++) {
@@ -8833,11 +8632,13 @@ int mbsys_reson7k_ctd(int verbose, void *mbio_ptr, void *store_ptr, int *kind, i
       if (environmental->ctd_time > 0.0 && *nctd < MB_CTD_MAX) {
         /* get time_d if needed */
         if (environmental->ctd_time < 10000.0) {
+          int time_j[5];
           time_j[0] = environmental->s7kTime.Year;
           time_j[1] = environmental->s7kTime.Day;
           time_j[2] = 60 * environmental->s7kTime.Hours + environmental->s7kTime.Minutes;
           time_j[3] = (int)environmental->s7kTime.Seconds;
           time_j[4] = (int)(1000000 * (environmental->s7kTime.Seconds - time_j[3]));
+          int time_i[7];
           mb_get_itime(verbose, time_j, time_i);
           mb_get_time(verbose, time_i, &environmental->ctd_time);
         }
@@ -8852,19 +8653,19 @@ int mbsys_reson7k_ctd(int verbose, void *mbio_ptr, void *store_ptr, int *kind, i
         (*nctd)++;
       }
     }
-  }
-
-  /* extract ctd data from CTD record */
-  else if (*kind == MB_DATA_CTD) {
+  } else if (*kind == MB_DATA_CTD) {
+    /* extract ctd data from CTD record */
     s7kr_ctd *ctd = &(store->ctd);
     s7k_header *header = &(ctd->header);
 
     /* get time */
+    int time_j[5];
     time_j[0] = header->s7kTime.Year;
     time_j[1] = header->s7kTime.Day;
     time_j[2] = 60 * header->s7kTime.Hours + header->s7kTime.Minutes;
     time_j[3] = (int)header->s7kTime.Seconds;
     time_j[4] = (int)(1000000 * (header->s7kTime.Seconds - time_j[3]));
+    int time_i[7];
     mb_get_itime(verbose, time_j, time_i);
     mb_get_time(verbose, time_i, &time_d[0]);
 
@@ -8881,10 +8682,8 @@ int mbsys_reson7k_ctd(int verbose, void *mbio_ptr, void *store_ptr, int *kind, i
       depth[i] = ctd->pressure_depth[i];
       soundspeed[i] = ctd->sound_velocity[i];
     }
-  }
-
-  /* else failure */
-  else {
+  } else {
+    /* else failure */
     *nctd = 0;
   }
 
@@ -8932,7 +8731,7 @@ int mbsys_reson7k_ancilliarysensor(int verbose, void *mbio_ptr, void *store_ptr,
   /* extract ctd data from bluefin environmental SSV record */
   if (*kind == MB_DATA_SSV) {
     s7kr_bluefin *bluefin = &(store->bluefin);
-    s7k_header *header = &(bluefin->header);
+    // s7k_header *header = &(bluefin->header);
 
     *nsamples = 0;
     for (int i = 0; i < bluefin->number_frames; i++) {
@@ -9432,42 +9231,12 @@ int mbsys_reson7k_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_
 
   return (status);
 }
-/*--------------------------------------------------------------------*/
-int mbsys_reson7k_makess(int verbose, void *mbio_ptr, void *store_ptr, int source, int pixel_size_set, double *pixel_size,
-                         int swath_width_set, double *swath_width, int pixel_int, int *error) {
-  s7kr_snippet *snippet;
-  s7kr_v2snippettimeseries *snippettimeseries;
-  s7kr_calibratedsnippettimeseries *calibratedsnippettimeseries;
-  int nss;
-  int ss_cnt[MBSYS_RESON7K_MAX_PIXELS];
-  double ss[MBSYS_RESON7K_MAX_PIXELS];
-  double ssacrosstrack[MBSYS_RESON7K_MAX_PIXELS];
-  double ssalongtrack[MBSYS_RESON7K_MAX_PIXELS];
-  int nbathsort;
-  double bathsort[MBSYS_RESON7K_MAX_BEAMS];
-  char beamflag[MBSYS_RESON7K_MAX_BEAMS];
-  double pixel_size_calc;
-  double ss_spacing, ss_spacing_use;
-  double soundspeed;
-  int iminxtrack;
-  double minxtrack;
-  double maxxtrack;
-  int nrangetable;
-  double rangetable[MBSYS_RESON7K_MAX_BEAMS];
-  double acrosstracktable[MBSYS_RESON7K_MAX_BEAMS], acrosstracktablemin;
-  double alongtracktable[MBSYS_RESON7K_MAX_BEAMS];
-  int irangenadir, irange;
-  int found;
-  int pixel_int_use;
-  int nsample, nsample_use, sample_start, sample_detect, sample_end;
-  double angle, altitude, xtrack, xtrackss, ltrackss, factor;
-  double range, beam_foot, beamwidth, sint;
-  mb_u_char *data_uchar;
-  unsigned short *data_ushort;
-  unsigned int *data_uint;
-  int first, last, k1, k2;
-  int ibeam;
 
+/*--------------------------------------------------------------------*/
+int mbsys_reson7k_makess_source(int verbose, void *mbio_ptr, void *store_ptr,
+                        int source, int pixel_size_set, double *pixel_size,
+                        int swath_width_set, double *swath_width, int pixel_int,
+                        int *error) {
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -9483,35 +9252,70 @@ int mbsys_reson7k_makess(int verbose, void *mbio_ptr, void *store_ptr, int sourc
   }
 
   struct mbsys_reson7k_struct *store = (struct mbsys_reson7k_struct *)store_ptr;
-  s7kr_reference *reference = (s7kr_reference *)&store->reference;
-  s7kr_volatilesettings *volatilesettings = (s7kr_volatilesettings *)&store->volatilesettings;
-  s7kr_beamgeometry *beamgeometry = (s7kr_beamgeometry *)&store->beamgeometry;
-  s7kr_bathymetry *bathymetry = (s7kr_bathymetry *)&store->bathymetry;
-  s7kr_backscatter *backscatter = (s7kr_backscatter *)&store->backscatter;
-  s7kr_v2snippet *v2snippet = (s7kr_v2snippet *)&store->v2snippet;
-  s7kr_calibratedsnippet *calibratedsnippet = (s7kr_calibratedsnippet *)&store->calibratedsnippet;
-  s7kr_beam *beam = (s7kr_beam *)&store->beam;
-  s7kr_processedsidescan *processedsidescan = (s7kr_processedsidescan *)&store->processedsidescan;
-  s7kr_bluefin *bluefin = (s7kr_bluefin *)&store->bluefin;
-  s7kr_soundvelocity *soundvelocity = (s7kr_soundvelocity *)&store->soundvelocity;
 
   /* if necessary pick a source for the backscatter */
   if (store->kind == MB_DATA_DATA && source == R7KRECID_None) {
-    if (store->read_calibratedsnippet == true)
+    if (store->read_calibratedsnippet)
       source = R7KRECID_7kCalibratedSnippetData;
-    else if (store->read_v2snippet == true)
+    else if (store->read_v2snippet)
       source = R7KRECID_7kV2SnippetData;
-    else if (store->read_beam == true)
+    else if (store->read_beam)
       source = R7KRECID_7kBeamData;
-    else if (store->read_backscatter == true)
+    else if (store->read_backscatter)
       source = R7KRECID_7kBackscatterImageData;
   }
 
   /* calculate sidescan from the desired source data if it is available */
-  if (store->kind == MB_DATA_DATA && ((source == R7KRECID_7kV2SnippetData && store->read_v2snippet == true) ||
-                                      (source == R7KRECID_7kCalibratedSnippetData && store->read_calibratedsnippet == true) ||
-                                      (source == R7KRECID_7kBeamData && store->read_beam == true) ||
-                                      (source == R7KRECID_7kBackscatterImageData && store->read_backscatter == true))) {
+  if (store->kind == MB_DATA_DATA && ((source == R7KRECID_7kV2SnippetData && store->read_v2snippet) ||
+                                      (source == R7KRECID_7kCalibratedSnippetData && store->read_calibratedsnippet) ||
+                                      (source == R7KRECID_7kBeamData && store->read_beam) ||
+                                      (source == R7KRECID_7kBackscatterImageData && store->read_backscatter))) {
+    int nbathsort;
+    double bathsort[MBSYS_RESON7K_MAX_BEAMS];
+    char beamflag[MBSYS_RESON7K_MAX_BEAMS];
+    double ss_spacing;
+    double ss_spacing_use;
+    double soundspeed;
+    int iminxtrack;
+    double minxtrack;
+    double maxxtrack;
+    int nrangetable;
+    double rangetable[MBSYS_RESON7K_MAX_BEAMS];
+    double acrosstracktable[MBSYS_RESON7K_MAX_BEAMS];
+    double acrosstracktablemin;
+    double alongtracktable[MBSYS_RESON7K_MAX_BEAMS];
+    int irangenadir;
+    // int irange;
+    int found;
+    int pixel_int_use;
+    int nsample_use;
+    int sample_start;
+    int sample_detect;
+    int sample_end;
+    double angle;
+    // double altitude;
+    double xtrack;
+    double xtrackss;
+    double ltrackss;
+    double factor;
+    double range;
+    double beam_foot;
+    double beamwidth;
+    double sint;
+    // int first, last;
+
+    s7kr_reference *reference = (s7kr_reference *)&store->reference;
+    s7kr_volatilesettings *volatilesettings = (s7kr_volatilesettings *)&store->volatilesettings;
+    s7kr_beamgeometry *beamgeometry = (s7kr_beamgeometry *)&store->beamgeometry;
+    s7kr_bathymetry *bathymetry = (s7kr_bathymetry *)&store->bathymetry;
+    s7kr_backscatter *backscatter = (s7kr_backscatter *)&store->backscatter;
+    s7kr_v2snippet *v2snippet = (s7kr_v2snippet *)&store->v2snippet;
+    s7kr_calibratedsnippet *calibratedsnippet = (s7kr_calibratedsnippet *)&store->calibratedsnippet;
+    s7kr_beam *beam = (s7kr_beam *)&store->beam;
+    s7kr_processedsidescan *processedsidescan = (s7kr_processedsidescan *)&store->processedsidescan;
+    s7kr_bluefin *bluefin = (s7kr_bluefin *)&store->bluefin;
+    s7kr_soundvelocity *soundvelocity = (s7kr_soundvelocity *)&store->soundvelocity;
+
     /* get beamflags - only use snippets from good beams */
     for (int i = 0; i < bathymetry->number_beams; i++) {
       /* beamflagging scheme:
@@ -9536,26 +9340,19 @@ int mbsys_reson7k_makess(int verbose, void *mbio_ptr, void *store_ptr, int sourc
               bit 7: on = manual flag */
       if (bathymetry->quality[i] == 0) {
         beamflag[i] = MB_FLAG_NULL;
-      }
-      else if (bathymetry->quality[i] & 64) {
+      } else if (bathymetry->quality[i] & 64) {
         beamflag[i] = MB_FLAG_FLAG + MB_FLAG_FILTER;
-      }
-      else if (bathymetry->quality[i] & 128) {
+      } else if (bathymetry->quality[i] & 128) {
         beamflag[i] = MB_FLAG_FLAG + MB_FLAG_MANUAL;
-      }
-      else if (bathymetry->quality[i] & 240) {
+      } else if (bathymetry->quality[i] & 240) {
         beamflag[i] = MB_FLAG_NONE;
-      }
-      else if ((bathymetry->quality[i] & 3) == 3) {
+      } else if ((bathymetry->quality[i] & 3) == 3) {
         beamflag[i] = MB_FLAG_NONE;
-      }
-      else if ((bathymetry->quality[i] & 15) == 0) {
+      } else if ((bathymetry->quality[i] & 15) == 0) {
         beamflag[i] = MB_FLAG_NULL;
-      }
-      else if ((bathymetry->quality[i] & 3) == 0) {
+      } else if ((bathymetry->quality[i] & 3) == 0) {
         beamflag[i] = MB_FLAG_FLAG + MB_FLAG_FILTER;
-      }
-      else {
+      } else {
         beamflag[i] = MB_FLAG_FLAG + MB_FLAG_MANUAL;
       }
     }
@@ -9587,7 +9384,7 @@ int mbsys_reson7k_makess(int verbose, void *mbio_ptr, void *store_ptr, int sourc
         bathsort[nbathsort] = bathymetry->depth[i] + bathymetry->vehicle_height;
         nbathsort++;
 
-        if (found == false || fabs(bathymetry->acrosstrack[i]) < minxtrack) {
+        if (!found || fabs(bathymetry->acrosstrack[i]) < minxtrack) {
           minxtrack = fabs(bathymetry->acrosstrack[i]);
           iminxtrack = i;
           found = true;
@@ -9598,17 +9395,17 @@ int mbsys_reson7k_makess(int verbose, void *mbio_ptr, void *store_ptr, int sourc
     }
 
     /* set number of pixels */
-    nss = MIN(4 * bathymetry->number_beams, MBSYS_RESON7K_MAX_PIXELS);
+    const int nss = MIN(4 * bathymetry->number_beams, MBSYS_RESON7K_MAX_PIXELS);
 
     /* get sidescan pixel size */
-    if (swath_width_set == false && bathymetry->number_beams > 0) {
+    if (!swath_width_set && bathymetry->number_beams > 0) {
       (*swath_width) = MAX(fabs(RTD * beamgeometry->angle_acrosstrack[0]),
                            fabs(RTD * beamgeometry->angle_acrosstrack[bathymetry->number_beams - 1]));
     }
-    if (pixel_size_set == false && nbathsort > 0) {
+    if (!pixel_size_set && nbathsort > 0) {
       /* calculate pixel size implied using swath width and nadir altitude */
       qsort((void *)bathsort, nbathsort, sizeof(double), (void *)mb_double_compare);
-      pixel_size_calc = 2.1 * tan(DTR * (*swath_width)) * bathsort[nbathsort / 2] / nss;
+      double pixel_size_calc = 2.1 * tan(DTR * (*swath_width)) * bathsort[nbathsort / 2] / nss;
 
       /* use pixel size based on actual swath width if that is larger than the first value */
       pixel_size_calc = MAX(pixel_size_calc, 2.1 * maxxtrack / nss);
@@ -9630,6 +9427,11 @@ int mbsys_reson7k_makess(int verbose, void *mbio_ptr, void *store_ptr, int sourc
     /* get pixel interpolation */
     pixel_int_use = pixel_int + 1;
 
+    int ss_cnt[MBSYS_RESON7K_MAX_PIXELS];
+    double ss[MBSYS_RESON7K_MAX_PIXELS];
+    double ssacrosstrack[MBSYS_RESON7K_MAX_PIXELS];
+    double ssalongtrack[MBSYS_RESON7K_MAX_PIXELS];
+
     /* zero the sidescan */
     for (int i = 0; i < MBSYS_RESON7K_MAX_PIXELS; i++) {
       ss[i] = 0.0;
@@ -9639,11 +9441,14 @@ int mbsys_reson7k_makess(int verbose, void *mbio_ptr, void *store_ptr, int sourc
     }
     for (int i = 0; i < nss; i++) {
       ssacrosstrack[i] = (*pixel_size) * (double)(i - (nss / 2));
-      ;
     }
 
     /* loop over raw backscatter or sidescan from the desired source,
      *   putting each raw sample into the binning arrays */
+
+    mb_u_char *data_uchar;
+    unsigned short *data_ushort;
+    unsigned int *data_uint;
 
     /* use calibrated snippet data
        error_flag = 0 is calibrated snippet data
@@ -9651,9 +9456,9 @@ int mbsys_reson7k_makess(int verbose, void *mbio_ptr, void *store_ptr, int sourc
        error_flag > 1 indicates a problem */
     if (source == R7KRECID_7kCalibratedSnippetData && calibratedsnippet->error_flag < 3) {
       for (int i = 0; i < calibratedsnippet->number_beams; i++) {
-        calibratedsnippettimeseries =
+        s7kr_calibratedsnippettimeseries *calibratedsnippettimeseries =
             (s7kr_calibratedsnippettimeseries *)&(calibratedsnippet->calibratedsnippettimeseries[i]);
-        ibeam = calibratedsnippettimeseries->beam_number;
+        const int ibeam = calibratedsnippettimeseries->beam_number;
 
         /* only use snippets from non-null and unflagged beams */
         /* note: errors have been observed in data produced by a Reson
@@ -9662,8 +9467,8 @@ int mbsys_reson7k_makess(int verbose, void *mbio_ptr, void *store_ptr, int sourc
             - the current code effectively ignores this case because
             sample_end < sample_start, so no samples are processed. */
         if (mb_beam_ok(beamflag[ibeam])) {
-          nsample = calibratedsnippettimeseries->end_sample - calibratedsnippettimeseries->begin_sample + 1;
-          altitude = bathymetry->depth[ibeam] + bathymetry->vehicle_height;
+          // const int nsample = calibratedsnippettimeseries->end_sample - calibratedsnippettimeseries->begin_sample + 1;
+          // const double altitude = bathymetry->depth[ibeam] + bathymetry->vehicle_height;
           xtrack = bathymetry->acrosstrack[ibeam];
           range = 0.5 * soundspeed * bathymetry->range[ibeam];
           angle = RTD * beamgeometry->angle_acrosstrack[ibeam];
@@ -9695,10 +9500,10 @@ int mbsys_reson7k_makess(int verbose, void *mbio_ptr, void *store_ptr, int sourc
     }
 
     /* use v2 snippet data */
-    else if (source == R7KRECID_7kV2SnippetData && v2snippet->error_flag == false) {
+    else if (source == R7KRECID_7kV2SnippetData && !v2snippet->error_flag) {
       for (int i = 0; i < v2snippet->number_beams; i++) {
-        snippettimeseries = (s7kr_v2snippettimeseries *)&(v2snippet->snippettimeseries[i]);
-        ibeam = snippettimeseries->beam_number;
+        s7kr_v2snippettimeseries *snippettimeseries = (s7kr_v2snippettimeseries *)&(v2snippet->snippettimeseries[i]);
+        const int ibeam = snippettimeseries->beam_number;
 
         /* only use snippets from non-null and unflagged beams */
         /* note: errors have been observed in data produced by a Reson
@@ -9707,8 +9512,8 @@ int mbsys_reson7k_makess(int verbose, void *mbio_ptr, void *store_ptr, int sourc
             - the current code effectively ignores this case because
             sample_end < sample_start, so no samples are processed. */
         if (mb_beam_ok(beamflag[ibeam])) {
-          nsample = snippettimeseries->end_sample - snippettimeseries->begin_sample + 1;
-          altitude = bathymetry->depth[ibeam] + bathymetry->vehicle_height;
+          // const int nsample = snippettimeseries->end_sample - snippettimeseries->begin_sample + 1;
+          // const double altitude = bathymetry->depth[ibeam] + bathymetry->vehicle_height;
           xtrack = bathymetry->acrosstrack[ibeam];
           range = 0.5 * soundspeed * bathymetry->range[ibeam];
           angle = RTD * beamgeometry->angle_acrosstrack[ibeam];
@@ -9741,13 +9546,13 @@ int mbsys_reson7k_makess(int verbose, void *mbio_ptr, void *store_ptr, int sourc
     /* use old snippet data */
     else if (source == R7KRECID_7kBeamData) {
       for (int i = 0; i < beam->number_beams; i++) {
-        snippet = (s7kr_snippet *)&(beam->snippets[i]);
-        ibeam = snippet->beam_number;
+        s7kr_snippet *snippet = (s7kr_snippet *)&(beam->snippets[i]);
+        const int ibeam = snippet->beam_number;
 
         /* only use snippets from non-null and unflagged beams */
         if (mb_beam_ok(beamflag[ibeam])) {
-          nsample = snippet->end_sample - snippet->begin_sample + 1;
-          altitude = bathymetry->depth[ibeam] + bathymetry->vehicle_height;
+          // const int nsample = snippet->end_sample - snippet->begin_sample + 1;
+          // const double altitude = bathymetry->depth[ibeam] + bathymetry->vehicle_height;
           xtrack = bathymetry->acrosstrack[ibeam];
           range = 0.5 * soundspeed * bathymetry->range[ibeam];
           angle = RTD * beamgeometry->angle_acrosstrack[ibeam];
@@ -9811,11 +9616,11 @@ int mbsys_reson7k_makess(int verbose, void *mbio_ptr, void *store_ptr, int sourc
       data_uint = (unsigned int *)backscatter->port_data;
       sample_start = rangetable[irangenadir] * volatilesettings->sample_rate;
       sample_end = MIN(rangetable[0] * volatilesettings->sample_rate, backscatter->number_samples - 1);
-      irange = irangenadir;
+      int irange = irangenadir;
       for (int i = sample_start; i < sample_end; i++) {
         range = ((double)i) / ((double)volatilesettings->sample_rate);
         found = false;
-        for (int j = irange; j > 0 && found == false; j--) {
+        for (int j = irange; j > 0 && !found; j--) {
           if (range >= rangetable[j] && range < rangetable[j - 1]) {
             irange = j;
             found = true;
@@ -9847,7 +9652,7 @@ int mbsys_reson7k_makess(int verbose, void *mbio_ptr, void *store_ptr, int sourc
       for (int i = sample_start; i < sample_end; i++) {
         range = ((double)i) / ((double)volatilesettings->sample_rate);
         found = false;
-        for (int j = irange; j < nrangetable - 1 && found == false; j++) {
+        for (int j = irange; j < nrangetable - 1 && !found; j++) {
           if (range >= rangetable[j] && range < rangetable[j + 1]) {
             irange = j;
             found = true;
@@ -9871,8 +9676,8 @@ int mbsys_reson7k_makess(int verbose, void *mbio_ptr, void *store_ptr, int sourc
     }
 
     /* average the sidescan */
-    first = nss;
-    last = -1;
+    int first = nss;
+    int last = -1;
     for (int k = 0; k < nss; k++) {
       if (ss_cnt[k] > 0) {
         ss[k] /= ss_cnt[k];
@@ -9885,8 +9690,8 @@ int mbsys_reson7k_makess(int verbose, void *mbio_ptr, void *store_ptr, int sourc
     }
 
     /* interpolate the sidescan */
-    k1 = first;
-    k2 = first;
+    int k1 = first;
+    int k2 = first;
     for (int k = first + 1; k < last; k++) {
       if (ss_cnt[k] <= 0) {
         if (k2 <= k) {
@@ -9940,6 +9745,55 @@ int mbsys_reson7k_makess(int verbose, void *mbio_ptr, void *store_ptr, int sourc
   }
 
   const int status = MB_SUCCESS;
+
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
+    fprintf(stderr, "dbg2  Return value:\n");
+    fprintf(stderr, "dbg2       pixel_size:      %f\n", *pixel_size);
+    fprintf(stderr, "dbg2       swath_width:     %f\n", *swath_width);
+    fprintf(stderr, "dbg2       error:           %d\n", *error);
+    fprintf(stderr, "dbg2  Return status:\n");
+    fprintf(stderr, "dbg2       status:          %d\n", status);
+  }
+
+  return (status);
+}
+/*--------------------------------------------------------------------*/
+int mbsys_reson7k_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel_size_set, double *pixel_size,
+                         int swath_width_set, double *swath_width, int pixel_int, int *error) {
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+    fprintf(stderr, "dbg2  Input arguments:\n");
+    fprintf(stderr, "dbg2       verbose:         %d\n", verbose);
+    fprintf(stderr, "dbg2       mbio_ptr:        %p\n", (void *)mbio_ptr);
+    fprintf(stderr, "dbg2       store_ptr:       %p\n", (void *)store_ptr);
+    fprintf(stderr, "dbg2       pixel_size_set:  %d\n", pixel_size_set);
+    fprintf(stderr, "dbg2       pixel_size:      %f\n", *pixel_size);
+    fprintf(stderr, "dbg2       swath_width_set: %d\n", swath_width_set);
+    fprintf(stderr, "dbg2       swath_width:     %f\n", *swath_width);
+    fprintf(stderr, "dbg2       pixel_int:       %d\n", pixel_int);
+  }
+
+  struct mbsys_reson7k_struct *store = (struct mbsys_reson7k_struct *)store_ptr;
+
+  // check for a prior sidescan source choice
+  int source = store->processedsidescan.ss_source;
+
+  /* if necessary pick a source for the backscatter */
+  if (source == R7KRECID_None) {
+    if (store->read_calibratedsnippet)
+      source = R7KRECID_7kCalibratedSnippetData;
+    else if (store->read_v2snippet)
+      source = R7KRECID_7kV2SnippetData;
+    else if (store->read_beam)
+      source = R7KRECID_7kBeamData;
+    else if (store->read_backscatter)
+      source = R7KRECID_7kBackscatterImageData;
+  }
+
+  int status = mbsys_reson7k_makess_source(verbose, mbio_ptr, store_ptr, source,
+                        pixel_size_set, pixel_size, swath_width_set, swath_width,
+                        pixel_int, error);
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);

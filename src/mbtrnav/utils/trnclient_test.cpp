@@ -37,6 +37,12 @@
 #endif
 
 
+// OS X before Sierra does not have clock_gettime, use clock_get_time
+#if defined(__APPLE__) && !defined(__CLOCK_AVAILABILITY) && defined(__MACH__)
+#include <mach/mach.h>      /* host_get_clock_service */
+#include <mach/clock.h>     /* clock_get_time */
+#endif
+
 #include "TrnClient.h"
 #include "matrixArrayCalcs.h"
 #include "TNavConfig.h"
@@ -105,7 +111,7 @@ static double s_etime()
     struct timespec ts;
     memset(&ts,0,sizeof(struct timespec));
 
-    // OS X before Sierra does not have clock_gettime, use clock_get_time
+// OS X before Sierra does not have clock_gettime, use clock_get_time
 #if defined(__APPLE__) && !defined(__CLOCK_AVAILABILITY) && defined(__MACH__)
     clock_serv_t cclock;
     mach_timespec_t mts;
@@ -380,6 +386,7 @@ int main(int argc, char** argv)
     sem_close(worker->run_sem);
     sem_unlink(TRNCLI_RUN_SEM_NAME);
     fprintf(stderr,"done\n");
+
     return 0;
 }
 

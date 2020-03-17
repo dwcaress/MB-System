@@ -352,6 +352,9 @@ struct mbna_project {
   double triangle_scale;
   int inversion_status;
 
+  int ref_grid_status;
+  struct mbna_grid ref_grid;
+
   int grid_status;
   struct mbna_grid grid;
   int visualization_status;

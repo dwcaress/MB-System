@@ -42,7 +42,7 @@ Additional Options:
 <B>-elevscale</B> <I>vert_exag</I>
 <B>-nowrz</B>
 <B>-noview</B>
-<B>-pallette</B> <I>pal</I>
+<B>-palette</B> <I>pal</I>
 <B>-newimage</B> <I>type|file</I>
 <B>-white</B>
 <B>-zmax</B> <I>maxclip</I>
@@ -277,7 +277,7 @@ file or specify the -newimage option.
 or the name of a TIFF file that you wish draped over the bathymetry.
 <P>
 The default type value is 2 for synthetic illumination with Haxby color
-map (this may be modified with the <B>-pallette</B> option). Use 5 to shade
+map (this may be modified with the <B>-palette</B> option). Use 5 to shade
 the image by slope value.
 If &lt;type|file&gt; is an image file name then that file is assumed to be
 orthorectified TIFF image (ending in .tif) that is co-registered
@@ -312,7 +312,7 @@ and tile only bathymetry use <B>-zmax 0</B>.  To force a color map
 of the standard Haxby colors between 4000 and 3000 meters
 depth use <B>-zmin -4000 -zmax -3000</B>.
 <P>
-<DT><B>-pallette</B>
+<DT><B>-palette</B>
 
 <DD>
 <I>pal</I>
@@ -321,11 +321,11 @@ The number of Color Lookup Table
 that is passed on to the -W1/ option of <A HREF="mbm_grdtiff.html">mbm_grdtiff</A>(1).
 The default value is 1 - the Haxby color map.  For reference, the
 color tables values are:
-<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<I>pallette</I>&nbsp;=&nbsp;1:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Haxby&nbsp;colors&nbsp;[default]
-<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<I>pallette</I>&nbsp;=&nbsp;2:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;high&nbsp;Intensity&nbsp;colors
-<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<I>pallette</I>&nbsp;=&nbsp;3:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;low&nbsp;Intensity&nbsp;colors
-<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<I>pallette</I>&nbsp;=&nbsp;4:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;grayscale
-<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<I>pallette</I>&nbsp;=&nbsp;5:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uniform&nbsp;grayscale
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<I>palette</I>&nbsp;=&nbsp;1:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Haxby&nbsp;colors&nbsp;[default]
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<I>palette</I>&nbsp;=&nbsp;2:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;high&nbsp;Intensity&nbsp;colors
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<I>palette</I>&nbsp;=&nbsp;3:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;low&nbsp;Intensity&nbsp;colors
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<I>palette</I>&nbsp;=&nbsp;4:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;grayscale
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<I>palette</I>&nbsp;=&nbsp;5:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uniform&nbsp;grayscale
 <BR>
 
 <P>

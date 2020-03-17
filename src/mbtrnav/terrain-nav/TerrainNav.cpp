@@ -44,7 +44,7 @@ particlesFile(NULL),saveDirectory(NULL),tNavFilter(NULL),
 terrainMap(NULL),filterType(1),mapType(1),
 allowFilterReinits(true),_trnLog(NULL),numReinits(0)
 {
- 
+
 }
 TerrainNav::TerrainNav(char* mapName) {
 	//initialize pointers
@@ -256,7 +256,7 @@ void TerrainNav::estimatePose(poseT* estimate, const int& type) {
 			estimate->vn_x = tNavFilter->lastNavPose->x;
 			estimate->vn_y = tNavFilter->lastNavPose->y;
 			estimate->vn_z = tNavFilter->lastNavPose->z;
-	
+
 
 			//If using a PMF, add on prior estNavOffset for attitude
 			if(this->filterType == 1 && ALLOW_ATTITUDE_SEARCH) {
@@ -295,7 +295,7 @@ void TerrainNav::estimatePose(poseT* estimate, const int& type) {
 	//*estimate += this->estNavOffset;
 	////*estimate += estNavOffset;
 
-	if(isnan(estimate->x) || isnan(estimate->y)){
+	if(std::isnan(estimate->x) || std::isnan(estimate->y)){
 		estimate->covariance[0] = X_STDDEV_INIT*X_STDDEV_INIT;
 		estimate->covariance[2] = Y_STDDEV_INIT*Y_STDDEV_INIT;
 	}
@@ -303,7 +303,7 @@ void TerrainNav::estimatePose(poseT* estimate, const int& type) {
 	/* Log to a data file */
    logs(TL_OMASK(TL_TERRAIN_NAV, TL_LOG),"\n variances([0], [2], and psi_berg) = "
    	"%f  %f  %f\n",
-   	estimate->covariance[0], 
+   	estimate->covariance[0],
    	estimate->covariance[2],
     estimate->covariance[44]);
 
@@ -412,11 +412,11 @@ void TerrainNav::measUpdate(measT* incomingMeas, const int& type) {
 void TerrainNav::motionUpdate(poseT* incomingNav) {
 
 	// Log position data
-	// 
+	//
 //	_posLog->log(incomingNav);
 
 	// Maintain a copy of the latest incoming nav
-	// 
+	//
 	_incomingNav = *incomingNav;
 
 	poseT currEstimate;
@@ -493,12 +493,12 @@ void TerrainNav::motionUpdate(poseT* incomingNav) {
 
 	   double deltat = currEstimate.time - tNavFilter->lastNavPose->time;
 
-//         Trapezoidal:	   
+//         Trapezoidal:
 //	   currEstimate.x = tNavFilter->lastNavPose->x + (prevVelMap(1,1) + currVelMap(1,1))*deltat/2.;
 //	   currEstimate.y = tNavFilter->lastNavPose->y + (prevVelMap(2,1) + currVelMap(2,1))*deltat/2.;
 //	   currEstimate.z = tNavFilter->lastNavPose->z + (prevVelMap(3,1) + currVelMap(3,1))*deltat/2.;
 //
-//         Forward Euler:	   
+//         Forward Euler:
 	   currEstimate.x = tNavFilter->lastNavPose->x + (prevVelMap(1,1) )*deltat;
 	   currEstimate.y = tNavFilter->lastNavPose->y + (prevVelMap(2,1) )*deltat;
 	   currEstimate.z = tNavFilter->lastNavPose->z + (prevVelMap(3,1) )*deltat;
@@ -659,7 +659,7 @@ void TerrainNav::createFilter(const int filterType, const double* windowVar) {
 			tNavFilter = new TNavParticleFilter(this->terrainMap, this->vehicleSpecFile,
 												this->saveDirectory, windowVar, this->mapType);
 			break;
-		case 3: 
+		case 3:
 			tNavFilter = new TNavBankFilter(this->terrainMap, this->vehicleSpecFile,
 												this->saveDirectory, windowVar, this->mapType);
 			break;
@@ -707,7 +707,7 @@ void TerrainNav::initVariables() {
 	// Shut off measWeights.txt debug.  It is too large.
 	this->saveDirectory = NULL;
 
-	
+
 	//logs(TL_OMASK(TL_TERRAIN_NAV, TL_LOG),"TerrainNav::TNavFilter initialized with Z variance %.2f\n", windowVar[5]);
 
 	//create filter object
@@ -769,7 +769,7 @@ void TerrainNav::attemptInitFilter(poseT& initEstimate) {
         // Added a switch to essentially skip the gpsValid check
         //
 	if(withinMap && initEstimate.bottomLock && lastMeasValid &&
-	    initEstimate.dvlValid && initEstimate.z > 1 && 
+	    initEstimate.dvlValid && initEstimate.z > 1 &&
             (!initEstimate.gpsValid || TNavConfig::instance()->getIgnoreGps())) {
 		//Incorporate increased search window to account for large initialization
 		//waiting times
@@ -940,7 +940,7 @@ void TerrainNav::checkRangeValidity(measT& currMeas) {
 	int i, j;
 	int numEqual = 0;
 	double alpha, dr, dt;
-#if MBTRN_DEBUG	
+#if MBTRN_DEBUG
 
 	logs(TL_OMASK(TL_TERRAIN_NAV, TL_LOG),"measT type:%d\n", currMeas.dataType);
 	logs(TL_OMASK(TL_TERRAIN_NAV, TL_LOG),"measT time:%.3f\n", currMeas.time);
@@ -986,7 +986,7 @@ void TerrainNav::checkRangeValidity(measT& currMeas) {
 			}
 
 			//check validity of each beam based on NaN or range value
-			if(isnan(currMeas.ranges[i]) || (currMeas.ranges[i] >= MAX_RANGE)
+			if(std::isnan(currMeas.ranges[i]) || (currMeas.ranges[i] >= MAX_RANGE)
 					|| (currMeas.ranges[i] <= MIN_RANGE)) {
 				currMeas.measStatus[i] = false;
 			}
@@ -1014,7 +1014,7 @@ void TerrainNav::checkRangeValidity(measT& currMeas) {
 		for(i = 0; i < currMeas.numMeas; i++) {
 			//check validity of each beam based on NaN or range value
 		        // Use only the middle 60 of 120 beams
-			if(isnan(currMeas.ranges[i]) || (currMeas.ranges[i] >= MAX_RANGE)
+			if(std::isnan(currMeas.ranges[i]) || (currMeas.ranges[i] >= MAX_RANGE)
 			   //		|| (currMeas.ranges[i] <= MIN_RANGE) || ((i < 30) || (i >= 90)) )
 			   		|| (currMeas.ranges[i] <= MIN_RANGE) || ((i < 30) || (i >  90)) )
 			{
@@ -1025,7 +1025,7 @@ void TerrainNav::checkRangeValidity(measT& currMeas) {
 			   //currMeas.measStatus[i] = true;
 			   //Further pare the center 60 down to only 5
 			   //if( i==30 || i==44 || i==59 || i==74 || i==89 )
-			   
+
 			   //Try paring down to every 6th for 11 total.
 			   if( i%6 == 0 )
 			      currMeas.measStatus[i] = true;
@@ -1331,7 +1331,7 @@ void TerrainNav::copyToLogDir()
        if ( errno != EEXIST )
        {
           // If the error is about something other than EEXIST
-          // 
+          //
           fprintf(stderr,"\n\n\t\tTerrainNav::copyToLogDir() - ERR: mkdir(%s) failed"
           " [%d,%s]\n\n", dir_spec, errno, strerror(errno));
           trnLogDir = dot;
@@ -1343,7 +1343,7 @@ void TerrainNav::copyToLogDir()
 		free(this->saveDirectory);
 		this->saveDirectory = strdup(dir_spec);
 		logs(TL_OMASK(TL_TERRAIN_NAV, TL_LOG), "TRN log directory is %s\n", this->saveDirectory);
-		
+
 
 		// Create a latest link that points to the log directory
 		//
