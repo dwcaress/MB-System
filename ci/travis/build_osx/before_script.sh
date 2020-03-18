@@ -15,4 +15,4 @@ echo "${bold}GDAL info:${endbold}"
 gdal-config --version
 
 echo "${bold}GMT info:${endbold}"
-gmt-config --version
+gmt --version
