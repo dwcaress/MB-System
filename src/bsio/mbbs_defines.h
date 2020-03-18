@@ -25,10 +25,6 @@
  *--------------------------------------------------------------------*/
 /*
  *	Copyright (c) 2004 by University of Hawaii.
- */
-
-/*
- *	bs_defines.h --
  *	Hawaii Mapping Research Group BS (bathymetry/sidescan)
  *	file format definitions.
  */
@@ -41,10 +37,6 @@
 #include <sys/time.h>
 #endif
 
-/* The preprocessor code inserted here to insure access to
- * XDR definitions is changed from the HMRG codebase */
-
-#ifdef HAVE_CONFIG_H
 #include <mb_config.h>
 
 /* XDR i/o include file */
@@ -56,52 +48,10 @@
 #include <rpc/xdr.h>
 #endif
 
-#else /* no HAVE_CONFIG_H */
-
-/* XDR i/o include file */
-#ifdef IRIX
-#include <rpc/rpc.h>
-#endif
-#ifdef IRIX64
-#include <rpc/rpc.h>
-#endif
-#ifdef SOLARIS
-#include <rpc/rpc.h>
-#endif
-#ifdef LINUX
-#include <rpc/rpc.h>
-#endif
-#ifdef LYNX
-#include <rpc/rpc.h>
-#endif
-#ifdef SUN
-#include <rpc/xdr.h>
-#endif
-#ifdef HPUX
-#include <rpc/rpc.h>
-#endif
-#if defined(DARWIN) || defined(__APPLE__)
-#include <rpc/types.h>
-#include <rpc/xdr.h>
-#endif
-#ifdef CYGWIN
-#include <rpc/types.h>
-#include <rpc/xdr.h>
-#endif
-#ifdef _WIN32
-#include <rpc/rpc.h>
-#endif
-#ifdef OTHER
-#include <rpc/types.h>
-#include <rpc/xdr.h>
-#endif
-
 #ifdef _WIN32
 #include <float.h>
 #define isnan _isnan
 #endif
-
-#endif /* HAVE_CONFIG_H */
 
 /* Some type definitions given here are in a separate
  * header file unixversion.h in the original HMRG codebase */
