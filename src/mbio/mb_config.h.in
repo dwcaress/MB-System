@@ -9,14 +9,14 @@
 /* Machine is bigendian, (Byteswapping off) */
 #undef ENDIAN_BIG
 
-/* Turned on OpenGL define in config */
-#undef GOT_GL
-
 /* define if the compiler supports basic C++11 syntax */
 #undef HAVE_CXX11
 
 /* Define to 1 if you have the <dlfcn.h> header file. */
 #undef HAVE_DLFCN_H
+
+/* Define to 1 if you have the `gsincos' function. */
+#undef HAVE_GSINCOS
 
 /* Define to 1 if you have the <inttypes.h> header file. */
 #undef HAVE_INTTYPES_H
@@ -35,6 +35,9 @@
 
 /* Define to 1 if you have the <rpc/types.h> header file. */
 #undef HAVE_RPC_TYPES_H
+
+/* Define to 1 if you have the `sincos' function. */
+#undef HAVE_SINCOS
 
 /* Define to 1 if you have the <stdint.h> header file. */
 #undef HAVE_STDINT_H

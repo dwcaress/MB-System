@@ -985,7 +985,7 @@ fprintf(stderr, "socket_definition|%s\n", socket_definition);
       else if (strcmp("trn-ftype", options[option_index].name) == 0) {
         sscanf(optarg, "%d", &trn_ftype);
       }
-      /* TRN valid northing covariance limit (m^2) *
+      /* TRN valid northing covariance limit (m^2) */
       else if (strcmp("trn-ncov", options[option_index].name) == 0) {
           sscanf(optarg, "%lf", &trn_max_ncov);
       }
@@ -3916,4 +3916,3 @@ int mbtrnpp_kemkmall_input_close(int verbose, void *mbio_ptr, int *error) {
   /* return */
   return (status);
 }
-

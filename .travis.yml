@@ -135,21 +135,20 @@ matrix:
       - OS_TAG=7
       - DOCKER_IMAGE=zberkowitz/mbsystem-deps:centos-7
 
-  # TODO(#974): gmt-config is not found.
-  # - os: osx
-  #   name: MB-System build on Mac OSX
-  #   env:
-  #     - TRAVIS_CONFIG=build_osx
-  #     - CFLAGS="-I/opt/X11/include -L/opt/X11/lib" 
-  #   addons:
-  #     homebrew:
-  #       packages:
-  #         - proj
-  #         - gdal
-  #         - netcdf
-  #         - fftw
-  #         - gmt
-  #         - openmotif
+  - os: osx
+    name: MB-System build on Mac OSX
+    env:
+      - TRAVIS_CONFIG=build_osx
+      - CFLAGS="-I/opt/X11/include -L/opt/X11/lib"
+    addons:
+      homebrew:
+        packages:
+          - proj
+          - gdal
+          - netcdf
+          - fftw
+          - gmt
+          - openmotif
 #
 #
 #  MB-System builds and tests for development configs
