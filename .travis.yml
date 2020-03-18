@@ -149,6 +149,7 @@ matrix:
           - fftw
           - gmt
           - openmotif
+        update: true
 #
 #
 #  MB-System builds and tests for development configs
