@@ -31,7 +31,6 @@ matrix:
           - fftw
           - gmt
           - openmotif
-        update: true
 
 #
 #
