@@ -13,6 +13,28 @@ matrix:
 
 #
 #
+#  MB-System OSX build.
+#
+
+  - os: osx
+    name: MB-System build on Mac OSX
+    osx_image: xcode11.3
+    env:
+      - TRAVIS_CONFIG=build_osx
+      - CFLAGS="-I/opt/X11/include -L/opt/X11/lib"
+    addons:
+      homebrew:
+        packages:
+          - proj
+          - gdal
+          - netcdf
+          - fftw
+          - gmt
+          - openmotif
+        update: true
+
+#
+#
 #  MB-System build-dependencies docker image builds.  Only on cron
 #
 #
@@ -82,7 +104,7 @@ matrix:
       - DOCKER_IMAGE=zberkowitz/mbsystem-deps:centos-7
 #
 #
-#  MB-System builds and tests on stock distributions
+#  MB-System builds and tests on stock Linux distributions
 #
 #
   - os: linux
@@ -134,22 +156,6 @@ matrix:
       - OS=centos
       - OS_TAG=7
       - DOCKER_IMAGE=zberkowitz/mbsystem-deps:centos-7
-
-  - os: osx
-    name: MB-System build on Mac OSX
-    env:
-      - TRAVIS_CONFIG=build_osx
-      - CFLAGS="-I/opt/X11/include -L/opt/X11/lib"
-    addons:
-      homebrew:
-        packages:
-          - proj
-          - gdal
-          - netcdf
-          - fftw
-          - gmt
-          - openmotif
-        update: true
 #
 #
 #  MB-System builds and tests for development configs
