@@ -199,7 +199,7 @@ void TimeTag::parseValue(const char *stringRep)
 
 Boolean TimeTag::leapYear(int year)
 {
-  return ((year % 4 == 0) && (year % 100 != 0)) || year % 400 == 0;
+  return (((year % 4) == 0) && ((year % 100) != 0)) || ((year % 400) == 0);
 }
 
 int TimeTag::dayOfYearToMonthDay(int doy, int year, int *month, int *day)

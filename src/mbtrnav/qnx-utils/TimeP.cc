@@ -187,7 +187,7 @@ int TimeP::hourMinSecToSecs(char *timestring, double *secs)
 
 Boolean TimeP::leapYear(int year)
 {
-  return ((year % 4 == 0) && (year % 100 != 0)) || year % 400 == 0;
+  return ((year % 4 == 0) && (year % 100 != 0)) || (year % 400 == 0);
 }
 
 
@@ -203,10 +203,10 @@ int TimeP::daysInYear(int year)
 int TimeP::dayOfYear(int year, int month, int day)
 {
   int i, leap;
-  if (year < 0 || month < 1 || month > 12 || day < 1 || day > 31)
+  if ( (year < 0) || (month < 1) || (month > 12) || (day < 1) || (day > 31))
     return -1;
 
-  leap = ((year % 4 == 0) && (year % 100 != 0)) || year % 400 == 0;
+  leap = ((year % 4 == 0) && (year % 100 != 0)) || ( (year % 400) == 0);
   for (i = 1; i < month; i++)
     day += _monthDays[leap][i];
 

@@ -654,12 +654,12 @@ BUILD_MBTRN_FALSE
 BUILD_MBTRN_TRUE
 BUILD_GL_FALSE
 BUILD_GL_TRUE
+BUILD_MOTIF_FALSE
+BUILD_MOTIF_TRUE
 libopengl_CPPFLAGS
 libopengl_LIBS
 libGLU_LIBS
 libGLU_CFLAGS
-BUILD_MOTIF_FALSE
-BUILD_MOTIF_TRUE
 libmotif_CPPFLAGS
 libmotif_LIBS
 libXm_LIBS
@@ -3766,7 +3766,7 @@ $as_echo "#define HAVE_CXX11 1" >>confdefs.h
 
 
 
-$as_echo "#define VERSION_DATE \"17 March 2020\"" >>confdefs.h
+$as_echo "#define VERSION_DATE \"19 March 2020\"" >>confdefs.h
 
 
 ac_aux_dir=
@@ -18475,6 +18475,19 @@ _ACEOF
 fi
 
 
+for ac_func in gsincos sincos
+do :
+  as_ac_var=`$as_echo "ac_cv_func_$ac_func" | $as_tr_sh`
+ac_fn_c_check_func "$LINENO" "$ac_func" "$as_ac_var"
+if eval test \"x\$"$as_ac_var"\" = x"yes"; then :
+  cat >>confdefs.h <<_ACEOF
+#define `$as_echo "HAVE_$ac_func" | $as_tr_cpp` 1
+_ACEOF
+
+fi
+done
+
+
 ac_fn_c_find_intX_t "$LINENO" "8" "ac_cv_c_int8_t"
 case $ac_cv_c_int8_t in #(
   no|yes) ;; #(
@@ -21146,15 +21159,6 @@ else
         $as_echo "Failed to find X11 libraries and headers - unable to build graphical tools"
 fi
 
- if test "$GOT_MOTIF" = yes; then
-  BUILD_MOTIF_TRUE=
-  BUILD_MOTIF_FALSE='#'
-else
-  BUILD_MOTIF_TRUE='#'
-  BUILD_MOTIF_FALSE=
-fi
-
-
 $as_echo "Check for OpenGL libraries libGL libGLU and header files GL/gl.h GL/glu.h GL/glx.h"
 GOT_OPENGL=no
 OPENGL_SETTING=no
@@ -21471,12 +21475,19 @@ fi
 
     libopengl_CPPFLAGS=$libopengl_CPPFLAGS
 
-    if test "$GOT_OPENGL" = "yes" ; then
+else
+        $as_echo "Failed to find Motif libraries and headers - did not look for OpenGL libraries and headers - unable to build visualization tools"
+fi
 
-$as_echo "#define GOT_GL 1" >>confdefs.h
+ if test "$GOT_MOTIF" = yes; then
+  BUILD_MOTIF_TRUE=
+  BUILD_MOTIF_FALSE='#'
+else
+  BUILD_MOTIF_TRUE='#'
+  BUILD_MOTIF_FALSE=
+fi
 
-    fi
-     if test "$GOT_OPENGL" = yes; then
+ if test "$GOT_OPENGL" = yes; then
   BUILD_GL_TRUE=
   BUILD_GL_FALSE='#'
 else
@@ -21484,10 +21495,6 @@ else
   BUILD_GL_FALSE=
 fi
 
-
-else
-        $as_echo "Failed to find Motif libraries and headers - did not look for OpenGL libraries and headers - unable to build visualization tools"
-fi
 
 
 

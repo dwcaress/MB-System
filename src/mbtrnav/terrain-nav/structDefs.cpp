@@ -40,7 +40,7 @@ void mapT::clean() {
 		xpts = NULL;
 	}
 
-	if(ypts != NULL) {
+  if(ypts != NULL) {
 		delete [] ypts;
 		ypts = NULL;
 	}

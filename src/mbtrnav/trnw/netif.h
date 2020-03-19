@@ -272,7 +272,7 @@ extern "C" {
     /// @param[in] self netif_t instance
     /// @param[in] log_dir log output directory path
     /// @return 0 on success, -1 otherwise
-    int netif_init_log(netif_t *self, char *log_name, char *log_dir);
+    int netif_init_log(netif_t *self, char *log_name, char *log_dir, char *session_str);
 
     /// @fn int netif_configure_debug(netif_t *self, int level)
     /// @brief set debug configuration
