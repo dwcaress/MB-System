@@ -16,4 +16,7 @@ distributions.
 Information about the library, including the history and licensing, can be found
 in the file [src/gsf/gsf_lib.pdf](gsf_lib.pdf).
 
-See: https://www.leidos.com/products/ocean-marine
+See:
+
+- https://www.leidos.com/products/ocean-marine
+- https://en.wikipedia.org/wiki/Generic_sensor_format
