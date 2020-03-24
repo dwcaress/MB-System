@@ -52,7 +52,6 @@
  *
  */
 
-/*--------------------------------------------------------------------*/
 #include <math.h>
 #include <stdbool.h>
 #include <stdio.h>
@@ -82,8 +81,6 @@
  *          minimize :  || a*x - d || = (a*x - d) * (a*x -d)
  *
  *----------------------------------------------------------------------*/
-void lsqup(const double *a, const int *ia, const int *nia, int nnz, int nc, int nr, double *x, double *dx, const double *d, int nfix, const int *ifix,
-           const double *fix, int ncycle, const double *sigma)
 /*----------------------------------------------------------------------
  * -------
  *  input
@@ -112,17 +109,16 @@ void lsqup(const double *a, const int *ia, const int *nia, int nnz, int nc, int 
  * --------
  *     x(1..nc)   - solution vector as defined above
  *                  only array x(..) is over-written by lsquc.
- *
  *----------------------------------------------------------------------*/
+void lsqup(const double *a, const int *ia, const int *nia, int nnz, int nc, int nr,
+           double *x, double *dx, const double *d, int nfix, const int *ifix,
+           const double *fix, int ncycle, const double *sigma)
 {
-	int k;
-	double res;
-	double s;
-
+	// TODO(schwehr): Is this dead code?  s is not used outside of for.
 	for (int i = 0; i < nr; i++) {
-		s = 0.0;
+		double s = 0.0;
 		for (int j = 0; j < nia[i]; j++) {
-			k = nnz * i + j;
+			const int k = nnz * i + j;
 			s += x[ia[k]] * a[k];
 		}
 	}
@@ -135,14 +131,14 @@ void lsqup(const double *a, const int *ia, const int *nia, int nnz, int nc, int 
 
 		/* loop over each row */
 		for (int i = 0; i < nr; i++) {
-			res = 0.0;
+			double res = 0.0;
 			for (int j = 0; j < nia[i]; j++) {
-				k = nnz * i + j;
+				const int k = nnz * i + j;
 				res += a[k] * x[ia[k]];
 			}
 			res = d[i] - res;
 			for (int j = 0; j < nia[i]; j++) {
-				k = nnz * i + j;
+				const int k = nnz * i + j;
 				dx[ia[k]] += res * a[k];
 			}
 		}
@@ -154,13 +150,8 @@ void lsqup(const double *a, const int *ia, const int *nia, int nnz, int nc, int 
 		/* apply fixed values */
 		for (int j = 0; j < nfix; j++)
 			x[ifix[j]] = fix[j];
-
-		/* output info */
-		/*fprintf(stderr, "lsqup cycle %d completed...\n", icyc);*/
 	}
 }
-/*----------------------------------------------------------------------*/
-void chebyu(double *sigma, int ncycle, double shi, double slo, double *work)
 /*----------------------------------------------------------------------
  *
  * computes the chebyshev weights with uniform distribution.
@@ -192,9 +183,8 @@ void chebyu(double *sigma, int ncycle, double shi, double slo, double *work)
  * calls function splits.
  *
  *----------------------------------------------------------------------*/
+void chebyu(double *sigma, int ncycle, double shi, double slo, double *work)
 {
-	int len, is, i0, nsort;
-
 	/* set up the chebyshev weights in increasing order */
 	for (int i = 0; i < ncycle; i++) {
 		sigma[i] = -cos((2 * (i + 1) - 1) * M_PI / 2 / ncycle);
@@ -202,11 +192,11 @@ void chebyu(double *sigma, int ncycle, double shi, double slo, double *work)
 	}
 
 	/* sort the weights */
-	len = ncycle;
+	int len = ncycle;
 	while (len > 2) {
-		nsort = ncycle / len;
-		for (is = 0; is < nsort; is++) {
-			i0 = is * len;
+		const int nsort = ncycle / len;
+		for (int is = 0; is < nsort; is++) {
+			const int i0 = is * len;
 			splits(&sigma[i0], work, len);
 		}
 		len /= 2;
@@ -214,9 +204,7 @@ void chebyu(double *sigma, int ncycle, double shi, double slo, double *work)
 }
 /*----------------------------------------------------------------------*/
 void splits(double *x, double *t, int n) {
-	int l, nb2, nb2m1;
-
-	l = 0;
+	int l = 0;
 	for (int i = 0; i < n; i += 2) {
 		t[l] = x[i];
 		l++;
@@ -226,8 +214,8 @@ void splits(double *x, double *t, int n) {
 		l++;
 	}
 
-	nb2 = n / 2;
-	nb2m1 = nb2 - 1;
+	const int nb2 = n / 2;
+	const int nb2m1 = nb2 - 1;
 	if (nb2 >= 2) {
 		for (int i = 0; i < nb2; i++) {
 			x[i] = t[nb2m1 - i];
@@ -235,8 +223,7 @@ void splits(double *x, double *t, int n) {
 		for (int i = nb2; i < n; i++) {
 			x[i] = t[i];
 		}
-	}
-	else {
+	} else {
 		for (int i = 0; i < n; i++)
 			x[i] = t[i];
 	}
@@ -244,13 +231,9 @@ void splits(double *x, double *t, int n) {
 /*----------------------------------------------------------------------*/
 /* returns limit of the maximum theoretical error using chebyshev weights */
 double errlim(double *sigma, int ncycle, double shi, double slo)
-/*----------------------------------------------------------------------*/
 {
-	double errlim;
-	double delta;
-
-	errlim = 1.0;
-	delta = 0.25 * (shi - slo);
+	double errlim = 1.0;
+	const double delta = 0.25 * (shi - slo);
 	for (int i = 0; i < ncycle; i++) {
 		errlim *= delta / sigma[i];
 	}
@@ -260,15 +243,10 @@ double errlim(double *sigma, int ncycle, double shi, double slo)
 /*----------------------------------------------------------------------*/
 /* computes the ratio of the error at eigenvalue x1 to the error at x2. */
 double errrat(double x1, double x2, double *sigma, int ncycle)
-/*----------------------------------------------------------------------*/
 {
-	double errrat;
-	double rat;
-	int k;
-
-	errrat = 1.0;
-	rat = x1 / x2;
-	for (k = 0; k < ncycle; k++) {
+	double errrat = 1.0;
+	const double rat = x1 / x2;
+	for (int k = 0; k < ncycle; k++) {
 		errrat = errrat * rat * (1.0 - sigma[k] / x1) / (1.0 - sigma[k] / x2);
 	}
 	errrat = fabs(errrat);
@@ -292,8 +270,6 @@ double errrat(double x1, double x2, double *sigma, int ncycle)
  *                            ..... allen h. olson 10-4-85.
  *                                  university of california, san diego
  *----------------------------------------------------------------------*/
-void lspeig(const double *a, const int *ia, const int *nia, int nnz, int nc, int nr, int ncyc, int *nsig, double *x, double *dx, double *sigma,
-            double *w, double *smax, double *err, double *sup)
 /*-------
  * input
  *-------
@@ -369,23 +345,27 @@ void lspeig(const double *a, const int *ia, const int *nia, int nnz, int nc, int
  *      between smax and sup can be monitored until the desired level of
  *      certainty is obtained. */
 /*----------------------------------------------------------------------*/
+void lspeig(const double *a, const int *ia, const int *nia, int nnz, int nc,
+            int nr, int ncyc, int *nsig, double *x, double *dx, double *sigma,
+            double *w, double *smax, double *err, double *sup)
 {
-	int i, k, icyc;
-	int nsig1;
+	int i;
 	double eps = 1.0e-6;
 	double res = 0.0;
-	double slo, smp, errsmp;
+	double slo;
+	double smp;
+	double errsmp;
 
 	if (ncyc == 0) {
 		i = 0;  /* TODO(schwehr): Bug? */
 		for (int j = 0; j < nia[i]; j++) {
-			k = nnz * i + j;
+			const int k = nnz * i + j;
 			x[ia[k]] = a[k];
 		}
 		for (i = 1; i < nr; i++) {
 			res = 0.0;
 			for (int j = 0; j < nia[i]; j++) {
-				k = nnz * i + j;
+				const int k = nnz * i + j;
 				res += x[ia[k]] * a[k];
 			}
 			if (fabs(res) <= 1.0e-30)
@@ -393,7 +373,7 @@ void lspeig(const double *a, const int *ia, const int *nia, int nnz, int nc, int
 			else
 				res = res / fabs(res);
 			for (int j = 0; j < nia[i]; j++) {
-				k = nnz * i + j;
+				const int k = nnz * i + j;
 				x[ia[k]] += res * a[k];
 			}
 		}
@@ -405,28 +385,26 @@ void lspeig(const double *a, const int *ia, const int *nia, int nnz, int nc, int
 		for (int j = 0; j < nc; j++) {
 			x[j] = x[j] * res;
 		}
-	}
-
-	else {
+	} else {
 		slo = 0.0;
 		chebyu(&sigma[*nsig], ncyc, *smax, slo, w);
 	}
 
-	nsig1 = *nsig + 1;
+	int nsig1 = *nsig + 1;
 	*nsig = nsig1 + ncyc;
 	sigma[*nsig - 1] = 0.0;
-	for (icyc = nsig1 - 1; icyc < *nsig; icyc++) {
+	for (int icyc = nsig1 - 1; icyc < *nsig; icyc++) {
 		for (int j = 0; j < nc; j++) {
 			dx[j] = 0.0;
 		}
 		for (int i = 0; i < nr; i++) {
 			res = 0.0;
 			for (int j = 0; j < nia[i]; j++) {
-				k = nnz * i + j;
+				const int k = nnz * i + j;
 				res += a[k] * x[ia[k]];
 			}
 			for (int j = 0; j < nia[i]; j++) {
-				k = nnz * i + j;
+				const int k = nnz * i + j;
 				dx[ia[k]] += res * a[k];
 			}
 		}
@@ -456,7 +434,9 @@ void lspeig(const double *a, const int *ia, const int *nia, int nnz, int nc, int
 	slo = *smax;
 	*sup = (1.0 + eps) * (*smax) * pow(eps, -1.0 / *nsig);
 	res = 1.0;
-	for (icyc = 0; icyc < 25 && res > eps; i++) {
+	// TODO(schwehr): Suspicious that icyc is tested but not modified in loop.
+	// TODO(schwehr): Suspicious "i++" as i isn't used in the loop.  icyc++ ???
+	for (int icyc = 0; icyc < 25 && res > eps; i++) {
 		smp = 0.5 * (*sup + slo);
 		errsmp = errrat(*smax, smp, sigma, *nsig);
 		if (errsmp > eps)
@@ -600,14 +580,14 @@ double mbcblas_ddot(const int N, const double *X, const int incX, const double *
   \return Two-norm of X.
 */
 double mbcblas_dnrm2(const int N, const double *X, const int incX) {
-	double scale = 0.0, ssq = 1.0;
-	int ix = 0;
-
 	if (N <= 0 || incX <= 0)
 		return 0;
 	else if (N == 1)
 		return fabs(X[0]);
 
+	double scale = 0.0;
+	double ssq = 1.0;
+	int ix = 0;
 	for (int i = 0; i < N; i++) {
 		const double x = X[ix];
 
@@ -617,8 +597,7 @@ double mbcblas_dnrm2(const int N, const double *X, const int incX) {
 			if (scale < ax) {
 				ssq = 1.0 + ssq * (scale / ax) * (scale / ax);
 				scale = ax;
-			}
-			else {
+			} else {
 				ssq += (ax / scale) * (ax / scale);
 			}
 		}
@@ -636,12 +615,10 @@ double mbcblas_dnrm2(const int N, const double *X, const int incX) {
   \param[in]     incX
 */
 void mbcblas_dscal(const int N, const double alpha, double *X, const int incX) {
-	int ix;
-
 	if (incX <= 0)
 		return;
 
-	ix = MBCBLAS_OFFSET(N, incX);
+	int ix = MBCBLAS_OFFSET(N, incX);
 
 	for (int i = 0; i < N; i++) {
 		X[ix] *= alpha;
@@ -659,10 +636,9 @@ void mbcblas_dscal(const int N, const double alpha, double *X, const int incX) {
 // 21 Mar 1990: First version.
 // ---------------------------------------------------------------------
 static double mblsqr_d2norm(const double a, const double b) {
-	double scale;
 	const double zero = 0.0;
 
-	scale = fabs(a) + fabs(b);
+	double scale = fabs(a) + fabs(b);
 	if (scale == zero)
 		return zero;
 	else
@@ -675,9 +651,296 @@ static void mblsqr_dload(const int n, const double alpha, double x[]) {
 	return;
 }
 
-// ---------------------------------------------------------------------
-// LSQR
-// ---------------------------------------------------------------------
+// LSQR  finds a solution x to the following problems:
+//
+// 1. Unsymmetric equations --    solve  A*x = b
+//
+// 2. Linear least squares  --    solve  A*x = b
+//                                in the least-squares sense
+//
+// 3. Damped least squares  --    solve  (   A    )*x = ( b )
+//                                       ( damp*I )     ( 0 )
+//                                in the least-squares sense
+//
+// where A is a matrix with m rows and n columns, b is an
+// m-vector, and damp is a scalar.  (All quantities are real.)
+// The matrix A is intended to be large and sparse.  It is accessed
+// by means of subroutine calls of the form
+//
+//            aprod ( mode, m, n, x, y, UsrWrk )
+//
+// which must perform the following functions:
+//
+//            If mode = 1, compute  y = y + A*x.
+//            If mode = 2, compute  x = x + A(transpose)*y.
+//
+// The vectors x and y are input parameters in both cases.
+// If  mode = 1,  y should be altered without changing x.
+// If  mode = 2,  x should be altered without changing y.
+// The parameter UsrWrk may be used for workspace as described
+// below.
+//
+// The rhs vector b is input via u, and subsequently overwritten.
+//
+//
+// Note:  LSQR uses an iterative method to approximate the solution.
+// The number of iterations required to reach a certain accuracy
+// depends strongly on the scaling of the problem.  Poor scaling of
+// the rows or columns of A should therefore be avoided where
+// possible.
+//
+// For example, in problem 1 the solution is unaltered by
+// row-scaling.  If a row of A is very small or large compared to
+// the other rows of A, the corresponding row of ( A  b ) should be
+// scaled up or down.
+//
+// In problems 1 and 2, the solution x is easily recovered
+// following column-scaling.  Unless better information is known,
+// the nonzero columns of A should be scaled so that they all have
+// the same Euclidean norm (e.g., 1.0).
+//
+// In problem 3, there is no freedom to re-scale if damp is
+// nonzero.  However, the value of damp should be assigned only
+// after attention has been paid to the scaling of A.
+//
+// The parameter damp is intended to help regularize
+// ill-conditioned systems, by preventing the true solution from
+// being very large.  Another aid to regularization is provided by
+// the parameter acond, which may be used to terminate iterations
+// before the computed solution becomes very large.
+//
+// Note that x is not an input parameter.
+// If some initial estimate x0 is known and if damp = 0,
+// one could proceed as follows:
+//
+//   1. Compute a residual vector     r0 = b - A*x0.
+//   2. Use LSQR to solve the system  A*dx = r0.
+//   3. Add the correction dx to obtain a final solution x = x0 + dx.
+//
+// This requires that x0 be available before and after the call
+// to LSQR.  To judge the benefits, suppose LSQR takes k1 iterations
+// to solve A*x = b and k2 iterations to solve A*dx = r0.
+// If x0 is "good", norm(r0) will be smaller than norm(b).
+// If the same stopping tolerances atol and btol are used for each
+// system, k1 and k2 will be similar, but the final solution x0 + dx
+// should be more accurate.  The only way to reduce the total work
+// is to use a larger stopping tolerance for the second system.
+// If some value btol is suitable for A*x = b, the larger value
+// btol*norm(b)/norm(r0)  should be suitable for A*dx = r0.
+//
+// Preconditioning is another way to reduce the number of iterations.
+// If it is possible to solve a related system M*x = b efficiently,
+// where M approximates A in some helpful way
+// (e.g. M - A has low rank or its elements are small relative to
+// those of A), LSQR may converge more rapidly on the system
+//       A*M(inverse)*z = b,
+// after which x can be recovered by solving M*x = z.
+//
+// NOTE: If A is symmetric, LSQR should not be used!
+// Alternatives are the symmetric conjugate-gradient method (cg)
+// and/or SYMMLQ.
+// SYMMLQ is an implementation of symmetric cg that applies to
+// any symmetric A and will converge more rapidly than LSQR.
+// If A is positive definite, there are other implementations of
+// symmetric cg that require slightly less work per iteration
+// than SYMMLQ (but will take the same number of iterations).
+//
+//
+// Notation
+// --------
+//
+// The following quantities are used in discussing the subroutine
+// parameters:
+//
+// Abar   =  (   A    ),          bbar  =  ( b )
+//           ( damp*I )                    ( 0 )
+//
+// r      =  b  -  A*x,           rbar  =  bbar  -  Abar*x
+//
+// rnorm  =  sqrt( norm(r)**2  +  damp**2 * norm(x)**2 )
+//        =  norm( rbar )
+//
+// relpr  =  the relative precision of floating-point arithmetic
+//           on the machine being used.  On most machines,
+//           relpr is about 1.0e-7 and 1.0d-16 in single and double
+//           precision respectively.
+//
+// LSQR  minimizes the function rnorm with respect to x.
+//
+//
+// Parameters
+// ----------
+//
+// m       input      m, the number of rows in A.
+//
+// n       input      n, the number of columns in A.
+//
+// aprod   external   See above.
+//
+// damp    input      The damping parameter for problem 3 above.
+//                    (damp should be 0.0 for problems 1 and 2.)
+//                    If the system A*x = b is incompatible, values
+//                    of damp in the range 0 to sqrt(relpr)*norm(A)
+//                    will probably have a negligible effect.
+//                    Larger values of damp will tend to decrease
+//                    the norm of x and reduce the number of
+//                    iterations required by LSQR.
+//
+//                    The work per iteration and the storage needed
+//                    by LSQR are the same for all values of damp.
+//
+// rw      workspace  Transit pointer to user's workspace.
+//                    Note:  LSQR  does not explicitly use this
+//                    parameter, but passes it to subroutine aprod for
+//                    possible use as workspace.
+//
+// u(m)    input      The rhs vector b.  Beware that u is
+//                    over-written by LSQR.
+//
+// v(n)    workspace
+//
+// w(n)    workspace
+//
+// x(n)    output     Returns the computed solution x.
+//
+// se(*)   output     If m .gt. n  or  damp .gt. 0,  the system is
+//         (maybe)    overdetermined and the standard errors may be
+//                    useful.  (See the first LSQR reference.)
+//                    Otherwise (m .le. n  and  damp = 0) they do not
+//                    mean much.  Some time and storage can be saved
+//                    by setting  se = NULL.  In that case, se will
+//                    not be touched.
+//
+//                    If se is not NULL, then the dimension of se must
+//                    be n or more.  se(1:n) then returns standard error
+//                    estimates for the components of x.
+//                    For each i, se(i) is set to the value
+//                       rnorm * sqrt( sigma(i,i) / t ),
+//                    where sigma(i,i) is an estimate of the i-th
+//                    diagonal of the inverse of Abar(transpose)*Abar
+//                    and  t = 1      if  m .le. n,
+//                         t = m - n  if  m .gt. n  and  damp = 0,
+//                         t = m      if  damp .ne. 0.
+//
+// atol    input      An estimate of the relative error in the data
+//                    defining the matrix A.  For example,
+//                    if A is accurate to about 6 digits, set
+//                    atol = 1.0e-6 .
+//
+// btol    input      An estimate of the relative error in the data
+//                    defining the rhs vector b.  For example,
+//                    if b is accurate to about 6 digits, set
+//                    btol = 1.0e-6 .
+//
+// conlim  input      An upper limit on cond(Abar), the apparent
+//                    condition number of the matrix Abar.
+//                    Iterations will be terminated if a computed
+//                    estimate of cond(Abar) exceeds conlim.
+//                    This is intended to prevent certain small or
+//                    zero singular values of A or Abar from
+//                    coming into effect and causing unwanted growth
+//                    in the computed solution.
+//
+//                    conlim and damp may be used separately or
+//                    together to regularize ill-conditioned systems.
+//
+//                    Normally, conlim should be in the range
+//                    1000 to 1/relpr.
+//                    Suggested value:
+//                    conlim = 1/(100*relpr)  for compatible systems,
+//                    conlim = 1/(10*sqrt(relpr)) for least squares.
+//
+//         Note:  If the user is not concerned about the parameters
+//         atol, btol and conlim, any or all of them may be set
+//         to zero.  The effect will be the same as the values
+//         relpr, relpr and 1/relpr respectively.
+//
+// itnlim  input      An upper limit on the number of iterations.
+//                    Suggested value:
+//                    itnlim = n/2   for well-conditioned systems
+//                                   with clustered singular values,
+//                    itnlim = 4*n   otherwise.
+//
+// nout    input      File number for printed output.  If positive,
+//                    a summary will be printed on file nout.
+//
+// istop   output     An integer giving the reason for termination:
+//
+//            0       x = 0  is the exact solution.
+//                    No iterations were performed.
+//
+//            1       The equations A*x = b are probably
+//                    compatible.  Norm(A*x - b) is sufficiently
+//                    small, given the values of atol and btol.
+//
+//            2       damp is zero.  The system A*x = b is probably
+//                    not compatible.  A least-squares solution has
+//                    been obtained that is sufficiently accurate,
+//                    given the value of atol.
+//
+//            3       damp is nonzero.  A damped least-squares
+//                    solution has been obtained that is sufficiently
+//                    accurate, given the value of atol.
+//
+//            4       An estimate of cond(Abar) has exceeded
+//                    conlim.  The system A*x = b appears to be
+//                    ill-conditioned.  Otherwise, there could be an
+//                    error in subroutine aprod.
+//
+//            5       The iteration limit itnlim was reached.
+//
+// itn     output     The number of iterations performed.
+//
+// anorm   output     An estimate of the Frobenius norm of  Abar.
+//                    This is the square-root of the sum of squares
+//                    of the elements of Abar.
+//                    If damp is small and if the columns of A
+//                    have all been scaled to have length 1.0,
+//                    anorm should increase to roughly sqrt(n).
+//                    A radically different value for anorm may
+//                    indicate an error in subroutine aprod (there
+//                    may be an inconsistency between modes 1 and 2).
+//
+// acond   output     An estimate of cond(Abar), the condition
+//                    number of Abar.  A very high value of acond
+//                    may again indicate an error in aprod.
+//
+// rnorm   output     An estimate of the final value of norm(rbar),
+//                    the function being minimized (see notation
+//                    above).  This will be small if A*x = b has
+//                    a solution.
+//
+// arnorm  output     An estimate of the final value of
+//                    norm( Abar(transpose)*rbar ), the norm of
+//                    the residual for the usual normal equations.
+//                    This should be small in all cases.  (arnorm
+//                    will often be smaller than the true value
+//                    computed from the output vector x.)
+//
+// xnorm   output     An estimate of the norm of the final
+//                    solution vector x.
+//
+// References:
+//
+// C.C. Paige and M.A. Saunders,  LSQR: An algorithm for sparse
+//      linear equations and sparse least squares,
+//      ACM Transactions on Mathematical Software 8, 1 (March 1982),
+//      pp. 43-71.
+//
+// C.C. Paige and M.A. Saunders,  Algorithm 583, LSQR: Sparse
+//      linear equations and least-squares problems,
+//      ACM Transactions on Mathematical Software 8, 2 (June 1982),
+//      pp. 195-209.
+//
+// C.L. Lawson, R.J. Hanson, D.R. Kincaid and F.T. Krogh,
+//      Basic linear algebra subprograms for Fortran usage,
+//      ACM Transactions on Mathematical Software 5, 3 (Sept 1979),
+//      pp. 308-323 and 324-325.
+//
+// Michael A. Saunders                  mike@sol-michael.stanford.edu
+// Dept of Operations Research          na.Msaunders@na-net.ornl.gov
+// Stanford University
+// Stanford, CA 94305-4022              (415) 723-1875
 void mblsqr_lsqr(int m, int n, void (*aprod)(int mode, int m, int n, double x[], double y[], void *UsrWrk), double damp,
                  void *UsrWrk,
                  double u[],  // len = m
@@ -689,374 +952,13 @@ void mblsqr_lsqr(int m, int n, void (*aprod)(int mode, int m, int n, double x[],
                  // The remaining variables are output only.
                  int *istop_out, int *itn_out, double *anorm_out, double *acond_out, double *rnorm_out, double *arnorm_out,
                  double *xnorm_out) {
-	//     ------------------------------------------------------------------
-	//
-	//     LSQR  finds a solution x to the following problems:
-	//
-	//     1. Unsymmetric equations --    solve  A*x = b
-	//
-	//     2. Linear least squares  --    solve  A*x = b
-	//                                    in the least-squares sense
-	//
-	//     3. Damped least squares  --    solve  (   A    )*x = ( b )
-	//                                           ( damp*I )     ( 0 )
-	//                                    in the least-squares sense
-	//
-	//     where A is a matrix with m rows and n columns, b is an
-	//     m-vector, and damp is a scalar.  (All quantities are real.)
-	//     The matrix A is intended to be large and sparse.  It is accessed
-	//     by means of subroutine calls of the form
-	//
-	//                aprod ( mode, m, n, x, y, UsrWrk )
-	//
-	//     which must perform the following functions:
-	//
-	//                If mode = 1, compute  y = y + A*x.
-	//                If mode = 2, compute  x = x + A(transpose)*y.
-	//
-	//     The vectors x and y are input parameters in both cases.
-	//     If  mode = 1,  y should be altered without changing x.
-	//     If  mode = 2,  x should be altered without changing y.
-	//     The parameter UsrWrk may be used for workspace as described
-	//     below.
-	//
-	//     The rhs vector b is input via u, and subsequently overwritten.
-	//
-	//
-	//     Note:  LSQR uses an iterative method to approximate the solution.
-	//     The number of iterations required to reach a certain accuracy
-	//     depends strongly on the scaling of the problem.  Poor scaling of
-	//     the rows or columns of A should therefore be avoided where
-	//     possible.
-	//
-	//     For example, in problem 1 the solution is unaltered by
-	//     row-scaling.  If a row of A is very small or large compared to
-	//     the other rows of A, the corresponding row of ( A  b ) should be
-	//     scaled up or down.
-	//
-	//     In problems 1 and 2, the solution x is easily recovered
-	//     following column-scaling.  Unless better information is known,
-	//     the nonzero columns of A should be scaled so that they all have
-	//     the same Euclidean norm (e.g., 1.0).
-	//
-	//     In problem 3, there is no freedom to re-scale if damp is
-	//     nonzero.  However, the value of damp should be assigned only
-	//     after attention has been paid to the scaling of A.
-	//
-	//     The parameter damp is intended to help regularize
-	//     ill-conditioned systems, by preventing the true solution from
-	//     being very large.  Another aid to regularization is provided by
-	//     the parameter acond, which may be used to terminate iterations
-	//     before the computed solution becomes very large.
-	//
-	//     Note that x is not an input parameter.
-	//     If some initial estimate x0 is known and if damp = 0,
-	//     one could proceed as follows:
-	//
-	//       1. Compute a residual vector     r0 = b - A*x0.
-	//       2. Use LSQR to solve the system  A*dx = r0.
-	//       3. Add the correction dx to obtain a final solution x = x0 + dx.
-	//
-	//     This requires that x0 be available before and after the call
-	//     to LSQR.  To judge the benefits, suppose LSQR takes k1 iterations
-	//     to solve A*x = b and k2 iterations to solve A*dx = r0.
-	//     If x0 is "good", norm(r0) will be smaller than norm(b).
-	//     If the same stopping tolerances atol and btol are used for each
-	//     system, k1 and k2 will be similar, but the final solution x0 + dx
-	//     should be more accurate.  The only way to reduce the total work
-	//     is to use a larger stopping tolerance for the second system.
-	//     If some value btol is suitable for A*x = b, the larger value
-	//     btol*norm(b)/norm(r0)  should be suitable for A*dx = r0.
-	//
-	//     Preconditioning is another way to reduce the number of iterations.
-	//     If it is possible to solve a related system M*x = b efficiently,
-	//     where M approximates A in some helpful way
-	//     (e.g. M - A has low rank or its elements are small relative to
-	//     those of A), LSQR may converge more rapidly on the system
-	//           A*M(inverse)*z = b,
-	//     after which x can be recovered by solving M*x = z.
-	//
-	//     NOTE: If A is symmetric, LSQR should not be used!
-	//     Alternatives are the symmetric conjugate-gradient method (cg)
-	//     and/or SYMMLQ.
-	//     SYMMLQ is an implementation of symmetric cg that applies to
-	//     any symmetric A and will converge more rapidly than LSQR.
-	//     If A is positive definite, there are other implementations of
-	//     symmetric cg that require slightly less work per iteration
-	//     than SYMMLQ (but will take the same number of iterations).
-	//
-	//
-	//     Notation
-	//     --------
-	//
-	//     The following quantities are used in discussing the subroutine
-	//     parameters:
-	//
-	//     Abar   =  (   A    ),          bbar  =  ( b )
-	//               ( damp*I )                    ( 0 )
-	//
-	//     r      =  b  -  A*x,           rbar  =  bbar  -  Abar*x
-	//
-	//     rnorm  =  sqrt( norm(r)**2  +  damp**2 * norm(x)**2 )
-	//            =  norm( rbar )
-	//
-	//     relpr  =  the relative precision of floating-point arithmetic
-	//               on the machine being used.  On most machines,
-	//               relpr is about 1.0e-7 and 1.0d-16 in single and double
-	//               precision respectively.
-	//
-	//     LSQR  minimizes the function rnorm with respect to x.
-	//
-	//
-	//     Parameters
-	//     ----------
-	//
-	//     m       input      m, the number of rows in A.
-	//
-	//     n       input      n, the number of columns in A.
-	//
-	//     aprod   external   See above.
-	//
-	//     damp    input      The damping parameter for problem 3 above.
-	//                        (damp should be 0.0 for problems 1 and 2.)
-	//                        If the system A*x = b is incompatible, values
-	//                        of damp in the range 0 to sqrt(relpr)*norm(A)
-	//                        will probably have a negligible effect.
-	//                        Larger values of damp will tend to decrease
-	//                        the norm of x and reduce the number of
-	//                        iterations required by LSQR.
-	//
-	//                        The work per iteration and the storage needed
-	//                        by LSQR are the same for all values of damp.
-	//
-	//     rw      workspace  Transit pointer to user's workspace.
-	//                        Note:  LSQR  does not explicitly use this
-	//                        parameter, but passes it to subroutine aprod for
-	//                        possible use as workspace.
-	//
-	//     u(m)    input      The rhs vector b.  Beware that u is
-	//                        over-written by LSQR.
-	//
-	//     v(n)    workspace
-	//
-	//     w(n)    workspace
-	//
-	//     x(n)    output     Returns the computed solution x.
-	//
-	//     se(*)   output     If m .gt. n  or  damp .gt. 0,  the system is
-	//             (maybe)    overdetermined and the standard errors may be
-	//                        useful.  (See the first LSQR reference.)
-	//                        Otherwise (m .le. n  and  damp = 0) they do not
-	//                        mean much.  Some time and storage can be saved
-	//                        by setting  se = NULL.  In that case, se will
-	//                        not be touched.
-	//
-	//                        If se is not NULL, then the dimension of se must
-	//                        be n or more.  se(1:n) then returns standard error
-	//                        estimates for the components of x.
-	//                        For each i, se(i) is set to the value
-	//                           rnorm * sqrt( sigma(i,i) / t ),
-	//                        where sigma(i,i) is an estimate of the i-th
-	//                        diagonal of the inverse of Abar(transpose)*Abar
-	//                        and  t = 1      if  m .le. n,
-	//                             t = m - n  if  m .gt. n  and  damp = 0,
-	//                             t = m      if  damp .ne. 0.
-	//
-	//     atol    input      An estimate of the relative error in the data
-	//                        defining the matrix A.  For example,
-	//                        if A is accurate to about 6 digits, set
-	//                        atol = 1.0e-6 .
-	//
-	//     btol    input      An estimate of the relative error in the data
-	//                        defining the rhs vector b.  For example,
-	//                        if b is accurate to about 6 digits, set
-	//                        btol = 1.0e-6 .
-	//
-	//     conlim  input      An upper limit on cond(Abar), the apparent
-	//                        condition number of the matrix Abar.
-	//                        Iterations will be terminated if a computed
-	//                        estimate of cond(Abar) exceeds conlim.
-	//                        This is intended to prevent certain small or
-	//                        zero singular values of A or Abar from
-	//                        coming into effect and causing unwanted growth
-	//                        in the computed solution.
-	//
-	//                        conlim and damp may be used separately or
-	//                        together to regularize ill-conditioned systems.
-	//
-	//                        Normally, conlim should be in the range
-	//                        1000 to 1/relpr.
-	//                        Suggested value:
-	//                        conlim = 1/(100*relpr)  for compatible systems,
-	//                        conlim = 1/(10*sqrt(relpr)) for least squares.
-	//
-	//             Note:  If the user is not concerned about the parameters
-	//             atol, btol and conlim, any or all of them may be set
-	//             to zero.  The effect will be the same as the values
-	//             relpr, relpr and 1/relpr respectively.
-	//
-	//     itnlim  input      An upper limit on the number of iterations.
-	//                        Suggested value:
-	//                        itnlim = n/2   for well-conditioned systems
-	//                                       with clustered singular values,
-	//                        itnlim = 4*n   otherwise.
-	//
-	//     nout    input      File number for printed output.  If positive,
-	//                        a summary will be printed on file nout.
-	//
-	//     istop   output     An integer giving the reason for termination:
-	//
-	//                0       x = 0  is the exact solution.
-	//                        No iterations were performed.
-	//
-	//                1       The equations A*x = b are probably
-	//                        compatible.  Norm(A*x - b) is sufficiently
-	//                        small, given the values of atol and btol.
-	//
-	//                2       damp is zero.  The system A*x = b is probably
-	//                        not compatible.  A least-squares solution has
-	//                        been obtained that is sufficiently accurate,
-	//                        given the value of atol.
-	//
-	//                3       damp is nonzero.  A damped least-squares
-	//                        solution has been obtained that is sufficiently
-	//                        accurate, given the value of atol.
-	//
-	//                4       An estimate of cond(Abar) has exceeded
-	//                        conlim.  The system A*x = b appears to be
-	//                        ill-conditioned.  Otherwise, there could be an
-	//                        error in subroutine aprod.
-	//
-	//                5       The iteration limit itnlim was reached.
-	//
-	//     itn     output     The number of iterations performed.
-	//
-	//     anorm   output     An estimate of the Frobenius norm of  Abar.
-	//                        This is the square-root of the sum of squares
-	//                        of the elements of Abar.
-	//                        If damp is small and if the columns of A
-	//                        have all been scaled to have length 1.0,
-	//                        anorm should increase to roughly sqrt(n).
-	//                        A radically different value for anorm may
-	//                        indicate an error in subroutine aprod (there
-	//                        may be an inconsistency between modes 1 and 2).
-	//
-	//     acond   output     An estimate of cond(Abar), the condition
-	//                        number of Abar.  A very high value of acond
-	//                        may again indicate an error in aprod.
-	//
-	//     rnorm   output     An estimate of the final value of norm(rbar),
-	//                        the function being minimized (see notation
-	//                        above).  This will be small if A*x = b has
-	//                        a solution.
-	//
-	//     arnorm  output     An estimate of the final value of
-	//                        norm( Abar(transpose)*rbar ), the norm of
-	//                        the residual for the usual normal equations.
-	//                        This should be small in all cases.  (arnorm
-	//                        will often be smaller than the true value
-	//                        computed from the output vector x.)
-	//
-	//     xnorm   output     An estimate of the norm of the final
-	//                        solution vector x.
-	//
-	//
-	//     Subroutines and functions used
-	//     ------------------------------
-	//
-	//     USER               aprod
-	//     CBLAS              dcopy, dnrm2, dscal (see Lawson et al. below)
-	//
-	//
-	//     References
-	//     ----------
-	//
-	//     C.C. Paige and M.A. Saunders,  LSQR: An algorithm for sparse
-	//          linear equations and sparse least squares,
-	//          ACM Transactions on Mathematical Software 8, 1 (March 1982),
-	//          pp. 43-71.
-	//
-	//     C.C. Paige and M.A. Saunders,  Algorithm 583, LSQR: Sparse
-	//          linear equations and least-squares problems,
-	//          ACM Transactions on Mathematical Software 8, 2 (June 1982),
-	//          pp. 195-209.
-	//
-	//     C.L. Lawson, R.J. Hanson, D.R. Kincaid and F.T. Krogh,
-	//          Basic linear algebra subprograms for Fortran usage,
-	//          ACM Transactions on Mathematical Software 5, 3 (Sept 1979),
-	//          pp. 308-323 and 324-325.
-	//     ------------------------------------------------------------------
-	//
-	//
-	//     LSQR development:
-	//     22 Feb 1982: LSQR sent to ACM TOMS to become Algorithm 583.
-	//     15 Sep 1985: Final F66 version.  LSQR sent to "misc" in netlib.
-	//     13 Oct 1987: Bug (Robert Davies, DSIR).  Have to delete
-	//                     if ( (one + dabs(t)) .le. one ) GO TO 200
-	//                  from loop 200.  The test was an attempt to reduce
-	//                  underflows, but caused w(i) not to be updated.
-	//     17 Mar 1989: First F77 version.
-	//     04 May 1989: Bug (David Gay, AT&T).  When the second beta is zero,
-	//                  rnorm = 0 and
-	//                  test2 = arnorm / (anorm * rnorm) overflows.
-	//                  Fixed by testing for rnorm = 0.
-	//     05 May 1989: Sent to "misc" in netlib.
-	//     14 Mar 1990: Bug (John Tomlin via IBM OSL testing).
-	//                  Setting rhbar2 = rhobar**2 + dampsq can give zero
-	//                  if rhobar underflows and damp = 0.
-	//                  Fixed by testing for damp = 0 specially.
-	//     15 Mar 1990: Converted to lower case.
-	//     21 Mar 1990: d2norm introduced to avoid overflow in numerous
-	//                  items like  c = sqrt( a**2 + b**2 ).
-	//     04 Sep 1991: wantse added as an argument to LSQR, to make
-	//                  standard errors optional.  This saves storage and
-	//                  time when se(*) is not wanted.
-	//     13 Feb 1992: istop now returns a value in [1,5], not [1,7].
-	//                  1, 2 or 3 means that x solves one of the problems
-	//                  Ax = b,  min norm(Ax - b)  or  damped least squares.
-	//                  4 means the limit on cond(A) was reached.
-	//                  5 means the limit on iterations was reached.
-	//     07 Dec 1994: Keep track of dxmax = max_k norm( phi_k * d_k ).
-	//                  So far, this is just printed at the end.
-	//                  A large value (relative to norm(x)) indicates
-	//                  significant cancellation in forming
-	//                  x  =  D*f  =  sum( phi_k * d_k ).
-	//                  A large column of D need NOT be serious if the
-	//                  corresponding phi_k is small.
-	//     27 Dec 1994: Include estimate of alfa_opt in iteration log.
-	//                  alfa_opt is the optimal scale factor for the
-	//                  residual in the "augmented system", as described by
-	//                  A. Bjorck (1992),
-	//                  Pivoting and stability in the augmented system method,
-	//                  in D. F. Griffiths and G. A. Watson (eds.),
-	//                  "Numerical Analysis 1991",
-	//                  Proceedings of the 14th Dundee Conference,
-	//                  Pitman Research Notes in Mathematics 260,
-	//                  Longman Scientific and Technical, Harlow, Essex, 1992.
-	//     14 Apr 2006: "Line-by-line" conversion to ISO C by
-	//                  Michael P. Friedlander.
-	//
-	//
-	//     Michael A. Saunders                  mike@sol-michael.stanford.edu
-	//     Dept of Operations Research          na.Msaunders@na-net.ornl.gov
-	//     Stanford University
-	//     Stanford, CA 94305-4022              (415) 723-1875
-	//-----------------------------------------------------------------------
+	const bool extra = false; // true for extra printing below.
+	const bool damped = damp > ZERO;
+	const bool wantse = se != NULL;
 
-	//  Local copies of output variables.  Output vars are assigned at exit.
-	int istop = 0, itn = 0;
-	double anorm = ZERO, acond = ZERO, rnorm = ZERO, arnorm = ZERO, xnorm = ZERO;
-
-	//  Local variables
-
-	const bool extra = false, // true for extra printing below.
-	    damped = damp > ZERO, wantse = se != NULL;
-	int maxdx, nconv, nstop;
-	double alfopt, alpha, arnorm0, beta, bnorm, cs, cs1, cs2, ctol, delta, dknorm, dnorm, dxk, dxmax, gamma, gambar, phi, phibar,
-	    psi, res2, rho, rhobar, rhbar1, rhs, rtol, sn, sn1, sn2, t, tau, temp, test1, test2, test3, theta, t1, t2, t3, xnorm1, z,
-	    zbar;
-	char *enter = "Enter LSQR.  ", *exit = "Exit  LSQR.  ",
-	     msg[6][100] = {{"The exact solution is  x = 0"},
+	const char *enter = "Enter LSQR.  ";
+	const char *exit = "Exit  LSQR.  ";
+	const char msg[6][100] = {{"The exact solution is  x = 0"},
 	                    {"A solution to Ax = b was found, given atol, btol"},
 	                    {"A least-squares solution was found, given atol"},
 	                    {"A damped least-squares solution was found, given atol"},
@@ -1075,28 +977,36 @@ void mblsqr_lsqr(int m, int n, void (*aprod)(int mode, int m, int n, double x[],
 		        " btol   = %-22.2e    itnlim = %10d\n\n",
 		        enter, m, n, damp, wantse, atol, conlim, btol, itnlim);
 
-	itn = 0;
-	istop = 0;
-	nstop = 0;
-	maxdx = 0;
-	ctol = ZERO;
-	if (conlim > ZERO)
-		ctol = ONE / conlim;
-	anorm = ZERO;
-	acond = ZERO;
-	dnorm = ZERO;
-	dxmax = ZERO;
-	res2 = ZERO;
-	psi = ZERO;
-	xnorm = ZERO;
-	xnorm1 = ZERO;
-	cs2 = -ONE;
-	sn2 = ZERO;
-	z = ZERO;
+	int itn = 0;
+	int istop = 0;
+	int nstop = 0;
+	int maxdx = 0;
+	const double ctol = conlim > ZERO ? ONE / conlim : ZERO;
+	double anorm = ZERO;
+	double acond = ZERO;
+	double rnorm = ZERO;
+	double arnorm = ZERO;
+	double xnorm = ZERO;
 
-	test1 = 0.0;
-	test2 = 0.0;
-	test3 = 0.0;
+	double dnorm = ZERO;
+	double dxmax = ZERO;
+	double res2 = ZERO;
+	double psi = ZERO;
+	xnorm = ZERO;
+	double xnorm1 = ZERO;
+	double cs2 = -ONE;
+	double sn2 = ZERO;
+	double z = ZERO;
+
+	double test1 = 0.0;
+	double test2 = 0.0;
+	double test3 = 0.0;
+
+	// TODO(schwehr): Localize
+	int nconv;
+	double alfopt, alpha, arnorm0, beta, bnorm, cs, cs1, delta, dknorm, dxk, gamma, gambar, phi, phibar;
+	double rho, rhobar, rhbar1, rhs, rtol, sn, sn1, t, tau, temp, theta, t1, t2, t3;
+	double zbar;
 
 	//  ------------------------------------------------------------------
 	//  Set up the first vectors u and v for the bidiagonalization.
