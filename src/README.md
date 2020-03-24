@@ -1,0 +1,27 @@
+# src
+
+- [bsio](bsio): Hawaii Mapping Research Group (HMRG) interfaces
+- [deprecated](deprecated): Old command line libraries
+- [gmt](gmt): Interfaces to Generic Mapping Tools library
+- [gsf](gsf): Generic Sensor Format libgsf
+- [html](html): HTML version of the documentation
+- [htmlsrc](htmlsrc): Source for the MB-System web pages
+- [macros](macros): Perl based command line programs
+- [man](man): Man pages
+- [mbaux](mbaux): Auxiliary functions used by MB-System
+- [mbedit](mbedit): Waterfall swath bathymetry editor
+- [mbeditviz](mbeditviz): Geographically oriented swath bathymetry editor
+- [mbgrdviz](mbgrdviz): 2D/3D grid visualization
+- [mbio](mbio): library to read and write many data formats
+- [mbnavadjust](mbnavadjust): Adjust survey navigation
+- [mbnavedit](mbnavedit): Survey navigation editor
+- [mbtrn](mbtrn): Terrain Relative Navigation (TRN)
+- [mbtrnav](mbtrnav): Terrain Relative Navigation (TRN)
+- [mbtrnutils](mbtrnutils): Terrain Relative Navigation (TRN)
+- [mbvelocitytool](mbvelocitytool): Modeling raytracing through sound velocity model
+- [mbview](mbview): Library for 2D/3D visualization
+- [otps](otps): Interface to OSU Tidal Prediction Software
+- [ps](ps): PostScript documentation
+- [share](share): 1 degree model of ocean water properties
+- [surf](surf): I/O for Hydrosweep and Fansweep multibeam sonars
+- [utilities](utilities): Command line programs
