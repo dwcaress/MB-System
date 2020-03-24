@@ -434,9 +434,7 @@ void lspeig(const double *a, const int *ia, const int *nia, int nnz, int nc,
 	slo = *smax;
 	*sup = (1.0 + eps) * (*smax) * pow(eps, -1.0 / *nsig);
 	res = 1.0;
-	// TODO(schwehr): Suspicious that icyc is tested but not modified in loop.
-	// TODO(schwehr): Suspicious "i++" as i isn't used in the loop.  icyc++ ???
-	for (int icyc = 0; icyc < 25 && res > eps; i++) {
+	for (int icyc = 0; icyc < 25 && res > eps; icyc++) {
 		smp = 0.5 * (*sup + slo);
 		errsmp = errrat(*smax, smp, sigma, *nsig);
 		if (errsmp > eps)
