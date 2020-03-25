@@ -982,8 +982,6 @@ void mblsqr_lsqr(int m, int n, void (*aprod)(int mode, int m, int n, double x[],
 	const double ctol = conlim > ZERO ? ONE / conlim : ZERO;
 	double anorm = ZERO;
 	double acond = ZERO;
-	double rnorm = ZERO;
-	double arnorm = ZERO;
 	double xnorm = ZERO;
 
 	double dnorm = ZERO;
@@ -1000,12 +998,6 @@ void mblsqr_lsqr(int m, int n, void (*aprod)(int mode, int m, int n, double x[],
 	double test2 = 0.0;
 	double test3 = 0.0;
 
-	// TODO(schwehr): Localize
-	int nconv;
-	double alfopt, alpha, arnorm0, beta, bnorm, cs, cs1, delta, dknorm, dxk, gamma, gambar, phi, phibar;
-	double rho, rhobar, rhbar1, rhs, rtol, sn, sn1, t, tau, temp, theta, t1, t2, t3;
-	double zbar;
-
 	//  ------------------------------------------------------------------
 	//  Set up the first vectors u and v for the bidiagonalization.
 	//  These satisfy  beta*u = b,  alpha*v = A(transpose)*u.
@@ -1016,8 +1008,8 @@ void mblsqr_lsqr(int m, int n, void (*aprod)(int mode, int m, int n, double x[],
 	if (wantse)
 		mblsqr_dload(n, 0.0, se);
 
-	alpha = ZERO;
-	beta = mbcblas_dnrm2(m, u, 1);
+	double alpha = ZERO;
+	double beta = mbcblas_dnrm2(m, u, 1);
 
 	if (beta > ZERO) {
 		mbcblas_dscal(m, (ONE / beta), u, 1);
@@ -1030,14 +1022,23 @@ void mblsqr_lsqr(int m, int n, void (*aprod)(int mode, int m, int n, double x[],
 		mbcblas_dcopy(n, v, 1, w, 1);
 	}
 
-	arnorm = arnorm0 = alpha * beta;
-	if (arnorm == ZERO)
-		goto goto_800;
+	// TODO(schwehr): Localize
+	int nconv;
+	double bnorm;
+	double rnorm;
+	double alfopt, cs, cs1, delta, dknorm, dxk, gamma, gambar, phi;
+	double rho, rhbar1, rhs, rtol, sn, sn1, t, tau, temp, theta, t1, t2, t3;
+	double zbar;
 
-	rhobar = alpha;
-	phibar = beta;
-	bnorm = beta;
-	rnorm = beta;
+	double arnorm0 = alpha * beta;
+	double arnorm = arnorm0;
+	// if (arnorm == ZERO)
+	//	goto goto_800;
+	if (arnorm != ZERO) {
+		double rhobar = alpha;
+		double phibar = beta;
+		bnorm = beta;
+		rnorm = beta;
 
 	if (nout != NULL) {
 		if (damped)
@@ -1297,7 +1298,8 @@ void mblsqr_lsqr(int m, int n, void (*aprod)(int mode, int m, int n, double x[],
 
 //  Decide if istop = 2 or 3.
 //  Print the stopping condition.
-goto_800:
+	} // goto_800:
+
 	if (damped && istop == 2)
 		istop = 3;
 	if (nout != NULL) {
