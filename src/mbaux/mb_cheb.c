@@ -1024,8 +1024,8 @@ void mblsqr_lsqr(int m, int n, void (*aprod)(int mode, int m, int n, double x[],
 
 	// TODO(schwehr): Localize
 	int nconv;
-	double bnorm;
-	double rnorm;
+	double bnorm = 0.0;
+	double rnorm = 0.0;
 	double alfopt, cs, cs1, delta, dknorm, dxk, gamma, gambar, phi;
 	double rho, rhbar1, rhs, rtol, sn, sn1, t, tau, temp, theta, t1, t2, t3;
 	double zbar;
