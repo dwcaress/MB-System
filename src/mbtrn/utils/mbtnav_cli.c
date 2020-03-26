@@ -488,7 +488,7 @@ static void s_out_csv(trn_offset_pub_t *self)
     fprintf(stderr,"%.3lf,%.3lf,%.4lf,%.4lf,%.4lf,",time,mle->time,mle->x,mle->y,mle->z);
     fprintf(stderr,"%.3lf,%.4lf,%.4lf,%.4lf,",mse->time,mse->x,mse->y,mse->z);
     fprintf(stderr,"%.4lf,%.4lf,%.4lf,",pt->x, pt->y, pt->z);
-    fprintf(stderr,"%.3lf,%.3lf,%.3lf,",(N_COVAR>=6?sqrt(mse->cov[0]):-1.0),(N_COVAR>=6?sqrt(mse->cov[2]):-1.0),(N_COVAR>=6?sqrt(mse->cov[5]):-1.0));
+    fprintf(stderr,"%.3lf,%.3lf,%.3lf,",sqrt(mse->cov[0]),sqrt(mse->cov[1]),sqrt(mse->cov[2]));
     fprintf(stderr,"%d,%d,%d,%d,%d,%hd,%hd\n",self->reinit_count,self->filter_state,self->success,self->mb1_cycle,self->ping_number,self->is_converged,self->is_valid);
 }
 
