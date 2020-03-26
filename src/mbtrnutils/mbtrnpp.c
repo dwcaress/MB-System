@@ -118,6 +118,7 @@ int mbtrnpp_reson7kr_input_close(int verbose, void *mbio_ptr, int *error);
 int mbtrnpp_kemkmall_input_open(int verbose, void *mbio_ptr, char *definition, int *error);
 int mbtrnpp_kemkmall_input_read(int verbose, void *mbio_ptr, size_t *size, char *buffer, int *error);
 int mbtrnpp_kemkmall_input_close(int verbose, void *mbio_ptr, int *error);
+int mbtrnpp_load_config(char *config_path);
 
 static char program_name[] = "mbtrnpp";
 
@@ -143,6 +144,10 @@ typedef enum{
 output_mode_t output_flags = OUTPUT_MBTRNPP_MSG;
 
 int64_t mbtrnpp_loop_delay_msec = 0;
+
+#define MBTRN_CFG_NAME    "mbtrn.cfg"
+#define MBTRN_CFG_PATH    "."
+char *mbtrn_cfg_path=NULL;
 
 #define MB1_BLOG_NAME     "mb1"
 #define MB1_BLOG_DESC     "mb1 binary data"
@@ -252,6 +257,8 @@ typedef enum {
     MBTPP_EV_MB_GAIN_LO,
     MBTPP_EV_EMBGETALL,
     MBTPP_EV_EMBFAILURE,
+    MBTPP_EV_EMBFRAMERD,
+    MBTPP_EV_EMBLOGWR,
     MBTPP_EV_EMBSOCKET,
     MBTPP_EV_EMBCON,
 #ifdef WITH_MBTNAV
@@ -262,7 +269,8 @@ typedef enum {
 } mbtrnpp_stevent_id;
 
 typedef enum {
-  MBTPP_STA_MB_FWRITE_BYTES=0,
+    MBTPP_STA_MB_FWRITE_BYTES=0,
+    MBTPP_STA_MB_SYNC_BYTES,
     MBTPP_STA_COUNT
 } mbtrnpp_ststatus_id;
 
@@ -293,14 +301,15 @@ typedef enum {
 
 const char *mbtrnpp_stevent_labels[] = {
     "mb_cycles", "mb_con", "mb_dis", "mb_pub_n", "mb_trn_reinit", "mb_gain_lo",
-    "e_mbgetall", "e_mbfailure", "e_mbsocket",
+    "e_mbgetall", "e_mbfailure", "e_mb_frame_rd", "e_mb_log_wr", "e_mbsocket",
     "e_mbcon"
 #ifdef WITH_MBTNAV
     ,"trn_proc_n","trnu_pub_n"
 #endif
 };
 const char *mbtrnpp_ststatus_labels[] = {
-    "mb_fwrite_bytes"
+    "mb_fwrite_bytes",
+    "mb_sync_bytes"
 };
 
 const char *mbtrnpp_stchan_labels[] = {
@@ -660,6 +669,8 @@ int main(int argc, char **argv) {
   g_cmd_line[MBTRNPP_CMD_LINE_BYTES - 1] = '\0';
   g_log_dir = strdup("./");
 
+  mbtrnpp_load_config("mbtrn.cfg");
+
   /* process argument list */
   while ((c = getopt_long(argc, argv, "", options, &option_index)) != -1)
     switch (c) {
@@ -985,7 +996,7 @@ fprintf(stderr, "socket_definition|%s\n", socket_definition);
       else if (strcmp("trn-ftype", options[option_index].name) == 0) {
         sscanf(optarg, "%d", &trn_ftype);
       }
-      /* TRN valid northing covariance limit (m^2) *
+      /* TRN valid northing covariance limit (m^2) */
       else if (strcmp("trn-ncov", options[option_index].name) == 0) {
           sscanf(optarg, "%lf", &trn_max_ncov);
       }
@@ -1957,7 +1968,9 @@ fprintf(stderr, "socket_definition|%s\n", socket_definition);
 
                     size_t obytes=0;
                     if( (obytes=fwrite(output_buffer, mb1_size, 1, output_fp))>0){
-                        MST_COUNTER_ADD(app_stats->stats->events[MBTPP_EV_EMBGETALL],obytes);
+                        MST_COUNTER_ADD(app_stats->stats->status[MBTPP_STA_MB_FWRITE_BYTES],mb1_size);
+                    }else{
+                        MST_COUNTER_INC(app_stats->stats->events[MBTPP_EV_EMBLOGWR]);
                     }
 
                     MST_METRIC_LAP(app_stats->stats->metrics[MBTPP_CH_MB_FWRITE_XT], mtime_dtime());
@@ -2434,7 +2447,7 @@ int mbtrnpp_logstatistics(int verbose, FILE *logfp, int n_pings_read, int n_soun
 int mbtrnpp_update_stats(mstats_profile_t *stats, mlog_id_t log_id, mstats_flags flags) {
 
   if (NULL != stats) {
-    double stats_now = mtime_dtime();
+    double stats_now = mtime_etime();
 
     if (log_clock_res) {
       // log the timing clock resolution (once)
@@ -3408,9 +3421,11 @@ int mbtrnpp_reson7kr_input_read(int verbose, void *mbio_ptr, size_t *size, char 
     *size    = (size_t)rbytes;
 
       MST_METRIC_START(app_stats->stats->metrics[MBTPP_CH_MB_GETFAIL_XT], mtime_dtime());
-      PMPRINT(MOD_MBTRNPP,MBTRNPP_V4,(stderr,"mb_get_all failed: status[%d] err[%d]\n",status, *error));
+      PMPRINT(MOD_MBTRNPP,MBTRNPP_V4,(stderr,"r7kr_read_stripped_frame failed: sync_bytes[%d] status[%d] err[%d]\n",sync_bytes,status, *error));
+      fprintf(stderr,"r7kr_read_stripped_frame failed: sync_bytes[%d] status[%d] err[%d]\n",sync_bytes,status, *error);
 
-      MST_COUNTER_INC(app_stats->stats->events[MBTPP_EV_EMBGETALL]);
+      MST_COUNTER_INC(app_stats->stats->events[MBTPP_EV_EMBFRAMERD]);
+      MST_COUNTER_ADD(app_stats->stats->events[MBTPP_STA_MB_SYNC_BYTES],sync_bytes);
 
       fprintf(stderr,"EOF (input socket) - clear status/error\n");
       status = MB_SUCCESS;
@@ -3926,4 +3941,146 @@ int mbtrnpp_kemkmall_input_close(int verbose, void *mbio_ptr, int *error) {
   /* return */
   return (status);
 }
+/*--------------------------------------------------------------------*/
 
+// trim leading/trailing whitespace and comments from token
+char *mbtrnpp_trim_token(char **ptok){
+    char *retval=NULL;
+    if(NULL!=ptok && NULL!=*ptok){
+        char *tcpy=strdup(*ptok);
+
+        // trim, truncate comments
+        char *cur = tcpy;
+        char *start=cur;
+        char *end = cur+strlen(cur);
+        bool valid=false;
+
+        // trim leading space
+        while(cur<end && isspace(*cur) )cur++;
+        start=cur;
+
+        // truncate at comment
+        while(cur<end){
+            if(*cur=='#' || (*cur=='/' && *(cur+1)=='/') ){
+                *cur='\0';
+                end=cur;
+                break;
+            }
+            cur++;
+        }
+        cur=start;
+
+        // trim trailing space
+        while(end>cur && (isspace(*end) || *end=='\0') ){
+            *end='\0';
+            end--;
+        }
+//        fprintf(stderr,"tcpy[%p] start[%p] end[%p] len[%d]\n",*tcpy,start,end,strlen(start));
+        if(strlen(start)>0){
+            *ptok=strdup(start);
+            retval=*ptok;
+        }
+        free(tcpy);
+    }
+    return retval;
+}
+
+// get one key/value token string from line
+// returns new, trimmed key/value token strings
+// caller must release using free()
+int mbtrnpp_get_kv(char *line, const char *del, char **pkey, char **pval){
+
+    int retval=-1;
+
+    if(NULL!=line && NULL!=del && NULL!=pkey && NULL!=pval){
+        char *lcopy=strdup(line);
+        char *tok=strtok(lcopy,del);
+        if(tok!=NULL){
+            *pkey=strdup(tok);
+            tok=strtok(NULL,del);
+            if(NULL!=tok && (strlen(tok)>0) ){
+                *pval=strdup(tok);
+            }else{
+                free(*pkey);
+                *pkey=NULL;
+            }
+        }
+        free(lcopy);
+
+        if(NULL!=*pkey && NULL!=*pval){
+            if(NULL!=mbtrnpp_trim_token(pkey) && NULL!=mbtrnpp_trim_token(pval)){
+                retval=0;
+            }else{
+                fprintf(stderr, "ERR invalid token key/val [%s:%s]\n", *pkey,*pval);
+                if(*pkey!=NULL){
+                    free(*pkey);
+                }
+                if(*pval!=NULL){
+                    free(*pval);
+                }
+                *pkey=NULL;
+                *pval=NULL;
+            }
+        }
+	}
+    return retval;
+}
+
+// parse key/value strings into configuration values
+int mbtrnpp_parse_kv(char *key, char *val){
+    int retval=-1;
+    if(NULL!=key && NULL!=val){
+        fprintf(stderr, ">>>> PARSING key/val [%s:%s]\n", key,val);
+        if(strcmp(key,"param")==0){
+
+        }
+        retval=0;
+    }else{
+        fprintf(stderr, "ERR - NULL key/val [%s/%s]\n", key,val);
+    }
+    return retval;
+}
+
+// load configuration from file
+// returns number of valid parsed options on success, -1 otherwise
+int mbtrnpp_load_config(char *config_path){
+    int retval=-1;
+    int errcount=0;
+    int parsed_count=0;
+    if(NULL!=config_path){
+        FILE *mbtrn_fp=fopen(config_path,"r+");
+        if(NULL!=mbtrn_fp){
+            // read and parse until end of file
+            char line[256]={0};
+            char *pline=line;
+            while((pline=fgets(line,256,mbtrn_fp))!=NULL){
+                // extract one key/value pair per line
+                // [mbtrnpp_get_kv returns new strings, must release using free()]
+                char *key=NULL;
+                char *val=NULL;
+                mbtrnpp_get_kv(pline,"=",&key,&val);
+                if(NULL!=key && NULL!=val){
+                    // parse key/value into configuration
+                    if(mbtrnpp_parse_kv(key,val)==0){
+                        parsed_count++;
+                    }else{
+                        fprintf(stderr, "ERR - parse error %s [%d/%s]\n", pline,errno,strerror(errno));
+                        errcount++;
+                    }
+                }else{
+                    fprintf(stderr, "ERR - invalid key/value in '%s' [%s/%s] [%d/%s]\n",pline,key,val,errno,strerror(errno));
+                }
+                // release key/value strings
+                if(NULL!=key)free(key);
+                if(NULL!=val)free(val);
+            }
+            retval=(errcount>0?-1:parsed_count);
+            fclose(mbtrn_fp);
+        }else{
+            fprintf(stderr, "ERR - could not open config file %s [%d/%s]\n", config_path,errno,strerror(errno));
+        }
+    }else{
+        fprintf(stderr, "ERR - NULL config path\n");
+    }
+    return retval;
+}
