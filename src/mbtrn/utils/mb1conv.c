@@ -252,7 +252,7 @@ void parse_args(int argc, char **argv, app_cfg_t *cfg)
         if(NULL==cp){
             cp=cfg->ofile+strlen(cfg->ofile);
         }
-        sprintf(cp,".mb71\x00");
+        sprintf(cp,".mb71");
     }
     if( cfg->verbose>0){
     PDPRINT((stderr,"verbose   [%d]\n",(cfg->verbose)));
@@ -574,7 +574,7 @@ static int s_app_main(app_cfg_t *cfg)
         retval=0;
         
         if(cfg->verbose>0){
-            fprintf(stderr,"%s:%d rec/in/out/err[%u/%ld/%u/%u]\n",__FUNCTION__,__LINE__,rec_count,input_bytes,output_bytes,err_count);
+            fprintf(stderr,"%s:%d rec/in/out/err[%"PRIu32"/%"PRId64"/%"PRIu32"/%"PRIu32"]\n",__FUNCTION__,__LINE__,rec_count,input_bytes,output_bytes,err_count);
         }
     }// else NULL cfg
     return retval;
