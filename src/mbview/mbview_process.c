@@ -12,23 +12,21 @@
  *    See README file for copying and redistribution conditions.
  *------------------------------------------------------------------------------*/
 /*
- *
  * Author:	D. W. Caress
  * Date:	September 25, 2003
  *
  * Note:	This code was broken out of mbview_callbacks.c, which was
  *		begun on October 7, 2002
- *
- *
  */
-/*------------------------------------------------------------------------------*/
 
-/* Standard includes for builtins. */
+#include <ctype.h>
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <ctype.h>
-#include <math.h>
+
+#include "mb_define.h"
+#include "mb_status.h"
 
 /* Need to include windows.h BEFORE the the Xm stuff otherwise VC14+ barf with conflicts */
 #if defined(_MSC_VER) && (_MSC_VER >= 1800)
@@ -39,7 +37,6 @@
 #include <windows.h>
 #endif
 
-/* Motif required Headers */
 #include <X11/StringDefs.h>
 #include <X11/cursorfont.h>
 #include <Xm/Xm.h>
@@ -58,7 +55,6 @@
 #include "MB3DNavList.h"
 
 /* OpenGL include files */
-
 #include <GL/gl.h>
 #include <GL/glu.h>
 #ifndef WIN32
@@ -66,32 +62,18 @@
 #endif
 #include "mb_glwdrawa.h"
 
-/* MBIO include files */
-#include "mb_status.h"
-#include "mb_define.h"
-
-/* mbview include */
 #include "mbview.h"
 #include "mbviewprivate.h"
 
 /*------------------------------------------------------------------------------*/
-
-/* local variables */
-
-/*------------------------------------------------------------------------------*/
 int mbview_projectdata(size_t instance) {
-	/* local variables */
-	int status = MB_SUCCESS;
 	int error = MB_ERROR_NO_ERROR;
 	int proj_status = MB_SUCCESS;
 	double xgrid, ygrid, xlon, ylat, xdisplay, ydisplay, zdisplay;
 	double xlonmin, xlonmax, ylatmin, ylatmax;
 	int i, j, k;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
 	char *message;
 
-	/* print starting debug statements */
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
@@ -102,19 +84,19 @@ int mbview_projectdata(size_t instance) {
 		fprintf(stderr, "mbview_projectdata: %zu\n", instance);
 
 	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
+	struct mbview_world_struct *view = &(mbviews[instance]);
+	struct mbview_struct *data = &(view->data);
 
 	/* delete old projections if necessary */
-	if (view->primary_pj_init == true && view->primary_pjptr != NULL) {
+	if (view->primary_pj_init && view->primary_pjptr != NULL) {
 		mb_proj_free(mbv_verbose, &(view->primary_pjptr), &error);
 		view->primary_pj_init = false;
 	}
-	if (view->secondary_pj_init == true && view->secondary_pjptr != NULL) {
+	if (view->secondary_pj_init && view->secondary_pjptr != NULL) {
 		mb_proj_free(mbv_verbose, &(view->secondary_pjptr), &error);
 		view->secondary_pj_init = false;
 	}
-	if (view->display_pj_init == true && view->display_pjptr != NULL) {
+	if (view->display_pj_init && view->display_pjptr != NULL) {
 		mb_proj_free(mbv_verbose, &(view->display_pjptr), &error);
 		view->display_pj_init = false;
 	}
@@ -335,11 +317,11 @@ int mbview_projectdata(size_t instance) {
 		}
 
 		/* check for pending event */
-		if (view->plot_done == false && view->plot_interrupt_allowed == true && i % MBV_EVENTCHECKCOARSENESS == 0)
+		if (!view->plot_done && view->plot_interrupt_allowed && i % MBV_EVENTCHECKCOARSENESS == 0)
 			do_mbview_xevents();
 
 		/* dump out of loop if plotting already done at a higher recursion */
-		if (view->plot_done == true)
+		if (view->plot_done)
 			i = data->primary_n_columns;
 	}
 
@@ -350,11 +332,11 @@ int mbview_projectdata(size_t instance) {
 		}
 
 		/* check for pending event */
-		if (view->plot_done == false && view->plot_interrupt_allowed == true && i % MBV_EVENTCHECKCOARSENESS == 0)
+		if (!view->plot_done && view->plot_interrupt_allowed && i % MBV_EVENTCHECKCOARSENESS == 0)
 			do_mbview_xevents();
 
 		/* dump out of loop if plotting already done at a higher recursion */
-		if (view->plot_done == true)
+		if (view->plot_done)
 			i = data->primary_n_columns;
 	}
 
@@ -365,31 +347,26 @@ int mbview_projectdata(size_t instance) {
 	mbview_zscale(instance);
 
 	/* set projected flag only if plotting not done */
-	if (view->plot_done == false) {
+	if (!view->plot_done) {
 		view->projected = true;
 	}
 
-	/* print output debug statements */
+	const int status = MB_SUCCESS;
+
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return status:\n");
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return */
 	return (status);
 }
 /*------------------------------------------------------------------------------*/
 int mbview_derivative(size_t instance, int i, int j) {
-	/* local variables */
-	int status = MB_SUCCESS;
-	int derivative_ok;
+	bool derivative_ok;
 	double dx, dy;
 	int k, k1, k2;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
 
-	/* print starting debug statements */
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
@@ -402,8 +379,8 @@ int mbview_derivative(size_t instance, int i, int j) {
 		fprintf(stderr, "mbview_derivative: %zu\n", instance);
 
 	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
+	struct mbview_world_struct *view = &(mbviews[instance]);
+	struct mbview_struct *data = &(view->data);
 
 	/* figure if x derivative can be calculated */
 	derivative_ok = false;
@@ -436,7 +413,7 @@ int mbview_derivative(size_t instance, int i, int j) {
 	}
 
 	/* calculate x derivative */
-	if (derivative_ok == true) {
+	if (derivative_ok) {
 		dx = (data->primary_x[k2] - data->primary_x[k1]);
 		if (dx != 0.0)
 			data->primary_dzdx[k] = view->scale * (data->primary_data[k2] - data->primary_data[k1]) / dx;
@@ -477,7 +454,7 @@ int mbview_derivative(size_t instance, int i, int j) {
 	}
 
 	/* calculate y derivative */
-	if (derivative_ok == true) {
+	if (derivative_ok) {
 		dy = (data->primary_y[k2] - data->primary_y[k1]);
 		if (dy != 0.0)
 			data->primary_dzdy[k] =
@@ -492,26 +469,21 @@ int mbview_derivative(size_t instance, int i, int j) {
 	view = &(mbviews[instance]);
 	data = &(view->data);
 
-	/* print output debug statements */
+	const int status = MB_SUCCESS;
+
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return status:\n");
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return */
 	return (status);
 }
 /*------------------------------------------------------------------------------*/
 int mbview_projectglobaldata(size_t instance) {
-	/* local variables */
-	int status = MB_SUCCESS;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
 	struct mbview_pointw_struct *pointw;
 	int i, j, k;
 
-	/* print starting debug statements */
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
@@ -522,11 +494,13 @@ int mbview_projectglobaldata(size_t instance) {
 		fprintf(stderr, "mbview_projectglobaldata: %zu\n", instance);
 
 	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
+	struct mbview_world_struct *view = &(mbviews[instance]);
+	// struct mbview_struct *data = &(view->data);
+
+	int status = MB_SUCCESS;
 
 	/* can only project if projections are set up */
-	if (view->projected == true) {
+	if (view->projected) {
 		/* handle navpicks */
 		if (shared.shareddata.navpick_type != MBV_PICK_NONE) {
 			pointw = &(shared.shareddata.navpick.endpoints[0]);
@@ -670,28 +644,21 @@ int mbview_projectglobaldata(size_t instance) {
 		view->globalprojected = true;
 	}
 
-	/* print output debug statements */
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return status:\n");
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return */
 	return (status);
 }
 /*------------------------------------------------------------------------------*/
 int mbview_zscalegridpoint(size_t instance, int k) {
-	/* local variables */
-	int status = MB_SUCCESS;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
 	double xgrid, ygrid;
 	double xlon, ylat;
 	double xdisplay, ydisplay, zdisplay;
 	int i, j;
 
-	/* print starting debug statements */
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
@@ -703,8 +670,8 @@ int mbview_zscalegridpoint(size_t instance, int k) {
 		fprintf(stderr, "mbview_zscalegridpoint: %d\n", k);
 
 	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
+	struct mbview_world_struct *view = &(mbviews[instance]);
+	struct mbview_struct *data = &(view->data);
 
 	/* scale z value */
 	if (data->display_projection_mode == MBV_PROJECTION_PROJECTED ||
@@ -733,25 +700,19 @@ int mbview_zscalegridpoint(size_t instance, int k) {
 	/* set zscale status bit */
 	data->primary_stat_z[k / 8] = data->primary_stat_z[k / 8] | statmask[k % 8];
 
-	/* print output debug statements */
+	const int status = MB_SUCCESS;
+
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return status:\n");
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return */
 	return (status);
 }
 
 /*------------------------------------------------------------------------------*/
 int mbview_zscalepoint(size_t instance, int globalview, double offset_factor, struct mbview_point_struct *point) {
-	/* local variables */
-	int status = MB_SUCCESS;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
-
-	/* print starting debug statements */
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
@@ -764,8 +725,8 @@ int mbview_zscalepoint(size_t instance, int globalview, double offset_factor, st
 		fprintf(stderr, "mbview_zscalepoint: %zu\n", instance);
 
 	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
+	struct mbview_world_struct *view = &(mbviews[instance]);
+	struct mbview_struct *data = &(view->data);
 
 	/* scale z value */
 	if (data->display_projection_mode != MBV_PROJECTION_SPHEROID) {
@@ -777,7 +738,7 @@ int mbview_zscalepoint(size_t instance, int globalview, double offset_factor, st
 		mbview_projectforward(instance, false, point->xgrid, point->ygrid, point->zdata, &point->xlon, &point->ylat,
 		                      &point->xdisplay, &point->ydisplay, &point->zdisplay);
 
-		if (globalview == false) {
+		if (!globalview) {
 			point->zdisplay += offset_factor;
 		}
 		else {
@@ -787,25 +748,19 @@ int mbview_zscalepoint(size_t instance, int globalview, double offset_factor, st
 		}
 	}
 
-	/* print output debug statements */
+	const int status = MB_SUCCESS;
+
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return status:\n");
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return */
 	return (status);
 }
 
 /*------------------------------------------------------------------------------*/
 int mbview_zscalepointw(size_t instance, int globalview, double offset_factor, struct mbview_pointw_struct *pointw) {
-	/* local variables */
-	int status = MB_SUCCESS;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
-
-	/* print starting debug statements */
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
@@ -818,8 +773,8 @@ int mbview_zscalepointw(size_t instance, int globalview, double offset_factor, s
 		fprintf(stderr, "mbview_zscalepointw: %zu\n", instance);
 
 	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
+	struct mbview_world_struct *view = &(mbviews[instance]);
+	struct mbview_struct *data = &(view->data);
 
 	/* scale z value */
 	if (data->display_projection_mode != MBV_PROJECTION_SPHEROID) {
@@ -832,7 +787,7 @@ int mbview_zscalepointw(size_t instance, int globalview, double offset_factor, s
 		                      &(pointw->ylat), &(pointw->xdisplay[instance]), &(pointw->ydisplay[instance]),
 		                      &(pointw->zdisplay[instance]));
 
-		if (globalview == false) {
+		if (!globalview) {
 			pointw->zdisplay[instance] += offset_factor;
 		}
 		else {
@@ -842,25 +797,20 @@ int mbview_zscalepointw(size_t instance, int globalview, double offset_factor, s
 		}
 	}
 
-	/* print output debug statements */
+	const int status = MB_SUCCESS;
+
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return status:\n");
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return */
 	return (status);
 }
 /*------------------------------------------------------------------------------*/
 int mbview_updatepointw(size_t instance, struct mbview_pointw_struct *pointw) {
-	/* local variables */
-	int status = MB_SUCCESS;
 	int i;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
 
-	/* print starting debug statements */
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
@@ -870,13 +820,15 @@ int mbview_updatepointw(size_t instance, struct mbview_pointw_struct *pointw) {
 	if (mbv_verbose >= 2)
 		fprintf(stderr, "mbview_updatepointw: %zu\n", instance);
 
+	int status = MB_SUCCESS;
+
 	/* update grid and display coordinates for pointw for all
 	    active instances other than instance, which has
 	    already been set */
 	for (i = 0; i < MBV_MAX_WINDOWS; i++) {
-		view = &(mbviews[i]);
+		struct mbview_world_struct *view = &(mbviews[i]);
 		if (i != instance && view->init != MBV_WINDOW_NULL) {
-			data = &(view->data);
+                  // struct mbview_struct *data = &(view->data);
 
 			/* get positions in grid coordinates */
 			status = mbview_projectll2xygrid(i, pointw->xlon, pointw->ylat, &(pointw->xgrid[i]), &(pointw->ygrid[i]));
@@ -887,23 +839,18 @@ int mbview_updatepointw(size_t instance, struct mbview_pointw_struct *pointw) {
 		}
 	}
 
-	/* print output debug statements */
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return status:\n");
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return */
 	return (status);
 }
 /*------------------------------------------------------------------------------*/
 int mbview_updatesegmentw(size_t instance, struct mbview_linesegmentw_struct *segmentw) {
-	/* local variables */
-	int status = MB_SUCCESS;
 	int i;
 
-	/* print starting debug statements */
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
@@ -920,27 +867,22 @@ int mbview_updatesegmentw(size_t instance, struct mbview_linesegmentw_struct *se
 		mbview_updatepointw(instance, &(segmentw->lspoints[i]));
 	}
 
-	/* print output debug statements */
+	const int status = MB_SUCCESS;
+
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return status:\n");
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return */
 	return (status);
 }
 /*------------------------------------------------------------------------------*/
 int mbview_zscale(size_t instance) {
-	/* local variables */
-	int status = MB_SUCCESS;
 	int i, j, k;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
 	int globalview;
 	double offset_factor;
 
-	/* print starting debug statements */
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
@@ -951,8 +893,8 @@ int mbview_zscale(size_t instance) {
 		fprintf(stderr, "mbview_zscale: %zu\n", instance);
 
 	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
+	struct mbview_world_struct *view = &(mbviews[instance]);
+	struct mbview_struct *data = &(view->data);
 
 	/* check if the contour offset needs to be applied in a global spherical direction or just up */
 	if (data->display_projection_mode == MBV_PROJECTION_SPHEROID && view->sphere_refx == 0.0 && view->sphere_refy == 0.0 &&
@@ -1108,33 +1050,29 @@ int mbview_zscale(size_t instance) {
 	}
 
 	/* set rez flags only if plotting not done */
-	if (view->plot_done == false) {
+	if (!view->plot_done) {
 		view->contourlorez = false;
 		view->contourhirez = false;
 		view->contourfullrez = false;
 	}
 
-	/* print output debug statements */
+	const int status = MB_SUCCESS;
+
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return status:\n");
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return */
 	return (status);
 }
 
 /*------------------------------------------------------------------------------*/
+// TODO(schwehr): bool needlonlat
 int mbview_projectforward(size_t instance, int needlonlat, double xgrid, double ygrid, double zdata, double *xlon, double *ylat,
                           double *xdisplay, double *ydisplay, double *zdisplay) {
-	/* local variables */
-	int status = MB_SUCCESS;
 	double xx, yy, zz;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
 
-	/* print starting debug statements */
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
@@ -1147,11 +1085,13 @@ int mbview_projectforward(size_t instance, int needlonlat, double xgrid, double 
 	}
 
 	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
+	struct mbview_world_struct *view = &(mbviews[instance]);
+	struct mbview_struct *data = &(view->data);
+
+	int status = MB_SUCCESS;
 
 	/* get positions into geographic coordinates if necessary */
-	if (needlonlat == true || data->primary_grid_projection_mode != MBV_PROJECTION_ALREADYPROJECTED) {
+	if (needlonlat || data->primary_grid_projection_mode != MBV_PROJECTION_ALREADYPROJECTED) {
 		status = mbview_projectgrid2ll(instance, xgrid, ygrid, xlon, ylat);
 	}
 
@@ -1168,7 +1108,6 @@ int mbview_projectforward(size_t instance, int needlonlat, double xgrid, double 
 		status = mbview_projectll2display(instance, *xlon, *ylat, zdata, xdisplay, ydisplay, zdisplay);
 	}
 
-	/* print output debug statements */
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return value:\n");
@@ -1181,20 +1120,14 @@ int mbview_projectforward(size_t instance, int needlonlat, double xgrid, double 
 		fprintf(stderr, "dbg2       status:      %d\n", status);
 	}
 
-	/* return */
 	return (status);
 }
 
 /*------------------------------------------------------------------------------*/
 int mbview_projectinverse(size_t instance, int needlonlat, double xdisplay, double ydisplay, double zdisplay, double *xlon,
                           double *ylat, double *xgrid, double *ygrid) {
-	/* local variables */
-	int status = MB_SUCCESS;
 	double xx, yy;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
 
-	/* print starting debug statements */
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
@@ -1207,11 +1140,13 @@ int mbview_projectinverse(size_t instance, int needlonlat, double xdisplay, doub
 	}
 
 	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
+	struct mbview_world_struct *view = &(mbviews[instance]);
+	struct mbview_struct *data = &(view->data);
+
+	int status = MB_SUCCESS;
 
 	/* get positions in geographic coordinates */
-	if (needlonlat == true || data->primary_grid_projection_mode != MBV_PROJECTION_ALREADYPROJECTED) {
+	if (needlonlat || data->primary_grid_projection_mode != MBV_PROJECTION_ALREADYPROJECTED) {
 		status = mbview_projectdisplay2ll(instance, xdisplay, ydisplay, zdisplay, xlon, ylat);
 	}
 
@@ -1226,7 +1161,6 @@ int mbview_projectinverse(size_t instance, int needlonlat, double xdisplay, doub
 		status = mbview_projectll2xygrid(instance, *xlon, *ylat, xgrid, ygrid);
 	}
 
-	/* print output debug statements */
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return value:\n");
@@ -1238,17 +1172,12 @@ int mbview_projectinverse(size_t instance, int needlonlat, double xdisplay, doub
 		fprintf(stderr, "dbg2       status:       %d\n", status);
 	}
 
-	/* return */
 	return (status);
 }
 
 /*------------------------------------------------------------------------------*/
 int mbview_projectfromlonlat(size_t instance, double xlon, double ylat, double zdata, double *xgrid, double *ygrid,
                              double *xdisplay, double *ydisplay, double *zdisplay) {
-	/* local variables */
-	int status = MB_SUCCESS;
-
-	/* print starting debug statements */
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
@@ -1260,12 +1189,11 @@ int mbview_projectfromlonlat(size_t instance, double xlon, double ylat, double z
 	}
 
 	/* get positions into grid coordinates */
-	status = mbview_projectll2xygrid(instance, xlon, ylat, xgrid, ygrid);
+	int status = mbview_projectll2xygrid(instance, xlon, ylat, xgrid, ygrid);
 
 	/* get positions in the display projection */
 	status = mbview_projectll2display(instance, xlon, ylat, zdata, xdisplay, ydisplay, zdisplay);
 
-	/* print output debug statements */
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return value:\n");
@@ -1278,19 +1206,13 @@ int mbview_projectfromlonlat(size_t instance, double xlon, double ylat, double z
 		fprintf(stderr, "dbg2       status:      %d\n", status);
 	}
 
-	/* return */
 	return (status);
 }
 
 /*------------------------------------------------------------------------------*/
 int mbview_projectgrid2ll(size_t instance, double xgrid, double ygrid, double *xlon, double *ylat) {
-	/* local variables */
-	int status = MB_SUCCESS;
 	int error = MB_ERROR_NO_ERROR;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
 
-	/* print starting debug statements */
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
@@ -1301,8 +1223,8 @@ int mbview_projectgrid2ll(size_t instance, double xgrid, double ygrid, double *x
 	}
 
 	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
+	struct mbview_world_struct *view = &(mbviews[instance]);
+	struct mbview_struct *data = &(view->data);
 
 	/* get positions into geographic coordinates */
 	if (data->primary_grid_projection_mode == MBV_PROJECTION_PROJECTED ||
@@ -1314,7 +1236,8 @@ int mbview_projectgrid2ll(size_t instance, double xgrid, double ygrid, double *x
 		*ylat = ygrid;
 	}
 
-	/* print output debug statements */
+	const int status = MB_SUCCESS;
+
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return value:\n");
@@ -1324,19 +1247,13 @@ int mbview_projectgrid2ll(size_t instance, double xgrid, double ygrid, double *x
 		fprintf(stderr, "dbg2       status:      %d\n", status);
 	}
 
-	/* return */
 	return (status);
 }
 
 /*------------------------------------------------------------------------------*/
 int mbview_projectll2xygrid(size_t instance, double xlon, double ylat, double *xgrid, double *ygrid) {
-	/* local variables */
-	int status = MB_SUCCESS;
 	int error = MB_ERROR_NO_ERROR;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
 
-	/* print starting debug statements */
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
@@ -1347,8 +1264,8 @@ int mbview_projectll2xygrid(size_t instance, double xlon, double ylat, double *x
 	}
 
 	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
+	struct mbview_world_struct *view = &(mbviews[instance]);
+	struct mbview_struct *data = &(view->data);
 
 	/* get positions into grid coordinates */
 	if (data->primary_grid_projection_mode == MBV_PROJECTION_PROJECTED ||
@@ -1366,7 +1283,8 @@ int mbview_projectll2xygrid(size_t instance, double xlon, double ylat, double *x
 		*ygrid = ylat;
 	}
 
-	/* print output debug statements */
+	const int status = MB_SUCCESS;
+
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return value:\n");
@@ -1376,21 +1294,15 @@ int mbview_projectll2xygrid(size_t instance, double xlon, double ylat, double *x
 		fprintf(stderr, "dbg2       status:      %d\n", status);
 	}
 
-	/* return */
 	return (status);
 }
 
 /*------------------------------------------------------------------------------*/
 int mbview_projectll2xyzgrid(size_t instance, double xlon, double ylat, double *xgrid, double *ygrid, double *zdata) {
-	/* local variables */
-	int status = MB_SUCCESS;
 	int error = MB_ERROR_NO_ERROR;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
 	int nfound;
 	int i, j, k, ii, jj;
 
-	/* print starting debug statements */
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
@@ -1402,8 +1314,8 @@ int mbview_projectll2xyzgrid(size_t instance, double xlon, double ylat, double *
 	}
 
 	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
+	struct mbview_world_struct *view = &(mbviews[instance]);
+	struct mbview_struct *data = &(view->data);
 
 	/* get positions into grid coordinates */
 	if (data->primary_grid_projection_mode == MBV_PROJECTION_PROJECTED ||
@@ -1436,6 +1348,8 @@ int mbview_projectll2xyzgrid(size_t instance, double xlon, double ylat, double *
 				}
 			}
 	}
+
+	int status = MB_SUCCESS;
 	if (nfound > 0) {
 		*zdata /= (double)nfound;
 		status = MB_SUCCESS;
@@ -1445,7 +1359,6 @@ int mbview_projectll2xyzgrid(size_t instance, double xlon, double ylat, double *
 		status = MB_FAILURE;
 	}
 
-	/* print output debug statements */
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return value:\n");
@@ -1456,22 +1369,16 @@ int mbview_projectll2xyzgrid(size_t instance, double xlon, double ylat, double *
 		fprintf(stderr, "dbg2       status:      %d\n", status);
 	}
 
-	/* return */
 	return (status);
 }
 
 /*------------------------------------------------------------------------------*/
 int mbview_projectll2display(size_t instance, double xlon, double ylat, double zdata, double *xdisplay, double *ydisplay,
                              double *zdisplay) {
-	/* local variables */
-	int status = MB_SUCCESS;
 	int error = MB_ERROR_NO_ERROR;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
 	double xx, yy, zz;
 	double effective_topography;
 
-	/* print starting debug statements */
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
@@ -1483,8 +1390,8 @@ int mbview_projectll2display(size_t instance, double xlon, double ylat, double z
 	}
 
 	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
+	struct mbview_world_struct *view = &(mbviews[instance]);
+	struct mbview_struct *data = &(view->data);
 
 	/* get positions in the display projection */
 	if (data->display_projection_mode == MBV_PROJECTION_PROJECTED ||
@@ -1521,7 +1428,8 @@ int mbview_projectll2display(size_t instance, double xlon, double ylat, double z
 	/* fprintf(stderr,"   scale:%f   scaled: %f %f %f\n",
 	view->scale, *xdisplay, *ydisplay, *zdisplay); */
 
-	/* print output debug statements */
+	const int status = MB_SUCCESS;
+
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return value:\n");
@@ -1532,20 +1440,14 @@ int mbview_projectll2display(size_t instance, double xlon, double ylat, double z
 		fprintf(stderr, "dbg2       status:      %d\n", status);
 	}
 
-	/* return */
 	return (status);
 }
 
 /*------------------------------------------------------------------------------*/
 int mbview_projectdisplay2ll(size_t instance, double xdisplay, double ydisplay, double zdisplay, double *xlon, double *ylat) {
-	/* local variables */
-	int status = MB_SUCCESS;
 	int error = MB_ERROR_NO_ERROR;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
 	double xx, yy, zz;
 
-	/* print starting debug statements */
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
@@ -1557,8 +1459,8 @@ int mbview_projectdisplay2ll(size_t instance, double xdisplay, double ydisplay, 
 	}
 
 	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
+	struct mbview_world_struct *view = &(mbviews[instance]);
+	struct mbview_struct *data = &(view->data);
 
 	/* get positions in display projection */
 	xx = xdisplay / view->scale + view->xorigin;
@@ -1581,7 +1483,8 @@ int mbview_projectdisplay2ll(size_t instance, double xdisplay, double ydisplay, 
 		mbview_sphere_inverse(instance, xx, yy, zz, xlon, ylat);
 	}
 
-	/* print output debug statements */
+	const int status = MB_SUCCESS;
+
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return value:\n");
@@ -1591,23 +1494,17 @@ int mbview_projectdisplay2ll(size_t instance, double xdisplay, double ydisplay, 
 		fprintf(stderr, "dbg2       status:      %d\n", status);
 	}
 
-	/* return */
 	return (status);
 }
 /*------------------------------------------------------------------------------*/
 int mbview_projectdistance(size_t instance, double xlon1, double ylat1, double zdata1, double xlon2, double ylat2, double zdata2,
                            double *distancelateral, double *distanceoverground, double *slope) {
-	/* local variables */
-	int status = MB_SUCCESS;
 	int error = MB_ERROR_NO_ERROR;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
 	double xx1, yy1, zz1;
 	double xx2, yy2, zz2;
 	double dx, dy, dz;
 	double bearing;
 
-	/* print starting debug statements */
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
@@ -1622,8 +1519,8 @@ int mbview_projectdistance(size_t instance, double xlon1, double ylat1, double z
 	}
 
 	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
+	struct mbview_world_struct *view = &(mbviews[instance]);
+	struct mbview_struct *data = &(view->data);
 
 	/* get positions in display projection without scaling or exageration */
 	if (data->display_projection_mode == MBV_PROJECTION_PROJECTED ||
@@ -1698,7 +1595,8 @@ int mbview_projectdistance(size_t instance, double xlon1, double ylat1, double z
 			*slope = 0.0;
 	}
 
-	/* print output debug statements */
+	const int status = MB_SUCCESS;
+
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return value:\n");
@@ -1709,19 +1607,14 @@ int mbview_projectdistance(size_t instance, double xlon1, double ylat1, double z
 		fprintf(stderr, "dbg2       status:      %d\n", status);
 	}
 
-	/* return */
 	return (status);
 }
 /*------------------------------------------------------------------------------*/
+// TODO(schwehr): bool earthcentered
 int mbview_sphere_setup(size_t instance, int earthcentered, double xlon, double ylat) {
-	/* local variables */
-	int status = MB_SUCCESS;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
 	double phi, theta, psi;
 	int j;
 
-	/* print starting debug statements */
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
@@ -1733,8 +1626,8 @@ int mbview_sphere_setup(size_t instance, int earthcentered, double xlon, double 
 	}
 
 	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
+	struct mbview_world_struct *view = &(mbviews[instance]);
+	// struct mbview_struct *data = &(view->data);
 
 	/* The initial spherical coordinate system is defined as:
 	        x = r * cos(longitude) * cos(latitude)
@@ -1802,11 +1695,12 @@ int mbview_sphere_setup(size_t instance, int earthcentered, double xlon, double 
 	view->sphere_refx = 0.0;
 	view->sphere_refy = 0.0;
 	view->sphere_refz = 0.0;
-	if (earthcentered == false) {
+	if (!earthcentered) {
 		mbview_sphere_forward(instance, xlon, ylat, &view->sphere_refx, &view->sphere_refy, &view->sphere_refz);
 	}
 
-	/* print output debug statements */
+	const int status = MB_SUCCESS;
+
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Internal results:\n");
@@ -1829,19 +1723,13 @@ int mbview_sphere_setup(size_t instance, int earthcentered, double xlon, double 
 		fprintf(stderr, "dbg2       status:      %d\n", status);
 	}
 
-	/* return */
 	return (status);
 }
 /*------------------------------------------------------------------------------*/
 int mbview_sphere_forward(size_t instance, double xlon, double ylat, double *xx, double *yy, double *zz) {
-	/* local variables */
-	int status = MB_SUCCESS;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
 	double sinlon, coslon, sinlat, coslat;
 	double posu[3], posr[3];
 
-	/* print starting debug statements */
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
@@ -1852,8 +1740,8 @@ int mbview_sphere_forward(size_t instance, double xlon, double ylat, double *xx,
 	}
 
 	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
+	struct mbview_world_struct *view = &(mbviews[instance]);
+	// struct mbview_struct *data = &(view->data);
 
 	/* get position in initial cartesian coordinates */
 	sinlon = sin(DTR * xlon);
@@ -1873,7 +1761,8 @@ int mbview_sphere_forward(size_t instance, double xlon, double ylat, double *xx,
 	*yy = posr[1];
 	*zz = posr[2];
 
-	/* print output debug statements */
+	const int status = MB_SUCCESS;
+
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return value:\n");
@@ -1890,19 +1779,13 @@ int mbview_sphere_forward(size_t instance, double xlon, double ylat, double *xx,
 		fprintf(stderr, "dbg2       status:      %d\n", status);
 	}
 
-	/* return */
 	return (status);
 }
 
 /*------------------------------------------------------------------------------*/
 int mbview_sphere_inverse(size_t instance, double xx, double yy, double zz, double *xlon, double *ylat) {
-	/* local variables */
-	int status = MB_SUCCESS;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
 	double posu[3], posr[3];
 
-	/* print starting debug statements */
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
@@ -1914,8 +1797,8 @@ int mbview_sphere_inverse(size_t instance, double xx, double yy, double zz, doub
 	}
 
 	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
+	struct mbview_world_struct *view = &(mbviews[instance]);
+	// struct mbview_struct *data = &(view->data);
 
 	/* get position in cartesian spheroid coordinates */
 	posr[0] = xx;
@@ -1929,7 +1812,8 @@ int mbview_sphere_inverse(size_t instance, double xx, double yy, double zz, doub
 	*xlon = RTD * atan2(posu[1], posu[0]);
 	*ylat = 90.0 - RTD * (atan2(sqrt(posu[0] * posu[0] + posu[1] * posu[1]), posu[2]));
 
-	/* print output debug statements */
+	const int status = MB_SUCCESS;
+
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return value:\n");
@@ -1945,16 +1829,11 @@ int mbview_sphere_inverse(size_t instance, double xx, double yy, double zz, doub
 		fprintf(stderr, "dbg2       status:      %d\n", status);
 	}
 
-	/* return */
 	return (status);
 }
 
 /*------------------------------------------------------------------------------*/
 int mbview_sphere_matrix(double phi, double theta, double psi, double *eulermatrix) {
-	/* local variables */
-	int status = MB_SUCCESS;
-
-	/* print starting debug statements */
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
@@ -2023,7 +1902,8 @@ int mbview_sphere_matrix(double phi, double theta, double psi, double *eulermatr
 	eulermatrix[7] = -cos(phi) * sin(theta);
 	eulermatrix[8] = cos(theta);
 
-	/* print output debug statements */
+	const int status = MB_SUCCESS;
+
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return value:\n");
@@ -2034,17 +1914,13 @@ int mbview_sphere_matrix(double phi, double theta, double psi, double *eulermatr
 		fprintf(stderr, "dbg2       status:      %d\n", status);
 	}
 
-	/* return */
 	return (status);
 }
 
 /*------------------------------------------------------------------------------*/
 int mbview_sphere_rotate(double *eulermatrix, double *v, double *vr) {
-	/* local variables */
-	int status = MB_SUCCESS;
 	int i, j;
 
-	/* print starting debug statements */
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
@@ -2065,7 +1941,8 @@ int mbview_sphere_rotate(double *eulermatrix, double *v, double *vr) {
 		}
 	}
 
-	/* print output debug statements */
+	const int status = MB_SUCCESS;
+
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return value:\n");
@@ -2074,21 +1951,15 @@ int mbview_sphere_rotate(double *eulermatrix, double *v, double *vr) {
 		fprintf(stderr, "dbg2       status:      %d\n", status);
 	}
 
-	/* return */
 	return (status);
 }
 
 /*------------------------------------------------------------------------------*/
 int mbview_greatcircle_distbearing(size_t instance, double lon1, double lat1, double lon2, double lat2, double *bearing,
                                    double *distance) {
-	/* local variables */
-	int status = MB_SUCCESS;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
 	double rlon1, rlat1, rlon2, rlat2, rbearing;
 	double t1, t2, t3, dd;
 
-	/* print starting debug statements */
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
@@ -2101,8 +1972,8 @@ int mbview_greatcircle_distbearing(size_t instance, double lon1, double lat1, do
 	}
 
 	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
+	// struct mbview_world_struct *view = &(mbviews[instance]);
+	// struct mbview_struct *data = &(view->data);
 
 	/* note: these equations derive in part from source code read at:
 	    http://simgear.org/doxygen/polar3d_8hxx-source.html
@@ -2148,7 +2019,8 @@ int mbview_greatcircle_distbearing(size_t instance, double lon1, double lat1, do
 			*bearing += 360.0;
 	}
 
-	/* print output debug statements */
+	int status = MB_SUCCESS;
+
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return value:\n");
@@ -2159,19 +2031,13 @@ int mbview_greatcircle_distbearing(size_t instance, double lon1, double lat1, do
 		fprintf(stderr, "dbg2       status:      %d\n", status);
 	}
 
-	/* return */
 	return (status);
 }
 /*------------------------------------------------------------------------------*/
 int mbview_greatcircle_dist(size_t instance, double lon1, double lat1, double lon2, double lat2, double *distance) {
-	/* local variables */
-	int status = MB_SUCCESS;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
 	double rlon1, rlat1, rlon2, rlat2;
 	double t1, t2, dd;
 
-	/* print starting debug statements */
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
@@ -2184,8 +2050,8 @@ int mbview_greatcircle_dist(size_t instance, double lon1, double lat1, double lo
 	}
 
 	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
+	// struct mbview_world_struct *view = &(mbviews[instance]);
+	// struct mbview_struct *data = &(view->data);
 
 	/* note: these equations derive in part from source code read at:
 	    http://simgear.org/doxygen/polar3d_8hxx-source.html
@@ -2202,7 +2068,8 @@ int mbview_greatcircle_dist(size_t instance, double lon1, double lat1, double lo
 	dd = 2.0 * asin(sqrt(t2 * t2 + cos(rlat1) * cos(rlat2) * t1 * t1));
 	*distance = MBV_SPHEROID_RADIUS * dd;
 
-	/* print output debug statements */
+	const int status = MB_SUCCESS;
+
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return value:\n");
@@ -2211,19 +2078,13 @@ int mbview_greatcircle_dist(size_t instance, double lon1, double lat1, double lo
 		fprintf(stderr, "dbg2       status:      %d\n", status);
 	}
 
-	/* return */
 	return (status);
 }
 /*------------------------------------------------------------------------------*/
 int mbview_greatcircle_endposition(size_t instance, double lon1, double lat1, double bearing, double distance, double *lon2,
                                    double *lat2) {
-	/* local variables */
-	int status = MB_SUCCESS;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
 	double rd, rbearing, rlon1, rlat1, rlat2;
 
-	/* print starting debug statements */
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
@@ -2236,8 +2097,8 @@ int mbview_greatcircle_endposition(size_t instance, double lon1, double lat1, do
 	}
 
 	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
+	// struct mbview_world_struct *view = &(mbviews[instance]);
+	// struct mbview_struct *data = &(view->data);
 
 	/* note: these equations derive in part from source code read at:
 	    http://simgear.org/doxygen/polar3d_8hxx-source.html
@@ -2262,7 +2123,8 @@ int mbview_greatcircle_endposition(size_t instance, double lon1, double lat1, do
 		*lon2 = RTD * (fmod(rlon1 - asin(sin(rbearing) * sin(rd) / cos(rlat2)) + M_PI, 2.0 * M_PI) - M_PI);
 	}
 
-	/* print output debug statements */
+	const int status = MB_SUCCESS;
+
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return value:\n");
@@ -2272,17 +2134,10 @@ int mbview_greatcircle_endposition(size_t instance, double lon1, double lat1, do
 		fprintf(stderr, "dbg2       status:      %d\n", status);
 	}
 
-	/* return */
 	return (status);
 }
 /*------------------------------------------------------------------------------*/
 int mbview_colorclear(size_t instance) {
-	/* local variables */
-	int status = MB_SUCCESS;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
-
-	/* print starting debug statements */
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
@@ -2294,33 +2149,27 @@ int mbview_colorclear(size_t instance) {
 		fprintf(stderr, "mbview_colorclear: %zu\n", instance);
 
 	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
+	struct mbview_world_struct *view = &(mbviews[instance]);
+	struct mbview_struct *data = &(view->data);
 
 	/* set status bit arrays */
 	view->colordonecount = 0;
 	if (data->primary_stat_color != NULL)
 		memset(data->primary_stat_color, 0, (data->primary_nxy / 8) + 1);
 
-	/* print output debug statements */
+	const int status = MB_SUCCESS;
+
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return status:\n");
 		fprintf(stderr, "dbg2       status:      %d\n", status);
 	}
 
-	/* return */
 	return (status);
 }
 
 /*------------------------------------------------------------------------------*/
 int mbview_zscaleclear(size_t instance) {
-	/* local variables */
-	int status = MB_SUCCESS;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
-
-	/* print starting debug statements */
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
@@ -2332,33 +2181,27 @@ int mbview_zscaleclear(size_t instance) {
 		fprintf(stderr, "mbview_zscaleclear: %zu\n", instance);
 
 	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
+	struct mbview_world_struct *view = &(mbviews[instance]);
+	struct mbview_struct *data = &(view->data);
 
 	/* set status bit arrays */
 	view->zscaledonecount = 0;
 	if (data->primary_stat_z != NULL)
 		memset(data->primary_stat_z, 0, (data->primary_nxy / 8) + 1);
 
-	/* print output debug statements */
+	const int status = MB_SUCCESS;
+
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return status:\n");
 		fprintf(stderr, "dbg2       status:      %d\n", status);
 	}
 
-	/* return */
 	return (status);
 }
 
 /*------------------------------------------------------------------------------*/
 int mbview_setcolorparms(size_t instance) {
-	/* local variables */
-	int status = MB_SUCCESS;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
-
-	/* print starting debug statements */
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
@@ -2367,8 +2210,8 @@ int mbview_setcolorparms(size_t instance) {
 	}
 
 	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
+	struct mbview_world_struct *view = &(mbviews[instance]);
+	struct mbview_struct *data = &(view->data);
 
 	/* get min max values for coloring */
 	if (data->grid_mode == MBV_GRID_VIEW_PRIMARY) {
@@ -2457,20 +2300,18 @@ int mbview_setcolorparms(size_t instance) {
 		view->colortable_green = colortable_haxby_green;
 	}
 
-	/* print output debug statements */
+	const int status = MB_SUCCESS;
+
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return status:\n");
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return */
 	return (status);
 }
 /*------------------------------------------------------------------------------*/
 int mbview_make_histogram(struct mbview_world_struct *view, struct mbview_struct *data, int which_data) {
-	/* local variables */
-	int status = MB_SUCCESS;
 	int binned_counts[MBV_RAW_HISTOGRAM_DIM];
 	int nbinned, nbinnedneg, nbinnedpos;
 	int bindimminusone;
@@ -2480,7 +2321,6 @@ int mbview_make_histogram(struct mbview_world_struct *view, struct mbview_struct
 	int binnedsum, target, jbinzero;
 	int i, jbin, khist;
 
-	/* print starting debug statements */
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
@@ -2617,7 +2457,8 @@ int mbview_make_histogram(struct mbview_world_struct *view, struct mbview_struct
 		}
 	}
 
-	/* print output debug statements */
+	int status = MB_SUCCESS;
+
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -2634,194 +2475,260 @@ int mbview_make_histogram(struct mbview_world_struct *view, struct mbview_struct
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return */
+	return (status);
+}
+
+
+/*------------------------------------------------------------------------------*/
+int mbview_colorvalue_instance(size_t instance, double value, float *r, float *g, float *b) {
+	if (mbv_verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       instance:         %zu\n", instance);
+		fprintf(stderr, "dbg2       value:            %f\n", value);
+	}
+
+	/* get view */
+	struct mbview_world_struct *view = &(mbviews[instance]);
+	struct mbview_struct *data = &(view->data);
+
+	/* get histogram equalization if in use */
+	float *histogram = NULL;
+	if (data->grid_mode == MBV_GRID_VIEW_PRIMARY && data->primary_histogram) {
+		histogram = view->primary_histogram;
+	}
+	else if (data->grid_mode == MBV_GRID_VIEW_PRIMARYSLOPE && data->primaryslope_histogram) {
+		histogram = view->primaryslope_histogram;
+	}
+	else if (data->grid_mode == MBV_GRID_VIEW_SECONDARY && data->secondary_histogram) {
+		histogram = view->secondary_histogram;
+	}
+
+	// get color value using relevant data and histogram
+	const int status = mbview_colorvalue(view, data, histogram, value, r, g, b);
+
+	if (mbv_verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       r:       %f\n", *r);
+		fprintf(stderr, "dbg2       g:       %f\n", *g);
+		fprintf(stderr, "dbg2       b:       %f\n", *b);
+		fprintf(stderr, "dbg2       status:  %d\n", status);
+	}
+
 	return (status);
 }
 
 /*------------------------------------------------------------------------------*/
-int mbview_colorpoint(struct mbview_world_struct *view, struct mbview_struct *data, int i, int j, int k) {
-	/* local variables */
-	int status = MB_SUCCESS;
-	double value, svalue, dd;
-	double intensity;
-	int value_ok = true;
-
-	/* print starting debug statements */
+int mbview_colorvalue(struct mbview_world_struct *view, struct mbview_struct *data,
+                      float *histogram, double value, float *r, float *g, float *b) {
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       view:             %p\n", view);
 		fprintf(stderr, "dbg2       data:             %p\n", data);
-		fprintf(stderr, "dbg2       i:                %d\n", i);
-		fprintf(stderr, "dbg2       j:                %d\n", j);
-		fprintf(stderr, "dbg2       k:                %d\n", k);
+		fprintf(stderr, "dbg2       histogram:        %p\n", histogram);
+		fprintf(stderr, "dbg2       value:            %f\n", value);
 	}
 
-	/* get values for coloring */
-	if (data->grid_mode == MBV_GRID_VIEW_PRIMARY) {
-		value = data->primary_data[k];
-	}
-	else if (data->grid_mode == MBV_GRID_VIEW_PRIMARYSLOPE) {
-		value = sqrt(data->primary_dzdx[k] * data->primary_dzdx[k] + data->primary_dzdy[k] * data->primary_dzdy[k]);
-	}
-	else if (data->grid_mode == MBV_GRID_VIEW_SECONDARY) {
-		if (data->secondary_sameas_primary == true)
-			value = data->secondary_data[k];
-		else {
-			mbview_getsecondaryvalue(view, data, i, j, &value);
-			if (value == data->secondary_nodatavalue)
-				value_ok = false;
-		}
-	}
+	/* get color without histogram */
+  if (histogram == NULL) {
+  	if (data->grid_mode == MBV_GRID_VIEW_PRIMARYSLOPE && view->colortable < MBV_COLORTABLE_SEALEVEL1) {
+  		mbview_getcolor(value, view->min, view->max, view->colortable_mode, (float)0.0, (float)0.0, (float)1.0, (float)1.0,
+  						(float)0.0, (float)0.0, view->colortable_red, view->colortable_green, view->colortable_blue,
+  						r, g, b);
+  	}
+  	else if (view->colortable < MBV_COLORTABLE_SEALEVEL1) {
+  		mbview_getcolor(value, view->min, view->max, view->colortable_mode, view->colortable_red[0], view->colortable_green[0],
+  						view->colortable_blue[0], view->colortable_red[MBV_NUM_COLORS - 1],
+  						view->colortable_green[MBV_NUM_COLORS - 1], view->colortable_blue[MBV_NUM_COLORS - 1],
+  						view->colortable_red, view->colortable_green, view->colortable_blue, r, g, b);
+  	}
+  	else if (view->colortable == MBV_COLORTABLE_SEALEVEL1) {
+  		if (value > 0.0) {
+  			if (view->colortable_mode == MBV_COLORTABLE_NORMAL) {
+  				mbview_getcolor(value, 0.0, view->max, view->colortable_mode, colortable_abovesealevel1_red[0],
+  								colortable_abovesealevel1_green[0], colortable_abovesealevel1_blue[0],
+  								colortable_abovesealevel1_red[MBV_NUM_COLORS - 1],
+  								colortable_abovesealevel1_green[MBV_NUM_COLORS - 1],
+  								colortable_abovesealevel1_blue[MBV_NUM_COLORS - 1], colortable_abovesealevel1_red,
+  								colortable_abovesealevel1_green, colortable_abovesealevel1_blue, r, g, b);
+  			}
+  			else {
+  				mbview_getcolor(value, -view->max / 11.0, view->max, view->colortable_mode, colortable_haxby_red[0],
+  								colortable_haxby_green[0], colortable_haxby_blue[0], colortable_haxby_red[MBV_NUM_COLORS - 1],
+  								colortable_haxby_green[MBV_NUM_COLORS - 1], colortable_haxby_blue[MBV_NUM_COLORS - 1],
+  								colortable_haxby_red, colortable_haxby_green, colortable_haxby_blue, r,
+  								g, b);
+  			}
+  		}
+  		else {
+  			if (view->colortable_mode == MBV_COLORTABLE_REVERSED) {
+  				mbview_getcolor(value, view->min, 0.0, view->colortable_mode, colortable_abovesealevel1_red[0],
+  								colortable_abovesealevel1_green[0], colortable_abovesealevel1_blue[0],
+  								colortable_abovesealevel1_red[MBV_NUM_COLORS - 1],
+  								colortable_abovesealevel1_green[MBV_NUM_COLORS - 1],
+  								colortable_abovesealevel1_blue[MBV_NUM_COLORS - 1], colortable_abovesealevel1_red,
+  								colortable_abovesealevel1_green, colortable_abovesealevel1_blue, r, g, b);
+  			}
+  			else {
+  				mbview_getcolor(value, view->min, -view->min / 11.0, view->colortable_mode, colortable_haxby_red[0],
+  								colortable_haxby_green[0], colortable_haxby_blue[0], colortable_haxby_red[MBV_NUM_COLORS - 1],
+  								colortable_haxby_green[MBV_NUM_COLORS - 1], colortable_haxby_blue[MBV_NUM_COLORS - 1],
+  								colortable_haxby_red, colortable_haxby_green, colortable_haxby_blue, r, g, b);
+  			}
+  		}
+  	}
+  	else if (view->colortable == MBV_COLORTABLE_SEALEVEL2) {
+  		if (value > 0.0) {
+  			if (view->colortable_mode == MBV_COLORTABLE_NORMAL) {
+  				mbview_getcolor(value, 0.0, view->max, view->colortable_mode, colortable_abovesealevel2_red[0],
+  								colortable_abovesealevel2_green[0], colortable_abovesealevel2_blue[0],
+  								colortable_abovesealevel2_red[MBV_NUM_COLORS - 1],
+  								colortable_abovesealevel2_green[MBV_NUM_COLORS - 1],
+  								colortable_abovesealevel2_blue[MBV_NUM_COLORS - 1], colortable_abovesealevel2_red,
+  								colortable_abovesealevel2_green, colortable_abovesealevel2_blue, r, g, b);
+  			}
+  			else {
+  				mbview_getcolor(value, -view->max / 11.0, view->max, view->colortable_mode, colortable_haxby_red[0],
+  								colortable_haxby_green[0], colortable_haxby_blue[0], colortable_haxby_red[MBV_NUM_COLORS - 1],
+  								colortable_haxby_green[MBV_NUM_COLORS - 1], colortable_haxby_blue[MBV_NUM_COLORS - 1],
+  								colortable_haxby_red, colortable_haxby_green, colortable_haxby_blue, r, g, b);
+  			}
+  		}
+  		else {
+  			if (view->colortable_mode == MBV_COLORTABLE_REVERSED) {
+  				mbview_getcolor(value, view->min, 0.0, view->colortable_mode, colortable_abovesealevel2_red[0],
+  								colortable_abovesealevel2_green[0], colortable_abovesealevel2_blue[0],
+  								colortable_abovesealevel2_red[MBV_NUM_COLORS - 1],
+  								colortable_abovesealevel2_green[MBV_NUM_COLORS - 1],
+  								colortable_abovesealevel2_blue[MBV_NUM_COLORS - 1], colortable_abovesealevel2_red,
+  								colortable_abovesealevel2_green, colortable_abovesealevel2_blue, r, g, b);
+  			}
+  			else {
+  				mbview_getcolor(value, view->min, -view->min / 11.0, view->colortable_mode, colortable_haxby_red[0],
+  								colortable_haxby_green[0], colortable_haxby_blue[0], colortable_haxby_red[MBV_NUM_COLORS - 1],
+  								colortable_haxby_green[MBV_NUM_COLORS - 1], colortable_haxby_blue[MBV_NUM_COLORS - 1],
+  								colortable_haxby_red, colortable_haxby_green, colortable_haxby_blue, r, g, b);
+  			}
+  		}
+  	}
+  }
 
-	/* get color */
-	if (value_ok == true) {
-		if (data->grid_mode == MBV_GRID_VIEW_PRIMARYSLOPE && view->colortable < MBV_COLORTABLE_SEALEVEL1) {
-			mbview_getcolor(value, view->min, view->max, view->colortable_mode, (float)0.0, (float)0.0, (float)1.0, (float)1.0,
-							(float)0.0, (float)0.0, view->colortable_red, view->colortable_green, view->colortable_blue,
-							&data->primary_r[k], &data->primary_g[k], &data->primary_b[k]);
-		}
-		else if (view->colortable < MBV_COLORTABLE_SEALEVEL1) {
-			mbview_getcolor(value, view->min, view->max, view->colortable_mode, view->colortable_red[0], view->colortable_green[0],
-							view->colortable_blue[0], view->colortable_red[MBV_NUM_COLORS - 1],
-							view->colortable_green[MBV_NUM_COLORS - 1], view->colortable_blue[MBV_NUM_COLORS - 1],
-							view->colortable_red, view->colortable_green, view->colortable_blue, &data->primary_r[k],
-							&data->primary_g[k], &data->primary_b[k]);
-		}
-		else if (view->colortable == MBV_COLORTABLE_SEALEVEL1) {
-			if (value > 0.0) {
-				if (view->colortable_mode == MBV_COLORTABLE_NORMAL) {
-					mbview_getcolor(value, 0.0, view->max, view->colortable_mode, colortable_abovesealevel1_red[0],
-									colortable_abovesealevel1_green[0], colortable_abovesealevel1_blue[0],
-									colortable_abovesealevel1_red[MBV_NUM_COLORS - 1],
-									colortable_abovesealevel1_green[MBV_NUM_COLORS - 1],
-									colortable_abovesealevel1_blue[MBV_NUM_COLORS - 1], colortable_abovesealevel1_red,
-									colortable_abovesealevel1_green, colortable_abovesealevel1_blue, &data->primary_r[k],
-									&data->primary_g[k], &data->primary_b[k]);
-				}
-				else {
-					mbview_getcolor(value, -view->max / 11.0, view->max, view->colortable_mode, colortable_haxby_red[0],
-									colortable_haxby_green[0], colortable_haxby_blue[0], colortable_haxby_red[MBV_NUM_COLORS - 1],
-									colortable_haxby_green[MBV_NUM_COLORS - 1], colortable_haxby_blue[MBV_NUM_COLORS - 1],
-									colortable_haxby_red, colortable_haxby_green, colortable_haxby_blue, &data->primary_r[k],
-									&data->primary_g[k], &data->primary_b[k]);
-				}
-			}
-			else {
-				if (view->colortable_mode == MBV_COLORTABLE_REVERSED) {
-					mbview_getcolor(value, view->min, 0.0, view->colortable_mode, colortable_abovesealevel1_red[0],
-									colortable_abovesealevel1_green[0], colortable_abovesealevel1_blue[0],
-									colortable_abovesealevel1_red[MBV_NUM_COLORS - 1],
-									colortable_abovesealevel1_green[MBV_NUM_COLORS - 1],
-									colortable_abovesealevel1_blue[MBV_NUM_COLORS - 1], colortable_abovesealevel1_red,
-									colortable_abovesealevel1_green, colortable_abovesealevel1_blue, &data->primary_r[k],
-									&data->primary_g[k], &data->primary_b[k]);
-				}
-				else {
-					mbview_getcolor(value, view->min, -view->min / 11.0, view->colortable_mode, colortable_haxby_red[0],
-									colortable_haxby_green[0], colortable_haxby_blue[0], colortable_haxby_red[MBV_NUM_COLORS - 1],
-									colortable_haxby_green[MBV_NUM_COLORS - 1], colortable_haxby_blue[MBV_NUM_COLORS - 1],
-									colortable_haxby_red, colortable_haxby_green, colortable_haxby_blue, &data->primary_r[k],
-									&data->primary_g[k], &data->primary_b[k]);
-				}
-			}
-		}
-		else if (view->colortable == MBV_COLORTABLE_SEALEVEL2) {
-			if (value > 0.0) {
-				if (view->colortable_mode == MBV_COLORTABLE_NORMAL) {
-					mbview_getcolor(value, 0.0, view->max, view->colortable_mode, colortable_abovesealevel2_red[0],
-									colortable_abovesealevel2_green[0], colortable_abovesealevel2_blue[0],
-									colortable_abovesealevel2_red[MBV_NUM_COLORS - 1],
-									colortable_abovesealevel2_green[MBV_NUM_COLORS - 1],
-									colortable_abovesealevel2_blue[MBV_NUM_COLORS - 1], colortable_abovesealevel2_red,
-									colortable_abovesealevel2_green, colortable_abovesealevel2_blue, &data->primary_r[k],
-									&data->primary_g[k], &data->primary_b[k]);
-				}
-				else {
-					mbview_getcolor(value, -view->max / 11.0, view->max, view->colortable_mode, colortable_haxby_red[0],
-									colortable_haxby_green[0], colortable_haxby_blue[0], colortable_haxby_red[MBV_NUM_COLORS - 1],
-									colortable_haxby_green[MBV_NUM_COLORS - 1], colortable_haxby_blue[MBV_NUM_COLORS - 1],
-									colortable_haxby_red, colortable_haxby_green, colortable_haxby_blue, &data->primary_r[k],
-									&data->primary_g[k], &data->primary_b[k]);
-				}
-			}
-			else {
-				if (view->colortable_mode == MBV_COLORTABLE_REVERSED) {
-					mbview_getcolor(value, view->min, 0.0, view->colortable_mode, colortable_abovesealevel2_red[0],
-									colortable_abovesealevel2_green[0], colortable_abovesealevel2_blue[0],
-									colortable_abovesealevel2_red[MBV_NUM_COLORS - 1],
-									colortable_abovesealevel2_green[MBV_NUM_COLORS - 1],
-									colortable_abovesealevel2_blue[MBV_NUM_COLORS - 1], colortable_abovesealevel2_red,
-									colortable_abovesealevel2_green, colortable_abovesealevel2_blue, &data->primary_r[k],
-									&data->primary_g[k], &data->primary_b[k]);
-				}
-				else {
-					mbview_getcolor(value, view->min, -view->min / 11.0, view->colortable_mode, colortable_haxby_red[0],
-									colortable_haxby_green[0], colortable_haxby_blue[0], colortable_haxby_red[MBV_NUM_COLORS - 1],
-									colortable_haxby_green[MBV_NUM_COLORS - 1], colortable_haxby_blue[MBV_NUM_COLORS - 1],
-									colortable_haxby_red, colortable_haxby_green, colortable_haxby_blue, &data->primary_r[k],
-									&data->primary_g[k], &data->primary_b[k]);
-				}
-			}
-		}
+  /* get color using histogram */
+  else {
+  	if (data->grid_mode == MBV_GRID_VIEW_PRIMARYSLOPE && view->colortable < MBV_COLORTABLE_SEALEVEL1) {
+  		mbview_getcolor_histogram(value, view->min, view->max, view->colortable_mode, (float)0.0, (float)0.0, (float)1.0,
+  		                          (float)1.0, (float)0.0, (float)0.0, view->colortable_red, view->colortable_green,
+  		                          view->colortable_blue, histogram, r, g, b);
+  	}
+  	else if (view->colortable < MBV_COLORTABLE_SEALEVEL1) {
+  		mbview_getcolor_histogram(value, view->min, view->max, view->colortable_mode, view->colortable_red[0],
+  		                          view->colortable_green[0], view->colortable_blue[0], view->colortable_red[MBV_NUM_COLORS - 1],
+  		                          view->colortable_green[MBV_NUM_COLORS - 1], view->colortable_blue[MBV_NUM_COLORS - 1],
+  		                          view->colortable_red, view->colortable_green, view->colortable_blue, histogram,
+  		                          r, g, b);
+  	}
+  	else if (view->colortable == MBV_COLORTABLE_SEALEVEL1) {
+  		if (value > 0.0) {
+  			if (view->colortable_mode == MBV_COLORTABLE_NORMAL) {
+  				mbview_getcolor_histogram(
+  				    value, 0.0, view->max, view->colortable_mode, colortable_abovesealevel1_red[0],
+  				    colortable_abovesealevel1_green[0], colortable_abovesealevel1_blue[0],
+  				    colortable_abovesealevel1_red[MBV_NUM_COLORS - 1], colortable_abovesealevel1_green[MBV_NUM_COLORS - 1],
+  				    colortable_abovesealevel1_blue[MBV_NUM_COLORS - 1], colortable_abovesealevel1_red,
+  				    colortable_abovesealevel1_green, colortable_abovesealevel1_blue, &(histogram[2 * MBV_NUM_COLORS]),
+  				    r, g, b);
+  			}
+  			else {
+  				mbview_getcolor_histogram(value, -view->max / 11.0, view->max, view->colortable_mode, colortable_haxby_red[0],
+  				                          colortable_haxby_green[0], colortable_haxby_blue[0],
+  				                          colortable_haxby_red[MBV_NUM_COLORS - 1], colortable_haxby_green[MBV_NUM_COLORS - 1],
+  				                          colortable_haxby_blue[MBV_NUM_COLORS - 1], colortable_haxby_red, colortable_haxby_green,
+  				                          colortable_haxby_blue, &(histogram[2 * MBV_NUM_COLORS]), r, g, b);
+  			}
+  		}
+  		else {
+  			if (view->colortable_mode == MBV_COLORTABLE_REVERSED) {
+  				mbview_getcolor_histogram(
+  				    value, view->min, 0.0, view->colortable_mode, colortable_abovesealevel1_red[0],
+  				    colortable_abovesealevel1_green[0], colortable_abovesealevel1_blue[0],
+  				    colortable_abovesealevel1_red[MBV_NUM_COLORS - 1], colortable_abovesealevel1_green[MBV_NUM_COLORS - 1],
+  				    colortable_abovesealevel1_blue[MBV_NUM_COLORS - 1], colortable_abovesealevel1_red,
+  				    colortable_abovesealevel1_green, colortable_abovesealevel1_blue, &(histogram[MBV_NUM_COLORS]),
+  				    r, g, b);
+  			}
+  			else {
+  				mbview_getcolor_histogram(value, view->min, -view->min / 11.0, view->colortable_mode, colortable_haxby_red[0],
+  				                          colortable_haxby_green[0], colortable_haxby_blue[0],
+  				                          colortable_haxby_red[MBV_NUM_COLORS - 1], colortable_haxby_green[MBV_NUM_COLORS - 1],
+  				                          colortable_haxby_blue[MBV_NUM_COLORS - 1], colortable_haxby_red, colortable_haxby_green,
+  				                          colortable_haxby_blue, &(histogram[MBV_NUM_COLORS]), r, g, b);
+  			}
+  		}
+  	}
+  	else if (view->colortable == MBV_COLORTABLE_SEALEVEL2) {
+  		if (value > 0.0) {
+  			if (view->colortable_mode == MBV_COLORTABLE_NORMAL) {
+  				mbview_getcolor_histogram(
+  				    value, 0.0, view->max, view->colortable_mode, colortable_abovesealevel2_red[0],
+  				    colortable_abovesealevel2_green[0], colortable_abovesealevel2_blue[0],
+  				    colortable_abovesealevel2_red[MBV_NUM_COLORS - 1], colortable_abovesealevel2_green[MBV_NUM_COLORS - 1],
+  				    colortable_abovesealevel2_blue[MBV_NUM_COLORS - 1], colortable_abovesealevel2_red,
+  				    colortable_abovesealevel2_green, colortable_abovesealevel2_blue, &(histogram[2 * MBV_NUM_COLORS]),
+  				    r, g, b);
+  			}
+  			else {
+  				mbview_getcolor_histogram(value, -view->max / 11.0, view->max, view->colortable_mode, colortable_haxby_red[0],
+  				                          colortable_haxby_green[0], colortable_haxby_blue[0],
+  				                          colortable_haxby_red[MBV_NUM_COLORS - 1], colortable_haxby_green[MBV_NUM_COLORS - 1],
+  				                          colortable_haxby_blue[MBV_NUM_COLORS - 1], colortable_haxby_red, colortable_haxby_green,
+  				                          colortable_haxby_blue, &(histogram[2 * MBV_NUM_COLORS]), r, g, b);
+  			}
+  		}
+  		else {
+  			if (view->colortable_mode == MBV_COLORTABLE_REVERSED) {
+  				mbview_getcolor_histogram(
+  				    value, view->min, 0.0, view->colortable_mode, colortable_abovesealevel2_red[0],
+  				    colortable_abovesealevel2_green[0], colortable_abovesealevel2_blue[0],
+  				    colortable_abovesealevel2_red[MBV_NUM_COLORS - 1], colortable_abovesealevel2_green[MBV_NUM_COLORS - 1],
+  				    colortable_abovesealevel2_blue[MBV_NUM_COLORS - 1], colortable_abovesealevel2_red,
+  				    colortable_abovesealevel2_green, colortable_abovesealevel2_blue, &(histogram[MBV_NUM_COLORS]),
+  				    r, g, b);
+  			}
+  			else {
+  				mbview_getcolor_histogram(value, view->min, -view->min / 11.0, view->colortable_mode, colortable_haxby_red[0],
+  				                          colortable_haxby_green[0], colortable_haxby_blue[0],
+  				                          colortable_haxby_red[MBV_NUM_COLORS - 1], colortable_haxby_green[MBV_NUM_COLORS - 1],
+  				                          colortable_haxby_blue[MBV_NUM_COLORS - 1], colortable_haxby_red, colortable_haxby_green,
+  				                          colortable_haxby_blue, &(histogram[MBV_NUM_COLORS]), r, g, b);
+  			}
+  		}
+  	}
+  }
 
-		/* get values for shading */
-		if (view->shade_mode != MBV_SHADE_VIEW_NONE) {
-			if (view->shade_mode == MBV_SHADE_VIEW_ILLUMINATION) {
-				dd = sqrt(view->mag2 * data->primary_dzdx[k] * data->primary_dzdx[k] +
-						  view->mag2 * data->primary_dzdy[k] * data->primary_dzdy[k] + 1.0);
-				intensity = data->illuminate_magnitude * view->illum_x * data->primary_dzdx[k] / dd +
-							data->illuminate_magnitude * view->illum_y * data->primary_dzdy[k] / dd + view->illum_z / dd - 0.5;
-				/*if (j==25)
-				fprintf(stderr,"intensity:%f  dzdx:%f  dzdy:%f\n",
-				intensity,data->primary_dzdx[k], data->primary_dzdy[k]);
-				*/
+	const int status = MB_SUCCESS;
 
-				mbview_applyshade(intensity, &data->primary_r[k], &data->primary_g[k], &data->primary_b[k]);
-			}
-			else if (view->shade_mode == MBV_SHADE_VIEW_SLOPE) {
-				intensity = -data->slope_magnitude *
-							sqrt(data->primary_dzdx[k] * data->primary_dzdx[k] + data->primary_dzdy[k] * data->primary_dzdy[k]);
-				intensity = MAX(intensity, -1.0);
-				mbview_applyshade(intensity, &data->primary_r[k], &data->primary_g[k], &data->primary_b[k]);
-			}
-			else if (view->shade_mode == MBV_SHADE_VIEW_OVERLAY) {
-				if (data->secondary_sameas_primary == true)
-					svalue = data->secondary_data[k];
-				else
-					mbview_getsecondaryvalue(view, data, i, j, &svalue);
-				if (svalue != data->secondary_nodatavalue) {
-					intensity = view->sign * data->overlay_shade_magnitude * (svalue - data->overlay_shade_center) /
-								(data->secondary_max - data->secondary_min);
-					mbview_applyshade(intensity, &data->primary_r[k], &data->primary_g[k], &data->primary_b[k]);
-				}
-			}
-		}
-
-		/* set color status bit */
-		data->primary_stat_color[k / 8] = data->primary_stat_color[k / 8] | statmask[k % 8];
-	}
-
-	/* print output debug statements */
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       r:       %f\n", *r);
+		fprintf(stderr, "dbg2       g:       %f\n", *g);
+		fprintf(stderr, "dbg2       b:       %f\n", *b);
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return */
 	return (status);
 }
+
 /*------------------------------------------------------------------------------*/
-int mbview_colorpoint_histogram(struct mbview_world_struct *view, struct mbview_struct *data, float *histogram, int i, int j,
-                                int k) {
-	/* local variables */
-	int status = MB_SUCCESS;
+int mbview_colorpoint(struct mbview_world_struct *view, struct mbview_struct *data,
+                                float *histogram, int i, int j, int k) {
 	double value, svalue, dd;
 	double intensity;
 
-	/* print starting debug statements */
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
@@ -2842,106 +2749,16 @@ int mbview_colorpoint_histogram(struct mbview_world_struct *view, struct mbview_
 		value = sqrt(data->primary_dzdx[k] * data->primary_dzdx[k] + data->primary_dzdy[k] * data->primary_dzdy[k]);
 	}
 	else if (data->grid_mode == MBV_GRID_VIEW_SECONDARY) {
-		if (data->secondary_sameas_primary == true)
+		if (data->secondary_sameas_primary) {
 			value = data->secondary_data[k];
-		else
+    }
+		else {
 			mbview_getsecondaryvalue(view, data, i, j, &value);
+    }
 	}
 
-	/* get color */
-	if (data->grid_mode == MBV_GRID_VIEW_PRIMARYSLOPE && view->colortable < MBV_COLORTABLE_SEALEVEL1) {
-		mbview_getcolor_histogram(value, view->min, view->max, view->colortable_mode, (float)0.0, (float)0.0, (float)1.0,
-		                          (float)1.0, (float)0.0, (float)0.0, view->colortable_red, view->colortable_green,
-		                          view->colortable_blue, histogram, &data->primary_r[k], &data->primary_g[k],
-		                          &data->primary_b[k]);
-	}
-	else if (view->colortable < MBV_COLORTABLE_SEALEVEL1) {
-		mbview_getcolor_histogram(value, view->min, view->max, view->colortable_mode, view->colortable_red[0],
-		                          view->colortable_green[0], view->colortable_blue[0], view->colortable_red[MBV_NUM_COLORS - 1],
-		                          view->colortable_green[MBV_NUM_COLORS - 1], view->colortable_blue[MBV_NUM_COLORS - 1],
-		                          view->colortable_red, view->colortable_green, view->colortable_blue, histogram,
-		                          &data->primary_r[k], &data->primary_g[k], &data->primary_b[k]);
-	}
-	else if (view->colortable == MBV_COLORTABLE_SEALEVEL1) {
-		if (value > 0.0) {
-			if (view->colortable_mode == MBV_COLORTABLE_NORMAL) {
-				mbview_getcolor_histogram(
-				    value, 0.0, view->max, view->colortable_mode, colortable_abovesealevel1_red[0],
-				    colortable_abovesealevel1_green[0], colortable_abovesealevel1_blue[0],
-				    colortable_abovesealevel1_red[MBV_NUM_COLORS - 1], colortable_abovesealevel1_green[MBV_NUM_COLORS - 1],
-				    colortable_abovesealevel1_blue[MBV_NUM_COLORS - 1], colortable_abovesealevel1_red,
-				    colortable_abovesealevel1_green, colortable_abovesealevel1_blue, &(histogram[2 * MBV_NUM_COLORS]),
-				    &data->primary_r[k], &data->primary_g[k], &data->primary_b[k]);
-			}
-			else {
-				mbview_getcolor_histogram(value, -view->max / 11.0, view->max, view->colortable_mode, colortable_haxby_red[0],
-				                          colortable_haxby_green[0], colortable_haxby_blue[0],
-				                          colortable_haxby_red[MBV_NUM_COLORS - 1], colortable_haxby_green[MBV_NUM_COLORS - 1],
-				                          colortable_haxby_blue[MBV_NUM_COLORS - 1], colortable_haxby_red, colortable_haxby_green,
-				                          colortable_haxby_blue, &(histogram[2 * MBV_NUM_COLORS]), &data->primary_r[k],
-				                          &data->primary_g[k], &data->primary_b[k]);
-			}
-		}
-		else {
-			if (view->colortable_mode == MBV_COLORTABLE_REVERSED) {
-				mbview_getcolor_histogram(
-				    value, view->min, 0.0, view->colortable_mode, colortable_abovesealevel1_red[0],
-				    colortable_abovesealevel1_green[0], colortable_abovesealevel1_blue[0],
-				    colortable_abovesealevel1_red[MBV_NUM_COLORS - 1], colortable_abovesealevel1_green[MBV_NUM_COLORS - 1],
-				    colortable_abovesealevel1_blue[MBV_NUM_COLORS - 1], colortable_abovesealevel1_red,
-				    colortable_abovesealevel1_green, colortable_abovesealevel1_blue, &(histogram[MBV_NUM_COLORS]),
-				    &data->primary_r[k], &data->primary_g[k], &data->primary_b[k]);
-			}
-			else {
-				mbview_getcolor_histogram(value, view->min, -view->min / 11.0, view->colortable_mode, colortable_haxby_red[0],
-				                          colortable_haxby_green[0], colortable_haxby_blue[0],
-				                          colortable_haxby_red[MBV_NUM_COLORS - 1], colortable_haxby_green[MBV_NUM_COLORS - 1],
-				                          colortable_haxby_blue[MBV_NUM_COLORS - 1], colortable_haxby_red, colortable_haxby_green,
-				                          colortable_haxby_blue, &(histogram[MBV_NUM_COLORS]), &data->primary_r[k],
-				                          &data->primary_g[k], &data->primary_b[k]);
-			}
-		}
-	}
-	else if (view->colortable == MBV_COLORTABLE_SEALEVEL2) {
-		if (value > 0.0) {
-			if (view->colortable_mode == MBV_COLORTABLE_NORMAL) {
-				mbview_getcolor_histogram(
-				    value, 0.0, view->max, view->colortable_mode, colortable_abovesealevel2_red[0],
-				    colortable_abovesealevel2_green[0], colortable_abovesealevel2_blue[0],
-				    colortable_abovesealevel2_red[MBV_NUM_COLORS - 1], colortable_abovesealevel2_green[MBV_NUM_COLORS - 1],
-				    colortable_abovesealevel2_blue[MBV_NUM_COLORS - 1], colortable_abovesealevel2_red,
-				    colortable_abovesealevel2_green, colortable_abovesealevel2_blue, &(histogram[2 * MBV_NUM_COLORS]),
-				    &data->primary_r[k], &data->primary_g[k], &data->primary_b[k]);
-			}
-			else {
-				mbview_getcolor_histogram(value, -view->max / 11.0, view->max, view->colortable_mode, colortable_haxby_red[0],
-				                          colortable_haxby_green[0], colortable_haxby_blue[0],
-				                          colortable_haxby_red[MBV_NUM_COLORS - 1], colortable_haxby_green[MBV_NUM_COLORS - 1],
-				                          colortable_haxby_blue[MBV_NUM_COLORS - 1], colortable_haxby_red, colortable_haxby_green,
-				                          colortable_haxby_blue, &(histogram[2 * MBV_NUM_COLORS]), &data->primary_r[k],
-				                          &data->primary_g[k], &data->primary_b[k]);
-			}
-		}
-		else {
-			if (view->colortable_mode == MBV_COLORTABLE_REVERSED) {
-				mbview_getcolor_histogram(
-				    value, view->min, 0.0, view->colortable_mode, colortable_abovesealevel2_red[0],
-				    colortable_abovesealevel2_green[0], colortable_abovesealevel2_blue[0],
-				    colortable_abovesealevel2_red[MBV_NUM_COLORS - 1], colortable_abovesealevel2_green[MBV_NUM_COLORS - 1],
-				    colortable_abovesealevel2_blue[MBV_NUM_COLORS - 1], colortable_abovesealevel2_red,
-				    colortable_abovesealevel2_green, colortable_abovesealevel2_blue, &(histogram[MBV_NUM_COLORS]),
-				    &data->primary_r[k], &data->primary_g[k], &data->primary_b[k]);
-			}
-			else {
-				mbview_getcolor_histogram(value, view->min, -view->min / 11.0, view->colortable_mode, colortable_haxby_red[0],
-				                          colortable_haxby_green[0], colortable_haxby_blue[0],
-				                          colortable_haxby_red[MBV_NUM_COLORS - 1], colortable_haxby_green[MBV_NUM_COLORS - 1],
-				                          colortable_haxby_blue[MBV_NUM_COLORS - 1], colortable_haxby_red, colortable_haxby_green,
-				                          colortable_haxby_blue, &(histogram[MBV_NUM_COLORS]), &data->primary_r[k],
-				                          &data->primary_g[k], &data->primary_b[k]);
-			}
-		}
-	}
+	/* get color for value using current color mode, color table, and histogram */
+	int status = mbview_colorvalue(view, data, histogram, value, &data->primary_r[k], &data->primary_g[k], &data->primary_b[k]);
 
 	/* get values for shading */
 	if (view->shade_mode != MBV_SHADE_VIEW_NONE) {
@@ -2964,7 +2781,7 @@ int mbview_colorpoint_histogram(struct mbview_world_struct *view, struct mbview_
 			mbview_applyshade(intensity, &data->primary_r[k], &data->primary_g[k], &data->primary_b[k]);
 		}
 		else if (view->shade_mode == MBV_SHADE_VIEW_OVERLAY) {
-			if (data->secondary_sameas_primary == true)
+			if (data->secondary_sameas_primary)
 				svalue = data->secondary_data[k];
 			else
 				mbview_getsecondaryvalue(view, data, i, j, &svalue);
@@ -2979,14 +2796,12 @@ int mbview_colorpoint_histogram(struct mbview_world_struct *view, struct mbview_
 	/* set color status bit */
 	data->primary_stat_color[k / 8] = data->primary_stat_color[k / 8] | statmask[k % 8];
 
-	/* print output debug statements */
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return status:\n");
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return */
 	return (status);
 }
 
@@ -2994,12 +2809,9 @@ int mbview_colorpoint_histogram(struct mbview_world_struct *view, struct mbview_
 int mbview_getcolor(double value, double min, double max, int colortablemode, float below_red, float below_green,
                     float below_blue, float above_red, float above_green, float above_blue, float *colortable_red,
                     float *colortable_green, float *colortable_blue, float *red, float *green, float *blue) {
-	/* local variables */
-	int status = MB_SUCCESS;
 	int i;
 	double ff, factor;
 
-	/* print starting debug statements */
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
@@ -3047,7 +2859,8 @@ int mbview_getcolor(double value, double min, double max, int colortablemode, fl
 		*blue = colortable_blue[i] + ff * (colortable_blue[i + 1] - colortable_blue[i]);
 	}
 
-	/* print output debug statements */
+	const int status = MB_SUCCESS;
+
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -3058,7 +2871,6 @@ int mbview_getcolor(double value, double min, double max, int colortablemode, fl
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return */
 	return (status);
 }
 
@@ -3067,13 +2879,10 @@ int mbview_getcolor_histogram(double value, double min, double max, int colortab
                               float below_blue, float above_red, float above_green, float above_blue, float *colortable_red,
                               float *colortable_green, float *colortable_blue, float *histogram, float *red, float *green,
                               float *blue) {
-	/* local variables */
-	int status = MB_SUCCESS;
 	double ff, factor;
-	int found;
+	bool found;
 	int i, ii;
 
-	/* print starting debug statements */
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
@@ -3114,7 +2923,7 @@ int mbview_getcolor_histogram(double value, double min, double max, int colortab
 	else {
 		/* find place in histogram */
 		found = false;
-		for (i = 0; i < MBV_NUM_COLORS - 1 && found == false; i++) {
+		for (i = 0; i < MBV_NUM_COLORS - 1 && !found; i++) {
 			if (value >= histogram[i] && value <= histogram[i + 1]) {
 				ii = i;
 				found = true;
@@ -3134,7 +2943,8 @@ int mbview_getcolor_histogram(double value, double min, double max, int colortab
 		*blue = colortable_blue[ii] + ff * (colortable_blue[ii + 1] - colortable_blue[ii]);
 	}
 
-	/* print output debug statements */
+	const int status = MB_SUCCESS;
+
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -3145,7 +2955,6 @@ int mbview_getcolor_histogram(double value, double min, double max, int colortab
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return */
 	return (status);
 }
 
@@ -3154,15 +2963,11 @@ int mbview_applyshade(double intensity, float *r, float *g, float *b) {
 	/* note - this correction algorithm is taken from the GMT Technical
 	   Reference and Cookbook by Wessel and Smith - you can find it in
 	   Appendix I: Color Space - The final frontier */
-
-	/* local variables */
-	int status = MB_SUCCESS;
 	double h, s, v;
 	double vmax, vmin, dv, idv;
 	double rmod, gmod, bmod;
 	double f, p, q, t;
 
-	/* print starting debug statements */
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
@@ -3264,7 +3069,8 @@ int mbview_applyshade(double intensity, float *r, float *g, float *b) {
 		}
 	}
 
-	/* print output debug statements */
+	const int status = MB_SUCCESS;
+
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -3275,22 +3081,18 @@ int mbview_applyshade(double intensity, float *r, float *g, float *b) {
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return */
 	return (status);
 }
 
 /*------------------------------------------------------------------------------*/
 int mbview_getsecondaryvalue(struct mbview_world_struct *view, struct mbview_struct *data, int i, int j,
                              double *secondary_value) {
-	/* local variables */
-	int status = MB_SUCCESS;
 	int error = MB_ERROR_NO_ERROR;
 	double xlon, ylat;
 	double xgrid, ygrid;
 	double xsgrid, ysgrid;
 	int ii, jj, kk;
 
-	/* print starting debug statements */
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
@@ -3337,7 +3139,8 @@ int mbview_getsecondaryvalue(struct mbview_world_struct *view, struct mbview_str
 		*secondary_value = data->secondary_data[kk];
 	}
 
-	/* print output debug statements */
+	const int status = MB_SUCCESS;
+
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -3346,28 +3149,23 @@ int mbview_getsecondaryvalue(struct mbview_world_struct *view, struct mbview_str
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return */
 	return (status);
 }
 /*------------------------------------------------------------------------------*/
 int mbview_contour(size_t instance, int rez) {
-	/* local variables */
-	int status = MB_SUCCESS;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
 	int i, j, k, l, kk;
 	int stride;
 	int vertex[4];
-	int triangleA, triangleB;
+	bool triangleA;
+	bool triangleB;
 	int nlevel, level_min, level_max;
 	int nvertex, nside;
 	float level_value, datamin, datamax;
 	float factor;
 	float xx[2], yy[2], zz[2];
-	int global;
+	bool global;
 	double contour_offset_factor;
 
-	/* print starting debug statements */
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
@@ -3377,8 +3175,8 @@ int mbview_contour(size_t instance, int rez) {
 	}
 
 	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
+	struct mbview_world_struct *view = &(mbviews[instance]);
+	struct mbview_struct *data = &(view->data);
 
 	/* set stride for looping over data */
 	if (rez == MBV_REZ_FULL)
@@ -3441,7 +3239,7 @@ int mbview_contour(size_t instance, int rez) {
 				triangleB = true;
 
 			/* if at least one triangle is valid, contour it */
-			if (triangleA == true || triangleB == true) {
+			if (triangleA || triangleB) {
 				/* get min max values and number of contours */
 				nvertex = 0;
 				datamin = 0.0;
@@ -3474,7 +3272,7 @@ int mbview_contour(size_t instance, int rez) {
 						level_value = l * data->contour_interval;
 
 						/* deal with triangle A - vertexes 0, 1, and 2 */
-						if (triangleA == true) {
+						if (triangleA) {
 							nside = 0;
 							if ((data->primary_data[vertex[0]] > level_value && data->primary_data[vertex[1]] < level_value) ||
 							    (data->primary_data[vertex[0]] < level_value && data->primary_data[vertex[1]] > level_value)) {
@@ -3518,7 +3316,7 @@ int mbview_contour(size_t instance, int rez) {
 									zz[0] += contour_offset_factor;
 									zz[1] += contour_offset_factor;
 								}
-								else if (global == true) {
+								else if (global) {
 									xx[0] += xx[0] * contour_offset_factor;
 									yy[0] += yy[0] * contour_offset_factor;
 									zz[0] += zz[0] * contour_offset_factor;
@@ -3536,7 +3334,7 @@ int mbview_contour(size_t instance, int rez) {
 						}
 
 						/* deal with triangle B - vertexes 1, 3, and 2 */
-						if (triangleB == true) {
+						if (triangleB) {
 							nside = 0;
 							if ((data->primary_data[vertex[1]] > level_value && data->primary_data[vertex[3]] < level_value) ||
 							    (data->primary_data[vertex[1]] < level_value && data->primary_data[vertex[3]] > level_value)) {
@@ -3580,7 +3378,7 @@ int mbview_contour(size_t instance, int rez) {
 									zz[0] += contour_offset_factor;
 									zz[1] += contour_offset_factor;
 								}
-								else if (global == true) {
+								else if (global) {
 									xx[0] += xx[0] * contour_offset_factor;
 									yy[0] += yy[0] * contour_offset_factor;
 									zz[0] += zz[0] * contour_offset_factor;
@@ -3602,11 +3400,11 @@ int mbview_contour(size_t instance, int rez) {
 		}
 
 		/* check for pending event */
-		if (view->plot_done == false && view->plot_interrupt_allowed == true && i % MBV_EVENTCHECKCOARSENESS == 0)
+		if (!view->plot_done && view->plot_interrupt_allowed && i % MBV_EVENTCHECKCOARSENESS == 0)
 			do_mbview_xevents();
 
 		/* dump out of loop if plotting already done at a higher recursion */
-		if (view->plot_done == true)
+		if (view->plot_done)
 			i = data->primary_n_columns;
 	}
 
@@ -3615,7 +3413,7 @@ int mbview_contour(size_t instance, int rez) {
 	glEndList();
 
 	/* set rez flag only if plotting not done */
-	if (view->plot_done == false) {
+	if (!view->plot_done) {
 		if (rez == MBV_REZ_FULL) {
 			view->contourfullrez = true;
 		}
@@ -3627,28 +3425,22 @@ int mbview_contour(size_t instance, int rez) {
 		}
 	}
 
-	/* print output debug statements */
+	const int status = MB_SUCCESS;
+
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return status:\n");
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return */
 	return (status);
 }
 /*------------------------------------------------------------------------------*/
 int mbview_getzdata(size_t instance, double xgrid, double ygrid, int *found, double *zdata) {
-
-	/* local variables */
-	int status = MB_SUCCESS;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
 	int nsum;
 	double zdatasum;
 	int i, j, k, l, m, n;
 
-	/* print starting debug statements */
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
@@ -3659,8 +3451,8 @@ int mbview_getzdata(size_t instance, double xgrid, double ygrid, int *found, dou
 	}
 
 	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
+	struct mbview_world_struct *view = &(mbviews[instance]);
+	struct mbview_struct *data = &(view->data);
 
 	/* get location in grid */
 	i = (int)((xgrid - data->primary_xmin) / data->primary_dx);
@@ -3706,7 +3498,8 @@ int mbview_getzdata(size_t instance, double xgrid, double ygrid, int *found, dou
 		}
 	}
 
-	/* print output debug statements */
+	const int status = MB_SUCCESS;
+
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -3715,7 +3508,6 @@ int mbview_getzdata(size_t instance, double xgrid, double ygrid, int *found, dou
 		fprintf(stderr, "dbg2       status:          %d\n", status);
 	}
 
-	/* return */
 	return (status);
 }
 

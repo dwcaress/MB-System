@@ -93,6 +93,7 @@ subdir = src/surf
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/ax_check_compile_flag.m4 \
 	$(top_srcdir)/m4/ax_check_link_flag.m4 \
+	$(top_srcdir)/m4/ax_cxx_compile_stdcxx.m4 \
 	$(top_srcdir)/m4/libtool.m4 $(top_srcdir)/m4/ltoptions.m4 \
 	$(top_srcdir)/m4/ltsugar.m4 $(top_srcdir)/m4/ltversion.m4 \
 	$(top_srcdir)/m4/lt~obsolete.m4 $(top_srcdir)/configure.ac
@@ -134,9 +135,9 @@ am__installdirs = "$(DESTDIR)$(libdir)" "$(DESTDIR)$(includedir)"
 LTLIBRARIES = $(lib_LTLIBRARIES)
 am__DEPENDENCIES_1 =
 libmbsapi_la_DEPENDENCIES = $(am__DEPENDENCIES_1)
-am_libmbsapi_la_OBJECTS = mem_surf.lo pb_math.lo sapi_build.lo \
-	sapi_data.lo sapi_files.lo sapi_globals.lo sapi_simple.lo \
-	util_surf.lo xdr_surf.lo
+am_libmbsapi_la_OBJECTS = mem_surf.lo pb_math.lo sapi_data.lo \
+	sapi_files.lo sapi_globals.lo sapi_simple.lo util_surf.lo \
+	xdr_surf.lo
 libmbsapi_la_OBJECTS = $(am_libmbsapi_la_OBJECTS)
 AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
@@ -161,10 +162,9 @@ DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)/src/mbio
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__maybe_remake_depfiles = depfiles
 am__depfiles_remade = ./$(DEPDIR)/mem_surf.Plo ./$(DEPDIR)/pb_math.Plo \
-	./$(DEPDIR)/sapi_build.Plo ./$(DEPDIR)/sapi_data.Plo \
-	./$(DEPDIR)/sapi_files.Plo ./$(DEPDIR)/sapi_globals.Plo \
-	./$(DEPDIR)/sapi_simple.Plo ./$(DEPDIR)/util_surf.Plo \
-	./$(DEPDIR)/xdr_surf.Plo
+	./$(DEPDIR)/sapi_data.Plo ./$(DEPDIR)/sapi_files.Plo \
+	./$(DEPDIR)/sapi_globals.Plo ./$(DEPDIR)/sapi_simple.Plo \
+	./$(DEPDIR)/util_surf.Plo ./$(DEPDIR)/xdr_surf.Plo
 am__mv = mv -f
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
@@ -250,6 +250,7 @@ HARDEN_BINCFLAGS = @HARDEN_BINCFLAGS@
 HARDEN_BINLDFLAGS = @HARDEN_BINLDFLAGS@
 HARDEN_CFLAGS = @HARDEN_CFLAGS@
 HARDEN_LDFLAGS = @HARDEN_LDFLAGS@
+HAVE_CXX11 = @HAVE_CXX11@
 INSTALL = @INSTALL@
 INSTALL_DATA = @INSTALL_DATA@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@
@@ -392,7 +393,7 @@ lib_LTLIBRARIES = libmbsapi.la
 libmbsapi_la_LDFLAGS = -no-undefined -version-info 0:0:0
 libmbsapi_la_LIBADD = ${XDR_LIB}
 libmbsapi_la_SOURCES = \
-		mem_surf.c pb_math.c sapi_build.c sapi_data.c sapi_files.c \
+		mem_surf.c pb_math.c sapi_data.c sapi_files.c \
 		sapi_globals.c sapi_simple.c util_surf.c xdr_surf.c
 
 all: all-am
@@ -475,7 +476,6 @@ distclean-compile:
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mem_surf.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pb_math.Plo@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sapi_build.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sapi_data.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sapi_files.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sapi_globals.Plo@am__quote@ # am--include-marker
@@ -636,7 +636,6 @@ clean-am: clean-generic clean-libLTLIBRARIES clean-libtool \
 distclean: distclean-am
 		-rm -f ./$(DEPDIR)/mem_surf.Plo
 	-rm -f ./$(DEPDIR)/pb_math.Plo
-	-rm -f ./$(DEPDIR)/sapi_build.Plo
 	-rm -f ./$(DEPDIR)/sapi_data.Plo
 	-rm -f ./$(DEPDIR)/sapi_files.Plo
 	-rm -f ./$(DEPDIR)/sapi_globals.Plo
@@ -690,7 +689,6 @@ installcheck-am:
 maintainer-clean: maintainer-clean-am
 		-rm -f ./$(DEPDIR)/mem_surf.Plo
 	-rm -f ./$(DEPDIR)/pb_math.Plo
-	-rm -f ./$(DEPDIR)/sapi_build.Plo
 	-rm -f ./$(DEPDIR)/sapi_data.Plo
 	-rm -f ./$(DEPDIR)/sapi_files.Plo
 	-rm -f ./$(DEPDIR)/sapi_globals.Plo

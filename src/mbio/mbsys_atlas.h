@@ -433,6 +433,10 @@ double DS2_TimeCorrDeep4[] = {
 
 #endif
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* system specific function prototypes */
 int mbsys_atlas_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *error);
 int mbsys_atlas_deall(int verbose, void *mbio_ptr, void **store_ptr, int *error);
@@ -459,5 +463,9 @@ int mbsys_atlas_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int tim
                            int *error);
 int mbsys_atlas_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_ptr, int *error);
 int mbsys_atlas_ttcorr(int verbose, void *mbio_ptr, void *store_ptr, int *error);
+
+#ifdef __cplusplus
+}  /* extern "C" */
+#endif
 
 #endif  /* MBSYS_ATLAS_H_ */

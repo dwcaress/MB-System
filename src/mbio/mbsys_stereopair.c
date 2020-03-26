@@ -44,13 +44,13 @@ int mbsys_stereopair_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *e
 	}
 
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* allocate memory for data structure */
 	const int status = mb_mallocd(verbose, __FILE__, __LINE__, sizeof(struct mbsys_stereopair_struct), (void **)store_ptr, error);
 
 	/* get data structure pointer */
-	struct mbsys_stereopair_struct *store = (struct mbsys_stereopair_struct *)*store_ptr;
+	// struct mbsys_stereopair_struct *store = (struct mbsys_stereopair_struct *)*store_ptr;
 
 	/* initialize data record */
 	memset(*store_ptr, 0, sizeof(struct mbsys_stereopair_struct));
@@ -83,10 +83,10 @@ int mbsys_stereopair_deall(int verbose, void *mbio_ptr, void **store_ptr, int *e
 
 	/* deallocate any arrays or structures contained within the store data structure */
 	if (store->num_soundings_alloc > 0 && store->soundings != NULL)
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)(&store->soundings), error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)(&store->soundings), error);
 
 	/* deallocate memory for data structure */
-	status = mb_freed(verbose, __FILE__, __LINE__, (void **)store_ptr, error);
+	status &= mb_freed(verbose, __FILE__, __LINE__, (void **)store_ptr, error);
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
@@ -111,7 +111,7 @@ int mbsys_stereopair_dimensions(int verbose, void *mbio_ptr, void *store_ptr, in
 	}
 
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	struct mbsys_stereopair_struct *store = (struct mbsys_stereopair_struct *)store_ptr;
@@ -159,10 +159,10 @@ int mbsys_stereopair_pingnumber(int verbose, void *mbio_ptr, unsigned int *pingn
 	}
 
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
-	struct mbsys_stereopair_struct *store = (struct mbsys_stereopair_struct *)mb_io_ptr->store_data;
+	// struct mbsys_stereopair_struct *store = (struct mbsys_stereopair_struct *)mb_io_ptr->store_data;
 
 	/* extract data from structure */
 	*pingnumber = 0;
@@ -191,10 +191,10 @@ int mbsys_stereopair_sonartype(int verbose, void *mbio_ptr, void *store_ptr, int
 	}
 
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
-	struct mbsys_stereopair_struct *store = (struct mbsys_stereopair_struct *)store_ptr;
+	// struct mbsys_stereopair_struct *store = (struct mbsys_stereopair_struct *)store_ptr;
 
 	/* get sonar type */
 	*sonartype = MB_TOPOGRAPHY_TYPE_CAMERA;
@@ -223,10 +223,10 @@ int mbsys_stereopair_sidescantype(int verbose, void *mbio_ptr, void *store_ptr, 
 	}
 
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
-	struct mbsys_stereopair_struct *store = (struct mbsys_stereopair_struct *)store_ptr;
+	// struct mbsys_stereopair_struct *store = (struct mbsys_stereopair_struct *)store_ptr;
 
 	/* get sidescan type */
 	*ss_type = MB_SIDESCAN_LINEAR;
@@ -507,7 +507,7 @@ int mbsys_stereopair_insert(int verbose, void *mbio_ptr, void *store_ptr, int ki
 	}
 
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	struct mbsys_stereopair_struct *store = (struct mbsys_stereopair_struct *)store_ptr;
@@ -611,7 +611,7 @@ int mbsys_stereopair_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *k
 	}
 
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	struct mbsys_stereopair_struct *store = (struct mbsys_stereopair_struct *)store_ptr;
@@ -696,7 +696,7 @@ int mbsys_stereopair_detects(int verbose, void *mbio_ptr, void *store_ptr, int *
 	}
 
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	struct mbsys_stereopair_struct *store = (struct mbsys_stereopair_struct *)store_ptr;
@@ -770,7 +770,7 @@ int mbsys_stereopair_gains(int verbose, void *mbio_ptr, void *store_ptr, int *ki
 	}
 
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	struct mbsys_stereopair_struct *store = (struct mbsys_stereopair_struct *)store_ptr;
@@ -842,7 +842,7 @@ int mbsys_stereopair_extract_altitude(int verbose, void *mbio_ptr, void *store_p
 	}
 
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	struct mbsys_stereopair_struct *store = (struct mbsys_stereopair_struct *)store_ptr;
@@ -907,7 +907,7 @@ int mbsys_stereopair_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, i
 	}
 
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	struct mbsys_stereopair_struct *store = (struct mbsys_stereopair_struct *)store_ptr;
@@ -1035,7 +1035,7 @@ int mbsys_stereopair_extract_nnav(int verbose, void *mbio_ptr, void *store_ptr, 
 	}
 
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	struct mbsys_stereopair_struct *store = (struct mbsys_stereopair_struct *)store_ptr;
@@ -1182,7 +1182,7 @@ int mbsys_stereopair_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, in
 	}
 
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	struct mbsys_stereopair_struct *store = (struct mbsys_stereopair_struct *)store_ptr;
@@ -1257,7 +1257,7 @@ int mbsys_stereopair_copy(int verbose, void *mbio_ptr, void *store_ptr, void *co
 	}
 
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointers */
 	struct mbsys_stereopair_struct *store = (struct mbsys_stereopair_struct *)store_ptr;

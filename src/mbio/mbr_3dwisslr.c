@@ -656,7 +656,13 @@ int mbr_3dwisslr_index_data
         time_i[4] = store->minutes;
         time_i[5] = store->seconds;
         time_i[6] = (int)(0.001 * store->nanoseconds);
-        mb_get_time(verbose, time_i, &time_d);
+        // handle glitch in early WISSL data where seconds could be 60
+        if (mb_get_time(verbose, time_i, &time_d) != MB_SUCCESS && time_i[5] == 60) {
+          time_i[5]--;
+          mb_get_time(verbose, time_i, &time_d);
+          time_d += 1.0;
+          mb_get_date(verbose, time_d, time_i);
+        }
 
         /* augment the index table */
         mb_io_ptr->indextable[mb_io_ptr->num_indextable].total_index_org =
@@ -895,7 +901,6 @@ int mbr_3dwisslr_rd_data
   size_t index;
   int time_i[7];
   int time_j[5];
-  int found;
 
   if (verbose >= 2)
     {
@@ -924,10 +929,10 @@ int mbr_3dwisslr_rd_data
   *error = MB_ERROR_NO_ERROR;
 
   /* find next unread record in the file index table */
-  found = false;
+  bool found = false;
   int irecord = 0;
-  for (int i = 0; i < mb_io_ptr->num_indextable && found == false; i++)
-    if (mb_io_ptr->indextable[i].read == false)
+  for (int i = 0; i < mb_io_ptr->num_indextable && !found; i++)
+    if (!mb_io_ptr->indextable[i].read)
       {
       found = true;
       irecord = i;
@@ -936,7 +941,7 @@ int mbr_3dwisslr_rd_data
   int status = MB_SUCCESS;
 
   /* read the next record */
-  if (found == true)
+  if (found)
     {
     /* set the file offset */
     fseek(mb_io_ptr->mbfp, mb_io_ptr->indextable[irecord].offset, SEEK_SET);
@@ -1562,12 +1567,9 @@ int mbr_3dwisslr_rd_data
         pulse = &store->pulses[ipulse];
         mb_get_binary_float(true, (void *)&buffer[index], &(pulse->angle_az)); index += 4;
         mb_get_binary_float(true, (void *)&buffer[index], &(pulse->angle_el)); index += 4;
-        mb_get_binary_float(true, (void *)&buffer[index], &(pulse->offset_az));
-        index += 4;
-        mb_get_binary_float(true, (void *)&buffer[index], &(pulse->offset_el));
-        index += 4;
-        mb_get_binary_float(true, (void *)&buffer[index], &(pulse->time_offset));
-        index += 4;
+        mb_get_binary_float(true, (void *)&buffer[index], &(pulse->offset_az)); index += 4;
+        mb_get_binary_float(true, (void *)&buffer[index], &(pulse->offset_el)); index += 4;
+        mb_get_binary_float(true, (void *)&buffer[index], &(pulse->time_offset)); index += 4;
         pulse->time_d = 0.0;
         pulse->acrosstrack_offset = 0.0;
         pulse->alongtrack_offset = 0.0;
@@ -1694,7 +1696,7 @@ int mbr_rt_3dwisslr
   int status = MB_SUCCESS;
 
   /* if needed index the file */
-  if (*file_indexed == false)
+  if (!*file_indexed)
     status = mbr_3dwisslr_index_data(verbose, mbio_ptr, store_ptr, error);
 
   /* read next data from file */
@@ -1702,7 +1704,7 @@ int mbr_rt_3dwisslr
 
   /* if needed calculate bathymetry */
   if (( status == MB_SUCCESS) && ( store->kind == MB_DATA_DATA) &&
-    ( store->bathymetry_calculated == false) )
+      (!store->bathymetry_calculated) )
     mbsys_3ddwissl_calculatebathymetry(verbose,
       mbio_ptr,
       store_ptr,

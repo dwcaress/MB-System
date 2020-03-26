@@ -49,8 +49,8 @@ const char *TimeTag::typeMnemonic()
 
 
 /* *************************************************************************
-NOTE: 
-TimeTag::parseValue() implementation depends on format of string generated 
+NOTE:
+TimeTag::parseValue() implementation depends on format of string generated
 by TimeTag::ascii()
 *****************************************************************************/
 const char *TimeTag::ascii()
@@ -106,7 +106,7 @@ void TimeTag::parseValue(const char *stringRep)
 
     case ParseYear:
       if (!StringConverter::isInteger(token)) {
-	sprintf(errorBuf, 
+	sprintf(errorBuf,
 		"TimeTag::parseValue() - invalid year: \"%s\"", token);
 	throw Exception(errorBuf);
       }
@@ -117,14 +117,14 @@ void TimeTag::parseValue(const char *stringRep)
 
     case ParseDayOfYear:
       if (!StringConverter::isInteger(token)) {
-	sprintf(errorBuf, 
+	sprintf(errorBuf,
 		"TimeTag::parseValue() - invalid day-of-year: \"%s\"", token);
 	throw Exception(errorBuf);
       }
 
       int month;
 
-      dayOfYearToMonthDay(atoi(token), 
+      dayOfYearToMonthDay(atoi(token),
 				timeStruct.tm_year,
 				&month,
 				&timeStruct.tm_mday);
@@ -137,7 +137,7 @@ void TimeTag::parseValue(const char *stringRep)
 
     case ParseHours:
       if (!StringConverter::isInteger(token)) {
-	sprintf(errorBuf, 
+	sprintf(errorBuf,
 		"TimeTag::parseValue() - invalid hours: \"%s\"", token);
 	throw Exception(errorBuf);
       }
@@ -148,7 +148,7 @@ void TimeTag::parseValue(const char *stringRep)
 
     case ParseMinutes:
       if (!StringConverter::isInteger(token)) {
-	sprintf(errorBuf, 
+	sprintf(errorBuf,
 		"TimeTag::parseValue() - invalid minutes: \"%s\"", token);
 	throw Exception(errorBuf);
       }
@@ -160,7 +160,7 @@ void TimeTag::parseValue(const char *stringRep)
     case ParseSeconds:
 
       if (!StringConverter::isFloat(token)) {
-	sprintf(errorBuf, 
+	sprintf(errorBuf,
 		"TimeTag::parseValue() - invalid seconds: \"%s\"", token);
 	throw Exception(errorBuf);
       }
@@ -173,7 +173,7 @@ void TimeTag::parseValue(const char *stringRep)
       break;
 
     default:
-      sprintf(errorBuf, "TimeTag::parseValue() - extra tokens in \"%s\"", 
+      sprintf(errorBuf, "TimeTag::parseValue() - extra tokens in \"%s\"",
 	      stringRep);
 
       throw Exception(errorBuf);
@@ -181,8 +181,8 @@ void TimeTag::parseValue(const char *stringRep)
   }
 
   if (state != Done) {
-    sprintf(errorBuf, 
-	    "TimeTag::parseValue() - bad number of tokens in \"%s\"", 
+    sprintf(errorBuf,
+	    "TimeTag::parseValue() - bad number of tokens in \"%s\"",
 	    stringRep);
 
     throw Exception(errorBuf);
@@ -212,17 +212,11 @@ int TimeTag::dayOfYearToMonthDay(int doy, int year, int *month, int *day)
     return -1;
 
   *month = 0;
-  for (sum = 0, *month = 0; sum + _monthDays[leap][*month] < doy; 
+  for (sum = 0, *month = 0; sum + _monthDays[leap][*month] < doy;
        sum += _monthDays[leap][*month], (*month)++)
   {
     ;
   }
-  *day = doy - sum;  
+  *day = doy - sum;
   return 0;
 }
-
-
-
-
-
-

@@ -16,18 +16,6 @@ class MblevitusTest(unittest.TestCase):
   def setUp(self):
     self.cmd = '../../src/utilities/mblevitus'
 
-  def testNoArgs(self):
-    cmd = [self.cmd]
-    raised = False
-    try:
-      subprocess.check_output(cmd, stderr=subprocess.STDOUT)
-    except subprocess.CalledProcessError as e:
-      raised = True
-      self.assertEqual(2, e.returncode)
-      self.assertIn(b'Unable to Open Levitus database file', e.output)
-      self.assertIn(b'LevitusAnnual82.dat', e.output)
-    self.assertTrue(raised)
-
   def testHelp(self):
     cmd = [self.cmd, '-h']
     output = subprocess.check_output(cmd, stderr=subprocess.STDOUT).decode()

@@ -19,8 +19,6 @@
  *
  * Author:	D. W. Caress
  * Date:	March 16, 1999
- *
- *
  */
 
 #include <math.h>
@@ -44,7 +42,7 @@ int mbsys_hdcs_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *error) 
 	}
 
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* allocate memory for data structure */
 	const int status = mb_mallocd(verbose, __FILE__, __LINE__, sizeof(struct mbsys_hdcs_struct), (void **)store_ptr, error);
@@ -162,12 +160,12 @@ int mbsys_hdcs_deall(int verbose, void *mbio_ptr, void **store_ptr, int *error) 
 
 	/* deallocate memory for data structures */
 	if (store->beams != NULL)
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&(store->beams), error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&(store->beams), error);
 	if (store->ss_raw != NULL)
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&(store->ss_raw), error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&(store->ss_raw), error);
 
 	/* deallocate memory for data structure */
-	status = mb_freed(verbose, __FILE__, __LINE__, (void **)store_ptr, error);
+	status &= mb_freed(verbose, __FILE__, __LINE__, (void **)store_ptr, error);
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
@@ -190,7 +188,7 @@ int mbsys_hdcs_dimensions(int verbose, void *mbio_ptr, void *store_ptr, int *kin
 	}
 
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	struct mbsys_hdcs_struct *store = (struct mbsys_hdcs_struct *)store_ptr;
@@ -239,7 +237,7 @@ int mbsys_hdcs_sonartype(int verbose, void *mbio_ptr, void *store_ptr, int *sona
 	}
 
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	struct mbsys_hdcs_struct *store = (struct mbsys_hdcs_struct *)store_ptr;
@@ -327,7 +325,7 @@ int mbsys_hdcs_sidescantype(int verbose, void *mbio_ptr, void *store_ptr, int *s
 	}
 
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	struct mbsys_hdcs_struct *store = (struct mbsys_hdcs_struct *)store_ptr;
@@ -712,7 +710,7 @@ int mbsys_hdcs_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, in
 	}
 
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	struct mbsys_hdcs_struct *store = (struct mbsys_hdcs_struct *)store_ptr;
@@ -806,7 +804,7 @@ int mbsys_hdcs_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind, i
 	}
 
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	struct mbsys_hdcs_struct *store = (struct mbsys_hdcs_struct *)store_ptr;
@@ -890,7 +888,7 @@ int mbsys_hdcs_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kind, 
 	}
 
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	struct mbsys_hdcs_struct *store = (struct mbsys_hdcs_struct *)store_ptr;
@@ -965,7 +963,7 @@ int mbsys_hdcs_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr, in
 	}
 
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	struct mbsys_hdcs_struct *store = (struct mbsys_hdcs_struct *)store_ptr;
@@ -1025,7 +1023,7 @@ int mbsys_hdcs_insert_altitude(int verbose, void *mbio_ptr, void *store_ptr, dou
 	}
 
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	struct mbsys_hdcs_struct *store = (struct mbsys_hdcs_struct *)store_ptr;
@@ -1073,7 +1071,7 @@ int mbsys_hdcs_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int *ki
 	}
 
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	struct mbsys_hdcs_struct *store = (struct mbsys_hdcs_struct *)store_ptr;
@@ -1218,7 +1216,7 @@ int mbsys_hdcs_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int time
 	}
 
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	struct mbsys_hdcs_struct *store = (struct mbsys_hdcs_struct *)store_ptr;
@@ -1275,7 +1273,7 @@ int mbsys_hdcs_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_ptr
 	}
 
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointers */
 	struct mbsys_hdcs_struct *store = (struct mbsys_hdcs_struct *)store_ptr;
@@ -1366,14 +1364,12 @@ int mbsys_hdcs_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_ptr
 		if (store->beams == NULL) {
 			if (copy->beams != NULL)
 				status = mb_freed(verbose, __FILE__, __LINE__, (void **)&copy->beams, error);
-		}
-
-		/* else copy beams */
-		else {
+		} else {
+			/* else copy beams */
 			/* reallocate memory for beams */
 			if (copy->beams != NULL)
 				status = mb_freed(verbose, __FILE__, __LINE__, (void **)&copy->beams, error);
-			status = mb_mallocd(verbose, __FILE__, __LINE__, copy->num_beam * sizeof(struct mbsys_hdcs_beam_struct),
+			status &= mb_mallocd(verbose, __FILE__, __LINE__, copy->num_beam * sizeof(struct mbsys_hdcs_beam_struct),
 			                    (void **)&copy->beams, error);
 			if (status == MB_SUCCESS) {
 				for (int i = 0; i < copy->numDepths_pro; i++) {
@@ -1418,14 +1414,12 @@ int mbsys_hdcs_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_ptr
 			if (copy->ss_raw != NULL)
 				status = mb_freed(verbose, __FILE__, __LINE__, (void **)&copy->ss_raw, error);
 			copy->numSamples = 0;
-		}
-
-		/* else copy sidescan samples */
-		else {
+		} else {
+			/* else copy sidescan samples */
 			/* reallocate memory for ss_raw */
 			if (copy->ss_raw != NULL)
 				status = mb_freed(verbose, __FILE__, __LINE__, (void **)&copy->ss_raw, error);
-			status = mb_mallocd(verbose, __FILE__, __LINE__, copy->numSamples, (void **)&copy->ss_raw, error);
+			status &= mb_mallocd(verbose, __FILE__, __LINE__, copy->numSamples, (void **)&copy->ss_raw, error);
 			if (status == MB_SUCCESS) {
 				for (int i = 0; i < copy->numSamples; i++) {
 					copy->ss_raw[i] = store->ss_raw[i];

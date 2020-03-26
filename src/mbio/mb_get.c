@@ -18,11 +18,10 @@
  *
  * Author:	D. W. Caress
  * Date:	January 26, 1993
- *
- *
  */
 
 #include <math.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -74,7 +73,7 @@ int mb_get(int verbose, void *mbio_ptr, int *kind, int *pings, int time_i[7], do
 	}
 
 	int status = MB_SUCCESS;
-	int reset_last;
+	bool reset_last;
 	double headingx = 0.0;
 	double headingy = 0.0;
 
@@ -103,18 +102,18 @@ int mb_get(int verbose, void *mbio_ptr, int *kind, int *pings, int time_i[7], do
 			    pointers of arrays passed into this function,
 			    as these pointers may have changed */
 			if (status == MB_SUCCESS && mb_io_ptr->new_kind == MB_DATA_DATA) {
-				if (mb_io_ptr->bath_arrays_reallocated == true) {
+				if (mb_io_ptr->bath_arrays_reallocated) {
 					status &= mb_update_arrayptr(verbose, mbio_ptr, (void **)&beamflag, error);
 					status &= mb_update_arrayptr(verbose, mbio_ptr, (void **)&bath, error);
 					status &= mb_update_arrayptr(verbose, mbio_ptr, (void **)&bathacrosstrack, error);
 					status &= mb_update_arrayptr(verbose, mbio_ptr, (void **)&bathalongtrack, error);
 					mb_io_ptr->bath_arrays_reallocated = false;
 				}
-				if (mb_io_ptr->amp_arrays_reallocated == true) {
+				if (mb_io_ptr->amp_arrays_reallocated) {
 					status &= mb_update_arrayptr(verbose, mbio_ptr, (void **)&amp, error);
 					mb_io_ptr->amp_arrays_reallocated = false;
 				}
-				if (mb_io_ptr->ss_arrays_reallocated == true) {
+				if (mb_io_ptr->ss_arrays_reallocated) {
 					status &= mb_update_arrayptr(verbose, mbio_ptr, (void **)&ss, error);
 					status &= mb_update_arrayptr(verbose, mbio_ptr, (void **)&ssacrosstrack, error);
 					status &= mb_update_arrayptr(verbose, mbio_ptr, (void **)&ssalongtrack, error);
@@ -435,7 +434,7 @@ int mb_get(int verbose, void *mbio_ptr, int *kind, int *pings, int time_i[7], do
 		}
 
 		/* if needed reset "last" pings */
-		if (reset_last == true) {
+		if (reset_last) {
 			mb_io_ptr->last_time_d = mb_io_ptr->new_time_d;
 			mb_io_ptr->last_lon = mb_io_ptr->new_lon;
 			mb_io_ptr->last_lat = mb_io_ptr->new_lat;
@@ -600,7 +599,7 @@ int mb_get(int verbose, void *mbio_ptr, int *kind, int *pings, int time_i[7], do
 				ssalongtrack[i] = 0.0;
 			}
 		}
-		if (mb_io_ptr->variable_beams == false) {
+		if (!mb_io_ptr->variable_beams) {
 			*nbath = mb_io_ptr->beams_bath_max;
 			*namp = mb_io_ptr->beams_amp_max;
 			*nss = mb_io_ptr->pixels_ss_max;

@@ -306,8 +306,8 @@ int mb_topogrid_intersect(int verbose, void *topogrid_ptr, double navlon, double
 
 	int status = MB_SUCCESS;
 
+	bool done = false;
 	double rmax;
-	int done = false;
 	double dtopo = 0.0;
 	double rmin = 0.0;
 
@@ -355,7 +355,7 @@ int mb_topogrid_intersect(int verbose, void *topogrid_ptr, double navlon, double
 	double topotolerance = 0.1;
 
 	/* test different ranges along the vector until the grid is intersected */
-	while (done == false && iteration < iteration_max) {
+	while (!done && iteration < iteration_max) {
 		/* update the range to be tested */
 		r += dr;
 

@@ -1,0 +1,50 @@
+
+Swath Data File:      TN136HS.309.snipped.mb54
+MBIO Data Format ID:  54
+Format name:          MBF_EM12DARW
+Informal Description: Simrad EM12S RRS Darwin processed format
+Attributes:           Simrad EM12S, bathymetry and amplitude,
+                      81 beams, binary, Oxford University.
+
+Data Totals:
+Number of Records:                           2
+Bathymetry Data (81 beams):
+  Number of Beams:              162
+  Number of Good Beams:         115     70.99%
+  Number of Zero Beams:          47     29.01%
+  Number of Flagged Beams:        0      0.00%
+Amplitude Data (81 beams):
+  Number of Beams:              162
+  Number of Good Beams:         115     70.99%
+  Number of Zero Beams:          47     29.01%
+  Number of Flagged Beams:        0      0.00%
+Sidescan Data (1024 pixels):
+  Number of Pixels:            2048
+  Number of Good Pixels:          0      0.00%
+  Number of Zero Pixels:          0      0.00%
+  Number of Flagged Pixels:    2048     100.00%
+
+Navigation Totals:
+Total Time:             0.0014 hours
+Total Track Length:     0.0036 km
+Average Speed:          2.6044 km/hr ( 1.4078 knots)
+
+Start of Data:
+Time:  11 05 2001 00:01:44.000000  JD309 (2001-11-05T00:01:44.000000)
+Lon:  -124.501602100     Lat:    40.838493300     Depth:   462.6000 meters
+Speed:  1.4400 km/hr ( 0.7784 knots)  Heading: 324.5000 degrees
+Sonar Depth:    0.0000 m  Sonar Altitude:  462.6000 m
+
+End of Data:
+Time:  11 05 2001 00:01:49.000000  JD309 (2001-11-05T00:01:49.000000)
+Lon:  -124.501632600     Lat:    40.838516200     Depth:   462.2000 meters
+Speed:  0.3600 km/hr ( 0.1946 knots)  Heading: 324.9000 degrees
+Sonar Depth:    0.0000 m  Sonar Altitude:  462.2000 m
+
+Limits:
+Minimum Longitude:    -124.505794155   Maximum Longitude:    -124.497393497
+Minimum Latitude:       40.836260446   Maximum Latitude:       40.840773217
+Minimum Sonar Depth:     0.0000   Maximum Sonar Depth:     0.0000
+Minimum Altitude:      462.2000   Maximum Altitude:      462.6000
+Minimum Depth:         448.2000   Maximum Depth:         468.2000
+Minimum Amplitude:       0.0000   Maximum Amplitude:       0.0000

@@ -96,7 +96,7 @@ loadSubMap(const double xcen, const double ycen, double* mapWidth, double vehN, 
 		case MAPBOUNDS_OK:
 			break;
 
-        case MAPBOUNDS_NEAR_EDGE:
+		case MAPBOUNDS_NEAR_EDGE:
 			logs(TL_OMASK(TL_TERRAIN_MAP_DEM, TL_LOG),"TerrainNav:: Vehicle is operating near the reference map boundary"
 				   "; correlation area may be truncated\n");
 			break;
@@ -608,8 +608,11 @@ extractVarMap(const double north, const double east, double* mapParams) {
 					}
 				}
 			}
+
 			this->map.depthVariance = temp;
+
 		}
+
 		mapdata_free(data, 1);
 	}
 
@@ -936,4 +939,3 @@ computeInterpTerrainGradient(int* xIndices, int* yIndices, double xi, double yi,
 		}
 	}
 }
-

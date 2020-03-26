@@ -1,19 +1,19 @@
-
-MB-System README file
----------------------
+--
+### MB-System README file
+--
 This file contains general information regarding the MB-System open
 source software package for the processing and display of swath sonar data.
 This file is located at the top of the MB-System source code distribution
 directory structure.
 
-The copyright and licensing terms are contained in the file *COPYING*.
-The GNU GPL version 3 license used for MB-System can be found in the file *GPL*.
+The copyright and licensing terms are contained in the file *COPYING.md*.
+The GNU GPL version 3 license used for MB-System can be found in the file *GPL.md*.
 The software authors are listed in the file *AUTHORS*.
-A log of source code changes is in the file *CHANGELOG*.
+A log of source code changes is in the file *CHANGELOG.md*.
 Installation instructions are found in the file *NOTES*.
 
-MB-System version 5 description
--------------------------------
+### MB-System version 5 description
+--
 
 MB-System is a software package consisting of programs which manipulate,
 process, list, or display swath sonar bathymetry, amplitude, and sidescan data.
@@ -26,11 +26,11 @@ from a variety of sources. Most of the programs are command-line tools, but the
 package does include graphical tools for editing swath bathymetry, editing
 navigation, modeling bathymetry calculation, and adjusting survey navigation.
 
-MB-System programs
-------------------
-| Program                 | Description                                                                                                                                                                                                                                                                                                                                                                                         |
+### MB-System programs
+--
+
+| Program                 | Description                                                                                                                                                                                                                                                                                                                                                                                         
 |-------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| 
 | mb7k2jstar(1)           | Extracts subbottom profiler and/or sidescan sonar data from Reson 7k format data files into Edgetech Jstar format data files                                                                                                                                                                                                                                                                        |
 | mb7k2ss(1)              | Extracts sidescan sonar data from Reson 7k format data, bins and lays the sidescan onto the seafloor, and outputs files in the MBF_MBLDEOIH formst (MBIO format id 71)                                                                                                                                                                                                                              |
 | mb7kpreprocess(1)       | Performs preprocessing of Reson 7k multibeam data in the 7k format (MBIO format 88) (deprecated, use mbpreprocess instead)                                                                                                                                                                                                                                                                                                                 |
@@ -102,8 +102,8 @@ MB-System programs
 | mbtime(1)               | Translate between calendar time values and unix time                                                                                                                                                                                                                                                                                                                                                |
 | mbvelocitytool(1)       | Interactive water sound velocity profile editor                                                                                                                                                                                                                                                                                                                                                     |
 
-The version 5 data processing structure
----------------------------------------
+### The version 5 data processing structure
+--
 
 MB-System version 5 features utilities implementing a parallel processing
 scheme that simplifies the processing of most swath data. This scheme is
@@ -244,8 +244,8 @@ can similarly change the SVP file without impacting on the bathymetry
 editing or navigation editing components of the processing.
 
 
-Other required and suggested software and data
-----------------------------------------------
+### Other required and suggested software and data
+--
 
 MB-System requires a number of other software packages and databases to be
 fully functional. These are:
@@ -305,8 +305,8 @@ Ghostscript-based packages from the Free Software Foundation.
 Users of MacOs X should note that many of the above packages can be painlessly
 installed using the fink package available from the Fink Project.
 
-Documentation
--------------
+###Documentation
+--
 
 The html documentation consists of a number of html documents and images in the
 directory mbsystem/share/doc/mbsystem/html. This documentation also comprises
@@ -322,8 +322,8 @@ documentation includes some general information about MB-System (e.g. who
 wrote, how to get it, how to install it) and a complete set of manual
 pages.
 
-MB-System discussion list
--------------------------
+###MB-System discussion list
+--
 
 We maintain an MB-System discussion email list to facilitate communication
 among MB-System developers and users. We encourage users with questions and/or
@@ -341,14 +341,14 @@ To subscribe to the list go to:
 To read the archives go to:
         http://listserver.mbari.org/sympa/arc/mbsystem
 
-Suggestions
------------
+###Suggestions
+--
 
 We are interested in your suggestions. Please post in the discussion list
 rather than emailing the authors directly.
 
-Bugs
-----
+###Bugs
+--
 
 There are undoubtably bugs in this software. Although we make no promises about
 how rapidly problems will be fixed, we strongly encourage users to notify us of

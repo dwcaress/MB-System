@@ -68,14 +68,14 @@ unsigned long TimeP::milliseconds()
   TimeP::gettime(&timeNow);
 
   if (!_epochAssigned) {
-    // Initialize epoch the first time through 
+    // Initialize epoch the first time through
     _epoch.tv_sec  = timeNow.tv_sec;
     _epoch.tv_nsec = timeNow.tv_nsec;
     _epochAssigned = True;
-  } 
+  }
 
-  long delta = 
-    (timeNow.tv_sec - _epoch.tv_sec) * 1000 + 
+  long delta =
+    (timeNow.tv_sec - _epoch.tv_sec) * 1000 +
       (timeNow.tv_nsec - _epoch.tv_nsec) / 1.e6;
 
   return (unsigned long )delta;
@@ -87,7 +87,7 @@ void TimeP::gettime(struct timespec *timeSpec)
    	clock_gettime(CLOCK_REALTIME, timeSpec);
 
 //  printf(":\t\t\t\tTimeP::gettime() - seconds %ld\n", timeSpec->tv_sec);
-} 
+}
 
 void TimeP::gettime(TimeIF::TimeSpec *timeSpec)
 {
@@ -95,13 +95,13 @@ void TimeP::gettime(TimeIF::TimeSpec *timeSpec)
   TimeP::gettime(&timeNow);
   timeSpec->seconds     = timeNow.tv_sec;
   timeSpec->nanoSeconds = timeNow.tv_nsec;
-} 
+}
 
 void TimeP::getEpoch(timespec *timeSpec)
 {
   timeSpec->tv_sec     = _epoch.tv_sec;
   timeSpec->tv_nsec    = _epoch.tv_nsec;
-} 
+}
 
 
 
@@ -151,7 +151,7 @@ int TimeP::hourMinSecToSecs(char *timestring, double *secs)
     {
       return -1;
     }
-    nflds++; 
+    nflds++;
     if (nflds > 4)
       return -1;
   }
@@ -224,11 +224,11 @@ int TimeP::dayOfYearToMonthDay(int doy, int year, int *month, int *day)
     return -1;
 
   *month = 0;
-  for (sum = 0, *month = 0; sum + _monthDays[leap][*month] < doy; 
+  for (sum = 0, *month = 0; sum + _monthDays[leap][*month] < doy;
        sum += _monthDays[leap][*month], (*month)++)
   {
     ;
   }
-  *day = doy - sum;  
+  *day = doy - sum;
   return 0;
 }

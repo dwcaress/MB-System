@@ -79,7 +79,7 @@ class MbconfigTest(unittest.TestCase):
     self.assertRegex(output, version_id_regex)
 
     match = re.search(version_id_regex, output)
-    version_id = int(match[0])
+    version_id = int(match.group(0))
     self.assertGreater(version_id, 50700000)
 
   def testVersionMajor(self):

@@ -24,7 +24,7 @@ typedef enum
 }XdrOp;
 
 
-typedef struct 
+typedef struct
 {
   XdrOp     x_op;
   char*   x_public;

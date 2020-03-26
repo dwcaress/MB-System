@@ -39,7 +39,8 @@ void mapT::clean() {
 		delete [] xpts;
 		xpts = NULL;
 	}
-	if(ypts != NULL) {
+
+  if(ypts != NULL) {
 		delete [] ypts;
 		ypts = NULL;
 	}
@@ -1039,7 +1040,7 @@ void sensorT::parseSensorSpecs(char* fileName) {
 	} else {
       // Throw exception on file open error rather than exit
       sprintf(temp, "Error opening sensor file %s...\n", fileName);
-      fprintf(stderr,"%s", temp);
+      fprintf(stderr, "%s", temp);
       throw Exception(temp);
 	}
 
@@ -1150,7 +1151,7 @@ void vehicleT::parseVehicleSpecs(char* fileName) {
         vehicleFile.close();
      } else {
         sprintf(temp,"Error opening file %s...\n", fileName);
-        fprintf(stderr,"%s", temp);
+        fprintf(stderr, "%s", temp);
         throw Exception(temp);
      }
 
@@ -1433,4 +1434,3 @@ void commsT::release() {
     particlename=NULL;
     logname=NULL;
 }
-

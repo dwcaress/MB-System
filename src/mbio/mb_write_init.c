@@ -17,10 +17,10 @@
  *
  * Author:	D. W. Caress
  * Date:	January 25, 1993
- *
  */
 
 #include <math.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -37,7 +37,7 @@
 #include "netcdf.h"
 #include "../surf/mb_sapi.h"
 #ifdef _WIN32
-#	include <rpc/xdr.h>			/* Don't understand whay this is now need. It wasn't till recently. 26 Juin 2018 (JL)*/
+#	include <rpc/xdr.h>			/* Don't understand why this is now need. It wasn't till recently. 26 Juin 2018 (JL)*/
 #endif
 
 
@@ -101,11 +101,11 @@ int mb_write_init(int verbose, char *file, int format, void **mbio_ptr, int *bea
 	mb_io_ptr->file_pos = 0;
 	mb_io_ptr->file_bytes = 0;
 	mb_io_ptr->mbfp2 = NULL;
-	strcpy(mb_io_ptr->file2, "\0");
+	strcpy(mb_io_ptr->file2, "");
 	mb_io_ptr->file2_pos = 0;
 	mb_io_ptr->file2_bytes = 0;
 	mb_io_ptr->mbfp3 = NULL;
-	strcpy(mb_io_ptr->file3, "\0");
+	strcpy(mb_io_ptr->file3, "");
 	mb_io_ptr->file3_pos = 0;
 	mb_io_ptr->file3_bytes = 0;
 	mb_io_ptr->ncid = 0;

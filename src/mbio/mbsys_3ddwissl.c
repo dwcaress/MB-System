@@ -342,7 +342,7 @@
 #include "mb_status.h"
 #include "mbsys_3ddwissl.h"
 
-#define MBF_3DDEPTHP_DEBUG 1
+// #define MBF_3DDEPTHP_DEBUG 1
 
 /*-------------------------------------------------------------------- */
 int mbsys_3ddwissl_alloc
@@ -366,7 +366,7 @@ int mbsys_3ddwissl_alloc
     }
 
   /* get mbio descriptor */
-  struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+  // struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
   /* allocate memory for data structure */
   int status = mb_mallocd(verbose,
@@ -545,7 +545,7 @@ int mbsys_3ddwissl_dimensions
     }
 
   /* get mbio descriptor */
-  struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+  // struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
   /* get data structure pointer */
   struct mbsys_3ddwissl_struct *store = (struct mbsys_3ddwissl_struct *)store_ptr;
@@ -637,29 +637,6 @@ int mbsys_3ddwissl_preprocess
   int *error
 )
 {
-  double time_d;
-  int time_i[7], time_j[5];
-  double navlon;
-  double navlat;
-  double heading;  /* heading (degrees) */
-  double sensordepth;
-  double roll;  /* roll (degrees) */
-  double pitch;  /* pitch (degrees) */
-  double speed;  /* speed (degrees) */
-  double mtodeglon, mtodeglat;
-  double dlonm, dlatm;
-  double headingx, headingy;
-  int interp_status = MB_SUCCESS;
-  int interp_error = MB_ERROR_NO_ERROR;
-  int ipulse;
-  int jnav = 0;
-  int jsensordepth = 0;
-  int jheading = 0;
-  /* int  jaltitude = 0; */
-  int jattitude = 0;
-  double amplitude_threshold;
-  double target_altitude;
-
   if (verbose >= 2)
     {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -671,6 +648,24 @@ int mbsys_3ddwissl_preprocess
     fprintf(stderr, "dbg2       preprocess_pars_ptr:        %p\n", (void *)preprocess_pars_ptr);
     }
 
+  double navlon;
+  double navlat;
+  double heading;  /* heading (degrees) */
+  double sensordepth;
+  double roll;  /* roll (degrees) */
+  double pitch;  /* pitch (degrees) */
+  double speed;  /* speed (degrees) */
+  double mtodeglon, mtodeglat;
+  double dlonm, dlatm;
+  double headingx, headingy;
+  int interp_error = MB_ERROR_NO_ERROR;
+  // int ipulse;
+  int jnav = 0;
+  int jsensordepth = 0;
+  int jheading = 0;
+  /* int  jaltitude = 0; */
+  int jattitude = 0;
+
   /* always successful */
   int status = MB_SUCCESS;
   *error = MB_ERROR_NO_ERROR;
@@ -681,14 +676,23 @@ int mbsys_3ddwissl_preprocess
 
   /* get data structure pointers */
   struct mbsys_3ddwissl_struct *store = (struct mbsys_3ddwissl_struct *)store_ptr;
-  struct mb_platform_struct *platform = (struct mb_platform_struct *)platform_ptr;
+  // struct mb_platform_struct *platform = (struct mb_platform_struct *)platform_ptr;
   struct mb_preprocess_struct *pars = (struct mb_preprocess_struct *)preprocess_pars_ptr;
 
-  if (verbose >= 2)
-    {
+  /* get kluges */
+  bool kluge_beampatternsnell = false;
+  double kluge_beampatternsnellfactor = 1.0;
+  for (int i = 0; i < pars->n_kluge; i++) {
+    if (pars->kluge_id[i] == MB_PR_KLUGE_BEAMTWEAK) {
+      kluge_beampatternsnell = true;
+      kluge_beampatternsnellfactor = *((double *)&pars->kluge_pars[i * MB_PR_KLUGE_PAR_SIZE]);
+    }
+  }
+
+  if (verbose >= 2) {
     fprintf(stderr, "dbg2       target_sensor:              %d\n", pars->target_sensor);
     fprintf(stderr, "dbg2       timestamp_changed:          %d\n", pars->timestamp_changed);
-    fprintf(stderr, "dbg2       time_d:                     %f\n", pars->time_d);
+    // fprintf(stderr, "dbg2       time_d:                     %f\n", pars->time_d);
     fprintf(stderr, "dbg2       n_nav:                      %d\n", pars->n_nav);
     fprintf(stderr, "dbg2       nav_time_d:                 %p\n", pars->nav_time_d);
     fprintf(stderr, "dbg2       nav_lon:                    %p\n", pars->nav_lon);
@@ -710,13 +714,19 @@ int mbsys_3ddwissl_preprocess
     fprintf(stderr, "dbg2       attitude_pitch:             %p\n", pars->attitude_pitch);
     fprintf(stderr, "dbg2       attitude_heave:             %p\n", pars->attitude_heave);
     fprintf(stderr, "dbg2       n_kluge:                    %d\n", pars->n_kluge);
-    for (int i = 0; i < pars->n_kluge; i++)
-      fprintf(stderr, "dbg2       kluge_id[%d]:                    %d\n", i,
-        pars->kluge_id[i]);
+    for (int i = 0; i < pars->n_kluge; i++) {
+      fprintf(stderr, "dbg2       kluge_id[%d]:                    %d\n", i, pars->kluge_id[i]);
+      if (pars->kluge_id[i] == MB_PR_KLUGE_BEAMTWEAK) {
+        fprintf(stderr, "dbg2       kluge_beampatternsnell:        %d\n", kluge_beampatternsnell);
+        fprintf(stderr, "dbg2       kluge_beampatternsnellfactor:  %f\n", kluge_beampatternsnellfactor);
+      }
     }
+  }
 
+  int time_i[7];
+  int time_j[5];
   /* change timestamp if indicated */
-  if (pars->timestamp_changed == true)
+  if (pars->timestamp_changed)
     {
     store->time_d = pars->time_d;
     mb_get_date(verbose, pars->time_d, time_i);
@@ -732,14 +742,15 @@ int mbsys_3ddwissl_preprocess
     }
 
   /* interpolate navigation and attitude */
-  time_d = store->time_d;
+  double time_d = store->time_d;
   mb_get_date(verbose, time_d, time_i);
 
   /* get nav sensordepth heading attitude values for record timestamp
      - this will generally conform to the first pulse of the scan */
+  // int interp_status = MB_SUCCESS;
   if (pars->n_nav > 0)
     {
-    interp_status = mb_linear_interp_longitude(verbose,
+    /* interp_status = */ mb_linear_interp_longitude(verbose,
       pars->nav_time_d - 1,
       pars->nav_lon - 1,
       pars->n_nav,
@@ -747,7 +758,7 @@ int mbsys_3ddwissl_preprocess
       &store->navlon,
       &jnav,
       &interp_error);
-    interp_status = mb_linear_interp_latitude(verbose,
+    /* interp_status = */ mb_linear_interp_latitude(verbose,
       pars->nav_time_d - 1,
       pars->nav_lat - 1,
       pars->n_nav,
@@ -755,7 +766,7 @@ int mbsys_3ddwissl_preprocess
       &store->navlat,
       &jnav,
       &interp_error);
-    interp_status = mb_linear_interp(verbose,
+    /* interp_status = */ mb_linear_interp(verbose,
       pars->nav_time_d - 1,
       pars->nav_speed - 1,
       pars->n_nav,
@@ -766,7 +777,7 @@ int mbsys_3ddwissl_preprocess
     store->speed = (float)speed;
     }
   if (pars->n_sensordepth > 0)
-    interp_status = mb_linear_interp(verbose,
+    /* interp_status = */ mb_linear_interp(verbose,
       pars->sensordepth_time_d - 1,
       pars->sensordepth_sensordepth - 1,
       pars->n_sensordepth,
@@ -776,7 +787,7 @@ int mbsys_3ddwissl_preprocess
       &interp_error);
   if (pars->n_heading > 0)
     {
-    interp_status = mb_linear_interp_heading(verbose,
+    /* interp_status = */ mb_linear_interp_heading(verbose,
       pars->heading_time_d - 1,
       pars->heading_heading - 1,
       pars->n_heading,
@@ -795,7 +806,7 @@ int mbsys_3ddwissl_preprocess
   /*  } */
   if (pars->n_attitude > 0)
     {
-    interp_status = mb_linear_interp(verbose,
+    /* interp_status = */ mb_linear_interp(verbose,
       pars->attitude_time_d - 1,
       pars->attitude_roll - 1,
       pars->n_attitude,
@@ -804,7 +815,7 @@ int mbsys_3ddwissl_preprocess
       &jattitude,
       &interp_error);
     store->roll = (float)roll;
-    interp_status = mb_linear_interp(verbose,
+    /* interp_status = */ mb_linear_interp(verbose,
       pars->attitude_time_d - 1,
       pars->attitude_pitch - 1,
       pars->n_attitude,
@@ -819,8 +830,8 @@ int mbsys_3ddwissl_preprocess
   if (platform_ptr != NULL)
     {
 
-    /* calculate sonar position position */
-    status =mb_platform_position(verbose,
+    /* calculate sonar position */
+    status = mb_platform_position(verbose,
       platform_ptr,
       pars->target_sensor,
       0,
@@ -883,7 +894,7 @@ int mbsys_3ddwissl_preprocess
     /* get nav sensordepth heading attitude values for record timestamp */
     if (pars->n_nav > 0)
       {
-      interp_status = mb_linear_interp_longitude(verbose,
+      /* interp_status = */ mb_linear_interp_longitude(verbose,
         pars->nav_time_d - 1,
         pars->nav_lon - 1,
         pars->n_nav,
@@ -891,7 +902,7 @@ int mbsys_3ddwissl_preprocess
         &navlon,
         &jnav,
         &interp_error);
-      interp_status = mb_linear_interp_latitude(verbose,
+      /* interp_status = */ mb_linear_interp_latitude(verbose,
         pars->nav_time_d - 1,
         pars->nav_lat - 1,
         pars->n_nav,
@@ -906,7 +917,7 @@ int mbsys_3ddwissl_preprocess
       }
     if (pars->n_sensordepth > 0)
       {
-      interp_status =mb_linear_interp(verbose,
+      /* interp_status = */mb_linear_interp(verbose,
         pars->sensordepth_time_d - 1,
         pars->sensordepth_sensordepth - 1,
         pars->n_sensordepth,
@@ -918,7 +929,7 @@ int mbsys_3ddwissl_preprocess
       }
     if (pars->n_heading > 0)
       {
-      interp_status = mb_linear_interp_heading(verbose,
+      /* interp_status = */ mb_linear_interp_heading(verbose,
         pars->heading_time_d - 1,
         pars->heading_heading - 1,
         pars->n_heading,
@@ -930,7 +941,7 @@ int mbsys_3ddwissl_preprocess
       }
     if (pars->n_attitude > 0)
       {
-      interp_status = mb_linear_interp(verbose,
+      /* interp_status = */ mb_linear_interp(verbose,
         pars->attitude_time_d - 1,
         pars->attitude_roll - 1,
         pars->n_attitude,
@@ -940,7 +951,7 @@ int mbsys_3ddwissl_preprocess
         &interp_error);
       pulse->roll_offset = (float)(roll - store->roll);
 
-      interp_status = mb_linear_interp(verbose,
+      /* interp_status = */ mb_linear_interp(verbose,
         pars->attitude_time_d - 1,
         pars->attitude_pitch - 1,
         pars->n_attitude,
@@ -991,18 +1002,25 @@ int mbsys_3ddwissl_preprocess
       pulse->roll_offset = (float)(roll - store->roll);
       pulse->pitch_offset = (float)(pitch - store->pitch);
       }
+
+      /* if requested apply kluge scaling of rx beam angles */
+      if (kluge_beampatternsnell) {
+        pulse->angle_az = RTD * asin(MAX(-1.0, MIN(1.0, kluge_beampatternsnellfactor * sin(DTR * pulse->angle_az))));
+      }
     }
 
   /* calculate the bathymetry using the newly inserted values */
-  if (pars->sounding_amplitude_filter == true)
+  double amplitude_threshold;
+  if (pars->sounding_amplitude_filter)
     amplitude_threshold = pars->sounding_amplitude_threshold;
   else
     amplitude_threshold = MBSYS_3DDWISSL_DEFAULT_AMPLITUDE_THRESHOLD;
-  if (pars->sounding_altitude_filter == true)
+  double target_altitude;
+  if (pars->sounding_altitude_filter)
     target_altitude = pars->sounding_target_altitude;
   else
     target_altitude = MBSYS_3DDWISSL_DEFAULT_TARGET_ALTITUDE;
-  if (pars->head1_offsets == true)
+  if (pars->head1_offsets)
     {
     store->heada_offset_x_m = pars->head1_offsets_x;
     store->heada_offset_y_m = pars->head1_offsets_y;
@@ -1011,7 +1029,7 @@ int mbsys_3ddwissl_preprocess
     store->heada_offset_roll_deg = pars->head1_offsets_roll;
     store->heada_offset_pitch_deg = pars->head1_offsets_pitch;
     }
-  if (pars->head2_offsets == true)
+  if (pars->head2_offsets)
     {
     store->headb_offset_x_m = pars->head2_offsets_x;
     store->headb_offset_y_m = pars->head2_offsets_y;
@@ -1020,12 +1038,8 @@ int mbsys_3ddwissl_preprocess
     store->headb_offset_roll_deg = pars->head2_offsets_roll;
     store->headb_offset_pitch_deg = pars->head2_offsets_pitch;
     }
-  status = mbsys_3ddwissl_calculatebathymetry(verbose,
-    mbio_ptr,
-    store_ptr,
-    amplitude_threshold,
-    target_altitude,
-    error);
+  status = mbsys_3ddwissl_calculatebathymetry(verbose, mbio_ptr, store_ptr,
+                amplitude_threshold, target_altitude, error);
 
   if (verbose >= 2)
     {
@@ -1062,7 +1076,7 @@ int mbsys_3ddwissl_sensorhead
     }
 
   /* get mbio descriptor */
-  struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+  // struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
   /* get data structure pointer */
   struct mbsys_3ddwissl_struct *store = (struct mbsys_3ddwissl_struct *)store_ptr;
@@ -1130,6 +1144,10 @@ int mbsys_3ddwissl_extract
   int *error                /* out: see mb_status.h:/MB_ERROR/ */
 )
 {
+  (void)ss;  // Unused arg
+  (void)ssacrosstrack;  // Unused arg
+  (void)ssalongtrack;  // Unused arg
+
   assert(mbio_ptr != NULL);
   assert(store_ptr != NULL);
 
@@ -1183,11 +1201,9 @@ int mbsys_3ddwissl_extract
     mb_io_ptr->beamwidth_ltrack = 0.02;
 
     /* get the bathymetry */
-    for (int ipulse = 0; ipulse < store->pulses_per_scan; ipulse++)
-      {
+    for (int ipulse = 0; ipulse < store->pulses_per_scan; ipulse++) {
       struct mbsys_3ddwissl_pulse_struct *pulse = &store->pulses[ipulse];
-      for (int isounding = 0; isounding < store->soundings_per_pulse; isounding++)
-        {
+      for (int isounding = 0; isounding < store->soundings_per_pulse; isounding++) {
         const int ibath = store->soundings_per_pulse * ipulse + isounding;
         struct mbsys_3ddwissl_sounding_struct *sounding = &pulse->soundings[isounding];
         beamflag[ibath] = sounding->beamflag;
@@ -1195,8 +1211,8 @@ int mbsys_3ddwissl_extract
         amp[ibath] = (double) sounding->amplitude;
         bathacrosstrack[ibath] = sounding->acrosstrack;
         bathalongtrack[ibath] = sounding->alongtrack;
-        }
       }
+    }
 
     /* always successful */
     *error = MB_ERROR_NO_ERROR;
@@ -1256,9 +1272,9 @@ int mbsys_3ddwissl_insert
   int *error                /* out: see mb_status.h:/MB_ERROR/ */
 )
 {
-  int status = MB_SUCCESS;
-  struct mbsys_3ddwissl_pulse_struct *pulse;
-  struct mbsys_3ddwissl_sounding_struct *sounding;
+  (void)ss;  // Unused arg
+  (void)ssacrosstrack;  // Unused arg
+  (void)ssalongtrack;  // Unused arg
 
   /* check for non-null data */
   assert(mbio_ptr != NULL);
@@ -1279,8 +1295,12 @@ int mbsys_3ddwissl_insert
     fprintf(stderr, "dbg2       kind:       %d\n", kind);
     }
 
+  int status = MB_SUCCESS;
+  struct mbsys_3ddwissl_pulse_struct *pulse;
+  struct mbsys_3ddwissl_sounding_struct *sounding;
+
   /* get mbio descriptor */
-  struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+  // struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
   /* get data structure pointer */
   struct mbsys_3ddwissl_struct *store = (struct mbsys_3ddwissl_struct *)store_ptr;
@@ -1302,9 +1322,9 @@ int mbsys_3ddwissl_insert
     store->time_d = time_d;
 
     /* calculate change in navigation */
-    double dlon = navlon - store->navlon;
-    double dlat = navlat - store->navlat;
-    double dheading = heading - store->heading;
+    // const double dlon = navlon - store->navlon;
+    // const double dlat = navlat - store->navlat;
+    // const double dheading = heading - store->heading;
 
     /* set the navigation */
     store->navlon = navlon;
@@ -1425,7 +1445,7 @@ int mbsys_3ddwissl_ttimes
     }
 
   /* get mb_io_ptr */
-  struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+  // struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
   struct mbsys_3ddwissl_struct *store = (struct mbsys_3ddwissl_struct *)store_ptr;
 
@@ -1518,7 +1538,7 @@ int mbsys_3ddwissl_detects
     }
 
   /* get mbio descriptor */
-  struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+  // struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
   /* get data structure pointer */
   struct mbsys_3ddwissl_struct *store = (struct mbsys_3ddwissl_struct *)store_ptr;
@@ -1621,7 +1641,7 @@ int mbsys_3ddwissl_pulses
     }
 
   /* get mbio descriptor */
-  struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+  // struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
   /* get data structure pointer */
   struct mbsys_3ddwissl_struct *store = (struct mbsys_3ddwissl_struct *)store_ptr;
@@ -1711,7 +1731,7 @@ int mbsys_3ddwissl_gains
     }
 
   /* get mbio descriptor */
-  struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+  // struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
   /* get data structure pointer */
   struct mbsys_3ddwissl_struct *store = (struct mbsys_3ddwissl_struct *)store_ptr;
@@ -1802,7 +1822,7 @@ int mbsys_3ddwissl_extract_altitude
     }
 
   /* get mbio descriptor */
-  struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+  // struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
   /* get data structure pointer */
   struct mbsys_3ddwissl_struct *store = (struct mbsys_3ddwissl_struct *)store_ptr;
@@ -1917,7 +1937,7 @@ int mbsys_3ddwissl_extract_nnav
     }
 
   /* get mbio descriptor */
-  struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+  // struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
   /* get data structure pointer */
   struct mbsys_3ddwissl_struct *store = (struct mbsys_3ddwissl_struct *)store_ptr;
@@ -2033,7 +2053,7 @@ int mbsys_3ddwissl_extract_nav
     }
 
   /* get mbio descriptor */
-  struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+  // struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
   /* get data structure */
   struct mbsys_3ddwissl_struct *store = (struct mbsys_3ddwissl_struct *)store_ptr;
@@ -2129,8 +2149,6 @@ int mbsys_3ddwissl_insert_nav
   int *error                          /* out: see mb_status.h:MB_ERROR */
 )
 {
-  double dlon, dlat, dheading, dsensordepth, droll, dpitch;
-
   /* check for non-null data */
   assert(mbio_ptr != NULL);
   assert(store_ptr != NULL);
@@ -2162,22 +2180,21 @@ int mbsys_3ddwissl_insert_nav
     }
 
   /* get mbio descriptor */
-  struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+  // struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
   /* get data structure pointer */
   struct mbsys_3ddwissl_struct *store = (struct mbsys_3ddwissl_struct *)store_ptr;
 
-  int status = MB_SUCCESS;
+  const int status = MB_SUCCESS;
 
   /* insert data in swathplus data structure */
-  if (store->kind == MB_DATA_DATA)
-    {
-    dlon = navlon - store->navlon;
-    dlat = navlat - store->navlat;
-    dheading = heading - store->heading;
-    dsensordepth = draft - heave - store->sensordepth;
-    droll = roll - store->roll;
-    dpitch = pitch - store->pitch;
+  if (store->kind == MB_DATA_DATA) {
+    // const double dlon = navlon - store->navlon;
+    // const double dlat = navlat - store->navlat;
+    // const double dheading = heading - store->heading;
+    // const double dsensordepth = draft - heave - store->sensordepth;
+    // const double droll = roll - store->roll;
+    // const double dpitch = pitch - store->pitch;
 
     store->time_d = time_d;
     store->navlon = navlon;
@@ -2190,8 +2207,8 @@ int mbsys_3ddwissl_insert_nav
 
     /* done translating values */
     *error = MB_ERROR_NO_ERROR;
-    status = MB_SUCCESS;
-    }
+    // status = MB_SUCCESS;
+  }
 
   if (verbose >= 2)
     {
@@ -2231,7 +2248,7 @@ int mbsys_3ddwissl_extract_svp
     }
 
   /* get mbio descriptor */
-  struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+  // struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
   /* get data structure pointer */
   struct mbsys_3ddwissl_struct *store = (struct mbsys_3ddwissl_struct *)store_ptr;
@@ -2312,7 +2329,7 @@ int mbsys_3ddwissl_insert_svp
     }
 
   /* get mbio descriptor */
-  struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+  // struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
   /* get data structure pointer */
   struct mbsys_3ddwissl_struct *store = (struct mbsys_3ddwissl_struct *)store_ptr;
@@ -2374,7 +2391,7 @@ int mbsys_3ddwissl_copy
   *error = MB_ERROR_NO_ERROR;
 
   /* get mbio descriptor */
-  struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+  // struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
   /* get data structure pointers */
   struct mbsys_3ddwissl_struct *store = (struct mbsys_3ddwissl_struct *)store_ptr;
@@ -3481,8 +3498,7 @@ int mbsys_3ddwissl_print_store
       fprintf(stderr, "%s     angle_el:                      %f\n", first, pulse->angle_el);
       fprintf(stderr, "%s     offset_az:                     %f\n", first, pulse->offset_az);
       fprintf(stderr, "%s     offset_el:                     %f\n", first, pulse->offset_el);
-      fprintf(stderr, "%s     time_offset:                   %f\n", first,
-        pulse->time_offset);
+      fprintf(stderr, "%s     time_offset:                   %f\n", first, pulse->time_offset);
       fprintf(stderr, "%s     time_d:                        %f\n", first, pulse->time_d);
       fprintf(stderr,
         "%s     acrosstrack_offset:            %f\n",
@@ -3563,6 +3579,8 @@ int mbsys_3ddwissl_calculatebathymetry
   int *error              /* out: see mb_status.h:MB_ERROR */
 )
 {
+  (void)mbio_ptr;  // Unused arg
+
   struct mbsys_3ddwissl_pulse_struct *pulse;
   struct mbsys_3ddwissl_sounding_struct *sounding;
   double alpha, beta, theta, phi;
@@ -3670,18 +3688,17 @@ int mbsys_3ddwissl_calculatebathymetry
         if (sounding->range > 0.001)
           {
           /* apply pitch and roll */
-          alpha = angle_el_sign * pulse->angle_el+ store->pitch+ head_offset_pitch_deg+
-            pulse->pitch_offset;
-          beta = 90.0 - (angle_az_sign * pulse->angle_az)+ store->roll+
-            head_offset_roll_deg+ pulse->roll_offset;
+          alpha = angle_el_sign * pulse->angle_el + store->pitch
+                  + head_offset_pitch_deg + pulse->pitch_offset;
+          beta = 90.0 - (angle_az_sign * pulse->angle_az) + store->roll
+                  + head_offset_roll_deg + pulse->roll_offset;
 
           /* calculate amplitude range factor */
           if (target_altitude > 0.0)
             {
-            target_range = target_altitude/
-              cos(DTR *
-              (angle_az_sign * pulse->angle_az- head_offset_roll_deg-
-              pulse->roll_offset));
+            target_range = target_altitude /
+                            cos(DTR * (angle_az_sign * pulse->angle_az
+                              - head_offset_roll_deg - pulse->roll_offset));
             scaled_range_diff = (sounding->range - target_range) / target_range;
             amplitude_factor = exp(-4.0 * scaled_range_diff * scaled_range_diff);
             }
@@ -3702,13 +3719,14 @@ int mbsys_3ddwissl_calculatebathymetry
 
           /* get lateral and vertical components of range */
           xx = sounding->range * sin(DTR * theta);
-          sounding->depth = sounding->range * cos(DTR * theta)+ head_offset_z_m+
-            pulse->sensordepth_offset;
-          sounding->acrosstrack = xx * cos(DTR * phi)+ head_offset_x_m+
-            pulse->acrosstrack_offset;
-          sounding->alongtrack = xx * sin(DTR * phi)+ head_offset_y_m+
-            pulse->alongtrack_offset;
-
+          sounding->depth = sounding->range * cos(DTR * theta)
+                            + head_offset_z_m + pulse->sensordepth_offset;
+          sounding->acrosstrack = xx * cos(DTR * phi) + head_offset_x_m
+                                  + angle_az_sign * pulse->offset_az
+                                  + pulse->acrosstrack_offset;
+          sounding->alongtrack = xx * sin(DTR * phi) + head_offset_y_m
+                                  + angle_el_sign * pulse->offset_el
+                                  + pulse->alongtrack_offset;
 
           /* check for largest amplitude */
           if (sounding->amplitude > amplitude_largest)

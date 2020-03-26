@@ -60,7 +60,7 @@ lon_center = center_long;
 lat_center = center_lat;
 false_easting = false_east;
 false_northing = false_north;
-sincos(center_lat, &sin_p15, &cos_p15);
+gsincos(center_lat, &sin_p15, &cos_p15);
 
 /* Report parameters to the user
   -----------------------------*/
@@ -92,7 +92,7 @@ double ksp;
 /* Forward equations
   -----------------*/
 dlon = adjust_lon(lon - lon_center);
-sincos(lat,&sinphi,&cosphi);
+gsincos(lat,&sinphi,&cosphi);
 coslon = cos(dlon);
 g = sin_p15 * sinphi + cos_p15 * cosphi * coslon;
 if (g < (1.0/ p))

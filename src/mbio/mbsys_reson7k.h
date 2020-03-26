@@ -1880,11 +1880,16 @@ typedef struct s7kr_systemeventmessage_struct {
 /* Reson 7k calibrated snippet data (part of record 7058) */
 typedef struct s7kr_calibratedsnippettimeseries_struct {
 	unsigned short beam_number; /* Beam or element number */
-	unsigned int begin_sample;  /* First sample included in snippet */
-	unsigned int detect_sample; /* Detection point */
-	unsigned int end_sample;    /* Last sample included in snippet */
-	unsigned int nalloc;        /* Bytes allocated to hold amplitude time series */
-	float *amplitude;           /* Amplitude time series */
+	unsigned int begin_sample;  /* First sample number in beam from transmitter and outward */
+	unsigned int detect_sample; /* Bottom detection point in beam from transmitter and outward */
+	unsigned int end_sample;    /* Last sample number in beam from transmitter and outward */
+	unsigned int nalloc;        /* Bytes allocated to hold the time series */
+	float *amplitude;           /* Backscattering Strength (BS) for each sample. BS = 10 log10(sigma), */
+                              /*   where 'sigma' is the backscattering cross section. The snippet */
+                              /*   vector of each beam is ordered in samples of increasing range */
+                              /*   from the transmitter. */
+  float *footprints;          /* Footprint area series for each sample in square meters. Only */
+                              /*   available when control flag bit 6 is set */
 } s7kr_calibratedsnippettimeseries;
 
 /* Reson 7k calibrated snippet (record 7058) */
@@ -1911,15 +1916,21 @@ typedef struct s7kr_calibratedsnippet_struct {
 	                         8 = No gain (Gain is too low)
 	                         255 = System cannot be calibrated (c7k file missing)
 	                         Other = reserved */
-	unsigned int control_flags;  /* Control settings from RC 1113 command:
-	                   Bit 0: Brightness is required to pass
-	                   Bit 1: Colinearity is required to pass
-	                   Bit 2: Bottom detection results are used for snippet
-	                   Bit 3: Snippets display min requirements are used
-	                   Bit 4: Minimum window size is required
-	                   Bit 5: Maximum window size is required
-	                   6-31: reserved */
-	mb_u_char reserved[28];      /* Reserved for future use */
+  unsigned int control_flags;  // Control settings from RC 1113 command:
+                        //  Bit 0: Brightness is required to pass
+                        //  Bit 1: Colinearity is required to pass
+                        //  Bit 2: Bottom detection results are used for snippet
+                        //  Bit 3: Snippets display min requirements are used
+                        //  Bit 4: Minimum window size is required
+                        //  Bit 5: Maximum window size is required
+                        //  Bit 6: - Footprint areas are included
+                        //  Bit 7: - Generic compensation (not per unit)
+                        //  Bit 8: - Single absorption value used for the whole ping.
+                        //           Otherwise a CTD profile is used
+                        //  Bit 9-31: - Reserved
+  float absorption;     // Absorption value in dB/km. Only valid when
+                      //   control flag bit 8 is set
+  unsigned int reserved[6];  // Reserved for future use
 	s7kr_calibratedsnippettimeseries calibratedsnippettimeseries[MBSYS_RESON7K_MAX_BEAMS];
 	/* Snippet time series for each beam */
 } s7kr_calibratedsnippet;
@@ -2099,14 +2110,14 @@ struct mbsys_reson7k_struct {
 
 	/* ping record id's */
 	int current_ping_number;
-	int read_volatilesettings;
-	int read_matchfilter;
-	int read_beamgeometry;
-	int read_remotecontrolsettings;
-	int read_bathymetry;
-	int read_backscatter;
-	int read_beam;
-	int read_verticaldepth;
+	int read_volatilesettings;  // TODO(schwehr): bool
+	int read_matchfilter;  // TODO(schwehr): bool
+	int read_beamgeometry;  // TODO(schwehr): bool
+	int read_remotecontrolsettings;  // TODO(schwehr): bool
+	int read_bathymetry;  // TODO(schwehr): bool
+	int read_backscatter;  // TODO(schwehr): bool
+	int read_beam;  // TODO(schwehr): bool
+	int read_verticaldepth;  // TODO(schwehr): bool
 	int read_tvg;
 	int read_image;
 	int read_v2pingmotion;
@@ -2351,6 +2362,10 @@ struct mbsys_reson7k_struct {
 	int nrec_other;
 };
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* 7K Macros */
 int mbsys_reson7k_checkheader(s7k_header header);
 
@@ -2413,7 +2428,9 @@ int mbsys_reson7k_ancilliarysensor(int verbose, void *mbio_ptr, void *store_ptr,
                                    double *sensor6, double *sensor7, double *sensor8, int *error);
 int mbsys_reson7k_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_ptr, int *error);
 int mbsys_reson7k_checkheader(s7k_header header);
-int mbsys_reson7k_makess(int verbose, void *mbio_ptr, void *store_ptr, int source, int pixel_size_set, double *pixel_size,
+int mbsys_reson7k_makess_source(int verbose, void *mbio_ptr, void *store_ptr, int source, int pixel_size_set, double *pixel_size,
+                         int swath_width_set, double *swath_width, int pixel_int, int *error);
+int mbsys_reson7k_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel_size_set, double *pixel_size,
                          int swath_width_set, double *swath_width, int pixel_int, int *error);
 int mbsys_reson7k_print_header(int verbose, s7k_header *header, int *error);
 int mbsys_reson7k_print_reference(int verbose, s7kr_reference *reference, int *error);
@@ -2477,5 +2494,9 @@ int mbsys_reson7k_print_pitch(int verbose, s7kr_pitch *pitch, int *error);
 int mbsys_reson7k_print_soundvelocity(int verbose, s7kr_soundvelocity *soundvelocity, int *error);
 int mbsys_reson7k_print_absorptionloss(int verbose, s7kr_absorptionloss *absorptionloss, int *error);
 int mbsys_reson7k_print_spreadingloss(int verbose, s7kr_spreadingloss *spreadingloss, int *error);
+
+#ifdef __cplusplus
+}  /* extern "C" */
+#endif
 
 #endif  /* MBSYS_RESON7K_H_ */

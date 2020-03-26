@@ -54,11 +54,11 @@ struct mbsys_ldeoih_struct {
 
 	/* sonar depth and altitude */
 	double sonardepth; /* meters (sonar depth for bathymetry calculation,
-	               already corrected for heave if needed,
-	                   sonardepth = transducer_depth
-	                   bath = altitude + sonardepth
-	                   sonardepth = draft - heave
-	                   draft = sonardepth + heave */
+	                      already corrected for heave if needed,
+	                          sonardepth = transducer_depth
+	                          bath = altitude + sonardepth
+	                          sonardepth = draft - heave
+	                          draft = sonardepth + heave */
 	double altitude;   /* meters */
 
 	/* heading and speed */
@@ -88,7 +88,7 @@ struct mbsys_ldeoih_struct {
 	/* scaling */
 	float depth_scale;    /* depth[i] = (bath[i] * depth_scale) + transducer_depth */
 	float distance_scale; /* acrosstrackdistance[i] = acrosstrack[i] * distance_scale
-	              alongtrackdistance[i] = alongtrack[i] * distance_scale */
+	                         alongtrackdistance[i] = alongtrack[i] * distance_scale */
 
 	/* data type parameters */
 	mb_s_char ss_scalepower; /* gives scaling factor for sidescan values in powers of 10:
@@ -100,26 +100,26 @@ struct mbsys_ldeoih_struct {
 	                                             ss_type = 0: logarithmic (dB)
 	                                             ss_type = 1: linear (voltage) */
 	mb_u_char imagery_type;  /* MBIO imagery source types defined in mb_status.h
-	                                         MB_IMAGERY_TYPE_UNKNOWN		        0
-	                                         MB_IMAGERY_TYPE_ECHOSOUNDER	        1
-	                                         MB_IMAGERY_TYPE_MULTIBEAM		2
-	                                         MB_IMAGERY_TYPE_SIDESCAN		3
-	                                         MB_IMAGERY_TYPE_INTERFEROMETRIC	        4
-	                                         MB_IMAGERY_TYPE_LIDAR      	        5
-	                                         MB_IMAGERY_TYPE_CAMERA     	        6
-	                                         MB_IMAGERY_TYPE_GRID     	        7
-	                                         MB_IMAGERY_TYPE_POINT       	        8 */
+	                                         MB_IMAGERY_TYPE_UNKNOWN           0
+	                                         MB_IMAGERY_TYPE_ECHOSOUNDER       1
+	                                         MB_IMAGERY_TYPE_MULTIBEAM         2
+	                                         MB_IMAGERY_TYPE_SIDESCAN          3
+	                                         MB_IMAGERY_TYPE_INTERFEROMETRIC   4
+	                                         MB_IMAGERY_TYPE_LIDAR             5
+	                                         MB_IMAGERY_TYPE_CAMERA            6
+	                                         MB_IMAGERY_TYPE_GRID              7
+	                                         MB_IMAGERY_TYPE_POINT             8 */
 
 	mb_u_char topo_type; /* MBIO topography source types
-	                                     MB_TOPOGRAPHY_TYPE_UNKNOWN		0
-	                                     MB_TOPOGRAPHY_TYPE_ECHOSOUNDER	        1
-	                                     MB_TOPOGRAPHY_TYPE_MULTIBEAM		2
-	                                     MB_TOPOGRAPHY_TYPE_SIDESCAN		3
-	                                     MB_TOPOGRAPHY_TYPE_INTERFEROMETRIC	4
-	                                     MB_TOPOGRAPHY_TYPE_LIDAR      	        5
-	                                     MB_TOPOGRAPHY_TYPE_CAMERA     	        6
-	                                     MB_TOPOGRAPHY_TYPE_GRID     	        7
-	                                     MB_TOPOGRAPHY_TYPE_POINT       	        8 */
+	                                     MB_TOPOGRAPHY_TYPE_UNKNOWN            0
+	                                     MB_TOPOGRAPHY_TYPE_ECHOSOUNDER        1
+	                                     MB_TOPOGRAPHY_TYPE_MULTIBEAM          2
+	                                     MB_TOPOGRAPHY_TYPE_SIDESCAN           3
+	                                     MB_TOPOGRAPHY_TYPE_INTERFEROMETRIC    4
+	                                     MB_TOPOGRAPHY_TYPE_LIDAR              5
+	                                     MB_TOPOGRAPHY_TYPE_CAMERA             6
+	                                     MB_TOPOGRAPHY_TYPE_GRID               7
+	                                     MB_TOPOGRAPHY_TYPE_POINT              8 */
 
 	/* pointers to arrays */
 	unsigned char *beamflag;

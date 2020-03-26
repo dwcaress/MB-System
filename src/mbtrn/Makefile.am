@@ -1,4 +1,4 @@
-lib_LTLIBRARIES = libr7kr.la libmframe.la 
+lib_LTLIBRARIES = libmframe.la libr7kr.la
 
 include_HEADERS = \
         mframe/src/mframe.h \

@@ -26,8 +26,6 @@
  *
  * Author:	D. W. Caress
  * Date:	April 13,  1999
- *
- *
  */
 
 #include <math.h>
@@ -158,7 +156,7 @@ int mbsys_singlebeam_dimensions(int verbose, void *mbio_ptr, void *store_ptr, in
 	}
 
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	struct mbsys_singlebeam_struct *store = (struct mbsys_singlebeam_struct *)store_ptr;
@@ -267,6 +265,10 @@ int mbsys_singlebeam_extract(int verbose, void *mbio_ptr, void *store_ptr, int *
                              double *navlon, double *navlat, double *speed, double *heading, int *nbath, int *namp, int *nss,
                              char *beamflag, double *bath, double *amp, double *bathacrosstrack, double *bathalongtrack,
                              double *ss, double *ssacrosstrack, double *ssalongtrack, char *comment, int *error) {
+	(void)amp;  // Unused arg
+	(void)ss;  // Unused arg
+	(void)ssacrosstrack;  // Unused arg
+	(void)ssalongtrack;  // Unused arg
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -396,6 +398,9 @@ int mbsys_singlebeam_insert(int verbose, void *mbio_ptr, void *store_ptr, int ki
                             double navlat, double speed, double heading, int nbath, int namp, int nss, char *beamflag,
                             double *bath, double *amp, double *bathacrosstrack, double *bathalongtrack, double *ss,
                             double *ssacrosstrack, double *ssalongtrack, char *comment, int *error) {
+	(void)bathalongtrack;  // Unused arg
+	(void)ssalongtrack;  // Unused arg
+
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -585,7 +590,7 @@ int mbsys_singlebeam_detects(int verbose, void *mbio_ptr, void *store_ptr, int *
 	}
 
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	struct mbsys_singlebeam_struct *store = (struct mbsys_singlebeam_struct *)store_ptr;
@@ -737,7 +742,7 @@ int mbsys_singlebeam_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, i
 	}
 
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	struct mbsys_singlebeam_struct *store = (struct mbsys_singlebeam_struct *)store_ptr;

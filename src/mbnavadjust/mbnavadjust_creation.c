@@ -481,6 +481,35 @@ Widget CreatemainWindow(Widget parent) {
 	XtAddCallback(pushButton_importdata, XmNactivateCallback, do_fileselection_mode, (XtPointer)MBNA_FILESELECTION_IMPORT);
 
 	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(pulldownMenu_file, (char *)"Import Reference Grid", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(
+		    args[ac], XmNfontList,
+		    BX_CONVERT(pulldownMenu_file, (char *)"-*-" SANS "-bold-r-*-*-*-120-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		pushButton_importreference = XmCreatePushButton(pulldownMenu_file, (char *)"pushButton_importreference", args, ac);
+		XtManageChild(pushButton_importreference);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(pushButton_importreference, XmNactivateCallback, BxSetValuesCB,
+	              (XtPointer) "xmDialogShell_fileselection.title=Import Reference Grid");
+	XtAddCallback(pushButton_importreference, XmNactivateCallback, BxUnmanageCB, (XtPointer) "label_format");
+	XtAddCallback(pushButton_importreference, XmNactivateCallback, BxUnmanageCB, (XtPointer) "textField_format");
+	XtAddCallback(pushButton_importreference, XmNactivateCallback, BxManageCB, (XtPointer) "bulletinBoard_fileselection");
+	XtAddCallback(pushButton_importreference, XmNactivateCallback, do_fileselection_mode, (XtPointer)MBNA_FILESELECTION_REFERENCE);
+
+	ac = 0;
 	separator3 = XmCreateSeparator(pulldownMenu_file, (char *)"separator3", args, ac);
 	XtManageChild(separator3);
 

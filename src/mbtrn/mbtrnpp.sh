@@ -504,6 +504,7 @@ do
     vout "ovr OPT_TRN_SEL: $OPT_TRN_SEL"
     fi
 
+
     if [ ${a:2:7} == "trn-dis" ]
     then
     OPT_TRN_SEL=${OPT_TRN_DIS}

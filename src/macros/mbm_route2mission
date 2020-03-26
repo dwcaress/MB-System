@@ -26,7 +26,8 @@
 #   mbm_route2mission -Iroutefile [-Aaltitudemin/altitudeabort[/altitudedesired]
 #                     -Bbehavior1/behavior2/behavior3/behavior4
 #                     -Ddepthmax/depthabort[/depthdescent]
-#                     -Fforwarddistance -Ggpsmode -M[sensors] -Omissionfile
+#                     -Fforwarddistance -Ggpsmode -M[sensors]
+#                     -N[spiraldescentaltitude[/startsurvey]] -Omissionfile
 #                     -P[startdistance | startlon/startlat] -Sspeed -Tstarttime -Wwaypointspacing -V -H]
 #
 #
@@ -35,7 +36,6 @@
 #      Monterey Bay Aquarium Research Institute
 #      Moss Landing, CA
 #
-# Version:
 # $Id $
 #
 #
@@ -410,13 +410,23 @@ elsif ($deltat)
 	{
 	$logmode = 1;
 	}
-if ($spiraldescentarg =~ /\S+/)
+if ($spiraldescentarg =~ /\S+\/\S+/)
+	{
+	($spiraldescentaltitude, $startsurvey) = $spiraldescentarg =~ /(\S+)\/(\S+)/;
+  if ($startsurvey != 0)
+    {
+    $startsurvey = 1;
+    }
+	}
+elsif ($spiraldescentarg =~ /\S+/)
 	{
 	($spiraldescentaltitude) = $spiraldescentarg =~ /(\S+)/;
+  $startsurvey = 1;
 	}
 elsif ($spiraldescent)
 	{
 	$spiraldescentaltitude = $altitudedesired;
+  $startsurvey = 1;
 	}
 if ($multibeamsettings =~ /\S+\/\S+\/\S+\/\S+/)
 	{
@@ -878,8 +888,8 @@ for ($i = 0; $i < $nmissionpoints; $i++)
 		$depthabort = $mmissiondepths[$i];
 		}
 	}
-$depthabort = $depthabort + $altitudedesired;
-$depthmax = $depthabort - 0.5 * $altitudemin;
+$depthmax = $depthabort + 0.5 * $altitudemin;
+$depthabort = $depthabort + $altitudemin;
 
 # calculate slopes
 for ($i = $nmissionpoints-1; $i > 0; $i--)
@@ -1003,7 +1013,15 @@ elsif ($verbose)
                 }
  	if ($spiraldescent)
 		{
-		printf "    Descent style:            Spiral descent\r\n";
+    if ($startsurvey == 0)
+      {
+		  printf "    Descent style:            Spiral descent without StartSurvey behavior\r\n";
+      }
+    else
+      {
+			printf "    Descent style:            Spiral descent with StartSurvey behavior\r\n";
+      }
+		printf "    Descent altitude:         %f\r\n", $spiraldescentaltitude;
 		}
 	else
 		{
@@ -1077,6 +1095,14 @@ elsif ($verbose)
 	printf "    Descent Vehicle Depth:      $descentdepth (m)\r\n";
 	if ($spiraldescent)
 		{
+    if ($startsurvey == 0)
+      {
+		  printf "    Descent style:            Spiral descent without StartSurvey behavior\r\n";
+      }
+    else
+      {
+			printf "    Descent style:            Spiral descent with StartSurvey behavior\r\n";
+      }
 		printf "    Spiral descent depth:     $spiraldescentdepth m\r\n";
 		printf "    Spiral descent altitude:  $spiraldescentaltitude m\r\n";
 		}
@@ -1162,7 +1188,14 @@ if (!$outputoff)
                 }
 	if ($spiraldescent)
 		{
-		printf MFILE "#     Descent style:            Spiral descent\r\n";
+		if ($startsurvey == 0)
+      {
+		  printf MFILE "#     Descent style:            Spiral descent without StartSurvey behavior\r\n";
+      }
+    else
+      {
+			printf MFILE "#     Descent style:            Spiral descent with StartSurvey behavior\r\n";
+      }
 		}
 	else
 		{
@@ -1836,15 +1869,18 @@ print "Behavior: delta_t (startup, logMode = $logmode)\r\n";
 			print MFILE "} \r\n";
 print "Behavior: waypoint\n";
 			print MFILE "# \r\n";
-			print MFILE "# Zero speed hang to allow final nav updates over acoustic modem\r\n";
-			print MFILE "# - must get start survey command over acoustic modem or mission aborts\r\n";
-			print MFILE "behavior StartSurvey  \r\n";
-			print MFILE "{ \r\n";
-			print MFILE "duration     = 300; \r\n";
-			print MFILE "} \r\n";
+      if ($startsurvey == 1)
+        {
+  			print MFILE "# Zero speed hang to allow final nav updates over acoustic modem\r\n";
+  			print MFILE "# - must get start survey command over acoustic modem or mission aborts\r\n";
+  			print MFILE "behavior StartSurvey  \r\n";
+  			print MFILE "{ \r\n";
+  			print MFILE "duration     = 300; \r\n";
+  			print MFILE "} \r\n";
 print "Behavior: startsurvey\n";
-			print MFILE "# \r\n";
-			print MFILE "# Acoustic update 4 - sent status ping at beginning of StartSurvey behavior \r\n";
+        }
+  		print MFILE "# \r\n";
+			print MFILE "# Acoustic update 4 - sent status ping at end of spiral descent \r\n";
 			print MFILE "# \r\n";
 			print MFILE "behavior acousticUpdate \r\n";
 			print MFILE "{ \r\n";
@@ -1852,8 +1888,8 @@ print "Behavior: startsurvey\n";
 			print MFILE "dummy  = 1; \r\n";
 			print MFILE "} \r\n";
 print "Behavior: acousticUpdate\n";
-			print MFILE "# \r\n";
-			print MFILE "# Spiral descend behavior to get to proper depth at start of line 1 \r\n";
+  		print MFILE "# \r\n";
+  		print MFILE "# Spiral descend behavior to get to proper depth at start of line 1 \r\n";
 			if ($maxdepthapplied == 0)
 				{
 				printf MFILE "#   Behavior depth of %f meters set by local depth and desired altitude\r\n", $mmissiondepths[$i];
@@ -1874,14 +1910,17 @@ print "Behavior: acousticUpdate\n";
 			print MFILE "} \r\n";
 			print MFILE "# \r\n";
 print "Behavior: spiral descend\n";
-			print MFILE "# Kearfott behavior - turn DVL aiding off for descent \r\n";
-			print MFILE "# \r\n";
-			print MFILE "behavior kearfott \r\n";
-			print MFILE "{ \r\n";
-			print MFILE "duration  = 2; \r\n";
-			print MFILE "enableDopAid = False; \r\n";
-			print MFILE "} \r\n";
+      if ($startsurvey == 1)
+        {
+  			print MFILE "# Kearfott behavior - turn DVL aiding off for descent \r\n";
+  			print MFILE "# \r\n";
+  			print MFILE "behavior kearfott \r\n";
+  			print MFILE "{ \r\n";
+  			print MFILE "duration  = 2; \r\n";
+  			print MFILE "enableDopAid = False; \r\n";
+  			print MFILE "} \r\n";
 print "Behavior: kearfott (disable DVL aiding)\n";
+      }
 			print MFILE "# Acoustic update 5 - sent status ping after end of line \r\n";
 			print MFILE "# \r\n";
 			print MFILE "behavior acousticUpdate \r\n";
@@ -2316,11 +2355,6 @@ printf " Mode 5 DesiredDepth: $depthconstant2 DesiredAltitude: $altitude ComDept
 				{
 				printf MFILE "duration           = %d; \r\n", ($durationfactorwaypoint * $mlengths[$i] / $survey_speed);
 				}
-			if ($mwaypoints[$i] != 0 && $iwaypoint != 0)
-				{
-				printf MFILE "# abortOnTimeout    = True; \r\n";
-				}
-			printf MFILE "altitude              = %f; \r\n", $altitude;
 			printf MFILE "depth                 = %f; \r\n", $mmissiondepths[$i];
 			if ($i > 0 && $mstartstops[$i-1] == 2)
 				{
@@ -2330,8 +2364,13 @@ printf " Mode 5 DesiredDepth: $depthconstant2 DesiredAltitude: $altitude ComDept
 				{
 				print MFILE "speed              = SURVEY_SPEED; \r\n";
 				}
-			print MFILE "avoidRange         = 60.0;\r\n";
-			print MFILE "tau                = 3;\r\n";
+			printf MFILE "reinitFilter              = True; \r\n";
+			if ($mwaypoints[$i] != 0 && $iwaypoint != 0)
+				{
+				printf MFILE "# abortOnTimeout    = True; \r\n";
+				}
+			print MFILE "# avoidRange         = 60.0;\r\n";
+			print MFILE "# tau                = 3;\r\n";
 			print MFILE "} \r\n";
 			print WFILE "$mlons[$i] $mlats[$i]\r\n";
 			}

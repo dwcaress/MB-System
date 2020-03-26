@@ -1,0 +1,47 @@
+
+Swath Data File:      TN136HS.309.snipped.mb192
+MBIO Data Format ID:  192
+Format name:          MBF_IMAGEMBA
+Informal Description: MBARI DeltaT Multibeam
+Attributes:           Multibeam, bathymetry, 480 beams, ascii + binary, MBARI.
+
+Data Totals:
+Number of Records:                           2
+Bathymetry Data (480 beams):
+  Number of Beams:              960
+  Number of Good Beams:           0      0.00%
+  Number of Zero Beams:         960     100.00%
+  Number of Flagged Beams:        0      0.00%
+Amplitude Data (0 beams):
+  Number of Beams:                0
+  Number of Good Beams:           0      0.00%
+  Number of Zero Beams:           0      0.00%
+  Number of Flagged Beams:        0      0.00%
+Sidescan Data (0 pixels):
+  Number of Pixels:               0
+  Number of Good Pixels:          0      0.00%
+  Number of Zero Pixels:          0      0.00%
+  Number of Flagged Pixels:       0      0.00%
+
+Navigation Totals:
+Total Time:             0.0014 hours
+Total Track Length:     0.0036 km
+Average Speed:          2.6007 km/hr ( 1.4058 knots)
+
+Start of Data:
+Time:  11 05 2001 00:01:44.000000  JD309 (2001-11-05T00:01:44.000000)
+Lon:  -124.501602167     Lat:    40.838493333     Depth:     0.0000 meters
+Speed:  1.2964 km/hr ( 0.7008 knots)  Heading: 324.5000 degrees
+Sonar Depth:    0.0000 m  Sonar Altitude:    0.0000 m
+
+End of Data:
+Time:  11 05 2001 00:01:49.000000  JD309 (2001-11-05T00:01:49.000000)
+Lon:  -124.501632667     Lat:    40.838516167     Depth:     5.6000 meters
+Speed:  0.1852 km/hr ( 0.1001 knots)  Heading: 324.9000 degrees
+Sonar Depth:    5.6000 m  Sonar Altitude:    0.0000 m
+
+Limits:
+Minimum Longitude:    -124.501632667   Maximum Longitude:    -124.501602167
+Minimum Latitude:       40.838493333   Maximum Latitude:       40.838516167
+Minimum Sonar Depth:     5.6000   Maximum Sonar Depth:     5.6000
+Minimum Altitude:        0.0000   Maximum Altitude:        0.0000

@@ -20,12 +20,11 @@
  *
  * Author:	David Finlayson and D. W. Caress
  * Date:	Aug 29, 2013
- *
- *
  */
 
 #include <assert.h>
 #include <math.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -37,15 +36,158 @@
 #include "mb_status.h"
 #include "mbsys_swathplus.h"
 
-static int set_identity(int verbose, swpls_matrix *m, int *error);
-static int concat_transform(int verbose, swpls_matrix *a, swpls_matrix *b, int *error);
-static int get_sxp_heave(int verbose, swpls_sxpping *sxp_sxpping, double *heave, int *error);
-static int set_sxp_height(int verbose, double heave, swpls_sxpping *sxp_ping, int *error);
 int swpls_angles_to_quat(int verbose, const swpls_angles *orientation, swpls_quaternion *q, int *error);
 int swpls_quat_to_angles(int verbose, const swpls_quaternion *q, swpls_angles *orientation, int *error);
 int swpls_slerp(int verbose, const swpls_quaternion *q0, const swpls_quaternion *q1, double t, swpls_quaternion *q, int *error);
-static double wrap_pi(double theta);
 
+static int get_sxp_heave(int verbose, swpls_sxpping *sxp_ping, double *heave, int *error) {
+       swpls_vector txoffset;
+       swpls_matrix vtow;
+
+       *error = MB_ERROR_NO_ERROR;
+
+       if (verbose >= 2) {
+               fprintf(stderr, "\ndbg2  MBIO function <%s> called.\n", __func__);
+               fprintf(stderr, "dbg2  Input arguments:\n");
+               fprintf(stderr, "dbg2       verbose:      %d\n", verbose);
+               fprintf(stderr, "dbg2       sxp_ping:    %p\n", (void *)sxp_ping);
+       }
+
+       /* crp to txer lever arms (body coordinate system) */
+       txoffset.x = sxp_ping->txer_starboard;
+       txoffset.y = -sxp_ping->txer_height;
+       txoffset.z = sxp_ping->txer_forward;
+
+       /* transform transducer lever arms from body to inertial system */
+       swpls_init_transform(verbose, &vtow, error);
+       swpls_concat_rotate_z(verbose, &vtow, +(-sxp_ping->roll) * DTR, error);
+       swpls_concat_rotate_x(verbose, &vtow, +(-sxp_ping->pitch) * DTR, error);
+       swpls_concat_rotate_y(verbose, &vtow, +sxp_ping->heading * DTR, error);
+       swpls_transform(verbose, &vtow, &txoffset, error);
+
+       *heave = sxp_ping->height - (-txoffset.y);
+
+       const int status = MB_SUCCESS;
+
+       if (verbose >= 2) {
+               fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
+               fprintf(stderr, "dbg2  Return values:\n");
+               fprintf(stderr, "dbg2       height:     %f\n", sxp_ping->height);
+               fprintf(stderr, "dbg2       error:      %d\n", *error);
+               fprintf(stderr, "dbg2  Return status:\n");
+               fprintf(stderr, "dbg2       status:     %d\n", status);
+       }
+
+       return (status);
+} /* get_sxp_heave */
+
+/* concatinates a transformation matrix b onto an existing transformation
+ * matrix a
+ *
+ * a - transformation matrix a
+ * b - transformation matrix b
+ */
+static int concat_transform(int verbose, swpls_matrix *a, swpls_matrix *b, int *error) {
+	swpls_matrix r;
+
+	*error = MB_ERROR_NO_ERROR;
+
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called.\n", __func__);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:      %d\n", verbose);
+		fprintf(stderr, "dbg2       a:            %p\n", (void *)a);
+		fprintf(stderr, "dbg2       b:            %p\n", (void *)b);
+	}
+
+	/* rotation matrix */
+	r.m11 = a->m11 * b->m11 + a->m12 * b->m21 + a->m13 * b->m31;
+	r.m12 = a->m11 * b->m12 + a->m12 * b->m22 + a->m13 * b->m32;
+	r.m13 = a->m11 * b->m13 + a->m12 * b->m23 + a->m13 * b->m33;
+
+	r.m21 = a->m21 * b->m11 + a->m22 * b->m21 + a->m23 * b->m31;
+	r.m22 = a->m21 * b->m12 + a->m22 * b->m22 + a->m23 * b->m32;
+	r.m23 = a->m21 * b->m13 + a->m22 * b->m23 + a->m23 * b->m33;
+
+	r.m31 = a->m31 * b->m11 + a->m32 * b->m21 + a->m33 * b->m31;
+	r.m32 = a->m31 * b->m12 + a->m32 * b->m22 + a->m33 * b->m32;
+	r.m33 = a->m31 * b->m13 + a->m32 * b->m23 + a->m33 * b->m33;
+
+	/* translation vector */
+	r.tx = a->tx * b->m11 + a->ty * b->m21 + a->tz * b->m31 + b->tx;
+	r.ty = a->tx * b->m12 + a->ty * b->m22 + a->tz * b->m32 + b->ty;
+	r.tz = a->tx * b->m13 + a->ty * b->m23 + a->tz * b->m33 + b->tz;
+
+	/* copy the results back into first matrix */
+	a->m11 = r.m11;
+	a->m12 = r.m12;
+	a->m13 = r.m13;
+	a->m21 = r.m21;
+	a->m22 = r.m22;
+	a->m23 = r.m23;
+	a->m31 = r.m31;
+	a->m32 = r.m32;
+	a->m33 = r.m33;
+	a->tx = r.tx;
+	a->ty = r.ty;
+	a->tz = r.tz;
+
+	const int status = MB_SUCCESS;
+
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       error:      %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:     %d\n", status);
+	}
+
+	return (status);
+} /* concat_transform */
+
+/* set/reset an swpls_matrix back to the identity matrix
+ *
+ * m - transformation matrix to reset
+ */
+static int set_identity(int verbose, swpls_matrix *m, int *error) {
+
+	*error = MB_ERROR_NO_ERROR;
+
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called.\n", __func__);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:      %d\n", verbose);
+		fprintf(stderr, "dbg2       m:            %p\n", (void *)m);
+	}
+
+	/* rotation matrix */
+	m->m11 = 1.0;
+	m->m12 = 0.0;
+	m->m13 = 0.0;
+	m->m21 = 0.0;
+	m->m22 = 1.0;
+	m->m23 = 0.0;
+	m->m31 = 0.0;
+	m->m32 = 0.0;
+	m->m33 = 1.0;
+
+	/* translation vector */
+	m->tx = 0.0;
+	m->ty = 0.0;
+	m->tz = 0.0;
+
+	const int status = MB_SUCCESS;
+
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       error:      %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:     %d\n", status);
+	}
+
+	return (status);
+} /* set_identity */
 
 /*--------------------------------------------------------------------*/
 int mbsys_swathplus_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *error) {
@@ -57,7 +199,7 @@ int mbsys_swathplus_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *er
 	}
 
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* allocate memory for data structure */
 	const int status = mb_mallocd(verbose, __FILE__, __LINE__, sizeof(struct mbsys_swathplus_struct), (void **)store_ptr, error);
@@ -179,7 +321,7 @@ int mbsys_swathplus_dimensions(int verbose, void *mbio_ptr, void *store_ptr, int
 	}
 
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	struct mbsys_swathplus_struct *store = (struct mbsys_swathplus_struct *)store_ptr;
@@ -240,8 +382,8 @@ int mbsys_swathplus_pingnumber(int verbose, void *mbio_ptr, unsigned int *pingnu
 
 	/* get data structure pointer */
 	struct mbsys_swathplus_struct *store = (struct mbsys_swathplus_struct *)mb_io_ptr->store_data;
-	swpls_sxpping *sxp_ping = (swpls_sxpping *)&(store->sxp_ping);
-	swpls_sxiping *sxi_ping = (swpls_sxiping *)&(store->sxi_ping);
+	// swpls_sxpping *sxp_ping = (swpls_sxpping *)&(store->sxp_ping);
+	// swpls_sxiping *sxi_ping = (swpls_sxiping *)&(store->sxi_ping);
 
 	/* get data kind */
 	const int kind = store->kind;
@@ -282,10 +424,10 @@ int mbsys_swathplus_sonartype(int verbose, void *mbio_ptr, void *store_ptr, int 
 	}
 
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
-	struct mbsys_swathplus_struct *store = (struct mbsys_swathplus_struct *)store_ptr;
+	// struct mbsys_swathplus_struct *store = (struct mbsys_swathplus_struct *)store_ptr;
 
 	/* get sonar type */
 	*sonartype = MB_TOPOGRAPHY_TYPE_INTERFEROMETRIC;
@@ -314,10 +456,10 @@ int mbsys_swathplus_sidescantype(int verbose, void *mbio_ptr, void *store_ptr, i
 	}
 
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
-	struct mbsys_swathplus_struct *store = (struct mbsys_swathplus_struct *)store_ptr;
+	// struct mbsys_swathplus_struct *store = (struct mbsys_swathplus_struct *)store_ptr;
 
 	/* get sidescan type */
 	*ss_type = MB_SIDESCAN_LOGARITHMIC;
@@ -357,7 +499,7 @@ int mbsys_swathplus_extract(int verbose, void *mbio_ptr, void *store_ptr, int *k
 	/* get data structure pointer */
 	struct mbsys_swathplus_struct *store = (struct mbsys_swathplus_struct *)store_ptr;
 	swpls_sxpping *sxp_ping = (swpls_sxpping *)&(store->sxp_ping);
-	swpls_sxiping *sxi_ping = (swpls_sxiping *)&(store->sxi_ping);
+	// swpls_sxiping *sxi_ping = (swpls_sxiping *)&(store->sxi_ping);
 
 	/* get data kind */
 	*kind = store->kind;
@@ -582,10 +724,6 @@ int mbsys_swathplus_insert(int verbose, void *mbio_ptr, void *store_ptr, int kin
                            double navlat, double speed, double heading, int nbath, int namp, int nss, char *beamflag,
                            double *bath, double *amp, double *bathacrosstrack, double *bathalongtrack, double *ss,
                            double *ssacrosstrack, double *ssalongtrack, char *comment, int *error) {
-	swpls_matrix vtow;
-	char path[MB_PATH_MAXLINE];
-	int nchars;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -642,7 +780,7 @@ int mbsys_swathplus_insert(int verbose, void *mbio_ptr, void *store_ptr, int kin
 
 	/* get data structure pointer */
 	struct mbsys_swathplus_struct *store = (struct mbsys_swathplus_struct *)store_ptr;
-	swpls_header *header = (swpls_header *)&(store->sxp_header);
+	// swpls_header *header = (swpls_header *)&(store->sxp_header);
 	swpls_sxpping *sxp_ping = (swpls_sxpping *)&(store->sxp_ping);
 	swpls_comment *ocomment = (swpls_comment *)&(store->comment);
 
@@ -661,6 +799,7 @@ int mbsys_swathplus_insert(int verbose, void *mbio_ptr, void *store_ptr, int kin
 		sxp_ping->time_d = time_d;
 
 		/* get the file name */
+		char path[MB_PATH_MAXLINE];
 		strncpy(path, mb_io_ptr->file, MB_PATH_MAXLINE);
 		mb_get_basename(verbose, &path[0], error);
 		strncpy(&(sxp_ping->linename[0]), &path[0], SWPLS_MAX_LINENAME);
@@ -690,6 +829,7 @@ int mbsys_swathplus_insert(int verbose, void *mbio_ptr, void *store_ptr, int kin
 		}
 
 		if (status == MB_SUCCESS) {
+			swpls_matrix vtow;
 			swpls_init_transform(verbose, &vtow, error);
 			swpls_concat_rotate_y(verbose, &vtow, sxp_ping->heading * DTR, error);
 			swpls_concat_translate(verbose, &vtow, sxp_ping->txer_e, 0.0, sxp_ping->txer_n, error);
@@ -739,7 +879,7 @@ int mbsys_swathplus_insert(int verbose, void *mbio_ptr, void *store_ptr, int kin
 		ocomment->microsec = 0;
 
 		/* allocate more memory for comment if necessary */
-		nchars = strnlen(comment, MB_COMMENT_MAXLINE) + 1;
+		int nchars = strnlen(comment, MB_COMMENT_MAXLINE) + 1;
 		if (ocomment->message_alloc < nchars) {
 			status = mb_reallocd(verbose, __FILE__, __LINE__, nchars, (void **)&(ocomment->message), error);
 			if (status != MB_SUCCESS) {
@@ -773,11 +913,6 @@ int mbsys_swathplus_insert(int verbose, void *mbio_ptr, void *store_ptr, int kin
 int mbsys_swathplus_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbeams, double *ttimes, double *angles,
                            double *angles_forward, double *angles_null, double *heave, double *alongtrack_offset, double *draft,
                            double *ssv, int *error) {
-	swpls_point *points;
-	int type;
-	double dist;
-	double alpha, beta, theta, phi;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -793,7 +928,7 @@ int mbsys_swathplus_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *ki
 	}
 
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	struct mbsys_swathplus_struct *store = (struct mbsys_swathplus_struct *)store_ptr;
@@ -801,7 +936,7 @@ int mbsys_swathplus_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *ki
 
 	/* get data kind */
 	*kind = store->kind;
-	type = store->type;
+	const int type = store->type;
 
 	int status = MB_SUCCESS;
 
@@ -825,7 +960,7 @@ int mbsys_swathplus_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *ki
 		                       error);
 		swpls_concat_rotate_y(verbose, &wtov, -sxp_ping->heading, error);
 
-		points = sxp_ping->points;
+		swpls_point *points = sxp_ping->points;
 		for (int i = 0; i < sxp_ping->nosampsfile; i++) {
 			swpls_vector ppos;
 
@@ -837,13 +972,15 @@ int mbsys_swathplus_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *ki
 			swpls_transform(verbose, &wtov, &ppos, error);
 
 			/* estimate ttime from slant range */
-			dist = sqrt(ppos.x * ppos.x + ppos.y * ppos.y + ppos.z * ppos.z);
+			const double dist = sqrt(ppos.x * ppos.x + ppos.y * ppos.y + ppos.z * ppos.z);
 			ttimes[i] = 2 * dist / *ssv;
 
 			/* estimate takeoff angles from geometry */
-			alpha = atan2(ppos.z, -ppos.y);
-			beta = atan2(-ppos.y, ppos.x);
+			const double alpha = atan2(ppos.z, -ppos.y);
+			const double beta = atan2(-ppos.y, ppos.x);
 
+			double phi;
+			double theta;
 			mb_rollpitch_to_takeoff(verbose, alpha * RTD, beta * RTD, &theta, &phi, error);
 
 			angles[i] = theta;
@@ -896,8 +1033,6 @@ int mbsys_swathplus_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *ki
 } /* mbsys_swathplus_ttimes */
 /*--------------------------------------------------------------------*/
 int mbsys_swathplus_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbeams, int *detects, int *error) {
-	int type;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -908,7 +1043,7 @@ int mbsys_swathplus_detects(int verbose, void *mbio_ptr, void *store_ptr, int *k
 	}
 
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	struct mbsys_swathplus_struct *store = (struct mbsys_swathplus_struct *)store_ptr;
@@ -916,7 +1051,7 @@ int mbsys_swathplus_detects(int verbose, void *mbio_ptr, void *store_ptr, int *k
 
 	/* get data kind */
 	*kind = store->kind;
-	type = store->type;
+	// int type = store->type;
 
 	int status = MB_SUCCESS;
 
@@ -982,7 +1117,7 @@ int mbsys_swathplus_gains(int verbose, void *mbio_ptr, void *store_ptr, int *kin
 	}
 
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	struct mbsys_swathplus_struct *store = (struct mbsys_swathplus_struct *)store_ptr;
@@ -1045,8 +1180,6 @@ int mbsys_swathplus_gains(int verbose, void *mbio_ptr, void *store_ptr, int *kin
 /*--------------------------------------------------------------------*/
 int mbsys_swathplus_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr, int *kind, double *transducer_depth,
                                      double *altitude, int *error) {
-	double sum, ave;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1056,7 +1189,7 @@ int mbsys_swathplus_extract_altitude(int verbose, void *mbio_ptr, void *store_pt
 	}
 
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	struct mbsys_swathplus_struct *store = (struct mbsys_swathplus_struct *)store_ptr;
@@ -1076,7 +1209,7 @@ int mbsys_swathplus_extract_altitude(int verbose, void *mbio_ptr, void *store_pt
 		/* calculate mean depth of first 25 near-nadir samples */
 		int i = 0;
 		int n = 0;
-		sum = 0.0;
+		double sum = 0.0;
 		while (i < sxp_ping->nosampsfile && n < 25) {
 			if (sxp_ping->points[i].status != SWPLS_POINT_REJECTED) {
 				sum += sxp_ping->points[i].z;
@@ -1087,7 +1220,7 @@ int mbsys_swathplus_extract_altitude(int verbose, void *mbio_ptr, void *store_pt
 
 		/* get the transducer altitude above the seafloor */
 		if (n > 0) {
-			ave = sum / n;
+			const double ave = sum / n;
 			*altitude = ave - (sxp_ping->height - sxp_ping->tide);
 		}
 		else {
@@ -1270,7 +1403,7 @@ int mbsys_swathplus_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int
 	}
 
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	struct mbsys_swathplus_struct *store = (struct mbsys_swathplus_struct *)store_ptr;
@@ -1399,7 +1532,7 @@ int mbsys_swathplus_copy(int verbose, void *mbio_ptr, void *store_ptr, void *cop
 	}
 
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointers */
 	struct mbsys_swathplus_struct *store = (struct mbsys_swathplus_struct *)store_ptr;
@@ -1579,14 +1712,14 @@ int swpls_chk_header(int verbose, void *mbio_ptr, char *buffer, int *recordid, i
 	}
 
 	/* get pointer to mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get values to check */
 	index = 0;
 	mb_get_binary_int(true, &buffer[index], recordid);
 	index += 4;
 	mb_get_binary_int(true, &buffer[index], size);
-	index += 4;
+	// index += 4;
 
 	int status = MB_SUCCESS;
 
@@ -1637,7 +1770,7 @@ int swpls_rd_sxpheader(int verbose, char *buffer, void *store_ptr, int *error) {
 	mb_get_binary_int(true, &buffer[index], &(header->swver));
 	index += 4;
 	mb_get_binary_int(true, &buffer[index], &(header->fmtver));
-	index += 4;
+	// index += 4;
 
 	int status = MB_SUCCESS;
 
@@ -1664,10 +1797,6 @@ int swpls_rd_sxpheader(int verbose, char *buffer, void *store_ptr, int *error) {
 } /* swpls_rd_sxpheader */
 /*--------------------------------------------------------------------*/
 int swpls_rd_sxpping(int verbose, char *buffer, void *store_ptr, int pingtype, int *error) {
-	int int_val;
-	short int short_val;
-	size_t read_len;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1686,6 +1815,7 @@ int swpls_rd_sxpping(int verbose, char *buffer, void *store_ptr, int pingtype, i
 	strncpy(&buffer[index], ping->linename, SWPLS_MAX_LINENAME);
 	index += SWPLS_MAX_LINENAME;
 	ping->linename[SWPLS_MAX_LINENAME - 1] = '\0';
+	int int_val = 0;
 	mb_get_binary_int(true, &buffer[index], &int_val);
 	index += 4;
 	ping->pingnumber = (unsigned int)int_val;
@@ -1773,7 +1903,7 @@ int swpls_rd_sxpping(int verbose, char *buffer, void *store_ptr, int pingtype, i
 	/* check that we have enough storage for the points stored in the file
 	 */
 	if (ping->points_alloc < ping->nosampsfile) {
-		read_len = (size_t)(ping->nosampsfile * sizeof(swpls_point));
+		size_t read_len = (size_t)(ping->nosampsfile * sizeof(swpls_point));
 		status = mb_reallocd(verbose, __FILE__, __LINE__, read_len, (void **)&(ping->points), error);
 		if (status != MB_SUCCESS) {
 			ping->points_alloc = 0;
@@ -1795,6 +1925,7 @@ int swpls_rd_sxpping(int verbose, char *buffer, void *store_ptr, int pingtype, i
 			index += 8;
 			mb_get_binary_float(true, &buffer[index], &(ping->points[i].z));
 			index += 4;
+			short int short_val = 0;
 			mb_get_binary_short(true, &buffer[index], &short_val);
 			index += 2;
 			ping->points[i].amp = (unsigned short)short_val;
@@ -1861,7 +1992,7 @@ int swpls_rd_projection(int verbose, char *buffer, void *store_ptr, int *error) 
 	swpls_projection *projection = NULL;
 
 	/* only read the projection if not previously set */
-	if (store->projection_set == false) {
+	if (!store->projection_set) {
 		projection = &(store->projection);
 
 		/* extract the data */
@@ -1887,7 +2018,7 @@ int swpls_rd_projection(int verbose, char *buffer, void *store_ptr, int *error) 
 
 		if (status == MB_SUCCESS) {
 			strncpy(&(projection->projection_id[0]), &buffer[index], (size_t)projection->nchars);
-			index += projection->nchars;
+			// index += projection->nchars;
 		}
 
 		if (status == MB_SUCCESS) {
@@ -1910,7 +2041,7 @@ int swpls_rd_projection(int verbose, char *buffer, void *store_ptr, int *error) 
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:                 %d\n", *error);
 		fprintf(stderr, "dbg2       store->projection_set: %d\n", store->projection_set);
-		if (store->projection_set == true) {
+		if (store->projection_set) {
 			projection = &(store->projection);
 			fprintf(stderr, "dbg2       projection->projection_id:  %s\n", projection->projection_id);
 		}
@@ -1958,7 +2089,7 @@ int swpls_rd_comment(int verbose, char *buffer, void *store_ptr, int *error) {
 
 	if (status == MB_SUCCESS) {
 		strncpy(&(comment->message[0]), &buffer[index], (size_t)comment->nchars);
-		index += comment->nchars;
+		// index += comment->nchars;
 	}
 
 	if (status == MB_SUCCESS) {
@@ -2003,7 +2134,7 @@ int swpls_rd_sxiheader(int verbose, char *buffer, void *store_ptr, int *error) {
 	mb_get_binary_int(true, &buffer[index], &(header->swver));
 	index += 4;
 	mb_get_binary_int(true, &buffer[index], &(header->fmtver));
-	index += 4;
+	// index += 4;
 
 	int status = MB_SUCCESS;
 
@@ -2030,10 +2161,6 @@ int swpls_rd_sxiheader(int verbose, char *buffer, void *store_ptr, int *error) {
 } /* swpls_rd_sxiheader */
 /*--------------------------------------------------------------------*/
 int swpls_rd_sxiping(int verbose, char *buffer, void *store_ptr, int *error) {
-	short short_val;
-	int int_val;
-	size_t read_len;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n:");
@@ -2046,6 +2173,7 @@ int swpls_rd_sxiping(int verbose, char *buffer, void *store_ptr, int *error) {
 	struct mbsys_swathplus_struct *store = (struct mbsys_swathplus_struct *)store_ptr;
 	swpls_sxiping *ping = &(store->sxi_ping);
 
+
 	/* extract the data */
 	int index = SWPLS_SIZE_BLOCKHEADER;
 	mb_get_binary_int(true, &buffer[index], &(ping->time_d));
@@ -2054,6 +2182,7 @@ int swpls_rd_sxiping(int verbose, char *buffer, void *store_ptr, int *error) {
 	index += 4;
 	ping->channel = buffer[index];
 	index++;
+	int int_val = 0;
 	mb_get_binary_int(true, &buffer[index], &int_val);
 	index += 4;
 	ping->pingnumber = (unsigned long)int_val;
@@ -2061,6 +2190,7 @@ int swpls_rd_sxiping(int verbose, char *buffer, void *store_ptr, int *error) {
 	index += 4;
 	mb_get_binary_float(true, &buffer[index], &(ping->samp_period));
 	index += 4;
+	short short_val = 0;
 	mb_get_binary_short(true, &buffer[index], &short_val);
 	index += 2;
 	ping->nosamps = (unsigned short)short_val;
@@ -2084,7 +2214,7 @@ int swpls_rd_sxiping(int verbose, char *buffer, void *store_ptr, int *error) {
 	/* check that we have enough storage for the samples stored in the file
 	 */
 	if (ping->samps_alloc < ping->nosamps) {
-		read_len = (size_t)(ping->nosamps * sizeof(unsigned short));
+		size_t read_len = (size_t)(ping->nosamps * sizeof(unsigned short));
 		status = mb_reallocd(verbose, __FILE__, __LINE__, read_len, (void **)&(ping->sampnum), error);
 		if (status == MB_SUCCESS) {
 			read_len = (size_t)(ping->nosamps * sizeof(short int));
@@ -2174,7 +2304,7 @@ int swpls_rd_attitude(int verbose, char *buffer, void *store_ptr, int *error) {
 	mb_get_binary_float(true, &buffer[index], &(attitude->heading));
 	index += 4;
 	mb_get_binary_float(true, &buffer[index], &(attitude->height));
-	index += 4;
+	// index += 4;
 
 	int status = MB_SUCCESS;
 
@@ -2226,7 +2356,7 @@ int swpls_rd_posll(int verbose, char *buffer, void *store_ptr, int *error) {
 	mb_get_binary_double(true, &buffer[index], &(posll->latitude));
 	index += 8;
 	mb_get_binary_double(true, &buffer[index], &(posll->longitude));
-	index += 8;
+	// index += 8;
 
 	int status = MB_SUCCESS;
 
@@ -2278,7 +2408,7 @@ int swpls_rd_posen(int verbose, char *buffer, void *store_ptr, int *error) {
 	mb_get_binary_double(true, &buffer[index], &(posen->easting));
 	index += 8;
 	mb_get_binary_double(true, &buffer[index], &(posen->northing));
-	index += 8;
+	// index += 8;
 
 	int status = MB_SUCCESS;
 
@@ -2328,7 +2458,7 @@ int swpls_rd_ssv(int verbose, char *buffer, void *store_ptr, int *error) {
 	ssv->channel = buffer[index];
 	index++;
 	mb_get_binary_float(true, &buffer[index], &(ssv->ssv));
-	index += 4;
+	// index += 4;
 
 	int status = MB_SUCCESS;
 
@@ -2378,7 +2508,7 @@ int swpls_rd_tide(int verbose, char *buffer, void *store_ptr, int *error) {
 	tide->channel = buffer[index];
 	index++;
 	mb_get_binary_float(true, &buffer[index], &(tide->tide));
-	index += 4;
+	// index += 4;
 
 	int status = MB_SUCCESS;
 
@@ -2428,7 +2558,7 @@ int swpls_rd_echosounder(int verbose, char *buffer, void *store_ptr, int *error)
 	echosounder->channel = buffer[index];
 	index++;
 	mb_get_binary_float(true, &buffer[index], &(echosounder->altitude));
-	index += 4;
+	// index += 4;
 
 	int status = MB_SUCCESS;
 
@@ -2480,7 +2610,7 @@ int swpls_rd_agds(int verbose, char *buffer, void *store_ptr, int *error) {
 	mb_get_binary_float(true, &buffer[index], &(agds->hardness));
 	index += 4;
 	mb_get_binary_float(true, &buffer[index], &(agds->roughness));
-	index += 4;
+	// index += 4;
 
 	int status = MB_SUCCESS;
 
@@ -2536,7 +2666,7 @@ int swpls_rd_pos_offset(int verbose, char *buffer, void *store_ptr, int *error) 
 	mb_get_binary_float(true, &buffer[index], &(pos_offset->starboard));
 	index += 4;
 	mb_get_binary_float(true, &buffer[index], &(pos_offset->time));
-	index += 4;
+	// index += 4;
 
 	int status = MB_SUCCESS;
 
@@ -2592,7 +2722,7 @@ int swpls_rd_imu_offset(int verbose, char *buffer, void *store_ptr, int *error) 
 	mb_get_binary_float(true, &buffer[index], &(imu_offset->starboard));
 	index += 4;
 	mb_get_binary_float(true, &buffer[index], &(imu_offset->time));
-	index += 4;
+	// index += 4;
 
 	int status = MB_SUCCESS;
 
@@ -2656,7 +2786,7 @@ int swpls_rd_txer_offset(int verbose, char *buffer, void *store_ptr, int *error)
 	mb_get_binary_float(true, &buffer[index], &(txer_offset->skew));
 	index += 4;
 	mb_get_binary_float(true, &buffer[index], &(txer_offset->time));
-	index += 4;
+	// index += 4;
 
 	int status = MB_SUCCESS;
 
@@ -2706,7 +2836,7 @@ int swpls_rd_wl_offset(int verbose, char *buffer, void *store_ptr, int *error) {
 	wl_offset->channel = buffer[index];
 	index++;
 	mb_get_binary_float(true, &buffer[index], &(wl_offset->height));
-	index += 4;
+	// index += 4;
 
 	int status = MB_SUCCESS;
 
@@ -2751,129 +2881,114 @@ int swpls_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 
 	/* get pointer to raw data structure */
 	struct mbsys_swathplus_struct *store = (struct mbsys_swathplus_struct *)store_ptr;
-	FILE *mbfp = mb_io_ptr->mbfp;
+	// FILE *mbfp = mb_io_ptr->mbfp;
 
 	/* get saved values */
 	char **bufferptr = (char **)&mb_io_ptr->saveptr1;
-	char *buffer = (char *)*bufferptr;
+	char *buffer;  // = (char *)*bufferptr;
 	int *bufferalloc = (int *)&mb_io_ptr->save6;
 
 	/* write the current data record */
 
 	int status = MB_SUCCESS;
 
-	/* write SWPLS_ID_SXP_HEADER_DATA record */
 	if ((store->kind == MB_DATA_HEADER) && (store->type == SWPLS_ID_SXP_HEADER_DATA)) {
+		/* write SWPLS_ID_SXP_HEADER_DATA record */
 		status = swpls_wr_sxpheader(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
 		buffer = (char *)*bufferptr;
 		write_len = (size_t)size;
-		status = mb_fileio_put(verbose, mbio_ptr, buffer, &write_len, error);
-	}
-	/* write SWPLS_ID_PROJECTION record */
-	else if ((store->kind == MB_DATA_PARAMETER) && (store->type == SWPLS_ID_PROJECTION)) {
+		status &= mb_fileio_put(verbose, mbio_ptr, buffer, &write_len, error);
+	} else if ((store->kind == MB_DATA_PARAMETER) && (store->type == SWPLS_ID_PROJECTION)) {
+		/* write SWPLS_ID_PROJECTION record */
 		status = swpls_wr_projection(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
 		buffer = (char *)*bufferptr;
 		write_len = (size_t)size;
-		status = mb_fileio_put(verbose, mbio_ptr, buffer, &write_len, error);
-	}
-	/* write SWPLS_ID_PROCESSED_PING2 record */
-	else if ((store->kind == MB_DATA_DATA) &&
+		status &= mb_fileio_put(verbose, mbio_ptr, buffer, &write_len, error);
+	} else if ((store->kind == MB_DATA_DATA) &&
 	         ((store->type == SWPLS_ID_PROCESSED_PING) || (store->type == SWPLS_ID_PROCESSED_PING2))) {
+		/* write SWPLS_ID_PROCESSED_PING2 record */
 		status = swpls_wr_sxpping(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
 		buffer = (char *)*bufferptr;
 		write_len = (size_t)size;
-		status = mb_fileio_put(verbose, mbio_ptr, buffer, &write_len, error);
-	}
-	/* write SWPLS_ID_COMMENT record */
-	else if (store->kind == MB_DATA_COMMENT) {
+		status &= mb_fileio_put(verbose, mbio_ptr, buffer, &write_len, error);
+	} else if (store->kind == MB_DATA_COMMENT) {
+		/* write SWPLS_ID_COMMENT record */
 		status = swpls_wr_comment(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
 		buffer = (char *)*bufferptr;
 		write_len = (size_t)size;
-		status = mb_fileio_put(verbose, mbio_ptr, buffer, &write_len, error);
-	}
-	/* write SWPLS_ID_SXI_HEADER_DATA */
-	else if ((store->kind == MB_DATA_HEADER) && (store->type == SWPLS_ID_SXI_HEADER_DATA)) {
+		status &= mb_fileio_put(verbose, mbio_ptr, buffer, &write_len, error);
+	} else if ((store->kind == MB_DATA_HEADER) && (store->type == SWPLS_ID_SXI_HEADER_DATA)) {
+		/* write SWPLS_ID_SXI_HEADER_DATA */
 		status = swpls_wr_sxiheader(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
 		buffer = (char *)*bufferptr;
 		write_len = (size_t)size;
-		status = mb_fileio_put(verbose, mbio_ptr, buffer, &write_len, error);
-	}
-	/* write SWPLS_ID_PARSED_PING */
-	else if ((store->kind == MB_DATA_DATA) && (store->type == SWPLS_ID_PARSED_PING)) {
+		status &= mb_fileio_put(verbose, mbio_ptr, buffer, &write_len, error);
+	} else if ((store->kind == MB_DATA_DATA) && (store->type == SWPLS_ID_PARSED_PING)) {
+		/* write SWPLS_ID_PARSED_PING */
 		status = swpls_wr_sxiping(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
 		buffer = (char *)*bufferptr;
 		write_len = (size_t)size;
-		status = mb_fileio_put(verbose, mbio_ptr, buffer, &write_len, error);
-	}
-	/* write SWPLS_ID_PARSED_ATTITUDE */
-	else if (store->kind == MB_DATA_ATTITUDE) {
+		status &= mb_fileio_put(verbose, mbio_ptr, buffer, &write_len, error);
+	} else if (store->kind == MB_DATA_ATTITUDE) {
+		/* write SWPLS_ID_PARSED_ATTITUDE */
 		status = swpls_wr_attitude(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
 		buffer = (char *)*bufferptr;
 		write_len = (size_t)size;
-		status = mb_fileio_put(verbose, mbio_ptr, buffer, &write_len, error);
-	}
-	/* write SWPLS_ID_PARSED_POSITION_LL */
-	else if (store->kind == MB_DATA_NAV) {
+		status &= mb_fileio_put(verbose, mbio_ptr, buffer, &write_len, error);
+	} else if (store->kind == MB_DATA_NAV) {
+		/* write SWPLS_ID_PARSED_POSITION_LL */
 		status = swpls_wr_posll(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
 		buffer = (char *)*bufferptr;
 		write_len = (size_t)size;
-		status = mb_fileio_put(verbose, mbio_ptr, buffer, &write_len, error);
-	}
-	/* write SWPLS_ID_PARSED_POSITION_EN */
-	else if (store->kind == MB_DATA_NAV1) {
+		status &= mb_fileio_put(verbose, mbio_ptr, buffer, &write_len, error);
+	} else if (store->kind == MB_DATA_NAV1) {
+		/* write SWPLS_ID_PARSED_POSITION_EN */
 		status = swpls_wr_posen(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
 		buffer = (char *)*bufferptr;
 		write_len = (size_t)size;
-		status = mb_fileio_put(verbose, mbio_ptr, buffer, &write_len, error);
-	}
-	/* write SWPLS_ID_PARSED_SSV */
-	else if (store->kind == MB_DATA_SSV) {
+		status &= mb_fileio_put(verbose, mbio_ptr, buffer, &write_len, error);
+	} else if (store->kind == MB_DATA_SSV) {
+		/* write SWPLS_ID_PARSED_SSV */
 		status = swpls_wr_ssv(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
 		buffer = (char *)*bufferptr;
 		write_len = (size_t)size;
-		status = mb_fileio_put(verbose, mbio_ptr, buffer, &write_len, error);
-	}
-	/* write SWPLS_ID_PARSED_ECHOSOUNDER */
-	else if (store->kind == MB_DATA_ALTITUDE) {
+		status &= mb_fileio_put(verbose, mbio_ptr, buffer, &write_len, error);
+	} else if (store->kind == MB_DATA_ALTITUDE) {
+		/* write SWPLS_ID_PARSED_ECHOSOUNDER */
 		status = swpls_wr_echosounder(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
 		buffer = (char *)*bufferptr;
 		write_len = (size_t)size;
-		status = mb_fileio_put(verbose, mbio_ptr, buffer, &write_len, error);
-	}
-	/* write SWPLS_ID_PARSED_TIDE */
-	else if (store->kind == MB_DATA_TIDE) {
+		status &= mb_fileio_put(verbose, mbio_ptr, buffer, &write_len, error);
+	} else if (store->kind == MB_DATA_TIDE) {
+		/* write SWPLS_ID_PARSED_TIDE */
 		status = swpls_wr_tide(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
 		buffer = (char *)*bufferptr;
 		write_len = (size_t)size;
-		status = mb_fileio_put(verbose, mbio_ptr, buffer, &write_len, error);
-	}
-	/* write SWPLS_ID_POS_OFFSET */
-	else if ((store->kind == MB_DATA_PARAMETER) && (store->type == SWPLS_ID_POS_OFFSET)) {
+		status &= mb_fileio_put(verbose, mbio_ptr, buffer, &write_len, error);
+	} else if ((store->kind == MB_DATA_PARAMETER) && (store->type == SWPLS_ID_POS_OFFSET)) {
+		/* write SWPLS_ID_POS_OFFSET */
 		status = swpls_wr_pos_offset(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
 		buffer = (char *)*bufferptr;
 		write_len = (size_t)size;
-		status = mb_fileio_put(verbose, mbio_ptr, buffer, &write_len, error);
-	}
-	/* write SWPLS_ID_IMU_OFFSET */
-	else if ((store->kind == MB_DATA_PARAMETER) && (store->type == SWPLS_ID_IMU_OFFSET)) {
+		status &= mb_fileio_put(verbose, mbio_ptr, buffer, &write_len, error);
+	} else if ((store->kind == MB_DATA_PARAMETER) && (store->type == SWPLS_ID_IMU_OFFSET)) {
+		/* write SWPLS_ID_IMU_OFFSET */
 		status = swpls_wr_imu_offset(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
 		buffer = (char *)*bufferptr;
 		write_len = (size_t)size;
-		status = mb_fileio_put(verbose, mbio_ptr, buffer, &write_len, error);
-	}
-	/* write SWPLS_ID_TXER_OFFSET */
-	else if ((store->kind == MB_DATA_PARAMETER) && (store->type == SWPLS_ID_TXER_OFFSET)) {
+		status &= mb_fileio_put(verbose, mbio_ptr, buffer, &write_len, error);
+	} else if ((store->kind == MB_DATA_PARAMETER) && (store->type == SWPLS_ID_TXER_OFFSET)) {
+		/* write SWPLS_ID_TXER_OFFSET */
 		status = swpls_wr_txer_offset(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
 		buffer = (char *)*bufferptr;
 		write_len = (size_t)size;
-		status = mb_fileio_put(verbose, mbio_ptr, buffer, &write_len, error);
-	}
-	/* write SWPLS_ID_WL_OFFSET */
-	else if ((store->kind == MB_DATA_PARAMETER) && (store->type == SWPLS_ID_WL_OFFSET)) {
+		status &= mb_fileio_put(verbose, mbio_ptr, buffer, &write_len, error);
+	} else if ((store->kind == MB_DATA_PARAMETER) && (store->type == SWPLS_ID_WL_OFFSET)) {
+		/* write SWPLS_ID_WL_OFFSET */
 		status = swpls_wr_wl_offset(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
 		buffer = (char *)*bufferptr;
 		write_len = (size_t)size;
-		status = mb_fileio_put(verbose, mbio_ptr, buffer, &write_len, error);
+		status &= mb_fileio_put(verbose, mbio_ptr, buffer, &write_len, error);
 	}
 
 	if (verbose >= 2) {
@@ -2938,7 +3053,7 @@ int swpls_wr_sxpheader(int verbose, int *bufferalloc, char **bufferptr, void *st
 		mb_put_binary_int(true, header->swver, &buffer[index]);
 		index += 4;
 		mb_put_binary_int(true, header->fmtver, &buffer[index]);
-		index += 4;
+		// index += 4;
 	}
 
 	if (verbose >= 2) {
@@ -3024,6 +3139,7 @@ int swpls_wr_sxpping(int verbose, int *bufferalloc, char **bufferptr, void *stor
 		index += 8;
 		mb_put_binary_double(true, ping->sos, &buffer[index]);
 		index += 8;
+		// TODO(schwehr): cppcheck doesn't like these.  need casting?
 		buffer[index] = ping->txno;
 		index += 1;
 		buffer[index] = ping->txstat;
@@ -3175,7 +3291,7 @@ int swpls_wr_projection(int verbose, int *bufferalloc, char **bufferptr, void *s
 		mb_put_binary_int(true, projection->nchars, &buffer[index]);
 		index += 4;
 		strncpy(&buffer[index], projection->projection_id, projection->nchars);
-		index += projection->nchars;
+		// index += projection->nchars;
 	}
 
 	if (verbose >= 2) {
@@ -3248,7 +3364,7 @@ int swpls_wr_comment(int verbose, int *bufferalloc, char **bufferptr, void *stor
 		mb_put_binary_int(true, comment->nchars, &buffer[index]);
 		index += 4;
 		strncpy(&buffer[index], comment->message, comment->nchars);
-		index += comment->nchars;
+		// index += comment->nchars;
 	}
 
 	if (verbose >= 2) {
@@ -3313,7 +3429,7 @@ int swpls_wr_sxiheader(int verbose, int *bufferalloc, char **bufferptr, void *st
 		mb_put_binary_int(true, header->swver, &buffer[index]);
 		index += 4;
 		mb_put_binary_int(true, header->fmtver, &buffer[index]);
-		index += 4;
+		// index += 4;
 	}
 
 	if (verbose >= 2) {
@@ -3485,7 +3601,7 @@ int swpls_wr_attitude(int verbose, int *bufferalloc, char **bufferptr, void *sto
 		mb_put_binary_float(true, attitude->heading, &buffer[index]);
 		index += 4;
 		mb_put_binary_float(true, attitude->height, &buffer[index]);
-		index += 2;
+		// index += 2;
 	}
 
 	if (verbose >= 2) {
@@ -3556,7 +3672,7 @@ int swpls_wr_posll(int verbose, int *bufferalloc, char **bufferptr, void *store_
 		mb_put_binary_double(true, posll->latitude, &buffer[index]);
 		index += 8;
 		mb_put_binary_double(true, posll->longitude, &buffer[index]);
-		index += 8;
+		// index += 8;
 	}
 
 	if (verbose >= 2) {
@@ -3627,7 +3743,7 @@ int swpls_wr_posen(int verbose, int *bufferalloc, char **bufferptr, void *store_
 		mb_put_binary_double(true, posen->easting, &buffer[index]);
 		index += 8;
 		mb_put_binary_double(true, posen->northing, &buffer[index]);
-		index += 8;
+		// index += 8;
 	}
 
 	if (verbose >= 2) {
@@ -3696,7 +3812,7 @@ int swpls_wr_ssv(int verbose, int *bufferalloc, char **bufferptr, void *store_pt
 		buffer[index] = ssv->channel;
 		index++;
 		mb_put_binary_float(true, ssv->ssv, &buffer[index]);
-		index += 4;
+		// index += 4;
 	}
 
 	if (verbose >= 2) {
@@ -3765,7 +3881,7 @@ int swpls_wr_tide(int verbose, int *bufferalloc, char **bufferptr, void *store_p
 		buffer[index] = tide->channel;
 		index++;
 		mb_put_binary_float(true, tide->tide, &buffer[index]);
-		index += 4;
+		// index += 4;
 	}
 
 	if (verbose >= 2) {
@@ -3832,7 +3948,7 @@ int swpls_wr_echosounder(int verbose, int *bufferalloc, char **bufferptr, void *
 		buffer[index] = echosounder->channel;
 		index++;
 		mb_put_binary_float(true, echosounder->altitude, &buffer[index]);
-		index += 4;
+		// index += 4;
 	}
 
 	if (verbose >= 2) {
@@ -3903,7 +4019,7 @@ int swpls_wr_agds(int verbose, int *bufferalloc, char **bufferptr, void *store_p
 		mb_put_binary_float(true, agds->hardness, &buffer[index]);
 		index += 4;
 		mb_put_binary_float(true, agds->roughness, &buffer[index]);
-		index += 4;
+		// index += 4;
 	}
 
 	if (verbose >= 2) {
@@ -3978,7 +4094,7 @@ int swpls_wr_pos_offset(int verbose, int *bufferalloc, char **bufferptr, void *s
 		mb_put_binary_float(true, pos_offset->starboard, &buffer[index]);
 		index += 4;
 		mb_put_binary_float(true, pos_offset->time, &buffer[index]);
-		index += 4;
+		// index += 4;
 	}
 
 	if (verbose >= 2) {
@@ -4053,7 +4169,7 @@ int swpls_wr_imu_offset(int verbose, int *bufferalloc, char **bufferptr, void *s
 		mb_put_binary_float(true, imu_offset->starboard, &buffer[index]);
 		index += 4;
 		mb_put_binary_float(true, imu_offset->time, &buffer[index]);
-		index += 4;
+		// index += 4;
 	}
 
 	if (verbose >= 2) {
@@ -4136,7 +4252,7 @@ int swpls_wr_txer_offset(int verbose, int *bufferalloc, char **bufferptr, void *
 		mb_put_binary_float(true, txer_offset->skew, &buffer[index]);
 		index += 4;
 		mb_put_binary_float(true, txer_offset->time, &buffer[index]);
-		index += 4;
+		// index += 4;
 	}
 
 	if (verbose >= 2) {
@@ -4205,7 +4321,7 @@ int swpls_wr_wl_offset(int verbose, int *bufferalloc, char **bufferptr, void *st
 		buffer[index] = wl_offset->channel;
 		index++;
 		mb_put_binary_float(true, wl_offset->height, &buffer[index]);
-		index += 4;
+		// index += 4;
 	}
 
 	if (verbose >= 2) {
@@ -4955,96 +5071,6 @@ int swpls_pr_wl_offset(int verbose, FILE *fout, swpls_wl_offset *wl_offset, int 
 
 	return (status);
 } /* swpls_pr_wl_offset */
-/* Get heave value from SXP Processed ping
- *
- * sxp_ping - SWATHplus processed ping
- * heave - heave component of ping
- */
-static int get_sxp_heave(int verbose, swpls_sxpping *sxp_ping, double *heave, int *error) {
-	swpls_vector txoffset;
-	swpls_matrix vtow;
-
-	*error = MB_ERROR_NO_ERROR;
-
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called.\n", __func__);
-		fprintf(stderr, "dbg2  Input arguments:\n");
-		fprintf(stderr, "dbg2       verbose:      %d\n", verbose);
-		fprintf(stderr, "dbg2       sxp_ping:    %p\n", (void *)sxp_ping);
-	}
-
-	/* crp to txer lever arms (body coordinate system) */
-	txoffset.x = sxp_ping->txer_starboard;
-	txoffset.y = -sxp_ping->txer_height;
-	txoffset.z = sxp_ping->txer_forward;
-
-	/* transform transducer lever arms from body to inertial system */
-	swpls_init_transform(verbose, &vtow, error);
-	swpls_concat_rotate_z(verbose, &vtow, +(-sxp_ping->roll) * DTR, error);
-	swpls_concat_rotate_x(verbose, &vtow, +(-sxp_ping->pitch) * DTR, error);
-	swpls_concat_rotate_y(verbose, &vtow, +sxp_ping->heading * DTR, error);
-	swpls_transform(verbose, &vtow, &txoffset, error);
-
-	*heave = sxp_ping->height - (-txoffset.y);
-
-	const int status = MB_SUCCESS;
-
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
-		fprintf(stderr, "dbg2  Return values:\n");
-		fprintf(stderr, "dbg2       height:     %f\n", sxp_ping->height);
-		fprintf(stderr, "dbg2       error:      %d\n", *error);
-		fprintf(stderr, "dbg2  Return status:\n");
-		fprintf(stderr, "dbg2       status:     %d\n", status);
-	}
-
-	return (status);
-} /* get_sxp_heave */
-/* Set SXP Processed ping height value from heave
- *
- * heave - heave calculated by MB System
- * sxp_ping - SWATHplus processed ping
- */
-static int set_sxp_height(int verbose, double heave, swpls_sxpping *sxp_ping, int *error) {
-	swpls_vector txoffset;
-	swpls_matrix vtow;
-
-	*error = MB_ERROR_NO_ERROR;
-
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called.\n", __func__);
-		fprintf(stderr, "dbg2  Input arguments:\n");
-		fprintf(stderr, "dbg2       verbose:      %d\n", verbose);
-		fprintf(stderr, "dbg2       heave:        %f\n", heave);
-	}
-
-	/* crp to txer lever arms (body coordinate system) */
-	txoffset.x = sxp_ping->txer_starboard;
-	txoffset.y = -sxp_ping->txer_height;
-	txoffset.z = sxp_ping->txer_forward;
-
-	/* transform transducer lever arms from body to inertial system */
-	swpls_init_transform(verbose, &vtow, error);
-	swpls_concat_rotate_z(verbose, &vtow, +(-sxp_ping->roll) * DTR, error);
-	swpls_concat_rotate_x(verbose, &vtow, +(-sxp_ping->pitch) * DTR, error);
-	swpls_concat_rotate_y(verbose, &vtow, +sxp_ping->heading * DTR, error);
-	swpls_transform(verbose, &vtow, &txoffset, error);
-
-	sxp_ping->height = heave + (-txoffset.y);
-
-	const int status = MB_SUCCESS;
-
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
-		fprintf(stderr, "dbg2  Return values:\n");
-		fprintf(stderr, "dbg2       sxp_ping->height: %f\n", sxp_ping->height);
-		fprintf(stderr, "dbg2       error:            %d\n", *error);
-		fprintf(stderr, "dbg2  Return status:\n");
-		fprintf(stderr, "dbg2       status:     %d\n", status);
-	}
-
-	return (status);
-} /* set_sxp_height */
 /*********************************************************************
 
    Following 3D Math algorithms are based on the books:
@@ -5399,207 +5425,3 @@ int swpls_quat_to_angles(int verbose, const swpls_quaternion *q, swpls_angles *o
 
 	return (status);
 } /* swpls_quat_to_angles */
-/* Spherical linear interpolation
- *
- * q0 - starting orientation as an object->inertial quaternion
- * q1 - ending orientation as an object->inertial quaternion
- * t - interpolation fraction ranging from 0 to 1 (corresponging to q0 and
- * q1, respectively)
- * q - iterpolated orientation quaternion coresponding to t
- */
-int swpls_slerp(int verbose, const swpls_quaternion *q0, const swpls_quaternion *q1, double t, swpls_quaternion *q, int *error) {
-	double q1w, q1x, q1y, q1z;
-	double k0, k1;
-	double omega, cosOmega, sinOmega, oneOverSinOmega;
-
-	*error = MB_ERROR_NO_ERROR;
-
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called.\n", __func__);
-		fprintf(stderr, "dbg2  Input arguments:\n");
-		fprintf(stderr, "dbg2       verbose:      %d\n", verbose);
-		fprintf(stderr, "dbg2       q0:           %p\n", (void *)q0);
-		fprintf(stderr, "dbg2       q1:           %p\n", (void *)q1);
-		fprintf(stderr, "dbg2       t:            %f\n", t);
-		fprintf(stderr, "dbg2       q:            %p\n", (void *)q);
-	}
-
-	/* Check for out of range parameter and return edge points if so */
-	if (t <= 0.0) {
-		*q = *q0;
-	}
-	else if (t >= 1.0) {
-		*q = *q1;
-	}
-	else {
-		/* Compute "cosine of angle between quaternions" using dot product
-		 */
-		cosOmega = q0->w * q1->w + q0->x * q1->x + q0->y * q1->y + q0->z * q1->z;
-
-		/* Chose q or -q to rotate using the acute angle */
-		q1w = q1->w;
-		q1x = q1->x;
-		q1y = q1->y;
-		q1z = q1->z;
-		if (cosOmega < 0.0) {
-			q1w = -q1w;
-			q1x = -q1x;
-			q1y = -q1y;
-			q1z = -q1z;
-			cosOmega = -cosOmega;
-		}
-
-		/* We should have two unit quaternions, so dot should be <= 1.0
-		   assert(cosOmega < 1.1); */
-
-		/* Compute interpolation fraction */
-		if (cosOmega > 0.9999) {
-			/* very close - just use linear interpolation */
-			k0 = 1.0 - t;
-			k1 = t;
-		}
-		else {
-			sinOmega = sqrt(1.0 - cosOmega * cosOmega);
-			omega = atan2(sinOmega, cosOmega);
-			oneOverSinOmega = 1.0 / sinOmega;
-			k0 = sin((1.0 - t) * omega) * oneOverSinOmega;
-			k1 = sin(t * omega) * oneOverSinOmega;
-		}
-
-		/* Interpolate */
-		q->x = k0 * q0->x + k1 * q1x;
-		q->y = k0 * q0->y + k1 * q1y;
-		q->z = k0 * q0->z + k1 * q1z;
-		q->w = k0 * q0->w + k1 * q1w;
-	}
-
-	const int status = MB_SUCCESS;
-
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
-		fprintf(stderr, "dbg2  Return values:\n");
-		fprintf(stderr, "dbg2       error:      %d\n", *error);
-		fprintf(stderr, "dbg2  Return status:\n");
-		fprintf(stderr, "dbg2       status:     %d\n", status);
-	}
-
-	return (status);
-} /* swpls_slerp */
-/* wrap an angle in range -pi ... pi by adding the correct multiple of
- * 2pi
- *
- * theta angle to wrap (radians)
- */
-static double wrap_pi(double theta) {
-	theta += kPi;
-	theta -= floor(theta * k1Over2Pi) * k2Pi;
-	theta -= kPi;
-
-	return (theta);
-}
-/* set/reset an swpls_matrix back to the identity matrix
- *
- * m - transformation matrix to reset
- */
-static int set_identity(int verbose, swpls_matrix *m, int *error) {
-
-	*error = MB_ERROR_NO_ERROR;
-
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called.\n", __func__);
-		fprintf(stderr, "dbg2  Input arguments:\n");
-		fprintf(stderr, "dbg2       verbose:      %d\n", verbose);
-		fprintf(stderr, "dbg2       m:            %p\n", (void *)m);
-	}
-
-	/* rotation matrix */
-	m->m11 = 1.0;
-	m->m12 = 0.0;
-	m->m13 = 0.0;
-	m->m21 = 0.0;
-	m->m22 = 1.0;
-	m->m23 = 0.0;
-	m->m31 = 0.0;
-	m->m32 = 0.0;
-	m->m33 = 1.0;
-
-	/* translation vector */
-	m->tx = 0.0;
-	m->ty = 0.0;
-	m->tz = 0.0;
-
-	const int status = MB_SUCCESS;
-
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
-		fprintf(stderr, "dbg2  Return values:\n");
-		fprintf(stderr, "dbg2       error:      %d\n", *error);
-		fprintf(stderr, "dbg2  Return status:\n");
-		fprintf(stderr, "dbg2       status:     %d\n", status);
-	}
-
-	return (status);
-} /* set_identity */
-/* concatinates a transformation matrix b onto an existing transformation
- * matrix a
- *
- * a - transformation matrix a
- * b - transformation matrix b
- */
-static int concat_transform(int verbose, swpls_matrix *a, swpls_matrix *b, int *error) {
-	swpls_matrix r;
-
-	*error = MB_ERROR_NO_ERROR;
-
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called.\n", __func__);
-		fprintf(stderr, "dbg2  Input arguments:\n");
-		fprintf(stderr, "dbg2       verbose:      %d\n", verbose);
-		fprintf(stderr, "dbg2       a:            %p\n", (void *)a);
-		fprintf(stderr, "dbg2       b:            %p\n", (void *)b);
-	}
-
-	/* rotation matrix */
-	r.m11 = a->m11 * b->m11 + a->m12 * b->m21 + a->m13 * b->m31;
-	r.m12 = a->m11 * b->m12 + a->m12 * b->m22 + a->m13 * b->m32;
-	r.m13 = a->m11 * b->m13 + a->m12 * b->m23 + a->m13 * b->m33;
-
-	r.m21 = a->m21 * b->m11 + a->m22 * b->m21 + a->m23 * b->m31;
-	r.m22 = a->m21 * b->m12 + a->m22 * b->m22 + a->m23 * b->m32;
-	r.m23 = a->m21 * b->m13 + a->m22 * b->m23 + a->m23 * b->m33;
-
-	r.m31 = a->m31 * b->m11 + a->m32 * b->m21 + a->m33 * b->m31;
-	r.m32 = a->m31 * b->m12 + a->m32 * b->m22 + a->m33 * b->m32;
-	r.m33 = a->m31 * b->m13 + a->m32 * b->m23 + a->m33 * b->m33;
-
-	/* translation vector */
-	r.tx = a->tx * b->m11 + a->ty * b->m21 + a->tz * b->m31 + b->tx;
-	r.ty = a->tx * b->m12 + a->ty * b->m22 + a->tz * b->m32 + b->ty;
-	r.tz = a->tx * b->m13 + a->ty * b->m23 + a->tz * b->m33 + b->tz;
-
-	/* copy the results back into first matrix */
-	a->m11 = r.m11;
-	a->m12 = r.m12;
-	a->m13 = r.m13;
-	a->m21 = r.m21;
-	a->m22 = r.m22;
-	a->m23 = r.m23;
-	a->m31 = r.m31;
-	a->m32 = r.m32;
-	a->m33 = r.m33;
-	a->tx = r.tx;
-	a->ty = r.ty;
-	a->tz = r.tz;
-
-	const int status = MB_SUCCESS;
-
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
-		fprintf(stderr, "dbg2  Return values:\n");
-		fprintf(stderr, "dbg2       error:      %d\n", *error);
-		fprintf(stderr, "dbg2  Return status:\n");
-		fprintf(stderr, "dbg2       status:     %d\n", status);
-	}
-
-	return (status);
-} /* concat_transform */

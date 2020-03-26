@@ -377,7 +377,8 @@ autoconf
 autoupdate
 autoreconf --force --install --warnings=all
 
-LDFLAGS="-L/opt/X11/lib" CFLAGS="-g -I/opt/X11/include" CXXFLAGS="-std=c++11" \
+LDFLAGS="-L/opt/X11/lib" \
+CFLAGS="-g -I/opt/X11/include" \
 ./configure \
     --prefix=/usr/local \
     --with-proj-include=/usr/local/opt/proj/include \
@@ -386,15 +387,16 @@ LDFLAGS="-L/opt/X11/lib" CFLAGS="-g -I/opt/X11/include" CXXFLAGS="-std=c++11" \
     --with-fftw-lib=/usr/local/lib \
     --with-motif-include=/usr/local/include \
     --with-motif-lib=/usr/local/lib \
-    --with-otps-dir=/usr/local/src/OTPS2 \
+    --with-otps-dir=/usr/local/opt/otps \
     --enable-hardening \
     --enable-mbtrn \
-    --enable-mbtnav
-    #--enable-test
+    --enable-mbtnav \
+    --enable-test
     #--enable-pcltools
+    #--with-otps-dir=/usr/local/src/OTPS2 \
 
 make
-
+make check
 make install
 
 cd src/htmlsrc ; make_mbhtml ; cd ../..

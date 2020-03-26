@@ -21,7 +21,6 @@
  *
  * Author:	D. W. Caress
  * Date:	May 4, 2005
- *
  */
 
 #include <assert.h>
@@ -127,7 +126,7 @@ int mbsys_jstar_dimensions(int verbose, void *mbio_ptr, void *store_ptr, int *ki
 	}
 
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	struct mbsys_jstar_struct *store = (struct mbsys_jstar_struct *)store_ptr;
@@ -137,7 +136,7 @@ int mbsys_jstar_dimensions(int verbose, void *mbio_ptr, void *store_ptr, int *ki
 
 	/* get beam and pixel numbers */
 	if (*kind == MB_DATA_SUBBOTTOM_SUBBOTTOM) {
-		struct mbsys_jstar_channel_struct *sbp = (struct mbsys_jstar_channel_struct *)&(store->sbp);
+		// struct mbsys_jstar_channel_struct *sbp = (struct mbsys_jstar_channel_struct *)&(store->sbp);
 		*nbath = 1;
 		*namp = 0;
 		*nss = 0;
@@ -201,7 +200,7 @@ int mbsys_jstar_pingnumber(int verbose, void *mbio_ptr, unsigned int *pingnumber
 	}
 	else if (kind == MB_DATA_DATA || kind == MB_DATA_SIDESCAN2) {
 		struct mbsys_jstar_channel_struct *ssport = (struct mbsys_jstar_channel_struct *)&(store->ssport);
-		struct mbsys_jstar_channel_struct *ssstbd = (struct mbsys_jstar_channel_struct *)&(store->ssstbd);
+		// struct mbsys_jstar_channel_struct *ssstbd = (struct mbsys_jstar_channel_struct *)&(store->ssstbd);
 		*pingnumber = ssport->pingNum;
 	}
 	else {
@@ -241,7 +240,6 @@ int mbsys_jstar_preprocess(int verbose,     /* in: verbosity level set on comman
 	double pitch = 0.0;
 	double heave = 0.0;
 	double altitude = 0.0;
-	int interp_status = MB_SUCCESS;
 	int interp_error = MB_ERROR_NO_ERROR;
 	int jnav = 0;
 	int jsensordepth = 0;
@@ -269,11 +267,11 @@ int mbsys_jstar_preprocess(int verbose,     /* in: verbosity level set on comman
 	assert(preprocess_pars_ptr != NULL);
 
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointers */
 	struct mbsys_jstar_struct *store = (struct mbsys_jstar_struct *)store_ptr;
-	struct mb_platform_struct *platform = (struct mb_platform_struct *)platform_ptr;
+	// struct mb_platform_struct *platform = (struct mb_platform_struct *)platform_ptr;
 	struct mb_preprocess_struct *pars = (struct mb_preprocess_struct *)preprocess_pars_ptr;
 
 	if (verbose >= 2) {
@@ -310,7 +308,7 @@ int mbsys_jstar_preprocess(int verbose,     /* in: verbosity level set on comman
 		sbp = (struct mbsys_jstar_channel_struct *)&(store->sbp);
 
 		/* change timestamp if indicated */
-		if (pars->timestamp_changed == true) {
+		if (pars->timestamp_changed) {
 			time_d = pars->time_d;
 			mb_get_date(verbose, time_d, time_i);
 			mb_get_jtime(verbose, time_i, time_j);
@@ -344,7 +342,7 @@ int mbsys_jstar_preprocess(int verbose,     /* in: verbosity level set on comman
 		ssstbd = (struct mbsys_jstar_channel_struct *)&(store->ssstbd);
 
 		/* change timestamp if indicated */
-		if (pars->timestamp_changed == true) {
+		if (pars->timestamp_changed) {
 			time_d = pars->time_d;
 			mb_get_date(verbose, time_d, time_i);
 			mb_get_jtime(verbose, time_i, time_j);
@@ -377,42 +375,44 @@ int mbsys_jstar_preprocess(int verbose,     /* in: verbosity level set on comman
 		mb_get_time(verbose, time_i, &time_d);
 	}
 
+	// int interp_status = MB_SUCCESS;
+
 	if (store->kind == MB_DATA_SUBBOTTOM_SUBBOTTOM || store->kind == MB_DATA_DATA || store->kind == MB_DATA_SIDESCAN2) {
 		/* get nav sensordepth heading attitude values for record timestamp */
 		if (pars->n_nav > 1) {
-			interp_status = mb_linear_interp_longitude(verbose, pars->nav_time_d - 1, pars->nav_lon - 1, pars->n_nav, time_d, &navlon,
+			/* interp_status = */ mb_linear_interp_longitude(verbose, pars->nav_time_d - 1, pars->nav_lon - 1, pars->n_nav, time_d, &navlon,
 		                                    &jnav, &interp_error);
-			interp_status = mb_linear_interp_latitude(verbose, pars->nav_time_d - 1, pars->nav_lat - 1, pars->n_nav, time_d, &navlat,
+			/* interp_status = */ mb_linear_interp_latitude(verbose, pars->nav_time_d - 1, pars->nav_lat - 1, pars->n_nav, time_d, &navlat,
 		                                    &jnav, &interp_error);
-			interp_status = mb_linear_interp(verbose, pars->nav_time_d - 1, pars->nav_speed - 1, pars->n_nav, time_d, &speed,
+			/* interp_status = */ mb_linear_interp(verbose, pars->nav_time_d - 1, pars->nav_speed - 1, pars->n_nav, time_d, &speed,
 											&jnav, &interp_error);
 		}
 
 		/* interpolate sensordepth */
 		if (pars->n_sensordepth > 1) {
-			interp_status = mb_linear_interp(verbose, pars->sensordepth_time_d - 1, pars->sensordepth_sensordepth - 1,
+			/* interp_status = */ mb_linear_interp(verbose, pars->sensordepth_time_d - 1, pars->sensordepth_sensordepth - 1,
 		                                 pars->n_sensordepth, time_d, &sensordepth, &jsensordepth, &interp_error);
 		}
 
 		/* interpolate heading */
 		if (pars->n_heading > 1) {
-			interp_status = mb_linear_interp_heading(verbose, pars->heading_time_d - 1, pars->heading_heading - 1, pars->n_heading,
+			/* interp_status = */ mb_linear_interp_heading(verbose, pars->heading_time_d - 1, pars->heading_heading - 1, pars->n_heading,
 		                                         time_d, &heading, &jheading, &interp_error);
 		}
 
 		/* interpolate altitude */
 		if (pars->n_altitude > 1) {
-			interp_status = mb_linear_interp(verbose, pars->altitude_time_d - 1, pars->altitude_altitude - 1, pars->n_altitude,
+			/* interp_status = */ mb_linear_interp(verbose, pars->altitude_time_d - 1, pars->altitude_altitude - 1, pars->n_altitude,
 		                                 time_d, &altitude, &jaltitude, &interp_error);
 		}
 
 		/* interpolate attitude */
 		if (pars->n_attitude > 1) {
-			interp_status = mb_linear_interp(verbose, pars->attitude_time_d - 1, pars->attitude_roll - 1, pars->n_attitude, time_d,
+			/* interp_status = */ mb_linear_interp(verbose, pars->attitude_time_d - 1, pars->attitude_roll - 1, pars->n_attitude, time_d,
 											 &roll, &jattitude, &interp_error);
-			interp_status = mb_linear_interp(verbose, pars->attitude_time_d - 1, pars->attitude_pitch - 1, pars->n_attitude, time_d,
+			/* interp_status = */ mb_linear_interp(verbose, pars->attitude_time_d - 1, pars->attitude_pitch - 1, pars->n_attitude, time_d,
 											 &pitch, &jattitude, &interp_error);
-			interp_status = mb_linear_interp(verbose, pars->attitude_time_d - 1, pars->attitude_heave - 1, pars->n_attitude, time_d,
+			/* interp_status = */ mb_linear_interp(verbose, pars->attitude_time_d - 1, pars->attitude_heave - 1, pars->n_attitude, time_d,
 											 &heave, &jattitude, &interp_error);
 		}
 	}
@@ -536,13 +536,15 @@ int mbsys_jstar_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
                         double *navlat, double *speed, double *heading, int *nbath, int *namp, int *nss, char *beamflag,
                         double *bath, double *amp, double *bathacrosstrack, double *bathalongtrack, double *ss,
                         double *ssacrosstrack, double *ssalongtrack, char *comment, int *error) {
+	(void)amp;  // Unused arg
+	(void)bathalongtrack;  // Unused arg
 	struct mbsys_jstar_channel_struct *sbp;
 	struct mbsys_jstar_channel_struct *ssport;
 	struct mbsys_jstar_channel_struct *ssstbd;
 	int time_j[5];
 	double rawpixelsize;
 	double pixelsize;
-	double range, altitude;
+	double altitude;
 	double weight;
 	int istart, jstart;
 
@@ -711,7 +713,7 @@ int mbsys_jstar_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
 		/* zero the array */
 		for (int i = 0; i < *nss; i++) {
 			ss[i] = 0.0;
-			range = altitude + fabs(pixelsize * (i - *nss / 2));
+			const double range = altitude + fabs(pixelsize * (i - *nss / 2));
 			ssacrosstrack[i] = sqrt(range * range - altitude * altitude);
 			if (i < *nss / 2)
 				ssacrosstrack[i] = -ssacrosstrack[i];
@@ -723,7 +725,7 @@ int mbsys_jstar_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
 		weight = exp(MB_LN_2 * ((double)ssport->weightingFactor));
 		jstart = *nss / 2;
 		for (int i = istart; i < ssport->samples; i++) {
-			range = rawpixelsize * (i + ssport->startDepth);
+			// range = rawpixelsize * (i + ssport->startDepth);
 			const int j = jstart - (int)((i - istart) * rawpixelsize / pixelsize);
 			ss[j] += ssport->trace[i] / weight;
 			ssalongtrack[j] += 1.0;
@@ -731,7 +733,7 @@ int mbsys_jstar_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
 		istart = MAX(0, ((int)(altitude / rawpixelsize)));
 		weight = exp(MB_LN_2 * ((double)ssstbd->weightingFactor));
 		for (int i = istart; i < ssstbd->samples; i++) {
-			range = rawpixelsize * (i + ssstbd->startDepth);
+			// range = rawpixelsize * (i + ssstbd->startDepth);
 			const int j = jstart + (int)((i - istart) * rawpixelsize / pixelsize);
 			ss[j] += ssstbd->trace[i] / weight;
 			ssalongtrack[j] += 1.0;
@@ -837,11 +839,13 @@ int mbsys_jstar_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, i
                        double navlat, double speed, double heading, int nbath, int namp, int nss, char *beamflag, double *bath,
                        double *amp, double *bathacrosstrack, double *bathalongtrack, double *ss, double *ssacrosstrack,
                        double *ssalongtrack, char *comment, int *error) {
+	(void)bathalongtrack;  // Unused arg
+	(void)ssalongtrack;  // Unused arg
 	struct mbsys_jstar_channel_struct *sbp;
 	struct mbsys_jstar_channel_struct *ssport;
 	struct mbsys_jstar_channel_struct *ssstbd;
 	int time_j[5];
-	double weight, altitude, xtrackmax, range, pixelsize, ssmax;
+	double weight, altitude, xtrackmax, pixelsize, ssmax;
 	int istart, jstart, jxtrackmax;
 	int shortspersample;
 	int nsamples, trace_size;
@@ -1035,7 +1039,7 @@ int mbsys_jstar_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, i
 		jxtrackmax = nss / 2;
 		pixelsize = 2.0 * altitude / nss;
 		nsamples = nss / 2;
-		range = altitude;
+		// range = altitude;
 		for (int j = 0; j < nss; j++) {
 			if (xtrackmax < fabs(ssacrosstrack[j])) {
 				xtrackmax = fabs(ssacrosstrack[j]);
@@ -1043,7 +1047,7 @@ int mbsys_jstar_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, i
 			}
 		}
 		if (altitude >= 0.0 && xtrackmax >= 0.0 && jxtrackmax != nss / 2) {
-			range = sqrt(xtrackmax * xtrackmax + altitude * altitude);
+			const double range = sqrt(xtrackmax * xtrackmax + altitude * altitude);
 			pixelsize = (range - altitude) / (abs(jxtrackmax - nss / 2));
 			nsamples = (int)MIN((double)(nss / 2), (range / pixelsize));
 		}
@@ -1150,7 +1154,7 @@ int mbsys_jstar_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind, 
 	}
 
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	struct mbsys_jstar_struct *store = (struct mbsys_jstar_struct *)store_ptr;
@@ -1213,7 +1217,7 @@ int mbsys_jstar_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
 	}
 
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	struct mbsys_jstar_struct *store = (struct mbsys_jstar_struct *)store_ptr;
@@ -1279,7 +1283,7 @@ int mbsys_jstar_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr, i
 	}
 
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	struct mbsys_jstar_struct *store = (struct mbsys_jstar_struct *)store_ptr;
@@ -1362,7 +1366,7 @@ int mbsys_jstar_insert_altitude(int verbose, void *mbio_ptr, void *store_ptr, do
 	}
 
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	struct mbsys_jstar_struct *store = (struct mbsys_jstar_struct *)store_ptr;
@@ -1438,7 +1442,7 @@ int mbsys_jstar_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int *k
 	}
 
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	struct mbsys_jstar_struct *store = (struct mbsys_jstar_struct *)store_ptr;
@@ -1654,7 +1658,7 @@ int mbsys_jstar_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int tim
 	}
 
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	struct mbsys_jstar_struct *store = (struct mbsys_jstar_struct *)store_ptr;
@@ -1805,7 +1809,7 @@ int mbsys_jstar_extract_rawssdimensions(int verbose, void *mbio_ptr, void *store
 	}
 
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	struct mbsys_jstar_struct *store = (struct mbsys_jstar_struct *)store_ptr;
@@ -1871,7 +1875,7 @@ int mbsys_jstar_extract_rawss(int verbose, void *mbio_ptr, void *store_ptr, int 
 	}
 
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	struct mbsys_jstar_struct *store = (struct mbsys_jstar_struct *)store_ptr;
@@ -1992,7 +1996,7 @@ int mbsys_jstar_insert_rawss(int verbose, void *mbio_ptr, void *store_ptr, int k
 	}
 
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	struct mbsys_jstar_struct *store = (struct mbsys_jstar_struct *)store_ptr;
@@ -2095,7 +2099,7 @@ int mbsys_jstar_extract_segytraceheader(int verbose, void *mbio_ptr, void *store
 	}
 
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	struct mbsys_jstar_struct *store = (struct mbsys_jstar_struct *)store_ptr;
@@ -2166,10 +2170,10 @@ int mbsys_jstar_extract_segytraceheader(int verbose, void *mbio_ptr, void *store
 		mb_segytraceheader_ptr->elev_scalar = -100; /* 0.01 m precision for depths */
 		mb_segytraceheader_ptr->coord_scalar = -100; /* 0.01 arc second precision for position
 		                     = 0.3 m precision at equator */
-		mb_segytraceheader_ptr->src_long = (int)(longitude * 600000.0);
-		mb_segytraceheader_ptr->src_lat = (int)(latitude * 600000.0);
-		mb_segytraceheader_ptr->grp_long = (int)(longitude * 600000.0);
-		mb_segytraceheader_ptr->grp_lat = (int)(latitude * 600000.0);
+		mb_segytraceheader_ptr->src_long = (int)(longitude * 360000.0);
+		mb_segytraceheader_ptr->src_lat = (int)(latitude * 360000.0);
+		mb_segytraceheader_ptr->grp_long = (int)(longitude * 360000.0);
+		mb_segytraceheader_ptr->grp_lat = (int)(latitude * 360000.0);
 		mb_segytraceheader_ptr->coord_units = 2;
 		mb_segytraceheader_ptr->wvel = watersoundspeed;
 		mb_segytraceheader_ptr->sbvel = 0;
@@ -2320,7 +2324,7 @@ int mbsys_jstar_extract_segy(int verbose, void *mbio_ptr, void *store_ptr, int *
 	}
 
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	struct mbsys_jstar_struct *store = (struct mbsys_jstar_struct *)store_ptr;
@@ -2511,7 +2515,7 @@ int mbsys_jstar_insert_segy(int verbose, void *mbio_ptr, void *store_ptr, int ki
 	}
 
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	struct mbsys_jstar_struct *store = (struct mbsys_jstar_struct *)store_ptr;
@@ -2528,7 +2532,7 @@ int mbsys_jstar_insert_segy(int verbose, void *mbio_ptr, void *store_ptr, int ki
 	if (store->kind == MB_DATA_SUBBOTTOM_SUBBOTTOM) {
 		/* get channel */
 		struct mbsys_jstar_channel_struct *sbp = (struct mbsys_jstar_channel_struct *)&(store->sbp);
-		short *shortptr = (short *)sbp->trace;
+		// short *shortptr = (short *)sbp->trace;
 
 		/* extract the data */
 		if (mb_segytraceheader_ptr->shot_num != 0)
@@ -2551,11 +2555,11 @@ int mbsys_jstar_insert_segy(int verbose, void *mbio_ptr, void *store_ptr, int ki
 			sonardepth = mb_segytraceheader_ptr->src_depth;
 		else
 			sonardepth = 0;
-		float factor;
-		if (mb_segytraceheader_ptr->elev_scalar < 0)
-			factor = 1.0 / ((float)(-mb_segytraceheader_ptr->elev_scalar));
-		else
-			factor = (float)mb_segytraceheader_ptr->elev_scalar;
+		// float factor;
+		// if (mb_segytraceheader_ptr->elev_scalar < 0)
+		//	factor = 1.0 / ((float)(-mb_segytraceheader_ptr->elev_scalar));
+		// else
+		// 	factor = (float)mb_segytraceheader_ptr->elev_scalar;
 		int waterdepth;
 		if (mb_segytraceheader_ptr->src_wbd != 0)
 			waterdepth = -mb_segytraceheader_ptr->grp_elev;
@@ -2563,10 +2567,10 @@ int mbsys_jstar_insert_segy(int verbose, void *mbio_ptr, void *store_ptr, int ki
 			waterdepth = -mb_segytraceheader_ptr->src_elev;
 		else
 			waterdepth = 0;
-		if (mb_segytraceheader_ptr->coord_scalar < 0)
-			factor = 1.0 / ((float)(-mb_segytraceheader_ptr->coord_scalar)) / 3600.0;
-		else
-			factor = (float)mb_segytraceheader_ptr->coord_scalar / 3600.0;
+		// if (mb_segytraceheader_ptr->coord_scalar < 0)
+		//	factor = 1.0 / ((float)(-mb_segytraceheader_ptr->coord_scalar)) / 3600.0;
+		// else
+		//	factor = (float)mb_segytraceheader_ptr->coord_scalar / 3600.0;
 		sbp->samples = mb_segytraceheader_ptr->nsamps;
 		sbp->sampleInterval = 1000 * mb_segytraceheader_ptr->si_micros;
 		int time_j[5];
@@ -2617,8 +2621,8 @@ int mbsys_jstar_insert_segy(int verbose, void *mbio_ptr, void *store_ptr, int ki
 		}
 
 		/* copy over the data */
+		short *shortptr = (short *)sbp->trace;
 		if (sbp->trace_alloc >= data_size) {
-			shortptr = (short *)sbp->trace;
 			for (int i = 0; i < sbp->samples; i++) {
 				shortptr[i] = (short)(segydata[i] * weight);
 			}
@@ -2728,7 +2732,7 @@ int mbsys_jstar_ctd(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int
 	}
 
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	struct mbsys_jstar_struct *store = (struct mbsys_jstar_struct *)store_ptr;
@@ -2795,7 +2799,7 @@ int mbsys_jstar_copyrecord(int verbose, void *mbio_ptr, void *store_ptr, void *c
 	}
 
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointers */
 	struct mbsys_jstar_struct *store = (struct mbsys_jstar_struct *)store_ptr;

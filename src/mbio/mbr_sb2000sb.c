@@ -240,7 +240,7 @@ int mbr_rt_sb2000sb(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	}
 
 	/* if not a good header search through file to find one */
-	while (status == MB_SUCCESS && found == false) {
+	while (status == MB_SUCCESS && !found) {
 		/* shift bytes by one */
 		for (int i = 0; i < MBSYS_SB2000_HEADER_SIZE - 1; i++)
 			buffer[i] = buffer[i + 1];

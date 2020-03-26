@@ -444,7 +444,7 @@ struct mbf_hypc8101_struct {
 	short pitch_offset;      /* pitch offset (0.01 degrees) */
 	short heading_offset;    /* heading offset (0.01 degrees) */
 	short time_delay;        /* positioning system delay (0.001 sec) */
-	short transducer_depth;  /* tranducer depth (0.01 meters) */
+	short transducer_depth;  /* transducer depth (0.01 meters) */
 	short transducer_height; /* reference height (0.01 meters) */
 	short transducer_x;      /* reference athwartships offset (0.01 meters) */
 	short transducer_y;      /* reference fore-aft offset (0.01 meters) */

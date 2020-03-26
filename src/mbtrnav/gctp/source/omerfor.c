@@ -83,7 +83,7 @@ temp = r_minor / r_major;
 es = 1.0 - SQUARE(temp);
 e = sqrt(es);
 
-sincos(lat_origin,&sin_p20,&cos_p20);
+gsincos(lat_origin,&sin_p20,&cos_p20);
 con = 1.0 - es * sin_p20 * sin_p20;
 com = sqrt(1.0 - es);
 bl = sqrt(1.0 + es * pow(cos_p20,4.0)/(1.0 - es));
@@ -133,8 +133,8 @@ if (mode != 0)
    con = fabs(lat_origin);
    if ((con > EPSLN) && (fabs(con - HALF_PI) > EPSLN))
       {
-      sincos(gama,&singam,&cosgam);
-      sincos(azimuth,&sinaz,&cosaz);
+      gsincos(gama,&singam,&cosgam);
+      gsincos(azimuth,&sinaz,&cosaz);
       if (lat_origin >= 0)
          u =  (al / bl) * atan(sqrt(d*d - 1.0)/cosaz);
       else
@@ -195,8 +195,8 @@ else
       return(202);
       }
       
-   sincos(gama,&singam,&cosgam);
-   sincos(azimuth,&sinaz,&cosaz);
+   gsincos(gama,&singam,&cosgam);
+   gsincos(azimuth,&sinaz,&cosaz);
    if (lat_origin >= 0)
       u =  (al/bl) * atan(sqrt(d * d - 1.0)/cosaz);
    else

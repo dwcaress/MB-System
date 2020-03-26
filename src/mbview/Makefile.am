@@ -20,17 +20,38 @@ AM_CPPFLAGS += ${libopengl_CPPFLAGS}
 
 libmbview_la_CFLAGS = -DMBVIEW_LIBRARY
 libmbview_la_LDFLAGS = -no-undefined -version-info 0:0:0
-libmbview_la_SOURCES = \
-        MB3DView.c MB3DSiteList.c MB3DRouteList.c MB3DNavList.c \
-        mbview_callbacks.c mbview_process.c mbview_plot.c mbview_primary.c \
-        mbview_secondary.c mbview_pick.c mbview_profile.c mbview_site.c \
-        mbview_route.c mbview_nav.c mbview_vector.c mbview_bxutils.c mb_glwdrawa.c Mb3dsdg.c \
-        mb3dsoundings_callbacks.c MBpedit.c mbpingedit_callbacks.c
-libmbview_la_LIBADD = \
-        ${top_builddir}/src/bsio/libmbbsio.la \
-        ${top_builddir}/src/surf/libmbsapi.la \
-        ${top_builddir}/src/mbio/libmbio.la \
-        ${top_builddir}/src/mbaux/libmbaux.la \
-        ${libgmt_LIBS} ${libnetcdf_LIBS} ${libproj_LIBS} \
-        $(MBTRNLIB) ${libmotif_LIBS} ${libopengl_LIBS} \
-        ${XDR_LIB}
+libmbview_la_SOURCES :=
+libmbview_la_SOURCES += MB3DView.c
+libmbview_la_SOURCES += MB3DSiteList.c
+libmbview_la_SOURCES += MB3DRouteList.c
+libmbview_la_SOURCES += MB3DNavList.c
+libmbview_la_SOURCES += mbview_callbacks.c
+libmbview_la_SOURCES += mbview_process.c
+libmbview_la_SOURCES += mbview_plot.c
+libmbview_la_SOURCES += mbview_primary.c
+libmbview_la_SOURCES += mbview_secondary.c
+libmbview_la_SOURCES += mbview_pick.c
+libmbview_la_SOURCES += mbview_profile.c
+libmbview_la_SOURCES += mbview_site.c
+libmbview_la_SOURCES += mbview_route.c
+libmbview_la_SOURCES += mbview_nav.c
+libmbview_la_SOURCES += mbview_vector.c
+libmbview_la_SOURCES += mbview_bxutils.c
+libmbview_la_SOURCES += mb_glwdrawa.c
+libmbview_la_SOURCES += Mb3dsdg.c
+libmbview_la_SOURCES += mb3dsoundings_callbacks.c
+libmbview_la_SOURCES += MBpedit.c
+libmbview_la_SOURCES += mbpingedit_callbacks.c
+
+libmbview_la_LIBADD :=
+libmbview_la_LIBADD += ${top_builddir}/src/bsio/libmbbsio.la
+libmbview_la_LIBADD += ${top_builddir}/src/surf/libmbsapi.la
+libmbview_la_LIBADD += ${top_builddir}/src/mbio/libmbio.la
+libmbview_la_LIBADD += ${top_builddir}/src/mbaux/libmbaux.la
+libmbview_la_LIBADD += ${libgmt_LIBS}
+libmbview_la_LIBADD += ${libnetcdf_LIBS}
+libmbview_la_LIBADD += ${libproj_LIBS}
+libmbview_la_LIBADD += ${MBTRNLIB}
+libmbview_la_LIBADD += ${libmotif_LIBS}
+libmbview_la_LIBADD += ${libopengl_LIBS}
+libmbview_la_LIBADD += ${XDR_LIB}

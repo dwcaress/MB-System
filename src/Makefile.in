@@ -92,6 +92,7 @@ subdir = src
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/ax_check_compile_flag.m4 \
 	$(top_srcdir)/m4/ax_check_link_flag.m4 \
+	$(top_srcdir)/m4/ax_cxx_compile_stdcxx.m4 \
 	$(top_srcdir)/m4/libtool.m4 $(top_srcdir)/m4/ltoptions.m4 \
 	$(top_srcdir)/m4/ltsugar.m4 $(top_srcdir)/m4/ltversion.m4 \
 	$(top_srcdir)/m4/lt~obsolete.m4 $(top_srcdir)/configure.ac
@@ -155,8 +156,8 @@ am__define_uniq_tagged_files = \
 ETAGS = etags
 CTAGS = ctags
 DIST_SUBDIRS = gsf surf bsio mbtrn mbtrnav mbio mbaux utilities \
-	mbtrnutils gmt otps macros share man html ps mbedit mbnavedit \
-	mbvelocitytool mbview mbgrdviz mbeditviz mbnavadjust
+	deprecated mbtrnutils gmt otps macros share man html ps mbedit \
+	mbnavedit mbvelocitytool mbview mbgrdviz mbeditviz mbnavadjust
 ACLOCAL = @ACLOCAL@
 AMTAR = @AMTAR@
 AM_DEFAULT_VERBOSITY = @AM_DEFAULT_VERBOSITY@
@@ -197,6 +198,7 @@ HARDEN_BINCFLAGS = @HARDEN_BINCFLAGS@
 HARDEN_BINLDFLAGS = @HARDEN_BINLDFLAGS@
 HARDEN_CFLAGS = @HARDEN_CFLAGS@
 HARDEN_LDFLAGS = @HARDEN_LDFLAGS@
+HAVE_CXX11 = @HAVE_CXX11@
 INSTALL = @INSTALL@
 INSTALL_DATA = @INSTALL_DATA@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@
@@ -340,7 +342,7 @@ top_srcdir = @top_srcdir@
 @BUILD_MBTRN_TRUE@XBUILD_SUB_MBTRNBIN = mbtrnutils
 @BUILD_MBTNAV_TRUE@XBUILD_SUB_MBTNAV = mbtrnav
 SUBDIRS = $(am__append_1) surf bsio $(XBUILD_SUB_MBTRN) \
-	$(XBUILD_SUB_MBTNAV) mbio mbaux utilities \
+	$(XBUILD_SUB_MBTNAV) mbio mbaux utilities deprecated \
 	$(XBUILD_SUB_MBTRNBIN) gmt otps macros share man html ps \
 	$(XBUILD_SUB_MOTIF) $(XBUILD_SUB_GL)
 CLEANFILES = 

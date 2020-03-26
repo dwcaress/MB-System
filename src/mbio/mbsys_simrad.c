@@ -33,6 +33,7 @@
  *
  */
 
+#include <assert.h>
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -56,7 +57,7 @@ int mbsys_simrad_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *error
 	}
 
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* allocate memory for data structure */
 	const int status = mb_mallocd(verbose, __FILE__, __LINE__, sizeof(struct mbsys_simrad_struct), (void **)store_ptr, error);
@@ -81,20 +82,20 @@ int mbsys_simrad_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *error
 	store->roll_offset = 0.0;    /* roll offset (degrees) */
 	store->pitch_offset = 0.0;   /* pitch offset (degrees) */
 	store->heading_offset = 0.0; /* heading offset (degrees) */
-	store->em100_td = 0.0;       /* EM-100 tranducer depth (meters) */
-	store->em100_tx = 0.0;       /* EM-100 tranducer fore-aft
+	store->em100_td = 0.0;       /* EM-100 transducer depth (meters) */
+	store->em100_tx = 0.0;       /* EM-100 transducer fore-aft
 	                     offset (meters) */
-	store->em100_ty = 0.0;       /* EM-100 tranducer athwartships
+	store->em100_ty = 0.0;       /* EM-100 transducer athwartships
 	                     offset (meters) */
-	store->em12_td = 0.0;        /* EM-12 tranducer depth (meters) */
-	store->em12_tx = 0.0;        /* EM-12 tranducer fore-aft
+	store->em12_td = 0.0;        /* EM-12 transducer depth (meters) */
+	store->em12_tx = 0.0;        /* EM-12 transducer fore-aft
 	                     offset (meters) */
-	store->em12_ty = 0.0;        /* EM-12 tranducer athwartships
+	store->em12_ty = 0.0;        /* EM-12 transducer athwartships
 	                     offset (meters) */
-	store->em1000_td = 0.0;      /* EM-1000 tranducer depth (meters) */
-	store->em1000_tx = 0.0;      /* EM-1000 tranducer fore-aft
+	store->em1000_td = 0.0;      /* EM-1000 transducer depth (meters) */
+	store->em1000_tx = 0.0;      /* EM-1000 transducer fore-aft
 	                     offset (meters) */
-	store->em1000_ty = 0.0;      /* EM-1000 tranducer athwartships
+	store->em1000_ty = 0.0;      /* EM-1000 transducer athwartships
 	                     offset (meters) */
 	for (int i = 0; i < 128; i++)
 		store->spare_parameter[i] = '\0';
@@ -170,7 +171,7 @@ int mbsys_simrad_survey_alloc(int verbose, void *mbio_ptr, void *store_ptr, int 
 	}
 
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	struct mbsys_simrad_struct *store = (struct mbsys_simrad_struct *)store_ptr;
@@ -267,7 +268,7 @@ int mbsys_simrad_deall(int verbose, void *mbio_ptr, void **store_ptr, int *error
 		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&(store->ping), error);
 
 	/* deallocate memory for data structure */
-	status = mb_freed(verbose, __FILE__, __LINE__, (void **)store_ptr, error);
+	status &= mb_freed(verbose, __FILE__, __LINE__, (void **)store_ptr, error);
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
@@ -291,7 +292,7 @@ int mbsys_simrad_dimensions(int verbose, void *mbio_ptr, void *store_ptr, int *k
 	}
 
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	struct mbsys_simrad_struct *store = (struct mbsys_simrad_struct *)store_ptr;
@@ -335,10 +336,6 @@ int mbsys_simrad_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind
                          double *navlat, double *speed, double *heading, int *nbath, int *namp, int *nss, char *beamflag,
                          double *bath, double *amp, double *bathacrosstrack, double *bathalongtrack, double *ss,
                          double *ssacrosstrack, double *ssalongtrack, char *comment, int *error) {
-	double ss_spacing;
-	double depthscale, dacrscale, daloscale, ttscale, reflscale;
-	double pixel_size;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -410,6 +407,12 @@ int mbsys_simrad_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind
 			}
 		}
 
+		double depthscale;
+		double dacrscale;
+		double daloscale;
+		// double ttscale;
+		double reflscale;
+
 		/* read distance and depth values into storage arrays */
 		*nbath = ping->beams_bath;
 		*namp = ping->beams_bath;
@@ -417,61 +420,58 @@ int mbsys_simrad_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind
 			depthscale = 0.02;
 			dacrscale = 0.1;
 			daloscale = 0.1;
-			ttscale = 0.05;
+			// ttscale = 0.05;
 			reflscale = 0.5;
-		}
-		else if (store->sonar == MBSYS_SIMRAD_EM12S && ping->bath_res == 1) {
+		} else if (store->sonar == MBSYS_SIMRAD_EM12S && ping->bath_res == 1) {
 			depthscale = 0.1;
 			dacrscale = 0.2;
 			daloscale = 0.2;
-			ttscale = 0.2;
+			// ttscale = 0.2;
 			reflscale = 0.5;
-		}
-		else if (store->sonar == MBSYS_SIMRAD_EM12S && ping->bath_res == 2) {
+		} else if (store->sonar == MBSYS_SIMRAD_EM12S && ping->bath_res == 2) {
 			depthscale = 0.2;
 			dacrscale = 0.5;
 			daloscale = 0.5;
-			ttscale = 0.8;
+			// ttscale = 0.8;
 			reflscale = 0.5;
-		}
-		else if (store->sonar == MBSYS_SIMRAD_EM12D && ping->bath_res == 1) {
+		} else if (store->sonar == MBSYS_SIMRAD_EM12D && ping->bath_res == 1) {
 			depthscale = 0.1;
 			dacrscale = 0.2;
 			daloscale = 0.2;
-			ttscale = 0.2;
+			// ttscale = 0.2;
 			reflscale = 0.5;
-		}
-		else if (store->sonar == MBSYS_SIMRAD_EM12D && ping->bath_res == 2) {
+		} else if (store->sonar == MBSYS_SIMRAD_EM12D && ping->bath_res == 2) {
 			depthscale = 0.2;
 			dacrscale = 0.5;
 			daloscale = 0.5;
-			ttscale = 0.8;
+			// ttscale = 0.8;
 			reflscale = 0.5;
-		}
-		else if (store->sonar == MBSYS_SIMRAD_EM121) {
+		} else if (store->sonar == MBSYS_SIMRAD_EM121) {
 			depthscale = 0.01 * ping->depth_res;
 			dacrscale = 0.01 * ping->across_res;
 			daloscale = 0.01 * ping->along_res;
-			ttscale = 0.1 * ping->range_res;
+			// ttscale = 0.1 * ping->range_res;
 			reflscale = 0.5;
-		}
-		else {
+		} else {
 			depthscale = 0.1;
 			dacrscale = 0.2;
 			daloscale = 0.2;
-			ttscale = 0.2;
+			// ttscale = 0.2;
 			reflscale = 0.5;
 		}
-		if (ping->ss_mode == 1)
-			ss_spacing = 0.6;
-		else if (ping->ss_mode == 2)
-			ss_spacing = 2.4;
-		else if (ping->ss_mode == 3)
-			ss_spacing = 0.3;
-		else if (ping->ss_mode == 4)
-			ss_spacing = 0.3;
-		else
-			ss_spacing = 0.15;
+
+		// double ss_spacing;
+		// if (ping->ss_mode == 1)
+		//	ss_spacing = 0.6;
+		// else if (ping->ss_mode == 2)
+		//	ss_spacing = 2.4;
+		// else if (ping->ss_mode == 3)
+		//	ss_spacing = 0.3;
+		// else if (ping->ss_mode == 4)
+		//	ss_spacing = 0.3;
+		// else
+		//	ss_spacing = 0.15;
+
 		for (int i = 0; i < *nbath; i++) {
 			beamflag[i] = ping->beamflag[i];
 			bath[i] = depthscale * ping->bath[i];
@@ -483,7 +483,7 @@ int mbsys_simrad_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind
 		}
 		if (ss != NULL) {
 			*nss = MBSYS_SIMRAD_MAXPIXELS;
-			pixel_size = 0.01 * ping->pixel_size;
+			const double pixel_size = 0.01 * ping->pixel_size;
 			for (int i = 0; i < MBSYS_SIMRAD_MAXPIXELS; i++) {
 				if (ping->ss[i] != 0) {
 					ss[i] = 0.01 * ping->ss[i];
@@ -537,7 +537,7 @@ int mbsys_simrad_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind
 	/* extract data from structure */
 	else if (*kind == MB_DATA_NAV) {
 		/* get survey data structure */
-		struct mbsys_simrad_survey_struct *ping = (struct mbsys_simrad_survey_struct *)store->ping;
+		// struct mbsys_simrad_survey_struct *ping = (struct mbsys_simrad_survey_struct *)store->ping;
 
 		/* get time */
 		mb_fix_y2k(verbose, store->pos_year, &time_i[0]);
@@ -645,8 +645,6 @@ int mbsys_simrad_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, 
                         double navlat, double speed, double heading, int nbath, int namp, int nss, char *beamflag, double *bath,
                         double *amp, double *bathacrosstrack, double *bathalongtrack, double *ss, double *ssacrosstrack,
                         double *ssalongtrack, char *comment, int *error) {
-	double depthscale, dacrscale, daloscale, ttscale, reflscale;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -691,7 +689,7 @@ int mbsys_simrad_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, 
 	}
 
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	struct mbsys_simrad_struct *store = (struct mbsys_simrad_struct *)store_ptr;
@@ -756,52 +754,54 @@ int mbsys_simrad_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, 
 				status = MB_FAILURE;
 			}
 		}
+
+		double depthscale;
+		double dacrscale;
+		double daloscale;
+		// double ttscale;
+		double reflscale;
+
 		if (store->sonar == MBSYS_SIMRAD_EM1000) {
 			depthscale = 0.02;
 			dacrscale = 0.1;
 			daloscale = 0.1;
-			ttscale = 0.05;
+			// ttscale = 0.05;
 			reflscale = 0.5;
-		}
-		else if (store->sonar == MBSYS_SIMRAD_EM12S && ping->bath_res == 1) {
+		} else if (store->sonar == MBSYS_SIMRAD_EM12S && ping->bath_res == 1) {
 			depthscale = 0.1;
 			dacrscale = 0.2;
 			daloscale = 0.2;
-			ttscale = 0.2;
+			// ttscale = 0.2;
 			reflscale = 0.5;
-		}
-		else if (store->sonar == MBSYS_SIMRAD_EM12S && ping->bath_res == 2) {
+		} else if (store->sonar == MBSYS_SIMRAD_EM12S && ping->bath_res == 2) {
 			depthscale = 0.2;
 			dacrscale = 0.5;
 			daloscale = 0.5;
-			ttscale = 0.8;
+			// ttscale = 0.8;
 			reflscale = 0.5;
-		}
-		else if (store->sonar == MBSYS_SIMRAD_EM12D && ping->bath_res == 1) {
+		} else if (store->sonar == MBSYS_SIMRAD_EM12D && ping->bath_res == 1) {
 			depthscale = 0.1;
 			dacrscale = 0.2;
 			daloscale = 0.2;
-			ttscale = 0.2;
+			// ttscale = 0.2;
 			reflscale = 0.5;
-		}
-		else if (store->sonar == MBSYS_SIMRAD_EM12D && ping->bath_res == 2) {
+		} else if (store->sonar == MBSYS_SIMRAD_EM12D && ping->bath_res == 2) {
 			depthscale = 0.2;
 			dacrscale = 0.5;
 			daloscale = 0.5;
-			ttscale = 0.8;
+			// ttscalettscale = 0.8;
 			reflscale = 0.5;
-		}
-		else if (store->sonar == MBSYS_SIMRAD_EM121) {
+		} else if (store->sonar == MBSYS_SIMRAD_EM121) {
 			depthscale = 0.01 * ping->depth_res;
 			dacrscale = 0.01 * ping->across_res;
 			daloscale = 0.01 * ping->along_res;
-			ttscale = 0.1 * ping->range_res;
+			// ttscale = 0.1 * ping->range_res;
 			reflscale = 0.5;
-		}
-		else {
+		} else {
 			*error = MB_ERROR_DATA_NOT_INSERTED;
 			status = MB_FAILURE;
 		}
+
 		if (status == MB_SUCCESS) {
 			for (int i = 0; i < nbath; i++) {
 				ping->bath[i] = bath[i] / depthscale;
@@ -870,13 +870,6 @@ int mbsys_simrad_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, 
 int mbsys_simrad_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbeams, double *ttimes, double *angles,
                         double *angles_forward, double *angles_null, double *heave, double *alongtrack_offset, double *draft,
                         double *ssv, int *error) {
-	double ttscale;
-	double heave_use;
-	double *angles_simrad;
-	double alpha, beta;
-	int istep = 0;
-	int interleave = 0;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -892,7 +885,7 @@ int mbsys_simrad_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
 	}
 
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	struct mbsys_simrad_struct *store = (struct mbsys_simrad_struct *)store_ptr;
@@ -911,7 +904,7 @@ int mbsys_simrad_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
 		*nbeams = ping->beams_bath;
 
 		/* get depth offset (heave + heave offset) */
-		heave_use = 0.01 * ping->ping_heave;
+		const double heave_use = 0.01 * ping->ping_heave;
 		*ssv = 0.1 * ping->sound_vel;
 		if (store->sonar == MBSYS_SIMRAD_EM12S)
 			*draft = store->em12_td;
@@ -923,7 +916,8 @@ int mbsys_simrad_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
 			*draft = store->em1000_td;
 
 		/* get travel times, angles */
-		interleave = false;
+		bool interleave = false;
+		double *angles_simrad;
 		if (store->sonar == MBSYS_SIMRAD_EM1000) {
 			if (ping->bath_mode == 1) {
 				angles_simrad = angles_EM1000_ISO_ANG_60_2_MS_48_FAIS;
@@ -1031,21 +1025,23 @@ int mbsys_simrad_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
 		else if (store->sonar == MBSYS_SIMRAD_EM121) {
 			angles_simrad = angles_EM121_GUESS;
 		}
+
+		double ttscale;
 		if (store->sonar == MBSYS_SIMRAD_EM1000) {
 			ttscale = 0.00005;
-		}
-		else if ((store->sonar == MBSYS_SIMRAD_EM12S || store->sonar == MBSYS_SIMRAD_EM12D) && ping->bath_res == 1) {
+		} else if ((store->sonar == MBSYS_SIMRAD_EM12S || store->sonar == MBSYS_SIMRAD_EM12D) && ping->bath_res == 1) {
 			ttscale = 0.0002;
-		}
-		else if ((store->sonar == MBSYS_SIMRAD_EM12S || store->sonar == MBSYS_SIMRAD_EM12D) && ping->bath_res == 2)
+		} else if ((store->sonar == MBSYS_SIMRAD_EM12S || store->sonar == MBSYS_SIMRAD_EM12D) && ping->bath_res == 2) {
 			ttscale = 0.0008;
-		else if (store->sonar == MBSYS_SIMRAD_EM121)
+		} else if (store->sonar == MBSYS_SIMRAD_EM121) {
 			ttscale = 0.0001 * ping->range_res;
-		else
+		} else {
 			ttscale = 0.0002;
+		}
 
 		/* if interleaved get center beam */
-		if (interleave == true) {
+		int istep = 0;
+		if (interleave) {
 			if (ping->bath_mode == 12 && abs(ping->bath_acrosstrack[28]) < abs(ping->bath_acrosstrack[29]))
 				istep = 1;
 			else if (ping->bath_mode == 13 && abs(ping->bath_acrosstrack[31]) < abs(ping->bath_acrosstrack[30]))
@@ -1059,19 +1055,18 @@ int mbsys_simrad_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
 		/* get travel times and angles */
 		for (int i = 0; i < *nbeams; i++) {
 			ttimes[i] = ttscale * ping->tt[i];
-			alpha = 0.01 * ping->pitch;
+			const double alpha = 0.01 * ping->pitch;
+			double beta;
 			if (store->sonar == MBSYS_SIMRAD_EM1000 && ping->bath_mode == 13) {
 				beta = 90.0 - angles_simrad[*nbeams - 1 - (2 * i + istep)];
-			}
-			else if (store->sonar == MBSYS_SIMRAD_EM1000 && interleave == true) {
+			} else if (store->sonar == MBSYS_SIMRAD_EM1000 && interleave) {
 				beta = 90.0 + angles_simrad[2 * i + istep];
-			}
-			else if (store->sonar == MBSYS_SIMRAD_EM1000) {
+			// } else if (store->sonar == MBSYS_SIMRAD_EM1000) {
+			//	beta = 90.0 + angles_simrad[i];
+			} else {
 				beta = 90.0 + angles_simrad[i];
 			}
-			else {
-				beta = 90.0 + angles_simrad[i];
-			}
+
 			mb_rollpitch_to_takeoff(verbose, alpha, beta, &angles[i], &angles_forward[i], error);
 			if (store->sonar == MBSYS_SIMRAD_EM1000)
 				angles_null[i] = angles[i];
@@ -1147,7 +1142,7 @@ int mbsys_simrad_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kind
 	}
 
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	struct mbsys_simrad_struct *store = (struct mbsys_simrad_struct *)store_ptr;
@@ -1223,7 +1218,7 @@ int mbsys_simrad_pulses(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
 	}
 
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	struct mbsys_simrad_struct *store = (struct mbsys_simrad_struct *)store_ptr;
@@ -1294,7 +1289,7 @@ int mbsys_simrad_gains(int verbose, void *mbio_ptr, void *store_ptr, int *kind, 
 	}
 
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	struct mbsys_simrad_struct *store = (struct mbsys_simrad_struct *)store_ptr;
@@ -1360,10 +1355,6 @@ int mbsys_simrad_gains(int verbose, void *mbio_ptr, void *store_ptr, int *kind, 
 /*--------------------------------------------------------------------*/
 int mbsys_simrad_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr, int *kind, double *transducer_depth,
                                   double *altitude, int *error) {
-	double depthscale, dacrscale;
-	double bath_best;
-	double xtrack_min;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1373,7 +1364,7 @@ int mbsys_simrad_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr, 
 	}
 
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	struct mbsys_simrad_struct *store = (struct mbsys_simrad_struct *)store_ptr;
@@ -1401,6 +1392,12 @@ int mbsys_simrad_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr, 
 			*transducer_depth = 0.01 * ping->ping_heave + store->em12_td;
 		else
 			*transducer_depth = 0.0;
+
+		double depthscale;
+		double dacrscale;
+		double bath_best;
+		double xtrack_min;
+
 		if (store->sonar == MBSYS_SIMRAD_EM1000) {
 			depthscale = 0.02;
 			dacrscale = 0.1;
@@ -1499,7 +1496,7 @@ int mbsys_simrad_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int *
 	}
 
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	struct mbsys_simrad_struct *store = (struct mbsys_simrad_struct *)store_ptr;
@@ -1713,7 +1710,7 @@ int mbsys_simrad_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int ti
 	}
 
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	struct mbsys_simrad_struct *store = (struct mbsys_simrad_struct *)store_ptr;
@@ -1817,7 +1814,7 @@ int mbsys_simrad_extract_svp(int verbose, void *mbio_ptr, void *store_ptr, int *
 	}
 
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	struct mbsys_simrad_struct *store = (struct mbsys_simrad_struct *)store_ptr;
@@ -1883,7 +1880,7 @@ int mbsys_simrad_insert_svp(int verbose, void *mbio_ptr, void *store_ptr, int ns
 	}
 
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	struct mbsys_simrad_struct *store = (struct mbsys_simrad_struct *)store_ptr;
@@ -1914,10 +1911,6 @@ int mbsys_simrad_insert_svp(int verbose, void *mbio_ptr, void *store_ptr, int ns
 }
 /*--------------------------------------------------------------------*/
 int mbsys_simrad_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_ptr, int *error) {
-	struct mbsys_simrad_survey_struct *ping_store;
-	struct mbsys_simrad_survey_struct *ping_copy;
-	char *ping_save;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1928,13 +1921,15 @@ int mbsys_simrad_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_p
 	}
 
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointers */
 	struct mbsys_simrad_struct *store = (struct mbsys_simrad_struct *)store_ptr;
 	struct mbsys_simrad_struct *copy = (struct mbsys_simrad_struct *)copy_ptr;
 
 	int status = MB_SUCCESS;
+
+	char *ping_save = NULL;
 
 	/* check if survey data needs to be copied */
 	if (store->kind == MB_DATA_DATA && store->ping != NULL) {
@@ -1947,8 +1942,6 @@ int mbsys_simrad_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_p
 		/* save pointer value */
 		ping_save = (char *)copy->ping;
 	}
-	else
-		ping_save = NULL;
 
 	/* copy the main structure */
 	*copy = *store;
@@ -1956,12 +1949,12 @@ int mbsys_simrad_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_p
 	/* if needed copy the survey data structure */
 	if (store->kind == MB_DATA_DATA && store->ping != NULL && status == MB_SUCCESS) {
 		copy->ping = (struct mbsys_simrad_survey_struct *)ping_save;
-		ping_store = (struct mbsys_simrad_survey_struct *)store->ping;
-		ping_copy = (struct mbsys_simrad_survey_struct *)copy->ping;
+		struct mbsys_simrad_survey_struct *ping_store = (struct mbsys_simrad_survey_struct *)store->ping;
+		struct mbsys_simrad_survey_struct *ping_copy = (struct mbsys_simrad_survey_struct *)copy->ping;
 		*ping_copy = *ping_store;
-	}
-	else
+	} else {
 		copy->ping = NULL;
+	}
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
@@ -1976,26 +1969,6 @@ int mbsys_simrad_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_p
 /*--------------------------------------------------------------------*/
 int mbsys_simrad_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel_size_set, double *pixel_size, int swath_width_set,
                         double *swath_width, int pixel_int, int *error) {
-	double ss[MBSYS_SIMRAD_MAXPIXELS];
-	int ss_cnt[MBSYS_SIMRAD_MAXPIXELS];
-	double ssacrosstrack[MBSYS_SIMRAD_MAXPIXELS];
-	double ssalongtrack[MBSYS_SIMRAD_MAXPIXELS];
-	mb_s_char *beam_ss;
-	int nbathsort;
-	double bathsort[MBSYS_SIMRAD_MAXBEAMS];
-	double depthscale, depthoffset;
-	double dacrscale, daloscale;
-	double reflscale;
-	double pixel_size_calc;
-	double ss_spacing, ss_spacing_use;
-	double *angles_simrad;
-	int pixel_int_use;
-	double depth, xtrack, ltrack, xtrackss;
-	double range, beam_foot, beamwidth, sint;
-	double angle;
-	int interleave, istep;
-	int first, last, k1, k2;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -2010,7 +1983,7 @@ int mbsys_simrad_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel_
 	}
 
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	struct mbsys_simrad_struct *store = (struct mbsys_simrad_struct *)store_ptr;
@@ -2020,6 +1993,11 @@ int mbsys_simrad_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel_
 		/* get pointer to raw data structure */
 		struct mbsys_simrad_survey_struct *ping = (struct mbsys_simrad_survey_struct *)store->ping;
 
+		double ss[MBSYS_SIMRAD_MAXPIXELS];
+		int ss_cnt[MBSYS_SIMRAD_MAXPIXELS];
+		double ssacrosstrack[MBSYS_SIMRAD_MAXPIXELS];
+		double ssalongtrack[MBSYS_SIMRAD_MAXPIXELS];
+
 		/* zero the sidescan */
 		for (int i = 0; i < MBSYS_SIMRAD_MAXPIXELS; i++) {
 			ss[i] = 0.0;
@@ -2028,14 +2006,18 @@ int mbsys_simrad_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel_
 			ss_cnt[i] = 0;
 		}
 
+		double depthscale;
+		double dacrscale;
+		double daloscale;
+		double reflscale;
+
 		/* set scaling parameters */
 		if (store->sonar == MBSYS_SIMRAD_EM1000) {
 			depthscale = 0.02;
 			dacrscale = 0.1;
 			daloscale = 0.1;
 			reflscale = 0.5;
-		}
-		else if (store->sonar == MBSYS_SIMRAD_EM12S && ping->bath_res == 1) {
+		} else if (store->sonar == MBSYS_SIMRAD_EM12S && ping->bath_res == 1) {
 			depthscale = 0.1;
 			dacrscale = 0.2;
 			daloscale = 0.2;
@@ -2046,90 +2028,73 @@ int mbsys_simrad_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel_
 			dacrscale = 0.5;
 			daloscale = 0.5;
 			reflscale = 0.5;
-		}
-		else if (store->sonar == MBSYS_SIMRAD_EM12D && ping->bath_res == 1) {
+		} else if (store->sonar == MBSYS_SIMRAD_EM12D && ping->bath_res == 1) {
 			depthscale = 0.1;
 			dacrscale = 0.2;
 			daloscale = 0.2;
 			reflscale = 0.5;
-		}
-		else if (store->sonar == MBSYS_SIMRAD_EM12D && ping->bath_res == 2) {
+		} else if (store->sonar == MBSYS_SIMRAD_EM12D && ping->bath_res == 2) {
 			depthscale = 0.2;
 			dacrscale = 0.5;
 			daloscale = 0.5;
 			reflscale = 0.5;
-		}
-		else if (store->sonar == MBSYS_SIMRAD_EM121) {
+		} else if (store->sonar == MBSYS_SIMRAD_EM121) {
 			depthscale = 0.01 * ping->depth_res;
 			dacrscale = 0.01 * ping->across_res;
 			daloscale = 0.01 * ping->along_res;
 			reflscale = 0.5;
-		}
-		else {
+		} else {
 			depthscale = 0.1;
 			dacrscale = 0.2;
 			daloscale = 0.2;
 			reflscale = 0.5;
 		}
-		depthoffset = 0.0;
 
 		/* get angles */
-		interleave = false;
+		bool interleave = false;
+		double *angles_simrad;
 		if (store->sonar == MBSYS_SIMRAD_EM1000) {
 			if (ping->bath_mode == 1) {
 				angles_simrad = angles_EM1000_ISO_ANG_60_2_MS_48_FAIS;
 				interleave = false;
-			}
-			else if (ping->bath_mode == 2) {
+			} else if (ping->bath_mode == 2) {
 				angles_simrad = angles_EM1000_ISO_ANG_120_07_MS_48_FAIS;
 				interleave = true;
-			}
-			else if (ping->bath_mode == 3) {
+			} else if (ping->bath_mode == 3) {
 				angles_simrad = angles_EM1000_ISO_ANG_150_02_MS_60_FAIS;
 				interleave = true;
-			}
-			else if (ping->bath_mode == 4) {
+			} else if (ping->bath_mode == 4) {
 				angles_simrad = angles_EM1000_CHANNEL_02_MS_60_FAIS;
 				interleave = true;
-			}
-			else if (ping->bath_mode == 5) {
+			} else if (ping->bath_mode == 5) {
 				angles_simrad = angles_EM1000_150_02_MS_60_FAIS;
 				interleave = true;
-			}
-			else if (ping->bath_mode == 6) {
+			} else if (ping->bath_mode == 6) {
 				angles_simrad = angles_EM1000_140_02_MS_60_FAIS;
 				interleave = true;
-			}
-			else if (ping->bath_mode == 7) {
+			} else if (ping->bath_mode == 7) {
 				angles_simrad = angles_EM1000_128_02_MS_60_FAIS;
 				interleave = true;
-			}
-			else if (ping->bath_mode == 8) {
+			} else if (ping->bath_mode == 8) {
 				angles_simrad = angles_EM1000_120_07_MS_48_FAIS;
 				interleave = true;
-			}
-			else if (ping->bath_mode == 9) {
+			} else if (ping->bath_mode == 9) {
 				angles_simrad = angles_EM1000_104_07_MS_48_FAIS;
 				interleave = true;
-			}
-			else if (ping->bath_mode == 10) {
+			} else if (ping->bath_mode == 10) {
 				angles_simrad = angles_EM1000_88_07_MS_48_FAIS;
 				interleave = true;
-			}
-			else if (ping->bath_mode == 11) {
+			} else if (ping->bath_mode == 11) {
 				angles_simrad = angles_EM1000_70_2_MS_48_FAIS;
 				interleave = false;
-			}
-			else if (ping->bath_mode == 12) {
+			} else if (ping->bath_mode == 12) {
+				angles_simrad = angles_EM1000_BERGE_02_MS_60_FAIS;
+				interleave = true;
+			} else if (ping->bath_mode == 13) {
 				angles_simrad = angles_EM1000_BERGE_02_MS_60_FAIS;
 				interleave = true;
 			}
-			else if (ping->bath_mode == 13) {
-				angles_simrad = angles_EM1000_BERGE_02_MS_60_FAIS;
-				interleave = true;
-			}
-		}
-		else if (store->sonar == MBSYS_SIMRAD_EM12S) {
+		} else if (store->sonar == MBSYS_SIMRAD_EM12S) {
 			if (ping->bath_mode == 1)
 				angles_simrad = angles_EM12S_ISO_ANG_SHALLOW;
 			else if (ping->bath_mode == 2)
@@ -2142,8 +2107,7 @@ int mbsys_simrad_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel_
 				angles_simrad = angles_EM12S_105;
 			else if (ping->bath_mode == 6)
 				angles_simrad = angles_EM12S_90;
-		}
-		else if (store->sonar == MBSYS_SIMRAD_EM12D && ping->swath_id == EM_SWATH_PORT) {
+		} else if (store->sonar == MBSYS_SIMRAD_EM12D && ping->swath_id == EM_SWATH_PORT) {
 			if (ping->bath_mode == 1)
 				angles_simrad = angles_EM12DP_ISO_ANG_SHALLOW;
 			else if (ping->bath_mode == 2)
@@ -2160,8 +2124,7 @@ int mbsys_simrad_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel_
 				angles_simrad = angles_EM12DP_114;
 			else if (ping->bath_mode == 8)
 				angles_simrad = angles_EM12DP_98;
-		}
-		else if (store->sonar == MBSYS_SIMRAD_EM12D && ping->swath_id == EM_SWATH_STARBOARD) {
+		} else if (store->sonar == MBSYS_SIMRAD_EM12D && ping->swath_id == EM_SWATH_STARBOARD) {
 			if (ping->bath_mode == 1)
 				angles_simrad = angles_EM12DS_ISO_ANG_SHALLOW;
 			else if (ping->bath_mode == 2)
@@ -2178,13 +2141,13 @@ int mbsys_simrad_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel_
 				angles_simrad = angles_EM12DS_114;
 			else if (ping->bath_mode == 8)
 				angles_simrad = angles_EM12DS_98;
-		}
-		else if (store->sonar == MBSYS_SIMRAD_EM121) {
+		} else if (store->sonar == MBSYS_SIMRAD_EM121) {
 			angles_simrad = angles_EM121_GUESS;
 		}
 
 		/* if interleaved get center beam */
-		if (interleave == true) {
+		int istep;
+		if (interleave) {
 			if (ping->bath_mode == 12 && abs(ping->bath_acrosstrack[28]) < abs(ping->bath_acrosstrack[29]))
 				istep = 1;
 			else if (ping->bath_mode == 13 && abs(ping->bath_acrosstrack[31]) < abs(ping->bath_acrosstrack[30]))
@@ -2194,6 +2157,8 @@ int mbsys_simrad_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel_
 			else
 				istep = 0;
 		}
+
+		double ss_spacing;
 
 		/* get raw pixel size */
 		if (store->sonar == MBSYS_SIMRAD_EM12D || store->sonar == MBSYS_SIMRAD_EM12S || store->sonar == MBSYS_SIMRAD_EM121) {
@@ -2205,19 +2170,19 @@ int mbsys_simrad_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel_
 				ss_spacing = 0.6;
 			else
 				ss_spacing = 2.4;
-		}
-		else if (store->sonar == MBSYS_SIMRAD_EM1000) {
+		} else if (store->sonar == MBSYS_SIMRAD_EM1000) {
 			if (ping->ss_mode == 3)
 				ss_spacing = 0.3;
 			else if (ping->ss_mode == 4)
 				ss_spacing = 0.3;
-			else if (ping->ss_mode == 5)
-				ss_spacing = 0.15;
+			// else if (ping->ss_mode == 5)
+			//	ss_spacing = 0.15;
 			else
 				ss_spacing = 0.15;
 		}
 
 		/* get beam angle size */
+		double beamwidth;
 		if (store->sonar == MBSYS_SIMRAD_EM12D || store->sonar == MBSYS_SIMRAD_EM12S) {
 			beamwidth = 2.00;
 		}
@@ -2226,10 +2191,13 @@ int mbsys_simrad_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel_
 		}
 		else if (store->sonar == MBSYS_SIMRAD_EM1000) {
 			beamwidth = 2.5;
+		} else {
+			assert(false);
 		}
 
 		/* get median depth */
-		nbathsort = 0;
+		int nbathsort = 0;
+		double bathsort[MBSYS_SIMRAD_MAXBEAMS];
 		for (int i = 0; i < ping->beams_bath; i++) {
 			if (ping->bath[i] > 0.0) {
 				bathsort[nbathsort] = depthscale * ping->bath[i];
@@ -2238,13 +2206,13 @@ int mbsys_simrad_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel_
 		}
 
 		/* get sidescan pixel size */
-		if (swath_width_set == false && nbathsort > 0) {
+		if (!swath_width_set && nbathsort > 0) {
 			(*swath_width) = 2.5 + angles_simrad[0];
 			(*swath_width) = MAX((*swath_width), 60.0);
 		}
-		if (pixel_size_set == false && nbathsort > 0) {
+		if (!pixel_size_set && nbathsort > 0) {
 			qsort((char *)bathsort, nbathsort, sizeof(double), (void *)mb_double_compare);
-			pixel_size_calc = 2 * tan(DTR * (*swath_width)) * bathsort[nbathsort / 2] / MBSYS_SIMRAD_MAXPIXELS;
+			double pixel_size_calc = 2 * tan(DTR * (*swath_width)) * bathsort[nbathsort / 2] / MBSYS_SIMRAD_MAXPIXELS;
 			pixel_size_calc = MAX(pixel_size_calc, bathsort[nbathsort / 2] * sin(DTR * 0.1));
 			if ((*pixel_size) <= 0.0)
 				(*pixel_size) = pixel_size_calc;
@@ -2257,7 +2225,9 @@ int mbsys_simrad_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel_
 		}
 
 		/* get pixel interpolation */
-		pixel_int_use = pixel_int + 1;
+		const int pixel_int_use = pixel_int + 1;
+
+		// const double depthoffset = 0.0;
 
 		if (verbose >= 2) {
 			fprintf(stderr, "\ndbg2  Sidescan regenerated in <%s>\n", __func__);
@@ -2266,7 +2236,7 @@ int mbsys_simrad_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel_
 			fprintf(stderr, "dbg2       daloscale:     %f\n", daloscale);
 			fprintf(stderr, "dbg2       reflscale:     %f\n", reflscale);
 			fprintf(stderr, "dbg2       depthscale:    %f\n", depthscale);
-			fprintf(stderr, "dbg2       depthoffset:   %f\n", depthoffset);
+			// fprintf(stderr, "dbg2       depthoffset:   %f\n", depthoffset);
 			fprintf(stderr, "dbg2       depthscale:    %f\n", depthscale);
 			fprintf(stderr, "dbg2       ss_spacing:    %f\n", ss_spacing);
 			fprintf(stderr, "dbg2       pixel_size:    %f\n", *pixel_size);
@@ -2279,35 +2249,38 @@ int mbsys_simrad_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel_
 
 		/* loop over raw sidescan, putting each raw pixel into
 		    the binning arrays */
+		{
+		double ltrack;
+		double ss_spacing_use;
+		double xtrack;
+
 		for (int i = 0; i < ping->beams_bath; i++) {
-			beam_ss = &ping->ssraw[ping->beam_start_sample[i]];
+			mb_s_char *beam_ss = &ping->ssraw[ping->beam_start_sample[i]];
 			if (ping->bath[i] > 0.0) {
 				if (ping->beam_samples[i] > 0) {
-					depth = depthscale * ping->bath[i];
+					const double depth = depthscale * ping->bath[i];
 					xtrack = dacrscale * ping->bath_acrosstrack[i];
 					ltrack = daloscale * ping->bath_alongtrack[i];
-					range = sqrt(depth * depth + xtrack * xtrack);
+					const double range = sqrt(depth * depth + xtrack * xtrack);
+					double angle;
 					if (store->sonar == MBSYS_SIMRAD_EM1000 && ping->bath_mode == 13) {
 						angle = angles_simrad[ping->beams_bath - 1 - (2 * i + istep)];
-					}
-					else if (store->sonar == MBSYS_SIMRAD_EM1000 && interleave == true) {
+					} else if (store->sonar == MBSYS_SIMRAD_EM1000 && interleave) {
 						angle = -angles_simrad[2 * i + istep];
-					}
-					else if (store->sonar == MBSYS_SIMRAD_EM1000) {
+					// } else if (store->sonar == MBSYS_SIMRAD_EM1000) {
+					//	angle = -angles_simrad[i];
+					} else {
 						angle = -angles_simrad[i];
 					}
-					else {
-						angle = -angles_simrad[i];
-					}
-					beam_foot = range * sin(DTR * beamwidth) / cos(DTR * angle);
-					sint = fabs(sin(DTR * angle));
+					const double beam_foot = range * sin(DTR * beamwidth) / cos(DTR * angle);
+					const double sint = fabs(sin(DTR * angle));
 					if (sint < ping->beam_samples[i] * ss_spacing / beam_foot)
 						ss_spacing_use = beam_foot / ping->beam_samples[i];
 					else
 						ss_spacing_use = ss_spacing / sint;
 				}
 				for (int k = 0; k < ping->beam_samples[i]; k++) {
-					xtrackss = xtrack + ss_spacing_use * (k - ping->beam_center_sample[i]);
+					const double xtrackss = xtrack + ss_spacing_use * (k - ping->beam_center_sample[i]);
 					const int kk = MBSYS_SIMRAD_MAXPIXELS / 2 + (int)(xtrackss / (*pixel_size));
 					if (kk > 0 && kk < MBSYS_SIMRAD_MAXPIXELS) {
 						ss[kk] += reflscale * ((double)beam_ss[k]);
@@ -2317,10 +2290,11 @@ int mbsys_simrad_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel_
 				}
 			}
 		}
+		}
 
 		/* average the sidescan */
-		first = MBSYS_SIMRAD_MAXPIXELS;
-		last = -1;
+		int first = MBSYS_SIMRAD_MAXPIXELS;
+		int last = -1;
 		for (int k = 0; k < MBSYS_SIMRAD_MAXPIXELS; k++) {
 			if (ss_cnt[k] > 0) {
 				ss[k] /= ss_cnt[k];
@@ -2334,13 +2308,13 @@ int mbsys_simrad_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel_
 		}
 
 		/* interpolate the sidescan */
-		k1 = first;
-		k2 = first;
+		int k1 = first;
+		int k2 = first;
 		for (int k = first + 1; k < last; k++) {
 			if (ss_cnt[k] <= 0) {
 				if (k2 <= k) {
 					k2 = k + 1;
-					while (ss_cnt[k2] <= 0 && k2 < last)
+					while (k2 < last && ss_cnt[k2] <= 0)
 						k2++;
 				}
 				if (k2 - k1 <= pixel_int_use) {

@@ -208,7 +208,7 @@ int mbr_sbifremr_rd_data(int verbose, void *mbio_ptr, int *error) {
 		/* get next line */
 		if (!line_save) {
 			mb_io_ptr->file_bytes = ftell(mbfp);
-			strncpy(line, "\0", MBF_SBIFREMR_MAXLINE);
+			strncpy(line, "", MBF_SBIFREMR_MAXLINE);
 			result = fgets(line, MBF_SBIFREMR_MAXLINE, mbfp);
 		}
 		else {

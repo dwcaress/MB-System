@@ -87,7 +87,7 @@ e = sqrt(es);
 esphi = e * sin(lat_center);
 chi = 2.0 * atan(tan((HALF_PI + lat_center)/2.0) * 
             pow(((1.0 - esphi)/(1.0 + esphi)),(e/2.0))) - HALF_PI;
-sincos(chi,&sin_p26,&cos_p26);
+gsincos(chi,&sin_p26,&cos_p26);
 
 
 /* Report parameters to the user
@@ -134,11 +134,11 @@ dlon = adjust_lon( lon - lon_center);
 
 /* caluclate x' and y' for Oblique Stereographic Proj for LAT/LONG
 ----------------------------------------------------------------*/
-sincos(dlon,&sinlon,&coslon);
+gsincos(dlon,&sinlon,&coslon);
 esphi = e * sin(lat);
 chi = 2.0 * atan(tan((HALF_PI + lat) / 2.0) * 
             pow(((1.0 - esphi) / (1.0 + esphi)),(e/2.0))) - HALF_PI;
-sincos(chi,&sinphi,&cosphi);
+gsincos(chi,&sinphi,&cosphi);
 g = sin_p26 * sinphi + cos_p26 * cosphi * coslon;
 s = 2.0 / (1.0 + g);
 xp = s * cosphi * sinlon;

@@ -20,13 +20,9 @@
  *      MBF_IMAGE83P : MBIO ID 191
  *      MBF_IMAGEMBA : MBIO ID 192
  *
- *
  * Author:	Vivek Reddy, Santa Clara University
  *       	D.W. Caress
  * Date:	May 5, 2008
- *
- *
- *
  */
 
 #include <math.h>
@@ -41,6 +37,8 @@
 
 /*--------------------------------------------------------------------*/
 int mbsys_image83p_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *error) {
+	(void)mbio_ptr;  // Unused arg
+
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -49,7 +47,7 @@ int mbsys_image83p_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *err
 	}
 
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* allocate memory for data structure */
 	const int status = mb_mallocd(verbose, __FILE__, __LINE__, sizeof(struct mbsys_image83p_struct), store_ptr, error);
@@ -67,6 +65,8 @@ int mbsys_image83p_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *err
 }
 /*--------------------------------------------------------------------*/
 int mbsys_image83p_deall(int verbose, void *mbio_ptr, void **store_ptr, int *error) {
+	(void)mbio_ptr;  // Unused arg
+
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -143,6 +143,11 @@ int mbsys_image83p_extract(int verbose, void *mbio_ptr, void *store_ptr, int *ki
                            double *navlat, double *speed, double *heading, int *nbath, int *namp, int *nss, char *beamflag,
                            double *bath, double *amp, double *bathacrosstrack, double *bathalongtrack, double *ss,
                            double *ssacrosstrack, double *ssalongtrack, char *comment, int *error) {
+	(void)amp;  // Unused arg
+	(void)ss;  // Unused arg
+	(void)ssacrosstrack;  // Unused arg
+	(void)ssalongtrack;  // Unused arg
+
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -275,6 +280,8 @@ int mbsys_image83p_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind
                           double navlat, double speed, double heading, int nbath, int namp, int nss, char *beamflag, double *bath,
                           double *amp, double *bathacrosstrack, double *bathalongtrack, double *ss, double *ssacrosstrack,
                           double *ssalongtrack, char *comment, int *error) {
+	(void)mbio_ptr;  // Unused arg
+
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -319,7 +326,7 @@ int mbsys_image83p_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind
 	}
 
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	struct mbsys_image83p_struct *store = (struct mbsys_image83p_struct *)store_ptr;
@@ -377,6 +384,8 @@ int mbsys_image83p_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind
 int mbsys_image83p_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbeams, double *ttimes, double *angles,
                           double *angles_forward, double *angles_null, double *heave, double *alongtrack_offset, double *draft,
                           double *ssv, int *error) {
+	(void)mbio_ptr;  // Unused arg
+
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -392,7 +401,7 @@ int mbsys_image83p_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kin
 	}
 
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	struct mbsys_image83p_struct *store = (struct mbsys_image83p_struct *)store_ptr;
@@ -477,7 +486,7 @@ int mbsys_image83p_detects(int verbose, void *mbio_ptr, void *store_ptr, int *ki
 	}
 
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	struct mbsys_image83p_struct *store = (struct mbsys_image83p_struct *)store_ptr;
@@ -539,6 +548,8 @@ int mbsys_image83p_detects(int verbose, void *mbio_ptr, void *store_ptr, int *ki
 /*--------------------------------------------------------------------*/
 int mbsys_image83p_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr, int *kind, double *transducer_depth,
                                     double *altitudev, int *error) {
+	(void)mbio_ptr;  // Unused arg
+
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -548,7 +559,7 @@ int mbsys_image83p_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr
 	}
 
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	struct mbsys_image83p_struct *store = (struct mbsys_image83p_struct *)store_ptr;
@@ -607,6 +618,8 @@ int mbsys_image83p_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr
 int mbsys_image83p_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int time_i[7], double *time_d,
                                double *navlon, double *navlat, double *speed, double *heading, double *draft, double *roll,
                                double *pitch, double *heave, int *error) {
+	(void)mbio_ptr;  // Unused arg
+
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -616,7 +629,7 @@ int mbsys_image83p_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int
 	}
 
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	struct mbsys_image83p_struct *store = (struct mbsys_image83p_struct *)store_ptr;
@@ -726,6 +739,8 @@ int mbsys_image83p_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int
 int mbsys_image83p_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int time_i[7], double time_d, double navlon,
                               double navlat, double speed, double heading, double draft, double roll, double pitch, double heave,
                               int *error) {
+	(void)mbio_ptr;  // Unused arg
+
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -751,7 +766,7 @@ int mbsys_image83p_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int 
 	}
 
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	struct mbsys_image83p_struct *store = (struct mbsys_image83p_struct *)store_ptr;
@@ -797,6 +812,8 @@ int mbsys_image83p_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int 
 
 /*--------------------------------------------------------------------*/
 int mbsys_image83p_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_ptr, int *error) {
+	(void)mbio_ptr;  // Unused arg
+
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -807,7 +824,7 @@ int mbsys_image83p_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy
 	}
 
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointers */
 	struct mbsys_image83p_struct *store = (struct mbsys_image83p_struct *)store_ptr;

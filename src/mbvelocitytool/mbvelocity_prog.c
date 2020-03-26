@@ -24,10 +24,8 @@
  * Date:        June 6, 1993
  */
 
-/*--------------------------------------------------------------------*/
-
-/* standard include files */
 #include <math.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -44,20 +42,19 @@
 #include <windows.h>
 #endif
 
-#include <X11/Intrinsic.h>
 
-/* MBIO include files */
-#include "mb_format.h"
-#include "mb_status.h"
-#include "mb_define.h"
-#include "mb_io.h"
-#include "mb_swap.h"
-#include "mb_process.h"
 #include "mb_aux.h"
+#include "mb_define.h"
+#include "mb_format.h"
+#include "mb_io.h"
+#include "mb_process.h"
+#include "mb_swap.h"
+#include "mb_status.h"
+
+#include <X11/Intrinsic.h>
 #include "mb_xgraphics.h"
 #include "mbvelocity.h"
 
-/* id variables */
 static char program_name[] = "MBVELOCITYTOOL";
 static char help_message[] = "MBVELOCITYTOOL is an interactive water velocity profile editor  \nused to examine multiple water "
                              "velocity profiles and to create  \nnew water velocity profiles which can be used for the "
@@ -67,7 +64,6 @@ static char help_message[] = "MBVELOCITYTOOL is an interactive water velocity pr
 static char usage_message[] =
     "mbvelocitytool [-Byr/mo/da/hr/mn/sc -Eyr/mo/da/hr/mn/sc \n\t-Fformat -Ifile -Ssvpfile -Wsvpfile -V -H]";
 
-/* status variables */
 int error = MB_ERROR_NO_ERROR;
 int verbose = 0;
 char *message = NULL;
@@ -78,7 +74,7 @@ struct profile profile_edit;
 int *edit_x = NULL;
 int *edit_y = NULL;
 mb_path editfile;
-int edit = 0;
+bool edit = false;
 int ndisplay = 0;
 void *mbvt_xgid;
 int borders[4];
@@ -201,12 +197,10 @@ int pixel_values[256];
 /*                  int status                                        */
 /*--------------------------------------------------------------------*/
 int mbvt_init(int argc, char **argv) {
-	/* local variables */
 	int status = MB_SUCCESS;
 	mb_path ifile, sfile, wfile;
 	int i;
 
-	/* parsing variables */
 	extern char *optarg;
 	int errflg = 0;
 	int c;
@@ -236,9 +230,9 @@ int mbvt_init(int argc, char **argv) {
 	speedmin = 0.0;
 	timegap = 1000000000.0;
 	nbeams = 16;
-	strcpy(ifile, "\0");
-	strcpy(sfile, "\0");
-	strcpy(wfile, "\0");
+	strcpy(ifile, "");
+	strcpy(sfile, "");
+	strcpy(wfile, "");
 
 	/* process argument list */
 	while ((c = getopt(argc, argv, "B:b:E:e:F:f:I:i:S:s:W:w:VvHh")) != -1)
@@ -338,7 +332,6 @@ int mbvt_init(int argc, char **argv) {
 		do_open_commandline(wfile, sfile, ifile, format);
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -347,7 +340,6 @@ int mbvt_init(int argc, char **argv) {
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return */
 	return (status);
 }
 
@@ -362,11 +354,9 @@ int mbvt_init(int argc, char **argv) {
 /*                  int status                                        */
 /*--------------------------------------------------------------------*/
 int mbvt_quit() {
-	/* local variables */
 	struct profile *profile;
 	int status;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 	}
@@ -378,10 +368,10 @@ int mbvt_quit() {
 	mbvt_deallocate_swath();
 
 	/* clear out old velocity data */
-	if (edit == true) {
+	if (edit) {
 		edit = false;
 		profile->n = 0;
-		strcpy(profile->name, "\0");
+		strcpy(profile->name, "");
 		mb_freed(verbose, __FILE__, __LINE__, (void **)&edit_x, &error);
 		mb_freed(verbose, __FILE__, __LINE__, (void **)&edit_y, &error);
 		mb_freed(verbose, __FILE__, __LINE__, (void **)&profile->depth, &error);
@@ -391,7 +381,6 @@ int mbvt_quit() {
 	/* check allocated memory */
 	status = mb_memory_list(verbose, &error);
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -400,7 +389,6 @@ int mbvt_quit() {
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return */
 	return (status);
 }
 
@@ -415,11 +403,9 @@ int mbvt_quit() {
 /*                  int status                                        */
 /*--------------------------------------------------------------------*/
 int mbvt_set_graphics(void *xgid, int *brdr, int ncol, unsigned int *pixels) {
-	/* local variables */
 	int status = MB_SUCCESS;
 	int i;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -443,7 +429,6 @@ int mbvt_set_graphics(void *xgid, int *brdr, int ncol, unsigned int *pixels) {
 	for (i = 0; i < ncolors; i++)
 		pixel_values[i] = pixels[i];
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -465,10 +450,8 @@ int mbvt_set_graphics(void *xgid, int *brdr, int ncol, unsigned int *pixels) {
 /*--------------------------------------------------------------------*/
 int mbvt_get_values(int *s_edit, int *s_ndisplay, double *s_maxdepth, double *s_velrange, double *s_velcenter, double *s_resrange,
                     int *s_anglemode, int *s_format) {
-	/* local variables */
 	int status = MB_SUCCESS;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 	}
@@ -483,7 +466,6 @@ int mbvt_get_values(int *s_edit, int *s_ndisplay, double *s_maxdepth, double *s_
 	*s_anglemode = anglemode;
 	*s_format = format;
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -516,10 +498,8 @@ int mbvt_get_values(int *s_edit, int *s_ndisplay, double *s_maxdepth, double *s_
 /*--------------------------------------------------------------------*/
 int mbvt_set_values(int s_edit, int s_ndisplay, double s_maxdepth, double s_velrange, double s_velcenter, double s_resrange,
                     int s_anglemode) {
-	/* local variables */
 	int status = MB_SUCCESS;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input values:\n");
@@ -541,7 +521,6 @@ int mbvt_set_values(int s_edit, int s_ndisplay, double s_maxdepth, double s_velr
 	resrange = s_resrange;
 	anglemode = s_anglemode;
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -563,7 +542,6 @@ int mbvt_set_values(int s_edit, int s_ndisplay, double s_maxdepth, double s_velr
 /*                  status                                            */
 /*--------------------------------------------------------------------*/
 int mbvt_open_edit_profile(char *file) {
-	/* local variables */
 	int status = MB_SUCCESS;
 	int size;
 	mb_path buffer;
@@ -571,7 +549,6 @@ int mbvt_open_edit_profile(char *file) {
 	struct profile *profile;
 	FILE *fp;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input values:\n");
@@ -582,10 +559,10 @@ int mbvt_open_edit_profile(char *file) {
 	profile = &profile_edit;
 
 	/* clear out old velocity data */
-	if (edit == true) {
+	if (edit) {
 		edit = false;
 		profile->n = 0;
-		strcpy(profile->name, "\0");
+		strcpy(profile->name, "");
 		mb_freed(verbose, __FILE__, __LINE__, (void **)&edit_x, &error);
 		mb_freed(verbose, __FILE__, __LINE__, (void **)&edit_y, &error);
 		mb_freed(verbose, __FILE__, __LINE__, (void **)&profile->depth, &error);
@@ -631,7 +608,7 @@ int mbvt_open_edit_profile(char *file) {
 		fprintf(stderr, "\nUnable to Open Velocity Profile File <%s> for reading\n", file);
 		return (status);
 	}
-	strncpy(buffer, "\0", sizeof(buffer));
+	strncpy(buffer, "", sizeof(buffer));
 	while ((result = fgets(buffer, MB_PATH_MAXLINE, fp)) == buffer) {
 		if (buffer[0] != '#') {
 			sscanf(buffer, "%lf %lf", &(profile->depth[profile->n]), &(profile->velocity[profile->n]));
@@ -644,7 +621,7 @@ int mbvt_open_edit_profile(char *file) {
 			}
 			profile->n++;
 		}
-		strncpy(buffer, "\0", sizeof(buffer));
+		strncpy(buffer, "", sizeof(buffer));
 	}
 	fclose(fp);
 
@@ -652,7 +629,6 @@ int mbvt_open_edit_profile(char *file) {
 	edit = true;
 	status = MB_SUCCESS;
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -676,14 +652,12 @@ int mbvt_open_edit_profile(char *file) {
 /*                  status                                            */
 /*--------------------------------------------------------------------*/
 int mbvt_new_edit_profile() {
-	/* local variables */
 	int status = MB_SUCCESS;
 	struct profile *profile;
 	int size;
 	double dz;
 	int i;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 	}
@@ -692,10 +666,10 @@ int mbvt_new_edit_profile() {
 	profile = &profile_edit;
 
 	/* clear out old velocity data */
-	if (edit == true) {
+	if (edit) {
 		edit = false;
 		profile->n = 0;
-		strcpy(profile->name, "\0");
+		strcpy(profile->name, "");
 		mb_freed(verbose, __FILE__, __LINE__, (void **)&edit_x, &error);
 		mb_freed(verbose, __FILE__, __LINE__, (void **)&edit_y, &error);
 		mb_freed(verbose, __FILE__, __LINE__, (void **)&profile->depth, &error);
@@ -745,7 +719,6 @@ int mbvt_new_edit_profile() {
 	edit = true;
 	status = MB_SUCCESS;
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -766,7 +739,6 @@ int mbvt_new_edit_profile() {
 /*                  status                                            */
 /*--------------------------------------------------------------------*/
 int mbvt_save_edit_profile(char *file) {
-	/* local variables */
 	int status = MB_SUCCESS;
 	struct profile *profile;
 	FILE *fp;
@@ -777,7 +749,6 @@ int mbvt_save_edit_profile(char *file) {
 	char date[32], *user_ptr;
 	mb_path user, host;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input values:\n");
@@ -821,7 +792,6 @@ int mbvt_save_edit_profile(char *file) {
 	edit = true;
 	status = MB_SUCCESS;
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -843,7 +813,6 @@ int mbvt_save_edit_profile(char *file) {
 /*                  status                                            */
 /*--------------------------------------------------------------------*/
 int mbvt_save_swath_profile(char *file) {
-	/* local variables */
 	int status = MB_SUCCESS;
 	struct profile *profile;
 	FILE *fp;
@@ -856,7 +825,6 @@ int mbvt_save_swath_profile(char *file) {
 	char date[32], *user_ptr;
 	mb_path user, host;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input values:\n");
@@ -910,7 +878,6 @@ int mbvt_save_swath_profile(char *file) {
 			edit = true;
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -931,7 +898,6 @@ int mbvt_save_swath_profile(char *file) {
 /*                  status                                            */
 /*--------------------------------------------------------------------*/
 int mbvt_save_residuals(char *file) {
-	/* local variables */
 	int status = MB_SUCCESS;
 	FILE *fp;
 	int oldmode;
@@ -944,7 +910,6 @@ int mbvt_save_residuals(char *file) {
 	char date[32], *user_ptr;
 	mb_path user, host;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input values:\n");
@@ -1035,7 +1000,6 @@ int mbvt_save_residuals(char *file) {
 		fclose(fp);
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -1054,14 +1018,12 @@ int mbvt_save_residuals(char *file) {
 /*                  status                                            */
 /*--------------------------------------------------------------------*/
 int mbvt_open_display_profile(char *file) {
-	/* local variables */
 	int status = MB_SUCCESS;
 	mb_path buffer;
 	char *result;
 	struct profile *profile;
 	FILE *fp;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input values:\n");
@@ -1116,7 +1078,7 @@ int mbvt_open_display_profile(char *file) {
 		fprintf(stderr, "\nUnable to Open Velocity Profile File <%s> for reading\n", file);
 		return (status);
 	}
-	strncpy(buffer, "\0", sizeof(buffer));
+	strncpy(buffer, "", sizeof(buffer));
 	while ((result = fgets(buffer, MB_PATH_MAXLINE, fp)) == buffer) {
 		if (buffer[0] != '#') {
 			sscanf(buffer, "%lf %lf", &(profile->depth[profile->n]), &(profile->velocity[profile->n]));
@@ -1129,7 +1091,7 @@ int mbvt_open_display_profile(char *file) {
 			}
 			profile->n++;
 		}
-		strncpy(buffer, "\0", sizeof(buffer));
+		strncpy(buffer, "", sizeof(buffer));
 	}
 	fclose(fp);
 
@@ -1137,7 +1099,6 @@ int mbvt_open_display_profile(char *file) {
 	ndisplay++;
 	status = MB_SUCCESS;
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -1159,11 +1120,9 @@ int mbvt_open_display_profile(char *file) {
 /*                  status                                            */
 /*--------------------------------------------------------------------*/
 int mbvt_get_display_names(int *nlist, char *list[MAX_PROFILES]) {
-	/* local variables */
 	int status = MB_SUCCESS;
 	int i;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input values:\n");
@@ -1175,7 +1134,6 @@ int mbvt_get_display_names(int *nlist, char *list[MAX_PROFILES]) {
 	for (i = 0; i < *nlist; i++)
 		list[i] = profile_display[i].name;
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -1199,12 +1157,10 @@ int mbvt_get_display_names(int *nlist, char *list[MAX_PROFILES]) {
 /*                  status                                            */
 /*--------------------------------------------------------------------*/
 int mbvt_delete_display_profile(int select) {
-	/* local variables */
 	struct profile *profile;
 	int status = MB_SUCCESS;
 	int i, j;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input values:\n");
@@ -1217,7 +1173,7 @@ int mbvt_delete_display_profile(int select) {
 		profile = &profile_display[select];
 		profile->n = 0;
 		profile->nalloc = 0;
-		strcpy(profile->name, "\0");
+		strcpy(profile->name, "");
 		mb_freed(verbose, __FILE__, __LINE__, (void **)&profile->depth, &error);
 		mb_freed(verbose, __FILE__, __LINE__, (void **)&profile->velocity, &error);
 
@@ -1235,7 +1191,6 @@ int mbvt_delete_display_profile(int select) {
 	else
 		status = MB_FAILURE;
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -1271,7 +1226,6 @@ int mbvt_delete_display_profile(int select) {
 /*                  status                                            */
 /*--------------------------------------------------------------------*/
 int mbvt_plot() {
-	/* local variables */
 	int status = MB_SUCCESS;
 
 	/* plotting variables */
@@ -1298,7 +1252,6 @@ int mbvt_plot() {
 	int color;
 	int i, j;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, " borders[0] = %d\n", borders[0]);
@@ -1393,7 +1346,7 @@ int mbvt_plot() {
 	}
 
 	/* plot edit profile */
-	if (edit == true) {
+	if (edit) {
 		for (j = 0; j < profile_edit.n; j++) {
 			xx = xmin + (profile_edit.velocity[j] - xminimum) * xscale;
 			yy = ymin + (profile_edit.depth[j] - yminimum) * yscale;
@@ -1611,7 +1564,6 @@ int mbvt_plot() {
 	/* turn clipping on for velocity profile box */
 	xg_setclip(mbvt_xgid, xmin, ymin, (xmax - xmin), (ymax - ymin));
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -1632,12 +1584,10 @@ int mbvt_plot() {
 /*                  status                                            */
 /*--------------------------------------------------------------------*/
 int mbvt_action_select_node(int x, int y) {
-	/* local variables */
 	int status = MB_SUCCESS;
 	double distance, distance_min;
 	int i;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input values:\n");
@@ -1660,7 +1610,6 @@ int mbvt_action_select_node(int x, int y) {
 		}
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -1680,10 +1629,8 @@ int mbvt_action_select_node(int x, int y) {
 /*                  status                                            */
 /*--------------------------------------------------------------------*/
 int mbvt_action_mouse_up(int x, int y) {
-	/* local variables */
 	int status = MB_SUCCESS;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input values:\n");
@@ -1696,7 +1643,6 @@ int mbvt_action_mouse_up(int x, int y) {
 		active = -1;
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -1718,11 +1664,9 @@ int mbvt_action_mouse_up(int x, int y) {
 /*                  status                                            */
 /*--------------------------------------------------------------------*/
 int mbvt_action_drag_node(int x, int y) {
-	/* local variables */
 	int status = MB_SUCCESS;
 	int ylim_min, ylim_max;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input values:\n");
@@ -1789,7 +1733,6 @@ int mbvt_action_drag_node(int x, int y) {
 	else
 		status = MB_FAILURE;
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -1810,12 +1753,10 @@ int mbvt_action_drag_node(int x, int y) {
 /*                  status                                            */
 /*--------------------------------------------------------------------*/
 int mbvt_action_add_node(int x, int y) {
-	/* local variables */
 	int status = MB_SUCCESS;
 	int add_i, add_x, add_y;
 	int i;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input values:\n");
@@ -1862,7 +1803,6 @@ int mbvt_action_add_node(int x, int y) {
 		}
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -1883,13 +1823,11 @@ int mbvt_action_add_node(int x, int y) {
 /*                  status                                            */
 /*--------------------------------------------------------------------*/
 int mbvt_action_delete_node(int x, int y) {
-	/* local variables */
 	int status = MB_SUCCESS;
 	double distance, distance_min;
 	int delete;
 	int i;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input values:\n");
@@ -1928,7 +1866,6 @@ int mbvt_action_delete_node(int x, int y) {
 		}
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -1939,12 +1876,10 @@ int mbvt_action_delete_node(int x, int y) {
 }
 /*--------------------------------------------------------------------*/
 int mbvt_get_format(char *file, int *form) {
-	/* local variables */
 	int status = MB_SUCCESS;
 	mb_path tmp;
 	int tform;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1958,7 +1893,6 @@ int mbvt_get_format(char *file, int *form) {
 		*form = tform;
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -1968,7 +1902,6 @@ int mbvt_get_format(char *file, int *form) {
 		fprintf(stderr, "dbg2       status:     %d\n", status);
 	}
 
-	/* return */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -1994,7 +1927,6 @@ int mbvt_get_format(char *file, int *form) {
 /*                  status                                            */
 /*--------------------------------------------------------------------*/
 int mbvt_open_swath_file(char *file, int form, int *numload) {
-	/* local variables */
 	int status = MB_SUCCESS;
 	int kind;
 	double navlon_levitus, navlat_levitus;
@@ -2002,19 +1934,17 @@ int mbvt_open_swath_file(char *file, int form, int *numload) {
 	double altitude;
 	double sonardepth;
 	int variable_beams;
-	int traveltime;
+	int traveltime;  // TODO(schwehr): bool
 	int beam_flagging;
 	mb_path command;
 	mb_path string;
 	mb_path svp_file;
-	int done, count;
+	int count;
 	struct stat file_status;
 	int fstat;
 	double rr, zz;
-	int shellstatus;
 	int i, k;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -2034,7 +1964,7 @@ int mbvt_open_swath_file(char *file, int form, int *numload) {
 		do_error_dialog("Data loading aborted.", "The specified swath data", "format is incorrect!");
 		return (status);
 	}
-	if (traveltime == false) {
+	if (!traveltime) {
 		fprintf(stderr, "\nProgram <%s> requires travel time data.\n", program_name);
 		fprintf(stderr, "Format %d is does not include travel time data.\n", format);
 		fprintf(stderr, "Travel times and angles are being estimated\n");
@@ -2043,7 +1973,7 @@ int mbvt_open_swath_file(char *file, int form, int *numload) {
 		do_error_dialog("Data doesn't include travel times!", "Travel times and angles estimated",
 		                "assuming 1500 m/s sound speed.");
 	}
-	/* if (traveltime == false)
+	/* if (!traveltime)
 	    {
 	    fprintf(stderr,"\nProgram <%s> requires travel time data.\n",program_name);
 	    fprintf(stderr,"Format %d is unacceptable because it does not include travel time data.\n",format);
@@ -2188,7 +2118,7 @@ int mbvt_open_swath_file(char *file, int form, int *numload) {
 				ping[nbuffer].bathacrosstrack[i] = bathacrosstrack[i];
 				ping[nbuffer].bathalongtrack[i] = bathalongtrack[i];
 			}
-			if (traveltime == true) {
+			if (traveltime) {
 				status = mb_ttimes(verbose, mbio_ptr, store_ptr, &kind, &nbeams, ping[nbuffer].ttimes, ping[nbuffer].angles,
 				                   ping[nbuffer].angles_forward, ping[nbuffer].angles_null, ping[nbuffer].heave,
 				                   ping[nbuffer].alongtrack_offset, &ping[nbuffer].sonardepth, &ping[nbuffer].ssv, &error);
@@ -2316,15 +2246,15 @@ int mbvt_open_swath_file(char *file, int form, int *numload) {
 	/* add Levitus display profile if nav available */
 	if (navlon_levitus != 0.0 || navlat_levitus != 0.0) {
 		sprintf(command, "mblevitus -R%f/%f -Ombvt_levitus_tmp.svp\n", navlon_levitus, navlat_levitus);
-		shellstatus = system(command);
+		/* const int shellstatus = */ system(command);
 		mbvt_open_display_profile("mbvt_levitus_tmp.svp");
-		shellstatus = system("rm -f mbvt_levitus_tmp.svp");
+		/* const int shellstatus = */ system("rm -f mbvt_levitus_tmp.svp");
 	}
 
 	/* load svp files generated by mbsvplist if available */
-	done = false;
+	bool done = false;
 	count = 0;
-	while (done == false) {
+	while (!done) {
 		sprintf(svp_file, "%s_%3.3d.svp", swathfile, count);
 		if ((fstat = stat(svp_file, &file_status)) == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR) {
 			mbvt_open_display_profile(svp_file);
@@ -2353,13 +2283,12 @@ int mbvt_open_swath_file(char *file, int form, int *numload) {
 	}
 
 	/* process the data */
-	if (status == MB_SUCCESS && edit == true)
+	if (status == MB_SUCCESS && edit)
 		status = mbvt_process_multibeam();
 
 	/* plot everything */
 	mbvt_plot();
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -2369,7 +2298,6 @@ int mbvt_open_swath_file(char *file, int form, int *numload) {
 		fprintf(stderr, "dbg2       status:     %d\n", status);
 	}
 
-	/* return */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -2384,11 +2312,9 @@ int mbvt_open_swath_file(char *file, int form, int *numload) {
 /*                  status                                            */
 /*--------------------------------------------------------------------*/
 int mbvt_deallocate_swath() {
-	/* local variables */
 	int status = MB_SUCCESS;
 	int i;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 	}
@@ -2440,7 +2366,6 @@ int mbvt_deallocate_swath() {
 		nbuffer = 0;
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -2449,7 +2374,6 @@ int mbvt_deallocate_swath() {
 		fprintf(stderr, "dbg2       status:     %d\n", status);
 	}
 
-	/* return */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -2463,13 +2387,12 @@ int mbvt_deallocate_swath() {
 /*                  status                                            */
 /*--------------------------------------------------------------------*/
 int mbvt_process_multibeam() {
-	/* local variables */
 	int status = MB_SUCCESS;
 	double *dep;
 	double *vel;
 	int nvel;
 	void *rt_svp = NULL;
-	int first;
+	bool first;
 	double ttime;
 	int ray_stat;
 	double factor;
@@ -2478,10 +2401,9 @@ int mbvt_process_multibeam() {
 	int ns;
 	double depth_predict, res;
 	double sonardepth, sonardepthshift, heave_use;
-	int found;
+	bool found;
 	int i, j, k;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 	}
@@ -2546,7 +2468,7 @@ int mbvt_process_multibeam() {
 
 		/* find a good heave value */
 		found = false;
-		for (i = 0; i < ping[k].beams_bath && found == false; i++) {
+		for (i = 0; i < ping[k].beams_bath && !found; i++) {
 			if (mb_beam_ok(ping[k].beamflag[i])) {
 				heave_use = ping[k].heave[i];
 				found = true;
@@ -2555,7 +2477,7 @@ int mbvt_process_multibeam() {
 
 		sonardepth = heave_use + ping[k].sonardepth;
 		sonardepthshift = 0.0;
-		if (first == true)
+		if (first)
 			raydepthmin = MIN(raydepthmin, sonardepth);
 		if (sonardepth < 0.0) {
 			sonardepthshift = sonardepth;
@@ -2574,7 +2496,7 @@ int mbvt_process_multibeam() {
 				factor = cos(DTR * ping[k].angles_forward[i]);
 
 				/* trace rays */
-				if (first == false) {
+				if (!first) {
 					/* call raytracing without keeping
 					plotting list */
 					status =
@@ -2604,7 +2526,7 @@ int mbvt_process_multibeam() {
 					bath_min = depth[i];
 				if (depth[i] > bath_max)
 					bath_max = depth[i];
-				if (first == true) {
+				if (first) {
 					rayxmax = MAX(rayxmax, fabs(acrosstrack[i]));
 					raydepthmax = MAX(raydepthmax, depth[i]);
 				}
@@ -2691,7 +2613,6 @@ int mbvt_process_multibeam() {
 	/* turn message off */
 	do_message_off();
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -2700,7 +2621,6 @@ int mbvt_process_multibeam() {
 		fprintf(stderr, "dbg2       status:     %d\n", status);
 	}
 
-	/* return */
 	return (status);
 }
 /*--------------------------------------------------------------------*/

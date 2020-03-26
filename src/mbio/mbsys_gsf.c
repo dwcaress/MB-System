@@ -21,8 +21,6 @@
  *
  * Author:	D. W. Caress
  * Date:	March 5, 1998
- *
- *
  */
 
 #include <math.h>
@@ -38,8 +36,6 @@
 
 /*--------------------------------------------------------------------*/
 int mbsys_gsf_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *error) {
-	int status = MB_SUCCESS;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -48,10 +44,10 @@ int mbsys_gsf_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *error) {
 	}
 
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* allocate memory for data structure */
-	status = mb_mallocd(verbose, __FILE__, __LINE__, sizeof(struct mbsys_gsf_struct), store_ptr, error);
+	const int status = mb_mallocd(verbose, __FILE__, __LINE__, sizeof(struct mbsys_gsf_struct), store_ptr, error);
 	memset(*store_ptr, 0, sizeof(struct mbsys_gsf_struct));
 
 	if (verbose >= 2) {
@@ -93,7 +89,6 @@ int mbsys_gsf_deall(int verbose, void *mbio_ptr, void **store_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbsys_gsf_dimensions(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbath, int *namp, int *nss, int *error) {
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -103,11 +98,11 @@ int mbsys_gsf_dimensions(int verbose, void *mbio_ptr, void *store_ptr, int *kind
 	}
 
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	struct mbsys_gsf_struct *store = (struct mbsys_gsf_struct *)store_ptr;
-	gsfDataID *dataID = &(store->dataID);
+	// gsfDataID *dataID = &(store->dataID);
 	gsfRecords *records = &(store->records);
 
 	/* get data kind */
@@ -168,11 +163,11 @@ int mbsys_gsf_sonartype(int verbose, void *mbio_ptr, void *store_ptr, int *sonar
 	}
 
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	struct mbsys_gsf_struct *store = (struct mbsys_gsf_struct *)store_ptr;
-	gsfDataID *dataID = &(store->dataID);
+	// gsfDataID *dataID = &(store->dataID);
 	gsfRecords *records = &(store->records);
 	gsfSwathBathyPing *mb_ping = &(records->mb_ping);
 
@@ -281,11 +276,11 @@ int mbsys_gsf_sidescantype(int verbose, void *mbio_ptr, void *store_ptr, int *ss
 	}
 
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	struct mbsys_gsf_struct *store = (struct mbsys_gsf_struct *)store_ptr;
-	gsfDataID *dataID = &(store->dataID);
+	// gsfDataID *dataID = &(store->dataID);
 	gsfRecords *records = &(store->records);
 	gsfSwathBathyPing *mb_ping = &(records->mb_ping);
 
@@ -318,7 +313,6 @@ int mbsys_gsf_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind, i
 	gsfTimeSeriesIntensity *snippet;
 	double ss_spacing, ss_spacing_use;
 	double vertical, range, beam_foot, sint, angle;
-	int gsfstatus;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -333,7 +327,7 @@ int mbsys_gsf_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind, i
 
 	/* get data structure pointer */
 	struct mbsys_gsf_struct *store = (struct mbsys_gsf_struct *)store_ptr;
-	gsfDataID *dataID = &(store->dataID);
+	// gsfDataID *dataID = &(store->dataID);
 	gsfRecords *records = &(store->records);
 
 	/* get data kind */
@@ -370,7 +364,8 @@ int mbsys_gsf_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind, i
 			*speed = 0.0;
 
 		/* set beamwidths in mb_io structure */
-		gsfstatus = gsfGetSwathBathyBeamWidths(records, &(mb_io_ptr->beamwidth_ltrack), &(mb_io_ptr->beamwidth_xtrack));
+		/* const int gsfstatus = */
+		gsfGetSwathBathyBeamWidths(records, &(mb_io_ptr->beamwidth_ltrack), &(mb_io_ptr->beamwidth_xtrack));
 
 		/* if not set then use hard coded values */
 		if (mb_io_ptr->beamwidth_ltrack <= 0.0 || mb_io_ptr->beamwidth_xtrack <= 0.0) {
@@ -430,10 +425,10 @@ int mbsys_gsf_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind, i
 				mb_io_ptr->beamwidth_ltrack = 1.5;
 				mb_io_ptr->beamwidth_xtrack = 2.8;
 			}
-			else if (mb_ping->sensor_id == GSF_SWATH_BATHY_SUBRECORD_ELAC_MKII_SPECIFIC) {
-				mb_io_ptr->beamwidth_ltrack = 1.5;
-				mb_io_ptr->beamwidth_xtrack = 2.8;
-			}
+			// else if (mb_ping->sensor_id == GSF_SWATH_BATHY_SUBRECORD_ELAC_MKII_SPECIFIC) {
+			// 	mb_io_ptr->beamwidth_ltrack = 1.5;
+			// 	mb_io_ptr->beamwidth_xtrack = 2.8;
+			// }
 			else if (mb_ping->sensor_id == GSF_SWATH_BATHY_SUBRECORD_GEOSWATH_PLUS_SPECIFIC) {
 				mb_io_ptr->beamwidth_ltrack = 1.0;
 				mb_io_ptr->beamwidth_xtrack = 0.1;
@@ -626,6 +621,10 @@ int mbsys_gsf_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, int
                      double navlat, double speed, double heading, int nbath, int namp, int nss, char *beamflag, double *bath,
                      double *amp, double *bathacrosstrack, double *bathalongtrack, double *ss, double *ssacrosstrack,
                      double *ssalongtrack, char *comment, int *error) {
+	(void)nss;  // Unused arg
+	(void)ss;  // Unused arg
+	(void)ssacrosstrack;  // Unused arg
+	(void)ssalongtrack;  // Unused arg
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -665,13 +664,12 @@ int mbsys_gsf_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, int
 	}
 
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	struct mbsys_gsf_struct *store = (struct mbsys_gsf_struct *)store_ptr;
 	gsfRecords *records = &(store->records);
 	gsfDataID *dataID = &(store->dataID);
-	gsfSwathBathyPing *mb_ping = &(records->mb_ping);
 
 	/* set data kind */
 	store->kind = kind;
@@ -681,7 +679,7 @@ int mbsys_gsf_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, int
 	/* insert data in structure */
 	if (store->kind == MB_DATA_DATA) {
 		dataID->recordID = GSF_RECORD_SWATH_BATHYMETRY_PING;
-		mb_ping = &(records->mb_ping);
+		gsfSwathBathyPing *mb_ping = &(records->mb_ping);
 
 		/* get time */
 		mb_ping->ping_time.tv_sec = (int)time_d;
@@ -829,12 +827,12 @@ int mbsys_gsf_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind, in
 	}
 
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	struct mbsys_gsf_struct *store = (struct mbsys_gsf_struct *)store_ptr;
 	gsfRecords *records = &(store->records);
-	gsfDataID *dataID = &(store->dataID);
+	// gsfDataID *dataID = &(store->dataID);
 	gsfSwathBathyPing *mb_ping = &(records->mb_ping);
 
 	/* get data kind */
@@ -1069,12 +1067,12 @@ int mbsys_gsf_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kind, i
 	}
 
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	struct mbsys_gsf_struct *store = (struct mbsys_gsf_struct *)store_ptr;
 	gsfRecords *records = &(store->records);
-	gsfDataID *dataID = &(store->dataID);
+	// gsfDataID *dataID = &(store->dataID);
 	gsfSwathBathyPing *mb_ping = &(records->mb_ping);
 
 	/* get data kind */
@@ -1143,13 +1141,13 @@ int mbsys_gsf_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr, int
 	}
 
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	int status = MB_SUCCESS;
 	struct mbsys_gsf_struct *store = (struct mbsys_gsf_struct *)store_ptr;
 	gsfRecords *records = &(store->records);
-	gsfDataID *dataID = &(store->dataID);
+	// gsfDataID *dataID = &(store->dataID);
 	gsfSwathBathyPing *mb_ping = &(records->mb_ping);
 
 	/* get data kind */
@@ -1256,12 +1254,12 @@ int mbsys_gsf_insert_altitude(int verbose, void *mbio_ptr, void *store_ptr, doub
 	}
 
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	struct mbsys_gsf_struct *store = (struct mbsys_gsf_struct *)store_ptr;
 	gsfRecords *records = &(store->records);
-	gsfDataID *dataID = &(store->dataID);
+	// gsfDataID *dataID = &(store->dataID);
 	gsfSwathBathyPing *mb_ping = &(records->mb_ping);
 
 	int status = MB_SUCCESS;
@@ -1322,12 +1320,12 @@ int mbsys_gsf_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int *kin
 	}
 
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	struct mbsys_gsf_struct *store = (struct mbsys_gsf_struct *)store_ptr;
 	gsfRecords *records = &(store->records);
-	gsfDataID *dataID = &(store->dataID);
+	// gsfDataID *dataID = &(store->dataID);
 	gsfSwathBathyPing *mb_ping = &(records->mb_ping);
 
 	/* get data kind */
@@ -1486,12 +1484,12 @@ int mbsys_gsf_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int time_
 	}
 
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	struct mbsys_gsf_struct *store = (struct mbsys_gsf_struct *)store_ptr;
 	gsfRecords *records = &(store->records);
-	gsfDataID *dataID = &(store->dataID);
+	// gsfDataID *dataID = &(store->dataID);
 	gsfSwathBathyPing *mb_ping = &(records->mb_ping);
 
 	int status = MB_SUCCESS;
@@ -1571,12 +1569,12 @@ int mbsys_gsf_extract_svp(int verbose, void *mbio_ptr, void *store_ptr, int *kin
 	}
 
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	struct mbsys_gsf_struct *store = (struct mbsys_gsf_struct *)store_ptr;
 	gsfRecords *records = &(store->records);
-	gsfDataID *dataID = &(store->dataID);
+	// gsfDataID *dataID = &(store->dataID);
 	gsfSVP *svp = &(records->svp);
 
 	/* get data kind */
@@ -1640,12 +1638,12 @@ int mbsys_gsf_insert_svp(int verbose, void *mbio_ptr, void *store_ptr, int nsvp,
 	}
 
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	struct mbsys_gsf_struct *store = (struct mbsys_gsf_struct *)store_ptr;
 	gsfRecords *records = &(store->records);
-	gsfDataID *dataID = &(store->dataID);
+	// gsfDataID *dataID = &(store->dataID);
 	gsfSVP *svp = &(records->svp);
 
 	/* insert data in structure */
@@ -1690,7 +1688,7 @@ int mbsys_gsf_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_ptr,
 	}
 
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointers */
 	struct mbsys_gsf_struct *store = (struct mbsys_gsf_struct *)store_ptr;
@@ -2068,7 +2066,7 @@ int mbsys_gsf_setscalefactors(int verbose, int reset_all, gsfSwathBathyPing *mb_
 				multiplier_min = floor(min_scale_factor / (min + mb_ping->scaleFactors.scaleTable[id - 1].offset));
 			multiplier = MAX(MIN(multiplier_min, multiplier_max), 1.0);
 
-			if (reset_all == true || multiplier < mb_ping->scaleFactors.scaleTable[id - 1].multiplier) {
+			if (reset_all || multiplier < mb_ping->scaleFactors.scaleTable[id - 1].multiplier) {
 				mb_ping->scaleFactors.scaleTable[id - 1].multiplier = multiplier;
 				mb_ping->scaleFactors.scaleTable[id - 1].offset = offset;
 			}

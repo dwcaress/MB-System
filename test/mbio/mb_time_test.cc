@@ -80,6 +80,76 @@ TEST(MbGetTime, Positive) {
   EXPECT_DOUBLE_EQ(1515506236.1370959, t);
 }
 
+TEST(MbGetTime, Invalid) {
+  const double expected_t = 0.0;
+  double t = -1.0;
+  // Year
+  {
+    int time[7] = {1929, 1, 9, 13, 57, 16, 137096};
+    EXPECT_EQ(MB_FAILURE, mb_get_time(0, time, &t));
+  }
+  {
+    int time[7] = {3001, 1, 9, 13, 57, 16, 137096};
+    EXPECT_EQ(MB_FAILURE, mb_get_time(0, time, &t));
+  }
+  // Month
+  {
+    int time[7] = {2018, 0, 9, 13, 57, 16, 137096};
+    EXPECT_EQ(MB_FAILURE, mb_get_time(0, time, &t));
+  }
+  {
+    int time[7] = {2018, 13, 9, 13, 57, 16, 137096};
+    EXPECT_EQ(MB_FAILURE, mb_get_time(0, time, &t));
+  }
+  // Day
+  {
+    int time[7] = {2018, 1, 0, 13, 57, 16, 137096};
+    EXPECT_EQ(MB_FAILURE, mb_get_time(0, time, &t));
+  }
+  {
+    int time[7] = {2018, 1, 32, 13, 57, 16, 137096};
+    EXPECT_EQ(MB_FAILURE, mb_get_time(0, time, &t));
+  }
+  // Hour
+  {
+    int time[7] = {2018, 1, 9, -1, 57, 16, 137096};
+    EXPECT_EQ(MB_FAILURE, mb_get_time(0, time, &t));
+  }
+  {
+    int time[7] = {2018, 1, 9, 24, 57, 16, 137096};
+    EXPECT_EQ(MB_FAILURE, mb_get_time(0, time, &t));
+  }
+  // Minute
+  {
+    int time[7] = {2018, 1, 9, 13, -1, 16, 137096};
+    EXPECT_EQ(MB_FAILURE, mb_get_time(0, time, &t));
+  }
+  {
+    int time[7] = {2018, 1, 9, 13, 60, 16, 137096};
+    EXPECT_EQ(MB_FAILURE, mb_get_time(0, time, &t));
+  }
+  // Second
+  {
+    int time[7] = {2018, 1, 9, 13, 57, -1, 137096};
+    EXPECT_EQ(MB_FAILURE, mb_get_time(0, time, &t));
+  }
+  {
+    int time[7] = {2018, 1, 9, 13, 57, 60, 137096};
+    EXPECT_EQ(MB_FAILURE, mb_get_time(0, time, &t));
+  }
+  // Microsec
+  {
+    int time[7] = {2018, 1, 9, 13, 57, 16, -1};
+    EXPECT_EQ(MB_FAILURE, mb_get_time(0, time, &t));
+  }
+  {
+    int time[7] = {2018, 1, 9, 13, 57, 16, 1000000};
+    EXPECT_EQ(MB_FAILURE, mb_get_time(0, time, &t));
+  }
+  // t should be set to zero
+  EXPECT_EQ(expected_t, t);
+}
+
 TEST(MbGetDate, Basic) {
   double t = 0.0;
   int time[7] = {-1, -1, -1, -1, -1, -1, -1};

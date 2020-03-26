@@ -3,7 +3,7 @@ NAME                Projection support routines listed below.
 
 PURPOSE:	The following functions are included in CPROJ.C.
 
-		SINCOS:	  Calculates the sine and cosine.
+		GSINCOS:	  Calculates the sine and cosine.
 		ASINZ:	  Eliminates roundoff errors.
 		MSFNZ:	  Computes the constant small m for Oblique Equal Area.
 		QSFNZ:	  Computes the constant small q for Oblique Equal Area.
@@ -46,15 +46,20 @@ S. Nelson, EROS		Jan, 1998	Changed misspelled error message
    than calling each function separately.  It is provided here for those
    computer systems which don`t implement this function
   ----------------------------------------------------*/
+
+// GCTP expects gsincos() to exist. If it does not define a local gsincos() 
+// and use sincos() if that exists or else call sin() and cos() separately
+
 // conflicts w/ existing definiion in Cygwin? [klh 06/2019]
-#if defined(__APPLE__)
-void sincos(val, sin_val, cos_val)
-double val;
-double *sin_val;
-double *cos_val;
+#ifndef HAVE_GSINCOS
+void gsincos(double val, double *sin_val, double *cos_val)
 {
+#ifdef HAVE_SINCOS
+sincos(val, sin_val, cos_val);
+#else
 *sin_val = sin(val);
 *cos_val = cos(val);
+#endif
 return;
 }
 #endif
@@ -132,7 +137,7 @@ long i;
       eccnts = eccent * eccent;
       for (i = 1; i <= 25; i++)
         {
-        sincos(phi,&sinpi,&cospi);
+        gsincos(phi,&sinpi,&cospi);
         con = eccent * sinpi;
         com = 1.0 - con * con;
         dphi = .5 * com * com / cospi * (qs / (1.0 - eccnts) - sinpi / com +

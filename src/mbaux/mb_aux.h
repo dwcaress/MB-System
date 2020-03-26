@@ -178,6 +178,10 @@ struct mb_topogrid_struct {
   float *data;
 };
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* mb_contour and mb_track function prototypes */
 int mb_triangulate(int verbose, struct swath *data, int *error);
 int mb_contour_init(int verbose, struct swath **data, int npings_max, int beams_bath, int contour_algorithm, int plot_contours,
@@ -223,9 +227,13 @@ int mb_delaun(int verbose, int npts, double *p1, double *p2, int *ed, int *ntri,
 int mb_read_gmt_grd(int verbose, char *grdfile, int *grid_projection_mode, char *grid_projection_id, float *nodatavalue, int *nxy,
                     int *n_columns, int *n_rows, double *min, double *max, double *xmin, double *xmax, double *ymin, double *ymax,
                     double *dx, double *dy, float **data, float **data_dzdx, float **data_dzdy, int *error);
-int mb_write_gmt_grd(int verbose, char *grdfile, float *grid, float nodatavalue, int n_columns, int n_rows, double xmin, double xmax,
-                     double ymin, double ymax, double zmin, double zmax, double dx, double dy, char *xlab, char *ylab, char *zlab,
-                     char *titl, char *projection, int argc, char **argv, int *error);
+int mb_write_gmt_grd(int verbose, const char *grdfile, float *grid, 
+                      float nodatavalue, int n_columns, int n_rows,
+                      double xmin, double xmax, double ymin, double ymax,
+                      double zmin, double zmax, double dx, double dy,
+                      const char *xlab, const char *ylab, const char *zlab,
+                     const char *titl, const char *projection,
+                     int argc, char **argv, int *error);
 
 /* mb_cheb function prototypes */
 void lsqup(const double *a, const int *ia, const int *nia, int nnz, int nc, int nr, double *x, double *dx, const double *d, int nfix, const int *ifix,
@@ -321,5 +329,9 @@ void mbcblas_dscal(const int N, const double alpha, double *X, const int incX);
 void mbcblas_dgemv(const enum MBCBLAS_ORDER order, const enum MBCBLAS_TRANSPOSE TransA, const int M, const int N,
                    const double alpha, const double *A, const int lda, const double *X, const int incX, const double beta,
                    double *Y, const int incY);
+
+#ifdef __cplusplus
+}  /* extern "C" */
+#endif
 
 #endif  /* MB_AUX_H_ */

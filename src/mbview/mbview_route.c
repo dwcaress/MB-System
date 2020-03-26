@@ -85,8 +85,6 @@ static char value_string[MB_PATH_MAXLINE];
 int mbview_getroutecount(int verbose, size_t instance, int *nroute, int *error) {
 	/* local variables */
 	int status = MB_SUCCESS;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
 
 	/* print starting debug statements */
 	if (verbose >= 2) {
@@ -98,8 +96,8 @@ int mbview_getroutecount(int verbose, size_t instance, int *nroute, int *error) 
 	}
 
 	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
+	// struct mbview_world_struct *view = &(mbviews[instance]);
+	// struct mbview_struct *data = &(view->data);
 
 	/* get number of routes */
 	*nroute = shared.shareddata.nroute;
@@ -122,8 +120,6 @@ int mbview_getroutecount(int verbose, size_t instance, int *nroute, int *error) 
 int mbview_getroutepointcount(int verbose, size_t instance, int route, int *npoint, int *nintpoint, int *error) {
 	/* local variables */
 	int status = MB_SUCCESS;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
 	int i;
 
 	/* print starting debug statements */
@@ -137,8 +133,8 @@ int mbview_getroutepointcount(int verbose, size_t instance, int route, int *npoi
 	}
 
 	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
+	// struct mbview_world_struct *view = &(mbviews[instance]);
+	// struct mbview_struct *data = &(view->data);
 
 	/* get number of points in specified route */
 	*npoint = 0;
@@ -169,8 +165,6 @@ int mbview_getroutepointcount(int verbose, size_t instance, int route, int *npoi
 int mbview_getrouteselected(int verbose, size_t instance, int route, int *selected, int *error) {
 	/* local variables */
 	int status = MB_SUCCESS;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
 
 	/* print starting debug statements */
 	if (verbose >= 2) {
@@ -183,8 +177,8 @@ int mbview_getrouteselected(int verbose, size_t instance, int route, int *select
 	}
 
 	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
+	// struct mbview_world_struct *view = &(mbviews[instance]);
+	// struct mbview_struct *data = &(view->data);
 
 	/* check if the specified route is currently selected in totality */
 	if (route == shared.shareddata.route_selected && shared.shareddata.route_point_selected == MBV_SELECT_ALL)
@@ -210,8 +204,6 @@ int mbview_getrouteinfo(int verbose, size_t instance, int working_route, int *nr
                         int *routecolor, int *routesize, double *routedistancelateral, double *routedistancetopo, int *error) {
 	/* local variables */
 	int status = MB_SUCCESS;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
 	struct mbview_route_struct *route;
 
 	/* print starting debug statements */
@@ -225,8 +217,8 @@ int mbview_getrouteinfo(int verbose, size_t instance, int working_route, int *nr
 	}
 
 	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
+	// struct mbview_world_struct *view = &(mbviews[instance]);
+	// struct mbview_struct *data = &(view->data);
 
 	/* check that the route is valid */
 	if (working_route < 0 && working_route >= shared.shareddata.nroute) {
@@ -524,8 +516,6 @@ int mbview_addroute(int verbose, size_t instance, int npoint, double *routelon, 
 int mbview_deleteroute(int verbose, size_t instance, int iroute, int *error) {
 	/* local variables */
 	int status = MB_SUCCESS;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
 	int jpoint;
 
 	/* print starting debug statements */
@@ -539,8 +529,8 @@ int mbview_deleteroute(int verbose, size_t instance, int iroute, int *error) {
 	}
 
 	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
+	// struct mbview_world_struct *view = &(mbviews[instance]);
+	// struct mbview_struct *data = &(view->data);
 
 	/* delete the points in the route backwards */
 	for (jpoint = shared.shareddata.routes[iroute].npoints - 1; jpoint >= 0; jpoint--) {
@@ -910,7 +900,7 @@ int mbview_enableviewroutes(int verbose, size_t instance, int *error)
 		data = &(view->data);
 
 		/* if instance active reset action sensitivity */
-		if (data->active == true)
+		if (data->active)
 			mbview_update_sensitivity(verbose, instance, error);
 	}
 
@@ -953,7 +943,7 @@ int mbview_enableeditroutes(int verbose, size_t instance, int *error)
 	shared.shareddata.route_mode = MBV_ROUTE_EDIT;
 
 	/* set widget sensitivity */
-	if (data->active == true)
+	if (data->active)
 		mbview_update_sensitivity(verbose, instance, error);
 
 	/* print output debug statements */
@@ -994,7 +984,7 @@ int mbview_enableviewties(int verbose, size_t instance, int *error)
 	shared.shareddata.route_mode = MBV_ROUTE_NAVADJUST;
 
 	/* set widget sensitivity */
-	if (data->active == true)
+	if (data->active)
 		mbview_update_sensitivity(verbose, instance, error);
 
 	/* print output debug statements */
@@ -1016,7 +1006,6 @@ int mbview_pick_routebyname(int verbose, size_t instance, char *name, int *error
 	int status = MB_SUCCESS;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
-	int found;
 	int i;
 
 	/* print starting debug statements */
@@ -1038,12 +1027,12 @@ int mbview_pick_routebyname(int verbose, size_t instance, char *name, int *error
 
 	/* only select route points if enabled and not in move mode */
 	if (shared.shareddata.route_mode != MBV_ROUTE_OFF && shared.shareddata.nroute > 0) {
-		found = false;
+		// bool found = false;
 		shared.shareddata.route_selected = MBV_SELECT_NONE;
 		shared.shareddata.route_point_selected = MBV_SELECT_NONE;
 		for (i = 0; i < shared.shareddata.nroute; i++) {
 			if (strcmp(name, shared.shareddata.routes[i].name) == 0) {
-				found = true;
+				// found = true;
 				shared.shareddata.route_selected = i;
 				shared.shareddata.route_point_selected = MBV_SELECT_ALL;
 			}
@@ -1155,7 +1144,7 @@ int mbview_pick_route_select(int verbose, size_t instance, int which, int xpixel
 
 		/* reset selected route position */
 		iroute = shared.shareddata.route_selected;
-		if (found && shared.shareddata.routes[iroute].editmode == true) {
+		if (found && shared.shareddata.routes[iroute].editmode) {
 			jpoint = shared.shareddata.route_point_selected;
 			shared.shareddata.routes[iroute].points[jpoint].xgrid[instance] = xgrid;
 			shared.shareddata.routes[iroute].points[jpoint].ygrid[instance] = ygrid;
@@ -1482,7 +1471,7 @@ int mbview_pick_route_add(int verbose, size_t instance, int which, int xpixel, i
 
 		/* else just add point to currently selected route and point */
 		else if (found && shared.shareddata.route_selected != MBV_SELECT_NONE &&
-		         shared.shareddata.routes[shared.shareddata.route_selected].editmode == true) {
+		         shared.shareddata.routes[shared.shareddata.route_selected].editmode) {
 			/* add route point after currently selected route point if any */
 			inew = shared.shareddata.route_selected;
 			jnew = shared.shareddata.route_point_selected + 1;
@@ -1654,8 +1643,6 @@ int mbview_pick_route_delete(int verbose, size_t instance, int xpixel, int ypixe
 
 	/* local variables */
 	int status = MB_SUCCESS;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
 	int found;
 	double xgrid, ygrid;
 	double xlon, ylat, zdata;
@@ -1675,8 +1662,8 @@ int mbview_pick_route_delete(int verbose, size_t instance, int xpixel, int ypixe
 	}
 
 	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
+	struct mbview_world_struct *view = &(mbviews[instance]);
+	// struct mbview_struct *data = &(view->data);
 
 	/* only delete a selected route if enabled */
 	if (shared.shareddata.route_mode == MBV_ROUTE_EDIT && shared.shareddata.route_selected != MBV_SELECT_NONE) {
@@ -2044,7 +2031,7 @@ int mbview_route_delete(size_t instance, int iroute, int ipoint) {
 	        shared.shareddata.routes[iroute].editmode);
 	/* delete route point if its valid */
 	if (iroute >= 0 && iroute < shared.shareddata.nroute && ipoint >= 0 && ipoint < shared.shareddata.routes[iroute].npoints &&
-	    shared.shareddata.routes[iroute].editmode == true) {
+	    shared.shareddata.routes[iroute].editmode) {
 		/* free segment immediately after deleted point if in the middle of the
 		    route or before if it is at the end */
 		if (shared.shareddata.routes[iroute].npoints > 1) {
@@ -2184,10 +2171,8 @@ int mbview_route_delete(size_t instance, int iroute, int ipoint) {
 int mbview_route_setdistance(size_t instance, int working_route) {
 	/* local variables */
 	int status = MB_SUCCESS;
-	struct mbview_world_struct *view = NULL;
-	struct mbview_struct *data = NULL;
 	struct mbview_route_struct *route = NULL;
-	int valid_route = false;
+	bool valid_route = false;
 	double distlateral, distovertopo;
 	double routelon0, routelon1;
 	double routelat0, routelat1;
@@ -2206,8 +2191,8 @@ int mbview_route_setdistance(size_t instance, int working_route) {
 	}
 
 	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
+	// struct mbview_world_struct *view = &(mbviews[instance]);
+	// struct mbview_struct *data = &(view->data);
 
 	/* check that the route is valid */
 	if (working_route >= 0 && working_route < shared.shareddata.nroute && shared.shareddata.routes[working_route].npoints > 0) {
@@ -2294,7 +2279,7 @@ int mbview_route_setdistance(size_t instance, int working_route) {
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
-		if (valid_route == true) {
+		if (valid_route) {
 			route = &(shared.shareddata.routes[working_route]);
 			fprintf(stderr, "dbg2       routedistancelateral:      %f\n", route->distancelateral);
 			fprintf(stderr, "dbg2       routedistancetopo:         %f\n", route->distancetopo);
@@ -2498,7 +2483,7 @@ int mbview_updateroutelist() {
 			/* loop over the routes */
 			nitems = 0;
 			for (iroute = 0; iroute < shared.shareddata.nroute; iroute++) {
-				if (shared.shareddata.routes[iroute].editmode == true)
+				if (shared.shareddata.routes[iroute].editmode)
 					sprintf(value_string, "Editable Route %3d | Waypoints:%3d | Length:%.2f %.2f m | %s | Name: %s", iroute,
 					        shared.shareddata.routes[iroute].npoints, shared.shareddata.routes[iroute].distancelateral,
 					        shared.shareddata.routes[iroute].distancetopo,

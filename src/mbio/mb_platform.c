@@ -29,6 +29,7 @@
 #include <time.h>
 #include <unistd.h>
 
+#define MB_NEED_SENSOR_TYPE
 #include "mb_define.h"
 #include "mb_format.h"
 #include "mb_io.h"
@@ -1492,8 +1493,9 @@ int mb_platform_write(int verbose, char *platform_file, void *platform_ptr, int 
   return (status);
 }
 /*--------------------------------------------------------------------*/
-int mb_platform_lever(int verbose, void *platform_ptr, int targetsensor, int targetsensoroffset, double heading, double roll,
-                      double pitch, double *lever_x, double *lever_y, double *lever_z, int *error) {
+int mb_platform_lever(int verbose, void *platform_ptr, int targetsensor, int targetsensoroffset,
+                      double heading, double roll, double pitch,
+                      double *lever_x, double *lever_y, double *lever_z, int *error) {
   /* reset error */
   *error = MB_ERROR_NO_ERROR;
 
@@ -1571,7 +1573,7 @@ int mb_platform_lever(int verbose, void *platform_ptr, int targetsensor, int tar
         zz -= sensor_depth->offsets[0].position_offset_z;
       }
 
-      *lever_z = cpitch * sroll * xx - spitch * yy + cpitch * croll * zz;
+      *lever_z = spitch * yy - cpitch * sroll * xx + cpitch * croll * zz;   // Note: Z up
 
       /* apply change in x and y due to offset between the position sensor and the target sensor
       using roll, pitch and heading corrected for the attitude sensor offset and the target sensor */
@@ -1588,11 +1590,13 @@ int mb_platform_lever(int verbose, void *platform_ptr, int targetsensor, int tar
         yy -= sensor_position->offsets[0].position_offset_y;
         zz -= sensor_position->offsets[0].position_offset_z;
       }
-      *lever_x = (cheading * croll + sheading * spitch * sroll) * xx + cpitch * sheading * yy +
-                 (croll * sheading * spitch - cheading * sroll) * zz;
+      *lever_x =  cpitch * sheading * yy +
+                 (cheading * croll + sheading * spitch * sroll) * xx -
+                 (croll * sheading * spitch - cheading * sroll) * zz; // Note: X Starboard
 
-      *lever_y = (cheading * spitch * sroll - croll * sheading) * xx + cheading * cpitch * yy +
-                 (sheading * sroll + cheading * croll * spitch) * zz;
+      *lever_y =  cheading * cpitch * yy +
+                 (cheading * spitch * sroll - croll * sheading) * xx -
+                 (sheading * sroll + cheading * croll * spitch) * zz; // Note: Y Forward
     }
   }
 
@@ -1663,7 +1667,7 @@ int mb_platform_position(int verbose, void *platform_ptr, int targetsensor, int 
         - note that z is positive up but sensordepth is positive down */
     *targetlon = navlon + lever_x * mtodeglon;
     *targetlat = navlat + lever_y * mtodeglat;
-    *targetdepth = sensordepth + lever_z;
+    *targetdepth = sensordepth - lever_z;
   }
 
   /* null platform pointer is an error */

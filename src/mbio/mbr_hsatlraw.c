@@ -377,7 +377,7 @@ int mbr_zero_hsatlraw(int verbose, void *data_ptr, int mode, int *error) {
 		}
 
 		/* comment (LDEOCOMM) */
-		strncpy(data->comment, "\0", MBF_HSATLRAW_MAXLINE);
+		strncpy(data->comment,  "", MBF_HSATLRAW_MAXLINE);
 	}
 
 	/* assume success */
@@ -693,7 +693,7 @@ int mbr_wt_hsatlraw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 /*--------------------------------------------------------------------*/
 int mbr_hsatlraw_rd_data(int verbose, void *mbio_ptr, int *error) {
 	static bool line_save_flag = false;
-	static char raw_line[MBF_HSATLRAW_MAXLINE] = "\0";
+	static char raw_line[MBF_HSATLRAW_MAXLINE] = "";
 	static int type = MBF_HSATLRAW_NONE;
 	static int shift = 0;
 
@@ -912,7 +912,7 @@ int mbr_hsatlraw_rd_label(int verbose, FILE *mbfp, char *line, int *type, int *s
 int mbr_hsatlraw_read_line(int verbose, FILE *mbfp, int minimum_size, char *line, int *error) {
 	int nchars;
 	char *result;
-	int blank;
+	bool blank;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -927,7 +927,7 @@ int mbr_hsatlraw_read_line(int verbose, FILE *mbfp, int minimum_size, char *line
 	bool done = false;
 	do {
 		/* read next line in file */
-		strncpy(line, "\0", MBF_HSATLRAW_MAXLINE);
+		strncpy(line, "", MBF_HSATLRAW_MAXLINE);
 		result = fgets(line, MBF_HSATLRAW_MAXLINE, mbfp);
 
 		/* check for eof */
@@ -939,7 +939,7 @@ int mbr_hsatlraw_read_line(int verbose, FILE *mbfp, int minimum_size, char *line
 
 				/* trim trailing blank characters */
 				blank = true;
-				for (int i = (nchars - 1); i >= 0 && blank == true; i--) {
+				for (int i = (nchars - 1); i >= 0 && blank; i--) {
 					if (line[i] == ' ' || line[i] == '\r' || line[i] == '\n')
 						line[i] = '\0';
 					else
