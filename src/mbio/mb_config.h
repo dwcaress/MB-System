@@ -23,7 +23,7 @@
 #define HAVE_LIBM 1
 
 /* Have malloc.h */
-#define HAVE_MALLOC_H 1
+/* #undef HAVE_MALLOC_H */
 
 /* Define to 1 if you have the <memory.h> header file. */
 #define HAVE_MEMORY_H 1
@@ -81,9 +81,6 @@
 
 /* Build graphical tools */
 /* #undef MBUTILS_ENABLED */
-
-/* Define to 1 if your C compiler doesn't accept -c and -o together. */
-/* #undef NO_MINUS_C_MINUS_O */
 
 /* Name of package */
 #define PACKAGE "mbsystem"
