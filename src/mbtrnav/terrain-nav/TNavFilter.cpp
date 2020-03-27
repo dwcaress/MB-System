@@ -231,7 +231,7 @@ increaseInitSearchWin(double* windowVarIncrement) {
 void
 TNavFilter::
 initVariables() {
-	_distribType = SAVE_PARTICLES;
+        setDistribToSave(SAVE_PARTICLES);
 	vehicle->displayVehicleInfo();
 	lastNavPose = NULL;
 	interpMeasAttitude = false;
@@ -733,12 +733,14 @@ unsigned int
 TNavFilter::
 setDistribToSave(unsigned int distrib)
 {
+  logs(TL_OMASK(TL_TNAV_FILTER, TL_LOG),"setDistribToSave(%d)", distrib);
   // If type not one of the recognized options, use the default 
   if (PARTICLESTOFILE == distrib || HISTOGRAMTOFILE == distrib)
     _distribType = distrib;
   else
     _distribType = SAVE_PARTICLES;
 
+  logs(TL_OMASK(TL_TNAV_FILTER, TL_LOG),"setDistribToSave set to %d", _distribType);
   return _distribType;
 }
 
