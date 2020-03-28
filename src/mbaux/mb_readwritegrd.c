@@ -232,7 +232,7 @@ int mb_read_gmt_grd(int verbose, char *grdfile, int *grid_projection_mode, char 
             kx2 = (i + 1) * (*n_rows) + j;
             ii++;
           } else {
-            kx0 = k;  // TODO(schwehr): Should this be kx2?
+            kx2 = k; 
           }
 
           int jj = 0;
