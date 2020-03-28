@@ -3296,7 +3296,7 @@ int main(int argc, char **argv) {
 		if (status == MB_SUCCESS)
 			status = mb_mallocd(verbose, __FILE__, __LINE__, ndata * sizeof(int), (void **)&work2, &error);
 		if (status == MB_SUCCESS)
-			status = mb_mallocd(verbose, __FILE__, __LINE__, (gxdim + gydim) * sizeof(int), (void **)&work3, &error);
+			status = mb_mallocd(verbose, __FILE__, __LINE__, (gxdim + gydim) * sizeof(bool), (void **)&work3, &error);
 		if (error != MB_ERROR_NO_ERROR) {
 			char *message = nullptr;
 			mb_error(verbose, MB_ERROR_MEMORY_FAIL, &message);
@@ -3367,7 +3367,9 @@ int main(int argc, char **argv) {
 		ddy = (float)dy;
 		if (clipmode == MBMOSAIC_INTERP_ALL)
 			clip = std::max(gxdim, gydim);
-		mb_zgrid2(sgrid, &gxdim, &gydim, &xmin, &ymin, &ddx, &ddy, sdata, &ndata, static_cast<float *>(work1), static_cast<int *>(work2), static_cast<int *>(work3), &cay, &clip);
+		mb_zgrid2(sgrid, &gxdim, &gydim, &xmin, &ymin, &ddx, &ddy, sdata, &ndata,
+                      static_cast<float *>(work1), static_cast<int *>(work2),
+                      static_cast<bool *>(work3), &cay, &clip);
 
 		if (clipmode == MBMOSAIC_INTERP_GAP)
 			fprintf(outfp, "Applying spline interpolation to fill gaps of %d cells or less...\n", clip);

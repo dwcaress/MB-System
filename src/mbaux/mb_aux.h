@@ -214,9 +214,9 @@ void mb_plot_string(double x, double y, double hgt, double angle, char *label);
 int mb_surface(int verbose, int ndat, float *xdat, float *ydat, float *zdat, double xxmin, double xxmax, double yymin,
                double yymax, double xxinc, double yyinc, double ttension, float *sgrid);
 int mb_zgrid(float *z, int *n_columns, int *n_rows, float *x1, float *y1, float *dx, float *dy, float *xyz, int *n, float *zpij, int *knxt,
-             int *imnew, float *cay, int *nrng);
+             bool *imnew, float *cay, int *nrng);
 int mb_zgrid2(float *z, int *n_columns, int *n_rows, float *x1, float *y1, float *dx, float *dy, float *xyz, int *n, float *zpij, int *knxt,
-              int *imnew, float *cay, int *nrng);
+              bool *imnew, float *cay, int *nrng);
 
 /* mb_delaun function prototypes */
 int mb_delaun(int verbose, int npts, double *p1, double *p2, int *ed, int *ntri, int *iv1, int *iv2, int *iv3, int *ct1, int *ct2,
@@ -227,7 +227,7 @@ int mb_delaun(int verbose, int npts, double *p1, double *p2, int *ed, int *ntri,
 int mb_read_gmt_grd(int verbose, char *grdfile, int *grid_projection_mode, char *grid_projection_id, float *nodatavalue, int *nxy,
                     int *n_columns, int *n_rows, double *min, double *max, double *xmin, double *xmax, double *ymin, double *ymax,
                     double *dx, double *dy, float **data, float **data_dzdx, float **data_dzdy, int *error);
-int mb_write_gmt_grd(int verbose, const char *grdfile, float *grid, 
+int mb_write_gmt_grd(int verbose, const char *grdfile, float *grid,
                       float nodatavalue, int n_columns, int n_rows,
                       double xmin, double xmax, double ymin, double ymax,
                       double zmin, double zmax, double dx, double dy,

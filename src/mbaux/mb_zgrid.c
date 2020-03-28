@@ -21,8 +21,8 @@
  * IGPP in 1989. A version similar and possibly identical to this
  * can be found online (March 27, 2020) at:
  *    https://oceanai.mit.edu/svn/oases-aro/contour/zgrid.f
- * 
- * The Fortran code was modified by David Caress and then was converted 
+ *
+ * The Fortran code was modified by David Caress and then was converted
  * to C in 1995 for use with the MB-System software package.
  *
  * The nature of the interpolation is controlled by the
@@ -44,7 +44,7 @@
  *     n = length of xyz series.
  *     zpij[n] = float work array
  *     knxt[n] = int work array
- *     imnew[MAX(nx, ny)+1] = int work array
+ *     imnew[MAX(nx, ny)+1] = bool work array
  *     cay = k = amount of spline eqn (between 0 and inf.)
  *     nrng...grid points more than nrng grid spaces from the nearest
  *            data point are set to undefined.
@@ -127,7 +127,7 @@ const int ZGRID_DIMENSION_MAX = 500;
 
 /*----------------------------------------------------------------------- */
 int mb_zgrid2(float *z, int *nx, int *ny, float *x1, float *y1, float *dx, float *dy, float *xyz, int *n, float *zpij, int *knxt,
-              int *imnew, float *cay, int *nrng) {
+              bool *imnew, float *cay, int *nrng) {
 	int status = MB_SUCCESS;
 
 	/* if nx and ny < ZGRID_DIMENSION_MAX just call zgrid() */
@@ -211,7 +211,7 @@ int mb_zgrid2(float *z, int *nx, int *ny, float *x1, float *y1, float *dx, float
 
 /*----------------------------------------------------------------------- */
 int mb_zgrid(float *z, int *nx, int *ny, float *x1, float *y1, float *dx, float *dy, float *xyz, int *n, float *zpij, int *knxt,
-             int *imnew, float *cay, int *nrng) {
+             bool *imnew, float *cay, int *nrng) {
 	/* Parameter adjustments */
 	int z_dim1 = *nx;
 	int z_offset = z_dim1 + 1;
@@ -412,11 +412,11 @@ int mb_zgrid(float *z, int *nx, int *ny, float *x1, float *y1, float *dx, float 
 					goto L195;
 				}
 			L192:
-				imnew[j - 1] = 0;
+				imnew[j - 1] = false;
 				jmnew = false;
 				goto L197;
 			L195:
-				imnew[j - 1] = 1;
+				imnew[j - 1] = true;
 				jmnew = true;
 				z[i + j * z_dim1] = zijn;
 				++nnew;
