@@ -18,7 +18,7 @@ define([AC_CACHE_LOAD], )
 define([AC_CACHE_SAVE], )
 
 dnl Initialize and set version and version date
-AC_INIT([mbsystem],[5.7.6beta32],[http://listserver.mbari.org/sympa/arc/mbsystem],[mbsystem],[http://www.mbari.org/data/mbsystem/])
+AC_INIT([mbsystem],[5.7.6beta33],[http://listserver.mbari.org/sympa/arc/mbsystem],[mbsystem],[http://www.mbari.org/data/mbsystem/])
 
 AC_CONFIG_MACRO_DIR(m4)
 AC_LANG(C)
@@ -27,7 +27,7 @@ AC_LANG(C)
 dnl Require c++11
 AX_CXX_COMPILE_STDCXX(11)
 
-AC_DEFINE(VERSION_DATE, "17 March 2020", [Set VERSION_DATE define in mb_config.h])
+AC_DEFINE(VERSION_DATE, "28 March 2020", [Set VERSION_DATE define in mb_config.h])
 
 dnl Check system arch
 AC_CANONICAL_HOST
@@ -159,6 +159,9 @@ AC_HEADER_STDC
 
 dnl Check for math lib
 AC_CHECK_LIB(m,exp,,,)
+
+dnl Check for gsincos() and sincos() functions
+AC_CHECK_FUNCS(gsincos sincos,,)
 
 dnl check for signed char
 AC_TYPE_INT8_T
@@ -787,10 +790,7 @@ else
     AS_ECHO(["Failed to find X11 libraries and headers - unable to build graphical tools"])
 fi
 
-AM_CONDITIONAL([BUILD_MOTIF], [test "$GOT_MOTIF" = yes])
-dnl End check for Motif library and headers
-
-dnl Check for OpenGL libraries libGL libGLU and header files GL/gl.h GL/glu.h GL/glx.h
+dnl If Motif found check for OpenGL libraries libGL libGLU and header files GL/gl.h GL/glu.h GL/glx.h
 AS_ECHO(["Check for OpenGL libraries libGL libGLU and header files GL/gl.h GL/glu.h GL/glx.h"])
 GOT_OPENGL=no
 OPENGL_SETTING=no
@@ -880,15 +880,14 @@ if test "$GOT_MOTIF" = "yes" ; then
     dnl Substitute OpenGL library and header arguments
     AC_SUBST([libopengl_LIBS], [$libopengl_LIBS])
     AC_SUBST([libopengl_CPPFLAGS], [$libopengl_CPPFLAGS])
-    if test "$GOT_OPENGL" = "yes" ; then
-        AC_DEFINE(GOT_GL, 1, [Turned on OpenGL define in config])
-    fi
-    AM_CONDITIONAL([BUILD_GL], [test "$GOT_OPENGL" = yes])
-
 else
     dnl Failed to find Motif libraries and headers - did not look for OpenGL libraries and headers - unable to build visualization tools
     AS_ECHO(["Failed to find Motif libraries and headers - did not look for OpenGL libraries and headers - unable to build visualization tools"])
 fi
+
+AM_CONDITIONAL([BUILD_MOTIF], [test "$GOT_MOTIF" = yes])
+AM_CONDITIONAL([BUILD_GL], [test "$GOT_OPENGL" = yes])
+dnl End check for Motif and OpenGL library and headers
 
 dnl--------------------------------------------------------------------
 dnl Add some variables to be exported to the src/mbio/mb_config.h file

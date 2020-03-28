@@ -1,8 +1,17 @@
-### MB-System
+# Source Directory: src/mbtrnav/
 
-Source Directory: **src/mbtrnav/**
+This directory contains the source files for several libraries and tools related
+to Terrain Relative Navigation (TRN). The primary TRN tool in MB-System is the
+program mbtrnpp, whose source is in [mbtrnutils](../mbtrnutils/). The program mbtrnpp
+links with the TRN library in this directory and also several support libraries
+in the direction [mbtrn](../mbtrn/). The TRN library has been developed by Steve
+Rock and his students at Stanford in collaboration with Rich Henthorn, Rob
+McEwen, and Mike Risi at the Monterey Bay Aquarium Research Institute
+(MBARI). The program mbtrnpp has been developed by Kent Headley and David Caress
+of MBARI. The primary use of mbtrnpp is to localize a submerged platform
+(e.g. AUV or ROV) by comparing realtime multibeam bathymetry with a pre-existing
+map.
 
-This directory contains the source files for several libraries and tools related to Terrain Relative Navigation (TRN). The primary TRN tool in MB-System is the program mbtrnpp, whose source is in **src/mbtrnutils/**. The program mbtrnpp links with the TRN library in this direcotry and also several support libraries in the direction **src/mbtrn/**. The TRN library has been developed by Steve Rock and his students at Stanford in collaboration with Rich Henthorn, Rob McEwen, and Mike Risi at the Monterey Bay Aquarium Research Institute (MBARI). The program mbtrnpp has been developed by Kent Headley and David Caress of MBARI. The primary use of mbtrnpp is to localize a submerged platform (e.g. AUV or ROV) by comparing realtime multibeam bathymetry with a pre-existing map.
-
-These source files are copyrighted and licensed in a variety of ways, as indicated in the file headers.
+These source files are copyrighted and licensed in a variety of ways, as
+indicated in the file headers.
 

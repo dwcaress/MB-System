@@ -75,6 +75,8 @@
 
 #define MBF_DATALIST -1
 
+#define MBF_IMAGELIST -2
+
 #define MBF_NONE 0
 
 #define MBF_SBSIOMRG 11

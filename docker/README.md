@@ -13,9 +13,9 @@ See https://github.com/dwcaress/MB-System/issues/807
 - To be automatically triggered on Docker Hub upon a push to the master branch.
 
     TODO: confirm master is the branch to be used.
-    
+
 - Image tag: `mbari/mbsystem:latest`
-  
+
     TODO: also generate and publish explicit version.
 
 ## Manual image build and publication
@@ -35,7 +35,7 @@ With:
 Some command-line program:
 
     $ docker run -it --rm $MBSYSTEM_IMAGE mbabsorption -h
-    
+
 GUI program:
 
     $ ip=$(ifconfig en0 | grep "inet " | sed 's/.*inet \([0-9\.]*\).*/\1/g')

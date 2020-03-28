@@ -995,6 +995,35 @@ int mb_format_info(int verbose, int *format, int *system, int *beams_bath_max, i
     status = MB_FAILURE;
     *error = MB_ERROR_BAD_FORMAT;
   }
+  else if (*format == MBF_IMAGELIST) {
+    *format = MBF_IMAGELIST;
+    *system = MB_SYS_NONE;
+    *beams_bath_max = 0;
+    *beams_amp_max = 0;
+    *pixels_ss_max = 0;
+    strcpy(format_name, "MBF_IMAGELIST");
+    strcpy(system_name, "MB_SYS_IMAGELIST");
+    strcpy(format_description, "MBF_IMAGELIST");
+    strncpy(format_description,
+            "Format name:          MBF_IMAGELIST\nInformal Description: Imagelist\nAttributes:           List of image data "
+            "files, singular or as stereo pairs, along with image timestamps.\n",
+            MB_DESCRIPTION_LENGTH);
+    *numfile = 0;
+    *filetype = 0;
+    *variable_beams = false;
+    *traveltime = false;
+    *beam_flagging = false;
+    *platform_source = MB_DATA_NONE;
+    *nav_source = MB_DATA_NONE;
+    *sensordepth_source = MB_DATA_NONE;
+    *heading_source = MB_DATA_NONE;
+    *attitude_source = MB_DATA_NONE;
+    *svp_source = MB_DATA_NONE;
+    *beamwidth_xtrack = 0.0;
+    *beamwidth_ltrack = 0.0;
+    status = MB_FAILURE;
+    *error = MB_ERROR_BAD_FORMAT;
+  }
   else {
     *format = MBF_NONE;
     *system = MB_SYS_NONE;
@@ -3462,45 +3491,8 @@ int mb_imagelist_open(int verbose, void **imagelist_ptr, char *path, int *error)
 }
 
 /*--------------------------------------------------------------------*/
-int mb_imagelist_close(int verbose, void **imagelist_ptr, int *error) {
-  if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
-    fprintf(stderr, "dbg2  Input arguments:\n");
-    fprintf(stderr, "dbg2       verbose:       %d\n", verbose);
-    fprintf(stderr, "dbg2       imagelist_ptr:  %p\n", (void *)*imagelist_ptr);
-  }
-
-  int status = MB_SUCCESS;
-
-  /* close file */
-  if (*imagelist_ptr != NULL) {
-    /* get imagelist pointer */
-    struct mb_imagelist_struct *imagelist = (struct mb_imagelist_struct *)*imagelist_ptr;
-
-    /* close file */
-    if (imagelist->open) {
-      fclose(imagelist->fp);
-    }
-  }
-
-  /* deallocate structure */
-  if (*imagelist_ptr != NULL) {
-    status = mb_freed(verbose, __FILE__, __LINE__, (void **)imagelist_ptr, error);
-  }
-
-  if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
-    fprintf(stderr, "dbg2  Return values:\n");
-    fprintf(stderr, "dbg2       imagelist_ptr:  %p\n", (void *)*imagelist_ptr);
-    fprintf(stderr, "dbg2       error:         %d\n", *error);
-    fprintf(stderr, "dbg2  Return status:\n");
-    fprintf(stderr, "dbg2       status:        %d\n", status);
-  }
-
-  return (status);
-}
-/*--------------------------------------------------------------------*/
-int mb_imagelist_read(int verbose, void *imagelist_ptr, int *imagestatus, char *path0, char *path1, char *dpath,
+int mb_imagelist_read(int verbose, void *imagelist_ptr, int *imagestatus,
+                      char *path0, char *path1, char *dpath,
                       double *time_d, double *dtime_d, int *error) {
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -3754,6 +3746,96 @@ int mb_imagelist_read(int verbose, void *imagelist_ptr, int *imagestatus, char *
     fprintf(stderr, "dbg2       error:       %d\n", *error);
     fprintf(stderr, "dbg2  Return status:\n");
     fprintf(stderr, "dbg2       status:      %d\n", status);
+  }
+
+  return (status);
+}
+/*--------------------------------------------------------------------*/
+int mb_imagelist_recursion(int verbose, void *imagelist_ptr, bool print, int *recursion, int *error) {
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+    fprintf(stderr, "dbg2  Input arguments:\n");
+    fprintf(stderr, "dbg2       verbose:       %d\n", verbose);
+    fprintf(stderr, "dbg2       imagelist:      %p\n", imagelist_ptr);
+    fprintf(stderr, "dbg2       print:         %d\n", print);
+  }
+
+
+  /* get imagelist structure */
+  /* int start = *recursion; */
+  if (imagelist_ptr != NULL) {
+    struct mb_imagelist_struct *imagelist = (struct mb_imagelist_struct *)imagelist_ptr;
+    *recursion = imagelist->recursion;
+    if (print && !imagelist->printed) {
+      fprintf(stderr, "<%2.2d> ", *recursion);
+      for (int i = 0; i < *recursion; i++)
+        fprintf(stderr, "\t");
+      fprintf(stderr, "%s\n", imagelist->path);
+      imagelist->printed = true;
+    }
+
+    /* descend through the recursive imagelist structures to the lowest current
+        level and return that current recursion level */
+    while (imagelist->imagelist != NULL) {
+      imagelist = imagelist->imagelist;
+      *recursion = imagelist->recursion;
+      if (print && !imagelist->printed) {
+        fprintf(stderr, "<%2.2d> ", *recursion);
+        for (int i = 0; i < *recursion; i++)
+          fprintf(stderr, "\t");
+        fprintf(stderr, "%s\n", imagelist->path);
+        imagelist->printed = true;
+      }
+    }
+  }
+
+  const int status = MB_SUCCESS;
+
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
+    fprintf(stderr, "dbg2  Return values:\n");
+    fprintf(stderr, "dbg2       recursion:   %d\n", *recursion);
+    fprintf(stderr, "dbg2       error:       %d\n", *error);
+    fprintf(stderr, "dbg2  Return status:\n");
+    fprintf(stderr, "dbg2       status:      %d\n", status);
+  }
+
+  return (status);
+}
+/*--------------------------------------------------------------------*/
+int mb_imagelist_close(int verbose, void **imagelist_ptr, int *error) {
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+    fprintf(stderr, "dbg2  Input arguments:\n");
+    fprintf(stderr, "dbg2       verbose:       %d\n", verbose);
+    fprintf(stderr, "dbg2       imagelist_ptr:  %p\n", (void *)*imagelist_ptr);
+  }
+
+  int status = MB_SUCCESS;
+
+  /* close file */
+  if (*imagelist_ptr != NULL) {
+    /* get imagelist pointer */
+    struct mb_imagelist_struct *imagelist = (struct mb_imagelist_struct *)*imagelist_ptr;
+
+    /* close file */
+    if (imagelist->open) {
+      fclose(imagelist->fp);
+    }
+  }
+
+  /* deallocate structure */
+  if (*imagelist_ptr != NULL) {
+    status = mb_freed(verbose, __FILE__, __LINE__, (void **)imagelist_ptr, error);
+  }
+
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
+    fprintf(stderr, "dbg2  Return values:\n");
+    fprintf(stderr, "dbg2       imagelist_ptr:  %p\n", (void *)*imagelist_ptr);
+    fprintf(stderr, "dbg2       error:         %d\n", *error);
+    fprintf(stderr, "dbg2  Return status:\n");
+    fprintf(stderr, "dbg2       status:        %d\n", status);
   }
 
   return (status);
