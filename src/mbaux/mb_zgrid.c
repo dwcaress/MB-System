@@ -18,9 +18,12 @@
  * Geophysics and Planetary Physics at the Scripps Institution
  * of Oceanography through the 1970's and 1980's. The Fortran
  * code was obtained from Professory Robert L. Parker at
- * IGPP in 1989.
- * It was converted to C in 1995 for use with the MB-System
- * software package.
+ * IGPP in 1989. A version similar and possibly identical to this
+ * can be found online (March 27, 2020) at:
+ *    https://oceanai.mit.edu/svn/oases-aro/contour/zgrid.f
+ * 
+ * The Fortran code was modified by David Caress and then was converted 
+ * to C in 1995 for use with the MB-System software package.
  *
  * The nature of the interpolation is controlled by the
  * parameters cay and nrng: cay sets the tension of the
@@ -355,7 +358,7 @@ int mb_zgrid(float *z, int *nx, int *ny, float *x1, float *y1, float *dx, float 
 		}
 	}
 	int i__2 = *nrng;
-	int jmnew = 0;  // TODO(schwehr): When can jmnew be negative?  Is it a bool?
+	bool jmnew = false;
 	for (int iter = 1; iter <= i__2; ++iter) {
 		nnew = 0;
 		i__1 = *nx;
@@ -368,8 +371,7 @@ int mb_zgrid(float *z, int *nx, int *ny, float *x1, float *y1, float *dx, float 
 				if (j - 1 <= 0) {
 					goto L162;
 				}
-				if (jmnew <= 0) {
-				} else {
+				if (jmnew) {
 					goto L162;
 				}
 				zijn = (r__1 = z[i + (j - 1) * z_dim1], (float)fabs((double)r__1));
@@ -382,9 +384,7 @@ int mb_zgrid(float *z, int *nx, int *ny, float *x1, float *y1, float *dx, float 
 				if (i - 1 <= 0) {
 					goto L172;
 				}
-				if (imnew[j - 1] <= 0) {
-				}
-				else {
+				if (imnew[j - 1]) {
 					goto L172;
 				}
 				zijn = (r__1 = z[i - 1 + j * z_dim1], (float)fabs((double)r__1));
@@ -413,11 +413,11 @@ int mb_zgrid(float *z, int *nx, int *ny, float *x1, float *y1, float *dx, float 
 				}
 			L192:
 				imnew[j - 1] = 0;
-				jmnew = 0;
+				jmnew = false;
 				goto L197;
 			L195:
 				imnew[j - 1] = 1;
-				jmnew = 1;
+				jmnew = true;
 				z[i + j * z_dim1] = zijn;
 				++nnew;
 			L197:;
