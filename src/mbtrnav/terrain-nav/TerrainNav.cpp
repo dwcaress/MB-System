@@ -1050,6 +1050,7 @@ void TerrainNav::reinitFilter(bool lowInfoTransition) {
 	int interpMapMethod = 1;
 	bool interpMeasAttitude = true;
 	double driftRate = 1;
+	unsigned int distrib_type = 0;
 	int useModWeight = useModifiedWeighting;
 
 	//Default initialization window --> mainly used for broad area reinitializations
@@ -1073,6 +1074,9 @@ void TerrainNav::reinitFilter(bool lowInfoTransition) {
 		interpMapMethod = tNavFilter->GetInterpMapMethod();
 		interpMeasAttitude = tNavFilter->interpMeasAttitude;
 		driftRate = tNavFilter->vehicle->driftRate;
+		distrib_type = tNavFilter->getDistribToSave();
+                logs(TL_OMASK(TL_TERRAIN_NAV, TL_BOTH), "reinitFilter: getDistribToSave == %d\n", distrib_type);
+
 		// More than one setting is encoded in the useModifiedSetting value,
 		// so always use the one recevied from the client through the setModifiedWeighting() call
 		//useModWeight = tNavFilter->useModifiedWeighting;  // RGH: Use the value received from the client
@@ -1143,10 +1147,10 @@ void TerrainNav::reinitFilter(bool lowInfoTransition) {
 
 	//reset filter and terrainNav parameters
 	setMapInterpMethod(interpMapMethod);
-
 	setVehicleDriftRate(driftRate);
 	setInterpMeasAttitude(interpMeasAttitude);
 	setModifiedWeighting(useModWeight);
+	if (tNavFilter != NULL) tNavFilter->setDistribToSave(distrib_type);
 
 	numWaitingMeas = 0;
 	lastMeasSuccessTime = -1.0;

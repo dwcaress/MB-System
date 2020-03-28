@@ -340,6 +340,8 @@ class TNavFilter
    */
   void increaseInitSearchWin(double *windowVarIncrement);
 
+  unsigned int getDistribToSave() { return _distribType; }
+
   unsigned int setDistribToSave(unsigned int distrib);
 
   /* Virtual functions required by any inheritance class:

@@ -98,9 +98,9 @@
 #define TRNW_MSG_SIZE TRN_MSG_SIZE
 #define TRNW_WMEAST_SERIAL_LEN(nmeas)  ( (2+1*nmeas)*sizeof(int) + (7+6*nmeas)*sizeof(double) + (0+1*nmeas)*sizeof(bool) + (0+1*nmeas)*sizeof(unsigned int) )
 
-#define TRN_MAX_NCOV_DFL 30.
+#define TRN_MAX_NCOV_DFL 49.
+#define TRN_MAX_ECOV_DFL 49.
 #define TRN_MAX_NERR_DFL 50.
-#define TRN_MAX_ECOV_DFL 30.
 #define TRN_MAX_EERR_DFL 50.
 
 struct wtnav_s;
