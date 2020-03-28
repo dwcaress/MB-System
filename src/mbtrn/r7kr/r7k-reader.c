@@ -1657,7 +1657,7 @@ int64_t r7kr_read_frame(r7kr_reader_t *self, byte *dest,
     }else{
         PEPRINT((stderr,"invalid argument\n"));
     }
-    PMPRINT(MOD_R7KR,R7KR_V2,(stderr,"returning [%lld]\n",retval));
+    PMPRINT(MOD_R7KR,R7KR_V2,(stderr,"r7kr_read_frame returning [%lld]\n",retval));
     return retval;
  }
 // End function r7kr_read_frame

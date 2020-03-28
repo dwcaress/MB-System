@@ -37,6 +37,12 @@ namespace NEWMAT {
 #define ReturnMatrix ReturnMatrixX&
 #endif
 
+#if __cplusplus >= 201103L
+#define NOEXCEPT_FALSE noexcept(false)
+#else
+#define NOEXCEPT_FALSE
+#endif
+
 // ************************** general utilities ****************************/
 
 class GeneralMatrix;
@@ -1540,7 +1546,6 @@ public:
 };
 
 // ************************** matrix input *******************************/
-
 class MatrixInput          // for reading a list of values into a matrix
                            // the difficult part is detecting a mismatch
                            // in the number of elements
@@ -1550,7 +1555,7 @@ class MatrixInput          // for reading a list of values into a matrix
 public:
    MatrixInput(const MatrixInput& mi) : n(mi.n), r(mi.r) {}
    MatrixInput(int nx, Real* rx) : n(nx), r(rx) {}
-   ~MatrixInput();
+   ~MatrixInput() NOEXCEPT_FALSE;
    MatrixInput operator<<(Real);
    MatrixInput operator<<(int f);
    friend class GeneralMatrix;

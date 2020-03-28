@@ -18,24 +18,24 @@
 /////////////////////////
 /*
  Copyright Information
-
+ 
  Copyright 2000-2018 MBARI
  Monterey Bay Aquarium Research Institute, all rights reserved.
-
+ 
  Terms of Use
-
+ 
  This program is free software; you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
  the Free Software Foundation; either version 3 of the License, or
  (at your option) any later version. You can access the GPLv3 license at
  http://www.gnu.org/licenses/gpl-3.0.html
-
+ 
  This program is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  GNU General Public License for more details
  (http://www.gnu.org/licenses/gpl-3.0.html)
-
+ 
  MBARI provides the documentation and software code "as is", with no warranty,
  express or implied, as to the software, title, non-infringement of third party
  rights, merchantability, or fitness for any particular purpose, the accuracy of
@@ -43,7 +43,7 @@
  assume the entire risk associated with use of the code, and you agree to be
  responsible for the entire cost of repair or servicing of the program with
  which you are using the code.
-
+ 
  In no event shall MBARI be liable for any damages, whether general, special,
  incidental or consequential damages, arising out of your use of the software,
  including, but not limited to, the loss or corruption of your data or damages
@@ -53,11 +53,11 @@
  liability or expense, including attorneys' fees, resulting from loss of or
  damage to property or the injury to or death of any person arising out of the
  use of the software.
-
+ 
  The MBARI software is provided without obligation on the part of the
  Monterey Bay Aquarium Research Institute to assist in its use, correction,
  modification, or enhancement.
-
+ 
  MBARI assumes no responsibility or liability for any third party and/or
  commercial software required for the database or applications. Licensee agrees
  to obtain and maintain valid licenses for any additional third party software
@@ -190,34 +190,34 @@ typedef struct mmd_module_config_s
 // Note: MX* macros use C99/GCC extensions
 /// @def MTPRINT
 /// @brief TBD
-#define MXTRACE() fprintf(stderr,"%s:%d\n", __FUNCTION__, __LINE__)
+#define MXTRACE() fprintf(stderr,"%s:%d\n",__FUNCTION__,__LINE__)
 /// @def MVTPRINT(fmt,__VA_ARGS__)
 /// @brief TBD
-#define MXVTPRINT(fmt, ...) fprintf(stderr, "%s:%s:%d - " fmt "" EOL, __FILE__, __FUNCTION__, __LINE__, ##__VA_ARGS__)
+#define MXVTPRINT(fmt, ...) fprintf(stderr,"%s:%s:%d - "fmt""EOL, __FILE__, __FUNCTION__, __LINE__, ##__VA_ARGS__)
 /// @def MVTWRITE(fmt,__VA_ARGS__)
 /// @brief TBD
-#define MVTWRITE(fmt, ...) fprintf(stderr, "%s:%s:%d - " fmt, __FILE__, __FUNCTION__, __LINE__, ##__VA_ARGS__)
+#define MVTWRITE(fmt, ...) fprintf(stderr,"%s:%s:%d - "fmt, __FILE__, __FUNCTION__, __LINE__, ##__VA_ARGS__)
 /// @def MXMSG(msg,__VA_ARGS__)
 /// @brief TBD
-#define MXMSG(msg) fprintf(stderr, msg "" EOL)
+#define MXMSG(msg) fprintf(stderr,msg""EOL)
 /// @def MXWRITE(fmt,__VA_ARGS__)
 /// @brief TBD
-#define MXWRITE(fmt, ...) fprintf(stderr, fmt, ##__VA_ARGS__)
+#define MXWRITE(fmt, ...) fprintf(stderr,fmt, ##__VA_ARGS__)
 /// @def MXPRINT(fmt,__VA_ARGS__)
 /// @brief TBD
-#define MXPRINT(fmt, ...) fprintf(stderr, fmt "" EOL, ##__VA_ARGS__)
+#define MXPRINT(fmt, ...) fprintf(stderr,fmt""EOL, ##__VA_ARGS__)
 /// @def MXWWRITE(fmt,__VA_ARGS__)
 /// @brief TBD
-#define MXWWRITE(fmt, ...) fprintf(stderr, "WARN - " fmt, ##__VA_ARGS__)
+#define MXWWRITE(fmt, ...) fprintf(stderr,"WARN - "fmt, ##__VA_ARGS__)
 /// @def MXWPRINT(fmt,__VA_ARGS__)
 /// @brief TBD
-#define MXWPRINT(fmt, ...) fprintf(stderr, "WARN - " fmt "" EOL, ##__VA_ARGS__)
+#define MXWPRINT(fmt, ...) fprintf(stderr,"WARN - "fmt""EOL, ##__VA_ARGS__)
 /// @def MXEWRITE(fmt,__VA_ARGS__)
 /// @brief TBD
-#define MXEWRITE(fmt, ...) fprintf(stderr, "ERR - " fmt, ##__VA_ARGS__)
+#define MXEWRITE(fmt, ...) fprintf(stderr,"ERR - "fmt, ##__VA_ARGS__)
 /// @def MXEPRINT(fmt,__VA_ARGS__)
 /// @brief TBD
-#define MXEPRINT(fmt, ...) fprintf(stderr, "ERR - " fmt "" EOL, ##__VA_ARGS__)
+#define MXEPRINT(fmt, ...) fprintf(stderr,"ERR - "fmt""EOL, ##__VA_ARGS__)
 
 #ifndef WITHOUT_MMDEBUG
 
