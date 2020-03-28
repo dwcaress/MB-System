@@ -17,7 +17,6 @@
  *
  * Author:  D. W. Caress
  * Date:  September 3, 2007
- *
  */
 
 #include <math.h>
@@ -28,6 +27,10 @@
 #include <unistd.h>
 
 #include "gmt_dev.h"
+#ifdef HAVE_SINCOS
+#undef HAVE_SINCOS  // avoid clash between gmt_config.h and mb_config.h
+#endif
+
 #include "mb_aux.h"
 #include "mb_define.h"
 #include "mb_status.h"
@@ -215,35 +218,41 @@ int mb_read_gmt_grd(int verbose, char *grdfile, int *grid_projection_mode, char 
         for (int j = 0; j < *n_rows; j++) {
           const int k = i * (*n_rows) + j;
           int ii = 0;
-          int jj = 0;
+
           int kx0;
-          int kx2;
-          int ky0;
-          int ky2;
           if (i > 0) {
             kx0 = (i - 1) * (*n_rows) + j;
             ii++;
-          }
-          else
+          } else {
             kx0 = k;
+          }
+
+          int kx2 = 0;
           if (i < *n_columns - 1) {
             kx2 = (i + 1) * (*n_rows) + j;
             ii++;
+          } else {
+            kx0 = k;  // TODO(schwehr): Should this be kx2?
           }
-          else
-            kx0 = k;
+
+          int jj = 0;
+
+          int ky0;
           if (j > 0) {
             ky0 = i * (*n_rows) + j + 1;
             jj++;
-          }
-          else
+          } else {
             ky0 = k;
+          }
+
+          int ky2;
           if (j < *n_rows - 1) {
             ky2 = i * (*n_rows) + j - 1;
             jj++;
-          }
-          else
+          } else {
             ky2 = k;
+          }
+
           if (ii > 0)
             (*data_dzdx)[k] = ((*data)[kx2] - (*data)[kx0]) / (((double)ii) * ddx);
           if (jj > 0)
@@ -342,12 +351,14 @@ int mb_read_gmt_grd(int verbose, char *grdfile, int *grid_projection_mode, char 
  * GMT version 2 netCDF grd file
  */
 int mb_write_gmt_grd(int verbose, const char *grdfile, float *grid,
-                      float nodatavalue, int n_columns, int n_rows,
-                      double xmin, double xmax, double ymin, double ymax,
-                      double zmin, double zmax, double dx, double dy,
-                      const char *xlab, const char *ylab, const char *zlab,
+                     float nodatavalue, int n_columns, int n_rows,
+                     double xmin, double xmax, double ymin, double ymax,
+                     double zmin, double zmax, double dx, double dy,
+                     const char *xlab, const char *ylab, const char *zlab,
                      const char *titl, const char *projection,
                      int argc, char **argv, int *error) {
+  (void)zmin;  // Unused parameter.
+  (void)zmax;  // Unused parameter.
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  Function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
