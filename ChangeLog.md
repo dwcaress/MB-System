@@ -343,12 +343,30 @@ announced releases. The source distributions associated with all releases, major
 --
 ### MB-System Version 5.7 Release Notes:
 --
+#### 5.7.6beta33 (March 28, 2020)
+
+General (mb_define.h, mb_format.c, mb_format.h): Added definition of format=-2
+as recursive imagelists. Analagous to datalists, this construct supports timestamped
+lists of single or stereo photographs. Like datalists, the imagelists can be
+recursive. This is a precursor to bringing into MB-System tools for processing
+seafloor photography collected during surveys, particularly for photomosaicing.
+
+Mbsslayout and future photomosaicing: The parameters use to define convergence
+when intersecting a vector with a topography model in mb_intersectgrid.c have
+been improved, yielding more accurate intersection locations for backscatter samples
+or source image pixels when laying out sidescan or photography data.
+
+Code style: Kurt Schwehr is systematically altering the code to conform to best
+practices and adding build tests. The improvements included in this beta release
+include work on the auxilliary library in src/mbaux, particularly including
+mb_cheb.c, mb_intersectgrid.c, and mb_zgrid.c.
+
 #### 5.7.6beta32 (March 19, 2020)
 
 Mbeditviz: Fixed problem with preserving changes to edits that are recorded in
 *.esf files.
 
-Mbtrnpp: merged recent changes by Kent Headley to the source files in 
+Mbtrnpp: merged recent changes by Kent Headley to the source files in
 src/mbtrn, src/mbtrnav, and src/mbtrnutils.
 
 Testing: Reinstated OSX test build as part of the Travis CI runs triggered by

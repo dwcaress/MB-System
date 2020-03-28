@@ -858,7 +858,7 @@ int main(int argc, char **argv) {
   float *sdata = nullptr;
   float *work1 = nullptr;
   int *work2 = nullptr;
-  int *work3 = nullptr;
+  bool *work3 = nullptr;
 #endif
   double bdata_origin_x, bdata_origin_y;
   float *output = nullptr;
@@ -2009,7 +2009,7 @@ int main(int argc, char **argv) {
     if (status == MB_SUCCESS)
       status = mb_mallocd(verbose, __FILE__, __LINE__, ndata * sizeof(int), (void **)&work2, &error);
     if (status == MB_SUCCESS)
-      status = mb_mallocd(verbose, __FILE__, __LINE__, (sxdim + sydim) * sizeof(int), (void **)&work3, &error);
+      status = mb_mallocd(verbose, __FILE__, __LINE__, (sxdim + sydim) * sizeof(bool), (void **)&work3, &error);
     if (error != MB_ERROR_NO_ERROR) {
       char *message = nullptr;
       mb_error(verbose, MB_ERROR_MEMORY_FAIL, &message);
@@ -2022,7 +2022,7 @@ int main(int argc, char **argv) {
     memset((char *)sdata, 0, 3 * ndata * sizeof(float));
     memset((char *)work1, 0, ndata * sizeof(float));
     memset((char *)work2, 0, ndata * sizeof(int));
-    memset((char *)work3, 0, (sxdim + sydim) * sizeof(int));
+    memset((char *)work3, 0, (sxdim + sydim) * sizeof(bool));
 
     /* get points from grid */
     /* simultaneously find the depth values nearest to the grid corners and edge midpoints */
@@ -5100,7 +5100,7 @@ int main(int argc, char **argv) {
     if (status == MB_SUCCESS)
       status = mb_mallocd(verbose, __FILE__, __LINE__, ndata * sizeof(int), (void **)&work2, &error);
     if (status == MB_SUCCESS)
-      status = mb_mallocd(verbose, __FILE__, __LINE__, (gxdim + gydim) * sizeof(int), (void **)&work3, &error);
+      status = mb_mallocd(verbose, __FILE__, __LINE__, (gxdim + gydim) * sizeof(bool), (void **)&work3, &error);
     if (error != MB_ERROR_NO_ERROR) {
       char *message = nullptr;
       mb_error(verbose, MB_ERROR_MEMORY_FAIL, &message);
@@ -5113,7 +5113,7 @@ int main(int argc, char **argv) {
     memset((char *)sdata, 0, 3 * ndata * sizeof(float));
     memset((char *)work1, 0, ndata * sizeof(float));
     memset((char *)work2, 0, ndata * sizeof(int));
-    memset((char *)work3, 0, (gxdim + gydim) * sizeof(int));
+    memset((char *)work3, 0, (gxdim + gydim) * sizeof(bool));
 
     /* get points from grid */
     /* simultaneously find the depth values nearest to the grid corners and edge midpoints */

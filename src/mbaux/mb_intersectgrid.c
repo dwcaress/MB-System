@@ -351,8 +351,8 @@ int mb_topogrid_intersect(int verbose, void *topogrid_ptr, double navlon, double
 	}
 
 	int iteration = 0;
-	const int iteration_max = 25;
-	double topotolerance = 0.1;
+	const int iteration_max = 50;
+	double topotolerance = 0.05 * (topogrid->dx / mtodeglon + topogrid->dy / mtodeglat);
 
 	/* test different ranges along the vector until the grid is intersected */
 	while (!done && iteration < iteration_max) {
