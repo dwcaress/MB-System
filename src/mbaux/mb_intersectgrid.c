@@ -307,21 +307,17 @@ int mb_topogrid_intersect(int verbose, void *topogrid_ptr, double navlon, double
 	int status = MB_SUCCESS;
 
 	bool done = false;
-	double rmax;
-	double dtopo = 0.0;
-	double rmin = 0.0;
 
 	/* if altitude specified use it for initial guess */
-	double dr;
-	double r;
+	double dr = 0.0;
+	double r = 0.0;
+	double rmax = 0.0;
 	if (altitude > 0.0) {
 		dr = altitude / 20;
 		r = altitude / vz - dr;
 		rmax = 4 * altitude / vz;
-	}
-
-	/* if altitude not specified use altitude at location */
-	else {
+	} else {
+		// if altitude not specified use altitude at location
 		int nfound = 0;
 		double topog = 0.0;
 		const int i = (int)((navlon - topogrid->xmin) / topogrid->dx);
@@ -342,14 +338,15 @@ int mb_topogrid_intersect(int verbose, void *topogrid_ptr, double navlon, double
 			dr = altitude / 20;
 			r = altitude / vz - dr;
 			rmax = 4 * altitude / vz;
-		}
-		else {
+		} else {
 			done = true;
 			status = MB_FAILURE;
 			*error = MB_ERROR_NOT_ENOUGH_DATA;
 		}
 	}
 
+	double rmin = 0.0;
+	double dtopo = 0.0;
 	int iteration = 0;
 	const int iteration_max = 50;
 	double topotolerance = 0.05 * (topogrid->dx / mtodeglon + topogrid->dy / mtodeglat);
@@ -378,8 +375,7 @@ int mb_topogrid_intersect(int verbose, void *topogrid_ptr, double navlon, double
 						topog += topogrid->data[k];
 					}
 				}
-		}
-		else {
+		} else {
 			done = true;
 			status = MB_FAILURE;
 			*error = MB_ERROR_NOT_ENOUGH_DATA;
