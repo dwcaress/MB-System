@@ -291,7 +291,7 @@ void xg_justify(void *xgid, char *string, int *width, int *ascent, int *descent)
  **********************************************************************/
 void xg_setclip(void *xgid, int x, int y, int width, int height) {
 	/* set up rectangle */
-	XRectangle rectangle[1] = {x, y, width, height};
+	XRectangle rectangle[1] = {{x, y, width, height}};
 
 	/* set clip rectangle */
 	struct xg_graphic *graphic = (struct xg_graphic *)xgid;

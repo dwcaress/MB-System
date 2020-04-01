@@ -21,8 +21,6 @@
  *
  * Name change:  mb_countour.h changed to mb_aux.h
  * Date:  October 13, 2009
- *
- *
  */
 
 #ifndef MB_AUX_H_
