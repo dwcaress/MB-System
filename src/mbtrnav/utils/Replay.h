@@ -28,6 +28,8 @@
 #include <netinet/in.h>
 #include <sys/time.h>
 
+#define  LCM_HOST  "USING.LCM.COMMS"   // Host id to indicate LCM usae
+
 class DataLogReader;
 struct TRN_attr;
 class poseT;
@@ -98,6 +100,7 @@ public:
   int getNextRecordSet(poseT *pt, measT *mt);
 
   Boolean useTRNServer();
+  Boolean useLcmTrn();
   TerrainNav* connectTRN();
 
 protected:

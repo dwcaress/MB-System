@@ -113,6 +113,7 @@ struct measT {
   int* beamNums;
 
   measT();
+  measT(unsigned int nummeas, int datatype);
   ~measT();
   void clean();
   measT& operator=(measT& rhs);

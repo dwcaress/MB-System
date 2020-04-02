@@ -28,6 +28,7 @@
 // - TLModuleID (in trn_log.h)
 static TLModule tl_module_config[TL_N_MODULES]={
     {TL_LOG,TL_NONE}, // TL_TRN_SERVER
+    {TL_LOG,TL_NONE}, // TL_TRN_LCM_APP
     {TL_LOG,TL_NONE}, // TL_STRUCT_DEFS
     {TL_LOG,TL_NONE}, // TL_TERRAIN_NAV
     {TL_LOG,TL_NONE}, // TL_TERRAIN_NAV_AID_LOG
