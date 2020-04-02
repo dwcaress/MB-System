@@ -28,6 +28,7 @@
 
 /*--------------------------------------------------------------------*/
 
+#include <getopt.h>
 #include <math.h>
 #include <stdbool.h>
 #include <stdio.h>
@@ -48,7 +49,6 @@
 
 #include <X11/Intrinsic.h>
 
-#include "getopt.h"
 #include "mb_define.h"
 #include "mb_format.h"
 #include "mb_io.h"
@@ -459,7 +459,7 @@ int mbedit_set_graphics(void *xgid, int ncol, unsigned int *pixels) {
 		fprintf(stderr, "dbg2       xgid:         %p\n", xgid);
 		fprintf(stderr, "dbg2       ncolors:      %d\n", ncol);
 		for (int i = 0; i < ncol; i++)
-			fprintf(stderr, "dbg2       pixel[%d]:     %d\n", i, pixels[i]);
+			fprintf(stderr, "dbg2       pixel[%d]:     %u\n", i, pixels[i]);
 	}
 
 	/* set graphics id */
@@ -1267,12 +1267,9 @@ int mbedit_action_plot(int plwd, int exgr, int xntrvl, int yntrvl, int plt_size,
 		if (*ngood > 0) {
 			status = mbedit_plot_all(plwd, exgr, xntrvl, yntrvl, plt_size, sh_mode, sh_flggdsdg, sh_flggdprf, sh_time, nplt, false);
 		}
-	}
-
-	/* if no file open set failure status */
-	else {
+	} else {
+		// if no file open set failure statu
 		status = MB_FAILURE;
-		*nbuffer = nbuff;
 		*nbuffer = nbuff;
 		*ngood = nbuff;
 		current_id = 0;
@@ -1434,12 +1431,9 @@ int mbedit_action_mouse_toggle(int x_loc, int y_loc, int plwd, int exgr, int xnt
 		if (ping[iping].bath_x[jbeam] < xmin || ping[iping].bath_x[jbeam] > xmax || ping[iping].bath_y[jbeam] < ymin ||
 		    ping[iping].bath_y[jbeam] > ymax)
 			status = mbedit_plot_ping_label(iping, false);
-	}
-
-	/* if no file open set failure status */
-	else if (!file_open) {
+	} else if (!file_open) {
+		// if no file open set failure status
 		status = MB_FAILURE;
-		*nbuffer = nbuff;
 		*nbuffer = nbuff;
 		*ngood = nbuff;
 		current_id = 0;
@@ -1583,12 +1577,9 @@ int mbedit_action_mouse_pick(int x_loc, int y_loc, int plwd, int exgr, int xntrv
 		if (ping[iping].bath_x[jbeam] < xmin || ping[iping].bath_x[jbeam] > xmax || ping[iping].bath_y[jbeam] < ymin ||
 		    ping[iping].bath_y[jbeam] > ymax)
 			status = mbedit_plot_ping_label(iping, false);
-	}
-
-	/* if no file open set failure status */
-	else if (!file_open) {
+	} else if (!file_open) {
+		// if no file open set failure status
 		status = MB_FAILURE;
-		*nbuffer = nbuff;
 		*nbuffer = nbuff;
 		*ngood = nbuff;
 		current_id = 0;
@@ -1722,12 +1713,9 @@ int mbedit_action_mouse_erase(int x_loc, int y_loc, int plwd, int exgr, int xntr
 		*nbuffer = nbuff;
 		*ngood = nbuff;
 		*icurrent = current_id;
-	}
-
-	/* if no file open set failure status */
-	else if (!file_open) {
+	} else if (!file_open) {
+		// if no file open set failure status
 		status = MB_FAILURE;
-		*nbuffer = nbuff;
 		*nbuffer = nbuff;
 		*ngood = nbuff;
 		current_id = 0;
@@ -1861,12 +1849,9 @@ int mbedit_action_mouse_restore(int x_loc, int y_loc, int plwd, int exgr, int xn
 		*nbuffer = nbuff;
 		*ngood = nbuff;
 		*icurrent = current_id;
-	}
-
-	/* if no file open set failure status */
-	else if (!file_open) {
+	} else if (!file_open) {
+		// if no file open set failure status
 		status = MB_FAILURE;
-		*nbuffer = nbuff;
 		*nbuffer = nbuff;
 		*ngood = nbuff;
 		current_id = 0;
@@ -2122,12 +2107,9 @@ int mbedit_action_mouse_grab(int grabmode, int x_loc, int y_loc, int plwd, int e
 		*nbuffer = nbuff;
 		*ngood = nbuff;
 		*icurrent = current_id;
-	}
-
-	/* if no file open set failure status */
-	else if (!file_open) {
+	} else /* if (!file_open) */ {
+		// if no file open set failure status
 		status = MB_FAILURE;
-		*nbuffer = nbuff;
 		*nbuffer = nbuff;
 		*ngood = nbuff;
 		current_id = 0;
@@ -2242,12 +2224,9 @@ int mbedit_action_mouse_info(int x_loc, int y_loc, int plwd, int exgr, int xntrv
 		*nbuffer = nbuff;
 		*ngood = nbuff;
 		*icurrent = current_id;
-	}
-
-	/* if no file open set failure status */
-	else if (!file_open) {
+	} else /* if (!file_open) */ {
+		// if no file open set failure status
 		status = MB_FAILURE;
-		*nbuffer = nbuff;
 		*nbuffer = nbuff;
 		*ngood = nbuff;
 		current_id = 0;
@@ -2349,12 +2328,9 @@ int mbedit_action_zap_outbounds(int iping, int plwd, int exgr, int xntrvl, int y
 		*nbuffer = nbuff;
 		*ngood = nbuff;
 		*icurrent = current_id;
-	}
-
-	/* if no file open set failure status */
-	else if (!file_open) {
+	} else /* if (!file_open) */ {
+		// if no file open set failure status
 		status = MB_FAILURE;
-		*nbuffer = nbuff;
 		*nbuffer = nbuff;
 		*ngood = nbuff;
 		current_id = 0;
@@ -2914,12 +2890,9 @@ int mbedit_action_flag_view(int plwd, int exgr, int xntrvl, int yntrvl, int plt_
 		if (*ngood > 0) {
 			status = mbedit_plot_all(plwd, exgr, xntrvl, yntrvl, plt_size, sh_mode, sh_flggdsdg, sh_flggdprf, sh_time, nplt, false);
 		}
-	}
-
-	/* if no file open set failure status */
-	else if (!file_open) {
+	} else /* if (!file_open) */ {
+		// if no file open set failure status
 		status = MB_FAILURE;
-		*nbuffer = nbuff;
 		*nbuffer = nbuff;
 		*ngood = nbuff;
 		current_id = 0;
@@ -3006,12 +2979,9 @@ int mbedit_action_unflag_view(int plwd, int exgr, int xntrvl, int yntrvl, int pl
 		if (*ngood > 0) {
 			status = mbedit_plot_all(plwd, exgr, xntrvl, yntrvl, plt_size, sh_mode, sh_flggdsdg, sh_flggdprf, sh_time, nplt, false);
 		}
-	}
-
-	/* if no file open set failure status */
-	else if (!file_open) {
+	} else /* if (!file_open) */ {
+		// if no file open set failure status
 		status = MB_FAILURE;
-		*nbuffer = nbuff;
 		*nbuffer = nbuff;
 		*ngood = nbuff;
 		current_id = 0;
@@ -3096,12 +3066,9 @@ int mbedit_action_unflag_all(int plwd, int exgr, int xntrvl, int yntrvl, int plt
 		if (*ngood > 0) {
 			status = mbedit_plot_all(plwd, exgr, xntrvl, yntrvl, plt_size, sh_mode, sh_flggdsdg, sh_flggdprf, sh_time, nplt, false);
 		}
-	}
-
-	/* if no file open set failure status */
-	else if (!file_open) {
+	} else /* if (!file_open) */ {
+		// if no file open set failure status
 		status = MB_FAILURE;
-		*nbuffer = nbuff;
 		*nbuffer = nbuff;
 		*ngood = nbuff;
 		current_id = 0;
@@ -3182,10 +3149,8 @@ int mbedit_action_filter_all(int plwd, int exgr, int xntrvl, int yntrvl, int plt
 		if (*ngood > 0) {
 			status = mbedit_plot_all(plwd, exgr, xntrvl, yntrvl, plt_size, sh_mode, sh_flggdsdg, sh_flggdprf, sh_time, nplt, false);
 		}
-	}
-
-	/* if no file open set failure status */
-	else if (!file_open) {
+	} else /* if (!file_open) */ {
+		// if no file open set failure status
 		status = MB_FAILURE;
 		*nbuffer = nbuff;
 		*ngood = nbuff;
@@ -3274,7 +3239,7 @@ int mbedit_filter_ping(int iping) {
 							}
 						}
 						if (nbathlist > 0) {
-							qsort((char *)bathlist, nbathlist, sizeof(double), (void *)mb_double_compare);
+							qsort(bathlist, nbathlist, sizeof(double), mb_double_compare);
 							bathmedian = bathlist[nbathlist / 2];
 						}
 						if (100 * fabs(ping[iping].bath[jbeam] - bathmedian) / ping[iping].altitude >
@@ -3372,11 +3337,10 @@ int mbedit_filter_ping(int iping) {
 							}
 						}
 					}
-				}
-
-				/* handle cut at edges of swath */
-				else if (filter_cutbeam_begin > filter_cutbeam_end) {
+				} else /* if (filter_cutbeam_begin > filter_cutbeam_end) */ {
+					/* handle cut at edges of swath */
 					for (int j = 0; j < ping[iping].beams_bath; j++) {
+						// TODO(schwehr): Always true.  Should this be an && rather than ||?
 						if ((j <= filter_cutbeam_end || j >= filter_cutbeam_begin) && mb_beam_ok(ping[iping].beamflag[j])) {
 							/* write edit to save file */
 							if (esffile_open)
@@ -3432,6 +3396,7 @@ int mbedit_filter_ping(int iping) {
 				else if (filter_cutdistance_begin > filter_cutdistance_end) {
 					for (int j = 0; j < ping[iping].beams_bath; j++) {
 						if (mb_beam_ok(ping[iping].beamflag[j])) {
+							// TODO(schwehr): Always true.  Should this be an && rather than ||?
 							if (ping[iping].bathacrosstrack[j] >= filter_cutdistance_begin ||
 							    ping[iping].bathacrosstrack[j] <= filter_cutdistance_end) {
 								/* write edit to save file */
@@ -3483,13 +3448,12 @@ int mbedit_filter_ping(int iping) {
 							}
 						}
 					}
-				}
-
-				/* handle cut at edges of swath */
-				else if (filter_cutangle_begin > filter_cutangle_end) {
+				} else /* if (filter_cutangle_begin > filter_cutangle_end) */ {
+					/* handle cut at edges of swath */
 					for (int j = 0; j < ping[iping].beams_bath; j++) {
 						if (mb_beam_ok(ping[iping].beamflag[j]) && ping[iping].altitude > 0.0) {
 							const double angle = RTD * atan(ping[iping].bathacrosstrack[j] / ping[iping].altitude);
+							// TODO(schwehr): Always true.  Should this be an && rather than ||?
 							if (angle >= filter_cutangle_begin || angle <= filter_cutangle_end) {
 								/* write edit to save file */
 								if (esffile_open)
@@ -3934,9 +3898,9 @@ int mbedit_dump_data(int hold_size, int *ndumped, int *nbuffer) {
 	if (verbose >= 2) {
 		fprintf(stderr, "\n%d data records dumped from buffer\n", *ndumped);
 		fprintf(stderr, "%d data records remain in buffer\n", *nbuffer);
-	}
+	// }
 
-	if (verbose >= 2) {
+	// if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       ndumped:    %d\n", *ndumped);
@@ -4283,7 +4247,7 @@ int mbedit_plot_all(int plwd, int exgr, int xntrvl, int yntrvl, int plt_size, in
 	}
 	double bathmedian = 0.0;  // -Wmaybe-uninitialized
 	if (nbathlist > 0) {
-		qsort((char *)bathlist, nbathlist, sizeof(double), (void *)mb_double_compare);
+		qsort(bathlist, nbathlist, sizeof(double), mb_double_compare);
 		bathmedian = bathlist[nbathlist / 2];
 	}
 
