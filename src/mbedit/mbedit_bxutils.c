@@ -14,8 +14,6 @@
 // Handy definition used in SET_BACKGROUND_COLOR
 #define UNSET (-1)
 
-#define XTPOINTER XtPointer
-
 /*
  * The following enum is used to support wide character sets.
  * Use this enum for references into the Common Wide Characters array.
@@ -50,23 +48,6 @@ enum {
 
 /*
  * Function:
- *      bytesConv = doMbstowcs(wcs, mbs, n);
- * Description:
- *      Create a wcs string from an input mbs.
- * Input:
- *	wcs - wchar_t* : pointer to result buffer of wcs
- *      mbs - char* : pointer to the source mbs
- *	n - size_t : the number of characters to convert
- * Output:
- *      bytesConv - size_t : number of bytes converted
- */
-// See man mbstowcs for C99
-static size_t doMbstowcs(wchar_t * wcs, const char * mbs, size_t n) {
-	return (mbstowcs(wcs, mbs, n));
-}
-
-/*
- * Function:
  *      bytesConv = doWcstombs(wcs, mbs, n);
  * Description:
  *      Create a mbs string from an input wcs.
@@ -83,27 +64,6 @@ static size_t doWcstombs(char *mbs, const wchar_t * wcs, size_t n) {
 		return (0);
 	else
 		return (retval);
-}
-
-/*
- * Function:
- *      status = dombtowc(wide, multi, size);
- * Description:
- *      Convert a multibyte character to a wide character.
- * Input:
- *      wide	- wchar_t *	: where to put the wide character
- *	multi	- char *	: the multibyte character to convert
- *	size	- size_t	: the number of characters to convert
- * Output:
- *      0	- if multi is a NULL pointer or points to a NULL character
- *	#bytes	- number of bytes in the multibyte character
- *	-1	- multi is an invalid multibyte character.
- *
- *	NOTE:  if wide is NULL, then this returns the number of bytes in
- *	       the multibyte character.
- */
-static int dombtowc(wchar_t * wide, const char * multi, size_t size) {
-	return mbtowc(wide, multi, size);
 }
 
 /*
@@ -129,7 +89,7 @@ static wchar_t *CStrCommonWideCharsGet() {
 			static const char *characters[] = {
 				"\000", "\t", "\n", "\r", "\f", "\v", "\\", "\"", "#", ":", "f",
 				"l",    "n",  "r",  "t",  "v",  "F",  "L",  "R",  "T", "0", "1"};
-			(void)dombtowc(&(CommonWideChars[i]), characters[i], 1);
+			(void)mbtowc(&(CommonWideChars[i]), characters[i], 1);
 		}
 	}
 	return (CommonWideChars);
@@ -437,7 +397,7 @@ static XmString StringToXmString(char *str) {
 	// For expediencies sake, we'll overallocate this buffer so that
 	// the wcs is guaranteed to fit (1 wc per byte in original string).
 	wchar_t *wcStr = (wchar_t *)XtMalloc((strlen(str) + 1) * sizeof(wchar_t));
-	doMbstowcs(wcStr, str, strlen(str) + 1);
+	mbstowcs(wcStr, str, strlen(str) + 1);
 
 	// Create the beginning segment
 	int curDir = XmSTRING_DIRECTION_L_TO_R;
@@ -627,7 +587,7 @@ static Boolean CvtStringToXmString(
 
 	// Done, return result
 	if (toVal->addr == NULL) {
-		toVal->addr = (XTPOINTER)&resStr;
+		toVal->addr = (XtPointer)&resStr;
 		toVal->size = sizeof(XmString);
 	} else if (toVal->size < sizeof(XmString)) {
 		toVal->size = sizeof(XmString);
@@ -707,8 +667,8 @@ static Boolean CvtStringToXmStringTable(
 			 */
 			fVal.size = strlen(str) + 1;
 			fVal.addr = str;
-			tVal.size = sizeof(XTPOINTER);
-			tVal.addr = (XTPOINTER)tblPtr;
+			tVal.size = sizeof(XtPointer);
+			tVal.addr = (XtPointer)tblPtr;
 
 			/*
 			 * Call converter ourselves since this is used to create
@@ -732,7 +692,7 @@ static Boolean CvtStringToXmStringTable(
 	// Done, return result
 
 	if (toVal->addr == NULL) {
-		toVal->addr = (XTPOINTER)&CStrTable;
+		toVal->addr = (XtPointer)&CStrTable;
 		toVal->size = sizeof(XmString);
 	}
 	else if (toVal->size < sizeof(XmString *)) {
@@ -835,13 +795,13 @@ XtPointer BX_CONVERT(
 		// toVal.size will hold the strlen of the string so generic
 		// conversion code can't handle it.  It is possible for a string to
 		// string conversion to happen so we do have to watch for it.
-		val = (XTPOINTER)toVal.addr;
+		val = (XtPointer)toVal.addr;
 	}
 	else if (!strcmp(to_type, "Double")) {
-		val = (XTPOINTER)((double *)toVal.addr);
+		val = (XtPointer)((double *)toVal.addr);
 	}
 	else if (!strcmp(to_type, "Float")) {
-		val = (XTPOINTER)((float *)toVal.addr);
+		val = (XtPointer)((float *)toVal.addr);
 	}
 	else {
 		// Here is the generic conversion return value handler.  This
@@ -850,20 +810,20 @@ XtPointer BX_CONVERT(
 		// return.  Here we check all sizes from 1 to 8 bytes.
 		switch (toVal.size) {
 		case 1:
-			val = (XTPOINTER)(long)(*(char *)toVal.addr);
+			val = (XtPointer)(long)(*(char *)toVal.addr);
 			break;
 		case 2:
-			val = (XTPOINTER)(long)(*(short *)toVal.addr);
+			val = (XtPointer)(long)(*(short *)toVal.addr);
 			break;
 		case 4:
-			val = (XTPOINTER)(long)(*(int *)toVal.addr);
+			val = (XtPointer)(long)(*(int *)toVal.addr);
 			break;
 		case 8:
 		default:
 #ifdef _WIN32
-			val = (XTPOINTER)(int64_t)(*(int64_t *)toVal.addr);
+			val = (XtPointer)(int64_t)(*(int64_t *)toVal.addr);
 #else
-			val = (XTPOINTER)(long)(*(long *)toVal.addr);
+			val = (XtPointer)(long)(*(long *)toVal.addr);
 #endif
 			break;
 		}
@@ -876,38 +836,6 @@ XtPointer BX_CONVERT(
 	// Return the converted value.
 	/*SUPPRESS 80*/
 	return (val);
-}
-
-/*
- * Function:
- *      MENU_POST(p, mw, ev, dispatch);
- * Description:
- *      A converter wrapper for convenience from BuilderXcessory.
- * Input:
- *      p - Widget : the widget to post
- *	mw - XtPointer : the menu widget
- *	ev - XEvent* : the event that caused the menu post
- *	dispatch - Boolean* : not used
- * Output:
- *      None
- */
-void BX_MENU_POST(Widget p, XtPointer mw, XEvent *ev, Boolean *dispatch) {
-	(void)p;  // Unused param
-	(void)dispatch;  // Unused param
-
-	Arg args[2];
-	int argcnt = 0;
-	int button;
-	XtSetArg(args[argcnt], XmNwhichButton, &button);
-	argcnt++;
-	Widget m = (Widget)mw;
-	XtGetValues(m, args, argcnt);
-	XButtonEvent *e = (XButtonEvent *)ev;
-	if (e->button != button)
-		return;
-
-	XmMenuPosition(m, e);
-	XtManageChild(m);
 }
 
 /*
@@ -1076,13 +1004,6 @@ XtPointer BX_SINGLE(float val) {
 	XtPointer pointer = (XtPointer)XtMalloc(sizeof(float));
 	if (pointer != NULL)
 		*((float *)pointer) = val;
-	return (pointer);
-}
-
-XtPointer BX_DOUBLE(double val) {
-	XtPointer pointer = (XtPointer)XtMalloc(sizeof(double));
-	if (pointer != NULL)
-		*((double *)pointer) = val;
 	return (pointer);
 }
 
@@ -1722,13 +1643,11 @@ static int xpmCreateImage(
     Display *display, bxxpmInternAttrib *attrib, XImage **image_return,
     XImage **shapeimage_return, BxXpmAttributes *attributes) {
 	// retrieve information from the BxXpmAttributes
-	BxXpmColorSymbol *colorsymbols;
-	unsigned int numsymbols;
+	BxXpmColorSymbol *colorsymbols = NULL;
+	unsigned int numsymbols = 0;
 	if (attributes && attributes->valuemask & BxXpmColorSymbols) {
 		colorsymbols = attributes->colorsymbols;
 		numsymbols = attributes->numsymbols;
-	} else {
-		numsymbols = 0;
 	}
 
 	Visual *visual;
