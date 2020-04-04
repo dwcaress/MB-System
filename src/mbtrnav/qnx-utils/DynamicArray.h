@@ -17,8 +17,6 @@
 #define DYNAMICARRAY_H
 #define MAXINT 99999
 
-static char array_h_id[] = "$Header$";
-
 /*
 $Log$
 Revision 1.1.2.2  2019/07/10 17:15:46  rob

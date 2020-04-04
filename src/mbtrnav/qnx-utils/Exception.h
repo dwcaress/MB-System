@@ -18,6 +18,8 @@
 
 #include <string.h>
 
+#define MAX_EXC_STRING_LEN 300
+
 /*
 CLASS 
 Exception
@@ -37,11 +39,12 @@ public:
   // [input] message: Descriptive message
   Exception(const char *message) {
     strncpy(msg, message, sizeof(msg));
+    fprintf(stderr, "\n%s\n", msg);
   }
 
   ///////////////////////////////////////////////////////////////////
   // Descriptive text message
-  char msg[100];
+  char msg[MAX_EXC_STRING_LEN];
 };
 
 #endif

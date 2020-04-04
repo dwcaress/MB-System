@@ -15,7 +15,6 @@
 /****************************************************************************/
 #ifndef _MATHP_H
 #define _MATHP_H
-static char Math_h_id[] = "$Header$";
 
 /*
 $Log$

@@ -81,9 +81,6 @@ int main(int argc, char **argv)
   // Data array name is log's name
   printf("\n %s=[\n", log->mnemonic() );
 
-  double timeBase;
-  double startTime;
-
   try {
     for (int nRecord = 0; ; nRecord++) {
 
@@ -109,11 +106,10 @@ int main(int argc, char **argv)
 	  if (!relativeTime)
 	    fprintf(stdout, "%.4f   ", log->timeTag()->value());
 	  else {
-	    // Relative time option in effect
-	    if (nRecord == 0)
-	      startTime = log->timeTag()->value();
+      // Relative time option in effect
+      double startTime = (nRecord == 0) ? log->timeTag()->value() : 0.;
 
-	    fprintf(stdout, "%.4f   ", log->timeTag()->value() - startTime);
+      fprintf(stdout, "%.4f , ", log->timeTag()->value() - startTime);
 	  }
 	}
 	else {
