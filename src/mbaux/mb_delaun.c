@@ -96,6 +96,7 @@
  */
 
 #include <math.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -234,7 +235,7 @@ int mb_delaun(int verbose, int npts, double *p1, double *p2, int *ed, int *ntri,
 						ivs2 = iv2;
 					if (l2 == 3)
 						ivs2 = iv3;
-					int addside = true;
+					bool addside = true;
 
 					/* Check if the side is already stored in kv. If it
 					    is then Side common to more than one of the
@@ -362,7 +363,7 @@ int mb_delaun(int verbose, int npts, double *p1, double *p2, int *ed, int *ntri,
 	for (int i = 0; i < *ntri; i++) {
 		/* check side 1 of triangle i */
 		if (ct1[i] == -1) {
-			int notfound = true;
+			bool notfound = true;
 			for (int j = 0; notfound && j < *ntri; j++) {
 				if (notfound && iv1[i] == iv2[j] && iv2[i] == iv1[j]) {
 					ct1[i] = j;
@@ -389,7 +390,7 @@ int mb_delaun(int verbose, int npts, double *p1, double *p2, int *ed, int *ntri,
 		}
 		/* check side 2 of triangle i */
 		if (ct2[i] == -1) {
-			int notfound = true;
+			bool notfound = true;
 			for (int j = 0; notfound && j < *ntri; j++) {
 				if (notfound && iv2[i] == iv2[j] && iv3[i] == iv1[j]) {
 					ct2[i] = j;
@@ -416,7 +417,7 @@ int mb_delaun(int verbose, int npts, double *p1, double *p2, int *ed, int *ntri,
 		}
 		/* check side 3 of triangle i */
 		if (ct3[i] == -1) {
-			int notfound = true;
+			bool notfound = true;
 			for (int j = 0; notfound && j < *ntri; j++) {
 				if (notfound && iv3[i] == iv2[j] && iv1[i] == iv1[j]) {
 					ct3[i] = j;
