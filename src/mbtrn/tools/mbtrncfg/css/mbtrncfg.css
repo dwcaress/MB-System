@@ -1,0 +1,135 @@
+
+
+body{
+    background-color: #111111;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    font-size: 16px;
+    font-family: Tahoma,Geneva,Helvetica,Verdana,Eurostyle,Palatino,Lucida,sans-serif;
+    color: #DDDDDD;
+}
+
+h1,h2,h3,h4,h5,h6{
+    font-weight: 400;
+    font-style: italic;
+    color:#FFFFFF;
+}
+
+th{
+    height:30px;
+    vertical-align: middle;
+    text-align: center;
+    font-size: 18px;
+    font-style: italic;
+    font-weight: 400;
+    color: goldenrod;
+}
+
+td.param{
+    white-space: nowrap;
+    vertical-align: middle;
+    text-align: right;
+}
+
+td.entry{
+    vertical-align: middle;
+    text-align: left;
+    padding-left: 6px;
+}
+
+a{
+    font-weight: 400;
+    /* darker */
+    color: #5c86a2;
+    /* lighter */
+    color: #8ba8bc;
+    color: #7397af;
+}
+
+a:hover {
+    font-style: normal;
+    font-variant: normal;
+    text-decoration: none;
+    color: goldenrod;
+}
+
+p,li{
+    margin-left: 10pt;
+    font-weight: 200;
+}
+
+form{
+    color: #CCCCCC;
+}
+
+input[type=text]{
+    padding-left: 4px;
+    padding-right: 4px;
+    background-color: #DDDDDD;
+    font-size: 12px;
+}
+
+input[type=radio]{
+    padding-left: 4px;
+    font-size: 11px;
+}
+
+textarea{
+    padding: 10px 10px;
+    border: 0;
+    border-radius: 4px;
+    font-family: "Lucida Console",Courier,monospace;
+}
+
+textarea.help{
+    width: 500px;
+    height: 600px;
+    background: inherit;
+    font-size: 15px;
+    color: goldenrod;
+}
+
+textarea.output{
+    width: 600px;
+    height: 140px;
+    background: #CCCCCC;
+    font-size: 12px;
+}
+
+.button{
+    padding: 10px 10px;
+    display: inline-block;
+    border: 1px solid #334455;
+    border: 2px solid #333333;
+    border-radius: 4px;
+    text-align: center;
+    text-decoration: none;
+    font-size: 12px;
+    font-weight: 500;
+    color: #BBBBBB;
+}
+
+.buttonsm{
+    padding: 10px 15px;
+}
+
+.buttong{
+    /* Green */
+    background-color: #4a6e35;
+}
+
+.buttonr{
+    /* Red */
+    background-color: #9a391b;
+}
+
+.buttonb{
+    /* Blue */
+    background-color: #00416d;
+}
+.button:active{
+/*    background-color: #555555;*/
+	opacity:0.8;
+/*    box-shadow: 0 5px #666;*/
+    transform: translateY(4px);
+}

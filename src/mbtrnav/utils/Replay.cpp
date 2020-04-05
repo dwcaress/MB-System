@@ -37,6 +37,10 @@
 #include "TRNUtils.h"
 #include "TerrainNavClient.h"
 
+#ifdef _LCMTRN
+#include "TerrainNavLcmClient.h"
+#endif
+
 // Common to QNX and NIX versions
 // 
 Replay::Replay(const char* loghome, const char *map, const char *host, int port)
@@ -235,7 +239,7 @@ int Replay::getNextRecordSet(poseT *pt, measT *mt)
     return 1;
     //fprintf(stdout, "\n");
   }
-  catch (Exception e) {
+  catch (...) {
     fprintf(stderr, "\nEnd of log!\n");
     return 0;
   }
@@ -425,6 +429,20 @@ Boolean Replay::useTRNServer()
 #endif
 }
 
+Boolean Replay::useLcmTrn()
+{
+#ifndef _LCMTRN
+  fprintf(stderr, "Replay - trn_replay was not build for LCMTRN!\n");
+  return False;
+#endif
+
+#ifdef _QNX
+  return True;
+#else
+  return !strcmp(trn_attr->_terrainNavServer, LCM_HOST);
+#endif
+}
+
 
 /****************************************************************************/
 
@@ -474,7 +492,7 @@ int Replay::loadCfgAttributes()
   trn_attr->_phiBias = 0;
   trn_attr->_useIDTData = false;
   trn_attr->_useDvlSide = false;
-  trn_attr->_useMbTrnData = false;
+  trn_attr->_useMbTrnData   = false;
 
   // Get   key = value   pairs from non-comment lines in the cfg.
   // If the key matches a known config item, extract and save the value.
@@ -503,7 +521,10 @@ int Replay::loadCfgAttributes()
     else if (!strcmp("RollOffset",           key))  trn_attr->_phiBias = atof(value);
     else if (!strcmp("useIDTData",           key))  trn_attr->_useIDTData = strcasecmp("false", value);
     else if (!strcmp("useDVLSide",           key))  trn_attr->_useDvlSide = strcasecmp("false", value);
+
+    // Use the MbTrn.log file data when using either MbTrn data mode
     else if (!strcmp("useMbTrnData",         key))  trn_attr->_useMbTrnData = strcasecmp("false", value);
+    else if (!strcmp("useMbTrnServer",       key))  trn_attr->_useMbTrnData |= strcasecmp("false", value);
     else
       fprintf(stderr, "\n\tReplay: Unknown key in cfg: %s\n\n", key);
   }
@@ -571,10 +592,18 @@ TerrainNav* Replay::connectTRN()
     sprintf(buf, "%s/%s", datadir, trn_attr->_particlesName);
     free(trn_attr->_particlesName); trn_attr->_particlesName = strdup(buf);
     fprintf(stdout, "%s\n%s\n%s\n", trn_attr->_mapFileName, trn_attr->_vehicleCfgName, trn_attr->_particlesName);
-    if (useTRNServer())
+
+    if (useLcmTrn())
+    {
+#ifdef _LCMTRN
+      printf("Connecting to %s ...\n", trn_attr->_terrainNavServer);
+      _tercom = new TerrainNavLcmClient();
+#endif
+    }
+    else if (useTRNServer())
     {
       printf("Connecting to %s in 2...\n", trn_attr->_terrainNavServer);
-      sleep(2);
+      sleep(1);
       _tercom = new TerrainNavClient(trn_attr->_terrainNavServer,
                                      trn_attr->_terrainNavPort,
                                      trn_attr->_mapFileName, 

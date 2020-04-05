@@ -461,6 +461,8 @@ int poseT::unserialize(char* buf, int buflen) {
 /measT member functions
 /----------------------------------------------------------------------------*/
 measT::measT() {
+   time = phi = theta = psi = x = y = z = 0.;
+   dataType = numMeas = ping_number = 0;
 	covariance = NULL;
 	ranges = NULL;
 	crossTrack = NULL;
@@ -471,6 +473,33 @@ measT::measT() {
 	beamNums = NULL;
 	ping_number = 0;
 	numMeas = 0;
+}
+
+/*----------------------------------------------------------------------------
+/measT ctor with datatype and numMeas
+/----------------------------------------------------------------------------*/
+measT::measT(unsigned int nummeas, int datatype)
+{
+	time = phi = theta = psi = x = y = z = 0.;
+	dataType = datatype;
+	numMeas = nummeas;
+	ping_number = 0;
+	covariance = new double[numMeas];
+	memset(covariance, 0, sizeof(double)*numMeas);
+	ranges = new double[numMeas];
+	memset(ranges, 0, sizeof(double)*numMeas);
+	crossTrack = new double[numMeas];
+	memset(crossTrack, 0, sizeof(double)*numMeas);
+	alongTrack = new double[numMeas];
+	memset(alongTrack, 0, sizeof(double)*numMeas);
+	altitudes = new double[numMeas];
+	memset(altitudes, 0, sizeof(double)*numMeas);
+	alphas = new double[numMeas];
+	memset(alphas, 0, sizeof(double)*numMeas);
+	measStatus = new bool[numMeas];
+	memset(measStatus, 0, sizeof(double)*numMeas);
+	beamNums = new int[numMeas];
+	memset(beamNums, 0, sizeof(double)*numMeas);
 }
 
 measT::~measT() {

@@ -28,7 +28,7 @@ char StringConverter::_errorBuf[512];
 
 Boolean StringConverter::isInteger(const char *str)
 {
-  int i;
+  unsigned int i;
   int state = Starting;
   int ndigits = 0;
   
@@ -94,7 +94,7 @@ Boolean StringConverter::isInteger(const char *str)
 
 Boolean StringConverter::isFloat(const char *str)
 {
-  int i;
+  unsigned int i;
   int n_dot = 0;
   Boolean start_num = False;
   Boolean trail_blank = False;
@@ -165,7 +165,7 @@ Boolean StringConverter::isBoolean(const char *str)
   char *string = strdup(str);
 
   // Case-fold to lower case
-  for (int i = 0; i < strlen(str); i++) {
+  for (unsigned int i = 0; i < strlen(str); i++) {
     string[i] = tolower(str[i]);
   }
 
@@ -214,7 +214,7 @@ Boolean StringConverter::stringToBoolean(const char *str)
   char *string = strdup(str);
 
   // Case-fold to lower case
-  for (int i = 0; i < strlen(str); i++) {
+  for (unsigned int i = 0; i < strlen(str); i++) {
     string[i] = tolower(str[i]);
   }
 

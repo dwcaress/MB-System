@@ -21,6 +21,8 @@ long *outzone;
 double *outparm;
 long *outunit;
 long *outspheroid;
+char *fn27;
+char *fn83;
 long *iflg;
 
 {

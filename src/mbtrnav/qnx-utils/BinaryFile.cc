@@ -43,8 +43,6 @@ BinaryFile::~BinaryFile()
 
 void BinaryFile::set(CharData *charData)
 {
-  char errorBuf[250];
-
   char value = charData->value();
 
   if ((_bufferNBytes + 1) > _WRITE_BUFFER_SIZE) {
@@ -54,6 +52,8 @@ void BinaryFile::set(CharData *charData)
 
   memcpy(_buffer+_bufferNBytes, &value, 1); _bufferNBytes++;
 /*
+  char errorBuf[MAX_EXC_STRING_LEN];
+
   if (fwrite((void *)&value, sizeof(char), 1, _file) < 1) {
     sprintf(errorBuf, "BinaryFile::set(CharData) - %s", strerror(errno));
     throw Exception(errorBuf);
@@ -64,8 +64,6 @@ void BinaryFile::set(CharData *charData)
 
 void BinaryFile::set(ShortData *shortData)
 {
-  char errorBuf[250];
-
   short value = shortData->value();
 
   if ((_bufferNBytes + sizeof(short) ) > _WRITE_BUFFER_SIZE) {
@@ -76,6 +74,8 @@ void BinaryFile::set(ShortData *shortData)
   memcpy(_buffer+_bufferNBytes, &value, sizeof(short));
   _bufferNBytes += sizeof(short);
 /*
+  char errorBuf[MAX_EXC_STRING_LEN];
+
   if (fwrite((void *)&value, sizeof(short), 1, _file) < 1) {
     sprintf(errorBuf, "BinaryFile::set(ShortData) - %s", strerror(errno));
     throw Exception(errorBuf);
@@ -86,8 +86,6 @@ void BinaryFile::set(ShortData *shortData)
 
 void BinaryFile::set(IntegerData *integerData)
 {
-  char errorBuf[250];
-
   int value = integerData->value();
 
   if ((_bufferNBytes + sizeof(int)) > _WRITE_BUFFER_SIZE) {
@@ -98,6 +96,8 @@ void BinaryFile::set(IntegerData *integerData)
   memcpy(_buffer+_bufferNBytes, &value, sizeof(int));
   _bufferNBytes += sizeof(int);
 /*
+  char errorBuf[MAX_EXC_STRING_LEN];
+
   if (fwrite((void *)&value, sizeof(int), 1, _file) < 1) {
     sprintf(errorBuf, "BinaryFile::set(IntegerData) - %s", strerror(errno));
     throw Exception(errorBuf);
@@ -108,8 +108,6 @@ void BinaryFile::set(IntegerData *integerData)
 
 void BinaryFile::set(FloatData *floatData)
 {
-  char errorBuf[250];
-
   float value = floatData->value();
 
   if ((_bufferNBytes + sizeof(float)) > _WRITE_BUFFER_SIZE) {
@@ -120,6 +118,8 @@ void BinaryFile::set(FloatData *floatData)
   memcpy(_buffer+_bufferNBytes, &value, sizeof(float));
   _bufferNBytes += sizeof(float);
 /*
+  char errorBuf[MAX_EXC_STRING_LEN];
+
   if (fwrite((void *)&value, sizeof(float), 1, _file) < 1) {
     sprintf(errorBuf, "BinaryFile::set(FloatData) - %s", strerror(errno));
     throw Exception(errorBuf);
@@ -130,8 +130,6 @@ void BinaryFile::set(FloatData *floatData)
 
 void BinaryFile::set(DoubleData *doubleData)
 {
-  char errorBuf[250];
-
   double value = doubleData->value();
 
   if ((_bufferNBytes + sizeof(double)) > _WRITE_BUFFER_SIZE) {
@@ -142,6 +140,8 @@ void BinaryFile::set(DoubleData *doubleData)
   memcpy(_buffer+_bufferNBytes, &value, sizeof(double));
   _bufferNBytes += sizeof(double);
 /*
+  char errorBuf[MAX_EXC_STRING_LEN];
+
   if (fwrite((void *)&value, sizeof(double), 1, _file) < 1) {
     sprintf(errorBuf, "BinaryFile::set(DoubleData) - %s", strerror(errno));
     throw Exception(errorBuf);
@@ -152,12 +152,12 @@ void BinaryFile::set(DoubleData *doubleData)
 
 void BinaryFile::set(StringData *stringData)
 {
-  char errorBuf[250];
-
   char *value = stringData->value();
   char nullChar = '\0';
 
   // Write string characaters and terminating null
+  char errorBuf[MAX_EXC_STRING_LEN];
+
   if (fwrite((void *)value, strlen(value), 1, _file) < 1 ||
       fwrite((void *)&nullChar, sizeof(nullChar), 1, _file) < 1) {
     sprintf(errorBuf, "BinaryFile::set(StringData) - %s", strerror(errno));
@@ -168,7 +168,7 @@ void BinaryFile::set(StringData *stringData)
 
 void BinaryFile::get(CharData *charData)
 {
-  char errorBuf[250];
+  char errorBuf[MAX_EXC_STRING_LEN];
   char value;
 
   if (fread((void *)&value, sizeof(char), 1, _file) < 1) {
@@ -188,7 +188,7 @@ void BinaryFile::get(CharData *charData)
 
 void BinaryFile::get(ShortData *shortData)
 {
-  char errorBuf[250];
+  char errorBuf[MAX_EXC_STRING_LEN];
   short value;
 
   if (fread((void *)&value, sizeof(short), 1, _file) < 1) {
@@ -207,7 +207,7 @@ void BinaryFile::get(ShortData *shortData)
 
 void BinaryFile::get(IntegerData *integerData)
 {
-  char errorBuf[250];
+  char errorBuf[MAX_EXC_STRING_LEN];
   int value;
 
   if (fread((void *)&value, sizeof(int), 1, _file) < 1) {
@@ -226,7 +226,7 @@ void BinaryFile::get(IntegerData *integerData)
 
 void BinaryFile::get(FloatData *floatData)
 {
-  char errorBuf[250];
+  char errorBuf[MAX_EXC_STRING_LEN];
   float value;
 
   if (fread((void *)&value, sizeof(float), 1, _file) < 1) {
@@ -246,7 +246,7 @@ void BinaryFile::get(FloatData *floatData)
 
 void BinaryFile::get(DoubleData *doubleData)
 {
-  char errorBuf[250];
+  char errorBuf[MAX_EXC_STRING_LEN];
   double value;
 
   if (fread((void *)&value, sizeof(double), 1, _file) < 1) {
@@ -265,12 +265,12 @@ void BinaryFile::get(DoubleData *doubleData)
 
 void BinaryFile::get(StringData *stringData)
 {
-  char errorBuf[250];
+  char errorBuf[MAX_EXC_STRING_LEN];
 
   // Right now we have a hard-wired upper bound to the length of 
   // the string!!!
   char string[100];
-  int nCopiedBytes = 0;
+  size_t nCopiedBytes = 0;
   Boolean stringFinished = False;
 
   while (nCopiedBytes < sizeof(string) - 1) {

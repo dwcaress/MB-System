@@ -42,7 +42,6 @@ DataLogWriter::DataLogWriter(const char *objectName,
 
   //////////////////////////////////////////////////////////////////
   // Build file name and open the file
-  char *latest = strdup(LatestLogDirName);
   char *trnLogDir = getenv(TRNLogDirName);
   if (trnLogDir == 0) {
     // No ENV for logs. Use current directory
@@ -95,8 +94,8 @@ void DataLogWriter::addField(DataField *field)
   // Check for spaces in name
   if (strchr(field->name(), ' ') || strchr(field->name(), '\t')) {
     // Spaces not allowed in field name
-    char errorBuf[100];
-    sprintf(errorBuf, 
+    char errorBuf[MAX_EXC_STRING_LEN];
+    snprintf(errorBuf, sizeof(errorBuf),
 	    "Illegal field name: \"%s\"; whitespace not allowed in name",
 	    field->name());
 
@@ -111,11 +110,7 @@ void DataLogWriter::writeHeader()
 {
   if (_logFile == NULL)
 
-  Boolean debug = False;
-
   if (DLDEBUG) printf("DataLogWriter::writeHeader()\n");
-
-  char buffer[256];
 
   switch (_fileFormat) {
 
@@ -133,9 +128,9 @@ void DataLogWriter::writeHeader()
     exit(1);
   }
 
-  DataField *field;
+  DataField *field = NULL;
 
-  for (int i = 0; i < nFields(); i++) {
+  for (unsigned int i = 0; i < nFields(); i++) {
 
     fields.get(i, &field);
 
@@ -160,7 +155,7 @@ void DataLogWriter::writeHeader()
 
 int DataLogWriter::write()
 {
-  Boolean debug = False;
+  char errorBuf[MAX_EXC_STRING_LEN];
 
   if (!_handledHeader) {
     // Need to write header. Note that write() is not called until
@@ -180,15 +175,22 @@ int DataLogWriter::write()
   // Call subclass-defined method to set field values
   setFields();
 
-  DataField *field;
+  DataField *field = NULL;
 
   // Write each field value to logfile
-  for (int i = 0; i < nFields(); i++) {
+  for (unsigned int i = 0; i < nFields(); i++) {
 
     fields.get(i, &field);
 
-    if (DLDEBUG) printf("DataLogWriter::write() - field %s\n", field->name());
-    field->write(_logFile);
+    if (DLDEBUG && field!=NULL) printf("DataLogWriter::write() - field %s\n", field->name());
+    if (field != NULL) field->write(_logFile);
+    else
+    {
+      snprintf(errorBuf, sizeof(errorBuf),
+               "DataLogWriter::write() expected field %d where none was found",
+               i);
+      throw Exception(errorBuf);
+    }
   }
 
   if (DLDEBUG) printf("DataLogWriter::write() - done with each field\n");

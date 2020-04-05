@@ -231,7 +231,7 @@ increaseInitSearchWin(double* windowVarIncrement) {
 void
 TNavFilter::
 initVariables() {
-        setDistribToSave(SAVE_PARTICLES);
+   setDistribToSave(SAVE_PARTICLES);
 	vehicle->displayVehicleInfo();
 	lastNavPose = NULL;
 	interpMeasAttitude = false;

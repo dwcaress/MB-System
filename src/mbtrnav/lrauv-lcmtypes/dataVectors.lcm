@@ -1,0 +1,67 @@
+package lcmMessages;
+
+// Structures for transfer of named int, float, and double data vectors
+// including units, as well as named string vectors
+
+// Named int16_t data item array with units.
+// Scalar item is indicated if nVal = 1.
+struct IntVector
+{
+    string name;
+    int32_t nVal;
+    int16_t val[nVal];
+    string unit;
+}
+
+// Named float data item array with units.
+// Scalar item is indicated if nVal = 1.
+struct FloatVector
+{
+    string name;
+    int32_t nVal;
+    float val[nVal];
+    string unit;
+}
+
+// Named double-precision data item array with units.
+// Scalar item is indicated if nVal = 1.
+struct DoubleVector
+{
+    string name;
+    int32_t nVal;
+    double val[nVal];
+    string unit;
+}
+
+// Named char *item array (no units)
+// Scalar item is indicated if nVal = 1.
+struct StringVector
+{
+    string name;
+    int32_t nVal;
+    string val[nVal];
+}
+
+
+// Time-stamped array of named data vectors with units
+struct DataVectors
+{
+
+    int64_t    epochMillisec;         // Timestamp in millisec since 1970
+    
+    // Sequence number, useful only if one publisher, which should
+    // increment seqNo 
+    int64_t seqNo;
+    
+    int32_t    nIntVectors;
+    IntVector intVector[nIntVectors];
+
+    int32_t    nFloatVectors;
+    FloatVector floatVector[nFloatVectors];
+
+    int32_t    nDoubleVectors;
+    DoubleVector doubleVector[nDoubleVectors];
+
+    int32_t    nStringVectors;
+    StringVector stringVector[nStringVectors];
+}

@@ -1,0 +1,247 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <meta http-equiv="Content-Style-Type" content="text/css">
+  <meta http-equiv="Content-Language" content="en">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
+
+  <title>MBTRN config tool</title>
+  <style type="text/css">
+      <!--
+      @import "css/mbtrncfg.css";
+      -->
+  </style>
+  <script type="text/javascript" language="Javascript" SRC="src/mbtrncfg.js">
+      </script>
+</head>
+  <body onload="javascript:init_preset('win.reson')">
+    <h2>mbtrnpp Command Line Builder</h2>
+    <p>Hover over parameter name for <a onmouseover="showhelp('general')">help</a></p>
+    <div style="margin: 25px 25px 25px 40px;">
+         <form method=POST name="settings" id="cfgform" enctype="text/plain">
+                <table>
+                    <tr>
+                        <th>Parameter</th>
+                        <th>Value</th>
+                    </tr>
+                    <tr>
+                        <td ></td>
+                        <td ></td>
+                        <td style="text-align:center; vertical-align:top;" rowspan="28">
+                            <div style="margin-left:30px;margin-top:0px;">
+                              <textarea name="helptext" id="helptext" spellcheck="false" class="help"></textarea>
+                            </div>
+                        </td>
+					</tr>
+                   <tr>
+                        <td class="param" onmouseover="showhelp('RESON_HOST')"><a>RESON_HOST</a></td>
+                        <td class="entry"><input type="text" size="16" name="reson-host" id="reson_host" value=""
+                            </td>
+                    </tr>
+                    <tr>
+                        <td class="param" onmouseover="showhelp('MBTRN_HOST')"><a>MBTRN_HOST</a></td>
+                        <td class="entry"><input type="text" size="16" name="out-host" id="out_host" value=""
+                            </td>
+                    </tr>
+                    <tr>
+                        <td class="param" onmouseover="showhelp('MBTRNDIR')"><a>MBTRNDIR</a></td>
+                        <td class="entry"><input type="text" size="48" name="mbtrndir" id="mbtrndir" value="">
+                            </td>
+                    </tr>
+                    <tr>
+                        <td class="param" onmouseover="showhelp('TRN_DATAFILES')"><a>TRN_DATAFILES</a></td>
+                        <td class="entry"><input type="text" size="48" name="trn_datafiles" id="trn_datafiles" value=""
+                            </td>
+                    </tr>
+                    <tr>
+                        <td class="param" onmouseover="showhelp('TRN_MAPFILES')"><a>TRN_MAPFILES</a></td>
+                        <td class="entry"><input type="text" size="48" name="trn_mapfiles" id="trn_mapfiles" value=""
+                            </td>
+                            </tr>
+                    <tr>
+                        <td class="param" onmouseover="showhelp('TRN_LOGFILES')"><a>TRN_LOGFILES</a></td>
+                        <td class="entry"><input type="text" size="48" name="trn_logfiles" id="trn_logfiles" value=""
+                            </td>
+                            </tr>
+                    <tr>
+                        <td class="param" onmouseover="showhelp('set-trnlogfiles')"><a>Set TRN_LOGFILES</a></td>
+                        <td class="entry">
+                            Y<input type="radio" size="48" name="set-trnlogfiles" value="en" checked >
+                                N<input type="radio" size="48" name="set-trnlogfiles" value="dis" >
+                                    </td>
+                    </tr>
+                   <tr><td><div style="height:5px;"></div></td></tr>
+                  <tr>
+                        <td class="param" onmouseover="showhelp('log-directory')"><a>log-directory</a></td>
+                        <td class="entry"><input type="text" size="48" name="log-directory" value="">
+                            </td>
+                    </tr>
+                   <tr>
+                        <td class="param" onmouseover="showhelp('verbose')"><a>verbose</a></td>
+                        <td class="entry"><input type="text" size="8" name="verbose" id="verbose" value="">
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="param" onmouseover="showhelp('input')"><a>input</a></td>
+                        <td class="entry"><input type="text" size="32" name="input" value="">
+                            </td>
+                    </tr>
+                    <tr>
+                        <td class="param" onmouseover="showhelp('output')"><a>output</a></td>
+                        <td class="entry"><input type="text" size="48" name="output" value="">
+                            </td>
+                    </tr>
+                    <tr>
+                        <td class="param" onmouseover="showhelp('swath')"><a>swath</a></td>
+                        <td class="entry"><input type="text" size="8" name="swath" value="">
+                            </td>
+                    </tr>
+                    <tr>
+                        <td class="param" onmouseover="showhelp('soundings')"><a>soundings</a></td>
+                        <td class="entry"><input type="text" size="8" name="soundings" value="">
+                            </td>
+                    </tr>
+                    <tr>
+                        <td class="param" onmouseover="showhelp('format')"><a>format</a></td>
+                        <td class="entry"><input type="text" size="8" name="format" value="">
+                            </td>
+                    </tr>
+                    <tr>
+                        <td class="param" onmouseover="showhelp('median-filter')"><a>median-filter</a></td>
+                        <td class="entry"><input type="text" size="8" name="median" value="">
+                            </td>
+                    </tr>
+                    <tr><td><div style="height:5px;"></div></td></tr>
+                    <tr>
+                        <td class="param" onmouseover="showhelp('trn-en')"><a>trn-en</a></td>
+                        <td class="entry">
+                            Y<input type="radio" size="48" name="trn-en" value="en" checked>
+                                N<input type="radio" size="48" name="trn-en" value="dis">
+                                    </td>
+                    </tr>
+                  <tr>
+                      <td class="param" onmouseover="showhelp('trn-utm')"><a>trn-utm</a></td>
+                      <td class="entry"><input type="text" size="8" name="trn-utm" value="">
+                          </td>
+                  </tr>
+                  <tr>
+                      <td class="param" onmouseover="showhelp('trn-map')"><a>trn-map</a></td>
+                      <td class="entry"><input type="text" size="64" name="trn-map" value="">
+                          </td>
+                  </tr>
+                  <tr>
+                      <td class="param" onmouseover="showhelp('trn-par')"><a>trn-par</a></td>
+                      <td class="entry"><input type="text" size="64" name="trn-par" value="">
+                          </td>
+                  </tr>
+                  <tr>
+                      <td class="param" onmouseover="showhelp('trn-cfg')"><a>trn-cfg</a></td>
+                      <td class="entry"><input type="text" size="64" name="trn-cfg" value="">
+                          </td>
+                  </tr>
+                  <tr>
+                      <td class="param" onmouseover="showhelp('trn-log')"><a>trn-log</a></td>
+                      <td class="entry"><input type="text" size="64" name="trn-log" value="">
+                          </td>
+                  </tr>
+                  <tr>
+                      <td class="param" onmouseover="showhelp('trn-decn')"><a>trn-decn</a></td>
+                      <td class="entry"><input type="text" size="8" name="trn-decn" value="">
+                          </td>
+                  </tr>
+                  <tr>
+                      <td class="param" onmouseover="showhelp('trn-out')"><a>trn-out</a></td>
+                      <td class="entry"><input type="text" size="64" name="trn-out" value="">
+                          </td>
+                  </tr>
+                  <tr>
+                      <td class="param" onmouseover="showhelp('mb-out')" ><a>mb-out</a></td>
+                      <td class="entry"><input type="text" size="32" name="mb-out" value="">
+                          </td>
+                  </tr>
+                  <tr>
+                      <td class="param" onmouseover="showhelp('mbhbt')"><a>mbhbt</a></td>
+                      <td class="entry"><input type="text" size="8" name="mbhbt" value="">
+                          </td>
+                  </tr>
+                  <tr>
+                      <td class="param" onmouseover="showhelp('trnhbt')"><a>trnhbt</a></td>
+                      <td class="entry"><input type="text" size="8" name="trnhbt" value="">
+                          </td>
+                  </tr>
+                  <tr>
+                      <td class="param" onmouseover="showhelp('trnuhbt')"><a>trnuhbt</a></td>
+                      <td class="entry"><input type="text" size="8" name="trnuhbt" value="">
+                          </td>
+                  </tr>
+                  <tr>
+                      <td class="param" onmouseover="showhelp('statsec')"><a>statsec</a></td>
+                      <td class="entry"><input type="text" size="8" name="statsec" value="">
+                          </td>
+                  </tr>
+              </table>
+                <table>
+                    <tr>
+                        <th colspan="3">Preset Selection</th>
+                    </tr>
+                    <tr>
+                        <td></td>
+                        <td></td>
+                        <td rowspan="3">
+                           <!-- <button type="button" class="button buttonr buttonsm" onclick="javascript:load_ctx()" onmouseover="showhelp('load')">Load</button>-->
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="param" onmouseover="showhelp('reson-host')"><a>Reson Host</a></td>
+                        <td class="entry">
+                            <select name="ctx-rhost" id="ctx-rhost">
+                                <option value="win.reson">mapper1</option>
+                                <option value="linux.mbari">linux.mbari</option>
+                                <option value="linux.carson">linux.carson</option>
+                                <option value="linux.home">linux.home</option>
+                                <option value="winvm.mbari">winVM.mbari</option>
+                                <option value="winvm.carson">winVM.carson</option>
+                                <option value="winvm.home">winVM.home</option>
+                                <option value="custom">-</option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="param" onmouseover="showhelp('mbtrn-host')"><a>MBTRN Host</a></td>
+                        <td class="entry">
+                            <select name="ctx-mhost" id="ctx-mhost">
+                                <option value="win.reson">mapper1</option>
+                                <option value="linux.mbari">linux.mbari</option>
+                                <option value="linux.carson">linux.carson</option>
+                                <option value="linux.home">linux.home</option>
+                                <option value="winvm.mbari">winVM.mbari</option>
+                                <option value="winvm.carson">winVM.carson</option>
+                                <option value="winvm.home">winVM.home</option>
+                                <option value="custom">-</option>
+                            </select>
+                        </td>
+                    </tr>
+                </table>
+
+        </form>
+    </div>
+
+    <div style="margin: 25px 25px 25px 125px;">
+         <p></p>
+        <button type="button" class="button buttong" onclick="javascript:update()" onmouseover="showhelp('update')">Update</button>
+        <button type="button" class="button buttonb opacityDefault" id="cbutton" onclick="javascript:copyclip()" onmouseover="showhelp('copy')">Copy</button>
+        <button type="button" class="button buttonr buttonsm" onclick="javascript:load_ctx()" onmouseover="showhelp('load')">Load</button>
+
+    </div>
+
+
+    <div style="margin-left:25px;"><h4>Command Line</h4></div>
+    <div style="margin: 25px 25px 25px 25px;">
+         <textarea name="outtext" id="outtext" spellcheck="false" class="output">
+    </textarea>
+    </div>
+</body>
+</html>

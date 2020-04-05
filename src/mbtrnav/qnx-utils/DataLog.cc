@@ -101,7 +101,6 @@ void DataLog::openFile()
   // otherwise we "break" logToMatlab. 
   if (access() == Write) { 
     int numtries = 1;
-    char trybuf[10];
  
     while ((logfile = fopen(_fileName, "r")) != NULL) {
       printf("logfile already exists!\n");
