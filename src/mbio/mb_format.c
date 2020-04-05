@@ -3533,9 +3533,9 @@ int mb_imagelist_read(int verbose, void *imagelist_ptr, int *imagestatus,
       if (imagelist->imagelist == NULL) {
         bool rdone = false;
         while (!rdone) {
-                    *imagestatus = MB_IMAGESTATUS_NONE;
-                    *time_d = 0.0;
-                    *dtime_d = 0.0;
+          *imagestatus = MB_IMAGESTATUS_NONE;
+          *time_d = 0.0;
+          *dtime_d = 0.0;
           buffer_ptr = fgets(buffer, MB_PATH_MAXLINE, imagelist->fp);
 
           /* deal with end of imagelist file */
