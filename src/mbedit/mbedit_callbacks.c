@@ -212,7 +212,6 @@ static int mb_borders[4] = {0, 1016, 0, 525};
  *      Notes:        *	This function expects that there is an application
  *		       	shell from which all other widgets are descended.
  */
-
 void BxUnmanageCB(Widget w, XtPointer client, XtPointer call) {
 	(void)call;
 
@@ -783,42 +782,15 @@ int do_setup_data() {
 /*--------------------------------------------------------------------*/
 
 void do_build_filelist() {
-	char value_text[MB_PATH_MAXLINE];
-	XmString *xstr;
-	char *lockstrptr;
-	char *lockedstr = "<Locked>";
-	char *unlockedstr = "        ";
-	char *loadedstr = "<loaded>";
-	char *esfstrptr;
-	char *esfyesstr = "<esf>";
-	char *esfnostr = "     ";
-	int verbose = 0;
-
-	/* swath file locking variables */
-	int lock_error = MB_ERROR_NO_ERROR;
-	bool locked = false;
-	int lock_purpose = MBP_LOCK_NONE;
-	mb_path lock_program;
-	mb_path lock_cpu;
-	mb_path lock_user;
-	char lock_date[25];
-
-	/* esf file checking variables */
-	int esf_exists;
-	struct stat file_status;
-	int fstat;
-	char save_file[MB_PATH_MAXLINE];
-
-	/* check to see if anything has changed */
-	bool update_filelist = false;
-
 	/* check for change in number of files */
 	Cardinal ac = 0;
 	Arg args[256];
-	int item_count;
+	int item_count = 0;
 	XtSetArg(args[ac], XmNitemCount, (XtPointer)&item_count);
 	ac++;
 	XtGetValues(list_filelist, args, ac);
+	// check to see if anything has changed
+	bool update_filelist = false;
 	if (item_count != numfiles)
 		update_filelist = true;
 
@@ -828,10 +800,21 @@ void do_build_filelist() {
 		update_filelist = true;
 	}
 
+	int verbose = 0;
+	char *lockedstr = "<Locked>";
+	char *unlockedstr = "        ";
+
 	/* check for change in lock status or esf status */
 	for (int i = 0; i < numfiles; i++) {
 		/* check for locks */
 		// int lock_status =
+		bool locked = false;
+		int lock_purpose = MBP_LOCK_NONE;
+		mb_path lock_program;
+		mb_path lock_user;
+		mb_path lock_cpu;
+		char lock_date[25];
+		int lock_error = MB_ERROR_NO_ERROR;
 		mb_pr_lockinfo(verbose, filepaths[i], &locked, &lock_purpose, lock_program, lock_user, lock_cpu, lock_date,
 		                             &lock_error);
 		if (locked != filelocks[i]) {
@@ -840,17 +823,24 @@ void do_build_filelist() {
 		}
 
 		/* check for edit save file */
+		char save_file[MB_PATH_MAXLINE];
 		sprintf(save_file, "%s.esf", filepaths[i]);
-		fstat = stat(save_file, &file_status);
-		if (fstat == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR)
-			esf_exists = true;
-		else
-			esf_exists = false;
+		struct stat file_status;
+		const int fstat = stat(save_file, &file_status);
+		const bool esf_exists = fstat == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR;
 		if (esf_exists != fileesfs[i]) {
 			fileesfs[i] = esf_exists;
 			update_filelist = true;
 		}
 	}
+
+	char value_text[MB_PATH_MAXLINE];
+	XmString *xstr;
+	char *lockstrptr;
+	char *loadedstr = "<loaded>";
+	char *esfstrptr;
+	char *esfyesstr = "<esf>";
+	char *esfnostr = "     ";
 
 	/* only rebuild the filelist if necessary */
 	if (update_filelist) {
