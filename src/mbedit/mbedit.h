@@ -169,7 +169,7 @@ void do_check_median_xtrack(Widget w, XtPointer client_data, XtPointer call_data
 void do_check_median_ltrack(Widget w, XtPointer client_data, XtPointer call_data);
 int do_wait_until_viewed(XtAppContext app);
 int do_mbedit_settimer(void);
-int do_mbedit_workfunction(XtPointer client_data);
+// int do_mbedit_workfunction(XtPointer client_data);
 int do_message_on(char *message);
 int do_message_off(void);
 int do_error_dialog(char *s1, char *s2, char *s3);
