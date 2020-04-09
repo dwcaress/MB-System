@@ -26,7 +26,7 @@
 #define HAVE_LIBM 1
 
 /* Have malloc.h */
-/* #undef HAVE_MALLOC_H */
+#define HAVE_MALLOC_H 1
 
 /* Define to 1 if you have the <memory.h> header file. */
 #define HAVE_MEMORY_H 1
@@ -38,7 +38,7 @@
 #define HAVE_RPC_TYPES_H 1
 
 /* Define to 1 if you have the `sincos' function. */
-/* #undef HAVE_SINCOS */
+#define HAVE_SINCOS 1
 
 /* Define to 1 if you have the <stdint.h> header file. */
 #define HAVE_STDINT_H 1
@@ -74,10 +74,10 @@
 #define MBSYSTEM_CONFIG_DEFINED 1
 
 /* Set MBSYSTEM_INSTALL_PREFIX define in mb_config.h */
-#define MBSYSTEM_INSTALL_PREFIX "/usr/local"
+#define MBSYSTEM_INSTALL_PREFIX "NONE"
 
 /* Set MBSYSTEM_OTPS_LOCATION define in mb_config.h */
-#define MBSYSTEM_OTPS_LOCATION "/usr/local/opt/otps"
+#define MBSYSTEM_OTPS_LOCATION "/usr/local/OTPS2"
 
 /* Build libmbtnav */
 #define MBTNAV_ENABLED 1
@@ -86,7 +86,10 @@
 #define MBTRN_ENABLED 1
 
 /* Build graphical tools */
-#define MBUTILS_ENABLED 1
+/* #undef MBUTILS_ENABLED */
+
+/* Define to 1 if your C compiler doesn't accept -c and -o together. */
+/* #undef NO_MINUS_C_MINUS_O */
 
 /* Name of package */
 #define PACKAGE "mbsystem"
@@ -116,7 +119,7 @@
 #define STDC_HEADERS 1
 
 /* Build unit tests */
-#define TEST_ENABLED 1
+/* #undef TEST_ENABLED */
 
 /* Version number of package */
 #define VERSION "5.7.6beta33"
