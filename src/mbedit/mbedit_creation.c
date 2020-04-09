@@ -1,13 +1,3 @@
-#ifndef SANS
-#define SANS "helvetica"
-#endif
-#ifndef SERIF
-#define SERIF "times"
-#endif
-#ifndef MONO
-#define MONO "courier"
-#endif
-
 #include <Xm/Xm.h>
 #include <Xm/MainW.h>
 #include <Xm/DialogS.h>
@@ -48,12 +38,19 @@
 
 #include "mbedit_creation.h"
 
+#ifndef SANS
+#define SANS "helvetica"
+#endif
+#ifndef SERIF
+#define SERIF "times"
+#endif
+#ifndef MONO
+#define MONO "courier"
+#endif
+
 // Convenience functions from utilities file.
 extern void RegisterBxConverters(XtAppContext);
 extern XtPointer BX_CONVERT(Widget, char *, char *, int, Boolean *);
-extern XtPointer BX_SINGLE(float);
-extern Pixmap XPM_PIXMAP(Widget, char **);
-extern void BX_SET_BACKGROUND_COLOR(Widget, ArgList, Cardinal *, Pixel);
 
 // Declarations for callbacks and handlers.
 extern void do_quit(Widget, XtPointer, XtPointer);
@@ -108,99 +105,12 @@ extern void do_mode_restore(Widget, XtPointer, XtPointer);
 extern void do_mode_grab(Widget, XtPointer, XtPointer);
 extern void do_mode_info(Widget, XtPointer, XtPointer);
 
-/**
- * Create the window_mbedit hierarchy of widgets.
- */
+// Create the window_mbedit hierarchy of widgets.
 Widget Createwindow_mbedit(Widget parent) {
-	Cardinal ac = 0;
 	Arg args[256];
 	Boolean argok = False;
-	Widget setting_output_label_filelist;
-	Widget pushButton_filelist_dismiss;
-	Widget scrolledWindow_filelist;
-	Widget dialogShell_filters;
-	Widget bulletinBoard_filters;
-	Widget scrolledWindow_filters;
-	Widget bulletinBoard_scrollfilters;
-	Widget separator6;
-	Widget separator5;
-	Widget separator4;
-	Widget separator3;
-	Widget pushButton_filters_reset;
-	Widget pushButton_filters_apply;
-	Widget pushButton_filters_dismiss;
-	Widget dialogShell_annotation;
-	Widget bulletinBoard_annotation;
-	Widget pushButton_annotation_dismiss;
-	Widget dialogShell_buffer;
-	Widget bulletinBoard_buffer;
-	Widget pushButton_buffer_dismiss;
-	Widget xmDialogShell_error;
-	Widget pushButton_error;
-	Widget xmDialogShell_editsave;
-	Widget label_editsave_one;
-	Widget label_editsave_two;
-	Widget pushButton_editsave_no;
-	Widget pushButton_editsave_yes;
-	Widget xmDialogShell_message;
-	Widget label_pleasewait;
-	Widget xmDialogShell_about;
-	Widget bulletinBoard_about;
-	Widget label_about_create1;
-	Widget separator1;
-	Widget pushButton_about_dismiss;
-	Widget label_about_create;
-	Widget label_about_lamont;
-	Widget label_about_columbia;
-	Widget label_about_mbsystem;
-	Widget label_about_mbpub;
-	Widget label_about_component;
-	Widget label_about_for;
-	Widget separator;
-	Widget label_about_function;
-	Widget label_about_mbedit;
-	Widget xmDialogShell_goto;
-	Widget bulletinBoard_goto;
-	Widget button_goto_cancel;
-	Widget button_goto_apply;
-	Widget textfield_second_label;
-	Widget textfield_minute_label;
-	Widget textfield_hour_label;
-	Widget textfield_day_label;
-	Widget textfield_month_label;
-	Widget textfield_year_label;
-	Widget xmDialogShell_file;
-	Widget bulletinBoard_file;
-	Widget mbedit_bboard;
-	Widget controls_mbedit;
-	Widget menuBar_file;
-	Widget cascadeButton_file;
-	Widget pulldownMenu_file;
-	Widget separator10;
-	Widget pushButton_filelist;
-	Widget pushButton_flag_view;
-	Widget menuBar_view;
-	Widget cascadeButton_view;
-	Widget pulldownMenu_view;
-	Widget separator2;
-	Widget separator8;
-	Widget separator9;
-	Widget pushButton_unflag_all;
-	Widget pushButton_unflag_view;
-	Widget menuBar_controls;
-	Widget cascadeButton_controls;
-	Widget pulldownMenu_controls;
-	Widget pushButton_goto;
-	Widget pushButton_buffer;
-	Widget pushButton_annotation;
-	Widget pushButton_filters;
-	Widget separator7;
-	Widget pushButton_about;
-	Widget pushButton_quit;
 
-	/**
-	 * Register the converters for the widgets.
-	 */
+	// Register the converters for the widgets.
 	RegisterBxConverters(XtWidgetToApplicationContext(parent));
 	XtInitializeWidgetClass((WidgetClass)xmMainWindowWidgetClass);
 	XtInitializeWidgetClass((WidgetClass)xmDialogShellWidgetClass);
@@ -223,7 +133,7 @@ Widget Createwindow_mbedit(Widget parent) {
 	XtInitializeWidgetClass((WidgetClass)xmRowColumnWidgetClass);
 	XtInitializeWidgetClass((WidgetClass)xmDrawingAreaWidgetClass);
 
-	ac = 0;
+	Cardinal ac = 0;
 	XtSetArg(args[ac], XmNx, 114);
 	ac++;
 	XtSetArg(args[ac], XmNy, 631);
@@ -247,7 +157,7 @@ Widget Createwindow_mbedit(Widget parent) {
 	ac++;
 	XtSetArg(args[ac], XmNheight, 663);
 	ac++;
-	mbedit_bboard = XmCreateBulletinBoard(window_mbedit, (char *)"mbedit_bboard", args, ac);
+	Widget mbedit_bboard = XmCreateBulletinBoard(window_mbedit, (char *)"mbedit_bboard", args, ac);
 	XtManageChild(mbedit_bboard);
 
 	ac = 0;
@@ -265,7 +175,7 @@ Widget Createwindow_mbedit(Widget parent) {
 	ac++;
 	XtSetArg(args[ac], XmNheight, 154);
 	ac++;
-	controls_mbedit = XmCreateBulletinBoard(mbedit_bboard, (char *)"controls_mbedit", args, ac);
+	Widget controls_mbedit = XmCreateBulletinBoard(mbedit_bboard, (char *)"controls_mbedit", args, ac);
 	XtManageChild(controls_mbedit);
 
 	ac = 0;
@@ -279,10 +189,11 @@ Widget Createwindow_mbedit(Widget parent) {
 	ac++;
 	XtSetArg(args[ac], XmNheight, 34);
 	ac++;
-	menuBar_file = XmCreateMenuBar(controls_mbedit, (char *)"menuBar_file", args, ac);
+	Widget menuBar_file = XmCreateMenuBar(controls_mbedit, (char *)"menuBar_file", args, ac);
 	XtManageChild(menuBar_file);
 
 	ac = 0;
+	Widget cascadeButton_file;
 	{
 		XmString tmp0 = (XmString)BX_CONVERT(menuBar_file, (char *)"File", XmRXmString, 0, &argok);
 		XtSetArg(args[ac], XmNlabelString, tmp0);
@@ -303,7 +214,7 @@ Widget Createwindow_mbedit(Widget parent) {
 		cascadeButton_file = XmCreateCascadeButton(menuBar_file, (char *)"cascadeButton_file", args, ac);
 		XtManageChild(cascadeButton_file);
 
-		XmStringFree((XmString)tmp0);
+		XmStringFree(tmp0);
 	}
 
 	ac = 0;
@@ -315,7 +226,7 @@ Widget Createwindow_mbedit(Widget parent) {
 	ac++;
 	XtSetArg(args[ac], XmNheight, 54);
 	ac++;
-	pulldownMenu_file = XmCreatePulldownMenu(XtParent(cascadeButton_file), (char *)"pulldownMenu_file", args, ac);
+	Widget pulldownMenu_file = XmCreatePulldownMenu(XtParent(cascadeButton_file), (char *)"pulldownMenu_file", args, ac);
 
 	ac = 0;
 	{
@@ -331,16 +242,17 @@ Widget Createwindow_mbedit(Widget parent) {
 		pushButton_file = XmCreatePushButton(pulldownMenu_file, (char *)"pushButton_file", args, ac);
 		XtManageChild(pushButton_file);
 
-		XmStringFree((XmString)tmp0);
+		XmStringFree(tmp0);
 	}
 
 	XtAddCallback(pushButton_file, XmNactivateCallback, BxManageCB, (XtPointer) "bulletinBoard_file");
 
 	ac = 0;
-	separator10 = XmCreateSeparator(pulldownMenu_file, (char *)"separator10", args, ac);
+	Widget separator10 = XmCreateSeparator(pulldownMenu_file, (char *)"separator10", args, ac);
 	XtManageChild(separator10);
 
 	ac = 0;
+	Widget pushButton_filelist;
 	{
 		XmString tmp0 = (XmString)BX_CONVERT(pulldownMenu_file, (char *)"File Selection List", XmRXmString, 0, &argok);
 		XtSetArg(args[ac], XmNlabelString, tmp0);
@@ -354,7 +266,7 @@ Widget Createwindow_mbedit(Widget parent) {
 		pushButton_filelist = XmCreatePushButton(pulldownMenu_file, (char *)"pushButton_filelist", args, ac);
 		XtManageChild(pushButton_filelist);
 
-		XmStringFree((XmString)tmp0);
+		XmStringFree(tmp0);
 	}
 
 	Widget form_filelist;
@@ -386,7 +298,7 @@ Widget Createwindow_mbedit(Widget parent) {
 		pushButton_end = XmCreatePushButton(controls_mbedit, (char *)"pushButton_end", args, ac);
 		XtManageChild(pushButton_end);
 
-		XmStringFree((XmString)tmp0);
+		XmStringFree(tmp0);
 	}
 
 	XtAddCallback(pushButton_end, XmNactivateCallback, do_end, (XtPointer)0);
@@ -412,7 +324,7 @@ Widget Createwindow_mbedit(Widget parent) {
 		pushButton_start = XmCreatePushButton(controls_mbedit, (char *)"pushButton_start", args, ac);
 		XtManageChild(pushButton_start);
 
-		XmStringFree((XmString)tmp0);
+		XmStringFree(tmp0);
 	}
 
 	XtAddCallback(pushButton_start, XmNactivateCallback, do_start, (XtPointer)0);
@@ -435,13 +347,13 @@ Widget Createwindow_mbedit(Widget parent) {
 		         BX_CONVERT(controls_mbedit, (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
 		if (argok)
 			ac++;
-		pushButton_flag_view = XmCreatePushButton(controls_mbedit, (char *)"pushButton_flag_view", args, ac);
+		Widget pushButton_flag_view = XmCreatePushButton(controls_mbedit, (char *)"pushButton_flag_view", args, ac);
 		XtManageChild(pushButton_flag_view);
+		XtAddCallback(pushButton_flag_view, XmNactivateCallback, do_flag_view, (XtPointer)0);
 
-		XmStringFree((XmString)tmp0);
+		XmStringFree(tmp0);
 	}
 
-	XtAddCallback(pushButton_flag_view, XmNactivateCallback, do_flag_view, (XtPointer)0);
 
 	ac = 0;
 	XtSetArg(args[ac], XmNpacking, XmPACK_TIGHT);
@@ -454,10 +366,11 @@ Widget Createwindow_mbedit(Widget parent) {
 	ac++;
 	XtSetArg(args[ac], XmNheight, 34);
 	ac++;
-	menuBar_view = XmCreateMenuBar(controls_mbedit, (char *)"menuBar_view", args, ac);
+	Widget menuBar_view = XmCreateMenuBar(controls_mbedit, (char *)"menuBar_view", args, ac);
 	XtManageChild(menuBar_view);
 
 	ac = 0;
+	Widget cascadeButton_view;
 	{
 		XmString tmp0 = (XmString)BX_CONVERT(menuBar_view, (char *)"View", XmRXmString, 0, &argok);
 		XtSetArg(args[ac], XmNlabelString, tmp0);
@@ -478,7 +391,7 @@ Widget Createwindow_mbedit(Widget parent) {
 		cascadeButton_view = XmCreateCascadeButton(menuBar_view, (char *)"cascadeButton_view", args, ac);
 		XtManageChild(cascadeButton_view);
 
-		XmStringFree((XmString)tmp0);
+		XmStringFree(tmp0);
 	}
 
 	ac = 0;
@@ -490,7 +403,7 @@ Widget Createwindow_mbedit(Widget parent) {
 	ac++;
 	XtSetArg(args[ac], XmNheight, 490);
 	ac++;
-	pulldownMenu_view = XmCreatePulldownMenu(XtParent(cascadeButton_view), (char *)"pulldownMenu_view", args, ac);
+	Widget pulldownMenu_view = XmCreatePulldownMenu(XtParent(cascadeButton_view), (char *)"pulldownMenu_view", args, ac);
 
 	ac = 0;
 	{
@@ -506,7 +419,7 @@ Widget Createwindow_mbedit(Widget parent) {
 		toggleButton_view_waterfall = XmCreateToggleButton(pulldownMenu_view, (char *)"toggleButton_view_waterfall", args, ac);
 		XtManageChild(toggleButton_view_waterfall);
 
-		XmStringFree((XmString)tmp0);
+		XmStringFree(tmp0);
 	}
 
 	XtAddCallback(toggleButton_view_waterfall, XmNvalueChangedCallback, do_view_mode, (XtPointer)0);
@@ -525,7 +438,7 @@ Widget Createwindow_mbedit(Widget parent) {
 		toggleButton_view_alongtrack = XmCreateToggleButton(pulldownMenu_view, (char *)"toggleButton_view_alongtrack", args, ac);
 		XtManageChild(toggleButton_view_alongtrack);
 
-		XmStringFree((XmString)tmp0);
+		XmStringFree(tmp0);
 	}
 
 	XtAddCallback(toggleButton_view_alongtrack, XmNvalueChangedCallback, do_view_mode, (XtPointer)0);
@@ -545,13 +458,13 @@ Widget Createwindow_mbedit(Widget parent) {
 		    XmCreateToggleButton(pulldownMenu_view, (char *)"toggleButton_view_acrosstrack", args, ac);
 		XtManageChild(toggleButton_view_acrosstrack);
 
-		XmStringFree((XmString)tmp0);
+		XmStringFree(tmp0);
 	}
 
 	XtAddCallback(toggleButton_view_acrosstrack, XmNvalueChangedCallback, do_view_mode, (XtPointer)0);
 
 	ac = 0;
-	separator2 = XmCreateSeparator(pulldownMenu_view, (char *)"separator2", args, ac);
+	Widget separator2 = XmCreateSeparator(pulldownMenu_view, (char *)"separator2", args, ac);
 	XtManageChild(separator2);
 
 	ac = 0;
@@ -570,7 +483,7 @@ Widget Createwindow_mbedit(Widget parent) {
 		toggleButton_show_flaggedsoundings_on = XmCreateToggleButton(pulldownMenu_view, (char *)"toggleButton_show_flaggedsoundings_on", args, ac);
 		XtManageChild(toggleButton_show_flaggedsoundings_on);
 
-		XmStringFree((XmString)tmp0);
+		XmStringFree(tmp0);
 	}
 
 	XtAddCallback(toggleButton_show_flaggedsoundings_on, XmNvalueChangedCallback, do_show_flaggedsoundings, (XtPointer)0);
@@ -591,13 +504,13 @@ Widget Createwindow_mbedit(Widget parent) {
 		toggleButton_show_flaggedprofiles_on = XmCreateToggleButton(pulldownMenu_view, (char *)"toggleButton_show_flaggedprofiles_on", args, ac);
 		XtManageChild(toggleButton_show_flaggedprofiles_on);
 
-		XmStringFree((XmString)tmp0);
+		XmStringFree(tmp0);
 	}
 
 	XtAddCallback(toggleButton_show_flaggedprofiles_on, XmNvalueChangedCallback, do_show_flaggedprofiles, (XtPointer)0);
 
 	ac = 0;
-	separator8 = XmCreateSeparator(pulldownMenu_view, (char *)"separator8", args, ac);
+	Widget separator8 = XmCreateSeparator(pulldownMenu_view, (char *)"separator8", args, ac);
 	XtManageChild(separator8);
 
 	ac = 0;
@@ -616,7 +529,7 @@ Widget Createwindow_mbedit(Widget parent) {
 		toggleButton_show_flags = XmCreateToggleButton(pulldownMenu_view, (char *)"toggleButton_show_flags", args, ac);
 		XtManageChild(toggleButton_show_flags);
 
-		XmStringFree((XmString)tmp0);
+		XmStringFree(tmp0);
 	}
 
 	XtAddCallback(toggleButton_show_flags, XmNvalueChangedCallback, do_show_flags, (XtPointer)0);
@@ -637,7 +550,7 @@ Widget Createwindow_mbedit(Widget parent) {
 		toggleButton_show_detects = XmCreateToggleButton(pulldownMenu_view, (char *)"toggleButton_show_detects", args, ac);
 		XtManageChild(toggleButton_show_detects);
 
-		XmStringFree((XmString)tmp0);
+		XmStringFree(tmp0);
 	}
 
 	XtAddCallback(toggleButton_show_detects, XmNvalueChangedCallback, do_show_detects, (XtPointer)0);
@@ -658,13 +571,13 @@ Widget Createwindow_mbedit(Widget parent) {
 		toggleButton_show_pulsetypes = XmCreateToggleButton(pulldownMenu_view, (char *)"toggleButton_show_pulsetypes", args, ac);
 		XtManageChild(toggleButton_show_pulsetypes);
 
-		XmStringFree((XmString)tmp0);
+		XmStringFree(tmp0);
 	}
 
 	XtAddCallback(toggleButton_show_pulsetypes, XmNvalueChangedCallback, do_show_pulsetypes, (XtPointer)0);
 
 	ac = 0;
-	separator9 = XmCreateSeparator(pulldownMenu_view, (char *)"separator9", args, ac);
+	Widget separator9 = XmCreateSeparator(pulldownMenu_view, (char *)"separator9", args, ac);
 	XtManageChild(separator9);
 
 	ac = 0;
@@ -683,7 +596,7 @@ Widget Createwindow_mbedit(Widget parent) {
 		toggleButton_show_wideplot = XmCreateToggleButton(pulldownMenu_view, (char *)"toggleButton_show_wideplot", args, ac);
 		XtManageChild(toggleButton_show_wideplot);
 
-		XmStringFree((XmString)tmp0);
+		XmStringFree(tmp0);
 	}
 
 	XtAddCallback(toggleButton_show_wideplot, XmNvalueChangedCallback, do_show_time, (XtPointer)0);
@@ -704,7 +617,7 @@ Widget Createwindow_mbedit(Widget parent) {
 		toggleButton_show_time = XmCreateToggleButton(pulldownMenu_view, (char *)"toggleButton_show_time", args, ac);
 		XtManageChild(toggleButton_show_time);
 
-		XmStringFree((XmString)tmp0);
+		XmStringFree(tmp0);
 	}
 
 	XtAddCallback(toggleButton_show_time, XmNvalueChangedCallback, do_show_time, (XtPointer)0);
@@ -723,7 +636,7 @@ Widget Createwindow_mbedit(Widget parent) {
 		toggleButton_show_interval = XmCreateToggleButton(pulldownMenu_view, (char *)"toggleButton_show_interval", args, ac);
 		XtManageChild(toggleButton_show_interval);
 
-		XmStringFree((XmString)tmp0);
+		XmStringFree(tmp0);
 	}
 
 	XtAddCallback(toggleButton_show_interval, XmNvalueChangedCallback, do_show_time, (XtPointer)0);
@@ -742,7 +655,7 @@ Widget Createwindow_mbedit(Widget parent) {
 		toggleButton_show_lon = XmCreateToggleButton(pulldownMenu_view, (char *)"toggleButton_show_lon", args, ac);
 		XtManageChild(toggleButton_show_lon);
 
-		XmStringFree((XmString)tmp0);
+		XmStringFree(tmp0);
 	}
 
 	XtAddCallback(toggleButton_show_lon, XmNvalueChangedCallback, do_show_time, (XtPointer)0);
@@ -761,7 +674,7 @@ Widget Createwindow_mbedit(Widget parent) {
 		toggleButton_show_latitude = XmCreateToggleButton(pulldownMenu_view, (char *)"toggleButton_show_latitude", args, ac);
 		XtManageChild(toggleButton_show_latitude);
 
-		XmStringFree((XmString)tmp0);
+		XmStringFree(tmp0);
 	}
 
 	XtAddCallback(toggleButton_show_latitude, XmNvalueChangedCallback, do_show_time, (XtPointer)0);
@@ -782,7 +695,7 @@ Widget Createwindow_mbedit(Widget parent) {
 		toggleButton_show_heading = XmCreateToggleButton(pulldownMenu_view, (char *)"toggleButton_show_heading", args, ac);
 		XtManageChild(toggleButton_show_heading);
 
-		XmStringFree((XmString)tmp0);
+		XmStringFree(tmp0);
 	}
 
 	XtAddCallback(toggleButton_show_heading, XmNvalueChangedCallback, do_show_time, (XtPointer)0);
@@ -801,7 +714,7 @@ Widget Createwindow_mbedit(Widget parent) {
 		toggleButton_show_speed = XmCreateToggleButton(pulldownMenu_view, (char *)"toggleButton_show_speed", args, ac);
 		XtManageChild(toggleButton_show_speed);
 
-		XmStringFree((XmString)tmp0);
+		XmStringFree(tmp0);
 	}
 
 	XtAddCallback(toggleButton_show_speed, XmNvalueChangedCallback, do_show_time, (XtPointer)0);
@@ -820,7 +733,7 @@ Widget Createwindow_mbedit(Widget parent) {
 		toggleButton_show_depth = XmCreateToggleButton(pulldownMenu_view, (char *)"toggleButton_show_depth", args, ac);
 		XtManageChild(toggleButton_show_depth);
 
-		XmStringFree((XmString)tmp0);
+		XmStringFree(tmp0);
 	}
 
 	XtAddCallback(toggleButton_show_depth, XmNvalueChangedCallback, do_show_time, (XtPointer)0);
@@ -839,7 +752,7 @@ Widget Createwindow_mbedit(Widget parent) {
 		toggleButton_show_altitude = XmCreateToggleButton(pulldownMenu_view, (char *)"toggleButton_show_altitude", args, ac);
 		XtManageChild(toggleButton_show_altitude);
 
-		XmStringFree((XmString)tmp0);
+		XmStringFree(tmp0);
 	}
 
 	XtAddCallback(toggleButton_show_altitude, XmNvalueChangedCallback, do_show_time, (XtPointer)0);
@@ -858,7 +771,7 @@ Widget Createwindow_mbedit(Widget parent) {
 		toggleButton_show_sonardepth = XmCreateToggleButton(pulldownMenu_view, (char *)"toggleButton_show_sonardepth", args, ac);
 		XtManageChild(toggleButton_show_sonardepth);
 
-		XmStringFree((XmString)tmp0);
+		XmStringFree(tmp0);
 	}
 
 	XtAddCallback(toggleButton_show_sonardepth, XmNvalueChangedCallback, do_show_time, (XtPointer)0);
@@ -877,7 +790,7 @@ Widget Createwindow_mbedit(Widget parent) {
 		toggleButton_show_roll = XmCreateToggleButton(pulldownMenu_view, (char *)"toggleButton_show_roll", args, ac);
 		XtManageChild(toggleButton_show_roll);
 
-		XmStringFree((XmString)tmp0);
+		XmStringFree(tmp0);
 	}
 
 	XtAddCallback(toggleButton_show_roll, XmNvalueChangedCallback, do_show_time, (XtPointer)0);
@@ -896,7 +809,7 @@ Widget Createwindow_mbedit(Widget parent) {
 		toggleButton_show_pitch = XmCreateToggleButton(pulldownMenu_view, (char *)"toggleButton_show_pitch", args, ac);
 		XtManageChild(toggleButton_show_pitch);
 
-		XmStringFree((XmString)tmp0);
+		XmStringFree(tmp0);
 	}
 
 	XtAddCallback(toggleButton_show_pitch, XmNvalueChangedCallback, do_show_time, (XtPointer)0);
@@ -915,7 +828,7 @@ Widget Createwindow_mbedit(Widget parent) {
 		toggleButton_show_heave = XmCreateToggleButton(pulldownMenu_view, (char *)"toggleButton_show_heave", args, ac);
 		XtManageChild(toggleButton_show_heave);
 
-		XmStringFree((XmString)tmp0);
+		XmStringFree(tmp0);
 	}
 
 	XtAddCallback(toggleButton_show_heave, XmNvalueChangedCallback, do_show_time, (XtPointer)0);
@@ -943,13 +856,12 @@ Widget Createwindow_mbedit(Widget parent) {
 		         BX_CONVERT(controls_mbedit, (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
 		if (argok)
 			ac++;
-		pushButton_unflag_all = XmCreatePushButton(controls_mbedit, (char *)"pushButton_unflag_all", args, ac);
+		Widget pushButton_unflag_all = XmCreatePushButton(controls_mbedit, (char *)"pushButton_unflag_all", args, ac);
 		XtManageChild(pushButton_unflag_all);
+		XtAddCallback(pushButton_unflag_all, XmNactivateCallback, do_unflag_all, (XtPointer)0);
 
-		XmStringFree((XmString)tmp0);
+		XmStringFree(tmp0);
 	}
-
-	XtAddCallback(pushButton_unflag_all, XmNactivateCallback, do_unflag_all, (XtPointer)0);
 
 	ac = 0;
 	{
@@ -969,13 +881,12 @@ Widget Createwindow_mbedit(Widget parent) {
 		         BX_CONVERT(controls_mbedit, (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
 		if (argok)
 			ac++;
-		pushButton_unflag_view = XmCreatePushButton(controls_mbedit, (char *)"pushButton_unflag_view", args, ac);
+		Widget pushButton_unflag_view = XmCreatePushButton(controls_mbedit, (char *)"pushButton_unflag_view", args, ac);
 		XtManageChild(pushButton_unflag_view);
+		XtAddCallback(pushButton_unflag_view, XmNactivateCallback, do_unflag_view, (XtPointer)0);
 
-		XmStringFree((XmString)tmp0);
+		XmStringFree(tmp0);
 	}
-
-	XtAddCallback(pushButton_unflag_view, XmNactivateCallback, do_unflag_view, (XtPointer)0);
 
 	ac = 0;
 	XtSetArg(args[ac], XmNx, 170);
@@ -986,10 +897,11 @@ Widget Createwindow_mbedit(Widget parent) {
 	ac++;
 	XtSetArg(args[ac], XmNheight, 34);
 	ac++;
-	menuBar_controls = XmCreateMenuBar(controls_mbedit, (char *)"menuBar_controls", args, ac);
+	Widget menuBar_controls = XmCreateMenuBar(controls_mbedit, (char *)"menuBar_controls", args, ac);
 	XtManageChild(menuBar_controls);
 
 	ac = 0;
+	Widget cascadeButton_controls;
 	{
 		XmString tmp0 = (XmString)BX_CONVERT(menuBar_controls, (char *)"Controls", XmRXmString, 0, &argok);
 		XtSetArg(args[ac], XmNlabelString, tmp0);
@@ -1011,7 +923,7 @@ Widget Createwindow_mbedit(Widget parent) {
 		cascadeButton_controls = XmCreateCascadeButton(menuBar_controls, (char *)"cascadeButton_controls", args, ac);
 		XtManageChild(cascadeButton_controls);
 
-		XmStringFree((XmString)tmp0);
+		XmStringFree(tmp0);
 	}
 
 	ac = 0;
@@ -1023,7 +935,7 @@ Widget Createwindow_mbedit(Widget parent) {
 	ac++;
 	XtSetArg(args[ac], XmNheight, 150);
 	ac++;
-	pulldownMenu_controls = XmCreatePulldownMenu(XtParent(cascadeButton_controls), (char *)"pulldownMenu_controls", args, ac);
+	Widget pulldownMenu_controls = XmCreatePulldownMenu(XtParent(cascadeButton_controls), (char *)"pulldownMenu_controls", args, ac);
 
 	ac = 0;
 	{
@@ -1036,13 +948,12 @@ Widget Createwindow_mbedit(Widget parent) {
 		                    &argok));
 		if (argok)
 			ac++;
-		pushButton_goto = XmCreatePushButton(pulldownMenu_controls, (char *)"pushButton_goto", args, ac);
+		Widget pushButton_goto = XmCreatePushButton(pulldownMenu_controls, (char *)"pushButton_goto", args, ac);
 		XtManageChild(pushButton_goto);
+		XtAddCallback(pushButton_goto, XmNactivateCallback, BxManageCB, (XtPointer) "bulletinBoard_goto");
 
-		XmStringFree((XmString)tmp0);
+		XmStringFree(tmp0);
 	}
-
-	XtAddCallback(pushButton_goto, XmNactivateCallback, BxManageCB, (XtPointer) "bulletinBoard_goto");
 
 	ac = 0;
 	{
@@ -1055,15 +966,15 @@ Widget Createwindow_mbedit(Widget parent) {
 		                    &argok));
 		if (argok)
 			ac++;
-		pushButton_buffer = XmCreatePushButton(pulldownMenu_controls, (char *)"pushButton_buffer", args, ac);
+		Widget pushButton_buffer = XmCreatePushButton(pulldownMenu_controls, (char *)"pushButton_buffer", args, ac);
 		XtManageChild(pushButton_buffer);
+		XtAddCallback(pushButton_buffer, XmNactivateCallback, BxManageCB, (XtPointer) "bulletinBoard_buffer");
 
-		XmStringFree((XmString)tmp0);
+		XmStringFree(tmp0);
 	}
 
-	XtAddCallback(pushButton_buffer, XmNactivateCallback, BxManageCB, (XtPointer) "bulletinBoard_buffer");
-
 	ac = 0;
+	Widget bulletinBoard_annotation;  // WARNING: Used again way later.
 	{
 		XmString tmp0 = (XmString)BX_CONVERT(pulldownMenu_controls, (char *)"Annotation...", XmRXmString, 0, &argok);
 		XtSetArg(args[ac], XmNlabelString, tmp0);
@@ -1074,13 +985,12 @@ Widget Createwindow_mbedit(Widget parent) {
 		                    &argok));
 		if (argok)
 			ac++;
-		pushButton_annotation = XmCreatePushButton(pulldownMenu_controls, (char *)"pushButton_annotation", args, ac);
+		Widget pushButton_annotation = XmCreatePushButton(pulldownMenu_controls, (char *)"pushButton_annotation", args, ac);
 		XtManageChild(pushButton_annotation);
+		XtAddCallback(pushButton_annotation, XmNactivateCallback, BxManageCB, (XtPointer) "bulletinBoard_annotation");
 
-		XmStringFree((XmString)tmp0);
+		XmStringFree(tmp0);
 	}
-
-	XtAddCallback(pushButton_annotation, XmNactivateCallback, BxManageCB, (XtPointer) "bulletinBoard_annotation");
 
 	ac = 0;
 	{
@@ -1093,16 +1003,17 @@ Widget Createwindow_mbedit(Widget parent) {
 		                    &argok));
 		if (argok)
 			ac++;
-		pushButton_filters = XmCreatePushButton(pulldownMenu_controls, (char *)"pushButton_filters", args, ac);
+		Widget pushButton_filters =
+			XmCreatePushButton(pulldownMenu_controls, (char *)"pushButton_filters", args, ac);
 		XtManageChild(pushButton_filters);
+		XtAddCallback(pushButton_filters, XmNactivateCallback, BxManageCB, (XtPointer) "bulletinBoard_filters");
 
-		XmStringFree((XmString)tmp0);
+		XmStringFree(tmp0);
 	}
 
-	XtAddCallback(pushButton_filters, XmNactivateCallback, BxManageCB, (XtPointer) "bulletinBoard_filters");
 
 	ac = 0;
-	separator7 = XmCreateSeparator(pulldownMenu_controls, (char *)"separator7", args, ac);
+	Widget separator7 = XmCreateSeparator(pulldownMenu_controls, (char *)"separator7", args, ac);
 	XtManageChild(separator7);
 
 	ac = 0;
@@ -1121,7 +1032,7 @@ Widget Createwindow_mbedit(Widget parent) {
 		toggleButton_reverse_keys = XmCreateToggleButton(pulldownMenu_controls, (char *)"toggleButton_reverse_keys", args, ac);
 		XtManageChild(toggleButton_reverse_keys);
 
-		XmStringFree((XmString)tmp0);
+		XmStringFree(tmp0);
 	}
 
 	XtAddCallback(toggleButton_reverse_keys, XmNvalueChangedCallback, do_reverse_keys, (XtPointer)0);
@@ -1142,7 +1053,7 @@ Widget Createwindow_mbedit(Widget parent) {
 		toggleButton_reverse_mouse = XmCreateToggleButton(pulldownMenu_controls, (char *)"toggleButton_reverse_mouse", args, ac);
 		XtManageChild(toggleButton_reverse_mouse);
 
-		XmStringFree((XmString)tmp0);
+		XmStringFree(tmp0);
 	}
 
 	XtAddCallback(toggleButton_reverse_mouse, XmNvalueChangedCallback, do_reverse_mouse, (XtPointer)0);
@@ -1170,13 +1081,12 @@ Widget Createwindow_mbedit(Widget parent) {
 		         BX_CONVERT(controls_mbedit, (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
 		if (argok)
 			ac++;
-		pushButton_about = XmCreatePushButton(controls_mbedit, (char *)"pushButton_about", args, ac);
+		Widget pushButton_about = XmCreatePushButton(controls_mbedit, (char *)"pushButton_about", args, ac);
 		XtManageChild(pushButton_about);
+		XtAddCallback(pushButton_about, XmNactivateCallback, BxManageCB, (XtPointer) "bulletinBoard_about");
 
-		XmStringFree((XmString)tmp0);
+		XmStringFree(tmp0);
 	}
-
-	XtAddCallback(pushButton_about, XmNactivateCallback, BxManageCB, (XtPointer) "bulletinBoard_about");
 
 	ac = 0;
 	{
@@ -1199,7 +1109,7 @@ Widget Createwindow_mbedit(Widget parent) {
 		pushButton_next = XmCreatePushButton(controls_mbedit, (char *)"pushButton_next", args, ac);
 		XtManageChild(pushButton_next);
 
-		XmStringFree((XmString)tmp0);
+		XmStringFree(tmp0);
 	}
 
 	XtAddCallback(pushButton_next, XmNactivateCallback, do_next_buffer, (XtPointer)0);
@@ -1225,7 +1135,7 @@ Widget Createwindow_mbedit(Widget parent) {
 		pushButton_done = XmCreatePushButton(controls_mbedit, (char *)"pushButton_done", args, ac);
 		XtManageChild(pushButton_done);
 
-		XmStringFree((XmString)tmp0);
+		XmStringFree(tmp0);
 	}
 
 	XtAddCallback(pushButton_done, XmNactivateCallback, do_done, (XtPointer)0);
@@ -1251,7 +1161,7 @@ Widget Createwindow_mbedit(Widget parent) {
 		pushButton_forward = XmCreatePushButton(controls_mbedit, (char *)"pushButton_forward", args, ac);
 		XtManageChild(pushButton_forward);
 
-		XmStringFree((XmString)tmp0);
+		XmStringFree(tmp0);
 	}
 
 	XtAddCallback(pushButton_forward, XmNactivateCallback, do_forward, (XtPointer)0);
@@ -1277,7 +1187,7 @@ Widget Createwindow_mbedit(Widget parent) {
 		pushButton_reverse = XmCreatePushButton(controls_mbedit, (char *)"pushButton_reverse", args, ac);
 		XtManageChild(pushButton_reverse);
 
-		XmStringFree((XmString)tmp0);
+		XmStringFree(tmp0);
 	}
 
 	XtAddCallback(pushButton_reverse, XmNactivateCallback, do_reverse, (XtPointer)0);
@@ -1300,13 +1210,14 @@ Widget Createwindow_mbedit(Widget parent) {
 		         BX_CONVERT(controls_mbedit, (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
 		if (argok)
 			ac++;
-		pushButton_quit = XmCreatePushButton(controls_mbedit, (char *)"pushButton_quit", args, ac);
+		Widget pushButton_quit =
+			XmCreatePushButton(controls_mbedit, (char *)"pushButton_quit", args, ac);
 		XtManageChild(pushButton_quit);
+		XtAddCallback(pushButton_quit, XmNactivateCallback, do_quit, (XtPointer)0);
 
-		XmStringFree((XmString)tmp0);
+		XmStringFree(tmp0);
 	}
 
-	XtAddCallback(pushButton_quit, XmNactivateCallback, do_quit, (XtPointer)0);
 
 	ac = 0;
 	{
@@ -1329,7 +1240,7 @@ Widget Createwindow_mbedit(Widget parent) {
 		slider_scale_x_label = XmCreateLabel(controls_mbedit, (char *)"slider_scale_x_label", args, ac);
 		XtManageChild(slider_scale_x_label);
 
-		XmStringFree((XmString)tmp0);
+		XmStringFree(tmp0);
 	}
 
 	ac = 0;
@@ -1388,7 +1299,7 @@ Widget Createwindow_mbedit(Widget parent) {
 		slider_scale_x_max_label = XmCreateLabel(controls_mbedit, (char *)"slider_scale_x_max_label", args, ac);
 		XtManageChild(slider_scale_x_max_label);
 
-		XmStringFree((XmString)tmp0);
+		XmStringFree(tmp0);
 	}
 
 	ac = 0;
@@ -1412,7 +1323,7 @@ Widget Createwindow_mbedit(Widget parent) {
 		slider_scale_y_label = XmCreateLabel(controls_mbedit, (char *)"slider_scale_y_label", args, ac);
 		XtManageChild(slider_scale_y_label);
 
-		XmStringFree((XmString)tmp0);
+		XmStringFree(tmp0);
 	}
 
 	ac = 0;
@@ -1473,7 +1384,7 @@ Widget Createwindow_mbedit(Widget parent) {
 		slider_scale_y_max_label = XmCreateLabel(controls_mbedit, (char *)"slider_scale_y_max_label", args, ac);
 		XtManageChild(slider_scale_y_max_label);
 
-		XmStringFree((XmString)tmp0);
+		XmStringFree(tmp0);
 	}
 
 	ac = 0;
@@ -1497,7 +1408,7 @@ Widget Createwindow_mbedit(Widget parent) {
 		slider_number_pings_label = XmCreateLabel(controls_mbedit, (char *)"slider_number_pings_label", args, ac);
 		XtManageChild(slider_number_pings_label);
 
-		XmStringFree((XmString)tmp0);
+		XmStringFree(tmp0);
 	}
 
 	ac = 0;
@@ -1556,7 +1467,7 @@ Widget Createwindow_mbedit(Widget parent) {
 		slider_num_pings_max_label = XmCreateLabel(controls_mbedit, (char *)"slider_num_pings_max_label", args, ac);
 		XtManageChild(slider_num_pings_max_label);
 
-		XmStringFree((XmString)tmp0);
+		XmStringFree(tmp0);
 	}
 
 	ac = 0;
@@ -1580,7 +1491,7 @@ Widget Createwindow_mbedit(Widget parent) {
 		slider_number_step_label = XmCreateLabel(controls_mbedit, (char *)"slider_number_step_label", args, ac);
 		XtManageChild(slider_number_step_label);
 
-		XmStringFree((XmString)tmp0);
+		XmStringFree(tmp0);
 	}
 
 	ac = 0;
@@ -1639,7 +1550,7 @@ Widget Createwindow_mbedit(Widget parent) {
 		slider_number_max_step_label = XmCreateLabel(controls_mbedit, (char *)"slider_number_max_step_label", args, ac);
 		XtManageChild(slider_number_max_step_label);
 
-		XmStringFree((XmString)tmp0);
+		XmStringFree(tmp0);
 	}
 
 	ac = 0;
@@ -1663,7 +1574,7 @@ Widget Createwindow_mbedit(Widget parent) {
 		Widget setting_mode_label = XmCreateLabel(controls_mbedit, (char *)"setting_mode_label", args, ac);
 		XtManageChild(setting_mode_label);
 
-		XmStringFree((XmString)tmp0);
+		XmStringFree(tmp0);
 	}
 
 	ac = 0;
@@ -1705,7 +1616,7 @@ Widget Createwindow_mbedit(Widget parent) {
 		setting_mode_toggle_toggle = XmCreateToggleButton(setting_mode, (char *)"setting_mode_toggle_toggle", args, ac);
 		XtManageChild(setting_mode_toggle_toggle);
 
-		XmStringFree((XmString)tmp0);
+		XmStringFree(tmp0);
 	}
 
 	XtAddCallback(setting_mode_toggle_toggle, XmNvalueChangedCallback, do_mode_toggle, (XtPointer)0);
@@ -1723,7 +1634,7 @@ Widget Createwindow_mbedit(Widget parent) {
 		setting_mode_toggle_pick = XmCreateToggleButton(setting_mode, (char *)"setting_mode_toggle_pick", args, ac);
 		XtManageChild(setting_mode_toggle_pick);
 
-		XmStringFree((XmString)tmp0);
+		XmStringFree(tmp0);
 	}
 
 	XtAddCallback(setting_mode_toggle_pick, XmNvalueChangedCallback, do_mode_pick, (XtPointer)0);
@@ -1741,7 +1652,7 @@ Widget Createwindow_mbedit(Widget parent) {
 		setting_mode_toggle_erase = XmCreateToggleButton(setting_mode, (char *)"setting_mode_toggle_erase", args, ac);
 		XtManageChild(setting_mode_toggle_erase);
 
-		XmStringFree((XmString)tmp0);
+		XmStringFree(tmp0);
 	}
 
 	XtAddCallback(setting_mode_toggle_erase, XmNvalueChangedCallback, do_mode_erase, (XtPointer)0);
@@ -1759,7 +1670,7 @@ Widget Createwindow_mbedit(Widget parent) {
 		setting_mode_toggle_restore = XmCreateToggleButton(setting_mode, (char *)"setting_mode_toggle_restore", args, ac);
 		XtManageChild(setting_mode_toggle_restore);
 
-		XmStringFree((XmString)tmp0);
+		XmStringFree(tmp0);
 	}
 
 	XtAddCallback(setting_mode_toggle_restore, XmNvalueChangedCallback, do_mode_restore, (XtPointer)0);
@@ -1781,7 +1692,7 @@ Widget Createwindow_mbedit(Widget parent) {
 		setting_mode_toggle_grab = XmCreateToggleButton(setting_mode, (char *)"setting_mode_toggle_grab", args, ac);
 		XtManageChild(setting_mode_toggle_grab);
 
-		XmStringFree((XmString)tmp0);
+		XmStringFree(tmp0);
 	}
 
 	XtAddCallback(setting_mode_toggle_grab, XmNvalueChangedCallback, do_mode_grab, (XtPointer)0);
@@ -1803,7 +1714,7 @@ Widget Createwindow_mbedit(Widget parent) {
 		setting_mode_toggle_info = XmCreateToggleButton(setting_mode, (char *)"setting_mode_toggle_info", args, ac);
 		XtManageChild(setting_mode_toggle_info);
 
-		XmStringFree((XmString)tmp0);
+		XmStringFree(tmp0);
 	}
 
 	XtAddCallback(setting_mode_toggle_info, XmNvalueChangedCallback, do_mode_info, (XtPointer)0);
@@ -1838,7 +1749,7 @@ Widget Createwindow_mbedit(Widget parent) {
 	ac++;
 	XtSetArg(args[ac], XmNheight, 489);
 	ac++;
-	xmDialogShell_file = XmCreateDialogShell(window_mbedit, (char *)"xmDialogShell_file", args, ac);
+	Widget xmDialogShell_file = XmCreateDialogShell(window_mbedit, (char *)"xmDialogShell_file", args, ac);
 
 	ac = 0;
 	XtSetArg(args[ac], XmNautoUnmanage, False);
@@ -1853,7 +1764,7 @@ Widget Createwindow_mbedit(Widget parent) {
 	ac++;
 	XtSetArg(args[ac], XmNheight, 489);
 	ac++;
-	bulletinBoard_file = XtCreateWidget((char *)"bulletinBoard_file", xmBulletinBoardWidgetClass, xmDialogShell_file, args, ac);
+	Widget bulletinBoard_file = XtCreateWidget((char *)"bulletinBoard_file", xmBulletinBoardWidgetClass, xmDialogShell_file, args, ac);
 
 	ac = 0;
 	XtSetArg(args[ac], XmNmarginHeight, 0);
@@ -1894,7 +1805,7 @@ Widget Createwindow_mbedit(Widget parent) {
 		textfield_format_label = XmCreateLabel(bulletinBoard_file, (char *)"textfield_format_label", args, ac);
 		XtManageChild(textfield_format_label);
 
-		XmStringFree((XmString)tmp0);
+		XmStringFree(tmp0);
 	}
 
 	ac = 0;
@@ -1937,7 +1848,7 @@ Widget Createwindow_mbedit(Widget parent) {
 		setting_output_label = XmCreateLabel(bulletinBoard_file, (char *)"setting_output_label", args, ac);
 		XtManageChild(setting_output_label);
 
-		XmStringFree((XmString)tmp0);
+		XmStringFree(tmp0);
 	}
 
 	ac = 0;
@@ -1979,7 +1890,7 @@ Widget Createwindow_mbedit(Widget parent) {
 		setting_output_toggle_edit = XmCreateToggleButton(setting_output, (char *)"setting_output_toggle_edit", args, ac);
 		XtManageChild(setting_output_toggle_edit);
 
-		XmStringFree((XmString)tmp0);
+		XmStringFree(tmp0);
 	}
 
 	XtAddCallback(setting_output_toggle_edit, XmNvalueChangedCallback, do_output_edit, (XtPointer)0);
@@ -1997,7 +1908,7 @@ Widget Createwindow_mbedit(Widget parent) {
 		setting_output_toggle_browse = XmCreateToggleButton(setting_output, (char *)"setting_output_toggle_browse", args, ac);
 		XtManageChild(setting_output_toggle_browse);
 
-		XmStringFree((XmString)tmp0);
+		XmStringFree(tmp0);
 	}
 
 	XtAddCallback(setting_output_toggle_browse, XmNvalueChangedCallback, do_output_browse, (XtPointer)0);
@@ -2011,7 +1922,7 @@ Widget Createwindow_mbedit(Widget parent) {
 	ac++;
 	XtSetArg(args[ac], XmNheight, 346);
 	ac++;
-	xmDialogShell_goto = XmCreateDialogShell(window_mbedit, (char *)"xmDialogShell_goto", args, ac);
+	Widget xmDialogShell_goto = XmCreateDialogShell(window_mbedit, (char *)"xmDialogShell_goto", args, ac);
 
 	ac = 0;
 	XtSetArg(args[ac], XmNresizePolicy, XmRESIZE_GROW);
@@ -2024,7 +1935,7 @@ Widget Createwindow_mbedit(Widget parent) {
 	ac++;
 	XtSetArg(args[ac], XmNheight, 346);
 	ac++;
-	bulletinBoard_goto = XtCreateWidget((char *)"bulletinBoard_goto", xmBulletinBoardWidgetClass, xmDialogShell_goto, args, ac);
+	Widget bulletinBoard_goto = XtCreateWidget((char *)"bulletinBoard_goto", xmBulletinBoardWidgetClass, xmDialogShell_goto, args, ac);
 
 	ac = 0;
 	XtSetArg(args[ac], XmNvalue, "1");
@@ -2061,13 +1972,12 @@ Widget Createwindow_mbedit(Widget parent) {
 		    BX_CONVERT(bulletinBoard_goto, (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
 		if (argok)
 			ac++;
-		button_goto_cancel = XmCreatePushButton(bulletinBoard_goto, (char *)"button_goto_cancel", args, ac);
+		Widget button_goto_cancel = XmCreatePushButton(bulletinBoard_goto, (char *)"button_goto_cancel", args, ac);
 		XtManageChild(button_goto_cancel);
+		XtAddCallback(button_goto_cancel, XmNactivateCallback, BxUnmanageCB, (XtPointer) "bulletinBoard_goto");
 
-		XmStringFree((XmString)tmp0);
+		XmStringFree(tmp0);
 	}
-
-	XtAddCallback(button_goto_cancel, XmNactivateCallback, BxUnmanageCB, (XtPointer) "bulletinBoard_goto");
 
 	ac = 0;
 	{
@@ -2088,14 +1998,13 @@ Widget Createwindow_mbedit(Widget parent) {
 		    BX_CONVERT(bulletinBoard_goto, (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
 		if (argok)
 			ac++;
-		button_goto_apply = XmCreatePushButton(bulletinBoard_goto, (char *)"button_goto_apply", args, ac);
+		Widget button_goto_apply = XmCreatePushButton(bulletinBoard_goto, (char *)"button_goto_apply", args, ac);
 		XtManageChild(button_goto_apply);
+		XtAddCallback(button_goto_apply, XmNactivateCallback, do_goto_apply, (XtPointer)0);
+		XtAddCallback(button_goto_apply, XmNactivateCallback, BxUnmanageCB, (XtPointer) "bulletinBoard_goto");
 
-		XmStringFree((XmString)tmp0);
+		XmStringFree(tmp0);
 	}
-
-	XtAddCallback(button_goto_apply, XmNactivateCallback, do_goto_apply, (XtPointer)0);
-	XtAddCallback(button_goto_apply, XmNactivateCallback, BxUnmanageCB, (XtPointer) "bulletinBoard_goto");
 
 	ac = 0;
 	XtSetArg(args[ac], XmNvalue, "0");
@@ -2196,10 +2105,10 @@ Widget Createwindow_mbedit(Widget parent) {
 		    BX_CONVERT(bulletinBoard_goto, (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
 		if (argok)
 			ac++;
-		textfield_second_label = XmCreateLabel(bulletinBoard_goto, (char *)"textfield_second_label", args, ac);
+		Widget textfield_second_label = XmCreateLabel(bulletinBoard_goto, (char *)"textfield_second_label", args, ac);
 		XtManageChild(textfield_second_label);
 
-		XmStringFree((XmString)tmp0);
+		XmStringFree(tmp0);
 	}
 
 	ac = 0;
@@ -2221,10 +2130,10 @@ Widget Createwindow_mbedit(Widget parent) {
 		    BX_CONVERT(bulletinBoard_goto, (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
 		if (argok)
 			ac++;
-		textfield_minute_label = XmCreateLabel(bulletinBoard_goto, (char *)"textfield_minute_label", args, ac);
+		Widget textfield_minute_label = XmCreateLabel(bulletinBoard_goto, (char *)"textfield_minute_label", args, ac);
 		XtManageChild(textfield_minute_label);
 
-		XmStringFree((XmString)tmp0);
+		XmStringFree(tmp0);
 	}
 
 	ac = 0;
@@ -2246,10 +2155,10 @@ Widget Createwindow_mbedit(Widget parent) {
 		    BX_CONVERT(bulletinBoard_goto, (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
 		if (argok)
 			ac++;
-		textfield_hour_label = XmCreateLabel(bulletinBoard_goto, (char *)"textfield_hour_label", args, ac);
+		Widget textfield_hour_label = XmCreateLabel(bulletinBoard_goto, (char *)"textfield_hour_label", args, ac);
 		XtManageChild(textfield_hour_label);
 
-		XmStringFree((XmString)tmp0);
+		XmStringFree(tmp0);
 	}
 
 	ac = 0;
@@ -2273,10 +2182,10 @@ Widget Createwindow_mbedit(Widget parent) {
 		    BX_CONVERT(bulletinBoard_goto, (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
 		if (argok)
 			ac++;
-		textfield_day_label = XmCreateLabel(bulletinBoard_goto, (char *)"textfield_day_label", args, ac);
+		Widget textfield_day_label = XmCreateLabel(bulletinBoard_goto, (char *)"textfield_day_label", args, ac);
 		XtManageChild(textfield_day_label);
 
-		XmStringFree((XmString)tmp0);
+		XmStringFree(tmp0);
 	}
 
 	ac = 0;
@@ -2298,10 +2207,10 @@ Widget Createwindow_mbedit(Widget parent) {
 		    BX_CONVERT(bulletinBoard_goto, (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
 		if (argok)
 			ac++;
-		textfield_month_label = XmCreateLabel(bulletinBoard_goto, (char *)"textfield_month_label", args, ac);
+		Widget textfield_month_label = XmCreateLabel(bulletinBoard_goto, (char *)"textfield_month_label", args, ac);
 		XtManageChild(textfield_month_label);
 
-		XmStringFree((XmString)tmp0);
+		XmStringFree(tmp0);
 	}
 
 	ac = 0;
@@ -2323,10 +2232,10 @@ Widget Createwindow_mbedit(Widget parent) {
 		    BX_CONVERT(bulletinBoard_goto, (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
 		if (argok)
 			ac++;
-		textfield_year_label = XmCreateLabel(bulletinBoard_goto, (char *)"textfield_year_label", args, ac);
+		Widget textfield_year_label = XmCreateLabel(bulletinBoard_goto, (char *)"textfield_year_label", args, ac);
 		XtManageChild(textfield_year_label);
 
-		XmStringFree((XmString)tmp0);
+		XmStringFree(tmp0);
 	}
 
 	ac = 0;
@@ -2338,7 +2247,7 @@ Widget Createwindow_mbedit(Widget parent) {
 	ac++;
 	XtSetArg(args[ac], XmNheight, 501);
 	ac++;
-	xmDialogShell_about = XmCreateDialogShell(window_mbedit, (char *)"xmDialogShell_about", args, ac);
+	Widget xmDialogShell_about = XmCreateDialogShell(window_mbedit, (char *)"xmDialogShell_about", args, ac);
 
 	ac = 0;
 	XtSetArg(args[ac], XmNresizePolicy, XmRESIZE_GROW);
@@ -2351,10 +2260,11 @@ Widget Createwindow_mbedit(Widget parent) {
 	ac++;
 	XtSetArg(args[ac], XmNheight, 501);
 	ac++;
-	bulletinBoard_about =
+	Widget bulletinBoard_about =
 	    XtCreateWidget((char *)"bulletinBoard_about", xmBulletinBoardWidgetClass, xmDialogShell_about, args, ac);
 
 	ac = 0;
+	Widget label_about_create1;
 	{
 		XmString tmp0 =
 		    (XmString)BX_CONVERT(bulletinBoard_about, (char *)"David W. Caress    and    Dale N. Chayes", XmRXmString, 0, &argok);
@@ -2377,7 +2287,7 @@ Widget Createwindow_mbedit(Widget parent) {
 		label_about_create1 = XmCreateLabel(bulletinBoard_about, (char *)"label_about_create1", args, ac);
 		XtManageChild(label_about_create1);
 
-		XmStringFree((XmString)tmp0);
+		XmStringFree(tmp0);
 	}
 
 	ac = 0;
@@ -2389,7 +2299,7 @@ Widget Createwindow_mbedit(Widget parent) {
 	ac++;
 	XtSetArg(args[ac], XmNheight, 20);
 	ac++;
-	separator1 = XmCreateSeparator(bulletinBoard_about, (char *)"separator1", args, ac);
+	Widget separator1 = XmCreateSeparator(bulletinBoard_about, (char *)"separator1", args, ac);
 	XtManageChild(separator1);
 
 	ac = 0;
@@ -2411,13 +2321,12 @@ Widget Createwindow_mbedit(Widget parent) {
 		ac++;
 		XtSetArg(args[ac], XmNheight, 35);
 		ac++;
-		pushButton_about_dismiss = XmCreatePushButton(bulletinBoard_about, (char *)"pushButton_about_dismiss", args, ac);
+		Widget pushButton_about_dismiss = XmCreatePushButton(bulletinBoard_about, (char *)"pushButton_about_dismiss", args, ac);
 		XtManageChild(pushButton_about_dismiss);
+		XtAddCallback(pushButton_about_dismiss, XmNactivateCallback, BxUnmanageCB, (XtPointer) "bulletinBoard_about");
 
-		XmStringFree((XmString)tmp0);
+		XmStringFree(tmp0);
 	}
-
-	XtAddCallback(pushButton_about_dismiss, XmNactivateCallback, BxUnmanageCB, (XtPointer) "bulletinBoard_about");
 
 	ac = 0;
 	{
@@ -2438,10 +2347,10 @@ Widget Createwindow_mbedit(Widget parent) {
 		ac++;
 		XtSetArg(args[ac], XmNheight, 20);
 		ac++;
-		label_about_create = XmCreateLabel(bulletinBoard_about, (char *)"label_about_create", args, ac);
+		Widget label_about_create = XmCreateLabel(bulletinBoard_about, (char *)"label_about_create", args, ac);
 		XtManageChild(label_about_create);
 
-		XmStringFree((XmString)tmp0);
+		XmStringFree(tmp0);
 	}
 
 	ac = 0;
@@ -2465,10 +2374,10 @@ Widget Createwindow_mbedit(Widget parent) {
 		ac++;
 		XtSetArg(args[ac], XmNheight, 60);
 		ac++;
-		label_about_lamont = XmCreateLabel(bulletinBoard_about, (char *)"label_about_lamont", args, ac);
+		Widget label_about_lamont = XmCreateLabel(bulletinBoard_about, (char *)"label_about_lamont", args, ac);
 		XtManageChild(label_about_lamont);
 
-		XmStringFree((XmString)tmp0);
+		XmStringFree(tmp0);
 	}
 
 	ac = 0;
@@ -2491,10 +2400,10 @@ Widget Createwindow_mbedit(Widget parent) {
 		ac++;
 		XtSetArg(args[ac], XmNheight, 60);
 		ac++;
-		label_about_columbia = XmCreateLabel(bulletinBoard_about, (char *)"label_about_columbia", args, ac);
+		Widget label_about_columbia = XmCreateLabel(bulletinBoard_about, (char *)"label_about_columbia", args, ac);
 		XtManageChild(label_about_columbia);
 
-		XmStringFree((XmString)tmp0);
+		XmStringFree(tmp0);
 	}
 
 	ac = 0;
@@ -2516,10 +2425,10 @@ Widget Createwindow_mbedit(Widget parent) {
 		ac++;
 		XtSetArg(args[ac], XmNheight, 38);
 		ac++;
-		label_about_mbsystem = XmCreateLabel(bulletinBoard_about, (char *)"label_about_mbsystem", args, ac);
+		Widget label_about_mbsystem = XmCreateLabel(bulletinBoard_about, (char *)"label_about_mbsystem", args, ac);
 		XtManageChild(label_about_mbsystem);
 
-		XmStringFree((XmString)tmp0);
+		XmStringFree(tmp0);
 	}
 
 	ac = 0;
@@ -2541,10 +2450,10 @@ Widget Createwindow_mbedit(Widget parent) {
 		ac++;
 		XtSetArg(args[ac], XmNheight, 30);
 		ac++;
-		label_about_mbpub = XmCreateLabel(bulletinBoard_about, (char *)"label_about_mbpub", args, ac);
+		Widget label_about_mbpub = XmCreateLabel(bulletinBoard_about, (char *)"label_about_mbpub", args, ac);
 		XtManageChild(label_about_mbpub);
 
-		XmStringFree((XmString)tmp0);
+		XmStringFree(tmp0);
 	}
 
 	ac = 0;
@@ -2566,10 +2475,10 @@ Widget Createwindow_mbedit(Widget parent) {
 		ac++;
 		XtSetArg(args[ac], XmNheight, 30);
 		ac++;
-		label_about_component = XmCreateLabel(bulletinBoard_about, (char *)"label_about_component", args, ac);
+		Widget label_about_component = XmCreateLabel(bulletinBoard_about, (char *)"label_about_component", args, ac);
 		XtManageChild(label_about_component);
 
-		XmStringFree((XmString)tmp0);
+		XmStringFree(tmp0);
 	}
 
 	ac = 0;
@@ -2592,10 +2501,10 @@ Widget Createwindow_mbedit(Widget parent) {
 		ac++;
 		XtSetArg(args[ac], XmNheight, 30);
 		ac++;
-		label_about_for = XmCreateLabel(bulletinBoard_about, (char *)"label_about_for", args, ac);
+		Widget label_about_for = XmCreateLabel(bulletinBoard_about, (char *)"label_about_for", args, ac);
 		XtManageChild(label_about_for);
 
-		XmStringFree((XmString)tmp0);
+		XmStringFree(tmp0);
 	}
 
 	ac = 0;
@@ -2607,7 +2516,7 @@ Widget Createwindow_mbedit(Widget parent) {
 	ac++;
 	XtSetArg(args[ac], XmNheight, 20);
 	ac++;
-	separator = XmCreateSeparator(bulletinBoard_about, (char *)"separator", args, ac);
+	Widget separator = XmCreateSeparator(bulletinBoard_about, (char *)"separator", args, ac);
 	XtManageChild(separator);
 
 	ac = 0;
@@ -2635,7 +2544,7 @@ Widget Createwindow_mbedit(Widget parent) {
 		label_about_version = XmCreateLabel(bulletinBoard_about, (char *)"label_about_version", args, ac);
 		XtManageChild(label_about_version);
 
-		XmStringFree((XmString)tmp0);
+		XmStringFree(tmp0);
 	}
 
 	ac = 0;
@@ -2657,10 +2566,10 @@ Widget Createwindow_mbedit(Widget parent) {
 		ac++;
 		XtSetArg(args[ac], XmNheight, 30);
 		ac++;
-		label_about_function = XmCreateLabel(bulletinBoard_about, (char *)"label_about_function", args, ac);
+		Widget label_about_function = XmCreateLabel(bulletinBoard_about, (char *)"label_about_function", args, ac);
 		XtManageChild(label_about_function);
 
-		XmStringFree((XmString)tmp0);
+		XmStringFree(tmp0);
 	}
 
 	ac = 0;
@@ -2682,10 +2591,10 @@ Widget Createwindow_mbedit(Widget parent) {
 		ac++;
 		XtSetArg(args[ac], XmNheight, 30);
 		ac++;
-		label_about_mbedit = XmCreateLabel(bulletinBoard_about, (char *)"label_about_mbedit", args, ac);
+		Widget label_about_mbedit = XmCreateLabel(bulletinBoard_about, (char *)"label_about_mbedit", args, ac);
 		XtManageChild(label_about_mbedit);
 
-		XmStringFree((XmString)tmp0);
+		XmStringFree(tmp0);
 	}
 
 	ac = 0;
@@ -2699,7 +2608,7 @@ Widget Createwindow_mbedit(Widget parent) {
 	ac++;
 	XtSetArg(args[ac], XmNheight, 112);
 	ac++;
-	xmDialogShell_message = XmCreateDialogShell(window_mbedit, (char *)"xmDialogShell_message", args, ac);
+	Widget xmDialogShell_message = XmCreateDialogShell(window_mbedit, (char *)"xmDialogShell_message", args, ac);
 
 	ac = 0;
 	XtSetArg(args[ac], XmNdialogStyle, XmDIALOG_FULL_APPLICATION_MODAL);
@@ -2740,10 +2649,10 @@ Widget Createwindow_mbedit(Widget parent) {
 		                    &argok));
 		if (argok)
 			ac++;
-		label_pleasewait = XmCreateLabel(bulletinBoard_message, (char *)"label_pleasewait", args, ac);
+		Widget label_pleasewait = XmCreateLabel(bulletinBoard_message, (char *)"label_pleasewait", args, ac);
 		XtManageChild(label_pleasewait);
 
-		XmStringFree((XmString)tmp0);
+		XmStringFree(tmp0);
 	}
 
 	ac = 0;
@@ -2772,7 +2681,7 @@ Widget Createwindow_mbedit(Widget parent) {
 		label_message = XmCreateLabel(bulletinBoard_message, (char *)"label_message", args, ac);
 		XtManageChild(label_message);
 
-		XmStringFree((XmString)tmp0);
+		XmStringFree(tmp0);
 	}
 
 	ac = 0;
@@ -2784,7 +2693,7 @@ Widget Createwindow_mbedit(Widget parent) {
 	ac++;
 	XtSetArg(args[ac], XmNheight, 177);
 	ac++;
-	xmDialogShell_editsave = XmCreateDialogShell(window_mbedit, (char *)"xmDialogShell_editsave", args, ac);
+	Widget xmDialogShell_editsave = XmCreateDialogShell(window_mbedit, (char *)"xmDialogShell_editsave", args, ac);
 
 	ac = 0;
 	XtSetArg(args[ac], XmNdialogStyle, XmDIALOG_FULL_APPLICATION_MODAL);
@@ -2825,10 +2734,10 @@ Widget Createwindow_mbedit(Widget parent) {
 		                    &argok));
 		if (argok)
 			ac++;
-		label_editsave_one = XmCreateLabel(bulletinBoard_editsave, (char *)"label_editsave_one", args, ac);
+		Widget label_editsave_one = XmCreateLabel(bulletinBoard_editsave, (char *)"label_editsave_one", args, ac);
 		XtManageChild(label_editsave_one);
 
-		XmStringFree((XmString)tmp0);
+		XmStringFree(tmp0);
 	}
 
 	ac = 0;
@@ -2853,10 +2762,10 @@ Widget Createwindow_mbedit(Widget parent) {
 		                    &argok));
 		if (argok)
 			ac++;
-		label_editsave_two = XmCreateLabel(bulletinBoard_editsave, (char *)"label_editsave_two", args, ac);
+		Widget label_editsave_two = XmCreateLabel(bulletinBoard_editsave, (char *)"label_editsave_two", args, ac);
 		XtManageChild(label_editsave_two);
 
-		XmStringFree((XmString)tmp0);
+		XmStringFree(tmp0);
 	}
 
 	ac = 0;
@@ -2878,15 +2787,15 @@ Widget Createwindow_mbedit(Widget parent) {
 		                    &argok));
 		if (argok)
 			ac++;
-		pushButton_editsave_no = XmCreatePushButton(bulletinBoard_editsave, (char *)"pushButton_editsave_no", args, ac);
+		Widget pushButton_editsave_no = XmCreatePushButton(bulletinBoard_editsave, (char *)"pushButton_editsave_no", args, ac);
 		XtManageChild(pushButton_editsave_no);
+		XtAddCallback(pushButton_editsave_no, XmNactivateCallback, do_load_ok, (XtPointer)0);
 
-		XmStringFree((XmString)tmp0);
+		XmStringFree(tmp0);
 	}
 
-	XtAddCallback(pushButton_editsave_no, XmNactivateCallback, do_load_ok, (XtPointer)0);
-
 	ac = 0;
+	Widget pushButton_editsave_yes;
 	{
 		XmString tmp0 = (XmString)BX_CONVERT(bulletinBoard_editsave, (char *)"Yes", XmRXmString, 0, &argok);
 		XtSetArg(args[ac], XmNlabelString, tmp0);
@@ -2908,7 +2817,7 @@ Widget Createwindow_mbedit(Widget parent) {
 		pushButton_editsave_yes = XmCreatePushButton(bulletinBoard_editsave, (char *)"pushButton_editsave_yes", args, ac);
 		XtManageChild(pushButton_editsave_yes);
 
-		XmStringFree((XmString)tmp0);
+		XmStringFree(tmp0);
 	}
 
 	XtAddCallback(pushButton_editsave_yes, XmNactivateCallback, do_load_ok_with_save, (XtPointer)0);
@@ -2920,7 +2829,7 @@ Widget Createwindow_mbedit(Widget parent) {
 	ac++;
 	XtSetArg(args[ac], XmNheight, 205);
 	ac++;
-	xmDialogShell_error = XmCreateDialogShell(window_mbedit, (char *)"xmDialogShell_error", args, ac);
+	Widget xmDialogShell_error = XmCreateDialogShell(window_mbedit, (char *)"xmDialogShell_error", args, ac);
 
 	ac = 0;
 	XtSetArg(args[ac], XmNdialogStyle, XmDIALOG_APPLICATION_MODAL);
@@ -2962,7 +2871,7 @@ Widget Createwindow_mbedit(Widget parent) {
 		label_error_two = XmCreateLabel(bulletinBoard_error, (char *)"label_error_two", args, ac);
 		XtManageChild(label_error_two);
 
-		XmStringFree((XmString)tmp0);
+		XmStringFree(tmp0);
 	}
 
 	ac = 0;
@@ -2989,7 +2898,7 @@ Widget Createwindow_mbedit(Widget parent) {
 		label_error_one = XmCreateLabel(bulletinBoard_error, (char *)"label_error_one", args, ac);
 		XtManageChild(label_error_one);
 
-		XmStringFree((XmString)tmp0);
+		XmStringFree(tmp0);
 	}
 
 	ac = 0;
@@ -3016,7 +2925,7 @@ Widget Createwindow_mbedit(Widget parent) {
 		label_error_three = XmCreateLabel(bulletinBoard_error, (char *)"label_error_three", args, ac);
 		XtManageChild(label_error_three);
 
-		XmStringFree((XmString)tmp0);
+		XmStringFree(tmp0);
 	}
 
 	ac = 0;
@@ -3038,10 +2947,10 @@ Widget Createwindow_mbedit(Widget parent) {
 		    BX_CONVERT(bulletinBoard_error, (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
 		if (argok)
 			ac++;
-		pushButton_error = XmCreatePushButton(bulletinBoard_error, (char *)"pushButton_error", args, ac);
+		Widget pushButton_error = XmCreatePushButton(bulletinBoard_error, (char *)"pushButton_error", args, ac);
 		XtManageChild(pushButton_error);
 
-		XmStringFree((XmString)tmp0);
+		XmStringFree(tmp0);
 	}
 
 	ac = 0;
@@ -3051,7 +2960,7 @@ Widget Createwindow_mbedit(Widget parent) {
 	ac++;
 	XtSetArg(args[ac], XmNheight, 186);
 	ac++;
-	dialogShell_buffer = XmCreateDialogShell(window_mbedit, (char *)"dialogShell_buffer", args, ac);
+	Widget dialogShell_buffer = XmCreateDialogShell(window_mbedit, (char *)"dialogShell_buffer", args, ac);
 
 	ac = 0;
 	XtSetArg(args[ac], XmNresizePolicy, XmRESIZE_GROW);
@@ -3064,7 +2973,7 @@ Widget Createwindow_mbedit(Widget parent) {
 	ac++;
 	XtSetArg(args[ac], XmNheight, 186);
 	ac++;
-	bulletinBoard_buffer =
+	Widget bulletinBoard_buffer =
 	    XtCreateWidget((char *)"bulletinBoard_buffer", xmBulletinBoardWidgetClass, dialogShell_buffer, args, ac);
 
 	ac = 0;
@@ -3086,13 +2995,12 @@ Widget Createwindow_mbedit(Widget parent) {
 		    BX_CONVERT(bulletinBoard_buffer, (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
 		if (argok)
 			ac++;
-		pushButton_buffer_dismiss = XmCreatePushButton(bulletinBoard_buffer, (char *)"pushButton_buffer_dismiss", args, ac);
+		Widget pushButton_buffer_dismiss = XmCreatePushButton(bulletinBoard_buffer, (char *)"pushButton_buffer_dismiss", args, ac);
 		XtManageChild(pushButton_buffer_dismiss);
+		XtAddCallback(pushButton_buffer_dismiss, XmNactivateCallback, BxUnmanageCB, (XtPointer) "bulletinBoard_buffer");
 
-		XmStringFree((XmString)tmp0);
+		XmStringFree(tmp0);
 	}
-
-	XtAddCallback(pushButton_buffer_dismiss, XmNactivateCallback, BxUnmanageCB, (XtPointer) "bulletinBoard_buffer");
 
 	ac = 0;
 	{
@@ -3118,7 +3026,7 @@ Widget Createwindow_mbedit(Widget parent) {
 		slider_buffer_hold_max_label = XmCreateLabel(bulletinBoard_buffer, (char *)"slider_buffer_hold_max_label", args, ac);
 		XtManageChild(slider_buffer_hold_max_label);
 
-		XmStringFree((XmString)tmp0);
+		XmStringFree(tmp0);
 	}
 
 	ac = 0;
@@ -3177,7 +3085,7 @@ Widget Createwindow_mbedit(Widget parent) {
 		slider_buffer_hold_label = XmCreateLabel(bulletinBoard_buffer, (char *)"slider_buffer_hold_label", args, ac);
 		XtManageChild(slider_buffer_hold_label);
 
-		XmStringFree((XmString)tmp0);
+		XmStringFree(tmp0);
 	}
 
 	ac = 0;
@@ -3204,7 +3112,7 @@ Widget Createwindow_mbedit(Widget parent) {
 		slider_buffer_size_max_label = XmCreateLabel(bulletinBoard_buffer, (char *)"slider_buffer_size_max_label", args, ac);
 		XtManageChild(slider_buffer_size_max_label);
 
-		XmStringFree((XmString)tmp0);
+		XmStringFree(tmp0);
 	}
 
 	ac = 0;
@@ -3265,7 +3173,7 @@ Widget Createwindow_mbedit(Widget parent) {
 		slider_buffer_size_label = XmCreateLabel(bulletinBoard_buffer, (char *)"slider_buffer_size_label", args, ac);
 		XtManageChild(slider_buffer_size_label);
 
-		XmStringFree((XmString)tmp0);
+		XmStringFree(tmp0);
 	}
 
 	ac = 0;
@@ -3273,7 +3181,7 @@ Widget Createwindow_mbedit(Widget parent) {
 	ac++;
 	XtSetArg(args[ac], XmNheight, 179);
 	ac++;
-	dialogShell_annotation = XmCreateDialogShell(window_mbedit, (char *)"dialogShell_annotation", args, ac);
+	Widget dialogShell_annotation = XmCreateDialogShell(window_mbedit, (char *)"dialogShell_annotation", args, ac);
 
 	ac = 0;
 	{
@@ -3294,7 +3202,7 @@ Widget Createwindow_mbedit(Widget parent) {
 		bulletinBoard_annotation =
 		    XtCreateWidget((char *)"bulletinBoard_annotation", xmBulletinBoardWidgetClass, dialogShell_annotation, args, ac);
 
-		XmStringFree((XmString)tmp0);
+		XmStringFree(tmp0);
 	}
 
 	ac = 0;
@@ -3316,11 +3224,11 @@ Widget Createwindow_mbedit(Widget parent) {
 		                    &argok));
 		if (argok)
 			ac++;
-		pushButton_annotation_dismiss =
+		Widget pushButton_annotation_dismiss =
 		    XmCreatePushButton(bulletinBoard_annotation, (char *)"pushButton_annotation_dismiss", args, ac);
 		XtManageChild(pushButton_annotation_dismiss);
 
-		XmStringFree((XmString)tmp0);
+		XmStringFree(tmp0);
 	}
 
 	ac = 0;
@@ -3347,7 +3255,7 @@ Widget Createwindow_mbedit(Widget parent) {
 		slider_y_max_interval_label = XmCreateLabel(bulletinBoard_annotation, (char *)"slider_y_max_interval_label", args, ac);
 		XtManageChild(slider_y_max_interval_label);
 
-		XmStringFree((XmString)tmp0);
+		XmStringFree(tmp0);
 	}
 
 	ac = 0;
@@ -3406,7 +3314,7 @@ Widget Createwindow_mbedit(Widget parent) {
 		slider_y_interval_label = XmCreateLabel(bulletinBoard_annotation, (char *)"slider_y_interval_label", args, ac);
 		XtManageChild(slider_y_interval_label);
 
-		XmStringFree((XmString)tmp0);
+		XmStringFree(tmp0);
 	}
 
 	ac = 0;
@@ -3433,7 +3341,7 @@ Widget Createwindow_mbedit(Widget parent) {
 		slider_x_max_interval_label = XmCreateLabel(bulletinBoard_annotation, (char *)"slider_x_max_interval_label", args, ac);
 		XtManageChild(slider_x_max_interval_label);
 
-		XmStringFree((XmString)tmp0);
+		XmStringFree(tmp0);
 	}
 
 	ac = 0;
@@ -3492,7 +3400,7 @@ Widget Createwindow_mbedit(Widget parent) {
 		slider_x_interval_label = XmCreateLabel(bulletinBoard_annotation, (char *)"slider_x_interval_label", args, ac);
 		XtManageChild(slider_x_interval_label);
 
-		XmStringFree((XmString)tmp0);
+		XmStringFree(tmp0);
 	}
 
 	ac = 0;
@@ -3502,7 +3410,8 @@ Widget Createwindow_mbedit(Widget parent) {
 	ac++;
 	XtSetArg(args[ac], XmNheight, 311);
 	ac++;
-	dialogShell_filters = XmCreateDialogShell(window_mbedit, (char *)"dialogShell_filters", args, ac);
+	Widget dialogShell_filters =
+		XmCreateDialogShell(window_mbedit, (char *)"dialogShell_filters", args, ac);
 
 	ac = 0;
 	XtSetArg(args[ac], XmNautoUnmanage, False);
@@ -3517,7 +3426,7 @@ Widget Createwindow_mbedit(Widget parent) {
 	ac++;
 	XtSetArg(args[ac], XmNheight, 311);
 	ac++;
-	bulletinBoard_filters =
+	Widget bulletinBoard_filters =
 	    XtCreateWidget((char *)"bulletinBoard_filters", xmBulletinBoardWidgetClass, dialogShell_filters, args, ac);
 
 	ac = 0;
@@ -3531,7 +3440,8 @@ Widget Createwindow_mbedit(Widget parent) {
 	ac++;
 	XtSetArg(args[ac], XmNheight, 230);
 	ac++;
-	scrolledWindow_filters = XmCreateScrolledWindow(bulletinBoard_filters, (char *)"scrolledWindow_filters", args, ac);
+	Widget scrolledWindow_filters =
+		XmCreateScrolledWindow(bulletinBoard_filters, (char *)"scrolledWindow_filters", args, ac);
 	XtManageChild(scrolledWindow_filters);
 
 	ac = 0;
@@ -3541,7 +3451,8 @@ Widget Createwindow_mbedit(Widget parent) {
 	ac++;
 	XtSetArg(args[ac], XmNheight, 810);
 	ac++;
-	bulletinBoard_scrollfilters = XmCreateBulletinBoard(scrolledWindow_filters, (char *)"bulletinBoard_scrollfilters", args, ac);
+	Widget bulletinBoard_scrollfilters =
+		XmCreateBulletinBoard(scrolledWindow_filters, (char *)"bulletinBoard_scrollfilters", args, ac);
 	XtManageChild(bulletinBoard_scrollfilters);
 
 	ac = 0;
@@ -3594,7 +3505,7 @@ Widget Createwindow_mbedit(Widget parent) {
 		scale_median_local_ltrack = XmCreateScale(bulletinBoard_scrollfilters, (char *)"scale_median_local_ltrack", args, ac);
 		XtManageChild(scale_median_local_ltrack);
 
-		XmStringFree((XmString)tmp0);
+		XmStringFree(tmp0);
 	}
 
 	XtAddCallback(scale_median_local_ltrack, XmNvalueChangedCallback, do_check_median_ltrack, (XtPointer)0);
@@ -3633,7 +3544,7 @@ Widget Createwindow_mbedit(Widget parent) {
 		scale_median_local_xtrack = XmCreateScale(bulletinBoard_scrollfilters, (char *)"scale_median_local_xtrack", args, ac);
 		XtManageChild(scale_median_local_xtrack);
 
-		XmStringFree((XmString)tmp0);
+		XmStringFree(tmp0);
 	}
 
 	XtAddCallback(scale_median_local_xtrack, XmNvalueChangedCallback, do_check_median_xtrack, (XtPointer)0);
@@ -3647,7 +3558,7 @@ Widget Createwindow_mbedit(Widget parent) {
 	ac++;
 	XtSetArg(args[ac], XmNheight, 20);
 	ac++;
-	separator6 = XmCreateSeparator(bulletinBoard_scrollfilters, (char *)"separator6", args, ac);
+	Widget separator6 = XmCreateSeparator(bulletinBoard_scrollfilters, (char *)"separator6", args, ac);
 	XtManageChild(separator6);
 
 	ac = 0;
@@ -3686,7 +3597,7 @@ Widget Createwindow_mbedit(Widget parent) {
 		scale_filters_cutangleend = XmCreateScale(bulletinBoard_scrollfilters, (char *)"scale_filters_cutangleend", args, ac);
 		XtManageChild(scale_filters_cutangleend);
 
-		XmStringFree((XmString)tmp0);
+		XmStringFree(tmp0);
 	}
 
 	ac = 0;
@@ -3725,7 +3636,7 @@ Widget Createwindow_mbedit(Widget parent) {
 		scale_filters_cutanglestart = XmCreateScale(bulletinBoard_scrollfilters, (char *)"scale_filters_cutanglestart", args, ac);
 		XtManageChild(scale_filters_cutanglestart);
 
-		XmStringFree((XmString)tmp0);
+		XmStringFree(tmp0);
 	}
 
 	ac = 0;
@@ -3754,7 +3665,7 @@ Widget Createwindow_mbedit(Widget parent) {
 		    XmCreateToggleButton(bulletinBoard_scrollfilters, (char *)"toggleButton_filters_cutangle", args, ac);
 		XtManageChild(toggleButton_filters_cutangle);
 
-		XmStringFree((XmString)tmp0);
+		XmStringFree(tmp0);
 	}
 
 	ac = 0;
@@ -3766,7 +3677,7 @@ Widget Createwindow_mbedit(Widget parent) {
 	ac++;
 	XtSetArg(args[ac], XmNheight, 20);
 	ac++;
-	separator5 = XmCreateSeparator(bulletinBoard_scrollfilters, (char *)"separator5", args, ac);
+	Widget separator5 = XmCreateSeparator(bulletinBoard_scrollfilters, (char *)"separator5", args, ac);
 	XtManageChild(separator5);
 
 	ac = 0;
@@ -3806,7 +3717,7 @@ Widget Createwindow_mbedit(Widget parent) {
 		    XmCreateScale(bulletinBoard_scrollfilters, (char *)"scale_filters_cutdistanceend", args, ac);
 		XtManageChild(scale_filters_cutdistanceend);
 
-		XmStringFree((XmString)tmp0);
+		XmStringFree(tmp0);
 	}
 
 	ac = 0;
@@ -3846,7 +3757,7 @@ Widget Createwindow_mbedit(Widget parent) {
 		    XmCreateScale(bulletinBoard_scrollfilters, (char *)"scale_filters_cutdistancestart", args, ac);
 		XtManageChild(scale_filters_cutdistancestart);
 
-		XmStringFree((XmString)tmp0);
+		XmStringFree(tmp0);
 	}
 
 	ac = 0;
@@ -3874,7 +3785,7 @@ Widget Createwindow_mbedit(Widget parent) {
 		    XmCreateToggleButton(bulletinBoard_scrollfilters, (char *)"toggleButton_filters_cutdistance", args, ac);
 		XtManageChild(toggleButton_filters_cutdistance);
 
-		XmStringFree((XmString)tmp0);
+		XmStringFree(tmp0);
 	}
 
 	ac = 0;
@@ -3886,7 +3797,7 @@ Widget Createwindow_mbedit(Widget parent) {
 	ac++;
 	XtSetArg(args[ac], XmNheight, 20);
 	ac++;
-	separator4 = XmCreateSeparator(bulletinBoard_scrollfilters, (char *)"separator4", args, ac);
+	Widget separator4 = XmCreateSeparator(bulletinBoard_scrollfilters, (char *)"separator4", args, ac);
 	XtManageChild(separator4);
 
 	ac = 0;
@@ -3921,7 +3832,7 @@ Widget Createwindow_mbedit(Widget parent) {
 		scale_filters_cutbeamend = XmCreateScale(bulletinBoard_scrollfilters, (char *)"scale_filters_cutbeamend", args, ac);
 		XtManageChild(scale_filters_cutbeamend);
 
-		XmStringFree((XmString)tmp0);
+		XmStringFree(tmp0);
 	}
 
 	ac = 0;
@@ -3956,7 +3867,7 @@ Widget Createwindow_mbedit(Widget parent) {
 		scale_filters_cutbeamstart = XmCreateScale(bulletinBoard_scrollfilters, (char *)"scale_filters_cutbeamstart", args, ac);
 		XtManageChild(scale_filters_cutbeamstart);
 
-		XmStringFree((XmString)tmp0);
+		XmStringFree(tmp0);
 	}
 
 	ac = 0;
@@ -3985,7 +3896,7 @@ Widget Createwindow_mbedit(Widget parent) {
 		    XmCreateToggleButton(bulletinBoard_scrollfilters, (char *)"toggleButton_filters_cutbeam", args, ac);
 		XtManageChild(toggleButton_filters_cutbeam);
 
-		XmStringFree((XmString)tmp0);
+		XmStringFree(tmp0);
 	}
 
 	ac = 0;
@@ -3997,7 +3908,7 @@ Widget Createwindow_mbedit(Widget parent) {
 	ac++;
 	XtSetArg(args[ac], XmNheight, 20);
 	ac++;
-	separator3 = XmCreateSeparator(bulletinBoard_scrollfilters, (char *)"separator3", args, ac);
+	Widget separator3 = XmCreateSeparator(bulletinBoard_scrollfilters, (char *)"separator3", args, ac);
 	XtManageChild(separator3);
 
 	ac = 0;
@@ -4032,7 +3943,7 @@ Widget Createwindow_mbedit(Widget parent) {
 		scale_filters_wrongside = XmCreateScale(bulletinBoard_scrollfilters, (char *)"scale_filters_wrongside", args, ac);
 		XtManageChild(scale_filters_wrongside);
 
-		XmStringFree((XmString)tmp0);
+		XmStringFree(tmp0);
 	}
 
 	ac = 0;
@@ -4061,7 +3972,7 @@ Widget Createwindow_mbedit(Widget parent) {
 		    XmCreateToggleButton(bulletinBoard_scrollfilters, (char *)"toggleButton_filters_wrongside", args, ac);
 		XtManageChild(toggleButton_filters_wrongside);
 
-		XmStringFree((XmString)tmp0);
+		XmStringFree(tmp0);
 	}
 
 	ac = 0;
@@ -4098,7 +4009,7 @@ Widget Createwindow_mbedit(Widget parent) {
 		scale_filters_medianspike = XmCreateScale(bulletinBoard_scrollfilters, (char *)"scale_filters_medianspike", args, ac);
 		XtManageChild(scale_filters_medianspike);
 
-		XmStringFree((XmString)tmp0);
+		XmStringFree(tmp0);
 	}
 
 	ac = 0;
@@ -4127,7 +4038,7 @@ Widget Createwindow_mbedit(Widget parent) {
 		    XmCreateToggleButton(bulletinBoard_scrollfilters, (char *)"toggleButton_filters_medianspike", args, ac);
 		XtManageChild(toggleButton_filters_medianspike);
 
-		XmStringFree((XmString)tmp0);
+		XmStringFree(tmp0);
 	}
 
 	ac = 0;
@@ -4149,13 +4060,12 @@ Widget Createwindow_mbedit(Widget parent) {
 		                    &argok));
 		if (argok)
 			ac++;
-		pushButton_filters_reset = XmCreatePushButton(bulletinBoard_filters, (char *)"pushButton_filters_reset", args, ac);
+		Widget pushButton_filters_reset = XmCreatePushButton(bulletinBoard_filters, (char *)"pushButton_filters_reset", args, ac);
 		XtManageChild(pushButton_filters_reset);
+		XtAddCallback(pushButton_filters_reset, XmNactivateCallback, do_reset_filters, (XtPointer)0);
 
-		XmStringFree((XmString)tmp0);
+		XmStringFree(tmp0);
 	}
-
-	XtAddCallback(pushButton_filters_reset, XmNactivateCallback, do_reset_filters, (XtPointer)0);
 
 	ac = 0;
 	{
@@ -4176,13 +4086,12 @@ Widget Createwindow_mbedit(Widget parent) {
 		                    &argok));
 		if (argok)
 			ac++;
-		pushButton_filters_apply = XmCreatePushButton(bulletinBoard_filters, (char *)"pushButton_filters_apply", args, ac);
+		Widget pushButton_filters_apply = XmCreatePushButton(bulletinBoard_filters, (char *)"pushButton_filters_apply", args, ac);
 		XtManageChild(pushButton_filters_apply);
+		XtAddCallback(pushButton_filters_apply, XmNactivateCallback, do_set_filters, (XtPointer)0);
 
-		XmStringFree((XmString)tmp0);
+		XmStringFree(tmp0);
 	}
-
-	XtAddCallback(pushButton_filters_apply, XmNactivateCallback, do_set_filters, (XtPointer)0);
 
 	ac = 0;
 	{
@@ -4203,13 +4112,12 @@ Widget Createwindow_mbedit(Widget parent) {
 		                    &argok));
 		if (argok)
 			ac++;
-		pushButton_filters_dismiss = XmCreatePushButton(bulletinBoard_filters, (char *)"pushButton_filters_dismiss", args, ac);
+		Widget pushButton_filters_dismiss = XmCreatePushButton(bulletinBoard_filters, (char *)"pushButton_filters_dismiss", args, ac);
 		XtManageChild(pushButton_filters_dismiss);
+		XtAddCallback(pushButton_filters_dismiss, XmNactivateCallback, BxUnmanageCB, (XtPointer) "bulletinBoard_filters");
 
-		XmStringFree((XmString)tmp0);
+		XmStringFree(tmp0);
 	}
-
-	XtAddCallback(pushButton_filters_dismiss, XmNactivateCallback, BxUnmanageCB, (XtPointer) "bulletinBoard_filters");
 
 	ac = 0;
 	XtSetArg(args[ac], XmNwidth, 343);
@@ -4238,7 +4146,7 @@ Widget Createwindow_mbedit(Widget parent) {
 		ac++;
 		form_filelist = XtCreateWidget((char *)"form_filelist", xmFormWidgetClass, dialogShell_filelist, args, ac);
 
-		XmStringFree((XmString)tmp0);
+		XmStringFree(tmp0);
 	}
 
 	ac = 0;
@@ -4265,7 +4173,7 @@ Widget Createwindow_mbedit(Widget parent) {
 		pushButton_filelist_remove = XmCreatePushButton(form_filelist, (char *)"pushButton_filelist_remove", args, ac);
 		XtManageChild(pushButton_filelist_remove);
 
-		XmStringFree((XmString)tmp0);
+		XmStringFree(tmp0);
 	}
 
 	XtAddCallback(pushButton_filelist_remove, XmNactivateCallback, do_filelist_remove, (XtPointer)0);
@@ -4294,12 +4202,13 @@ Widget Createwindow_mbedit(Widget parent) {
 		pushButton_filelist_edit = XmCreatePushButton(form_filelist, (char *)"pushButton_filelist_edit", args, ac);
 		XtManageChild(pushButton_filelist_edit);
 
-		XmStringFree((XmString)tmp0);
+		XmStringFree(tmp0);
 	}
 
 	XtAddCallback(pushButton_filelist_edit, XmNactivateCallback, do_editlistselection, (XtPointer)0);
 
 	ac = 0;
+	Widget setting_output_label_filelist;
 	{
 		XmString tmp0 = (XmString)BX_CONVERT(form_filelist, (char *)"Output Mode:", XmRXmString, 0, &argok);
 		XtSetArg(args[ac], XmNlabelString, tmp0);
@@ -4320,7 +4229,7 @@ Widget Createwindow_mbedit(Widget parent) {
 		setting_output_label_filelist = XmCreateLabel(form_filelist, (char *)"setting_output_label_filelist", args, ac);
 		XtManageChild(setting_output_label_filelist);
 
-		XmStringFree((XmString)tmp0);
+		XmStringFree(tmp0);
 	}
 
 	ac = 0;
@@ -4364,7 +4273,7 @@ Widget Createwindow_mbedit(Widget parent) {
 		    XmCreateToggleButton(setting_output_filelist, (char *)"setting_output_toggle_edit_filelist", args, ac);
 		XtManageChild(setting_output_toggle_edit_filelist);
 
-		XmStringFree((XmString)tmp0);
+		XmStringFree(tmp0);
 	}
 
 	XtAddCallback(setting_output_toggle_edit_filelist, XmNvalueChangedCallback, do_output_edit_filelist, (XtPointer)0);
@@ -4386,12 +4295,13 @@ Widget Createwindow_mbedit(Widget parent) {
 		    XmCreateToggleButton(setting_output_filelist, (char *)"setting_output_toggle_browse_filelist", args, ac);
 		XtManageChild(setting_output_toggle_browse_filelist);
 
-		XmStringFree((XmString)tmp0);
+		XmStringFree(tmp0);
 	}
 
 	XtAddCallback(setting_output_toggle_browse_filelist, XmNvalueChangedCallback, do_output_browse_filelist, (XtPointer)0);
 
 	ac = 0;
+	Widget pushButton_filelist_dismiss;
 	{
 		XmString tmp0 = (XmString)BX_CONVERT(form_filelist, (char *)"Dismiss", XmRXmString, 0, &argok);
 		XtSetArg(args[ac], XmNlabelString, tmp0);
@@ -4414,7 +4324,7 @@ Widget Createwindow_mbedit(Widget parent) {
 		pushButton_filelist_dismiss = XmCreatePushButton(form_filelist, (char *)"pushButton_filelist_dismiss", args, ac);
 		XtManageChild(pushButton_filelist_dismiss);
 
-		XmStringFree((XmString)tmp0);
+		XmStringFree(tmp0);
 	}
 
 	XtAddCallback(pushButton_filelist_dismiss, XmNactivateCallback, BxUnmanageCB, (XtPointer) "form_filelist");
@@ -4430,7 +4340,8 @@ Widget Createwindow_mbedit(Widget parent) {
 	ac++;
 	XtSetArg(args[ac], XmNheight, 450);
 	ac++;
-	scrolledWindow_filelist = XmCreateScrolledWindow(form_filelist, (char *)"scrolledWindow_filelist", args, ac);
+	Widget scrolledWindow_filelist =
+		XmCreateScrolledWindow(form_filelist, (char *)"scrolledWindow_filelist", args, ac);
 	XtManageChild(scrolledWindow_filelist);
 
 	ac = 0;
