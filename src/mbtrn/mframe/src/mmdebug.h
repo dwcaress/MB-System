@@ -234,7 +234,7 @@ typedef struct mmd_module_config_s
 #define MMVTPRINT(mod,cmsk,fmt,...) if( mmd_channel_isset(mod,cmsk) ) MXVTPRINT(fmt, ##__VA_ARGS__)
 
 /// @def MMMSG(mod,ch,)
-/// @brief messsage (msg EOL)
+/// @brief message (msg EOL)
 #define MMMSG(mod,cmsk,msg) if( mmd_channel_isset(mod,cmsk) ) MXMSG(msg)
 
 /// @def MMWRITE(mod,ch,fmt,__VA_ARGS__)
