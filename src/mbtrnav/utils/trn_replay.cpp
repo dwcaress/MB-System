@@ -224,7 +224,6 @@ int main(int argc, char* argv[])
 
     // Continue to invoke tercom like a normal mission
     // 
-    int fs = _tercom->getFilterState();
     int nr = _tercom->getNumReinits();
     if (nr > numReinits)
     {

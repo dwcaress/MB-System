@@ -585,7 +585,7 @@ int
 Octree<ValueType>::
 AddData(const Vector points[], const ValueType data[], unsigned int numDatas) {
 	if(OctreeNodeType == OctreeType::Data) {
-		int index;
+		unsigned int index;
 		for(index = 0; index < numDatas; index ++) {
 			if(!ContainsPoint(points[index])) {
 				ExpandOctreeToIncludePoint(points[index]);
@@ -654,7 +654,7 @@ template <class ValueType>
 void 
 Octree<ValueType>::
 FillIfEmpty(const Vector points[], unsigned int numPoints, ValueType fillValue){
-	for(int index = 0; index < numPoints; index++){
+	for(unsigned int index = 0; index < numPoints; index++){
 		FillIfEmpty(points[index], fillValue);
 	}
 }

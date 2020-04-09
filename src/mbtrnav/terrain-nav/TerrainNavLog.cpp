@@ -237,10 +237,6 @@ void TerrainNavLog::logMMSE(poseT* pt)
     _mmseE->setValue(pt->y);
     _mmseZ->setValue(pt->z);
     _mmseVarN->setValue(pt->covariance[0]);
-    if( pt->covariance[0] < 0.5 )
-    {
-       float f = pt->covariance[0];
-    }
     _mmseVarE->setValue(pt->covariance[2]);
     _mmseVarZ->setValue(pt->covariance[5]);
     _mmsePhi->setValue(pt->phi);

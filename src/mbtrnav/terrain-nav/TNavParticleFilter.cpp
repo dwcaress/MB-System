@@ -1250,9 +1250,6 @@ initVariables() {
 	//The particle filter will start out with the maximum number of particles
 	nParticles = MAX_PARTICLES;
 
-	//Initialize random seed to desired location
-	srand(time(NULL));
-
 	//Initialize counter for soundings used in correlation
 	nSoundings = 0;
 
@@ -1650,16 +1647,6 @@ getExpectedMeasDiffParticle(particleT& particle, const Matrix& beamsSF, double* 
 // It also outputs the map variance (mapVar) that is also later used with particle
 // weighting
 
-
-#if 0
-   // RGH: I don't think this needs to be initialized every time since we're
-   // either setting tempUseBeam[i] true or false for all Ncols beams
-	if (0)
-	for(int index = 0; index < 120; index++){
-		this->tempUseBeam[index] = true;//default use the beam unless there are problems
-		//usebeam first n entries correspond to the n real measurements passed in; higher indicies have no meaning. e.g. first 4 entries for DVL.
-	}
-#endif
 
 	int i;
 	//!double beamN, beamE, beamZ, mapZ;

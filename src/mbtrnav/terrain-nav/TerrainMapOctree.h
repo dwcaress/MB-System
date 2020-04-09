@@ -46,7 +46,8 @@ class TerrainMapOctree : public TerrainMap{
 		Octree<bool> *OctreeMap;
 		//Octree<bool> OctreeMap1;
 		//Octree<bool> OctreeMap2;
-		double northingCenter_, eastEastingCenter_, westEastingCenter_;
+		// Center values not used in this iteration
+		//double northingCenter_, eastEastingCenter_, westEastingCenter_;
 		int numTiles_, minDistTile_, lastMinDistTile_;
 
 		struct MapTile

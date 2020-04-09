@@ -531,9 +531,9 @@ class TNavParticleFilter : public TNavFilter
   //!array of current measurement weights (initialized when first measurement update is applied)
   double currMeasWeights[MAX_PARTICLES];
 
-  bool KruChanges_;
-  
-  
+  // KruChanges not used in this iteration
+  // bool KruChanges_;
+    
   bool* tempUseBeam;
   bool* useBeam;
 

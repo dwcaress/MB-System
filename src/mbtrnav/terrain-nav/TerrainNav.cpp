@@ -39,16 +39,17 @@ trn_server.cpp calls getFilterState() which currently only returns 0
 ******************************************************************************/
 //static int transitionMatrix[5][3] = {{0, 0, 1}, {1, 1, 1}, {1, 2, 2}, {2, 2, 2}, {2, 2, 2}};
 TerrainNav::TerrainNav()
-: mapFile(NULL),vehicleSpecFile(NULL),
-particlesFile(NULL),saveDirectory(NULL),tNavFilter(NULL),
-terrainMap(NULL),filterType(1),mapType(1),
-allowFilterReinits(true),_trnLog(NULL),numReinits(0)
+: tNavFilter(NULL),allowFilterReinits(true),numReinits(0),
+saveDirectory(NULL), vehicleSpecFile(NULL),
+particlesFile(NULL), mapFile(NULL),
+filterType(1),mapType(1),
+terrainMap(NULL),_trnLog(NULL)
 {
 
 }
 TerrainNav::TerrainNav(char* mapName) {
 	//initialize pointers
-	this->mapFile = strdup(mapName);
+	this->mapFile = STRDUPNULL(mapName);
 	this->vehicleSpecFile = (char*)"mappingAUV_specs.cfg";
 	this->particlesFile = NULL;
 	this->saveDirectory = NULL;
@@ -71,8 +72,8 @@ TerrainNav::TerrainNav(char* mapName) {
 
 TerrainNav::TerrainNav(char* mapName, char* vehicleSpecs) {
 	//initialize pointers
-	this->mapFile = strdup(mapName);
-	this->vehicleSpecFile = strdup(vehicleSpecs);
+	this->mapFile = STRDUPNULL(mapName);
+	this->vehicleSpecFile = STRDUPNULL(vehicleSpecs);
 	this->particlesFile = NULL;
 	this->saveDirectory = NULL;
 	this->tNavFilter = NULL;
@@ -95,8 +96,8 @@ TerrainNav::TerrainNav(char* mapName, char* vehicleSpecs) {
 TerrainNav::TerrainNav(char* mapName, char* vehicleSpecs,
 					   const int& filterType) {
 	//initialize pointers
-	this->mapFile = strdup(mapName);
-	this->vehicleSpecFile = strdup(vehicleSpecs);
+	this->mapFile = STRDUPNULL(mapName);
+	this->vehicleSpecFile = STRDUPNULL(vehicleSpecs);
 	this->particlesFile = NULL;
 	this->saveDirectory = NULL;
 	this->tNavFilter = NULL;
@@ -119,9 +120,9 @@ TerrainNav::TerrainNav(char* mapName, char* vehicleSpecs,
 TerrainNav::TerrainNav(char* mapName, char* vehicleSpecs,
 					   const int& filterType, char* directory) {
 	//initialize pointers
-	this->mapFile = strdup(mapName);
-	this->vehicleSpecFile = strdup(vehicleSpecs);
-	this->saveDirectory = strdup(directory);
+	this->mapFile = STRDUPNULL(mapName);
+	this->vehicleSpecFile = STRDUPNULL(vehicleSpecs);
+	this->saveDirectory = STRDUPNULL(directory);
 	this->particlesFile = NULL;
 	this->tNavFilter = NULL;
 	this->terrainMap = NULL;
@@ -143,8 +144,8 @@ TerrainNav::TerrainNav(char* mapName, char* vehicleSpecs,
 TerrainNav::TerrainNav(char* mapName, char* vehicleSpecs,
 					   const int& filterType, const int& mapType) {
 	//initialize pointers
-	this->mapFile = strdup(mapName);
-	this->vehicleSpecFile = strdup(vehicleSpecs);
+	this->mapFile = STRDUPNULL(mapName);
+	this->vehicleSpecFile = STRDUPNULL(vehicleSpecs);
 	this->saveDirectory = NULL;
 	this->particlesFile = NULL;
 	this->tNavFilter = NULL;
@@ -166,9 +167,9 @@ TerrainNav::TerrainNav(char* mapName, char* vehicleSpecs,
 TerrainNav::TerrainNav(char* mapName, char* vehicleSpecs,
 					   const int& filterType, const int& mapType, char* directory) {
 	//initialize pointers
-	this->mapFile = strdup(mapName);
-	this->vehicleSpecFile = strdup(vehicleSpecs);
-	this->saveDirectory = strdup(directory);
+	this->mapFile = STRDUPNULL(mapName);
+	this->vehicleSpecFile = STRDUPNULL(vehicleSpecs);
+	this->saveDirectory = STRDUPNULL(directory);
 	this->particlesFile = NULL;
 	this->tNavFilter = NULL;
 	this->terrainMap = NULL;
@@ -191,10 +192,10 @@ TerrainNav::TerrainNav(char* mapName, char* vehicleSpecs, char* particles,
 							  const int& filterType, const int& mapType, char* directory) {
 
 	//initialize pointers
-	this->mapFile = strdup(mapName);
-	this->vehicleSpecFile = strdup(vehicleSpecs);
-	this->saveDirectory = strdup(directory);
-	this->particlesFile = strdup(particles);
+	this->mapFile = STRDUPNULL(mapName);
+	this->vehicleSpecFile = STRDUPNULL(vehicleSpecs);
+	this->saveDirectory = STRDUPNULL(directory);
+	this->particlesFile = STRDUPNULL(particles);
 	this->tNavFilter = NULL;
 	this->terrainMap = NULL;
 	this->filterType = filterType;
@@ -695,7 +696,7 @@ void TerrainNav::initVariables() {
 
 	//create log objects
 	_trnLog = new TerrainNavLog(DataLog::BinaryFormat);
-  tl_new_logfile(dirname(strdup(_trnLog->fileName())));
+  tl_new_logfile(dirname(STRDUPNULL(_trnLog->fileName())));
 
 	// Initialize TNavConfig
 	TNavConfig::instance()->setMapFile(this->mapFile);
@@ -1300,7 +1301,6 @@ bool TerrainNav::checkFilterHealth() {
 
 }
 
-
 /* Function: copyToLogDir() - copies configuration files to the log directory
 *			     for future reference
 *  A log directory (saveDirectory) must be specified in the initialization
@@ -1313,7 +1313,6 @@ void TerrainNav::copyToLogDir()
 
 	// Copy only if there is a place for the files to land
 	//
-	int sys_return;
 	char *slash = NULL;
 	if (NULL != this->saveDirectory)
 	{
@@ -1345,16 +1344,20 @@ void TerrainNav::copyToLogDir()
 		}
 
 		free(this->saveDirectory);
-		this->saveDirectory = strdup(dir_spec);
+		this->saveDirectory = STRDUPNULL(dir_spec);
 		logs(TL_OMASK(TL_TERRAIN_NAV, TL_LOG), "TRN log directory is %s\n", this->saveDirectory);
 
 
 		// Create a latest link that points to the log directory
 		//
 		sprintf(dir_spec, "%s/%s", trnLogDir, LatestLogDirName);
-		logs(TL_OMASK(TL_TERRAIN_NAV, TL_LOG), "symlink %s is linked to %s\n", dir_spec, this->saveDirectory);
 		remove(dir_spec);
-		sys_return = symlink(this->saveDirectory, dir_spec);
+		if (0 != symlink(this->saveDirectory, dir_spec))
+			logs(TL_OMASK(TL_TERRAIN_NAV, TL_LOG), "symlink %s to %s failed:%s\n",
+				dir_spec, this->saveDirectory, strerror(errno));
+		else
+			logs(TL_OMASK(TL_TERRAIN_NAV, TL_LOG), "symlink %s to %s OK\n",
+				dir_spec, this->saveDirectory);
 	}
 	else
 		return;
@@ -1364,14 +1367,18 @@ void TerrainNav::copyToLogDir()
 	{
 		sprintf(copybuf, "cp %s %s/.", this->vehicleSpecFile,
 						    this->saveDirectory);
-		sys_return = system(copybuf);
+		if (0 != system(copybuf))
+			logs(TL_OMASK(TL_TERRAIN_NAV, TL_LOG), "command \'%s\' failed:%s\n",
+				copybuf, strerror(errno));
 	}
 
 	if (NULL != this->particlesFile)
 	{
 		sprintf(copybuf, "cp %s %s/.", this->particlesFile,
 						    this->saveDirectory);
-		sys_return = system(copybuf);
+		if (0 != system(copybuf))
+			logs(TL_OMASK(TL_TERRAIN_NAV, TL_LOG), "command \'%s\' failed:%s\n",
+				copybuf, strerror(errno));
 	}
 
 	// Create a vehicleT object just to get the sensor spec files to copy
@@ -1381,7 +1388,9 @@ void TerrainNav::copyToLogDir()
 	{
 		sprintf(copybuf, "cp %s %s/.", v->sensors[i].filename,
 						       this->saveDirectory);
-		sys_return = system(copybuf);
+		if (0 != system(copybuf))
+			logs(TL_OMASK(TL_TERRAIN_NAV, TL_LOG), "command \'%s\' failed:%s\n",
+				copybuf, strerror(errno));
 	}
 	delete v;
 }

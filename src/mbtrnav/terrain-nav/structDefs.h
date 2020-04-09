@@ -26,6 +26,10 @@
 #include <newmatap.h>
 #include <newmatio.h>
 
+// Define safer versions of strdup(char*)
+// If original is NULL, copy is null
+#define  STRDUPNULL(char_star) (char_star != NULL ? strdup(char_star) : NULL)
+
 #ifndef PI
 #define PI 3.14159265358979
 #endif

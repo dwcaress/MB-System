@@ -52,6 +52,30 @@ int round(const double& num) {
 }
 #endif
 
+/* Function: seed_randn(unsigned int *p_seed)
+ * Usage:    unsigned int seed = 27;
+ *           seed_randn(&seed);
+ * -------------------------------------------------------------------------*/
+/*! Seed the random number generator using:
+ *    - the seed pointed to by p_seed if p_seed is not NULL.
+ *    - if p_seed is NULL, use the result of time(NULL) as the seed
+ *    - zero if the compiler switch TRN_NORAND is set. 
+ *  Returns the seed used.
+ */
+unsigned int seed_randn(unsigned int *p_seed)
+{
+   unsigned int seed = (NULL != p_seed)? *p_seed : time(NULL);
+#ifdef TRN_NORAND
+   // Building to use the same set of random numbers
+   seed = 0;
+#endif
+
+	//Initialize random number generator
+   srand(seed);
+   return seed;
+}
+
+
 int minVal(const int* values, const int numValues) {
 	int minVal = 10000;
 	for(int i = 0; i < numValues; i++) {

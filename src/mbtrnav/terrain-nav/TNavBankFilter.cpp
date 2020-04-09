@@ -145,10 +145,10 @@ setModifiedWeighting(const int use)
   bfLogs = new TNavPFLog*[numFilters];
   for (i=0; i < numFilters; i++)
   {
-  	char lname[50];
-  	char mname[10];
-  	snprintf(lname, sizeof(lname), "TNavBFLog_%d", i+1);
-  	snprintf(mname, sizeof(mname), "tnbf_%d", i+1);
+  	char lname[TNAVPF_LOGFILE_NAMELEN];
+  	char mname[TNAVPF_MNEM_NAMELEN];
+  	snprintf(lname, sizeof(lname), "%s_%d", TNavBFLogName, i+1);
+  	snprintf(mname, sizeof(mname), "%s_%d", TNavBFMnemName, i+1);
   	bfLogs[i] = new TNavPFLog(DataLog::BinaryFormat, lname, mname);
   }
 }
@@ -1377,7 +1377,6 @@ computeMMSE(poseT* mmsePose) {
 	int nonDisagreementCounts[MAX_NUM_FILTERS];
 	for(int index=0; index < this->numFilters; index++){nonDisagreementCounts[index] = 0;}
 	int minAgreements = 0;
-	double covarianceOfMinAgreements = 0;
 	int bestIndex = -1;
 
 	switch(this->filterComparison){
@@ -1741,9 +1740,6 @@ initVariables() {
 
 	//The particle filter will start out with the maximum number of particles
 	//nParticles = 3721; //61x61 array //MAX_PARTICLES;
-
-	//Initialize random seed to desired location
-	srand(time(NULL));
 
 	//Initialize counter for soundings used in correlation
 	nSoundings = 0;

@@ -49,8 +49,12 @@
 #define TRN_DEBUG 0
 #define MAX_RECV_ATTEMPTS 3
 
+#define MAPNAME_BUF_BYTES 512
+#define CFGNAME_BUF_BYTES 512
+#define PARTICLENAME_BUF_BYTES 512
+#define DEBUG_BUF_BYTES 512
+
 static TerrainNav* _tercom;
-static struct sockaddr_in _serv_addr;
 static int _servfd;   // socket to bind
 static int _connfd;   // socket to handle client
 static bool _connected;
@@ -59,7 +63,6 @@ static struct commsT _ack(TRN_ACK);
 static struct commsT _nack(TRN_NACK);
 
 static struct sockaddr_in _server_addr;     // Server Socket object
-static struct sockaddr_in _client_addr;
 
 static char _sock_buf[TRN_MSG_SIZE];
 static char logbuf[2400];
@@ -146,7 +149,7 @@ int get_msg() {
 		// Verbose debugging output
 		//
 		if(len > 0 && (debug || TRN_DEBUG)) {
-            char obuf[512]={0};
+            char obuf[DEBUG_BUF_BYTES]={0};
             char *bp=obuf;
             int wbytes=0;
 			for(int i = 0; i < 100; i++) {
@@ -156,7 +159,7 @@ int get_msg() {
                     fprintf(stderr,"WARN: get_msg - debug sprintf failed\n");
                 }
 
-                if (bp>(obuf+512)) {
+                if (bp>(obuf+DEBUG_BUF_BYTES)) {
                     fprintf(stderr,"WARN: get_msg - debug buffer full, truncating\n");
                     break;
                 }
@@ -170,8 +173,8 @@ int get_msg() {
 
 // Sends a commsT object to client over socket connection.
 //
-int send_msg(commsT& msg) {
-	int sl = 0;
+size_t send_msg(commsT& msg) {
+	size_t sl = 0;
 	sprintf(logbuf, "Sending:%s", msg.to_s(_sock_buf, sizeof(_sock_buf)));
 	if (msg.msg_type == TRN_NACK) logs(TL_OMASK(TL_TRN_SERVER, TL_LOG),"%s",logbuf);
 	//logs(TL_OMASK(TL_TRN_SERVER, TL_LOG),"%s",logbuf);
@@ -183,9 +186,12 @@ int send_msg(commsT& msg) {
 		msg.serialize(_sock_buf);
 
 		// Send the whole message
-		//
+        // TODO: check send return value (may return -1, and this doesn't handle it)
 		for(sl = 0; sl < sizeof(_sock_buf);) {
-			sl += send(_connfd, _sock_buf, sizeof(_sock_buf), 0);
+            ssize_t test=0;
+            if( (test=send(_connfd, _sock_buf, sizeof(_sock_buf), 0))>=0){
+                sl+=test;
+            }// else error
 		}
 	}
 	return sl;
@@ -206,9 +212,9 @@ int init() {
 	// Construct a TerrainNav object using the info from the client
 	// Use environment variables to find location of maps and datafiles.
 	//
-	char mapname[512], cfgname[512], particlename[512], logname[300];
+    char mapname[MAPNAME_BUF_BYTES], cfgname[CFGNAME_BUF_BYTES], particlename[PARTICLENAME_BUF_BYTES];//, logname[300];
 	char* mapPath = getenv("TRN_MAPFILES");
-   char* cfgPath = getenv("TRN_DATAFILES");
+    char* cfgPath = getenv("TRN_DATAFILES");
 	char* logPath = getenv("TRN_LOGFILES");
 
    fprintf(stderr, "ENV: maps:%s, cfgs:%s, and logs:%s\n", mapPath, cfgPath, logPath);
@@ -828,7 +834,6 @@ int main(int argc, char** argv) {
 	// done, repeat.
 	//
 	while(true) {
-		time_t ticks;
 
       char *maps = getenv("TRN_MAPFILES");
 

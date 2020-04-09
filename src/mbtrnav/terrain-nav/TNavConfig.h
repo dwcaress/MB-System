@@ -51,13 +51,16 @@ public:
    TNavConfig();
    ~TNavConfig();
 
+   // These accessor functions return a pointer to
+   // strings malloc'd off the heap. It is the caller's
+   // responsibility to free the memory.
+   // 
    char *getVehicleSpecsFile();
    char *getParticlesFile();
    char *getMapFile();
    char *getLogDir();
+
    void setMapFile(char *filename);
-
-
    void setParticlesFile(char *filename);
    void setVehicleSpecsFile(char *filename);
    void setLogDir(char *filename);
