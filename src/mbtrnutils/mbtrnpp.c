@@ -101,6 +101,105 @@ struct mbtrnpp_ping_struct {
 #define MBTRNPREPROCESS_MB1_CHECKSUM_SIZE 4
 
 #define MBTRNPREPROCESS_LOGFILE_TIMELENGTH 900.0
+typedef enum { INPUT_MODE_SOCKET = 1, INPUT_MODE_FILE = 2 } input_mode_t;
+typedef enum{
+    OUTPUT_NONE        =0x000, OUTPUT_MB1_FILE_EN =0x001, OUTPUT_MB1_SVR_EN  =0x002,
+    OUTPUT_TRN_SVR_EN  =0x004, OUTPUT_TRNU_SVR_EN =0x008, OUTPUT_MB1_BIN     =0x010,
+    OUTPUT_RESON_BIN   =0x020, OUTPUT_TRNU_ASC    =0x040, OUTPUT_TRNU_SOUT   =0x080,
+    OUTPUT_TRNU_SERR   =0x100, OUTPUT_TRNU_DEBUG  =0x200, OUTPUT_MBTRNPP_MSG =0x400,
+    OUTPUT_MBSYS_STDOUT = 0x800,
+    OUTPUT_ALL         =0xFFF
+}output_mode_t;
+
+typedef struct mbtrnpp_opts_s{
+    // opt "verbose"
+    int verbose;
+    // opt "input"
+    input_mode_t input;
+    mb_path socket_definition;
+    // opt "format"
+    int format;
+    // opt "platform-file"
+    mb_path platform_file;
+    // opt "platform-target-sensor"
+    int target_sensor;
+    // opt "log-directory"
+    mb_path log_directory;
+    int logd_status;
+    bool make_logs;
+    // opt "output"
+    mb_path output_file;
+    output_mode_t output_flags;
+    // opt "projection"
+    // opt "swath-width"
+    double swath_width;
+    // opt "soundings"
+    int soundings;
+    // opt "median-filter"
+    double median_filter_threshold;
+    int median_filter_n_across;
+    int median_filter_n_along;
+    bool median_filter;
+    int n_buffer_max;
+
+    // opt "mbhbn"
+    int mbsvr_hbtok;
+    // opt "mbhbt"
+    double mbsvr_hbto;
+    // opt "trnhbt"
+    double trnsvr_hbto;
+    // opt "trnuhbt"
+    double trnusvr_hbto;
+    // opt "delay"
+    int64_t mbtrnpp_loop_delay_msec;
+    // opt "statsec"
+    double trn_status_interval_sec;
+    // opt "statflags"
+    mstats_flags mbtrnpp_stat_flags;
+    // opt "trn-en"
+    // opt "trn-dis"
+    bool trn_enable;
+    // opt "trn-utm"
+    long int trn_utm_zone;
+    // opt "trn-map"
+    char *trn_map_file;
+    // opt "trn-cfg"
+    char *trn_cfg_file;
+    // opt "trn-par"
+    char *trn_particles_file;
+    // opt "trn-log"
+    char *trn_log_dir;
+    // opt "trn-mtype"
+    int trn_mtype;
+    // opt "trn-ftype"
+    int trn_ftype;
+
+    // opt "trn-ncov"
+    double trn_max_ncov;
+    // opt "trn-nerr"
+    double trn_max_nerr;
+    // opt "trn-ecov"
+    double trn_max_ecov;
+    // opt "trn-eerr"
+    double trn_max_eerr;
+    // opt "mb-out"
+    int mb1svr_port;
+    char *mb1svr_host;
+    // opt "trn-out"
+    int trnsvr_port;
+    char *trnsvr_host;
+    int trnusvr_port;
+    char *trnusvr_host;
+    // opt "trn-decn"
+    unsigned int trn_decn;
+    // opt "trn-decs"
+    double trn_decs;
+    // opt "trn-nombgain"
+    bool trn_nombgain;
+
+}mbtrnpp_opts_t;
+
+mbtrnpp_opts_t mbtrn_opts_s, *mbtrn_opts=&mbtrn_opts_s;
 
 int mbtrnpp_openlog(int verbose, mb_path log_directory, FILE **logfp, int *error);
 int mbtrnpp_closelog(int verbose, FILE **logfp, int *error);
@@ -119,8 +218,8 @@ int mbtrnpp_reson7kr_input_close(int verbose, void *mbio_ptr, int *error);
 int mbtrnpp_kemkmall_input_open(int verbose, void *mbio_ptr, char *definition, int *error);
 int mbtrnpp_kemkmall_input_read(int verbose, void *mbio_ptr, size_t *size, char *buffer, int *error);
 int mbtrnpp_kemkmall_input_close(int verbose, void *mbio_ptr, int *error);
-int mbtrnpp_load_config(char *config_path);
-
+//int mbtrnpp_load_config(char *config_path);
+int mbtrnpp_load_config(char *config_path, mbtrnpp_opts_t *cfg);
 static char program_name[] = "mbtrnpp";
 
 mb_path socket_definition;
@@ -129,16 +228,7 @@ mb_path socket_definition;
 
 
 #define MBTPP 1
-typedef enum { INPUT_MODE_SOCKET = 1, INPUT_MODE_FILE = 2 } input_mode_t;
 input_mode_t input_mode;
-typedef enum{
-    OUTPUT_NONE        =0x000, OUTPUT_MB1_FILE_EN =0x001, OUTPUT_MB1_SVR_EN  =0x002,
-    OUTPUT_TRN_SVR_EN  =0x004, OUTPUT_TRNU_SVR_EN =0x008, OUTPUT_MB1_BIN     =0x010,
-    OUTPUT_RESON_BIN   =0x020, OUTPUT_TRNU_ASC    =0x040, OUTPUT_TRNU_SOUT   =0x080,
-    OUTPUT_TRNU_SERR   =0x100, OUTPUT_TRNU_DEBUG  =0x200, OUTPUT_MBTRNPP_MSG =0x400,
-    OUTPUT_MBSYS_STDOUT = 0x800,
-    OUTPUT_ALL         =0xFFF
-}output_mode_t;
 #define OUTPUT_FLAG_SET(m)  ((m&output_flags)==0 ? false : true)
 #define OUTPUT_FLAG_CLR(m)  ((m&output_flags)==0 ? true : false)
 #define OUTPUT_FLAGS_ZERO() ((output_flags==0) ? true : false)
@@ -670,7 +760,7 @@ int main(int argc, char **argv) {
   g_cmd_line[MBTRNPP_CMD_LINE_BYTES - 1] = '\0';
   g_log_dir = strdup("./");
 
-  mbtrnpp_load_config("mbtrn.cfg");
+  mbtrnpp_load_config("mbtrn.cfg",mbtrn_opts);
 
   /* process argument list */
   while ((c = getopt_long(argc, argv, "", options, &option_index)) != -1)
@@ -696,7 +786,7 @@ int main(int argc, char **argv) {
         if (strstr(input, "socket:")) {
           input_mode = INPUT_MODE_SOCKET;
           sscanf(input, "socket:%s", socket_definition);
-fprintf(stderr, "socket_definition|%s\n", socket_definition);
+            fprintf(stderr, "socket_definition|%s\n", socket_definition);
         }
         else {
           input_mode = INPUT_MODE_FILE;
@@ -3944,144 +4034,159 @@ int mbtrnpp_kemkmall_input_close(int verbose, void *mbio_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 
-// trim leading/trailing whitespace and comments from token
-char *mbtrnpp_trim_token(char **ptok){
-    char *retval=NULL;
-    if(NULL!=ptok && NULL!=*ptok){
-        char *tcpy=strdup(*ptok);
 
-        // trim, truncate comments
-        char *cur = tcpy;
-        char *start=cur;
-        char *end = cur+strlen(cur);
-        bool valid=false;
-
-        // trim leading space
-        while(cur<end && isspace(*cur) )cur++;
-        start=cur;
-
-        // truncate at comment
-        while(cur<end){
-            if(*cur=='#' || (*cur=='/' && *(cur+1)=='/') ){
-                *cur='\0';
-                end=cur;
-                break;
-            }
-            cur++;
-        }
-        cur=start;
-
-        // trim trailing space
-        while(end>cur && (isspace(*end) || *end=='\0') ){
-            *end='\0';
-            end--;
-        }
-//        fprintf(stderr,"tcpy[%p] start[%p] end[%p] len[%d]\n",*tcpy,start,end,strlen(start));
-        if(strlen(start)>0){
-            *ptok=strdup(start);
-            retval=*ptok;
-        }
-        free(tcpy);
-    }
-    return retval;
-}
-
-// get one key/value token string from line
-// returns new, trimmed key/value token strings
-// caller must release using free()
-int mbtrnpp_get_kv(char *line, const char *del, char **pkey, char **pval){
-
-    int retval=-1;
-
-    if(NULL!=line && NULL!=del && NULL!=pkey && NULL!=pval){
-        char *lcopy=strdup(line);
-        char *tok=strtok(lcopy,del);
-        if(tok!=NULL){
-            *pkey=strdup(tok);
-            tok=strtok(NULL,del);
-            if(NULL!=tok && (strlen(tok)>0) ){
-                *pval=strdup(tok);
-            }else{
-                free(*pkey);
-                *pkey=NULL;
-            }
-        }
-        free(lcopy);
-
-        if(NULL!=*pkey && NULL!=*pval){
-            if(NULL!=mbtrnpp_trim_token(pkey) && NULL!=mbtrnpp_trim_token(pval)){
-                retval=0;
-            }else{
-                fprintf(stderr, "ERR invalid token key/val [%s:%s]\n", *pkey,*pval);
-                if(*pkey!=NULL){
-                    free(*pkey);
-                }
-                if(*pval!=NULL){
-                    free(*pval);
-                }
-                *pkey=NULL;
-                *pval=NULL;
-            }
-        }
-	}
-    return retval;
-}
-
-// parse key/value strings into configuration values
-int mbtrnpp_parse_kv(char *key, char *val){
-    int retval=-1;
-    if(NULL!=key && NULL!=val){
-        fprintf(stderr, ">>>> PARSING key/val [%s:%s]\n", key,val);
-        if(strcmp(key,"param")==0){
-
-        }
-        retval=0;
-    }else{
-        fprintf(stderr, "ERR - NULL key/val [%s/%s]\n", key,val);
-    }
-    return retval;
-}
 
 // load configuration from file
 // returns number of valid parsed options on success, -1 otherwise
-int mbtrnpp_load_config(char *config_path){
+int mbtrnpp_load_config(char *config_path, mbtrnpp_opts_t *cfg)
+{
     int retval=-1;
     int errcount=0;
     int parsed_count=0;
-    if(NULL!=config_path){
-        FILE *mbtrn_fp=fopen(config_path,"r+");
-        if(NULL!=mbtrn_fp){
-            // read and parse until end of file
-            char line[256]={0};
-            char *pline=line;
-            while((pline=fgets(line,256,mbtrn_fp))!=NULL){
-                // extract one key/value pair per line
-                // [mbtrnpp_get_kv returns new strings, must release using free()]
-                char *key=NULL;
-                char *val=NULL;
-                mbtrnpp_get_kv(pline,"=",&key,&val);
-                if(NULL!=key && NULL!=val){
-                    // parse key/value into configuration
-                    if(mbtrnpp_parse_kv(key,val)==0){
-                        parsed_count++;
-                    }else{
-                        fprintf(stderr, "ERR - parse error %s [%d/%s]\n", pline,errno,strerror(errno));
-                        errcount++;
-                    }
-                }else{
-                    fprintf(stderr, "ERR - invalid key/value in '%s' [%s/%s] [%d/%s]\n",pline,key,val,errno,strerror(errno));
-                }
-                // release key/value strings
-                if(NULL!=key)free(key);
-                if(NULL!=val)free(val);
-            }
-            retval=(errcount>0?-1:parsed_count);
-            fclose(mbtrn_fp);
-        }else{
-            fprintf(stderr, "ERR - could not open config file %s [%d/%s]\n", config_path,errno,strerror(errno));
-        }
-    }else{
-        fprintf(stderr, "ERR - NULL config path\n");
+    if(NULL!=config_path && NULL!=cfg){
+
     }
     return retval;
 }
+
+//// trim leading/trailing whitespace and comments from token
+//char *mbtrnpp_trim_token(char **ptok){
+//    char *retval=NULL;
+//    if(NULL!=ptok && NULL!=*ptok){
+//        char *tcpy=strdup(*ptok);
+//
+//        // trim, truncate comments
+//        char *cur = tcpy;
+//        char *start=cur;
+//        char *end = cur+strlen(cur);
+//        bool valid=false;
+//
+//        // trim leading space
+//        while(cur<end && isspace(*cur) )cur++;
+//        start=cur;
+//
+//        // truncate at comment
+//        while(cur<end){
+//            if(*cur=='#' || (*cur=='/' && *(cur+1)=='/') ){
+//                *cur='\0';
+//                end=cur;
+//                break;
+//            }
+//            cur++;
+//        }
+//        cur=start;
+//
+//        // trim trailing space
+//        while(end>cur && (isspace(*end) || *end=='\0') ){
+//            *end='\0';
+//            end--;
+//        }
+//        //        fprintf(stderr,"tcpy[%p] start[%p] end[%p] len[%d]\n",*tcpy,start,end,strlen(start));
+//        if(strlen(start)>0){
+//            *ptok=strdup(start);
+//            retval=*ptok;
+//        }
+//        free(tcpy);
+//    }
+//    return retval;
+//}
+
+//// get one key/value token string from line
+//// returns new, trimmed key/value token strings
+//// caller must release using free()
+//int mbtrnpp_get_kv(char *line, const char *del, char **pkey, char **pval){
+//
+//    int retval=-1;
+//
+//    if(NULL!=line && NULL!=del && NULL!=pkey && NULL!=pval){
+//        char *lcopy=strdup(line);
+//        char *tok=strtok(lcopy,del);
+//        if(tok!=NULL){
+//            *pkey=strdup(tok);
+//            tok=strtok(NULL,del);
+//            if(NULL!=tok && (strlen(tok)>0) ){
+//                *pval=strdup(tok);
+//            }else{
+//                free(*pkey);
+//                *pkey=NULL;
+//            }
+//        }
+//        free(lcopy);
+//
+//        if(NULL!=*pkey && NULL!=*pval){
+//            if(NULL!=mbtrnpp_trim_token(pkey) && NULL!=mbtrnpp_trim_token(pval)){
+//                retval=0;
+//            }else{
+//                fprintf(stderr, "ERR invalid token key/val [%s:%s]\n", *pkey,*pval);
+//                if(*pkey!=NULL){
+//                    free(*pkey);
+//                }
+//                if(*pval!=NULL){
+//                    free(*pval);
+//                }
+//                *pkey=NULL;
+//                *pval=NULL;
+//            }
+//        }
+//    }
+//    return retval;
+//}
+//
+//// parse key/value strings into configuration values
+//int mbtrnpp_parse_kv(char *key, char *val){
+//    int retval=-1;
+//    if(NULL!=key && NULL!=val){
+//        fprintf(stderr, ">>>> PARSING key/val [%s:%s]\n", key,val);
+//        if(strcmp(key,"param")==0){
+//
+//        }
+//        retval=0;
+//    }else{
+//        fprintf(stderr, "ERR - NULL key/val [%s/%s]\n", key,val);
+//    }
+//    return retval;
+//}
+//
+//// load configuration from file
+//// returns number of valid parsed options on success, -1 otherwise
+//int mbtrnpp_load_config(char *config_path){
+//    int retval=-1;
+//    int errcount=0;
+//    int parsed_count=0;
+//    if(NULL!=config_path){
+//        FILE *mbtrn_fp=fopen(config_path,"r+");
+//        if(NULL!=mbtrn_fp){
+//            // read and parse until end of file
+//            char line[256]={0};
+//            char *pline=line;
+//            while((pline=fgets(line,256,mbtrn_fp))!=NULL){
+//                // extract one key/value pair per line
+//                // [mbtrnpp_get_kv returns new strings, must release using free()]
+//                char *key=NULL;
+//                char *val=NULL;
+//                mbtrnpp_get_kv(pline,"=",&key,&val);
+//                if(NULL!=key && NULL!=val){
+//                    // parse key/value into configuration
+//                    if(mbtrnpp_parse_kv(key,val)==0){
+//                        parsed_count++;
+//                    }else{
+//                        fprintf(stderr, "ERR - parse error %s [%d/%s]\n", pline,errno,strerror(errno));
+//                        errcount++;
+//                    }
+//                }else{
+//                    fprintf(stderr, "ERR - invalid key/value in '%s' [%s/%s] [%d/%s]\n",pline,key,val,errno,strerror(errno));
+//                }
+//                // release key/value strings
+//                if(NULL!=key)free(key);
+//                if(NULL!=val)free(val);
+//            }
+//            retval=(errcount>0?-1:parsed_count);
+//            fclose(mbtrn_fp);
+//        }else{
+//            fprintf(stderr, "ERR - could not open config file %s [%d/%s]\n", config_path,errno,strerror(errno));
+//        }
+//    }else{
+//        fprintf(stderr, "ERR - NULL config path\n");
+//    }
+//    return retval;
+//}
