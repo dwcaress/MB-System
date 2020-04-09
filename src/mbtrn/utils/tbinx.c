@@ -744,7 +744,7 @@ static int s_out_socket(msock_socket_t *s, mb1_sounding_t *sounding)
                             }else{
                                 PMPRINT(MOD_TBINX,TBINX_V1,(stderr,"adding to client list id[%d] addr[%p]\n",svc,trn_peer));
                                 // client doesn't exist
-                                // initialze and add to list
+                                // initialize and add to list
                                 trn_peer->id = svc;
                                 trn_peer->heartbeat = trn_hbtok;
                                 trn_peer->next=NULL;
@@ -779,7 +779,7 @@ static int s_out_socket(msock_socket_t *s, mb1_sounding_t *sounding)
                     
                     break;
             }
-            // keep reading while data is availble
+            // keep reading while data is available
         } while (data_available);
         
         

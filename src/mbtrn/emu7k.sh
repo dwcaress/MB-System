@@ -146,7 +146,7 @@ exitError(){
 # name: processCmdLine
 # description: do command line processsing
 # args:
-#     args:       positional paramters
+#     args:       positional parameters
 #     returnCode: none
 ########################################
 processCmdLine(){
@@ -187,7 +187,7 @@ processCmdLine(){
 # Argument processing
 # Accepts arguments from command line
 # or pipe/file redirect
-# Comand line settings override config
+# Command line settings override config
 # file settings
 
 # process command line args
@@ -351,7 +351,7 @@ then
     fi
 fi
 
-# intialize cycle count
+# initialize cycle count
 # [loop indefinitely if <0]
 let "LOOP_COUNT=${CYCLES}"
 
