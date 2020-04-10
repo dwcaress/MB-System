@@ -901,7 +901,7 @@ int main(int argc, char** argv) {
 			//
  			if (!_tercom && _ct.msg_type != TRN_INIT) {
 				send_msg(_nack);
-				logs(TL_OMASK(TL_TRN_SERVER, TL_BOTH),"Unable to accept reqests: server not initialized\n");
+				logs(TL_OMASK(TL_TRN_SERVER, TL_BOTH),"Unable to accept requests: server not initialized\n");
 				continue;
 			}
 

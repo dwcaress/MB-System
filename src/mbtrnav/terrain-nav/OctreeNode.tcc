@@ -68,7 +68,7 @@ AddPointBinaryOccupancy(const Octree<ValueType>& OT, const Vector& point, const 
 }
 
 /*! AddData
-Takes a point and a value, and assignes the value to the leaf at MaxDepth containing that point.
+Takes a point and a value, and assigns the value to the leaf at MaxDepth containing that point.
 If the tree is not yet split down to MaxDepth at the input point, AddData will split nodes until it is.
 Assignment is always done, so the last entry written to a given leaf wins.  Collapsed values are
 perserved in all of the new children except the MaxDepth leaf in which the new data value is located.
@@ -206,7 +206,7 @@ void
 Octree<ValueType>::OctreeNode::
 Print(int num) const {
 	//Depth first order
-	//PrintTabs indents so that the tree is actualy readable by a human.
+	//PrintTabs indents so that the tree is actually readable by a human.
 	OctreeNode_PrintTabs(num);
 	std::cout << "value:    " << value << std::endl;
 	OctreeNode_PrintTabs(num);
@@ -226,7 +226,7 @@ Print(int num) const {
 Some more are defined in the OctreeNode classdef at the bottom of class Octree in Octree.hpp
 */
 /* Copy Constructor
-Defined because children is dynamicaly allocated.
+Defined because children is dynamically allocated.
 */
 template <class ValueType>
 Octree<ValueType>::OctreeNode::
@@ -244,7 +244,7 @@ OctreeNode(const OctreeNode& nodeToCopy) {
 }
 
 /* copy assignment operator
-Defined because children is dynamicaly allocated.
+Defined because children is dynamically allocated.
 */
 template <class ValueType>
 typename Octree<ValueType>::OctreeNode& //typename means Octree<ValueType>::OctreeNode is a type
@@ -270,7 +270,7 @@ Swap(OctreeNode& nodeToSwap) {
 }
 
 /* Destructor
-Defined because children is dynamicaly allocated.
+Defined because children is dynamically allocated.
 */
 template <class ValueType>
 Octree<ValueType>::OctreeNode::

@@ -489,7 +489,7 @@ Octree(const Vector& desiredResolution, const Vector& lowerBounds, const Vector&
 }
 
 /* copy assignment operator
-defined because ot the dynamic allocation of OctreeRoot
+defined because of the dynamic allocation of OctreeRoot
 */
 template <class ValueType>
 Octree<ValueType>&
@@ -515,7 +515,7 @@ as a result of a point being added.  See OctreeNode.tcc for the various AddPoint
 or Octree.hpp for a description of the Octree Types.  The return indicates the number of points added.
 
 If the point is outside the bounds of the Octree, it expands to include the new point.  This is not 
-recomended as it can result in unnecessarily large Octrees.
+recommended as it can result in unnecessarily large Octrees.
 */
 // One point
 template <class ValueType>
@@ -579,7 +579,7 @@ AddData(const Vector point, const ValueType data) {
 	return false;
 }
 
-// Many datas
+// Multiple data
 template <class ValueType>
 int
 Octree<ValueType>::

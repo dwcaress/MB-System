@@ -741,7 +741,7 @@ double computeKLdiv_gaussian_mat(double* xpts, double* ypts,
 	for(i = 1; i <= refPDF.Nrows(); i++) {
 		dx(1) = xpts[i - 1] - mu[0];
 		for(j = 1; j <= refPDF.Ncols(); j++) {
-			//compute current guassian probability
+			//compute current gaussian probability
 			dx(2) = ypts[j - 1] - mu[1];
 			Value = dx.t() * A * dx;
 			q = eta * exp(Value.AsScalar() * -0.5);

@@ -37,7 +37,7 @@ void print(long int n, measT *mt, poseT *pt, poseT *mle, poseT *mse, char goodMe
 
 int main(int argc, char* argv[])
 {
-  // Get the connection paramteres from the command line
+  // Get the connection parameters from the command line
   //
   char *map = 0, *host=0, *logdir=0, verbose=0;
   ofstream *pfile = NULL;

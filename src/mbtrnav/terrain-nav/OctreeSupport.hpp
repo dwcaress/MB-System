@@ -77,7 +77,7 @@ int Octree_PickMaxRatio(double& Xratio, const double Yratio, const double Zratio
 int Octree_PickMinPositiveRatio(const double Xratio, const double Yratio, const double Zratio);
 //for OctreeNode.cpp
 void OctreeNode_PrintTabs(int num);
-unsigned int OctreeNode_CalculateWeights(double* weights, const Vector* const points, const unsigned int* const indicies, 
+unsigned int OctreeNode_CalculateWeights(double* weights, const Vector* const points, const unsigned int* const indices, 
 								 unsigned int numPoints, const Vector& nodeLowerBounds, 
 								 const Vector& nodeUpperBounds, const Vector& TrueResolution);
 

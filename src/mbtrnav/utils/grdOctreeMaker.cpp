@@ -12,10 +12,10 @@
   take a The define X_INDEX_FIRST sets the indexing order into the one dimensional array of z values.  
   I have only ever worked with X_INDEX_FIRST = 1, but it should work to negate z and flip the x-y index 
   ordering when set to 0. If things aren't working, look at the points or the north, east, and down 
-  bounds on the points and make sure they are correct for a NED cordinate system point in Monterey 
+  bounds on the points and make sure they are correct for a NED coordinate system point in Monterey
   Bay (X: 4E6, Y: 5E5, Z: >0).
 
-  The Raytrace function of the octree requires a Euclidean coordinate system to give meaningfull 
+  The Raytrace function of the octree requires a Euclidean coordinate system to give meaningful
   results. Otherwise, the octree will work fine in any coordinate system (like LLA), and querying 
   the value at a location (with an LLA query point) will work fine.
 */
@@ -29,7 +29,7 @@
 */
 
 /*! Reducing the area of the resulting octree:
-  You can cut down the area of the octree with limits on the North and East cordinates. This is 
+  You can cut down the area of the octree with limits on the North and East coordinates. This is
   set with NORTH_BOUND, EAST_BOUND, SOUTH_BOUND, and WEST_BOUND respectively. Set any of them to 
   -1 to disable that bound and go to the edge of the input grd on that dimension. Similarly, 
   MAX_ACCEPTED_DEPTH and MIN_ACCEPTED_DEPTH set the range of depths which are accepted. If you 
@@ -71,7 +71,7 @@
 //#define INFILE "/media/sf_SharedWithVM/planer-fit/Map/AxialEM_post2015_AUV2015Bounds_TopoUTM5m.grd"
 #define INFILE "/media/sf_SharedWithVM/planer-fit/Map/IcebergTestWall/IcebergTestWall_Topo1mUTM.grd"
 
-//! zGrid could be moved to OctreeSupport (thats where I have it, but to simplify sending this, I coppied it here)
+//! zGrid could be moved to OctreeSupport (that's where I have it, but to simplify sending this, I copied it here)
 /*//header entry:
 
   struct zGrid{

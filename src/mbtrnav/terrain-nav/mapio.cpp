@@ -5,7 +5,7 @@
 //  Created by Brian Schlining on 2007-08-31.
 //  Copyright 2007 MBARI. All rights reserved.
 //
-// Documentation is formated for HeaderDoc or HeaderBrowser
+// Documentation is formatted for HeaderDoc or HeaderBrowser
 
 #include "mapio.h"
 

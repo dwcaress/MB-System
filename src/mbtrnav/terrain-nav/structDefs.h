@@ -80,7 +80,7 @@ struct poseT {
 
   double time;		  		 				 //Time (s)
 
-  bool dvlValid;							  //Validity flag for dvl motion measurment
+  bool dvlValid;							  //Validity flag for dvl motion measurement
   bool gpsValid;							  //Validity flag for GPS measurement
   bool bottomLock;						  //Validity flag for DVL lock onto seafloor
 

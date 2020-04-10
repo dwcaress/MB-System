@@ -12,10 +12,10 @@ Octrees used for TRN have historically been stored in the NED coordinate system.
 take a The define X_INDEX_FIRST sets the indexing order into the one dimensional array of z values.  
 I have only ever worked with X_INDEX_FIRST = 1, but it should work to negate z and flip the x-y index 
 ordering when set to 0. If things aren't working, look at the points or the north, east, and down 
-bounds on the points and make sure they are correct for a NED cordinate system point in Monterey 
+bounds on the points and make sure they are correct for a NED coordinate system point in Monterey
 Bay (X: 4E6, Y: 5E5, Z: >0).
 
-The Raytrace function of the octree requires a Euclidean coordinate system to give meaningfull 
+The Raytrace function of the octree requires a Euclidean coordinate system to give meaningful
 results. Otherwise, the octree will work fine in any coordinate system (like LLA), and querying 
 the value at a location (with an LLA query point) will work fine.
 */

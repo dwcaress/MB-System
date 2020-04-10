@@ -611,7 +611,7 @@ void TerrainNav::motionUpdate(poseT* incomingNav) {
 					//update lastNavPose variable
 					*tNavFilter->lastNavPose = measPose;
 
-					//incoporate measurement
+					//incorporate measurement
 					this->lastMeasSuccess = tNavFilter->measUpdate(waitingMeas[i]);
 
 					if(this->lastMeasSuccess) {
@@ -892,7 +892,7 @@ void TerrainNav::computeMeasVariance(measT& currMeas) {
 	}
 	perError = tNavFilter->vehicle->sensors[sensorIdx].percentRangeError;
 
-	//if covariance vector not already intialized, intialize it
+	//if covariance vector not already initialized, initialize it
 	if(currMeas.covariance == NULL) {
 		currMeas.covariance = new double[currMeas.numMeas];
 	}
@@ -979,7 +979,7 @@ void TerrainNav::checkRangeValidity(measT& currMeas) {
 					for(j = 0; j < currMeas.numMeas; j++) {
 						currMeas.measStatus[j] = false;
 					}
-					logs(TL_OMASK(TL_TERRAIN_NAV, TL_LOG),"TerrainNav:: Throwing out all beams beacause more "
+					logs(TL_OMASK(TL_TERRAIN_NAV, TL_LOG),"TerrainNav:: Throwing out all beams because more "
 					       "than two are equal to %.3f at t=%.2f, ping # %u.\n",
 					       alpha, currMeas.time, currMeas.ping_number);
 					return;
@@ -1079,7 +1079,7 @@ void TerrainNav::reinitFilter(bool lowInfoTransition) {
                 logs(TL_OMASK(TL_TERRAIN_NAV, TL_BOTH), "reinitFilter: getDistribToSave == %d\n", distrib_type);
 
 		// More than one setting is encoded in the useModifiedSetting value,
-		// so always use the one recevied from the client through the setModifiedWeighting() call
+		// so always use the one received from the client through the setModifiedWeighting() call
 		//useModWeight = tNavFilter->useModifiedWeighting;  // RGH: Use the value received from the client
 
 		//If keeping mean and covariance
@@ -1118,7 +1118,7 @@ void TerrainNav::reinitFilter(bool lowInfoTransition) {
 				}
 			}
 			if(this->mapType == 2) {
-				//Create Particle Fitler from windowVar  TODO: don't only use PF with octree, but allow PMF too
+				//Create Particle Filter from windowVar  TODO: don't only use PF with octree, but allow PMF too
 				createFilter(2, windowVar);
 			} else {
 				//Create Point Mass Filter from windowVar  TODO: fix PMF so that it can be used here for both cases
@@ -1205,7 +1205,7 @@ bool TerrainNav::checkFilterHealth() {
 	/*//old state machine version:
 	//check if x/y uncertainty of the filter is below a set minimum.
 	//potentially for switching filters in the future.
-	// force reinit is for testing the fitler reinitialization only
+	// force reinit is for testing the filter reinitialization only
 	if(healthy && currVarArea < MIN_FILTER_VAR)
 		//if(healthy && larger < MIN_FILTER_VAR)
 	{

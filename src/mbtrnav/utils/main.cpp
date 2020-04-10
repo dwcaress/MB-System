@@ -349,7 +349,7 @@ void runTerrainNav(const Matrix& dataKft, const Matrix& dataMeas,
 				   int mSubSample, poseT* tercomEst, poseT* mmseEst,
 				   bool realTime, int filterType, ofstream& distribFile,
 				   char* savePath, int dataK_init, double& mapResolutionX, double& mapResolutionY) {
-	//initialize measurment and pose structures
+	//initialize measurement and pose structures
 	poseT* currEstimate = new poseT;
 	measT* currMeas = new measT;
 	int dataType;
@@ -524,7 +524,7 @@ void runTerrainNav(const Matrix& dataKft, const Matrix& dataMeas,
 				j = j + mSubSample;
 				
 				//If measurement update happens first or measurement update
-				//unsucessful, skip pose estimation and file saving
+				//unsuccessful, skip pose estimation and file saving
 				if(i > 1 && tercom->lastMeasSuccessful()) {
 					//compute tercom MLE pose estimate
 					tercom->estimatePose(tercomEst, 1);

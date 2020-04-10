@@ -49,14 +49,14 @@ struct particleT {
   double terrainState[3];			//N,E,heading offset of terrain (triggered by MOVING_TERRAIN)
   double alignState[3];				//Phi, theta, psi offset of sensor wrt vehicle (triggered by SEARCH_ALIGN_STATE)
   double gyroBias[3];					//gyro bias rates for phi, theta, psi in rad/s (triggered by SEARCH_GYRO_BIAS)
-  double compassBias;					//heading bias estimate (triggerd by SEARCH_COMPASS_BIAS)
+  double compassBias;					//heading bias estimate (triggered by SEARCH_COMPASS_BIAS)
   double psiBerg;                               //Radians.  Iceberg orientation state triggered by SEARCH_PSI_BERG
   double dvlScaleFactor;			//DVL scale factor estimate (TODO: keep this? triggered by SEARCH_DVL_ERRORS)
   double dvlBias[3];					//DVL bias estimate (TODO: keep this? triggered by SEARCH_DVL_ERRORS)
 
 	//TODO: Maybe put this in another place?  Not a property of the particle?
-  //double expectedMeasDiff[4]; //TODO: make this not hard coded to 4 measurements, maybe use vector - not sure how this impacts efficiency, tho?
-	std::vector<double> expectedMeasDiff; //TODO: make this not hard coded to 4 measurements, maybe use vector - not sure how this impacts efficiency, tho?
+  //double expectedMeasDiff[4]; //TODO: make this not hard coded to 4 measurements, maybe use vector - not sure how this impacts efficiency, though?
+	std::vector<double> expectedMeasDiff; //TODO: make this not hard coded to 4 measurements, maybe use vector - not sure how this impacts efficiency, though?
 
 	double windowedNis[20];
 	unsigned int windowIndex;
@@ -136,7 +136,7 @@ class TNavPFLog;
  * estimates based on vehicle sonar and inertial measurements.
  *
  * Intended use:
- *      Initalize the TNavParticleFilter object
+ *      Initialize the TNavParticleFilter object
  *               TNavFilter *tNavFilter;
  *               tNavFilter = new TNavParticleFilter();
  *
@@ -314,7 +314,7 @@ class TNavParticleFilter : public TNavFilter
   /*! Incorporates the current roll and pitch measurement information into the 
    * particle distribution, using them to update the particle weights.  
    * Resamples the particle distribution if appropriate.
-   * Note that this funciton is only called when INTEG_PHI_THETA is set to 1.
+   * Note that this function is only called when INTEG_PHI_THETA is set to 1.
    */
   void attitudeMeasUpdate(poseT& currPose);
 
@@ -345,7 +345,7 @@ class TNavParticleFilter : public TNavFilter
   /* Function: resampParticleDist
    * Usage: resampParticleDist();
    * -------------------------------------------------------------------------*/
-  /*! Resamples the particle distibution.  Draws a set of nParticles particles
+  /*! Resamples the particle distribution.  Draws a set of nParticles particles
    * from the distribution, allParticles, with replacement.  Particles are
    * drawn with probability proportional to their weight.
    */
@@ -378,7 +378,7 @@ class TNavParticleFilter : public TNavFilter
    * Usage: updateParticleDist();
    * -------------------------------------------------------------------------*/
   /*! Updates the current particle distribution defined in allParticles to the
-   * distribution defind by resampParticles.
+   * distribution defined by resampParticles.
    */
   void updateParticleDist();
 
@@ -462,7 +462,7 @@ class TNavParticleFilter : public TNavFilter
    * "particleFile".  For each histogram, the following two lines of 
    * information are written to file:
    * 
-   * identity # of state - min. state value - max. state value - # hist bins
+   * identity # of state - min. state value - max. state value - # history bins
    * value of histogram bins for the above specified state
    *
    * This function thus adds a data block of size 4xN to the end of the 
@@ -482,7 +482,7 @@ class TNavParticleFilter : public TNavFilter
    * the min and max North and East boundaries of all the particles and adding
    * onto that the expected maximum beam projection in North and East.  The 
    * maximum beam projection is determined by using the 3sigma values of the 
-   * attitude angles in the current particle distrubtion.
+   * attitude angles in the current particle distribution.
    */
 		int defineAndLoadSubMap(const Matrix &beamsVF);
 

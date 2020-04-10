@@ -67,11 +67,11 @@
  * estimates based on vehicle sonar and inertial measurements.
  * The TNavPointMassFilter object contains a mapT structure for storing the 
  * probability distribution associated with the vehicle's current North-East 
- * location.  It also conatins a set of Matrix structures which track the 
+ * location.  It also contains a set of Matrix structures which track the
  * maximum likelihood depth bias estimate at each North-East location.
  *
  * Intended use:
- *       Initalize the TNavPointMassFilter object
+ *       Initialize the TNavPointMassFilter object
  *               TNavFilter *tNavFilter;
  *               tNavFilter = new TNavPointMassFilter();
  *
@@ -211,7 +211,7 @@ class TNavPointMassFilter : public TNavFilter
   /* Helper Function: generateMeasCorrData
    * Usage: generateMeasCorrData(currMeas);
    * -------------------------------------------------------------------------*/
-  /*! Generates the corrData structure for the current sonar measurment,currMeas
+  /*! Generates the corrData structure for the current sonar measurement,currMeas
    * , to be used in creating a likelihood correlation surface. Returns a 
    * boolean indicating if the correlation vector is non-zero size.
    */

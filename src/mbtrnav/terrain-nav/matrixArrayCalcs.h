@@ -354,7 +354,7 @@ unsigned int seed_randn(unsigned int *p_seed);
  * Usage:  randn(mean, stddev);
  * -------------------------------------------------------------------------*/
 /*! Uses a polar form Box-Muller Transform to generate a pseudorandom number
- *  from a gaussian distribution with specificied mean and standard deviation.
+ *  from a gaussian distribution with specified mean and standard deviation.
  *  Generates two random numbers for each call and stores the unused number 
  *  for the next call to this function.
  */
