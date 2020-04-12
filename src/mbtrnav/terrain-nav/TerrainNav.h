@@ -101,7 +101,7 @@ using namespace std;
 
 // Turn on V deltaT
 #ifndef INTG_POS
-#define INTG_POS 0          //Boolean to substitude integrated dvl velocity for the deltaPose.
+#define INTG_POS 0          //Boolean to substitute integrated dvl velocity for the deltaPose.
 #endif
 
 //#ifndef NIS_WINDOW_LENGTH
@@ -483,7 +483,7 @@ class TerrainNav
    * 3. 3D Extended Kalman Filter
    * 4. 8D Sigma Point (Unscented) Kalman Filter
    *
-   * windowVar is used to size the initalization window for the new filter.
+   * windowVar is used to size the inialization window for the new filter.
    *
    * If the filter object already exists, this function will delete the current
    * filter object and create a new one with stored saveDirectory,
@@ -598,7 +598,7 @@ class TerrainNav
   int numWaitingMeas;
 
   /*!boolean indicating if the previous sonar measurement was successfully
-    incoporated into the navigation filter*/
+    incorporated into the navigation filter*/
   bool lastMeasSuccess;
 
   /*!array containing the last good velocity measurements and bottom-lock status
@@ -658,7 +658,7 @@ class TerrainNav
   //!pcl pointcloud object containing current map when using octree
   //pcl::octree::OctreePointCloudSearch<pcl::PointXYZ> *octreeMap;
 
-	//!boolean indiating true if initialized successfully (i.e., the mapfile was found)
+	//!boolean indicating true if initialized successfully (i.e., the mapfile was found)
   bool _initialized;
 
   poseT _incomingNav;  // maintain the incoming poseT object, not a pointer

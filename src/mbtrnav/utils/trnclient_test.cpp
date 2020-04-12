@@ -221,12 +221,11 @@ static void s_delay_sec(double period)
 
 int main(int argc, char** argv)
 {
-    struct sigaction sa;
+
     signal(SIGINT,s_sig_handler);
 
-    trn_worker_t worker_s;
-    memset(&worker_s,0,sizeof(trn_worker_t));
-    trn_worker_t *worker=&worker_s;
+    trn_worker_t worker_s, *worker=&worker_s;
+    memset((void *)worker,0,sizeof(trn_worker_t));
 
     worker->ofmt = OF_ASCII;
     worker->pfile=NULL;

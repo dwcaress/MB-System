@@ -49,7 +49,7 @@ TLModule *tl_modules=&tl_module_config[0];
 // ring buffer
 static char ringbuf[TL_RING_BYTES];
 // ring buffer input pointer
-static char *pring=ringbuf;
+static char *p_ringbuf=ringbuf;
 // temporary buffer
 static char temp[TL_RING_BYTES];
 // TRN log file
@@ -121,15 +121,15 @@ void trn_log(const char* log_msg) {
     if (tlog != NULL) {
         // If the ring buffer isn't empty,
         // write it to the log file first.
-        if(pring>ringbuf){
+        if(p_ringbuf>ringbuf){
             char *op=ringbuf;
-            while (op<pring) {
+            while (op<p_ringbuf) {
                 fputc(*op++, tlog);
             }
             
             // empty/reset the ringbuffer
             memset(ringbuf,0,TL_RING_BYTES);
-            pring=ringbuf;
+            p_ringbuf=ringbuf;
         }
         // write the message and timestamp
         // to the log file
@@ -150,7 +150,7 @@ void trn_log(const char* log_msg) {
         // write len=msg length (w/ NULL)+newline (maybe)
         int wlen=len+ts_len+(term==0x00 ? 0 : 1);
         // space remaining
-        int rem=ringbuf+TL_RING_BYTES-pring;
+        int rem=ringbuf+TL_RING_BYTES-p_ringbuf;
         int wbytes=0;
         
 		// compare message size with space remaining
@@ -161,27 +161,27 @@ void trn_log(const char* log_msg) {
                 // truncate the message (set write len to ringbuf size)
                 wlen=TL_RING_BYTES;
                 // set input pointer to start of buffer
-                pring=ringbuf;
+                p_ringbuf=ringbuf;
             }else{
                 // wlen fits in buffer, but not in the remaining space...
                 // clear the buffer, and overwrite
                 fprintf(stderr,"WARN: overwriting start of ring buffer\n");
                 memset(ringbuf,0,TL_RING_BYTES);
-                pring=ringbuf;
+                p_ringbuf=ringbuf;
             }
         } // else message will fit in remaining space...
 
         // write to ring buffer
-        wbytes=snprintf(pring,wlen,"%s%s%c",t_str,log_msg,term);
-        //fprintf(stderr,"## len[%d] ts_len[%d] rem[%d] wlen[%d] term[%x] wbytes[%d] ios[%d]\n",len,ts_len,rem,wlen,term,wbytes,(pring-ringbuf));
+        wbytes=snprintf(p_ringbuf,wlen,"%s%s%c",t_str,log_msg,term);
+        //fprintf(stderr,"## len[%d] ts_len[%d] rem[%d] wlen[%d] term[%x] wbytes[%d] ios[%d]\n",len,ts_len,rem,wlen,term,wbytes,(p_ringbuf-ringbuf));
 
         // update ring buffer input pointer
-        pring+=(wbytes>0 ? wbytes : 0);
-        pring-=(term=='\0' ? 1 : 0);
+        p_ringbuf+=(wbytes>0 ? wbytes : 0);
+        p_ringbuf-=(term=='\0' ? 1 : 0);
     }
     // check input pointer
-    if (pring >= (ringbuf+TL_RING_BYTES)) {
-        pring=ringbuf;
+    if (p_ringbuf >= (ringbuf+TL_RING_BYTES)) {
+        p_ringbuf=ringbuf;
     }
 }
 

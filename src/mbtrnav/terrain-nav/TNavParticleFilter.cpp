@@ -103,7 +103,7 @@ measUpdate(measT& currMeas) {
 	*/
 	Matrix beamsVF(3, currMeas.numMeas);
 	Matrix tempBeamsVF(3, currMeas.numMeas);
-	int beamIndices[currMeas.numMeas];  //beamsVF to currMeas index correspondance
+	int beamIndices[currMeas.numMeas];  //beamsVF to currMeas index correspondence
 	double sumSquaresWeights = 0;
 	double sumWeights = 0;
 	double sumMeasWeights = 0;
@@ -139,7 +139,7 @@ measUpdate(measT& currMeas) {
 	}
 
 	logs(TL_OMASK(TL_TNAV_PARTICLE_FILTER, TL_LOG),"TNavPF::Measurements Projected \n");
-	logs(TL_OMASK(TL_TNAV_PARTICLE_FILTER, TL_LOG),"TNavPF::Beam Correspondances %i %i %i %i %i %i %i %i %i %i %i\n",
+	logs(TL_OMASK(TL_TNAV_PARTICLE_FILTER, TL_LOG),"TNavPF::Beam Correspondences %i %i %i %i %i %i %i %i %i %i %i\n",
 	beamIndices[0], beamIndices[1], beamIndices[2], beamIndices[3], beamIndices[4],
 	beamIndices[5], beamIndices[6], beamIndices[7], beamIndices[8], beamIndices[9], beamIndices[10] );
 
@@ -311,11 +311,11 @@ measUpdate(measT& currMeas) {
 						continue;
 					}
 
-					//particle indicies in subcloud
+					//particle indices in subcloud
 					int particleIndicies[nParticles];
 					int numParticlesWithBeamM = 0;
 
-					//indicies for particles not in the subcloud; needed for correctly handeling their weights
+					//indicies for particles not in the subcloud; needed for correctly handling their weights
 					int nonSubcloudIndicies[nParticles];
 					int nonSubcloudCount = 0;
 
@@ -487,10 +487,10 @@ measUpdate(measT& currMeas) {
 					"Weighting particles with cross beam comparison.\n");
 
 				//compile a list of beams to use for cross beam comparison
-				//	can be different beams for each particle (thats the point)
+				//	can be different beams for each particle (that's the point)
 				//	max of MAX_CROSS_BEAM_COMPARISONS
 				//	Also find the particle with the fewest good beams in case it's less
-				//	currently takes beams in numbered order rather than randomly or ordered by terrain informaiton
+				//	currently takes beams in numbered order rather than randomly or ordered by terrain information
 				int numGoodBeamsParticle[nParticles];
 				int goodBeamIndicies[nParticles * MAX_CROSS_BEAM_COMPARISONS];
 				for(int indexP = 0; indexP < nParticles; indexP++) {
@@ -501,7 +501,7 @@ measUpdate(measT& currMeas) {
 				for(int indexP = 0; indexP < nParticles; indexP++) {
 					for(int indexM=0; indexM < beamsVF.Ncols(); indexM++){
 
-						// No nan beams, and no beams which can be used normaly
+						// No nan beams, and no beams which can be used normally
 						// if(!(isnan(allParticles[indexP].expectedMeasDiff[indexM]) || useBeam[indexM])){
 						if(!(ISNIN(allParticles[indexP].expectedMeasDiff[indexM]) || useBeam[indexM])){
 							goodBeamIndicies[indexP * MAX_CROSS_BEAM_COMPARISONS + numGoodBeamsParticle[indexP]] = indexM;
@@ -534,7 +534,7 @@ measUpdate(measT& currMeas) {
 
 					//for each particle
 					//	pick a beam
-					//	calculate it's likelyhood with p(h)==1 assumption
+					//	calculate it's likelihood with p(h)==1 assumption
 					//	calculate it's contribution to delta_rms (alpha precursor)
 					for(int indexP = 0; indexP < nParticles; indexP++) {
 
@@ -577,7 +577,7 @@ measUpdate(measT& currMeas) {
 					}
 				}
 
-				//chack for nan values before allowing the update into the filter weights
+				//check for nan values before allowing the update into the filter weights
 				bool nanWeights = false;
 				for(int indexP = 0; indexP < nParticles; indexP++) {
 					//nanWeights = nanWeights || isnan(tempWeights[indexP]);
@@ -602,7 +602,7 @@ measUpdate(measT& currMeas) {
 
 
 
-			//Here we trigger betweeen using the modified weighting scheme concocted by Shandor
+			//Here we trigger between using the modified weighting scheme concocted by Shandor
 			//and the standard TRN weighting
 
 			//TODO: Figure out if we are going to do any different correlation for octree vs dem
@@ -901,7 +901,7 @@ motionUpdate(poseT& currNavPose) {
 		velocity_sf_sigma[1] = 0.0;
 		velocity_sf_sigma[2] = 0.0;
 
-		//Extract PREVIOUS sensor frame velocity plus guassian noise based on
+		//Extract PREVIOUS sensor frame velocity plus gaussian noise based on
 		//bottom lock:
 		if(lastNavPose->bottomLock) {
 			velocity_sf_sigma[0] += fabs(VEL_PER_ERROR * lastNavPose->vx / 100.0);
@@ -975,7 +975,7 @@ motionUpdate(poseT& currNavPose) {
 
 //********************************************************************************
 //
-// Maxiumum Likelihood, the particle with the highest weight.
+// Maximum Likelihood, the particle with the highest weight.
 
 void
 TNavParticleFilter::
@@ -1250,9 +1250,6 @@ initVariables() {
 	//The particle filter will start out with the maximum number of particles
 	nParticles = MAX_PARTICLES;
 
-	//Initialize random seed to desired location
-	srand(time(NULL));
-
 	//Initialize counter for soundings used in correlation
 	nSoundings = 0;
 
@@ -1393,7 +1390,7 @@ initParticleDist(particleT& initialGuess) {
 
 	}else{
 	        // If not using the particle file:
-		//Initialize the particle distribution to a gaussian around the intial guess
+		//Initialize the particle distribution to a gaussian around the initial guess
 		//Variances defined in particleFilterDefs.h
 		for(i = 0; i < nParticles; i++) {
 			allParticles[i] = initialGuess;
@@ -1650,16 +1647,6 @@ getExpectedMeasDiffParticle(particleT& particle, const Matrix& beamsSF, double* 
 // It also outputs the map variance (mapVar) that is also later used with particle
 // weighting
 
-
-#if 0
-   // RGH: I don't think this needs to be initialized every time since we're
-   // either setting tempUseBeam[i] true or false for all Ncols beams
-	if (0)
-	for(int index = 0; index < 120; index++){
-		this->tempUseBeam[index] = true;//default use the beam unless there are problems
-		//usebeam first n entries correspond to the n real measurements passed in; higher indicies have no meaning. e.g. first 4 entries for DVL.
-	}
-#endif
 
 	int i;
 	//!double beamN, beamE, beamZ, mapZ;
@@ -2159,7 +2146,7 @@ computeKLdiv_gaussian_particles() {
 		dx(1) = allParticles[i].position[0] - mu[0];
 		dx(2) = allParticles[i].position[1] - mu[1];
 
-		//compute current guassian probability
+		//compute current gaussian probability
 		Value = dx.t() * A * dx;
 		q = eta * exp(Value.AsScalar() * -0.5);
 

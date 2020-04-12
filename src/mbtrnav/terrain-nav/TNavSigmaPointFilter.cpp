@@ -123,7 +123,7 @@ bool TNavSigmaPointFilter::measUpdate(measT& currMeas)
    //project beams into vehicle frame
    successfulMeas = projectMeasVF(beamsVF, currMeas);
 
-   //if projection was sucessful, load relevant submap and apply 
+   //if projection was successful, load relevant submap and apply
    //measurement update to each particle
    if(successfulMeas)
    {
@@ -557,7 +557,7 @@ bool TNavSigmaPointFilter::incorporateMeas(Matrix& beamsVF, measT& currMeas)
          }
          else
          {
-            //if we dont' want to use nan values, don't incorporate this measurement
+            //if we don't want to use nan values, don't incorporate this measurement
             if(!USE_MAP_NAN)
             { 
                logs(TL_OMASK(TL_TNAV_SIGMA_POINT_FILTER, TL_LOG),"TerrainNav::Measurement from time = %.2f sec. not included; "

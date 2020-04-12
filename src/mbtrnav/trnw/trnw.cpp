@@ -474,7 +474,7 @@ uint32_t  wcommst_cdata_serialize(char *dest, ct_cdata_t *src, int len)
         // on the down side, it requires
         // a lot of copying/conversion b/c
         // commsT implements poseT and measT
-        // instances instead of refernces (pointers)
+        // instances instead of references (pointers)
 
         commsT *ct = new commsT();
 

@@ -38,7 +38,7 @@ Revision 1.3  2006/09/06 21:29:23  rob
 Added a Shell sort routine.
 
 Revision 1.2  2004/09/15 23:28:06  rob
-Added a root-solver using the bisect algorithm from Numerical Recipies.
+Added a root-solver using the bisect algorithm from Numerical Recipes.
 
 Revision 1.1  2001/06/02 21:33:54  hthomas
 various changes; remove stale entries in root makefile, fixed file naming to allow for serving from windows, and fixed makefiles to avoid file linking/unlinking problem in makedepend when talking through samba to windows boxes
@@ -176,7 +176,7 @@ class Math
   static int round(double x);
 
   //
-  // Bisection root solver from the old Numerical Recipies book.
+  // Bisection root solver from the old Numerical Recipes book.
   // Inputs:
   //    func(x) - function pointer to a scalar function that passes
   //              through zero in the interval [x1, x2].

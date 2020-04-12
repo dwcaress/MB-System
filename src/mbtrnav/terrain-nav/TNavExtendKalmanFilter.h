@@ -45,7 +45,7 @@
  *
  * Intended use:
  * <pre>
- *        Initalize the TNavExtendKalmanFilter object
+ *        Initialize the TNavExtendKalmanFilter object
  *               TNavFilter *tNavFilter;
  *               tNavFilter = new TNavExtendKalmanFilter();
  *
@@ -154,7 +154,7 @@ class TNavExtendKalmanFilter : public TNavFilter
   /*! Incorporates the current measurements stored in corrData by computing the
    * Kalman matrix and measurement innovation.  The H matrix is computed here
    * by computing the terrain gradients local to each measurement beam.
-   * Returns a boolean indicating if the measurment was successfully added 
+   * Returns a boolean indicating if the measurement was successfully added
    * (will be successful unless no valid terrain map information is available
    * for the current measurement).
    */
@@ -164,7 +164,7 @@ class TNavExtendKalmanFilter : public TNavFilter
   /* Function: generateMeasCorrData(currMeas)
    * Usage: generateMeasCorrData(currMeas)
    * -------------------------------------------------------------------------*/
-  /*! Generates the corrData structure for the current sonar measurment,currMeas
+  /*! Generates the corrData structure for the current sonar measurement,currMeas
    * , to be used in computing the EKF measurement update. Returns a 
    * boolean indicating if the correlation vector is non-zero size.
    */

@@ -101,7 +101,7 @@ GNU General Public License for more details
 /////////////////////////
 
 /// @fn mlist_item_t * s_mlist_partition(mlist_item_t * head, mlist_item_t * end, mlist_item_t ** newHead, mlist_item_t ** newEnd, mlist_cmp_fn compare)
-/// @brief mlist qsort partioning.
+/// @brief mlist qsort partitioning.
 /// @param[in] head list head
 /// @param[in] end list tail
 /// @param[in] newHead pointer to new list head reference

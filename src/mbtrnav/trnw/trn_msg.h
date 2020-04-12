@@ -183,7 +183,7 @@ typedef struct pt_cdata_s{
     //Time (s)
     double time;
     
-    //Validity flag for dvl motion measurment
+    //Validity flag for dvl motion measurement
     unsigned char dvlValid;
     //Validity flag for GPS measurement
     unsigned char gpsValid;

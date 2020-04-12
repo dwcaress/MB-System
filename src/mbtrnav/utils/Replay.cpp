@@ -44,8 +44,8 @@
 // Common to QNX and NIX versions
 // 
 Replay::Replay(const char* loghome, const char *map, const char *host, int port)
-  : logdir(0), trn_log(0), dvl_log(0), nav_log(0), mbtrn_log(0), nreinits(0),
-    dvl_csv(0), lastTime(0.0), nupdates(0L)
+  : logdir(0),
+     lastTime(0.0),  nupdates(0L), nreinits(0),  trn_log(0),  dvl_log(0), nav_log(0), mbtrn_log(0), dvl_csv(0)
 {
   logdir = strdup(loghome);
 
@@ -71,11 +71,11 @@ Replay::Replay(const char* loghome, const char *map, const char *host, int port)
     fprintf(stderr, "\nreplay - DeltaT data replay not implemented at the moment\n\n");
   }
 
-  char *par_format = "Particles   :";
+  char par_format[] = "Particles   :";
   if (!strcmp("NotSpecified", trn_attr->_particlesName))
   {
-    strcpy(trn_attr->_particlesName, "");
-    par_format = "";
+      strcpy(trn_attr->_particlesName, "");
+      strcpy(par_format, "");
   }
 
   // Use TRN config from the command line
@@ -116,16 +116,15 @@ Replay::~Replay()
 /*
 ** Take the standard 2-norm. This one returns the answer, since it is a scalar.
 */
-#define DIM 3
 static double Vnorm( double v[] )
 {
    double Vnorm2 = 0.;
    int i;
-   for(i=0; i<DIM; i++) Vnorm2 += pow(v[i],2.);
+   for(i=0; i<REPLAY_VNORM_DIM; i++) Vnorm2 += pow(v[i],2.);
    return( sqrt( Vnorm2 ) );
 }
 
-#if 0
+#if WITH_REPLAY_DEGTORAD
 static double degToRad(double deg)
 {
   double const RadsPerDeg = M_PI  / 180.0;
@@ -157,10 +156,7 @@ int Replay::getNextRecordSet(poseT *pt, measT *mt)
 
   // Get the data from the other log files
   // 
-  DataField *f, *field;
-  FloatData   *ff;
-  IntegerData *fi;
-  char line[20000];
+    DataField *f=NULL;
 
   try 
   {
@@ -296,17 +292,13 @@ int Replay::getLRAUVDvlRecordSet(poseT *pt, measT *mt)
 // 
 int Replay::getMbTrnRecordSet(poseT *pt, measT *mt)
 {
-  DataField *f, *field;
-  FloatData   *ff;
-  IntegerData *fi;
-  char line[20000];
+    DataField *f=NULL;
 
   try 
   {
     // Read a TRN record. TRN logs every 3 seconds, or 0.33 HZ
     // 
     mbtrn_log->read();
-    double ts = mbtrn_log->timeTag()->value();
     double lat, lon;
     mbtrn_log->fields.get( 1,&f); pt->time = atof(f->ascii());
     mbtrn_log->fields.get( 2,&f); lat = atof(f->ascii());
@@ -471,14 +463,14 @@ int Replay::loadCfgAttributes()
 
   // Initialize to default values
   // 
-  trn_attr->_mapFileName = "";
+  trn_attr->_mapFileName = NULL;
   trn_attr->_map_type = 2;
   trn_attr->_filter_type = 2;
-  trn_attr->_particlesName = "";
-  trn_attr->_vehicleCfgName = "";
-  trn_attr->_dvlCfgName = "";
-  trn_attr->_resonCfgName = "";
-  trn_attr->_terrainNavServer = "";
+  trn_attr->_particlesName = NULL;
+  trn_attr->_vehicleCfgName = NULL;
+  trn_attr->_dvlCfgName = NULL;
+  trn_attr->_resonCfgName = NULL;
+  trn_attr->_terrainNavServer = NULL;
   trn_attr->_lrauvDvlFilename = 0;
   trn_attr->_terrainNavPort = 27027;
   trn_attr->_forceLowGradeFilter = false;

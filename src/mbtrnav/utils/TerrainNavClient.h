@@ -299,7 +299,7 @@ class TerrainNavClient : public TerrainNav
 
   /////////////////////////////////////////////////////////////////////
   // Communication functions
-  int  send_msg(commsT& msg); // Pack and send the message
+  size_t  send_msg(commsT& msg); // Pack and send the message
   char get_msg();       // Returns the type of message as defined in
                         // structDefs.h, message placed in _server_msg
   bool requestAndConfirm(commsT& msg, char expected_ret_type);

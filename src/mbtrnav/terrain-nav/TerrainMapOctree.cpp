@@ -1,20 +1,16 @@
-#include "OctreeSupport.hpp"
-#include "Octree.hpp"
-
 #include <libgen.h>
-
 #include <cmath>
-
-#include "genFilterDefs.h"
-
-#include "TerrainMapOctree.h"
-
-#include "trn_log.h"
-
 #include <dirent.h>
-
 #include <fcntl.h>
 #include <fstream>
+
+
+#include "TerrainMapOctree.h"
+#include "OctreeSupport.hpp"
+#include "Octree.hpp"
+#include "genFilterDefs.h"
+#include "structDefs.h"
+#include "trn_log.h"
 
 double
 TerrainMapOctree::
@@ -53,7 +49,7 @@ TerrainMapOctree::
 tileLoadTest()
 {
    // load and unload here to catch a possible corrupted or
-   // malformed map file. This can be used in a offlin utility
+   // malformed map file. This can be used in a offline utility
    // to ensure that all tiles will load (not corrupted).
    // It can take quite some time to execute, depending on the
    // number of tiles, so it is not recommended for use in
@@ -84,8 +80,17 @@ bool
 TerrainMapOctree::
 initializeTiles(const char* mapName)
 {
-   
+   // Initialize number of tiles
+   // 
    numTiles_ = 0;
+
+   // Caller must provide a map name
+   // 
+   if (NULL == mapName)
+   {
+      logs(TL_LOG|TL_SERR,"TerrainMapOctree::no mapName given\n");
+      return false;
+   }
 
    // Does mapName exist?
    // 
@@ -98,14 +103,13 @@ initializeTiles(const char* mapName)
    // If mapname is a directory load the tiles in the "tiles.csv" file,
    // Otherwise create one tile with just the mapname and then return "true".  
    //
-
    if( !opendir( mapName ) )
    {
    	// mapName is not a directory - load one tile, one tile only
    	// 
       numTiles_ = 1;
       tiles_ = new struct MapTile;
-      tiles_[0].mapName = strdup(mapName);
+      tiles_[0].mapName = STRDUPNULL(mapName);
       tiles_[0].octreeMap = NULL;
       logs(TL_LOG|TL_SERR,"TerrainMapOctree::Using a single (non-tiled) map.\n");
       return true;
@@ -153,7 +157,7 @@ initializeTiles(const char* mapName)
       f >> tileName >> comma  >> tiles_[i].easting >> comma >> tiles_[i].northing;
       sprintf( record, "%s/%s", mapName, tileName );
 
-      tiles_[i].mapName = strdup(record);
+      tiles_[i].mapName = STRDUPNULL(record);
       tiles_[i].octreeMap = NULL;
       logs(TL_LOG|TL_SERR,"TerrainMapOctree::read tile line: %s %.1f %.1f .\n",
 			   tiles_[i].mapName, tiles_[i].northing, tiles_[i].easting);
@@ -203,15 +207,6 @@ TerrainMapOctree(const char* mapName) {
    OctreeMap = tiles_[0].octreeMap;
    OctreeMap->Print();
 
-   char *bName = strdup(mapName);
-   char *pName = strdup(mapName);
-	
-   logs(TL_LOG|TL_SERR,"TerrainMapOctree:: basename = %s.\n", basename(bName));
-   logs(TL_LOG|TL_SERR,"TerrainMapOctree:: dirname  = %s.\n", dirname(pName));
-   //logs(TL_LOG|TL_SERR,"TerrainMapOctree:: dirname = %s.\n", dirname(mapName));
-   //char *path = getPathName( mapName );
-	
-	
 }
 
 int
@@ -300,7 +295,8 @@ TerrainMapOctree::
 	{
 		for (int i = 0; i < numTiles_; i++)
 		{
-			if (tiles_[i].octreeMap) tiles_[i].unload();
+         if (tiles_[i].octreeMap) tiles_[i].unload();
+			if (tiles_[i].mapName) delete tiles_[i].mapName;
 		}
 		delete [] tiles_;
 		tiles_ = NULL;

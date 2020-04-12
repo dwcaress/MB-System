@@ -1069,7 +1069,7 @@ void sensorT::parseSensorSpecs(char* fileName) {
 	} else {
       // Throw exception on file open error rather than exit
       sprintf(temp, "Error opening sensor file %s...\n", fileName);
-      fprintf(stderr, "%s", temp);
+      fprintf(stderr, "%s: %s", __func__, temp);
       throw Exception(temp);
 	}
 
@@ -1180,7 +1180,7 @@ void vehicleT::parseVehicleSpecs(char* fileName) {
         vehicleFile.close();
      } else {
         sprintf(temp,"Error opening file %s...\n", fileName);
-        fprintf(stderr, "%s", temp);
+	     fprintf(stderr, "%s: %s", __func__, temp);
         throw Exception(temp);
      }
 
@@ -1251,10 +1251,14 @@ commsT::commsT(char type, int param, char* map, char* cfg,
 	            char* partfile, char* logdir)
 	: msg_type(type), parameter(param), vdr(0.0),
 	  mapname(NULL), cfgname(NULL), particlename(NULL), logname(NULL) {
-	mapname = strdup(map);
-	cfgname = strdup(cfg);
-	logname = strdup(logdir);
-	particlename = strdup(partfile);
+	mapname = STRDUPNULL(map);
+	cfgname = STRDUPNULL(cfg);
+	logname = STRDUPNULL(logdir);
+	particlename = STRDUPNULL(partfile);
+	if (!(map && cfg && logdir && partfile))
+		fprintf(stderr,"%s: WARNING - converted NULL parameters to empty string\n",
+			__func__);
+
 }
 
 commsT::commsT(char type, int param, measT& m)
@@ -1265,7 +1269,7 @@ commsT::commsT(char type, int param, measT& m)
 	if(msg_type == TRN_MEAS) {
 		mt = m;
 	} else {
-		fprintf(stderr,"MU msg NOT created\n");
+		fprintf(stderr,"%s: MU msg NOT created\n", __func__);
 	}
 	//printf("MU msg created\n");
 }
@@ -1279,7 +1283,7 @@ commsT::commsT(char type, poseT& p)
 			msg_type == TRN_ACK)) {
 		pt = p;
 	} else {
-		fprintf(stderr,"EP/ACK msg NOT created\n");
+		fprintf(stderr,"%s, EP/ACK msg NOT created\n", __func__);
 	}
 }
 
@@ -1386,15 +1390,15 @@ int commsT::unserialize(char* buf, int buf_length) {
 	// Initialization message?
 	//
 	else if(msg_type == TRN_INIT) {
-		mapname = strdup(buf + len);
+		mapname = STRDUPNULL(buf + len);
 		len += strlen(mapname) + 1;
-		cfgname = strdup(buf + len);
+		cfgname = STRDUPNULL(buf + len);
 		len += strlen(cfgname) + 1;
-		particlename = strdup(buf + len);
+		particlename = STRDUPNULL(buf + len);
 		len += strlen(particlename) + 1;
-		logname = strdup(buf + len);
+		logname = STRDUPNULL(buf + len);
 		len += strlen(logname) + 1;
-        LOGM("commsT::serialize - setting log name [%s]\n",logname);
+      LOGM("commsT::serialize - setting log name [%s]\n",logname);
 
 	}
 

@@ -238,12 +238,12 @@ extern "C" {
     ///  if supported by platform
     double mtime_mdtime(double mod);
     /// @fn void mtime_delay_ns(uint32_t nsec)
-    /// @brief delay for specied period
+    /// @brief delay for specified period
     /// @param[in] nsec delay period (nsec)
     /// @return none
     void mtime_delay_ns(uint32_t nsec);
     /// @fn void mtime_delay_ms(uint32_t msec)
-    /// @brief delay for specied period
+    /// @brief delay for specified period
     /// @param[in] msec delay period (msec)
     /// @return none
     void mtime_delay_ms(uint32_t msec);

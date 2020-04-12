@@ -35,7 +35,7 @@ void print(measT *mt, poseT *pt, poseT *mle, poseT *mse, char goodMeas);
 
 int main(int argc, char* argv[])
 {
-  // Get the connection paramteres from the command line
+  // Get the connection parameters from the command line
   //
   char *host=0, *logdir=0, verbose=0;
   long port=27027;

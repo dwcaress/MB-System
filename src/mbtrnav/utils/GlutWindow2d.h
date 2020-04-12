@@ -60,7 +60,7 @@ class GlutWindow2d : public GlutWindow
    virtual void mouse(int button, int state, int x, int y);
 
    /*!
-     This routine is called whenever a mouse movement event has occured.
+     This routine is called whenever a mouse movement event has occurred.
      
      @param x The x location of the mouse
      @param y The y location of the mouse
@@ -68,7 +68,7 @@ class GlutWindow2d : public GlutWindow
    virtual void mouseMotion(int x, int y);
 
    /*!
-     Overide this function to change the location from which the scene is 
+     Override this function to change the location from which the scene is 
      rendered.  It currently uses information from the mouse and the special 
      keyboard keys to set its direction
    */
