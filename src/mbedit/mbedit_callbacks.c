@@ -212,7 +212,6 @@ static int mb_borders[4] = {0, 1016, 0, 525};
  *      Notes:        *	This function expects that there is an application
  *		       	shell from which all other widgets are descended.
  */
-
 void BxUnmanageCB(Widget w, XtPointer client, XtPointer call) {
 	(void)call;
 
@@ -439,7 +438,7 @@ void do_parse_datalist(char *file, int form) {
 		const int verbose = 0;
 		void *datalist;
 		int error = MB_ERROR_NO_ERROR;
-                int datalist_status = mb_datalist_open(verbose, &datalist, file, MB_DATALIST_LOOK_NO, &error);
+                const int datalist_status = mb_datalist_open(verbose, &datalist, file, MB_DATALIST_LOOK_NO, &error);
 		if (datalist_status == MB_SUCCESS) {
 			bool done = false;
 			double weight;
@@ -449,7 +448,7 @@ void do_parse_datalist(char *file, int form) {
 			char fileprocessed[MB_PATH_MAXLINE];
 			char dfile[MB_PATH_MAXLINE];
 			while (!done) {
-				if ((datalist_status = mb_datalist_read2(verbose, datalist, &filestatus, fileraw, fileprocessed, dfile,
+				if ((/* datalist_status = */ mb_datalist_read2(verbose, datalist, &filestatus, fileraw, fileprocessed, dfile,
 				                                         &fileformat, &weight, &error)) == MB_SUCCESS) {
 					if (numfiles < NUM_FILES_MAX) {
 						strcpy(filepaths[numfiles], fileraw);
@@ -458,9 +457,8 @@ void do_parse_datalist(char *file, int form) {
 						fileesfs[numfiles] = -1;
 						numfiles++;
 					}
-				}
-				else {
-					datalist_status = mb_datalist_close(verbose, &datalist, &error);
+				} else {
+					/* datalist_status = */ mb_datalist_close(verbose, &datalist, &error);
 					done = true;
 				}
 			}
@@ -783,42 +781,15 @@ int do_setup_data() {
 /*--------------------------------------------------------------------*/
 
 void do_build_filelist() {
-	char value_text[MB_PATH_MAXLINE];
-	XmString *xstr;
-	char *lockstrptr;
-	char *lockedstr = "<Locked>";
-	char *unlockedstr = "        ";
-	char *loadedstr = "<loaded>";
-	char *esfstrptr;
-	char *esfyesstr = "<esf>";
-	char *esfnostr = "     ";
-	int verbose = 0;
-
-	/* swath file locking variables */
-	int lock_error = MB_ERROR_NO_ERROR;
-	bool locked = false;
-	int lock_purpose = MBP_LOCK_NONE;
-	mb_path lock_program;
-	mb_path lock_cpu;
-	mb_path lock_user;
-	char lock_date[25];
-
-	/* esf file checking variables */
-	int esf_exists;
-	struct stat file_status;
-	int fstat;
-	char save_file[MB_PATH_MAXLINE];
-
-	/* check to see if anything has changed */
-	bool update_filelist = false;
-
 	/* check for change in number of files */
 	Cardinal ac = 0;
 	Arg args[256];
-	int item_count;
+	int item_count = 0;
 	XtSetArg(args[ac], XmNitemCount, (XtPointer)&item_count);
 	ac++;
 	XtGetValues(list_filelist, args, ac);
+	// check to see if anything has changed
+	bool update_filelist = false;
 	if (item_count != numfiles)
 		update_filelist = true;
 
@@ -828,10 +799,21 @@ void do_build_filelist() {
 		update_filelist = true;
 	}
 
+	int verbose = 0;
+	char *lockedstr = "<Locked>";
+	char *unlockedstr = "        ";
+
 	/* check for change in lock status or esf status */
 	for (int i = 0; i < numfiles; i++) {
 		/* check for locks */
 		// int lock_status =
+		bool locked = false;
+		int lock_purpose = MBP_LOCK_NONE;
+		mb_path lock_program;
+		mb_path lock_user;
+		mb_path lock_cpu;
+		char lock_date[25];
+		int lock_error = MB_ERROR_NO_ERROR;
 		mb_pr_lockinfo(verbose, filepaths[i], &locked, &lock_purpose, lock_program, lock_user, lock_cpu, lock_date,
 		                             &lock_error);
 		if (locked != filelocks[i]) {
@@ -840,17 +822,20 @@ void do_build_filelist() {
 		}
 
 		/* check for edit save file */
+		char save_file[MB_PATH_MAXLINE];
 		sprintf(save_file, "%s.esf", filepaths[i]);
-		fstat = stat(save_file, &file_status);
-		if (fstat == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR)
-			esf_exists = true;
-		else
-			esf_exists = false;
+		struct stat file_status;
+		const int fstat = stat(save_file, &file_status);
+		const bool esf_exists = fstat == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR;
 		if (esf_exists != fileesfs[i]) {
 			fileesfs[i] = esf_exists;
 			update_filelist = true;
 		}
 	}
+
+	char *loadedstr = "<loaded>";
+	char *esfyesstr = "<esf>";
+	char *esfnostr = "     ";
 
 	/* only rebuild the filelist if necessary */
 	if (update_filelist) {
@@ -874,9 +859,10 @@ void do_build_filelist() {
 		if (numfiles > 0) {
 
 			/* allocate array of x strings */
-			xstr = (XmString *)malloc(numfiles * sizeof(XmString));
+			XmString *xstr = (XmString *)malloc(numfiles * sizeof(XmString));
 			for (int i = 0; i < numfiles; i++) {
 				/* check for locks */
+				char *lockstrptr;
 				if (currentfile == i)
 					lockstrptr = loadedstr;
 				else if (filelocks[i])
@@ -885,12 +871,14 @@ void do_build_filelist() {
 					lockstrptr = unlockedstr;
 
 				/* check for edit save file */
+				char *esfstrptr;
 				if (fileesfs[i])
 					esfstrptr = esfyesstr;
 				else
 					esfstrptr = esfnostr;
 
 				/* build x string item */
+				char value_text[MB_PATH_MAXLINE];
 				sprintf(value_text, "%s %s %s %3d", lockstrptr, esfstrptr, filepaths[i], fileformats[i]);
 				xstr[i] = XmStringCreateLocalized(value_text);
 
@@ -1303,13 +1291,11 @@ void do_y_interval(Widget w, XtPointer client_data, XtPointer call_data) {
 	(void)client_data;
 	XmScaleCallbackStruct *acs = (XmScaleCallbackStruct *)call_data;
 
-	int maxx;
-	char label[10];
-
 	my_interval = acs->value;
 
 	/* if slider set to minimum value, half the value range;
 	    if slider set to maximum value,  double the range */
+	int maxx;
 	XtVaGetValues(slider_y_interval, XmNmaximum, &maxx, NULL);
 	if (my_interval == 1 || my_interval == maxx) {
 		if (my_interval == 1)
@@ -1319,13 +1305,14 @@ void do_y_interval(Widget w, XtPointer client_data, XtPointer call_data) {
 		if (maxx < 2)
 			maxx = 2;
 		XtVaSetValues(slider_y_interval, XmNmaximum, maxx, NULL);
+		char label[10];
 		sprintf(label, "%d", maxx);
 		set_label_string(slider_y_max_interval_label, label);
 	}
 
 	/* replot the data */
 	status = mbedit_action_plot(mplot_width, mexager, mx_interval, my_interval,
-								mplot_size, mshow_beammode, mshow_flaggedsoundings, mshow_flaggedprofiles,
+				    mplot_size, mshow_beammode, mshow_flaggedsoundings, mshow_flaggedprofiles,
 	                            mshow_time, &nbuffer, &ngood, &icurrent, &mnplot);
 	if (status == 0)
 		XBell(theDisplay, 100);
@@ -1334,7 +1321,6 @@ void do_y_interval(Widget w, XtPointer client_data, XtPointer call_data) {
 /*--------------------------------------------------------------------*/
 
 void do_load(int save_mode) {
-
 	/* turn off expose plots */
 	expose_plot_ok = false;
 
@@ -1398,8 +1384,7 @@ void do_load_check(Widget w, XtPointer client_data, XtPointer call_data) {
 	/* read the input file name */
 	if (!XmStringGetLtoR(acs->value, XmSTRING_DEFAULT_CHARSET, &input_file_ptr)) {
 		fprintf(stderr, "\nno input multibeam file selected\n");
-	}
-	else {
+	} else {
 		/* turn off expose plots */
 		expose_plot_ok = false;
 
@@ -1596,11 +1581,8 @@ void do_event(Widget w, XtPointer client_data, XtPointer call_data) {
 	XEvent *event = acs->event;
 
 	KeySym keysym;
-	char buffer[1];
 	int root_x_return, root_y_return, win_x, win_y;
 	unsigned int mask_return;
-	int doit;
-	int grab_mode;
 	time_t start_time_t;
 
 	/* If there is input in the drawing area */
@@ -1611,6 +1593,7 @@ void do_event(Widget w, XtPointer client_data, XtPointer call_data) {
 								mplot_size, mshow_beammode, mshow_flaggedsoundings, mshow_flaggedprofiles,
 			                            mshow_time, &nbuffer, &ngood, &icurrent, &mnplot);
 
+		char buffer[1];
 		/* Deal with KeyPress events */
 		if (event->xany.type == KeyPress) {
 			/* Get key pressed - buffer[0] */
@@ -1922,9 +1905,9 @@ void do_event(Widget w, XtPointer client_data, XtPointer call_data) {
 			    (event->xbutton.button == 3 && mode_reverse_mouse)) {
 				x_loc = event->xbutton.x;
 				y_loc = event->xbutton.y;
-				grab_mode = GRAB_START;
+				int grab_mode = GRAB_START;
 
-				doit = 1;
+				int doit = 1;
 				while (doit) {
 
 					if (mode_pick == MODE_TOGGLE)
@@ -1997,20 +1980,18 @@ void do_event(Widget w, XtPointer client_data, XtPointer call_data) {
 
 					/* If the button is still pressed then read the location */
 					/* of the pointer and run the action mouse function again */
-					if (!mode_reverse_mouse) {
+					if (mode_reverse_mouse) {
+						if ((mask_return & 1024) == 1024 && mode_pick != MODE_TOGGLE && mode_pick != MODE_PICK)
+							doit = 1;
+						else
+							doit = 0;
+					} else /* if (!mode_reverse_mouse) */ {
 						if ((mask_return & 256) == 256 && mode_pick != MODE_TOGGLE && mode_pick != MODE_PICK)
 							doit = 1;
 						else
 							doit = 0;
 					}
-					else if (mode_reverse_mouse) {
-						if ((mask_return & 1024) == 1024 && mode_pick != MODE_TOGGLE && mode_pick != MODE_PICK)
-							doit = 1;
-						else
-							doit = 0;
-					}
-					else
-						doit = 0;
+					// else doit = 0;
 
 					/* if grab on but mouse released, end grab */
 					if (grab_mode == GRAB_MOVE && doit == 0) {
@@ -2026,7 +2007,7 @@ void do_event(Widget w, XtPointer client_data, XtPointer call_data) {
 			/* If middle mouse button is pushed then scroll in reverse. */
 			if (event->xbutton.button == 2) {
 				time(&start_time_t);
-				doit = 1;
+				int doit = 1;
 				while (doit) {
 					if (doit == 1 || difftime(time(NULL), start_time_t) > 2.0) {
 						if (key_g_down == 0) {
@@ -2059,7 +2040,7 @@ void do_event(Widget w, XtPointer client_data, XtPointer call_data) {
 			if ((event->xbutton.button == 3 && !mode_reverse_mouse) ||
 			    (event->xbutton.button == 1 && mode_reverse_mouse)) {
 				time(&start_time_t);
-				doit = 1;
+				int doit = 1;
 				while (doit) {
 					if (doit == 1 || difftime(time(NULL), start_time_t) > 2.0) {
 						if (key_g_down == 0) {
@@ -2682,30 +2663,9 @@ int do_wait_until_viewed(XtAppContext app) {
 }
 /*------------------------------------------------------------------------------*/
 
-int do_mbedit_settimer() {
-	int status = MB_SUCCESS;
-	int timer_timeout_time = 1000;
-
-	/* set timer function if none set for this instance */
-	if (!timer_function_set) {
-		const int id = XtAppAddTimeOut(app_context, (unsigned long)timer_timeout_time, (XtTimerCallbackProc)do_mbedit_workfunction,
-		                     (XtPointer)-1);
-		if (id > 0)
-			timer_function_set = true;
-		else
-			status = MB_FAILURE;
-	}
-
-	/* else
-	fprintf(stderr,"do_mbedit_settimer: FUNCTION ALREADY SET!!\n"); */
-
-	return (status);
-}
-
-/*------------------------------------------------------------------------------*/
-
-int do_mbedit_workfunction(XtPointer client_data) {
+void do_mbedit_workfunction(void *client_data, XtIntervalId *id) {
 	(void)client_data;
+	(void)id;
 
 	timer_function_set = false;
 
@@ -2717,7 +2677,26 @@ int do_mbedit_workfunction(XtPointer client_data) {
 	/* reset the timer function */
 	do_mbedit_settimer();
 
-	const int status = MB_SUCCESS;
+	// return MB_SUCCESS;
+}
+
+/*------------------------------------------------------------------------------*/
+int do_mbedit_settimer() {
+	int status = MB_SUCCESS;
+
+	/* set timer function if none set for this instance */
+	if (!timer_function_set) {
+		const unsigned long timer_timeout_time = 1000ul;
+		const int id = XtAppAddTimeOut(
+                    app_context, timer_timeout_time,
+                    do_mbedit_workfunction,
+                    (XtPointer)-1);
+		if (id > 0)
+			timer_function_set = true;
+		else
+			status = MB_FAILURE;
+	}
+
 	return (status);
 }
 
@@ -2726,23 +2705,24 @@ int do_mbedit_workfunction(XtPointer client_data) {
 /*--------------------------------------------------------------------*/
 
 int do_message_on(char *message) {
-	Widget diashell, topshell;
-	Window diawindow, topwindow;
-	XWindowAttributes xwa;
-	XEvent event;
-
 	set_label_string(label_message, message);
 	XtManageChild(bulletinBoard_message);
 
 	/* force the label to be visible */
+	Widget diashell;
 	for (diashell = label_message; !XtIsShell(diashell); diashell = XtParent(diashell))
 		;
+
+	Widget topshell;
 	for (topshell = diashell; !XtIsTopLevelShell(topshell); topshell = XtParent(topshell))
 		;
-	if (XtIsRealized(diashell) && XtIsRealized(topshell)) {
-		diawindow = XtWindow(diashell);
-		topwindow = XtWindow(topshell);
 
+	if (XtIsRealized(diashell) && XtIsRealized(topshell)) {
+		Window diawindow = XtWindow(diashell);
+		Window topwindow = XtWindow(topshell);
+
+		XEvent event;
+		XWindowAttributes xwa;
 		/* wait for the dialog to be mapped */
 		while (XGetWindowAttributes(display, diawindow, &xwa) && xwa.map_state != IsViewable) {
 			if (XGetWindowAttributes(display, topwindow, &xwa) && xwa.map_state != IsViewable)
