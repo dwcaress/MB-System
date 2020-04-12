@@ -35,7 +35,7 @@ unset MBTRNPP_ENV
 
 # set environment defaults
 # variables use environment values if set
-# and may be overriden on the command line
+# and may be overridden on the command line
 # using an environment file or options
 TRN_RESONHOST=${TRN_RESONHOST:-134.89.32.107}
 TRN_OUTHOST=${TRN_OUTHOST:-134.89.32.107}
@@ -289,9 +289,9 @@ exitError(){
 
 ########################################
 # name: processCmdLine
-# description: do command line processsing
+# description: do command line processing
 # args:
-#     args:       positional paramters
+#     args:       positional parameters
 #     returnCode: none
 ########################################
 processCmdLine(){
@@ -338,7 +338,7 @@ while getopts a:c:d:e:hm:o:r:tvw: Option
 # Argument processing
 # Accepts arguments from command line
 # or pipe/file redirect
-# Comand line settings override config
+# Command line settings override config
 # file settings
 
 # pre-process cmdline to get env file
@@ -676,7 +676,7 @@ then
     fi
 fi
 
-# intialize cycle count
+# initialize cycle count
 # [loop indefinitely if <0]
 let "LOOP_COUNT=${CYCLES}"
 

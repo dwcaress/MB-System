@@ -19,8 +19,6 @@
 #include "DoubleData.h"
 #include "TimeTag.h"
 
-class poseT;
-
 class PositionLog: public DataLogWriter {
 
 public:

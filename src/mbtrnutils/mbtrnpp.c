@@ -2855,10 +2855,10 @@ int mbtrnpp_init_trn(wtnav_t **pdest, int verbose, trn_config_t *cfg)
             if (wtnav_initialized(instance)) {
                 *pdest = instance;
                 retval = 0;
-                fprintf(stderr, "%s : TRN intialize - OK\n",__FUNCTION__);
+                fprintf(stderr, "%s : TRN initialize - OK\n",__FUNCTION__);
             }
             else {
-                fprintf(stderr, "%s : ERR - TRN wtnav intialization failed\n",__FUNCTION__);
+                fprintf(stderr, "%s : ERR - TRN wtnav initialization failed\n",__FUNCTION__);
                 wtnav_destroy(instance);
             }
         }

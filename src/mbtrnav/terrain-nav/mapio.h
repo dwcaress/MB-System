@@ -250,15 +250,15 @@ char *mapsrc_tostring(struct mapsrc *src);
  * function: mapdata_fill
  * @brief Read a submap from a netcdf UTM GRD file into a mapdata structure
  * @details Reads in a rectangular block of bathymetry data from a file (defined by src). The
- * size of the rectangle is based on the params but will NOT be exaclty as specified by xwidth and ywidth.
- * @param src The mapsrc structure definining where we are reading data from
+ * size of the rectangle is based on the params but will NOT be exactly as specified by xwidth and ywidth.
+ * @param src The mapsrc structure defining where we are reading data from
  * @param data A mapdata structure for storing the submap
  * @param x The easting position of the vehicle. In the same UTM coordinate system as the src map.
  * @param y The northing position of the vehicle. In the same UTM coordinate system as the src map.
- * @param xwidth The width of the submap in meters to retrive. 
+ * @param xwidth The width of the submap in meters to retrieve.
  * @param ywidth The width of the submap in meters to retrieve
  * @result An integer code of MAPBOUNDS_OK if all is OK, MAPBOUNDS_OUT_OF_BOUNDS if the
- *      x or y coordinate is outside the boundaries fo the map reference by src, or
+ *      x or y coordinate is outside the boundaries for the map referenced by src, or
  *      MAPBOUNDS_NEAR_EDGE if you x,y position is near the edge (resulting in a truncated
  *      submap)
  */
@@ -319,10 +319,10 @@ struct mapbounds *mapbounds_init();
 /*!
  * function: mapbounds_fill1
  * @brief Fills a mapbounds structure from a mapsrc object
- * @details Fills in a mapbounds structure based on info in the src stucture
+ * @details Fills in a mapbounds structure based on info in the src structure
  * @param src The mapsrc data structure
  * @param bounds The mapbounds data structure to populate
- * @return TODO...return a meaninful error code
+ * @return TODO...return a meaningful error code
  */
 int mapbounds_fill1(struct mapsrc *src, struct mapbounds *bounds);
 

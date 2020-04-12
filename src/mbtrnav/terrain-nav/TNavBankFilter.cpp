@@ -145,10 +145,10 @@ setModifiedWeighting(const int use)
   bfLogs = new TNavPFLog*[numFilters];
   for (i=0; i < numFilters; i++)
   {
-  	char lname[50];
-  	char mname[10];
-  	snprintf(lname, sizeof(lname), "TNavBFLog_%d", i+1);
-  	snprintf(mname, sizeof(mname), "tnbf_%d", i+1);
+  	char lname[TNAVPF_LOGFILE_NAMELEN];
+  	char mname[TNAVPF_MNEM_NAMELEN];
+  	snprintf(lname, sizeof(lname), "%s_%d", TNavBFLogName, i+1);
+  	snprintf(mname, sizeof(mname), "%s_%d", TNavBFMnemName, i+1);
   	bfLogs[i] = new TNavPFLog(DataLog::BinaryFormat, lname, mname);
   }
 }
@@ -213,7 +213,7 @@ measUpdate(measT& currMeas) {
 	Matrix beamsVF(3, currMeas.numMeas);
 	Matrix tempBeamsVF(3, currMeas.numMeas);
 	Matrix beamsIF(3, currMeas.numMeas);
-	int beamIndices[currMeas.numMeas];  //beamsVF to currMeas index correspondance
+	int beamIndices[currMeas.numMeas];  //beamsVF to currMeas index correspondence
 	double sumSquaresWeights = 0;
 	double sumWeights = 0;
 	double sumMeasWeights = 0;
@@ -249,7 +249,7 @@ measUpdate(measT& currMeas) {
 	}
 
 	logs(TL_OMASK(TL_TNAV_BANK_FILTER, TL_LOG),"TNavBF::Measurements Projected \n");
-	logs(TL_OMASK(TL_TNAV_BANK_FILTER, TL_LOG),"TNavBF::Beam Correspondances %i %i %i %i %i %i %i %i %i %i %i\n",
+	logs(TL_OMASK(TL_TNAV_BANK_FILTER, TL_LOG),"TNavBF::Beam Correspondences %i %i %i %i %i %i %i %i %i %i %i\n",
 	beamIndices[0], beamIndices[1], beamIndices[2], beamIndices[3], beamIndices[4],
 	beamIndices[5], beamIndices[6], beamIndices[7], beamIndices[8], beamIndices[9], beamIndices[10] );
 
@@ -563,11 +563,11 @@ measUpdate(measT& currMeas) {
 							continue;
 						}
 
-						//particle indicies in subcloud
+						//particle indices in subcloud
 						int particleIndicies[nParticles];
 						int numParticlesWithBeamM = 0;
 
-						//indicies for particles not in the subcloud; needed for correctly handeling their weights
+						//indices for particles not in the subcloud; needed for correctly handling their weights
 						int nonSubcloudIndicies[nParticles];
 						int nonSubcloudCount = 0;
 
@@ -762,10 +762,10 @@ measUpdate(measT& currMeas) {
 						"Filter %i\tWeighting particles with cross beam comparison.\n", filterIndex);
 
 					//compile a list of beams to use for cross beam comparison
-					//	can be different beams for each particle (thats the point)
+					//	can be different beams for each particle (that's the point)
 					//	max of MAX_CROSS_BEAM_COMPARISONS
 					//	Also find the particle with the fewest good beams in case it's less
-					//	currently takes beams in numbered order rather than randomly or ordered by terrain informaiton
+					//	currently takes beams in numbered order rather than randomly or ordered by terrain information
 					int numGoodBeamsParticle[nParticles];
 					int goodBeamIndicies[nParticles * MAX_CROSS_BEAM_COMPARISONS];
 					for(int indexP = 0; indexP < nParticles; indexP++) {
@@ -776,7 +776,7 @@ measUpdate(measT& currMeas) {
 					for(int indexP = 0; indexP < nParticles; indexP++) {
 						for(int indexM=0; indexM < beamsVF.Ncols(); indexM++){
 
-							// No nan beams, and no beams which can be used normaly
+                            // No nan beams, and no beams which can be used normally
 							// if(!(isnan(allParticles[indexP].expectedMeasDiff[indexM]) || useBeam[indexM])){
 							if(!(ISNIN(allParticles[indexP].expectedMeasDiff[indexM]) || useBeam[indexM] || !conditionForUsingBeamInFilter[indexM])){
 								goodBeamIndicies[indexP * MAX_CROSS_BEAM_COMPARISONS + numGoodBeamsParticle[indexP]] = indexM;
@@ -809,7 +809,7 @@ measUpdate(measT& currMeas) {
 
 						//for each particle
 						//	pick a beam
-						//	calculate it's likelyhood with p(h)==1 assumption
+						//	calculate it's likelihood with p(h)==1 assumption
 						//	calculate it's contribution to delta_rms (alpha precursor)
 						for(int indexP = 0; indexP < nParticles; indexP++) {
 
@@ -853,7 +853,7 @@ measUpdate(measT& currMeas) {
 						}
 					}
 
-					//chack for nan values before allowing the update into the filter weights
+					//check for nan values before allowing the update into the filter weights
 					bool nanWeights = false;
 					for(int indexP = 0; indexP < nParticles; indexP++) {
 						//nanWeights = nanWeights || isnan(tempWeights[indexP]);
@@ -872,7 +872,7 @@ measUpdate(measT& currMeas) {
 
 				/* END cross beam comparison edits*/
 
-                //Here we trigger betweeen using the modified weighting scheme concocted by Shandor
+                //Here we trigger between using the modified weighting scheme concocted by Shandor
 				//and the standard TRN weighting
 
 				//TODO: Figure out if we are going to do any different correlation for octree vs dem
@@ -1148,7 +1148,7 @@ motionUpdate(poseT& currNavPose) {
 		velocity_sf_sigma[1] = 0.0;
 		velocity_sf_sigma[2] = 0.0;
 
-		//Extract PREVIOUS sensor frame velocity plus guassian noise based on
+		//Extract PREVIOUS sensor frame velocity plus gaussian noise based on
 		//bottom lock:
 		if(lastNavPose->bottomLock) {
 			velocity_sf_sigma[0] += fabs(VEL_PER_ERROR * lastNavPose->vx / 100.0);
@@ -1261,7 +1261,7 @@ motionUpdate(poseT& currNavPose) {
 
 //********************************************************************************
 //
-// Maxiumum Likelihood, the particle with the highest weight.
+// Maximum Likelihood, the particle with the highest weight.
 
 void
 TNavBankFilter::
@@ -1377,7 +1377,6 @@ computeMMSE(poseT* mmsePose) {
 	int nonDisagreementCounts[MAX_NUM_FILTERS];
 	for(int index=0; index < this->numFilters; index++){nonDisagreementCounts[index] = 0;}
 	int minAgreements = 0;
-	double covarianceOfMinAgreements = 0;
 	int bestIndex = -1;
 
 	switch(this->filterComparison){
@@ -1742,9 +1741,6 @@ initVariables() {
 	//The particle filter will start out with the maximum number of particles
 	//nParticles = 3721; //61x61 array //MAX_PARTICLES;
 
-	//Initialize random seed to desired location
-	srand(time(NULL));
-
 	//Initialize counter for soundings used in correlation
 	nSoundings = 0;
 
@@ -1899,7 +1895,7 @@ initParticleDist(particleT& initialGuess) {
 
 	}else{
 		// If not using the particle file:
-		//Initialize the particle distribution to a gaussian around the intial guess
+		//Initialize the particle distribution to a gaussian around the initial guess
 		//Variances defined in particleFilterDefs.h
 
 		for(i = 0; i < nParticles; i++) {
@@ -2117,10 +2113,10 @@ treatBeamAsNan(int filterIndex, Matrix beamIF, const particleT &particle){
 			break;
 
 
-		case 3: // 6x 20m overlaping stripes; 3 N-S, 3 E-W
+		case 3: // 6x 20m overlapping stripes; 3 N-S, 3 E-W
 			return ((int)((10*filterIndex + beamIF(1,1) + particle.position[0]) * (filterIndex<3) + (10*filterIndex + beamIF(2,1) + particle.position[1]) * (filterIndex>=3)) % 30) >= 10;
 			break;
-		case 4:// 6x 10m non-overlaping stripes; 3 N-S, 3 E-W
+		case 4:// 6x 10m non-overlapping stripes; 3 N-S, 3 E-W
 			return ((int)((10*filterIndex + beamIF(1,1) + particle.position[0]) * (filterIndex<3) + (10*filterIndex + beamIF(2,1) + particle.position[1]) * (filterIndex>=3)) % 30) < 10;
 			break;
 		default:
@@ -2158,7 +2154,7 @@ getExpectedMeasDiffParticle(particleT& particle, const Matrix& beamsSF, double* 
 	if (0)
 		for(int index = 0; index < 120; index++){
 			this->tempUseBeam[index] = true;//default use the beam unless there are problems
-			//usebeam first n entries correspond to the n real measurements passed in; higher indicies have no meaning. e.g. first 4 entries for DVL.
+			//usebeam first n entries correspond to the n real measurements passed in; higher indices have no meaning. e.g. first 4 entries for DVL.
 		}
 #endif
 
@@ -2493,7 +2489,7 @@ computeKLdiv_gaussian_particles() {
 		dx(1) = allParticles[i].position[0] - mu[0];
 		dx(2) = allParticles[i].position[1] - mu[1];
 
-		//compute current guassian probability
+		//compute current gaussian probability
 		Value = dx.t() * A * dx;
 		q = eta * exp(Value.AsScalar() * -0.5);
 

@@ -3736,11 +3736,17 @@ int mb_imagelist_read(int verbose, void *imagelist_ptr, int *imagestatus,
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
+    fprintf(stderr, "dbg2       imagelist->open:             %d\n", imagelist->open);
+    fprintf(stderr, "dbg2       imagelist->fp:               %p\n", (void *)imagelist->fp);
+    fprintf(stderr, "dbg2       imagelist->recursion:        %d\n", imagelist->recursion);
+    fprintf(stderr, "dbg2       imagelist->path:             %s\n", imagelist->path);
+    fprintf(stderr, "dbg2       imagelist->printed:          %d\n", imagelist->printed);
+    fprintf(stderr, "dbg2       imagelist->imagelist:         %p\n", (void *)imagelist->imagelist);
     fprintf(stderr, "dbg2       path0:       %s\n", path0);
     fprintf(stderr, "dbg2       path1:       %s\n", path1);
     fprintf(stderr, "dbg2       dpath:       %s\n", dpath);
-        fprintf(stderr, "dbg2       time_d:      %f\n", *time_d);
-        fprintf(stderr, "dbg2       dtime_d:     %f\n", *dtime_d);
+    fprintf(stderr, "dbg2       time_d:      %f\n", *time_d);
+    fprintf(stderr, "dbg2       dtime_d:     %f\n", *dtime_d);
     fprintf(stderr, "dbg2       error:       %d\n", *error);
     fprintf(stderr, "dbg2  Return status:\n");
     fprintf(stderr, "dbg2       status:      %d\n", status);

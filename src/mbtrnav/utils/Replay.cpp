@@ -37,11 +37,15 @@
 #include "TRNUtils.h"
 #include "TerrainNavClient.h"
 
+#ifdef _LCMTRN
+#include "TerrainNavLcmClient.h"
+#endif
+
 // Common to QNX and NIX versions
 // 
 Replay::Replay(const char* loghome, const char *map, const char *host, int port)
-  : logdir(0), trn_log(0), dvl_log(0), nav_log(0), mbtrn_log(0), nreinits(0),
-    dvl_csv(0), lastTime(0.0), nupdates(0L)
+  : logdir(0),
+     lastTime(0.0),  nupdates(0L), nreinits(0),  trn_log(0),  dvl_log(0), nav_log(0), mbtrn_log(0), dvl_csv(0)
 {
   logdir = strdup(loghome);
 
@@ -67,11 +71,11 @@ Replay::Replay(const char* loghome, const char *map, const char *host, int port)
     fprintf(stderr, "\nreplay - DeltaT data replay not implemented at the moment\n\n");
   }
 
-  char *par_format = "Particles   :";
+  char par_format[] = "Particles   :";
   if (!strcmp("NotSpecified", trn_attr->_particlesName))
   {
-    strcpy(trn_attr->_particlesName, "");
-    par_format = "";
+      strcpy(trn_attr->_particlesName, "");
+      strcpy(par_format, "");
   }
 
   // Use TRN config from the command line
@@ -112,16 +116,15 @@ Replay::~Replay()
 /*
 ** Take the standard 2-norm. This one returns the answer, since it is a scalar.
 */
-#define DIM 3
 static double Vnorm( double v[] )
 {
    double Vnorm2 = 0.;
    int i;
-   for(i=0; i<DIM; i++) Vnorm2 += pow(v[i],2.);
+   for(i=0; i<REPLAY_VNORM_DIM; i++) Vnorm2 += pow(v[i],2.);
    return( sqrt( Vnorm2 ) );
 }
 
-#if 0
+#if WITH_REPLAY_DEGTORAD
 static double degToRad(double deg)
 {
   double const RadsPerDeg = M_PI  / 180.0;
@@ -153,10 +156,7 @@ int Replay::getNextRecordSet(poseT *pt, measT *mt)
 
   // Get the data from the other log files
   // 
-  DataField *f, *field;
-  FloatData   *ff;
-  IntegerData *fi;
-  char line[20000];
+    DataField *f=NULL;
 
   try 
   {
@@ -235,7 +235,7 @@ int Replay::getNextRecordSet(poseT *pt, measT *mt)
     return 1;
     //fprintf(stdout, "\n");
   }
-  catch (Exception e) {
+  catch (...) {
     fprintf(stderr, "\nEnd of log!\n");
     return 0;
   }
@@ -292,17 +292,13 @@ int Replay::getLRAUVDvlRecordSet(poseT *pt, measT *mt)
 // 
 int Replay::getMbTrnRecordSet(poseT *pt, measT *mt)
 {
-  DataField *f, *field;
-  FloatData   *ff;
-  IntegerData *fi;
-  char line[20000];
+    DataField *f=NULL;
 
   try 
   {
     // Read a TRN record. TRN logs every 3 seconds, or 0.33 HZ
     // 
     mbtrn_log->read();
-    double ts = mbtrn_log->timeTag()->value();
     double lat, lon;
     mbtrn_log->fields.get( 1,&f); pt->time = atof(f->ascii());
     mbtrn_log->fields.get( 2,&f); lat = atof(f->ascii());
@@ -425,6 +421,20 @@ Boolean Replay::useTRNServer()
 #endif
 }
 
+Boolean Replay::useLcmTrn()
+{
+#ifndef _LCMTRN
+  fprintf(stderr, "Replay - trn_replay was not build for LCMTRN!\n");
+  return False;
+#endif
+
+#ifdef _QNX
+  return True;
+#else
+  return !strcmp(trn_attr->_terrainNavServer, LCM_HOST);
+#endif
+}
+
 
 /****************************************************************************/
 
@@ -453,14 +463,14 @@ int Replay::loadCfgAttributes()
 
   // Initialize to default values
   // 
-  trn_attr->_mapFileName = "";
+  trn_attr->_mapFileName = NULL;
   trn_attr->_map_type = 2;
   trn_attr->_filter_type = 2;
-  trn_attr->_particlesName = "";
-  trn_attr->_vehicleCfgName = "";
-  trn_attr->_dvlCfgName = "";
-  trn_attr->_resonCfgName = "";
-  trn_attr->_terrainNavServer = "";
+  trn_attr->_particlesName = NULL;
+  trn_attr->_vehicleCfgName = NULL;
+  trn_attr->_dvlCfgName = NULL;
+  trn_attr->_resonCfgName = NULL;
+  trn_attr->_terrainNavServer = NULL;
   trn_attr->_lrauvDvlFilename = 0;
   trn_attr->_terrainNavPort = 27027;
   trn_attr->_forceLowGradeFilter = false;
@@ -474,7 +484,7 @@ int Replay::loadCfgAttributes()
   trn_attr->_phiBias = 0;
   trn_attr->_useIDTData = false;
   trn_attr->_useDvlSide = false;
-  trn_attr->_useMbTrnData = false;
+  trn_attr->_useMbTrnData   = false;
 
   // Get   key = value   pairs from non-comment lines in the cfg.
   // If the key matches a known config item, extract and save the value.
@@ -503,7 +513,10 @@ int Replay::loadCfgAttributes()
     else if (!strcmp("RollOffset",           key))  trn_attr->_phiBias = atof(value);
     else if (!strcmp("useIDTData",           key))  trn_attr->_useIDTData = strcasecmp("false", value);
     else if (!strcmp("useDVLSide",           key))  trn_attr->_useDvlSide = strcasecmp("false", value);
+
+    // Use the MbTrn.log file data when using either MbTrn data mode
     else if (!strcmp("useMbTrnData",         key))  trn_attr->_useMbTrnData = strcasecmp("false", value);
+    else if (!strcmp("useMbTrnServer",       key))  trn_attr->_useMbTrnData |= strcasecmp("false", value);
     else
       fprintf(stderr, "\n\tReplay: Unknown key in cfg: %s\n\n", key);
   }
@@ -571,10 +584,18 @@ TerrainNav* Replay::connectTRN()
     sprintf(buf, "%s/%s", datadir, trn_attr->_particlesName);
     free(trn_attr->_particlesName); trn_attr->_particlesName = strdup(buf);
     fprintf(stdout, "%s\n%s\n%s\n", trn_attr->_mapFileName, trn_attr->_vehicleCfgName, trn_attr->_particlesName);
-    if (useTRNServer())
+
+    if (useLcmTrn())
+    {
+#ifdef _LCMTRN
+      printf("Connecting to %s ...\n", trn_attr->_terrainNavServer);
+      _tercom = new TerrainNavLcmClient();
+#endif
+    }
+    else if (useTRNServer())
     {
       printf("Connecting to %s in 2...\n", trn_attr->_terrainNavServer);
-      sleep(2);
+      sleep(1);
       _tercom = new TerrainNavClient(trn_attr->_terrainNavServer,
                                      trn_attr->_terrainNavPort,
                                      trn_attr->_mapFileName, 

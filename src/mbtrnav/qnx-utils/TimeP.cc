@@ -23,8 +23,8 @@
 
 char TimeP::_monthDays[2][13] =
 {
-  0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31,
-  0, 31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31,
+  {0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31},
+  {0, 31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31}
 };
 
 
@@ -34,13 +34,11 @@ const int TimeP::SecondsPerMinute = 60;
 
 TimeP::TimeP()
 {
-    Boolean debug=True;
     if (TPDEBUG) printf("\n****TimeP::TimeP ctor[%p]\n",this);
 }
 
 TimeP::~TimeP()
 {
-    Boolean debug=True;
     if (TPDEBUG) printf("\n****TimeP::TimeP dtor[%p]\n",this);
 }
 void TimeP::cleanup(){
@@ -83,7 +81,6 @@ unsigned long TimeP::milliseconds()
 
 void TimeP::gettime(struct timespec *timeSpec)
 {
-    Boolean debug=True;
    	clock_gettime(CLOCK_REALTIME, timeSpec);
 
 //  printf(":\t\t\t\tTimeP::gettime() - seconds %ld\n", timeSpec->tv_sec);

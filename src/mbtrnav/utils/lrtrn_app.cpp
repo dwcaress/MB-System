@@ -16,22 +16,60 @@
 
 using namespace lcmTrn;
 
+// Return a default configuration file pathname using the environment variable, etc.
+//
+char* getDefaultConfig()
+{
+  // Use the environment variable for the config directory. If the
+  // variable is not defined, use the local directory.
+  //
+  char *cfg = LcmTrn::constructFullName(LCMTRN_CONFIG_ENV, LCMTRN_DEFAULT_CONFIG);
+  return cfg;
+}
+
+void usage()
+{
+  fprintf(stderr, "Usage:\n");
+  fprintf(stderr, "  lrtrn_app [cfgfile]\n\n");
+  fprintf(stderr, "  cfgfile: optional path to lrtrn configuration file\n");
+  fprintf(stderr, "           default is $%s/%s\n", LCMTRN_CONFIG_ENV, LCMTRN_DEFAULT_CONFIG);
+  fprintf(stderr, "           local directory used if $%s is undefined\n\n", LCMTRN_CONFIG_ENV);
+}
+
 int main(int argc, char** argv)
 {
   //**************************************************************************
   // Initialization phase
   //**************************************************************************
 
+  // Use default configuration file if none was specified on the command line.
+  //
   char *configfile = NULL;
-  if (argc > 1) configfile = argv[1];
+  if (argc == 1)
+    configfile = getDefaultConfig();
+  else if (argc == 2)
+    configfile = strdup(argv[1]);
+  else
+    usage();
 
+  // Quit if no config
+  //
+  if (NULL == configfile) exit(0);
+
+  // Create LcmTrn object and run it
+  //
   lcmTrn::LcmTrn *_trn = new LcmTrn(configfile);
 
-  _trn->run();
+  // Run if the LcmTrn object setup was a success.
+  // run() only stops when the LcmTrn object is not good.
+  //
+  if (_trn->good()) _trn->run();
 
-  _trn->reinit("some-other-file.cfg");
 
-  _trn->run();
+  // Clean
+  //
+  DELOBJ(_trn);
+  DELOBJ(configfile);
 
   return 0;
 }

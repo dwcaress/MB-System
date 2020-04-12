@@ -959,6 +959,8 @@ extern "C" {
 int mb_pr_checkstatus(int verbose, char *file, int *prstatus, int *error);
 int mb_pr_readpar(int verbose, char *file, int lookforfiles, struct mb_process_struct *process, int *error);
 int mb_pr_writepar(int verbose, char *file, struct mb_process_struct *process, int *error);
+int mb_pr_compare(int verbose, struct mb_process_struct *process1,
+                  struct mb_process_struct *process2, int *num_difference, int *error);
 int mb_pr_bathmode(int verbose, struct mb_process_struct *process, int *error);
 int mb_pr_default_output(int verbose, struct mb_process_struct *process, int *error);
 int mb_pr_get_output(int verbose, int *format, char *ifile, char *ofile, int *error);

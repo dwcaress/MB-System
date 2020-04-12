@@ -136,7 +136,8 @@ int main(int argc, char** argv) {
 		strcpy(map_files[num], "PortugueseLedge/PortugueseLedgeRemade6-14-2016.bo");
 		//strcpy(map_files[num], "PortugueseLedge/PL_2m_filled_compression.bin");
 	} else if(map_type == 3){
-		strcpy(map_files[num], "PortugueseLedge/PortugueseLedgeOctree_PlanarFit_2m_filledOne_compression_fullCoverage.pfo");//TODO: no guarintee this is a good map -David
+        //TODO: no guarantee this is a good map -David
+		strcpy(map_files[num], "PortugueseLedge/PortugueseLedgeOctree_PlanarFit_2m_filledOne_compression_fullCoverage.pfo");
 	} 	else {
 		printf("Invalid map_type.  Exiting.\n");
 		return -1;
@@ -162,7 +163,8 @@ int main(int argc, char** argv) {
 		//strcpy(map_files[num], "SoquelCanyon/SoquelCanyonOctree_PlanarFit_2m_filledOne_compression_fullCoverage.bin");
 		//strcpy(map_files[num], "SoquelCanyon/SC_2m_filled_compression.bin");
 	} else if(map_type == 3){
-		strcpy(map_files[num], "SoquelCanyon/SoquelCanyonOctree_PlanarFit_2m_filledOne_compression_fullCoverage.pfo");//TODO: no guarintee this is a good map -David
+        //TODO: no guarantee this is a good map -David
+		strcpy(map_files[num], "SoquelCanyon/SoquelCanyonOctree_PlanarFit_2m_filledOne_compression_fullCoverage.pfo");
 	} else {
 		printf("Invalid map_type.  Exiting.\n");
 		return -1;
@@ -185,7 +187,8 @@ int main(int argc, char** argv) {
 		strcpy(map_files[num], "PortugueseLedge/PortugueseLedgeOctree_SomewhatFilled_1m.bin");
 		//strcpy(map_files[num], "PortugueseLedge/PL_2m_filled_compression.bin");
 	} else if(map_type == 3){
-		strcpy(map_files[num], "PortugueseLedge/PortugueseLedgeOctree_PlanarFit_2m_filledOne_compression_fullCoverage.pfo");//TODO: no guarintee this is a good map -David
+        //TODO: no guarantee this is a good map -David
+        strcpy(map_files[num], "PortugueseLedge/PortugueseLedgeOctree_PlanarFit_2m_filledOne_compression_fullCoverage.pfo");
 	} else {
 		printf("Invalid map_type.  Exiting.\n");
 		return -1;
@@ -221,8 +224,7 @@ int main(int argc, char** argv) {
 								   dataK_numRows[i], 22);
 								   
 		for(j = 0; j < numRepeat; j++) {
-			double mapResolutionX, mapResolutionY;
-			
+
 			runTerrainNav(dataKft, dataMeas,
 						  map_type, map_files[i], 0, 15, 15,
 						  tercomEst, mmseEst, realTime, 3, init_dataK[i]);
@@ -312,15 +314,11 @@ void runTerrainNav(const Matrix& dataKft, const Matrix& dataMeas,
 				   int interpMethod, int kSubSample,
 				   int mSubSample, poseT* tercomEst, poseT* mmseEst,
 				   bool realTime, int filterType, int dataK_init) {
-	//initialize measurment and pose structures
+	//initialize measurement and pose structures
 	poseT* currEstimate = new poseT;
 	measT* currMeas = new measT;
 	int dataType;
-//	currMeas->ranges = new double[4];
-//	currMeas->alongTrack = new double[20];
-//	currMeas->crossTrack = new double[20];
-//	currMeas->altitudes = new double[20];
-//	currMeas->measStatus = new bool[20];
+    // TODO: replace consts w/ macros (what drives the values?)
 	currMeas->ranges = new double[120];
 	currMeas->alongTrack = new double[120];
 	currMeas->crossTrack = new double[120];
@@ -331,14 +329,9 @@ void runTerrainNav(const Matrix& dataKft, const Matrix& dataMeas,
 	int M = dataMeas.Nrows();
 	int i_init = dataK_init;
 	int j_init = 1;
-	int i, j, k;
-	sem_t semaphore;
-	struct timespec semTime;
-	
-	sem_init(&semaphore, 0, 0);
-	
+    int i, j;
 	char filename[512];
-	
+	struct timespec semTime;
 	
 	char dotSlash[] = "./";
 	char *dataPath = getenv("TRN_DATAFILES");
@@ -348,22 +341,18 @@ void runTerrainNav(const Matrix& dataKft, const Matrix& dataMeas,
 	
 	//initialize terrainNav object and load map
 	TerrainNav* tercom;
+    char spec_cfg[]="mappingAUV_specs.cfg";
+
 	if(trnHost) {
 		tercom = new TerrainNavClient(trnHost, trnPort,
-									  mapFile, (char*)"mappingAUV_specs.cfg", "", "", filterType, map_type);
+                                      mapFile, spec_cfg, NULL, NULL, filterType, map_type);
 	} else {
 	
 		sprintf(filename, "%s%s", mapPath, mapFile);
 		printf("Loading map file %s\n", filename);
-		tercom = new TerrainNav(filename, (char*)"mappingAUV_specs.cfg", filterType, map_type);
+		tercom = new TerrainNav(filename, spec_cfg, filterType, map_type);
 	}
-	
-	//set random number generator for test cases
-	//srand(2000);
-	
-	//tercom->tNavFilter->setMapInterpMethod(interpMethod);
-	//tercom->tNavFilter->setInterpMeasAttitude(true);
-	
+
 	// Changed to be compatible with TRN Client
 	tercom->setMapInterpMethod(interpMethod);
 	tercom->setInterpMeasAttitude(true);
@@ -472,7 +461,7 @@ void runTerrainNav(const Matrix& dataKft, const Matrix& dataMeas,
 				j = j + mSubSample;
 				
 				//If measurement update happens first or measurement update
-				//unsucessful, skip pose estimation and file saving
+				//unsuccessful, skip pose estimation and file saving
 				if(i > 1 && tercom->lastMeasSuccessful()) {
 					//compute tercom MLE pose estimate
 					tercom->estimatePose(tercomEst, 1);

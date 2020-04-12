@@ -168,9 +168,9 @@ exit_error(){
 
 ########################################
 # name: processCmdLine
-# description: do command line processsing
+# description: do command line processing
 # args:
-#     args:       positional paramters
+#     args:       positional parameters
 #     returnCode: none
 ########################################
 processCmdLine(){

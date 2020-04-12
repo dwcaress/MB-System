@@ -30,11 +30,11 @@ Specifics for Vector functions and struct Path : OctreeSupport.cpp and OctreeSup
 */
 
 /*! Overarching Goal of Octree.hpp and related stuff:
-Octrees are intended to be used for maping and navigation in fully 3D underwater environments.
+Octrees are intended to be used for mapping and navigation in fully 3D underwater environments.
 Octrees are a compressed representation of discritized (gridded) space.  The compression
 comes from groupoing together volumes of space which have the same "value" attached.  This
 grouping is represented in a tree structure:
-	- The tree is stored and accesed by the root (depth zero) node.
+	- The tree is stored and accessed by the root (depth zero) node.
 	- Nodes have either eight children (branch nodes) or no children (leaf nodes)
 	- At each successive level of branch nodes, the parent's volume is divided in half
 		on all three dimensions to get the volumes for the eight children.
@@ -52,8 +52,8 @@ octrees:
 	- Measurement functions (Ray traceing, Querying, and a linear interpolation Query)
 	- Constructor and addPoint functions for making the octree structure and giving it data to
 		represent
-	- Save and Load funcitons
-	- Private helper functions for useing the Octree
+	- Save and Load functions
+	- Private helper functions for using the Octree
 
 You may notice that Octree is templated; this allows the same class to represent many
 different possible types of data with the same functionality.  OctreeType is somewhat related
@@ -62,7 +62,7 @@ OctreeTypes section below).
 */
 /*! Description of OctreeNode:
 The OctreeNode class is defined privately inside class Octree.  This is to hide the
-implimentation of Octree from the user.  The class has two variables: value and children.
+implementation of Octree from the user.  The class has two variables: value and children.
 - Value is the payload of the node.  If the node is a leaf, the OctreeType and the input
 	points determine what the value is.  If the node is a branch node, value is EmptyValue
 	(most likely zero).
@@ -92,10 +92,10 @@ Current Octree Types:
 	
 	- Data type: User specifies the value to store at each node by inputing (point, value) pairs.
 		Unspecified nodes have value = EmptyValue.
-		<Literaly any type> but it is on you to figure out what should go in each voxel.
+		<Literally any type> but it is on you to figure out what should go in each voxel.
 
 Note about ValueType and OctreeType: It is up to you to combine them inteligently.  You
-are capible of making a BinaryOccupancy Octree with ValueType 'long double' and it
+are capable of making a BinaryOccupancy Octree with ValueType 'long double' and it
 probably won't break anything. ...but I will think less of you as a person.  Also, some
 combinations may cause unexpected results or not compile like a PointCount Octree with ValueType 'bool'
 */

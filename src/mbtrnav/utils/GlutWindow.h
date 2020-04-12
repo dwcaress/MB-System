@@ -106,7 +106,7 @@ class GlutWindow
    virtual void mouse(int button, int state, int x, int y);
 
    /*!
-     This routine is called whenever a mouse movement event has occured.
+     This routine is called whenever a mouse movement event has occurred.
      If you are overriding it, consider calling Glut_Window::mouse_motion()
      in your descendant classes, to maintain the mouse interface
      @param x The x location of the mouse
@@ -115,7 +115,7 @@ class GlutWindow
    virtual void mouseMotion(int x, int y);
 
    /*!
-     Overide this function to change the location from which the scene is 
+     Override this function to change the location from which the scene is
      rendered.  It currently uses information from the mouse and the special 
      keyboard keys to set its direction
    */
@@ -181,7 +181,7 @@ protected:
    //*! Whether the window was launched.  Needed in the destructor to destroy the window or not.
    bool windowLaunched;
 
-   /*! Saves the current screen shot to the filname */
+   /*! Saves the current screen shot to the filename */
    //void saveScreenshot(char *filename);
 };
 

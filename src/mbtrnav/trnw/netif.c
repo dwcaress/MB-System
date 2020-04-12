@@ -252,7 +252,7 @@ static bool s_peer_idval_cmp(void *item, void *value)
             retval=-1;
             MST_COUNTER_INC(self->profile->stats->events[NETIF_EV_ECLI_RXZ]);
 
-            break;// fall thru - OK(?)
+            break;// fall through - OK(?)
         case -1:
             if(errsave!=EAGAIN){
             PMPRINT(MOD_NETIF,NETIF_V2,(stderr,"[UDPCON.%s]:ERR - recvfrom ret[-1] err[%d/%s]\n",self->port_name,errsave,strerror(errsave)));
@@ -283,7 +283,7 @@ static bool s_peer_idval_cmp(void *item, void *value)
                    }else{
                         PMPRINT(MOD_NETIF,NETIF_V1,(stderr,"[UDPCON.%s]:ADD_SUB - id[%p/%s:%s] idx[%zd]\n",self->port_name,peer,peer->chost, peer->service,mlist_size(list)-1));
                         // client doesn't exist
-                        // initialze and add to list
+                        // initialize and add to list
                         peer->id = svc;
                         peer->heartbeat = 0;
                         peer->hbtime = connect_time;
@@ -1205,7 +1205,7 @@ int netif_test()
     mlog_tprintf(netif->mlog_id,"*** netif session end (TEST) uptime[%.3lf] ***\n",(mtime_dtime()-start_time));
     // server: close, release netif
     netif_destroy(&netif);
-    // relase trn
+    // release trn
     wtnav_destroy(trn);
     // debug: release resources
     mmd_release();

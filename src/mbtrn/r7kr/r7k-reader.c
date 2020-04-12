@@ -526,7 +526,7 @@ void r7kr_reader_purge(r7kr_reader_t *self)
 /// @param[in] len number of bytes of input to read
 /// @param[in] retries number of retries
 /// @param[in] tmout_ms timeout
-/// @return none; attempts to read len characters at a tim
+/// @return none; attempts to read len characters at a time
 /// until a timeout occurs
 void r7kr_reader_flush(r7kr_reader_t *self, uint32_t len, int32_t retries, uint32_t tmout_ms)
 {

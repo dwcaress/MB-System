@@ -33,11 +33,11 @@ static int numReinits = 0;
 
 // Verbose mode print facility
 // 
-void print(measT *mt, poseT *pt, poseT *mle, poseT *mse, char goodMeas);
+void print(long int n, measT *mt, poseT *pt, poseT *mle, poseT *mse, char goodMeas);
 
 int main(int argc, char* argv[])
 {
-  // Get the connection paramteres from the command line
+  // Get the connection parameters from the command line
   //
   char *map = 0, *host=0, *logdir=0, verbose=0;
   ofstream *pfile = NULL;
@@ -47,14 +47,16 @@ int main(int argc, char* argv[])
 
   // Deal with cmd-line options
   // 
-  while ( (c = getopt(argc, argv, "m:h:p:l:vf:")) != EOF )
+  while ( (c = getopt(argc, argv, "m:h:p:l:vf:L")) != EOF )
   {
     if (c == 'l')
       logdir = strdup(optarg);   // Log directory
+    else if (c == 'L')
+      host = strdup(LCM_HOST);   // Send updates to LCM channels
     else if (c == 'h')
       host = strdup(optarg);     // TRN host overrides host in config file
     else if (c == 'm')
-      map = strdup(optarg);     // TRN map overrides map in config file
+      map = strdup(optarg);      // TRN map overrides map in config file
     else if (c == 'p')
       port = atol(optarg);       // TRN port overrides port in config file
     else if (c == 'v')
@@ -143,7 +145,7 @@ int main(int argc, char* argv[])
   // motion and measure updates that were used by TRN in
   // this mission, and send them again.
   // 
-  long int nupdates, nu;
+  long int nupdates, nu, ng;
   poseT pt, mle, mse;
   measT mt;
   mt.numMeas    = 4;
@@ -159,13 +161,14 @@ int main(int argc, char* argv[])
   // data remains in the mission log files.
   // 
   int s;
-  for (nupdates=0, nu=0; (s = r->getNextRecordSet(&pt, &mt)) != 0; nupdates += 2)
+  for (nupdates=0, nu=0, ng=0; (s = r->getNextRecordSet(&pt, &mt)) != 0; nupdates += 2)
   {
     // Skip this record if indicated
     // 
     if (s < 0) continue;
 
     nu++;
+    //sleep(3);
 
     //continue;
     // Order is significant, so if the measT timestamp is
@@ -196,11 +199,12 @@ int main(int argc, char* argv[])
     char goodMeas = _tercom->lastMeasSuccessful();
     if (verbose)
     {
-      print(&mt, &pt, &mle, &mse, goodMeas);
+      print(nu, &mt, &pt, &mle, &mse, goodMeas);
     }
 
     if (goodMeas)
     {
+      ng++;
       if (pfile) _tercom->tNavFilter->saveCurrDistrib(*pfile);
 
       //display tercom estimate biases
@@ -220,7 +224,6 @@ int main(int argc, char* argv[])
 
     // Continue to invoke tercom like a normal mission
     // 
-    int fs = _tercom->getFilterState();
     int nr = _tercom->getNumReinits();
     if (nr > numReinits)
     {
@@ -236,8 +239,8 @@ int main(int argc, char* argv[])
 
   // Done
   // 
-  fprintf(stderr,"Done. Close the connection after %ld updates"
-                " and %d reinits...\n", nu, numReinits);
+  fprintf(stderr,"Done. Close the connection after %ld updates, %ld good meas"
+                " and %d reinits...\n", nu, ng, numReinits);
   delete _tercom;
 
   return 0;
@@ -245,8 +248,9 @@ int main(int argc, char* argv[])
 
 // Verbose mode print facility
 // 
-void print(measT *mt, poseT *pt, poseT *mle, poseT *mse, char goodMeas)
+void print(long int nu, measT *mt, poseT *pt, poseT *mle, poseT *mse, char goodMeas)
 {
+  fprintf(stderr, "Iteration: %ld\n",nu);
   fprintf(stderr,"\nposeT: %.6f\n"
          "  x    : %.6f\n"
          "  y    : %.6f\n"
@@ -262,7 +266,7 @@ void print(measT *mt, poseT *pt, poseT *mle, poseT *mse, char goodMeas)
                   pt->dvlValid, pt->gpsValid, pt->bottomLock);
 
   if (mt->numMeas >= 4)
-    fprintf(stderr,"\nmeasT: %.6f\n"
+    fprintf(stderr,"\nmeasT: %.6f\t%d beams\n"
          "  beam1: %.6f\n"
          "  beam2: %.6f\n"
          "  beam3: %.6f\n"
@@ -270,7 +274,7 @@ void print(measT *mt, poseT *pt, poseT *mle, poseT *mse, char goodMeas)
          "  phi  : %.6f\n"
          "  theta: %.6f\n"
          "  psi  : %.6f\n",
-         mt->time, mt->ranges[0], mt->ranges[1], mt->ranges[2], mt->ranges[3],
+         mt->time, mt->numMeas, mt->ranges[0], mt->ranges[1], mt->ranges[2], mt->ranges[3],
          mt->phi, mt->theta, mt->psi);
 
   // Print position estimates only when they were successful

@@ -65,7 +65,7 @@ void CharData::parseValue(const char *stringRep)
 {
 
   if (strlen(stringRep) > 1) {
-    char errorBuf[100];
+    char errorBuf[MAX_EXC_STRING_LEN];
     sprintf(errorBuf, 
 	    "CharData::parseValue() - invalid representation: \"%s\"",
 	    stringRep);

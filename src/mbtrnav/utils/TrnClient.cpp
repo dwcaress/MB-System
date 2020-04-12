@@ -35,12 +35,13 @@
 #include "DataField.h"
 #include "TRNUtils.h"
 
+
 // Common to QNX and NIX versions
 // 
 TrnClient::TrnClient(const char *host, int port)
 : TerrainNavClient(),
-logdir(NULL), nreinits(0L),verbose(0),
-   lastTime(0.0), nupdates(0L)
+logdir(NULL),
+   lastTime(0.0), nupdates(0L), nreinits(0L), verbose(0)
 {
 
     
@@ -82,16 +83,18 @@ TrnClient::~TrnClient()
 /*
 ** Take the standard 2-norm. This one returns the answer, since it is a scalar.
 */
-#define DIM 3
+
+#ifdef WITH_VNORM_FN
 static double Vnorm( double v[] )
 {
    double Vnorm2 = 0.;
    int i;
-   for(i=0; i<DIM; i++) Vnorm2 += pow(v[i],2.);
+   for(i=0; i<VNORM_DIM; i++) Vnorm2 += pow(v[i],2.);
    return( sqrt( Vnorm2 ) );
 }
+#endif
 
-#if 0
+#ifdef WITH_DEGTORAD_FN
 static double degToRad(double deg)
 {
   double const RadsPerDeg = M_PI  / 180.0;

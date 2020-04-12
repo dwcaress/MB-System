@@ -26,8 +26,8 @@
 
 char _monthDays[2][13] =
 {
-  0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31,
-  0, 31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31,
+  {0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31},
+  {0, 31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31}
 };
 
 
@@ -89,10 +89,10 @@ void TimeTag::parseValue(const char *stringRep)
 
   struct tm timeStruct;
   char buf[100];
-  char errorBuf[100];
+  char errorBuf[MAX_EXC_STRING_LEN];
   double seconds;
 
-  strncpy(buf, stringRep, sizeof(buf));
+  strncpy(buf, stringRep, sizeof(buf)-1);
 
   state = ParseYear;
   char *token;
@@ -106,7 +106,7 @@ void TimeTag::parseValue(const char *stringRep)
 
     case ParseYear:
       if (!StringConverter::isInteger(token)) {
-	sprintf(errorBuf,
+	snprintf(errorBuf, sizeof(errorBuf),
 		"TimeTag::parseValue() - invalid year: \"%s\"", token);
 	throw Exception(errorBuf);
       }
@@ -117,7 +117,7 @@ void TimeTag::parseValue(const char *stringRep)
 
     case ParseDayOfYear:
       if (!StringConverter::isInteger(token)) {
-	sprintf(errorBuf,
+	snprintf(errorBuf, sizeof(errorBuf),
 		"TimeTag::parseValue() - invalid day-of-year: \"%s\"", token);
 	throw Exception(errorBuf);
       }
@@ -137,7 +137,7 @@ void TimeTag::parseValue(const char *stringRep)
 
     case ParseHours:
       if (!StringConverter::isInteger(token)) {
-	sprintf(errorBuf,
+	snprintf(errorBuf, sizeof(errorBuf),
 		"TimeTag::parseValue() - invalid hours: \"%s\"", token);
 	throw Exception(errorBuf);
       }
@@ -148,7 +148,7 @@ void TimeTag::parseValue(const char *stringRep)
 
     case ParseMinutes:
       if (!StringConverter::isInteger(token)) {
-	sprintf(errorBuf,
+	snprintf(errorBuf, sizeof(errorBuf),
 		"TimeTag::parseValue() - invalid minutes: \"%s\"", token);
 	throw Exception(errorBuf);
       }
@@ -160,7 +160,7 @@ void TimeTag::parseValue(const char *stringRep)
     case ParseSeconds:
 
       if (!StringConverter::isFloat(token)) {
-	sprintf(errorBuf,
+	snprintf(errorBuf, sizeof(errorBuf),
 		"TimeTag::parseValue() - invalid seconds: \"%s\"", token);
 	throw Exception(errorBuf);
       }
@@ -173,7 +173,8 @@ void TimeTag::parseValue(const char *stringRep)
       break;
 
     default:
-      sprintf(errorBuf, "TimeTag::parseValue() - extra tokens in \"%s\"",
+      snprintf(errorBuf, sizeof(errorBuf), 
+        "TimeTag::parseValue() - extra tokens in \"%s\"",
 	      stringRep);
 
       throw Exception(errorBuf);
@@ -181,7 +182,7 @@ void TimeTag::parseValue(const char *stringRep)
   }
 
   if (state != Done) {
-    sprintf(errorBuf,
+    snprintf(errorBuf, sizeof(errorBuf),
 	    "TimeTag::parseValue() - bad number of tokens in \"%s\"",
 	    stringRep);
 

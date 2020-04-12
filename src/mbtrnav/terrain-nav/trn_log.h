@@ -161,6 +161,7 @@ typedef enum{
 // - TLModuleID (in trn_log.h)
 typedef enum{
     TL_TRN_SERVER,
+    TL_TRN_LCM_APP,
     TL_STRUCT_DEFS,
     TL_TERRAIN_NAV,
     TL_TERRAIN_NAV_AID_LOG,
