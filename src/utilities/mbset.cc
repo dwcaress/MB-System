@@ -192,16 +192,31 @@ int main(int argc, char **argv) {
 		read_data = true;
 	}
 
-	struct mb_process_struct process;
-
 	int status = MB_SUCCESS;
 
 	/* loop over all files to be read */
 	while (read_data) {
+	  struct mb_process_struct process;
+	  struct mb_process_struct process_org;
+	  char mbp_pfile[MBP_FILENAMESIZE];
+
 		/* load parameters */
-		status = mb_pr_readpar(verbose, mbp_ifile, lookforfiles, &process, &error);
+		status = mb_pr_readpar(verbose, mbp_ifile, false, &process_org, &error);
+    if (lookforfiles) {
+		  status = mb_pr_readpar(verbose, mbp_ifile, true, &process, &error);
+    } else {
+      process = process_org;
+    }
+		process_org.mbp_ifile_specified = true;
 		process.mbp_ifile_specified = true;
 		bool write_parameter_file = false;
+		bool existing_parameter_file = false;
+    strncpy(mbp_pfile, mbp_ifile, MBP_FILENAMESIZE - 4);
+    strcat(mbp_pfile, ".par");
+    const int fstat = stat(mbp_pfile, &file_status);
+    if (fstat == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR) {
+      existing_parameter_file = true;
+    }
 
 		if (process.mbp_format_specified == false) {
 			process.mbp_format = mbp_format;
@@ -232,10 +247,6 @@ int main(int argc, char **argv) {
 			process.mbp_navadjfile[0] = '\0';
 			process.mbp_navadj_mode = MBP_NAVADJ_OFF;
 		}
-
-		/* if any parameters are being set, write a parameter file */
-		if (pargc > 0)
-			write_parameter_file = true;
 
 		/* process parameter list */
 		for (int i = 0; i < pargc; i++) {
@@ -869,30 +880,6 @@ int main(int argc, char **argv) {
 		/* update bathymetry recalculation mode */
 		mb_pr_bathmode(verbose, &process, &error);
 
-		/* if any of the important modes has been turned on, write the parameter file */
-		if (process.mbp_nav_mode != MBP_NAV_OFF || process.mbp_navadj_mode != MBP_NAVADJ_OFF || process.mbp_attitude_mode != 0 ||
-		    process.mbp_sonardepth_mode != 0 || process.mbp_cut_num != 0 || process.mbp_edit_mode != MBP_EDIT_OFF ||
-		    process.mbp_bathrecalc_mode != MBP_BATHRECALC_OFF || process.mbp_draft_mode != MBP_DRAFT_OFF ||
-		    process.mbp_heave_mode != MBP_HEAVE_OFF || process.mbp_lever_mode != MBP_LEVER_OFF ||
-		    process.mbp_rollbias_mode != MBP_ROLLBIAS_OFF || process.mbp_pitchbias_mode != MBP_PITCHBIAS_OFF ||
-		    process.mbp_heading_mode != MBP_HEADING_OFF || process.mbp_tide_mode != MBP_TIDE_OFF ||
-		    process.mbp_ampcorr_mode != MBP_AMPCORR_OFF || process.mbp_sscorr_mode != MBP_SSCORR_OFF ||
-		    process.mbp_ssrecalc_mode != MBP_SSRECALC_OFF || process.mbp_meta_vessel[0] != '\0' ||
-		    process.mbp_meta_institution[0] != '\0' || process.mbp_meta_platform[0] != '\0' ||
-		    process.mbp_meta_sonar[0] != '\0' || process.mbp_meta_sonarversion[0] != '\0' ||
-		    process.mbp_meta_cruiseid[0] != '\0' || process.mbp_meta_cruisename[0] != '\0' || process.mbp_meta_pi[0] != '\0' ||
-		    process.mbp_meta_piinstitution[0] != '\0' || process.mbp_meta_client[0] != '\0' ||
-		    process.mbp_meta_svcorrected != MBP_CORRECTION_UNKNOWN || process.mbp_meta_tidecorrected != MBP_CORRECTION_UNKNOWN ||
-		    process.mbp_meta_batheditmanual != MBP_CORRECTION_UNKNOWN ||
-		    process.mbp_meta_batheditauto != MBP_CORRECTION_UNKNOWN || process.mbp_meta_rollbias != MBP_METANOVALUE + 1. ||
-		    process.mbp_meta_pitchbias != MBP_METANOVALUE + 1. || process.mbp_meta_headingbias != MBP_METANOVALUE + 1. ||
-		    process.mbp_meta_draft != MBP_METANOVALUE + 1. || process.mbp_kluge001 != false || process.mbp_kluge002 != false ||
-		    process.mbp_kluge003 != false || process.mbp_kluge004 != false || process.mbp_kluge005 != false ||
-		    process.mbp_kluge006 != false || process.mbp_kluge007 != false || process.mbp_kluge008 != false ||
-		    process.mbp_kluge009 != false || process.mbp_kluge010 != false) {
-			write_parameter_file = true;
-		}
-
 		if (verbose >= 2) {
 			fprintf(stderr, "\ndbg2  Program <%s>\n", program_name);
 			fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
@@ -1217,14 +1204,35 @@ int main(int argc, char **argv) {
 			fprintf(stderr, "  Kluge010:                      %d\n", process.mbp_kluge010);
 		}
 
-		if (write_parameter_file)
+		/* if the process structure has changed at all, write a new parameter file */
+    int num_difference = 0;
+    mb_pr_compare(verbose, &process, &process_org, &num_difference, &error);
+		if (num_difference > 0)
+		  write_parameter_file = true;
+
+		if (write_parameter_file) {
 			status = mb_pr_writepar(verbose, mbp_ifile, &process, &error);
 
-		if (status == MB_SUCCESS) {
-			fprintf(stderr, "Success updating parameter file for %s...\n", mbp_ifile);
-		} else {
-			fprintf(stderr, "Failure to update parameter file for %s!!!\n", mbp_ifile);
-		}
+    	if (status == MB_SUCCESS) {
+        if (existing_parameter_file) {
+    			fprintf(stderr, "%s: parameter file exists    - updated\n", mbp_ifile);
+    		} else {
+    			fprintf(stderr, "%s: no parameter file exists - created\n", mbp_ifile);
+    		}
+      } else {
+        if (existing_parameter_file) {
+    			fprintf(stderr, "%s: parameter file exists    - ** failed to update **\n", mbp_ifile);
+    		} else {
+    			fprintf(stderr, "%s: no parameter file exists - ** failed to create **\n", mbp_ifile);
+    		}
+      }
+    } else {
+      if (existing_parameter_file) {
+  			fprintf(stderr, "File %s: parameter file exists    - not changed\n", mbp_ifile);
+  		} else {
+  			fprintf(stderr, "File %s: no parameter file exists - not created\n", mbp_ifile);
+  		}
+    }
 
 		/* figure out whether and what to read next */
 		if (read_datalist) {
