@@ -3766,7 +3766,7 @@ $as_echo "#define HAVE_CXX11 1" >>confdefs.h
 
 
 
-$as_echo "#define VERSION_DATE \"12 April 2020\"" >>confdefs.h
+$as_echo "#define VERSION_DATE \"13 April 2020\"" >>confdefs.h
 
 
 ac_aux_dir=

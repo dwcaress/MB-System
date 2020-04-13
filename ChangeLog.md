@@ -20,7 +20,7 @@ include "beta" in the tag name are preliminary and generally not announced.
 Distributions that do not include "beta" in the tag name correspond to the major,
 announced releases. The source distributions associated with all releases, major or beta, are equally accessible as tarballs through the Github interface.
 
-- Version 5.7.6beta32    April 12, 2020
+- Version 5.7.6beta32    April 13, 2020
 - Version 5.7.6beta31    March 2, 2020
 - Version 5.7.6beta30    February 20, 2020
 - Version 5.7.6beta29    February 17, 2020
@@ -343,7 +343,7 @@ announced releases. The source distributions associated with all releases, major
 --
 ### MB-System Version 5.7 Release Notes:
 --
-#### 5.7.6beta32 (April 9, 2020)
+#### 5.7.6beta32 (April 13, 2020)
 
 General (mb_define.h, mb_format.c, mb_format.h): Added definition of format=-2
 as recursive imagelists. Analagous to datalists, this construct supports timestamped
@@ -369,6 +369,12 @@ Mbset: changed output to clearly indicate when parameter files are created
 mb_pr_compare() to mb_process.c that can be used in mbset.c to check
 whether the modified process parameter structure actually differs from
 the original structure.
+
+Formats MBF_OICGEODA (141) and MBF_OICMBARI (142): Fixed support for old OIC
+format DSL120 interferometric sonar data. Processing of these data now works
+with mbpreprocess and mbprocess again. The sidescan data were compromised
+by treating unsigned amplitude values as signed, and treating null samples as
+valid.
 
 Testing: Reinstated OSX test build as part of the Travis CI runs triggered by
 commits to the Github repository.

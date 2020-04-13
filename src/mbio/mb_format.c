@@ -2636,7 +2636,7 @@ int mb_get_format(int verbose, char *filename, char *fileroot, int *format, int 
     }
   }
 
-  /* look for a Imagex multibeam .83p format convention*/
+  /* look for a Imagex multibeam .83p format convention */
   if (!found) {
     int i;
     if (strlen(filename) >= 5)
@@ -2659,7 +2659,7 @@ int mb_get_format(int verbose, char *filename, char *fileroot, int *format, int 
     }
   }
 
-  /* look for an R2R navigation format convention*/
+  /* look for an R2R navigation format convention */
   if (!found) {
     int i;
     if (strlen(filename) >= 8)
@@ -2682,7 +2682,7 @@ int mb_get_format(int verbose, char *filename, char *fileroot, int *format, int 
     }
   }
 
-  /* look for a HYSWEEP *.HSX file format convention*/
+  /* look for a HYSWEEP *.HSX file format convention */
   if (!found) {
     int i;
     if (strlen(filename) >= 5)
@@ -2705,7 +2705,30 @@ int mb_get_format(int verbose, char *filename, char *fileroot, int *format, int 
     }
   }
 
-  /* look for a SEA SWATHplus *.sxi file format convention*/
+  /* look for an OIC *.oic file format convention */
+  if (!found) {
+    int i;
+    if (strlen(filename) >= 5)
+      i = strlen(filename) - 4;
+    else
+      i = 0;
+    if ((suffix = strstr(&filename[i], ".oic")) != NULL)
+      suffix_len = 4;
+    else if ((suffix = strstr(&filename[i], ".OIC")) != NULL)
+      suffix_len = 4;
+    else
+      suffix_len = 0;
+    if (suffix_len == 4) {
+      if (fileroot != NULL) {
+        strncpy(fileroot, filename, strlen(filename) - suffix_len);
+        fileroot[strlen(filename) - suffix_len] = '\0';
+      }
+      *format = MBF_OICGEODA;
+      found = true;
+    }
+  }
+
+  /* look for a SEA SWATHplus *.sxi file format convention */
   if (!found) {
     int i;
     if (strlen(filename) >= 5)
@@ -2728,7 +2751,7 @@ int mb_get_format(int verbose, char *filename, char *fileroot, int *format, int 
     }
   }
 
-  /* look for a SEA SWATHplus *.sxp file format convention*/
+  /* look for a SEA SWATHplus *.sxp file format convention */
   if (!found) {
     int i;
     if (strlen(filename) >= 5)
@@ -2751,7 +2774,7 @@ int mb_get_format(int verbose, char *filename, char *fileroot, int *format, int 
     }
   }
 
-  /* look for a 3DatDepth *.raa file format convention*/
+  /* look for a 3DatDepth *.raa file format convention */
   if (!found) {
     int i;
     if (strlen(filename) >= 5)
@@ -2793,7 +2816,7 @@ int mb_get_format(int verbose, char *filename, char *fileroot, int *format, int 
         }
   }
 
-  /* look for a WASSP *.000 file format convention*/
+  /* look for a WASSP *.000 file format convention */
   if (!found) {
     int i;
     if (strlen(filename) >= 5)
@@ -2814,7 +2837,7 @@ int mb_get_format(int verbose, char *filename, char *fileroot, int *format, int 
     }
   }
 
-  /* look for a WASSP *.nwsf file format convention*/
+  /* look for a WASSP *.nwsf file format convention */
   if (!found) {
     int i;
     if (strlen(filename) >= 6)
