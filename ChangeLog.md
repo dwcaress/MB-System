@@ -20,7 +20,7 @@ include "beta" in the tag name are preliminary and generally not announced.
 Distributions that do not include "beta" in the tag name correspond to the major,
 announced releases. The source distributions associated with all releases, major or beta, are equally accessible as tarballs through the Github interface.
 
-- Version 5.7.6beta32    March 19, 2020
+- Version 5.7.6beta32    April 12, 2020
 - Version 5.7.6beta31    March 2, 2020
 - Version 5.7.6beta30    February 20, 2020
 - Version 5.7.6beta29    February 17, 2020
@@ -343,7 +343,7 @@ announced releases. The source distributions associated with all releases, major
 --
 ### MB-System Version 5.7 Release Notes:
 --
-#### 5.7.6beta33 (March 28, 2020)
+#### 5.7.6beta32 (April 9, 2020)
 
 General (mb_define.h, mb_format.c, mb_format.h): Added definition of format=-2
 as recursive imagelists. Analagous to datalists, this construct supports timestamped
@@ -356,12 +356,7 @@ when intersecting a vector with a topography model in mb_intersectgrid.c have
 been improved, yielding more accurate intersection locations for backscatter samples
 or source image pixels when laying out sidescan or photography data.
 
-Code style: Kurt Schwehr is systematically altering the code to conform to best
-practices and adding build tests. The improvements included in this beta release
-include work on the auxilliary library in src/mbaux, particularly including
-mb_cheb.c, mb_intersectgrid.c, and mb_zgrid.c.
-
-#### 5.7.6beta32 (March 19, 2020)
+Mbnavedit: Changed minimum range of draft (sensordepth) plot to be +/- 0.05 meters.
 
 Mbeditviz: Fixed problem with preserving changes to edits that are recorded in
 *.esf files.
@@ -369,12 +364,19 @@ Mbeditviz: Fixed problem with preserving changes to edits that are recorded in
 Mbtrnpp: merged recent changes by Kent Headley to the source files in
 src/mbtrn, src/mbtrnav, and src/mbtrnutils.
 
+Mbset: changed output to clearly indicate when parameter files are created
+(or not) or modified (or not). This involved adding a function
+mb_pr_compare() to mb_process.c that can be used in mbset.c to check
+whether the modified process parameter structure actually differs from
+the original structure.
+
 Testing: Reinstated OSX test build as part of the Travis CI runs triggered by
 commits to the Github repository.
 
 Code style: Kurt Schwehr is systematically altering the code to conform to best
 practices and adding build tests. The improvements included in this beta release
-include work on mbview and programs using mbview.
+include work on mbview and programs using mbview, the auxilliary library in src/mbaux, particularly including mb_cheb.c, mb_intersectgrid.c, and mb_zgrid.c,
+and on mbedit.
 
 Code style: Tom O'Reilly and David Caress added README.md files in each of the subdirectories under src/.
 

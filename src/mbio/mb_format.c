@@ -1720,15 +1720,12 @@ int mb_get_format(int verbose, char *filename, char *fileroot, int *format, int 
   short type1swap;
   short type2swap;
   short sonar2swap;
-  int nsonar, nlow, nhigh, subsystem, size;
+  int nsonar, nlow, nhigh, subsystem;
+  int size;
 
   /* look for old Simrad Mermaid suffix convention */
   if (!found) {
-    int i;
-    if (strlen(filename) > 8)
-      i = strlen(filename) - 8;
-    else
-      i = 0;
+    const int i = strlen(filename) > 8 ? strlen(filename) - 8 : 0;
     if ((suffix = strstr(&filename[i], "_raw.all")) != NULL || (suffix = strstr(&filename[i], "-raw.all")) != NULL ||
         (suffix = strstr(&filename[i], "_RAW.ALL")) != NULL || (suffix = strstr(&filename[i], "-RAW.ALL")) != NULL) {
       suffix_len = strlen(suffix);
@@ -3272,7 +3269,7 @@ int mb_datalist_read2(int verbose, void *datalist_ptr, int *pstatus, char *path,
               }
 
               if (pfile_specified) {
-                if ((fstat = stat(pfile, &file_status)) == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR &&
+                if ((/* fstat = */ stat(pfile, &file_status)) == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR &&
                     file_status.st_size > 0) {
                   strcpy(ppath, pfile);
                   if (datalist->look_processed == MB_DATALIST_LOOK_YES)
@@ -3515,12 +3512,7 @@ int mb_imagelist_read(int verbose, void *imagelist_ptr, int *imagestatus,
   int status = MB_SUCCESS;
   struct mb_imagelist_struct *imagelist2;
   char buffer[MB_PATH_MAXLINE];
-  char tmpstr[MB_PATH_MAXLINE];
-  char *buffer_ptr;
-  int len;
-  int nscan;
   struct stat file_status;
-  int fstat;
 
   /* loop over reading from imagelist_ptr */
   bool done = false;
@@ -3533,10 +3525,10 @@ int mb_imagelist_read(int verbose, void *imagelist_ptr, int *imagestatus,
       if (imagelist->imagelist == NULL) {
         bool rdone = false;
         while (!rdone) {
-                    *imagestatus = MB_IMAGESTATUS_NONE;
-                    *time_d = 0.0;
-                    *dtime_d = 0.0;
-          buffer_ptr = fgets(buffer, MB_PATH_MAXLINE, imagelist->fp);
+          *imagestatus = MB_IMAGESTATUS_NONE;
+          *time_d = 0.0;
+          *dtime_d = 0.0;
+	  char *buffer_ptr = fgets(buffer, MB_PATH_MAXLINE, imagelist->fp);
 
           /* deal with end of imagelist file */
           if (buffer_ptr != buffer) {
@@ -3574,13 +3566,15 @@ int mb_imagelist_read(int verbose, void *imagelist_ptr, int *imagestatus,
           /* check for valid image entry */
           else {
               /* try to read a stereo pair entry */
-              nscan = sscanf(buffer, "%s %s %lf %lf", path0, path1, time_d, dtime_d);
+              int nscan = sscanf(buffer, "%s %s %lf %lf", path0, path1, time_d, dtime_d);
               if (nscan == 4) {
 
                   /* if relative path make it global */
                   if (strcmp(path0, "NULL") != 0) {
+                      int len;
                       if (path0[0] != '/' && strrchr(imagelist->path, '/') != NULL &&
                           (len = strrchr(imagelist->path, '/') - imagelist->path + 1) > 1) {
+                          char tmpstr[MB_PATH_MAXLINE];
                           strcpy(tmpstr, path0);
                           strncpy(path0, imagelist->path, len);
                           path0[len] = '\0';
@@ -3588,7 +3582,7 @@ int mb_imagelist_read(int verbose, void *imagelist_ptr, int *imagestatus,
                       }
 
                       /* check if path0 exists and can be opened */
-                      fstat = stat(path0, &file_status);
+                      const int fstat = stat(path0, &file_status);
                       if (fstat == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR && file_status.st_size > 0) {
                           *imagestatus = *imagestatus | MB_IMAGESTATUS_LEFT;
                       }
@@ -3603,8 +3597,10 @@ int mb_imagelist_read(int verbose, void *imagelist_ptr, int *imagestatus,
 
                   /* if relative path make it global */
                   if (strcmp(path1, "NULL") != 0) {
+                      int len;
                       if (path1[0] != '/' && strrchr(imagelist->path, '/') != NULL &&
                           (len = strrchr(imagelist->path, '/') - imagelist->path + 1) > 1) {
+                          char tmpstr[MB_PATH_MAXLINE];
                           strcpy(tmpstr, path1);
                           strncpy(path1, imagelist->path, len);
                           path1[len] = '\0';
@@ -3612,7 +3608,7 @@ int mb_imagelist_read(int verbose, void *imagelist_ptr, int *imagestatus,
                       }
 
                       /* check if path0 exists and can be opened */
-                      fstat = stat(path1, &file_status);
+                      const int fstat = stat(path1, &file_status);
                       if (fstat == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR && file_status.st_size > 0) {
                           *imagestatus = *imagestatus | MB_IMAGESTATUS_RIGHT;
                       }
@@ -3632,8 +3628,10 @@ int mb_imagelist_read(int verbose, void *imagelist_ptr, int *imagestatus,
                   if (strcmp(path0, "NULL") != 0) {
 
                       /* if relative path make it global */
+                      int len;
                       if (path0[0] != '/' && strrchr(imagelist->path, '/') != NULL &&
                           (len = strrchr(imagelist->path, '/') - imagelist->path + 1) > 1) {
+                          char tmpstr[MB_PATH_MAXLINE];
                           strcpy(tmpstr, path0);
                           strncpy(path0, imagelist->path, len);
                           path0[len] = '\0';
@@ -3642,7 +3640,7 @@ int mb_imagelist_read(int verbose, void *imagelist_ptr, int *imagestatus,
                       }
 
                       /* check if path0 exists and can be opened */
-                      fstat = stat(path0, &file_status);
+                      const int fstat = stat(path0, &file_status);
                       if (fstat == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR && file_status.st_size > 0) {
 
                           /* set status */
@@ -3672,8 +3670,10 @@ int mb_imagelist_read(int verbose, void *imagelist_ptr, int *imagestatus,
                   if (nscan == 1 && strcmp(path0, "NULL") != 0) {
 
                       /* if relative path make it global */
+                      int len;
                       if (path0[0] != '/' && strrchr(imagelist->path, '/') != NULL &&
                           (len = strrchr(imagelist->path, '/') - imagelist->path + 1) > 1) {
+                          char tmpstr[MB_PATH_MAXLINE];
                           strcpy(tmpstr, path0);
                           strncpy(path0, imagelist->path, len);
                           path0[len] = '\0';
@@ -3681,10 +3681,8 @@ int mb_imagelist_read(int verbose, void *imagelist_ptr, int *imagestatus,
                       }
 
                       /* check if path0 exists and can be opened */
-                      fstat = stat(path0, &file_status);
+                      const int fstat = stat(path0, &file_status);
                       if (fstat == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR && file_status.st_size > 0) {
-
-                          /* set status */
                           *imagestatus = MB_IMAGESTATUS_IMAGELIST;
                       }
                   }
@@ -3738,11 +3736,17 @@ int mb_imagelist_read(int verbose, void *imagelist_ptr, int *imagestatus,
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
+    fprintf(stderr, "dbg2       imagelist->open:             %d\n", imagelist->open);
+    fprintf(stderr, "dbg2       imagelist->fp:               %p\n", (void *)imagelist->fp);
+    fprintf(stderr, "dbg2       imagelist->recursion:        %d\n", imagelist->recursion);
+    fprintf(stderr, "dbg2       imagelist->path:             %s\n", imagelist->path);
+    fprintf(stderr, "dbg2       imagelist->printed:          %d\n", imagelist->printed);
+    fprintf(stderr, "dbg2       imagelist->imagelist:         %p\n", (void *)imagelist->imagelist);
     fprintf(stderr, "dbg2       path0:       %s\n", path0);
     fprintf(stderr, "dbg2       path1:       %s\n", path1);
     fprintf(stderr, "dbg2       dpath:       %s\n", dpath);
-        fprintf(stderr, "dbg2       time_d:      %f\n", *time_d);
-        fprintf(stderr, "dbg2       dtime_d:     %f\n", *dtime_d);
+    fprintf(stderr, "dbg2       time_d:      %f\n", *time_d);
+    fprintf(stderr, "dbg2       dtime_d:     %f\n", *dtime_d);
     fprintf(stderr, "dbg2       error:       %d\n", *error);
     fprintf(stderr, "dbg2  Return status:\n");
     fprintf(stderr, "dbg2       status:      %d\n", status);
@@ -3940,15 +3944,11 @@ int mb_get_relative_path(int verbose, char *path, char *ipwd, int *error) {
   pathlen = strlen(path);
   pwdlen = strlen(pwd);
 
-  int same;
-  int isame;
-  int ndiff;
-
   /* try to get best relative path */
   if (pathlen > 0 && pwdlen > 0) {
     /* look for last identical slash-terminated section */
-    same = true;
-    isame = 0;
+    bool same = true;
+    int isame = 0;
     for (int i = 0; i < MIN(pathlen, pwdlen) && same; i++) {
       if (path[i] == pwd[i]) {
         if (path[i] == '/')
@@ -3964,7 +3964,7 @@ int mb_get_relative_path(int verbose, char *path, char *ipwd, int *error) {
     /* if more in common than first '/' look through pwd */
     if (isame > 0) {
       /* look for number of different directories in pwd */
-      ndiff = 0;
+      int ndiff = 0;
       for (int i = isame; i < pwdlen - 1; i++) {
         if (pwd[i] == '/')
           ndiff++;

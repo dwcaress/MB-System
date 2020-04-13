@@ -3978,10 +3978,10 @@ int mbnavedit_plot_all() {
 			heading_min = center - 5;
 			heading_max = center + 5;
 		}
-		if ((draft_max - draft_min) < 0.5) {
+		if ((draft_max - draft_min) < 0.1) {
 			center = 0.5 * (draft_min + draft_max);
-			draft_min = center - 0.25;
-			draft_max = center + 0.25;
+			draft_min = center - 0.05;
+			draft_max = center + 0.05;
 		}
 		if ((roll_max - roll_min) < 2.0) {
 			center = 0.5 * (roll_min + roll_max);
