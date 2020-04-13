@@ -74,10 +74,10 @@
 #define MBSYSTEM_CONFIG_DEFINED 1
 
 /* Set MBSYSTEM_INSTALL_PREFIX define in mb_config.h */
-#define MBSYSTEM_INSTALL_PREFIX "NONE"
+#define MBSYSTEM_INSTALL_PREFIX "/usr/local"
 
 /* Set MBSYSTEM_OTPS_LOCATION define in mb_config.h */
-#define MBSYSTEM_OTPS_LOCATION "/usr/local/OTPS2"
+#define MBSYSTEM_OTPS_LOCATION "/usr/local/opt/otps"
 
 /* Build libmbtnav */
 #define MBTNAV_ENABLED 1
@@ -86,7 +86,7 @@
 #define MBTRN_ENABLED 1
 
 /* Build graphical tools */
-/* #undef MBUTILS_ENABLED */
+#define MBUTILS_ENABLED 1
 
 /* Name of package */
 #define PACKAGE "mbsystem"
@@ -116,13 +116,13 @@
 #define STDC_HEADERS 1
 
 /* Build unit tests */
-/* #undef TEST_ENABLED */
+#define TEST_ENABLED 1
 
 /* Version number of package */
 #define VERSION "5.7.6beta32"
 
 /* Set VERSION_DATE define in mb_config.h */
-#define VERSION_DATE "12 April 2020"
+#define VERSION_DATE "13 April 2020"
 
 /* Define WORDS_BIGENDIAN to 1 if your processor stores words with the most
    significant byte first (like Motorola and SPARC, unlike Intel). */
