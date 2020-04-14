@@ -562,8 +562,8 @@ top_srcdir = @top_srcdir@
 include_HEADERS = levitus.h
 AM_CFLAGS = ${libgmt_CFLAGS} ${libnetcdf_CFLAGS}
 AM_CPPFLAGS = -I${top_srcdir}/src/mbio -I${top_srcdir}/src/mbaux \
-	$(am__append_1) $(MBTRNINCDIR) ${libgmt_CPPFLAGS} \
-	${libnetcdf_CPPFLAGS} ${libfftw_CPPFLAGS}
+	$(am__append_1) $(MBTRNINCDIR) ${libproj_CPPFLAGS} \
+	${libgmt_CPPFLAGS} ${libnetcdf_CPPFLAGS} ${libfftw_CPPFLAGS}
 AM_LDFLAGS = 
 mbconfig_SOURCES = mbconfig.cc
 mbabsorption_SOURCES = mbabsorption.cc
