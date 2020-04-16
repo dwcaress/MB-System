@@ -36,9 +36,9 @@ As initial basic test:
     
 I can also run MB-System GUI programs, e.g.:
 
-    $ docker run -it --rm -e DISPLAY=${ip}:0 $MBSYSTEM_IMAGE mbgrdviz
+    $ docker run -it --rm -e DISPLAY=${ip}:0 $MBSYSTEM_IMAGE mbeditviz
     
-![](mbgrdviz.png)
+![](mbeditviz.png)
 
 
 ## Windows
