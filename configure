@@ -671,7 +671,10 @@ libfftw_LIBS
 fftw_app
 libfftw3_LIBS
 libfftw3_CFLAGS
+GMT61PLUS_FALSE
+GMT61PLUS_TRUE
 GMT_PLUGINDIR
+libgmt_LDFLAGS
 libgmt_CPPFLAGS
 libgmt_LIBS
 GMT_CONF
@@ -3766,7 +3769,7 @@ $as_echo "#define HAVE_CXX11 1" >>confdefs.h
 
 
 
-$as_echo "#define VERSION_DATE \"13 April 2020\"" >>confdefs.h
+$as_echo "#define VERSION_DATE \"15 April 2020\"" >>confdefs.h
 
 
 ac_aux_dir=
@@ -20496,6 +20499,94 @@ fi
 
 fi
 if test -x "$GMT_CONF" ; then
+
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for GMT version" >&5
+$as_echo_n "checking for GMT version... " >&6; }
+    GMT_VERSION=`$GMT_CONF --version 2>/dev/null`
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: $GMT_VERSION" >&5
+$as_echo "$GMT_VERSION" >&6; }
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking GMT version >= 6.1.0" >&5
+$as_echo_n "checking GMT version >= 6.1.0... " >&6; }
+
+
+
+  # Used to indicate true or false condition
+  ax_compare_version=false
+
+  # Convert the two version strings to be compared into a format that
+  # allows a simple string comparison.  The end result is that a version
+  # string of the form 1.12.5-r617 will be converted to the form
+  # 0001001200050617.  In other words, each number is zero padded to four
+  # digits, and non digits are removed.
+
+  ax_compare_version_A=`echo "$GMT_VERSION" | sed -e 's/\([0-9]*\)/Z\1Z/g' \
+                     -e 's/Z\([0-9]\)Z/Z0\1Z/g' \
+                     -e 's/Z\([0-9][0-9]\)Z/Z0\1Z/g' \
+                     -e 's/Z\([0-9][0-9][0-9]\)Z/Z0\1Z/g' \
+                     -e 's/[^0-9]//g'`
+
+
+  ax_compare_version_B=`echo "6.1.0" | sed -e 's/\([0-9]*\)/Z\1Z/g' \
+                     -e 's/Z\([0-9]\)Z/Z0\1Z/g' \
+                     -e 's/Z\([0-9][0-9]\)Z/Z0\1Z/g' \
+                     -e 's/Z\([0-9][0-9][0-9]\)Z/Z0\1Z/g' \
+                     -e 's/[^0-9]//g'`
+
+
+    ax_compare_version=`echo "x$ax_compare_version_A
+x$ax_compare_version_B" | sed 's/^ *//' | sort -r | sed "s/x${ax_compare_version_A}/true/;s/x${ax_compare_version_B}/false/;1q"`
+
+
+
+    if test "$ax_compare_version" = "true" ; then
+    GMT61PLUS=true
+    else GMT61PLUS=false
+  fi
+
+
+
+
+  # Used to indicate true or false condition
+  ax_compare_version=false
+
+  # Convert the two version strings to be compared into a format that
+  # allows a simple string comparison.  The end result is that a version
+  # string of the form 1.12.5-r617 will be converted to the form
+  # 0001001200050617.  In other words, each number is zero padded to four
+  # digits, and non digits are removed.
+
+  ax_compare_version_A=`echo "$GMT_VERSION" | sed -e 's/\([0-9]*\)/Z\1Z/g' \
+                     -e 's/Z\([0-9]\)Z/Z0\1Z/g' \
+                     -e 's/Z\([0-9][0-9]\)Z/Z0\1Z/g' \
+                     -e 's/Z\([0-9][0-9][0-9]\)Z/Z0\1Z/g' \
+                     -e 's/[^0-9]//g'`
+
+
+  ax_compare_version_B=`echo "6.1.0" | sed -e 's/\([0-9]*\)/Z\1Z/g' \
+                     -e 's/Z\([0-9]\)Z/Z0\1Z/g' \
+                     -e 's/Z\([0-9][0-9]\)Z/Z0\1Z/g' \
+                     -e 's/Z\([0-9][0-9][0-9]\)Z/Z0\1Z/g' \
+                     -e 's/[^0-9]//g'`
+
+
+    ax_compare_version=`echo "x$ax_compare_version_A
+x$ax_compare_version_B" | sed 's/^ *//' | sort -r | sed "s/x${ax_compare_version_A}/true/;s/x${ax_compare_version_B}/false/;1q"`
+
+
+
+    if test "$ax_compare_version" = "true" ; then
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }
+    else { $as_echo "$as_me:${as_lineno-$LINENO}: result: no - $GMT_VERSION found" >&5
+$as_echo "no - $GMT_VERSION found" >&6; }
+  fi
+
+    if test -x "$GMT61PLUS" ; then
+    $as_echo "GMT version >= 6.1.0, mbgrdtiff calls the grdimage module"
+    else
+    $as_echo "GMT version < 6.1.0, mbgrdtiff contructs image without calling the grdimage module"
+    fi
+
     { $as_echo "$as_me:${as_lineno-$LINENO}: checking for GMT includes" >&5
 $as_echo_n "checking for GMT includes... " >&6; }
     GMT_INC=`$GMT_CONF --cflags 2>/dev/null`
@@ -20509,8 +20600,8 @@ $as_echo_n "checking for GMT libs... " >&6; }
 $as_echo "$GMT_LIB" >&6; }
     GMT_LIB_PATH=`echo $GMT_LIB | sed 's/^-L//;s/\ .*//'`
     rpath="$GMT_LIB_PATH"
-    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for 32/64-bit GMT5 installation" >&5
-$as_echo_n "checking for 32/64-bit GMT5 installation... " >&6; }
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for 32/64-bit GMT installation" >&5
+$as_echo_n "checking for 32/64-bit GMT installation... " >&6; }
     bits=`$GMT_CONF --bits 2>/dev/null`
     GCC_64="-m${bits}"
     LDFLAGS="$LDFLAGS -m${bits}"
@@ -20534,6 +20625,16 @@ libgmt_LIBS=$libgmt_LIBS
 
 libgmt_CPPFLAGS=$libgmt_CPPFLAGS
 
+libgmt_LDFLAGS=$libgmt_LDFLAGS
+
+
+ if test -x "$GMT61PLUS"; then
+  GMT61PLUS_TRUE=
+  GMT61PLUS_FALSE='#'
+else
+  GMT61PLUS_TRUE='#'
+  GMT61PLUS_FALSE=
+fi
 
 
 
@@ -21800,6 +21901,10 @@ Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${BUILD_MBSVPSELECT_TRUE}" && test -z "${BUILD_MBSVPSELECT_FALSE}"; then
   as_fn_error $? "conditional \"BUILD_MBSVPSELECT\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${GMT61PLUS_TRUE}" && test -z "${GMT61PLUS_FALSE}"; then
+  as_fn_error $? "conditional \"GMT61PLUS\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${BUILD_FFTW_TRUE}" && test -z "${BUILD_FFTW_FALSE}"; then
