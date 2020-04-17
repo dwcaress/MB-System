@@ -27,7 +27,7 @@ AC_LANG(C)
 dnl Require c++11
 AX_CXX_COMPILE_STDCXX(11)
 
-AC_DEFINE(VERSION_DATE, "13 April 2020", [Set VERSION_DATE define in mb_config.h])
+AC_DEFINE(VERSION_DATE, "15 April 2020", [Set VERSION_DATE define in mb_config.h])
 
 dnl Check system arch
 AC_CANONICAL_HOST
@@ -551,7 +551,7 @@ AC_SUBST([libgdal_CPPFLAGS], [$libgdal_CPPFLAGS])
 
 dnl--------------------------------------------------------------------
 dnl GMT Section
-dnl We use gmt-config to set GMT5 paths and settings
+dnl We use gmt-config to set GMT paths and settings
 dnl--------------------------------------------------------------------
 
 if test "X$with_gmt_config" != "X" ; then
@@ -562,6 +562,19 @@ else
     AC_PATH_PROG([GMT_CONF], [gmt-config])
 fi
 if test -x "$GMT_CONF" ; then
+
+    AC_MSG_CHECKING(for GMT version)
+    GMT_VERSION=`$GMT_CONF --version 2>/dev/null`
+    AC_MSG_RESULT($GMT_VERSION)
+    AC_MSG_CHECKING(GMT version >= 6.1.0)
+    AX_COMPARE_VERSION([$GMT_VERSION], [ge], [6.1.0], [GMT61PLUS=true], [GMT61PLUS=false])
+    AX_COMPARE_VERSION([$GMT_VERSION], [ge], [6.1.0], [AC_MSG_RESULT([yes])], [AC_MSG_RESULT([no - $GMT_VERSION found])])
+    if test -x "$GMT61PLUS" ; then
+    AS_ECHO(["GMT version >= 6.1.0, mbgrdtiff calls the grdimage module"])
+    else
+    AS_ECHO(["GMT version < 6.1.0, mbgrdtiff contructs image without calling the grdimage module"])
+    fi
+
     AC_MSG_CHECKING(for GMT includes)
     GMT_INC=`$GMT_CONF --cflags 2>/dev/null`
     AC_MSG_RESULT($GMT_INC)
@@ -571,7 +584,7 @@ if test -x "$GMT_CONF" ; then
     AC_MSG_RESULT($GMT_LIB)
     GMT_LIB_PATH=`echo $GMT_LIB | sed 's/^-L//;s/\ .*//'`
     rpath="$GMT_LIB_PATH"
-    AC_MSG_CHECKING(for 32/64-bit GMT5 installation)
+    AC_MSG_CHECKING(for 32/64-bit GMT installation)
     bits=`$GMT_CONF --bits 2>/dev/null`
     GCC_64="-m${bits}"
     LDFLAGS="$LDFLAGS -m${bits}"
@@ -591,7 +604,9 @@ fi
 dnl Substitute GMT library and header arguments
 AC_SUBST([libgmt_LIBS], [$libgmt_LIBS])
 AC_SUBST([libgmt_CPPFLAGS], [$libgmt_CPPFLAGS])
+AC_SUBST([libgmt_LDFLAGS], [$libgmt_LDFLAGS])
 AC_SUBST(GMT_PLUGINDIR)
+AM_CONDITIONAL([GMT61PLUS], [test -x "$GMT61PLUS"])
 
 dnl--------------------------------------------------------------------
 dnl FFTW Section
