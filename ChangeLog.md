@@ -343,7 +343,17 @@ announced releases. The source distributions associated with all releases, major
 --
 ### MB-System Version 5.7 Release Notes:
 --
-#### 5.7.6beta32 (April 13, 2020)
+#### 5.7.6beta32 (April 17, 2020)
+
+Mbgrdtiff: Paul Wessel contributed a new version of mbgrdtiff that constructs
+the image by a direct call to the grdimage module. This version will only build
+and work with GMT 6.1 and later. The original code included code building the
+image, duplicating functionality in grdimage. The new version is now
+    mbsystem/src/gmt/mbgrdtiff.c
+and the original version
+    mbsystem/src/gmt/mbgrdtifforg.c.
+The build system has been augmented to check the GMT version and build mbgrdtiff
+from the original when that is <6.1 and the new file when that is >= 6.1.
 
 General (mb_define.h, mb_format.c, mb_format.h): Added definition of format=-2
 as recursive imagelists. Analagous to datalists, this construct supports timestamped
