@@ -87,7 +87,6 @@ int mbbs_setswradius(int version, FILE *fp, long phoffset, int side, unsigned in
 	xdrstdio_create(&xdr, fp, XDR_DECODE);
 
 	Ping png;
-
 	if (!mbbs_xdrpnghdr(&png, &xdr, version)) {
 		xdr_destroy(&xdr);
 		return BS_READ;
@@ -95,13 +94,13 @@ int mbbs_setswradius(int version, FILE *fp, long phoffset, int side, unsigned in
 
 	int trimbty = 0;
 	int trimss = 0;
-	int nbtyvals;
+	int nbtyvals = 0;
 	if (dtmask & BS_DTM_BATHYMETRY) {
 		if ((nbtyvals = png.png_sides[side].ps_btycount) > 0)
 			trimbty = 1;
 	}
-	int ssstart;
-	int nssvals;
+	int ssstart = 0;
+	int nssvals = 0;
 	if (dtmask & BS_DTM_SIDESCAN) {
 		float sscutoff;
 		if ((sscutoff = swradius - png.png_sides[side].ps_ssxoffset) < 0.)

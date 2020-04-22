@@ -20,8 +20,6 @@
 #include "TimeTag.h"
 #include "structDefs.h"
 
-class poseT;
-
 class TerrainNavLog: public DataLogWriter {
 
 public:

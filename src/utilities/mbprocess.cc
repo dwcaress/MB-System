@@ -804,7 +804,7 @@ int main(int argc, char **argv) {
   /* swath file locking variables */
   int lock_status;
   int lock_error;
-  int lock_purpose;
+  int lock_purpose = MBP_LOCK_NONE;
   mb_path lock_program;
   mb_path lock_cpu;
   mb_path lock_user;
@@ -886,7 +886,7 @@ int main(int argc, char **argv) {
   int ioff;
   int mm;
 
-  int locked;  // TODO(schwehr): Make mb_pr_lockswathfile take a bool.
+  bool locked;
   bool attitude_ok;
   bool nav_ok;
   bool time_set;

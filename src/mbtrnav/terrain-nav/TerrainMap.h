@@ -18,7 +18,7 @@ inline double evalVariogram(const double s){return VARIOGRAM_ALPHA * pow(s, 2.0 
 
 
 /*
-TerrainMap is a an abstract parrent for TerrainMapDEM and TerrainMapOctree.  It's primary purpose is to define a 
+TerrainMap is a an abstract parent for TerrainMapDEM and TerrainMapOctree.  It's primary purpose is to define a 
 common interface for the two map types.  TerrainMapOctree is a wrapper for the Octree class which is documented in Octree.hpp.
 TerrainMapDEM has functions from TnavFilter, TnavParticleFilter, and the old TerrainMap.  It pulls together the DEM functionality 
 into one class.  Many of the function comments from tNavParticleFilter and TnavFilter are collected at the bottom of TerrainMapDEM.

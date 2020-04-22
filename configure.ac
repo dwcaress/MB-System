@@ -18,7 +18,7 @@ define([AC_CACHE_LOAD], )
 define([AC_CACHE_SAVE], )
 
 dnl Initialize and set version and version date
-AC_INIT([mbsystem],[5.7.6beta31],[http://listserver.mbari.org/sympa/arc/mbsystem],[mbsystem],[http://www.mbari.org/data/mbsystem/])
+AC_INIT([mbsystem],[5.7.6beta32],[http://listserver.mbari.org/sympa/arc/mbsystem],[mbsystem],[http://www.mbari.org/data/mbsystem/])
 
 AC_CONFIG_MACRO_DIR(m4)
 AC_LANG(C)
@@ -27,7 +27,7 @@ AC_LANG(C)
 dnl Require c++11
 AX_CXX_COMPILE_STDCXX(11)
 
-AC_DEFINE(VERSION_DATE, "2 March 2020", [Set VERSION_DATE define in mb_config.h])
+AC_DEFINE(VERSION_DATE, "17 April 2020", [Set VERSION_DATE define in mb_config.h])
 
 dnl Check system arch
 AC_CANONICAL_HOST
@@ -106,6 +106,7 @@ AS_ECHO(["        --enable-mbtnav       - enable building terrain relative navig
 AS_ECHO(["        --disable-mbtools     - disable building graphical tools (use with --enable-mbtrn and --enable-mbtnav)"])
 AS_ECHO(["        --enable-hardening    - Enable compiler and linker options to frustrate memory corruption exploits  (e.g. -fPIE and -pie) (optional)"])
 AS_ECHO(["        --enable-test         - Enable building unit tests in test/ and third-party/"])
+AS_ECHO(["        --enable-qt           - Enable building graphical tools using the Qt5 framework"])
 AS_ECHO([" "])
 AS_ECHO(["    After configure you can run the make utility in the usual fashion"])
 AS_ECHO(["        make"])
@@ -159,6 +160,9 @@ AC_HEADER_STDC
 
 dnl Check for math lib
 AC_CHECK_LIB(m,exp,,,)
+
+dnl Check for gsincos() and sincos() functions
+AC_CHECK_FUNCS(gsincos sincos,,)
 
 dnl check for signed char
 AC_TYPE_INT8_T
@@ -548,7 +552,7 @@ AC_SUBST([libgdal_CPPFLAGS], [$libgdal_CPPFLAGS])
 
 dnl--------------------------------------------------------------------
 dnl GMT Section
-dnl We use gmt-config to set GMT5 paths and settings
+dnl We use gmt-config to set GMT paths and settings
 dnl--------------------------------------------------------------------
 
 if test "X$with_gmt_config" != "X" ; then
@@ -559,6 +563,19 @@ else
     AC_PATH_PROG([GMT_CONF], [gmt-config])
 fi
 if test -x "$GMT_CONF" ; then
+
+    AC_MSG_CHECKING(for GMT version)
+    GMT_VERSION=`$GMT_CONF --version 2>/dev/null`
+    AC_MSG_RESULT($GMT_VERSION)
+    AC_MSG_CHECKING(GMT version >= 6.1.0)
+    AX_COMPARE_VERSION([$GMT_VERSION], [ge], [6.1.0], [GMT61PLUS=true], [GMT61PLUS=false])
+    AX_COMPARE_VERSION([$GMT_VERSION], [ge], [6.1.0], [AC_MSG_RESULT([yes])], [AC_MSG_RESULT([no - $GMT_VERSION found])])
+    if test -x "$GMT61PLUS" ; then
+    AS_ECHO(["GMT version >= 6.1.0, mbgrdtiff calls the grdimage module"])
+    else
+    AS_ECHO(["GMT version < 6.1.0, mbgrdtiff contructs image without calling the grdimage module"])
+    fi
+
     AC_MSG_CHECKING(for GMT includes)
     GMT_INC=`$GMT_CONF --cflags 2>/dev/null`
     AC_MSG_RESULT($GMT_INC)
@@ -568,7 +585,7 @@ if test -x "$GMT_CONF" ; then
     AC_MSG_RESULT($GMT_LIB)
     GMT_LIB_PATH=`echo $GMT_LIB | sed 's/^-L//;s/\ .*//'`
     rpath="$GMT_LIB_PATH"
-    AC_MSG_CHECKING(for 32/64-bit GMT5 installation)
+    AC_MSG_CHECKING(for 32/64-bit GMT installation)
     bits=`$GMT_CONF --bits 2>/dev/null`
     GCC_64="-m${bits}"
     LDFLAGS="$LDFLAGS -m${bits}"
@@ -588,7 +605,9 @@ fi
 dnl Substitute GMT library and header arguments
 AC_SUBST([libgmt_LIBS], [$libgmt_LIBS])
 AC_SUBST([libgmt_CPPFLAGS], [$libgmt_CPPFLAGS])
+AC_SUBST([libgmt_LDFLAGS], [$libgmt_LDFLAGS])
 AC_SUBST(GMT_PLUGINDIR)
+AM_CONDITIONAL([GMT61PLUS], [test -x "$GMT61PLUS"])
 
 dnl--------------------------------------------------------------------
 dnl FFTW Section
@@ -787,10 +806,7 @@ else
     AS_ECHO(["Failed to find X11 libraries and headers - unable to build graphical tools"])
 fi
 
-AM_CONDITIONAL([BUILD_MOTIF], [test "$GOT_MOTIF" = yes])
-dnl End check for Motif library and headers
-
-dnl Check for OpenGL libraries libGL libGLU and header files GL/gl.h GL/glu.h GL/glx.h
+dnl If Motif found check for OpenGL libraries libGL libGLU and header files GL/gl.h GL/glu.h GL/glx.h
 AS_ECHO(["Check for OpenGL libraries libGL libGLU and header files GL/gl.h GL/glu.h GL/glx.h"])
 GOT_OPENGL=no
 OPENGL_SETTING=no
@@ -880,14 +896,50 @@ if test "$GOT_MOTIF" = "yes" ; then
     dnl Substitute OpenGL library and header arguments
     AC_SUBST([libopengl_LIBS], [$libopengl_LIBS])
     AC_SUBST([libopengl_CPPFLAGS], [$libopengl_CPPFLAGS])
-    if test "$GOT_OPENGL" = "yes" ; then
-        AC_DEFINE(GOT_GL, 1, [Turned on OpenGL define in config])
-    fi
-    AM_CONDITIONAL([BUILD_GL], [test "$GOT_OPENGL" = yes])
-
 else
     dnl Failed to find Motif libraries and headers - did not look for OpenGL libraries and headers - unable to build visualization tools
     AS_ECHO(["Failed to find Motif libraries and headers - did not look for OpenGL libraries and headers - unable to build visualization tools"])
+fi
+
+AM_CONDITIONAL([BUILD_MOTIF], [test "$GOT_MOTIF" = yes])
+AM_CONDITIONAL([BUILD_GL], [test "$GOT_OPENGL" = yes])
+dnl End check for Motif and OpenGL library and headers
+
+dnl--------------------------------------------------------------------
+dnl Qt5 Section
+dnl   - Use macro ax_have_qt() from
+dnl         https://www.gnu.org/software/autoconf-archive/ax_have_qt.html
+dnl         http://git.savannah.gnu.org/gitweb/?p=autoconf-archive.git;a=blob_plain;f=m4/ax_have_qt.m4
+dnl   - Usage of this macro described at:
+dnl         https://stackoverflow.com/questions/37758622/how-to-use-gnu-autotool-to-build-a-qt-project
+dnl--------------------------------------------------------------------
+
+dnl Check if Qt5 based graphical tools should be built
+AS_ECHO(["Check if Qt5 based graphical tools should be built"])
+AC_ARG_ENABLE([qt],
+  [AS_HELP_STRING([--enable-qt], [build Qt5 based graphical tools])],
+  [build_qttools=yes],
+  [build_qttools=no])
+AS_ECHO(["build_qttools: $build_qttools"])
+if test "$build_qttools" = "yes" ; then
+  AX_HAVE_QT()
+  if test "$have_qt" = "yes" ; then
+    AS_ECHO(["Qt5 installation found"])
+    AC_SUBST([qt_LIBS], [$QT_LIBS])
+    AC_SUBST([qt_CPPFLAGS], [$QT_CXXFLAGS])
+  else
+    AS_ECHO(["Qt5 installation not found"])
+    build_qttools=no
+  fi
+fi
+AM_CONDITIONAL([BUILD_QTTOOLS], [test $build_qttools = yes])
+if test "$build_qttools" = "yes" ; then
+    dnl Build tools using QT
+    AS_ECHO(["Building Qt5-based graphical tools"])
+    AC_DEFINE(QTTOOLS_ENABLED, 1, [Build tools using Qt5])
+else
+    dnl Not building tools using Qt5
+    AS_ECHO(["Not building Qt5-based graphical tools"])
 fi
 
 dnl--------------------------------------------------------------------
@@ -961,7 +1013,7 @@ dnl--------------------------------------------------------------------
 dnl Check if programs using PCL should be built
 AS_ECHO(["Check if programs using PCL should be built"])
 AC_ARG_ENABLE(pcltools, [AS_HELP_STRING([--enable-pcltools],
-        [build tools using PCL])], [build_pcltools=yes], [build_mbpcltools=no])
+        [build tools using PCL])], [build_pcltools=yes], [build_pcltools=no])
 AM_CONDITIONAL([BUILD_PCLTOOLS], [test $build_pcltools = yes])
 if test "$build_pcltools" = "yes" ; then
     dnl Build tools using PCL
@@ -1011,14 +1063,15 @@ dnl--------------------------------------------------------------------
 
 AS_ECHO(["Check if the GSF driver should be built"])
 AC_ARG_ENABLE(gsf, [AS_HELP_STRING([--disable-gsf], [build without the GSF driver])],
-        [GOT_GSF=yes], [GOT_GSF=no])
-if test "$GOT_GSF" = "no" ; then
+        [GOT_GSFDISABLE=yes], [GOT_GSFDISABLE=no])
+if test "$GOT_GSFDISABLE" = "no" ; then
   enable_gsf=yes
+  AS_ECHO(["GSF driver will be built"])
+  AC_DEFINE([ENABLE_GSF], 1, [Build with GSF])
+else
+  AS_ECHO(["GSF driver will not be built"])
 fi
 AM_CONDITIONAL([BUILD_GSF], [test $enable_gsf = yes])
-if test "$enable_gsf" = "yes" ; then
-  AC_DEFINE([ENABLE_GSF], 1, [Build with GSF])
-fi
 
 dnl--------------------------------------------------------------------
 dnl Generate Makefiles
@@ -1054,6 +1107,7 @@ AC_CONFIG_FILES([\
       src/man/man3/Makefile \
       src/html/Makefile \
       src/ps/Makefile \
+      src/qttest/Makefile \
       src/share/Makefile \
       third_party/Makefile \
       third_party/googletest/Makefile \
@@ -1148,6 +1202,11 @@ if test "$build_mbtools" = "yes" ; then
 	AS_ECHO(["Build graphical tools: Enabled"])
 else
 	AS_ECHO(["Build graphical tools: Disabled"])
+fi
+if test "$build_qttools" = "yes" ; then
+	AS_ECHO(["Build Qt tools: Enabled"])
+else
+	AS_ECHO(["Build Qt tools: Disabled"])
 fi
 if test "$build_pcltools" = "yes" ; then
     AS_ECHO(["Build PCL tools: Enabled"])

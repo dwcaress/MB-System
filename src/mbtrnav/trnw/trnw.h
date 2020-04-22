@@ -97,6 +97,12 @@
 /////////////////////////
 #define TRNW_MSG_SIZE TRN_MSG_SIZE
 #define TRNW_WMEAST_SERIAL_LEN(nmeas)  ( (2+1*nmeas)*sizeof(int) + (7+6*nmeas)*sizeof(double) + (0+1*nmeas)*sizeof(bool) + (0+1*nmeas)*sizeof(unsigned int) )
+
+#define TRN_MAX_NCOV_DFL 49.
+#define TRN_MAX_ECOV_DFL 49.
+#define TRN_MAX_NERR_DFL 50.
+#define TRN_MAX_EERR_DFL 50.
+
 struct wtnav_s;
 typedef struct wtnav_s wtnav_t;
 
@@ -117,6 +123,7 @@ typedef enum {
     TRNW_OSOCKET=0x10,
 }trnw_oflags_t;
 
+
 typedef struct trn_config_s{
     char *trn_host;
     int  trn_port;
@@ -128,6 +135,10 @@ typedef struct trn_config_s{
     int  map_type;
     long int utm_zone;
     trnw_oflags_t oflags;
+    double max_northing_cov;
+    double max_northing_err;
+    double max_easting_cov;
+    double max_easting_err;
 }trn_config_t;
 
 /////////////////////////
@@ -144,7 +155,12 @@ extern "C" {
                              char *cfg_file,
                              char *particles_file,
                              char *logdir,
-                             trnw_oflags_t oflags);
+                             trnw_oflags_t oflags,
+                             double max_northing_cov,
+                             double max_northing_err,
+                             double max_easting_cov,
+                             double max_easting_err
+                             );
     
     void trncfg_destroy(trn_config_t **pself);
     void trncfg_show(trn_config_t *obj, bool verbose, int indent);

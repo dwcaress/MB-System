@@ -41,10 +41,9 @@ DataLogReader::~DataLogReader()
 
 void DataLogReader::readHeader()
 {
-  char typeMnem[256];
   char buffer[256];
   char buffer2[256];
-  char errorBuf[256];
+  char errorBuf[MAX_EXC_STRING_LEN];
   char *mnem, *type, *format, *lname, *units;
   char *token;
   int nTokens;
@@ -106,7 +105,7 @@ void DataLogReader::readHeader()
       }
       else {
 	_fileFormat = UnknownFormat;
-	sprintf(errorBuf, 
+	snprintf(errorBuf, sizeof(errorBuf), 
 		"DataLogReader::readHeader() - Unknown file format \"%s\"",
 		token);
 
@@ -215,7 +214,7 @@ void DataLogReader::readHeader()
         field = DataFieldFactory::instanceOf()->create(type, mnem);
         if (!field)
         {
-          sprintf(errorBuf, "DataLogReader::readHeader() - "
+          snprintf(errorBuf, sizeof(errorBuf), "DataLogReader::readHeader() - "
                             "unknown DataField: %s %s %s ,%s ,%s\n",
                             type, mnem, format, lname, units);
           throw Exception(errorBuf);
@@ -231,8 +230,12 @@ void DataLogReader::readHeader()
   }
 
   if (parseError) {
-    sprintf(errorBuf, "DataLogReader::readHeader() parse error %s %s %s %s %s",
-            type, mnem, format, lname, units);
+    const char *ns = "(NULL)";
+    snprintf(errorBuf,  sizeof(errorBuf), 
+            "DataLogReader::readHeader() parse error %s %s %s %s %s",
+            (type   != NULL ? type   : ns), (mnem  !=NULL ? mnem  : ns),
+            (format != NULL ? format : ns), (lname !=NULL ? lname : ns),
+            (units  != NULL ? units  : ns));
 
     throw Exception(errorBuf);
   }
@@ -244,13 +247,21 @@ void DataLogReader::readHeader()
 
 int DataLogReader::read()
 {
-  DataField *field;
+  char errorBuf[MAX_EXC_STRING_LEN];
+  DataField *field = NULL;
 
-  for (int i = 0; i < nFields(); i++) {
+  for (unsigned int i = 0; i < nFields(); i++) {
 
     fields.get(i, &field);
 
-    field->read(_logFile);
+    if (field != NULL) field->read(_logFile);
+    else
+    {
+      snprintf(errorBuf,  sizeof(errorBuf), 
+               "DataLogReader::read() expected field %d where none was found",
+               i);
+      throw Exception(errorBuf);
+    }
   }
 
   return 0;
@@ -260,8 +271,6 @@ int DataLogReader::read()
 
 void DataLogReader::print()
 {
-  Boolean debug = True;
-
   DataField *field;
   int i;
 

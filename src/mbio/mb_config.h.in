@@ -9,14 +9,14 @@
 /* Machine is bigendian, (Byteswapping off) */
 #undef ENDIAN_BIG
 
-/* Turned on OpenGL define in config */
-#undef GOT_GL
-
 /* define if the compiler supports basic C++11 syntax */
 #undef HAVE_CXX11
 
 /* Define to 1 if you have the <dlfcn.h> header file. */
 #undef HAVE_DLFCN_H
+
+/* Define to 1 if you have the `gsincos' function. */
+#undef HAVE_GSINCOS
 
 /* Define to 1 if you have the <inttypes.h> header file. */
 #undef HAVE_INTTYPES_H
@@ -35,6 +35,9 @@
 
 /* Define to 1 if you have the <rpc/types.h> header file. */
 #undef HAVE_RPC_TYPES_H
+
+/* Define to 1 if you have the `sincos' function. */
+#undef HAVE_SINCOS
 
 /* Define to 1 if you have the <stdint.h> header file. */
 #undef HAVE_STDINT_H
@@ -108,6 +111,9 @@
 /* Build tools using PCL */
 #undef PCLTOOLS_ENABLED
 
+/* Build tools using Qt5 */
+#undef QTTOOLS_ENABLED
+
 /* Define to 1 if you have the ANSI C header files. */
 #undef STDC_HEADERS
 
@@ -131,6 +137,9 @@
 #  undef WORDS_BIGENDIAN
 # endif
 #endif
+
+/* Define to 1 if the X Window System is missing or not being used. */
+#undef X_DISPLAY_MISSING
 
 /* Define to the type of a signed integer type of width exactly 8 bits if such
    a type exists and the standard includes do not define it. */

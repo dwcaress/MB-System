@@ -353,7 +353,7 @@ static int s_app_main (app_cfg_t *cfg)
                         PMPRINT(MOD_S7K,S7K_V1,(stderr,"subscribe failed [%d/%s]\n",me_errno,strerror(me_errno)));
                     }
                 }else{
-                    PMPRINT(MOD_S7K,S7K_V1,(stderr,"connnect failed [%d/%s]\n",me_errno,strerror(me_errno)));
+                    PMPRINT(MOD_S7K,S7K_V1,(stderr,"connect failed [%d/%s]\n",me_errno,strerror(me_errno)));
                 }
             }else{
                 PMPRINT(MOD_S7K,S7K_V1,(stderr,"msock_socket_new failed [%d/%s]\n",me_errno,strerror(me_errno)));

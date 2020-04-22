@@ -56,7 +56,7 @@ typedef enum {
     MBMOSAIC_CDFGRD = 3,
     MBMOSAIC_ARCASCII = 4,
     MBMOSAIC_GMTGRD = 100,
-} grid_kind_t;
+} grid_type_t;
 
 /* gridded data type */
 typedef enum {
@@ -1064,7 +1064,7 @@ int main(int argc, char **argv) {
 	int weight_priorities = 0;
 	grid_mode_t grid_mode = MBMOSAIC_SINGLE_BEST;
 	char gridkindstring[MB_PATH_MAXLINE] = "";
-	grid_kind_t gridkind = MBMOSAIC_GMTGRD;
+	grid_type_t gridkind = MBMOSAIC_GMTGRD;
 	bool more = false;
 	mb_path filelist = "datalist.mb-1";
 	bool projection_pars_f = false;
@@ -1162,27 +1162,31 @@ int main(int argc, char **argv) {
 				sscanf(optarg, "%lf/%d", &priority_range, &weight_priorities);
 				grid_mode = MBMOSAIC_AVERAGE;
 				break;
-			case 'G':
-			case 'g':
-				if (optarg[0] == '=') {
-					gridkind = MBMOSAIC_GMTGRD;
-					strcpy(gridkindstring, optarg);
-				}
-				else {
-					int tmp;
-					sscanf(optarg, "%d", &tmp);
-					// TODO(schwehr): Make sure that the number is valid.
-					gridkind = (grid_kind_t)tmp;
-					if (gridkind == MBMOSAIC_CDFGRD) {
-						gridkind = MBMOSAIC_GMTGRD;
-						gridkindstring[0] = '\0';
-					}
-					else if (gridkind > MBMOSAIC_GMTGRD) {
-						sprintf(gridkindstring, "=%d", (gridkind - 100));
-						gridkind = MBMOSAIC_GMTGRD;
-					}
-				}
-				break;
+      case 'G':
+      case 'g':
+        if (optarg[0] == '=') {
+          gridkind = MBMOSAIC_GMTGRD;
+          strcpy(gridkindstring, optarg);
+        }
+        else {
+          int tmp;
+          sscanf(optarg, "%d", &tmp);
+          // Range check
+          if (tmp >= 1 && tmp <= 4) {
+            gridkind = (grid_type_t)tmp;
+            if (gridkind == MBMOSAIC_CDFGRD) {
+              gridkind = MBMOSAIC_GMTGRD;
+              gridkindstring[0] = '\0';
+            }
+          } else if (tmp >= MBMOSAIC_GMTGRD && tmp <= MBMOSAIC_GMTGRD + 11) {
+            sprintf(gridkindstring, "=%d", (gridkind - 100));
+            gridkind = MBMOSAIC_GMTGRD;
+          } else {
+            fprintf(stdout, "Invalid gridkind option: -G%s\n\n", optarg);
+            errflg = true;
+          }
+        }
+        break;
 			case 'H':
 			case 'h':
 				help = true;
@@ -2159,7 +2163,7 @@ int main(int argc, char **argv) {
 	double table_altitude[MB7K2SS_NUM_ANGLES];
 	double table_range[MB7K2SS_NUM_ANGLES];
 
-	int file_in_bounds;  // TODO(schwehr): Make mb_check_info a bool.
+	bool file_in_bounds = false;
 
 	/***** do first pass gridding *****/
 	if (grid_mode == MBMOSAIC_SINGLE_BEST || priority_mode != MBMOSAIC_PRIORITY_NONE) {
@@ -3296,7 +3300,7 @@ int main(int argc, char **argv) {
 		if (status == MB_SUCCESS)
 			status = mb_mallocd(verbose, __FILE__, __LINE__, ndata * sizeof(int), (void **)&work2, &error);
 		if (status == MB_SUCCESS)
-			status = mb_mallocd(verbose, __FILE__, __LINE__, (gxdim + gydim) * sizeof(int), (void **)&work3, &error);
+			status = mb_mallocd(verbose, __FILE__, __LINE__, (gxdim + gydim) * sizeof(bool), (void **)&work3, &error);
 		if (error != MB_ERROR_NO_ERROR) {
 			char *message = nullptr;
 			mb_error(verbose, MB_ERROR_MEMORY_FAIL, &message);
@@ -3367,7 +3371,9 @@ int main(int argc, char **argv) {
 		ddy = (float)dy;
 		if (clipmode == MBMOSAIC_INTERP_ALL)
 			clip = std::max(gxdim, gydim);
-		mb_zgrid2(sgrid, &gxdim, &gydim, &xmin, &ymin, &ddx, &ddy, sdata, &ndata, static_cast<float *>(work1), static_cast<int *>(work2), static_cast<int *>(work3), &cay, &clip);
+		mb_zgrid2(sgrid, &gxdim, &gydim, &xmin, &ymin, &ddx, &ddy, sdata, &ndata,
+                      static_cast<float *>(work1), static_cast<int *>(work2),
+                      static_cast<bool *>(work3), &cay, &clip);
 
 		if (clipmode == MBMOSAIC_INTERP_GAP)
 			fprintf(outfp, "Applying spline interpolation to fill gaps of %d cells or less...\n", clip);

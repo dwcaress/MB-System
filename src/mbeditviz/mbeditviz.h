@@ -129,8 +129,8 @@ struct mbev_ping_struct {
 struct mbev_file_struct {
 	int load_status;
 	int load_status_shown;
-	int locked;
-	int esf_exists;
+	bool locked;
+	bool esf_exists;
 	char name[MB_PATH_MAXLINE];
 	char path[MB_PATH_MAXLINE];
 	int format;
@@ -139,7 +139,8 @@ struct mbev_file_struct {
 	struct mb_info_struct raw_info;
 	struct mb_info_struct processed_info;
 	struct mb_process_struct process;
-	int esf_open;
+	bool esf_open;
+  bool esf_changed;
 	char esffile[MB_PATH_MAXLINE];
 	struct mb_esf_struct esf;
 	int num_pings;

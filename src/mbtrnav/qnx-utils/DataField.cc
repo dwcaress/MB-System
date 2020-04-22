@@ -92,6 +92,7 @@ void DataField::setUnits(const char *newUnits)
 void DataField::setAsciiFormat(const char *format)
 {
   strncpy(_asciiFormat, (char *)format, sizeof(_asciiFormat));
+  _asciiFormat[sizeof(_asciiFormat) - 1] = '\0';
 }
 
 

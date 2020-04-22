@@ -107,6 +107,9 @@ typedef enum {
 /* comparison threshold */;
 constexpr double MBGRID_TINY = 0.00000001;
 
+/* maximum allowed beam grazing angle */
+constexpr double FOOT_THETA_MAX = 85.0;
+
 /* interpolation algorithm
     The code is set to use either of two
     algorithms for 2D thin plate spline
@@ -121,7 +124,7 @@ constexpr double MBGRID_TINY = 0.00000001;
 
 /* output stream for basic stuff (stdout if verbose <= 1,
     stderr if verbose > 1) */
-FILE *outfp = nullptr;
+FILE *outfp = stdout;
 
 /* program identifiers */
 constexpr char program_name[] = "mbgrid";
@@ -572,15 +575,19 @@ int main(int argc, char **argv) {
         else {
           int tmp;
           sscanf(optarg, "%d", &tmp);
-          // TODO)schwehr): Range check
-          gridkind = (grid_type_t)tmp; // TODO)schwehr): Range check
-          if (gridkind == MBGRID_CDFGRD) {
-            gridkind = MBGRID_GMTGRD;
-            gridkindstring[0] = '\0';
-          }
-          else if (gridkind > MBGRID_GMTGRD) {
+          // Range check
+          if (tmp >= 1 && tmp <= 4) {
+            gridkind = (grid_type_t)tmp;
+            if (gridkind == MBGRID_CDFGRD) {
+              gridkind = MBGRID_GMTGRD;
+              gridkindstring[0] = '\0';
+            }
+          } else if (tmp >= MBGRID_GMTGRD && tmp <= MBGRID_GMTGRD + 11) {
             sprintf(gridkindstring, "=%d", (gridkind - 100));
             gridkind = MBGRID_GMTGRD;
+          } else {
+            fprintf(stdout, "Invalid gridkind option: -G%s\n\n", optarg);
+            errflg = true;
           }
         }
         break;
@@ -660,6 +667,8 @@ int main(int argc, char **argv) {
       case 'V':
       case 'v':
         verbose++;
+        if (verbose >= 2)
+          outfp = stderr;
         break;
       case 'W':
       case 'w':
@@ -673,11 +682,6 @@ int main(int argc, char **argv) {
         errflg = true;
       }
     }
-
-    if (verbose >= 2)
-      outfp = stderr;
-    else
-      outfp = stdout;
 
     if (errflg) {
       fprintf(outfp, "usage: %s\n", usage_message);
@@ -858,12 +862,13 @@ int main(int argc, char **argv) {
   float *sdata = nullptr;
   float *work1 = nullptr;
   int *work2 = nullptr;
-  int *work3 = nullptr;
+  bool *work3 = nullptr;
 #endif
   double bdata_origin_x, bdata_origin_y;
   float *output = nullptr;
   float *sgrid = nullptr;
   int *cnt = nullptr;
+  int *num = nullptr;
   double **data;
   double *value = nullptr;
   int ndata, ndatafile, nbackground;
@@ -892,7 +897,7 @@ int main(int argc, char **argv) {
   int ix1, ix2, iy1, iy2;
 
   double foot_dx, foot_dy, foot_dxn, foot_dyn;
-  double foot_lateral, foot_range, foot_theta;
+  double foot_lateral, beam_altitude, foot_range, foot_theta;
   double foot_dtheta, foot_dphi;
   double foot_hwidth, foot_hlength;
   int foot_wix, foot_wiy, foot_lix, foot_liy, foot_dix, foot_diy;
@@ -1475,11 +1480,6 @@ int main(int argc, char **argv) {
 
     /* guess about twice the data actually expected */
     int nbackground_alloc = 2 * gxdim * gydim;
-    // TODO(schwehr): Bug?
-    // if (use_projection)
-    //  nbackground_alloc = 2 * gxdim * gydim;
-    // else
-    //   nbackground_alloc = 2 * gxdim * gydim;
 
 /* allocate and initialize background data arrays */
 #ifdef USESURFACE
@@ -1682,8 +1682,6 @@ int main(int argc, char **argv) {
     }
   }
 
-  int *num = nullptr;  // TODO(schwehr): Can num be a bool?
-
   /* allocate memory for grid arrays */
   status = mb_mallocd(verbose, __FILE__, __LINE__, gxdim * gydim * sizeof(double), (void **)&grid, &error);
   if (status == MB_SUCCESS)
@@ -1716,8 +1714,10 @@ int main(int argc, char **argv) {
   }
 
 /* -------------------------------------------------------------------------- */
-  int file_in_bounds;  // TODO(schwehr): Make mb_check_info take a bool.
-  bool time_ok;  // TODO(schwehr): Probably can be many localize variables.
+  bool file_in_bounds = false;
+  bool time_ok;  // TODO(schwehr): Probably can localize many variables.
+  bool region_ok;
+  bool footprint_ok;
 
   /***** do weighted footprint slope gridding *****/
   if (grid_mode == MBGRID_WEIGHTED_FOOTPRINT_SLOPE) {
@@ -2009,7 +2009,7 @@ int main(int argc, char **argv) {
     if (status == MB_SUCCESS)
       status = mb_mallocd(verbose, __FILE__, __LINE__, ndata * sizeof(int), (void **)&work2, &error);
     if (status == MB_SUCCESS)
-      status = mb_mallocd(verbose, __FILE__, __LINE__, (sxdim + sydim) * sizeof(int), (void **)&work3, &error);
+      status = mb_mallocd(verbose, __FILE__, __LINE__, (sxdim + sydim) * sizeof(bool), (void **)&work3, &error);
     if (error != MB_ERROR_NO_ERROR) {
       char *message = nullptr;
       mb_error(verbose, MB_ERROR_MEMORY_FAIL, &message);
@@ -2022,7 +2022,7 @@ int main(int argc, char **argv) {
     memset((char *)sdata, 0, 3 * ndata * sizeof(float));
     memset((char *)work1, 0, ndata * sizeof(float));
     memset((char *)work2, 0, ndata * sizeof(int));
-    memset((char *)work3, 0, (sxdim + sydim) * sizeof(int));
+    memset((char *)work3, 0, (sxdim + sydim) * sizeof(bool));
 
     /* get points from grid */
     /* simultaneously find the depth values nearest to the grid corners and edge midpoints */
@@ -2294,53 +2294,43 @@ int main(int argc, char **argv) {
                       dzdy = (gridsmall[k2] - gridsmall[k1]) / (2.0 * sdy);
                     }
 
+                    /* check if in region of interest */
+                    if (ix >= 0 && ix < gxdim
+                      && iy >= 0 && iy < gydim) {
+                      region_ok = true;
+                    } else {
+                      region_ok = false;
+                    }
+
                     /* check if within allowed time */
-                    if (check_time) {
+                    time_ok = true;
+                    if (region_ok && check_time) {
                       /* if in region of interest
                          check if time is ok */
-                      if (ix >= 0 && ix < gxdim && iy >= 0 && iy < gydim) {
-                        kgrid = ix * gydim + iy;
-                        if (firsttime[kgrid] <= 0.0) {
-                          firsttime[kgrid] = time_d;
-                          time_ok = true;
-                        }
-                        else if (fabs(time_d - firsttime[kgrid]) > timediff) {
-                          if (first_in_stays)
-                            time_ok = false;
-                          else {
-                            time_ok = true;
-                            firsttime[kgrid] = time_d;
-                            ndata = ndata - cnt[kgrid];
-                            ndatafile = ndatafile - cnt[kgrid];
-                            norm[kgrid] = 0.0;
-                            grid[kgrid] = 0.0;
-                            sigma[kgrid] = 0.0;
-                            num[kgrid] = 0;
-                            cnt[kgrid] = 0;
-                          }
-                        }
-                        else
-                          time_ok = true;
-                      }
-                      else
+                      kgrid = ix * gydim + iy;
+                      if (firsttime[kgrid] <= 0.0) {
+                        firsttime[kgrid] = time_d;
                         time_ok = true;
+                      } else if (fabs(time_d - firsttime[kgrid]) > timediff) {
+                        if (first_in_stays)
+                          time_ok = false;
+                        else {
+                          time_ok = true;
+                          firsttime[kgrid] = time_d;
+                          ndata = ndata - cnt[kgrid];
+                          ndatafile = ndatafile - cnt[kgrid];
+                          norm[kgrid] = 0.0;
+                          grid[kgrid] = 0.0;
+                          sigma[kgrid] = 0.0;
+                          num[kgrid] = 0;
+                          cnt[kgrid] = 0;
+                        }
+                      }
                     }
-                    else
-                      time_ok = true;
 
-                    /* process if in region of interest */
-                    if (ix >= 0 && ix < gxdim
-                        && iy >= 0 && iy < gydim && time_ok) {
-                      /* calculate footprint - this is a kluge assuming
-                         sonar at surface - also assumes lon lat grid
-                         - to be generalized in later version
-                         DWC 11/16/99 */
-                      /* calculate footprint - now uses sonar altitude
-                         - still assumes lon lat grid
-                         - to be generalized in later version
-                         DWC 1/29/2001 */
-                      /* now handles projected grids
-                         DWC 3/5/2003 */
+                    /* calculate footprint if in region of interest */
+                    if (region_ok && time_ok) {
+                      /* calculate footprint  */
                       if (use_projection) {
                         foot_dx = (bathlon[ib] - navlon);
                         foot_dy = (bathlat[ib] - navlat);
@@ -2358,9 +2348,11 @@ int main(int argc, char **argv) {
                         foot_dxn = 1.0;
                         foot_dyn = 0.0;
                       }
-                      foot_range = sqrt(foot_lateral * foot_lateral + altitude * altitude);
-                      if (foot_range > 0.0) {
-                        foot_theta = RTD * atan2(foot_lateral, (bath[ib] - sonardepth));
+                      beam_altitude = bath[ib] - sonardepth;
+                      foot_range = sqrt(foot_lateral * foot_lateral + beam_altitude * beam_altitude);
+                      foot_theta = RTD * atan2(foot_lateral, beam_altitude);
+                      if (foot_range > 0.0 && foot_theta < FOOT_THETA_MAX) {
+                        footprint_ok = true;
                         foot_dtheta = 0.5 * scale * mb_io_ptr->beamwidth_xtrack;
                         foot_dphi = 0.5 * scale * mb_io_ptr->beamwidth_ltrack;
                         if (foot_dtheta <= 0.0)
@@ -2370,121 +2362,125 @@ int main(int argc, char **argv) {
                         foot_hwidth = (bath[ib] - sonardepth) * tan(DTR * (foot_theta + foot_dtheta)) -
                                       foot_lateral;
                         foot_hlength = foot_range * tan(DTR * foot_dphi);
+                      } else {
+                        footprint_ok = false;
+                      }
+                    }
 
-                        /* get range of bins around footprint to examine */
-                        if (use_projection) {
-                          foot_wix = fabs(foot_hwidth * cos(DTR * foot_theta) / dx);
-                          foot_wiy = fabs(foot_hwidth * sin(DTR * foot_theta) / dx);
-                          foot_lix = fabs(foot_hlength * sin(DTR * foot_theta) / dy);
-                          foot_liy = fabs(foot_hlength * cos(DTR * foot_theta) / dy);
-                        }
-                        else {
-                          foot_wix = fabs(foot_hwidth * cos(DTR * foot_theta) * mtodeglon / dx);
-                          foot_wiy = fabs(foot_hwidth * sin(DTR * foot_theta) * mtodeglon / dx);
-                          foot_lix = fabs(foot_hlength * sin(DTR * foot_theta) * mtodeglat / dy);
-                          foot_liy = fabs(foot_hlength * cos(DTR * foot_theta) * mtodeglat / dy);
-                        }
-                        foot_dix = 2 * std::max(foot_wix, foot_lix);
-                        foot_diy = 2 * std::max(foot_wiy, foot_liy);
-                        ix1 = std::max(ix - foot_dix, 0);
-                        ix2 = std::min(ix + foot_dix, gxdim - 1);
-                        iy1 = std::max(iy - foot_diy, 0);
-                        iy2 = std::min(iy + foot_diy, gydim - 1);
+                    if (time_ok && region_ok && footprint_ok) {
+                      /* get range of bins around footprint to examine */
+                      if (use_projection) {
+                        foot_wix = fabs(foot_hwidth * cos(DTR * foot_theta) / dx);
+                        foot_wiy = fabs(foot_hwidth * sin(DTR * foot_theta) / dx);
+                        foot_lix = fabs(foot_hlength * sin(DTR * foot_theta) / dy);
+                        foot_liy = fabs(foot_hlength * cos(DTR * foot_theta) / dy);
+                      }
+                      else {
+                        foot_wix = fabs(foot_hwidth * cos(DTR * foot_theta) * mtodeglon / dx);
+                        foot_wiy = fabs(foot_hwidth * sin(DTR * foot_theta) * mtodeglon / dx);
+                        foot_lix = fabs(foot_hlength * sin(DTR * foot_theta) * mtodeglat / dy);
+                        foot_liy = fabs(foot_hlength * cos(DTR * foot_theta) * mtodeglat / dy);
+                      }
+                      foot_dix = 2 * std::max(foot_wix, foot_lix);
+                      foot_diy = 2 * std::max(foot_wiy, foot_liy);
+                      ix1 = std::max(ix - foot_dix, 0);
+                      ix2 = std::min(ix + foot_dix, gxdim - 1);
+                      iy1 = std::max(iy - foot_diy, 0);
+                      iy2 = std::min(iy + foot_diy, gydim - 1);
 
-                        /* loop over neighborhood of bins */
-                        for (int ii = ix1; ii <= ix2; ii++)
-                          for (int jj = iy1; jj <= iy2; jj++) {
-                            /* find center of bin in lon lat degrees from sounding center */
-                            kgrid = ii * gydim + jj;
-                            xx = (wbnd[0] + ii * dx + 0.5 * dx - bathlon[ib]);
-                            yy = (wbnd[2] + jj * dy + 0.5 * dy - bathlat[ib]);
+                      /* loop over neighborhood of bins */
+                      for (int ii = ix1; ii <= ix2; ii++)
+                        for (int jj = iy1; jj <= iy2; jj++) {
+                          /* find center of bin in lon lat degrees from sounding center */
+                          kgrid = ii * gydim + jj;
+                          xx = (wbnd[0] + ii * dx + 0.5 * dx - bathlon[ib]);
+                          yy = (wbnd[2] + jj * dy + 0.5 * dy - bathlat[ib]);
 
-                            /* get depth or topo value at this point using slope estimate */
-                            sbath = topofactor * bath[ib] + dzdx * xx + dzdy * yy;
+                          /* get depth or topo value at this point using slope estimate */
+                          sbath = topofactor * bath[ib] + dzdx * xx + dzdy * yy;
 
-                            /* get center and corners of bin in meters from sounding center */
-                            if (use_projection) {
-                              xx0 = xx;
-                              yy0 = yy;
-                              bdx = 0.5 * dx;
-                              bdy = 0.5 * dy;
-                            }
-                            else {
-                              xx0 = xx / mtodeglon;
-                              yy0 = yy / mtodeglat;
-                              bdx = 0.5 * dx / mtodeglon;
-                              bdy = 0.5 * dy / mtodeglat;
-                            }
-                            xx1 = xx0 - bdx;
-                            xx2 = xx0 + bdx;
-                            yy1 = yy0 - bdy;
-                            yy2 = yy0 + bdy;
+                          /* get center and corners of bin in meters from sounding center */
+                          if (use_projection) {
+                            xx0 = xx;
+                            yy0 = yy;
+                            bdx = 0.5 * dx;
+                            bdy = 0.5 * dy;
+                          }
+                          else {
+                            xx0 = xx / mtodeglon;
+                            yy0 = yy / mtodeglat;
+                            bdx = 0.5 * dx / mtodeglon;
+                            bdy = 0.5 * dy / mtodeglat;
+                          }
+                          xx1 = xx0 - bdx;
+                          xx2 = xx0 + bdx;
+                          yy1 = yy0 - bdy;
+                          yy2 = yy0 + bdy;
 
-                            /* rotate center and corners of bin to footprint coordinates */
-                            prx[0] = xx0 * foot_dxn + yy0 * foot_dyn;
-                            pry[0] = -xx0 * foot_dyn + yy0 * foot_dxn;
-                            prx[1] = xx1 * foot_dxn + yy1 * foot_dyn;
-                            pry[1] = -xx1 * foot_dyn + yy1 * foot_dxn;
-                            prx[2] = xx2 * foot_dxn + yy1 * foot_dyn;
-                            pry[2] = -xx2 * foot_dyn + yy1 * foot_dxn;
-                            prx[3] = xx1 * foot_dxn + yy2 * foot_dyn;
-                            pry[3] = -xx1 * foot_dyn + yy2 * foot_dxn;
-                            prx[4] = xx2 * foot_dxn + yy2 * foot_dyn;
-                            pry[4] = -xx2 * foot_dyn + yy2 * foot_dxn;
+                          /* rotate center and corners of bin to footprint coordinates */
+                          prx[0] = xx0 * foot_dxn + yy0 * foot_dyn;
+                          pry[0] = -xx0 * foot_dyn + yy0 * foot_dxn;
+                          prx[1] = xx1 * foot_dxn + yy1 * foot_dyn;
+                          pry[1] = -xx1 * foot_dyn + yy1 * foot_dxn;
+                          prx[2] = xx2 * foot_dxn + yy1 * foot_dyn;
+                          pry[2] = -xx2 * foot_dyn + yy1 * foot_dxn;
+                          prx[3] = xx1 * foot_dxn + yy2 * foot_dyn;
+                          pry[3] = -xx1 * foot_dyn + yy2 * foot_dxn;
+                          prx[4] = xx2 * foot_dxn + yy2 * foot_dyn;
+                          pry[4] = -xx2 * foot_dyn + yy2 * foot_dxn;
 
-                            /* get weight integrated over bin */
-                            mbgrid_weight(verbose, foot_hwidth, foot_hlength, prx[0], pry[0], bdx,
-                                          bdy, &prx[1], &pry[1], &weight, &use_weight, &error);
+                          /* get weight integrated over bin */
+                          mbgrid_weight(verbose, foot_hwidth, foot_hlength, prx[0], pry[0], bdx,
+                                        bdy, &prx[1], &pry[1], &weight, &use_weight, &error);
 
-                            if (use_weight != MBGRID_USE_NO && weight > 0.000001) {
-                              weight *= file_weight;
-                              norm[kgrid] = norm[kgrid] + weight;
-                              grid[kgrid] = grid[kgrid] + weight * sbath;
-                              sigma[kgrid] = sigma[kgrid] + weight * sbath * sbath;
-                              if (use_weight == MBGRID_USE_YES) {
-                                num[kgrid]++;
-                                if (ii == ix && jj == iy)
-                                  cnt[kgrid]++;
-                              }
+                          if (use_weight != MBGRID_USE_NO && weight > 0.000001) {
+                            weight *= file_weight;
+                            norm[kgrid] = norm[kgrid] + weight;
+                            grid[kgrid] = grid[kgrid] + weight * sbath;
+                            sigma[kgrid] = sigma[kgrid] + weight * sbath * sbath;
+                            if (use_weight == MBGRID_USE_YES) {
+                              num[kgrid]++;
+                              if (ii == ix && jj == iy)
+                                cnt[kgrid]++;
                             }
                           }
-                        ndata++;
-                        ndatafile++;
-                        if (first) {
-                          first = false;
-                          dmin = topofactor * bath[ib];
-                          dmax = topofactor * bath[ib];
-                        } else {
-                          dmin = std::min(topofactor * bath[ib], dmin);
-                          dmax = std::max(topofactor * bath[ib], dmax);
                         }
+                      ndata++;
+                      ndatafile++;
+                      if (first) {
+                        first = false;
+                        dmin = topofactor * bath[ib];
+                        dmax = topofactor * bath[ib];
+                      } else {
+                        dmin = std::min(topofactor * bath[ib], dmin);
+                        dmax = std::max(topofactor * bath[ib], dmax);
                       }
+                    }
 
                       /* else for xyz data without footprint */
-                      else if (ix >= 0 && ix < gxdim && iy >= 0 && iy < gydim) {
-                        kgrid = ix * gydim + iy;
-                        norm[kgrid] = norm[kgrid] + file_weight;
-                        grid[kgrid] = grid[kgrid] + file_weight * topofactor * bath[ib];
-                        sigma[kgrid] =
-                            sigma[kgrid] + file_weight * topofactor * topofactor * bath[ib] * bath[ib];
-                        num[kgrid]++;
-                        cnt[kgrid]++;
-                        ndata++;
-                        ndatafile++;
-                        if (first) {
-                          first = false;
-                          dmin = topofactor * bath[ib];
-                          dmax = topofactor * bath[ib];
-                        } else {
-                          dmin = std::min(topofactor * bath[ib], dmin);
-                          dmax = std::max(topofactor * bath[ib], dmax);
-                        }
+                    else if (time_ok && region_ok) {
+                      kgrid = ix * gydim + iy;
+                      norm[kgrid] = norm[kgrid] + file_weight;
+                      grid[kgrid] = grid[kgrid] + file_weight * topofactor * bath[ib];
+                      sigma[kgrid] =
+                          sigma[kgrid] + file_weight * topofactor * topofactor * bath[ib] * bath[ib];
+                      num[kgrid]++;
+                      cnt[kgrid]++;
+                      ndata++;
+                      ndatafile++;
+                      if (first) {
+                        first = false;
+                        dmin = topofactor * bath[ib];
+                        dmax = topofactor * bath[ib];
+                      } else {
+                        dmin = std::min(topofactor * bath[ib], dmin);
+                        dmax = std::max(topofactor * bath[ib], dmax);
                       }
                     }
                   }
                 }
+              }
             }
-          }
           mb_close(verbose, &mbio_ptr, &error);
           status = MB_SUCCESS;
           error = MB_ERROR_NO_ERROR;
@@ -3479,16 +3475,7 @@ int main(int argc, char **argv) {
         if (cnt[kgrid] > 0) {
           value = data[kgrid];
           qsort((char *)value, cnt[kgrid], sizeof(double), mb_double_compare);
-          // TODO(schwehr): grid_mode always has to be MBGRID_MEDIAN_FILTER here.
-          if (grid_mode == MBGRID_MEDIAN_FILTER) {
-            grid[kgrid] = value[cnt[kgrid] / 2];
-          }
-          else if (grid_mode == MBGRID_MINIMUM_FILTER) {
-            grid[kgrid] = value[0];
-          }
-          else if (grid_mode == MBGRID_MAXIMUM_FILTER) {
-            grid[kgrid] = value[cnt[kgrid] - 1];
-          }
+          grid[kgrid] = value[cnt[kgrid] / 2];
           sigma[kgrid] = 0.0;
           for (int k = 0; k < cnt[kgrid]; k++)
             sigma[kgrid] += (value[k] - grid[kgrid]) * (value[k] - grid[kgrid]);
@@ -5100,7 +5087,7 @@ int main(int argc, char **argv) {
     if (status == MB_SUCCESS)
       status = mb_mallocd(verbose, __FILE__, __LINE__, ndata * sizeof(int), (void **)&work2, &error);
     if (status == MB_SUCCESS)
-      status = mb_mallocd(verbose, __FILE__, __LINE__, (gxdim + gydim) * sizeof(int), (void **)&work3, &error);
+      status = mb_mallocd(verbose, __FILE__, __LINE__, (gxdim + gydim) * sizeof(bool), (void **)&work3, &error);
     if (error != MB_ERROR_NO_ERROR) {
       char *message = nullptr;
       mb_error(verbose, MB_ERROR_MEMORY_FAIL, &message);
@@ -5113,7 +5100,7 @@ int main(int argc, char **argv) {
     memset((char *)sdata, 0, 3 * ndata * sizeof(float));
     memset((char *)work1, 0, ndata * sizeof(float));
     memset((char *)work2, 0, ndata * sizeof(int));
-    memset((char *)work3, 0, (gxdim + gydim) * sizeof(int));
+    memset((char *)work3, 0, (gxdim + gydim) * sizeof(bool));
 
     /* get points from grid */
     /* simultaneously find the depth values nearest to the grid corners and edge midpoints */
@@ -5189,6 +5176,18 @@ int main(int argc, char **argv) {
     else if (clipmode == MBGRID_INTERP_ALL)
       fprintf(outfp, "Applying spline interpolation to fill all undefined cells in the grid...\n");
 
+    /* allocate interpolation mask */
+    bool *smask = NULL;
+    if (mb_mallocd(verbose, __FILE__, __LINE__, gxdim * gydim * sizeof(bool), (void **)&smask, &error) != MB_SUCCESS) {
+      char *message = nullptr;
+      mb_error(verbose, MB_ERROR_MEMORY_FAIL, &message);
+      fprintf(outfp, "\nMBIO Error allocating interpolation work arrays:\n%s\n", message);
+      fprintf(outfp, "\nProgram <%s> Terminated\n", program_name);
+      mb_memory_clear(verbose, &error);
+      exit(error);
+    }
+    memset((char *)smask, 0, (gxdim + gydim) * sizeof(bool));
+
     /* translate the interpolation into the grid array
         filling only data gaps */
     const float zflag = 5.0e34f;
@@ -5201,7 +5200,7 @@ int main(int argc, char **argv) {
 #else
           kint = i + j * gxdim;
 #endif
-          num[kgrid] = false;
+          smask[kgrid] = false;
           if (grid[kgrid] >= clipvalue && sgrid[kint] < zflag) {
             /* initialize direction mask of search */
             int dmask[9];
@@ -5209,8 +5208,7 @@ int main(int argc, char **argv) {
               dmask[ii] = false;
 
             /* loop over rings around point, starting close */
-            // TODO(schwehr): Is num an int or a bool?
-            for (int ir = 0; ir <= clip && num[kgrid] == false; ir++) {
+            for (int ir = 0; ir <= clip && smask[kgrid] == false; ir++) {
               /* set bounds of search */
               const int i1 = std::max(0, i - ir);
               const int i2 = std::min(gxdim - 1, i + ir);
@@ -5218,7 +5216,7 @@ int main(int argc, char **argv) {
               const int j2 = std::min(gydim - 1, j + ir);
 
               int jj = j1;
-              for (int ii = i1; ii <= i2 && num[kgrid] == false; ii++) {
+              for (int ii = i1; ii <= i2 && smask[kgrid] == false; ii++) {
                 if (grid[ii * gydim + jj] < clipvalue) {
                   const double r = sqrt((double)((ii - i) * (ii - i) + (jj - j) * (jj - j)));
                   const int iii = rint((ii - i) / r + 1);
@@ -5227,12 +5225,12 @@ int main(int argc, char **argv) {
                   dmask[kkk] = true;
                   if ((dmask[0] && dmask[8]) || (dmask[3] && dmask[5]) || (dmask[6] && dmask[2]) ||
                       (dmask[1] && dmask[7]))
-                    num[kgrid] = true;
+                    smask[kgrid] = true;
                 }
               }
 
               jj = j2;
-              for (int ii = i1; ii <= i2 && num[kgrid] == false; ii++) {
+              for (int ii = i1; ii <= i2 && smask[kgrid] == false; ii++) {
                 if (grid[ii * gydim + jj] < clipvalue) {
                   const double r = sqrt((double)((ii - i) * (ii - i) + (jj - j) * (jj - j)));
                   const int iii = rint((ii - i) / r + 1);
@@ -5241,12 +5239,12 @@ int main(int argc, char **argv) {
                   dmask[kkk] = true;
                   if ((dmask[0] && dmask[8]) || (dmask[3] && dmask[5]) || (dmask[6] && dmask[2]) ||
                       (dmask[1] && dmask[7]))
-                    num[kgrid] = true;
+                    smask[kgrid] = true;
                 }
               }
 
               int ii = i1;
-              for (jj = j1; jj <= j2 && num[kgrid] == false; jj++) {
+              for (jj = j1; jj <= j2 && smask[kgrid] == false; jj++) {
                 if (grid[ii * gydim + jj] < clipvalue) {
                   const double r = sqrt((double)((ii - i) * (ii - i) + (jj - j) * (jj - j)));
                   const int iii = rint((ii - i) / r + 1);
@@ -5255,12 +5253,12 @@ int main(int argc, char **argv) {
                   dmask[kkk] = true;
                   if ((dmask[0] && dmask[8]) || (dmask[3] && dmask[5]) || (dmask[6] && dmask[2]) ||
                       (dmask[1] && dmask[7]))
-                    num[kgrid] = true;
+                    smask[kgrid] = true;
                 }
               }
 
               ii = i2;
-              for (jj = j1; jj <= j2 && num[kgrid] == false; jj++) {
+              for (jj = j1; jj <= j2 && smask[kgrid] == false; jj++) {
                 if (grid[ii * gydim + jj] < clipvalue) {
                   const double r = sqrt((double)((ii - i) * (ii - i) + (jj - j) * (jj - j)));
                   const int iii = rint((ii - i) / r + 1);
@@ -5269,7 +5267,7 @@ int main(int argc, char **argv) {
                   dmask[kkk] = true;
                   if ((dmask[0] && dmask[8]) || (dmask[3] && dmask[5]) || (dmask[6] && dmask[2]) ||
                       (dmask[1] && dmask[7]))
-                    num[kgrid] = true;
+                    smask[kgrid] = true;
                 }
               }
             }
@@ -5283,7 +5281,7 @@ int main(int argc, char **argv) {
 #else
           kint = i + j * gxdim;
 #endif
-          if (num[kgrid] == true) {
+          if (smask[kgrid] == true) {
             grid[kgrid] = sgrid[kint];
             nbinspline++;
           }
@@ -5302,10 +5300,10 @@ int main(int argc, char **argv) {
           kint = i + j * gxdim;
 #endif
 
-          num[kgrid] = false;
+          smask[kgrid] = false;
           if (grid[kgrid] >= clipvalue && sgrid[kint] < zflag) {
             /* loop over rings around point, starting close */
-            for (int ir = 0; ir <= clip && num[kgrid] == false; ir++) {
+            for (int ir = 0; ir <= clip && smask[kgrid] == false; ir++) {
               /* set bounds of search */
               const int i1 = std::max(0, i - ir);
               const int i2 = std::min(gxdim - 1, i + ir);
@@ -5313,30 +5311,30 @@ int main(int argc, char **argv) {
               const int j2 = std::min(gydim - 1, j + ir);
 
               int jj = j1;
-              for (int ii = i1; ii <= i2 && num[kgrid] == false; ii++) {
+              for (int ii = i1; ii <= i2 && smask[kgrid] == false; ii++) {
                 if (grid[ii * gydim + jj] < clipvalue) {
-                  num[kgrid] = true;
+                  smask[kgrid] = true;
                 }
               }
 
               jj = j2;
-              for (int ii = i1; ii <= i2 && num[kgrid] == false; ii++) {
+              for (int ii = i1; ii <= i2 && smask[kgrid] == false; ii++) {
                 if (grid[ii * gydim + jj] < clipvalue) {
-                  num[kgrid] = true;
+                  smask[kgrid] = true;
                 }
               }
 
               int ii = i1;
-              for (jj = j1; jj <= j2 && num[kgrid] == false; jj++) {
+              for (jj = j1; jj <= j2 && smask[kgrid] == false; jj++) {
                 if (grid[ii * gydim + jj] < clipvalue) {
-                  num[kgrid] = true;
+                  smask[kgrid] = true;
                 }
               }
 
               ii = i2;
-              for (jj = j1; jj <= j2 && num[kgrid] == false; jj++) {
+              for (jj = j1; jj <= j2 && smask[kgrid] == false; jj++) {
                 if (grid[ii * gydim + jj] < clipvalue) {
-                  num[kgrid] = true;
+                  smask[kgrid] = true;
                 }
               }
             }
@@ -5350,7 +5348,7 @@ int main(int argc, char **argv) {
 #else
           kint = i + j * gxdim;
 #endif
-          if (num[kgrid] == true) {
+          if (smask[kgrid] == true) {
             grid[kgrid] = sgrid[kint];
             nbinspline++;
           }
@@ -5386,6 +5384,7 @@ int main(int argc, char **argv) {
     mb_freed(verbose, __FILE__, __LINE__, (void **)&work2, &error);
     mb_freed(verbose, __FILE__, __LINE__, (void **)&work3, &error);
 #endif
+    mb_freed(verbose, __FILE__, __LINE__, (void **)&smask, &error);
     mb_freed(verbose, __FILE__, __LINE__, (void **)&sgrid, &error);
   }
 /* -------------------------------------------------------------------------- */
@@ -5699,10 +5698,7 @@ int main(int argc, char **argv) {
       sprintf(plot_cmd, "mbm_grdplot -I%s%s -G1 -C -D -V -L\"File %s - %s:%s\"", ofile, gridkindstring, ofile, title, zlabel);
     } else if (datatype == MBGRID_DATA_TOPOGRAPHY) {
       sprintf(plot_cmd, "mbm_grdplot -I%s%s -G1 -C -V -L\"File %s - %s:%s\"", ofile, gridkindstring, ofile, title, zlabel);
-    // TODO(schwehr): Bug?
-    // } else if (datatype == MBGRID_DATA_AMPLITUDE) {
-    //  sprintf(plot_cmd, "mbm_grdplot -I%s%s -G1 -W1/4 -S -D -V -L\"File %s - %s:%s\"", ofile, gridkindstring, ofile, title, zlabel);
-    } else {
+    } else { // if (datatype == MBGRID_DATA_AMPLITUDE || datatype == MBGRID_DATA_SIDESCAN) {
       sprintf(plot_cmd, "mbm_grdplot -I%s%s -G1 -W1/4 -S -D -V -L\"File %s - %s:%s\"", ofile, gridkindstring, ofile, title, zlabel);
     }
     if (verbose) {

@@ -162,6 +162,11 @@ typedef enum {
 #define MB_DATALIST_LOOK_NO 1
 #define MB_DATALIST_LOOK_YES 2
 
+/* settings for recursive imagelist reading functions */
+#define MB_IMAGELIST_LOOK_UNSET 0
+#define MB_IMAGELIST_LOOK_NO 1
+#define MB_IMAGELIST_LOOK_YES 2
+
 /* settings of i/o array dimension types */
 #define MB_MEM_TYPE_NONE 0
 #define MB_MEM_TYPE_BATHYMETRY 1
@@ -272,10 +277,15 @@ int mb_datalist_read2(int verbose, void *datalist_ptr, int *pstatus, char *path,
 int mb_datalist_readorg(int verbose, void *datalist_ptr, char *path, int *format, double *weight, int *error);
 int mb_datalist_recursion(int verbose, void *datalist_ptr, bool print, int *recursion, int *error);
 int mb_datalist_close(int verbose, void **datalist_ptr, int *error);
+int mb_imagelist_open(int verbose, void **imagelist_ptr, char *path, int *error);
+int mb_imagelist_read(int verbose, void *imagelist_ptr, int *imagestatus, char *path0, char *path1, char *dpath,
+                      double *time_d, double *dtime_d, int *error);
+int mb_imagelist_recursion(int verbose, void *imagelist_ptr, bool print, int *recursion, int *error);
+int mb_imagelist_close(int verbose, void **imagelist_ptr, int *error);
 int mb_get_relative_path(int verbose, char *path, char *pwd, int *error);
 int mb_get_shortest_path(int verbose, char *path, int *error);
 int mb_get_basename(int verbose, char *path, int *error);
-int mb_check_info(int verbose, char *file, int lonflip, double bounds[4], int *file_in_bounds, int *error);
+int mb_check_info(int verbose, char *file, int lonflip, double bounds[4], bool *file_in_bounds, int *error);
 bool mb_should_make_fbt(int verbose, int format);
 bool mb_should_make_fnv(int verbose, int format);
 int mb_make_info(int verbose, bool force, char *file, int format, int *error);

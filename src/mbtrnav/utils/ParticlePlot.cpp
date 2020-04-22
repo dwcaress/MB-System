@@ -89,7 +89,7 @@ void ParticlePlot::spawnAsThread() {
 //****************************************************************************************
 
 /*!
-  This function needs to be overriden to draw the scene.  This function is called from
+  This function needs to be overridden to draw the scene.  This function is called from
   the display function automatically.
 */
 

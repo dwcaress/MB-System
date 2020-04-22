@@ -89,14 +89,18 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
+@GMT61PLUS_TRUE@am__append_1 = mbgrdtiff.c
+@GMT61PLUS_FALSE@am__append_2 = mbgrdtifforg.c
 subdir = src/gmt
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/ax_check_compile_flag.m4 \
 	$(top_srcdir)/m4/ax_check_link_flag.m4 \
+	$(top_srcdir)/m4/ax_compare_version.m4 \
 	$(top_srcdir)/m4/ax_cxx_compile_stdcxx.m4 \
-	$(top_srcdir)/m4/libtool.m4 $(top_srcdir)/m4/ltoptions.m4 \
-	$(top_srcdir)/m4/ltsugar.m4 $(top_srcdir)/m4/ltversion.m4 \
-	$(top_srcdir)/m4/lt~obsolete.m4 $(top_srcdir)/configure.ac
+	$(top_srcdir)/m4/ax_have_qt.m4 $(top_srcdir)/m4/libtool.m4 \
+	$(top_srcdir)/m4/ltoptions.m4 $(top_srcdir)/m4/ltsugar.m4 \
+	$(top_srcdir)/m4/ltversion.m4 $(top_srcdir)/m4/lt~obsolete.m4 \
+	$(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 DIST_COMMON = $(srcdir)/Makefile.am $(include_HEADERS)
@@ -138,7 +142,10 @@ mbsystem_la_DEPENDENCIES = ${top_builddir}/src/mbio/libmbio.la \
 	${top_builddir}/src/mbaux/libmbaux.la $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1) $(MBTRNLIB)
-am_mbsystem_la_OBJECTS = mbcontour.lo mbgrdtiff.lo mbswath.lo
+@GMT61PLUS_TRUE@am__objects_1 = mbgrdtiff.lo
+@GMT61PLUS_FALSE@am__objects_2 = mbgrdtifforg.lo
+am_mbsystem_la_OBJECTS = mbcontour.lo mbswath.lo $(am__objects_1) \
+	$(am__objects_2)
 mbsystem_la_OBJECTS = $(am_mbsystem_la_OBJECTS)
 AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
@@ -163,7 +170,8 @@ DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)/src/mbio
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__maybe_remake_depfiles = depfiles
 am__depfiles_remade = ./$(DEPDIR)/mbcontour.Plo \
-	./$(DEPDIR)/mbgrdtiff.Plo ./$(DEPDIR)/mbswath.Plo
+	./$(DEPDIR)/mbgrdtiff.Plo ./$(DEPDIR)/mbgrdtifforg.Plo \
+	./$(DEPDIR)/mbswath.Plo
 am__mv = mv -f
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
@@ -297,6 +305,14 @@ PYTHON_EXEC_PREFIX = @PYTHON_EXEC_PREFIX@
 PYTHON_PLATFORM = @PYTHON_PLATFORM@
 PYTHON_PREFIX = @PYTHON_PREFIX@
 PYTHON_VERSION = @PYTHON_VERSION@
+QT_CXXFLAGS = @QT_CXXFLAGS@
+QT_DIR = @QT_DIR@
+QT_LIBS = @QT_LIBS@
+QT_LRELEASE = @QT_LRELEASE@
+QT_LUPDATE = @QT_LUPDATE@
+QT_MOC = @QT_MOC@
+QT_RCC = @QT_RCC@
+QT_UIC = @QT_UIC@
 RANLIB = @RANLIB@
 SED = @SED@
 SET_MAKE = @SET_MAKE@
@@ -304,6 +320,11 @@ SHELL = @SHELL@
 STRIP = @STRIP@
 VERSION = @VERSION@
 XDR_LIB = @XDR_LIB@
+XMKMF = @XMKMF@
+X_CFLAGS = @X_CFLAGS@
+X_EXTRA_LIBS = @X_EXTRA_LIBS@
+X_LIBS = @X_LIBS@
+X_PRE_LIBS = @X_PRE_LIBS@
 abs_builddir = @abs_builddir@
 abs_srcdir = @abs_srcdir@
 abs_top_builddir = @abs_top_builddir@
@@ -352,6 +373,7 @@ libfftw_LIBS = @libfftw_LIBS@
 libgdal_CPPFLAGS = @libgdal_CPPFLAGS@
 libgdal_LIBS = @libgdal_LIBS@
 libgmt_CPPFLAGS = @libgmt_CPPFLAGS@
+libgmt_LDFLAGS = @libgmt_LDFLAGS@
 libgmt_LIBS = @libgmt_LIBS@
 libmotif_CPPFLAGS = @libmotif_CPPFLAGS@
 libmotif_LIBS = @libmotif_LIBS@
@@ -378,6 +400,8 @@ program_transform_name = @program_transform_name@
 psdir = @psdir@
 pyexecdir = @pyexecdir@
 pythondir = @pythondir@
+qt_CPPFLAGS = @qt_CPPFLAGS@
+qt_LIBS = @qt_LIBS@
 sbindir = @sbindir@
 sharedstatedir = @sharedstatedir@
 srcdir = @srcdir@
@@ -395,7 +419,8 @@ AM_CPPFLAGS = -I${top_srcdir}/src/mbio -I${top_srcdir}/src/mbaux \
 	${libnetcdf_CPPFLAGS}
 AM_CFLAGS = ${libgmt_CFLAGS} ${libgdal_CFLAGS} ${libnetcdf_CFLAGS}
 mbsystem_la_LDFLAGS = -module -avoid-version -shared
-mbsystem_la_SOURCES = mbcontour.c mbgrdtiff.c mbswath.c
+mbsystem_la_SOURCES = mbcontour.c mbswath.c $(am__append_1) \
+	$(am__append_2)
 mbsystem_la_LIBADD = ${top_builddir}/src/mbio/libmbio.la \
 	${top_builddir}/src/mbaux/libmbaux.la ${libgmt_LIBS} \
 	${libgdal_LIBS} ${libnetcdf_LIBS} ${libnetcdf_LIBS} \
@@ -480,6 +505,7 @@ distclean-compile:
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbcontour.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbgrdtiff.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbgrdtifforg.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbswath.Plo@am__quote@ # am--include-marker
 
 $(am__depfiles_remade):
@@ -635,6 +661,7 @@ clean-am: clean-generic clean-libLTLIBRARIES clean-libtool \
 distclean: distclean-am
 		-rm -f ./$(DEPDIR)/mbcontour.Plo
 	-rm -f ./$(DEPDIR)/mbgrdtiff.Plo
+	-rm -f ./$(DEPDIR)/mbgrdtifforg.Plo
 	-rm -f ./$(DEPDIR)/mbswath.Plo
 	-rm -f Makefile
 distclean-am: clean-am distclean-compile distclean-generic \
@@ -683,6 +710,7 @@ installcheck-am:
 maintainer-clean: maintainer-clean-am
 		-rm -f ./$(DEPDIR)/mbcontour.Plo
 	-rm -f ./$(DEPDIR)/mbgrdtiff.Plo
+	-rm -f ./$(DEPDIR)/mbgrdtifforg.Plo
 	-rm -f ./$(DEPDIR)/mbswath.Plo
 	-rm -f Makefile
 maintainer-clean-am: distclean-am maintainer-clean-generic

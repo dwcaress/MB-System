@@ -18,9 +18,12 @@
  * Geophysics and Planetary Physics at the Scripps Institution
  * of Oceanography through the 1970's and 1980's. The Fortran
  * code was obtained from Professory Robert L. Parker at
- * IGPP in 1989.
- * It was converted to C in 1995 for use with the MB-System
- * software package.
+ * IGPP in 1989. A version similar and possibly identical to this
+ * can be found online (March 27, 2020) at:
+ *    https://oceanai.mit.edu/svn/oases-aro/contour/zgrid.f
+ *
+ * The Fortran code was modified by David Caress and then was converted
+ * to C in 1995 for use with the MB-System software package.
  *
  * The nature of the interpolation is controlled by the
  * parameters cay and nrng: cay sets the tension of the
@@ -41,7 +44,7 @@
  *     n = length of xyz series.
  *     zpij[n] = float work array
  *     knxt[n] = int work array
- *     imnew[MAX(nx, ny)+1] = int work array
+ *     imnew[MAX(nx, ny)+1] = bool work array
  *     cay = k = amount of spline eqn (between 0 and inf.)
  *     nrng...grid points more than nrng grid spaces from the nearest
  *            data point are set to undefined.
@@ -50,8 +53,6 @@
  *              obviously contributed.
  * Hacker:	D. W. Caress
  * Date:	April 25, 1995
- *
- *
  *
  * The following are the original comments from the Fortran code:
  *
@@ -126,7 +127,7 @@ const int ZGRID_DIMENSION_MAX = 500;
 
 /*----------------------------------------------------------------------- */
 int mb_zgrid2(float *z, int *nx, int *ny, float *x1, float *y1, float *dx, float *dy, float *xyz, int *n, float *zpij, int *knxt,
-              int *imnew, float *cay, int *nrng) {
+              bool *imnew, float *cay, int *nrng) {
 	int status = MB_SUCCESS;
 
 	/* if nx and ny < ZGRID_DIMENSION_MAX just call zgrid() */
@@ -210,7 +211,7 @@ int mb_zgrid2(float *z, int *nx, int *ny, float *x1, float *y1, float *dx, float
 
 /*----------------------------------------------------------------------- */
 int mb_zgrid(float *z, int *nx, int *ny, float *x1, float *y1, float *dx, float *dy, float *xyz, int *n, float *zpij, int *knxt,
-             int *imnew, float *cay, int *nrng) {
+             bool *imnew, float *cay, int *nrng) {
 	/* Parameter adjustments */
 	int z_dim1 = *nx;
 	int z_offset = z_dim1 + 1;
@@ -236,119 +237,85 @@ int mb_zgrid(float *z, int *nx, int *ny, float *x1, float *y1, float *dx, float 
 	float big = 9.0e29f;
 	int nconvtestincrease = 0;
 
-	/*     get zbase which will make all zp values positive by 20*(zmax-zmin)
-	 */
-	/* **********************************************************************
-	 */
-
-	int i__2, i__3;
-	float r__1;
-	float delz;
-	int iter, nnew;
-	float zijn, zimm, zjmm, zipp, zjpp;
-	float root, zsum, zpxy, a, b, c, d;
-	int j;
-	float x, y, zbase, relax, delzm;
-	float derzm;
-	int jmnew;
-	float dzmax, dzrms;
-	int kk, im, jm;
-	float dzrms8, z00, dz, ze, hrange, zn, zs, zw, zrange, dzmaxf, convtest, relaxn, rootgs, dzrmsp, abz;
-	int npg;
-	float zim, zjm;
-	int npt;
-	float wgt, zip, zjp, tpy, zxy;
-	int ii, jj, kkk;
+	// get zbase which will make all zp values positive by 20*(zmax-zmin)
 
 	float zmin = xyz[6];
 	float zmax = xyz[6];
 	int i__1 = *n;
 	for (int k = 2; k <= i__1; ++k) {
 		if (xyz[k * 3 + 3] - zmax <= 0.0f) {
-			goto L14;
+		} else {
+			zmax = xyz[k * 3 + 3];
 		}
-		else {
-			goto L12;
-		}
-	L12:
-		zmax = xyz[k * 3 + 3];
-	L14:
 		if (xyz[k * 3 + 3] - zmin >= 0.0f) {
-			goto L20;
+		} else {
+			zmin = xyz[k * 3 + 3];
 		}
-		else {
-			goto L16;
-		}
-	L16:
-		zmin = xyz[k * 3 + 3];
-	L20:;
 	}
-	zrange = zmax - zmin;
-	zbase = zrange * 20.0f - zmin;
-	hrange = MIN(*dx * (*nx - 1), *dy * (*ny - 1));
-	derzm = zrange * 2.0f / hrange;
+	const float zrange = zmax - zmin;
+	const float zbase = zrange * 20.0f - zmin;
+	const float hrange = MIN(*dx * (*nx - 1), *dy * (*ny - 1));
+	const float derzm = zrange * 2.0f / hrange;
 
-	/*     set pointer array knxt */
-	/* **********************************************************************
-	 */
+	int i__3;
+	float r__1;
+	float delz;
+	int nnew;
+	float zijn, zimm, zjmm, zipp, zjpp;
+	float root, zsum, zpxy, a, b, c, d;
+	int j;
+	float x, y, delzm;
+	float dzmax, dzrms;
+	int im, jm;
+	float dzrms8 = 0.0f;  // TODO(schwehr): -Wmaybe-uninitialized
+	float z00;
+	float dz;
+	float ze;
+	float zn, zs, zw;
+	float dzmaxf, convtest, relaxn, rootgs, dzrmsp, abz;
+	int npg;
+	float zim, zjm;
+	int npt;
+	float wgt, zip, zjp, tpy, zxy;
+	int ii, jj, kkk;
+
+	// set pointer array knxt
 
 	i__1 = *n;
+	int kk;
 	for (kk = 1; kk <= i__1; ++kk) {
 		const int k = *n + 1 - kk;
 		knxt[k - 1] = 0;
 		const int i = (xyz[k * 3 + 1] - *x1) / *dx + 1.5f;
 		if (i * (*nx + 1 - i) <= 0) {
-			goto L60;
+			continue;
 		}
-		else {
-			goto L35;
-		}
-	L35:
+
 		j = (xyz[k * 3 + 2] - *y1) / *dy + 1.5f;
 		if (j * (*ny + 1 - j) <= 0) {
-			goto L60;
+			continue;
 		}
-		else {
-			goto L40;
-		}
-	L40:
+
 		if (z[i + j * z_dim1] - big >= 0.0f) {
-			goto L60;
+			continue;
 		}
-		else {
-			goto L45;
-		}
-	L45:
 		knxt[k - 1] = *n + 1;
 		if (z[i + j * z_dim1] <= 0.0f) {
-			goto L55;
+		} else {
+			knxt[k - 1] = z[i + j * z_dim1] + 0.5f;
 		}
-		else {
-			goto L50;
-		}
-	L50:
-		knxt[k - 1] = z[i + j * z_dim1] + 0.5f;
-	L55:
+
 		z[i + j * z_dim1] = (float)k;
-	L60:;
 	}
 
-	/*     affix each data point zp to its nearby grid point.  take avg zp if
-	 */
-	/*     more than one zp nearby the grid point. add zbase and complement.
-	 */
-	/* **********************************************************************
-	 */
+	// affix each data point zp to its nearby grid point.  take avg zp if
+	// more than one zp nearby the grid point. add zbase and complement.
 
 	i__1 = *n;
 	for (int k = 1; k <= i__1; ++k) {
 		if (knxt[k - 1] <= 0) {
-			goto L80;
+			continue;
 		}
-		else {
-			goto L65;
-		}
-	L65:
 		npt = 0;
 		zsum = 0.0f;
 		const int i = (xyz[k * 3 + 1] - *x1) / *dx + 1.5f;
@@ -360,17 +327,11 @@ int mb_zgrid(float *z, int *nx, int *ny, float *x1, float *y1, float *dx, float 
 		knxt[kk - 1] = -knxt[kk - 1];
 		kk = -knxt[kk - 1];
 		if (kk <= 0) {
-			goto L75;
-		}
-		else if (kk - *n <= 0) {
+		} else if (kk - *n <= 0) {
 			goto L70;
 		}
-		else {
-			goto L75;
-		}
-	L75:
+
 		z[i + j * z_dim1] = -(double)zsum / npt - zbase;
-	L80:;
 	}
 
 	for (ii = 1; ii <= *nx; ++ii) {
@@ -384,28 +345,21 @@ int mb_zgrid(float *z, int *nx, int *ny, float *x1, float *y1, float *dx, float 
 		}
 	}
 
-	/*     initially set each unset grid point to value of nearest known pt.
-	 */
-	/* **********************************************************************
-	 */
+	// initially set each unset grid point to value of nearest known pt.
 
 	i__1 = *nx;
 	for (int i = 1; i <= i__1; ++i) {
-		i__2 = *ny;
+		const int i__2 = *ny;
 		for (j = 1; j <= i__2; ++j) {
 			if (z[i + j * z_dim1] != 0.0f) {
-				goto L110;
+				continue;
 			}
-			else {
-				goto L100;
-			}
-		L100:
 			z[i + j * z_dim1] = (float)-1e35;
-		L110:;
 		}
 	}
-	i__2 = *nrng;
-	for (iter = 1; iter <= i__2; ++iter) {
+	int i__2 = *nrng;
+	bool jmnew = false;
+	for (int iter = 1; iter <= i__2; ++iter) {
 		nnew = 0;
 		i__1 = *nx;
 		for (int i = 1; i <= i__1; ++i) {
@@ -414,27 +368,14 @@ int mb_zgrid(float *z, int *nx, int *ny, float *x1, float *y1, float *dx, float 
 				if (z[i + j * z_dim1] + big >= 0.0f) {
 					goto L192;
 				}
-				else {
-					goto L152;
-				}
-			L152:
 				if (j - 1 <= 0) {
 					goto L162;
 				}
-				else {
-					goto L153;
-				}
-			L153:
-				if (jmnew <= 0) {
-					goto L154;
-				}
-				else {
+				if (jmnew) {
 					goto L162;
 				}
-			L154:
 				zijn = (r__1 = z[i + (j - 1) * z_dim1], (float)fabs((double)r__1));
 				if (zijn - big >= 0.0f) {
-					goto L162;
 				}
 				else {
 					goto L195;
@@ -443,20 +384,11 @@ int mb_zgrid(float *z, int *nx, int *ny, float *x1, float *y1, float *dx, float 
 				if (i - 1 <= 0) {
 					goto L172;
 				}
-				else {
-					goto L163;
-				}
-			L163:
-				if (imnew[j - 1] <= 0) {
-					goto L164;
-				}
-				else {
+				if (imnew[j - 1]) {
 					goto L172;
 				}
-			L164:
 				zijn = (r__1 = z[i - 1 + j * z_dim1], (float)fabs((double)r__1));
 				if (zijn - big >= 0.0f) {
-					goto L172;
 				}
 				else {
 					goto L195;
@@ -465,39 +397,27 @@ int mb_zgrid(float *z, int *nx, int *ny, float *x1, float *y1, float *dx, float 
 				if (j - *ny >= 0) {
 					goto L182;
 				}
-				else {
-					goto L173;
-				}
-			L173:
 				zijn = (r__1 = z[i + (j + 1) * z_dim1], (float)fabs((double)r__1));
 				if (zijn - big >= 0.0f) {
-					goto L182;
-				}
-				else {
+				} else {
 					goto L195;
 				}
 			L182:
 				if (i - *nx >= 0) {
 					goto L192;
 				}
-				else {
-					goto L183;
-				}
-			L183:
 				zijn = (r__1 = z[i + 1 + j * z_dim1], (float)fabs((double)r__1));
 				if (zijn - big >= 0.0f) {
-					goto L192;
-				}
-				else {
+				} else {
 					goto L195;
 				}
 			L192:
-				imnew[j - 1] = 0;
-				jmnew = 0;
+				imnew[j - 1] = false;
+				jmnew = false;
 				goto L197;
 			L195:
-				imnew[j - 1] = 1;
-				jmnew = 1;
+				imnew[j - 1] = true;
+				jmnew = true;
 				z[i + j * z_dim1] = zijn;
 				++nnew;
 			L197:;
@@ -506,10 +426,6 @@ int mb_zgrid(float *z, int *nx, int *ny, float *x1, float *y1, float *dx, float 
 		if (nnew <= 0) {
 			goto L200;
 		}
-		else {
-			goto L199;
-		}
-	L199:;
 	}
 L200:
 	i__2 = *nx;
@@ -535,8 +451,8 @@ L200:
 	 */
 	fprintf(stderr, "Zgrid starting iterations\n");
 	dzrmsp = zrange;
-	relax = 1.0f;
-	for (iter = 1; iter <= ITERMAX; ++iter) {
+	float relax = 1.0f;
+	for (int iter = 1; iter <= ITERMAX; ++iter) {
 		dzrms = 0.0f;
 		dzmax = 0.0f;
 		npg = 0;

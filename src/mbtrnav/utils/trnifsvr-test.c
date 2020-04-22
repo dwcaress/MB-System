@@ -224,7 +224,12 @@ static int s_app_main(app_cfg_t *cfg)
                                       "/home/headley/tmp/config/mappingAUV_specs.cfg",
                                       "/home/headley/tmp/config/particles.cfg",
                                       "logs",
-                                      0);
+                                      0,
+                                       TRN_MAX_NCOV_DFL,
+                                       TRN_MAX_NERR_DFL,
+                                       TRN_MAX_ECOV_DFL,
+                                       TRN_MAX_EERR_DFL
+                                       );
 
     wtnav_t *trn = wtnav_new(trn_cfg);
 
@@ -234,7 +239,7 @@ static int s_app_main(app_cfg_t *cfg)
     netif_show(netif,true,5);
 
     // initialize message log
-    int il = netif_init_log(netif, NETIF_MLOG_NAME, NULL);
+    int il = netif_init_log(netif, NETIF_MLOG_NAME, NULL,NULL);
     mlog_tprintf(netif->mlog_id,"*** netif session start (TEST) ***\n");
     mlog_tprintf(netif->mlog_id,"libnetif v[%s] build[%s]\n",netif_get_version(),netif_get_build());
 

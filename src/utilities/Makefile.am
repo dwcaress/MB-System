@@ -61,6 +61,7 @@ if BUILD_GSF
 AM_CPPFLAGS += -I${top_srcdir}/src/gsf
 endif
 AM_CPPFLAGS += $(MBTRNINCDIR)
+AM_CPPFLAGS += ${libproj_CPPFLAGS}
 AM_CPPFLAGS += ${libgmt_CPPFLAGS}
 AM_CPPFLAGS += ${libnetcdf_CPPFLAGS}
 AM_CPPFLAGS += ${libfftw_CPPFLAGS}

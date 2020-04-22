@@ -28,16 +28,20 @@
 #include <netinet/in.h>
 #include <sys/time.h>
 
+#define  LCM_HOST  "USING.LCM.COMMS"   // Host id to indicate LCM usae
+
 class DataLogReader;
 struct TRN_attr;
-class poseT;
-class measT;
+struct poseT;
+struct measT;
 class TerrainNav;
 
 #define  Boolean  bool
 
 #define  DVL4TRN  0.4 // Seconds within which a DVL record matches TRN record
 #define  NAV4TRN  0.2 // Seconds within which a nav record matches TRN record
+#define REPLAY_VNORM_DIM 3
+#undef WITH_REPLAY_DEGTORAD
 
 enum DvlCsvFields
 {
@@ -98,6 +102,7 @@ public:
   int getNextRecordSet(poseT *pt, measT *mt);
 
   Boolean useTRNServer();
+  Boolean useLcmTrn();
   TerrainNav* connectTRN();
 
 protected:

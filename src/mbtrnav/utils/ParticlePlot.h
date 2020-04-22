@@ -75,7 +75,7 @@ class ParticlePlot : public GlutWindow2d
    void setMap(Matrix& heightValues, double *xPos, double *yPos);
    
    /*!
-     Copys the particles in the viewer
+     Copies the particles in the viewer
    */
    void setParticles(particleT* currParticles);
 

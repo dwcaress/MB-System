@@ -20,8 +20,12 @@ AM_CFLAGS = ${libgmt_CFLAGS} ${libgdal_CFLAGS} ${libnetcdf_CFLAGS}
 mbsystem_la_LDFLAGS = -module -avoid-version -shared
 mbsystem_la_SOURCES =
 mbsystem_la_SOURCES += mbcontour.c
-mbsystem_la_SOURCES += mbgrdtiff.c
 mbsystem_la_SOURCES += mbswath.c
+if GMT61PLUS
+  mbsystem_la_SOURCES += mbgrdtiff.c
+else
+  mbsystem_la_SOURCES += mbgrdtifforg.c
+endif
 
 mbsystem_la_LIBADD =
 mbsystem_la_LIBADD += ${top_builddir}/src/mbio/libmbio.la

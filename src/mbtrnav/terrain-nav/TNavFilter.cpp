@@ -47,6 +47,11 @@ TNavFilter(TerrainMap* terrainMap, char* vehicleSpecs, char* directory, const do
 	currVar[0] = windowVar[0];
 	currVar[1] = windowVar[2];
 	
+	//Initialize random number generator
+   unsigned int seed = seed_randn(NULL);
+   logs(TL_OMASK(TL_TNAV_PARTICLE_FILTER, TL_LOG),
+          "Random noise maker initialized with %d", seed);
+
 	initVariables();
 }
 
@@ -231,7 +236,7 @@ increaseInitSearchWin(double* windowVarIncrement) {
 void
 TNavFilter::
 initVariables() {
-	_distribType = SAVE_PARTICLES;
+   setDistribToSave(SAVE_PARTICLES);
 	vehicle->displayVehicleInfo();
 	lastNavPose = NULL;
 	interpMeasAttitude = false;
@@ -317,7 +322,7 @@ projectMeasSF(Matrix& beamsSF, const measT& currMeas, int* beamIndices) {
    int measSensor = 0;
    int numGoodBeams = 0;
    int i, n_unknown;
-   double theta, psi, phi;
+   double theta, psi;
    Matrix dr_bs(3, 1);
 	
    //check that a valid sensor index can be found for current measurement
@@ -383,11 +388,12 @@ projectMeasSF(Matrix& beamsSF, const measT& currMeas, int* beamIndices) {
 	    break;
 			
 	 case TRN_SENSOR_DELTAT:
-	    phi = vehicle->sensors[measSensor].T_bs[i - 1].rotation[0];
+	    //TODO: copied from DVL case, need to verify that this is correct - maybe
+	    //needs phi as well or don't need psi
+	    //phi = vehicle->sensors[measSensor].T_bs[i - 1].rotation[0];
 	    theta = vehicle->sensors[measSensor].T_bs[i - 1].rotation[1];
 	    psi = vehicle->sensors[measSensor].T_bs[i - 1].rotation[2];
-				
-	    //TODO: copied from DVL case, need to verify that this is correct - maybe needs phi as well or don't need psi
+
 	    //project beams into sensor frame
 	    //Note that this is projecting a beam that is default in +z direction
 	    beamsSF(1, numGoodBeams + 1) = sin(theta) * cos(psi) * currMeas.ranges[i - 1];
@@ -721,7 +727,7 @@ updateNISwindow(double& nisVal) {
 	int i;
 	windowedNIS = 0;
 
-    for(i = 0; i < NIS_WINDOW_LENGTH; i++) {
+    for(i = 0; i < NIS_WINDOW_LENGTH-1; i++) {
 		windowedNISlog[i] = windowedNISlog[i + 1];
 		windowedNIS += windowedNISlog[i] / NIS_WINDOW_LENGTH;
 	}
@@ -733,12 +739,14 @@ unsigned int
 TNavFilter::
 setDistribToSave(unsigned int distrib)
 {
+  logs(TL_OMASK(TL_TNAV_FILTER, TL_LOG),"setDistribToSave(%d)", distrib);
   // If type not one of the recognized options, use the default 
   if (PARTICLESTOFILE == distrib || HISTOGRAMTOFILE == distrib)
     _distribType = distrib;
   else
     _distribType = SAVE_PARTICLES;
 
+  logs(TL_OMASK(TL_TNAV_FILTER, TL_LOG),"setDistribToSave set to %d", _distribType);
   return _distribType;
 }
 

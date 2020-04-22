@@ -243,7 +243,7 @@ bool wtnav_is_converged(wtnav_t *self)
     bool retval=false;
    if(NULL!=self){
         TerrainNav *obj = static_cast<TerrainNav *>(self->obj);
-       if(NULL!=obj){
+       if(NULL!=obj && NULL!=obj->tNavFilter){
        retval = obj->tNavFilter->isConverged();
        }
     }
@@ -474,7 +474,7 @@ uint32_t  wcommst_cdata_serialize(char *dest, ct_cdata_t *src, int len)
         // on the down side, it requires
         // a lot of copying/conversion b/c
         // commsT implements poseT and measT
-        // instances instead of refernces (pointers)
+        // instances instead of references (pointers)
 
         commsT *ct = new commsT();
 
@@ -1580,7 +1580,12 @@ trn_config_t *trncfg_new(char *host,int port,
                          char *cfg_file,
                          char *particles_file,
                          char *log_dir,
-                         trnw_oflags_t oflags)
+                         trnw_oflags_t oflags,
+                         double max_northing_cov,
+                         double max_northing_err,
+                         double max_easting_cov,
+                         double max_easting_err
+                         )
 {
     trn_config_t *instance = (trn_config_t *)calloc(1,sizeof(*instance));
 
@@ -1595,6 +1600,10 @@ trn_config_t *trncfg_new(char *host,int port,
         instance->map_type=map_type;
         instance->utm_zone=utm_zone;
         instance->oflags=oflags;
+        instance->max_northing_cov = max_northing_cov;
+        instance->max_northing_err = max_northing_err;
+        instance->max_easting_cov = max_easting_cov;
+        instance->max_easting_err = max_easting_err;
    }
     return instance;
 }
@@ -1636,6 +1645,10 @@ void trncfg_show(trn_config_t *obj, bool verbose, int indent)
         fprintf(stderr,"%*s[cfg_file  %10s]\n",indent,(indent>0?" ":""), obj->cfg_file);
         fprintf(stderr,"%*s[part_file %10s]\n",indent,(indent>0?" ":""), obj->particles_file);
         fprintf(stderr,"%*s[log_dir   %10s]\n",indent,(indent>0?" ":""), obj->log_dir);
+        fprintf(stderr,"%*s[maxNcov   %10s%.3lf]\n",indent,(indent>0?" ":""), "",obj->max_northing_cov);
+        fprintf(stderr,"%*s[maxNerr   %10s%.3lf]\n",indent,(indent>0?" ":""), "",obj->max_northing_err);
+        fprintf(stderr,"%*s[maxEcov   %10s%.3lf]\n",indent,(indent>0?" ":""), "",obj->max_easting_cov);
+        fprintf(stderr,"%*s[maxEerr   %10s%.3lf]\n",indent,(indent>0?" ":""), "",obj->max_easting_err);
     }
 }
 

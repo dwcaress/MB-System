@@ -11,8 +11,13 @@
 #ifndef TNavPFLog_H
 #define TNavPFLog_H
 
+#define TNAVPF_LOGFILE_NAMELEN 100
+#define TNAVPF_MNEM_NAMELEN    50
 #define TNavPFLogName  "TNavPFLog"
 #define TNavPFMnemName "tnpf"
+#define TNavBFLogName  "TNavBFLog"
+#define TNavBFMnemName "tnbf"
+
 
 #include "structDefs.h"
 #include "DataLogWriter.h"

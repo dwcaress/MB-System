@@ -13,7 +13,7 @@
 /****************************************************************************/
 /* Modification History:                                                    */
 /****************************************************************************/
-static char Math_id[] = "$Header$";
+//static char Math_id[] = "$Header$";
 
 /*
 $Log$
@@ -37,7 +37,7 @@ Revision 1.8  2006/09/06 21:29:23  rob
 Added a Shell sort routine.
 
 Revision 1.7  2004/09/15 23:28:06  rob
-Added a root-solver using the bisect algorithm from Numerical Recipies.
+Added a root-solver using the bisect algorithm from Numerical Recipes.
 
 Revision 1.6  2001/06/02 21:33:53  hthomas
 various changes; remove stale entries in root makefile, fixed file naming to allow for serving from windows, and fixed makefiles to avoid file linking/unlinking problem in makedepend when talking through samba to windows boxes
@@ -218,7 +218,7 @@ int Math::round(double x)
 //
 // See MathP.h
 //
-// (From Numerical Recipies) Using bisection, find the root of a function
+// (From Numerical Recipes) Using bisection, find the root of a function
 // func() known to lie between x1 and x2.  The root, returned as bisect, 
 // will be refined  until its accuracy is +/- xtol.
 double Math::bisect( double (*func)(double), double x1, double x2, 

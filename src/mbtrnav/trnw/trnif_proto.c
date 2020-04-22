@@ -111,10 +111,6 @@
 static uint32_t s_trnif_dfl_send_tcp(msock_connection_t *peer, char *msg, int32_t send_len, int *errout)
 {
     uint32_t retval=0;
-    int flags = 0;
-#ifdef MSG_NOSIGNAL
-    flags = MSG_NOSIGNAL;
-#endif
     if(NULL!=peer && NULL!=msg && send_len>0){
         int64_t send_bytes=0;
         int flags=0;
@@ -157,10 +153,6 @@ static int s_trnif_msg_read_dfl(byte *dest, uint32_t readlen, msock_socket_t *so
 static uint32_t s_trnif_dfl_send_udp(netif_t *self,msock_connection_t *peer, char *msg, int32_t send_len, int *errout)
 {
     uint32_t retval=0;
-    int flags = 0;
-#ifdef MSG_NOSIGNAL
-    flags = MSG_NOSIGNAL;
-#endif
     if(NULL!=peer && NULL!=msg && send_len>0){
         int64_t send_bytes=0;
         int flags=0;
@@ -591,6 +583,7 @@ int trnif_msg_handle_ct(void *msg, netif_t *self, msock_connection_t *peer, int 
                     mlog_tprintf(self->mlog_id,"trn_init_nack,[%s:%s]\n", peer->chost, peer->service);
                 }
 
+                mlog_tprintf(self->mlog_id,"trn_init,%lf,[%s:%s]\n",msg_time,peer->chost, peer->service);
                 break;
 
             case TRN_MSG_MEAS:
@@ -598,11 +591,13 @@ int trnif_msg_handle_ct(void *msg, netif_t *self, msock_connection_t *peer, int 
                 commst_meas_update(trn, ct);
                 // serialize updated message
                 send_len=wcommst_serialize(&msg_out,ct,TRN_MSG_SIZE);
+                mlog_tprintf(self->mlog_id,"trn_meas,%lf,[%s:%s]\n",msg_time,peer->chost, peer->service);
                 break;
 
             case TRN_MSG_MOTN:
                 // do measurement update (using ct->mt)
                 commst_motion_update(trn, ct);
+                mlog_tprintf(self->mlog_id,"trn_motn,%lf,[%s:%s]\n",msg_time,peer->chost, peer->service);
 
                 // return ACK
                 send_len=trnw_ack_msg(&msg_out);
@@ -901,7 +896,9 @@ int trnif_msg_handle_trnu(void *msg, netif_t *self, msock_connection_t *peer, in
         uint32_t send_bytes=0;
         char *msg_out=NULL;
 
-        if(strcmp(msg,"REQ")==0 || strcmp(msg,"PING")==0){
+        if(strcmp(msg,"REQ")==0 ||
+           strcmp(msg,"CON")==0||
+            strcmp(msg,"PING")==0){
             msg_out=strdup("ACK");
             send_len=4;
         }else{
@@ -952,6 +949,5 @@ int trnif_msg_pub(netif_t *self, msock_connection_t *peer, char *data, size_t le
         }
     }
     return retval;
-
 }
 // End function

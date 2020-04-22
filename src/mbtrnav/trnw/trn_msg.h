@@ -183,7 +183,7 @@ typedef struct pt_cdata_s{
     //Time (s)
     double time;
     
-    //Validity flag for dvl motion measurment
+    //Validity flag for dvl motion measurement
     unsigned char dvlValid;
     //Validity flag for GPS measurement
     unsigned char gpsValid;
@@ -202,7 +202,7 @@ typedef struct pt_cdata_s{
 #define TRNW_PUB_SYNC 0x53445400
 #pragma pack(push,1)
 typedef struct trn_estimate_s{
-    // Time (epoch? s)
+    // Time (epoch s)
     double time;
     // North
     double x;
@@ -221,9 +221,31 @@ typedef struct trn_estimate_s{
 }trn_estimate_t;
 
 typedef struct trn_offset_pub_s{
+    // sync bytes (see NW_PUB_SYNC)
     uint32_t sync;
+    // TRN estimates
+    // 0:pose_t 1:mle 2:mmse
     trn_estimate_t est[3];
+    // number of reinits
     int reinit_count;
+    // time of last reinint (not implemented)
+    double reinit_tlast;
+    // TRN filter state
+    int filter_state;
+    // last measurement successful
+    int success;
+    // TRN is_converged (TRN isConverged())
+    short int is_converged;
+    // TRN is_valid (covariance thresholds)
+    short int is_valid;
+    // mbtrnpp MB1 cycle counter
+    int mb1_cycle;
+    // MB1 ping number
+    int ping_number;
+    // MB1 timestamp
+    double mb1_time;
+    // TRN update time (taken in mbtrnpp)
+    double update_time;
 }trn_offset_pub_t;
 #pragma pack(pop)
 
@@ -235,6 +257,14 @@ typedef struct trn_update_s{
     pt_cdata_t *mse_dat;
     int reinit_count;
     double reinit_tlast;
+    int filter_state;
+    int success;
+    short int is_converged;
+    short int is_valid;
+    int mb1_cycle;
+    int ping_number;
+    double mb1_time;
+    double update_time;
 }trn_update_t;
 
 typedef struct mt_cdata_s{

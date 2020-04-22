@@ -19,7 +19,7 @@ These images are built and pushed to hub.docker.com as monthly cron jobs.
 
 ### MB-System build tasks
 
-Distribution Compatabilty builds test MB-System code base against distributions
+Distribution Compatibility builds test MB-System code base against distributions
 
 | Name              | Image                      | Build Trigger | CFLAGS | MBTRN | MBTNAV | GSF |
 |-------------------|----------------------------|---------------|--------|:-----:|:------:|:---:|
@@ -47,7 +47,7 @@ OSX build dependencies are installed using homebrew.
 - GDAL: 2.4.2
 - GMT: 6.0.0
 
-Distribution Compatabilty builds test MB-System code base against distributions
+Distribution Compatibility builds test MB-System code base against distributions
 
 | Name              | OSX Version     | XCODE    | Build Trigger | CFLAGS             | MBTRN | MBTNAV | GSF |
 |-------------------|-----------------|----------|---------------|--------------------|:-----:|:------:|:---:|

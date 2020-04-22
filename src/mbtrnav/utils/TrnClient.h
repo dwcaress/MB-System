@@ -29,10 +29,15 @@
 #include "TerrainNavClient.h"
 #include "structDefs.h"
 
+
+#define VNORM_DIM 3
+#undef WITH_VNORM_FN
+#undef WITH_DEGTORAD_FN
+
 class DataLogReader;
 struct TRN_attr;
-class poseT;
-class measT;
+struct poseT;
+struct measT;
 class TerrainNav;
 
 #define  Boolean  bool

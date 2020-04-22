@@ -78,7 +78,7 @@ void Path::Print(void) const {
 }
 
 
-/* local funciton performs specific task similar to Matlab's [value,index] = min(stuff)
+/* local function performs specific task similar to Matlab's [value,index] = min(stuff)
 where negative values have been replaced with NaN
 */
 int Octree_PickMinPositiveRatio(const double Xratio, const double Yratio, const double Zratio) {
@@ -108,7 +108,7 @@ int Octree_PickMinPositiveRatio(const double Xratio, const double Yratio, const 
 }
 
 
-// local funcion performs specific task similar to Matlab's [val,index] = max(stuff)
+// local function performs specific task similar to Matlab's [val,index] = max(stuff)
 int Octree_PickMaxRatio(double& Xratio, const double Yratio, const double Zratio) {
 	// returns the 'index' of the maximum value, and sets the first input to the corresponding value.
 	if(Xratio < Yratio) {
@@ -133,12 +133,12 @@ void OctreeNode_PrintTabs(int num) {
 	}
 }
 
-unsigned int OctreeNode_CalculateWeights(double* weights, const Vector* const points, const unsigned int* const indicies, 
+unsigned int OctreeNode_CalculateWeights(double* weights, const Vector* const points, const unsigned int* const indices,
 								 unsigned int numPoints, const Vector& nodeLowerBounds, 
 								 const Vector& nodeUpperBounds, const Vector& TrueResolution){
 	unsigned int numNonZeroWeights = 0;
 	for(unsigned int index = 0; index < numPoints; index++){
-		Vector point = points[indicies[index]];
+		Vector point = points[indices[index]];
 		weights[index] = 1.0 - 1.0*sqrt(
 			(pow((point.x - nodeLowerBounds.x) / TrueResolution.x, 2.0)*static_cast<double>(point.x < nodeLowerBounds.x))
 			+ (pow((point.x - nodeUpperBounds.x) / TrueResolution.x, 2.0)*static_cast<double>(point.x > nodeUpperBounds.x))

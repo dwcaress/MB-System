@@ -35,13 +35,13 @@ unset MBTRNPP_ENV
 
 # set environment defaults
 # variables use environment values if set
-# and may be overriden on the command line
+# and may be overridden on the command line
 # using an environment file or options
 TRN_RESONHOST=${TRN_RESONHOST:-134.89.32.107}
 TRN_OUTHOST=${TRN_OUTHOST:-134.89.32.107}
 TRN_MBTRNDIR=${TRN_MBTRNDIR:-/usr/local/bin}
 TRN_MAPFILES=${TRN_MAPFILES:-/cygdrive/d/cygwin64/maps}
-TRN_DATAFILES=${TRN_DATAFILES:-/cygdrive/d/cygwin64/config}
+TRN_DATAFILES=${TRN_DATAFILES:-/cygdrive/d/cygwin64/G2TerrainNav/config}
 TRN_LOGFILES=${TRN_LOGFILES:-/cygdrive/d/cygwin64/logs/mbtrnpp}
 
 #################################
@@ -135,13 +135,14 @@ init_vars(){
     # RESON3  134.89.32.110
     # TRNSVR_PORT  28000
     # TRNUSVR_PORT 8000
-    OPT_TRNOUT="--trn-out=trnsvr:${TRN_OUTHOST}:28000,trnu"
+	OPT_TRNOUT="--trn-out=trnsvr:${TRN_OUTHOST}:28000,trnu"
+	OPT_TRNOUT="--trn-out=trnsvr:${TRN_OUTHOST}:28000,trnu,trnusvr:${TRN_OUTHOST}:8000"
 
     # enable/disable TRN processing
     # (requires map,par,log,cfg)
     OPT_TRN_EN="--trn-en"
 	OPT_TRN_DIS="--trn-dis"
-	OPT_TRN_SEL=${OPT_TRN_DIS}
+	OPT_TRN_SEL=${OPT_TRN_EN}
 
 	# set TRN UTM zone
     # Monterey Bay 10
@@ -166,6 +167,12 @@ init_vars(){
     # TRN_FILT_BANK       3
 	#OPT_TRN_FTYPE="--trn-ftype=2"
 
+    # set TRN valid covariance limits
+    #OPT_TRN_NCOV="--trn-ncov=30.0"
+    #OPT_TRN_NERR="--trn-nerr=50.0"
+    #OPT_TRN_ECOV="--trn-ecov=30.0"
+    #OPT_TRN_EERR="--trn-eerr=50.0"
+
 	# ignore multibeam gain threshold
 	#OPT_TRN_NOMBGAIN="--trn-nombgain"
 
@@ -182,7 +189,7 @@ init_vars(){
     # drop TRN clients after OPT_MBHBT seconds
 	#OPT_TRNHBT="--trnhbt=15"
     # drop TRNU clients after OPT_MBHBT seconds
-    #OPT_TRNUHBT="--trnuhbt=0"
+    OPT_TRNUHBT="--trnuhbt=30"
 
     # delay between TRN messages (msec)
     #OPT_DELAY="--delay=0"
@@ -282,9 +289,9 @@ exitError(){
 
 ########################################
 # name: processCmdLine
-# description: do command line processsing
+# description: do command line processing
 # args:
-#     args:       positional paramters
+#     args:       positional parameters
 #     returnCode: none
 ########################################
 processCmdLine(){
@@ -331,7 +338,7 @@ while getopts a:c:d:e:hm:o:r:tvw: Option
 # Argument processing
 # Accepts arguments from command line
 # or pipe/file redirect
-# Comand line settings override config
+# Command line settings override config
 # file settings
 
 # pre-process cmdline to get env file
@@ -415,25 +422,25 @@ do
 
     if [ ${a:2:5} == "mbhbn" ]
     then
-    OPT_HBEAT=$a
+    OPT_MBHBN=$a
     vout "ovr OPT_MBHBN: $OPT_MBHBN"
     fi
 
     if [ ${a:2:5} == "mbhbt" ]
     then
-    OPT_HBEAT=$a
+    OPT_MBHBT=$a
     vout "ovr OPT_MBHBT: $OPT_MBHBT"
     fi
 
     if [ ${a:2:6} == "trnhbt" ]
     then
-    OPT_HBEAT=$a
+    OPT_TRNHBT=$a
     vout "ovr OPT_TRNHBT: $OPT_TRNHBT"
     fi
 
     if [ ${a:2:7} == "trnuhbt" ]
     then
-    OPT_HBEAT=$a
+    OPT_TRNUHBT=$a
     vout "ovr OPT_TRNUHBT: $OPT_TRNUHBT"
     fi
 
@@ -546,6 +553,30 @@ do
     vout "ovr OPT_TRN_FTYPE: $OPT_TRN_FTYPE"
     fi
 
+    if [ ${a:2:8} == "trn-ncov" ]
+    then
+    OPT_TRN_NCOV=$a
+    vout "ovr OPT_TRN_NCOV: $OPT_TRN_NCOV"
+    fi
+
+    if [ ${a:2:8} == "trn-nerr" ]
+    then
+    OPT_TRN_NERR=$a
+    vout "ovr OPT_TRN_NERR: $OPT_TRN_NERR"
+    fi
+
+    if [ ${a:2:8} == "trn-ecov" ]
+    then
+    OPT_TRN_ECOV=$a
+    vout "ovr OPT_TRN_ECOV: $OPT_TRN_ECOV"
+    fi
+
+    if [ ${a:2:8} == "trn-eerr" ]
+    then
+    OPT_TRN_EERR=$a
+    vout "ovr OPT_TRN_EERR: $OPT_TRN_EERR"
+    fi
+
     if [ ${a:2:8} == "trn-decn" ]
     then
     OPT_TRN_DECN=$a
@@ -573,8 +604,7 @@ done
 
 
 # set cmdline options
-
-APP_OPTS="$OPT_VERBOSE $OPT_INPUT $OPT_LOGDIR $OPT_SWATH $OPT_SOUNDINGS $OPT_FORMAT $OPT_MFILTER $OPT_OUTPUT $OPT_STATSEC $OPT_STATFLAGS $OPT_MBHBN $OPT_MBHBT $OPT_TRNHBT $OPT_TRNUHBT $OPT_DELAY $OPT_TRN_UTM $OPT_MBOUT $OPT_TRN_MAP $OPT_TRN_PAR $OPT_TRN_CFG $OPT_TRN_LOG $OPT_TRN_MTYPE $OPT_TRN_FTYPE $OPT_TRN_DECN $OPT_TRN_DECS $OPT_TRNOUT $OPT_TRN_NOMBGAIN $OPT_TRN_SEL  $OPT_HELP"
+APP_OPTS="$OPT_VERBOSE $OPT_INPUT $OPT_LOGDIR $OPT_SWATH $OPT_SOUNDINGS $OPT_FORMAT $OPT_MFILTER $OPT_OUTPUT $OPT_STATSEC $OPT_STATFLAGS $OPT_MBHBN $OPT_MBHBT $OPT_TRNHBT $OPT_TRNUHBT $OPT_DELAY $OPT_TRN_UTM $OPT_MBOUT $OPT_TRN_MAP $OPT_TRN_PAR $OPT_TRN_CFG $OPT_TRN_LOG $OPT_TRN_MTYPE $OPT_TRN_FTYPE $OPT_TRN_NCOV $OPT_TRN_NERR $OPT_TRN_ECOV $OPT_TRN_EERR $OPT_TRN_DECN $OPT_TRN_DECS $OPT_TRNOUT $OPT_TRN_NOMBGAIN $OPT_TRN_SEL $OPT_HELP"
 
 # check required TRN options
 if [ ! -z "${OPT_TRN_EN}" ]
@@ -646,7 +676,7 @@ then
     fi
 fi
 
-# intialize cycle count
+# initialize cycle count
 # [loop indefinitely if <0]
 let "LOOP_COUNT=${CYCLES}"
 

@@ -46,15 +46,23 @@ S. Nelson, EROS		Jan, 1998	Changed misspelled error message
    than calling each function separately.  It is provided here for those
    computer systems which don`t implement this function
   ----------------------------------------------------*/
-void gsincos(val, sin_val, cos_val)
-double val;
-double *sin_val;
-double *cos_val;
+
+// GCTP expects gsincos() to exist. If it does not define a local gsincos() 
+// and use sincos() if that exists or else call sin() and cos() separately
+
+// conflicts w/ existing definiion in Cygwin? [klh 06/2019]
+#ifndef HAVE_GSINCOS
+void gsincos(double val, double *sin_val, double *cos_val)
 {
+#ifdef HAVE_SINCOS
+sincos(val, sin_val, cos_val);
+#else
 *sin_val = sin(val);
 *cos_val = cos(val);
+#endif
 return;
 }
+#endif
 
 /* Function to eliminate roundoff errors in asin
 ----------------------------------------------*/

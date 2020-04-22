@@ -370,7 +370,7 @@ void r7k_parser_show(r7k_parse_stat_t *self, bool verbose, uint16_t indent)
 /// @param[in] len buffer length
 /// @param[in] verbose use verbose output
 /// @param[in] indent output indent spaces
-/// @return new string (if dest==NULL) or dest on success, NULL otherwise. May truncate if buffer length is unsufficient.
+/// @return new string (if dest==NULL) or dest on success, NULL otherwise. May truncate if buffer length is insufficient.
 char *r7k_parser_str(r7k_parse_stat_t *self, char *dest, uint32_t len, bool verbose, uint16_t indent)
 {
     char *retval=NULL;
@@ -1421,7 +1421,7 @@ r7k_drf_t* r7k_drfcon_next(r7k_drf_container_t *self)
 
 /// @fn r7k_msg_t * r7k_msg_new(uint32_t data_len)
 /// @brief create new r7k protocol message structure.
-/// r7k messages have DRF and NF elements, but must be explicitely
+/// r7k messages have DRF and NF elements, but must be explicitly
 /// serialized before sending to 7k center.
 /// currently only used in mbtrn-server.
 /// @param[in] data_len number of message data bytes

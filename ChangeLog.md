@@ -20,6 +20,7 @@ include "beta" in the tag name are preliminary and generally not announced.
 Distributions that do not include "beta" in the tag name correspond to the major,
 announced releases. The source distributions associated with all releases, major or beta, are equally accessible as tarballs through the Github interface.
 
+- Version 5.7.6beta32    April 22, 2020
 - Version 5.7.6beta31    March 2, 2020
 - Version 5.7.6beta30    February 20, 2020
 - Version 5.7.6beta29    February 17, 2020
@@ -342,6 +343,74 @@ announced releases. The source distributions associated with all releases, major
 --
 ### MB-System Version 5.7 Release Notes:
 --
+#### 5.7.6beta32 (April 22, 2020)
+
+Mbgrid: Fixed failure of the two gridding algorithm using beam footprints in
+which the footprint size blows up at low grazing angles. The fix is to not
+use soundings for which the grazing angle is less than five degrees.
+
+Mbgrid and mbmosaic: Replaced int values with bool values where appropriate.
+
+Build system: Added option to enable building tools based on Qt5 to the autotools
+build system. If the configure script is given the --enable-qt option, it
+checks if Qt5 has been installed, and if so, determines the compiler and linker
+flags required to build tools using Qt5. At present, the only Qt5 based code
+is in the directory src/qttest, and this code does not successfully compile
+and run. Therefore it is not recommended to run configure with the --enable-qt
+option. However, the build system is now ready to support Qt5 based tools as
+they are developed.
+
+Mbgrdtiff: Paul Wessel contributed a new version of mbgrdtiff that constructs
+the image by a direct call to the grdimage module. This version will only build
+and work with GMT 6.1 and later. The original code included code building the
+image, duplicating functionality in grdimage. The new version is now
+    mbsystem/src/gmt/mbgrdtiff.c
+and the original version
+    mbsystem/src/gmt/mbgrdtifforg.c.
+The build system has been augmented to check the GMT version and build mbgrdtiff
+from the original when that is <6.1 and the new file when that is >= 6.1.
+
+General (mb_define.h, mb_format.c, mb_format.h): Added definition of format=-2
+as recursive imagelists. Analagous to datalists, this construct supports timestamped
+lists of single or stereo photographs. Like datalists, the imagelists can be
+recursive. This is a precursor to bringing into MB-System tools for processing
+seafloor photography collected during surveys, particularly for photomosaicing.
+
+Mbsslayout and future photomosaicing: The parameters use to define convergence
+when intersecting a vector with a topography model in mb_intersectgrid.c have
+been improved, yielding more accurate intersection locations for backscatter samples
+or source image pixels when laying out sidescan or photography data.
+
+Mbnavedit: Changed minimum range of draft (sensordepth) plot to be +/- 0.05 meters.
+
+Mbeditviz: Fixed problem with preserving changes to edits that are recorded in
+*.esf files.
+
+Mbtrnpp: merged recent changes by Kent Headley to the source files in
+src/mbtrn, src/mbtrnav, and src/mbtrnutils.
+
+Mbset: changed output to clearly indicate when parameter files are created
+(or not) or modified (or not). This involved adding a function
+mb_pr_compare() to mb_process.c that can be used in mbset.c to check
+whether the modified process parameter structure actually differs from
+the original structure.
+
+Formats MBF_OICGEODA (141) and MBF_OICMBARI (142): Fixed support for old OIC
+format DSL120 interferometric sonar data. Processing of these data now works
+with mbpreprocess and mbprocess again. The sidescan data were compromised
+by treating unsigned amplitude values as signed, and treating null samples as
+valid.
+
+Testing: Reinstated OSX test build as part of the Travis CI runs triggered by
+commits to the Github repository.
+
+Code style: Kurt Schwehr is systematically altering the code to conform to best
+practices and adding build tests. The improvements included in this beta release
+include work on mbview and programs using mbview, the auxilliary library in src/mbaux, particularly including mb_cheb.c, mb_intersectgrid.c, and mb_zgrid.c,
+and on mbedit.
+
+Code style: Tom O'Reilly and David Caress added README.md files in each of the subdirectories under src/.
+
 #### 5.7.6beta31 (March 2, 2020)
 
 Mbvoxelclean: Fixed memory leak. Added --acrosstrack-minimum and --acrosstrack-maximum

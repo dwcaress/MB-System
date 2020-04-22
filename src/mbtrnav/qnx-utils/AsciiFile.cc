@@ -46,7 +46,7 @@ AsciiFile::~AsciiFile()
 
 void AsciiFile::set(CharData *charData)
 {
-  char errorBuf[250];
+  char errorBuf[MAX_EXC_STRING_LEN];
 
   if (fprintf(_file, "%s%c", charData->ascii(), _delimiter) < 0) {
     sprintf(errorBuf, "AsciiFile::set(CharData) - %s", strerror(errno));
@@ -57,7 +57,7 @@ void AsciiFile::set(CharData *charData)
 
 void AsciiFile::set(ShortData *shortData)
 {
-  char errorBuf[250];
+  char errorBuf[MAX_EXC_STRING_LEN];
 
   if (fprintf(_file, "%s%c", shortData->ascii(), _delimiter) < 0) {
     sprintf(errorBuf, "AsciiFile::set(ShortData) - %s", strerror(errno));
@@ -68,7 +68,7 @@ void AsciiFile::set(ShortData *shortData)
 
 void AsciiFile::set(IntegerData *integerData)
 {
-  char errorBuf[250];
+  char errorBuf[MAX_EXC_STRING_LEN];
 
   if (fprintf(_file, "%s%c", integerData->ascii(), _delimiter) < 0) {
     sprintf(errorBuf, "AsciiFile::set(IntegerData) - %s", strerror(errno));
@@ -79,7 +79,7 @@ void AsciiFile::set(IntegerData *integerData)
 
 void AsciiFile::set(FloatData *floatData)
 {
-  char errorBuf[250];
+  char errorBuf[MAX_EXC_STRING_LEN];
 
   if (fprintf(_file, "%s%c", floatData->ascii(), _delimiter) < 0) {
     sprintf(errorBuf, "AsciiFile::set(FloatData) - %s", strerror(errno));
@@ -90,7 +90,7 @@ void AsciiFile::set(FloatData *floatData)
 
 void AsciiFile::set(DoubleData *doubleData)
 {
-  char errorBuf[250];
+  char errorBuf[MAX_EXC_STRING_LEN];
 
   if (fprintf(_file, "%s%c", doubleData->ascii(), _delimiter) < 0) {
     sprintf(errorBuf, "AsciiFile::set(double) - %s", strerror(errno));
@@ -101,7 +101,7 @@ void AsciiFile::set(DoubleData *doubleData)
 
 void AsciiFile::set(StringData *stringData)
 {
-  char errorBuf[250];
+  char errorBuf[MAX_EXC_STRING_LEN];
 
   // Make sure string does not contain delimiter character
   if (strchr(stringData->ascii(), _delimiter) != 0) {
@@ -158,7 +158,7 @@ void AsciiFile::get(StringData *stringData)
 
 void AsciiFile::endRecord()
 {
-  char errorBuf[250];
+  char errorBuf[MAX_EXC_STRING_LEN];
 
   if (fprintf(_file, "\n") < 0) {
     sprintf(errorBuf, "AsciiFile::endRecord() - %s", strerror(errno));

@@ -180,7 +180,8 @@ int main()
       {
          int i;
          RowVector A(8);
-         for (i=1;i<=7;i++) A(i)=0.0; A(8)=1.0;
+         for (i=1;i<=7;i++) A(i)=0.0;
+         A(8)=1.0;
          Print(A);
       }
       cout << "\n";

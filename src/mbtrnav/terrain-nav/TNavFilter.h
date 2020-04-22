@@ -304,7 +304,7 @@ class TNavFilter
    * -------------------------------------------------------------------------*/
   /*! Transforms position vectors from vehicle frame to map frame, using the 
    * given vehicle attitude angles.  The vehicle frame position vectors are
-   * given in Matrix format, with each vector representating a column of 
+   * given in Matrix format, with each vector representing a column of
    * beamsVF.
    */
   Matrix applyRotation(const double* attitude,  const Matrix &beamsVF);
@@ -340,6 +340,8 @@ class TNavFilter
    */
   void increaseInitSearchWin(double *windowVarIncrement);
 
+  unsigned int getDistribToSave() { return _distribType; }
+
   unsigned int setDistribToSave(unsigned int distrib);
 
   /* Virtual functions required by any inheritance class:
@@ -352,7 +354,7 @@ class TNavFilter
    *                                 boolean indicating if this was successful*/
   virtual bool measUpdate(measT& currMeas) = 0;
 
-  /*! motionUpdate(currNavPose): incorporate current. inertial pose measurment
+  /*! motionUpdate(currNavPose): incorporate current. inertial pose measurement
    *                             into the navigation filter */
   virtual void motionUpdate(poseT& currNavPose) = 0;
 
@@ -443,7 +445,7 @@ class TNavFilter
    * -------------------------------------------------------------------------*/
   /*! Projects current measurement into the vehicle frame. This projection is
    * contained in the 3xN maxtrix beamsVF, where N is the number of individual
-   * sonar beams which are valid for the current measurement.  The correspondance 
+   * sonar beams which are valid for the current measurement.  The correspondence
    * between beamsVF index and currMeas index is stored in beamIndices.
    * Returns a boolean indicating if the projection resulted in at least one
    * valid sonar beam. Calls projectMeasSF() as part of this routine.
@@ -456,7 +458,7 @@ class TNavFilter
    * -------------------------------------------------------------------------*/
   /*! Projects current measurement into the sensor frame. This projection is
    * contained in the 3xN maxtrix beamsSF, where N is the number of individual
-   * sonar beams which are valid for the current measurement.  The correspondance 
+   * sonar beams which are valid for the current measurement.  The correspondence
    * between beamsVF index and currMeas index is stored in beamIndices.
    * Returns a boolean indicating if the projection resulted in at least one
    * valid sonar beam.
@@ -492,7 +494,7 @@ class TNavFilter
   /*! This function takes in Map-Frame beam vectors (beamsMF) and modifies them
    * to correspond with the closest possible beam return within the beam's 
    * measurement cone.  This calculation is done by assuming a planar terrain
-   * in the vincinity of the projected beam location.  The vehicle pose is also
+   * in the vicinity of the projected beam location.  The vehicle pose is also
    * needed as input to this function, but is not modified.
    */
   void modifyBeamDir(Matrix &beamsMF, const double* vehPose);

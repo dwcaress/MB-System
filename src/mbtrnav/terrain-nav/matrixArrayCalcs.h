@@ -337,11 +337,24 @@ inline double unif_zeroOne()
 }
 
 
+/* Function: seed_randn(unsigned int *p_seed)
+ * Usage:    unsigned int seed = 27;
+ *           seed_randn(&seed);
+ * -------------------------------------------------------------------------*/
+/*! Seed the random number generator using:
+ *    - the seed pointed to by p_seed if p_seed is not NULL.
+ *    - if p_seed is NULL, use the result of time(NULL) as the seed
+ *    - zero if the compiler switch TRN_NORAND is set. 
+ *  Returns the seed used.
+ */
+unsigned int seed_randn(unsigned int *p_seed);
+
+
 /* Function:  randn
  * Usage:  randn(mean, stddev);
  * -------------------------------------------------------------------------*/
 /*! Uses a polar form Box-Muller Transform to generate a pseudorandom number
- *  from a gaussian distribution with specificied mean and standard deviation.
+ *  from a gaussian distribution with specified mean and standard deviation.
  *  Generates two random numbers for each call and stores the unused number 
  *  for the next call to this function.
  */

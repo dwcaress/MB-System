@@ -225,7 +225,7 @@ int mbr_rt_oicgeoda(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	char buffer[MBF_OICGEODA_HEADER_SIZE] = "";
 	int read_size;
 	int data_size;
-	char *char_ptr;
+	mb_u_char *char_ptr;
 	short *short_ptr;
 	int *int_ptr;
 	float *float_ptr;
@@ -630,7 +630,7 @@ int mbr_rt_oicgeoda(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			fprintf(stderr, "dbg5       num samples: %d\n", header->channel[i].num_samples);
 			if (header->channel[i].size == OIC_SIZE_CHAR) {
 				fprintf(stderr, "dbg5       size:      char (1 byte)\n");
-				char_ptr = (char *)data->raw[i];
+				char_ptr = (mb_u_char *)data->raw[i];
 				for (int j = 0; j < header->channel[i].num_samples; j++) {
 					fprintf(stderr, "dbg5      %5d  %5d\n", j, char_ptr[j]);
 				}
@@ -880,7 +880,7 @@ int mbr_rt_oicgeoda(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			ichan = header->ss_chan_port;
 			sample_interval = header->fish_ping_period / header->channel[ichan].num_samples;
 			if (header->channel[ichan].size == OIC_SIZE_CHAR)
-				char_ptr = (char *)data->raw[ichan];
+				char_ptr = (mb_u_char *)data->raw[ichan];
 			else if (header->channel[ichan].size == OIC_SIZE_SHORT)
 				short_ptr = (short *)data->raw[ichan];
 			else if (header->channel[ichan].size == OIC_SIZE_INT)
@@ -890,11 +890,20 @@ int mbr_rt_oicgeoda(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			for (int i = header->fish_altitude_samples + 1; i < header->channel[ichan].num_samples; i++) {
 				const int j = header->channel[ichan].num_samples - i + header->fish_altitude_samples;
 				if (header->channel[ichan].size == OIC_SIZE_CHAR)
-					data->ss[j] = char_ptr[i];
+          if (char_ptr[i] != 0)
+					  data->ss[j] = char_ptr[i];
+          else
+            data->ss[j] = MB_SIDESCAN_NULL;
 				else if (header->channel[ichan].size == OIC_SIZE_SHORT)
-					data->ss[j] = short_ptr[i];
+          if (short_ptr[i] != 0)
+					  data->ss[j] = short_ptr[i];
+          else
+            data->ss[j] = MB_SIDESCAN_NULL;
 				else if (header->channel[ichan].size == OIC_SIZE_INT)
-					data->ss[j] = int_ptr[i];
+          if (int_ptr[i] != 0)
+					  data->ss[j] = int_ptr[i];
+          else
+            data->ss[j] = MB_SIDESCAN_NULL;
 				else if (header->channel[ichan].size == OIC_SIZE_FLOAT)
 					data->ss[j] = float_ptr[i];
 				beta = 180.0 - asin(((double)header->fish_altitude_samples) / ((double)i)) / DTR;
@@ -913,7 +922,7 @@ int mbr_rt_oicgeoda(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			ichan = header->ss_chan_stbd;
 			sample_interval = header->fish_ping_period / header->channel[ichan].num_samples;
 			if (header->channel[ichan].size == OIC_SIZE_CHAR)
-				char_ptr = (char *)data->raw[ichan];
+				char_ptr = (mb_u_char *)data->raw[ichan];
 			else if (header->channel[ichan].size == OIC_SIZE_SHORT)
 				short_ptr = (short *)data->raw[ichan];
 			else if (header->channel[ichan].size == OIC_SIZE_INT)
@@ -1137,7 +1146,7 @@ int mbr_wt_oicgeoda(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	char buffer[MBF_OICGEODA_HEADER_SIZE] = "";
 	int write_size;
 	int data_size;
-	char *char_ptr;
+	mb_u_char *char_ptr;
 	short *short_ptr;
 	int *int_ptr;
 	float *float_ptr;
@@ -1388,7 +1397,7 @@ int mbr_wt_oicgeoda(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			fprintf(stderr, "dbg5       num samples: %d\n", header->channel[i].num_samples);
 			if (header->channel[i].size == OIC_SIZE_CHAR) {
 				fprintf(stderr, "dbg5       size:      char (1 byte)\n");
-				char_ptr = (char *)data->raw[i];
+				char_ptr = (mb_u_char *)data->raw[i];
 				for (int j = 0; j < header->channel[i].num_samples; j++) {
 					fprintf(stderr, "dbg5      %5d  %5d\n", j, char_ptr[j]);
 				}

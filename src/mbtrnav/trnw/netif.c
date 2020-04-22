@@ -252,7 +252,7 @@ static bool s_peer_idval_cmp(void *item, void *value)
             retval=-1;
             MST_COUNTER_INC(self->profile->stats->events[NETIF_EV_ECLI_RXZ]);
 
-            break;// fall thru - OK(?)
+            break;// fall through - OK(?)
         case -1:
             if(errsave!=EAGAIN){
             PMPRINT(MOD_NETIF,NETIF_V2,(stderr,"[UDPCON.%s]:ERR - recvfrom ret[-1] err[%d/%s]\n",self->port_name,errsave,strerror(errsave)));
@@ -283,7 +283,7 @@ static bool s_peer_idval_cmp(void *item, void *value)
                    }else{
                         PMPRINT(MOD_NETIF,NETIF_V1,(stderr,"[UDPCON.%s]:ADD_SUB - id[%p/%s:%s] idx[%zd]\n",self->port_name,peer,peer->chost, peer->service,mlist_size(list)-1));
                         // client doesn't exist
-                        // initialze and add to list
+                        // initialize and add to list
                         peer->id = svc;
                         peer->heartbeat = 0;
                         peer->hbtime = connect_time;
@@ -822,7 +822,7 @@ void netif_show(netif_t *self, bool verbose, int indent)
 // End function netif_show
 
 
-int netif_init_log(netif_t *self, char *log_name, char *log_dir)
+int netif_init_log(netif_t *self, char *log_name, char *log_dir, char *session_str)
 {
     int retval=-1;
     if(NULL!=self && NULL!=log_name){
@@ -849,6 +849,9 @@ int netif_init_log(netif_t *self, char *log_name, char *log_dir)
             self->log_dir=strdup(log_dir);
         }
 
+        if(NULL!=session_str){
+            sprintf(session_date,"%s",session_str);
+        }else{
         // make session time string to use
         // in log file names
         time(&rawtime);
@@ -859,7 +862,7 @@ int netif_init_log(netif_t *self, char *log_name, char *log_dir)
                 (gmt->tm_year+1900),gmt->tm_mon+1,gmt->tm_mday,
                 gmt->tm_hour,gmt->tm_min,gmt->tm_sec);
 
-
+        }
         self->mlog_path = (char *)malloc(NETIF_LOG_PATH_BYTES);
 
         sprintf(self->mlog_path,"%s//%s-%s%s",self->log_dir,log_name,session_date,NETIF_LOG_EXT);
@@ -879,7 +882,7 @@ int netif_start(netif_t *self, uint32_t delay_msec)
     int test=-1;
     if(NULL!=self && NULL!=self->host){
         if(self->mlog_id==MLOG_ID_INVALID){
-        	netif_init_log(self,NETIF_MLOG_NAME,NULL);
+        	netif_init_log(self,NETIF_MLOG_NAME,NULL,NULL);
         }
 
         mlog_tprintf(self->mlog_id,"*** netif session start ***\n");
@@ -1152,7 +1155,7 @@ int netif_test()
     netif_init_mmd();
     netif_set_reqres_res(netif,trn);
     // initialize message log
-    int il = netif_init_log(netif, NETIF_MLOG_NAME, NULL);
+    int il = netif_init_log(netif, NETIF_MLOG_NAME, NULL,NULL);
 
     mlog_tprintf(netif->mlog_id,"*** netif session start (TEST) ***\n");
     mlog_tprintf(netif->mlog_id,"libnetif v[%s] build[%s]\n",netif_get_version(),netif_get_build());
@@ -1202,7 +1205,7 @@ int netif_test()
     mlog_tprintf(netif->mlog_id,"*** netif session end (TEST) uptime[%.3lf] ***\n",(mtime_dtime()-start_time));
     // server: close, release netif
     netif_destroy(&netif);
-    // relase trn
+    // release trn
     wtnav_destroy(trn);
     // debug: release resources
     mmd_release();

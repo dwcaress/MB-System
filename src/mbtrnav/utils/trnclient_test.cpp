@@ -25,19 +25,25 @@
 #include <sys/time.h>
 #include <pthread.h>
 #include <semaphore.h>
+#include <fcntl.h>
+#include <sys/stat.h>
 #include <signal.h>
-
 // OS X before Sierra does not have clock_gettime, use clock_get_time
 #if defined(__APPLE__) && !defined(__CLOCK_AVAILABILITY) && defined(__MACH__)
-#include <mach/mach.h>      /* host_get_clock_service */
-#include <mach/clock.h>     /* clock_get_time */
+// host_get_clock_service
+#include <mach/mach.h>
+// host_get_clock_service
+#include <mach/clock.h>
 #endif
+
 
 #include "TrnClient.h"
 #include "matrixArrayCalcs.h"
 #include "TNavConfig.h"
 #include "TerrainNavClient.h"
+
 #define TRNCLI_PER_DFL 2
+#define TRNCLI_RUN_SEM_NAME "trncli_run_sem"
 
 bool g_quit=false;
 
@@ -59,7 +65,7 @@ typedef struct trn_worker_s
     TrnClient *trncli;
     TerrainNav *tnav;
     bool quit;
-    sem_t run_sem;
+    sem_t *run_sem;
 }trn_worker_t;
 
 static int numReinits = 0;
@@ -91,6 +97,7 @@ void out_cons(double time, measT *mt, poseT *pt, poseT *mle, poseT *mse, char go
 
 }
 
+
 static double s_etime()
 {
     double retval=0.0;
@@ -98,7 +105,7 @@ static double s_etime()
     struct timespec ts;
     memset(&ts,0,sizeof(struct timespec));
 
-// OS X before Sierra does not have clock_gettime, use clock_get_time
+    // OS X before Sierra does not have clock_gettime, use clock_get_time
 #if defined(__APPLE__) && !defined(__CLOCK_AVAILABILITY) && defined(__MACH__)
     clock_serv_t cclock;
     mach_timespec_t mts;
@@ -123,6 +130,7 @@ void out_csv(double time, measT *mt, poseT *pt, poseT *mle, poseT *mse, char goo
     fprintf(stderr,"%.3lf,%.3lf,%.4lf,%.4lf,%.4lf,",time,mle->time,mle->x,mle->y,mle->z);
     fprintf(stderr,"%.3lf,%.4lf,%.4lf,%.4lf,",mse->time,mse->x,mse->y,mse->z);
     fprintf(stderr,"%.4lf,%.4lf,%.4lf,",pt->x, pt->y, pt->z);
+    fprintf(stderr,"%.4lf,%.4lf,%.4lf,",mse->vn_x, mse->vn_y, mse->vn_z);
     fprintf(stderr,"%.3lf,%.3lf,%.3lf,",(N_COVAR>=6?sqrt(mse->covariance[0]):-1.0),(N_COVAR>=6?sqrt(mse->covariance[2]):-1.0),(N_COVAR>=6?sqrt(mse->covariance[5]):-1.0));
     fprintf(stderr,"%d,%d\n",fs,nr);
 }
@@ -136,7 +144,6 @@ void static s_trn_cycle(trn_worker_t *worker)
         worker->mse.covariance[2] = worker->mse.covariance[3] = 0.;
 
         worker->tnav->estimatePose( &worker->mle, 1);
-
         worker->tnav->estimatePose( &worker->mse, 2);
 
         char goodMeas = worker->tnav->lastMeasSuccessful();
@@ -173,7 +180,7 @@ void *client_worker(void *vworker)
 
         s_trn_cycle(worker);
 
-        sem_wait(&worker->run_sem);
+        sem_wait(worker->run_sem);
     }
 
     fprintf(stderr,"worker thread quitting\n");
@@ -214,12 +221,11 @@ static void s_delay_sec(double period)
 
 int main(int argc, char** argv)
 {
-    struct sigaction sa;
+
     signal(SIGINT,s_sig_handler);
 
-    trn_worker_t worker_s;
-    memset(&worker_s,0,sizeof(trn_worker_t));
-    trn_worker_t *worker=&worker_s;
+    trn_worker_t worker_s, *worker=&worker_s;
+    memset((void *)worker,0,sizeof(trn_worker_t));
 
     worker->ofmt = OF_ASCII;
     worker->pfile=NULL;
@@ -339,13 +345,18 @@ int main(int argc, char** argv)
             fprintf(stderr,"worker thread create failed [%d/%s]\n",errno,strerror(errno));
             exit(-1);
         }
-        sem_init(&worker->run_sem,0,0);
+//        sem_init(&worker->run_sem,0,0);
+        worker->run_sem = sem_open(TRNCLI_RUN_SEM_NAME,O_CREAT);
+        if(NULL == worker->run_sem){
+            fprintf(stderr,"NULL semaphore [%d/%s]\n",errno,strerror(errno));
+            exit(0);
+        }
     }
 
     while(g_quit==false){
         s_delay_sec(delay_sec);
         if(is_threaded){
-            sem_post(&worker->run_sem);
+            sem_post(worker->run_sem);
         }else{
             s_trn_cycle(worker);
         }
@@ -353,7 +364,7 @@ int main(int argc, char** argv)
 
     if(is_threaded){
         fprintf(stderr,"quit flag set, signaling worker thread...\n");
-        sem_post(&worker->run_sem);
+        sem_post(worker->run_sem);
         fprintf(stderr,"waiting for worker thread...\n");
         pthread_join( worker_thread, NULL);
     }
@@ -365,8 +376,9 @@ int main(int argc, char** argv)
     if(NULL!=worker->host)
     free(worker->host);
 
+    sem_close(worker->run_sem);
+    sem_unlink(TRNCLI_RUN_SEM_NAME);
     fprintf(stderr,"done\n");
-
     return 0;
 }
 
