@@ -42,6 +42,10 @@ CMDPREFIX="docker run -it --rm"
 # Map current directory to /opt/MBSWorkDir:
 CMDPREFIX="$CMDPREFIX -v $(pwd):/opt/MBSWorkDir"
 
+# TODO determine running user.
+# For now, add this in general:
+CMDPREFIX="$CMDPREFIX --user $(id -u)"
+
 # TODO determine host environment, in particular for any needed
 #  preparations for the GUI programs.
 #  Initially testing with MacOS and linux.
