@@ -112,6 +112,9 @@
 /* Build tools using PCL */
 /* #undef PCLTOOLS_ENABLED */
 
+/* Build tools using Qt5 */
+/* #undef QTTOOLS_ENABLED */
+
 /* Define to 1 if you have the ANSI C header files. */
 #define STDC_HEADERS 1
 
@@ -122,7 +125,7 @@
 #define VERSION "5.7.6beta32"
 
 /* Set VERSION_DATE define in mb_config.h */
-#define VERSION_DATE "15 April 2020"
+#define VERSION_DATE "17 April 2020"
 
 /* Define WORDS_BIGENDIAN to 1 if your processor stores words with the most
    significant byte first (like Motorola and SPARC, unlike Intel). */
@@ -135,6 +138,9 @@
 /* #  undef WORDS_BIGENDIAN */
 # endif
 #endif
+
+/* Define to 1 if the X Window System is missing or not being used. */
+/* #undef X_DISPLAY_MISSING */
 
 /* Define to the type of a signed integer type of width exactly 8 bits if such
    a type exists and the standard includes do not define it. */

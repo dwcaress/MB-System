@@ -106,6 +106,7 @@ AS_ECHO(["        --enable-mbtnav       - enable building terrain relative navig
 AS_ECHO(["        --disable-mbtools     - disable building graphical tools (use with --enable-mbtrn and --enable-mbtnav)"])
 AS_ECHO(["        --enable-hardening    - Enable compiler and linker options to frustrate memory corruption exploits  (e.g. -fPIE and -pie) (optional)"])
 AS_ECHO(["        --enable-test         - Enable building unit tests in test/ and third-party/"])
+AS_ECHO(["        --enable-qt           - Enable building graphical tools using the Qt5 framework"])
 AS_ECHO([" "])
 AS_ECHO(["    After configure you can run the make utility in the usual fashion"])
 AS_ECHO(["        make"])
@@ -905,6 +906,43 @@ AM_CONDITIONAL([BUILD_GL], [test "$GOT_OPENGL" = yes])
 dnl End check for Motif and OpenGL library and headers
 
 dnl--------------------------------------------------------------------
+dnl Qt5 Section
+dnl   - Use macro ax_have_qt() from
+dnl         https://www.gnu.org/software/autoconf-archive/ax_have_qt.html
+dnl         http://git.savannah.gnu.org/gitweb/?p=autoconf-archive.git;a=blob_plain;f=m4/ax_have_qt.m4
+dnl   - Usage of this macro described at:
+dnl         https://stackoverflow.com/questions/37758622/how-to-use-gnu-autotool-to-build-a-qt-project
+dnl--------------------------------------------------------------------
+
+dnl Check if Qt5 based graphical tools should be built
+AS_ECHO(["Check if Qt5 based graphical tools should be built"])
+AC_ARG_ENABLE([qt],
+  [AS_HELP_STRING([--enable-qt], [build Qt5 based graphical tools])],
+  [build_qttools=yes],
+  [build_qttools=no])
+AS_ECHO(["build_qttools: $build_qttools"])
+if test "$build_qttools" = "yes" ; then
+  AX_HAVE_QT()
+  if test "$have_qt" = "yes" ; then
+    AS_ECHO(["Qt5 installation found"])
+    AC_SUBST([qt_LIBS], [$QT_LIBS])
+    AC_SUBST([qt_CPPFLAGS], [$QT_CXXFLAGS])
+  else
+    AS_ECHO(["Qt5 installation not found"])
+    build_qttools=no
+  fi
+fi
+AM_CONDITIONAL([BUILD_QTTOOLS], [test $build_qttools = yes])
+if test "$build_qttools" = "yes" ; then
+    dnl Build tools using QT
+    AS_ECHO(["Building Qt5-based graphical tools"])
+    AC_DEFINE(QTTOOLS_ENABLED, 1, [Build tools using Qt5])
+else
+    dnl Not building tools using Qt5
+    AS_ECHO(["Not building Qt5-based graphical tools"])
+fi
+
+dnl--------------------------------------------------------------------
 dnl Add some variables to be exported to the src/mbio/mb_config.h file
 dnl--------------------------------------------------------------------
 
@@ -975,7 +1013,7 @@ dnl--------------------------------------------------------------------
 dnl Check if programs using PCL should be built
 AS_ECHO(["Check if programs using PCL should be built"])
 AC_ARG_ENABLE(pcltools, [AS_HELP_STRING([--enable-pcltools],
-        [build tools using PCL])], [build_pcltools=yes], [build_mbpcltools=no])
+        [build tools using PCL])], [build_pcltools=yes], [build_pcltools=no])
 AM_CONDITIONAL([BUILD_PCLTOOLS], [test $build_pcltools = yes])
 if test "$build_pcltools" = "yes" ; then
     dnl Build tools using PCL
@@ -1025,14 +1063,15 @@ dnl--------------------------------------------------------------------
 
 AS_ECHO(["Check if the GSF driver should be built"])
 AC_ARG_ENABLE(gsf, [AS_HELP_STRING([--disable-gsf], [build without the GSF driver])],
-        [GOT_GSF=yes], [GOT_GSF=no])
-if test "$GOT_GSF" = "no" ; then
+        [GOT_GSFDISABLE=yes], [GOT_GSFDISABLE=no])
+if test "$GOT_GSFDISABLE" = "no" ; then
   enable_gsf=yes
+  AS_ECHO(["GSF driver will be built"])
+  AC_DEFINE([ENABLE_GSF], 1, [Build with GSF])
+else
+  AS_ECHO(["GSF driver will not be built"])
 fi
 AM_CONDITIONAL([BUILD_GSF], [test $enable_gsf = yes])
-if test "$enable_gsf" = "yes" ; then
-  AC_DEFINE([ENABLE_GSF], 1, [Build with GSF])
-fi
 
 dnl--------------------------------------------------------------------
 dnl Generate Makefiles
@@ -1068,6 +1107,7 @@ AC_CONFIG_FILES([\
       src/man/man3/Makefile \
       src/html/Makefile \
       src/ps/Makefile \
+      src/qttest/Makefile \
       src/share/Makefile \
       third_party/Makefile \
       third_party/googletest/Makefile \
@@ -1162,6 +1202,11 @@ if test "$build_mbtools" = "yes" ; then
 	AS_ECHO(["Build graphical tools: Enabled"])
 else
 	AS_ECHO(["Build graphical tools: Disabled"])
+fi
+if test "$build_qttools" = "yes" ; then
+	AS_ECHO(["Build Qt tools: Enabled"])
+else
+	AS_ECHO(["Build Qt tools: Disabled"])
 fi
 if test "$build_pcltools" = "yes" ; then
     AS_ECHO(["Build PCL tools: Enabled"])

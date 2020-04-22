@@ -20,7 +20,7 @@ include "beta" in the tag name are preliminary and generally not announced.
 Distributions that do not include "beta" in the tag name correspond to the major,
 announced releases. The source distributions associated with all releases, major or beta, are equally accessible as tarballs through the Github interface.
 
-- Version 5.7.6beta32    April 13, 2020
+- Version 5.7.6beta32    April 22, 2020
 - Version 5.7.6beta31    March 2, 2020
 - Version 5.7.6beta30    February 20, 2020
 - Version 5.7.6beta29    February 17, 2020
@@ -343,7 +343,22 @@ announced releases. The source distributions associated with all releases, major
 --
 ### MB-System Version 5.7 Release Notes:
 --
-#### 5.7.6beta32 (April 17, 2020)
+#### 5.7.6beta32 (April 22, 2020)
+
+Mbgrid: Fixed failure of the two gridding algorithm using beam footprints in
+which the footprint size blows up at low grazing angles. The fix is to not
+use soundings for which the grazing angle is less than five degrees.
+
+Mbgrid and mbmosaic: Replaced int values with bool values where appropriate.
+
+Build system: Added option to enable building tools based on Qt5 to the autotools
+build system. If the configure script is given the --enable-qt option, it
+checks if Qt5 has been installed, and if so, determines the compiler and linker
+flags required to build tools using Qt5. At present, the only Qt5 based code
+is in the directory src/qttest, and this code does not successfully compile
+and run. Therefore it is not recommended to run configure with the --enable-qt
+option. However, the build system is now ready to support Qt5 based tools as
+they are developed.
 
 Mbgrdtiff: Paul Wessel contributed a new version of mbgrdtiff that constructs
 the image by a direct call to the grdimage module. This version will only build
