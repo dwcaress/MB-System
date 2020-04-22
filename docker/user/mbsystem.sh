@@ -18,33 +18,35 @@ if [ -z "$MBSYSTEM_IMAGE" ]; then
     error "Required MBSYSTEM_IMAGE env var undefined" 1
 fi
 
-unset ISGUI
-
-# TODO see if given program (below) is one of the graphical ones
-#  to do the associated preparation.
-#  For now, let's handle a special `-gui` option for this:
-if [ "$1" = "-gui" ]; then
-    ISGUI=1
-    shift
-fi
-
 pgm=$1
 if [ -z "$pgm" ]; then
-    # TODO show list of available programs?
+    # TODO show help message including list of available programs?
     error "MB-System program not given" 2
 fi
 shift
+
+# The graphical programs per https://www.mbari.org/products/research-software/mb-system/mb-system-youtube-tutorials/:
+#   mbedit, mbeditviz, mbvelocitytool, mbgrdviz and mbnavedit
+# plus: mbnavadjust  (TODO probably others?)
+ISGUI=0
+if [ "$pgm" = "mbedit" ] ||
+   [ "$pgm" = "mbeditviz" ] ||
+   [ "$pgm" = "mbnavadjust" ] ||
+   [ "$pgm" = "mbvelocitytool" ] ||
+   [ "$pgm" = "mbgrdviz" ] ||
+   [ "$pgm" = "mbnavedit" ]; then
+    ISGUI=1
+fi
 
 # Build the command to be run:
 
 CMDPREFIX="docker run -it --rm"
 
+# Set running user:
+CMDPREFIX="$CMDPREFIX --user $(id -u)"
+
 # Map current directory to /opt/MBSWorkDir:
 CMDPREFIX="$CMDPREFIX -v $(pwd):/opt/MBSWorkDir"
-
-# TODO determine running user.
-# For now, add this in general:
-CMDPREFIX="$CMDPREFIX --user $(id -u)"
 
 # TODO determine host environment, in particular for any needed
 #  preparations for the GUI programs.

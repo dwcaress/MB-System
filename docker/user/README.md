@@ -83,7 +83,4 @@ The launcher, however, is also intended to help set up the host environment
 prior to running the MB-System programs, in particular those with a GUI.
 Example:
 
-    $ ./mbsystem.sh -gui mbnavadjust
-
-> NOTE: the `-gui` option is temporary.
-
+    $ ./mbsystem.sh mbnavadjust
