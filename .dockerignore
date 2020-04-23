@@ -1,2 +1,11 @@
-# TODO likely more stuff to be ignored
-*/.git
+# TODO likely more stuff that could be ignored
+.git
+.gitignore
+.github
+.travis.yml
+ci
+docker
+
+# NOTE: there's unfortunately no "global dockerignore" mechanism AFAICT,
+# so I'm for now adding some other local stuff under my env here:
+.idea
