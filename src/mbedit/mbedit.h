@@ -81,16 +81,16 @@ int mbedit_action_filter_all(int plwd, int exgr, int xntrvl, int yntrvl, int plt
                              int *nbuffer, int *ngood, int *icurrent, int *nplt);
 int mbedit_filter_ping(int iping);
 int mbedit_get_format(char *file, int *form);
-int mbedit_open_file(char *file, int form, int savemode);
+int mbedit_open_file(char *file, int form, bool savemode);
 int mbedit_close_file(void);
 int mbedit_dump_data(int hold_size, int *ndumped, int *nbuffer);
 int mbedit_load_data(int buffer_size, int *nloaded, int *nbuffer, int *ngood, int *icurrent);
 int mbedit_clear_screen(void);
 int mbedit_plot_all(int plwd, int exgr, int xntrvl, int yntrvl, int plt_size, int sh_mode, int sh_flggdsdg, int sh_flggdprf, int sh_time, int *nplt,
-                    int autoscale);
+                    bool autoscale);
 int mbedit_plot_beam(int iping, int jbeam);
 int mbedit_plot_ping(int iping);
-int mbedit_plot_ping_label(int iping, int save);
+int mbedit_plot_ping_label(int iping, bool save);
 int mbedit_plot_info(void);
 int mbedit_unplot_beam(int iping, int jbeam);
 int mbedit_unplot_ping(int iping);
