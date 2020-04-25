@@ -5336,13 +5336,13 @@ int mbedit_tsminmax(int iping, int nping, int data_id, double *tsmin, double *ts
 		*tsmax = *tsmin;
 		for (int i = iping; i < iping + nping; i++) {
 		  double value;
-		  double value2;
 			mbedit_tsvalue(i, data_id, &value);
 			*tsmin = MIN(*tsmin, value);
 			*tsmax = MAX(*tsmax, value);
 
 			/* handle slope plotting in roll plot */
 			if (data_id == MBEDIT_PLOT_ROLL) {
+		    double value2;
 				mbedit_xtrackslope(i, &value2);
 				*tsmin = MIN(*tsmin, value2);
 				*tsmax = MAX(*tsmax, value2);
