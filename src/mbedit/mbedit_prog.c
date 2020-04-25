@@ -3674,12 +3674,8 @@ int mbedit_open_file(char *file, int form, bool savemode) {
 		}
 
 		/* handle esf edits */
-    int outputmode;
-    if (output_mode == MBEDIT_OUTPUT_BROWSE)
-      outputmode = MBP_ESF_NOWRITE;
-    else
-      outputmode = MBP_ESF_WRITE;
-		if (savemode || outputmode) {
+    const int outputmode = ((output_mode == MBEDIT_OUTPUT_BROWSE) ? MBP_ESF_NOWRITE : MBP_ESF_WRITE);
+		if (savemode || (outputmode == MBP_ESF_WRITE)) {
 			status = mb_esf_load(verbose, program_name, ifile, savemode, outputmode, esffile, &esf, &error);
 			if (output_mode != MBEDIT_OUTPUT_BROWSE && status == MB_SUCCESS && esf.esffp != NULL)
 				esffile_open = true;
@@ -4936,16 +4932,17 @@ int mbedit_unplot_ping(int iping) {
 	/* unplot the ping profile */
 	bool first = true;
 	for (int j = 0; j < ping[iping].beams_bath; j++) {
-		if (mb_beam_ok(ping[iping].beamflag[j]) && first) {
-			first = false;
-			xold = ping[iping].bath_x[j];
-			yold = ping[iping].bath_y[j];
-		}
-		else if (mb_beam_ok(ping[iping].beamflag[j])) {
-			xg_drawline(mbedit_xgid, xold, yold, ping[iping].bath_x[j], ping[iping].bath_y[j], pixel_values[WHITE], XG_SOLIDLINE);
-			xold = ping[iping].bath_x[j];
-			yold = ping[iping].bath_y[j];
-		}
+		if (mb_beam_ok(ping[iping].beamflag[j])) {
+      if (first) {
+			  first = false;
+			  xold = ping[iping].bath_x[j];
+			  yold = ping[iping].bath_y[j];
+		  } else {
+			  xg_drawline(mbedit_xgid, xold, yold, ping[iping].bath_x[j], ping[iping].bath_y[j], pixel_values[WHITE], XG_SOLIDLINE);
+			  xold = ping[iping].bath_x[j];
+			  yold = ping[iping].bath_y[j];
+		  }
+    }
 	}
 
 	const int status = MB_SUCCESS;
@@ -5156,18 +5153,19 @@ int mbedit_action_goto(int ttime_i[7], int hold_size, int buffer_size, int plwd,
 	}
 
 	/* let the world know... */
-	if (verbose >= 2 && found) {
-		fprintf(stderr, "\n>> Target time %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d found\n", ttime_i[0], ttime_i[1], ttime_i[2],
+	if (verbose >= 2) {
+    if (found) {
+		  fprintf(stderr, "\n>> Target time %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d found\n", ttime_i[0], ttime_i[1], ttime_i[2],
 		        ttime_i[3], ttime_i[4], ttime_i[5], ttime_i[6]);
-		fprintf(stderr, ">> Found time: %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d\n", ping[0].time_i[0], ping[0].time_i[1],
+		  fprintf(stderr, ">> Found time: %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d\n", ping[0].time_i[0], ping[0].time_i[1],
 		        ping[0].time_i[2], ping[0].time_i[3], ping[0].time_i[4], ping[0].time_i[5], ping[0].time_i[6]);
-		fprintf(stderr, "Current data record index:  %d\n", current_id);
-		fprintf(stderr, "Current global data record: %d\n", current_id + ndump_total);
-	}
-	else if (verbose >= 2) {
-		fprintf(stderr, "\n>> Target time %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d found\n", ttime_i[0], ttime_i[1], ttime_i[2],
+		  fprintf(stderr, "Current data record index:  %d\n", current_id);
+		  fprintf(stderr, "Current global data record: %d\n", current_id + ndump_total);
+    } else {
+		  fprintf(stderr, "\n>> Target time %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d found\n", ttime_i[0], ttime_i[1], ttime_i[2],
 		        ttime_i[3], ttime_i[4], ttime_i[5], ttime_i[6]);
-		fprintf(stderr, "\n>> Unable to go to target time...\n");
+		  fprintf(stderr, "\n>> Unable to go to target time...\n");
+    }
 	}
 
 	/* reset beam_save */
