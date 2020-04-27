@@ -5,8 +5,7 @@ See https://github.com/dwcaress/MB-System/issues/807
 ## Status
 
 - Basic setup functional
-- Some basic GUI tests OK on MacOS
-- This README is still preliminary as well
+- Some basic GUI tests OK on MacOS and CentOS 7
 
 ## Dockerfile
 
@@ -86,4 +85,3 @@ Status: preliminary (some notes [here](gui/README.md)).
 - Use current host directory mapped as "home" directory
 - List file with "pointers" to locations
 - Windows
-- keep using separate repo for now
