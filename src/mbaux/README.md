@@ -1,4 +1,4 @@
-# Source Directory: src/mbaux/
+## MB-System Source Directory: src/mbaux/
 
 This directory contains the C source files for the libmbaux library, which
 includes a number of auxiliary functions used by MB-System programs. These
