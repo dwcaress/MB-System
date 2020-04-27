@@ -34,7 +34,7 @@
 #include <QtDataVisualization/QSurface3DSeries>
 #include "datavisualizationqml2/declarativesurface_p.h"
 
-#include "gmt.h"
+#include <gmt/gmt.h>
 
 using namespace QtDataVisualization;
 
@@ -49,12 +49,12 @@ public:
   /// Load topographic data into series
   void setTopography(void *gmtApi, GMT_GRID *grid);
      void setTopography(void *gmtApi, GMT_GRID *grid, float width, float height);
-
+  
 
   /// Read grid from GMT file; return pointer to GMT_GRID if
   /// successful, else return nullptr
   static GMT_GRID *readGridFile(const char *filename, void **gmtApi);
-
+    
   /// Toggle between color map and solid color
   void toggleColorMap(bool on);
 
@@ -85,7 +85,7 @@ public:
     m_minLongit = std::numeric_limits<double>::max();
     m_maxLongit = std::numeric_limits<double>::lowest();
   }
-
+    
 public Q_SLOTS:
 
   protected:
