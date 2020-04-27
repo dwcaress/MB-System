@@ -1038,4 +1038,4 @@ int mbr_info_kemkmall(int verbose, int *system, int *beams_bath_max, int *beams_
                      int *heading_source, int *attitude_source, int *svp_source, double *beamwidth_xtrack,
                      double *beamwidth_ltrack, int *error);
 
-#endif  /* MB_FORTMAT_H_ */
+#endif  /* MB_FORMAT_H_ */
