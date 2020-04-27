@@ -33,14 +33,18 @@ SOURCES += \
     TopographicSeries.cpp \
     BackEnd.cpp
 
-###    qrc_qml.cpp \  WTF???
+# User *MUST* set environment variable QT_HOME
+INCDIR = $$(QT_HOME)
+message(Using INCDIR $$INCDIR - ok?)
 
-INCLUDEPATH += /home/oreilly/Qt5.14.2/5.14.2/Src/qtdatavis3d/src/
-INCLUDEPATH += /home/oreilly/Qt5.14.2/5.14.2/Src/qtdatavis3d/src/datavisualization/global
-INCLUDEPATH += /home/oreilly/Qt5.14.2/5.14.2/Src/qtdatavis3d/src/datavisualization/engine/
-INCLUDEPATH += /home/oreilly/Qt5.14.2/5.14.2/Src/qtdatavis3d/src/datavisualization/data/
-INCLUDEPATH += /home/oreilly/Qt5.14.2/5.14.2/Src/qtdatavis3d/src/datavisualization/theme
-INCLUDEPATH += /home/oreilly/projects/mb-system/gui-test/mbgrdviz-2/datavisualizationqml2
+INCLUDEPATH += $$INCDIR/5.14.2/Src/qtdatavis3d/src/
+INCLUDEPATH += $$INCDIR/5.14.2/Src/qtdatavis3d/src/datavisualization/global
+INCLUDEPATH += $$INCDIR/5.14.2/Src/qtdatavis3d/src/datavisualization/engine/
+INCLUDEPATH += $$INCDIR/5.14.2/Src/qtdatavis3d/src/datavisualization/data/
+INCLUDEPATH += $$INCDIR/5.14.2/Src/qtdatavis3d/src/datavisualization/theme
+
+INCLUDEPATH += datavisualizationqml2
+
 RESOURCES += qml.qrc
 
 # Additional import path used to resolve QML modules in Qt Creator's code model
