@@ -10,7 +10,7 @@
 #include <QCoreApplication>
 #include <QValue3DAxis>
 #include <QValue3DAxisFormatter>
-#include <gmt.h>
+#include <gmt/gmt.h>
 
 #include "BackEnd.h"
 #include "TopographicSeries.h"
@@ -113,16 +113,16 @@ void BackEnd::setGridFile(QUrl fileURL) {
       free((void *)m_gridFile);
     }
     m_gridFile = strdup(fileURL.toLocalFile().toLatin1().data());
-
+    
     if (m_topographicSeries) {
       // Need to remove series from surface before deleting the series
         m_surface->removeSeries(m_topographicSeries);
-
+      
         delete m_topographicSeries;
     }
     m_topographicSeries = new TopographicSeries();
 
-
+    
     void *gmtApi;
     GMT_GRID *gmtGrid =
       TopographicSeries::readGridFile(m_gridFile,
