@@ -5,17 +5,22 @@ See https://github.com/dwcaress/MB-System/issues/807
 ## Status
 
 - Basic setup functional
-- Some basic GUI tests OK on MacOS and CentOS 7
+- GUI tests OK on CentOS 7 and MacOS
 
 ## Dockerfile
 
-The [`Dockerfile`](Dockerfile) here for the MB-System image build leverages 
+The [`Dockerfile`](Dockerfile) here for the MB-System image build currently leverages
 [zberkowitz/mbsystem-deps:centos-7](https://hub.docker.com/r/zberkowitz/mbsystem-deps/tags)
 as base image for the build of the Mb-System itself.
 See [`../.travis.yml`](../.travis.yml) and [`centos/Dockerfile`](centos/Dockerfile). 
 
-**TODO**: Determine whether the build of the dependencies base image above
-should be incorporated as part of the overall MB-System image build.
+**TODO**: Determine whether the build of the dependency base image above
+should more explicitly be incorporated as part of the overall MB-System
+image build here. In fact, other required packages are added as noted
+while advancing the tests, in particular with the GUI programs, so far:
+
+- `mesa-dri-drivers`
+
 
 ## Automatic image build and publication
 
