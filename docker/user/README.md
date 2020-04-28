@@ -2,7 +2,7 @@
 
 Notes for the end user about using the dockerized MB-System.
 
-**Status**: WIP, preliminary notes.  Feedback most welcome.
+**Status**: WIP. Feedback welcome.
 
 ## Requirements
 
@@ -14,13 +14,14 @@ The core requirements on your host system are:
 Additionally:
 
 - on MacOS:
+
     - [socat](http://www.dest-unreach.org/socat/)
 
 - on Windows 10:
     - (TODO)
 
 
-The dockerized MB-system has been tested on ...
+The dockerized MB-system has been tested on CentOS 7 and MacOS.
 
 
 ## The MB-System docker image
@@ -48,39 +49,52 @@ available locally, but you can get it beforehand with an explicit
     $ docker pull $MBSYSTEM_IMAGE
     5.7.6beta32: Pulling from mbari/mbsystem
     ab5ef0e58194: Already exists
-    a145630667c7: Already exists
-    785c505a04fc: Already exists
-    71848de57f0d: Already exists
-    6d6760671aa6: Already exists
-    ded91f515ba2: Already exists
-    a3267f0a1277: Already exists
-    77cffdf7b54a: Pull complete
-    48a2a54358a4: Pull complete
-    5b675a116cbe: Pull complete
-    Digest: sha256:548ce9f5980d9b8a25efc415a2e20882647b2ad63d805fd48797375818cb33ce
+    a145630667c7: Pull complete
+    785c505a04fc: Pull complete
+    71848de57f0d: Pull complete
+    6d6760671aa6: Pull complete
+    ded91f515ba2: Pull complete
+    a3267f0a1277: Pull complete
+    11aeaa2f215b: Pull complete
+    e570f695f2c5: Pull complete
+    914373a96266: Pull complete
+    2913a20436b7: Pull complete
+    Digest: sha256:2f9b6314edff2b11ceb9f63962a0db20e43f30a61d751593d93f053276dd9a81
     Status: Downloaded newer image for mbari/mbsystem:5.7.6beta32
     docker.io/mbari/mbsystem:5.7.6beta32
 
 ### The launcher script
 
 The included `mbsystem.sh` script is basically a wrapper around the
-`docker` command to help run any of the MB-System programs.
-At this point, the script has a focus on Linux and MacOS hosts.
+`docker` command on your host to help run the MB-System.
+This script is to be used on Linux and MacOS hosts.
 
-TODO: Windows 10.
+In the following we assume that `mbsystem.sh` is available through
+your `$PATH` and that it has execution permission.
 
-Relying on the `MBSYSTEM_IMAGE` environment variable as defined above,
-you just need to indicate the desired program and any arguments
-to `mbsystem.sh`, for example:
+The script requires the environment variable `MBSYSTEM_IMAGE` to be
+defined as explained above.
+The script can accept some arguments
+(run `mbsystem.sh -h` to see a help message),
+but you will typically run it with no arguments
+to simply launch the container with `bash` running in it.
+As an example, starting on your host:
 
-    $ ./mbsystem.sh mbabsorption -h
-
-In this case, this is equivalent to:
-
-    $ docker run -it --rm $MBSYSTEM_IMAGE mbabsorption -h
+    $ pwd
+    /tmp
     
-The launcher, however, is also intended to help set up the host environment
-prior to running the MB-System programs, in particular those with a GUI.
-Example:
+    $ mbsystem.sh
 
-    $ ./mbsystem.sh mbnavadjust
+    bash-4.2$ pwd
+    /opt/MBSWorkDir
+    
+    bash-4.2$ mbedit -h
+    
+    Program MBedit
+    MB-system Version ...
+    
+    MBedit is an interactive editor used to ...
+
+Note that `/opt/MBSWorkDir` is the initial working directory in the container.
+This location is mapped to the current directory on your host when you
+launch the system, `/tmp` in the example.
