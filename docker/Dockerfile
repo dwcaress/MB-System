@@ -11,8 +11,15 @@ ENV LIBGL_DEBUG=verbose
 # `glxinfo >/dev/null` will for example help spot any errors
 
 
+# This location, to be mounted from some file on the host, will
+# help keep the bash history upon re-starts of the container:
+ENV HISTFILE=/opt/mbsystem.bash_history
+# NOTE: not using the default HISTFILE to facilitate running
+# the container as a different user from the one by default.
+
 RUN mkdir -p /opt/MB-System \
-             /opt/MBSWorkDir
+             /opt/MBSWorkDir \
+ && touch $HISTFILE
 
 COPY . /opt/MB-System/
 RUN  cd /opt/MB-System/         && \

@@ -27,13 +27,13 @@ The dockerized MB-system has been tested on CentOS 7 and MacOS.
 ## The MB-System docker image
 
 The MB-System docker image is available at
-https://hub.docker.com/repository/docker/mbari/mbsystem.
+https://hub.docker.com/r/mbari/mbsystem.
 
 Note that proper releases of the image are indicated with tags having an
 `x.y.z` prefix, for example, `5.7.6beta32`.
 Typically, you will be using the most recent of such available tags.
 
-The complete image designation has the form `mbari/mbsystem:<tag>`, 
+The complete image designation has the form `mbari/mbsystem:<tag>`,
 for example, `mbari/mbsystem:5.7.6beta32`.
 In the following we will assume that such image designation is captured
 in the `$MBSYSTEM_IMAGE` environment variable:
@@ -41,10 +41,10 @@ in the `$MBSYSTEM_IMAGE` environment variable:
     $ export MBSYSTEM_IMAGE=mbari/mbsystem:5.7.6beta32
 
 ### Getting the image
-    
+
 The launcher script (see below) will download the image if not already
 available locally, but you can get it beforehand with an explicit
-`git pull` command: 
+`git pull` command:
 
     $ docker pull $MBSYSTEM_IMAGE
     5.7.6beta32: Pulling from mbari/mbsystem
@@ -72,11 +72,13 @@ This script is to be used on Linux and MacOS hosts.
 In the following we assume that `mbsystem.sh` is available through
 your `$PATH` and that it has execution permission.
 
-The script requires the environment variable `MBSYSTEM_IMAGE` to be
-defined as explained above.
+First, edit the script to set the particular docker image to be used
+(variable `MBSYSTEM_IMAGE`), as well as the running user and the host
+directory to mount as `/opt/MBSWorkDir` in the container.
+
 The script can accept some arguments
 (run `mbsystem.sh -h` to see a help message),
-but you will typically run it with no arguments
+but it will typically be run with no arguments
 to simply launch the container with `bash` running in it.
 As an example, starting on your host:
 
@@ -96,5 +98,10 @@ As an example, starting on your host:
     MBedit is an interactive editor used to ...
 
 Note that `/opt/MBSWorkDir` is the initial working directory in the container.
-This location is mapped to the current directory on your host when you
-launch the system, `/tmp` in the example.
+By default, depending on your defined settings in the script, this location
+is mapped to the current directory on your host when you launch the system,  
+`/tmp` in the example above.
+
+Note also that `$HOME/.mbsystem.bash_history`, a file created by the script
+on your host and mounted into a file in the container, is used to help
+preserve your command history upon re-starts of the container.
