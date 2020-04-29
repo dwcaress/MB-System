@@ -2,7 +2,9 @@ import QtQuick 2.9
 import QtQuick.Controls 2.3
 import QtQuick.Dialogs 1.1
 import QtDataVisualization 1.14
+import QtQuick.Layouts 1.14
 import "ui-components"
+
 /* ***
 Displays bathymetry/topography as a Surface3D object.
 Mouse controls:
@@ -97,8 +99,6 @@ ApplicationWindow {
                     quitDialog.open()
                 }
             }
-
-
         }
 
 
@@ -225,20 +225,35 @@ ApplicationWindow {
 
         Text {
             id: selectedFile
-	    objectName: "selectedFile"
+            objectName: "selectedFile"
             text: "filename goes HERE"
             anchors.top: parent.top
             anchors.topMargin: 0
-            font.family: "Helvetica"
+            font.family: "Courier"
             font.pointSize: 18
             color: "black"
         }
 
+        RowLayout {
+            id: radioLayout
+            anchors.top: selectedFile.bottom
+            anchors.topMargin: 0
+            Text { text: "Mouse mode: " }
+
+            RadioButton {
+                checked: true
+                text: qsTr("Rotate")
+            }
+            RadioButton {
+                text: qsTr("Pan")
+            }
+
+        }
         Item {
             width: 964
             anchors.bottom: parent.bottom
             anchors.bottomMargin: 0
-            anchors.top: selectedFile.bottom
+            anchors.top: radioLayout.bottom
             anchors.topMargin: 0
             objectName: "surface3DItem"
 
@@ -248,9 +263,9 @@ ApplicationWindow {
                 objectName: "surface3D"
                 id: surface3D
 
-		// Clicking on specific axis and then dragging on that axis
-		// translates surace along that axis
-                onSelectedElementChanged: { 
+                // Clicking on specific axis and then dragging on that axis
+                // translates surace along that axis
+                onSelectedElementChanged: {
 
                     if (selectedElement >= AbstractGraph3D.ElementAxisXLabel
                             && selectedElement <= AbstractGraph3D.ElementAxisZLabel) {
@@ -275,14 +290,14 @@ ApplicationWindow {
                 //! [3]
                 onPositionChanged: {
 
-		// Keep track of mouse position
-		currentMouseX = mouse.x;
-                currentMouseY = mouse.y;
+                    // Keep track of mouse position
+                    currentMouseX = mouse.x;
+                    currentMouseY = mouse.y;
 
                     if (pressed && selectedAxisLabel != -1) {
-		       // User has selected an axis
+                        // User has selected an axis
                         item1.dragAxis();
-			}
+                    }
 
                     previousMouseX = currentMouseX;
                     previousMouseY = currentMouseY;
@@ -309,7 +324,7 @@ ApplicationWindow {
             // console.log("dragAxis()")
             // Do nothing if previous mouse position is uninitialized
             if (previousMouseX === -1) {
-               // console.log("dragAxis(): previousMousX=-1 just return")
+                // console.log("dragAxis(): previousMousX=-1 just return")
                 return
             }
 
@@ -325,7 +340,7 @@ ApplicationWindow {
             switch (selectedAxisLabel) {
             case AbstractGraph3D.ElementAxisXLabel:
                 var distance = ((moveX - moveY) * cameraMultiplier) / dragSpeedModifier
-                 distance *= (surface3D.axisX.max -surface3D.axisX.min)
+                distance *= (surface3D.axisX.max -surface3D.axisX.min)
                 // console.log("X: distance=", distance)
                 // Check if we need to change min or max first to avoid invalid ranges
                 if (distance > 0) {
