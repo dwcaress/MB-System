@@ -38,6 +38,9 @@
 
 using namespace QtDataVisualization;
 
+/* **
+   This class holds topographic/bathymetric data for Surface3D QML object
+** */
 class TopographicSeries : public QSurface3DSeries
 {
     Q_OBJECT
