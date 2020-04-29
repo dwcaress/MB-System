@@ -27,7 +27,7 @@ The dockerized MB-system has been tested on CentOS 7 and MacOS.
 ## The MB-System docker image
 
 The MB-System docker image is available at
-https://hub.docker.com/repository/docker/mbari/mbsystem.
+https://hub.docker.com/r/mbari/mbsystem.
 
 Note that proper releases of the image are indicated with tags having an
 `x.y.z` prefix, for example, `5.7.6beta32`.
