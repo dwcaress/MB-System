@@ -2,8 +2,17 @@ import QtQuick 2.9
 import QtQuick.Controls 2.3
 import QtQuick.Dialogs 1.1
 import QtDataVisualization 1.14
+import QtQuick.Layouts 1.14
 import "ui-components"
+
 /* ***
+Displays bathymetry/topography as a Surface3D object.
+Mouse controls:
+Right drag: rotate
+Center wheel: zoom
+Left click: Select axis to be dragged
+Left drag: Translate scale on selected axis
+
 BackEnd singleton must be registered in root context by main.cpp
 See https://qml.guide/singletons/
 *** */
@@ -16,6 +25,12 @@ ApplicationWindow {
     height: 880
     title: "TEST4"
 
+    property int selectedAxisLabel: -1
+    property real dragSpeedModifier: 100.0
+    property int currentMouseX: -1
+    property int currentMouseY: -1
+    property int previousMouseX: -1
+    property int previousMouseY: -1
 
 
     Settings2dWindow {
@@ -84,8 +99,6 @@ ApplicationWindow {
                     quitDialog.open()
                 }
             }
-
-
         }
 
 
@@ -194,6 +207,7 @@ ApplicationWindow {
             }
         }
     }
+
     FileDialog {
         id: fileDialog
         title: "Open file"
@@ -207,64 +221,166 @@ ApplicationWindow {
     Item {
         id: item1
         anchors.fill: parent
+
+
         Text {
             id: selectedFile
-            text: "filename goes here"
+            objectName: "selectedFile"
+            text: "filename goes HERE"
             anchors.top: parent.top
             anchors.topMargin: 0
-            font.family: "Helvetica"
-            font.pointSize: 24
-            color: "red"
+            font.family: "Courier"
+            font.pointSize: 18
+            color: "black"
         }
 
+        RowLayout {
+            id: radioLayout
+            anchors.top: selectedFile.bottom
+            anchors.topMargin: 0
+            Text { text: "Mouse mode: " }
+
+            RadioButton {
+                checked: true
+                text: qsTr("Rotate")
+            }
+            RadioButton {
+                text: qsTr("Pan")
+            }
+
+        }
         Item {
             width: 964
             anchors.bottom: parent.bottom
             anchors.bottomMargin: 0
-            anchors.top: selectedFile.bottom
-            anchors.topMargin: -36
+            anchors.top: radioLayout.bottom
+            anchors.topMargin: 0
             objectName: "surface3DItem"
 
             Surface3D {
+                // inputHandler: null
                 anchors.fill: parent
                 objectName: "surface3D"
+                id: surface3D
 
+                // Clicking on specific axis and then dragging on that axis
+                // translates surace along that axis
+                onSelectedElementChanged: {
 
-                Surface3DSeries {
-                    objectName: "surface3DSeries"
-                    itemLabelFormat: "Pop density at (@xLabel N, @zLabel E): @yLabel"
-                    ItemModelSurfaceDataProxy {
-                        itemModel: dataModel
-                        // Mapping model roles to surface series rows, columns, and values.
-                        rowRole: "longitude"
-                        columnRole: "latitude"
-                        yPosRole: "pop_density"
+                    if (selectedElement >= AbstractGraph3D.ElementAxisXLabel
+                            && selectedElement <= AbstractGraph3D.ElementAxisZLabel) {
+                        selectedAxisLabel = selectedElement
+                        console.log("set selected axis=", selectedAxisLabel)
+                    }
+                    else {
+                        console.log("selected a non-axis element; set selected axis = -1")
+                        selectedAxisLabel = -1
                     }
                 }
 
             }
-            ListModel {
-                id: dataModel
-                ListElement{ longitude: "20"; latitude: "10"; pop_density: "4.75"; }
-                ListElement{ longitude: "21"; latitude: "10"; pop_density: "3.00"; }
-                ListElement{ longitude: "22"; latitude: "10"; pop_density: "1.24"; }
-                ListElement{ longitude: "23"; latitude: "10"; pop_density: "2.53"; }
-                ListElement{ longitude: "20"; latitude: "11"; pop_density: "2.55"; }
-                ListElement{ longitude: "21"; latitude: "11"; pop_density: "2.03"; }
-                ListElement{ longitude: "22"; latitude: "11"; pop_density: "3.46"; }
-                ListElement{ longitude: "23"; latitude: "11"; pop_density: "5.12"; }
-                ListElement{ longitude: "20"; latitude: "12"; pop_density: "1.37"; }
-                ListElement{ longitude: "21"; latitude: "12"; pop_density: "2.98"; }
-                ListElement{ longitude: "22"; latitude: "12"; pop_density: "3.33"; }
-                ListElement{ longitude: "23"; latitude: "12"; pop_density: "3.23"; }
-                ListElement{ longitude: "20"; latitude: "13"; pop_density: "4.34"; }
-                ListElement{ longitude: "21"; latitude: "13"; pop_density: "3.54"; }
-                ListElement{ longitude: "22"; latitude: "13"; pop_density: "1.65"; }
-                ListElement{ longitude: "23"; latitude: "13"; pop_density: "2.67"; }
+
+
+            MouseArea {
+                anchors.fill: parent
+                hoverEnabled: true
+                acceptedButtons: Qt.LeftButton
+                //! [1]
+
+                //! [3]
+                onPositionChanged: {
+
+                    // Keep track of mouse position
+                    currentMouseX = mouse.x;
+                    currentMouseY = mouse.y;
+
+                    if (pressed && selectedAxisLabel != -1) {
+                        // User has selected an axis
+                        item1.dragAxis();
+                    }
+
+                    previousMouseX = currentMouseX;
+                    previousMouseY = currentMouseY;
+                }
+
+                onPressed: {
+                    surface3D.scene.selectionQueryPosition = Qt.point(mouse.x, mouse.y);
+                }
+
+                onReleased: {
+                    // We need to clear mouse positions and selected axis, because touch devices cannot
+                    // track position all the time
+                    selectedAxisLabel = -1
+                    currentMouseX = -1
+                    currentMouseY = -1
+                    previousMouseX = -1
+                    previousMouseY = -1
+                }
+            }
+        }
+
+        // Change range of selected axis to reflect mouse-drag
+        function dragAxis() {
+            // console.log("dragAxis()")
+            // Do nothing if previous mouse position is uninitialized
+            if (previousMouseX === -1) {
+                // console.log("dragAxis(): previousMousX=-1 just return")
+                return
             }
 
+            // Directional drag multipliers based on rotation. Camera is locked to 45 degrees, so we
+            // can use one precalculated value instead of calculating xx, xy, zx and zy individually
+            var cameraMultiplier = 0.70710678; // Need to multiply angle by axis range
+
+            // Calculate the mouse move amount
+            var moveX = currentMouseX - previousMouseX
+            var moveY = currentMouseY - previousMouseY
+            // console.log("dragAxis(): moveX=", moveX, "moveY=", moveY)
+            // Adjust axes
+            switch (selectedAxisLabel) {
+            case AbstractGraph3D.ElementAxisXLabel:
+                var distance = ((moveX - moveY) * cameraMultiplier) / dragSpeedModifier
+                distance *= (surface3D.axisX.max -surface3D.axisX.min)
+                // console.log("X: distance=", distance)
+                // Check if we need to change min or max first to avoid invalid ranges
+                if (distance > 0) {
+                    surface3D.axisX.min -= distance
+                    surface3D.axisX.max -= distance
+                } else {
+                    surface3D.axisX.max -= distance
+                    surface3D.axisX.min -= distance
+                }
+                break
+            case AbstractGraph3D.ElementAxisYLabel:
+                distance = moveY / dragSpeedModifier
+                distance *= (surface3D.axisY.max -surface3D.axisY.min)
+                // console.log("Y: distance=", distance)
+                // Check if we need to change min or max first to avoid invalid ranges
+                if (distance > 0) {
+                    surface3D.axisY.max += distance
+                    surface3D.axisY.min += distance
+                } else {
+                    surface3D.axisY.min += distance
+                    surface3D.axisY.max += distance
+                }
+                break
+            case AbstractGraph3D.ElementAxisZLabel:
+                distance = ((moveX + moveY) * cameraMultiplier) / dragSpeedModifier
+                distance *= (surface3D.axisZ.max -surface3D.axisZ.min)
+                // Check if we need to change min or max first to avoid invalid ranges
+                // console.log("Z: distance=", distance)
+                if (distance > 0) {
+                    surface3D.axisZ.max += distance
+                    surface3D.axisZ.min += distance
+                } else {
+                    surface3D.axisZ.min += distance
+                    surface3D.axisZ.max += distance
+                }
+                break
+            }
         }
     }
+
 
     MessageDialog {
         id: quitDialog
@@ -279,12 +395,11 @@ ApplicationWindow {
     }
 
     MessageDialog {
-         id: myMessageDialog
-         objectName: "myMessageDialog"
-         title: "my message dialog"
-         text: "this is default text"
-         Component.onCompleted: visible = false
-     }
-
+        id: myMessageDialog
+        objectName: "myMessageDialog"
+        title: "my message dialog"
+        text: "this is default text"
+        Component.onCompleted: visible = false
+    }
 
 }

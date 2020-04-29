@@ -48,8 +48,6 @@ public:
 
   /// Load topographic data into series
   void setTopography(void *gmtApi, GMT_GRID *grid);
-     void setTopography(void *gmtApi, GMT_GRID *grid, float width, float height);
-  
 
   /// Read grid from GMT file; return pointer to GMT_GRID if
   /// successful, else return nullptr
@@ -89,14 +87,6 @@ public:
 public Q_SLOTS:
 
   protected:
-
-  static int getRowMajorIndex(int row, int col, int nCols) {
-    return col + row * nCols;
-  }
-
-  static int getColMajorIndex(int row, int col, int nRows) {
-    return row + col * nRows;
-  }
 
   double m_minLatit;
   double m_maxLatit;

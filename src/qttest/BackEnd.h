@@ -65,6 +65,9 @@ protected:
     /// Topographic/bathymetric data
     TopographicSeries *m_topographicSeries;
 
+  /// Displayed file name
+  QObject *m_selectedFileText;
+
     /// Current grid file
     char *m_gridFile;
 
