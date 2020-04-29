@@ -33,7 +33,7 @@ Note that proper releases of the image are indicated with tags having an
 `x.y.z` prefix, for example, `5.7.6beta32`.
 Typically, you will be using the most recent of such available tags.
 
-The complete image designation has the form `mbari/mbsystem:<tag>`, 
+The complete image designation has the form `mbari/mbsystem:<tag>`,
 for example, `mbari/mbsystem:5.7.6beta32`.
 In the following we will assume that such image designation is captured
 in the `$MBSYSTEM_IMAGE` environment variable:
@@ -41,10 +41,10 @@ in the `$MBSYSTEM_IMAGE` environment variable:
     $ export MBSYSTEM_IMAGE=mbari/mbsystem:5.7.6beta32
 
 ### Getting the image
-    
+
 The launcher script (see below) will download the image if not already
 available locally, but you can get it beforehand with an explicit
-`git pull` command: 
+`git pull` command:
 
     $ docker pull $MBSYSTEM_IMAGE
     5.7.6beta32: Pulling from mbari/mbsystem
@@ -98,3 +98,7 @@ As an example, starting on your host:
 Note that `/opt/MBSWorkDir` is the initial working directory in the container.
 This location is mapped to the current directory on your host when you
 launch the system, `/tmp` in the example.
+
+Note also that `$HOME/.mbsystem.bash_history`, a file created by the script
+on your host and mounted into a file in the container, is used to help
+preserve your command history upon re-starts of the container.

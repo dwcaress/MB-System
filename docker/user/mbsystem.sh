@@ -55,27 +55,6 @@ while [ $# -gt 0 ]; do
     esac
 done
 
-pgm=$1
-if [ -z "$pgm" ]; then
-    pgm=bash
-else
-    shift
-fi
-
-# Build the command to be run:
-
-#CMDPREFIX="docker run -it --rm --name `basename $pgm`"
-CMDPREFIX="docker run -it --rm"
-
-# Set running user:
-CMDPREFIX="$CMDPREFIX --user $(id -u)"
-log "Running as user $(id -u)"
-
-# Map current directory to /opt/MBSWorkDir:
-HOST_WORK_DIR=$(pwd)
-CMDPREFIX="$CMDPREFIX -v $HOST_WORK_DIR:/opt/MBSWorkDir"
-log "Host directory $HOST_WORK_DIR mounted as /opt/MBSWorkDir in container"
-
 # Determine host environment.
 # Initial focus on Linux and MacOS.
 # From $OSTYPE, simplify the OS name in an $os variable:
@@ -94,6 +73,60 @@ if [ "$os" = "linux" ] || [ "$os" = "macos" ]; then
     if ! command -v docker >/dev/null 2>&1 ; then
         error "'docker' command not found" 1
     fi
+fi
+
+
+pgm=$1
+if [ -z "$pgm" ]; then
+    pgm=bash
+else
+    shift
+fi
+
+# Container name only dependent on the concrete program to be run (any arguments ignored):
+container_name="mbsystem-$(basename $pgm | sed 's/[^a-zA-Z0-9_]/-/g')"
+# In particular, this helps in two ways:
+# - determining whether to start a brand new container or re-start one previously run;
+# - keep the state of a stopped/resumed container (e.g., for bash history purposes).
+
+# Has the container already been created (i.e., previously run and now stopped)?
+already_created=$(docker ps -a --filter "name=^/${container_name}$" --format '{{.Names}}')
+# If so, just need to re-start it, see below.
+
+# But, for simplicity, we force a complete fresh container if any arguments are being
+# passed to the program (as they may be different):
+if [[ $already_created ]] && [[ $# -gt 0 ]]; then
+    log "Forcing new container ${container_name} because of passed arguments."
+    docker rm "${container_name}"
+    already_created=""
+fi
+
+# For simplicity, most of the following assuming a fresh container, but
+# then we check already_created for the actual final command to be run.
+
+# Build the command to be run (assuming fresh container):
+
+CMDPREFIX="docker run -it --name ${container_name}"
+
+# Set running user (UID) as the user for the container:
+CMDPREFIX="$CMDPREFIX --user $(id -u)"
+log "Running as user $(id -u)"
+
+# Map current directory to /opt/MBSWorkDir:
+HOST_WORK_DIR=$(pwd)
+CMDPREFIX="$CMDPREFIX -v $HOST_WORK_DIR:/opt/MBSWorkDir"
+log "Mounting $HOST_WORK_DIR as /opt/MBSWorkDir in container"
+
+# Map the following host file to /opt/mbsystem.bash_history:
+HOST_BASH_HISTORY="$HOME/.mbsystem.bash_history"
+CMDPREFIX="$CMDPREFIX -v $HOST_BASH_HISTORY:/opt/mbsystem.bash_history"
+log "Mounting $HOST_BASH_HISTORY as /opt/mbsystem.bash_history in container"
+
+# Make sure $HOST_BASH_HISTORY exists and is a regular file:
+if test -d "$HOST_BASH_HISTORY"; then
+    error "Unexpected: $HOST_BASH_HISTORY is a directory" 5
+elif [[ ! -f "$HOST_BASH_HISTORY" ]]; then
+    touch "$HOST_BASH_HISTORY"
 fi
 
 if [ "$os" = "linux" ]; then
@@ -119,8 +152,16 @@ else
     error "Unexpected os=$os" 99
 fi
 
-# final complete command to run:
-CMD="$CMDPREFIX $MBSYSTEM_IMAGE $pgm $@"
+# Ready to launch:
+
+if [[ $already_created ]]; then
+    log "Restarting existing container '${container_name}'"
+    CMD="docker start -ai ${container_name}"
+else
+    log "Starting container '${container_name}'"
+    CMD="$CMDPREFIX $MBSYSTEM_IMAGE $pgm $@"
+fi
+
 log "Running: $CMD\n"
 $CMD
 
