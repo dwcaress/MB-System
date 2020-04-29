@@ -72,11 +72,13 @@ This script is to be used on Linux and MacOS hosts.
 In the following we assume that `mbsystem.sh` is available through
 your `$PATH` and that it has execution permission.
 
-The script requires the environment variable `MBSYSTEM_IMAGE` to be
-defined as explained above.
+First, edit the script to set the particular docker image to be used
+(variable `MBSYSTEM_IMAGE`), as well as the running user and the host
+directory to mount as `/opt/MBSWorkDir` in the container.
+
 The script can accept some arguments
 (run `mbsystem.sh -h` to see a help message),
-but you will typically run it with no arguments
+but it will typically be run with no arguments
 to simply launch the container with `bash` running in it.
 As an example, starting on your host:
 
@@ -96,8 +98,9 @@ As an example, starting on your host:
     MBedit is an interactive editor used to ...
 
 Note that `/opt/MBSWorkDir` is the initial working directory in the container.
-This location is mapped to the current directory on your host when you
-launch the system, `/tmp` in the example.
+By default, depending on your defined settings in the script, this location
+is mapped to the current directory on your host when you launch the system,  
+`/tmp` in the example above.
 
 Note also that `$HOME/.mbsystem.bash_history`, a file created by the script
 on your host and mounted into a file in the container, is used to help

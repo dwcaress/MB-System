@@ -1,9 +1,30 @@
 #!/bin/bash
 #
-# mbsystem.sh: A launcher script for the dockerized MB-System programs.
+# mbsystem.sh: A launcher script for the dockerized MB-System
+# on Linux and MacOS hosts.
+#
+# Edit this file to adjust the first couple of settings as needed,
+# and then run it, for example:
+#
+#       ./mbsystem.sh -h
 #
 # Status: Under testing
 #
+###################################################################
+
+# The concrete image to use:
+MBSYSTEM_IMAGE=mbari/mbsystem:5.7.6beta32
+
+# Host directory to mount as /opt/MBSWorkDir in the container:
+HOST_WORK_DIR=$(pwd)
+
+# The running user (UID) for the container:
+RUNNING_USER=$(id -u)
+
+
+###################################################################
+# Probably no more changes needed after this point.
+###################################################################
 
 function usage() {
 cat << EOF
@@ -16,8 +37,6 @@ Options:
   -L                     Print some basic launching log messages.
   [program [args...]]    Desired program in the container to run.
                          By default, bash.
-
-The script assumes the MBSYSTEM_IMAGE environment variable is defined.
 
 EOF
 }
@@ -34,10 +53,6 @@ function error {
     echo -e "$1"
     exit "$2"
 }
-
-if [ -z "$MBSYSTEM_IMAGE" ]; then
-    error "Required MBSYSTEM_IMAGE env var undefined" 1
-fi
 
 while [ $# -gt 0 ]; do
     case "$1" in
@@ -108,13 +123,12 @@ fi
 
 CMDPREFIX="docker run -it --name ${container_name}"
 
-# Set running user (UID) as the user for the container:
-CMDPREFIX="$CMDPREFIX --user $(id -u)"
-log "Running as user $(id -u)"
+# Set running user as the user for the container:
+CMDPREFIX="$CMDPREFIX --user ${RUNNING_USER}"
+log "Running as user ${RUNNING_USER}"
 
-# Map current directory to /opt/MBSWorkDir:
-HOST_WORK_DIR=$(pwd)
-CMDPREFIX="$CMDPREFIX -v $HOST_WORK_DIR:/opt/MBSWorkDir"
+# Set work directory mapping:
+CMDPREFIX="$CMDPREFIX -v ${HOST_WORK_DIR}:/opt/MBSWorkDir"
 log "Mounting $HOST_WORK_DIR as /opt/MBSWorkDir in container"
 
 # Map the following host file to /opt/mbsystem.bash_history:

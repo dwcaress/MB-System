@@ -15,7 +15,7 @@ ENV LIBGL_DEBUG=verbose
 # help keep the bash history upon re-starts of the container:
 ENV HISTFILE=/opt/mbsystem.bash_history
 # NOTE: not using the default HISTFILE to facilitate running
-# the container as a diffent use from the one by default.
+# the container as a different user from the one by default.
 
 RUN mkdir -p /opt/MB-System \
              /opt/MBSWorkDir \
