@@ -88,14 +88,6 @@ public Q_SLOTS:
 
   protected:
 
-  static int getRowMajorIndex(int row, int col, int nCols) {
-    return col + row * nCols;
-  }
-
-  static int getColMajorIndex(int row, int col, int nRows) {
-    return row + col * nRows;
-  }
-
   double m_minLatit;
   double m_maxLatit;
   double m_minLongit;
