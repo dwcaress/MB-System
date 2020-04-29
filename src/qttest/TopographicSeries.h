@@ -48,8 +48,6 @@ public:
 
   /// Load topographic data into series
   void setTopography(void *gmtApi, GMT_GRID *grid);
-     void setTopography(void *gmtApi, GMT_GRID *grid, float width, float height);
-  
 
   /// Read grid from GMT file; return pointer to GMT_GRID if
   /// successful, else return nullptr
