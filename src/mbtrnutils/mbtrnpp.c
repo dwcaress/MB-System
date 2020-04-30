@@ -1946,14 +1946,14 @@ static int s_mbtrnpp_configure(mbtrnpp_cfg_t *cfg, mbtrnpp_opts_t *opts)
                     psdef+=strlen("socket:");
                     sprintf(cfg->socket_definition,"%s",psdef);
                 }else{
-                    fprintf(stderr,"socket definition length exceeds MB_PATH_SIZE [%s/%z/%z]\n",psdef,strlen(psdef)/MB_PATH_SIZE);
+                    fprintf(stderr,"socket definition length exceeds MB_PATH_SIZE [%s/%zu/%zu]\n",psdef,strlen(psdef),(size_t)MB_PATH_SIZE);
                 }
             }
             if(strlen(opts->input)<MB_PATH_SIZE){
                 sprintf(cfg->socket_definition,"%s",psdef);
 
             }else{
-                fprintf(stderr,"input length exceeds MB_PATH_SIZE [%s/%z/%z]\n",opts->input,strlen(opts->input)/MB_PATH_SIZE);
+                fprintf(stderr,"input length exceeds MB_PATH_SIZE [%s/%zu/%zu]\n",opts->input,strlen(opts->input),(size_t)MB_PATH_SIZE);
             }
 //            fprintf(stderr, "socket_definition|%s\n", cfg->socket_definition);
         }else {
@@ -5013,7 +5013,7 @@ int mbtrnpp_reson7kr_input_open(int verbose, void *mbio_ptr, char *definition, i
     if(NULL!=addr[0])
     strcpy(hostname, addr[0]);
     if(NULL!=addr[1])
-    sscanf(addr[1], "%d:%zd", &port, &size);
+    sscanf(addr[1], "%d:%zu", &port, &size);
     // release definition copy
     free(defcpy);
 
