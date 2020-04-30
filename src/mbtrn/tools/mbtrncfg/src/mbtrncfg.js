@@ -140,7 +140,7 @@ help_topics["verbose"]="mbtrnpp output level\n\
 help_topics["input"]="7K input source IP\n\n\
   use: socket:<address>:<port>:0";
 help_topics["log-directory"]="MB-System, TRN log directory";
-help_topics["swath"]="MB-System swath (deg)";
+help_topics["swath-width"]="MB-System swath (deg)";
 help_topics["soundings"]="MB1 bathymetry soundings (integer)";
 help_topics["format"]="MB-System record format [MB1:88]";
 help_topics["median-filter"]="Median filter settings\n\n\
@@ -293,7 +293,7 @@ function load_ctx(){
     x.elements["verbose"].value="-2";
     x.elements["input"].value="socket:RESON_HOST:7000:0";
     x.elements["log-directory"].value="TRN_LOGFILES";
-    x.elements["swath"].value="90";
+    x.elements["swath-width"].value="90";
     x.elements["soundings"].value="11";
     x.elements["format"].value="88";
     x.elements["median"].value="0.10/9/3";
@@ -338,7 +338,7 @@ function init_preset(key){
     x.elements["verbose"].value="-2";
     x.elements["input"].value="socket:RESON_HOST:7000:0";
     x.elements["log-directory"].value="TRN_LOGFILES";
-    x.elements["swath"].value="90";
+    x.elements["swath-width"].value="90";
     x.elements["soundings"].value="11";
     x.elements["format"].value="88";
     x.elements["median"].value="0.10/9/3";
@@ -401,8 +401,8 @@ function update(){
     var text = MBTRNDIR["current"]+"/mbtrnpp ";
     if(x.elements["verbose"].value.length>0)
         text += '--verbose='+x.elements["verbose"].value+" ";
-    if(x.elements["swath"].value.length>0)
-        text += '--swath='+x.elements["swath"].value+" ";
+    if(x.elements["swath-width"].value.length>0)
+        text += '--swath-width='+x.elements["swath-width"].value+" ";
     if(x.elements["soundings"].value.length>0)
         text += '--soundings='+x.elements["soundings"].value+" ";
     if(x.elements["format"].value.length>0)
