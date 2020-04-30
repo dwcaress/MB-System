@@ -1,0 +1,139 @@
+
+#  mbtrnpp configuration options
+
+// opt "verbose" [int]
+verbose=-2
+
+// opt "log-directory" [mb_path]
+// cfg var int logd_status
+// cfg var bool make_logs
+// cfg var mb_path log_directory
+log-directory=/home/headley/tmp/logs
+
+// opt "input" [input_mode_t]
+// cfg var mb_path socket_definition
+input=socket:192.168.1.68:7000:0
+
+// opt "output" [?]
+// cfg var mb_path output_file
+// cfg var output_mode_t output_flags
+output=file:mbtrnpp_SESSION.mb1
+
+// opt "swath-width" [double]
+// cfg var double swath_width
+swath-width=90
+
+// opt "soundings" [int]
+// cfg var int soundings
+soundings=11
+
+// opt "median-filter" [?]
+// cfg var int median_filter_n_across
+// cfg var int median_filter_n_along
+// cfg var bool median_filter
+// cfg var int n_buffer_max
+// cfg var double median_filter_threshold
+median-filter=0.10/9/3
+
+// opt "format" [int]
+// cfg var int format
+format=88
+
+// opt "platform-file" [mb_path]
+// cfg var mb_path platform_file
+#platform-file=
+
+// opt "platform-target-sensor" [int]
+#target_sensor=
+
+// opt "projection"
+#projection=
+
+
+// opt "mbhbn" [int]
+// cfg var int mbsvr_hbtok
+#mbhbn
+// opt "mbhbt" [double]
+// cfg var double mbsvr_hbto
+mbhbt=15
+// opt "trnhbt" [double]
+//var double trnsvr_hbto
+trnhbt=15
+// opt "trnuhbt" [double]
+//var double trnusvr_hbto
+trnuhbt=15
+// opt "delay" [int64_t]
+// cfg var mbtrnpp_loop_delay_msec
+delay=0
+// opt "statsec" [double]
+// cfg var double trn_status_interval_sec
+statsec=30
+// opt "statflags" [mstats_flags]
+// cfg var mstats_flags mbtrnpp_stat_flags
+statflags=MSF_STATUS|MSF_EVENT|MSF_ASTAT|MSF_PSTAT
+// opt "trn-en" [bool]
+// opt "trn-dis" [bool]
+// cfg var bool trn_enable
+trn-en=Y
+// opt "trn-utm" [long]
+// cfg var long int trn_utm_zone
+trn-utm=10
+// opt "trn-map" [char*]
+// cfg var char *trn_map_file
+trn-map=/mnt/vmhost/maps/PortTiles
+// opt "trn-cfg" [char*]
+// cfg var char *trn_cfg_file
+trn-cfg=/mnt/vmhost/config/mappingAUV_specs.cfg
+// opt "trn-par" [char*]
+// cfg var char *trn_particles_file
+trn-par=/mnt/vmhost/config/particles.cfg
+
+// opt "trn-mid" [char*]
+// cfg var char *trn_mission_id
+trn-mid=mb-TRN_SESSION
+// opt "trn-mtype" [int]
+// cfg var int trn_mtype
+// TRN_MAP_DEM  1
+// TRN_MAP_BO   2
+trn-mtype=2
+// opt "trn-ftype" [int]
+// cfg var int trn_ftype
+// TRN_FILT_PARTICLE
+// TRN_FILT_NONE       0
+// TRN_FILT_POINTMASS  1
+// TRN_FILT_PARTICLE   2
+// TRN_FILT_BANK       3
+trn-ftype=2
+
+// opt "trn-ncov" [double]
+// cfg var double trn_max_ncov
+trn-ncov=49
+// opt "trn-nerr" [double]
+// cfg var double trn_max_nerr
+trn-nerr=50
+// opt "trn-ecov" [double]
+// cfg var double trn_max_ecov
+trn-ecov=49
+// opt "trn-eerr" [double]
+//var double trn_max_eerr
+trn-eerr=50
+// opt "mb-out" [?]
+// cfg var int mb1svr_port
+// cfg var char *mb1svr_host
+mb-out=mb1svr:192.168.1.68:27000
+// opt "trn-out" [?]
+// cfg var int trnsvr_port
+// cfg var char *trnsvr_host
+// cfg var int trnusvr_port
+// cfg var char *trnusvr_host
+trn-out=trnsvr:192.168.1.68:28000,trnu,trnusvr:192.168.1.68:8000
+// opt "trn-decn" [int]
+// cfg var unsigned int trn_decn
+trn-decn=9
+// opt "trn-decs" [double]
+// cfg var double trn_decs
+#trn-decs=3.0
+// opt "trn-nombgain" [bool]
+// cfg var bool trn_nombgain
+#trn-nombgain=Y
+
