@@ -2,6 +2,7 @@ QT += quick
 QT += datavisualization
 
 CONFIG += c++11
+CONFIG -= app_bundle
 
 # The following define makes your compiler emit warnings if you use
 # any feature of Qt which as been marked deprecated (the exact warnings
@@ -33,18 +34,15 @@ SOURCES += \
     TopographicSeries.cpp \
     BackEnd.cpp
 
-# User *MUST* set environment variable QT_HOME
-INCDIR = $$(QT_HOME)
-message(Using INCDIR $$INCDIR - ok?)
+###    qrc_qml.cpp \  WTF???
 
-INCLUDEPATH += $$INCDIR/5.14.2/Src/qtdatavis3d/src/
-INCLUDEPATH += $$INCDIR/5.14.2/Src/qtdatavis3d/src/datavisualization/global
-INCLUDEPATH += $$INCDIR/5.14.2/Src/qtdatavis3d/src/datavisualization/engine/
-INCLUDEPATH += $$INCDIR/5.14.2/Src/qtdatavis3d/src/datavisualization/data/
-INCLUDEPATH += $$INCDIR/5.14.2/Src/qtdatavis3d/src/datavisualization/theme
-
-INCLUDEPATH += datavisualizationqml2
-
+INCLUDEPATH += /Users/caress/sandbox/Qt/5.14.2/5.14.2/Src/qtdatavis3d/src/
+INCLUDEPATH += /Users/caress/sandbox/Qt/5.14.2/5.14.2/Src/qtdatavis3d/src/datavisualization/global
+INCLUDEPATH += /Users/caress/sandbox/Qt/5.14.2/5.14.2/Src/qtdatavis3d/src/datavisualization/engine/
+INCLUDEPATH += /Users/caress/sandbox/Qt/5.14.2/5.14.2/Src/qtdatavis3d/src/datavisualization/data/
+INCLUDEPATH += /Users/caress/sandbox/Qt/5.14.2/5.14.2/Src/qtdatavis3d/src/datavisualization/theme
+INCLUDEPATH += /home/oreilly/projects/mb-system/gui-test/mbgrdviz-2/datavisualizationqml2
+INCLUDEPATH += /usr/local/include/gmt
 RESOURCES += qml.qrc
 
 # Additional import path used to resolve QML modules in Qt Creator's code model
@@ -79,4 +77,4 @@ HEADERS += \
     TopographicSeries.h \
     BackEnd.h
 
-unix|win32: LIBS += -lgmt
+unix|win32: LIBS += -L/usr/local/lib -lgmt

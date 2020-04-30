@@ -95,7 +95,7 @@ am__aclocal_m4_deps = $(top_srcdir)/m4/ax_check_compile_flag.m4 \
 	$(top_srcdir)/m4/ax_check_link_flag.m4 \
 	$(top_srcdir)/m4/ax_compare_version.m4 \
 	$(top_srcdir)/m4/ax_cxx_compile_stdcxx.m4 \
-	$(top_srcdir)/m4/ax_have_qt.m4 $(top_srcdir)/m4/libtool.m4 \
+	$(top_srcdir)/m4/ax_have_qt_mb.m4 $(top_srcdir)/m4/libtool.m4 \
 	$(top_srcdir)/m4/ltoptions.m4 $(top_srcdir)/m4/ltsugar.m4 \
 	$(top_srcdir)/m4/ltversion.m4 $(top_srcdir)/m4/lt~obsolete.m4 \
 	$(top_srcdir)/configure.ac
@@ -361,7 +361,9 @@ psdir = @psdir@
 pyexecdir = @pyexecdir@
 pythondir = @pythondir@
 qt_CPPFLAGS = @qt_CPPFLAGS@
+qt_DIR = @qt_DIR@
 qt_LIBS = @qt_LIBS@
+qt_MOC = @qt_MOC@
 sbindir = @sbindir@
 sharedstatedir = @sharedstatedir@
 srcdir = @srcdir@

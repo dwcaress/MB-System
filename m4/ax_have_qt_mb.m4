@@ -1,10 +1,14 @@
 # ===========================================================================
-#        https://www.gnu.org/software/autoconf-archive/ax_have_qt.html
+#        Obtained from:
+#          https://www.gnu.org/software/autoconf-archive/ax_have_qt.html
+#          April 2020
+#
+#        Modified for use with MB-System
 # ===========================================================================
 #
 # SYNOPSIS
 #
-#   AX_HAVE_QT
+#   AX_HAVE_QT_MB
 #
 # DESCRIPTION
 #
@@ -48,6 +52,7 @@
 #
 #   Copyright (c) 2008 Bastiaan Veelo <Bastiaan@Veelo.net>
 #   Copyright (c) 2014 Alex Henrie <alexhenrie24@gmail.com>
+#   Modified 2020 for use with MB-System - David Caress
 #
 #   Copying and distribution of this file, with or without modification, are
 #   permitted in any medium without royalty provided the copyright notice
@@ -56,8 +61,8 @@
 
 #serial 17
 
-AU_ALIAS([BNV_HAVE_QT], [AX_HAVE_QT])
-AC_DEFUN([AX_HAVE_QT],
+AU_ALIAS([BNV_HAVE_QT], [AX_HAVE_QT_MB])
+AC_DEFUN([AX_HAVE_QT_MB],
 [
   AC_REQUIRE([AC_PROG_CXX])
   AC_REQUIRE([AC_PATH_X])

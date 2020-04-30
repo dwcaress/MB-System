@@ -4,12 +4,15 @@ This directory contains the C source files for the libmbio library that MB-Syste
 
 This document first covers the basic use of the libmbio API and then discusses structure of the source files included in this directory.
 
+A document describing libmbio with a focus on how to write a new i/o module can be found at:
+[https://www.mbari.org/wp-content/uploads/2016/03/codinganmb-systemiomodulev4.pdf](https://www.mbari.org/wp-content/uploads/2016/03/codinganmb-systemiomodulev4.pdf)
+
 These source files are copyright by David Caress and Dale Chayes and licensed
 using GPL3 as part of MB-System.
 
---
+-
 ### Table of Contents
---
+-
 
 1. MBIO Description
 	1. Data Terminology
@@ -19,6 +22,7 @@ using GPL3 as part of MB-System.
 		1. Level 3: Buffered Reading and Writing
 		1. Use of the Different I/O Levels
 	1. Header Files
+	2. I/O Modules
 	2. Function Status And Error Codes
 	1. Function Verbosity
 1. Initialization And Closing Functions
@@ -120,13 +124,11 @@ using GPL3 as part of MB-System.
 --
 MBIO (**M**ulti**B**eam **I**nput/**O**utput) is a library
 of functions used for reading and writing swath seafloor mapping
-data files.  MBIO supports a large number of data
+data files. This library enables processing and display
+programs that are independent of particular data formats and provides
+a standard approach to seafloor mapping data i/o.MBIO supports a large number of data
 formats associated with different institutions and different mapping systems, including multibean sonars, sidescan sonars, interferometric sonars, lidar, and seafloor photography.
-The purpose of MBIO is to 
-eenable processing and display
-programs that are independent of particular data formats and to provide
-a standard approach to seafloor mapping data i/o. MBIO is written in C,
-and the functions exposed as the MBIO API are described below.
+MB-System supports these  heterogenous data types by layering a common application programming interface (API) on top of the I/O modules that read and write sonar data in the existing data formats. The MBIO API consists of high level functions that allow applications to open data streams for reading or writing, read and write data records sequentially, to straighforwardly extract and insert the commonly used values, and to expose the complete data representation to access. Although MB-System as a whole includes C, C++, Python, and perl source code, the MBIO library is entirely written in C. 
 
 ### Data Terminology
 
@@ -323,7 +325,409 @@ There are several header files that are included by C or C++ programs calling li
 * mb\_info.h - Defines structures and function prototypes used to store geographic bounds information from metadata (*.inf) files associated with swath data files. This header file is used by programs like mbgrid, mbmosaic, mbeditviz, mbareaclean, and mbvoxelclean.
 * mb\_segy.h - Defines the structures used to store time series data (usually seismic reflection) from files in the SEGY data format.
 
-There are also header files associated with the many supported data formats and the i/o modules used to read and write those formats. For most purposes, programs using libmbio access swath data through the functions described above, and do not directly access data through the structures used to store data in memory by i/o modules. The structure of the i/o modules is described later in this document.
+There are also header files associated with the many supported data formats and the i/o modules used to read and write those formats. For most purposes, programs using libmbio access swath data through the functions described above, and do not directly access data through the structures used to store data in memory by i/o modules. The structure of the i/o modules is described below.
+
+* mb\_absorption.c
+* mb\_access.c
+* mb\_angle.c
+* mb\_buffer.c
+* mb\_check\_info.c
+* mb\_close.c
+* mb\_compare.c
+* mb\_coor\_scale.c
+* mb\_defaults.c
+* mb\_error.c
+* mb\_esf.c
+* mb\_fileio.c
+* mb\_format.c
+* mb\_get.c
+* mb\_get\_all.c
+* mb\_get\_value.c
+* mb\_mem.c
+* mb\_navint.c
+* mb\_platform.c
+* mb\_platform\_math.c
+* mb\_process.c
+* mb\_proj.c
+* mb\_put\_all.c
+* mb\_put\_comment.c
+* mb\_read.c
+* mb\_read\_init.c
+* mb\_read\_ping.c
+* mb\_rt.c
+* mb\_segy.c
+* mb\_spline.c
+* mb\_swap.c
+* mb\_time.c
+* mb\_write\_init.c
+* mb\_write\_ping.c
+
+mb\_config.h
+mb\_define.h
+mb\_format.h
+mb\_info.h
+mb\_io.h
+mb\_process.h
+mb\_segy.h
+mb\_status.h
+mb\_swap.h
+
+
+mbr\_3ddepthp.c
+
+mbr\_3dwisslp.c
+
+mbr\_3dwisslr.c
+
+mbr\_asciixyz.c
+
+mbr\_bchrtunb.c
+mbf\_bchrtunb.h
+
+mbr\_bchrxunb.c
+mbf\_bchrxunb.h
+
+mbr\_cbat8101.c
+mbf\_cbat8101.h
+
+mbr\_cbat9001.c
+mbf\_cbat9001.h
+
+mbr\_dsl120pf.c
+mbf\_dsl120pf.h
+
+mbr\_dsl120sf.c
+mbf\_dsl120sf.h
+
+mbr\_edgjstar.c
+
+mbr\_elmk2unb.c
+mbf\_elmk2unb.h
+
+mbr\_em12darw.c
+mbf\_em12darw.h
+
+mbr\_em12ifrm.c
+mbf\_em12ifrm.h
+
+mbr\_em300mba.c
+
+mbr\_em300raw.c
+
+mbr\_em710mba.c
+
+mbr\_em710raw.c
+
+mbr\_emoldraw.c
+
+mbr\_gsfgenmb.c
+mbf\_gsfgenmb.h
+
+mbr\_hir2rnav.c
+
+mbr\_hs10jams.c
+
+mbr\_hsatlraw.c
+mbf\_hsatlraw.h
+
+mbr\_hsds2lam.c
+
+mbr\_hsds2raw.c
+
+mbr\_hsldedmb.c
+mbf\_hsldedmb.h
+
+mbr\_hsldeoih.c
+mbf\_hsldeoih.h
+
+mbr\_hsmdaraw.c
+mbf\_hsmdaraw.h
+
+mbr\_hsmdldih.c
+mbf\_hsmdldih.h
+
+mbr\_hsunknwn.c
+
+mbr\_hsuricen.c
+mbf\_hsuricen.h
+
+mbr\_hsurivax.c
+
+mbr\_hydrob93.c
+
+mbr\_hypc8101.c
+mbf\_hypc8101.h
+
+mbr\_hysweep1.c
+
+mbr\_image83p.c
+
+mbr\_imagemba.c
+
+mbr\_kemkmall.c
+
+mbr\_l3xseraw.c
+
+mbr\_mbarimb1.c
+
+mbr\_mbarirov.c
+mbf\_mbarirov.h
+
+mbr\_mbarrov2.c
+mbf\_mbarrov2.h
+
+mbr\_mbldeoih.c
+
+mbr\_mbnetcdf.c
+
+mbr\_mbpronav.c
+mbf\_mbpronav.h
+
+mbr\_mgd77dat.c
+mbf_mgd77dat.h
+
+mbr_mgd77tab.c
+
+mbr_mgd77txt.c
+
+mbr_mr1aldeo.c
+mbf_mr1aldeo.h
+
+mbr_mr1bldeo.c
+mbf_mr1bldeo.h
+
+mbr_mr1prhig.c
+mbf_mr1prhig.h
+
+mbr_mr1prvr2.c
+
+mbr_mstiffss.c
+mbf_mstiffss.h
+
+mbr_nvnetcdf.c
+
+mbr_oicgeoda.c
+mbf_oicgeoda.h
+
+mbr_oicmbari.c
+mbf_oicmbari.h
+
+mbr_omghdcsj.c
+mbf_omghdcsj.h
+
+mbr_photgram.c
+
+mbr_reson7k3.c
+
+mbr_reson7kr.c
+
+mbr_samesurf.c
+
+mbr_segysegy.c
+
+mbr_swplssxi.c
+
+mbr_swplssxp.c
+
+mbr_tempform.c
+
+mbr_wasspenl.c
+
+mbr_xtfb1624.c
+
+mbr_xtfr8101.c
+mbf_xtfr8101.h
+
+
+
+
+mbsys_3datdepthlidar.c
+mbsys_3datdepthlidar.h
+
+mbsys_3ddwissl.c
+mbsys_3ddwissl.h
+
+mbsys_atlas.c
+mbsys_atlas.h
+
+mbsys_benthos.c
+mbsys_benthos.h
+
+mbsys_dsl.c
+mbsys_dsl.h
+
+mbsys_elac.c
+mbsys_elac.h
+
+mbsys_elacmk2.c
+mbsys_elacmk2.h
+
+mbsys_gsf.c
+mbsys_gsf.h
+
+mbsys_hdcs.c
+mbsys_hdcs.h
+
+mbsys_hs10.c
+mbsys_hs10.h
+
+mbsys_hsds.c
+mbsys_hsds.h
+
+mbsys_hsmd.c
+mbsys_hsmd.h
+
+mbsys_hysweep.c
+mbsys_hysweep.h
+
+mbsys_image83p.c
+mbsys_image83p.h
+
+mbsys_jstar.c
+mbsys_jstar.h
+mbsys_jstar2.h
+
+mbsys_kmbes.c
+mbsys_kmbes.h
+
+mbsys_ldeoih.c
+mbsys_ldeoih.h
+
+mbsys_mr1.c
+mbsys_mr1.h
+
+mbsys_mr1b.c
+mbsys_mr1b.h
+
+mbsys_mr1v2001.c
+mbsys_mr1v2001.h
+
+mbsys_mstiff.c
+mbsys_mstiff.h
+
+mbsys_navnetcdf.c
+mbsys_navnetcdf.h
+
+mbsys_netcdf.c
+mbsys_netcdf.h
+
+mbsys_oic.c
+mbsys_oic.h
+
+mbsys_reson.c
+mbsys_reson.h
+
+mbsys_reson7k.c
+mbsys_reson7k.h
+
+mbsys_reson7k3.c
+mbsys_reson7k3.h
+
+mbsys_reson8k.c
+mbsys_reson8k.h
+
+
+* **Data System "SB"**
+	* SeaBeam Classic multibeam
+		* mbsys_sb.c
+		* mbsys_sb.h
+	* Format SBSIOMRG 11
+		* mbr_sbsiomrg.c
+		* mbf_sbsiomrg.h
+	* Format SBSIOCEN 12
+		* mbr_sbsiocen.c
+		* mbf_sbsiocen.h
+	* Format SBSIOLSI 13
+		* mbr_sbsiolsi.c
+		* mbf_sbsiolsi.h
+	* Format SBURICEN 14
+		* mbr_sburicen.c
+		* mbf_sburicen.h
+	* Format SBURIVAX 15
+		* mbr_sburivax.c
+	* Format SBSIOSWB 16
+		* mbr_sbsioswb.c
+		* mbf_sbsioswb.h
+	* Format SBIFREMR 17
+		* mbr_sbifremr.c
+		* mbf_sbifremr.h
+		
+* **Data System "HSDS"**
+	* Atlas Hydrosweep DS multibeam
+		* mbsys_hsds.c
+		* mbsys_hsds.h
+
+mbr_sb2000sb.c
+
+mbr_sb2000ss.c
+
+mbr_sb2100bi.c
+
+mbr_sb2100rw.c
+mbf_sb2100rw.h
+
+mbf_sb2120xs.h
+
+
+
+
+
+
+
+
+mbsys_sb2000.c
+mbsys_sb2000.h
+
+mbsys_sb2100.c
+mbsys_sb2100.h
+
+mbsys_simrad.c
+mbsys_simrad.h
+
+mbsys_simrad2.c
+mbsys_simrad2.h
+
+mbsys_simrad3.c
+mbsys_simrad3.h
+
+mbsys_singlebeam.c
+mbsys_singlebeam.h
+
+mbsys_stereopair.c
+mbsys_stereopair.h
+
+mbsys_surf.c
+mbsys_surf.h
+
+mbsys_swathplus.c
+mbsys_swathplus.h
+
+mbsys_templatesystem.c
+mbsys_templatesystem.h
+
+mbsys_wassp.c
+mbsys_wassp.h
+
+mbsys_xse.c
+mbsys_xse.h
+
+projections.h
+
+### I/O Modules
+In order to support as broad a range of mapping data as possible without losing information, and to allow for advances in the remote sensing technology we use, we have architected MB-System to read and write data in the existing formats and to store those data internally with all information preserved. The consequence is that the MB-System input and output capability is isolated to this modular library (MBIO) supporting dozens of different seafloor mapping data formats. Each unique format is associated with an integer identifier number and with functions that read the data into an internal representation, or data system, and write from that representation. A second level of modularity includes the many different data systems that are supported; each data system is defined by a structure used to store the data and a set of functions that extract commonly used values from, or insert values into, that structure.  
+
+In the terminology of this document, each MBIO I/O module consists of a single data system and at least one data format. Each data system includes both a structure to store the data and functions that map commonly used values to and from that structure. The data format includes functions that read and write the data to and from the data structure of the associated data system. The data systems are defined by two source files each: a header file with a name of the form mbsys\_XXX.h that defines the structure used to store the data and a C file with a name of the form mbsys\_XXX.c that includes all of the functions used to extract information from or insert information into the storage structure. Here "XXX" is the data system name, which may be any number of characters. The data formats are defined in C files with names of the form mbr_YYYYYYYY.c that include the functions to read and write data files in that format, translating the data into and out of the representation structure in mbsys\_XXX.h. Here "YYYYYYYY" is the data format name, which is always eight characters long.
+
+As an example, the Kongsberg third generation multibeam data format is supported with two data formats, the raw or vendor format logged by the sonars, and an extended format defined for MB-System processing. The data system name is "simrad3", and the format names and numeric id's are "em710raw" and 58 for the vendor format and "em710mba" and 59 for the extended format. The source files associated with these two formats are:
+
+* mbsys_simrad3.h
+* mbsys_simrad3.c
+* mbr_em710raw.c
+* mbr_em710mba.c
+
+In some cases, data formats include structure definitions used while translating data from the files to and from the data system representation; these structures are found in files with names of the form mbf_YYYYYYYY.h.
+
+Several data formats depend on lower level libraries such as XDR or NetCDF for i/o. Others depend on high level libraries such Generic Sensor Format (GSF) or BSIO that are included in separate source directories within the MB-System package. 
 
 ### Function Status And Error Codes
 All of the MBIO functions return an integer status value with the  convention that:
@@ -367,19 +771,19 @@ suite of possible error values and the associated error messages are:
 * error = 14:    "Invalid system id - this should not happen!"
 * error = 15:    "This data file is not in the specified format!"
 
-In  general,  programs  should treat negative error values as non-fatal
-(reading and writing can continue) and positive error values  as  fatal
+In general, programs should treat negative error values as non-fatal
+(reading and writing can continue) and positive error values as fatal
 (the data files should be closed and the program terminated).
 
 ### Function Verbosity
 All of the MBIO functions are passed a verbose parameter which controls
-how much debugging information is output to standard error.  If verbose
-is  0  or  1, the MBIO functions will be silent.  If verbose is 2, then
-each function will output information  as  it  is  entered  and  as  it
+how much debugging information is output to standard error. If verbose
+is 0 or 1, the MBIO functions will be silent. If verbose is 2, then
+each function will output information as it is entered and as it
 returns,  along  with the parameter values passed into and returned out
-of the function.  Greater  values  of  verbose  will  cause  additional
-information  to  be  output, including values at various stages of data
-processing during read and  write  operations.   In  general,  programs
+of the function.  Greater values of verbose will cause additional
+information to be output, including values at various stages of data
+processing during read and write operations.  In general, programs
 using MBIO functions should adopt the following verbosity conventions:
 
 * verbose = 0: "silent" or near-"silent" execution
@@ -428,15 +832,15 @@ The format identifier format specifies which of the supported data for-
 mats is being read or written;  the  currently  supported  formats  are
 listed in the "SUPPORTED FORMATS" section.
 
-The  pings  parameter  determines whether and how pings are averaged as
-part of data input.  This parameter  is  used  only  by  the  functions
+The pings parameter determines whether and how pings are averaged as
+part of data input.  This parameter is used only by the functions
 mb\_read and mb\_get; mb\_get\_all and mb\_buffer\_load do not average pings.
 If pings = 1, then no ping averaging will be done and  each  ping  read
 will be returned unaltered by the reading function.  If pings > 1, then
 the navigation and beam data for pings pings will  be  read,  averaged,
 and  returned  as  the  data for a single ping.  If pings = 0, then the
 ping averaging will be varied so that the along-track distance  between
-averaged  pings  is  as  close as possible to the across-track distance
+averaged  pings is as close as possible to the across-track distance
 between beams.
 
 The lonflip paramenter determines the range in which  longitude  values
