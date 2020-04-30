@@ -137,13 +137,23 @@ ApplicationWindow {
             MenuSeparator {}
             Menu {
                 title: "Color table"
-                Action {checkable: true; checked: true; text: qsTr("Haxby"); ActionGroup.group: colorActions }
-                Action {checkable: true; text: qsTr("Bright rainbow"); ActionGroup.group: colorActions}
-                Action {checkable: true; text: qsTr("Muted rainbow"); ActionGroup.group: colorActions }
+                Action {checkable: true; checked: true; text: qsTr("Haxby"); ActionGroup.group: colorActions
+                  onTriggered: { surface3D.theme.baseGradients=[haxbyGradient] }
+                }
+
+		Action {checkable: true; text: qsTr("Bright rainbow"); ActionGroup.group: colorActions
+                  onTriggered: { surface3D.theme.baseGradients=[rainbowGradient] }
+		}
+
+		Action {checkable: true; text: qsTr("Muted rainbow"); ActionGroup.group: colorActions }
                 Action {checkable: true; text: qsTr("Grayscale"); ActionGroup.group: colorActions }
                 Action {checkable: true; text: qsTr("Flat gray"); ActionGroup.group: colorActions }
-                Action {checkable: true; text: qsTr("Sealevel1"); ActionGroup.group: colorActions }
-                Action {checkable: true; text: qsTr("Sealevel2"); ActionGroup.group: colorActions }
+		
+                Action {checkable: true; text: qsTr("Sealevel-1"); ActionGroup.group: colorActions
+                  onTriggered: { surface3D.theme.baseGradients=[sealevel1Gradient] }
+                }
+
+                Action {checkable: true; text: qsTr("Sealevel-2"); ActionGroup.group: colorActions }
             }
         }
 
@@ -262,6 +272,34 @@ ApplicationWindow {
                 anchors.fill: parent
                 objectName: "surface3D"
                 id: surface3D
+
+            	theme: Theme3D {
+                  type: Theme3D.ThemeQt
+                  labelBorderEnabled: false
+                  font.pointSize: 35
+                  labelBackgroundEnabled: true
+		  lightStrength: 3.5
+		
+		  colorStyle: Theme3D.ColorStyleRangeGradient
+
+		  baseGradients: [haxbyGradient]
+
+                }
+
+
+             	Surface3DSeries {
+                    objectName: "surface3DSeries"
+                    itemLabelFormat: "Pop density at (@xLabel N, @zLabel E): @yLabel"
+                    ItemModelSurfaceDataProxy {
+                        itemModel: dataModel
+                        // Mapping model roles to surface series rows, columns, and values.
+                        rowRole: "longitude"
+                        columnRole: "latitude"
+                        yPosRole: "pop_density"
+                    }
+                }
+
+      
 
                 // Clicking on specific axis and then dragging on that axis
                 // translates surace along that axis
@@ -402,4 +440,72 @@ ApplicationWindow {
         Component.onCompleted: visible = false
     }
 
+
+      ListModel {
+                id: dataModel
+                ListElement{ longitude: "20"; latitude: "10"; pop_density: "4.75"; }
+                ListElement{ longitude: "21"; latitude: "10"; pop_density: "3.00"; }
+                ListElement{ longitude: "22"; latitude: "10"; pop_density: "1.24"; }
+                ListElement{ longitude: "23"; latitude: "10"; pop_density: "2.53"; }
+                ListElement{ longitude: "20"; latitude: "11"; pop_density: "2.55"; }
+                ListElement{ longitude: "21"; latitude: "11"; pop_density: "2.03"; }
+                ListElement{ longitude: "22"; latitude: "11"; pop_density: "3.46"; }
+                ListElement{ longitude: "23"; latitude: "11"; pop_density: "5.12"; }
+                ListElement{ longitude: "20"; latitude: "12"; pop_density: "1.37"; }
+                ListElement{ longitude: "21"; latitude: "12"; pop_density: "2.98"; }
+                ListElement{ longitude: "22"; latitude: "12"; pop_density: "3.33"; }
+                ListElement{ longitude: "23"; latitude: "12"; pop_density: "3.23"; }
+                ListElement{ longitude: "20"; latitude: "13"; pop_density: "4.34"; }
+                ListElement{ longitude: "21"; latitude: "13"; pop_density: "3.54"; }
+                ListElement{ longitude: "22"; latitude: "13"; pop_density: "1.65"; }
+                ListElement{ longitude: "23"; latitude: "13"; pop_density: "2.67"; }
+            }
+
+
+  ColorGradient {
+     id: duskGradient
+     ColorGradientStop { position: 0.0; color: "darkslategray" }
+     ColorGradientStop { id: middleGradient; position: 0.5; color: "peru" }
+     ColorGradientStop { position: 1.0; color: "red" }
+   }
+
+  ColorGradient {
+     id: rainbowGradient
+     ColorGradientStop { position: 0.2; color: "blue" }
+     ColorGradientStop { position: 0.4; color: "green" }
+     ColorGradientStop { position: 0.6; color: "yellow" }
+     ColorGradientStop { position: 0.8; color: "orange" }          
+     ColorGradientStop { position: 1.0; color: "red" }
+   }
+
+   ColorGradient {
+     id: haxbyGradient
+     ColorGradientStop { position: 0.100; color: "#2539AF"}
+     ColorGradientStop { position: 0.200; color: "#287FFB"}
+     ColorGradientStop { position: 0.300; color: "#32BEFF"}
+     ColorGradientStop { position: 0.400; color: "#6AEBFF"}
+     ColorGradientStop { position: 0.500; color: "#8AECAE"}
+     ColorGradientStop { position: 0.600; color: "#CDFFA2"}
+     ColorGradientStop { position: 0.700; color: "#F0EC79"}
+     ColorGradientStop { position: 0.800; color: "#FFBD57"}
+     ColorGradientStop { position: 0.900; color: "#FFA144"}
+     ColorGradientStop { position: 1.000; color: "#FFBA85"}
+     ColorGradientStop { position: 1.100; color: "#F2F2F2"}
+   }
+
+   ColorGradient {
+     id: sealevel1Gradient
+     ColorGradientStop { position: 0.100; color: "#C89628"}
+     ColorGradientStop { position: 0.200; color: "#CDA030"}
+     ColorGradientStop { position: 0.300; color: "#D2AA38"}
+     ColorGradientStop { position: 0.400; color: "#D7B440"}
+     ColorGradientStop { position: 0.500; color: "#DCBE48"}
+     ColorGradientStop { position: 0.600; color: "#E1C850"}
+     ColorGradientStop { position: 0.700; color: "#E6D258"}
+     ColorGradientStop { position: 0.800; color: "#EBDC60"}
+     ColorGradientStop { position: 0.900; color: "#F0E668"}
+     ColorGradientStop { position: 1.000; color: "#F5F070"}
+     ColorGradientStop { position: 1.100; color: "#FAFA78"}
+   }
 }
+
