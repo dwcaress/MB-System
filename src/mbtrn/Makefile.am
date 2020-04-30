@@ -13,6 +13,7 @@ include_HEADERS = \
         mframe/src/mlog.h \
         mframe/src/mlist.h \
         mframe/src/mstats.h \
+        mframe/src/mkvconf.h \
         utils/mconfig.h \
         utils/mb1_msg.h \
         utils/mb71_msg.h \
@@ -46,6 +47,7 @@ libmframe_la_SOURCES = mframe/src/mframe.c \
         mframe/src/mstats.c \
         mframe/src/mswap.c \
         mframe/src/mutils.c \
+        mframe/src/mkvconf.c \
         utils/mconfig.c
 
 libmframe_la_LIBADD =
