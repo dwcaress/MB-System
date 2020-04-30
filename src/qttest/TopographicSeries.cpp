@@ -47,7 +47,7 @@ TopographicSeries::TopographicSeries()
 
     setDrawMode(QSurface3DSeries::DrawSurface);
     setFlatShadingEnabled(true);
-    toggleColorMap(true);
+    // toggleColorMap(true);
     // setBaseColor(Qt::white);
 }
 
@@ -177,3 +177,6 @@ void TopographicSeries::toggleColorMap(bool on) {
         setBaseColor(Qt::white);
     }
 }
+
+
+
