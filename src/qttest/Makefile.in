@@ -96,7 +96,7 @@ am__aclocal_m4_deps = $(top_srcdir)/m4/ax_check_compile_flag.m4 \
 	$(top_srcdir)/m4/ax_check_link_flag.m4 \
 	$(top_srcdir)/m4/ax_compare_version.m4 \
 	$(top_srcdir)/m4/ax_cxx_compile_stdcxx.m4 \
-	$(top_srcdir)/m4/ax_have_qt.m4 $(top_srcdir)/m4/libtool.m4 \
+	$(top_srcdir)/m4/ax_have_qt_mb.m4 $(top_srcdir)/m4/libtool.m4 \
 	$(top_srcdir)/m4/ltoptions.m4 $(top_srcdir)/m4/ltsugar.m4 \
 	$(top_srcdir)/m4/ltversion.m4 $(top_srcdir)/m4/lt~obsolete.m4 \
 	$(top_srcdir)/configure.ac
@@ -125,7 +125,20 @@ am_mbqttest_OBJECTS =  \
 	datavisualizationqml2/enumtostringmap.$(OBJEXT) \
 	datavisualizationqml2/glstatestore.$(OBJEXT) main.$(OBJEXT) \
 	MyTimer.$(OBJEXT) TopographicSeries.$(OBJEXT) \
-	BackEnd.$(OBJEXT)
+	BackEnd.$(OBJEXT) moc_BackEnd.$(OBJEXT) moc_MyTimer.$(OBJEXT) \
+	moc_TopographicSeries.$(OBJEXT) \
+	moc_abstractdeclarative_p.$(OBJEXT) \
+	moc_colorgradient_p.$(OBJEXT) \
+	moc_datavisualizationqml2_plugin.$(OBJEXT) \
+	moc_declarativebars_p.$(OBJEXT) \
+	moc_declarativecolor_p.$(OBJEXT) \
+	moc_declarativerendernode_p.$(OBJEXT) \
+	moc_declarativescatter_p.$(OBJEXT) \
+	moc_declarativescene_p.$(OBJEXT) \
+	moc_declarativeseries_p.$(OBJEXT) \
+	moc_declarativesurface_p.$(OBJEXT) \
+	moc_declarativetheme_p.$(OBJEXT) moc_glstatestore_p.$(OBJEXT) \
+	qrc_qml.$(OBJEXT)
 mbqttest_OBJECTS = $(am_mbqttest_OBJECTS)
 mbqttest_LDADD = $(LDADD)
 AM_V_lt = $(am__v_lt_@AM_V@)
@@ -149,6 +162,20 @@ depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__maybe_remake_depfiles = depfiles
 am__depfiles_remade = ./$(DEPDIR)/BackEnd.Po ./$(DEPDIR)/MyTimer.Po \
 	./$(DEPDIR)/TopographicSeries.Po ./$(DEPDIR)/main.Po \
+	./$(DEPDIR)/moc_BackEnd.Po ./$(DEPDIR)/moc_MyTimer.Po \
+	./$(DEPDIR)/moc_TopographicSeries.Po \
+	./$(DEPDIR)/moc_abstractdeclarative_p.Po \
+	./$(DEPDIR)/moc_colorgradient_p.Po \
+	./$(DEPDIR)/moc_datavisualizationqml2_plugin.Po \
+	./$(DEPDIR)/moc_declarativebars_p.Po \
+	./$(DEPDIR)/moc_declarativecolor_p.Po \
+	./$(DEPDIR)/moc_declarativerendernode_p.Po \
+	./$(DEPDIR)/moc_declarativescatter_p.Po \
+	./$(DEPDIR)/moc_declarativescene_p.Po \
+	./$(DEPDIR)/moc_declarativeseries_p.Po \
+	./$(DEPDIR)/moc_declarativesurface_p.Po \
+	./$(DEPDIR)/moc_declarativetheme_p.Po \
+	./$(DEPDIR)/moc_glstatestore_p.Po ./$(DEPDIR)/qrc_qml.Po \
 	datavisualizationqml2/$(DEPDIR)/abstractdeclarative.Po \
 	datavisualizationqml2/$(DEPDIR)/colorgradient.Po \
 	datavisualizationqml2/$(DEPDIR)/datavisualizationqml2_plugin.Po \
@@ -418,7 +445,9 @@ psdir = @psdir@
 pyexecdir = @pyexecdir@
 pythondir = @pythondir@
 qt_CPPFLAGS = @qt_CPPFLAGS@
+qt_DIR = @qt_DIR@
 qt_LIBS = @qt_LIBS@
+qt_MOC = @qt_MOC@
 sbindir = @sbindir@
 sharedstatedir = @sharedstatedir@
 srcdir = @srcdir@
@@ -446,27 +475,54 @@ include_HEADERS = BackEnd.h \
 
 AM_CFLAGS = ${libgmt_CFLAGS} ${libnetcdf_CFLAGS} ${qt_CPPFLAGS}
 AM_CPPFLAGS = ${qt_CPPFLAGS} ${libgmt_CPPFLAGS} ${libnetcdf_CPPFLAGS}
-AM_LDFLAGS = ${qt_LIBS}
+AM_LDFLAGS = -Wl,-rpath,${qt_DIR} ${qt_LIBS}
 mbqttest_SOURCES = datavisualizationqml2/abstractdeclarative.cpp \
-	mbqttest_SOURCES += datavisualizationqml2/colorgradient.cpp \
-	mbqttest_SOURCES += \
+	datavisualizationqml2/colorgradient.cpp \
 	datavisualizationqml2/datavisualizationqml2_plugin.cpp \
-	mbqttest_SOURCES += datavisualizationqml2/declarativebars.cpp \
-	mbqttest_SOURCES += datavisualizationqml2/declarativecolor.cpp \
-	mbqttest_SOURCES += \
+	datavisualizationqml2/declarativebars.cpp \
+	datavisualizationqml2/declarativecolor.cpp \
 	datavisualizationqml2/declarativerendernode.cpp \
-	mbqttest_SOURCES += \
-	datavisualizationqml2/declarativescatter.cpp mbqttest_SOURCES \
-	+= datavisualizationqml2/declarativescene.cpp mbqttest_SOURCES \
-	+= datavisualizationqml2/declarativeseries.cpp \
-	mbqttest_SOURCES += \
-	datavisualizationqml2/declarativesurface.cpp mbqttest_SOURCES \
-	+= datavisualizationqml2/declarativetheme.cpp mbqttest_SOURCES \
-	+= datavisualizationqml2/enumtostringmap.cpp mbqttest_SOURCES \
-	+= datavisualizationqml2/glstatestore.cpp mbqttest_SOURCES += \
-	main.cpp mbqttest_SOURCES += MyTimer.cpp mbqttest_SOURCES += \
-	TopographicSeries.cpp mbqttest_SOURCES += BackEnd.cpp
-all: all-am
+	datavisualizationqml2/declarativescatter.cpp \
+	datavisualizationqml2/declarativescene.cpp \
+	datavisualizationqml2/declarativeseries.cpp \
+	datavisualizationqml2/declarativesurface.cpp \
+	datavisualizationqml2/declarativetheme.cpp \
+	datavisualizationqml2/enumtostringmap.cpp \
+	datavisualizationqml2/glstatestore.cpp main.cpp MyTimer.cpp \
+	TopographicSeries.cpp BackEnd.cpp moc_BackEnd.cpp \
+	moc_MyTimer.cpp moc_TopographicSeries.cpp \
+	moc_abstractdeclarative_p.cpp moc_colorgradient_p.cpp \
+	moc_datavisualizationqml2_plugin.cpp moc_declarativebars_p.cpp \
+	moc_declarativecolor_p.cpp moc_declarativerendernode_p.cpp \
+	moc_declarativescatter_p.cpp moc_declarativescene_p.cpp \
+	moc_declarativeseries_p.cpp moc_declarativesurface_p.cpp \
+	moc_declarativetheme_p.cpp moc_glstatestore_p.cpp qrc_qml.cpp
+BUILT_SOURCES = moc_BackEnd.cpp moc_MyTimer.cpp \
+	moc_TopographicSeries.cpp moc_abstractdeclarative_p.cpp \
+	moc_colorgradient_p.cpp moc_datavisualizationqml2_plugin.cpp \
+	moc_declarativebars_p.cpp moc_declarativecolor_p.cpp \
+	moc_declarativerendernode_p.cpp moc_declarativescatter_p.cpp \
+	moc_declarativescene_p.cpp moc_declarativeseries_p.cpp \
+	moc_declarativesurface_p.cpp moc_declarativetheme_p.cpp \
+	moc_glstatestore_p.cpp qrc_qml.cpp moc_predefs.h
+CLEANFILES = moc_BackEnd.cpp moc_MyTimer.cpp moc_TopographicSeries.cpp \
+	moc_abstractdeclarative_p.cpp moc_colorgradient_p.cpp \
+	moc_datavisualizationqml2_plugin.cpp moc_declarativebars_p.cpp \
+	moc_declarativecolor_p.cpp moc_declarativerendernode_p.cpp \
+	moc_declarativescatter_p.cpp moc_declarativescene_p.cpp \
+	moc_declarativeseries_p.cpp moc_declarativesurface_p.cpp \
+	moc_declarativetheme_p.cpp moc_glstatestore_p.cpp qrc_qml.cpp \
+	moc_predefs.h
+DISTCLEANFILES = moc_BackEnd.cpp moc_MyTimer.cpp \
+	moc_TopographicSeries.cpp moc_abstractdeclarative_p.cpp \
+	moc_colorgradient_p.cpp moc_datavisualizationqml2_plugin.cpp \
+	moc_declarativebars_p.cpp moc_declarativecolor_p.cpp \
+	moc_declarativerendernode_p.cpp moc_declarativescatter_p.cpp \
+	moc_declarativescene_p.cpp moc_declarativeseries_p.cpp \
+	moc_declarativesurface_p.cpp moc_declarativetheme_p.cpp \
+	moc_glstatestore_p.cpp qrc_qml.cpp moc_predefs.h
+all: $(BUILT_SOURCES)
+	$(MAKE) $(AM_MAKEFLAGS) all-am
 
 .SUFFIXES:
 .SUFFIXES: .cpp .lo .o .obj
@@ -609,6 +665,22 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/MyTimer.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/TopographicSeries.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/main.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/moc_BackEnd.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/moc_MyTimer.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/moc_TopographicSeries.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/moc_abstractdeclarative_p.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/moc_colorgradient_p.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/moc_datavisualizationqml2_plugin.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/moc_declarativebars_p.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/moc_declarativecolor_p.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/moc_declarativerendernode_p.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/moc_declarativescatter_p.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/moc_declarativescene_p.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/moc_declarativeseries_p.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/moc_declarativesurface_p.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/moc_declarativetheme_p.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/moc_glstatestore_p.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/qrc_qml.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@datavisualizationqml2/$(DEPDIR)/abstractdeclarative.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@datavisualizationqml2/$(DEPDIR)/colorgradient.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@datavisualizationqml2/$(DEPDIR)/datavisualizationqml2_plugin.Po@am__quote@ # am--include-marker
@@ -732,13 +804,15 @@ cscopelist-am: $(am__tagged_files)
 distclean-tags:
 	-rm -f TAGS ID GTAGS GRTAGS GSYMS GPATH tags
 check-am: all-am
-check: check-am
+check: $(BUILT_SOURCES)
+	$(MAKE) $(AM_MAKEFLAGS) check-am
 all-am: Makefile $(PROGRAMS) $(HEADERS)
 installdirs:
 	for dir in "$(DESTDIR)$(bindir)" "$(DESTDIR)$(includedir)"; do \
 	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
 	done
-install: install-am
+install: $(BUILT_SOURCES)
+	$(MAKE) $(AM_MAKEFLAGS) install-am
 install-exec: install-exec-am
 install-data: install-data-am
 uninstall: uninstall-am
@@ -760,16 +834,19 @@ install-strip:
 mostlyclean-generic:
 
 clean-generic:
+	-test -z "$(CLEANFILES)" || rm -f $(CLEANFILES)
 
 distclean-generic:
 	-test -z "$(CONFIG_CLEAN_FILES)" || rm -f $(CONFIG_CLEAN_FILES)
 	-test . = "$(srcdir)" || test -z "$(CONFIG_CLEAN_VPATH_FILES)" || rm -f $(CONFIG_CLEAN_VPATH_FILES)
 	-rm -f datavisualizationqml2/$(DEPDIR)/$(am__dirstamp)
 	-rm -f datavisualizationqml2/$(am__dirstamp)
+	-test -z "$(DISTCLEANFILES)" || rm -f $(DISTCLEANFILES)
 
 maintainer-clean-generic:
 	@echo "This command is intended for maintainers to use"
 	@echo "it deletes files that may require special tools to rebuild."
+	-test -z "$(BUILT_SOURCES)" || rm -f $(BUILT_SOURCES)
 clean: clean-am
 
 clean-am: clean-binPROGRAMS clean-generic clean-libtool mostlyclean-am
@@ -779,6 +856,22 @@ distclean: distclean-am
 	-rm -f ./$(DEPDIR)/MyTimer.Po
 	-rm -f ./$(DEPDIR)/TopographicSeries.Po
 	-rm -f ./$(DEPDIR)/main.Po
+	-rm -f ./$(DEPDIR)/moc_BackEnd.Po
+	-rm -f ./$(DEPDIR)/moc_MyTimer.Po
+	-rm -f ./$(DEPDIR)/moc_TopographicSeries.Po
+	-rm -f ./$(DEPDIR)/moc_abstractdeclarative_p.Po
+	-rm -f ./$(DEPDIR)/moc_colorgradient_p.Po
+	-rm -f ./$(DEPDIR)/moc_datavisualizationqml2_plugin.Po
+	-rm -f ./$(DEPDIR)/moc_declarativebars_p.Po
+	-rm -f ./$(DEPDIR)/moc_declarativecolor_p.Po
+	-rm -f ./$(DEPDIR)/moc_declarativerendernode_p.Po
+	-rm -f ./$(DEPDIR)/moc_declarativescatter_p.Po
+	-rm -f ./$(DEPDIR)/moc_declarativescene_p.Po
+	-rm -f ./$(DEPDIR)/moc_declarativeseries_p.Po
+	-rm -f ./$(DEPDIR)/moc_declarativesurface_p.Po
+	-rm -f ./$(DEPDIR)/moc_declarativetheme_p.Po
+	-rm -f ./$(DEPDIR)/moc_glstatestore_p.Po
+	-rm -f ./$(DEPDIR)/qrc_qml.Po
 	-rm -f datavisualizationqml2/$(DEPDIR)/abstractdeclarative.Po
 	-rm -f datavisualizationqml2/$(DEPDIR)/colorgradient.Po
 	-rm -f datavisualizationqml2/$(DEPDIR)/datavisualizationqml2_plugin.Po
@@ -841,6 +934,22 @@ maintainer-clean: maintainer-clean-am
 	-rm -f ./$(DEPDIR)/MyTimer.Po
 	-rm -f ./$(DEPDIR)/TopographicSeries.Po
 	-rm -f ./$(DEPDIR)/main.Po
+	-rm -f ./$(DEPDIR)/moc_BackEnd.Po
+	-rm -f ./$(DEPDIR)/moc_MyTimer.Po
+	-rm -f ./$(DEPDIR)/moc_TopographicSeries.Po
+	-rm -f ./$(DEPDIR)/moc_abstractdeclarative_p.Po
+	-rm -f ./$(DEPDIR)/moc_colorgradient_p.Po
+	-rm -f ./$(DEPDIR)/moc_datavisualizationqml2_plugin.Po
+	-rm -f ./$(DEPDIR)/moc_declarativebars_p.Po
+	-rm -f ./$(DEPDIR)/moc_declarativecolor_p.Po
+	-rm -f ./$(DEPDIR)/moc_declarativerendernode_p.Po
+	-rm -f ./$(DEPDIR)/moc_declarativescatter_p.Po
+	-rm -f ./$(DEPDIR)/moc_declarativescene_p.Po
+	-rm -f ./$(DEPDIR)/moc_declarativeseries_p.Po
+	-rm -f ./$(DEPDIR)/moc_declarativesurface_p.Po
+	-rm -f ./$(DEPDIR)/moc_declarativetheme_p.Po
+	-rm -f ./$(DEPDIR)/moc_glstatestore_p.Po
+	-rm -f ./$(DEPDIR)/qrc_qml.Po
 	-rm -f datavisualizationqml2/$(DEPDIR)/abstractdeclarative.Po
 	-rm -f datavisualizationqml2/$(DEPDIR)/colorgradient.Po
 	-rm -f datavisualizationqml2/$(DEPDIR)/datavisualizationqml2_plugin.Po
@@ -872,7 +981,7 @@ ps-am:
 
 uninstall-am: uninstall-binPROGRAMS uninstall-includeHEADERS
 
-.MAKE: install-am install-strip
+.MAKE: all check install install-am install-strip
 
 .PHONY: CTAGS GTAGS TAGS all all-am am--depfiles check check-am clean \
 	clean-binPROGRAMS clean-generic clean-libtool cscopelist-am \
@@ -891,6 +1000,74 @@ uninstall-am: uninstall-binPROGRAMS uninstall-includeHEADERS
 
 .PRECIOUS: Makefile
 
+
+moc_BackEnd.cpp: BackEnd.h
+	make -f Makefile.qmake compiler_rcc_make_all
+	make -f Makefile.qmake compiler_moc_header_make_all
+
+moc_MyTimer.cpp: MyTimer.h
+	make -f Makefile.qmake compiler_rcc_make_all
+	make -f Makefile.qmake compiler_moc_header_make_all
+
+moc_TopographicSeries.cpp: TopographicSeries.h
+	make -f Makefile.qmake compiler_rcc_make_all
+	make -f Makefile.qmake compiler_moc_header_make_all
+
+moc_abstractdeclarative_p.cpp: datavisualizationqml2/abstractdeclarative_p.h
+	make -f Makefile.qmake compiler_rcc_make_all
+	make -f Makefile.qmake compiler_moc_header_make_all
+
+moc_colorgradient_p.cpp: datavisualizationqml2/colorgradient_p.h
+	make -f Makefile.qmake compiler_rcc_make_all
+	make -f Makefile.qmake compiler_moc_header_make_all
+
+moc_datavisualizationqml2_plugin.cpp: datavisualizationqml2/datavisualizationqml2_plugin.h
+	make -f Makefile.qmake compiler_rcc_make_all
+	make -f Makefile.qmake compiler_moc_header_make_all
+
+moc_declarativebars_p.cpp: datavisualizationqml2/declarativebars_p.h
+	make -f Makefile.qmake compiler_rcc_make_all
+	make -f Makefile.qmake compiler_moc_header_make_all
+
+moc_declarativecolor_p.cpp: datavisualizationqml2/declarativecolor_p.h
+	make -f Makefile.qmake compiler_rcc_make_all
+	make -f Makefile.qmake compiler_moc_header_make_all
+
+moc_declarativerendernode_p.cpp: datavisualizationqml2/declarativerendernode_p.h
+	make -f Makefile.qmake compiler_rcc_make_all
+	make -f Makefile.qmake compiler_moc_header_make_all
+
+moc_declarativescatter_p.cpp: datavisualizationqml2/declarativescatter_p.h
+	make -f Makefile.qmake compiler_rcc_make_all
+	make -f Makefile.qmake compiler_moc_header_make_all
+
+moc_declarativescene_p.cpp: datavisualizationqml2/declarativescene_p.h
+	make -f Makefile.qmake compiler_rcc_make_all
+	make -f Makefile.qmake compiler_moc_header_make_all
+
+moc_declarativeseries_p.cpp: datavisualizationqml2/declarativeseries_p.h
+	make -f Makefile.qmake compiler_rcc_make_all
+	make -f Makefile.qmake compiler_moc_header_make_all
+
+moc_declarativesurface_p.cpp: datavisualizationqml2/declarativesurface_p.h
+	make -f Makefile.qmake compiler_rcc_make_all
+	make -f Makefile.qmake compiler_moc_header_make_all compiler_moc_header_make_all
+
+moc_declarativetheme_p.cpp: datavisualizationqml2/declarativetheme_p.h
+	make -f Makefile.qmake compiler_rcc_make_all
+	make -f Makefile.qmake compiler_moc_header_make_all
+
+moc_glstatestore_p.cpp: datavisualizationqml2/glstatestore_p.h
+	make -f Makefile.qmake compiler_rcc_make_all
+	make -f Makefile.qmake compiler_moc_header_make_all
+
+moc_predefs.h:
+	make -f Makefile.qmake compiler_rcc_make_all
+	make -f Makefile.qmake compiler_moc_header_make_all
+
+qrc_qml.cpp: qml.qrc
+	make -f Makefile.qmake compiler_rcc_make_all
+	make -f Makefile.qmake compiler_moc_header_make_all
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

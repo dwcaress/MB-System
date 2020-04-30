@@ -10,7 +10,7 @@
 #include <QCoreApplication>
 #include <QValue3DAxis>
 #include <QValue3DAxisFormatter>
-#include <gmt.h>
+#include "gmt.h"
 
 #include "BackEnd.h"
 #include "TopographicSeries.h"
@@ -87,16 +87,6 @@ bool BackEnd::getQmlItems() {
     }
     qDebug() << "Found \"surface3D\" in GUI";
     m_surface = (DeclarativeSurface *)object;
-
-    object = g_rootWindow->findChild<QObject *>("selectedFile");
-
-    if (!object) {
-        qCritical() << "Couldn't find \"selectedFile\" object in GUI";
-        return false;
-    }
-
-    m_selectedFileText = object;
-
     return true;
 }
 
@@ -213,7 +203,13 @@ void BackEnd::setGridFile(QUrl fileURL) {
             << " series";
 
 
-    m_selectedFileText->setProperty("text", fileURL.toLocalFile());
+    object = g_rootWindow->findChild<QObject *>("mainWindow");
+    if (!object) {
+        qCritical("Could not find mainWindow");
+        return;
+    }
+    g_rootWindow->setProperty("title", fileURL.toLocalFile());
+
 }
 
 void BackEnd::test() {

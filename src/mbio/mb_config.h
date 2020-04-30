@@ -113,7 +113,7 @@
 /* #undef PCLTOOLS_ENABLED */
 
 /* Build tools using Qt5 */
-/* #undef QTTOOLS_ENABLED */
+#define QTTOOLS_ENABLED 1
 
 /* Define to 1 if you have the ANSI C header files. */
 #define STDC_HEADERS 1

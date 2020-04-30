@@ -35,6 +35,11 @@
 
 using namespace QtDataVisualization;
 
+//! [0]
+// Value used to encode height data as RGB value on PNG file
+const float packingFactor = 11983.0f;
+//! [0]
+
 const float darkRedPos = 1.0f;
 const float redPos = 0.8f;
 const float yellowPos = 0.6f;
@@ -115,6 +120,131 @@ void TopographicSeries::setTopography(void *gmtApi, GMT_GRID *grid)
 
 }
 
+
+void TopographicSeries::setTopography(void *gmtApi, GMT_GRID *grid, float width, float height)
+{
+  // Reset min/max latitude, longitude, height
+  resetDataLimits();
+
+  const int nRows = 4;         // Number of latitudes
+  const int nColumns = 4;   // Number of longitudes
+
+  // Latitudes
+  float latit[nRows] = {10., 11., 12, 13 };
+
+  // Longitudes
+  float longit[nColumns] = {20., 21., 22., 23.};
+
+
+  // Data in row-major order
+  float data[nRows * nColumns] = {4.75, 3.00, 1.24, 2.53,
+		    2.55, 2.03, 3.46, 5.12,
+            1.37, 10., 14., 4,
+		    4.34, 3.54, 1.65, 2.67};
+
+  /* ***
+  // Data in row-major order
+  float data[nRows * nColumns] = {5., 5., 5., 5.,
+				  5., 5., 5., 5.,
+				  5., 5., 5., 5.,
+				  5., 5., 5., 5.};
+
+*** */
+
+  //  float latHeight = latit[nRows-1] - latit[0];
+  // float lonWidth = longit[nColumns-1] - longit[0];
+
+  // This holds the data
+  QSurfaceDataArray *dataArray = new QSurfaceDataArray();
+
+  // Reserve space for rows (latitudes)
+  dataArray->reserve(nRows);
+
+  for (int row = 0; row < nRows; row++) {
+    QSurfaceDataRow *newRow = new QSurfaceDataRow(nColumns);
+    for (int col = 0; col < nColumns; col++) {
+      int index = getRowMajorIndex(row, col, nColumns);
+      // int index = getColMajorIndex(row, col, nRows);
+      float dataValue = data[index];
+
+      qDebug() << "lon lat value: " << longit[col] << " " << latit[row] << " " << dataValue;
+      //      (*newRow)[col].setPosition(QVector3D(longit[col], latit[row], dataValue));
+      (*newRow)[col].setPosition(QVector3D(longit[col], dataValue, latit[row]));
+
+      // Set data ranges
+      m_minLatit = std::min<float>(m_minLatit, latit[row]);
+      m_maxLatit = std::max<float>(m_minLatit, latit[row]);
+
+      m_minLongit = std::min<float>(m_minLongit, longit[col]);
+      m_maxLongit = std::max<float>(m_maxLongit, longit[col]);
+
+      m_minHeight = std::min<float>(m_minHeight, dataValue);
+      m_maxHeight = std::max<float>(m_maxHeight, dataValue);
+
+    }
+    *dataArray << newRow;
+
+    // delete newRow;  // Delete here causes crash in addSeries()
+  }
+
+  // Set Surface3DSeries data
+  dataProxy()->resetArray(dataArray);
+  // delete dataArray; // Delete here causes crash in addSeries()
+
+  /* **
+        ListElement{ longitude: "20"; latitude: "10"; pop_density: "4.75"; }
+        ListElement{ longitude: "21"; latitude: "10"; pop_density: "3.00"; }
+        ListElement{ longitude: "22"; latitude: "10"; pop_density: "1.24"; }
+        ListElement{ longitude: "23"; latitude: "10"; pop_density: "2.53"; }
+        ListElement{ longitude: "20"; latitude: "11"; pop_density: "2.55"; }
+        ListElement{ longitude: "21"; latitude: "11"; pop_density: "2.03"; }
+        ListElement{ longitude: "22"; latitude: "11"; pop_density: "3.46"; }
+        ListElement{ longitude: "23"; latitude: "11"; pop_density: "5.12"; }
+        ListElement{ longitude: "20"; latitude: "12"; pop_density: "1.37"; }
+        ListElement{ longitude: "21"; latitude: "12"; pop_density: "2.98"; }
+        ListElement{ longitude: "22"; latitude: "12"; pop_density: "3.33"; }
+        ListElement{ longitude: "23"; latitude: "12"; pop_density: "3.23"; }
+        ListElement{ longitude: "20"; latitude: "13"; pop_density: "4.34"; }
+        ListElement{ longitude: "21"; latitude: "13"; pop_density: "3.54"; }
+        ListElement{ longitude: "22"; latitude: "13"; pop_density: "1.65"; }
+        ListElement{ longitude: "23"; latitude: "13"; pop_density: "2.67"; }
+	** */
+
+
+}
+
+/* **
+void TopographicSeries::setTopography(void *gmtApi, GMT_GRID *grid)
+{
+  int imageHeight = grid->header->n_rows;
+  int imageWidth = grid->header->n_columns;
+  float stepX = widthLon / float(imageWidth);
+  float stepZ = heightLat / float(imageHeight);
+
+  QSurfaceDataArray *dataArray = new QSurfaceDataArray;
+
+  dataArray->reserve(imageHeight);
+  for (int row = 0; row < imageHeight; row++) {
+      float z = (heightLat - float(row) * stepZ) + grid->header->wesn[2];
+      QSurfaceDataRow *newRow = new QSurfaceDataRow(imageWidth);
+      for (int col = 0; col < imageWidth; col++) {
+          //int index = row * imageWidth + col;
+          int index = GMT_Get_Index(gmtApi, grid->header, row, col);
+	  float y = grid->data[index];
+          // (QSurface properly ignores NaN)
+          float x = float(col) * stepX + grid->header->wesn[0];
+
+          (*newRow)[col].setPosition(QVector3D(x, y, z));
+      }
+      *dataArray << newRow;
+  }
+
+
+    dataProxy()->resetArray(dataArray);
+//! [1]
+
+}
+** */
 
 
 GMT_GRID *TopographicSeries::readGridFile(const char *gridFile, void **api) {

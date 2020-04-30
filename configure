@@ -654,8 +654,10 @@ BUILD_MBTRN_FALSE
 BUILD_MBTRN_TRUE
 BUILD_QTTOOLS_FALSE
 BUILD_QTTOOLS_TRUE
+qt_MOC
 qt_CPPFLAGS
 qt_LIBS
+qt_DIR
 QT_LUPDATE
 QT_LRELEASE
 QT_RCC
@@ -22531,10 +22533,16 @@ $as_echo "$ax_cv_qt_test_result" >&6; }
 
   if test "$have_qt" = "yes" ; then
     $as_echo "Qt5 installation found"
+    qt_DIR=$QT_DIR
+
     qt_LIBS=$QT_LIBS
 
     qt_CPPFLAGS=$QT_CXXFLAGS
 
+    qt_MOC=$QT_MOC
+
+    $as_echo "Running qmake in src/qttest to generate src/qttest/Makefile.qmake..."
+    `cd src/qttest ; qmake -makefile -o Makefile.qmake ; cd ../..`
   else
     $as_echo "Qt5 installation not found"
     build_qttools=no

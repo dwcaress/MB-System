@@ -922,11 +922,17 @@ AC_ARG_ENABLE([qt],
   [build_qttools=no])
 AS_ECHO(["build_qttools: $build_qttools"])
 if test "$build_qttools" = "yes" ; then
-  AX_HAVE_QT()
+  AX_HAVE_QT_MB()
   if test "$have_qt" = "yes" ; then
     AS_ECHO(["Qt5 installation found"])
+    AC_SUBST([qt_DIR], [$QT_DIR])
     AC_SUBST([qt_LIBS], [$QT_LIBS])
     AC_SUBST([qt_CPPFLAGS], [$QT_CXXFLAGS])
+    AC_SUBST([qt_MOC], [$QT_MOC])
+    AS_ECHO(["Running qmake in src/qttest to generate src/qttest/Makefile.qmake..."])
+    `cd src/qttest ; qmake -makefile -o Makefile.qmake ; cd ../..`
+dnl    AS_ECHO(["Running make -f Makefile.qmake compiler_moc_header_make_all in src/qttest - this generates the moc_*.h files"])
+dnl    `cd src/qttest ; make -f Makefile.qmake compiler_moc_header_make_all ; cd ../..`
   else
     AS_ECHO(["Qt5 installation not found"])
     build_qttools=no

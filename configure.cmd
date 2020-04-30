@@ -391,7 +391,7 @@ CFLAGS="-g -I/opt/X11/include" \
     --enable-hardening \
     --enable-mbtrn \
     --enable-mbtnav \
-    --enable-test
+    --enable-test --enable-qt
     #--enable-qt
     #--enable-pcltools
     #--with-otps-dir=/usr/local/src/OTPS2 \
