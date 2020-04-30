@@ -62,7 +62,7 @@
 /// Headers
 #include <fcntl.h>
 #include "mkvconf.h"
-#include "mdebug.h"
+#include "medebug.h"
 
 /// Macros
 
@@ -125,10 +125,6 @@ static char *s_trim_token(char **ptok)
 
         // trim trailing space
         end=s_trim_trailing(start);
-//        while(end>start && (isspace(*end) || *end=='\0') ){
-//            *end='\0';
-//            end--;
-//        }
 
         // check quotes:
         // find opening/closing quotes, check mismatch/ordering
@@ -211,6 +207,7 @@ static char *s_trim_token(char **ptok)
 
         //        fprintf(stderr,"tcpy[%p] start[%p] end[%p] len[%d]\n",*tcpy,start,end,strlen(start));
         if(err_count==0 && strlen(start)>0){
+            MF_MEM_CHKINVALIDATE(*ptok);
             *ptok=strdup(start);
             retval=*ptok;
         }else{
@@ -218,7 +215,7 @@ static char *s_trim_token(char **ptok)
         }
 //        fprintf(stderr,"ERR - strlen[%lu] err_count[%d] ret[%s]\n",strlen(start),err_count,retval);
 
-        free(tcpy);
+        MF_MEM_CHKFREE(tcpy);
     }
     return retval;
 }
@@ -226,7 +223,7 @@ static char *s_trim_token(char **ptok)
 // get one key/value token string from line
 // returns new, trimmed key/value token strings
 // caller must release using free()
-static int s_get_kv(char *line, const char *del, char **pkey, char **pval)
+int mkvc_parse_kx(char *line, const char *del, char **pkey, char **pval, bool val_required)
 {
 
     int retval=-1;
@@ -236,67 +233,56 @@ static int s_get_kv(char *line, const char *del, char **pkey, char **pval)
         char *lcopy=strdup(line);
         // get the key token
         char *tok=strtok(lcopy,del);
+
         if(tok!=NULL){
             // set key return value (caller must free)
-            *pkey=strdup(tok);
+            MF_MEM_CHKFREE(*pkey);
+           *pkey=strdup(tok);
             // value token is everything to the end of the line
-            tok=strtok(NULL,del);
-            if(NULL!=tok && (strlen(tok)>0) ){
-                *pval=strdup(tok);
-            }else{
-                free(*pkey);
-                *pkey=NULL;
-            }
-        }
-        free(lcopy);
+             tok=strtok(NULL,del);
 
-        if(NULL!=*pkey && NULL!=*pval){
+            if(NULL!=tok && (strlen(tok)>0) ){
+                MF_MEM_CHKFREE(*pval);
+                *pval=strdup(tok);
+            }
+        }else{PTRACE();}
+
+        MF_MEM_CHKFREE(lcopy);
+
+        if(NULL!=*pkey && (NULL!=*pval || !val_required)){
 
             char *test[2]={s_trim_token(pkey),s_trim_token(pval)};
-//            test[0]=s_trim_token(pkey);
-//            test[1]=s_trim_token(pval);
-            if( test[0]!=NULL && test[1]!=NULL){
+
+        	if( test[0]!=NULL && (test[1]!=NULL || !val_required)){
                 retval=0;
             }else{
-
-//                fprintf(stderr,"t0[%p/%s] t1[%p/%s]\n",test[0],test[1],*pkey,*pval);
+                // report error detail
                 if(test[0]!=NULL){
                     // key valid, val invalid
                     s_trim_trailing(*pval);
-
-//                    char *cur=NULL;
-//                    if(*pval!=NULL){
-//                        cur=*pval+strlen(*pval);
-//                        while(*cur=='\0' || isspace(*cur)){
-//                            *cur='\0';
-//                            cur--;
-//                        }
-//                    }
                     fprintf(stderr, "ERR - invalid val token k[%s] v[%s]\n",*pkey,*pval?*pval:"");
-                    free(*pkey);
                 }
 
                 if(test[1]!=NULL){
                     // key invalid, val valid
                     s_trim_trailing(*pkey);
-
-//                    char *cur=NULL;
-//                    if(*pkey!=NULL){
-//                        cur=*pkey+strlen(*pkey);
-//                        while(*cur=='\0' || isspace(*cur)){
-//                            *cur='\0';
-//                            cur--;
-//                        }
-//                    }
                     fprintf(stderr, "ERR - invalid key token k[%s] v[%s]\n",*pkey?*pkey:"",*pval);
-                    free(*pval);
                 }
-                *pkey=NULL;
-                *pval=NULL;
+                // release resources
+                MF_MEM_CHKINVALIDATE(*pkey);
+                MF_MEM_CHKINVALIDATE(*pval);
             }
+        }else{
+            MF_MEM_CHKINVALIDATE(*pkey);
+            MF_MEM_CHKINVALIDATE(*pval);
+            PTRACE();
         }
     }
     return retval;
+}
+int mkvc_parse_kv(char *line, const char *del, char **pkey, char **pval)
+{
+    return mkvc_parse_kx(line, del, pkey, pval, true);
 }
 
 mkvc_reader_t *mkvc_new(const char *file, const char *del, mkvc_parse_fn parser)
@@ -322,7 +308,7 @@ void mkvc_destroy(mkvc_reader_t **pself)
             if(NULL!=self->del){
                 free(self->del);
             }
-
+            free(self);
             *pself=NULL;
         }
     }
@@ -367,7 +353,7 @@ static bool s_is_ignore(char *line)
             cp++;
         }
     }
-//    fprintf(stderr,"ignore [%s] [%c]\n",line,(retval?'Y':'N'));
+
     return retval;
 }
 
@@ -383,18 +369,17 @@ int mkvc_load_config(mkvc_reader_t *self, void *cfg, int *r_par, int *r_inv, int
         self->fp=fopen(self->fpath,"r+");
         if(NULL!=self->fp){
             // read and parse until end of file
-            char line[256]={0};
+            char line[MKVC_LINE_BUF_LEN]={0};
             char *pline=line;
-            while((pline=fgets(line,256,self->fp))!=NULL){
+            while((pline=fgets(line,MKVC_LINE_BUF_LEN,self->fp))!=NULL){
                 if(!s_is_ignore(pline)){
                     // extract one key/value pair per line
                     // [mbtrnpp_get_kv returns new strings, must release using free()]
                     char *key=NULL;
                     char *val=NULL;
 
-                    if(s_get_kv(pline,self->del,&key,&val)==0 &&
-                       NULL!=key &&
-                       NULL!=val){
+                    if(mkvc_parse_kx(pline,self->del,&key,&val,false)==0 &&
+                       NULL!=key){
                         // parse key/value into configuration
                         if(self->parser(key,val,cfg)==0){
                             par_count++;
@@ -430,7 +415,32 @@ int mkvc_load_config(mkvc_reader_t *self, void *cfg, int *r_par, int *r_inv, int
     if(NULL!=r_inv)*r_inv=inv_count;
     if(NULL!=r_err)*r_err=err_count;
 
-    fprintf(stderr,"load_cfg ret[%d] par[%d] inv[%d] err[%d]\n",retval,par_count,inv_count,err_count);
+//    fprintf(stderr,"load_cfg ret[%d] par[%d] inv[%d] err[%d]\n",retval,par_count,inv_count,err_count);
+    return retval;
+}
+
+int mkvc_parse_bool(const char *src, bool *dest)
+{
+    int retval=-1;
+    if(NULL!=src && NULL!=dest){
+        // flip retval so we don't have to set it many times
+        retval=0;
+        if(strcasecmp(src,"Y")==0){
+            *dest=true;
+        }else if(strcasecmp(src,"N")==0){
+            *dest=false;
+        }else if(strcasecmp(src,"TRUE")==0){
+            *dest=true;
+        }else if(strcasecmp(src,"FALSE")==0){
+            *dest=false;
+        }else if(strcasecmp(src,"1")==0){
+            *dest=true;
+        }else if(strcasecmp(src,"0")==0){
+            *dest=false;
+        }else {
+            retval=-1;
+        }
+    }// invalid arg
     return retval;
 }
 
@@ -444,66 +454,76 @@ typedef struct cfg_s{
     char cpar;
     char *spar;
     bool bpar;
+    bool flagpar;
 }cfg_t;
 
 // parse key/value strings into configuration values
 static int s_test_parser(char *key, char *val, void *config)
 {
     int retval=0;
-    if(NULL!=key && NULL!=val && NULL!=config){
+    if(NULL!=key && NULL!=config){
         cfg_t *cfg=(cfg_t *)config;
-        fprintf(stderr, ">>>> PARSING key/val [%s:%s]\n", key,val);
+//        fprintf(stderr, ">>>> PARSING key/val [%s:%s]\n", key,val);
         retval=-1;
-        if(strcmp(key,"ipar")==0 ){
-            if(sscanf(val,"%d",&cfg->ipar)==1){
+
+        if(NULL!=val){
+            // args requiring values
+            if(strcmp(key,"ipar")==0 ){
+                if(sscanf(val,"%d",&cfg->ipar)==1){
+                    retval=0;
+                }
+            }else if(strcmp(key,"xpar")==0 ){
+                if(sscanf(val,"%x",&cfg->xpar)==1 || sscanf(val,"%X",&cfg->xpar)==1){
+                    retval=0;
+                }
+            }else if(strcmp(key,"fpar")==0 ){
+                if(sscanf(val,"%f",&cfg->fpar)==1){
+                    retval=0;
+                }
+            }else if(strcmp(key,"cpar")==0 ){
+                if(sscanf(val,"%c",&cfg->cpar)==1){
+                    retval=0;
+                }
+            }else if(strcmp(key,"spar")==0 ){
+                if((cfg->spar=strdup(val))!=NULL){
+                    retval=0;
+                }
+            }else if(strcmp(key,"bpar")==0 ){
+                // flip retval so we don't have to set it many times
                 retval=0;
+                if(strcasecmp(val,"Y")==0){
+                    cfg->bpar=true;
+                }else if(strcasecmp(val,"N")==0){
+                    cfg->bpar=false;
+                }else if(strcasecmp(val,"TRUE")==0){
+                    cfg->bpar=true;
+                }else if(strcasecmp(val,"FALSE")==0){
+                    cfg->bpar=false;
+                }else if(strcasecmp(val,"1")==0){
+                    cfg->bpar=true;
+                }else if(strcasecmp(val,"0")==0){
+                    cfg->bpar=false;
+                }else {
+                    retval=-1;
+                }
+            }else{
+                fprintf(stderr, "WARN - unsupported key/val [%s/%s]\n", key,val);
             }
-        }else
-        if(strcmp(key,"xpar")==0 ){
-            if(sscanf(val,"%x",&cfg->xpar)==1 || sscanf(val,"%X",&cfg->xpar)==1){
-                retval=0;
-            }
-        }else
-        if(strcmp(key,"fpar")==0 ){
-            if(sscanf(val,"%f",&cfg->fpar)==1){
-                retval=0;
-            }
-        }else
-        if(strcmp(key,"cpar")==0 ){
-            if(sscanf(val,"%c",&cfg->cpar)==1){
-                retval=0;
-            }
-        }else
-        if(strcmp(key,"spar")==0 ){
-            if((cfg->spar=strdup(val))!=NULL){
-                retval=0;
-            }
-        }else
-        if(strcmp(key,"bpar")==0 ){
-            // flip retval so we don't have to set it many times
-            retval=0;
-            if(strcasecmp(val,"Y")==0){
-                cfg->bpar=true;
-            }else if(strcasecmp(val,"N")==0){
-                cfg->bpar=false;
-            }else if(strcasecmp(val,"TRUE")==0){
-                cfg->bpar=true;
-            }else if(strcasecmp(val,"FALSE")==0){
-                cfg->bpar=false;
-            }else if(strcasecmp(val,"1")==0){
-                cfg->bpar=true;
-            }else if(strcasecmp(val,"0")==0){
-                cfg->bpar=false;
-            }else {
-                retval=-1;
-            }
+
         }else{
-            fprintf(stderr, "WARN - unsupported key/val [%s/%s]\n", key,val);
+            // args with optional/no values
+            if(strcmp(key,"flagpar")==0 ){
+                // flag par - no value required
+                cfg->flagpar=true;
+                retval=0;
+            }else{
+                fprintf(stderr, "WARN - unsupported key/val [%s/%s]\n", key,val);
+            }
         }
     }else{
         fprintf(stderr, "ERR - NULL key/val [%s/%s]\n", key,val);
     }
-//    fprintf(stderr, "parse ret[%d]\n",retval);
+
     return retval;
 }
 
@@ -522,6 +542,7 @@ static int s_mk_test_conf(const char *file)
             fwrite("// char param\n cpar =X\n",strlen("// char param\n cpar =X\n"),1,fp);
             fwrite("// bool param\n bpar = Y\n",strlen("// bool param\n bpar = Y\n"),1,fp);
             fwrite("// str param\n spar=\"two strings walk into a bar...\\n\"\n",strlen("// str param\n spar=\"two strings walk into a bar...\\n\"\n"),1,fp);
+            fwrite("// flag key w/o val\n flagpar\n",strlen("// flag key w/o val\n flagpar\n"),1,fp);
 
             // 2 valid, but not supported
             fwrite("// nested squotes\n nsq=\'nsq \'are\' \"OK\" \'\n",strlen("// nested squotes\n nsq=\'nsq \'are\' \"OK\" \'\n"),1,fp);
@@ -560,6 +581,7 @@ static void s_cfg_show(cfg_t *self, bool verbose, uint16_t indent)
         fprintf(stderr,"%*s[cpar     %10c]\n",indent,(indent>0?" ":""), self->cpar);
         fprintf(stderr,"%*s[bpar     %10s]\n",indent,(indent>0?" ":""), (self->bpar?"true":"false"));
         fprintf(stderr,"%*s[spar     %10s]\n",indent,(indent>0?" ":""), self->spar);
+        fprintf(stderr,"%*s[flagpar  %10s]\n",indent,(indent>0?" ":""), (self->flagpar?"true":"false"));
     }
 }
 
@@ -587,16 +609,48 @@ int mkvconf_test()
 //                    cfg->fpar,
 //                    cfg->cpar,
 //                    cfg->spar,
-//                    cfg->bpar?'Y':'N');
+//                    cfg->bpar?'Y':'N',
+//                    cfg->flagpar?'Y':'N');
 
-            // should be 6 parsed, 13 errors [2 invalid k/v, 11 parse error]
-            if(r_par==6 && r_inv==2 && r_err==11){
+            // should be 7 parsed, 13 errors [12 invalid k/v, 1 parse error]
+            if(r_par==7 && r_inv==12 && r_err==1){
                 retval=0;
             }
             mkvc_destroy(&reader);
         }
     }
 
+    bool bval=false;
+    uint32_t bool_test=0,i=0;
+    if( !(mkvc_parse_bool("true",&bval)==0 && bval==true)){
+        bool_test|=(1<<i);
+    }
+    i++;
+    if( !(mkvc_parse_bool("false",&bval)==0 && bval==false)){
+        bool_test|=(1<<i);
+    }
+    i++;
+    if( !(mkvc_parse_bool("Y",&bval)==0 && bval==true)){
+        bool_test|=(1<<i);
+    }
+    i++;
+    if( !(mkvc_parse_bool("N",&bval)==0 && bval==false)){
+        bool_test|=(1<<i);
+    }
+    i++;
+    if( !(mkvc_parse_bool("1",&bval)==0 && bval==true)){
+        bool_test|=(1<<i);
+    }
+    i++;
+    if( !(mkvc_parse_bool("0",&bval)==0 && bval==false)){
+        bool_test|=(1<<i);
+    }
+    i++;
+    if(bool_test==0){
+        fprintf(stderr,"mkvc_parse_bool test     OK [0x%X]\n",bool_test);
+    }else{
+        fprintf(stderr,"mkvc_parse_bool test FAILED [0x%X]\n",bool_test);
+    }
     if(NULL!=cfg->spar){
         free(cfg->spar);
     }

@@ -65,9 +65,16 @@
 #include "mframe.h"
 
 /// Macros
+#define MF_MEM_CHKFREE(s) if(NULL!=s)free(s)
+#define MF_MEM_CHKINVALIDATE(s) do{\
+if(NULL!=s)free(s);\
+s=NULL;\
+}while(0)
+
 #define WITH_MKVCONF_TEST
 
 #define MKVC_DEL_DFL "="
+#define MKVC_LINE_BUF_LEN 512
 
 /// Type Definitions
 typedef struct mkvc_s mkvc_reader_t;
@@ -100,6 +107,33 @@ extern "C" {
     /// @param[in] r_err return number of parse errors 
     /// @return 0 on success, -1 otherwise
     int mkvc_load_config(mkvc_reader_t *self, void *cfg, int *r_par, int *r_inv, int *r_err);
+
+    /// @fn int mkvc_parse_kv(char *line, const char *del, char **pkey, char **pval)
+    /// @brief parse and trim key/value pair. Both key and value must exist.
+    /// Equivalent to mkvc_parse_kx(...true). Input may contain comments and leading/trailing whitespace.
+    /// @param[in] line input string containing key/value
+    /// @param[in] del  key/value delimiter
+    /// @param[in] pkey pointer to key char array (dynamically created if key is NULL)
+    /// @param[in] pval pointer to key char array (dynamically created if key is NULL)
+    /// @return 0 on success, -1 otherwise, key and/or value set
+    int mkvc_parse_kv(char *line, const char *del, char **pkey, char **pval);
+
+    /// @fn int mkvc_parse_kx(char *line, const char *del, char **pkey, char **pval, bool val_required)
+    /// @brief parse and trim key/value pair. Key must exist, value is optional.
+    /// Input may contain comments and leading/trailing whitespace.
+    /// @param[in] line input string containing key/value
+    /// @param[in] del  key/value delimiter
+    /// @param[out] pkey pointer to key char array (dynamically created if key is NULL)
+    /// @param[out] pval pointer to key char array (dynamically created if key is NULL)
+    /// @param[in] val_required true if value is required, false if optional
+    /// @return 0 on success, -1 otherwise, key and/or value set
+    int mkvc_parse_kx(char *line, const char *del, char **pkey, char **pval, bool val_required);
+    
+    /// @fn int mkvc_parse_bool(const char *src, bool *dest)
+    /// @brief parse boolean string values. Accepts "true"/"false"/"y"/n"/"0"/"1". Case insensitive
+    /// @param[in] src boolean string value
+    /// @param[out] dest boolean value
+    int mkvc_parse_bool(const char *src, bool *dest);
 
 #ifdef WITH_MKVCONF_TEST
     extern bool g_mkvconf_test_quit;
