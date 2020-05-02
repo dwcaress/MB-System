@@ -1,3 +1,8 @@
+# The configure script copies this file to mbgrdvizqt.pro and then modifies it
+# with sed to include the relevant GMT compile and load flags
+# The configure script then runs qmake to generate a Makefile.qmake while
+# also generating a Makefile that calls "make -f Makefile.qmake"
+
 QT += quick
 QT += datavisualization
 
@@ -34,15 +39,14 @@ SOURCES += \
     TopographicSeries.cpp \
     BackEnd.cpp
 
-###    qrc_qml.cpp \  WTF???
-
 INCLUDEPATH += /Users/caress/sandbox/Qt/5.14.2/5.14.2/Src/qtdatavis3d/src/
 INCLUDEPATH += /Users/caress/sandbox/Qt/5.14.2/5.14.2/Src/qtdatavis3d/src/datavisualization/global
 INCLUDEPATH += /Users/caress/sandbox/Qt/5.14.2/5.14.2/Src/qtdatavis3d/src/datavisualization/engine/
 INCLUDEPATH += /Users/caress/sandbox/Qt/5.14.2/5.14.2/Src/qtdatavis3d/src/datavisualization/data/
 INCLUDEPATH += /Users/caress/sandbox/Qt/5.14.2/5.14.2/Src/qtdatavis3d/src/datavisualization/theme
-INCLUDEPATH += /home/oreilly/projects/mb-system/gui-test/mbgrdviz-2/datavisualizationqml2
+INCLUDEPATH += datavisualizationqml2
 INCLUDEPATH += /usr/local/include/gmt
+
 RESOURCES += qml.qrc
 
 # Additional import path used to resolve QML modules in Qt Creator's code model
@@ -52,9 +56,9 @@ QML_IMPORT_PATH =
 QML_DESIGNER_IMPORT_PATH =
 
 # Default rules for deployment.
-qnx: target.path = /tmp/$${TARGET}/bin
-else: unix:!android: target.path = /opt/$${TARGET}/bin
-!isEmpty(target.path): INSTALLS += target
+target.path = /usr/local/bin
+target.files = mbgrdvizqt
+INSTALLS += target
 
 HEADERS += \
     TopographicSeries.h \
@@ -77,4 +81,4 @@ HEADERS += \
     TopographicSeries.h \
     BackEnd.h
 
-unix|win32: LIBS += -L/usr/local/lib -lgmt
+LIBS += -L/usr/local/lib -lgmt

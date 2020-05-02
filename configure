@@ -694,6 +694,7 @@ GMT61PLUS_FALSE
 GMT61PLUS_TRUE
 GMT_PLUGINDIR
 libgmt_LDFLAGS
+libgmt_INCLUDEDIR
 libgmt_CPPFLAGS
 libgmt_LIBS
 GMT_CONF
@@ -20617,19 +20618,32 @@ $as_echo "no - $GMT_VERSION found" >&6; }
     $as_echo "GMT version < 6.1.0, mbgrdtiff contructs image without calling the grdimage module"
     fi
 
-    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for GMT includes" >&5
-$as_echo_n "checking for GMT includes... " >&6; }
-    GMT_INC=`$GMT_CONF --cflags 2>/dev/null`
-    { $as_echo "$as_me:${as_lineno-$LINENO}: result: $GMT_INC" >&5
-$as_echo "$GMT_INC" >&6; }
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for GMT cflags" >&5
+$as_echo_n "checking for GMT cflags... " >&6; }
+    GMT_CFLAGS=`$GMT_CONF --cflags 2>/dev/null`
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: $GMT_CFLAGS" >&5
+$as_echo "$GMT_CFLAGS" >&6; }
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for GMT include directory" >&5
+$as_echo_n "checking for GMT include directory... " >&6; }
+    GMT_INCLUDEDIR=`$GMT_CONF --includedir 2>/dev/null`
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: $GMT_INCLUDEDIR" >&5
+$as_echo "$GMT_INCLUDEDIR" >&6; }
     { $as_echo "$as_me:${as_lineno-$LINENO}: checking for GMT libs" >&5
 $as_echo_n "checking for GMT libs... " >&6; }
-    GMT_LIB=`$GMT_CONF --libs 2>/dev/null`
+    GMT_LIBS=`$GMT_CONF --libs 2>/dev/null`
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: $GMT_LIBS" >&5
+$as_echo "$GMT_LIBS" >&6; }
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for GMT library directory" >&5
+$as_echo_n "checking for GMT library directory... " >&6; }
+    GMT_LIBDIR=`$GMT_CONF --libdir 2>/dev/null`
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: $GMT_LIBDIR" >&5
+$as_echo "$GMT_LIBDIR" >&6; }
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for GMT dependent libraries" >&5
+$as_echo_n "checking for GMT dependent libraries... " >&6; }
     DEP_LIBS=`$GMT_CONF --dep-libs 2>/dev/null`
-    { $as_echo "$as_me:${as_lineno-$LINENO}: result: $GMT_LIB" >&5
-$as_echo "$GMT_LIB" >&6; }
-    GMT_LIB_PATH=`echo $GMT_LIB | sed 's/^-L//;s/\ .*//'`
-    rpath="$GMT_LIB_PATH"
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: $DEP_LIBS" >&5
+$as_echo "$DEP_LIBS" >&6; }
+    rpath="$GMT_LIBDIR"
     { $as_echo "$as_me:${as_lineno-$LINENO}: checking for 32/64-bit GMT installation" >&5
 $as_echo_n "checking for 32/64-bit GMT installation... " >&6; }
     bits=`$GMT_CONF --bits 2>/dev/null`
@@ -20643,9 +20657,10 @@ $as_echo_n "checking for GMT plugin location... " >&6; }
     { $as_echo "$as_me:${as_lineno-$LINENO}: result: $GMT_PLUGINDIR" >&5
 $as_echo "$GMT_PLUGINDIR" >&6; }
 
-    libgmt_CPPFLAGS="$GMT_INC"
-    libgmt_LIBS="-L$GMT_LIB_PATH -R $GMT_LIB_PATH -lgmt -lpostscriptlight"
-    libgmt_LDFLAGS="-L$GMT_LIB_PATH"
+    libgmt_INCLUDEDIR="$GMT_INCLUDEDIR"
+    libgmt_CPPFLAGS="$GMT_CFLAGS"
+    libgmt_LIBS="$GMT_LIBS"
+    libgmt_LDFLAGS="$GMT_LIBS"
 else
     $as_echo "Did not find gmt-config program, use --with-gmt-config to set the location"
     as_fn_error $? "\"Did not find gmt-config program, use --with-gmt-config to set the location\"" "$LINENO" 5
@@ -20654,6 +20669,8 @@ fi
 libgmt_LIBS=$libgmt_LIBS
 
 libgmt_CPPFLAGS=$libgmt_CPPFLAGS
+
+libgmt_INCLUDEDIR=$libgmt_INCLUDEDIR
 
 libgmt_LDFLAGS=$libgmt_LDFLAGS
 
@@ -22541,6 +22558,11 @@ $as_echo "$ax_cv_qt_test_result" >&6; }
 
     qt_MOC=$QT_MOC
 
+    $as_echo "Constructing Qt project file mbgrdvizqt.pro in src/qttest..."
+    `cp src/qttest/mbgrdvizqt.pro.org src/qttest/mbgrdvizqt.pro`
+    `sed -i "" "s#__GMT_INCLUDEDIR__#$libgmt_INCLUDEDIR#" src/qttest/mbgrdvizqt.pro`
+    `sed -i "" "s#__GMT_LIBS__#$libgmt_LIBS#" src/qttest/mbgrdvizqt.pro`
+    `sed -i "" "s#__INSTALLDIR__#$prefix/bin#" src/qttest/mbgrdvizqt.pro`
     $as_echo "Running qmake in src/qttest to generate src/qttest/Makefile.qmake..."
     `cd src/qttest ; qmake -makefile -o Makefile.qmake ; cd ../..`
   else
