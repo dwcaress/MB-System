@@ -77,6 +77,7 @@ void TopographicSeries::setTopography(void *gmtApi, GMT_GRID *grid)
 
   // Reserve space for rows (latitudes)
   dataArray->reserve(nRows);
+  int numNAN = 0;
 
   for (int row = 0; row < nRows; row++) {
     QSurfaceDataRow *newRow = new QSurfaceDataRow(nColumns);
@@ -85,7 +86,7 @@ void TopographicSeries::setTopography(void *gmtApi, GMT_GRID *grid)
       int index = GMT_Get_Index(gmtApi, grid->header, row, col);
       float dataValue = (float )grid->data[index];
       if (std::isnan(dataValue)) {
-	fprintf(stderr, "setTopography(): NAN at row %d col %d\n", row, col);
+        numNAN++;
       }
 
       (*newRow)[col].setPosition(QVector3D(longit[col], dataValue, latit[row]));
@@ -108,14 +109,14 @@ void TopographicSeries::setTopography(void *gmtApi, GMT_GRID *grid)
 
     // delete newRow;  // Delete here causes crash in addSeries()
   }
+  fprintf(stderr, "%s:%s():%d): %d NANs out of %d data in grid\n",
+  __FILE__, __func__, __LINE__, numNAN, nRows*nColumns);
 
   // Set Surface3DSeries data
   dataProxy()->resetArray(dataArray);
   // delete dataArray; // Delete here causes crash in addSeries()
 
 }
-
-
 
 GMT_GRID *TopographicSeries::readGridFile(const char *gridFile, void **api) {
     fprintf(stderr, "readGridFile(): gridFile: %s\n", gridFile);

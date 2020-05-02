@@ -309,6 +309,7 @@ libfftw_LIBS = @libfftw_LIBS@
 libgdal_CPPFLAGS = @libgdal_CPPFLAGS@
 libgdal_LIBS = @libgdal_LIBS@
 libgmt_CPPFLAGS = @libgmt_CPPFLAGS@
+libgmt_INCLUDEDIR = @libgmt_INCLUDEDIR@
 libgmt_LDFLAGS = @libgmt_LDFLAGS@
 libgmt_LIBS = @libgmt_LIBS@
 libmotif_CPPFLAGS = @libmotif_CPPFLAGS@

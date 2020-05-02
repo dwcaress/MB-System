@@ -20,6 +20,7 @@ include "beta" in the tag name are preliminary and generally not announced.
 Distributions that do not include "beta" in the tag name correspond to the major,
 announced releases. The source distributions associated with all releases, major or beta, are equally accessible as tarballs through the Github interface.
 
+- Version 5.7.6beta33    May 3, 2020
 - Version 5.7.6beta32    April 22, 2020
 - Version 5.7.6beta31    March 2, 2020
 - Version 5.7.6beta30    February 20, 2020
@@ -343,6 +344,23 @@ announced releases. The source distributions associated with all releases, major
 --
 ### MB-System Version 5.7 Release Notes:
 --
+
+#### 5.7.6beta33 (May 3, 2020)
+
+Build system for Qt5 based tools: Improved the build system handling of Qt5
+programs. The test program enabled by running configure with the --enable-qt
+option has been renamed mbgrdvizqt, but still resides in src/qttest. The
+approach now is to do the following:
+(1) The configure script creates the Qt project file src/qttest/mbgrdvizqt.pro
+    and then modifies the values of variables specifying the required MB-System
+    and GMT libraries and headers.
+(2) The configure script runs qmake in src/qttest to generate a Makefile named
+    src/qttest/Makefile.qmake
+(3) The configure script generates a Makefile in src/qttest that in turn will
+    run make itself using Makefile.qmake for targets all, install, uninstall,
+    and clean.
+This approach now works on a Mac. It's time to test on Linux.
+
 #### 5.7.6beta32 (April 22, 2020)
 
 Mbgrid: Fixed failure of the two gridding algorithm using beam footprints in

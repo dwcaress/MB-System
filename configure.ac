@@ -18,7 +18,7 @@ define([AC_CACHE_LOAD], )
 define([AC_CACHE_SAVE], )
 
 dnl Initialize and set version and version date
-AC_INIT([mbsystem],[5.7.6beta32],[http://listserver.mbari.org/sympa/arc/mbsystem],[mbsystem],[http://www.mbari.org/data/mbsystem/])
+AC_INIT([mbsystem],[5.7.6beta33],[http://listserver.mbari.org/sympa/arc/mbsystem],[mbsystem],[http://www.mbari.org/data/mbsystem/])
 
 AC_CONFIG_MACRO_DIR(m4)
 AC_LANG(C)
@@ -27,7 +27,7 @@ AC_LANG(C)
 dnl Require c++11
 AX_CXX_COMPILE_STDCXX(11)
 
-AC_DEFINE(VERSION_DATE, "17 April 2020", [Set VERSION_DATE define in mb_config.h])
+AC_DEFINE(VERSION_DATE, "3 May 2020", [Set VERSION_DATE define in mb_config.h])
 
 dnl Check system arch
 AC_CANONICAL_HOST
@@ -576,15 +576,22 @@ if test -x "$GMT_CONF" ; then
     AS_ECHO(["GMT version < 6.1.0, mbgrdtiff contructs image without calling the grdimage module"])
     fi
 
-    AC_MSG_CHECKING(for GMT includes)
-    GMT_INC=`$GMT_CONF --cflags 2>/dev/null`
-    AC_MSG_RESULT($GMT_INC)
+    AC_MSG_CHECKING(for GMT cflags)
+    GMT_CFLAGS=`$GMT_CONF --cflags 2>/dev/null`
+    AC_MSG_RESULT($GMT_CFLAGS)
+    AC_MSG_CHECKING(for GMT include directory)
+    GMT_INCLUDEDIR=`$GMT_CONF --includedir 2>/dev/null`
+    AC_MSG_RESULT($GMT_INCLUDEDIR)
     AC_MSG_CHECKING(for GMT libs)
-    GMT_LIB=`$GMT_CONF --libs 2>/dev/null`
+    GMT_LIBS=`$GMT_CONF --libs 2>/dev/null`
+    AC_MSG_RESULT($GMT_LIBS)
+    AC_MSG_CHECKING(for GMT library directory)
+    GMT_LIBDIR=`$GMT_CONF --libdir 2>/dev/null`
+    AC_MSG_RESULT($GMT_LIBDIR)
+    AC_MSG_CHECKING(for GMT dependent libraries)
     DEP_LIBS=`$GMT_CONF --dep-libs 2>/dev/null`
-    AC_MSG_RESULT($GMT_LIB)
-    GMT_LIB_PATH=`echo $GMT_LIB | sed 's/^-L//;s/\ .*//'`
-    rpath="$GMT_LIB_PATH"
+    AC_MSG_RESULT($DEP_LIBS)
+    rpath="$GMT_LIBDIR"
     AC_MSG_CHECKING(for 32/64-bit GMT installation)
     bits=`$GMT_CONF --bits 2>/dev/null`
     GCC_64="-m${bits}"
@@ -594,9 +601,10 @@ if test -x "$GMT_CONF" ; then
     GMT_PLUGINDIR=`$GMT_CONF --plugindir 2>/dev/null`
     AC_MSG_RESULT($GMT_PLUGINDIR)
 
-    libgmt_CPPFLAGS="$GMT_INC"
-    libgmt_LIBS="-L$GMT_LIB_PATH -R $GMT_LIB_PATH -lgmt -lpostscriptlight"
-    libgmt_LDFLAGS="-L$GMT_LIB_PATH"
+    libgmt_INCLUDEDIR="$GMT_INCLUDEDIR"
+    libgmt_CPPFLAGS="$GMT_CFLAGS"
+    libgmt_LIBS="$GMT_LIBS"
+    libgmt_LDFLAGS="$GMT_LIBS"
 else
     AS_ECHO(["Did not find gmt-config program, use --with-gmt-config to set the location"])
     AC_MSG_ERROR(["Did not find gmt-config program, use --with-gmt-config to set the location"])
@@ -605,6 +613,7 @@ fi
 dnl Substitute GMT library and header arguments
 AC_SUBST([libgmt_LIBS], [$libgmt_LIBS])
 AC_SUBST([libgmt_CPPFLAGS], [$libgmt_CPPFLAGS])
+AC_SUBST([libgmt_INCLUDEDIR], [$libgmt_INCLUDEDIR])
 AC_SUBST([libgmt_LDFLAGS], [$libgmt_LDFLAGS])
 AC_SUBST(GMT_PLUGINDIR)
 AM_CONDITIONAL([GMT61PLUS], [test -x "$GMT61PLUS"])
@@ -929,10 +938,13 @@ if test "$build_qttools" = "yes" ; then
     AC_SUBST([qt_LIBS], [$QT_LIBS])
     AC_SUBST([qt_CPPFLAGS], [$QT_CXXFLAGS])
     AC_SUBST([qt_MOC], [$QT_MOC])
+    AS_ECHO(["Constructing Qt project file mbgrdvizqt.pro in src/qttest..."])
+    `cp src/qttest/mbgrdvizqt.pro.init src/qttest/mbgrdvizqt.pro`
+    `sed -i "" "s#__GMT_INCLUDEDIR__#$libgmt_INCLUDEDIR#" src/qttest/mbgrdvizqt.pro`
+    `sed -i "" "s#__GMT_LIBS__#$libgmt_LIBS#" src/qttest/mbgrdvizqt.pro`
+    `sed -i "" "s#__INSTALLDIR__#$prefix/bin#" src/qttest/mbgrdvizqt.pro`
     AS_ECHO(["Running qmake in src/qttest to generate src/qttest/Makefile.qmake..."])
     `cd src/qttest ; qmake -makefile -o Makefile.qmake ; cd ../..`
-dnl    AS_ECHO(["Running make -f Makefile.qmake compiler_moc_header_make_all in src/qttest - this generates the moc_*.h files"])
-dnl    `cd src/qttest ; make -f Makefile.qmake compiler_moc_header_make_all ; cd ../..`
   else
     AS_ECHO(["Qt5 installation not found"])
     build_qttools=no
