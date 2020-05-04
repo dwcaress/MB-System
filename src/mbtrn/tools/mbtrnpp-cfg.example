@@ -8,11 +8,11 @@ verbose=-2
 // cfg var int logd_status
 // cfg var bool make_logs
 // cfg var mb_path log_directory
-log-directory=/home/headley/tmp/logs
+log-directory=TRN_LOGDIRECTORY
 
 // opt "input" [input_mode_t]
 // cfg var mb_path socket_definition
-input=socket:192.168.1.68:7000:0
+input=socket:TRN_RESON_HOST:7000:0
 
 // opt "output" [?]
 // cfg var mb_path output_file
@@ -80,13 +80,13 @@ trn-en=Y
 trn-utm=10
 // opt "trn-map" [char*]
 // cfg var char *trn_map_file
-trn-map=/mnt/vmhost/maps/PortTiles
+trn-map=TRN_MAPFILES/PortTiles
 // opt "trn-cfg" [char*]
 // cfg var char *trn_cfg_file
-trn-cfg=/mnt/vmhost/config/mappingAUV_specs.cfg
+trn-cfg=TRN_DATAFILES/mappingAUV_specs.cfg
 // opt "trn-par" [char*]
 // cfg var char *trn_particles_file
-trn-par=/mnt/vmhost/config/particles.cfg
+trn-par=TRN_DATAFILES/particles.cfg
 
 // opt "trn-mid" [char*]
 // cfg var char *trn_mission_id
@@ -120,13 +120,13 @@ trn-eerr=50
 // opt "mb-out" [?]
 // cfg var int mb1svr_port
 // cfg var char *mb1svr_host
-mb-out=mb1svr:192.168.1.68:27000
+mb-out=mb1svr:TRN_HOST:27000
 // opt "trn-out" [?]
 // cfg var int trnsvr_port
 // cfg var char *trnsvr_host
 // cfg var int trnusvr_port
 // cfg var char *trnusvr_host
-trn-out=trnsvr:192.168.1.68:28000,trnu,trnusvr:192.168.1.68:8000
+trn-out=trnsvr:TRN_HOST:28000,trnu,trnusvr:TRN_HOST:8000
 // opt "trn-decn" [int]
 // cfg var unsigned int trn_decn
 trn-decn=9
