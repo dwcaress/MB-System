@@ -20,7 +20,7 @@ include "beta" in the tag name are preliminary and generally not announced.
 Distributions that do not include "beta" in the tag name correspond to the major,
 announced releases. The source distributions associated with all releases, major or beta, are equally accessible as tarballs through the Github interface.
 
-- Version 5.7.6beta33    May 3, 2020
+- Version 5.7.6beta33    May 4, 2020
 - Version 5.7.6beta32    April 22, 2020
 - Version 5.7.6beta31    March 2, 2020
 - Version 5.7.6beta30    February 20, 2020
@@ -345,7 +345,32 @@ announced releases. The source distributions associated with all releases, major
 ### MB-System Version 5.7 Release Notes:
 --
 
-#### 5.7.6beta33 (May 3, 2020)
+#### 5.7.6beta33 (May 4, 2020)
+
+Mbcopy: A compile failure occurs for src/utilities/mbcopy.cc on Windows as
+reported by Joaquim Luis. The issue is that under Visual Studio C++ some
+external symbols referenced in the mbsys_simrad.h header file are not
+available to the C++ code in mbcopy.cc. This is not true for clang or gcc.
+The symbols in question are double arrays holding the beam angles for different
+operation modes of the Simrad multibeams supported by this i/o module.
+The solution attempted here is to move the array definitions to mbsys_simrad.c
+and to provide a non-standard function to access pointers to those arrays. By
+non-standard I mean this does not fit with the normal set of MBIO API functions,
+and does not exist for i/o modules generally. The function mbsys_simrad_beamangles()
+has been added to mbsys_simrad.c and the prototype in mbsys_simrad.h is wrapped
+with extern "C" so it can be called from mbcopy.cc.
+
+Mbcopy: The current processing model for old Simrad multibeam data in format 51
+is to first use mbcopy to translate it the extended second generation Kongsberg
+format 57, and then process it as one would more modern data. It was discovered
+that this translation was failing to properly copy navigation records. This
+was fixed.
+
+Format MBF_EMOLDRAW (51): Because the compile error referenced above involved
+1990's era Simrad multibeam data in format 51, it was necessary to test processing
+of such data. This revealed that recent changes to program logic from using
+MB_YES/MB_NO/MB_MAYBE values to bool variables (true/false) had broken the basic
+data record reading logic for the MBF_EMOLDRAW i/o module. This has been fixed.
 
 Build system for Qt5 based tools: Improved the build system handling of Qt5
 programs. The test program enabled by running configure with the --enable-qt

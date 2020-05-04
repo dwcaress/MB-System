@@ -878,13 +878,14 @@ int mbcopy_simrad_to_simrad2(int verbose, struct mbsys_simrad_struct *istore, st
     ;
     /* heading (0.01 deg) if valid,
     invalid = 0xFFFF */
-    ostore->pos_system = istore->pos_type;
+    ostore->pos_system = 129; // don't use istore->pos_type;
     /* position system number, type, and realtime use
         - position system number given by two lowest bits
         - fifth bit set means position must be derived
         from input Simrad 90 datagram
         - sixth bit set means valid time is that of
-        input datagram */
+        input datagram
+        - setting pos_system = 129 makes nav system1 the active sensor */
     ostore->pos_input_size = 0; /* number of bytes in input position datagram */
     for (int i = 0; i < 256; i++) {
       ostore->pos_input[i] = 0; /* position input datagram as received, minus
@@ -1050,280 +1051,181 @@ int mbcopy_simrad_to_simrad2(int verbose, struct mbsys_simrad_struct *istore, st
         /* sampling rate (Hz) */
       }
 
-      /* get angles */
+      /* get predefined table of beam angles using sonar type and operational mode */
       bool interleave = false;
-      if (istore->sonar == MBSYS_SIMRAD_EM1000) {
-        if (iping->bath_mode == 1) {
-          angles_simrad = angles_EM1000_ISO_ANG_60_2_MS_48_FAIS;
-          // interleave = false;
-        }
-        else if (iping->bath_mode == 2) {
-          angles_simrad = angles_EM1000_ISO_ANG_120_07_MS_48_FAIS;
-          interleave = true;
-        }
-        else if (iping->bath_mode == 3) {
-          angles_simrad = angles_EM1000_ISO_ANG_150_02_MS_60_FAIS;
-          interleave = true;
-        }
-        else if (iping->bath_mode == 4) {
-          angles_simrad = angles_EM1000_CHANNEL_02_MS_60_FAIS;
-          interleave = true;
-        }
-        else if (iping->bath_mode == 5) {
-          angles_simrad = angles_EM1000_150_02_MS_60_FAIS;
-          interleave = true;
-        }
-        else if (iping->bath_mode == 6) {
-          angles_simrad = angles_EM1000_140_02_MS_60_FAIS;
-          interleave = true;
-        }
-        else if (iping->bath_mode == 7) {
-          angles_simrad = angles_EM1000_128_02_MS_60_FAIS;
-          interleave = true;
-        }
-        else if (iping->bath_mode == 8) {
-          angles_simrad = angles_EM1000_120_07_MS_48_FAIS;
-          interleave = true;
-        }
-        else if (iping->bath_mode == 9) {
-          angles_simrad = angles_EM1000_104_07_MS_48_FAIS;
-          interleave = true;
-        }
-        else if (iping->bath_mode == 10) {
-          angles_simrad = angles_EM1000_88_07_MS_48_FAIS;
-          interleave = true;
-        }
-        else if (iping->bath_mode == 11) {
-          angles_simrad = angles_EM1000_70_2_MS_48_FAIS;
-          interleave = false;
-        }
-        else if (iping->bath_mode == 12) {
-          angles_simrad = angles_EM1000_BERGE_02_MS_60_FAIS;
-          interleave = true;
-        }
-        else if (iping->bath_mode == 13) {
-          angles_simrad = angles_EM1000_BERGE_02_MS_60_FAIS;
-          interleave = true;
-        }
-      }
-      else if (istore->sonar == MBSYS_SIMRAD_EM12S) {
-        if (iping->bath_mode == 1)
-          angles_simrad = angles_EM12S_ISO_ANG_SHALLOW;
-        else if (iping->bath_mode == 2)
-          angles_simrad = angles_EM12S_ISO_ANG_DEEP;
-        else if (iping->bath_mode == 3)
-          angles_simrad = angles_EM12S_SHALLOW;
-        else if (iping->bath_mode == 4)
-          angles_simrad = angles_EM12S_120;
-        else if (iping->bath_mode == 5)
-          angles_simrad = angles_EM12S_105;
-        else if (iping->bath_mode == 6)
-          angles_simrad = angles_EM12S_90;
-      }
-      else if (istore->sonar == MBSYS_SIMRAD_EM12D && iping->swath_id == EM_SWATH_PORT) {
-        if (iping->bath_mode == 1)
-          angles_simrad = angles_EM12DP_ISO_ANG_SHALLOW;
-        else if (iping->bath_mode == 2)
-          angles_simrad = angles_EM12DP_ISO_ANG_DEEP;
-        else if (iping->bath_mode == 3)
-          angles_simrad = angles_EM12DP_SHALLOW;
-        else if (iping->bath_mode == 4)
-          angles_simrad = angles_EM12DP_150;
-        else if (iping->bath_mode == 5)
-          angles_simrad = angles_EM12DP_140;
-        else if (iping->bath_mode == 6)
-          angles_simrad = angles_EM12DP_128;
-        else if (iping->bath_mode == 7)
-          angles_simrad = angles_EM12DP_114;
-        else if (iping->bath_mode == 8)
-          angles_simrad = angles_EM12DP_98;
-      }
-      else if (istore->sonar == MBSYS_SIMRAD_EM12D && iping->swath_id == EM_SWATH_STARBOARD) {
-        if (iping->bath_mode == 1)
-          angles_simrad = angles_EM12DS_ISO_ANG_SHALLOW;
-        else if (iping->bath_mode == 2)
-          angles_simrad = angles_EM12DS_ISO_ANG_DEEP;
-        else if (iping->bath_mode == 3)
-          angles_simrad = angles_EM12DS_SHALLOW;
-        else if (iping->bath_mode == 4)
-          angles_simrad = angles_EM12DS_150;
-        else if (iping->bath_mode == 5)
-          angles_simrad = angles_EM12DS_140;
-        else if (iping->bath_mode == 6)
-          angles_simrad = angles_EM12DS_128;
-        else if (iping->bath_mode == 7)
-          angles_simrad = angles_EM12DS_114;
-        else if (iping->bath_mode == 8)
-          angles_simrad = angles_EM12DS_98;
-      }
+      int nbeams = 0;
+      mbsys_simrad_beamangles(verbose, (void *)istore,
+      		                    &interleave, &nbeams, &angles_simrad, error);
 
-      /* if interleaved get center beam */
-      if (interleave) {
-        if (iping->bath_mode == 12 && abs(iping->bath_acrosstrack[28]) < abs(iping->bath_acrosstrack[29]))
-          istep = 1;
-        else if (iping->bath_mode == 13 && abs(iping->bath_acrosstrack[31]) < abs(iping->bath_acrosstrack[30]))
-          istep = 1;
-        else if (abs(iping->bath_acrosstrack[oping->png_nbeams / 2 - 1]) <
-                 abs(iping->bath_acrosstrack[oping->png_nbeams / 2]))
-          istep = 1;
+      if (*error == MB_ERROR_NO_ERROR && nbeams > 0 && angles_simrad != nullptr) {
+        /* if interleaved get center beam */
+        if (interleave) {
+          if (iping->bath_mode == 12 && abs(iping->bath_acrosstrack[28]) < abs(iping->bath_acrosstrack[29]))
+            istep = 1;
+          else if (iping->bath_mode == 13 && abs(iping->bath_acrosstrack[31]) < abs(iping->bath_acrosstrack[30]))
+            istep = 1;
+          else if (abs(iping->bath_acrosstrack[oping->png_nbeams / 2 - 1]) <
+                   abs(iping->bath_acrosstrack[oping->png_nbeams / 2]))
+            istep = 1;
+          else
+            istep = 0;
+        }
+
+        /* set beam values */
+        for (int i = 0; i < oping->png_nbeams; i++) {
+          oping->png_depth[i] = (int)((unsigned short)iping->bath[i]);
+          /* depths in depth resolution units */
+          if (oping->png_depth[i] != 0)
+            oping->png_depth[i] -= (int)(bath_offset / (0.01 * oping->png_depth_res));
+          oping->png_acrosstrack[i] = iping->bath_acrosstrack[i];
+          /* acrosstrack distances in distance resolution units */
+          oping->png_alongtrack[i] = iping->bath_alongtrack[i];
+          /* alongtrack distances in distance resolution units */
+
+          alpha = 0.01 * iping->pitch;
+          if (istore->sonar == MBSYS_SIMRAD_EM1000 && iping->bath_mode == 13) {
+            beta = 90.0 - angles_simrad[oping->png_nbeams - 1 - (2 * i + istep)];
+          }
+          else if (istore->sonar == MBSYS_SIMRAD_EM1000 && interleave) {
+            beta = 90.0 + angles_simrad[2 * i + istep];
+          }
+          else if (istore->sonar == MBSYS_SIMRAD_EM1000) {
+            beta = 90.0 + angles_simrad[i];
+          }
+          else {
+            beta = 90.0 + angles_simrad[i];
+          }
+          mb_rollpitch_to_takeoff(verbose, alpha, beta, &theta, &phi, error);
+          oping->png_depression[i] = (int)(100 * (90.0 - theta));
+          /* Beam depression angles
+              in 0.01 degree. These are the takeoff angles used
+              in raytracing calculations. */
+          oping->png_azimuth[i] = (int)(100 * (90.0 - phi));
+          if (oping->png_azimuth[i] < 0)
+            oping->png_azimuth[i] += 36000;
+          /* Beam azimuth angles
+              in 0.01 degree. These values used to rotate sounding
+              position relative to the sonar after raytracing. */
+          oping->png_range[i] = iping->tt[i];
+          /* Ranges as one way
+              travel times in time units defined as half
+              the inverse sampling rate. */
+          oping->png_quality[i] = iping->quality[i];
+          /* 0-254 */
+          oping->png_window[i] = 0;
+          /* samples/4 */
+          oping->png_amp[i] = iping->amp[i];
+          /* 0.5 dB */
+          oping->png_beam_num[i] = i + 1;
+          /* beam 128 is first beam on
+              second head of EM3000D */
+          if (iping->bath[i] > 0)
+            oping->png_beamflag[i] = MB_FLAG_NONE;
+          else
+            oping->png_beamflag[i] = MB_FLAG_NULL;
+        }
+
+        /* raw travel time and angle data */
+        oping->png_raw1_read = false; /* flag indicating actual reading of rawbeam1 record */
+        oping->png_raw2_read = false; /* flag indicating actual reading of rawbeam2 record */
+        oping->png_raw_nbeams = 0; /* number of raw travel times and angles
+               - nonzero only if raw beam record read */
+                                   /* number of valid beams */
+
+        /* get raw pixel size to be stored in oping->png_max_range */
+        if (iping->pixels_ssraw > 0)
+          oping->png_ss_read = true; /* flag indicating actual reading of sidescan record */
         else
-          istep = 0;
-      }
-
-      /* set beam values */
-      for (int i = 0; i < oping->png_nbeams; i++) {
-        oping->png_depth[i] = (int)((unsigned short)iping->bath[i]);
-        /* depths in depth resolution units */
-        if (oping->png_depth[i] != 0)
-          oping->png_depth[i] -= (int)(bath_offset / (0.01 * oping->png_depth_res));
-        oping->png_acrosstrack[i] = iping->bath_acrosstrack[i];
-        /* acrosstrack distances in distance resolution units */
-        oping->png_alongtrack[i] = iping->bath_alongtrack[i];
-        /* alongtrack distances in distance resolution units */
-
-        alpha = 0.01 * iping->pitch;
-        if (istore->sonar == MBSYS_SIMRAD_EM1000 && iping->bath_mode == 13) {
-          beta = 90.0 - angles_simrad[oping->png_nbeams - 1 - (2 * i + istep)];
-        }
-        else if (istore->sonar == MBSYS_SIMRAD_EM1000 && interleave) {
-          beta = 90.0 + angles_simrad[2 * i + istep];
+          oping->png_ss_read = false;       /* flag indicating actual reading of sidescan record */
+        oping->png_ss_date = oping->png_date; /* date = year*10000 + month*100 + day
+              Feb 26, 1995 = 19950226 */
+        oping->png_ss_msec = oping->png_msec; /* time since midnight in msec
+              08:12:51.234 = 29570234 */
+        if (istore->sonar == MBSYS_SIMRAD_EM12D || istore->sonar == MBSYS_SIMRAD_EM12S ||
+            istore->sonar == MBSYS_SIMRAD_EM121) {
+          if (iping->ss_mode == 1)
+            oping->png_max_range = 60;
+          else if (iping->ss_mode == 2)
+            oping->png_max_range = 240;
+          else if (iping->bath_mode == 1 || iping->bath_mode == 3)
+            oping->png_max_range = 60;
+          else
+            oping->png_max_range = 240;
         }
         else if (istore->sonar == MBSYS_SIMRAD_EM1000) {
-          beta = 90.0 + angles_simrad[i];
+          if (iping->ss_mode == 3)
+            oping->png_max_range = 30;
+          else if (iping->ss_mode == 4)
+            oping->png_max_range = 30;
+          else if (iping->ss_mode == 5)
+            oping->png_max_range = 15;
+          else
+            oping->png_max_range = 15;
         }
-        else {
-          beta = 90.0 + angles_simrad[i];
+
+        /* sidescan */
+        oping->png_r_zero = 0;
+        /* range to normal incidence used in TVG
+            (R0 predicted) in samples */
+        oping->png_r_zero_corr = 0;
+        /* range to normal incidence used to correct
+            sample amplitudes in number of samples */
+        oping->png_tvg_start = 0;
+        /* start sample of TVG ramp if not enough
+            dynamic range (0 otherwise) */
+        oping->png_tvg_stop = 0; /* stop sample of TVG ramp if not enough
+                                     dynamic range (0 otherwise) */
+        oping->png_bsn = 0;
+        /* normal incidence backscatter (BSN) in dB */
+        oping->png_bso = 0;
+        /* oblique incidence backscatter (BSO) in dB */
+        if (ostore->sonar == MBSYS_SIMRAD2_EM121)
+          oping->png_tx = 10 * iping->beam_width;
+        else if (ostore->sonar == MBSYS_SIMRAD2_EM12S || ostore->sonar == MBSYS_SIMRAD2_EM12D)
+          oping->png_tx = 17;
+        else if (ostore->sonar == MBSYS_SIMRAD2_EM1000)
+          oping->png_tx = 33;
+        /* Tx beamwidth in 0.1 degree */
+        oping->png_tvg_crossover = 0;
+        /* TVG law crossover angle in degrees */
+        oping->png_nbeams_ss = oping->png_nbeams;
+        /* number of beams with sidescan */
+        oping->png_npixels = iping->pixels_ssraw;
+        for (int i = 0; i < oping->png_nbeams_ss; i++) {
+          oping->png_beam_index[i] = i;
+          /* beam index number */
+          oping->png_sort_direction[i] = 0;
+          /* sorting direction - first sample in beam has lowest
+              range if 1, highest if -1. */
+          oping->png_beam_samples[i] = iping->beam_samples[i];
+          /* number of sidescan samples derived from
+              each beam */
+          oping->png_start_sample[i] = iping->beam_start_sample[i];
+          /* start sample number */
+          oping->png_center_sample[i] = iping->beam_center_sample[i];
+          /* center sample number */
         }
-        mb_rollpitch_to_takeoff(verbose, alpha, beta, &theta, &phi, error);
-        oping->png_depression[i] = (int)(100 * (90.0 - theta));
-        /* Beam depression angles
-            in 0.01 degree. These are the takeoff angles used
-            in raytracing calculations. */
-        oping->png_azimuth[i] = (int)(100 * (90.0 - phi));
-        if (oping->png_azimuth[i] < 0)
-          oping->png_azimuth[i] += 36000;
-        /* Beam azimuth angles
-            in 0.01 degree. These values used to rotate sounding
-            position relative to the sonar after raytracing. */
-        oping->png_range[i] = iping->tt[i];
-        /* Ranges as one way
-            travel times in time units defined as half
-            the inverse sampling rate. */
-        oping->png_quality[i] = iping->quality[i];
-        /* 0-254 */
-        oping->png_window[i] = 0;
-        /* samples/4 */
-        oping->png_amp[i] = iping->amp[i];
-        /* 0.5 dB */
-        oping->png_beam_num[i] = i + 1;
-        /* beam 128 is first beam on
-            second head of EM3000D */
-        if (iping->bath[i] > 0)
-          oping->png_beamflag[i] = MB_FLAG_NONE;
-        else
-          oping->png_beamflag[i] = MB_FLAG_NULL;
-      }
-
-      /* raw travel time and angle data */
-      oping->png_raw1_read = false; /* flag indicating actual reading of rawbeam1 record */
-      oping->png_raw2_read = false; /* flag indicating actual reading of rawbeam2 record */
-      oping->png_raw_nbeams = 0; /* number of raw travel times and angles
-             - nonzero only if raw beam record read */
-                                 /* number of valid beams */
-
-      /* get raw pixel size to be stored in oping->png_max_range */
-      if (iping->pixels_ssraw > 0)
-        oping->png_ss_read = true; /* flag indicating actual reading of sidescan record */
-      else
-        oping->png_ss_read = false;       /* flag indicating actual reading of sidescan record */
-      oping->png_ss_date = oping->png_date; /* date = year*10000 + month*100 + day
-            Feb 26, 1995 = 19950226 */
-      oping->png_ss_msec = oping->png_msec; /* time since midnight in msec
-            08:12:51.234 = 29570234 */
-      if (istore->sonar == MBSYS_SIMRAD_EM12D || istore->sonar == MBSYS_SIMRAD_EM12S ||
-          istore->sonar == MBSYS_SIMRAD_EM121) {
-        if (iping->ss_mode == 1)
-          oping->png_max_range = 60;
-        else if (iping->ss_mode == 2)
-          oping->png_max_range = 240;
-        else if (iping->bath_mode == 1 || iping->bath_mode == 3)
-          oping->png_max_range = 60;
-        else
-          oping->png_max_range = 240;
-      }
-      else if (istore->sonar == MBSYS_SIMRAD_EM1000) {
-        if (iping->ss_mode == 3)
-          oping->png_max_range = 30;
-        else if (iping->ss_mode == 4)
-          oping->png_max_range = 30;
-        else if (iping->ss_mode == 5)
-          oping->png_max_range = 15;
-        else
-          oping->png_max_range = 15;
-      }
-
-      /* sidescan */
-      oping->png_r_zero = 0;
-      /* range to normal incidence used in TVG
-          (R0 predicted) in samples */
-      oping->png_r_zero_corr = 0;
-      /* range to normal incidence used to correct
-          sample amplitudes in number of samples */
-      oping->png_tvg_start = 0;
-      /* start sample of TVG ramp if not enough
-          dynamic range (0 otherwise) */
-      oping->png_tvg_stop = 0; /* stop sample of TVG ramp if not enough
-                                   dynamic range (0 otherwise) */
-      oping->png_bsn = 0;
-      /* normal incidence backscatter (BSN) in dB */
-      oping->png_bso = 0;
-      /* oblique incidence backscatter (BSO) in dB */
-      if (ostore->sonar == MBSYS_SIMRAD2_EM121)
-        oping->png_tx = 10 * iping->beam_width;
-      else if (ostore->sonar == MBSYS_SIMRAD2_EM12S || ostore->sonar == MBSYS_SIMRAD2_EM12D)
-        oping->png_tx = 17;
-      else if (ostore->sonar == MBSYS_SIMRAD2_EM1000)
-        oping->png_tx = 33;
-      /* Tx beamwidth in 0.1 degree */
-      oping->png_tvg_crossover = 0;
-      /* TVG law crossover angle in degrees */
-      oping->png_nbeams_ss = oping->png_nbeams;
-      /* number of beams with sidescan */
-      oping->png_npixels = iping->pixels_ssraw;
-      for (int i = 0; i < oping->png_nbeams_ss; i++) {
-        oping->png_beam_index[i] = i;
-        /* beam index number */
-        oping->png_sort_direction[i] = 0;
-        /* sorting direction - first sample in beam has lowest
-            range if 1, highest if -1. */
-        oping->png_beam_samples[i] = iping->beam_samples[i];
-        /* number of sidescan samples derived from
-            each beam */
-        oping->png_start_sample[i] = iping->beam_start_sample[i];
-        /* start sample number */
-        oping->png_center_sample[i] = iping->beam_center_sample[i];
-        /* center sample number */
-      }
-      for (int i = 0; i < oping->png_npixels; i++) {
-        oping->png_ssraw[i] = iping->ssraw[i];
-        /* the raw sidescan ordered port to starboard */
-      }
-      oping->png_pixel_size = iping->pixel_size;
-      oping->png_pixels_ss = iping->pixels_ss;
-      for (int i = 0; i < oping->png_pixels_ss; i++) {
-        if (iping->ss[i] != 0) {
-          oping->png_ss[i] = iping->ss[i];
-          /* the processed sidescan ordered port to starboard */
-          oping->png_ssalongtrack[i] = iping->ssalongtrack[i];
-          /* the processed sidescan alongtrack distances
-              in distance resolution units */
+        for (int i = 0; i < oping->png_npixels; i++) {
+          oping->png_ssraw[i] = iping->ssraw[i];
+          /* the raw sidescan ordered port to starboard */
         }
-        else {
-          oping->png_ss[i] = EM2_INVALID_AMP;
-          /* the processed sidescan ordered port to starboard */
-          oping->png_ssalongtrack[i] = EM2_INVALID_AMP;
-          /* the processed sidescan alongtrack distances
-              in distance resolution units */
+        oping->png_pixel_size = iping->pixel_size;
+        oping->png_pixels_ss = iping->pixels_ss;
+        for (int i = 0; i < oping->png_pixels_ss; i++) {
+          if (iping->ss[i] != 0) {
+            oping->png_ss[i] = iping->ss[i];
+            /* the processed sidescan ordered port to starboard */
+            oping->png_ssalongtrack[i] = iping->ssalongtrack[i];
+            /* the processed sidescan alongtrack distances
+                in distance resolution units */
+          }
+          else {
+            oping->png_ss[i] = EM2_INVALID_AMP;
+            /* the processed sidescan ordered port to starboard */
+            oping->png_ssalongtrack[i] = EM2_INVALID_AMP;
+            /* the processed sidescan alongtrack distances
+                in distance resolution units */
+          }
         }
       }
     }

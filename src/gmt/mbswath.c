@@ -1893,7 +1893,6 @@ int GMT_mbswath(void *V_API, int mode, void *args) {
 	mb_path file;
 	mb_path dfile;
 	int format;
-	int file_in_bounds;
 	int read_data;
 	struct ping *pingcur;
 	double amplog;
@@ -2053,6 +2052,7 @@ int GMT_mbswath(void *V_API, int mode, void *args) {
 		fprintf(stderr, "\n");
 	while (read_data) {
 		/* check for mbinfo file - get file bounds if possible */
+	  bool file_in_bounds = false;
 		status = mb_check_info(verbose, file, Ctrl->L.lonflip, Ctrl->bounds, &file_in_bounds, &error);
 		if (status == MB_FAILURE) {
 			file_in_bounds = true;
