@@ -1109,7 +1109,7 @@ int GMT_mbcontour(void *V_API, int mode, void *args) {
 
 	while (read_data) {
 		/* check for mbinfo file - get file bounds if possible */
-		int file_in_bounds = false;  // TOOD(schwehr): bool
+		bool file_in_bounds = false;
 		status = mb_check_info(verbose, file, lonflip, bounds, &file_in_bounds, &error);
 		if (status == MB_FAILURE) {
 			file_in_bounds = true;
