@@ -1,7 +1,7 @@
 /*--------------------------------------------------------------------
  *    The MB-system:  mbtrnpp.c  2/19/2018
  *
- *    Copyright (c) 2018-2019 by
+ *    Copyright (c) 2018-2019 bysocket_definition
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -317,8 +317,21 @@ s=NULL;\
 #define BOOL2II(v) ( v ? 1 : 0 )
 
 #define MBTRNPP_CONF_DEL "="
+
+#define CFG_INPUT_DFL          "datalist.mb-1"
+//#define CFG_INPUT_DFL          "socket:localhost:7000:0"
+#define CFG_MNEM_SESSION       "SESSION"
+#define CFG_MNEM_RHOST         "TRN_RESON_HOST"
+#define CFG_MNEM_TRN_HOST      "TRN_HOST"
+#define CFG_MNEM_TRN_SESSION   "TRN_SESSION"
+#define CFG_MNEM_TRN_LOGFILES  "TRN_LOGFILES"
+#define CFG_MNEM_TRN_MAPFILES  "TRN_MAPFILES"
+#define CFG_MNEM_TRN_DATAFILES "TRN_DATAFILES"
+#define CFG_MNEM_TRN_CFGFILES  "TRN_CFGFILES"
+#define CFG_TRN_LOG_DIR_DFL    "."
+
 #define OPT_VERBOSE_DFL                 0
-#define OPT_INPUT_DFL                   "socket:localhost:7000:0"
+#define OPT_INPUT_DFL                   CFG_INPUT_DFL
 #define OPT_FORMAT_DFL                  88
 #define OPT_PLATFORM_FILE_DFL           NULL
 #define OPT_PLATFORM_TARGET_SENSOR_DFL  0
@@ -355,17 +368,6 @@ s=NULL;\
 #define OPT_TRN_NOMBGAIN_DFL            false
 #define OPT_HELP_DFL                    false
 
-#define CFG_INPUT_DFL                    "datalist.mb-1"
-
-#define CFG_MNEM_SESSION       "SESSION"
-#define CFG_MNEM_RHOST         "RESON_HOST"
-#define CFG_MNEM_MBTRN_HOST    "MBTRN_HOST"
-#define CFG_MNEM_TRN_SESSION   "TRN_SESSION"
-#define CFG_MNEM_TRN_LOGFILES  "TRN_LOGFILES"
-#define CFG_MNEM_TRN_MAPFILES  "TRN_MAPFILES"
-#define CFG_MNEM_TRN_DATAFILES "TRN_DATAFILES"
-#define CFG_MNEM_TRN_CFGFILES  "TRN_CFGFILES"
-#define CFG_TRN_LOG_DIR_DFL    "."
 
 #define MNEM_MAX_LEN 64
 #define HOSTNAME_BUF_LEN 256
@@ -377,19 +379,12 @@ s=NULL;\
 #define SESSION_BUF_LEN 16
 #define TRNSESSION_BUF_LEN 9
 
-
-//mb_path socket_definition;
-
 #define SONAR_SIM_HOST "localhost"
 
 #define MBTPP 1
-//input_mode_t input_mode;
 #define OUTPUT_FLAG_SET(m)  ((m&mbtrn_cfg->output_flags)==0 ? false : true)
 #define OUTPUT_FLAG_CLR(m)  ((m&mbtrn_cfg->output_flags)==0 ? true : false)
 #define OUTPUT_FLAGS_ZERO() ((mbtrn_cfg->output_flags==0) ? true : false)
-//output_mode_t output_flags = OUTPUT_MBTRNPP_MSG;
-
-//int64_t mbtrnpp_loop_delay_msec = 0;
 
 #define MBTRN_CFG_NAME    "mbtrn.cfg"
 #define MBTRN_CFG_PATH    "."
@@ -466,47 +461,16 @@ mfile_flags_t flags = MFILE_RDWR | MFILE_APPEND | MFILE_CREATE;
 mfile_mode_t mode = MFILE_RU | MFILE_WU | MFILE_RG | MFILE_WG;
 
 netif_t *mb1svr=NULL;
-//int mb1svr_port=MB1SVR_PORT_DFL;
-//char *mb1svr_host=MB1SVR_HOST_DFL;
-//int mbsvr_hbtok = MB1SVR_HBTOK_DFL;
-//double mbsvr_hbto = MB1SVR_HBTO_DFL;
-//double trnsvr_hbto = TRNSVR_HBTO_DFL;
-//double trnusvr_hbto = TRNUSVR_HBTO_DFL;
 
 #ifdef WITH_MBTNAV
 trn_config_t *trn_cfg = NULL;
-//bool trn_enable = false;
-//long int trn_utm_zone = TRN_UTM_DFL;
-//int trn_mtype = TRN_MTYPE_DFL;
-//int trn_ftype = TRN_FTYPE_DFL;
-//char *trn_map_file = NULL;
-//char *trn_cfg_file = NULL;
-//char *trn_particles_file = NULL;
-//char *trn_log_dir = NULL;
-//unsigned int trn_decn=0;
-//double trn_decs=0.0;
 unsigned int trn_dec_cycles=0;
 double trn_dec_time=0.0;
 wtnav_t *trn_instance = NULL;
 trnw_oflags_t trn_oflags=TRN_OUT_DFL;
-//double trn_max_ncov=TRN_MAX_NCOV_DFL;
-//double trn_max_nerr=TRN_MAX_NERR_DFL;
-//double trn_max_ecov=TRN_MAX_ECOV_DFL;
-//double trn_max_eerr=TRN_MAX_EERR_DFL;
-
 netif_t *trnsvr=NULL;
-//int trnsvr_port=TRNSVR_PORT_DFL;
-//char *trnsvr_host=TRNSVR_HOST_DFL;
-
 netif_t *trnusvr=NULL;
-//int trnusvr_port=TRNU_PORT_DFL;
-//char *trnusvr_host=TRNU_HOST_DFL;
-
 #endif // WITH_MBTNAV
-
-//char g_cmd_line[MBTRNPP_CMD_LINE_BYTES] = {0};
-
-//char *trn_log_dir = NULL;
 
 typedef enum{RF_NONE=0,RF_FORCE_UPDATE=0x1,RF_RELEASE=0x2}mb_resource_flag_t;
 
@@ -595,7 +559,6 @@ const char *mbtrnpp_stchan_labels[] = {
 const char **mbtrnpp_stats_labels[MSLABEL_COUNT] = {mbtrnpp_stevent_labels, mbtrnpp_ststatus_labels, mbtrnpp_stchan_labels};
 mstats_profile_t *app_stats = NULL;
 mstats_t *reader_stats = NULL;
-//double trn_status_interval_sec = MBTRNPP_STAT_PERIOD_SEC;
 // stats interval end
 static double stats_prev_end = 0.0;
 // stats interval start
@@ -664,6 +627,8 @@ static int s_parse_opt_mbout(mbtrnpp_cfg_t *cfg, char *opt_str);
 static int s_parse_opt_trnout(mbtrnpp_cfg_t *cfg, char *opt_str);
 // parse option: --logdir
 static int s_parse_opt_logdir(mbtrnpp_cfg_t *cfg, char *opt_str);
+// parse option: --input
+static int s_parse_opt_input(mbtrnpp_cfg_t *cfg, char *opt_str);
 // get --config option from cmdline, if provided
 static char *s_mbtrnpp_peek_opt_cfg(int argc, char **argv, char **buf, size_t len);
 
@@ -704,7 +669,6 @@ char *mbtrnpp_trn_updatestr(char *dest, int len, trn_update_t *update, int inden
 // reinit TRN when sonar transmit gain above threshold
 // or if trn_nombgain is true
 bool trn_reinit_flag=true;
-//bool trn_nombgain=false;
 
 char mRecordBuf[MBSYS_KMBES_MAX_NUM_MRZ_DGMS][64*1024];
 /*--------------------------------------------------------------------*/
@@ -873,7 +837,7 @@ char *s_mnem_value(char **pdest, size_t len, const char *key)
 
             val=CHK_STRDUP(s_mbtrnpp_trnsession_str(NULL,0,RF_NONE));
 
-        }else if(strcmp(key,CFG_MNEM_MBTRN_HOST)==0){
+        }else if(strcmp(key,CFG_MNEM_TRN_HOST)==0){
 
             // try env
             val=CHK_STRDUP(getenv(key));
@@ -1020,7 +984,7 @@ static int s_test_mnem()
 {
     char *opt_session = strdup("test_session-SESSION--");
     char *opt_rhost=strdup("test_rhost-RESON_HOST--");
-    char *opt_mbtrnhost=strdup("test_mbtrnhost-MBTRN_HOST--");
+    char *opt_trnhost=strdup("test_trnhost-TRN_HOST--");
     char *opt_trnsession = strdup("test_trnsession-TRN_SESSION--");
     char *opt_trnlog = strdup("test_trnlog-TRN_LOGFILES--");
     char *opt_trnmap = strdup("test_trnmap-TRN_MAPFILES--");
@@ -1032,7 +996,7 @@ static int s_test_mnem()
     MEM_CHKINVALIDATE(val);
     s_sub_mnem(&opt_rhost,0,opt_rhost,CFG_MNEM_RHOST,s_mnem_value(&val,0,CFG_MNEM_RHOST));
     MEM_CHKINVALIDATE(val);
-    s_sub_mnem(&opt_mbtrnhost,0,opt_mbtrnhost,CFG_MNEM_MBTRN_HOST,s_mnem_value(&val,0,CFG_MNEM_MBTRN_HOST));
+    s_sub_mnem(&opt_trnhost,0,opt_trnhost,CFG_MNEM_TRN_HOST,s_mnem_value(&val,0,CFG_MNEM_TRN_HOST));
     MEM_CHKINVALIDATE(val);
     s_sub_mnem(&opt_trnsession,0,opt_trnsession,CFG_MNEM_TRN_SESSION,s_mnem_value(&val,0,CFG_MNEM_TRN_SESSION));
     MEM_CHKINVALIDATE(val);
@@ -1047,7 +1011,7 @@ static int s_test_mnem()
 
     fprintf(stderr,"%s:%d - opt_session    [%s]\n",__func__,__LINE__,opt_session);
     fprintf(stderr,"%s:%d - opt_rhost      [%s]\n",__func__,__LINE__,opt_rhost);
-    fprintf(stderr,"%s:%d - opt_mbtrnhost  [%s]\n",__func__,__LINE__,opt_mbtrnhost);
+    fprintf(stderr,"%s:%d - opt_trnhost    [%s]\n",__func__,__LINE__,opt_trnhost);
     fprintf(stderr,"%s:%d - opt_trnsession [%s]\n",__func__,__LINE__,opt_trnsession);
     fprintf(stderr,"%s:%d - opt_trnlog     [%s]\n",__func__,__LINE__,opt_trnlog);
     fprintf(stderr,"%s:%d - opt_trnmap     [%s]\n",__func__,__LINE__,opt_trnmap);
@@ -1056,7 +1020,7 @@ static int s_test_mnem()
 
     MEM_CHKFREE(opt_session);
     MEM_CHKFREE(opt_rhost);
-    MEM_CHKFREE(opt_mbtrnhost);
+    MEM_CHKFREE(opt_trnhost);
     MEM_CHKFREE(opt_trnsession);
     MEM_CHKFREE(opt_trnlog);
     MEM_CHKFREE(opt_trnmap);
@@ -1613,6 +1577,43 @@ static int s_parse_opt_logdir(mbtrnpp_cfg_t *cfg, char *opt_str)
     return retval;
 }
 
+static int s_parse_opt_input(mbtrnpp_cfg_t *cfg, char *opt_str)
+{
+    int retval=-1;
+    if(NULL!=cfg && NULL!=opt_str){
+        size_t opt_len=strlen(opt_str);
+
+        if(opt_len>0 && opt_len<MB_PATH_SIZE){
+            // set config input option
+            sprintf(cfg->input,"%s",opt_str);
+            // parse option and set mode
+            char *psdef=NULL;
+            if ((psdef=strstr(opt_str, "socket:"))!=NULL) {
+                if(NULL!=psdef){
+                    size_t sdef_len=strlen(psdef);
+                    if(sdef_len>0 && sdef_len<MB_PATH_SIZE){
+                        psdef+=strlen("socket:");
+                        // set socket mode and definition
+                        cfg->input_mode = INPUT_MODE_SOCKET;
+                        sprintf(cfg->socket_definition,"%s",psdef);
+                    }else{
+                        fprintf(stderr,"socket definition length invalid [%s/%zu/%zu]\n",psdef,sdef_len,(size_t)MB_PATH_SIZE);
+                    }
+//            fprintf(stderr, "socket_definition|%s\n", cfg->socket_definition);
+                }
+            }else {
+                // cfg->input is input file name
+                mbtrn_cfg->input_mode = INPUT_MODE_FILE;
+            }
+        }else{
+            fprintf(stderr,"input specifier length invalid [%s/%zu/%zu]\n",opt_str,opt_len,(size_t)MB_PATH_SIZE);
+        }
+    }else{
+        fprintf(stderr,"%s: ERR - invalid argument\n",__func__);
+    }
+    return retval;
+}
+
 static char *s_mbtrnpp_peek_opt_cfg(int argc, char **argv, char **pbuf, size_t len)
 {
     char *retval =NULL;
@@ -1862,9 +1863,9 @@ static int s_mbtrnpp_kvparse_fn(char *key, char *val, void *cfg)
         MEM_CHKINVALIDATE(val);
         s_sub_mnem(&opts->output,0,opts->output,CFG_MNEM_SESSION,s_mnem_value(&val,0,CFG_MNEM_SESSION));
         MEM_CHKINVALIDATE(val);
-        s_sub_mnem(&opts->mb_out,0,opts->mb_out,CFG_MNEM_MBTRN_HOST,s_mnem_value(&val,0,CFG_MNEM_MBTRN_HOST));
+        s_sub_mnem(&opts->mb_out,0,opts->mb_out,CFG_MNEM_TRN_HOST,s_mnem_value(&val,0,CFG_MNEM_TRN_HOST));
         MEM_CHKINVALIDATE(val);
-        s_sub_mnem(&opts->trn_out,0,opts->trn_out,CFG_MNEM_MBTRN_HOST,s_mnem_value(&val,0,CFG_MNEM_MBTRN_HOST));
+        s_sub_mnem(&opts->trn_out,0,opts->trn_out,CFG_MNEM_TRN_HOST,s_mnem_value(&val,0,CFG_MNEM_TRN_HOST));
         MEM_CHKINVALIDATE(val);
         s_sub_mnem(&opts->trn_mid,0,opts->trn_mid,CFG_MNEM_TRN_SESSION,s_mnem_value(&val,0,CFG_MNEM_TRN_SESSION));
         MEM_CHKINVALIDATE(val);
@@ -1938,22 +1939,9 @@ static int s_mbtrnpp_configure(mbtrnpp_cfg_t *cfg, mbtrnpp_opts_t *opts)
     if(NULL!=opts && NULL!=cfg){
         // verbose
         cfg->verbose = opts->verbose;
+
         // input
-        char *psdef=NULL;
-        if (NULL!=opts->input && (psdef=strstr(opts->input, "socket:"))!=NULL) {
-            mbtrn_cfg->input_mode = INPUT_MODE_SOCKET;
-            if(NULL!=psdef){
-                if(strlen(psdef)<MB_PATH_SIZE){
-                    psdef+=strlen("socket:");
-                    sprintf(cfg->socket_definition,"%s",psdef);
-                }else{
-                    fprintf(stderr,"socket definition length exceeds MB_PATH_SIZE [%s/%zu/%zu]\n",psdef,strlen(psdef),(size_t)MB_PATH_SIZE);
-                }
-                //            fprintf(stderr, "socket_definition|%s\n", cfg->socket_definition);
-            }
-        }else {
-            mbtrn_cfg->input_mode = INPUT_MODE_FILE;
-        }
+        s_parse_opt_input(cfg,opts->input);
         // output
         s_parse_opt_output(cfg,opts->output);
         // mb-out
@@ -2101,6 +2089,13 @@ static int s_mbtrnpp_validate_config(mbtrnpp_cfg_t *cfg)
         }
 
         if(cfg->trn_enable){
+            // check TRN input source
+            if(strlen(cfg->socket_definition)<=0 &&
+               strlen(cfg->input)<=0){
+                err_count++;
+                fprintf(stderr,"ERR - input source not set\n");
+            }
+
             // validate required TRN options
             if(NULL==cfg->trn_map_file){
                 err_count++;
@@ -2124,31 +2119,31 @@ static int s_mbtrnpp_validate_config(mbtrnpp_cfg_t *cfg)
             }
 
             if((cfg->output_flags&OUTPUT_MB1_SVR_EN)){
-                if(NULL!=cfg->mb1svr_host ){
+                if(NULL==cfg->mb1svr_host ){
                     err_count++;
                     fprintf(stderr,"ERR - mb1svr_host not set [%s]\n",cfg->mb1svr_host);
                 }
-                if((cfg->mb1svr_port<1 || cfg->mb1svr_port>255)){
+                if((cfg->mb1svr_port<1024 || cfg->mb1svr_port>65535)){
                     err_count++;
                     fprintf(stderr,"ERR - invalid mb1svr_port [%d] valid range 1-255\n",cfg->mb1svr_port);
                 }
         	}
             if((cfg->output_flags&OUTPUT_TRN_SVR_EN)){
-                if(NULL!=cfg->trnsvr_host ){
+                if(NULL==cfg->trnsvr_host ){
                     err_count++;
                     fprintf(stderr,"ERR - trnsvr_host not set [%s]\n",cfg->trnsvr_host);
                 }
-                if((cfg->trnsvr_port<1 || cfg->trnsvr_port>255)){
+                if((cfg->trnsvr_port<1024 || cfg->trnsvr_port>65535)){
                     err_count++;
                     fprintf(stderr,"ERR - invalid trnsvr_port [%d] valid range 1-255\n",cfg->trnsvr_port);
                 }
             }
             if((cfg->output_flags&OUTPUT_TRNU_SVR_EN)){
-                if(NULL!=cfg->trnusvr_host ){
+                if(NULL==cfg->trnusvr_host ){
                     err_count++;
                     fprintf(stderr,"ERR - trnusvr_host not set [%s]\n",cfg->trnusvr_host);
                 }
-                if((cfg->trnusvr_port<1 || cfg->trnusvr_port>255)){
+                if((cfg->trnusvr_port<1024 || cfg->trnusvr_port>65535)){
                     err_count++;
                     fprintf(stderr,"ERR - invalid trnusvr_port [%d] valid range 1-255\n",cfg->trnusvr_port);
                 }
@@ -2212,73 +2207,16 @@ int main(int argc, char **argv) {
 
   /* MBIO status variables */
   int status;
-  //int verbose = OPT_VERBOSE_DFL;
   int error = MB_ERROR_NO_ERROR;
   char *message;
-
-  /* command line option definitions */
-  /* mbtrnpp
-   *     --verbose
-   *     --help
-   *     --input=datalist [or file or socket id]
-   *     --format=format
-   *     --platform-file=file
-   *     --platform-target-sensor
-   *     --log-directory=path
-   *     --output=file [or socket id]
-   *     --projection=projection_id
-   *     --swath-width=value
-   *     --soundings=value
-   *     --median-filter=threshold/nacrosstrack/nalongtrack
-   */
-//  static struct option options[] = {{"help", no_argument, NULL, 0},
-//                                    {"verbose", required_argument, NULL, 0},
-//                                    {"input", required_argument, NULL, 0},
-//                                    {"mbhbn", required_argument, NULL, 0},
-//                                    {"mbhbt", required_argument, NULL, 0},
-//                                    {"trnhbt", required_argument, NULL, 0},
-//                                    {"trnuhbt", required_argument, NULL, 0},
-//                                    {"delay", required_argument, NULL, 0},
-//                                    {"statsec", required_argument, NULL, 0},
-//                                    {"statflags", required_argument, NULL, 0},
-//                                    {"format", required_argument, NULL, 0},
-//                                    {"platform-file", required_argument, NULL, 0},
-//                                    {"platform-target-sensor", required_argument, NULL, 0},
-//                                    {"log-directory", required_argument, NULL, 0},
-//                                    {"output", required_argument, NULL, 0},
-//                                    {"projection", required_argument, NULL, 0},
-//                                    {"swath-width", required_argument, NULL, 0},
-//                                    {"soundings", required_argument, NULL, 0},
-//                                    {"median-filter", required_argument, NULL, 0},
-//                                    {"trn-en", no_argument, NULL, 0},
-//                                    {"trn-dis", no_argument, NULL, 0},
-//                                    {"trn-utm", required_argument, NULL, 0},
-//                                    {"trn-map", required_argument, NULL, 0},
-//                                    {"trn-cfg", required_argument, NULL, 0},
-//                                    {"trn-par", required_argument, NULL, 0},
-//                                    {"trn-mid", required_argument, NULL, 0},
-//                                    {"trn-mtype", required_argument, NULL, 0},
-//                                    {"trn-ftype", required_argument, NULL, 0},
-//                                    {"trn-ncov", required_argument, NULL, 0},
-//                                    {"trn-nerr", required_argument, NULL, 0},
-//                                    {"trn-ecov", required_argument, NULL, 0},
-//                                    {"trn-eerr", required_argument, NULL, 0},
-//                                    {"mb-out", required_argument, NULL, 0},
-//                                    {"trn-out", required_argument, NULL, 0},
-//                                    {"trn-decn", required_argument, NULL, 0},
-//                                    {"trn-decs", required_argument, NULL, 0},
-//                                    {"trn-nombgain", no_argument, NULL, 0},
-//                                    {NULL, 0, NULL, 0}};
 
   /* MBIO read control parameters */
   int read_datalist = false;
   int read_data = false;
   int read_socket = false;
-//  mb_path input;
   void *datalist;
   int look_processed = MB_DATALIST_LOOK_UNSET;
   double file_weight;
-//  int format;
   int system;
   int pings;
   int lonflip;
@@ -2307,8 +2245,6 @@ int main(int argc, char **argv) {
   char comment[MB_COMMENT_MAXLINE];
 
   /* platform definition file */
-//  mb_path platform_file;
-//  int use_platform_file = false;
   struct mb_platform_struct *platform = NULL;
   struct mb_sensor_struct *sensor_bathymetry = NULL;
   struct mb_sensor_struct *sensor_backscatter = NULL;
@@ -2321,7 +2257,6 @@ int main(int argc, char **argv) {
 //  int target_sensor = -1;
 
   /* buffer handling parameters */
-//  int n_buffer_max = 1;
   struct mbtrnpp_ping_struct ping[MBTRNPREPROCESS_BUFFER_DEFAULT];
 
   /* counting parameters */
@@ -2345,22 +2280,15 @@ int main(int argc, char **argv) {
   int n_tot_soundings_written = 0;
 
   /* processing control variables */
-//  double swath_width = 150.0;
   double tangent, threshold_tangent;
-//  int n_output_soundings = 101;
-//  int median_filter_en = false;
-//  int median_filter_n_across = 1;
-//  int median_filter_n_along = 1;
   int median_filter_n_total = 1;
   int median_filter_n_min = 1;
-//  double median_filter_threshold = 0.05;
   double *median_filter_soundings = NULL;
   int n_median_filter_soundings = 0;
   double median;
   int n_output;
 
   /* output write control parameters */
-//  mb_path output_file;
   FILE *output_fp = NULL;
   char *output_buffer = NULL;
   int n_output_buffer_alloc = 0;
@@ -2368,8 +2296,6 @@ int main(int argc, char **argv) {
   unsigned int checksum;
 
   /* log file parameters */
-//  int make_logs = false;
-//  mb_path log_directory;
   FILE *logfp = NULL;
   mb_path log_message;
   double now_time_d;
@@ -2421,7 +2347,6 @@ int main(int argc, char **argv) {
 //  memset(input, 0, sizeof(mb_path));
   memset(mbtrn_cfg->output_file, 0, sizeof(mb_path));
   memset(mbtrn_cfg->log_directory, 0, sizeof(mb_path));
-//  strcpy(input, "datalist.mb-1");
   strcpy(mbtrn_cfg->output_file, "stdout");
 
   // initialize session time string
@@ -2431,8 +2356,6 @@ int main(int argc, char **argv) {
     s_mbtrnpp_cmdline_str(NULL, 0, argc, argv, RF_NONE);
 
     fprintf(stderr,">>> CMDLINE [%s]\n",s_mbtrnpp_cmdline_str(NULL, 0, 0, NULL, RF_NONE));
-//    MEM_CHKINVALIDATE(mbtrn_cfg->trn_log_dir);
-//  mbtrn_cfg->trn_log_dir = strdup(CFG_TRN_LOG_DIR_DFL);
 
     // set run-time config defaults
     s_mbtrnpp_init_cfg(mbtrn_cfg);
@@ -2494,483 +2417,6 @@ int main(int argc, char **argv) {
 //    s_mbtrnpp_cmdline_str(NULL, 0, 0, NULL, RF_RELEASE);
 //    return -1;
 
-  /* process argument list */
-//  while ((c = getopt_long(argc, argv, "", options, &option_index)) != -1)
-//    switch (c) {
-//    /* long options all return c=0 */
-//    case 0:
-//      /* verbose */
-//      if (strcmp("verbose", options[option_index].name) == 0) {
-//        sscanf(optarg, "%d", &verbose); // verbose++;
-//      }
-//
-//      /* help */
-//      else if (strcmp("help", options[option_index].name) == 0) {
-//        help = true;
-//      }
-//
-//      /*-------------------------------------------------------
-//       * Define input file and format */
-//
-//      /* input */
-//      else if (strcmp("input", options[option_index].name) == 0) {
-//        strcpy(input, optarg);
-//        if (strstr(input, "socket:")) {
-//          input_mode = INPUT_MODE_SOCKET;
-//          sscanf(input, "socket:%s", socket_definition);
-//            fprintf(stderr, "socket_definition|%s\n", socket_definition);
-//        }
-//        else {
-//          input_mode = INPUT_MODE_FILE;
-//        }
-//      }
-//      /* output */
-//      else if ((strcmp("output", options[option_index].name) == 0)) {
-//#define MBSYSOUT_OPT_N 8
-//          // tokenize optarg
-//          char *ocopy = strdup(optarg);
-//          int i=0;
-//          char *tok[MBSYSOUT_OPT_N]={0};
-//          for(i=0;i<MBSYSOUT_OPT_N;i++){
-//              tok[i] = (i==0  ? strtok(ocopy,",") : strtok(NULL,","));
-//              fprintf(stderr,"tok[%d][%s]\n",i,tok[i]);
-//              if(tok[i]==NULL)
-//                  break;
-//          }
-//          // parse tokens
-//          for(i=0;i<MBSYSOUT_OPT_N;i++){
-//              if(NULL==tok[i])
-//                  break;
-//              if (NULL!=strstr(tok[i], "socket:")) {
-//                  // enable mb1 socket (use specified IP)
-//               char *acpy = strdup(tok[i]);
-//                  char *atok = strtok(acpy,":");
-//                  if(NULL!=atok){
-//                      // uses defaults if NULL
-//                      char *shost = strtok(NULL,":");
-//                      char *sport = strtok(NULL,":");
-//                      fprintf(stderr,"shost[%s] sport[%s]\n",shost,sport);
-//
-//                      if(NULL!=shost){
-//                          mb1svr_host = strdup(shost);
-//                      }
-//                      if(NULL!=sport){
-//                          sscanf(sport,"%d",&mb1svr_port);
-//                      }
-//                  }
-//                  fprintf(stderr,"mb1svr[%s:%d]\n",mb1svr_host,mb1svr_port);
-//                  free(acpy);
-//                  output_flags |= OUTPUT_MB1_SVR_EN;
-//             }
-//              if (strcmp(tok[i], "socket") == 0) {
-//                  // enable mb1 socket (use default IP)
-//                  output_flags |= OUTPUT_MB1_SVR_EN;
-//              }
-//
-//              if(NULL!=strstr(tok[i],"file:")){
-//                  char *acpy = strdup(tok[i]);
-//                  char *atok = strtok(acpy,":");
-//                  atok = strtok(NULL,":");
-//                  fprintf(stderr,"output_file[%s]\n",atok);
-//                  if(strlen(atok)>0){
-//                      strcpy(output_file,atok);
-//                      // enable mb1 data log (use specified name)
-//                      output_flags |= OUTPUT_MB1_FILE_EN;
-//                  }
-//                  free(acpy);
-//              }
-//              if (strcmp(tok[i], "file") == 0) {
-//                  // enable mb1 data log (use default MB-System name)
-//                  output_flags |= OUTPUT_MB1_FILE_EN;
-//              }
-//          }
-//          free(ocopy);
-//      }
-//
-//        // MB1 output options
-//      else if (strcmp("mb-out", options[option_index].name) == 0) {
-//#define MBOUT_OPT_N 16
-//          // tokenize optarg
-//          char *ocopy = strdup(optarg);
-//          int i=0;
-//          char *tok[MBOUT_OPT_N]={0};
-//          for(i=0;i<MBOUT_OPT_N;i++){
-//              tok[i] = (i==0  ? strtok(ocopy,",") : strtok(NULL,","));
-//              fprintf(stderr,"tok[%d][%s]\n",i,tok[i]);
-//              if(tok[i]==NULL)
-//                  break;
-//          }
-//          // parse tokens
-//          for(i=0;i<MBOUT_OPT_N;i++){
-//              if(NULL==tok[i])
-//                  break;
-//              if(strstr(tok[i],"mb1svr")!=NULL){
-//                  // enable mb1 socket output (optionally, specify host:port)
-//                  fprintf(stderr,"tok[%d][%s]\n",i,tok[i]);
-//                  char *acpy = strdup(tok[i]);
-//                  char *atok = strtok(acpy,":");
-//                  fprintf(stderr,"args[%s]\n",atok);
-//                  if(NULL!=atok){
-//                      // uses defaults if NULL
-//                      char *shost = strtok(NULL,":");
-//                      char *sport = strtok(NULL,":");
-//                      fprintf(stderr,"shost[%s] sport[%s]\n",shost,sport);
-//
-//                      if(NULL!=shost){
-//                          mb1svr_host = strdup(shost);
-//                      }
-//                      if(NULL!=sport){
-//                          sscanf(sport,"%d",&mb1svr_port);
-//                      }
-//                  }
-//                  fprintf(stderr,"mb1svr[%s:%d]\n",mb1svr_host,mb1svr_port);
-//                  output_flags |= OUTPUT_MB1_SVR_EN;
-//                  free(acpy);
-//              }
-//              if(strcmp(tok[i],"mb1")==0){
-//                  // enable mb1 data log
-//                  output_flags |= OUTPUT_MB1_BIN;
-//              }
-//              if(NULL!=strstr(tok[i],"file:")){
-//                  char *acpy = strdup(tok[i]);
-//                  char *atok = strtok(acpy,":");
-//                  atok = strtok(NULL,":");
-//                  fprintf(stderr,"output_file[%s]\n",atok);
-//                  if(strlen(atok)>0){
-//                      strcpy(output_file,atok);
-//                      // enable mb1 data log (use specified name)
-//                      output_flags |= OUTPUT_MB1_FILE_EN;
-//                  }
-//                  free(acpy);
-//              }
-//              if (strcmp(tok[i], "file") == 0) {
-//                  // enable mb1 data log (use default MB-System name)
-//                  output_flags |= OUTPUT_MB1_FILE_EN;
-//              }
-//              if(strcmp(tok[i],"reson")==0){
-//                  // enable reson frame data log
-//                  output_flags |= OUTPUT_RESON_BIN;
-//              }
-//              if(strcmp(tok[i],"nomb1")==0){
-//                  // disable mb1 data log
-//                  output_flags &= ~OUTPUT_MB1_BIN;
-//              }
-//              if(strcmp(tok[i],"noreson")==0){
-//                  // disable reson frame data log
-//                  output_flags &= ~OUTPUT_RESON_BIN;
-//              }
-//              if(strcmp(tok[i],"nombsvr")==0){
-//                  // disable mb1svr
-//                  output_flags &= ~OUTPUT_MB1_SVR_EN;
-//                  if(NULL!=mb1svr_host)free(mb1svr_host);
-//                  mb1svr_host=NULL;
-//              }
-//              if(strcmp(tok[i],"nombtrnpp")==0){
-//                  // disable mbtrnpp message log (not recommended)
-//                  output_flags &= ~OUTPUT_MBTRNPP_MSG;
-//              }
-//          }
-//          free(ocopy);
-//      }
-//
-//        // TRN output options
-//      else if (strcmp("trn-out", options[option_index].name) == 0) {
-//#define TRNOUT_OPT_N 16
-//          // tokenize optarg
-//          char *ocopy = strdup(optarg);
-//          int i=0;
-//          char *tok[TRNOUT_OPT_N]={0};
-//          for(i=0;i<TRNOUT_OPT_N;i++){
-//              tok[i] = (i==0  ? strtok(ocopy,",") : strtok(NULL,","));
-//              fprintf(stderr,"tok[%d][%s]\n",i,tok[i]);
-//              if(tok[i]==NULL)
-//                  break;
-//          }
-//          // parse tokens
-//          for(i=0;i<TRNOUT_OPT_N;i++){
-//              if(NULL==tok[i])
-//                  break;
-//              if(strstr(tok[i],"trnsvr")!=NULL){
-//                  // enable trnsvr (mbsvr:host:port)
-//                  char *acpy = strdup(tok[i]);
-//                  char *atok = strtok(acpy,":");
-//                  if(NULL!=atok){
-//                      char *shost = strtok(NULL,":");
-//                      char *sport = strtok(NULL,":");
-//
-//
-//                      if(NULL!=shost){
-//                          trnsvr_host = strdup(shost);
-//                      }
-//                      if(NULL!=sport){
-//                          sscanf(sport,"%d",&trnsvr_port);
-//                      }
-//                  }
-//                  output_flags |= OUTPUT_TRN_SVR_EN;
-//                  free(acpy);
-//              }
-//              if(strstr(tok[i],"trnusvr")!=NULL){
-//                  // enable trnsvr (mbsvr:host:port)
-//                  char *acpy = strdup(tok[i]);
-//                  char *tok = strtok(acpy,":");
-//                  if(NULL!=tok){
-//                      char *shost = strtok(NULL,":");
-//                      char *sport = strtok(NULL,":");
-//
-//
-//                      if(NULL!=shost){
-//                          trnusvr_host = strdup(shost);
-//                      }
-//                      if(NULL!=sport){
-//                          sscanf(sport,"%u",&trnusvr_port);
-//                      }
-//                  }
-//                  fprintf(stderr,"trnusvr[%s:%d]\n",trnusvr_host,trnusvr_port);
-//                  output_flags |= OUTPUT_TRNU_SVR_EN;
-//                  free(acpy);
-//              }
-//              if(strcmp(tok[i],"trnu")==0){
-//                  // enable trn update data log
-//                  output_flags |= OUTPUT_TRNU_ASC;
-//              }
-//              if(strcmp(tok[i],"sout")==0){
-//                  // enable trn update to stdout
-//                  output_flags |= OUTPUT_TRNU_SOUT;
-//              }
-//              if(strcmp(tok[i],"serr")==0){
-//                  // enable trn updatetp stderr
-//                  output_flags |= OUTPUT_TRNU_SERR;
-//              }
-//              if(strcmp(tok[i],"debug")==0){
-//                  // enable trn update per debug settings
-//                  output_flags |= OUTPUT_TRNU_DEBUG;
-//              }
-//              if(strcmp(tok[i],"notrnsvr")==0){
-//                  // disable trnsvr
-//                  output_flags &= ~OUTPUT_TRN_SVR_EN;
-//                  trnsvr_host=NULL;
-//              }
-//              if(strcmp(tok[i],"notrnusvr")==0){
-//                  // disable trnsvr
-//                  output_flags &= ~OUTPUT_TRNU_SVR_EN;
-//                  if(NULL!=trnusvr_host)free(trnusvr_host);
-//                 trnusvr_host=NULL;
-//              }
-//          }
-//          free(ocopy);
-//      }
-//
-//     // heartbeat (pings)
-//      else if (strcmp("mbhbn", options[option_index].name) == 0) {
-//          sscanf(optarg, "%d", &mbsvr_hbtok);
-//      }
-//      else if (strcmp("mbhbt", options[option_index].name) == 0) {
-//          sscanf(optarg, "%lf", &mbsvr_hbto);
-//      }
-//      else if (strcmp("trnhbt", options[option_index].name) == 0) {
-//          sscanf(optarg, "%lf", &trnsvr_hbto);
-//      }
-//      else if (strcmp("trnuhbt", options[option_index].name) == 0) {
-//          sscanf(optarg, "%lf", &trnusvr_hbto);
-//      }
-//      // ping delay
-//      else if (strcmp("delay", options[option_index].name) == 0) {
-//        sscanf(optarg, "%lld", &mbtrnpp_loop_delay_msec);
-//      }
-//      /* status log interval (decimal s) */
-//      else if (strcmp("statsec", options[option_index].name) == 0) {
-//        sscanf(optarg, "%lf", &trn_status_interval_sec);
-//      }
-//            /* status flags */
-//      else if (strcmp("statflags", options[option_index].name) == 0) {
-//          mbtrnpp_stat_flags=0;
-//          if(NULL!=strstr(optarg,"MSF_STATUS") || NULL!=strstr(optarg,"msf_status")){
-//              mbtrnpp_stat_flags |= MSF_STATUS;
-//          }
-//          if(NULL!=strstr(optarg,"MSF_EVENT") || NULL!=strstr(optarg,"msf_event")){
-//              mbtrnpp_stat_flags |= MSF_EVENT;
-//          }
-//          if(NULL!=strstr(optarg,"MSF_ASTAT") || NULL!=strstr(optarg,"msf_astat")){
-//              mbtrnpp_stat_flags |= MSF_ASTAT;
-//          }
-//          if(NULL!=strstr(optarg,"MSF_PSTAT") || NULL!=strstr(optarg,"msf_pstat")){
-//              mbtrnpp_stat_flags |= MSF_PSTAT;
-//          }
-//          if(NULL!=strstr(optarg,"MSF_READER") || NULL!=strstr(optarg,"msf_reader")){
-//              mbtrnpp_stat_flags |= MSF_READER;
-//          }
-//      }
-//#ifdef WITH_MBTNAV
-//        /* TRN enable */
-//        else if (strcmp("trn-en", options[option_index].name) == 0) {
-//            trn_enable = true;
-//        }
-//        /* TRN disable */
-//        else if (strcmp("trn-dis", options[option_index].name) == 0) {
-//            trn_enable = false;
-//        }
-//      /* TRN UTM zone */
-//      else if (strcmp("trn-utm", options[option_index].name) == 0) {
-//        sscanf(optarg, "%ld", &trn_utm_zone);
-//      }
-//      /* TRN map type */
-//      else if (strcmp("trn-mtype", options[option_index].name) == 0) {
-//        sscanf(optarg, "%d", &trn_mtype);
-//      }
-//      /* TRN filter type */
-//      else if (strcmp("trn-ftype", options[option_index].name) == 0) {
-//        sscanf(optarg, "%d", &trn_ftype);
-//      }
-//      /* TRN valid northing covariance limit (m^2) */
-//      else if (strcmp("trn-ncov", options[option_index].name) == 0) {
-//          sscanf(optarg, "%lf", &trn_max_ncov);
-//      }
-//      /* TRN valid northing error limit (m) */
-//      else if (strcmp("trn-nerr", options[option_index].name) == 0) {
-//          sscanf(optarg, "%lf", &trn_max_nerr);
-//      }
-//      /* TRN valid easting covariance limit (m^2) */
-//      else if (strcmp("trn-ecov", options[option_index].name) == 0) {
-//          sscanf(optarg, "%lf", &trn_max_ecov);
-//      }
-//      /* TRN valid easting error limit (m) */
-//      else if (strcmp("trn-eerr", options[option_index].name) == 0) {
-//          sscanf(optarg, "%lf", &trn_max_eerr);
-//      }
-//      /* TRN map file */
-//      else if (strcmp("trn-map", options[option_index].name) == 0) {
-//        if (NULL != trn_map_file)
-//          free(trn_map_file);
-//        trn_map_file = strdup(optarg);
-//      }
-//      /* TRN config file */
-//      else if (strcmp("trn-cfg", options[option_index].name) == 0) {
-//        if (NULL != trn_cfg_file)
-//          free(trn_cfg_file);
-//        trn_cfg_file = strdup(optarg);
-//      }
-//      /* TRN particles file */
-//      else if (strcmp("trn-par", options[option_index].name) == 0) {
-//        if (NULL != trn_particles_file)
-//          free(trn_particles_file);
-//        trn_particles_file = strdup(optarg);
-//      }
-//      /* TRN log directory */
-//      else if (strcmp("trn-log", options[option_index].name) == 0) {
-//        if (NULL != trn_log_dir)
-//          free(trn_log_dir);
-//        trn_log_dir = strdup(optarg);
-//      }
-//            /* TRN processing decimation (modulus, update every decn'th sounding) */
-//      else if (strcmp("trn-decn", options[option_index].name) == 0) {
-//          sscanf(optarg,"%u",&trn_decn);
-//      }
-//            /* TRN processing decimation (period, update every decms milliseconds) */
-//      else if (strcmp("trn-decs", options[option_index].name) == 0) {
-//          sscanf(optarg,"%lf",&trn_decs);
-//          // start decimation timer
-//          if(trn_decs>0.0)
-//              trn_dec_time=mtime_dtime();
-//
-//      }
-//      /* Ignore TRN transmit gain threshold checks */
-//      else if (strcmp("trn-nombgain", options[option_index].name) == 0) {
-//          trn_nombgain=true;
-//      }
-//
-//#endif // WITH_MBTNAV
-//
-//      /* format */
-//      else if (strcmp("format", options[option_index].name) == 0) {
-//        n = sscanf(optarg, "%d", &format);
-//      }
-//
-//      /*-------------------------------------------------------
-//       * Set platform file */
-//
-//      /* platform-file */
-//      else if (strcmp("platform-file", options[option_index].name) == 0) {
-//        n = sscanf(optarg, "%s", platform_file);
-//        if (n == 1)
-//          use_platform_file = true;
-//      }
-//
-//      /* platform-target-sensor */
-//      else if (strcmp("platform-target-sensor", options[option_index].name) == 0) {
-//          n = sscanf(optarg, "%d", &target_sensor);
-//      }
-//
-//      /*-------------------------------------------------------
-//       * Define processing parameters */
-//
-//      /* output */
-//      else if ((strcmp("output", options[option_index].name) == 0)) {
-//        strcpy(output_file, optarg);
-//        if (strstr(output_file, "socket") != NULL) {
-//            output_flags|=OUTPUT_MB1_SVR_EN;
-//        }
-//        if (strstr(output_file, "file") != NULL) {
-//            output_flags|=OUTPUT_MB1_FILE_EN;
-//        }
-//      }
-//
-//      /* log-directory */
-//      else if ((strcmp("log-directory", options[option_index].name) == 0)) {
-//        strcpy(log_directory, optarg);
-//        logd_status = stat(log_directory, &logd_stat);
-//        if (logd_status != 0) {
-//          fprintf(stderr, "\nSpecified log file directory %s does not exist...\n", log_directory);
-//          make_logs = false;
-//            int status=0;
-//            char *ps = strdup(log_directory);
-//           if( (status=mkdir(ps,S_IRWXU|S_IRGRP|S_IXGRP|S_IROTH|S_IXOTH))==0){
-//                make_logs = true;
-//               free(trn_log_dir);
-//               trn_log_dir=strdup(ps);
-//                 fprintf(stderr, "\ncreated/using log directory %s...\n", trn_log_dir);
-//            }else{
-//                fprintf(stderr, "\nCreate log directory %s failed [%d/%s]\n", ps,errno,strerror(errno));
-//            }
-//            free(ps);
-//        }
-//        else if ((logd_stat.st_mode & S_IFMT) != S_IFDIR) {
-//          fprintf(stderr, "\nSpecified log file directory %s is not a directory...\n", log_directory);
-//          make_logs = false;
-//        }
-//        else {
-//          make_logs = true;
-//          free(trn_log_dir);
-//          trn_log_dir = strdup(log_directory);
-//          fprintf(stderr, "\nusing log directory %s...\n", trn_log_dir);
-//        }
-//      }
-//
-//      /* swathwidth */
-//      else if ((strcmp("swath-width", options[option_index].name) == 0)) {
-//        n = sscanf(optarg, "%lf", &swath_width);
-//      }
-//
-//      /* soundings */
-//      else if ((strcmp("soundings", options[option_index].name) == 0)) {
-//        n = sscanf(optarg, "%d", &n_output_soundings);
-//      }
-//
-//      /* median-filter */
-//      else if ((strcmp("median-filter", options[option_index].name) == 0)) {
-//        n = sscanf(optarg, "%lf/%d/%d", &median_filter_threshold,
-//                            &median_filter_n_across, &median_filter_n_along);
-//        if (n == 3) {
-//          median_filter_en = true;
-//          n_buffer_max = median_filter_n_along;
-//        }
-//      }
-//
-//      /*-------------------------------------------------------*/
-//
-//      break;
-//    case '?':
-//      errflg++;
-//    }
 
   /* if error flagged then print it and exit */
   if (errflg) {
