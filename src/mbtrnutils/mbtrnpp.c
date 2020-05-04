@@ -677,6 +677,8 @@ static int s_mbtrnpp_load_config(char *config_path, mbtrnpp_opts_t *opts);
 static int s_mbtrnpp_process_cmdline(int argc, char **argv, mbtrnpp_opts_t *opts);
 // parse options to configuration values
 static int s_mbtrnpp_configure(mbtrnpp_cfg_t *cfg, mbtrnpp_opts_t *opts);
+// validate configuration
+static int s_mbtrnpp_validate_config(mbtrnpp_cfg_t *cfg);
 
 int mbtrnpp_update_stats(mstats_profile_t *stats, mlog_id_t log_id, mstats_flags flags);
 int mbtrnpp_process_mb1(char *mb1, size_t len, trn_config_t *cfg);
@@ -1256,7 +1258,7 @@ static int s_mbtrnpp_show_cfg(mbtrnpp_cfg_t *self, bool verbose, int indent)
         retval+=fprintf(stderr,"%*s %*s  %*s\n",indent,(indent>0?" ":""), wkey,"trn_map_file",wval,self->trn_map_file);
         retval+=fprintf(stderr,"%*s %*s  %*s\n",indent,(indent>0?" ":""), wkey,"trn_cfg_file",wval,self->trn_cfg_file);
         retval+=fprintf(stderr,"%*s %*s  %*s\n",indent,(indent>0?" ":""), wkey,"trn_particles_file",wval,self->trn_particles_file);
-        retval+=fprintf(stderr,"%*s %*s  %*s\n",indent,(indent>0?" ":""), wkey,"trn_ mission_dir",wval,self->trn_mission_id);
+        retval+=fprintf(stderr,"%*s %*s  %*s\n",indent,(indent>0?" ":""), wkey,"trn_mission_dir",wval,self->trn_mission_id);
         retval+=fprintf(stderr,"%*s %*s  %*u\n",indent,(indent>0?" ":""), wkey,"trn_decn",wval,self->trn_decn);
         retval+=fprintf(stderr,"%*s %*s  %*.2lf\n",indent,(indent>0?" ":""), wkey,"trn_decs",wval,self->trn_decs);
         retval+=fprintf(stderr,"%*s %*s  %*c\n",indent,(indent>0?" ":""), wkey,"trn_nombgain",wval,BOOL2YNC(self->trn_nombgain));
@@ -1572,7 +1574,6 @@ static int s_parse_opt_logdir(mbtrnpp_cfg_t *cfg, char *opt_str)
 {
     int retval=-1;
     if(NULL!=cfg && NULL!=opt_str){
-
         strcpy(cfg->log_directory, opt_str);
         struct stat logd_stat;
         int logd_status=0;
@@ -1587,8 +1588,8 @@ static int s_parse_opt_logdir(mbtrnpp_cfg_t *cfg, char *opt_str)
                 if( (status=mkdir(ps,S_IRWXU|S_IRGRP|S_IXGRP|S_IROTH|S_IXOTH))==0){
                     cfg->make_logs = true;
                     MEM_CHKINVALIDATE(cfg->trn_log_dir);
-                    cfg->trn_log_dir=strdup(ps);
-                    fprintf(stderr, "\ncreated/using log directory %s...\n", cfg->trn_log_dir);
+                   cfg->trn_log_dir=CHK_STRDUP(ps);
+                   fprintf(stderr, "\ncreated/using log directory %s...\n", cfg->trn_log_dir);
                 }else{
                     fprintf(stderr, "\nCreate log directory %s failed [%d/%s]\n", ps,errno,strerror(errno));
                 }
@@ -1938,9 +1939,9 @@ static int s_mbtrnpp_configure(mbtrnpp_cfg_t *cfg, mbtrnpp_opts_t *opts)
         // verbose
         cfg->verbose = opts->verbose;
         // input
-        if (strstr(opts->input, "socket:")!=NULL) {
+        char *psdef=NULL;
+        if (NULL!=opts->input && (psdef=strstr(opts->input, "socket:"))!=NULL) {
             mbtrn_cfg->input_mode = INPUT_MODE_SOCKET;
-            char *psdef=strstr(cfg->socket_definition,"socket:");
             if(NULL!=psdef){
                 if(strlen(psdef)<MB_PATH_SIZE){
                     psdef+=strlen("socket:");
@@ -1948,14 +1949,8 @@ static int s_mbtrnpp_configure(mbtrnpp_cfg_t *cfg, mbtrnpp_opts_t *opts)
                 }else{
                     fprintf(stderr,"socket definition length exceeds MB_PATH_SIZE [%s/%zu/%zu]\n",psdef,strlen(psdef),(size_t)MB_PATH_SIZE);
                 }
+                //            fprintf(stderr, "socket_definition|%s\n", cfg->socket_definition);
             }
-            if(strlen(opts->input)<MB_PATH_SIZE){
-                sprintf(cfg->socket_definition,"%s",psdef);
-
-            }else{
-                fprintf(stderr,"input length exceeds MB_PATH_SIZE [%s/%zu/%zu]\n",opts->input,strlen(opts->input),(size_t)MB_PATH_SIZE);
-            }
-//            fprintf(stderr, "socket_definition|%s\n", cfg->socket_definition);
         }else {
             mbtrn_cfg->input_mode = INPUT_MODE_FILE;
         }
@@ -2017,7 +2012,7 @@ static int s_mbtrnpp_configure(mbtrnpp_cfg_t *cfg, mbtrnpp_opts_t *opts)
         // format
         cfg->format = opts->format;
         // platform-file
-        if(NULL!=opts->platform_file){
+       if(NULL!=opts->platform_file){
             strcpy(cfg->platform_file, opts->platform_file);
             cfg->use_platform_file=true;
         }
@@ -2030,18 +2025,138 @@ static int s_mbtrnpp_configure(mbtrnpp_cfg_t *cfg, mbtrnpp_opts_t *opts)
         // soundings
         cfg->n_output_soundings=opts->soundings;
         // median-filter
-        int n = sscanf(opts->median_filter, "%lf/%d/%d", &cfg->median_filter_threshold,
-                   &cfg->median_filter_n_across, &cfg->median_filter_n_along);
-        if (n == 3) {
-            cfg->median_filter_en = true;
-            cfg->n_buffer_max = cfg->median_filter_n_along;
+        if(NULL!=opts->median_filter){
+            int n = sscanf(opts->median_filter, "%lf/%d/%d", &cfg->median_filter_threshold,
+                       &cfg->median_filter_n_across, &cfg->median_filter_n_along);
+            if (n == 3) {
+                cfg->median_filter_en = true;
+                cfg->n_buffer_max = cfg->median_filter_n_along;
+            }
+        }else{
+            cfg->median_filter_en = false;
         }
-
         retval=0;
     }else{
         fprintf(stderr, "ERR - invalid argument (NULL opts)\n");
     }
 
+    return retval;
+}
+
+// validate configuration
+static int s_mbtrnpp_validate_config(mbtrnpp_cfg_t *cfg)
+{
+    int retval=-1;
+    if(NULL!=cfg){
+        int err_count=0;
+
+        if(cfg->median_filter_en){
+            if(cfg->median_filter_n_across<0){
+                err_count++;
+                fprintf(stderr,"ERR - invalid median_filter_n_across [%d] valid range >0\n",cfg->median_filter_n_across);
+            }
+            if(cfg->median_filter_n_along<0){
+                err_count++;
+                fprintf(stderr,"ERR - invalid median_filter_n_along [%d] valid range >0\n",cfg->median_filter_n_along);
+            }
+            if(cfg->median_filter_threshold<0.0){
+                err_count++;
+                fprintf(stderr,"ERR - invalid median_filter_threshold [%lf] valid range >00\n",cfg->median_filter_threshold);
+            }
+            if(cfg->n_buffer_max<0){
+                err_count++;
+                fprintf(stderr,"ERR - invalid n_buffer_max [%d] valid range >0\n",cfg->n_buffer_max);
+            }
+        }
+
+        if(cfg->swath_width<0.0){
+            err_count++;
+            fprintf(stderr,"ERR - invalid swath_width [%lf] valid range >0\n",cfg->swath_width);
+        }
+
+        switch (cfg->input_mode) {
+            case INPUT_MODE_FILE:
+                if(strlen(cfg->input)<=0){
+                    err_count++;
+                    fprintf(stderr,"ERR - input path not set\n");
+                }
+                break;
+            case INPUT_MODE_SOCKET:
+                if(strlen(cfg->socket_definition)<=0){
+                    err_count++;
+                    fprintf(stderr,"ERR - socket_definition not set\n");
+                }
+                break;
+            default:
+                err_count++;
+                fprintf(stderr,"ERR - invalid input mode [%d]\n",cfg->input_mode);
+                break;
+        }
+
+        if( (cfg->output_flags&OUTPUT_MB1_FILE_EN)!=0){
+            if(strlen(cfg->output_file)<=0){
+                err_count++;
+                fprintf(stderr,"ERR - output_file not set\n");
+            }
+        }
+
+        if(cfg->trn_enable){
+            // validate required TRN options
+            if(NULL==cfg->trn_map_file){
+                err_count++;
+                fprintf(stderr,"ERR - trn_map_file not set\n");
+            }
+            if(NULL==cfg->trn_cfg_file){
+                err_count++;
+                fprintf(stderr,"ERR - trn_cfg_file not set\n");
+            }
+            if(cfg->trn_utm_zone<1 || cfg->trn_utm_zone>60){
+                err_count++;
+                fprintf(stderr,"ERR - invalid trn_utm_zone [%ld] valid range 1-60\n",cfg->trn_utm_zone);
+            }
+            if(cfg->trn_mtype<1 || cfg->trn_mtype>2){
+                err_count++;
+                fprintf(stderr,"ERR - invalid trn_mtype [%d] valid range 1-2\n",cfg->trn_mtype);
+            }
+            if(cfg->trn_ftype<0 || cfg->trn_ftype>4){
+                err_count++;
+                fprintf(stderr,"ERR - invalid trn_mtype [%d] valid range 0-4\n",cfg->trn_ftype);
+            }
+
+            if((cfg->output_flags&OUTPUT_MB1_SVR_EN)){
+                if(NULL!=cfg->mb1svr_host ){
+                    err_count++;
+                    fprintf(stderr,"ERR - mb1svr_host not set [%s]\n",cfg->mb1svr_host);
+                }
+                if((cfg->mb1svr_port<1 || cfg->mb1svr_port>255)){
+                    err_count++;
+                    fprintf(stderr,"ERR - invalid mb1svr_port [%d] valid range 1-255\n",cfg->mb1svr_port);
+                }
+        	}
+            if((cfg->output_flags&OUTPUT_TRN_SVR_EN)){
+                if(NULL!=cfg->trnsvr_host ){
+                    err_count++;
+                    fprintf(stderr,"ERR - trnsvr_host not set [%s]\n",cfg->trnsvr_host);
+                }
+                if((cfg->trnsvr_port<1 || cfg->trnsvr_port>255)){
+                    err_count++;
+                    fprintf(stderr,"ERR - invalid trnsvr_port [%d] valid range 1-255\n",cfg->trnsvr_port);
+                }
+            }
+            if((cfg->output_flags&OUTPUT_TRNU_SVR_EN)){
+                if(NULL!=cfg->trnusvr_host ){
+                    err_count++;
+                    fprintf(stderr,"ERR - trnusvr_host not set [%s]\n",cfg->trnusvr_host);
+                }
+                if((cfg->trnusvr_port<1 || cfg->trnusvr_port>255)){
+                    err_count++;
+                    fprintf(stderr,"ERR - invalid trnusvr_port [%d] valid range 1-255\n",cfg->trnusvr_port);
+                }
+            }
+        }
+
+        retval=(err_count==0?0:-1);
+    }
     return retval;
 }
 
@@ -2350,6 +2465,11 @@ int main(int argc, char **argv) {
 
     // configure using selected options
     if(s_mbtrnpp_configure(mbtrn_cfg, mbtrn_opts)!=0){
+        errflg++;
+    };
+
+    // check configuration
+    if(s_mbtrnpp_validate_config(mbtrn_cfg)!=0){
         errflg++;
     };
 
