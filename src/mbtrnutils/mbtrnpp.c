@@ -318,10 +318,13 @@ s=NULL;\
 
 #define MBTRNPP_CONF_DEL "="
 
-#define CFG_INPUT_DFL          "datalist.mb-1"
+#define CFG_INPUT_DFL             "datalist.mb-1"
+#define CFG_OUTPUT_FILE_DFL       "stdout"
+#define CFG_LOG_DIRECTORY_DFL     "."
+#define CFG_SOCKET_DEFINITION_DFL "socket:TRN_RESON_HOST:7000:0"
 //#define CFG_INPUT_DFL          "socket:localhost:7000:0"
 #define CFG_MNEM_SESSION       "SESSION"
-#define CFG_MNEM_RHOST         "TRN_RESON_HOST"
+#define CFG_MNEM_TRN_RESON_HOST         "TRN_RESON_HOST"
 #define CFG_MNEM_TRN_HOST      "TRN_HOST"
 #define CFG_MNEM_TRN_SESSION   "TRN_SESSION"
 #define CFG_MNEM_TRN_LOGFILES  "TRN_LOGFILES"
@@ -811,7 +814,7 @@ char *s_mnem_value(char **pdest, size_t len, const char *key)
         char *val=NULL;
         char *alt=NULL;
 
-        if(strcmp(key,CFG_MNEM_RHOST)==0){
+        if(strcmp(key,CFG_MNEM_TRN_RESON_HOST)==0){
             val=CHK_STRDUP(getenv(key));
             if(NULL==val){
                 // if unset, use local IP
@@ -998,7 +1001,7 @@ static int s_test_mnem()
     char *val=NULL;
     s_sub_mnem(&opt_session,0,opt_session,CFG_MNEM_SESSION,s_mnem_value(&val,0,CFG_MNEM_SESSION));
     MEM_CHKINVALIDATE(val);
-    s_sub_mnem(&opt_rhost,0,opt_rhost,CFG_MNEM_RHOST,s_mnem_value(&val,0,CFG_MNEM_RHOST));
+    s_sub_mnem(&opt_rhost,0,opt_rhost,CFG_MNEM_TRN_RESON_HOST,s_mnem_value(&val,0,CFG_MNEM_TRN_RESON_HOST));
     MEM_CHKINVALIDATE(val);
     s_sub_mnem(&opt_trnhost,0,opt_trnhost,CFG_MNEM_TRN_HOST,s_mnem_value(&val,0,CFG_MNEM_TRN_HOST));
     MEM_CHKINVALIDATE(val);
@@ -1041,7 +1044,9 @@ static int s_mbtrnpp_init_cfg(mbtrnpp_cfg_t *cfg)
         cfg->verbose=0;
         cfg->input_mode=INPUT_MODE_FILE;
         memset(cfg->socket_definition,0,MB_PATH_SIZE);
+        sprintf(cfg->socket_definition,"%s",CFG_SOCKET_DEFINITION_DFL);
         memset(cfg->output_file,0,MB_PATH_SIZE);
+        sprintf(cfg->output_file,"%s",CFG_OUTPUT_FILE_DFL);
         memset(cfg->input,0,MB_PATH_SIZE);
         sprintf(cfg->input,"%s",CFG_INPUT_DFL);
         cfg->format=0;
@@ -1049,6 +1054,7 @@ static int s_mbtrnpp_init_cfg(mbtrnpp_cfg_t *cfg)
         cfg->use_platform_file=false;
         cfg->target_sensor=-1;
         memset(cfg->log_directory,0,MB_PATH_SIZE);
+        sprintf(cfg->log_directory,"%s",CFG_LOG_DIRECTORY_DFL);
         cfg->make_logs=false;
         cfg->trn_log_dir=strdup(CFG_TRN_LOG_DIR_DFL);
         cfg->swath_width=150;
@@ -1861,7 +1867,7 @@ static int s_mbtrnpp_kvparse_fn(char *key, char *val, void *cfg)
 
         // perform mnemonic substitutions
         char *val=NULL;
-        s_sub_mnem(&opts->input,0,opts->input,CFG_MNEM_RHOST,s_mnem_value(&val,0,CFG_MNEM_RHOST));
+        s_sub_mnem(&opts->input,0,opts->input,CFG_MNEM_TRN_RESON_HOST,s_mnem_value(&val,0,CFG_MNEM_TRN_RESON_HOST));
         MEM_CHKINVALIDATE(val);
         s_sub_mnem(&opts->output,0,opts->output,CFG_MNEM_SESSION,s_mnem_value(&val,0,CFG_MNEM_SESSION));
         MEM_CHKINVALIDATE(val);
@@ -2359,12 +2365,6 @@ int main(int argc, char **argv) {
   speedmin = 0.0;
   timegap = 1000000000.0;
 
-  /* set default input and output */
-//  memset(input, 0, sizeof(mb_path));
-  memset(mbtrn_cfg->output_file, 0, sizeof(mb_path));
-  memset(mbtrn_cfg->log_directory, 0, sizeof(mb_path));
-  strcpy(mbtrn_cfg->output_file, "stdout");
-
   // initialize session time string
     s_mbtrnpp_session_str(NULL,0,RF_NONE);
     s_mbtrnpp_trnsession_str(NULL,0,RF_NONE);
@@ -2377,6 +2377,9 @@ int main(int argc, char **argv) {
     s_mbtrnpp_init_cfg(mbtrn_cfg);
     // set run-time option defaults
     s_mbtrnpp_init_opts(mbtrn_opts);
+
+    fprintf(stderr,"\ndefault config:\n");
+    s_mbtrnpp_show_cfg(mbtrn_cfg,true,5);
 
     // load option overrrides from config file, if specified
     char *cfg_path=NULL;
