@@ -13,7 +13,7 @@
 /// simple string messages, as well as automatic generation of special
 /// formatting information including error/warning text and code location.
 
-/// medebug's three basic macro types differ by argment type
+/// medebug's three basic macro types differ by argument type
 /// and end-of-line (EOL) inclusion:
 ///
 /// *MSG    : args: single string  EOL: Y

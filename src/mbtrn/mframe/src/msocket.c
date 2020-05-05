@@ -620,7 +620,7 @@ int64_t msock_send(msock_socket_t *s,byte *buf, uint32_t len)
 /// @param[in] buf data buffer
 /// @param[in] len number of bytes to send
 /// @param[in] flags optional flags
-/// @return number of bytes sent on success, -1 ohterwise.
+/// @return number of bytes sent on success, -1 otherwise.
 int64_t msock_sendto(msock_socket_t *s, msock_addr_t *addr, byte *buf, uint32_t len, int32_t flags)
 {
     int64_t retval=-1;
