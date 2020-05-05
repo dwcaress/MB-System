@@ -8,7 +8,7 @@ verbose=-2
 // cfg var int logd_status
 // cfg var bool make_logs
 // cfg var mb_path log_directory
-log-directory=TRN_LOGDIRECTORY
+log-directory=TRN_LOGFILES
 
 // opt "input" [input_mode_t]
 // cfg var mb_path socket_definition
