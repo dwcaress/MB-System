@@ -612,8 +612,10 @@ char *s_mnem_value(char **pdest, size_t len, const char *key);
 // substitute mnemonic value into string
 // (dest must be dynamically allocated, caller must free)
 char *s_sub_mnem(char **pdest, size_t len, char *src,const char *pkey,const char *pval);
+#ifdef WITH_TEST_MNEM_SUB
 // test mnemonic substitution
 static int s_test_mnem();
+#endif
 // initialize mbtrnpp config struct
 static int s_mbtrnpp_init_cfg(mbtrnpp_cfg_t *cfg);
 // initialize mbtrnpp options struct
@@ -986,7 +988,7 @@ char *s_sub_mnem(char **pdest, size_t len, char *src,const char *pkey,const char
 //    fprintf(stderr,"%d - ret dest[%s]\n",__LINE__,*pdest);
     return retval;
 }
-
+#ifdef WITH_TEST_MNEM_SUB
 static int s_test_mnem()
 {
     char *opt_session = strdup("test_session-SESSION--");
@@ -1036,7 +1038,7 @@ static int s_test_mnem()
 
     return 0;
 }
-
+#endif
 static int s_mbtrnpp_init_cfg(mbtrnpp_cfg_t *cfg)
 {
     int retval =-1;
@@ -1664,7 +1666,7 @@ static int s_mbtrnpp_kvparse_fn(char *key, char *val, void *cfg)
 
     if(NULL!=key &&  NULL!=cfg){
         mbtrnpp_opts_t *opts=(mbtrnpp_opts_t *)cfg;
-        fprintf(stderr, ">>>> PARSING key/val [%13s / %s]\n", key,val);
+//        fprintf(stderr, ">>>> PARSING key/val [%13s / %s]\n", key,val);
         if(NULL!=val){
             // process opts w/ required args
 
@@ -2181,7 +2183,7 @@ static void s_mbtrnpp_exit(int error)
 /*--------------------------------------------------------------------*/
 
 int main(int argc, char **argv) {
-  char usage_message[] = "mbtrnpp [\n"
+  char usage_message[] = "mbtrnpp \n"
                          "\t--verbose\n"
                          "\t--help\n"
                          "\t--log-directory=path\n"
@@ -2365,20 +2367,25 @@ int main(int argc, char **argv) {
   speedmin = 0.0;
   timegap = 1000000000.0;
 
+#ifdef WITH_TEST_MNEM_SUB
+    fprintf(stderr, "%s:%d - TODO - REMOVE MNEM-SUB TEST\n",__func__,__LINE__);
+    s_test_mnem();
+#endif
+
   // initialize session time string
     s_mbtrnpp_session_str(NULL,0,RF_NONE);
     s_mbtrnpp_trnsession_str(NULL,0,RF_NONE);
     // initialize command line string
     s_mbtrnpp_cmdline_str(NULL, 0, argc, argv, RF_NONE);
 
-    fprintf(stderr,">>> CMDLINE [%s]\n",s_mbtrnpp_cmdline_str(NULL, 0, 0, NULL, RF_NONE));
+    fprintf(stderr,"command line:\n[%s]\n",s_mbtrnpp_cmdline_str(NULL, 0, 0, NULL, RF_NONE));
 
     // set run-time config defaults
     s_mbtrnpp_init_cfg(mbtrn_cfg);
     // set run-time option defaults
     s_mbtrnpp_init_opts(mbtrn_opts);
 
-    fprintf(stderr,"\ndefault config:\n");
+    fprintf(stderr,"\nconfiguration - default:\n");
     s_mbtrnpp_show_cfg(mbtrn_cfg,true,5);
 
     // load option overrrides from config file, if specified
@@ -2392,21 +2399,21 @@ int main(int argc, char **argv) {
         }
     }
     MEM_CHKINVALIDATE(cfg_path);
-    fprintf(stderr,"opts: config:\n");
+    fprintf(stderr,"options - post-config:\n");
     s_mbtrnpp_show_opts(mbtrn_opts,true,5);
 
     // load option overrrides from command line, if specified
     if(s_mbtrnpp_process_cmdline(argc,argv,mbtrn_opts)!=0){
-        PTRACE();
         fprintf(stderr,"ERR - error(s) in cmdline\n");
         errflg++;
     };
 
-    fprintf(stderr,"opts: cmdline:\n");
+    fprintf(stderr,"options - post-cmdline:\n");
     s_mbtrnpp_show_opts(mbtrn_opts,true,5);
 
     // configure using selected options
     if(s_mbtrnpp_configure(mbtrn_cfg, mbtrn_opts)!=0){
+        fprintf(stderr,"ERR - error(s) in configure\n");
         errflg++;
     };
 
@@ -2415,18 +2422,8 @@ int main(int argc, char **argv) {
         errflg++;
     };
 
-    fprintf(stderr,"opts: final\n");
-    s_mbtrnpp_show_opts(mbtrn_opts,true,5);
-    fprintf(stderr,"\nconfiguration:\n");
+    fprintf(stderr,"\nconfiguration - final:\n");
     s_mbtrnpp_show_cfg(mbtrn_cfg,true,5);
-
-#ifdef WITH_TEST_MNEM_SUB
-    fprintf(stderr, "%s:%d - TODO - REMOVE MNEM-SUB TEST\n",__func__,__LINE__);
-    s_test_mnem();
-#endif
-
-//    fprintf(stderr, "%s:%d - TODO - REMOVE TEST EXIT\n",__func__,__LINE__);
-//    s_mbtrnpp_exit(-1);
 
   /* if error flagged then print it and exit */
   if (errflg) {
@@ -3918,8 +3915,10 @@ int mbtrnpp_init_debug(int verbose) {
   // open trn data log
   if ( OUTPUT_FLAG_SET(OUTPUT_MB1_BIN) ) {
     mb1_blog_path = (char *)malloc(512);
-    sprintf(mb1_blog_path, "%s//%s-%s%s", mbtrn_cfg->trn_log_dir, MB1_BLOG_NAME, s_mbtrnpp_session_str(NULL,0,RF_NONE), MBTRNPP_LOG_EXT);
+    sprintf(mb1_blog_path, "%s//%s-%s%s", mbtrn_cfg->trn_log_dir, MB1_BLOG_NAME,
+            s_mbtrnpp_session_str(NULL,0,RF_NONE), MBTRNPP_LOG_EXT);
     mb1_blog_id = mlog_get_instance(mb1_blog_path, &mb1_blog_conf, MB1_BLOG_NAME);
+    fprintf(stderr,"MB1 binary log [%s]\n",mb1_blog_path);
     mlog_show(mb1_blog_id, true, 5);
     mlog_open(mb1_blog_id, flags, mode);
   }
@@ -3928,6 +3927,7 @@ int mbtrnpp_init_debug(int verbose) {
     mbtrnpp_mlog_path = (char *)malloc(512);
     sprintf(mbtrnpp_mlog_path, "%s//%s-%s%s", mbtrn_cfg->trn_log_dir, MBTRNPP_MLOG_NAME, s_mbtrnpp_session_str(NULL,0,RF_NONE), MBTRNPP_LOG_EXT);
     mbtrnpp_mlog_id = mlog_get_instance(mbtrnpp_mlog_path, &mbtrnpp_mlog_conf, MBTRNPP_MLOG_NAME);
+    fprintf(stderr,"mbtrnpp message log [%s]\n",mbtrnpp_mlog_path);
     mlog_show(mbtrnpp_mlog_id, true, 5);
     mlog_open(mbtrnpp_mlog_id, flags, mode);
     mlog_tprintf(mbtrnpp_mlog_id, "*** mbtrn session start ***\n");
@@ -3938,6 +3938,7 @@ int mbtrnpp_init_debug(int verbose) {
       trn_ulog_path = (char *)malloc(512);
       sprintf(trn_ulog_path, "%s//%s-%s%s", mbtrn_cfg->trn_log_dir, TRN_ULOG_NAME, s_mbtrnpp_session_str(NULL,0,RF_NONE), MBTRNPP_LOG_EXT);
       trn_ulog_id = mlog_get_instance(trn_ulog_path, &trn_ulog_conf, TRN_ULOG_NAME);
+      fprintf(stderr,"trn update log [%s]\n",trn_ulog_path);
       mlog_show(trn_ulog_id, true, 5);
       mlog_open(trn_ulog_id, flags, mode);
       mlog_tprintf(trn_ulog_id, "*** trn update session start ***\n");
@@ -4172,6 +4173,7 @@ int mbtrnpp_init_trnsvr(netif_t **psvr, wtnav_t *trn, char *host, int port, bool
         if(NULL!=svr){
             *psvr = svr;
             netif_set_reqres_res(svr,trn);
+            fprintf(stderr,"trnsvr netif:\n");
             netif_show(svr,true,5);
             netif_init_log(svr, "trnsvr", (NULL!=mbtrn_cfg->trn_log_dir?mbtrn_cfg->trn_log_dir:"."), s_mbtrnpp_session_str(NULL,0,RF_NONE));
             mlog_tprintf(svr->mlog_id,"*** trnsvr session start (TEST) ***\n");
@@ -4204,6 +4206,7 @@ int mbtrnpp_init_mb1svr(netif_t **psvr, char *host, int port, bool verbose)
         if(NULL!=svr){
             *psvr = svr;
 //            netif_set_reqres_res(svr,trn);
+            fprintf(stderr,"mb1svr netif:\n");
             netif_show(svr,true,5);
             netif_init_log(svr, "mb1svr", (NULL!=mbtrn_cfg->trn_log_dir?mbtrn_cfg->trn_log_dir:"."), s_mbtrnpp_session_str(NULL,0,RF_NONE));
             mlog_tprintf(svr->mlog_id,"*** mb1svr session start (TEST) ***\n");
@@ -4236,6 +4239,7 @@ int mbtrnpp_init_trnusvr(netif_t **psvr, char *host, int port, bool verbose)
         if(NULL!=svr){
             *psvr = svr;
             //            netif_set_reqres_res(svr,trn);
+            fprintf(stderr,"trnusvr netif:\n");
             netif_show(svr,true,5);
             netif_init_log(svr, "trnusvr", (NULL!=mbtrn_cfg->trn_log_dir?mbtrn_cfg->trn_log_dir:"."), s_mbtrnpp_session_str(NULL,0,RF_NONE));
             mlog_tprintf(svr->mlog_id,"*** trnusvr session start (TEST) ***\n");
