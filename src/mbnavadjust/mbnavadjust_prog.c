@@ -10373,11 +10373,11 @@ int mbnavadjust_updategrid() {
     if ((afp = fopen(apath, "w")) != NULL) {
       for (int i = 0; i < project.num_files; i++) {
         file = &project.files[i];
-        if (file->status != MBNA_FILE_FIXEDNAV) {
+        //if (file->status != MBNA_FILE_FIXEDNAV) {
           for (int j = 0; j < file->num_sections; j++) {
             fprintf(afp, "nvs_%4.4d_%4.4d.mb71 71\n", file->id, j);
           }
-        }
+        //}
       }
       fclose(afp);
     }
@@ -10420,13 +10420,15 @@ int mbnavadjust_updategrid() {
         file = &project.files[ifile];
         sprintf(npath, "%s/nvs_%4.4d.mb166", project.datadir, ifile);
         sprintf(apath, "%s/nvs_%4.4d.na%d", project.datadir, ifile, file->output_id);
+        /*
         if (file->status == MBNA_FILE_FIXEDNAV) {
           sprintf(message, " > Not outputting updated nav to fixed file %s\n", apath);
           do_info_add(message, false);
           if (mbna_verbose == 0)
             fprintf(stderr, "%s", message);
         }
-        else if ((nfp = fopen(npath, "r")) == NULL) {
+        else */
+        if ((nfp = fopen(npath, "r")) == NULL) {
           status = MB_FAILURE;
           error = MB_ERROR_OPEN_FAIL;
           sprintf(message, " > Unable to read initial nav file %s\n", npath);
@@ -10552,15 +10554,6 @@ ifile, isection, isnav);
                           factor * (section->snav_z_offset[isnav + 1] - section->snav_z_offset[isnav]);
 
                 /* write the updated nav out */
-                /* printing this string twice because in some situations the first
-                    print has the time_d value come out as "nan" - this is the worst sort
-                    of kluge for a real but mysterious bug - apologies to all who find this
-                    - DWC 18 Aug 2007 R/V Atlantis Cobb Segment JDF Ridge */
-//                sprintf(ostring,
-//                        "%4.4d %2.2d %2.2d %2.2d %2.2d %2.2d.%6.6d %16.6f %.10f %.10f %.2f %.2f %.3f %.2f %.2f "
-//                        "%.2f %.3f\r\n",
-//                        time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6], time_d,
-//                        navlon, navlat, heading, speed, draft, roll, pitch, heave, zoffset);
                 sprintf(ostring,
                         "%4.4d %2.2d %2.2d %2.2d %2.2d %2.2d.%6.6d %16.6f %.10f %.10f %.2f %.2f %.3f %.2f %.2f "
                         "%.2f %.3f\r\n",
@@ -10681,13 +10674,14 @@ int mbnavadjust_applynav() {
       sprintf(npath, "%s/nvs_%4.4d.mb166", project.datadir, ifile);
       sprintf(apath, "%s/nvs_%4.4d.na%d", project.datadir, ifile, file->output_id);
       sprintf(opath, "%s.na%d", file->path, file->output_id);
+      /*
       if (file->status == MBNA_FILE_FIXEDNAV) {
         sprintf(message, " > Not outputting updated nav to fixed file %s\n", opath);
         do_info_add(message, false);
         if (mbna_verbose == 0)
           fprintf(stderr, "%s", message);
-      }
-      else if ((nfp = fopen(npath, "r")) == NULL) {
+      } else */
+      if ((nfp = fopen(npath, "r")) == NULL) {
         status = MB_FAILURE;
         error = MB_ERROR_OPEN_FAIL;
         sprintf(message, " > Unable to read initial nav file %s\n", npath);
@@ -10830,15 +10824,6 @@ ifile, isection, isnav);
                         factor * (section->snav_z_offset[isnav + 1] - section->snav_z_offset[isnav]);
 
               /* write the updated nav out */
-              /* printing this string twice because in some situations the first
-                  print has the time_d value come out as "nan" - this is the worst sort
-                  of kluge for a real but mysterious bug - apologies to all who find this
-                  - DWC 18 Aug 2007 R/V Atlantis Cobb Segment JDF Ridge */
-//              sprintf(ostring,
-//                      "%4.4d %2.2d %2.2d %2.2d %2.2d %2.2d.%6.6d %16.6f %.10f %.10f %.2f %.2f %.3f %.2f %.2f %.2f "
-//                      "%.3f\r\n",
-//                      time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6], time_d, navlon,
-//                      navlat, heading, speed, draft, roll, pitch, heave, zoffset);
               sprintf(ostring,
                       "%4.4d %2.2d %2.2d %2.2d %2.2d %2.2d.%6.6d %16.6f %.10f %.10f %.2f %.2f %.3f %.2f %.2f %.2f "
                       "%.3f\r\n",
