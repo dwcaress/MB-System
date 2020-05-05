@@ -20,7 +20,7 @@ include "beta" in the tag name are preliminary and generally not announced.
 Distributions that do not include "beta" in the tag name correspond to the major,
 announced releases. The source distributions associated with all releases, major or beta, are equally accessible as tarballs through the Github interface.
 
-- Version 5.7.6beta33    May 4, 2020
+- Version 5.7.6beta33    May 5, 2020
 - Version 5.7.6beta32    April 22, 2020
 - Version 5.7.6beta31    March 2, 2020
 - Version 5.7.6beta30    February 20, 2020
@@ -345,7 +345,13 @@ announced releases. The source distributions associated with all releases, major
 ### MB-System Version 5.7 Release Notes:
 --
 
-#### 5.7.6beta33 (May 4, 2020)
+#### 5.7.6beta33 (May 5, 2020)
+
+Mbnavadjust: Changed handling of fixed surveys when updating the project grid
+or applying the solution. Previously the files of fixed surveys were ignored,
+even if they previously had been adjusted before being set to fixed. Now, the
+unchanged *.na0 file will be output and the navadjust state will be updated
+so that mbprocess will apply the unchanged navigation.
 
 Mbcopy: A compile failure occurs for src/utilities/mbcopy.cc on Windows as
 reported by Joaquim Luis. The issue is that under Visual Studio C++ some
