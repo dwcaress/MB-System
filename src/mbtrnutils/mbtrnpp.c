@@ -1087,10 +1087,10 @@ static int s_mbtrnpp_init_cfg(mbtrnpp_cfg_t *cfg)
         cfg->trn_max_nerr=TRN_MAX_NERR_DFL;
         cfg->trn_max_ecov=TRN_MAX_ECOV_DFL;
         cfg->trn_max_eerr=TRN_MAX_EERR_DFL;
-        char *trn_map_file=NULL;
-        char *trn_cfg_file=NULL;
-        char *trn_particles_file=NULL;
-        char *trn_mission_id=NULL;
+        cfg->trn_map_file=NULL;
+        cfg->trn_cfg_file=NULL;
+        cfg->trn_particles_file=NULL;
+        cfg->trn_mission_id=NULL;
         cfg->trn_decn=0;
         cfg->trn_decs=0.0;
         cfg->trn_nombgain=false;
@@ -3033,7 +3033,7 @@ int main(int argc, char **argv) {
           /* apply decimation - only consider outputting decimated soundings */
           beam_decimation = ((beam_end - beam_start + 1) / mbtrn_cfg->n_output_soundings) + 1;
           dj = mbtrn_cfg->median_filter_n_across / 2;
-          int di = mbtrn_cfg->median_filter_n_along / 2;
+//          int di = mbtrn_cfg->median_filter_n_along / 2;
           n_output = 0;
           for (j = beam_start; j <= beam_end; j++) {
             if ((j - beam_start) % beam_decimation == 0) {
@@ -5065,7 +5065,7 @@ int mbtrnpp_kemkmall_input_read(int verbose, void *mbio_ptr, size_t *size,
   // Read from the socket.
   int *sd_ptr = (int *)mb_io_ptr->mbsp;
   struct mbsys_kmbes_header header;
-  unsigned int num_bytes_dgm_end;
+  unsigned int num_bytes_dgm_end=0;
   mbsys_kmbes_emdgm_type emdgm_type=UNKNOWN;
   memset(buffer, 0, *size);
   int readlen = read(*sd_ptr, buffer, *size);
@@ -5098,8 +5098,8 @@ int mbtrnpp_kemkmall_input_read(int verbose, void *mbio_ptr, size_t *size,
 
   /*handle multi-packet MRZ and MWC records*/
   if (emdgm_type == MRZ || emdgm_type == MWC) {
-      unsigned short numOfDgms;
-      unsigned short dgmNum;
+      unsigned short numOfDgms=0;
+      unsigned short dgmNum=0;
 
     mb_get_binary_short(true, &buffer[MBSYS_KMBES_HEADER_SIZE], &numOfDgms);
     mb_get_binary_short(true, &buffer[MBSYS_KMBES_HEADER_SIZE+2], &dgmNum);
@@ -5126,8 +5126,11 @@ int mbtrnpp_kemkmall_input_read(int verbose, void *mbio_ptr, size_t *size,
       else {
         dgmsReceived++;
       }
-
-      memcpy(mRecordBuf[dgmNum-1], buffer, header.numBytesDgm);
+        if(dgmNum>0){
+            memcpy(mRecordBuf[dgmNum-1], buffer, header.numBytesDgm);
+        }else{
+            fprintf(stderr,"%s: ERR - dgNum<0\n",__func__);
+        }
 
       if (dgmsReceived == totalDgms) {
 
