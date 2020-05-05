@@ -95,7 +95,10 @@ mbtnav_cli_SOURCES = utils/mbtnav_cli.c
 mbtnav_cli_LDADD = libr7kr.la
 
 dist_bin_SCRIPTS = mbtrnpp.sh emu7k.sh
+
 bin_SCRIPTS = mbtrnpp.sh
+
+DIST_SUBDIRS = tools
 
 CLEANFILES =
 DISTCLEANFILES =
