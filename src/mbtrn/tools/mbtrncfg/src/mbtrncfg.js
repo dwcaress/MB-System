@@ -176,7 +176,7 @@ nombtrnpp            [disable MB1 message log (not recommended)]";
 help_topics["trn-map"]="path to TRN map file or directory (for tiled maps)";
 help_topics["trn-par"]="path to TRN particles file (required by TRN server but unused)";
 help_topics["trn-cfg"]="path to TRN server config file";
-help_topics["trn-mid"]="trn config log directory prefix (e.g. <prefix>-TRN)\n[mbtrnpp TRN_LOGFILES environment variable must be set]";
+help_topics["trn-mid"]="trn config mission ID (used for log directory prefix, e.g. <prefix>-TRN)\n[mbtrnpp TRN_LOGFILES environment variable must be set]";
 help_topics["trn-decn"]="TRN update decimation modulus\n\n i.e., TRN is updated every n MB1 samples";
 help_topics["trn-out"]="TRN output configuration\n\n\
 Options for TRN output are configured using one or more comma separated values:\n\n\
@@ -209,7 +209,7 @@ Placeholders : \n\
   TRN_LOGFILES : use with [log-directory]\n\
     TRN log file directory\n";
 help_topics["reson-host"]="Select reson host preset";
-help_topics["mbtrn-host"]="Select mbtrn host preset\n\n[affects directories, timeouts, etc]";
+help_topics["trn-host"]="Select mbtrn host preset\n\n[affects directories, timeouts, etc]";
 help_topics["set-trnlogfiles"]="Set TRN_LOGFILES environment on command line";
 
 help_topics["copy"]="Copy command line to clipboard\n\n[calls update]";
