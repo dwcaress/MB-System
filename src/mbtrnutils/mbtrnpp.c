@@ -2205,7 +2205,6 @@ int main(int argc, char **argv) {
                          "\t--trnuhbt=n\n"
                          "\t--delay=n\n"
                          "\t--trn-en\n"
-                         "\t--trn-dis\n"
                          "\t--trn-utm\n"
                          "\t--trn-map\n"
                          "\t--trn-par\n"
