@@ -20,7 +20,8 @@ include "beta" in the tag name are preliminary and generally not announced.
 Distributions that do not include "beta" in the tag name correspond to the major,
 announced releases. The source distributions associated with all releases, major or beta, are equally accessible as tarballs through the Github interface.
 
-- Version 5.7.6beta32    April 12, 2020
+- Version 5.7.6beta33    May 5, 2020
+- Version 5.7.6beta32    April 22, 2020
 - Version 5.7.6beta31    March 2, 2020
 - Version 5.7.6beta30    February 20, 2020
 - Version 5.7.6beta29    February 17, 2020
@@ -343,7 +344,80 @@ announced releases. The source distributions associated with all releases, major
 --
 ### MB-System Version 5.7 Release Notes:
 --
-#### 5.7.6beta32 (April 9, 2020)
+
+#### 5.7.6beta33 (May 5, 2020)
+
+Mbnavadjust: Changed handling of fixed surveys when updating the project grid
+or applying the solution. Previously the files of fixed surveys were ignored,
+even if they previously had been adjusted before being set to fixed. Now, the
+unchanged *.na0 file will be output and the navadjust state will be updated
+so that mbprocess will apply the unchanged navigation.
+
+Mbcopy: A compile failure occurs for src/utilities/mbcopy.cc on Windows as
+reported by Joaquim Luis. The issue is that under Visual Studio C++ some
+external symbols referenced in the mbsys_simrad.h header file are not
+available to the C++ code in mbcopy.cc. This is not true for clang or gcc.
+The symbols in question are double arrays holding the beam angles for different
+operation modes of the Simrad multibeams supported by this i/o module.
+The solution attempted here is to move the array definitions to mbsys_simrad.c
+and to provide a non-standard function to access pointers to those arrays. By
+non-standard I mean this does not fit with the normal set of MBIO API functions,
+and does not exist for i/o modules generally. The function mbsys_simrad_beamangles()
+has been added to mbsys_simrad.c and the prototype in mbsys_simrad.h is wrapped
+with extern "C" so it can be called from mbcopy.cc.
+
+Mbcopy: The current processing model for old Simrad multibeam data in format 51
+is to first use mbcopy to translate it the extended second generation Kongsberg
+format 57, and then process it as one would more modern data. It was discovered
+that this translation was failing to properly copy navigation records. This
+was fixed.
+
+Format MBF_EMOLDRAW (51): Because the compile error referenced above involved
+1990's era Simrad multibeam data in format 51, it was necessary to test processing
+of such data. This revealed that recent changes to program logic from using
+MB_YES/MB_NO/MB_MAYBE values to bool variables (true/false) had broken the basic
+data record reading logic for the MBF_EMOLDRAW i/o module. This has been fixed.
+
+Build system for Qt5 based tools: Improved the build system handling of Qt5
+programs. The test program enabled by running configure with the --enable-qt
+option has been renamed mbgrdvizqt, but still resides in src/qttest. The
+approach now is to do the following:
+(1) The configure script creates the Qt project file src/qttest/mbgrdvizqt.pro
+    and then modifies the values of variables specifying the required MB-System
+    and GMT libraries and headers.
+(2) The configure script runs qmake in src/qttest to generate a Makefile named
+    src/qttest/Makefile.qmake
+(3) The configure script generates a Makefile in src/qttest that in turn will
+    run make itself using Makefile.qmake for targets all, install, uninstall,
+    and clean.
+This approach now works on a Mac. It's time to test on Linux.
+
+#### 5.7.6beta32 (April 22, 2020)
+
+Mbgrid: Fixed failure of the two gridding algorithm using beam footprints in
+which the footprint size blows up at low grazing angles. The fix is to not
+use soundings for which the grazing angle is less than five degrees.
+
+Mbgrid and mbmosaic: Replaced int values with bool values where appropriate.
+
+Build system: Added option to enable building tools based on Qt5 to the autotools
+build system. If the configure script is given the --enable-qt option, it
+checks if Qt5 has been installed, and if so, determines the compiler and linker
+flags required to build tools using Qt5. At present, the only Qt5 based code
+is in the directory src/qttest, and this code does not successfully compile
+and run. Therefore it is not recommended to run configure with the --enable-qt
+option. However, the build system is now ready to support Qt5 based tools as
+they are developed.
+
+Mbgrdtiff: Paul Wessel contributed a new version of mbgrdtiff that constructs
+the image by a direct call to the grdimage module. This version will only build
+and work with GMT 6.1 and later. The original code included code building the
+image, duplicating functionality in grdimage. The new version is now
+    mbsystem/src/gmt/mbgrdtiff.c
+and the original version
+    mbsystem/src/gmt/mbgrdtifforg.c.
+The build system has been augmented to check the GMT version and build mbgrdtiff
+from the original when that is <6.1 and the new file when that is >= 6.1.
 
 General (mb_define.h, mb_format.c, mb_format.h): Added definition of format=-2
 as recursive imagelists. Analagous to datalists, this construct supports timestamped
@@ -369,6 +443,12 @@ Mbset: changed output to clearly indicate when parameter files are created
 mb_pr_compare() to mb_process.c that can be used in mbset.c to check
 whether the modified process parameter structure actually differs from
 the original structure.
+
+Formats MBF_OICGEODA (141) and MBF_OICMBARI (142): Fixed support for old OIC
+format DSL120 interferometric sonar data. Processing of these data now works
+with mbpreprocess and mbprocess again. The sidescan data were compromised
+by treating unsigned amplitude values as signed, and treating null samples as
+valid.
 
 Testing: Reinstated OSX test build as part of the Travis CI runs triggered by
 commits to the Github repository.

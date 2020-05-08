@@ -2286,6 +2286,8 @@ int main(int argc, char **argv) {
       oformat = MBF_IMAGEMBA;
     else if (iformat == MBF_3DWISSLR)
       oformat = MBF_3DWISSLP;
+    else if (iformat == MBF_OICGEODA)
+      oformat = MBF_OICMBARI;
     else
       oformat = iformat;
 

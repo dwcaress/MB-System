@@ -285,7 +285,7 @@ int mb_imagelist_close(int verbose, void **imagelist_ptr, int *error);
 int mb_get_relative_path(int verbose, char *path, char *pwd, int *error);
 int mb_get_shortest_path(int verbose, char *path, int *error);
 int mb_get_basename(int verbose, char *path, int *error);
-int mb_check_info(int verbose, char *file, int lonflip, double bounds[4], int *file_in_bounds, int *error);
+int mb_check_info(int verbose, char *file, int lonflip, double bounds[4], bool *file_in_bounds, int *error);
 bool mb_should_make_fbt(int verbose, int format);
 bool mb_should_make_fnv(int verbose, int format);
 int mb_make_info(int verbose, bool force, char *file, int format, int *error);

@@ -1,41 +1,34 @@
-FROM centos:7
+# See README.md
+FROM zberkowitz/mbsystem-deps:centos-7
 
-RUN yum -y groupinstall "Development Tools"
+RUN yum install -y \
+        glxinfo \
+        mesa-dri-drivers
 
-RUN yum install -y epel-release
+# TODO remove the following, only added to facilitate debugging
+# during initial tests of the container
+ENV LIBGL_DEBUG=verbose
+# `glxinfo >/dev/null` will for example help spot any errors
 
-# Per https://www.mbari.org/products/research-software/mb-system/how-to-download-and-install-mb-system/#toggle-id-10
-RUN yum -y install \
-            fftw \
-            fftw-devel \
-            gdal-devel \
-            gmt \
-            gmt-devel \
-            netcdf \
-            netcdf-devel \
-            openmotif \
-            openmotif-devel \
-            perl \
-            proj \
-            proj-devel
 
-# Added freeglut to resolve OpenGL stuff:
-RUN yum -y install \
-            freeglut \
-            freeglut-devel
+# This location, to be mounted from some file on the host, will
+# help keep the bash history upon re-starts of the container:
+ENV HISTFILE=/opt/mbsystem.bash_history
+# NOTE: not using the default HISTFILE to facilitate running
+# the container as a different user from the one by default.
 
-# -------------------------
-# MB-System:
-
-RUN  mkdir -p /opt/MB-System /opt/MBSWorkDir
+RUN mkdir -p /opt/MB-System \
+             /opt/MBSWorkDir \
+ && touch $HISTFILE
 
 COPY . /opt/MB-System/
 RUN  cd /opt/MB-System/         && \
      ./configure                && \
      make                       && \
+     make check                 && \
      make install
 
-WORKDIR    /opt/MBSWorkDir
+WORKDIR  /opt/MBSWorkDir
 
-# No explicit cmd or entry_point; any MB-System program (and arguments)
-# can be executed as arguments passed at the end of `docker run ...` command.
+# No explicit cmd or entry_point. Launcher script will typically run `bash`
+# but also allow to run any other program in the container.

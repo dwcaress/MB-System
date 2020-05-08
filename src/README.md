@@ -1,4 +1,4 @@
-# src
+## MB-System Source Directory: src/
 
 - Libraries
   - [bsio](bsio): Hawaii Mapping Research Group (HMRG) interfaces

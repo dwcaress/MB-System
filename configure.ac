@@ -18,7 +18,7 @@ define([AC_CACHE_LOAD], )
 define([AC_CACHE_SAVE], )
 
 dnl Initialize and set version and version date
-AC_INIT([mbsystem],[5.7.6beta32],[http://listserver.mbari.org/sympa/arc/mbsystem],[mbsystem],[http://www.mbari.org/data/mbsystem/])
+AC_INIT([mbsystem],[5.7.6beta33],[http://listserver.mbari.org/sympa/arc/mbsystem],[mbsystem],[http://www.mbari.org/data/mbsystem/])
 
 AC_CONFIG_MACRO_DIR(m4)
 AC_LANG(C)
@@ -27,7 +27,7 @@ AC_LANG(C)
 dnl Require c++11
 AX_CXX_COMPILE_STDCXX(11)
 
-AC_DEFINE(VERSION_DATE, "12 April 2020", [Set VERSION_DATE define in mb_config.h])
+AC_DEFINE(VERSION_DATE, "5 May 2020", [Set VERSION_DATE define in mb_config.h])
 
 dnl Check system arch
 AC_CANONICAL_HOST
@@ -106,6 +106,7 @@ AS_ECHO(["        --enable-mbtnav       - enable building terrain relative navig
 AS_ECHO(["        --disable-mbtools     - disable building graphical tools (use with --enable-mbtrn and --enable-mbtnav)"])
 AS_ECHO(["        --enable-hardening    - Enable compiler and linker options to frustrate memory corruption exploits  (e.g. -fPIE and -pie) (optional)"])
 AS_ECHO(["        --enable-test         - Enable building unit tests in test/ and third-party/"])
+AS_ECHO(["        --enable-qt           - Enable building graphical tools using the Qt5 framework"])
 AS_ECHO([" "])
 AS_ECHO(["    After configure you can run the make utility in the usual fashion"])
 AS_ECHO(["        make"])
@@ -551,7 +552,7 @@ AC_SUBST([libgdal_CPPFLAGS], [$libgdal_CPPFLAGS])
 
 dnl--------------------------------------------------------------------
 dnl GMT Section
-dnl We use gmt-config to set GMT5 paths and settings
+dnl We use gmt-config to set GMT paths and settings
 dnl--------------------------------------------------------------------
 
 if test "X$with_gmt_config" != "X" ; then
@@ -562,16 +563,36 @@ else
     AC_PATH_PROG([GMT_CONF], [gmt-config])
 fi
 if test -x "$GMT_CONF" ; then
-    AC_MSG_CHECKING(for GMT includes)
-    GMT_INC=`$GMT_CONF --cflags 2>/dev/null`
-    AC_MSG_RESULT($GMT_INC)
+
+    AC_MSG_CHECKING(for GMT version)
+    GMT_VERSION=`$GMT_CONF --version 2>/dev/null`
+    AC_MSG_RESULT($GMT_VERSION)
+    AC_MSG_CHECKING(GMT version >= 6.1.0)
+    AX_COMPARE_VERSION([$GMT_VERSION], [ge], [6.1.0], [GMT61PLUS=true], [GMT61PLUS=false])
+    AX_COMPARE_VERSION([$GMT_VERSION], [ge], [6.1.0], [AC_MSG_RESULT([yes])], [AC_MSG_RESULT([no - $GMT_VERSION found])])
+    if test -x "$GMT61PLUS" ; then
+    AS_ECHO(["GMT version >= 6.1.0, mbgrdtiff calls the grdimage module"])
+    else
+    AS_ECHO(["GMT version < 6.1.0, mbgrdtiff contructs image without calling the grdimage module"])
+    fi
+
+    AC_MSG_CHECKING(for GMT cflags)
+    GMT_CFLAGS=`$GMT_CONF --cflags 2>/dev/null`
+    AC_MSG_RESULT($GMT_CFLAGS)
+    AC_MSG_CHECKING(for GMT include directory)
+    GMT_INCLUDEDIR=`$GMT_CONF --includedir 2>/dev/null`
+    AC_MSG_RESULT($GMT_INCLUDEDIR)
     AC_MSG_CHECKING(for GMT libs)
-    GMT_LIB=`$GMT_CONF --libs 2>/dev/null`
+    GMT_LIBS=`$GMT_CONF --libs 2>/dev/null`
+    AC_MSG_RESULT($GMT_LIBS)
+    AC_MSG_CHECKING(for GMT library directory)
+    GMT_LIBDIR=`$GMT_CONF --libdir 2>/dev/null`
+    AC_MSG_RESULT($GMT_LIBDIR)
+    AC_MSG_CHECKING(for GMT dependent libraries)
     DEP_LIBS=`$GMT_CONF --dep-libs 2>/dev/null`
-    AC_MSG_RESULT($GMT_LIB)
-    GMT_LIB_PATH=`echo $GMT_LIB | sed 's/^-L//;s/\ .*//'`
-    rpath="$GMT_LIB_PATH"
-    AC_MSG_CHECKING(for 32/64-bit GMT5 installation)
+    AC_MSG_RESULT($DEP_LIBS)
+    rpath="$GMT_LIBDIR"
+    AC_MSG_CHECKING(for 32/64-bit GMT installation)
     bits=`$GMT_CONF --bits 2>/dev/null`
     GCC_64="-m${bits}"
     LDFLAGS="$LDFLAGS -m${bits}"
@@ -580,9 +601,10 @@ if test -x "$GMT_CONF" ; then
     GMT_PLUGINDIR=`$GMT_CONF --plugindir 2>/dev/null`
     AC_MSG_RESULT($GMT_PLUGINDIR)
 
-    libgmt_CPPFLAGS="$GMT_INC"
-    libgmt_LIBS="-L$GMT_LIB_PATH -R $GMT_LIB_PATH -lgmt -lpostscriptlight"
-    libgmt_LDFLAGS="-L$GMT_LIB_PATH"
+    libgmt_INCLUDEDIR="$GMT_INCLUDEDIR"
+    libgmt_CPPFLAGS="$GMT_CFLAGS"
+    libgmt_LIBS="$GMT_LIBS"
+    libgmt_LDFLAGS="$GMT_LIBS"
 else
     AS_ECHO(["Did not find gmt-config program, use --with-gmt-config to set the location"])
     AC_MSG_ERROR(["Did not find gmt-config program, use --with-gmt-config to set the location"])
@@ -591,7 +613,10 @@ fi
 dnl Substitute GMT library and header arguments
 AC_SUBST([libgmt_LIBS], [$libgmt_LIBS])
 AC_SUBST([libgmt_CPPFLAGS], [$libgmt_CPPFLAGS])
+AC_SUBST([libgmt_INCLUDEDIR], [$libgmt_INCLUDEDIR])
+AC_SUBST([libgmt_LDFLAGS], [$libgmt_LDFLAGS])
 AC_SUBST(GMT_PLUGINDIR)
+AM_CONDITIONAL([GMT61PLUS], [test -x "$GMT61PLUS"])
 
 dnl--------------------------------------------------------------------
 dnl FFTW Section
@@ -890,6 +915,52 @@ AM_CONDITIONAL([BUILD_GL], [test "$GOT_OPENGL" = yes])
 dnl End check for Motif and OpenGL library and headers
 
 dnl--------------------------------------------------------------------
+dnl Qt5 Section
+dnl   - Use macro ax_have_qt() from
+dnl         https://www.gnu.org/software/autoconf-archive/ax_have_qt.html
+dnl         http://git.savannah.gnu.org/gitweb/?p=autoconf-archive.git;a=blob_plain;f=m4/ax_have_qt.m4
+dnl   - Usage of this macro described at:
+dnl         https://stackoverflow.com/questions/37758622/how-to-use-gnu-autotool-to-build-a-qt-project
+dnl--------------------------------------------------------------------
+
+dnl Check if Qt5 based graphical tools should be built
+AS_ECHO(["Check if Qt5 based graphical tools should be built"])
+AC_ARG_ENABLE([qt],
+  [AS_HELP_STRING([--enable-qt], [build Qt5 based graphical tools])],
+  [build_qttools=yes],
+  [build_qttools=no])
+AS_ECHO(["build_qttools: $build_qttools"])
+if test "$build_qttools" = "yes" ; then
+  AX_HAVE_QT_MB()
+  if test "$have_qt" = "yes" ; then
+    AS_ECHO(["Qt5 installation found"])
+    AC_SUBST([qt_DIR], [$QT_DIR])
+    AC_SUBST([qt_LIBS], [$QT_LIBS])
+    AC_SUBST([qt_CPPFLAGS], [$QT_CXXFLAGS])
+    AC_SUBST([qt_MOC], [$QT_MOC])
+    AS_ECHO(["Constructing Qt project file mbgrdvizqt.pro in src/qttest..."])
+    `cp src/qttest/mbgrdvizqt.pro.init src/qttest/mbgrdvizqt.pro`
+    `sed -i "" "s#__GMT_INCLUDEDIR__#$libgmt_INCLUDEDIR#" src/qttest/mbgrdvizqt.pro`
+    `sed -i "" "s#__GMT_LIBS__#$libgmt_LIBS#" src/qttest/mbgrdvizqt.pro`
+    `sed -i "" "s#__INSTALLDIR__#$prefix/bin#" src/qttest/mbgrdvizqt.pro`
+    AS_ECHO(["Running qmake in src/qttest to generate src/qttest/Makefile.qmake..."])
+    `cd src/qttest ; qmake -makefile -o Makefile.qmake ; cd ../..`
+  else
+    AS_ECHO(["Qt5 installation not found"])
+    build_qttools=no
+  fi
+fi
+AM_CONDITIONAL([BUILD_QTTOOLS], [test $build_qttools = yes])
+if test "$build_qttools" = "yes" ; then
+    dnl Build tools using QT
+    AS_ECHO(["Building Qt5-based graphical tools"])
+    AC_DEFINE(QTTOOLS_ENABLED, 1, [Build tools using Qt5])
+else
+    dnl Not building tools using Qt5
+    AS_ECHO(["Not building Qt5-based graphical tools"])
+fi
+
+dnl--------------------------------------------------------------------
 dnl Add some variables to be exported to the src/mbio/mb_config.h file
 dnl--------------------------------------------------------------------
 
@@ -960,7 +1031,7 @@ dnl--------------------------------------------------------------------
 dnl Check if programs using PCL should be built
 AS_ECHO(["Check if programs using PCL should be built"])
 AC_ARG_ENABLE(pcltools, [AS_HELP_STRING([--enable-pcltools],
-        [build tools using PCL])], [build_pcltools=yes], [build_mbpcltools=no])
+        [build tools using PCL])], [build_pcltools=yes], [build_pcltools=no])
 AM_CONDITIONAL([BUILD_PCLTOOLS], [test $build_pcltools = yes])
 if test "$build_pcltools" = "yes" ; then
     dnl Build tools using PCL
@@ -1010,14 +1081,15 @@ dnl--------------------------------------------------------------------
 
 AS_ECHO(["Check if the GSF driver should be built"])
 AC_ARG_ENABLE(gsf, [AS_HELP_STRING([--disable-gsf], [build without the GSF driver])],
-        [GOT_GSF=yes], [GOT_GSF=no])
-if test "$GOT_GSF" = "no" ; then
+        [GOT_GSFDISABLE=yes], [GOT_GSFDISABLE=no])
+if test "$GOT_GSFDISABLE" = "no" ; then
   enable_gsf=yes
+  AS_ECHO(["GSF driver will be built"])
+  AC_DEFINE([ENABLE_GSF], 1, [Build with GSF])
+else
+  AS_ECHO(["GSF driver will not be built"])
 fi
 AM_CONDITIONAL([BUILD_GSF], [test $enable_gsf = yes])
-if test "$enable_gsf" = "yes" ; then
-  AC_DEFINE([ENABLE_GSF], 1, [Build with GSF])
-fi
 
 dnl--------------------------------------------------------------------
 dnl Generate Makefiles
@@ -1053,6 +1125,7 @@ AC_CONFIG_FILES([\
       src/man/man3/Makefile \
       src/html/Makefile \
       src/ps/Makefile \
+      src/qttest/Makefile \
       src/share/Makefile \
       third_party/Makefile \
       third_party/googletest/Makefile \
@@ -1147,6 +1220,11 @@ if test "$build_mbtools" = "yes" ; then
 	AS_ECHO(["Build graphical tools: Enabled"])
 else
 	AS_ECHO(["Build graphical tools: Disabled"])
+fi
+if test "$build_qttools" = "yes" ; then
+	AS_ECHO(["Build Qt tools: Enabled"])
+else
+	AS_ECHO(["Build Qt tools: Disabled"])
 fi
 if test "$build_pcltools" = "yes" ; then
     AS_ECHO(["Build PCL tools: Enabled"])

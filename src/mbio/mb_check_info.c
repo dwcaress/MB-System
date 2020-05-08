@@ -38,7 +38,7 @@
 #include "mb_status.h"
 
 /*--------------------------------------------------------------------*/
-int mb_check_info(int verbose, char *file, int lonflip, double bounds[4], int *file_in_bounds, int *error) {
+int mb_check_info(int verbose, char *file, int lonflip, double bounds[4], bool *file_in_bounds, int *error) {
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");

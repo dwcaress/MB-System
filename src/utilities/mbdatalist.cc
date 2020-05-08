@@ -330,7 +330,7 @@ int main(int argc, char **argv) {
 	mb_path lock_user = "";
 	char lock_date[25] = "";
 	mb_path lockfile = "";
-	int file_in_bounds = false;  // TODO(schwehr): Convert mb_check_info to bool.
+	bool file_in_bounds = false;
 	bool locked = false;
 
 	/* if not a datalist just output filename format and weight */
@@ -426,7 +426,7 @@ int main(int argc, char **argv) {
 		char dfilelast[MB_PATH_MAXLINE];
 		while (mb_datalist_read(verbose, datalist, file, dfile, &format, &file_weight, &error) == MB_SUCCESS) {
 			nfile++;
-			char pwd[MB_PATH_MAXLINE];  // TODO(schwehr): is the cwd going to change?
+			char pwd[MB_PATH_MAXLINE];
 			/* char *bufptr = */ getcwd(pwd, MB_PATH_MAXLINE);
 			mb_get_relative_path(verbose, file, pwd, &error);
 			mb_get_relative_path(verbose, dfile, pwd, &error);

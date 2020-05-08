@@ -3340,7 +3340,6 @@ int mbedit_filter_ping(int iping) {
 				} else /* if (filter_cutbeam_begin > filter_cutbeam_end) */ {
 					/* handle cut at edges of swath */
 					for (int j = 0; j < ping[iping].beams_bath; j++) {
-						// TODO(schwehr): Always true.  Should this be an && rather than ||?
 						if ((j <= filter_cutbeam_end || j >= filter_cutbeam_begin) && mb_beam_ok(ping[iping].beamflag[j])) {
 							/* write edit to save file */
 							if (esffile_open)
@@ -3393,10 +3392,9 @@ int mbedit_filter_ping(int iping) {
 				}
 
 				/* handle cut at edges of swath */
-				else if (filter_cutdistance_begin > filter_cutdistance_end) {
+				else /* if (filter_cutdistance_begin > filter_cutdistance_end) */ {
 					for (int j = 0; j < ping[iping].beams_bath; j++) {
 						if (mb_beam_ok(ping[iping].beamflag[j])) {
-							// TODO(schwehr): Always true.  Should this be an && rather than ||?
 							if (ping[iping].bathacrosstrack[j] >= filter_cutdistance_begin ||
 							    ping[iping].bathacrosstrack[j] <= filter_cutdistance_end) {
 								/* write edit to save file */
@@ -3453,7 +3451,6 @@ int mbedit_filter_ping(int iping) {
 					for (int j = 0; j < ping[iping].beams_bath; j++) {
 						if (mb_beam_ok(ping[iping].beamflag[j]) && ping[iping].altitude > 0.0) {
 							const double angle = RTD * atan(ping[iping].bathacrosstrack[j] / ping[iping].altitude);
-							// TODO(schwehr): Always true.  Should this be an && rather than ||?
 							if (angle >= filter_cutangle_begin || angle <= filter_cutangle_end) {
 								/* write edit to save file */
 								if (esffile_open)
@@ -3520,8 +3517,7 @@ int mbedit_get_format(char *file, int *form) {
 	return (status);
 }
 /*--------------------------------------------------------------------*/
-// TODO(schwehr): savemode -> bool
-int mbedit_open_file(char *file, int form, int savemode) {
+int mbedit_open_file(char *file, int form, bool savemode) {
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -3678,8 +3674,8 @@ int mbedit_open_file(char *file, int form, int savemode) {
 		}
 
 		/* handle esf edits */
-		const bool outputmode = output_mode != MBEDIT_OUTPUT_BROWSE;
-		if (savemode || outputmode) {
+    const int outputmode = ((output_mode == MBEDIT_OUTPUT_BROWSE) ? MBP_ESF_NOWRITE : MBP_ESF_WRITE);
+		if (savemode || (outputmode == MBP_ESF_WRITE)) {
 			status = mb_esf_load(verbose, program_name, ifile, savemode, outputmode, esffile, &esf, &error);
 			if (output_mode != MBEDIT_OUTPUT_BROWSE && status == MB_SUCCESS && esf.esffp != NULL)
 				esffile_open = true;
@@ -4176,9 +4172,9 @@ int mbedit_clear_screen() {
 	return (status);
 }
 /*--------------------------------------------------------------------*/
-// TODO(schwehr): autoscale -> bool
-int mbedit_plot_all(int plwd, int exgr, int xntrvl, int yntrvl, int plt_size, int sh_mode, int sh_flggdsdg, int sh_flggdprf, int sh_time, int *nplt,
-                    int autoscale) {
+int mbedit_plot_all(int plwd, int exgr, int xntrvl, int yntrvl, int plt_size,
+                    int sh_mode, int sh_flggdsdg, int sh_flggdprf, int sh_time,
+                    int *nplt, bool autoscale) {
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -4754,8 +4750,7 @@ int mbedit_plot_ping(int iping) {
 	return (status);
 }
 /*--------------------------------------------------------------------*/
-// TODO(schwehr): save -> bool
-int mbedit_plot_ping_label(int iping, int save) {
+int mbedit_plot_ping_label(int iping, bool save) {
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -4937,16 +4932,17 @@ int mbedit_unplot_ping(int iping) {
 	/* unplot the ping profile */
 	bool first = true;
 	for (int j = 0; j < ping[iping].beams_bath; j++) {
-		if (mb_beam_ok(ping[iping].beamflag[j]) && first) {
-			first = false;
-			xold = ping[iping].bath_x[j];
-			yold = ping[iping].bath_y[j];
-		}
-		else if (mb_beam_ok(ping[iping].beamflag[j])) {
-			xg_drawline(mbedit_xgid, xold, yold, ping[iping].bath_x[j], ping[iping].bath_y[j], pixel_values[WHITE], XG_SOLIDLINE);
-			xold = ping[iping].bath_x[j];
-			yold = ping[iping].bath_y[j];
-		}
+		if (mb_beam_ok(ping[iping].beamflag[j])) {
+      if (first) {
+			  first = false;
+			  xold = ping[iping].bath_x[j];
+			  yold = ping[iping].bath_y[j];
+		  } else {
+			  xg_drawline(mbedit_xgid, xold, yold, ping[iping].bath_x[j], ping[iping].bath_y[j], pixel_values[WHITE], XG_SOLIDLINE);
+			  xold = ping[iping].bath_x[j];
+			  yold = ping[iping].bath_y[j];
+		  }
+    }
 	}
 
 	const int status = MB_SUCCESS;
@@ -5157,18 +5153,19 @@ int mbedit_action_goto(int ttime_i[7], int hold_size, int buffer_size, int plwd,
 	}
 
 	/* let the world know... */
-	if (verbose >= 2 && found) {
-		fprintf(stderr, "\n>> Target time %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d found\n", ttime_i[0], ttime_i[1], ttime_i[2],
+	if (verbose >= 2) {
+    if (found) {
+		  fprintf(stderr, "\n>> Target time %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d found\n", ttime_i[0], ttime_i[1], ttime_i[2],
 		        ttime_i[3], ttime_i[4], ttime_i[5], ttime_i[6]);
-		fprintf(stderr, ">> Found time: %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d\n", ping[0].time_i[0], ping[0].time_i[1],
+		  fprintf(stderr, ">> Found time: %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d\n", ping[0].time_i[0], ping[0].time_i[1],
 		        ping[0].time_i[2], ping[0].time_i[3], ping[0].time_i[4], ping[0].time_i[5], ping[0].time_i[6]);
-		fprintf(stderr, "Current data record index:  %d\n", current_id);
-		fprintf(stderr, "Current global data record: %d\n", current_id + ndump_total);
-	}
-	else if (verbose >= 2) {
-		fprintf(stderr, "\n>> Target time %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d found\n", ttime_i[0], ttime_i[1], ttime_i[2],
+		  fprintf(stderr, "Current data record index:  %d\n", current_id);
+		  fprintf(stderr, "Current global data record: %d\n", current_id + ndump_total);
+    } else {
+		  fprintf(stderr, "\n>> Target time %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d found\n", ttime_i[0], ttime_i[1], ttime_i[2],
 		        ttime_i[3], ttime_i[4], ttime_i[5], ttime_i[6]);
-		fprintf(stderr, "\n>> Unable to go to target time...\n");
+		  fprintf(stderr, "\n>> Unable to go to target time...\n");
+    }
 	}
 
 	/* reset beam_save */
@@ -5337,16 +5334,15 @@ int mbedit_tsminmax(int iping, int nping, int data_id, double *tsmin, double *ts
 	if (iping >= 0 && nbuff > iping && nping > 0 && iping + nping - 1 < nbuff) {
 		mbedit_tsvalue(iping, data_id, tsmin);
 		*tsmax = *tsmin;
-		// TODO(schwehr): Localize value and value2?
-		double value;
-		double value2;
 		for (int i = iping; i < iping + nping; i++) {
+		  double value;
 			mbedit_tsvalue(i, data_id, &value);
 			*tsmin = MIN(*tsmin, value);
 			*tsmax = MAX(*tsmax, value);
 
 			/* handle slope plotting in roll plot */
 			if (data_id == MBEDIT_PLOT_ROLL) {
+		    double value2;
 				mbedit_xtrackslope(i, &value2);
 				*tsmin = MIN(*tsmin, value2);
 				*tsmax = MAX(*tsmax, value2);

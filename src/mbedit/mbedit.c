@@ -3,6 +3,8 @@
 #include <windows.h>
 #endif
 
+#include <stdbool.h>
+
 #include <X11/StringDefs.h>
 #include <Xm/DialogS.h>
 #include <Xm/MwmUtil.h>
