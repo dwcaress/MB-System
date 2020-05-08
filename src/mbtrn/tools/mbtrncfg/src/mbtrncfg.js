@@ -1,7 +1,7 @@
 // variable declarations, initialization
 var help_topics=[];
-var RESON_HOST=[];
-var MBTRN_HOST=[];
+var TRN_RESON_HOST=[];
+var TRN_HOST=[];
 var TRN_LOGFILES=[];
 var TRN_DATAFILES=[];
 var TRN_MAPFILES=[];
@@ -46,8 +46,8 @@ var WINVM_MBTRNDIR="/home/headley/git/MB-System/src/mbtrnutils"
 var SESSION=session_str();
 
 // initialize presets
-RESON_HOST["win.reson"]=MAPPER1_RESON_IP;
-MBTRN_HOST["win.reson"]=MAPPER1_RESON_IP;
+TRN_RESON_HOST["win.reson"]=MAPPER1_RESON_IP;
+TRN_HOST["win.reson"]=MAPPER1_RESON_IP;
 TRN_LOGFILES["win.reson"]=RESON_LOGFILES;
 TRN_DATAFILES["win.reson"]=RESON_DATAFILES;
 TRN_MAPFILES["win.reson"]=RESON_MAPFILES;
@@ -56,8 +56,8 @@ mbhbt["win.reson"]=MBHBT_MAPPER1;
 trnhbt["win.reson"]=TRNHBT_MAPPER1;
 trnuhbt["win.reson"]=TRNUHBT_MAPPER1;
 
-RESON_HOST["linux.mbari"]=MBARI_LINUXVM_IP;
-MBTRN_HOST["linux.mbari"]=MBARI_LINUXVM_IP;
+TRN_RESON_HOST["linux.mbari"]=MBARI_LINUXVM_IP;
+TRN_HOST["linux.mbari"]=MBARI_LINUXVM_IP;
 TRN_LOGFILES["linux.mbari"]=LINUXVM_LOGFILES;
 TRN_DATAFILES["linux.mbari"]=LINUXVM_DATAFILES;
 TRN_MAPFILES["linux.mbari"]=LINUXVM_MAPFILES;
@@ -66,8 +66,8 @@ mbhbt["linux.mbari"]=MBHBT_TEST;
 trnhbt["linux.mbari"]=TRNHBT_TEST;
 trnuhbt["linux.mbari"]=TRNUHBT_TEST;
 
-RESON_HOST["linux.carson"]=CARSON_LINUXVM_IP;
-MBTRN_HOST["linux.carson"]=CARSON_LINUXVM_IP;
+TRN_RESON_HOST["linux.carson"]=CARSON_LINUXVM_IP;
+TRN_HOST["linux.carson"]=CARSON_LINUXVM_IP;
 TRN_LOGFILES["linux.carson"]=LINUXVM_LOGFILES;
 TRN_DATAFILES["linux.carson"]=LINUXVM_DATAFILES;
 TRN_MAPFILES["linux.carson"]=LINUXVM_MAPFILES;
@@ -76,8 +76,8 @@ mbhbt["linux.carson"]=MBHBT_TEST;
 trnhbt["linux.carson"]=TRNHBT_TEST;
 trnuhbt["linux.carson"]=TRNUHBT_TEST;
 
-RESON_HOST["linux.home"]=HOME_LINUXVM_IP;
-MBTRN_HOST["linux.home"]=HOME_LINUXVM_IP;
+TRN_RESON_HOST["linux.home"]=HOME_LINUXVM_IP;
+TRN_HOST["linux.home"]=HOME_LINUXVM_IP;
 TRN_LOGFILES["linux.home"]=LINUXVM_LOGFILES;
 TRN_DATAFILES["linux.home"]=LINUXVM_DATAFILES;
 TRN_MAPFILES["linux.home"]=LINUXVM_MAPFILES;
@@ -86,8 +86,8 @@ mbhbt["linux.home"]=MBHBT_TEST;
 trnhbt["linux.home"]=TRNHBT_TEST;
 trnuhbt["linux.home"]=TRNUHBT_TEST;
 
-RESON_HOST["winvm.mbari"]=MBARI_WINVM_IP;
-MBTRN_HOST["winvm.mbari"]=MBARI_WINVM_IP;
+TRN_RESON_HOST["winvm.mbari"]=MBARI_WINVM_IP;
+TRN_HOST["winvm.mbari"]=MBARI_WINVM_IP;
 TRN_LOGFILES["winvm.mbari"]=WINVM_LOGFILES;
 TRN_DATAFILES["winvm.mbari"]=WINVM_DATAFILES;
 TRN_MAPFILES["winvm.mbari"]=WINVM_MAPFILES;
@@ -96,8 +96,8 @@ mbhbt["winvm.mbari"]=MBHBT_TEST;
 trnhbt["winvm.mbari"]=TRNHBT_TEST;
 trnuhbt["winvm.mbari"]=TRNUHBT_TEST;
 
-RESON_HOST["winvm.carson"]=CARSON_WINVM_IP;
-MBTRN_HOST["winvm.carson"]=CARSON_WINVM_IP;
+TRN_RESON_HOST["winvm.carson"]=CARSON_WINVM_IP;
+TRN_HOST["winvm.carson"]=CARSON_WINVM_IP;
 TRN_LOGFILES["winvm.carson"]=WINVM_LOGFILES;
 TRN_DATAFILES["winvm.carson"]=WINVM_DATAFILES;
 TRN_MAPFILES["winvm.carson"]=WINVM_MAPFILES;
@@ -106,8 +106,8 @@ mbhbt["winvm.carson"]=MBHBT_TEST;
 trnhbt["winvm.carson"]=TRNHBT_TEST;
 trnuhbt["winvm.carson"]=TRNUHBT_TEST;
 
-RESON_HOST["winvm.home"]=HOME_WINVM_IP;
-MBTRN_HOST["winvm.home"]=HOME_WINVM_IP;
+TRN_RESON_HOST["winvm.home"]=HOME_WINVM_IP;
+TRN_HOST["winvm.home"]=HOME_WINVM_IP;
 TRN_LOGFILES["winvm.home"]=WINVM_LOGFILES;
 TRN_DATAFILES["winvm.home"]=WINVM_DATAFILES;
 TRN_MAPFILES["winvm.home"]=WINVM_MAPFILES;
@@ -116,8 +116,8 @@ mbhbt["winvm.home"]=MBHBT_TEST;
 trnhbt["winvm.home"]=TRNHBT_TEST;
 trnuhbt["winvm.home"]=TRNUHBT_TEST;
 
-RESON_HOST["custom"]="";
-MBTRN_HOST["custom"]="";
+TRN_RESON_HOST["custom"]="";
+TRN_HOST["custom"]="";
 TRN_LOGFILES["custom"]="";
 TRN_DATAFILES["custom"]="";
 TRN_MAPFILES["custom"]="";
@@ -128,8 +128,8 @@ trnuhbt["custom"]="";
 
 // help strings
 help_topics["MBTRNDIR"]="mbtrnpp binary directory";
-help_topics["RESON_HOST"]="7K center or emulator IP address";
-help_topics["MBTRN_HOST"]="TRN output host IP (for TRN, TRNU, MB1 servers, etc.";
+help_topics["TRN_TRN_RESON_HOST"]="7K center or emulator IP address";
+help_topics["TRN_HOST"]="TRN output host IP (for TRN, TRNU, MB1 servers, etc.";
 help_topics["TRN_DATAFILES"]="TRN_DATAFILES environment var\nSets TRN configuration output directory";
 help_topics["TRN_MAPFILES"]="TRN_LOGFILES environment var\nSets TRN map file directory";
 help_topics["TRN_LOGFILES"]="TRN_LOGFILES environment var\nSets TRN log output directory";
@@ -140,7 +140,7 @@ help_topics["verbose"]="mbtrnpp output level\n\
 help_topics["input"]="7K input source IP\n\n\
   use: socket:<address>:<port>:0";
 help_topics["log-directory"]="MB-System, TRN log directory";
-help_topics["swath"]="MB-System swath (deg)";
+help_topics["swath-width"]="MB-System swath (deg)";
 help_topics["soundings"]="MB1 bathymetry soundings (integer)";
 help_topics["format"]="MB-System record format [MB1:88]";
 help_topics["median-filter"]="Median filter settings\n\n\
@@ -176,7 +176,7 @@ nombtrnpp            [disable MB1 message log (not recommended)]";
 help_topics["trn-map"]="path to TRN map file or directory (for tiled maps)";
 help_topics["trn-par"]="path to TRN particles file (required by TRN server but unused)";
 help_topics["trn-cfg"]="path to TRN server config file";
-help_topics["trn-log"]="trn config log directory prefix (e.g. <prefix>-TRN)\n[mbtrnpp TRN_LOGFILES environment variable must be set]";
+help_topics["trn-mid"]="trn config mission ID (used for log directory prefix, e.g. <prefix>-TRN)\n[mbtrnpp TRN_LOGFILES environment variable must be set]";
 help_topics["trn-decn"]="TRN update decimation modulus\n\n i.e., TRN is updated every n MB1 samples";
 help_topics["trn-out"]="TRN output configuration\n\n\
 Options for TRN output are configured using one or more comma separated values:\n\n\
@@ -196,9 +196,9 @@ Buttons :\n\
  Reset  : reload defaults\n\n\
 Placeholders : \n\
  Substitute selected parameter values:\n\n\
-  RESON_HOST: use with [input]\n\
+  TRN_RESON_HOST: use with [input]\n\
     7k Center host or emulator address, port \n\n\
-  MBTRN_HOST  : use with [mb-out,trn-out]\n\
+  TRN_HOST  : use with [mb-out,trn-out]\n\
     mbtrnpp connection address,port\n\n\
   SESSION   : use with [output]\n\
     session ID (current date/time YYYYMMDD-HHMMSS)\n\n\
@@ -209,7 +209,7 @@ Placeholders : \n\
   TRN_LOGFILES : use with [log-directory]\n\
     TRN log file directory\n";
 help_topics["reson-host"]="Select reson host preset";
-help_topics["mbtrn-host"]="Select mbtrn host preset\n\n[affects directories, timeouts, etc]";
+help_topics["trn-host"]="Select mbtrn host preset\n\n[affects directories, timeouts, etc]";
 help_topics["set-trnlogfiles"]="Set TRN_LOGFILES environment on command line";
 
 help_topics["copy"]="Copy command line to clipboard\n\n[calls update]";
@@ -278,8 +278,8 @@ function load_ctx(){
     var key=x.elements["ctx-mhost"].value;
 
     // initialize preset-specific/placeholder values
-    x.elements["reson-host"].value=RESON_HOST[rkey];
-    x.elements["out-host"].value=MBTRN_HOST[key];
+    x.elements["reson-host"].value=TRN_RESON_HOST[rkey];
+    x.elements["out-host"].value=TRN_HOST[key];
     x.elements["mbtrndir"].value=MBTRNDIR[key];
     x.elements["trn_datafiles"].value=TRN_DATAFILES[key];
     x.elements["trn_mapfiles"].value=TRN_MAPFILES[key];
@@ -291,22 +291,22 @@ function load_ctx(){
     // initialize common defaults
     // (may reference placeholder values)
     x.elements["verbose"].value="-2";
-    x.elements["input"].value="socket:RESON_HOST:7000:0";
+    x.elements["input"].value="socket:TRN_RESON_HOST:7000:0";
     x.elements["log-directory"].value="TRN_LOGFILES";
-    x.elements["swath"].value="90";
+    x.elements["swath-width"].value="90";
     x.elements["soundings"].value="11";
     x.elements["format"].value="88";
     x.elements["median"].value="0.10/9/3";
     x.elements["output"].value="file:mbtrnpp_SESSION.mb1";
     x.elements["statsec"].value="30";
     x.elements["trn-utm"].value="10";
-    x.elements["mb-out"].value="mb1svr:MBTRN_HOST:27000";
+    x.elements["mb-out"].value="mb1svr:TRN_HOST:27000";
     x.elements["trn-map"].value="TRN_MAPFILES/PortTiles";
     x.elements["trn-par"].value="TRN_DATAFILES/particles.cfg";
     x.elements["trn-cfg"].value="TRN_DATAFILES/mappingAUV_specs.cfg";
-    x.elements["trn-log"].value="mb-TRN_SESSION";
+    x.elements["trn-mid"].value="mb-TRN_SESSION";
     x.elements["trn-decn"].value="9";
-    x.elements["trn-out"].value="trnsvr:MBTRN_HOST:28000,trnu,trnusvr:MBTRN_HOST:8000";
+    x.elements["trn-out"].value="trnsvr:TRN_HOST:28000,trnu,trnusvr:TRN_HOST:8000";
     x.elements["trn-en"].value="en";
     x.elements["set-trnlogfiles"].value="en";
 
@@ -324,8 +324,8 @@ function init_preset(key){
 
     // initialize preset-specific/placeholder values
     x.elements["mbtrndir"].value=MBTRNDIR[key];
-    x.elements["reson-host"].value=RESON_HOST[key];
-    x.elements["out-host"].value=MBTRN_HOST[key];
+    x.elements["reson-host"].value=TRN_RESON_HOST[key];
+    x.elements["out-host"].value=TRN_HOST[key];
     x.elements["trn_datafiles"].value=TRN_DATAFILES[key];
     x.elements["trn_mapfiles"].value=TRN_MAPFILES[key];
     x.elements["trn_logfiles"].value=TRN_LOGFILES[key];
@@ -336,22 +336,22 @@ function init_preset(key){
     // initialize common defaults
     // (may reference placeholder values)
     x.elements["verbose"].value="-2";
-    x.elements["input"].value="socket:RESON_HOST:7000:0";
+    x.elements["input"].value="socket:TRN_RESON_HOST:7000:0";
     x.elements["log-directory"].value="TRN_LOGFILES";
-    x.elements["swath"].value="90";
+    x.elements["swath-width"].value="90";
     x.elements["soundings"].value="11";
     x.elements["format"].value="88";
     x.elements["median"].value="0.10/9/3";
     x.elements["output"].value="file:mbtrnpp_SESSION.mb1";
     x.elements["statsec"].value="30";
     x.elements["trn-utm"].value="10";
-    x.elements["mb-out"].value="mb1svr:MBTRN_HOST:27000";
+    x.elements["mb-out"].value="mb1svr:TRN_HOST:27000";
     x.elements["trn-map"].value="TRN_MAPFILES/PortTiles";
     x.elements["trn-par"].value="TRN_DATAFILES/particles.cfg";
     x.elements["trn-cfg"].value="TRN_DATAFILES/mappingAUV_specs.cfg";
-    x.elements["trn-log"].value="mb-TRN_SESSION";
+    x.elements["trn-mid"].value="mb-TRN_SESSION";
     x.elements["trn-decn"].value="9";
-    x.elements["trn-out"].value="trnsvr:MBTRN_HOST:28000,trnu,trnusvr:MBTRN_HOST:8000";
+    x.elements["trn-out"].value="trnsvr:TRN_HOST:28000,trnu,trnusvr:TRN_HOST:8000";
     x.elements["trn-en"].value="en";
     x.elements["set-trnlogfiles"].value="en";
 
@@ -390,8 +390,8 @@ function update(){
     var x = document.getElementById("cfgform");
 
     // update environment values with user inputs
-    RESON_HOST["current"]=x.elements["reson-host"].value;
-    MBTRN_HOST["current"]=x.elements["out-host"].value;
+    TRN_RESON_HOST["current"]=x.elements["reson-host"].value;
+    TRN_HOST["current"]=x.elements["out-host"].value;
     MBTRNDIR["current"]=x.elements["mbtrndir"].value;
     TRN_DATAFILES["current"]=x.elements["trn_datafiles"].value;
     TRN_MAPFILES["current"]=x.elements["trn_mapfiles"].value;
@@ -401,8 +401,8 @@ function update(){
     var text = MBTRNDIR["current"]+"/mbtrnpp ";
     if(x.elements["verbose"].value.length>0)
         text += '--verbose='+x.elements["verbose"].value+" ";
-    if(x.elements["swath"].value.length>0)
-        text += '--swath='+x.elements["swath"].value+" ";
+    if(x.elements["swath-width"].value.length>0)
+        text += '--swath-width='+x.elements["swath-width"].value+" ";
     if(x.elements["soundings"].value.length>0)
         text += '--soundings='+x.elements["soundings"].value+" ";
     if(x.elements["format"].value.length>0)
@@ -427,15 +427,15 @@ function update(){
         text = "TRN_LOGFILES=\""+TRN_LOGFILES["current"]+"\" "+text;
 
     // these parameters support substitutions
-    text += sub_placeholder(x,"input","RESON_HOST",RESON_HOST["current"]);
+    text += sub_placeholder(x,"input","TRN_RESON_HOST",TRN_RESON_HOST["current"]);
     text += sub_placeholder(x,"log-directory","TRN_LOGFILES",TRN_LOGFILES["current"]);
     text += sub_placeholder(x,"trn-map","TRN_MAPFILES",TRN_MAPFILES["current"]);
     text += sub_placeholder(x,"trn-par","TRN_DATAFILES",TRN_DATAFILES["current"]);
     text += sub_placeholder(x,"trn-cfg","TRN_DATAFILES",TRN_DATAFILES["current"]);
     text += sub_placeholder(x,"output","SESSION",session_str());
-    text += sub_placeholder(x,"mb-out","MBTRN_HOST",MBTRN_HOST["current"]);
-    text += sub_placeholder(x,"trn-out","MBTRN_HOST",MBTRN_HOST["current"]);
-    text += sub_placeholder(x,"trn-log","TRN_SESSION",trn_session());
+    text += sub_placeholder(x,"mb-out","TRN_HOST",TRN_HOST["current"]);
+    text += sub_placeholder(x,"trn-out","TRN_HOST",TRN_HOST["current"]);
+    text += sub_placeholder(x,"trn-mid","TRN_SESSION",trn_session());
 
     // set the output value
     var ofrm = document.getElementById("outtext");
