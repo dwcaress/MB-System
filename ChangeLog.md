@@ -20,6 +20,7 @@ include "beta" in the tag name are preliminary and generally not announced.
 Distributions that do not include "beta" in the tag name correspond to the major,
 announced releases. The source distributions associated with all releases, major or beta, are equally accessible as tarballs through the Github interface.
 
+- Version 5.7.6beta34    May 8, 2020
 - Version 5.7.6beta33    May 5, 2020
 - Version 5.7.6beta32    April 22, 2020
 - Version 5.7.6beta31    March 2, 2020
@@ -344,6 +345,25 @@ announced releases. The source distributions associated with all releases, major
 --
 ### MB-System Version 5.7 Release Notes:
 --
+
+#### 5.7.6beta34 (May 8, 2020)
+
+Mbset and mbmakeplatform: Joaquim Luis reports that these programs will not
+compile on Windows Visual Studio "because of the too many nested if-else  problem."
+I have attempted to fix this problem two ways. In mbset.cc I now use a switch  
+statement instead of many if {} else if {} statements to find the meanings of
+all the input options. In mbmakeplatform I now have many separate if {} statements
+testing the input arguments, but each first also tests a bool that indicates
+if a prior if {} statement matched the argument. We will find out from Joaquim
+if either, neither, or both methods work.
+
+Tests: The Travis-CI tests of new checkins to the repository are failing for one
+of the many builds - the Ubuntu Xenial (16.04) build. The failures are occuring
+on all programs that call GMT grid io, but the existing logs do not tell me why.
+I have added print statements to the tests in
+  mbsystem/test/utilities/mbbackangle_test.py
+and
+  mbsystem/test/utilities/mbgrid_test.py.
 
 #### 5.7.6beta33 (May 5, 2020)
 

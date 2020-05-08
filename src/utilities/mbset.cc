@@ -250,8 +250,11 @@ int main(int argc, char **argv) {
 
 		/* process parameter list */
 		for (int i = 0; i < pargc; i++) {
+      bool found = false;
+
 			/* general parameters */
 			if (strncmp(pargv[i], "OUTFILE", 7) == 0) {
+        found = true;
 				nscan = sscanf(pargv[i], "OUTFILE:%1023s", process.mbp_ofile);
 				if (nscan == 1)
 					process.mbp_ofile_specified = true;
@@ -260,13 +263,15 @@ int main(int argc, char **argv) {
 					process.mbp_ofile[0] = '\0';
 				}
 			}
-			else if (strncmp(pargv[i], "FORMAT", 6) == 0) {
+			if (!found && strncmp(pargv[i], "FORMAT", 6) == 0) {
+        found = true;
 				sscanf(pargv[i], "FORMAT:%d", &process.mbp_format);
 				process.mbp_format_specified = true;
 			}
 
 			/* navigation merging */
-			else if (strncmp(pargv[i], "NAVMODE", 7) == 0) {
+			if (!found && strncmp(pargv[i], "NAVMODE", 7) == 0) {
+        found = true;
 				sscanf(pargv[i], "NAVMODE:%d", &process.mbp_nav_mode);
 				if (!is_explicit && process.mbp_nav_mode == MBP_NAV_OFF) {
 					process.mbp_navfile[0] = '\0';
@@ -276,7 +281,8 @@ int main(int argc, char **argv) {
 					process.mbp_nav_attitude = MBP_NAV_OFF;
 				}
 			}
-			else if (strncmp(pargv[i], "NAVFILE", 7) == 0) {
+			if (!found && strncmp(pargv[i], "NAVFILE", 7) == 0) {
+        found = true;
 				sscanf(pargv[i], "NAVFILE:%1023s", process.mbp_navfile);
 				if (!is_explicit) {
 					process.mbp_nav_mode = MBP_NAV_ON;
@@ -286,117 +292,143 @@ int main(int argc, char **argv) {
 					process.mbp_nav_attitude = MBP_NAV_ON;
 				}
 			}
-			else if (strncmp(pargv[i], "NAVFORMAT", 9) == 0) {
+			if (!found && strncmp(pargv[i], "NAVFORMAT", 9) == 0) {
+        found = true;
 				sscanf(pargv[i], "NAVFORMAT:%d", &process.mbp_nav_format);
 			}
-			else if (strncmp(pargv[i], "NAVHEADING", 10) == 0) {
+			if (!found && strncmp(pargv[i], "NAVHEADING", 10) == 0) {
+        found = true;
 				sscanf(pargv[i], "NAVHEADING:%d", &process.mbp_nav_heading);
 			}
-			else if (strncmp(pargv[i], "NAVSPEED", 8) == 0) {
+			if (!found && strncmp(pargv[i], "NAVSPEED", 8) == 0) {
+        found = true;
 				sscanf(pargv[i], "NAVSPEED:%d", &process.mbp_nav_speed);
 			}
-			else if (strncmp(pargv[i], "NAVDRAFT", 8) == 0) {
+			if (!found && strncmp(pargv[i], "NAVDRAFT", 8) == 0) {
+        found = true;
 				sscanf(pargv[i], "NAVDRAFT:%d", &process.mbp_nav_draft);
 			}
-			else if (strncmp(pargv[i], "NAVATTITUDE", 11) == 0) {
+			if (!found && strncmp(pargv[i], "NAVATTITUDE", 11) == 0) {
+        found = true;
 				sscanf(pargv[i], "NAVATTITUDE:%d", &process.mbp_nav_attitude);
 			}
-			else if (strncmp(pargv[i], "NAVINTERP", 9) == 0) {
+			if (!found && strncmp(pargv[i], "NAVINTERP", 9) == 0) {
+        found = true;
 				sscanf(pargv[i], "NAVINTERP:%d", &process.mbp_nav_algorithm);
 			}
-			else if (strncmp(pargv[i], "NAVTIMESHIFT", 12) == 0) {
+			if (!found && strncmp(pargv[i], "NAVTIMESHIFT", 12) == 0) {
+        found = true;
 				sscanf(pargv[i], "NAVTIMESHIFT:%lf", &process.mbp_nav_timeshift);
 			}
 
 			/* navigation offsets and shifts */
-			else if (strncmp(pargv[i], "NAVOFFSETX", 10) == 0) {
+			if (!found && strncmp(pargv[i], "NAVOFFSETX", 10) == 0) {
+        found = true;
 				sscanf(pargv[i], "NAVOFFSETX:%lf", &process.mbp_nav_offsetx);
 				process.mbp_nav_shift = MBP_NAV_ON;
 			}
-			else if (strncmp(pargv[i], "NAVOFFSETY", 10) == 0) {
+			if (!found && strncmp(pargv[i], "NAVOFFSETY", 10) == 0) {
+        found = true;
 				sscanf(pargv[i], "NAVOFFSETY:%lf", &process.mbp_nav_offsety);
 				process.mbp_nav_shift = MBP_NAV_ON;
 			}
-			else if (strncmp(pargv[i], "NAVOFFSETZ", 10) == 0) {
+			if (!found && strncmp(pargv[i], "NAVOFFSETZ", 10) == 0) {
+        found = true;
 				sscanf(pargv[i], "NAVOFFSETZ:%lf", &process.mbp_nav_offsetz);
 				process.mbp_nav_shift = MBP_NAV_ON;
 			}
-			else if (strncmp(pargv[i], "NAVSHIFTLON", 11) == 0) {
+			if (!found && strncmp(pargv[i], "NAVSHIFTLON", 11) == 0) {
+        found = true;
 				sscanf(pargv[i], "NAVSHIFTLON:%lf", &process.mbp_nav_shiftlon);
 				process.mbp_nav_shift = MBP_NAV_ON;
 			}
-			else if (strncmp(pargv[i], "NAVSHIFTLAT", 11) == 0) {
+			if (!found && strncmp(pargv[i], "NAVSHIFTLAT", 11) == 0) {
+        found = true;
 				sscanf(pargv[i], "NAVSHIFTLAT:%lf", &process.mbp_nav_shiftlat);
 				process.mbp_nav_shift = MBP_NAV_ON;
 			}
-			else if (strncmp(pargv[i], "NAVSHIFTX", 9) == 0) {
+			if (!found && strncmp(pargv[i], "NAVSHIFTX", 9) == 0) {
+        found = true;
 				sscanf(pargv[i], "NAVSHIFTX:%lf", &process.mbp_nav_shiftx);
 				process.mbp_nav_shift = MBP_NAV_ON;
 			}
-			else if (strncmp(pargv[i], "NAVSHIFTY", 9) == 0) {
+			if (!found && strncmp(pargv[i], "NAVSHIFTY", 9) == 0) {
+        found = true;
 				sscanf(pargv[i], "NAVSHIFTY:%lf", &process.mbp_nav_shifty);
 				process.mbp_nav_shift = MBP_NAV_ON;
 			}
-			else if (strncmp(pargv[i], "NAVSHIFT", 8) == 0) {
+			if (!found && strncmp(pargv[i], "NAVSHIFT", 8) == 0) {
+        found = true;
 				sscanf(pargv[i], "NAVSHIFT:%d", &process.mbp_nav_shift);
 			}
 
 			/* adjusted navigation merging */
-			else if (strncmp(pargv[i], "NAVADJMODE", 10) == 0) {
+			if (!found && strncmp(pargv[i], "NAVADJMODE", 10) == 0) {
+        found = true;
 				sscanf(pargv[i], "NAVADJMODE:%d", &process.mbp_navadj_mode);
 				if (!is_explicit && process.mbp_navadj_mode == MBP_NAVADJ_OFF) {
 					process.mbp_navadjfile[0] = '\0';
 				}
 			}
-			else if (strncmp(pargv[i], "NAVADJFILE", 10) == 0) {
+			if (!found && strncmp(pargv[i], "NAVADJFILE", 10) == 0) {
+        found = true;
 				sscanf(pargv[i], "NAVADJFILE:%1023s", process.mbp_navadjfile);
 				if (!is_explicit) {
 					process.mbp_navadj_mode = MBP_NAVADJ_LLZ;
 				}
 			}
-			else if (strncmp(pargv[i], "NAVADJINTERP", 12) == 0) {
+			if (!found && strncmp(pargv[i], "NAVADJINTERP", 12) == 0) {
+        found = true;
 				sscanf(pargv[i], "NAVADJINTERP:%d", &process.mbp_navadj_algorithm);
 			}
 
 			/* attitude merging */
-			else if (strncmp(pargv[i], "ATTITUDEMODE", 12) == 0) {
+			if (!found && strncmp(pargv[i], "ATTITUDEMODE", 12) == 0) {
+        found = true;
 				sscanf(pargv[i], "ATTITUDEMODE:%d", &process.mbp_attitude_mode);
 				if (!is_explicit && process.mbp_attitude_mode == MBP_ATTITUDE_OFF) {
 					process.mbp_attitudefile[0] = '\0';
 				}
 			}
-			else if (strncmp(pargv[i], "ATTITUDEFILE", 12) == 0) {
+			if (!found && strncmp(pargv[i], "ATTITUDEFILE", 12) == 0) {
+        found = true;
 				sscanf(pargv[i], "ATTITUDEFILE:%1023s", process.mbp_attitudefile);
 				if (!is_explicit) {
 					process.mbp_attitude_mode = MBP_ATTITUDE_ON;
 				}
 			}
-			else if (strncmp(pargv[i], "ATTITUDEFORMAT", 14) == 0) {
+			if (!found && strncmp(pargv[i], "ATTITUDEFORMAT", 14) == 0) {
+        found = true;
 				sscanf(pargv[i], "ATTITUDEFORMAT:%d", &process.mbp_attitude_format);
 			}
 
 			/* sonardepth merging */
-			else if (strncmp(pargv[i], "SONARDEPTHMODE", 14) == 0) {
+			if (!found && strncmp(pargv[i], "SONARDEPTHMODE", 14) == 0) {
+        found = true;
 				sscanf(pargv[i], "SONARDEPTHMODE:%d", &process.mbp_sonardepth_mode);
 				if (!is_explicit && process.mbp_sonardepth_mode == MBP_SONARDEPTH_OFF) {
 					process.mbp_sonardepthfile[0] = '\0';
 				}
 			}
-			else if (strncmp(pargv[i], "SONARDEPTHFILE", 14) == 0) {
+			if (!found && strncmp(pargv[i], "SONARDEPTHFILE", 14) == 0) {
+        found = true;
 				sscanf(pargv[i], "SONARDEPTHFILE:%1023s", process.mbp_sonardepthfile);
 				if (!is_explicit) {
 					process.mbp_sonardepth_mode = MBP_SONARDEPTH_ON;
 				}
 			}
-			else if (strncmp(pargv[i], "SONARDEPTHFORMAT", 16) == 0) {
+			if (!found && strncmp(pargv[i], "SONARDEPTHFORMAT", 16) == 0) {
+        found = true;
 				sscanf(pargv[i], "SONARDEPTHFORMAT:%d", &process.mbp_sonardepth_format);
 			}
 
 			/* data cutting */
-			else if (strncmp(pargv[i], "DATACUTCLEAR", 12) == 0) {
+			if (!found && strncmp(pargv[i], "DATACUTCLEAR", 12) == 0) {
+        found = true;
 				process.mbp_cut_num = 0;
 			}
-			else if (strncmp(pargv[i], "DATACUT", 7) == 0) {
+			if (!found && strncmp(pargv[i], "DATACUT", 7) == 0) {
+        found = true;
 				if (process.mbp_cut_num < MBP_CUT_NUM_MAX) {
 					sscanf(pargv[i], "DATACUT:%d:%d:%lf:%lf", &process.mbp_cut_kind[process.mbp_cut_num],
 					       &process.mbp_cut_mode[process.mbp_cut_num], &process.mbp_cut_min[process.mbp_cut_num],
@@ -404,7 +436,8 @@ int main(int argc, char **argv) {
 					process.mbp_cut_num++;
 				}
 			}
-			else if (strncmp(pargv[i], "BATHCUTNUMBER", 13) == 0) {
+			if (!found && strncmp(pargv[i], "BATHCUTNUMBER", 13) == 0) {
+        found = true;
 				if (process.mbp_cut_num < MBP_CUT_NUM_MAX) {
 					sscanf(pargv[i], "BATHCUTNUMBER:%lf:%lf", &process.mbp_cut_min[process.mbp_cut_num],
 					       &process.mbp_cut_max[process.mbp_cut_num]);
@@ -413,7 +446,8 @@ int main(int argc, char **argv) {
 					process.mbp_cut_num++;
 				}
 			}
-			else if (strncmp(pargv[i], "BATHCUTDISTANCE", 15) == 0) {
+			if (!found && strncmp(pargv[i], "BATHCUTDISTANCE", 15) == 0) {
+        found = true;
 				if (process.mbp_cut_num < MBP_CUT_NUM_MAX) {
 					sscanf(pargv[i], "BATHCUTDISTANCE:%lf:%lf", &process.mbp_cut_min[process.mbp_cut_num],
 					       &process.mbp_cut_max[process.mbp_cut_num]);
@@ -422,7 +456,8 @@ int main(int argc, char **argv) {
 					process.mbp_cut_num++;
 				}
 			}
-			else if (strncmp(pargv[i], "BATHCUTSPEED", 12) == 0) {
+			if (!found && strncmp(pargv[i], "BATHCUTSPEED", 12) == 0) {
+        found = true;
 				if (process.mbp_cut_num < MBP_CUT_NUM_MAX) {
 					sscanf(pargv[i], "BATHCUTSPEED:%lf:%lf", &process.mbp_cut_min[process.mbp_cut_num],
 					       &process.mbp_cut_max[process.mbp_cut_num]);
@@ -431,7 +466,8 @@ int main(int argc, char **argv) {
 					process.mbp_cut_num++;
 				}
 			}
-			else if (strncmp(pargv[i], "AMPCUTNUMBER", 12) == 0) {
+			if (!found && strncmp(pargv[i], "AMPCUTNUMBER", 12) == 0) {
+        found = true;
 				if (process.mbp_cut_num < MBP_CUT_NUM_MAX) {
 					sscanf(pargv[i], "AMPCUTNUMBER:%lf:%lf", &process.mbp_cut_min[process.mbp_cut_num],
 					       &process.mbp_cut_max[process.mbp_cut_num]);
@@ -440,7 +476,8 @@ int main(int argc, char **argv) {
 					process.mbp_cut_num++;
 				}
 			}
-			else if (strncmp(pargv[i], "AMPCUTDISTANCE", 14) == 0) {
+			if (!found && strncmp(pargv[i], "AMPCUTDISTANCE", 14) == 0) {
+        found = true;
 				if (process.mbp_cut_num < MBP_CUT_NUM_MAX) {
 					sscanf(pargv[i], "AMPCUTDISTANCE:%lf:%lf", &process.mbp_cut_min[process.mbp_cut_num],
 					       &process.mbp_cut_max[process.mbp_cut_num]);
@@ -449,7 +486,8 @@ int main(int argc, char **argv) {
 					process.mbp_cut_num++;
 				}
 			}
-			else if (strncmp(pargv[i], "AMPCUTSPEED", 11) == 0) {
+			if (!found && strncmp(pargv[i], "AMPCUTSPEED", 11) == 0) {
+        found = true;
 				if (process.mbp_cut_num < MBP_CUT_NUM_MAX) {
 					sscanf(pargv[i], "AMPCUTSPEED:%lf:%lf", &process.mbp_cut_min[process.mbp_cut_num],
 					       &process.mbp_cut_max[process.mbp_cut_num]);
@@ -458,7 +496,8 @@ int main(int argc, char **argv) {
 					process.mbp_cut_num++;
 				}
 			}
-			else if (strncmp(pargv[i], "SSCUTNUMBER", 11) == 0) {
+			if (!found && strncmp(pargv[i], "SSCUTNUMBER", 11) == 0) {
+        found = true;
 				if (process.mbp_cut_num < MBP_CUT_NUM_MAX) {
 					sscanf(pargv[i], "SSCUTNUMBER:%lf:%lf", &process.mbp_cut_min[process.mbp_cut_num],
 					       &process.mbp_cut_max[process.mbp_cut_num]);
@@ -467,7 +506,8 @@ int main(int argc, char **argv) {
 					process.mbp_cut_num++;
 				}
 			}
-			else if (strncmp(pargv[i], "SSCUTDISTANCE", 13) == 0) {
+			if (!found && strncmp(pargv[i], "SSCUTDISTANCE", 13) == 0) {
+        found = true;
 				if (process.mbp_cut_num < MBP_CUT_NUM_MAX) {
 					sscanf(pargv[i], "SSCUTDISTANCE:%lf:%lf", &process.mbp_cut_min[process.mbp_cut_num],
 					       &process.mbp_cut_max[process.mbp_cut_num]);
@@ -476,7 +516,8 @@ int main(int argc, char **argv) {
 					process.mbp_cut_num++;
 				}
 			}
-			else if (strncmp(pargv[i], "SSCUTSPEED", 10) == 0) {
+			if (!found && strncmp(pargv[i], "SSCUTSPEED", 10) == 0) {
+        found = true;
 				if (process.mbp_cut_num < MBP_CUT_NUM_MAX) {
 					sscanf(pargv[i], "SSCUTSPEED:%lf:%lf", &process.mbp_cut_min[process.mbp_cut_num],
 					       &process.mbp_cut_max[process.mbp_cut_num]);
@@ -487,13 +528,15 @@ int main(int argc, char **argv) {
 			}
 
 			/* bathymetry editing */
-			else if (strncmp(pargv[i], "EDITSAVEMODE", 12) == 0) {
+			if (!found && strncmp(pargv[i], "EDITSAVEMODE", 12) == 0) {
+        found = true;
 				sscanf(pargv[i], "EDITSAVEMODE:%d", &process.mbp_edit_mode);
 				if (!is_explicit && process.mbp_edit_mode == MBP_EDIT_OFF) {
 					process.mbp_editfile[0] = '\0';
 				}
 			}
-			else if (strncmp(pargv[i], "EDITSAVEFILE", 12) == 0) {
+			if (!found && strncmp(pargv[i], "EDITSAVEFILE", 12) == 0) {
+        found = true;
 				sscanf(pargv[i], "EDITSAVEFILE:%1023s", process.mbp_editfile);
 				if (!is_explicit) {
 					process.mbp_edit_mode = MBP_EDIT_ON;
@@ -501,51 +544,63 @@ int main(int argc, char **argv) {
 			}
 
 			/* bathymetry recalculation */
-			else if (strncmp(pargv[i], "RAYTRACE", 8) == 0) {
+			if (!found && strncmp(pargv[i], "RAYTRACE", 8) == 0) {
+        found = true;
 				sscanf(pargv[i], "RAYTRACE:%d", &process.mbp_svp_mode);
 			}
-			else if (strncmp(pargv[i], "SVPMODE", 7) == 0) {
+			if (!found && strncmp(pargv[i], "SVPMODE", 7) == 0) {
+        found = true;
 				sscanf(pargv[i], "SVPMODE:%d", &process.mbp_svp_mode);
 				if (!is_explicit && process.mbp_svp_mode == MBP_SVP_OFF) {
 					process.mbp_svpfile[0] = '\0';
 				}
 			}
-			else if (strncmp(pargv[i], "SVPFILE", 7) == 0) {
+			if (!found && strncmp(pargv[i], "SVPFILE", 7) == 0) {
+        found = true;
 				sscanf(pargv[i], "SVPFILE:%1023s", process.mbp_svpfile);
 				if (!is_explicit) {
 					process.mbp_svp_mode = MBP_SVP_ON;
 				}
 			}
-			else if (strncmp(pargv[i], "SSVMODE", 7) == 0) {
+			if (!found && strncmp(pargv[i], "SSVMODE", 7) == 0) {
+        found = true;
 				sscanf(pargv[i], "SSVMODE:%d", &process.mbp_ssv_mode);
 			}
-			else if (strncmp(pargv[i], "SSV", 3) == 0) {
+			if (!found && strncmp(pargv[i], "SSV", 3) == 0) {
+        found = true;
 				sscanf(pargv[i], "SSV:%lf", &process.mbp_ssv);
 			}
-			else if (strncmp(pargv[i], "TTMODE", 6) == 0) {
+			if (!found && strncmp(pargv[i], "TTMODE", 6) == 0) {
+        found = true;
 				sscanf(pargv[i], "TTMODE:%d", &process.mbp_tt_mode);
 			}
-			else if (strncmp(pargv[i], "TTMULTIPLY", 10) == 0) {
+			if (!found && strncmp(pargv[i], "TTMULTIPLY", 10) == 0) {
+        found = true;
 				sscanf(pargv[i], "TTMULTIPLY:%lf", &process.mbp_tt_mult);
 			}
-			else if (strncmp(pargv[i], "CORRECTED", 9) == 0) {
+			if (!found && strncmp(pargv[i], "CORRECTED", 9) == 0) {
+        found = true;
 				sscanf(pargv[i], "CORRECTED:%d", &process.mbp_corrected);
 			}
-			else if (strncmp(pargv[i], "ANGLEMODE", 9) == 0) {
+			if (!found && strncmp(pargv[i], "ANGLEMODE", 9) == 0) {
+        found = true;
 				sscanf(pargv[i], "ANGLEMODE:%d", &process.mbp_angle_mode);
 			}
-			else if (strncmp(pargv[i], "SOUNDSPEEDREF", 13) == 0) {
+			if (!found && strncmp(pargv[i], "SOUNDSPEEDREF", 13) == 0) {
+        found = true;
 				sscanf(pargv[i], "SOUNDSPEEDREF:%d", &process.mbp_corrected);
 			}
 
 			/* static beam bathymetry correction */
-			else if (strncmp(pargv[i], "STATICMODE", 10) == 0) {
+			if (!found && strncmp(pargv[i], "STATICMODE", 10) == 0) {
+        found = true;
 				sscanf(pargv[i], "STATICMODE:%d", &process.mbp_static_mode);
 				if (!is_explicit && process.mbp_static_mode == MBP_STATIC_OFF) {
 					process.mbp_staticfile[0] = '\0';
 				}
 			}
-			else if (strncmp(pargv[i], "STATICFILE", 10) == 0) {
+			if (!found && strncmp(pargv[i], "STATICFILE", 10) == 0) {
+        found = true;
 				sscanf(pargv[i], "STATICFILE:%1023s", process.mbp_staticfile);
 				if (!is_explicit) {
 					process.mbp_static_mode = MBP_SVP_ON;
@@ -553,10 +608,12 @@ int main(int argc, char **argv) {
 			}
 
 			/* draft correction */
-			else if (strncmp(pargv[i], "DRAFTMODE", 9) == 0) {
+			if (!found && strncmp(pargv[i], "DRAFTMODE", 9) == 0) {
+        found = true;
 				sscanf(pargv[i], "DRAFTMODE:%d", &process.mbp_draft_mode);
 			}
-			else if (strncmp(pargv[i], "DRAFTOFFSET", 11) == 0) {
+			if (!found && strncmp(pargv[i], "DRAFTOFFSET", 11) == 0) {
+        found = true;
 				sscanf(pargv[i], "DRAFTOFFSET:%lf", &process.mbp_draft_offset);
 				if (!is_explicit && process.mbp_draft_mode == MBP_DRAFT_MULTIPLY) {
 					process.mbp_draft_mode = MBP_DRAFT_MULTIPLYOFFSET;
@@ -565,7 +622,8 @@ int main(int argc, char **argv) {
 					process.mbp_draft_mode = MBP_DRAFT_OFFSET;
 				}
 			}
-			else if (strncmp(pargv[i], "DRAFTMULTIPLY", 13) == 0) {
+			if (!found && strncmp(pargv[i], "DRAFTMULTIPLY", 13) == 0) {
+        found = true;
 				sscanf(pargv[i], "DRAFTMULTIPLY:%lf", &process.mbp_draft_mult);
 				if (!is_explicit && process.mbp_draft_mode == MBP_DRAFT_OFFSET) {
 					process.mbp_draft_mode = MBP_DRAFT_MULTIPLYOFFSET;
@@ -574,7 +632,8 @@ int main(int argc, char **argv) {
 					process.mbp_draft_mode = MBP_DRAFT_MULTIPLY;
 				}
 			}
-			else if (strncmp(pargv[i], "DRAFT", 5) == 0) {
+			if (!found && strncmp(pargv[i], "DRAFT", 5) == 0) {
+        found = true;
 				sscanf(pargv[i], "DRAFT:%lf", &process.mbp_draft);
 				if (!is_explicit) {
 					process.mbp_draft_mode = MBP_DRAFT_SET;
@@ -582,10 +641,12 @@ int main(int argc, char **argv) {
 			}
 
 			/* heave correction */
-			else if (strncmp(pargv[i], "HEAVEMODE", 9) == 0) {
+			if (!found && strncmp(pargv[i], "HEAVEMODE", 9) == 0) {
+        found = true;
 				sscanf(pargv[i], "HEAVEMODE:%d", &process.mbp_heave_mode);
 			}
-			else if (strncmp(pargv[i], "HEAVEOFFSET", 11) == 0) {
+			if (!found && strncmp(pargv[i], "HEAVEOFFSET", 11) == 0) {
+        found = true;
 				sscanf(pargv[i], "HEAVEOFFSET:%lf", &process.mbp_heave);
 				if (!is_explicit && process.mbp_heave_mode == MBP_HEAVE_MULTIPLY) {
 					process.mbp_heave_mode = MBP_HEAVE_MULTIPLYOFFSET;
@@ -594,7 +655,8 @@ int main(int argc, char **argv) {
 					process.mbp_heave_mode = MBP_HEAVE_OFFSET;
 				}
 			}
-			else if (strncmp(pargv[i], "HEAVEMULTIPLY", 13) == 0) {
+			if (!found && strncmp(pargv[i], "HEAVEMULTIPLY", 13) == 0) {
+        found = true;
 				sscanf(pargv[i], "HEAVEMULTIPLY:%lf", &process.mbp_heave_mult);
 				if (!is_explicit && process.mbp_heave_mode == MBP_HEAVE_OFFSET) {
 					process.mbp_heave_mode = MBP_HEAVE_MULTIPLYOFFSET;
@@ -605,40 +667,47 @@ int main(int argc, char **argv) {
 			}
 
 			/* lever correction */
-			else if (strncmp(pargv[i], "LEVERMODE", 9) == 0) {
+			if (!found && strncmp(pargv[i], "LEVERMODE", 9) == 0) {
+        found = true;
 				sscanf(pargv[i], "LEVERMODE:%d", &process.mbp_lever_mode);
 			}
-			else if (strncmp(pargv[i], "VRUOFFSETX", 10) == 0) {
+			if (!found && strncmp(pargv[i], "VRUOFFSETX", 10) == 0) {
+        found = true;
 				sscanf(pargv[i], "VRUOFFSETX:%lf", &process.mbp_vru_offsetx);
 				if (!is_explicit) {
 					process.mbp_lever_mode = MBP_LEVER_ON;
 				}
 			}
-			else if (strncmp(pargv[i], "VRUOFFSETY", 10) == 0) {
+			if (!found && strncmp(pargv[i], "VRUOFFSETY", 10) == 0) {
+        found = true;
 				sscanf(pargv[i], "VRUOFFSETY:%lf", &process.mbp_vru_offsety);
 				if (!is_explicit) {
 					process.mbp_lever_mode = MBP_LEVER_ON;
 				}
 			}
-			else if (strncmp(pargv[i], "VRUOFFSETZ", 10) == 0) {
+			if (!found && strncmp(pargv[i], "VRUOFFSETZ", 10) == 0) {
+        found = true;
 				sscanf(pargv[i], "VRUOFFSETZ:%lf", &process.mbp_vru_offsetz);
 				if (!is_explicit) {
 					process.mbp_lever_mode = MBP_LEVER_ON;
 				}
 			}
-			else if (strncmp(pargv[i], "SONAROFFSETX", 12) == 0) {
+			if (!found && strncmp(pargv[i], "SONAROFFSETX", 12) == 0) {
+        found = true;
 				sscanf(pargv[i], "SONAROFFSETX:%lf", &process.mbp_sonar_offsetx);
 				if (!is_explicit) {
 					process.mbp_lever_mode = MBP_LEVER_ON;
 				}
 			}
-			else if (strncmp(pargv[i], "SONAROFFSETY", 12) == 0) {
+			if (!found && strncmp(pargv[i], "SONAROFFSETY", 12) == 0) {
+        found = true;
 				sscanf(pargv[i], "SONAROFFSETY:%lf", &process.mbp_sonar_offsety);
 				if (!is_explicit) {
 					process.mbp_lever_mode = MBP_LEVER_ON;
 				}
 			}
-			else if (strncmp(pargv[i], "SONAROFFSETZ", 12) == 0) {
+			if (!found && strncmp(pargv[i], "SONAROFFSETZ", 12) == 0) {
+        found = true;
 				sscanf(pargv[i], "SONAROFFSETZ:%lf", &process.mbp_sonar_offsetz);
 				if (!is_explicit) {
 					process.mbp_lever_mode = MBP_LEVER_ON;
@@ -646,22 +715,26 @@ int main(int argc, char **argv) {
 			}
 
 			/* roll correction */
-			else if (strncmp(pargv[i], "ROLLBIASMODE", 12) == 0) {
+			if (!found && strncmp(pargv[i], "ROLLBIASMODE", 12) == 0) {
+        found = true;
 				sscanf(pargv[i], "ROLLBIASMODE:%d", &process.mbp_rollbias_mode);
 			}
-			else if (strncmp(pargv[i], "ROLLBIASPORT", 12) == 0) {
+			if (!found && strncmp(pargv[i], "ROLLBIASPORT", 12) == 0) {
+        found = true;
 				sscanf(pargv[i], "ROLLBIASPORT:%lf", &process.mbp_rollbias_port);
 				if (!is_explicit) {
 					process.mbp_rollbias_mode = MBP_ROLLBIAS_DOUBLE;
 				}
 			}
-			else if (strncmp(pargv[i], "ROLLBIASSTBD", 12) == 0) {
+			if (!found && strncmp(pargv[i], "ROLLBIASSTBD", 12) == 0) {
+        found = true;
 				sscanf(pargv[i], "ROLLBIASSTBD:%lf", &process.mbp_rollbias_stbd);
 				if (!is_explicit) {
 					process.mbp_rollbias_mode = MBP_ROLLBIAS_DOUBLE;
 				}
 			}
-			else if (strncmp(pargv[i], "ROLLBIAS", 8) == 0) {
+			if (!found && strncmp(pargv[i], "ROLLBIAS", 8) == 0) {
+        found = true;
 				sscanf(pargv[i], "ROLLBIAS:%lf", &process.mbp_rollbias);
 				if (!is_explicit) {
 					process.mbp_rollbias_mode = MBP_ROLLBIAS_SINGLE;
@@ -669,10 +742,12 @@ int main(int argc, char **argv) {
 			}
 
 			/* pitch correction */
-			else if (strncmp(pargv[i], "PITCHBIASMODE", 13) == 0) {
+			if (!found && strncmp(pargv[i], "PITCHBIASMODE", 13) == 0) {
+        found = true;
 				sscanf(pargv[i], "PITCHBIASMODE:%d", &process.mbp_pitchbias_mode);
 			}
-			else if (strncmp(pargv[i], "PITCHBIAS", 9) == 0) {
+			if (!found && strncmp(pargv[i], "PITCHBIAS", 9) == 0) {
+        found = true;
 				sscanf(pargv[i], "PITCHBIAS:%lf", &process.mbp_pitchbias);
 				if (!is_explicit) {
 					process.mbp_pitchbias_mode = MBP_PITCHBIAS_ON;
@@ -680,10 +755,12 @@ int main(int argc, char **argv) {
 			}
 
 			/* heading correction */
-			else if (strncmp(pargv[i], "HEADINGMODE", 11) == 0) {
+			if (!found && strncmp(pargv[i], "HEADINGMODE", 11) == 0) {
+        found = true;
 				sscanf(pargv[i], "HEADINGMODE:%d", &process.mbp_heading_mode);
 			}
-			else if (strncmp(pargv[i], "HEADINGOFFSET", 13) == 0) {
+			if (!found && strncmp(pargv[i], "HEADINGOFFSET", 13) == 0) {
+        found = true;
 				sscanf(pargv[i], "HEADINGOFFSET:%lf", &process.mbp_headingbias);
 				if (!is_explicit && process.mbp_heading_mode == MBP_HEADING_CALC) {
 					process.mbp_heading_mode = MBP_HEADING_CALCOFFSET;
@@ -694,180 +771,228 @@ int main(int argc, char **argv) {
 			}
 
 			/* tide correction */
-			else if (strncmp(pargv[i], "TIDEMODE", 8) == 0) {
+			if (!found && strncmp(pargv[i], "TIDEMODE", 8) == 0) {
+        found = true;
 				sscanf(pargv[i], "TIDEMODE:%d", &process.mbp_tide_mode);
 				if (!is_explicit && process.mbp_tide_mode == MBP_TIDE_OFF) {
 					process.mbp_tidefile[0] = '\0';
 				}
 			}
-			else if (strncmp(pargv[i], "TIDEFILE", 8) == 0) {
+			if (!found && strncmp(pargv[i], "TIDEFILE", 8) == 0) {
+        found = true;
 				sscanf(pargv[i], "TIDEFILE:%1023s", process.mbp_tidefile);
 				if (!is_explicit) {
 					process.mbp_tide_mode = MBP_TIDE_ON;
 				}
 			}
-			else if (strncmp(pargv[i], "TIDEFORMAT", 10) == 0) {
+			if (!found && strncmp(pargv[i], "TIDEFORMAT", 10) == 0) {
+        found = true;
 				sscanf(pargv[i], "TIDEFORMAT:%d", &process.mbp_tide_format);
 			}
 
 			/* amplitude correction */
-			else if (strncmp(pargv[i], "AMPCORRMODE", 11) == 0) {
+			if (!found && strncmp(pargv[i], "AMPCORRMODE", 11) == 0) {
+        found = true;
 				sscanf(pargv[i], "AMPCORRMODE:%d", &process.mbp_ampcorr_mode);
 				if (!is_explicit && process.mbp_ampcorr_mode == MBP_AMPCORR_OFF) {
 					process.mbp_ampcorrfile[0] = '\0';
 				}
 			}
-			else if (strncmp(pargv[i], "AMPCORRFILE", 11) == 0) {
+			if (!found && strncmp(pargv[i], "AMPCORRFILE", 11) == 0) {
+        found = true;
 				sscanf(pargv[i], "AMPCORRFILE:%1023s", process.mbp_ampcorrfile);
 				if (!is_explicit) {
 					process.mbp_ampcorr_mode = MBP_AMPCORR_ON;
 				}
 			}
-			else if (strncmp(pargv[i], "AMPCORRTYPE", 11) == 0) {
+			if (!found && strncmp(pargv[i], "AMPCORRTYPE", 11) == 0) {
+        found = true;
 				sscanf(pargv[i], "AMPCORRTYPE:%d", &process.mbp_ampcorr_type);
 			}
-			else if (strncmp(pargv[i], "AMPCORRSYMMETRY", 15) == 0) {
+			if (!found && strncmp(pargv[i], "AMPCORRSYMMETRY", 15) == 0) {
+        found = true;
 				sscanf(pargv[i], "AMPCORRSYMMETRY:%d", &process.mbp_ampcorr_symmetry);
 			}
-			else if (strncmp(pargv[i], "AMPCORRANGLE", 12) == 0) {
+			if (!found && strncmp(pargv[i], "AMPCORRANGLE", 12) == 0) {
+        found = true;
 				sscanf(pargv[i], "AMPCORRANGLE:%lf", &process.mbp_ampcorr_angle);
 			}
-			else if (strncmp(pargv[i], "AMPCORRSLOPE", 12) == 0) {
+			if (!found && strncmp(pargv[i], "AMPCORRSLOPE", 12) == 0) {
+        found = true;
 				sscanf(pargv[i], "AMPCORRSLOPE:%d", &process.mbp_ampcorr_slope);
 			}
-			else if (strncmp(pargv[i], "AMPSSCORRTOPOFILE", 17) == 0) {
+			if (!found && strncmp(pargv[i], "AMPSSCORRTOPOFILE", 17) == 0) {
+        found = true;
 				sscanf(pargv[i], "AMPSSCORRTOPOFILE:%1023s", process.mbp_ampsscorr_topofile);
 			}
 
 			/* sidescan correction */
-			else if (strncmp(pargv[i], "SSCORRMODE", 10) == 0) {
+			if (!found && strncmp(pargv[i], "SSCORRMODE", 10) == 0) {
+        found = true;
 				sscanf(pargv[i], "SSCORRMODE:%d", &process.mbp_sscorr_mode);
 				if (!is_explicit && process.mbp_sscorr_mode == MBP_SSCORR_OFF) {
 					process.mbp_sscorrfile[0] = '\0';
 				}
 			}
-			else if (strncmp(pargv[i], "SSCORRFILE", 10) == 0) {
+			if (!found && strncmp(pargv[i], "SSCORRFILE", 10) == 0) {
+        found = true;
 				sscanf(pargv[i], "SSCORRFILE:%1023s", process.mbp_sscorrfile);
 				if (!is_explicit) {
 					process.mbp_sscorr_mode = MBP_SSCORR_ON;
 				}
 			}
-			else if (strncmp(pargv[i], "SSCORRTYPE", 10) == 0) {
+			if (!found && strncmp(pargv[i], "SSCORRTYPE", 10) == 0) {
+        found = true;
 				sscanf(pargv[i], "SSCORRTYPE:%d", &process.mbp_sscorr_type);
 			}
-			else if (strncmp(pargv[i], "SSCORRSYMMETRY", 14) == 0) {
+			if (!found && strncmp(pargv[i], "SSCORRSYMMETRY", 14) == 0) {
+        found = true;
 				sscanf(pargv[i], "SSCORRSYMMETRY:%d", &process.mbp_sscorr_symmetry);
 			}
-			else if (strncmp(pargv[i], "SSCORRANGLE", 11) == 0) {
+			if (!found && strncmp(pargv[i], "SSCORRANGLE", 11) == 0) {
+        found = true;
 				sscanf(pargv[i], "SSCORRANGLE:%lf", &process.mbp_sscorr_angle);
 			}
-			else if (strncmp(pargv[i], "SSCORRSLOPE", 11) == 0) {
+			if (!found && strncmp(pargv[i], "SSCORRSLOPE", 11) == 0) {
+        found = true;
 				sscanf(pargv[i], "SSCORRSLOPE:%d", &process.mbp_sscorr_slope);
 			}
 			/* sidescan recalculation */
-			else if (strncmp(pargv[i], "SSRECALCMODE", 12) == 0) {
+			if (!found && strncmp(pargv[i], "SSRECALCMODE", 12) == 0) {
+        found = true;
 				sscanf(pargv[i], "SSRECALCMODE:%d", &process.mbp_ssrecalc_mode);
 			}
-			else if (strncmp(pargv[i], "SSPIXELSIZE", 11) == 0) {
+			if (!found && strncmp(pargv[i], "SSPIXELSIZE", 11) == 0) {
+        found = true;
 				sscanf(pargv[i], "SSPIXELSIZE:%lf", &process.mbp_ssrecalc_pixelsize);
 			}
-			else if (strncmp(pargv[i], "SSSWATHWIDTH", 11) == 0) {
+			if (!found && strncmp(pargv[i], "SSSWATHWIDTH", 11) == 0) {
+        found = true;
 				sscanf(pargv[i], "SSSWATHWIDTH:%lf", &process.mbp_ssrecalc_swathwidth);
 			}
-			else if (strncmp(pargv[i], "SSINTERPOLATE", 11) == 0) {
+			if (!found && strncmp(pargv[i], "SSINTERPOLATE", 11) == 0) {
+        found = true;
 				sscanf(pargv[i], "SSINTERPOLATE:%d", &process.mbp_ssrecalc_interpolate);
 			}
 
 			/* metadata insertion */
-			else if (strncmp(pargv[i], "METAVESSEL:", 11) == 0) {
+			if (!found && strncmp(pargv[i], "METAVESSEL:", 11) == 0) {
+        found = true;
 				strcpy(process.mbp_meta_vessel, &(pargv[i][11]));
 			}
-			else if (strncmp(pargv[i], "METAINSTITUTION:", 16) == 0) {
+			if (!found && strncmp(pargv[i], "METAINSTITUTION:", 16) == 0) {
+        found = true;
 				strcpy(process.mbp_meta_institution, &(pargv[i][16]));
 			}
-			else if (strncmp(pargv[i], "METAPLATFORM:", 13) == 0) {
+			if (!found && strncmp(pargv[i], "METAPLATFORM:", 13) == 0) {
+        found = true;
 				strcpy(process.mbp_meta_platform, &(pargv[i][13]));
 			}
-			else if (strncmp(pargv[i], "METASONARVERSION:", 17) == 0) {
+			if (!found && strncmp(pargv[i], "METASONARVERSION:", 17) == 0) {
+        found = true;
 				strcpy(process.mbp_meta_sonarversion, &(pargv[i][17]));
 			}
-			else if (strncmp(pargv[i], "METASONAR:", 10) == 0) {
+			if (!found && strncmp(pargv[i], "METASONAR:", 10) == 0) {
+        found = true;
 				strcpy(process.mbp_meta_sonar, &(pargv[i][10]));
 			}
-			else if (strncmp(pargv[i], "METACRUISEID:", 13) == 0) {
+			if (!found && strncmp(pargv[i], "METACRUISEID:", 13) == 0) {
+        found = true;
 				strcpy(process.mbp_meta_cruiseid, &(pargv[i][13]));
 			}
-			else if (strncmp(pargv[i], "METACRUISENAME:", 15) == 0) {
+			if (!found && strncmp(pargv[i], "METACRUISENAME:", 15) == 0) {
+        found = true;
 				strcpy(process.mbp_meta_cruisename, &(pargv[i][15]));
 			}
-			else if (strncmp(pargv[i], "METAPIINSTITUTION:", 18) == 0) {
+			if (!found && strncmp(pargv[i], "METAPIINSTITUTION:", 18) == 0) {
+        found = true;
 				strcpy(process.mbp_meta_piinstitution, &(pargv[i][18]));
 			}
-			else if (strncmp(pargv[i], "METACLIENT:", 11) == 0) {
+			if (!found && strncmp(pargv[i], "METACLIENT:", 11) == 0) {
+        found = true;
 				strcpy(process.mbp_meta_client, &(pargv[i][11]));
 			}
-			else if (strncmp(pargv[i], "METASVCORRECTED:", 16) == 0) {
+			if (!found && strncmp(pargv[i], "METASVCORRECTED:", 16) == 0) {
+        found = true;
 				sscanf(pargv[i], "METASVCORRECTED:%d", &(process.mbp_meta_svcorrected));
 			}
-			else if (strncmp(pargv[i], "METATIDECORRECTED:", 18) == 0) {
+			if (!found && strncmp(pargv[i], "METATIDECORRECTED:", 18) == 0) {
+        found = true;
 				sscanf(pargv[i], "METATIDECORRECTED:%d", &(process.mbp_meta_tidecorrected));
 			}
-			else if (strncmp(pargv[i], "METABATHEDITMANUAL:", 19) == 0) {
+			if (!found && strncmp(pargv[i], "METABATHEDITMANUAL:", 19) == 0) {
+        found = true;
 				sscanf(pargv[i], "METABATHEDITMANUAL:%d", &(process.mbp_meta_batheditmanual));
 			}
-			else if (strncmp(pargv[i], "METABATHEDITAUTO:", 17) == 0) {
+			if (!found && strncmp(pargv[i], "METABATHEDITAUTO:", 17) == 0) {
+        found = true;
 				sscanf(pargv[i], "METABATHEDITAUTO:%d", &(process.mbp_meta_batheditauto));
 			}
-			else if (strncmp(pargv[i], "METAROLLBIAS:", 13) == 0) {
+			if (!found && strncmp(pargv[i], "METAROLLBIAS:", 13) == 0) {
+        found = true;
 				sscanf(pargv[i], "METAROLLBIAS:%lf", &(process.mbp_meta_rollbias));
 			}
-			else if (strncmp(pargv[i], "METAPITCHBIAS:", 14) == 0) {
+			if (!found && strncmp(pargv[i], "METAPITCHBIAS:", 14) == 0) {
+        found = true;
 				sscanf(pargv[i], "METAPITCHBIAS:%lf", &(process.mbp_meta_pitchbias));
 			}
-			else if (strncmp(pargv[i], "METAPI:", 7) == 0) {
+			if (!found && strncmp(pargv[i], "METAPI:", 7) == 0) {
+        found = true;
 				strcpy(process.mbp_meta_pi, &(pargv[i][7]));
 			}
-			else if (strncmp(pargv[i], "METAHEADINGBIAS:", 16) == 0) {
+			if (!found && strncmp(pargv[i], "METAHEADINGBIAS:", 16) == 0) {
+        found = true;
 				sscanf(pargv[i], "METAHEADINGBIAS:%lf", &(process.mbp_meta_headingbias));
 			}
-			else if (strncmp(pargv[i], "METADRAFT:", 10) == 0) {
+			if (!found && strncmp(pargv[i], "METADRAFT:", 10) == 0) {
+        found = true;
 				sscanf(pargv[i], "METADRAFT:%lf", &(process.mbp_meta_draft));
 			}
 
 			/* processing kluges */
-			else if (strncmp(pargv[i], "KLUGE001:", 8) == 0) {
+			if (!found && strncmp(pargv[i], "KLUGE001:", 8) == 0) {
+        found = true;
 				sscanf(pargv[i], "KLUGE001:%d", &(process.mbp_kluge001));
 			}
-			else if (strncmp(pargv[i], "KLUGE002:", 8) == 0) {
+			if (!found && strncmp(pargv[i], "KLUGE002:", 8) == 0) {
+        found = true;
 				sscanf(pargv[i], "KLUGE002:%d", &(process.mbp_kluge002));
 			}
-			else if (strncmp(pargv[i], "KLUGE003:", 8) == 0) {
+			if (!found && strncmp(pargv[i], "KLUGE003:", 8) == 0) {
+        found = true;
 				sscanf(pargv[i], "KLUGE003:%d", &(process.mbp_kluge003));
 			}
-			else if (strncmp(pargv[i], "KLUGE004:", 8) == 0) {
+			if (!found && strncmp(pargv[i], "KLUGE004:", 8) == 0) {
+        found = true;
 				sscanf(pargv[i], "KLUGE004:%d", &(process.mbp_kluge004));
 			}
-			else if (strncmp(pargv[i], "KLUGE005:", 8) == 0) {
+			if (!found && strncmp(pargv[i], "KLUGE005:", 8) == 0) {
+        found = true;
 				sscanf(pargv[i], "KLUGE005:%d", &(process.mbp_kluge005));
 			}
-			else if (strncmp(pargv[i], "KLUGE006:", 8) == 0) {
+			if (!found && strncmp(pargv[i], "KLUGE006:", 8) == 0) {
+        found = true;
 				sscanf(pargv[i], "KLUGE006:%d", &(process.mbp_kluge006));
 			}
-			else if (strncmp(pargv[i], "KLUGE007:", 8) == 0) {
+			if (!found && strncmp(pargv[i], "KLUGE007:", 8) == 0) {
+        found = true;
 				sscanf(pargv[i], "KLUGE007:%d", &(process.mbp_kluge007));
 			}
-			else if (strncmp(pargv[i], "KLUGE008:", 8) == 0) {
+			if (!found && strncmp(pargv[i], "KLUGE008:", 8) == 0) {
+        found = true;
 				sscanf(pargv[i], "KLUGE008:%d", &(process.mbp_kluge008));
 			}
-			else if (strncmp(pargv[i], "KLUGE009:", 8) == 0) {
+			if (!found && strncmp(pargv[i], "KLUGE009:", 8) == 0) {
+        found = true;
 				sscanf(pargv[i], "KLUGE009:%d", &(process.mbp_kluge009));
 			}
-			else if (strncmp(pargv[i], "KLUGE010:", 8) == 0) {
+			if (!found && strncmp(pargv[i], "KLUGE010:", 8) == 0) {
+        found = true;
 				sscanf(pargv[i], "KLUGE010:%d", &(process.mbp_kluge010));
 			}
 
 			/* unrecognized command */
-			else {
+			if (!found) {
 				fprintf(stderr, "\nUnrecognized %s command: %s\n", program_name, pargv[i]);
 			}
 		}
