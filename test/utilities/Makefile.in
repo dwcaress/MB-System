@@ -523,8 +523,8 @@ top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 TEST_EXTENSIONS = .py
 
-# TESTS += mbtrnpreprocess_test.py
-# check_SCRIPTS += mbtrnpreprocess_test.py
+# TESTS += mbtrnpp_test.py
+# check_SCRIPTS += mbtrnpp_test.py
 TESTS = mbabsorption_test.py mbareaclean_test.py mbauvloglist_test.py \
 	mbbackangle_test.py mbclean_test.py mbconfig_test.py \
 	mbcopy_test.py mbctdlist_test.py mbdatalist_test.py \
