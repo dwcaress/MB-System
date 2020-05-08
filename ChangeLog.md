@@ -364,6 +364,11 @@ I have added print statements to the tests in
   mbsystem/test/utilities/mbbackangle_test.py
 and
   mbsystem/test/utilities/mbgrid_test.py.
+I don't know how to get that output into the log that Travis-CI makes available.
+
+TRN tools: Kent Headley have added a config file mechanism to mbtrnpp, and fixed
+a number of other issues in a series of commits. These changes are in src/mbtrn,
+src/mbtrnav, and src/mbtrnutils.
 
 #### 5.7.6beta33 (May 5, 2020)
 
