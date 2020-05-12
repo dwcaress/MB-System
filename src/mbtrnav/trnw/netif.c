@@ -418,14 +418,14 @@ int netif_update_connections(netif_t *self)
 {
     int retval = -1;
 
-    MST_METRIC_START(self->profile->stats->metrics[NETIF_CH_UDCON_XT], mtime_dtime());
     if(NULL!=self){
+        MST_METRIC_START(self->profile->stats->metrics[NETIF_CH_UDCON_XT], mtime_dtime());
         if(self->ctype==ST_UDP)
             netif_udp_update_connections(self);
         if(self->ctype==ST_TCP)
             netif_tcp_update_connections(self);
+        MST_METRIC_LAP(self->profile->stats->metrics[NETIF_CH_UDCON_XT], mtime_dtime());
     }
-    MST_METRIC_LAP(self->profile->stats->metrics[NETIF_CH_UDCON_XT], mtime_dtime());
    return retval;
 }
 
@@ -441,9 +441,9 @@ int netif_connections(netif_t *self)
 int netif_check_hbeat(netif_t *self, msock_connection_t **ppsub, int idx)
 {
     int retval = -1;
-    MST_METRIC_START(self->profile->stats->metrics[NETIF_CH_CHKHB_XT], mtime_dtime());
 
     if(NULL!=self && NULL!=ppsub){
+        MST_METRIC_START(self->profile->stats->metrics[NETIF_CH_CHKHB_XT], mtime_dtime());
         msock_connection_t *psub = *ppsub;
         double now = mtime_dtime();
         double tmout = self->hbto;
@@ -464,8 +464,8 @@ int netif_check_hbeat(netif_t *self, msock_connection_t **ppsub, int idx)
             PMPRINT(MOD_NETIF,NETIF_V1,(stderr,"[CHKHB.%s]:OK id[%d/%s:%s] - %.3lf/%.3lf/%.3lf %lf\n",self->port_name,idx,psub->chost, psub->service, now,psub->hbtime,(now-psub->hbtime),tmout));
         }
         retval=0;
+        MST_METRIC_LAP(self->profile->stats->metrics[NETIF_CH_CHKHB_XT], mtime_dtime());
     }
-    MST_METRIC_LAP(self->profile->stats->metrics[NETIF_CH_CHKHB_XT], mtime_dtime());
 
     return retval;
 }
@@ -473,16 +473,15 @@ int netif_check_hbeat(netif_t *self, msock_connection_t **ppsub, int idx)
 int netif_reqres(netif_t *self)
 {
     int retval=-1;
-    int iobytes = 0;
-    int cli=0;
-    MST_COUNTER_INC(self->profile->stats->events[NETIF_EV_CLI_REQRESN]);
-    MST_METRIC_START(self->profile->stats->metrics[NETIF_CH_REQRES_XT], mtime_dtime());
+
 
     if(NULL!=self && NULL!=self->read_fn && NULL!=self->handle_fn){
+        MST_COUNTER_INC(self->profile->stats->events[NETIF_EV_CLI_REQRESN]);
+        MST_METRIC_START(self->profile->stats->metrics[NETIF_CH_REQRES_XT], mtime_dtime());
 
         // iterate over data providers...
         msock_connection_t *psub = (msock_connection_t *)mlist_first(self->list);
-        cli=0;
+        int cli=0;
         byte *pmsg=NULL;
         uint32_t msg_len=0;
         int merr=0;
@@ -498,7 +497,7 @@ int netif_reqres(netif_t *self)
             msock_set_blocking(psub->sock, false);
 
             MST_METRIC_START(self->profile->stats->metrics[NETIF_CH_READ_XT], mtime_dtime());
-            iobytes=self->read_fn(&pmsg,&msg_len,self,psub, &merr);
+            int iobytes=self->read_fn(&pmsg,&msg_len,self,psub, &merr);
             MST_METRIC_LAP(self->profile->stats->metrics[NETIF_CH_READ_XT], mtime_dtime());
 
 
@@ -560,8 +559,8 @@ int netif_reqres(netif_t *self)
 
 
         retval=0;
+        MST_METRIC_LAP(self->profile->stats->metrics[NETIF_CH_REQRES_XT], mtime_dtime());
     }
-    MST_METRIC_LAP(self->profile->stats->metrics[NETIF_CH_REQRES_XT], mtime_dtime());
    return retval;
 }
 // End function
@@ -569,18 +568,16 @@ int netif_reqres(netif_t *self)
 int netif_pub(netif_t *self, char *output_buffer, size_t len)
 {
     int retval=-1;
-    int iobytes = 0;
-    int idx=-1;
-    MST_METRIC_START(self->profile->stats->metrics[NETIF_CH_PUB_XT], mtime_dtime());
 
     if(NULL!=self && NULL!=self->pub_fn && NULL!=output_buffer && len>0){
+        MST_METRIC_START(self->profile->stats->metrics[NETIF_CH_PUB_XT], mtime_dtime());
 
         // iterate over subscribers...
         msock_connection_t *psub = (msock_connection_t *)mlist_first(self->list);
-        idx=0;
+        int idx=0;
 
         while (psub != NULL) {
-            iobytes = self->pub_fn(self,psub,output_buffer,len);
+            int iobytes = self->pub_fn(self,psub,output_buffer,len);
 
             if (  iobytes > 0) {
                 // update stats if publish successful
@@ -605,8 +602,8 @@ int netif_pub(netif_t *self, char *output_buffer, size_t len)
             idx++;
         }// while psub
         retval=0;
+        MST_METRIC_LAP(self->profile->stats->metrics[NETIF_CH_PUB_XT], mtime_dtime());
     }
-    MST_METRIC_LAP(self->profile->stats->metrics[NETIF_CH_PUB_XT], mtime_dtime());
 
     return retval;
 }
@@ -829,7 +826,6 @@ int netif_init_log(netif_t *self, char *log_name, char *log_dir, char *session_s
         char session_date[32]={0};
 
         time_t rawtime;
-        struct tm *gmt;
 
         // remove existing log configuration
         if(self->mlog_id!=MLOG_ID_INVALID){
@@ -856,7 +852,7 @@ int netif_init_log(netif_t *self, char *log_name, char *log_dir, char *session_s
         // in log file names
         time(&rawtime);
         // Get GMT time
-        gmt = gmtime(&rawtime);
+        struct tm *gmt = gmtime(&rawtime);
         // format YYYYMMDD-HHMMSS
         sprintf(session_date, "%04d%02d%02d-%02d%02d%02d",
                 (gmt->tm_year+1900),gmt->tm_mon+1,gmt->tm_mday,
@@ -879,7 +875,6 @@ int netif_init_log(netif_t *self, char *log_name, char *log_dir, char *session_s
 int netif_start(netif_t *self, uint32_t delay_msec)
 {
     int retval=-1;
-    int test=-1;
     if(NULL!=self && NULL!=self->host){
         if(self->mlog_id==MLOG_ID_INVALID){
         	netif_init_log(self,NETIF_MLOG_NAME,NULL,NULL);
@@ -888,7 +883,7 @@ int netif_start(netif_t *self, uint32_t delay_msec)
         mlog_tprintf(self->mlog_id,"*** netif session start ***\n");
         //    mlog_tprintf(self->mlog_id,"cmdline [%s]\n",g_cmd_line);
         mlog_tprintf(self->mlog_id,"libnetif v[%s] build[%s]\n",netif_get_version(),netif_get_build());
-
+        int test=-1;
         if( (test=netif_connect(self))==0){
             // enter main loop
             s_netif_run(self,delay_msec);
@@ -1000,22 +995,22 @@ static int s_netif_pub_msg(netif_t *self, msock_connection_t *peer, char *data, 
 
     if(NULL!=self && NULL!=peer && NULL!=data && len>0){
         int64_t iobytes=0;
-        int flags=0;
-#if !defined(__APPLE__)
-        flags=MSG_NOSIGNAL;
-#endif
         if(self->ctype==ST_UDP){
+            int flags=0;
+#if !defined(__APPLE__)
+            flags=MSG_NOSIGNAL;
+#endif
             if ( (iobytes = msock_sendto(self->socket, peer->addr, (byte *) data, len, flags )) > 0) {
-                fprintf(stderr,"client PUB UDP OK len[%lld]:\n",iobytes);
+                fprintf(stderr,"client PUB UDP OK len[%"PRId64"]:\n",iobytes);
             }else{
-                fprintf(stderr,"client PUB UDP ERR len[%lld][%d/%s]\n",iobytes,errno,strerror(errno));
+                fprintf(stderr,"client PUB UDP ERR len[%"PRId64"][%d/%s]\n",iobytes,errno,strerror(errno));
             }
         }
         if(self->ctype==ST_TCP){
             if ( (iobytes = msock_send(peer->sock, (byte *)data, len )) > 0) {
-                fprintf(stderr,"client PUB TCP OK len[%lld]:\n",iobytes);
+                fprintf(stderr,"client PUB TCP OK len[%"PRId64"]:\n",iobytes);
             }else{
-                fprintf(stderr,"client PUB TCP ERR len[%lld][%d/%s]\n",iobytes,errno,strerror(errno));
+                fprintf(stderr,"client PUB TCP ERR len[%"PRId64"][%d/%s]\n",iobytes,errno,strerror(errno));
             }
         }
         retval=0;
@@ -1037,11 +1032,11 @@ static int s_test_pub_recv(msock_socket_t *cli)
 
         msock_set_blocking(cli,false);
         if( (test=msock_recv(cli,(byte *)reply,TRN_MSG_SIZE,0))>0){
-            fprintf(stderr,"client PUB recv OK len[%lld]:\n",test);
+            fprintf(stderr,"client PUB recv OK len[%"PRId64"]:\n",test);
             mfu_hex_show((byte *)reply,test,16,true,5);
             retval=test;
         }else{
-            fprintf(stderr,"client PUB recv ERR len[%lld][%d/%s]\n",test,errno,strerror(errno));
+            fprintf(stderr,"client PUB recv ERR len[%"PRId64"][%d/%s]\n",test,errno,strerror(errno));
         }
     }
     return retval;
@@ -1062,7 +1057,7 @@ int s_netif_test_read(byte **pdest, uint32_t *len, netif_t *self, msock_connecti
             *pdest=buf;
         }
         if( (msg_bytes=msock_recvfrom(peer->sock, peer->addr,buf,readlen,0)) >0 ){
-            PDPRINT((stderr,"%s: READ - msg_bytes[%lld]\n",__FUNCTION__,msg_bytes));
+            PDPRINT((stderr,"%s: READ - msg_bytes[%"PRId64"]\n",__FUNCTION__,msg_bytes));
             retval=msg_bytes;
         }
     }
@@ -1096,14 +1091,16 @@ static int s_netif_test_send(msock_socket_t *cli)
 
     if(NULL!=cli){
         char *msg_out=strdup("PING");
-        size_t len=strlen(msg_out)+1;
-        if( len>0 && NULL!=msg_out && msock_send(cli,(byte *)msg_out,len)==len){
-            fprintf(stderr,"client REQ send OK [%s/%zu]\n",msg_out,len);
-            retval=0;
-        }else{
-            fprintf(stderr,"client REQ send failed\n");
+        if(NULL!=msg_out){
+            size_t len=strlen(msg_out)+1;
+            if( len>0 && msock_send(cli,(byte *)msg_out,len)==len){
+                fprintf(stderr,"client REQ send OK [%s/%zu]\n",msg_out,len);
+                retval=0;
+            }else{
+                fprintf(stderr,"client REQ send failed\n");
+            }
+            free(msg_out);
         }
-        free(msg_out);
     }
     return retval;
 }
@@ -1119,15 +1116,15 @@ static int s_netif_test_recv(msock_socket_t *cli)
         msock_set_blocking(cli,false);
         if( (test=msock_recv(cli,(byte *)reply,16,0))>0){
             if(test==4 && strcmp(reply,"ACK")==0){
-                fprintf(stderr,"client ACK recv OK len[%s/%lld]\n",reply,test);
+                fprintf(stderr,"client ACK recv OK len[%s/%"PRId64"]\n",reply,test);
                 retval=0;
             }else if(test==5 && strcmp(reply,"NACK")==0){
-                fprintf(stderr,"client NACK recv OK len[%s/%lld]\n",reply,test);
+                fprintf(stderr,"client NACK recv OK len[%s/%"PRId64"]\n",reply,test);
             }else{
-                fprintf(stderr,"client ACK/NACK recv INVALID len[%s/%lld]\n",reply,test);
+                fprintf(stderr,"client ACK/NACK recv INVALID len[%s/%"PRId64"]\n",reply,test);
             }
         }else{
-            fprintf(stderr,"client ACK recv ERR len[%lld][%d/%s]\n",test,errno,strerror(errno));
+            fprintf(stderr,"client ACK recv ERR len[%"PRId64"][%d/%s]\n",test,errno,strerror(errno));
         }
     }
     return retval;

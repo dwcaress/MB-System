@@ -83,7 +83,7 @@
 #define TRNIF_SYNC_LEN sizeof(trn_sync_t)
 #define TRNIF_CHKSUM_LEN sizeof(trn_checksum_t)
 #define TRNIF_HDR_LEN sizeof(trnmsg_header_t)
-#define TRNIF_SYNC_CMP(b,i) (i>=0 && i<TRNIF_SYNC_LEN && b==((g_trn_sync>>i*8)&0xFF) ? true : false)
+#define TRNIF_SYNC_CMP(b,i) ( (i>=0) && (i<TRNIF_SYNC_LEN) && (b==(((g_trn_sync>>(i*8)))&0xFF)) ? true : false)
 #define TRNIF_PDATA(msg) (NULL!=msg ? ((byte *)msg+TRNIF_HDR_LEN) : NULL)
 #define TRNIF_TPDATA(msg,type) (type *)(NULL!=msg ? ((byte *)msg+TRNIF_HDR_LEN) : NULL)
 #define TRNIF_IDSTR(t) (t>=0 && t<TRNIF_MSG_ID_COUNT? trnmsg_id_names[t]:NULL)

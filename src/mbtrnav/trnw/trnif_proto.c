@@ -141,7 +141,6 @@ static int s_trnif_msg_read_dfl(byte *dest, uint32_t readlen, msock_socket_t *so
         if( (msg_bytes=msock_recvfrom(socket, peer->addr,dest,readlen,0)) >0 ){
             retval = msg_bytes;
             PDPRINT((stderr,"%s: READ - OK read[%lld]\n",__FUNCTION__,msg_bytes));
-            retval=msg_bytes;
         }else{
             if(errno!=EAGAIN)
             PDPRINT((stderr,"%s: READ - ERR read[%lld] [%d/%s]\n",__FUNCTION__,msg_bytes,errno,strerror(errno)));
@@ -184,140 +183,142 @@ int trnif_msg_read_trnmsg(byte **pdest, uint32_t *len, netif_t *self, msock_conn
     enum State state=ST_SYNC;
     enum Action {AC_NOP=0,AC_SYNC, AC_HDR, AC_DATA, AC_CHK, AC_ERR };
     enum Action action = AC_NOP;
-#if defined(WITH_PDEBUG)
-    char *stateNames[]={"ST_START","ST_SYNC_OK","ST_HDR_OK","ST_DATA_OK", "ST_CHK_OK", "ST_SYNC", "ST_QUIT"};
-#endif
 
     if(NULL!=pdest && NULL!=self && NULL!=peer){
-        uint32_t msg_bytes=0;
-        uint32_t test=0;
-        uint32_t readlen=0;
         byte *buf=*pdest;
         if(NULL==buf){
             buf=(byte *)malloc(TRNIF_MAX_SIZE);
+        }
+        if(NULL!=buf){
             memset(buf,0,TRNIF_MAX_SIZE);
-        }
-        byte *cur = buf;
-        int err=0;
-        trnmsg_header_t *pheader=(trnmsg_header_t *)buf;
-        if(NULL!=errout){
-            *errout=MSG_EOK;
-        }
-
-        while(msg_bytes<*len && state!=ST_QUIT && !self->stop){
-            switch (state) {
-                case ST_SYNC:
-                    // read the sync pattern
-                    msg_bytes=0;
-                    cur=buf;
-                    action = AC_SYNC;
-                    break;
-                case ST_SYNC_OK:
-                    // read the header
-                    // (cur points to correct location)
-                    action=AC_HDR;
-                    break;
-                case ST_HDR_OK:
-                    // read the header
-                    // (cur points to correct location)
-                    readlen=pheader->data_len;
-                    action=AC_DATA;
-                    break;
-                case ST_DATA_OK:
-                    // compare checksum
-                    action=AC_CHK;
-                    break;
-                default:
-                    // illegal state
-                    MST_COUNTER_INC(self->profile->stats->events[NETIF_EV_EPROTO_RD]);
-                    break;
+            uint32_t msg_bytes=0;
+            uint32_t test=0;
+            uint32_t readlen=0;
+#if defined(WITH_PDEBUG)
+            char *stateNames[]={"ST_START","ST_SYNC_OK","ST_HDR_OK","ST_DATA_OK", "ST_CHK_OK", "ST_SYNC", "ST_QUIT"};
+#endif
+         byte *cur = buf;
+            int err=0;
+            trnmsg_header_t *pheader=(trnmsg_header_t *)buf;
+            if(NULL!=errout){
+                *errout=MSG_EOK;
             }
-            PDPRINT((stderr,"state[%s] readlen[%u]\n",stateNames[state],readlen));
 
-            if(action==AC_SYNC){
-                // read byte by byte until sync pattern matched
-                while( (cur-buf)<TRNIF_SYNC_LEN && action!=AC_ERR && !self->stop){
-                    if( (test=msock_recvfrom(peer->sock, peer->addr,cur,1,MSG_DONTWAIT))==1 && TRNIF_SYNC_CMP(*cur,(cur-buf))){
-                        PDPRINT((stderr,"SYNC - OK test[%d] cur[%p/x%02X] cur-buf[%ld] cmp[%d]\n",test,cur,*cur,(cur-buf),(TRNIF_SYNC_CMP(*cur,(cur-buf)?1:0))));
-                        cur+=test;
-                        msg_bytes+=test;
-                        state=ST_SYNC_OK;
-                    }else{
-                        err=errno;
-                        PDPRINT((stderr,"SYNC - ERR cur-buf[%ld] *cur[%02X] c(%02X) test[%d] err[%d/%s]\n",(cur-buf),*cur,((g_trn_sync>>(cur-buf))),test,err,strerror(err)));
-                        action=AC_ERR;
-                   }
-                }
-            }// AC_SYNC
-
-            if(action==AC_HDR){
-                if( (test=msock_recvfrom(peer->sock, peer->addr,cur,TRNIF_HDR_LEN-TRNIF_SYNC_LEN,0)) >0  ){
-                    PDPRINT((stderr,"HDR - OK test[%d] cur[%p/x%02X]\n",test,cur,*cur));
-                    cur+=test;
-                    msg_bytes+=test;
-                    state=ST_HDR_OK;
-                }else{
-                    PTRACE();
-                    err=errno;
-                    action=AC_ERR;
-               }
-            }// AC_HDR
-
-            if(action==AC_DATA){
-                PTRACE();
-                if(readlen==0){
-                    state=ST_DATA_OK;
-                }else if( (test=msock_recvfrom(peer->sock, peer->addr,cur,readlen,0)) == readlen ){
-                    PDPRINT((stderr,"DATA - OK test[%d] cur[%p/x%02X]\n",test,cur,*cur));
-                    cur+=test;
-                    msg_bytes+=test;
-                    state=ST_DATA_OK;
-                }else{
-                    PTRACE();
-                    err=errno;
-                    action=AC_ERR;
-               }
-            }// AC_DATA
-
-            if(action==AC_CHK){
-                PTRACE();
-                trn_checksum_t chk=0;
-                byte *cp = buf+TRNIF_HDR_LEN;
-                chk = mfu_checksum(cp, pheader->data_len);
-                if(chk == pheader->checksum){
-                    retval=msg_bytes;
-                }else{
-                    if(NULL!=errout){
-                    	*errout=MSG_ECHK;
-                    }
-                    MST_COUNTER_INC(self->profile->stats->events[NETIF_EV_EPROTO_RD]);
-                }
-                state=ST_QUIT;
-            }// AC_CHK
-
-            if(action==AC_ERR){
-                MST_COUNTER_INC(self->profile->stats->events[NETIF_EV_EPROTO_RD]);
-                // check for errors
-                switch (err) {
-                        // EWOULDBLOCK == EAGAIN on many systems
-                    case EAGAIN:
-                        PTRACE();
-                        // nothing to read: quit
-                        if(NULL!=errout){
-                       		*errout=MSG_ENODATA;
-                        }
-                        state=ST_QUIT;
+            while(msg_bytes<*len && state!=ST_QUIT && !self->stop){
+                switch (state) {
+                    case ST_SYNC:
+                        // read the sync pattern
+                        msg_bytes=0;
+                        cur=buf;
+                        action = AC_SYNC;
+                        break;
+                    case ST_SYNC_OK:
+                        // read the header
+                        // (cur points to correct location)
+                        action=AC_HDR;
+                        break;
+                    case ST_HDR_OK:
+                        // read the header
+                        // (cur points to correct location)
+                        readlen=pheader->data_len;
+                        action=AC_DATA;
+                        break;
+                    case ST_DATA_OK:
+                        // compare checksum
+                        action=AC_CHK;
                         break;
                     default:
-                        PTRACE();
-                        // start over
-                        cur=buf;
-                        msg_bytes=0;
-                        state=ST_SYNC;
+                        // illegal state
+                        MST_COUNTER_INC(self->profile->stats->events[NETIF_EV_EPROTO_RD]);
                         break;
                 }
-            }// AC_ERR
-        }
+                PDPRINT((stderr,"state[%s] readlen[%u]\n",stateNames[state],readlen));
+
+                if(action==AC_SYNC){
+                    // read byte by byte until sync pattern matched
+                    while( (cur-buf)<TRNIF_SYNC_LEN && action!=AC_ERR && !self->stop){
+                        if( (test=msock_recvfrom(peer->sock, peer->addr,cur,1,MSG_DONTWAIT))==1 && TRNIF_SYNC_CMP(*cur,(cur-buf))){
+                            PDPRINT((stderr,"SYNC - OK test[%d] cur[%p/x%02X] cur-buf[%ld] cmp[%d]\n",test,cur,*cur,(cur-buf),(TRNIF_SYNC_CMP(*cur,(cur-buf)?1:0))));
+                            cur+=test;
+                            msg_bytes+=test;
+                            state=ST_SYNC_OK;
+                        }else{
+                            err=errno;
+                            PDPRINT((stderr,"SYNC - ERR cur-buf[%ld] *cur[%02X] c(%02X) test[%d] err[%d/%s]\n",(cur-buf),*cur,((g_trn_sync>>(cur-buf))),test,err,strerror(err)));
+                            action=AC_ERR;
+                        }
+                    }
+                }// AC_SYNC
+
+                if(action==AC_HDR){
+                    if( (test=msock_recvfrom(peer->sock, peer->addr,cur,TRNIF_HDR_LEN-TRNIF_SYNC_LEN,0)) >0  ){
+                        PDPRINT((stderr,"HDR - OK test[%d] cur[%p/x%02X]\n",test,cur,*cur));
+                        cur+=test;
+                        msg_bytes+=test;
+                        state=ST_HDR_OK;
+                    }else{
+                        PTRACE();
+                        err=errno;
+                        action=AC_ERR;
+                    }
+                }// AC_HDR
+
+                if(action==AC_DATA){
+                    PTRACE();
+                    if(readlen==0){
+                        state=ST_DATA_OK;
+                    }else if( (test=msock_recvfrom(peer->sock, peer->addr,cur,readlen,0)) == readlen ){
+                        PDPRINT((stderr,"DATA - OK test[%d] cur[%p/x%02X]\n",test,cur,*cur));
+                        cur+=test;
+                        msg_bytes+=test;
+                        state=ST_DATA_OK;
+                    }else{
+                        PTRACE();
+                        err=errno;
+                        action=AC_ERR;
+                    }
+                }// AC_DATA
+
+                if(action==AC_CHK){
+                    PTRACE();
+                    trn_checksum_t chk=0;
+                    byte *cp = buf+TRNIF_HDR_LEN;
+                    chk = mfu_checksum(cp, pheader->data_len);
+                    if(chk == pheader->checksum){
+                        retval=msg_bytes;
+                    }else{
+                        if(NULL!=errout){
+                            *errout=MSG_ECHK;
+                        }
+                        MST_COUNTER_INC(self->profile->stats->events[NETIF_EV_EPROTO_RD]);
+                    }
+                    state=ST_QUIT;
+                }// AC_CHK
+
+                if(action==AC_ERR){
+                    MST_COUNTER_INC(self->profile->stats->events[NETIF_EV_EPROTO_RD]);
+                    // check for errors
+                    switch (err) {
+                            // EWOULDBLOCK == EAGAIN on many systems
+                        case EAGAIN:
+                            PTRACE();
+                            // nothing to read: quit
+                            if(NULL!=errout){
+                                *errout=MSG_ENODATA;
+                            }
+                            state=ST_QUIT;
+                            break;
+                        default:
+                            PTRACE();
+                            // start over
+                            cur=buf;
+                            msg_bytes=0;
+                            state=ST_SYNC;
+                            break;
+                    }
+                }// AC_ERR
+            }
+        }else{PTRACE();}
 
     }// else invalid arg
     PDPRINT((stderr,"errout[%d] msg_len/ret[%u]\n",(NULL==errout?-1:*errout),retval));
@@ -336,7 +337,6 @@ int trnif_msg_handle_trnmsg(void *msg, netif_t *self, msock_connection_t *peer, 
     int retval=-1;
     if(NULL!=msg && NULL!=self && NULL!=peer){
 
-        int32_t send_len=0;
         wtnav_t *trn = self->rr_res;
         trnmsg_t *msg_in = NULL;
         trnmsg_t *msg_out = NULL;
@@ -347,8 +347,9 @@ int trnif_msg_handle_trnmsg(void *msg, netif_t *self, msock_connection_t *peer, 
         // deserialize message bytes
         trnmsg_deserialize(&msg_in, (byte *)msg, TRNIF_MAX_SIZE);
         PDPRINT((stderr,"%s - TRNMSG received:\n",__FUNCTION__));
-        if(mmd_channel_isset(MOD_NETIF,(MM_DEBUG | NETIF_V3 | NETIF_V4)))
-        trnmsg_show(msg_in,true,5);
+        if(mmd_channel_isset(MOD_NETIF,(MM_DEBUG | NETIF_V3 | NETIF_V4))){
+        	trnmsg_show(msg_in,true,5);
+        }
 
         switch (msg_in->hdr.msg_id) {
             case TRNIF_PING:
@@ -359,14 +360,18 @@ int trnif_msg_handle_trnmsg(void *msg, netif_t *self, msock_connection_t *peer, 
             case TRNIF_MEAS:
                 // get pointer to (trn_meas_t) data payload
                 trn_meas = TRNIF_TPDATA(msg_in, trn_meas_t);
-                // deserialize meast
-                wmeast_unserialize(&mt, (char *) pdata+sizeof(trn_meas_t), msg_in->hdr.data_len);
-                // do measurement update
-                wtnav_meas_update(trn, mt, trn_meas->parameter);
-                // make return message
-                msg_out = trnmsg_new_meas_msg( TRNIF_MEAS, trn_meas->parameter, mt);
+                if(NULL!=trn_meas){
+                    // deserialize meast
+                    wmeast_unserialize(&mt, (char *) pdata+sizeof(trn_meas_t), msg_in->hdr.data_len);
+                    // do measurement update
+                    wtnav_meas_update(trn, mt, trn_meas->parameter);
+                    // make return message
+                    msg_out = trnmsg_new_meas_msg( TRNIF_MEAS, trn_meas->parameter, mt);
 
-                wmeast_destroy(mt);
+                    wmeast_destroy(mt);
+                }else{
+                    PDPRINT((stderr,"%s - ERR NULL message\n",__func__));
+                }
 
                 break;
 //
@@ -462,7 +467,7 @@ int trnif_msg_handle_trnmsg(void *msg, netif_t *self, msock_connection_t *peer, 
         }
 
         if(NULL!=msg_out){
-            send_len = trnmsg_len(msg_out);
+            int32_t send_len = trnmsg_len(msg_out);
             retval=s_trnif_dfl_send_tcp(peer, (char *)msg_out, send_len, errout);
         }else{
             MST_COUNTER_INC(self->profile->stats->events[NETIF_EV_EPROTO_HND]);
@@ -503,8 +508,8 @@ int trnif_msg_read_ct(byte **pdest, uint32_t *len, netif_t *self, msock_connecti
         //   message complete or retries expire
         byte *pread = buf;
         int64_t read_sz = readlen;
-        int64_t read_bytes = 0;
        while(retries<TRNIF_READ_RETRIES_CT  && msg_bytes<read_sz ){
+           int64_t read_bytes = 0;
 //            fprintf(stderr,"%s:%d msg_bytes[%lld] retries[%d/%d] readlen[%u]\n",__FUNCTION__,__LINE__,msg_bytes,TRNIF_READ_RETRIES_CT-retries,TRNIF_READ_RETRIES_CT,readlen);
             if( (read_bytes=msock_recv(peer->sock, pread,readlen,0)) > 0 ){
                 readlen   -= read_bytes;
@@ -513,7 +518,7 @@ int trnif_msg_read_ct(byte **pdest, uint32_t *len, netif_t *self, msock_connecti
             }else{
                 int errsave=errno;
                 if(errsave!=EAGAIN){
-	                fprintf(stderr,"%s:%d ERR recv msg_bytes[%lld] [%d/%s]\n",__FUNCTION__,__LINE__,msg_bytes,errsave,strerror(errsave));
+	                fprintf(stderr,"%s:%d ERR recv msg_bytes[%"PRId64"] [%d/%s]\n",__FUNCTION__,__LINE__,msg_bytes,errsave,strerror(errsave));
                     MST_COUNTER_INC(self->profile->stats->events[NETIF_EV_EPROTO_RD]);
                 }
                 if(NULL!=errout){
@@ -531,7 +536,11 @@ int trnif_msg_read_ct(byte **pdest, uint32_t *len, netif_t *self, msock_connecti
         retval = msg_bytes;
 
     }else{
+        if(NULL!=self){
         MST_COUNTER_INC(self->profile->stats->events[NETIF_EV_EPROTO_RD]);
+        }else{
+            fprintf(stderr,"%s - ERR invalid arg\n",__func__);
+        }
     }
 
     if(mmd_channel_isset(MOD_NETIF,(MM_DEBUG))){
@@ -917,11 +926,11 @@ int trnif_msg_pub(netif_t *self, msock_connection_t *peer, char *data, size_t le
 
     if(NULL!=self && NULL!=peer && NULL!=data && len>0){
         int64_t iobytes=0;
-        int flags=0;
-#if !defined(__APPLE__)
-        flags=MSG_NOSIGNAL;
-#endif
         if(self->ctype==ST_UDP){
+            int flags=0;
+#if !defined(__APPLE__)
+            flags=MSG_NOSIGNAL;
+#endif
             if ( (iobytes = msock_sendto(self->socket, peer->addr, (byte *)data, len, flags )) > 0) {
                 retval=iobytes;
             }

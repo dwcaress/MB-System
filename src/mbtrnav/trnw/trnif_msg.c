@@ -168,9 +168,11 @@ trnmsg_t *trnmsg_new_type_msg(trnmsg_id_t id, int parameter)
         trnmsg_header_t *hdr = (trnmsg_header_t *)instance;
 
         trn_type_t *data = TRNIF_TPDATA(instance,trn_type_t);
-        data->parameter=parameter;
-        
-        hdr->checksum = trnmsg_checksum((byte *)data,hdr->data_len);
+        if(NULL!=data){
+            data->parameter=parameter;
+            
+            hdr->checksum = trnmsg_checksum((byte *)data,hdr->data_len);
+        }
     }
     return instance;
 }

@@ -369,12 +369,12 @@ static int s_test_ct_recv(msock_socket_t *cli)
             wcommst_t *ct = NULL;
             wcommst_unserialize(&ct, reply, TRN_MSG_SIZE);
             char mtype = wcommst_get_msg_type(ct);
-            fprintf(stderr,"client CT recv OK len[%lld] msg_type[%c/%02X]:\n",test,mtype,mtype);
+            fprintf(stderr,"client CT recv OK len[%"PRId64"] msg_type[%c/%02X]:\n",test,mtype,mtype);
             wcommst_show(ct, true, 5);
             wcommst_destroy(ct);
             retval=test;
         }else{
-            fprintf(stderr,"client CT recv failed len[%lld][%d/%s]\n",test,errno,strerror(errno));
+            fprintf(stderr,"client CT recv failed len[%"PRId64"][%d/%s]\n",test,errno,strerror(errno));
         }
     }
     return retval;
@@ -415,13 +415,13 @@ static uint32_t s_test_trnmsg_recv(msock_socket_t *cli)
             int32_t dok=trnmsg_deserialize(&msg_in,(byte *)reply,TRNIF_MAX_SIZE);
             if(NULL!=msg_in && dok==0){
                 trnmsg_id_t mtype = msg_in->hdr.msg_id;
-                fprintf(stderr,"client TRNMSG recv OK len[%lld] msg_type[%u/%s]:\n",test,mtype,TRNIF_IDSTR(mtype));
+                fprintf(stderr,"client TRNMSG recv OK len[%"PRId64"] msg_type[%u/%s]:\n",test,mtype,TRNIF_IDSTR(mtype));
                 trnmsg_show(msg_in, true, 5);
                 trnmsg_destroy(&msg_in);
                 retval=msg_in->hdr.data_len;
             }
         }else{
-            fprintf(stderr,"client TRNMSG recv failed len[%lld][%d/%s]\n",test,errno,strerror(errno));
+            fprintf(stderr,"client TRNMSG recv failed len[%"PRId64"][%d/%s]\n",test,errno,strerror(errno));
         }
     }
     return retval;
@@ -441,9 +441,11 @@ static int s_test_ct(app_cfg_t *cfg)
 
         // server: connect to client
         int uc = netif_update_connections(cfg->netif);
+        fprintf(stderr,"netif_update_connections returned [%d]\n",uc);
 
         // server: get TRN_MSG_PING, return TRN_MSG_ACK
         int sc = netif_reqres(cfg->netif);
+        fprintf(stderr,"netif_reqres returned [%d]\n",sc);
 
         // client: get TRN_MSG_ACK
         s_test_ct_recv(cfg->cli);
@@ -606,7 +608,8 @@ int main(int argc, char **argv)
         NULL,
         NULL,
         strdup("logs")
-    }, *cfg=&cfg_s;
+    };
+    app_cfg_t *cfg = &cfg_s;
 
     parse_args(argc,argv,cfg);
     s_app_main(cfg);

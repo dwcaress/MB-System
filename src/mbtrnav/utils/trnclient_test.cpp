@@ -165,7 +165,7 @@ void static s_trn_cycle(trn_worker_t *worker)
             break;
         }
 
-    }catch(Exception e){
+    }catch(Exception &e){
         fprintf(stderr,"\n%s\n", e.what());
         worker->quit=true;
     }
