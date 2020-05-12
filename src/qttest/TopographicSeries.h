@@ -32,7 +32,6 @@
 
 #include <limits>
 #include <QtDataVisualization/QSurface3DSeries>
-#include "datavisualizationqml2/declarativesurface_p.h"
 
 #include <gmt/gmt.h>
 
