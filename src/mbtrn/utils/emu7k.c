@@ -956,7 +956,6 @@ void *s_server_main(void *arg)
                     for (int i=s->fd; i<=fdmax; i++) {
 
                         if (FD_ISSET(i, &read_fds)){
-                            bool do_close=true;
                             // MMINFO(APP1,"readfs [%d/%d] selected\n",i,fdmax);
                             if (i==s->fd) {
                                 PMPRINT(MOD_EMU7K,EMU7K_V4,(stderr,"server main listener [%d] got request\n",i));
@@ -976,8 +975,7 @@ void *s_server_main(void *arg)
                                 }
                             }else{
                                 int nbytes=0;
-
-                                do_close=false;
+                                bool do_close=false;
                                 PMPRINT(MOD_EMU7K,EMU7K_V4,(stderr,"server waiting for client data fd[%d]\n",i));
                                 if (( nbytes = recv(i, iobuf, sizeof iobuf, 0)) <= 0) {
                                     PMPRINT(MOD_EMU7K,EMU7K_V4,(stderr,"ERR - recv failed fd[%d] nbytes[%d] [%d/%s]\n",i,nbytes,errno, strerror(errno)));

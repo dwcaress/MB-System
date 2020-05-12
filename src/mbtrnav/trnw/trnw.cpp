@@ -707,7 +707,6 @@ void commst_initialize(wtnav_t *self, wcommst_t *msg)
             char mapname[512]={0};
             char cfgname[512]={0};
             char particlename[512]={0};
-            char logname[300]={0};
 
             char* mapPath = getenv("TRN_MAPFILES");
             char* cfgPath = getenv("TRN_DATAFILES");

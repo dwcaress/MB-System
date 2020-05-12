@@ -136,7 +136,7 @@ bool g_interrupt=false;
 static void s_show_help()
 {
     char help_message[] = "\ntrnif unit test\n";
-    char usage_message[] = "\ntrnc [options]\n"
+    char usage_message[] = "\ntrnif-test [options]\n"
     "--verbose=n    : verbose output, n>0\n"
     "--help         : output help message\n"
     "--version      : output version info\n"
@@ -144,7 +144,7 @@ static void s_show_help()
     "--map=s        : map file/directory [*]\n"
     "--cfg=s        : config file        [*]\n"
     "--particles=s  : particles file     [*]\n"
-    "--logdir=s     : log directory      [*]\n"
+    "--logdir=s     : logdir prefix      [*]\n"
     "[*] - required\n"
     "\n";
     printf("%s",help_message);
@@ -401,9 +401,9 @@ static int s_test_trnmsg_send(msock_socket_t *cli)
     return retval;
 }
 
-static int s_test_trnmsg_recv(msock_socket_t *cli)
+static uint32_t s_test_trnmsg_recv(msock_socket_t *cli)
 {
-    int retval=-1;
+    uint32_t retval=-1;
 
     if(NULL!=cli){
         int64_t test=0;
@@ -412,14 +412,13 @@ static int s_test_trnmsg_recv(msock_socket_t *cli)
         msock_set_blocking(cli,false);
         if( (test=msock_recv(cli,(byte *)reply,TRNIF_MAX_SIZE,0))>0){
             trnmsg_t *msg_in = NULL;
-            int len = trnmsg_deserialize(&msg_in,(byte *)reply,TRNIF_MAX_SIZE);
-            if(NULL!=msg_in){
+            int32_t dok=trnmsg_deserialize(&msg_in,(byte *)reply,TRNIF_MAX_SIZE);
+            if(NULL!=msg_in && dok==0){
                 trnmsg_id_t mtype = msg_in->hdr.msg_id;
                 fprintf(stderr,"client TRNMSG recv OK len[%lld] msg_type[%u/%s]:\n",test,mtype,TRNIF_IDSTR(mtype));
                 trnmsg_show(msg_in, true, 5);
                 trnmsg_destroy(&msg_in);
-                retval=len;
-
+                retval=msg_in->hdr.data_len;
             }
         }else{
             fprintf(stderr,"client TRNMSG recv failed len[%lld][%d/%s]\n",test,errno,strerror(errno));
@@ -488,6 +487,9 @@ static int s_test_trnmsg(app_cfg_t *cfg)
 
         // server: get MSG_PING, return TRNMSG_ACK
         int sc = netif_reqres(cfg->netif);
+        if(sc!=0){
+            fprintf(stderr,"ERR - netif_reqres returned[%d]\n",sc);
+        }
 
         // client: get TRNMSG_ACK
         s_test_trnmsg_recv(cfg->cli);
@@ -522,10 +524,6 @@ static int s_app_main(app_cfg_t *cfg)
                                        cfg->particles,
                                        cfg->logdir,
                                        0,
-//                                      "/home/headley/tmp/maps/PortTiles",
-//                                      "/home/headley/tmp/config/mappingAUV_specs.cfg",
-//                                      "/home/headley/tmp/config/particles.cfg",
-//                                      "logs",
                                        TRN_MAX_NCOV_DFL,
                                        TRN_MAX_NERR_DFL,
                                        TRN_MAX_ECOV_DFL,
@@ -542,11 +540,14 @@ static int s_app_main(app_cfg_t *cfg)
 
     // initialize message log
     int il = netif_init_log(netif, NETIF_MLOG_NAME, ".",NULL);
+    fprintf(stderr,"netif_init_log returned[%d]\n",il);
+
     mlog_tprintf(netif->mlog_id,"*** netif session start (TEST) ***\n");
     mlog_tprintf(netif->mlog_id,"libnetif v[%s] build[%s]\n",netif_get_version(),netif_get_build());
 
     // server: open socket, listen
     int nc = netif_connect(netif);
+    fprintf(stderr,"netif_connect returned[%d]\n",nc);
 
     // client: connect
     msock_socket_t *cli = msock_socket_new(NETIF_HOST_DFL,NETIF_PORT_DFL, ST_TCP);
@@ -566,6 +567,8 @@ static int s_app_main(app_cfg_t *cfg)
     // client: force expire, check, prune
     sleep(3);
     int uc = netif_reqres(netif);
+    fprintf(stderr,"netif_reqres returned[%d]\n",uc);
+
 
     mlog_tprintf(netif->mlog_id,"*** netif session end (TEST) uptime[%.3lf] ***\n",(mtime_dtime()-start_time));
 
@@ -577,6 +580,7 @@ static int s_app_main(app_cfg_t *cfg)
 int main(int argc, char **argv)
 {
     int retval=-1;
+    signal(SIGINT,s_termination_handler);
 
 //    int verbose;
 //    netif_t *netif;
