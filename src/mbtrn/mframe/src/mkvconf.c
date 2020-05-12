@@ -117,7 +117,6 @@ static char *s_trim_token(char **ptok)
         while(cur<start){
             if(*cur=='#' || (*cur=='/' && *(cur-1)=='/') ){
                 *cur='\0';
-                end=cur;
                 break;
             }
             cur--;
@@ -319,38 +318,40 @@ void mkvc_destroy(mkvc_reader_t **pself)
 static bool s_is_ignore(char *line)
 {
     bool retval=true;
-    size_t len = strlen(line)+1;
 
-    if(NULL!=line && (len-1)>0){
-        char *cp=line;
-        bool quit=false;
-        while(!quit && *cp!='\0' && cp<(line+len)){
-            switch (*cp) {
-                case ' ':
-                case '\t':
-                case '\r':
-                case '\n':
-                    break;
+    if(NULL!=line){
+        size_t len = strlen(line)+1;
+        if((len-1)>0){
+            char *cp=line;
+            bool quit=false;
+            while(!quit && *cp!='\0' && cp<(line+len)){
+                switch (*cp) {
+                    case ' ':
+                    case '\t':
+                    case '\r':
+                    case '\n':
+                        break;
 
-                case '#':
-                    quit=true;
-                    break;
+                    case '#':
+                        quit=true;
+                        break;
 
-                case '/':
-                    if(*(cp+1)!='/'){
-                       retval=false;
-                    }
-                    quit=true;
-                    break;
-                case '\0':
-                    quit=true;
-                    break;
-                default:
-                    retval=false;
-                    quit=true;
-                    break;
+                    case '/':
+                        if(*(cp+1)!='/'){
+                            retval=false;
+                        }
+                        quit=true;
+                        break;
+                    case '\0':
+                        quit=true;
+                        break;
+                    default:
+                        retval=false;
+                        quit=true;
+                        break;
+                }
+                cp++;
             }
-            cp++;
         }
     }
 
@@ -512,16 +513,16 @@ static int s_test_parser(char *key, char *val, void *config)
 
         }else{
             // args with optional/no values
-            if(strcmp(key,"flagpar")==0 ){
+            if(NULL!=key && strcmp(key,"flagpar")==0 ){
                 // flag par - no value required
                 cfg->flagpar=true;
                 retval=0;
             }else{
-                fprintf(stderr, "WARN - unsupported key/val [%s/%s]\n", key,val);
+                fprintf(stderr, "WARN - unsupported key/val [%s/%s]\n", (NULL==key?"NULL":key), (NULL==val?"NULL":val));
             }
         }
     }else{
-        fprintf(stderr, "ERR - NULL key/val [%s/%s]\n", key,val);
+        fprintf(stderr, "ERR - NULL key/val [%s/%s]\n", (NULL==key?"NULL":key), (NULL==val?"NULL":val));
     }
 
     return retval;
@@ -590,12 +591,12 @@ int mkvconf_test()
     int retval=-1;
 
     const char *fpath="mkvc-test.conf";
-    const char *del="=";
 
     cfg_t cfg_instance, *cfg=&cfg_instance;
     memset(cfg,0,sizeof(cfg_t));
 
     if(s_mk_test_conf(fpath)==0){
+        const char *del="=";
         mkvc_reader_t *reader = mkvc_new(fpath, del, s_test_parser);
         int r_par=0;
         int r_inv=0;

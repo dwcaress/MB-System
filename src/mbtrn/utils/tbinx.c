@@ -871,8 +871,7 @@ int s_process_file(app_cfg_t *cfg)
                 mb1_frame_t *mb1= (mb1_frame_t *) &msg_buf[0]; //&frame;
                 mb1->sounding = (mb1_sounding_t *)((byte *)msg_buf+sizeof(mb1_frame_t));
                 byte *ptype = (byte *)(&(mb1->sounding->type));
-                byte *psize = (byte *)(&(mb1->sounding->size));
-                
+
                 double prev_time =0.0;
                 
                 bool ferror=false;
@@ -881,7 +880,6 @@ int s_process_file(app_cfg_t *cfg)
                 while (!ferror) {
                     byte *sp = (byte *)mb1->sounding;
                     bool header_valid=false;
-                    bool sounding_valid=false;
                     bool rec_valid=false;
                     while (!sync_valid) {
                         if( ((rbytes=mfile_read(ifile,(byte *)sp,1))==1) && *sp=='M'){

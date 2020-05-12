@@ -337,16 +337,12 @@ int trnif_msg_handle_trnmsg(void *msg, netif_t *self, msock_connection_t *peer, 
     if(NULL!=msg && NULL!=self && NULL!=peer){
 
         int32_t send_len=0;
-        uint32_t send_bytes=0;
         wtnav_t *trn = self->rr_res;
         trnmsg_t *msg_in = NULL;
         trnmsg_t *msg_out = NULL;
-        char *ser_out=NULL;
-        int ival=0;
         byte *pdata = TRNIF_PDATA(msg_in);
         trn_meas_t *trn_meas = NULL;
         wmeast_t *mt = NULL;
-        wposet_t *pt = NULL;
 
         // deserialize message bytes
         trnmsg_deserialize(&msg_in, (byte *)msg, TRNIF_MAX_SIZE);
@@ -552,9 +548,7 @@ int trnif_msg_handle_ct(void *msg, netif_t *self, msock_connection_t *peer, int 
     if(NULL!=msg && NULL!=self && NULL!=peer){
 
         int32_t send_len=0;
-        uint32_t send_bytes=0;
         char *msg_out=NULL;
-        int ival=0;
         wcommst_t *ct = NULL;
         // dereference resource bundle
         wtnav_t *trn = (wtnav_t *) self->rr_res;
@@ -800,7 +794,6 @@ int trnif_msg_read_mb(byte **pdest, uint32_t *len, netif_t *self, msock_connecti
     int retval = 0;
 
     if(NULL!=pdest && NULL!=self && NULL!=peer){
-        int64_t msg_bytes=0;
         uint32_t readlen=MBIF_MSG_SIZE;
         byte *buf=*pdest;
         if(NULL==buf){
@@ -812,12 +805,6 @@ int trnif_msg_read_mb(byte **pdest, uint32_t *len, netif_t *self, msock_connecti
         if( (retval=s_trnif_msg_read_dfl(buf, readlen, peer->sock, peer, errout))<=0){
             MST_COUNTER_INC(self->profile->stats->events[NETIF_EV_EPROTO_RD]);
         }
-//        PDPRINT((stderr,"%s: READ - readlen[%d]\n",__FUNCTION__,readlen));
-//        if( (msg_bytes=msock_recvfrom(peer->sock, peer->addr,buf,readlen,0)) >0 ){
-//            *len = msg_bytes;
-//            PDPRINT((stderr,"%s: READ - msg_bytes[%d]\n",__FUNCTION__,msg_bytes));
-//            retval=msg_bytes;
-//        }
     }
     return retval;
 }
@@ -830,7 +817,6 @@ int trnif_msg_handle_mb(void *msg, netif_t *self, msock_connection_t *peer, int 
     if(NULL!=msg && NULL!=self && NULL!=peer){
 
         int32_t send_len=0;
-        uint32_t send_bytes=0;
         char *msg_out=NULL;
 
         if(strcmp(msg,"CON")==0){
@@ -870,7 +856,6 @@ int trnif_msg_read_trnu(byte **pdest, uint32_t *len, netif_t *self, msock_connec
     int retval = 0;
 
     if(NULL!=pdest && NULL!=self && NULL!=peer){
-        int64_t msg_bytes=0;
         uint32_t readlen=TRNX_MSG_SIZE;
         byte *buf=*pdest;
         if(NULL==buf){
@@ -893,7 +878,6 @@ int trnif_msg_handle_trnu(void *msg, netif_t *self, msock_connection_t *peer, in
     if(NULL!=msg && NULL!=self && NULL!=peer){
 
         int32_t send_len=0;
-        uint32_t send_bytes=0;
         char *msg_out=NULL;
 
         if(strcmp(msg,"REQ")==0 ||

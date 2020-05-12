@@ -362,7 +362,7 @@ int netif_tcp_update_connections(netif_t *self)
                 int sndbuf=0;
                 int rcvbuf=0;
                 socklen_t bsz=sizeof(int);
-                int newsz=16*1024;
+//                int newsz=16*1024;
                 // read TCP buffer sizes
                 if(msock_get_opt(peer->sock,SO_SNDBUF,&sndbuf,&bsz)<0){
                     PMPRINT(MOD_NETIF,NETIF_V4,(stderr,"[TCPCON.%s]: ERR getopt SNDBUF failed [%d/%s]\n",self->port_name,errno,strerror(errno)));
@@ -1156,6 +1156,9 @@ int netif_test()
     netif_set_reqres_res(netif,trn);
     // initialize message log
     int il = netif_init_log(netif, NETIF_MLOG_NAME, NULL,NULL);
+    if(il!=0){
+        fprintf(stderr,"ERR - netif_init_log returned[%d]\n",il);
+    }
 
     mlog_tprintf(netif->mlog_id,"*** netif session start (TEST) ***\n");
     mlog_tprintf(netif->mlog_id,"libnetif v[%s] build[%s]\n",netif_get_version(),netif_get_build());
@@ -1164,6 +1167,11 @@ int netif_test()
 
     // server: open socket, listen
     int nc = netif_connect(netif);
+
+    if(nc!=0){
+        fprintf(stderr,"ERR - netif_connect returned[%d]\n",nc);
+    }
+
     netif_show(netif,true,5);
 
     // client: connect
@@ -1172,6 +1180,9 @@ int netif_test()
 
     // server: register new connection(s)
     int uc = netif_update_connections(netif);
+    if(uc!=0){
+        fprintf(stderr,"ERR - netif_update_connections returned[%d]\n",uc);
+    }
 
     // change message handler
     netif->read_fn   = s_netif_test_read;
@@ -1183,6 +1194,9 @@ int netif_test()
 
     // server: get PING, return ACK/NACK
     int sc = netif_reqres(netif);
+    if(sc!=0){
+        fprintf(stderr,"ERR - netif_reqres returned[%d]\n",sc);
+    }
 
     // client: get ACK/NACK
     s_netif_test_recv(cli);
@@ -1190,6 +1204,9 @@ int netif_test()
     // server: publish data
     char obuf[]="MB1";
     int sp = netif_pub(netif, obuf, 4);
+    if(sp!=0){
+        fprintf(stderr,"ERR - netif_pub returned[%d]\n",sp);
+    }
 
     // client: get pub data
     s_test_pub_recv(cli);
