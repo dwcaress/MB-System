@@ -3,6 +3,7 @@ import QtQuick.Controls 2.3
 import QtQuick.Dialogs 1.1
 import QtDataVisualization 1.14
 import QtQuick.Layouts 1.14
+import Qt3D.Extras 2.14
 import "ui-components"
 
 /* ***
@@ -273,13 +274,16 @@ ApplicationWindow {
                 objectName: "surface3D"
                 id: surface3D
 
-                theme: Theme3D {
+
+                  theme: Theme3D {
                     type: Theme3D.ThemeQt
                     labelBorderEnabled: false
                     font.pointSize: 35
                     labelBackgroundEnabled: true
-                    lightStrength: 3.5
 
+                    //  lightStrength: 1.
+		    lightStrength: 5.
+             	    ambientLightStrength: .3
                     colorStyle: Theme3D.ColorStyleRangeGradient
 
                     baseGradients: [haxbyGradient]
