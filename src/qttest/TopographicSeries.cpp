@@ -91,19 +91,19 @@ void TopographicSeries::setTopography(void *gmtApi, GMT_GRID *grid)
       (*newRow)[col].setPosition(QVector3D(longit[col], dataValue, latit[row]));
 
       // Check longitude range
-      m_minLongit = std::min<float>(m_minLongit, longit[col]);
-      m_maxLongit = std::max<float>(m_maxLongit, longit[col]);
+      m_minLongit = std::min<double>(m_minLongit, longit[col]);
+      m_maxLongit = std::max<double>(m_maxLongit, longit[col]);
 
       // Check data value range
-      m_minHeight = std::min<float>(m_minHeight, dataValue);
-      m_maxHeight = std::max<float>(m_maxHeight, dataValue);
+      m_minHeight = std::min<double>(m_minHeight, dataValue);
+      m_maxHeight = std::max<double>(m_maxHeight, dataValue);
 
     }
     *dataArray << newRow;
 
     // Check latitude range
-    m_minLatit = std::min<float>(m_minLatit, latit[row]);
-    m_maxLatit = std::max<float>(m_maxLatit, latit[row]);
+    m_minLatit = std::min<double>(m_minLatit, latit[row]);
+    m_maxLatit = std::max<double>(m_maxLatit, latit[row]);
 
 
     // delete newRow;  // Delete here causes crash in addSeries()
