@@ -620,10 +620,10 @@ int main(int argc, char **argv)
     };
     app_cfg_t *cfg = &cfg_s;
 
-    parse_args(argc,argv,cfg);
-    s_app_main(cfg);
 
     if(NULL!=cfg){
+        parse_args(argc,argv,cfg);
+        s_app_main(cfg);
         if(NULL!=cfg->host)free(cfg->host);
         if(NULL!=cfg->map)free(cfg->map);
         if(NULL!=cfg->cfg)free(cfg->cfg);
