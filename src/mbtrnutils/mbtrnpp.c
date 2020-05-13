@@ -303,7 +303,7 @@ typedef struct mbtrnpp_cfg_s{
 
 #define MBTRNPREPROCESS_LOGFILE_TIMELENGTH 900.0
 
-#define CHK_STRDUP(s) ( NULL!=s ? strdup(s) : NULL )
+#define CHK_STRDUP(s) ( (NULL!=s) ? strdup((NULL!=s?s:"")) : NULL )
 #define MEM_CHKFREE(s) if(NULL!=s)free(s)
 #define MEM_CHKINVALIDATE(s) do{\
 if(NULL!=s)free(s);\
@@ -375,6 +375,7 @@ s=NULL;\
 #define MNEM_MAX_LEN 64
 #define HOSTNAME_BUF_LEN 256
 #define MB_PATH_SIZE 1024
+#define LOG_MSG_BUF_SZ 2048
 #define MBOUT_OPT_N 16
 #define MBSYSOUT_OPT_N 8
 #define TRNOUT_OPT_N 16
@@ -702,7 +703,7 @@ static char *s_mbtrnpp_trnsession_str(char **pdest, size_t len, mb_resource_flag
     if(NULL!=pdest){
         // return requested
         if(NULL==*pdest){
-            *pdest=CHK_STRDUP(session_date);
+            *pdest=strdup(session_date);
             retval=*pdest;
         }else {
             if(len>=TRNSESSION_BUF_LEN){
@@ -740,7 +741,7 @@ static char *s_mbtrnpp_session_str(char **pdest, size_t len, mb_resource_flag_t 
     if(NULL!=pdest){
         // return requested
         if(NULL==*pdest){
-            *pdest=CHK_STRDUP(session_date);
+            *pdest=strdup(session_date);
             retval=*pdest;
         }else {
             if(len>=SESSION_BUF_LEN){
@@ -2685,7 +2686,8 @@ int main(int argc, char **argv) {
   MST_METRIC_START(app_stats->stats->metrics[MBTPP_CH_MB_STATS_XT], mtime_dtime());
   /* loop over all files to be read */
   while (read_data == true) {
-      mb_path log_message;
+      char log_message[LOG_MSG_BUF_SZ];
+      memset(log_message,0,LOG_MSG_BUF_SZ);
 
     /* open log file if specified */
     if (mbtrn_cfg->make_logs == true) {
@@ -3422,7 +3424,7 @@ int mbtrnpp_openlog(int verbose, mb_path log_directory, FILE **logfp, int *error
   char date[32], user[128], *user_ptr;
   mb_path host;
   mb_path log_file;
-  mb_path log_message;
+  char log_message[LOG_MSG_BUF_SZ]={0};
 
   /* print input debug statements */
   if (verbose >= 2) {
@@ -3774,13 +3776,13 @@ int mbtrnpp_update_stats(mstats_profile_t *stats, mlog_id_t log_id, mstats_flags
     mstats_update_stats(trnusvr_stats, NETIF_CH_COUNT, flags);
 
     PMPRINT(MOD_MBTRNPP,  MBTRNPP_V4,
-            (stderr, "cycle_xt.p: N[%lld] sum[%.3lf] min[%.3lf] max[%.3lf] avg[%.3lf]\n",
+            (stderr, "cycle_xt.p: N[%"PRId64"] sum[%.3lf] min[%.3lf] max[%.3lf] avg[%.3lf]\n",
              app_stats->stats->per_stats[MBTPP_CH_MB_CYCLE_XT].n, app_stats->stats->per_stats[MBTPP_CH_MB_CYCLE_XT].sum,
              app_stats->stats->per_stats[MBTPP_CH_MB_CYCLE_XT].min, app_stats->stats->per_stats[MBTPP_CH_MB_CYCLE_XT].max,
              app_stats->stats->per_stats[MBTPP_CH_MB_CYCLE_XT].avg));
 
     PMPRINT(MOD_MBTRNPP, MBTRNPP_V4,
-            (stderr, "cycle_xt.a: N[%lld] sum[%.3lf] min[%.3lf] max[%.3lf] avg[%.3lf]\n",
+            (stderr, "cycle_xt.a: N[%"PRId64"] sum[%.3lf] min[%.3lf] max[%.3lf] avg[%.3lf]\n",
              app_stats->stats->agg_stats[MBTPP_CH_MB_CYCLE_XT].n, app_stats->stats->agg_stats[MBTPP_CH_MB_CYCLE_XT].sum,
              app_stats->stats->agg_stats[MBTPP_CH_MB_CYCLE_XT].min, app_stats->stats->agg_stats[MBTPP_CH_MB_CYCLE_XT].max,
              app_stats->stats->agg_stats[MBTPP_CH_MB_CYCLE_XT].avg));
@@ -4534,7 +4536,7 @@ int mbtrnpp_process_mb1(char *src, size_t len, trn_config_t *cfg)
         //                (s-p)[%+6.3lf]**\n",(stime-ptime));
 
         if (mbtrn_cfg->mbtrnpp_loop_delay_msec > 0) {
-            PMPRINT(MOD_MBTRNPP, MBTRNPP_V5, (stderr, "delaying msec[%lld]\n", mbtrn_cfg->mbtrnpp_loop_delay_msec));
+            PMPRINT(MOD_MBTRNPP, MBTRNPP_V5, (stderr, "delaying msec[%"PRId64"]\n", mbtrn_cfg->mbtrnpp_loop_delay_msec));
             mtime_delay_ms(mbtrn_cfg->mbtrnpp_loop_delay_msec);
         }
 

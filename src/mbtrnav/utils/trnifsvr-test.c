@@ -255,8 +255,8 @@ void parse_args(int argc, char **argv, app_cfg_t *cfg)
     fprintf(stderr,"port      [%d]\n",cfg->port);
     fprintf(stderr,"map       [%s]\n",cfg->map);
     fprintf(stderr,"cfg       [%s]\n",cfg->cfg);
-    fprintf(stderr,"particles [%s]\n",cfg->map);
-    fprintf(stderr,"logdir    [%s]\n",cfg->map);
+    fprintf(stderr,"particles [%s]\n",cfg->particles);
+    fprintf(stderr,"logdir    [%s]\n",cfg->logdir);
 
 }
 // End function parse_args
@@ -309,80 +309,93 @@ static int s_run(app_cfg_t *cfg)
 static int s_app_main(app_cfg_t *cfg)
 {
     int retval=-1;
-    signal(SIGINT,s_termination_handler);
-    double start_time=mtime_dtime();
-    netif_t *netif = netif_new("trnsvr","localhost",
-                               27027,
-                               ST_TCP,
-                               IFM_REQRES,
-                               0.0,
-                               NULL,
-                               NULL,
-                               NULL);
-    assert(netif!=NULL);
-
-    trn_config_t *trn_cfg = trncfg_new(NULL,
-                                      -1,
-                                      10L,
-                                      TRN_MAP_BO,
-                                      TRN_FILT_PARTICLE,
-                                      cfg->map,
-                                      cfg->cfg,
-                                      cfg->particles,
-                                      cfg->logdir,
-                                      0,
-                                       TRN_MAX_NCOV_DFL,
-                                       TRN_MAX_NERR_DFL,
-                                       TRN_MAX_ECOV_DFL,
-                                       TRN_MAX_EERR_DFL
-                                       );
-
-    wtnav_t *trn = wtnav_new(trn_cfg);
-
-    netif_set_reqres_res(netif,trn);
-
-    netif_init_mmd();
-    netif_show(netif,true,5);
-
-    // initialize message log
-    int il = netif_init_log(netif, NETIF_MLOG_NAME, NULL,NULL);
-    fprintf(stderr,"netif_init_log returned[%d]\n",il);
-
-    mlog_tprintf(netif->mlog_id,"*** netif session start (TEST) ***\n");
-    mlog_tprintf(netif->mlog_id,"libnetif v[%s] build[%s]\n",netif_get_version(),netif_get_build());
-
-    // server: open socket, listen
-    int nc = netif_connect(netif);
-    fprintf(stderr,"netif_connect returned[%d]\n",nc);
-
-    // fill in config
-    cfg->netif = netif;
-    cfg->trn_cfg = trn_cfg;
-    cfg->trn = trn;
-    cfg->cli = NULL;
-
-    // test trn_server/commsT protocol
-    s_run(cfg);
-
-    mlog_tprintf(netif->mlog_id,"*** netif session end (TEST) uptime[%.3lf] ***\n",(mtime_dtime()-start_time));
 
     if(NULL!=cfg){
-        if(NULL!=cfg->host)free(cfg->host);
-        if(NULL!=cfg->map)free(cfg->map);
-        if(NULL!=cfg->cfg)free(cfg->cfg);
-        if(NULL!=cfg->particles)free(cfg->particles);
-        if(NULL!=cfg->logdir)free(cfg->logdir);
-    }
-    // server: close, release netif
-    netif_destroy(&netif);
-    // release trn config
-    trncfg_destroy(&trn_cfg);
-    // release trn
-    wtnav_destroy(trn);
-    // debug: release resources
-    mmd_release();
 
-    retval=0;
+        signal(SIGINT,s_termination_handler);
+
+        netif_t *netif = netif_new("trnsvr","localhost",
+                                   27027,
+                                   ST_TCP,
+                                   IFM_REQRES,
+                                   0.0,
+                                   NULL,
+                                   NULL,
+                                   NULL);
+
+        trn_config_t *trn_cfg = trncfg_new(NULL,
+                                           -1,
+                                           10L,
+                                           TRN_MAP_BO,
+                                           TRN_FILT_PARTICLE,
+                                           cfg->map,
+                                           cfg->cfg,
+                                           cfg->particles,
+                                           cfg->logdir,
+                                           0,
+                                           TRN_MAX_NCOV_DFL,
+                                           TRN_MAX_NERR_DFL,
+                                           TRN_MAX_ECOV_DFL,
+                                           TRN_MAX_EERR_DFL
+                                           );
+
+        if(NULL!=netif && NULL!=trn_cfg){
+            wtnav_t *trn = wtnav_new(trn_cfg);
+
+            if(NULL!=trn){
+                double start_time=mtime_dtime();
+                netif_set_reqres_res(netif,trn);
+
+                netif_init_mmd();
+                netif_show(netif,true,5);
+
+                // initialize message log
+                int il = netif_init_log(netif, NETIF_MLOG_NAME, NULL,NULL);
+                fprintf(stderr,"netif_init_log returned[%d]\n",il);
+
+                mlog_tprintf(netif->mlog_id,"*** netif session start (TEST) ***\n");
+                mlog_tprintf(netif->mlog_id,"libnetif v[%s] build[%s]\n",netif_get_version(),netif_get_build());
+
+                // server: open socket, listen
+                int nc = netif_connect(netif);
+                fprintf(stderr,"netif_connect returned[%d]\n",nc);
+
+                // fill in config
+                cfg->netif = netif;
+                cfg->trn_cfg = trn_cfg;
+                cfg->trn = trn;
+                cfg->cli = NULL;
+
+                // test trn_server/commsT protocol
+                s_run(cfg);
+
+                mlog_tprintf(netif->mlog_id,"*** netif session end (TEST) uptime[%.3lf] ***\n",(mtime_dtime()-start_time));
+
+                if(NULL!=cfg->host)free(cfg->host);
+                if(NULL!=cfg->map)free(cfg->map);
+                if(NULL!=cfg->cfg)free(cfg->cfg);
+                if(NULL!=cfg->particles)free(cfg->particles);
+                if(NULL!=cfg->logdir)free(cfg->logdir);
+
+                // server: close, release netif
+                netif_destroy(&netif);
+                // release trn config
+                trncfg_destroy(&trn_cfg);
+                // release trn
+                wtnav_destroy(trn);
+                // debug: release resources
+                mmd_release();
+
+                retval=0;
+            }else{
+                fprintf(stderr,"trn instance allocation failed\n");
+            }
+        }else{
+            fprintf(stderr,"component allocation failed netif[%p] trn_cfg[%p]\n",netif,trn_cfg);
+        }
+    }else{
+        fprintf(stderr,"invalid argument\n");
+    }
     return retval;
 }
 

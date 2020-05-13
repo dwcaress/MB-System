@@ -369,12 +369,12 @@ static int s_test_ct_recv(msock_socket_t *cli)
             wcommst_t *ct = NULL;
             wcommst_unserialize(&ct, reply, TRN_MSG_SIZE);
             char mtype = wcommst_get_msg_type(ct);
-            fprintf(stderr,"client CT recv OK len[%lld] msg_type[%c/%02X]:\n",test,mtype,mtype);
+            fprintf(stderr,"client CT recv OK len[%"PRId64"] msg_type[%c/%02X]:\n",test,mtype,mtype);
             wcommst_show(ct, true, 5);
             wcommst_destroy(ct);
             retval=test;
         }else{
-            fprintf(stderr,"client CT recv failed len[%lld][%d/%s]\n",test,errno,strerror(errno));
+            fprintf(stderr,"client CT recv failed len[%"PRId64"][%d/%s]\n",test,errno,strerror(errno));
         }
     }
     return retval;
@@ -415,13 +415,13 @@ static uint32_t s_test_trnmsg_recv(msock_socket_t *cli)
             int32_t dok=trnmsg_deserialize(&msg_in,(byte *)reply,TRNIF_MAX_SIZE);
             if(NULL!=msg_in && dok==0){
                 trnmsg_id_t mtype = msg_in->hdr.msg_id;
-                fprintf(stderr,"client TRNMSG recv OK len[%lld] msg_type[%u/%s]:\n",test,mtype,TRNIF_IDSTR(mtype));
+                fprintf(stderr,"client TRNMSG recv OK len[%"PRId64"] msg_type[%u/%s]:\n",test,mtype,TRNIF_IDSTR(mtype));
                 trnmsg_show(msg_in, true, 5);
                 trnmsg_destroy(&msg_in);
                 retval=msg_in->hdr.data_len;
             }
         }else{
-            fprintf(stderr,"client TRNMSG recv failed len[%lld][%d/%s]\n",test,errno,strerror(errno));
+            fprintf(stderr,"client TRNMSG recv failed len[%"PRId64"][%d/%s]\n",test,errno,strerror(errno));
         }
     }
     return retval;
@@ -441,9 +441,11 @@ static int s_test_ct(app_cfg_t *cfg)
 
         // server: connect to client
         int uc = netif_update_connections(cfg->netif);
+        fprintf(stderr,"netif_update_connections returned [%d]\n",uc);
 
         // server: get TRN_MSG_PING, return TRN_MSG_ACK
         int sc = netif_reqres(cfg->netif);
+        fprintf(stderr,"netif_reqres returned [%d]\n",sc);
 
         // client: get TRN_MSG_ACK
         s_test_ct_recv(cfg->cli);
@@ -504,76 +506,85 @@ static int s_app_main(app_cfg_t *cfg)
 {
     int retval=-1;
     double start_time=mtime_dtime();
-    netif_t *netif = netif_new("trnif",cfg->host,
-                               cfg->port,
-                               ST_TCP,
-                               IFM_REQRES,
-                               3.0,
-                               NULL,
-                               NULL,
-                               NULL);
-    assert(netif!=NULL);
 
-    trn_config_t *trn_cfg = trncfg_new(cfg->host,
-                                      cfg->port,
-                                      10L,
-                                      TRN_MAP_BO,
-                                      TRN_FILT_PARTICLE,
-                                       cfg->map,
-                                       cfg->cfg,
-                                       cfg->particles,
-                                       cfg->logdir,
-                                       0,
-                                       TRN_MAX_NCOV_DFL,
-                                       TRN_MAX_NERR_DFL,
-                                       TRN_MAX_ECOV_DFL,
-                                       TRN_MAX_EERR_DFL
-                                      );
+    if(NULL!=cfg)
+    {
+        netif_t *netif = netif_new("trnif",cfg->host,
+                                   cfg->port,
+                                   ST_TCP,
+                                   IFM_REQRES,
+                                   3.0,
+                                   NULL,
+                                   NULL,
+                                   NULL);
 
-    wtnav_t *trn = wtnav_new(trn_cfg);
+        trn_config_t *trn_cfg = trncfg_new(cfg->host,
+                                           cfg->port,
+                                           10L,
+                                           TRN_MAP_BO,
+                                           TRN_FILT_PARTICLE,
+                                           cfg->map,
+                                           cfg->cfg,
+                                           cfg->particles,
+                                           cfg->logdir,
+                                           0,
+                                           TRN_MAX_NCOV_DFL,
+                                           TRN_MAX_NERR_DFL,
+                                           TRN_MAX_ECOV_DFL,
+                                           TRN_MAX_EERR_DFL
+                                           );
+        if(NULL!=netif && NULL!=trn_cfg){
+            wtnav_t *trn = wtnav_new(trn_cfg);
 
-    netif_set_reqres_res(netif,trn);
+            if(NULL!=trn){
+                netif_set_reqres_res(netif,trn);
 
-//    mmd_module_configure(&mmd_config_defaults[0]);
-    netif_init_mmd();
-    netif_show(netif,true,5);
+                //    mmd_module_configure(&mmd_config_defaults[0]);
+                netif_init_mmd();
+                netif_show(netif,true,5);
 
-    // initialize message log
-    int il = netif_init_log(netif, NETIF_MLOG_NAME, ".",NULL);
-    fprintf(stderr,"netif_init_log returned[%d]\n",il);
+                // initialize message log
+                int il = netif_init_log(netif, NETIF_MLOG_NAME, ".",NULL);
+                fprintf(stderr,"netif_init_log returned[%d]\n",il);
 
-    mlog_tprintf(netif->mlog_id,"*** netif session start (TEST) ***\n");
-    mlog_tprintf(netif->mlog_id,"libnetif v[%s] build[%s]\n",netif_get_version(),netif_get_build());
+                mlog_tprintf(netif->mlog_id,"*** netif session start (TEST) ***\n");
+                mlog_tprintf(netif->mlog_id,"libnetif v[%s] build[%s]\n",netif_get_version(),netif_get_build());
 
-    // server: open socket, listen
-    int nc = netif_connect(netif);
-    fprintf(stderr,"netif_connect returned[%d]\n",nc);
+                // server: open socket, listen
+                int nc = netif_connect(netif);
+                fprintf(stderr,"netif_connect returned[%d]\n",nc);
 
-    // client: connect
-    msock_socket_t *cli = msock_socket_new(NETIF_HOST_DFL,NETIF_PORT_DFL, ST_TCP);
-    msock_connect(cli);
+                // client: connect
+                msock_socket_t *cli = msock_socket_new(NETIF_HOST_DFL,NETIF_PORT_DFL, ST_TCP);
+                msock_connect(cli);
 
-    // fill in config
-    cfg->netif = netif;
-    cfg->trn_cfg = trn_cfg;
-    cfg->trn = trn;
-    cfg->cli = cli;
+                // fill in config
+                cfg->netif = netif;
+                cfg->trn_cfg = trn_cfg;
+                cfg->trn = trn;
+                cfg->cli = cli;
 
-    // test trn_server/commsT protocol
-    s_test_ct(cfg);
-    // test trnmsg protocol
-    s_test_trnmsg(cfg);
+                // test trn_server/commsT protocol
+                s_test_ct(cfg);
+                // test trnmsg protocol
+                s_test_trnmsg(cfg);
 
-    // client: force expire, check, prune
-    sleep(3);
-    int uc = netif_reqres(netif);
-    fprintf(stderr,"netif_reqres returned[%d]\n",uc);
+                // client: force expire, check, prune
+                sleep(3);
+                int uc = netif_reqres(netif);
+                fprintf(stderr,"netif_reqres returned[%d]\n",uc);
 
-
-    mlog_tprintf(netif->mlog_id,"*** netif session end (TEST) uptime[%.3lf] ***\n",(mtime_dtime()-start_time));
-
-
-    retval=0;
+                mlog_tprintf(netif->mlog_id,"*** netif session end (TEST) uptime[%.3lf] ***\n",(mtime_dtime()-start_time));
+                retval=0;
+            }else{
+                fprintf(stderr,"trn instance allocation failed\n");
+            }
+        }else{
+            fprintf(stderr,"component allocation failed netif[%p] trn_cfg[%p]\n",netif,trn_cfg);
+        }
+    }else{
+        fprintf(stderr,"invalid argument\n");
+    }
     return retval;
 }
 
@@ -606,7 +617,8 @@ int main(int argc, char **argv)
         NULL,
         NULL,
         strdup("logs")
-    }, *cfg=&cfg_s;
+    };
+    app_cfg_t *cfg = &cfg_s;
 
     parse_args(argc,argv,cfg);
     s_app_main(cfg);
