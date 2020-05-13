@@ -84,9 +84,10 @@
 #define TRNIF_CHKSUM_LEN sizeof(trn_checksum_t)
 #define TRNIF_HDR_LEN sizeof(trnmsg_header_t)
 #define TRNIF_SYNC_CMP(b,i) ( (i>=0) && (i<TRNIF_SYNC_LEN) && (b==(((g_trn_sync>>(i*8)))&0xFF)) ? true : false)
-#define TRNIF_PDATA(msg) (NULL!=msg ? ((byte *)msg+TRNIF_HDR_LEN) : NULL)
-#define TRNIF_TPDATA(msg,type) (type *)(NULL!=msg ? ((byte *)msg+TRNIF_HDR_LEN) : NULL)
-#define TRNIF_IDSTR(t) (t>=0 && t<TRNIF_MSG_ID_COUNT? trnmsg_id_names[t]:NULL)
+//#define TRNIF_PDATA(msg) ((NULL==msg) ? NULL : ((byte *)msg+TRNIF_HDR_LEN))
+//#define TRNIF_TPDATA(msg,type) (type *)( (NULL==msg) ? NULL : ((byte *)msg+TRNIF_HDR_LEN) )
+#define TRNIF_TPDATA(msg,type) (type *)( TRNIF_PDATA(msg) )
+#define TRNIF_IDSTR(t) ( (t>=0) && (t<TRNIF_MSG_ID_COUNT) ? trnmsg_id_names[t] : NULL)
 
 #define TRNIF_MAX_SIZE 2048
 
@@ -226,6 +227,8 @@ extern "C" {
     void trnmsg_hex_show(byte *data, uint32_t len, uint16_t cols, bool show_offsets, uint16_t indent);
     uint32_t trnmsg_checksum(byte *pdata, uint32_t len);
 
+    byte *TRNIF_PDATA(void *msg);
+    
 #ifdef __cplusplus
 }
 #endif

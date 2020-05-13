@@ -255,8 +255,8 @@ void parse_args(int argc, char **argv, app_cfg_t *cfg)
     fprintf(stderr,"port      [%d]\n",cfg->port);
     fprintf(stderr,"map       [%s]\n",cfg->map);
     fprintf(stderr,"cfg       [%s]\n",cfg->cfg);
-    fprintf(stderr,"particles [%s]\n",cfg->map);
-    fprintf(stderr,"logdir    [%s]\n",cfg->map);
+    fprintf(stderr,"particles [%s]\n",cfg->particles);
+    fprintf(stderr,"logdir    [%s]\n",cfg->logdir);
 
 }
 // End function parse_args

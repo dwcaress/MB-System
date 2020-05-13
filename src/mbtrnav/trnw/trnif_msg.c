@@ -170,7 +170,7 @@ trnmsg_t *trnmsg_new_type_msg(trnmsg_id_t id, int parameter)
         trn_type_t *data = TRNIF_TPDATA(instance,trn_type_t);
         if(NULL!=data){
             data->parameter=parameter;
-            
+
             hdr->checksum = trnmsg_checksum((byte *)data,hdr->data_len);
         }
     }
@@ -363,3 +363,11 @@ uint32_t trnmsg_checksum(byte *pdata, uint32_t len)
     return checksum;
 }
 // End function trnmsg_checksum
+
+
+byte *TRNIF_PDATA(void *msg)
+{
+    byte *retval = NULL;
+    if(NULL!=msg)retval=(byte *)msg+TRNIF_HDR_LEN;
+    return retval;
+}

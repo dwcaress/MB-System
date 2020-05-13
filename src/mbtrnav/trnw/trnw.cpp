@@ -712,7 +712,7 @@ void commst_initialize(wtnav_t *self, wcommst_t *msg)
             char* cfgPath = getenv("TRN_DATAFILES");
             char* logPath = getenv("TRN_LOGFILES");
 
-            fprintf(stderr, "ENV: maps:%s, cfgs:%s, and logs:%s\n", mapPath, cfgPath, logPath);
+            fprintf(stderr, "ENV: maps:%s, cfgs:%s, and logs:%s\n", mapPath?mapPath:"", cfgPath?cfgPath:"", logPath?logPath:"");
 
             char dotSlash[] = "./";
 

@@ -140,10 +140,10 @@ static int s_trnif_msg_read_dfl(byte *dest, uint32_t readlen, msock_socket_t *so
         PDPRINT((stderr,"%s: READ - readlen[%d]\n",__FUNCTION__,readlen));
         if( (msg_bytes=msock_recvfrom(socket, peer->addr,dest,readlen,0)) >0 ){
             retval = msg_bytes;
-            PDPRINT((stderr,"%s: READ - OK read[%lld]\n",__FUNCTION__,msg_bytes));
+            PDPRINT((stderr,"%s: READ - OK read[%"PRId64"]\n",__FUNCTION__,msg_bytes));
         }else{
             if(errno!=EAGAIN)
-            PDPRINT((stderr,"%s: READ - ERR read[%lld] [%d/%s]\n",__FUNCTION__,msg_bytes,errno,strerror(errno)));
+            PDPRINT((stderr,"%s: READ - ERR read[%"PRId64"] [%d/%s]\n",__FUNCTION__,msg_bytes,errno,strerror(errno)));
         }
     }
     return retval;
@@ -238,7 +238,7 @@ int trnif_msg_read_trnmsg(byte **pdest, uint32_t *len, netif_t *self, msock_conn
                     // read byte by byte until sync pattern matched
                     while( (cur-buf)<TRNIF_SYNC_LEN && action!=AC_ERR && !self->stop){
                         if( (test=msock_recvfrom(peer->sock, peer->addr,cur,1,MSG_DONTWAIT))==1 && TRNIF_SYNC_CMP(*cur,(cur-buf))){
-                            PDPRINT((stderr,"SYNC - OK test[%d] cur[%p/x%02X] cur-buf[%ld] cmp[%d]\n",test,cur,*cur,(cur-buf),(TRNIF_SYNC_CMP(*cur,(cur-buf)?1:0))));
+                            PDPRINT((stderr,"SYNC - OK test[%d] cur[%p/x%02X] cur-buf[%ld] cmp[%d]\n",test,cur,*cur,(cur-buf),(TRNIF_SYNC_CMP(*cur,(cur-buf))?1:0)));
                             cur+=test;
                             msg_bytes+=test;
                             state=ST_SYNC_OK;
@@ -510,7 +510,7 @@ int trnif_msg_read_ct(byte **pdest, uint32_t *len, netif_t *self, msock_connecti
         int64_t read_sz = readlen;
        while(retries<TRNIF_READ_RETRIES_CT  && msg_bytes<read_sz ){
            int64_t read_bytes = 0;
-//            fprintf(stderr,"%s:%d msg_bytes[%lld] retries[%d/%d] readlen[%u]\n",__FUNCTION__,__LINE__,msg_bytes,TRNIF_READ_RETRIES_CT-retries,TRNIF_READ_RETRIES_CT,readlen);
+//            fprintf(stderr,"%s:%d msg_bytes[%"PRId64"] retries[%d/%d] readlen[%u]\n",__FUNCTION__,__LINE__,msg_bytes,TRNIF_READ_RETRIES_CT-retries,TRNIF_READ_RETRIES_CT,readlen);
             if( (read_bytes=msock_recv(peer->sock, pread,readlen,0)) > 0 ){
                 readlen   -= read_bytes;
                 msg_bytes += read_bytes;
@@ -531,7 +531,7 @@ int trnif_msg_read_ct(byte **pdest, uint32_t *len, netif_t *self, msock_connecti
             retries++;
         }
 
-//        fprintf(stderr,"%s:%d msg_bytes[%lld] retries[%d/%d] readlen[%u]\n",__FUNCTION__,__LINE__,msg_bytes,TRNIF_READ_RETRIES_CT-retries,TRNIF_READ_RETRIES_CT,readlen);
+//        fprintf(stderr,"%s:%d msg_bytes[%"PRId64"] retries[%d/%d] readlen[%u]\n",__FUNCTION__,__LINE__,msg_bytes,TRNIF_READ_RETRIES_CT-retries,TRNIF_READ_RETRIES_CT,readlen);
         *len = msg_bytes;
         retval = msg_bytes;
 
@@ -544,7 +544,7 @@ int trnif_msg_read_ct(byte **pdest, uint32_t *len, netif_t *self, msock_connecti
     }
 
     if(mmd_channel_isset(MOD_NETIF,(MM_DEBUG))){
-   	 PDPRINT((stderr,"%s:%d RET msg_bytes[%lld] retries[%d]\n",__FUNCTION__,__LINE__,msg_bytes,retries));
+   	 PDPRINT((stderr,"%s:%d RET msg_bytes[%"PRId64"] retries[%d]\n",__FUNCTION__,__LINE__,msg_bytes,retries));
     }
     return retval;
 }

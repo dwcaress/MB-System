@@ -546,7 +546,7 @@ void r7kr_reader_flush(r7kr_reader_t *self, uint32_t len, int32_t retries, uint3
                 }
             }
         }while ( (x!=-1) && (me_errno!=(int)ME_ETMOUT));
-//        MMDEBUG(R7KR,"EXIT - retries[%d/%s] x[%lld] e[%d/%s] n[%u]\n",retries,(use_retries?"true":"false"),x,
+//        MMDEBUG(R7KR,"EXIT - retries[%d/%s] x[%"PRId64"] e[%d/%s] n[%u]\n",retries,(use_retries?"true":"false"),x,
 //               me_errno,me_strerror(me_errno),n);
     }
 }
@@ -583,7 +583,7 @@ int64_t r7kr_reader_poll(r7kr_reader_t *self, byte *dest, uint32_t len, uint32_t
             if ( (me_errno==ME_OK || me_errno==ME_ETMOUT) ) {
                 retval = rbytes;
 
-//                PMPRINT(MOD_R7KR,MM_DEBUG,(stderr,"buf[%p] req[%d] rd[%lld] to[%u]\n",dest,len,rbytes,tmout_ms));
+//                PMPRINT(MOD_R7KR,MM_DEBUG,(stderr,"buf[%p] req[%d] rd[%"PRId64"] to[%u]\n",dest,len,rbytes,tmout_ms));
             }else{
                 // error
                 PMPRINT(MOD_R7KR,MM_DEBUG,(stderr,"read err1 to[%"PRIu32"] merr[%d/%s] rb[%"PRId64"]\n",tmout_ms,me_errno,me_strerror(me_errno),rbytes));
@@ -1657,7 +1657,7 @@ int64_t r7kr_read_frame(r7kr_reader_t *self, byte *dest,
     }else{
         PEPRINT((stderr,"invalid argument\n"));
     }
-    PMPRINT(MOD_R7KR,R7KR_V2,(stderr,"r7kr_read_frame returning [%lld]\n",retval));
+    PMPRINT(MOD_R7KR,R7KR_V2,(stderr,"r7kr_read_frame returning [%"PRId64"]\n",retval));
     return retval;
  }
 // End function r7kr_read_frame
