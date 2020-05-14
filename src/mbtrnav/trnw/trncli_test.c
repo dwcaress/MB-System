@@ -766,27 +766,21 @@ static int s_trncli_process_mb1(trncli_t *dcli, mb1_t *mb1, app_cfg_t *cfg)
 static int s_trncli_test_csv(trncli_t *dcli, app_cfg_t *cfg)
 {
     int retval=0;
-    mfile_file_t *ifile = NULL;
-    ifile = mfile_file_new(cfg->ifile);
-    int err_count=0;
+    mfile_file_t *ifile = mfile_file_new(cfg->ifile);
     int test=-1;
     
     if( (test=mfile_open(ifile, MFILE_RONLY)) >0){
         bool quit=false;
         mb1_t mb1;
         while( !g_interrupt && !quit && (test=s_csv_to_mb1(&mb1, ifile))>0){
-            
             if( (test=s_trncli_process_mb1(dcli,&mb1,cfg))!=0){
                 if(test==EPIPE){
                     quit=true;
                 }
-                err_count++;
             }
         }// while
-
     }else{
         fprintf(stderr,"mfile_open failed [%d]\n",test);
-        err_count++;
     }
     mfile_file_destroy(&ifile);
     return retval;
@@ -925,25 +919,20 @@ static int s_trncli_test_mbin(trncli_t *dcli, app_cfg_t *cfg)
     int retval=0;
     mfile_file_t *ifile = NULL;
     ifile = mfile_file_new(cfg->ifile);
-    int err_count=0;
     int test=-1;
     
     if( (test=mfile_open(ifile, MFILE_RONLY))>0){
         bool quit=false;
         mb1_t mb1;
         while( !g_interrupt && !quit && (test=s_read_mb1_rec(&mb1, ifile))>0){
-            
             if( (test=s_trncli_process_mb1(dcli,&mb1,cfg))!=0){
                 if(test==EPIPE){
                     quit=true;
                 }
-                err_count++;
             }
-            
         }// while
     }else{
         fprintf(stderr,"%s - mfile_open [%s] failed [%d][%d/%s]\n",__FUNCTION__,cfg->ifile,test,errno,strerror(errno));
-        err_count++;
     }
     mfile_file_destroy(&ifile);
     return retval;

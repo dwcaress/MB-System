@@ -20,7 +20,7 @@ include "beta" in the tag name are preliminary and generally not announced.
 Distributions that do not include "beta" in the tag name correspond to the major,
 announced releases. The source distributions associated with all releases, major or beta, are equally accessible as tarballs through the Github interface.
 
-- Version 5.7.6beta34    May 8, 2020
+- Version 5.7.6beta34    May 14, 2020
 - Version 5.7.6beta33    May 5, 2020
 - Version 5.7.6beta32    April 22, 2020
 - Version 5.7.6beta31    March 2, 2020
@@ -346,7 +346,11 @@ announced releases. The source distributions associated with all releases, major
 ### MB-System Version 5.7 Release Notes:
 --
 
-#### 5.7.6beta34 (May 8, 2020)
+#### 5.7.6beta34 (May 14, 2020)
+
+Mbgrd2obj: New GMT module that converts GMT topographic grids to OBJ format 3D
+model files that can be imported to visualization software or printed on 3D
+printers.
 
 Mbset and mbmakeplatform: Joaquim Luis reports that these programs will not
 compile on Windows Visual Studio "because of the too many nested if-else  problem."

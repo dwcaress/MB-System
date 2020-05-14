@@ -5516,14 +5516,16 @@ int mbnavadjust_autopick(int do_vertical) {
           process = true;
       }
 
-      // check if section track lengths are long enough */
+      // check if section track lengths are long enough (at least 0.25 of the
+      // length of the first section for the file) - this excludes trying to
+      // match short sections at the end of a file */
       if (process) {
         file1 = &project.files[crossing->file_id_1];
         section1 = &file1->sections[crossing->section_1];
         file2 = &project.files[crossing->file_id_2];
         section2 = &file2->sections[crossing->section_2];
-        if (section1->distance < 0.25 * project.section_length
-            || section2->distance < 0.25 * project.section_length) {
+        if (section1->distance < 0.25 * file1->sections[0].distance
+            || section2->distance < 0.25 * file2->sections[0].distance) {
           process = false;
         }
       }

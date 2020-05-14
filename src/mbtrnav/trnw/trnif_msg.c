@@ -168,9 +168,11 @@ trnmsg_t *trnmsg_new_type_msg(trnmsg_id_t id, int parameter)
         trnmsg_header_t *hdr = (trnmsg_header_t *)instance;
 
         trn_type_t *data = TRNIF_TPDATA(instance,trn_type_t);
-        data->parameter=parameter;
-        
-        hdr->checksum = trnmsg_checksum((byte *)data,hdr->data_len);
+        if(NULL!=data){
+            data->parameter=parameter;
+
+            hdr->checksum = trnmsg_checksum((byte *)data,hdr->data_len);
+        }
     }
     return instance;
 }
@@ -180,7 +182,6 @@ trnmsg_t *trnmsg_new_vdr_msg(trnmsg_id_t id, int parameter, float vdr)
 {
     trnmsg_t *instance = trnmsg_dnew(id,sizeof(trn_float_t));
     if(NULL!=instance){
-        trnmsg_header_t *hdr = (trnmsg_header_t *)instance;
         trn_float_t *data = TRNIF_TPDATA(instance,trn_float_t);
         data->parameter=parameter;
         data->data=vdr;
@@ -272,9 +273,9 @@ int32_t trnmsg_deserialize(trnmsg_t **pdest, byte *src, uint32_t len)
            msg->hdr.msg_id>=0 && msg->hdr.msg_id<TRNIF_MSG_ID_COUNT &&
            msg->hdr.data_len>0 && msg->hdr.data_len<=TRNIF_MAX_SIZE){
             
-            uint32_t msg_size = msg->hdr.data_len+sizeof(trnmsg_header_t);
             trnmsg_t *dest = trnmsg_new(msg->hdr.msg_id,TRNIF_PDATA(src),msg->hdr.data_len);
             *pdest = dest;
+            retval=0;
         }
     }
     return retval;
@@ -362,3 +363,11 @@ uint32_t trnmsg_checksum(byte *pdata, uint32_t len)
     return checksum;
 }
 // End function trnmsg_checksum
+
+
+byte *TRNIF_PDATA(void *msg)
+{
+    byte *retval = NULL;
+    if(NULL!=msg)retval=(byte *)msg+TRNIF_HDR_LEN;
+    return retval;
+}
