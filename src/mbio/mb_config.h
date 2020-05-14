@@ -74,10 +74,10 @@
 #define MBSYSTEM_CONFIG_DEFINED 1
 
 /* Set MBSYSTEM_INSTALL_PREFIX define in mb_config.h */
-#define MBSYSTEM_INSTALL_PREFIX "/usr/local"
+#define MBSYSTEM_INSTALL_PREFIX "NONE"
 
 /* Set MBSYSTEM_OTPS_LOCATION define in mb_config.h */
-#define MBSYSTEM_OTPS_LOCATION "/usr/local/opt/otps"
+#define MBSYSTEM_OTPS_LOCATION "/usr/local/OTPS2"
 
 /* Build libmbtnav */
 #define MBTNAV_ENABLED 1
@@ -86,7 +86,7 @@
 #define MBTRN_ENABLED 1
 
 /* Build graphical tools */
-#define MBUTILS_ENABLED 1
+/* #undef MBUTILS_ENABLED */
 
 /* Name of package */
 #define PACKAGE "mbsystem"
@@ -119,7 +119,7 @@
 #define STDC_HEADERS 1
 
 /* Build unit tests */
-#define TEST_ENABLED 1
+/* #undef TEST_ENABLED */
 
 /* Version number of package */
 #define VERSION "5.7.6beta34"
