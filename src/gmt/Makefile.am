@@ -26,6 +26,7 @@ if GMT61PLUS
 else
   mbsystem_la_SOURCES += mbgrdtifforg.c
 endif
+mbsystem_la_SOURCES += mbgrd2obj.c
 
 mbsystem_la_LIBADD =
 mbsystem_la_LIBADD += ${top_builddir}/src/mbio/libmbio.la

@@ -346,7 +346,7 @@ struct MBGRDTIFF_CTRL {
 		bool active;
 		char *arg;
 	} G;
-	struct I { /* -I<inputfile>> */
+	struct I { /* -I<inputfile> */
 		bool active;
 		unsigned int n_files;
 		char *file[3];
