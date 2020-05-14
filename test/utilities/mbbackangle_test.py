@@ -31,6 +31,8 @@ class MbbackangleTest(unittest.TestCase):
   def testHelp(self):
     cmd = [self.cmd, '-h']
     output = subprocess.check_output(cmd, stderr=subprocess.STDOUT).decode()
+    print("\nOutput from mbbackangle -h\n--------------------------")
+    print(output)
     self.assertIn('Version', output)
     self.assertIn('reads a swath sonar data file', output)
     self.assertIn('tables containing the average amplitude', output)
@@ -38,6 +40,8 @@ class MbbackangleTest(unittest.TestCase):
   def testHelpVerbose2(self):
     cmd = [self.cmd, '-h', '-V', '-V']
     output = subprocess.check_output(cmd, stderr=subprocess.STDOUT).decode()
+    print("\nOutput from mbbackangle -h -V -V\n--------------------------------")
+    print(output)
     self.assertIn('Version', output)
     self.assertIn('reads a swath sonar data file', output)
     self.assertIn('tables containing the average amplitude', output)

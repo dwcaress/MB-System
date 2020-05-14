@@ -29,7 +29,7 @@ Version 5.0
 <A NAME="lbAD">&nbsp;</A>
 <H2>SYNOPSIS</H2>
 
-<B>mbsslayout</B> [ 
+<B>mbsslayout</B> [
 <BR>
 
 <B>--verbose</B>
@@ -202,7 +202,7 @@ include any form of swath bathymetry data.
 The output will be sidescan data for which each ping return is represented by a single array
 of pixels with acrosstrack and alongtrack locations, where in the acrosstrack
 direction the pixels are uniformly sized (and therefore uniformly spaced).
-The output will be written to files in the MBF_MBLDEOIH format (MBIO format id 71). 
+The output will be written to files in the MBF_MBLDEOIH format (MBIO format id 71).
 <P>
 The time series sidescan is
 &quot;laid out&quot; onto the seafloor using the two-travel time of each sample, it's
@@ -308,7 +308,7 @@ purpose and a listing of its control options, and then exit immediately.
 
 This option defines the input files containing the time series sidescan data.
 The <I>datalist</I> value typically denotes a datalist  file
-containing a list of input swath data files and/or other datalist files. 
+containing a list of input swath data files and/or other datalist files.
 Alternatively, a single swath data file can also be specified.
 <DT><B>--format</B>=<I>format</I>
 
@@ -383,9 +383,9 @@ survey lines, allowing <B>mbsslayout</B> to structure the output files according
 to those survey lines. Since the navigation of real surveys rarely passes through the
 planned waypoints exactly, the times at which waypoints are reached is calculated
 using a range threshold specified using the <B>--line-range-threshold</B> option.
+<DT><B>--line-range-threshold</B>=<I>value</I>
 
-<B>--line-range-threshold</B>=<I>value</I>
-
+<DD>
 <BR>
 
 Specifies the range threshold used to define when survey navigation reaches a
@@ -560,12 +560,12 @@ value are:
 <BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ddmmyy&nbsp;hhmmssss&nbsp;ddmmmmmmmN&nbsp;dddmmmmmmmE
 <BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;where&nbsp;dd&nbsp;is&nbsp;day&nbsp;of&nbsp;the&nbsp;month,&nbsp;mm&nbsp;is&nbsp;the&nbsp;month,&nbsp;yy&nbsp;is&nbsp;the&nbsp;two&nbsp;digit&nbsp;year,
 <BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;hh&nbsp;is&nbsp;the&nbsp;hour,&nbsp;mm&nbsp;is&nbsp;the&nbsp;minute,&nbsp;and&nbsp;ssss&nbsp;is&nbsp;seconds&nbsp;*&nbsp;100.
-<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;latitude&nbsp;is&nbsp;given&nbsp;as&nbsp;ddmmmmmmmN&nbsp;where&nbsp;dd&nbsp;are&nbsp;integer&nbsp;degrees,&nbsp;
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;latitude&nbsp;is&nbsp;given&nbsp;as&nbsp;ddmmmmmmmN&nbsp;where&nbsp;dd&nbsp;are&nbsp;integer&nbsp;degrees,
 <BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;mmmmmmm&nbsp;is&nbsp;minutes&nbsp;*&nbsp;100000,&nbsp;and&nbsp;N&nbsp;is&nbsp;'N'&nbsp;for&nbsp;north&nbsp;and&nbsp;'S'&nbsp;for&nbsp;south&nbsp;latitude.
-<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;longitude&nbsp;is&nbsp;given&nbsp;as&nbsp;dddmmmmmmmE&nbsp;where&nbsp;ddd&nbsp;are&nbsp;integer&nbsp;degrees,&nbsp;
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;longitude&nbsp;is&nbsp;given&nbsp;as&nbsp;dddmmmmmmmE&nbsp;where&nbsp;ddd&nbsp;are&nbsp;integer&nbsp;degrees,
 <BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;mmmmmmm&nbsp;is&nbsp;minutes&nbsp;*&nbsp;100000,&nbsp;and&nbsp;E&nbsp;is&nbsp;'E'&nbsp;for&nbsp;east&nbsp;and&nbsp;'W'&nbsp;for&nbsp;west&nbsp;longitude.
-<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<P>
+<P>
 <BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;day_minute&nbsp;values&nbsp;are&nbsp;integers,
 <BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;the&nbsp;second&nbsp;value&nbsp;is&nbsp;decimal,&nbsp;and&nbsp;longitude&nbsp;and&nbsp;latitude&nbsp;are&nbsp;in&nbsp;decimal
 <BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;degrees.&nbsp;The&nbsp;longitude&nbsp;is&nbsp;given&nbsp;as

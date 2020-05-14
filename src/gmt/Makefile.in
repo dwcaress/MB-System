@@ -145,7 +145,7 @@ mbsystem_la_DEPENDENCIES = ${top_builddir}/src/mbio/libmbio.la \
 @GMT61PLUS_TRUE@am__objects_1 = mbgrdtiff.lo
 @GMT61PLUS_FALSE@am__objects_2 = mbgrdtifforg.lo
 am_mbsystem_la_OBJECTS = mbcontour.lo mbswath.lo $(am__objects_1) \
-	$(am__objects_2)
+	$(am__objects_2) mbgrd2obj.lo
 mbsystem_la_OBJECTS = $(am_mbsystem_la_OBJECTS)
 AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
@@ -170,8 +170,8 @@ DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)/src/mbio
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__maybe_remake_depfiles = depfiles
 am__depfiles_remade = ./$(DEPDIR)/mbcontour.Plo \
-	./$(DEPDIR)/mbgrdtiff.Plo ./$(DEPDIR)/mbgrdtifforg.Plo \
-	./$(DEPDIR)/mbswath.Plo
+	./$(DEPDIR)/mbgrd2obj.Plo ./$(DEPDIR)/mbgrdtiff.Plo \
+	./$(DEPDIR)/mbgrdtifforg.Plo ./$(DEPDIR)/mbswath.Plo
 am__mv = mv -f
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
@@ -423,7 +423,7 @@ AM_CPPFLAGS = -I${top_srcdir}/src/mbio -I${top_srcdir}/src/mbaux \
 AM_CFLAGS = ${libgmt_CFLAGS} ${libgdal_CFLAGS} ${libnetcdf_CFLAGS}
 mbsystem_la_LDFLAGS = -module -avoid-version -shared
 mbsystem_la_SOURCES = mbcontour.c mbswath.c $(am__append_1) \
-	$(am__append_2)
+	$(am__append_2) mbgrd2obj.c
 mbsystem_la_LIBADD = ${top_builddir}/src/mbio/libmbio.la \
 	${top_builddir}/src/mbaux/libmbaux.la ${libgmt_LIBS} \
 	${libgdal_LIBS} ${libnetcdf_LIBS} ${libnetcdf_LIBS} \
@@ -507,6 +507,7 @@ distclean-compile:
 	-rm -f *.tab.c
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbcontour.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbgrd2obj.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbgrdtiff.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbgrdtifforg.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbswath.Plo@am__quote@ # am--include-marker
@@ -663,6 +664,7 @@ clean-am: clean-generic clean-libLTLIBRARIES clean-libtool \
 
 distclean: distclean-am
 		-rm -f ./$(DEPDIR)/mbcontour.Plo
+	-rm -f ./$(DEPDIR)/mbgrd2obj.Plo
 	-rm -f ./$(DEPDIR)/mbgrdtiff.Plo
 	-rm -f ./$(DEPDIR)/mbgrdtifforg.Plo
 	-rm -f ./$(DEPDIR)/mbswath.Plo
@@ -712,6 +714,7 @@ installcheck-am:
 
 maintainer-clean: maintainer-clean-am
 		-rm -f ./$(DEPDIR)/mbcontour.Plo
+	-rm -f ./$(DEPDIR)/mbgrd2obj.Plo
 	-rm -f ./$(DEPDIR)/mbgrdtiff.Plo
 	-rm -f ./$(DEPDIR)/mbgrdtifforg.Plo
 	-rm -f ./$(DEPDIR)/mbswath.Plo

@@ -8,7 +8,7 @@ topographic model.
 Version 5.0
 
 .SH SYNOPSIS
-\fBmbsslayout\fP [ 
+\fBmbsslayout\fP [
 .br
 \fB\-\-verbose\fP
 .br
@@ -125,7 +125,7 @@ include any form of swath bathymetry data.
 The output will be sidescan data for which each ping return is represented by a single array
 of pixels with acrosstrack and alongtrack locations, where in the acrosstrack
 direction the pixels are uniformly sized (and therefore uniformly spaced).
-The output will be written to files in the MBF_MBLDEOIH format (MBIO format id 71). 
+The output will be written to files in the MBF_MBLDEOIH format (MBIO format id 71).
 
 The time series sidescan is
 "laid out" onto the seafloor using the two-travel time of each sample, it's
@@ -211,7 +211,7 @@ purpose and a listing of its control options, and then exit immediately.
 .br
 This option defines the input files containing the time series sidescan data.
 The \fIdatalist\fP value typically denotes a datalist  file
-containing a list of input swath data files and/or other datalist files. 
+containing a list of input swath data files and/or other datalist files.
 Alternatively, a single swath data file can also be specified.
 .TP
 .B \-\-format\fP=\fIformat\fP
@@ -273,7 +273,7 @@ survey lines, allowing \fBmbsslayout\fP to structure the output files according
 to those survey lines. Since the navigation of real surveys rarely passes through the
 planned waypoints exactly, the times at which waypoints are reached is calculated
 using a range threshold specified using the \fB\-\-line-range-threshold\fP option.
-..TP
+.TP
 .B \-\-line-range-threshold\fP=\fIvalue\fP
 .br
 Specifies the range threshold used to define when survey navigation reaches a
@@ -419,12 +419,12 @@ value are:
         ddmmyy hhmmssss ddmmmmmmmN dddmmmmmmmE
       where dd is day of the month, mm is the month, yy is the two digit year,
       hh is the hour, mm is the minute, and ssss is seconds * 100.
-      The latitude is given as ddmmmmmmmN where dd are integer degrees, 
+      The latitude is given as ddmmmmmmmN where dd are integer degrees,
       mmmmmmm is minutes * 100000, and N is 'N' for north and 'S' for south latitude.
-      The longitude is given as dddmmmmmmmE where ddd are integer degrees, 
+      The longitude is given as dddmmmmmmmE where ddd are integer degrees,
       mmmmmmm is minutes * 100000, and E is 'E' for east and 'W' for west longitude.
-      
-      
+
+
       day_minute values are integers,
       the second value is decimal, and longitude and latitude are in decimal
       degrees. The longitude is given as
