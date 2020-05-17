@@ -2130,9 +2130,11 @@ int mbnavadjust_crossing_overlap(int verbose, struct mbna_project *project, int 
     if (overlap2[i] == 1)
       noverlap2++;
   }
-  const double overlapfraction =
-      (dx1 * dy1) / (dx1 * dy1 + dx2 * dy2) * ((double)noverlap1) / ((double)ncoverage1) +
-      (dx2 * dy2) / (dx1 * dy1 + dx2 * dy2) * ((double)noverlap2) / ((double)ncoverage2);
+  //const double overlapfraction =
+  //    (dx1 * dy1) / (dx1 * dy1 + dx2 * dy2) * ((double)noverlap1) / ((double)ncoverage1) +
+  //    (dx2 * dy2) / (dx1 * dy1 + dx2 * dy2) * ((double)noverlap2) / ((double)ncoverage2);
+  const double overlapfraction = 0.5 * ((double)noverlap1) / ((double)ncoverage1)
+                                  + 0.5 * ((double)noverlap2) / ((double)ncoverage2);
   crossing->overlap = (int)(100.0 * overlapfraction);
   if (crossing->overlap < 1)
     crossing->overlap = 1;
