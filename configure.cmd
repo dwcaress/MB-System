@@ -400,7 +400,7 @@ make
 make check
 make install
 
-cd src/htmlsrc ; make_mbhtml ; cd ../..
+cd src/htmlsrc ; ./make_mbhtml ; cd ../..
 
 make -j install
 
