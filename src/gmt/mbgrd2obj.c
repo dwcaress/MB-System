@@ -141,11 +141,17 @@ GMT_LOCAL void Free_Ctrl (struct GMT_CTRL *GMT, struct MBGRD2OBJ_CTRL *C) {	/* D
 	gmt_M_free (GMT, C);
 }
 
-GMT_LOCAL int usage (struct GMTAPI_CTRL *API, int level) {
+GMT_LOCAL int GMT_mbgrd2obj_usage (struct GMTAPI_CTRL *API, int level) {
+#if GMT_MAJOR_VERSION < 6
+	gmt_show_name_and_purpose (API, THIS_MODULE_LIB, THIS_MODULE_CLASSIC_NAME, THIS_MODULE_PURPOSE);
+	if (level == GMT_MODULE_PURPOSE) return (GMT_NOERROR);
+	GMT_Message (API, GMT_TIME_NONE, "usage: mbgrd2obj <gridfile>  -G<objfile> [%s] [%s]\n", GMT_Rgeo_OPT, GMT_V_OPT);
+#else
 	const char *name = gmt_show_name_and_purpose (API, THIS_MODULE_LIB, THIS_MODULE_CLASSIC_NAME, THIS_MODULE_PURPOSE);
 	if (level == GMT_MODULE_PURPOSE) return (GMT_NOERROR);
 	GMT_Message (API, GMT_TIME_NONE, "usage: %s <gridfile>  -G<objfile> [%s] [%s]\n", name, GMT_Rgeo_OPT, GMT_V_OPT);
 	GMT_Message (API, GMT_TIME_NONE, "\t[%s]\n\n", GMT_PAR_OPT);
+#endif
 
 	if (level == GMT_SYNOPSIS) return (GMT_MODULE_SYNOPSIS);
 
@@ -228,10 +234,13 @@ int GMT_mbgrd2obj (void *V_API, int mode, void *args) {
 	/*----------------------- Standard module initialization and parsing ----------------------*/
 
 	if (API == NULL) return (GMT_NOT_A_SESSION);
-	if (mode == GMT_MODULE_PURPOSE) return (usage (API, GMT_MODULE_PURPOSE));	/* Return the purpose of program */
+	if (mode == GMT_MODULE_PURPOSE) return (GMT_mbgrd2obj_usage (API, GMT_MODULE_PURPOSE));	/* Return the purpose of program */
 	options = GMT_Create_Options (API, mode, args);	if (API->error) return (API->error);	/* Set or get option list */
 
-	if ((error = gmt_report_usage (API, options, 0, usage)) != GMT_NOERROR) bailout (error);	/* Give usage if requested */
+	if (!options || options->option == GMT_OPT_USAGE)
+		bailout(GMT_mbgrd2obj_usage(API, GMT_USAGE)); /* Return the usage message */
+	if (options->option == GMT_OPT_SYNOPSIS)
+		bailout(GMT_mbgrd2obj_usage(API, GMT_SYNOPSIS)); /* Return the synopsis */
 
 	/* Parse the command-line arguments */
 
