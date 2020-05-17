@@ -177,7 +177,6 @@ void parse_args(int argc, char **argv, app_cfg_t *cfg)
     int c;
     bool help=false;
     bool version=false;
-    char cmnem=0;
     static struct option options[] = {
         {"verbose", required_argument, NULL, 0},
         {"help", no_argument, NULL, 0},
@@ -189,9 +188,7 @@ void parse_args(int argc, char **argv, app_cfg_t *cfg)
     
     // process argument list
     while ((c = getopt_long(argc, argv, "", options, &option_index)) != -1){
-        char *scpy = NULL;
-        char *shost = NULL;
-        char *sport = NULL;
+
         switch (c) {
                 // long options all return c=0
             case 0:

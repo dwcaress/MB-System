@@ -707,13 +707,12 @@ void commst_initialize(wtnav_t *self, wcommst_t *msg)
             char mapname[512]={0};
             char cfgname[512]={0};
             char particlename[512]={0};
-            char logname[300]={0};
 
             char* mapPath = getenv("TRN_MAPFILES");
             char* cfgPath = getenv("TRN_DATAFILES");
             char* logPath = getenv("TRN_LOGFILES");
 
-            fprintf(stderr, "ENV: maps:%s, cfgs:%s, and logs:%s\n", mapPath, cfgPath, logPath);
+            fprintf(stderr, "ENV: maps:%s, cfgs:%s, and logs:%s\n", mapPath?mapPath:"", cfgPath?cfgPath:"", logPath?logPath:"");
 
             char dotSlash[] = "./";
 
@@ -1417,7 +1416,7 @@ int32_t trnw_meas_msg(char **dest, wmeast_t *src, int msg_type, int param)
         measT *mtsrc = static_cast<measT *>(src->obj);
 
         commsT *ct = new commsT(msg_type, param, *mtsrc);
-        retval=ct->serialize(msg,TRN_MSG_SIZE);
+        ct->serialize(msg,TRN_MSG_SIZE);
         *dest=msg;
         delete ct;
         retval=TRN_MSG_SIZE;
@@ -1433,7 +1432,7 @@ int32_t trnw_pose_msg(char **dest, wposet_t *src, char msg_type)
         memset(msg,0,TRN_MSG_SIZE);
         poseT *ptsrc = static_cast<poseT *>(src->obj);
         commsT ct(msg_type, *ptsrc);
-        retval=ct.serialize(msg,TRN_MSG_SIZE);
+        ct.serialize(msg,TRN_MSG_SIZE);
         *dest=msg;
         retval=TRN_MSG_SIZE;
     }
@@ -1451,7 +1450,7 @@ int32_t trnw_init_msg(char **dest, trn_config_t *cfg)
         int param = cfg->map_type*10+cfg->filter_type;
         commsT ct(TRN_INIT, param, cfg->map_file,cfg->cfg_file,cfg->particles_file,cfg->log_dir);
 
-        retval=ct.serialize(msg,TRN_MSG_SIZE);
+        ct.serialize(msg,TRN_MSG_SIZE);
         *dest=msg;
         retval=TRN_MSG_SIZE;
     }
@@ -1465,7 +1464,7 @@ int32_t trnw_vdr_msg(char **dest, char msg_type, int param, float vdr)
     if(NULL!=msg){
         memset(msg,0,TRN_MSG_SIZE);
         commsT ct(msg_type,param,vdr);
-        retval=ct.serialize(msg,TRN_MSG_SIZE);
+        ct.serialize(msg,TRN_MSG_SIZE);
         *dest=msg;
         retval=TRN_MSG_SIZE;
     }
@@ -1479,7 +1478,7 @@ int32_t trnw_ptype_msg(char **dest, char msg_type, int param)
     if(NULL!=msg){
         memset(msg,0,TRN_MSG_SIZE);
         commsT ct(msg_type,param);
-        retval=ct.serialize(msg,TRN_MSG_SIZE);
+        ct.serialize(msg,TRN_MSG_SIZE);
         *dest=msg;
         retval=TRN_MSG_SIZE;
     }
@@ -1493,7 +1492,7 @@ int32_t trnw_type_msg(char **dest, char msg_type)
     if(NULL!=msg){
         memset(msg,0,TRN_MSG_SIZE);
         commsT ct(msg_type);
-        retval=ct.serialize(msg,TRN_MSG_SIZE);
+        ct.serialize(msg,TRN_MSG_SIZE);
         *dest=msg;
         retval=TRN_MSG_SIZE;
     }
@@ -1507,9 +1506,9 @@ int32_t trnw_acknack_msg(char **pdest,char ACK_NACK)
     if(NULL!=msg && NULL!=pdest){
         memset(msg,0,TRN_MSG_SIZE);
         commsT ct(ACK_NACK);
-        retval=ct.serialize(msg,TRN_MSG_SIZE);
+        ct.serialize(msg,TRN_MSG_SIZE);
         *pdest=msg;
-                retval=TRN_MSG_SIZE;
+        retval=TRN_MSG_SIZE;
     }
     return retval;
 }

@@ -550,81 +550,6 @@ static int s_out_stdx(FILE *dest, mb1_sounding_t *sounding)
 }
 // End function s_out_stdx
 
-///// @fn int s_out_sout(trn_data_t *message)
-///// @brief export message to stdout
-///// @param[in] message message reference
-///// @return 0 on success, -1 otherwise
-//static int s_out_sout(trn_message_t *message)
-//{
-//    int retval=0;
-//
-//    if (NULL!=message) {
-//        mb1_frame_t frame = {0},*mb1=&frame;
-//        mb1->sounding=(mb1_sounding_t *)(msg_buf);
-//        mb1->checksum=MB1_PCHECKSUM_U32(mb1);
-//
-//        fprintf(stdout,"\nts[%.3lf] ping[%06"PRIu32"] beams[%03d]\nlat[%.4f] lon[%.4lf] hdg[%6.2lf] sd[%7.2lf]\n",\
-//                frame->sounding->ts,
-//                frame->sounding->ping_number,
-//                frame->sounding->nbeams,
-//                frame->sounding->lat,
-//                frame->sounding->lon,
-//                frame->sounding->hdg,
-//                frame->sounding->depth
-//                );
-//        if (frame->sounding->nbeams<=512) {
-//            for (int j = 0; j < (int)frame->sounding->nbeams; j++) {
-//                fprintf(stdout,"n[%03"PRId32"] atrk/X[%+10.3lf] ctrk/Y[%+10.3lf] dpth/Z[%+10.3lf]\n",
-//                        frame->sounding->beams[j].beam_num,
-//                        frame->sounding->beams[j].rhox,
-//                        frame->sounding->beams[j].rhoy,
-//                        frame->sounding->beams[j].rhoz);
-//            }
-//        }
-//    }else{
-//        PMPRINT(MOD_TBINX,TBINX_V2,(stderr,"invalid argument\n"));
-//        retval=-1;
-//    }
-//    return retval;
-//}
-//// End function s_out_sout
-//
-///// @fn int s_out_serr(trn_data_t *message)
-///// @brief export message to stderr
-///// @param[in] message message reference
-///// @return 0 on success, -1 otherwise
-//static int s_out_serr(trn_message_t *message)
-//{
-//    int retval=0;
-//
-//    if (NULL!=message) {
-//        mbtrn_sounding_t *psounding     = &message->data.sounding;
-//        fprintf(stderr,"\nts[%.3lf] ping[%06"PRIu32"] beams[%03d]\nlat[%.4f] lon[%.4lf] hdg[%6.2lf] sd[%7.2lf]\n",\
-//                psounding->ts,
-//                psounding->ping_number,
-//                psounding->nbeams,
-//                psounding->lat,
-//                psounding->lon,
-//                psounding->hdg,
-//                psounding->depth
-//                );
-//        if (psounding->nbeams<=512) {
-//            for (int j = 0; j < (int)psounding->nbeams; j++) {
-//                fprintf(stderr,"n[%03"PRId32"] atrk/X[%+10.3lf] ctrk/Y[%+10.3lf] dpth/Z[%+10.3lf]\n",
-//                        psounding->beams[j].beam_num,
-//                        psounding->beams[j].rhox,
-//                        psounding->beams[j].rhoy,
-//                        psounding->beams[j].rhoz);
-//            }
-//        }
-//    }else{
-//        PMPRINT(MOD_TBINX,TBINX_V2,(stderr,"invalid argument\n"));
-//        retval=-1;
-//    }
-//    return retval;
-//}
-//// End function s_out_serr
-
 /// @fn int s_out_csv(trn_data_t *message)
 /// @brief export message to csv file
 /// @param[in] dest CSV file reference
@@ -871,8 +796,7 @@ int s_process_file(app_cfg_t *cfg)
                 mb1_frame_t *mb1= (mb1_frame_t *) &msg_buf[0]; //&frame;
                 mb1->sounding = (mb1_sounding_t *)((byte *)msg_buf+sizeof(mb1_frame_t));
                 byte *ptype = (byte *)(&(mb1->sounding->type));
-                byte *psize = (byte *)(&(mb1->sounding->size));
-                
+
                 double prev_time =0.0;
                 
                 bool ferror=false;
@@ -881,7 +805,6 @@ int s_process_file(app_cfg_t *cfg)
                 while (!ferror) {
                     byte *sp = (byte *)mb1->sounding;
                     bool header_valid=false;
-                    bool sounding_valid=false;
                     bool rec_valid=false;
                     while (!sync_valid) {
                         if( ((rbytes=mfile_read(ifile,(byte *)sp,1))==1) && *sp=='M'){
@@ -934,7 +857,7 @@ int s_process_file(app_cfg_t *cfg)
                             
                             if ((int32_t)mb1->sounding->size == cmplen ) {
                                 header_valid=true;
-                                PMPRINT(MOD_TBINX,TBINX_V2,(stderr,"sounding header read len[%"PRIu32"/%lld]\n",(uint32_t)readlen,rbytes));
+                                PMPRINT(MOD_TBINX,TBINX_V2,(stderr,"sounding header read len[%"PRIu32"/%"PRId64"]\n",(uint32_t)readlen,rbytes));
                                 PMPRINT(MOD_TBINX,TBINX_V3,(stderr,"  size   [%d]\n",mb1->sounding->size));
                                 PMPRINT(MOD_TBINX,TBINX_V3,(stderr,"  time   [%.3f]\n",mb1->sounding->ts));
                                 PMPRINT(MOD_TBINX,TBINX_V3,(stderr,"  lat    [%.3f]\n",mb1->sounding->lat));
@@ -947,7 +870,7 @@ int s_process_file(app_cfg_t *cfg)
                                 PMPRINT(MOD_TBINX,MM_WARN,(stderr,"message len invalid l[%d] l*[%d]\n",mb1->sounding->size,cmplen));
                             }
                         }else{
-                            PEPRINT((stderr,"could not read header bytes [%lld]\n",rbytes));
+                            PEPRINT((stderr,"could not read header bytes [%"PRId64"]\n",rbytes));
                             ferror=true;
                         }
                     }
@@ -961,11 +884,11 @@ int s_process_file(app_cfg_t *cfg)
                             uint32_t readlen = MB1_BEAM_ARRAY_BYTES(mb1->sounding->nbeams);
                             if( ((rbytes=mfile_read(ifile,bp,readlen))==readlen)){
                                 
-                                //                                PMPRINT(MOD_TBINX,TBINX_V2,(stderr,"beams read blen[%d/%lld]\n",beamsz,rbytes));
+                                //                                PMPRINT(MOD_TBINX,TBINX_V2,(stderr,"beams read blen[%d/%"PRId64"]\n",beamsz,rbytes));
                                 
                                 
                             }else{
-                                PMPRINT(MOD_TBINX,TBINX_V2,(stderr,"beam read failed pb[%p] read[%lld]\n",bp,rbytes));
+                                PMPRINT(MOD_TBINX,TBINX_V2,(stderr,"beam read failed pb[%p] read[%"PRId64"]\n",bp,rbytes));
                             }
 
                         }
@@ -973,16 +896,16 @@ int s_process_file(app_cfg_t *cfg)
                         byte *cp = (byte *)MB1_PCHECKSUM_U32(mb1);
 
                         if( ((rbytes=mfile_read(ifile,cp,MB1_CHECKSUM_BYTES))==MB1_CHECKSUM_BYTES)){
-                            //                                    PMPRINT(MOD_TBINX,TBINX_V2,(stderr,"chksum read clen[%lld]\n",rbytes));
+                            //                                    PMPRINT(MOD_TBINX,TBINX_V2,(stderr,"chksum read clen[%"PRId64"]\n",rbytes));
                             //                                    PMPRINT(MOD_TBINX,TBINX_V3,(stderr,"  chksum [%0X]\n",pmessage->chksum));
                             
                             rec_valid=true;
                         }else{
-                            PMPRINT(MOD_TBINX,MM_WARN,(stderr,"chksum read failed [%lld]\n",rbytes));
+                            PMPRINT(MOD_TBINX,MM_WARN,(stderr,"chksum read failed [%"PRId64"]\n",rbytes));
                         }
 
                     }else{
-                        PMPRINT(MOD_TBINX,MM_WARN,(stderr,"header read failed [%lld]\n",rbytes));
+                        PMPRINT(MOD_TBINX,MM_WARN,(stderr,"header read failed [%"PRId64"]\n",rbytes));
                     }
                     
                     if (rec_valid && ferror==false) {
