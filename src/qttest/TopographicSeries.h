@@ -85,7 +85,8 @@ public:
     m_minLongit = std::numeric_limits<double>::max();
     m_maxLongit = std::numeric_limits<double>::lowest();
   }
-    
+
+
 public Q_SLOTS:
 
   protected:
@@ -97,6 +98,8 @@ public Q_SLOTS:
   double m_minHeight;
   double m_maxHeight;
 
+  QSurfaceDataArray *m_dataArray;
+  
 };
 
 #endif // TOPOGRAPHICSERIES_H
