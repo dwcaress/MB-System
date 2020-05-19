@@ -34,14 +34,14 @@ SOURCES += \
     BackEnd.cpp
 
 # User *MUST* set environment variable QT_HOME
-INCDIR = $$(QT_HOME)
-message(Using INCDIR $$INCDIR - ok?)
+##INCDIR = $$(QT_HOME)
+##message(Using INCDIR $$INCDIR - ok?)
 
-INCLUDEPATH += $$INCDIR/5.14.2/Src/qtdatavis3d/src/
-INCLUDEPATH += $$INCDIR/5.14.2/Src/qtdatavis3d/src/datavisualization/global
-INCLUDEPATH += $$INCDIR/5.14.2/Src/qtdatavis3d/src/datavisualization/engine/
-INCLUDEPATH += $$INCDIR/5.14.2/Src/qtdatavis3d/src/datavisualization/data/
-INCLUDEPATH += $$INCDIR/5.14.2/Src/qtdatavis3d/src/datavisualization/theme
+##INCLUDEPATH += $$INCDIR/5.14.2/Src/qtdatavis3d/src/
+##INCLUDEPATH += $$INCDIR/5.14.2/Src/qtdatavis3d/src/datavisualization/global
+##INCLUDEPATH += $$INCDIR/5.14.2/Src/qtdatavis3d/src/datavisualization/engine/
+##INCLUDEPATH += $$INCDIR/5.14.2/Src/qtdatavis3d/src/datavisualization/data/
+##INCLUDEPATH += $$INCDIR/5.14.2/Src/qtdatavis3d/src/datavisualization/theme
 
 INCLUDEPATH += datavisualizationqml2
 
