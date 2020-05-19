@@ -143,21 +143,18 @@ void BackEnd::setGridFile(QUrl fileURL) {
     }
     qDebug() << "Opened " << fileURL;
 
-    QObject *object;
-
-    object = g_rootWindow->findChild<QObject *>("surface3DItem");
-    if (!object) {
-        qCritical() << "Couldn't find \"surface3DItem\" object in GUI";
-        return;
-    }
-    qDebug() << "surface3DItem width: " << ((QQuickItem *)object)->width();
-    qDebug() << "surface3DItem height: " << ((QQuickItem *)object)->height();
-    qDebug() << "areaWidth: " << gmtGrid->header->wesn[1] - gmtGrid->header->wesn[0];
-    qDebug() << "areaHeight: " << gmtGrid->header->wesn[3] - gmtGrid->header->wesn[2];
+    qDebug() << "sizeof(QVector3D) " << sizeof(QVector3D);
+    size_t bytesNeeded = gmtGrid->header->n_rows * gmtGrid->header->n_columns *
+      sizeof(QVector3D);
+    
+    qDebug() << "total " << gmtGrid->header->n_rows * gmtGrid->header->n_columns
+	     << " points, " << bytesNeeded << " bytes";
 
     // Load data into series
+    qDebug() << "call setTopography()";
     m_topographicSeries->setTopography(gmtApi, gmtGrid);
-
+    qDebug() << "returned from setTopography()";
+    
     m_topographicSeries->setItemLabelFormat(QStringLiteral("@yLabel m"));
     qDebug() << "surface3D width: " << m_surface->width();
     qDebug() << "surface3D height: " << m_surface->height();
@@ -179,7 +176,9 @@ void BackEnd::setGridFile(QUrl fileURL) {
     QValue3DAxis *axis = m_surface->axisX();
     qDebug() << "current X (longit) min: " << axis->min() << ", max: " << axis->max();
     axis->setRange(min, max);
-    // axis->setLabelFormat(QStringLiteral("%.0f"));
+    if (strstr(gmtGrid->header->x_units, "meters")) {
+      axis->setLabelFormat(QStringLiteral("%.0f"));
+    }
     axis->setTitle(gmtGrid->header->x_units);
     axis->setTitleVisible(true);
 
@@ -197,7 +196,9 @@ void BackEnd::setGridFile(QUrl fileURL) {
     axis = m_surface->axisZ();
     qDebug() << "current Z (latit) min: " << axis->min() << ", max: " << axis->max();
     axis->setRange(min, max);
-    // axis->setLabelFormat(QStringLiteral("%.0f"));
+    if (strstr(gmtGrid->header->y_units, "meters")) {
+      axis->setLabelFormat(QStringLiteral("%.0f"));
+    }
     axis->setTitle(gmtGrid->header->y_units);  // note qt transposes z and y
     axis->setTitleVisible(true);
 
@@ -209,6 +210,9 @@ void BackEnd::setGridFile(QUrl fileURL) {
     m_surface->addSeries(m_topographicSeries);
     qDebug() << "returned from addSeries()";
 
+    // Freeing data array causes segfault
+    // m_topographicSeries->freeDataArray();
+    
     qDebug() << "after adding topo series, found " << m_surface->countSeriesFunc(&seriesList)
             << " series";
 
