@@ -26,13 +26,13 @@ ApplicationWindow {
     height: 880
     title: "TEST4"
 
-    property int selectedAxisLabel: -1
+    property int mySelectedAxis: -1
     property real dragSpeedModifier: 100.0
     property int currentMouseX: -1
     property int currentMouseY: -1
     property int previousMouseX: -1
     property int previousMouseY: -1
-
+    property bool panMode: false
 
     Settings2dWindow {
         id: settings2d
@@ -254,9 +254,15 @@ ApplicationWindow {
             RadioButton {
                 checked: true
                 text: qsTr("Rotate")
+                onClicked: { console.log("Rotate selected"); panMode = false
+                }
             }
             RadioButton {
                 text: qsTr("Pan")
+                onClicked: { console.log("Pan selected")
+                    panMode = true;
+                }
+
             }
 
         }
@@ -275,15 +281,15 @@ ApplicationWindow {
                 id: surface3D
 
 
-                  theme: Theme3D {
+                theme: Theme3D {
                     type: Theme3D.ThemeQt
                     labelBorderEnabled: false
                     font.pointSize: 35
                     labelBackgroundEnabled: true
 
                     //  lightStrength: 1.
-		    lightStrength: 5.
-             	    ambientLightStrength: .3
+                    lightStrength: 5.
+                    ambientLightStrength: .3
                     colorStyle: Theme3D.ColorStyleRangeGradient
 
                     baseGradients: [haxbyGradient]
@@ -313,12 +319,12 @@ ApplicationWindow {
 
                     if (selectedElement >= AbstractGraph3D.ElementAxisXLabel
                             && selectedElement <= AbstractGraph3D.ElementAxisZLabel) {
-                        selectedAxisLabel = selectedElement
-                        console.log("set selected axis=", selectedAxisLabel)
+                        mySelectedAxis = selectedElement
+                        console.log("set selected axis=", mySelectedAxis)
                     }
                     else {
-                        console.log("selected a non-axis element; set selected axis = -1")
-                        selectedAxisLabel = -1
+                        // console.log("selected a non-axis element; set selected axis = -1")
+                        if (!panMode) mySelectedAxis = -1
                     }
                 }
 
@@ -338,8 +344,12 @@ ApplicationWindow {
                     currentMouseX = mouse.x;
                     currentMouseY = mouse.y;
 
-                    if (pressed && selectedAxisLabel != -1) {
-                        // User has selected an axis
+                    if (pressed && panMode && mySelectedAxis == -1) {
+                        console.log("call dragAxes()");
+                        item1.dragAxes();
+                    }
+                    else if (pressed && mySelectedAxis != -1) {
+                        console.log("call dragAxis(selectedAxis)");
                         item1.dragAxis();
                     }
 
@@ -354,7 +364,7 @@ ApplicationWindow {
                 onReleased: {
                     // We need to clear mouse positions and selected axis, because touch devices cannot
                     // track position all the time
-                    selectedAxisLabel = -1
+                    mySelectedAxis = -1
                     currentMouseX = -1
                     currentMouseY = -1
                     previousMouseX = -1
@@ -381,11 +391,11 @@ ApplicationWindow {
             var moveY = currentMouseY - previousMouseY
             // console.log("dragAxis(): moveX=", moveX, "moveY=", moveY)
             // Adjust axes
-            switch (selectedAxisLabel) {
+            switch (mySelectedAxis) {
             case AbstractGraph3D.ElementAxisXLabel:
                 var distance = ((moveX - moveY) * cameraMultiplier) / dragSpeedModifier
                 distance *= (surface3D.axisX.max -surface3D.axisX.min)
-                // console.log("X: distance=", distance)
+                console.log("X: distance=", distance)
                 // Check if we need to change min or max first to avoid invalid ranges
                 if (distance > 0) {
                     surface3D.axisX.min -= distance
@@ -398,7 +408,7 @@ ApplicationWindow {
             case AbstractGraph3D.ElementAxisYLabel:
                 distance = moveY / dragSpeedModifier
                 distance *= (surface3D.axisY.max -surface3D.axisY.min)
-                // console.log("Y: distance=", distance)
+                console.log("Y: distance=", distance)
                 // Check if we need to change min or max first to avoid invalid ranges
                 if (distance > 0) {
                     surface3D.axisY.max += distance
@@ -412,7 +422,7 @@ ApplicationWindow {
                 distance = ((moveX + moveY) * cameraMultiplier) / dragSpeedModifier
                 distance *= (surface3D.axisZ.max -surface3D.axisZ.min)
                 // Check if we need to change min or max first to avoid invalid ranges
-                // console.log("Z: distance=", distance)
+                console.log("Z: distance=", distance)
                 if (distance > 0) {
                     surface3D.axisZ.max += distance
                     surface3D.axisZ.min += distance
@@ -423,7 +433,72 @@ ApplicationWindow {
                 break
             }
         }
-    }
+
+        // Change range of selected axis to reflect mouse-drag
+        function dragAxes() {
+            // console.log("dragAxes()")
+            // Do nothing if previous mouse position is uninitialized
+            if (previousMouseX === -1) {
+                // console.log("dragAxis(): previousMousX=-1 just return")
+                return
+            }
+
+            // Directional drag multipliers based on rotation. Camera is locked
+            // to 45 degrees, so we can use one precalculated value instead of
+            // calculating xx, xy, zx and zy individually
+            var cameraMultiplier = 0.70710678; // Need to multiply angle by axis range
+
+            // Calculate the mouse move amount
+            var moveX = currentMouseX - previousMouseX
+            var moveY = currentMouseY - previousMouseY
+            // console.log("dragAxes(): moveX=", moveX, "moveY=", moveY)
+            // Adjust axes
+
+            // Adjust x-axis
+            var distance = ((moveX - moveY) * cameraMultiplier) / dragSpeedModifier
+            distance *= (surface3D.axisX.max -surface3D.axisX.min)
+            // console.log("X: distance=", distance)
+            // Check if we need to change min or max first to avoid invalid ranges
+            if (distance > 0) {
+                surface3D.axisX.min -= distance
+                surface3D.axisX.max -= distance
+            } else {
+                surface3D.axisX.max -= distance
+                surface3D.axisX.min -= distance
+            }
+
+            /* ***
+            // Adjust y-axis
+            distance = moveY / dragSpeedModifier
+            distance *= (surface3D.axisY.max -surface3D.axisY.min)
+            // console.log("Y: distance=", distance)
+            // Check if we need to change min or max first to avoid invalid ranges
+            if (distance > 0) {
+                surface3D.axisY.max += distance
+                surface3D.axisY.min += distance
+            } else {
+                surface3D.axisY.min += distance
+                surface3D.axisY.max += distance
+            }
+	    *** */
+                // Adjust z-axis
+                distance = ((moveX + moveY) * cameraMultiplier) / dragSpeedModifier
+                distance *= (surface3D.axisZ.max -surface3D.axisZ.min)
+                // Check if we need to change min or max first to avoid invalid ranges
+                console.log("Z: distance=", distance)
+                if (distance > 0) {
+                    surface3D.axisZ.max += distance
+                    surface3D.axisZ.min += distance
+                } else {
+                    surface3D.axisZ.min += distance
+                    surface3D.axisZ.max += distance
+                }
+
+        }
+    } // Item1
+
+
+
 
 
     MessageDialog {
