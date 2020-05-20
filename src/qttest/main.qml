@@ -245,25 +245,29 @@ ApplicationWindow {
             color: "black"
         }
 
+
         RowLayout {
             id: radioLayout
             anchors.top: selectedFile.bottom
             anchors.topMargin: 0
-            Text { text: "Mouse mode: " }
 
-            RadioButton {
-                checked: true
-                text: qsTr("Rotate")
-                onClicked: { console.log("Rotate selected"); panMode = false
+            CheckBox {
+                text: qsTr("Left mouse pan enabled")
+                anchors.top: selectedFile.bottom
+                anchors.topMargin: 0
+                onClicked: {
+                    if (checkState == Qt.Checked) {
+                        panMode = true;
+                        console.log("pan enabled")
+                    }
+                    else {
+                        panMode = false;
+                        console.log("pan disabled")
+                    }
                 }
             }
-            RadioButton {
-                text: qsTr("Pan")
-                onClicked: { console.log("Pan selected")
-                    panMode = true;
-                }
 
-            }
+
 
         }
         Item {
@@ -480,19 +484,19 @@ ApplicationWindow {
                 surface3D.axisY.min += distance
                 surface3D.axisY.max += distance
             }
-	    *** */
-                // Adjust z-axis
-                distance = ((moveX + moveY) * cameraMultiplier) / dragSpeedModifier
-                distance *= (surface3D.axisZ.max -surface3D.axisZ.min)
-                // Check if we need to change min or max first to avoid invalid ranges
-                console.log("Z: distance=", distance)
-                if (distance > 0) {
-                    surface3D.axisZ.max += distance
-                    surface3D.axisZ.min += distance
-                } else {
-                    surface3D.axisZ.min += distance
-                    surface3D.axisZ.max += distance
-                }
+        *** */
+            // Adjust z-axis
+            distance = ((moveX + moveY) * cameraMultiplier) / dragSpeedModifier
+            distance *= (surface3D.axisZ.max -surface3D.axisZ.min)
+            // Check if we need to change min or max first to avoid invalid ranges
+            console.log("Z: distance=", distance)
+            if (distance > 0) {
+                surface3D.axisZ.max += distance
+                surface3D.axisZ.min += distance
+            } else {
+                surface3D.axisZ.min += distance
+                surface3D.axisZ.max += distance
+            }
 
         }
     } // Item1
