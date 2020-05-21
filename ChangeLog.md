@@ -347,6 +347,14 @@ announced releases. The source distributions associated with all releases, major
 ### MB-System Version 5.7 Release Notes:
 --
 
+Mbnavadjust: Fixed crash on Linux when executing the Auto Set Vertical Offset
+function (didn't dimension arrays large enough).
+
+Writing GMT grids: Fixed crash reported by Joaquim Luis on Windows when writing
+GMT grids - the problem was a function call that caused GDAL to allocate a string
+but then it allowing that pointer to be freed in GMT functions. The solution is
+to copy the string and free the pointer using a GDAL call.
+
 #### 5.7.6beta36 (May 17, 2020)
 
 Mbgrd3obj: Had to add #ifdef's on GMT version because the number of parameters
