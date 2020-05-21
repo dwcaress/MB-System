@@ -473,8 +473,8 @@ int mb_write_gmt_grd(int verbose, const char *grdfile, float *grid,
     if ((eErr = OSRExportToProj4(hSRS, &pszResult)) != OGRERR_NONE) {
       fprintf(stderr, "Failed to convert the SRS to Proj syntax\n");
     }
-    header->ProjRefPROJ4 = strdup(pszResult);
-    CPLFree(pszResult);
+    header->ProjRefPROJ4 = gmt_strdup_noquote(pszResult); // allocated within GMT because it will be freed within GMT
+    CPLFree(pszResult); // make sure this is freed within GDAL because it was allocated within GDAL
     OSRDestroySpatialReference(hSRS);
   }
   fprintf(stderr,"header->ProjRefPROJ4:%s\n", header->ProjRefPROJ4);
