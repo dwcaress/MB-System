@@ -6203,8 +6203,8 @@ int mbnavadjust_autosetsvsvertical() {
     ncols = 3 * nnav;
     nrows_ba = nblockties + nblockglobalties + 3;
     ncols_ba = 3 * nblock;
-    nrows_alloc = nrows_ba; // MAX(nrows, nrows_ba);
-    ncols_alloc = ncols_ba; // MAX(ncols, ncols_ba);
+    nrows_alloc = MAX(nrows, nrows_ba);
+    ncols_alloc = MAX(ncols, ncols_ba);
     fprintf(stderr, "\nMBnavadjust block average inversion preparation:\n");
     fprintf(stderr, "     nblock:            %d\n", nblock);
     fprintf(stderr, "     nblockties:        %d\n", nblockties);

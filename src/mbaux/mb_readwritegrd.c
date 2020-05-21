@@ -466,12 +466,15 @@ int mb_write_gmt_grd(int verbose, const char *grdfile, float *grid,
   {
     OGRErr eErr = OGRERR_NONE;
     OGRSpatialReferenceH hSRS = OSRNewSpatialReference(NULL);
+    char *pszResult = NULL;
     if ((eErr = OSRImportFromEPSG(hSRS, epsgid)) != OGRERR_NONE) {
       fprintf(stderr, "Did not get the SRS from input EPSG  %d\n", epsgid);
     }
-    if ((eErr = OSRExportToProj4(hSRS, &header->ProjRefPROJ4)) != OGRERR_NONE) {
+    if ((eErr = OSRExportToProj4(hSRS, &pszResult)) != OGRERR_NONE) {
       fprintf(stderr, "Failed to convert the SRS to Proj syntax\n");
     }
+    header->ProjRefPROJ4 = strdup(pszResult);
+    CPLFree(pszResult);
     OSRDestroySpatialReference(hSRS);
   }
   fprintf(stderr,"header->ProjRefPROJ4:%s\n", header->ProjRefPROJ4);
