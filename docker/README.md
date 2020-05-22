@@ -2,10 +2,15 @@
 
 See https://github.com/dwcaress/MB-System/issues/807
 
+User-oriented instructions: [user/README.md](user/README.md).
+
+> Proper location for such instructions TBD.
+
 ## Status
 
 - Basic setup functional
 - GUI tests OK on CentOS 7 and MacOS
+- OpenGL-related issues on MacOS
 
 ## Dockerfile
 
@@ -54,6 +59,9 @@ Do some tests (see below) and then:
 
 ## Basic tests
 
+Note: very basic tests just for minimal functionality, in particular,
+no volume mappings below.
+
 ### Command-line program example
 
     $ docker run -it --rm $MBSYSTEM_IMAGE mbabsorption -h
@@ -69,7 +77,7 @@ Do some tests (see below) and then:
 
 ### GUI programs
 
-Status: preliminary (some notes [here](gui/README.md)).
+(some notes [here](gui/README.md))
 
     $ socat TCP-LISTEN:6000,reuseaddr,fork UNIX-CLIENT:\"$DISPLAY\" &
     $ ip=$(ifconfig en0 | grep "inet " | sed 's/.*inet \([0-9\.]*\).*/\1/g')
