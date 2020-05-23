@@ -698,6 +698,8 @@ libgmt_INCLUDEDIR
 libgmt_CPPFLAGS
 libgmt_LIBS
 GMT_CONF
+HAVE_GDAL_FALSE
+HAVE_GDAL_TRUE
 libgdal_CPPFLAGS
 libgdal_LIBS
 GDAL_CONF
@@ -20469,6 +20471,7 @@ $as_echo "$GDAL_LIB" >&6; }
     libgdal_CPPFLAGS="$GDAL_INC"
     libgdal_LIBS="-L$GDAL_LIB_PATH -R $GDAL_LIB_PATH -lgdal"
     libgdal_LDFLAGS="-L$GDAL_LIB_PATH"
+
 else
     $as_echo "Did not find gdal-config program, use --with-gdal-config to set the location"
     as_fn_error $? "\"Did not find gdal-config program, use --with-gdal-config to set the location\"" "$LINENO" 5
@@ -20478,6 +20481,13 @@ libgdal_LIBS=$libgdal_LIBS
 
 libgdal_CPPFLAGS=$libgdal_CPPFLAGS
 
+ if test -x "$GDAL_CONF"; then
+  HAVE_GDAL_TRUE=
+  HAVE_GDAL_FALSE='#'
+else
+  HAVE_GDAL_TRUE='#'
+  HAVE_GDAL_FALSE=
+fi
 
 
 
@@ -22892,6 +22902,10 @@ Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${BUILD_MBSVPSELECT_TRUE}" && test -z "${BUILD_MBSVPSELECT_FALSE}"; then
   as_fn_error $? "conditional \"BUILD_MBSVPSELECT\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${HAVE_GDAL_TRUE}" && test -z "${HAVE_GDAL_FALSE}"; then
+  as_fn_error $? "conditional \"HAVE_GDAL\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${GMT61PLUS_TRUE}" && test -z "${GMT61PLUS_FALSE}"; then

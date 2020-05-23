@@ -20,6 +20,7 @@ include "beta" in the tag name are preliminary and generally not announced.
 Distributions that do not include "beta" in the tag name correspond to the major,
 announced releases. The source distributions associated with all releases, major or beta, are equally accessible as tarballs through the Github interface.
 
+- Version 5.7.6beta37    May 23, 2020
 - Version 5.7.6beta36    May 17, 2020
 - Version 5.7.6beta34    May 14, 2020
 - Version 5.7.6beta33    May 5, 2020
@@ -347,13 +348,17 @@ announced releases. The source distributions associated with all releases, major
 ### MB-System Version 5.7 Release Notes:
 --
 
+#### 5.7.6beta37 (May 23, 2020)
+
 Mbnavadjust: Fixed crash on Linux when executing the Auto Set Vertical Offset
 function (didn't dimension arrays large enough).
 
 Writing GMT grids: Fixed crash reported by Joaquim Luis on Windows when writing
 GMT grids - the problem was a function call that caused GDAL to allocate a string
 but then it allowing that pointer to be freed in GMT functions. The solution is
-to copy the string and free the pointer using a GDAL call.
+to copy the string and free the pointer using a GDAL call. I also had to alter
+the configure.ac to add a conditional HAVE_GDAL that mimics one used in the
+GMT build system so that GDAL related headers are included by gmt_dev.h.
 
 #### 5.7.6beta36 (May 17, 2020)
 
