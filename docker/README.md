@@ -12,7 +12,8 @@ User-oriented instructions: [user/README.md](user/README.md).
 - GUI tests OK on CentOS 7 and MacOS
 - OpenGL-related issues on MacOS
 
-- Note: 5.7.6beta36 NOT building, see below.
+- **Note**: 5.7.6beta36 **NOT** building, see comments in [`Dockerfile`](Dockerfile)
+  and in the ticket [#807](https://github.com/dwcaress/MB-System/issues/807).
 
 ## Dockerfile
 
