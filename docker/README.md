@@ -2,7 +2,7 @@
 
 See https://github.com/dwcaress/MB-System/issues/807
 
-User-oriented instructions: [user/README.md](user/README.md).
+**NOTE**: User-oriented instructions: [user/README.md](user/README.md).
 
 > Proper location for such instructions TBD.
 
@@ -12,15 +12,18 @@ User-oriented instructions: [user/README.md](user/README.md).
 - GUI tests OK on CentOS 7 and MacOS
 - OpenGL-related issues on MacOS
 
-- **Note**: 5.7.6beta36 **NOT** building, see comments in [`Dockerfile`](Dockerfile)
-  and in the ticket [#807](https://github.com/dwcaress/MB-System/issues/807).
+- **Note**: the image build and basic testing are now OK
+  (with 5.7.6beta37 tag per latest entry in ChangeLog).
+  But programs are still reporting 5.7.6beta36.
 
 ## Dockerfile
 
 The [`Dockerfile`](Dockerfile) here for the MB-System image uses `centos:7`
-as base image. Dependencies installed according to general instructions in
-the project website, relevant CI scripts, and as needed while doing testing  
-of the system, for example:
+as base image. On top of this, dependencies are installed according to
+[general instructions for CentOS](
+https://www.mbari.org/products/research-software/mb-system/how-to-download-and-install-mb-system/#toggle-id-10)
+on the project website, as well as relevant CI scripts in the repo, and as
+needed while doing testing of the system, for example:
 
 - `mesa-dri-drivers`
 - `gedit`
@@ -29,18 +32,15 @@ of the system, for example:
 
 ## Automatic image build and publication
 
-- Automatically triggered on Docker Hub upon a push to the master branch
-  at Github.
-  In this case the updated image gets the "latest" tag: `mbari/mbsystem:latest`.
-  
-    **NOTE**: This is currently enabled for the 
-    [mbari-org/MB-System](https://github.com/mbari-org/MB-System) fork.
+Image build and publication to be automatically triggered at Docker Hub:
 
-- **TODO**: Also generate versioned image upon a push to a tag.
+  - image `mbari/mbsystem:latest` upon a push to the *master* branch
+  - image `mbari/mbsystem:<tag>`  upon pushing tag `<tag>`
 
-- **TODO**(who?): Enable the above at Docker Hub for the 
-  [`dwcaress/MB-System`](https://github.com/dwcaress/MB-System)
-  repo.
+(This is currently enabled for the
+[mbari-org/MB-System](https://github.com/mbari-org/MB-System) fork.)
+
+**TODO**(who?): Enable this for [`dwcaress/MB-System`](https://github.com/dwcaress/MB-System)
 
 ## Manual image build and publication
 
@@ -49,7 +49,7 @@ reflected in the docker image.
 
 Example:
 
-    $ MBSYSTEM_IMAGE=mbari/mbsystem:5.7.6beta32
+    $ MBSYSTEM_IMAGE=mbari/mbsystem:5.7.6beta37
     $ cd ..  ## i.e., root of the MB-System codebase
     $ docker build -f docker/Dockerfile -t "$MBSYSTEM_IMAGE" .
     
@@ -60,14 +60,14 @@ Do some tests (see below) and then:
 ## Basic tests
 
 Note: very basic tests just for minimal functionality, in particular,
-no volume mappings below.
+no volume mappings are set below.
 
 ### Command-line program example
 
     $ docker run -it --rm $MBSYSTEM_IMAGE mbabsorption -h
 
     Program MBabsorption
-    MB-system Version 5.7.6beta32
+    MB-system Version 5.7.6beta36
     
     MBabsorption calculates the absorption of sound in sea water
     in dB/km as a function of frequency, temperature, salinity,
@@ -94,7 +94,13 @@ no volume mappings below.
 
 **DC & CR meeting (2020-01-13)**
 
-- Ability to access shares like titan
-- Use current host directory mapped as "home" directory
+- [x] Use current host directory mapped as "home" directory.
+  Done, see [user/README.md](user/README.md).
+
+- [x] Ability to access shares like titan.
+  This is already in place, noting that some image customization is
+  required regarding with user/group ownership.
+
 - List file with "pointers" to locations
+
 - Windows

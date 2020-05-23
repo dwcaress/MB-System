@@ -13,7 +13,7 @@
 ###################################################################
 
 # The concrete image to use:
-MBSYSTEM_IMAGE=mbari/mbsystem:5.7.6beta32
+MBSYSTEM_IMAGE=mbari/mbsystem:5.7.6beta37
 
 # Host directory to mount as /opt/MBSWorkDir in the container:
 HOST_WORK_DIR=$(pwd)

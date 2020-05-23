@@ -69,5 +69,8 @@ RUN cd /opt/MB-System/                              \
 
 WORKDIR  /opt/MBSWorkDir
 
+# due to programs failing to load libgmt
+ENV LD_LIBRARY_PATH ${LD_LIBRARY_PATH:+$LD_LIBRARY_PATH:}/usr/local/lib64
+
 # No explicit cmd or entry_point. Launcher script will typically run `bash`
 # but also allow to run any other program in the container.
