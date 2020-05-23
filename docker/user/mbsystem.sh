@@ -30,17 +30,20 @@ function usage() {
 cat << EOF
 ${0##*/}: A launcher script for the dockerized MB-System programs.
 
-Usage: ${0##*/} [-h] [-L] [program [args...]]
+Usage: ${0##*/} [options] [program [args...]]
 
 Options:
   -h                     Display this message and exit.
   -L                     Print some basic launching log messages.
+  -f                     Force container creation.
+  -m <dir>               Mount given dir as /opt/MBSWorkDir
   [program [args...]]    Desired program in the container to run.
                          By default, bash.
 
 EOF
 }
 
+doFresh=0
 doLog=0
 
 function log {
@@ -62,6 +65,15 @@ while [ $# -gt 0 ]; do
           ;;
         -L)
           doLog=1
+          shift
+          ;;
+        -f)
+          doFresh=1
+          shift
+          ;;
+        -m)
+          HOST_WORK_DIR=$2
+          shift
           shift
           ;;
         *)
@@ -112,6 +124,12 @@ already_created=$(docker ps -a --filter "name=^/${container_name}$" --format '{{
 # passed to the program (as they may be different):
 if [[ $already_created ]] && [[ $# -gt 0 ]]; then
     log "Forcing new container ${container_name} because of passed arguments."
+    docker rm "${container_name}"
+    already_created=""
+fi
+
+if [[ "$doFresh" = "1" ]]; then
+    log "Forcing new container ${container_name} because of -f"
     docker rm "${container_name}"
     already_created=""
 fi
