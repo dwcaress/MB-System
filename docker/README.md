@@ -49,7 +49,7 @@ reflected in the docker image.
 
 Example:
 
-    $ MBSYSTEM_IMAGE=mbari/mbsystem:5.7.6beta36
+    $ MBSYSTEM_IMAGE=mbari/mbsystem:5.7.6beta32
     $ cd ..  ## i.e., root of the MB-System codebase
     $ docker build -f docker/Dockerfile -t "$MBSYSTEM_IMAGE" .
     
@@ -67,7 +67,7 @@ no volume mappings below.
     $ docker run -it --rm $MBSYSTEM_IMAGE mbabsorption -h
 
     Program MBabsorption
-    MB-system Version 5.7.6beta36
+    MB-system Version 5.7.6beta32
     
     MBabsorption calculates the absorption of sound in sea water
     in dB/km as a function of frequency, temperature, salinity,
