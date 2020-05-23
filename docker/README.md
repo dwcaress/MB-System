@@ -12,19 +12,18 @@ User-oriented instructions: [user/README.md](user/README.md).
 - GUI tests OK on CentOS 7 and MacOS
 - OpenGL-related issues on MacOS
 
+- Note: 5.7.6beta36 NOT building, see below.
+
 ## Dockerfile
 
-The [`Dockerfile`](Dockerfile) here for the MB-System image build currently leverages
-[zberkowitz/mbsystem-deps:centos-7](https://hub.docker.com/r/zberkowitz/mbsystem-deps/tags)
-as base image for the build of the Mb-System itself.
-See [`../.travis.yml`](../.travis.yml) and [`centos/Dockerfile`](centos/Dockerfile). 
-
-**TODO**: Determine whether the build of the dependency base image above
-should more explicitly be incorporated as part of the overall MB-System
-image build here. In fact, other required packages are added as noted
-while advancing the tests, in particular with the GUI programs, so far:
+The [`Dockerfile`](Dockerfile) here for the MB-System image uses `centos:7`
+as base image. Dependencies installed according to general instructions in
+the project website, relevant CI scripts, and as needed while doing testing  
+of the system, for example:
 
 - `mesa-dri-drivers`
+- `gedit`
+- `evince`
 
 
 ## Automatic image build and publication
@@ -49,7 +48,7 @@ reflected in the docker image.
 
 Example:
 
-    $ MBSYSTEM_IMAGE=mbari/mbsystem:5.7.6beta32
+    $ MBSYSTEM_IMAGE=mbari/mbsystem:5.7.6beta36
     $ cd ..  ## i.e., root of the MB-System codebase
     $ docker build -f docker/Dockerfile -t "$MBSYSTEM_IMAGE" .
     
@@ -67,7 +66,7 @@ no volume mappings below.
     $ docker run -it --rm $MBSYSTEM_IMAGE mbabsorption -h
 
     Program MBabsorption
-    MB-system Version 5.7.6beta32
+    MB-system Version 5.7.6beta36
     
     MBabsorption calculates the absorption of sound in sea water
     in dB/km as a function of frequency, temperature, salinity,
