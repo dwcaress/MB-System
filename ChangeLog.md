@@ -356,9 +356,16 @@ function (didn't dimension arrays large enough).
 Writing GMT grids: Fixed crash reported by Joaquim Luis on Windows when writing
 GMT grids - the problem was a function call that caused GDAL to allocate a string
 but then it allowing that pointer to be freed in GMT functions. The solution is
-to copy the string and free the pointer using a GDAL call. I also had to alter
-the configure.ac to add a conditional HAVE_GDAL that mimics one used in the
-GMT build system so that GDAL related headers are included by gmt_dev.h.
+to ensure that memory allocated with GMT or GDAL libraries is freed from those
+same libraries. I also had to alter the configure.ac to add a conditional
+HAVE_GDAL that mimics one used in the GMT build system so that GDAL related
+headers are included by gmt_dev.h. The relevant code is only used if GDAL is
+available. If GMT version is >= 6.1.1 then the function gmt_strdup_noquote()
+is called to allocate a PROJ4 string stored in the grid header; otherwise strdup()
+is called. Building on Windows will now require GMT 6.1.1 or later.
+
+Mblevitus: Fixed errors that had been inadvertently created as part of commit #448.
+Thanks to Joaquim Luis for finding and fixing this.
 
 #### 5.7.6beta36 (May 17, 2020)
 
