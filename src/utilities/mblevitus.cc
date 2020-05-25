@@ -265,17 +265,18 @@ int main(int argc, char **argv) {
       nvelocity_tot++;
 
       /* get pressure for a given depth
-          as a function of latitude */
-      double pressure = 1.0052405 * depth[i] * (1.0 + 0.00528 * sin(DTR * latitude) * sin(DTR * latitude)) +
-                 0.00000236 * depth[i] * depth[i]
-        /* calculate water sound speed using
-            DelGrosso equations */
-        /* convert decibar to kg/cm**2 */
-        * 0.1019716;
+        as a function of latitude */
+      const double pressure_dbar = 1.0052405 * depth[i] * (1.0 + 0.00528 * sin (DTR * lat_actual) * sin(DTR * lat_actual))
+                                    + 0.00000236 * depth[i] * depth[i];
+
+      /* calculate water sound speed using
+        DelGrosso equations */
+      /* convert decibar to kg/cm**2 */
+      const double pressure = pressure_dbar * 0.1019716;
       const double c0 = 1402.392;
-      const double dltact = temperature[last_good][ilat] *
-               (5.01109398873 +
-                temperature[last_good][ilat] * (-0.0550946843172 + temperature[last_good][ilat] * 0.000221535969240));
+      const double dltact  = temperature[last_good][ilat]
+            * ( 5.01109398873 + temperature[last_good][ilat]
+              * (-0.0550946843172 + temperature[last_good][ilat] * 0.000221535969240));
       const double dltacs = salinity[last_good][ilat] * (1.32952290781 + salinity[last_good][ilat] * 0.000128955756844);
 
       const double dltacp = pressure * (0.156059257041E0 + pressure * (0.000024499868841 + pressure * -0.00000000883392332513));
