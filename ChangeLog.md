@@ -20,7 +20,7 @@ include "beta" in the tag name are preliminary and generally not announced.
 Distributions that do not include "beta" in the tag name correspond to the major,
 announced releases. The source distributions associated with all releases, major or beta, are equally accessible as tarballs through the Github interface.
 
-- Version 5.7.6beta37    May 23, 2020
+- Version 5.7.6beta37    May 26, 2020
 - Version 5.7.6beta36    May 17, 2020
 - Version 5.7.6beta34    May 14, 2020
 - Version 5.7.6beta33    May 5, 2020
@@ -348,7 +348,23 @@ announced releases. The source distributions associated with all releases, major
 ### MB-System Version 5.7 Release Notes:
 --
 
-#### 5.7.6beta37 (May 23, 2020)
+#### 5.7.6beta37 (May 26, 2020)
+
+Mbnavadjust: Fixed problems in the inversion algorithm.
+The complexity of this algorithm results from the tendency
+of overdetermined least squares solutions to work best at providing uniform scale,
+zero mean solutions. Consequently we construct the solution in three steps.
+First we solve for the average offsets
+between continuous surveys, and make this the starting model for the second step.
+Then we solve for a coarse ("chunk") perturbation model in which each chunk is a
+dataset consisting of about five sections worth of continuous survey data. This is
+done through an iterative damped relaxation procedure, and the resulting perturbation
+model is added to the starting model for the third and final step. The final step
+is to solve for a perturbation satisfying all of the navigation ties at full
+resolution. The problem is set up as an overdetermined least squares matrix
+problem and is solved using LSQR. The regularization is just penalizing the
+first derivative of the perturbation at present - we are not currently penalizing
+the second derivative.
 
 Mbnavadjust: Fixed crash on Linux when executing the Auto Set Vertical Offset
 function (didn't dimension arrays large enough).
@@ -377,6 +393,9 @@ not small in the case that a small section (by area) is entirely inside the boun
 much larger section. This case happens when adjusting navigation from surveys at
 at two very different scales (e.g. AUV survey with ship hull mounted survey,
 or ROV survey with AUV survey).
+
+Mbnavadjustmerge: Added function to merge two adjacent surveys into one with an
+internal discontinuity.
 
 #### 5.7.6beta34 (May 14, 2020)
 
