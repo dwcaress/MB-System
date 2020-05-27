@@ -12,10 +12,6 @@ See https://github.com/dwcaress/MB-System/issues/807
 - GUI tests OK on CentOS 7 and MacOS
 - OpenGL-related issues on MacOS
 
-- **Note**: the image build and basic testing are now OK
-  (with 5.7.6beta37 tag per latest entry in ChangeLog).
-  But programs are still reporting 5.7.6beta36.
-
 ## Dockerfile
 
 The [`Dockerfile`](Dockerfile) here for the MB-System image uses `centos:7`
@@ -67,7 +63,7 @@ no volume mappings are set below.
     $ docker run -it --rm $MBSYSTEM_IMAGE mbabsorption -h
 
     Program MBabsorption
-    MB-system Version 5.7.6beta36
+    MB-system Version 5.7.6beta37
     
     MBabsorption calculates the absorption of sound in sea water
     in dB/km as a function of frequency, temperature, salinity,
