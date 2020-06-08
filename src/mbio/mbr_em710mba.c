@@ -252,9 +252,30 @@ int mbr_em710mba_chk_label(int verbose, void *mbio_ptr, char *label, short *type
 		const short sonarswap = mb_swap_short(sonarunswap);
 
 		/* check for valid sonarunswap */
-		if (sonarunswap == MBSYS_SIMRAD3_EM710 || sonarunswap == MBSYS_SIMRAD3_EM712 || sonarunswap == MBSYS_SIMRAD3_EM850 ||
-		    sonarunswap == MBSYS_SIMRAD3_EM3002 || sonarunswap == MBSYS_SIMRAD3_EM302 || sonarunswap == MBSYS_SIMRAD3_EM122 ||
-		    sonarunswap == MBSYS_SIMRAD3_EM2040 || sonarunswap == MBSYS_SIMRAD3_EM2045 || sonarunswap == MBSYS_SIMRAD3_M3) {
+		if (sonarunswap == MBSYS_SIMRAD3_M3
+		    || sonarunswap == MBSYS_SIMRAD3_EM2045
+		    || sonarunswap == MBSYS_SIMRAD3_EM2040
+		    || sonarunswap == MBSYS_SIMRAD3_EM850
+		    || sonarunswap == MBSYS_SIMRAD3_EM710
+		    || sonarunswap == MBSYS_SIMRAD3_EM712
+		    || sonarunswap == MBSYS_SIMRAD3_EM302
+		    || sonarunswap == MBSYS_SIMRAD3_EM304
+		    || sonarunswap == MBSYS_SIMRAD3_EM122
+		    || sonarunswap == MBSYS_SIMRAD3_EM124
+		    || sonarunswap == MBSYS_SIMRAD3_EM120
+		    || sonarunswap == MBSYS_SIMRAD3_EM300
+		    || sonarunswap == MBSYS_SIMRAD3_EM1002
+		    || sonarunswap == MBSYS_SIMRAD3_EM2000
+		    || sonarunswap == MBSYS_SIMRAD3_EM3000
+		    || sonarunswap == MBSYS_SIMRAD3_EM3000D_1
+		    || sonarunswap == MBSYS_SIMRAD3_EM3000D_2
+		    || sonarunswap == MBSYS_SIMRAD3_EM3000D_3
+		    || sonarunswap == MBSYS_SIMRAD3_EM3000D_4
+		    || sonarunswap == MBSYS_SIMRAD3_EM3000D_5
+		    || sonarunswap == MBSYS_SIMRAD3_EM3000D_6
+		    || sonarunswap == MBSYS_SIMRAD3_EM3000D_7
+		    || sonarunswap == MBSYS_SIMRAD3_EM3000D_8
+		    || sonarunswap == MBSYS_SIMRAD3_EM3002) {
 			sonarunswapgood = true;
 		}
 		else {
@@ -262,9 +283,30 @@ int mbr_em710mba_chk_label(int verbose, void *mbio_ptr, char *label, short *type
 		}
 
 		/* check for valid sonarswap */
-		if (sonarswap == MBSYS_SIMRAD3_EM710 || sonarswap == MBSYS_SIMRAD3_EM712 || sonarswap == MBSYS_SIMRAD3_EM850 ||
-		    sonarswap == MBSYS_SIMRAD3_EM3002 || sonarswap == MBSYS_SIMRAD3_EM302 || sonarswap == MBSYS_SIMRAD3_EM122 ||
-		    sonarswap == MBSYS_SIMRAD3_EM2040 || sonarswap == MBSYS_SIMRAD3_EM2045 || sonarswap == MBSYS_SIMRAD3_M3) {
+		if (sonarswap == MBSYS_SIMRAD3_M3
+		    || sonarswap == MBSYS_SIMRAD3_EM2045
+		    || sonarswap == MBSYS_SIMRAD3_EM2040
+		    || sonarswap == MBSYS_SIMRAD3_EM850
+		    || sonarswap == MBSYS_SIMRAD3_EM710
+		    || sonarswap == MBSYS_SIMRAD3_EM712
+		    || sonarswap == MBSYS_SIMRAD3_EM302
+		    || sonarswap == MBSYS_SIMRAD3_EM304
+		    || sonarswap == MBSYS_SIMRAD3_EM122
+		    || sonarswap == MBSYS_SIMRAD3_EM124
+		    || sonarswap == MBSYS_SIMRAD3_EM120
+		    || sonarswap == MBSYS_SIMRAD3_EM300
+		    || sonarswap == MBSYS_SIMRAD3_EM1002
+		    || sonarswap == MBSYS_SIMRAD3_EM2000
+		    || sonarswap == MBSYS_SIMRAD3_EM3000
+		    || sonarswap == MBSYS_SIMRAD3_EM3000D_1
+		    || sonarswap == MBSYS_SIMRAD3_EM3000D_2
+		    || sonarswap == MBSYS_SIMRAD3_EM3000D_3
+		    || sonarswap == MBSYS_SIMRAD3_EM3000D_4
+		    || sonarswap == MBSYS_SIMRAD3_EM3000D_5
+		    || sonarswap == MBSYS_SIMRAD3_EM3000D_6
+		    || sonarswap == MBSYS_SIMRAD3_EM3000D_7
+		    || sonarswap == MBSYS_SIMRAD3_EM3000D_8
+		    || sonarswap == MBSYS_SIMRAD3_EM3002) {
 			sonarswapgood = true;
 		}
 		else {
@@ -303,13 +345,34 @@ int mbr_em710mba_chk_label(int verbose, void *mbio_ptr, char *label, short *type
 
 	/* check for valid sonar */
 	bool sonargood;
-	if (*sonar != MBSYS_SIMRAD3_EM710 && *sonar != MBSYS_SIMRAD3_EM712 && *sonar != MBSYS_SIMRAD3_EM850 &&
-	    *sonar != MBSYS_SIMRAD3_EM3002 && *sonar != MBSYS_SIMRAD3_EM302 && *sonar != MBSYS_SIMRAD3_EM122 &&
-	    *sonar != MBSYS_SIMRAD3_EM2040 && *sonar != MBSYS_SIMRAD3_EM2045 && *sonar != MBSYS_SIMRAD3_M3) {
-		sonargood = false;
+	if (*sonar == MBSYS_SIMRAD3_M3
+	    || *sonar == MBSYS_SIMRAD3_EM2045
+	    || *sonar == MBSYS_SIMRAD3_EM2040
+	    || *sonar == MBSYS_SIMRAD3_EM850
+	    || *sonar == MBSYS_SIMRAD3_EM710
+	    || *sonar == MBSYS_SIMRAD3_EM712
+	    || *sonar == MBSYS_SIMRAD3_EM302
+	    || *sonar == MBSYS_SIMRAD3_EM304
+	    || *sonar == MBSYS_SIMRAD3_EM122
+	    || *sonar == MBSYS_SIMRAD3_EM124
+	    || *sonar == MBSYS_SIMRAD3_EM120
+	    || *sonar == MBSYS_SIMRAD3_EM300
+	    || *sonar == MBSYS_SIMRAD3_EM1002
+	    || *sonar == MBSYS_SIMRAD3_EM2000
+	    || *sonar == MBSYS_SIMRAD3_EM3000
+	    || *sonar == MBSYS_SIMRAD3_EM3000D_1
+	    || *sonar == MBSYS_SIMRAD3_EM3000D_2
+	    || *sonar == MBSYS_SIMRAD3_EM3000D_3
+	    || *sonar == MBSYS_SIMRAD3_EM3000D_4
+	    || *sonar == MBSYS_SIMRAD3_EM3000D_5
+	    || *sonar == MBSYS_SIMRAD3_EM3000D_6
+	    || *sonar == MBSYS_SIMRAD3_EM3000D_7
+	    || *sonar == MBSYS_SIMRAD3_EM3000D_8
+	    || *sonar == MBSYS_SIMRAD3_EM3002) {
+		sonargood = true;
 	}
 	else {
-		sonargood = true;
+		sonargood = false;
 	}
 
 	if (startbyte == EM3_START_BYTE && !typegood && sonargood) {

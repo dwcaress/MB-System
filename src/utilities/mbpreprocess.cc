@@ -49,9 +49,6 @@ typedef enum {
     MBPREPROCESS_MERGE_ASYNC = 2,
 } merge_t;
 
-// constexpr int MBPREPROCESS_TIME_LATENCY_OFF = 0;
-// constexpr int MBPREPROCESS_TIME_LATENCY_FILE = 1;
-// constexpr int MBPREPROCESS_TIME_LATENCY_CONSTANT = 2;;
 constexpr mb_u_char MBPREPROCESS_TIME_LATENCY_APPLY_NONE = 0x00;
 constexpr mb_u_char MBPREPROCESS_TIME_LATENCY_APPLY_NAV = 0x01;
 constexpr mb_u_char MBPREPROCESS_TIME_LATENCY_APPLY_SENSORDEPTH = 0x02;
@@ -1292,6 +1289,10 @@ int main(int argc, char **argv) {
         nav_mode = MBPREPROCESS_MERGE_ASYNC;
         nav_async = MB_DATA_NAV;
       }
+      else if (iformat == MBF_KEMKMALL) {
+        nav_mode = MBPREPROCESS_MERGE_ASYNC;
+        nav_async = MB_DATA_NAV1;
+      }
       else if (iformat == MBF_RESON7KR) {
         nav_mode = MBPREPROCESS_MERGE_ASYNC;
         nav_async = MB_DATA_NAV1;
@@ -1305,6 +1306,10 @@ int main(int argc, char **argv) {
       if (iformat == MBF_EMOLDRAW || iformat == MBF_EM300RAW || iformat == MBF_EM710RAW) {
         sensordepth_mode = MBPREPROCESS_MERGE_ASYNC;
         sensordepth_async = MB_DATA_HEIGHT;
+      }
+      else if (iformat == MBF_KEMKMALL) {
+        sensordepth_mode = MBPREPROCESS_MERGE_ASYNC;
+        sensordepth_async = MB_DATA_SONARDEPTH;
       }
       else if (iformat == MBF_RESON7KR) {
         sensordepth_mode = MBPREPROCESS_MERGE_ASYNC;
@@ -1320,6 +1325,10 @@ int main(int argc, char **argv) {
         heading_mode = MBPREPROCESS_MERGE_ASYNC;
         heading_async = MB_DATA_NAV;
       }
+      else if (iformat == MBF_KEMKMALL) {
+        heading_mode = MBPREPROCESS_MERGE_ASYNC;
+        heading_async = MB_DATA_NAV1;
+      }
       else if (iformat == MBF_RESON7KR) {
         heading_mode = MBPREPROCESS_MERGE_ASYNC;
         heading_async = MB_DATA_HEADING;
@@ -1333,6 +1342,10 @@ int main(int argc, char **argv) {
       if (iformat == MBF_EMOLDRAW || iformat == MBF_EM300RAW || iformat == MBF_EM710RAW) {
         attitude_mode = MBPREPROCESS_MERGE_ASYNC;
         attitude_async = MB_DATA_ATTITUDE;
+      }
+      else if (iformat == MBF_KEMKMALL) {
+        attitude_mode = MBPREPROCESS_MERGE_ASYNC;
+        attitude_async = MB_DATA_NAV1;
       }
       else if (iformat == MBF_RESON7KR) {
         attitude_mode = MBPREPROCESS_MERGE_ASYNC;

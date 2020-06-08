@@ -536,12 +536,9 @@ int mbsys_kmbes_preprocess(int verbose, void *mbio_ptr, void *store_ptr,
             j1 = jnav - 2;
             j2 = jnav - 1;
           }
-          else if (jnav == 1){
+          else /* if (jnav == 1) */ {
             j1 = jnav - 1;
             j2 = jnav;
-          } else {
-            fprintf(stderr, "TODO(schwehr): What was supposed to happen here?\n");
-            assert(false);
           }
           dx = (pars->nav_lon[j2] - pars->nav_lon[j1]) / mtodeglon;
           dy = (pars->nav_lat[j2] - pars->nav_lat[j1]) / mtodeglat;
@@ -560,16 +557,31 @@ int mbsys_kmbes_preprocess(int verbose, void *mbio_ptr, void *store_ptr,
       }
 
       /* interpolate sensordepth */
-      if (pars->n_sensordepth > 0) {
-        /* interp_status = */ mb_linear_interp(verbose, pars->sensordepth_time_d - 1, pars->sensordepth_sensordepth - 1,
-                                        pars->n_sensordepth, time_d, &sensordepth, &jsensordepth, &interp_error);
+      if (kluge_auvsentrysensordepth) {
+        if (pars->n_sensordepth > 0) {
+          /* interp_status = */ mb_linear_interp(verbose, pars->sensordepth_time_d - 1, pars->sensordepth_sensordepth - 1,
+                                          pars->n_sensordepth, time_d, &sensordepth, &jsensordepth, &interp_error);
+          mrz->pingInfo.txTransducerDepth_m = sensordepth;
+          xmt->xmtPingInfo.sensordepth = sensordepth;
+        }
+        else {
+          sensordepth = -mrz->pingInfo.ellipsoidHeightReRefPoint_m;
+          mrz->pingInfo.txTransducerDepth_m = sensordepth;
+          xmt->xmtPingInfo.sensordepth = sensordepth;
+        }
       }
-      else if (kluge_auvsentrysensordepth) {
-        sensordepth = -mrz->pingInfo.ellipsoidHeightReRefPoint_m;
-        sensordepth = -mrz->pingInfo.ellipsoidHeightReRefPoint_m;
+      else {
+        if (pars->n_sensordepth > 0) {
+          /* interp_status = */ mb_linear_interp(verbose, pars->sensordepth_time_d - 1, pars->sensordepth_sensordepth - 1,
+                                          pars->n_sensordepth, time_d, &sensordepth, &jsensordepth, &interp_error);
+          mrz->pingInfo.txTransducerDepth_m = sensordepth;
+          xmt->xmtPingInfo.sensordepth = sensordepth;
+        }
+        else {
+          sensordepth = mrz->pingInfo.txTransducerDepth_m;
+          xmt->xmtPingInfo.sensordepth = sensordepth;
+        }
       }
-      mrz->pingInfo.txTransducerDepth_m = sensordepth;
-      xmt->xmtPingInfo.sensordepth = sensordepth;
 
       /* interpolate heading */
       if (pars->n_heading > 0) {
@@ -679,11 +691,14 @@ int mbsys_kmbes_preprocess(int verbose, void *mbio_ptr, void *store_ptr,
         tx_orientation.roll = roll;
         tx_orientation.pitch = pitch;
         tx_orientation.heading = heading;
-        rx_steer = mrz->sounding[i].beamAngleReRx_deg;
+        rx_steer = mrz->sounding[i].beamAngleReRx_deg - mrz->sounding[i].beamAngleCorrection_deg;
         rx_orientation.roll = beamroll;
         rx_orientation.pitch = beampitch;
         rx_orientation.heading = beamheading;
         reference_heading = heading;
+//fprintf(stderr, "%s:%d:%s: beam %d: beamAngleReRx_deg:%f beamAngleCorrection_deg:%f roll:%f %f rx_steer:%f\n",
+//__FILE__, __LINE__, __func__, i, mrz->sounding[i].beamAngleReRx_deg, mrz->sounding[i].beamAngleCorrection_deg,
+//roll, beamroll, rx_steer);
 
         mb_3D_orientation rx_align = {0.0, 0.0, 0.0};  // TODO(schwehr): Bug?
         status = mb_beaudoin(verbose, tx_align, tx_orientation, tx_steer, rx_align, rx_orientation, rx_steer,
@@ -714,6 +729,9 @@ int mbsys_kmbes_preprocess(int verbose, void *mbio_ptr, void *store_ptr,
         }
         else if (kluge_auvsentrysensordepth) {
           receive_sensordepth = -mrz->pingInfo.ellipsoidHeightReRefPoint_m;
+        }
+        else {
+          sensordepth = mrz->pingInfo.txTransducerDepth_m;
         }
         if (pars->n_attitude > 0) {
           /* interp_status = */ mb_linear_interp(verbose, pars->attitude_time_d - 1, pars->attitude_heave - 1, pars->n_attitude,
@@ -772,7 +790,11 @@ int mbsys_kmbes_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
   // struct mbsys_kmbes_mrz *mrz = (struct mbsys_kmbes_mrz *)&store->mrz[0];
   struct mbsys_kmbes_spo *spo = (struct mbsys_kmbes_spo *)&store->spo;
   struct mbsys_kmbes_skm *skm = (struct mbsys_kmbes_skm *)&store->skm;
+  struct mbsys_kmbes_sde *sde = (struct mbsys_kmbes_sde *)&store->sde;
+  struct mbsys_kmbes_shi *shi = (struct mbsys_kmbes_shi *)&store->shi;
+  struct mbsys_kmbes_sha *sha = (struct mbsys_kmbes_sha *)&store->sha;
   struct mbsys_kmbes_cpo *cpo = (struct mbsys_kmbes_cpo *)&store->cpo;
+  struct mbsys_kmbes_mrz *mrz = (struct mbsys_kmbes_mrz *)&store->mrz[0];
   struct mbsys_kmbes_xmc *xmc = (struct mbsys_kmbes_xmc *)&store->xmc;
   struct mbsys_kmbes_xmt *xmt = (struct mbsys_kmbes_xmt *)&store->xmt[0];
   struct mbsys_kmbes_xms *xms = (struct mbsys_kmbes_xms *)&store->xms;
@@ -787,18 +809,15 @@ int mbsys_kmbes_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
       time_i[i] = store->time_i[i];
     *time_d = store->time_d;
 
-    /* derive overall navigation from first sub-ping for this ping */
-    struct mbsys_kmbes_mrz *mrz = (struct mbsys_kmbes_mrz *)&store->mrz[0];
-
     /* get navigation */
-    *navlon = mrz->pingInfo.longitude_deg;
-    *navlat = mrz->pingInfo.latitude_deg;
+    *navlon = xmt->xmtPingInfo.longitude;
+    *navlat = xmt->xmtPingInfo.latitude;
 
     /* get speed */
     *speed = 3.6 * xmt->xmtPingInfo.speed;
 
     /* get heading */
-    *heading = mrz->pingInfo.headingVessel_deg;
+    *heading = xmt->xmtPingInfo.heading;
 
     /* set beamwidths in mb_io structure */
     mb_io_ptr->beamwidth_xtrack = mrz->pingInfo.receiveArraySizeUsed_deg;
@@ -816,11 +835,13 @@ int mbsys_kmbes_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
             i < (mrz->rxInfo.numSoundingsMaxMain + mrz->rxInfo.numExtraDetections);
             i++) {
         bath[numSoundings] = mrz->sounding[i].z_reRefPoint_m
-                              + mrz->pingInfo.txTransducerDepth_m;
-//fprintf(stderr,"txdepth:%f waterlevel:%f ellipsoidHeightReRefPoint_m:%f bath:%f\n",
+                              - mrz->pingInfo.z_waterLevelReRefPoint_m ;
+//fprintf(stderr,"%s:%d:%s: %4.4d/%2.2d/%2.2d-%2.2d:%2.2d:%2.2d.%6.6d txd:%f wlr:%f ehr:%f zreref:%f bath:%f\n",
+//__FILE__, __LINE__, __func__,
+//time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6],
 //mrz->pingInfo.txTransducerDepth_m, mrz->pingInfo.z_waterLevelReRefPoint_m,
 //mrz->pingInfo.ellipsoidHeightReRefPoint_m,
-//mrz->sounding[i].z_reRefPoint_m);
+//mrz->sounding[i].z_reRefPoint_m, bath[numSoundings]);
         beamflag[numSoundings] = mrz->sounding[i].beamflag;
         bathacrosstrack[numSoundings] = mrz->sounding[i].y_reRefPoint_m;
         bathalongtrack[numSoundings] = mrz->sounding[i].x_reRefPoint_m;
@@ -1016,6 +1037,94 @@ int mbsys_kmbes_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
     /* done translating values */
   }
 
+  /* extract data from structure */
+  else if (*kind == MB_DATA_SONARDEPTH) {
+    /* get time */
+    for (int i = 0; i < 7; i++)
+      time_i[i] = store->time_i[i];
+    *time_d = store->time_d;
+
+    /* get navigation */
+    *navlon = xmt->xmtPingInfo.longitude;
+    *navlat = xmt->xmtPingInfo.latitude;
+
+    /* get speed */
+    *speed = 3.6 * xmt->xmtPingInfo.speed;
+
+    /* get heading */
+    *heading = xmt->xmtPingInfo.heading;
+
+    /* set beam and pixel numbers */
+    *nbath = 0;
+    *namp = 0;
+    *nss = 0;
+
+    if (verbose >= 5) {
+      fprintf(stderr, "\ndbg4  Data extracted by MBIO function <%s>\n", __func__);
+      fprintf(stderr, "dbg4  Extracted values:\n");
+      fprintf(stderr, "dbg4       kind:       %d\n", *kind);
+      fprintf(stderr, "dbg4       error:      %d\n", *error);
+      fprintf(stderr, "dbg4       time_i[0]:  %d\n", time_i[0]);
+      fprintf(stderr, "dbg4       time_i[1]:  %d\n", time_i[1]);
+      fprintf(stderr, "dbg4       time_i[2]:  %d\n", time_i[2]);
+      fprintf(stderr, "dbg4       time_i[3]:  %d\n", time_i[3]);
+      fprintf(stderr, "dbg4       time_i[4]:  %d\n", time_i[4]);
+      fprintf(stderr, "dbg4       time_i[5]:  %d\n", time_i[5]);
+      fprintf(stderr, "dbg4       time_i[6]:  %d\n", time_i[6]);
+      fprintf(stderr, "dbg4       time_d:     %f\n", *time_d);
+      fprintf(stderr, "dbg4       longitude:  %f\n", *navlon);
+      fprintf(stderr, "dbg4       latitude:   %f\n", *navlat);
+      fprintf(stderr, "dbg4       speed:      %f\n", *speed);
+      fprintf(stderr, "dbg4       heading:    %f\n", *heading);
+    }
+
+    /* done translating values */
+  }
+
+  /* extract data from structure */
+  else if (*kind == MB_DATA_HEADING) {
+    /* get time */
+    for (int i = 0; i < 7; i++)
+      time_i[i] = store->time_i[i];
+    *time_d = store->time_d;
+
+    /* get navigation */
+    *navlon = xmt->xmtPingInfo.longitude;
+    *navlat = xmt->xmtPingInfo.latitude;
+
+    /* get speed */
+    *speed = 3.6 * xmt->xmtPingInfo.speed;
+
+    /* get heading */
+    *heading = sha->sensorData[0].headingCorrected_deg;
+
+    /* set beam and pixel numbers */
+    *nbath = 0;
+    *namp = 0;
+    *nss = 0;
+
+    if (verbose >= 5) {
+      fprintf(stderr, "\ndbg4  Data extracted by MBIO function <%s>\n", __func__);
+      fprintf(stderr, "dbg4  Extracted values:\n");
+      fprintf(stderr, "dbg4       kind:       %d\n", *kind);
+      fprintf(stderr, "dbg4       error:      %d\n", *error);
+      fprintf(stderr, "dbg4       time_i[0]:  %d\n", time_i[0]);
+      fprintf(stderr, "dbg4       time_i[1]:  %d\n", time_i[1]);
+      fprintf(stderr, "dbg4       time_i[2]:  %d\n", time_i[2]);
+      fprintf(stderr, "dbg4       time_i[3]:  %d\n", time_i[3]);
+      fprintf(stderr, "dbg4       time_i[4]:  %d\n", time_i[4]);
+      fprintf(stderr, "dbg4       time_i[5]:  %d\n", time_i[5]);
+      fprintf(stderr, "dbg4       time_i[6]:  %d\n", time_i[6]);
+      fprintf(stderr, "dbg4       time_d:     %f\n", *time_d);
+      fprintf(stderr, "dbg4       longitude:  %f\n", *navlon);
+      fprintf(stderr, "dbg4       latitude:   %f\n", *navlat);
+      fprintf(stderr, "dbg4       speed:      %f\n", *speed);
+      fprintf(stderr, "dbg4       heading:    %f\n", *heading);
+    }
+
+    /* done translating values */
+  }
+
   /* extract comment from structure */
   else if (*kind == MB_DATA_COMMENT) {
     /* get time */
@@ -1176,11 +1285,12 @@ int mbsys_kmbes_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, i
   /* get data structure pointer */
   struct mbsys_kmbes_struct *store = (struct mbsys_kmbes_struct *)store_ptr;
 
-  // struct mbsys_kmbes_mrz *mrz = (struct mbsys_kmbes_mrz *)&store->mrz[0];
   struct mbsys_kmbes_spo *spo = (struct mbsys_kmbes_spo *)&store->spo;
   struct mbsys_kmbes_skm *skm = (struct mbsys_kmbes_skm *)&store->skm;
+  struct mbsys_kmbes_sde *sde = (struct mbsys_kmbes_sde *)&store->sde;
+  struct mbsys_kmbes_sha *sha = (struct mbsys_kmbes_sha *)&store->sha;
   struct mbsys_kmbes_cpo *cpo = (struct mbsys_kmbes_cpo *)&store->cpo;
-  // struct mbsys_kmbes_xmc *xmc = (struct mbsys_kmbes_xmc *)&store->xmc;
+  struct mbsys_kmbes_xmc *xmc = (struct mbsys_kmbes_xmc *)&store->xmc;
   struct mbsys_kmbes_xmt *xmt = (struct mbsys_kmbes_xmt *)&store->xmt[0];
   struct mbsys_kmbes_xms *xms = (struct mbsys_kmbes_xms *)&store->xms;
 
@@ -1209,7 +1319,9 @@ int mbsys_kmbes_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, i
             i < (mrz->rxInfo.numSoundingsMaxMain + mrz->rxInfo.numExtraDetections);
             i++) {
         mrz->sounding[i].z_reRefPoint_m = bath[numSoundings]
-                                - mrz->pingInfo.txTransducerDepth_m;
+                                + mrz->pingInfo.z_waterLevelReRefPoint_m;
+//        mrz->sounding[i].z_reRefPoint_m = bath[numSoundings]
+//                                - mrz->pingInfo.txTransducerDepth_m;
         mrz->sounding[i].beamflag = beamflag[numSoundings];
         mrz->sounding[i].x_reRefPoint_m = bathalongtrack[numSoundings];
         mrz->sounding[i].y_reRefPoint_m = bathacrosstrack[numSoundings];
@@ -1286,19 +1398,39 @@ int mbsys_kmbes_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, i
     cpo->sensorData.speedOverGround_mPerSec = speed / 3.6;
   }
 
+  /* insert data in nav structure */
+  else if (store->kind == MB_DATA_SONARDEPTH) {
+
+  }
+
+  /* insert data in nav structure */
+  else if (store->kind == MB_DATA_HEADING) {
+    /* get time */
+    for (int i = 0; i < 7; i++)
+      store->time_i[i] = time_i[i];
+    store->time_d = time_d;
+
+    /* get navigation */
+
+    /* get heading */
+    sha->sensorData[0].headingCorrected_deg = heading;
+
+    /* get speed  */
+  }
+
   /* insert comment in structure */
   else if (store->kind == MB_DATA_COMMENT) {
     /* copy comment */
-    strncpy(store->xmc.comment, comment, MB_COMMENT_MAXLINE-1);
-    store->xmc.comment[MB_COMMENT_MAXLINE-1] = '\0';
+    strncpy(xmc->comment, comment, MB_COMMENT_MAXLINE-1);
+    xmc->comment[MB_COMMENT_MAXLINE-1] = '\0';
 
     /* have to construct this record now */
-    const int numBytesComment = strlen(store->xmc.comment) + (strlen(store->xmc.comment) % 2);
-    store->xmc.header.numBytesDgm = MBSYS_KMBES_HEADER_SIZE + numBytesComment + 36;
-    strncpy((char *)store->xmc.header.dgmType, "#XMC", 4);
-    store->xmc.header.dgmVersion = 0;
-    store->xmc.header.systemID = 0;
-    store->xmc.header.echoSounderID = 0;
+    const int numBytesComment = strlen(xmc->comment) + (strlen(xmc->comment) % 2);
+    xmc->header.numBytesDgm = MBSYS_KMBES_HEADER_SIZE + numBytesComment + 36;
+    strncpy((char *)xmc->header.dgmType, "#XMC", 4);
+    xmc->header.dgmVersion = 0;
+    xmc->header.systemID = 0;
+    xmc->header.echoSounderID = 0;
 
     /* insert current time as timestamp if needed (time_d close to zero) */
     if (fabs(time_d) < 1.0) {
@@ -1310,8 +1442,8 @@ int mbsys_kmbes_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, i
     for (int i = 0; i < 7; i++)
       store->time_i[i] = time_i[i];
     store->time_d = time_d;
-    store->xmc.header.time_sec = (int)time_d;
-    store->xmc.header.time_nanosec = (time_d - floor(time_d)) * 1.0e9;
+    xmc->header.time_sec = (int)time_d;
+    xmc->header.time_nanosec = (time_d - floor(time_d)) * 1.0e9;
   }
 
   const int status = MB_SUCCESS;
@@ -1331,6 +1463,7 @@ int mbsys_kmbes_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, i
 int mbsys_kmbes_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbeams, double *ttimes,
                                 double *angles, double *angles_forward, double *angles_null, double *heave,
                                 double *alongtrack_offset, double *draft, double *ssv, int *error) {
+
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1350,8 +1483,6 @@ int mbsys_kmbes_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind, 
 
   /* get data structure pointer */
   struct mbsys_kmbes_struct *store = (struct mbsys_kmbes_struct *)store_ptr;
-  struct mbsys_kmbes_mrz *mrz = (struct mbsys_kmbes_mrz *)&store->mrz[0];
-  // struct mbsys_kmbes_xmt *xmt = (struct mbsys_kmbes_xmt *)&store->xmt[0];
 
   /* get data kind */
   *kind = store->kind;
@@ -1360,6 +1491,8 @@ int mbsys_kmbes_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind, 
 
   /* extract data from structure */
   if (*kind == MB_DATA_DATA) {
+    struct mbsys_kmbes_mrz *mrz = (struct mbsys_kmbes_mrz *)&store->mrz[0];
+
     /* get depth offset (heave + sonar depth) */
     *ssv = mrz->pingInfo.soundSpeedAtTxDepth_mPerSec;
 
@@ -1790,6 +1923,8 @@ int mbsys_kmbes_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int *k
   // struct mbsys_kmbes_xmb *xmb = (struct mbsys_kmbes_xmb *)&store->xmb;
   struct mbsys_kmbes_spo *spo = (struct mbsys_kmbes_spo *)&store->spo;
   struct mbsys_kmbes_skm *skm = (struct mbsys_kmbes_skm *)&store->skm;
+  struct mbsys_kmbes_sde *sde = (struct mbsys_kmbes_sde *)&store->sde;
+  struct mbsys_kmbes_sha *sha = (struct mbsys_kmbes_sha *)&store->sha;
   struct mbsys_kmbes_cpo *cpo = (struct mbsys_kmbes_cpo *)&store->cpo;
 
   /* get data kind */
@@ -1805,8 +1940,8 @@ int mbsys_kmbes_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int *k
     *time_d = store->time_d;
 
     /* get navigation */
-    *navlon = mrz->pingInfo.longitude_deg;
-    *navlat = mrz->pingInfo.latitude_deg;
+    *navlon = xmt->xmtPingInfo.longitude;
+    *navlat = xmt->xmtPingInfo.latitude;
 
     /* get speed */
     *speed = 3.6 * xmt->xmtPingInfo.speed;
@@ -1842,13 +1977,13 @@ int mbsys_kmbes_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int *k
     /* get heading */
     *heading = spo->sensorData.courseOverGround_deg;
 
-      /* get draft  */
-      *draft = mrz->pingInfo.txTransducerDepth_m;
+    /* get draft  */
+    *draft = mrz->pingInfo.txTransducerDepth_m;
 
-      /* get attitude  */
-      *roll = xmt->xmtPingInfo.roll;
-      *pitch = xmt->xmtPingInfo.pitch;
-      *heave = xmt->xmtPingInfo.heave;
+    /* get attitude  */
+    *roll = xmt->xmtPingInfo.roll;
+    *pitch = xmt->xmtPingInfo.pitch;
+    *heave = xmt->xmtPingInfo.heave;
 
     /* done translating values */
 }
@@ -1877,9 +2012,9 @@ int mbsys_kmbes_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int *k
     *draft = mrz->pingInfo.txTransducerDepth_m;
 
     /* get attitude  */
-    *roll = xmt->xmtPingInfo.roll;
-    *pitch = xmt->xmtPingInfo.pitch;
-    *heave = xmt->xmtPingInfo.heave;
+    *roll = skm->sample[0].KMdefault.roll_deg;
+    *pitch = skm->sample[0].KMdefault.pitch_deg;
+    *heave = skm->sample[0].KMdefault.heave_m;
 
     /* done translating values */
   }
@@ -1900,6 +2035,62 @@ int mbsys_kmbes_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int *k
 
     /* get heading */
     *heading = cpo->sensorData.courseOverGround_deg;
+
+    /* get draft  */
+    *draft = mrz->pingInfo.txTransducerDepth_m;
+
+    /* get attitude  */
+    *roll = xmt->xmtPingInfo.roll;
+    *pitch = xmt->xmtPingInfo.pitch;
+    *heave = xmt->xmtPingInfo.heave;
+
+    /* done translating values */
+  }
+
+  /* extract data from nav record */
+  else if (*kind == MB_DATA_SONARDEPTH) {
+    /* get time */
+    for (int i = 0; i < 7; i++)
+      time_i[i] = store->time_i[i];
+    *time_d = store->time_d;
+
+    /* get navigation */
+    *navlon = xmt->xmtPingInfo.longitude;
+    *navlat = xmt->xmtPingInfo.latitude;
+
+    /* get speed */
+    *speed = 3.6 * xmt->xmtPingInfo.speed;
+
+    /* get heading */
+    *heading = mrz->pingInfo.headingVessel_deg;
+
+    /* get draft  */
+    *draft = sde->sensorData.depthUsed_m;
+
+    /* get attitude  */
+    *roll = xmt->xmtPingInfo.roll;
+    *pitch = xmt->xmtPingInfo.pitch;
+    *heave = xmt->xmtPingInfo.heave;
+
+    /* done translating values */
+  }
+
+  /* extract data from nav record */
+  else if (*kind == MB_DATA_HEADING) {
+    /* get time */
+    for (int i = 0; i < 7; i++)
+      time_i[i] = store->time_i[i];
+    *time_d = store->time_d;
+
+    /* get navigation */
+    *navlon = xmt->xmtPingInfo.longitude;
+    *navlat = xmt->xmtPingInfo.latitude;
+
+    /* get speed */
+    *speed = 3.6 * xmt->xmtPingInfo.speed;
+
+    /* get heading */
+    *heading = sha->sensorData[0].headingCorrected_deg;
 
     /* get draft  */
     *draft = mrz->pingInfo.txTransducerDepth_m;
@@ -1985,6 +2176,8 @@ int mbsys_kmbes_extract_nnav(int verbose, void *mbio_ptr, void *store_ptr, int n
   struct mbsys_kmbes_mrz *mrz = (struct mbsys_kmbes_mrz *)&store->mrz[0];
   struct mbsys_kmbes_spo *spo = (struct mbsys_kmbes_spo *)&store->spo;
   struct mbsys_kmbes_skm *skm = (struct mbsys_kmbes_skm *)&store->skm;
+  struct mbsys_kmbes_sde *sde = (struct mbsys_kmbes_sde *)&store->sde;
+  struct mbsys_kmbes_sha *sha = (struct mbsys_kmbes_sha *)&store->sha;
   struct mbsys_kmbes_cpo *cpo = (struct mbsys_kmbes_cpo *)&store->cpo;
   struct mbsys_kmbes_xmt *xmt = (struct mbsys_kmbes_xmt *)&store->xmt[0];
 
@@ -2026,20 +2219,23 @@ int mbsys_kmbes_extract_nnav(int verbose, void *mbio_ptr, void *store_ptr, int n
 
   /* extract data from structure */
   else if (*kind == MB_DATA_NAV) {
+    /* just one navigation value */
+    *n = 1;
+
     /* get time */
     for (int i = 0; i < 7; i++)
       time_i[i] = store->time_i[i];
-    *time_d = store->time_d;
+    time_d[0] = store->time_d;
 
     /* get navigation */
-    *navlon = spo->sensorData.correctedLong_deg;
-    *navlat = spo->sensorData.correctedLat_deg;
+    navlon[0] = spo->sensorData.correctedLong_deg;
+    navlat[0] = spo->sensorData.correctedLat_deg;
 
     /* get speed */
-    *speed = 3.6 * spo->sensorData.speedOverGround_mPerSec;
+    speed[0] = 3.6 * spo->sensorData.speedOverGround_mPerSec;
 
     /* get heading */
-    *heading = spo->sensorData.courseOverGround_deg;
+    heading[0] = spo->sensorData.courseOverGround_deg;
 
     /* get attitude  */
     roll[0] = xmt->xmtPingInfo.roll;
@@ -2049,43 +2245,40 @@ int mbsys_kmbes_extract_nnav(int verbose, void *mbio_ptr, void *store_ptr, int n
 
   /* extract data from nav record */
   else if (*kind == MB_DATA_NAV1) {
-    /* just one navigation value - in some formats there
-        are multiple values in nav records to loop over */
-    *n = 1;
+    *n = MIN(skm->infoPart.numSamplesArray, MB_NAV_MAX);
 
-    /* get time */
-    for (int i = 0; i < 7; i++)
-      time_i[i] = store->time_i[i];
-    time_d[0] = store->time_d;
+    for (int i = 0; i < *n; i++) {
+      /* get time */
+      time_d[i] = skm->sample[i].KMdefault.time_sec + 0.000000001 * skm->sample[i].KMdefault.time_nanosec;
+      mb_get_date(verbose, time_d[i], &time_i[7*i]);
 
-    /* get navigation */
-    navlon[0] = skm->sample[0].KMdefault.longitude_deg;
-    navlat[0] = skm->sample[0].KMdefault.latitude_deg;
+      /* get navigation */
+      navlon[i] = skm->sample[i].KMdefault.longitude_deg;
+      navlat[i] = skm->sample[i].KMdefault.latitude_deg;
 
-    /* get speed */
-    speed[0] = 3.6 * sqrt(skm->sample[0].KMdefault.velNorth
-                          * skm->sample[0].KMdefault.velNorth
-                        + skm->sample[0].KMdefault.velEast
-                          * skm->sample[0].KMdefault.velEast);
+      /* get speed */
+      speed[i] = 3.6 * sqrt(skm->sample[i].KMdefault.velNorth
+                            * skm->sample[i].KMdefault.velNorth
+                          + skm->sample[i].KMdefault.velEast
+                            * skm->sample[i].KMdefault.velEast);
 
-    /* get heading */
-    heading[0] = skm->sample[0].KMdefault.heading_deg;
+      /* get heading */
+      heading[i] = skm->sample[i].KMdefault.heading_deg;
 
-    /* get draft  */
-    draft[0] = mrz->pingInfo.txTransducerDepth_m;
+      /* get draft  */
+      draft[i] = mrz->pingInfo.txTransducerDepth_m;
 
-    /* get attitude  */
-    roll[0] = xmt->xmtPingInfo.roll;
-    pitch[0] = xmt->xmtPingInfo.pitch;
-    heave[0] = xmt->xmtPingInfo.heave;
+      /* get attitude  */
+      roll[i] = skm->sample[i].KMdefault.roll_deg;
+      pitch[i] = skm->sample[i].KMdefault.pitch_deg;
+      heave[i] = skm->sample[i].KMdefault.heave_m;
+    }
 
     /* done translating values */
   }
 
   /* extract data from nav record */
   else if (*kind == MB_DATA_NAV2) {
-    /* just one navigation value - in some formats there
-        are multiple values in nav records to loop over */
     *n = 1;
 
     /* get time */
@@ -2110,6 +2303,70 @@ int mbsys_kmbes_extract_nnav(int verbose, void *mbio_ptr, void *store_ptr, int n
     roll[0] = xmt->xmtPingInfo.roll;
     pitch[0] = xmt->xmtPingInfo.pitch;
     heave[0] = xmt->xmtPingInfo.heave;
+
+    /* done translating values */
+  }
+
+  /* extract data from nav record */
+  else if (*kind == MB_DATA_SONARDEPTH) {
+    *n = 1;
+
+    /* get time */
+    for (int i = 0; i < 7; i++)
+      time_i[i] = store->time_i[i];
+    time_d[0] = store->time_d;
+
+    /* get navigation */
+    *navlon = xmt->xmtPingInfo.longitude;
+    *navlat = xmt->xmtPingInfo.latitude;
+
+    /* get speed */
+    *speed = 3.6 * xmt->xmtPingInfo.speed;
+
+    /* get heading */
+    *heading = mrz->pingInfo.headingVessel_deg;
+
+    /* get draft  */
+    *draft = sde->sensorData.depthUsed_m;
+
+    /* get attitude  */
+    *roll = xmt->xmtPingInfo.roll;
+    *pitch = xmt->xmtPingInfo.pitch;
+    *heave = xmt->xmtPingInfo.heave;
+
+    /* done translating values */
+  }
+
+  /* extract data from nav record */
+  else if (*kind == MB_DATA_HEADING) {
+    *n = sha->dataInfo.numSamplesArray;
+
+    const double sha_time_d = sha->header.time_sec + 0.000000001 * sha->header.time_nanosec;
+    double sha_sample_time_d;
+    for (int i=0; i<*n; i++) {
+
+      /* get time */
+      time_d[i] = sha_time_d + 0.000000001 * sha->sensorData[i].timeSinceRecStart_nanosec;
+      mb_get_date(verbose, time_d[i], &time_i[7*i]);
+
+      /* get navigation */
+      *navlon = xmt->xmtPingInfo.longitude;
+      *navlat = xmt->xmtPingInfo.latitude;
+
+      /* get speed */
+      *speed = 3.6 * xmt->xmtPingInfo.speed;
+
+      /* get heading */
+      *heading = sha->sensorData[i].headingCorrected_deg;
+
+      /* get draft  */
+      *draft = mrz->pingInfo.txTransducerDepth_m;
+
+      /* get attitude  */
+      *roll = xmt->xmtPingInfo.roll;
+      *pitch = xmt->xmtPingInfo.pitch;
+      *heave = xmt->xmtPingInfo.heave;
+    }
 
     /* done translating values */
   }
@@ -2488,6 +2745,7 @@ int mbsys_kmbes_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_pt
         copy_beamData_p->detectedRangeInSamples = store_beamData_p->detectedRangeInSamples;
         copy_beamData_p->beamTxSectorNum = store_beamData_p->beamTxSectorNum;
         copy_beamData_p->numSampleData = store_beamData_p->numSampleData;
+        copy_beamData_p->detectedRangeInSamplesHighResolution = store_beamData_p->detectedRangeInSamplesHighResolution;
 
         alloc_size = (size_t)(store_beamData_p->numSampleData);
         if (copy_beamData_p->sampleAmplitude05dB_p_alloc_size < alloc_size) {
@@ -2554,7 +2812,10 @@ int mbsys_kmbes_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_pt
   copy->che = store->che;
   copy->iip = store->iip;
   copy->iop = store->iop;
-  copy->ib = store->ib;
+  copy->ibe = store->ibe;
+  copy->ibr = store->ibr;
+  copy->ibs = store->ibs;
+  copy->fcf = store->fcf;
   copy->xmb = store->xmb;
   copy->xmc = store->xmc;
   copy->unknown = store->unknown;
@@ -2702,8 +2963,8 @@ int mbsys_kmbes_makess(
             for (int k = k1; k < kc; k++) {
               xx = mrz->sounding[i].y_reRefPoint_m - dx2 * (k - kc);
               const int kk = MBSYS_KMBES_MAX_PIXELS / 2 + (int)(xx / (*pixel_size));
-              if (kk > 0 && kk < MBSYS_KMBES_MAX_PIXELS) {
-                ss[kk] += 10.0 * mrz->SIsample_desidB[k];
+              if (kk > 0 && kk < MBSYS_KMBES_MAX_PIXELS && mrz->SIsample_desidB[k] > -32767) {
+                ss[kk] += 0.1 * (float)(mrz->SIsample_desidB[k]);
                 ssalongtrack[kk] += mrz->sounding[i].x_reRefPoint_m;
                 ss_cnt[kk]++;
               }
@@ -2711,8 +2972,8 @@ int mbsys_kmbes_makess(
             for (int k = kc; k <= k2; k++) {
               xx = mrz->sounding[i].y_reRefPoint_m - dx1 * (k - kc);
               const int kk = MBSYS_KMBES_MAX_PIXELS / 2 + (int)(xx / (*pixel_size));
-              if (kk > 0 && kk < MBSYS_KMBES_MAX_PIXELS) {
-                ss[kk] += 10.0 * mrz->SIsample_desidB[k];
+              if (kk > 0 && kk < MBSYS_KMBES_MAX_PIXELS && mrz->SIsample_desidB[k] > -32767) {
+                ss[kk] += 0.1 * (float)(mrz->SIsample_desidB[k]);
                 ssalongtrack[kk] += mrz->sounding[i].x_reRefPoint_m;
                 ss_cnt[kk]++;
               }
@@ -2738,8 +2999,8 @@ int mbsys_kmbes_makess(
             for (int k = k1; k < kc; k++) {
               xx = mrz->sounding[i].y_reRefPoint_m + dx1 * (k - kc);
               const int kk = MBSYS_KMBES_MAX_PIXELS / 2 + (int)(xx / (*pixel_size));
-              if (kk > 0 && kk < MBSYS_KMBES_MAX_PIXELS) {
-                ss[kk] += 10.0 * mrz->SIsample_desidB[k];
+              if (kk > 0 && kk < MBSYS_KMBES_MAX_PIXELS && mrz->SIsample_desidB[k] > -32767) {
+                ss[kk] += 0.1 * (float)(mrz->SIsample_desidB[k]);
                 ssalongtrack[kk] += mrz->sounding[i].x_reRefPoint_m;
                 ss_cnt[kk]++;
               }
@@ -2747,8 +3008,8 @@ int mbsys_kmbes_makess(
             for (int k = kc; k <= k2; k++) {
               xx = mrz->sounding[i].y_reRefPoint_m + dx2 * (k - kc);
               const int kk = MBSYS_KMBES_MAX_PIXELS / 2 + (int)(xx / (*pixel_size));
-              if (kk > 0 && kk < MBSYS_KMBES_MAX_PIXELS) {
-                ss[kk] += 10.0 * mrz->SIsample_desidB[k];
+              if (kk > 0 && kk < MBSYS_KMBES_MAX_PIXELS && mrz->SIsample_desidB[k] > -32767) {
+                ss[kk] += 0.1 * (float)(mrz->SIsample_desidB[k]);
                 ssalongtrack[kk] += mrz->sounding[i].x_reRefPoint_m;
                 ss_cnt[kk]++;
               }

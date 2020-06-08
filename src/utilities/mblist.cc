@@ -101,7 +101,7 @@ int set_output(int verbose, int beams_bath, int beams_amp, int pixels_ss, bool u
     fprintf(stderr, "dbg2       use_amp:         %d\n", use_amp);
     fprintf(stderr, "dbg2       use_ss:          %d\n", use_ss);
     fprintf(stderr, "dbg2       dump_mode:       %d\n", dump_mode);
-    fprintf(stderr, "dbg2       :        %d\n", beam_set);
+    fprintf(stderr, "dbg2       beam_set:        %d\n", beam_set);
     fprintf(stderr, "dbg2       pixel_set:       %d\n", pixel_set);
     fprintf(stderr, "dbg2       beam_vertical:   %d\n", beam_vertical);
     fprintf(stderr, "dbg2       pixel_vertical:  %d\n", pixel_vertical);
@@ -2926,15 +2926,13 @@ int main(int argc, char **argv) {
 
       /* set output beams and pixels */
       if (error == MB_ERROR_NO_ERROR) {
-        /* find vertical-most non-null beam
+        /* find vertical-most non-null beam (the nadir beam)
             and port and starboard-most good beams */
-        if (use_swathbounds) {
-          status = mb_swathbounds(verbose, true, beams_bath, pixels_ss,
+        status = mb_swathbounds(verbose, true, beams_bath, pixels_ss,
                                 beamflag, bathacrosstrack,
                                 ss, ssacrosstrack,
                                 &beam_port, &beam_vertical, &beam_stbd,
                                 &pixel_port, &pixel_vertical, &pixel_stbd, &error);
-        }
 
         /* set and/or check beams and pixels to be output */
         status &= set_output(verbose, beams_bath, beams_amp, pixels_ss, use_bath, use_amp, use_ss, dump_mode, beam_set,
