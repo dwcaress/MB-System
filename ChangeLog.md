@@ -20,6 +20,7 @@ include "beta" in the tag name are preliminary and generally not announced.
 Distributions that do not include "beta" in the tag name correspond to the major,
 announced releases. The source distributions associated with all releases, major or beta, are equally accessible as tarballs through the Github interface.
 
+- Version 5.7.6beta38    June 8, 2020
 - Version 5.7.6beta37    May 26, 2020
 - Version 5.7.6beta36    May 17, 2020
 - Version 5.7.6beta34    May 14, 2020
@@ -347,6 +348,26 @@ announced releases. The source distributions associated with all releases, major
 --
 ### MB-System Version 5.7 Release Notes:
 --
+
+#### 5.7.6beta38 (June 8, 2020)
+
+Mblist: Fixed problem in which the centermost (nadir) beam was generally set to 0.
+
+Format MBF_KEMKMALL (261): Brought reading and writing of *.kmall files up to
+revision G of the Kongsberg data format specification. Also fixed problems in the
+logic relating calculated depths as stored in the format to the depth values
+reported by the MB-System API functions, and with the beam angles calculated for
+use in recalculating bathymetry through raytracing. However, problems remain
+with extracting the installation bias parameters and time latencies that must
+be applied to the asynchronous ancillary data in order to properly calculate
+these values. At present, recalculation of bathymetry by raytracing still does
+not work correctly with this format - in some cases additional attitude biases
+and time latencies must be applied, and in others the result is simply not right.
+
+Formats MBF_EM710RAW (58) and MBF_EM710MBA (59): Added allowed sonar models
+- unexpectedly we are seeing *.all files from some current generation sonar
+installations, so we have to allow EM304 and EM712 sonar models with the
+obsolete format.
 
 #### 5.7.6beta37 (May 26, 2020)
 

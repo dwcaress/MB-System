@@ -46,31 +46,35 @@
  *      unsigned int numBytesDgm;       // Datagram length in bytes.
  *   6. All data are in little-endian form.
  *   7. The data record names include:
- *      // I - datagrams
+ *      // I - datagrams (Installation and Runtime)
  *      IIP, // Info Installation PU
  *      IOP, // Runtime datagram
- *      IBE, // BIST report
+ *      IBE, // BIST error report
  *      IBR, // BIST reply
  *      IBS, // BIST short reply
  *
- *      // S-datagrams
+ *      // S-datagrams (Sensors)
  *      SPO, // Sensor POsition data
  *      SKM, // KM binary sensor data
  *      SVP, // Sound Velocity Profile
+ *      SVT, // Sensor data for sound Velocity at Transducer
  *      SCL, // Sensor CLock data
  *      SDE, // Sensor DEpth data
  *      SHI, // Sensor HeIght data
  *      SHA, // Sensor HeAding data
  *
- *      // M-datagrams
+ *      // M-datagrams (Multibeam)
  *      MRZ, // Multibeam data for raw range, depth, reflectivity, seabed image(SI) etc.
  *      MWC, // Water column multibeam data
  *
- *      // C-datagrams
+ *      // C-datagrams (Compatibility)
  *      CHE, // Compatibility heave data - store raw sensor data without modification
  *      CPO, // Compatibility position data - store raw sensor data without modification
  *
- *      // X-datagrams (extra - defined only for MB-System)
+ *      // F-datagrams (Files)
+ *      FCF, // Backscatter calibration (C) file (F) datagram
+ *
+ *      // X-datagrams (eXtra - defined only for MB-System)
  *      XMB, // The presence of this datagram indicates this file/stream has been
  *           // written by MB-System.
  *           // - this means that pings include a sidescan datagram MMS after the MRZ datagrams
@@ -89,12 +93,15 @@
 /* I - datagrams */
 #define MBSYS_KMBES_I_INSTALLATION_PARAM        "#IIP" // Installation parameters and sensor setup.
 #define MBSYS_KMBES_I_OP_RUNTIME                "#IOP" // Runtime parameters as chosen by operator.
+#define MBSYS_KMBES_I_BE_BIST                   "#IBE" // Built in test (BIST) error report.
+#define MBSYS_KMBES_I_BR_BIST                   "#IBR" // Built in test (BIST) reply.
+#define MBSYS_KMBES_I_BS_BIST                   "#IBS" // Built in test (BIST) short reply.
 
 /* S-datagrams */
 #define MBSYS_KMBES_S_POSITION                  "#SPO" // Sensor POsition data
 #define MBSYS_KMBES_S_KM_BINARY                 "#SKM" // KM binary sensor data
 #define MBSYS_KMBES_S_SOUND_VELOCITY_PROFILE    "#SVP" // Sound Velocity Profile
-#define MBSYS_KMBES_S_SOUND_VELOCITY_TRANSDUCER "#SVT"
+#define MBSYS_KMBES_S_SOUND_VELOCITY_TRANSDUCER "#SVT" // Sensor data for sound Velocity at Transducer
 #define MBSYS_KMBES_S_CLOCK                     "#SCL" // Sensor CLock datagram
 #define MBSYS_KMBES_S_DEPTH                     "#SDE" // Sensor DEpth data
 #define MBSYS_KMBES_S_HEIGHT                    "#SHI" // Sensor HeIght data
@@ -108,11 +115,14 @@
 #define MBSYS_KMBES_C_POSITION                  "#CPO"
 #define MBSYS_KMBES_C_HEAVE                     "#CHE"
 
+/* F-datagrams */
+#define MBSYS_KMBES_F_BSCALIBRATIONFILE         "#FCF"
+
 /* X-datagrams */
-#define MBSYS_KMBES_X_MBSYSTEM                 "#XMB" // Indicates these data written by MB-System (MB-System only)
-#define MBSYS_KMBES_X_COMMENT                  "#XMC" // Comment datagram (MB-System only)
-#define MBSYS_KMBES_X_EXTENSION                "#XMT" // Multibeam pseudosidescan derived from multibeam backscatter (MB-System only)
-#define MBSYS_KMBES_X_PSEUDOSIDESCAN           "#XMS" // Multibeam pseudosidescan derived from multibeam backscatter (MB-System only)
+#define MBSYS_KMBES_X_MBSYSTEM                  "#XMB" // Indicates these data written by MB-System (MB-System only)
+#define MBSYS_KMBES_X_COMMENT                   "#XMC" // Comment datagram (MB-System only)
+#define MBSYS_KMBES_X_EXTENSION                 "#XMT" // Multibeam pseudosidescan derived from multibeam backscatter (MB-System only)
+#define MBSYS_KMBES_X_PSEUDOSIDESCAN            "#XMS" // Multibeam pseudosidescan derived from multibeam backscatter (MB-System only)
 
 #define MBSYS_KMBES_SYNC_CHAR 0x23  // ascii "#"
 #define MBSYS_KMBES_QUAL_FACTOR_THRESHOLD 50
@@ -161,6 +171,9 @@
 #define MBSYS_KMBES_MAX_NUM_MST_DGMS 256
 #define MBSYS_KMBES_MAX_NUM_MWC_DGMS 256
 #define MBSYS_KMBES_MAX_NUM_MRZ_DGMS 32
+#define MBSYS_KMBES_MAX_F_FILENAME_LENGTH 64
+#define MBSYS_KMBES_MAX_F_FILE_SIZE 63000
+
 // number of datagrams to add when index table size limit reached (dynamic allocation)
 
 /*---------------------------------------------------------------*/
@@ -192,6 +205,9 @@ typedef enum {
     /* I - datagrams */
     IIP, // EM_DGM_I_INSTALLATION_PARAM
     IOP, // EM_DGM_I_OP_RUNTIME
+    IBE, // EM_DGM_I_BE_BIST
+    IBR, // EM_DGM_I_BR_BIST
+    IBS, // EM_DGM_I_BS_BIST
 
     /* S-datagrams */
     SPO, // EM_DGM_S_POSITION
@@ -210,6 +226,9 @@ typedef enum {
     /* C-datagrams */
     CPO, // EM_DGM_C_POSITION
     CHE, // EM_DGM_C_HEAVE
+
+    /* F-datagrams */
+    FCF, // EM_DGM_F_CALIBRATION
 
     // X-datagrams (extra - defined only for MB-System)
     XMB, // The presence of this datagram indicates this file/stream has been
@@ -341,7 +360,7 @@ struct mbsys_kmbes_skm_info {
 };
 
 
-struct mbsys_kmbes_km_binary {
+struct mbsys_kmbes_skm_binary {
     /* #SKM - Sensor attitude data block. Data given timestamped, not corrected. */
     mb_u_char dgmType[4];
     unsigned short numBytesDgm;     /* Datagram length in bytes. The length field at the start (4 bytes) and end of
@@ -357,10 +376,27 @@ struct mbsys_kmbes_km_binary {
     unsigned int status;            /* Bit pattern for indicating validity of sensor data, and reduced performance.
                                      * The status word consists of 32 single bit flags numbered from 0 to 31, where 0
                                      * is the least significant bit.
-                                     * Bit number 0-7 indicate if from a sensor data is invalid. 0 = valid data,
-                                     * 1 = invalid data.
+                                     * Bit number 0-7 indicate if from a sensor data is invalid.
+                                     *   0 = valid data, 1 = invalid data.
+                                     *        Bit number 	Sensor data --—
+                                     *        0 	Horizontal position and velocity
+                                     *        1 	Roll and pitch
+                                     *        2 	Heading
+                                     *        3 	Heave and vertical velocity
+                                     *        4 	Acceleration
+                                     *        5 	Error fields
+                                     *        6 	Delayed heave
+
                                      * Bit number 16-> indicate if data from sensor has reduced performance.
-                                     * 0 = valid data, 1 = reduced performance. */
+                                     *   0 = valid data, 1 = reduced performance.
+                                     *        Bit number 	Sensor data --—
+                                     *        16 	Horizontal position and velocity
+                                     *        17 	Roll and pitch
+                                     *        18 	Heading
+                                     *        19 	Heave and vertical velocity
+                                     *        20 	Acceleration
+                                     *        21 	Error fields
+                                     *        22 	Delayed heave */
 
     /* Position */
     double latitude_deg;        /* Position in decimal degrees. */
@@ -400,7 +436,7 @@ struct mbsys_kmbes_km_binary {
     float downAcceleration;     /* Unit m/s^2 */
 };
 
-struct mbsys_kmbes_km_delayed_heave {
+struct mbsys_kmbes_skm_delayed_heave {
     /* #SKM - delayed heave. Included if available from sensor. */
     unsigned int time_sec;
     unsigned int time_nanosec;
@@ -409,8 +445,8 @@ struct mbsys_kmbes_km_delayed_heave {
 
 struct mbsys_kmbes_skm_sample {
     /* #SKM - all available data. */
-    struct mbsys_kmbes_km_binary KMdefault;
-    struct mbsys_kmbes_km_delayed_heave delayedHeave;
+    struct mbsys_kmbes_skm_binary KMdefault;
+    struct mbsys_kmbes_skm_delayed_heave delayedHeave;
 };
 
 struct mbsys_kmbes_skm {
@@ -508,7 +544,9 @@ struct mbsys_kmbes_svt_info
                                          *      5	    Micro SV
                                          *      6	    Micro SVT
                                          *      7	    Micro SVP
-                                         *      8	    Valeport MiniSVS */
+                                         *      8	    Valeport MiniSVS
+                                         *      9 	  KSSIS 80
+                                         *      10 	  KSSIS 43 */
     unsigned short numSamplesArray;     /* Number of sensor samples added in this datagram. */
     unsigned short numBytesPerSample;   /* Length in bytes of one whole SVT sensor sample. */
     unsigned short sensorDataContents;  /* Field to indicate which information is available from the input sensor, at
@@ -682,6 +720,12 @@ struct mbsys_kmbes_m_body {
 /************************************
     #MRZ - multibeam data for raw range,
     depth, reflectivity, seabed image(SI) etc.
+      Datagram Version (header->dgmVersion):
+        Format Spec Rev < F ==> 0
+        Format Spec Rev < G ==> 1
+        Format Spec Rev < H ==> 2
+      MB-System writes MRZ datagrams in version 2 form.
+      Fields added for version 1 are marked with <G> and version 2 with <H>
  ************************************/
 
 struct mbsys_kmbes_mrz_ping_info {
@@ -719,9 +763,9 @@ struct mbsys_kmbes_mrz_ping_info {
                                          * 1 = mix
                                          * 2 = FM */
     unsigned short padding1;            /* Ping rate. Filtered/averaged. */
-    float frequencyMode_Hz;             /* Ping frequency in hertz.
-                                         * E.g. for EM 2040: 200 000 Hz, 300 000 Hz or 400 000 Hz.
-                                         * If values is less than 100, it refers to a code defined in the table below.
+    float frequencyMode_Hz;             /* Ping frequency in hertz. E.g. for EM 2040: 200 000 Hz, 300 000 Hz,
+                                         * 400 000 Hz, 600 000 Hz or 700 000 Hz. If values is less than 100,
+                                         * it refers to a code defined in the table below.
                                          * Value	    Frequency	    Valid for EM model
                                          * -1	        Not used	    -
                                          * 0	        40 - 100 kHz	EM 710, EM 712
@@ -730,9 +774,11 @@ struct mbsys_kmbes_mrz_ping_info {
                                          * 3	        50 kHz	        EM 710, EM 712
                                          * 4	        40 kHz	        EM 710, EM 712
                                          * 180k - 400k	180 - 400 kHz	EM 2040C (10 kHz steps)
-                                         * 200k	        200 kHz	        EM 2040
-                                         * 300k	        300 kHz	        EM 2040
-                                         * 400k	        400 kHz	        EM 2040 */
+                                         * 200k	        200 kHz	        EM 2040, EM 2040P
+                                         * 300k	        300 kHz	        EM 2040, EM 2040P
+                                         * 400k	        400 kHz	        EM 2040, EM 2040P
+                                         * 600k	        600 kHz	        EM 2040, EM 2040P
+                                         * 700k	        700 kHz	        EM 2040, EM 2040P */
     float freqRangeLowLim_Hz;           /* Lowest centre frequency of all sectors in this swath. Unit hertz.
                                          * E.g. for EM 2040: 260 000 Hz. */
     float freqRangeHighLim_Hz;          /* Highest centre frequency of all sectors in this swath. Unit hertz.
@@ -826,6 +872,11 @@ struct mbsys_kmbes_mrz_ping_info {
     float ellipsoidHeightReRefPoint_m;  /* Height of vessel reference point above the ellipsoid, derived from active GGA
                                          * sensor. ellipsoidHeightReRefPoint_m is GGA height corrected for motion and
                                          * installation offsets of the position sensor. */
+    float bsCorrectionOffset_dB;        /* <G> Backscatter offset set in the installation menu. */
+    mb_u_char lambertsLawApplied;       /* <G> Beam intensity data corrected as seabed image data (Lambert and normal incidence corrections).  */
+    mb_u_char iceWindow;                /* <G> Ice window installed. */
+    unsigned short activeModes;         /* <H> Showing active modes. Currently used for EM MultiFrequency Mode only.
+                                           <G> Was 2-Byte alignment padding4 in version 1. */
 };
 
 struct mbsys_kmbes_mrz_tx_sector_info
@@ -847,7 +898,7 @@ struct mbsys_kmbes_mrz_tx_sector_info
                                      * of the ping, i.e. relative to the time used in the datagram header. */
     float tiltAngleReTx_deg;        /* Along ship steering angle of the TX beam (main lobe of transmitted pulse), angle
                                      * referred to transducer array coordinate system. Unit degree. */
-    float txNominalSourceLevel_dB;  /* Unit dB re 1 microPascal. */
+    float txNominalSourceLevel_dB;  /* Actual SL = txNominalSourceLevel_dB + highVoltageLevel_dB. Unit dB re 1 microPascal.  */
     float txFocusRange_m;           /* 0 = no focusing applied. */
     float centreFreq_Hz;            /* Centre frequency. Unit hertz. */
     float signalBandWidth_Hz;       /* FM mode: effective bandwidth
@@ -859,7 +910,15 @@ struct mbsys_kmbes_mrz_tx_sector_info
                                      * 0 = CW
                                      * 1 = FM upsweep
                                      * 2 = FM downsweep. */
-    unsigned short padding1;        /* Byte alignment. */
+    unsigned short padding1;        /* <G> Byte alignment. */
+    float highVoltageLevel_dB;      /* <G> 20log(Measured high voltage power level at TX pulse or Nominal high voltage
+                                     * power level). This parameter will also include the effect of user selected
+                                     * transmit power reduction (transmitPower_dB) and mammal protection.
+                                     * Actual SL = txNominalSourceLevel_dB + highVoltageLevel_dB. Unit dB. */
+    float sectorTrackingCorr_dB;    /* <G> Backscatter correction added in sector tracking mode. Unit dB. */
+    float effectiveSignalLength_sec;/* <G> Signal length used for backscatter footprint calculation.
+                                     * This compensates for the TX pulse tapering and the RX filter bandwidths.
+                                     * Unit second. */
 };
 
 struct mbsys_kmbes_mrz_rx_info {
@@ -943,6 +1002,8 @@ struct mbsys_kmbes_mrz_sounding {
                                          * Info for plotting soundings together with water column data. */
     unsigned short WCrange_samples;     /* Water column range. Range of bottom detection, in samples. */
     float WCNomBeamAngleAcross_deg;     /* Water column nominal beam angle across. Re vertical. */
+
+    /* Reflectivity data (backscatter (BS) data) */
     float meanAbsCoeff_dBPerkm;         /* Mean absorption coefficient, alfa. Used for TVG calculations.
                                          * Value as used. Unit dB/km.*/
     float reflectivity1_dB;             /* Beam intensity (BS), using TVG = X log(R) + 2 alpha R. X (operator selected)
@@ -964,7 +1025,7 @@ struct mbsys_kmbes_mrz_sounding {
     float BScalibration_dB;             /* Backscatter (BScorr) calibration offset applied (default = 0 dB). */
     float TVG_dB;                       /* Time Varying Gain (TVG) used when correcting reflectivity. */
 
-    /* Reflectivity data (backscatter (BS) data) */
+    /* Travel time and angle data) */
     float beamAngleReRx_deg;            /* Angle relative to the RX transducer array, except for ME70, where the
                                          * angles are relative to the horizontal plane. */
     float beamAngleCorrection_deg;      /* Applied beam pointing angle correction. */
@@ -1040,10 +1101,15 @@ struct mbsys_kmbes_mrz {
      * used for reflectivity2_dB (struct mbsys_kmbes_mrz_sounding).*/
 };
 
- #define MBSYS_KMBES_MRZ_VERSION 0
+ #define MBSYS_KMBES_MRZ_VERSION 2
 
 /************************************
     #MWC - water column datagram
+      Datagram Version (header->dgmVersion):
+        Format Spec Rev < F ==> 0
+        Format Spec Rev = G ==> 1
+      MB-System writes MWC datagrams in version 1 form.
+      Fields added for version 1 are marked with <G>
  ************************************/
 
 struct mbsys_kmbes_mwc_tx_info {
@@ -1097,6 +1163,13 @@ struct mbsys_kmbes_mwc_rx_beam_data {
      * is set to zero when the beam has no bottom detection */
     unsigned short beamTxSectorNum;
     unsigned short numSampleData;           /* Number of sample data for current beam. Also denoted Ns. */
+    float detectedRangeInSamplesHighResolution;  /* <G> The same information as in detectedRangeInSamples
+                                                    with higher resolution. Two way range in samples.
+                                                    Approximation to calculated distance from tx to
+                                                    bottom detection [meters] = soundVelocity_mPerSec
+                                                    * detectedRangeInSamples / (sampleFreq_Hz * 2).
+                                                    The detected range is set to zero when the beam
+                                                    has no bottom detection.*/
     size_t sampleAmplitude05dB_p_alloc_size;
     signed char  *sampleAmplitude05dB_p;    /* Pointer to start of array with Water Column data. Length of
                                              * array = numSampleData. Sample amplitudes in 0.5 dB resolution. */
@@ -1123,7 +1196,7 @@ struct mbsys_kmbes_mwc {
     struct mbsys_kmbes_mwc_rx_beam_data *beamData_p;
 };
 
- #define MBSYS_KMBES_MWC_VERSION 0
+ #define MBSYS_KMBES_MWC_VERSION 1
 
 /*********************************************
 
@@ -1257,6 +1330,33 @@ struct mbsys_kmbes_ib {
 
 /*********************************************
 
+    File datagrams
+
+ *********************************************/
+
+struct mbsys_kmbes_f_common
+{
+    uint16_t numBytesCmnPart;               /* Size in bytes of common part struct.  */
+    int8_t fileStatus;                      /* -1 = No file found, 0 = OK, 1 = File too large (cropped) */
+    uint8_t padding1;                       /* padding */
+    unsigned int numBytesFile;              /* File size in bytes. */
+    char fileName[MBSYS_KMBES_MAX_F_FILENAME_LENGTH];   /* Name of file. */
+};
+
+/********************************************
+     #FCF - Backscatter calibration file datagram
+ ********************************************/
+struct mbsys_kmbes_fcf {
+    struct mbsys_kmbes_header header;
+    struct mbsys_kmbes_m_partition partition;
+    struct mbsys_kmbes_f_common cmnPart;
+    mb_u_char bsCalibrationFile[MBSYS_KMBES_MAX_F_FILE_SIZE];
+};
+
+#define MBSYS_KMBES_FCF_VERSION 0
+
+/*********************************************
+
    X-datagrams (extra - defined only for MB-System)
 
  *********************************************/
@@ -1281,7 +1381,7 @@ struct mbsys_kmbes_xmb {
     char version[MB_COMMENT_MAXLINE];          /* MB-System version string */
 };
 
- #define MBSYS_KMBES_XMB_VERSION 0
+ #define MBSYS_KMBES_XMB_VERSION 1
 
 /************************************
 
@@ -1510,8 +1610,17 @@ struct mbsys_kmbes_struct {
     /* #IOP -  Runtime datagram */
     struct mbsys_kmbes_iop iop;
 
-    /* #IBE, #IBR, #IBS - BIST Error Datagrams */
-    struct mbsys_kmbes_ib ib;
+    /* #IBE - BIST error report datagram */
+    struct mbsys_kmbes_ib ibe;
+
+    /* #IBR - BIST reply datagram */
+    struct mbsys_kmbes_ib ibr;
+
+    /* #IBS - BIST short reply datagram */
+    struct mbsys_kmbes_ib ibs;
+
+    /* #FCF - Backscatter Calibration File Datagram */
+    struct mbsys_kmbes_fcf fcf;
 
     /* #XMB - datagram indicating these data have been written by MB-System */
     struct mbsys_kmbes_xmb xmb;
