@@ -75,12 +75,13 @@ void TopographicSeries::setTopography(void *gmtApi, GMT_GRID *grid)
   int subInterval = 1;      // subsample interval
   while ((nRows/subInterval + nRows % subInterval) *
 	 (nCols/subInterval + nCols % subInterval) *
-	 sizeof(QVector3D) > MAX_QVECTOR_SIZE) {
+	 sizeof(QVector3D) > MAX_QVECTOR_SIZE/16) {
     // Dataset too big for QVector; increase subsample interval
     subInterval++;
   }
 
-  qDebug() << "subInterval: " << subInterval;
+
+  qDebug() << "**** subInterval: " << subInterval;
   
   int nSubRows =
     nRows / subInterval + nRows % subInterval;  // number of subsampled rows
