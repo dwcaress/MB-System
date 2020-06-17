@@ -267,8 +267,6 @@ ApplicationWindow {
                 }
             }
 
-
-
         }
         Item {
             width: 964
@@ -349,11 +347,11 @@ ApplicationWindow {
                     currentMouseY = mouse.y;
 
                     if (pressed && panMode && mySelectedAxis == -1) {
-                        console.log("call dragAxes()");
+                        // console.log("call dragAxes()");
                         item1.dragAxes();
                     }
                     else if (pressed && mySelectedAxis != -1) {
-                        console.log("call dragAxis(selectedAxis)");
+                        // console.log("call dragAxis(selectedAxis)");
                         item1.dragAxis();
                     }
 
@@ -399,7 +397,7 @@ ApplicationWindow {
             case AbstractGraph3D.ElementAxisXLabel:
                 var distance = ((moveX - moveY) * cameraMultiplier) / dragSpeedModifier
                 distance *= (surface3D.axisX.max -surface3D.axisX.min)
-                console.log("X: distance=", distance)
+                // console.log("X: distance=", distance)
                 // Check if we need to change min or max first to avoid invalid ranges
                 if (distance > 0) {
                     surface3D.axisX.min -= distance
@@ -412,7 +410,7 @@ ApplicationWindow {
             case AbstractGraph3D.ElementAxisYLabel:
                 distance = moveY / dragSpeedModifier
                 distance *= (surface3D.axisY.max -surface3D.axisY.min)
-                console.log("Y: distance=", distance)
+                // console.log("Y: distance=", distance)
                 // Check if we need to change min or max first to avoid invalid ranges
                 if (distance > 0) {
                     surface3D.axisY.max += distance
@@ -426,7 +424,7 @@ ApplicationWindow {
                 distance = ((moveX + moveY) * cameraMultiplier) / dragSpeedModifier
                 distance *= (surface3D.axisZ.max -surface3D.axisZ.min)
                 // Check if we need to change min or max first to avoid invalid ranges
-                console.log("Z: distance=", distance)
+                // console.log("Z: distance=", distance)
                 if (distance > 0) {
                     surface3D.axisZ.max += distance
                     surface3D.axisZ.min += distance
@@ -471,25 +469,11 @@ ApplicationWindow {
                 surface3D.axisX.min -= distance
             }
 
-            /* ***
-            // Adjust y-axis
-            distance = moveY / dragSpeedModifier
-            distance *= (surface3D.axisY.max -surface3D.axisY.min)
-            // console.log("Y: distance=", distance)
-            // Check if we need to change min or max first to avoid invalid ranges
-            if (distance > 0) {
-                surface3D.axisY.max += distance
-                surface3D.axisY.min += distance
-            } else {
-                surface3D.axisY.min += distance
-                surface3D.axisY.max += distance
-            }
-        *** */
             // Adjust z-axis
             distance = ((moveX + moveY) * cameraMultiplier) / dragSpeedModifier
             distance *= (surface3D.axisZ.max -surface3D.axisZ.min)
             // Check if we need to change min or max first to avoid invalid ranges
-            console.log("Z: distance=", distance)
+            // console.log("Z: distance=", distance)
             if (distance > 0) {
                 surface3D.axisZ.max += distance
                 surface3D.axisZ.min += distance
