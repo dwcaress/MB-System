@@ -15,7 +15,6 @@ int main(int argc, char *argv[])
     QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
 
     QGuiApplication app(argc, argv);
-    qmlRegisterSingletonType<BackEnd>("MbSystem.BackEnd", 1, 0, "BackEnd", BackEnd::qmlInstance );
 
     g_appEngine = new QQmlApplicationEngine();
     g_appEngine->load(QUrl(QStringLiteral("qrc:/main.qml")));
@@ -30,10 +29,6 @@ int main(int argc, char *argv[])
         fprintf(stderr, "BackEnd::registerSingleton() failed\n");
         exit(1);
     }
-
-    // Wait a bit for object load to complete...
-  //  MyTimer timer(g_rootWindow);
-  //  timer.start(5);
 
     return app.exec();
 }
