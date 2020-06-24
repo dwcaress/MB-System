@@ -5,6 +5,9 @@
 #include <QTimer>
 #include <QQuickWindow>
 
+/**
+MyTimer lists loaded child objects after specified number of seconds
+ */
 class MyTimer : public QObject {
     Q_OBJECT
 public:
