@@ -11,7 +11,7 @@
 #include "datavisualizationqml2/declarativesurface_p.h"
 #include "TopographicSeries.h"
 
-/// C++ "business logic" for bathymetry/topography viewer
+/// BackEnd contains C++ "business logic" for bathymetry/topography viewer
 class BackEnd : public QObject
 {
     Q_OBJECT
