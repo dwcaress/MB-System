@@ -22,7 +22,6 @@ AC_INIT([mbsystem],[5.7.6beta38],[http://listserver.mbari.org/sympa/arc/mbsystem
 
 AC_CONFIG_MACRO_DIR(m4)
 AC_LANG(C)
-# AC_LANG([C++])
 
 dnl Require c++11
 AX_CXX_COMPILE_STDCXX(11)
@@ -831,9 +830,9 @@ if test "$GOT_MOTIF" = "yes" ; then
         AS_ECHO(["OpenGL library location specified: $opengl_libdir - check if libGL libGLU are there..."])
         save_LDFLAGS=$LDFLAGS
         LDFLAGS="$LDFLAGS -L$opengl_libdir"
-        AC_CHECK_LIB([GLU], [main], [OPENGL_SETTING=yes], [OPENGL_SETTING=no], )
+        AC_CHECK_LIB([GL], [glBegin], [OPENGL_SETTING=yes], [OPENGL_SETTING=no], )
         if test "$OPENGL_SETTING" = "yes"; then
-            AC_CHECK_LIB([GL], [main], [OPENGL_SETTING=yes], [OPENGL_SETTING=no], )
+            AC_CHECK_LIB([GLU], [gluScaleImage], [OPENGL_SETTING=yes], [OPENGL_SETTING=no], )
         fi
         LDFLAGS="$save_LDFLAGS"
         if test "$OPENGL_SETTING" = "no"; then
@@ -842,7 +841,7 @@ if test "$GOT_MOTIF" = "yes" ; then
         libopengl_LIBS="-L$opengl_libdir -R $opengl_libdir -lGL -lGLU"
         libopengl_LDFLAGS="-L$opengl_libdir"
     else
-        dnl Look for pkg-config X11 package...
+        dnl Look for pkg-config OpenGL package...
         AS_ECHO(["Look for pkg-config OpenGL package..."])
         PKG_CHECK_MODULES([libGLU], [opengl], [GOT_OPENGL=yes], [GOT_OPENGL=no])
         libopengl_LIBS="-lGL -lGLU"
@@ -851,9 +850,9 @@ if test "$GOT_MOTIF" = "yes" ; then
     if test "$GOT_OPENGL" = "no" ; then
         dnl Did not find OpenGL library pkg-config package, looking in the usual places...
         AS_ECHO(["Did not find OpenGL library pkg-config package, looking in the usual places..."])
-        AC_CHECK_LIB([GLU], [main], [OPENGL_SETTING=yes], [OPENGL_SETTING=no],)
-        if test "$OPENGL_SETTING" = "yes" ; then
-            AC_CHECK_LIB([GL], [main], [OPENGL_SETTING=yes], [OPENGL_SETTING=no],)
+        AC_CHECK_LIB([GL], [glBegin], [OPENGL_SETTING=yes], [OPENGL_SETTING=no], )
+        if test "$OPENGL_SETTING" = "yes"; then
+            AC_CHECK_LIB([GLU], [gluScaleImage], [OPENGL_SETTING=yes], [OPENGL_SETTING=no], )
         fi
         if test "$OPENGL_SETTING" = "yes" ; then
             GOT_OPENGL=yes
@@ -876,22 +875,22 @@ if test "$GOT_MOTIF" = "yes" ; then
         AC_ARG_WITH(opengl-include, [  --with-opengl-include=DIR    Location of OpenGL headers],
                 [libopengl_CPPFLAGS="-I${withval}"] [GOT_OPENGL=yes], [GOT_OPENGL=no])
         if test "$GOT_OPENGL" = "yes" ; then
-            dnl OpenGL header location specified: $libopengl_CPPFLAGS - check if Xm/Xm.h is there...
-            AS_ECHO(["OpenGL header location specified: $libopengl_CPPFLAGS - check if Xm/Xm.h is there..."])
+            dnl OpenGL header location specified: $libopengl_CPPFLAGS - check if GL/gl.h is there...
+            AS_ECHO(["OpenGL header location specified: $libopengl_CPPFLAGS - check if GL/gl.h is there..."])
             save_CPPFLAGS=$CPPFLAGS
             save_CFLAGS=$CFLAGS
             CPPFLAGS="$CPPFLAGS $libopengl_CPPFLAGS"
             CFLAGS="$CFLAGS $libopengl_CPPFLAGS"
-            AC_CHECK_HEADER(Xm/Xm.h, [OPENGL_SETTING=yes], [OPENGL_SETTING=no],)
+            AC_CHECK_HEADER(GL/gl.h, [OPENGL_SETTING=yes], [OPENGL_SETTING=no],)
             CPPFLAGS=$save_CPPFLAGS
             CFLAGS=$save_CFLAGS
             if test "$OPENGL_SETTING" = "no"; then
-                AC_MSG_ERROR([Did not find Xm/Xm.h according to --with-opengl-include - check the installation!])
+                AC_MSG_ERROR([Did not find GL/gl.h according to --with-opengl-include - check the installation!])
             fi
         else
             dnl Looking for OpenGL headers in the usual places...
             AS_ECHO(["Looking for OpenGL headers in the usual places..."])
-            AC_CHECK_HEADER(Xm/Xm.h, [OPENGL_SETTING=yes], [OPENGL_SETTING=no])
+            AC_CHECK_HEADER(GL/gl.h, [OPENGL_SETTING=yes], [OPENGL_SETTING=no])
             if test "$OPENGL_SETTING" = "yes" ; then
                 GOT_OPENGL=yes
                 AS_ECHO(["Using pre-installed OpenGL headers..."])
@@ -960,15 +959,6 @@ else
     dnl Not building tools using Qt5
     AS_ECHO(["Not building Qt5-based graphical tools"])
 fi
-
-dnl--------------------------------------------------------------------
-dnl Add some variables to be exported to the src/mbio/mb_config.h file
-dnl--------------------------------------------------------------------
-
-AC_DEFINE_UNQUOTED(MBSYSTEM_CONFIG_DEFINED, 1, [Set MBSYSTEM_CONFIG_DEFINED define in mb_config.h])
-AC_DEFINE_UNQUOTED(MBSYSTEM_INSTALL_PREFIX, "$prefix", [Set MBSYSTEM_INSTALL_PREFIX define in mb_config.h])
-AC_DEFINE_UNQUOTED(MBSYSTEM_OTPS_LOCATION, "$OTPS_DIR", [Set MBSYSTEM_OTPS_LOCATION define in mb_config.h])
-
 
 dnl--------------------------------------------------------------------
 dnl MBTRN Section - optionally build terrain relative navigation (TRN) tools
@@ -1067,16 +1057,6 @@ else
 fi
 
 dnl--------------------------------------------------------------------
-dnl Configure pthreads.
-dnl Force to yes.
-dnl--------------------------------------------------------------------
-
-AM_CONDITIONAL([HAVE_PTHREADS],[test "yes" = "yes"])
-AC_SUBST(PTHREAD_CFLAGS)
-AC_SUBST(PTHREAD_LIBS)
-
-
-dnl--------------------------------------------------------------------
 dnl GSF Section - optionally disable inclusion of GSF format i/o module
 dnl--------------------------------------------------------------------
 
@@ -1091,6 +1071,23 @@ else
   AS_ECHO(["GSF driver will not be built"])
 fi
 AM_CONDITIONAL([BUILD_GSF], [test $enable_gsf = yes])
+
+dnl--------------------------------------------------------------------
+dnl Configure pthreads.
+dnl Force to yes.
+dnl--------------------------------------------------------------------
+
+AM_CONDITIONAL([HAVE_PTHREADS],[test "yes" = "yes"])
+AC_SUBST(PTHREAD_CFLAGS)
+AC_SUBST(PTHREAD_LIBS)
+
+dnl--------------------------------------------------------------------
+dnl Add some variables to be exported to the src/mbio/mb_config.h file
+dnl--------------------------------------------------------------------
+
+AC_DEFINE_UNQUOTED(MBSYSTEM_CONFIG_DEFINED, 1, [Set MBSYSTEM_CONFIG_DEFINED define in mb_config.h])
+AC_DEFINE_UNQUOTED(MBSYSTEM_INSTALL_PREFIX, "$prefix", [Set MBSYSTEM_INSTALL_PREFIX define in mb_config.h])
+AC_DEFINE_UNQUOTED(MBSYSTEM_OTPS_LOCATION, "$OTPS_DIR", [Set MBSYSTEM_OTPS_LOCATION define in mb_config.h])
 
 dnl--------------------------------------------------------------------
 dnl Generate Makefiles
@@ -1237,7 +1234,7 @@ if test "$build_test" = "yes" ; then
 else
     AS_ECHO(["Build unit tests: Disabled"])
 fi
-if test $enable_gsf = yes ; then
+if test "$enable_gsf" = "yes" ; then
     AS_ECHO(["Build driver gsf: Enabled"])
 else
     AS_ECHO(["Build driver gsf: Disabled"])

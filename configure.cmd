@@ -381,8 +381,8 @@ LDFLAGS="-L/opt/X11/lib" \
 CFLAGS="-g -I/opt/X11/include" \
 ./configure \
     --prefix=/usr/local \
-    --with-proj-include=/usr/local/opt/proj/include \
-    --with-proj-lib=/usr/local/opt/proj/lib \
+    --with-proj-include=/usr/local/include \
+    --with-proj-lib=/usr/local/lib \
     --with-fftw-include=/usr/local/include \
     --with-fftw-lib=/usr/local/lib \
     --with-motif-include=/usr/local/include \
