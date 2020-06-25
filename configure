@@ -636,12 +636,12 @@ ac_subst_vars='am__EXEEXT_FALSE
 am__EXEEXT_TRUE
 LTLIBOBJS
 LIBOBJS
-BUILD_GSF_FALSE
-BUILD_GSF_TRUE
 PTHREAD_LIBS
 PTHREAD_CFLAGS
 HAVE_PTHREADS_FALSE
 HAVE_PTHREADS_TRUE
+BUILD_GSF_FALSE
+BUILD_GSF_TRUE
 BUILD_TEST_FALSE
 BUILD_TEST_TRUE
 BUILD_PCLTOOLS_FALSE
@@ -21335,46 +21335,9 @@ fi
                 $as_echo "OpenGL library location specified: $opengl_libdir - check if libGL libGLU are there..."
         save_LDFLAGS=$LDFLAGS
         LDFLAGS="$LDFLAGS -L$opengl_libdir"
-        { $as_echo "$as_me:${as_lineno-$LINENO}: checking for main in -lGLU" >&5
-$as_echo_n "checking for main in -lGLU... " >&6; }
-if ${ac_cv_lib_GLU_main+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  ac_check_lib_save_LIBS=$LIBS
-LIBS="-lGLU  $LIBS"
-cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-
-int
-main ()
-{
-return main ();
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_link "$LINENO"; then :
-  ac_cv_lib_GLU_main=yes
-else
-  ac_cv_lib_GLU_main=no
-fi
-rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext conftest.$ac_ext
-LIBS=$ac_check_lib_save_LIBS
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_GLU_main" >&5
-$as_echo "$ac_cv_lib_GLU_main" >&6; }
-if test "x$ac_cv_lib_GLU_main" = xyes; then :
-  OPENGL_SETTING=yes
-else
-  OPENGL_SETTING=no
-fi
-
-        if test "$OPENGL_SETTING" = "yes"; then
-            { $as_echo "$as_me:${as_lineno-$LINENO}: checking for main in -lGL" >&5
-$as_echo_n "checking for main in -lGL... " >&6; }
-if ${ac_cv_lib_GL_main+:} false; then :
+        { $as_echo "$as_me:${as_lineno-$LINENO}: checking for glBegin in -lGL" >&5
+$as_echo_n "checking for glBegin in -lGL... " >&6; }
+if ${ac_cv_lib_GL_glBegin+:} false; then :
   $as_echo_n "(cached) " >&6
 else
   ac_check_lib_save_LIBS=$LIBS
@@ -21382,27 +21345,76 @@ LIBS="-lGL  $LIBS"
 cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 
-
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char glBegin ();
 int
 main ()
 {
-return main ();
+return glBegin ();
   ;
   return 0;
 }
 _ACEOF
 if ac_fn_c_try_link "$LINENO"; then :
-  ac_cv_lib_GL_main=yes
+  ac_cv_lib_GL_glBegin=yes
 else
-  ac_cv_lib_GL_main=no
+  ac_cv_lib_GL_glBegin=no
 fi
 rm -f core conftest.err conftest.$ac_objext \
     conftest$ac_exeext conftest.$ac_ext
 LIBS=$ac_check_lib_save_LIBS
 fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_GL_main" >&5
-$as_echo "$ac_cv_lib_GL_main" >&6; }
-if test "x$ac_cv_lib_GL_main" = xyes; then :
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_GL_glBegin" >&5
+$as_echo "$ac_cv_lib_GL_glBegin" >&6; }
+if test "x$ac_cv_lib_GL_glBegin" = xyes; then :
+  OPENGL_SETTING=yes
+else
+  OPENGL_SETTING=no
+fi
+
+        if test "$OPENGL_SETTING" = "yes"; then
+            { $as_echo "$as_me:${as_lineno-$LINENO}: checking for gluScaleImage in -lGLU" >&5
+$as_echo_n "checking for gluScaleImage in -lGLU... " >&6; }
+if ${ac_cv_lib_GLU_gluScaleImage+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-lGLU  $LIBS"
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char gluScaleImage ();
+int
+main ()
+{
+return gluScaleImage ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  ac_cv_lib_GLU_gluScaleImage=yes
+else
+  ac_cv_lib_GLU_gluScaleImage=no
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_GLU_gluScaleImage" >&5
+$as_echo "$ac_cv_lib_GLU_gluScaleImage" >&6; }
+if test "x$ac_cv_lib_GLU_gluScaleImage" = xyes; then :
   OPENGL_SETTING=yes
 else
   OPENGL_SETTING=no
@@ -21493,46 +21505,9 @@ fi
     fi
     if test "$GOT_OPENGL" = "no" ; then
                 $as_echo "Did not find OpenGL library pkg-config package, looking in the usual places..."
-        { $as_echo "$as_me:${as_lineno-$LINENO}: checking for main in -lGLU" >&5
-$as_echo_n "checking for main in -lGLU... " >&6; }
-if ${ac_cv_lib_GLU_main+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  ac_check_lib_save_LIBS=$LIBS
-LIBS="-lGLU  $LIBS"
-cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-
-int
-main ()
-{
-return main ();
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_link "$LINENO"; then :
-  ac_cv_lib_GLU_main=yes
-else
-  ac_cv_lib_GLU_main=no
-fi
-rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext conftest.$ac_ext
-LIBS=$ac_check_lib_save_LIBS
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_GLU_main" >&5
-$as_echo "$ac_cv_lib_GLU_main" >&6; }
-if test "x$ac_cv_lib_GLU_main" = xyes; then :
-  OPENGL_SETTING=yes
-else
-  OPENGL_SETTING=no
-fi
-
-        if test "$OPENGL_SETTING" = "yes" ; then
-            { $as_echo "$as_me:${as_lineno-$LINENO}: checking for main in -lGL" >&5
-$as_echo_n "checking for main in -lGL... " >&6; }
-if ${ac_cv_lib_GL_main+:} false; then :
+        { $as_echo "$as_me:${as_lineno-$LINENO}: checking for glBegin in -lGL" >&5
+$as_echo_n "checking for glBegin in -lGL... " >&6; }
+if ${ac_cv_lib_GL_glBegin+:} false; then :
   $as_echo_n "(cached) " >&6
 else
   ac_check_lib_save_LIBS=$LIBS
@@ -21540,27 +21515,76 @@ LIBS="-lGL  $LIBS"
 cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 
-
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char glBegin ();
 int
 main ()
 {
-return main ();
+return glBegin ();
   ;
   return 0;
 }
 _ACEOF
 if ac_fn_c_try_link "$LINENO"; then :
-  ac_cv_lib_GL_main=yes
+  ac_cv_lib_GL_glBegin=yes
 else
-  ac_cv_lib_GL_main=no
+  ac_cv_lib_GL_glBegin=no
 fi
 rm -f core conftest.err conftest.$ac_objext \
     conftest$ac_exeext conftest.$ac_ext
 LIBS=$ac_check_lib_save_LIBS
 fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_GL_main" >&5
-$as_echo "$ac_cv_lib_GL_main" >&6; }
-if test "x$ac_cv_lib_GL_main" = xyes; then :
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_GL_glBegin" >&5
+$as_echo "$ac_cv_lib_GL_glBegin" >&6; }
+if test "x$ac_cv_lib_GL_glBegin" = xyes; then :
+  OPENGL_SETTING=yes
+else
+  OPENGL_SETTING=no
+fi
+
+        if test "$OPENGL_SETTING" = "yes"; then
+            { $as_echo "$as_me:${as_lineno-$LINENO}: checking for gluScaleImage in -lGLU" >&5
+$as_echo_n "checking for gluScaleImage in -lGLU... " >&6; }
+if ${ac_cv_lib_GLU_gluScaleImage+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-lGLU  $LIBS"
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char gluScaleImage ();
+int
+main ()
+{
+return gluScaleImage ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  ac_cv_lib_GLU_gluScaleImage=yes
+else
+  ac_cv_lib_GLU_gluScaleImage=no
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_GLU_gluScaleImage" >&5
+$as_echo "$ac_cv_lib_GLU_gluScaleImage" >&6; }
+if test "x$ac_cv_lib_GLU_gluScaleImage" = xyes; then :
   OPENGL_SETTING=yes
 else
   OPENGL_SETTING=no
@@ -21591,13 +21615,13 @@ else
 fi
 
         if test "$GOT_OPENGL" = "yes" ; then
-                        $as_echo "OpenGL header location specified: $libopengl_CPPFLAGS - check if Xm/Xm.h is there..."
+                        $as_echo "OpenGL header location specified: $libopengl_CPPFLAGS - check if GL/gl.h is there..."
             save_CPPFLAGS=$CPPFLAGS
             save_CFLAGS=$CFLAGS
             CPPFLAGS="$CPPFLAGS $libopengl_CPPFLAGS"
             CFLAGS="$CFLAGS $libopengl_CPPFLAGS"
-            ac_fn_c_check_header_mongrel "$LINENO" "Xm/Xm.h" "ac_cv_header_Xm_Xm_h" "$ac_includes_default"
-if test "x$ac_cv_header_Xm_Xm_h" = xyes; then :
+            ac_fn_c_check_header_mongrel "$LINENO" "GL/gl.h" "ac_cv_header_GL_gl_h" "$ac_includes_default"
+if test "x$ac_cv_header_GL_gl_h" = xyes; then :
   OPENGL_SETTING=yes
 else
   OPENGL_SETTING=no
@@ -21607,12 +21631,12 @@ fi
             CPPFLAGS=$save_CPPFLAGS
             CFLAGS=$save_CFLAGS
             if test "$OPENGL_SETTING" = "no"; then
-                as_fn_error $? "Did not find Xm/Xm.h according to --with-opengl-include - check the installation!" "$LINENO" 5
+                as_fn_error $? "Did not find GL/gl.h according to --with-opengl-include - check the installation!" "$LINENO" 5
             fi
         else
                         $as_echo "Looking for OpenGL headers in the usual places..."
-            ac_fn_c_check_header_mongrel "$LINENO" "Xm/Xm.h" "ac_cv_header_Xm_Xm_h" "$ac_includes_default"
-if test "x$ac_cv_header_Xm_Xm_h" = xyes; then :
+            ac_fn_c_check_header_mongrel "$LINENO" "GL/gl.h" "ac_cv_header_GL_gl_h" "$ac_includes_default"
+if test "x$ac_cv_header_GL_gl_h" = xyes; then :
   OPENGL_SETTING=yes
 else
   OPENGL_SETTING=no
@@ -22598,24 +22622,6 @@ else
 fi
 
 
-
-cat >>confdefs.h <<_ACEOF
-#define MBSYSTEM_CONFIG_DEFINED 1
-_ACEOF
-
-
-cat >>confdefs.h <<_ACEOF
-#define MBSYSTEM_INSTALL_PREFIX "$prefix"
-_ACEOF
-
-
-cat >>confdefs.h <<_ACEOF
-#define MBSYSTEM_OTPS_LOCATION "$OTPS_DIR"
-_ACEOF
-
-
-
-
 $as_echo "Check if the mbtrn tools should be built"
 # Check whether --enable-mbtrn was given.
 if test "${enable_mbtrn+set}" = set; then :
@@ -22791,19 +22797,6 @@ else
 fi
 
 
- if test "yes" = "yes"; then
-  HAVE_PTHREADS_TRUE=
-  HAVE_PTHREADS_FALSE='#'
-else
-  HAVE_PTHREADS_TRUE='#'
-  HAVE_PTHREADS_FALSE=
-fi
-
-
-
-
-
-
 $as_echo "Check if the GSF driver should be built"
 # Check whether --enable-gsf was given.
 if test "${enable_gsf+set}" = set; then :
@@ -22828,6 +22821,35 @@ else
   BUILD_GSF_TRUE='#'
   BUILD_GSF_FALSE=
 fi
+
+
+
+ if test "yes" = "yes"; then
+  HAVE_PTHREADS_TRUE=
+  HAVE_PTHREADS_FALSE='#'
+else
+  HAVE_PTHREADS_TRUE='#'
+  HAVE_PTHREADS_FALSE=
+fi
+
+
+
+
+
+
+cat >>confdefs.h <<_ACEOF
+#define MBSYSTEM_CONFIG_DEFINED 1
+_ACEOF
+
+
+cat >>confdefs.h <<_ACEOF
+#define MBSYSTEM_INSTALL_PREFIX "$prefix"
+_ACEOF
+
+
+cat >>confdefs.h <<_ACEOF
+#define MBSYSTEM_OTPS_LOCATION "$OTPS_DIR"
+_ACEOF
 
 
 
@@ -22948,12 +22970,12 @@ if test -z "${BUILD_TEST_TRUE}" && test -z "${BUILD_TEST_FALSE}"; then
   as_fn_error $? "conditional \"BUILD_TEST\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
-if test -z "${HAVE_PTHREADS_TRUE}" && test -z "${HAVE_PTHREADS_FALSE}"; then
-  as_fn_error $? "conditional \"HAVE_PTHREADS\" was never defined.
-Usually this means the macro was only invoked conditionally." "$LINENO" 5
-fi
 if test -z "${BUILD_GSF_TRUE}" && test -z "${BUILD_GSF_FALSE}"; then
   as_fn_error $? "conditional \"BUILD_GSF\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${HAVE_PTHREADS_TRUE}" && test -z "${HAVE_PTHREADS_FALSE}"; then
+  as_fn_error $? "conditional \"HAVE_PTHREADS\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 

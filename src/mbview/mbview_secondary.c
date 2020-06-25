@@ -143,11 +143,9 @@ int mbview_setsecondarygrid(int verbose, size_t instance, int secondary_grid_pro
 	/* set projection for secondary grid if needed */
 	if (data->secondary_nxy > 0 && data->secondary_grid_projection_mode == MBV_PROJECTION_PROJECTED) {
 		/* set projection for getting lon lat */
-		const int proj_status = mb_proj_init(5, data->secondary_grid_projection_id, &(view->secondary_pjptr), error);
+		const int proj_status = mb_proj_init(verbose, data->secondary_grid_projection_id, &(view->secondary_pjptr), error);
 		if (proj_status == MB_SUCCESS)
 			view->secondary_pj_init = true;
-		fprintf(stderr,"SECONDARY GRID PROJECTION:%d %p %s\n",
-		view->secondary_pj_init,view->secondary_pjptr,data->secondary_grid_projection_id);
 
 		/* quit if projection fails */
 		if (proj_status != MB_SUCCESS) {

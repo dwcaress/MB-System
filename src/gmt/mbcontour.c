@@ -239,6 +239,7 @@ void *New_mbcontour_Ctrl(struct GMT_CTRL *GMT) { /* Allocate and initialize a ne
 	double dummybounds[4];
 	int dummyformat;
 	int dummypings;
+fprintf(stderr, "%s:%d:%s\n", __FILE__, __LINE__, __func__);
 
 	struct MBCONTOUR_CTRL *Ctrl = gmt_M_memory(GMT, NULL, 1, struct MBCONTOUR_CTRL);
 
@@ -291,6 +292,7 @@ void *New_mbcontour_Ctrl(struct GMT_CTRL *GMT) { /* Allocate and initialize a ne
 }
 
 void Free_mbcontour_Ctrl(struct GMT_CTRL *GMT, struct MBCONTOUR_CTRL *Ctrl) { /* Deallocate control structure */
+fprintf(stderr, "%s:%d:%s\n", __FILE__, __LINE__, __func__);
 	if (!Ctrl)
 		return;
 	if (Ctrl->C.contourfile)
@@ -623,6 +625,7 @@ int mbcontour_ping_copy(int verbose, int one, int two, struct swath *swath, int 
 
 /*--------------------------------------------------------------------------*/
 void mbcontour_plot(double x, double y, int ipen) {
+fprintf(stderr, "%s:%d:%s\n", __FILE__, __LINE__, __func__);
 	/* make sure contour arrays are large enough */
 	if (ncontour_plot >= ncontour_plot_alloc) {
 		ncontour_plot_alloc += MBCONTOUR_PLOT_ALLOC_INC;
@@ -680,10 +683,12 @@ void mbcontour_plot(double x, double y, int ipen) {
 void mbcontour_setline(int linewidth) {
 	(void)linewidth;  // Unused parameter
 	// PSL_setlinewidth(PSL, (double)linewidth);
+fprintf(stderr, "%s:%d:%s\n", __FILE__, __LINE__, __func__);
 }
 
 /*--------------------------------------------------------------------------*/
 void mbcontour_newpen(int ipen) {
+fprintf(stderr, "%s:%d:%s\n", __FILE__, __LINE__, __func__);
 	if (ipen > -1 && ipen < ncolor) {
 		double rgb[4] = {
 			red[ipen] / 255.0,
@@ -698,6 +703,7 @@ void mbcontour_newpen(int ipen) {
 /*--------------------------------------------------------------------------*/
 void mbcontour_justify_string(double height, char *string, double *s) {
 	const int len = strlen(string);
+fprintf(stderr, "%s:%d:%s\n", __FILE__, __LINE__, __func__);
 	s[0] = 0.0;
 	s[1] = 0.185 * height * len;
 	s[2] = 0.37 * len * height;
@@ -709,6 +715,7 @@ void mbcontour_plot_string(double x, double y, double hgt, double angle, char *l
 	double xx;
 	double yy;
 	const double fontsize = 72.0 * hgt / inchtolon;
+fprintf(stderr, "%s:%d:%s\n", __FILE__, __LINE__, __func__);
 	gmt_geo_to_xy(GMT, x, y, &xx, &yy);
 	const int justify = 5;
 	const int mode = 0;
@@ -721,6 +728,7 @@ void mb_set_colors(int ncolor, int *red, int *green, int *blue) {
 	(void)red;  // Unused parameter
 	(void)green;  // Unused parameter
 	(void)blue;  // Unused parameter
+fprintf(stderr, "%s:%d:%s\n", __FILE__, __LINE__, __func__);
 }
 
 /*--------------------------------------------------------------------------*/
@@ -731,6 +739,7 @@ int GMT_mbcontour(void *V_API, int mode, void *args) {
 	struct GMTAPI_CTRL *API = gmt_get_api_ptr(V_API); /* Cast from void to GMTAPI_CTRL pointer */
 	struct MBCONTOUR_CTRL *Ctrl = NULL;
 	int error = MB_ERROR_NO_ERROR;
+fprintf(stderr, "%s:%d:%s\n", __FILE__, __LINE__, __func__);
 
 	if (API == NULL)
 		return (GMT_NOT_A_SESSION);
@@ -739,19 +748,23 @@ int GMT_mbcontour(void *V_API, int mode, void *args) {
 	options = GMT_Create_Options(API, mode, args);
 	if (API->error)
 		return (API->error); /* Set or get option list */
+fprintf(stderr, "%s:%d:%s\n", __FILE__, __LINE__, __func__);
 
 	if (!options || options->option == GMT_OPT_USAGE)
 		bailout(GMT_mbcontour_usage(API, GMT_USAGE)); /* Return the usage message */
 	if (options->option == GMT_OPT_SYNOPSIS)
 		bailout(GMT_mbcontour_usage(API, GMT_SYNOPSIS)); /* Return the synopsis */
+fprintf(stderr, "%s:%d:%s\n", __FILE__, __LINE__, __func__);
 
 	/* Parse the command-line arguments */
 
 	GMT = gmt_begin_module(API, THIS_MODULE_LIB, THIS_MODULE_NAME, &GMT_cpy); /* Save current state */
+fprintf(stderr, "%s:%d:%s\n", __FILE__, __LINE__, __func__);
 	if (GMT_Parse_Common(API, GMT_PROG_OPTIONS, options)) {
 		fprintf(stderr, "Error from GMT_Parse_common():%d\n", API->error);
 		Return(API->error);
 	}
+fprintf(stderr, "%s:%d:%s\n", __FILE__, __LINE__, __func__);
 
 	Ctrl = (struct MBCONTOUR_CTRL *)New_mbcontour_Ctrl(GMT); /* Allocate and initialize a new control structure */
 	if ((error = GMT_mbcontour_parse(GMT, Ctrl, options))) {
@@ -760,6 +773,7 @@ int GMT_mbcontour(void *V_API, int mode, void *args) {
 	}
 
 	/*-------------------------------- Variable initialization --------------------------------*/
+fprintf(stderr, "%s:%d:%s\n", __FILE__, __LINE__, __func__);
 
 	/* get current mb default values */
 	int verbose = 0;
@@ -771,7 +785,9 @@ int GMT_mbcontour(void *V_API, int mode, void *args) {
 	int etime_i[7];
 	double speedmin;
 	double timegap;
+fprintf(stderr, "%s:%d:%s\n", __FILE__, __LINE__, __func__);
 	int status = mb_defaults(verbose, &format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
+fprintf(stderr, "%s:%d:%s\n", __FILE__, __LINE__, __func__);
 
 	if (Ctrl->p.active)
 		pings = Ctrl->p.pings; /* If pings were set by user, prefer it */
