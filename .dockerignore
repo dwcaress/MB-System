@@ -4,7 +4,6 @@
 .github
 .travis.yml
 ci
-docker
 
 # NOTE: there's unfortunately no "global dockerignore" mechanism AFAICT,
 # so I'm for now adding some other local stuff under my env here:
