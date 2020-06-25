@@ -2,7 +2,7 @@
 
 Notes for the end user about using the dockerized MB-System.
 
-**Status**: WIP. Feedback welcome.
+**Status**: Functional and tested on CentOS 7 and MacOS. Feedback welcome.
 
 ## Requirements
 
@@ -35,32 +35,8 @@ Typically, you will be using the most recent of such available tags.
 
 The complete image designation has the form `mbari/mbsystem:<tag>`,
 for example, `mbari/mbsystem:5.7.6beta37`.
-In the following we will assume that such image designation is captured
-in the `$MBSYSTEM_IMAGE` environment variable:
-
-    $ export MBSYSTEM_IMAGE=mbari/mbsystem:5.7.6beta37
-
-### Getting the image
-
-The launcher script (see below) will download the image if not already
-available locally, but you can get it beforehand with an explicit
-`git pull` command:
-
-    $ docker pull $MBSYSTEM_IMAGE
-    5.7.6beta37: Pulling from mbari/mbsystem
-    ab5ef0e58194: Already exists
-    37cd1160c2ff: Pull complete
-    418bb9b64c52: Pull complete
-    cee9b14da639: Pull complete
-    cb70efeb0bb1: Pull complete
-    ced5f26bd0fc: Pull complete
-    6306c31894e1: Pull complete
-    05defd1ec313: Pull complete
-    9616a48b6670: Pull complete
-    618c4d986e70: Pull complete
-    Digest: sha256:924b85c95c53ed70716e7016fdbf822b69219fb3da3f99e0929f841b894d60c2
-    Status: Downloaded newer image for mbari/mbsystem:5.7.6beta37
-    docker.io/mbari/mbsystem:5.7.6beta37
+The `MBSYSTEM_IMAGE` variable in the launcher script (described below)
+is used to capture this image designation.
 
 ### The launcher script
 
@@ -74,6 +50,27 @@ your `$PATH` and that it has execution permission.
 First, edit the script to set the particular docker image to be used
 (variable `MBSYSTEM_IMAGE`), as well as the running user and the host
 directory to mount as `/opt/MBSWorkDir` in the container.
+
+> The launcher script will automatically download the image if not already
+> available locally, but you can get it beforehand with an explicit
+> `git pull` command, for example:
+>
+>       $ docker pull mbari/mbsystem:5.7.6beta37
+>       5.7.6beta37: Pulling from mbari/mbsystem
+>       ab5ef0e58194: Already exists
+>       37cd1160c2ff: Pull complete
+>       418bb9b64c52: Pull complete
+>       cee9b14da639: Pull complete
+>       cb70efeb0bb1: Pull complete
+>       ced5f26bd0fc: Pull complete
+>       6306c31894e1: Pull complete
+>       05defd1ec313: Pull complete
+>       9616a48b6670: Pull complete
+>       618c4d986e70: Pull complete
+>       Digest: sha256:924b85c95c53ed70716e7016fdbf822b69219fb3da3f99e0929f841b894d60c2
+>       Status: Downloaded newer image for mbari/mbsystem:5.7.6beta37
+>       docker.io/mbari/mbsystem:5.7.6beta37
+
 
 The script can accept some arguments
 (run `mbsystem.sh -h` to see a help message),
