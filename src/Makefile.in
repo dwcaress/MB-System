@@ -160,7 +160,7 @@ CTAGS = ctags
 DIST_SUBDIRS = gsf surf bsio mbtrn mbtrnav mbio mbaux utilities \
 	deprecated mbtrnutils gmt otps macros share man html ps mbedit \
 	mbnavedit mbvelocitytool mbview mbgrdviz mbeditviz mbnavadjust \
-	qttest
+	qt-mbgrdviz-1 qt-mbgrdviz-2 qt-mbgui qt-mbgrdviz-3
 ACLOCAL = @ACLOCAL@
 AMTAR = @AMTAR@
 AM_DEFAULT_VERBOSITY = @AM_DEFAULT_VERBOSITY@
@@ -325,6 +325,7 @@ libmotif_LIBS = @libmotif_LIBS@
 libnetcdf_CPPFLAGS = @libnetcdf_CPPFLAGS@
 libnetcdf_LIBS = @libnetcdf_LIBS@
 libopengl_CPPFLAGS = @libopengl_CPPFLAGS@
+libopengl_INCLUDEDIR = @libopengl_INCLUDEDIR@
 libopengl_LIBS = @libopengl_LIBS@
 libproj_CFLAGS = @libproj_CFLAGS@
 libproj_CPPFLAGS = @libproj_CPPFLAGS@
@@ -363,7 +364,7 @@ top_srcdir = @top_srcdir@
 @BUILD_MBTNAV_TRUE@XBUILD_SUB_MBTRNBIN = mbtrnutils
 @BUILD_MBTRN_TRUE@XBUILD_SUB_MBTRNBIN = mbtrnutils
 @BUILD_MBTNAV_TRUE@XBUILD_SUB_MBTNAV = mbtrnav
-@BUILD_QTTOOLS_TRUE@XBUILD_SUB_QTTOOLS = qttest
+@BUILD_QTTOOLS_TRUE@XBUILD_SUB_QTTOOLS = qt-mbgrdviz-1 qt-mbgrdviz-2 qt-mbgui qt-mbgrdviz-3
 SUBDIRS = $(am__append_1) surf bsio $(XBUILD_SUB_MBTRN) \
 	$(XBUILD_SUB_MBTNAV) mbio mbaux utilities deprecated \
 	$(XBUILD_SUB_MBTRNBIN) gmt otps macros share man html ps \

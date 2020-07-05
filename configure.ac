@@ -707,7 +707,7 @@ fi
 AM_CONDITIONAL([BUILD_FFTW], [test "$GOT_FFTW" = yes])
 
 dnl--------------------------------------------------------------------
-dnl X11/Motif & OpenGL Section
+dnl X11/Motif Section
 dnl--------------------------------------------------------------------
 
 dnl Check for X11 libraries libX11 libXt and X11 header file X11/Intrinsic.h
@@ -815,104 +815,112 @@ else
     AS_ECHO(["Failed to find X11 libraries and headers - unable to build graphical tools"])
 fi
 
-dnl If Motif found check for OpenGL libraries libGL libGLU and header files GL/gl.h GL/glu.h GL/glx.h
+AM_CONDITIONAL([BUILD_MOTIF], [test "$GOT_MOTIF" = yes])
+dnl End check for Motif library and headers
+
+dnl--------------------------------------------------------------------
+dnl OpenGL Section
+dnl--------------------------------------------------------------------
+
+dnl Check for OpenGL libraries libGL libGLU and header files GL/gl.h GL/glu.h GL/glx.h
 AS_ECHO(["Check for OpenGL libraries libGL libGLU and header files GL/gl.h GL/glu.h GL/glx.h"])
 GOT_OPENGL=no
 OPENGL_SETTING=no
-if test "$GOT_MOTIF" = "yes" ; then
 
-    dnl Check for OpenGL libraries libGLU libGL
-    AS_ECHO(["Check for OpenGL libraries libGLU libGL"])
-    AC_ARG_WITH(opengl-lib, [  --with-opengl-lib=DIR    Location of OpenGL library],
-            [opengl_libdir="${withval}"] [GOT_OPENGL=yes], [GOT_OPENGL=no])
-    if test "$GOT_OPENGL" = "yes" ; then
-        dnl OpenGL library location specified: $opengl_libdir - check if libGLU libGL is there...
-        AS_ECHO(["OpenGL library location specified: $opengl_libdir - check if libGL libGLU are there..."])
-        save_LDFLAGS=$LDFLAGS
-        LDFLAGS="$LDFLAGS -L$opengl_libdir"
-        AC_CHECK_LIB([GL], [glBegin], [OPENGL_SETTING=yes], [OPENGL_SETTING=no], )
-        if test "$OPENGL_SETTING" = "yes"; then
-            AC_CHECK_LIB([GLU], [gluScaleImage], [OPENGL_SETTING=yes], [OPENGL_SETTING=no], )
-        fi
-        LDFLAGS="$save_LDFLAGS"
-        if test "$OPENGL_SETTING" = "no"; then
-            AC_MSG_ERROR([Did not find libGLU libGL according to --with-opengl-lib - check the installation!])
-        fi
-        libopengl_LIBS="-L$opengl_libdir -R $opengl_libdir -lGL -lGLU"
-        libopengl_LDFLAGS="-L$opengl_libdir"
-    else
-        dnl Look for pkg-config OpenGL package...
-        AS_ECHO(["Look for pkg-config OpenGL package..."])
-        PKG_CHECK_MODULES([libGLU], [opengl], [GOT_OPENGL=yes], [GOT_OPENGL=no])
+dnl Check for OpenGL libraries libGLU libGL
+AS_ECHO(["Check for OpenGL libraries libGLU libGL"])
+AC_ARG_WITH(opengl-lib, [  --with-opengl-lib=DIR    Location of OpenGL library],
+        [opengl_libdir="${withval}"] [GOT_OPENGL=yes], [GOT_OPENGL=no])
+if test "$GOT_OPENGL" = "yes" ; then
+    dnl OpenGL library location specified: $opengl_libdir - check if libGLU libGL is there...
+    AS_ECHO(["OpenGL library location specified: $opengl_libdir - check if libGL libGLU are there..."])
+    save_LDFLAGS=$LDFLAGS
+    LDFLAGS="$LDFLAGS -L$opengl_libdir"
+    AC_CHECK_LIB([GL], [glBegin], [OPENGL_SETTING=yes], [OPENGL_SETTING=no], )
+    if test "$OPENGL_SETTING" = "yes"; then
+        AC_CHECK_LIB([GLU], [gluScaleImage], [OPENGL_SETTING=yes], [OPENGL_SETTING=no], )
+    fi
+    LDFLAGS="$save_LDFLAGS"
+    if test "$OPENGL_SETTING" = "no"; then
+        AC_MSG_ERROR([Did not find libGLU libGL according to --with-opengl-lib - check the installation!])
+    fi
+    libopengl_LIBS="-L$opengl_libdir -lGL -lGLU"
+    libopengl_LDFLAGS="-L$opengl_libdir"
+else
+    dnl Look for pkg-config OpenGL package...
+    AS_ECHO(["Look for pkg-config OpenGL package..."])
+    PKG_CHECK_MODULES([libGLU], [opengl], [GOT_OPENGL=yes], [GOT_OPENGL=no])
+    libopengl_LIBS="-lGL -lGLU"
+    libopengl_LDFLAGS=""
+fi
+if test "$GOT_OPENGL" = "no" ; then
+    dnl Did not find OpenGL library pkg-config package, looking in the usual places...
+    AS_ECHO(["Did not find OpenGL library pkg-config package, looking in the usual places..."])
+    AC_CHECK_LIB([GL], [glBegin], [OPENGL_SETTING=yes], [OPENGL_SETTING=no], )
+    if test "$OPENGL_SETTING" = "yes"; then
+        AC_CHECK_LIB([GLU], [gluScaleImage], [OPENGL_SETTING=yes], [OPENGL_SETTING=no], )
+    fi
+    if test "$OPENGL_SETTING" = "yes" ; then
+        GOT_OPENGL=yes
+        AS_ECHO(["Using pre-installed libGLU libGL..."])
         libopengl_LIBS="-lGL -lGLU"
         libopengl_LDFLAGS=""
+    else
+        AS_ECHO(["Did not find OpenGL library anywhere, use --with-opengl-lib to set the location"])
+        AC_MSG_ERROR([Did not find OpenGL library anywhere, use --with-opengl-lib to set the location])
     fi
-    if test "$GOT_OPENGL" = "no" ; then
-        dnl Did not find OpenGL library pkg-config package, looking in the usual places...
-        AS_ECHO(["Did not find OpenGL library pkg-config package, looking in the usual places..."])
-        AC_CHECK_LIB([GL], [glBegin], [OPENGL_SETTING=yes], [OPENGL_SETTING=no], )
-        if test "$OPENGL_SETTING" = "yes"; then
-            AC_CHECK_LIB([GLU], [gluScaleImage], [OPENGL_SETTING=yes], [OPENGL_SETTING=no], )
+fi
+dnl Done checking for OpenGL libraries libGLU libGL
+
+if test "$GOT_OPENGL" = "yes" ; then
+    dnl Check for OpenGL headers
+    AS_ECHO(["Check for OpenGL headers"])
+    GOT_OPENGL=no
+    OPENGL_SETTING=no
+    dnl First check if OpenGL location specified on the command line
+    AC_ARG_WITH(opengl-include, [  --with-opengl-include=DIR    Location of OpenGL headers],
+            [libopengl_INCLUDEDIR="${withval}"] [GOT_OPENGL=yes], [GOT_OPENGL=no])
+    if test "$GOT_OPENGL" = "yes" ; then
+        libopengl_CPPFLAGS="-I$libopengl_INCLUDEDIR"
+        dnl OpenGL header location specified: $libopengl_CPPFLAGS - check if GL/gl.h is there...
+        AS_ECHO(["OpenGL header location specified: $libopengl_CPPFLAGS - check if GL/gl.h is there..."])
+        save_CPPFLAGS=$CPPFLAGS
+        save_CFLAGS=$CFLAGS
+        CPPFLAGS="$CPPFLAGS $libopengl_CPPFLAGS"
+        CFLAGS="$CFLAGS $libopengl_CPPFLAGS"
+        AC_CHECK_HEADER(GL/gl.h, [OPENGL_SETTING=yes], [OPENGL_SETTING=no],)
+        CPPFLAGS=$save_CPPFLAGS
+        CFLAGS=$save_CFLAGS
+        if test "$OPENGL_SETTING" = "no"; then
+            AC_MSG_ERROR([Did not find GL/gl.h according to --with-opengl-include - check the installation!])
         fi
+    else
+        dnl Looking for OpenGL headers in the usual places...
+        AS_ECHO(["Looking for OpenGL headers in the usual places..."])
+        AC_CHECK_HEADER(GL/gl.h, [OPENGL_SETTING=yes], [OPENGL_SETTING=no])
         if test "$OPENGL_SETTING" = "yes" ; then
             GOT_OPENGL=yes
-            AS_ECHO(["Using pre-installed libGLU libGL..."])
-            libopengl_LIBS="-lGL -lGLU"
-            libopengl_LDFLAGS=""
+            AS_ECHO(["Using pre-installed OpenGL headers..."])
         else
-            AS_ECHO(["Did not find OpenGL library anywhere, use --with-opengl-lib to set the location"])
-            AC_MSG_ERROR([Did not find OpenGL library anywhere, use --with-opengl-lib to set the location])
+            AS_ECHO(["Did not find OpenGL headers anywhere, use --with-opengl-include to set the location"])
+            AC_MSG_ERROR([Did not find OpenGL headers anywhere, use --with-opengl-include to set the location])
         fi
     fi
-    dnl Done checking for OpenGL libraries libGLU libGL
-
-    if test "$GOT_OPENGL" = "yes" ; then
-        dnl Check for OpenGL headers
-        AS_ECHO(["Check for OpenGL headers"])
-        GOT_OPENGL=no
-        OPENGL_SETTING=no
-        dnl First check if OpenGL location specified on the command line
-        AC_ARG_WITH(opengl-include, [  --with-opengl-include=DIR    Location of OpenGL headers],
-                [libopengl_CPPFLAGS="-I${withval}"] [GOT_OPENGL=yes], [GOT_OPENGL=no])
-        if test "$GOT_OPENGL" = "yes" ; then
-            dnl OpenGL header location specified: $libopengl_CPPFLAGS - check if GL/gl.h is there...
-            AS_ECHO(["OpenGL header location specified: $libopengl_CPPFLAGS - check if GL/gl.h is there..."])
-            save_CPPFLAGS=$CPPFLAGS
-            save_CFLAGS=$CFLAGS
-            CPPFLAGS="$CPPFLAGS $libopengl_CPPFLAGS"
-            CFLAGS="$CFLAGS $libopengl_CPPFLAGS"
-            AC_CHECK_HEADER(GL/gl.h, [OPENGL_SETTING=yes], [OPENGL_SETTING=no],)
-            CPPFLAGS=$save_CPPFLAGS
-            CFLAGS=$save_CFLAGS
-            if test "$OPENGL_SETTING" = "no"; then
-                AC_MSG_ERROR([Did not find GL/gl.h according to --with-opengl-include - check the installation!])
-            fi
-        else
-            dnl Looking for OpenGL headers in the usual places...
-            AS_ECHO(["Looking for OpenGL headers in the usual places..."])
-            AC_CHECK_HEADER(GL/gl.h, [OPENGL_SETTING=yes], [OPENGL_SETTING=no])
-            if test "$OPENGL_SETTING" = "yes" ; then
-                GOT_OPENGL=yes
-                AS_ECHO(["Using pre-installed OpenGL headers..."])
-            else
-                AS_ECHO(["Did not find OpenGL headers anywhere, use --with-opengl-include to set the location"])
-                AC_MSG_ERROR([Did not find OpenGL headers anywhere, use --with-opengl-include to set the location])
-            fi
-        fi
-        dnl Done checking for OpenGL headers
-    fi
-
-    dnl Substitute OpenGL library and header arguments
-    AC_SUBST([libopengl_LIBS], [$libopengl_LIBS])
-    AC_SUBST([libopengl_CPPFLAGS], [$libopengl_CPPFLAGS])
-else
-    dnl Failed to find Motif libraries and headers - did not look for OpenGL libraries and headers - unable to build visualization tools
-    AS_ECHO(["Failed to find Motif libraries and headers - did not look for OpenGL libraries and headers - unable to build visualization tools"])
+    dnl Done checking for OpenGL headers
 fi
 
-AM_CONDITIONAL([BUILD_MOTIF], [test "$GOT_MOTIF" = yes])
+dnl Substitute OpenGL library and header arguments
+AC_SUBST([libopengl_LIBS], [$libopengl_LIBS])
+AC_SUBST([libopengl_INCLUDEDIR], [$libopengl_INCLUDEDIR])
+AC_SUBST([libopengl_CPPFLAGS], [$libopengl_CPPFLAGS])
+
 AM_CONDITIONAL([BUILD_GL], [test "$GOT_OPENGL" = yes])
-dnl End check for Motif and OpenGL library and headers
+dnl End check for OpenGL library and headers
+
+if test "$GOT_OPENGL" = "no" ; then
+    dnl Failed to find OpenGL libraries and headers - unable to build OpenGL based visualization tools
+    AS_ECHO(["Failed to find OpenGL libraries and headers - unable to build OpenGL based visualization tools"])
+fi
 
 dnl--------------------------------------------------------------------
 dnl Qt5 Section
@@ -938,13 +946,43 @@ if test "$build_qttools" = "yes" ; then
     AC_SUBST([qt_LIBS], [$QT_LIBS])
     AC_SUBST([qt_CPPFLAGS], [$QT_CXXFLAGS])
     AC_SUBST([qt_MOC], [$QT_MOC])
-    AS_ECHO(["Constructing Qt project file mbgrdvizqt.pro in src/qttest..."])
-    `cp src/qttest/mbgrdvizqt.pro.init src/qttest/mbgrdvizqt.pro`
-    `sed -i "" "s#__GMT_INCLUDEDIR__#$libgmt_INCLUDEDIR#" src/qttest/mbgrdvizqt.pro`
-    `sed -i "" "s#__GMT_LIBS__#$libgmt_LIBS#" src/qttest/mbgrdvizqt.pro`
-    `sed -i "" "s#__INSTALLDIR__#$prefix/bin#" src/qttest/mbgrdvizqt.pro`
-    AS_ECHO(["Running qmake in src/qttest to generate src/qttest/Makefile.qmake..."])
-    `cd src/qttest ; qmake -makefile -o Makefile.qmake ; cd ../..`
+
+    AS_ECHO(["Constructing Qt project file mbgui.pro in src/qt-mbgui..."])
+    `cp src/qt-mbgui/mbgui.pro.init src/qt-mbgui/mbgui.pro`
+    `sed -i "" "s#__OPENGL_INCLUDEDIR__#$libopengl_INCLUDEDIR#" src/qt-mbgui/mbgui.pro`
+    `sed -i "" "s#__OPENGL_LIBS__#$libopengl_LIBS#" src/qt-mbgui/mbgui.pro`
+    `sed -i "" "s#__GMT_INCLUDEDIR__#$libgmt_INCLUDEDIR#" src/qt-mbgui/mbgui.pro`
+    `sed -i "" "s#__GMT_LIBS__#$libgmt_LIBS#" src/qt-mbgui/mbgui.pro`
+    `sed -i "" "s#__INSTALLDIR__#$prefix/lib#" src/qt-mbgui/mbgui.pro`
+    AS_ECHO(["Running qmake in src/qt-mbgui to generate src/qt-mbgui/Makefile.qmake..."])
+    `cd src/qt-mbgui ; qmake -makefile -o Makefile.qmake ; cd ../..`
+
+    AS_ECHO(["Constructing Qt project file mbgrdviz-1.pro in src/qt-mbgrdviz-1..."])
+    `cp src/qt-mbgrdviz-1/mbgrdviz-1.pro.init src/qt-mbgrdviz-1/mbgrdviz-1.pro`
+    `sed -i "" "s#__GMT_INCLUDEDIR__#$libgmt_INCLUDEDIR#" src/qt-mbgrdviz-1/mbgrdviz-1.pro`
+    `sed -i "" "s#__GMT_LIBS__#$libgmt_LIBS#" src/qt-mbgrdviz-1/mbgrdviz-1.pro`
+    `sed -i "" "s#__INSTALLDIR__#$prefix/bin#" src/qt-mbgrdviz-1/mbgrdviz-1.pro`
+    AS_ECHO(["Running qmake in src/qt-mbgrdviz-1 to generate src/qt-mbgrdviz-1/Makefile.qmake..."])
+    `cd src/qt-mbgrdviz-1 ; qmake -makefile -o Makefile.qmake ; cd ../..`
+
+    AS_ECHO(["Constructing Qt project file mbgrdviz-2.pro in src/qt-mbgrdviz-2..."])
+    `cp src/qt-mbgrdviz-2/mbgrdviz-2.pro.init src/qt-mbgrdviz-2/mbgrdviz-2.pro`
+    `sed -i "" "s#__GMT_INCLUDEDIR__#$libgmt_INCLUDEDIR#" src/qt-mbgrdviz-2/mbgrdviz-2.pro`
+    `sed -i "" "s#__GMT_LIBS__#$libgmt_LIBS#" src/qt-mbgrdviz-2/mbgrdviz-2.pro`
+    `sed -i "" "s#__INSTALLDIR__#$prefix/bin#" src/qt-mbgrdviz-2/mbgrdviz-2.pro`
+    AS_ECHO(["Running qmake in src/qt-mbgrdviz-2 to generate src/qt-mbgrdviz-2/Makefile.qmake..."])
+    `cd src/qt-mbgrdviz-2 ; qmake -makefile -o Makefile.qmake ; cd ../..`
+
+    AS_ECHO(["Constructing Qt project file mbgrdviz-3.pro in src/qt-mbgrdviz-3..."])
+    `cp src/qt-mbgrdviz-3/mbgrdviz-3.pro.init src/qt-mbgrdviz-3/mbgrdviz-3.pro`
+    `sed -i "" "s#__OPENGL_INCLUDEDIR__#$libopengl_INCLUDEDIR#" src/qt-mbgrdviz-3/mbgrdviz-3.pro`
+    `sed -i "" "s#__OPENGL_LIBS__#$libopengl_LIBS#" src/qt-mbgrdviz-3/mbgrdviz-3.pro`
+    `sed -i "" "s#__GMT_INCLUDEDIR__#$libgmt_INCLUDEDIR#" src/qt-mbgrdviz-3/mbgrdviz-3.pro`
+    `sed -i "" "s#__GMT_LIBS__#$libgmt_LIBS#" src/qt-mbgrdviz-3/mbgrdviz-3.pro`
+    `sed -i "" "s#__INSTALLDIR__#$prefix/bin#" src/qt-mbgrdviz-3/mbgrdviz-3.pro`
+    AS_ECHO(["Running qmake in src/qt-mbgrdviz-3 to generate src/qt-mbgrdviz-3/Makefile.qmake..."])
+    `cd src/qt-mbgrdviz-3 ; qmake -makefile -o Makefile.qmake ; cd ../..`
+
   else
     AS_ECHO(["Qt5 installation not found"])
     build_qttools=no
@@ -1123,7 +1161,10 @@ AC_CONFIG_FILES([\
       src/man/man3/Makefile \
       src/html/Makefile \
       src/ps/Makefile \
-      src/qttest/Makefile \
+      src/qt-mbgui/Makefile \
+      src/qt-mbgrdviz-1/Makefile \
+      src/qt-mbgrdviz-2/Makefile \
+      src/qt-mbgrdviz-3/Makefile \
       src/share/Makefile \
       third_party/Makefile \
       third_party/googletest/Makefile \

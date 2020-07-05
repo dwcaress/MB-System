@@ -673,12 +673,13 @@ X_CFLAGS
 XMKMF
 BUILD_GL_FALSE
 BUILD_GL_TRUE
-BUILD_MOTIF_FALSE
-BUILD_MOTIF_TRUE
 libopengl_CPPFLAGS
+libopengl_INCLUDEDIR
 libopengl_LIBS
 libGLU_LIBS
 libGLU_CFLAGS
+BUILD_MOTIF_FALSE
+BUILD_MOTIF_TRUE
 libmotif_CPPFLAGS
 libmotif_LIBS
 libXm_LIBS
@@ -2607,7 +2608,6 @@ ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
 ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
 ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
-# AC_LANG([C++])
 
 ac_ext=cpp
 ac_cpp='$CXXCPP $CPPFLAGS'
@@ -21317,12 +21317,21 @@ else
         $as_echo "Failed to find X11 libraries and headers - unable to build graphical tools"
 fi
 
+ if test "$GOT_MOTIF" = yes; then
+  BUILD_MOTIF_TRUE=
+  BUILD_MOTIF_FALSE='#'
+else
+  BUILD_MOTIF_TRUE='#'
+  BUILD_MOTIF_FALSE=
+fi
+
+
+
 $as_echo "Check for OpenGL libraries libGL libGLU and header files GL/gl.h GL/glu.h GL/glx.h"
 GOT_OPENGL=no
 OPENGL_SETTING=no
-if test "$GOT_MOTIF" = "yes" ; then
 
-        $as_echo "Check for OpenGL libraries libGLU libGL"
+$as_echo "Check for OpenGL libraries libGLU libGL"
 
 # Check whether --with-opengl-lib was given.
 if test "${with_opengl_lib+set}" = set; then :
@@ -21331,11 +21340,11 @@ else
   GOT_OPENGL=no
 fi
 
-    if test "$GOT_OPENGL" = "yes" ; then
-                $as_echo "OpenGL library location specified: $opengl_libdir - check if libGL libGLU are there..."
-        save_LDFLAGS=$LDFLAGS
-        LDFLAGS="$LDFLAGS -L$opengl_libdir"
-        { $as_echo "$as_me:${as_lineno-$LINENO}: checking for glBegin in -lGL" >&5
+if test "$GOT_OPENGL" = "yes" ; then
+        $as_echo "OpenGL library location specified: $opengl_libdir - check if libGL libGLU are there..."
+    save_LDFLAGS=$LDFLAGS
+    LDFLAGS="$LDFLAGS -L$opengl_libdir"
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for glBegin in -lGL" >&5
 $as_echo_n "checking for glBegin in -lGL... " >&6; }
 if ${ac_cv_lib_GL_glBegin+:} false; then :
   $as_echo_n "(cached) " >&6
@@ -21377,8 +21386,8 @@ else
   OPENGL_SETTING=no
 fi
 
-        if test "$OPENGL_SETTING" = "yes"; then
-            { $as_echo "$as_me:${as_lineno-$LINENO}: checking for gluScaleImage in -lGLU" >&5
+    if test "$OPENGL_SETTING" = "yes"; then
+        { $as_echo "$as_me:${as_lineno-$LINENO}: checking for gluScaleImage in -lGLU" >&5
 $as_echo_n "checking for gluScaleImage in -lGLU... " >&6; }
 if ${ac_cv_lib_GLU_gluScaleImage+:} false; then :
   $as_echo_n "(cached) " >&6
@@ -21420,15 +21429,15 @@ else
   OPENGL_SETTING=no
 fi
 
-        fi
-        LDFLAGS="$save_LDFLAGS"
-        if test "$OPENGL_SETTING" = "no"; then
-            as_fn_error $? "Did not find libGLU libGL according to --with-opengl-lib - check the installation!" "$LINENO" 5
-        fi
-        libopengl_LIBS="-L$opengl_libdir -R $opengl_libdir -lGL -lGLU"
-        libopengl_LDFLAGS="-L$opengl_libdir"
-    else
-                $as_echo "Look for pkg-config OpenGL package..."
+    fi
+    LDFLAGS="$save_LDFLAGS"
+    if test "$OPENGL_SETTING" = "no"; then
+        as_fn_error $? "Did not find libGLU libGL according to --with-opengl-lib - check the installation!" "$LINENO" 5
+    fi
+    libopengl_LIBS="-L$opengl_libdir -lGL -lGLU"
+    libopengl_LDFLAGS="-L$opengl_libdir"
+else
+        $as_echo "Look for pkg-config OpenGL package..."
 
 pkg_failed=no
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for opengl" >&5
@@ -21500,12 +21509,12 @@ else
 $as_echo "yes" >&6; }
 	GOT_OPENGL=yes
 fi
-        libopengl_LIBS="-lGL -lGLU"
-        libopengl_LDFLAGS=""
-    fi
-    if test "$GOT_OPENGL" = "no" ; then
-                $as_echo "Did not find OpenGL library pkg-config package, looking in the usual places..."
-        { $as_echo "$as_me:${as_lineno-$LINENO}: checking for glBegin in -lGL" >&5
+    libopengl_LIBS="-lGL -lGLU"
+    libopengl_LDFLAGS=""
+fi
+if test "$GOT_OPENGL" = "no" ; then
+        $as_echo "Did not find OpenGL library pkg-config package, looking in the usual places..."
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for glBegin in -lGL" >&5
 $as_echo_n "checking for glBegin in -lGL... " >&6; }
 if ${ac_cv_lib_GL_glBegin+:} false; then :
   $as_echo_n "(cached) " >&6
@@ -21547,8 +21556,8 @@ else
   OPENGL_SETTING=no
 fi
 
-        if test "$OPENGL_SETTING" = "yes"; then
-            { $as_echo "$as_me:${as_lineno-$LINENO}: checking for gluScaleImage in -lGLU" >&5
+    if test "$OPENGL_SETTING" = "yes"; then
+        { $as_echo "$as_me:${as_lineno-$LINENO}: checking for gluScaleImage in -lGLU" >&5
 $as_echo_n "checking for gluScaleImage in -lGLU... " >&6; }
 if ${ac_cv_lib_GLU_gluScaleImage+:} false; then :
   $as_echo_n "(cached) " >&6
@@ -21590,37 +21599,38 @@ else
   OPENGL_SETTING=no
 fi
 
-        fi
-        if test "$OPENGL_SETTING" = "yes" ; then
-            GOT_OPENGL=yes
-            $as_echo "Using pre-installed libGLU libGL..."
-            libopengl_LIBS="-lGL -lGLU"
-            libopengl_LDFLAGS=""
-        else
-            $as_echo "Did not find OpenGL library anywhere, use --with-opengl-lib to set the location"
-            as_fn_error $? "Did not find OpenGL library anywhere, use --with-opengl-lib to set the location" "$LINENO" 5
-        fi
     fi
+    if test "$OPENGL_SETTING" = "yes" ; then
+        GOT_OPENGL=yes
+        $as_echo "Using pre-installed libGLU libGL..."
+        libopengl_LIBS="-lGL -lGLU"
+        libopengl_LDFLAGS=""
+    else
+        $as_echo "Did not find OpenGL library anywhere, use --with-opengl-lib to set the location"
+        as_fn_error $? "Did not find OpenGL library anywhere, use --with-opengl-lib to set the location" "$LINENO" 5
+    fi
+fi
 
-    if test "$GOT_OPENGL" = "yes" ; then
-                $as_echo "Check for OpenGL headers"
-        GOT_OPENGL=no
-        OPENGL_SETTING=no
+if test "$GOT_OPENGL" = "yes" ; then
+        $as_echo "Check for OpenGL headers"
+    GOT_OPENGL=no
+    OPENGL_SETTING=no
 
 # Check whether --with-opengl-include was given.
 if test "${with_opengl_include+set}" = set; then :
-  withval=$with_opengl_include; libopengl_CPPFLAGS="-I${withval}" GOT_OPENGL=yes
+  withval=$with_opengl_include; libopengl_INCLUDEDIR="${withval}" GOT_OPENGL=yes
 else
   GOT_OPENGL=no
 fi
 
-        if test "$GOT_OPENGL" = "yes" ; then
-                        $as_echo "OpenGL header location specified: $libopengl_CPPFLAGS - check if GL/gl.h is there..."
-            save_CPPFLAGS=$CPPFLAGS
-            save_CFLAGS=$CFLAGS
-            CPPFLAGS="$CPPFLAGS $libopengl_CPPFLAGS"
-            CFLAGS="$CFLAGS $libopengl_CPPFLAGS"
-            ac_fn_c_check_header_mongrel "$LINENO" "GL/gl.h" "ac_cv_header_GL_gl_h" "$ac_includes_default"
+    if test "$GOT_OPENGL" = "yes" ; then
+        libopengl_CPPFLAGS="-I$libopengl_INCLUDEDIR"
+                $as_echo "OpenGL header location specified: $libopengl_CPPFLAGS - check if GL/gl.h is there..."
+        save_CPPFLAGS=$CPPFLAGS
+        save_CFLAGS=$CFLAGS
+        CPPFLAGS="$CPPFLAGS $libopengl_CPPFLAGS"
+        CFLAGS="$CFLAGS $libopengl_CPPFLAGS"
+        ac_fn_c_check_header_mongrel "$LINENO" "GL/gl.h" "ac_cv_header_GL_gl_h" "$ac_includes_default"
 if test "x$ac_cv_header_GL_gl_h" = xyes; then :
   OPENGL_SETTING=yes
 else
@@ -21628,46 +21638,37 @@ else
 fi
 
 
-            CPPFLAGS=$save_CPPFLAGS
-            CFLAGS=$save_CFLAGS
-            if test "$OPENGL_SETTING" = "no"; then
-                as_fn_error $? "Did not find GL/gl.h according to --with-opengl-include - check the installation!" "$LINENO" 5
-            fi
-        else
-                        $as_echo "Looking for OpenGL headers in the usual places..."
-            ac_fn_c_check_header_mongrel "$LINENO" "GL/gl.h" "ac_cv_header_GL_gl_h" "$ac_includes_default"
-if test "x$ac_cv_header_GL_gl_h" = xyes; then :
-  OPENGL_SETTING=yes
-else
-  OPENGL_SETTING=no
-fi
-
-
-            if test "$OPENGL_SETTING" = "yes" ; then
-                GOT_OPENGL=yes
-                $as_echo "Using pre-installed OpenGL headers..."
-            else
-                $as_echo "Did not find OpenGL headers anywhere, use --with-opengl-include to set the location"
-                as_fn_error $? "Did not find OpenGL headers anywhere, use --with-opengl-include to set the location" "$LINENO" 5
-            fi
+        CPPFLAGS=$save_CPPFLAGS
+        CFLAGS=$save_CFLAGS
+        if test "$OPENGL_SETTING" = "no"; then
+            as_fn_error $? "Did not find GL/gl.h according to --with-opengl-include - check the installation!" "$LINENO" 5
         fi
-            fi
-
-        libopengl_LIBS=$libopengl_LIBS
-
-    libopengl_CPPFLAGS=$libopengl_CPPFLAGS
-
+    else
+                $as_echo "Looking for OpenGL headers in the usual places..."
+        ac_fn_c_check_header_mongrel "$LINENO" "GL/gl.h" "ac_cv_header_GL_gl_h" "$ac_includes_default"
+if test "x$ac_cv_header_GL_gl_h" = xyes; then :
+  OPENGL_SETTING=yes
 else
-        $as_echo "Failed to find Motif libraries and headers - did not look for OpenGL libraries and headers - unable to build visualization tools"
+  OPENGL_SETTING=no
 fi
 
- if test "$GOT_MOTIF" = yes; then
-  BUILD_MOTIF_TRUE=
-  BUILD_MOTIF_FALSE='#'
-else
-  BUILD_MOTIF_TRUE='#'
-  BUILD_MOTIF_FALSE=
-fi
+
+        if test "$OPENGL_SETTING" = "yes" ; then
+            GOT_OPENGL=yes
+            $as_echo "Using pre-installed OpenGL headers..."
+        else
+            $as_echo "Did not find OpenGL headers anywhere, use --with-opengl-include to set the location"
+            as_fn_error $? "Did not find OpenGL headers anywhere, use --with-opengl-include to set the location" "$LINENO" 5
+        fi
+    fi
+    fi
+
+libopengl_LIBS=$libopengl_LIBS
+
+libopengl_INCLUDEDIR=$libopengl_INCLUDEDIR
+
+libopengl_CPPFLAGS=$libopengl_CPPFLAGS
+
 
  if test "$GOT_OPENGL" = yes; then
   BUILD_GL_TRUE=
@@ -21677,6 +21678,10 @@ else
   BUILD_GL_FALSE=
 fi
 
+
+if test "$GOT_OPENGL" = "no" ; then
+        $as_echo "Failed to find OpenGL libraries and headers - unable to build OpenGL based visualization tools"
+fi
 
 
 $as_echo "Check if Qt5 based graphical tools should be built"
@@ -22592,13 +22597,43 @@ $as_echo "$ax_cv_qt_test_result" >&6; }
 
     qt_MOC=$QT_MOC
 
-    $as_echo "Constructing Qt project file mbgrdvizqt.pro in src/qttest..."
-    `cp src/qttest/mbgrdvizqt.pro.init src/qttest/mbgrdvizqt.pro`
-    `sed -i "" "s#__GMT_INCLUDEDIR__#$libgmt_INCLUDEDIR#" src/qttest/mbgrdvizqt.pro`
-    `sed -i "" "s#__GMT_LIBS__#$libgmt_LIBS#" src/qttest/mbgrdvizqt.pro`
-    `sed -i "" "s#__INSTALLDIR__#$prefix/bin#" src/qttest/mbgrdvizqt.pro`
-    $as_echo "Running qmake in src/qttest to generate src/qttest/Makefile.qmake..."
-    `cd src/qttest ; qmake -makefile -o Makefile.qmake ; cd ../..`
+
+    $as_echo "Constructing Qt project file mbgui.pro in src/qt-mbgui..."
+    `cp src/qt-mbgui/mbgui.pro.init src/qt-mbgui/mbgui.pro`
+    `sed -i "" "s#__OPENGL_INCLUDEDIR__#$libopengl_INCLUDEDIR#" src/qt-mbgui/mbgui.pro`
+    `sed -i "" "s#__OPENGL_LIBS__#$libopengl_LIBS#" src/qt-mbgui/mbgui.pro`
+    `sed -i "" "s#__GMT_INCLUDEDIR__#$libgmt_INCLUDEDIR#" src/qt-mbgui/mbgui.pro`
+    `sed -i "" "s#__GMT_LIBS__#$libgmt_LIBS#" src/qt-mbgui/mbgui.pro`
+    `sed -i "" "s#__INSTALLDIR__#$prefix/lib#" src/qt-mbgui/mbgui.pro`
+    $as_echo "Running qmake in src/qt-mbgui to generate src/qt-mbgui/Makefile.qmake..."
+    `cd src/qt-mbgui ; qmake -makefile -o Makefile.qmake ; cd ../..`
+
+    $as_echo "Constructing Qt project file mbgrdviz-1.pro in src/qt-mbgrdviz-1..."
+    `cp src/qt-mbgrdviz-1/mbgrdviz-1.pro.init src/qt-mbgrdviz-1/mbgrdviz-1.pro`
+    `sed -i "" "s#__GMT_INCLUDEDIR__#$libgmt_INCLUDEDIR#" src/qt-mbgrdviz-1/mbgrdviz-1.pro`
+    `sed -i "" "s#__GMT_LIBS__#$libgmt_LIBS#" src/qt-mbgrdviz-1/mbgrdviz-1.pro`
+    `sed -i "" "s#__INSTALLDIR__#$prefix/bin#" src/qt-mbgrdviz-1/mbgrdviz-1.pro`
+    $as_echo "Running qmake in src/qt-mbgrdviz-1 to generate src/qt-mbgrdviz-1/Makefile.qmake..."
+    `cd src/qt-mbgrdviz-1 ; qmake -makefile -o Makefile.qmake ; cd ../..`
+
+    $as_echo "Constructing Qt project file mbgrdviz-2.pro in src/qt-mbgrdviz-2..."
+    `cp src/qt-mbgrdviz-2/mbgrdviz-2.pro.init src/qt-mbgrdviz-2/mbgrdviz-2.pro`
+    `sed -i "" "s#__GMT_INCLUDEDIR__#$libgmt_INCLUDEDIR#" src/qt-mbgrdviz-2/mbgrdviz-2.pro`
+    `sed -i "" "s#__GMT_LIBS__#$libgmt_LIBS#" src/qt-mbgrdviz-2/mbgrdviz-2.pro`
+    `sed -i "" "s#__INSTALLDIR__#$prefix/bin#" src/qt-mbgrdviz-2/mbgrdviz-2.pro`
+    $as_echo "Running qmake in src/qt-mbgrdviz-2 to generate src/qt-mbgrdviz-2/Makefile.qmake..."
+    `cd src/qt-mbgrdviz-2 ; qmake -makefile -o Makefile.qmake ; cd ../..`
+
+    $as_echo "Constructing Qt project file mbgrdviz-3.pro in src/qt-mbgrdviz-3..."
+    `cp src/qt-mbgrdviz-3/mbgrdviz-3.pro.init src/qt-mbgrdviz-3/mbgrdviz-3.pro`
+    `sed -i "" "s#__OPENGL_INCLUDEDIR__#$libopengl_INCLUDEDIR#" src/qt-mbgrdviz-3/mbgrdviz-3.pro`
+    `sed -i "" "s#__OPENGL_LIBS__#$libopengl_LIBS#" src/qt-mbgrdviz-3/mbgrdviz-3.pro`
+    `sed -i "" "s#__GMT_INCLUDEDIR__#$libgmt_INCLUDEDIR#" src/qt-mbgrdviz-3/mbgrdviz-3.pro`
+    `sed -i "" "s#__GMT_LIBS__#$libgmt_LIBS#" src/qt-mbgrdviz-3/mbgrdviz-3.pro`
+    `sed -i "" "s#__INSTALLDIR__#$prefix/bin#" src/qt-mbgrdviz-3/mbgrdviz-3.pro`
+    $as_echo "Running qmake in src/qt-mbgrdviz-3 to generate src/qt-mbgrdviz-3/Makefile.qmake..."
+    `cd src/qt-mbgrdviz-3 ; qmake -makefile -o Makefile.qmake ; cd ../..`
+
   else
     $as_echo "Qt5 installation not found"
     build_qttools=no
@@ -22855,7 +22890,7 @@ _ACEOF
 
 $as_echo " "
 $as_echo "About to create Makefiles..."
-ac_config_files="$ac_config_files Makefile src/Makefile src/mbio/Makefile src/surf/Makefile src/bsio/Makefile src/gsf/Makefile src/mbaux/Makefile src/utilities/Makefile src/deprecated/Makefile src/gmt/Makefile src/macros/Makefile src/mbedit/Makefile src/mbnavedit/Makefile src/mbvelocitytool/Makefile src/mbnavadjust/Makefile src/otps/Makefile src/mbtrn/Makefile src/mbtrnav/Makefile src/mbtrnutils/Makefile src/mbview/Makefile src/mbgrdviz/Makefile src/mbeditviz/Makefile src/man/Makefile src/man/man1/Makefile src/man/man3/Makefile src/html/Makefile src/ps/Makefile src/qttest/Makefile src/share/Makefile third_party/Makefile third_party/googletest/Makefile third_party/googlemock/Makefile test/Makefile test/mbio/Makefile test/utilities/Makefile test/deprecated/Makefile"
+ac_config_files="$ac_config_files Makefile src/Makefile src/mbio/Makefile src/surf/Makefile src/bsio/Makefile src/gsf/Makefile src/mbaux/Makefile src/utilities/Makefile src/deprecated/Makefile src/gmt/Makefile src/macros/Makefile src/mbedit/Makefile src/mbnavedit/Makefile src/mbvelocitytool/Makefile src/mbnavadjust/Makefile src/otps/Makefile src/mbtrn/Makefile src/mbtrnav/Makefile src/mbtrnutils/Makefile src/mbview/Makefile src/mbgrdviz/Makefile src/mbeditviz/Makefile src/man/Makefile src/man/man1/Makefile src/man/man3/Makefile src/html/Makefile src/ps/Makefile src/qt-mbgui/Makefile src/qt-mbgrdviz-1/Makefile src/qt-mbgrdviz-2/Makefile src/qt-mbgrdviz-3/Makefile src/share/Makefile third_party/Makefile third_party/googletest/Makefile third_party/googlemock/Makefile test/Makefile test/mbio/Makefile test/utilities/Makefile test/deprecated/Makefile"
 
 
 
@@ -23982,7 +24017,10 @@ do
     "src/man/man3/Makefile") CONFIG_FILES="$CONFIG_FILES src/man/man3/Makefile" ;;
     "src/html/Makefile") CONFIG_FILES="$CONFIG_FILES src/html/Makefile" ;;
     "src/ps/Makefile") CONFIG_FILES="$CONFIG_FILES src/ps/Makefile" ;;
-    "src/qttest/Makefile") CONFIG_FILES="$CONFIG_FILES src/qttest/Makefile" ;;
+    "src/qt-mbgui/Makefile") CONFIG_FILES="$CONFIG_FILES src/qt-mbgui/Makefile" ;;
+    "src/qt-mbgrdviz-1/Makefile") CONFIG_FILES="$CONFIG_FILES src/qt-mbgrdviz-1/Makefile" ;;
+    "src/qt-mbgrdviz-2/Makefile") CONFIG_FILES="$CONFIG_FILES src/qt-mbgrdviz-2/Makefile" ;;
+    "src/qt-mbgrdviz-3/Makefile") CONFIG_FILES="$CONFIG_FILES src/qt-mbgrdviz-3/Makefile" ;;
     "src/share/Makefile") CONFIG_FILES="$CONFIG_FILES src/share/Makefile" ;;
     "third_party/Makefile") CONFIG_FILES="$CONFIG_FILES third_party/Makefile" ;;
     "third_party/googletest/Makefile") CONFIG_FILES="$CONFIG_FILES third_party/googletest/Makefile" ;;
@@ -25527,7 +25565,7 @@ if test "$build_test" = "yes" ; then
 else
     $as_echo "Build unit tests: Disabled"
 fi
-if test $enable_gsf = yes ; then
+if test "$enable_gsf" = "yes" ; then
     $as_echo "Build driver gsf: Enabled"
 else
     $as_echo "Build driver gsf: Disabled"

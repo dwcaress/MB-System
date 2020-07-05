@@ -375,7 +375,7 @@ autoheader
 automake --add-missing --include-deps
 autoconf
 autoupdate
-autoreconf --force --install --warnings=all
+autoreconf --force --install #--warnings=all
 
 LDFLAGS="-L/opt/X11/lib" \
 CFLAGS="-g -I/opt/X11/include" \
@@ -387,14 +387,15 @@ CFLAGS="-g -I/opt/X11/include" \
     --with-fftw-lib=/usr/local/lib \
     --with-motif-include=/usr/local/include \
     --with-motif-lib=/usr/local/lib \
+    --with-opengl-include=/opt/X11/include \
+    --with-opengl-lib=/opt/X11/lib \
     --with-otps-dir=/usr/local/opt/otps \
     --enable-hardening \
-    --enable-mbtrn \
-    --enable-mbtnav \
     --enable-test
-    #--enable-qt
+    #--enable-mbtrn \
+    #--enable-mbtnav \
+    #--enable-qt \
     #--enable-pcltools
-    #--with-otps-dir=/usr/local/src/OTPS2 \
 
 make
 make check

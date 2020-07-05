@@ -15,7 +15,7 @@ if BUILD_MBTNAV
   XBUILD_SUB_MBTRNBIN = mbtrnutils
 endif
 if BUILD_QTTOOLS
-  XBUILD_SUB_QTTOOLS = qttest
+  XBUILD_SUB_QTTOOLS = qt-mbgrdviz-1 qt-mbgrdviz-2 qt-mbgui qt-mbgrdviz-3
 endif
 
 SUBDIRS =

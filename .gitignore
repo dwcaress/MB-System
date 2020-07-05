@@ -167,3 +167,4 @@ src/qttest/MOC/moc_colorgradient_p.cpp
 src/qttest/MOC/moc_BackEnd.cpp
 src/qttest/MOC/moc_abstractdeclarative_p.cpp
 src/qttest/mbqttest
+*.stash

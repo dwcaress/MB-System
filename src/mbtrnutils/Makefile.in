@@ -345,6 +345,7 @@ libmotif_LIBS = @libmotif_LIBS@
 libnetcdf_CPPFLAGS = @libnetcdf_CPPFLAGS@
 libnetcdf_LIBS = @libnetcdf_LIBS@
 libopengl_CPPFLAGS = @libopengl_CPPFLAGS@
+libopengl_INCLUDEDIR = @libopengl_INCLUDEDIR@
 libopengl_LIBS = @libopengl_LIBS@
 libproj_CFLAGS = @libproj_CFLAGS@
 libproj_CPPFLAGS = @libproj_CPPFLAGS@

@@ -1,0 +1,10 @@
+<!DOCTYPE RCC>
+<RCC>
+    <qresource prefix="/">
+        <file>glsl-shaders/phong.vert</file>
+        <file>glsl-shaders/phong.frag</file>
+        <file>glsl-shaders/test.vert</file>
+        <file>glsl-shaders/test.frag</file>
+
+    </qresource>
+</RCC>
