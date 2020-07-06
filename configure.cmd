@@ -391,10 +391,13 @@ CFLAGS="-g -I/opt/X11/include" \
     --with-opengl-lib=/opt/X11/lib \
     --with-otps-dir=/usr/local/opt/otps \
     --enable-hardening \
-    --enable-test
-    #--enable-mbtrn \
-    #--enable-mbtnav \
-    #--enable-qt \
+    --enable-test \
+    --enable-mbtrn \
+    --enable-mbtnav \
+    --enable-qt \
+    --enable-opencv \
+    --with-opencv-include=/usr/local/Cellar/opencv/4.3.0_5/include/opencv4 \
+    --with-opencv-lib=/usr/local/Cellar/opencv/4.3.0_5/lib
     #--enable-pcltools
 
 make
