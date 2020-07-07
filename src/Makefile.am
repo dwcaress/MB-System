@@ -1,26 +1,33 @@
 if BUILD_MBUTILS
 if BUILD_MOTIF
-  XBUILD_SUB_MOTIF = mbedit mbnavedit mbvelocitytool
-endif
+XBUILD_SUB_MOTIF = mbedit mbnavedit mbvelocitytool
 if BUILD_GL
-  XBUILD_SUB_GL = mbview mbgrdviz mbeditviz mbnavadjust
+XBUILD_SUB_GL = mbview mbgrdviz mbeditviz mbnavadjust
 endif
 endif
+endif
+
 if BUILD_MBTRN
-  XBUILD_SUB_MBTRN = mbtrn
-  XBUILD_SUB_MBTRNBIN = mbtrnutils
+XBUILD_SUB_MBTRN = mbtrn
 endif
 if BUILD_MBTNAV
-  XBUILD_SUB_MBTNAV = mbtrnav
-  XBUILD_SUB_MBTRNBIN = mbtrnutils
+XBUILD_SUB_MBTNAV = mbtrnav
 endif
+if BUILD_MBTRNUTILS
+XBUILD_SUB_MBTRNBIN = mbtrnutils
+endif
+
+if BUILD_OPENCVTOOLS
+XBUILD_SUB_OPENCVTOOLS = photo
+endif
+
 if BUILD_QTTOOLS
-  XBUILD_SUB_QTTOOLS = qttest
+XBUILD_SUB_QTTOOLS = qt-mbgrdviz-1 qt-mbgrdviz-2 qt-mbgui qt-mbgrdviz-3
 endif
 
 SUBDIRS =
 if BUILD_GSF
-SUBDIRS += gsf
+  SUBDIRS += gsf
 endif
 SUBDIRS += surf
 SUBDIRS += bsio
@@ -40,6 +47,7 @@ SUBDIRS += html
 SUBDIRS += ps
 SUBDIRS += $(XBUILD_SUB_MOTIF)
 SUBDIRS += $(XBUILD_SUB_GL)
+SUBDIRS += $(XBUILD_SUB_OPENCVTOOLS)
 SUBDIRS += $(XBUILD_SUB_QTTOOLS)
 
 CLEANFILES =

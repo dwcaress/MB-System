@@ -107,7 +107,7 @@
 
 #define THIS_MODULE_CLASSIC_NAME	"mbgrd2obj"
 #define THIS_MODULE_MODERN_NAME	"mbgrd2obj"
-#define THIS_MODULE_LIB		"core"
+#define THIS_MODULE_LIB		"mbsystem"
 #define THIS_MODULE_PURPOSE	"Convert grid to OBJ format 3D model file"
 #define THIS_MODULE_KEYS	"<G{+,>}"
 #define THIS_MODULE_NEEDS	"g"
@@ -244,10 +244,12 @@ int GMT_mbgrd2obj (void *V_API, int mode, void *args) {
 
 	/* Parse the command-line arguments */
 
-#if GMT_MAJOR_VERSION == 6 && GMT_MINOR_VERSION >= 1
+#if GMT_MAJOR_VERSION >= 6 && GMT_MINOR_VERSION >= 1
 	if ((GMT = gmt_init_module (API, THIS_MODULE_LIB, THIS_MODULE_CLASSIC_NAME, THIS_MODULE_KEYS, THIS_MODULE_NEEDS, NULL, &options, &GMT_cpy)) == NULL) bailout (API->error); /* Save current state */
-#else
+#elif GMT_MAJOR_VERSION >= 6
 	if ((GMT = gmt_init_module (API, THIS_MODULE_LIB, THIS_MODULE_CLASSIC_NAME, THIS_MODULE_KEYS, THIS_MODULE_NEEDS, &options, &GMT_cpy)) == NULL) bailout (API->error); /* Save current state */
+#else
+	GMT = gmt_begin_module(API, THIS_MODULE_LIB, THIS_MODULE_NAME, &GMT_cpy); /* Save current state */
 #endif
 
 	if (GMT_Parse_Common (API, THIS_MODULE_OPTIONS, options)) Return (API->error);

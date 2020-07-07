@@ -21,11 +21,11 @@ mbsystem_la_LDFLAGS = -module -avoid-version -shared
 mbsystem_la_SOURCES =
 mbsystem_la_SOURCES += mbcontour.c
 mbsystem_la_SOURCES += mbswath.c
-if GMT61PLUS
-  mbsystem_la_SOURCES += mbgrdtiff.c
-else
+#if GMT61PLUS
+#  mbsystem_la_SOURCES += mbgrdtiff.c
+#else
   mbsystem_la_SOURCES += mbgrdtifforg.c
-endif
+#endif
 mbsystem_la_SOURCES += mbgrd2obj.c
 
 mbsystem_la_LIBADD =

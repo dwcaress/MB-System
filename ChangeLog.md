@@ -20,6 +20,7 @@ include "beta" in the tag name are preliminary and generally not announced.
 Distributions that do not include "beta" in the tag name correspond to the major,
 announced releases. The source distributions associated with all releases, major or beta, are equally accessible as tarballs through the Github interface.
 
+- Version 5.7.6beta39    July 6, 2020
 - Version 5.7.6beta38    June 8, 2020
 - Version 5.7.6beta37    May 26, 2020
 - Version 5.7.6beta36    May 17, 2020
@@ -348,6 +349,36 @@ announced releases. The source distributions associated with all releases, major
 --
 ### MB-System Version 5.7 Release Notes:
 --
+
+#### 5.7.6beta39 (July 6, 2020)
+
+Mbphotomosaic, mbgetphotocorrection, mbphotogrammetry: Added three programs used
+for processing seafloor photography collected during seafloor mapping surveys
+(i.e. from a survey platform with navigation and attitude data). These programs
+depend on the OpenCV version 4 package, and so add a large and complex dependency
+to MB-System. The source files are in the new directory src/photo. These programs
+are not currently built by default - the configure script must be run with a
+--enable-opencv option in order to enable building the photo tools. No documentation
+exists at this point for these tools. A key aspect is that the photography data
+are referenced through recursive imagelist structures (introduced in 5.7.6beta32)
+analagous to the datalists used for sonar and lidar data. The photomosaicing and
+photo correction tools will work with both single and stereo camera datasets. The
+photogrammetry tools works only with stereo pair data. These tools also depend
+on camera calibrations - the tool(s) for that are not yet included in MB-System.
+
+Qt based tool prototypes: Improved the build system handling of Qt5 and OpenGL
+programs. The test libraries and programs enabled by running configure with the
+--enable-qt option are now located in four directories: src/qt-mbgui, 
+src/qt-mbgrdviz-1, src/qt-mbgrdviz-2, and src/qt-mbgrdviz-3.
+
+GMT integration: The GMT 6.1.0 release contains a change to the API that broke
+the build of the GMT module mbswath. It also contained changes to the module
+initialization code that caused mbswath, mbcontour, and mbgrdtiff to crash.
+The code has been modified with (more) proprocessor directives determined by
+the installed GMT version to build with GMT versions 5.2, 5.4, 6.0, 6.1, and
+the current master that will become 6.2. For GMT versions >= 6.0 the MB-System
+code no longer depends on either the gmt/src/gmt_mb.h header file or the obsolete
+gmt_begin_module() function.
 
 #### 5.7.6beta38 (June 8, 2020)
 

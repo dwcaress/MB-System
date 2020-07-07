@@ -30,7 +30,7 @@
  */
 
 #define THIS_MODULE_NAME "mbswath"
-#define THIS_MODULE_LIB "mbgmt"
+#define THIS_MODULE_LIB "mbsystem"
 #define THIS_MODULE_PURPOSE "Plot swath bathymetry, amplitude, or backscatter"
 #define THIS_MODULE_KEYS ""
 
@@ -410,8 +410,13 @@ int GMT_mbswath_usage(struct GMTAPI_CTRL *API, int level) {
 	GMT_Message(API, GMT_TIME_NONE, "\t[-I<inputfile>] [-L<lonflip>] [-N<cptfile>]\n");
 	GMT_Message(API, GMT_TIME_NONE, "\t[-S<speed>] [-T<timegap>] [-W] [-Z<mode>]\n");
 	GMT_Message(API, GMT_TIME_NONE, "\t[%s] [-T] [%s] [%s]\n", GMT_Rgeo_OPT, GMT_U_OPT, GMT_V_OPT);
+#if GMT_MAJOR_VERSION >= 6
+	GMT_Message(API, GMT_TIME_NONE, "\t[%s] [%s] [%s]\n\t[%s]\n\t[%s] [%s]\n\n", GMT_X_OPT, GMT_Y_OPT, GMT_f_OPT,
+	            GMT_n_OPT, GMT_p_OPT, GMT_t_OPT);
+#else
 	GMT_Message(API, GMT_TIME_NONE, "\t[%s] [%s] [%s] [%s]\n\t[%s]\n\t[%s] [%s]\n\n", GMT_X_OPT, GMT_Y_OPT, GMT_c_OPT, GMT_f_OPT,
 	            GMT_n_OPT, GMT_p_OPT, GMT_t_OPT);
+#endif
 
 	if (level == GMT_SYNOPSIS)
 		return (EXIT_FAILURE);
@@ -1923,8 +1928,14 @@ int GMT_mbswath(void *V_API, int mode, void *args) {
 
 	/* Parse the command-line arguments */
 
+#if GMT_MAJOR_VERSION >= 6 && GMT_MINOR_VERSION >= 1
+	GMT = gmt_init_module(API, THIS_MODULE_LIB, THIS_MODULE_NAME, "", "", NULL, &options, &GMT_cpy); /* Save current state */
+#elif GMT_MAJOR_VERSION >= 6
+	GMT = gmt_init_module(API, THIS_MODULE_LIB, THIS_MODULE_NAME, "", "", &options, &GMT_cpy); /* Save current state */
+#else
 	GMT = gmt_begin_module(API, THIS_MODULE_LIB, THIS_MODULE_NAME, &GMT_cpy); /* Save current state */
-	if (GMT_Parse_Common(API, GMT_PROG_OPTIONS, options))
+#endif
+  if (GMT_Parse_Common(API, GMT_PROG_OPTIONS, options))
 		Return(API->error);
 	Ctrl = (struct MBSWATH_CTRL *)New_mbswath_Ctrl(GMT); /* Allocate and initialize a new control structure */
 	if ((error = GMT_mbswath_parse(GMT, Ctrl, options)))
@@ -1965,6 +1976,8 @@ int GMT_mbswath(void *V_API, int mode, void *args) {
 	gmt_plotcanvas(GMT); /* Fill canvas if requested */
 	gmt_map_clip_on(GMT, GMT->session.no_rgb, 3);
 
+#if GMT_MAJOR_VERSION < 6
+
 	/* Read the color palette file */
 	if (Ctrl->C.active) { /* Read palette file */
 		if ((CPTcolor = gmt_get_cpt(GMT, Ctrl->C.cptfile, GMT_CPT_REQUIRED, 0.0, 0.0)) == NULL) {
@@ -1980,6 +1993,44 @@ int GMT_mbswath(void *V_API, int mode, void *args) {
 			Return(API->error);
 		}
 	}
+
+#elif GMT_MAJOR_VERSION == 6 && GMT_MINOR_VERSION == 0
+
+	/* Read the color palette file */
+	if (Ctrl->C.active) { /* Read palette file */
+		if ((CPTcolor = gmt_get_palette(GMT, Ctrl->C.cptfile, GMT_CPT_REQUIRED, 0.0, 0.0, 0.0, 0)) == NULL) {
+			Return(API->error);
+		}
+		if (CPTcolor && CPTcolor->is_gray && Ctrl->image_type == MBSWATH_IMAGE_24)
+			Ctrl->image_type = MBSWATH_IMAGE_8;
+	}
+
+	/* Read the color palette file for amplitude shading if requested */
+	if (Ctrl->N.active) { /* Read palette file */
+		if ((CPTshade = gmt_get_palette(GMT, Ctrl->N.cptfile, GMT_CPT_REQUIRED, 0.0, 0.0, 0.0, 0)) == NULL) {
+			Return(API->error);
+		}
+	}
+
+#else
+
+	/* Read the color palette file */
+	if (Ctrl->C.active) { /* Read palette file */
+		if ((CPTcolor = gmt_get_palette(GMT, Ctrl->C.cptfile, GMT_CPT_REQUIRED, 0.0, 0.0, 0.0)) == NULL) {
+			Return(API->error);
+		}
+		if (CPTcolor && CPTcolor->is_gray && Ctrl->image_type == MBSWATH_IMAGE_24)
+			Ctrl->image_type = MBSWATH_IMAGE_8;
+	}
+
+	/* Read the color palette file for amplitude shading if requested */
+	if (Ctrl->N.active) { /* Read palette file */
+		if ((CPTshade = gmt_get_palette(GMT, Ctrl->N.cptfile, GMT_CPT_REQUIRED, 0.0, 0.0, 0.0)) == NULL) {
+			Return(API->error);
+		}
+	}
+
+#endif
 
 	/* Set particulars of output image for the postscript plot */
 	gmt_geo_to_xy(GMT, GMT->common.R.wesn[0], GMT->common.R.wesn[2], &Ctrl->clipx[0], &Ctrl->clipy[0]);
