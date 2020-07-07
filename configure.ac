@@ -11,8 +11,8 @@ dnl    See README file for copying and redistribution conditions.
 dnl--------------------------------------------------------------------
 
 dnl Initialize and set version and version date
-AC_INIT([mbsystem],[5.7.6beta38],[http://listserver.mbari.org/sympa/arc/mbsystem],[mbsystem],[http://www.mbari.org/data/mbsystem/])
-AC_DEFINE(VERSION_DATE, ["8 June 2020"], [Set VERSION_DATE define in mb_config.h])
+AC_INIT([mbsystem],[5.7.6beta39],[http://listserver.mbari.org/sympa/arc/mbsystem],[mbsystem],[http://www.mbari.org/data/mbsystem/])
+AC_DEFINE(VERSION_DATE, ["6 July 2020"], [Set VERSION_DATE define in mb_config.h])
 prefix=$ac_default_prefix
 
 AS_ECHO([" "])
@@ -580,10 +580,10 @@ if test -x "$GMT_CONF" ; then
     AC_MSG_CHECKING(GMT version >= 6.1.0)
     AX_COMPARE_VERSION([$GMT_VERSION], [ge], [6.1.0], [GMT61PLUS=true], [GMT61PLUS=false])
     AX_COMPARE_VERSION([$GMT_VERSION], [ge], [6.1.0], [AC_MSG_RESULT([yes])], [AC_MSG_RESULT([no - $GMT_VERSION found])])
-    if test -x "$GMT61PLUS" ; then
-    AS_ECHO(["GMT version >= 6.1.0, mbgrdtiff calls the grdimage module"])
+    if [ $GMT61PLUS ] ; then
+        AS_ECHO(["GMT version >= 6.1.0, mbgrdtiff calls the grdimage module"])
     else
-    AS_ECHO(["GMT version < 6.1.0, mbgrdtiff contructs image without calling the grdimage module"])
+        AS_ECHO(["GMT version < 6.1.0, mbgrdtiff contructs image without calling the grdimage module"])
     fi
 
     AC_MSG_CHECKING(for GMT cflags)
@@ -626,7 +626,7 @@ AC_SUBST([libgmt_CPPFLAGS], [$libgmt_CPPFLAGS])
 AC_SUBST([libgmt_INCLUDEDIR], [$libgmt_INCLUDEDIR])
 AC_SUBST([libgmt_LDFLAGS], [$libgmt_LDFLAGS])
 AC_SUBST(GMT_PLUGINDIR)
-AM_CONDITIONAL([GMT61PLUS], [test -x "$GMT61PLUS"])
+AM_CONDITIONAL([GMT61PLUS], [$GMT61PLUS])
 
 dnl--------------------------------------------------------------------
 dnl FFTW Section

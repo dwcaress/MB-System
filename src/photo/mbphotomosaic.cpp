@@ -63,12 +63,37 @@ int main(int argc, char** argv)
 {
     char program_name[] = "mbphotomosaic";
     char help_message[] =  "mbphotomosaic makes a mosaic of navigated downlooking photographs.";
-    char usage_message[] = "mbphotomosaic -Iimagelist -Ooutputimage \n"
-                "\t[-H -Aimagecorrectionfile -Bplatformfile \n"
-                "\t-Ccalibrationfile -Dxdim/ydim -Edx/dy[/units][!] \n"
-                "\t-Ffovfactor -Jprojection -Mtidefile -Nnavigationfile \n"
-                "\t-Paltitude/range -Rwest/east/south/north -S -Ttopographygridfile \n"
-                "\t-Ucameramode -V]";
+    char usage_message[] = "mbphotomosaic \n"
+                            "\t--verbose\n"
+                            "\t--help\n"
+                            "\t--show-images\n"
+                            "\t--input=imagelist\n"
+                            "\t--output=file\n"
+                            "\t--image-dimensions=width/height\n"
+                            "\t--image-spacing=dx/dy[/units]\n"
+                            "\t--fov-fudgefactor=factor\n"
+                            "\t--projection=projection_pars\n"
+                            "\t--altitude=standoff_target/standoff_range\n"
+                            "\t--standoff=standoff_target/standoff_range\n"
+                            "\t--rangemax=range_max\n"
+                            "\t--bounds=lonmin/lonmax/latmin/latmax | west/east/south/north\n"
+                            "\t--correction-file=imagecorrection.yaml\n"
+                            "\t--brightness-correction\n"
+                            "\t--platform-file=platform.plf\n"
+                            "\t--camera-sensor=camera_sensor_id\n"
+                            "\t--nav-sensor=nav_sensor_id\n"
+                            "\t--sensordepth-sensor=sensordepth_sensor_id\n"
+                            "\t--heading-sensor=heading_sensor_id\n"
+                            "\t--altitude-sensor=altitude_sensor_id\n"
+                            "\t--attitude-sensor=attitude_sensor_id\n"
+                            "\t--use-left-camera\n"
+                            "\t--use-right-camera\n"
+                            "\t--use-both-cameras\n"
+                            "\t--show-image\n"
+                            "\t--calibration-file=stereocalibration.yaml\n"
+                            "\t--navigation-file=file\n"
+                            "\t--tide-file=file\n"
+                            "\t--topography-grid=file";
     extern char *optarg;
     int    option_index;
     int    errflg = 0;

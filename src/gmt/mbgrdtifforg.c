@@ -305,7 +305,7 @@ int tiff_offset[] = {
 /*--------------------------------------------------------------------*/
 
 #define THIS_MODULE_NAME "mbgrdtiff"
-#define THIS_MODULE_LIB "mbgmt"
+#define THIS_MODULE_LIB "mbsystem"
 #define THIS_MODULE_PURPOSE "Project grids or images and plot them on maps"
 #define THIS_MODULE_KEYS ""
 
@@ -478,8 +478,13 @@ int GMT_mbgrdtiff_usage(struct GMTAPI_CTRL *API, int level) {
 	            GMT_J_OPT, GMT_B_OPT);
 	GMT_Message(API, GMT_TIME_NONE, "\t[-G[f|b]<rgb>] [-I<intensgrid>|<value>] [-K] [-M] [-N<nudge_x>/<nudge_y>] [-O] [-P] [-Q]\n");
 	GMT_Message(API, GMT_TIME_NONE, "\t[%s] [-T] [%s] [%s]\n", GMT_Rgeo_OPT, GMT_U_OPT, GMT_V_OPT);
+#if GMT_MAJOR_VERSION >= 6
+	GMT_Message(API, GMT_TIME_NONE, "\t[%s] [%s] [%s]\n\t[%s]\n\t[%s] [%s]\n\n", GMT_X_OPT, GMT_Y_OPT, GMT_f_OPT,
+	            GMT_n_OPT, GMT_p_OPT, GMT_t_OPT);
+#else
 	GMT_Message(API, GMT_TIME_NONE, "\t[%s] [%s] [%s] [%s]\n\t[%s]\n\t[%s] [%s]\n\n", GMT_X_OPT, GMT_Y_OPT, GMT_c_OPT, GMT_f_OPT,
 	            GMT_n_OPT, GMT_p_OPT, GMT_t_OPT);
+#endif
 
 	if (level == GMT_SYNOPSIS)
 		return (EXIT_FAILURE);
@@ -760,7 +765,13 @@ int GMT_mbgrdtiff(void *V_API, int mode, void *args) {
 	/* Parse the command-line arguments */
 
 	struct GMT_CTRL *GMT_cpy = NULL;
+#if GMT_MAJOR_VERSION >= 6 && GMT_MINOR_VERSION >= 1
+	struct GMT_CTRL *GMT = gmt_init_module(API, THIS_MODULE_LIB, THIS_MODULE_NAME, "", "", NULL, &options, &GMT_cpy); /* Save current state */
+#elif GMT_MAJOR_VERSION >= 6
+	struct GMT_CTRL *GMT = gmt_init_module(API, THIS_MODULE_LIB, THIS_MODULE_NAME, "", "", &options, &GMT_cpy); /* Save current state */
+#else
 	struct GMT_CTRL *GMT = gmt_begin_module(API, THIS_MODULE_LIB, THIS_MODULE_NAME, &GMT_cpy); /* Save current state */
+#endif
 
 	struct MBGRDTIFF_CTRL *Ctrl = NULL;
 	if (GMT_Parse_Common(API, GMT_PROG_OPTIONS, options))
@@ -985,9 +996,19 @@ int GMT_mbgrdtiff(void *V_API, int mode, void *args) {
 	/* Get/calculate a color palette file */
 	if (!Ctrl->I.do_rgb) {
 		if (Ctrl->C.active) { /* Read palette file */
+#if GMT_MAJOR_VERSION < 6
 			if ((P = gmt_get_cpt(GMT, Ctrl->C.file, GMT_CPT_OPTIONAL, header_work->z_min, header_work->z_max)) == NULL) {
 				Return(API->error);
 			}
+#elif GMT_MAJOR_VERSION == 6 && GMT_MINOR_VERSION == 0
+			if ((P = gmt_get_palette(GMT, Ctrl->C.file, GMT_CPT_OPTIONAL, header_work->z_min, header_work->z_max, 0.0, 0)) == NULL) {
+				Return(API->error);
+			}
+#else
+			if ((P = gmt_get_palette(GMT, Ctrl->C.file, GMT_CPT_OPTIONAL, header_work->z_min, header_work->z_max, 0.0)) == NULL) {
+				Return(API->error);
+			}
+#endif
 			gray_only = (P && P->is_gray);
 		}
 	}

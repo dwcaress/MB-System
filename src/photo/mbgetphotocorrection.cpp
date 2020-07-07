@@ -68,7 +68,31 @@ int main(int argc, char** argv)
 {
     char program_name[] = "mbgetphotocorrection";
     char help_message[] =  "mbgetphotocorrection generates image intensity corrections from a set of navigated downlooking photographs.";
-    char usage_message[] = "mbgetphotocorrection -Iimagelist -Ocorrectionfile [-H -Nnavigationfile -Ttopographygridfile -V]";
+    char usage_message[] = "mbgetphotocorrection \n"
+                            "\t--verbose\n"
+                            "\t--help\n"
+                            "\t--show-images\n"
+                            "\t--input=imagelist\n"
+                            "\t--output=file  [--correction-file=file]\n"
+                            "\t--correction-x-dimension=value\n"
+                            "\t--correction-y-dimension=value\n"
+                            "\t--correction-z-dimension=value\n"
+                            "\t--correction-z-minmax=value/value\n"
+                            "\t--platform-file=plffile\n"
+                            "\t--camera-sensor=sensor_id\n"
+                            "\t--nav-sensor=sensor_id\n"
+                            "\t--sensordepth-sensor=sensor_id\n"
+                            "\t--heading-sensor=sensor_id\n"
+                            "\t--altitude-sensor=sensor_id\n"
+                            "\t--attitude-sensor=sensor_id\n"
+                            "\t--use-left-camera\n"
+                            "\t--use-right-camera\n"
+                            "\t--use-both-cameras\n"
+                            "\t--show-image\n"
+                            "\t--calibration-file=file\n"
+                            "\t--navigation-file=file\n"
+                            "\t--tide-file=file\n"
+                            "\t--topography-grid=file";
     extern char *optarg;
     int    option_index;
     int    errflg = 0;

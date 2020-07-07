@@ -143,3 +143,4 @@ src/qt-mbgui/libmbgui.1.0.0.dylib
 src/photo/mbphotogrammetry
 src/photo/mbphotomosaic
 src/photo/mbgetphotocorrection
+src/qt-mbgui/qrc_resources.cpp

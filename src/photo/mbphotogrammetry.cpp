@@ -66,10 +66,43 @@ int main(int argc, char** argv)
 {
     char program_name[] = "mbphotogrammetry";
     char help_message[] = "mbphotogrammetry generates bathymetry from stereo pairs of photographs through photogrammetry.";
-    char usage_message[] = "mbphotogrammetry -Iimagelist -Ooutput -Nnavigationfile \n"
-                "\t[-H -Boffx/offy/offz/rollbias/pitchbias/headingbias \n"
-                "\t-Ccalibrationfile -Ffovfactor -Mtidefile \n"
-                "\t-Paltitude/range -V]";
+    char usage_message[] = "mbphotogrammetry \n"
+                            "\t--verbose\n"
+                            "\t--help\n"
+                            "\t--show-images\n"
+                            "\t--input=imagelist\n"
+                            "\t--navigation-file=file\n"
+                            "\t--survey-line-file=file\n"
+                            "\t--tide-file=file\n"
+                            "\t--output=fileroot\n"
+                            "\t--output-number-pairs=value\n"
+                            "\t--camera-calibration-file=file\n"
+                            "\t--calibration-file=file\n"
+                            "\t--platform-file=platform.plf\n"
+                            "\t--camera-sensor=camera_sensor_id\n"
+                            "\t--nav-sensor=nav_sensor_id\n"
+                            "\t--sensordepth-sensor=sensordepth_sensor_id\n"
+                            "\t--heading-sensor=heading_sensor_id\n"
+                            "\t--altitude-sensor=altitude_sensor_id\n"
+                            "\t--attitude-sensor=attitude_sensor_id\n"
+                            "\t--altitude-min=value\n"
+                            "\t--altitude-max=value\n"
+                            "\t--trim=value\n"
+                            "\t--bin-size=value\n"
+                            "\t--bin-filter=value (0=mean, 1=median)\n"
+                            "\t--downsample=value\n"
+                            "\t--algorithm=algorithm (bm, sgbm, hh)\n"
+                            "\t--algorithm-pre-filter-cap=value\n"
+                            "\t--algorithm-sad-window-size=value\n"
+                            "\t--algorithm-smoothing-penalty-1=value\n"
+                            "\t--algorithm-smoothing-penalty-2=value\n"
+                            "\t--algorithm-min-disparity=value\n"
+                            "\t--algorithm-number-disparities=value\n"
+                            "\t--algorithm-uniqueness-ratio=value\n"
+                            "\t--algorithm-speckle-window-size=value\n"
+                            "\t--algorithm-speckle-range=value\n"
+                            "\t--algorithm-disp-12-max-diff=value\n"
+                            "\t--algorithm-texture-threshold=value";
     extern char *optarg;
     int    option_index;
     int    errflg = 0;
