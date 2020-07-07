@@ -2730,7 +2730,6 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
 $as_echo "#define VERSION_DATE \"7 July 2020\"" >>confdefs.h
 
-prefix=$ac_default_prefix
 
 $as_echo " "
 $as_echo "------------------------------------------------------------------------------"

@@ -13,7 +13,7 @@ dnl--------------------------------------------------------------------
 dnl Initialize and set version and version date
 AC_INIT([mbsystem],[5.7.6beta40],[http://listserver.mbari.org/sympa/arc/mbsystem],[mbsystem],[http://www.mbari.org/data/mbsystem/])
 AC_DEFINE(VERSION_DATE, ["7 July 2020"], [Set VERSION_DATE define in mb_config.h])
-prefix=$ac_default_prefix
+dnl prefix=$ac_default_prefix
 
 AS_ECHO([" "])
 AS_ECHO(["------------------------------------------------------------------------------"])
