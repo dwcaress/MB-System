@@ -20,7 +20,7 @@ include "beta" in the tag name are preliminary and generally not announced.
 Distributions that do not include "beta" in the tag name correspond to the major,
 announced releases. The source distributions associated with all releases, major or beta, are equally accessible as tarballs through the Github interface.
 
-- Version 5.7.6beta39    July 6, 2020
+- Version 5.7.6beta40    July 7, 2020
 - Version 5.7.6beta38    June 8, 2020
 - Version 5.7.6beta37    May 26, 2020
 - Version 5.7.6beta36    May 17, 2020
@@ -350,7 +350,7 @@ announced releases. The source distributions associated with all releases, major
 ### MB-System Version 5.7 Release Notes:
 --
 
-#### 5.7.6beta39 (July 6, 2020)
+#### 5.7.6beta40 (July 7, 2020)
 
 Mbphotomosaic, mbgetphotocorrection, mbphotogrammetry: Added three programs used
 for processing seafloor photography collected during seafloor mapping surveys
@@ -368,7 +368,7 @@ on camera calibrations - the tool(s) for that are not yet included in MB-System.
 
 Qt based tool prototypes: Improved the build system handling of Qt5 and OpenGL
 programs. The test libraries and programs enabled by running configure with the
---enable-qt option are now located in four directories: src/qt-mbgui, 
+--enable-qt option are now located in four directories: src/qt-mbgui,
 src/qt-mbgrdviz-1, src/qt-mbgrdviz-2, and src/qt-mbgrdviz-3.
 
 GMT integration: The GMT 6.1.0 release contains a change to the API that broke
