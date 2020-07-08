@@ -62,7 +62,7 @@ libr7kr_la_SOURCES =  utils/mconfig.c \
 
 libr7kr_la_LIBADD = libmframe.la -lpthread
 
-bin_PROGRAMS =  stream7k frames7k emu7k trnc tbinx udps udpc mb1conv r7kr_test mbtnav-cli
+bin_PROGRAMS =  stream7k frames7k emu7k trnc tbinx udps udpc mb1conv mb12csv r7kr_test mbtnav-cli
 
 stream7k_SOURCES = utils/stream7k.c
 stream7k_LDADD = libr7kr.la
@@ -87,6 +87,9 @@ udpc_LDADD = libr7kr.la
 
 mb1conv_SOURCES = utils/mb1conv.c
 mb1conv_LDADD = libr7kr.la
+
+mb12csv_SOURCES = utils/mb12csv.c
+mb12csv_LDADD = libr7kr.la
 
 r7kr_test_SOURCES = r7kr/r7kr-test.c
 r7kr_test_LDADD = libr7kr.la
