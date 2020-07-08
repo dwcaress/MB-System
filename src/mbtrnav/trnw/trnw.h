@@ -134,6 +134,9 @@ typedef struct trn_config_s{
     int  filter_type;
     int  map_type;
     long int utm_zone;
+    int mod_weight;
+    int filter_reinit;
+    int filter_grade;
     trnw_oflags_t oflags;
     double max_northing_cov;
     double max_northing_err;
@@ -150,7 +153,11 @@ extern "C" {
     // TRN config API
     trn_config_t *trncfg_dnew();
     trn_config_t *trncfg_new(char *host, int port,
-                             long int utm_zone,int map_type, int filter_type,
+                             long int utm_zone,int map_type,
+                             int filter_type,
+                             int filter_grade,
+                             int filter_reinit,
+                             int mod_weight,
                              char *map_file,
                              char *cfg_file,
                              char *particles_file,

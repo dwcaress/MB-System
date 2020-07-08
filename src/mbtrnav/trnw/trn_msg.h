@@ -86,6 +86,23 @@
 #define TRN_FILT_PARTICLE   2
 #define TRN_FILT_BANK       3
 
+#define TRN_FILT_HIGH  1
+#define TRN_FILT_LOW   0
+
+#define TRN_FILT_REINIT_EN  1
+#define TRN_FILT_REINIT_DIS 0
+
+// 0 - No weighting modifications.
+// 1 - Shandor's original alpha modification.
+// 2 - Crossbeam with Shandor's weighting.
+// 3 - Subcloud with Shandor's original.
+// 4 - Subcloud with modified NIS always on.
+#define TRN_MWEIGHT_NONE             0
+#define TRN_MWEIGHT_SHANDOR          1
+#define TRN_MWEIGHT_CROSSBEAM        2
+#define TRN_MWEIGHT_SUBCLOUD_SHANDOR 3
+#define TRN_MWEIGHT_SUBCLOUD_NISON   4
+
 #define TRN_MAP_DEM  1
 #define TRN_MAP_BO   2
 
