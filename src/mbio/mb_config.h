@@ -74,19 +74,19 @@
 #define MBSYSTEM_CONFIG_DEFINED 1
 
 /* Set MBSYSTEM_INSTALL_PREFIX define in mb_config.h */
-#define MBSYSTEM_INSTALL_PREFIX "/usr/local"
+#define MBSYSTEM_INSTALL_PREFIX "NONE"
 
 /* Set MBSYSTEM_OTPS_LOCATION define in mb_config.h */
-#define MBSYSTEM_OTPS_LOCATION "/usr/local/opt/otps"
+#define MBSYSTEM_OTPS_LOCATION "/usr/local/OTPS2"
 
 /* Build libmbtnav and embed TRN instance in mbtrnpp */
-/* #undef MBTNAV_ENABLED */
+#define MBTNAV_ENABLED 1
 
 /* Build libmbtrn and mbtrnpp */
-/* #undef MBTRN_ENABLED */
+#define MBTRN_ENABLED 1
 
 /* Build graphical tools */
-#define MBUTILS_ENABLED 1
+/* #undef MBUTILS_ENABLED */
 
 /* Build tools using OpenCV */
 /* #undef OPENCVTOOLS_ENABLED */
@@ -122,7 +122,7 @@
 #define STDC_HEADERS 1
 
 /* Building unit tests */
-#define TEST_ENABLED 1
+/* #undef TEST_ENABLED */
 
 /* Version number of package */
 #define VERSION "5.7.6beta40"
