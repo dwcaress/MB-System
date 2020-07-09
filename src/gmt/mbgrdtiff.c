@@ -346,7 +346,7 @@ struct MBGRDTIFF_CTRL {
 		bool active;
 		char *arg;
 	} G;
-	struct I { /* -I<inputfile>> */
+	struct I { /* -I<inputfile> */
 		bool active;
 		unsigned int n_files;
 		char *file[3];
@@ -645,8 +645,12 @@ int GMT_mbgrdtiff(void *V_API, int mode, void *args) {
 
 	/* Parse the command-line arguments */
 
+#if GMT_MAJOR_VERSION >= 6
+	GMT = gmt_init_module(API, THIS_MODULE_LIB, THIS_MODULE_NAME, "", "", NULL, &options, &GMT_cpy); /* Save current state */
+#else
 	GMT = gmt_begin_module(API, THIS_MODULE_LIB, THIS_MODULE_NAME, &GMT_cpy); /* Save current state */
-	if (GMT_Parse_Common(API, GMT_PROG_OPTIONS, options))
+#endif
+  if (GMT_Parse_Common(API, GMT_PROG_OPTIONS, options))
 		Return(API->error);
 	Ctrl = New_mbgrdtiff_Ctrl(GMT); /* Allocate and initialize a new control structure */
 	if ((error = GMT_mbgrdtiff_parse(GMT, Ctrl, options)))

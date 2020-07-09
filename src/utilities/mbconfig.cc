@@ -201,13 +201,8 @@ int main(int argc, char **argv) {
 	if (mode_libs) {
 		if (verbose > 0)
 			fprintf(stdout, "\n# MB-System link flags:\n");
-#ifdef MBSYSTEM_BUNDLED_PROJ
-		fprintf(stdout, "-L%s/libs -lmbaux.la -lmbsapi.la -lmbbsio.la -lmbview.la -lmbgsf.la -lmbxgr.la -lmbio.la -lproj\n",
+		fprintf(stdout, "-L%s/lib -lmbaux -lmbsapi -lmbbsio -lmbview -lmbgsf -lmbxgr -lmbio\n",
 		        MBSYSTEM_INSTALL_PREFIX);
-#else
-		fprintf(stdout, "-L%s/libs -lmbaux.la -lmbsapi.la -lmbbsio.la -lmbview.la -lmbgsf.la -lmbxgr.la -lmbio.la\n",
-		        MBSYSTEM_INSTALL_PREFIX);
-#endif
 	}
 
 	if (mode_version) {

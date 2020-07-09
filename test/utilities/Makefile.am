@@ -122,8 +122,8 @@ TESTS += mbtime_test.py
 check_SCRIPTS += mbtime_test.py
 
 if BUILD_MBTRN
-# TESTS += mbtrnpreprocess_test.py
-# check_SCRIPTS += mbtrnpreprocess_test.py
+# TESTS += mbtrnpp_test.py
+# check_SCRIPTS += mbtrnpp_test.py
 endif
 
 TESTS += mbvoxelclean_test.py

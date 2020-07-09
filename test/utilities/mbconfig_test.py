@@ -66,7 +66,7 @@ class MbconfigTest(unittest.TestCase):
     output = subprocess.check_output(cmd, stderr=subprocess.STDOUT).decode().rstrip()
     self.assertIn('MB-System link flags:', output)
     for lib in ('mbaux', 'mbsapi', 'mbbsio', 'mbview', 'mbgsf', 'mbxgr', 'mbio'):
-      self.assertIn(' -l%s.la' % lib, output)
+      self.assertIn(' -l%s' % lib, output)
     # TODO(schwehr): -LNONE/include is wrong
 
   def testVersionId(self):

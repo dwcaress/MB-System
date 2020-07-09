@@ -375,32 +375,36 @@ autoheader
 automake --add-missing --include-deps
 autoconf
 autoupdate
-autoreconf --force --install --warnings=all
+autoreconf --force --install #--warnings=all
 
 LDFLAGS="-L/opt/X11/lib" \
 CFLAGS="-g -I/opt/X11/include" \
 ./configure \
     --prefix=/usr/local \
-    --with-proj-include=/usr/local/opt/proj/include \
-    --with-proj-lib=/usr/local/opt/proj/lib \
+    --with-proj-include=/usr/local/include \
+    --with-proj-lib=/usr/local/lib \
     --with-fftw-include=/usr/local/include \
     --with-fftw-lib=/usr/local/lib \
     --with-motif-include=/usr/local/include \
     --with-motif-lib=/usr/local/lib \
+    --with-opengl-include=/opt/X11/include \
+    --with-opengl-lib=/opt/X11/lib \
     --with-otps-dir=/usr/local/opt/otps \
     --enable-hardening \
-    --enable-mbtrn \
-    --enable-mbtnav \
-    --enable-test --enable-qt
-    #--enable-qt
+    --enable-test 
+    #--enable-mbtrn \
+    #--enable-mbtnav \
+    #--enable-qt \
+    #--enable-opencv \
+    #--with-opencv-include=/usr/local/include/opencv4 \
+    #--with-opencv-lib=/usr/local/lib
     #--enable-pcltools
-    #--with-otps-dir=/usr/local/src/OTPS2 \
 
 make
 make check
 make install
 
-cd src/htmlsrc ; make_mbhtml ; cd ../..
+cd src/htmlsrc ; ./make_mbhtml ; cd ../..
 
 make -j install
 

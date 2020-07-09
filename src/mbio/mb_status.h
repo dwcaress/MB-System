@@ -52,7 +52,7 @@
 #define MB_IMAGERY_TYPE_POINT 8
 
 /* MBIO data type ("kind") convention */
-#define MB_DATA_KINDS 63
+#define MB_DATA_KINDS 69
 #define MB_DATA_NONE 0
 #define MB_DATA_DATA 1                   /* general survey data */
 #define MB_DATA_COMMENT 2                /* general comment */
@@ -122,6 +122,7 @@
 #define MB_DATA_BIST1 66                 /* Kongsberg BIST reply */
 #define MB_DATA_BIST2 67                 /* Kongsberg BIST short reply */
 #define MB_DATA_MBSYSTEM 68              /* Written by MB-System - extension to Kongsberg kmall */
+#define MB_DATA_BSCALIBRATIONFILE 69     /* Kongsberg backscatter calibration file */
 
 /* MBIO function status convention */
 #define MB_SUCCESS 1
@@ -298,6 +299,12 @@ static char *notice_msg[] = {
     "MB_DATA_GEN_SENS (61): WASSP generic sensor data",
     "MB_DATA_WC_PICKS (62): WASSP water column picks",
     "MB_DATA_TIMESTAMP (63): JSTAR file timestamp",
+    "MB_DATA_HEAVE (64): Kongsberg kmall",
+    "MB_DATA_BIST (65): Kongsberg BIST report",
+    "MB_DATA_BIST1 (66): Kongsberg BIST reply",
+    "MB_DATA_BIST2 (67): Kongsberg BIST short reply",
+    "MB_DATA_MBSYSTEM (68): Written by MB-System - extension to Kongsberg kmall",
+    "MB_DATA_BSCALIBRATIONFILE (69): Kongsberg backscatter calibration file",
 
     /* notices for nonfatal error messages */
     "MB_ERROR_TIME_GAP (ID=-1): Time gap in data",

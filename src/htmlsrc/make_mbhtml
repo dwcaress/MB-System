@@ -104,7 +104,7 @@ foreach $manpageraw (@manual_pages) {
     $date = substr($date, 1);
 #    `cat $manpageraw | ./man2html -leftm 1 -topm 5 -botm 5 -pgsize 55 > $raw_html_file`;
 #    `$groff -man -Thtml $manpageraw  > $raw_html_file`;
-    `cat $manpageraw | man2html -f > $raw_html_file`;
+    `cat $manpageraw | ./man2html -f > $raw_html_file`;
 
     # Open the input file
     if (!open(IHTML,"$raw_html_file"))

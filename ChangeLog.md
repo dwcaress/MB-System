@@ -20,6 +20,11 @@ include "beta" in the tag name are preliminary and generally not announced.
 Distributions that do not include "beta" in the tag name correspond to the major,
 announced releases. The source distributions associated with all releases, major or beta, are equally accessible as tarballs through the Github interface.
 
+- Version 5.7.6beta40    July 7, 2020
+- Version 5.7.6beta38    June 8, 2020
+- Version 5.7.6beta37    May 26, 2020
+- Version 5.7.6beta36    May 17, 2020
+- Version 5.7.6beta34    May 14, 2020
 - Version 5.7.6beta33    May 5, 2020
 - Version 5.7.6beta32    April 22, 2020
 - Version 5.7.6beta31    March 2, 2020
@@ -344,6 +349,133 @@ announced releases. The source distributions associated with all releases, major
 --
 ### MB-System Version 5.7 Release Notes:
 --
+
+#### 5.7.6beta40 (July 7, 2020)
+
+Mbphotomosaic, mbgetphotocorrection, mbphotogrammetry: Added three programs used
+for processing seafloor photography collected during seafloor mapping surveys
+(i.e. from a survey platform with navigation and attitude data). These programs
+depend on the OpenCV version 4 package, and so add a large and complex dependency
+to MB-System. The source files are in the new directory src/photo. These programs
+are not currently built by default - the configure script must be run with a
+--enable-opencv option in order to enable building the photo tools. No documentation
+exists at this point for these tools. A key aspect is that the photography data
+are referenced through recursive imagelist structures (introduced in 5.7.6beta32)
+analagous to the datalists used for sonar and lidar data. The photomosaicing and
+photo correction tools will work with both single and stereo camera datasets. The
+photogrammetry tools works only with stereo pair data. These tools also depend
+on camera calibrations - the tool(s) for that are not yet included in MB-System.
+
+Qt based tool prototypes: Improved the build system handling of Qt5 and OpenGL
+programs. The test libraries and programs enabled by running configure with the
+--enable-qt option are now located in four directories: src/qt-mbgui,
+src/qt-mbgrdviz-1, src/qt-mbgrdviz-2, and src/qt-mbgrdviz-3.
+
+GMT integration: The GMT 6.1.0 release contains a change to the API that broke
+the build of the GMT module mbswath. It also contained changes to the module
+initialization code that caused mbswath, mbcontour, and mbgrdtiff to crash.
+The code has been modified with (more) proprocessor directives determined by
+the installed GMT version to build with GMT versions 5.2, 5.4, 6.0, 6.1, and
+the current master that will become 6.2. For GMT versions >= 6.0 the MB-System
+code no longer depends on either the gmt/src/gmt_mb.h header file or the obsolete
+gmt_begin_module() function.
+
+#### 5.7.6beta38 (June 8, 2020)
+
+Mblist: Fixed problem in which the centermost (nadir) beam was generally set to 0.
+
+Format MBF_KEMKMALL (261): Brought reading and writing of *.kmall files up to
+revision G of the Kongsberg data format specification. Also fixed problems in the
+logic relating calculated depths as stored in the format to the depth values
+reported by the MB-System API functions, and with the beam angles calculated for
+use in recalculating bathymetry through raytracing. However, problems remain
+with extracting the installation bias parameters and time latencies that must
+be applied to the asynchronous ancillary data in order to properly calculate
+these values. At present, recalculation of bathymetry by raytracing still does
+not work correctly with this format - in some cases additional attitude biases
+and time latencies must be applied, and in others the result is simply not right.
+
+Formats MBF_EM710RAW (58) and MBF_EM710MBA (59): Added allowed sonar models
+- unexpectedly we are seeing *.all files from some current generation sonar
+installations, so we have to allow EM304 and EM712 sonar models with the
+obsolete format.
+
+#### 5.7.6beta37 (May 26, 2020)
+
+Mbnavadjust: Fixed problems in the inversion algorithm.
+The complexity of this algorithm results from the tendency
+of overdetermined least squares solutions to work best at providing uniform scale,
+zero mean solutions. Consequently we construct the solution in three steps.
+First we solve for the average offsets
+between continuous surveys, and make this the starting model for the second step.
+Then we solve for a coarse ("chunk") perturbation model in which each chunk is a
+dataset consisting of about five sections worth of continuous survey data. This is
+done through an iterative damped relaxation procedure, and the resulting perturbation
+model is added to the starting model for the third and final step. The final step
+is to solve for a perturbation satisfying all of the navigation ties at full
+resolution. The problem is set up as an overdetermined least squares matrix
+problem and is solved using LSQR. The regularization is just penalizing the
+first derivative of the perturbation at present - we are not currently penalizing
+the second derivative.
+
+Mbnavadjust: Fixed crash on Linux when executing the Auto Set Vertical Offset
+function (didn't dimension arrays large enough).
+
+Writing GMT grids: Fixed crash reported by Joaquim Luis on Windows when writing
+GMT grids - the problem was a function call that caused GDAL to allocate a string
+but then it allowing that pointer to be freed in GMT functions. The solution is
+to ensure that memory allocated with GMT or GDAL libraries is freed from those
+same libraries. I also had to alter the configure.ac to add a conditional
+HAVE_GDAL that mimics one used in the GMT build system so that GDAL related
+headers are included by gmt_dev.h. The relevant code is only used if GDAL is
+available. If GMT version is >= 6.1.1 then the function gmt_strdup_noquote()
+is called to allocate a PROJ4 string stored in the grid header; otherwise strdup()
+is called. Building on Windows will now require GMT 6.1.1 or later.
+
+Mblevitus: Fixed errors that had been inadvertently created as part of commit #448.
+Thanks to Joaquim Luis for finding and fixing this.
+
+#### 5.7.6beta36 (May 17, 2020)
+
+Mbgrd3obj: Had to add #ifdef's on GMT version because the number of parameters
+passed to gmt_init_module() changes between GMT 5.3 through 6.0 and 6.1.
+
+Mbnavadjust: Changed calculation of overlap for a crossing so that the value is
+not small in the case that a small section (by area) is entirely inside the bounds of a
+much larger section. This case happens when adjusting navigation from surveys at
+at two very different scales (e.g. AUV survey with ship hull mounted survey,
+or ROV survey with AUV survey).
+
+Mbnavadjustmerge: Added function to merge two adjacent surveys into one with an
+internal discontinuity.
+
+#### 5.7.6beta34 (May 14, 2020)
+
+Mbgrd2obj: New GMT module that converts GMT topographic grids to OBJ format 3D
+model files that can be imported to visualization software or printed on 3D
+printers.
+
+Mbset and mbmakeplatform: Joaquim Luis reports that these programs will not
+compile on Windows Visual Studio "because of the too many nested if-else  problem."
+I have attempted to fix this problem two ways. In mbset.cc I now use a switch  
+statement instead of many if {} else if {} statements to find the meanings of
+all the input options. In mbmakeplatform I now have many separate if {} statements
+testing the input arguments, but each first also tests a bool that indicates
+if a prior if {} statement matched the argument. We will find out from Joaquim
+if either, neither, or both methods work.
+
+Tests: The Travis-CI tests of new checkins to the repository are failing for one
+of the many builds - the Ubuntu Xenial (16.04) build. The failures are occuring
+on all programs that call GMT grid io, but the existing logs do not tell me why.
+I have added print statements to the tests in
+  mbsystem/test/utilities/mbbackangle_test.py
+and
+  mbsystem/test/utilities/mbgrid_test.py.
+I don't know how to get that output into the log that Travis-CI makes available.
+
+TRN tools: Kent Headley have added a config file mechanism to mbtrnpp, and fixed
+a number of other issues in a series of commits. These changes are in src/mbtrn,
+src/mbtrnav, and src/mbtrnutils.
 
 #### 5.7.6beta33 (May 5, 2020)
 

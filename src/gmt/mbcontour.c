@@ -35,7 +35,7 @@
 #include <stdbool.h>
 
 #define THIS_MODULE_NAME "mbcontour"
-#define THIS_MODULE_LIB "mbgmt"
+#define THIS_MODULE_LIB "mbsystem"
 #define THIS_MODULE_PURPOSE "Plot swath bathymetry, amplitude, or backscatter"
 #define THIS_MODULE_KEYS ""
 
@@ -313,8 +313,13 @@ int GMT_mbcontour_usage(struct GMTAPI_CTRL *API, int level) {
 	GMT_Message(API, GMT_TIME_NONE, "\t[-I<inputfile>] [-L<lonflip>] [-N<cptfile>]\n");
 	GMT_Message(API, GMT_TIME_NONE, "\t[-S<speed>] [-T<timegap>] [-W] [-Z<mode>]\n");
 	GMT_Message(API, GMT_TIME_NONE, "\t[%s] [-T] [%s] [%s]\n", GMT_Rgeo_OPT, GMT_U_OPT, GMT_V_OPT);
+#if GMT_MAJOR_VERSION >= 6
 	GMT_Message(API, GMT_TIME_NONE, "\t[%s] [%s] [%s]\n\t[%s]\n\t[%s] [%s]\n\n", GMT_X_OPT, GMT_Y_OPT, GMT_f_OPT,
 	            GMT_n_OPT, GMT_p_OPT, GMT_t_OPT);
+#else
+	GMT_Message(API, GMT_TIME_NONE, "\t[%s] [%s] [%s] [%s]\n\t[%s]\n\t[%s] [%s]\n\n", GMT_X_OPT, GMT_Y_OPT, GMT_c_OPT, GMT_f_OPT,
+	            GMT_n_OPT, GMT_p_OPT, GMT_t_OPT);
+#endif
 
 	if (level == GMT_SYNOPSIS)
 		return (EXIT_FAILURE);
@@ -746,8 +751,13 @@ int GMT_mbcontour(void *V_API, int mode, void *args) {
 		bailout(GMT_mbcontour_usage(API, GMT_SYNOPSIS)); /* Return the synopsis */
 
 	/* Parse the command-line arguments */
-
+#if GMT_MAJOR_VERSION >= 6 && GMT_MINOR_VERSION >= 1
+	GMT = gmt_init_module(API, THIS_MODULE_LIB, THIS_MODULE_NAME, "", "", NULL, &options, &GMT_cpy); /* Save current state */
+#elif GMT_MAJOR_VERSION >= 6
+	GMT = gmt_init_module(API, THIS_MODULE_LIB, THIS_MODULE_NAME, "", "", &options, &GMT_cpy); /* Save current state */
+#else
 	GMT = gmt_begin_module(API, THIS_MODULE_LIB, THIS_MODULE_NAME, &GMT_cpy); /* Save current state */
+#endif
 	if (GMT_Parse_Common(API, GMT_PROG_OPTIONS, options)) {
 		fprintf(stderr, "Error from GMT_Parse_common():%d\n", API->error);
 		Return(API->error);

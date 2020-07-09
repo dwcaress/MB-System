@@ -78,7 +78,7 @@
 /* Set MBSYSTEM_OTPS_LOCATION define in mb_config.h */
 #undef MBSYSTEM_OTPS_LOCATION
 
-/* Build libmbtnav */
+/* Build libmbtnav and embed TRN instance in mbtrnpp */
 #undef MBTNAV_ENABLED
 
 /* Build libmbtrn and mbtrnpp */
@@ -86,6 +86,9 @@
 
 /* Build graphical tools */
 #undef MBUTILS_ENABLED
+
+/* Build tools using OpenCV */
+#undef OPENCVTOOLS_ENABLED
 
 /* Name of package */
 #undef PACKAGE
@@ -117,7 +120,7 @@
 /* Define to 1 if you have the ANSI C header files. */
 #undef STDC_HEADERS
 
-/* Build unit tests */
+/* Building unit tests */
 #undef TEST_ENABLED
 
 /* Version number of package */

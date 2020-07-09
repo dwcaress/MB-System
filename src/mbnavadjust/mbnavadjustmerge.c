@@ -85,12 +85,13 @@
 #define MOD_MODE_UNSET_SKIPPED_CROSSINGS_BLOCK 39
 #define MOD_MODE_UNSET_SKIPPED_CROSSINGS_BETWEEN_SURVEYS 40
 #define MOD_MODE_INSERT_DISCONTINUITY 41
-#define MOD_MODE_REIMPORT_FILE 42
-#define MOD_MODE_REIMPORT_ALL_FILES 43
-#define MOD_MODE_TRIANGULATE 44
-#define MOD_MODE_TRIANGULATE_SECTION 45
-#define MOD_MODE_UNSET_SHORT_SECTION_TIES 46
-#define MOD_MODE_SKIP_SHORT_SECTION_CROSSINGS 47
+#define MOD_MODE_MERGE_SURVEYS 42
+#define MOD_MODE_REIMPORT_FILE 43
+#define MOD_MODE_REIMPORT_ALL_FILES 44
+#define MOD_MODE_TRIANGULATE 45
+#define MOD_MODE_TRIANGULATE_SECTION 46
+#define MOD_MODE_UNSET_SHORT_SECTION_TIES 47
+#define MOD_MODE_SKIP_SHORT_SECTION_CROSSINGS 48
 #define IMPORT_NONE 0
 #define IMPORT_TIE 1
 #define IMPORT_GLOBALTIE 2
@@ -164,6 +165,7 @@ static char usage_message[] =
     "\t--unset-skipped-crossings-by-block=survey1/survey2\n"
     "\t--unset-skipped-crossings-between-surveys\n"
     "\t--insert-discontinuity=file:section\n"
+    "\t--merge-surveys=survey1:survey2\n"
     "\t--reimport-file=file\n"
     "\t--reimport-all-files\n"
     "\t--import-tie-list=file\n"
@@ -247,6 +249,7 @@ int main(int argc, char **argv) {
                                     {"unset-skipped-crossings-by-block", required_argument, NULL, 0},
                                     {"unset-skipped-crossings-between-surveys", no_argument, NULL, 0},
                                     {"insert-discontinuity", required_argument, NULL, 0},
+                                    {"merge-surveys", required_argument, NULL, 0},
                                     {"reimport-file", required_argument, NULL, 0},
                                     {"reimport-all-files", no_argument, NULL, 0},
                                     {"import-tie-list", required_argument, NULL, 0},
@@ -1108,6 +1111,27 @@ int main(int argc, char **argv) {
         }
         else {
           fprintf(stderr, "Maximum number of mod commands reached:\n\tskip-unset-crossings command ignored\n\n");
+        }
+      }
+
+      /*-------------------------------------------------------
+       * Merge two adjacent surveys into a single survey with a discontinuity
+          --merge-surveys */
+      else if (strcmp("merge-surveys", options[option_index].name) == 0) {
+        if (num_mods < NUMBER_MODS_MAX) {
+          int nscan;
+          if ((nscan = sscanf(optarg, "%d/%d", &mods[num_mods].survey1, &mods[num_mods].survey2)) == 2
+              && mods[num_mods].survey2 == mods[num_mods].survey1 + 1) {
+            mods[num_mods].mode = MOD_MODE_MERGE_SURVEYS;
+            num_mods++;
+          }
+          else {
+            fprintf(stderr, "Failure to parse --merge-surveys=%s\n\tmod command ignored\n\n", optarg);
+          }
+        }
+        else {
+          fprintf(stderr, "Maximum number of mod commands reached:\n\t--merge-surveys=%s command ignored\n\n",
+                  optarg);
         }
       }
 
@@ -2887,6 +2911,27 @@ int main(int argc, char **argv) {
       }
       break;
 
+    case MOD_MODE_MERGE_SURVEYS:
+      fprintf(stderr, "\nCommand merge-surveys=%2.2d/%2.2d\n", mods[imod].survey1, mods[imod].survey2);
+
+      if (mods[imod].survey1 >= 0 && mods[imod].survey1 < project_output.num_blocks
+          && mods[imod].survey2 >= 0 && mods[imod].survey2 < project_output.num_blocks
+          && mods[imod].survey2 == mods[imod].survey1 + 1) {
+        // loop over files,resetting block id for all files with blocks (surveys) >= survey2 to be one less
+        for (int ifile=0; ifile < project_output.num_files; ifile++) {
+          file1 = &(project_output.files[ifile]);
+          if (file1->block > mods[imod].survey1) {
+            if (file1->block == mods[imod].survey2) {
+              file1->sections[0].continuity = true;
+            }
+            file1->block--;
+            fprintf(stderr, "Reset file %d to be in survey %d instead of %d\n", ifile, file1->block, file1->block +1);
+          }
+        }
+        project_output.num_blocks--;
+      }
+      break;
+
     case MOD_MODE_REIMPORT_FILE:
     case MOD_MODE_REIMPORT_ALL_FILES:
       if (mods[imod].mode == MOD_MODE_REIMPORT_FILE)
@@ -2952,10 +2997,9 @@ int main(int argc, char **argv) {
       section1 = &(file1->sections[mods[imod].section1]);
       struct mbna_swathraw *swathraw = NULL;
       struct swath *swath = NULL;
-      // TODO(schwehr): Not set
-      // if (verbose) {
-      //   fprintf(stderr,"Triangulating section %2.2d:%4.4d ", ifile, isection);
-      // }
+      if (verbose) {
+         fprintf(stderr,"Triangulating section %2.2d:%4.4d ", mods[imod].file1, mods[imod].section1);
+      }
       status = mbnavadjust_section_load(verbose, &project_output, mods[imod].file1, mods[imod].section1,
                                           (void **)&swathraw, (void **)&swath, section1->num_pings, &error);
       status = mbnavadjust_section_unload(verbose, (void **)&swathraw, (void **)&swath, &error);

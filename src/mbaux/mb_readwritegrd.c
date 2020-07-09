@@ -462,19 +462,28 @@ int mb_write_gmt_grd(int verbose, const char *grdfile, float *grid,
   }
 
   struct GMT_GRID_HEADER *header = G->header;
-  /* Rely on GDAL to tell us the Proj string of this EPSG code */
-  {
-    OGRErr eErr = OGRERR_NONE;
-    OGRSpatialReferenceH hSRS = OSRNewSpatialReference(NULL);
-    if ((eErr = OSRImportFromEPSG(hSRS, epsgid)) != OGRERR_NONE) {
-      fprintf(stderr, "Did not get the SRS from input EPSG  %d\n", epsgid);
-    }
-    if ((eErr = OSRExportToProj4(hSRS, &header->ProjRefPROJ4)) != OGRERR_NONE) {
-      fprintf(stderr, "Failed to convert the SRS to Proj syntax\n");
-    }
-    OSRDestroySpatialReference(hSRS);
+#ifdef HAVE_GDAL
+  /* If GDAL available use it to get the Proj string of this EPSG code */
+  OGRErr eErr = OGRERR_NONE;
+  OGRSpatialReferenceH hSRS = OSRNewSpatialReference(NULL);
+  char *pszResult = NULL;
+  if ((eErr = OSRImportFromEPSG(hSRS, epsgid)) != OGRERR_NONE) {
+    fprintf(stderr, "Did not get the SRS from input EPSG  %d\n", epsgid);
   }
-  fprintf(stderr,"header->ProjRefPROJ4:%s\n", header->ProjRefPROJ4);
+  if ((eErr = OSRExportToProj4(hSRS, &pszResult)) != OGRERR_NONE) {
+    fprintf(stderr, "Failed to convert the SRS to Proj syntax\n");
+  }
+#if (GMT_MAJOR_VERSION == 6 && GMT_MINOR_VERSION >= 1) || GMT_MAJOR_VERSION > 6
+  header->ProjRefPROJ4 = gmt_strdup_noquote(pszResult); // allocated within GMT because it will be freed within GMT
+#else
+  header->ProjRefPROJ4 = strdup(pszResult);
+#endif
+#if GMT_MAJOR_VERSION >= 6
+  header->ProjRefEPSG = epsgid;
+#endif
+  CPLFree(pszResult); // make sure this is freed within GDAL because it was allocated within GDAL
+  OSRDestroySpatialReference(hSRS);
+#endif
 
   mb_path program_name = "";
   if (argc > 0)

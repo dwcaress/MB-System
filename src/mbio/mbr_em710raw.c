@@ -259,9 +259,30 @@ int mbr_em710raw_chk_label(int verbose, void *mbio_ptr, char *label, short *type
 		sonarswap = mb_swap_short(sonarunswap);
 
 		/* check for valid sonarunswap */
-		if (sonarunswap == MBSYS_SIMRAD3_EM710 || sonarunswap == MBSYS_SIMRAD3_EM712 || sonarunswap == MBSYS_SIMRAD3_EM850 ||
-		    sonarunswap == MBSYS_SIMRAD3_EM3002 || sonarunswap == MBSYS_SIMRAD3_EM302 || sonarunswap == MBSYS_SIMRAD3_EM122 ||
-		    sonarunswap == MBSYS_SIMRAD3_EM2040 || sonarunswap == MBSYS_SIMRAD3_EM2045 || sonarunswap == MBSYS_SIMRAD3_M3) {
+		if (sonarunswap == MBSYS_SIMRAD3_M3
+		    || sonarunswap == MBSYS_SIMRAD3_EM2045
+		    || sonarunswap == MBSYS_SIMRAD3_EM2040
+		    || sonarunswap == MBSYS_SIMRAD3_EM850
+		    || sonarunswap == MBSYS_SIMRAD3_EM710
+		    || sonarunswap == MBSYS_SIMRAD3_EM712
+		    || sonarunswap == MBSYS_SIMRAD3_EM302
+		    || sonarunswap == MBSYS_SIMRAD3_EM304
+		    || sonarunswap == MBSYS_SIMRAD3_EM122
+		    || sonarunswap == MBSYS_SIMRAD3_EM124
+		    || sonarunswap == MBSYS_SIMRAD3_EM120
+		    || sonarunswap == MBSYS_SIMRAD3_EM300
+		    || sonarunswap == MBSYS_SIMRAD3_EM1002
+		    || sonarunswap == MBSYS_SIMRAD3_EM2000
+		    || sonarunswap == MBSYS_SIMRAD3_EM3000
+		    || sonarunswap == MBSYS_SIMRAD3_EM3000D_1
+		    || sonarunswap == MBSYS_SIMRAD3_EM3000D_2
+		    || sonarunswap == MBSYS_SIMRAD3_EM3000D_3
+		    || sonarunswap == MBSYS_SIMRAD3_EM3000D_4
+		    || sonarunswap == MBSYS_SIMRAD3_EM3000D_5
+		    || sonarunswap == MBSYS_SIMRAD3_EM3000D_6
+		    || sonarunswap == MBSYS_SIMRAD3_EM3000D_7
+		    || sonarunswap == MBSYS_SIMRAD3_EM3000D_8
+		    || sonarunswap == MBSYS_SIMRAD3_EM3002) {
 			sonarunswapgood = true;
 		}
 		else {
@@ -269,9 +290,30 @@ int mbr_em710raw_chk_label(int verbose, void *mbio_ptr, char *label, short *type
 		}
 
 		/* check for valid sonarswap */
-		if (sonarswap == MBSYS_SIMRAD3_EM710 || sonarswap == MBSYS_SIMRAD3_EM712 || sonarswap == MBSYS_SIMRAD3_EM850 ||
-		    sonarswap == MBSYS_SIMRAD3_EM3002 || sonarswap == MBSYS_SIMRAD3_EM302 || sonarswap == MBSYS_SIMRAD3_EM122 ||
-		    sonarswap == MBSYS_SIMRAD3_EM2040 || sonarswap == MBSYS_SIMRAD3_EM2045 || sonarswap == MBSYS_SIMRAD3_M3) {
+		if (sonarswap == MBSYS_SIMRAD3_M3
+		    || sonarswap == MBSYS_SIMRAD3_EM2045
+		    || sonarswap == MBSYS_SIMRAD3_EM2040
+		    || sonarswap == MBSYS_SIMRAD3_EM850
+		    || sonarswap == MBSYS_SIMRAD3_EM710
+		    || sonarswap == MBSYS_SIMRAD3_EM712
+		    || sonarswap == MBSYS_SIMRAD3_EM302
+		    || sonarswap == MBSYS_SIMRAD3_EM304
+		    || sonarswap == MBSYS_SIMRAD3_EM122
+		    || sonarswap == MBSYS_SIMRAD3_EM124
+		    || sonarswap == MBSYS_SIMRAD3_EM120
+		    || sonarswap == MBSYS_SIMRAD3_EM300
+		    || sonarswap == MBSYS_SIMRAD3_EM1002
+		    || sonarswap == MBSYS_SIMRAD3_EM2000
+		    || sonarswap == MBSYS_SIMRAD3_EM3000
+		    || sonarswap == MBSYS_SIMRAD3_EM3000D_1
+		    || sonarswap == MBSYS_SIMRAD3_EM3000D_2
+		    || sonarswap == MBSYS_SIMRAD3_EM3000D_3
+		    || sonarswap == MBSYS_SIMRAD3_EM3000D_4
+		    || sonarswap == MBSYS_SIMRAD3_EM3000D_5
+		    || sonarswap == MBSYS_SIMRAD3_EM3000D_6
+		    || sonarswap == MBSYS_SIMRAD3_EM3000D_7
+		    || sonarswap == MBSYS_SIMRAD3_EM3000D_8
+		    || sonarswap == MBSYS_SIMRAD3_EM3002) {
 			sonarswapgood = true;
 		}
 		else {
@@ -309,13 +351,34 @@ int mbr_em710raw_chk_label(int verbose, void *mbio_ptr, char *label, short *type
 #endif
 
 	/* check for valid sonar */
-	if (*sonar != MBSYS_SIMRAD3_EM710 && *sonar != MBSYS_SIMRAD3_EM712 && *sonar != MBSYS_SIMRAD3_EM850 &&
-	    *sonar != MBSYS_SIMRAD3_EM3002 && *sonar != MBSYS_SIMRAD3_EM302 && *sonar != MBSYS_SIMRAD3_EM122 &&
-	    *sonar != MBSYS_SIMRAD3_EM2040 && *sonar != MBSYS_SIMRAD3_EM2045 && *sonar != MBSYS_SIMRAD3_M3) {
-		sonargood = false;
+	if (*sonar == MBSYS_SIMRAD3_M3
+	    || *sonar == MBSYS_SIMRAD3_EM2045
+	    || *sonar == MBSYS_SIMRAD3_EM2040
+	    || *sonar == MBSYS_SIMRAD3_EM850
+	    || *sonar == MBSYS_SIMRAD3_EM710
+	    || *sonar == MBSYS_SIMRAD3_EM712
+	    || *sonar == MBSYS_SIMRAD3_EM302
+	    || *sonar == MBSYS_SIMRAD3_EM304
+	    || *sonar == MBSYS_SIMRAD3_EM122
+	    || *sonar == MBSYS_SIMRAD3_EM124
+	    || *sonar == MBSYS_SIMRAD3_EM120
+	    || *sonar == MBSYS_SIMRAD3_EM300
+	    || *sonar == MBSYS_SIMRAD3_EM1002
+	    || *sonar == MBSYS_SIMRAD3_EM2000
+	    || *sonar == MBSYS_SIMRAD3_EM3000
+	    || *sonar == MBSYS_SIMRAD3_EM3000D_1
+	    || *sonar == MBSYS_SIMRAD3_EM3000D_2
+	    || *sonar == MBSYS_SIMRAD3_EM3000D_3
+	    || *sonar == MBSYS_SIMRAD3_EM3000D_4
+	    || *sonar == MBSYS_SIMRAD3_EM3000D_5
+	    || *sonar == MBSYS_SIMRAD3_EM3000D_6
+	    || *sonar == MBSYS_SIMRAD3_EM3000D_7
+	    || *sonar == MBSYS_SIMRAD3_EM3000D_8
+	    || *sonar == MBSYS_SIMRAD3_EM3002) {
+		sonargood = true;
 	}
 	else {
-		sonargood = true;
+		sonargood = false;
 	}
 
 	if (startbyte == EM3_START_BYTE && !typegood && sonargood) {
@@ -4239,6 +4302,7 @@ int mbr_rt_em710raw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	double beamAzimuth;
 	double beamDepression;
 	mb_u_char detection_mask;
+  int interp_error = MB_ERROR_NO_ERROR;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -4403,7 +4467,7 @@ int mbr_rt_em710raw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		mb_get_time(verbose, time_i, &ntime_d);
 
 		/* interpolate from saved attitude */
-		mb_attint_interp(verbose, mbio_ptr, ntime_d, &heave, &roll, &pitch, error);
+		mb_attint_interp(verbose, mbio_ptr, ntime_d, &heave, &roll, &pitch, &interp_error);
 		store->pos_roll = (int)rint(roll / 0.01);
 		store->pos_pitch = (int)rint(pitch / 0.01);
 		store->pos_heave = (int)rint(heave / 0.01);
@@ -4700,7 +4764,7 @@ int mbr_rt_em710raw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		else
 			rawspeed = 0.036 * store->pos_speed;
 		pheading = 0.01 * ping->png_heading;
-		mb_navint_interp(verbose, mbio_ptr, ptime_d, pheading, rawspeed, &plon, &plat, &pspeed, error);
+		mb_navint_interp(verbose, mbio_ptr, ptime_d, pheading, rawspeed, &plon, &plat, &pspeed,  &interp_error);
 		if (plon == 0.0 && plat == 0.0) {
 			ping->png_longitude = (int)EM3_INVALID_INT;
 			ping->png_latitude = (int)EM3_INVALID_INT;
@@ -4712,7 +4776,7 @@ int mbr_rt_em710raw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		ping->png_speed = (int)rint(pspeed / 0.036);
 
 		/* interpolate from saved attitude */
-		mb_attint_interp(verbose, mbio_ptr, ptime_d, &heave, &roll, &pitch, error);
+		mb_attint_interp(verbose, mbio_ptr, ptime_d, &heave, &roll, &pitch, &interp_error);
 		ping->png_roll = (int)rint(roll / 0.01);
 		ping->png_pitch = (int)rint(pitch / 0.01);
 		ping->png_heave = (int)rint(heave / 0.01);
@@ -4727,10 +4791,10 @@ int mbr_rt_em710raw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			receive_time_d = transmit_time_d + ping->png_raw_rxrange[i];
 
 			/* get attitude and heave at ping and receive time */
-			mb_hedint_interp(verbose, mbio_ptr, transmit_time_d, &transmit_heading, error);
-			mb_attint_interp(verbose, mbio_ptr, transmit_time_d, &transmit_heave, &transmit_roll, &transmit_pitch, error);
-			mb_hedint_interp(verbose, mbio_ptr, receive_time_d, &receive_heading, error);
-			mb_attint_interp(verbose, mbio_ptr, receive_time_d, &receive_heave, &receive_roll, &receive_pitch, error);
+			mb_hedint_interp(verbose, mbio_ptr, transmit_time_d, &transmit_heading, &interp_error);
+			mb_attint_interp(verbose, mbio_ptr, transmit_time_d, &transmit_heave, &transmit_roll, &transmit_pitch, &interp_error);
+			mb_hedint_interp(verbose, mbio_ptr, receive_time_d, &receive_heading, &interp_error);
+			mb_attint_interp(verbose, mbio_ptr, receive_time_d, &receive_heave, &receive_roll, &receive_pitch, &interp_error);
 
 			/* alongtrack offset distance */
 			// const double transmit_alongtrack =
@@ -5043,7 +5107,10 @@ int mbr_em710raw_wr_start(int verbose, void *mbio_ptr, int swap, struct mbsys_si
 
 	/* put binary header data into buffer */
 	line[4] = EM3_START_BYTE;
-	line[5] = EM3_ID_START;
+  if (store->type == EM3_START)
+	  line[5] = EM3_ID_START;
+  else
+	  line[5] = EM3_ID_STOP;
 	mb_put_binary_short(swap, (unsigned short)store->sonar, (void *)&line[6]);
 	mb_put_binary_int(swap, (int)store->par_date, (void *)&line[8]);
 	mb_put_binary_int(swap, (int)store->par_msec, (void *)&line[12]);
@@ -8278,6 +8345,7 @@ int mbr_em710raw_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 
 #ifdef MBR_EM710RAW_DEBUG
 	fprintf(stderr, "\nstart of mbr_em710raw_wr_data:\n");
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 	fprintf(stderr, "kind:%d %d type:%x\n", store->kind, mb_io_ptr->new_kind, store->type);
 #endif
 

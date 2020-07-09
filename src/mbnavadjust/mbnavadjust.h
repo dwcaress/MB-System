@@ -200,7 +200,7 @@ int mbnavadjust_set_graphics(void *cn_xgid, void *cr_xgid, void *zc_xgid);
 int mbnavadjust_file_new(char *projectname);
 int mbnavadjust_file_open(char *projectname);
 int mbnavadjust_import_data(char *path, int format);
-int mbnavadjust_import_file(char *path, int format, int firstfile);
+int mbnavadjust_import_file(char *path, int format, bool firstfile);
 int mbnavadjust_import_reference(char *path);
 int mbnavadjust_bin_bathymetry(double altitude, int beams_bath, char *beamflag, double *bath, double *bathacrosstrack,
                                double *bathalongtrack, int mbna_bin_beams_bath, double mbna_bin_pseudobeamwidth,
@@ -235,7 +235,7 @@ int mbnavadjust_crossing_load(void);
 int mbnavadjust_crossing_unload(void);
 int mbnavadjust_crossing_replot(void);
 int mbnavadjust_naverr_snavpoints(int ix, int iy);
-int mbnavadjust_sections_intersect(int crossing_id);
+bool mbnavadjust_sections_intersect(int crossing_id);
 int mbnavadjust_get_misfit(void);
 int mbnavadjust_get_misfitxy(void);
 void plot(double x, double y, int ipen);
@@ -244,7 +244,7 @@ void justify_string(double height, char *string, double *s);
 void plot_string(double x, double y, double hgt, double angle, char *label);
 void mbnavadjust_naverr_scale(void);
 void mbnavadjust_naverr_plot(int plotmode);
-int mbnavadjust_autopick(int do_vertical);
+int mbnavadjust_autopick(bool do_vertical);
 int mbnavadjust_autosetsvsvertical(void);
 int mbnavadjust_zerozoffsets(void);
 int mbnavadjust_invertnav(void);

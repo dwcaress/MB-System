@@ -2661,7 +2661,7 @@ int mbview_setsensitivitynotify(int verbose, size_t instance, void(mbview_sensit
 
 /*------------------------------------------------------------------------------*/
 int mbview_setcolorchangenotify(int verbose, size_t instance, void(mbview_colorchange_notify)(size_t), int *error) {
-	if (verbose >= 0) {
+	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
 		fprintf(stderr, "dbg2  Input arguments:\n");

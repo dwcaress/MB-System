@@ -19,12 +19,16 @@ class MbGridTest(unittest.TestCase):
   def testNoArgs(self):
     cmd = [self.cmd]
     output = subprocess.check_output(cmd, stderr=subprocess.STDOUT).decode()
+    print("\nOutput from mbgrid:\n--------------------------")
+    print(output)
     self.assertIn('Unable to open data list file:', output)
     self.assertIn('datalist.mb-1', output)
 
   def testHelp(self):
     cmd = [self.cmd, '-h']
     output = subprocess.check_output(cmd, stderr=subprocess.STDOUT).decode()
+    print("\nOutput from mbgrid -h:\n--------------------------")
+    print(output)
     self.assertIn('Version', output)
     self.assertIn('used to grid bathymetry, amplitude', output)
     self.assertIn('curvature algorithm', output)
@@ -34,6 +38,8 @@ class MbGridTest(unittest.TestCase):
   def testHelpVerbose2(self):
     cmd = [self.cmd, '-h', '-V', '-V']
     output = subprocess.check_output(cmd, stderr=subprocess.STDOUT).decode()
+    print("\nOutput from mbgrid -h -V -V:\n--------------------------")
+    print(output)
     self.assertIn('Version', output)
     self.assertIn('used to grid bathymetry, amplitude', output)
     self.assertIn('curvature algorithm', output)
