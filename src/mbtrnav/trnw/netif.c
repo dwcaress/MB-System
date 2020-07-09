@@ -636,7 +636,11 @@ int netif_connect(netif_t *self)
     case ST_UDP:
         self->socket = msock_socket_new(self->host, self->port, ST_UDP);
             if(NULL!=self->socket){
+                const int optionval = 1;
+                msock_set_opt(self->socket, SO_REUSEPORT, &optionval, sizeof(optionval));
+                msock_set_opt(self->socket, SO_REUSEADDR, &optionval, sizeof(optionval));
                 msock_set_blocking(self->socket,false);
+
                 if ( (test=msock_bind(self->socket))==0) {
                     PMPRINT(MOD_NETIF,MM_DEBUG,(stderr,"TRN udp socket bind OK [%s:%d]\n",self->host,self->port));
                     retval=0;
@@ -652,6 +656,9 @@ int netif_connect(netif_t *self)
         self->socket = msock_socket_new(self->host, self->port, ST_TCP);
             if(NULL!=self->socket){
                 msock_set_blocking(self->socket,false);
+                const int optionval = 1;
+                msock_set_opt(self->socket, SO_REUSEPORT, &optionval, sizeof(optionval));
+                msock_set_opt(self->socket, SO_REUSEADDR, &optionval, sizeof(optionval));
                 if ( (test=msock_bind(self->socket))==0) {
                     PMPRINT(MOD_NETIF,MM_DEBUG,(stderr,"TRN tcp socket bind OK [%s:%d]\n",self->host,self->port));
                     if ( (test=msock_listen(self->socket,NETIF_QUEUE_DFL))==0) {

@@ -507,8 +507,7 @@ int msock_bind(msock_socket_t *s)
 {
     int retval=-1;
     if (NULL != s && s->fd>0 && NULL != s->addr->ainfo) {
-        const int optionval = 1;
-        setsockopt(s->fd, SOL_SOCKET, SO_REUSEADDR, &optionval, sizeof(optionval));
+
         if(bind(s->fd, s->addr->ainfo->ai_addr, s->addr->ainfo->ai_addrlen) == 0){
             retval=0;
         }else{

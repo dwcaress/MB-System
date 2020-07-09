@@ -935,6 +935,10 @@ void *s_server_main(void *arg)
             char buf[ADDRSTR_BYTES]={0};
             int fdmax;
 
+            const int optionval = 1;
+            msock_set_opt(s, SO_REUSEPORT, &optionval, sizeof(optionval));
+            msock_set_opt(s, SO_REUSEADDR, &optionval, sizeof(optionval));
+
             msock_bind(s);
             PMPRINT(MOD_EMU7K,EMU7K_V2,(stderr,"server [%s] - starting\n",msock_addr2str(s,buf,ADDRSTR_BYTES)));
             msock_listen(s,1);
