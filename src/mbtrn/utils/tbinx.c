@@ -781,7 +781,10 @@ int s_process_file(app_cfg_t *cfg)
 
                 trn_osocket = msock_socket_new(cfg->host, cfg->port, ST_UDP);
                 msock_set_blocking(trn_osocket,false);
-           
+                const int optionval = 1;
+                msock_set_opt(trn_osocket, SO_REUSEPORT, &optionval, sizeof(optionval));
+                msock_set_opt(trn_osocket, SO_REUSEADDR, &optionval, sizeof(optionval));
+
                 if ( (test=msock_bind(trn_osocket))==0) {
                     fprintf(stderr,"TRN host socket bind OK [%s:%d]\n",cfg->host, cfg->port);
                 }else{

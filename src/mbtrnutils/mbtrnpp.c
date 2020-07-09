@@ -165,6 +165,12 @@ typedef struct mbtrnpp_opts_s{
     int trn_mtype;
     // opt "trn-ftype"
     int trn_ftype;
+    // opt "trn-fgrade"
+    int trn_fgrade;
+    // opt "trn-freinit"
+    int trn_freinit;
+    // opt "trn-mweight"
+    int trn_mweight;
     // opt "trn-ncov"
     double trn_ncov;
     // opt "trn-nerr"
@@ -266,6 +272,12 @@ typedef struct mbtrnpp_cfg_s{
     int trn_mtype;
     // TRN filter type
     int trn_ftype;
+    // TRN filter grade
+    int trn_fgrade;
+    // TRN allow filter reinit
+    int trn_freinit;
+    // TRN modified weighting
+    int trn_mweight;
     // TRN convergence northing covariance limit
     double trn_max_ncov;
     // TRN convergence northing error limit
@@ -360,6 +372,9 @@ s=NULL;\
 #define OPT_TRN_MDIR_DFL                "mb"
 #define OPT_TRN_MTYPE_DFL               TRN_MTYPE_DFL
 #define OPT_TRN_FTYPE_DFL               TRN_FTYPE_DFL
+#define OPT_TRN_FGRADE_DFL              TRN_FGRADE_DFL
+#define OPT_TRN_FREINIT_DFL             TRN_FREINIT_DFL
+#define OPT_TRN_MWEIGHT_DFL             TRN_MWEIGHT_DFL
 #define OPT_TRN_NCOV_DFL                TRN_MAX_NCOV_DFL
 #define OPT_TRN_NERR_DFL                TRN_MAX_NERR_DFL
 #define OPT_TRN_ECOV_DFL                TRN_MAX_ECOV_DFL
@@ -408,6 +423,9 @@ s=NULL;\
 #define TRN_UTM_DFL      UTM_MONTEREY_BAY
 #define TRN_MTYPE_DFL    TRN_MAP_BO
 #define TRN_FTYPE_DFL    TRN_FILT_PARTICLE
+#define TRN_FGRADE_DFL   TRN_FILT_HIGH
+#define TRN_FREINIT_DFL  TRN_FILT_REINIT_EN
+#define TRN_MWEIGHT_DFL  TRN_MWEIGHT_SUBCLOUD_NISON
 #define TRN_OUT_DFL      (TRNW_ODEBUG|TRNW_OLOG)
 #define TRNU_HOST_DFL    "localhost"
 #define TRNU_PORT_DFL    8000
@@ -1086,6 +1104,9 @@ static int s_mbtrnpp_init_cfg(mbtrnpp_cfg_t *cfg)
         cfg->trn_utm_zone=TRN_UTM_DFL;
         cfg->trn_mtype=TRN_MTYPE_DFL;
         cfg->trn_ftype=TRN_FTYPE_DFL;
+        cfg->trn_fgrade=TRN_FGRADE_DFL;
+        cfg->trn_freinit=TRN_FREINIT_DFL;
+        cfg->trn_mweight=TRN_MWEIGHT_DFL;
         cfg->trn_max_ncov=TRN_MAX_NCOV_DFL;
         cfg->trn_max_nerr=TRN_MAX_NERR_DFL;
         cfg->trn_max_ecov=TRN_MAX_ECOV_DFL;
@@ -1132,6 +1153,9 @@ static int s_mbtrnpp_init_opts(mbtrnpp_opts_t *opts)
         opts->trn_mid=strdup(OPT_TRN_MDIR_DFL);
         opts->trn_mtype=OPT_TRN_MTYPE_DFL;
         opts->trn_ftype=OPT_TRN_FTYPE_DFL;
+        opts->trn_fgrade=OPT_TRN_FGRADE_DFL;
+        opts->trn_freinit=OPT_TRN_FREINIT_DFL;
+        opts->trn_mweight=OPT_TRN_MWEIGHT_DFL;
         opts->trn_ncov=OPT_TRN_NCOV_DFL;
         opts->trn_nerr=OPT_TRN_NERR_DFL;
         opts->trn_ecov=OPT_TRN_ECOV_DFL;
@@ -1228,6 +1252,9 @@ static int s_mbtrnpp_show_cfg(mbtrnpp_cfg_t *self, bool verbose, int indent)
         retval+=fprintf(stderr,"%*s %*s  %*ld\n",indent,(indent>0?" ":""), wkey,"trn_utm_zone",wval,self->trn_utm_zone);
         retval+=fprintf(stderr,"%*s %*s  %*d\n",indent,(indent>0?" ":""), wkey,"trn_mtype",wval,self->trn_mtype);
         retval+=fprintf(stderr,"%*s %*s  %*d\n",indent,(indent>0?" ":""), wkey,"trn_ftype",wval,self->trn_ftype);
+        retval+=fprintf(stderr,"%*s %*s  %*d\n",indent,(indent>0?" ":""), wkey,"trn_fgrade",wval,self->trn_fgrade);
+        retval+=fprintf(stderr,"%*s %*s  %*d\n",indent,(indent>0?" ":""), wkey,"trn_freinit",wval,self->trn_freinit);
+        retval+=fprintf(stderr,"%*s %*s  %*d\n",indent,(indent>0?" ":""), wkey,"trn_mweight",wval,self->trn_mweight);
         retval+=fprintf(stderr,"%*s %*s  %*.2lf\n",indent,(indent>0?" ":""), wkey,"trn_max_ncov",wval,self->trn_max_ncov);
         retval+=fprintf(stderr,"%*s %*s  %*.2lf\n",indent,(indent>0?" ":""), wkey,"trn_max_nerr",wval,self->trn_max_nerr);
         retval+=fprintf(stderr,"%*s %*s  %*.2lf\n",indent,(indent>0?" ":""), wkey,"trn_max_ecov",wval,self->trn_max_ecov);
@@ -1277,6 +1304,9 @@ static int s_mbtrnpp_show_opts(mbtrnpp_opts_t *self, bool verbose, int indent){
         retval+=fprintf(stderr,"%*s %*s  %*s\n",indent,(indent>0?" ":""), wkey,"trn-mid",wval,self->trn_mid);
         retval+=fprintf(stderr,"%*s %*s  %*d\n",indent,(indent>0?" ":""), wkey,"trn-mtype",wval,self->trn_mtype);
         retval+=fprintf(stderr,"%*s %*s  %*d\n",indent,(indent>0?" ":""), wkey,"trn-ftype",wval,self->trn_ftype);
+        retval+=fprintf(stderr,"%*s %*s  %*d\n",indent,(indent>0?" ":""), wkey,"trn-fgrade",wval,self->trn_fgrade);
+        retval+=fprintf(stderr,"%*s %*s  %*d\n",indent,(indent>0?" ":""), wkey,"trn-freinit",wval,self->trn_freinit);
+        retval+=fprintf(stderr,"%*s %*s  %*d\n",indent,(indent>0?" ":""), wkey,"trn-mweight",wval,self->trn_mweight);
         retval+=fprintf(stderr,"%*s %*s  %*.2lf\n",indent,(indent>0?" ":""), wkey,"trn-ncov",wval,self->trn_ncov);
         retval+=fprintf(stderr,"%*s %*s  %*.2lf\n",indent,(indent>0?" ":""), wkey,"trn-nerr",wval,self->trn_nerr);
         retval+=fprintf(stderr,"%*s %*s  %*.2lf\n",indent,(indent>0?" ":""), wkey,"trn-ecov",wval,self->trn_ecov);
@@ -1801,6 +1831,18 @@ static int s_mbtrnpp_kvparse_fn(char *key, char *val, void *cfg)
                 if(sscanf(val,"%d",&opts->trn_ftype)==1){
                     retval=0;
                 }
+            }else if(strcmp(key,"trn-fgrade")==0 ){
+                if(sscanf(val,"%d",&opts->trn_fgrade)==1){
+                    retval=0;
+                }
+            }else if(strcmp(key,"trn-freinit")==0 ){
+                if(sscanf(val,"%d",&opts->trn_freinit)==1){
+                    retval=0;
+                }
+            }else if(strcmp(key,"trn-mweight")==0 ){
+                if(sscanf(val,"%d",&opts->trn_mweight)==1){
+                    retval=0;
+                }
             }else if(strcmp(key,"trn-ncov")==0 ){
                 if(sscanf(val,"%lf",&opts->trn_ncov)==1){
                     retval=0;
@@ -1981,6 +2023,12 @@ static int s_mbtrnpp_configure(mbtrnpp_cfg_t *cfg, mbtrnpp_opts_t *opts)
         cfg->trn_mtype = opts->trn_mtype;
         // trn-ftype
         cfg->trn_ftype = opts->trn_ftype;
+        // trn-fgrade
+        cfg->trn_fgrade = opts->trn_fgrade;
+        // trn-freinit
+        cfg->trn_freinit = opts->trn_freinit;
+        // trn-mweight
+        cfg->trn_mweight = opts->trn_mweight;
         // trn-ncov
         cfg->trn_max_ncov = opts->trn_ncov;
         // trn-nerr
@@ -2213,6 +2261,9 @@ int main(int argc, char **argv) {
                          "\t--trn-cfg\n"
                          "\t--trn-mtype\n"
                          "\t--trn-ftype\n"
+                         "\t--trn-fgrade\n"
+                         "\t--trn-freinit\n"
+                         "\t--trn-mweight\n"
                          "\t--trn-ncov\n"
                          "\t--trn-nerr\n"
                          "\t--trn-ecov\n"
@@ -2505,7 +2556,7 @@ int main(int argc, char **argv) {
 
 #ifdef WITH_MBTNAV
 
-    trn_cfg = trncfg_new(NULL, -1, mbtrn_cfg->trn_utm_zone, mbtrn_cfg->trn_mtype, mbtrn_cfg->trn_ftype, mbtrn_cfg->trn_map_file, mbtrn_cfg->trn_cfg_file, mbtrn_cfg->trn_particles_file, mbtrn_cfg->trn_mission_id,trn_oflags,mbtrn_cfg->trn_max_ncov,mbtrn_cfg->trn_max_nerr, mbtrn_cfg->trn_max_ecov, mbtrn_cfg->trn_max_eerr);
+    trn_cfg = trncfg_new(NULL, -1, mbtrn_cfg->trn_utm_zone, mbtrn_cfg->trn_mtype, mbtrn_cfg->trn_ftype,mbtrn_cfg->trn_fgrade,mbtrn_cfg->trn_freinit,mbtrn_cfg->trn_mweight,mbtrn_cfg->trn_map_file, mbtrn_cfg->trn_cfg_file, mbtrn_cfg->trn_particles_file, mbtrn_cfg->trn_mission_id,trn_oflags,mbtrn_cfg->trn_max_ncov,mbtrn_cfg->trn_max_nerr, mbtrn_cfg->trn_max_ecov, mbtrn_cfg->trn_max_eerr);
 
     if (mbtrn_cfg->trn_enable &&  NULL!=trn_cfg ) {
         mbtrnpp_init_trn(&trn_instance,mbtrn_cfg->verbose, trn_cfg);

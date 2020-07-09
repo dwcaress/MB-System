@@ -157,6 +157,20 @@ wtnav_t *wtnav_new(trn_config_t *cfg)
         memset(m,0,sizeof(*m));
         TerrainNav *obj = new TerrainNav(cfg->map_file, cfg->cfg_file, cfg->particles_file, cfg->filter_type, cfg->map_type, cfg->log_dir);
         m->obj = obj;
+        if(NULL!=obj){
+            obj->setModifiedWeighting(cfg->mod_weight);
+            obj->setFilterReinit(cfg->filter_reinit==0?false:true);
+            switch (cfg->filter_grade) {
+                case 0:
+                    obj->useLowGradeFilter();
+                    break;
+                case 1:
+                    obj->useHighGradeFilter();
+                    break;
+                default:
+                    break;
+            }
+    	}
     }
 
     return m;
@@ -298,7 +312,7 @@ void wtnav_use_lowgrade_filter(wtnav_t *self)
     if(NULL!=self){
         TerrainNav *obj = static_cast<TerrainNav *>(self->obj);
         if(NULL!=obj){
-        obj->useHighGradeFilter();
+        obj->useLowGradeFilter();
         }
     }
     return ;
@@ -1574,7 +1588,11 @@ trn_config_t *trncfg_dnew()
 }
 
 trn_config_t *trncfg_new(char *host,int port,
-                         long int utm_zone, int map_type, int filter_type,
+                         long int utm_zone, int map_type,
+                         int filter_type,
+                         int filter_reinit,
+                         int filter_grade,
+                         int mod_weight,
                          char *map_file,
                          char *cfg_file,
                          char *particles_file,
@@ -1598,6 +1616,9 @@ trn_config_t *trncfg_new(char *host,int port,
         instance->filter_type=filter_type;
         instance->map_type=map_type;
         instance->utm_zone=utm_zone;
+        instance->mod_weight=mod_weight;
+        instance->filter_reinit=filter_reinit;
+        instance->filter_grade=filter_grade;
         instance->oflags=oflags;
         instance->max_northing_cov = max_northing_cov;
         instance->max_northing_err = max_northing_err;
