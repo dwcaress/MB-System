@@ -486,14 +486,14 @@ int msock_connect(msock_socket_t *s)
             // success
 #ifdef WITH_PDEBUG
             char buf[ADDRSTR_BYTES]={0};
-            PDPRINT((stderr,"connect OK [%s]\n",msock_addr2str(s,buf,ADDRSTR_BYTES)));
+            PDPRINT((stderr,"%s - connect OK [%s]\n",__func__,msock_addr2str(s,buf,ADDRSTR_BYTES)));
 #endif
             retval=0;
         }else{
-            fprintf(stderr,"connect failed fd[%d] [%d/%s]\n",s->fd,errno,strerror(errno));
+            fprintf(stderr,"%s - connect failed fd[%d] [%d/%s]\n",__func__,s->fd,errno,strerror(errno));
         }
     }else{
-        fprintf(stderr,"invalid argument s[%p] ainfo[%p]\n",s,(s?s->addr->ainfo:0));
+        fprintf(stderr,"%s - invalid argument s[%p] ainfo[%p]\n",__func__,s,(s?s->addr->ainfo:0));
     }
     return retval;
 }
@@ -603,7 +603,7 @@ int64_t msock_send(msock_socket_t *s,byte *buf, uint32_t len)
             }
 #endif
         }else{
-            fprintf(stderr,"invalid arguments (!TCP)\n");
+            fprintf(stderr,"%s - invalid arguments (!TCP)\n",__func__);
         }
     }else{
         fprintf(stderr,"%s - invalid arguments\n",__FUNCTION__);
