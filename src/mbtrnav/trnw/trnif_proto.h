@@ -81,6 +81,21 @@
 #define MBIF_MSG_SIZE 16
 #define TRNX_MSG_SIZE 16
 
+#define PROTO_MB_CON  "CON"
+#define PROTO_MB_REQ  "REQ"
+#define PROTO_MB_ACK  "ACK"
+#define PROTO_MB_NACK "NACK"
+
+#define PROTO_TRNU_CON  "CON"
+#define PROTO_TRNU_REQ  "REQ"
+#define PROTO_TRNU_HBT  "HBT"
+#define PROTO_TRNU_PING "PING"
+#define PROTO_TRNU_DIS  "DIS"
+#define PROTO_TRNU_ACK  "ACK"
+#define PROTO_TRNU_NACK "NACK"
+
+#define PROTO_MSG_LEN(s) (strlen(s)+1)
+
 /////////////////////////
 // Type Definitions
 /////////////////////////
