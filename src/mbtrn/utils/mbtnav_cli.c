@@ -437,7 +437,7 @@ static void s_termination_handler (int signum)
 }
 // End function termination_handler
 
-static void s_trnw_estimate_show(trn_estimate_t *self, bool verbose, uint16_t indent)
+static void s_trnw_estimate_show(trnu_estimate_t *self, bool verbose, uint16_t indent)
 {
     if (NULL != self) {
         fprintf(stderr,"%*s[self        %15p]\n",indent,(indent>0?" ":""), self);
@@ -450,7 +450,7 @@ static void s_trnw_estimate_show(trn_estimate_t *self, bool verbose, uint16_t in
     }
 }
 
-static void s_trnw_offset_show(trn_offset_pub_t *self, bool verbose, uint16_t indent)
+static void s_trnw_offset_show(trnu_pub_t *self, bool verbose, uint16_t indent)
 {
     if (NULL != self) {
         fprintf(stderr,"%*s[self        %15p]\n",indent,(indent>0?" ":""), self);
@@ -473,12 +473,12 @@ static void s_trnw_offset_show(trn_offset_pub_t *self, bool verbose, uint16_t in
     }
 }
 
-static void s_out_csv(trn_offset_pub_t *self)
+static void s_out_csv(trnu_pub_t *self)
 {
     double time=mtime_etime();//s_etime();
-        trn_estimate_t *pt=&self->est[0];
-        trn_estimate_t *mle=&self->est[1];
-        trn_estimate_t *mse=&self->est[2];
+        trnu_estimate_t *pt=&self->est[0];
+        trnu_estimate_t *mle=&self->est[1];
+        trnu_estimate_t *mse=&self->est[2];
     // system time,
     // mle_time, mle.x, mle.y, mle.z
     // mmse_time, mmse.x, mmse.y, mmse.z
@@ -517,7 +517,7 @@ static int s_trnc_state_machine(msock_socket_t *s, app_cfg_t *cfg)
 //        mbtrn_header_t *pheader = &pmessage->data.header;
 //        mbtrn_sounding_t *psounding = &pmessage->data.sounding;
 //        memset(pmessage,0,sizeof(message));
-        byte msg_buf[TRN_OFFSET_PUB_BYTES]={0};
+        byte msg_buf[TRNU_PUB_BYTES]={0};
         int hbeat_counter=0;
         int64_t test=0;
         byte *pread=NULL;
@@ -525,7 +525,7 @@ static int s_trnc_state_machine(msock_socket_t *s, app_cfg_t *cfg)
         
         trnc_state_t state=TRNSM_INIT;
         trnc_action_t action=TRNAT_NOP;
-        trn_offset_pub_t *frame = (trn_offset_pub_t *)msg_buf;
+        trnu_pub_t *frame = (trnu_pub_t *)msg_buf;
 
         // state machine entry point
         while (state != TRNSM_DONE && !g_interrupt) {
@@ -533,7 +533,7 @@ static int s_trnc_state_machine(msock_socket_t *s, app_cfg_t *cfg)
             // check states, assign actions
             switch (state) {
                 case TRNSM_INIT:
-                    memset(&msg_buf,0,TRN_OFFSET_PUB_BYTES);
+                    memset(&msg_buf,0,TRNU_PUB_BYTES);
                     action = TRNAT_CONNECT;
                     break;
                 case TRNSM_CONNECTED:
@@ -541,7 +541,7 @@ static int s_trnc_state_machine(msock_socket_t *s, app_cfg_t *cfg)
                     break;
                 case TRNSM_REQ_PENDING:
                 case TRNSM_SUBSCRIBED:
-                    memset(&msg_buf,0,TRN_OFFSET_PUB_BYTES);
+                    memset(&msg_buf,0,TRNU_PUB_BYTES);
                     action=TRNAT_RD_MSG;
                     break;
                 case TRNSM_HBEAT_EXPIRED:
@@ -583,7 +583,7 @@ static int s_trnc_state_machine(msock_socket_t *s, app_cfg_t *cfg)
             // action: read response
             if (action == TRNAT_RD_MSG) {
                 pread = msg_buf;
-                readlen = TRN_OFFSET_PUB_BYTES;
+                readlen = TRNU_PUB_BYTES;
                 
                 // request message
                 if ((test = msock_recvfrom(s, NULL, pread, readlen,0))>0) {
@@ -597,7 +597,7 @@ static int s_trnc_state_machine(msock_socket_t *s, app_cfg_t *cfg)
                         PMPRINT(MOD_MBTNAV,MM_DEBUG,(stderr,"received ACK ret[%"PRId64"] [%08X]\n",test,frame->sync));
                         hbeat_counter=0;
                         state=TRNSM_SUBSCRIBED;
-                    }else if(frame->sync==TRNW_PUB_SYNC && test==readlen){
+                    }else if(frame->sync==TRNU_PUB_SYNC && test==readlen){
 
                         PMPRINT(MOD_MBTNAV,MM_DEBUG,(stderr,"received MSG ret[%"PRId64"] type[%08X] size[%"PRId64"] \n",test,frame->sync,test));
                         trn_msg_count++;

@@ -4146,8 +4146,8 @@ int mbtrnpp_trn_pub_osocket(trn_update_t *update,
         if(NULL!=update && NULL!=pub_sock){
             int iobytes=0;
             // serialize data
-            trn_offset_pub_t pub_data={
-                TRNW_PUB_SYNC,
+            trnu_pub_t pub_data={
+                TRNU_PUB_SYNC,
                 {
                     {update->pt_dat->time,update->pt_dat->x,update->pt_dat->y,update->pt_dat->z,
                         {update->pt_dat->covariance[0],update->pt_dat->covariance[2],update->pt_dat->covariance[5],update->pt_dat->covariance[1]}
