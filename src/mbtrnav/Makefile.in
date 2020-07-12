@@ -253,7 +253,7 @@ netif_test_DEPENDENCIES = libnetif.la \
 am_trn_cli_OBJECTS = trnw/trncli_test.$(OBJEXT) trnw/trn_cli.$(OBJEXT)
 trn_cli_OBJECTS = $(am_trn_cli_OBJECTS)
 trn_cli_DEPENDENCIES = $(top_builddir)/src/mbtrn/libmframe.la \
-	libtrnw.la libqnx.la libnewmat.la libtnav.la libgeolib.la
+	libtrnw.la
 am_trn_server_OBJECTS = utils/trn_server.$(OBJEXT)
 trn_server_OBJECTS = $(am_trn_server_OBJECTS)
 trn_server_DEPENDENCIES = libtnav.la libqnx.la libnewmat.la libtnav.la \
@@ -273,8 +273,7 @@ trnifsvr_test_DEPENDENCIES = libnetif.la \
 am_trnu_cli_OBJECTS = trnw/trnucli_test.$(OBJEXT) \
 	trnw/trnu_cli.$(OBJEXT)
 trnu_cli_OBJECTS = $(am_trnu_cli_OBJECTS)
-trnu_cli_DEPENDENCIES = $(top_builddir)/src/mbtrn/libmframe.la \
-	libtrnw.la libqnx.la libnewmat.la libtnav.la libgeolib.la
+trnu_cli_DEPENDENCIES = $(top_builddir)/src/mbtrn/libmframe.la
 SCRIPTS = $(dist_bin_SCRIPTS)
 AM_V_P = $(am__v_P_@AM_V@)
 am__v_P_ = $(am__v_P_@AM_DEFAULT_V@)
@@ -865,9 +864,9 @@ libnetif_la_LIBADD = libtrnw.la \
                 -lm -lpthread
 
 trnu_cli_SOURCES = trnw/trnucli_test.c trnw/trnu_cli.c
-trnu_cli_LDADD = $(top_builddir)/src/mbtrn/libmframe.la libtrnw.la libqnx.la libnewmat.la  libtnav.la  libgeolib.la
+trnu_cli_LDADD = $(top_builddir)/src/mbtrn/libmframe.la
 trn_cli_SOURCES = trnw/trncli_test.c trnw/trn_cli.c
-trn_cli_LDADD = $(top_builddir)/src/mbtrn/libmframe.la libtrnw.la libqnx.la libnewmat.la  libtnav.la  libgeolib.la
+trn_cli_LDADD = $(top_builddir)/src/mbtrn/libmframe.la libtrnw.la
 trn_server_SOURCES = utils/trn_server.cpp
 trn_server_LDADD = libtnav.la libqnx.la libnewmat.la libtnav.la libgeolib.la
 netif_test_SOURCES = utils/netif-test.c
