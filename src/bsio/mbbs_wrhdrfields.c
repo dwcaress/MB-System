@@ -43,8 +43,7 @@ extern unsigned long bs_iobytecnt;
 /*
    Set the bits from bitmask in the file header flags field.
 */
-int mbbs_wrfflagssetbits(FILE *fp, unsigned int bitmask)
-{
+int mbbs_wrfflagssetbits(FILE *fp, unsigned int bitmask) {
 	if (fseek(fp, (long)0, SEEK_SET) != 0)
 		return BS_FSEEK;
 	XDR xdr;
@@ -94,8 +93,7 @@ int mbbs_wrfflagssetbits(FILE *fp, unsigned int bitmask)
 /*
    Clear the bits of bitmask from the file header flags field.
 */
-int mbbs_wrfflagsclrbits(FILE *fp, unsigned int bitmask)
-{
+int mbbs_wrfflagsclrbits(FILE *fp, unsigned int bitmask) {
 	if (fseek(fp, (long)0, SEEK_SET) != 0)
 		return BS_FSEEK;
 	XDR xdr;
@@ -146,8 +144,7 @@ int mbbs_wrfflagsclrbits(FILE *fp, unsigned int bitmask)
    Writes the ping flags field of a ping header
    located at an arbitrary file byte offset.
 */
-int mbbs_wrpflags(int version, FILE *fp, long phoffset, unsigned int flags)
-{
+int mbbs_wrpflags(int version, FILE *fp, long phoffset, unsigned int flags) {
 	bs_iobytecnt = 0;
 
 	switch (version) {
@@ -181,8 +178,7 @@ int mbbs_wrpflags(int version, FILE *fp, long phoffset, unsigned int flags)
    Set the bits from bitmask in the ping flags field of
    a ping header located at an arbitrary file byte offset.
 */
-int mbbs_wrpflagssetbits(int version, FILE *fp, long phoffset, unsigned int bitmask)
-{
+int mbbs_wrpflagssetbits(int version, FILE *fp, long phoffset, unsigned int bitmask) {
 	bs_iobytecnt = 0;
 
 	switch (version) {
@@ -228,8 +224,7 @@ int mbbs_wrpflagssetbits(int version, FILE *fp, long phoffset, unsigned int bitm
    Clear the bits in bitmask from the ping flags field of
    a ping header located at an arbitrary file byte offset.
 */
-int mbbs_wrpflagsclrbits(int version, FILE *fp, long phoffset, unsigned int bitmask)
-{
+int mbbs_wrpflagsclrbits(int version, FILE *fp, long phoffset, unsigned int bitmask) {
 	bs_iobytecnt = 0;
 
 	switch (version) {
@@ -275,8 +270,7 @@ int mbbs_wrpflagsclrbits(int version, FILE *fp, long phoffset, unsigned int bitm
    Writes ship longitude, latitude and course fields
    of a ping header located at an arbitrary file byte offset.
 */
-int mbbs_wrsllc(int version, FILE *fp, long phoffset, double slon, double slat, float scourse)
-{
+int mbbs_wrsllc(int version, FILE *fp, long phoffset, double slon, double slat, float scourse) {
 	bs_iobytecnt = 0;
 
 	switch (version) {
@@ -321,8 +315,7 @@ int mbbs_wrsllc(int version, FILE *fp, long phoffset, double slon, double slat, 
    Writes towfish longitude, latitude and course fields
    of a ping header located at an arbitrary file byte offset.
 */
-int mbbs_wrtllc(int version, FILE *fp, long phoffset, double tlon, double tlat, float tcourse)
-{
+int mbbs_wrtllc(int version, FILE *fp, long phoffset, double tlon, double tlat, float tcourse) {
 	bs_iobytecnt = 0;
 
 	switch (version) {
@@ -367,8 +360,7 @@ int mbbs_wrtllc(int version, FILE *fp, long phoffset, double tlon, double tlat, 
    Writes towfish longitude and latitude fields of a
    ping header located at an arbitrary file byte offset.
 */
-int mbbs_wrtll(int version, FILE *fp, long phoffset, double tlon, double tlat)
-{
+int mbbs_wrtll(int version, FILE *fp, long phoffset, double tlon, double tlat) {
 	bs_iobytecnt = 0;
 
 	switch (version) {

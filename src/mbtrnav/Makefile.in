@@ -273,7 +273,8 @@ trnifsvr_test_DEPENDENCIES = libnetif.la \
 am_trnu_cli_OBJECTS = trnw/trnucli_test.$(OBJEXT) \
 	trnw/trnu_cli.$(OBJEXT)
 trnu_cli_OBJECTS = $(am_trnu_cli_OBJECTS)
-trnu_cli_DEPENDENCIES = $(top_builddir)/src/mbtrn/libmframe.la
+trnu_cli_DEPENDENCIES = $(top_builddir)/src/mbtrn/libmframe.la \
+	libtrnw.la
 SCRIPTS = $(dist_bin_SCRIPTS)
 AM_V_P = $(am__v_P_@AM_V@)
 am__v_P_ = $(am__v_P_@AM_DEFAULT_V@)
@@ -864,7 +865,7 @@ libnetif_la_LIBADD = libtrnw.la \
                 -lm -lpthread
 
 trnu_cli_SOURCES = trnw/trnucli_test.c trnw/trnu_cli.c
-trnu_cli_LDADD = $(top_builddir)/src/mbtrn/libmframe.la
+trnu_cli_LDADD = $(top_builddir)/src/mbtrn/libmframe.la libtrnw.la
 trn_cli_SOURCES = trnw/trncli_test.c trnw/trn_cli.c
 trn_cli_LDADD = $(top_builddir)/src/mbtrn/libmframe.la libtrnw.la
 trn_server_SOURCES = utils/trn_server.cpp

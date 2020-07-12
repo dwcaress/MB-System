@@ -48,8 +48,7 @@ static unsigned int bswsf_databufsz = 0;
    across-track distances greater than swradius with {BTYD,SSD}_SWEDGE for
    the ping whose header is located at an arbitrary file byte offset.
 */
-int mbbs_setswradius(int version, FILE *fp, long phoffset, int side, unsigned int dtmask, float swradius)
-{
+int mbbs_setswradius(int version, FILE *fp, long phoffset, int side, unsigned int dtmask, float swradius) {
 	switch (version) {
 	case MR1_VERSION_1_0:
 	case MR1_VERSION_2_0:

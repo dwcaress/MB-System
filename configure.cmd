@@ -367,8 +367,7 @@ sed -i.bak s/2\.69/2\.65/ configure.ac
 make -j uninstall
 make -j clean
 
-# Reconstruct the build system, and then use it to build in place
-# in my personal development tree
+# Reconstruct the build system, including the Makefile.in files and the configure script
 glibtoolize --force --copy
 aclocal
 autoheader
@@ -377,6 +376,8 @@ autoconf
 autoupdate
 autoreconf --force --install #--warnings=all
 
+# Run the configure script - here all possible optional targets are enabled
+# include the experimental and prototype tools (mbtrn, mbtnav, qt tools, opencv tools)
 LDFLAGS="-L/opt/X11/lib" \
 CFLAGS="-g -I/opt/X11/include" \
 ./configure \
@@ -390,14 +391,14 @@ CFLAGS="-g -I/opt/X11/include" \
     --with-opengl-include=/opt/X11/include \
     --with-opengl-lib=/opt/X11/lib \
     --with-otps-dir=/usr/local/opt/otps \
-    --enable-hardening
-    #--enable-test \
-    #--enable-mbtrn \
-    #--enable-mbtnav \
-    #--enable-qt \
-    #--enable-opencv \
-    #--with-opencv-include=/usr/local/include/opencv4 \
-    #--with-opencv-lib=/usr/local/lib
+    --enable-hardening \
+    --enable-test \
+    --enable-mbtrn \
+    --enable-mbtnav \
+    --enable-qt \
+    --enable-opencv \
+    --with-opencv-include=/usr/local/include/opencv4 \
+    --with-opencv-lib=/usr/local/lib
     #--enable-pcltools
 
 make
