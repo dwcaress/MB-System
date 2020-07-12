@@ -158,6 +158,9 @@ typedef struct app_cfg_s{
     /// @var app_cfg_s::ofmt
     /// @brief TBD
     trnuc_fmt_t ofmt;
+    /// @var app_cfg_s::demo
+    /// @brief TBD
+    bool demo;
     /// @var app_cfg_s::log_cfg
     /// @brief TBD
     mlog_config_t *log_cfg;
@@ -207,8 +210,9 @@ static void s_show_help()
     "--ofmt=[pcx]  : output format (P:pretty X:hex PX:pretty_hex C:csv\n"
     "--block=[lc]  : block on connect/listen (L:listen C:connect)\n"
     "--ifile       : input file\n"
-    "--update      : TRN update N\n"
+    "--update=n    : TRN update N\n"
     "--log         : enable logging\n"
+    "--demo        : use trn_cli handler mechanism (demo handler, print formatted output)\n"
     "\n";
     printf("%s",help_message);
     printf("%s",usage_message);
@@ -239,6 +243,7 @@ void parse_args(int argc, char **argv, app_cfg_t *cfg)
         {"block", required_argument, NULL, 0},
         {"ifile", required_argument, NULL, 0},
         {"update", required_argument, NULL, 0},
+        {"demo", no_argument, NULL, 0},
         {NULL, 0, NULL, 0}};
  
     // process argument list
@@ -333,6 +338,10 @@ void parse_args(int argc, char **argv, app_cfg_t *cfg)
                     if(strstr(optarg,"l")!=NULL || strstr(optarg,"L")!=NULL )
                         cfg->flags|=TRNUC_BLK_LISTEN;
                 }
+                // demo
+                else if (strcmp("demo", options[option_index].name) == 0) {
+                    cfg->demo=true;
+                }
 
                 break;
             default:
@@ -358,6 +367,7 @@ void parse_args(int argc, char **argv, app_cfg_t *cfg)
     PDPRINT((stderr,"trnu_hbeat [%d]\n",cfg->trnu_hbeat));
     PDPRINT((stderr,"ofmt       [%02x]\n",cfg->ofmt));
     PDPRINT((stderr,"update_n   [%u]\n",cfg->update_n));
+    PDPRINT((stderr,"demo       [%c]\n",(cfg->demo?'Y':'N')));
 }
 // End function parse_args
 
@@ -455,7 +465,12 @@ static int s_update_callback(trnu_pub_t *update)
 {
     int retval=-1;
 
-    fprintf(stderr,"WARN - %s: not implemented - uppdate[%p]\n",__func__,update);
+    // demo callback : call the string formatter and output
+    char *str=NULL;
+    trnucli_update_str(update,&str,0,TRNUC_FMT_PRETTY);
+    fprintf(stdout,"%s\n",str);
+    if(NULL!=str)free(str);
+    str=NULL;
 
     return retval;
 }
@@ -677,16 +692,17 @@ static int s_trnucli_test_trnu(app_cfg_t *cfg)
     }
     fprintf(stderr,"%s - running\n",__func__);
     // could set handler here (called by listener)...
-    // trncli_set_callback(dcli,s_update_callback);
-
+    if(cfg->demo){
+    	trnucli_set_callback(dcli,s_update_callback);
+    }
     while(!g_interrupt){
         int test=-1;
         if( (test=trnucli_listen(dcli))==0){
 
             // could call handler or handle here
-//            s_update_callback(dcli->update);
-            s_trnucli_process_update(dcli->update,cfg);
-
+            if(!cfg->demo){
+	            s_trnucli_process_update(dcli->update,cfg);
+            }
         }else{
             fprintf(stderr,"listen ret[%d]\n",test);
         }
