@@ -468,7 +468,9 @@ static int s_update_callback(trnu_pub_t *update)
     // demo callback : call the string formatter and output
     char *str=NULL;
     trnucli_update_str(update,&str,0,TRNUC_FMT_PRETTY);
-    fprintf(stdout,"%s\n",str);
+    if(NULL!=str){
+    	fprintf(stdout,"%s\n",str);
+    }
     if(NULL!=str)free(str);
     str=NULL;
 
@@ -648,7 +650,9 @@ static int s_trnucli_process_update(trnu_pub_t *update, app_cfg_t *cfg)
     // call the string formatter and output
     char *str=NULL;
     trnucli_update_str(update,&str,0,cfg->ofmt);
-    fprintf(stdout,"%s\n",str);
+    if(NULL!=str){
+    	fprintf(stdout,"%s\n",str);
+    }
     if(NULL!=str)free(str);
     str=NULL;
 

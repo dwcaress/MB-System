@@ -195,9 +195,6 @@ int trnucli_listen(trnucli_t *self)
         }
         if(NULL!=self->update){
             memset(self->update,0,TRNU_PUB_BYTES);
-
-            int32_t rret=-1;
-
             msock_set_blocking(self->trnu->sock,TRNUC_BLK_LISTEN(self->flags));
             int32_t rret=msock_recv(self->trnu->sock,(byte *)self->update,TRNU_PUB_BYTES,0);
             if(rret>0){
@@ -217,13 +214,12 @@ int trnucli_listen(trnucli_t *self)
 }
 
 
-static int s_update_pretty(trnu_pub_t *update, char *dest, int len)
+static int s_update_pretty(trnu_pub_t *update, char *dest, int len, int indent)
 {
     int retval=0;
     if(NULL!=update && NULL!=dest && len>0){
         int wkey=15;
         int wval=15;
-        int indent=0;
         int rem=len;
         char *dp=dest;
         int wbytes=snprintf(dp,rem,"%*s %*s  %*p\n",indent,(indent>0?" ":""), wkey,"addr",wval,update);
@@ -422,7 +418,7 @@ int trnucli_update_str(trnu_pub_t *self, char **dest, int len, trnuc_fmt_t fmt)
 
             switch (fmt) {
                 case TRNUC_FMT_PRETTY:
-                    retval=s_update_pretty(self,obuf,olen);
+                    retval=s_update_pretty(self,obuf,olen,0);
                     break;
                 case TRNUC_FMT_CSV:
                     retval=s_update_csv(self,obuf,olen);
