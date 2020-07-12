@@ -470,8 +470,8 @@ static int s_update_callback(trnu_pub_t *update)
     trnucli_update_str(update,&str,0,TRNUC_FMT_PRETTY);
     if(NULL!=str){
     	fprintf(stdout,"%s\n",str);
+        free(str);
     }
-    if(NULL!=str)free(str);
     str=NULL;
 
     return retval;
@@ -652,8 +652,8 @@ static int s_trnucli_process_update(trnu_pub_t *update, app_cfg_t *cfg)
     trnucli_update_str(update,&str,0,cfg->ofmt);
     if(NULL!=str){
     	fprintf(stdout,"%s\n",str);
+        free(str);
     }
-    if(NULL!=str)free(str);
     str=NULL;
 
     return retval;
