@@ -208,7 +208,8 @@ mb-out=mb1svr:TRN_HOST:27000
 // TRN output specifier
 // comma delimited list including one or more of:
 // trnsvr:<ip>:<port>  - enable trn server interface
-// trnu                - enable TRN update logging
+// trnu                - enable TRN update ascii logging
+// trnub               - enable TRN update binary logging
 // trnusvr:<ip>:<port> - enable TRN update server
 // sout                - enable TRN output to stdout
 // serr                - enable TRN output to stderr
