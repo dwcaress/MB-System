@@ -390,8 +390,8 @@ CFLAGS="-g -I/opt/X11/include" \
     --with-opengl-include=/opt/X11/include \
     --with-opengl-lib=/opt/X11/lib \
     --with-otps-dir=/usr/local/opt/otps \
-    --enable-hardening \
-    --enable-test 
+    --enable-hardening
+    #--enable-test \
     #--enable-mbtrn \
     #--enable-mbtnav \
     #--enable-qt \

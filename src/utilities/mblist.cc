@@ -1312,7 +1312,7 @@ int main(int argc, char **argv) {
     fprintf(outfile, ":command_line = \"");
     for (int i = 0; i < argc; i++)
       fprintf(outfile, "%s ", argv[i]);
-    fprintf(outfile, "\n");
+    fprintf(outfile, "\";\n");
     fprintf(outfile, "\t:mbsystem_version = \"%s\";\n", MB_VERSION);
 
     const time_t right_now = time((time_t *)0);
