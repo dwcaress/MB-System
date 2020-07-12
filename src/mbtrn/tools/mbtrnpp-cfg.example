@@ -27,7 +27,7 @@ verbose=-2
 
 // opt "log-directory" [mb_path]
 // log directory
-log-directory=TRN_LOGFILES
+log-directory=/path/to logs
 
 // opt "input" [input_mode_t]
 // input data source specifier
@@ -44,7 +44,7 @@ output=file:mbtrnpp_SESSION.mb1
 swath-width=90
 
 // opt "soundings" [int]
-// number of sonar soundings
+// number of sonar soundings to output
 soundings=11
 
 // opt "median-filter" [?]
@@ -62,7 +62,7 @@ format=88
 
 // opt "platform-target-sensor" [int]
 // description TBD
-#platform-target_sensor=
+#platform-target-sensor=
 
 // opt "projection"
 // cartographic(?) projection ID
@@ -103,18 +103,21 @@ statsec=30
 statflags=MSF_STATUS|MSF_EVENT|MSF_ASTAT|MSF_PSTAT
 
 // opt "trn-en" [bool]
+// opt "trn-dis" [bool]
 // enable/disable TRN processing
 // use Y/1: enable N/0: disable
 trn-en=Y
 
 // opt "trn-utm" [long]
 // UTM zone for TRN processing (1-60)
-trn-utm=10
+// Monterey Bay : 10
+//        Axial :  9
+trn-utm=9
 
 // opt "trn-map" [char*]
 // TRN map file (required for TRN processing)
 // (may be a directory path for tiled map)
-trn-map=TRN_MAPFILES/PortTiles
+trn-map=TRN_MAPFILES/AxialSummit_MAUV_Post2011Eruption_Topo1mUTM.grd
 
 // opt "trn-cfg" [char*]
 // TRN configuration file (required for TRN processing)
@@ -133,7 +136,7 @@ trn-mid=mb-TRN_SESSION
 // TRN map type
 // TRN_MAP_DEM  1
 // TRN_MAP_BO   2
-trn-mtype=2
+trn-mtype=1
 
 // opt "trn-ftype" [int]
 // TRN filter type
@@ -144,6 +147,27 @@ trn-mtype=2
 // TRN_FILT_BANK       3
 trn-ftype=2
 
+// opt "trn-fgrade" [int]
+// filter grade
+// 0: use low grade filter
+// 1: use high grade filter
+trn-fgrade=0
+
+// opt "trn-reinit" [int]
+// enable filter reinit
+// 0: don't allow filter reinit
+// 1: allow reinit
+trn-reinit=1
+
+// opt "trn-mweight" [int]
+// use modified weighting
+// 0 - No weighting modifications.
+// 1 - Shandor's original alpha modification.
+// 2 - Crossbeam with Shandor's weighting.
+// 3 - Subcloud with Shandor's original.
+// 4 - Subcloud with modified NIS always on.
+trn-mweight=4
+
 // opt "trn-ncov" [double]
 // TRN convergence criteria
 // northing covariance limit
@@ -152,7 +176,8 @@ trn-ncov=49
 // opt "trn-nerr" [double]
 // TRN convergence criteria
 // northing error limit
-trn-nerr=50
+//trn-nerr=50
+trn-nerr=200
 
 // opt "trn-ecov" [double]
 // TRN convergence criteria
@@ -162,7 +187,8 @@ trn-ecov=49
 // opt "trn-eerr" [double]
 // TRN convergence criteria
 // easting error limit
-trn-eerr=50
+//trn-eerr=50
+trn-eerr=200
 
 // opt "mb-out" [?]
 // MB1 output specifier
@@ -182,7 +208,8 @@ mb-out=mb1svr:TRN_HOST:27000
 // TRN output specifier
 // comma delimited list including one or more of:
 // trnsvr:<ip>:<port>  - enable trn server interface
-// trnu                - enable TRN update logging
+// trnu                - enable TRN update ascii logging
+// trnub               - enable TRN update binary logging
 // trnusvr:<ip>:<port> - enable TRN update server
 // sout                - enable TRN output to stdout
 // serr                - enable TRN output to stderr

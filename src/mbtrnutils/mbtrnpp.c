@@ -97,12 +97,12 @@ typedef enum {
 } input_mode_t;
 
 typedef enum{
-    OUTPUT_NONE        =0x000, OUTPUT_MB1_FILE_EN =0x001, OUTPUT_MB1_SVR_EN  =0x002,
-    OUTPUT_TRN_SVR_EN  =0x004, OUTPUT_TRNU_SVR_EN =0x008, OUTPUT_MB1_BIN     =0x010,
-    OUTPUT_RESON_BIN   =0x020, OUTPUT_TRNU_ASC    =0x040, OUTPUT_TRNU_SOUT   =0x080,
-    OUTPUT_TRNU_SERR   =0x100, OUTPUT_TRNU_DEBUG  =0x200, OUTPUT_MBTRNPP_MSG =0x400,
-    OUTPUT_MBSYS_STDOUT = 0x800,
-    OUTPUT_ALL         =0xFFF
+    OUTPUT_NONE        =0x0000, OUTPUT_MB1_FILE_EN =0x0001, OUTPUT_MB1_SVR_EN  =0x0002,
+    OUTPUT_TRN_SVR_EN  =0x0004, OUTPUT_TRNU_SVR_EN =0x0008, OUTPUT_MB1_BIN     =0x0010,
+    OUTPUT_RESON_BIN   =0x0020, OUTPUT_TRNU_ASC    =0x0040, OUTPUT_TRNU_SOUT   =0x0080,
+    OUTPUT_TRNU_SERR   =0x0100, OUTPUT_TRNU_DEBUG  =0x0200, OUTPUT_TRNU_BIN    =0x0400,
+    OUTPUT_MBTRNPP_MSG =0x0800, OUTPUT_MBSYS_STDOUT=0x1000,
+    OUTPUT_ALL         =0x1FFF
 }output_mode_t;
 
 
@@ -165,6 +165,12 @@ typedef struct mbtrnpp_opts_s{
     int trn_mtype;
     // opt "trn-ftype"
     int trn_ftype;
+    // opt "trn-fgrade"
+    int trn_fgrade;
+    // opt "trn-freinit"
+    int trn_freinit;
+    // opt "trn-mweight"
+    int trn_mweight;
     // opt "trn-ncov"
     double trn_ncov;
     // opt "trn-nerr"
@@ -266,6 +272,12 @@ typedef struct mbtrnpp_cfg_s{
     int trn_mtype;
     // TRN filter type
     int trn_ftype;
+    // TRN filter grade
+    int trn_fgrade;
+    // TRN allow filter reinit
+    int trn_freinit;
+    // TRN modified weighting
+    int trn_mweight;
     // TRN convergence northing covariance limit
     double trn_max_ncov;
     // TRN convergence northing error limit
@@ -360,6 +372,9 @@ s=NULL;\
 #define OPT_TRN_MDIR_DFL                "mb"
 #define OPT_TRN_MTYPE_DFL               TRN_MTYPE_DFL
 #define OPT_TRN_FTYPE_DFL               TRN_FTYPE_DFL
+#define OPT_TRN_FGRADE_DFL              TRN_FGRADE_DFL
+#define OPT_TRN_FREINIT_DFL             TRN_FREINIT_DFL
+#define OPT_TRN_MWEIGHT_DFL             TRN_MWEIGHT_DFL
 #define OPT_TRN_NCOV_DFL                TRN_MAX_NCOV_DFL
 #define OPT_TRN_NERR_DFL                TRN_MAX_NERR_DFL
 #define OPT_TRN_ECOV_DFL                TRN_MAX_ECOV_DFL
@@ -399,8 +414,10 @@ s=NULL;\
 #define MBTRNPP_MLOG_DESC "mbtrnpp message log"
 #define RESON_BLOG_NAME   "r7kbin"
 #define RESON_BLOG_DESC   "reson 7k frame log"
-#define TRN_ULOG_NAME     "trnu"
-#define TRN_ULOG_DESC     "trn update log"
+#define TRNU_ALOG_NAME    "trnu"
+#define TRNU_ALOG_DESC    "trnu log"
+#define TRNU_BLOG_NAME    "trnub"
+#define TRNU_BLOG_DESC    "trnu log (binary)"
 #define MBTRNPP_LOG_EXT   ".log"
 #ifdef WITH_MBTNAV
 #define UTM_MONTEREY_BAY 10L
@@ -408,6 +425,9 @@ s=NULL;\
 #define TRN_UTM_DFL      UTM_MONTEREY_BAY
 #define TRN_MTYPE_DFL    TRN_MAP_BO
 #define TRN_FTYPE_DFL    TRN_FILT_PARTICLE
+#define TRN_FGRADE_DFL   TRN_FILT_HIGH
+#define TRN_FREINIT_DFL  TRN_FILT_REINIT_EN
+#define TRN_MWEIGHT_DFL  TRN_MWEIGHT_SUBCLOUD_NISON
 #define TRN_OUT_DFL      (TRNW_ODEBUG|TRNW_OLOG)
 #define TRNU_HOST_DFL    "localhost"
 #define TRNU_PORT_DFL    8000
@@ -449,17 +469,20 @@ char *mbtrn_cfg_path=NULL;
 mlog_id_t mb1_blog_id = MLOG_ID_INVALID;
 mlog_id_t mbtrnpp_mlog_id = MLOG_ID_INVALID;
 mlog_id_t reson_blog_id = MLOG_ID_INVALID;
-mlog_id_t trn_ulog_id = MLOG_ID_INVALID;
+mlog_id_t trnu_alog_id = MLOG_ID_INVALID;
+mlog_id_t trnu_blog_id = MLOG_ID_INVALID;
 
 mlog_config_t mb1_blog_conf = {100 * SZ_1M, ML_NOLIMIT, ML_NOLIMIT, ML_OSEG | ML_LIMLEN, ML_FILE, ML_TFMT_ISO1806};
 mlog_config_t mbtrnpp_mlog_conf = {ML_NOLIMIT, ML_NOLIMIT, ML_NOLIMIT, ML_MONO, ML_FILE, ML_TFMT_ISO1806};
 mlog_config_t reson_blog_conf = {ML_NOLIMIT, ML_NOLIMIT, ML_NOLIMIT, ML_MONO, ML_FILE, ML_TFMT_ISO1806};
-mlog_config_t trn_ulog_conf = {ML_NOLIMIT, ML_NOLIMIT, ML_NOLIMIT, ML_MONO, ML_FILE, ML_TFMT_ISO1806};
+mlog_config_t trnu_alog_conf = {ML_NOLIMIT, ML_NOLIMIT, ML_NOLIMIT, ML_MONO, ML_FILE, ML_TFMT_ISO1806};
+mlog_config_t trnu_blog_conf = {100 * SZ_1M, ML_NOLIMIT, ML_NOLIMIT, ML_OSEG | ML_LIMLEN, ML_FILE, ML_TFMT_ISO1806};
 
 char *mb1_blog_path = NULL;
 char *mbtrnpp_mlog_path = NULL;
 char *reson_blog_path = NULL;
-char *trn_ulog_path = NULL;
+char *trnu_alog_path = NULL;
+char *trnu_blog_path = NULL;
 
 mfile_flags_t flags = MFILE_RDWR | MFILE_APPEND | MFILE_CREATE;
 mfile_mode_t mode = MFILE_RU | MFILE_WU | MFILE_RG | MFILE_WG;
@@ -480,10 +503,10 @@ typedef enum{RF_NONE=0,RF_FORCE_UPDATE=0x1,RF_RELEASE=0x2}mb_resource_flag_t;
 
 // profiling - event channels
 typedef enum {
-  MBTPP_EV_MB_CYCLES = 0,
-  MBTPP_EV_MB_CONN,
-  MBTPP_EV_MB_DISN,
-  MBTPP_EV_MB_PUBN,
+    MBTPP_EV_MB_CYCLES = 0,
+    MBTPP_EV_MB_CONN,
+    MBTPP_EV_MB_DISN,
+    MBTPP_EV_MB_PUBN,
     MBTPP_EV_MB_TRN_REINIT,
     MBTPP_EV_MB_GAIN_LO,
     MBTPP_EV_EMBGETALL,
@@ -524,6 +547,7 @@ typedef enum {
     MBTPP_CH_TRN_NREINITS_XT,
     MBTPP_CH_TRN_TRNU_PUB_XT,
     MBTPP_CH_TRN_TRNU_LOG_XT,
+    MBTPP_CH_TRN_TRNU_BLOG_XT,
     MBTPP_CH_TRN_PROC_XT,
     MBTPP_CH_TRN_TRNSVR_XT,
     MBTPP_CH_TRN_TRNUSVR_XT,
@@ -555,7 +579,7 @@ const char *mbtrnpp_stchan_labels[] = {
     "mb_proc_mb1_xt"
 #ifdef WITH_MBTNAV
     , "trn_update_xt", "trn_biasest_xt", "trn_nreinits_xt",
-    "trn_trnu_pub_xt", "trn_trnu_log_xt", "trn_proc_xt",
+    "trn_trnu_pub_xt", "trn_trnu_log_xt", "trn_trnu_blog_xt", "trn_proc_xt",
     "trn_trnsvr_xt", "trn_trnusvr_xt", "trn_proc_trn_xt"
 #endif
 };
@@ -1086,6 +1110,9 @@ static int s_mbtrnpp_init_cfg(mbtrnpp_cfg_t *cfg)
         cfg->trn_utm_zone=TRN_UTM_DFL;
         cfg->trn_mtype=TRN_MTYPE_DFL;
         cfg->trn_ftype=TRN_FTYPE_DFL;
+        cfg->trn_fgrade=TRN_FGRADE_DFL;
+        cfg->trn_freinit=TRN_FREINIT_DFL;
+        cfg->trn_mweight=TRN_MWEIGHT_DFL;
         cfg->trn_max_ncov=TRN_MAX_NCOV_DFL;
         cfg->trn_max_nerr=TRN_MAX_NERR_DFL;
         cfg->trn_max_ecov=TRN_MAX_ECOV_DFL;
@@ -1132,6 +1159,9 @@ static int s_mbtrnpp_init_opts(mbtrnpp_opts_t *opts)
         opts->trn_mid=strdup(OPT_TRN_MDIR_DFL);
         opts->trn_mtype=OPT_TRN_MTYPE_DFL;
         opts->trn_ftype=OPT_TRN_FTYPE_DFL;
+        opts->trn_fgrade=OPT_TRN_FGRADE_DFL;
+        opts->trn_freinit=OPT_TRN_FREINIT_DFL;
+        opts->trn_mweight=OPT_TRN_MWEIGHT_DFL;
         opts->trn_ncov=OPT_TRN_NCOV_DFL;
         opts->trn_nerr=OPT_TRN_NERR_DFL;
         opts->trn_ecov=OPT_TRN_ECOV_DFL;
@@ -1228,6 +1258,9 @@ static int s_mbtrnpp_show_cfg(mbtrnpp_cfg_t *self, bool verbose, int indent)
         retval+=fprintf(stderr,"%*s %*s  %*ld\n",indent,(indent>0?" ":""), wkey,"trn_utm_zone",wval,self->trn_utm_zone);
         retval+=fprintf(stderr,"%*s %*s  %*d\n",indent,(indent>0?" ":""), wkey,"trn_mtype",wval,self->trn_mtype);
         retval+=fprintf(stderr,"%*s %*s  %*d\n",indent,(indent>0?" ":""), wkey,"trn_ftype",wval,self->trn_ftype);
+        retval+=fprintf(stderr,"%*s %*s  %*d\n",indent,(indent>0?" ":""), wkey,"trn_fgrade",wval,self->trn_fgrade);
+        retval+=fprintf(stderr,"%*s %*s  %*d\n",indent,(indent>0?" ":""), wkey,"trn_freinit",wval,self->trn_freinit);
+        retval+=fprintf(stderr,"%*s %*s  %*d\n",indent,(indent>0?" ":""), wkey,"trn_mweight",wval,self->trn_mweight);
         retval+=fprintf(stderr,"%*s %*s  %*.2lf\n",indent,(indent>0?" ":""), wkey,"trn_max_ncov",wval,self->trn_max_ncov);
         retval+=fprintf(stderr,"%*s %*s  %*.2lf\n",indent,(indent>0?" ":""), wkey,"trn_max_nerr",wval,self->trn_max_nerr);
         retval+=fprintf(stderr,"%*s %*s  %*.2lf\n",indent,(indent>0?" ":""), wkey,"trn_max_ecov",wval,self->trn_max_ecov);
@@ -1277,6 +1310,9 @@ static int s_mbtrnpp_show_opts(mbtrnpp_opts_t *self, bool verbose, int indent){
         retval+=fprintf(stderr,"%*s %*s  %*s\n",indent,(indent>0?" ":""), wkey,"trn-mid",wval,self->trn_mid);
         retval+=fprintf(stderr,"%*s %*s  %*d\n",indent,(indent>0?" ":""), wkey,"trn-mtype",wval,self->trn_mtype);
         retval+=fprintf(stderr,"%*s %*s  %*d\n",indent,(indent>0?" ":""), wkey,"trn-ftype",wval,self->trn_ftype);
+        retval+=fprintf(stderr,"%*s %*s  %*d\n",indent,(indent>0?" ":""), wkey,"trn-fgrade",wval,self->trn_fgrade);
+        retval+=fprintf(stderr,"%*s %*s  %*d\n",indent,(indent>0?" ":""), wkey,"trn-freinit",wval,self->trn_freinit);
+        retval+=fprintf(stderr,"%*s %*s  %*d\n",indent,(indent>0?" ":""), wkey,"trn-mweight",wval,self->trn_mweight);
         retval+=fprintf(stderr,"%*s %*s  %*.2lf\n",indent,(indent>0?" ":""), wkey,"trn-ncov",wval,self->trn_ncov);
         retval+=fprintf(stderr,"%*s %*s  %*.2lf\n",indent,(indent>0?" ":""), wkey,"trn-nerr",wval,self->trn_nerr);
         retval+=fprintf(stderr,"%*s %*s  %*.2lf\n",indent,(indent>0?" ":""), wkey,"trn-ecov",wval,self->trn_ecov);
@@ -1515,6 +1551,10 @@ static int s_parse_opt_trnout(mbtrnpp_cfg_t *cfg, char *opt_str)
             if(strcmp(tok[i],"trnu")==0){
                 // enable trn update data log
                 cfg->output_flags |= OUTPUT_TRNU_ASC;
+            }
+            if(strcmp(tok[i],"trnub")==0){
+                // enable trn update data log
+                cfg->output_flags |= OUTPUT_TRNU_BIN;
             }
             if(strcmp(tok[i],"sout")==0){
                 // enable trn update to stdout
@@ -1801,6 +1841,18 @@ static int s_mbtrnpp_kvparse_fn(char *key, char *val, void *cfg)
                 if(sscanf(val,"%d",&opts->trn_ftype)==1){
                     retval=0;
                 }
+            }else if(strcmp(key,"trn-fgrade")==0 ){
+                if(sscanf(val,"%d",&opts->trn_fgrade)==1){
+                    retval=0;
+                }
+            }else if(strcmp(key,"trn-freinit")==0 ){
+                if(sscanf(val,"%d",&opts->trn_freinit)==1){
+                    retval=0;
+                }
+            }else if(strcmp(key,"trn-mweight")==0 ){
+                if(sscanf(val,"%d",&opts->trn_mweight)==1){
+                    retval=0;
+                }
             }else if(strcmp(key,"trn-ncov")==0 ){
                 if(sscanf(val,"%lf",&opts->trn_ncov)==1){
                     retval=0;
@@ -1981,6 +2033,12 @@ static int s_mbtrnpp_configure(mbtrnpp_cfg_t *cfg, mbtrnpp_opts_t *opts)
         cfg->trn_mtype = opts->trn_mtype;
         // trn-ftype
         cfg->trn_ftype = opts->trn_ftype;
+        // trn-fgrade
+        cfg->trn_fgrade = opts->trn_fgrade;
+        // trn-freinit
+        cfg->trn_freinit = opts->trn_freinit;
+        // trn-mweight
+        cfg->trn_mweight = opts->trn_mweight;
         // trn-ncov
         cfg->trn_max_ncov = opts->trn_ncov;
         // trn-nerr
@@ -2213,6 +2271,9 @@ int main(int argc, char **argv) {
                          "\t--trn-cfg\n"
                          "\t--trn-mtype\n"
                          "\t--trn-ftype\n"
+                         "\t--trn-fgrade\n"
+                         "\t--trn-freinit\n"
+                         "\t--trn-mweight\n"
                          "\t--trn-ncov\n"
                          "\t--trn-nerr\n"
                          "\t--trn-ecov\n"
@@ -2505,7 +2566,7 @@ int main(int argc, char **argv) {
 
 #ifdef WITH_MBTNAV
 
-    trn_cfg = trncfg_new(NULL, -1, mbtrn_cfg->trn_utm_zone, mbtrn_cfg->trn_mtype, mbtrn_cfg->trn_ftype, mbtrn_cfg->trn_map_file, mbtrn_cfg->trn_cfg_file, mbtrn_cfg->trn_particles_file, mbtrn_cfg->trn_mission_id,trn_oflags,mbtrn_cfg->trn_max_ncov,mbtrn_cfg->trn_max_nerr, mbtrn_cfg->trn_max_ecov, mbtrn_cfg->trn_max_eerr);
+    trn_cfg = trncfg_new(NULL, -1, mbtrn_cfg->trn_utm_zone, mbtrn_cfg->trn_mtype, mbtrn_cfg->trn_ftype,mbtrn_cfg->trn_fgrade,mbtrn_cfg->trn_freinit,mbtrn_cfg->trn_mweight,mbtrn_cfg->trn_map_file, mbtrn_cfg->trn_cfg_file, mbtrn_cfg->trn_particles_file, mbtrn_cfg->trn_mission_id,trn_oflags,mbtrn_cfg->trn_max_ncov,mbtrn_cfg->trn_max_nerr, mbtrn_cfg->trn_max_ecov, mbtrn_cfg->trn_max_eerr);
 
     if (mbtrn_cfg->trn_enable &&  NULL!=trn_cfg ) {
         mbtrnpp_init_trn(&trn_instance,mbtrn_cfg->verbose, trn_cfg);
@@ -3913,7 +3974,7 @@ int mbtrnpp_init_debug(int verbose) {
   }
   fprintf(stderr, "%s:%d >>> MOD_MBTRNPP  en[%08X]\n", __FUNCTION__, __LINE__, mmd_get_enmask(MOD_MBTRNPP, NULL));
 
-  // open trn data log
+  // open mb1 data log
   if ( OUTPUT_FLAG_SET(OUTPUT_MB1_BIN) ) {
     mb1_blog_path = (char *)malloc(512);
     sprintf(mb1_blog_path, "%s//%s-%s%s", mbtrn_cfg->trn_log_dir, MB1_BLOG_NAME,
@@ -3923,6 +3984,7 @@ int mbtrnpp_init_debug(int verbose) {
     mlog_show(mb1_blog_id, true, 5);
     mlog_open(mb1_blog_id, flags, mode);
   }
+
   // open trn message log
   if (OUTPUT_FLAG_SET(OUTPUT_MBTRNPP_MSG) ) {
     mbtrnpp_mlog_path = (char *)malloc(512);
@@ -3934,23 +3996,34 @@ int mbtrnpp_init_debug(int verbose) {
     mlog_tprintf(mbtrnpp_mlog_id, "*** mbtrn session start ***\n");
     mlog_tprintf(mbtrnpp_mlog_id, "cmdline [%s]\n", s_mbtrnpp_cmdline_str(NULL, 0, 0, NULL, RF_NONE));
     mlog_tprintf(mbtrnpp_mlog_id, "r7kr v[%s] build[%s]\n", R7KR_VERSION_STR, LIBMFRAME_BUILD);
-
-
-      trn_ulog_path = (char *)malloc(512);
-      sprintf(trn_ulog_path, "%s//%s-%s%s", mbtrn_cfg->trn_log_dir, TRN_ULOG_NAME, s_mbtrnpp_session_str(NULL,0,RF_NONE), MBTRNPP_LOG_EXT);
-      trn_ulog_id = mlog_get_instance(trn_ulog_path, &trn_ulog_conf, TRN_ULOG_NAME);
-      fprintf(stderr,"trn update log [%s]\n",trn_ulog_path);
-      mlog_show(trn_ulog_id, true, 5);
-      mlog_open(trn_ulog_id, flags, mode);
-      mlog_tprintf(trn_ulog_id, "*** trn update session start ***\n");
-      mlog_tprintf(trn_ulog_id, "cmdline [%s]\n", s_mbtrnpp_cmdline_str(NULL, 0, 0, NULL, RF_NONE));
-      mlog_tprintf(trn_ulog_id, "r7kr v[%s] build[%s]\n", R7KR_VERSION_STR, LIBMFRAME_BUILD);
-
-  }
-  else {
+  }else{
+      // put to stderr if log disabled
     fprintf(stderr, "*** mbtrn session start ***\n");
     fprintf(stderr, "cmdline [%s]\n", s_mbtrnpp_cmdline_str(NULL, 0, 0, NULL, RF_NONE));
   }
+
+    // open trn message log
+    if (OUTPUT_FLAG_SET(OUTPUT_TRNU_ASC) ) {
+        trnu_alog_path = (char *)malloc(512);
+        sprintf(trnu_alog_path, "%s//%s-%s%s", mbtrn_cfg->trn_log_dir, TRNU_ALOG_NAME, s_mbtrnpp_session_str(NULL,0,RF_NONE), MBTRNPP_LOG_EXT);
+        trnu_alog_id = mlog_get_instance(trnu_alog_path, &trnu_alog_conf, TRNU_ALOG_NAME);
+        fprintf(stderr,"trn update log [%s]\n",trnu_alog_path);
+        mlog_show(trnu_alog_id, true, 5);
+        mlog_open(trnu_alog_id, flags, mode);
+        mlog_tprintf(trnu_alog_id, "*** trn update session start ***\n");
+        mlog_tprintf(trnu_alog_id, "cmdline [%s]\n", s_mbtrnpp_cmdline_str(NULL, 0, 0, NULL, RF_NONE));
+        mlog_tprintf(trnu_alog_id, "r7kr v[%s] build[%s]\n", R7KR_VERSION_STR, LIBMFRAME_BUILD);
+    }
+
+    if ( OUTPUT_FLAG_SET(OUTPUT_TRNU_BIN) ) {
+        trnu_blog_path = (char *)malloc(512);
+        sprintf(trnu_blog_path, "%s//%s-%s%s", mbtrn_cfg->trn_log_dir, TRNU_BLOG_NAME,
+                s_mbtrnpp_session_str(NULL,0,RF_NONE), MBTRNPP_LOG_EXT);
+        trnu_blog_id = mlog_get_instance(trnu_blog_path, &trnu_blog_conf, TRNU_BLOG_NAME);
+        fprintf(stderr,"TRNU binary log [%s]\n",trnu_blog_path);
+        mlog_show(trnu_blog_id, true, 5);
+        mlog_open(trnu_blog_id, flags, mode);
+    }
 
   app_stats = mstats_profile_new(MBTPP_EV_COUNT, MBTPP_STA_COUNT, MBTPP_CH_COUNT, mbtrnpp_stats_labels, mtime_dtime(),
                                  mbtrn_cfg->trn_status_interval_sec);
@@ -4082,7 +4155,50 @@ int mbtrnpp_trn_pub_olog(trn_update_t *update,
 
 /*--------------------------------------------------------------------*/
 
+int mbtrnpp_trn_pub_blog(trn_update_t *update,
+                             mlog_id_t log_id)
+{
+    int retval=-1;
 
+    if(NULL!=update && log_id!=MLOG_ID_INVALID){
+        retval=0;
+
+        int iobytes=0;
+        // serialize data
+        trnu_pub_t pub_data={
+            TRNU_PUB_SYNC,
+            {
+                {update->pt_dat->time,update->pt_dat->x,update->pt_dat->y,update->pt_dat->z,
+                    {update->pt_dat->covariance[0],update->pt_dat->covariance[2],update->pt_dat->covariance[5],update->pt_dat->covariance[1]}
+                },
+                {update->mle_dat->time,update->mle_dat->x,update->mle_dat->y,update->mle_dat->z,
+                    {update->mle_dat->covariance[0],update->mle_dat->covariance[2],update->mle_dat->covariance[5],update->mle_dat->covariance[1]}
+                },
+                {update->mse_dat->time,update->mse_dat->x,update->mse_dat->y,update->mse_dat->z,
+                    {update->mse_dat->covariance[0],update->mse_dat->covariance[2],update->mse_dat->covariance[5],update->mse_dat->covariance[1]}
+                }
+            },
+            update->reinit_count,
+            update->reinit_tlast,
+            update->filter_state,
+            update->success,
+            update->is_converged,
+            update->is_valid,
+            update->mb1_cycle,
+            update->ping_number,
+            update->mb1_time,
+            update->update_time
+        };
+
+        if( (iobytes=mlog_write(log_id,(byte *)&pub_data, sizeof(pub_data)))>0){
+            retval=iobytes;
+        }
+
+    }
+    return retval;
+}
+
+/*--------------------------------------------------------------------*/
 
 int mbtrnpp_trn_pub_osocket(trn_update_t *update,
                              msock_socket_t *pub_sock)
@@ -4095,8 +4211,8 @@ int mbtrnpp_trn_pub_osocket(trn_update_t *update,
         if(NULL!=update && NULL!=pub_sock){
             int iobytes=0;
             // serialize data
-            trn_offset_pub_t pub_data={
-                TRNW_PUB_SYNC,
+            trnu_pub_t pub_data={
+                TRNU_PUB_SYNC,
                 {
                     {update->pt_dat->time,update->pt_dat->x,update->pt_dat->y,update->pt_dat->z,
                         {update->pt_dat->covariance[0],update->pt_dat->covariance[2],update->pt_dat->covariance[5],update->pt_dat->covariance[1]}
@@ -4280,7 +4396,7 @@ int mbtrnpp_trn_get_bias_estimates(wtnav_t *self, wposet_t *pt, trn_update_t *ps
         }
         else {
             PMPRINT(MOD_MBTRNPP, MM_DEBUG, (stderr, "Last Meas Invalid\n"));
-            mlog_tprintf(trn_ulog_id,"ERR: last meas invalid\n");
+            mlog_tprintf(trnu_alog_id,"ERR: last meas invalid\n");
         }
         wposet_destroy(mle);
         wposet_destroy(mse);
@@ -4309,9 +4425,16 @@ int mbtrnpp_trn_publish(trn_update_t *pstate, trn_config_t *cfg)
         if( OUTPUT_FLAG_SET(OUTPUT_TRNU_ASC) ){
             MST_METRIC_START(app_stats->stats->metrics[MBTPP_CH_TRN_TRNU_LOG_XT], mtime_dtime());
 
-            mbtrnpp_trn_pub_olog(pstate, trn_ulog_id);
+            mbtrnpp_trn_pub_olog(pstate, trnu_alog_id);
 
             MST_METRIC_LAP(app_stats->stats->metrics[MBTPP_CH_TRN_TRNU_LOG_XT], mtime_dtime());
+        }
+        if( OUTPUT_FLAG_SET(OUTPUT_TRNU_BIN) ){
+            MST_METRIC_START(app_stats->stats->metrics[MBTPP_CH_TRN_TRNU_BLOG_XT], mtime_dtime());
+
+            mbtrnpp_trn_pub_blog(pstate, trnu_blog_id);
+
+            MST_METRIC_LAP(app_stats->stats->metrics[MBTPP_CH_TRN_TRNU_BLOG_XT], mtime_dtime());
         }
         if( OUTPUT_FLAG_SET(OUTPUT_TRNU_DEBUG) ){
             mbtrnpp_trn_pub_odebug(pstate);
@@ -4349,12 +4472,12 @@ int mbtrnpp_trn_update(wtnav_t *self, mb1_t *src, wposet_t **pt_out, wmeast_t **
       }
       else {
         PMPRINT(MOD_MBTRNPP, MM_DEBUG, (stderr, "wposet_mb1_to_pose failed [%d]\n", test));
-          mlog_tprintf(trn_ulog_id,"ERR: mb1_to_pose failed [%d]\n", test);
+          mlog_tprintf(trnu_alog_id,"ERR: mb1_to_pose failed [%d]\n", test);
       }
     }
     else {
       PMPRINT(MOD_MBTRNPP, MM_DEBUG, (stderr, "wmeast_mb1_to_meas failed [%d]\n", test));
-        mlog_tprintf(trn_ulog_id,"ERR: mb1_to_meas failed [%d]\n", test);
+        mlog_tprintf(trnu_alog_id,"ERR: mb1_to_meas failed [%d]\n", test);
     }
   }
 
@@ -4369,7 +4492,7 @@ int mbtrnpp_trn_process_mb1(wtnav_t *tnav, mb1_t *mb1, trn_config_t *cfg)
 
     static int mb1_count=0;
 
-    mlog_tprintf(trn_ulog_id,"trn_mb1_count,%lf,%d\n",mtime_etime(),++mb1_count);
+    mlog_tprintf(trnu_alog_id,"trn_mb1_count,%lf,%d\n",mtime_etime(),++mb1_count);
 
     // ignore if trn disabled
     if(mbtrn_cfg->trn_enable){
@@ -4418,7 +4541,7 @@ int mbtrnpp_trn_process_mb1(wtnav_t *tnav, mb1_t *mb1, trn_config_t *cfg)
             if(NULL!=tnav && NULL!=mb1 && NULL!=cfg){
                 static int process_count=0;
 
-                mlog_tprintf(trn_ulog_id,"trn_update_start,%lf,%lf,%d\n",mtime_etime(),mb1->sounding.ts,++process_count);
+                mlog_tprintf(trnu_alog_id,"trn_update_start,%lf,%lf,%d\n",mtime_etime(),mb1->sounding.ts,++process_count);
                 MST_METRIC_START(app_stats->stats->metrics[MBTPP_CH_TRN_PROC_XT], mtime_dtime());
 
                 wmeast_t *mt = NULL;
@@ -4471,18 +4594,18 @@ int mbtrnpp_trn_process_mb1(wtnav_t *tnav, mb1_t *mb1, trn_config_t *cfg)
 
                             }else{
                                 PMPRINT(MOD_MBTRNPP,MM_DEBUG,(stderr,"ERR: pt[%p] pt_dat[%p] mle_dat[%p] mse_dat[%p]\n",pt,pstate->pt_dat,pstate->mle_dat,pstate->mse_dat));
-                                mlog_tprintf(trn_ulog_id,"ERR: NULL data pt[%p] pt_dat[%p] mle_dat[%p] mse_dat[%p] ts[%.3lf] beams[%u] ping[%d] lat[%.5lf] lon[%.5lf] hdg[%.2lf] sd[%.1lf]\n",
+                                mlog_tprintf(trnu_alog_id,"ERR: NULL data pt[%p] pt_dat[%p] mle_dat[%p] mse_dat[%p] ts[%.3lf] beams[%u] ping[%d] lat[%.5lf] lon[%.5lf] hdg[%.2lf] sd[%.1lf]\n",
                                              pt,pstate->pt_dat,pstate->mle_dat,pstate->mse_dat,
                                              mb1->sounding.ts, mb1->sounding.nbeams, mb1->sounding.ping_number,
                                              mb1->sounding.lat, mb1->sounding.lon, mb1->sounding.hdg, mb1->sounding.depth);
                             }
                         }else{
-                            mlog_tprintf(trn_ulog_id,"ERR: trncli_get_bias_estimates failed [%d] [%d/%s]\n",test,errno,strerror(errno));
+                            mlog_tprintf(trnu_alog_id,"ERR: trncli_get_bias_estimates failed [%d] [%d/%s]\n",test,errno,strerror(errno));
 
                             PMPRINT(MOD_MBTRNPP,MM_DEBUG|MBTRNPP_V3,(stderr,"ERR: trn_get_bias_estimates failed [%d] [%d/%s]\n",test,errno,strerror(errno)));
                         }
                     }else{
-                        mlog_tprintf(trn_ulog_id,"ERR: trncli_send_update failed [%d] [%d/%s]\n",test,errno,strerror(errno));
+                        mlog_tprintf(trnu_alog_id,"ERR: trncli_send_update failed [%d] [%d/%s]\n",test,errno,strerror(errno));
                         PMPRINT(MOD_MBTRNPP,MM_DEBUG|MBTRNPP_V3,(stderr,"ERR: trn_update failed [%d] [%d/%s]\n",test,errno,strerror(errno)));
                     }
                     wmeast_destroy(mt);
@@ -4496,7 +4619,7 @@ int mbtrnpp_trn_process_mb1(wtnav_t *tnav, mb1_t *mb1, trn_config_t *cfg)
                 }
                 MST_METRIC_LAP(app_stats->stats->metrics[MBTPP_CH_TRN_PROC_XT], mtime_dtime());
             }// if tnav, mb1,cfg != NULL
-            mlog_tprintf(trn_ulog_id,"trn_update_end,%lf,%d\n",mtime_etime(),retval);
+            mlog_tprintf(trnu_alog_id,"trn_update_end,%lf,%d\n",mtime_etime(),retval);
         }// if do_process
     }// if trn_en
 

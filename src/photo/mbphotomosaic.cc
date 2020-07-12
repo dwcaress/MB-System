@@ -77,6 +77,7 @@ int main(int argc, char** argv)
                             "\t--standoff=standoff_target/standoff_range\n"
                             "\t--rangemax=range_max\n"
                             "\t--bounds=lonmin/lonmax/latmin/latmax | west/east/south/north\n"
+                            "\t--bounds-buffer=bounds_buffer\n"
                             "\t--correction-file=imagecorrection.yaml\n"
                             "\t--brightness-correction\n"
                             "\t--platform-file=platform.plf\n"
@@ -104,6 +105,7 @@ int main(int argc, char** argv)
     /* Output image variables */
     double  bounds[4];
     int    bounds_specified = MB_NO;
+    double bounds_buffer = 6.0;
     int    xdim = 0;
     int    ydim = 0;
     int    spacing_priority = MB_NO;
@@ -329,6 +331,7 @@ int main(int argc, char** argv)
      *    --standoff=standoff_target/standoff_range
      *    --rangemax=range_max
      *    --bounds=lonmin/lonmax/latmin/latmax | west/east/south/north
+     *    --bounds-buffer=bounds_buffer
      *    --correction-file=imagecorrection.yaml
      *    --brightness-correction
      *    --platform-file=platform.plf
@@ -364,6 +367,7 @@ int main(int argc, char** argv)
         {"standoff",                    required_argument,      NULL,         0},
         {"rangemax",                    required_argument,      NULL,         0},
         {"bounds",                      required_argument,      NULL,         0},
+        {"bounds-buffer",               required_argument,      NULL,         0},
         {"correction-file",             required_argument,      NULL,         0},
         {"brightness-correction",       no_argument,            NULL,         0},
         {"platform-file",               required_argument,      NULL,         0},
@@ -506,6 +510,12 @@ int main(int argc, char** argv)
             else if (strcmp("bounds", options[option_index].name) == 0)
                 {
                 bounds_specified = mb_get_bounds(optarg, bounds);
+                }
+
+            /* bounds-buffer */
+            else if (strcmp("bounds-buffer", options[option_index].name) == 0)
+                {
+                n = sscanf (optarg,"%lf", &bounds_buffer);
                 }
 
             /* correction-file */
@@ -667,6 +677,7 @@ int main(int argc, char** argv)
         fprintf(stream,"dbg2       Bounds: east:                %f\n",bounds[1]);
         fprintf(stream,"dbg2       Bounds: south:               %f\n",bounds[2]);
         fprintf(stream,"dbg2       Bounds: north:               %f\n",bounds[3]);
+        fprintf(stream,"dbg2       Bounds buffer:               %f\n",bounds_buffer);
         fprintf(stream,"dbg2       set_spacing:                 %d\n",set_spacing);
         fprintf(stream,"dbg2       spacing_priority:            %d\n",spacing_priority);
         fprintf(stream,"dbg2       dx_set:                      %f\n",dx_set);
@@ -717,6 +728,7 @@ int main(int argc, char** argv)
         fprintf(stream,"  Bounds: east:                %f\n",bounds[1]);
         fprintf(stream,"  Bounds: south:               %f\n",bounds[2]);
         fprintf(stream,"  Bounds: north:               %f\n",bounds[3]);
+        fprintf(stream,"  Bounds buffer:               %f\n",bounds_buffer);
         fprintf(stream,"  set_spacing:                 %d\n",set_spacing);
         fprintf(stream,"  spacing_priority:            %d\n",spacing_priority);
         fprintf(stream,"  dx_set:                      %f\n",dx_set);
@@ -1242,11 +1254,24 @@ bounds[0], bounds[1], bounds[2], bounds[3]);*/
                 }
             strcpy(units, "degrees");
             }
+
+        /* copy bounds to pbounds */
+        pbounds[0] = bounds[0];
+        pbounds[1] = bounds[1];
+        pbounds[2] = bounds[2];
+        pbounds[3] = bounds[3];
         }
 
     /* calculate other grid properties */
     dx = (bounds[1] - bounds[0])/(xdim-1);
     dy = (bounds[3] - bounds[2])/(ydim-1);
+
+    /* pbounds is used to check for images of interest using navigation
+      - expand it a little to account for image size */
+    pbounds[0] -= mtodeglon * bounds_buffer;
+    pbounds[1] += mtodeglon * bounds_buffer;
+    pbounds[2] -= mtodeglat * bounds_buffer;
+    pbounds[3] += mtodeglat * bounds_buffer;
 
     /* output information */
     if (verbose >= 1)
@@ -1641,7 +1666,7 @@ fprintf(stderr,"Done reading TopographyGridFile: %s\n", TopographyGridFile);
                     use_this_image = MB_YES;
             }
 
-            /* check navigation for location inside destination image bounds */
+            /* check navigation for location close to or inside destination image bounds */
             if (use_this_image == MB_YES) {
                 if (nnav > 0 && time_d >= ntime[0] && time_d <= ntime[nnav-1]) {
                     /* get navigation for this image */
@@ -1653,8 +1678,8 @@ fprintf(stderr,"Done reading TopographyGridFile: %s\n", TopographyGridFile);
                             ntime-1, nlat-1,
                             nnav, time_d, &navlat, &itime,
                             &error);
-                    if (navlon < bounds[0] || navlon > bounds[1]
-                        || navlat < bounds[2] || navlat > bounds[3]) {
+                    if (navlon < pbounds[0] || navlon > pbounds[1]
+                        || navlat < pbounds[2] || navlat > pbounds[3]) {
                         use_this_image = MB_NO;
                     }
                 }
@@ -2172,14 +2197,32 @@ fprintf(stderr,"Done reading TopographyGridFile: %s\n", TopographyGridFile);
 //imageUndistort.at<Vec3b>(j,i)[2],
 //r,g,b,intensityChange);
 
-                            /* find the corresponding pixel in the output image */
-                            iii = (lon - bounds[0] + 0.5 * dx) / dx;
-                            jjj = (bounds[3] - lat + 0.5 * dy) / dy;
-                            kkk = xdim * jjj + iii;
+                            /* find the location and footprint of the input pixel
+                                in the output image */
+                            if (use_projection == MB_YES) {
+                                /* pixel location */
+                                mb_proj_forward(verbose, pjptr, lon, lat, &xx, &yy, &error);
+                                iii = (xx - bounds[0] + 0.5 * dx) / dx;
+                                jjj = (bounds[3] - yy + 0.5 * dy) / dy;
+                                kkk = xdim * jjj + iii;
 
-                            /* figure out the "footprint" size of the mapped pixel */
-                            pixel_dx = 4.0 * rr * cos(DTR * theta) * tan (DTR * dtheta) * (mtodeglon / dx);
-                            pixel_dy = 4.0 * rr * cos(DTR * theta) * tan (DTR * dtheta) * (mtodeglat / dy);
+                                /* pixel footprint size */
+                                pixel_dx = 4.0 * rr * cos(DTR * theta) * tan (DTR * dtheta) / dx;
+                                pixel_dy = 4.0 * rr * cos(DTR * theta) * tan (DTR * dtheta) / dy;
+                            }
+
+                            else {
+                                /* pixel location */
+                                iii = (lon - bounds[0] + 0.5 * dx) / dx;
+                                jjj = (bounds[3] - lat + 0.5 * dy) / dy;
+                                kkk = xdim * jjj + iii;
+
+                                /* pixel footprint size */
+                                pixel_dx = 4.0 * rr * cos(DTR * theta) * tan (DTR * dtheta) * (mtodeglon / dx);
+                                pixel_dy = 4.0 * rr * cos(DTR * theta) * tan (DTR * dtheta) * (mtodeglat / dy);
+                            }
+
+                            /* figure out the "footprint" extent of the mapped pixel */
                             iii1 = iii - floor(pixel_dx);
                             iii2 = iii + floor(pixel_dx);
                             jjj1 = jjj - floor(pixel_dy);
@@ -2258,10 +2301,14 @@ fprintf(stderr,"Done reading TopographyGridFile: %s\n", TopographyGridFile);
 
         /* close the world file */
         fclose(tfp);
+
+        /* announce it */
+        fprintf(stderr, "\nOutput photomosaic: %s\n",OutputImageFile);
+
         }
     else
         {
-        printf("Could not save: %s\n",OutputImageFile);
+        fprintf(stderr, "Could not save: %s\n",OutputImageFile);
         }
 
     /* deallocate priority array */

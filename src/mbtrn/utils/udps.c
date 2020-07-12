@@ -349,6 +349,9 @@ static int s_app_main(msock_socket_t *s, app_cfg_t *cfg)
         // bind to port
         PDPRINT((stderr,"binding [%s] fd[%d]\n",cfg->host,s->fd));
         int test=0;
+        const int optionval = 1;
+        msock_set_opt(s, SO_REUSEPORT, &optionval, sizeof(optionval));
+        msock_set_opt(s, SO_REUSEADDR, &optionval, sizeof(optionval));
         if ( (test=msock_bind(s))==0) {
             uint32_t con_idx=0;
             retval=0;

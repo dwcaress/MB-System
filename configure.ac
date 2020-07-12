@@ -11,9 +11,8 @@ dnl    See README file for copying and redistribution conditions.
 dnl--------------------------------------------------------------------
 
 dnl Initialize and set version and version date
-AC_INIT([mbsystem],[5.7.6beta40],[http://listserver.mbari.org/sympa/arc/mbsystem],[mbsystem],[http://www.mbari.org/data/mbsystem/])
-AC_DEFINE(VERSION_DATE, ["7 July 2020"], [Set VERSION_DATE define in mb_config.h])
-dnl prefix=$ac_default_prefix
+AC_INIT([mbsystem],[5.7.6beta41],[http://listserver.mbari.org/sympa/arc/mbsystem],[mbsystem],[http://www.mbari.org/data/mbsystem/])
+AC_DEFINE(VERSION_DATE, ["12 July 2020"], [Set VERSION_DATE define in mb_config.h])
 
 AS_ECHO([" "])
 AS_ECHO(["------------------------------------------------------------------------------"])
@@ -110,11 +109,17 @@ AC_CANONICAL_HOST
 AS_ECHO([" "])
 AS_ECHO(["------------------------------------------------------------------------------"])
 AS_ECHO(["Configure will now attempt to construct the Makefiles required to build MB-System"])
-AS_ECHO(["MB-System Version            $PACKAGE_VERSION"])
-AS_ECHO(["HOST System Type:            ${host}"])
-AS_ECHO(["Default Installation Prefix: ${prefix}"])
+AS_ECHO(["MB-System Version               $PACKAGE_VERSION"])
+AS_ECHO(["HOST System Type:               ${host}"])
+AS_ECHO(["Specified Installation Prefix:  ${prefix}"])
+AS_ECHO(["Default Installation Prefix:    $ac_default_prefix"])
+if test $prefix == "NONE" ; then
+    prefix=$ac_default_prefix
+fi
+AS_ECHO(["Used Installation Prefix:       $prefix"])
 AS_ECHO(["------------------------------------------------------------------------------"])
 AS_ECHO([" "])
+
 
 dnl Require automake 2.69 or later
 AC_PREREQ([2.69])

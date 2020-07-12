@@ -828,15 +828,15 @@ int trnif_msg_handle_mb(void *msg, netif_t *self, msock_connection_t *peer, int 
         int32_t send_len=0;
         char *msg_out=NULL;
 
-        if(strcmp(msg,"CON")==0){
-            msg_out=strdup("ACK");
-            send_len=4;
-        }else if(strcmp(msg,"REQ")==0){
-            msg_out=strdup("ACK");
-            send_len=4;
+        if(strcmp(msg,PROTO_MB_CON)==0){
+            msg_out=strdup(PROTO_MB_ACK);
+            send_len=strlen(PROTO_MB_ACK)+1;
+        }else if(strcmp(msg,PROTO_MB_REQ)==0){
+            msg_out=strdup(PROTO_MB_ACK);
+            send_len=strlen(PROTO_MB_ACK)+1;
         }else{
-            msg_out=strdup("NACK");
-            send_len=strlen("NACK")+1;
+            msg_out=strdup(PROTO_MB_NACK);
+            send_len=strlen(PROTO_MB_NACK)+1;
         }
 
         if(send_len>0){
@@ -889,14 +889,16 @@ int trnif_msg_handle_trnu(void *msg, netif_t *self, msock_connection_t *peer, in
         int32_t send_len=0;
         char *msg_out=NULL;
 
-        if(strcmp(msg,"REQ")==0 ||
-           strcmp(msg,"CON")==0||
-            strcmp(msg,"PING")==0){
-            msg_out=strdup("ACK");
-            send_len=4;
+        if(strcmp(msg,PROTO_TRNU_REQ)==0 ||
+           strcmp(msg,PROTO_TRNU_CON)==0||
+           strcmp(msg,PROTO_TRNU_HBT)==0||
+           strcmp(msg,PROTO_TRNU_DIS)==0||
+            strcmp(msg,PROTO_TRNU_PING)==0){
+            msg_out=strdup(PROTO_TRNU_ACK);
+            send_len=strlen(PROTO_TRNU_ACK)+1;
         }else{
-            msg_out=strdup("NACK");
-            send_len=strlen("NACK")+1;
+            msg_out=strdup(PROTO_TRNU_NACK);
+            send_len=strlen(PROTO_TRNU_NACK)+1;
         }
 
         if(send_len>0){

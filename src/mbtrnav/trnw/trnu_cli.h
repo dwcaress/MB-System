@@ -1,10 +1,9 @@
 ///
-/// @file trnif_proto.h
+/// @file trnu_cli.h
 /// @authors k. headley
-/// @date 18 oct 2019
+/// @date 09 jul 2019
 
-/// TRN netif protocol
-/// trnif read, handle, pub
+/// TRN update UDP client API
 
 /// @sa doxygen-examples.c for more examples of Doxygen markup
 
@@ -15,7 +14,7 @@
 /*
  Copyright Information
   
- Copyright 2002-2019 MBARI
+ Copyright 2002-YYYY MBARI
  Monterey Bay Aquarium Research Institute, all rights reserved.
  
  Terms of Use
@@ -60,50 +59,70 @@
  required.
  */
 
-#ifndef TRNIF_PROTO_H
-#define TRNIF_PROTO_H
+// Always do this
+#ifndef TRNU_CLI_H
+#define TRNU_CLI_H
 
 /////////////////////////
 // Includes 
 /////////////////////////
 
-#include "netif.h"
 #include "trnw.h"
+#include "mb1_msg.h"
 #include "trn_msg.h"
-#include "trnif_msg.h"
 #include "mframe.h"
 #include "msocket.h"
-#include "mb1_msg.h"
+#include "medebug.h"
 
 /////////////////////////
 // Macros
 /////////////////////////
-#define MBIF_MSG_SIZE 16
-#define TRNX_MSG_SIZE 16
-
-#define PROTO_MB_CON  "CON"
-#define PROTO_MB_REQ  "REQ"
-#define PROTO_MB_ACK  "ACK"
-#define PROTO_MB_NACK "NACK"
-
-#define PROTO_TRNU_CON  "CON"
-#define PROTO_TRNU_REQ  "REQ"
-#define PROTO_TRNU_HBT  "HBT"
-#define PROTO_TRNU_PING "PING"
-#define PROTO_TRNU_DIS  "DIS"
-#define PROTO_TRNU_ACK  "ACK"
-#define PROTO_TRNU_NACK "NACK"
-
-#define PROTO_MSG_LEN(s) (strlen(s)+1)
+//#define TRNUC_WITH_STATIC
+#define TRNUC_BLK_CON(f) ( ((f&TRNUC_BLK_CON)!=0) ? true : false)
+#define TRNUC_BLK_LISTEN(f) ( ((f&TRNUC_BLK_LISTEN)!=0) ? true : false)
+#define TRNUC_CON_MSG(f) ( ((f&TRNUC_CON_MSG)!=0) ? true : false)
+#define TRNUC_MSET(pf,m) do{ if(NULL!=pf)*pf|=m; }while(0)
+#define TRNUC_MCLR(pf,m) do{ if(NULL!=pf)*pf&=~(m); }while(0)
+#define TRNUC_STR_LEN 1024
+#define TRNUC_CSV_FIELDS 41
+#define TRNUC_CSV_LINE_BYTES 512
 
 /////////////////////////
 // Type Definitions
 /////////////////////////
-// resource bundle points to
-// objects/data needed by message handlers, etc.
-typedef struct trnif_res_s{
-    wtnav_t *trn;
-}trnif_res_t;
+
+typedef enum{
+    TRNUC_BLK_CON   =0x010,
+    TRNUC_BLK_LISTEN=0x020,
+    TRNUC_CON_MSG   =0x100
+}trnuc_flags_t;
+
+typedef int (* update_callback_fn)(trnu_pub_t *update);
+
+typedef struct trnucli_s{
+    msock_connection_t *trnu;
+    trnu_pub_t *update;
+    update_callback_fn update_fn;
+    trnuc_flags_t flags;
+    double hbto;
+
+    // TODO features:
+    // callback list
+    // update list
+    // flags
+    // flag:connect message
+    // flag:block on connect
+    // flag:block on read
+    // compile:TRNUC_WITH_STATIC
+
+}trnucli_t;
+
+typedef enum{
+    TRNUC_FMT_PRETTY=0X1,
+    TRNUC_FMT_CSV=0X2,
+    TRNUC_FMT_HEX=0X4,
+    TRNUC_FMT_PRETTY_HEX=0X8
+}trnuc_fmt_t;
 
 /////////////////////////
 // Exports
@@ -112,21 +131,14 @@ typedef struct trnif_res_s{
 #ifdef __cplusplus
 extern "C" {
 #endif
-    int trnif_msg_read_ct(byte **pdest, uint32_t *len, netif_t *self, msock_connection_t *peer, int *errout);
-    int trnif_msg_handle_ct(void *msg, netif_t *self, msock_connection_t *peer, int *errout);
-    
-    int trnif_msg_read_mb(byte **pdest, uint32_t *len, netif_t *self, msock_connection_t *peer, int *errout);
-    int trnif_msg_handle_mb(void *msg, netif_t *self, msock_connection_t *peer, int *errout);
-    int trnif_msg_pub_mb(netif_t *self, msock_connection_t *peer, char *data, size_t len);
-    
-    int trnif_msg_read_trnu(byte **pdest, uint32_t *len, netif_t *self, msock_connection_t *peer, int *errout);
-    int trnif_msg_handle_trnu(void *msg, netif_t *self, msock_connection_t *peer, int *errout);
-    int trnif_msg_pub_trnu(netif_t *self, msock_connection_t *peer, char *data, size_t len);
+    trnucli_t *trnucli_new(update_callback_fn update_fn, trnuc_flags_t flags, double hbto);
+    void trnucli_destroy(trnucli_t **pself);
+    int trnucli_connect(trnucli_t *self, char *host, int port);
+    int trnucli_disconnect(trnucli_t *self);
+    int trnucli_set_callback(trnucli_t *self, update_callback_fn func);
+    int trnucli_listen(trnucli_t *self);
+    int trnucli_update_str(trnu_pub_t *self, char **dest, int len, trnuc_fmt_t fmt);
 
-    int trnif_msg_read_trnmsg(byte **pdest, uint32_t *len, netif_t *self, msock_connection_t *peer, int *errout);
-    int trnif_msg_handle_trnmsg(void *msg, netif_t *self, msock_connection_t *peer, int *errout);
-    
-    int trnif_msg_pub(netif_t *self, msock_connection_t *peer, char *data, size_t len);
 #ifdef __cplusplus
 }
 #endif

@@ -86,6 +86,23 @@
 #define TRN_FILT_PARTICLE   2
 #define TRN_FILT_BANK       3
 
+#define TRN_FILT_HIGH  1
+#define TRN_FILT_LOW   0
+
+#define TRN_FILT_REINIT_EN  1
+#define TRN_FILT_REINIT_DIS 0
+
+// 0 - No weighting modifications.
+// 1 - Shandor's original alpha modification.
+// 2 - Crossbeam with Shandor's weighting.
+// 3 - Subcloud with Shandor's original.
+// 4 - Subcloud with modified NIS always on.
+#define TRN_MWEIGHT_NONE             0
+#define TRN_MWEIGHT_SHANDOR          1
+#define TRN_MWEIGHT_CROSSBEAM        2
+#define TRN_MWEIGHT_SUBCLOUD_SHANDOR 3
+#define TRN_MWEIGHT_SUBCLOUD_NISON   4
+
 #define TRN_MAP_DEM  1
 #define TRN_MAP_BO   2
 
@@ -196,10 +213,16 @@ typedef struct pt_cdata_s{
 }pt_cdata_t;
 #pragma pack(pop)
 
-#define TRNW_PUB_PT  0
-#define TRNW_PUB_MLE 1
-#define TRNW_PUB_MSE 2
-#define TRNW_PUB_SYNC 0x53445400
+#define TRNU_EST_PT   0
+#define TRNU_EST_MLE  1
+#define TRNU_EST_MMSE 2
+#define TRNU_COV_X   0
+#define TRNU_COV_Y   1
+#define TRNU_COV_Z   2
+#define TRNU_COV_XY  3
+#define TRNU_PUB_SYNC 0x53445400
+#define TRNU_PUB_BYTES (sizeof(trnu_pub_t))
+
 #pragma pack(push,1)
 typedef struct trn_estimate_s{
     // Time (epoch s)
@@ -218,14 +241,14 @@ typedef struct trn_estimate_s{
     // [2] : z : poset.covariance[5]
     // [3] : xy: poset.covariance[1]
     double cov[4];
-}trn_estimate_t;
+}trnu_estimate_t;
 
 typedef struct trn_offset_pub_s{
     // sync bytes (see NW_PUB_SYNC)
     uint32_t sync;
     // TRN estimates
     // 0:pose_t 1:mle 2:mmse
-    trn_estimate_t est[3];
+    trnu_estimate_t est[3];
     // number of reinits
     int reinit_count;
     // time of last reinint (not implemented)
@@ -246,10 +269,9 @@ typedef struct trn_offset_pub_s{
     double mb1_time;
     // TRN update time (taken in mbtrnpp)
     double update_time;
-}trn_offset_pub_t;
+}trnu_pub_t;
 #pragma pack(pop)
 
-#define TRN_OFFSET_PUB_BYTES (sizeof(trn_offset_pub_t))
 
 typedef struct trn_update_s{
     pt_cdata_t *pt_dat;

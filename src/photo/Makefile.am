@@ -14,6 +14,6 @@ LIBS += $(top_builddir)/src/mbio/libmbio.la
 LIBS += $(top_builddir)/src/mbaux/libmbaux.la
 LIBS += ${opencv4_LIBS}
 
-mbphotomosaic_SOURCES = mbphotomosaic.cpp
-mbgetphotocorrection_SOURCES = mbgetphotocorrection.cpp
-mbphotogrammetry_SOURCES = mbphotogrammetry.cpp
+mbphotomosaic_SOURCES = mbphotomosaic.cc
+mbgetphotocorrection_SOURCES = mbgetphotocorrection.cc
+mbphotogrammetry_SOURCES = mbphotogrammetry.cc

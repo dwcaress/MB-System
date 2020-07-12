@@ -1,10 +1,10 @@
 ///
-/// @file trnif_proto.h
+/// @file mb12csv.h
 /// @authors k. headley
-/// @date 18 oct 2019
+/// @date 08 aug 2019
 
-/// TRN netif protocol
-/// trnif read, handle, pub
+/// MB1 to MB-System F71/FBT record conversion
+
 
 /// @sa doxygen-examples.c for more examples of Doxygen markup
 
@@ -15,7 +15,7 @@
 /*
  Copyright Information
   
- Copyright 2002-2019 MBARI
+ Copyright 2002-YYYY MBARI
  Monterey Bay Aquarium Research Institute, all rights reserved.
  
  Terms of Use
@@ -60,50 +60,27 @@
  required.
  */
 
-#ifndef TRNIF_PROTO_H
-#define TRNIF_PROTO_H
+// Always do this
+#ifndef MB12CSV_H
+#define MB12CSV_H
 
 /////////////////////////
 // Includes 
 /////////////////////////
 
-#include "netif.h"
-#include "trnw.h"
-#include "trn_msg.h"
-#include "trnif_msg.h"
-#include "mframe.h"
-#include "msocket.h"
-#include "mb1_msg.h"
 
 /////////////////////////
 // Macros
 /////////////////////////
-#define MBIF_MSG_SIZE 16
-#define TRNX_MSG_SIZE 16
-
-#define PROTO_MB_CON  "CON"
-#define PROTO_MB_REQ  "REQ"
-#define PROTO_MB_ACK  "ACK"
-#define PROTO_MB_NACK "NACK"
-
-#define PROTO_TRNU_CON  "CON"
-#define PROTO_TRNU_REQ  "REQ"
-#define PROTO_TRNU_HBT  "HBT"
-#define PROTO_TRNU_PING "PING"
-#define PROTO_TRNU_DIS  "DIS"
-#define PROTO_TRNU_ACK  "ACK"
-#define PROTO_TRNU_NACK "NACK"
-
-#define PROTO_MSG_LEN(s) (strlen(s)+1)
+#define MB12CSV_VERBOSE_DFL 0
+#define MB12CSV_BSWAP_DFL true
+#define MB12CSV_IFILE_DFL "./in.mb1"
+#define MB12CSV_OFILE_DFL "./out.mb71"
 
 /////////////////////////
 // Type Definitions
 /////////////////////////
-// resource bundle points to
-// objects/data needed by message handlers, etc.
-typedef struct trnif_res_s{
-    wtnav_t *trn;
-}trnif_res_t;
+
 
 /////////////////////////
 // Exports
@@ -112,21 +89,7 @@ typedef struct trnif_res_s{
 #ifdef __cplusplus
 extern "C" {
 #endif
-    int trnif_msg_read_ct(byte **pdest, uint32_t *len, netif_t *self, msock_connection_t *peer, int *errout);
-    int trnif_msg_handle_ct(void *msg, netif_t *self, msock_connection_t *peer, int *errout);
-    
-    int trnif_msg_read_mb(byte **pdest, uint32_t *len, netif_t *self, msock_connection_t *peer, int *errout);
-    int trnif_msg_handle_mb(void *msg, netif_t *self, msock_connection_t *peer, int *errout);
-    int trnif_msg_pub_mb(netif_t *self, msock_connection_t *peer, char *data, size_t len);
-    
-    int trnif_msg_read_trnu(byte **pdest, uint32_t *len, netif_t *self, msock_connection_t *peer, int *errout);
-    int trnif_msg_handle_trnu(void *msg, netif_t *self, msock_connection_t *peer, int *errout);
-    int trnif_msg_pub_trnu(netif_t *self, msock_connection_t *peer, char *data, size_t len);
 
-    int trnif_msg_read_trnmsg(byte **pdest, uint32_t *len, netif_t *self, msock_connection_t *peer, int *errout);
-    int trnif_msg_handle_trnmsg(void *msg, netif_t *self, msock_connection_t *peer, int *errout);
-    
-    int trnif_msg_pub(netif_t *self, msock_connection_t *peer, char *data, size_t len);
 #ifdef __cplusplus
 }
 #endif

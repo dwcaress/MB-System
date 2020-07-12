@@ -22,7 +22,7 @@
  *
  *
  */
-#include "mbnavadjust_icp.hpp"
+#include "mbnavadjust_icp.h"
 
 /* standard include files */
 #include <iostream>

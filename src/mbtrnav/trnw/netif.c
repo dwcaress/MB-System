@@ -226,7 +226,8 @@ static bool s_peer_idval_cmp(void *item, void *value)
 // End function s_peer_vcmp
 
 
- int netif_udp_update_connections(netif_t *self){
+ int netif_udp_update_connections(netif_t *self)
+{
     int retval=-1;
 
     msock_socket_t *socket =self->socket;
@@ -240,7 +241,7 @@ static bool s_peer_idval_cmp(void *item, void *value)
 
     // clear buffer
     memset(buf,0,NETIF_UDP_BUF_LEN);
-//    PMPRINT(MOD_NETIF,NETIF_V4,(stderr,"[UDPCON.%s]:RX n[%d]\n",self->port_name,netif_connections(self)));
+    //    PMPRINT(MOD_NETIF,NETIF_V4,(stderr,"[UDPCON.%s]:RX n[%d]\n",self->port_name,netif_connections(self)));
 
     // read client socket
     iobytes = msock_recvfrom(socket, peer->addr, buf, NETIF_UDP_BUF_LEN,0);
@@ -255,7 +256,7 @@ static bool s_peer_idval_cmp(void *item, void *value)
             break;// fall through - OK(?)
         case -1:
             if(errsave!=EAGAIN){
-            PMPRINT(MOD_NETIF,NETIF_V2,(stderr,"[UDPCON.%s]:ERR - recvfrom ret[-1] err[%d/%s]\n",self->port_name,errsave,strerror(errsave)));
+                PMPRINT(MOD_NETIF,NETIF_V2,(stderr,"[UDPCON.%s]:ERR - recvfrom ret[-1] err[%d/%s]\n",self->port_name,errsave,strerror(errsave)));
                 MST_COUNTER_INC(self->profile->stats->events[NETIF_EV_EAGAIN]);
             }
             MST_COUNTER_INC(self->profile->stats->events[NETIF_EV_ECLI_RXE]);
@@ -263,52 +264,52 @@ static bool s_peer_idval_cmp(void *item, void *value)
 
         default:
 
-                     // record arrival time
-                    connect_time= mtime_dtime();
+            // record arrival time
+            connect_time= mtime_dtime();
 
-                    // get host name info from connection
-                    int svc = msock_connection_addr2str(peer);
+            // get host name info from connection
+            int svc = msock_connection_addr2str(peer);
 
-                    PMPRINT(MOD_NETIF,NETIF_V4,(stderr,"[UDPCON.%s]:RX - ret[%d] bytes id[%s:%s]\n",
-                                                self->port_name,iobytes, peer->chost, peer->service));
+            PMPRINT(MOD_NETIF,NETIF_V4,(stderr,"[UDPCON.%s]:RX - ret[%d] bytes id[%s:%s]\n",
+                                        self->port_name,iobytes, peer->chost, peer->service));
 
-                    // update client list
-                    msock_connection_t *pcon=NULL;
+            // update client list
+            msock_connection_t *pcon=NULL;
 
 
             if( (pcon=mlist_vlookup(list,(void *)&svc,s_peer_idval_cmp))!=NULL){
-//                        fprintf(stderr,"%s - [UDPCON] found sub id[%p/%s:%s]\n",__FUNCTION__,peer,peer->chost, peer->service);
-                      // update heartbeat if client on list
-                        pcon->hbtime=connect_time;
-                   }else{
-                        PMPRINT(MOD_NETIF,NETIF_V1,(stderr,"[UDPCON.%s]:ADD_SUB - id[%p/%s:%s] idx[%zd]\n",self->port_name,peer,peer->chost, peer->service,mlist_size(list)-1));
-                        // client doesn't exist
-                        // initialize and add to list
-                        peer->id = svc;
-                        peer->heartbeat = 0;
-                        peer->hbtime = connect_time;
-                        peer->next=NULL;
-                        mlist_add(list, (void *)self->peer);
-                        // save pointer to finish up (send ACK, update hbeat)
-                        pcon=self->peer;
-                        // create a new peer for next read
-                        self->peer = msock_connection_new();
-                        mlog_tprintf(self->mlog_id,"[UDPCON.%s]:ADD_SUB - id[%p/%s:%s] n[%zd]\n",self->port_name,peer,peer->chost, peer->service,mlist_size(list));
-                       MST_COUNTER_INC(self->profile->stats->events[NETIF_EV_CLI_CONN]);
-                       MST_COUNTER_SET(self->profile->stats->status[NETIF_STA_CLI_LIST_LEN],mlist_size(self->list));
-                 }
-                    if ( (NULL!=pcon) && ( iobytes > 0) ) {
-                        fprintf(stderr,"%s - [UDPCON] handle SUB connect message (if any)\n",__FUNCTION__);
-                        int errout=0;
-                        // invoke handler (if client sent connect message)
-                        MST_METRIC_START(self->profile->stats->metrics[NETIF_CH_HANDLE_XT], mtime_dtime());
+                //                        fprintf(stderr,"%s - [UDPCON] found sub id[%p/%s:%s]\n",__FUNCTION__,peer,peer->chost, peer->service);
+                // update heartbeat if client on list
+                pcon->hbtime=connect_time;
+            }else{
+                PMPRINT(MOD_NETIF,NETIF_V1,(stderr,"[UDPCON.%s]:ADD_SUB - id[%p/%s:%s] idx[%zd]\n",self->port_name,peer,peer->chost, peer->service,mlist_size(list)-1));
+                // client doesn't exist
+                // initialize and add to list
+                peer->id = svc;
+                peer->heartbeat = 0;
+                peer->hbtime = connect_time;
+                peer->next=NULL;
+                mlist_add(list, (void *)self->peer);
+                // save pointer to finish up (send ACK, update hbeat)
+                pcon=self->peer;
+                // create a new peer for next read
+                self->peer = msock_connection_new();
+                mlog_tprintf(self->mlog_id,"[UDPCON.%s]:ADD_SUB - id[%p/%s:%s] n[%zd]\n",self->port_name,peer,peer->chost, peer->service,mlist_size(list));
+                MST_COUNTER_INC(self->profile->stats->events[NETIF_EV_CLI_CONN]);
+                MST_COUNTER_SET(self->profile->stats->status[NETIF_STA_CLI_LIST_LEN],mlist_size(self->list));
+            }
+            if ( (NULL!=pcon) && ( iobytes > 0) ) {
+                fprintf(stderr,"%s - [UDPCON] handle SUB connect message (if any)\n",__FUNCTION__);
+                int errout=0;
+                // invoke handler (if client sent connect message)
+                MST_METRIC_START(self->profile->stats->metrics[NETIF_CH_HANDLE_XT], mtime_dtime());
 
-                        if( (iobytes = self->handle_fn(buf,self,pcon,&errout))>0){
-                            MST_COUNTER_ADD(self->profile->stats->status[NETIF_STA_CLI_TX_BYTES],iobytes);
-                        }
+                if( (iobytes = self->handle_fn(buf,self,pcon,&errout))>0){
+                    MST_COUNTER_ADD(self->profile->stats->status[NETIF_STA_CLI_TX_BYTES],iobytes);
+                }
 
-                        MST_METRIC_LAP(self->profile->stats->metrics[NETIF_CH_HANDLE_XT], mtime_dtime());
-                    }
+                MST_METRIC_LAP(self->profile->stats->metrics[NETIF_CH_HANDLE_XT], mtime_dtime());
+            }
 
             break;
     }
@@ -636,7 +637,11 @@ int netif_connect(netif_t *self)
     case ST_UDP:
         self->socket = msock_socket_new(self->host, self->port, ST_UDP);
             if(NULL!=self->socket){
+                const int optionval = 1;
+                msock_set_opt(self->socket, SO_REUSEPORT, &optionval, sizeof(optionval));
+                msock_set_opt(self->socket, SO_REUSEADDR, &optionval, sizeof(optionval));
                 msock_set_blocking(self->socket,false);
+
                 if ( (test=msock_bind(self->socket))==0) {
                     PMPRINT(MOD_NETIF,MM_DEBUG,(stderr,"TRN udp socket bind OK [%s:%d]\n",self->host,self->port));
                     retval=0;
@@ -652,6 +657,9 @@ int netif_connect(netif_t *self)
         self->socket = msock_socket_new(self->host, self->port, ST_TCP);
             if(NULL!=self->socket){
                 msock_set_blocking(self->socket,false);
+                const int optionval = 1;
+                msock_set_opt(self->socket, SO_REUSEPORT, &optionval, sizeof(optionval));
+                msock_set_opt(self->socket, SO_REUSEADDR, &optionval, sizeof(optionval));
                 if ( (test=msock_bind(self->socket))==0) {
                     PMPRINT(MOD_NETIF,MM_DEBUG,(stderr,"TRN tcp socket bind OK [%s:%d]\n",self->host,self->port));
                     if ( (test=msock_listen(self->socket,NETIF_QUEUE_DFL))==0) {
