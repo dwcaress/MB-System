@@ -51,8 +51,7 @@ static int tm_clrtzval;
    passed in as an argument regardless of whether the environment
    is successfully restored to its original state.
 */
-int mbbs_rsttz(int code)
-{
+int mbbs_rsttz(int code) {
 	if (tm_callertz == TM_TZ_GMT)
 		return code;
 	if (tm_rsttzval)
@@ -76,8 +75,7 @@ int mbbs_rsttz(int code)
    routine instead. This routine sets and restores a special flag
    that turns both mbbs_setgmttz() and mbbs_rsttz() into no-ops.
 */
-int mbbs_tmparsegmttz(char *str, int tmmode, double *dtm)
-{
+int mbbs_tmparsegmttz(char *str, int tmmode, double *dtm) {
 	tm_callertz = TM_TZ_GMT;
 	const int err = mbbs_tmparse(str, tmmode, dtm);
 	tm_callertz = TM_TZ_UNKNOWN;
@@ -235,8 +233,7 @@ int mbbs_tmparse(char *str, int tmmode, double *dtm) {
    function should always be followed by a call to
    mbbs_rsttz() to undo its effect, if any.
 */
-int mbbs_setgmttz()
-{
+int mbbs_setgmttz() {
 	if (tm_callertz == TM_TZ_GMT)
 		return BS_SUCCESS;
 
@@ -279,8 +276,7 @@ int mbbs_setgmttz()
    Derive Unix calendar month (0-11) and day (1-31)
    from Unix year (real year minus 1900) and julian day (0-365).
 */
-void mbbs_jul2cal(struct tm *ts)
-{
+void mbbs_jul2cal(struct tm *ts) {
 	const int leap = mbbs_leapyr(ts);
 	ts->tm_mday = ts->tm_yday + 1;
 	for (ts->tm_mon = 0; ts->tm_mon < 12; ts->tm_mon++) {
@@ -297,8 +293,7 @@ void mbbs_jul2cal(struct tm *ts)
    Derive Unix julian day (0-365) from Unix year (real year
    minus 1900), calendar month (0-11) and day (1-31).
 */
-void mbbs_cal2jul(struct tm *ts)
-{
+void mbbs_cal2jul(struct tm *ts) {
 	const int leap = mbbs_leapyr(ts);
 	ts->tm_yday = 0;
 	for (int month = 0; month < ts->tm_mon; month++) {
@@ -313,8 +308,7 @@ void mbbs_cal2jul(struct tm *ts)
 /*
    Returns 1 if leap year, 0 otherwise.
 */
-int mbbs_leapyr(struct tm *ts)
-{
+int mbbs_leapyr(struct tm *ts) {
 	const int year = ts->tm_year + 1900;
 
 	return ((year % 4 == 0) && ((year % 100 != 0) || (year % 400 == 0)));

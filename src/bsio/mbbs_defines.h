@@ -201,12 +201,12 @@ typedef struct sns_struct {
    port or starboard side of a single ping. */
 
 typedef struct ps_struct {
-	float ps_xmitpwr; /* transmitter power (1=full) */
-	float ps_gain;    /* gain setting (units?) */
-	float ps_pulse;   /* pulse length (millisecs) */
-	float ps_bdrange; /* bottom detect range (m) */
-	int ps_btycount;  /* number of valid bathymetry samples */
-	int ps_btypad;    /* number of invalid trailing pad samples */
+	float ps_xmitpwr;   /* transmitter power (1=full) */
+	float ps_gain;      /* gain setting (units?) */
+	float ps_pulse;     /* pulse length (millisecs) */
+	float ps_bdrange;   /* bottom detect range (m) */
+	int ps_btycount;    /* number of valid bathymetry samples */
+	int ps_btypad;      /* number of invalid trailing pad samples */
 	float ps_ssxoffset; /* across-track distance (m) or, for
 	               BS_SSSLANTRNG files, time (s) to first
 	               sidescan sample */
@@ -273,16 +273,16 @@ typedef struct png_struct {
 	Sensor png_roll;        /* towfish roll (deg, where + is port down) */
 	int png_snspad;         /* number of invalid trailing pad sensor samples */
 	float png_temp;         /* water temperature (deg C) */
-	float png_ssincr; /* sidescan increment in across-track distance (m)
-	             or, for BS_SSSLANTRNG files, time (s) */
-	int png_ssyoffsetmode; /* sidescan along-track offset mode */
-	float png_alt;         /* towfish altitude (m) */
-	float png_magcorr;     /* magnetic correction (deg) */
-	float png_sndvel;      /* sound velocity (m/sec) */
-	float png_cond;        /* conductivity (siemens/m) */
-	float png_magx;        /* magnetic field x (microteslas) */
-	float png_magy;        /* magnetic field y (microteslas) */
-	float png_magz;        /* magnetic field z (microteslas) */
+	float png_ssincr;       /* sidescan increment in across-track distance (m)
+	                   or, for BS_SSSLANTRNG files, time (s) */
+	int png_ssyoffsetmode;  /* sidescan along-track offset mode */
+	float png_alt;          /* towfish altitude (m) */
+	float png_magcorr;      /* magnetic correction (deg) */
+	float png_sndvel;       /* sound velocity (m/sec) */
+	float png_cond;         /* conductivity (siemens/m) */
+	float png_magx;         /* magnetic field x (microteslas) */
+	float png_magy;         /* magnetic field y (microteslas) */
+	float png_magz;         /* magnetic field z (microteslas) */
 	PingSide png_sides[ACP_NSIDES];
 } Ping;
 

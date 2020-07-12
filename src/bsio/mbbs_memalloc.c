@@ -41,9 +41,7 @@ static key_t mem_key = (key_t)IPC_PRIVATE;
 #endif
 static const int mem_shmflag = 0666;
 
-void mbbs_memmaxalloc(unsigned long m) {
-	mem_maxallocsz = m;
-}
+void mbbs_memmaxalloc(unsigned long m) { mem_maxallocsz = m; }
 
 int mbbs_memalloc(MemType **buf, unsigned int *bufsz, unsigned int nobj, size_t objsz) {
 	if (buf == (MemType **)0)

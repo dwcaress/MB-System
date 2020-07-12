@@ -70,8 +70,7 @@
    only if the host architecture supports 8-byte (or larger) unsigned
    long long integers.
 */
-int mbbs_pngdatabufsz(Ping *png, unsigned long long *pngsz)
-{
+int mbbs_pngdatabufsz(Ping *png, unsigned long long *pngsz) {
 	if (pngsz == (unsigned long long *)0)
 		return BS_BADARG;
 
@@ -161,9 +160,9 @@ int mbbs_pngdatabufsz(Ping *png, unsigned long long *pngsz)
 	/* make sure start of starboard data/flags
 	   section is properly byte-aligned */
 	{
-	const unsigned long long k = nbytes % PNG_BYTEALIGNSZ;
-	if (k != 0)
-		nbytes += PNG_BYTEALIGNSZ - k;
+		const unsigned long long k = nbytes % PNG_BYTEALIGNSZ;
+		if (k != 0)
+			nbytes += PNG_BYTEALIGNSZ - k;
 	}
 
 	/* starboard bathymetry/sidescan data and flags */
@@ -202,8 +201,7 @@ int mbbs_pngdatabufsz(Ping *png, unsigned long long *pngsz)
    Allocates memory for ping data arrays.
    Returns a pointer to the allocated memory.
 */
-MemType *mbbs_pngmemalloc(Ping *png)
-{
+MemType *mbbs_pngmemalloc(Ping *png) {
 	if (sizeof(int) < 4)
 		return (MemType *)0;
 
@@ -229,8 +227,7 @@ MemType *mbbs_pngmemalloc(Ping *png)
    returns a pointer to the reallocated (if necessary) buffer
    into *buf and the size in bytes of the buffer into bufsz.
 */
-int mbbs_pngrealloc(Ping *png, MemType **buf, unsigned int *bufsz)
-{
+int mbbs_pngrealloc(Ping *png, MemType **buf, unsigned int *bufsz) {
 	if (sizeof(int) < 4)
 		return BS_BADARCH;
 
@@ -272,8 +269,7 @@ int mbbs_pngrealloc(Ping *png, MemType **buf, unsigned int *bufsz)
 
    Returns BS_SUCCESS or BS_BADARG.
 */
-int mbbs_getpngdataptrs(Ping *png, MemType *data, PingData *pd)
-{
+int mbbs_getpngdataptrs(Ping *png, MemType *data, PingData *pd) {
 	if (sizeof(int) < 4)
 		return BS_BADARCH;
 
@@ -356,8 +352,7 @@ int mbbs_getpngdataptrs(Ping *png, MemType *data, PingData *pd)
    Append a string to the specified string field.
    Returns BS_SUCCESS, BS_BADARG or BS_MEMALLOC.
 */
-int mbbs_appendstr(char **field, char *str)
-{
+int mbbs_appendstr(char **field, char *str) {
 	if (field == (char **)0)
 		return BS_BADARG;
 	if ((str == (char *)0) || (strlen(str) == 0))
@@ -391,8 +386,7 @@ int mbbs_appendstr(char **field, char *str)
    strings of the argument list and (iii) a trailing semicolon.
    Returns BS_SUCCESS, BS_BADARCH, BS_BADARG or BS_MEMALLOC.
 */
-int mbbs_appendlog(BSFile *bsf, char **argv)
-{
+int mbbs_appendlog(BSFile *bsf, char **argv) {
 	if (sizeof(int) < 4)
 		return BS_BADARCH;
 
@@ -449,8 +443,7 @@ int mbbs_appendlog(BSFile *bsf, char **argv)
    Copy a string to the specified string field.
    Returns BS_SUCCESS, BS_BADARG or BS_MEMALLOC.
 */
-int mbbs_replacestr(char **field, char *str)
-{
+int mbbs_replacestr(char **field, char *str) {
 	if (field == (char **)0)
 		return BS_BADARG;
 	if ((str == (char *)0) || (strlen(str) == 0)) {
@@ -488,8 +481,7 @@ int mbbs_replacestr(char **field, char *str)
    Strips all consecutive instances of c from the end of str.
    Returns BS_SUCCESS or BS_BADARG.
 */
-int mbbs_striptail(char *str, char c)
-{
+int mbbs_striptail(char *str, char c) {
 	if (str == NULL)
 		return BS_BADARG;
 	const StrSizeType len = strlen(str);
@@ -512,8 +504,7 @@ int mbbs_striptail(char *str, char c)
    User-callable routine.
    Allocates ping mark memory and sets all marks to BS_NULLMARK (i.e., 0).
 */
-void *mbbs_mrkmemalloc(int size)
-{
+void *mbbs_mrkmemalloc(int size) {
 	unsigned int bufsz = size / 2;
 	if (size % 2 != 0)
 		bufsz++;
@@ -524,8 +515,7 @@ void *mbbs_mrkmemalloc(int size)
    User-callable routine.
    Returns the ping mark value of the specified ping index.
 */
-int mbbs_mrkget(void *mrkbuf, int side, int index)
-{
+int mbbs_mrkget(void *mrkbuf, int side, int index) {
 	char *c = (char *)mrkbuf;
 	c += index / 2;
 	return ((*c >> (((index % 2) * 4) + (side * 2))) & 0x3);
@@ -535,8 +525,7 @@ int mbbs_mrkget(void *mrkbuf, int side, int index)
    User-callable routine.
    Sets the ping mark value of the specified ping index.
 */
-void mbbs_mrkset(void *mrkbuf, int side, int index, int value)
-{
+void mbbs_mrkset(void *mrkbuf, int side, int index, int value) {
 	char *c = (char *)mrkbuf;
 	c += index / 2;
 	*c &= ~(0x3 << (((index % 2) * 4) + (side * 2)));
@@ -568,10 +557,6 @@ double mbbs_nand() {
 	return d;
 }
 
-int mbbs_isnanf(float f) {
-	return isnan((double)f);
-}
+int mbbs_isnanf(float f) { return isnan((double)f); }
 
-int mbbs_isnand(double d) {
-	return isnan(d);
-}
+int mbbs_isnand(double d) { return isnan(d); }
