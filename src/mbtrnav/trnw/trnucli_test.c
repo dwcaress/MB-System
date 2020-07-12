@@ -580,8 +580,6 @@ static int s_csv_to_update(trnu_pub_t *dest, mfile_file_t *src)
 static int32_t s_fread_bin_update( trnu_pub_t *dest, mfile_file_t *src)
 {
     int32_t retval=-1;
-    fprintf(stderr,"WARN - %s: not implemented\n",__func__);
-    return retval;
 
     if(NULL!=src && NULL!=dest){
 
@@ -594,13 +592,13 @@ static int32_t s_fread_bin_update( trnu_pub_t *dest, mfile_file_t *src)
 
         // find sync pattern
         while(mfile_seek(src,0,MFILE_CUR) < fsize){
-            if(mfile_read(src,(byte *)bp,readlen)==readlen && *bp=='\x53' ){
+            if(mfile_read(src,(byte *)bp,readlen)==readlen && *bp=='\x00' ){
                 bp++;
-                if(mfile_read(src,(byte *)bp,readlen)==readlen && *bp=='\x44'){
+                if(mfile_read(src,(byte *)bp,readlen)==readlen && *bp=='\x54'){
                     bp++;
-                    if(mfile_read(src,(byte *)bp,readlen)==readlen && *bp=='\x54'){
+                    if(mfile_read(src,(byte *)bp,readlen)==readlen && *bp=='\x44'){
                         bp++;
-                        if(mfile_read(src,(byte *)bp,readlen)==readlen && *bp=='\x00'){
+                        if(mfile_read(src,(byte *)bp,readlen)==readlen && *bp=='\x53'){
                             record_bytes+=readlen;
                             bp++;
                             readlen=TRNU_PUB_BYTES-4;
