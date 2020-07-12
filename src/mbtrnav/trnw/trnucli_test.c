@@ -696,7 +696,6 @@ static int s_trnucli_test_trnu(app_cfg_t *cfg)
     	trnucli_set_callback(dcli,s_update_callback);
     }
     while(!g_interrupt){
-        int test=-1;
         if( (test=trnucli_listen(dcli))==0){
 
             // could call handler or handle here
