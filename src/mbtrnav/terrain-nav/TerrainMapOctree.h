@@ -16,38 +16,40 @@ Several of these functions are DEM specific, and are included here only to stand
 class TerrainMapOctree : public TerrainMap{
 	public:
 		double GetRangeError(double& mapVariance, const double* const startPoint, const double* const directionVector, double expectedDistance);
-		//double QueryMap(const double[3] queryPoint);
-		
-		
+
+#ifdef WITH_QUERYMAP
+		double QueryMap(const double[3] queryPoint);
+#endif
+
 		TerrainMapOctree(const char* mapName);
 		~TerrainMapOctree();
-		
-		//int loadSubMap(const double xcen, const double ycen, double* mapWidth) { return MAPBOUNDS_OK; }
+
 		int loadSubMap(const double xcen, const double ycen, double* mapWidth,
 			       double vehN, double vehE);
 
 		bool initializeTiles(const char* mapName);
 		bool tileLoadTest();
-		
+
 		bool withinRefMap(const double northPos, const double eastPos);
 		bool withinValidMapRegion(const double north, const double east);
 		bool withinSubMap(const double northPos, const double eastPos);
-		
+
 		void setLowResMap(const char* mapName){};//for Octrees, this is a no-op
 		bool GetMapT(mapT& currMap);
 		bool GetMapBounds(double* currMapBounds);
-		
+
 		double Getdx(void){ return OctreeMap->GetTrueResolution().x; }
 		double Getdy(void){ return OctreeMap->GetTrueResolution().y; }
 
-		
+
 	private:
 		//Octree<PlanarFitNode> OctreeMap;
-		Octree<bool> *OctreeMap;
 		//Octree<bool> OctreeMap1;
 		//Octree<bool> OctreeMap2;
 		// Center values not used in this iteration
 		//double northingCenter_, eastEastingCenter_, westEastingCenter_;
+
+		Octree<bool> *OctreeMap;
 		int numTiles_, minDistTile_, lastMinDistTile_;
 
 		struct MapTile

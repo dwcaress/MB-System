@@ -138,11 +138,12 @@ measUpdate(measT& currMeas) {
 		successfulMeas = projectMeasVF(beamsVF, currMeas, beamIndices);
 	}
 
-	logs(TL_OMASK(TL_TNAV_PARTICLE_FILTER, TL_LOG),"TNavPF::Measurements Projected \n");
-	logs(TL_OMASK(TL_TNAV_PARTICLE_FILTER, TL_LOG),"TNavPF::Beam Correspondences %i %i %i %i %i %i %i %i %i %i %i\n",
-	beamIndices[0], beamIndices[1], beamIndices[2], beamIndices[3], beamIndices[4],
-	beamIndices[5], beamIndices[6], beamIndices[7], beamIndices[8], beamIndices[9], beamIndices[10] );
-
+	logs(TL_OMASK(TL_TNAV_PARTICLE_FILTER, TL_LOG),
+		"TNavPF::Measurements Projected, beam correspondences:");
+	for (int i=0; i<currMeas.numMeas; i++) {
+		logs(TL_OMASK(TL_TNAV_PARTICLE_FILTER, TL_LOG),
+			"TNavPF:: beamIndex[%i] = %i", i, beamIndices[i]);
+	}
 	logs(TL_OMASK(TL_TNAV_PARTICLE_FILTER, TL_LOG), "TNavPF:: *** beamsVF.Ncols() = %d ***", beamsVF.Ncols());
 	logs(TL_OMASK(TL_TNAV_PARTICLE_FILTER, TL_LOG), "TNavPF:: *** currMeas.numMeas = %d ***", currMeas.numMeas);
 
