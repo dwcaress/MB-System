@@ -1,4 +1,4 @@
-#include "mbnavadjust_icp.hpp"
+#include "mbnavadjust_icp.h"
 
 /* C++ include files */
 #include <iostream>

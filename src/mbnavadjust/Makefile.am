@@ -51,8 +51,8 @@ mbnavadjust_SOURCES += mbnavadjust_util.c
 mbnavadjustmerge_SOURCES = mbnavadjustmerge.c mbnavadjust_io.c mbnavadjust_io.h
 
 mbnavadjustfine_SOURCES =
-mbnavadjustfine_SOURCES += mbnavadjust_fine.cpp
-mbnavadjustfine_SOURCES += mbnavadjust_icp.cpp
-mbnavadjustfine_SOURCES += mbnavadjust_icp.hpp
+mbnavadjustfine_SOURCES += mbnavadjust_fine.cc
+mbnavadjustfine_SOURCES += mbnavadjust_icp.cc
+mbnavadjustfine_SOURCES += mbnavadjust_icp.h
 mbnavadjustfine_SOURCES += mbnavadjust_io.c
 mbnavadjustfine_SOURCES += mbnavadjust_io.h

@@ -306,7 +306,6 @@ struct MBSWATH_CTRL {
 	} Z;
 };
 
-
 void *New_mbswath_Ctrl(struct GMT_CTRL *GMT) { /* Allocate and initialize a new control structure */
 	int verbose = 0;
 	double dummybounds[4];
@@ -319,8 +318,8 @@ void *New_mbswath_Ctrl(struct GMT_CTRL *GMT) { /* Allocate and initialize a new 
 
 	/* get current mb default values */
 	// int status =
-	mb_defaults(verbose, &dummyformat, &dummypings, &Ctrl->L.lonflip, dummybounds, Ctrl->b.time_i, Ctrl->e.time_i,
-	                     &Ctrl->S.speed, &Ctrl->T.timegap);
+	mb_defaults(verbose, &dummyformat, &dummypings, &Ctrl->L.lonflip, dummybounds, Ctrl->b.time_i, Ctrl->e.time_i, &Ctrl->S.speed,
+	            &Ctrl->T.timegap);
 
 	Ctrl->A.factor = 1.0;
 	Ctrl->A.mode = MBSWATH_FOOTPRINT_REAL;
@@ -411,8 +410,8 @@ int GMT_mbswath_usage(struct GMTAPI_CTRL *API, int level) {
 	GMT_Message(API, GMT_TIME_NONE, "\t[-S<speed>] [-T<timegap>] [-W] [-Z<mode>]\n");
 	GMT_Message(API, GMT_TIME_NONE, "\t[%s] [-T] [%s] [%s]\n", GMT_Rgeo_OPT, GMT_U_OPT, GMT_V_OPT);
 #if GMT_MAJOR_VERSION >= 6
-	GMT_Message(API, GMT_TIME_NONE, "\t[%s] [%s] [%s]\n\t[%s]\n\t[%s] [%s]\n\n", GMT_X_OPT, GMT_Y_OPT, GMT_f_OPT,
-	            GMT_n_OPT, GMT_p_OPT, GMT_t_OPT);
+	GMT_Message(API, GMT_TIME_NONE, "\t[%s] [%s] [%s]\n\t[%s]\n\t[%s] [%s]\n\n", GMT_X_OPT, GMT_Y_OPT, GMT_f_OPT, GMT_n_OPT,
+	            GMT_p_OPT, GMT_t_OPT);
 #else
 	GMT_Message(API, GMT_TIME_NONE, "\t[%s] [%s] [%s] [%s]\n\t[%s]\n\t[%s] [%s]\n\n", GMT_X_OPT, GMT_Y_OPT, GMT_c_OPT, GMT_f_OPT,
 	            GMT_n_OPT, GMT_p_OPT, GMT_t_OPT);
@@ -475,7 +474,7 @@ int GMT_mbswath_parse(struct GMT_CTRL *GMT, struct MBSWATH_CTRL *Ctrl, struct GM
 			}
 			break;
 
-		/* Processes program-specific parameters */
+			/* Processes program-specific parameters */
 
 		case 'A': /* footprint controls */
 			n = sscanf(opt->arg, "%lf/%d/%lf", &(Ctrl->A.factor), &(Ctrl->A.mode), &(Ctrl->A.depth));
@@ -758,7 +757,7 @@ int mbswath_get_footprints(int verbose, struct MBSWATH_CTRL *Ctrl, int *error) {
 	double dlat1, dlat2;
 	double x, y;
 	double ddlonx, ddlaty;
-	static double dddepth = 0.0;  // TODO(schwehr): Why static?
+	static double dddepth = 0.0; // TODO(schwehr): Why static?
 	bool setprint;
 
 	/* loop over the inner beams and get
@@ -1875,8 +1874,8 @@ int GMT_mbswath(void *V_API, int mode, void *args) {
 
 	static const char program_name[] = "mbswath";
 	//	char help_message[] =  "mbswath is a GMT compatible utility which creates a color postscript \nimage of swath bathymetry
-	//or backscatter data.  The image \nmay be shaded relief as well.  Complete maps are made by using \nMBSWATH in conjunction
-	//with the usual GMT programs."; 	char usage_message[] = "mbswath -Ccptfile -Jparameters -Rwest/east/south/north
+	// or backscatter data.  The image \nmay be shaded relief as well.  Complete maps are made by using \nMBSWATH in conjunction
+	// with the usual GMT programs."; 	char usage_message[] = "mbswath -Ccptfile -Jparameters -Rwest/east/south/north
 	//\n\t[-Afactor -Btickinfo -byr/mon/day/hour/min/sec \n\t-ccopies -Dmode/ampscale/ampmin/ampmax \n\t-Eyr/mon/day/hour/min/sec
 	//-fformat \n\t-Fred/green/blue -Gmagnitude/azimuth -Idatalist \n\t-K -Ncptfile -O -P -ppings -Qdpi -Ttimegap -U -W -Xx-shift
 	//-Yy-shift \n\t-Zmode[F] -V -H]";
@@ -1926,7 +1925,7 @@ int GMT_mbswath(void *V_API, int mode, void *args) {
 	if (options->option == GMT_OPT_SYNOPSIS)
 		bailout(GMT_mbswath_usage(API, GMT_SYNOPSIS)); /* Return the synopsis */
 
-	/* Parse the command-line arguments */
+		/* Parse the command-line arguments */
 
 #if GMT_MAJOR_VERSION >= 6 && GMT_MINOR_VERSION >= 1
 	GMT = gmt_init_module(API, THIS_MODULE_LIB, THIS_MODULE_NAME, "", "", NULL, &options, &GMT_cpy); /* Save current state */
@@ -1935,7 +1934,7 @@ int GMT_mbswath(void *V_API, int mode, void *args) {
 #else
 	GMT = gmt_begin_module(API, THIS_MODULE_LIB, THIS_MODULE_NAME, &GMT_cpy); /* Save current state */
 #endif
-  if (GMT_Parse_Common(API, GMT_PROG_OPTIONS, options))
+	if (GMT_Parse_Common(API, GMT_PROG_OPTIONS, options))
 		Return(API->error);
 	Ctrl = (struct MBSWATH_CTRL *)New_mbswath_Ctrl(GMT); /* Allocate and initialize a new control structure */
 	if ((error = GMT_mbswath_parse(GMT, Ctrl, options)))
@@ -2103,7 +2102,7 @@ int GMT_mbswath(void *V_API, int mode, void *args) {
 		fprintf(stderr, "\n");
 	while (read_data) {
 		/* check for mbinfo file - get file bounds if possible */
-	  bool file_in_bounds = false;
+		bool file_in_bounds = false;
 		status = mb_check_info(verbose, file, Ctrl->L.lonflip, Ctrl->bounds, &file_in_bounds, &error);
 		if (status == MB_FAILURE) {
 			file_in_bounds = true;

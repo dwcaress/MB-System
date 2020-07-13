@@ -20,6 +20,7 @@ include "beta" in the tag name are preliminary and generally not announced.
 Distributions that do not include "beta" in the tag name correspond to the major,
 announced releases. The source distributions associated with all releases, major or beta, are equally accessible as tarballs through the Github interface.
 
+- Version 5.7.6beta41    July 12, 2020
 - Version 5.7.6beta40    July 7, 2020
 - Version 5.7.6beta38    June 8, 2020
 - Version 5.7.6beta37    May 26, 2020
@@ -349,6 +350,18 @@ announced releases. The source distributions associated with all releases, major
 --
 ### MB-System Version 5.7 Release Notes:
 --
+
+#### 5.7.6beta41 (July 12, 2020)
+
+Mblist: Fixed bug in which output in the CDL format was broken, which in turn
+broke output in netCDF.
+
+Mbphotomosaic: Fixed generation of photomosaics in projected coordinate systems
+(e.g. UTM).
+
+Mbphotomosaic, mbgetphotocorrection, mbphotogrammetry: Changed source file names
+from the \*.cpp suffix to the \*.cc suffix to be consistent with other C++ source
+files in MB-System.
 
 #### 5.7.6beta40 (July 7, 2020)
 

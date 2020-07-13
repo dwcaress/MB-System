@@ -838,9 +838,11 @@ int main(int argc, char** argv)
     /* read intrinsic and extrinsic stereo camera calibration parameters */
     if (use_calibration == MB_YES)
         {
-fprintf(stderr, "%s:%d:%s: \n", __FILE__, __LINE__, __func__);
+        if (verbose > 0) {
+        fprintf(stream,"\nAbout to read stereo camera calibration file: %s\n",StereoCameraCalibrationFile);
+
+        }
         fstorage.open(StereoCameraCalibrationFile, FileStorage::READ);
-fprintf(stderr, "%s:%d:%s: \n", __FILE__, __LINE__, __func__);
         if(fstorage.isOpened() )
             {
             fstorage["M1"] >> cameraMatrix[0];
@@ -1498,6 +1500,23 @@ fprintf(stderr, "%s:%d:%s: no algorithm\n", __FILE__, __LINE__, __func__);
                     stereoRectify( cameraMatrix[0], distCoeffs[0], cameraMatrix[1], distCoeffs[1], imageSize[0], R, T, R1, R2, P1, P2, Q, CALIB_ZERO_DISPARITY, -1, imageSize[0], &roi1, &roi2 );
                     initUndistortRectifyMap(cameraMatrix[0], distCoeffs[0], R1, P1, imageSize[0], CV_16SC2, map11, map12);
                     initUndistortRectifyMap(cameraMatrix[1], distCoeffs[1], R2, P2, imageSize[1], CV_16SC2, map21, map22);
+
+                    /* print out calibration values */
+                    if (verbose > 0)
+                        {
+                        fprintf(stderr,"\nStereo Camera Calibration Parameters:\n");
+                        cerr << "M1:" << endl << cameraMatrix[0] << endl << endl;
+                        cerr << "D1:" << endl << distCoeffs[0] << endl << endl;
+                        cerr << "M2:" << endl << cameraMatrix[1] << endl << endl;
+                        cerr << "D2:" << endl << distCoeffs[1] << endl << endl;
+                        cerr << "R:" << endl << R << endl << endl;
+                        cerr << "T:" << endl << T << endl << endl;
+                        cerr << "R1:" << endl << R1 << endl << endl;
+                        cerr << "R2:" << endl << R2 << endl << endl;
+                        cerr << "P1:" << endl << P1 << endl << endl;
+                        cerr << "P2:" << endl << P2 << endl << endl;
+                        cerr << "Q:" << endl << Q << endl << endl;
+                        }
                 }
             }
 

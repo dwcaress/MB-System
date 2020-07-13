@@ -88,7 +88,6 @@ int main(int argc, char** argv)
                             "\t--use-left-camera\n"
                             "\t--use-right-camera\n"
                             "\t--use-both-cameras\n"
-                            "\t--show-image\n"
                             "\t--calibration-file=file\n"
                             "\t--navigation-file=file\n"
                             "\t--tide-file=file\n"
@@ -298,7 +297,6 @@ int main(int argc, char** argv)
      *         --use-left-camera
      *         --use-right-camera
      *         --use-both-cameras
-     *         --show-image
      *
      *         --calibration-file=file
      *         --navigation-file=file
@@ -328,7 +326,6 @@ int main(int argc, char** argv)
         {"use-left-camera",           no_argument,        NULL, 0},
         {"use-right-camera",          no_argument,        NULL, 0},
         {"use-both-cameras",          no_argument,        NULL, 0},
-        {"show-image",                no_argument,        NULL, 0},
         {"calibration-file",          required_argument,  NULL, 0},
         {"navigation-file",           required_argument,  NULL, 0},
         {"tide-file",                 required_argument,  NULL, 0},

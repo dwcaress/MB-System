@@ -360,8 +360,8 @@ struct MBGRDTIFF_CTRL {
 	} M;
 	struct Nudge { /* -N<nudge_x>/<nudge_y> */
 		bool active;
-    double nudge_x;
-    double nudge_y;
+		double nudge_x;
+		double nudge_y;
 	} Nudge;
 	struct mbO { /* -O */
 		bool active;
@@ -463,7 +463,7 @@ static int GMT_mbgrdtiff_parse(struct GMT_CTRL *GMT, struct MBGRDTIFF_CTRL *Ctrl
 				n_errors++;
 			break;
 
-		/* Processes program-specific parameters */
+			/* Processes program-specific parameters */
 
 		case 'C': /* CPT file */
 			Ctrl->C.active = true;
@@ -496,10 +496,11 @@ static int GMT_mbgrdtiff_parse(struct GMT_CTRL *GMT, struct MBGRDTIFF_CTRL *Ctrl
 			Ctrl->M.active = true;
 			break;
 		case 'N': /* -N<nudge_x>/<nudge_y> Offset location of image by
-                  nudge_x meters east and nudge_y meters north */
+		          nudge_x meters east and nudge_y meters north */
 			if (sscanf(opt->arg, "%lf/%lf", &Ctrl->Nudge.nudge_x, &Ctrl->Nudge.nudge_y) == 2) {
 				Ctrl->Nudge.active = true;
-			} else {
+			}
+			else {
 				Ctrl->Nudge.active = false;
 			}
 			break;
@@ -523,59 +524,59 @@ static int GMT_mbgrdtiff_parse(struct GMT_CTRL *GMT, struct MBGRDTIFF_CTRL *Ctrl
 	return (n_errors ? GMT_PARSE_ERROR : GMT_OK);
 }
 
-GMT_LOCAL struct GMT_IMAGE * mbgrdtiff_get_image (struct GMTAPI_CTRL *API, struct MBGRDTIFF_CTRL *Ctrl) {
+GMT_LOCAL struct GMT_IMAGE *mbgrdtiff_get_image(struct GMTAPI_CTRL *API, struct MBGRDTIFF_CTRL *Ctrl) {
 	/* use options to call grdimage -A and return the image back to the calling environment */
 	char the_image[GMT_VF_LEN] = {""}, cmd[GMT_LEN256] = {""};
 	struct GMT_IMAGE *I = NULL;
 
 	/* Create grdimage command string */
 
-	if (GMT_Open_VirtualFile (API, GMT_IS_IMAGE, GMT_IS_SURFACE, GMT_OUT, NULL, the_image)) {
-		GMT_Report (API, GMT_MSG_ERROR, "Unable to create an output image reference\n");
+	if (GMT_Open_VirtualFile(API, GMT_IS_IMAGE, GMT_IS_SURFACE, GMT_OUT, NULL, the_image)) {
+		GMT_Report(API, GMT_MSG_ERROR, "Unable to create an output image reference\n");
 		return NULL;
 	}
 
-	sprintf (cmd, "-A%s", the_image);
+	sprintf(cmd, "-A%s", the_image);
 	for (unsigned int k = 0; k < Ctrl->I.n_files; k++) {
-		strcat (cmd, " ");
-		strcat (cmd, Ctrl->I.file[k]);
+		strcat(cmd, " ");
+		strcat(cmd, Ctrl->I.file[k]);
 	}
 	if (Ctrl->C.active) {
-		strcat (cmd, " -C");
-		strcat (cmd, Ctrl->C.arg);
+		strcat(cmd, " -C");
+		strcat(cmd, Ctrl->C.arg);
 	}
 	if (Ctrl->E.active) {
-		strcat (cmd, " -E");
-		strcat (cmd, Ctrl->E.arg);
+		strcat(cmd, " -E");
+		strcat(cmd, Ctrl->E.arg);
 	}
 	if (Ctrl->G.active) {
-		strcat (cmd, " -G");
-		strcat (cmd, Ctrl->G.arg);
+		strcat(cmd, " -G");
+		strcat(cmd, Ctrl->G.arg);
 	}
 	if (Ctrl->Intensity.active) {
-		strcat (cmd, " -I");
-		strcat (cmd, Ctrl->Intensity.arg);
+		strcat(cmd, " -I");
+		strcat(cmd, Ctrl->Intensity.arg);
 	}
 	if (API->GMT->common.J.active) {
-		strcat (cmd, " -J");
-		strcat (cmd, API->GMT->common.J.string);
+		strcat(cmd, " -J");
+		strcat(cmd, API->GMT->common.J.string);
 	}
 	if (Ctrl->M.active)
-		strcat (cmd, " -M");
+		strcat(cmd, " -M");
 	if (Ctrl->Q.active)
-		strcat (cmd, " -Q");
+		strcat(cmd, " -Q");
 	if (API->GMT->common.R.active[RSET]) {
-		strcat (cmd, " -R");
-		strcat (cmd, API->GMT->common.R.string);
+		strcat(cmd, " -R");
+		strcat(cmd, API->GMT->common.R.string);
 	}
 
-	GMT_Report (API, GMT_MSG_INFORMATION, "Calling grdimage with args %s\n", cmd);
-	if (GMT_Call_Module (API, "grdimage", GMT_MODULE_CMD, cmd))
+	GMT_Report(API, GMT_MSG_INFORMATION, "Calling grdimage with args %s\n", cmd);
+	if (GMT_Call_Module(API, "grdimage", GMT_MODULE_CMD, cmd))
 		return NULL;
 	/* Obtain the data from the virtual file */
-	if ((I = GMT_Read_VirtualFile (API, the_image)) == NULL)
+	if ((I = GMT_Read_VirtualFile(API, the_image)) == NULL)
 		return NULL;
-	GMT_Close_VirtualFile (API, the_image);
+	GMT_Close_VirtualFile(API, the_image);
 
 	return (I);
 }
@@ -613,7 +614,7 @@ int GMT_mbgrdtiff(void *V_API, int mode, void *args) {
 	int keyindex;
 
 	double mtodeglon, mtodeglat;
-  unsigned short value_short;
+	unsigned short value_short;
 	int value_int;
 	double value_double;
 	size_t write_size;
@@ -643,14 +644,14 @@ int GMT_mbgrdtiff(void *V_API, int mode, void *args) {
 	if (options->option == GMT_OPT_SYNOPSIS)
 		bailout(GMT_mbgrdtiff_usage(API, GMT_SYNOPSIS)); /* Return the synopsis */
 
-	/* Parse the command-line arguments */
+		/* Parse the command-line arguments */
 
 #if GMT_MAJOR_VERSION >= 6
 	GMT = gmt_init_module(API, THIS_MODULE_LIB, THIS_MODULE_NAME, "", "", NULL, &options, &GMT_cpy); /* Save current state */
 #else
 	GMT = gmt_begin_module(API, THIS_MODULE_LIB, THIS_MODULE_NAME, &GMT_cpy); /* Save current state */
 #endif
-  if (GMT_Parse_Common(API, GMT_PROG_OPTIONS, options))
+	if (GMT_Parse_Common(API, GMT_PROG_OPTIONS, options))
 		Return(API->error);
 	Ctrl = New_mbgrdtiff_Ctrl(GMT); /* Allocate and initialize a new control structure */
 	if ((error = GMT_mbgrdtiff_parse(GMT, Ctrl, options)))
@@ -658,15 +659,14 @@ int GMT_mbgrdtiff(void *V_API, int mode, void *args) {
 
 	/*---------------------------- This is the mbgrdtiff main code ----------------------------*/
 
-
-	if ((Image = mbgrdtiff_get_image (API, Ctrl)) == NULL) {
-		GMT_Report (API, GMT_MSG_ERROR, "Unable to create an output image reference\n");
-		Return (API->error);
+	if ((Image = mbgrdtiff_get_image(API, Ctrl)) == NULL) {
+		GMT_Report(API, GMT_MSG_ERROR, "Unable to create an output image reference\n");
+		Return(API->error);
 	}
 
-	header_work = Image->header;	/* Final image projected header */
-	tiff_image  = Image->data;		/* Final 1 or 3-band image */
-	image_size  = header_work->nm * header_work->n_bands;
+	header_work = Image->header; /* Final image projected header */
+	tiff_image = Image->data;    /* Final 1 or 3-band image */
+	image_size = header_work->nm * header_work->n_bands;
 
 	/*------------------------- Write out the GeoTiff and world files -------------------------*/
 
@@ -702,24 +702,25 @@ int GMT_mbgrdtiff(void *V_API, int mode, void *args) {
 		projectionid = GCS_WGS_84;
 	}
 
-  /* apply shift or "nudge" to grid bounds so that the GeoTiff location is shifted
-      as desired - the nudge_x and nudge_y values are defined in meters and must
-      be translated to the image bounds coordinates */
-  if (Ctrl->Nudge.active == true) {
-    /* geographic coordinates so convert Ctrl->Nudge.nudge_x and Ctrl->Nudge.nudge_y to degrees lon and lat */
-    if (modeltype == ModelTypeGeographic) {
-      mb_coor_scale(0, 0.5 * (header_work->wesn[YLO] + header_work->wesn[YHI]), &mtodeglon, &mtodeglat);
-      header_work->wesn[XLO] += Ctrl->Nudge.nudge_x * mtodeglon;
-      header_work->wesn[XHI] += Ctrl->Nudge.nudge_x * mtodeglon;
-      header_work->wesn[YLO] += Ctrl->Nudge.nudge_y * mtodeglat;
-      header_work->wesn[YHI] += Ctrl->Nudge.nudge_y * mtodeglat;
-    } else {
-      header_work->wesn[XLO] += Ctrl->Nudge.nudge_x;
-      header_work->wesn[XHI] += Ctrl->Nudge.nudge_x;
-      header_work->wesn[YLO] += Ctrl->Nudge.nudge_y;
-      header_work->wesn[YHI] += Ctrl->Nudge.nudge_y;
-    }
-  }
+	/* apply shift or "nudge" to grid bounds so that the GeoTiff location is shifted
+	    as desired - the nudge_x and nudge_y values are defined in meters and must
+	    be translated to the image bounds coordinates */
+	if (Ctrl->Nudge.active == true) {
+		/* geographic coordinates so convert Ctrl->Nudge.nudge_x and Ctrl->Nudge.nudge_y to degrees lon and lat */
+		if (modeltype == ModelTypeGeographic) {
+			mb_coor_scale(0, 0.5 * (header_work->wesn[YLO] + header_work->wesn[YHI]), &mtodeglon, &mtodeglat);
+			header_work->wesn[XLO] += Ctrl->Nudge.nudge_x * mtodeglon;
+			header_work->wesn[XHI] += Ctrl->Nudge.nudge_x * mtodeglon;
+			header_work->wesn[YLO] += Ctrl->Nudge.nudge_y * mtodeglat;
+			header_work->wesn[YHI] += Ctrl->Nudge.nudge_y * mtodeglat;
+		}
+		else {
+			header_work->wesn[XLO] += Ctrl->Nudge.nudge_x;
+			header_work->wesn[XHI] += Ctrl->Nudge.nudge_x;
+			header_work->wesn[YLO] += Ctrl->Nudge.nudge_y;
+			header_work->wesn[YHI] += Ctrl->Nudge.nudge_y;
+		}
+	}
 
 	/* Google Earth Pro requires GeoTiffs longitude to be in -180 to +180 domain
 	 * make sure geographic images have the origin in the right domain unless
@@ -1089,14 +1090,14 @@ int GMT_mbgrdtiff(void *V_API, int mode, void *args) {
 	}
 
 	/* write out world file contents */
-	fprintf(tfp, "%.9f\r\n0.0\r\n0.0\r\n%.9f\r\n%.9f\r\n%.9f\r\n", header_work->inc[GMT_X], -header_work->inc[GMT_Y], header_work->wesn[XLO] - 0.5 * header_work->inc[GMT_X],
-	        header_work->wesn[YHI] + 0.5 * header_work->inc[GMT_Y]);
+	fprintf(tfp, "%.9f\r\n0.0\r\n0.0\r\n%.9f\r\n%.9f\r\n%.9f\r\n", header_work->inc[GMT_X], -header_work->inc[GMT_Y],
+	        header_work->wesn[XLO] - 0.5 * header_work->inc[GMT_X], header_work->wesn[YHI] + 0.5 * header_work->inc[GMT_Y]);
 
 	/* close the world file */
 	fclose(tfp);
 	fprintf(stderr, "3 Work header:\n\tnx:%d ny:%d registration:%d\n\tWESN: %f %f %f %f\n\tinc: %f %f\n", header_work->n_columns,
-	        header_work->n_rows, header_work->registration, header_work->wesn[XLO], header_work->wesn[XHI], header_work->wesn[YLO],
-	        header_work->wesn[YHI], header_work->inc[0], header_work->inc[1]);
+	        header_work->n_rows, header_work->registration, header_work->wesn[XLO], header_work->wesn[XHI],
+	        header_work->wesn[YLO], header_work->wesn[YHI], header_work->inc[0], header_work->inc[1]);
 
 	Return(EXIT_SUCCESS);
 }
