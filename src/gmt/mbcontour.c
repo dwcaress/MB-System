@@ -247,7 +247,7 @@ void *New_mbcontour_Ctrl(struct GMT_CTRL *GMT) { /* Allocate and initialize a ne
 	/* get current mb default values */
 	// const int status =
 	mb_defaults(verbose, &dummyformat, &dummypings, &Ctrl->L.lonflip, dummybounds, Ctrl->b.time_i, Ctrl->e.time_i,
-		&Ctrl->S.speedmin, &Ctrl->T.timegap);
+	            &Ctrl->S.speedmin, &Ctrl->T.timegap);
 
 	Ctrl->A.active = false;
 	Ctrl->A.cont_int = 25.;
@@ -314,8 +314,8 @@ int GMT_mbcontour_usage(struct GMTAPI_CTRL *API, int level) {
 	GMT_Message(API, GMT_TIME_NONE, "\t[-S<speed>] [-T<timegap>] [-W] [-Z<mode>]\n");
 	GMT_Message(API, GMT_TIME_NONE, "\t[%s] [-T] [%s] [%s]\n", GMT_Rgeo_OPT, GMT_U_OPT, GMT_V_OPT);
 #if GMT_MAJOR_VERSION >= 6
-	GMT_Message(API, GMT_TIME_NONE, "\t[%s] [%s] [%s]\n\t[%s]\n\t[%s] [%s]\n\n", GMT_X_OPT, GMT_Y_OPT, GMT_f_OPT,
-	            GMT_n_OPT, GMT_p_OPT, GMT_t_OPT);
+	GMT_Message(API, GMT_TIME_NONE, "\t[%s] [%s] [%s]\n\t[%s]\n\t[%s] [%s]\n\n", GMT_X_OPT, GMT_Y_OPT, GMT_f_OPT, GMT_n_OPT,
+	            GMT_p_OPT, GMT_t_OPT);
 #else
 	GMT_Message(API, GMT_TIME_NONE, "\t[%s] [%s] [%s] [%s]\n\t[%s]\n\t[%s] [%s]\n\n", GMT_X_OPT, GMT_Y_OPT, GMT_c_OPT, GMT_f_OPT,
 	            GMT_n_OPT, GMT_p_OPT, GMT_t_OPT);
@@ -377,7 +377,7 @@ int GMT_mbcontour_parse(struct GMT_CTRL *GMT, struct MBCONTOUR_CTRL *Ctrl, struc
 			}
 			break;
 
-		/* Processes program-specific parameters */
+			/* Processes program-specific parameters */
 
 		case 'A': /* contour controls */
 			n = sscanf(opt->arg, "%lf/%lf/%lf/%lf/%lf/%lf/%lf", &(Ctrl->A.cont_int), &(Ctrl->A.col_int), &(Ctrl->A.tick_int),
@@ -634,14 +634,16 @@ void mbcontour_plot(double x, double y, int ipen) {
 		double *p = (double *)realloc(contour_x, sizeof(double) * (ncontour_plot_alloc));
 		if (p != NULL) {
 			contour_x = p;
-		} else {
+		}
+		else {
 			free(contour_x);
 			contour_x = NULL;
 			ncontour_plot_alloc = 0;
 		}
 		if ((p = (double *)realloc(contour_y, sizeof(double) * (ncontour_plot_alloc))) != NULL) {
 			contour_y = p;
-		} else {
+		}
+		else {
 			free(contour_y);
 			contour_y = NULL;
 			ncontour_plot_alloc = 0;
@@ -683,18 +685,16 @@ void mbcontour_plot(double x, double y, int ipen) {
 
 /*--------------------------------------------------------------------------*/
 void mbcontour_setline(int linewidth) {
-	(void)linewidth;  // Unused parameter
-	// PSL_setlinewidth(PSL, (double)linewidth);
+	(void)linewidth; // Unused parameter
+	                 // PSL_setlinewidth(PSL, (double)linewidth);
 }
 
 /*--------------------------------------------------------------------------*/
 void mbcontour_newpen(int ipen) {
 	if (ipen > -1 && ipen < ncolor) {
 		double rgb[4] = {
-			red[ipen] / 255.0,
-			green[ipen] / 255.0,
-			blue[ipen] / 255.0,
-			0, // To not fall into the transparency case of pslib.c/psl_putcolor()
+		    red[ipen] / 255.0, green[ipen] / 255.0, blue[ipen] / 255.0,
+		    0, // To not fall into the transparency case of pslib.c/psl_putcolor()
 		};
 		PSL_setcolor(PSL, rgb, PSL_IS_STROKE);
 	}
@@ -722,10 +722,10 @@ void mbcontour_plot_string(double x, double y, double hgt, double angle, char *l
 
 /*--------------------------------------------------------------------------*/
 void mb_set_colors(int ncolor, int *red, int *green, int *blue) {
-	(void)ncolor;  // Unused parameter
-	(void)red;  // Unused parameter
+	(void)ncolor; // Unused parameter
+	(void)red;    // Unused parameter
 	(void)green;  // Unused parameter
-	(void)blue;  // Unused parameter
+	(void)blue;   // Unused parameter
 }
 
 /*--------------------------------------------------------------------------*/
@@ -750,7 +750,7 @@ int GMT_mbcontour(void *V_API, int mode, void *args) {
 	if (options->option == GMT_OPT_SYNOPSIS)
 		bailout(GMT_mbcontour_usage(API, GMT_SYNOPSIS)); /* Return the synopsis */
 
-	/* Parse the command-line arguments */
+		/* Parse the command-line arguments */
 #if GMT_MAJOR_VERSION >= 6 && GMT_MINOR_VERSION >= 1
 	GMT = gmt_init_module(API, THIS_MODULE_LIB, THIS_MODULE_NAME, "", "", NULL, &options, &GMT_cpy); /* Save current state */
 #elif GMT_MAJOR_VERSION >= 6
@@ -959,7 +959,7 @@ int GMT_mbcontour(void *V_API, int mode, void *args) {
 			mb_path labelstr;
 			mb_path tickstr;
 			const int count = sscanf(line, "%lf %s %s %d %d %d", &level[nlevel], labelstr, tickstr, &red[nlevel], &green[nlevel],
-			               &blue[nlevel]);
+			                         &blue[nlevel]);
 			bool setcolors = true;
 			if (count >= 2 && labelstr[0] == 'a')
 				label[nlevel] = 1;
@@ -1059,7 +1059,7 @@ int GMT_mbcontour(void *V_API, int mode, void *args) {
 	inchtolon = (GMT->common.R.wesn[1] - GMT->common.R.wesn[0]) / (clipx[1] - clipx[0]);
 
 	/* scale label and tick sizes */
-	const double label_hgt_map =  inchtolon * label_hgt;
+	const double label_hgt_map = inchtolon * label_hgt;
 	const double label_spacing_map = inchtolon * label_spacing;
 	const double tick_len_map = inchtolon * tick_len;
 	const double time_tick_len_map = inchtolon * time_tick_len;

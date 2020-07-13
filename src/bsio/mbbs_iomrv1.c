@@ -49,8 +49,7 @@ extern double bs_ionand;
    Records the total number of bytes transferred into *bytecnt.
    Returns 1 if successful, 0 otherwise.
 */
-int mr1_xdrsidev1(PingSide *ps, XDR *xdrs, unsigned long *bytecnt)
-{
+int mr1_xdrsidev1(PingSide *ps, XDR *xdrs, unsigned long *bytecnt) {
 	*bytecnt = 0;
 
 	/* output in obsolete format not allowed! */
@@ -117,8 +116,7 @@ int mr1_xdrsidev1(PingSide *ps, XDR *xdrs, unsigned long *bytecnt)
    Does XDR decoding of an MR1 version 1 ping header.
    Returns 1 if successful, 0 otherwise.
 */
-int mbbs_mr1_xdrpnghdrv1(Ping *png, XDR *xdrs)
-{
+int mbbs_mr1_xdrpnghdrv1(Ping *png, XDR *xdrs) {
 	bs_iobytecnt = 0;
 
 	/* output in obsolete format not allowed! */

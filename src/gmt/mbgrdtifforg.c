@@ -476,11 +476,12 @@ int GMT_mbgrdtiff_usage(struct GMTAPI_CTRL *API, int level) {
 		return (GMT_NOERROR);
 	GMT_Message(API, GMT_TIME_NONE, "usage: mbgrdtiff <grd_z>|<grd_r> <grd_g> <grd_b> %s [%s] [-C<cpt>] [-Ei[|<dpi>]]\n",
 	            GMT_J_OPT, GMT_B_OPT);
-	GMT_Message(API, GMT_TIME_NONE, "\t[-G[f|b]<rgb>] [-I<intensgrid>|<value>] [-K] [-M] [-N<nudge_x>/<nudge_y>] [-O] [-P] [-Q]\n");
+	GMT_Message(API, GMT_TIME_NONE,
+	            "\t[-G[f|b]<rgb>] [-I<intensgrid>|<value>] [-K] [-M] [-N<nudge_x>/<nudge_y>] [-O] [-P] [-Q]\n");
 	GMT_Message(API, GMT_TIME_NONE, "\t[%s] [-T] [%s] [%s]\n", GMT_Rgeo_OPT, GMT_U_OPT, GMT_V_OPT);
 #if GMT_MAJOR_VERSION >= 6
-	GMT_Message(API, GMT_TIME_NONE, "\t[%s] [%s] [%s]\n\t[%s]\n\t[%s] [%s]\n\n", GMT_X_OPT, GMT_Y_OPT, GMT_f_OPT,
-	            GMT_n_OPT, GMT_p_OPT, GMT_t_OPT);
+	GMT_Message(API, GMT_TIME_NONE, "\t[%s] [%s] [%s]\n\t[%s]\n\t[%s] [%s]\n\n", GMT_X_OPT, GMT_Y_OPT, GMT_f_OPT, GMT_n_OPT,
+	            GMT_p_OPT, GMT_t_OPT);
 #else
 	GMT_Message(API, GMT_TIME_NONE, "\t[%s] [%s] [%s] [%s]\n\t[%s]\n\t[%s] [%s]\n\n", GMT_X_OPT, GMT_Y_OPT, GMT_c_OPT, GMT_f_OPT,
 	            GMT_n_OPT, GMT_p_OPT, GMT_t_OPT);
@@ -545,7 +546,7 @@ int GMT_mbgrdtiff_parse(struct GMT_CTRL *GMT, struct MBGRDTIFF_CTRL *Ctrl, struc
 				n_errors++;
 			break;
 
-		/* Processes program-specific parameters */
+			/* Processes program-specific parameters */
 
 		case 'C': /* CPT file */
 			Ctrl->C.active = true;
@@ -619,12 +620,13 @@ int GMT_mbgrdtiff_parse(struct GMT_CTRL *GMT, struct MBGRDTIFF_CTRL *Ctrl, struc
 			Ctrl->M.active = true;
 			break;
 		case 'N': /* -N<nudge_x>/<nudge_y> Offset location of image by
-                  nudge_x meters east and nudge_y meters north */
-      if (sscanf(opt->arg, "%lf/%lf", &Ctrl->Nudge.nudge_x, &Ctrl->Nudge.nudge_y) == 2) {
-        Ctrl->Nudge.active = true;
-      } else {
-        Ctrl->Nudge.active = false;
-      }
+		          nudge_x meters east and nudge_y meters north */
+			if (sscanf(opt->arg, "%lf/%lf", &Ctrl->Nudge.nudge_x, &Ctrl->Nudge.nudge_y) == 2) {
+				Ctrl->Nudge.active = true;
+			}
+			else {
+				Ctrl->Nudge.active = false;
+			}
 			break;
 		case 'O': /* Output file */
 			Ctrl->O.active = true;
@@ -729,16 +731,16 @@ void GMT_mbgrdtiff_set_proj_limits(struct GMT_CTRL *GMT, struct GMT_GRID_HEADER 
 }
 /*--------------------------------------------------------------------*/
 
-#define bailout(code)                      \
-	{                                  \
-		gmt_M_free_options(mode);  \
-		return (code);             \
+#define bailout(code)                                                                                                            \
+	{                                                                                                                            \
+		gmt_M_free_options(mode);                                                                                                \
+		return (code);                                                                                                           \
 	}
-#define Return(code)                             \
-	{                                        \
-		Free_mbgrdtiff_Ctrl(GMT, Ctrl);  \
-		gmt_end_module(GMT, GMT_cpy);    \
-		bailout(code);                   \
+#define Return(code)                                                                                                             \
+	{                                                                                                                            \
+		Free_mbgrdtiff_Ctrl(GMT, Ctrl);                                                                                          \
+		gmt_end_module(GMT, GMT_cpy);                                                                                            \
+		bailout(code);                                                                                                           \
 	}
 
 int GMT_mbgrdtiff(void *V_API, int mode, void *args) {
@@ -766,9 +768,11 @@ int GMT_mbgrdtiff(void *V_API, int mode, void *args) {
 
 	struct GMT_CTRL *GMT_cpy = NULL;
 #if GMT_MAJOR_VERSION >= 6 && GMT_MINOR_VERSION >= 1
-	struct GMT_CTRL *GMT = gmt_init_module(API, THIS_MODULE_LIB, THIS_MODULE_NAME, "", "", NULL, &options, &GMT_cpy); /* Save current state */
+	struct GMT_CTRL *GMT =
+	    gmt_init_module(API, THIS_MODULE_LIB, THIS_MODULE_NAME, "", "", NULL, &options, &GMT_cpy); /* Save current state */
 #elif GMT_MAJOR_VERSION >= 6
-	struct GMT_CTRL *GMT = gmt_init_module(API, THIS_MODULE_LIB, THIS_MODULE_NAME, "", "", &options, &GMT_cpy); /* Save current state */
+	struct GMT_CTRL *GMT =
+	    gmt_init_module(API, THIS_MODULE_LIB, THIS_MODULE_NAME, "", "", &options, &GMT_cpy); /* Save current state */
 #else
 	struct GMT_CTRL *GMT = gmt_begin_module(API, THIS_MODULE_LIB, THIS_MODULE_NAME, &GMT_cpy); /* Save current state */
 #endif
@@ -813,7 +817,7 @@ int GMT_mbgrdtiff(void *V_API, int mode, void *args) {
 			Ctrl->C.active = true; /* Use default CPT stuff */
 	}
 
-	struct GMT_GRID_HEADER *header_work = NULL;       /* Pointer to a GMT header for the image or grid */
+	struct GMT_GRID_HEADER *header_work = NULL; /* Pointer to a GMT header for the image or grid */
 	if (n_grids)
 		header_work = Grid_orig[0]->header; /* OK, we are in GRID mode and this was not set further above. Do it now */
 
@@ -825,9 +829,11 @@ int GMT_mbgrdtiff(void *V_API, int mode, void *args) {
 		if (!(Grid_orig[0]->header->inc[GMT_X] == Grid_orig[1]->header->inc[GMT_X] &&
 		      Grid_orig[0]->header->inc[GMT_X] == Grid_orig[2]->header->inc[GMT_X]))
 			error++;
-		if (!(Grid_orig[0]->header->n_columns == Grid_orig[1]->header->n_columns && Grid_orig[0]->header->n_columns == Grid_orig[2]->header->n_columns))
+		if (!(Grid_orig[0]->header->n_columns == Grid_orig[1]->header->n_columns &&
+		      Grid_orig[0]->header->n_columns == Grid_orig[2]->header->n_columns))
 			error++;
-		if (!(Grid_orig[0]->header->n_rows == Grid_orig[1]->header->n_rows && Grid_orig[0]->header->n_rows == Grid_orig[2]->header->n_rows))
+		if (!(Grid_orig[0]->header->n_rows == Grid_orig[1]->header->n_rows &&
+		      Grid_orig[0]->header->n_rows == Grid_orig[2]->header->n_rows))
 			error++;
 		if (!(Grid_orig[0]->header->registration == Grid_orig[1]->header->registration &&
 		      Grid_orig[0]->header->registration == Grid_orig[2]->header->registration))
@@ -904,8 +910,8 @@ int GMT_mbgrdtiff(void *V_API, int mode, void *args) {
 		                  Intens_orig) == NULL) {
 			Return(API->error); /* Get grid data */
 		}
-		if (n_grids &&
-		    (Intens_orig->header->n_columns != Grid_orig[0]->header->n_columns || Intens_orig->header->n_rows != Grid_orig[0]->header->n_rows)) {
+		if (n_grids && (Intens_orig->header->n_columns != Grid_orig[0]->header->n_columns ||
+		                Intens_orig->header->n_rows != Grid_orig[0]->header->n_rows)) {
 			GMT_Report(API, GMT_MSG_NORMAL, "Intensity file has improper dimensions!\n");
 			Return(EXIT_FAILURE);
 		}
@@ -1001,7 +1007,8 @@ int GMT_mbgrdtiff(void *V_API, int mode, void *args) {
 				Return(API->error);
 			}
 #elif GMT_MAJOR_VERSION == 6 && GMT_MINOR_VERSION == 0
-			if ((P = gmt_get_palette(GMT, Ctrl->C.file, GMT_CPT_OPTIONAL, header_work->z_min, header_work->z_max, 0.0, 0)) == NULL) {
+			if ((P = gmt_get_palette(GMT, Ctrl->C.file, GMT_CPT_OPTIONAL, header_work->z_min, header_work->z_max, 0.0, 0)) ==
+			    NULL) {
 				Return(API->error);
 			}
 #else
@@ -1041,7 +1048,8 @@ int GMT_mbgrdtiff(void *V_API, int mode, void *args) {
 		image_size = nm;
 		bitimage_8 = gmt_M_memory(GMT, NULL, image_size, unsigned char);
 		tiff_image = bitimage_8;
-	} else {
+	}
+	else {
 		if (Ctrl->Q.active)
 			colormask_offset = 3;
 		image_size = 3 * nm + colormask_offset;
@@ -1062,14 +1070,14 @@ int GMT_mbgrdtiff(void *V_API, int mode, void *args) {
 	double rgb[4] = {0.0, 0.0, 0.0, 0.0};
 
 	bool done = false;
-	for (int try = 0; !done && try < 2; try++) {
+	for (int try = 0; !done && try < 2; try ++) {
 		/* Evaluate colors at least once, or twice if -Q and we need to select another NaN color */
 		uint64_t byte = colormask_offset;
 		for (unsigned int row = 0; row < ny; row++) {
 			const unsigned int actual_row = normal_y ? row : ny - row - 1;
 			const uint64_t kk = gmt_M_ijpgi(header_work, actual_row, 0);
 			if (Ctrl->D.active && row == 0)
-				node_RGBA = kk;              /* First time per row equals 'node', after grows alone */
+				node_RGBA = kk;                           /* First time per row equals 'node', after grows alone */
 			for (unsigned int col = 0; col < nx; col++) { /* Compute rgb for each pixel */
 				uint64_t node = kk + (normal_x ? col : nx - col - 1);
 				if (Ctrl->I.do_rgb) {
@@ -1165,8 +1173,10 @@ int GMT_mbgrdtiff(void *V_API, int mode, void *args) {
 	}
 
 	/* Get actual size of each pixel */
-	const double dx = gmt_M_get_inc(GMT, header_work->wesn[XLO], header_work->wesn[XHI], header_work->n_columns, header_work->registration);
-	const double dy = gmt_M_get_inc(GMT, header_work->wesn[YLO], header_work->wesn[YHI], header_work->n_rows, header_work->registration);
+	const double dx =
+	    gmt_M_get_inc(GMT, header_work->wesn[XLO], header_work->wesn[XHI], header_work->n_columns, header_work->registration);
+	const double dy =
+	    gmt_M_get_inc(GMT, header_work->wesn[YLO], header_work->wesn[YHI], header_work->n_rows, header_work->registration);
 
 	/* Set lower left position of image on map */
 
@@ -1280,25 +1290,26 @@ int GMT_mbgrdtiff(void *V_API, int mode, void *args) {
 		projectionid = GCS_WGS_84;
 	}
 
-  /* apply shift or "nudge" to grid bounds so that the GeoTiff location is shifted
-      as desired - the nudge_x and nudge_y values are defined in meters and must
-      be translated to the image bounds coordinates */
-  if (Ctrl->Nudge.active) {
-    /* geographic coordinates so convert Ctrl->Nudge.nudge_x and Ctrl->Nudge.nudge_y to degress lon and lat */
-    if (modeltype == ModelTypeGeographic) {
-	double mtodeglon, mtodeglat;
-      mb_coor_scale(0, 0.5 * (header_work->wesn[YLO] + header_work->wesn[YHI]), &mtodeglon, &mtodeglat);
-      header_work->wesn[XLO] += Ctrl->Nudge.nudge_x * mtodeglon;
-      header_work->wesn[XHI] += Ctrl->Nudge.nudge_x * mtodeglon;
-      header_work->wesn[YLO] += Ctrl->Nudge.nudge_y * mtodeglat;
-      header_work->wesn[YHI] += Ctrl->Nudge.nudge_y * mtodeglat;
-    } else {
-      header_work->wesn[XLO] += Ctrl->Nudge.nudge_x;
-      header_work->wesn[XHI] += Ctrl->Nudge.nudge_x;
-      header_work->wesn[YLO] += Ctrl->Nudge.nudge_y;
-      header_work->wesn[YHI] += Ctrl->Nudge.nudge_y;
-    }
-  }
+	/* apply shift or "nudge" to grid bounds so that the GeoTiff location is shifted
+	    as desired - the nudge_x and nudge_y values are defined in meters and must
+	    be translated to the image bounds coordinates */
+	if (Ctrl->Nudge.active) {
+		/* geographic coordinates so convert Ctrl->Nudge.nudge_x and Ctrl->Nudge.nudge_y to degress lon and lat */
+		if (modeltype == ModelTypeGeographic) {
+			double mtodeglon, mtodeglat;
+			mb_coor_scale(0, 0.5 * (header_work->wesn[YLO] + header_work->wesn[YHI]), &mtodeglon, &mtodeglat);
+			header_work->wesn[XLO] += Ctrl->Nudge.nudge_x * mtodeglon;
+			header_work->wesn[XHI] += Ctrl->Nudge.nudge_x * mtodeglon;
+			header_work->wesn[YLO] += Ctrl->Nudge.nudge_y * mtodeglat;
+			header_work->wesn[YHI] += Ctrl->Nudge.nudge_y * mtodeglat;
+		}
+		else {
+			header_work->wesn[XLO] += Ctrl->Nudge.nudge_x;
+			header_work->wesn[XHI] += Ctrl->Nudge.nudge_x;
+			header_work->wesn[YLO] += Ctrl->Nudge.nudge_y;
+			header_work->wesn[YHI] += Ctrl->Nudge.nudge_y;
+		}
+	}
 
 	/* Google Earth Pro requires GeoTiffs longitude to be in -180 to +180 domain
 	 * make sure geographic images have the origin in the right domain unless
@@ -1480,8 +1491,7 @@ int GMT_mbgrdtiff(void *V_API, int mode, void *args) {
 			mb_put_binary_short(false, value_short, &tiff_header[index]);
 			index += 4;
 			break;
-		case ModelPixelScaleTag:
-		{
+		case ModelPixelScaleTag: {
 			value_int = 3;
 			mb_put_binary_int(false, value_int, &tiff_header[index]);
 			index += 4;
@@ -1496,8 +1506,7 @@ int GMT_mbgrdtiff(void *V_API, int mode, void *args) {
 			mb_put_binary_double(false, value_double, &tiff_header[tiff_offset[i] + 16]);
 			break;
 		}
-		case ModelTiepointTag:
-		{
+		case ModelTiepointTag: {
 			value_int = 6;
 			mb_put_binary_int(false, value_int, &tiff_header[index]);
 			index += 4;
@@ -1519,8 +1528,7 @@ int GMT_mbgrdtiff(void *V_API, int mode, void *args) {
 			mb_put_binary_double(false, value_double, &tiff_header[tiff_offset[i] + 5 * 8]);
 			break;
 		}
-		case GeoKeyDirectoryTag:
-		{
+		case GeoKeyDirectoryTag: {
 			value_int = 20;
 			mb_put_binary_int(false, value_int, &tiff_header[index]);
 			index += 4;
@@ -1691,8 +1699,8 @@ int GMT_mbgrdtiff(void *V_API, int mode, void *args) {
 	        Grid_orig[0]->header->wesn[XLO], Grid_orig[0]->header->wesn[XHI], Grid_orig[0]->header->wesn[YLO],
 	        Grid_orig[0]->header->wesn[YHI], Grid_orig[0]->header->inc[0], Grid_orig[0]->header->inc[1]);
 	fprintf(stderr, "3 Work header:\n\tnx:%d ny:%d registration:%d\n\tWESN: %f %f %f %f\n\tinc: %f %f\n", header_work->n_columns,
-	        header_work->n_rows, header_work->registration, header_work->wesn[XLO], header_work->wesn[XHI], header_work->wesn[YLO],
-	        header_work->wesn[YHI], header_work->inc[0], header_work->inc[1]);
+	        header_work->n_rows, header_work->registration, header_work->wesn[XLO], header_work->wesn[XHI],
+	        header_work->wesn[YLO], header_work->wesn[YHI], header_work->inc[0], header_work->inc[1]);
 
 	/* Free bitimage arrays. gmt_M_free will not complain if they have not been used (NULL) */
 	if (P && P->is_bw)
