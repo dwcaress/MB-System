@@ -936,7 +936,9 @@ void *s_server_main(void *arg)
             int fdmax;
 
             const int optionval = 1;
+#if !defined(__CYGWIN__)
             msock_set_opt(s, SO_REUSEPORT, &optionval, sizeof(optionval));
+#endif
             msock_set_opt(s, SO_REUSEADDR, &optionval, sizeof(optionval));
 
             msock_bind(s);
