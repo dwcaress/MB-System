@@ -468,8 +468,10 @@ static int s_update_callback(trnu_pub_t *update)
     // demo callback : call the string formatter and output
     char *str=NULL;
     trnucli_update_str(update,&str,0,TRNUC_FMT_PRETTY);
-    fprintf(stdout,"%s\n",str);
-    if(NULL!=str)free(str);
+    if(NULL!=str){
+    	fprintf(stdout,"%s\n",str);
+        free(str);
+    }
     str=NULL;
 
     return retval;
@@ -648,8 +650,10 @@ static int s_trnucli_process_update(trnu_pub_t *update, app_cfg_t *cfg)
     // call the string formatter and output
     char *str=NULL;
     trnucli_update_str(update,&str,0,cfg->ofmt);
-    fprintf(stdout,"%s\n",str);
-    if(NULL!=str)free(str);
+    if(NULL!=str){
+    	fprintf(stdout,"%s\n",str);
+        free(str);
+    }
     str=NULL;
 
     return retval;
@@ -696,7 +700,6 @@ static int s_trnucli_test_trnu(app_cfg_t *cfg)
     	trnucli_set_callback(dcli,s_update_callback);
     }
     while(!g_interrupt){
-        int test=-1;
         if( (test=trnucli_listen(dcli))==0){
 
             // could call handler or handle here

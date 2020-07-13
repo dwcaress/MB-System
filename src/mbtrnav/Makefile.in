@@ -865,7 +865,7 @@ libnetif_la_LIBADD = libtrnw.la \
                 -lm -lpthread
 
 trnu_cli_SOURCES = trnw/trnucli_test.c trnw/trnu_cli.c
-trnu_cli_LDADD = $(top_builddir)/src/mbtrn/libmframe.la libtrnw.la
+trnu_cli_LDADD = $(top_builddir)/src/mbtrn/libmframe.la  libtrnw.la
 trn_cli_SOURCES = trnw/trncli_test.c trnw/trn_cli.c
 trn_cli_LDADD = $(top_builddir)/src/mbtrn/libmframe.la libtrnw.la
 trn_server_SOURCES = utils/trn_server.cpp

@@ -165,12 +165,11 @@ int trnucli_disconnect(trnucli_t *self)
 {
     int retval=-1;
 
-    int32_t sret=-1;
-
     msock_set_blocking(self->trnu->sock,false);
     char msg[8]={0};
     sprintf(msg,PROTO_TRNU_DIS);
-    if((sret=msock_sendto(self->trnu->sock,NULL,(byte *)msg,4,0))>0){
+    int32_t sret=msock_sendto(self->trnu->sock,NULL,(byte *)msg,4,0);
+    if(sret>0){
         retval=0;
     }
     return retval;
@@ -196,12 +195,9 @@ int trnucli_listen(trnucli_t *self)
         }
         if(NULL!=self->update){
             memset(self->update,0,TRNU_PUB_BYTES);
-
-            int32_t rret=-1;
-
             msock_set_blocking(self->trnu->sock,TRNUC_BLK_LISTEN(self->flags));
-
-            if((rret=msock_recv(self->trnu->sock,(byte *)self->update,TRNU_PUB_BYTES,0))>0){
+            int32_t rret=msock_recv(self->trnu->sock,(byte *)self->update,TRNU_PUB_BYTES,0);
+            if(rret>0){
                 retval=0;
                 if(NULL!=self->update_fn){
                     retval= self->update_fn(self->update);
@@ -218,17 +214,15 @@ int trnucli_listen(trnucli_t *self)
 }
 
 
-static int s_update_pretty(trnu_pub_t *update, char *dest, int len)
+static int s_update_pretty(trnu_pub_t *update, char *dest, int len, int indent)
 {
     int retval=0;
     if(NULL!=update && NULL!=dest && len>0){
         int wkey=15;
         int wval=15;
-        int indent=0;
         int rem=len;
-        int wbytes=0;
         char *dp=dest;
-        wbytes=snprintf(dp,rem,"%*s %*s  %*p\n",indent,(indent>0?" ":""), wkey,"addr",wval,update);
+        int wbytes=snprintf(dp,rem,"%*s %*s  %*p\n",indent,(indent>0?" ":""), wkey,"addr",wval,update);
         rem-=(wbytes-1);
         dp+=wbytes;
         wbytes=snprintf(dp,rem,"%*s %*s  %*.3lf\n",indent,(indent>0?" ":""), wkey,"mb1_time",wval,update->mb1_time);
@@ -293,7 +287,7 @@ static int s_update_pretty(trnu_pub_t *update, char *dest, int len)
         wbytes=snprintf(dp,rem,"%*s %*s %.3lf,%.3lf,%.3lf\n",indent,(indent>0?" ":""), wkey,"MMSE:",(emmse->x-ept->x),(emmse->y-ept->y),(emmse->z-ept->z));
         rem-=(wbytes-1);
         dp+=wbytes;
-        wbytes=snprintf(dp,rem,"%*s %*s %.3lf,%.3lf,%.3lf\n",indent,(indent>0?" ":""), wkey," COV:",sqrt(emmse->cov[0]),sqrt(emmse->cov[1]),sqrt(emmse->cov[2]));
+        snprintf(dp,rem,"%*s %*s %.3lf,%.3lf,%.3lf\n",indent,(indent>0?" ":""), wkey," COV:",sqrt(emmse->cov[0]),sqrt(emmse->cov[1]),sqrt(emmse->cov[2]));
 
         retval=strlen(dest)+1;
     }
@@ -305,11 +299,9 @@ static int s_update_csv(trnu_pub_t *update, char *dest, int len)
     int retval=0;
     if(NULL!=update && NULL!=dest && len>0){
         int rem=len;
-        int wbytes=0;
         char *dp=dest;
 
-
-        wbytes=snprintf(dp,rem,"%.3lf,",update->mb1_time);
+        int wbytes=snprintf(dp,rem,"%.3lf,",update->mb1_time);
         rem-=(wbytes-1);
         dp+=wbytes;
         wbytes=snprintf(dp,rem,"%.3lf,",update->update_time);
@@ -362,7 +354,7 @@ static int s_update_csv(trnu_pub_t *update, char *dest, int len)
         wbytes=snprintf(dp,rem,"%.3lf,%.3lf,%.3lf,",(emmse->x-ept->x),(emmse->y-ept->y),(emmse->z-ept->z));
         rem-=(wbytes-1);
         dp+=wbytes;
-        wbytes=snprintf(dp,rem,"%.3lf,%.3lf,%.3lf",sqrt(emmse->cov[0]),sqrt(emmse->cov[1]),sqrt(emmse->cov[2]));
+        snprintf(dp,rem,"%.3lf,%.3lf,%.3lf",sqrt(emmse->cov[0]),sqrt(emmse->cov[1]),sqrt(emmse->cov[2]));
 
         retval=strlen(dest)+1;
     }
@@ -426,7 +418,7 @@ int trnucli_update_str(trnu_pub_t *self, char **dest, int len, trnuc_fmt_t fmt)
 
             switch (fmt) {
                 case TRNUC_FMT_PRETTY:
-                    retval=s_update_pretty(self,obuf,olen);
+                    retval=s_update_pretty(self,obuf,olen,0);
                     break;
                 case TRNUC_FMT_CSV:
                     retval=s_update_csv(self,obuf,olen);
