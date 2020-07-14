@@ -886,8 +886,11 @@ int trnif_msg_handle_trnu(void *msg, netif_t *self, msock_connection_t *peer, in
 
     if(NULL!=msg && NULL!=self && NULL!=peer){
 
-        int32_t send_len=0;
+        wtnav_t *trn = self->rr_res;
+       int32_t send_len=0;
         char *msg_out=NULL;
+
+        double msg_time = mtime_etime();
 
         if(strcmp(msg,PROTO_TRNU_REQ)==0 ||
            strcmp(msg,PROTO_TRNU_CON)==0||
@@ -899,6 +902,14 @@ int trnif_msg_handle_trnu(void *msg, netif_t *self, msock_connection_t *peer, in
         }else{
             msg_out=strdup(PROTO_TRNU_NACK);
             send_len=strlen(PROTO_TRNU_NACK)+1;
+        }
+
+        if(strcmp(msg,PROTO_TRNU_RST)==0){
+            // reinit, return ACK
+            wtnav_reinit_filter(trn,true);
+            msg_out=strdup(PROTO_TRNU_ACK);
+            send_len=strlen(PROTO_TRNU_ACK)+1;
+            mlog_tprintf(self->mlog_id,"trn_filt_reinit,%lf,[%s:%s]\n", msg_time,peer->chost, peer->service);
         }
 
         if(send_len>0){
