@@ -463,7 +463,7 @@ static int s_tokenize(char *src, char ***dest, char *del, int ntok)
 
 static int s_update_callback(trnu_pub_t *update)
 {
-    int retval=-1;
+    int retval=0;
 
     // demo callback : call the string formatter and output
     char *str=NULL;
@@ -688,6 +688,7 @@ static int s_trnucli_test_trnu(app_cfg_t *cfg)
 {
     int retval=0;
     int test=-1;
+    static int call_count=0;
     trnucli_t *dcli = trnucli_new(NULL,cfg->flags,0.0);
     if( (test=trnucli_connect(dcli, cfg->trnu_host, cfg->trnu_port))==0){
         fprintf(stderr,"trnucli_connect [%d]\n",test);
@@ -705,6 +706,12 @@ static int s_trnucli_test_trnu(app_cfg_t *cfg)
             // could call handler or handle here
             if(!cfg->demo){
 	            s_trnucli_process_update(dcli->update,cfg);
+            }else{
+                if( (call_count>0) && (call_count%10)==0){
+                    int rst=trnucli_reset_trn(dcli);
+                    fprintf(stderr,"%s - reset TRN [%d]\n\n",__func__,rst);
+                }
+                call_count++;
             }
         }else{
             fprintf(stderr,"listen ret[%d]\n",test);
