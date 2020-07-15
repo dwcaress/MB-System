@@ -105,8 +105,6 @@
  "GNU General Public License for more details (http://www.gnu.org/licenses/gpl-3.0.html)\n"
  */
 
-
-#define TRNUCLI_TEST_TRNU_HOST "127.0.0.1"
 #define TRNUCLI_TEST_TRNU_PORT 8000
 #define TRNUCLI_TEST_TRNU_HBEAT 25
 #define TRNUCLI_CSV_LINE_BYTES 1024*20
@@ -117,6 +115,7 @@
 #define TRNUCLI_TEST_LOG_EXT  ".log"
 #define TRN_CMD_LINE_BYTES 2048
 #define TRNUCLI_TEST_CONNECT_DELAY_SEC 5
+#define HOSTNAME_BUF_LEN 256
 
 /////////////////////////
 // Declarations
@@ -271,8 +270,16 @@ void parse_args(int argc, char **argv, app_cfg_t *cfg)
                 // host
                 else if (strcmp("host", options[option_index].name) == 0) {
                     scpy = strdup(optarg);
-                    shost = strtok(scpy,":");
-                    sport = strtok(NULL,":");
+                    char *cp=scpy;
+                    while(isspace(*cp) && *cp!='\0' )cp++;
+
+                    if(*cp==':'){
+                        shost=NULL;
+                        sport = strtok(cp,":");
+                    }else{
+                    	shost = strtok(cp,":");
+                    	sport = strtok(NULL,":");
+                    }
                     if(NULL!=shost){
                         if(NULL!=cfg->trnu_host){
                             free(cfg->trnu_host);
@@ -359,6 +366,26 @@ void parse_args(int argc, char **argv, app_cfg_t *cfg)
             exit(0);
         }
     }// while
+
+    // use this host if unset
+    if(NULL==cfg->trnu_host){
+        // if unset, use local IP
+        char host[HOSTNAME_BUF_LEN]={0};
+        if(gethostname(host, HOSTNAME_BUF_LEN)==0 && strlen(host)>0){
+            struct hostent *host_entry;
+
+            if( (host_entry = gethostbyname(host))!=NULL){
+                //Convert into IP string
+                char *s =inet_ntoa(*((struct in_addr*) host_entry->h_addr_list[0]));
+                cfg->trnu_host = strdup(s);
+            } //find host information
+        }
+
+        if(NULL==cfg->trnu_host){
+            cfg->trnu_host=strdup("localhost");
+        }
+    }
+
     PDPRINT((stderr,"verbose    [%s]\n",(cfg->verbose?"Y":"N")));
     PDPRINT((stderr,"ifile      [%s]\n",cfg->ifile));
     PDPRINT((stderr,"input_src  [%d]\n",cfg->input_src));
@@ -402,7 +429,7 @@ static app_cfg_t *app_cfg_new()
         instance->ifile=NULL;
         instance->input_src=SRC_TRNU;
 
-        instance->trnu_host=strdup(TRNUCLI_TEST_TRNU_HOST);
+        instance->trnu_host=NULL;
         instance->trnu_port=TRNUCLI_TEST_TRNU_PORT;
         instance->trnu_hbeat=TRNUCLI_TEST_TRNU_HBEAT;
         instance->update_n=TRNUCLI_TEST_UPDATE_N;
@@ -438,7 +465,7 @@ static void app_cfg_destroy(app_cfg_t **pself)
             *pself=NULL;
         }
     }
-    
+    return;
 }
 
 static int s_tokenize(char *src, char ***dest, char *del, int ntok)
@@ -521,6 +548,7 @@ static void s_init_log(int argc, char **argv, app_cfg_t *cfg)
     mlog_tprintf(cfg->log_id,"cmdline [%s]\n",g_cmd_line);
     mlog_tprintf(cfg->log_id,"build [%s]\n",TRNUCLI_TEST_BUILD);
 
+    return;
 }
 
 static int32_t s_read_csv_rec(mfile_file_t *src, char *dest, uint32_t len)
