@@ -78,45 +78,67 @@
 // Macros
 /////////////////////////
 //#define TRNUC_WITH_STATIC
+// return true if block-on-connect flag set
 #define TRNUC_BLK_CON(f) ( ((f&TRNUC_BLK_CON)!=0) ? true : false)
+// return true if block-on-listen flag set
 #define TRNUC_BLK_LISTEN(f) ( ((f&TRNUC_BLK_LISTEN)!=0) ? true : false)
+// return true if enable connect message flag set
 #define TRNUC_CON_MSG(f) ( ((f&TRNUC_CON_MSG)!=0) ? true : false)
+// set flags
+// pf: flag pointer
+// m: mask (flags to set)
 #define TRNUC_MSET(pf,m) do{ if(NULL!=pf)*pf|=m; }while(0)
+// clear flags
+// pf: flag pointer
+// m: mask (flags to set)
 #define TRNUC_MCLR(pf,m) do{ if(NULL!=pf)*pf&=~(m); }while(0)
+// update string buffer len (holds max string)
 #define TRNUC_STR_LEN 1024
+// number of fields in CSV record
 #define TRNUC_CSV_FIELDS 41
+// max CSV record string length
 #define TRNUC_CSV_LINE_BYTES 512
 
 /////////////////////////
 // Type Definitions
 /////////////////////////
 
+// Configuration flags
+// TRNUC_BLK_CON    block on connect
+// TRNUC_BLK_LISTEN block on listen
+// TRNUC_CON_MSG    send connect message
 typedef enum{
     TRNUC_BLK_CON   =0x010,
     TRNUC_BLK_LISTEN=0x020,
     TRNUC_CON_MSG   =0x100
 }trnuc_flags_t;
 
+// callback function typedef
 typedef int (* update_callback_fn)(trnu_pub_t *update);
 
 typedef struct trnucli_s{
+    // struct trnucli_s::trnu
+    // server socket connection
     msock_connection_t *trnu;
+    // struct trnucli_s::update
+    // last update received (NULL if unset)
     trnu_pub_t *update;
+    // struct trnucli_s::update_fn
+    // callback function (NULL if unset)
     update_callback_fn update_fn;
+    // struct trnucli_s::flags
+    // configuration flags
     trnuc_flags_t flags;
+    // struct trnucli_s::hbto
+    // heartbeat timeout (s)
     double hbto;
-
-    // TODO features:
-    // callback list
-    // update list
-    // flags
-    // flag:connect message
-    // flag:block on connect
-    // flag:block on read
-    // compile:TRNUC_WITH_STATIC
-
 }trnucli_t;
 
+// update string format flags
+// TRNUC_FMT_PRETTY : ASCII, for console
+// TRNUC_FMT_CSV    : comma separated value
+// TRNUC_FMT_HEX    : hex
+// TRNUC_FMT_PRETTY_HEX: formatted hex (w/ offsets)
 typedef enum{
     TRNUC_FMT_PRETTY=0X1,
     TRNUC_FMT_CSV=0X2,
@@ -131,14 +153,55 @@ typedef enum{
 #ifdef __cplusplus
 extern "C" {
 #endif
+    // get a new trnu_cli instance
+    // caller must release resources using trnucli_destroy
+    // fn   : optional update callback (may be NULL)
+    // flags: blocking and other flags
+    // hbto : heartbeat timeout (s)
+    // returns new instance
     trnucli_t *trnucli_new(update_callback_fn update_fn, trnuc_flags_t flags, double hbto);
+
+    // release trnu_cli instance resources
+    // pself : pointer to instance pointer
+    // return: none, instance pointer set to NULL
     void trnucli_destroy(trnucli_t **pself);
+
+    // connect to trnusvr
+    // host: host name or IP address
+    // port: port number
+    // returns 0 on success, -1 otherwise
     int trnucli_connect(trnucli_t *self, char *host, int port);
+
+    // disconnect from trnusvr
+    // returns 0 on success, -1 otherwise
     int trnucli_disconnect(trnucli_t *self);
+
+    // optionally set a callback to be called by listen
+    // when an update is received
+    // func: optional update callback (may be NULL)
+    // returns 0 on success, -1 otherwise
     int trnucli_set_callback(trnucli_t *self, update_callback_fn func);
+
+    // listen for updates, invoke callback if set
+    // returns 0 on success (instance update current), -1 otherwise (instance update empty)
     int trnucli_listen(trnucli_t *self);
+
+    // issue TRN reset request
+    // must check subsequent update reinit count to confirm
+    // returns 0 on request ACK, -1 otherwise
     int trnucli_reset_trn(trnucli_t *self);
+
+    // issue heartbeat request
+    // caller must manage timing
+    // returns 0 on request ACK, -1 otherwise
     int trnucli_hbeat(trnucli_t *self);
+
+    // convert update to formatted string
+    // caller must free destination
+    // dest: pointer to buffer (will dynamically allocate if *dest==NULL)
+    // len: size of buffer (<=0 if *dest==NULL)
+    // fmt: format flags
+    // return length of string
     int trnucli_update_str(trnu_pub_t *self, char **dest, int len, trnuc_fmt_t fmt);
 
 #ifdef __cplusplus
