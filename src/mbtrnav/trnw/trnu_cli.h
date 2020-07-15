@@ -208,7 +208,7 @@ extern "C" {
     // dest: pointer to buffer (will dynamically allocate if *dest==NULL)
     // len: size of buffer (<=0 if *dest==NULL)
     // fmt: format flags
-    // return length of string
+    // return length of string or -1 on error
     int trnucli_update_str(trnu_pub_t *self, char **dest, int len, trnuc_fmt_t fmt);
 
 #ifdef __cplusplus
