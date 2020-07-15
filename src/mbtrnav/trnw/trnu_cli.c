@@ -231,6 +231,24 @@ int trnucli_reset_trn(trnucli_t *self)
     return retval;
 }// end trnucli_reset_trn trnucli_connect
 
+int trnucli_hbeat(trnucli_t *self)
+{
+    int retval=-1;
+
+    int test=-1;
+    if( (test=msock_sendto(self->trnu->sock,NULL,(byte *)PROTO_TRNU_HBT,(strlen(PROTO_TRNU_HBT)+1),0))>0){
+        PDPRINT((stderr,"hbeat msg OK [%d]\n",test));
+        byte ack[8]={0};
+        retval=1;
+        if( (test=msock_recv(self->trnu->sock,ack,8,0))>0){
+            PDPRINT((stderr,"ACK OK [%d/%s]\n",test,ack));
+            retval=0;
+        }
+    }else{PTRACE();}
+
+    return retval;
+}// end trnucli_reset_trn trnucli_connect
+
 
 static int s_update_pretty(trnu_pub_t *update, char *dest, int len, int indent)
 {
