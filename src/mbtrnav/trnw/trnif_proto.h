@@ -88,6 +88,7 @@
 
 #define PROTO_TRNU_CON  "CON"
 #define PROTO_TRNU_REQ  "REQ"
+#define PROTO_TRNU_RST  "RST"
 #define PROTO_TRNU_HBT  "HBT"
 #define PROTO_TRNU_PING "PING"
 #define PROTO_TRNU_DIS  "DIS"

@@ -4,7 +4,7 @@ include_HEADERS =
 
 AM_CFLAGS = ${libgmt_CFLAGS} ${libnetcdf_CFLAGS}
 
-AM_CPPFLAGS = -g -O0 -I${top_srcdir}/src/mbtrnav/trnw -I${top_srcdir}/src/mbtrnav/utils -I${top_srcdir}/src/mbtrnav/terrain-nav -I${top_srcdir}/src/mbtrnav/qnx-utils -I${top_srcdir}/src/mbtrnav/newmat  -I${top_srcdir}/src/mbtrnav/gctp/source -I${top_srcdir}/src/mbtrn/mframe/src -I${top_srcdir}/src/mbtrn/utils -DHAVE_CONFIG_H  -DWITH_TESTS -DWITH_PDEBUG -DWITH_MMDEBUG -D_GNU_SOURCE  -DWITH_MST_MSTATS -DMST_STATS_EN
+AM_CPPFLAGS = -g -O0 -I${top_srcdir}/src/mbtrnav/trnw -I${top_srcdir}/src/mbtrnav/utils -I${top_srcdir}/src/mbtrnav/terrain-nav -I${top_srcdir}/src/mbtrnav/qnx-utils -I${top_srcdir}/src/mbtrnav/newmat  -I${top_srcdir}/src/mbtrnav/gctp/source -I${top_srcdir}/src/mbtrn/utils  -I${top_srcdir}/src/mbtrn/mframe/src -DHAVE_CONFIG_H  -DWITH_TESTS -DWITH_PDEBUG -DWITH_MMDEBUG -D_GNU_SOURCE  -DWITH_MST_MSTATS -DMST_STATS_EN
 
 
 libgeolib_la_LDFLAGS =  -no-undefined -version-info 0:0:0
@@ -191,7 +191,7 @@ bin_PROGRAMS =   trn-server trn-cli netif-test trnif-test trnifsvr-test trnclien
 
 
 trnu_cli_SOURCES = trnw/trnucli_test.c trnw/trnu_cli.c
-trnu_cli_LDADD = $(top_builddir)/src/mbtrn/libmframe.la libtrnw.la
+trnu_cli_LDADD = $(top_builddir)/src/mbtrn/libmframe.la  libtrnw.la
 
 trn_cli_SOURCES = trnw/trncli_test.c trnw/trn_cli.c
 trn_cli_LDADD = $(top_builddir)/src/mbtrn/libmframe.la libtrnw.la

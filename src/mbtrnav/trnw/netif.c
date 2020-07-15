@@ -638,7 +638,9 @@ int netif_connect(netif_t *self)
         self->socket = msock_socket_new(self->host, self->port, ST_UDP);
             if(NULL!=self->socket){
                 const int optionval = 1;
+#if !defined(__CYGWIN__)
                 msock_set_opt(self->socket, SO_REUSEPORT, &optionval, sizeof(optionval));
+#endif
                 msock_set_opt(self->socket, SO_REUSEADDR, &optionval, sizeof(optionval));
                 msock_set_blocking(self->socket,false);
 
@@ -658,7 +660,9 @@ int netif_connect(netif_t *self)
             if(NULL!=self->socket){
                 msock_set_blocking(self->socket,false);
                 const int optionval = 1;
+#if !defined(__CYGWIN__)
                 msock_set_opt(self->socket, SO_REUSEPORT, &optionval, sizeof(optionval));
+#endif
                 msock_set_opt(self->socket, SO_REUSEADDR, &optionval, sizeof(optionval));
                 if ( (test=msock_bind(self->socket))==0) {
                     PMPRINT(MOD_NETIF,MM_DEBUG,(stderr,"TRN tcp socket bind OK [%s:%d]\n",self->host,self->port));

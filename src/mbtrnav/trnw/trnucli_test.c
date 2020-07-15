@@ -105,8 +105,6 @@
  "GNU General Public License for more details (http://www.gnu.org/licenses/gpl-3.0.html)\n"
  */
 
-
-#define TRNUCLI_TEST_TRNU_HOST "127.0.0.1"
 #define TRNUCLI_TEST_TRNU_PORT 8000
 #define TRNUCLI_TEST_TRNU_HBEAT 25
 #define TRNUCLI_CSV_LINE_BYTES 1024*20
@@ -117,6 +115,7 @@
 #define TRNUCLI_TEST_LOG_EXT  ".log"
 #define TRN_CMD_LINE_BYTES 2048
 #define TRNUCLI_TEST_CONNECT_DELAY_SEC 5
+#define HOSTNAME_BUF_LEN 256
 
 /////////////////////////
 // Declarations
@@ -160,7 +159,7 @@ typedef struct app_cfg_s{
     trnuc_fmt_t ofmt;
     /// @var app_cfg_s::demo
     /// @brief TBD
-    bool demo;
+    int demo;
     /// @var app_cfg_s::log_cfg
     /// @brief TBD
     mlog_config_t *log_cfg;
@@ -206,13 +205,13 @@ static void s_show_help()
     "--help        : output help message\n"
     "--version     : output version info\n"
     "--host[:port] : TRNU server host:port\n"
-    "--input       : input type (B:bin C:csv T:trnu)\n"
+    "--input       : input type (B:bin C:csv S:socket)\n"
     "--ofmt=[pcx]  : output format (P:pretty X:hex PX:pretty_hex C:csv\n"
     "--block=[lc]  : block on connect/listen (L:listen C:connect)\n"
     "--ifile       : input file\n"
     "--update=n    : TRN update N\n"
     "--log         : enable logging\n"
-    "--demo        : use trn_cli handler mechanism (demo handler, print formatted output)\n"
+    "--demo=n      : use trn_cli handler mechanism, w/ periodic TRN resets (mod n)\n"
     "\n";
     printf("%s",help_message);
     printf("%s",usage_message);
@@ -243,7 +242,7 @@ void parse_args(int argc, char **argv, app_cfg_t *cfg)
         {"block", required_argument, NULL, 0},
         {"ifile", required_argument, NULL, 0},
         {"update", required_argument, NULL, 0},
-        {"demo", no_argument, NULL, 0},
+        {"demo", required_argument, NULL, 0},
         {NULL, 0, NULL, 0}};
  
     // process argument list
@@ -271,8 +270,16 @@ void parse_args(int argc, char **argv, app_cfg_t *cfg)
                 // host
                 else if (strcmp("host", options[option_index].name) == 0) {
                     scpy = strdup(optarg);
-                    shost = strtok(scpy,":");
-                    sport = strtok(NULL,":");
+                    char *cp=scpy;
+                    while(isspace(*cp) && *cp!='\0' )cp++;
+
+                    if(*cp==':'){
+                        shost=NULL;
+                        sport = strtok(cp,":");
+                    }else{
+                    	shost = strtok(cp,":");
+                    	sport = strtok(NULL,":");
+                    }
                     if(NULL!=shost){
                         if(NULL!=cfg->trnu_host){
                             free(cfg->trnu_host);
@@ -296,8 +303,8 @@ void parse_args(int argc, char **argv, app_cfg_t *cfg)
                         case 'B':
                             cfg->input_src=SRC_BIN;
                             break;
-                        case 't':
-                        case 'T':
+                        case 's':
+                        case 'S':
                             cfg->input_src=SRC_TRNU;
                             break;
                        default:
@@ -340,7 +347,7 @@ void parse_args(int argc, char **argv, app_cfg_t *cfg)
                 }
                 // demo
                 else if (strcmp("demo", options[option_index].name) == 0) {
-                    cfg->demo=true;
+                    sscanf(optarg,"%d",&cfg->demo);
                 }
 
                 break;
@@ -359,6 +366,26 @@ void parse_args(int argc, char **argv, app_cfg_t *cfg)
             exit(0);
         }
     }// while
+
+    // use this host if unset
+    if(NULL==cfg->trnu_host){
+        // if unset, use local IP
+        char host[HOSTNAME_BUF_LEN]={0};
+        if(gethostname(host, HOSTNAME_BUF_LEN)==0 && strlen(host)>0){
+            struct hostent *host_entry;
+
+            if( (host_entry = gethostbyname(host))!=NULL){
+                //Convert into IP string
+                char *s =inet_ntoa(*((struct in_addr*) host_entry->h_addr_list[0]));
+                cfg->trnu_host = strdup(s);
+            } //find host information
+        }
+
+        if(NULL==cfg->trnu_host){
+            cfg->trnu_host=strdup("localhost");
+        }
+    }
+
     PDPRINT((stderr,"verbose    [%s]\n",(cfg->verbose?"Y":"N")));
     PDPRINT((stderr,"ifile      [%s]\n",cfg->ifile));
     PDPRINT((stderr,"input_src  [%d]\n",cfg->input_src));
@@ -367,7 +394,7 @@ void parse_args(int argc, char **argv, app_cfg_t *cfg)
     PDPRINT((stderr,"trnu_hbeat [%d]\n",cfg->trnu_hbeat));
     PDPRINT((stderr,"ofmt       [%02x]\n",cfg->ofmt));
     PDPRINT((stderr,"update_n   [%u]\n",cfg->update_n));
-    PDPRINT((stderr,"demo       [%c]\n",(cfg->demo?'Y':'N')));
+    PDPRINT((stderr,"demo       [%d]\n",cfg->demo));
 }
 // End function parse_args
 
@@ -402,7 +429,7 @@ static app_cfg_t *app_cfg_new()
         instance->ifile=NULL;
         instance->input_src=SRC_TRNU;
 
-        instance->trnu_host=strdup(TRNUCLI_TEST_TRNU_HOST);
+        instance->trnu_host=NULL;
         instance->trnu_port=TRNUCLI_TEST_TRNU_PORT;
         instance->trnu_hbeat=TRNUCLI_TEST_TRNU_HBEAT;
         instance->update_n=TRNUCLI_TEST_UPDATE_N;
@@ -438,7 +465,7 @@ static void app_cfg_destroy(app_cfg_t **pself)
             *pself=NULL;
         }
     }
-    
+    return;
 }
 
 static int s_tokenize(char *src, char ***dest, char *del, int ntok)
@@ -463,13 +490,15 @@ static int s_tokenize(char *src, char ***dest, char *del, int ntok)
 
 static int s_update_callback(trnu_pub_t *update)
 {
-    int retval=-1;
+    int retval=0;
 
     // demo callback : call the string formatter and output
     char *str=NULL;
     trnucli_update_str(update,&str,0,TRNUC_FMT_PRETTY);
-    fprintf(stdout,"%s\n",str);
-    if(NULL!=str)free(str);
+    if(NULL!=str){
+    	fprintf(stdout,"%s\n",str);
+        free(str);
+    }
     str=NULL;
 
     return retval;
@@ -519,6 +548,7 @@ static void s_init_log(int argc, char **argv, app_cfg_t *cfg)
     mlog_tprintf(cfg->log_id,"cmdline [%s]\n",g_cmd_line);
     mlog_tprintf(cfg->log_id,"build [%s]\n",TRNUCLI_TEST_BUILD);
 
+    return;
 }
 
 static int32_t s_read_csv_rec(mfile_file_t *src, char *dest, uint32_t len)
@@ -648,8 +678,10 @@ static int s_trnucli_process_update(trnu_pub_t *update, app_cfg_t *cfg)
     // call the string formatter and output
     char *str=NULL;
     trnucli_update_str(update,&str,0,cfg->ofmt);
-    fprintf(stdout,"%s\n",str);
-    if(NULL!=str)free(str);
+    if(NULL!=str){
+    	fprintf(stdout,"%s\n",str);
+        free(str);
+    }
     str=NULL;
 
     return retval;
@@ -682,41 +714,51 @@ static int s_trnucli_test_csv(app_cfg_t *cfg)
 
 static int s_trnucli_test_trnu(app_cfg_t *cfg)
 {
-    int retval=0;
+    int retval=-1;
     int test=-1;
+    static int call_count=0;
     trnucli_t *dcli = trnucli_new(NULL,cfg->flags,0.0);
     if( (test=trnucli_connect(dcli, cfg->trnu_host, cfg->trnu_port))==0){
         fprintf(stderr,"trnucli_connect [%d]\n",test);
     }else{
         fprintf(stderr,"trnucli_connect failed [%d]\n",test);
     }
-    fprintf(stderr,"%s - running\n",__func__);
-    // could set handler here (called by listener)...
-    if(cfg->demo){
+    if(cfg->demo>0){
+        // in demo mode, set a callback to
+        // process updates (called by trn_cli::listen()
     	trnucli_set_callback(dcli,s_update_callback);
     }
     while(!g_interrupt){
-        int test=-1;
         if( (test=trnucli_listen(dcli))==0){
-
-            // could call handler or handle here
-            if(!cfg->demo){
+            if(cfg->demo<=0){
+                // in normal mode, process the update here
 	            s_trnucli_process_update(dcli->update,cfg);
+            }else{
+                // in demo mode, reset TRN periodically and send heartbeat
+                if( (call_count>0) && (call_count%cfg->demo)==0){
+                    int rst=trnucli_reset_trn(dcli);
+                    fprintf(stderr,"%s - reset TRN [%d]\n\n",__func__,rst);
+                    int hbt=trnucli_hbeat(dcli);
+                    fprintf(stderr,"%s - hbeat TRN [%d]\n\n",__func__,hbt);
+                }
+                call_count++;
             }
         }else{
             fprintf(stderr,"listen ret[%d]\n",test);
         }
-//        sleep(1);
     }
-
+    // disconnect from server
     if( (test=trnucli_disconnect(dcli))!=0){
         fprintf(stderr,"trnucli_disconnect failed [%d]\n",test);
     }
 
+    // release instance
     trnucli_destroy(&dcli);
 
     if(g_interrupt){
-        mlog_tprintf(cfg->log_id,"INTERRUPTED sig[%d] - exiting\n",g_signal);
+        // interrupted by user
+        mlog_tprintf(cfg->log_id,"Interrupted sig[%d] - exiting\n",g_signal);
+        retval=0;
     }
     
     return retval;

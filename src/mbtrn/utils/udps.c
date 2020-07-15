@@ -350,7 +350,9 @@ static int s_app_main(msock_socket_t *s, app_cfg_t *cfg)
         PDPRINT((stderr,"binding [%s] fd[%d]\n",cfg->host,s->fd));
         int test=0;
         const int optionval = 1;
+#if !defined(__CYGWIN__)
         msock_set_opt(s, SO_REUSEPORT, &optionval, sizeof(optionval));
+#endif
         msock_set_opt(s, SO_REUSEADDR, &optionval, sizeof(optionval));
         if ( (test=msock_bind(s))==0) {
             uint32_t con_idx=0;
@@ -511,7 +513,9 @@ int main(int argc, char **argv)
     //    int so_reuseaddr=0;
     //    setsockopt(s->fd,SOL_SOCKET,SO_REUSEADDR,&so_reuseaddr,sizeof(int));
     //    int so_reuseport=0;
+//#if !defined(__CYGWIN__)
     //    setsockopt(s->fd,SOL_SOCKET,SO_REUSEPORT,&so_reuseport,sizeof(int));
+//#endif
     //    struct linger so_linger={0};
     //    setsockopt(s->fd,SOL_SOCKET,SO_LINGER,&so_linger,sizeof(so_linger));
     
