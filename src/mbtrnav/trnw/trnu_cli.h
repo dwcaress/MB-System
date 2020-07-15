@@ -138,6 +138,7 @@ extern "C" {
     int trnucli_set_callback(trnucli_t *self, update_callback_fn func);
     int trnucli_listen(trnucli_t *self);
     int trnucli_reset_trn(trnucli_t *self);
+    int trnucli_hbeat(trnucli_t *self);
     int trnucli_update_str(trnu_pub_t *self, char **dest, int len, trnuc_fmt_t fmt);
 
 #ifdef __cplusplus

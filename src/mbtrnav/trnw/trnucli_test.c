@@ -714,7 +714,7 @@ static int s_trnucli_test_csv(app_cfg_t *cfg)
 
 static int s_trnucli_test_trnu(app_cfg_t *cfg)
 {
-    int retval=0;
+    int retval=-1;
     int test=-1;
     static int call_count=0;
     trnucli_t *dcli = trnucli_new(NULL,cfg->flags,0.0);
@@ -734,10 +734,12 @@ static int s_trnucli_test_trnu(app_cfg_t *cfg)
                 // in normal mode, process the update here
 	            s_trnucli_process_update(dcli->update,cfg);
             }else{
-                // in demo mode, reset TRN periodically
+                // in demo mode, reset TRN periodically and send heartbeat
                 if( (call_count>0) && (call_count%cfg->demo)==0){
                     int rst=trnucli_reset_trn(dcli);
                     fprintf(stderr,"%s - reset TRN [%d]\n\n",__func__,rst);
+                    int hbt=trnucli_hbeat(dcli);
+                    fprintf(stderr,"%s - hbeat TRN [%d]\n\n",__func__,hbt);
                 }
                 call_count++;
             }
@@ -745,15 +747,18 @@ static int s_trnucli_test_trnu(app_cfg_t *cfg)
             fprintf(stderr,"listen ret[%d]\n",test);
         }
     }
-
+    // disconnect from server
     if( (test=trnucli_disconnect(dcli))!=0){
         fprintf(stderr,"trnucli_disconnect failed [%d]\n",test);
     }
 
+    // release instance
     trnucli_destroy(&dcli);
 
     if(g_interrupt){
+        // interrupted by user
         mlog_tprintf(cfg->log_id,"Interrupted sig[%d] - exiting\n",g_signal);
+        retval=0;
     }
     
     return retval;
