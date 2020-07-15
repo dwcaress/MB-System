@@ -205,7 +205,7 @@ static void s_show_help()
     "--help        : output help message\n"
     "--version     : output version info\n"
     "--host[:port] : TRNU server host:port\n"
-    "--input       : input type (B:bin C:csv T:trnu)\n"
+    "--input       : input type (B:bin C:csv S:socket)\n"
     "--ofmt=[pcx]  : output format (P:pretty X:hex PX:pretty_hex C:csv\n"
     "--block=[lc]  : block on connect/listen (L:listen C:connect)\n"
     "--ifile       : input file\n"
@@ -303,8 +303,8 @@ void parse_args(int argc, char **argv, app_cfg_t *cfg)
                         case 'B':
                             cfg->input_src=SRC_BIN;
                             break;
-                        case 't':
-                        case 'T':
+                        case 's':
+                        case 'S':
                             cfg->input_src=SRC_TRNU;
                             break;
                        default:
