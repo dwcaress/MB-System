@@ -158,6 +158,7 @@ extern "C" {
     // TODO: add update age threshold/rejection
     // TODO: add UDP buffer configuration
     // TODO: add drain function to empty UDP buffer
+    // TODO: add update copy and/or buffering
 
     // get a new trnu_cli instance
     // caller must release resources using trnucli_destroy
