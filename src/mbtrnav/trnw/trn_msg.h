@@ -243,8 +243,8 @@ typedef struct trn_estimate_s{
     double cov[4];
 }trnu_estimate_t;
 
-typedef struct trn_offset_pub_s{
-    // sync bytes (see NW_PUB_SYNC)
+typedef struct trnu_pub_s{
+    // sync bytes (see TRNU_PUB_SYNC)
     uint32_t sync;
     // TRN estimates
     // 0:pose_t 1:mle 2:mmse
@@ -257,7 +257,7 @@ typedef struct trn_offset_pub_s{
     int filter_state;
     // last measurement successful
     int success;
-    // TRN is_converged (TRN isConverged())
+    // TRN is_converged (deprecated, use is_valid)
     short int is_converged;
     // TRN is_valid (covariance thresholds)
     short int is_valid;
