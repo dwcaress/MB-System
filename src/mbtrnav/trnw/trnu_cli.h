@@ -116,6 +116,7 @@ typedef enum{
 // callback function typedef
 typedef int (* update_callback_fn)(trnu_pub_t *update);
 
+// trnu_cli instance
 typedef struct trnucli_s{
     // struct trnucli_s::trnu
     // server socket connection
@@ -153,6 +154,11 @@ typedef enum{
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+    // TODO: add update age threshold/rejection
+    // TODO: add UDP buffer configuration
+    // TODO: add drain function to empty UDP buffer
+
     // get a new trnu_cli instance
     // caller must release resources using trnucli_destroy
     // fn   : optional update callback (may be NULL)
