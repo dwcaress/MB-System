@@ -159,7 +159,7 @@ typedef struct app_cfg_s{
     trnuc_fmt_t ofmt;
     /// @var app_cfg_s::demo
     /// @brief TBD
-    bool demo;
+    int demo;
     /// @var app_cfg_s::log_cfg
     /// @brief TBD
     mlog_config_t *log_cfg;
@@ -211,7 +211,7 @@ static void s_show_help()
     "--ifile       : input file\n"
     "--update=n    : TRN update N\n"
     "--log         : enable logging\n"
-    "--demo        : use trn_cli handler mechanism (demo handler, print formatted output)\n"
+    "--demo=n      : use trn_cli handler mechanism, w/ periodic TRN resets (mod n)\n"
     "\n";
     printf("%s",help_message);
     printf("%s",usage_message);
@@ -242,7 +242,7 @@ void parse_args(int argc, char **argv, app_cfg_t *cfg)
         {"block", required_argument, NULL, 0},
         {"ifile", required_argument, NULL, 0},
         {"update", required_argument, NULL, 0},
-        {"demo", no_argument, NULL, 0},
+        {"demo", required_argument, NULL, 0},
         {NULL, 0, NULL, 0}};
  
     // process argument list
@@ -347,7 +347,7 @@ void parse_args(int argc, char **argv, app_cfg_t *cfg)
                 }
                 // demo
                 else if (strcmp("demo", options[option_index].name) == 0) {
-                    cfg->demo=true;
+                    sscanf(optarg,"%d",&cfg->demo);
                 }
 
                 break;
@@ -394,7 +394,7 @@ void parse_args(int argc, char **argv, app_cfg_t *cfg)
     PDPRINT((stderr,"trnu_hbeat [%d]\n",cfg->trnu_hbeat));
     PDPRINT((stderr,"ofmt       [%02x]\n",cfg->ofmt));
     PDPRINT((stderr,"update_n   [%u]\n",cfg->update_n));
-    PDPRINT((stderr,"demo       [%c]\n",(cfg->demo?'Y':'N')));
+    PDPRINT((stderr,"demo       [%d]\n",cfg->demo));
 }
 // End function parse_args
 
@@ -723,19 +723,19 @@ static int s_trnucli_test_trnu(app_cfg_t *cfg)
     }else{
         fprintf(stderr,"trnucli_connect failed [%d]\n",test);
     }
-    fprintf(stderr,"%s - running\n",__func__);
-    // could set handler here (called by listener)...
-    if(cfg->demo){
+    if(cfg->demo>0){
+        // in demo mode, set a callback to
+        // process updates (called by trn_cli::listen()
     	trnucli_set_callback(dcli,s_update_callback);
     }
     while(!g_interrupt){
         if( (test=trnucli_listen(dcli))==0){
-
-            // could call handler or handle here
-            if(!cfg->demo){
+            if(cfg->demo<=0){
+                // in normal mode, process the update here
 	            s_trnucli_process_update(dcli->update,cfg);
             }else{
-                if( (call_count>0) && (call_count%10)==0){
+                // in demo mode, reset TRN periodically
+                if( (call_count>0) && (call_count%cfg->demo)==0){
                     int rst=trnucli_reset_trn(dcli);
                     fprintf(stderr,"%s - reset TRN [%d]\n\n",__func__,rst);
                 }
@@ -744,7 +744,6 @@ static int s_trnucli_test_trnu(app_cfg_t *cfg)
         }else{
             fprintf(stderr,"listen ret[%d]\n",test);
         }
-//        sleep(1);
     }
 
     if( (test=trnucli_disconnect(dcli))!=0){
@@ -754,7 +753,7 @@ static int s_trnucli_test_trnu(app_cfg_t *cfg)
     trnucli_destroy(&dcli);
 
     if(g_interrupt){
-        mlog_tprintf(cfg->log_id,"INTERRUPTED sig[%d] - exiting\n",g_signal);
+        mlog_tprintf(cfg->log_id,"Interrupted sig[%d] - exiting\n",g_signal);
     }
     
     return retval;
