@@ -36,6 +36,7 @@
 
 /* GMT5 header file */
 #include "gmt_dev.h"
+
 /*  Compatibility with old lower-function/macro names use prior to GMT 5.3.0 */
 #if GMT_MAJOR_VERSION == 5 && GMT_MINOR_VERSION < 3
 #define gmt_M_180_range GMT_180_RANGE

@@ -145,3 +145,4 @@ src/photo/mbphotomosaic
 src/photo/mbgetphotocorrection
 src/qt-mbgui/qrc_resources.cpp
 src/mbtrnav/trnu-cli
+src/mbtrn/mb12csv
