@@ -42,7 +42,6 @@
 #endif
 
 // Common to QNX and NIX versions
-// 
 Replay::Replay(const char* loghome, const char *map, const char *host, int port)
   : logdir(0),
      lastTime(0.0),  nupdates(0L), nreinits(0),  trn_log(0),  dvl_log(0), nav_log(0), mbtrn_log(0), dvl_csv(0)
@@ -80,7 +79,6 @@ Replay::Replay(const char* loghome, const char *map, const char *host, int port)
 
   // Use TRN config from the command line
   // for map, host, and port if they were provided.
-  // 
   if (map)
   {
     if (trn_attr->_mapFileName) delete trn_attr->_mapFileName;
@@ -92,7 +90,7 @@ Replay::Replay(const char* loghome, const char *map, const char *host, int port)
     trn_attr->_terrainNavServer = strdup(host);
     trn_attr->_terrainNavPort = port;
   }
-  
+
   fprintf(stderr, "\n"
                 "Server      : %s  %d\n"
                 "Vehicle Cfg : %s\n"
@@ -133,9 +131,8 @@ static double degToRad(double deg)
 #endif
 
 // Call the appropriate function based on which instruments were used
-// for TRN, determined by flags set in the terrainAid.cfg file and 
+// for TRN, determined by flags set in the terrainAid.cfg file and
 // loaded here in loadCfgAttributes().
-// 
 int Replay::getNextRecordSet(poseT *pt, measT *mt)
 {
   nupdates++;
@@ -143,31 +140,26 @@ int Replay::getNextRecordSet(poseT *pt, measT *mt)
   if (trn_attr->_lrauvDvlFilename)
   {
     // Read all poseT and measT data from the LRAUV dvl CSV file
-    // 
     return getLRAUVDvlRecordSet(pt, mt);
   }
   else if (trn_attr->_useMbTrnData)
   {
     // Read all poseT and measT data from the MbTrn.log
-    // 
     return getMbTrnRecordSet(pt, mt);
   }
 
 
   // Get the data from the other log files
-  // 
-    DataField *f=NULL;
+  DataField *f=NULL;
 
-  try 
+  try
   {
     // Read a TRN record. TRN logs every 3 seconds, or 0.33 HZ
-    // 
     trn_log->read();
     pt->time = trn_log->timeTag()->value();
 
     // Get [x,y,z], [phi,theta,psi], [wx,wy,wz], [vx,vy,vz],
     // and flags from the TRN record
-    // 
     // navN, navN, depth
     trn_log->fields.get( 3,&f); pt->x = atof(f->ascii());
     trn_log->fields.get( 4,&f); pt->y = atof(f->ascii());
@@ -203,7 +195,7 @@ int Replay::getNextRecordSet(poseT *pt, measT *mt)
       mt->measStatus[0] = mt->measStatus[1] = mt->measStatus[2]
                         = mt->measStatus[3] = true;
 
-    
+
       mt->x     = pt->x;
       mt->y     = pt->y;
       mt->z     = pt->z;
@@ -212,7 +204,6 @@ int Replay::getNextRecordSet(poseT *pt, measT *mt)
       mt->psi   = pt->psi;
 
       // Collect the remaining measT elements nav record
-      // 
       double nav_time = 0.;
       do
       {
@@ -263,14 +254,11 @@ int Replay::getNextRecordSet(poseT *pt, measT *mt)
 
 // This function returns the next DVL record set in pt and mt.
 // Read from the CSV file specified in the config.
-// 
 // Function returns 1 when a record was retrieved successfully
 // and 0 when unsuccessful (usually means EOF was reached).
-// 
 int Replay::getLRAUVDvlRecordSet(poseT *pt, measT *mt)
 {
   // Requires an open CSV file.
-  // 
   if (!dvl_csv)
   {
     fprintf(stderr, "\n\tReplay - No dvl data file: %s\n\n", trn_attr->_lrauvDvlFilename);
@@ -278,7 +266,6 @@ int Replay::getLRAUVDvlRecordSet(poseT *pt, measT *mt)
   }
 
   // Read next line into buffer. Retirn 0 upon EOF
-  //
   char csvbuf[3000];
   if (!fgets((char*)csvbuf, sizeof(csvbuf), dvl_csv))
     return 0;
@@ -289,15 +276,13 @@ int Replay::getLRAUVDvlRecordSet(poseT *pt, measT *mt)
 // This function returns the next MbTrn record set in pt and mt.
 // Function returns 1 when a record was retrieved successfully
 // and 0 when unsuccessful (usually means EOF was reached).
-// 
 int Replay::getMbTrnRecordSet(poseT *pt, measT *mt)
 {
     DataField *f=NULL;
 
-  try 
+  try
   {
     // Read a TRN record. TRN logs every 3 seconds, or 0.33 HZ
-    // 
     mbtrn_log->read();
     double lat, lon;
     mbtrn_log->fields.get( 1,&f); pt->time = atof(f->ascii());
@@ -308,7 +293,6 @@ int Replay::getMbTrnRecordSet(poseT *pt, measT *mt)
                        Math::degToRad(lon),
                        NavUtils::geoToUtmZone(Math::degToRad(lat),Math::degToRad(lon)),
                        &pt->x, &pt->y);
-//                       10, &pt->x, &pt->y);
 
     mbtrn_log->fields.get( 4,&f); pt->z = atof(f->ascii());
     mbtrn_log->fields.get( 5,&f); pt->psi = atof(f->ascii());
@@ -362,14 +346,12 @@ int Replay::getMbTrnRecordSet(poseT *pt, measT *mt)
   return 0;
 }
 
-// 
 int Replay::openLogFiles()
 {
   char logfile[1000];
   fprintf(stdout, "Replay - Loading log files in %s...\n", logdir);
 
   // Open the "special cases" if needed
-  // 
   if (trn_attr->_lrauvDvlFilename)
   {
     // Open the dvl CSV file and prep for reading
@@ -391,7 +373,6 @@ int Replay::openLogFiles()
   }
 
   // Default log files
-  // 
   sprintf(logfile, "%s/TerrainAid.log", logdir);
   fprintf(stdout, "Replay - Opening %s...\n", logfile);
   trn_log = new DataLogReader(logfile);
@@ -411,7 +392,6 @@ int Replay::openLogFiles()
 // If the user enters "native" as the argument in the -h option,
 // return false.
 // On QNX, always use the trn_server for TRN
-// 
 Boolean Replay::useTRNServer()
 {
 #ifdef _QNX
@@ -440,10 +420,9 @@ Boolean Replay::useLcmTrn()
 
 
 
-// Could be common to QNX and NIX versions. 
+// Could be common to QNX and NIX versions.
 // Just use this function in the QNX version
 // since it works OK.
-// 
 int Replay::loadCfgAttributes()
 {
   char cfgfile[300];
@@ -462,7 +441,6 @@ int Replay::loadCfgAttributes()
   }
 
   // Initialize to default values
-  // 
   trn_attr->_mapFileName = NULL;
   trn_attr->_map_type = 2;
   trn_attr->_filter_type = 2;
@@ -488,7 +466,6 @@ int Replay::loadCfgAttributes()
 
   // Get   key = value   pairs from non-comment lines in the cfg.
   // If the key matches a known config item, extract and save the value.
-  // 
   char key[100], value[200];
   while (getNextKeyValue(cfg, key, value))
   {
@@ -527,16 +504,14 @@ int Replay::loadCfgAttributes()
 // Return the next key and value pair in the cfg file.
 // Function returns 0 if no key/value pair was found,
 // otherwise 1.
-// 
 int Replay::getNextKeyValue(FILE *cfg, char key[], char value[])
 {
   // Continue reading from cfg skipping comment lines
-  // 
-  char line[300]; 
+  //
+  char line[300];
   while (fgets(line, sizeof(line), cfg))
   {
     // Chop off leading whitespace, then look for '//'
-    // 
     size_t i = 0;
     while(line[i] == ' ' || line[i] == '\t' || line[i] == '\n' || line[i] == '\r'
       || line[i] == '\f' || line[i] == '\v') i++;
@@ -545,8 +520,7 @@ int Replay::getNextKeyValue(FILE *cfg, char key[], char value[])
     {
       // If a non-comment line was read from the config file,
       // extract the key and value
-      // 
-      char *loc; 
+      char *loc;
       sscanf(line, "%s = %s", key, value);
       if ( (loc = strchr(value, ';')) ) *loc = '\0';  // Remove ';' from the value
       return 1;
@@ -559,7 +533,6 @@ int Replay::getNextKeyValue(FILE *cfg, char key[], char value[])
 
 
 // Common to QNX and NIX versions
-// 
 TerrainNav* Replay::connectTRN()
 {
   TerrainNav *_tercom = 0;
@@ -571,10 +544,7 @@ TerrainNav* Replay::connectTRN()
 
   try
   {
-    // On linux and cygwin, we can use a native TerrainNav object instead
-    // of relying on a trn_server. Call useTRNServer() to decide.
-    // 
-    char buf[300];
+    char buf[REPLAY_PATHNAME_LENGTH];
     char *mapdir  = getenv("TRN_MAPFILES");
     char *datadir = getenv("TRN_DATAFILES");
     sprintf(buf, "%s/%s", mapdir, trn_attr->_mapFileName);
@@ -598,7 +568,7 @@ TerrainNav* Replay::connectTRN()
       sleep(1);
       _tercom = new TerrainNavClient(trn_attr->_terrainNavServer,
                                      trn_attr->_terrainNavPort,
-                                     trn_attr->_mapFileName, 
+                                     trn_attr->_mapFileName,
                                      trn_attr->_vehicleCfgName,
                                      trn_attr->_particlesName,
                                      TRNUtils::basename(logdir),
@@ -606,7 +576,9 @@ TerrainNav* Replay::connectTRN()
     }
     else
     {
-      _tercom = new TerrainNav(trn_attr->_mapFileName, 
+      // On macOS, linux, and cygwin, we can use a native TerrainNav object
+      // instead of relying on a trn_server. Call useTRNServer() to decide.
+      _tercom = new TerrainNav(trn_attr->_mapFileName,
                                trn_attr->_vehicleCfgName,
                                trn_attr->_particlesName,
                                trn_attr->_filter_type,
@@ -623,7 +595,6 @@ TerrainNav* Replay::connectTRN()
   if (_tercom)
   {
     // After moving is_connected() to public section, we can use this code block
-    //
     if (_tercom &&  (!_tercom->is_connected() || !_tercom->initialized()))
     {
       fprintf(stderr, "replay -:Not initialized. See trn_server error messages...\n");
@@ -631,13 +602,11 @@ TerrainNav* Replay::connectTRN()
     }
 
     // If we reach here then we've connected
-    //
     fprintf(stdout, "replay -:Should be Connected to server if no error messages...\n");
 
     fprintf(stdout, "replay -:Lets just set the interpret measure attitude flag to true...\n");
 
     // The following calls to setup TRN lifted from TerrainAidDriver
-    // 
     _tercom->setInterpMeasAttitude(true);
 
     //choose filter settings based on whether kearfott is available and if
@@ -646,10 +615,10 @@ TerrainNav* Replay::connectTRN()
       _tercom->useLowGradeFilter();
     else
       _tercom->useHighGradeFilter();
-     
+
     //turn on filter reintialization if set in terrainAid.cfg
     _tercom->setFilterReinit(trn_attr->_allowFilterReinits);
-     
+
     //turn on modified weighting if set in terrainAid.cfg
     _tercom->setModifiedWeighting(trn_attr->_useModifiedWeighting);
   }
@@ -668,7 +637,6 @@ int Replay::parseDvlCsvLine(const char *line, poseT *pt, measT *mt)
   mt->numMeas  = 0;
 
   // Get position data
-  // 
   for (int c = 0; c < DVL_RANGES; c++)
   {
     char *token = strtok((char*)buf, ",");
@@ -686,7 +654,6 @@ int Replay::parseDvlCsvLine(const char *line, poseT *pt, measT *mt)
       pt->time = atof(token);
 
       // Ensure that measurements are at least 3 seconds apart
-      // 
       if (pt->time < lastTime + DVL_SAMPLE_PERIOD)
         return -1;
 
@@ -711,7 +678,6 @@ int Replay::parseDvlCsvLine(const char *line, poseT *pt, measT *mt)
   //printf("  yaw = %.6f\n", pt->phi); // sleep(1);
 
   // Now get measure data == beam data
-  // 
   mt->time = pt->time;
   mt->covariance = (double*)realloc(mt->covariance, N_COVAR*sizeof(double));
   mt->ranges     = (double*)realloc(mt->ranges,     mt->numMeas*sizeof(double));
@@ -722,7 +688,6 @@ int Replay::parseDvlCsvLine(const char *line, poseT *pt, measT *mt)
   mt->measStatus = (bool*)  realloc(mt->measStatus, mt->numMeas*sizeof(bool));
 
   // There are 3 data items per beam, 3 * numMeas
-  // 
   for (int b = 0; b < mt->numMeas * 3; b++)
   {
     char *token = strtok((char*)buf, ",");
@@ -736,7 +701,6 @@ int Replay::parseDvlCsvLine(const char *line, poseT *pt, measT *mt)
     //printf("  %d = %s\n", b/3, token);
 
     // these three go with beam number (b/3)
-    // 
     if (0 == b%3)      // skip beam number
       ;
     else if (1 == b%3) // measStatus
@@ -747,7 +711,6 @@ int Replay::parseDvlCsvLine(const char *line, poseT *pt, measT *mt)
   }
 
   // There shouldn't be any more tokens. Let's check...
-  // 
   if (strtok((char*)buf, ","))
   {
     fprintf(stderr, "Replay - unexpected tokens at the end of line %ld\n",

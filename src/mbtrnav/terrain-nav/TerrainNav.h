@@ -29,6 +29,7 @@
 #include "TerrainMap.h"
 #include "TerrainMapOctree.h"
 #include "TerrainMapDEM.h"
+#include "TNavConfig.h"
 
 #include <cmath>
 #include <fstream>
