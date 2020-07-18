@@ -28,8 +28,6 @@
 #include <netinet/in.h>
 #include <sys/time.h>
 
-#define  LCM_HOST  "USING.LCM.COMMS"   // Host id to indicate LCM usae
-
 class DataLogReader;
 struct TRN_attr;
 struct poseT;
@@ -37,11 +35,13 @@ struct measT;
 class TerrainNav;
 
 #define  Boolean  bool
-
+#define  LCM_HOST  "USING.LCM.COMMS"   // Host id to indicate LCM usae
+#define  REPLAY_PATHNAME_LENGTH  300    // buffer lengths for full pathnames
 #define  DVL4TRN  0.4 // Seconds within which a DVL record matches TRN record
 #define  NAV4TRN  0.2 // Seconds within which a nav record matches TRN record
-#define REPLAY_VNORM_DIM 3
-#undef WITH_REPLAY_DEGTORAD
+#define  REPLAY_VNORM_DIM 3
+
+#undef   WITH_REPLAY_DEGTORAD
 
 enum DvlCsvFields
 {
@@ -112,7 +112,6 @@ protected:
   long nupdates, nreinits;
 
   // Use file streams instead of DataLogReaders
-  // 
   DataLogReader *trn_log, *dvl_log, *nav_log, *mbtrn_log;
   FILE *dvl_csv;
 
