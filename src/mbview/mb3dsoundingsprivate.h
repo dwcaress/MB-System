@@ -1,7 +1,7 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb3dsoundingsprivate.h	9/24/2003
  *
- *    Copyright (c) 2007-2019 by
+ *    Copyright (c) 2007-2020 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039

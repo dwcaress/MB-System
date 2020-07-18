@@ -1,7 +1,7 @@
 /*--------------------------------------------------------------------
  *    The MB-system:    mbstripNaN.c        8/8/02
  *
- *    Copyright (c) 2002-2019 by
+ *    Copyright (c) 2002-2020 by
  *    Mike McCann (mccann@mbari.org)
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute

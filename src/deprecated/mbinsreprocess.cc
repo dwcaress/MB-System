@@ -2,7 +2,7 @@
  *    The MB-system:	mbinsreprocess.c	11/21/2004
  *
  *
- *    Copyright (c) 2014-2019 by
+ *    Copyright (c) 2014-2020 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039

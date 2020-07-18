@@ -1,9 +1,9 @@
 /* FILENAME      : TerrainNavClient.cpp
  * AUTHOR        : Rich Henthorn
  * DATE          : 04/17/13
- * 
- * LAST MODIFIED : 
- * MODIFIED BY   : 
+ *
+ * LAST MODIFIED :
+ * MODIFIED BY   :
  * -----------------------------------------------------------------------------
  * Modification History
  * -----------------------------------------------------------------------------
@@ -19,6 +19,7 @@
 #include "myexcept.h"
 #endif
 #include "TerrainNavClient.h"
+#include "TRNUtils.h"
 
 /******************************************************************************
  TRANSITION MATRIX
@@ -42,12 +43,11 @@
 TerrainNavClient::TerrainNavClient()
   :TerrainNav()
 {
-    
+
 }
 
 // Just establish a connection to a server that does not need initialization.
 // Used to connect to the Trn server in mbtrnpp
-// 
 TerrainNavClient::TerrainNavClient(char *server_ip, int port)
   :TerrainNav(), _connected(false), _mbtrn_server_type(true), _server_ip(NULL), _sockport(port)
 {
@@ -56,19 +56,38 @@ TerrainNavClient::TerrainNavClient(char *server_ip, int port)
   _initialized = true;
 }
 
+// Use default ctor and initialize only the members needed for client
 TerrainNavClient::TerrainNavClient(char *server_ip, int port,
-				   char *mapName, char *vehicleSpecs, char *particlefile, char *logdir,
-				   const int &filterType, const int &mapType)
-  : TerrainNav(mapName, vehicleSpecs, particlefile, filterType, mapType, logdir),
-     _connected(false), _mbtrn_server_type(false),_server_ip(NULL), _sockport(port)
+           char *mapName, char *vehicleSpecs, char *particlefile, char *logdir,
+           const int &filterType, const int &mapType)
+  : TerrainNav(), _sockport(port)
 {
-    _server_ip = (NULL!=server_ip ? strdup(server_ip) : NULL);
-    _logdir    = (NULL!=logdir ? strdup(logdir) : NULL);
+  // initialize member variables from the argument list
+  // do not load maps, do not call initVariables() as those are uneeded
+  this->mapFile = STRDUPNULL(mapName);
+  this->vehicleSpecFile = STRDUPNULL(vehicleSpecs);
+  this->saveDirectory = STRDUPNULL(logdir);
+  this->particlesFile = STRDUPNULL(particlefile);
+  this->tNavFilter = NULL;
+  this->terrainMap = NULL;
+  this->filterType = filterType;
+  this->mapType = mapType;
+  this->allowFilterReinits = true;
+
+  // Initialize TNavConfig
+  TNavConfig::instance()->setMapFile(this->mapFile);
+  TNavConfig::instance()->setVehicleSpecsFile(this->vehicleSpecFile);
+  TNavConfig::instance()->setParticlesFile(this->particlesFile);
+  TNavConfig::instance()->setLogDir(this->saveDirectory);
+
+  _server_ip = (NULL!=server_ip ? strdup(server_ip) : NULL);
+  _logdir    = (NULL!=logdir ? strdup(logdir) : NULL);
   _initialized = false;
 
   init_comms();
   init_server();
-
+  logs(TL_OMASK(TL_TERRAIN_NAV, TL_LOG),
+    "TerrainNavClient::Constructor finished.\n");
 }
 
 TerrainNavClient::~TerrainNavClient()
@@ -99,19 +118,23 @@ void TerrainNavClient::init_comms()
 
   // Set up client info
   // Beam former sends data to us
-  //
-    if(NULL==_server_ip){
-        fprintf(stderr,"WARN - %s NULL _server_ip\n",__FUNCTION__);
-    }
+  if(NULL==_server_ip)
+  {
+     fprintf(stderr,"WARN - %s NULL _server_ip\n",__FUNCTION__);
+  }
+
   _server_addr.sin_family      = AF_INET;
   _server_addr.sin_addr.s_addr = inet_addr(_server_ip);
   _server_addr.sin_port        = htons(_sockport);
 
   if (connect(_sockfd, (struct sockaddr *)&_server_addr, sizeof(_server_addr))
-	      < 0) {
-    printf("TerrainNavClient: can't connect to server: %d\n", errno);
+	      < 0)
+  {
+    perror("TerrainNavClient: can't connect to server");
+    fprintf(stderr, "IP: %s  Port: %d\n", _server_ip, _sockport);
   }
-  else {
+  else
+  {
     struct timeval tv;
     tv.tv_sec = 150;
     tv.tv_usec = 0;
@@ -125,7 +148,6 @@ void TerrainNavClient::init_comms()
 bool TerrainNavClient::is_connected()
 {
   // Don't bother checking unless we have initialized comms successfully
-  //
   if (_connected) {
     struct timeval tv;
     tv.tv_sec = 0;
@@ -140,10 +162,10 @@ bool TerrainNavClient::is_connected()
       if (0 == recv(_sockfd, temp, 1, MSG_PEEK)) {
 	       printf("TerrainNavClient::is_connected() - Server closed connection!\n");
 	       ::close(_sockfd);    // Client disconnected
-         _connected = false; 
+         _connected = false;
       }
       else {
-	       _connected = true;   // Connected and there is data to read 
+         _connected = true;   // Connected and there is data to read
       }
     }
     else {
@@ -155,7 +177,6 @@ bool TerrainNavClient::is_connected()
 }
 
 // throws a TRNConnection exception if TRN has hung up
-//
 char TerrainNavClient::get_msg()
 {
   bool OK = true;
@@ -176,20 +197,20 @@ char TerrainNavClient::get_msg()
             //len);
             perror("TerrainNavClient::get_msg");
             printf("\n\t\tTerrainNavClient::get_msg, errno = %d [%s]\n", saveErrno,strerror(saveErrno));
-            
+
             //if ((sl == 0 || errno == EINTR) && --ntries > 0) { // try again
             if ((saveErrno == EINTR) && --ntries > 0)
             { // try again
                 //printf("Trying to get rest of message after an interrupt.\n");
                 continue;
             }
-            
+
             // Check to see if server hung up
             if (sl==0) {
                 // server orderly shutdown
                 printf("\n\t\tTerrainNavClient::recv return 0 - server shut down\n");
             }
-            
+
             // disconnected or unrecoverable error, quit loop
             OK=false;
             break;
@@ -210,13 +231,11 @@ char TerrainNavClient::get_msg()
   else
   {
     // No connection
-    //
     OK = false;
   }
 
 
   // Server hung-up
-  //
   if (!OK)
   {
     _connected = false;
@@ -231,7 +250,6 @@ char TerrainNavClient::get_msg()
 #define TRN_CHUNK_SIZE  512
 
 // throws a TRNConnection exception if TRN has hung up
-//
 size_t TerrainNavClient::send_msg(commsT& msg)
 {
   size_t sl = 0;
@@ -239,13 +257,11 @@ size_t TerrainNavClient::send_msg(commsT& msg)
   //msg.to_s(_comms_buf, sizeof(_comms_buf)));
 
   // Check to see if client is still connected first
-  //
   if (is_connected()) {
     memset(_comms_buf, 0, sizeof(_comms_buf));
     msg.serialize(_comms_buf);
 
     // Send the whole message
-    //
 #if 0
     if (msg.msg_type == TRN_MEAS)
     {
@@ -265,7 +281,6 @@ size_t TerrainNavClient::send_msg(commsT& msg)
     // Otherwise, to workaround the QNX tcp/ip bug we need to break messages up
     // into 512-byte chunks. The bug comes into play when sending measure updates
     // with many beams.
-    // 
     if (_mbtrn_server_type)
     {
       sl = send(_sockfd, _comms_buf, sizeof(_comms_buf), 0);
@@ -298,25 +313,29 @@ size_t TerrainNavClient::send_msg(commsT& msg)
   return sl;
 }
 
-// Initialize the server with map and config filenames. 
-//
+// Initialize the server with map and config filenames.
 void TerrainNavClient::init_server()
 {
   // filter type and map type encoded in single integer
   // param = filter*100 + map
-  //
   char cmt = char(mapType);
   cmt *= 10;
   char cft = char(filterType);
   char param = cmt + cft;
 
+  // Use basenames (no pathnames) of files and folders when connecting
+  // to trn-server. Let the server find the files in its environment.
   printf("TerrainNavClient::init_server() - server initializatiing...\n");
-  commsT init(TRN_INIT, param, this->mapFile, this->vehicleSpecFile, this->particlesFile, this->saveDirectory);
+  commsT init(TRN_INIT, param,
+              TRNUtils::basename(TNavConfig::instance()->getMapFile()),
+              TRNUtils::basename(TNavConfig::instance()->getVehicleSpecsFile()),
+              TRNUtils::basename(TNavConfig::instance()->getParticlesFile()),
+              TRNUtils::basename(TNavConfig::instance()->getLogDir())
+             );
 
   _initialized = false;
   if (0 != send_msg(init)) {
     // Check for ack response
-    //
     if (TRN_ACK != get_msg()) {
       printf("TerrainNavClient::init_server() - server initialization failed!\n");
       _initialized = false;
@@ -335,7 +354,6 @@ void TerrainNavClient::estimatePose(poseT* estimate, const int &type)
 {
   // Send request to server for estimate
   // Type = 1 is MLE, 2 is MMSE
-  //
   commsT *pose;
   if (type == 1)
     pose = new commsT(TRN_MLE, *estimate);
@@ -345,7 +363,6 @@ void TerrainNavClient::estimatePose(poseT* estimate, const int &type)
   for (int i = 0; i < 2; i++)
     if (0 != send_msg(*pose)) {
       // Check for response
-      //
       char ret_msg = get_msg();
       if (TRN_NACK == ret_msg)
       {
@@ -363,19 +380,17 @@ void TerrainNavClient::estimatePose(poseT* estimate, const int &type)
     }
 
   delete pose;
-  return;   
+  return;
 }
 
 void TerrainNavClient::motionUpdate(poseT* incomingNav)
 {
   // Send measurement update to server
-  //
   commsT motn(TRN_MOTN, *incomingNav);
 
   for (int i = 0; i < 2; i++)
     if (0 != send_msg(motn)) {
       // Check for response
-      //
       char ret_msg = get_msg();
       if (TRN_ACK != ret_msg) {
         printf("TerrainNavClient::motionUpdate() - server choked on motion update\n");
@@ -387,20 +402,17 @@ void TerrainNavClient::motionUpdate(poseT* incomingNav)
   return;
 }
 
-void TerrainNavClient::measUpdate(measT* incomingMeas, const int &type) 
+void TerrainNavClient::measUpdate(measT* incomingMeas, const int &type)
 {
   // Send measurement update to server
-  //
   commsT meas(TRN_MEAS, type, *incomingMeas);
 
   for (int i = 0; i < 2; i++)
     if (0 != send_msg(meas)) {
       // Check for response
-      //
       char ret_msg = get_msg();
 
       // The return message is the measT object with updated alphas
-      // 
       // if (TRN_ACK != ret_msg) {
       if (TRN_MEAS != ret_msg) {
         printf("TerrainNavClient::measUpdate() - server choked on measure update\n");
@@ -410,8 +422,7 @@ void TerrainNavClient::measUpdate(measT* incomingMeas, const int &type)
       {
         //printf("TerrainNavClient::recv'd TRN_MEAS %f\n", _server_msg.mt.alphas[0]);
         // Unpack the returned measT, then copy the contents into incomingMeas
-        // 
-        *incomingMeas = _server_msg.mt;        
+        *incomingMeas = _server_msg.mt;
         break;
       }
     }
@@ -423,9 +434,9 @@ void TerrainNavClient::measUpdate(measT* incomingMeas, const int &type)
 /* Function: outstandingMeas
  * Usage: tercom->outstandingMeas;
  * -------------------------------------------------------------------------*/
-/*! Returns a boolean indicating if there are any measurements 
+/*! Returns a boolean indicating if there are any measurements
  * not yet incorporated into the PDF and waiting for more recent inertial
- * measurement data. 
+ * measurement data.
  */
 bool TerrainNavClient::outstandingMeas()
 {
@@ -436,7 +447,6 @@ bool TerrainNavClient::outstandingMeas()
   for (int i = 0; i < 2; i++)
     if (0 != send_msg(out)) {
       // Check for response
-      //
       char ret_msg = get_msg();
       if (TRN_ACK != ret_msg) {
         printf("TerrainNavClient::outstandingMeas() - server choked on request\n");
@@ -453,7 +463,7 @@ bool TerrainNavClient::outstandingMeas()
 /* Function: lastMeasSuccessful
  * Usage: tercom->lastMeasSuccessful();
  * -------------------------------------------------------------------------*/
-/*! Returns a boolean indicating if the last sonar measurement 
+/*! Returns a boolean indicating if the last sonar measurement
  * was successfully incorporated into the filter or not.
  */
 bool TerrainNavClient::lastMeasSuccessful()
@@ -465,7 +475,6 @@ bool TerrainNavClient::lastMeasSuccessful()
   for (int i = 0; i < 2; i++)
     if (0 != send_msg(last)) {
       // Check for response
-      //
       char ret_msg = get_msg();
       if (TRN_ACK != ret_msg) {
         printf("TerrainNavClient::lastMeasSuccessful() - server choked on request\n");
@@ -483,7 +492,7 @@ bool TerrainNavClient::lastMeasSuccessful()
 /* Function: setInterpMeasAttitude()
  * Usage: tercom->setInterpMeasAttitude(1);
  * -------------------------------------------------------------------------*/
-/*! Sets a boolean indicating if the sonar measurement attitude 
+/*! Sets a boolean indicating if the sonar measurement attitude
  * information should be determined from interpolated inertial poses.
  * Default = 0;
  */
@@ -498,7 +507,6 @@ void TerrainNavClient::setInterpMeasAttitude(bool set)
   for (int i = 0; i < 2; i++)
     if (0 != send_msg(ima)) {
       // Check for response
-      //
       char ret_msg = get_msg();
       if (TRN_ACK != ret_msg) {
         printf("TerrainNavClient::setInterpMeasAttitude() - server choked on request\n");
@@ -532,7 +540,6 @@ void TerrainNavClient::setMapInterpMethod(const int &type)
   for (int i = 0; i < 2; i++)
     if (0 != send_msg(mim)) {
       // Check for response
-      //
       char ret_msg = get_msg();
       if (TRN_ACK != ret_msg) {
         printf("TerrainNavClient::setMapInterpMethod() - server choked on request\n");
@@ -561,7 +568,6 @@ void TerrainNavClient::setVehicleDriftRate(const double &driftRate)
   for (int i = 0; i < 2; i++)
     if (0 != send_msg(vdr)) {
       // Check for response
-      //
       char ret_msg = get_msg();
       if (TRN_ACK != ret_msg) {
         printf("TerrainNavClient::setVehicleDriftRate() - server choked on request\n");
@@ -577,7 +583,7 @@ void TerrainNavClient::setVehicleDriftRate(const double &driftRate)
 /* Function: isConverged()
  * Usage: converged = tercom->isConverged();
  * ------------------------------------------------------------------------*/
-/*! Returns a boolean indicating if the terrain navigation filter has 
+/*! Returns a boolean indicating if the terrain navigation filter has
  * converged to an estimate.
  */
 bool TerrainNavClient::isConverged()
@@ -589,7 +595,6 @@ bool TerrainNavClient::isConverged()
   for (int i = 0; i < 2; i++)
     if (0 != send_msg(conv)) {
       // Check for response
-      //
       char ret_msg = get_msg();
       if (TRN_ACK != ret_msg) {
         printf("TerrainNavClient::isConverged() - server choked on request\n");
@@ -619,7 +624,6 @@ void TerrainNavClient::useLowGradeFilter()
   for (int i = 0; i < 2; i++)
     if (0 != send_msg(low)) {
       // Check for response
-      //
       char ret_msg = get_msg();
       if (TRN_ACK != ret_msg) {
         printf("TerrainNavClient::useLowGradeFilter() - server choked on request\n");
@@ -645,7 +649,6 @@ void TerrainNavClient::useHighGradeFilter()
   for (int i = 0; i < 2; i++)
     if (0 != send_msg(high)) {
       // Check for response
-      //
       char ret_msg = get_msg();
       if (TRN_ACK != ret_msg) {
         printf("TerrainNavClient::useHighGradeFilter() - server choked on request\n");
@@ -672,7 +675,6 @@ void TerrainNavClient::setFilterReinit(const bool allow)
   for (int i = 0; i < 2; i++)
     if (0 != send_msg(reinit)) {
       // Check for response
-      //
       char ret_msg = get_msg();
       if (TRN_ACK != ret_msg) {
         printf("TerrainNavClient::setFilterReinit() - server choked on request\n");
@@ -690,15 +692,14 @@ void TerrainNavClient::setFilterReinit(const bool allow)
 /*! Overwrite boolean useModifiedWeighting with input argument, use.
  */
 void TerrainNavClient::setModifiedWeighting(const int use)
-{ 
+{
   commsT smw(TRN_SET_MW, use);
   //printf("%s\n", smw.to_s(_comms_buf, TRN_MSG_SIZE));
   smw.serialize(_comms_buf);
-  
+
   for (int i = 0; i < 2; i++)
     if (0 != send_msg(smw)) {
       // Check for response
-      //
       char ret_msg = get_msg();
       if (TRN_ACK != ret_msg) {
         printf("TerrainNavClient::setModifiedWeighting() - server choked on request\n");
@@ -709,7 +710,7 @@ void TerrainNavClient::setModifiedWeighting(const int use)
 
   return;
 }
-  
+
 
 /* Function: getFilterState()
  * Usage: filterType = tercom->getFilterState();
@@ -725,7 +726,6 @@ int TerrainNavClient::getFilterState()
   for (int i = 0; i < 2; i++)
     if (0 != send_msg(state)) {
       // Check for response
-      //
       char ret_msg = get_msg();
       if (TRN_ACK != ret_msg) {
         printf("TerrainNavClient::getFilterState() - server choked on request\n");
@@ -764,7 +764,7 @@ void TerrainNavClient::reinitFilter(const bool lowInfoTransition)
   commsT reinit(TRN_FILT_REINIT);
   //printf("%s\n", reinits.to_s(_comms_buf, TRN_MSG_SIZE));
   reinit.serialize(_comms_buf);
-  
+
   if(!requestAndConfirm(reinit, TRN_ACK)) {
     printf("TerrainNavClient::reinitFilter() - comms failure\n");
   }
@@ -778,7 +778,6 @@ bool TerrainNavClient::requestAndConfirm(commsT& msg,
   for (int i = 0; i < MAX_SEND_ATTEMPTS; i++) {
     if (0 != send_msg(msg)) {
       // Check the response if any
-      //
       char ret_msg = get_msg();
       if (expected_ret_type != ret_msg) {
         //printf("%d: TerrainNavClient::requestAndConfirm()-unexpected response",

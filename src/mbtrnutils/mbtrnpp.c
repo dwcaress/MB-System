@@ -1,7 +1,7 @@
 /*--------------------------------------------------------------------
  *    The MB-system:  mbtrnpp.c  2/19/2018
  *
- *    Copyright (c) 2018-2019 bysocket_definition
+ *    Copyright (c) 2018-2020 bysocket_definition
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039

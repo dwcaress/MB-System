@@ -14,7 +14,6 @@
 #include <libgen.h>
 
 #include "TerrainNav.h"
-#include "TNavConfig.h"
 #include "TerrainNavLog.h"
 
 #define MBTRN_DEBUG 0
