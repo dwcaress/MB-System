@@ -2,7 +2,7 @@
  *    The MB-system:	mbrolltimelag.c	11/10/2005
  *
  *
- *    Copyright (c) 2005-2019 by
+ *    Copyright (c) 2005-2020 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039

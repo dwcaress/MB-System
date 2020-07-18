@@ -1,7 +1,7 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_simrad3.h	2/22/2008
  *
- *    Copyright (c) 2008-2019 by
+ *    Copyright (c) 2008-2020 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039

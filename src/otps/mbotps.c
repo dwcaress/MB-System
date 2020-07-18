@@ -1,7 +1,7 @@
 /*--------------------------------------------------------------------
  *    The MB-system:  mbotps.c  7/30/2009
  *
- *    Copyright (c) 2009-2019 by
+ *    Copyright (c) 2009-2020 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039

@@ -1,7 +1,7 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_emoldraw.c	3/4/2001
  *
- *    Copyright (c) 2001-2019 by
+ *    Copyright (c) 2001-2020 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039

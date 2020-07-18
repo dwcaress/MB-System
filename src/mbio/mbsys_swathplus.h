@@ -1,7 +1,7 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_swathplus.h	1/28/2014
  *
- *    Copyright (c) 2014-2019 by
+ *    Copyright (c) 2014-2020 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
