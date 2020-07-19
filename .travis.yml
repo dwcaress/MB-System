@@ -72,15 +72,16 @@ matrix:
       - OS_TAG=bionic
       - DOCKER_IMAGE=zberkowitz/mbsystem-deps:ubuntu-bionic
 
-  - os: linux
-    if: repo = berkowski/MB-System AND type = cron
-    name: Ubuntu Disco (19.04) Build-Deps Docker Image
-    services: docker
-    env:
-      - TRAVIS_CONFIG=docker_dep_image
-      - OS=ubuntu
-      - OS_TAG=disco
-      - DOCKER_IMAGE=zberkowitz/mbsystem-deps:ubuntu-disco
+  # Disco repos are no longer online
+  # - os: linux
+  #   if: repo = berkowski/MB-System AND type = cron
+  #   name: Ubuntu Disco (19.04) Build-Deps Docker Image
+  #   services: docker
+  #   env:
+  #     - TRAVIS_CONFIG=docker_dep_image
+  #     - OS=ubuntu
+  #     - OS_TAG=disco
+  #     - DOCKER_IMAGE=zberkowitz/mbsystem-deps:ubuntu-disco
 
   - os: linux
     if: repo = berkowski/MB-System AND type = cron
