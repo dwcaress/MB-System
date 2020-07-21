@@ -4906,7 +4906,7 @@ int mbsys_reson7k3_preprocess(int verbose,     /* in: verbosity level set on com
           bathydata->alongtrack = xx * sin(DTR * phi);
           bathydata->depth = zz + sensordepth - heave;
           bathydata->pointing_angle = DTR * theta;
-          bathydata->azimuth_angle = DTR * phi;
+          bathydata->azimuth_angle = DTR * beamAzimuth;
         }
 
         /* set flag */
@@ -4992,7 +4992,7 @@ int mbsys_reson7k3_preprocess(int verbose,     /* in: verbosity level set on com
           bathydata->alongtrack = xx * sin(DTR * phi);
           bathydata->depth = zz + sensordepth - heave;
           bathydata->pointing_angle = DTR * theta;
-          bathydata->azimuth_angle = DTR * phi;
+          bathydata->azimuth_angle = DTR * beamAzimuth;
         }
 
         /* set flag */
@@ -6036,7 +6036,7 @@ int mbsys_reson7k3_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kin
         bathydata = &(RawDetection->bathydata[i]);
         ttimes[i] = rawdetectiondata->detection_point / RawDetection->sampling_rate;
         angles[i] = RTD * bathydata->pointing_angle;
-        angles_forward[i] = RTD * bathydata->azimuth_angle;
+        angles_forward[i] = 90.0 - RTD * bathydata->azimuth_angle;
         angles_null[i] = 0.0;
         heave[i] =  RawDetection->heave;
         alongtrack_offset[i] = 0.0;
@@ -6064,7 +6064,7 @@ int mbsys_reson7k3_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kin
         bathydata = &(SegmentedRawDetection->bathydata[i]);
         ttimes[i] = segmentedrawdetectionrxdata->detection_point / segmentedrawdetectiontxdata->sampling_rate;
         angles[i] = RTD * bathydata->pointing_angle;
-        angles_forward[i] = RTD * bathydata->azimuth_angle;
+        angles_forward[i] = 90.0 - RTD * bathydata->azimuth_angle;
         angles_null[i] = 0.0;
         heave[i] =  SegmentedRawDetection->heave;
         alongtrack_offset[i] = 0.0;

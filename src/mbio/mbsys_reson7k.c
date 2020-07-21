@@ -6752,8 +6752,8 @@ int mbsys_reson7k_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind
       else {
         const double alpha = RTD * beamgeometry->angle_alongtrack[i] + bathymetry->pitch;
         const double beta = 90.0 - RTD * beamgeometry->angle_acrosstrack[i] + bathymetry->roll;
-	double phi;
-	double theta;
+	      double phi;
+	      double theta;
         mb_rollpitch_to_takeoff(verbose, alpha, beta, &theta, &phi, error);
         angles[i] = theta;
         angles_forward[i] = phi;

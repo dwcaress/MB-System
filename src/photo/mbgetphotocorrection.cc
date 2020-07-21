@@ -88,6 +88,7 @@ int main(int argc, char** argv)
                             "\t--use-left-camera\n"
                             "\t--use-right-camera\n"
                             "\t--use-both-cameras\n"
+                            "\t--image-quality-threshold=value\n"
                             "\t--calibration-file=file\n"
                             "\t--navigation-file=file\n"
                             "\t--tide-file=file\n"
@@ -169,6 +170,7 @@ int main(int argc, char** argv)
     int imagelist_camera = 0;
     int image_camera = MBPM_CAMERA_LEFT;
     int use_camera_mode = MBPM_USE_STEREO;
+    double imageQualityThreshold = 0.0;
     mb_path StereoCameraCalibrationFile;
     int calibration_specified = MB_NO;
     Mat cameraMatrix[2], distCoeffs[2];
@@ -297,6 +299,7 @@ int main(int argc, char** argv)
      *         --use-left-camera
      *         --use-right-camera
      *         --use-both-cameras
+     *         --image-quality-threshold=value
      *
      *         --calibration-file=file
      *         --navigation-file=file
@@ -326,6 +329,7 @@ int main(int argc, char** argv)
         {"use-left-camera",           no_argument,        NULL, 0},
         {"use-right-camera",          no_argument,        NULL, 0},
         {"use-both-cameras",          no_argument,        NULL, 0},
+        {"image-quality-threshold",     required_argument,      NULL,         0},
         {"calibration-file",          required_argument,  NULL, 0},
         {"navigation-file",           required_argument,  NULL, 0},
         {"tide-file",                 required_argument,  NULL, 0},
@@ -482,6 +486,12 @@ int main(int argc, char** argv)
                 use_camera_mode = MBPM_USE_STEREO;
                 }
 
+            /* image-quality-threshold  (0 <= imageQualityThreshold <= 1) */
+            else if (strcmp("image-quality-threshold", options[option_index].name) == 0)
+                {
+                n = sscanf (optarg,"%lf", &imageQualityThreshold);
+                }
+
             /* calibration-file */
             else if (strcmp("calibration-file", options[option_index].name) == 0)
                 {
@@ -569,6 +579,7 @@ int main(int argc, char** argv)
         fprintf(stream,"dbg2       altitude_sensor:             %d\n",altitude_sensor);
         fprintf(stream,"dbg2       attitude_sensor:             %d\n",attitude_sensor);
         fprintf(stream,"dbg2       use_camera_mode:             %d\n",use_camera_mode);
+        fprintf(stream,"dbg2       imageQualityThreshold:       %f\n",imageQualityThreshold);
         fprintf(stream,"dbg2       StereoCameraCalibrationFile: %s\n",StereoCameraCalibrationFile);
         fprintf(stream,"dbg2       calibration_specified:       %d\n",calibration_specified);
         fprintf(stream,"dbg2       NavigationFile:              %s\n",NavigationFile);
@@ -604,6 +615,7 @@ int main(int argc, char** argv)
         fprintf(stream,"    altitude_sensor:             %d\n",altitude_sensor);
         fprintf(stream,"    attitude_sensor:             %d\n",attitude_sensor);
         fprintf(stream,"    use_camera_mode:             %d\n",use_camera_mode);
+        fprintf(stream,"    imageQualityThreshold:       %f\n",imageQualityThreshold);
         fprintf(stream,"    StereoCameraCalibrationFile: %s\n",StereoCameraCalibrationFile);
         fprintf(stream,"    calibration_specified:       %d\n",calibration_specified);
         fprintf(stream,"    NavigationFile:              %s\n",NavigationFile);
@@ -1046,10 +1058,11 @@ int main(int argc, char** argv)
     nimages = 0;
     int imagestatus = MB_IMAGESTATUS_NONE;
     mb_path dpath;
+    double imageQuality = 0.0;
     fprintf(stderr,"About to read ImageListFile: %s\n", ImageListFile);
     while ((status = mb_imagelist_read(verbose, imagelist_ptr, &imagestatus,
                                 imageLeftFile, imageRightFile, dpath,
-                                &left_time_d, &time_diff, &error)) == MB_SUCCESS) {
+                                &left_time_d, &time_diff, &imageQuality, &error)) == MB_SUCCESS) {
         if (imagestatus == MB_IMAGESTATUS_STEREO) {
           if (use_camera_mode == MBPM_USE_STEREO) {
             npairs++;
@@ -1120,6 +1133,11 @@ int main(int argc, char** argv)
                      time_d = left_time_d + time_diff;
                     strcpy(imageFile, imageRightFile);
                     use_this_image = MB_YES;
+            }
+
+            /* check imageQuality value against threshold to see if this image should be used */
+            if (use_this_image == MB_YES && imageQuality < imageQualityThreshold) {
+              use_this_image = MB_NO;
             }
 
             /* check that navigation is available for this image */

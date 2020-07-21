@@ -20,7 +20,7 @@ include "beta" in the tag name are preliminary and generally not announced.
 Distributions that do not include "beta" in the tag name correspond to the major,
 announced releases. The source distributions associated with all releases, major or beta, are equally accessible as tarballs through the Github interface.
 
-- Version 5.7.6beta42    July 18, 2020
+- Version 5.7.6beta42    July 21, 2020
 - Version 5.7.6beta41    July 12, 2020
 - Version 5.7.6beta40    July 7, 2020
 - Version 5.7.6beta38    June 8, 2020
@@ -352,9 +352,26 @@ announced releases. The source distributions associated with all releases, major
 ### MB-System Version 5.7 Release Notes:
 --
 
-#### 5.7.6beta42 (July 18, 2020)
+#### 5.7.6beta42 (July 21, 2020)
 
 Mbtrn and mbtrnav: Updates and bug fixes to replay-trn_server.
+
+Mbphotomosaic, mbgetphotocorrection, mbphotogrammetry: Added image quality value
+to the parameters returned by function mb_imagelist_read(), and augmented the
+definition of an imagelist entry to optionally include a quality column that
+has values in the range 0.0 to 1.0. Augmented mbphotogrammetry to output an
+imagelist of all image pairs it processes, and to populate the new quality
+field with the fraction of all possible bathymetry values that are successfully
+calculated, a number 0.0 >= quality >= 1.0. Also augmented mbphotomosaic and
+mbgetphotocorrection with new options "--image-quality-threshold=value" that
+set a threshold quality value (by default 0.0) below which images or image pairs
+are ignored.
+
+Format 89 (MBF_RESON7K3): Fixed calculation and use of azimuthal beam angles
+in RawDetection and SegmentedRawDetection records. This bug resulted in
+bathymetry recalculated by raytracing in mbprocess having the acrosstrack
+and alongtrack distances transposed. To fix the problems caused by this bug
+mbpreprocess and then mbprocess should be rerun.
 
 #### 5.7.6beta41 (July 12, 2020)
 
