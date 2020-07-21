@@ -102,7 +102,7 @@ int main(int argc, char** argv)
                             "\t--algorithm-speckle-window-size=value\n"
                             "\t--algorithm-speckle-range=value\n"
                             "\t--algorithm-disp-12-max-diff=value\n"
-                            "\t--algorithm-texture-threshold=value";
+                            "\t--algorithm-texture-threshold=value\n";
     extern char *optarg;
     int    option_index;
     int    errflg = 0;
@@ -116,6 +116,7 @@ int main(int argc, char** argv)
      *         --help
      *         --show-images
      *         --input=imagelist
+     *         --image-quality-threshold=value
      *         --navigation-file=file
      *         --survey-line-file=file
      *         --tide-file=file
@@ -155,6 +156,7 @@ int main(int argc, char** argv)
         {"help",                            no_argument,          NULL, 0},
         {"show-images",                     no_argument,          NULL, 0},
         {"input",                           required_argument,    NULL, 0},
+        {"image-quality-threshold",         required_argument,      NULL,         0},
         {"navigation-file",                 required_argument,    NULL, 0},
         {"survey-line-file",                required_argument,    NULL, 0},
         {"tide-file",                       required_argument,    NULL, 0},
@@ -187,6 +189,7 @@ int main(int argc, char** argv)
         {"algorithm-speckle-range",         required_argument,    NULL, 0},
         {"algorithm-disp-12-max-diff",      required_argument,    NULL, 0},
         {"algorithm-texture-threshold",     required_argument,    NULL, 0},
+        {"good-fraction-threshold",                  required_argument,    NULL, 0},
         { NULL,                             0,                    NULL, 0}
         };
 
@@ -281,6 +284,7 @@ int main(int argc, char** argv)
     struct mb_sensor_struct *sensor_camera = NULL;
 
     /* Input camera parameters */
+    double imageQualityThreshold = 0.0;
     int    camerasInitialized = MB_NO;
     mb_path    StereoCameraCalibrationFile;
     int    use_calibration = MB_NO;
@@ -414,6 +418,15 @@ int main(int argc, char** argv)
             else if (strcmp("input", options[option_index].name) == 0)
                 {
                 n = sscanf (optarg,"%s", ImageListFile);
+                }
+
+            /*-------------------------------------------------------
+             * Set input image quality threshold  (0 <= imageQualityThreshold <= 1) */
+
+            /* image-quality-threshold */
+            else if (strcmp("image-quality-threshold", options[option_index].name) == 0)
+                {
+                n = sscanf (optarg,"%lf", &imageQualityThreshold);
                 }
 
             /*-------------------------------------------------------
@@ -682,6 +695,7 @@ int main(int argc, char** argv)
         fprintf(stream,"dbg2       help:                        %d\n",help);
         fprintf(stream,"dbg2       show_images:                 %d\n",show_images);
         fprintf(stream,"dbg2       ImageListFile:               %s\n",ImageListFile);
+        fprintf(stream,"dbg2       imageQualityThreshold:       %f\n",imageQualityThreshold);
         fprintf(stream,"dbg2       use_navigation:              %d\n",use_navigation);
         fprintf(stream,"dbg2       NavigationFile:              %s\n",NavigationFile);
         fprintf(stream,"dbg2       use_surveylinetimefile:      %d\n",use_surveylinetimefile);
@@ -728,6 +742,7 @@ int main(int argc, char** argv)
         fprintf(stream,"     help:                        %d\n",help);
         fprintf(stream,"     show_images:                 %d\n",show_images);
         fprintf(stream,"     ImageListFile:               %s\n",ImageListFile);
+        fprintf(stream,"     imageQualityThreshold:       %f\n",imageQualityThreshold);
         fprintf(stream,"     use_navigation:              %d\n",use_navigation);
         fprintf(stream,"     NavigationFile:              %s\n",NavigationFile);
         fprintf(stream,"     use_surveylinetimefile:      %d\n",use_surveylinetimefile);
@@ -1101,7 +1116,7 @@ int main(int argc, char** argv)
             ntide++;
         fclose(tfp);
 
-        /* allocate arrays for nav */
+        /* allocate arrays for tide */
         if (ntide > 1)
             {
             size = (ntide+1)*sizeof(double);
@@ -1131,12 +1146,12 @@ int main(int argc, char** argv)
             exit(error);
             }
 
-        /* read the data points in the nav file */
+        /* read the data points in the tide file */
         ntide = 0;
         if ((tfp = fopen(TideFile, "r")) == NULL)
             {
             error = MB_ERROR_OPEN_FAIL;
-            fprintf(stderr,"\nUnable to Open Navigation File <%s> for reading\n",NavigationFile);
+            fprintf(stderr,"\nUnable to Open Navigation File <%s> for reading\n", TideFile);
             fprintf(stderr,"\nProgram <%s> Terminated\n",
                 program_name);
             exit(error);
@@ -1145,7 +1160,7 @@ int main(int argc, char** argv)
             {
             value_ok = MB_NO;
 
-            /* read the navigation from an fnv file */
+            /* read the tide data */
             nget = sscanf(buffer,"%lf %lf",
                 &ttime[ntide], &ttide[ntide]);
             if (nget >= 2)
@@ -1221,20 +1236,39 @@ int main(int argc, char** argv)
             OutputFileRoot[len-5] = '\0';
         }
 
+    /* Open output good imagelist including good disparity fraction values */
+    mb_path OutputImagelist;
+    FILE *oilfp = NULL;
+    sprintf(OutputImagelist, "%s_ImagePairs.mb-2", OutputFileRoot);
+    if ((oilfp = fopen(OutputImagelist, "w")) == NULL)
+            {
+            error = MB_ERROR_OPEN_FAIL;
+            fprintf(stderr,"\nUnable to open output imagelist file <%s> for writing\n",OutputImagelist);
+            fprintf(stderr,"\nProgram <%s> Terminated\n",
+                program_name);
+            exit(error);
+            }
+
     /* loop over single images or stereo pairs in the imagelist file */
     npairs = 0;
     nimages = 0;
     waypoint = 0;
     int imagestatus = MB_IMAGESTATUS_NONE;
     mb_path dpath;
+    double imageQuality = 0.0;
     fprintf(stderr,"About to read ImageListFile: %s\n", ImageListFile);
 
     while ((status = mb_imagelist_read(verbose, imagelist_ptr, &imagestatus,
                                 imageLeftFile, imageRightFile, dpath,
-                                &left_time_d, &time_diff, &error)) == MB_SUCCESS) {
+                                &left_time_d, &time_diff, &imageQuality, &error)) == MB_SUCCESS) {
         use_this_pair = MB_NO;
         if (imagestatus == MB_IMAGESTATUS_STEREO) {
             use_this_pair = MB_YES;
+
+            /* check imageQuality value against threshold to see if this image should be used */
+            if (use_this_pair == MB_YES && imageQuality < imageQualityThreshold) {
+              use_this_pair = MB_NO;
+            }
 
             /* check that navigation is available for this stereo pair */
             if (!(nnav > 0 && left_time_d >= ntime[0] && left_time_d <= ntime[nnav-1])) {
@@ -1845,7 +1879,12 @@ fprintf(stderr, "%s:%d:%s: no algorithm\n", __FILE__, __LINE__, __func__);
                     }
                 }
             }
-            fprintf(stream, "      --> Disparity calculations: good:%d  bad:%d\n", ngood, nbad);
+
+            // output image list entry and bathymetry
+            double good_fraction = ((double)ngood / ((double)(ngood + nbad)));
+            fprintf(stream, "      --> Disparity calculations: good:%d  bad:%d  fraction:%.3f\n",
+                    ngood, nbad, good_fraction);
+            fprintf(oilfp, "%s %s %.6f %.6f  %.2f\n", imageLeftFile, imageRightFile, left_time_d, time_diff, good_fraction);
 
             mb_write_ping(verbose, mbio_ptr, (void *)store, &error);
             output_count++;
@@ -1862,10 +1901,19 @@ fprintf(stderr, "%s:%d:%s: no algorithm\n", __FILE__, __LINE__, __func__);
             npairs++;
             nimages += 2;
         }
+
+        // else not used add to imagelist with zero good fraction
+        else {
+            fprintf(oilfp, "%s %s %.6f %.6f  %.2f\n", imageLeftFile, imageRightFile, left_time_d, time_diff, 0.0);
+        }
     }
 
-    /* close imagelist file */
+    /* close imagelist files */
     status = mb_imagelist_close(verbose, &imagelist_ptr, &error);
+    if (oilfp != NULL) {
+      fclose(oilfp);
+      oilfp = NULL;
+    }
 
     /* close the output file */
     if (mbio_ptr != NULL)

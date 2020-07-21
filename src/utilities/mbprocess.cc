@@ -5106,6 +5106,8 @@ int main(int argc, char **argv) {
                   fprintf(stderr, "dbg5       %3d %3d %6.3f %6.3f %6.3f %8.2f %8.2f %8.2f\n", idata, i,
                           0.5 * ttimes[i], angles[i], angles_forward[i], bathacrosstrack[i], bathalongtrack[i],
                           bath[i]);
+                }
+                if (verbose >= 5) {
                   fprintf(stderr, "\ndbg5  Depth value calculated in program <%s>:\n", program_name);
                   fprintf(stderr, "dbg5       kind:  %d\n", kind);
                   fprintf(stderr, "dbg5       beam:  %d\n", i);

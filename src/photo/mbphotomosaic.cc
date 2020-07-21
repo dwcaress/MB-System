@@ -90,6 +90,7 @@ int main(int argc, char** argv)
                             "\t--use-left-camera\n"
                             "\t--use-right-camera\n"
                             "\t--use-both-cameras\n"
+                            "\t--image-quality-threshold=value\n"
                             "\t--show-image\n"
                             "\t--calibration-file=stereocalibration.yaml\n"
                             "\t--navigation-file=file\n"
@@ -181,6 +182,7 @@ int main(int argc, char** argv)
     int imagelist_camera;
     int image_camera = MBPM_CAMERA_LEFT;
     int use_camera_mode = MBPM_USE_STEREO;
+    double imageQualityThreshold = 0.0;
     int show_image = MB_NO;
     mb_path StereoCameraCalibrationFile;
     int    calibration_specified = MB_NO;
@@ -344,6 +346,7 @@ int main(int argc, char** argv)
      *    --use-left-camera
      *    --use-right-camera
      *    --use-both-cameras
+     *    --image-quality-threshold=value
      *    --show-image
      *    --calibration-file=stereocalibration.yaml
      *    --navigation-file=file
@@ -380,6 +383,7 @@ int main(int argc, char** argv)
         {"use-left-camera",             no_argument,            NULL,         0},
         {"use-right-camera",            no_argument,            NULL,         0},
         {"use-both-cameras",            no_argument,            NULL,         0},
+        {"image-quality-threshold",     required_argument,      NULL,         0},
         {"show-image",                  no_argument,            NULL,         0},
         {"calibration-file",            required_argument,      NULL,         0},
         {"navigation-file",             required_argument,      NULL,         0},
@@ -597,6 +601,12 @@ int main(int argc, char** argv)
                 use_camera_mode = MBPM_USE_STEREO;
                 }
 
+            /* image-quality-threshold  (0 <= imageQualityThreshold <= 1) */
+            else if (strcmp("image-quality-threshold", options[option_index].name) == 0)
+                {
+                n = sscanf (optarg,"%lf", &imageQualityThreshold);
+                }
+
             /* show-image */
             else if (strcmp("show-image", options[option_index].name) == 0)
                 {
@@ -670,6 +680,7 @@ int main(int argc, char** argv)
         fprintf(stream,"dbg2       help:                        %d\n",help);
         fprintf(stream,"dbg2       ImageListFile:               %s\n",ImageListFile);
         fprintf(stream,"dbg2       use_camera_mode:             %d\n",use_camera_mode);
+        fprintf(stream,"dbg2       imageQualityThreshold:       %f\n",imageQualityThreshold);
         fprintf(stream,"dbg2       show_image:                  %d\n",show_image);
         fprintf(stream,"dbg2       OutputImageFile:             %s\n",OutputImageFile);
         fprintf(stream,"dbg2       bounds_specified:            %d\n",bounds_specified);
@@ -721,6 +732,7 @@ int main(int argc, char** argv)
         fprintf(stream,"Control Parameters:\n");
         fprintf(stream,"  ImageListFile:               %s\n",ImageListFile);
         fprintf(stream,"  use_camera_mode:             %d\n",use_camera_mode);
+        fprintf(stream,"  imageQualityThreshold:       %f\n",imageQualityThreshold);
         fprintf(stream,"  show_image:                  %d\n",show_image);
         fprintf(stream,"  OutputImageFile:             %s\n",OutputImageFile);
         fprintf(stream,"  bounds_specified:            %d\n",bounds_specified);
@@ -1587,14 +1599,15 @@ fprintf(stderr,"Done reading TopographyGridFile: %s\n", TopographyGridFile);
     /* loop over single images or stereo pairs in the imagelist file */
     npairs = 0;
     nimages = 0;
-    int imagestatus = MB_IMAGESTATUS_NONE;
+    int imageStatus = MB_IMAGESTATUS_NONE;
+    double imageQuality = 0.0;
     mb_path dpath;
     fprintf(stderr,"About to read ImageListFile: %s\n", ImageListFile);
 
-    while ((status = mb_imagelist_read(verbose, imagelist_ptr, &imagestatus,
+    while ((status = mb_imagelist_read(verbose, imagelist_ptr, &imageStatus,
                                 imageLeftFile, imageRightFile, dpath,
-                                &left_time_d, &time_diff, &error)) == MB_SUCCESS) {
-        if (imagestatus == MB_IMAGESTATUS_STEREO) {
+                                &left_time_d, &time_diff, &imageQuality, &error)) == MB_SUCCESS) {
+        if (imageStatus == MB_IMAGESTATUS_STEREO) {
           if (use_camera_mode == MBPM_USE_STEREO) {
             npairs++;
             nimages += 2;
@@ -1608,7 +1621,7 @@ fprintf(stderr,"Done reading TopographyGridFile: %s\n", TopographyGridFile);
             currentimages = 1;
             nimages++;
           }
-        } else if (imagestatus == MB_IMAGESTATUS_LEFT) {
+        } else if (imageStatus == MB_IMAGESTATUS_LEFT) {
           if (use_camera_mode == MBPM_USE_LEFT) {
             image_camera = MBPM_CAMERA_LEFT;
             currentimages = 1;
@@ -1616,7 +1629,7 @@ fprintf(stderr,"Done reading TopographyGridFile: %s\n", TopographyGridFile);
           } else {
             currentimages = 0;
           }
-        } else if (imagestatus == MB_IMAGESTATUS_RIGHT) {
+        } else if (imageStatus == MB_IMAGESTATUS_RIGHT) {
           if (use_camera_mode == MBPM_USE_RIGHT) {
             image_camera = MBPM_CAMERA_RIGHT;
             currentimages = 1;
@@ -1624,7 +1637,7 @@ fprintf(stderr,"Done reading TopographyGridFile: %s\n", TopographyGridFile);
           } else {
             currentimages = 0;
           }
-        } else if (imagestatus == MB_IMAGESTATUS_SINGLE) {
+        } else if (imageStatus == MB_IMAGESTATUS_SINGLE) {
           if (use_camera_mode == MBPM_USE_LEFT) {
             image_camera = MBPM_CAMERA_LEFT;
             currentimages = 1;
@@ -1666,6 +1679,11 @@ fprintf(stderr,"Done reading TopographyGridFile: %s\n", TopographyGridFile);
                     use_this_image = MB_YES;
             }
 
+            /* check imageQuality value against threshold to see if this image should be used */
+            if (use_this_image == MB_YES && imageQuality < imageQualityThreshold) {
+              use_this_image = MB_NO;
+            }
+
             /* check navigation for location close to or inside destination image bounds */
             if (use_this_image == MB_YES) {
                 if (nnav > 0 && time_d >= ntime[0] && time_d <= ntime[nnav-1]) {
@@ -1687,6 +1705,7 @@ fprintf(stderr,"Done reading TopographyGridFile: %s\n", TopographyGridFile);
                     use_this_image = MB_NO;
                 }
             }
+
             /* read the image */
             if (use_this_image == MB_YES) {
                 /* read the image */
@@ -1698,6 +1717,39 @@ fprintf(stderr,"Done reading TopographyGridFile: %s\n", TopographyGridFile);
 
             /* process the image */
             if (use_this_image == MB_YES) {
+                /* get some statistics on this image */
+                vector<Mat> bgr_planes;
+                split( imageProcess, bgr_planes );
+                int histSize = 256;
+                float range[] = { 0, 256 }; //the upper boundary is exclusive
+                const float* histRange = { range };
+                bool uniform = true, accumulate = false;
+                Mat b_hist, g_hist, r_hist;
+                calcHist( &bgr_planes[0], 1, 0, Mat(), b_hist, 1, &histSize, &histRange, uniform, accumulate );
+                calcHist( &bgr_planes[1], 1, 0, Mat(), g_hist, 1, &histSize, &histRange, uniform, accumulate );
+                calcHist( &bgr_planes[2], 1, 0, Mat(), r_hist, 1, &histSize, &histRange, uniform, accumulate );
+                int hist_w = 512, hist_h = 400;
+                int bin_w = cvRound( (double) hist_w/histSize );
+                Mat histImage( hist_h, hist_w, CV_8UC3, Scalar( 0,0,0) );
+                normalize(b_hist, b_hist, 0, histImage.rows, NORM_MINMAX, -1, Mat() );
+                normalize(g_hist, g_hist, 0, histImage.rows, NORM_MINMAX, -1, Mat() );
+                normalize(r_hist, r_hist, 0, histImage.rows, NORM_MINMAX, -1, Mat() );
+                for( int i = 1; i < histSize; i++ )
+                {
+                    line( histImage, Point( bin_w*(i-1), hist_h - cvRound(b_hist.at<float>(i-1)) ),
+                          Point( bin_w*(i), hist_h - cvRound(b_hist.at<float>(i)) ),
+                          Scalar( 255, 0, 0), 2, 8, 0  );
+                    line( histImage, Point( bin_w*(i-1), hist_h - cvRound(g_hist.at<float>(i-1)) ),
+                          Point( bin_w*(i), hist_h - cvRound(g_hist.at<float>(i)) ),
+                          Scalar( 0, 255, 0), 2, 8, 0  );
+                    line( histImage, Point( bin_w*(i-1), hist_h - cvRound(r_hist.at<float>(i-1)) ),
+                          Point( bin_w*(i), hist_h - cvRound(r_hist.at<float>(i)) ),
+                          Scalar( 0, 0, 255), 2, 8, 0  );
+                }
+                imshow("Source image", imageProcess );
+                imshow("calcHist Demo", histImage );
+                waitKey();
+
                 /* if calibration loaded, undistort the image */
                 if (calibration_specified == MB_YES) {
                     if (undistort_initialized == MB_NO) {
