@@ -17,15 +17,15 @@ DEFINES += QT_DEPRECATED_WARNINGS
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
-        CanvasHandler.cpp \
+        BackEnd.cpp \
         CommandModel.cpp \
         CommandModelAdd.cpp \
         CommandModelTranslate.cpp \
         GmtGridReader.cpp \
         Model.cpp \
         ProcessingEngine.cpp \
-        QVTKFramebufferObjectItem.cpp \
-        QVTKFramebufferObjectRenderer.cpp \
+        QVtkItem.cpp \
+        QVtkRenderer.cpp \
         main.cpp
 
 RESOURCES += qml.qrc \
@@ -47,15 +47,15 @@ DISTFILES += \
     qt-vtk.pro.user
 
 HEADERS += \
-    CanvasHandler.h \
+    BackEnd.h \
     CommandModel.h \
     CommandModelAdd.h \
     CommandModelTranslate.h \
     GmtGridReader.h \
     Model.h \
     ProcessingEngine.h \
-    QVTKFramebufferObjectItem.h \
-    QVTKFramebufferObjectRenderer.h
+    QVtkItem.h \
+    QVtkRenderer.h
 
 INCLUDEPATH += /usr/local/include/vtk-8.2
 
