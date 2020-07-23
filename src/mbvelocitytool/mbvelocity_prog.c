@@ -367,7 +367,7 @@ int mbvt_quit() {
 	/* deallocate previously loaded data, if any */
 	mbvt_deallocate_swath();
 
-	/* clear out old velocity data */
+	/* deallocate editable svp model */
 	if (edit) {
 		edit = false;
 		profile->n = 0;
@@ -378,6 +378,12 @@ int mbvt_quit() {
 		mb_freed(verbose, __FILE__, __LINE__, (void **)&profile->velocity, &error);
 	}
 
+  /* deallocate any display svp profiles */
+  if (ndisplay > 0) {
+    for (int i=ndisplay-1; i>=0; i--) {
+      mbvt_delete_display_profile(i);
+    }
+  }
 	/* check allocated memory */
 	status = mb_memory_list(verbose, &error);
 
@@ -2058,7 +2064,7 @@ int mbvt_open_swath_file(char *file, int form, int *numload) {
 		                    bathalongtrack, ss, ssacrosstrack, ssalongtrack, comment, &error);
 		if (error <= MB_ERROR_NO_ERROR && (kind == MB_DATA_DATA) &&
 		    (error == MB_ERROR_NO_ERROR || error == MB_ERROR_TIME_GAP || error == MB_ERROR_OUT_BOUNDS ||
-		     error == MB_ERROR_OUT_TIME || error == MB_ERROR_SPEED_TOO_SMALL)) {
+		     error == MB_ERROR_SPEED_TOO_SMALL)) {
 			status = MB_SUCCESS;
 			error = MB_ERROR_NO_ERROR;
 		}

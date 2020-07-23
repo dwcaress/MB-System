@@ -21,9 +21,6 @@
  *
  */
 
-/* source file version string */
-static char version_id[] = "$Id: mbpreprocess.c 2261 2016-01-07 01:49:22Z caress $";
-
 /* standard include files */
 #include <iostream>
 #include <stdio.h>
@@ -1053,6 +1050,12 @@ int main(int argc, char** argv)
         exit(error);
         }
 
+    /* prepare to display images */
+    String windowName = "Undistorted Image";
+    if (show_images) {
+        namedWindow(windowName, 0);
+    }
+
     /* loop over single images or stereo pairs in the imagelist file */
     npairs = 0;
     nimages = 0;
@@ -1244,11 +1247,8 @@ int main(int argc, char** argv)
 
                 /* display images */
                 if (show_images) {
-                    String windowName = "Undistorted Image";
-                    namedWindow(windowName, 0);
                     imshow(windowName, imageUndistort);
-                    waitKey(1000);
-                    destroyWindow(windowName);
+                    waitKey(1);
                 }
 
                 /* get navigation for this image */
@@ -1538,6 +1538,11 @@ i,j,sensordepth,tide,sensordepth,topo,standoff,kbin_z);
                 }
             }
         }
+    }
+
+    /* end display images */
+    if (show_images) {
+        destroyWindow(windowName);
     }
 
     /* close imagelist file */

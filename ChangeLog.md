@@ -20,6 +20,7 @@ include "beta" in the tag name are preliminary and generally not announced.
 Distributions that do not include "beta" in the tag name correspond to the major,
 announced releases. The source distributions associated with all releases, major or beta, are equally accessible as tarballs through the Github interface.
 
+- Version 5.7.6beta43    July 23, 2020
 - Version 5.7.6beta42    July 21, 2020
 - Version 5.7.6beta41    July 12, 2020
 - Version 5.7.6beta40    July 7, 2020
@@ -351,6 +352,28 @@ announced releases. The source distributions associated with all releases, major
 --
 ### MB-System Version 5.7 Release Notes:
 --
+
+#### 5.7.6beta43 (July 23, 2020)
+
+Mbsvplist: Added capability to extract sound velocity profile (SVP) models from
+MB_DATA_CTD type records as well as MB_DATA_SOUND_VELOCITY_PROFILE type records
+(which is the default). This is controlled with the -A option: -AS specifies use
+of SVP records, and -AC specifies use of CTD records. At present, the only
+relevant data formats are the old Reson (88) and current Teledyne (89) *.s7k formats.
+
+Mbvelocitytool: Fixed the -B and -E options to specify the allowed begin and end
+times of swath data used for modeling; previously these options were ignored. Also
+fixed a memory leak involving the display SVP profiles.
+
+Mbgetphotocorrection: The --show-images option now uses the OpenCV imshow() function
+to briefly display the images being read and processed.
+
+Mbphotomosaic: The --show-images option now uses the OpenCV imshow() function
+to briefly display the images being read and processed.
+
+Mbphotogrammetry: The --show-images option now uses the OpenCV imshow() function
+to briefly display stereo pairs being read and processed, along with the disparity
+function calculated for the image pair.
 
 #### 5.7.6beta42 (July 21, 2020)
 
