@@ -13,7 +13,7 @@
 class CommandModel;
 class Model;
 class ProcessingEngine;
-class QVTKFramebufferObjectRenderer;
+class QVtkRenderer;
 
 /**
 Captures and processes mouse events from canvas 
@@ -21,15 +21,15 @@ Captures and processes mouse events from canvas
 Based on Nicano Romero Venier's QtVTK demo at 
 https://github.com/nicanor-romero/QtVtk
  */
-class QVTKFramebufferObjectItem : public QQuickFramebufferObject
+class QVtkItem : public QQuickFramebufferObject
 {
 	Q_OBJECT
 
 public:
-	QVTKFramebufferObjectItem();
+	QVtkItem();
 
 	Renderer *createRenderer() const Q_DECL_OVERRIDE;
-	void setVtkFboRenderer(QVTKFramebufferObjectRenderer*);
+	void setVtkFboRenderer(QVtkRenderer*);
 	bool isInitialized() const;
 	void setProcessingEngine(const std::shared_ptr<ProcessingEngine> processingEngine);
 
@@ -91,7 +91,7 @@ signals:
 private:
 	void addCommand(CommandModel* command);
 
-	QVTKFramebufferObjectRenderer *m_vtkFboRenderer = nullptr;
+	QVtkRenderer *m_vtkFboRenderer = nullptr;
 	std::shared_ptr<ProcessingEngine> m_processingEngine;
 
 	std::queue<CommandModel*> m_commandsQueue;

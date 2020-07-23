@@ -23,19 +23,19 @@
 #include <vtkSmartPointer.h>
 
 class Model;
-class QVTKFramebufferObjectItem;
+class QVtkItem;
 class ProcessingEngine;
 
 /**
 Based on Nicano Romero Venier's QtVTK demo at 
 https://github.com/nicanor-romero/QtVtk
  */
-class QVTKFramebufferObjectRenderer : public QObject, public QQuickFramebufferObject::Renderer, protected QOpenGLFunctions
+class QVtkRenderer : public QObject, public QQuickFramebufferObject::Renderer, protected QOpenGLFunctions
 {
 	Q_OBJECT
 
 public:
-	QVTKFramebufferObjectRenderer();
+	QVtkRenderer();
 
 	void setProcessingEngine(const std::shared_ptr<ProcessingEngine> processingEngine);
 
@@ -77,7 +77,7 @@ private:
 	std::shared_ptr<Model> getSelectedModelNoLock() const;
 
 	std::shared_ptr<ProcessingEngine> m_processingEngine;
-	QVTKFramebufferObjectItem *m_vtkFboItem = nullptr;
+	QVtkItem *m_vtkFboItem = nullptr;
 	vtkSmartPointer<vtkGenericOpenGLRenderWindow> m_vtkRenderWindow;
 	vtkSmartPointer<vtkRenderer> m_renderer;
 	vtkSmartPointer<vtkGenericRenderWindowInteractor> m_vtkRenderWindowInteractor;
