@@ -11,14 +11,16 @@
 
 class Model;
 class ProcessingEngine;
-class QVTKFramebufferObjectRenderer;
+class QVtkRenderer;
 
 class CommandModelAdd : public QThread, public CommandModel
 {
 	Q_OBJECT
 
 public:
-	CommandModelAdd(QVTKFramebufferObjectRenderer *vtkFboRenderer, std::shared_ptr<ProcessingEngine> processingEngine, QUrl modelPath);
+	CommandModelAdd(QVtkRenderer *vtkFboRenderer,
+			std::shared_ptr<ProcessingEngine> processingEngine,
+			QUrl modelPath);
 
 	void run() Q_DECL_OVERRIDE;
 

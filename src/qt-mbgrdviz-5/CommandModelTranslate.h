@@ -7,7 +7,7 @@
 
 
 class Model;
-class QVTKFramebufferObjectRenderer;
+class QVtkRenderer;
 
 class CommandModelTranslate : public CommandModel
 {
@@ -23,7 +23,7 @@ public:
 		double targetPositionY{0};
 	} TranslateParams_t;
 
-	CommandModelTranslate(QVTKFramebufferObjectRenderer *vtkFboRenderer, const TranslateParams_t & translateVector, bool inTransition);
+	CommandModelTranslate(QVtkRenderer *vtkFboRenderer, const TranslateParams_t & translateVector, bool inTransition);
 
 	bool isReady() const override;
 	void execute() override;

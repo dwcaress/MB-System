@@ -2,7 +2,7 @@
 #define COMMANDMODEL_H
 
 
-class QVTKFramebufferObjectRenderer;
+class QVtkRenderer;
 
 class CommandModel
 {
@@ -14,7 +14,7 @@ public:
 	virtual void execute() = 0;
 
 protected:
-	QVTKFramebufferObjectRenderer *m_vtkFboRenderer;
+	QVtkRenderer *m_vtkFboRenderer;
 };
 
 #endif // COMMANDMODEL_H

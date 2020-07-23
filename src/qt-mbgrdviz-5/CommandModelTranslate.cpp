@@ -2,10 +2,10 @@
 
 #include "CommandModelTranslate.h"
 #include "Model.h"
-#include "QVTKFramebufferObjectRenderer.h"
+#include "QVtkRenderer.h"
 
 
-CommandModelTranslate::CommandModelTranslate(QVTKFramebufferObjectRenderer *vtkFboRenderer, const TranslateParams_t & translateData, bool inTransition)
+CommandModelTranslate::CommandModelTranslate(QVtkRenderer *vtkFboRenderer, const TranslateParams_t & translateData, bool inTransition)
 	: m_translateParams{translateData}
 	, m_inTransition{inTransition}
 {
