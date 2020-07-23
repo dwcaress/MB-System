@@ -313,7 +313,7 @@ int main(int argc, char** argv)
     double camera_pitch;
 
         /* algorithm parameters */
-    enum { STEREO_BM=0, STEREO_SGBM=1, STEREO_HH=2, STEREO_VAR=3 };
+    enum { STEREO_BM=0, STEREO_SGBM=1, STEREO_HH=2 };
     int algorithm = STEREO_SGBM;
     int preFilterCap = 4;
     int SADWindowSize = 5;
@@ -334,7 +334,6 @@ int main(int argc, char** argv)
     int textureThreshold = 10;
     Ptr<StereoBM> bm = StereoBM::create();
     Ptr<StereoSGBM> sgbm = StereoSGBM::create();
-    //StereoVar     var;  // StereoVar is no more available in opencv>3, use StereoBM or StereoSGBM instead
     Mat img1, img2;
     double min_disparity;
     double max_disparity;
@@ -587,8 +586,6 @@ int main(int argc, char** argv)
                     algorithm = STEREO_SGBM;
                 else if (strcmp(optarg, "hh") == 0 || strcmp(optarg, "HH") == 0)
                     algorithm = STEREO_HH;
-                else if (strcmp(optarg, "var") == 0 || strcmp(optarg, "VAR") == 0)
-                    algorithm = STEREO_VAR;
                 }
 
             /* algorithm-pre-filter-cap=value */
@@ -1300,20 +1297,6 @@ int main(int argc, char** argv)
         /* process the stereo pair */
         if (use_this_pair == MB_YES) {
 
-            /* display images */
-            if (show_images) {
-                String windowNameLeft = "Left";
-                namedWindow(windowNameLeft, 0);
-                imshow(windowNameLeft, img1);
-                waitKey(1000);
-                destroyWindow(windowNameLeft);
-                String windowNameRight = "Right";
-                namedWindow(windowNameRight, 0);
-                imshow(windowNameRight, img2);
-                waitKey(1000);
-                destroyWindow(windowNameRight);
-            }
-
             /* get navigation attitude and tide for this stereo pair */
             time_d = left_time_d;
             intstat = mb_linear_interp_longitude(verbose,
@@ -1464,20 +1447,6 @@ fprintf(stderr, "%s:%d:%s: algorithm == STEREO_HH\n", __FILE__, __LINE__, __func
                 } else {
 fprintf(stderr, "%s:%d:%s: no algorithm\n", __FILE__, __LINE__, __func__);
                 }
-//                else if (algorithm == STEREO_VAR) {
-//                    var.levels = 3;                                 // ignored with USE_AUTO_PARAMS
-//                    var.pyrScale = 0.5;                             // ignored with USE_AUTO_PARAMS
-//                    var.nIt = 25;
-//                    var.minDisp = -numberOfDisparities;
-//                    var.maxDisp = 0;
-//                    var.poly_n = 3;
-//                    var.poly_sigma = 0.0;
-//                    var.fi = 15.0f;
-//                    var.lambda = 0.03f;
-//                    var.penalization = var.PENALIZATION_TICHONOV;   // ignored with USE_AUTO_PARAMS
-//                    var.cycle = var.CYCLE_V;                        // ignored with USE_AUTO_PARAMS
-//                    var.flags = var.USE_SMART_ID | var.USE_AUTO_PARAMS | var.USE_INITIAL_DISPARITY | var.USE_MEDIAN_FILTERING ;
-//                }
 
                 /* set up rectification */
                 if( use_calibration == MB_YES ) {
@@ -1601,15 +1570,6 @@ fprintf(stderr, "%s:%d:%s: no algorithm\n", __FILE__, __LINE__, __func__);
 //avgPixelIntensityDisparity = mean(disp8);
 //fprintf(stderr, "%s:%d:%s: avgPixelIntensity: %f %f %f\n", __FILE__, __LINE__, __func__, avgPixelIntensityLeft.val[0], avgPixelIntensityRight.val[0], avgPixelIntensityDisparity.val[0]);
 
-                /* display the disparity map */
-                if (show_images) {
-                    String windowNameDisparity = "Disparity";
-                    namedWindow(windowNameDisparity, 0);
-                    imshow(windowNameDisparity, disp);
-                    waitKey(1000);
-                    destroyWindow(windowNameDisparity);
-                }
-
                 disp.convertTo(dispf, CV_32FC1, 1/16.0, 0);
             }
             else if (algorithm == STEREO_SGBM || algorithm == STEREO_HH) {
@@ -1624,15 +1584,6 @@ fprintf(stderr, "%s:%d:%s: no algorithm\n", __FILE__, __LINE__, __func__);
 //fprintf(stderr, "%s:%d:%s: avgPixelIntensity: %f %f %f\n", __FILE__, __LINE__, __func__,
 //avgPixelIntensityLeft.val[0], avgPixelIntensityRight.val[0], avgPixelIntensityDisparity.val[0]);
 
-                /* display the disparity map */
-                if (show_images) {
-                    String windowNameDisparity = "Disparity";
-                    namedWindow(windowNameDisparity, 0);
-                    imshow(windowNameDisparity, disp);
-                    waitKey(1000);
-                    destroyWindow(windowNameDisparity);
-                }
-
                 disp.convertTo(dispf, CV_32FC1, 1/16.0, 0);
 //for (i = 0; i < dispf.rows; i++) {
 //for (j = 0; j < dispf.cols; j++) {
@@ -1643,37 +1594,20 @@ fprintf(stderr, "%s:%d:%s: no algorithm\n", __FILE__, __LINE__, __func__);
 //}
 //}
             }
-//            else if (algorithm == STEREO_VAR) {
-//                var(img1g, img2g, disp);
-//
-//
-//                /* display the disparity map */
-//                if (show_images) {
-//                    String windowNameDisparity = "Disparity";
-//                    namedWindow(windowNameDisparity, 0);
-//                    imshow(windowNameDisparity, disp);
-//                    waitKey(1000);
-//                    destroyWindow(windowNameDisparity);
-//                }
-//
-//                /* convert to a float disparity */
-//                int MaxD = MAX(labs(var.minDisp), labs(var.maxDisp));
-//                int SignD = 1; if (MIN(var.minDisp, var.maxDisp) < 0) SignD = -1;
-//                if (var.minDisp >= var.maxDisp)
-//                    {
-//                    MaxD = 256; SignD = 1;
-//                    }
-//                disp.convertTo(dispf, CV_32FC1, 256 / MaxD, 0);
-//                for (i = 0; i < dispf.rows; i++)
-//                    {
-//                    for (j = 0; j < dispf.cols; j++)
-//                        {
-//                        fprintf(stream, "DISPARITY: %d %d  %d %d %f\n",
-//                            i, j, disp.at<short>(i,j), disp8.at<uchar>(i,j), dispf.at<float>(i,j));
-//                        }
-//                    }
-//                }
-//fprintf(stderr,"disp depth:%d channels:%d\n",disp.depth(),disp.channels());
+
+            /* display images */
+            if (show_images) {
+                Mat imgConcat, dispColor;
+                hconcat(img1, img2, imgConcat);
+                equalizeHist(disp8, disp8);
+                applyColorMap(disp8, dispColor, COLORMAP_JET);
+                hconcat(imgConcat, dispColor, imgConcat);
+                String windowName = "Stereo Pair & Disparity";
+                namedWindow(windowName, 0);
+                imshow(windowName, imgConcat);
+                waitKey(1);
+                destroyWindow(windowName);
+            }
 
             /* check to see if a new output file is required */
             if (use_surveylinetimefile == MB_YES) {
