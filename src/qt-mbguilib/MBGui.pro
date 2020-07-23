@@ -20,6 +20,7 @@ DEFINES += QT_DEPRECATED_WARNINGS
 SOURCES += \
     Camera.cpp \
     ColorMap.cpp \
+    GmtGridReader.cpp \
     GmtGridSurface.cpp \
     MBGui.cpp \
     MBQuickItem.cpp \
@@ -30,6 +31,7 @@ SOURCES += \
 HEADERS += \
     Camera.h \
     ColorMap.h \
+    GmtGridReader.h \
     GmtGridSurface.h \
     MBGui_global.h \
     MBGui.h \
@@ -39,6 +41,8 @@ HEADERS += \
     SurfaceRenderer.h \
     Vertex.h \
     colorTables.h
+
+INCLUDEPATH += /usr/local/include/vtk-8.2
 
 # Default rules for deployment.
 unix {
