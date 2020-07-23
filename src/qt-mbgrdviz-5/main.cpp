@@ -6,7 +6,7 @@ VTK_MODULE_INIT(vtkRenderingOpenGL2); // VTK was built with vtkRenderingOpenGL2
 VTK_MODULE_INIT(vtkInteractionStyle);
 VTK_MODULE_INIT(vtkRenderingFreeType)
 
-#include "CanvasHandler.h"
+#include "BackEnd.h"
 
 
 int main(int argc, char **argv)
@@ -18,7 +18,7 @@ int main(int argc, char **argv)
 	putenv((char *)"LC_NUMERIC=C");
 #endif //LINUX
 
-	CanvasHandler(argc, argv);
+	BackEnd(argc, argv);
 
 	return 0;
 }
