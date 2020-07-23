@@ -7,8 +7,8 @@
 
 #include "Model.h"
 #include "ProcessingEngine.h"
-#include "QVTKFramebufferObjectItem.h"
-#include "QVTKFramebufferObjectRenderer.h"
+#include "QVtkItem.h"
+#include "QVtkRenderer.h"
 #include "BackEnd.h"
 
 
@@ -21,7 +21,7 @@ BackEnd::BackEnd(int argc, char **argv)
 	app.setWindowIcon(QIcon(":/resources/bq.ico"));
 
 	// Register QML types
-	qmlRegisterType<QVTKFramebufferObjectItem>("QtVTK", 1, 0, "VtkFboItem");
+	qmlRegisterType<QVtkItem>("QtVTK", 1, 0, "VtkFboItem");
 
 	// Create classes instances
 	m_processingEngine = std::shared_ptr<ProcessingEngine>(new ProcessingEngine());
@@ -36,10 +36,10 @@ BackEnd::BackEnd(int argc, char **argv)
 	// Load main QML file
 	engine.load(QUrl("qrc:/main.qml"));
 
-	// Get reference to the QVTKFramebufferObjectItem created in QML
+	// Get reference to the QVtkItem created in QML
 	// We cannot use smart pointers because this object must be deleted by QML
 	QObject *rootObject = engine.rootObjects().first();
-	m_vtkFboItem = rootObject->findChild<QVTKFramebufferObjectItem*>("vtkFboItem");
+	m_vtkFboItem = rootObject->findChild<QVtkItem*>("vtkFboItem");
 
 	// Give the vtkFboItem reference to the BackEnd
 	if (m_vtkFboItem)
@@ -48,10 +48,10 @@ BackEnd::BackEnd(int argc, char **argv)
 
 		m_vtkFboItem->setProcessingEngine(m_processingEngine);
 
-		connect(m_vtkFboItem, &QVTKFramebufferObjectItem::rendererInitialized, this, &BackEnd::startApplication);
-		connect(m_vtkFboItem, &QVTKFramebufferObjectItem::isModelSelectedChanged, this, &BackEnd::isModelSelectedChanged);
-		connect(m_vtkFboItem, &QVTKFramebufferObjectItem::selectedModelPositionXChanged, this, &BackEnd::selectedModelPositionXChanged);
-		connect(m_vtkFboItem, &QVTKFramebufferObjectItem::selectedModelPositionYChanged, this, &BackEnd::selectedModelPositionYChanged);
+		connect(m_vtkFboItem, &QVtkItem::rendererInitialized, this, &BackEnd::startApplication);
+		connect(m_vtkFboItem, &QVtkItem::isModelSelectedChanged, this, &BackEnd::isModelSelectedChanged);
+		connect(m_vtkFboItem, &QVtkItem::selectedModelPositionXChanged, this, &BackEnd::selectedModelPositionXChanged);
+		connect(m_vtkFboItem, &QVtkItem::selectedModelPositionYChanged, this, &BackEnd::selectedModelPositionYChanged);
 	}
 	else
 	{
@@ -69,7 +69,7 @@ void BackEnd::startApplication() const
 {
 	qDebug() << "BackEnd::startApplication()";
 
-	disconnect(m_vtkFboItem, &QVTKFramebufferObjectItem::rendererInitialized, this, &BackEnd::startApplication);
+	disconnect(m_vtkFboItem, &QVtkItem::rendererInitialized, this, &BackEnd::startApplication);
 }
 
 
@@ -149,7 +149,7 @@ void BackEnd::mouseReleaseEvent(const int button, const int screenX, const int s
 
 bool BackEnd::getIsModelSelected() const
 {
-	// QVTKFramebufferObjectItem might not be initialized when QML loads
+	// QVtkItem might not be initialized when QML loads
 	if (!m_vtkFboItem)
 	{
 		return 0;
@@ -160,7 +160,7 @@ bool BackEnd::getIsModelSelected() const
 
 double BackEnd::getSelectedModelPositionX() const
 {
-	// QVTKFramebufferObjectItem might not be initialized when QML loads
+	// QVtkItem might not be initialized when QML loads
 	if (!m_vtkFboItem)
 	{
 		return 0;
@@ -171,7 +171,7 @@ double BackEnd::getSelectedModelPositionX() const
 
 double BackEnd::getSelectedModelPositionY() const
 {
-	// QVTKFramebufferObjectItem might not be initialized when QML loads
+	// QVtkItem might not be initialized when QML loads
 	if (!m_vtkFboItem)
 	{
 		return 0;

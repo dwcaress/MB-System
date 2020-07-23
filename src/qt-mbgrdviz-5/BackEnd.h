@@ -8,7 +8,7 @@
 
 
 class ProcessingEngine;
-class QVTKFramebufferObjectItem;
+class QVtkItem;
 
 /** 
 BackEnd manages interaction with QML, is the QML C++ "backend", its properties and methods available
@@ -56,7 +56,7 @@ signals:
 private:
 
 	std::shared_ptr<ProcessingEngine> m_processingEngine;
-	QVTKFramebufferObjectItem *m_vtkFboItem = nullptr;
+	QVtkItem *m_vtkFboItem = nullptr;
 
 	double m_previousWorldX = 0;
 	double m_previousWorldY = 0;
