@@ -108,7 +108,7 @@ void QVtkRenderer::synchronize(QQuickFramebufferObject *item)
   m_modelsRepresentationOption = m_vtkFboItem->getModelsRepresentation();
   m_modelsOpacity = m_vtkFboItem->getModelsOpacity();
   m_modelsGouraudInterpolation = m_vtkFboItem->getGourauInterpolation();
-  Model::setSelectedModelColor(QColor(m_vtkFboItem->getModelColorR(), m_vtkFboItem->getModelColorG(), m_vtkFboItem->getModelColorB()));
+  Model::setSelectedColor(QColor(m_vtkFboItem->getModelColorR(), m_vtkFboItem->getModelColorG(), m_vtkFboItem->getModelColorB()));
 }
 
 void QVtkRenderer::render()
@@ -381,7 +381,7 @@ void QVtkRenderer::createLine(const double x1, const double y1, const double z1,
 
 void QVtkRenderer::addModelActor(const std::shared_ptr<Model> model)
 {
-  m_renderer->AddActor(model->getModelActor());
+  m_renderer->AddActor(model->getActor());
 
   qDebug() << "QVtkRenderer::addModelActor(): Model added " << model.get();
 }

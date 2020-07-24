@@ -91,7 +91,7 @@ void ProcessingEngine::setModelsRepresentation(const int modelsRepresentationOpt
 {
   for (const std::shared_ptr<Model>& model : m_models)
     {
-      model->getModelActor()->GetProperty()->SetRepresentation(modelsRepresentationOption);
+      model->getActor()->GetProperty()->SetRepresentation(modelsRepresentationOption);
     }
 }
 
@@ -99,7 +99,7 @@ void ProcessingEngine::setModelsOpacity(const double modelsOpacity) const
 {
   for (const std::shared_ptr<Model>& model : m_models)
     {
-      model->getModelActor()->GetProperty()->SetOpacity(modelsOpacity);
+      model->getActor()->GetProperty()->SetOpacity(modelsOpacity);
     }
 }
 
@@ -109,11 +109,11 @@ void ProcessingEngine::setModelsGouraudInterpolation(const bool enableGouraudInt
     {
       if (enableGouraudInterpolation)
 	{
-	  model->getModelActor()->GetProperty()->SetInterpolationToGouraud();
+	  model->getActor()->GetProperty()->SetInterpolationToGouraud();
 	}
       else
 	{
-	  model->getModelActor()->GetProperty()->SetInterpolationToFlat();
+	  model->getActor()->GetProperty()->SetInterpolationToFlat();
 	}
     }
 }
@@ -122,7 +122,7 @@ void ProcessingEngine::updateModelsColor() const
 {
   for (const std::shared_ptr<Model>& model : m_models)
     {
-      model->updateModelColor();
+      model->updateColor();
     }
 }
 
@@ -130,7 +130,7 @@ std::shared_ptr<Model> ProcessingEngine::getModelFromActor(const vtkSmartPointer
 {
   for (const std::shared_ptr<Model> &model : m_models)
     {
-      if (model->getModelActor() == modelActor)
+      if (model->getActor() == modelActor)
 	{
 	  return model;
 	}
