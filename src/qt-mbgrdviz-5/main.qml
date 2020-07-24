@@ -170,7 +170,7 @@ ApplicationWindow {
         visible: canvasHandler.showFileDialog
         title: "Import model"
         folder: shortcuts.documents
-        nameFilters: ["Model files" + "(*.stl *.STL *.obj *.OBJ *.grd *.GRD)", "All files" + "(*)"]
+        nameFilters: ["Model files" + "(*.grd *.GRD)", "All files" + "(*)"]
 
         onAccepted: {
             canvasHandler.showFileDialog = false;
