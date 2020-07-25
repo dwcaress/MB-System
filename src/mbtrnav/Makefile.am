@@ -187,7 +187,7 @@ libnetif_la_LIBADD = libtrnw.la \
                 $(top_builddir)/src/mbtrn/libmframe.la \
                 -lm -lpthread
 
-bin_PROGRAMS =   trn-server trn-cli netif-test trnif-test trnifsvr-test trnclient-test trnu-cli #  readlog writelog
+bin_PROGRAMS =   trn-server trn-cli netif-test trnif-test trnifsvr-test trnclient-test trnu-cli trnusvr-test #  readlog writelog
 
 
 trnu_cli_SOURCES = trnw/trnucli_test.c trnw/trnu_cli.c
@@ -210,6 +210,9 @@ trnifsvr_test_LDADD = libnetif.la  ${top_builddir}/src/mbtrn/libr7kr.la libtrnw.
 
 trnclient_test_SOURCES =  utils/trnclient_test.cpp utils/TrnClient.cpp utils/TerrainNavClient.cpp
 trnclient_test_LDADD = libtnav.la
+
+trnusvr_test_SOURCES = utils/trnusvr-test.c
+trnusvr_test_LDADD = libnetif.la libtrnw.la
 
 dist_bin_SCRIPTS =
 
