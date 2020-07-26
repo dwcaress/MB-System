@@ -238,7 +238,7 @@ int mbeditviz_init(int argc, char **argv) {
 	}
 
 	/* print starting debug statements */
-	if (mbev_verbose >= 0) {
+	if (mbev_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  Program <%s>\n", program_name);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
 		fprintf(stderr, "dbg2  Control Parameters:\n");
@@ -4460,6 +4460,7 @@ void mbeditviz_mb3dsoundings_optimizebiasvalues(int mode, double *rollbias_best,
 	 * - if a good set of values is found (measured by variace reduction)
 	 * then set the values and apply them before returning */
 	fprintf(stderr,"\nMBeditviz: Optimizing Bias Parameters\n");
+  fprintf(stderr,"  Number of selected soundings: %d\n", mbev_selected.num_soundings);
 	if (mode == MB3DSDG_OPTIMIZEBIASVALUES_R)
 		fprintf(stderr,"  Mode: Roll Bias\n");
 	else if (mode == MB3DSDG_OPTIMIZEBIASVALUES_P)

@@ -495,7 +495,7 @@ Thanks to Joaquim Luis for finding and fixing this.
 
 #### 5.7.6beta36 (May 17, 2020)
 
-Mbgrd3obj: Had to add #ifdef's on GMT version because the number of parameters
+Mbgrd2obj: Had to add #ifdef's on GMT version because the number of parameters
 passed to gmt_init_module() changes between GMT 5.3 through 6.0 and 6.1.
 
 Mbnavadjust: Changed calculation of overlap for a crossing so that the value is
