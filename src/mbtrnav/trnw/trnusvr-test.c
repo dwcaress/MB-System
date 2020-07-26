@@ -104,6 +104,7 @@
 #define TRNUST_MOD_DFL 3
 #define TRNUST_HBTO_DFL 0.0
 #define TRNUST_VERBOSE_DFL 0
+#define SESSION_BUF_LEN 80
 
 /////////////////////////
 // Declarations
@@ -332,7 +333,6 @@ static int s_trnu_pub(trnu_pub_t *update, netif_t *trnusvr)
     return retval;
 }
 // End function s_trnu_pub
-#define SESSION_BUF_LEN 16
 
 static char *s_session_str(char **pdest, size_t len)
 {
