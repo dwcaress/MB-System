@@ -33,15 +33,31 @@ OS_INC_PATH=-I/opt/local/include
 OS_LIB_PATH=-L/opt/local/lib
 endif
 
+# for TRN clients or to force
+# netif default MMDEBUG config
+# define NETIF_MMDEBUG
+# compile using make trnc...
+# or make NETIF_MMDEBUG=1
+ifeq ($(MAKECMDGOALS),trnc)
+OPT_NETIF_MMDEBUG=-DNETIF_MMDEBUG
+$(info INFO >>>>>> using NETIF_MMDEBUG)
+else ifdef NETIF_MMDEBUG
+OPT_NETIF_MMDEBUG=-DNETIF_MMDEBUG
+$(info INFO >>>>>> using NETIF_MMDEBUG)
+endif
+
 # Build options
-BUILD_RELEASE_OPTIONS = $(STD) -D_GNU_SOURCE  $(OPT_TRN_VER) $(OPT_TRN_BUILD)
+BUILD_RELEASE_OPTIONS = $(STD) -D_GNU_SOURCE  $(OPT_TRN_VER) $(OPT_TRN_BUILD) $(OPT_NETIF_MMDEBUG)
 BUILD_DEBUG_OPTIONS = $(BUILD_RELEASE_OPTIONS) -DWITH_PDEBUG
+
 BUILD_OPTIONS = $(BUILD_RELEASE_OPTIONS)
 
 # build debug version (else build release)
-# [use BUILD_DEBUG=1 make...]
+# [use make BUILD_DEBUG=1...]
 ifdef BUILD_DEBUG
-BUILD_OPTIONS= $(BUILD_DEBUG_OPTIONS)
+BUILD_OPTIONS = $(BUILD_DEBUG_OPTIONS)
+else
+BUILD_OPTIONS = $(BUILD_RELEASE_OPTIONS)
 endif
 
 # build directories
@@ -78,7 +94,7 @@ WARN_FLAGS=-Wall
 
 # Compiler flags
 CFLAGS = -g -O2 $(WARN_FLAGS) $(GPROF) $(BUILD_OPTIONS) $(OS_CFLAGS)
-INC_PATHS =  -I.  -I$(MFRAME_INC_DIR) -I$(TNAV_DIR) -I$(NEWMAT_DIR) -I$(QNX_DIR) $(OS_INC_PATH)
+INC_PATHS = -I. -I$(MFRAME_INC_DIR) -I$(TNAV_DIR) -I$(NEWMAT_DIR) -I$(QNX_DIR) $(OS_INC_PATH)
 
 # Linker flags
 LD_FLAGS = -g $(GPROF)
@@ -133,10 +149,18 @@ TRNUCLI_TEST_SRC=trnucli_test.c
 TRNUCLI_TEST_OBJ=$(TRNUCLI_TEST_SRC:%.c=$(BUILD_DIR)/%.o)
 TRNUCLI_TEST_LIBS = $(MFRAME_LIB) -lpthread -lm -ltrnucli
 
+# trnusvr-test: trnu_cli test server
+TRNUSVR_TEST=trnusvr-test
+TRNUSVR_TEST_SRC=trnusvr-test.c netif.c trnif_msg.c trnif_proto.c
+TRNUSVR_TEST_OBJ=$(TRNUSVR_TEST_SRC:%.c=$(BUILD_DIR)/%.o)
+TRNUSVR_TEST_LIBS = $(MFRAME_LIB) -lpthread -lm -ltrnw -lm -lqnx -lnewmat -ltrn -ltrncli -lnetcdf -lgeolib -lstdc++
+
 # TRN clients
-TRNC_SRC+= $(LIBTRNCLI_SRC) $(TRNCLI_TEST_SRC) $(LIBTRNUCLI_SRC) $(TRNUCLI_TEST_SRC)
+TRNC_SRC+= $(LIBTRNCLI_SRC) $(TRNCLI_TEST_SRC) \
+$(LIBTRNUCLI_SRC) $(TRNUCLI_TEST_SRC) $(TRNUSVR_TEST_SRC)
+
 TRNC_TARGETS+=  $(OUTPUT_DIR)/$(LIBTRNCLI) $(OUTPUT_DIR)/$(TRNCLI_TEST) \
-	$(OUTPUT_DIR)/$(LIBTRNUCLI) $(OUTPUT_DIR)/$(TRNUCLI_TEST)
+$(OUTPUT_DIR)/$(LIBTRNUCLI) $(OUTPUT_DIR)/$(TRNUCLI_TEST) $(OUTPUT_DIR)/$(TRNUSVR_TEST)
 
 ########################################
 # Build Files (mostly for cleanup)
@@ -188,6 +212,12 @@ $(OUTPUT_DIR)/$(LIBTRNUCLI): $(LIBTRNUCLI_OBJ)
 $(OUTPUT_DIR)/$(TRNUCLI_TEST): $(TRNUCLI_TEST_OBJ) $(LIBTRNUCLI_OBJ)
 	@echo building $@...
 	$(CXX) $(INC_PATHS) $(LIB_PATHS) $^ -o $@ $(LD_FLAGS) $(TRNUCLI_TEST_LIBS)
+	@echo
+
+# build trnusvr-test utility
+$(OUTPUT_DIR)/$(TRNUSVR_TEST): $(TRNUSVR_TEST_OBJ)
+	@echo building $@...
+	$(CXX) $(INC_PATHS) $(LIB_PATHS) $^ -o $@ $(LD_FLAGS) $(TRNUSVR_TEST_LIBS)
 	@echo
 
 # include the dependencies
