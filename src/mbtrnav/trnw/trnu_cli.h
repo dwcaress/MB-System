@@ -68,8 +68,6 @@
 /////////////////////////
 
 #include "trnw.h"
-#include "mb1_msg.h"
-#include "trn_msg.h"
 #include "mframe.h"
 #include "msocket.h"
 #include "medebug.h"

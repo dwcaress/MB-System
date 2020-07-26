@@ -906,10 +906,16 @@ int trnif_msg_handle_trnu(void *msg, netif_t *self, msock_connection_t *peer, in
 
         if(strcmp(msg,PROTO_TRNU_RST)==0){
             // reinit, return ACK
+            if(NULL!=trn){
             wtnav_reinit_filter(trn,true);
             msg_out=strdup(PROTO_TRNU_ACK);
             send_len=strlen(PROTO_TRNU_ACK)+1;
             mlog_tprintf(self->mlog_id,"trn_filt_reinit,%lf,[%s:%s]\n", msg_time,peer->chost, peer->service);
+            }else{
+                mlog_tprintf(self->mlog_id,"trn_filt_reinit[NULL_instance],%lf,[%s,%s]\n", msg_time,peer->chost, peer->service);
+                msg_out=strdup(PROTO_TRNU_NACK);
+                send_len=strlen(PROTO_TRNU_NACK)+1;
+            }
         }
 
         if(send_len>0){
