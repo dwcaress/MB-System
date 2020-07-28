@@ -151,7 +151,7 @@ TRNUCLI_TEST_LIBS = $(MFRAME_LIB) -lpthread -lm -ltrnucli
 
 # trnusvr-test: trnu_cli test server
 TRNUSVR_TEST=trnusvr-test
-TRNUSVR_TEST_SRC=trnusvr-test.c netif.c trnif_msg.c trnif_proto.c
+TRNUSVR_TEST_SRC=trnusvr_test.c netif.c trnif_msg.c trnif_proto.c
 TRNUSVR_TEST_OBJ=$(TRNUSVR_TEST_SRC:%.c=$(BUILD_DIR)/%.o)
 TRNUSVR_TEST_LIBS = $(MFRAME_LIB) -lpthread -lm -ltrnw -lm -lqnx -lnewmat -ltrn -ltrncli -lnetcdf -lgeolib -lstdc++
 
