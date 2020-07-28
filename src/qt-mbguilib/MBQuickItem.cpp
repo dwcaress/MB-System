@@ -31,6 +31,11 @@
 #include "SurfaceRenderer.h"
 #include "GmtGridSurface.h"
 
+/// Define global references
+QQuickWindow *g_rootWindow;
+QQmlApplicationEngine *g_appEngine;
+
+
 /// Initialize static singleton instance
 MBQuickItem *MBQuickItem::m_instance = nullptr;
 
