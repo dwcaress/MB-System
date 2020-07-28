@@ -1,10 +1,11 @@
 ///
-/// @file trnusvr-test.c
+/// @file trnusvr_test.c
 /// @authors k. Headley
 /// @date 12 jun 2019
 
 /// Test server for trnu clients
 
+/// TODO: fix compilation note
 /// Compile test using
 /// gcc -DWITH_NETIF_TEST -o netif-test netif-test.c netif.c -L../bin -lmframe
 /// @sa doxygen-examples.c for more examples of Doxygen markup
@@ -105,6 +106,7 @@
 #define TRNUST_HBTO_DFL 0.0
 #define TRNUST_VERBOSE_DFL 0
 #define SESSION_BUF_LEN 80
+#define TRNUSVR_CMD_LINE_BYTES 2048
 
 /////////////////////////
 // Declarations
@@ -121,6 +123,7 @@ typedef struct app_cfg_s{
 
 
 bool g_interrupt=false;
+int g_signal=0;
 
 /////////////////////////
 // Imports
@@ -265,6 +268,7 @@ void parse_args(int argc, char **argv, app_cfg_t *cfg)
 /// @return none
 static void s_termination_handler (int signum)
 {
+    g_signal=signum;
     switch (signum) {
         case SIGINT:
         case SIGHUP:
@@ -362,15 +366,15 @@ static char *s_session_str(char **pdest, size_t len)
                 sprintf(*pdest,"%s",session_date);
                 retval=*pdest;
             }else{
-                fprintf(stderr,"ERR - dest buffer too small");
+                fprintf(stderr,"ERR - dest buffer too small\n");
             }
-        }
+       }
     }
     return retval;
 }
 // End function s_session_str
 
-static int s_init_trnusvr(app_cfg_t *cfg, bool verbose)
+static int s_init_trnusvr(int argc, char **argv, app_cfg_t *cfg, bool verbose)
 {
     int retval = -1;
     if(NULL!=cfg && NULL!=cfg->host){
@@ -390,8 +394,24 @@ static int s_init_trnusvr(app_cfg_t *cfg, bool verbose)
             fprintf(stderr,"trnusvr netif:\n");
             netif_show(cfg->netif,true,5);
             netif_init_log(cfg->netif, "trnusvr", (NULL!=cfg->logdir?cfg->logdir:"."), s_session_str(NULL,0));
+
+            char g_cmd_line[TRNUSVR_CMD_LINE_BYTES]={0};
+            char *ip=g_cmd_line;
+            int x=0;
+            for (x=0;x<argc;x++){
+                if ((ip+strlen(argv[x])-g_cmd_line) > TRNUSVR_CMD_LINE_BYTES) {
+                    fprintf(stderr,"warning - logged cmdline truncated\n");
+                    mlog_tprintf(cfg->netif->mlog_id,"warning - logged cmdline truncated\n");
+                    break;
+                }
+                int ilen=sprintf(ip," %s",argv[x]);
+                ip+=ilen;
+            }
+            g_cmd_line[TRNUSVR_CMD_LINE_BYTES-1]='\0';
             mlog_tprintf(cfg->netif->mlog_id,"*** trnusvr session start (TEST) ***\n");
             mlog_tprintf(cfg->netif->mlog_id,"libnetif v[%s] build[%s]\n",netif_get_version(),netif_get_build());
+            mlog_tprintf(cfg->netif->mlog_id,"cmdline [%s]\n",g_cmd_line);
+
             retval = netif_connect(cfg->netif);
         }else{
             fprintf(stderr,"%s:%d - ERR allocation\n",__FUNCTION__,__LINE__);
@@ -477,6 +497,7 @@ static int s_run(app_cfg_t *cfg)
             count++;
         }
         fprintf(stderr,"interrupted by user - returning\n");
+         mlog_tprintf(cfg->netif->mlog_id,"interrupted by user signal[%d]\n",g_signal);
         retval = 0;
     }
     return retval;
@@ -489,9 +510,6 @@ static int s_app_main(app_cfg_t *cfg)
 
     if(NULL!=cfg){
 
-        signal(SIGINT,s_termination_handler);
-
-        s_init_trnusvr(cfg,true);
 
         if(NULL!=cfg->netif ){
             double start_time=mtime_dtime();
@@ -533,9 +551,12 @@ int main(int argc, char **argv)
     int retval=-1;
 
     app_cfg_t *cfg=app_cfg_new();
+    signal(SIGINT,s_termination_handler);
 
     if(NULL!=cfg){
         parse_args(argc,argv,cfg);
+
+        s_init_trnusvr(argc,argv,cfg,true);
 
         retval=s_app_main(cfg);
 
