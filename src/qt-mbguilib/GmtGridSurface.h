@@ -6,8 +6,8 @@
 #include "ColorMap.h"
 
 /** 
-GMTGridSurface represents a 3D surface based on contents of a MB-System 
-GMT grid file
+    GMTGridSurface represents a 3D surface based on contents of a MB-System 
+    GMT grid file
 */
 class GmtGridSurface : public Surface {
 

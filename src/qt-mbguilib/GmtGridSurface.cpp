@@ -45,7 +45,6 @@ bool GmtGridSurface::build(const char *gridFile) {
 
  setData(gmtApi, gmtGrid);
 
- /// TEST TEST TEST
  /* ***
  qDebug() << "normals().constData():";
  qDebug() << normals().constData();
