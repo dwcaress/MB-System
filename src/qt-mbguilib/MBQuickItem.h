@@ -32,9 +32,12 @@ class Camera;
 
 /**
 MBQuickItem connects GUI thread with render thread by responding to signals
-emitted by QML renderer, and invoking renderer for non-QML "underlay" OpenGL code at appropriate
-times. Based on D'Angelo's MyQuickView and the Squircle example, this class inherits QQuickItem so that it may be 
-incoporated by ApplicationWindow.
+emitted by QML renderer. It encapsulates a SurfaceRenderer object, which renders
+a non-QML 3D surface using "native" OpenGL calls. The SurfaceRenderer drawing is 
+rendered first, and underlays QML GUI elements.
+Based on D'Angelo's MyQuickView example:
+https://www.kdab.com/integrate-opengl-code-qt-quick-2-applications-part-2/
+This class inherits QQuickItem so that it may be incoporated by ApplicationWindow.
 */
 class MBQuickItem : public QQuickItem
 {

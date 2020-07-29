@@ -36,8 +36,9 @@ class QOpenGLVertexArrayObject;
 
 /**
    SurfaceRenderer invokes OpenGL api functions to initialize drawing and buffers,
-   set up shaders, loads and paints surface data.
-   Based on D'Angelo's MeshRenderer.
+   set up shaders, load and paint 3D surface data.
+   Based on D'Angelo's MeshRenderer at
+   https://www.kdab.com/integrate-opengl-code-qt-quick-2-applications-part-2/
    */
 class SurfaceRenderer : public QObject
 {
