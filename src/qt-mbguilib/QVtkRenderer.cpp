@@ -9,6 +9,7 @@
 #include "QVtkItem.h"
 #include "GmtGridReader.h"
 
+using namespace mb_system;
 
 QVtkRenderer::QVtkRenderer() :
     item_(nullptr),

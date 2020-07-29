@@ -14,24 +14,26 @@
 #include "GmtGridReader.h"
 
 
-class QVtkItem;
+namespace mb_system {
 
-/**
-QVtkRenderer and QVtkItem coordinate with one another to
-render VTK scenes within a QQuickItem specified in QML.
-A QVtkRenderer object is created by an accompanying QVtkItem object 
-and runs in the application's "render" thread; QVtkRenderer
-is responsible for setting up the scene in the VTK pipeline,
-rendering the scene, and making scene adjustments based on user
-inputs (zoom, rotate, pan...) received by its accompanying QVtkItem
-running in the GUI thread. 
-See https://www.qt.io/blog/2015/05/11/integrating-custom-opengl-rendering-with-qt-quick-via-qquickframebufferobject
-*/
+  class QVtkItem;
+  
+  /**
+     QVtkRenderer and QVtkItem coordinate with one another to
+     render VTK scenes within a QQuickItem specified in QML.
+     A QVtkRenderer object is created by an accompanying QVtkItem object 
+     and runs in the application's "render" thread; QVtkRenderer
+     is responsible for setting up the scene in the VTK pipeline,
+     rendering the scene, and making scene adjustments based on user
+     inputs (zoom, rotate, pan...) received by its accompanying QVtkItem
+     running in the GUI thread. 
+     See https://www.qt.io/blog/2015/05/11/integrating-custom-opengl-rendering-with-qt-quick-via-qquickframebufferobject
+  */
 
-class QVtkRenderer : public QQuickFramebufferObject::Renderer,
-        protected QOpenGLFunctions
-{
-public:
+  class QVtkRenderer : public QQuickFramebufferObject::Renderer,
+		       protected QOpenGLFunctions
+  {
+  public:
     QVtkRenderer();
 
     /// Create rendering surface
@@ -47,7 +49,7 @@ public:
     void render() override;
     
 
-protected:
+  protected:
 
     /// Initialize renderer
     void initialize();
@@ -97,6 +99,7 @@ protected:
     /// Latest mouse move event
     std::shared_ptr<QMouseEvent> mouseMoveEvent_;
 
-};
+  };
+}
 
 #endif // QVTKRENDERER_H

@@ -5,20 +5,21 @@
 #include <QQuickFramebufferObject>
 #include "QVtkRenderer.h"
 
-/**
-QVtkItem and QVtkRenderer coordinate with one another to
-render VTK scenes within a QQuickItem specified in QML. A QVtkItem object
-is created when specified in QML, and creates an accompanying 
-QVtkRenderer object. The QVtkItem object runs in the GUI thread, is
-responsible for accepting user input (mouse zoom, rotate, etc) and passing
-those inputs to its accompanying QVtkRenderer object running in the render
-thead. See https://www.qt.io/blog/2015/05/11/integrating-custom-opengl-rendering-with-qt-quick-via-qquickframebufferobject
-*/
-class QVtkItem : public QQuickFramebufferObject
-{
+namespace mb_system {
+  /**
+     QVtkItem and QVtkRenderer coordinate with one another to
+     render VTK scenes within a QQuickItem specified in QML. A QVtkItem object
+     is created when specified in QML, and creates an accompanying 
+     QVtkRenderer object. The QVtkItem object runs in the GUI thread, is
+     responsible for accepting user input (mouse zoom, rotate, etc) and passing
+     those inputs to its accompanying QVtkRenderer object running in the render
+     thead. See https://www.qt.io/blog/2015/05/11/integrating-custom-opengl-rendering-with-qt-quick-via-qquickframebufferobject
+  */
+  class QVtkItem : public QQuickFramebufferObject
+  {
     Q_OBJECT
 
-public:
+  public:
 
     QVtkItem();
 
@@ -30,28 +31,28 @@ public:
 
     /// Get name of grid file
     char *getGridFilename() {
-        return gridFilename_;
+      return gridFilename_;
     }
 
     /// Return latest wheel event.
     /// Called by the QVtkRenderer during QVtkRenderer::synchronize()
     QWheelEvent *latestWheelEvent() {
-        return wheelEvent_.get();
+      return wheelEvent_.get();
     }
 
     /// Return latest mouse button press event.
     /// Called by the QVtkRenderer during QVtkRenderer::synchronize()  
     QMouseEvent *latestMouseButtonEvent() {
-        return mouseButtonEvent_.get();
+      return mouseButtonEvent_.get();
     }
 
     /// Return latest mouse move event.
     /// Called by the QVtkRenderer during QVtkRenderer::synchronize()  
     QMouseEvent *latestMouseMoveEvent() {
-        return mouseMoveEvent_.get();
+      return mouseMoveEvent_.get();
     }
 
-protected:
+  protected:
 
     /// Handle mouse wheel event
     virtual void wheelEvent(QWheelEvent *event) override;
@@ -77,6 +78,7 @@ protected:
     /// Latest mouse move event
     std::shared_ptr<QMouseEvent> mouseMoveEvent_;
 
-};
+  };
+}
 
 #endif // QVTKITEM_H

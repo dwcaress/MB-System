@@ -1,6 +1,7 @@
 #include "QVtkItem.h"
 #include "QVtkRenderer.h"
 
+using namespace mb_system;
 
 QVtkItem::QVtkItem() :
     gridFilename_(nullptr)
