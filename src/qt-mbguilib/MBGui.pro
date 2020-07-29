@@ -25,6 +25,8 @@ SOURCES += \
     MBGui.cpp \
     MBQuickItem.cpp \
     MBQuickView.cpp \
+    QVtkItem.cpp \
+    QVtkRenderer.cpp \
     Surface.cpp \
     SurfaceRenderer.cpp
 
@@ -37,6 +39,8 @@ HEADERS += \
     MBGui.h \
     MBQuickItem.h \
     MBQuickView.h \
+    QVtkItem.h \
+    QVtkRenderer.h \    
     Surface.h \
     SurfaceRenderer.h \
     Vertex.h \
