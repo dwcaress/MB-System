@@ -16,6 +16,17 @@
 
 class QVtkItem;
 
+/**
+QVtkRenderer and QVtkItem coordinate with one another to
+render VTK scenes within a QQuickItem specified in QML.
+A QVtkRenderer object is created by an accompanying QVtkItem object 
+and runs in the application's "render" thread; QVtkRenderer
+is responsible for setting up the scene in the VTK pipeline,
+rendering the scene, and making scene adjustments based on user
+inputs (zoom, rotate, pan...) received by its accompanying QVtkItem
+running in the GUI thread. 
+*/
+
 class QVtkRenderer : public QQuickFramebufferObject::Renderer,
         protected QOpenGLFunctions
 {
@@ -25,12 +36,15 @@ public:
     /// Create rendering surface
     QOpenGLFramebufferObject * createFramebufferObject(const QSize &size) override;
 
+    /// Copy new user inputs received by the accompanying QVtkItem
+    /// running in the GUI thread. The synchronize() function is
+    /// called while the GUI thread is blocked following a call
+    /// to QVtkItem::update(), so is thread-safe.
+    void synchronize(QQuickFramebufferObject *) override;
+
     /// Render the VTK scene
     void render() override;
     
-    /// Synchronize with main thread
-    void synchronize(QQuickFramebufferObject *) override;
-
 
 protected:
 

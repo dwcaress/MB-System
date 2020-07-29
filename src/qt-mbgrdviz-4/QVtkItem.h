@@ -5,6 +5,15 @@
 #include <QQuickFramebufferObject>
 #include "QVtkRenderer.h"
 
+/**
+QVtkItem and QVtkRenderer coordinate with one another to
+render VTK scenes within a QQuickItem specified in QML. A QVtkItem object
+is created when specified in QML, and creates an accompanying 
+QVtkRenderer object. The QVtkItem object runs in the GUI thread, is
+responsible for accepting user input (mouse zoom, rotate, etc) and passing
+those inputs to its accompanying QVtkRenderer object running in the render
+thead. 
+*/
 class QVtkItem : public QQuickFramebufferObject
 {
     Q_OBJECT
@@ -24,17 +33,20 @@ public:
         return gridFilename_;
     }
 
-    /// Return latest wheel event
+    /// Return latest wheel event.
+    /// Called by the QVtkRenderer during QVtkRenderer::synchronize()
     QWheelEvent *latestWheelEvent() {
         return wheelEvent_.get();
     }
 
-    /// Return latest mouse button press event
+    /// Return latest mouse button press event.
+    /// Called by the QVtkRenderer during QVtkRenderer::synchronize()  
     QMouseEvent *latestMouseButtonEvent() {
         return mouseButtonEvent_.get();
     }
 
-    /// Return latest mouse move event
+    /// Return latest mouse move event.
+    /// Called by the QVtkRenderer during QVtkRenderer::synchronize()  
     QMouseEvent *latestMouseMoveEvent() {
         return mouseMoveEvent_.get();
     }
