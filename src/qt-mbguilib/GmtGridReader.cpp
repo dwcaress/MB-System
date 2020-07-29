@@ -36,6 +36,8 @@ int GmtGridReader::RequestData(vtkInformation* request,
 			       vtkInformationVector* outputVector) {
 
   std::cerr << "GmtGridReader::RequestData()" << std::endl;
+  (void)request;     // Unused parameter
+  (void)inputVector; // Unused parameter
   
   vtkInformation* outInfo = outputVector->GetInformationObject(0);
 
