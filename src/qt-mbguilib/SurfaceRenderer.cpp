@@ -36,6 +36,7 @@
 #include <cmath>
 #include <QtMath>
 
+using namespace mb_system;
 
 const char * SurfaceRenderer::ShaderName = "phong";
 const char * SurfaceRenderer::VertexAttrName = "vertexPosition";

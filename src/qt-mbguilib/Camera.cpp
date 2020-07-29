@@ -21,6 +21,8 @@
 #include <QDebug>
 #include "Camera.h"
 
+using namespace mb_system;
+
 Camera::Camera(QObject *parent)
     : QObject(parent)
     , m_azimuth(0.0)

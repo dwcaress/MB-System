@@ -2,6 +2,8 @@
 #include <GL/gl.h>
 #include "Surface.h"
 
+using namespace mb_system;
+
 Surface::Surface() {
 }
 

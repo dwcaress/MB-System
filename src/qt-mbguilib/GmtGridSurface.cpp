@@ -8,6 +8,8 @@
 #include "GmtGridSurface.h"
 #include "colorTables.h"
 
+using namespace mb_system;
+
 GmtGridSurface::GmtGridSurface() {
 
   // Create Haxby color table

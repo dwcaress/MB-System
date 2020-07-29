@@ -3,6 +3,8 @@
 #include <QDebug>
 #include "ColorMap.h"
 
+using namespace mb_system;
+
 bool ColorMap::initialize(const QList<QVector3D> &rgbScale) {
 
   m_rgbScale = rgbScale;

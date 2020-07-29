@@ -26,6 +26,7 @@
 #include "SurfaceRenderer.h"
 #include "GmtGridSurface.h"
 
+using namespace mb_system;
 
 MBQuickView::MBQuickView(const char *qmlResource, QWindow *parent)
   : QQuickView(parent),
