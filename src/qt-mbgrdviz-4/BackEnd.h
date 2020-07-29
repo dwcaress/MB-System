@@ -5,6 +5,9 @@
 #include <QQmlApplicationEngine>
 #include "QVtkItem.h"
 
+/**
+   BackEnd is an interface between QML and C++ objects and functions.
+ */
 class BackEnd : public QObject
 {
     Q_OBJECT
