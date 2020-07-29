@@ -28,7 +28,7 @@ int main(int argc, char *argv[])
             QCoreApplication::exit(-1);
     }, Qt::QueuedConnection);
 
-    qmlRegisterType<QVtkItem>("QVtk", 1, 0, "QVtkItem");
+    qmlRegisterType<mb_system::QVtkItem>("QVtk", 1, 0, "QVtkItem");
     engine.load(url);
 
     if (!BackEnd::registerSingleton(argc, argv, &engine)) {

@@ -11,7 +11,7 @@ BackEnd::BackEnd(QQmlApplicationEngine *engine, QObject *parent) : QObject(paren
   qVtkItem_(nullptr)
 {
     QObject *rootObject = engine->rootObjects().first();
-    qVtkItem_ = rootObject->findChild<QVtkItem *>("qVtkItem");
+    qVtkItem_ = rootObject->findChild<mb_system::QVtkItem *>("qVtkItem");
     if (!qVtkItem_) {
         qCritical() << "Could not find qVtkItem";
         exit(1);

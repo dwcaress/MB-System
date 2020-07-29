@@ -29,7 +29,7 @@ protected:
     static BackEnd *singleInstance_;
 
     /// QVtkItem instantiated by QML
-    QVtkItem *qVtkItem_;
+  mb_system::QVtkItem *qVtkItem_;
 };
 
 #endif // BACKEND_H
