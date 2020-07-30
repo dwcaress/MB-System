@@ -9,24 +9,24 @@ Surface::Surface() {
 
 
 void Surface::center(float *x, float *y, float *z) {
-  *x = (m_xMax + m_xMin) / 2.;
-  *y = (m_yMax + m_yMin) / 2.;
-  *z = (m_zMax + m_zMin) / 2.;    
+  *x = (xMax_ + xMin_) / 2.;
+  *y = (yMax_ + yMin_) / 2.;
+  *z = (zMax_ + zMin_) / 2.;    
 }
 
 
 void Surface::spans(float *xSpan, float *ySpan, float *zSpan) {
-  *xSpan = m_xMax - m_xMin;
-  *ySpan = m_yMax - m_yMin;
-  *zSpan = m_zMax - m_zMin;
+  *xSpan = xMax_ - xMin_;
+  *ySpan = yMax_ - yMin_;
+  *zSpan = zMax_ - zMin_;
 }
 
 
 void Surface::initialize() {
-  m_xMin = std::numeric_limits<float>::max();
-  m_xMax = -std::numeric_limits<float>::max();
-  m_yMin = std::numeric_limits<float>::max();
-  m_yMax = -std::numeric_limits<float>::max();
-  m_zMin = std::numeric_limits<float>::max();
-  m_zMax = -std::numeric_limits<float>::max();
+  xMin_ = std::numeric_limits<float>::max();
+  xMax_ = -std::numeric_limits<float>::max();
+  yMin_ = std::numeric_limits<float>::max();
+  yMax_ = -std::numeric_limits<float>::max();
+  zMin_ = std::numeric_limits<float>::max();
+  zMax_ = -std::numeric_limits<float>::max();
 }

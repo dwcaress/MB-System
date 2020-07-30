@@ -20,13 +20,13 @@ namespace mb_system {
     virtual ~Surface() { }
   
     /// Return vertex positions
-    std::vector<Vertex> vertices() { return m_vertices; }
+    std::vector<Vertex> vertices() { return vertices_; }
 
     /// Return normals to each triangle
-    std::vector<Point3D> normals() { return m_normals; }
+    std::vector<Point3D> normals() { return normals_; }
 
     /// Return triangle-drawing indices
-    std::vector<unsigned int> drawingIndices() { return m_indices; }
+    std::vector<unsigned int> drawingIndices() { return indices_; }
 
     /// Return "center" of surface in world coordinates
     void center(float *x, float *y, float *z);
@@ -36,26 +36,26 @@ namespace mb_system {
 
     /// Return span of x values
     float xSpan(float *xMin, float *xMax) {
-      // qDebug() << "Surface::xSpan(): " << m_xMax - m_xMin;
-      *xMin = m_xMin;
-      *xMax = m_xMax;
-      return (m_xMax - m_xMin);
+      // qDebug() << "Surface::xSpan(): " << xMax_ - xMin_;
+      *xMin = xMin_;
+      *xMax = xMax_;
+      return (xMax_ - xMin_);
     }
 
     /// Return span of y values  
     float ySpan(float *yMin, float *yMax) {
-      // qDebug() << "Surface::ySpan(): " << m_yMax - m_yMin;    
-      *yMin = m_yMin;
-      *yMax = m_yMax;
-      return (m_yMax - m_yMin);
+      // qDebug() << "Surface::ySpan(): " << yMax_ - yMin_;    
+      *yMin = yMin_;
+      *yMax = yMax_;
+      return (yMax_ - yMin_);
     }
 
     /// Return span of z values  
     float zSpan(float *zMin, float *zMax) {
-      // qDebug() << "Surface::zSpan(): " << m_zMax - m_zMin;        
-      *zMin = m_zMin;
-      *zMax = m_zMax;
-      return (m_zMax - m_zMin);
+      // qDebug() << "Surface::zSpan(): " << zMax_ - zMin_;        
+      *zMin = zMin_;
+      *zMax = zMax_;
+      return (zMax_ - zMin_);
     }
   
   
@@ -67,22 +67,22 @@ namespace mb_system {
     void initialize();
   
     /// Surface points
-    std::vector<Vertex> m_vertices;
+    std::vector<Vertex> vertices_;
 
     /// Normals to surface points
-    std::vector<Point3D> m_normals;
+    std::vector<Point3D> normals_;
 
     /// Triangle drawing indices
-    std::vector<unsigned int> m_indices;
+    std::vector<unsigned int> indices_;
 
 
     // Surface extents
-    float m_xMin;
-    float m_xMax;
-    float m_yMin;
-    float m_yMax;
-    float m_zMin;
-    float m_zMax;
+    float xMin_;
+    float xMax_;
+    float yMin_;
+    float yMax_;
+    float zMin_;
+    float zMax_;
   
 
   };
