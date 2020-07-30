@@ -165,7 +165,19 @@ void GmtGridReader::SelectionModifiedCallback(vtkObject*, unsigned long, void* c
 }
 
 
-void GmtGridReader::zSpan(float *zMin, float *zMax) {
+void GmtGridReader::zBounds(float *zMin, float *zMax) {
+  *zMin = gmtGrid_->header->z_min;
+  *zMax = gmtGrid_->header->z_max;
+}
+
+
+void GmtGridReader::bounds(float *xMin, float *xMax,
+			   float *yMin, float *yMax,
+			   float *zMin, float *zMax) {
+  *xMin = gmtGrid_->header->wesn[0];
+  *xMax = gmtGrid_->header->wesn[1];
+  *yMin = gmtGrid_->header->wesn[2];
+  *yMax = gmtGrid_->header->wesn[3];
   *zMin = gmtGrid_->header->z_min;
   *zMax = gmtGrid_->header->z_max;
 }

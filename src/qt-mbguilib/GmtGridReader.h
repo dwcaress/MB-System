@@ -36,8 +36,12 @@ namespace mb_system {
     vtkPoints *gridPoints() { return gridPoints_; }
 
     /// Get span of z values
-    void zSpan(float *zMin, float *zMax);
-  
+    void zBounds(float *zMin, float *zMax);
+
+    /// Get span of x, y, and z values
+    void bounds(float *xMin, float *xMax, float *yMin, float *yMax,
+		float *zMin, float *zMax);
+    
   protected:
   
     /// Callback registered with the VariableArraySelection.
