@@ -30,10 +30,10 @@ using namespace mb_system;
 
 MBQuickView::MBQuickView(const char *qmlResource, QWindow *parent)
   : QQuickView(parent),
-    m_camera(new Camera()),
-    m_renderer(new SurfaceRenderer(this)),
-    m_surface(nullptr),
-    m_gridFilename(nullptr)
+    camera_(new Camera()),
+    renderer_(new SurfaceRenderer(this)),
+    surface_(nullptr),
+    gridFilename_(nullptr)
 {
   QSurfaceFormat format;
   format.setMajorVersion(3);
@@ -60,19 +60,19 @@ MBQuickView::MBQuickView(const char *qmlResource, QWindow *parent)
 	  this, &MBQuickView::invalidateUnderlay,
 	  Qt::DirectConnection);
 
-  connect(m_camera, &Camera::azimuthChanged,
+  connect(camera_, &Camera::azimuthChanged,
 	  this, &QQuickWindow::update);
 
-  connect(m_camera, &Camera::elevationChanged,
+  connect(camera_, &Camera::elevationChanged,
 	  this, &QQuickWindow::update);
 
-  connect(m_camera, &Camera::distanceChanged,
+  connect(camera_, &Camera::distanceChanged,
 	  this, &QQuickWindow::update);
 
-  connect(m_camera, &Camera::xOffsetChanged,
+  connect(camera_, &Camera::xOffsetChanged,
 	  this, &QQuickWindow::update);
 
-  connect(m_camera, &Camera::yOffsetChanged,
+  connect(camera_, &Camera::yOffsetChanged,
 	  this, &QQuickWindow::update);    
   
   setClearBeforeRendering(false);
@@ -80,7 +80,7 @@ MBQuickView::MBQuickView(const char *qmlResource, QWindow *parent)
 
 
   setResizeMode(SizeRootObjectToView);
-  rootContext()->setContextProperty("camera", m_camera);
+  rootContext()->setContextProperty("camera", camera_);
   /** 
   qDebug() << "set source to qml";
   setSource(QUrl("qrc:///main.qml"));
@@ -98,39 +98,39 @@ void MBQuickView::setQmlSource(const char *qmlResource) {
 
 
 void MBQuickView::setGridSurface(QUrl fileURL) {
-  if (m_gridFilename) {
-    free((void *)m_gridFilename);
+  if (gridFilename_) {
+    free((void *)gridFilename_);
   }
   qDebug() << "MBQuickView::setGridSurface to " << fileURL;
-  m_gridFilename = (const char *)strdup(fileURL.toLocalFile().toLatin1().data());
+  gridFilename_ = (const char *)strdup(fileURL.toLocalFile().toLatin1().data());
   initializeUnderlay();
 }
 
 
 void MBQuickView::initializeUnderlay()
 {
-  if (!m_gridFilename) {
+  if (!gridFilename_) {
     qInfo() << "No grid file loaded";
     return;
   }
   
-  if (m_surface) {
-    delete m_surface;
+  if (surface_) {
+    delete surface_;
   }
   
-  m_surface = new GmtGridSurface();
-  if (!m_surface->build(m_gridFilename)) {
+  surface_ = new GmtGridSurface();
+  if (!surface_->build(gridFilename_)) {
     // Failed to build surface from gridFilename
   }
   
-  m_renderer->initialize(m_surface);
+  renderer_->initialize(surface_);
   resetOpenGLState();
 
   // Calculate maximum viewing distance
   float min, max;
-  float maxDistance = 10 * m_renderer->surface()->xSpan(&min, &max);
+  float maxDistance = 10 * renderer_->surface()->xSpan(&min, &max);
   qDebug() << "initializeUnderlay(): max view distance = " << maxDistance;
-  m_camera->setMaxDistance(maxDistance);
+  camera_->setMaxDistance(maxDistance);
   QObject *object = this->findChild<QObject *>("distanceSlider");
   if (!object) {
     qCritical() << "Can't find distanceSlider";
@@ -144,19 +144,19 @@ void MBQuickView::initializeUnderlay()
 void MBQuickView::synchronizeUnderlay()
 {
   /// Update renderer with current camera parameters
-  m_renderer->setView(m_camera->azimuth(), m_camera->elevation(),
-		      m_camera->distance(),
-		      m_camera->xOffset(), m_camera->yOffset());
+  renderer_->setView(camera_->azimuth(), camera_->elevation(),
+		      camera_->distance(),
+		      camera_->xOffset(), camera_->yOffset());
 }
 
 void MBQuickView::renderUnderlay()
 {
-  m_renderer->render();
+  renderer_->render();
   resetOpenGLState();
 }
 
 void MBQuickView::invalidateUnderlay()
 {
-  m_renderer->invalidate();
+  renderer_->invalidate();
   resetOpenGLState();
 }

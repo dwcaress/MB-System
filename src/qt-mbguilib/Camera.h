@@ -61,13 +61,13 @@ namespace mb_system {
     /// View y-offset from target center
     int yOffset() const;
 
-    /// Returns value of m_forceRender
+    /// Returns value of forceRender_
     bool forceRender() const;
 
   
     /// Set maximum view distance
     float maxDistance() const {
-      return m_maxDistance;
+      return maxDistance_;
     };
 
   signals:
@@ -98,19 +98,19 @@ namespace mb_system {
     /// Set camera y offset from target center
     void setYOffset(float offset);
 
-    /// Set value of m_forceRender
+    /// Set value of forceRender_
     void setForceRender(bool value);
   
   private:
-    float m_azimuth;
-    float m_elevation;
-    float m_distance;
-    float m_xOffset;
-    float m_yOffset;
-    bool m_forceRender;
+    float azimuth_;
+    float elevation_;
+    float distance_;
+    float xOffset_;
+    float yOffset_;
+    bool forceRender_;
 
     /// Maximum viewing distance 
-    float m_maxDistance;
+    float maxDistance_;
   };
 }
 

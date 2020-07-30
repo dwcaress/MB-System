@@ -25,51 +25,51 @@ using namespace mb_system;
 
 Camera::Camera(QObject *parent)
     : QObject(parent)
-    , m_azimuth(0.0)
-    , m_elevation(180.0)
-    , m_distance(1000.0)
-    , m_xOffset(0)
-    , m_yOffset(0)
-    , m_forceRender(false)
+    , azimuth_(0.0)
+    , elevation_(180.0)
+    , distance_(1000.0)
+    , xOffset_(0)
+    , yOffset_(0)
+    , forceRender_(false)
 {
 }
 
 float Camera::azimuth() const
 {
-    return m_azimuth;
+    return azimuth_;
 }
 
 float Camera::distance() const
 {
-    return m_distance;
+    return distance_;
 }
 
 float Camera::elevation() const
 {
-    return m_elevation;
+    return elevation_;
 }
 
 int Camera::xOffset() const {
-  return m_xOffset;
+  return xOffset_;
 }
 
 
 int Camera::yOffset() const {
-  return m_yOffset;
+  return yOffset_;
 }
 
 
 bool Camera::forceRender() const {
-  return m_forceRender;
+  return forceRender_;
 }
 
 
 void Camera::setAzimuth(float azimuth)
 {
-    if (m_azimuth == azimuth)
+    if (azimuth_ == azimuth)
         return;
 
-    m_azimuth = azimuth;
+    azimuth_ = azimuth;
     qDebug() << "emit azimuthChanged(offset)";            
     emit azimuthChanged(azimuth);
 }
@@ -77,20 +77,20 @@ void Camera::setAzimuth(float azimuth)
 void Camera::setDistance(float distance)
 {
   // qDebug() << "Camera::setDistance() to " << distance;
-  if (m_distance == distance)
+  if (distance_ == distance)
         return;
 
-    m_distance = distance;
+    distance_ = distance;
     qDebug() << "emit distanceChanged(offset)";        
     emit distanceChanged(distance);
 }
 
 void Camera::setElevation(float elevation)
 {
-    if (m_elevation == elevation)
+    if (elevation_ == elevation)
         return;
 
-    m_elevation = elevation;
+    elevation_ = elevation;
     qDebug() << "emit elevationChanged(offset)";    
     emit elevationChanged(elevation);
 }
@@ -98,34 +98,33 @@ void Camera::setElevation(float elevation)
 
 void Camera::setXOffset(float offset) {
   qDebug() << "Camera::setXOffset(): " << offset;
-  if (m_xOffset == offset) {
+  if (xOffset_ == offset) {
     return;
   }
-  m_xOffset = offset;
+  xOffset_ = offset;
   qDebug() << "need to emit xOffsetChanged(offset)";
   emit xOffsetChanged(offset); // Needed? See NOTIFY property
 }
 
 
 void Camera::setYOffset(float offset) {
-  if (m_yOffset == offset) {
+  if (yOffset_ == offset) {
     return;
   }
-  m_yOffset = offset;
+  yOffset_ = offset;
   qDebug() << "emit yOffsetChanged(offset)";  
   emit yOffsetChanged(offset);
 }
 
 
 void Camera::setForceRender(bool force) {
-  m_forceRender = force;
+  forceRender_ = force;
   emit forceRenderChanged(force);
 }
 
 
-
 void Camera::setMaxDistance(float maxDistance) {
   qDebug() << "Camera::setMaxDistance(): " << maxDistance;
-  m_maxDistance = maxDistance;
+  maxDistance_ = maxDistance;
 
 }

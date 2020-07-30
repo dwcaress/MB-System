@@ -36,10 +36,10 @@ namespace mb_system {
  
   private:
     /// x, y, z
-    Point3D m_position;
+    Point3D position_;
 
     /// R, G, B, A
-    Point4D m_color;
+    Point4D color_;
   };
 
   /*******************************************************************************
@@ -53,31 +53,31 @@ namespace mb_system {
   inline Vertex::Vertex() {}
 
   inline Vertex::Vertex(const Point3D &position)
-    : m_position(position) {}
+    : position_(position) {}
 
   inline Vertex::Vertex(const Point3D &position,
 			const Point4D &color)
-    : m_position(position), m_color(color) {}
+    : position_(position), color_(color) {}
  
   // Accessors / Mutators
   inline const Point3D& Vertex::position()
-    const { return m_position; }
+    const { return position_; }
 
   inline const Point4D& Vertex::color()
-    const { return m_color; }
+    const { return color_; }
 
   void inline Vertex::setPosition(const Point3D& position) {
-    m_position = position; }
+    position_ = position; }
 
-  void inline Vertex::setColor(const Point4D& color) { m_color = color; }
+  void inline Vertex::setColor(const Point4D& color) { color_ = color; }
  
   // OpenGL Helpers
   inline int Vertex::positionOffset() {
-    return offsetof(Vertex, m_position);
+    return offsetof(Vertex, position_);
   }
 
   inline int Vertex::colorOffset() {
-    return offsetof(Vertex, m_color);
+    return offsetof(Vertex, color_);
   }
 
   inline int Vertex::stride() { return sizeof(Vertex); }

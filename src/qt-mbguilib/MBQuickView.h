@@ -64,16 +64,16 @@ namespace mb_system {
     void invalidateUnderlay();
 
     /// Camera object that views surface
-    Camera *m_camera;
+    Camera *camera_;
 
     /// Calls openGL functions
-    SurfaceRenderer *m_renderer;
+    SurfaceRenderer *renderer_;
 
     /// Current GMT grid surface
-    GmtGridSurface *m_surface;
+    GmtGridSurface *surface_;
 
     /// Name of current GMT grid file
-    const char *m_gridFilename;
+    const char *gridFilename_;
   
   
   };

@@ -22,7 +22,7 @@ namespace mb_system {
 
   protected:
   
-    QList<QVector3D> m_rgbScale;
+    QList<QVector3D> rgbScale_;
   
   };
 

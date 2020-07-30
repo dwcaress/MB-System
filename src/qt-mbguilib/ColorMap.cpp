@@ -7,7 +7,7 @@ using namespace mb_system;
 
 bool ColorMap::initialize(const QList<QVector3D> &rgbScale) {
 
-  m_rgbScale = rgbScale;
+  rgbScale_ = rgbScale;
   
   return true;
 }
@@ -29,11 +29,11 @@ bool ColorMap::rgbValues(float zValue, float zMin, float zMax,
     *blue = 1.0;
   }
   else {
-    int i = (int)(factor * (m_rgbScale.size() - 1));
-    double ff = factor * (m_rgbScale.size() - 1) - i;
-    *red = m_rgbScale[i].x() + ff * (m_rgbScale[i + 1].x() - m_rgbScale[i].x());
-    *green = m_rgbScale[i].y() + ff * (m_rgbScale[i + 1].y() - m_rgbScale[i].y());
-    *blue = m_rgbScale[i].z() + ff * (m_rgbScale[i + 1].z() - m_rgbScale[i].z());
+    int i = (int)(factor * (rgbScale_.size() - 1));
+    double ff = factor * (rgbScale_.size() - 1) - i;
+    *red = rgbScale_[i].x() + ff * (rgbScale_[i + 1].x() - rgbScale_[i].x());
+    *green = rgbScale_[i].y() + ff * (rgbScale_[i + 1].y() - rgbScale_[i].y());
+    *blue = rgbScale_[i].z() + ff * (rgbScale_[i + 1].z() - rgbScale_[i].z());
   }
 
   return true;
