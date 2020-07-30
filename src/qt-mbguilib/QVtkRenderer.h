@@ -8,6 +8,7 @@
 #include <vtkGenericRenderWindowInteractor.h>
 #include <vtkRenderer.h>
 #include <vtkActor.h>
+#include <vtkCubeAxesActor.h>
 #include <vtkSmartPointer.h>
 #include <vtkElevationFilter.h>
 #include <vtkPolyDataMapper.h>
@@ -77,6 +78,9 @@ namespace mb_system {
 
     /// Grid surface actor
     vtkSmartPointer<vtkActor> surfaceActor_;
+
+    /// Grid axes actor
+    vtkSmartPointer<vtkCubeAxesActor> axesActor_;    
 
     /// VTK renderer
     vtkSmartPointer<vtkRenderer> renderer_;
