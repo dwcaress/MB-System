@@ -222,12 +222,13 @@ ApplicationWindow {
 
         Text {
             id: selectedFile
+            objectName: "selectedFile"
             text: "filename goes here"
             anchors.top: parent.top
             anchors.topMargin: 0
-            font.family: "Helvetica"
-            font.pointSize: 24
-            color: "red"
+            font.family: "courier"
+            font.pointSize: 18
+            color: "black"
         }
 
         Item {

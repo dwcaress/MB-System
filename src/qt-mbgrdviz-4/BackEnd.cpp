@@ -7,17 +7,23 @@
 /// Initialize singleton to null
 BackEnd *BackEnd::singleInstance_ = nullptr;
 
-BackEnd::BackEnd(QQmlApplicationEngine *engine, QObject *parent) : QObject(parent),
+BackEnd::BackEnd(QQmlApplicationEngine *engine,
+		 QObject *parent) : QObject(parent),
   qVtkItem_(nullptr)
 {
     QObject *rootObject = engine->rootObjects().first();
     qVtkItem_ = rootObject->findChild<mb_system::QVtkItem *>("qVtkItem");
     if (!qVtkItem_) {
-        qCritical() << "Could not find qVtkItem";
+        qCritical() << "Could not find \"qVtkItem\" in QML";
         exit(1);
     }
     qDebug() << "got qVtkItem";
 
+    selectedFileItem_ = rootObject->findChild<QObject *>("selectedFile");    
+    if (!selectedFileItem_) {
+        qCritical() << "Could not find \"selectedFile\" in QML";
+        exit(1);      
+    }
 }
 
 bool BackEnd::registerSingleton(int argc, char **argv, QQmlApplicationEngine *qmlEngine) {
@@ -80,5 +86,9 @@ bool BackEnd::setGridFile(QUrl fileURL) {
     qVtkItem_->setGridFilename(gridFilename);
     qVtkItem_->update();
 
+    selectedFileItem_->setProperty("text", fileURL.toLocalFile());
+
+      
+    
     return true;
 }
