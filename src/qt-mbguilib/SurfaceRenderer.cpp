@@ -56,22 +56,22 @@ const char * SurfaceRenderer::SpecularColorName = "u_specularColor";
 
 SurfaceRenderer::SurfaceRenderer(QObject *parent)
   : QObject(parent)
-  , m_surface(nullptr)
-  , m_positionColorBuffer(new QOpenGLBuffer(QOpenGLBuffer::VertexBuffer))
-  , m_normalBuffer(new QOpenGLBuffer(QOpenGLBuffer::VertexBuffer))
-  , m_indicesBuffer(new QOpenGLBuffer(QOpenGLBuffer::IndexBuffer))
-  , m_shaderProgram()
-  , m_vao(new QOpenGLVertexArrayObject)
-  , m_indicesCount(0)
-  , m_coordinateMirroring(DoNotMirrorCoordinates)
-  , m_verticalExagg(1.)
-  , m_azimuthDeg(0.0)
-  , m_elevationDeg(180.0)
-  , m_distance(500.0)
-  , m_xOffset(0)
-  , m_yOffset(0)
-  , m_verticalFovDeg(30.)
-  , m_initialized(false)
+  , surface_(nullptr)
+  , positionColorBuffer_(new QOpenGLBuffer(QOpenGLBuffer::VertexBuffer))
+  , normalBuffer_(new QOpenGLBuffer(QOpenGLBuffer::VertexBuffer))
+  , indicesBuffer_(new QOpenGLBuffer(QOpenGLBuffer::IndexBuffer))
+  , shaderProgram_()
+  , vao_(new QOpenGLVertexArrayObject)
+  , indicesCount_(0)
+  , coordinateMirroring_(DoNotMirrorCoordinates)
+  , verticalExagg_(1.)
+  , azimuthDeg_(0.0)
+  , elevationDeg_(180.0)
+  , distance_(500.0)
+  , xOffset_(0)
+  , yOffset_(0)
+  , verticalFovDeg_(30.)
+  , initialized_(false)
 {
   qDebug() << "****SurfaceRenderer::SurfaceRenderer()";
   qDebug() << "Using shader " << ShaderName;
@@ -80,8 +80,8 @@ SurfaceRenderer::SurfaceRenderer(QObject *parent)
 SurfaceRenderer::~SurfaceRenderer()
 {
   invalidate();
-  if (m_surface) {
-    delete m_surface;
+  if (surface_) {
+    delete surface_;
   }
 }
 
@@ -94,56 +94,56 @@ void SurfaceRenderer::initialize(Surface *surface, CoordinateMirroring cm)
     return;
   }
 
-  if (m_initialized) {
+  if (initialized_) {
     qInfo() << "SurfaceRenderer::initialize(): already initialized";
   }
   
-  if (m_vao->isCreated())
+  if (vao_->isCreated())
     return; // already initialized
 
-  m_surface = surface;
+  surface_ = surface;
 
   size_t totalBytes = 0;
-  size_t nBytes = m_surface->vertices().size() * sizeof(Vertex);
+  size_t nBytes = surface_->vertices().size() * sizeof(Vertex);
   
-  qDebug() << "will allocate " << m_surface->vertices().size() <<
+  qDebug() << "will allocate " << surface_->vertices().size() <<
     " vertices = " << nBytes << " bytes";
 
   totalBytes += nBytes;
   
-  nBytes = m_surface->normals().size() * sizeof(Point3D);
+  nBytes = surface_->normals().size() * sizeof(Point3D);
   
-  qDebug() << "will allocate " << m_surface->normals().size() <<
+  qDebug() << "will allocate " << surface_->normals().size() <<
     " normals = " << nBytes << " bytes";  
 
   totalBytes += nBytes;
   
-  nBytes = m_surface->drawingIndices().size() * sizeof(unsigned int);
+  nBytes = surface_->drawingIndices().size() * sizeof(unsigned int);
   
-  qDebug() << "will allocate " << m_surface->drawingIndices().size() <<
+  qDebug() << "will allocate " << surface_->drawingIndices().size() <<
     " indices = " << nBytes << " bytes";
 
   totalBytes += nBytes;  
   qDebug() << "will allocate total " << totalBytes/1e9 << " GB";
   
-  m_coordinateMirroring = cm;
+  coordinateMirroring_ = cm;
 
-  if (!m_vao->create())
+  if (!vao_->create())
     qFatal("Unable to create VAO");
 
-  m_vao->bind();
+  vao_->bind();
 
-  std::vector<Vertex> vertices = m_surface->vertices();
-  if (!m_positionColorBuffer->create())
+  std::vector<Vertex> vertices = surface_->vertices();
+  if (!positionColorBuffer_->create())
     qFatal("Unable to create position buffer");
-  m_positionColorBuffer->bind();
-  m_positionColorBuffer->setUsagePattern(QOpenGLBuffer::StaticDraw);
+  positionColorBuffer_->bind();
+  positionColorBuffer_->setUsagePattern(QOpenGLBuffer::StaticDraw);
 
-  if (m_verticalExagg != 1.) {
+  if (verticalExagg_ != 1.) {
     // Apply vertical exaggeration
     for (unsigned int i = 0; i < vertices.size(); i++) {
       Point3D position = vertices[i].position();
-      float z = position.z() * m_verticalExagg;
+      float z = position.z() * verticalExagg_;
       position.setZ(z);
       vertices[i].setPosition(position);
     }
@@ -154,7 +154,7 @@ void SurfaceRenderer::initialize(Surface *surface, CoordinateMirroring cm)
   
   qDebug() << "allocate positionColorBuffer: " << vertices.size() << " elements";
   /* ***
-  m_positionColorBuffer->allocate(vertices.data(),
+  positionColorBuffer_->allocate(vertices.data(),
 			      vertices.size() * sizeof(Vertex));
 			      *** */
   qDebug() << "allocate positionColorBuffer with glBufferData()";
@@ -162,14 +162,14 @@ void SurfaceRenderer::initialize(Surface *surface, CoordinateMirroring cm)
 			  vertices.size() * sizeof(Vertex),
 			  vertices.data(), GL_STATIC_DRAW);
   
-  const std::vector<Point3D> normals = m_surface->normals();
-  m_normalBuffer->create();
-  m_normalBuffer->bind();
-  m_normalBuffer->setUsagePattern(QOpenGLBuffer::StaticDraw);
+  const std::vector<Point3D> normals = surface_->normals();
+  normalBuffer_->create();
+  normalBuffer_->bind();
+  normalBuffer_->setUsagePattern(QOpenGLBuffer::StaticDraw);
 
   qDebug() << "allocate normalBuffer: " << normals.size() << " elements";
   /* **
-  m_normalBuffer->allocate(normals.data(),
+  normalBuffer_->allocate(normals.data(),
 			   normals.size() * sizeof(QVector3D));
   ** */
       
@@ -178,22 +178,22 @@ void SurfaceRenderer::initialize(Surface *surface, CoordinateMirroring cm)
 			  normals.size() * sizeof(Point3D),
 			  normals.data(), GL_STATIC_DRAW);
   
-  const std::vector<unsigned int> indices = m_surface->drawingIndices();
-  m_indicesCount = indices.size();
-  if (!m_indicesBuffer->create())
+  const std::vector<unsigned int> indices = surface_->drawingIndices();
+  indicesCount_ = indices.size();
+  if (!indicesBuffer_->create())
     qFatal("Unable to create index buffer");
 
-  m_indicesBuffer->bind();
-  m_indicesBuffer->setUsagePattern(QOpenGLBuffer::StaticDraw);
+  indicesBuffer_->bind();
+  indicesBuffer_->setUsagePattern(QOpenGLBuffer::StaticDraw);
   qDebug() << "allocate indices buffer: " << normals.size() << " elements";  
-  m_indicesBuffer->allocate(indices.data(),
+  indicesBuffer_->allocate(indices.data(),
 			    indices.size() * sizeof(unsigned int));
 
   qDebug() << "Done with buffer allocation";
-  m_shaderProgram.reset(new QOpenGLShaderProgram);
-  if (!m_shaderProgram->create()) {
+  shaderProgram_.reset(new QOpenGLShaderProgram);
+  if (!shaderProgram_->create()) {
     qFatal("Couldn't create shader program:\n%s",
-	   m_shaderProgram->log().toLatin1().constData());
+	   shaderProgram_->log().toLatin1().constData());
   }
 
   char vertShaderName[64];
@@ -203,94 +203,94 @@ void SurfaceRenderer::initialize(Surface *surface, CoordinateMirroring cm)
   
   qDebug() << "using vertex shader " << vertShaderName << ", fragment shader " << fragShaderName;
   
-  if (!m_shaderProgram->addShaderFromSourceFile(QOpenGLShader::Vertex,
+  if (!shaderProgram_->addShaderFromSourceFile(QOpenGLShader::Vertex,
 						vertShaderName)) {
     qFatal("Vertex shader compilation failed:\n%s",
-	   m_shaderProgram->log().toLatin1().constData());
+	   shaderProgram_->log().toLatin1().constData());
   }
   qDebug() << "vertex shader compiled ok";
-  if (!m_shaderProgram->addShaderFromSourceFile(QOpenGLShader::Fragment,
+  if (!shaderProgram_->addShaderFromSourceFile(QOpenGLShader::Fragment,
 						fragShaderName)) {
     qFatal("Fragment shader compilation failed:\n%s",
-	   m_shaderProgram->log().toLatin1().constData());
+	   shaderProgram_->log().toLatin1().constData());
   }
   qDebug() << "fragment shader compiled ok";
   
-  if (!m_shaderProgram->link()) {
+  if (!shaderProgram_->link()) {
     qFatal("Shader program link failed:\n%s",
-	   m_shaderProgram->log().toLatin1().constData());    
+	   shaderProgram_->log().toLatin1().constData());    
   }
   
-  m_shaderProgram->bind();
+  shaderProgram_->bind();
 
-  m_positionColorBuffer->bind();
+  positionColorBuffer_->bind();
 
-  m_shaderProgram->enableAttributeArray(VertexAttrName);
-  m_shaderProgram->setAttributeBuffer(VertexAttrName, GL_FLOAT,
+  shaderProgram_->enableAttributeArray(VertexAttrName);
+  shaderProgram_->setAttributeBuffer(VertexAttrName, GL_FLOAT,
 				      Vertex::positionOffset(),
 				      Vertex::PositionTupleSize,
 				      Vertex::stride());
 
-  m_shaderProgram->enableAttributeArray(ColorAttrName);    
-  m_shaderProgram->setAttributeBuffer(ColorAttrName, GL_FLOAT,
+  shaderProgram_->enableAttributeArray(ColorAttrName);    
+  shaderProgram_->setAttributeBuffer(ColorAttrName, GL_FLOAT,
 				      Vertex::colorOffset(),
 				      Vertex::ColorTupleSize,
 				      Vertex::stride());    
 
-  m_normalBuffer->bind();
-  m_shaderProgram->enableAttributeArray(NormalAttrName);
+  normalBuffer_->bind();
+  shaderProgram_->enableAttributeArray(NormalAttrName);
   int offset = 0;
   int tupleSize = 3;
   int stride = 0;
-  m_shaderProgram->setAttributeBuffer(NormalAttrName, GL_FLOAT, offset,
+  shaderProgram_->setAttributeBuffer(NormalAttrName, GL_FLOAT, offset,
 				      tupleSize, stride);
 
-  m_vao->release();
+  vao_->release();
 
-  m_initialized = true;
+  initialized_ = true;
 }
 
 
 void SurfaceRenderer::render()
 {
   qDebug() << "SurfaceRenderer::render()";
-  if (!m_surface) {
+  if (!surface_) {
     qInfo() << "SurfaceRenderer::render(): surface not yet created";
     return;
   }
 
-  if (!m_initialized) {
+  if (!initialized_) {
     qDebug() << "SurfaceRenderer::render(): call initialize()";
-    initialize(m_surface);
+    initialize(surface_);
   }
 
   QOpenGLFunctions *functions = QOpenGLContext::currentContext()->functions();
 
   functions->glClear(GL_COLOR_BUFFER_BIT);
-  if (!m_shaderProgram->bind()) {
-    QString msg = m_shaderProgram->log();
+  if (!shaderProgram_->bind()) {
+    QString msg = shaderProgram_->log();
     qFatal("Couldn't bind program:\n%s\n", msg.toLatin1().constData());
   }
 
-  if (m_shaderProgram->attributeLocation(VertexAttrName) == -1) {
+  if (shaderProgram_->attributeLocation(VertexAttrName) == -1) {
     qFatal("Attribute %s not found in shader", VertexAttrName);
   }
 
-  if (m_shaderProgram->attributeLocation(ColorAttrName) == -1) {
+  if (shaderProgram_->attributeLocation(ColorAttrName) == -1) {
     qFatal("Attribute %s not found in shader", ColorAttrName);
   }
 
-  if (m_shaderProgram->attributeLocation(NormalAttrName) == -1) {
+  if (shaderProgram_->attributeLocation(NormalAttrName) == -1) {
     qFatal("Attribute %s not found in shader", NormalAttrName);
   }
   
   // Get map limits
   float xMin, xMax, yMin, yMax, zMin, zMax;
-  m_surface->xSpan(&xMin, &xMax);
-  m_surface->ySpan(&yMin, &yMax);
-  m_surface->zSpan(&zMin, &zMax);
-  zMin *= m_verticalExagg;
-  zMax *= m_verticalExagg;
+  surface_->xSpan(&xMin, &xMax);
+  surface_->ySpan(&yMin, &yMax);
+  surface_->zSpan(&zMin, &zMax);
+  zMin *= verticalExagg_;
+  zMax *= verticalExagg_;
 
   QMatrix4x4 modelMatrix;
   // qDebug("Set model to identity matrix");
@@ -298,26 +298,26 @@ void SurfaceRenderer::render()
   modelMatrix.rotate(-90, 0, 1, 0);
   
   float x, y, z;
-  m_surface->center(&x, &y, &z);
-  // qDebug() << "m_xOffset: " << m_xOffset << ", m_yOffset: " << m_yOffset;
-  x += m_xOffset;
-  y += m_yOffset;
-  modelMatrix.translate(-x, -y, -z * m_verticalExagg);
+  surface_->center(&x, &y, &z);
+  // qDebug() << "xOffset_: " << xOffset_ << ", yOffset_: " << yOffset_;
+  x += xOffset_;
+  y += yOffset_;
+  modelMatrix.translate(-x, -y, -z * verticalExagg_);
   
-  const float azimuthRad = qDegreesToRadians(m_azimuthDeg);
-  const float elevationRad = qDegreesToRadians(m_elevationDeg);
+  const float azimuthRad = qDegreesToRadians(azimuthDeg_);
+  const float elevationRad = qDegreesToRadians(elevationDeg_);
 
   const QVector3D eyePosition(std::cos(elevationRad) * std::cos(azimuthRad),
 			      std::sin(elevationRad),
 			      -std::cos(elevationRad) * std::sin(azimuthRad));
   
-  QVector3D upVector = qFuzzyCompare(m_elevationDeg, 90.0f)
+  QVector3D upVector = qFuzzyCompare(elevationDeg_, 90.0f)
     ? QVector3D(-std::cos(azimuthRad), 0, std::sin(azimuthRad))
     : QVector3D(0, 1, 0);
 
   QMatrix4x4 viewMatrix;
   viewMatrix.setToIdentity();
-  viewMatrix.lookAt(eyePosition * m_distance,
+  viewMatrix.lookAt(eyePosition * distance_,
 		    QVector3D(0, 0, 0),
 		    upVector);
 
@@ -326,65 +326,65 @@ void SurfaceRenderer::render()
   projectionMatrix.perspective(45.f, 0.8, 0.1, 1000000.f);
 
   // qDebug("send modelMatrix to shader");
-  if (!setUniformValue(m_shaderProgram, ModelMatrixName, modelMatrix)) {
+  if (!setUniformValue(shaderProgram_, ModelMatrixName, modelMatrix)) {
     qFatal("variable %s not found in shader", ModelMatrixName);
   }
   
   // qDebug("send viewMatrix to shader");
-  if (!setUniformValue(m_shaderProgram, ViewMatrixName, viewMatrix)) {
+  if (!setUniformValue(shaderProgram_, ViewMatrixName, viewMatrix)) {
     qCritical() << "WARNING: variable " << ViewMatrixName << " not found in shader";
     // return;    
   }
   
   // qDebug("send projectionMatrix to shader");
-  if (!setUniformValue(m_shaderProgram, ProjectionMatrixName, projectionMatrix)) {
+  if (!setUniformValue(shaderProgram_, ProjectionMatrixName, projectionMatrix)) {
     qFatal("variable %s not found in shader", ProjectionMatrixName);
   }
 
 
   QVector3D ambientColor(0., 0., 0.); // shadow should be black
-  if (!setUniformValue(m_shaderProgram, AmbientColorName, ambientColor)) {
+  if (!setUniformValue(shaderProgram_, AmbientColorName, ambientColor)) {
     qFatal("variable %s not found in shader", AmbientColorName);
   }
 
   QVector3D specularColor(1.0, 1.0, 1.0);  // should be white
-  if (!setUniformValue(m_shaderProgram, SpecularColorName, specularColor)) {
+  if (!setUniformValue(shaderProgram_, SpecularColorName, specularColor)) {
     qFatal("variable %s not found in shader", SpecularColorName);
   }    
   
   // QVector3D lightPos(0, 0, 10000);  // This works
   QVector3D lightPos(4000, 4000, 10000);  
-  if (!setUniformValue(m_shaderProgram, LightPosName, lightPos)) {
+  if (!setUniformValue(shaderProgram_, LightPosName, lightPos)) {
     qFatal("variable %s not found in shader", LightPosName);
   }
 
   // Set reflectivities
-  if (!setUniformScalarValue(m_shaderProgram, AmbientReflectionName, 0.84)) {
+  if (!setUniformScalarValue(shaderProgram_, AmbientReflectionName, 0.84)) {
     qFatal("variable %s not found in shader", AmbientReflectionName);
   }
 
-  if (!setUniformScalarValue(m_shaderProgram, DiffuseReflectionName, 1.00)) {
+  if (!setUniformScalarValue(shaderProgram_, DiffuseReflectionName, 1.00)) {
     qFatal("variable %s not found in shader", DiffuseReflectionName);
   }
 
-  if (!setUniformScalarValue(m_shaderProgram, SpecularReflectionName, .2)) {
+  if (!setUniformScalarValue(shaderProgram_, SpecularReflectionName, .2)) {
     qFatal("variable %s not found in shader", SpecularReflectionName);
     return;
   }
 
 
-  if (!setUniformScalarValue(m_shaderProgram, ShininessName, 1.)) {
+  if (!setUniformScalarValue(shaderProgram_, ShininessName, 1.)) {
     qFatal("variable %s not found in shader", ShininessName);
     return;
   }        
 					     
-  m_vao->bind();
+  vao_->bind();
   
-  functions->glDrawElements(GL_TRIANGLES, m_indicesCount, GL_UNSIGNED_INT, 0);
+  functions->glDrawElements(GL_TRIANGLES, indicesCount_, GL_UNSIGNED_INT, 0);
 
-  m_vao->release();
+  vao_->release();
 
-  m_shaderProgram->release();
+  shaderProgram_->release();
   glFlush();
   return;
 }
@@ -394,23 +394,23 @@ void SurfaceRenderer::invalidate()
 {
   qDebug() << "SurfaceRenderer::invalidate()";
   
-  m_positionColorBuffer->destroy();
-  m_normalBuffer->destroy();
-  m_indicesBuffer->destroy();
-  m_shaderProgram.reset();
-  m_vao->destroy();
-  m_initialized = false;
+  positionColorBuffer_->destroy();
+  normalBuffer_->destroy();
+  indicesBuffer_->destroy();
+  shaderProgram_.reset();
+  vao_->destroy();
+  initialized_ = false;
 }
 
 
 void SurfaceRenderer::setView(float azimuthDeg, float elevationDeg, float distance,
 	     float xOffset, float yOffset) {
 
-  m_azimuthDeg = azimuthDeg;
-  m_elevationDeg = elevationDeg;
-  m_distance = distance;
-  m_xOffset = xOffset;
-  m_yOffset = yOffset;
+  azimuthDeg_ = azimuthDeg;
+  elevationDeg_ = elevationDeg;
+  distance_ = distance;
+  xOffset_ = xOffset;
+  yOffset_ = yOffset;
 }
 
 

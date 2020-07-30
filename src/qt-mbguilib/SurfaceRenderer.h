@@ -69,50 +69,50 @@ namespace mb_system {
 
     /// Return pointer to surface
     Surface *surface() {
-      return m_surface;
+      return surface_;
     }
   
   protected:
 
     /// Surface to be rendered
-    Surface *m_surface;
+    Surface *surface_;
 
     /// Vertex buffer object holds surface vertex positions and colors
-    QScopedPointer<QOpenGLBuffer> m_positionColorBuffer;
+    QScopedPointer<QOpenGLBuffer> positionColorBuffer_;
 
     /// Vertex buffer object holds surface normal vectors
-    QScopedPointer<QOpenGLBuffer> m_normalBuffer;
+    QScopedPointer<QOpenGLBuffer> normalBuffer_;
 
     /// Index buffer object holds indices for triangle strips
-    QScopedPointer<QOpenGLBuffer> m_indicesBuffer;
+    QScopedPointer<QOpenGLBuffer> indicesBuffer_;
 
     /// Shaders to render surface
-    QScopedPointer<QOpenGLShaderProgram> m_shaderProgram;
+    QScopedPointer<QOpenGLShaderProgram> shaderProgram_;
 
     /// Vertex Array Object, holds all information to render surface
-    QScopedPointer<QOpenGLVertexArrayObject> m_vao;
+    QScopedPointer<QOpenGLVertexArrayObject> vao_;
 
-    int m_indicesCount;
+    int indicesCount_;
 
-    CoordinateMirroring m_coordinateMirroring;
+    CoordinateMirroring coordinateMirroring_;
 
     /// Vertical exaggeration 
-    float m_verticalExagg;
+    float verticalExagg_;
   
     /// Viewing azimuth, elevation, and distance 
-    float m_azimuthDeg;
-    float m_elevationDeg;
-    float m_distance;
+    float azimuthDeg_;
+    float elevationDeg_;
+    float distance_;
 
     /// X and Y offsets from target center
-    int m_xOffset;
-    int m_yOffset;
+    int xOffset_;
+    int yOffset_;
   
     /// Vertical FOV angle for perspective projection
-    float m_verticalFovDeg;
+    float verticalFovDeg_;
   
     /// Indicates if renderer has been initialized with surface data
-    bool m_initialized;
+    bool initialized_;
 
     /// Helper function - set uniform value
     inline bool setUniformScalarValue(QScopedPointer<QOpenGLShaderProgram>&shader,
