@@ -49,7 +49,7 @@ namespace mb_system {
     explicit MBQuickItem();
 
     /// Build GMT grid surface from data in specified file. If successful,
-    /// marks m_newSurface flag, which is checked the next time sync() runs,
+    /// marks newSurface_ flag, which is checked the next time sync() runs,
     /// before the next QML rendering. This function can be
     /// invoked by QML code, e.g. from File->Open menu item
     Q_INVOKABLE bool setGridSurface(QUrl fileURL);
@@ -86,24 +86,24 @@ namespace mb_system {
     void testUpdate();
   
     /// Camera object that views surface
-    mb_system::Camera *m_camera;
+    mb_system::Camera *camera_;
 
     /// Calls openGL functions to render surface
-    SurfaceRenderer *m_renderer;
+    SurfaceRenderer *renderer_;
 
     /// Current GMT grid surface
-    mb_system::GmtGridSurface *m_surface;
+    mb_system::GmtGridSurface *surface_;
 
     /// Name of current GMT grid file
-    const char *m_gridFilename;
+    const char *gridFilename_;
 
     /// Indicates when new surface has been created; flag is checked in sync() method
     /// before each main-renderer synchronization, and new renderer created when new surface has
     /// been created.
-    bool m_newSurface;
+    bool newSurface_;
   
     /// Singleton instance
-    static MBQuickItem *m_instance;
+    static MBQuickItem *instance_;
 	
 
   protected slots:
