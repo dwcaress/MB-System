@@ -38,7 +38,7 @@ namespace mb_system {
       return (GLuint)( row * nColumns + col );
     }
 
-    ColorMap *m_colorMap;
+    ColorMap *colorMap_;
   };
 }
 

@@ -26,8 +26,8 @@ GmtGridSurface::GmtGridSurface() {
   haxbyScale.append(QVector3D(0.157, 0.498, 0.984));
   haxbyScale.append(QVector3D(0.145, 0.224, 0.686));
 
-  m_colorMap = new ColorMap();
-  m_colorMap->initialize(haxbyScale);
+  colorMap_ = new ColorMap();
+  colorMap_->initialize(haxbyScale);
 
 }
 
@@ -128,23 +128,23 @@ void GmtGridSurface::setData(void *gmtApi, GMT_GRID *gmtGrid) {
   bool seaLevelClip = true;
   
   if (!seaLevelClip) {
-    m_zMin = header->z_min;
-    m_zMax = header->z_max;
+    zMin_ = header->z_min;
+    zMax_ = header->z_max;
   }
   else {
     // Clip min and max to be below sea level
-    m_zMin = std::min<float>(header->z_min, 0.);
-    m_zMax = std::min<float>(header->z_max, 0.);
+    zMin_ = std::min<float>(header->z_min, 0.);
+    zMax_ = std::min<float>(header->z_max, 0.);
   }
-  qDebug() << "setData(): m_zMin: " << m_zMin << ", m_zMax: " << m_zMax;
+  qDebug() << "setData(): zMin_: " << zMin_ << ", zMax_: " << zMax_;
   
   qDebug() << "nRows: " << header->n_rows << ", nCols: " << header->n_columns;
   float zPrevRow = 0.f;
   // Populate vertices with GMT_GRID data
   for (uint row = 0; row < header->n_rows; row++) {
     
-    if (gmtGrid->y[row] < m_yMin) { m_yMin = gmtGrid->y[row]; }
-    if (gmtGrid->y[row] > m_yMax) { m_yMax = gmtGrid->y[row]; }    
+    if (gmtGrid->y[row] < yMin_) { yMin_ = gmtGrid->y[row]; }
+    if (gmtGrid->y[row] > yMax_) { yMax_ = gmtGrid->y[row]; }    
 
     for (uint col = 0; col < header->n_columns; col++) {
 
@@ -160,15 +160,15 @@ void GmtGridSurface::setData(void *gmtApi, GMT_GRID *gmtGrid) {
 	    alpha = 0.;   // transparent
 	  }
 	  else {
-	    m_colorMap->rgbValues(z, m_zMin, m_zMax, &red, &green, &blue);
+	    colorMap_->rgbValues(z, zMin_, zMax_, &red, &green, &blue);
 	  }
 	  
-	  m_vertices.push_back(Vertex(Point3D((float )gmtGrid->x[col],
+	  vertices_.push_back(Vertex(Point3D((float )gmtGrid->x[col],
 						(float )gmtGrid->y[row], z),
 				      Point4D(red, green, blue, alpha)));
 
-	  if (gmtGrid->x[col] < m_xMin) { m_xMin = gmtGrid->x[col]; }
-	  if (gmtGrid->x[col] > m_xMax) { m_xMax = gmtGrid->x[col]; }
+	  if (gmtGrid->x[col] < xMin_) { xMin_ = gmtGrid->x[col]; }
+	  if (gmtGrid->x[col] > xMax_) { xMax_ = gmtGrid->x[col]; }
 	  
           // Estimate normal vector at this point, based on slope
           if (col > 0 && row > 0) {
@@ -195,14 +195,14 @@ void GmtGridSurface::setData(void *gmtApi, GMT_GRID *gmtGrid) {
               float length = sqrt(normVec[0]*normVec[0] +
                    normVec[1]*normVec[1] + normVec[2]*normVec[2]);
 
-	      m_normals.push_back(Point3D(normVec[0] / length,
+	      normals_.push_back(Point3D(normVec[0] / length,
 	      	  normVec[1] / length,
 	      	  normVec[2] / length));
 	  }
           else {  // Point along x=0 or y=0 edge
 	    // Assume some slope for points at edge of grid
 	    // qDebug() << "set edge normal";
-	    m_normals.push_back(Point3D(0., 0., 1.));
+	    normals_.push_back(Point3D(0., 0., 1.));
 	  }
 
         }
@@ -213,20 +213,20 @@ void GmtGridSurface::setData(void *gmtApi, GMT_GRID *gmtGrid) {
       for (uint col = 0; col < header->n_columns - 1; col++) {
 
           // First triangle
- 	  m_indices.push_back(vertexIndex(col, row, header->n_columns));
-	  m_indices.push_back(vertexIndex(col+1, row, header->n_columns));
-	  m_indices.push_back(vertexIndex(col+1, row+1, header->n_columns));
+ 	  indices_.push_back(vertexIndex(col, row, header->n_columns));
+	  indices_.push_back(vertexIndex(col+1, row, header->n_columns));
+	  indices_.push_back(vertexIndex(col+1, row+1, header->n_columns));
           // Second triangle
-	  m_indices.push_back(vertexIndex(col, row, header->n_columns));
-	  m_indices.push_back(vertexIndex(col+1, row+1, header->n_columns));
-	  m_indices.push_back(vertexIndex(col, row+1, header->n_columns));
+	  indices_.push_back(vertexIndex(col, row, header->n_columns));
+	  indices_.push_back(vertexIndex(col+1, row+1, header->n_columns));
+	  indices_.push_back(vertexIndex(col, row+1, header->n_columns));
 
         }
     }
 
   qDebug("Done with setData()");
-  qDebug() << "Got " << m_vertices.size() << " vertices, " <<
-    m_normals.size() << " normals, " << m_indices.size() << " indices";
+  qDebug() << "Got " << vertices_.size() << " vertices, " <<
+    normals_.size() << " normals, " << indices_.size() << " indices";
 }
 
 /* ***
