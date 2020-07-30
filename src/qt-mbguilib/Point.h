@@ -15,31 +15,31 @@ namespace mb_system {
   public:
     Point3D() {}
     Point3D(float x, float y, float z) {
-      m_data[X] = x;
-      m_data[Y] = y;
-      m_data[Z] = z;
+      data_[X] = x;
+      data_[Y] = y;
+      data_[Z] = z;
     }
 
     /// Return x element
-    float x() { return m_data[X]; }
+    float x() { return data_[X]; }
 
     /// Return y element
-    float y() { return m_data[Y]; }
+    float y() { return data_[Y]; }
 
     /// Return z element
-    float z() { return m_data[Z]; }    
+    float z() { return data_[Z]; }    
   
     /// Set x element
-    void setX(float x) { m_data[X] = x; }
+    void setX(float x) { data_[X] = x; }
 
     /// Set y element
-    void setY(float y) { m_data[Y] = y; }
+    void setY(float y) { data_[Y] = y; }
 
     /// Set z element
-    void setZ(float z) { m_data[Z] = z; }  
+    void setZ(float z) { data_[Z] = z; }  
 
   protected:
-    float m_data[3];
+    float data_[3];
   };
 
 
@@ -49,14 +49,14 @@ namespace mb_system {
   public:
     Point4D() {}
     Point4D(float x, float y, float z, float w) {
-      m_data[X] = x;
-      m_data[Y] = y;
-      m_data[Z] = z;
-      m_data[W] = w;
+      data_[X] = x;
+      data_[Y] = y;
+      data_[Z] = z;
+      data_[W] = w;
     }
 
   protected:
-    float m_data[4];
+    float data_[4];
   };
 
 }
