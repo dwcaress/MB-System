@@ -39,15 +39,15 @@ QQmlApplicationEngine *mb_system::g_appEngine;
 
 
 /// Initialize static singleton instance
-MBQuickItem *MBQuickItem::m_instance = nullptr;
+MBQuickItem *MBQuickItem::instance_ = nullptr;
 
 MBQuickItem::MBQuickItem()
   : QQuickItem(),
-    m_camera(new Camera()),
-    m_renderer(nullptr),
-    m_surface(nullptr),
-    m_gridFilename(nullptr),
-    m_newSurface(false)
+    camera_(new Camera()),
+    renderer_(nullptr),
+    surface_(nullptr),
+    gridFilename_(nullptr),
+    newSurface_(false)
 {
   connect(this, &QQuickItem::windowChanged, this, &MBQuickItem::handleWindowChanged);
 
@@ -55,9 +55,9 @@ MBQuickItem::MBQuickItem()
 
   // Find 'camera' property in QML context
   QQmlContext *context = g_appEngine->rootContext();
-  context->setContextProperty("camera", m_camera);
+  context->setContextProperty("camera", camera_);
 
-  qDebug() << "MBQuickItem::MBQuickItem(): m_renderer=" << m_renderer;
+  qDebug() << "MBQuickItem::MBQuickItem(): renderer_=" << renderer_;
 }
 
 
@@ -75,17 +75,17 @@ void MBQuickItem::handleWindowChanged(QQuickWindow *window) {
 	    Qt::DirectConnection);
 
     // Trigger repaint when camera properties are changed
-    connect(m_camera, &Camera::xOffsetChanged, window, &QQuickWindow::update);
+    connect(camera_, &Camera::xOffsetChanged, window, &QQuickWindow::update);
 
-    connect(m_camera, &Camera::yOffsetChanged, window, &QQuickWindow::update);    
+    connect(camera_, &Camera::yOffsetChanged, window, &QQuickWindow::update);    
 
-    connect(m_camera, &Camera::azimuthChanged, window, &QQuickWindow::update);
+    connect(camera_, &Camera::azimuthChanged, window, &QQuickWindow::update);
 
-    connect(m_camera, &Camera::elevationChanged, window, &QQuickWindow::update);
+    connect(camera_, &Camera::elevationChanged, window, &QQuickWindow::update);
 
-    connect(m_camera, &Camera::distanceChanged, window, &QQuickWindow::update);
+    connect(camera_, &Camera::distanceChanged, window, &QQuickWindow::update);
 
-    connect(m_camera, &Camera::forceRenderChanged, window, &QQuickWindow::update);    
+    connect(camera_, &Camera::forceRenderChanged, window, &QQuickWindow::update);    
     
     // Don't clear before QML rendering, since we want surface to "underlay" the GUI, i.e.
     // will draw surface before QML is drawn.
@@ -96,9 +96,9 @@ void MBQuickItem::handleWindowChanged(QQuickWindow *window) {
 
 
 void MBQuickItem::cleanup() {
-  if (m_renderer) {
-    delete m_renderer;
-    m_renderer = nullptr;
+  if (renderer_) {
+    delete renderer_;
+    renderer_ = nullptr;
   }
 }
 
@@ -109,21 +109,21 @@ void MBQuickItem::synchronizeUnderlay() {
 
   // This method is called before main thread synchronizes with render thread
 
-  if (m_newSurface) {
+  if (newSurface_) {
     /// A new surface has been created. Delete the current renderer 
-    qDebug() << "MBQuickItem::sync() - m_newSurface is true";
-    if (m_renderer) {
-      qDebug() << "MBQuickItem::sync() - delete m_renderer";
-      delete m_renderer;
-      m_renderer = nullptr;
+    qDebug() << "MBQuickItem::sync() - newSurface_ is true";
+    if (renderer_) {
+      qDebug() << "MBQuickItem::sync() - delete renderer_";
+      delete renderer_;
+      renderer_ = nullptr;
     }    
-    m_newSurface = false;
+    newSurface_ = false;
   }
   
-  if (!m_renderer) {
+  if (!renderer_) {
     /// A new surface is available for rendering
     qDebug() << "MBQuickItem::sync() - create renderer";
-    m_renderer = new SurfaceRenderer();
+    renderer_ = new SurfaceRenderer();
     
     /// Initialize renderer
     qDebug() << "MBQuickItem::sync() - initializeUnderlay()";
@@ -136,9 +136,9 @@ void MBQuickItem::synchronizeUnderlay() {
   }
   
   /// Update renderer with current camera parameters
-  m_renderer->setView(m_camera->azimuth(), m_camera->elevation(),
-		      m_camera->distance(),
-		      m_camera->xOffset(), m_camera->yOffset());
+  renderer_->setView(camera_->azimuth(), camera_->elevation(),
+		      camera_->distance(),
+		      camera_->xOffset(), camera_->yOffset());
   
 }
 
@@ -146,8 +146,8 @@ void MBQuickItem::synchronizeUnderlay() {
 
 
 bool MBQuickItem::setGridSurface(QUrl fileURL) {
-  if (m_gridFilename) {
-    free((void *)m_gridFilename);
+  if (gridFilename_) {
+    free((void *)gridFilename_);
   }
   qDebug() << "MBQuickItem::setGridSurface to " << fileURL;
 
@@ -162,17 +162,17 @@ bool MBQuickItem::setGridSurface(QUrl fileURL) {
   }
 
   // Set grid file name member
-  m_gridFilename = (const char *)strdup(gridFilename);
+  gridFilename_ = (const char *)strdup(gridFilename);
   free((void *)gridFilename);
 
-  if (m_surface) {
-    delete m_surface;
+  if (surface_) {
+    delete surface_;
   }
-  m_surface = surface;
+  surface_ = surface;
 
   // Set flag to indicate that new surface has been created; this will be checked
   // by sync() when it's invoked before next sync between main and renderer threads
-  m_newSurface = true;
+  newSurface_ = true;
 
   return true;
 }
@@ -180,26 +180,26 @@ bool MBQuickItem::setGridSurface(QUrl fileURL) {
 
 void MBQuickItem::initializeUnderlay()
 {
-  if (!m_renderer) {
-    m_renderer = new SurfaceRenderer();
+  if (!renderer_) {
+    renderer_ = new SurfaceRenderer();
   }
   
-  if (!m_gridFilename) {
+  if (!gridFilename_) {
     qInfo() << "No grid file loaded";
     return;
   }
 
-  if (!m_surface) {
+  if (!surface_) {
     qInfo() << "No surface has been created";
     return;
   }
   
     
-  m_renderer->initialize(m_surface);
+  renderer_->initialize(surface_);
   window()->resetOpenGLState();
 
   // Calculate maximum viewing distance
-  //  float maxDistance = 10 * m_renderer->surface()->xSpan();
+  //  float maxDistance = 10 * renderer_->surface()->xSpan();
   //  qDebug() << "initializeUnderlay(): max view distance = " << maxDistance;
   setMaxViewDistance();
 }
@@ -208,30 +208,30 @@ void MBQuickItem::initializeUnderlay()
 void MBQuickItem::renderUnderlay()
 {
   qDebug() << "MBQuickItem::renderUnderlay()";
-  m_renderer->render();
+  renderer_->render();
   window()->resetOpenGLState();
 }
 
 
 void MBQuickItem::invalidateUnderlay()
 {
-  m_renderer->invalidate();
+  renderer_->invalidate();
   window()->resetOpenGLState();
 }
 
 class CleanupJob : public QRunnable
 {
 public:
-  CleanupJob(SurfaceRenderer *renderer) : m_renderer(renderer) { }
-  void run() override { delete m_renderer; }
+  CleanupJob(SurfaceRenderer *renderer) : renderer_(renderer) { }
+  void run() override { delete renderer_; }
 private:
-  SurfaceRenderer *m_renderer;
+  SurfaceRenderer *renderer_;
 };
 
 bool MBQuickItem::setMaxViewDistance() {
   // Calculate maximum viewing distance
   float min, max;
-  float maxDistance = 10 * m_renderer->surface()->xSpan(&min, &max);
+  float maxDistance = 10 * renderer_->surface()->xSpan(&min, &max);
 
   
   QObject *object = g_rootWindow->findChild<QObject *>("distanceSlider");
@@ -243,7 +243,7 @@ bool MBQuickItem::setMaxViewDistance() {
   object->setProperty("from", 0.001);  
   object->setProperty("to", maxDistance);
 
-  m_camera->setMaxDistance(maxDistance);
+  camera_->setMaxDistance(maxDistance);
 
   return true;
 }
@@ -252,11 +252,11 @@ bool MBQuickItem::setMaxViewDistance() {
 bool MBQuickItem::registerSingleton(int argc, char **argv,
 				    QQmlEngine *qmlEngine) {
 
-  if (! m_instance) {
+  if (! instance_) {
     qInfo() << "MBQuickItem::registerSingleton(): Delete existing instance";
-    delete m_instance;
+    delete instance_;
   }
-  m_instance = new MBQuickItem();
+  instance_ = new MBQuickItem();
 
   bool error = false;
   for (int i = 1; i < argc; i++) {
@@ -284,7 +284,7 @@ bool MBQuickItem::registerSingleton(int argc, char **argv,
       qDebug() << "registerSingleton(): urlstring - " << urlstring
 	       << ", qUrl - " << qUrl;
 
-      m_instance->setGridSurface(qUrl);
+      instance_->setGridSurface(qUrl);
       free((void *)fullPath);
     }
     else {
@@ -293,12 +293,12 @@ bool MBQuickItem::registerSingleton(int argc, char **argv,
     }
   }
   if (error) {
-    delete m_instance;
-    m_instance = nullptr;
+    delete instance_;
+    instance_ = nullptr;
     fprintf(stderr, "usage: %s [-I gridfile]\n", argv[0]);
     return false;
   }
   QQmlContext *rootContext = qmlEngine->rootContext();
-  rootContext->setContextProperty("BackEnd", m_instance);
+  rootContext->setContextProperty("BackEnd", instance_);
   return true;
 }
