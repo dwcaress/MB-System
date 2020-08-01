@@ -13,10 +13,10 @@
 
 namespace mb_system {
   /**
-     GmtGrideader reads data stored in a GMT grid file (NetCDF format), and outputs the data into
-     a vtkDataSet.
+     GmtGrideader reads data stored in a GMT grid file (NetCDF format), and outputs 
+     the data into a vtkPoints (vertices) and vtkCellArray (triangles) where data
+     can be accessed by the VTK pipeline.
   */
-
   class GmtGridReader : public vtkAbstractPolyDataReader {
 
   public:

@@ -4,16 +4,18 @@
 #include <QObject>
 #include <QQuickFramebufferObject>
 #include "QVtkRenderer.h"
+#include "DisplayProperties.h"
 
 namespace mb_system {
   /**
      QVtkItem and QVtkRenderer coordinate with one another to
      render VTK scenes within a QQuickItem specified in QML. A QVtkItem object
-     is created when specified in QML, and creates an accompanying 
-     QVtkRenderer object. The QVtkItem object runs in the GUI thread, is
-     responsible for accepting user input (mouse zoom, rotate, etc) and passing
-     those inputs to its accompanying QVtkRenderer object running in the render
-     thead. See https://www.qt.io/blog/2015/05/11/integrating-custom-opengl-rendering-with-qt-quick-via-qquickframebufferobject
+     is created when specified in QML, and the accompanying QVtkRenderer is created
+     when QVtkItem's createRenderer() function is invoked by the Qt framework.
+     The QVtkItem object code runs in the main thread, is responsible for accepting 
+     user input such as mouse zoom, rotate, etc, and making that input available to 
+     its accompanying QVtkRenderer object.
+     See https://www.qt.io/blog/2015/05/11/integrating-custom-opengl-rendering-with-qt-quick-via-qquickframebufferobject
   */
   class QVtkItem : public QQuickFramebufferObject
   {
@@ -52,8 +54,22 @@ namespace mb_system {
       return mouseMoveEvent_.get();
     }
 
+    /// Get display properties
+    const DisplayProperties *displayProperties() {
+      return &displayProperties_;
+    }
+
+    /// Toggle axes display
+    void showAxes(bool show) {
+      displayProperties_.drawAxes = show;
+    }
+    
+
   protected:
 
+    /// Display properties, e.g. visible axes, etc.
+    DisplayProperties displayProperties_;
+    
     /// Handle mouse wheel event
     virtual void wheelEvent(QWheelEvent *event) override;
 
@@ -79,6 +95,8 @@ namespace mb_system {
     std::shared_ptr<QMouseEvent> mouseMoveEvent_;
 
   };
+
+
 }
 
 #endif // QVTKITEM_H
