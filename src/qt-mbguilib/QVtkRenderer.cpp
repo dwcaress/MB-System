@@ -17,6 +17,7 @@
 using namespace mb_system;
 
 QVtkRenderer::QVtkRenderer() :
+  displayProperties_(nullptr),
   item_(nullptr),
   initialized_(false),
   gridFilename_(nullptr),
@@ -49,13 +50,13 @@ void QVtkRenderer::render() {
   qDebug() << "*** render(): viewAngle = " << angle;
 
   /* ***
-  double position[3];
-  renderer_->GetActiveCamera()->GetPosition(position);
+     double position[3];
+     renderer_->GetActiveCamera()->GetPosition(position);
 
-  qDebug() << "*** render(): position = " << position[0] << ", " << position[1]
-	   << ", " << position[2];
+     qDebug() << "*** render(): position = " << position[0] << ", " << position[1]
+     << ", " << position[2];
   
-	   *** */
+     *** */
   
   renderWindow_->PushState();
   initializeOpenGLState();
@@ -141,6 +142,7 @@ void QVtkRenderer::synchronize(QQuickFramebufferObject *item) {
   // Copy data from item to this renderer
   if (!item_) {
     item_ = static_cast<QVtkItem *>(item);
+    displayProperties_ = item_->displayProperties();
   }
 
   char *gridFilename = item_->getGridFilename();
@@ -165,26 +167,34 @@ void QVtkRenderer::synchronize(QQuickFramebufferObject *item) {
     initializePipeline(gridFilename_);
   }
 
-  if (item_->latestWheelEvent() && !item_->latestWheelEvent()->isAccepted()) {
+  if (item_->latestWheelEvent() &&
+      !item_->latestWheelEvent()->isAccepted()) {
     // Copy and accept latest wheel event
     qDebug() << "synchronize() - copy wheelEvent";
     wheelEvent_ = std::make_shared<QWheelEvent>(*item_->latestWheelEvent());
     item_->latestWheelEvent()->accept();
   }
 
-  if (item_->latestMouseButtonEvent() && !item_->latestMouseButtonEvent()->isAccepted()) {
+  if (item_->latestMouseButtonEvent() &&
+      !item_->latestMouseButtonEvent()->isAccepted()) {
     qDebug() << "synchronize() - copy mouseButtonEvent";
     mouseButtonEvent_ =
       std::make_shared<QMouseEvent>(*item_->latestMouseButtonEvent());
     item_->latestMouseButtonEvent()->accept();
   }
 
-  if (item_->latestMouseMoveEvent() && !item_->latestMouseMoveEvent()->isAccepted()) {
+  if (item_->latestMouseMoveEvent() &&
+      !item_->latestMouseMoveEvent()->isAccepted()) {
     qDebug() << "synchronize() - copy mouseMoveEvent";
     mouseMoveEvent_ =
       std::make_shared<QMouseEvent>(*item_->latestMouseMoveEvent());
     item_->latestMouseMoveEvent()->accept();
   }
+
+
+  // Copy pointer to display properties
+  displayProperties_ = item_->displayProperties();
+  
 }
 
 
@@ -199,9 +209,9 @@ void QVtkRenderer::initialize() {
 
 bool QVtkRenderer::initializePipeline(const char *gridFilename) {
   qDebug() << "QVtkRenderer::initializePipeline() " << gridFilename;
+
   gridReader_ =
     vtkSmartPointer<GmtGridReader>::New();
-
 
   gridReader_->SetFileName ( gridFilename );
   qDebug() << "reader->Update()";
@@ -239,53 +249,55 @@ bool QVtkRenderer::initializePipeline(const char *gridFilename) {
   qDebug() << "assign mapper to actor";
   surfaceActor_->SetMapper(mapper_);
 
-  // Axes for surface
-  vtkSmartPointer<vtkNamedColors> colors = 
-    vtkSmartPointer<vtkNamedColors>::New();
+  if (displayProperties_->drawAxes) {
+    // Axes for surface
+    vtkSmartPointer<vtkNamedColors> colors = 
+      vtkSmartPointer<vtkNamedColors>::New();
 
-  vtkColor3d axisColor = colors->GetColor3d("Black");
-  vtkColor3d labelColor = colors->GetColor3d("Black");
+    vtkColor3d axisColor = colors->GetColor3d("Black");
+    vtkColor3d labelColor = colors->GetColor3d("Black");
   
-  axesActor_ = vtkSmartPointer<vtkCubeAxesActor>::New();
-  axesActor_->SetUseTextActor3D(1);
-  axesActor_->SetBounds(gridReader_->GetOutput()->GetBounds());
-  axesActor_->SetCamera(renderer_->GetActiveCamera());
-  axesActor_->GetTitleTextProperty(0)->SetFontSize(48);
-  axesActor_->DrawXGridlinesOn();
-  axesActor_->DrawYGridlinesOn();
-  axesActor_->DrawZGridlinesOn();
+    axesActor_ = vtkSmartPointer<vtkCubeAxesActor>::New();
+    axesActor_->SetUseTextActor3D(1);
+    axesActor_->SetBounds(gridReader_->GetOutput()->GetBounds());
+    axesActor_->SetCamera(renderer_->GetActiveCamera());
+    axesActor_->GetTitleTextProperty(0)->SetFontSize(48);
+    axesActor_->DrawXGridlinesOn();
+    axesActor_->DrawYGridlinesOn();
+    axesActor_->DrawZGridlinesOn();
 
-  // Set axis line color
-  axesActor_->GetXAxesLinesProperty()->SetColor(axisColor.GetData());
-  axesActor_->GetYAxesLinesProperty()->SetColor(axisColor.GetData());
-  axesActor_->GetZAxesLinesProperty()->SetColor(axisColor.GetData());
+    // Set axis line color
+    axesActor_->GetXAxesLinesProperty()->SetColor(axisColor.GetData());
+    axesActor_->GetYAxesLinesProperty()->SetColor(axisColor.GetData());
+    axesActor_->GetZAxesLinesProperty()->SetColor(axisColor.GetData());
   
-  axesActor_->GetXAxesGridlinesProperty()->SetColor(axisColor.GetData());
-  axesActor_->GetYAxesGridlinesProperty()->SetColor(axisColor.GetData());
-  axesActor_->GetZAxesGridlinesProperty()->SetColor(axisColor.GetData());
+    axesActor_->GetXAxesGridlinesProperty()->SetColor(axisColor.GetData());
+    axesActor_->GetYAxesGridlinesProperty()->SetColor(axisColor.GetData());
+    axesActor_->GetZAxesGridlinesProperty()->SetColor(axisColor.GetData());
 
-  axesActor_->GetTitleTextProperty(0)->SetColor(labelColor.GetData());
-  axesActor_->GetLabelTextProperty(0)->SetColor(labelColor.GetData());
-  axesActor_->GetTitleTextProperty(1)->SetColor(labelColor.GetData());
-  axesActor_->GetLabelTextProperty(1)->SetColor(labelColor.GetData());
-  axesActor_->GetTitleTextProperty(2)->SetColor(labelColor.GetData());
-  axesActor_->GetLabelTextProperty(2)->SetColor(labelColor.GetData());       
+    axesActor_->GetTitleTextProperty(0)->SetColor(labelColor.GetData());
+    axesActor_->GetLabelTextProperty(0)->SetColor(labelColor.GetData());
+    axesActor_->GetTitleTextProperty(1)->SetColor(labelColor.GetData());
+    axesActor_->GetLabelTextProperty(1)->SetColor(labelColor.GetData());
+    axesActor_->GetTitleTextProperty(2)->SetColor(labelColor.GetData());
+    axesActor_->GetLabelTextProperty(2)->SetColor(labelColor.GetData());       
 
   
 #if VTK_MAJOR_VERSION == 6
-  axesActor_->SetGridLineLocation(VTK_GRID_LINES_FURTHEST);
+    axesActor_->SetGridLineLocation(VTK_GRID_LINES_FURTHEST);
 #endif
 #if VTK_MAJOR_VERSION > 6
-  axesActor_->SetGridLineLocation(
-    axesActor_->VTK_GRID_LINES_FURTHEST);
+    axesActor_->SetGridLineLocation(
+				    axesActor_->VTK_GRID_LINES_FURTHEST);
 #endif
   
-  axesActor_->XAxisMinorTickVisibilityOff();
-  axesActor_->YAxisMinorTickVisibilityOff();
-  axesActor_->ZAxisMinorTickVisibilityOff();
+    axesActor_->XAxisMinorTickVisibilityOff();
+    axesActor_->YAxisMinorTickVisibilityOff();
+    axesActor_->ZAxisMinorTickVisibilityOff();
 
-  axesActor_->SetFlyModeToStaticEdges();
-
+    axesActor_->SetFlyModeToStaticEdges();
+  }
+  
   // Create vtk renderWindow
   qDebug() << "create renderWindow";
   renderWindow_ =
@@ -311,8 +323,11 @@ bool QVtkRenderer::initializePipeline(const char *gridFilename) {
   renderWindow_->SetInteractor(renderWindowInteractor_);
 
   renderer_->AddActor(surfaceActor_);
-  renderer_->AddActor(axesActor_);    
 
+  if (displayProperties_->drawAxes) {
+    renderer_->AddActor(axesActor_);    
+  }
+  
   renderer_->ResetCamera();
 
   // Initialize the OpenGL context for the renderer
