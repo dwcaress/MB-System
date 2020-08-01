@@ -29,12 +29,23 @@ PATHS
 
 # mconfig header/source path
 # may be custom (utils) or default (src)
-find_path(MFCONF_HEADER_PATH
+find_path(MFCONF_CUSTOM_PATH
 NAMES mconfig.h
 PATHS
 "${MFRAME_DIR}/utils"
+)
+find_path(MFCONF_DEFAULT_PATH
+NAMES mconfig.h
+PATHS
 "${MFRAME_DIR}/src"
 )
+
+if(MFCONF_CUSTOM_PATH)
+set(MFCONF_HEADER_PATH "${MFCONF_CUSTOM_PATH}")
+else()
+set(MFCONF_HEADER_PATH "${MFCONF_DEFAULT_PATH}")
+add_compile_options("SHELL:-D NETIF_MMDEBUG")
+endif()
 
 # libnetcdf
 find_library(NETCDF
@@ -118,6 +129,7 @@ configure_file(LibtrnavConfig.h.in LibtrnavConfig.h)
 
 message("MFRAME_LIB=${MFRAMELIB}")
 message("MFRAME_HEADER_PATH=${MFRAME_HEADER_PATH}")
+message("MFCONF_HEADER_PATH=${MFCONF_HEADER_PATH}")
 message("EXTRA_INCLUDES=${EXTRA_INCLUDES}")
 
 # build trnu_cli component library
