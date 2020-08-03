@@ -67,7 +67,17 @@ int GmtGridReader::RequestData(vtkInformation* request,
 
   // Reset/clear points
   gridPoints_->Reset();
+
+  unsigned nRows = gmtGrid_->header->n_rows;
+  unsigned nCols = gmtGrid_->header->n_columns;
   
+  // Pre-allocate points memory
+  if (!gridPoints_->Allocate(nRows * nCols)) {
+    std::cerr << "failed to allocat "
+	      <<  nRows * nCols << " points"
+	      << std::endl;
+  }
+
   // Load points read from grid file
   std::cerr << "GmtGridReader::RequestData() - load points" << std::endl;    
   for (unsigned row = 0; row < gmtGrid_->header->n_rows; row++) {
@@ -78,11 +88,14 @@ int GmtGridReader::RequestData(vtkInformation* request,
     }
   }
 
-
   // Set triangle vertices
-  unsigned nRows = gmtGrid_->header->n_rows;
-  unsigned nCols = gmtGrid_->header->n_columns;
+  if (!gridPolygons_->Allocate(nRows * nCols * 2)) {
+    std::cerr << "failed to allocat "
+	      <<  nRows * nCols *2 << " polygons"
+	      << std::endl;
+  }    
   vtkIdType triangleVertexId[3];
+  int nCells = 0;
   // Triangles must stay within row and column bounds
   for (unsigned row = 0; row < nRows-1; row++) {
     for (unsigned col = 0; col < nCols-1; col++) {
@@ -92,15 +105,17 @@ int GmtGridReader::RequestData(vtkInformation* request,
       triangleVertexId[1] = gridOffset(nRows, nCols, row, col+1);
       triangleVertexId[2] = gridOffset(nRows, nCols, row+1, col+1);      
       gridPolygons_->InsertNextCell(3, triangleVertexId);
+      nCells++;
       
       // Second triangle
       triangleVertexId[0] = gridOffset(nRows, nCols, row, col);
       triangleVertexId[1] = gridOffset(nRows, nCols, row+1, col+1);
       triangleVertexId[2] = gridOffset(nRows, nCols, row+1, col);      
       gridPolygons_->InsertNextCell(3, triangleVertexId);
+      nCells++;
     }
   }
-
+  std::cout << "nCells=" << nCells << std::endl;
 
   polyOutput->SetPoints(gridPoints_);
   // std::cerr << "SKIPPING POLYGONS FOR NOW" << std::endl;
