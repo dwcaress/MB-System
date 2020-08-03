@@ -13,9 +13,9 @@
 
 namespace mb_system {
   /**
-     GmtGrideader reads data stored in a GMT grid file (NetCDF format), and outputs 
-     the data into a vtkPoints (vertices) and vtkCellArray (triangles) where data
-     can be accessed by the VTK pipeline.
+     GmtGrideader reads data stored in a GMT grid file (NetCDF format), 
+     and outputs the data into a vtkPoints (vertices) and vtkCellArray 
+     (triangles) where data can be accessed by the VTK pipeline.
   */
   class GmtGridReader : public vtkAbstractPolyDataReader {
 
@@ -45,9 +45,8 @@ namespace mb_system {
   protected:
   
     /// Callback registered with the VariableArraySelection.
-    static void SelectionModifiedCallback(
-					  vtkObject* caller, unsigned long eid, void* clientdata, void* calldata);
-
+    static void SelectionModifiedCallback(vtkObject* caller, unsigned long eid,
+					  void* clientdata, void* calldata);
 
     /// Get offset from start of data grid.
     /// It's an error if row or col are out-of-range
