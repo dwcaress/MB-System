@@ -33,6 +33,7 @@ SOURCES += \
 HEADERS += \
     Camera.h \
     ColorMap.h \
+    DisplayProperties.h \
     GmtGridReader.h \
     GmtGridSurface.h \
     MBGui_global.h \
