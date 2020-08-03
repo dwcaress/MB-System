@@ -10,11 +10,12 @@ namespace mb_system {
   /**
      QVtkItem and QVtkRenderer coordinate with one another to
      render VTK scenes within a QQuickItem specified in QML. A QVtkItem object
-     is created when specified in QML, and the accompanying QVtkRenderer is created
-     when QVtkItem's createRenderer() function is invoked by the Qt framework.
-     The QVtkItem object code runs in the main thread, is responsible for accepting 
-     user input such as mouse zoom, rotate, etc, and making that input available to 
-     its accompanying QVtkRenderer object.
+     is created when specified in QML, and the accompanying QVtkRenderer is 
+     created when QVtkItem's createRenderer() function is invoked by the Qt 
+     framework. The QVtkItem object code runs in the main thread, is 
+     responsible for accepting user input such as mouse zoom, rotate, etc, 
+     and making that input available to its accompanying QVtkRenderer object,
+     which runs in the renderer thread.
      See https://www.qt.io/blog/2015/05/11/integrating-custom-opengl-rendering-with-qt-quick-via-qquickframebufferobject
   */
   class QVtkItem : public QQuickFramebufferObject
