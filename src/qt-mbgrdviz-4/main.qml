@@ -5,7 +5,7 @@ import QtDataVisualization 1.14
 import QVtk 1.0
 import "ui-components"
 /* ***
-Displays bathymetry/topography as a Surface3D object.
+Displays bathymetry/topography in a QVtkItem 
 Mouse controls:
 TBD
 
@@ -19,7 +19,7 @@ ApplicationWindow {
     visible: true
     width: 1000
     height: 880
-    title: "TEST4"
+    title: "mbgrdviz-4"
 
     property int selectedAxisLabel: -1
     property real dragSpeedModifier: 100.0
@@ -118,6 +118,7 @@ ApplicationWindow {
             Action { checkable: true; text: qsTr("&Routes") }
             Action { checkable: true; text: qsTr("&Vector") }
             Action { checkable: true; text: qsTr("&Profile window") }
+            Action { checkable: true; text: qsTr("&Axes") }	    
             MenuSeparator {}
             Menu {
                 title: "Shading"
