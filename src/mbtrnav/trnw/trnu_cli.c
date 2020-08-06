@@ -144,20 +144,36 @@ int trnucli_connect(trnucli_t *self, char *host, int port)
     }
 
     if( (self->trnu->sock=msock_socket_new(host,port,ST_UDP))!=NULL ){
-        msock_set_blocking(self->trnu->sock,true);
 
-        if ( msock_connect(self->trnu->sock)==0) {
-            int test=-1;
-            if( (test=msock_sendto(self->trnu->sock,NULL,(byte *)PROTO_TRNU_CON,(strlen(PROTO_TRNU_CON)+1),0))>0){
-                PDPRINT((stderr,"connect msg OK [%d]\n",test));
-                byte ack[8]={0};
-                if( (test=msock_recv(self->trnu->sock,ack,8,0))>0){
-                    PDPRINT((stderr,"ACK OK [%d/%s]\n",test,ack));
+        msock_set_blocking(self->trnu->sock,false);
+        int test=-1;
+
+        if ( (test=msock_connect(self->trnu->sock))==0) {
+            int retries=3;
+            while(retries>0 && retval!=0){
+                if( (test=msock_sendto(self->trnu->sock,NULL,(byte *)PROTO_TRNU_CON,(strlen(PROTO_TRNU_CON)+1),0))>0){
+                    PDPRINT((stderr,"CON msg send OK [%d]\n",test));
+                    byte ack[8]={0};
+                    int rx_retries=5;
+                    while(rx_retries>0){
+                        mtime_delay_ms(250);
+    //                    msock_set_blocking(self->trnu->sock,true);
+                        if( (test=msock_recv(self->trnu->sock,ack,8,0))>0){
+                            PDPRINT((stderr,"ACK OK [%d/%s]\n",test,ack));
+                            retval=0;
+                            break;
+                        }
+                        rx_retries--;
+                    }
                 }
+                retries--;
             }
-            retval=0;
-        }else{PTRACE();}
+        }else{
+            PTRACE();
+            PDPRINT((stderr,"CON failed [%d]\n",test));
+        }
     }else{PTRACE();}
+
     return retval;
 }// end function trnucli_connect
 

@@ -562,6 +562,7 @@ int mstats_test()
                 double k=0.0;
                 for(k=0.0;k<2.0*PI;k+=PI/100.0){
                     double j=sin(k);
+                    if(j==j){};
 #ifdef MST_STATS_EN
                     // some "status" counters: number of times sin()
                     // is gt, lt, or eq zero
@@ -573,6 +574,7 @@ int mstats_test()
                         MST_COUNTER_INC(stats->status[MSAPP_SIN_LT]);
                     else
                         MST_COUNTER_INC(stats->status[MSAPP_SIN_EQ]);
+
 #endif
                 }
             }

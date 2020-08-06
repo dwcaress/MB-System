@@ -1,0 +1,4 @@
+// the configured options and settings for Tutorial
+#define Mframe_VERSION_MAJOR @Tutorial_VERSION_MAJOR@
+#define MFrame_VERSION_MINOR @Tutorial_VERSION_MINOR@
+
