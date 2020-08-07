@@ -71,6 +71,7 @@
 #include "mfile.h"
 #include "msocket.h"
 #include "mlog.h"
+#include "mtime.h"
 #include "medebug.h"
 #include "trn_msg.h"
 
@@ -107,14 +108,18 @@
 
 #define TRNUCLI_TEST_TRNU_PORT 8000
 #define TRNUCLI_TEST_TRNU_HBEAT 25
-#define TRNUCLI_CSV_LINE_BYTES 1024*20
+#define TRNUCLI_TEST_CSV_LINE_BYTES 1024*20
 #define TRNUCLI_TEST_UPDATE_N 10
 #define TRNUCLI_TEST_LOG_NAME "trnucli"
 #define TRNUCLI_TEST_LOG_DESC "trnu client log"
 #define TRNUCLI_TEST_LOG_DIR  "."
 #define TRNUCLI_TEST_LOG_EXT  ".log"
-#define TRN_CMD_LINE_BYTES 2048
-#define TRNUCLI_TEST_CONNECT_DELAY_SEC 5
+#define TRNUCLI_TEST_CMD_LINE_BYTES 2048
+#define TRNUCLI_TEST_CONNECT_WAIT_SEC 5
+#define TRNUCLI_TEST_ELISTEN_RETRIES 5
+#define TRNUCLI_TEST_ELISTEN_WAIT 3
+#define TRNUCLI_TEST_EDEL_MSEC  500
+#define TRNUCLI_TEST_RCTO_SEC 10.0
 #define HOSTNAME_BUF_LEN 256
 
 /////////////////////////
@@ -160,6 +165,13 @@ typedef struct app_cfg_s{
     /// @var app_cfg_s::demo
     /// @brief TBD
     int demo;
+    /// @var app_cfg_s::recon
+    /// @brief TBD
+    double rctos;
+    double recon_timer;
+    /// @var app_cfg_s::edelms
+    /// @brief TBD
+    uint32_t edelms;
     /// @var app_cfg_s::log_cfg
     /// @brief TBD
     mlog_config_t *log_cfg;
@@ -208,6 +220,8 @@ static void s_show_help()
     "--input       : input type (B:bin C:csv S:socket)\n"
     "--ofmt=[pcx]  : output format (P:pretty X:hex PX:pretty_hex C:csv\n"
     "--block=[lc]  : block on connect/listen (L:listen C:connect)\n"
+    "--rctos=n     : reconnect timeout sec (reconnect if no message received for n sec)\n"
+    "--edelms=n    : delay n ms on listen error\n"
     "--ifile       : input file\n"
     "--update=n    : TRN update N\n"
     "--log         : enable logging\n"
@@ -242,6 +256,8 @@ void parse_args(int argc, char **argv, app_cfg_t *cfg)
         {"block", required_argument, NULL, 0},
         {"ifile", required_argument, NULL, 0},
         {"update", required_argument, NULL, 0},
+        {"rctos", required_argument, NULL, 0},
+        {"edelms", required_argument, NULL, 0},
         {"demo", required_argument, NULL, 0},
         {NULL, 0, NULL, 0}};
  
@@ -345,6 +361,14 @@ void parse_args(int argc, char **argv, app_cfg_t *cfg)
                     if(strstr(optarg,"l")!=NULL || strstr(optarg,"L")!=NULL )
                         cfg->flags|=TRNUC_BLK_LISTEN;
                 }
+                // rctos
+                else if (strcmp("rctos", options[option_index].name) == 0) {
+                    sscanf(optarg,"%lf",&cfg->rctos);
+                }
+                // edelms
+                else if (strcmp("edelms", options[option_index].name) == 0) {
+                    sscanf(optarg,"%"PRIu32"",&cfg->edelms);
+                }
                 // demo
                 else if (strcmp("demo", options[option_index].name) == 0) {
                     sscanf(optarg,"%d",&cfg->demo);
@@ -394,6 +418,8 @@ void parse_args(int argc, char **argv, app_cfg_t *cfg)
     PDPRINT((stderr,"trnu_hbeat [%d]\n",cfg->trnu_hbeat));
     PDPRINT((stderr,"ofmt       [%02x]\n",cfg->ofmt));
     PDPRINT((stderr,"update_n   [%u]\n",cfg->update_n));
+    PDPRINT((stderr,"rctos      [%.3lf]\n",cfg->rctos));
+    PDPRINT((stderr,"edelms      [%"PRIu32"]\n",cfg->edelms));
     PDPRINT((stderr,"demo       [%d]\n",cfg->demo));
 }
 // End function parse_args
@@ -408,12 +434,12 @@ static void s_termination_handler (int signum)
         case SIGINT:
         case SIGHUP:
         case SIGTERM:
-            PDPRINT((stderr,"sig received[%d]\n",signum));
+            PDPRINT((stderr,"INFO - sig received[%d]\n",signum));
             g_interrupt=true;
             g_signal=signum;
             break;
         default:
-            fprintf(stderr,"s_termination_handler: sig not handled[%d]\n",signum);
+            fprintf(stderr,"ERR - s_termination_handler: sig not handled[%d]\n",signum);
             break;
     }
 }
@@ -438,6 +464,9 @@ static app_cfg_t *app_cfg_new()
         instance->log_name=strdup(TRNUCLI_TEST_LOG_NAME);
         instance->log_dir=strdup(TRNUCLI_TEST_LOG_DIR);
         instance->log_path=(char *)malloc(512);
+        instance->rctos=TRNUCLI_TEST_RCTO_SEC;
+        instance->recon_timer=0.0;
+        instance->edelms=TRNUCLI_TEST_EDEL_MSEC;
     }
     return instance;
 }
@@ -530,18 +559,18 @@ static void s_init_log(int argc, char **argv, app_cfg_t *cfg)
     mfile_flags_t flags = MFILE_RDWR|MFILE_APPEND|MFILE_CREATE;
     mfile_mode_t mode = MFILE_RU|MFILE_WU|MFILE_RG|MFILE_WG;
 
-    char g_cmd_line[TRN_CMD_LINE_BYTES]={0};
+    char g_cmd_line[TRNUCLI_TEST_CMD_LINE_BYTES]={0};
     char *ip=g_cmd_line;
     int x=0;
     for (x=0;x<argc;x++){
-        if ((ip+strlen(argv[x])-g_cmd_line) > TRN_CMD_LINE_BYTES) {
-            fprintf(stderr,"warning - logged cmdline truncated\n");
+        if ((ip+strlen(argv[x])-g_cmd_line) > TRNUCLI_TEST_CMD_LINE_BYTES) {
+            fprintf(stderr,"WARN - logged cmdline truncated\n");
             break;
         }
         int ilen=sprintf(ip," %s",argv[x]);
         ip+=ilen;
     }
-    g_cmd_line[TRN_CMD_LINE_BYTES-1]='\0';
+    g_cmd_line[TRNUCLI_TEST_CMD_LINE_BYTES-1]='\0';
 
     mlog_open(cfg->log_id, flags, mode);
     mlog_tprintf(cfg->log_id,"*** trnucli-test session start ***\n");
@@ -611,13 +640,13 @@ static int s_csv_to_update(trnu_pub_t *dest, mfile_file_t *src)
                 retval=test;
                 free(fields);
             }else{
-                fprintf(stderr,"tokenize failed [%d]\n",test);
+                fprintf(stderr,"ERR - tokenize failed [%d]\n",test);
             }
         }else{
-            fprintf(stderr,"read_csv_rec failed [%d]\n",test);
+            fprintf(stderr,"ERR - read_csv_rec failed [%d]\n",test);
         }
     }else{
-        fprintf(stderr,"invalid argument d[%p] s[%p]\n",dest,src);
+        fprintf(stderr,"ERR - invalid argument d[%p] s[%p]\n",dest,src);
     }
     return retval;
 }
@@ -718,38 +747,124 @@ static int s_trnucli_test_trnu(app_cfg_t *cfg)
     int test=-1;
     static int call_count=0;
     trnucli_t *dcli = trnucli_new(NULL,cfg->flags,0.0);
-    if( (test=trnucli_connect(dcli, cfg->trnu_host, cfg->trnu_port))==0){
-        fprintf(stderr,"trnucli_connect [%d]\n",test);
-    }else{
-        fprintf(stderr,"trnucli_connect failed [%d]\n",test);
-    }
+    typedef enum{DISCONNECTED=0,LISTENING}trnuc_state_t;
+    typedef enum{NOP=0,CONNECT,LISTEN}trnuc_action_t;
+    const char *state_str[]={"DISCONNECTED","LISTENING"};
+    const char *action_str[]={"NOP","CONNECT","LISTEN"};
+
     if(cfg->demo>0){
         // in demo mode, set a callback to
         // process updates (called by trn_cli::listen()
     	trnucli_set_callback(dcli,s_update_callback);
     }
+
+    trnuc_state_t state=DISCONNECTED;
+    trnuc_action_t action=NOP;
+    int e_connect=0;
+    int e_listen=0;
+    int connect_count=0;
+    int disconnect_count=0;
+    int update_count=0;
+    int reset_count=0;
+    cfg->recon_timer=mtime_dtime();
     while(!g_interrupt){
-        if( (test=trnucli_listen(dcli))==0){
-            if(cfg->demo<=0){
-                // in normal mode, process the update here
-	            s_trnucli_process_update(dcli->update,cfg);
-            }else{
-                // in demo mode, reset TRN periodically and send heartbeat
-                if( (call_count>0) && (call_count%cfg->demo)==0){
-                    int rst=trnucli_reset_trn(dcli);
-                    fprintf(stderr,"%s - reset TRN [%d]\n\n",__func__,rst);
-                    int hbt=trnucli_hbeat(dcli);
-                    fprintf(stderr,"%s - hbeat TRN [%d]\n\n",__func__,hbt);
-                }
-                call_count++;
-            }
-        }else{
-            fprintf(stderr,"listen ret[%d]\n",test);
+
+        switch (state) {
+            case DISCONNECTED:
+                action=CONNECT;
+                break;
+            case LISTENING:
+                action=LISTEN;
+                break;
+            default:
+                fprintf(stderr,"ERR - invalid state [%d]\n",state);
+                mlog_tprintf(cfg->log_id,"ERR - invalid state [%d]\n",state);
+                action=NOP;
+                break;
         }
+        if(cfg->verbose)
+        fprintf(stderr,"state [%d/%s] action [%d/%s]\n",state,state_str[state], action,action_str[action]);
+
+        if(action==CONNECT){
+            if( (test=trnucli_connect(dcli, cfg->trnu_host, cfg->trnu_port))==0){
+                cfg->recon_timer=mtime_dtime();
+                fprintf(stderr,"trnucli_connect OK [%d]\n",test);
+                mlog_tprintf(cfg->log_id,"trnucli_connect OK [%d]\n",test);
+                state=LISTENING;
+                connect_count++;
+            }else{
+                fprintf(stderr,"trnucli_connect failed [%d]\n",test);
+                mlog_tprintf(cfg->log_id,"trnucli_connect failed [%d]\n",test);
+                e_connect++;
+                sleep(TRNUCLI_TEST_CONNECT_WAIT_SEC);
+            }
+        }// action CONNECT
+
+        if(action==LISTEN){
+            if( (test=trnucli_listen(dcli))==0){
+                update_count++;
+
+                if(cfg->demo<=0){
+                    cfg->recon_timer=mtime_dtime();
+                    // in normal mode, process the update here
+                    s_trnucli_process_update(dcli->update,cfg);
+                    if(cfg->verbose)
+                    fprintf(stderr,"processed update (normal mode)\n");
+                    mlog_tprintf(cfg->log_id,"processed update (normal mode)\n");
+                }else{
+                    cfg->recon_timer=mtime_dtime();
+                    if(cfg->verbose)
+                    fprintf(stderr,"processed update (demo mode)\n");
+                    // in demo mode, reset TRN periodically and send heartbeat
+                    if( (call_count>0) && (call_count%cfg->demo)==0){
+                        int rst=trnucli_reset_trn(dcli);
+                        int hbt=trnucli_hbeat(dcli);
+                        reset_count++;
+                        fprintf(stderr,"reset TRN [%d]\n",rst);
+                        fprintf(stderr,"hbeat TRN [%d]\n",hbt);
+                        mlog_tprintf(cfg->log_id,"reset TRN [%d]\n",rst);
+                        mlog_tprintf(cfg->log_id,"hbeat TRN [%d]\n",hbt);
+                    }
+                    call_count++;
+                }
+            }else{
+                if(cfg->verbose)
+                fprintf(stderr,"ERR - listen ret[%d] rcto[%.3lf/%.3lf]\n",test,(cfg->rctos-(mtime_dtime()-cfg->recon_timer)),cfg->rctos);
+                mlog_tprintf(cfg->log_id,"ERR - listen ret[%d]\n",test);
+                e_listen++;
+                mtime_delay_ms(cfg->edelms);
+            }
+
+            if(cfg->rctos>0.0 && (mtime_dtime()-cfg->recon_timer)>=cfg->rctos){
+                // reconnect if timer expired
+                fprintf(stderr,"ERR - recon timer expired [%.3lf] - restarting\n",cfg->rctos);
+                mlog_tprintf(cfg->log_id,"ERR - recon timer expired [%.3lf] - restarting\n",cfg->rctos);
+                disconnect_count++;
+                trnucli_disconnect(dcli);
+                state=DISCONNECTED;
+                cfg->recon_timer=mtime_dtime();
+            }
+        }// action LISTEN
+
     }
+
+    fprintf(stderr,"connect_count    [%d]\n",connect_count);
+    fprintf(stderr,"disconnect_count [%d]\n",disconnect_count);
+    fprintf(stderr,"reset_count      [%d]\n",reset_count);
+    fprintf(stderr,"update_count     [%d]\n",update_count);
+    fprintf(stderr,"e_connect        [%d]\n",e_connect);
+    fprintf(stderr,"e_listen         [%d]\n",e_listen);
+
+    mlog_tprintf(cfg->log_id,"connect_count    [%d]\n",connect_count);
+    mlog_tprintf(cfg->log_id,"disconnect_count [%d]\n",disconnect_count);
+    mlog_tprintf(cfg->log_id,"reset_count      [%d]\n",reset_count);
+    mlog_tprintf(cfg->log_id,"update_count     [%d]\n",update_count);
+    mlog_tprintf(cfg->log_id,"e_connect        [%d]\n",e_connect);
+    mlog_tprintf(cfg->log_id,"e_listen         [%d]\n",e_listen);
+
     // disconnect from server
     if( (test=trnucli_disconnect(dcli))!=0){
-        fprintf(stderr,"trnucli_disconnect failed [%d]\n",test);
+        fprintf(stderr,"ERR - trnucli_disconnect failed [%d]\n",test);
     }
 
     // release instance
@@ -757,7 +872,7 @@ static int s_trnucli_test_trnu(app_cfg_t *cfg)
 
     if(g_interrupt){
         // interrupted by user
-        mlog_tprintf(cfg->log_id,"Interrupted sig[%d] - exiting\n",g_signal);
+        mlog_tprintf(cfg->log_id,"INFO - Interrupted sig[%d] - exiting\n",g_signal);
         retval=0;
     }
     
@@ -782,7 +897,7 @@ static int s_trnucli_test_bin(app_cfg_t *cfg)
             }
         }// while
     }else{
-        fprintf(stderr,"%s - mfile_open [%s] failed [%d][%d/%s]\n",__func__,cfg->ifile,test,errno,strerror(errno));
+        fprintf(stderr,"ERR - mfile_open [%s] failed [%d][%d/%s]\n",cfg->ifile,test,errno,strerror(errno));
     }
     mfile_file_destroy(&ifile);
     return retval;
@@ -804,7 +919,7 @@ static int s_app_main(app_cfg_t *cfg)
                 retval=s_trnucli_test_trnu(cfg);
                 break;
             default:
-                fprintf(stderr,"invalid input type [%d]\n",cfg->input_src);
+                fprintf(stderr,"ERR - invalid input type [%d]\n",cfg->input_src);
                 break;
         }
     }else{

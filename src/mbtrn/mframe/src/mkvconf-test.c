@@ -12,7 +12,9 @@ static void s_termination_handler (int signum)
         case SIGHUP:
         case SIGTERM:
             fprintf(stderr,"\nsig received[%d]\n",signum);
+#if defined(WITH_MKVCONF_TEST)
             g_mkvconf_test_quit=true;
+#endif
             break;
         default:
             fprintf(stderr,"\ns_termination_handler: sig not handled[%d]\n",signum);

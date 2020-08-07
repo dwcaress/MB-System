@@ -211,7 +211,7 @@ trnifsvr_test_LDADD = libnetif.la  ${top_builddir}/src/mbtrn/libr7kr.la libtrnw.
 trnclient_test_SOURCES =  utils/trnclient_test.cpp utils/TrnClient.cpp utils/TerrainNavClient.cpp
 trnclient_test_LDADD = libtnav.la
 
-trnusvr_test_SOURCES = trnw/trnusvr-test.c
+trnusvr_test_SOURCES = trnw/trnusvr_test.c
 trnusvr_test_LDADD = libnetif.la libtrnw.la
 
 dist_bin_SCRIPTS =
