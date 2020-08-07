@@ -46,8 +46,8 @@ void QVtkRenderer::render() {
     return;
   }
 
-  double angle = renderer_->GetActiveCamera()->GetViewAngle();
-  qDebug() << "*** render(): viewAngle = " << angle;
+  //  double angle = renderer_->GetActiveCamera()->GetViewAngle();
+  // qDebug() << "*** render(): viewAngle = " << angle;
 
   /* ***
      double position[3];
@@ -66,6 +66,11 @@ void QVtkRenderer::render() {
     initialize();
     initialized_ = true;
   }
+
+  qDebug() << "*** QVtkRenderer::render(): drawAxes=" <<
+    displayProperties_->drawAxes;
+  
+  axesActor_->SetVisibility(displayProperties_->drawAxes);
 
   if (wheelEvent_ && !wheelEvent_->isAccepted()) {
     qDebug() << "render(): handle wheelEvent";
@@ -142,9 +147,10 @@ void QVtkRenderer::synchronize(QQuickFramebufferObject *item) {
   // Copy data from item to this renderer
   if (!item_) {
     item_ = static_cast<QVtkItem *>(item);
-    displayProperties_ = item_->displayProperties();
   }
 
+  displayProperties_ = item_->displayProperties();
+  
   char *gridFilename = item_->getGridFilename();
   bool filenameChanged = false;
   if (!gridFilename && gridFilename_) {
@@ -249,54 +255,52 @@ bool QVtkRenderer::initializePipeline(const char *gridFilename) {
   qDebug() << "assign mapper to actor";
   surfaceActor_->SetMapper(mapper_);
 
-  if (displayProperties_->drawAxes) {
-    // Axes for surface
-    vtkSmartPointer<vtkNamedColors> colors = 
-      vtkSmartPointer<vtkNamedColors>::New();
+  // Axes for surface
+  vtkSmartPointer<vtkNamedColors> colors = 
+    vtkSmartPointer<vtkNamedColors>::New();
 
-    vtkColor3d axisColor = colors->GetColor3d("Black");
-    vtkColor3d labelColor = colors->GetColor3d("Black");
+  vtkColor3d axisColor = colors->GetColor3d("Black");
+  vtkColor3d labelColor = colors->GetColor3d("Black");
   
-    axesActor_ = vtkSmartPointer<vtkCubeAxesActor>::New();
-    axesActor_->SetUseTextActor3D(1);
-    axesActor_->SetBounds(gridReader_->GetOutput()->GetBounds());
-    axesActor_->SetCamera(renderer_->GetActiveCamera());
-    axesActor_->GetTitleTextProperty(0)->SetFontSize(48);
-    axesActor_->DrawXGridlinesOn();
-    axesActor_->DrawYGridlinesOn();
-    axesActor_->DrawZGridlinesOn();
+  axesActor_ = vtkSmartPointer<vtkCubeAxesActor>::New();
+  axesActor_->SetUseTextActor3D(1);
+  axesActor_->SetBounds(gridReader_->GetOutput()->GetBounds());
+  axesActor_->SetCamera(renderer_->GetActiveCamera());
+  axesActor_->GetTitleTextProperty(0)->SetFontSize(48);
+  axesActor_->DrawXGridlinesOn();
+  axesActor_->DrawYGridlinesOn();
+  axesActor_->DrawZGridlinesOn();
 
-    // Set axis line color
-    axesActor_->GetXAxesLinesProperty()->SetColor(axisColor.GetData());
-    axesActor_->GetYAxesLinesProperty()->SetColor(axisColor.GetData());
-    axesActor_->GetZAxesLinesProperty()->SetColor(axisColor.GetData());
+  // Set axis line color
+  axesActor_->GetXAxesLinesProperty()->SetColor(axisColor.GetData());
+  axesActor_->GetYAxesLinesProperty()->SetColor(axisColor.GetData());
+  axesActor_->GetZAxesLinesProperty()->SetColor(axisColor.GetData());
   
-    axesActor_->GetXAxesGridlinesProperty()->SetColor(axisColor.GetData());
-    axesActor_->GetYAxesGridlinesProperty()->SetColor(axisColor.GetData());
-    axesActor_->GetZAxesGridlinesProperty()->SetColor(axisColor.GetData());
+  axesActor_->GetXAxesGridlinesProperty()->SetColor(axisColor.GetData());
+  axesActor_->GetYAxesGridlinesProperty()->SetColor(axisColor.GetData());
+  axesActor_->GetZAxesGridlinesProperty()->SetColor(axisColor.GetData());
 
-    axesActor_->GetTitleTextProperty(0)->SetColor(labelColor.GetData());
-    axesActor_->GetLabelTextProperty(0)->SetColor(labelColor.GetData());
-    axesActor_->GetTitleTextProperty(1)->SetColor(labelColor.GetData());
-    axesActor_->GetLabelTextProperty(1)->SetColor(labelColor.GetData());
-    axesActor_->GetTitleTextProperty(2)->SetColor(labelColor.GetData());
-    axesActor_->GetLabelTextProperty(2)->SetColor(labelColor.GetData());       
+  axesActor_->GetTitleTextProperty(0)->SetColor(labelColor.GetData());
+  axesActor_->GetLabelTextProperty(0)->SetColor(labelColor.GetData());
+  axesActor_->GetTitleTextProperty(1)->SetColor(labelColor.GetData());
+  axesActor_->GetLabelTextProperty(1)->SetColor(labelColor.GetData());
+  axesActor_->GetTitleTextProperty(2)->SetColor(labelColor.GetData());
+  axesActor_->GetLabelTextProperty(2)->SetColor(labelColor.GetData());       
 
   
 #if VTK_MAJOR_VERSION == 6
-    axesActor_->SetGridLineLocation(VTK_GRID_LINES_FURTHEST);
+  axesActor_->SetGridLineLocation(VTK_GRID_LINES_FURTHEST);
 #endif
 #if VTK_MAJOR_VERSION > 6
-    axesActor_->SetGridLineLocation(
-				    axesActor_->VTK_GRID_LINES_FURTHEST);
+  axesActor_->SetGridLineLocation(
+				  axesActor_->VTK_GRID_LINES_FURTHEST);
 #endif
   
-    axesActor_->XAxisMinorTickVisibilityOff();
-    axesActor_->YAxisMinorTickVisibilityOff();
-    axesActor_->ZAxisMinorTickVisibilityOff();
+  axesActor_->XAxisMinorTickVisibilityOff();
+  axesActor_->YAxisMinorTickVisibilityOff();
+  axesActor_->ZAxisMinorTickVisibilityOff();
 
-    axesActor_->SetFlyModeToStaticEdges();
-  }
+  axesActor_->SetFlyModeToStaticEdges();
   
   // Create vtk renderWindow
   qDebug() << "create renderWindow";
@@ -324,9 +328,9 @@ bool QVtkRenderer::initializePipeline(const char *gridFilename) {
 
   renderer_->AddActor(surfaceActor_);
 
-  if (displayProperties_->drawAxes) {
-    renderer_->AddActor(axesActor_);    
-  }
+  axesActor_->SetVisibility(displayProperties_->drawAxes);
+  
+  renderer_->AddActor(axesActor_);    
   
   renderer_->ResetCamera();
 
