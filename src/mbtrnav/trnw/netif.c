@@ -66,7 +66,6 @@
 #include "netif.h"
 #include "mtime.h"
 #include "mutils.h"
-#include "mmdebug.h"
 #include "medebug.h"
 #include "mconfig.h"
 
@@ -104,32 +103,10 @@
 /////////////////////////
 // Module Global Variables
 /////////////////////////
-#undef NETIF_USE_LOCAL_DEBUG
-#ifdef NETIF_USE_LOCAL_DEBUG
-typedef enum{
-    MOD_NETIF=MM_MODULE_COUNT,
-    APP_MODULE_COUNT
-}app_module_ids;
 
-/// @enum netif_channel_id
-/// @brief test module channel IDs
-/// [note : starting above reserved mframe channel IDs]
-typedef enum{
-    ID_NETIF_V1=MM_CHANNEL_COUNT,
-    ID_NETIF_V2,
-    ID_NETIF_V3,
-    ID_NETIF_V4,
-    NETIF_CHAN_COUNT
-}netif_channel_id;
-
-/// @enum netif_channel_mask
-/// @brief test module channel masks
-typedef enum{
-    NETIF_V1= (1<<ID_NETIF_V1),
-    NETIF_V2= (1<<ID_NETIF_V2),
-    NETIF_V3= (1<<ID_NETIF_V3),
-    NETIF_V4= (1<<ID_NETIF_V4)
-}netif_channel_mask;
+#ifdef NETIF_MMDEBUG
+// definitions are used when not
+// defined in mconfig.c (i.e. by application)
 
 /// @var char *netif_ch_names[NETIF_CH_COUNT]
 /// @brief module channel names
@@ -146,7 +123,7 @@ char *netif_ch_names[NETIF_CHAN_COUNT]={
 static mmd_module_config_t mmd_config_defaults[]={
     {MOD_NETIF,"MOD_NETIF",NETIF_CHAN_COUNT,((MM_ERR|MM_WARN)|NETIF_V1|NETIF_V2|NETIF_V3|NETIF_V4),netif_ch_names}
 };
-#endif
+#endif // NETIF_MMDEBUG
 
 const char *prof_event_labels[]={ \
     "e_src_socket",
@@ -972,7 +949,7 @@ void netif_set_pub_res(netif_t *self, void *res)
 
 void netif_init_mmd()
 {
-#ifdef NETIF_USE_LOCAL_DEBUG
+#ifdef NETIF_MMDEBUG
     mmd_module_configure(&mmd_config_defaults[0]);
 #else
     mconf_init(NULL,NULL);

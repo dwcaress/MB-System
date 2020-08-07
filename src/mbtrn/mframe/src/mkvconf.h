@@ -71,7 +71,6 @@ if(NULL!=s)free(s);\
 s=NULL;\
 }while(0)
 
-#define WITH_MKVCONF_TEST
 
 #define MKVC_DEL_DFL "="
 #define MKVC_LINE_BUF_LEN 512
