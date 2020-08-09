@@ -3516,8 +3516,11 @@ int main(int argc, char **argv) {
   if (mbtrn_cfg->verbose >= 1) {
   }
 
-    MBTRNPP_UPDATE_STATS(app_stats, mbtrnpp_mlog_id, mbtrn_cfg->mbtrnpp_stat_flags);
-    mlog_tprintf(mbtrnpp_mlog_id,"i,end mbtrnpp session\n");
+    mlog_tprintf(mbtrnpp_mlog_id, "uptime,%0.3lf\n", app_stats->uptime);
+    mlog_tprintf(mbtrnpp_mlog_id,"i,end session\n");
+    mlog_tprintf(netif_log(mb1svr),"i,end session\n");
+    mlog_tprintf(netif_log(trnsvr),"i,end session\n");
+    mlog_tprintf(netif_log(trnusvr),"i,end session\n");
 
   fprintf(stderr, "exit app [%d]\n", error);
 
