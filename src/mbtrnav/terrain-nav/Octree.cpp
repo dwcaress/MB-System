@@ -52,7 +52,7 @@ template <class ValueType>
 double
 Octree<ValueType>::
 RayTrace(const Vector& startPoint, const Vector& directionVector) const {
-	
+
 	/*
 	All right, first we are going get to the octree (if we need to).  Then we will loop until
 	we either hit the object or go out of the map.  On each loop, we will step from the entry
@@ -63,12 +63,12 @@ RayTrace(const Vector& startPoint, const Vector& directionVector) const {
 	Vector transitionPoint;
 	Vector deltaToTransitionPoint;
 	Vector deltaToCorner;
-	
+
 	double distance;
 	OctreeNode* nodePointer;
 	Path path;
 	int depth;
-	
+
 	//get to the octree
 	if(ContainsPoint(startPoint))	{
 		//the boring case
@@ -82,11 +82,11 @@ RayTrace(const Vector& startPoint, const Vector& directionVector) const {
 			return distance;
 		}
 	}
-	
+
 	// set up for the start of the loop
 	path = FindPathToPoint(transitionPoint);
 	nodePointer = GetPointerToLeafOnPath(depth, path);
-	
+
 	// loop until termination criteria
 	// currently set to: hitting a node with non-zero value
 	while(nodePointer->value == EmptyValue) {
@@ -94,7 +94,7 @@ RayTrace(const Vector& startPoint, const Vector& directionVector) const {
 		out which side of the box the ray will exit.  Based on that determine the
 		distance traveled through this node and set up for the next loop.
 		*/
-		
+
 		/*
 		each block of the switch will update the transitionPoint
 		for stepping to the edge the current node.  The relevant path
@@ -148,10 +148,10 @@ RayTrace(const Vector& startPoint, const Vector& directionVector) const {
 				}
 				break;
 		}
-		
+
 		// update the distance from moving through this node
 		distance += deltaToTransitionPoint.Norm();
-		
+
 		// update the node for the next iteration
 		nodePointer = GetPointerToLeafOnPath(depth, path);
 	}
@@ -160,7 +160,7 @@ RayTrace(const Vector& startPoint, const Vector& directionVector) const {
 }
 
 
-/* sets nodeLowerBounds and nodeUpperBounds for the next leaf node in the tree with value == desiredValue. If there are no mode leaf nodes with value == desiredValue, it returns false. 
+/* sets nodeLowerBounds and nodeUpperBounds for the next leaf node in the tree with value == desiredValue. If there are no mode leaf nodes with value == desiredValue, it returns false.
 Usage: while(octreeMap.ItterateThroughLeaves(nodeLowerBounds, nodeUpperBounds, true)){ PLOT_OCTREE_NODE(nodeLowerBounds, nodeUpperBounds);}*/
 template <class ValueType>
 bool
@@ -169,26 +169,26 @@ ItterateThroughLeaves(Vector& nodeLowerBounds, Vector& nodeUpperBounds, ValueTyp
 	if(treeComplete){
 		return false;
 	}
-	
+
 	int depth = 0;
 	if(OctreeRoot->ItterateThroughLeaves(*this, depth, Value)){
 		CalculateBoundsFromPath(nodeLowerBounds, nodeUpperBounds, currentItterationPath, depth);
 		return true;
 	}
-	
+
 	currentItterationPath = Path();
 	if(OctreeRoot->FindNextChildWithValueAndSetPath(*this, 0, Value, 0, depth)){
 		CalculateBoundsFromPath(nodeLowerBounds, nodeUpperBounds, currentItterationPath, depth);
 		treeComplete = true;
 		return true;
 	}
-	
+
 	return false;
 }
 
 /* Query Function:
-This is intended for maps where the probability of getting a sonar reading at given point is 
-stored in the map rather than the underlying surface.  With this map style, the combination of 
+This is intended for maps where the probability of getting a sonar reading at given point is
+stored in the map rather than the underlying surface.  With this map style, the combination of
 calling RayTrace and applying a sensor model is replaced with a call to Query or InterpolatingQuery.
 
 This will return the value stored in the leaf containing the queryPoint.  If the
@@ -220,38 +220,38 @@ InterpolatingQuery(const Vector& queryPoint) const {
 	To do linear interpolation, you need the values to interpolate from, and the
 	contribution to the total made by each value.  To do this efficiently in this
 	octree structure the two of those tasks need to be slightly intertwined.
-	
+
 	Good luck.
 	*/
-	
+
 	Vector percentageTowardThisNodeCenter;
 	double interpolationConstant[8];
 	double interpolatedValue;
 	double queriedValues[8];
 	Path path;
 	signed int adjacentPathDirection[3];
-	
+
 	//get an extra bit of precision on the path in order to find which corner of the current box we are in
 	path.x = static_cast<unsigned int>(2.0 * (queryPoint.x - LowerBounds.x) / TrueResolution.x);
 	path.y = static_cast<unsigned int>(2.0 * (queryPoint.y - LowerBounds.y) / TrueResolution.y);
 	path.z = static_cast<unsigned int>(2.0 * (queryPoint.z - LowerBounds.z) / TrueResolution.z);
-	
+
 	//convert LSB of path.* into '-1' or '1' for finding adjacent nodes
 	adjacentPathDirection[0] = ((path.x & 1) << 1) - 1;//X
 	adjacentPathDirection[1] = ((path.y & 1) << 1) - 1;//Y
 	adjacentPathDirection[2] = ((path.z & 1) << 1) - 1;//Z
-	
+
 	//then throw the LSB away
 	path.x >>= 1;
 	path.y >>= 1;
 	path.z >>= 1;
-	
+
 	//you can trust me on this one
 	percentageTowardThisNodeCenter.SetValues(
 		1 - std::abs(((queryPoint.x - LowerBounds.x) / TrueResolution.x) - path.x - 0.5),
 		1 - std::abs(((queryPoint.y - LowerBounds.y) / TrueResolution.y) - path.y - 0.5),
 		1 - std::abs(((queryPoint.z - LowerBounds.z) / TrueResolution.z) - path.z - 0.5));
-		
+
 	//weights for each of the interpolated nodes
 	interpolationConstant[0] = percentageTowardThisNodeCenter.x *
 							   percentageTowardThisNodeCenter.y *
@@ -277,15 +277,15 @@ InterpolatingQuery(const Vector& queryPoint) const {
 	interpolationConstant[7] = (1 - percentageTowardThisNodeCenter.x) *
 							   (1 - percentageTowardThisNodeCenter.y) *
 							   (1 - percentageTowardThisNodeCenter.z);
-							   
-							   
+
+
 	//already have the path for the first leaf
 	queriedValues[0] = static_cast<double>(GetPointerToLeafOnPath(path)->value);
 	/*
 	The next hundred lines of three layer nested if/else will find all the nodes which are
 	inside the map and get their values.  Also, all nodes not on the map will have a value
 	of OffMapValue for the purposes of interpolation.
-	
+
 	Note: only one of the third layer of if/else will run, and queriedValues[###] will only be set
 	once for each index (0-7).
 	*/
@@ -295,7 +295,7 @@ InterpolatingQuery(const Vector& queryPoint) const {
 				path.x + adjacentPathDirection[0],
 				path.y,
 				path.z)->value);
-				
+
 		//test in Y
 		if(PathElementIsValid(path.y + adjacentPathDirection[1])) {
 			queriedValues[2] = static_cast<double>(GetPointerToLeafOnPath(
@@ -306,7 +306,7 @@ InterpolatingQuery(const Vector& queryPoint) const {
 					path.x + adjacentPathDirection[0],
 					path.y + adjacentPathDirection[1],
 					path.z)->value);
-					
+
 			//test in Z
 			if(PathElementIsValid(path.z + adjacentPathDirection[2])) {
 				//all three directions good
@@ -339,7 +339,7 @@ InterpolatingQuery(const Vector& queryPoint) const {
 			queriedValues[3] = static_cast<double>(OffMapValue);
 			queriedValues[6] = static_cast<double>(OffMapValue);
 			queriedValues[7] = static_cast<double>(OffMapValue);
-			
+
 			//test Z
 			if(PathElementIsValid(path.z + adjacentPathDirection[2])) {
 				//X and Z only
@@ -363,14 +363,14 @@ InterpolatingQuery(const Vector& queryPoint) const {
 		queriedValues[5] = static_cast<double>(OffMapValue);
 		queriedValues[6] = static_cast<double>(OffMapValue);
 		queriedValues[7] = static_cast<double>(OffMapValue);
-		
+
 		//test Y
 		if(PathElementIsValid(path.y + adjacentPathDirection[1])) {
 			queriedValues[2] = static_cast<double>(GetPointerToLeafOnPath(
 					path.x,
 					path.y + adjacentPathDirection[1],
 					path.z)->value);
-					
+
 			//test Z
 			if(PathElementIsValid(path.z + adjacentPathDirection[2])) {
 				//Y and Z only
@@ -391,7 +391,7 @@ InterpolatingQuery(const Vector& queryPoint) const {
 			//no Y
 			queriedValues[2] = static_cast<double>(OffMapValue);
 			queriedValues[3] = static_cast<double>(OffMapValue);
-			
+
 			//test Z
 			if(PathElementIsValid(path.z + adjacentPathDirection[2])) {
 				//Z only
@@ -404,7 +404,7 @@ InterpolatingQuery(const Vector& queryPoint) const {
 			}
 		}
 	}//done with getting queriedValues
-	
+
 	interpolatedValue = 0;
 	int index;
 	for(index = 0; index < 8; index++) {
@@ -426,9 +426,9 @@ Octree() {
 	TrueResolution = Vector();
 	MaxDepth = 0;
 	OctreeNodeType = OctreeType::BinaryOccupancy;
-	
+
 	OctreeRoot = new OctreeNode;
-	
+
 	currentItterationPath = Path();
 	treeComplete = false;
 }
@@ -441,39 +441,39 @@ Octree(const Octree<ValueType>& octreeToCopy) {
 	UpperBounds = Vector(octreeToCopy.UpperBounds);
 	Size = Vector(octreeToCopy.Size);
 	TrueResolution = Vector(octreeToCopy.TrueResolution);
-	
+
 	MaxDepth = int(octreeToCopy.MaxDepth);
 	OffMapValue = ValueType(octreeToCopy.OffMapValue);
 	EmptyValue = ValueType(octreeToCopy.EmptyValue);
 	OctreeNodeType = OctreeType::EnumOctreeType(octreeToCopy.OctreeNodeType);
-	
+
 	OctreeRoot = new OctreeNode(*(octreeToCopy.OctreeRoot));
-	
+
 	currentItterationPath = octreeToCopy.currentItterationPath;
 	treeComplete = false;
 }
 
 /* Constructor you want to use:
 This will set MaxDepth so that we split the points down to TrueResolution <= desiredResolution.  It
-also sets TrueResolution deals with the rest of the Octree properties:  EmptyValue and OffMapValue 
+also sets TrueResolution deals with the rest of the Octree properties:  EmptyValue and OffMapValue
 are set to zero.  Size is set to UpperBounds - LowerBounds.
 */
 template <class ValueType>
 Octree<ValueType>::
 Octree(const Vector& desiredResolution, const Vector& lowerBounds, const Vector& upperBounds,
-	   const OctreeType::EnumOctreeType octreeType) 
+	   const OctreeType::EnumOctreeType octreeType)
 {
-	   
+
 	//all we are doing here is setting parameters for the tree as a whole, then calling the correct OctreeNode<type> constructor
 	OffMapValue = static_cast<ValueType>(0);
 	EmptyValue = static_cast<ValueType>(0);
-	
+
 	UpperBounds = Vector(upperBounds);
 	LowerBounds = Vector(lowerBounds);
-	
+
 	Size = UpperBounds - LowerBounds;
 	TrueResolution = Vector(Size);
-	
+
 	//set the true resolution and max depth
 	MaxDepth = 0;
 	while(! TrueResolution.StrictlyLessOrEqualTo(desiredResolution)) {
@@ -481,9 +481,9 @@ Octree(const Vector& desiredResolution, const Vector& lowerBounds, const Vector&
 		MaxDepth++;
 	}
 	OctreeNodeType = octreeType;
-	
+
 	OctreeRoot = new OctreeNode(EmptyValue);
-	
+
 	currentItterationPath = Path();
 	treeComplete = false;
 }
@@ -514,7 +514,7 @@ Adding points will switch based on the OctreeType for determining what is done
 as a result of a point being added.  See OctreeNode.tcc for the various AddPoint methods
 or Octree.hpp for a description of the Octree Types.  The return indicates the number of points added.
 
-If the point is outside the bounds of the Octree, it expands to include the new point.  This is not 
+If the point is outside the bounds of the Octree, it expands to include the new point.  This is not
 recommended as it can result in unnecessarily large Octrees.
 */
 // One point
@@ -554,7 +554,7 @@ AddPoints(const Vector points[], const unsigned int numPoints) {
 			}
 		}
 		break;
-		
+
 		default: {
 			std::cout << "\nData Type Octrees require the AddData Method\nNo points added\n\n";
 		}
@@ -617,7 +617,7 @@ FillSmallestResolutionLeafAtPointIfEmpty(const Vector& point, ValueType fillValu
 					| ((0 != (path.y & bitmask)) << 1)
 					| (0 != (path.z & bitmask));
 				bitmask >>= 1;
-				
+
 				//just in case
 				if(nodePointer->children != NULL){
 					for(int index = 0; index < 8; index ++){
@@ -625,7 +625,7 @@ FillSmallestResolutionLeafAtPointIfEmpty(const Vector& point, ValueType fillValu
 					}
 					delete[] nodePointer->children;
 				}
-				
+
 				nodePointer->children = new OctreeNode*[8];
 				for(int index = 0; index < 8; index++){
 					nodePointer->children[index] = new OctreeNode(EmptyValue);
@@ -639,7 +639,7 @@ FillSmallestResolutionLeafAtPointIfEmpty(const Vector& point, ValueType fillValu
 
 // Memory reduction
 template <class ValueType>
-void 
+void
 Octree<ValueType>::
 FillIfEmpty(const Vector& point, ValueType fillValue){
 	if(ContainsPoint(point)){
@@ -651,7 +651,7 @@ FillIfEmpty(const Vector& point, ValueType fillValue){
 }
 
 template <class ValueType>
-void 
+void
 Octree<ValueType>::
 FillIfEmpty(const Vector points[], unsigned int numPoints, ValueType fillValue){
 	for(unsigned int index = 0; index < numPoints; index++){
@@ -661,7 +661,7 @@ FillIfEmpty(const Vector points[], unsigned int numPoints, ValueType fillValue){
 
 
 /* Collapse
-This runs through the tree and collapses voxels which are uniform.  
+This runs through the tree and collapses voxels which are uniform.
 */
 template <class ValueType>
 void
@@ -672,7 +672,7 @@ Collapse(void) {
 
 // Save, Load, and Print
 /* Save function:
-Writes directly to a binary file.  
+Writes directly to a binary file.
 */
 template <class ValueType>
 bool
@@ -687,36 +687,36 @@ SaveToFile(const char* filename) const {
 		std::cout << "Unable to open: " << filename << std::endl;
 		return false;
 	}
-	
+
 	//LowerBounds
 	std::fwrite(&LowerBounds.x, sizeof(LowerBounds.x), 1, saveFile);
 	std::fwrite(&LowerBounds.y, sizeof(LowerBounds.y), 1, saveFile);
 	std::fwrite(&LowerBounds.z, sizeof(LowerBounds.z), 1, saveFile);
-	
+
 	//UpperBounds
 	std::fwrite(&UpperBounds.x, sizeof(UpperBounds.x), 1, saveFile);
 	std::fwrite(&UpperBounds.y, sizeof(UpperBounds.y), 1, saveFile);
 	std::fwrite(&UpperBounds.z, sizeof(UpperBounds.z), 1, saveFile);
-	
+
 	//Size
 	std::fwrite(&Size.x, sizeof(Size.x), 1, saveFile);
 	std::fwrite(&Size.y, sizeof(Size.y), 1, saveFile);
 	std::fwrite(&Size.z, sizeof(Size.z), 1, saveFile);
-	
+
 	//True Resolution
 	std::fwrite(&TrueResolution.x, sizeof(TrueResolution.x), 1, saveFile);
 	std::fwrite(&TrueResolution.y, sizeof(TrueResolution.y), 1, saveFile);
 	std::fwrite(&TrueResolution.z, sizeof(TrueResolution.z), 1, saveFile);
-	
+
 	//non-vector quantities
 	std::fwrite(&MaxDepth, sizeof(MaxDepth), 1, saveFile);
 	std::fwrite(&OffMapValue, sizeof(OffMapValue), 1, saveFile);
 	std::fwrite(&EmptyValue, sizeof(EmptyValue), 1, saveFile);
 	std::fwrite(&OctreeNodeType, sizeof(OctreeNodeType), 1, saveFile);
-	
+
 	//the tree itself
 	OctreeRoot->SaveToFile(saveFile);
-	
+
 	if(ferror(saveFile)) {
 		fclose(saveFile);
 		return false;
@@ -739,27 +739,27 @@ LoadFromFile(const char* filename) {
 		std::cout << "LoadFromFile - Unable to open: " << filename << std::endl;
 		return false;
 	}
-	
+
 	//LowerBounds
 	if(std::fread(&LowerBounds.x, sizeof(LowerBounds.x), 1, loadFile) != 1){return false;}
 	if(std::fread(&LowerBounds.y, sizeof(LowerBounds.y), 1, loadFile) != 1){return false;}
 	if(std::fread(&LowerBounds.z, sizeof(LowerBounds.z), 1, loadFile) != 1){return false;}
-	
+
 	//UpperBounds
 	if(std::fread(&UpperBounds.x, sizeof(UpperBounds.x), 1, loadFile) != 1){return false;}
 	if(std::fread(&UpperBounds.y, sizeof(UpperBounds.y), 1, loadFile) != 1){return false;}
 	if(std::fread(&UpperBounds.z, sizeof(UpperBounds.z), 1, loadFile) != 1){return false;}
-	
+
 	//Size
 	if(std::fread(&Size.x, sizeof(Size.x), 1, loadFile) != 1){return false;}
 	if(std::fread(&Size.y, sizeof(Size.y), 1, loadFile) != 1){return false;}
 	if(std::fread(&Size.z, sizeof(Size.z), 1, loadFile) != 1){return false;}
-	
+
 	//True Resolution
 	if(std::fread(&TrueResolution.x, sizeof(TrueResolution.x), 1, loadFile) != 1){return false;}
 	if(std::fread(&TrueResolution.y, sizeof(TrueResolution.y), 1, loadFile) != 1){return false;}
 	if(std::fread(&TrueResolution.z, sizeof(TrueResolution.z), 1, loadFile) != 1){return false;}
-	
+
 	//MaxDepth
 	if(std::fread(&MaxDepth, sizeof(MaxDepth), 1, loadFile) != 1){return false;}
 	//OffMapValue
@@ -768,22 +768,22 @@ LoadFromFile(const char* filename) {
 	if(std::fread(&EmptyValue, sizeof(ValueType), 1, loadFile) != 1){return false;}
 	//OctreeType
 	if(std::fread(&OctreeNodeType, sizeof(OctreeType::EnumOctreeType), 1, loadFile) != 1){return false;}
-	
+
 	//OctreeRoot
 	delete OctreeRoot;
 	OctreeRoot = new OctreeNode;
-	
-	//Old: 
+
+	//Old:
 	//bool returnValue = OctreeRoot->LoadFromFile(loadFile, );
 	//New:
 	int numBranchNodes = 0;
 	int numLeafNodes = 0;
-	
+
 	bool returnValue = OctreeRoot->LoadFromFile(loadFile, numBranchNodes, numLeafNodes);
 	std::cout << "Num Branch Nodes: " << numBranchNodes << "\tNum Leaf Nodes: " << numLeafNodes << "\n";
 	std::cout << "Total Node Size: " << ((numBranchNodes + numLeafNodes) * sizeof(OctreeNode) +
 					     numBranchNodes * 8 * sizeof(OctreeNode*) )/ 1048576 << " MB \n";
-	
+
 	if(std::ferror(loadFile)) {
 		std::fclose(loadFile);
 		return false;
@@ -807,10 +807,10 @@ Print(void) const {
 	std::cout << "TrueResolution:\t";
 	TrueResolution.Print();
 	std::cout << "OctreeType:\t" << OctreeNodeType << std::endl;
-	
+
 	//big octrees have LOTS to print
 	//OctreeRoot->Print(0);
-	
+
 	std::cout << std::endl;
 }
 
@@ -824,7 +824,7 @@ Path
 Octree<ValueType>::
 FindPathToPoint(const Vector& desiredPoint) const {
 	//'1' represents going to the upper half along that axis
-	
+
 	Path path;
 	//fast return if possible
 	if(ContainsPoint(desiredPoint)){
@@ -832,7 +832,7 @@ FindPathToPoint(const Vector& desiredPoint) const {
 		path.y = static_cast<unsigned int>((desiredPoint.y - LowerBounds.y) / TrueResolution.y);
 		path.z = static_cast<unsigned int>((desiredPoint.z - LowerBounds.z) / TrueResolution.z);
 	}
-	
+
 	//X
 	if(desiredPoint.x <= LowerBounds.x) {
 		path.x = 0;
@@ -921,7 +921,7 @@ CalculateBoundsFromPath(Vector& nodeLowerBounds, Vector& nodeUpperBounds, const 
 		(static_cast<double>((path.x >>(MaxDepth - depth)) + 1)) * multiplier.x,
 		(static_cast<double>((path.y >>(MaxDepth - depth)) + 1)) * multiplier.y,
 		(static_cast<double>((path.z >>(MaxDepth - depth)) + 1)) * multiplier.z);
-		
+
 	//add the LowerBounds of the Octree to get the true bounds of the node
 	nodeUpperBounds += LowerBounds;
 	nodeLowerBounds += LowerBounds;
@@ -1076,7 +1076,7 @@ RayTraceToThisOctree(Vector& transitionPoint, const Vector& startPoint, const Ve
 	(directionVector.x == 0) ? (Xratio = -1.0) : (Xratio = deltaToCorner.x / directionVector.x);
 	(directionVector.y == 0) ? (Yratio = -1.0) : (Yratio = deltaToCorner.y / directionVector.y);
 	(directionVector.z == 0) ? (Zratio = -1.0) : (Zratio = deltaToCorner.z / directionVector.z);
-	
+
 	entranceSide = Octree_PickMaxRatio(Xratio, Yratio, Zratio);
 	/* Ratios have served their purpose, so X ratio is used as to return the maximum value
 	If that value is negative, the startPoint is past relevantCorner (projected onto directionVector).
@@ -1085,7 +1085,7 @@ RayTraceToThisOctree(Vector& transitionPoint, const Vector& startPoint, const Ve
 		//we missed completely
 		return -1.0;
 	}
-	
+
 	// we still need to check the transitionPoint and make sure it is within
 	// bounds.
 	switch(entranceSide) {
@@ -1132,7 +1132,7 @@ RayTraceToThisOctree(Vector& transitionPoint, const Vector& startPoint, const Ve
 			}
 			break;
 	}
-	
+
 	//we hit the octree
 	return deltaToEntryPoint.Norm();
 }
@@ -1191,16 +1191,16 @@ GetExitSide(Vector& deltaToCorner, const Vector& transitionPoint, const Vector& 
 			const int depth) const {
 	double Xratio, Yratio, Zratio;
 	Vector relevantCorner;
-	
+
 	// direction is used to pick which corner separates the three edges we might exit.
 	SetRelevantInternalCorner(relevantCorner, directionVector, path, depth);
 	deltaToCorner = relevantCorner - transitionPoint;
-	
+
 	//eliminate any directions in which the direction vector is 0
 	(directionVector.x == 0.0) ? (Xratio = -1.0) : (Xratio = deltaToCorner.x / directionVector.x);
 	(directionVector.y == 0.0) ? (Yratio = -1.0) : (Yratio = deltaToCorner.y / directionVector.y);
 	(directionVector.z == 0.0) ? (Zratio = -1.0) : (Zratio = deltaToCorner.z / directionVector.z);
-	
+
 	//and return the side we exit: the min ratio of deltaToCorner/directionVector
 	return Octree_PickMinPositiveRatio(Xratio, Yratio, Zratio);
 }
@@ -1215,9 +1215,9 @@ SetRelevantInternalCorner(Vector& relevantCorner, const Vector& directionVector,
 	*/
 	Vector nodeUpperBounds;
 	Vector nodeLowerBounds;
-	
+
 	CalculateBoundsFromPath(nodeLowerBounds, nodeUpperBounds, path, depth);
-	
+
 	switch(((directionVector.x >= 0) << 2)
 			| ((directionVector.y >= 0) << 1)
 			| (directionVector.z >= 0)) {
@@ -1258,16 +1258,16 @@ Swap(Octree<ValueType>& octreeToSwap) {
 	std::swap(UpperBounds, octreeToSwap.UpperBounds);
 	std::swap(Size, octreeToSwap.Size);
 	std::swap(TrueResolution, octreeToSwap.TrueResolution);
-	
+
 	std::swap(MaxDepth, octreeToSwap.MaxDepth);
 	std::swap(OffMapValue, octreeToSwap.OffMapValue);
-	
+
 	std::swap(OctreeNodeType, octreeToSwap.OctreeNodeType);
-	
+
 	OctreeNode* tempPointer = OctreeRoot;
 	OctreeRoot = octreeToSwap.OctreeRoot;
 	octreeToSwap.OctreeRoot = tempPointer;
-	
+
 	std::swap(currentItterationPath, octreeToSwap.currentItterationPath);
 	std::swap(treeComplete, octreeToSwap.treeComplete);
 }
@@ -1314,7 +1314,7 @@ ExpandOctreeToIncludePoint(const Vector& PointToInclude) {
 		childNumber = ((PointToInclude.x < UpperBounds.x) << 2)
 					  | ((PointToInclude.y < UpperBounds.y) << 1)
 					  | (PointToInclude.z < UpperBounds.z);
-					  
+
 		//expand the tree
 		OctreeNode* currentRoot = OctreeRoot;
 		OctreeRoot = new OctreeNode(EmptyValue);
@@ -1324,7 +1324,7 @@ ExpandOctreeToIncludePoint(const Vector& PointToInclude) {
 		}
 		delete OctreeRoot->children[childNumber];
 		OctreeRoot->children[childNumber] = currentRoot;
-		
+
 		//deal with the Octree Properties
 		switch(childNumber) {
 			case 0: {
@@ -1379,4 +1379,3 @@ ExpandOctreeToIncludePoint(const Vector& PointToInclude) {
 
 
 template class Octree<bool>;
-

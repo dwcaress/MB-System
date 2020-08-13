@@ -21,7 +21,7 @@ TEST_OPTS=-DWITH_TESTS -DWITH_R7KR_TEST
 AM_CPPFLAGS = -g -O0 -I${top_srcdir}/src/mbtrn/r7kr -I${top_srcdir}/src/mbtrn/utils -I${top_srcdir}/src/mbtrn/mframe/src $(MBTNAV_INC)  -DHAVE_CONFIG_H  ${TEST_OPTS} -DWITH_MST_MSTATS -DMST_STATS_EN -DWITH_PDEBUG -DWITH_MMDEBUG -D_GNU_SOURCE -DMFRAME_BUILD="${BUILD_DATE}" ${FRAMES7K_VER} ${TRNC_VER} ${STREAM7K_VER} ${TBIN_VER} ${EMU7K_VER} ${MBTNAV_OPT}
 
 
-bin_PROGRAMS =  mbtrnpp
+bin_PROGRAMS =  mbtrnpp mbgrd2octree
 
 mbtrnpp_SOURCES = mbtrnpp.c
 mbtrnpp_LDADD =  $(top_builddir)/src/mbio/libmbio.la \
@@ -30,6 +30,9 @@ mbtrnpp_LDADD =  $(top_builddir)/src/mbio/libmbio.la \
   ${libgmt_LIBS} ${libnetcdf_LIBS} ${libproj_LIBS} \
   $(top_builddir)/src/mbtrn/libr7kr.la $(TRNWLIBS) $(LIBM)
 
+mbgrd2octree_SOURCES = mbgrd2octree.cc
+mbgrd2octree_LDADD =  \
+  $(TRNWLIBS) $(LIBM)
 
 CLEANFILES =
 DISTCLEANFILES =

@@ -434,6 +434,9 @@ int mbeditviz_import_file(char *path, int format) {
 			file->raw_info_loaded = true;
 			mbev_num_files++;
 		}
+    else {
+      fprintf(stderr, "Unable to load file %s because of missing *.inf file\n", file->path);
+    }
 
 		/* load processing parameters */
 		if (mbev_status == MB_SUCCESS) {

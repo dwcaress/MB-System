@@ -20,6 +20,7 @@ include "beta" in the tag name are preliminary and generally not announced.
 Distributions that do not include "beta" in the tag name correspond to the major,
 announced releases. The source distributions associated with all releases, major or beta, are equally accessible as tarballs through the Github interface.
 
+- Version 5.7.6beta44    August 13, 2020
 - Version 5.7.6beta43    July 23, 2020
 - Version 5.7.6beta42    July 21, 2020
 - Version 5.7.6beta41    July 12, 2020
@@ -352,6 +353,53 @@ announced releases. The source distributions associated with all releases, major
 --
 ### MB-System Version 5.7 Release Notes:
 --
+
+#### 5.7.6beta44 (August 13, 2020)
+
+Format 89 (MBF_RESON7K3): Fixed handling and processing of backscatter data, which
+had a variety of problems. Now, the pseudo-sidescan reported by MB-Systen as sidescan
+can be recalculated by mbprocess from the desired backscatter source.
+The default is to use the best source of backscatter available, with the order
+of "bestness" being:
+
+1. Calibrated snippets
+1. Snippets
+1. Calibrated sidescan
+1. Sidescan
+
+You can force mbpreprocess to use a desired backscatter source with the
+--multibeam-sidescan-source option, where:
+
+*  --multibeam-sidescan-source=C ==> Calibrated snippet records
+*  --multibeam-sidescan-source=S ==> Snippet records
+*  --multibeam-sidescan-source=W ==> Calibrated sidescan records
+*  --multibeam-sidescan-source=B ==> Sidescan records
+
+
+Format 89 (MBF_RESON7K3): Added support for additional informational data records.
+
+Mbsegylist: Fixed formatting time strings.
+
+Mbnavlist: Fixed formatting time strings.
+
+Mbextractsegy: Fixed embedding the seafloor depth value correctly into output
+segy trace headers when the data are being extracted from Edgetech Jstar format
+data (MBIO format 132).
+
+Mbnavadjust: Changed the inversion control parameters such that the second phase
+of the navigation adjustment solution, a coarse progressive relaxation intended
+to achieve large scale shifts between surveys, now has a maximum iteration count
+of 10000 (previously 1000) and a convergence criterea of 0.00001 (previously 0.0001).
+
+Mbgrd2octree: New program to translate a GMT bathymetry grid to an octree
+representation in the form used by the Stanford/MBARI Terrain Relative Navigation
+software. The octree files have a suffix convention of *.ob for octree binary.
+The input bathymetry grids are assumed to be in UTM coordinates with square cells.
+
+Mbtrnpp: Made the --platform-target-sensor option functional.
+
+Mbeditviz: Now outputs error message to shell when a file can't be imported
+because it lacks an *.inf file.
 
 #### 5.7.6beta43 (July 23, 2020)
 

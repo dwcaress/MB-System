@@ -5584,10 +5584,12 @@ int main(int argc, char **argv) {
                   }
                   status = get_anglecorr(verbose, sscorrtableuse.nangle, sscorrtableuse.angle,
                                          sscorrtableuse.amplitude, angle, &correction, &error);
-                  if (process.mbp_sscorr_type == MBP_SSCORR_SUBTRACTION)
+                  if (process.mbp_sscorr_type == MBP_SSCORR_SUBTRACTION) {
                     ss[i] = ss[i] - correction + reference_amp;
-                  else
+                  }
+                  else {
                     ss[i] = ss[i] / correction * reference_amp;
+                  }
                 }
               }
             }

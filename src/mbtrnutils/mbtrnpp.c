@@ -1,7 +1,7 @@
 /*--------------------------------------------------------------------
  *    The MB-system:  mbtrnpp.c  2/19/2018
  *
- *    Copyright (c) 2018-2020 bysocket_definition
+ *    Copyright (c) 2018-2020 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -14,8 +14,8 @@
 /*
  * mbtrnpp - originally mbtrnpreprocess
  *
- * Author:  D. W. Caress
- * Date:  February 18, 2018
+ * Authors:  D. W. Caress and Kent Headley
+ * Date:  Begun February 18, 2018
  */
 
 #if defined(__CYGWIN__)
@@ -331,6 +331,7 @@ s=NULL;\
 #define MBTRNPP_CONF_DEL "="
 
 #define CFG_INPUT_DFL             "datalist.mb-1"
+#define CFG_FORMAT_DFL            -1
 #define CFG_OUTPUT_FILE_DFL       "stdout"
 #define CFG_LOG_DIRECTORY_DFL     "."
 #define CFG_SOCKET_DEFINITION_DFL "socket:TRN_RESON_HOST:7000:0"
@@ -347,7 +348,7 @@ s=NULL;\
 
 #define OPT_VERBOSE_DFL                 0
 #define OPT_INPUT_DFL                   CFG_INPUT_DFL
-#define OPT_FORMAT_DFL                  88
+#define OPT_FORMAT_DFL                  CFG_FORMAT_DFL
 #define OPT_PLATFORM_FILE_DFL           NULL
 #define OPT_PLATFORM_TARGET_SENSOR_DFL  0
 #define OPT_LOG_DIRECTORY_DFL           "."
@@ -1729,6 +1730,10 @@ static int s_mbtrnpp_kvparse_fn(char *key, char *val, void *cfg)
                 if( (opts->platform_file=CHK_STRDUP(val)) != NULL){
                     retval=0;
                 }
+            }else if(strcmp(key,"platform-target-sensor")==0 ){
+                if(sscanf(val,"%d",&opts->platform_target_sensor)==1){
+                    retval=0;
+                }
             }else if(strcmp(key,"log-directory")==0 ){
                 MEM_CHKFREE(opts->log_directory);
                 if( (opts->log_directory=CHK_STRDUP(val)) != NULL){
@@ -2566,7 +2571,13 @@ int main(int argc, char **argv) {
 
 #ifdef WITH_MBTNAV
 
-    trn_cfg = trncfg_new(NULL, -1, mbtrn_cfg->trn_utm_zone, mbtrn_cfg->trn_mtype, mbtrn_cfg->trn_ftype,mbtrn_cfg->trn_fgrade,mbtrn_cfg->trn_freinit,mbtrn_cfg->trn_mweight,mbtrn_cfg->trn_map_file, mbtrn_cfg->trn_cfg_file, mbtrn_cfg->trn_particles_file, mbtrn_cfg->trn_mission_id,trn_oflags,mbtrn_cfg->trn_max_ncov,mbtrn_cfg->trn_max_nerr, mbtrn_cfg->trn_max_ecov, mbtrn_cfg->trn_max_eerr);
+    trn_cfg = trncfg_new(NULL, -1, mbtrn_cfg->trn_utm_zone, mbtrn_cfg->trn_mtype,
+                        mbtrn_cfg->trn_ftype,mbtrn_cfg->trn_fgrade,
+                        mbtrn_cfg->trn_freinit,mbtrn_cfg->trn_mweight,
+                        mbtrn_cfg->trn_map_file, mbtrn_cfg->trn_cfg_file,
+                        mbtrn_cfg->trn_particles_file, mbtrn_cfg->trn_mission_id,
+                        trn_oflags,mbtrn_cfg->trn_max_ncov,mbtrn_cfg->trn_max_nerr,
+                        mbtrn_cfg->trn_max_ecov, mbtrn_cfg->trn_max_eerr);
 
     if (mbtrn_cfg->trn_enable &&  NULL!=trn_cfg ) {
         mbtrnpp_init_trn(&trn_instance,mbtrn_cfg->verbose, trn_cfg);
@@ -3268,6 +3279,7 @@ int main(int argc, char **argv) {
                 MST_METRIC_LAP(app_stats->stats->metrics[MBTPP_CH_MB_PROC_MB1_XT], mtime_dtime());
 
 #ifdef WITH_MBTNAV
+
                 if (mbtrn_cfg->trn_nombgain || (transmit_gain >= transmit_gain_threshold) ){
                     // reinit TRN filter when transmit gains indicate valid input
                     // and clear the flag
@@ -4382,10 +4394,10 @@ int mbtrnpp_trn_get_bias_estimates(wtnav_t *self, wposet_t *pt, trn_update_t *ps
         wtnav_estimate_pose(self, mle, 1);
         wtnav_estimate_pose(self, mse, 2);
 
-        //        fprintf(stderr,"%s:%d MLE,MSE\n",__FUNCTION__,__LINE__);
-        //        wposet_show(mle,true,5);
-        //        fprintf(stderr,"\n");
-        //        wposet_show(mse,true,5);
+//fprintf(stderr,"%s:%d MLE,MSE\n",__FUNCTION__,__LINE__);
+//wposet_show(mle,true,5);
+//fprintf(stderr,"\n");
+//wposet_show(mse,true,5);
 
         if (wtnav_last_meas_successful(self)) {
             wposet_pose_to_cdata(&pstate->pt_dat, pt);
@@ -4393,6 +4405,17 @@ int mbtrnpp_trn_get_bias_estimates(wtnav_t *self, wposet_t *pt, trn_update_t *ps
             wposet_pose_to_cdata(&pstate->mse_dat, mse);
             pstate->success=1;
             retval = 0;
+
+pt_cdata_t *cdata = (pt_cdata_t *)(pstate->mse_dat);
+int time_i[7];
+mb_get_date(0, (double)cdata->time, time_i);
+fprintf(stderr, "TRN: %4.4d/%2.2d/%2.2d-%2.2d:%2.2d:%2.2d.%6.6d %.6f  %11.3f %11.3f %8.3f  %11.3f %11.3f %8.3f  %7.3f %7.3f %6.3f   %9.6f %9.6f %9.6f\n",
+time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6],
+cdata->time, cdata->x, cdata->y, cdata->z,
+cdata->vn_x, cdata->vn_y, cdata->vn_z,
+cdata->x - cdata->vn_x, cdata->y - cdata->vn_y, cdata->z - cdata->vn_z,
+cdata->covariance[0], cdata->covariance[1], cdata->covariance[2]);
+
         }
         else {
             PMPRINT(MOD_MBTRNPP, MM_DEBUG, (stderr, "Last Meas Invalid\n"));
@@ -5353,4 +5376,3 @@ int mbtrnpp_kemkmall_input_close(int verbose, void *mbio_ptr, int *error) {
   return (status);
 }
 /*--------------------------------------------------------------------*/
-

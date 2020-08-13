@@ -547,6 +547,7 @@ int main(int argc, char **argv) {
             preprocess_pars.multibeam_sidescan_source = MB_PR_SSSOURCE_WIDEBEAMBACKSCATTER;
           else if (optarg[0] == 'W' || optarg[0] == 'w')
             preprocess_pars.multibeam_sidescan_source = MB_PR_SSSOURCE_CALIBRATEDWIDEBEAMBACKSCATTER;
+fprintf(stderr, "multibeam_sidescan_source:%d arg:%c\n", preprocess_pars.multibeam_sidescan_source, optarg[0]);
         }
         else if (strcmp("sounding-amplitude-filter", options[option_index].name) == 0) {
           const int n = sscanf(optarg, "%lf", &preprocess_pars.sounding_amplitude_threshold);

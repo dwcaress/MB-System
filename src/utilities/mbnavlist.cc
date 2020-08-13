@@ -757,7 +757,7 @@ int main(int argc, char **argv) {
 							case 'T': /* yyyy/mm/dd/hh/mm/ss time string */
 								seconds = time_i[5] + 1e-6 * time_i[6];
 								if (ascii) {
-									printf("%.4d/%.2d/%.2d/%.2d/%.2d/%9.6f", time_i[0], time_i[1], time_i[2], time_i[3],
+									printf("%.4d/%.2d/%.2d/%.2d/%.2d/%09.6f", time_i[0], time_i[1], time_i[2], time_i[3],
 									       time_i[4], seconds);
 								} else {
 									double b = time_i[0];
@@ -777,7 +777,7 @@ int main(int argc, char **argv) {
 							case 't': /* yyyy mm dd hh mm ss time string */
 								seconds = time_i[5] + 1e-6 * time_i[6];
 								if (ascii) {
-									printf("%.4d %.2d %.2d %.2d %.2d %9.6f", time_i[0], time_i[1], time_i[2], time_i[3],
+									printf("%.4d %.2d %.2d %.2d %.2d %09.6f", time_i[0], time_i[1], time_i[2], time_i[3],
 									       time_i[4], seconds);
 								} else {
 									double b = time_i[0];
