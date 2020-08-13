@@ -1255,6 +1255,13 @@ int main(int argc, char** argv)
     double imageQuality = 0.0;
     fprintf(stderr,"About to read ImageListFile: %s\n", ImageListFile);
 
+    /* set up to display images if specified */
+    String windowName;
+    if (show_images) {
+        windowName = "Stereo Pair & Disparity";
+        namedWindow(windowName, 0);
+    }
+
     while ((status = mb_imagelist_read(verbose, imagelist_ptr, &imagestatus,
                                 imageLeftFile, imageRightFile, dpath,
                                 &left_time_d, &time_diff, &imageQuality, &error)) == MB_SUCCESS) {
@@ -1602,11 +1609,8 @@ fprintf(stderr, "%s:%d:%s: no algorithm\n", __FILE__, __LINE__, __func__);
                 equalizeHist(disp8, disp8);
                 applyColorMap(disp8, dispColor, COLORMAP_JET);
                 hconcat(imgConcat, dispColor, imgConcat);
-                String windowName = "Stereo Pair & Disparity";
-                namedWindow(windowName, 0);
                 imshow(windowName, imgConcat);
                 waitKey(1);
-                destroyWindow(windowName);
             }
 
             /* check to see if a new output file is required */
@@ -1840,6 +1844,11 @@ fprintf(stderr, "%s:%d:%s: no algorithm\n", __FILE__, __LINE__, __func__);
         else {
             fprintf(oilfp, "%s %s %.6f %.6f  %.2f\n", imageLeftFile, imageRightFile, left_time_d, time_diff, 0.0);
         }
+    }
+
+    /* delete image display window if specified */
+    if (show_images) {
+        destroyWindow(windowName);
     }
 
     /* close imagelist files */

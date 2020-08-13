@@ -1,7 +1,6 @@
 #!/usr/bin/env perl
 #--------------------------------------------------------------------
 #    The MB-system: mbm_route2mission.perl   7/18/2004
-#    $Id $
 #
 #    Copyright (c) 2004-2020 by
 #    D. W. Caress (caress@mbari.org)
@@ -35,9 +34,6 @@
 #   David W. Caress
 #      Monterey Bay Aquarium Research Institute
 #      Moss Landing, CA
-#
-# $Id $
-#
 #
 $program_name = "mbm_route2mission";
 
@@ -195,8 +191,7 @@ $outputoff =		($opt_Z || $opt_z);
 
 # print out help message if required
 if ($help) {
-    print "\r\n$program_name:\r\n";
-    print "\nVersion: \$Id $\r\n";
+    print "\r\n$program_name\r\n";
     print "\r\nPerl shellscript to translate survey route file derived from \r\n";
     print "MBgrdviz into an MBARI AUV mission script. Developed for use\r\n";
     print "in survey planning for the MBARI Mapping AUV.\r\n";
@@ -1165,8 +1160,7 @@ if (!$outputoff)
 	printf MFILE "# by the MB-System program $program_name run by\r\n";
 	printf MFILE "# user <$user> on cpu <$host> at <$date>\r\n";
 	printf MFILE "# \r\n";
-	printf MFILE "# Program mbm_route2mission version:\r\n";
-	printf MFILE "#     \$Id $ \r\n";
+	printf MFILE "# Program mbm_route2mission:\r\n";
 	printf MFILE "# \r\n";
 	printf MFILE "# Mission Summary:\r\n";
 	printf MFILE "#     Route File:               $routefile\r\n";

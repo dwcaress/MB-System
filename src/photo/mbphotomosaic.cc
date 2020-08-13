@@ -1594,6 +1594,16 @@ fprintf(stderr,"Done reading TopographyGridFile: %s\n", TopographyGridFile);
         exit(error);
         }
 
+    /* prepare to display images */
+    String windowNameImage = "Source Image & RGB Histograms";
+    if (show_images) {
+        namedWindow(windowNameImage, 0);
+    }
+    String windowNamePriority = "Priority Map";
+    if (show_priority_map) {
+        namedWindow(windowNamePriority, 0);
+    }
+
     /* loop over single images or stereo pairs in the imagelist file */
     npairs = 0;
     nimages = 0;
@@ -1846,13 +1856,12 @@ fprintf(stderr,"Done reading TopographyGridFile: %s\n", TopographyGridFile);
 
                 /* get tide for this image */
                 tide = 0.0;
-                if (ntide > 1)
-                    {
+                if (ntide > 1) {
                     intstat = mb_linear_interp(verbose,
                             ttime-1, ttide-1,
                             ntide, time_d, &tide, &iitime,
                             &error);
-                    }
+                }
                 sensordepth = sensordepth - tide;
 
                 /* calculate target sensor position */
@@ -1922,7 +1931,7 @@ fprintf(stderr,"Done reading TopographyGridFile: %s\n", TopographyGridFile);
                     }
                     Mat imgConcat;
                     hconcat(imageUndistort, histImage, imgConcat);
-                    imshow("Source Image & RGB Histograms", imgConcat );
+                    imshow(windowNameImage, imgConcat );
                     waitKey(1);
                 }
 
@@ -1935,10 +1944,8 @@ fprintf(stderr,"Done reading TopographyGridFile: %s\n", TopographyGridFile);
                 /* make and display a priority map */
                 if (show_priority_map) {
                     imagePriority = imageUndistort.clone();
-                    for(i=0; i<imageUndistort.cols; i++)
-                        {
-                        for(j=0; j<imageUndistort.rows; j++)
-                            {
+                    for(i=0; i<imageUndistort.cols; i++) {
+                        for(j=0; j<imageUndistort.rows; j++) {
                             /* calculate the pixel priority based on the distance
                                 from the image center */
                             xx = i - center_x;
@@ -1951,9 +1958,9 @@ fprintf(stderr,"Done reading TopographyGridFile: %s\n", TopographyGridFile);
                             imagePriority.at<Vec3b>(j,i)[2] = r;
 //if (xx == yy)fprintf(stderr,"PRIORITY xx:%7.1f yy:%7.1f rrxy:%10.5f rrxymax:%10.5f pixel_priority:%10.8f %3u\n",
 //            xx,yy,rrxy,rrxymax,pixel_priority,r);
-                            }
                         }
-                    imshow("Priority Map", imagePriority);
+                    }
+                    imshow(windowNamePriority, imagePriority);
                     waitKey(500);
                 }
 
@@ -1962,14 +1969,12 @@ fprintf(stderr,"Done reading TopographyGridFile: %s\n", TopographyGridFile);
                  * average intensity to a value of 70.0
                  */
                 avgPixelIntensity = mean(imageUndistortYCrCb);
-                if (use_simple_brightness_correction == MB_YES)
-                    {
+                if (use_simple_brightness_correction == MB_YES) {
                     avgImageIntensityCorrection = 70.0 / avgPixelIntensity.val[0];
-                    }
-                else
-                    {
+                }
+                else {
                      avgImageIntensityCorrection = 1.0;
-                    }
+                }
                 mb_get_date(verbose, time_d, time_i);
                 fprintf(stderr,"%4d Camera:%d Image:%s %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d LLZ: %.10f %.10f %8.3f Tide:%7.3f H:%6.2f R:%6.2f P:%6.2f Avg Intensity:%.3f\n",
                         (nimages - currentimages + iimage), image_camera, imageFile,
@@ -1995,18 +2000,16 @@ fprintf(stderr,"Done reading TopographyGridFile: %s\n", TopographyGridFile);
                 vy = sin(DTR * theta) * sin(DTR * phi);
 
                 /* apply rotation of each camera relative to the rig */
-                if (image_camera == 1)
-                    {
+                if (image_camera == 1) {
                     vxx = vx * (R.at<double>(0,0)) + vy * (R.at<double>(0,1)) + vz * (R.at<double>(0,2));
                     vyy = vx * (R.at<double>(1,0)) + vy * (R.at<double>(1,1)) + vz * (R.at<double>(1,2));
                     vzz = vx * (R.at<double>(2,0)) + vy * (R.at<double>(2,1)) + vz * (R.at<double>(2,2));
-                    }
-                else
-                    {
+                }
+                else {
                     vxx = vx;
                     vyy = vy;
                     vzz = vz;
-                    }
+                }
 
                 /* rotate unit vector by camera rig heading */
                 cx = vxx * cos(DTR * camera_heading) + vyy * sin(DTR * camera_heading);
@@ -2014,10 +2017,8 @@ fprintf(stderr,"Done reading TopographyGridFile: %s\n", TopographyGridFile);
                 cz = vzz;
 
                 /* loop over the pixels */
-                for(i=0; i<imageUndistort.cols; i++)
-                    {
-                    for(j=0; j<imageUndistort.rows; j++)
-                        {
+                for(i=0; i<imageUndistort.cols; i++) {
+                    for(j=0; j<imageUndistort.rows; j++) {
                         /* calculate the pixel priority based on the distance
                             from the image center */
                         xx = i - center_x;
@@ -2082,8 +2083,7 @@ fprintf(stderr,"Done reading TopographyGridFile: %s\n", TopographyGridFile);
                         if (theta <= 80.0) {
 
                             /* apply rotation of each camera relative to the rig */
-                            if (image_camera == 1)
-                                {
+                            if (image_camera == 1) {
                                 vxx = vx * (R.at<double>(0,0)) + vy * (R.at<double>(0,1)) + vz * (R.at<double>(0,2));
                                 vyy = vx * (R.at<double>(1,0)) + vy * (R.at<double>(1,1)) + vz * (R.at<double>(1,2));
                                 vzz = vx * (R.at<double>(2,0)) + vy * (R.at<double>(2,1)) + vz * (R.at<double>(2,2));
@@ -2093,13 +2093,12 @@ fprintf(stderr,"Done reading TopographyGridFile: %s\n", TopographyGridFile);
 //    fprintf(stderr,"R:      %f %f %f\n",R.at<double>(2,0), R.at<double>(2,1), R.at<double>(2,2));
 //    fprintf(stderr,"Rotation: camera 1 unit vector: %f %f %f    camera 0 unit vector: %f %f %f\n",vx,vy,vz,vxx,vyy,vzz);
 //    }
-                                }
-                            else
-                                {
+                            }
+                            else {
                                 vxx = vx;
                                 vyy = vy;
                                 vzz = vz;
-                                }
+                            }
 //if (debugprint == MB_YES) {
 //fprintf(stderr,"camera unit vector:     %f %f %f\n",vx,vy,vz);
 //}
@@ -2133,25 +2132,23 @@ fprintf(stderr,"Done reading TopographyGridFile: %s\n", TopographyGridFile);
 //fprintf(stderr," llz: %.10f %.10f %.3f  range:%.3f  standoff:%.3f\n", lon, lat, topo, rr, standoff);
 //}
 
-                            }
+                        }
 
                         /* use pixel if not too vertical or range too large */
                         if (theta <= 80.0 && rr < range_max) {
 
                             /* modulate the source pixel priority by the standoff if desired */
-                            if (priority_mode == MBPM_PRIORITY_CENTRALITY_PLUS_STANDOFF)
-                                {
+                            if (priority_mode == MBPM_PRIORITY_CENTRALITY_PLUS_STANDOFF)  {
                                 dstandoff = (standoff - standoff_target) / standoff_range;
                                 standoff_priority = (float) (exp(-dstandoff * dstandoff));
                                 pixel_priority *= standoff_priority;
-                                }
+                            }
 //if (debugprint == MB_YES) {
 //fprintf(stderr," standoff:%f pixel_priority:%.3f\n", standoff, pixel_priority);
 //}
 
                             /* get the intensity correction using interpolation of the correction table */
-                            if (correction_specified == MB_YES)
-                                {
+                            if (correction_specified == MB_YES) {
                                 ibin_x1 = MIN(MAX(((int)((i + 0.5 * bin_dx) / bin_dx)), 0), ncorr_x - 2);
                                 ibin_x2 = ibin_x1 + 1;
                                 factor_x = ((double)i - 0.5 * bin_dx) / bin_dx - (double)ibin_x1;
@@ -2217,13 +2214,12 @@ fprintf(stderr,"Done reading TopographyGridFile: %s\n", TopographyGridFile);
 
 //fprintf(stderr,"pixelIntensityCorrection:%f table_intensity_ref:%f table_intensity:%f\n",
 //pixelIntensityCorrection,table_intensity_ref,table_intensity);
-                                }
+                            }
 
                             /* else do no correction */
-                            else
-                                {
+                            else {
                                 pixelIntensityCorrection = 1.0;
-                                }
+                            }
 
                             /* apply intensity correction combining all specified corrections */
                             intensityCorrection = referenceIntensityCorrection[image_camera]
@@ -2283,9 +2279,8 @@ fprintf(stderr,"Done reading TopographyGridFile: %s\n", TopographyGridFile);
 //fprintf(stderr,"       standoff:%f pixel_priority:%.3f\n", standoff, pixel_priority);
 //}
 
-                            for (ipix=iii1;ipix<=iii2;ipix++)
-                                for (jpix=jjj1;jpix<=jjj2;jpix++)
-                                    {
+                            for (ipix=iii1;ipix<=iii2;ipix++) {
+                                for (jpix=jjj1;jpix<=jjj2;jpix++) {
                                     kpix = xdim * jpix + ipix;
                                     if (ipix == iii && jpix == jjj)
                                         pixel_priority_use = pixel_priority;
@@ -2295,8 +2290,7 @@ fprintf(stderr,"Done reading TopographyGridFile: %s\n", TopographyGridFile);
                                         pixel_priority_use = 0.98 * pixel_priority;
                                     if (ipix >= 0 && ipix < xdim
                                         && jpix >= 0 && jpix < ydim
-                                        && pixel_priority_use > priority[kpix])
-                                        {
+                                        && pixel_priority_use > priority[kpix]) {
 //if (debugprint == MB_YES) {
 //fprintf(stderr,"              Pixel used: i:%d j:%d  ipix:%d jpix:%d  BGR:%d %d %d Priority:%f %f\n",
 //i,j,ipix,jpix,OutputImage.at<Vec3b>(jpix,ipix)[0],OutputImage.at<Vec3b>(jpix,ipix)[1],OutputImage.at<Vec3b>(jpix,ipix)[2],
@@ -2306,19 +2300,22 @@ fprintf(stderr,"Done reading TopographyGridFile: %s\n", TopographyGridFile);
                                         OutputImage.at<Vec3b>(jpix,ipix)[1] = g;
                                         OutputImage.at<Vec3b>(jpix,ipix)[2] = r;
                                         priority[kpix] = pixel_priority_use;
-                                        }
                                     }
+                                }
                             }
                         }
                     }
                 }
-
-            /* destroy the image display */
-            if (show_images)
-                destroyWindow(imageFile);
-            if (show_priority_map)
-                destroyWindow("Priority Map");
+            }
         }
+    }
+
+    /* end display images */
+    if (show_images) {
+        destroyWindow(windowNameImage);
+    }
+    if (show_images) {
+        destroyWindow(windowNamePriority);
     }
 
     /* close imagelist file */

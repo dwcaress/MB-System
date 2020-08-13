@@ -52,7 +52,7 @@
 #define MB_IMAGERY_TYPE_POINT 8
 
 /* MBIO data type ("kind") convention */
-#define MB_DATA_KINDS 69
+#define MB_DATA_KINDS 74
 #define MB_DATA_NONE 0
 #define MB_DATA_DATA 1                   /* general survey data */
 #define MB_DATA_COMMENT 2                /* general comment */
@@ -123,6 +123,11 @@
 #define MB_DATA_BIST2 67                 /* Kongsberg BIST short reply */
 #define MB_DATA_MBSYSTEM 68              /* Written by MB-System - extension to Kongsberg kmall */
 #define MB_DATA_BSCALIBRATIONFILE 69     /* Kongsberg backscatter calibration file */
+#define MB_DATA_SALINITY 70              /* Reson 7k */
+#define MB_DATA_TEMPERATURE 71           /* Reson 7k */
+#define MB_DATA_PIPE 72                  /* Reson 7k */
+#define MB_DATA_CONTACT 73               /* Reson 7k */
+#define MB_DATA_GATES 74                 /* Reson 7k */
 
 /* MBIO function status convention */
 #define MB_SUCCESS 1

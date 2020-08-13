@@ -39,14 +39,14 @@ TNavFilter(TerrainMap* terrainMap, char* vehicleSpecs, char* directory, const do
 	this->useModifiedWeighting = TRN_WT_NONE;  //default to not using.
 	// for flat terrain use setModifiedWeighting to change
 	//this->octreeMap = NULL;
-	
+
 	//initialize currVar and initWindowVar
 	for(i = 0; i < N_COVAR; i++) {
 		initWindowVar[i] = windowVar[i];
 	}
 	currVar[0] = windowVar[0];
 	currVar[1] = windowVar[2];
-	
+
 	//Initialize random number generator
    unsigned int seed = seed_randn(NULL);
    logs(TL_OMASK(TL_TNAV_PARTICLE_FILTER, TL_LOG),
@@ -66,26 +66,26 @@ TNavFilter::
 	}
 	terrainMap = NULL;
 	*/
-	
+
 	if(lastNavPose != NULL) {
 		delete lastNavPose;
 	}
 	lastNavPose = NULL;
-	
+
 	if(vehicle != NULL) {
 		delete vehicle;
 	}
 	vehicle = NULL;
-	
+
 	if(compassBias != NULL) {
 		delete compassBias;
 	}
 	compassBias = NULL;
-	
+
 #ifdef USE_MATLAB
 	engClose(matlabEng);
 #endif
-	
+
 }
 
 bool
@@ -95,7 +95,7 @@ withinRefMap() {
 	double north, east;
 	north = this->lastNavPose->x;
 	east = this->lastNavPose->y;
-	
+
 	//TODO: may want to augment this with depth when using Octrees
 	//reply: not for Octrees based on DEM data.  For Octrees of 3D objects, 'within' the map no longer means much
 	//Octrees now do the exact same test as DEMs: X and Y dimensions, but this may not mean much as Octrees are often expanded/squared out
@@ -117,7 +117,7 @@ withinValidMapRegion(const double& north, const double& east) {
 			&& terrainMap->withinValidMapRegion(north - sqrt(fabs(initWindowVar[0])) - dx, east - sqrt(fabs(initWindowVar[2])) - dx)) {
 		return true;
 	}
-	
+
 	return false;
 }
 
@@ -127,7 +127,7 @@ withinValidMapRegionPoint(const double& north, const double& east) {
 	if(terrainMap->withinValidMapRegion(north, east)) {
 		return true;//TODO why does this exist
 	}
-	
+
 	return false;
 }
 
@@ -142,7 +142,7 @@ bool
 TNavFilter::
 findMeasSensorIndex(int measType, int& sensorIndex) {
 	sensorIndex = 0;
-	
+
 	//associate measurement with correct sensor type
 	while((measType != vehicle->sensors[sensorIndex].type) &&
 			(sensorIndex < vehicle->numSensors)) {
@@ -150,7 +150,7 @@ findMeasSensorIndex(int measType, int& sensorIndex) {
 	   //logs(TL_OMASK(TL_TNAV_FILTER, TL_LOG),"findMeasSensorIndex:: checking measType =%d, against "
 	   //	"sensorType = %d.\n",measType,
 	   //	vehicle->sensors[sensorIndex].type);
-	    
+
 	    sensorIndex++;
 
 
@@ -167,7 +167,7 @@ findMeasSensorIndex(int measType, int& sensorIndex) {
 		 vehicle->numSensors);
 		return false;
 	}
-	
+
 	return true;
 }
 
@@ -185,7 +185,7 @@ applyRotation(const double* attitude,  const Matrix& beamsVF) {
 	double stheta_sphi = stheta * sphi;
 	double stheta_cphi = stheta * cphi;
 	int i;
-	
+
 	double R11 = cpsi * ctheta;
 	double R12 = spsi * ctheta;
 	double R13 = -stheta;
@@ -195,15 +195,15 @@ applyRotation(const double* attitude,  const Matrix& beamsVF) {
 	double R31 = spsi * sphi + cpsi * stheta_cphi;
 	double R32 = -cpsi * sphi + spsi * stheta_cphi;
 	double R33 = ctheta * cphi;
-	
+
 	for(i = 1; i <= beamsVF.Ncols(); i++) {
 		beamsMF(1, i) = R11 * beamsVF(1, i) + R21 * beamsVF(2, i) + R31 * beamsVF(3, i);
-		
+
 		beamsMF(2, i) = R12 * beamsVF(1, i) + R22 * beamsVF(2, i) + R32 * beamsVF(3, i);
-		
+
 		beamsMF(3, i) = R13 * beamsVF(1, i) + R23 * beamsVF(2, i) + R33 * beamsVF(3, i);
 	}
-	
+
 	return beamsMF;
 }
 
@@ -228,7 +228,7 @@ increaseInitSearchWin(double* windowVarIncrement) {
 	for(i = 0; i < N_COVAR; i++) {
 		this->initWindowVar[i] += windowVarIncrement[i];
 	}
-	
+
 	return;
 }
 
@@ -252,10 +252,10 @@ initVariables() {
 	for(i = 0; i < NIS_WINDOW_LENGTH; i++) {
 		windowedNISlog[i] = 0.0;
 	}
-	
+
 	//initialize distribution type to Uniform
 	initDistribType = 0;
-	
+
 #ifdef USE_MATLAB
 	//start Matlab engine
 	if(!(matlabEng = engOpen("\0"))) {
@@ -263,19 +263,19 @@ initVariables() {
 		exit(0);   // Only when running within a matlab test or sim
 	}
 #endif
-	
+
 	//determine dvl sensor attitude
 	int sensorIndex = 0;
-	
+
 	//associate measurement with correct sensor type
 	while((1 != vehicle->sensors[sensorIndex].type) &&
 			(sensorIndex < vehicle->numSensors)) {
 		sensorIndex++;
 	}
-	
+
 	dvlAttitude = vehicle->T_sv[sensorIndex].rotation;
 	dvlRotMatrix = getRotMatrix(dvlAttitude);
-	
+
 }
 
 //bool TNavFilter::projectMeasVF(Matrix &beamsVF, measT& currMeas)
@@ -287,26 +287,26 @@ projectMeasVF(Matrix& beamsVF, const measT& currMeas, int* beamIndices) {
 	Matrix beamsSF(3, currMeas.numMeas);
 	int measSensor = 0;
 	int i;
-	
+
 	//check that a valid sensor index can be found for current measurement
 	if(!findMeasSensorIndex(currMeas.dataType, measSensor)) {
 		logs(TL_OMASK(TL_TNAV_FILTER, TL_LOG),"TNavFilter:: Invalid measurement type %d. Unable to add"
 		       " measurement\n", currMeas.dataType);
 		return false;
 	}
-	
+
 	//project beams into sensor frame
 	if(projectMeasSF(beamsSF, currMeas, beamIndices)) {
 		//project beams into vehicle frame
 		//--------------------------------------------------------------------------
 		Rsv = getRotMatrix(vehicle->T_sv[measSensor].rotation);
 		trans_sv << vehicle->T_sv[measSensor].translation;
-		
+
 		beamsVF.ReSize(3, beamsSF.Ncols());
 		for(i = 1; i <= beamsSF.Ncols(); i++) {
 			beamsVF.SubMatrix(1, 3, i, i) = Rsv.t() * beamsSF.SubMatrix(1, 3, i, i) + trans_sv;
 		}
-		
+
 		return true;
 	} else {
 		return false;
@@ -324,54 +324,54 @@ projectMeasSF(Matrix& beamsSF, const measT& currMeas, int* beamIndices) {
    int i, n_unknown;
    double theta, psi;
    Matrix dr_bs(3, 1);
-	
+
    //check that a valid sensor index can be found for current measurement
    if(!findMeasSensorIndex(currMeas.dataType, measSensor)) {
       logs(TL_OMASK(TL_TNAV_FILTER, TL_LOG),"TNavFilter:: Invalid measurement type. Unable to add"
 	   " measurement\n");
       return false;
    }
-	
+
    //translational vector between beam and sensor frames
    dr_bs << vehicle->sensors[measSensor].T_bs[0].translation;
-	
+
    //project beams into sensor frame
    //---------------------------------------------------------------------------
    for(n_unknown = NO_DATATYPE, i = 1; i <= currMeas.numMeas; i++)
    {
       //only include beams that are reasonable/good
-      if(!currMeas.measStatus[i - 1]) { 
+      if(!currMeas.measStatus[i - 1]) {
          continue;
       }
       logs(TL_OMASK(TL_TNAV_FILTER, TL_LOG),
       	            "TNavFilter:: ping # %ld currMeas.measStatus[%d] = %d",
 	             			currMeas.ping_number, i-1, currMeas.measStatus[i-1]);
-		
+
       switch(currMeas.dataType) { //1: DVL, 2: Multibeam, 3: Single Beam, 5: Imagenex delta t multibeam
 	 case TRN_SENSOR_DVL:
 	    theta = vehicle->sensors[measSensor].T_bs[i - 1].rotation[1];
 	    psi = vehicle->sensors[measSensor].T_bs[i - 1].rotation[2];
-				
+
 	    //project beams into sensor frame
 	    //Note that this is projecting a beam that is default in +z direction
 	    beamsSF(1, numGoodBeams + 1) = sin(theta) * cos(psi) * currMeas.ranges[i - 1];
 	    beamsSF(2, numGoodBeams + 1) = sin(theta) * sin(psi) * currMeas.ranges[i - 1];
 	    beamsSF(3, numGoodBeams + 1) = cos(theta) * currMeas.ranges[i - 1];
-				
+
 //         //overwrite measT data to ensure first numGoodBeams entries are valid
 //         if(i != numGoodBeams+1)
 //            currMeas.ranges[numGoodBeams] = currMeas.ranges[i-1];
 	    break;
-				
+
 	 case TRN_SENSOR_MB:
 	    //ignore beams with missing/NaN data values
 	    /*if(isnan(currMeas.crossTrack[i-1]))
 	      continue;*/
-				
+
 	    beamsSF(1, numGoodBeams + 1) = currMeas.alongTrack[i - 1];
 	    beamsSF(2, numGoodBeams + 1) = currMeas.crossTrack[i - 1];
 	    beamsSF(3, numGoodBeams + 1) = currMeas.altitudes[i - 1];
-				
+
 //         //overwrite measT data to ensure first numGoodBeams entries are valid
 //         if(i != numGoodBeams+1)
 //         {
@@ -380,13 +380,13 @@ projectMeasSF(Matrix& beamsSF, const measT& currMeas, int* beamIndices) {
 //            currMeas.altitudes[numGoodBeams] = currMeas.altitudes[i-1];
 //         }
 	    break;
-				
+
 	 case TRN_SENSOR_PENCIL:
 	    beamsSF(1, numGoodBeams + 1) = cos(currMeas.theta) * currMeas.ranges[0];
 	    beamsSF(2, numGoodBeams + 1) = 0;
 	    beamsSF(3, numGoodBeams + 1) = sin(currMeas.theta) * currMeas.ranges[0];
 	    break;
-			
+
 	 case TRN_SENSOR_DELTAT:
 	    //TODO: copied from DVL case, need to verify that this is correct - maybe
 	    //needs phi as well or don't need psi
@@ -400,17 +400,17 @@ projectMeasSF(Matrix& beamsSF, const measT& currMeas, int* beamIndices) {
 	    beamsSF(2, numGoodBeams + 1) = sin(theta) * sin(psi) * currMeas.ranges[i - 1];
 	    beamsSF(3, numGoodBeams + 1) = cos(theta) * currMeas.ranges[i - 1];
 	    break;
-				
+
 	 default:
 	    logs(TL_OMASK(TL_TNAV_FILTER, TL_LOG),"TNavFilter::Invalid measurement type specified. Exiting...\n");
 	    n_unknown = currMeas.dataType;
 	    continue;    // Do not add to beamIndices, go to next beam
 
       }
-		
+
       //translation component of transformation into sensor frame
       beamsSF.SubMatrix(1, 3, numGoodBeams + 1, numGoodBeams + 1) += dr_bs;
-		
+
 //      //overwrite measT data to ensure first numGoodBeams entries are all valid
 //      if(i != numGoodBeams+1)
 //      {
@@ -419,12 +419,12 @@ projectMeasSF(Matrix& beamsSF, const measT& currMeas, int* beamIndices) {
 //      }
 
       beamIndices[numGoodBeams] = i - 1;
-		
+
       numGoodBeams++;
    }
 
    // Report invalid datatypes in beam vector
-   // 
+   //
    if (n_unknown != NO_DATATYPE)
       logs(TL_OMASK(TL_TNAV_FILTER, TL_LOG),"TNavFilter::One or more invalid datatypes specified (e.g., %d)\n",
 	   currMeas.dataType);
@@ -435,16 +435,16 @@ projectMeasSF(Matrix& beamsSF, const measT& currMeas, int* beamIndices) {
 	   " are no good beams from the sonar.\n", currMeas.time, currMeas.ping_number);
       return false;
    }
-	
+
    //If some beams were rejected, display message to the screen
    if(numGoodBeams != currMeas.numMeas)
       logs(TL_OMASK(TL_TNAV_FILTER, TL_LOG),"TNavFilter::Excluded %i beam(s) from correlation due to poor"
 	   " sonar data.\n", currMeas.numMeas - numGoodBeams);
    logs(TL_OMASK(TL_TNAV_FILTER, TL_LOG),"TNavFilter::%i good beams.\n", numGoodBeams);
-			   
+
    //Take only subset of beamsSF that has valid beams.
    beamsSF = beamsSF.Columns(1, numGoodBeams);
-	
+
    return true;
 }
 
@@ -460,7 +460,7 @@ getRotMatrix(const double* attitude) {
 	double spsi = sin(attitude[2]);
 	double stheta_sphi = stheta * sphi;
 	double stheta_cphi = stheta * cphi;
-	
+
 	R(1, 1) = cpsi * ctheta;
 	R(1, 2) = spsi * ctheta;
 	R(1, 3) = -stheta;
@@ -470,7 +470,7 @@ getRotMatrix(const double* attitude) {
 	R(3, 1) = spsi * sphi + cpsi * stheta_cphi;
 	R(3, 2) = -cpsi * sphi + spsi * stheta_cphi;
 	R(3, 3) = ctheta * cphi;
-	
+
 	return R;
 }
 
@@ -480,15 +480,15 @@ TNavFilter::
 applyDVLrotation(const Matrix& beamsSF) {
 	Matrix beamsVF = beamsSF;
 	int i;
-	
+
 	for(i = 1; i <= beamsSF.Ncols(); i++) {
 		beamsVF(1, i) = dvlRotMatrix(1, 1) * beamsSF(1, i) + dvlRotMatrix(2, 1) * beamsSF(2, i) + dvlRotMatrix(3, 1) * beamsSF(3, i);
-		
+
 		beamsVF(2, i) = dvlRotMatrix(1, 2) * beamsSF(1, i) + dvlRotMatrix(2, 2) * beamsSF(2, i) + dvlRotMatrix(3, 2) * beamsSF(3, i);
-		
+
 		beamsVF(3, i) = dvlRotMatrix(1, 3) * beamsSF(1, i) + dvlRotMatrix(2, 3) * beamsSF(2, i) + dvlRotMatrix(3, 3) * beamsSF(3, i);
 	}
-	
+
 	return beamsVF;
 }
 
@@ -507,39 +507,39 @@ modifyBeamDir(Matrix& beamsMF, const double* vehPose) {
 	double minorAxis[3];
 	double majorAxis[3];
 	double u[3];
-	
+
 	for(i = 1; i <= beamsMF.Ncols(); i++) {
 		//find initial mapIntersect in N,E,D frame
 		mapIntersect[0] = beamsMF(1, i) + vehPose[0];
 		mapIntersect[1] = beamsMF(2, i) + vehPose[1];
 		mapIntersect[2] = 0.0;
-		
+
 		//Assess terrain normal
 		interpolateDepthAndGradient(mapIntersect[0], mapIntersect[1],// TODO this isn't in here anymore, it moved to terrainMapDEM
 									mapIntersect[2], zVar, H);
 		if(isnan(H(1, 1)) || isnan(H(1, 2))) {
 			continue;
 		}
-		
+
 		n[0] = H(1, 1);
 		n[1] = H(1, 2);
 		n[2] = -1.0;
-		
+
 		//normalize terrain normal
 		norm = sqrt(n[0] * n[0] + n[1] * n[1] + n[2] * n[2]);
 		n[0] = n[0] / norm;
 		n[1] = n[1] / norm;
 		n[2] = n[2] / norm;
-		
+
 		//Define original norm
 		normU = sqrt(beamsMF(1, i) * beamsMF(1, i) + beamsMF(2, i) * beamsMF(2, i)
 					 + beamsMF(3, i) * beamsMF(3, i));
-					 
+
 		//Determine if normal vector is within the beam cone (if yes,
 		//this is the closest-direction.
 		testVal = -n[0] * beamsMF(1, i) - n[1] * beamsMF(2, i) - n[2] * beamsMF(3, i) -
 				  normU * cos(vehicle->sensors[0].beamWidth / 2.0);
-				  
+
 		if(testVal >= 0) {
 	*/		//TODO: what is p? why isn't it used anywhere?
 			/*   p = -((mapIntersect[0]-vehPose[0])*n[0] +
@@ -552,15 +552,15 @@ modifyBeamDir(Matrix& beamsMF, const double* vehPose) {
 			beamsMF(3, i) = -n[2] * normU;
 			continue;
 		}
-		
+
 		//If closest point is not within the beam cone, we will use
 		//the closest point within the intersection ellipse
-		
+
 		//minorAxis = nxu,  majorAxis = minorUxn
 		u[0] = beamsMF(1, i) / normU;
 		u[1] = beamsMF(2, i) / normU;
 		u[2] = beamsMF(3, i) / normU;
-		
+
 		//compute minor axis
 		computeArrayCrossProd(n, u, minorAxis);
 		norm = sqrt(minorAxis[0] * minorAxis[0] + minorAxis[1] * minorAxis[1] +
@@ -568,7 +568,7 @@ modifyBeamDir(Matrix& beamsMF, const double* vehPose) {
 		minorAxis[0] = minorAxis[0] / norm;
 		minorAxis[1] = minorAxis[1] / norm;
 		minorAxis[2] = minorAxis[2] / norm;
-		
+
 		//compute major axis
 		computeArrayCrossProd(minorAxis, n, majorAxis);
 		norm = sqrt(majorAxis[0] * majorAxis[0] + majorAxis[1] * majorAxis[1] +
@@ -576,7 +576,7 @@ modifyBeamDir(Matrix& beamsMF, const double* vehPose) {
 		majorAxis[0] = majorAxis[0] / norm;
 		majorAxis[1] = majorAxis[1] / norm;
 		majorAxis[2] = majorAxis[2] / norm;
-		
+
 		//determine angle between u and major axis
 		phi = acos(-(u[0] * majorAxis[0] + u[1] * majorAxis[1] + u[2] * majorAxis[2]));
 		if(phi > PI / 2) {
@@ -585,16 +585,16 @@ modifyBeamDir(Matrix& beamsMF, const double* vehPose) {
 			majorAxis[2] = -majorAxis[2];
 			phi = PI - phi;
 		}
-		
+
 		//determine length of major axis
 		alpha = PI - phi - vehicle->sensors[0].beamWidth / 2.0;
 		d = sin(vehicle->sensors[0].beamWidth / 2.0) * normU / sin(alpha);
-		
+
 		//redefine beamsMF
 		beamsMF(1, i) += d * majorAxis[0];
 		beamsMF(2, i) += d * majorAxis[1];
 		beamsMF(3, i) += d * majorAxis[2];
-		
+
 		//reweight beamsMF to have same length as before
 		norm = sqrt(beamsMF(1, i) * beamsMF(1, i) + beamsMF(2, i) * beamsMF(2, i)
 					+ beamsMF(3, i) * beamsMF(3, i));
@@ -618,10 +618,10 @@ modifyBeamDirExtensive(Matrix& beamsMF, const double* vehPose) {
 	double mapIntersect[3];
 	double testPt[3];
 	double minDist = 0;
-	
+
 	mapT mapForBeamDirExtensive;
 	terrainMap->GetMapT(mapForBeamDirExtensive);
-	
+
 	for(i = 1; i <= beamsMF.Ncols(); i++) {
 		//Define original norm
 		normU = sqrt(beamsMF(1, i) * beamsMF(1, i) + beamsMF(2, i) * beamsMF(2, i)
@@ -630,7 +630,7 @@ modifyBeamDirExtensive(Matrix& beamsMF, const double* vehPose) {
 		u[0] = beamsMF(1, i) / normU;
 		u[1] = beamsMF(2, i) / normU;
 		u[2] = beamsMF(3, i) / normU;
-		
+
 		//find initial mapIntersect in N,E,D frame
 		computeMapRayIntersection(vehPose, u, r, var);
 		mapIntersect[0] = u[0] * r + vehPose[0];
@@ -641,7 +641,7 @@ modifyBeamDirExtensive(Matrix& beamsMF, const double* vehPose) {
 		indexY = closestPtUniformArray(mapIntersect[1], mapForBeamDirExtensive.ypts[0],
 									   mapForBeamDirExtensive.ypts[mapForBeamDirExtensive.numY - 1], mapForBeamDirExtensive.numY);
 		//logs(TL_OMASK(TL_TNAV_FILTER, TL_LOG),"indexX: %i, indexY: %i, range: %f\n", indexX, indexY, normU);
-		
+
 		//Find closest point in the terrain within beam cone
 		nearestPt[0] = mapForBeamDirExtensive.xpts[0] - vehPose[0];
 		nearestPt[1] = mapForBeamDirExtensive.ypts[0] - vehPose[1];
@@ -657,7 +657,7 @@ modifyBeamDirExtensive(Matrix& beamsMF, const double* vehPose) {
 				testPt[2] = mapForBeamDirExtensive.depths(j + 1, k + 1) - vehPose[2];
 				norm = sqrt(testPt[0] * testPt[0] + testPt[1] * testPt[1]
 							+ testPt[2] * testPt[2]);
-							
+
 				//check if test point is within the cone
 				testVal = testPt[0] * u[0] + testPt[1] * u[1] + testPt[2] * u[2] -
 						  norm * cos(vehicle->sensors[0].beamWidth / 2.0);
@@ -671,16 +671,16 @@ modifyBeamDirExtensive(Matrix& beamsMF, const double* vehPose) {
 				}
 			}
 		}
-		
+
 		u_new[0] = nearestPt[0] / minDist;
 		u_new[1] = nearestPt[1] / minDist;
 		u_new[2] = nearestPt[2] / minDist;
-		
+
 		beamsMF(1, i) = u_new[0] * normU;
 		beamsMF(2, i) = u_new[1] * normU;
 		beamsMF(3, i) = u_new[2] * normU;
 	}
-	
+
 }
 */
 
@@ -690,13 +690,13 @@ calculateNIS(SymmetricMatrix& measCov, ColumnVector& meanDiff, double& nisVal,
 			 const measT& currMeas, int* beamIndices) {
 	SymmetricMatrix covMatrix(measCov.Ncols());
 	covMatrix = measCov;
-	
+
 //	int goodIndexCounter = 1;
 
 	//Add the variance due to the range sensor
 	for(int j = 0; j < measCov.Ncols(); j++) {
 		covMatrix(j + 1, j + 1) += currMeas.covariance[beamIndices[j]];
-		
+
 //		if (currMeas.measStatus[j])  //If the measurement is good, add it's covariance in
 //		{
 //			if (goodIndexCounter <= covMatrix.Ncols())
@@ -712,7 +712,7 @@ calculateNIS(SymmetricMatrix& measCov, ColumnVector& meanDiff, double& nisVal,
 //			}
 //		}
 	}
-	
+
 	//Compute Err' * inv(Sigma) * Err
 	Matrix nisMatrix;
 	nisMatrix =  meanDiff.t() * covMatrix.i() * meanDiff;
@@ -740,7 +740,7 @@ TNavFilter::
 setDistribToSave(unsigned int distrib)
 {
   logs(TL_OMASK(TL_TNAV_FILTER, TL_LOG),"setDistribToSave(%d)", distrib);
-  // If type not one of the recognized options, use the default 
+  // If type not one of the recognized options, use the default
   if (PARTICLESTOFILE == distrib || HISTOGRAMTOFILE == distrib)
     _distribType = distrib;
   else
@@ -749,4 +749,3 @@ setDistribToSave(unsigned int distrib)
   logs(TL_OMASK(TL_TNAV_FILTER, TL_LOG),"setDistribToSave set to %d", _distribType);
   return _distribType;
 }
-

@@ -346,7 +346,9 @@ int TerrainMapOctree::loadSubMap(const double xcen, const double ycen,
       return MAPBOUNDS_OK;
    }
 
-   logs(TL_LOG|TL_SERR,"TerrainMapOctree:   (vehN, vehE )  =  (%.2f, %.2f).",
+//   logs(TL_LOG|TL_SERR,"TerrainMapOctree:   (vehN, vehE )  =  (%.2f, %.2f).",
+//      vehN, vehE);
+   logs(TL_LOG, "TerrainMapOctree:   (vehN, vehE )  =  (%.2f, %.2f).",
       vehN, vehE);
 
    double minDist = 1e8;

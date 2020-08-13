@@ -206,17 +206,6 @@ int mbsys_reson7k3_deall(int verbose, void *mbio_ptr, void **store_ptr, int *err
   /* Sonar Pipe Environment (record 2004) */
   s7k3_SonarPipeEnvironment *SonarPipeEnvironment = &store->SonarPipeEnvironment;
   SonarPipeEnvironment->n = 0;
-  SonarPipeEnvironment->nalloc = 0;
-  if (SonarPipeEnvironment->x != NULL)
-    status = mb_freed(verbose, __FILE__, __LINE__, (void **)&(SonarPipeEnvironment->x), error);
-  if (SonarPipeEnvironment->y != NULL)
-    status = mb_freed(verbose, __FILE__, __LINE__, (void **)&(SonarPipeEnvironment->y), error);
-  if (SonarPipeEnvironment->z != NULL)
-    status = mb_freed(verbose, __FILE__, __LINE__, (void **)&(SonarPipeEnvironment->z), error);
-  if (SonarPipeEnvironment->angle != NULL)
-    status = mb_freed(verbose, __FILE__, __LINE__, (void **)&(SonarPipeEnvironment->angle), error);
-  if (SonarPipeEnvironment->sample_number != NULL)
-    status = mb_freed(verbose, __FILE__, __LINE__, (void **)&(SonarPipeEnvironment->sample_number), error);
 
   /* Reson 7k Configuration (record 7001) */
   s7k3_Configuration *Configuration = &store->Configuration;
@@ -441,6 +430,9 @@ int mbsys_reson7k3_print_header(int verbose, s7k3_header *header, int *error) {
   fprintf(stderr, "%s     Size:                    %d\n", first, header->Size);
   fprintf(stderr, "%s     OptionalDataOffset:      %d\n", first, header->OptionalDataOffset);
   fprintf(stderr, "%s     OptionalDataIdentifier:  %d\n", first, header->OptionalDataIdentifier);
+  fprintf(stderr, "%s     s7kTime:                 %4u-%3.3u-%2.2u:%2.2u:%9.6f\n",
+            first, header->s7kTime.Year, header->s7kTime.Day, header->s7kTime.Hours,
+            header->s7kTime.Minutes, header->s7kTime.Seconds);
   fprintf(stderr, "%s     s7kTime.Year:            %d\n", first, header->s7kTime.Year);
   fprintf(stderr, "%s     s7kTime.Day:             %d\n", first, header->s7kTime.Day);
   fprintf(stderr, "%s     s7kTime.Seconds:         %f\n", first, header->s7kTime.Seconds);
@@ -1242,41 +1234,222 @@ int mbsys_reson7k3_print_PanTilt(int verbose, s7k3_PanTilt *PanTilt, int *error)
 /*--------------------------------------------------------------------*/
 
 int mbsys_reson7k3_print_SonarInstallationIDs(int verbose, s7k3_SonarInstallationIDs *SonarInstallationIDs, int *error) {
-  (void) verbose;  // Unused arg
-  (void) SonarInstallationIDs;  // Unused arg
-  (void) error;  // Unused arg
-  // Notdone
-  return (MB_SUCCESS);
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+    fprintf(stderr, "dbg2  Input arguments:\n");
+    fprintf(stderr, "dbg2       verbose:               %d\n", verbose);
+    fprintf(stderr, "dbg2       SonarInstallationIDs:  %p\n", (void *)SonarInstallationIDs);
+  }
+
+  /* print Reson 7k data record header information */
+  mbsys_reson7k3_print_header(verbose, &SonarInstallationIDs->header, error);
+
+  /* print SonarInstallationIDs (record 1018) */
+  const char *first;
+  if (verbose >= 2)
+    first = debug_str;
+  else {
+    first = nodebug_str;
+    fprintf(stderr, "\n%sMBIO function <%s> called\n", first, __func__);
+  }
+  fprintf(stderr, "%sStructure Contents:\n", first);
+  fprintf(stderr, "%s     system_id:              %d\n", first, SonarInstallationIDs->system_id);
+  fprintf(stderr, "%s     tx_id:                  %d\n", first, SonarInstallationIDs->tx_id);
+  fprintf(stderr, "%s     rx_id:                  %d\n", first, SonarInstallationIDs->rx_id);
+  fprintf(stderr, "%s     std_id:                 %d\n", first, SonarInstallationIDs->std_id);
+  fprintf(stderr, "%s     conf_pars:              %d\n", first, SonarInstallationIDs->conf_pars);
+  fprintf(stderr, "%s     tx_length:              %f\n", first, SonarInstallationIDs->tx_length);
+  fprintf(stderr, "%s     tx_width:               %f\n", first, SonarInstallationIDs->tx_width);
+  fprintf(stderr, "%s     tx_height:              %f\n", first, SonarInstallationIDs->tx_height);
+  fprintf(stderr, "%s     tx_radius:              %f\n", first, SonarInstallationIDs->tx_radius);
+  fprintf(stderr, "%s     offset_srp2tx_x         %f\n", first, SonarInstallationIDs->offset_srp2tx_x);
+  fprintf(stderr, "%s     offset_srp2tx_y         %f\n", first, SonarInstallationIDs->offset_srp2tx_y);
+  fprintf(stderr, "%s     offset_srp2tx_z         %f\n", first, SonarInstallationIDs->offset_srp2tx_z);
+  fprintf(stderr, "%s     offset_tx_roll          %f\n", first, SonarInstallationIDs->offset_tx_roll);
+  fprintf(stderr, "%s     offset_tx_pitch         %f\n", first, SonarInstallationIDs->offset_tx_pitch);
+  fprintf(stderr, "%s     offset_tx_yaw           %f\n", first, SonarInstallationIDs->offset_tx_yaw);
+  fprintf(stderr, "%s     rx_length               %f\n", first, SonarInstallationIDs->rx_length);
+  fprintf(stderr, "%s     rx_width                %f\n", first, SonarInstallationIDs->rx_width);
+  fprintf(stderr, "%s     rx_height               %f\n", first, SonarInstallationIDs->rx_height);
+  fprintf(stderr, "%s     rx_radius               %f\n", first, SonarInstallationIDs->rx_radius);
+  fprintf(stderr, "%s     offset_srp2rx_x         %f\n", first, SonarInstallationIDs->offset_srp2rx_x);
+  fprintf(stderr, "%s     offset_srp2rx_y         %f\n", first, SonarInstallationIDs->offset_srp2rx_y);
+  fprintf(stderr, "%s     offset_srp2rx_z         %f\n", first, SonarInstallationIDs->offset_srp2rx_z);
+  fprintf(stderr, "%s     offset_rx_roll          %f\n", first, SonarInstallationIDs->offset_rx_roll);
+  fprintf(stderr, "%s     offset_rx_pitch         %f\n", first, SonarInstallationIDs->offset_rx_pitch);
+  fprintf(stderr, "%s     offset_rx_yaw           %f\n", first, SonarInstallationIDs->offset_rx_yaw);
+  fprintf(stderr, "%s     frequency               %f\n", first, SonarInstallationIDs->frequency);
+  fprintf(stderr, "%s     offset_vrp2srp_x        %f\n", first, SonarInstallationIDs->offset_vrp2srp_x);
+  fprintf(stderr, "%s     offset_vrp2srp_y        %f\n", first, SonarInstallationIDs->offset_vrp2srp_y);
+  fprintf(stderr, "%s     offset_vrp2srp_z        %f\n", first, SonarInstallationIDs->offset_vrp2srp_z);
+  fprintf(stderr, "%s     cable_length            %d\n", first, SonarInstallationIDs->cable_length);
+  for (int i = 0; i < 44; i++) {
+    fprintf(stderr, "%s     reserved[%2d]:          %d\n", first, i, SonarInstallationIDs->reserved[i]);
+  }
+
+  const int status = MB_SUCCESS;
+
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
+    fprintf(stderr, "dbg2  Return values:\n");
+    fprintf(stderr, "dbg2       error:      %d\n", *error);
+    fprintf(stderr, "dbg2  Return status:\n");
+    fprintf(stderr, "dbg2       status:     %d\n", status);
+  }
+
+  return (status);
 }
 
 /*--------------------------------------------------------------------*/
 
 int mbsys_reson7k3_print_Mystery(int verbose, s7k3_Mystery *Mystery, int *error) {
-  (void) verbose;  // Unused arg
-  (void) Mystery;  // Unused arg
-  (void) error;  // Unused arg
-  // Notdone
-  return (MB_SUCCESS);
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+    fprintf(stderr, "dbg2  Input arguments:\n");
+    fprintf(stderr, "dbg2       verbose:               %d\n", verbose);
+    fprintf(stderr, "dbg2       Mystery:               %p\n", (void *)Mystery);
+  }
+
+  /* print Reson 7k data record header information */
+  mbsys_reson7k3_print_header(verbose, &Mystery->header, error);
+
+  /* print Mystery (record 1018) */
+  const char *first;
+  if (verbose >= 2)
+    first = debug_str;
+  else {
+    first = nodebug_str;
+    fprintf(stderr, "\n%sMBIO function <%s> called\n", first, __func__);
+  }
+  fprintf(stderr, "%sStructure Contents:\n", first);
+  fprintf(stderr, "%s     data:                   \n", first);
+  for (int i = 0; i < R7KHDRSIZE_Mystery; i++) {
+    fprintf(stderr, "%u \n", Mystery->data[i]);
+  }
+
+  const int status = MB_SUCCESS;
+
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
+    fprintf(stderr, "dbg2  Return values:\n");
+    fprintf(stderr, "dbg2       error:      %d\n", *error);
+    fprintf(stderr, "dbg2  Return status:\n");
+    fprintf(stderr, "dbg2       status:     %d\n", status);
+  }
+
+  return (status);
 }
 
 /*--------------------------------------------------------------------*/
 
 int mbsys_reson7k3_print_SonarPipeEnvironment(int verbose, s7k3_SonarPipeEnvironment *SonarPipeEnvironment, int *error) {
-  (void) verbose;  // Unused arg
-  (void) SonarPipeEnvironment;  // Unused arg
-  (void) error;  // Unused arg
-  // Notdone
-  return (MB_SUCCESS);
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+    fprintf(stderr, "dbg2  Input arguments:\n");
+    fprintf(stderr, "dbg2       verbose:               %d\n", verbose);
+    fprintf(stderr, "dbg2       SonarPipeEnvironment:  %p\n", (void *)SonarPipeEnvironment);
+  }
+
+  /* print Reson 7k data record header information */
+  mbsys_reson7k3_print_header(verbose, &SonarPipeEnvironment->header, error);
+
+  /* print SonarPipeEnvironment (record 1018) */
+  const char *first;
+  if (verbose >= 2)
+    first = debug_str;
+  else {
+    first = nodebug_str;
+    fprintf(stderr, "\n%sMBIO function <%s> called\n", first, __func__);
+  }
+  fprintf(stderr, "%sStructure Contents:\n", first);
+  fprintf(stderr, "%s     pipe_number:                %u\n", first, SonarPipeEnvironment->pipe_number);
+  fprintf(stderr, "%s     s7kTime:                    %4u-%3.3u-%2.2u:%2.2u:%9.6f\n",
+            first, SonarPipeEnvironment->s7kTime.Year, SonarPipeEnvironment->s7kTime.Day,
+            SonarPipeEnvironment->s7kTime.Hours, SonarPipeEnvironment->s7kTime.Minutes,
+            SonarPipeEnvironment->s7kTime.Seconds);
+  fprintf(stderr, "%s     ping_number:                 %u\n", first, SonarPipeEnvironment->ping_number);
+  fprintf(stderr, "%s     multiping_number:            %u\n", first, SonarPipeEnvironment->multiping_number);
+  fprintf(stderr, "%s     pipe_diameter:               %f\n", first, SonarPipeEnvironment->pipe_diameter);
+  fprintf(stderr, "%s     sound_velocity:              %f\n", first, SonarPipeEnvironment->sound_velocity);
+  fprintf(stderr, "%s     sample_rate:                 %f\n", first, SonarPipeEnvironment->sample_rate);
+  fprintf(stderr, "%s     finished:                    %u\n", first, SonarPipeEnvironment->finished);
+  fprintf(stderr, "%s     points_number:               %u\n", first, SonarPipeEnvironment->points_number);
+  fprintf(stderr, "%s     n:                           %u\n", first, SonarPipeEnvironment->n);
+  for (int i = 0; i < 10; i++) {
+    fprintf(stderr, "%s     reserved[%d]:                %u\n", first, i, SonarPipeEnvironment->reserved[i]);
+  }
+  for (int i = 0; i < 5; i++) {
+    fprintf(stderr, "%s     Points[%d] (x y z angle #):  %.3f %.3f %.3f %.3f %.3f\n",
+                  first, i, SonarPipeEnvironment->x[i], SonarPipeEnvironment->y[i],
+                  SonarPipeEnvironment->z[i], SonarPipeEnvironment->angle[i],
+                  SonarPipeEnvironment->sample_number[i]);
+  }
+
+  const int status = MB_SUCCESS;
+
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
+    fprintf(stderr, "dbg2  Return values:\n");
+    fprintf(stderr, "dbg2       error:      %d\n", *error);
+    fprintf(stderr, "dbg2  Return status:\n");
+    fprintf(stderr, "dbg2       status:     %d\n", status);
+  }
+
+  return (status);
 }
 
 /*--------------------------------------------------------------------*/
 
 int mbsys_reson7k3_print_ContactOutput(int verbose, s7k3_ContactOutput *ContactOutput, int *error) {
-  (void) verbose;  // Unused arg
-  (void) ContactOutput;  // Unused arg
-  (void) error;  // Unused arg
-  // Notdone
-  return (MB_SUCCESS);
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+    fprintf(stderr, "dbg2  Input arguments:\n");
+    fprintf(stderr, "dbg2       verbose:               %d\n", verbose);
+    fprintf(stderr, "dbg2       ContactOutput:         %p\n", (void *)ContactOutput);
+  }
+
+  /* print Reson 7k data record header information */
+  mbsys_reson7k3_print_header(verbose, &ContactOutput->header, error);
+
+  /* print ContactOutput (record 1018) */
+  const char *first;
+  if (verbose >= 2)
+    first = debug_str;
+  else {
+    first = nodebug_str;
+    fprintf(stderr, "\n%sMBIO function <%s> called\n", first, __func__);
+  }
+  fprintf(stderr, "%sStructure Contents:\n", first);
+  fprintf(stderr, "%s     target_id:                  %u\n", first, ContactOutput->target_id);
+  fprintf(stderr, "%s     ping_number:                %u\n", first, ContactOutput->ping_number);
+  fprintf(stderr, "%s     s7kTime:                    %4u-%3.3u-%2.2u:%2.2u:%9.6f\n",
+            first, ContactOutput->s7kTime.Year, ContactOutput->s7kTime.Day,
+            ContactOutput->s7kTime.Hours, ContactOutput->s7kTime.Minutes,
+            ContactOutput->s7kTime.Seconds);
+  fprintf(stderr, "%s     operator_name:               %s\n", first, ContactOutput->operator_name);
+  fprintf(stderr, "%s     contact_state:               %u\n", first, ContactOutput->contact_state);
+  fprintf(stderr, "%s     range:                       %f\n", first, ContactOutput->range);
+  fprintf(stderr, "%s     bearing:                     %f\n", first, ContactOutput->bearing);
+  fprintf(stderr, "%s     info_flags:                  %u\n", first, ContactOutput->info_flags);
+  fprintf(stderr, "%s     latitude:                    %f\n", first, ContactOutput->latitude);
+  fprintf(stderr, "%s     longitude:                   %f\n", first, ContactOutput->longitude);
+  fprintf(stderr, "%s     azimuth:                     %f\n", first, ContactOutput->azimuth);
+  fprintf(stderr, "%s     contact_length:              %f\n", first, ContactOutput->contact_length);
+  fprintf(stderr, "%s     contact_width:               %f\n", first, ContactOutput->contact_width);
+  fprintf(stderr, "%s     classification:              %s\n", first, ContactOutput->classification);
+  fprintf(stderr, "%s     description:                 %s\n", first, ContactOutput->description);
+
+  const int status = MB_SUCCESS;
+
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
+    fprintf(stderr, "dbg2  Return values:\n");
+    fprintf(stderr, "dbg2       error:      %d\n", *error);
+    fprintf(stderr, "dbg2  Return status:\n");
+    fprintf(stderr, "dbg2       status:     %d\n", status);
+  }
+
+  return (status);
 }
 /*--------------------------------------------------------------------*/
 
@@ -1752,11 +1925,100 @@ int mbsys_reson7k3_print_SideScan(int verbose, s7k3_SideScan *SideScan, int *err
 /*--------------------------------------------------------------------*/
 
 int mbsys_reson7k3_print_WaterColumn(int verbose, s7k3_WaterColumn *WaterColumn, int *error) {
-  (void) verbose;  // Unused arg
-  (void) WaterColumn;  // Unused arg
-  (void) error;  // Unused arg
-  // Notdone
-  return (MB_SUCCESS);
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+    fprintf(stderr, "dbg2  Input arguments:\n");
+    fprintf(stderr, "dbg2       verbose:           %d\n", verbose);
+    fprintf(stderr, "dbg2       WaterColumn:       %p\n", (void *)WaterColumn);
+  }
+
+  /* print Reson 7k data record header information */
+  mbsys_reson7k3_print_header(verbose, &WaterColumn->header, error);
+
+  /* print Reson 7k vertical depth data (record 7009) */
+  const char *first;
+  if (verbose >= 2)
+    first = debug_str;
+  else {
+    first = nodebug_str;
+    fprintf(stderr, "\n%sMBIO function <%s> called\n", first, __func__);
+  }
+  fprintf(stderr, "%sStructure Contents:\n", first);
+  fprintf(stderr, "%s     serial_number:              %llu\n", first, WaterColumn->serial_number);
+  fprintf(stderr, "%s     ping_number:                %u\n", first, WaterColumn->ping_number);
+  fprintf(stderr, "%s     multi_ping:                 %u\n", first, WaterColumn->multi_ping);
+  fprintf(stderr, "%s     number_beams:               %u\n", first, WaterColumn->number_beams);
+  fprintf(stderr, "%s     reserved:                   %u\n", first, WaterColumn->reserved);
+  fprintf(stderr, "%s     samples:                    %u\n", first, WaterColumn->samples);
+  fprintf(stderr, "%s     subset_flag:                %u\n", first, WaterColumn->subset_flag);
+  fprintf(stderr, "%s     column_flag:                %u\n", first, WaterColumn->column_flag);
+  fprintf(stderr, "%s     reserved2:                  %u\n", first, WaterColumn->reserved2);
+  fprintf(stderr, "%s     sample_type:                %u\n", first, WaterColumn->sample_type);
+  int sample_type_amp = WaterColumn->sample_type & 15;
+  int sample_type_phase = (WaterColumn->sample_type >> 4) & 15;
+  int sample_type_iandq = (WaterColumn->sample_type >> 8) & 15;
+  char *charptr;
+  unsigned short *ushortptr;
+  unsigned int *uintptr;
+  short *shortptramp;
+  short *shortptrphase;
+  int *intptramp;
+  int *intptrphase;
+  for (int i = 0; i < WaterColumn->number_beams; i++) {
+    s7k3_wcd *wcd = &WaterColumn->wcd[i];
+    fprintf(stderr, "%s     beam[%3d] # begin end:   %u   %u %u\n", first, i, wcd->beam_number,  wcd->begin_sample,  wcd->end_sample);
+    int nsamples = wcd->end_sample - wcd->begin_sample + 1;
+    for (int j = 0; j < nsamples; j++) {
+      fprintf(stderr, "%s   sample[%4d | %4d] ", first, j, j + wcd->begin_sample);
+      if (sample_type_amp == 1) {
+        charptr = (char *)wcd->amplitude;
+        fprintf(stderr, "amplitude: %u  ", charptr[j]);
+      }
+      else if (sample_type_amp == 2) {
+        ushortptr = (unsigned short *)wcd->amplitude;
+        fprintf(stderr, "amplitude: %u  ", ushortptr[j]);
+      }
+      else if (sample_type_amp == 3) {
+        uintptr = (unsigned int *)wcd->amplitude;
+        fprintf(stderr, "amplitude: %u  ", uintptr[j]);
+      }
+      if (sample_type_phase == 1) {
+        charptr = (char *)wcd->phase;
+        fprintf(stderr, "phase: %u  ", charptr[j]);
+      }
+      else if (sample_type_phase == 2) {
+        ushortptr = (unsigned short *)wcd->phase;
+        fprintf(stderr, "phase: %u  ", ushortptr[j]);
+      }
+      else if (sample_type_phase == 3) {
+        uintptr = (unsigned int *)wcd->phase;
+        fprintf(stderr, "phase: %u  ", uintptr[j]);
+      }
+      if (sample_type_iandq == 1) {
+        shortptramp = (short *)wcd->amplitude;
+        shortptrphase = (short *)wcd->phase;
+        fprintf(stderr, "amplitude: %u  phase: %u  ", shortptramp[j], shortptrphase[j]);
+      }
+      else if (sample_type_iandq == 2) {
+        intptramp = (int *)wcd->amplitude;
+        intptrphase = (int *)wcd->phase;
+        fprintf(stderr, "amplitude: %u  phase: %u  ", intptramp[j], intptrphase[j]);
+      }
+      fprintf(stderr, "\n");
+    }
+  }
+
+  const int status = MB_SUCCESS;
+
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
+    fprintf(stderr, "dbg2  Return values:\n");
+    fprintf(stderr, "dbg2       error:      %d\n", *error);
+    fprintf(stderr, "dbg2  Return status:\n");
+    fprintf(stderr, "dbg2       status:     %d\n", status);
+  }
+
+  return (status);
 }
 
 /*--------------------------------------------------------------------*/
@@ -1964,11 +2226,50 @@ int mbsys_reson7k3_print_PingMotion(int verbose, s7k3_PingMotion *PingMotion, in
 /*--------------------------------------------------------------------*/
 
 int mbsys_reson7k3_print_AdaptiveGate(int verbose, s7k3_AdaptiveGate *AdaptiveGate, int *error) {
-  (void) verbose;  // Unused arg
-  (void) AdaptiveGate;  // Unused arg
-  (void) error;  // Unused arg
-  // Notdone
-  return (MB_SUCCESS);
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+    fprintf(stderr, "dbg2  Input arguments:\n");
+    fprintf(stderr, "dbg2       verbose:           %d\n", verbose);
+    fprintf(stderr, "dbg2       AdaptiveGate:      %p\n", (void *)AdaptiveGate);
+  }
+
+  /* print Reson 7k data record header information */
+  mbsys_reson7k3_print_header(verbose, &AdaptiveGate->header, error);
+
+  /* print Reson 7k detection setup (record 7017) */
+  const char *first;
+  if (verbose >= 2)
+    first = debug_str;
+  else {
+    first = nodebug_str;
+    fprintf(stderr, "\n%sMBIO function <%s> called\n", first, __func__);
+  }
+  fprintf(stderr, "%sStructure Contents:\n", first);
+  fprintf(stderr, "%s     record_size:                %u\n", first, AdaptiveGate->record_size);
+  fprintf(stderr, "%s     serial_number:              %llu\n", first, AdaptiveGate->serial_number);
+  fprintf(stderr, "%s     ping_number:                %u\n", first, AdaptiveGate->ping_number);
+  fprintf(stderr, "%s     multi_ping:                 %u\n", first, AdaptiveGate->multi_ping);
+  fprintf(stderr, "%s     n:               %u\n", first, AdaptiveGate->n);
+  fprintf(stderr, "%s     gate_size:            %u\n", first, AdaptiveGate->gate_size);
+  fprintf(stderr, "%s     beam   angle   min_limit    max_limit\n", first);
+  fprintf(stderr, "%s     -------------------------------------\n", first);
+  for (int i = 0; i < AdaptiveGate->n; i++) {
+    fprintf(stderr, "%s     %3d  %f   %f   %f\n", first,
+            i, AdaptiveGate->angle[i], AdaptiveGate->min_limit[i],
+            AdaptiveGate->max_limit[i]);
+  }
+
+  const int status = MB_SUCCESS;
+
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
+    fprintf(stderr, "dbg2  Return values:\n");
+    fprintf(stderr, "dbg2       error:      %d\n", *error);
+    fprintf(stderr, "dbg2  Return status:\n");
+    fprintf(stderr, "dbg2       status:     %d\n", status);
+  }
+
+  return (status);
 }
 
 /*--------------------------------------------------------------------*/
@@ -2091,11 +2392,75 @@ int mbsys_reson7k3_print_Beamformed(int verbose, s7k3_Beamformed *Beamformed, in
 /*--------------------------------------------------------------------*/
 
 int mbsys_reson7k3_print_VernierProcessingDataRaw(int verbose, s7k3_VernierProcessingDataRaw *VernierProcessingDataRaw, int *error) {
-  (void) verbose;  // Unused arg
-  (void) VernierProcessingDataRaw;  // Unused arg
-  (void) error;  // Unused arg
-  // Notdone
-  return (MB_SUCCESS);
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+    fprintf(stderr, "dbg2  Input arguments:\n");
+    fprintf(stderr, "dbg2       verbose:                  %d\n", verbose);
+    fprintf(stderr, "dbg2       VernierProcessingDataRaw: %p\n", (void *)VernierProcessingDataRaw);
+  }
+
+  /* Reson 7k VernierProcessingDataRaw magnitude and phase data (record 7018) */
+  mbsys_reson7k3_print_header(verbose, &VernierProcessingDataRaw->header, error);
+
+  /* print Reson 7k VernierProcessingDataRaw Data (record 7018)  */
+  const char *first;
+  if (verbose >= 2)
+    first = debug_str;
+  else {
+    first = nodebug_str;
+    fprintf(stderr, "\n%sMBIO function <%s> called\n", first, __func__);
+  }
+  fprintf(stderr, "%sStructure Contents:\n", first);
+  fprintf(stderr, "%s     serial_number:              %llu\n", first, VernierProcessingDataRaw->serial_number);
+  fprintf(stderr, "%s     ping_number:                %u\n", first, VernierProcessingDataRaw->ping_number);
+  fprintf(stderr, "%s     multi_ping:                 %u\n", first, VernierProcessingDataRaw->multi_ping);
+  fprintf(stderr, "%s     reference_array:            %u\n", first, VernierProcessingDataRaw->reference_array);
+  fprintf(stderr, "%s     pair1_array2:               %u\n", first, VernierProcessingDataRaw->pair1_array2);
+  fprintf(stderr, "%s     decimator:                  %u\n", first, VernierProcessingDataRaw->decimator);
+  fprintf(stderr, "%s     beam_number:                %u\n", first, VernierProcessingDataRaw->beam_number);
+  fprintf(stderr, "%s     n:                          %u\n", first, VernierProcessingDataRaw->n);
+  fprintf(stderr, "%s     decimated_samples:          %u\n", first, VernierProcessingDataRaw->decimated_samples);
+  fprintf(stderr, "%s     first_sample:               %u\n", first, VernierProcessingDataRaw->first_sample);
+  for (int i = 0; i < 2; i++) {
+    fprintf(stderr, "%s     reserved[%d]:                %u\n", first, i, VernierProcessingDataRaw->reserved[i]);
+  }
+  fprintf(stderr, "%s     smoothing_type:             %u\n", first, VernierProcessingDataRaw->smoothing_type);
+  fprintf(stderr, "%s     smoothing_length:           %u\n", first, VernierProcessingDataRaw->smoothing_length);
+  for (int i = 0; i < 2; i++) {
+    fprintf(stderr, "%s     reserved2[%d]:               %u\n", first, i, VernierProcessingDataRaw->reserved2[i]);
+  }
+  fprintf(stderr, "%s     magnitude:                  %f\n", first, VernierProcessingDataRaw->magnitude);
+  fprintf(stderr, "%s     min_qf:                     %f\n", first, VernierProcessingDataRaw->min_qf);
+  fprintf(stderr, "%s     max_qf:                     %f\n", first, VernierProcessingDataRaw->max_qf);
+  fprintf(stderr, "%s     min_angle:                  %f\n", first, VernierProcessingDataRaw->min_angle);
+  fprintf(stderr, "%s     max_angle:                  %f\n", first, VernierProcessingDataRaw->max_angle);
+  fprintf(stderr, "%s     elevation_coverage:         %f\n", first, VernierProcessingDataRaw->elevation_coverage);
+  for (int i = 0; i < 4; i++) {
+    fprintf(stderr, "%s     reserved3[%d]:               %u\n", first, i, VernierProcessingDataRaw->reserved3[i]);
+  }
+  fprintf(stderr, "%s     nalloc:                     %u\n", first, VernierProcessingDataRaw->nalloc);
+  for (int i = 0; i < VernierProcessingDataRaw->beam_number; i++) {
+    s7k3_anglemagnitude *anglemagnitude = &(VernierProcessingDataRaw->anglemagnitude[i]);
+    for (int j = 0; j < VernierProcessingDataRaw->decimated_samples; j++) {
+      fprintf(stderr, "%s     beam[%d] sample[%d] angle:%u magnitude:%u "
+      "coherence:%u cross_power:%u quality_factor:%u reserved:%u\n",
+      first, i, j, anglemagnitude->angle[j], anglemagnitude->magnitude[j],
+      anglemagnitude->coherence[j], anglemagnitude->cross_power[j],
+      anglemagnitude->quality_factor[j], anglemagnitude->reserved[j]);
+    }
+  }
+
+  const int status = MB_SUCCESS;
+
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
+    fprintf(stderr, "dbg2  Return values:\n");
+    fprintf(stderr, "dbg2       error:      %d\n", *error);
+    fprintf(stderr, "dbg2  Return status:\n");
+    fprintf(stderr, "dbg2       status:     %d\n", status);
+  }
+
+  return (status);
 }
 
 /*--------------------------------------------------------------------*/
@@ -2404,11 +2769,51 @@ int mbsys_reson7k3_print_Snippet(int verbose, s7k3_Snippet *Snippet, int *error)
 /*--------------------------------------------------------------------*/
 
 int mbsys_reson7k3_print_VernierProcessingDataFiltered(int verbose, s7k3_VernierProcessingDataFiltered *VernierProcessingDataFiltered, int *error) {
-  (void) verbose;  // Unused arg
-  (void) VernierProcessingDataFiltered;  // Unused arg
-  (void) error;  // Unused arg
-  // Notdone
-  return (MB_SUCCESS);
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+    fprintf(stderr, "dbg2  Input arguments:\n");
+    fprintf(stderr, "dbg2       verbose:           %d\n", verbose);
+    fprintf(stderr, "dbg2       VernierProcessingDataFiltered:      %p\n", (void *)VernierProcessingDataFiltered);
+  }
+
+  /* print Reson 7k data record header information */
+  mbsys_reson7k3_print_header(verbose, &VernierProcessingDataFiltered->header, error);
+
+  /* print Reson 7k VernierProcessingDataFiltered (record 7029) */
+  const char *first;
+  if (verbose >= 2)
+    first = debug_str;
+  else {
+    first = nodebug_str;
+    fprintf(stderr, "\n%sMBIO function <%s> called\n", first, __func__);
+  }
+  fprintf(stderr, "%sStructure Contents:\n", first);
+  fprintf(stderr, "%s     serial_number:              %llu\n", first, VernierProcessingDataFiltered->serial_number);
+  fprintf(stderr, "%s     ping_number:                %u\n", first, VernierProcessingDataFiltered->ping_number);
+  fprintf(stderr, "%s     multi_ping:                 %u\n", first, VernierProcessingDataFiltered->multi_ping);
+  fprintf(stderr, "%s     number_soundings:           %u\n", first, VernierProcessingDataFiltered->number_soundings);
+  fprintf(stderr, "%s     min_angle:                  %f\n", first, VernierProcessingDataFiltered->min_angle);
+  fprintf(stderr, "%s     max_angle:                  %f\n", first, VernierProcessingDataFiltered->max_angle);
+  fprintf(stderr, "%s     repeat_size:                %u\n", first, VernierProcessingDataFiltered->repeat_size);
+  for (int i = 0; i < VernierProcessingDataFiltered->number_soundings; i++) {
+    s7k3_vernierprocessingdatasoundings *vernierprocessingdatasoundings
+              = &(VernierProcessingDataFiltered->vernierprocessingdatasoundings[i]);
+    fprintf(stderr, "%s     sounding[%d]:               %f %u %f %f\n", first, i,
+            vernierprocessingdatasoundings->beam_angle, vernierprocessingdatasoundings->sample,
+            vernierprocessingdatasoundings->elevation, vernierprocessingdatasoundings->reserved);
+  }
+
+  const int status = MB_SUCCESS;
+
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
+    fprintf(stderr, "dbg2  Return values:\n");
+    fprintf(stderr, "dbg2       error:      %d\n", *error);
+    fprintf(stderr, "dbg2  Return status:\n");
+    fprintf(stderr, "dbg2       status:     %d\n", status);
+  }
+
+  return (status);
 }
 
 /*--------------------------------------------------------------------*/
@@ -2437,8 +2842,8 @@ int mbsys_reson7k3_print_InstallationParameters(int verbose, s7k3_InstallationPa
   fprintf(stderr, "%s     firmware_version:           %s\n", first, InstallationParameters->firmware_version);
   fprintf(stderr, "%s     software_version_len:       %d\n", first, InstallationParameters->software_version_len);
   fprintf(stderr, "%s     software_version:           %s\n", first, InstallationParameters->software_version);
-  fprintf(stderr, "%s     s7k3_version_len:            %d\n", first, InstallationParameters->s7k3_version_len);
-  fprintf(stderr, "%s     s7k3_version:                %s\n", first, InstallationParameters->s7k3_version);
+  fprintf(stderr, "%s     s7k3_version_len:           %d\n", first, InstallationParameters->s7k3_version_len);
+  fprintf(stderr, "%s     s7k3_version:               %s\n", first, InstallationParameters->s7k3_version);
   fprintf(stderr, "%s     protocal_version_len:       %d\n", first, InstallationParameters->protocal_version_len);
   fprintf(stderr, "%s     protocal_version:           %s\n", first, InstallationParameters->protocal_version);
   fprintf(stderr, "%s     transmit_x:                 %f\n", first, InstallationParameters->transmit_x);
@@ -2482,11 +2887,50 @@ int mbsys_reson7k3_print_InstallationParameters(int verbose, s7k3_InstallationPa
 /*--------------------------------------------------------------------*/
 
 int mbsys_reson7k3_print_BITESummary(int verbose, s7k3_BITESummary *BITESummary, int *error) {
-  (void) verbose;  // Unused arg
-  (void) BITESummary;  // Unused arg
-  (void) error;  // Unused arg
-  // Notdone
-  return (MB_SUCCESS);
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+    fprintf(stderr, "dbg2  Input arguments:\n");
+    fprintf(stderr, "dbg2       verbose:           %d\n", verbose);
+    fprintf(stderr, "dbg2       BITESummary:      %p\n", (void *)BITESummary);
+  }
+
+  /* print Reson 7k data record header information */
+  mbsys_reson7k3_print_header(verbose, &BITESummary->header, error);
+
+  /* print Reson 7k sonar BITESummary parameters (record 7030) */
+  const char *first;
+  if (verbose >= 2)
+    first = debug_str;
+  else {
+    first = nodebug_str;
+    fprintf(stderr, "\n%sMBIO function <%s> called\n", first, __func__);
+  }
+  fprintf(stderr, "%sStructure Contents:\n", first);
+  fprintf(stderr, "%s     total_items:                %u\n", first, BITESummary->total_items);
+  for (int i = 0; i < 4; i++) {
+    fprintf(stderr, "%s     warnings[%d]:               %u\n", first, i, BITESummary->warnings[i]);
+  }
+  for (int i = 0; i < 4; i++) {
+    fprintf(stderr, "%s     errors[%d]:                 %u\n", first, i, BITESummary->errors[i]);
+  }
+  for (int i = 0; i < 4; i++) {
+    fprintf(stderr, "%s     fatals[%d]:                 %u\n", first, i, BITESummary->fatals[i]);
+  }
+  for (int i = 0; i < 2; i++) {
+    fprintf(stderr, "%s     reserved[%d]:               %u\n", first, i, BITESummary->reserved[i]);
+  }
+
+  const int status = MB_SUCCESS;
+
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
+    fprintf(stderr, "dbg2  Return values:\n");
+    fprintf(stderr, "dbg2       error:      %d\n", *error);
+    fprintf(stderr, "dbg2  Return status:\n");
+    fprintf(stderr, "dbg2       status:     %d\n", status);
+  }
+
+  return (status);
 }
 
 /*--------------------------------------------------------------------*/
@@ -2495,6 +2939,9 @@ int mbsys_reson7k3_print_CompressedBeamformedMagnitude(int verbose, s7k3_Compres
   (void) CompressedBeamformedMagnitude;  // Unused arg
   (void) error;  // Unused arg
   // Notdone
+  // Not implemented because documentation is vague about the actual sample size
+  // and because this record is deprecated and unlikely to be part of a 7k3
+  // data stream
   return (MB_SUCCESS);
 }
 
@@ -2716,20 +3163,103 @@ int mbsys_reson7k3_print_SegmentedRawDetection(int verbose, s7k3_SegmentedRawDet
 
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k3_print_CalibratedBeam(int verbose, s7k3_CalibratedBeam *CalibratedBeam, int *error) {
-  (void) verbose;  // Unused arg
-  (void) CalibratedBeam;  // Unused arg
-  (void) error;  // Unused arg
-  // Notdone
-  return (MB_SUCCESS);
+
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+    fprintf(stderr, "dbg2  Input arguments:\n");
+    fprintf(stderr, "dbg2       verbose:           %d\n", verbose);
+    fprintf(stderr, "dbg2       CalibratedBeam:      %p\n", (void *)CalibratedBeam);
+  }
+
+  /* print Reson 7k data record header information */
+  mbsys_reson7k3_print_header(verbose, &CalibratedBeam->header, error);
+
+  /* print Reson 7k sonar CalibratedBeam parameters (record 7042) */
+  const char *first;
+  if (verbose >= 2)
+    first = debug_str;
+  else {
+    first = nodebug_str;
+    fprintf(stderr, "\n%sMBIO function <%s> called\n", first, __func__);
+  }
+  fprintf(stderr, "%sStructure Contents:\n", first);
+  fprintf(stderr, "%s     serial_number:              %llu\n", first, CalibratedBeam->serial_number);
+  fprintf(stderr, "%s     ping_number:                %u\n", first, CalibratedBeam->ping_number);
+  fprintf(stderr, "%s     multi_ping:                 %u\n", first, CalibratedBeam->multi_ping);
+  fprintf(stderr, "%s     first_beam:                 %u\n", first, CalibratedBeam->first_beam);
+  fprintf(stderr, "%s     total_beams:                %u\n", first, CalibratedBeam->total_beams);
+  fprintf(stderr, "%s     total_samples:              %u\n", first, CalibratedBeam->total_samples);
+  fprintf(stderr, "%s     foward_looking_sonar:       %u\n", first, CalibratedBeam->foward_looking_sonar);
+  fprintf(stderr, "%s     error_flag:                 %u\n", first, CalibratedBeam->error_flag);
+  for (int i = 0; i < 8; i++) {
+    fprintf(stderr, "%s     reserved[%d]:                %u\n", first, i, CalibratedBeam->reserved[i]);
+  }
+  fprintf(stderr, "%s     nalloc:         %u\n", first, CalibratedBeam->nalloc);
+  for (int i = 0;i<CalibratedBeam->total_samples;i++) {
+    fprintf(stderr, "%s     amplitude[%3d]:             %f\n", first, i, CalibratedBeam->samples[i]);
+  }
+
+  const int status = MB_SUCCESS;
+
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
+    fprintf(stderr, "dbg2  Return values:\n");
+    fprintf(stderr, "dbg2       error:      %d\n", *error);
+    fprintf(stderr, "dbg2  Return status:\n");
+    fprintf(stderr, "dbg2       status:     %d\n", status);
+  }
+
+  return (status);
 }
 
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k3_print_SystemEvents(int verbose, s7k3_SystemEvents *SystemEvents, int *error) {
-  (void) verbose;  // Unused arg
-  (void) SystemEvents;  // Unused arg
-  (void) error;  // Unused arg
-  // Notdone
-  return (MB_SUCCESS);
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+    fprintf(stderr, "dbg2  Input arguments:\n");
+    fprintf(stderr, "dbg2       verbose:           %d\n", verbose);
+    fprintf(stderr, "dbg2       SystemEvents:%p\n", (void *)SystemEvents);
+  }
+
+  /* print Reson 7k data record header information */
+  mbsys_reson7k3_print_header(verbose, &SystemEvents->header, error);
+
+  /* print Reson 7k system event (record 7051) */
+  const char *first;
+  if (verbose >= 2)
+    first = debug_str;
+  else {
+    first = nodebug_str;
+    fprintf(stderr, "\n%sMBIO function <%s> called\n", first, __func__);
+  }
+  fprintf(stderr, "%sStructure Contents:\n", first);
+  fprintf(stderr, "%s     serial_number:              %llu\n", first, SystemEvents->serial_number);
+  fprintf(stderr, "%s     number_events:              %d\n", first, SystemEvents->number_events);
+  fprintf(stderr, "%s     nalloc:                     %d\n", first, SystemEvents->nalloc);
+  for (int i = 0; i < SystemEvents->number_events; i++) {
+    s7k3_systemeventsdata *systemeventsdata = &(SystemEvents->systemeventsdata[i]);
+    fprintf(stderr, "%s     event_type:                 %d\n", first, systemeventsdata->event_type);
+    fprintf(stderr, "%s     event_id:                   %d\n", first, systemeventsdata->event_id);
+    fprintf(stderr, "%s     system_enum:                %d\n", first, systemeventsdata->system_enum);
+    fprintf(stderr, "%s     event_message_length:       %d\n", first, systemeventsdata->event_message_length);
+    fprintf(stderr, "%s     s7kTime:                    %4u-%3.3u-%2.2u:%2.2u:%9.6f\n",
+            first, systemeventsdata->s7kTime.Year, systemeventsdata->s7kTime.Day,
+            systemeventsdata->s7kTime.Hours, systemeventsdata->s7kTime.Minutes,
+            systemeventsdata->s7kTime.Seconds);
+    fprintf(stderr, "%s     message:                    %s\n", first, systemeventsdata->event_message);
+  }
+
+  const int status = MB_SUCCESS;
+
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
+    fprintf(stderr, "dbg2  Return values:\n");
+    fprintf(stderr, "dbg2       error:      %d\n", *error);
+    fprintf(stderr, "dbg2  Return status:\n");
+    fprintf(stderr, "dbg2       status:     %d\n", status);
+  }
+
+  return (status);
 }
 
 /*--------------------------------------------------------------------*/
@@ -2794,29 +3324,163 @@ int mbsys_reson7k3_print_Subscriptions(int verbose, s7k3_Subscriptions *Subscrip
 
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k3_print_RDRStorageRecording(int verbose, s7k3_RDRStorageRecording *RDRStorageRecording, int *error) {
-  (void) verbose;  // Unused arg
-  (void) RDRStorageRecording;  // Unused arg
-  (void) error;  // Unused arg
-  // Notdone
-  return (MB_SUCCESS);
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+    fprintf(stderr, "dbg2  Input arguments:\n");
+    fprintf(stderr, "dbg2       verbose:           %d\n", verbose);
+    fprintf(stderr, "dbg2       RDRStorageRecording:      %p\n", (void *)RDRStorageRecording);
+  }
+
+  /* print Reson 7k data record header information */
+  mbsys_reson7k3_print_header(verbose, &RDRStorageRecording->header, error);
+
+  /* print Reson 7k Snippet Backscattering Strength (Record 7058) */
+  const char *first;
+  if (verbose >= 2)
+    first = debug_str;
+  else {
+    first = nodebug_str;
+    fprintf(stderr, "\n%sMBIO function <%s> called\n", first, __func__);
+  }
+  fprintf(stderr, "%sStructure Contents:\n", first);
+  fprintf(stderr, "%s     diskfree_percentage:        %u\n", first, RDRStorageRecording->diskfree_percentage);
+  fprintf(stderr, "%s     number_records:             %u\n", first, RDRStorageRecording->number_records);
+  fprintf(stderr, "%s     size:                       %llu\n", first, RDRStorageRecording->size);
+  for (int i = 0; i < 4; i++) {
+    fprintf(stderr, "%s     reserved[%d]:                %u\n", first, i, RDRStorageRecording->reserved[i]);
+  }
+  fprintf(stderr, "%s     mode:                       %u\n", first, RDRStorageRecording->mode);
+  fprintf(stderr, "%s     file_name:                  %s\n", first, RDRStorageRecording->file_name);
+  fprintf(stderr, "%s     RDR_error:                  %u\n", first, RDRStorageRecording->RDR_error);
+  fprintf(stderr, "%s     data_rate:                  %llu\n", first, RDRStorageRecording->data_rate);
+  fprintf(stderr, "%s     minutes_left:               %u\n", first, RDRStorageRecording->minutes_left);
+
+  const int status = MB_SUCCESS;
+
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
+    fprintf(stderr, "dbg2  Return values:\n");
+    fprintf(stderr, "dbg2       error:      %d\n", *error);
+    fprintf(stderr, "dbg2  Return status:\n");
+    fprintf(stderr, "dbg2       status:     %d\n", status);
+  }
+
+  return (status);
 }
 
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k3_print_CalibrationStatus(int verbose, s7k3_CalibrationStatus *CalibrationStatus, int *error) {
-  (void) verbose;  // Unused arg
-  (void) CalibrationStatus;  // Unused arg
-  (void) error;  // Unused arg
-  // Notdone
-  return (MB_SUCCESS);
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+    fprintf(stderr, "dbg2  Input arguments:\n");
+    fprintf(stderr, "dbg2       verbose:           %d\n", verbose);
+    fprintf(stderr, "dbg2       CalibrationStatus:      %p\n", (void *)CalibrationStatus);
+  }
+
+  /* print Reson 7k data record header information */
+  mbsys_reson7k3_print_header(verbose, &CalibrationStatus->header, error);
+
+  /* print Reson 7k Snippet Backscattering Strength (Record 7058) */
+  const char *first;
+  if (verbose >= 2)
+    first = debug_str;
+  else {
+    first = nodebug_str;
+    fprintf(stderr, "\n%sMBIO function <%s> called\n", first, __func__);
+  }
+  fprintf(stderr, "%sStructure Contents:\n", first);
+  fprintf(stderr, "%s     serial_number:              %llu\n", first, CalibrationStatus->serial_number);
+  fprintf(stderr, "%s     calibration_status:         %u\n", first, CalibrationStatus->calibration_status);
+  fprintf(stderr, "%s     percent_complete:           %u\n", first, CalibrationStatus->percent_complete);
+  fprintf(stderr, "%s     s7kTime:                    %4u-%3.3u-%2.2u:%2.2u:%9.6f\n",
+            first, CalibrationStatus->s7kTime.Year, CalibrationStatus->s7kTime.Day,
+            CalibrationStatus->s7kTime.Hours, CalibrationStatus->s7kTime.Minutes,
+            CalibrationStatus->s7kTime.Seconds);
+  fprintf(stderr, "%s     status_message:             %s\n", first, CalibrationStatus->status_message);
+  fprintf(stderr, "%s     sub_status:                 %u\n", first, CalibrationStatus->sub_status);
+  fprintf(stderr, "%s     optionaldata:               %u\n", first, CalibrationStatus->optionaldata);
+  fprintf(stderr, "%s     system_calibration:         %u\n", first, CalibrationStatus->system_calibration);
+  fprintf(stderr, "%s     done_calibration:           %u\n", first, CalibrationStatus->done_calibration);
+  fprintf(stderr, "%s     current_calibration:        %u\n", first, CalibrationStatus->current_calibration);
+  fprintf(stderr, "%s     startup_calibration:        %u\n", first, CalibrationStatus->startup_calibration);
+  for (int i = 0; i < 8; i++) {
+    fprintf(stderr, "%s     status[%d]:                  %u\n", first, i, CalibrationStatus->status[i]);
+  }
+  for (int i = 0; i < 2; i++) {
+    fprintf(stderr, "%s     reserved[%d]:                %u\n", first, i, CalibrationStatus->reserved[i]);
+  }
+
+  const int status = MB_SUCCESS;
+
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
+    fprintf(stderr, "dbg2  Return values:\n");
+    fprintf(stderr, "dbg2       error:      %d\n", *error);
+    fprintf(stderr, "dbg2  Return status:\n");
+    fprintf(stderr, "dbg2       status:     %d\n", status);
+  }
+
+  return (status);
 }
 
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k3_print_CalibratedSideScan(int verbose, s7k3_CalibratedSideScan *CalibratedSideScan, int *error) {
-  (void) verbose;  // Unused arg
-  (void) CalibratedSideScan;  // Unused arg
-  (void) error;  // Unused arg
-  // Notdone
-  return (MB_SUCCESS);
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+    fprintf(stderr, "dbg2  Input arguments:\n");
+    fprintf(stderr, "dbg2       verbose:           %d\n", verbose);
+    fprintf(stderr, "dbg2       CalibratedSideScan:      %p\n", (void *)CalibratedSideScan);
+  }
+
+  /* print Reson 7k data record header information */
+  mbsys_reson7k3_print_header(verbose, &CalibratedSideScan->header, error);
+
+  /* print Reson 7k Snippet Backscattering Strength (Record 7058) */
+  const char *first;
+  if (verbose >= 2)
+    first = debug_str;
+  else {
+    first = nodebug_str;
+    fprintf(stderr, "\n%sMBIO function <%s> called\n", first, __func__);
+  }
+  fprintf(stderr, "%sStructure Contents:\n", first);
+  fprintf(stderr, "%s     serial_number:              %llu\n", first, CalibratedSideScan->serial_number);
+  fprintf(stderr, "%s     ping_number:                %u\n", first, CalibratedSideScan->ping_number);
+  fprintf(stderr, "%s     multi_ping:                 %u\n", first, CalibratedSideScan->multi_ping);
+  fprintf(stderr, "%s     beam_position:              %f\n", first, CalibratedSideScan->beam_position);
+  fprintf(stderr, "%s     reserved:                   %u\n", first, CalibratedSideScan->reserved);
+  fprintf(stderr, "%s     samples:                    %u\n", first, CalibratedSideScan->samples);
+  fprintf(stderr, "%s     reserved2:                  %f\n", first, CalibratedSideScan->reserved2);
+  fprintf(stderr, "%s     beams:                      %u\n", first, CalibratedSideScan->beams);
+  fprintf(stderr, "%s     current_beam:               %u\n", first, CalibratedSideScan->current_beam);
+  fprintf(stderr, "%s     bytes_persample:            %u\n", first, CalibratedSideScan->bytes_persample);
+  fprintf(stderr, "%s     data_types:                 %u\n", first, CalibratedSideScan->data_types);
+  fprintf(stderr, "%s     error_flag:                 %u\n", first, CalibratedSideScan->error_flag);
+  fprintf(stderr, "%s     nalloc:                     %u\n", first, CalibratedSideScan->nalloc);
+  for (int i = 0; i < CalibratedSideScan->samples; i++) {
+    fprintf(stderr, "%s     port[%d]: %10u from beam:%3u\n", first, i, CalibratedSideScan->port_data[i], CalibratedSideScan->port_beam[i]);
+  }
+  for (int i = 0; i < CalibratedSideScan->samples; i++) {
+    fprintf(stderr, "%s     stbd[%d]: %10u from beam:%3u\n", first, i, CalibratedSideScan->stbd_data[i], CalibratedSideScan->stbd_beam[i]);
+  }
+  fprintf(stderr, "%s     optionaldata:               %u\n", first, CalibratedSideScan->optionaldata);
+  fprintf(stderr, "%s     frequency:                  %f\n", first, CalibratedSideScan->frequency);
+  fprintf(stderr, "%s     latitude:                   %f\n", first, CalibratedSideScan->latitude);
+  fprintf(stderr, "%s     longitude:                  %f\n", first, CalibratedSideScan->longitude);
+  fprintf(stderr, "%s     heading:                    %f\n", first, CalibratedSideScan->heading);
+  fprintf(stderr, "%s     depth:                      %f\n", first, CalibratedSideScan->depth);
+
+  const int status = MB_SUCCESS;
+
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
+    fprintf(stderr, "dbg2  Return values:\n");
+    fprintf(stderr, "dbg2       error:      %d\n", *error);
+    fprintf(stderr, "dbg2  Return status:\n");
+    fprintf(stderr, "dbg2       status:     %d\n", status);
+  }
+
+  return (status);
 }
 
 /*--------------------------------------------------------------------*/
@@ -2881,11 +3545,77 @@ int mbsys_reson7k3_print_SnippetBackscatteringStrength(int verbose, s7k3_Snippet
 /*--------------------------------------------------------------------*/
 
 int mbsys_reson7k3_print_MB2Status(int verbose, s7k3_MB2Status *MB2Status, int *error) {
-  (void) verbose;  // Unused arg
-  (void) MB2Status;  // Unused arg
-  (void) error;  // Unused arg
-  // Notdone
-  return (MB_SUCCESS);
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+    fprintf(stderr, "dbg2  Input arguments:\n");
+    fprintf(stderr, "dbg2       verbose:           %d\n", verbose);
+    fprintf(stderr, "dbg2       MB2Status:      %p\n", (void *)MB2Status);
+  }
+
+  /* print Reson 7k data record header information */
+  mbsys_reson7k3_print_header(verbose, &MB2Status->header, error);
+
+  /* print Reson 7k Snippet Backscattering Strength (Record 7058) */
+  const char *first;
+  if (verbose >= 2)
+    first = debug_str;
+  else {
+    first = nodebug_str;
+    fprintf(stderr, "\n%sMBIO function <%s> called\n", first, __func__);
+  }
+  fprintf(stderr, "%sStructure Contents:\n", first);
+  fprintf(stderr, "%s     directory:                  %s\n", first, MB2Status->directory);
+  fprintf(stderr, "%s     header_name:                %s\n", first, MB2Status->header_name);
+  fprintf(stderr, "%s     trailer_name:               %s\n", first, MB2Status->trailer_name);
+  fprintf(stderr, "%s     prepend_header:             %u\n", first, MB2Status->prepend_header);
+  fprintf(stderr, "%s     storage:                    %u\n", first, MB2Status->storage);
+  fprintf(stderr, "%s     playback_path:              %s\n", first, MB2Status->playback_path);
+  fprintf(stderr, "%s     playback_file:              %s\n", first, MB2Status->playback_file);
+  fprintf(stderr, "%s     playback_loopmode:          %u\n", first, MB2Status->playback_loopmode);
+  fprintf(stderr, "%s     playback:                   %u\n", first, MB2Status->playback);
+  fprintf(stderr, "%s     rrio_address1:              %s\n", first, MB2Status->rrio_address1);
+  fprintf(stderr, "%s     rrio_address2:              %s\n", first, MB2Status->rrio_address2);
+  fprintf(stderr, "%s     rrio_address3:              %s\n", first, MB2Status->rrio_address3);
+  fprintf(stderr, "%s     build_hpr:                  %u\n", first, MB2Status->build_hpr);
+  fprintf(stderr, "%s     attached_hpr:               %u\n", first, MB2Status->attached_hpr);
+  fprintf(stderr, "%s     stacking:                   %u\n", first, MB2Status->stacking);
+  fprintf(stderr, "%s     stacking_value:             %u\n", first, MB2Status->stacking_value);
+  fprintf(stderr, "%s     zda_baudrate:               %u\n", first, MB2Status->zda_baudrate);
+  fprintf(stderr, "%s     zda_parity:                 %u\n", first, MB2Status->zda_parity);
+  fprintf(stderr, "%s     zda_databits:               %u\n", first, MB2Status->zda_databits);
+  fprintf(stderr, "%s     zda_stopbits:               %u\n", first, MB2Status->zda_stopbits);
+  fprintf(stderr, "%s     gga_baudrate:               %u\n", first, MB2Status->gga_baudrate);
+  fprintf(stderr, "%s     gga_parity:                 %u\n", first, MB2Status->gga_parity);
+  fprintf(stderr, "%s     gga_databits:               %u\n", first, MB2Status->gga_databits);
+  fprintf(stderr, "%s     gga_stopbits:               %u\n", first, MB2Status->gga_stopbits);
+  fprintf(stderr, "%s     svp_baudrate:               %u\n", first, MB2Status->svp_baudrate);
+  fprintf(stderr, "%s     svp_parity:                 %u\n", first, MB2Status->svp_parity);
+  fprintf(stderr, "%s     svp_databits:               %u\n", first, MB2Status->svp_databits);
+  fprintf(stderr, "%s     svp_stopbits:               %u\n", first, MB2Status->svp_stopbits);
+  fprintf(stderr, "%s     hpr_baudrate:               %u\n", first, MB2Status->hpr_baudrate);
+  fprintf(stderr, "%s     hpr_parity:                 %u\n", first, MB2Status->hpr_parity);
+  fprintf(stderr, "%s     hpr_databits:               %u\n", first, MB2Status->hpr_databits);
+  fprintf(stderr, "%s     hpr_stopbits:               %u\n", first, MB2Status->hpr_stopbits);
+  fprintf(stderr, "%s     hdt_baudrate:               %u\n", first, MB2Status->hdt_baudrate);
+  fprintf(stderr, "%s     hdt_parity:                 %u\n", first, MB2Status->hdt_parity);
+  fprintf(stderr, "%s     hdt_databits:               %u\n", first, MB2Status->hdt_databits);
+  fprintf(stderr, "%s     hdt_stopbits:               %u\n", first, MB2Status->hdt_stopbits);
+  fprintf(stderr, "%s     rrio:                       %u\n", first, MB2Status->rrio);
+  fprintf(stderr, "%s     playback_timestamps:        %u\n", first, MB2Status->playback_timestamps);
+  fprintf(stderr, "%s     reserved:                   %u\n", first, MB2Status->reserved);
+  fprintf(stderr, "%s     reserved2:                  %u\n", first, MB2Status->reserved2);
+
+  const int status = MB_SUCCESS;
+
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
+    fprintf(stderr, "dbg2  Return values:\n");
+    fprintf(stderr, "dbg2       error:      %d\n", *error);
+    fprintf(stderr, "dbg2  Return status:\n");
+    fprintf(stderr, "dbg2       status:     %d\n", status);
+  }
+
+  return (status);
 }
 
 /*--------------------------------------------------------------------*/
@@ -3071,6 +3801,8 @@ int mbsys_reson7k3_print_FileCatalog(int verbose, s7k3_FileCatalog *FileCatalog,
   int nrec_SoundVelocity = 0;
   int nrec_AbsorptionLoss = 0;
   int nrec_SpreadingLoss = 0;
+  int nrec_ProfileAverageSalinity = 0;
+  int nrec_ProfileAverageTemperature = 0;
   for (int i = 0; i < FileCatalog->n; i++) {
     filecatalogdata = &FileCatalog->filecatalogdata[i];
 
@@ -3294,6 +4026,12 @@ int mbsys_reson7k3_print_FileCatalog(int verbose, s7k3_FileCatalog *FileCatalog,
       case (R7KRECID_SpreadingLoss):
         nrec_SpreadingLoss++;
         break;
+      case (R7KRECID_ProfileAverageSalinity):
+        nrec_ProfileAverageSalinity++;
+        break;
+      case (R7KRECID_ProfileAverageTemperature):
+        nrec_ProfileAverageTemperature++;
+        break;
       default:
         break;
       }
@@ -3375,6 +4113,8 @@ fprintf(stderr, "nrec_SystemLockStatus:                     %7d\n", nrec_SystemL
 fprintf(stderr, "nrec_SoundVelocity:                        %7d\n", nrec_SoundVelocity);
 fprintf(stderr, "nrec_AbsorptionLoss:                       %7d\n", nrec_AbsorptionLoss);
 fprintf(stderr, "nrec_SpreadingLoss:                        %7d\n", nrec_SpreadingLoss);
+fprintf(stderr, "nrec_ProfileAverageSalinity:               %7d\n", nrec_ProfileAverageSalinity);
+fprintf(stderr, "nrec_ProfileAverageTemperature:            %7d\n", nrec_ProfileAverageTemperature);
 
   const int status = MB_SUCCESS;
 
@@ -3391,11 +4131,50 @@ fprintf(stderr, "nrec_SpreadingLoss:                        %7d\n", nrec_Spreadi
 
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k3_print_TimeMessage(int verbose, s7k3_TimeMessage *TimeMessage, int *error) {
-  (void) verbose;  // Unused arg
-  (void) TimeMessage;  // Unused arg
-  (void) error;  // Unused arg
-  // Notdone
-  return (MB_SUCCESS);
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+    fprintf(stderr, "dbg2  Input arguments:\n");
+    fprintf(stderr, "dbg2       verbose:           %d\n", verbose);
+    fprintf(stderr, "dbg2       TimeMessage:       %p\n", (void *)TimeMessage);
+  }
+
+  /* print Reson 7k data record header information */
+  mbsys_reson7k3_print_header(verbose, &TimeMessage->header, error);
+
+  /* print Reson 7k file header (record 7200) */
+  const char *first;
+  if (verbose >= 2)
+    first = debug_str;
+  else {
+    first = nodebug_str;
+    fprintf(stderr, "\n%sMBIO function <%s> called\n", first, __func__);
+  }
+  fprintf(stderr, "%sStructure Contents:\n", first);
+  fprintf(stderr, "%s     second_offset:              %d\n", first, TimeMessage->second_offset);
+  fprintf(stderr, "%s     pulse_flag:                 %u\n", first, TimeMessage->pulse_flag);
+  fprintf(stderr, "%s     port_id:                    %u\n", first, TimeMessage->port_id);
+  fprintf(stderr, "%s     reserved:                   %u\n", first, TimeMessage->reserved);
+  fprintf(stderr, "%s     reserved2:                  %llu\n", first, TimeMessage->reserved2);
+  fprintf(stderr, "%s     optionaldata:               %d\n", first, TimeMessage->optionaldata);
+  fprintf(stderr, "%s     utctime:                    %f\n", first, TimeMessage->utctime);
+  fprintf(stderr, "%s     external_time:              %f\n", first, TimeMessage->external_time);
+  fprintf(stderr, "%s     t0:                         %f\n", first, TimeMessage->t0);
+  fprintf(stderr, "%s     t1:                         %f\n", first, TimeMessage->t1);
+  fprintf(stderr, "%s     pulse_length:               %f\n", first, TimeMessage->pulse_length);
+  fprintf(stderr, "%s     difference:                 %f\n", first, TimeMessage->difference);
+  fprintf(stderr, "%s     io_status:                  %u\n", first, TimeMessage->io_status);
+
+  const int status = MB_SUCCESS;
+
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
+    fprintf(stderr, "dbg2  Return values:\n");
+    fprintf(stderr, "dbg2       error:      %d\n", *error);
+    fprintf(stderr, "dbg2  Return status:\n");
+    fprintf(stderr, "dbg2       status:     %d\n", status);
+  }
+
+  return (status);
 }
 
 /*--------------------------------------------------------------------*/
@@ -3633,21 +4412,85 @@ int mbsys_reson7k3_print_CommonSystemSettings(int verbose, s7k3_CommonSystemSett
 /*--------------------------------------------------------------------*/
 
 int mbsys_reson7k3_print_SVFiltering(int verbose, s7k3_SVFiltering *SVFiltering, int *error) {
-  (void) verbose;  // Unused arg
-  (void) SVFiltering;  // Unused arg
-  (void) error;  // Unused arg
-  // Notdone
-  return (MB_SUCCESS);
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+    fprintf(stderr, "dbg2  Input arguments:\n");
+    fprintf(stderr, "dbg2       verbose:           %d\n", verbose);
+    fprintf(stderr, "dbg2       SVFiltering:       %p\n", (void *)SVFiltering);
+  }
+
+  /* print Reson 7k data record header information */
+  mbsys_reson7k3_print_header(verbose, &SVFiltering->header, error);
+
+  /* print Reson 7k Sound Velocity (record 7610) */
+  const char *first;
+  if (verbose >= 2)
+    first = debug_str;
+  else {
+    first = nodebug_str;
+    fprintf(stderr, "\n%sMBIO function <%s> called\n", first, __func__);
+  }
+  fprintf(stderr, "%sStructure Contents:\n", first);
+  fprintf(stderr, "%s     sensor_sv:                %f\n", first, SVFiltering->sensor_sv);
+  fprintf(stderr, "%s     filtered_sv:              %f\n", first, SVFiltering->filtered_sv);
+  fprintf(stderr, "%s     filter:                   %u\n", first, SVFiltering->filter);
+
+  /* Optional data */
+
+  const int status = MB_SUCCESS;
+
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
+    fprintf(stderr, "dbg2  Return values:\n");
+    fprintf(stderr, "dbg2       error:      %d\n", *error);
+    fprintf(stderr, "dbg2  Return status:\n");
+    fprintf(stderr, "dbg2       status:     %d\n", status);
+  }
+
+  return (status);
 }
 
 /*--------------------------------------------------------------------*/
 
 int mbsys_reson7k3_print_SystemLockStatus(int verbose, s7k3_SystemLockStatus *SystemLockStatus, int *error) {
-  (void) verbose;  // Unused arg
-  (void) SystemLockStatus;  // Unused arg
-  (void) error;  // Unused arg
-  // Notdone
-  return (MB_SUCCESS);
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+    fprintf(stderr, "dbg2  Input arguments:\n");
+    fprintf(stderr, "dbg2       verbose:           %d\n", verbose);
+    fprintf(stderr, "dbg2       SystemLockStatus:  %p\n", (void *)SystemLockStatus);
+  }
+
+  /* print Reson 7k data record header information */
+  mbsys_reson7k3_print_header(verbose, &SystemLockStatus->header, error);
+
+  /* print Reson 7k Sound Velocity (record 7610) */
+  const char *first;
+  if (verbose >= 2)
+    first = debug_str;
+  else {
+    first = nodebug_str;
+    fprintf(stderr, "\n%sMBIO function <%s> called\n", first, __func__);
+  }
+  fprintf(stderr, "%sStructure Contents:\n", first);
+  fprintf(stderr, "%s     systemlock:                    %u\n", first, SystemLockStatus->systemlock);
+  fprintf(stderr, "%s     client_ip:                     %u\n", first, SystemLockStatus->client_ip);
+  for (int i = 0; i < 8; i++) {
+    fprintf(stderr, "%s     reserved[%d]:                   %u\n", first, i, SystemLockStatus->reserved[i]);
+  }
+
+  /* Optional data */
+
+  const int status = MB_SUCCESS;
+
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
+    fprintf(stderr, "dbg2  Return values:\n");
+    fprintf(stderr, "dbg2       error:      %d\n", *error);
+    fprintf(stderr, "dbg2  Return status:\n");
+    fprintf(stderr, "dbg2       status:     %d\n", status);
+  }
+
+  return (status);
 }
 
 /*--------------------------------------------------------------------*/
@@ -3746,6 +4589,78 @@ int mbsys_reson7k3_print_SpreadingLoss(int verbose, s7k3_SpreadingLoss *Spreadin
   }
   fprintf(stderr, "%sStructure Contents:\n", first);
   fprintf(stderr, "%s     SpreadingLoss:              %f\n", first, SpreadingLoss->spreadingloss);
+
+  const int status = MB_SUCCESS;
+
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
+    fprintf(stderr, "dbg2  Return values:\n");
+    fprintf(stderr, "dbg2       error:      %d\n", *error);
+    fprintf(stderr, "dbg2  Return status:\n");
+    fprintf(stderr, "dbg2       status:     %d\n", status);
+  }
+
+  return (status);
+}
+
+/*--------------------------------------------------------------------*/
+int mbsys_reson7k3_print_ProfileAverageSalinity(int verbose, s7k3_ProfileAverageSalinity *ProfileAverageSalinity, int *error) {
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+    fprintf(stderr, "dbg2  Input arguments:\n");
+    fprintf(stderr, "dbg2       verbose:                  %d\n", verbose);
+    fprintf(stderr, "dbg2       ProfileAverageSalinity:   %p\n", (void *)ProfileAverageSalinity);
+  }
+
+  /* print Reson 7k data record header information */
+  mbsys_reson7k3_print_header(verbose, &ProfileAverageSalinity->header, error);
+
+  /* print Reson 7k Spreading Loss (record 7612) */
+  const char *first;
+  if (verbose >= 2)
+    first = debug_str;
+  else {
+    first = nodebug_str;
+    fprintf(stderr, "\n%sMBIO function <%s> called\n", first, __func__);
+  }
+  fprintf(stderr, "%sStructure Contents:\n", first);
+  fprintf(stderr, "%s     salinity:              %f\n", first, ProfileAverageSalinity->salinity);
+
+  const int status = MB_SUCCESS;
+
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
+    fprintf(stderr, "dbg2  Return values:\n");
+    fprintf(stderr, "dbg2       error:      %d\n", *error);
+    fprintf(stderr, "dbg2  Return status:\n");
+    fprintf(stderr, "dbg2       status:     %d\n", status);
+  }
+
+  return (status);
+}
+
+/*--------------------------------------------------------------------*/
+int mbsys_reson7k3_print_ProfileAverageTemperature(int verbose, s7k3_ProfileAverageTemperature *ProfileAverageTemperature, int *error) {
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+    fprintf(stderr, "dbg2  Input arguments:\n");
+    fprintf(stderr, "dbg2       verbose:           %d\n", verbose);
+    fprintf(stderr, "dbg2       ProfileAverageTemperature:     %p\n", (void *)ProfileAverageTemperature);
+  }
+
+  /* print Reson 7k data record header information */
+  mbsys_reson7k3_print_header(verbose, &ProfileAverageTemperature->header, error);
+
+  /* print Reson 7k Spreading Loss (record 7612) */
+  const char *first;
+  if (verbose >= 2)
+    first = debug_str;
+  else {
+    first = nodebug_str;
+    fprintf(stderr, "\n%sMBIO function <%s> called\n", first, __func__);
+  }
+  fprintf(stderr, "%sStructure Contents:\n", first);
+  fprintf(stderr, "%s     temperature:            %f\n", first, ProfileAverageTemperature->temperature);
 
   const int status = MB_SUCCESS;
 
@@ -4576,8 +5491,6 @@ int mbsys_reson7k3_preprocess(int verbose,     /* in: verbosity level set on com
       *error = MB_ERROR_MISSING_NAVATTITUDE;
     }
 
-    int ss_source = R7KRECID_None;
-
     /*--------------------------------------------------------------*/
     /* recalculate Bathymetry  */
     /*--------------------------------------------------------------*/
@@ -5002,7 +5915,13 @@ int mbsys_reson7k3_preprocess(int verbose,     /* in: verbosity level set on com
             + SegmentedRawDetection->n_segments * SegmentedRawDetection->segment_field_size
             + SegmentedRawDetection->n_rx * SegmentedRawDetection->rx_field_size;
       }
+    }
 
+    /* regenerate SideScan */
+    if (!store->read_ProcessedSideScan
+      || pars->recalculate_bathymetry
+      || pars->multibeam_sidescan_source != MB_PR_SSSOURCE_UNKNOWN) {
+      int ss_source = R7KRECID_None;
       if (pars->multibeam_sidescan_source == MB_PR_SSSOURCE_CALIBRATEDSNIPPET)
         ss_source = R7KRECID_SnippetBackscatteringStrength;
       else if (pars->multibeam_sidescan_source == MB_PR_SSSOURCE_SNIPPET)
@@ -5011,11 +5930,6 @@ int mbsys_reson7k3_preprocess(int verbose,     /* in: verbosity level set on com
         ss_source = R7KRECID_CalibratedSideScan;
       else if (pars->multibeam_sidescan_source == MB_PR_SSSOURCE_WIDEBEAMBACKSCATTER)
         ss_source = R7KRECID_SideScan;
-    }
-
-    /* regenerate SideScan */
-    if (!store->read_ProcessedSideScan
-      || pars->recalculate_bathymetry) {
       status = mbsys_reson7k3_makess_source(verbose, mbio_ptr, store_ptr, ss_source,
                                       false, pixel_size, false, swath_width,
                                       true, error);
@@ -7713,31 +8627,12 @@ int mbsys_reson7k3_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy
   copy->SonarPipeEnvironment.finished = store->SonarPipeEnvironment.finished;
   copy->SonarPipeEnvironment.points_number = store->SonarPipeEnvironment.points_number;
   copy->SonarPipeEnvironment.n = store->SonarPipeEnvironment.n;
-  if (status == MB_SUCCESS && (copy->SonarPipeEnvironment.nalloc < copy->SonarPipeEnvironment.n * sizeof(float))) {
-    copy->SonarPipeEnvironment.nalloc = copy->SonarPipeEnvironment.n * sizeof(float);
-    if (status == MB_SUCCESS)
-      status = mb_reallocd(verbose, __FILE__, __LINE__, copy->SonarPipeEnvironment.nalloc, (void **)&(copy->SonarPipeEnvironment.x), error);
-    if (status == MB_SUCCESS)
-      status = mb_reallocd(verbose, __FILE__, __LINE__, copy->SonarPipeEnvironment.nalloc, (void **)&(copy->SonarPipeEnvironment.y), error);
-    if (status == MB_SUCCESS)
-      status = mb_reallocd(verbose, __FILE__, __LINE__, copy->SonarPipeEnvironment.nalloc, (void **)&(copy->SonarPipeEnvironment.z), error);
-    if (status == MB_SUCCESS)
-      status = mb_reallocd(verbose, __FILE__, __LINE__, copy->SonarPipeEnvironment.nalloc, (void **)&(copy->SonarPipeEnvironment.angle), error);
-    if (status == MB_SUCCESS)
-      status = mb_reallocd(verbose, __FILE__, __LINE__, copy->SonarPipeEnvironment.nalloc, (void **)&(copy->SonarPipeEnvironment.sample_number), error);
-    if (status != MB_SUCCESS) {
-      copy->SonarPipeEnvironment.n = 0;
-      copy->SonarPipeEnvironment.nalloc = 0;
-    }
-  }
-  if (status == MB_SUCCESS) {
-    for (int i = 0;i<copy->SonarPipeEnvironment.n;i++) {
-      copy->SonarPipeEnvironment.x[i] = store->SonarPipeEnvironment.x[i];
-      copy->SonarPipeEnvironment.y[i] = store->SonarPipeEnvironment.y[i];
-      copy->SonarPipeEnvironment.z[i] = store->SonarPipeEnvironment.z[i];
-      copy->SonarPipeEnvironment.angle[i] = store->SonarPipeEnvironment.angle[i];
-      copy->SonarPipeEnvironment.sample_number[i] = store->SonarPipeEnvironment.sample_number[i];
-    }
+  for (int i = 0; i < MIN(copy->SonarPipeEnvironment.n, 5); i++) {
+    copy->SonarPipeEnvironment.x[i] = store->SonarPipeEnvironment.x[i];
+    copy->SonarPipeEnvironment.y[i] = store->SonarPipeEnvironment.y[i];
+    copy->SonarPipeEnvironment.z[i] = store->SonarPipeEnvironment.z[i];
+    copy->SonarPipeEnvironment.angle[i] = store->SonarPipeEnvironment.angle[i];
+    copy->SonarPipeEnvironment.sample_number[i] = store->SonarPipeEnvironment.sample_number[i];
   }
 
   /* Contact Output (record 3001) */
@@ -7960,6 +8855,12 @@ int mbsys_reson7k3_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy
   /* Reson 7k Spreading Loss (record 7612) */
   copy->SpreadingLoss = store->SpreadingLoss;
 
+  /* Reson 7k Profile Average Salinity (record 7613) */
+  copy->ProfileAverageSalinity = store->ProfileAverageSalinity;
+
+  /* Reson 7k Profile Average Temperature (record 7614) */
+  copy->ProfileAverageTemperature = store->ProfileAverageTemperature;
+
   /* record counting variables */
   copy->nrec_read = store->nrec_read;
   copy->nrec_write = store->nrec_write;
@@ -8035,6 +8936,8 @@ int mbsys_reson7k3_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy
   copy->nrec_SoundVelocity = store->nrec_SoundVelocity;
   copy->nrec_AbsorptionLoss = store->nrec_AbsorptionLoss;
   copy->nrec_SpreadingLoss = store->nrec_SpreadingLoss;
+  copy->nrec_ProfileAverageSalinity = store->nrec_ProfileAverageSalinity;
+  copy->nrec_ProfileAverageTemperature = store->nrec_ProfileAverageTemperature;
 
   /* Reson 7k file header (record 7200) */
   copy->FileHeader = store->FileHeader;
@@ -8115,18 +9018,20 @@ int mbsys_reson7k3_makess_source(
   double minxtrack;
   double maxxtrack;
   int nrangetable;
-  double rangetable[MBSYS_RESON7K_MAX_BEAMS];
-  double acrosstracktable[MBSYS_RESON7K_MAX_BEAMS], acrosstracktablemin;
-  double alongtracktable[MBSYS_RESON7K_MAX_BEAMS];
+  double rangetable[MBSYS_RESON7K_MAX_SOUNDINGS];
+  double acrosstracktable[MBSYS_RESON7K_MAX_SOUNDINGS], acrosstracktablemin;
+  double alongtracktable[MBSYS_RESON7K_MAX_SOUNDINGS];
   int irangenadir, irange;
   // bool found;
   int pixel_int_use;
   int nsample_use, sample_start, sample_end;
   double angle, xtrack, xtrackss, ltrackss, factor;
   double range, beam_foot, beamwidth, sint;
-  mb_u_char *data_uchar;
-  unsigned short *data_ushort;
-  unsigned int *data_uint;
+  mb_u_char *data_uchar = NULL;
+  unsigned short *data_ushort = NULL;
+  unsigned int *data_uint = NULL;
+  float *data_float = NULL;
+  double *data_double = NULL;
   // int first, last;
   // k1, k2;
   mb_u_char *qualitycharptr;
@@ -8244,7 +9149,7 @@ int mbsys_reson7k3_makess_source(
         double rx_angle2 = SegmentedRawDetection->segmentedrawdetectionrxdata[SegmentedRawDetection->n_rx - 1].rx_angle_cross;
         (*swath_width) = MAX(fabs(RTD * rx_angle1), fabs(RTD * rx_angle2));
       }
-      if (pixel_size_set) {
+      if (!pixel_size_set) {
 
         // get median depth relative to the sonar and check for min max xtrack
         nbathsort = 0;
@@ -8438,14 +9343,14 @@ int mbsys_reson7k3_makess_source(
           // search RawDetection record for the associated sounding
           bool found = false;
           for (int j = ibeamdetectindex; j < RawDetection->number_beams && !found; j++) {
-            if ((RawDetection->rawdetectiondata[j].beam_descriptor == snippetdata->beam_number)
-                && ((RawDetection->rawdetectiondata[j].flags & 0x40) == 0)) {
+            if (RawDetection->rawdetectiondata[j].beam_descriptor == snippetdata->beam_number) {
               ibeamdetectindex = j;
               found = true;
             }
           }
           // Now get altitude, xtrack, range, and angle from the sounding detection
-          if (found && mb_beam_ok(beamflag[ibeamdetectindex])) {
+          if (found && ((RawDetection->rawdetectiondata[ibeamdetectindex].flags & 0x40) == 0)
+              && mb_beam_ok(beamflag[ibeamdetectindex])) {
             processbeam = true;
             rawdetectiondata = &(RawDetection->rawdetectiondata[ibeamdetectindex]);
             bathydata = &(RawDetection->bathydata[ibeamdetectindex]);
@@ -8463,8 +9368,8 @@ int mbsys_reson7k3_makess_source(
           // search SegmentedRawDetection record for the associated sounding
           bool found = false;
           for (int j = ibeamdetectindex; j < SegmentedRawDetection->n_rx && !found; j++) {
-            if ((SegmentedRawDetection->segmentedrawdetectionrxdata[j].beam_number == snippetdata->beam_number)
-                && ((SegmentedRawDetection->segmentedrawdetectionrxdata[j].flags2 & 0x4000) == 0)) {
+            if (SegmentedRawDetection->segmentedrawdetectionrxdata[j].beam_number == snippetdata->beam_number
+                && (SegmentedRawDetection->segmentedrawdetectionrxdata[j].flags2 & 0x4000) == 0) {
               ibeamdetectindex = j;
               found = true;
             }
@@ -8508,10 +9413,12 @@ int mbsys_reson7k3_makess_source(
               xtrackss = xtrack + ss_spacing_use * (k - (int)snippetdata->detect_sample);
             int kk = nss / 2 + (int)(xtrackss / (*pixel_size));
             kk = MIN(MAX(0, kk), nss - 1);
-            if ((Snippet->flags & 0x01) != 0)
+            if ((Snippet->flags & 0x01) != 0) {
               ss[kk] += (double)data_uint[k - (int)snippetdata->begin_sample];
-            else
+            }
+            else {
               ss[kk] += (double)data_ushort[k - (int)snippetdata->begin_sample];
+            }
             ssalongtrack[kk] += bathydata->alongtrack;
             ss_cnt[kk]++;
           }
@@ -8560,9 +9467,8 @@ int mbsys_reson7k3_makess_source(
       }
 
       /* lay out port side */
-      data_uchar = (mb_u_char *)CalibratedSideScan->calibratedsidescanseries.portbeams;
-      data_ushort = (unsigned short *)CalibratedSideScan->calibratedsidescanseries.portbeams;
-      data_uint = (unsigned int *)CalibratedSideScan->calibratedsidescanseries.portbeams;
+      data_float = (float *)CalibratedSideScan->port_data;
+      data_double = (double *)CalibratedSideScan->port_data;
       sample_start = rangetable[irangenadir] * SonarSettings->sample_rate;
       sample_end = MIN(rangetable[0] * SonarSettings->sample_rate, CalibratedSideScan->samples - 1);
       irange = irangenadir;
@@ -8580,21 +9486,18 @@ int mbsys_reson7k3_makess_source(
         ltrackss = alongtracktable[irange] + factor * (alongtracktable[irange - 1] - alongtracktable[irange]);
         const int kk = nss / 2 + (int)(xtrackss / (*pixel_size));
         if (kk >= 0 && kk < nss) {
-          if (CalibratedSideScan->bytes_persample == 1)
-            ss[kk] += (double)data_uchar[i];
-          else if (CalibratedSideScan->bytes_persample == 2)
-            ss[kk] += (double)data_ushort[i];
+          if (CalibratedSideScan->bytes_persample == 4)
+            ss[kk] += (double)data_float[i];
           else
-            ss[kk] += (double)data_uint[i];
+            ss[kk] += (double)data_double[i];
           ssalongtrack[kk] += ltrackss;
           ss_cnt[kk]++;
         }
       }
 
       /* lay out starboard side */
-      data_uchar = (mb_u_char *)CalibratedSideScan->calibratedsidescanseries.starboardbeams;
-      data_ushort = (unsigned short *)CalibratedSideScan->calibratedsidescanseries.starboardbeams;
-      data_uint = (unsigned int *)CalibratedSideScan->calibratedsidescanseries.starboardbeams;
+      data_float = (float *)CalibratedSideScan->stbd_data;
+      data_double = (double *)CalibratedSideScan->stbd_data;
       sample_start = rangetable[irangenadir] * SonarSettings->sample_rate;
       sample_end = MIN(rangetable[nrangetable - 1] * SonarSettings->sample_rate, CalibratedSideScan->samples - 1);
       irange = irangenadir;
@@ -8612,12 +9515,10 @@ int mbsys_reson7k3_makess_source(
         ltrackss = alongtracktable[irange] + factor * (alongtracktable[irange + 1] - alongtracktable[irange]);
         const int kk = nss / 2 + (int)(xtrackss / (*pixel_size));
         if (kk >= 0 && kk < nss) {
-          if (CalibratedSideScan->bytes_persample == 1)
-            ss[kk] += (double)data_uchar[i];
-          else if (CalibratedSideScan->bytes_persample == 2)
-            ss[kk] += (double)data_ushort[i];
+          if (CalibratedSideScan->bytes_persample == 4)
+            ss[kk] += (double)data_float[i];
           else
-            ss[kk] += (double)data_uint[i];
+            ss[kk] += (double)data_double[i];
           ssalongtrack[kk] += ltrackss;
           ss_cnt[kk]++;
         }
@@ -8663,7 +9564,9 @@ int mbsys_reson7k3_makess_source(
           }
         }
       }
-
+//for (int i=0; i<nrangetable; i++){
+//fprintf(stderr, "RangeTable: %d %11.6f %11.3f %11.3f\n", i, rangetable[i], acrosstracktable[i], alongtracktable[i]);
+//}
       /* lay out port side */
       data_uchar = (mb_u_char *)SideScan->port_data;
       data_ushort = (unsigned short *)SideScan->port_data;
@@ -8671,6 +9574,8 @@ int mbsys_reson7k3_makess_source(
       sample_start = rangetable[irangenadir] * SonarSettings->sample_rate;
       sample_end = MIN(rangetable[0] * SonarSettings->sample_rate, SideScan->number_samples - 1);
       irange = irangenadir;
+//fprintf(stderr, "\nPORT SIDE: samples: %d %d %d  sample_rate:%f pixel_size:%f\n",
+//sample_start, sample_end, SideScan->number_samples, SonarSettings->sample_rate, *pixel_size);
       for (int i = sample_start; i < sample_end; i++) {
         range = ((double)i) / ((double)SonarSettings->sample_rate);
         bool found = false;
@@ -8683,6 +9588,7 @@ int mbsys_reson7k3_makess_source(
         factor = (range - rangetable[irange]) / (rangetable[irange - 1] - rangetable[irange]);
         xtrackss = acrosstracktable[irange] + factor * (acrosstracktable[irange - 1] - acrosstracktable[irange]);
         ltrackss = alongtracktable[irange] + factor * (alongtracktable[irange - 1] - alongtracktable[irange]);
+//fprintf(stderr, "port %d: xtrack:%11.3f ltrack:%11.3f\n", i, xtrackss, ltrackss);
         const int kk = nss / 2 + (int)(xtrackss / (*pixel_size));
         if (kk >= 0 && kk < nss) {
           if (SideScan->sample_size == 1)
@@ -8806,6 +9712,59 @@ int mbsys_reson7k3_makess_source(
 
     if (verbose >= 2) {
       fprintf(stderr, "\ndbg2  SideScan regenerated in <%s>\n", __func__);
+      fprintf(stderr, "dbg2       pixels_ss:  %d\n", nss);
+      for (int i = 0; i < nss; i++)
+        fprintf(stderr, "dbg2       pixel:%4d  cnt:%3d  ss:%10f  xtrack:%10f  ltrack:%10f\n", i, ss_cnt[i], ss[i],
+                ssacrosstrack[i], ssalongtrack[i]);
+    }
+  }
+
+  /* else unable to regenerate sidescan, output an empty record */
+  else {
+    /* embed the SideScan into the processed SideScan record */
+    store->read_ProcessedSideScan = true;
+    if (store->read_RawDetection) {
+      ProcessedSideScan->header = RawDetection->header;
+      ProcessedSideScan->serial_number = RawDetection->serial_number;
+      ProcessedSideScan->ping_number = RawDetection->ping_number;
+      ProcessedSideScan->multi_ping = RawDetection->multi_ping;
+      ProcessedSideScan->ss_source = source;
+      ProcessedSideScan->number_pixels = MIN(2 * BeamGeometry->number_beams, MBSYS_RESON7K_MAX_PIXELS);
+      ProcessedSideScan->ss_type = MB_SIDESCAN_LINEAR;
+      ProcessedSideScan->pixelwidth = *pixel_size;
+      ProcessedSideScan->sonardepth = RawDetection->vehicle_depth;
+      ProcessedSideScan->altitude = RawDetection->bathydata[iminxtrack].depth
+                                    - ProcessedSideScan->sonardepth;
+
+    }
+    else if (store->read_SegmentedRawDetection) {
+      ProcessedSideScan->header = SegmentedRawDetection->header;
+      ProcessedSideScan->serial_number = SegmentedRawDetection->serial_number;
+      ProcessedSideScan->ping_number = SegmentedRawDetection->ping_number;
+      ProcessedSideScan->multi_ping = SegmentedRawDetection->multi_ping;
+      ProcessedSideScan->ss_source = source;
+      ProcessedSideScan->number_pixels = MBSYS_RESON7K_MAX_PIXELS / 2;
+      ProcessedSideScan->ss_type = MB_SIDESCAN_LINEAR;
+      ProcessedSideScan->pixelwidth = *pixel_size;
+      ProcessedSideScan->sonardepth = SegmentedRawDetection->vehicle_depth;
+      ProcessedSideScan->altitude = SegmentedRawDetection->bathydata[iminxtrack].depth
+                                    - ProcessedSideScan->sonardepth;
+    }
+    ProcessedSideScan->header.Offset = 60;
+    ProcessedSideScan->header.Size = MBSYS_RESON7K_RECORDHEADER_SIZE
+                                      + MBSYS_RESON7K_RECORDTAIL_SIZE
+                                      + R7KHDRSIZE_ProcessedSideScan + nss * 8;
+    ProcessedSideScan->header.OptionalDataOffset = 0;
+    ProcessedSideScan->header.OptionalDataIdentifier = 0;
+    ProcessedSideScan->header.RecordType = R7KRECID_ProcessedSideScan;
+    ProcessedSideScan->recordversion = 1;
+    for (int i = 0; i < MBSYS_RESON7K_MAX_PIXELS; i++) {
+      ProcessedSideScan->sidescan[i] = MB_SIDESCAN_NULL;
+      ProcessedSideScan->alongtrack[i] = 0.0;
+    }
+
+    if (verbose >= 2) {
+      fprintf(stderr, "\ndbg2  SideScan regenerated in <%s> - but all values null for lack of expected source data\n", __func__);
       fprintf(stderr, "dbg2       pixels_ss:  %d\n", nss);
       for (int i = 0; i < nss; i++)
         fprintf(stderr, "dbg2       pixel:%4d  cnt:%3d  ss:%10f  xtrack:%10f  ltrack:%10f\n", i, ss_cnt[i], ss[i],

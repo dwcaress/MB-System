@@ -239,9 +239,12 @@ int main(int argc, char **argv) {
 				break;
 			case 'O':
 			case 'o':
-				for (int j = 0, n_list = 0; j < (int)strlen(optarg); j++, n_list++)
+        n_list = 0;
+				for (int j = 0; j < (int)strlen(optarg); j++) {
 					if (n_list < MAX_OPTIONS)
 						list[n_list] = optarg[j];
+          n_list++;
+        }
 				break;
 			case 'Z':
 			case 'z':
@@ -564,7 +567,7 @@ int main(int argc, char **argv) {
 				case 'T': /* yyyy/mm/dd/hh/mm/ss time string */
 					seconds = time_i[5] + 1e-6 * time_i[6];
 					if (ascii)
-						printf("%.4d/%.2d/%.2d/%.2d/%.2d/%9.6f", time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], seconds);
+						printf("%.4d/%.2d/%.2d/%.2d/%.2d/%09.6f", time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], seconds);
 					else {
 						double b = time_i[0];
 						fwrite(&b, sizeof(double), 1, stdout);
@@ -583,7 +586,7 @@ int main(int argc, char **argv) {
 				case 't': /* yyyy mm dd hh mm ss time string */
 					seconds = time_i[5] + 1e-6 * time_i[6];
 					if (ascii)
-						printf("%.4d %.2d %.2d %.2d %.2d %9.6f", time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], seconds);
+						printf("%.4d %.2d %.2d %.2d %.2d %09.6f", time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], seconds);
 					else {
 						double b = time_i[0];
 						fwrite(&b, sizeof(double), 1, stdout);
