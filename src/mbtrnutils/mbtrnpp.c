@@ -2231,11 +2231,52 @@ static int s_mbtrnpp_validate_config(mbtrnpp_cfg_t *cfg)
 
 static void s_mbtrnpp_release_resources()
 {
+
+    fprintf(stderr,"release output servers...\n");
+    // release output servers
+    netif_destroy(&mb1svr);
+    netif_destroy(&trnsvr);
+    netif_destroy(&trnusvr);
+
+    fprintf(stderr,"release TRN instance...\n");
+    // release TRN instance
+    wtnav_destroy(trn_instance);
+    fprintf(stderr,"release TRN configuration...\n");
+	// release TRN configuration
+    trncfg_destroy(&trn_cfg);
+
+    fprintf(stderr,"release stats instance...\n");
+   // release stats instance
+    mstats_profile_destroy(&app_stats);
+
+    fprintf(stderr,"release log instances...\n");
+	// release log instances
+    mlog_delete_instance(mbtrnpp_mlog_id);
+    mlog_delete_instance(mb1_blog_id);
+    mlog_delete_instance(reson_blog_id);
+    mlog_delete_instance(trnu_alog_id);
+    mlog_delete_instance(trnu_blog_id);
+
+    fprintf(stderr,"release log paths...\n");
+    // release log paths
+    MEM_CHKFREE(mb1_blog_path);
+    MEM_CHKFREE(mbtrnpp_mlog_path);
+    MEM_CHKFREE(reson_blog_path);
+    MEM_CHKFREE(trnu_alog_path);
+    MEM_CHKFREE(trnu_blog_path);
+
+    fprintf(stderr,"release app configuration...\n");
+    // release app configuration
     s_mbtrnpp_free_opts(&mbtrn_opts);
     s_mbtrnpp_free_cfg(&mbtrn_cfg);
+
+    fprintf(stderr,"release global variables...\n");
+    // release global variables
     s_mbtrnpp_session_str(NULL, 0, RF_RELEASE);
     s_mbtrnpp_trnsession_str(NULL, 0, RF_RELEASE);
     s_mbtrnpp_cmdline_str(NULL, 0, 0, NULL, RF_RELEASE);
+    fprintf(stderr,"done\n");
+
 }
 
 static void s_mbtrnpp_exit(int error)
@@ -2756,7 +2797,8 @@ int main(int argc, char **argv) {
   // future cycles start and end in the stats update
   MST_METRIC_START(app_stats->stats->metrics[MBTPP_CH_MB_CYCLE_XT], mtime_dtime());
   MST_METRIC_START(app_stats->stats->metrics[MBTPP_CH_MB_STATS_XT], mtime_dtime());
-  /* loop over all files to be read */
+
+    /* loop over all files to be read */
   while (read_data == true) {
       char log_message[LOG_MSG_BUF_SZ];
       memset(log_message,0,LOG_MSG_BUF_SZ);
@@ -3099,6 +3141,12 @@ int main(int argc, char **argv) {
               }
             }
           }
+            if(beam_start<0 || beam_end<0)
+            mlog_tprintf(mbtrnpp_mlog_id,"e,ping array boundary violation beam_start/end[%d/%d] n_pings_read[%d]\n",beam_start,beam_end,n_pings_read);
+
+            // test boundaries (zero min)
+            beam_start = MAX(beam_start, 0);
+            beam_end = MAX(beam_end, 0);
 
           /* apply decimation - only consider outputting decimated soundings */
           beam_decimation = ((beam_end - beam_start + 1) / mbtrn_cfg->n_output_soundings) + 1;
@@ -3425,6 +3473,9 @@ int main(int argc, char **argv) {
         PMPRINT(MOD_MBTRNPP, MM_DEBUG, (stderr, "read_datalist == NO\n"));
         read_data = false;
       }
+      mlog_tprintf(mbtrnpp_mlog_id,"i,read_datalist[%s] read_data[%s] status[%d] ifile[%s] dfile[%s] error[%d]\n",
+                     (read_datalist?"Y":"N"),(read_data?"Y":"N"),status,ifile,dfile,error );
+
     }
     /* end loop over files in list */
   }
@@ -3476,6 +3527,12 @@ int main(int argc, char **argv) {
   /* give the statistics */
   if (mbtrn_cfg->verbose >= 1) {
   }
+
+    mlog_tprintf(mbtrnpp_mlog_id, "uptime,%0.3lf\n", app_stats->uptime);
+    mlog_tprintf(mbtrnpp_mlog_id,"i,end session\n");
+    mlog_tprintf(netif_log(mb1svr),"i,end session\n");
+    mlog_tprintf(netif_log(trnsvr),"i,end session\n");
+    mlog_tprintf(netif_log(trnusvr),"i,end session\n");
 
   fprintf(stderr, "exit app [%d]\n", error);
 
