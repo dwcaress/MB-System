@@ -9091,29 +9091,27 @@ int mbsys_reson7k3_makess_source(
         (*swath_width) = MAX(fabs(RTD * BeamGeometry->angle_acrosstrack[ib1]),
                              fabs(RTD * BeamGeometry->angle_acrosstrack[ib2]));
       }
-      if (!pixel_size_set) {
 
-        // get median depth relative to the sonar and check for min max xtrack
-        nbathsort = 0;
-        minxtrack = 0.0;
-        maxxtrack = 0.0;
-        iminxtrack = RawDetection->number_beams / 2;
-        bool found = false;
-        for (int i = 0; i < RawDetection->number_beams; i++) {
-          rawdetectiondata = &(RawDetection->rawdetectiondata[i]);
-          bathydata = &(RawDetection->bathydata[i]);
-          qualitycharptr = (mb_u_char *)&(rawdetectiondata->quality);
-          beamflag[i] = qualitycharptr[3];
-          if (mb_beam_ok(beamflag[i])) {
-            bathsort[nbathsort] = bathydata->depth - RawDetection->vehicle_depth;
-            nbathsort++;
-            if (!found || fabs(bathydata->acrosstrack) < minxtrack) {
-              minxtrack = fabs(bathydata->acrosstrack);
-              iminxtrack = i;
-              found = true;
-            }
-            maxxtrack = MAX(fabs(bathydata->acrosstrack), maxxtrack);
+      // get median depth relative to the sonar and check for min max xtrack
+      nbathsort = 0;
+      minxtrack = 0.0;
+      maxxtrack = 0.0;
+      iminxtrack = RawDetection->number_beams / 2;
+      bool found = false;
+      for (int i = 0; i < RawDetection->number_beams; i++) {
+        rawdetectiondata = &(RawDetection->rawdetectiondata[i]);
+        bathydata = &(RawDetection->bathydata[i]);
+        qualitycharptr = (mb_u_char *)&(rawdetectiondata->quality);
+        beamflag[i] = qualitycharptr[3];
+        if (mb_beam_ok(beamflag[i])) {
+          bathsort[nbathsort] = bathydata->depth - RawDetection->vehicle_depth;
+          nbathsort++;
+          if (!found || fabs(bathydata->acrosstrack) < minxtrack) {
+            minxtrack = fabs(bathydata->acrosstrack);
+            iminxtrack = i;
+            found = true;
           }
+          maxxtrack = MAX(fabs(bathydata->acrosstrack), maxxtrack);
         }
       }
     } // end handling bathymetry in RawDetection 7027 records
@@ -9149,35 +9147,33 @@ int mbsys_reson7k3_makess_source(
         double rx_angle2 = SegmentedRawDetection->segmentedrawdetectionrxdata[SegmentedRawDetection->n_rx - 1].rx_angle_cross;
         (*swath_width) = MAX(fabs(RTD * rx_angle1), fabs(RTD * rx_angle2));
       }
-      if (!pixel_size_set) {
 
-        // get median depth relative to the sonar and check for min max xtrack
-        nbathsort = 0;
-        minxtrack = 0.0;
-        maxxtrack = 0.0;
-        iminxtrack = SegmentedRawDetection->n_rx / 2;
-        bool found = false;
-        for (int i = 0; i < SegmentedRawDetection->n_rx; i++) {
-          segmentedrawdetectionrxdata = &(SegmentedRawDetection->segmentedrawdetectionrxdata[i]);
-          bathydata = &(SegmentedRawDetection->bathydata[i]);
-          qualitycharptr = (mb_u_char *)&(segmentedrawdetectionrxdata->quality);
-          beamflag[i] = qualitycharptr[3];
-          if (mb_beam_ok(beamflag[i])) {
-            bathsort[nbathsort] = bathydata->depth - SegmentedRawDetection->vehicle_depth;
-            nbathsort++;
-            if (!found || fabs(bathydata->acrosstrack) < minxtrack) {
-              minxtrack = fabs(bathydata->acrosstrack);
-              iminxtrack = i;
-              found = true;
-            }
-            maxxtrack = MAX(fabs(bathydata->acrosstrack), maxxtrack);
+      // get median depth relative to the sonar and check for min max xtrack
+      nbathsort = 0;
+      minxtrack = 0.0;
+      maxxtrack = 0.0;
+      iminxtrack = SegmentedRawDetection->n_rx / 2;
+      bool found = false;
+      for (int i = 0; i < SegmentedRawDetection->n_rx; i++) {
+        segmentedrawdetectionrxdata = &(SegmentedRawDetection->segmentedrawdetectionrxdata[i]);
+        bathydata = &(SegmentedRawDetection->bathydata[i]);
+        qualitycharptr = (mb_u_char *)&(segmentedrawdetectionrxdata->quality);
+        beamflag[i] = qualitycharptr[3];
+        if (mb_beam_ok(beamflag[i])) {
+          bathsort[nbathsort] = bathydata->depth - SegmentedRawDetection->vehicle_depth;
+          nbathsort++;
+          if (!found || fabs(bathydata->acrosstrack) < minxtrack) {
+            minxtrack = fabs(bathydata->acrosstrack);
+            iminxtrack = i;
+            found = true;
           }
+          maxxtrack = MAX(fabs(bathydata->acrosstrack), maxxtrack);
         }
       }
     } // end handling bathymetry in SegmentedRawDetection 7047 records
 
     /* if bathymetry available calculate pixel size implied using swath width and nadir altitude */
-    if (nbathsort > 0) {
+    if (!pixel_size_set && nbathsort > 0) {
       qsort((void *)bathsort, nbathsort, sizeof(double), (void *)mb_double_compare);
       pixel_size_calc = 2.1 * tan(DTR * (*swath_width)) * bathsort[nbathsort / 2] / nss;
 
@@ -9724,6 +9720,22 @@ int mbsys_reson7k3_makess_source(
     /* embed the SideScan into the processed SideScan record */
     store->read_ProcessedSideScan = true;
     if (store->read_RawDetection) {
+      minxtrack = 0.0;
+      iminxtrack = RawDetection->number_beams / 2;
+      bool found = false;
+      for (int i = 0; i < RawDetection->number_beams; i++) {
+        rawdetectiondata = &(RawDetection->rawdetectiondata[i]);
+        bathydata = &(RawDetection->bathydata[i]);
+        qualitycharptr = (mb_u_char *)&(rawdetectiondata->quality);
+        beamflag[i] = qualitycharptr[3];
+        if (mb_beam_ok(beamflag[i])) {
+          if (!found || fabs(bathydata->acrosstrack) < minxtrack) {
+            minxtrack = fabs(bathydata->acrosstrack);
+            iminxtrack = i;
+            found = true;
+          }
+        }
+      }
       ProcessedSideScan->header = RawDetection->header;
       ProcessedSideScan->serial_number = RawDetection->serial_number;
       ProcessedSideScan->ping_number = RawDetection->ping_number;
@@ -9738,6 +9750,22 @@ int mbsys_reson7k3_makess_source(
 
     }
     else if (store->read_SegmentedRawDetection) {
+      minxtrack = 0.0;
+      iminxtrack = SegmentedRawDetection->n_rx / 2;
+      bool found = false;
+      for (int i = 0; i < SegmentedRawDetection->n_rx; i++) {
+        segmentedrawdetectionrxdata = &(SegmentedRawDetection->segmentedrawdetectionrxdata[i]);
+        bathydata = &(SegmentedRawDetection->bathydata[i]);
+        qualitycharptr = (mb_u_char *)&(segmentedrawdetectionrxdata->quality);
+        beamflag[i] = qualitycharptr[3];
+        if (mb_beam_ok(beamflag[i])) {
+          if (!found || fabs(bathydata->acrosstrack) < minxtrack) {
+            minxtrack = fabs(bathydata->acrosstrack);
+            iminxtrack = i;
+            found = true;
+          }
+        }
+      }
       ProcessedSideScan->header = SegmentedRawDetection->header;
       ProcessedSideScan->serial_number = SegmentedRawDetection->serial_number;
       ProcessedSideScan->ping_number = SegmentedRawDetection->ping_number;

@@ -374,7 +374,7 @@ autoheader
 automake --add-missing --include-deps
 autoconf
 autoupdate
-autoreconf --force --install #--warnings=all
+autoreconf --force --install
 
 # Run the configure script - here all possible optional targets are enabled
 # include the experimental and prototype tools (mbtrn, mbtnav, qt tools, opencv tools)
@@ -395,11 +395,11 @@ CFLAGS="-g -I/opt/X11/include" \
     --enable-test \
     --enable-mbtrn \
     --enable-mbtnav \
-    --enable-qt \
     --enable-opencv \
     --with-opencv-include=/usr/local/include/opencv4 \
     --with-opencv-lib=/usr/local/lib
-    #--enable-pcltools
+#    --enable-qt \
+#    --enable-pcltools
 
 make
 make check

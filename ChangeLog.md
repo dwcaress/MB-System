@@ -20,7 +20,7 @@ include "beta" in the tag name are preliminary and generally not announced.
 Distributions that do not include "beta" in the tag name correspond to the major,
 announced releases. The source distributions associated with all releases, major or beta, are equally accessible as tarballs through the Github interface.
 
-- Version 5.7.6beta44    August 13, 2020
+- Version 5.7.6beta44    August 24, 2020
 - Version 5.7.6beta43    July 23, 2020
 - Version 5.7.6beta42    July 21, 2020
 - Version 5.7.6beta41    July 12, 2020
@@ -354,7 +354,7 @@ announced releases. The source distributions associated with all releases, major
 ### MB-System Version 5.7 Release Notes:
 --
 
-#### 5.7.6beta44 (August 13, 2020)
+#### 5.7.6beta44 (August 24, 2020)
 
 Format 89 (MBF_RESON7K3): Fixed handling and processing of backscatter data, which
 had a variety of problems. Now, the pseudo-sidescan reported by MB-Systen as sidescan
@@ -396,7 +396,8 @@ representation in the form used by the Stanford/MBARI Terrain Relative Navigatio
 software. The octree files have a suffix convention of *.ob for octree binary.
 The input bathymetry grids are assumed to be in UTM coordinates with square cells.
 
-Mbtrnpp: Made the --platform-target-sensor option functional.
+Mbtrnpp: Made the --platform-target-sensor option functional. Added options
+        --reinit-qain --reinit-xyoffset=max --reinint-zoffset=min/max
 
 Mbeditviz: Now outputs error message to shell when a file can't be imported
 because it lacks an *.inf file.

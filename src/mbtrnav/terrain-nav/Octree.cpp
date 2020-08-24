@@ -780,6 +780,7 @@ LoadFromFile(const char* filename) {
 	int numLeafNodes = 0;
 
 	bool returnValue = OctreeRoot->LoadFromFile(loadFile, numBranchNodes, numLeafNodes);
+  std::cout << "\nOctree file <" << filename << "> loaded\n";
 	std::cout << "Num Branch Nodes: " << numBranchNodes << "\tNum Leaf Nodes: " << numLeafNodes << "\n";
 	std::cout << "Total Node Size: " << ((numBranchNodes + numLeafNodes) * sizeof(OctreeNode) +
 					     numBranchNodes * 8 * sizeof(OctreeNode*) )/ 1048576 << " MB \n";
