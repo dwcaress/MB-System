@@ -310,6 +310,11 @@ static char *notice_msg[] = {
     "MB_DATA_BIST2 (67): Kongsberg BIST short reply",
     "MB_DATA_MBSYSTEM (68): Written by MB-System - extension to Kongsberg kmall",
     "MB_DATA_BSCALIBRATIONFILE (69): Kongsberg backscatter calibration file",
+    "MB_DATA_SALINITY (70): Teledyne s7k salinity",
+    "MB_DATA_TEMPERATURE (71): Teledyne s7k salinity",
+    "MB_DATA_PIPE (72): Teledyne s7k pipe tracking",
+    "MB_DATA_CONTACT (73): Teledyne s7k sonar contact",
+    "MB_DATA_GATES (74): Teledyne s7k bathymetry picking gates",
 
     /* notices for nonfatal error messages */
     "MB_ERROR_TIME_GAP (ID=-1): Time gap in data",

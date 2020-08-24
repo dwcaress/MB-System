@@ -27,7 +27,7 @@
 #include "Exception.h"
 #include "BinaryFile.h"
 
-DataLog::DataLog(const char *name, DataLog::Access access, 
+DataLog::DataLog(const char *name, DataLog::Access access,
 		 DataLog::FileFormat fileFormat)
 {
   if (name == NULL || strlen(name) < 1)
@@ -98,13 +98,13 @@ void DataLog::openFile()
   strcpy(origName, _fileName);
 
   // only do this check if access mode is write
-  // otherwise we "break" logToMatlab. 
-  if (access() == Write) { 
+  // otherwise we "break" logToMatlab.
+  if (access() == Write) {
     int numtries = 1;
- 
+
     while ((logfile = fopen(_fileName, "r")) != NULL) {
-      printf("logfile already exists!\n");
-      printf("I will try to append a %d to your file\n", numtries);
+      //printf("logfile already exists!\n");
+      //printf("I will try to append a %d to your file\n", numtries);
       sprintf(_fileName, "%s.%d",origName,numtries);
       fclose(logfile);
       numtries++;

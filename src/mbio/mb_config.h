@@ -116,7 +116,7 @@
 /* #undef PCLTOOLS_ENABLED */
 
 /* Build tools using Qt5 */
-#define QTTOOLS_ENABLED 1
+/* #undef QTTOOLS_ENABLED */
 
 /* Define to 1 if you have the ANSI C header files. */
 #define STDC_HEADERS 1
@@ -128,7 +128,7 @@
 #define VERSION "5.7.6beta44"
 
 /* Set VERSION_DATE define in mb_config.h */
-#define VERSION_DATE "13 August 2020"
+#define VERSION_DATE "24 August 2020"
 
 /* Define WORDS_BIGENDIAN to 1 if your processor stores words with the most
    significant byte first (like Motorola and SPARC, unlike Intel). */
