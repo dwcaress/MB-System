@@ -342,7 +342,7 @@ int mbr_wt_sbsiolsi(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		/* comment */
 		else if (store->kind == MB_DATA_COMMENT) {
 			strcpy(datacomment, "cc");
-			strncat(datacomment, store->comment, MBSYS_SB_MAXLINE - 1);
+			strncat(datacomment, store->comment, mb_io_ptr->data_structure_size - 3);
 		}
 	}
 

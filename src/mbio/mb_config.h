@@ -77,7 +77,7 @@
 #define MBSYSTEM_INSTALL_PREFIX "/usr/local"
 
 /* Set MBSYSTEM_OTPS_LOCATION define in mb_config.h */
-#define MBSYSTEM_OTPS_LOCATION "/usr/local/OTPS2"
+#define MBSYSTEM_OTPS_LOCATION "/usr/local/opt/otps"
 
 /* Build libmbtnav and embed TRN instance in mbtrnpp */
 #define MBTNAV_ENABLED 1
@@ -86,10 +86,10 @@
 #define MBTRN_ENABLED 1
 
 /* Build graphical tools */
-/* #undef MBUTILS_ENABLED */
+#define MBUTILS_ENABLED 1
 
 /* Build tools using OpenCV */
-/* #undef OPENCVTOOLS_ENABLED */
+#define OPENCVTOOLS_ENABLED 1
 
 /* Name of package */
 #define PACKAGE "mbsystem"
@@ -101,7 +101,7 @@
 #define PACKAGE_NAME "mbsystem"
 
 /* Define to the full name and version of this package. */
-#define PACKAGE_STRING "mbsystem 5.7.6beta44"
+#define PACKAGE_STRING "mbsystem 5.7.6beta45"
 
 /* Define to the one symbol short name of this package. */
 #define PACKAGE_TARNAME "mbsystem"
@@ -110,7 +110,7 @@
 #define PACKAGE_URL "http://www.mbari.org/data/mbsystem/"
 
 /* Define to the version of this package. */
-#define PACKAGE_VERSION "5.7.6beta44"
+#define PACKAGE_VERSION "5.7.6beta45"
 
 /* Build tools using PCL */
 /* #undef PCLTOOLS_ENABLED */
@@ -122,13 +122,13 @@
 #define STDC_HEADERS 1
 
 /* Building unit tests */
-/* #undef TEST_ENABLED */
+#define TEST_ENABLED 1
 
 /* Version number of package */
-#define VERSION "5.7.6beta44"
+#define VERSION "5.7.6beta45"
 
 /* Set VERSION_DATE define in mb_config.h */
-#define VERSION_DATE "24 August 2020"
+#define VERSION_DATE "26 August 2020"
 
 /* Define WORDS_BIGENDIAN to 1 if your processor stores words with the most
    significant byte first (like Motorola and SPARC, unlike Intel). */
