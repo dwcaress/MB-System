@@ -127,6 +127,11 @@ textarea.output{
     /* Blue */
     background-color: #00416d;
 }
+.buttony{
+    /* Yellow */
+    background-color: #e1ad01;
+    color:#222222;
+}
 .button:active{
 /*    background-color: #555555;*/
 	opacity:0.8;
