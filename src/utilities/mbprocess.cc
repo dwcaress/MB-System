@@ -1,7 +1,7 @@
 /*--------------------------------------------------------------------
  *    The MB-system:  mbprocess.c  3/31/93
  *
- *    Copyright (c) 2000-2019 by
+ *    Copyright (c) 2000-2020 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -5106,6 +5106,8 @@ int main(int argc, char **argv) {
                   fprintf(stderr, "dbg5       %3d %3d %6.3f %6.3f %6.3f %8.2f %8.2f %8.2f\n", idata, i,
                           0.5 * ttimes[i], angles[i], angles_forward[i], bathacrosstrack[i], bathalongtrack[i],
                           bath[i]);
+                }
+                if (verbose >= 5) {
                   fprintf(stderr, "\ndbg5  Depth value calculated in program <%s>:\n", program_name);
                   fprintf(stderr, "dbg5       kind:  %d\n", kind);
                   fprintf(stderr, "dbg5       beam:  %d\n", i);
@@ -5582,10 +5584,12 @@ int main(int argc, char **argv) {
                   }
                   status = get_anglecorr(verbose, sscorrtableuse.nangle, sscorrtableuse.angle,
                                          sscorrtableuse.amplitude, angle, &correction, &error);
-                  if (process.mbp_sscorr_type == MBP_SSCORR_SUBTRACTION)
+                  if (process.mbp_sscorr_type == MBP_SSCORR_SUBTRACTION) {
                     ss[i] = ss[i] - correction + reference_amp;
-                  else
+                  }
+                  else {
                     ss[i] = ss[i] / correction * reference_amp;
+                  }
                 }
               }
             }

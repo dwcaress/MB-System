@@ -46,6 +46,9 @@ autoreconf -fvi
 make -j3 
 make install
 
+# Update ldconfig
+ldconfig -v
+
 popd
 
 rm -rf PROJ gdal

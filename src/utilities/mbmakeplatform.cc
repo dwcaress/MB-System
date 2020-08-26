@@ -1,7 +1,7 @@
 /*--------------------------------------------------------------------
  *    The MB-system:  mbmakeplatform.c  9/5/2015
  *
- *    Copyright (c) 2015-2019 by
+ *    Copyright (c) 2015-2020 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039

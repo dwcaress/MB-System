@@ -1,7 +1,7 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbneptune2esf.c	2004/11/11
  *
- *    Copyright (c) 2004-2019 by
+ *    Copyright (c) 2004-2020 by
  *    Gordon Keith
  *      CSIRO Marine Research
  *      Castray Esplanade

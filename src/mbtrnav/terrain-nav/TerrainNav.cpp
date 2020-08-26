@@ -1075,7 +1075,7 @@ void TerrainNav::reinitFilter(bool lowInfoTransition) {
 		interpMeasAttitude = tNavFilter->interpMeasAttitude;
 		driftRate = tNavFilter->vehicle->driftRate;
 		distrib_type = tNavFilter->getDistribToSave();
-                logs(TL_OMASK(TL_TERRAIN_NAV, TL_BOTH), "reinitFilter: getDistribToSave == %d\n", distrib_type);
+                logs(TL_OMASK(TL_TERRAIN_NAV, TL_LOG), "reinitFilter: getDistribToSave == %d\n", distrib_type);
 
 		// More than one setting is encoded in the useModifiedSetting value,
 		// so always use the one received from the client through the setModifiedWeighting() call

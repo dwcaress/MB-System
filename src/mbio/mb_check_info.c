@@ -1,7 +1,7 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_check_info.c	1/25/93
  *
- *    Copyright (c) 1993-2019 by
+ *    Copyright (c) 1993-2020 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -251,8 +251,17 @@ int mb_get_info(int verbose, char *file, struct mb_info_struct *mb_info, int lon
 			fprintf(stderr, "dbg2  Cannot open requested inf file: %s\n", file_inf);
 		}
 
+  	if (verbose >= 2) {
+  		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
+  		fprintf(stderr, "dbg2  Return values:\n");
+  		fprintf(stderr, "dbg2       loaded:                   %d\n", mb_info->loaded);
+  		fprintf(stderr, "dbg2       error:                    %d\n", *error);
+  		fprintf(stderr, "dbg2  Return status:\n");
+  		fprintf(stderr, "dbg2       status:  %d\n", status);
+  	}
+
 		/* return in disgrace */
-		return (status);
+  	return (status);
 	}
 
 	/* load information from inf file */

@@ -1,7 +1,7 @@
 /*--------------------------------------------------------------------
  *    The MB-system:  mbnavadjust_prog.c  3/23/00
  *
- *    Copyright (c) 2000-2019 by
+ *    Copyright (c) 2000-2020 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -7656,9 +7656,9 @@ int mbnavadjust_invertnav() {
          */
 
         /* loop over all ties applying the offsets to the chunks partitioned according to survey quality */
-        n_iteration = 1000;
+        n_iteration = 10000;
         convergence = 1000.0;
-        convergence_threshold = 0.0005;
+        convergence_threshold = 0.0001;
         damping = 0.001;
         for (int iteration=0; iteration < n_iteration && convergence > convergence_threshold; iteration ++) {
             fprintf(stderr,"\nStage 2 relaxation iteration %d\n", iteration);

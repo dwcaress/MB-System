@@ -1,7 +1,7 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbbackangle.c	1/6/95
  *
- *    Copyright (c) 1995-2019 by
+ *    Copyright (c) 1995-2020 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -862,13 +862,13 @@ int main(int argc, char **argv) {
 
 		/* set correction modes according to format */
 		if (format == MBF_SB2100RW || format == MBF_SB2100B1 || format == MBF_SB2100B2 || format == MBF_EDGJSTAR ||
-		    format == MBF_EDGJSTR2 || format == MBF_RESON7KR)
+		    format == MBF_EDGJSTR2 || format == MBF_RESON7KR || format == MBF_RESON7K3)
 			ss_corr_type = MBP_SSCORR_DIVISION;
 		else if (format == MBF_MBLDEOIH)
 			ss_corr_type = MBP_SSCORR_UNKNOWN;
 		else
 			ss_corr_type = MBP_SSCORR_SUBTRACTION;
-    if (format == MBF_3DWISSLR || format == MBF_3DWISSLP)
+    if (format == MBF_3DWISSLR || format == MBF_3DWISSLP || format == MBF_RESON7K3)
 			amp_corr_type = MBP_AMPCORR_DIVISION;
 	  else
 			amp_corr_type = MBP_AMPCORR_SUBTRACTION;
@@ -1074,13 +1074,13 @@ int main(int argc, char **argv) {
 		while (error <= MB_ERROR_NO_ERROR) {
 
 			/* read a ping of data */
-			status &= mb_get(verbose, mbio_ptr, &kind, &pings, time_i, &time_d, &navlon, &navlat, &speed, &heading, &distance,
+			status = mb_get(verbose, mbio_ptr, &kind, &pings, time_i, &time_d, &navlon, &navlat, &speed, &heading, &distance,
 			                &altitude, &sonardepth, &beams_bath, &beams_amp, &pixels_ss, beamflag, bath, amp, bathacrosstrack,
 			                bathalongtrack, ss, ssacrosstrack, ssalongtrack, comment, &error);
 
 			/* Apply ESF Edits if available */
 			if (esf.nedit > 0 && error == MB_ERROR_NO_ERROR && kind == MB_DATA_DATA) {
-				status &= mb_esf_apply(verbose, &esf, time_d, 0, beams_bath, beamflag, &error);
+				status = mb_esf_apply(verbose, &esf, time_d, 0, beams_bath, beamflag, &error);
 			}
 
 			if ((navg > 0 && (error == MB_ERROR_TIME_GAP || error == MB_ERROR_EOF)) || (navg >= pings_avg) ||
@@ -1134,12 +1134,14 @@ int main(int argc, char **argv) {
 			if (error == MB_ERROR_NO_ERROR || error == MB_ERROR_TIME_GAP) {
 				/* if needed, attempt to get sidescan correction type */
 				if (ss_corr_type == MBP_SSCORR_UNKNOWN) {
-					status &= mb_sidescantype(verbose, mbio_ptr, nullptr, &ss_type, &error);
+					status = mb_sidescantype(5, mbio_ptr, nullptr, &ss_type, &error);
 					if (status == MB_SUCCESS) {
-						if (ss_type == MB_SIDESCAN_LINEAR)
+						if (ss_type == MB_SIDESCAN_LINEAR) {
 							ss_corr_type = MBP_SSCORR_DIVISION;
-						else
+            }
+						else {
 							ss_corr_type = MBP_SSCORR_SUBTRACTION;
+            }
 					}
 					else {
 						status = MB_SUCCESS;
