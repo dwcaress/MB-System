@@ -276,7 +276,7 @@ static bool s_peer_idval_cmp(void *item, void *value)
                 MST_COUNTER_SET(self->profile->stats->status[NETIF_STA_CLI_LIST_LEN],mlist_size(self->list));
             }
             if ( (NULL!=pcon) && ( iobytes > 0) ) {
-                fprintf(stderr,"%s - [UDPCON] handle SUB connect message (if any)\n",__FUNCTION__);
+                PMPRINT(MOD_NETIF,NETIF_V1,(stderr,"%s - [UDPCON] handle SUB connect message (if any)\n",__FUNCTION__));
                 int errout=0;
                 // invoke handler (if client sent connect message)
                 MST_METRIC_START(self->profile->stats->metrics[NETIF_CH_HANDLE_XT], mtime_dtime());
