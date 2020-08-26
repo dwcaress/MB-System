@@ -20,6 +20,7 @@ include "beta" in the tag name are preliminary and generally not announced.
 Distributions that do not include "beta" in the tag name correspond to the major,
 announced releases. The source distributions associated with all releases, major or beta, are equally accessible as tarballs through the Github interface.
 
+- Version 5.7.6beta45    August 26, 2020
 - Version 5.7.6beta44    August 24, 2020
 - Version 5.7.6beta43    July 23, 2020
 - Version 5.7.6beta42    July 21, 2020
@@ -354,29 +355,34 @@ announced releases. The source distributions associated with all releases, major
 ### MB-System Version 5.7 Release Notes:
 --
 
+#### 5.7.6beta45 (August 26, 2020)
+
+Mbtrnpp: Changed most shell output from stdout to stderr. Altered logic for
+triggering TRN reinits.
+
+Formats 12 (MBF_SBSIOCEN), 13 (MBF_SBSIOLSI), 14 (MBF_SBURICEN), 15 (MBF_SBURIVAX):
+Fixed string overrun while writing long comment records.
+
 #### 5.7.6beta44 (August 24, 2020)
 
-Format 89 (MBF_RESON7K3): Fixed handling and processing of backscatter data, which
-had a variety of problems. Now, the pseudo-sidescan reported by MB-Systen as sidescan
-can be recalculated by mbprocess from the desired backscatter source.
-The default is to use the best source of backscatter available, with the order
-of "bestness" being:
-
-1. Calibrated snippets
-1. Snippets
-1. Calibrated sidescan
-1. Sidescan
-
+Format 89 (MBF_RESON7K3): Fixed handling and processing of backscatter data,
+which had a variety of problems. Now, the pseudo-sidescan reported by MB-System
+as sidescan can be recalculated by mbprocess from the desired backscatter
+source. The default is to use the best source of backscatter available, with
+the order of "bestness" being:
+  1. Calibrated snippets
+  2. Snippets
+  3. Calibrated sidescan
+  4. Sidescan
 You can force mbpreprocess to use a desired backscatter source with the
---multibeam-sidescan-source option, where:
+  --multibeam-sidescan-source option, where:
+  --multibeam-sidescan-source=C ==> Calibrated snippet records
+  --multibeam-sidescan-source=S ==> Snippet records
+  --multibeam-sidescan-source=W ==> Calibrated sidescan records
+  --multibeam-sidescan-source=B ==> Sidescan records
 
-*  --multibeam-sidescan-source=C ==> Calibrated snippet records
-*  --multibeam-sidescan-source=S ==> Snippet records
-*  --multibeam-sidescan-source=W ==> Calibrated sidescan records
-*  --multibeam-sidescan-source=B ==> Sidescan records
-
-
-Format 89 (MBF_RESON7K3): Added support for additional informational data records.
+Format 89 (MBF_RESON7K3): Added support for additional informational data
+records.
 
 Mbsegylist: Fixed formatting time strings.
 
@@ -386,15 +392,17 @@ Mbextractsegy: Fixed embedding the seafloor depth value correctly into output
 segy trace headers when the data are being extracted from Edgetech Jstar format
 data (MBIO format 132).
 
-Mbnavadjust: Changed the inversion control parameters such that the second phase
-of the navigation adjustment solution, a coarse progressive relaxation intended
-to achieve large scale shifts between surveys, now has a maximum iteration count
-of 10000 (previously 1000) and a convergence criterea of 0.00001 (previously 0.0001).
+Mbnavadjust: Changed the inversion control parameters such that the second
+phase of the navigation adjustment solution, a coarse progressive relaxation
+intended to achieve large scale shifts between surveys, now has a maximum
+iteration count of 10000 (previously 1000) and a convergence criterea of
+0.00001 (previously 0.0001).
 
 Mbgrd2octree: New program to translate a GMT bathymetry grid to an octree
-representation in the form used by the Stanford/MBARI Terrain Relative Navigation
-software. The octree files have a suffix convention of *.ob for octree binary.
-The input bathymetry grids are assumed to be in UTM coordinates with square cells.
+representation in the form used by the Stanford/MBARI Terrain Relative
+Navigation software. The octree files have a suffix convention of *.ob for
+octree binary. The input bathymetry grids are assumed to be in UTM coordinates
+with square cells.
 
 Mbtrnpp: Made the --platform-target-sensor option functional. Added options
         --reinit-qain --reinit-xyoffset=max --reinint-zoffset=min/max
@@ -406,23 +414,24 @@ because it lacks an *.inf file.
 
 Mbsvplist: Added capability to extract sound velocity profile (SVP) models from
 MB_DATA_CTD type records as well as MB_DATA_SOUND_VELOCITY_PROFILE type records
-(which is the default). This is controlled with the -A option: -AS specifies use
-of SVP records, and -AC specifies use of CTD records. At present, the only
-relevant data formats are the old Reson (88) and current Teledyne (89) *.s7k formats.
+(which is the default). This is controlled with the -A option: -AS specifies
+use of SVP records, and -AC specifies use of CTD records. At present, the only
+relevant data formats are the old Reson (88) and current Teledyne (89) *.s7k
+formats.
 
-Mbvelocitytool: Fixed the -B and -E options to specify the allowed begin and end
-times of swath data used for modeling; previously these options were ignored. Also
-fixed a memory leak involving the display SVP profiles.
+Mbvelocitytool: Fixed the -B and -E options to specify the allowed begin and
+end times of swath data used for modeling; previously these options were
+ignored. Also fixed a memory leak involving the display SVP profiles.
 
-Mbgetphotocorrection: The --show-images option now uses the OpenCV imshow() function
-to briefly display the images being read and processed.
+Mbgetphotocorrection: The --show-images option now uses the OpenCV imshow()
+function to briefly display the images being read and processed.
 
 Mbphotomosaic: The --show-images option now uses the OpenCV imshow() function
 to briefly display the images being read and processed.
 
-Mbphotogrammetry: The --show-images option now uses the OpenCV imshow() function
-to briefly display stereo pairs being read and processed, along with the disparity
-function calculated for the image pair.
+Mbphotogrammetry: The --show-images option now uses the OpenCV imshow()
+function to briefly display stereo pairs being read and processed, along with
+the disparity function calculated for the image pair.
 
 #### 5.7.6beta42 (July 21, 2020)
 
