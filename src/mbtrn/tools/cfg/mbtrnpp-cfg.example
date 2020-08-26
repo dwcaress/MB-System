@@ -245,10 +245,10 @@ reinit-file=Y
 
 // opt "reinit-xyoffset" [double]
 // reinitialize TRN whenever the magnitude of the
-// lateral converged offset is greater than max
+// lateral converged offset exceeds specified limit
 reinit-xyoffset=150.0
 
 // opt "reinit-zoffset" [double]
 // reinitialize TRN whenever the converged z-offset
-// is less than min or more than max.
+// is is outside specified range.
 reinit-zoffset=-2.0/2.0
