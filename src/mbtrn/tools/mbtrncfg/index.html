@@ -21,6 +21,10 @@
     <h2>mbtrnpp Command Line Builder</h2>
     <p>Hover over parameter name for <a onmouseover="showhelp('general')">help</a></p>
     <div style="margin: 25px 25px 25px 40px;">
+        <div style="float:right;margin-top:20px;margin-right:400px;top:0;position:sticky;">
+            <textarea name="helptext" id="helptext" spellcheck="false" class="help"></textarea>
+        </div>
+
          <form method=POST name="settings" id="cfgform" enctype="text/plain">
                 <table>
                     <tr>
@@ -31,8 +35,9 @@
                         <td ></td>
                         <td ></td>
                         <td style="text-align:center; vertical-align:top;" rowspan="28">
-                            <div style="margin-left:30px;margin-top:0px;">
+                          <!--  <div style="margin-left:30px;margin-top:0px;position:sticky">
                               <textarea name="helptext" id="helptext" spellcheck="false" class="help"></textarea>
+                           -->
                             </div>
                         </td>
 					</tr>
@@ -47,7 +52,7 @@
                             </td>
                     </tr>
                     <tr>
-                        <td class="param" onmouseover="showhelp('MBTRNDIR')"><a>MBTRNDIR</a></td>
+                        <td class="param" onmouseover="showhelp('TRN_MBTRNDIR')"><a>TRN_MBTRNDIR</a></td>
                         <td class="entry"><input type="text" size="48" name="mbtrndir" id="mbtrndir" value="">
                             </td>
                     </tr>
@@ -111,7 +116,7 @@
                     </tr>
                     <tr>
                         <td class="param" onmouseover="showhelp('median-filter')"><a>median-filter</a></td>
-                        <td class="entry"><input type="text" size="8" name="median" value="">
+                        <td class="entry"><input type="text" size="8" name="median-filter" value="">
                             </td>
                     </tr>
                     <tr><td><div style="height:5px;"></div></td></tr>
@@ -130,6 +135,74 @@
                   <tr>
                       <td class="param" onmouseover="showhelp('trn-map')"><a>trn-map</a></td>
                       <td class="entry"><input type="text" size="64" name="trn-map" value="">
+                          </td>
+                  </tr>
+                  <tr>
+                      <td class="param" onmouseover="showhelp('trn-mtype')"><a>trn-mtype</a></td>
+                      <td class="entry"><input type="text" size="8" name="trn-mtype" value="">
+                          </td>
+                  </tr>
+                  <tr>
+                      <td class="param" onmouseover="showhelp('trn-ftype')"><a>trn-ftype</a></td>
+                      <td class="entry"><input type="text" size="8" name="trn-ftype" value="">
+                          </td>
+                  </tr>
+                  <tr>
+                      <td class="param" onmouseover="showhelp('trn-fgrade')"><a>trn-fgrade</a></td>
+                      <td class="entry"><input type="text" size="8" name="trn-fgrade" value="">
+                          </td>
+                  </tr>
+                  <tr>
+                      <td class="param" onmouseover="showhelp('trn-reinit')"><a>trn-reinit</a></td>
+                      <td class="entry"><input type="text" size="8" name="trn-reinit" value="">
+                          </td>
+                  </tr>
+                  <tr>
+                      <td class="param" onmouseover="showhelp('trn-mweight')"><a>trn-mweight</a></td>
+                      <td class="entry"><input type="text" size="8" name="trn-mweight" value="">
+                          </td>
+                  </tr>
+                  <tr>
+                      <td class="param" onmouseover="showhelp('trn-ncov')"><a>trn-ncov</a></td>
+                      <td class="entry"><input type="text" size="8" name="trn-ncov" value="">
+                          </td>
+                  </tr>
+                  <tr>
+                      <td class="param" onmouseover="showhelp('trn-nerr')"><a>trn-nerr</a></td>
+                      <td class="entry"><input type="text" size="8" name="trn-nerr" value="">
+                          </td>
+                  </tr>
+                  <tr>
+                      <td class="param" onmouseover="showhelp('trn-ecov')"><a>trn-ecov</a></td>
+                      <td class="entry"><input type="text" size="8" name="trn-ecov" value="">
+                          </td>
+                  </tr>
+                  <tr>
+                      <td class="param" onmouseover="showhelp('trn-eerr')"><a>trn-eerr</a></td>
+                      <td class="entry"><input type="text" size="8" name="trn-eerr" value="">
+                          </td>
+                  </tr>
+                  <tr><td><div style="height:5px;"></div></td></tr>
+                  <tr>
+                      <td class="param" onmouseover="showhelp('reinit-gain')"><a>reinit-gain</a></td>
+                      <td class="entry">
+                          Y<input type="radio" size="48" name="reinit-gain" value="en" checked>
+                              N<input type="radio" size="48" name="reinit-gain" value="dis">
+                                  </td>
+                  </tr>
+                  <tr>
+                      <td class="param" onmouseover="showhelp('reinit-file')"><a>reinit-file</a></td>
+                      <td class="entry"><input type="text" size="8" name="reinit-file" value="">
+                          </td>
+                  </tr>
+                  <tr>
+                      <td class="param" onmouseover="showhelp('reinit-xyoffset')"><a>reinit-xyoffset</a></td>
+                      <td class="entry"><input type="text" size="8" name="reinit-xyoffset" value="">
+                          </td>
+                  </tr>
+                  <tr>
+                      <td class="param" onmouseover="showhelp('reinit-zoffset')"><a>reinit-zoffset</a></td>
+                      <td class="entry"><input type="text" size="8" name="reinit-zoffset" value="">
                           </td>
                   </tr>
                   <tr>
@@ -180,6 +253,16 @@
                   <tr>
                       <td class="param" onmouseover="showhelp('statsec')"><a>statsec</a></td>
                       <td class="entry"><input type="text" size="8" name="statsec" value="">
+                          </td>
+                  </tr>
+                  <tr>
+                      <td class="param" onmouseover="showhelp('statflags')"><a>statflags</a></td>
+                      <td class="entry"><input type="text" size="64" name="statflags" value="">
+                          </td>
+                  </tr>
+                 <tr>
+                      <td class="param" onmouseover="showhelp('delay')"><a>delay</a></td>
+                      <td class="entry"><input type="text" size="8" name="delay" value="">
                           </td>
                   </tr>
               </table>
@@ -234,7 +317,11 @@
         <button type="button" class="button buttong" onclick="javascript:update()" onmouseover="showhelp('update')">Update</button>
         <button type="button" class="button buttonb opacityDefault" id="cbutton" onclick="javascript:copyclip()" onmouseover="showhelp('copy')">Copy</button>
         <button type="button" class="button buttonr buttonsm" onclick="javascript:load_ctx()" onmouseover="showhelp('load')">Load</button>
-
+        <form method=POST name="output" id="outform" enctype="text/plain">
+            <button type="button" class="button buttony buttonsm" onclick="javascript:write_cfg()" onmouseover="showhelp('export')">Export</button>
+            Verbose Y<input type="radio" size="48" name="verbose-export" value="en" checked>
+            N<input type="radio" size="48" name="verbose-export" value="dis">
+        </form>
     </div>
 
 

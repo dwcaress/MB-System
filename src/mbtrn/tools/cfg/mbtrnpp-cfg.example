@@ -5,8 +5,9 @@
 # - use '#' or '//' for comments
 # - some options support variable substitution:
 #     option        variable          description
+#     ------        --------          -----------
 #     output        SESSION           mbtrpp session ID (YYYYMMDD-hhmmss)
-#     input         TRN_RESON_HOST[1] reson IP address
+#     input         TRN_RESON_HOST[1] input socket IP address
 #     mb-out        TRN_HOST[1]       TRN processing host IP
 #     trn-out       TRN_HOST
 #     trn-mid       TRN_SESSION       TRN mission ID (YYYY-JJJ) (JJJ: year day)
@@ -231,5 +232,23 @@ trn-decn=9
 // opt "trn-nombgain" [bool]
 // enable/disable gating TRN resets using sonar transmit gain
 // use Y/1: enable N/0: disable
-#trn-nombgain=Y
+#trn-nombgain=Y (deprecated, use reinit-gain)
 
+// opt "reinit-gain" [none]
+// enable/disable gating TRN resets using sonar transmit gain
+reinit-gain
+
+// opt "reinit-file" [bool]
+// reinitialize TRN every time a new
+// file is read when parsing a datalist
+reinit-file=Y
+
+// opt "reinit-xyoffset" [double]
+// reinitialize TRN whenever the magnitude of the
+// lateral converged offset exceeds specified limit
+reinit-xyoffset=150.0
+
+// opt "reinit-zoffset" [double]
+// reinitialize TRN whenever the converged z-offset
+// is is outside specified range.
+reinit-zoffset=-2.0/2.0
