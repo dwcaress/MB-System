@@ -32,7 +32,7 @@
 
 #define DLDEBUG 0
 
-DataLogWriter::DataLogWriter(const char *objectName, 
+DataLogWriter::DataLogWriter(const char *objectName,
 			     DataLog::FileFormat fileFormat,
 			     Boolean autoTimestamp)
   : DataLog(objectName, DataLog::Write, fileFormat),
@@ -45,10 +45,10 @@ DataLogWriter::DataLogWriter(const char *objectName,
   char *trnLogDir = getenv(TRNLogDirName);
   if (trnLogDir == 0) {
     // No ENV for logs. Use current directory
-    // 
-    printf("\n\n\tDataLog::DataLog() - environment variable %s not set\n",
-      TRNLogDirName);
-    printf("\tDataLog::DataLog() - Log directory is in local directory!\n\n");
+    //
+    //printf("\n\n\tDataLog::DataLog() - environment variable %s not set\n",
+    //  TRNLogDirName);
+    //printf("\tDataLog::DataLog() - Log directory is in local directory!\n\n");
     trnLogDir = strdup(".");
   }
 
@@ -99,7 +99,7 @@ void DataLogWriter::addField(DataField *field)
 	    "Illegal field name: \"%s\"; whitespace not allowed in name",
 	    field->name());
 
-    throw Exception(errorBuf); 
+    throw Exception(errorBuf);
   }
 
   fields.add(&field);
@@ -115,7 +115,7 @@ void DataLogWriter::writeHeader()
   switch (_fileFormat) {
 
   case BinaryFormat:
-    fprintf(fileStream(), "%s %s %s\n", 
+    fprintf(fileStream(), "%s %s %s\n",
 	    CommentChar, BinaryFormatMnem, mnemonic());
     break;
 
@@ -138,8 +138,8 @@ void DataLogWriter::writeHeader()
     // May03 - also print the descriptive name and the units for each field
     //       - delimit long name and units fields by commas rather than space
     //
-    fprintf(fileStream(), "%s %s %s %s ,%s ,%s \n", 
-	    CommentChar, field->typeMnemonic(), field->name(), 
+    fprintf(fileStream(), "%s %s %s %s ,%s ,%s \n",
+	    CommentChar, field->typeMnemonic(), field->name(),
 	    field->asciiFormat(),
 	    field->longName(), field->units());
   }
@@ -213,4 +213,3 @@ TimeIF::TimeSpec *DataLogWriter::getTimeSpec()
    _timeIFSpec.nanoSeconds = _timeSpec.tv_nsec;
    return &_timeIFSpec;
 }
-

@@ -1,7 +1,7 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_sbsioswb.c	9/18/93
  *
- *    Copyright (c) 1994-2019 by
+ *    Copyright (c) 1994-2020 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039

@@ -1,7 +1,7 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_jstar.c	10/4/94
  *
- *    Copyright (c) 2005-2019 by
+ *    Copyright (c) 2005-2020 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -2135,7 +2135,7 @@ int mbsys_jstar_extract_segytraceheader(int verbose, void *mbio_ptr, void *store
 		const double dsonaraltitude = 0.001 * sbp->sonarAltitude;
 		double dwaterdepth;
 		if (sbp->sonarDepth > 0)
-			dwaterdepth = 0.001 * sbp->sonarDepth;
+			dwaterdepth = 0.001 * sbp->sonarDepth + dsonaraltitude;
 		else
 			dwaterdepth = dsonardepth + dsonaraltitude;
 		const int sonardepth = (int)(100 * dsonardepth);

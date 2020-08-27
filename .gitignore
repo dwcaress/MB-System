@@ -39,6 +39,7 @@ src/mbtrnsave/
 src/mbtrnavsave/
 src/mbtrnutilssave/
 src/mbtrn/mbtnav-cli
+src/mbtrnav/build/*
 src/mbtrnav/netif-test
 src/mbtrnav/trnclient-test
 src/mbtrnav/trnif-test
@@ -145,3 +146,7 @@ src/photo/mbphotomosaic
 src/photo/mbgetphotocorrection
 src/qt-mbgui/qrc_resources.cpp
 src/mbtrnav/trnu-cli
+src/mbtrn/mb12csv
+src/mbtrnutils/mbgrd2octree
+src/mbtrnav/trnusvr-test
+src/mbtrnav/bin/libtrn.a

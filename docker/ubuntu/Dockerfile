@@ -4,6 +4,7 @@ FROM ubuntu:${OS_TAG}
 
 ARG GMT_SOURCE_TAG
 ARG PROJ_SOURCE_TAG
+ARG DEBIAN_FRONTEND=noninteractive
 
 # Install all dependencies except for proj and gmt from default repos
 RUN apt-get update && \

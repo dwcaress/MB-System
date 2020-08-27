@@ -1,7 +1,7 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_singlebeam.c	4/13/99
  *
- *    Copyright (c) 1999-2019 by
+ *    Copyright (c) 1999-2020 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039

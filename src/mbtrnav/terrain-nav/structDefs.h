@@ -1,6 +1,6 @@
 /* File: structDefs.h
  * -------------------
- * structDefs defines various structs and their member functions for use in 
+ * structDefs defines various structs and their member functions for use in
  * terrainNav type programs.
  *
  * Dependencies:
@@ -34,7 +34,7 @@
 #define PI 3.14159265358979
 #endif
 
-#define TRN_MAX_BEAMS  25
+#define TRN_MAX_BEAMS  91
 
 // Sensor types
 //1: DVL, 2: Multibeam, 3: Single Beam, 5: Imagenex delta t multibeam
@@ -85,7 +85,7 @@ struct poseT {
   bool bottomLock;						  //Validity flag for DVL lock onto seafloor
 
   double covariance[N_COVAR];   //XYZ, phi, theta, psi, wy, wz covariance (passively stable in roll) (see above units)
-  
+
 
   poseT();
   poseT& operator=(poseT& rhs);
@@ -102,8 +102,8 @@ struct measT {
   int dataType; //1: DVL, 2: Multibeam, 3: Single Beam,
 		//4: Homer Relative Measurement, 5: Imagenex multibeam, 6: Side-looking DVL
   double phi, theta, psi;
-  double x, y, z;				
-  double* covariance;		
+  double x, y, z;
+  double* covariance;
   double* ranges;
   double* crossTrack;
   double* alongTrack;
@@ -162,7 +162,7 @@ struct vehicleT
   double driftRate;
   transformT* T_sv;			//TODO:Sensor to Vehicle transform (TODO:rename)
   sensorT* sensors;
-  
+
   vehicleT();
   vehicleT(char* fileName);
   ~vehicleT();
@@ -176,7 +176,7 @@ struct vehicleT
 //#define TRN_MSG_SIZE 2500       // Increased to accomomdate DeltaT (120 beams)
 //#define TRN_MSG_SIZE 30000      // Increased to accomomdate Reson (512 beams)
 #define TRN_MSG_SIZE 8000         // Decreased.  30000 started to cause Nacks in sim.
- 
+
 // Payload size does not include header of one char and the message length
 // For use in socket reads and writes
 #define TRN_PAYLOAD_SIZE (TRN_MSG_SIZE - 2*sizeof(char) - sizeof(unsigned int))
@@ -209,7 +209,7 @@ struct commsT
   char *logname;
 
   // Changing parameter from a char to an int
-  // 
+  //
   commsT();
   commsT(char msg_type);
   commsT(char msg_type, int parameter);
@@ -351,26 +351,26 @@ enum
 
 // Use filter grade message.
 // buf[0] = 1 for high, 0 for low
-// 
+//
 // Server responds with an ack if initialization was successful, otherwise nack.
 
 #define TRN_ACK '+'
 
 // Ack last message. Request succeeded.
 // Sent when no data other response is expected.
-// 
+//
 
 #define TRN_NACK '-'
 
 // Nack last message. Request failed.
 // Sent when no data other response is expected, or a data request failed.
-// 
+//
 
 #define TRN_BYE 'B'
 
 // Optional message to close the link.
 // No response expected.
-// 
+//
 
 #define TRN_OUT_MEAS  'O'
 

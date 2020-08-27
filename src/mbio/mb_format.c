@@ -1,7 +1,7 @@
 /*--------------------------------------------------------------------
  *    The MB-system:  mb_format.c  2/18/94
  *
- *    Copyright (c) 1993-2019 by
+ *    Copyright (c) 1993-2020 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -3516,7 +3516,7 @@ int mb_imagelist_open(int verbose, void **imagelist_ptr, char *path, int *error)
 /*--------------------------------------------------------------------*/
 int mb_imagelist_read(int verbose, void *imagelist_ptr, int *imagestatus,
                       char *path0, char *path1, char *dpath,
-                      double *time_d, double *dtime_d, int *error) {
+                      double *time_d, double *dtime_d, double *quality, int *error) {
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -3554,7 +3554,8 @@ int mb_imagelist_read(int verbose, void *imagelist_ptr, int *imagestatus,
           *imagestatus = MB_IMAGESTATUS_NONE;
           *time_d = 0.0;
           *dtime_d = 0.0;
-	  char *buffer_ptr = fgets(buffer, MB_PATH_MAXLINE, imagelist->fp);
+          *quality = 0.0;
+          char *buffer_ptr = fgets(buffer, MB_PATH_MAXLINE, imagelist->fp);
 
           /* deal with end of imagelist file */
           if (buffer_ptr != buffer) {
@@ -3592,8 +3593,12 @@ int mb_imagelist_read(int verbose, void *imagelist_ptr, int *imagestatus,
           /* check for valid image entry */
           else {
               /* try to read a stereo pair entry */
-              int nscan = sscanf(buffer, "%s %s %lf %lf", path0, path1, time_d, dtime_d);
-              if (nscan == 4) {
+              int nscan = sscanf(buffer, "%s %s %lf %lf %lf", path0, path1, time_d, dtime_d, quality);
+              if (nscan >= 4) {
+                  /* if no quality value assume 1.00 */
+                  if (nscan == 4) {
+                      *quality = 1.00;
+                  }
 
                   /* if relative path make it global */
                   if (strcmp(path0, "NULL") != 0) {
@@ -3650,8 +3655,13 @@ int mb_imagelist_read(int verbose, void *imagelist_ptr, int *imagestatus,
 
               /* else try to read a single image entry */
               /* line should have one path and one time stamp */
-              else if ((nscan = sscanf(buffer, "%s %lf", path0, time_d)) == 2) {
+              else if ((nscan = sscanf(buffer, "%s %lf %lf", path0, time_d, quality)) >= 2) {
                   if (strcmp(path0, "NULL") != 0) {
+
+                      /* if no quality value assume 1.00 */
+                      if (nscan == 2) {
+                          *quality = 1.00;
+                      }
 
                       /* if relative path make it global */
                       int len;
@@ -3744,8 +3754,8 @@ int mb_imagelist_read(int verbose, void *imagelist_ptr, int *imagestatus,
         imagelist2 = (struct mb_imagelist_struct *)imagelist->imagelist;
         if (imagelist2->open) {
           /* recursively call mb_read_imagelist */
-          status = mb_imagelist_read(verbose, (void *)imagelist->imagelist, imagestatus, path0, path1, dpath, time_d, dtime_d,
-                                     error);
+          status = mb_imagelist_read(verbose, (void *)imagelist->imagelist, imagestatus,
+                                    path0, path1, dpath, time_d, dtime_d, quality, error);
 
           /* if imagelist read fails close it */
           if (status == MB_FAILURE) {
@@ -3773,6 +3783,7 @@ int mb_imagelist_read(int verbose, void *imagelist_ptr, int *imagestatus,
     fprintf(stderr, "dbg2       dpath:       %s\n", dpath);
     fprintf(stderr, "dbg2       time_d:      %f\n", *time_d);
     fprintf(stderr, "dbg2       dtime_d:     %f\n", *dtime_d);
+    fprintf(stderr, "dbg2       quality:     %f\n", *quality);
     fprintf(stderr, "dbg2       error:       %d\n", *error);
     fprintf(stderr, "dbg2  Return status:\n");
     fprintf(stderr, "dbg2       status:      %d\n", status);

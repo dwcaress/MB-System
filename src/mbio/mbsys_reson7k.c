@@ -1,7 +1,7 @@
 /*--------------------------------------------------------------------
  *    The MB-system:  mbsys_reson7k.c  3.00  3/23/2004
  *
- *    Copyright (c) 2004-2019 by
+ *    Copyright (c) 2004-2020 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -6752,8 +6752,8 @@ int mbsys_reson7k_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind
       else {
         const double alpha = RTD * beamgeometry->angle_alongtrack[i] + bathymetry->pitch;
         const double beta = 90.0 - RTD * beamgeometry->angle_acrosstrack[i] + bathymetry->roll;
-	double phi;
-	double theta;
+	      double phi;
+	      double theta;
         mb_rollpitch_to_takeoff(verbose, alpha, beta, &theta, &phi, error);
         angles[i] = theta;
         angles_forward[i] = phi;
@@ -7833,6 +7833,8 @@ int mbsys_reson7k_extract_svp(int verbose, void *mbio_ptr, void *store_ptr, int 
 
   struct mbsys_reson7k_struct *store = (struct mbsys_reson7k_struct *)store_ptr;
   s7kr_svp *svp = (s7kr_svp *)&store->svp;
+  s7kr_ctd *ctd = (s7kr_ctd *)&store->ctd;;
+  double latitude = 0.0;
 
   /* get data kind */
   *kind = store->kind;
@@ -7848,6 +7850,40 @@ int mbsys_reson7k_extract_svp(int verbose, void *mbio_ptr, void *store_ptr, int 
     for (int i = 0; i < *nsvp; i++) {
       depth[i] = svp->depth[i];
       velocity[i] = svp->sound_velocity[i];
+    }
+
+    /* done translating values */
+  }
+
+  else if (*kind == MB_DATA_CTD) {
+    /* get number of depth-velocity pairs */
+    *nsvp = ctd->n;
+
+    if (ctd->pressure_flag == 0) {
+      if (ctd->latitude != 0.0) {
+        latitude = RTD * ctd->latitude;
+      }
+      else if (store->read_bathymetry && store->bathymetry.optionaldata
+          && store->bathymetry.latitude != 0.0) {
+          latitude = RTD * store->bathymetry.latitude;
+      }
+      else if (store->position.latitude != 0.0 && store->position.type == 0) {
+        latitude = RTD * store->position.latitude;
+      }
+      else if (store->navigation.latitude != 0.0) {
+        latitude = RTD * store->navigation.latitude;
+      }
+    }
+
+    /* get profile */
+    for (int i = 0; i < *nsvp; i++) {
+      if (ctd->pressure_flag == 0) {
+        status = mb_seabird_depth(verbose, (double)ctd->pressure_depth[i], latitude, &depth[i], error);
+      }
+      else {
+        depth[i] = ctd->pressure_depth[i];
+      }
+      velocity[i] = ctd->sound_velocity[i];
     }
 
     /* done translating values */

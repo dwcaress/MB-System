@@ -1,7 +1,7 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_sbsiolsi.c	2/2/93
  *
- *    Copyright (c) 1993-2019 by
+ *    Copyright (c) 1993-2020 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -342,7 +342,7 @@ int mbr_wt_sbsiolsi(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		/* comment */
 		else if (store->kind == MB_DATA_COMMENT) {
 			strcpy(datacomment, "cc");
-			strncat(datacomment, store->comment, MBSYS_SB_MAXLINE - 1);
+			strncat(datacomment, store->comment, mb_io_ptr->data_structure_size - 3);
 		}
 	}
 

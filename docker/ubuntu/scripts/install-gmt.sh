@@ -19,5 +19,8 @@ cmake -DGSHHG_ROOT=/usr/share/gmt-gshhg -DDCW_ROOT=/usr/share/gmt-dcw ..
 make
 make install
 
+# Update ldconfig
+ldconfig -v
+
 cd ../..
 rm -rf gmt

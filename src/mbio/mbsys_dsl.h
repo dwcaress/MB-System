@@ -1,7 +1,7 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_dsl.h	8/5/94
  *
- *    Copyright (c) 1996-2019 by
+ *    Copyright (c) 1996-2020 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039

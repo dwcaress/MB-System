@@ -1,7 +1,7 @@
 //--------------------------------------------------------------------
 //    The MB-system:  mbsys_reson7k3.h  1/8/2019
 //
-//    Copyright (c) 2004-2019 by
+//    Copyright (c) 2004-2020 by
 //    David W. Caress (caress@mbari.org)
 //      Monterey Bay Aquarium Research Institute
 //      Moss Landing, CA 95039
@@ -179,6 +179,8 @@
 #define R7KRECID_SoundVelocity 7610
 #define R7KRECID_AbsorptionLoss 7611
 #define R7KRECID_SpreadingLoss 7612
+#define R7KRECID_ProfileAverageSalinity 7613
+#define R7KRECID_ProfileAverageTemperature 7614
 
 //-----------------------------------------------------------------
 // Record size definitions
@@ -256,7 +258,7 @@
 #define R7KHDRSIZE_VernierProcessingDataFiltered 26
 #define R7KRDTSIZE_VernierProcessingDataFiltered 16
 #define R7KHDRSIZE_InstallationParameters 616
-#define R7KHDRSIZE_BITESummary 36
+#define R7KHDRSIZE_BITESummary 34
 #define R7KHDRSIZE_CompressedBeamformedMagnitude 38
 #define R7KHDRSIZE_CompressedWaterColumn 44
 #define R7KHDRSIZE_SegmentedRawDetection 36
@@ -271,7 +273,9 @@
 #define R7KRDTSIZE_Subscriptions 780
 #define R7KHDRSIZE_RDRStorageRecording 303
 #define R7KHDRSIZE_CalibrationStatus 826
+#define R7KOPTHDRSIZE_CalibrationStatus 28
 #define R7KHDRSIZE_CalibratedSideScan 65
+#define R7KOPTHDRSIZE_CalibratedSideScan 28
 #define R7KHDRSIZE_SnippetBackscatteringStrength 49
 #define R7KRDTSIZE_SnippetBackscatteringStrength 14
 #define R7KHDRSIZE_MB2Status 2088
@@ -280,6 +284,7 @@
 #define R7KHDRSIZE_FileCatalog 14
 #define R7KRDTSIZE_FileCatalog 48
 #define R7KHDRSIZE_TimeMessage 16
+#define R7KOPTHDRSIZE_TimeMessage 50
 #define R7KHDRSIZE_RemoteControl 24
 #define R7KHDRSIZE_RemoteControlAcknowledge 20
 #define R7KHDRSIZE_RemoteControlNotAcknowledge 24
@@ -290,6 +295,8 @@
 #define R7KHDRSIZE_SoundVelocity 4
 #define R7KHDRSIZE_AbsorptionLoss 4
 #define R7KHDRSIZE_SpreadingLoss 4
+#define R7KHDRSIZE_ProfileAverageSalinity 4
+#define R7KHDRSIZE_ProfileAverageTemperature 4
 
 //-----------------------------------------------------------------
 
@@ -841,12 +848,11 @@ typedef struct s7k3_SonarPipeEnvironment_struct {
   u8 points_number;             // Number of point sub records, always 5 (five)
   u8 n;                         // Size of sub record
   u8 reserved[10];              // Reserved field
-  i32 nalloc;                   // number of samples allocated
-  f32 *x;                       // X coordinate in sonar space (meters)
-  f32 *y;                       // Y coordinate in sonar space (meters)
-  f32 *z;                       // Z coordinate in sonar space (meters)
-  f32 *angle;                   // Point angle (radians)
-  f32 *sample_number;           // Sample number
+  f32 x[5];                       // X coordinate in sonar space (meters)
+  f32 y[5];                       // Y coordinate in sonar space (meters)
+  f32 z[5];                       // Z coordinate in sonar space (meters)
+  f32 angle[5];                   // Point angle (radians)
+  f32 sample_number[5];           // Sample number
 } s7k3_SonarPipeEnvironment;
 
 // Contact Output (record 3001)
@@ -910,7 +916,7 @@ typedef struct s7k3_ProcessedSideScan_struct {
                                 // of pixels, counting from port to starboard starting at 0
   f64 sonardepth;                          // Sonar depth in m
   f64 altitude;                            // Sonar nadir altitude in m
-  f32 sidescan[MBSYS_RESON7K_MAX_PIXELS];   // Depth releative to chart datum in meters
+  f32 sidescan[MBSYS_RESON7K_MAX_PIXELS];   // sidescan values
   f32 alongtrack[MBSYS_RESON7K_MAX_PIXELS]; // Alongtrack distance in meters
 } s7k3_ProcessedSideScan;
 
@@ -1502,56 +1508,54 @@ typedef struct s7k3_Beamformed_struct {
 
 // Reson 7k angle and magnitude data (part of record 7019)
 typedef struct s7k3_anglemagnitude_struct {
-  u16 beam_number;    // Beam or element number
-  u32 n;              // Number of samples
-  u32 nalloc;         // Number of samples allocated
-  i16 *angle;         // Vertical angle for samples
-  u16 *magnitude;     // Magnitude for samples
-  u16 *coherence;      // Coherence data, total size 'decimated samples' times
-                      //   'beams' times 2 bytes
-  u16 *cross_power;    // Cross Power data, total size 'decimated samples' times
-                      //   'beams' times 2 bytes
-  u16 *quality_factor; // Coherence data, total size 'decimated samples' times
-                      //   'beams' times 2 bytes
-  u16 *reserved;       // Coherence data, total size 'decimated samples' times
-                      //   'beams' times 2 bytes
+  i16 *angle;               // Vertical angle for samples
+  u16 *magnitude;           // Magnitude for samples
+  u16 *coherence;           // Coherence data, total size 'decimated samples' times
+                            //   'beams' times 2 bytes
+  u16 *cross_power;         // Cross Power data, total size 'decimated samples' times
+                            //   'beams' times 2 bytes
+  u16 *quality_factor;      // Coherence data, total size 'decimated samples' times
+                            //   'beams' times 2 bytes
+  u16 *reserved;            // Coherence data, total size 'decimated samples' times
+                            //   'beams' times 2 bytes
 } s7k3_anglemagnitude;
 
 // Reson 7k Vernier Processing Data Raw (record 7019)
 typedef struct s7k3_VernierProcessingDataRaw_struct {
   s7k3_header header;
-  u64 serial_number;       // Sonar serial number
-  u32 ping_number;         // Sequential number
-  u16 multi_ping;          // Multi-ping sequence number
-                        //    0 = single ping
-  u8 reference_array;      // Index of reference array
-  u8 pair1_array2;         // Index of reference array
-  u8 pair2_array2;         // Index of reference array
-  u8 decimator;            // Data decimated by this factor
-  u16 beam_number;         // Total number of beams or elements in record
-  u32 n;                   // Number of samples in each beam in this record
-  u32 decimated_samples;   // Number of samples in output angle data after filtering
-                        //    and decimation and clipping (where 'First Sample' > 0)
-  u32 first_sample;        // Index of first sample (base-0)
-  u32 reserved[2];         // Reserved
-  u16 smoothing_type;      // Smoothing window type:
-                        //     0 - retangular
-                        //     2 - hamming
-                        //     99 - None
-  u16 smoothing_length;    // Smoothing window length [samples]
+  u64 serial_number;        // Sonar serial number
+  u32 ping_number;          // Sequential number
+  u16 multi_ping;           // Multi-ping sequence number
+                            //    0 = single ping
+  u8 reference_array;       // Index of reference array
+  u8 pair1_array2;          // Index of reference array
+  u8 pair2_array2;          // Index of reference array
+  u8 decimator;             // Data decimated by this factor
+  u16 beam_number;          // Total number of beams or elements in record
+  u32 n;                    // Number of samples in each beam in this record
+  u32 decimated_samples;    // Number of samples in output angle data after filtering
+                            //    and decimation and clipping (where 'First Sample' > 0)
+  u32 first_sample;         // Index of first sample (base-0)
+  u32 reserved[2];          // Reserved
+  u16 smoothing_type;       // Smoothing window type:
+                            //     0 - retangular
+                            //     2 - hamming
+                            //     99 - None
+  u16 smoothing_length;     // Smoothing window length [samples]
   u32 reserved2[2];         // Reserved
-  f32 magnitude;           // Magnitude threshold for determination of data quality
-  f32 min_qf;              // Minimum quality factor (QF), default 0.5
-  f32 max_qf;              // Minimum quality factor (QF), default 3.5
-  f32 min_angle;           // Lower limit on possible elevation angles,
-                        //    normally -45 degrees (in radians)
-  f32 max_angle;           // Upper limit on possible elevation angles,
-                        //    normally -45 degrees (in radians)
-  f32 elevation_coverage;  // Normally 90 degrees (in radians)
+  f32 magnitude;            // Magnitude threshold for determination of data quality
+  f32 min_qf;               // Minimum quality factor (QF), default 0.5
+  f32 max_qf;               // Minimum quality factor (QF), default 3.5
+  f32 min_angle;            // Lower limit on possible elevation angles,
+                            //    normally -45 degrees (in radians)
+  f32 max_angle;            // Upper limit on possible elevation angles,
+                            //    normally -45 degrees (in radians)
+  f32 elevation_coverage;   // Normally 90 degrees (in radians)
   u32 reserved3[4];         // Reserved
+  u32 nalloc;               // Number of bytes allocated to anglemagnitude time series
   s7k3_anglemagnitude anglemagnitude[MBSYS_RESON7K_MAX_BEAMS];
-                           // Angle and magnitude data for each beam plus
-                        //    additional records
+                            // Angle and magnitude data for each beam plus
+                            //    additional records
 } s7k3_VernierProcessingDataRaw;
 
 // Reson 7k BITE field (part of record 7021)
@@ -1804,7 +1808,6 @@ typedef struct s7k3_Snippet_struct {
 
 // Reson 7k vernier Processing Data Filtered (part of record 7029)
 typedef struct s7k3_vernierprocessingdatasoundings_struct {
-  s7k3_header header;
   f32 beam_angle;     // Sounding horizontal angle (radians)
   u32 sample;         // Sounding sample number (convert to range using sample
                         // rate and sound velocity
@@ -1891,7 +1894,6 @@ typedef struct s7k3_BITESummary_struct {
 
 // Reson 7k Compressed Beamformed Magnitude Data (part of Record 7041)
 typedef struct s7k3_beamformedmagnitude_struct {
-  s7k3_header header;
   u32 beam;          // Identification for the beam
   u32 samples;       // Total number of samples recorded ofr this beam
   u32 nalloc;        // Bytes allocated to hold amplitude time series
@@ -2159,16 +2161,13 @@ typedef struct s7k3_CalibratedBeam_struct {
                         //     8 - No gain (Gain is too low)
                         //     128-254 - Reserved for internal errors
                         //     255 - System cannot be calibrated (c7k file missing)
-  u32 reserved[8];          // Reserved for future use
-  f32 *sample;              // Amplitude series for each beam. First sample represents
-                        //     range 0 meters
+  u32 reserved[8];      // Reserved for future use
+  u32 nalloc;           // bytes allocated to hold all samples
+  f32 *samples;          // Amplitude series for each beam. First sample represents range 0 meters
 } s7k3_CalibratedBeam;
-
-// Reson 7k Reserved (Record 7049)
 
 // Reson 7k System Events (part of Record 7050)
 typedef struct s7k3_systemeventsdata_struct {
-  s7k3_header header;
   u16 event_type;
   u16 event_id;
   u32 device_id;
@@ -2183,7 +2182,8 @@ typedef struct s7k3_SystemEvents_struct {
   s7k3_header header;
   u64 serial_number;
   u32 number_events;
-  s7k3_systemeventsdata systemeventsdata;
+  u32 nalloc;
+  s7k3_systemeventsdata *systemeventsdata;
 } s7k3_SystemEvents;
 
 // Reson 7k System Event Message (record 7051)
@@ -2204,7 +2204,6 @@ typedef struct s7k3_SystemEventMessage_struct {
 
 // Reson 7k RDR Recording Status (part of Record 7052)
 typedef struct s7k3_rdrrecordingstatusdata_struct {
-  s7k3_header header;
   u32 threshold_length;
   u32 *threshold_value_array;
   u32 included_records;
@@ -2256,7 +2255,6 @@ typedef struct s7k3_RDRRecordingStatus_struct {
 
 // Reson 7k Subscriptions (part of Record 7053)
 typedef struct s7k3_subscriptionsdata_struct {
-  s7k3_header header;
   u32 address;           // IP Address (little endian data order)
   u16 port;              // Port number
   u16 type;              // 0 - UPD; 1 - TCP
@@ -2301,7 +2299,7 @@ typedef struct s7k3_CalibrationStatus_struct {
                         //    0 - Results of previous calibration used without validation
                         //    1-99 - Results of previous calibration validated and used
                         //    100 - Full calibration performed
-  u8 calibration_time[10]; // Completion time of most recent calibration (zero if none).
+  s7k3_time s7kTime;    // Completion time of most recent calibration (zero if none).
                         //    TIME_7K format (UTC). If calibration status is 1 (not
                         //    done), calibration time other than zero indicates that
                         //    previous calibration results are available but not
@@ -2332,40 +2330,27 @@ typedef struct s7k3_CalibrationStatus_struct {
   u32 reserved[2];         // Reserved
 } s7k3_CalibrationStatus;
 
-// Reson 7k Calibrated Sidescan Data (part of record 7057)
-typedef struct s7k3_calibratedsidescanseries_struct {
-  u32 nalloc;            // Bytes allocated to hold the time series
-  u64 *portbeams;        // Magnitude/Phase series. First sample represents range
-                        //  0 meters (total bytes per side)
-  u64 *starboardbeams;   // Magnitude/Phase series. First sample represents range
-                        //  0 meters (total bytes per side)
-  u64 *portnumber_beams;        // Magnitude/Phase series. First sample represents range
-                        //  0 meters (total bytes per side)
-  u64 *starboardnumber_beams;   // Magnitude/Phase series. First sample represents range
-                        //  0 meters (total bytes per side)
-} s7k3_calibratedsidescanseries;
-
 // Reson 7k Calibrated Sidescan Data (record 7057)
 typedef struct s7k3_CalibratedSideScan_struct {
   s7k3_header header;
-  u64 serial_number;  // Sonar serial number
-  u32 ping_number;    // Sequential number
-  u16 multi_ping;     // Flag to indicate multi-ping sequence. Always 0 (zero) if not
-                      //   in multi-ping mode; otherwise this represents the sequence
-                      //   number of the ping in the multi-ping sequence
-  f32 beam_position;  // Meters forward from position of beam 0
-  u32 reserved;       // Controls Bit field:
-                      //   Bit 0-31: Reserved
-  u32 samples;        // Samples per side (port/starboard)
-  f32 reserved2;      // Reserved
-  u16 beams;          // Number of beams per side
-  u16 current_beam;   // Beam number of this record's data (0 to N-1)
-  u8 bytes_persample; // Number of bytes per sample
-                      //   4 - Single precision (u32)
-  u8 data_types;      // Bit field:
-                      //   Bit 0: Reserved (always 0)
-                      //   Bit 1-7: Reserved
-  u8 error_flag;      // If set, record contains original non-calibrated beamformed
+  u64 serial_number;    // Sonar serial number
+  u32 ping_number;      // Sequential number
+  u16 multi_ping;       // Flag to indicate multi-ping sequence. Always 0 (zero) if not
+                        //   in multi-ping mode; otherwise this represents the sequence
+                        //   number of the ping in the multi-ping sequence
+  f32 beam_position;    // Meters forward from position of beam 0
+  u32 reserved;         // Controls Bit field:
+                        //   Bit 0-31: Reserved
+  u32 samples;          // Samples per side (port/starboard)
+  f32 reserved2;        // Reserved
+  u16 beams;            // Number of beams per side
+  u16 current_beam;     // Beam number of this record's data (0 to N-1)
+  u8 bytes_persample;   // Number of bytes per sample
+                        //   4 - Single precision (u32)
+  u8 data_types;        // Bit field:
+                        //   Bit 0: Reserved (always 0)
+                        //   Bit 1-7: Reserved
+  u8 error_flag;        // If set, record contains original non-calibrated beamformed
                         // data. Flag itself will indicate an error.
                         //  0 = Ok
                         //  1 = No calibration
@@ -2378,15 +2363,19 @@ typedef struct s7k3_CalibratedSideScan_struct {
                         //  8 = No gain (Gain is too low)
                         //  128-254 = Reserved for internal errors
                         //  255 = System cannot be calibrated (c7k file missing)
-  s7k3_calibratedsidescanseries calibratedsidescanseries;
-  u32 optionaldata;    // Optional data
-  f32 frequency;       // Ping frequency in Hz
-  f64 latitude;        // Latitude of vessel reference point in Radians -pi/2 to pi/2,
+  u32 nalloc;           // Bytes allocated to hold each magnitude and phase time series
+  u8 *port_data;        // Port magnitude series. First sample represents zero range
+  u8 *stbd_data;        // Starboard magnitude series. First sample represents zero range
+  u16 *port_beam;       // Indicates the beam number corresponding value was taken from
+  u16 *stbd_beam;       // Indicates the beam number corresponding value was taken from
+  u32 optionaldata;     // Optional data
+  f32 frequency;        // Ping frequency in Hz
+  f64 latitude;         // Latitude of vessel reference point in Radians -pi/2 to pi/2,
                         //south negative
-  f64 longitude;       // Longitude of vessel reference point in Radians -pi/2 to pi/2,
+  f64 longitude;        // Longitude of vessel reference point in Radians -pi/2 to pi/2,
                         //west negative
-  f32 heading;         // Heading of vessel at transmit time in radians
-  f32 depth;           // Depth for slant range correction in meters
+  f32 heading;          // Heading of vessel at transmit time in radians
+  f32 depth;            // Depth for slant range correction in meters
 } s7k3_CalibratedSideScan;
 
 // Reson 7k Snippet Backscattering Strength (part of Record 7058)
@@ -3128,6 +3117,18 @@ typedef struct s7k3_SpreadingLoss_struct {
   f32 spreadingloss; // dB (0 - 60)
 } s7k3_SpreadingLoss;
 
+// Reson 7k Profile Average Salinity (record 7613)
+typedef struct s7k3_ProfileAverageSalinity_struct {
+  s7k3_header header;
+  f32 salinity; // Average salinity [ppt]
+} s7k3_ProfileAverageSalinity;
+
+// Reson 7k Profile Average Temperature (record 7614)
+typedef struct s7k3_ProfileAverageTemperature_struct {
+  s7k3_header header;
+  f32 temperature; // Average water temperature vertically below the sensor. [deg Celcius]
+} s7k3_ProfileAverageTemperature;
+
 // internal data structure
 struct mbsys_reson7k3_struct {
   // Type of data record
@@ -3385,6 +3386,12 @@ struct mbsys_reson7k3_struct {
   // Reson 7k Spreading Loss (record 7612)
   s7k3_SpreadingLoss SpreadingLoss;
 
+  // Reson 7k Profile Average Salinity (record 7613)
+  s7k3_ProfileAverageSalinity ProfileAverageSalinity;
+
+  // Reson 7k Profile Average Temperature (record 7614)
+  s7k3_ProfileAverageTemperature ProfileAverageTemperature;
+
   // Buffered comments - many MB-System programs output comments before
   // the first data records are passed through to be written
   // - but when writing a file the comments have to be
@@ -3470,6 +3477,8 @@ struct mbsys_reson7k3_struct {
   int nrec_SoundVelocity;
   int nrec_AbsorptionLoss;
   int nrec_SpreadingLoss;
+  int nrec_ProfileAverageSalinity;
+  int nrec_ProfileAverageTemperature;
 };
 
 // 7K Macros
@@ -3610,5 +3619,7 @@ int mbsys_reson7k3_print_SystemLockStatus(int verbose, s7k3_SystemLockStatus *Sy
 int mbsys_reson7k3_print_SoundVelocity(int verbose, s7k3_SoundVelocity *SoundVelocity, int *error);
 int mbsys_reson7k3_print_AbsorptionLoss(int verbose, s7k3_AbsorptionLoss *AbsorptionLoss, int *error);
 int mbsys_reson7k3_print_SpreadingLoss(int verbose, s7k3_SpreadingLoss *SpreadingLoss, int *error);
+int mbsys_reson7k3_print_ProfileAverageSalinity(int verbose, s7k3_ProfileAverageSalinity *ProfileAverageSalinity, int *error);
+int mbsys_reson7k3_print_ProfileAverageTemperature(int verbose, s7k3_ProfileAverageTemperature *ProfileAverageTemperature, int *error);
 
 #endif  //  MBSYS_RESON7K3_H_

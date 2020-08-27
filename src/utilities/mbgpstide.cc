@@ -1,7 +1,7 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbgpstide.c	2018-05-23
  *
- *    Copyright (c) 2018
+ *    Copyright (c) 2020 by
  *    Gordon J. Keith (gordon@keith.id.au)
  *    and David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
