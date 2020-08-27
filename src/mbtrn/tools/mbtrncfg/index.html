@@ -8,7 +8,7 @@
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
 
-  <title>MBTRN config tool</title>
+  <title>MBTRNPP config tool</title>
   <style type="text/css">
       <!--
       @import "css/mbtrncfg.css";
@@ -18,14 +18,16 @@
       </script>
 </head>
   <body onload="javascript:init_preset('win.reson')">
-    <h2>mbtrnpp Command Line Builder</h2>
+    <h2>mbtrnpp Configuration Tool</h2>
     <p>Hover over parameter name for <a onmouseover="showhelp('general')">help</a></p>
-    <div style="margin: 25px 25px 25px 40px;">
-        <div style="float:right;margin-top:20px;margin-right:400px;top:0;position:sticky;">
+
+    <div style="margin: 25px 25px 25px 40px;"><!--margin:0px 200px 0px 0px;-->
+
+        <div style="top:0;margin-left:570px;position:fixed;">
             <textarea name="helptext" id="helptext" spellcheck="false" class="help"></textarea>
         </div>
 
-         <form method=POST name="settings" id="cfgform" enctype="text/plain">
+        <form method=POST name="settings" id="cfgform" enctype="text/plain">
                 <table>
                     <tr>
                         <th>Parameter</th>
@@ -34,12 +36,12 @@
                     <tr>
                         <td ></td>
                         <td ></td>
-                        <td style="text-align:center; vertical-align:top;" rowspan="28">
-                          <!--  <div style="margin-left:30px;margin-top:0px;position:sticky">
+                        <!--  <td style="text-align:center; vertical-align:top;" rowspan="28">
+                          <div style="margin-left:30px;margin-top:0px;position:sticky">
                               <textarea name="helptext" id="helptext" spellcheck="false" class="help"></textarea>
-                           -->
                             </div>
-                        </td>
+
+                        </td>-->
 					</tr>
                    <tr>
                         <td class="param" onmouseover="showhelp('TRN_RESON_HOST')"><a>TRN_RESON_HOST</a></td>
@@ -308,7 +310,6 @@
                         </td>
                     </tr>
                 </table>
-
         </form>
     </div>
 
