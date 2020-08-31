@@ -140,6 +140,26 @@
                           </td>
                   </tr>
                   <tr>
+                      <td class="param" onmouseover="showhelp('trn-par')"><a>trn-par</a></td>
+                      <td class="entry"><input type="text" size="64" name="trn-par" value="">
+                          </td>
+                  </tr>
+                  <tr>
+                      <td class="param" onmouseover="showhelp('trn-cfg')"><a>trn-cfg</a></td>
+                      <td class="entry"><input type="text" size="64" name="trn-cfg" value="">
+                          </td>
+                  </tr>
+                  <tr>
+                      <td class="param" onmouseover="showhelp('trn-mid')"><a>trn-mid</a></td>
+                      <td class="entry"><input type="text" size="64" name="trn-mid" value="">
+                          </td>
+                  </tr>
+                  <tr>
+                      <td class="param" onmouseover="showhelp('trn-decn')"><a>trn-decn</a></td>
+                      <td class="entry"><input type="text" size="8" name="trn-decn" value="">
+                          </td>
+                  </tr>
+                  <tr>
                       <td class="param" onmouseover="showhelp('trn-mtype')"><a>trn-mtype</a></td>
                       <td class="entry"><input type="text" size="8" name="trn-mtype" value="">
                           </td>
@@ -152,11 +172,6 @@
                   <tr>
                       <td class="param" onmouseover="showhelp('trn-fgrade')"><a>trn-fgrade</a></td>
                       <td class="entry"><input type="text" size="8" name="trn-fgrade" value="">
-                          </td>
-                  </tr>
-                  <tr>
-                      <td class="param" onmouseover="showhelp('trn-reinit')"><a>trn-reinit</a></td>
-                      <td class="entry"><input type="text" size="8" name="trn-reinit" value="">
                           </td>
                   </tr>
                   <tr>
@@ -184,7 +199,11 @@
                       <td class="entry"><input type="text" size="8" name="trn-eerr" value="">
                           </td>
                   </tr>
-                  <tr><td><div style="height:5px;"></div></td></tr>
+                  <tr>
+                      <td class="param" onmouseover="showhelp('trn-reinit')"><a>trn-reinit</a></td>
+                      <td class="entry"><input type="text" size="8" name="trn-reinit" value="">
+                          </td>
+                  </tr>
                   <tr>
                       <td class="param" onmouseover="showhelp('reinit-gain')"><a>reinit-gain</a></td>
                       <td class="entry">
@@ -192,6 +211,7 @@
                               N<input type="radio" size="48" name="reinit-gain" value="dis">
                                   </td>
                   </tr>
+                  <tr><td><div style="height:5px;"></div></td></tr>
                   <tr>
                       <td class="param" onmouseover="showhelp('reinit-file')"><a>reinit-file</a></td>
                       <td class="entry"><input type="text" size="8" name="reinit-file" value="">
@@ -208,38 +228,8 @@
                           </td>
                   </tr>
                   <tr>
-                      <td class="param" onmouseover="showhelp('trn-par')"><a>trn-par</a></td>
-                      <td class="entry"><input type="text" size="64" name="trn-par" value="">
-                          </td>
-                  </tr>
-                  <tr>
-                      <td class="param" onmouseover="showhelp('trn-cfg')"><a>trn-cfg</a></td>
-                      <td class="entry"><input type="text" size="64" name="trn-cfg" value="">
-                          </td>
-                  </tr>
-                  <tr>
-                      <td class="param" onmouseover="showhelp('trn-mid')"><a>trn-mid</a></td>
-                      <td class="entry"><input type="text" size="64" name="trn-mid" value="">
-                          </td>
-                  </tr>
-                  <tr>
-                      <td class="param" onmouseover="showhelp('trn-decn')"><a>trn-decn</a></td>
-                      <td class="entry"><input type="text" size="8" name="trn-decn" value="">
-                          </td>
-                  </tr>
-                  <tr>
                       <td class="param" onmouseover="showhelp('trn-out')"><a>trn-out</a></td>
                       <td class="entry"><input type="text" size="64" name="trn-out" value="">
-                          </td>
-                  </tr>
-                  <tr>
-                      <td class="param" onmouseover="showhelp('mb-out')" ><a>mb-out</a></td>
-                      <td class="entry"><input type="text" size="32" name="mb-out" value="">
-                          </td>
-                  </tr>
-                  <tr>
-                      <td class="param" onmouseover="showhelp('mbhbt')"><a>mbhbt</a></td>
-                      <td class="entry"><input type="text" size="8" name="mbhbt" value="">
                           </td>
                   </tr>
                   <tr>
@@ -250,6 +240,16 @@
                   <tr>
                       <td class="param" onmouseover="showhelp('trnuhbt')"><a>trnuhbt</a></td>
                       <td class="entry"><input type="text" size="8" name="trnuhbt" value="">
+                          </td>
+                  </tr>
+                  <tr>
+                      <td class="param" onmouseover="showhelp('mb-out')" ><a>mb-out</a></td>
+                      <td class="entry"><input type="text" size="32" name="mb-out" value="">
+                          </td>
+                  </tr>
+                  <tr>
+                      <td class="param" onmouseover="showhelp('mbhbt')"><a>mbhbt</a></td>
+                      <td class="entry"><input type="text" size="8" name="mbhbt" value="">
                           </td>
                   </tr>
                   <tr>
@@ -319,7 +319,7 @@
         <button type="button" class="button buttonb opacityDefault" id="cbutton" onclick="javascript:copyclip()" onmouseover="showhelp('copy')">Copy</button>
         <button type="button" class="button buttonr buttonsm" onclick="javascript:load_ctx()" onmouseover="showhelp('load')">Load</button>
         <form method=POST name="output" id="outform" enctype="text/plain">
-            <button type="button" class="button buttony buttonsm" onclick="javascript:write_cfg()" onmouseover="showhelp('export')">Export</button>
+            <button type="button" class="button buttony buttonmd" onclick="javascript:write_cfg()" onmouseover="showhelp('export')">Export</button>
             Verbose Y<input type="radio" size="48" name="verbose-export" value="en" checked>
             N<input type="radio" size="48" name="verbose-export" value="dis">
         </form>

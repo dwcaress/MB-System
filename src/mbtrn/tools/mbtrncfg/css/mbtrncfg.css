@@ -114,6 +114,10 @@ textarea.output{
     padding: 10px 15px;
 }
 
+.buttonmd{
+    padding: 10px 12px;
+}
+
 .buttong{
     /* Green */
     background-color: #4a6e35;
