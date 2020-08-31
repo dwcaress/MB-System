@@ -1044,6 +1044,22 @@ void TerrainNav::checkRangeValidity(measT& currMeas) {
 
 }
 
+// Function void TerrainNav::setEstNavOffset() allows an external reset of the prior
+// offset estimate. This function is used prior to a particle filter reinit call
+// in order to force the reinit to be centered on a particular offset value rather than
+// the actual last offset estimate. This capability was created for use by the
+// MB-System program mbtrnpp so that reinit could, if necessary, be forced to be
+// centered on a zero offset or a prior very good offset estimate if that is known.
+// This addresses the occasional tendency of TRN to converge on similar topoography
+// far from the actual location - when this occurs convergence will soon be lost,
+// but the reinit should be centered on a more likely position.
+// David Caress MBARI August 29, 2020
+void TerrainNav::setEstNavOffset(double offset_x, double offset_y, double offset_z) {
+        estNavOffset.x = offset_x;
+        estNavOffset.y = offset_y;
+        estNavOffset.z = offset_z;
+}
+
 //void TerrainNav::reinitFilter(int newState, bool lowInfoTransition) {
 //old state machine declaratino: void TerrainNav::reinitFilter(int newState, bool lowInfoTransition) {
 void TerrainNav::reinitFilter(bool lowInfoTransition) {
@@ -1075,7 +1091,7 @@ void TerrainNav::reinitFilter(bool lowInfoTransition) {
 		interpMeasAttitude = tNavFilter->interpMeasAttitude;
 		driftRate = tNavFilter->vehicle->driftRate;
 		distrib_type = tNavFilter->getDistribToSave();
-                logs(TL_OMASK(TL_TERRAIN_NAV, TL_LOG), "reinitFilter: getDistribToSave == %d\n", distrib_type);
+    logs(TL_OMASK(TL_TERRAIN_NAV, TL_LOG), "reinitFilter: getDistribToSave == %d\n", distrib_type);
 
 		// More than one setting is encoded in the useModifiedSetting value,
 		// so always use the one received from the client through the setModifiedWeighting() call
@@ -1135,15 +1151,11 @@ void TerrainNav::reinitFilter(bool lowInfoTransition) {
 
 	createFilter(this->filterType, windowVar);
 
-
-
 	//if not transitioning due to low information, initialize the filter
 	//with a Gaussian distribution
 	if(!lowInfoTransition) {
 		tNavFilter->setInitDistribType(1);
 	}
-
-
 
 	//reset filter and terrainNav parameters
 	setMapInterpMethod(interpMapMethod);
@@ -1159,6 +1171,7 @@ void TerrainNav::reinitFilter(bool lowInfoTransition) {
 	numReinits++;
 	delete temp;
 }
+
 
 bool TerrainNav::checkFilterHealth() {
 	bool healthy = true; //1 is healthy, 0 is not healthy and

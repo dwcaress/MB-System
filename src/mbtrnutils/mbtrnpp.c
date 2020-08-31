@@ -133,7 +133,7 @@ typedef struct mbtrnpp_opts_s{
     // opt "output"
     char *output;
 
-    // opt "projection
+    // opt "projection"
     int projection;
 
     // opt "swath-width"
@@ -224,25 +224,25 @@ typedef struct mbtrnpp_opts_s{
     // opt "trn-decs"
     double trn_decs;
 
-    // TRN reinit gain enable
+    // opt "covariance-magnitude-max"
+    double covariance_magnitude_max;
+
+    // opt "convergence-repeat-min"
+    int convergence_repeat_min;
+
+    // opt "reinit-gain"
     bool reinit_gain_enable;
 
-    // TRN reinit file enable
+    // opt "reinit-file"
     bool reinit_file_enable;
 
-    // TRN reinit xyoffset enable
+    // opt "reinit-xyoffset"
     bool reinit_xyoffset_enable;
-
-    // TRN reinit xyoffset max
     double reinit_xyoffset_max;
 
-    // TRN reinit zoffset enable
+    // opt "reinit-offset_z"
     bool reinit_zoffset_enable;
-
-    // TRN reinit zoffset max
     double reinit_zoffset_min;
-
-    // TRN reinit zoffset max
     double reinit_zoffset_max;
 
     // opt "help"
@@ -406,6 +406,15 @@ typedef struct mbtrnpp_cfg_s{
     double trn_decs;
 
     // --------------------------
+    // mbtrnpp convergence use criteria
+
+    // covariance magnitude maximum
+    double covariance_magnitude_max;
+
+    // converged repeat streak minimum
+    int convergence_repeat_min;
+
+    // --------------------------
     // TRN reinit triggers
 
     // TRN reinit gain enable
@@ -420,13 +429,13 @@ typedef struct mbtrnpp_cfg_s{
     // TRN reinit xyoffset max
     double reinit_xyoffset_max;
 
-    // TRN reinit zoffset enable
+    // TRN reinit offset_z enable
     bool reinit_zoffset_enable;
 
-    // TRN reinit zoffset max
+    // TRN reinit offset_z max
     double reinit_zoffset_min;
 
-    // TRN reinit zoffset max
+    // TRN reinit offset_z max
     double reinit_zoffset_max;
 
 }mbtrnpp_cfg_t;
@@ -474,53 +483,54 @@ s=NULL;\
 #define CFG_MNEM_TRN_CFGFILES  "TRN_CFGFILES"
 #define CFG_TRN_LOG_DIR_DFL    "."
 
-#define OPT_VERBOSE_DFL                 0
-#define OPT_INPUT_DFL                   CFG_INPUT_DFL
-#define OPT_FORMAT_DFL                  CFG_FORMAT_DFL
-#define OPT_PLATFORM_FILE_DFL           NULL
-#define OPT_PLATFORM_TARGET_SENSOR_DFL  0
-#define OPT_LOG_DIRECTORY_DFL           "."
-#define OPT_OUTPUT_DFL                  NULL
-#define OPT_PROJECTION_DFL              0
-#define OPT_SWATH_WIDTH_DFL             90
-#define OPT_SOUNDINGS_DFL               11
-#define OPT_MEDIAN_FILTER_DFL           NULL
-#define OPT_MBHBN_DFL                   MB1SVR_HBTOK_DFL
-#define OPT_MBHBT_DFL                   MB1SVR_HBTO_DFL
-#define OPT_TRNHBT_DFL                  TRNSVR_HBTO_DFL
-#define OPT_TRNUHBT_DFL                 TRNUSVR_HBTO_DFL
-#define OPT_DELAY_DFL                   0
-#define OPT_STATSEC_DFL                 MBTRNPP_STAT_PERIOD_SEC
-#define OPT_STATFLAGS_DFL               MBTRNPP_STAT_FLAGS_DFL
-#define OPT_STATFLAG_STR_DFL            "MSF_STATUS|MSF_EVENT|MSF_ASTAT|MSF_PSTAT"
-#define OPT_TRN_EN_DFL                  true
-#define OPT_TRN_UTM_DFL                 TRN_UTM_DFL
-#define OPT_MAP_DFL                     NULL
-#define OPT_CFG_DFL                     NULL
-#define OPT_PAR_DFL                     NULL
-#define OPT_TRN_MDIR_DFL                "mb"
-#define OPT_TRN_MTYPE_DFL               TRN_MTYPE_DFL
-#define OPT_TRN_FTYPE_DFL               TRN_FTYPE_DFL
-#define OPT_TRN_FGRADE_DFL              TRN_FGRADE_DFL
-#define OPT_TRN_FREINIT_DFL             TRN_FREINIT_DFL
-#define OPT_TRN_MWEIGHT_DFL             TRN_MWEIGHT_DFL
-#define OPT_TRN_NCOV_DFL                TRN_MAX_NCOV_DFL
-#define OPT_TRN_NERR_DFL                TRN_MAX_NERR_DFL
-#define OPT_TRN_ECOV_DFL                TRN_MAX_ECOV_DFL
-#define OPT_TRN_EERR_DFL                TRN_MAX_EERR_DFL
-#define OPT_MB_OUT_DFL                  NULL
-#define OPT_TRN_OUT_DFL                 NULL
-#define OPT_TRN_DECN_DFL                0
-#define OPT_TRN_DECS_DFL                0.0
-#define OPT_REINIT_GAIN_ENABLE_DFL      false
-#define OPT_REINIT_FILE_ENABLE_DFL      false
-#define OPT_REINIT_XYOFFSET_ENABLE_DFL  false
-#define OPT_REINIT_XYOFFSET_MAX_DFL     0.0
-#define OPT_REINIT_ZOFFSET_ENABLE_DFL   false
-#define OPT_REINIT_ZOFFSET_MIN_DFL      0.0
-#define OPT_REINIT_ZOFFSET_MAX_DFL      0.0
-#define OPT_HELP_DFL                    false
-
+#define OPT_VERBOSE_DFL                   0
+#define OPT_INPUT_DFL                     CFG_INPUT_DFL
+#define OPT_FORMAT_DFL                    CFG_FORMAT_DFL
+#define OPT_PLATFORM_FILE_DFL             NULL
+#define OPT_PLATFORM_TARGET_SENSOR_DFL    0
+#define OPT_LOG_DIRECTORY_DFL             "."
+#define OPT_OUTPUT_DFL                    NULL
+#define OPT_PROJECTION_DFL                0
+#define OPT_SWATH_WIDTH_DFL               90
+#define OPT_SOUNDINGS_DFL                 11
+#define OPT_MEDIAN_FILTER_DFL             NULL
+#define OPT_MBHBN_DFL                     MB1SVR_HBTOK_DFL
+#define OPT_MBHBT_DFL                     MB1SVR_HBTO_DFL
+#define OPT_TRNHBT_DFL                    TRNSVR_HBTO_DFL
+#define OPT_TRNUHBT_DFL                   TRNUSVR_HBTO_DFL
+#define OPT_DELAY_DFL                     0
+#define OPT_STATSEC_DFL                   MBTRNPP_STAT_PERIOD_SEC
+#define OPT_STATFLAGS_DFL                 MBTRNPP_STAT_FLAGS_DFL
+#define OPT_STATFLAG_STR_DFL              "MSF_STATUS|MSF_EVENT|MSF_ASTAT|MSF_PSTAT"
+#define OPT_TRN_EN_DFL                    true
+#define OPT_TRN_UTM_DFL                   TRN_UTM_DFL
+#define OPT_MAP_DFL                       NULL
+#define OPT_CFG_DFL                       NULL
+#define OPT_PAR_DFL                       NULL
+#define OPT_TRN_MDIR_DFL                  "mb"
+#define OPT_TRN_MTYPE_DFL                 TRN_MTYPE_DFL
+#define OPT_TRN_FTYPE_DFL                 TRN_FTYPE_DFL
+#define OPT_TRN_FGRADE_DFL                TRN_FGRADE_DFL
+#define OPT_TRN_FREINIT_DFL               TRN_FREINIT_DFL
+#define OPT_TRN_MWEIGHT_DFL               TRN_MWEIGHT_DFL
+#define OPT_TRN_NCOV_DFL                  TRN_MAX_NCOV_DFL    // 49.
+#define OPT_TRN_NERR_DFL                  TRN_MAX_NERR_DFL    // 49.
+#define OPT_TRN_ECOV_DFL                  TRN_MAX_ECOV_DFL    // 50.
+#define OPT_TRN_EERR_DFL                  TRN_MAX_EERR_DFL    // 50.
+#define OPT_MB_OUT_DFL                    NULL
+#define OPT_TRN_OUT_DFL                   NULL
+#define OPT_TRN_DECN_DFL                  0
+#define OPT_TRN_DECS_DFL                  0.0
+#define OPT_COVARIANCE_MAGNITUDE_MAX_DFL  5.0
+#define OPT_CONVERGENCE_REPEAT_MIN        200
+#define OPT_REINIT_GAIN_ENABLE_DFL        false
+#define OPT_REINIT_FILE_ENABLE_DFL        false
+#define OPT_REINIT_XYOFFSET_ENABLE_DFL    false
+#define OPT_REINIT_XYOFFSET_MAX_DFL       0.0
+#define OPT_REINIT_ZOFFSET_ENABLE_DFL     false
+#define OPT_REINIT_ZOFFSET_MIN_DFL        0.0
+#define OPT_REINIT_ZOFFSET_MAX_DFL        0.0
+#define OPT_HELP_DFL                      false
 
 #define MNEM_MAX_LEN 64
 #define HOSTNAME_BUF_LEN 256
@@ -645,8 +655,8 @@ typedef enum {
     MBTPP_EV_MB_REINIT,
     MBTPP_EV_MB_GAIN_LO,
     MBTPP_EV_MB_FILE,
-    MBTPP_EV_MB_XYOFFSET,
-    MBTPP_EV_MB_ZOFFSET,
+    MBTPP_EV_MB_xyoffset,
+    MBTPP_EV_MB_offset_z,
     MBTPP_EV_MB_EOF,
     MBTPP_EV_EMBGETALL,
     MBTPP_EV_EMBFAILURE,
@@ -698,7 +708,7 @@ typedef enum {
 // profiling - event channel labels
 const char *mbtrnpp_stevent_labels[] = {
     "mb_cycles", "mb_con", "mb_dis", "mb_pub_n", "mb_reinit", "mb_gain_lo", "mb_file",
-    "mb_xyoffset", "mb_zoffset", "mb_eof", "e_mbgetall", "e_mbfailure",
+    "mb_xyoffset", "mb_offset_z", "mb_eof", "e_mbgetall", "e_mbfailure",
     "e_mb_frame_rd", "e_mb_log_wr", "e_mbsocket", "e_mbcon"
 #ifdef WITH_MBTNAV
     ,"trn_proc_n","trnu_pub_n"
@@ -838,12 +848,15 @@ char *mbtrnpp_trn_updatestr(char *dest, int len, trn_update_t *update, int inden
 bool reinit_flag=true;
 
 /* counting convergence or lack of it */
-double trn_covariance_threshold = 5.0;
 int n_converged_streak = 0;
 int n_unconverged_streak = 0;
 int n_converged_tot = 0;
 int n_unconverged_tot = 0;
 int n_reinit = 0;
+bool use_trn_offset = false;
+double use_offset_e = 0.0;
+double use_offset_n = 0.0;
+double use_offset_z = 0.0;
 
 char mRecordBuf[MBSYS_KMBES_MAX_NUM_MRZ_DGMS][64*1024];
 /*--------------------------------------------------------------------*/
@@ -1267,6 +1280,8 @@ static int s_mbtrnpp_init_cfg(mbtrnpp_cfg_t *cfg)
         cfg->trn_mission_id=NULL;
         cfg->trn_decn=0;
         cfg->trn_decs=0.0;
+        cfg->covariance_magnitude_max = OPT_COVARIANCE_MAGNITUDE_MAX_DFL;
+        cfg->convergence_repeat_min = OPT_CONVERGENCE_REPEAT_MIN;
         cfg->reinit_gain_enable = false;
         cfg->reinit_file_enable = false;
         cfg->reinit_xyoffset_enable = false;
@@ -1320,6 +1335,8 @@ static int s_mbtrnpp_init_opts(mbtrnpp_opts_t *opts)
         opts->trn_out=CHK_STRDUP(OPT_TRN_OUT_DFL);
         opts->trn_decn=OPT_TRN_DECN_DFL;
         opts->trn_decs=OPT_TRN_DECS_DFL;
+        opts->covariance_magnitude_max = OPT_COVARIANCE_MAGNITUDE_MAX_DFL;
+        opts->convergence_repeat_min = OPT_CONVERGENCE_REPEAT_MIN;
         opts->reinit_gain_enable = OPT_REINIT_GAIN_ENABLE_DFL;
         opts->reinit_file_enable = OPT_REINIT_FILE_ENABLE_DFL;
         opts->reinit_xyoffset_enable = OPT_REINIT_XYOFFSET_ENABLE_DFL;
@@ -1395,7 +1412,6 @@ static int s_mbtrnpp_show_cfg(mbtrnpp_cfg_t *self, bool verbose, int indent)
         retval+=fprintf(stderr,"%*s %*s  %*d\n",indent,(indent>0?" ":""), wkey,"median_filter_n_along",wval,self->median_filter_n_along);
         retval+=fprintf(stderr,"%*s %*s  %*c\n",indent,(indent>0?" ":""), wkey,"median_filter_en",wval,BOOL2YNC(self->median_filter_en));
         retval+=fprintf(stderr,"%*s %*s  %*d\n",indent,(indent>0?" ":""), wkey,"n_buffer_max",wval,self->n_buffer_max);
-
         retval+=fprintf(stderr,"%*s %*s  %*s\n",indent,(indent>0?" ":""), wkey,"mb1svr_host",wval,self->mb1svr_host);
         retval+=fprintf(stderr,"%*s %*s  %*d\n",indent,(indent>0?" ":""), wkey,"mb1svr_port",wval,self->mb1svr_port);
         retval+=fprintf(stderr,"%*s %*s  %*s\n",indent,(indent>0?" ":""), wkey,"trnsvr_host",wval,self->trnsvr_host);
@@ -1427,6 +1443,8 @@ static int s_mbtrnpp_show_cfg(mbtrnpp_cfg_t *self, bool verbose, int indent)
         retval+=fprintf(stderr,"%*s %*s  %*s\n",indent,(indent>0?" ":""), wkey,"trn_mission_dir",wval,self->trn_mission_id);
         retval+=fprintf(stderr,"%*s %*s  %*u\n",indent,(indent>0?" ":""), wkey,"trn_decn",wval,self->trn_decn);
         retval+=fprintf(stderr,"%*s %*s  %*.2lf\n",indent,(indent>0?" ":""), wkey,"trn_decs",wval,self->trn_decs);
+        retval+=fprintf(stderr,"%*s %*s  %*.2lf\n",indent,(indent>0?" ":""), wkey,"covariance_magnitude_max",wval,self->covariance_magnitude_max);
+        retval+=fprintf(stderr,"%*s %*s  %*d\n",indent,(indent>0?" ":""), wkey,"convergence_repeat_min",wval,self->convergence_repeat_min);
         retval+=fprintf(stderr,"%*s %*s  %*c\n",indent,(indent>0?" ":""), wkey,"reinit_gain_enable",wval,BOOL2YNC(self->reinit_gain_enable));
         retval+=fprintf(stderr,"%*s %*s  %*c\n",indent,(indent>0?" ":""), wkey,"reinit_file_enable",wval,BOOL2YNC(self->reinit_file_enable));
         retval+=fprintf(stderr,"%*s %*s  %*c\n",indent,(indent>0?" ":""), wkey,"reinit_xyoffset_enable",wval,BOOL2YNC(self->reinit_xyoffset_enable));
@@ -1483,6 +1501,8 @@ static int s_mbtrnpp_show_opts(mbtrnpp_opts_t *self, bool verbose, int indent){
         retval+=fprintf(stderr,"%*s %*s  %*s\n",indent,(indent>0?" ":""), wkey,"trn-out",wval,self->trn_out);
         retval+=fprintf(stderr,"%*s %*s  %*u\n",indent,(indent>0?" ":""), wkey,"trn-decn",wval,self->trn_decn);
         retval+=fprintf(stderr,"%*s %*s  %*.2lf\n",indent,(indent>0?" ":""), wkey,"trn-decs",wval,self->trn_decs);
+        retval+=fprintf(stderr,"%*s %*s  %*.2lf\n",indent,(indent>0?" ":""), wkey,"covariance-magnitude-max",wval,self->covariance_magnitude_max);
+        retval+=fprintf(stderr,"%*s %*s  %*d\n",indent,(indent>0?" ":""), wkey,"convergence-repeat-min",wval,self->convergence_repeat_min);
         retval+=fprintf(stderr,"%*s %*s  %*c\n",indent,(indent>0?" ":""), wkey,"reinit_gain_enable",wval,BOOL2YNC(self->reinit_gain_enable));
         retval+=fprintf(stderr,"%*s %*s  %*c\n",indent,(indent>0?" ":""), wkey,"reinit_file_enable",wval,BOOL2YNC(self->reinit_file_enable));
         retval+=fprintf(stderr,"%*s %*s  %*c\n",indent,(indent>0?" ":""), wkey,"reinit_xyoffset_enable",wval,BOOL2YNC(self->reinit_xyoffset_enable));
@@ -2051,6 +2071,14 @@ static int s_mbtrnpp_kvparse_fn(char *key, char *val, void *cfg)
                 if(sscanf(val,"%lf",&opts->trn_decs)==1){
                     retval=0;
                 }
+            }else if(strcmp(key,"covariance-magnitude-max")==0 ){
+                if(sscanf(val,"%lf",&opts->covariance_magnitude_max)==1){
+                    retval=0;
+                }
+            }else if(strcmp(key,"convergence-repeat-min")==0 ){
+                if(sscanf(val,"%d",&opts->convergence_repeat_min)==1){
+                    retval=0;
+                }
             }else if(strcmp(key,"reinit-gain")==0 ){
                 if( mkvc_parse_bool(val,&opts->reinit_gain_enable)==0){
                     retval=0;
@@ -2260,6 +2288,10 @@ static int s_mbtrnpp_configure(mbtrnpp_cfg_t *cfg, mbtrnpp_opts_t *opts)
         cfg->trn_decn = opts->trn_decn;
         // trn-decs
         cfg->trn_decs = opts->trn_decs;
+        // covariance-magnitude-max
+        cfg->covariance_magnitude_max = opts->covariance_magnitude_max;
+        // convergence-repeat-min
+        cfg->convergence_repeat_min = opts->convergence_repeat_min;
         // reinit-gain
         cfg->reinit_gain_enable = opts->reinit_gain_enable;
         // reinit-file
@@ -2267,7 +2299,7 @@ static int s_mbtrnpp_configure(mbtrnpp_cfg_t *cfg, mbtrnpp_opts_t *opts)
         // reinit-xyoffset
         cfg->reinit_xyoffset_enable = opts->reinit_xyoffset_enable;
         cfg->reinit_xyoffset_max = opts->reinit_xyoffset_max;
-        // reinit-zoffset
+        // reinit-offset_z
         cfg->reinit_zoffset_enable = opts->reinit_zoffset_enable;
         cfg->reinit_zoffset_min = opts->reinit_zoffset_min;
         cfg->reinit_zoffset_max = opts->reinit_zoffset_max;
@@ -2532,7 +2564,7 @@ int main(int argc, char **argv) {
                          "\t--reinit-gain\n"
                          "\t--reinit-file\n"
                          "\t--reinit-xyoffset=xyoffset_max\n"
-                         "\t--reinit-zoffset=zoffset_min/zoffset_max\n";
+                         "\t--reinit-offset_z=offset_z_min/offset_z_max\n";
   extern char WIN_DECLSPEC *optarg;
 //  int option_index;
   int errflg = 0;
@@ -3194,6 +3226,15 @@ int main(int argc, char **argv) {
                                    (void **)&ping[i].ssalongtrack, &error);
     }
 
+    /* if option for AUV Sentry is set, then set flag in mb_io_ptr structure that
+        will apply the Sentry sensordepth kluge to the multibem data - the sensordepth
+        value has to be accessed in a nonstandard location in the data stream */
+    bool auv_sentry = true;
+    if (auv_sentry) {
+      struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)imbio_ptr;
+      mb_io_ptr->save10 = 1;
+    }
+
     /* loop over reading data */
     bool done = false;
     while (!done) {
@@ -3265,7 +3306,6 @@ int main(int argc, char **argv) {
       //            error));
       MST_METRIC_LAP(app_stats->stats->metrics[MBTPP_CH_MB_GETALL_XT], mtime_dtime());
       MST_METRIC_START(app_stats->stats->metrics[MBTPP_CH_MB_PING_XT], mtime_dtime());
-
       if (status == MB_SUCCESS && kind == MB_DATA_DATA) {
         ping[idataread].count = ndata;
         ndata++;
@@ -3542,8 +3582,12 @@ int main(int argc, char **argv) {
 
                   // if reinit_flag set then reinit the TRN filter
                   if (reinit_flag) {
-                    wtnav_reinit_filter(trn_instance, true);
-                    mlog_tprintf(mbtrnpp_mlog_id, "mbtrnpp: trn filter reinit time_d:%.6f\n", ping[i_ping_process].time_d);
+                    //wtnav_reinit_filter(trn_instance, true);
+                    fprintf(stderr, "--reinit time_d:%.6f centered on offset: %f %f %f\n",
+                                  ping[i_ping_process].time_d, use_offset_e, use_offset_n, use_offset_z);
+                    wtnav_reinit_filter_offset(trn_instance, true, use_offset_n, use_offset_e, use_offset_z);
+                    mlog_tprintf(mbtrnpp_mlog_id, "mbtrnpp: trn filter reinit time_d:%.6f centered on offset: %f %f %f\n",
+                                  ping[i_ping_process].time_d, use_offset_e, use_offset_n, use_offset_z);
                     MST_COUNTER_INC(app_stats->stats->events[MBTPP_EV_MB_REINIT]);
                     reinit_flag = false;
                     n_reinit++;
@@ -4664,7 +4708,7 @@ int mbtrnpp_trn_get_bias_estimates(wtnav_t *self, wposet_t *pt, trn_update_t *ps
         wtnav_estimate_pose(self, mle, 1);
         wtnav_estimate_pose(self, mse, 2);
 
-//fprintf(stderr,"%s:%d MLE,MSE\n",__FUNCTION__,__LINE__);
+//fprintf(stderr,"\n%s:%d:%s MLE,MSE\n",__FILE__, __LINE__, __FUNCTION__);
 //wposet_show(mle,true,5);
 //fprintf(stderr,"\n");
 //wposet_show(mse,true,5);
@@ -4694,18 +4738,18 @@ int mbtrnpp_check_reinit(trn_update_t *pstate, trn_config_t *cfg)
 
     if(NULL!=pstate && NULL!=cfg){
 
-        double xoffset = 0.0;
-        double yoffset = 0.0;
-        double zoffset = 0.0;
+        double offset_n = 0.0;
+        double offset_e = 0.0;
+        double offset_z = 0.0;
         double covariance_mag = 0.0;
         if (pstate->mse_dat->time > 0.0) {
-          xoffset = pstate->mse_dat->x - pstate->mse_dat->vn_x;
-          yoffset = pstate->mse_dat->y - pstate->mse_dat->vn_y;
-          zoffset = pstate->mse_dat->z - pstate->mse_dat->vn_z;
+          offset_n = pstate->mse_dat->x - pstate->mse_dat->vn_x;
+          offset_e = pstate->mse_dat->y - pstate->mse_dat->vn_y;
+          offset_z = pstate->mse_dat->z - pstate->mse_dat->vn_z;
           covariance_mag = sqrt(pstate->mse_dat->covariance[0] * pstate->mse_dat->covariance[0]
                     + pstate->mse_dat->covariance[1] * pstate->mse_dat->covariance[1]
                     + pstate->mse_dat->covariance[2] * pstate->mse_dat->covariance[2]);
-          if (covariance_mag <= trn_covariance_threshold) {
+          if (covariance_mag <= mbtrn_cfg->covariance_magnitude_max) {
             n_converged_streak++;
             n_unconverged_streak = 0;
             n_converged_tot++;
@@ -4714,9 +4758,17 @@ int mbtrnpp_check_reinit(trn_update_t *pstate, trn_config_t *cfg)
             n_unconverged_streak++;
             n_unconverged_tot++;
           }
+          if (n_converged_streak >= mbtrn_cfg->convergence_repeat_min) {
+            use_trn_offset = true;
+            use_offset_n = offset_n;
+            use_offset_e = offset_e;
+            use_offset_z = offset_z;
+          } else {
+            use_trn_offset = false;
+          }
 
           // check if offsets are within acceptable limits, set reinit_flag if not
-          double xyoffsetmag = sqrt(xoffset * xoffset + yoffset * yoffset);
+          double xyoffsetmag = sqrt(offset_n * offset_n + offset_e * offset_e);
           if (mbtrn_cfg->reinit_xyoffset_enable && (xyoffsetmag > mbtrn_cfg->reinit_xyoffset_max)
               && n_converged_streak > 10) {
             if (!reinit_flag) {
@@ -4724,20 +4776,20 @@ int mbtrnpp_check_reinit(trn_update_t *pstate, trn_config_t *cfg)
                       xyoffsetmag, mbtrn_cfg->reinit_xyoffset_max);
               mlog_tprintf(mbtrnpp_mlog_id,"mbtrnpp: set reinit due to xyoffset magnitude [%.3lf] > threshold [%.3lf]\n",
                           xyoffsetmag, mbtrn_cfg->reinit_xyoffset_max);
-              MST_COUNTER_INC(app_stats->stats->events[MBTPP_EV_MB_XYOFFSET]);
+              MST_COUNTER_INC(app_stats->stats->events[MBTPP_EV_MB_xyoffset]);
               reinit_flag = true;
             }
           }
           if (mbtrn_cfg->reinit_zoffset_enable
-              && (zoffset < mbtrn_cfg->reinit_zoffset_min
-                  || zoffset > mbtrn_cfg->reinit_zoffset_max)
+              && (offset_z < mbtrn_cfg->reinit_zoffset_min
+                  || offset_z > mbtrn_cfg->reinit_zoffset_max)
               && n_converged_streak > 10) {
             if (!reinit_flag) {
               fprintf(stderr, "--Reinit set due to z offset %f outside allowed range %f %f\n",
-                      zoffset, mbtrn_cfg->reinit_zoffset_min, mbtrn_cfg->reinit_zoffset_max);
-              mlog_tprintf(mbtrnpp_mlog_id,"mbtrnpp: set reinit due to zoffset [%.3lf] outside of allowed range: [%.3lf] to [%.3lf]\n",
-                            zoffset, mbtrn_cfg->reinit_zoffset_min, mbtrn_cfg->reinit_zoffset_max);
-              MST_COUNTER_INC(app_stats->stats->events[MBTPP_EV_MB_ZOFFSET]);
+                      offset_z, mbtrn_cfg->reinit_zoffset_min, mbtrn_cfg->reinit_zoffset_max);
+              mlog_tprintf(mbtrnpp_mlog_id,"mbtrnpp: set reinit due to offset_z [%.3lf] outside of allowed range: [%.3lf] to [%.3lf]\n",
+                            offset_z, mbtrn_cfg->reinit_zoffset_min, mbtrn_cfg->reinit_zoffset_max);
+              MST_COUNTER_INC(app_stats->stats->events[MBTPP_EV_MB_offset_z]);
               reinit_flag = true;
             }
           }
@@ -4765,6 +4817,17 @@ int mbtrnpp_trn_publish(trn_update_t *pstate, trn_config_t *cfg)
             MST_METRIC_LAP(app_stats->stats->metrics[MBTPP_CH_TRN_TRNU_PUB_XT], mtime_dtime());
             MST_COUNTER_INC(app_stats->stats->events[MBTPP_EV_TRNU_PUBN]);
         }
+// fprintf(stderr, "%s:%d:%s: pt_dat: %f  %f %f %f  %f %f %f %f  mle_dat: %f  %f %f %f  %f %f %f %f  mse_dat: %f  %f %f %f  %f %f %f %f"
+// " %d %f %d %d %d %d %d %d %f %f\n",
+// __FILE__, __LINE__, __func__,
+// pstate->pt_dat->time,pstate->pt_dat->x,pstate->pt_dat->y,pstate->pt_dat->z,
+// pstate->pt_dat->covariance[0],pstate->pt_dat->covariance[2],pstate->pt_dat->covariance[5],pstate->pt_dat->covariance[1],
+// pstate->mle_dat->time,pstate->mle_dat->x,pstate->mle_dat->y,pstate->mle_dat->z,
+// pstate->mle_dat->covariance[0],pstate->mle_dat->covariance[2],pstate->mle_dat->covariance[5],pstate->mle_dat->covariance[1],
+// pstate->mse_dat->time,pstate->mse_dat->x,pstate->mse_dat->y,pstate->mse_dat->z,
+// pstate->mse_dat->covariance[0],pstate->mse_dat->covariance[2],pstate->mse_dat->covariance[5],pstate->mse_dat->covariance[1],
+// pstate->reinit_count, pstate->reinit_tlast, pstate->filter_state, pstate->success, pstate->is_converged,
+// pstate->is_valid, pstate->mb1_cycle, pstate->ping_number, pstate->mb1_time, pstate->update_time);
         if( OUTPUT_FLAG_SET(OUTPUT_TRNU_ASC) ){
             MST_METRIC_START(app_stats->stats->metrics[MBTPP_CH_TRN_TRNU_LOG_XT], mtime_dtime());
 
@@ -4789,37 +4852,36 @@ int mbtrnpp_trn_publish(trn_update_t *pstate, trn_config_t *cfg)
             mbtrnpp_trn_pub_ostream(pstate, stderr);
         }
 
-        double xoffset = 0.0;
-        double yoffset = 0.0;
-        double zoffset = 0.0;
-        double covariance_mag = 0.0;
         if (pstate->mse_dat->time > 0.0) {
+          char *useornot[2] = {"   ", "USE"};
           int time_i[7];
           mb_get_date(0, (double)pstate->mse_dat->time, time_i);
-          xoffset = pstate->mse_dat->x - pstate->mse_dat->vn_x;
-          yoffset = pstate->mse_dat->y - pstate->mse_dat->vn_y;
-          zoffset = pstate->mse_dat->z - pstate->mse_dat->vn_z;
-          covariance_mag = sqrt(pstate->mse_dat->covariance[0] * pstate->mse_dat->covariance[0]
+          double offset_n = pstate->mse_dat->x - pstate->mse_dat->vn_x;
+          double offset_e = pstate->mse_dat->y - pstate->mse_dat->vn_y;
+          double offset_z = pstate->mse_dat->z - pstate->mse_dat->vn_z;
+          double covariance_mag = sqrt(pstate->mse_dat->covariance[0] * pstate->mse_dat->covariance[0]
                     + pstate->mse_dat->covariance[1] * pstate->mse_dat->covariance[1]
                     + pstate->mse_dat->covariance[2] * pstate->mse_dat->covariance[2]);
 
           // NOTE: TRN convention is x:northing y:easting z:down
           //       Output here is in order easting northing z
           if ((n_converged_tot + n_unconverged_tot - 1) % 25 == 0) {
-            fprintf(stderr, "---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------\n");
-            fprintf(stderr, "YYYY/MM/DD-HH:MM:SS.SSSSSS TTTTTTTTTT.TTTTTT | Nav: Easting  Northing     Z     | TRN: Easting  Northing     Z     | Off: East North    Z   | Cov: East    North      Z     |   Ncs   Nct   Nus   Nut  Nr\n");
-            fprintf(stderr, "---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------\n");
+            fprintf(stderr, "--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------\n");
+            fprintf(stderr, "YYYY/MM/DD-HH:MM:SS.SSSSSS TTTTTTTTTT.TTTTTT | Nav: Easting  Northing     Z     | TRN: Easting  Northing     Z     | Off: East North    Z   | Cov: East     North       Z   :     Mag   | Best Off: E    N   Z   |   Ncs   Nct   Nus   Nut  Nr | Use \n");
+            fprintf(stderr, "--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------\n");
           }
           fprintf(stderr, "%4.4d/%2.2d/%2.2d-%2.2d:%2.2d:%2.2d.%6.6d %.6f "
                           "| %11.3f %11.3f %8.3f | %11.3f %11.3f %8.3f "
-                          "| %7.3f %7.3f %6.3f | %9.3f %9.3f %9.3f "
-                          "| %5d %5d %5d %5d %3d\n",
+                          "| %7.3f %7.3f %6.3f | %9.3f %9.3f %9.3f : %9.3f "
+                          "| %7.3f %7.3f %6.3f | %5d %5d %5d %5d %3d | %s\n",
           time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6],
-          pstate->mse_dat->time, pstate->mse_dat->y, pstate->mse_dat->x, pstate->mse_dat->z,
-          pstate->mse_dat->vn_y, pstate->mse_dat->vn_x, pstate->mse_dat->vn_z,
-          yoffset, xoffset, zoffset,
-          pstate->mse_dat->covariance[1], pstate->mse_dat->covariance[0], pstate->mse_dat->covariance[2],
-          n_converged_streak, n_converged_tot, n_unconverged_streak, n_unconverged_tot, n_reinit);
+          pstate->mse_dat->time, pstate->mse_dat->vn_y, pstate->mse_dat->vn_x, pstate->mse_dat->vn_z,
+          pstate->mse_dat->y, pstate->mse_dat->x, pstate->mse_dat->z,
+          offset_e, offset_n, offset_z,
+          pstate->mse_dat->covariance[1], pstate->mse_dat->covariance[0], pstate->mse_dat->covariance[2], covariance_mag,
+          use_offset_e, use_offset_n, use_offset_z,
+          n_converged_streak, n_converged_tot, n_unconverged_streak, n_unconverged_tot, n_reinit,
+          useornot[use_trn_offset]);
         }
 
         retval=0;
@@ -4889,7 +4951,7 @@ int mbtrnpp_trn_process_mb1(wtnav_t *tnav, mb1_t *mb1, trn_config_t *cfg)
                 trn_dec_time=now;
             }
         }else {
-            // always process of decimation disabled
+            // always process if decimation disabled
             // (trn_decs<=0 && mbtrn_cfg->trn_decn<=0 )
             do_process=true;
         }
@@ -4951,12 +5013,13 @@ int mbtrnpp_trn_process_mb1(wtnav_t *tnav, mb1_t *mb1, trn_config_t *cfg)
                                 pstate->reinit_count = wtnav_get_num_reinits(tnav);
                                 pstate->filter_state = wtnav_get_filter_state(tnav);
                                 pstate->is_converged = (wtnav_is_converged(tnav) ? 1 : 0);
-                                pstate->is_valid = ( (mb1->sounding.ts > 0. &&
-                                                      pstate->mse_dat->covariance[0] <= cfg->max_northing_cov &&
-                                                      pstate->mse_dat->covariance[2] <= cfg->max_easting_cov &&
-                                                      fabs(pstate->mse_dat->x-pstate->pt_dat->x) <= cfg->max_northing_err &&
-                                                      fabs(pstate->mse_dat->y-pstate->pt_dat->y) <= cfg->max_easting_err
-                                                    )? 1 : 0);
+                                pstate->is_valid = use_trn_offset;
+                                // pstate->is_valid = ( (mb1->sounding.ts > 0. &&
+                                //                       pstate->mse_dat->covariance[0] <= cfg->max_northing_cov &&
+                                //                       pstate->mse_dat->covariance[2] <= cfg->max_easting_cov &&
+                                //                       fabs(pstate->mse_dat->x-pstate->pt_dat->x) <= cfg->max_northing_err &&
+                                //                       fabs(pstate->mse_dat->y-pstate->pt_dat->y) <= cfg->max_easting_err
+                                //                     )? 1 : 0);
                                 pstate->mb1_cycle=mb1_count;
                                 pstate->ping_number=mb1->sounding.ping_number;
                                 pstate->mb1_time=mb1->sounding.ts;
@@ -5335,6 +5398,10 @@ int mbtrnpp_kemkmall_input_open(int verbose, void *mbio_ptr, char *definition, i
 
   /* set initial status */
   status = MB_SUCCESS;
+
+  /* set flag to enable Sentry sensordepth kluge */
+  int *kluge_set = (int *)&mb_io_ptr->save10;
+  *kluge_set = 1;
 
   // Open and initialize the socket based input for reading using function
   // mbtrnpp_kemkmall_input_read().

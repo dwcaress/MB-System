@@ -393,6 +393,24 @@ class TerrainNav
    */
   virtual inline void setFilterReinit(const bool allow){this->allowFilterReinits = allow;}
 
+  /* Helper Function: setEstNavOffset
+   * Usage: setEstNavOffset(offset_x, offset_y, offset_z)
+   * -------------------------------------------------------------------------*/
+  /*! This function sets the x, y, z values of the estNavOffset structure that
+   * holds the prior offset estimate. This function is used prior to a particle
+   * filter reinit callvin order to force the reinit to be centered on a particular
+   * offset value rather than the actual last offset estimate. This capability
+   * was created for use by the MB-System program mbtrnpp so that reinit could,
+   * if necessary, be forced to be centered on a zero offset or a prior very good
+   * offset estimate if that is known. Resetting the prior offset estimate
+   * addresses the occasional tendency of TRN to converge on similar topoography
+   * far from the actual location - when this occurs convergence will soon be lost,
+   * but the reinit should be centered on a more likely position if that is known
+   * external to TRN.
+   * 29-Aug-2020 David Caress MBARI
+   */
+  void setEstNavOffset(double offset_x, double offset_y, double offset_z);
+
   /* Helper Function: reinitFilter
    * Usage: reinitFilter()
    * -------------------------------------------------------------------------*/

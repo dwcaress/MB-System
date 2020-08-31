@@ -33,24 +33,24 @@
 /////////////////////////
 /*
  Copyright Information
- 
+
  Copyright 2002-2019 MBARI
  Monterey Bay Aquarium Research Institute, all rights reserved.
- 
+
  Terms of Use
- 
+
  This program is free software; you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
  the Free Software Foundation; either version 3 of the License, or
  (at your option) any later version. You can access the GPLv3 license at
  http://www.gnu.org/licenses/gpl-3.0.html
- 
+
  This program is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  GNU General Public License for more details
  (http://www.gnu.org/licenses/gpl-3.0.html)
- 
+
  MBARI provides the documentation and software code "as is", with no warranty,
  express or implied, as to the software, title, non-infringement of third party
  rights, merchantability, or fitness for any particular purpose, the accuracy of
@@ -58,7 +58,7 @@
  assume the entire risk associated with use of the code, and you agree to be
  responsible for the entire cost of repair or servicing of the program with
  which you are using the code.
- 
+
  In no event shall MBARI be liable for any damages, whether general, special,
  incidental or consequential damages, arising out of your use of the software,
  including, but not limited to, the loss or corruption of your data or damages
@@ -68,11 +68,11 @@
  liability or expense, including attorneys' fees, resulting from loss of or
  damage to property or the injury to or death of any person arising out of the
  use of the software.
- 
+
  The MBARI software is provided without obligation on the part of the
  Monterey Bay Aquarium Research Institute to assist in its use, correction,
  modification, or enhancement.
- 
+
  MBARI assumes no responsibility or liability for any third party and/or
  commercial software required for the database or applications. Licensee agrees
  to obtain and maintain valid licenses for any additional third party software
@@ -84,7 +84,7 @@
 #define TRNW_H
 
 /////////////////////////
-// Includes 
+// Includes
 /////////////////////////
 #include <stdint.h>
 #include <stdbool.h>
@@ -168,7 +168,7 @@ extern "C" {
                              double max_easting_cov,
                              double max_easting_err
                              );
-    
+
     void trncfg_destroy(trn_config_t **pself);
     void trncfg_show(trn_config_t *obj, bool verbose, int indent);
 
@@ -176,7 +176,7 @@ extern "C" {
     wtnav_t *wtnav_dnew();
     wtnav_t *wtnav_new(trn_config_t *cfg);
     void wtnav_destroy(wtnav_t *self);
-    
+
     void wtnav_estimate_pose(wtnav_t *self, wposet_t *estimate, const int type);
     void wtnav_meas_update(wtnav_t *self, wmeast_t *incomingMeas, const int type);
     void wtnav_motion_update(wtnav_t *self, wposet_t *incomingNav);
@@ -185,6 +185,8 @@ extern "C" {
     bool wtnav_initialized(wtnav_t *self);
     bool wtnav_is_converged(wtnav_t *self);
     void wtnav_reinit_filter(wtnav_t *self, bool lowInfoTransition);
+    void wtnav_reinit_filter_offset(wtnav_t *self, bool lowInfoTransition,
+                            double offset_x, double offset_y, double offset_z);
     int  wtnav_get_filter_type(wtnav_t *self);
     int  wtnav_get_filter_state(wtnav_t *self);
     void wtnav_use_highgrade_filter(wtnav_t *self);
@@ -203,7 +205,7 @@ extern "C" {
     wcommst_t *wcommst_dnew();
     void wcommst_destroy(wcommst_t *self);
     void wcommst_show(wcommst_t *self, bool verbose, int indent);
-    
+
     ct_cdata_t *wcommst_cdata_new();
     void wcommst_cdata_destroy(ct_cdata_t **pself);
     uint32_t  wcommst_cdata_serialize(char *dest, ct_cdata_t *src, int len);
@@ -260,8 +262,8 @@ extern "C" {
     // utils
     int trnw_utm_to_geo(double northing, double easting, long utmZone, double *lat_deg, double *lon_deg);
     int trnw_geo_to_utm(double lat_deg, double lon_deg, long int utmZone, double *northing, double *easting);
-    
-    
+
+
 #ifdef __cplusplus
 }
 #endif
