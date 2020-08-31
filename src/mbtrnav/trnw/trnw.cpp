@@ -275,6 +275,18 @@ void wtnav_reinit_filter(wtnav_t *self, bool lowInfoTransition)
     }
 }
 
+void wtnav_reinit_filter_offset(wtnav_t *self, bool lowInfoTransition, double offsetx, double offsety, double offsetz)
+{
+    if(NULL!=self){
+        TerrainNav *obj = static_cast<TerrainNav *>(self->obj);
+        if(NULL!=obj){
+        obj->setEstNavOffset(offsetx, offsety, offsetz);
+        obj->reinitFilter(lowInfoTransition);
+        }
+        return ;
+    }
+}
+
 int wtnav_get_filter_type(wtnav_t *self)
 {
     int retval = -1;

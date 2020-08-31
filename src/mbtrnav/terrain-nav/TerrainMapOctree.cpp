@@ -210,6 +210,7 @@ bool TerrainMapOctree::initializeTiles(const char* mapName)
       tiles_ = new struct MapTile;
       tiles_[0].mapName = STRDUPNULL(mapName);
       tiles_[0].octreeMap = NULL;
+      tilesLoaded = 1;
       logs(TL_LOG|TL_LOG,"TerrainMapOctree::Using a single (non-tiled) map.");
    }
    else if (S_ISDIR(map_stat.st_mode))

@@ -38,7 +38,7 @@
 #include "mbsys_kmbes.h"
 
 /* turn on debug statements here */
-// #define MBR_KEMKMALL_DEBUG 1
+//#define MBR_KEMKMALL_DEBUG 1
 
 /*--------------------------------------------------------------------*/
 int mbr_info_kemkmall(int verbose, int *system, int *beams_bath_max, int *beams_amp_max, int *pixels_ss_max, char *format_name,
@@ -153,10 +153,12 @@ int mbr_alm_kemkmall(int verbose, void *mbio_ptr, int *error) {
   int *heading_saved = (int *)&mb_io_ptr->save4;
   int *attitude_saved = (int *)&mb_io_ptr->save5;
   int *sensordepth_saved = (int *)&mb_io_ptr->save6;
+  int *kluge_set = (int *)&mb_io_ptr->save10;
   *nav_saved = MB_DATA_NONE;
   *heading_saved = MB_DATA_NONE;
   *attitude_saved = MB_DATA_NONE;
   *sensordepth_saved = MB_DATA_NONE;
+  *kluge_set = 0;
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);

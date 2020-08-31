@@ -394,7 +394,7 @@ int mbr_rt_mbarimb1(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
       index += 8;
       mb_get_binary_double(true, &buffer[index], &bath);
       index += 8;
-      depthmax = MAX(depthmax, fabs(bath - sonardepth));
+      depthmax = MAX(depthmax, fabs(bath));
       distmax = MAX(distmax, fabs(bathacrosstrack));
       distmax = MAX(distmax, fabs(bathalongtrack));
     }
@@ -417,7 +417,7 @@ int mbr_rt_mbarimb1(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
       index += 8;
 
       store->beamflag[i] = MB_FLAG_NONE;
-      store->bath[i] = (bath - sonardepth) / store->depth_scale;
+      store->bath[i] = bath / store->depth_scale;
       store->bath_acrosstrack[i] = bathacrosstrack / store->distance_scale;
       store->bath_alongtrack[i] = bathalongtrack / store->distance_scale;
     }
@@ -571,7 +571,7 @@ int mbr_wt_mbarimb1(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
       double bathacrosstrack = store->bath_acrosstrack[i] * store->distance_scale;
       mb_put_binary_double(true, bathacrosstrack, &buffer[index]);
       index += 8;
-      double bath = (store->bath[i] * store->depth_scale) + sonardepth;
+      double bath = store->bath[i] * store->depth_scale;
       mb_put_binary_double(true, bath, &buffer[index]);
       index += 8;
     }
