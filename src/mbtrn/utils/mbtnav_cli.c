@@ -10,24 +10,24 @@
 /////////////////////////
 /*
  Copyright Information
- 
+
  Copyright 2000-2018 MBARI
  Monterey Bay Aquarium Research Institute, all rights reserved.
- 
+
  Terms of Use
- 
+
  This program is free software; you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
  the Free Software Foundation; either version 3 of the License, or
  (at your option) any later version. You can access the GPLv3 license at
  http://www.gnu.org/licenses/gpl-3.0.html
- 
+
  This program is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  GNU General Public License for more details
  (http://www.gnu.org/licenses/gpl-3.0.html)
- 
+
  MBARI provides the documentation and software code "as is", with no warranty,
  express or implied, as to the software, title, non-infringement of third party
  rights, merchantability, or fitness for any particular purpose, the accuracy of
@@ -35,7 +35,7 @@
  assume the entire risk associated with use of the code, and you agree to be
  responsible for the entire cost of repair or servicing of the program with
  which you are using the code.
- 
+
  In no event shall MBARI be liable for any damages, whether general, special,
  incidental or consequential damages, arising out of your use of the software,
  including, but not limited to, the loss or corruption of your data or damages
@@ -45,11 +45,11 @@
  liability or expense, including attorneys' fees, resulting from loss of or
  damage to property or the injury to or death of any person arising out of the
  use of the software.
- 
+
  The MBARI software is provided without obligation on the part of the
  Monterey Bay Aquarium Research Institute to assist in its use, correction,
  modification, or enhancement.
- 
+
  MBARI assumes no responsibility or liability for any third party and/or
  commercial software required for the database or applications. Licensee agrees
  to obtain and maintain valid licenses for any additional third party software
@@ -93,7 +93,7 @@
  /// @def PRODUCT
  /// @brief header software product name
  #define PRODUCT "MBRT"
- 
+
  /// @def COPYRIGHT
  /// @brief header software copyright info
  #define COPYRIGHT "Copyright 2002-2013 MBARI Monterey Bay Aquarium Research Institute, all rights reserved."
@@ -268,7 +268,7 @@ void parse_args(int argc, char **argv, app_cfg_t *cfg)
     int c;
     bool help=false;
     bool version=false;
-    
+
     static struct option options[] = {
         {"verbose", required_argument, NULL, 0},
         {"help", no_argument, NULL, 0},
@@ -281,27 +281,27 @@ void parse_args(int argc, char **argv, app_cfg_t *cfg)
         {"ofmt", required_argument, NULL, 0},
        {NULL, 0, NULL, 0}};
 
-    // process argument list 
+    // process argument list
     while ((c = getopt_long(argc, argv, "", options, &option_index)) != -1){
         switch (c) {
-                // long options all return c=0 
+                // long options all return c=0
             case 0:
-                // verbose 
+                // verbose
                 if (strcmp("verbose", options[option_index].name) == 0) {
                     sscanf(optarg,"%d",&cfg->verbose);
                 }
-                
-                // help 
+
+                // help
                 else if (strcmp("help", options[option_index].name) == 0) {
                     help = true;
                 }
-                
+
                 // version
                 else if (strcmp("version", options[option_index].name) == 0) {
                     version = true;
                 }
-                
-                // host 
+
+                // host
                 else if (strcmp("host", options[option_index].name) == 0) {
 
                     char *hsave=cfg->host;
@@ -327,7 +327,7 @@ void parse_args(int argc, char **argv, app_cfg_t *cfg)
                 else if (strcmp("hbeat", options[option_index].name) == 0) {
                     sscanf(optarg,"%d",&cfg->hbeat);
                 }
-                // cycles 
+                // cycles
                 else if (strcmp("cycles", options[option_index].name) == 0) {
                     sscanf(optarg,"%d",&cfg->cycles);
                 }
@@ -375,7 +375,7 @@ void parse_args(int argc, char **argv, app_cfg_t *cfg)
             exit(0);
         }
     }// while
-    
+
     mconf_init(NULL,NULL);
     mmd_channel_set(MOD_MBTNAV,MM_ERR);
     mmd_channel_set(MOD_R7K,MM_ERR);
@@ -405,7 +405,7 @@ void parse_args(int argc, char **argv, app_cfg_t *cfg)
             mmd_channel_en(MOD_MBTNAV,MM_DEBUG);
             break;
     }
-    
+
     PMPRINT(MOD_MBTNAV,MM_DEBUG,(stderr,"verbose [%s]\n",(cfg->verbose?"Y":"N")));
     PMPRINT(MOD_MBTNAV,MM_DEBUG,(stderr,"host    [%s]\n",cfg->host));
     PMPRINT(MOD_MBTNAV,MM_DEBUG,(stderr,"port    [%d]\n",cfg->port));
@@ -507,9 +507,9 @@ static int s_trnc_state_machine(msock_socket_t *s, app_cfg_t *cfg)
     int trn_rx_bytes=0;
     int trn_msg_count=0;
     int trn_msg_bytes=0;
-    
+
     if (NULL!=s) {
-        
+
         // initialize variables
 //        TODO replace
 //        trn_message_t message;
@@ -522,14 +522,14 @@ static int s_trnc_state_machine(msock_socket_t *s, app_cfg_t *cfg)
         int64_t test=0;
         byte *pread=NULL;
         uint32_t readlen=0;
-        
+
         trnc_state_t state=TRNSM_INIT;
         trnc_action_t action=TRNAT_NOP;
         trnu_pub_t *frame = (trnu_pub_t *)msg_buf;
 
         // state machine entry point
         while (state != TRNSM_DONE && !g_interrupt) {
-            
+
             // check states, assign actions
             switch (state) {
                 case TRNSM_INIT:
@@ -547,11 +547,11 @@ static int s_trnc_state_machine(msock_socket_t *s, app_cfg_t *cfg)
                 case TRNSM_HBEAT_EXPIRED:
                     action=TRNAT_WR_REQ;
                     break;
-                    
+
                 default:
                     break;
             }// switch
-            
+
             // action: connect
             if (action == TRNAT_CONNECT) {
                 PMPRINT(MOD_MBTNAV,MM_DEBUG,(stderr,"connecting [%s:%d]\n",cfg->host,cfg->port));
@@ -562,15 +562,15 @@ static int s_trnc_state_machine(msock_socket_t *s, app_cfg_t *cfg)
                     PEPRINT((stderr,"connect failed [%"PRId64"]\n",test));
                 }
             }
-            
+
             // action: write request
             if (action == TRNAT_WR_REQ) {
                 const char *reqstr="REQ\0";
 
                 test=msock_sendto(s,NULL,(byte *)reqstr,4,0);
-                
+
                 PMPRINT(MOD_MBTNAV,MM_DEBUG,(stderr,"sendto REQ ret[%"PRId64"] [%d/%s]\n",test,errno,strerror(errno)));
-                
+
                 if( test>0 ){
                     trn_tx_count++;
                     trn_tx_bytes+=test;
@@ -579,18 +579,18 @@ static int s_trnc_state_machine(msock_socket_t *s, app_cfg_t *cfg)
                     PMPRINT(MOD_MBTNAV,MM_DEBUG,(stderr,"sendto failed ret[%"PRId64"] [%d/%s]\n",test,errno,strerror(errno)));
                 }
             }
-            
+
             // action: read response
             if (action == TRNAT_RD_MSG) {
                 pread = msg_buf;
                 readlen = TRNU_PUB_BYTES;
-                
+
                 // request message
                 if ((test = msock_recvfrom(s, NULL, pread, readlen,0))>0) {
-                    
+
                     trn_rx_bytes+=test;
                     trn_rx_count++;
-                    
+
 
                     // check message type
                     if(frame->sync==MBTRN_MSGTYPE_ACK){
@@ -641,7 +641,7 @@ static int s_trnc_state_machine(msock_socket_t *s, app_cfg_t *cfg)
                     }//switch
                 }
             }
-            
+
             // action: show message
             if (action == TRNAT_SHOW_MSG) {
                 if( (cfg->ofmt&OF_HEX) != 0)
@@ -653,12 +653,12 @@ static int s_trnc_state_machine(msock_socket_t *s, app_cfg_t *cfg)
                 if( (cfg->ofmt&OF_CSV) != 0)
                     s_out_csv(frame);
             }
-            
+
             // action: quit state machine
             if (action == TRNAT_QUIT) {
                 break;
             }
-            
+
             // check cycles and signals
             scycles--;
             if(scycles==0){
@@ -666,20 +666,20 @@ static int s_trnc_state_machine(msock_socket_t *s, app_cfg_t *cfg)
                 retval=0;
                 state=TRNSM_DONE;
             }
-            
+
             if(g_interrupt){
                 PTRACE();
                 retval=-1;
                 state=TRNSM_DONE;
             }
-            
+
         }// while !TRNSM_DONE
     }//else invalid arg
-    
+
     PMPRINT(MOD_MBTNAV,MBTNAV_V1,(stderr,"tx count/bytes[%d/%d]\n",trn_tx_count,trn_tx_bytes));
     PMPRINT(MOD_MBTNAV,MBTNAV_V1,(stderr,"rx count/bytes[%d/%d]\n",trn_rx_count,trn_rx_bytes));
     PMPRINT(MOD_MBTNAV,MBTNAV_V1,(stderr,"trn count/bytes[%d/%d]\n",trn_msg_count,trn_msg_bytes));
-    
+
     return retval;
 }
 // End function s_trnc_state_machine
@@ -691,7 +691,7 @@ static int s_trnc_state_machine(msock_socket_t *s, app_cfg_t *cfg)
 static int s_app_main(app_cfg_t *cfg)
 {
     int retval=0;
-    
+
     // init receive buffer
     byte buf[cfg->bsize];
     memset(buf,0,cfg->bsize);
@@ -699,7 +699,7 @@ static int s_app_main(app_cfg_t *cfg)
     // create socket
     msock_socket_t *s = msock_socket_new(cfg->host, cfg->port, ST_UDP);
     msock_set_blocking(s,(cfg->blocking==0?false:true));
- 
+
 // these options are used by mbtrnrcv
 // setting these options is only for debug
 //    int so_reuseaddr=1;
@@ -729,7 +729,7 @@ static int s_app_main(app_cfg_t *cfg)
 int main(int argc, char **argv)
 {
     int retval=0;
-    
+
     // set default app configuration
     app_cfg_t cfg = {
         MBTNAV_VERBOSE_DFL,
@@ -759,4 +759,3 @@ int main(int argc, char **argv)
     return retval;
 }
 // End function main
-

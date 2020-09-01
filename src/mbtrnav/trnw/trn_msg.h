@@ -13,24 +13,24 @@
 /////////////////////////
 /*
  Copyright Information
-  
+
  Copyright 2002-YYYY MBARI
  Monterey Bay Aquarium Research Institute, all rights reserved.
- 
+
  Terms of Use
- 
+
  This program is free software; you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
  the Free Software Foundation; either version 3 of the License, or
  (at your option) any later version. You can access the GPLv3 license at
  http://www.gnu.org/licenses/gpl-3.0.html
- 
+
  This program is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  GNU General Public License for more details
  (http://www.gnu.org/licenses/gpl-3.0.html)
- 
+
  MBARI provides the documentation and software code "as is", with no warranty,
  express or implied, as to the software, title, non-infringement of third party
  rights, merchantability, or fitness for any particular purpose, the accuracy of
@@ -38,7 +38,7 @@
  assume the entire risk associated with use of the code, and you agree to be
  responsible for the entire cost of repair or servicing of the program with
  which you are using the code.
- 
+
  In no event shall MBARI be liable for any damages, whether general, special,
  incidental or consequential damages, arising out of your use of the software,
  including, but not limited to, the loss or corruption of your data or damages
@@ -48,11 +48,11 @@
  liability or expense, including attorneys' fees, resulting from loss of or
  damage to property or the injury to or death of any person arising out of the
  use of the software.
- 
+
  The MBARI software is provided without obligation on the part of the
  Monterey Bay Aquarium Research Institute to assist in its use, correction,
  modification, or enhancement.
- 
+
  MBARI assumes no responsibility or liability for any third party and/or
  commercial software required for the database or applications. Licensee agrees
  to obtain and maintain valid licenses for any additional third party software
@@ -64,7 +64,7 @@
 #define TRN_MSG_H
 
 /////////////////////////
-// Includes 
+// Includes
 /////////////////////////
 
 /////////////////////////
@@ -196,20 +196,20 @@ typedef struct pt_cdata_s{
     double phi, theta, psi;
     //TRN states
     double psi_berg, psi_dot_berg;
-    
+
     //Time (s)
     double time;
-    
+
     //Validity flag for dvl motion measurement
     unsigned char dvlValid;
     //Validity flag for GPS measurement
     unsigned char gpsValid;
     //Validity flag for DVL lock onto seafloor
     unsigned char bottomLock;
-    
+
     //XYZ, phi, theta, psi, wy, wz covariance (passively stable in roll) (see above units)
     double covariance[N_COVAR];
-    
+
 }pt_cdata_t;
 #pragma pack(pop)
 
@@ -243,7 +243,7 @@ typedef struct trn_estimate_s{
     double cov[4];
 }trnu_estimate_t;
 
-typedef struct trnu_pub_s{
+typedef struct trnu_pub_org_s{
     // sync bytes (see TRNU_PUB_SYNC)
     uint32_t sync;
     // TRN estimates
@@ -269,9 +269,95 @@ typedef struct trnu_pub_s{
     double mb1_time;
     // TRN update time (taken in mbtrnpp)
     double update_time;
-}trnu_pub_t;
-#pragma pack(pop)
+}trnu_pub_org_t;
 
+typedef struct trnu_pub_s{
+    // sync bytes (see TRNU_PUB_SYNC)
+    uint32_t sync;
+    // TRN estimates
+    // 0:pose_t 1:mle 2:mmse 3: offset 4: most recent useful offset
+    trnu_estimate_t est[5];
+    // number of reinits
+    int reinit_count;
+    // time of last reinint (not implemented)
+    double reinit_tlast;
+    // TRN filter state
+    int filter_state;
+    // last measurement successful
+    int success;
+    // TRN is_converged
+    short int is_converged;
+    // TRN is_valid (covariance thresholds) - flag indicating this offset is reliable and can be used
+    short int is_valid;
+    // mbtrnpp MB1 cycle counter
+    int mb1_cycle;
+    // MB1 ping number
+    int ping_number;
+    // Number of current streak of converged estimates
+    int n_con_seq;
+    // Total number of unconverged estimates
+    int n_con_tot;
+    // Number of current streak of converged estimates
+    int n_uncon_seq;
+    // Total number of unconverged estimates
+    int n_uncon_tot;
+    // MB1 timestamp
+    double mb1_time;
+    // Time of most recent reinit (epoch seconds)
+    double reinit_time;
+    // TRN update time (taken in mbtrnpp)
+    double update_time;
+}trnu_pub_t;
+
+typedef struct trnu_pub_future_s{
+    // sync bytes (see TRNU_PUB_SYNC)
+    uint32_t sync;
+
+    // Ping time (epoch seconds)
+    double time;
+
+    // Realtime position (pose_t)
+    double nav_x; // North (meters)
+    double nav_y; // East (meters)
+    double nav_z; // Down (meters)
+
+    // TRN MMSE estimate position and covariance
+    double trn_x; // North (meters)
+    double trn_y; // East (meters)
+    double trn_z; // Down (meters)
+    // Covariance matrix
+    // - symmetric 3x3 matrix
+    // - only (4) elements needed: diagonal and COV(XY) elements
+    // [0] : x : poset.covariance[0]
+    // [1] : y : poset.covariance[2]
+    // [2] : z : poset.covariance[5]
+    // [3] : xy: poset.covariance[1]
+    double trn_cov[4];
+
+    // Current Navigation offset estimate (trn - nav)
+    double off_x; // North (meters)
+    double off_y; // East (meters)
+    double off_z; // Down (meters)
+
+    // Most recent reliable navigation offset estimate (trn - nav)
+    double off_use_time;  // Epoch seconds
+    double off_use_x; // North (meters)
+    double off_use_y; // East (meters)
+    double off_use_z; // Down (meters)
+
+    // Metrics
+    int mb1_cycle;      // mbtrnpp MB1 cycle counter
+    int ping_number;    // Current multibeam ping number
+    int n_con_seq;      // Number of current streak of converged estimates
+    int n_con_tot;      // Total number of unconverged estimates
+    int n_uncon_seq;    // Number of current streak of converged estimates
+    int n_uncon_tot;    // Total number of unconverged estimates
+    bool is_converged;  // TRN filter converged by its measure
+    bool is_reliable;   // Current offset estimate is reliable enough to be used
+    double reinit_time; // Time of most recent reinit (epoch seconds)
+    double update_time; // TRN update time (taken in mbtrnpp)
+}trnu_pub_future_t;
+#pragma pack(pop)
 
 typedef struct trn_update_s{
     pt_cdata_t *pt_dat;
@@ -307,7 +393,7 @@ typedef struct mt_cdata_s{
     double* altitudes;
     double* alphas;
     bool* measStatus;
-    
+
     // For use in sensors that vary the number of beams (e.g., MB-system)
     int* beamNums;
 }mt_cdata_t;
