@@ -106,20 +106,11 @@
  "GNU General Public License for more details (http://www.gnu.org/licenses/gpl-3.0.html)\n"
  */
 
-#define TRNUCLI_TEST_TRNU_PORT 8000
-#define TRNUCLI_TEST_TRNU_HBEAT 25
-#define TRNUCLI_TEST_CSV_LINE_BYTES 1024*20
-#define TRNUCLI_TEST_UPDATE_N 10
-#define TRNUCLI_TEST_LOG_NAME "trnucli"
-#define TRNUCLI_TEST_LOG_DESC "trnu client log"
-#define TRNUCLI_TEST_LOG_DIR  "."
-#define TRNUCLI_TEST_LOG_EXT  ".log"
-#define TRNUCLI_TEST_CMD_LINE_BYTES 2048
-#define TRNUCLI_TEST_CONNECT_WAIT_SEC 5
-#define TRNUCLI_TEST_ELISTEN_RETRIES 5
-#define TRNUCLI_TEST_ELISTEN_WAIT 3
-#define TRNUCLI_TEST_EDEL_MSEC  500
-#define TRNUCLI_TEST_RCTO_SEC 10.0
+
+#define TRNUC_SRC_CSV_STR  "csv"
+#define TRNUC_SRC_TRNU_STR "svr"
+#define TRNUC_SRC_BIN_STR  "bin"
+
 #define HOSTNAME_BUF_LEN 256
 
 /////////////////////////
@@ -153,6 +144,9 @@ typedef struct app_cfg_s{
     /// @var app_cfg_s::trnu_hbeat
     /// @brief TBD
     int trnu_hbeat;
+    /// @var app_cfg_s::hbeat_to_sec
+    /// @brief TBD
+    double hbeat_to_sec;
     /// @var app_cfg_s::flags
     /// @brief TBD
     trnuc_flags_t flags;
@@ -162,16 +156,36 @@ typedef struct app_cfg_s{
     /// @var app_cfg_s::ofmt
     /// @brief TBD
     trnuc_fmt_t ofmt;
+    /// @var app_cfg_s::ofile
+    /// @brief TBD
+    FILE *ofile;
     /// @var app_cfg_s::demo
     /// @brief TBD
     int demo;
+    /// @var app_cfg_s::async
+    /// @brief TBD
+    uint32_t async;
+    /// @var app_cfg_s::session_timer
+    /// @brief TBD
+    double session_timer;
+    /// @var app_cfg_s::recon_timer
+    /// @brief TBD
+    double recon_timer;
     /// @var app_cfg_s::recon
     /// @brief TBD
-    double rctos;
-    double recon_timer;
-    /// @var app_cfg_s::edelms
+    double recon_to_sec;
+    /// @var app_cfg_s::stats_log_period_sec
     /// @brief TBD
-    uint32_t edelms;
+    double stats_log_period_sec;
+    /// @var app_cfg_s::listen_to_msec
+    /// @brief TBD
+    uint32_t listen_to_ms;
+    /// @var app_cfg_s::nddelms
+    /// @brief TBD
+    uint32_t enodata_delay_ms;
+    /// @var app_cfg_s::rcdelms
+    /// @brief TBD
+    uint32_t erecon_delay_ms;
     /// @var app_cfg_s::log_cfg
     /// @brief TBD
     mlog_config_t *log_cfg;
@@ -187,10 +201,39 @@ typedef struct app_cfg_s{
     /// @var app_cfg_s::log_path
     /// @brief TBD
     char *log_path;
+    /// @var app_cfg_s::log_en
+    /// @brief TBD
+    bool log_en;
 }app_cfg_t;
 
+#define TRNUCLI_TEST_TRNU_PORT 8000
+#define TRNUCLI_TEST_TRNU_HBEAT 25
+#define TRNUCLI_TEST_CSV_LINE_BYTES 1024*20
+#define TRNUCLI_TEST_UPDATE_N 10
+#define TRNUCLI_TEST_LOG_NAME "trnucli"
+#define TRNUCLI_TEST_LOG_DESC "trnu client log"
+#define TRNUCLI_TEST_LOG_DIR  "."
+#define TRNUCLI_TEST_LOG_EXT  ".log"
+#define TRNUCLI_TEST_CMD_LINE_BYTES 2048
+#define TRNUCLI_TEST_CONNECT_WAIT_SEC 5
+#define TRNUCLI_TEST_ELISTEN_RETRIES 5
+#define TRNUCLI_TEST_ELISTEN_WAIT 3
+#define TRNUCLI_TEST_ENODATA_DELAY_MSEC  50
+#define TRNUCLI_TEST_ERECON_DELAY_MSEC  5000
+#define TRNUCLI_TEST_RECON_TMOUT_SEC 10.0
+#define TRNUCLI_TEST_HBEAT_TMOUT_SEC 0.0
+#define TRNUCLI_TEST_LISTEN_TMOUT_MSEC 50
+#define TRNUCLI_TEST_LOG_EN true
+#define TRNUCLI_TEST_STATS_LOG_PERIOD_SEC 60.0
+#define TRNUCLI_TEST_OFILE stdout
+#define TRNUCLI_TEST_OFMT TRNUC_FMT_PRETTY
+#define TRNUCLI_TEST_SRC SRC_TRNU
 
 static void s_show_help();
+static const char *s_app_ofmt2str(trnuc_fmt_t fmt);
+static const char *s_app_ofile2str(FILE *file);
+static const char *s_app_input2str(trnucli_src_type src);
+static int s_app_cfg_show(app_cfg_t *self,bool verbose, int indent);
 
 /////////////////////////
 // Imports
@@ -201,6 +244,23 @@ static void s_show_help();
 /////////////////////////
 static bool g_interrupt=false;
 static bool g_signal=0;
+const char *ofmt_strings[]={
+    TRNUC_FMT_PRETTY_STR,
+    TRNUC_FMT_CSV_STR,
+    TRNUC_FMT_HEX_STR,
+    TRNUC_FMT_PRETTY_HEX_STR
+};
+
+const char *ofile_strings[]={
+    TRNUC_OFILE_SOUT_STR,
+    TRNUC_OFILE_SERR_STR
+};
+
+const char *src_strings[]={
+    TRNUC_SRC_CSV_STR,
+    TRNUC_SRC_TRNU_STR,
+    TRNUC_SRC_BIN_STR
+};
 
 /////////////////////////
 // Function Definitions
@@ -213,22 +273,50 @@ static void s_show_help()
 {
     char help_message[] = "\nTRNU client (trnu_cli) test\n";
     char usage_message[] = "\ntrnucli-test [options]\n"
-    "--verbose     : verbose output\n"
-    "--help        : output help message\n"
-    "--version     : output version info\n"
-    "--host[:port] : TRNU server host:port\n"
-    "--input       : input type (B:bin C:csv S:socket)\n"
-    "--ofmt=[pcx]  : output format (P:pretty X:hex PX:pretty_hex C:csv\n"
-    "--block=[lc]  : block on connect/listen (L:listen C:connect)\n"
-    "--rctos=n     : reconnect timeout sec (reconnect if no message received for n sec)\n"
-    "--edelms=n    : delay n ms on listen error\n"
-    "--ifile       : input file\n"
-    "--update=n    : TRN update N\n"
-    "--log         : enable logging\n"
-    "--demo=n      : use trn_cli handler mechanism, w/ periodic TRN resets (mod n)\n"
+    " --verbose     : verbose output\n"
+    " --help        : output help message\n"
+    " --version     : output version info\n"
+    " --host[:port] : TRNU server host:port\n"
+    " --input=[bcs] : input type (B:bin C:csv S:socket)\n"
+    " --ofmt=[pcx]  : output format (P:pretty X:hex PX:pretty_hex C:csv\n"
+    " --serr        : send updates to stderr (default is stdout)\n"
+    " --ifile       : input file\n"
+    " --hbtos       : heartbeat period (sec, 0.0 to disable)\n"
+    "\ntrncli API options:\n"
+    " --block=[lc]  : block on connect/listen (L:listen C:connect)\n"
+    " --update=n    : TRN update N\n"
+    " --demo=n      : use trn_cli handler mechanism, w/ periodic TRN resets (mod n)\n"
+    "\ntrncli_ctx API options:\n"
+    " --rctos=n     : reconnect timeout sec (reconnect if no message received for n sec)\n"
+    " --nddelms=n   : delay n ms on listen error\n"
+    " --ltoms=n     : listen timeuot msec\n"
+    " --rcdelms=n   : delay n ms on reconnect error\n"
+    " --no-log      : disable client logging\n"
+    " --logstats=f  : async client stats log period (sec, <=0.0 to disable)\n"
+    " --async=n     : use asynchronous implementation, show status every n msec\n"
+    "\n"
+    " Example:\n"
+    " # async client\n"
+    " trnucli-test --host=<trnsvr IP>[:<port>] --input=S --ofmt=p --async=3000\n"
     "\n";
     printf("%s",help_message);
     printf("%s",usage_message);
+    int wkey=10;
+    int wval=10;
+    printf(" Defaults:\n");
+    printf("%*s  %*d\n",wkey,"port",wval,TRNUCLI_TEST_TRNU_PORT);
+    printf("%*s  %*s\n",wkey,"input",wval,s_app_input2str(TRNUCLI_TEST_SRC));
+    printf("%*s  %*s\n",wkey,"ofmt",wval,s_app_ofmt2str(TRNUCLI_TEST_OFMT));
+    printf("%*s  %*.1lf\n",wkey,"hbtos",wval,TRNUCLI_TEST_HBEAT_TMOUT_SEC);
+    printf("%*s  %*d\n",wkey,"update",wval,TRNUCLI_TEST_UPDATE_N);
+    printf("%*s  %*.3lf\n", wkey,"rctos",wval,TRNUCLI_TEST_RECON_TMOUT_SEC);
+    printf("%*s  %*"PRIu32"\n",wkey,"ltoms",wval,TRNUCLI_TEST_LISTEN_TMOUT_MSEC);
+    printf("%*s  %*"PRIu32"\n",wkey,"nddelms",wval,TRNUCLI_TEST_ENODATA_DELAY_MSEC);
+    printf("%*s  %*"PRIu32"\n",wkey,"rcdelms",wval,TRNUCLI_TEST_ERECON_DELAY_MSEC);
+    printf("%*s  %*.3lf\n",wkey,"logstats",wval,TRNUCLI_TEST_STATS_LOG_PERIOD_SEC);
+    printf("%*s  %*s\n",wkey,"log_en",wval,(TRNUCLI_TEST_LOG_EN?"Y":"N"));
+    printf("%*s  %*s\n",wkey,"ofile",wval,s_app_ofile2str(TRNUCLI_TEST_OFILE));
+    printf("\n");
 }
 // End function s_show_help
 
@@ -247,18 +335,25 @@ void parse_args(int argc, char **argv, app_cfg_t *cfg)
     bool version=false;
     char cmnem=0;
     static struct option options[] = {
-        {"verbose", no_argument, NULL, 0},
         {"help", no_argument, NULL, 0},
+        {"verbose", no_argument, NULL, 0},
         {"version", no_argument, NULL, 0},
+        {"no-log", no_argument, NULL, 0},
+        {"serr", no_argument, NULL, 0},
         {"host", required_argument, NULL, 0},
         {"input", required_argument, NULL, 0},
         {"ofmt", required_argument, NULL, 0},
         {"block", required_argument, NULL, 0},
         {"ifile", required_argument, NULL, 0},
         {"update", required_argument, NULL, 0},
+        {"hbtos", required_argument, NULL, 0},
         {"rctos", required_argument, NULL, 0},
-        {"edelms", required_argument, NULL, 0},
+        {"ltoms", required_argument, NULL, 0},
+        {"nddelms", required_argument, NULL, 0},
+        {"rcdelms", required_argument, NULL, 0},
         {"demo", required_argument, NULL, 0},
+        {"async", required_argument, NULL, 0},
+        {"logstats", required_argument, NULL, 0},
         {NULL, 0, NULL, 0}};
  
     // process argument list
@@ -282,7 +377,10 @@ void parse_args(int argc, char **argv, app_cfg_t *cfg)
                 else if (strcmp("version", options[option_index].name) == 0) {
                     version = true;
                 }
-                
+                // no-log
+                else if (strcmp("no-log", options[option_index].name) == 0) {
+                    cfg->log_en = false;
+                }
                 // host
                 else if (strcmp("host", options[option_index].name) == 0) {
                     scpy = strdup(optarg);
@@ -335,6 +433,10 @@ void parse_args(int argc, char **argv, app_cfg_t *cfg)
                     }
                     cfg->ifile=(NULL!=optarg?strdup(optarg):NULL);
                 }
+                // serr
+                else if (strcmp("serr", options[option_index].name) == 0) {
+                    cfg->ofile=stderr;
+                }
                 // update
                 else if (strcmp("update", options[option_index].name) == 0) {
                     sscanf(optarg,"%d",&cfg->update_n);
@@ -361,17 +463,37 @@ void parse_args(int argc, char **argv, app_cfg_t *cfg)
                     if(strstr(optarg,"l")!=NULL || strstr(optarg,"L")!=NULL )
                         cfg->flags|=TRNUC_BLK_LISTEN;
                 }
+                // hbtos
+                else if (strcmp("hbtos", options[option_index].name) == 0) {
+                    sscanf(optarg,"%lf",&cfg->hbeat_to_sec);
+                }
                 // rctos
                 else if (strcmp("rctos", options[option_index].name) == 0) {
-                    sscanf(optarg,"%lf",&cfg->rctos);
+                    sscanf(optarg,"%lf",&cfg->recon_to_sec);
                 }
-                // edelms
-                else if (strcmp("edelms", options[option_index].name) == 0) {
-                    sscanf(optarg,"%"PRIu32"",&cfg->edelms);
+                // ltoms
+                else if (strcmp("ltoms", options[option_index].name) == 0) {
+                    sscanf(optarg,"%"PRIu32"",&cfg->listen_to_ms);
+                }
+                // nddelms
+                else if (strcmp("nddelms", options[option_index].name) == 0) {
+                    sscanf(optarg,"%"PRIu32"",&cfg->enodata_delay_ms);
+                }
+                // rcdelms
+                else if (strcmp("rcdelms", options[option_index].name) == 0) {
+                    sscanf(optarg,"%"PRIu32"",&cfg->erecon_delay_ms);
                 }
                 // demo
                 else if (strcmp("demo", options[option_index].name) == 0) {
                     sscanf(optarg,"%d",&cfg->demo);
+                }
+                // async
+                else if (strcmp("async", options[option_index].name) == 0) {
+                    sscanf(optarg,"%"PRIu32"",&cfg->async);
+                }
+                // logstats
+                else if (strcmp("logstats", options[option_index].name) == 0) {
+                    sscanf(optarg,"%lf",&cfg->stats_log_period_sec);
                 }
 
                 break;
@@ -410,17 +532,12 @@ void parse_args(int argc, char **argv, app_cfg_t *cfg)
         }
     }
 
-    PDPRINT((stderr,"verbose    [%s]\n",(cfg->verbose?"Y":"N")));
-    PDPRINT((stderr,"ifile      [%s]\n",cfg->ifile));
-    PDPRINT((stderr,"input_src  [%d]\n",cfg->input_src));
-    PDPRINT((stderr,"host       [%s]\n",cfg->trnu_host));
-    PDPRINT((stderr,"port       [%d]\n",cfg->trnu_port));
-    PDPRINT((stderr,"trnu_hbeat [%d]\n",cfg->trnu_hbeat));
-    PDPRINT((stderr,"ofmt       [%02x]\n",cfg->ofmt));
-    PDPRINT((stderr,"update_n   [%u]\n",cfg->update_n));
-    PDPRINT((stderr,"rctos      [%.3lf]\n",cfg->rctos));
-    PDPRINT((stderr,"edelms      [%"PRIu32"]\n",cfg->edelms));
-    PDPRINT((stderr,"demo       [%d]\n",cfg->demo));
+    if(cfg->verbose){
+        fprintf(stderr," Configuration:\n");
+        s_app_cfg_show(cfg,true,5);
+        fprintf(stderr,"\n");
+    }
+
 }
 // End function parse_args
 
@@ -445,6 +562,59 @@ static void s_termination_handler (int signum)
 }
 // End function termination_handler
 
+
+static const char *s_app_ofmt2str(trnuc_fmt_t fmt)
+{
+    const char *retval=NULL;
+    switch (fmt) {
+        case TRNUC_FMT_PRETTY:
+            retval=ofmt_strings[0];
+            break;
+        case TRNUC_FMT_CSV:
+            retval=ofmt_strings[1];
+            break;
+        case TRNUC_FMT_HEX:
+            retval=ofmt_strings[2];
+            break;
+        case TRNUC_FMT_PRETTY_HEX:
+            retval=ofmt_strings[3];
+            break;
+        default:
+            break;
+    }
+    return retval;
+}
+
+static const char *s_app_ofile2str(FILE *file)
+{
+    const char *retval=NULL;
+    if(file==stdout)
+        retval=ofile_strings[0];
+    else if(file==stderr)
+        retval=ofile_strings[1];
+    return retval;
+}
+
+static const char *s_app_input2str(trnucli_src_type src)
+{
+    const char *retval=NULL;
+    switch (src) {
+        case SRC_CSV:
+            retval=src_strings[0];
+            break;
+        case SRC_TRNU:
+            retval=src_strings[1];
+            break;
+        case SRC_BIN:
+            retval=src_strings[2];
+            break;
+
+        default:
+            break;
+    }
+    return retval;
+}
+
 static app_cfg_t *app_cfg_new()
 {
     app_cfg_t *instance = (app_cfg_t *)malloc(sizeof(app_cfg_t));
@@ -453,20 +623,27 @@ static app_cfg_t *app_cfg_new()
         memset(instance,0,sizeof(app_cfg_t));
         instance->verbose=false;
         instance->ifile=NULL;
-        instance->input_src=SRC_TRNU;
+        instance->input_src=TRNUCLI_TEST_SRC;
 
         instance->trnu_host=NULL;
         instance->trnu_port=TRNUCLI_TEST_TRNU_PORT;
+        instance->ofmt=TRNUCLI_TEST_OFMT;
         instance->trnu_hbeat=TRNUCLI_TEST_TRNU_HBEAT;
+        instance->hbeat_to_sec=TRNUCLI_TEST_HBEAT_TMOUT_SEC;
         instance->update_n=TRNUCLI_TEST_UPDATE_N;
         instance->log_cfg=mlog_config_new(ML_TFMT_ISO1806,ML_DFL_DEL,ML_MONO|ML_NOLIMIT,ML_FILE,0,0,0);
         instance->log_id=MLOG_ID_INVALID;
         instance->log_name=strdup(TRNUCLI_TEST_LOG_NAME);
         instance->log_dir=strdup(TRNUCLI_TEST_LOG_DIR);
         instance->log_path=(char *)malloc(512);
-        instance->rctos=TRNUCLI_TEST_RCTO_SEC;
+        instance->recon_to_sec=TRNUCLI_TEST_RECON_TMOUT_SEC;
         instance->recon_timer=0.0;
-        instance->edelms=TRNUCLI_TEST_EDEL_MSEC;
+        instance->listen_to_ms=TRNUCLI_TEST_LISTEN_TMOUT_MSEC;
+        instance->enodata_delay_ms=TRNUCLI_TEST_ENODATA_DELAY_MSEC;
+        instance->erecon_delay_ms=TRNUCLI_TEST_ERECON_DELAY_MSEC;
+        instance->stats_log_period_sec=TRNUCLI_TEST_STATS_LOG_PERIOD_SEC;
+        instance->log_en=TRNUCLI_TEST_LOG_EN;
+        instance->ofile=TRNUCLI_TEST_OFILE;
     }
     return instance;
 }
@@ -495,6 +672,36 @@ static void app_cfg_destroy(app_cfg_t **pself)
         }
     }
     return;
+}
+
+static int s_app_cfg_show(app_cfg_t *self,bool verbose, int indent)
+{
+    int retval=0;
+    int wkey=12;
+    int wval=14;
+    fprintf(stderr,"%*s%*s  %*s\n",indent,(indent>0?" ":""),wkey,"verbose",wval,(self->verbose?"Y":"N"));
+    fprintf(stderr,"%*s%*s  %*s\n",indent,(indent>0?" ":""),wkey,"host",wval,self->trnu_host);
+    fprintf(stderr,"%*s%*s  %*d\n",indent,(indent>0?" ":""),wkey,"port",wval,self->trnu_port);
+
+    fprintf(stderr,"%*s%*s  %*s\n",indent,(indent>0?" ":""),wkey,"input_src",wval,s_app_input2str(self->input_src));
+    fprintf(stderr,"%*s%*s  %*u\n",indent,(indent>0?" ":""),wkey,"async",wval,self->async);
+    fprintf(stderr,"%*s%*s  %*d\n",indent,(indent>0?" ":""),wkey,"demo",wval,self->demo);
+    fprintf(stderr,"%*s%*s  %*s\n",indent,(indent>0?" ":""),wkey,"ifile",wval,self->ifile);
+    fprintf(stderr,"%*s%*s  %*s\n",indent,(indent>0?" ":""),wkey,"ofmt",wval,s_app_ofmt2str(self->ofmt));
+    fprintf(stderr,"%*s%*s  %*s\n",indent,(indent>0?" ":""),wkey,"out",wval,s_app_ofile2str(self->ofile));
+
+    fprintf(stderr,"%*s%*s  %*.3lf\n",indent,(indent>0?" ":""),wkey,"hbtos",wval,self->hbeat_to_sec);
+    fprintf(stderr,"%*s%*s  %*.3lf\n",indent,(indent>0?" ":""),wkey,"rctos",wval,self->recon_to_sec);
+    fprintf(stderr,"%*s%*s  %*"PRIu32"\n",indent,(indent>0?" ":""),wkey,"ltoms",wval,self->listen_to_ms);
+    fprintf(stderr,"%*s%*s  %*"PRIu32"\n",indent,(indent>0?" ":""),wkey,"nddelms",wval,self->enodata_delay_ms);
+    fprintf(stderr,"%*s%*s  %*"PRIu32"\n",indent,(indent>0?" ":""),wkey,"rcdelms",wval,self->erecon_delay_ms);
+    fprintf(stderr,"%*s%*s  %*.3lf\n",indent,(indent>0?" ":""),wkey,"logstats",wval,self->stats_log_period_sec);
+    fprintf(stderr,"%*s%*s  %*s\n",indent,(indent>0?" ":""),wkey,"no-log",wval,(self->verbose?"Y":"N"));
+
+    fprintf(stderr,"%*s%*s  %*u\n",indent,(indent>0?" ":""),wkey,"update_n",wval,self->update_n);
+    fprintf(stderr,"%*s%*s  %*d\n",indent,(indent>0?" ":""),wkey,"trnu_hbeat",wval,self->trnu_hbeat);
+
+    return retval;
 }
 
 static int s_tokenize(char *src, char ***dest, char *del, int ntok)
@@ -543,6 +750,7 @@ static void s_init_log(int argc, char **argv, app_cfg_t *cfg)
     struct tm *gmt;
 
     time(&rawtime);
+    cfg->session_timer=mtime_etime();
     // Get GMT time
     gmt = gmtime(&rawtime);
     // format YYYYMMDD-HHMMSS
@@ -574,6 +782,8 @@ static void s_init_log(int argc, char **argv, app_cfg_t *cfg)
 
     mlog_open(cfg->log_id, flags, mode);
     mlog_tprintf(cfg->log_id,"*** trnucli-test session start ***\n");
+    mlog_tprintf(cfg->log_id,"start_time,%.3lf\n",cfg->session_timer);
+    mlog_tprintf(cfg->log_id,"log_id=[%d]\n",cfg->log_id);
     mlog_tprintf(cfg->log_id,"cmdline [%s]\n",g_cmd_line);
     mlog_tprintf(cfg->log_id,"build [%s]\n",TRNUCLI_TEST_BUILD);
 
@@ -762,7 +972,7 @@ static int s_trnucli_process_update(trnu_pub_t *update, app_cfg_t *cfg)
     char *str=NULL;
     trnucli_update_str(update,&str,0,cfg->ofmt);
     if(NULL!=str){
-    	fprintf(stdout,"%s\n",str);
+    	fprintf(cfg->ofile,"%s\n",str);
         free(str);
     }
     str=NULL;
@@ -794,6 +1004,101 @@ static int s_trnucli_test_csv(app_cfg_t *cfg)
     mfile_file_destroy(&ifile);
     return retval;
 }
+static int s_trnucli_test_trnu_async(app_cfg_t *cfg)
+{
+    int retval=-1;
+
+    // configure a trnu async context instance
+    // applications may handle updates, or assign an update callback function
+    //    For this client:
+    //    - updates handled by app (NULL handler assigned)
+    //    - hbeat_to_sec     : heartbeat period
+    //    - enodata_delay_ms : delay if data not available
+    //    - erecon_delay_ms  : delay  if connect attempt fails
+    //    - recon_to_sec     : reconnect if data unavailable
+    trnucli_ctx_t *ctx = trnucli_ctx_newl(cfg->trnu_host,cfg->trnu_port,NULL,
+                                          cfg->hbeat_to_sec,
+                                          cfg->listen_to_ms,
+                                          cfg->enodata_delay_ms,
+                                          cfg->erecon_delay_ms,
+                                          cfg->recon_to_sec,
+                                          cfg->log_en?TRNU_LOG_EN:TRNU_LOG_DIS);
+
+    if(NULL!=ctx){
+
+        // configure stats logging
+        trnucli_ctx_set_stats_log_period(ctx,cfg->stats_log_period_sec);
+
+        // start the client - separate worker thread
+        //  - manages connection (reconnects on timeout)
+        //  - receives updates w/ optional update handler callback
+        int test=trnucli_ctx_start(ctx);
+
+        if(test==0){
+            // success
+            fprintf(stderr,"ctx start OK\n");
+            mlog_tprintf(cfg->log_id,"host             %s\n",cfg->trnu_host);
+            mlog_tprintf(cfg->log_id,"port             %d\n",cfg->trnu_port);
+            mlog_tprintf(cfg->log_id,"hbeat_to_sec     %.3lf\n",cfg->hbeat_to_sec);
+            mlog_tprintf(cfg->log_id,"listen_to_ms     %"PRIu32"\n",cfg->listen_to_ms);
+            mlog_tprintf(cfg->log_id,"enodata_delay_ms %"PRIu32"\n",cfg->enodata_delay_ms);
+            mlog_tprintf(cfg->log_id,"erecon_delay_ms  %"PRIu32"\n",cfg->erecon_delay_ms);
+            mlog_tprintf(cfg->log_id,"recon_to_sec     %.3lf\n",cfg->recon_to_sec);
+        }else{
+            fprintf(stderr,"ERR - ctx start failed\n");
+            mlog_tprintf(cfg->log_id,"ERR - ctx start failed\n");
+        }
+
+        // app does things here...
+
+        // this app prints status to demo API methods
+        // until the use interrupts (CTRL-C)
+        while(test==0 && !g_interrupt){
+
+            // show the context...
+            fprintf(stderr,"\nUpdate Status\n");
+            fprintf(stderr,"     updates since last read        [%"PRIu32"]\n",trnucli_ctx_new_count(ctx));
+            fprintf(stderr,"     update arrival time (arrtime)  [%.3lf]\n",trnucli_ctx_update_arrtime(ctx));
+            fprintf(stderr,"     update arrival age  (arrage)   [%.3lf]\n",trnucli_ctx_update_arrage(ctx));
+            fprintf(stderr,"     update data time    (mb1time)  [%.3lf]\n",trnucli_ctx_update_mb1time(ctx));
+            fprintf(stderr,"     update data age     (mb1age)   [%.3lf]\n",trnucli_ctx_update_mb1age(ctx));
+            fprintf(stderr,"     update host time    (hosttime) [%.3lf]\n",trnucli_ctx_update_hosttime(ctx));
+            fprintf(stderr,"     update host age     (hostage)  [%.3lf]\n",trnucli_ctx_update_hostage(ctx));
+
+            // show stats...
+            fprintf(stderr,"\nContext Stats\n");
+            trnucli_stats_t *stats=NULL;
+            trnucli_ctx_stats(ctx,&stats);
+            trnucli_ctx_stat_show(stats,true,5);
+            if(NULL!=stats)free(stats);
+
+            fprintf(stderr,"\nTRN Client Context\n");
+            trnucli_ctx_show(ctx,false,5);
+
+            // show latest update...
+            fprintf(stderr,"\nUpdate Data\n");
+            trnu_pub_t latest={0};
+            if(trnucli_ctx_last_update(ctx,&latest,NULL)==0){
+                // format per config (pretty, hex, csv, etc.)
+                s_trnucli_process_update(&latest,cfg);
+            }
+
+            // delay
+            if(cfg->async>0)
+                mtime_delay_ms(cfg->async);
+        }// while !CTRL-C
+
+        fprintf(stderr,"user interrupt - stopping\n");
+        mlog_tprintf(cfg->log_id,"user interrupt - stopping\n");
+
+        // release client resources
+        fprintf(stderr,"destroying ctx\n");
+        mlog_tprintf(cfg->log_id,"destroying ctx\n");
+        trnucli_ctx_destroy(&ctx);
+    }
+
+    return retval;
+} //  s_trnucli_test_trnu_async
 
 static int s_trnucli_test_trnu(app_cfg_t *cfg)
 {
@@ -855,7 +1160,7 @@ static int s_trnucli_test_trnu(app_cfg_t *cfg)
         }// action CONNECT
 
         if(action==LISTEN){
-            if( (test=trnucli_listen(dcli))==0){
+            if( (test=trnucli_listen(dcli,(cfg->demo>0)))==0){
                 update_count++;
 
                 if(cfg->demo<=0){
@@ -883,16 +1188,16 @@ static int s_trnucli_test_trnu(app_cfg_t *cfg)
                 }
             }else{
                 if(cfg->verbose)
-                fprintf(stderr,"ERR - listen ret[%d] rcto[%.3lf/%.3lf]\n",test,(cfg->rctos-(mtime_dtime()-cfg->recon_timer)),cfg->rctos);
+                fprintf(stderr,"ERR - listen ret[%d] rcto[%.3lf/%.3lf]\n",test,(cfg->recon_to_sec-(mtime_dtime()-cfg->recon_timer)),cfg->recon_to_sec);
                 mlog_tprintf(cfg->log_id,"ERR - listen ret[%d]\n",test);
                 e_listen++;
-                mtime_delay_ms(cfg->edelms);
+                mtime_delay_ms(cfg->enodata_delay_ms);
             }
 
-            if(cfg->rctos>0.0 && (mtime_dtime()-cfg->recon_timer)>=cfg->rctos){
+            if(cfg->recon_to_sec>0.0 && (mtime_dtime()-cfg->recon_timer)>=cfg->recon_to_sec){
                 // reconnect if timer expired
-                fprintf(stderr,"ERR - recon timer expired [%.3lf] - restarting\n",cfg->rctos);
-                mlog_tprintf(cfg->log_id,"ERR - recon timer expired [%.3lf] - restarting\n",cfg->rctos);
+                fprintf(stderr,"ERR - recon timer expired [%.3lf] - restarting\n",cfg->recon_to_sec);
+                mlog_tprintf(cfg->log_id,"ERR - recon timer expired [%.3lf] - restarting\n",cfg->recon_to_sec);
                 disconnect_count++;
                 trnucli_disconnect(dcli);
                 state=DISCONNECTED;
@@ -970,7 +1275,11 @@ static int s_app_main(app_cfg_t *cfg)
                 retval=s_trnucli_test_bin(cfg);
                 break;
             case SRC_TRNU:
-                retval=s_trnucli_test_trnu(cfg);
+                if(cfg->async>0){
+                    retval=s_trnucli_test_trnu_async(cfg);
+                }else{
+                	retval=s_trnucli_test_trnu(cfg);
+                }
                 break;
             default:
                 fprintf(stderr,"ERR - invalid input type [%d]\n",cfg->input_src);
@@ -980,6 +1289,8 @@ static int s_app_main(app_cfg_t *cfg)
         fprintf(stderr,"ERR - NULL config\n");
     }
 
+    double now=mtime_etime();
+    mlog_tprintf(cfg->log_id,"stop_time,%.3lf elapsed[%.3lf]\n",now,now-cfg->session_timer);
     mlog_tprintf(cfg->log_id,"*** trnucli-test session end ***\n");
 
     return retval;
