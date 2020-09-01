@@ -3605,6 +3605,15 @@ int main(int argc, char **argv) {
 
                 }
 
+                else {
+                    int time_i[7];
+                    mb_get_date(0, ping[i_ping_process].time_d, time_i);
+                    fprintf(stderr, "%4.4d/%2.2d/%2.2d-%2.2d:%2.2d:%2.2d.%6.6d %.6f "
+                                    "| %11.6f %11.6f %8.3f | Ping not processed - low gain condition\n",
+                    time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6], ping[i_ping_process].time_d,
+                    ping[i_ping_process].navlon, ping[i_ping_process].navlat, ping[i_ping_process].sonardepth);
+                }
+
 #endif // WITH_MBTNAV
 
                 MBTRNPP_UPDATE_STATS(app_stats, mbtrnpp_mlog_id, mbtrn_cfg->mbtrnpp_stat_flags);
@@ -5119,10 +5128,24 @@ int mbtrnpp_trn_process_mb1(wtnav_t *tnav, mb1_t *mb1, trn_config_t *cfg)
                             mlog_tprintf(trnu_alog_id,"ERR: trncli_get_bias_estimates failed [%d] [%d/%s]\n",test,errno,strerror(errno));
 
                             PMPRINT(MOD_MBTRNPP,MM_DEBUG|MBTRNPP_V3,(stderr,"ERR: trn_get_bias_estimates failed [%d] [%d/%s]\n",test,errno,strerror(errno)));
+
+                            int time_i[7];
+                            mb_get_date(0, mb1->sounding.ts, time_i);
+                            fprintf(stderr, "%4.4d/%2.2d/%2.2d-%2.2d:%2.2d:%2.2d.%6.6d %.6f "
+                                            "| %11.6f %11.6f %8.3f | Ping not used - failed bias estimate\n",
+                            time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6], mb1->sounding.ts,
+                            mb1->sounding.lon, mb1->sounding.lat, mb1->sounding.depth);
                         }
                     }else{
                         mlog_tprintf(trnu_alog_id,"ERR: trncli_send_update failed [%d] [%d/%s]\n",test,errno,strerror(errno));
                         PMPRINT(MOD_MBTRNPP,MM_DEBUG|MBTRNPP_V3,(stderr,"ERR: trn_update failed [%d] [%d/%s]\n",test,errno,strerror(errno)));
+
+                        int time_i[7];
+                        mb_get_date(0, mb1->sounding.ts, time_i);
+                        fprintf(stderr, "%4.4d/%2.2d/%2.2d-%2.2d:%2.2d:%2.2d.%6.6d %.6f "
+                                        "| %11.6f %11.6f %8.3f | Ping not used - failed trn processing\n",
+                        time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6], mb1->sounding.ts,
+                        mb1->sounding.lon, mb1->sounding.lat, mb1->sounding.depth);
                     }
                     wmeast_destroy(mt);
                     wposet_destroy(pt);
@@ -5137,6 +5160,14 @@ int mbtrnpp_trn_process_mb1(wtnav_t *tnav, mb1_t *mb1, trn_config_t *cfg)
             }// if tnav, mb1,cfg != NULL
             mlog_tprintf(trnu_alog_id,"trn_update_end,%lf,%d\n",mtime_etime(),retval);
         }// if do_process
+        //else {
+        //    int time_i[7];
+        //    mb_get_date(0, mb1->sounding.ts, time_i);
+        //    fprintf(stderr, "%4.4d/%2.2d/%2.2d-%2.2d:%2.2d:%2.2d.%6.6d %.6f "
+        //                    "| %11.6f %11.6f %8.3f | Ping not processed - decimated\n",
+        //    time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6], mb1->sounding.ts,
+        //    mb1->sounding.lon, mb1->sounding.lat, mb1->sounding.depth);
+        //}
     }// if trn_en
 
     return retval;
