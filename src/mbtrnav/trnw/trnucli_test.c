@@ -602,7 +602,7 @@ static int32_t s_read_csv_rec(mfile_file_t *src, char *dest, uint32_t len)
     return retval;
 }
 
-static int s_csv_to_update(trnu_pub_t *dest, mfile_file_t *src)
+static int s_csv_to_update_org(trnu_pub_t *dest, mfile_file_t *src)
 {
     int retval=-1;
 //    fprintf(stderr,"WARN - %s: not implemented\n",__func__);
@@ -628,6 +628,60 @@ static int s_csv_to_update(trnu_pub_t *dest, mfile_file_t *src)
                 sscanf(fields[10],"%d",&dest->ping_number);
                 unsigned int i=0;
                 for(i=0;i<3;i++){
+                    int j=11+(i*7);
+                    sscanf(fields[j+0],"%lf",&dest->est[i].x);
+                    sscanf(fields[j+1],"%lf",&dest->est[i].y);
+                    sscanf(fields[j+2],"%lf",&dest->est[i].z);
+                    sscanf(fields[j+3],"%lf",&dest->est[i].cov[0]);
+                    sscanf(fields[j+4],"%lf",&dest->est[i].cov[1]);
+                    sscanf(fields[j+5],"%lf",&dest->est[i].cov[2]);
+                    sscanf(fields[j+6],"%lf",&dest->est[i].cov[3]);
+                }
+                retval=test;
+                free(fields);
+            }else{
+                fprintf(stderr,"ERR - tokenize failed [%d]\n",test);
+            }
+        }else{
+            fprintf(stderr,"ERR - read_csv_rec failed [%d]\n",test);
+        }
+    }else{
+        fprintf(stderr,"ERR - invalid argument d[%p] s[%p]\n",dest,src);
+    }
+    return retval;
+}
+
+static int s_csv_to_update(trnu_pub_t *dest, mfile_file_t *src)
+{
+    int retval=-1;
+    //    fprintf(stderr,"WARN - %s: not implemented\n",__func__);
+
+    if(NULL!=dest && NULL!=src){
+        char line[TRNUC_CSV_LINE_BYTES]={0};
+        char **fields=NULL;
+        int32_t test = 0;
+        if( (test=s_read_csv_rec(src,line,TRNUC_CSV_LINE_BYTES))>0){
+            fprintf(stderr,"read csvline:\n%s\n",line);
+            if( (test=s_tokenize(line, &fields, ",", TRNUC_CSV_FIELDS))==TRNUC_CSV_FIELDS){
+
+                sscanf(fields[0],"%lf",&dest->mb1_time);
+                sscanf(fields[1],"%lf",&dest->update_time);
+                sscanf(fields[1],"%lf",&dest->reinit_time);
+                sscanf(fields[2],"%08X",&dest->sync);
+                sscanf(fields[3],"%d",&dest->reinit_count);
+                sscanf(fields[4],"%lf",&dest->reinit_tlast);
+                sscanf(fields[5],"%d",&dest->filter_state);
+                sscanf(fields[6],"%d",&dest->success);
+                sscanf(fields[7],"%hd",&dest->is_converged);
+                sscanf(fields[8],"%hd",&dest->is_valid);
+                sscanf(fields[9],"%d",&dest->mb1_cycle);
+                sscanf(fields[10],"%d",&dest->ping_number);
+                sscanf(fields[10],"%d",&dest->n_con_seq);
+                sscanf(fields[10],"%d",&dest->n_con_tot);
+                sscanf(fields[10],"%d",&dest->n_uncon_seq);
+                sscanf(fields[10],"%d",&dest->n_uncon_tot);
+                unsigned int i=0;
+                for(i=0;i<5;i++){
                     int j=11+(i*7);
                     sscanf(fields[j+0],"%lf",&dest->est[i].x);
                     sscanf(fields[j+1],"%lf",&dest->est[i].y);

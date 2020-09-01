@@ -216,6 +216,8 @@ typedef struct pt_cdata_s{
 #define TRNU_EST_PT   0
 #define TRNU_EST_MLE  1
 #define TRNU_EST_MMSE 2
+#define TRNU_EST_OFFSET 3
+#define TRNU_EST_LAST_GOOD 4
 #define TRNU_COV_X   0
 #define TRNU_COV_Y   1
 #define TRNU_COV_Z   2

@@ -2567,7 +2567,7 @@ int main(int argc, char **argv) {
                          "\t--reinit-gain\n"
                          "\t--reinit-file\n"
                          "\t--reinit-xyoffset=xyoffset_max\n"
-                         "\t--reinit-offset_z=offset_z_min/offset_z_max\n";
+                         "\t--reinit-zoffset=offset_z_min/offset_z_max\n";
   extern char WIN_DECLSPEC *optarg;
 //  int option_index;
   int errflg = 0;

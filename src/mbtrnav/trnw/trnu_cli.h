@@ -91,7 +91,7 @@
 // m: mask (flags to set)
 #define TRNUC_MCLR(pf,m) do{ if(NULL!=pf)*pf&=~(m); }while(0)
 // update string buffer len (holds max string)
-#define TRNUC_STR_LEN 1024
+#define TRNUC_STR_LEN 2048
 // number of fields in CSV record
 #define TRNUC_CSV_FIELDS 41
 // max CSV record string length

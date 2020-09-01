@@ -450,7 +450,7 @@ static void s_trnw_estimate_show(trnu_estimate_t *self, bool verbose, uint16_t i
     }
 }
 
-static void s_trnw_offset_show(trnu_pub_t *self, bool verbose, uint16_t indent)
+static void s_trnw_offset_show_org(trnu_pub_t *self, bool verbose, uint16_t indent)
 {
     if (NULL != self) {
         fprintf(stderr,"%*s[self        %15p]\n",indent,(indent>0?" ":""), self);
@@ -473,7 +473,40 @@ static void s_trnw_offset_show(trnu_pub_t *self, bool verbose, uint16_t indent)
     }
 }
 
-static void s_out_csv(trnu_pub_t *self)
+static void s_trnw_offset_show(trnu_pub_t *self, bool verbose, uint16_t indent)
+{
+    if (NULL != self) {
+        fprintf(stderr,"%*s[self        %15p]\n",indent,(indent>0?" ":""), self);
+        fprintf(stderr,"%*s[ pt ]\n",indent,(indent>0?" ":""));
+        s_trnw_estimate_show(&self->est[0],verbose,indent+1);
+        fprintf(stderr,"%*s[ mle ]\n",indent,(indent>0?" ":""));
+        s_trnw_estimate_show(&self->est[1],verbose,indent+1);
+        fprintf(stderr,"%*s[ mse ]\n",indent,(indent>0?" ":""));
+        s_trnw_estimate_show(&self->est[2],verbose,indent+1);
+        fprintf(stderr,"%*s[ offset ]\n",indent,(indent>0?" ":""));
+        s_trnw_estimate_show(&self->est[3],verbose,indent+1);
+        fprintf(stderr,"%*s[ last useful ]\n",indent,(indent>0?" ":""));
+        s_trnw_estimate_show(&self->est[4],verbose,indent+1);
+        fprintf(stderr,"%*s[reinit       %15d]\n",indent,(indent>0?" ":""), self->reinit_count);
+        fprintf(stderr,"%*s[reinit_t     %15.3lf]\n",indent,(indent>0?" ":""),self->reinit_tlast);
+        fprintf(stderr,"%*s[filt_state   %15d]\n",indent,(indent>0?" ":""), self->filter_state);
+        fprintf(stderr,"%*s[success      %15d]\n",indent,(indent>0?" ":""), self->success);
+        fprintf(stderr,"%*s[is_converged %15hd]\n",indent,(indent>0?" ":""), self->is_converged);
+        fprintf(stderr,"%*s[is_valid     %15hd]\n",indent,(indent>0?" ":""), self->is_valid);
+        fprintf(stderr,"%*s[mb1_cycle    %15d]\n",indent,(indent>0?" ":""), self->mb1_cycle);
+        fprintf(stderr,"%*s[ping_number  %15d]\n",indent,(indent>0?" ":""), self->ping_number);
+        fprintf(stderr,"%*s[mb1_time     %15.3lf]\n",indent,(indent>0?" ":""),self->mb1_time);
+        fprintf(stderr,"%*s[update_time  %15.3lf]\n",indent,(indent>0?" ":""),self->update_time);
+        fprintf(stderr,"%*s[n_con_seq    %15d]\n",indent,(indent>0?" ":""),self->n_con_seq);
+        fprintf(stderr,"%*s[n_con_tot    %15d]\n",indent,(indent>0?" ":""),self->n_con_tot);
+        fprintf(stderr,"%*s[n_uncon_seq  %15d]\n",indent,(indent>0?" ":""),self->n_uncon_seq);
+        fprintf(stderr,"%*s[n_uncon_tot  %15d]\n",indent,(indent>0?" ":""),self->n_uncon_tot);
+        fprintf(stderr,"%*s[reinit_time  %15.3lf]\n",indent,(indent>0?" ":""),self->reinit_time);
+
+    }
+}
+
+static void s_out_csv_org(trnu_pub_t *self)
 {
     double time=mtime_etime();//s_etime();
         trnu_estimate_t *pt=&self->est[0];
@@ -490,6 +523,30 @@ static void s_out_csv(trnu_pub_t *self)
     fprintf(stderr,"%.4lf,%.4lf,%.4lf,",pt->x, pt->y, pt->z);
     fprintf(stderr,"%.3lf,%.3lf,%.3lf,",sqrt(mse->cov[0]),sqrt(mse->cov[1]),sqrt(mse->cov[2]));
     fprintf(stderr,"%d,%d,%d,%d,%d,%hd,%hd\n",self->reinit_count,self->filter_state,self->success,self->mb1_cycle,self->ping_number,self->is_converged,self->is_valid);
+}
+
+static void s_out_csv(trnu_pub_t *self)
+{
+    double time=mtime_etime();//s_etime();
+    trnu_estimate_t *pt=&self->est[0];
+    trnu_estimate_t *mle=&self->est[1];
+    trnu_estimate_t *mse=&self->est[2];
+    trnu_estimate_t *offset=&self->est[3];
+    trnu_estimate_t *recent=&self->est[4];
+    // system time,
+    // mle_time, mle.x, mle.y, mle.z
+    // mmse_time, mmse.x, mmse.y, mmse.z
+    // pt.x, pt.y, pt.z
+    // cov[0],cov[2],cov[5]
+    // reinit_count, filter_state, lm_successful, mb1_cycle, mb1_ping_number, isconverged
+    fprintf(stderr,"%.3lf,%.3lf,%.4lf,%.4lf,%.4lf,",time,mle->time,mle->x,mle->y,mle->z);
+    fprintf(stderr,"%.3lf,%.4lf,%.4lf,%.4lf,",mse->time,mse->x,mse->y,mse->z);
+    fprintf(stderr,"%.4lf,%.4lf,%.4lf,",pt->x, pt->y, pt->z);
+    fprintf(stderr,"%.3lf,%.3lf,%.3lf,",sqrt(mse->cov[0]),sqrt(mse->cov[1]),sqrt(mse->cov[2]));
+    fprintf(stderr,"%d,%d,%d,%d,%d,%hd,%hd,",self->reinit_count,self->filter_state,self->success,self->mb1_cycle,self->ping_number,self->is_converged,self->is_valid);
+    fprintf(stderr,"%.3lf,%.4lf,%.4lf,%.4lf,",offset->time,offset->x,offset->y,offset->z);
+    fprintf(stderr,"%.3lf,%.4lf,%.4lf,%.4lf,",recent->time,recent->x,recent->y,recent->z);
+    fprintf(stderr,"%d,%d,%d,%d\n",self->n_con_seq,self->n_con_tot,self->n_uncon_seq,self->n_uncon_tot);
 }
 
 /// @fn int s_trnc_state_machine(msock_socket_t *s, app_cfg_t *cfg)

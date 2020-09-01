@@ -431,9 +431,12 @@ static void s_advance_update(trnu_pub_t *update)
         update->est[TRNU_EST_PT].time=mtime_dtime();
         update->est[TRNU_EST_MLE].time=mtime_dtime();
         update->est[TRNU_EST_MMSE].time=mtime_dtime();
+        update->est[TRNU_EST_OFFSET].time=mtime_dtime();
+        update->est[TRNU_EST_LAST_GOOD].time=mtime_dtime();
         update->mb1_cycle++;
         update->ping_number++;
         update->mb1_time=mtime_dtime();
+        update->reinit_time=mtime_dtime();
         update->update_time=mtime_dtime();
 
         update->filter_state=count%5;
@@ -443,6 +446,14 @@ static void s_advance_update(trnu_pub_t *update)
             update->is_converged=update->is_converged==0?1:0;
             update->is_valid=update->is_valid==0?1:0;
         }
+
+        if( (count%2)==0){
+            update->n_con_seq++;
+            update->n_con_tot++;
+        }else{
+            update->n_uncon_seq++;
+            update->n_uncon_tot++;
+       }
         count++;
     }
     return;
@@ -468,6 +479,14 @@ static int s_run(app_cfg_t *cfg)
                 {mtime_dtime(),0.0,0.0,0.0,
                     {0.0,0.0,0.0,0.0}
                 },
+                // offset info {time,x,y,z,{cov[0],cov[2],cov[5],cov[1]}}
+                {mtime_dtime(),0.0,0.0,0.0,
+                    {0.0,0.0,0.0,0.0}
+                },
+                // last_good info {time,x,y,z,{cov[0],cov[2],cov[5],cov[1]}}
+                {mtime_dtime(),0.0,0.0,0.0,
+                    {0.0,0.0,0.0,0.0}
+                },
             },
             0,// reinit_count
             0.0,// reinit_tlast
@@ -477,7 +496,12 @@ static int s_run(app_cfg_t *cfg)
             0,// is_valid
             0,// mb1_cycle
             0,// ping_number
+            0,// n_con_seq
+            0,// n_con_tot
+            0,// n_uncon_seq
+            0,// n_uncon_tot
             mtime_dtime(),// mb1_time
+            mtime_dtime(),// reinit_time
             mtime_dtime(),// update_time
         };
         trnu_pub_t *update=&update_s;

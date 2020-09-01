@@ -266,7 +266,7 @@ int trnucli_hbeat(trnucli_t *self)
 }// end trnucli_reset_trn trnucli_connect
 
 
-static int s_update_pretty(trnu_pub_t *update, char *dest, int len, int indent)
+static int s_update_pretty_org(trnu_pub_t *update, char *dest, int len, int indent)
 {
     int retval=0;
     if(NULL!=update && NULL!=dest && len>0){
@@ -346,7 +346,7 @@ static int s_update_pretty(trnu_pub_t *update, char *dest, int len, int indent)
     return retval;
 }
 
-static int s_update_csv(trnu_pub_t *update, char *dest, int len)
+static int s_update_csv_org(trnu_pub_t *update, char *dest, int len)
 {
     int retval=0;
     if(NULL!=update && NULL!=dest && len>0){
@@ -412,6 +412,203 @@ static int s_update_csv(trnu_pub_t *update, char *dest, int len)
     }
     return retval;
 }
+
+static int s_update_pretty(trnu_pub_t *update, char *dest, int len, int indent)
+{
+    int retval=0;
+    if(NULL!=update && NULL!=dest && len>0){
+        int wkey=15;
+        int wval=15;
+        int rem=len;
+        char *dp=dest;
+        int wbytes=snprintf(dp,rem,"%*s %*s  %*p\n",indent,(indent>0?" ":""), wkey,"addr",wval,update);
+        rem-=(wbytes-1);
+        dp+=wbytes;
+        wbytes=snprintf(dp,rem,"%*s %*s  %*.3lf\n",indent,(indent>0?" ":""), wkey,"mb1_time",wval,update->mb1_time);
+        rem-=(wbytes-1);
+        dp+=wbytes;
+        wbytes=snprintf(dp,rem,"%*s %*s  %*.3lf\n",indent,(indent>0?" ":""), wkey,"update_time",wval,update->update_time);
+        rem-=(wbytes-1);
+        dp+=wbytes;
+        wbytes=snprintf(dp,rem,"%*s %*s  %*.3lf\n",indent,(indent>0?" ":""), wkey,"reinit_time",wval,update->reinit_time);
+        rem-=(wbytes-1);
+        dp+=wbytes;
+        wbytes=snprintf(dp,rem,"%*s %*s  %*s%08X\n",indent,(indent>0?" ":""), wkey,"sync",(wval-8)," ",update->sync);
+        rem-=(wbytes-1);
+        dp+=wbytes;
+        wbytes=snprintf(dp,rem,"%*s %*s  %*d\n",indent,(indent>0?" ":""), wkey,"reinit_count",wval,update->reinit_count);
+        rem-=(wbytes-1);
+        dp+=wbytes;
+        wbytes=snprintf(dp,rem,"%*s %*s  %*.3lf\n",indent,(indent>0?" ":""), wkey,"reinit_tlast",wval,update->reinit_tlast);
+        rem-=(wbytes-1);
+        dp+=wbytes;
+        wbytes=snprintf(dp,rem,"%*s %*s  %*d\n",indent,(indent>0?" ":""), wkey,"filter_state",wval,update->filter_state);
+        rem-=(wbytes-1);
+        dp+=wbytes;
+        wbytes=snprintf(dp,rem,"%*s %*s  %*d\n",indent,(indent>0?" ":""), wkey,"success",wval,update->success);
+        rem-=(wbytes-1);
+        dp+=wbytes;
+        wbytes=snprintf(dp,rem,"%*s %*s  %*hd\n",indent,(indent>0?" ":""), wkey,"is_converged",wval,update->is_converged);
+        rem-=(wbytes-1);
+        dp+=wbytes;
+        wbytes=snprintf(dp,rem,"%*s %*s  %*hd\n",indent,(indent>0?" ":""), wkey,"is_valid",wval,update->is_valid);
+        rem-=(wbytes-1);
+        dp+=wbytes;
+        wbytes=snprintf(dp,rem,"%*s %*s  %*d\n",indent,(indent>0?" ":""), wkey,"mb1_cycle",wval,update->mb1_cycle);
+        rem-=(wbytes-1);
+        dp+=wbytes;
+        wbytes=snprintf(dp,rem,"%*s %*s  %*d\n",indent,(indent>0?" ":""), wkey,"ping_number",wval,update->ping_number);
+        rem-=(wbytes-1);
+        dp+=wbytes;
+        wbytes=snprintf(dp,rem,"%*s %*s  %*d\n",indent,(indent>0?" ":""), wkey,"n_con_seq",wval,update->n_con_seq);
+        rem-=(wbytes-1);
+        dp+=wbytes;
+        wbytes=snprintf(dp,rem,"%*s %*s  %*d\n",indent,(indent>0?" ":""), wkey,"n_con_tot",wval,update->n_con_tot);
+        rem-=(wbytes-1);
+        dp+=wbytes;
+        wbytes=snprintf(dp,rem,"%*s %*s  %*d\n",indent,(indent>0?" ":""), wkey,"n_uncon_seq",wval,update->n_uncon_seq);
+        rem-=(wbytes-1);
+        dp+=wbytes;
+        wbytes=snprintf(dp,rem,"%*s %*s  %*d\n",indent,(indent>0?" ":""), wkey,"n_uncon_tot",wval,update->n_uncon_tot);
+        rem-=(wbytes-1);
+        dp+=wbytes;
+        wbytes=snprintf(dp,rem,"%*s %*s  %*d\n",indent,(indent>0?" ":""), wkey,"n_con_seq",wval,update->n_con_seq);
+        rem-=(wbytes-1);
+        dp+=wbytes;
+        wbytes=snprintf(dp,rem,"%*s %*s\n",indent,(indent>0?" ":""), wkey,"estimates:");
+        rem-=(wbytes-1);
+        dp+=wbytes;
+        int i=0;
+        for(i=0;i<5;i++){
+            trnu_estimate_t *est = &update->est[i];
+            const char *est_labels[5]={"pt", "mle", "mmse", "offset", "last_good"};
+            //            const char *cov_labels[4]={"pt.covx", "pt.covy","pt.covz","pt.covxy"};
+            wbytes=snprintf(dp,rem,"%*s %*s[%d]   %.3lf,%s,%.3lf,%.3lf,%.3lf,%.3lf,%.3lf,%.3lf,%.3lf\n",indent,(indent>0?" ":""),wkey-3," ",i,
+                            est->time,est_labels[i],
+                            est->x,est->y,est->z,
+                            est->cov[0],est->cov[1],est->cov[2],est->cov[3]);
+
+            rem-=(wbytes-1);
+            dp+=wbytes;
+        }
+
+        wbytes=snprintf(dp,rem,"%*s %*s\n",indent,(indent>0?" ":""), wkey,"Bias Estimates:");
+        rem-=(wbytes-1);
+        dp+=wbytes;
+        trnu_estimate_t *ept = &update->est[TRNU_EST_PT];
+        trnu_estimate_t *emle = &update->est[TRNU_EST_MLE];
+        trnu_estimate_t *emmse = &update->est[TRNU_EST_MMSE];
+        trnu_estimate_t *offset = &update->est[TRNU_EST_OFFSET];
+        trnu_estimate_t *last_good = &update->est[TRNU_EST_LAST_GOOD];
+        wbytes=snprintf(dp,rem,"%*s %*s %.3lf,%.3lf,%.3lf\n",indent,(indent>0?" ":""), wkey," OFFSET:",offset->x,offset->y,offset->z);
+        rem-=(wbytes-1);
+        dp+=wbytes;
+        wbytes=snprintf(dp,rem,"%*s %*s %.3lf,%.3lf,%.3lf\n",indent,(indent>0?" ":""), wkey," LAST:",last_good->x,last_good->y,last_good->z);
+        rem-=(wbytes-1);
+        dp+=wbytes;
+//       wbytes=snprintf(dp,rem,"%*s %*s %.3lf,%.3lf,%.3lf\n",indent,(indent>0?" ":""), wkey," MLE:",(emle->x-ept->x),(emle->y-ept->y),(emle->z-ept->z));
+//        rem-=(wbytes-1);
+//        dp+=wbytes;
+        wbytes=snprintf(dp,rem,"%*s %*s %.3lf,%.3lf,%.3lf\n",indent,(indent>0?" ":""), wkey,"MMSE:",(emmse->x-ept->x),(emmse->y-ept->y),(emmse->z-ept->z));
+        rem-=(wbytes-1);
+        dp+=wbytes;
+        snprintf(dp,rem,"%*s %*s %.3lf,%.3lf,%.3lf\n",indent,(indent>0?" ":""), wkey," COV:",sqrt(emmse->cov[0]),sqrt(emmse->cov[1]),sqrt(emmse->cov[2]));
+
+        retval=strlen(dest)+1;
+    }
+    return retval;
+}
+
+static int s_update_csv(trnu_pub_t *update, char *dest, int len)
+{
+    int retval=0;
+    if(NULL!=update && NULL!=dest && len>0){
+        int rem=len;
+        char *dp=dest;
+
+        int wbytes=snprintf(dp,rem,"%.3lf,",update->mb1_time);
+        rem-=(wbytes-1);
+        dp+=wbytes;
+        wbytes=snprintf(dp,rem,"%.3lf,",update->update_time);
+        rem-=(wbytes-1);
+        dp+=wbytes;
+        wbytes=snprintf(dp,rem,"%.3lf,",update->reinit_time);
+        rem-=(wbytes-1);
+        dp+=wbytes;
+        wbytes=snprintf(dp,rem,"%04X,",update->sync);
+        rem-=(wbytes-1);
+        dp+=wbytes;
+        wbytes=snprintf(dp,rem,"%d,",update->reinit_count);
+        rem-=(wbytes-1);
+        dp+=wbytes;
+        wbytes=snprintf(dp,rem,"%.3lf,",update->reinit_tlast);
+        rem-=(wbytes-1);
+        dp+=wbytes;
+        wbytes=snprintf(dp,rem,"%d,",update->filter_state);
+        rem-=(wbytes-1);
+        dp+=wbytes;
+        wbytes=snprintf(dp,rem,"%d,",update->success);
+        rem-=(wbytes-1);
+        dp+=wbytes;
+        wbytes=snprintf(dp,rem,"%hd,",update->is_converged);
+        rem-=(wbytes-1);
+        dp+=wbytes;
+        wbytes=snprintf(dp,rem,"%hd,",update->is_valid);
+        rem-=(wbytes-1);
+        dp+=wbytes;
+        wbytes=snprintf(dp,rem,"%d,",update->mb1_cycle);
+        rem-=(wbytes-1);
+        dp+=wbytes;
+        wbytes=snprintf(dp,rem,"%d,",update->ping_number);
+        rem-=(wbytes-1);
+        dp+=wbytes;
+        wbytes=snprintf(dp,rem,"%d,",update->n_con_seq);
+        rem-=(wbytes-1);
+        dp+=wbytes;
+        wbytes=snprintf(dp,rem,"%d,",update->n_con_tot);
+        rem-=(wbytes-1);
+        dp+=wbytes;
+        wbytes=snprintf(dp,rem,"%d,",update->n_uncon_seq);
+        rem-=(wbytes-1);
+        dp+=wbytes;
+        wbytes=snprintf(dp,rem,"%d,",update->n_uncon_tot);
+        rem-=(wbytes-1);
+        dp+=wbytes;
+        int i=0;
+        for(i=0;i<5;i++){
+            trnu_estimate_t *est = &update->est[i];
+            wbytes=snprintf(dp,rem,"%.3lf,%.3lf,%.3lf,%.3lf,%.3lf,%.3lf,%.3lf,",
+                            est->x,est->y,est->z,
+                            est->cov[0],est->cov[1],est->cov[2],est->cov[3]);
+
+            rem-=(wbytes-1);
+            dp+=wbytes;
+        }
+
+//        trnu_estimate_t *ept = &update->est[TRNU_EST_PT];
+//        trnu_estimate_t *emle = &update->est[TRNU_EST_MLE];
+//        trnu_estimate_t *emmse = &update->est[TRNU_EST_MMSE];
+//        trnu_estimate_t *offset = &update->est[TRNU_EST_OFFSET];
+//        trnu_estimate_t *last_good = &update->est[TRNU_EST_LAST_GOOD];
+//        wbytes=snprintf(dp,rem,"%.3lf,%.3lf,%.3lf,",(emle->x-ept->x),(emle->y-ept->y),(emle->z-ept->z));
+//        rem-=(wbytes-1);
+//        dp+=wbytes;
+//        wbytes=snprintf(dp,rem,"%.3lf,%.3lf,%.3lf,",(emmse->x-ept->x),(emmse->y-ept->y),(emmse->z-ept->z));
+//        rem-=(wbytes-1);
+//        dp+=wbytes;
+//        wbytes=snprintf(dp,rem,"%.3lf,%.3lf,%.3lf,",offset->x,offset->y,offset->z);
+//        rem-=(wbytes-1);
+//        dp+=wbytes;
+//        wbytes=snprintf(dp,rem,"%.3lf,%.3lf,%.3lf,",last_good->x,last_good->y,last_good->z);
+//        rem-=(wbytes-1);
+//        dp+=wbytes;
+//      snprintf(dp,rem,"%.3lf,%.3lf,%.3lf",sqrt(emmse->cov[0]),sqrt(emmse->cov[1]),sqrt(emmse->cov[2]));
+
+        retval=strlen(dest)+1;
+    }
+    return retval;
+}
+
 
 static int s_update_hex(trnu_pub_t *update, char *dest, int len, bool pretty)
 {
