@@ -2,57 +2,63 @@
 cmake_minimum_required(VERSION 3.10)
 
 # set the project name and version
-project(Libtrnav VERSION 1.0)
+project(Libtrnav VERSION 0.1.0)
 
-# library source paths
-# TODO : find/build mframe package
-set(MFRAME_DIR ../mframe)
+# get absolute path to parent directory
+get_filename_component(
+       PARENT_DIR
+       "../"
+       ABSOLUTE
+)
+
+#################################
+# define source directories
 set(GCTP_SRC_DIR ${PROJECT_SOURCE_DIR}/gctp/source)
 set(NEWMAT_SRC_DIR ${PROJECT_SOURCE_DIR}/newmat)
 set(QNX_SRC_DIR ${PROJECT_SOURCE_DIR}/qnx-utils)
 set(TNAV_SRC_DIR ${PROJECT_SOURCE_DIR}/terrain-nav)
 set(TRNW_SRC_DIR ${PROJECT_SOURCE_DIR}/trnw)
 
-# mframe library
-# TODO : build package
-find_library(MFRAMELIB
-NAMES libmframe.a
-PATHS "${MFRAME_DIR}/build"
-)
+#################################
+# pull in dependencies
+# - libmframe
+#   - libm
+#   - libpthread
+# - libtrnav
+# - libnetcdf
+#   - libcurl [1]
+#   - libhdf5 [1]
+#
+# [1] - required by some netcdf versions
 
-# mframe header path
-find_path(MFRAME_HEADER_PATH
-NAMES mframe.h
+
+set(DFL_PKG_PATH "${PARENT_DIR}/mframe/build/install")
+message(" >>> CMakeLists.txt -  MFRAME_PKG_PATH  ${MFRAME_PKG_PATH}")
+message(" >>> CMakeLists.txt -       PARENT_DIR  ${PARENT_DIR}")
+message(" >>> CMakeLists.txt -     DFL_PKG_PATH  ${DFL_PKG_PATH}")
+
+find_package(
+Libmframe
+CONFIG
 PATHS
-"${MFRAME_DIR}/src"
+"${MFRAME_PKG_PATH}"
+"${DFL_PKG_PATH}"
+PATH_SUFFIXES
+lib/cmake/mframe
+REQUIRED
 )
 
-# mconfig header/source path
-# may be custom (utils) or default (src)
-find_path(MFCONF_CUSTOM_PATH
-NAMES mconfig.h
-PATHS
-"${MFRAME_DIR}/utils"
-)
-find_path(MFCONF_DEFAULT_PATH
-NAMES mconfig.h
-PATHS
-"${MFRAME_DIR}/src"
-)
+message(" >>> CMakeLists.txt -  Libmframe_INCLUDE_DIR  ${Libmframe_INCLUDE_DIR}")
+message(" >>> CMakeLists.txt -    Libmframe_LIBRARIES  ${Libmframe_LIBRARIES}")
+#message(FATAL_ERROR " >>>>>>>> REMOVE THIS DEBUG MESSAGE <<<<<<<<")
 
-if(MFCONF_CUSTOM_PATH)
-set(MFCONF_HEADER_PATH "${MFCONF_CUSTOM_PATH}")
-else()
-set(MFCONF_HEADER_PATH "${MFCONF_DEFAULT_PATH}")
-add_compile_options("SHELL:-D NETIF_MMDEBUG")
-endif()
-
-# libnetcdf
+# include LIBNETCDF
 find_library(NETCDF
 NAMES
 libnetcdf
 libnetcdf.so
 libnetcdf.dylib
+libnetcdf.dll.a
 PATHS
 "/usr/lib64"
 "/opt/local/lib"
@@ -64,7 +70,7 @@ PATHS
 "/opt/local/include"
 )
 
-# libcurl
+# include LIBCURL [for some versions of netcdf]
 find_library(CURL
 NAMES
 libcurl
@@ -72,7 +78,7 @@ libcurl.so
 PATHS "/usr/lib64"
 )
 
-# libhdf5
+# include LIBHDF5 [for some versions of netcdf]
 find_library(HDF5
 NAMES
 libhdf5_hl_cpp
@@ -92,27 +98,34 @@ PATHS
 "/opt/local/lib"
 )
 
-# library paths
+#################################
+# define dependency libs
+
+# libm, libpthread, libnetcdf
 list(APPEND EXTRA_LIBS
-"${MFRAMELIB}"
+Libmframe::mframe
 m
 pthread
 "${NETCDF}"
 )
 
+# add libcurl [as needed]
 if(CURL)
 list(APPEND EXTRA_LIBS "${CURL}")
 endif()
 
+# add libhdf5 [as needed]
 if(HDF5)
 list(APPEND EXTRA_LIBS "${HDF5}")
 endif()
 
-# include paths
+#################################
+# define include paths
+
+# mframe, libtrnav, netcdf
 list(APPEND EXTRA_INCLUDES
-"${MFCONF_HEADER_PATH}"
-"${MFRAME_HEADER_PATH}"
-"${MFRAME_SRC_DIR}"
+"${Libmframe_INCLUDE_DIR}"
+"${MFRAME_INCL_DIR}"
 "${TRNW_SRC_DIR}"
 "${GCTP_SRC_DIR}"
 "${NEWMAT_SRC_DIR}"
@@ -122,27 +135,63 @@ list(APPEND EXTRA_INCLUDES
 "${NETCDF_HEADER_PATH}"
 )
 
+#################################
+# specify build options
+
 # global compiler options
 add_compile_options( -Wall -g -O2 )
 
+# debug
+if( WITH_PDEBUG )
+# add WITH_PDEBUG to enable extra debug output, e.g. PTRACE, PDPRINT
+# compile using cmake .. -DWITH_PDEBUG=1
+message("compiling with WITH_PDEBUG")
+add_compile_definitions(WITH_PDEBUG)
+endif()
+
+# built-in netif module debug
+if( WITH_NETIF_MMD_EXT )
+# TODO: get external netif mmdebug channel defs
+else()
+# add NETIF_MMDEBUG to use netif default MMDEBUG macros
+# instead of values defined in a custom mconfig.h
+# [may need for Cygwin build]
+# compile using cmake .. -DNETIF_MMDEBUG=1
+message("compiling with NETIF_MMDEBUG")
+add_compile_definitions(NETIF_MMDEBUG)
+endif()
+
+# configuration/feature header
 configure_file(LibtrnavConfig.h.in LibtrnavConfig.h)
 
-message("MFRAME_LIB=${MFRAMELIB}")
-message("MFRAME_HEADER_PATH=${MFRAME_HEADER_PATH}")
-message("MFCONF_HEADER_PATH=${MFCONF_HEADER_PATH}")
+#################################
+# emit some build info
+message("WITH_PDEBUG=${WITH_PDEBUG}")
+message("WITH_NETIF_MMD_EXT=${WITH_NETIF_MMD_EXT}")
+message("PARENT_DIR=${PARENT_DIR}")
+message("MFRAME_PKG_PATH=${MFRAME_PKG_PATH}")
 message("EXTRA_INCLUDES=${EXTRA_INCLUDES}")
+message("EXTRA_LIBS`=${EXTRA_LIBS}")
 
+#################################
 # build trnu_cli component library
+
+# specify library
 add_library(trnucli STATIC
 ${TRNW_SRC_DIR}/trnu_cli.c
 )
+
+# specify include directories
 set_target_properties( trnucli
 PROPERTIES
 INCLUDE_DIRECTORIES
 "${EXTRA_INCLUDES}"
 )
 
-# libgeolib (gctp)
+#################################
+# build libgeolib (gctp)
+
+# specify library
 add_library(geolib STATIC
  ${GCTP_SRC_DIR}/gctp.c
  ${GCTP_SRC_DIR}/alberfor.c
@@ -215,7 +264,10 @@ add_library(geolib STATIC
  ${GCTP_SRC_DIR}/br_gctp.c
 )
 
-# libnewmat (matrix math)
+#################################
+# build libnewmat (matrix math)
+
+# specify library
 add_library(newmat STATIC
 ${NEWMAT_SRC_DIR}/newmat1.cpp
 ${NEWMAT_SRC_DIR}/newmat2.cpp
@@ -241,7 +293,10 @@ ${NEWMAT_SRC_DIR}/newmatrm.cpp
 ${NEWMAT_SRC_DIR}/newmat9.cpp
 )
 
-# libqnx (utils)
+#################################
+# build libqnx (utils)
+
+# specify library
 add_library(qnx STATIC
 ${QNX_SRC_DIR}/AsciiFile.cc
 ${QNX_SRC_DIR}/AngleData.cc
@@ -266,6 +321,10 @@ ${QNX_SRC_DIR}/DataFieldFactory.cc
 ${QNX_SRC_DIR}/LogFile.cc
 )
 
+#################################
+# build tnav (TRN engine core)
+
+# specify library
 add_library(tnav STATIC
 ${TNAV_SRC_DIR}/TerrainNav.cpp
 ${TNAV_SRC_DIR}/TNavConfig.cpp
@@ -289,20 +348,24 @@ ${TNAV_SRC_DIR}/OctreeNode.cpp
 ${TNAV_SRC_DIR}/TRNUtils.cpp
 )
 
-# TRN core
+# specify include paths and libraries
 set_target_properties( tnav
 PROPERTIES
 INCLUDE_DIRECTORIES
 "${EXTRA_INCLUDES}"
 )
 
-# TRN C wrapper
+#################################
+# build trnw (TRN C wrapper)
+
+# specify library
 add_library(trnw STATIC
 ${TRNW_SRC_DIR}/trnw.cpp
 ${TRNW_SRC_DIR}/mb1_msg.c
 ${TRNW_SRC_DIR}/trnif_msg.c
 )
 
+# specify include paths and libraries
 set_target_properties( trnw
 PROPERTIES
 INCLUDE_DIRECTORIES
@@ -315,12 +378,16 @@ LINK_LIBRARIES
 "pthread"
 )
 
-# libnetif (TRNx server network interfaces)
+#################################
+# build libnetif (TRNx server network interfaces)
+
+# specify library
 add_library(netif STATIC
 ${TRNW_SRC_DIR}/netif.c
 ${TRNW_SRC_DIR}/trnif_proto.c
 )
 
+# specify include paths and libraries
 set_target_properties( netif
 PROPERTIES
 INCLUDE_DIRECTORIES
@@ -331,40 +398,222 @@ LINK_LIBRARIES
 "pthread"
 )
 
-# trnucli-test (TRNU client app)
+##################################
+# build trnucli-test (TRNU client app)
+
+# specify build target
 add_executable(trnucli-test
 ${PROJECT_SOURCE_DIR}/trnw/trnucli_test.c
 )
-# link with trnucli, mframe libs
+
+# specify dependency libs
 target_link_libraries(trnucli-test
 trnucli
-${EXTRA_LIBS}
+Libmframe::mframe
+"${EXTRA_LIBS}"
 )
 
+# specify include paths
 target_include_directories(trnucli-test PUBLIC
 "${PROJECT_BINARY_DIR}"
 "${PROJECT_SOURCE_DIR}/trnw"
 "${EXTRA_INCLUDES}"
 )
 
+##################################
+# build trnusvr-test (stand-alone TRN server (no TRN instance))
 
-# trnusvr-test  (stand-alone TRN server (no TRN instance))
+# specify build target
 add_executable(trnusvr-test
 ${PROJECT_SOURCE_DIR}/trnw/trnusvr_test.c
 )
-# link with trnusvr, mframe libs
+
+# specify dependency libs
 target_link_libraries(trnusvr-test
+"netif"
 "trnw"
 "tnav"
 "qnx"
 "newmat"
-"netif"
 "geolib"
 "${EXTRA_LIBS}"
 )
 
+# specify include paths
 target_include_directories(trnusvr-test PUBLIC
 "${PROJECT_BINARY_DIR}"
 "${PROJECT_SOURCE_DIR}/trnw"
 "${EXTRA_INCLUDES}"
+)
+
+#################################
+# Export package
+
+# set environment (used by cmake.in)
+set(INCLUDE_INSTALL_DIR include/libtrnav-${CMAKE_PROJECT_VERSION}
+CACHE PATH "libtrnav include install path")
+
+set(LIB_INSTALL_DIR lib/libtrnav-${CMAKE_PROJECT_VERSION}
+CACHE PATH "libtrnav lib install path" )
+
+# load cmake package config module
+include(CMakePackageConfigHelpers)
+
+# set package path
+# (relative to package root)
+set(ConfigPackageLocation lib/cmake/libtrnav)
+
+# generate/stage package config file (Config.cmake)
+# using cmake.in
+configure_package_config_file(
+cmake/Libtrnav.cmake.in
+${CMAKE_CURRENT_BINARY_DIR}/libtrnav-pkg/LibtrnavConfig.cmake
+INSTALL_DESTINATION ${ConfigPackageLocation}
+PATH_VARS
+INCLUDE_INSTALL_DIR
+)
+
+# generate/stage package version vile (ConfigVersion.make)
+write_basic_package_version_file(
+${CMAKE_CURRENT_BINARY_DIR}/libtrnav-pkg/LibtrnavConfigVersion.cmake
+VERSION ${Libtrnav_VERSION}
+COMPATIBILITY AnyNewerVersion
+#ARCH_INDEPENDENT
+)
+
+
+##################################
+set(CMAKE_INCLUDE_CURRENT_DIR ON)
+set(CMAKE_INCLUDE_CURRENT_DIR_IN_INTERFACE ON)
+
+# get cmake export module
+include(GenerateExportHeader)
+
+# generate export headers
+generate_export_header(geolib)
+set_property(TARGET geolib PROPERTY VERSION ${Libtrnav_VERSION})
+set_property(TARGET geolib PROPERTY SOVERSION 0)
+set_property(TARGET geolib PROPERTY INTERFACE_libtrnav_MAJOR_VERSION 0)
+set_property(TARGET geolib APPEND PROPERTY
+COMPATIBLE_INTERFACE_STRING geolib_MAJOR_VERSION
+)
+
+generate_export_header(newmat)
+set_property(TARGET newmat PROPERTY VERSION ${Libtrnav_VERSION})
+set_property(TARGET newmat PROPERTY SOVERSION 0)
+set_property(TARGET newmat PROPERTY INTERFACE_libtrnav_MAJOR_VERSION 0)
+set_property(TARGET newmat APPEND PROPERTY
+COMPATIBLE_INTERFACE_STRING newmat_MAJOR_VERSION
+)
+
+generate_export_header(qnx)
+set_property(TARGET qnx PROPERTY VERSION ${Libtrnav_VERSION})
+set_property(TARGET qnx PROPERTY SOVERSION 0)
+set_property(TARGET qnx PROPERTY INTERFACE_libtrnav_MAJOR_VERSION 0)
+set_property(TARGET qnx APPEND PROPERTY
+COMPATIBLE_INTERFACE_STRING qnx_MAJOR_VERSION
+)
+
+generate_export_header(tnav)
+set_property(TARGET tnav PROPERTY VERSION ${Libtrnav_VERSION})
+set_property(TARGET tnav PROPERTY SOVERSION 0)
+set_property(TARGET tnav PROPERTY INTERFACE_libtrnav_MAJOR_VERSION 0)
+set_property(TARGET tnav APPEND PROPERTY
+COMPATIBLE_INTERFACE_STRING tnav_MAJOR_VERSION
+)
+
+generate_export_header(trnw)
+set_property(TARGET trnw PROPERTY VERSION ${Libtrnav_VERSION})
+set_property(TARGET trnw PROPERTY SOVERSION 0)
+set_property(TARGET trnw PROPERTY INTERFACE_libtrnav_MAJOR_VERSION 0)
+set_property(TARGET trnw APPEND PROPERTY
+COMPATIBLE_INTERFACE_STRING trnw_MAJOR_VERSION
+)
+
+generate_export_header(netif)
+set_property(TARGET netif PROPERTY VERSION ${Libtrnav_VERSION})
+set_property(TARGET netif PROPERTY SOVERSION 0)
+set_property(TARGET netif PROPERTY INTERFACE_libtrnav_MAJOR_VERSION 0)
+set_property(TARGET netif APPEND PROPERTY
+COMPATIBLE_INTERFACE_STRING netif_MAJOR_VERSION
+)
+
+generate_export_header(trnucli)
+set_property(TARGET trnucli PROPERTY VERSION ${Libtrnav_VERSION})
+set_property(TARGET trnucli PROPERTY SOVERSION 0)
+set_property(TARGET trnucli PROPERTY INTERFACE_libtrnav_MAJOR_VERSION 0)
+set_property(TARGET trnucli APPEND PROPERTY
+COMPATIBLE_INTERFACE_STRING trnucli_MAJOR_VERSION
+)
+
+# specify export layout
+install(TARGETS
+geolib
+newmat
+qnx
+tnav
+trnw
+netif
+trnucli
+EXPORT LibtrnavTargets
+LIBRARY DESTINATION lib
+ARCHIVE DESTINATION lib
+RUNTIME DESTINATION bin
+INCLUDES DESTINATION include
+)
+
+# specify package files
+install(
+FILES
+${TRNW_SRC_DIR}/trnw.h
+${TRNW_SRC_DIR}/netif.h
+${TRNW_SRC_DIR}/trnu_cli.h
+${TRNW_SRC_DIR}/trn_cli.h
+${TRNW_SRC_DIR}/trn_msg.h
+${TRNW_SRC_DIR}/mb1_msg.h
+${TRNW_SRC_DIR}/trnif_msg.h
+${TRNW_SRC_DIR}/trnif_proto.h
+"${CMAKE_CURRENT_BINARY_DIR}/geolib_export.h"
+"${CMAKE_CURRENT_BINARY_DIR}/newmat_export.h"
+"${CMAKE_CURRENT_BINARY_DIR}/qnx_export.h"
+"${CMAKE_CURRENT_BINARY_DIR}/tnav_export.h"
+"${CMAKE_CURRENT_BINARY_DIR}/trnw_export.h"
+"${CMAKE_CURRENT_BINARY_DIR}/trnucli_export.h"
+DESTINATION
+include/libtrnav-${Libtrnav_VERSION}
+COMPONENT
+Devel
+)
+
+install(
+PROGRAMS
+"${CMAKE_CURRENT_BINARY_DIR}/trnucli-test"
+"${CMAKE_CURRENT_BINARY_DIR}/trnusvr-test"
+DESTINATION
+bin/libtrnav-${Libtrnav_VERSION}
+COMPONENT
+runtime
+)
+
+# install package config and version files
+install(FILES
+${CMAKE_CURRENT_BINARY_DIR}/libtrnav-pkg/LibtrnavConfig.cmake
+${CMAKE_CURRENT_BINARY_DIR}/libtrnav-pkg/LibtrnavConfigVersion.cmake
+DESTINATION ${ConfigPackageLocation}
+)
+
+# generate/stage Targets.cmake
+export(EXPORT LibtrnavTargets
+FILE "${CMAKE_CURRENT_BINARY_DIR}/libtrnav-pkg/LibtrnavTargets.cmake"
+NAMESPACE Libtrnav::
+)
+
+# install export group, Targets.cmake
+install(EXPORT LibtrnavTargets
+FILE
+LibtrnavTargets.cmake
+NAMESPACE
+Libtrnav::
+DESTINATION
+${ConfigPackageLocation}
 )
