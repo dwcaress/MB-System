@@ -97,9 +97,9 @@ r7kr_test_LDADD = libr7kr.la
 mbtnav_cli_SOURCES = utils/mbtnav_cli.c
 mbtnav_cli_LDADD = libr7kr.la
 
-dist_bin_SCRIPTS = mbtrnpp.sh emu7k.sh
+dist_bin_SCRIPTS = tools/bin/mbtrnpp.sh emu7k.sh
 
-bin_SCRIPTS = mbtrnpp.sh
+bin_SCRIPTS = tools/bin/mbtrnpp.sh
 
 DIST_SUBDIRS = tools
 
