@@ -1,6 +1,6 @@
 #! /bin/sh
-# Generated automatically by config.status (mbsystem) 5.7.6beta47
-# Libtool was configured on host tharp.local:
+# Generated automatically by config.status (mbsystem) 5.7.6beta48
+# Libtool was configured on host tharp.shore.mbari.org:
 # NOTE: Changes made to this file will be lost: look at ltmain.sh.
 
 # Provide generalized library-building support services.

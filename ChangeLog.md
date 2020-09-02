@@ -20,6 +20,7 @@ include "beta" in the tag name are preliminary and generally not announced.
 Distributions that do not include "beta" in the tag name correspond to the major,
 announced releases. The source distributions associated with all releases, major or beta, are equally accessible as tarballs through the Github interface.
 
+- Version 5.7.6beta48    September 1, 2020
 - Version 5.7.6beta47    September 1, 2020
 - Version 5.7.6beta46    August 31, 2020
 - Version 5.7.6beta45    August 26, 2020
@@ -357,6 +358,13 @@ announced releases. The source distributions associated with all releases, major
 ### MB-System Version 5.7 Release Notes:
 --
 
+
+#### 5.7.6beta48 (September 1, 2020)
+
+mbtrnpp: Fixed bug that opened a new log file at each reinitialization without
+closing the old log file, eventually using up all of the available file descriptors
+and crashing. Added some diagnostic output. Updated related test clients and servers
+used to demonstrate socket based i/o to and from mbtrnpp.
 
 #### 5.7.6beta47 (September 1, 2020)
 
