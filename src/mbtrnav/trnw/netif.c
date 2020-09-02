@@ -789,20 +789,23 @@ void netif_destroy(netif_t **pself)
 void netif_show(netif_t *self, bool verbose, int indent)
 {
     if (NULL != self) {
-        fprintf(stderr,"%*s[self         %10p]\n",indent,(indent>0?" ":""), self);
-        fprintf(stderr,"%*s[port_name    %10s]\n",indent,(indent>0?" ":""), self->port_name);
-        fprintf(stderr,"%*s[host         %10s]\n",indent,(indent>0?" ":""), self->host);
-        fprintf(stderr,"%*s[port         %10d]\n",indent,(indent>0?" ":""), self->port);
-        fprintf(stderr,"%*s[socket       %10p]\n",indent,(indent>0?" ":""), self->socket);
-        fprintf(stderr,"%*s[peer         %10p]\n",indent,(indent>0?" ":""), self->peer);
-        fprintf(stderr,"%*s[list         %10p/%02lu]\n",indent,(indent>0?" ":""), self->list, mlist_size(self->list));
-        fprintf(stderr,"%*s[profile      %10p]\n",indent,(indent>0?" ":""), self->profile);
-        fprintf(stderr,"%*s[mlog_id      %10d]\n",indent,(indent>0?" ":""), self->mlog_id);
-        fprintf(stderr,"%*s[mlog_path    %10s]\n",indent,(indent>0?" ":""), self->mlog_path);
-        fprintf(stderr,"%*s[log_dir      %10s]\n",indent,(indent>0?" ":""), self->log_dir);
-        fprintf(stderr,"%*s[hbto        %.3lf]\n",indent,(indent>0?" ":""), self->hbto);
-        fprintf(stderr,"%*s[cmdline      %10s]\n",indent,(indent>0?" ":""), self->cmdline);
-        fprintf(stderr,"%*s[stop         %10d]\n",indent,(indent>0?" ":""), self->stop?1:0);
+        int wkey=16;
+        int wval=16;
+        fprintf(stderr,"%*s%*s  %*p\n",indent,(indent>0?" ":""),wkey,"self",wval,self);
+        fprintf(stderr,"%*s%*s  %*s\n",indent,(indent>0?" ":""),wkey,"port_name",wval,self->port_name);
+        fprintf(stderr,"%*s%*s  %*s\n",indent,(indent>0?" ":""),wkey,"host",wval,self->host);
+        fprintf(stderr,"%*s%*s  %*d\n",indent,(indent>0?" ":""),wkey,"port",wval,self->port);
+        fprintf(stderr,"%*s%*s  %*p\n",indent,(indent>0?" ":""),wkey,"socket",wval,self->socket);
+        fprintf(stderr,"%*s%*s  %*p\n",indent,(indent>0?" ":""),wkey,"peer",wval,self->peer);
+        fprintf(stderr,"%*s%*s  %*p\n",indent,(indent>0?" ":""), wkey,"list@",wval,self->list);
+        fprintf(stderr,"%*s%*s  %*lu\n",indent,(indent>0?" ":""),wkey,"list len",wval,mlist_size(self->list));
+        fprintf(stderr,"%*s%*s  %*p\n",indent,(indent>0?" ":""),wkey,"profile",wval,self->profile);
+        fprintf(stderr,"%*s%*s  %*d\n",indent,(indent>0?" ":""),wkey,"mlog_id",wval,self->mlog_id);
+        fprintf(stderr,"%*s%*s  %*s\n",indent,(indent>0?" ":""),wkey,"mlog_path",wval,self->mlog_path);
+        fprintf(stderr,"%*s%*s  %*s\n",indent,(indent>0?" ":""),wkey,"log_dir",wval,self->log_dir);
+        fprintf(stderr,"%*s%*s  %*.3lf\n",indent,(indent>0?" ":""),wkey,"hbto",wval,self->hbto);
+        fprintf(stderr,"%*s%*s  %*s\n",indent,(indent>0?" ":""),wkey,"cmdline",wval,self->cmdline);
+        fprintf(stderr,"%*s%*s  %*d\n",indent,(indent>0?" ":""),wkey,"stop",wval,self->stop?1:0);
     }
 }
 // End function netif_show
@@ -983,20 +986,21 @@ static int s_netif_pub_msg(netif_t *self, msock_connection_t *peer, char *data, 
     int retval=-1;
 
     if(NULL!=self && NULL!=peer && NULL!=data && len>0){
-        int64_t iobytes=0;
         if(self->ctype==ST_UDP){
             int flags=0;
 #if !defined(__APPLE__)
             flags=MSG_NOSIGNAL;
 #endif
-            if ( (iobytes = msock_sendto(self->socket, peer->addr, (byte *) data, len, flags )) > 0) {
+            int64_t iobytes = msock_sendto(self->socket, peer->addr, (byte *) data, len, flags );
+            if (  iobytes > 0) {
                 fprintf(stderr,"client PUB UDP OK len[%"PRId64"]:\n",iobytes);
             }else{
                 fprintf(stderr,"client PUB UDP ERR len[%"PRId64"][%d/%s]\n",iobytes,errno,strerror(errno));
             }
         }
         if(self->ctype==ST_TCP){
-            if ( (iobytes = msock_send(peer->sock, (byte *)data, len )) > 0) {
+            int64_t iobytes = msock_send(peer->sock, (byte *)data, len );
+            if ( iobytes > 0) {
                 fprintf(stderr,"client PUB TCP OK len[%"PRId64"]:\n",iobytes);
             }else{
                 fprintf(stderr,"client PUB TCP ERR len[%"PRId64"][%d/%s]\n",iobytes,errno,strerror(errno));

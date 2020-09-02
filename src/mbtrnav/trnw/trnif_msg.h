@@ -87,7 +87,6 @@
 //#define TRNIF_PDATA(msg) ((NULL==msg) ? NULL : ((byte *)msg+TRNIF_HDR_LEN))
 //#define TRNIF_TPDATA(msg,type) (type *)( (NULL==msg) ? NULL : ((byte *)msg+TRNIF_HDR_LEN) )
 #define TRNIF_TPDATA(msg,type) (type *)( TRNIF_PDATA(msg) )
-#define TRNIF_IDSTR(t) ( (t>=0) && (t<TRNIF_MSG_ID_COUNT) ? trnmsg_id_names[t] : NULL)
 
 #define TRNIF_MAX_SIZE 2048
 
@@ -207,8 +206,7 @@ typedef pt_cdata_t trn_mmse_t;
 extern "C" {
 #endif
     extern trn_sync_t g_trn_sync;
-    const char *trnmsg_id_names[TRNIF_MSG_ID_COUNT];
-    
+
     // message API
     trnmsg_t *trnmsg_new(trnmsg_id_t id, byte *data, uint32_t data_len);
     trnmsg_t *trnmsg_new_type_msg(trnmsg_id_t id, int parameter);
@@ -223,6 +221,7 @@ extern "C" {
     trnmsg_t *trnmsg_realloc(trnmsg_t **dest, trnmsg_id_t id, byte *data, uint32_t data_len);
     int32_t trnmsg_deserialize(trnmsg_t **dest, byte *src, uint32_t len);
     int32_t trnmsg_serialize(byte **dest, uint32_t len);
+    const char *trnmsg_idstr(int id);
 
     void trnmsg_hex_show(byte *data, uint32_t len, uint16_t cols, bool show_offsets, uint16_t indent);
     uint32_t trnmsg_checksum(byte *pdata, uint32_t len);

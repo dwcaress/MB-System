@@ -103,6 +103,8 @@
 #define TRNUST_PORT_DFL 8000
 #define TRNUST_LOGDIR_DFL "."
 #define TRNUST_MOD_DFL 3
+#define TRNUST_UPDATE_DFL 3.0
+#define TRNUST_DELAY_DFL 200
 #define TRNUST_HBTO_DFL 0.0
 #define TRNUST_VERBOSE_DFL 0
 #define SESSION_BUF_LEN 80
@@ -117,8 +119,10 @@ typedef struct app_cfg_s{
     char *host;
     int port;
     char *logdir;
-    int update_mod;
+    double session_timer;
+    double update_period_sec;
     double hbto;
+    uint32_t delay_ms;
 }app_cfg_t;
 
 
@@ -144,14 +148,14 @@ static void s_show_help()
 {
     char help_message[] = "\ntrnif server unit test\n";
     char usage_message[] = "\ntrnusvr-test [options]\n"
-    "--verbose=n    : verbose output, n>0\n"
-    "--help         : output help message\n"
-    "--version      : output version info\n"
-    "--host=ip:n    : TRN server host:port\n"
-    "--mod=n        : update modulus\n"
-    "--hbto=f       : hbeat tiemout\n"
-    "--logdir=s     : logdir prefix      [*]\n"
-    "[*] - required\n"
+    " --verbose=n    : verbose output, n>0\n"
+    " --help         : output help message\n"
+    " --version      : output version info\n"
+    " --host=ip:n    : TRN server host:port\n"
+    " --update=f     : update period sec\n"
+    " --hbto=f       : hbeat tiemout\n"
+    " --delay=u      : delay msec\n"
+    " --logdir=s     : logdir prefix\n"
     "\n";
     printf("%s",help_message);
     printf("%s",usage_message);
@@ -177,7 +181,8 @@ void parse_args(int argc, char **argv, app_cfg_t *cfg)
         {"help", no_argument, NULL, 0},
         {"version", no_argument, NULL, 0},
         {"host", required_argument, NULL, 0},
-        {"mod", required_argument, NULL, 0},
+        {"update", required_argument, NULL, 0},
+        {"delay", required_argument, NULL, 0},
         {"hbto", required_argument, NULL, 0},
         {"logdir", required_argument, NULL, 0},
         {NULL, 0, NULL, 0}};
@@ -229,9 +234,13 @@ void parse_args(int argc, char **argv, app_cfg_t *cfg)
                 cfg->logdir=(NULL==optarg?NULL:strdup(optarg));
 
             }
-            // update_mod
-            else if (strcmp("mod", options[option_index].name) == 0) {
-                sscanf(optarg,"%d",&cfg->update_mod);
+                // delay
+            else if (strcmp("delay", options[option_index].name) == 0) {
+                sscanf(optarg,"%"PRIu32"",&cfg->delay_ms);
+            }
+                // update
+            else if (strcmp("update", options[option_index].name) == 0) {
+                sscanf(optarg,"%lf",&cfg->update_period_sec);
             }
             // hbto
             else if (strcmp("hbto", options[option_index].name) == 0) {
@@ -256,8 +265,9 @@ void parse_args(int argc, char **argv, app_cfg_t *cfg)
     fprintf(stderr,"host      [%s]\n",cfg->host);
     fprintf(stderr,"port      [%d]\n",cfg->port);
     fprintf(stderr,"logdir    [%s]\n",cfg->logdir);
-    fprintf(stderr,"mod       [%d]\n",cfg->update_mod);
-    fprintf(stderr,"hbto      [%lf]\n",cfg->hbto);
+    fprintf(stderr,"update    [%.3lf]\n",cfg->update_period_sec);
+    fprintf(stderr,"hbto      [%.3lf]\n",cfg->hbto);
+    fprintf(stderr,"delay     [%"PRIu32"]\n",cfg->delay_ms);
 
 }
 // End function parse_args
@@ -293,7 +303,9 @@ static app_cfg_t *app_cfg_new()
         instance->host=strdup(TRNUST_HOST_DFL);
         instance->port=TRNUST_PORT_DFL;
         instance->verbose=TRNUST_VERBOSE_DFL;
-        instance->update_mod=TRNUST_MOD_DFL;
+        instance->update_period_sec=TRNUST_UPDATE_DFL;
+        instance->delay_ms=TRNUST_DELAY_DFL;
+        instance->session_timer=0.0;
     }
     return instance;
 }
@@ -408,11 +420,15 @@ static int s_init_trnusvr(int argc, char **argv, app_cfg_t *cfg, bool verbose)
                 ip+=ilen;
             }
             g_cmd_line[TRNUSVR_CMD_LINE_BYTES-1]='\0';
-            mlog_tprintf(cfg->netif->mlog_id,"*** trnusvr session start (TEST) ***\n");
+            mlog_tprintf(cfg->netif->mlog_id,"*** trnusvr session start ***\n");
+            cfg->session_timer=mtime_etime();
+            mlog_tprintf(cfg->netif->mlog_id,"start_time,%.3lf\n",cfg->session_timer);
             mlog_tprintf(cfg->netif->mlog_id,"libnetif v[%s] build[%s]\n",netif_get_version(),netif_get_build());
             mlog_tprintf(cfg->netif->mlog_id,"cmdline [%s]\n",g_cmd_line);
 
+            // server: open socket, listen
             retval = netif_connect(cfg->netif);
+            fprintf(stderr,"netif_connect returned[%d]\n",retval);
         }else{
             fprintf(stderr,"%s:%d - ERR allocation\n",__FUNCTION__,__LINE__);
         }
@@ -425,16 +441,17 @@ static int s_init_trnusvr(int argc, char **argv, app_cfg_t *cfg, bool verbose)
 
 static void s_advance_update(trnu_pub_t *update)
 {
-    static int count=0;
 
     if(NULL!=update){
-        update->est[TRNU_EST_PT].time=mtime_dtime();
-        update->est[TRNU_EST_MLE].time=mtime_dtime();
-        update->est[TRNU_EST_MMSE].time=mtime_dtime();
+        static int count=0;
+        
+        update->est[TRNU_EST_PT].time=mtime_etime();
+        update->est[TRNU_EST_MLE].time=mtime_etime();
+        update->est[TRNU_EST_MMSE].time=mtime_etime();
         update->mb1_cycle++;
         update->ping_number++;
-        update->mb1_time=mtime_dtime();
-        update->update_time=mtime_dtime();
+        update->mb1_time=mtime_etime();
+        update->update_time=mtime_etime();
 
         update->filter_state=count%5;
         if( (count%3)==0){
@@ -457,15 +474,23 @@ static int s_run(app_cfg_t *cfg)
             TRNU_PUB_SYNC,
             {
                 // pt info {time,x,y,z,{cov[0],cov[2],cov[5],cov[1]}}
-                {mtime_dtime(),0.0,0.0,0.0,
+                {mtime_etime(),0.0,0.0,0.0,
                     {0.0,0.0,0.0,0.0}
                 },
                 // mle info {time,x,y,z,{cov[0],cov[2],cov[5],cov[1]}}
-                {mtime_dtime(),0.0,0.0,0.0,
+                {mtime_etime(),0.0,0.0,0.0,
                     {0.0,0.0,0.0,0.0}
                 },
                 // mmse info {time,x,y,z,{cov[0],cov[2],cov[5],cov[1]}}
-                {mtime_dtime(),0.0,0.0,0.0,
+                {mtime_etime(),0.0,0.0,0.0,
+                    {0.0,0.0,0.0,0.0}
+                },
+                // offset info {time,x,y,z,{cov[0],cov[2],cov[5],cov[1]}}
+                {mtime_etime(),0.0,0.0,0.0,
+                    {0.0,0.0,0.0,0.0}
+                },
+                // last_good info {time,x,y,z,{cov[0],cov[2],cov[5],cov[1]}}
+                {mtime_etime(),0.0,0.0,0.0,
                     {0.0,0.0,0.0,0.0}
                 },
             },
@@ -477,24 +502,40 @@ static int s_run(app_cfg_t *cfg)
             0,// is_valid
             0,// mb1_cycle
             0,// ping_number
-            mtime_dtime(),// mb1_time
-            mtime_dtime(),// update_time
+            0,// n_con_seq
+            0,// n_con_tot
+            0,// n_uncon_seq
+            0,// n_uncon_tot
+            mtime_etime(),// mb1_time
+            mtime_etime(),// reinit_time
+            mtime_etime(),// update_time
         };
         trnu_pub_t *update=&update_s;
-        int count=0;
-        fprintf(stderr,"trnusvr waiting for connection...(CTRL-C to exit)\n");
-        while(!g_interrupt){
-            // server: connect to client
-            netif_update_connections(cfg->netif);
 
-            // server: get TRN_MSG_PING, return TRN_MSG_ACK
-            netif_reqres(cfg->netif);
-            sleep(1);
-            if((count%cfg->update_mod)==0){
+        fprintf(stderr,"trnusvr waiting for connection...(CTRL-C to exit)\n");
+        double update_timer=mtime_dtime();
+        double check_timer=mtime_dtime();
+        while(!g_interrupt){
+
+            double now=mtime_dtime();
+
+            if( (now-check_timer) > 1.0){
+                // server: connect to client
+                netif_update_connections(cfg->netif);
+
+                // server: get TRN_MSG_PING, return TRN_MSG_ACK
+                netif_reqres(cfg->netif);
+                check_timer=mtime_dtime();
+            }
+
+            if( (now-update_timer) > cfg->update_period_sec){
                 s_advance_update(update);
                 s_trnu_pub(update,cfg->netif);
+                update_timer=mtime_dtime();
             }
-            count++;
+
+            if(cfg->delay_ms>0)
+            mtime_delay_ms(cfg->delay_ms);
         }
         fprintf(stderr,"interrupted by user - returning\n");
          mlog_tprintf(cfg->netif->mlog_id,"interrupted by user signal[%d]\n",g_signal);
@@ -510,30 +551,21 @@ static int s_app_main(app_cfg_t *cfg)
 
     if(NULL!=cfg){
 
-
         if(NULL!=cfg->netif ){
-            double start_time=mtime_dtime();
 
+            // enable module debug
             netif_init_mmd();
-            netif_show(cfg->netif,true,5);
-
-            // initialize message log
-            int il = netif_init_log(cfg->netif, NETIF_MLOG_NAME, NULL,NULL);
-            fprintf(stderr,"netif_init_log returned[%d]\n",il);
-
-            mlog_tprintf(cfg->netif->mlog_id,"*** netif session start (TEST) ***\n");
-            mlog_tprintf(cfg->netif->mlog_id,"libnetif v[%s] build[%s]\n",netif_get_version(),netif_get_build());
-
-            // server: open socket, listen
-            int nc = netif_connect(cfg->netif);
-            fprintf(stderr,"netif_connect returned[%d]\n",nc);
 
             // test trn_server/commsT protocol
             s_run(cfg);
 
-            mlog_tprintf(cfg->netif->mlog_id,"*** netif session end (TEST) uptime[%.3lf] ***\n",(mtime_dtime()-start_time));
-
+            // release module debug resources
             mmd_release();
+
+            // log session end
+            double now=mtime_etime();
+            mlog_tprintf(cfg->netif->mlog_id,"stop_time,%.3lf elapsed[%.3lf] ***\n",now,(now-cfg->session_timer));
+            mlog_tprintf(cfg->netif->mlog_id,"*** trnusvr session end ***\n");
 
             retval=0;
         }else{
@@ -556,6 +588,7 @@ int main(int argc, char **argv)
     if(NULL!=cfg){
         parse_args(argc,argv,cfg);
 
+        // configure and start
         s_init_trnusvr(argc,argv,cfg,true);
 
         retval=s_app_main(cfg);

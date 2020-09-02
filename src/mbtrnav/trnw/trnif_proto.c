@@ -944,18 +944,19 @@ int trnif_msg_pub(netif_t *self, msock_connection_t *peer, char *data, size_t le
     int retval=-1;
 
     if(NULL!=self && NULL!=peer && NULL!=data && len>0){
-        int64_t iobytes=0;
         if(self->ctype==ST_UDP){
             int flags=0;
 #if !defined(__APPLE__)
             flags=MSG_NOSIGNAL;
 #endif
-            if ( (iobytes = msock_sendto(self->socket, peer->addr, (byte *)data, len, flags )) > 0) {
+            int64_t iobytes = msock_sendto(self->socket, peer->addr, (byte *)data, len, flags );
+            if ( iobytes > 0) {
                 retval=iobytes;
             }
         }
         if(self->ctype==ST_TCP){
-            if ( (iobytes = msock_send(peer->sock, (byte *)data, len )) > 0) {
+            int64_t iobytes = msock_send(peer->sock, (byte *)data, len );
+            if ( iobytes > 0) {
                 retval=iobytes;
             }
         }

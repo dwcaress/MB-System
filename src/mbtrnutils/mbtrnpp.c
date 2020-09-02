@@ -853,10 +853,13 @@ int n_unconverged_streak = 0;
 int n_converged_tot = 0;
 int n_unconverged_tot = 0;
 int n_reinit = 0;
+double reinit_time = 0.0;
 bool use_trn_offset = false;
+double use_offset_time = 0.0;
 double use_offset_e = 0.0;
 double use_offset_n = 0.0;
 double use_offset_z = 0.0;
+double use_covariance[4] = {0.0, 0.0, 0.0, 0.0};
 
 char mRecordBuf[MBSYS_KMBES_MAX_NUM_MRZ_DGMS][64*1024];
 /*--------------------------------------------------------------------*/
@@ -2561,10 +2564,12 @@ int main(int argc, char **argv) {
                          "\t--trn-out=trnsvr[:host:port]/trnusvr[:host:port]/trnu/sout/serr/debug\n"
                          "\t--trn-decn\n"
                          "\t--trn-decs\n"
+                         "\t--covariance-magnitude-max=covariance_magnitude_max\n"
+                         "\t--convergence-repeat-min=convergence_repeat_min\n"
                          "\t--reinit-gain\n"
                          "\t--reinit-file\n"
                          "\t--reinit-xyoffset=xyoffset_max\n"
-                         "\t--reinit-offset_z=offset_z_min/offset_z_max\n";
+                         "\t--reinit-zoffset=offset_z_min/offset_z_max\n";
   extern char WIN_DECLSPEC *optarg;
 //  int option_index;
   int errflg = 0;
@@ -3236,6 +3241,7 @@ int main(int argc, char **argv) {
     }
 
     /* loop over reading data */
+    int n_non_survey_data = 0;
     bool done = false;
     while (!done) {
       /* open new log file if it is time */
@@ -3311,6 +3317,7 @@ int main(int argc, char **argv) {
         ndata++;
         n_pings_read++;
         n_soundings_read += ping[idataread].beams_bath;
+        n_non_survey_data = 0;
 
         // apply transmit gain thresholding
         double transmit_gain;
@@ -3602,6 +3609,15 @@ int main(int argc, char **argv) {
 
                 }
 
+                else {
+                    int time_i[7];
+                    mb_get_date(0, ping[i_ping_process].time_d, time_i);
+                    fprintf(stderr, "%4.4d/%2.2d/%2.2d-%2.2d:%2.2d:%2.2d.%6.6d %.6f "
+                                    "| %11.6f %11.6f %8.3f | Ping not processed - low gain condition\n",
+                    time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6], ping[i_ping_process].time_d,
+                    ping[i_ping_process].navlon, ping[i_ping_process].navlat, ping[i_ping_process].sonardepth);
+                }
+
 #endif // WITH_MBTNAV
 
                 MBTRNPP_UPDATE_STATS(app_stats, mbtrnpp_mlog_id, mbtrn_cfg->mbtrnpp_stat_flags);
@@ -3669,6 +3685,15 @@ int main(int argc, char **argv) {
             status = MB_SUCCESS;
             error = MB_ERROR_NO_ERROR;
             MST_COUNTER_INC(app_stats->stats->events[MBTPP_EV_EMBFAILURE]);
+          }
+        } else {
+          n_non_survey_data++;
+          if (n_non_survey_data > 0 && n_non_survey_data % 100 == 0) {
+            int time_i[7];
+            mb_get_date(0, ping[idataread].time_d, time_i);
+            fprintf(stderr, "%4.4d/%2.2d/%2.2d-%2.2d:%2.2d:%2.2d.%6.6d %.6f "
+                            "| Read 100 non-survey data records...\n",
+            time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6], ping[idataread].time_d);
           }
         }
         MST_METRIC_LAP(app_stats->stats->metrics[MBTPP_CH_MB_GETFAIL_XT], mtime_dtime());
@@ -4536,8 +4561,71 @@ int mbtrnpp_trn_pub_osocket(trn_update_t *update,
 
         if(NULL!=update && NULL!=pub_sock){
             int iobytes=0;
+
+            double offset_n = update->mse_dat->x - update->pt_dat->x;
+            double offset_e = update->mse_dat->y - update->pt_dat->y;
+            double offset_z = update->mse_dat->z - update->pt_dat->z;
+            double covariance_mag = sqrt(update->mse_dat->covariance[0] * update->mse_dat->covariance[0]
+                      + update->mse_dat->covariance[1] * update->mse_dat->covariance[1]
+                      + update->mse_dat->covariance[2] * update->mse_dat->covariance[2]);
+
             // serialize data
             trnu_pub_t pub_data={
+                TRNU_PUB_SYNC,
+                {
+                    {update->pt_dat->time,update->pt_dat->x,update->pt_dat->y,update->pt_dat->z,
+                        {update->pt_dat->covariance[0],update->pt_dat->covariance[2],update->pt_dat->covariance[5],update->pt_dat->covariance[1]}
+                    },
+                    {update->mle_dat->time,update->mle_dat->x,update->mle_dat->y,update->mle_dat->z,
+                        {update->mle_dat->covariance[0],update->mle_dat->covariance[2],update->mle_dat->covariance[5],update->mle_dat->covariance[1]}
+                    },
+                    {update->mse_dat->time,update->mse_dat->x,update->mse_dat->y,update->mse_dat->z,
+                        {update->mse_dat->covariance[0],update->mse_dat->covariance[2],update->mse_dat->covariance[5],update->mse_dat->covariance[1]}
+                    },
+                    {update->mse_dat->time,offset_n,offset_e,offset_z,
+                        {update->mse_dat->covariance[0],update->mse_dat->covariance[2],update->mse_dat->covariance[5],update->mse_dat->covariance[1]}
+                    },
+                    {use_offset_time,use_offset_e,use_offset_n,use_offset_z,
+                        {use_covariance[0],use_covariance[2],use_covariance[5],use_covariance[1]}
+                    },
+                },
+                update->reinit_count,
+                update->reinit_tlast,
+                update->filter_state,
+                update->success,
+                update->is_converged,
+                update->is_valid,
+                update->mb1_cycle,
+                update->ping_number,
+                n_converged_streak,
+                n_converged_tot,
+                n_unconverged_streak,
+                n_unconverged_tot,
+                update->mb1_time,
+                reinit_time,
+                update->update_time
+            };
+
+            if( (iobytes=netif_pub(trnusvr,(char *)&pub_data, sizeof(pub_data)))>0){
+                retval=iobytes;
+            }
+        }
+    }
+    return retval;
+}
+
+int mbtrnpp_trn_pub_osocket_org(trn_update_t *update,
+                             msock_socket_t *pub_sock)
+{
+    int retval=-1;
+
+    if(NULL!=update && NULL!=pub_sock){
+        retval=0;
+
+        if(NULL!=update && NULL!=pub_sock){
+            int iobytes=0;
+            // serialize data
+            trnu_pub_org_t pub_data={
                 TRNU_PUB_SYNC,
                 {
                     {update->pt_dat->time,update->pt_dat->x,update->pt_dat->y,update->pt_dat->z,
@@ -4742,10 +4830,12 @@ int mbtrnpp_check_reinit(trn_update_t *pstate, trn_config_t *cfg)
         double offset_e = 0.0;
         double offset_z = 0.0;
         double covariance_mag = 0.0;
+        if (use_offset_time == 0.0)
+          use_offset_time = pstate->mse_dat->time;
         if (pstate->mse_dat->time > 0.0) {
-          offset_n = pstate->mse_dat->x - pstate->mse_dat->vn_x;
-          offset_e = pstate->mse_dat->y - pstate->mse_dat->vn_y;
-          offset_z = pstate->mse_dat->z - pstate->mse_dat->vn_z;
+          offset_n = pstate->mse_dat->x - pstate->pt_dat->x;
+          offset_e = pstate->mse_dat->y - pstate->pt_dat->y;
+          offset_z = pstate->mse_dat->z - pstate->pt_dat->z;
           covariance_mag = sqrt(pstate->mse_dat->covariance[0] * pstate->mse_dat->covariance[0]
                     + pstate->mse_dat->covariance[1] * pstate->mse_dat->covariance[1]
                     + pstate->mse_dat->covariance[2] * pstate->mse_dat->covariance[2]);
@@ -4760,9 +4850,14 @@ int mbtrnpp_check_reinit(trn_update_t *pstate, trn_config_t *cfg)
           }
           if (n_converged_streak >= mbtrn_cfg->convergence_repeat_min) {
             use_trn_offset = true;
+            use_offset_time = pstate->mse_dat->time;
             use_offset_n = offset_n;
             use_offset_e = offset_e;
             use_offset_z = offset_z;
+            use_covariance[0] = pstate->mse_dat->covariance[0];
+            use_covariance[1] = pstate->mse_dat->covariance[2];
+            use_covariance[2] = pstate->mse_dat->covariance[5];
+            use_covariance[3] = pstate->mse_dat->covariance[1];
           } else {
             use_trn_offset = false;
           }
@@ -4856,9 +4951,9 @@ int mbtrnpp_trn_publish(trn_update_t *pstate, trn_config_t *cfg)
           char *useornot[2] = {"   ", "USE"};
           int time_i[7];
           mb_get_date(0, (double)pstate->mse_dat->time, time_i);
-          double offset_n = pstate->mse_dat->x - pstate->mse_dat->vn_x;
-          double offset_e = pstate->mse_dat->y - pstate->mse_dat->vn_y;
-          double offset_z = pstate->mse_dat->z - pstate->mse_dat->vn_z;
+          double offset_n = pstate->mse_dat->x - pstate->pt_dat->x;
+          double offset_e = pstate->mse_dat->y - pstate->pt_dat->y;
+          double offset_z = pstate->mse_dat->z - pstate->pt_dat->z;
           double covariance_mag = sqrt(pstate->mse_dat->covariance[0] * pstate->mse_dat->covariance[0]
                     + pstate->mse_dat->covariance[1] * pstate->mse_dat->covariance[1]
                     + pstate->mse_dat->covariance[2] * pstate->mse_dat->covariance[2]);
@@ -4866,20 +4961,20 @@ int mbtrnpp_trn_publish(trn_update_t *pstate, trn_config_t *cfg)
           // NOTE: TRN convention is x:northing y:easting z:down
           //       Output here is in order easting northing z
           if ((n_converged_tot + n_unconverged_tot - 1) % 25 == 0) {
-            fprintf(stderr, "--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------\n");
-            fprintf(stderr, "YYYY/MM/DD-HH:MM:SS.SSSSSS TTTTTTTTTT.TTTTTT | Nav: Easting  Northing     Z     | TRN: Easting  Northing     Z     | Off: East North    Z   | Cov: East     North       Z   :     Mag   | Best Off: E    N   Z   |   Ncs   Nct   Nus   Nut  Nr | Use \n");
-            fprintf(stderr, "--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------\n");
+            fprintf(stderr, "---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------\n");
+            fprintf(stderr, "YYYY/MM/DD-HH:MM:SS.SSSSSS TTTTTTTTTT.TTTTTT | Nav: Easting  Northing     Z     | TRN: Easting  Northing     Z     | Off: East   North     Z   | Cov: East     North       Z   :     Mag   | Best Off: T      E      N      Z    |   Ncs   Nct   Nus   Nut  Nr | Use \n");
+            fprintf(stderr, "---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------\n");
           }
           fprintf(stderr, "%4.4d/%2.2d/%2.2d-%2.2d:%2.2d:%2.2d.%6.6d %.6f "
                           "| %11.3f %11.3f %8.3f | %11.3f %11.3f %8.3f "
-                          "| %7.3f %7.3f %6.3f | %9.3f %9.3f %9.3f : %9.3f "
-                          "| %7.3f %7.3f %6.3f | %5d %5d %5d %5d %3d | %s\n",
-          time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6],
-          pstate->mse_dat->time, pstate->mse_dat->vn_y, pstate->mse_dat->vn_x, pstate->mse_dat->vn_z,
+                          "| %8.3f %8.3f %7.3f | %9.3f %9.3f %9.3f : %9.3f "
+                          "| %12.6f %7.3f %7.3f %6.3f | %5d %5d %5d %5d %3d | %s\n",
+          time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6], pstate->pt_dat->time,
+          pstate->pt_dat->y, pstate->pt_dat->x, pstate->pt_dat->z,
           pstate->mse_dat->y, pstate->mse_dat->x, pstate->mse_dat->z,
           offset_e, offset_n, offset_z,
           pstate->mse_dat->covariance[1], pstate->mse_dat->covariance[0], pstate->mse_dat->covariance[2], covariance_mag,
-          use_offset_e, use_offset_n, use_offset_z,
+          pstate->pt_dat->time - use_offset_time, use_offset_e, use_offset_n, use_offset_z,
           n_converged_streak, n_converged_tot, n_unconverged_streak, n_unconverged_tot, n_reinit,
           useornot[use_trn_offset]);
         }
@@ -5010,6 +5105,9 @@ int mbtrnpp_trn_process_mb1(wtnav_t *tnav, mb1_t *mb1, trn_config_t *cfg)
                                 // get number of reinits
                                 MST_METRIC_START(app_stats->stats->metrics[MBTPP_CH_TRN_NREINITS_XT], mtime_dtime());
 
+                                // check if reinit will be required on next processing
+                                mbtrnpp_check_reinit(pstate, cfg);
+
                                 pstate->reinit_count = wtnav_get_num_reinits(tnav);
                                 pstate->filter_state = wtnav_get_filter_state(tnav);
                                 pstate->is_converged = (wtnav_is_converged(tnav) ? 1 : 0);
@@ -5027,9 +5125,6 @@ int mbtrnpp_trn_process_mb1(wtnav_t *tnav, mb1_t *mb1, trn_config_t *cfg)
 
                                 MST_METRIC_LAP(app_stats->stats->metrics[MBTPP_CH_TRN_NREINITS_XT], mtime_dtime());
 
-                                // check if reinit will be required on next processing
-                                mbtrnpp_check_reinit(pstate, cfg);
-
                                 // publish to selected outputs
                                 mbtrnpp_trn_publish(pstate, cfg);
 
@@ -5046,10 +5141,24 @@ int mbtrnpp_trn_process_mb1(wtnav_t *tnav, mb1_t *mb1, trn_config_t *cfg)
                             mlog_tprintf(trnu_alog_id,"ERR: trncli_get_bias_estimates failed [%d] [%d/%s]\n",test,errno,strerror(errno));
 
                             PMPRINT(MOD_MBTRNPP,MM_DEBUG|MBTRNPP_V3,(stderr,"ERR: trn_get_bias_estimates failed [%d] [%d/%s]\n",test,errno,strerror(errno)));
+
+                            int time_i[7];
+                            mb_get_date(0, mb1->sounding.ts, time_i);
+                            fprintf(stderr, "%4.4d/%2.2d/%2.2d-%2.2d:%2.2d:%2.2d.%6.6d %.6f "
+                                            "| %11.6f %11.6f %8.3f | %d filtered beams - Ping not used - failed bias estimate\n",
+                            time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6], mb1->sounding.ts,
+                            mb1->sounding.lon, mb1->sounding.lat, mb1->sounding.depth, mb1->sounding.nbeams);
                         }
                     }else{
                         mlog_tprintf(trnu_alog_id,"ERR: trncli_send_update failed [%d] [%d/%s]\n",test,errno,strerror(errno));
                         PMPRINT(MOD_MBTRNPP,MM_DEBUG|MBTRNPP_V3,(stderr,"ERR: trn_update failed [%d] [%d/%s]\n",test,errno,strerror(errno)));
+
+                        int time_i[7];
+                        mb_get_date(0, mb1->sounding.ts, time_i);
+                        fprintf(stderr, "%4.4d/%2.2d/%2.2d-%2.2d:%2.2d:%2.2d.%6.6d %.6f "
+                                        "| %11.6f %11.6f %8.3f | %d filtered beams - Ping not used - failed trn processing\n",
+                        time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6], mb1->sounding.ts,
+                        mb1->sounding.lon, mb1->sounding.lat, mb1->sounding.depth, mb1->sounding.nbeams);
                     }
                     wmeast_destroy(mt);
                     wposet_destroy(pt);
@@ -5064,6 +5173,14 @@ int mbtrnpp_trn_process_mb1(wtnav_t *tnav, mb1_t *mb1, trn_config_t *cfg)
             }// if tnav, mb1,cfg != NULL
             mlog_tprintf(trnu_alog_id,"trn_update_end,%lf,%d\n",mtime_etime(),retval);
         }// if do_process
+        //else {
+        //    int time_i[7];
+        //    mb_get_date(0, mb1->sounding.ts, time_i);
+        //    fprintf(stderr, "%4.4d/%2.2d/%2.2d-%2.2d:%2.2d:%2.2d.%6.6d %.6f "
+        //                    "| %11.6f %11.6f %8.3f | Ping not processed - decimated\n",
+        //    time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6], mb1->sounding.ts,
+        //    mb1->sounding.lon, mb1->sounding.lat, mb1->sounding.depth);
+        //}
     }// if trn_en
 
     return retval;

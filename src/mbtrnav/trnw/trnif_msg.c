@@ -233,7 +233,7 @@ void trnmsg_show(trnmsg_t *self, bool verbose, int indent)
     if (NULL != self) {
         fprintf(stderr,"%*s[self     %10p]\n",indent,(indent>0?" ":""), self);
         fprintf(stderr,"%*s[hdr      %10p]\n",indent,(indent>0?" ":""), &self->hdr);
-        fprintf(stderr,"%*s[type     %10s]\n",indent,(indent>0?" ":""), TRNIF_IDSTR(self->hdr.msg_id));
+        fprintf(stderr,"%*s[type     %10s]\n",indent,(indent>0?" ":""), trnmsg_idstr(self->hdr.msg_id));
         fprintf(stderr,"%*s[sync     %10X]\n",indent,(indent>0?" ":""), self->hdr.sync);
         fprintf(stderr,"%*s[data_len %10"PRIu32"]\n",indent,(indent>0?" ":""), self->hdr.data_len);
         fprintf(stderr,"%*s[checksum %2s%08X]\n",indent,(indent>0?" ":""), " ",self->hdr.checksum);
@@ -270,7 +270,7 @@ int32_t trnmsg_deserialize(trnmsg_t **pdest, byte *src, uint32_t len)
         
         trnmsg_t *msg = (trnmsg_t *)src;
         if(msg->hdr.sync == g_trn_sync &&
-           msg->hdr.msg_id>=0 && msg->hdr.msg_id<TRNIF_MSG_ID_COUNT &&
+           msg->hdr.msg_id<TRNIF_MSG_ID_COUNT &&
            msg->hdr.data_len>0 && msg->hdr.data_len<=TRNIF_MAX_SIZE){
             
             trnmsg_t *dest = trnmsg_new(msg->hdr.msg_id,TRNIF_PDATA(src),msg->hdr.data_len);
@@ -289,6 +289,11 @@ int32_t trnmsg_serialize(byte **dest, uint32_t len)
 }
 // End function trnmsg_serialize
 
+const char *trnmsg_idstr(int id)
+{
+    const char *retval=(id>0 && id<TRNIF_MSG_ID_COUNT ? trnmsg_id_names[id] : NULL);
+    return retval;
+}// trnmsg_idstr
 
 /// @fn void trnmsg_hex_show(byte * data, uint32_t len, uint16_t cols, _Bool show_offsets, uint16_t indent)
 /// @brief output data buffer bytes in hex to stderr.

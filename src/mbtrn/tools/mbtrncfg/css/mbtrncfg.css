@@ -87,11 +87,12 @@ textarea.help{
     background: inherit;
     font-size: 15px;
     color: goldenrod;
+    text-align: left;
 }
 
 textarea.output{
     width: 600px;
-    height: 140px;
+    height: 170px;
     background: #CCCCCC;
     font-size: 12px;
 }
@@ -111,6 +112,10 @@ textarea.output{
 
 .buttonsm{
     padding: 10px 15px;
+}
+
+.buttonmd{
+    padding: 10px 12px;
 }
 
 .buttong{
@@ -137,4 +142,10 @@ textarea.output{
 	opacity:0.8;
 /*    box-shadow: 0 5px #666;*/
     transform: translateY(4px);
+}
+
+.cfgtext{
+    font-family: "Lucida Console",Courier,monospace,sans-serif;
+    color:darkseagreen;
+    color:limegreen;
 }
