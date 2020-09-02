@@ -2098,7 +2098,10 @@ static int s_mbtrnpp_kvparse_fn(char *key, char *val, void *cfg)
                 }
             }else if(strcmp(key,"reinit-xyoffset")==0 ){
                 if(sscanf(val,"%lf",&opts->reinit_xyoffset_max)==1){
-                    opts->reinit_xyoffset_enable = true;
+                    opts->reinit_xyoffset_enable = (opts->reinit_xyoffset_max > 0.0 ? true : false);
+                    retval=0;
+                } else {
+                    opts->reinit_xyoffset_enable = false;
                     retval=0;
                 }
             }else if(strcmp(key,"reinit-zoffset")==0 ){
