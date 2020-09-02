@@ -48,7 +48,7 @@ TNavParticleFilter::
 	}
 	delete [] tempUseBeam;
 	delete [] useBeam;
-    delete pfLog;
+  delete pfLog;
 }
 
 //********************************************************************************

@@ -2564,6 +2564,8 @@ int main(int argc, char **argv) {
                          "\t--trn-out=trnsvr[:host:port]/trnusvr[:host:port]/trnu/sout/serr/debug\n"
                          "\t--trn-decn\n"
                          "\t--trn-decs\n"
+                         "\t--covariance-magnitude-max=covariance_magnitude_max\n"
+                         "\t--convergence-repeat-min=convergence_repeat_min\n"
                          "\t--reinit-gain\n"
                          "\t--reinit-file\n"
                          "\t--reinit-xyoffset=xyoffset_max\n"
@@ -3239,6 +3241,7 @@ int main(int argc, char **argv) {
     }
 
     /* loop over reading data */
+    int n_non_survey_data = 0;
     bool done = false;
     while (!done) {
       /* open new log file if it is time */
@@ -3314,6 +3317,7 @@ int main(int argc, char **argv) {
         ndata++;
         n_pings_read++;
         n_soundings_read += ping[idataread].beams_bath;
+        n_non_survey_data = 0;
 
         // apply transmit gain thresholding
         double transmit_gain;
@@ -3681,6 +3685,15 @@ int main(int argc, char **argv) {
             status = MB_SUCCESS;
             error = MB_ERROR_NO_ERROR;
             MST_COUNTER_INC(app_stats->stats->events[MBTPP_EV_EMBFAILURE]);
+          }
+        } else {
+          n_non_survey_data++;
+          if (n_non_survey_data > 0 && n_non_survey_data % 100 == 0) {
+            int time_i[7];
+            mb_get_date(0, ping[idataread].time_d, time_i);
+            fprintf(stderr, "%4.4d/%2.2d/%2.2d-%2.2d:%2.2d:%2.2d.%6.6d %.6f "
+                            "| Read 100 non-survey data records...\n",
+            time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6], ping[idataread].time_d);
           }
         }
         MST_METRIC_LAP(app_stats->stats->metrics[MBTPP_CH_MB_GETFAIL_XT], mtime_dtime());
@@ -5132,9 +5145,9 @@ int mbtrnpp_trn_process_mb1(wtnav_t *tnav, mb1_t *mb1, trn_config_t *cfg)
                             int time_i[7];
                             mb_get_date(0, mb1->sounding.ts, time_i);
                             fprintf(stderr, "%4.4d/%2.2d/%2.2d-%2.2d:%2.2d:%2.2d.%6.6d %.6f "
-                                            "| %11.6f %11.6f %8.3f | Ping not used - failed bias estimate\n",
+                                            "| %11.6f %11.6f %8.3f | %d filtered beams - Ping not used - failed bias estimate\n",
                             time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6], mb1->sounding.ts,
-                            mb1->sounding.lon, mb1->sounding.lat, mb1->sounding.depth);
+                            mb1->sounding.lon, mb1->sounding.lat, mb1->sounding.depth, mb1->sounding.nbeams);
                         }
                     }else{
                         mlog_tprintf(trnu_alog_id,"ERR: trncli_send_update failed [%d] [%d/%s]\n",test,errno,strerror(errno));
@@ -5143,9 +5156,9 @@ int mbtrnpp_trn_process_mb1(wtnav_t *tnav, mb1_t *mb1, trn_config_t *cfg)
                         int time_i[7];
                         mb_get_date(0, mb1->sounding.ts, time_i);
                         fprintf(stderr, "%4.4d/%2.2d/%2.2d-%2.2d:%2.2d:%2.2d.%6.6d %.6f "
-                                        "| %11.6f %11.6f %8.3f | Ping not used - failed trn processing\n",
+                                        "| %11.6f %11.6f %8.3f | %d filtered beams - Ping not used - failed trn processing\n",
                         time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6], mb1->sounding.ts,
-                        mb1->sounding.lon, mb1->sounding.lat, mb1->sounding.depth);
+                        mb1->sounding.lon, mb1->sounding.lat, mb1->sounding.depth, mb1->sounding.nbeams);
                     }
                     wmeast_destroy(mt);
                     wposet_destroy(pt);
