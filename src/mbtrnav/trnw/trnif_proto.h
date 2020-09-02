@@ -93,7 +93,7 @@
 #define PROTO_TRNU_PING "PING"
 #define PROTO_TRNU_DIS  "DIS"
 #define PROTO_TRNU_ACK  "ACK"
-#define PROTO_TRNU_NACK "NACK"
+#define PROTO_TRNU_NACK "NAK"
 
 #define PROTO_MSG_LEN(s) (strlen(s)+1)
 

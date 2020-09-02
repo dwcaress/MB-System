@@ -20,6 +20,9 @@ include "beta" in the tag name are preliminary and generally not announced.
 Distributions that do not include "beta" in the tag name correspond to the major,
 announced releases. The source distributions associated with all releases, major or beta, are equally accessible as tarballs through the Github interface.
 
+- Version 5.7.6beta48    September 1, 2020
+- Version 5.7.6beta47    September 1, 2020
+- Version 5.7.6beta46    August 31, 2020
 - Version 5.7.6beta45    August 26, 2020
 - Version 5.7.6beta44    August 24, 2020
 - Version 5.7.6beta43    July 23, 2020
@@ -354,6 +357,41 @@ announced releases. The source distributions associated with all releases, major
 --
 ### MB-System Version 5.7 Release Notes:
 --
+
+
+#### 5.7.6beta48 (September 1, 2020)
+
+mbtrnpp: Fixed bug that opened a new log file at each reinitialization without
+closing the old log file, eventually using up all of the available file descriptors
+and crashing. Added some diagnostic output. Updated related test clients and servers
+used to demonstrate socket based i/o to and from mbtrnpp.
+
+#### 5.7.6beta47 (September 1, 2020)
+
+mbtrnpp: Modified the socket based TRN output packet and the related internal
+representation.
+
+#### 5.7.6beta46 (August 31, 2020)
+
+mbtrnpp: Now reinitializes the Terrain Relative Navigation (TRN) filter using
+the best available position rather than the last estimated navigation offset.
+If no good convergence has been reached, then the center of the particle filter
+cloud will be offset from the current navigation by zero. If a good convergence
+has been found at some point, the most recent good convergence offset value
+will be used to center the new particle filter cloud. Good convergence is not
+defined by the convergence criteria within the TRN filter code, but is instead
+defined by mbtrnpp according to a maximum standard deviation magnitude (by
+default 5.0 meters) and a minimum number of successive iterations that achieve
+better than that threshold (by default 200)
+
+Format 261 (MBF_KEMKMALL): Added hook to allow a program (currently on mbtrnpp)
+to set a flag that enables a correction specific to EM2040 data collected on
+AUV Sentry. The sensor depth value is recorded in a nonstandard location within
+the *.kmall data on AUV Sentry. In post processing this is handled with a special
+kluge option to mbpreprocess. The program mbtrnpp can now force the i/o module to
+make this same correction when reading raw *.kmall data.
+
+Format 72 (MBF_MBARIMB1): Fixed bug in handling sensordepth values.
 
 #### 5.7.6beta45 (August 26, 2020)
 

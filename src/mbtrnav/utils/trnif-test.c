@@ -415,7 +415,7 @@ static uint32_t s_test_trnmsg_recv(msock_socket_t *cli)
             int32_t dok=trnmsg_deserialize(&msg_in,(byte *)reply,TRNIF_MAX_SIZE);
             if(NULL!=msg_in && dok==0){
                 trnmsg_id_t mtype = msg_in->hdr.msg_id;
-                fprintf(stderr,"client TRNMSG recv OK len[%"PRId64"] msg_type[%u/%s]:\n",test,mtype,TRNIF_IDSTR(mtype));
+                fprintf(stderr,"client TRNMSG recv OK len[%"PRId64"] msg_type[%u/%s]:\n",test,mtype,trnmsg_idstr(mtype));
                 trnmsg_show(msg_in, true, 5);
                 trnmsg_destroy(&msg_in);
                 retval=msg_in->hdr.data_len;

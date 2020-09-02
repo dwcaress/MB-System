@@ -255,6 +255,8 @@ help_topics["reinit-gain"]="Enable/disable gating TRN resets using sonar transmi
 help_topics["reinit-file"]="Reinitialize TRN every time a new file is read when parsing a datalist";
 help_topics["reinit-xyoffset"]="Reinitialize TRN whenever the magnitude of the lateral converged offset exceeds specified limit";
 help_topics["reinit-zoffset"]="Reinitialize TRN whenever the converged z-offset is outside specified range";
+help_topics["covariance-magnitude-max"]="Convergence criteria: max covariance magnitude";
+help_topics["convergence-repeat-min"]="Convergence criteria: min convergence repeat";
 
 // show help string
 function showhelp(key){
@@ -363,6 +365,8 @@ function load_ctx(){
     x.elements["reinit-xyoffset"].value="150.0";
     x.elements["reinit-zoffset"].value="2.0/2.0";
     x.elements["set-trnlogfiles"].value="en";
+    x.elements["covariance-magnitude-max"].value="5.0";
+    x.elements["convergence-repeat-min"].value="200";
 
     // clear help text
     showhelp('reset');
@@ -423,6 +427,8 @@ function init_preset(key){
     x.elements["reinit-xyoffset"].value="150.0";
     x.elements["reinit-zoffset"].value="2.0/2.0";
     x.elements["set-trnlogfiles"].value="en";
+    x.elements["covariance-magnitude-max"].value="5.0";
+    x.elements["convergence-repeat-min"].value="200";
 
     // clear help text
     showhelp('reset');
@@ -524,6 +530,12 @@ function update(){
         text += '--reinit-zoffset='+x.elements["reinit-zoffset"].value+" ";
     if(x.elements["set-trnlogfiles"].value=='en')
         text = "TRN_LOGFILES=\""+TRN_LOGFILES["current"]+"\" "+text;
+    if(x.elements["reinit-zoffset"].value.length>0)
+        text += '--reinit-zoffset='+x.elements["reinit-zoffset"].value+" ";
+    if(x.elements["covariance-magnitude-max"].value.length>0)
+        text += '--covariance-magnitude-max='+x.elements["covariance-magnitude-max"].value+" ";
+    if(x.elements["convergence-repeat-min"].value.length>0)
+        text += '--convergence-repeat-min='+x.elements["convergence-repeat-min"].value+" ";
 
     // these parameters support substitutions
     text += sub_placeholder(x,"input","TRN_RESON_HOST",TRN_RESON_HOST["current"]);
@@ -943,6 +955,20 @@ function cfg2str(){
     }
     retval+="reinit-zoffset="+x.elements["reinit-zoffset"].value+"\n";
 
+    retval+="\n";
+    if(verbose){
+        retval+="// opt covariance-magnitude-max [double]\n";
+        retval+="// TRN convergence max covariance limit\n";
+    }
+    retval+="covariance-magnitude-max="+x.elements["covariance-magnitude-max"].value+"\n";
+
+    retval+="\n";
+    if(verbose){
+        retval+="// opt convergence-repeat-min [int]\n";
+        retval+="// TRN convergence minimum repeat limit\n";
+    }
+    retval+="convergence-repeat-min="+x.elements["convergence-repeat-min"].value+"\n";
+    
     return retval;
 }
 
