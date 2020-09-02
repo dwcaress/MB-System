@@ -99,7 +99,7 @@ mbtnav_cli_LDADD = libr7kr.la
 
 dist_bin_SCRIPTS = tools/bin/mbtrnpp.sh emu7k.sh
 
-bin_SCRIPTS = mbtrnpp.sh
+bin_SCRIPTS = tools/bin/mbtrnpp.sh
 
 DIST_SUBDIRS = tools
 
