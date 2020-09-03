@@ -59,10 +59,12 @@ export QU_TRNSTATE1_OIMG_NAME="trn-state-1"
 QU_TRNSTATE1_PTITLE=${QU_PTITLE:-"TRN state-1"}
 export QU_TRNSTATE2_OIMG_NAME="trn-state-2"
 QU_TRNSTATE2_PTITLE=${QU_PTITLE:-"TRN state-2"}
+export QU_TRNSTATERI_OIMG_NAME="trn-state-reinit"
+QU_TRNSTATERI_PTITLE=${QU_PTITLE:-"TRN state-reinit"}
 
 
 # Define job names to use in the configuration
-declare -a QU_KEYS=( "est-mle" "est-mse" "mse-var" "mle" "mlex" "mley" "mlez" "mmse" "mmsex" "mmsey" "mmsez"  "pt" "ptx" "pty" "ptz" "trn-state1" "trn-state2" "comb-all" )
+declare -a QU_KEYS=( "est-mle" "est-mse" "mse-var" "mle" "mlex" "mley" "mlez" "mmse" "mmsex" "mmsey" "mmsez"  "pt" "ptx" "pty" "ptz" "trn-state1" "trn-state2" "trn-state-reinit" "comb-all" )
 
 # Set time formats for data and plots
 # time format strings conform to gnuplot syntax
@@ -95,6 +97,7 @@ QP_JOB_DEFS["${QU_KEYS[13]}"]="plot,${QU_OTERM},${QU_KEYS[13]}"
 QP_JOB_DEFS["${QU_KEYS[14]}"]="plot,${QU_OTERM},${QU_KEYS[14]}"
 QP_JOB_DEFS["${QU_KEYS[15]}"]="plot,${QU_OTERM},${QU_KEYS[15]}"
 QP_JOB_DEFS["${QU_KEYS[16]}"]="plot,${QU_OTERM},${QU_KEYS[16]}"
+QP_JOB_DEFS["${QU_KEYS[17]}"]="plot,${QU_OTERM},${QU_KEYS[17]}"
 # local combiner job (e.g. make PDF containing plots in this configuration)
 #QP_JOB_DEFS["${QU_KEYS[17]}"]="combine,png,plot-output/${QU_OFILE_NAME}${QU_SESSION_ID}.pdf,./plot-output/*png"
 
@@ -117,7 +120,8 @@ QP_JOB_ORDER[${#QP_JOB_ORDER[*]}]="${QU_KEYS[13]}"
 QP_JOB_ORDER[${#QP_JOB_ORDER[*]}]="${QU_KEYS[14]}"
 QP_JOB_ORDER[${#QP_JOB_ORDER[*]}]="${QU_KEYS[15]}"
 QP_JOB_ORDER[${#QP_JOB_ORDER[*]}]="${QU_KEYS[16]}"
-#QP_JOB_ORDER[${#QP_JOB_ORDER[*]}]="${QU_KEYS[17]}"
+QP_JOB_ORDER[${#QP_JOB_ORDER[*]}]="${QU_KEYS[17]}"
+#QP_JOB_ORDER[${#QP_JOB_ORDER[*]}]="${QU_KEYS[18]}"
 
 # Plot configuration parameters
 QU_KEY=${QU_KEYS[0]}
@@ -799,9 +803,8 @@ QP_INC_LINETYPE["$QU_KEY"]="Y"
 QP_EXPR["$QU_KEY"]="Y"
 QP_SPECDEL["$QU_KEY"]="|"
 # add small offset to separate traces; read nearest integer below trace
-QP_PLOT_SPECS["$QU_KEY"]="${QU_TRNU_STATE_CSV},${QU_BLUE},14,,1,(\$4 + 0.0),,reinit"
-QP_PLOT_SPECS["$QU_KEY"]+="|${QU_TRNU_STATE_CSV},${QU_ORANGE},14,,1,(\$6 + 0.1),,fstate"
-QP_PLOT_SPECS["$QU_KEY"]+="|${QU_TRNU_STATE_CSV},${QU_YELLOW},14,,1,(\$8 + 0.2),,lms"
+QP_PLOT_SPECS["$QU_KEY"]="${QU_TRNU_STATE_CSV},${QU_ORANGE},14,,1,(\$6 + 0.1),,fstate"
+QP_PLOT_SPECS["$QU_KEY"]+="|${QU_TRNU_STATE_CSV},${QU_YELLOW},14,,1,(\$8 + 0.2),,last.meas.successful"
 QP_PLOT_SPECS["$QU_KEY"]+="|${QU_TRNU_STATE_CSV},${QU_PURPLE},14,,1,(\$18 + 0.3),,isconv"
 QP_PLOT_SPECS["$QU_KEY"]+="|${QU_TRNU_STATE_CSV},${QU_BLACK},14,,1,(\$20 + 0.4),,isval"
 
@@ -847,3 +850,48 @@ QP_INC_LINETYPE["$QU_KEY"]="Y"
 #QP_LINE_TYPES["$QU_KEY"]="${QU_LINE_TYPE_DFL}"
 QP_PLOT_SPECS["$QU_KEY"]="${QU_TRNU_STATE_CSV},${QU_GREEN},14,,1,10,,cycle"
 QP_PLOT_SPECS["$QU_KEY"]+="+${QU_TRNU_STATE_CSV},${QU_BLUE},14,,1,12,,ping"
+
+QU_KEY=${QU_KEYS[17]}
+QP_OFILE_NAME["$QU_KEY"]="${QU_TRNSTATERI_OIMG_NAME}"
+QP_PTITLE["$QU_KEY"]="${QU_TRNSTATERI_PTITLE}${QU_STITLE}"
+QP_TFMT["$QU_KEY"]=${QU_ITIME}
+QP_XTFMT["$QU_KEY"]=${QU_OTIME}
+QP_ISTIME["$QU_KEY"]="Y"
+QP_YFMT["$QU_KEY"]="%g" #${QU_OTIME}
+QP_DSEP["$QU_KEY"]=","
+#QP_KEY_FONT["$QU_KEY"]="arial"
+#QP_KEY_SIZE["$QU_KEY"]="9"
+#QP_KEY_MAX_COL["$QU_KEY"]="8"
+#QP_TERM_FONT["$QU_KEY"]="arial"
+#QP_TERM_SIZE["$QU_KEY"]="10"
+QP_TERM_OSIZE["$QU_KEY"]=${QU_TERM_OSIZE[${QU_OTERM}]}
+QP_XTITLE["$QU_KEY"]="Time (h:m:s)"
+#QP_XRANGE_MIN["$QU_KEY"]=0
+#QP_XRANGE_MAX["$QU_KEY"]=10
+QP_YTITLE["$QU_KEY"]="TRN state[1]"
+#QP_YRANGE_MIN["$QU_KEY"]=6.5
+#QP_YRANGE_MAX["$QU_KEY"]=5.0
+#QP_X2TITLE["$QU_KEY"]=""
+#QP_X2RANGE_MIN["$QU_KEY"]=0
+#QP_X2RANGE_MAX["$QU_KEY"]=10
+#QP_Y2TITLE["$QU_KEY"]="Depth"
+#QP_Y2RANGE_MIN["$QU_KEY"]=6.5
+#QP_Y2RANGE_MAX["$QU_KEY"]=8.8
+#QP_XSCALE["$QU_KEY"]=-1.0
+#QP_YSCALE["$QU_KEY"]=-1.0
+#QP_XOFS["$QU_KEY"]=4.0618e6
+#QP_YOFS["$QU_KEY"]=594500.
+QP_PLOT_STYLE["$QU_KEY"]="linespoints" #lines
+QP_POINTSIZE["$QU_KEY"]=${QU_POINT_SIZE}
+QP_POINTTYPE["$QU_KEY"]=${QU_POINT_TYPE}
+QP_POINTCOLOR["$QU_KEY"]=${QU_POINT_COLOR}
+QP_INC_POINTTYPE["$QU_KEY"]="N"
+QP_INC_POINTCOLOR["$QU_KEY"]="N"
+QP_USE_LINETYPES["$QU_KEY"]="N"
+QP_LINETYPE["$QU_KEY"]=1
+QP_INC_LINETYPE["$QU_KEY"]="Y"
+#QP_LINE_TYPES["$QU_KEY"]="${QU_LINE_TYPE_DFL}"
+QP_EXPR["$QU_KEY"]="Y"
+QP_SPECDEL["$QU_KEY"]="|"
+# add small offset to separate traces; read nearest integer below trace
+QP_PLOT_SPECS["$QU_KEY"]="${QU_TRNU_STATE_CSV},${QU_BLUE},14,,1,(\$4 + 0.0),,reinit"

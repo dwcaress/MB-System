@@ -314,7 +314,7 @@ plot_mbtrnpp(){
     export QU_MBTRNPP_XT_TRNPROCTRN_FILTER="p,trn_proc_trn_xt"
     export QU_MBTRNPP_XT_TRNPROCTRN_CSV="xt_mbtrnpp_trnproctrn.csv"
     # events
-    export QU_MBTRNPP_E_TRNREINIT_FILTER="e,mb_trn_reinit"
+	export QU_MBTRNPP_E_TRNREINIT_FILTER="e,mb_reinit" #"e,mb_trn_reinit"
     export QU_MBTRNPP_E_TRNREINIT_CSV="e_mbtrnpp_reinit.csv"
     export QU_MBTRNPP_E_GAINLO_FILTER="e,mb_gain_lo"
     export QU_MBTRNPP_E_GAINLO_CSV="e_mbtrnpp_gainlo.csv"
@@ -322,6 +322,10 @@ plot_mbtrnpp(){
     export QU_MBTRNPP_E_MBCON_CSV="e_mbtrnpp_mbcon.csv"
     export QU_MBTRNPP_E_MBDIS_FILTER="e,mb_dis"
     export QU_MBTRNPP_E_MBDIS_CSV="e_mbtrnpp_mbdis.csv"
+    export QU_MBTRNPP_E_MBXYOFFSET="e,mb_xyoffset"
+    export QU_MBTRNPP_E_MBXYOFFSET_CSV="e_mbtrnpp_mbxyoffset.csv"
+    export QU_MBTRNPP_E_MBZOFFSET="e,mb_offset_z"
+    export QU_MBTRNPP_E_MBZOFFSET_CSV="e_mbtrnpp_mbzoffset.csv"
     # errors
     export QU_MBTRNPP_E_EMBGETALL_FILTER="e,e_mbgetall"
     export QU_MBTRNPP_E_EMBGETALL_CSV="e_mbtrnpp_embgetall.csv"
@@ -360,6 +364,8 @@ plot_mbtrnpp(){
         grep ${QU_MBTRNPP_E_EMBCON_FILTER} ${MBTRNPP_LOG} > ${QP_PLOT_DATA_DIR}/${QU_MBTRNPP_E_EMBCON_CSV}
         grep ${QU_MBTRNPP_E_EMBFRAMERD_FILTER} ${MBTRNPP_LOG} > ${QP_PLOT_DATA_DIR}/${QU_MBTRNPP_E_EMBFRAMERD_CSV}
         grep ${QU_MBTRNPP_E_EMBLOGWR_FILTER} ${MBTRNPP_LOG} > ${QP_PLOT_DATA_DIR}/${QU_MBTRNPP_E_EMBLOGWR_CSV}
+        grep ${QU_MBTRNPP_E_MBXYOFFSET} ${MBTRNPP_LOG} > ${QP_PLOT_DATA_DIR}/${QU_MBTRNPP_E_MBXYOFFSET_CSV}
+        grep ${QU_MBTRNPP_E_MBZOFFSET} ${MBTRNPP_LOG} > ${QP_PLOT_DATA_DIR}/${QU_MBTRNPP_E_MBZOFFSET_CSV}
 
         # use qplot to generate plot set
         ${QPLOT_CMD} -f ${MBTRNPP_QPCONF}
