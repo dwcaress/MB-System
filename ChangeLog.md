@@ -20,6 +20,8 @@ include "beta" in the tag name are preliminary and generally not announced.
 Distributions that do not include "beta" in the tag name correspond to the major,
 announced releases. The source distributions associated with all releases, major or beta, are equally accessible as tarballs through the Github interface.
 
+- Version 5.7.6beta50    September 2, 2020
+- Version 5.7.6beta49    September 2, 2020
 - Version 5.7.6beta48    September 1, 2020
 - Version 5.7.6beta47    September 1, 2020
 - Version 5.7.6beta46    August 31, 2020
@@ -358,6 +360,15 @@ announced releases. The source distributions associated with all releases, major
 ### MB-System Version 5.7 Release Notes:
 --
 
+#### 5.7.6beta50 (September 2, 2020)
+
+mbtrnpp: Now outputs TRN status messages even when the input data do not include
+valid soundings and so do not get processed by TRN. Also reduced the debug level
+of the network interface code.
+
+#### 5.7.6beta49 (September 2, 2020)
+
+mbtrnpp: Fixed bugs in parsing commands and also in management shellscript mbtrnpp.sh
 
 #### 5.7.6beta48 (September 1, 2020)
 
