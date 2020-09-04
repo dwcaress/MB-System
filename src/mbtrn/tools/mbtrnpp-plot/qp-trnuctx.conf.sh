@@ -9,7 +9,7 @@
 # QX_ prefix denotes local/application-specific variables (file scope)
 
 # import shared environment, variables
-source qp-shared.conf.sh
+source ${QP_PLOT_HOME}/$qp-shared.conf.sh
 
 # session ID (used by local combiner job)
 # QU_SESSION_ID="-`date +%s`

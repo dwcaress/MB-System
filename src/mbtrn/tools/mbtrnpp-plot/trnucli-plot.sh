@@ -66,11 +66,17 @@ declare -a QX_LOG_PATHS
 declare -a QX_SESSION_IDS
 declare -a QX_DATA_SET_IDS
 
+# basic configuration
+# usually QP_PLOT_HOME is set by the calling script or b
+# overridden by the user
+export QP_PLOT_HOME=${QP_PLOT_HOME:-`pwd`}
+export QPLOT_CMD="${QP_PLOT_HOME}/qplot/bin/qplot"
+
 # source plotset definitions
-source qu-plotsets-conf.sh
+source ${QP_PLOT_HOME}/qu-plotsets-conf.sh
 
 # source shared definitions
-source qp-shared.conf.sh
+source ${QP_PLOT_HOME}/qp-shared.conf.sh
 
 #################################
 # Function Definitions
@@ -330,7 +336,7 @@ plot_trnuctx(){
     export QU_TRNUCTX_E_ECON_FILTER="e,n_econnect"
     export QU_TRNUCTX_E_ECON_CSV="e_trnuctx_econ.csv"
 
-    if [ -f "${TRNUCTX_LOG}" ] && [ -f "${TRNUCTX_QPCONF}" ]
+    if [ -f "${TRNUCTX_LOG}" ] && [ -f "${QP_PLOT_HOME}/${TRNUCTX_QPCONF}" ]
     then
         vout " processing ${TRNUCTX_LOG}"
 		grep ${QU_TRNUCTX_E_UPDATE_STAT_FILTER} ${TRNUCTX_LOG} > ${QP_PLOT_DATA_DIR}/${QU_TRNUCTX_E_UPDATE_STAT_CSV}
@@ -349,11 +355,11 @@ plot_trnuctx(){
         grep ${QU_TRNUCTX_T_CON_FILTER} ${TRNUCTX_LOG} > ${QP_PLOT_DATA_DIR}/${QU_TRNUCTX_T_CON_CSV}
 
         # use qplot to generate plot set
-        ${QPLOT_CMD} -f ${TRNUCTX_QPCONF}
+        ${QPLOT_CMD} -f ${QP_PLOT_HOME}/${TRNUCTX_QPCONF}
 
     else
         echo "ERR - TRNUCTX_LOG log not found ${TRNUCTX_LOG}"
-        echo "ERR - TRNUCTX_QPCONF log not found ${TRNUCTX_QPCONF}"
+        echo "ERR - TRNUCTX_QPCONF log not found ${QP_PLOT_HOME}/${TRNUCTX_QPCONF}"
     fi
 
 }
@@ -382,7 +388,7 @@ plot_trnucli_logs(){
     COMB_QPCONF="qp-trnucli-comb.conf.sh"
 
     # generate combined PDF plot set with qplot
-    ${QPLOT_CMD} -f ${COMB_QPCONF}
+    ${QPLOT_CMD} -f ${QP_PLOT_HOME}/${COMB_QPCONF}
 
 } # end function
 
@@ -471,17 +477,30 @@ fi
 # create plot data directory if it doesn't exist
 if [ ! -d "${QP_PLOT_DATA_DIR}" ]
 then
-    mkdir -p ${QP_PLOT_DATA_DIR}
+vout "creating plot data dir : ${QP_PLOT_DATA_DIR}"
+mkdir -p ${QP_PLOT_DATA_DIR}
+if [ ! -d "${QP_PLOT_DATA_DIR}" ]
+then
+echo "could not create plot data dir : ${QP_PLOT_DATA_DIR}"
+exit -1
+fi
 fi
 # create plot output directory if it doesn't exist
 if [ ! -d "${QP_OUTPUT_DIR}" ]
 then
-	mkdir -p ${QP_OUTPUT_DIR}
+vout "creating plot data dir : ${QP_PLOT_DATA_DIR}"
+mkdir -p ${QP_OUTPUT_DIR}
 fi
 # create plot job output directory if it doesn't exist
 if [ ! -d "${QX_JOB_DIR}" ]
 then
-	mkdir -p ${QX_JOB_DIR}
+vout "creating job dir : ${QP_PLOT_DATA_DIR}"
+mkdir -p ${QX_JOB_DIR}
+if [ ! -d "${QX_JOB_DIR}" ]
+then
+echo "could not create job dir : ${QX_JOB_DIR}"
+exit -1
+fi
 fi
 
 # process jobs

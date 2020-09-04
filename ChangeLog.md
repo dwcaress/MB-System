@@ -360,6 +360,11 @@ announced releases. The source distributions associated with all releases, major
 ### MB-System Version 5.7 Release Notes:
 --
 
+#### 5.7.6beta51 (September 4, 2020)
+
+mbtrnpp: Added time stamp and position to TRN status messages generated for pings
+with no valid soundings.
+
 #### 5.7.6beta50 (September 2, 2020)
 
 mbtrnpp: Now outputs TRN status messages even when the input data do not include

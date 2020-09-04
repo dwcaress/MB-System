@@ -66,11 +66,16 @@ declare -a QX_LOG_PATHS
 declare -a QX_SESSION_IDS
 declare -a QX_DATA_SET_IDS
 
+# set QPLOT_HOME at this scripts location
+# (unless set externally)
+QP_PLOT_HOME_DFL="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+QP_PLOT_HOME=${QP_PLOT_HOME:-${QP_PLOT_HOME_DFL}}
+
 # source plotset definitions
-source qu-plotsets-conf.sh
+source ${QP_PLOT_HOME}/qu-plotsets-conf.sh
 
 # source shared definitions
-source qp-shared.conf.sh
+source ${QP_PLOT_HOME}/qp-shared.conf.sh
 
 #################################
 # Function Definitions
@@ -340,7 +345,7 @@ plot_mbtrnpp(){
     export QU_MBTRNPP_E_EMBLOGWR_FILTER="e,e_mb_log_wr"
     export QU_MBTRNPP_E_EMBLOGWR_CSV="e_mbtrnpp_emlogwr.csv"
 
-    if [ -f "${MBTRNPP_LOG}" ] && [ -f "${MBTRNPP_QPCONF}" ]
+    if [ -f "${MBTRNPP_LOG}" ] && [ -f "${QP_PLOT_HOME}/${MBTRNPP_QPCONF}" ]
     then
         vout " processing ${MBTRNPP_LOG}"
         grep ${QU_MBTRNPP_XT_GETALL_FILTER} ${MBTRNPP_LOG} > ${QP_PLOT_DATA_DIR}/${QU_MBTRNPP_XT_GETALL_CSV}
@@ -368,11 +373,11 @@ plot_mbtrnpp(){
         grep ${QU_MBTRNPP_E_MBZOFFSET} ${MBTRNPP_LOG} > ${QP_PLOT_DATA_DIR}/${QU_MBTRNPP_E_MBZOFFSET_CSV}
 
         # use qplot to generate plot set
-        ${QPLOT_CMD} -f ${MBTRNPP_QPCONF}
+		${QPLOT_CMD} -f ${QP_PLOT_HOME}/${MBTRNPP_QPCONF}
 
     else
         echo "ERR - MBTRNPP_LOG log not found ${MBTRNPP_LOG}"
-        echo "ERR - MBTRNPP_QPCONF log not found ${MBTRNPP_QPCONF}"
+        echo "ERR - MBTRNPP_QPCONF log not found ${QP_PLOT_HOME}/${MBTRNPP_QPCONF}"
     fi
 
 }
@@ -408,7 +413,7 @@ plot_trnu(){
     export QU_TRNU_STATE_FILTER="trn_state"
     export QU_TRNU_STATE_CSV="trnu_state.csv"
 
-    if [ -f "${TRNU_LOG}" ] && [ -f "${TRNU_QPCONF}" ]
+    if [ -f "${TRNU_LOG}" ] && [ -f "${QP_PLOT_HOME}/${TRNU_QPCONF}" ]
     then
         vout " processing ${TRNU_LOG}"
         grep ${QU_TRNU_EST_FILTER} ${TRNU_LOG} > ${QP_PLOT_DATA_DIR}/${QU_TRNU_EST_CSV}
@@ -419,11 +424,11 @@ plot_trnu(){
         grep ${QU_TRNU_STATE_FILTER} ${TRNU_LOG} > ${QP_PLOT_DATA_DIR}/${QU_TRNU_STATE_CSV}
 
         # use qplot to generate plot set
-        ${QPLOT_CMD} -f ${TRNU_QPCONF}
+        ${QPLOT_CMD} -f ${QP_PLOT_HOME}/${TRNU_QPCONF}
 
     else
         echo "ERR - TRNU_LOG log not found ${TRNU_LOG}"
-        echo "ERR - TRNU_QPCONF log not found ${TRNU_QPCONF}"
+        echo "ERR - TRNU_QPCONF log not found ${QP_PLOT_HOME}/${TRNU_QPCONF}"
     fi
 
 }
@@ -468,7 +473,7 @@ plot_trnusvr(){
     export QU_TRNUSVR_CLILL_CSV="trnusvr_clill.csv"
 
 
-    if [ -f "${TRNUSVR_LOG}" ] && [ -f "${TRNUSVR_QPCONF}" ]
+    if [ -f "${TRNUSVR_LOG}" ] && [ -f "${QP_PLOT_HOME}/${TRNUSVR_QPCONF}" ]
     then
         vout " processing ${TRNUSVR_LOG}"
         grep ${QU_TRNUSVR_XT_UDCON_FILTER} ${TRNUSVR_LOG} > ${QP_PLOT_DATA_DIR}/${QU_TRNUSVR_XT_UDCON_CSV}
@@ -482,10 +487,10 @@ plot_trnusvr(){
         grep ${QU_TRNUSVR_CLILL_FILTER} ${TRNUSVR_LOG} > ${QP_PLOT_DATA_DIR}/${QU_TRNUSVR_CLILL_CSV}
 
         # use qplot to generate plot set
-        ${QPLOT_CMD} -f ${TRNUSVR_QPCONF}
+        ${QPLOT_CMD} -f ${QP_PLOT_HOME}/${TRNUSVR_QPCONF}
     else
         echo "ERR - TRNUSVR_LOG log not found ${TRNUSVR_LOG}"
-        echo "ERR - TRNUSVR_QPCONF log not found ${TRNUSVR_QPCONF}"
+        echo "ERR - TRNUSVR_QPCONF log not found ${QP_PLOT_HOME}/${TRNUSVR_QPCONF}"
     fi
 }
 
@@ -529,7 +534,7 @@ plot_trnsvr(){
     export QU_TRNSVR_CLILL_CSV="trnsvr_clill.csv"
 
 
-    if [ -f "${TRNSVR_LOG}" ] && [ -f "${TRNSVR_QPCONF}" ]
+    if [ -f "${TRNSVR_LOG}" ] && [ -f "${QP_PLOT_HOME}/${TRNSVR_QPCONF}" ]
     then
         vout " processing ${TRNSVR_LOG}"
         grep ${QU_TRNSVR_XT_UDCON_FILTER} ${TRNSVR_LOG} > ${QP_PLOT_DATA_DIR}/${QU_TRNSVR_XT_UDCON_CSV}
@@ -543,10 +548,10 @@ plot_trnsvr(){
         grep ${QU_TRNSVR_CLILL_FILTER} ${TRNSVR_LOG} > ${QP_PLOT_DATA_DIR}/${QU_TRNSVR_CLILL_CSV}
 
         # use qplot to generate plot set
-        ${QPLOT_CMD} -f ${TRNSVR_QPCONF}
+        ${QPLOT_CMD} -f ${QP_PLOT_HOME}/${TRNSVR_QPCONF}
     else
         echo "ERR - TRNSVR_LOG log not found ${TRNSVR_LOG}"
-        echo "ERR - TRNSVR_QPCONF log not found ${TRNSVR_QPCONF}"
+        echo "ERR - TRNSVR_QPCONF log not found ${QP_PLOT_HOME}/${TRNSVR_QPCONF}"
     fi
 }
 
@@ -590,7 +595,7 @@ plot_mb1svr(){
     export QU_MB1SVR_CLILL_CSV="mb1svr_clill.csv"
 
 
-    if [ -f "${MB1SVR_LOG}" ] && [ -f "${MB1SVR_QPCONF}" ]
+    if [ -f "${MB1SVR_LOG}" ] && [ -f "${QP_PLOT_HOME}/${MB1SVR_QPCONF}" ]
     then
         vout " processing ${MB1SVR_LOG}"
         grep ${QU_MB1SVR_XT_UDCON_FILTER} ${MB1SVR_LOG} > ${QP_PLOT_DATA_DIR}/${QU_MB1SVR_XT_UDCON_CSV}
@@ -604,10 +609,10 @@ plot_mb1svr(){
         grep ${QU_MB1SVR_CLILL_FILTER} ${MB1SVR_LOG} > ${QP_PLOT_DATA_DIR}/${QU_MB1SVR_CLILL_CSV}
 
         # use qplot to generate plot set
-        ${QPLOT_CMD} -f ${MB1SVR_QPCONF}
+        ${QPLOT_CMD} -f ${QP_PLOT_HOME}/${MB1SVR_QPCONF}
     else
         echo "ERR - MB1SVR_LOG log not found ${MB1SVR_LOG}"
-        echo "ERR - MB1SVR_QPCONF log not found ${MB1SVR_QPCONF}"
+        echo "ERR - MB1SVR_QPCONF log not found ${QP_PLOT_HOME}/${MB1SVR_QPCONF}"
     fi
 }
 
@@ -643,7 +648,7 @@ plot_mbtrnpp_logs(){
     COMB_QPCONF="qp-comb.conf.sh"
 
     # generate combined PDF plot set with qplot
-    ${QPLOT_CMD} -f ${COMB_QPCONF}
+    ${QPLOT_CMD} -f ${QP_PLOT_HOME}/${COMB_QPCONF}
 
 } # end function
 
@@ -732,17 +737,30 @@ fi
 # create plot data directory if it doesn't exist
 if [ ! -d "${QP_PLOT_DATA_DIR}" ]
 then
+	vout "creating plot data dir : ${QP_PLOT_DATA_DIR}"
     mkdir -p ${QP_PLOT_DATA_DIR}
+    if [ ! -d "${QP_PLOT_DATA_DIR}" ]
+    then
+    echo "could not create plot data dir : ${QP_PLOT_DATA_DIR}"
+    exit -1
+    fi
 fi
 # create plot output directory if it doesn't exist
 if [ ! -d "${QP_OUTPUT_DIR}" ]
 then
+	vout "creating plot data dir : ${QP_PLOT_DATA_DIR}"
 	mkdir -p ${QP_OUTPUT_DIR}
 fi
 # create plot job output directory if it doesn't exist
 if [ ! -d "${QX_JOB_DIR}" ]
 then
+	vout "creating job dir : ${QP_PLOT_DATA_DIR}"
 	mkdir -p ${QX_JOB_DIR}
+    if [ ! -d "${QX_JOB_DIR}" ]
+    then
+    echo "could not create job dir : ${QX_JOB_DIR}"
+    exit -1
+    fi
 fi
 
 # process jobs
