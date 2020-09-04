@@ -4147,7 +4147,8 @@ int mbtrnpp_logstatistics(int verbose, FILE *logfp, int n_pings_read, int n_soun
 int mbtrnpp_update_stats(mstats_profile_t *stats, mlog_id_t log_id, mstats_flags flags) {
 
   if (NULL != stats) {
-    double stats_now = mtime_etime();
+      double stats_now = mtime_etime();
+      double stats_nowd = mtime_dtime();
 
     if (log_clock_res) {
       // log the timing clock resolution (once)
@@ -4165,13 +4166,13 @@ int mbtrnpp_update_stats(mstats_profile_t *stats, mlog_id_t log_id, mstats_flags
     }
     else {
       // seed the first cycle
-      MST_METRIC_START(app_stats->stats->metrics[MBTPP_CH_MB_STATS_XT], (stats_now - 0.0001));
-      MST_METRIC_LAP(app_stats->stats->metrics[MBTPP_CH_MB_STATS_XT], stats_now);
+      MST_METRIC_START(app_stats->stats->metrics[MBTPP_CH_MB_STATS_XT], (stats_nowd - 0.0001));
+      MST_METRIC_LAP(app_stats->stats->metrics[MBTPP_CH_MB_STATS_XT], stats_nowd);
     }
 
     // end the cycle timer here
     // [start at the end if this function]
-    MST_METRIC_LAP(app_stats->stats->metrics[MBTPP_CH_MB_CYCLE_XT], stats_now);
+    MST_METRIC_LAP(app_stats->stats->metrics[MBTPP_CH_MB_CYCLE_XT], stats_nowd);
 
     // measure dtime execution time (twice), while we're at it
     MST_METRIC_START(app_stats->stats->metrics[MBTPP_CH_MB_DTIME_XT], mtime_dtime());
@@ -4182,7 +4183,7 @@ int mbtrnpp_update_stats(mstats_profile_t *stats, mlog_id_t log_id, mstats_flags
     stats->uptime = stats_now - stats->session_start;
 
     PMPRINT(MOD_MBTRNPP, MBTRNPP_V4,
-            (stderr, "cycle_xt: stat_now[%.4lf] start[%.4lf] stop[%.4lf] value[%.4lf]\n", stats_now,
+            (stderr, "cycle_xt: stat_now[%.4lf] stat_nowd[%.4lf] start[%.4lf] stop[%.4lf] value[%.4lf]\n", stats_now,stats_nowd,
              app_stats->stats->metrics[MBTPP_CH_MB_CYCLE_XT].start, app_stats->stats->metrics[MBTPP_CH_MB_CYCLE_XT].stop,
              app_stats->stats->metrics[MBTPP_CH_MB_CYCLE_XT].value));
 
@@ -4252,7 +4253,7 @@ int mbtrnpp_update_stats(mstats_profile_t *stats, mlog_id_t log_id, mstats_flags
     MST_METRIC_START(app_stats->stats->metrics[MBTPP_CH_MB_CYCLE_XT], mtime_dtime());
 
     // update stats execution time variables
-    stats_prev_start = stats_now;
+    stats_prev_start = stats_nowd;
     stats_prev_end = mtime_dtime();
   }
   else {

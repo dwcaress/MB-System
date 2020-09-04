@@ -363,7 +363,9 @@ announced releases. The source distributions associated with all releases, major
 #### 5.7.6beta51 (September 4, 2020)
 
 mbtrnpp: Added time stamp and position to TRN status messages generated for pings
-with no valid soundings.
+with no valid soundings. Bug fix: stats and cycle exec time metrics get incorrect
+values on some platforms, because of mixed reference to real time and precision
+clocks; now use consistent references
 
 #### 5.7.6beta50 (September 2, 2020)
 

@@ -9,7 +9,7 @@
 # QX_ prefix denotes local/application-specific variables (file scope)
 
 # import shared environment
-source qp-shared.conf.sh
+source ${QP_PLOT_HOME}/qp-shared.conf.sh
 
 # define variables
 QU_SESSION_ID="" #"-`date +%s`

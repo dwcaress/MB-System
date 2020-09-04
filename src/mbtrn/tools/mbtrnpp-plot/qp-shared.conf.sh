@@ -9,8 +9,10 @@
 # QX_ prefix denotes local/application-specific variables (file scope)
 
 # basic configuration
-export QP_PLOT_HOME=`pwd`
-export QPLOT_CMD="./qplot/bin/qplot"
+# usually QP_PLOT_HOME is set by the calling script or b
+# overridden by the user
+export QP_PLOT_HOME=${QP_PLOT_HOME:-`pwd`}
+export QPLOT_CMD="${QP_PLOT_HOME}/qplot/bin/qplot"
 
 export QP_VERBOSE=${QP_VERBOSE:-"N"}
 export QP_DEBUG=${QP_DEBUG:-"Y"}
