@@ -841,7 +841,7 @@ int mbtrnpp_trn_pub_ostream(trn_update_t *update, FILE *stream);
 int mbtrnpp_trn_pub_odebug(trn_update_t *update);
 int mbtrnpp_trn_pub_olog(trn_update_t *update, mlog_id_t log_id);
 int mbtrnpp_trn_pub_osocket(trn_update_t *update, msock_socket_t *pub_sock);
-int mbtrnpp_trn_pubempty_osocket(msock_socket_t *pub_sock);
+int mbtrnpp_trn_pubempty_osocket(double time, double lat, double lon, double depth, msock_socket_t *pub_sock);
 char *mbtrnpp_trn_updatestr(char *dest, int len, trn_update_t *update, int indent);
 #endif // WITH_MBTNAV
 
@@ -3620,7 +3620,8 @@ int main(int argc, char **argv) {
                                     "| %11.6f %11.6f %8.3f | Ping not processed - low gain condition\n",
                     time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6], ping[i_ping_process].time_d,
                     ping[i_ping_process].navlon, ping[i_ping_process].navlat, ping[i_ping_process].sonardepth);
-                    mbtrnpp_trn_pubempty_osocket(trnusvr->socket);
+                    mbtrnpp_trn_pubempty_osocket(ping[i_ping_process].time_d, ping[i_ping_process].navlat,
+                      ping[i_ping_process].navlon, ping[i_ping_process].sonardepth,  trnusvr->socket);
                 }
 
 #endif // WITH_MBTNAV
@@ -3699,7 +3700,8 @@ int main(int argc, char **argv) {
             fprintf(stderr, "%4.4d/%2.2d/%2.2d-%2.2d:%2.2d:%2.2d.%6.6d %.6f "
                             "| Read 100 non-survey data records...\n",
             time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6], ping[idataread].time_d);
-            mbtrnpp_trn_pubempty_osocket(trnusvr->socket);
+            double dzero = 0.0;
+            mbtrnpp_trn_pubempty_osocket(ping[idataread].time_d, dzero, dzero, dzero, trnusvr->socket);
           }
         }
         MST_METRIC_LAP(app_stats->stats->metrics[MBTPP_CH_MB_GETFAIL_XT], mtime_dtime());
@@ -4621,7 +4623,7 @@ int mbtrnpp_trn_pub_osocket(trn_update_t *update,
     return retval;
 }
 
-int mbtrnpp_trn_pubempty_osocket(msock_socket_t *pub_sock)
+int mbtrnpp_trn_pubempty_osocket(double time, double lat, double lon, double depth, msock_socket_t *pub_sock)
 {
     int retval=-1;
 
@@ -4639,20 +4641,20 @@ int mbtrnpp_trn_pubempty_osocket(msock_socket_t *pub_sock)
             trnu_pub_t pub_data={
                 TRNU_PUB_SYNC,
                 {
-                    {dzero,dzero,dzero,dzero,
-                        {dzero,dzero,dzero,dzero}
+                    {time, lat, lon, depth,
+                        {dzero, dzero, dzero, dzero}
                     },
-                    {dzero,dzero,dzero,dzero,
-                        {dzero,dzero,dzero,dzero}
+                    {dzero, dzero, dzero, dzero,
+                        {dzero, dzero, dzero, dzero}
                     },
-                    {dzero,dzero,dzero,dzero,
-                        {dzero,dzero,dzero,dzero}
+                    {dzero, dzero, dzero, dzero,
+                        {dzero, dzero, dzero, dzero}
                     },
-                    {dzero,dzero,dzero,dzero,
-                        {dzero,dzero,dzero,dzero}
+                    {dzero, dzero, dzero, dzero,
+                        {dzero, dzero, dzero, dzero}
                     },
-                    {dzero,dzero,dzero,dzero,
-                        {dzero,dzero,dzero,dzero}
+                    {dzero, dzero, dzero, dzero,
+                        {dzero, dzero, dzero, dzero}
                     },
                 },
                 izero,
@@ -5214,7 +5216,7 @@ int mbtrnpp_trn_process_mb1(wtnav_t *tnav, mb1_t *mb1, trn_config_t *cfg)
                                             "| %11.6f %11.6f %8.3f | %d filtered beams - Ping not used - failed bias estimate\n",
                             time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6], mb1->sounding.ts,
                             mb1->sounding.lon, mb1->sounding.lat, mb1->sounding.depth, mb1->sounding.nbeams);
-                            mbtrnpp_trn_pubempty_osocket(trnusvr->socket);
+                            mbtrnpp_trn_pubempty_osocket(mb1->sounding.ts, mb1->sounding.lat, mb1->sounding.lon, mb1->sounding.depth, trnusvr->socket);
                         }
                     }else{
                         mlog_tprintf(trnu_alog_id,"ERR: trncli_send_update failed [%d] [%d/%s]\n",test,errno,strerror(errno));
@@ -5226,7 +5228,7 @@ int mbtrnpp_trn_process_mb1(wtnav_t *tnav, mb1_t *mb1, trn_config_t *cfg)
                                         "| %11.6f %11.6f %8.3f | %d filtered beams - Ping not used - failed trn processing\n",
                         time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6], mb1->sounding.ts,
                         mb1->sounding.lon, mb1->sounding.lat, mb1->sounding.depth, mb1->sounding.nbeams);
-                        mbtrnpp_trn_pubempty_osocket(trnusvr->socket);
+                        mbtrnpp_trn_pubempty_osocket(mb1->sounding.ts, mb1->sounding.lat, mb1->sounding.lon, mb1->sounding.depth, trnusvr->socket);
                     }
                     wmeast_destroy(mt);
                     wposet_destroy(pt);
