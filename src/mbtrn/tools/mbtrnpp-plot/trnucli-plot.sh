@@ -66,11 +66,10 @@ declare -a QX_LOG_PATHS
 declare -a QX_SESSION_IDS
 declare -a QX_DATA_SET_IDS
 
-# basic configuration
-# usually QP_PLOT_HOME is set by the calling script or b
-# overridden by the user
-export QP_PLOT_HOME=${QP_PLOT_HOME:-`pwd`}
-export QPLOT_CMD="${QP_PLOT_HOME}/qplot/bin/qplot"
+# set QPLOT_HOME at this scripts location
+# (unless set externally)
+QP_PLOT_HOME_DFL="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+QP_PLOT_HOME=${QP_PLOT_HOME:-${QP_PLOT_HOME_DFL}}
 
 # source plotset definitions
 source ${QP_PLOT_HOME}/qu-plotsets-conf.sh

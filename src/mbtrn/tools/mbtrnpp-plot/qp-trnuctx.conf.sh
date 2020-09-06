@@ -9,7 +9,7 @@
 # QX_ prefix denotes local/application-specific variables (file scope)
 
 # import shared environment, variables
-source ${QP_PLOT_HOME}/$qp-shared.conf.sh
+source ${QP_PLOT_HOME}/qp-shared.conf.sh
 
 # session ID (used by local combiner job)
 # QU_SESSION_ID="-`date +%s`
@@ -55,7 +55,7 @@ QP_JOB_DEFS["${QU_KEYS[0]}"]="plot,${QU_OTERM},${QU_KEYS[0]}"
 QP_JOB_DEFS["${QU_KEYS[1]}"]="plot,${QU_OTERM},${QU_KEYS[1]}"
 QP_JOB_DEFS["${QU_KEYS[2]}"]="plot,${QU_OTERM},${QU_KEYS[2]}"
 QP_JOB_DEFS["${QU_KEYS[3]}"]="plot,${QU_OTERM},${QU_KEYS[3]}"
-QP_JOB_DEFS["${QU_KEYS[3]}"]="plot,${QU_OTERM},${QU_KEYS[4]}"
+QP_JOB_DEFS["${QU_KEYS[4]}"]="plot,${QU_OTERM},${QU_KEYS[4]}"
 # local combiner job (e.g. make PDF containing plots in this configuration)
 #QP_JOB_DEFS["${QU_KEYS[4]}"]="combine,png,plot-output/${QU_OFILE_NAME}${QU_SESSION_ID}.pdf,./plot-output/*png"
 
@@ -254,8 +254,8 @@ QP_LINETYPE["$QU_KEY"]=1
 QP_INC_LINETYPE["$QU_KEY"]="Y"
 #QP_LINE_TYPES["$QU_KEY"]="${QU_LINE_TYPE_DFL}"
 QP_PLOT_SPECS["$QU_KEY"]="${QU_TRNUCTX_E_UPDATE_STAT_CSV},${QU_GREEN},1,,1,3,,update"
-QP_PLOT_SPECS["$QU_KEY"]+="+${QU_TRNUCTX_E_UPDATE_STAT_CSV},${QU_BLUE},1,,1,4,,cycle"
-QP_PLOT_SPECS["$QU_KEY"]+="+${QU_TRNUCTX_E_UPDATE_STAT_CSV},${QU_RED},1,,1,5,,elist"
+QP_PLOT_SPECS["$QU_KEY"]+="|${QU_TRNUCTX_E_UPDATE_STAT_CSV},${QU_BLUE},1,,1,4,,cycle"
+QP_PLOT_SPECS["$QU_KEY"]+="|${QU_TRNUCTX_E_UPDATE_STAT_CSV},${QU_RED},1,,1,5,,elist"
 #QP_PLOT_SPECS["$QU_KEY"]+="+${QU_TRNUCTX_E_UPDATE_STAT_CSV},${QU_GOLDENROD},1,,1,6,,tsvr"
 
 QU_KEY=${QU_KEYS[4]}
