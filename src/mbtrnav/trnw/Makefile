@@ -147,13 +147,13 @@ LIBTRNUCLI_LIBS = -lmframe -lpthread -lm
 TRNUCLI_TEST=trnucli-test
 TRNUCLI_TEST_SRC=trnucli_test.c
 TRNUCLI_TEST_OBJ=$(TRNUCLI_TEST_SRC:%.c=$(BUILD_DIR)/%.o)
-TRNUCLI_TEST_LIBS = $(MFRAME_LIB) -lpthread -lm -ltrnucli
+TRNUCLI_TEST_LIBS = $(MFRAME_LIB) -ltrnucli -lpthread -lm -lqnx -lnewmat -ltrn -ltrncli -lnetcdf -lgeolib 
 
 # trnusvr-test: trnu_cli test server
 TRNUSVR_TEST=trnusvr-test
 TRNUSVR_TEST_SRC=trnusvr_test.c netif.c trnif_msg.c trnif_proto.c
 TRNUSVR_TEST_OBJ=$(TRNUSVR_TEST_SRC:%.c=$(BUILD_DIR)/%.o)
-TRNUSVR_TEST_LIBS = $(MFRAME_LIB) -lpthread -lm -ltrnw -lm -lqnx -lnewmat -ltrn -ltrncli -lnetcdf -lgeolib -lstdc++
+TRNUSVR_TEST_LIBS = $(MFRAME_LIB) -lpthread -lm -lqnx -lnewmat -ltrn -ltrncli -lnetcdf -lgeolib -lstdc++
 
 # TRN clients
 TRNC_SRC+= $(LIBTRNCLI_SRC) $(TRNCLI_TEST_SRC) \
