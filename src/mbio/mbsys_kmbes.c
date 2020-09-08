@@ -1318,10 +1318,13 @@ int mbsys_kmbes_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, i
     for(int imrz = 0; imrz < store->n_mrz_read; imrz++) {
       struct mbsys_kmbes_mrz *mrz = (struct mbsys_kmbes_mrz *)&store->mrz[imrz];
 
+      xmt->xmtPingInfo.longitude = navlon;
+      xmt->xmtPingInfo.latitude = navlat;
+      xmt->xmtPingInfo.heading = heading;
+      xmt->xmtPingInfo.speed = speed /  3.6;
       mrz->pingInfo.longitude_deg = navlon;
       mrz->pingInfo.latitude_deg = navlat;
       mrz->pingInfo.headingVessel_deg = heading;
-      xmt->xmtPingInfo.speed = speed /  3.6;
 
       for (int i = 0;
             i < (mrz->rxInfo.numSoundingsMaxMain + mrz->rxInfo.numExtraDetections);
