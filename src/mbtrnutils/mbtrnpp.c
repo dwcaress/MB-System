@@ -658,15 +658,20 @@ typedef enum {
     MBTPP_EV_MB_xyoffset,
     MBTPP_EV_MB_offset_z,
     MBTPP_EV_MB_EOF,
+    MBTPP_EV_MB_NONSURVEY,
     MBTPP_EV_EMBGETALL,
     MBTPP_EV_EMBFAILURE,
     MBTPP_EV_EMBFRAMERD,
     MBTPP_EV_EMBLOGWR,
     MBTPP_EV_EMBSOCKET,
     MBTPP_EV_EMBCON,
+    MBTPP_EV_EMBPUB,
 #ifdef WITH_MBTNAV
     MBTPP_EV_TRN_PROCN,
     MBTPP_EV_TRNU_PUBN,
+    MBTPP_EV_TRNU_PUBEMPTYN,
+    MBTPP_EV_ETRNUPUB,
+    MBTPP_EV_ETRNUPUBEMPTY,
 #endif
     MBTPP_EV_COUNT
 } mbtrnpp_stevent_id;
@@ -708,10 +713,10 @@ typedef enum {
 // profiling - event channel labels
 const char *mbtrnpp_stevent_labels[] = {
     "mb_cycles", "mb_con", "mb_dis", "mb_pub_n", "mb_reinit", "mb_gain_lo", "mb_file",
-    "mb_xyoffset", "mb_offset_z", "mb_eof", "e_mbgetall", "e_mbfailure",
-    "e_mb_frame_rd", "e_mb_log_wr", "e_mbsocket", "e_mbcon"
+    "mb_xyoffset", "mb_offset_z", "mb_eof", "mb_nonsurvey", "e_mbgetall", "e_mbfailure",
+    "e_mb_frame_rd", "e_mb_log_wr", "e_mbsocket", "e_mbcon" "e_mbpub"
 #ifdef WITH_MBTNAV
-    ,"trn_proc_n","trnu_pub_n"
+    ,"trn_proc_n","trnu_pub_n","trnu_pubempty_n","e_trnu_pub","e_trnu_pubempty"
 #endif
 };
 
@@ -840,8 +845,8 @@ int mbtrnpp_check_reinit(trn_update_t *pstate, trn_config_t *cfg);
 int mbtrnpp_trn_pub_ostream(trn_update_t *update, FILE *stream);
 int mbtrnpp_trn_pub_odebug(trn_update_t *update);
 int mbtrnpp_trn_pub_olog(trn_update_t *update, mlog_id_t log_id);
-int mbtrnpp_trn_pub_osocket(trn_update_t *update, msock_socket_t *pub_sock);
-int mbtrnpp_trn_pubempty_osocket(double time, double lat, double lon, double depth, msock_socket_t *pub_sock);
+int mbtrnpp_trnu_pub_osocket(trn_update_t *update, msock_socket_t *pub_sock);
+int mbtrnpp_trnu_pubempty_osocket(double time, double lat, double lon, double depth, msock_socket_t *pub_sock);
 char *mbtrnpp_trn_updatestr(char *dest, int len, trn_update_t *update, int indent);
 #endif // WITH_MBTNAV
 
@@ -3032,7 +3037,7 @@ int main(int argc, char **argv) {
     else if (mbtrn_cfg->format == MBF_KEMKMALL) {
         transmit_gain_threshold = TRN_XMIT_GAIN_KMALL_DFL;
     }
-    mlog_tprintf(mbtrnpp_mlog_id, "mbtrnpp: transmit gain threshold[%.2lf]\n", transmit_gain_threshold);
+    mlog_tprintf(mbtrnpp_mlog_id, "i,transmit gain threshold[%.2lf]\n", transmit_gain_threshold);
   }
 
   // kick off the first cycle here
@@ -3147,11 +3152,18 @@ int main(int argc, char **argv) {
           mbtrnpp_postlog(mbtrn_cfg->verbose, logfp, log_message, &error);
         fprintf(stderr, "\n%s\n", log_message);
 
+          mlog_tprintf(mbtrnpp_mlog_id,"e,sonar data connection init failed\n");
+ 		MST_COUNTER_INC(app_stats->stats->events[MBTPP_EV_EMBCON]);
+
         s_mbtrnpp_exit(error);
       }
       else {
 
         sprintf(log_message, "Sonar data socket <%s> initialized for reading", ifile);
+          mlog_tprintf(mbtrnpp_mlog_id,"i,sonar data socket initialized\n");
+          mlog_tprintf(mbtrnpp_mlog_id,"MBIO format id,%d\n", mbtrn_cfg->format);
+        MST_COUNTER_INC(app_stats->stats->events[MBTPP_EV_MB_CONN]);
+
         if (logfp != NULL)
           mbtrnpp_postlog(mbtrn_cfg->verbose, logfp, log_message, &error);
         if (mbtrn_cfg->verbose > 0)
@@ -3192,10 +3204,13 @@ int main(int argc, char **argv) {
           mbtrnpp_postlog(mbtrn_cfg->verbose, logfp, log_message, &error);
         fprintf(stderr, "\n%s\n", log_message);
 
+          mlog_tprintf(mbtrnpp_mlog_id,"e,sonar data file init failed\n");
+
         s_mbtrnpp_exit(error);
       }
       else {
         sprintf(log_message, "Sonar File <%s> of format <%d> initialized for reading", ifile, mbtrn_cfg->format);
+          mlog_tprintf(mbtrnpp_mlog_id,"i,sonar data file initialized\n");
         if (logfp != NULL)
           mbtrnpp_postlog(mbtrn_cfg->verbose, logfp, log_message, &error);
         //if (mbtrn_cfg->verbose > 0)
@@ -3478,6 +3493,7 @@ int main(int argc, char **argv) {
                 mb_error(mbtrn_cfg->verbose, error, &message);
                 fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
                 fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
+				mlog_tprintf(mbtrnpp_mlog_id,"e,MBIO error allocating data arrays [%s]\n");
                 s_mbtrnpp_exit(error);
               }
             }
@@ -3581,7 +3597,7 @@ int main(int argc, char **argv) {
                   if (!reinit_flag) {
                     fprintf(stderr, "--Reinit set due to transmit gain %f < threshold %f\n",
                             transmit_gain, transmit_gain_threshold);
-                    mlog_tprintf(mbtrnpp_mlog_id,"mbtrnpp: set reinit due to transmit gain [%.2lf] lower than threshold [%.2lf]\n",
+                    mlog_tprintf(mbtrnpp_mlog_id,"i,set reinit due to transmit gain [%.2lf] lower than threshold [%.2lf]\n",
                                   transmit_gain, transmit_gain_threshold);
                     MST_COUNTER_INC(app_stats->stats->events[MBTPP_EV_MB_GAIN_LO]);
                     reinit_flag = true;
@@ -3597,7 +3613,7 @@ int main(int argc, char **argv) {
                     fprintf(stderr, "--reinit time_d:%.6f centered on offset: %f %f %f\n",
                                   ping[i_ping_process].time_d, use_offset_e, use_offset_n, use_offset_z);
                     wtnav_reinit_filter_offset(trn_instance, true, use_offset_n, use_offset_e, use_offset_z);
-                    mlog_tprintf(mbtrnpp_mlog_id, "mbtrnpp: trn filter reinit time_d:%.6f centered on offset: %f %f %f\n",
+                    mlog_tprintf(mbtrnpp_mlog_id, "i,trn filter reinit time_d:%.6f centered on offset: %f %f %f\n",
                                   ping[i_ping_process].time_d, use_offset_e, use_offset_n, use_offset_z);
                     MST_COUNTER_INC(app_stats->stats->events[MBTPP_EV_MB_REINIT]);
                     reinit_flag = false;
@@ -3620,7 +3636,7 @@ int main(int argc, char **argv) {
                                     "| %11.6f %11.6f %8.3f | Ping not processed - low gain condition\n",
                     time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6], ping[i_ping_process].time_d,
                     ping[i_ping_process].navlon, ping[i_ping_process].navlat, ping[i_ping_process].sonardepth);
-                    mbtrnpp_trn_pubempty_osocket(ping[i_ping_process].time_d, ping[i_ping_process].navlat,
+                    mbtrnpp_trnu_pubempty_osocket(ping[i_ping_process].time_d, ping[i_ping_process].navlat,
                       ping[i_ping_process].navlon, ping[i_ping_process].sonardepth,  trnusvr->socket);
                 }
 
@@ -3694,6 +3710,7 @@ int main(int argc, char **argv) {
           }
         } else {
           n_non_survey_data++;
+          MST_COUNTER_INC(app_stats->stats->events[MBTPP_EV_MB_NONSURVEY]);
           if (n_non_survey_data > 0 && n_non_survey_data % 100 == 0) {
             int time_i[7];
             mb_get_date(0, ping[idataread].time_d, time_i);
@@ -3701,7 +3718,7 @@ int main(int argc, char **argv) {
                             "| Read 100 non-survey data records...\n",
             time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6], ping[idataread].time_d);
             double dzero = 0.0;
-            mbtrnpp_trn_pubempty_osocket(ping[idataread].time_d, dzero, dzero, dzero, trnusvr->socket);
+            mbtrnpp_trnu_pubempty_osocket(ping[idataread].time_d, dzero, dzero, dzero, trnusvr->socket);
           }
         }
         MST_METRIC_LAP(app_stats->stats->metrics[MBTPP_CH_MB_GETFAIL_XT], mtime_dtime());
@@ -3713,6 +3730,7 @@ int main(int argc, char **argv) {
     /* close the files */
     if (mbtrn_cfg->input_mode == INPUT_MODE_SOCKET) {
       fprintf(stderr, "socket input mode - continue (probably shouldn't be here)\n");
+        mlog_tprintf(mbtrnpp_mlog_id,"e,invalid code path - socket input mode\n");
       read_data = true;
 
       // empty the ring buffer
@@ -3725,6 +3743,8 @@ int main(int argc, char **argv) {
       ndata = 0;
 
       sprintf(log_message, "Multibeam File <%s> of format <%d> closed", ifile, mbtrn_cfg->format);
+      mlog_tprintf(mbtrnpp_mlog_id,"i,closing file/format [%s/%d]\n", ifile, mbtrn_cfg->format);
+
       if (logfp != NULL) {
         mbtrnpp_postlog(mbtrn_cfg->verbose, logfp, log_message, &error);
         fflush(logfp);
@@ -3734,7 +3754,7 @@ int main(int argc, char **argv) {
       // force a reinit when data from the next file is opened
       if (mbtrn_cfg->reinit_file_enable && !reinit_flag) {
         fprintf(stderr, "--Reinit set due to closing input swath file\n");
-        mlog_tprintf(mbtrnpp_mlog_id,"mbtrnpp: set reinit due to closing input swath file [%s]\n", ifile);
+        mlog_tprintf(mbtrnpp_mlog_id,"i,mbtrnpp: set reinit due to closing input swath file [%s]\n", ifile);
         MST_COUNTER_INC(app_stats->stats->events[MBTPP_EV_MB_EOF]);
         reinit_flag = true;
       }
@@ -3763,6 +3783,7 @@ int main(int argc, char **argv) {
   }
 
   fprintf(stderr, "\nDone reading data\n");
+  mlog_tprintf(mbtrnpp_mlog_id,"i,closing data list - OK\n");
   if (read_datalist == true) {
     mb_datalist_close(mbtrn_cfg->verbose, &datalist, &error);
     fprintf(stderr, "Closed input datalist\n");
@@ -4560,7 +4581,7 @@ int mbtrnpp_trn_pub_blog(trn_update_t *update,
 
 /*--------------------------------------------------------------------*/
 
-int mbtrnpp_trn_pub_osocket(trn_update_t *update,
+int mbtrnpp_trnu_pub_osocket(trn_update_t *update,
                              msock_socket_t *pub_sock)
 {
     int retval=-1;
@@ -4617,13 +4638,16 @@ int mbtrnpp_trn_pub_osocket(trn_update_t *update,
 
             if( (iobytes=netif_pub(trnusvr,(char *)&pub_data, sizeof(pub_data)))>0){
                 retval=iobytes;
+                MST_COUNTER_INC(app_stats->stats->events[MBTPP_EV_TRNU_PUBN]);
+            }else{
+                MST_COUNTER_INC(app_stats->stats->events[MBTPP_EV_ETRNUPUB]);
             }
         }
     }
     return retval;
 }
 
-int mbtrnpp_trn_pubempty_osocket(double time, double lat, double lon, double depth, msock_socket_t *pub_sock)
+int mbtrnpp_trnu_pubempty_osocket(double time, double lat, double lon, double depth, msock_socket_t *pub_sock)
 {
     int retval=-1;
 
@@ -4676,13 +4700,16 @@ int mbtrnpp_trn_pubempty_osocket(double time, double lat, double lon, double dep
 
             if( (iobytes=netif_pub(trnusvr,(char *)&pub_data, sizeof(pub_data)))>0){
                 retval=iobytes;
+                MST_COUNTER_INC(app_stats->stats->events[MBTPP_EV_TRNU_PUBEMPTYN]);
+            }else{
+                MST_COUNTER_INC(app_stats->stats->events[MBTPP_EV_ETRNUPUBEMPTY]);
             }
         }
     }
     return retval;
 }
 
-int mbtrnpp_trn_pub_osocket_org(trn_update_t *update,
+int mbtrnpp_trnu_pub_osocket_org(trn_update_t *update,
                              msock_socket_t *pub_sock)
 {
     int retval=-1;
@@ -4720,6 +4747,7 @@ int mbtrnpp_trn_pub_osocket_org(trn_update_t *update,
 
             if( (iobytes=netif_pub(trnusvr,(char *)&pub_data, sizeof(pub_data)))>0){
                 retval=iobytes;
+                MST_COUNTER_INC(app_stats->stats->events[MBTPP_EV_TRNU_PUBN]);
             }
         }
     }
@@ -4937,7 +4965,7 @@ int mbtrnpp_check_reinit(trn_update_t *pstate, trn_config_t *cfg)
             if (!reinit_flag) {
               fprintf(stderr, "--Reinit set due to xy offset magntitude %f > threshold %f\n",
                       xyoffsetmag, mbtrn_cfg->reinit_xyoffset_max);
-              mlog_tprintf(mbtrnpp_mlog_id,"mbtrnpp: set reinit due to xyoffset magnitude [%.3lf] > threshold [%.3lf]\n",
+              mlog_tprintf(mbtrnpp_mlog_id,"i,reinit due to xyoffset magnitude [%.3lf] > threshold [%.3lf]\n",
                           xyoffsetmag, mbtrn_cfg->reinit_xyoffset_max);
               MST_COUNTER_INC(app_stats->stats->events[MBTPP_EV_MB_xyoffset]);
               reinit_flag = true;
@@ -4950,7 +4978,7 @@ int mbtrnpp_check_reinit(trn_update_t *pstate, trn_config_t *cfg)
             if (!reinit_flag) {
               fprintf(stderr, "--Reinit set due to z offset %f outside allowed range %f %f\n",
                       offset_z, mbtrn_cfg->reinit_zoffset_min, mbtrn_cfg->reinit_zoffset_max);
-              mlog_tprintf(mbtrnpp_mlog_id,"mbtrnpp: set reinit due to offset_z [%.3lf] outside of allowed range: [%.3lf] to [%.3lf]\n",
+              mlog_tprintf(mbtrnpp_mlog_id,"i,reinit due to offset_z [%.3lf] outside of allowed range: [%.3lf] to [%.3lf]\n",
                             offset_z, mbtrn_cfg->reinit_zoffset_min, mbtrn_cfg->reinit_zoffset_max);
               MST_COUNTER_INC(app_stats->stats->events[MBTPP_EV_MB_offset_z]);
               reinit_flag = true;
@@ -4975,10 +5003,9 @@ int mbtrnpp_trn_publish(trn_update_t *pstate, trn_config_t *cfg)
 
             MST_METRIC_START(app_stats->stats->metrics[MBTPP_CH_TRN_TRNU_PUB_XT], mtime_dtime());
 
-            mbtrnpp_trn_pub_osocket(pstate, trnusvr->socket);
+            mbtrnpp_trnu_pub_osocket(pstate, trnusvr->socket);
 
             MST_METRIC_LAP(app_stats->stats->metrics[MBTPP_CH_TRN_TRNU_PUB_XT], mtime_dtime());
-            MST_COUNTER_INC(app_stats->stats->events[MBTPP_EV_TRNU_PUBN]);
         }
 // fprintf(stderr, "%s:%d:%s: pt_dat: %f  %f %f %f  %f %f %f %f  mle_dat: %f  %f %f %f  %f %f %f %f  mse_dat: %f  %f %f %f  %f %f %f %f"
 // " %d %f %d %d %d %d %d %d %f %f\n",
@@ -5216,7 +5243,7 @@ int mbtrnpp_trn_process_mb1(wtnav_t *tnav, mb1_t *mb1, trn_config_t *cfg)
                                             "| %11.6f %11.6f %8.3f | %d filtered beams - Ping not used - failed bias estimate\n",
                             time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6], mb1->sounding.ts,
                             mb1->sounding.lon, mb1->sounding.lat, mb1->sounding.depth, mb1->sounding.nbeams);
-                            mbtrnpp_trn_pubempty_osocket(mb1->sounding.ts, mb1->sounding.lat, mb1->sounding.lon, mb1->sounding.depth, trnusvr->socket);
+                            mbtrnpp_trnu_pubempty_osocket(mb1->sounding.ts, mb1->sounding.lat, mb1->sounding.lon, mb1->sounding.depth, trnusvr->socket);
                         }
                     }else{
                         mlog_tprintf(trnu_alog_id,"ERR: trncli_send_update failed [%d] [%d/%s]\n",test,errno,strerror(errno));
@@ -5228,7 +5255,7 @@ int mbtrnpp_trn_process_mb1(wtnav_t *tnav, mb1_t *mb1, trn_config_t *cfg)
                                         "| %11.6f %11.6f %8.3f | %d filtered beams - Ping not used - failed trn processing\n",
                         time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6], mb1->sounding.ts,
                         mb1->sounding.lon, mb1->sounding.lat, mb1->sounding.depth, mb1->sounding.nbeams);
-                        mbtrnpp_trn_pubempty_osocket(mb1->sounding.ts, mb1->sounding.lat, mb1->sounding.lon, mb1->sounding.depth, trnusvr->socket);
+                        mbtrnpp_trnu_pubempty_osocket(mb1->sounding.ts, mb1->sounding.lat, mb1->sounding.lon, mb1->sounding.depth, trnusvr->socket);
                     }
                     wmeast_destroy(mt);
                     wposet_destroy(pt);
@@ -5275,9 +5302,11 @@ int mbtrnpp_process_mb1(char *src, size_t len, trn_config_t *cfg)
             // server: service (mb1 server) client requests
             netif_reqres(mb1svr);
            // publish mb1 sounding to all clients
-            netif_pub(mb1svr,(char *)src, len);
-            MST_COUNTER_INC(app_stats->stats->events[MBTPP_EV_MB_PUBN]);
-
+            if(netif_pub(mb1svr,(char *)src, len)==0){
+	            MST_COUNTER_INC(app_stats->stats->events[MBTPP_EV_MB_PUBN]);
+            }else{
+                MST_COUNTER_INC(app_stats->stats->events[MBTPP_EV_EMBPUB]);
+            }
         }
         MST_COUNTER_INC(app_stats->stats->events[MBTPP_EV_MB_CYCLES]);
 
@@ -5621,7 +5650,11 @@ int mbtrnpp_kemkmall_input_open(int verbose, void *mbio_ptr, char *definition, i
   if (sd < 0)
   {
       perror("Opening datagram socket error");
-      exit(1);
+
+      mlog_tprintf(mbtrnpp_mlog_id,"e,datagram socket [%d/%s]\n",errno,strerror(errno));
+      status=MB_FAILURE;
+      *error=MB_ERROR_OPEN_FAIL;
+      return status;
   }
 
   /* Enable SO_REUSEADDR to allow multiple instances of this */
@@ -5631,7 +5664,10 @@ int mbtrnpp_kemkmall_input_open(int verbose, void *mbio_ptr, char *definition, i
     {
       perror("Setting SO_REUSEADDR error");
       close(sd);
-      exit(1);
+      mlog_tprintf(mbtrnpp_mlog_id,"e,setsockopt SO_REUSEADDR [%d/%s]\n",errno,strerror(errno));
+      status=MB_FAILURE;
+      *error=MB_ERROR_OPEN_FAIL;
+      return status;
     }
 
   /* Bind to the proper port number with the IP address */
@@ -5643,7 +5679,10 @@ int mbtrnpp_kemkmall_input_open(int verbose, void *mbio_ptr, char *definition, i
   if (bind(sd, (struct sockaddr*)&localSock, sizeof(localSock))) {
       perror("Binding datagram socket error");
       close(sd);
-      exit(1);
+      mlog_tprintf(mbtrnpp_mlog_id,"e,bind [%d/%s]\n",errno,strerror(errno));
+      status=MB_FAILURE;
+      *error=MB_ERROR_OPEN_FAIL;
+      return status;
   }
 
   /* Join the multicast group on the specified */
@@ -5657,7 +5696,10 @@ int mbtrnpp_kemkmall_input_open(int verbose, void *mbio_ptr, char *definition, i
     (char *)&group, sizeof(group)) < 0) {
     perror("Adding multicast group error");
     close(sd);
-    exit(1);
+    mlog_tprintf(mbtrnpp_mlog_id,"e,setsockopt IP_ADD_MEMBERSHIP [%d/%s]\n",errno,strerror(errno));
+    status=MB_FAILURE;
+	*error=MB_ERROR_OPEN_FAIL;
+	return status;
   }
 
   // save the socket within the mb_io structure
@@ -5677,6 +5719,8 @@ int mbtrnpp_kemkmall_input_open(int verbose, void *mbio_ptr, char *definition, i
     fprintf(stderr, "dbg2  Return status:\n");
     fprintf(stderr, "dbg2       status:             %d\n", status);
   }
+
+    MST_COUNTER_INC(app_stats->stats->events[MBTPP_EV_MB_CONN]);
 
   /* return */
   return (status);
