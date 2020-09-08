@@ -327,10 +327,16 @@ plot_mbtrnpp(){
     export QU_MBTRNPP_E_MBCON_CSV="e_mbtrnpp_mbcon.csv"
     export QU_MBTRNPP_E_MBDIS_FILTER="e,mb_dis"
     export QU_MBTRNPP_E_MBDIS_CSV="e_mbtrnpp_mbdis.csv"
-    export QU_MBTRNPP_E_MBXYOFFSET="e,mb_xyoffset"
+    export QU_MBTRNPP_E_MBXYOFFSET_FILTER="e,mb_xyoffset"
     export QU_MBTRNPP_E_MBXYOFFSET_CSV="e_mbtrnpp_mbxyoffset.csv"
-    export QU_MBTRNPP_E_MBZOFFSET="e,mb_offset_z"
+    export QU_MBTRNPP_E_MBZOFFSET_FILTER="e,mb_offset_z"
     export QU_MBTRNPP_E_MBZOFFSET_CSV="e_mbtrnpp_mbzoffset.csv"
+	export QU_MBTRNPP_E_MBNONSURVEY_FILTER="e,mb_nonsurvey"
+	export QU_MBTRNPP_E_MBNONSURVEY_CSV="e_mbtrnpp_mbnonsurvey.csv"
+    export QU_MBTRNPP_E_TRNUPUB_FILTER="e,trnu_pub_n"
+    export QU_MBTRNPP_E_TRNUPUB_CSV="e_mbtrnpp_trnupub.csv"
+    export QU_MBTRNPP_E_TRNUPUBEMPTY_FILTER="e,trnu_pubempty_n"
+    export QU_MBTRNPP_E_TRNUPUBEMPTY_CSV="e_mbtrnpp_trnupubempty.csv"
     # errors
     export QU_MBTRNPP_E_EMBGETALL_FILTER="e,e_mbgetall"
     export QU_MBTRNPP_E_EMBGETALL_CSV="e_mbtrnpp_embgetall.csv"
@@ -344,6 +350,10 @@ plot_mbtrnpp(){
     export QU_MBTRNPP_E_EMBFRAMERD_CSV="e_mbtrnpp_embframerd.csv"
     export QU_MBTRNPP_E_EMBLOGWR_FILTER="e,e_mb_log_wr"
     export QU_MBTRNPP_E_EMBLOGWR_CSV="e_mbtrnpp_emlogwr.csv"
+    export QU_MBTRNPP_E_ETRNUPUB_FILTER="e,e_trnu_pub,"
+    export QU_MBTRNPP_E_ETRNUPUB_CSV="e_mbtrnpp_etrnupub.csv"
+    export QU_MBTRNPP_E_ETRNUPUBEMPTY_FILTER="e,e_trnu_pubempty"
+    export QU_MBTRNPP_E_ETRNUPUBEMPTY_CSV="e_mbtrnpp_etrnupubempty.csv"
 
     if [ -f "${MBTRNPP_LOG}" ] && [ -f "${QP_PLOT_HOME}/${MBTRNPP_QPCONF}" ]
     then
@@ -363,14 +373,20 @@ plot_mbtrnpp(){
         grep ${QU_MBTRNPP_E_GAINLO_FILTER} ${MBTRNPP_LOG} > ${QP_PLOT_DATA_DIR}/${QU_MBTRNPP_E_GAINLO_CSV}
         grep ${QU_MBTRNPP_E_MBCON_FILTER} ${MBTRNPP_LOG} > ${QP_PLOT_DATA_DIR}/${QU_MBTRNPP_E_MBCON_CSV}
         grep ${QU_MBTRNPP_E_MBDIS_FILTER} ${MBTRNPP_LOG} > ${QP_PLOT_DATA_DIR}/${QU_MBTRNPP_E_MBDIS_CSV}
+        grep ${QU_MBTRNPP_E_MBNONSURVEY_FILTER} ${MBTRNPP_LOG} > ${QP_PLOT_DATA_DIR}/${QU_MBTRNPP_E_MBNONSURVEY_CSV}
+        grep ${QU_MBTRNPP_E_TRNUPUB_FILTER} ${MBTRNPP_LOG} > ${QP_PLOT_DATA_DIR}/${QU_MBTRNPP_E_TRNUPUB_CSV}
+        grep ${QU_MBTRNPP_E_TRNUPUBEMPTY_FILTER} ${MBTRNPP_LOG} > ${QP_PLOT_DATA_DIR}/${QU_MBTRNPP_E_TRNUPUBEMPTY_CSV}
+
         grep ${QU_MBTRNPP_E_EMBGETALL_FILTER} ${MBTRNPP_LOG} > ${QP_PLOT_DATA_DIR}/${QU_MBTRNPP_E_EMBGETALL_CSV}
         grep ${QU_MBTRNPP_E_EMBFAIL_FILTER} ${MBTRNPP_LOG} > ${QP_PLOT_DATA_DIR}/${QU_MBTRNPP_E_EMBFAIL_CSV}
         grep ${QU_MBTRNPP_E_EMBSOCK_FILTER} ${MBTRNPP_LOG} > ${QP_PLOT_DATA_DIR}/${QU_MBTRNPP_E_EMBSOCK_CSV}
         grep ${QU_MBTRNPP_E_EMBCON_FILTER} ${MBTRNPP_LOG} > ${QP_PLOT_DATA_DIR}/${QU_MBTRNPP_E_EMBCON_CSV}
         grep ${QU_MBTRNPP_E_EMBFRAMERD_FILTER} ${MBTRNPP_LOG} > ${QP_PLOT_DATA_DIR}/${QU_MBTRNPP_E_EMBFRAMERD_CSV}
         grep ${QU_MBTRNPP_E_EMBLOGWR_FILTER} ${MBTRNPP_LOG} > ${QP_PLOT_DATA_DIR}/${QU_MBTRNPP_E_EMBLOGWR_CSV}
-        grep ${QU_MBTRNPP_E_MBXYOFFSET} ${MBTRNPP_LOG} > ${QP_PLOT_DATA_DIR}/${QU_MBTRNPP_E_MBXYOFFSET_CSV}
-        grep ${QU_MBTRNPP_E_MBZOFFSET} ${MBTRNPP_LOG} > ${QP_PLOT_DATA_DIR}/${QU_MBTRNPP_E_MBZOFFSET_CSV}
+        grep ${QU_MBTRNPP_E_MBXYOFFSET_FILTER} ${MBTRNPP_LOG} > ${QP_PLOT_DATA_DIR}/${QU_MBTRNPP_E_MBXYOFFSET_CSV}
+		grep ${QU_MBTRNPP_E_MBZOFFSET_FILTER} ${MBTRNPP_LOG} > ${QP_PLOT_DATA_DIR}/${QU_MBTRNPP_E_MBZOFFSET_CSV}
+        grep ${QU_MBTRNPP_E_ETRNUPUB_FILTER} ${MBTRNPP_LOG} > ${QP_PLOT_DATA_DIR}/${QU_MBTRNPP_E_ETRNUPUB_CSV}
+        grep ${QU_MBTRNPP_E_ETRNUPUBEMPTY_FILTER} ${MBTRNPP_LOG} > ${QP_PLOT_DATA_DIR}/${QU_MBTRNPP_E_ETRNUPUBEMPTY_CSV}
 
         # use qplot to generate plot set
 		${QPLOT_CMD} -f ${QP_PLOT_HOME}/${MBTRNPP_QPCONF}
