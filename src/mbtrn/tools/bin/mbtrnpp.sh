@@ -435,22 +435,28 @@ OPT_CONFIG=$a
 vout "ovr OPT_CONFIG: $OPT_CONFIG"
 fi
 
-    if [ ${a:2:7} == "verbose" ]
-    then
-    OPT_VERBOSE=$a
-    vout "ovr OPT_VERBOSE: $OPT_VERBOSE"
-    fi
+if [ ${a:2:7} == "verbose" ]
+then
+OPT_VERBOSE=$a
+vout "ovr OPT_VERBOSE: $OPT_VERBOSE"
+fi
 
-    if [ ${a:2:5} == "input" ]
-    then
-    OPT_INPUT=$a
-    vout "ovr OPT_INPUT: $OPT_INPUT"
-    fi
+if [ ${a:2:5} == "input" ]
+then
+OPT_INPUT=$a
+vout "ovr OPT_INPUT: $OPT_INPUT"
+fi
 
 if [ ${a:2:6} == "output" ]
 then
 OPT_OUTPUT=$a
 vout "ovr OPT_OUTPUT: $OPT_OUTPUT"
+fi
+
+if [ ${a:2:10} == "tide-model" ]
+then
+OPT_TIDE=$a
+vout "ovr OPT_TIDE: $OPT_TIDE"
 fi
 
 if [ ${a:2:11} == "swath-width" ]
@@ -701,7 +707,7 @@ done
 #$OPT_TRN_MID $OPT_MBHBN $OPT_TRN_NOMBGAIN
 
 # set cmdline options
-APP_OPTS="$OPT_CONFIG $OPT_LOGDIR  $OPT_VERBOSE $OPT_INPUT $OPT_OUTPUT $OPT_SWATH $OPT_SOUNDINGS $OPT_FORMAT $OPT_MFILTER \
+APP_OPTS="$OPT_CONFIG $OPT_LOGDIR  $OPT_VERBOSE $OPT_INPUT $OPT_OUTPUT $OPT_TIDE $OPT_SWATH $OPT_SOUNDINGS $OPT_FORMAT $OPT_MFILTER \
 $OPT_TRN_SEL $OPT_TRN_UTM $OPT_TRN_MAP $OPT_TRN_PAR $OPT_TRN_CFG $OPT_TRN_MID $OPT_TRN_DECN $OPT_TRN_DECS \
 $OPT_TRN_MTYPE $OPT_TRN_FTYPE $OPT_TRN_FGRADE $OPT_TRN_MWEIGHT $OPT_TRN_NCOV $OPT_TRN_NERR $OPT_TRN_ECOV $OPT_TRN_EERR \
 $OPT_TRN_REINIT $OPT_REINIT_GAIN $OPT_REINIT_FILE $OPT_REINIT_XYOFFSET $OPT_REINIT_ZOFFSET \

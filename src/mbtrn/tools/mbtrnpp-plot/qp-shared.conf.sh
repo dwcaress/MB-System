@@ -26,7 +26,7 @@ QU_IMG_TYPE="png"
 
 # plot styles
 export QU_POINT_COLOR=9 #7(orng,blk,gray)
-export QU_POINT_SIZE=0.3
+export QU_POINT_SIZE=0.1
 export QU_POINT_TYPE=5
 export QU_OTERM="pngcairo"
 
@@ -34,7 +34,7 @@ export QU_OTERM="pngcairo"
 # index using QU_OTERM
 declare -A QU_TERM_OSIZE
 QU_TERM_OSIZE["aqua"]="2048,1536"
-QU_TERM_OSIZE["pngcairo"]="800,600" #"2048,1536"
+QU_TERM_OSIZE["pngcairo"]="1600,1200" #800,600" #"2048,1536"
 QU_TERM_OSIZE["pdfcairo"]="17,11"
 QU_TERM_OSIZE["x11"]="1024,768"
 QU_TERM_OSIZE["png"]="800,600"
@@ -66,6 +66,7 @@ set linetype cycle 8
 # colors
 export QU_BLUE="\'#0072bd\'"   # blue
 export QU_ORANGE="\'#d95319\'" # orange
+export QU_LTORANGE="\'#c97339\'" # light-orange
 export QU_YELLOW="\'#edb120\'" # yellow
 export QU_PURPLE="\'#7e2f8e\'" # purple
 export QU_GREEN="\'#77ac30\'"  # green
