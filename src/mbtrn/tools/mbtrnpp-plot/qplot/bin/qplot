@@ -1,5 +1,4 @@
 #!/usr/local/bin/bash
-##!/bin/bash
 
 #########################################
 # Name: qplot
@@ -54,13 +53,7 @@ declare -A QP_GS_DEV=( [png]="png16m" [pdf]="pdfwrite" )
 unset QP_CONF
 
 QP_GHOSTSCRIPT_CMD=`which gs`
-if [ $(uname) == "Darwin" ]
-then
-QP_GNUPLOT_CMD="gnuplot"
-else
-QP_GNUPLOT_CMD="gnuplot"
-fi
-
+QP_GNUPLOT_CMD=`which gnuplot`
 QP_CONVERT_CMD=`which convert`
 QP_MAKEPDF_CMD="$QP_GHOSTSCRIPT_CMD -q -dNOPAUSE -dNOPROMPT -dBATCH"
 QP_COMBINE_CMD="$QP_GHOSTSCRIPT_CMD -q -dNOPAUSE -dNOPROMPT -dBATCH"
