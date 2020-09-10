@@ -1133,13 +1133,18 @@ int mbnavadjust_import_file(char *path, int iformat, bool firstfile) {
         error = MB_ERROR_NO_ERROR;
       }
 
+      /* do not ignore null navigation */
+      if (kind == MB_DATA_DATA && navlon == 0.0 && navlat == 0.0) {
+        error = MB_ERROR_IGNORE;
+      }
+
             /* deal with survey data */
       if (kind == MB_DATA_DATA) {
         /* int status_sensorhead = */
         mb_sensorhead(mbna_verbose, imbio_ptr, istore_ptr, &sensorhead, &error_sensorhead);
         if (sonartype == MB_TOPOGRAPHY_TYPE_UNKNOWN) {
           status = mb_sonartype(mbna_verbose, imbio_ptr, istore_ptr, &sonartype, &error);
-                }
+        }
 
                 /* if sonar is interferometric, bin the bathymetry */
         if (sonartype == MB_TOPOGRAPHY_TYPE_INTERFEROMETRIC) {
@@ -1161,7 +1166,7 @@ int mbnavadjust_import_file(char *path, int iformat, bool firstfile) {
             }
           }
 
-          /* figure out if this is a ping to one side or across the while swath */
+          /* figure out if this is a ping to one side or across the whole swath */
           xtrackavg = 0.0;
           xtrackmax = 0.0;
           nxtrack = 0;

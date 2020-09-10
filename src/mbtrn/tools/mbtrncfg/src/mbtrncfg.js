@@ -257,6 +257,7 @@ help_topics["reinit-xyoffset"]="Reinitialize TRN whenever the magnitude of the l
 help_topics["reinit-zoffset"]="Reinitialize TRN whenever the converged z-offset is outside specified range";
 help_topics["covariance-magnitude-max"]="Convergence criteria: max covariance magnitude";
 help_topics["convergence-repeat-min"]="Convergence criteria: min convergence repeat";
+help_topics["tide-model"]="OTPS tide model file";
 
 // show help string
 function showhelp(key){
@@ -367,6 +368,7 @@ function load_ctx(){
     x.elements["set-trnlogfiles"].value="en";
     x.elements["covariance-magnitude-max"].value="5.0";
     x.elements["convergence-repeat-min"].value="200";
+    x.elements["tide-model"].value="";
 
     // clear help text
     showhelp('reset');
@@ -429,6 +431,7 @@ function init_preset(key){
     x.elements["set-trnlogfiles"].value="en";
     x.elements["covariance-magnitude-max"].value="5.0";
     x.elements["convergence-repeat-min"].value="200";
+    x.elements["tide-model"].value="";
 
     // clear help text
     showhelp('reset');
@@ -536,6 +539,8 @@ function update(){
         text += '--covariance-magnitude-max='+x.elements["covariance-magnitude-max"].value+" ";
     if(x.elements["convergence-repeat-min"].value.length>0)
         text += '--convergence-repeat-min='+x.elements["convergence-repeat-min"].value+" ";
+    if(x.elements["tide-model"].value.length>0)
+        text += '--tide-model='+x.elements["tide-model"].value+" ";
 
     // these parameters support substitutions
     text += sub_placeholder(x,"input","TRN_RESON_HOST",TRN_RESON_HOST["current"]);
@@ -968,7 +973,16 @@ function cfg2str(){
         retval+="// TRN convergence minimum repeat limit\n";
     }
     retval+="convergence-repeat-min="+x.elements["convergence-repeat-min"].value+"\n";
-    
+
+    retval+="\n";
+    if(verbose){
+        retval+="// opt tide-model [path]\n";
+        retval+="// OTPS tide model file\n";
+    }
+    if(x.elements["tide-model"].value.length>0)
+        retval+="tide-model="+x.elements["tide-model"].value+"\n";
+    else
+        retval+="#tide-model=\n";
     return retval;
 }
 
