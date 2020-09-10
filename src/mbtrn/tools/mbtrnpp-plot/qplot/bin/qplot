@@ -1,4 +1,4 @@
-#!/opt/local/bin/bash
+#!/usr/local/bin/bash
 ##!/bin/bash
 
 #########################################
@@ -56,9 +56,9 @@ unset QP_CONF
 QP_GHOSTSCRIPT_CMD=`which gs`
 if [ $(uname) == "Darwin" ]
 then
-QP_GNUPLOT_CMD="/opt/local/bin/gnuplot"
+QP_GNUPLOT_CMD="gnuplot"
 else
-QP_GNUPLOT_CMD="/usr/bin/gnuplot"
+QP_GNUPLOT_CMD="gnuplot"
 fi
 
 QP_CONVERT_CMD=`which convert`
@@ -183,7 +183,7 @@ QP_DEBUG="N"
 printUsage(){
     echo
     echo "`basename $0`: Generate plots from one or more delimited text files"
-    echo 
+    echo
     echo "usage: `basename $0` [options] file... "
     echo ""
 	echo "Options:"
