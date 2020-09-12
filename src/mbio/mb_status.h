@@ -266,7 +266,7 @@ static char *unknown_error_msg[] = {"Unknown error identifier"};
 
 /* MBIO function notice messages */
 static char *notice_msg[] = {
-    "Unknown notice identifier junk",
+    "Unknown notice identifier",
 
     /* notices for data record types */
     "MB_DATA_DATA (ID=1): survey data", "MB_DATA_COMMENT (ID=2): comment", "MB_DATA_HEADER (ID=3): general header",
@@ -348,7 +348,7 @@ static char *notice_msg[] = {
     "DATA PROBLEM (ID=3): Instantaneous speed exceeds 25 km/hr", "DATA PROBLEM (ID=4): Average speed exceeds 25 km/hr",
     "DATA PROBLEM (ID=5): Sounding depth exceeds 11000 m", "DATA PROBLEM (ID=6): Unsupported datagram or record",
 };
-static char *unknown_notice_msg[] = {"Unknown notice identifier detritus"};
+static char *unknown_notice_msg[] = {"Unknown notice identifier"};
 #endif
 
 /* MBIO sidescan types

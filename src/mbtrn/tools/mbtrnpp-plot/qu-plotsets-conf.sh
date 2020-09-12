@@ -1,4 +1,4 @@
-#!/opt/local/bin/bash
+#!/usr/local/bin/bash
 ##/bin/bash
 
 # qu-plotsets-conf
@@ -184,4 +184,3 @@ QU_LOG_PATHS["$QU_KEY"]="/mnt/vmhost/logs/20200206m2r1"
 QU_LOG_PATHS["$QU_KEY"]="/Volumes/linux-share/logs/20200206m2r1"
 QU_SESSION_IDS["$QU_KEY"]="20200212-1807160000"
 QU_DATA_SET_IDS["$QU_KEY"]="cruise 06feb19 m2 replay (new/fixed logs) (${QU_SESSION_IDS[$QU_KEY]})"
-

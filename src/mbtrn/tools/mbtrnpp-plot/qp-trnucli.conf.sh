@@ -1,4 +1,4 @@
-#!/opt/local/bin/bash
+#!/usr/local/bin/bash
 #/bin/bash
 
 # Configuration for trnu log data plots

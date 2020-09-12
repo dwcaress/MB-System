@@ -2407,6 +2407,7 @@ int mbnavedit_action_interpolate() {
 	}
 
 	int status = MB_SUCCESS;
+  double dtime;
 
 	/* don't try to do anything if no data */
 	if (nplot > 0) {
@@ -2481,16 +2482,24 @@ int mbnavedit_action_interpolate() {
 						iafter = i;
 				}
 				if (ibefore < iping && iafter > iping) {
-					ping[iping].lon = ping[ibefore].lon + (ping[iafter].lon - ping[ibefore].lon) *
+          dtime = ping[iafter].time_d - ping[ibefore].time_d;
+          if (dtime > 0.0)
+					  ping[iping].lon = ping[ibefore].lon + (ping[iafter].lon - ping[ibefore].lon) *
 					                                          (ping[iping].time_d - ping[ibefore].time_d) /
 					                                          (ping[iafter].time_d - ping[ibefore].time_d);
+          else
+					  ping[iping].lon = ping[ibefore].lon + 0.5 * (ping[iafter].lon - ping[ibefore].lon);
 					ping[iping].lonlat_flag = true;
 					timelonlat_change = true;
 				}
 				else if (ibefore < iping && ibefore > 0) {
-					ping[iping].lon = ping[ibefore].lon + (ping[ibefore].lon - ping[ibefore - 1].lon) *
+          dtime = ping[iafter].time_d - ping[ibefore - 1].time_d;
+					if (dtime > 0.0)
+					  ping[iping].lon = ping[ibefore].lon + (ping[ibefore].lon - ping[ibefore - 1].lon) *
 					                                          (ping[iping].time_d - ping[ibefore].time_d) /
 					                                          (ping[ibefore].time_d - ping[ibefore - 1].time_d);
+          else
+            ping[iping].lon = ping[ibefore].lon;
 					ping[iping].lonlat_flag = true;
 					timelonlat_change = true;
 				}
@@ -2500,9 +2509,13 @@ int mbnavedit_action_interpolate() {
 					timelonlat_change = true;
 				}
 				else if (iafter > iping && iafter < nbuff - 1) {
-					ping[iping].lon = ping[iafter].lon + (ping[iafter + 1].lon - ping[iafter].lon) *
+          dtime = ping[iafter + 1].time_d - ping[iafter].time_d;
+					if (dtime > 0.0)
+					  ping[iping].lon = ping[iafter].lon + (ping[iafter + 1].lon - ping[iafter].lon) *
 					                                         (ping[iping].time_d - ping[iafter].time_d) /
 					                                         (ping[iafter + 1].time_d - ping[iafter].time_d);
+          else
+            ping[iping].lon = ping[iafter].lon;
 					ping[iping].lonlat_flag = true;
 					timelonlat_change = true;
 				}
@@ -2528,16 +2541,24 @@ int mbnavedit_action_interpolate() {
 						iafter = i;
 				}
 				if (ibefore < iping && iafter > iping) {
-					ping[iping].lat = ping[ibefore].lat + (ping[iafter].lat - ping[ibefore].lat) *
+					dtime = ping[iafter].time_d - ping[ibefore].time_d;
+          if (dtime > 0.0)
+					  ping[iping].lat = ping[ibefore].lat + (ping[iafter].lat - ping[ibefore].lat) *
 					                                          (ping[iping].time_d - ping[ibefore].time_d) /
 					                                          (ping[iafter].time_d - ping[ibefore].time_d);
+          else
+					  ping[iping].lat = ping[ibefore].lat + 0.5 * (ping[iafter].lat - ping[ibefore].lat);
 					ping[iping].lonlat_flag = true;
 					timelonlat_change = true;
 				}
 				else if (ibefore < iping && ibefore > 0) {
-					ping[iping].lat = ping[ibefore].lat + (ping[ibefore].lat - ping[ibefore - 1].lat) *
+					dtime = ping[iafter].time_d - ping[ibefore - 1].time_d;
+					if (dtime > 0.0)
+					  ping[iping].lat = ping[ibefore].lat + (ping[ibefore].lat - ping[ibefore - 1].lat) *
 					                                          (ping[iping].time_d - ping[ibefore].time_d) /
 					                                          (ping[ibefore].time_d - ping[ibefore - 1].time_d);
+          else
+            ping[iping].lat = ping[ibefore].lat;
 					ping[iping].lonlat_flag = true;
 					timelonlat_change = true;
 				}
@@ -2547,9 +2568,13 @@ int mbnavedit_action_interpolate() {
 					timelonlat_change = true;
 				}
 				else if (iafter > iping && iafter < nbuff - 1) {
-					ping[iping].lat = ping[iafter].lat + (ping[iafter + 1].lat - ping[iafter].lat) *
+					dtime = ping[iafter + 1].time_d - ping[iafter].time_d;
+					if (dtime > 0.0)
+					  ping[iping].lat = ping[iafter].lat + (ping[iafter + 1].lat - ping[iafter].lat) *
 					                                         (ping[iping].time_d - ping[iafter].time_d) /
 					                                         (ping[iafter + 1].time_d - ping[iafter].time_d);
+          else
+            ping[iping].lat = ping[iafter].lat;
 					ping[iping].lonlat_flag = true;
 					timelonlat_change = true;
 				}
@@ -2575,9 +2600,13 @@ int mbnavedit_action_interpolate() {
 						iafter = i;
 				}
 				if (ibefore < iping && iafter > iping) {
-					ping[iping].speed = ping[ibefore].speed + (ping[iafter].speed - ping[ibefore].speed) *
+					dtime = ping[iafter].time_d - ping[ibefore].time_d;
+					if (dtime > 0.0)
+					  ping[iping].speed = ping[ibefore].speed + (ping[iafter].speed - ping[ibefore].speed) *
 					                                              (ping[iping].time_d - ping[ibefore].time_d) /
 					                                              (ping[iafter].time_d - ping[ibefore].time_d);
+          else
+					  ping[iping].speed = ping[ibefore].speed + 0.5 * (ping[iafter].speed - ping[ibefore].speed);
 					speedheading_change = true;
 				}
 				else if (ibefore < iping) {
@@ -2604,9 +2633,13 @@ int mbnavedit_action_interpolate() {
 					if (!ping[i].heading_select && iafter == iping)
 						iafter = i;
 				if (ibefore < iping && iafter > iping) {
-					ping[iping].heading = ping[ibefore].heading + (ping[iafter].heading - ping[ibefore].heading) *
+					dtime = ping[iafter].time_d - ping[ibefore].time_d;
+					if (dtime > 0.0)
+					  ping[iping].heading = ping[ibefore].heading + (ping[iafter].heading - ping[ibefore].heading) *
 					                                                  (ping[iping].time_d - ping[ibefore].time_d) /
 					                                                  (ping[iafter].time_d - ping[ibefore].time_d);
+					else
+					  ping[iping].heading = ping[ibefore].heading + 0.5 * (ping[iafter].heading - ping[ibefore].heading);
 					speedheading_change = true;
 				}
 				else if (ibefore < iping) {
@@ -2633,9 +2666,13 @@ int mbnavedit_action_interpolate() {
 					if (!ping[i].draft_select && iafter == iping)
 						iafter = i;
 				if (ibefore < iping && iafter > iping) {
-					ping[iping].draft = ping[ibefore].draft + (ping[iafter].draft - ping[ibefore].draft) *
+					dtime = ping[iafter].time_d - ping[ibefore].time_d;
+					if (dtime > 0.0)
+					  ping[iping].draft = ping[ibefore].draft + (ping[iafter].draft - ping[ibefore].draft) *
 					                                              (ping[iping].time_d - ping[ibefore].time_d) /
 					                                              (ping[iafter].time_d - ping[ibefore].time_d);
+					else
+					  ping[iping].draft = ping[ibefore].draft + 0.5 * (ping[iafter].draft - ping[ibefore].draft);
 					ping[iping].lonlat_flag = true;
 					timelonlat_change = true;
 				}
