@@ -434,86 +434,6 @@ static int32_t s_read_mb1_rec( mb1_frame_t **pdest, mfile_file_t *src, app_cfg_t
     return retval;
 }
 
-
-//static int32_t s_read_mb1_rec( mb1_frame_t **pdest, mfile_file_t *src)
-//{
-//    int32_t retval=-1;
-//
-//    if(NULL!=src && NULL!=pdest){
-//        byte *bp = NULL;
-//        uint32_t readlen = 1;
-//        uint32_t record_bytes=0;
-//        int64_t read_bytes=0;
-//        mb1_frame_t *dest = *pdest;
-//
-//        // sync to start of record
-//        bp = (byte *)dest->sounding;
-//
-//        while( (read_bytes=mfile_read(src,(byte *)bp,readlen))==readlen){
-//            if(*bp=='M'){
-//                // found sync start
-//                //                fprintf(stderr,"%s:%d\n",__FUNCTION__,__LINE__);
-//                record_bytes+=read_bytes;
-//                bp++;
-//                readlen=MB1_HEADER_BYTES-1;
-//                //                fprintf(stderr,"%d: read_bytes[%lld] bp[%p] err[%d/%s]\n",__LINE__,read_bytes,bp,errno,strerror(errno));
-//                break;
-//            }
-//        }
-//
-////        fprintf(stderr,"%d: read sync err[%d/%s]\n",__LINE__,errno,strerror(errno));
-////        fprintf(stderr,"%d: frame[%p]\n",__LINE__,dest);
-////        fprintf(stderr,"%d: sounding[%p]\n",__LINE__,dest->sounding);
-////        fprintf(stderr,"%d: chksum[%p]\n",__LINE__,dest->checksum);
-//
-//        // if start of sync found, read header (fixed-length sounding bytes)
-//        if(record_bytes>0 && (read_bytes=mfile_read(src,(byte *)bp,readlen))==readlen){
-//
-//            record_bytes+=read_bytes;
-//            bp=NULL;
-//            readlen=0;
-//            if(NULL!=dest && NULL!=dest->sounding && dest->sounding->nbeams>0 && dest->sounding->nbeams<=MB1_MAX_BEAMS){
-//
-//                if(mb1_frame_resize(&dest, dest->sounding->nbeams, MB1_RS_BEAMS)!=NULL){
-//                    bp=(byte *)&dest->sounding->beams[0];
-//                    readlen = dest->sounding->size-(MB1_HEADER_BYTES+MB1_CHECKSUM_BYTES);
-//                    *pdest=dest;
-//                }
-//            }
-//
-//
-////                        fprintf(stderr,"%d: sounding->sz[%u] readlen[%u] err[%d/%s]\n",__LINE__,dest->sounding->size,readlen,errno,strerror(errno));
-//
-//             // if header OK, read sounding data (variable length)
-//            if(readlen>0 && (read_bytes=mfile_read(src,(byte *)bp,readlen))==readlen){
-//                record_bytes+=read_bytes;
-//                bp=(byte *)dest->checksum;
-//                readlen=MB1_CHECKSUM_BYTES;
-////              fprintf(stderr,"%d: read_bytes[%lld] bp[%p] err[%d/%s]\n",__LINE__,read_bytes,bp,errno,strerror(errno));
-//                // read checksum
-//                if( (read_bytes=mfile_read(src,(byte *)bp,readlen))==readlen){
-//                    record_bytes+=read_bytes;
-//                    retval=record_bytes;
-//
-//                    unsigned int checksum = mb1_frame_calc_checksum(dest);
-//                    if(checksum!=*(dest->checksum)){
-//                    fprintf(stderr,"checksum err (calc/read)[%08X/%08X]\n",checksum,*(dest->checksum));
-//                    }
-////                  fprintf(stderr,"%d: read_bytes[%lld] bp[%p] err[%d/%s]\n",__LINE__,read_bytes,bp,errno,strerror(errno));
-//                }else{
-//                    fprintf(stderr,"%d: read failed err[%d/%s]\n",__LINE__,errno,strerror(errno));
-//                }
-//            }else{
-//                fprintf(stderr,"%d: read failed err[%d/%s]\n",__LINE__,errno,strerror(errno));
-//            }
-//        }else{
-//            fprintf(stderr,"%d: read failed err[%d/%s]\n",__LINE__,errno,strerror(errno));
-//        }
-//    }
-//    //    fprintf(stderr,"%d: record_bytes[%lu] retval[%d] err[%d/%s]\n",__LINE__,record_bytes,retval,errno,strerror(errno));
-//    return retval;
-//}
-
 static int32_t s_mb1_to_mb71v5(byte **dest, int32_t size, mb1_frame_t *src, app_cfg_t *cfg)
 {
     int32_t retval=-1;
@@ -607,8 +527,6 @@ static int32_t s_mb1_to_mb71v5(byte **dest, int32_t size, mb1_frame_t *src, app_
             //        pmb71->ss_acrosstrack;
             //        pmb71->ss_alongtrack;            }
         }
-        
-        
     }// else invalid arg
     return retval;
 }
@@ -678,13 +596,10 @@ static int s_app_main(app_cfg_t *cfg)
                         fprintf(stderr,"reached end of file\n");
                         quit=true;
                     }else{
-
                         if(NULL!=cfg && cfg->verbose>=2)
                         fprintf(stderr,"s_read_mb1_rec failed [%d] ecount[%u] fp/fsz[%"PRId64"/%"PRId64"]\n",test[0],err_count,mfile_seek(ifile,0,MFILE_CUR),mfile_fsize(ifile));
                     }
-                    //                    quit=true;
                 }
-                
             }// while
             
         }else{
