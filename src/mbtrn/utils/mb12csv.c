@@ -392,7 +392,7 @@ static int32_t s_read_mb1_rec( mb1_frame_t **pdest, mfile_file_t *src, app_cfg_t
                 break;
             }
         }
-        
+
         if(NULL!=cfg && cfg->verbose>2){
             fprintf(stderr,"%d: read sync err[%d/%s]\n",__LINE__,errno,strerror(errno));
             fprintf(stderr,"%d: frame[%p]\n",__LINE__,dest);
@@ -403,9 +403,16 @@ static int32_t s_read_mb1_rec( mb1_frame_t **pdest, mfile_file_t *src, app_cfg_t
             fprintf(stderr,"%d: sizeof int[%zd]\n",__LINE__,sizeof(int));
             fprintf(stderr,"%d: sizeof mb1_sounding_t[%zd]\n",__LINE__,sizeof(mb1_sounding_t));
             fprintf(stderr,"%d: sizeof mb1_beam_t[%zd]\n",__LINE__,sizeof(mb1_beam_t));
+            fprintf(stderr,"%d: sizeof mb1_frame_t[%zd]\n",__LINE__,sizeof(mb1_frame_t));
         }
+
         // if start of sync found, read header (fixed-length sounding bytes)
         if(record_bytes>0 && (read_bytes=mfile_read(src,(byte *)bp,readlen))==readlen){
+
+            if(NULL!=cfg && cfg->verbose>2){
+                fprintf(stderr,"%d: type[x%08X]\n",__LINE__,dest->sounding->type);
+                fprintf(stderr,"%d: nbeams[%u]\n",__LINE__,dest->sounding->nbeams);
+            }
 
             record_bytes+=read_bytes;
 
@@ -413,25 +420,44 @@ static int32_t s_read_mb1_rec( mb1_frame_t **pdest, mfile_file_t *src, app_cfg_t
             readlen=0;
             retval=record_bytes;
 
-            if(NULL!=dest && NULL!=dest->sounding && dest->sounding->nbeams>0 && dest->sounding->nbeams<=MB1_MAX_BEAMS){
-                if(mb1_frame_resize(&dest, dest->sounding->nbeams, MB1_RS_BEAMS)!=NULL){
-                    bp=(byte *)&dest->sounding->beams[0];
-                    readlen = dest->sounding->size-(MB1_HEADER_BYTES+MB1_CHECKSUM_BYTES);
-                    *pdest=dest;
+            if(NULL!=dest && NULL!=dest->sounding ){
+                if(dest->sounding->type==0x0031424D){
+                    if(dest->sounding->nbeams>0 && dest->sounding->nbeams<=MB1_MAX_BEAMS){
+                        if(mb1_frame_resize(&dest, dest->sounding->nbeams, MB1_RS_BEAMS)!=NULL){
+                            bp=(byte *)&dest->sounding->beams[0];
+                            readlen = dest->sounding->size-(MB1_HEADER_BYTES+MB1_CHECKSUM_BYTES);
+                            *pdest=dest;
+                        }else{fprintf(stderr,"%s:%d - ERR frame_resize\n",__func__,__LINE__);}
+                    }else{
+                        // don't resize, but update checksum pointer
+                        dest->checksum=MB1_PCHECKSUM_U32(dest);
+                    }
+                }else{
+                    if(NULL!=cfg && cfg->verbose>=2)
+                    fprintf(stderr,"%s:%d - ERR invalid type[%u]\n",__func__,__LINE__,dest->sounding->type);
+                    retval=-1;
                 }
+            }else{
+                fprintf(stderr,"%s:%d - ERR dest[%p] sounding[%p]\n",__func__,__LINE__,dest,dest->sounding);
             }
 
             if(NULL!=cfg && cfg->verbose>2){
                 fprintf(stderr,"%d: sounding->sz[%"PRIu32"] read[%"PRId64"/%"PRIu32"] err[%d/%s]\n",__LINE__,dest->sounding->size,read_bytes,readlen,errno,strerror(errno));
-            }
+                fprintf(stderr,"%d: sounding->type[%08X]\n",__LINE__,dest->sounding->type);
+                fprintf(stderr,"%d: sounding->checksum[%p]\n",__LINE__,dest->checksum);
+                 if(readlen>0)
+                fprintf(stderr,"%d: sounding->checksum[%"PRIu32"]\n",__LINE__,*dest->checksum);
+           }
+
 
              // if header OK, read sounding data (variable length)
             read_bytes=0;
             if(readlen>0 && (read_bytes=mfile_read(src,(byte *)bp,readlen))==readlen){
                 record_bytes+=read_bytes;
+
                 bp=(byte *)dest->checksum;
                 readlen=MB1_CHECKSUM_BYTES;
-//              fprintf(stderr,"%d: read_bytes[%lld] bp[%p] err[%d/%s]\n",__LINE__,read_bytes,bp,errno,strerror(errno));
+
                 // read checksum
                 if( (read_bytes=mfile_read(src,(byte *)bp,readlen))==readlen){
                     record_bytes+=read_bytes;
@@ -449,8 +475,12 @@ static int32_t s_read_mb1_rec( mb1_frame_t **pdest, mfile_file_t *src, app_cfg_t
                 fprintf(stderr,"%d: read failed err[%d/%s] readlen[%"PRId32"] read_bytes[%"PRId64"] fp/fsz[%"PRId64"/%"PRId64"]\n",__LINE__,errno,strerror(errno),readlen,read_bytes,mfile_seek(src,0,MFILE_CUR),mfile_fsize(src));
             }
         }else{
-            if(mfile_seek(src,0,MFILE_CUR)!=mfile_fsize(src))
-            fprintf(stderr,"%d: read failed fp/fsz[%"PRId64"/%"PRId64"] err[%d/%s]\n",__LINE__,mfile_seek(src,0,MFILE_CUR),mfile_fsize(src),errno,strerror(errno));
+            if(mfile_seek(src,0,MFILE_CUR)==mfile_fsize(src)){
+                if(NULL!=cfg && cfg->verbose>0)
+                fprintf(stderr,"%d: read failed end of file reached fp/fsz[%"PRId64"/%"PRId64"] err[%d/%s]\n",__LINE__,mfile_seek(src,0,MFILE_CUR),mfile_fsize(src),errno,strerror(errno));
+            }else{
+                fprintf(stderr,"%d: read failed err[%d/%s]\n",__LINE__,errno,strerror(errno));
+            }
         }
         if(NULL!=cfg && cfg->verbose>2){
             fprintf(stderr,"%d: record_bytes[%"PRIu32"] retval[%d] err[%d/%s]\n",__LINE__,record_bytes,retval,errno,strerror(errno));
@@ -612,7 +642,7 @@ static int s_app_main(app_cfg_t *cfg)
                         }
                     }else{
                         err_count++;
-                        if(cfg->verbose>0){
+                        if(NULL!=cfg && cfg->verbose>0){
                             fprintf(stderr,"s_mb1_to_csv failed [%d] ecount[%u]\n",record_size,err_count);
                         }
                     }
@@ -621,10 +651,12 @@ static int s_app_main(app_cfg_t *cfg)
                     if(mfile_seek(ifile,0,MFILE_CUR)==mfile_fsize(ifile)){
                         if(cfg->verbose>0)
                         fprintf(stderr,"reached end of file\n");
+                        quit=true;
                     }else{
+                        if(NULL!=cfg && cfg->verbose>=2)
                     	fprintf(stderr,"s_read_mb1_rec failed [%d] ecount[%u] fp/fsz[%"PRId64"/%"PRId64"]\n",test[0],err_count,mfile_seek(ifile,0,MFILE_CUR),mfile_fsize(ifile));
                     }
-                    quit=true;
+//                    quit=true;
                 }
                 
             }// while
