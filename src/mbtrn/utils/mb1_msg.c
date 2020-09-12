@@ -215,7 +215,9 @@ void mb1_frame_show(mb1_frame_t *self, bool verbose, uint16_t indent)
         fprintf(stderr,"%*s[hdg            %10.3lf]\n",indent,(indent>0?" ":""), self->sounding->hdg);
         fprintf(stderr,"%*s[ping_number    %10d]\n",indent,(indent>0?" ":""), self->sounding->ping_number);
         fprintf(stderr,"%*s[nbeams         %10u]\n",indent,(indent>0?" ":""), self->sounding->nbeams);
+        fprintf(stderr,"%*s[checksum       %2s%p]\n",indent,(indent>0?" ":""), " ",self->checksum);
         fprintf(stderr,"%*s[checksum       %2s%08X]\n",indent,(indent>0?" ":""), " ",*self->checksum);
+
         int nbeams = self->sounding->nbeams;
         fprintf(stderr,"%*s[[ n ] beam     rhox      rhoy       rhoz   ]\n",indent+3,(indent>0?" ":""));
         for(int i=0;i<nbeams;i++){
