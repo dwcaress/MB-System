@@ -444,7 +444,7 @@ static int32_t s_mb1_to_mb71v5(byte **dest, int32_t size, mb1_frame_t *src, app_
         byte *bp = *dest;
         int32_t msize = size;
 
-        if(mb71_size>size){
+        if(mb71_size>size || NULL==bp){
             bp=(byte *)realloc((void *)*dest,mb71_size);
             msize = mb71_size;
         }
@@ -527,6 +527,8 @@ static int32_t s_mb1_to_mb71v5(byte **dest, int32_t size, mb1_frame_t *src, app_
             //        pmb71->ss_acrosstrack;
             //        pmb71->ss_alongtrack;            }
         }
+    }else{
+        fprintf(stderr,"%s:%d Invalid arg\n",__func__,__LINE__);
     }// else invalid arg
     return retval;
 }
@@ -578,11 +580,22 @@ static int s_app_main(app_cfg_t *cfg)
                         // byte swap mb71 frame, per config
                         // (once swapped, don't use data members)
                         if(cfg->bswap){
-                            mb71v5_bswap(NULL, pmb71);
+                            byte *bp=(byte *)malloc(mb71_size);
+                            if(NULL!=bp){
+                                memset(bp,0,mb71_size);
+                                if(mb71v5_bswap((mb71v5_t *)bp, pmb71)==0){
+                                    mfile_write(ofile,(byte *)bp,mb71_size);
+                                }else{
+                                    if(cfg->verbose>2)fprintf(stderr,"%s:%d ERR mb71v5_bswap failed\n",__func__,__LINE__);
+                                }
+                                free(bp);
+                            }else{
+                                fprintf(stderr,"%s:%d ERR swap buffer malloc failed\n",__func__,__LINE__);
+                            }
+                        }else{
+                            // write the bytes
+                            mfile_write(ofile,(byte *)pmb71,mb71_size);
                         }
-                        
-                        // write the bytes
-                        mfile_write(ofile,(byte *)pmb71,mb71_size);
                     }else{
                         err_count++;
                         if(NULL!=cfg && cfg->verbose>0){
