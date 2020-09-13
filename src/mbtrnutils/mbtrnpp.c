@@ -3371,6 +3371,8 @@ int main(int argc, char **argv) {
     /* loop over reading data */
     int n_non_survey_data = 0;
     bool done = false;
+    int num_kinds_read[MB_DATA_KINDS + 1] = { 0 };
+    int num_kinds_read_tot[MB_DATA_KINDS + 1] = { 0 };
     while (!done) {
       /* open new log file if it is time */
       if (mbtrn_cfg->make_logs == true) {
@@ -3440,6 +3442,10 @@ int main(int argc, char **argv) {
       //            error));
       MST_METRIC_LAP(app_stats->stats->metrics[MBTPP_CH_MB_GETALL_XT], mtime_dtime());
       MST_METRIC_START(app_stats->stats->metrics[MBTPP_CH_MB_PING_XT], mtime_dtime());
+      if (error <= 0) {
+        num_kinds_read[kind]++;
+        num_kinds_read_tot[kind]++;
+      }
       if (status == MB_SUCCESS && kind == MB_DATA_DATA) {
         ping[idataread].count = ndata;
         ndata++;
@@ -3834,12 +3840,22 @@ int main(int argc, char **argv) {
         } else {
           n_non_survey_data++;
           MST_COUNTER_INC(app_stats->stats->events[MBTPP_EV_MB_NONSURVEY]);
-          if (n_non_survey_data > 0 && n_non_survey_data % 100 == 0) {
+          if (n_non_survey_data > 0 && n_non_survey_data % 25 == 0) {
             int time_i[7];
             mb_get_date(0, ping[idataread].time_d, time_i);
             fprintf(stderr, "%4.4d/%2.2d/%2.2d-%2.2d:%2.2d:%2.2d.%6.6d %.6f "
-                            "| Read 100 non-survey data records...\n",
+                            "| Read 25 non-survey data records...\n",
             time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6], ping[idataread].time_d);
+
+            for (int i = 0; i < MB_DATA_KINDS; i++) {
+              if (num_kinds_read[i] > 0) {
+                char *message = NULL;
+                if (mb_notice_message(mbtrn_cfg->verbose, i, &message) == MB_SUCCESS) {
+                  fprintf(stderr, "     %6d %s\n", num_kinds_read[i], message);
+                  num_kinds_read[i] = 0;
+                }
+              }
+            }
             double dzero = 0.0;
             mbtrnpp_trnu_pubempty_osocket(ping[idataread].time_d, dzero, dzero, dzero, trnusvr->socket);
           }
@@ -4749,7 +4765,7 @@ int mbtrnpp_trnu_pub_osocket(trn_update_t *update,
                     {update->mse_dat->time,offset_n,offset_e,offset_z,
                         {update->mse_dat->covariance[0],update->mse_dat->covariance[2],update->mse_dat->covariance[5],update->mse_dat->covariance[1]}
                     },
-                    {use_offset_time,use_offset_e,use_offset_n,use_offset_z,
+                    {use_offset_time,use_offset_n,use_offset_e,use_offset_z,
                         {use_covariance[0],use_covariance[2],use_covariance[5],use_covariance[1]}
                     },
                 },

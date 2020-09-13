@@ -105,7 +105,6 @@
 // Declarations 
 /////////////////////////
 
-
 /////////////////////////
 // Imports
 /////////////////////////
@@ -121,44 +120,46 @@
 void mb71v5_show(mb71v5_t *self, bool verbose, uint16_t indent)
 {
     if (NULL != self) {
-        fprintf(stderr,"%*s[self           %10p]\n",indent,(indent>0?" ":""), self);
-        fprintf(stderr,"%*s[recordtype     %6s%04X]\n",indent,(indent>0?" ":"")," ", self->recordtype);
-        fprintf(stderr,"%*s[time_d     %10.3lf]\n",indent,(indent>0?" ":""), self->time_d);
-        fprintf(stderr,"%*s[longitude      %10.3lf]\n",indent,(indent>0?" ":""), self->longitude);
-        fprintf(stderr,"%*s[latitude       %10.3lf]\n",indent,(indent>0?" ":""), self->latitude);
-        fprintf(stderr,"%*s[sonardepth     %10.3lf]\n",indent,(indent>0?" ":""), self->sonardepth);
-        fprintf(stderr,"%*s[altitude       %10.3lf]\n",indent,(indent>0?" ":""), self->altitude);
-        fprintf(stderr,"%*s[heading        %10.3lf]\n",indent,(indent>0?" ":""), self->heading);
-        fprintf(stderr,"%*s[speed          %10.3lf]\n",indent,(indent>0?" ":""), self->speed);
-        fprintf(stderr,"%*s[roll           %10.3lf]\n",indent,(indent>0?" ":""), self->roll);
-        fprintf(stderr,"%*s[pitch          %10.3lf]\n",indent,(indent>0?" ":""), self->pitch);
-        fprintf(stderr,"%*s[heave          %10.3lf]\n",indent,(indent>0?" ":""), self->heave);
-        fprintf(stderr,"%*s[beam_xwidth    %10.3lf]\n",indent,(indent>0?" ":""), self->beam_xwidth);
-        fprintf(stderr,"%*s[beam_lwidth    %10.3lf]\n",indent,(indent>0?" ":""), self->beam_lwidth);
-        fprintf(stderr,"%*s[beams_bath     %10d]\n",indent,(indent>0?" ":""), self->beams_bath);
-        fprintf(stderr,"%*s[beams_amp      %10d]\n",indent,(indent>0?" ":""), self->beams_amp);
-        fprintf(stderr,"%*s[pixels_ss      %10d]\n",indent,(indent>0?" ":""), self->pixels_ss);
-        fprintf(stderr,"%*s[spare1         %10d]\n",indent,(indent>0?" ":""), self->spare1);
-        fprintf(stderr,"%*s[depth_scale    %10.6lf]\n",indent,(indent>0?" ":""), self->depth_scale);
-        fprintf(stderr,"%*s[distance_scale %10.6lf]\n",indent,(indent>0?" ":""), self->distance_scale);
-        fprintf(stderr,"%*s[ss_scalepower  %8s%02X]\n",indent,(indent>0?" ":""), " ",self->ss_scalepower);
-        fprintf(stderr,"%*s[ss_type        %8s%02X]\n",indent,(indent>0?" ":""), " ",self->ss_type);
-        fprintf(stderr,"%*s[imagery_type   %8s%02X]\n",indent,(indent>0?" ":""), " ",self->imagery_type);
-        fprintf(stderr,"%*s[topo_type      %8s%02X]\n",indent,(indent>0?" ":""), " ",self->topo_type);
+        int wkey=15;
+        int wval=15;
+        fprintf(stderr,"%*s%*s %*p\n",indent,(indent>0?" ":""),wkey,"self",wval,self);
+        fprintf(stderr,"%*s%*s %*s%04X\n",indent,(indent>0?" ":""),wkey,"recordtype",wval-4," ",self->recordtype);
+        fprintf(stderr,"%*s%*s %*.3lf\n",indent,(indent>0?" ":""),wkey,"time_d",wval,self->time_d);
+        fprintf(stderr,"%*s%*s %*.3lf\n",indent,(indent>0?" ":""),wkey,"longitude",wval,self->longitude);
+        fprintf(stderr,"%*s%*s %*.3lf\n",indent,(indent>0?" ":""),wkey,"latitude",wval,self->latitude);
+        fprintf(stderr,"%*s%*s %*.3lf\n",indent,(indent>0?" ":""),wkey,"sonardepth",wval,self->sonardepth);
+        fprintf(stderr,"%*s%*s %*.3lf\n",indent,(indent>0?" ":""),wkey,"altitude",wval,self->altitude);
+        fprintf(stderr,"%*s%*s %*.3lf\n",indent,(indent>0?" ":""),wkey,"heading",wval,self->heading);
+        fprintf(stderr,"%*s%*s %*.3lf\n",indent,(indent>0?" ":""),wkey,"speed",wval,self->speed);
+        fprintf(stderr,"%*s%*s %*.3lf\n",indent,(indent>0?" ":""),wkey,"roll",wval,self->roll);
+        fprintf(stderr,"%*s%*s %*.3lf\n",indent,(indent>0?" ":""),wkey,"pitch",wval,self->pitch);
+        fprintf(stderr,"%*s%*s %*.3lf\n",indent,(indent>0?" ":""),wkey,"heave",wval,self->heave);
+        fprintf(stderr,"%*s%*s %*.3lf\n",indent,(indent>0?" ":""),wkey,"beam_xwidth",wval,self->beam_xwidth);
+        fprintf(stderr,"%*s%*s %*.3lf\n",indent,(indent>0?" ":""),wkey,"beam_lwidth",wval,self->beam_lwidth);
+        fprintf(stderr,"%*s%*s %*d\n",indent,(indent>0?" ":""),wkey,"beams_bath",wval,self->beams_bath);
+        fprintf(stderr,"%*s%*s %*d\n",indent,(indent>0?" ":""),wkey,"beams_amp",wval,self->beams_amp);
+        fprintf(stderr,"%*s%*s %*d\n",indent,(indent>0?" ":""),wkey,"pixels_ss",wval,self->pixels_ss);
+        fprintf(stderr,"%*s%*s %*d\n",indent,(indent>0?" ":""),wkey,"spare1",wval,self->spare1);
+        fprintf(stderr,"%*s%*s %*.6lf\n",indent,(indent>0?" ":""),wkey,"depth_scale",wval,self->depth_scale);
+        fprintf(stderr,"%*s%*s %*.6lf\n",indent,(indent>0?" ":""),wkey,"distance_scale",wval,self->distance_scale);
+        fprintf(stderr,"%*s%*s %*s%02X\n",indent,(indent>0?" ":""),wkey,"ss_scalepower",wval-2," ",self->ss_scalepower);
+        fprintf(stderr,"%*s%*s %*s%02X\n",indent,(indent>0?" ":""),wkey,"ss_type",wval-2," ",self->ss_type);
+        fprintf(stderr,"%*s%*s %*s%02X\n",indent,(indent>0?" ":""),wkey,"imagery_type",wval-2," ",self->imagery_type);
+        fprintf(stderr,"%*s%*s %*s%02X\n",indent,(indent>0?" ":""),wkey,"topo_type",wval-2," ",self->topo_type);
         int nbeams =self->beams_bath;
         if(nbeams>0){
-        unsigned char *bf = MB71_PBF(self,nbeams);
-        short *bz = MB71_PBZ(self,nbeams);
-        short *by = MB71_PBY(self,nbeams);
-        short *bx = MB71_PBX(self,nbeams);
+            unsigned char *bf = MB71_PBF(self,nbeams);
+            short *bz = MB71_PBZ(self,nbeams);
+            short *by = MB71_PBY(self,nbeams);
+            short *bx = MB71_PBX(self,nbeams);
+            if(self->beams_bath>0){
+            fprintf(stderr,"%*s[ n   flags vert    cross      along]\n",indent+3,(indent>0?" ":""));
 
-        fprintf(stderr,"%*s[ n   flags vert    cross      along]\n",indent+3,(indent>0?" ":""));
-
-        for(int i=0;i<self->beams_bath;i++){
-            fprintf(stderr,"%*s[%3d  %02X,%8hd,%8hd,%8hd ]\n",indent+3,(indent>0?" ":""), i, bf[i],bz[i],by[i],bx[i]);
+            for(int i=0;i<self->beams_bath;i++){
+                fprintf(stderr,"%*s %3d  %02X,%8hd,%8hd,%8hd \n",indent+3,(indent>0?" ":""), i, bf[i],bz[i],by[i],bx[i]);
+            }
+          }
         }
-        }
-
     }
 }
 // End function mb71v5_show
@@ -171,9 +172,6 @@ int mb71v5_bswap(mb71v5_t *dest, mb71v5_t *src)
         // save nbeams before it's swapped
         int nbeams=src->beams_bath;
         mb71v5_t *out = (NULL==dest ? src : dest);
-//        uint64_t u64[2]={0};
-//        uint32_t u32[2]={0};
-//        uint16_t u16[2]={0};
         
         out->recordtype = mswap_16(src->recordtype);
         if(out==src){

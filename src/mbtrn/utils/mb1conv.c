@@ -312,62 +312,97 @@ static void app_cfg_destroy(app_cfg_t **pself)
     }
 }
 
-
-static int32_t s_read_mb1_rec( mb1_frame_t **pdest, mfile_file_t *src)
+static int32_t s_read_mb1_rec( mb1_frame_t **pdest, mfile_file_t *src, app_cfg_t *cfg)
 {
     int32_t retval=-1;
-    
+
     if(NULL!=src && NULL!=pdest){
         byte *bp = NULL;
         uint32_t readlen = 1;
         uint32_t record_bytes=0;
         int64_t read_bytes=0;
         mb1_frame_t *dest = *pdest;
-        
+
         // sync to start of record
         bp = (byte *)dest->sounding;
 
         while( (read_bytes=mfile_read(src,(byte *)bp,readlen))==readlen){
             if(*bp=='M'){
                 // found sync start
-                //                fprintf(stderr,"%s:%d\n",__FUNCTION__,__LINE__);
                 record_bytes+=read_bytes;
                 bp++;
                 readlen=MB1_HEADER_BYTES-1;
-                //                fprintf(stderr,"%d: read_bytes[%lld] bp[%p] err[%d/%s]\n",__LINE__,read_bytes,bp,errno,strerror(errno));
+
+                if(NULL!=cfg && cfg->verbose>2){
+                    fprintf(stderr,"%d: read_bytes[%lld] bp[%p] err[%d/%s] readlen[%u]\n",__LINE__,read_bytes,bp,errno,strerror(errno),readlen);
+                }
                 break;
             }
         }
-        
-//        fprintf(stderr,"%d: read sync err[%d/%s]\n",__LINE__,errno,strerror(errno));
-//        fprintf(stderr,"%d: frame[%p]\n",__LINE__,dest);
-//        fprintf(stderr,"%d: sounding[%p]\n",__LINE__,dest->sounding);
-//        fprintf(stderr,"%d: chksum[%p]\n",__LINE__,dest->checksum);
+
+        if(NULL!=cfg && cfg->verbose>2){
+            fprintf(stderr,"%d: read sync err[%d/%s]\n",__LINE__,errno,strerror(errno));
+            fprintf(stderr,"%d: frame[%p]\n",__LINE__,dest);
+            fprintf(stderr,"%d: sounding[%p]\n",__LINE__,dest->sounding);
+            fprintf(stderr,"%d: chksum[%p]\n",__LINE__,dest->checksum);
+            fprintf(stderr,"%d: readlen[%u]\n",__LINE__,readlen);
+            fprintf(stderr,"%d: sizeof double[%zd]\n",__LINE__,sizeof(double));
+            fprintf(stderr,"%d: sizeof int[%zd]\n",__LINE__,sizeof(int));
+            fprintf(stderr,"%d: sizeof mb1_sounding_t[%zd]\n",__LINE__,sizeof(mb1_sounding_t));
+            fprintf(stderr,"%d: sizeof mb1_beam_t[%zd]\n",__LINE__,sizeof(mb1_beam_t));
+            fprintf(stderr,"%d: sizeof mb1_frame_t[%zd]\n",__LINE__,sizeof(mb1_frame_t));
+        }
 
         // if start of sync found, read header (fixed-length sounding bytes)
         if(record_bytes>0 && (read_bytes=mfile_read(src,(byte *)bp,readlen))==readlen){
-            
+
+            if(NULL!=cfg && cfg->verbose>2){
+            fprintf(stderr,"%d: type[x%08X]\n",__LINE__,dest->sounding->type);
+            fprintf(stderr,"%d: nbeams[%u]\n",__LINE__,dest->sounding->nbeams);
+            }
             record_bytes+=read_bytes;
+
             bp=NULL;
             readlen=0;
-            if(NULL!=dest && NULL!=dest->sounding && dest->sounding->nbeams>0 && dest->sounding->nbeams<=MB1_MAX_BEAMS){
-      
-                if(mb1_frame_resize(&dest, dest->sounding->nbeams, MB1_RS_BEAMS)!=NULL){
-                    bp=(byte *)&dest->sounding->beams[0];
-                    readlen = dest->sounding->size-(MB1_HEADER_BYTES+MB1_CHECKSUM_BYTES);
-                    *pdest=dest;
+            retval=record_bytes;
+
+            if(NULL!=dest && NULL!=dest->sounding ){
+                if(dest->sounding->type==0x0031424D){
+                    if(dest->sounding->nbeams>0 && dest->sounding->nbeams<=MB1_MAX_BEAMS){
+                        if(mb1_frame_resize(&dest, dest->sounding->nbeams, MB1_RS_BEAMS)!=NULL){
+                            bp=(byte *)&dest->sounding->beams[0];
+                            readlen = dest->sounding->size-(MB1_HEADER_BYTES+MB1_CHECKSUM_BYTES);
+                            *pdest=dest;
+                        }else{fprintf(stderr,"%s:%d - ERR frame_resize\n",__func__,__LINE__);}
+                    }else{
+                        // don't resize, but update checksum pointer
+                        dest->checksum=MB1_PCHECKSUM_U32(dest);
+                    }
+                }else{
+                    if(NULL!=cfg && cfg->verbose>=2)
+                    fprintf(stderr,"%s:%d - ERR invalid type[%u]\n",__func__,__LINE__,dest->sounding->type);
+                    retval=-1;
                 }
+            }else{
+                fprintf(stderr,"%s:%d - ERR dest[%p] sounding[%p]\n",__func__,__LINE__,dest,dest->sounding);
             }
 
-            
-//                        fprintf(stderr,"%d: sounding->sz[%u] readlen[%u] err[%d/%s]\n",__LINE__,dest->sounding->size,readlen,errno,strerror(errno));
+            if(NULL!=cfg && cfg->verbose>2){
+                fprintf(stderr,"%d: sounding->sz[%"PRIu32"] read[%"PRId64"/%"PRIu32"] err[%d/%s]\n",__LINE__,dest->sounding->size,read_bytes,readlen,errno,strerror(errno));
+                fprintf(stderr,"%d: sounding->type[%08X]\n",__LINE__,dest->sounding->type);
+                fprintf(stderr,"%d: sounding->checksum[%p]\n",__LINE__,dest->checksum);
+                if(readlen>0)
+                fprintf(stderr,"%d: sounding->checksum[%"PRIu32"]\n",__LINE__,*dest->checksum);
+            }
 
-             // if header OK, read sounding data (variable length)
+            // if header OK, read sounding data (variable length)
+            read_bytes=0;
             if(readlen>0 && (read_bytes=mfile_read(src,(byte *)bp,readlen))==readlen){
                 record_bytes+=read_bytes;
+
                 bp=(byte *)dest->checksum;
                 readlen=MB1_CHECKSUM_BYTES;
-//              fprintf(stderr,"%d: read_bytes[%lld] bp[%p] err[%d/%s]\n",__LINE__,read_bytes,bp,errno,strerror(errno));
+
                 // read checksum
                 if( (read_bytes=mfile_read(src,(byte *)bp,readlen))==readlen){
                     record_bytes+=read_bytes;
@@ -375,20 +410,27 @@ static int32_t s_read_mb1_rec( mb1_frame_t **pdest, mfile_file_t *src)
 
                     unsigned int checksum = mb1_frame_calc_checksum(dest);
                     if(checksum!=*(dest->checksum)){
-                    fprintf(stderr,"checksum err (calc/read)[%08X/%08X]\n",checksum,*(dest->checksum));
+                        fprintf(stderr,"checksum err (calc/read)[%08X/%08X] failed fp/fsz[%"PRId64"/%"PRId64"]\n",checksum,*(dest->checksum),mfile_seek(src,0,MFILE_CUR),mfile_fsize(src));
                     }
-//                  fprintf(stderr,"%d: read_bytes[%lld] bp[%p] err[%d/%s]\n",__LINE__,read_bytes,bp,errno,strerror(errno));
                 }else{
-                    fprintf(stderr,"%d: read failed err[%d/%s]\n",__LINE__,errno,strerror(errno));
+                    fprintf(stderr,"%d: read failed err[%d/%s] fp/fsz[%"PRId64"/%"PRId64"]\n",__LINE__,errno,strerror(errno),mfile_seek(src,0,MFILE_CUR),mfile_fsize(src));
                 }
             }else{
-                fprintf(stderr,"%d: read failed err[%d/%s]\n",__LINE__,errno,strerror(errno));
+                if(readlen>0)
+                fprintf(stderr,"%d: read failed err[%d/%s] readlen[%"PRId32"] read_bytes[%"PRId64"] fp/fsz[%"PRId64"/%"PRId64"]\n",__LINE__,errno,strerror(errno),readlen,read_bytes,mfile_seek(src,0,MFILE_CUR),mfile_fsize(src));
             }
         }else{
-            fprintf(stderr,"%d: read failed err[%d/%s]\n",__LINE__,errno,strerror(errno));
+            if(mfile_seek(src,0,MFILE_CUR)==mfile_fsize(src)){
+                if(NULL!=cfg && cfg->verbose>0)
+                fprintf(stderr,"%d: read failed end of file reached fp/fsz[%"PRId64"/%"PRId64"] err[%d/%s]\n",__LINE__,mfile_seek(src,0,MFILE_CUR),mfile_fsize(src),errno,strerror(errno));
+            }else{
+            	fprintf(stderr,"%d: read failed err[%d/%s]\n",__LINE__,errno,strerror(errno));
+            }
+        }
+        if(NULL!=cfg && cfg->verbose>2){
+            fprintf(stderr,"%d: record_bytes[%"PRIu32"] retval[%d] err[%d/%s]\n",__LINE__,record_bytes,retval,errno,strerror(errno));
         }
     }
-    //    fprintf(stderr,"%d: record_bytes[%lu] retval[%d] err[%d/%s]\n",__LINE__,record_bytes,retval,errno,strerror(errno));
     return retval;
 }
 
@@ -402,7 +444,7 @@ static int32_t s_mb1_to_mb71v5(byte **dest, int32_t size, mb1_frame_t *src, app_
         byte *bp = *dest;
         int32_t msize = size;
 
-        if(mb71_size>size){
+        if(mb71_size>size || NULL==bp){
             bp=(byte *)realloc((void *)*dest,mb71_size);
             msize = mb71_size;
         }
@@ -485,8 +527,8 @@ static int32_t s_mb1_to_mb71v5(byte **dest, int32_t size, mb1_frame_t *src, app_
             //        pmb71->ss_acrosstrack;
             //        pmb71->ss_alongtrack;            }
         }
-        
-        
+    }else{
+        fprintf(stderr,"%s:%d Invalid arg\n",__func__,__LINE__);
     }// else invalid arg
     return retval;
 }
@@ -520,7 +562,7 @@ static int s_app_main(app_cfg_t *cfg)
                 // reset frame (or create if NULL)
                 mb1_frame_resize(&mb1,0,MB1_RS_ALL);
                 
-                if((test[0]=s_read_mb1_rec(&mb1, ifile))>0){
+                if((test[0]=s_read_mb1_rec(&mb1, ifile,cfg))>0){
                     rec_count++;
                     input_bytes+=test[0];
                     
@@ -538,23 +580,39 @@ static int s_app_main(app_cfg_t *cfg)
                         // byte swap mb71 frame, per config
                         // (once swapped, don't use data members)
                         if(cfg->bswap){
-                            mb71v5_bswap(NULL, pmb71);
+                            byte *bp=(byte *)malloc(mb71_size);
+                            if(NULL!=bp){
+                                memset(bp,0,mb71_size);
+                                if(mb71v5_bswap((mb71v5_t *)bp, pmb71)==0){
+                                    mfile_write(ofile,(byte *)bp,mb71_size);
+                                }else{
+                                    if(cfg->verbose>2)fprintf(stderr,"%s:%d ERR mb71v5_bswap failed\n",__func__,__LINE__);
+                                }
+                                free(bp);
+                            }else{
+                                fprintf(stderr,"%s:%d ERR swap buffer malloc failed\n",__func__,__LINE__);
+                            }
+                        }else{
+                            // write the bytes
+                            mfile_write(ofile,(byte *)pmb71,mb71_size);
                         }
-                        
-                        // write the bytes
-                        mfile_write(ofile,(byte *)pmb71,mb71_size);
                     }else{
                         err_count++;
-                        if(cfg->verbose>0){
+                        if(NULL!=cfg && cfg->verbose>0){
                             fprintf(stderr,"s_mb1_to_mb71v5 failed [%d] ecount[%u]\n",record_size,err_count);
                         }
                     }
                 }else{
                     err_count++;
-                    fprintf(stderr,"s_read_mb1_rec failed [%d] ecount[%u]\n",test[0],err_count);
-                    quit=true;
+                    if(mfile_seek(ifile,0,MFILE_CUR)==mfile_fsize(ifile)){
+                        if(cfg->verbose>0)
+                        fprintf(stderr,"reached end of file\n");
+                        quit=true;
+                    }else{
+                        if(NULL!=cfg && cfg->verbose>=2)
+                        fprintf(stderr,"s_read_mb1_rec failed [%d] ecount[%u] fp/fsz[%"PRId64"/%"PRId64"]\n",test[0],err_count,mfile_seek(ifile,0,MFILE_CUR),mfile_fsize(ifile));
+                    }
                 }
-                
             }// while
             
         }else{

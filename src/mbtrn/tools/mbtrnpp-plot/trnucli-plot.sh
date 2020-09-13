@@ -1,5 +1,4 @@
-#!/opt/local/bin/bash
-#/usr/bin/bash
+#!/usr/local/bin/bash
 
 #########################################
 # Name: trnucli-plot
@@ -508,4 +507,3 @@ run_jobs
 vout ""
 
 exit 0
-

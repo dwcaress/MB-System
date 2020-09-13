@@ -423,265 +423,265 @@ do
     vout "ovr APP_CMD: $APP_CMD"
     fi
 
-if [ ${a:2:13} == "log-directory" ]
-then
-OPT_LOGDIR=$a
-vout "ovr OPT_LOGDIR: $OPT_LOGDIR"
-fi
+    if [ ${a:2:13} == "log-directory" ]
+    then
+    OPT_LOGDIR=$a
+    vout "ovr OPT_LOGDIR: $OPT_LOGDIR"
+    fi
 
-if [ ${a:2:6} == "config" ]
-then
-OPT_CONFIG=$a
-vout "ovr OPT_CONFIG: $OPT_CONFIG"
-fi
+    if [ ${a:2:6} == "config" ]
+    then
+    OPT_CONFIG=$a
+    vout "ovr OPT_CONFIG: $OPT_CONFIG"
+    fi
 
-if [ ${a:2:7} == "verbose" ]
-then
-OPT_VERBOSE=$a
-vout "ovr OPT_VERBOSE: $OPT_VERBOSE"
-fi
+    if [ ${a:2:7} == "verbose" ]
+    then
+    OPT_VERBOSE=$a
+    vout "ovr OPT_VERBOSE: $OPT_VERBOSE"
+    fi
 
-if [ ${a:2:5} == "input" ]
-then
-OPT_INPUT=$a
-vout "ovr OPT_INPUT: $OPT_INPUT"
-fi
+    if [ ${a:2:5} == "input" ]
+    then
+    OPT_INPUT=$a
+    vout "ovr OPT_INPUT: $OPT_INPUT"
+    fi
 
-if [ ${a:2:6} == "output" ]
-then
-OPT_OUTPUT=$a
-vout "ovr OPT_OUTPUT: $OPT_OUTPUT"
-fi
+    if [ ${a:2:6} == "output" ]
+    then
+    OPT_OUTPUT=$a
+    vout "ovr OPT_OUTPUT: $OPT_OUTPUT"
+    fi
 
-if [ ${a:2:10} == "tide-model" ]
-then
-OPT_TIDE=$a
-vout "ovr OPT_TIDE: $OPT_TIDE"
-fi
+    if [ ${a:2:10} == "tide-model" ]
+    then
+    OPT_TIDE=$a
+    vout "ovr OPT_TIDE: $OPT_TIDE"
+    fi
 
-if [ ${a:2:11} == "swath-width" ]
-then
-OPT_SWATH=$a
-vout "ovr OPT_SWATH: $OPT_SWATH"
-fi
+    if [ ${a:2:11} == "swath-width" ]
+    then
+    OPT_SWATH=$a
+    vout "ovr OPT_SWATH: $OPT_SWATH"
+    fi
 
-if [ ${a:2:9} == "soundings" ]
-then
-OPT_SOUNDINGS=$a
-vout "ovr OPT_SOUNDINGS: $OPT_SOUNDINGS"
-fi
+    if [ ${a:2:9} == "soundings" ]
+    then
+    OPT_SOUNDINGS=$a
+    vout "ovr OPT_SOUNDINGS: $OPT_SOUNDINGS"
+    fi
 
-if [ ${a:2:6} == "format" ]
-then
-OPT_FORMAT=$a
-vout "ovr OPT_FORMAT: $OPT_FORMAT"
-fi
+    if [ ${a:2:6} == "format" ]
+    then
+    OPT_FORMAT=$a
+    vout "ovr OPT_FORMAT: $OPT_FORMAT"
+    fi
 
-if [ ${a:2:13} == "median-filter" ]
-then
-OPT_MFILTER=$a
-vout "ovr OPT_MFILTER: $OPT_MFILTER"
-fi
+    if [ ${a:2:13} == "median-filter" ]
+    then
+    OPT_MFILTER=$a
+    vout "ovr OPT_MFILTER: $OPT_MFILTER"
+    fi
 
-if [ ${a:2:6} == "trn-en" ]
-then
-OPT_TRN_SEL=${OPT_TRN_EN}
-vout "ovr OPT_TRN_SEL: $OPT_TRN_SEL"
-fi
+    if [ ${a:2:6} == "trn-en" ]
+    then
+    OPT_TRN_SEL=${OPT_TRN_EN}
+    vout "ovr OPT_TRN_SEL: $OPT_TRN_SEL"
+    fi
 
-if [ ${a:2:7} == "trn-dis" ]
-then
-OPT_TRN_SEL=${OPT_TRN_DIS}
-vout "ovr OPT_TRN_SEL: $OPT_TRN_SEL"
-fi
+    if [ ${a:2:7} == "trn-dis" ]
+    then
+    OPT_TRN_SEL=${OPT_TRN_DIS}
+    vout "ovr OPT_TRN_SEL: $OPT_TRN_SEL"
+    fi
 
-if [ ${a:2:7} == "trn-utm" ]
-then
-OPT_TRN_UTM=$a
-vout "ovr OPT_TRN_UTM: $OPT_TRN_UTM"
-fi
+    if [ ${a:2:7} == "trn-utm" ]
+    then
+    OPT_TRN_UTM=$a
+    vout "ovr OPT_TRN_UTM: $OPT_TRN_UTM"
+    fi
 
-if [ ${a:2:7} == "trn-map" ]
-then
-OPT_TRN_MAP=$a
-vout "ovr OPT_TRN_MAP: $OPT_TRN_MAP"
-fi
+    if [ ${a:2:7} == "trn-map" ]
+    then
+    OPT_TRN_MAP=$a
+    vout "ovr OPT_TRN_MAP: $OPT_TRN_MAP"
+    fi
 
-if [ ${a:2:7} == "trn-par" ]
-then
-OPT_TRN_PAR=$a
-vout "ovr OPT_TRN_PAR: $OPT_TRN_PAR"
-fi
+    if [ ${a:2:7} == "trn-par" ]
+    then
+    OPT_TRN_PAR=$a
+    vout "ovr OPT_TRN_PAR: $OPT_TRN_PAR"
+    fi
 
-if [ ${a:2:7} == "trn-cfg" ]
-then
-OPT_TRN_CFG=$a
-vout "ovr OPT_TRN_CFG: $OPT_TRN_CFG"
-fi
+    if [ ${a:2:7} == "trn-cfg" ]
+    then
+    OPT_TRN_CFG=$a
+    vout "ovr OPT_TRN_CFG: $OPT_TRN_CFG"
+    fi
 
-if [ ${a:2:7} == "trn-mid" ]
-then
-OPT_TRN_MID=$a
-vout "ovr OPT_TRN_MID: $OPT_TRN_MID"
-fi
-
-
-if [ ${a:2:8} == "trn-decn" ]
-then
-OPT_TRN_DECN=$a
-vout "ovr OPT_TRN_DECN: $OPT_TRN_DECN"
-fi
-
-if [ ${a:2:8} == "trn-decs" ]
-then
-OPT_TRN_DECS=$a
-vout "ovr OPT_TRN_DECS: $OPT_TRN_DECS"
-fi
-
-if [ ${a:2:9} == "trn-mtype" ]
-then
-OPT_TRN_MTYPE=$a
-vout "ovr OPT_TRN_MTYPE: $OPT_TRN_MTYPE"
-fi
-
-if [ ${a:2:9} == "trn-ftype" ]
-then
-OPT_TRN_FTYPE=$a
-vout "ovr OPT_TRN_FTYPE: $OPT_TRN_FTYPE"
-fi
-
-if [ ${a:2:10} == "trn-fgrade" ]
-then
-OPT_TRN_FGRADE=$a
-vout "ovr OPT_TRN_FGRADE: $OPT_TRN_FGRADE"
-fi
-
-if [ ${a:2:11} == "trn-mweight" ]
-then
-OPT_TRN_MWEIGHT=$a
-vout "ovr OPT_TRN_MWEIGHT: $OPT_TRN_MWEIGHT"
-fi
-
-if [ ${a:2:8} == "trn-ncov" ]
-then
-OPT_TRN_NCOV=$a
-vout "ovr OPT_TRN_NCOV: $OPT_TRN_NCOV"
-fi
-
-if [ ${a:2:8} == "trn-nerr" ]
-then
-OPT_TRN_NERR=$a
-vout "ovr OPT_TRN_NERR: $OPT_TRN_NERR"
-fi
-
-if [ ${a:2:8} == "trn-ecov" ]
-then
-OPT_TRN_ECOV=$a
-vout "ovr OPT_TRN_ECOV: $OPT_TRN_ECOV"
-fi
-
-if [ ${a:2:8} == "trn-eerr" ]
-then
-OPT_TRN_EERR=$a
-vout "ovr OPT_TRN_EERR: $OPT_TRN_EERR"
-fi
-
-if [ ${a:2:10} == "trn-reinit" ]
-then
-OPT_TRN_REINIT=$a
-vout "ovr OPT_TRN_REINIT: $OPT_TRN_REINIT"
-fi
-
-if [ ${a:2:11} == "reinit-gain" ]
-then
-OPT_REINIT_GAIN=$a
-vout "ovr OPT_REINIT_GAIN: $OPT_REINIT_GAIN"
-fi
-
-if [ ${a:2:11} == "reinit-file" ]
-then
-OPT_REINIT_FILE=$a
-vout "ovr OPT_REINIT_FILE: $OPT_REINIT_FILE"
-fi
-
-if [ ${a:2:15} == "reinit-xyoffset" ]
-then
-OPT_REINIT_XYOFFSET=$a
-vout "ovr OPT_REINIT_XYOFFSET: $OPT_REINIT_XYOFFSET"
-fi
-
-if [ ${a:2:14} == "reinit-zoffset" ]
-then
-OPT_REINIT_ZOFFSET=$a
-vout "ovr OPT_REINIT_ZOFFSET: $OPT_REINIT_ZOFFSET"
-fi
-
-if [ ${a:2:24} == "covariance-magnitude-max" ]
-then
-OPT_COVARIANCE_MAGNITUDE_MAX=$a
-vout "ovr OPT_COVARIANCE_MAGNITUDE_MAX: $OPT_COVARIANCE_MAGNITUDE_MAX"
-fi
-
-if [ ${a:2:22} == "convergence-repeat-min" ]
-then
-OPT_CONVERGENCE_REPEAT_MIN=$a
-vout "ovr OPT_CONVERGENCE_REPEAT_MIN: $OPT_CONVERGENCE_REPEAT_MIN"
-fi
-
-if [ ${a:2:7} == "trn-out" ]
-then
-OPT_TRNOUT=$a
-vout "ovr OPT_TRNOUT: $OPT_TRNOUT"
-fi
-
-if [ ${a:2:6} == "trnhbt" ]
-then
-OPT_TRNHBT=$a
-vout "ovr OPT_TRNHBT: $OPT_TRNHBT"
-fi
-
-if [ ${a:2:7} == "trnuhbt" ]
-then
-OPT_TRNUHBT=$a
-vout "ovr OPT_TRNUHBT: $OPT_TRNUHBT"
-fi
-
-if [ ${a:2:6} == "mb-out" ]
-then
-OPT_MBOUT=$a
-vout "ovr OPT_MBOUT: $OPT_MBOUT"
-fi
-
-if [ ${a:2:5} == "mbhbt" ]
-then
-OPT_MBHBT=$a
-vout "ovr OPT_MBHBT: $OPT_MBHBT"
-fi
+    if [ ${a:2:7} == "trn-mid" ]
+    then
+    OPT_TRN_MID=$a
+    vout "ovr OPT_TRN_MID: $OPT_TRN_MID"
+    fi
 
 
-if [ ${a:2:7} == "statsec" ]
-then
-OPT_STATSEC=$a
-vout "ovr OPT_STATSEC: $OPT_STATSEC"
-fi
+    if [ ${a:2:8} == "trn-decn" ]
+    then
+    OPT_TRN_DECN=$a
+    vout "ovr OPT_TRN_DECN: $OPT_TRN_DECN"
+    fi
 
-if [ ${a:2:9} == "statflags" ]
-then
-OPT_STATFLAGS=$a
-vout "ovr OPT_STATFLAGS: $OPT_STATFLAGS"
-fi
+    if [ ${a:2:8} == "trn-decs" ]
+    then
+    OPT_TRN_DECS=$a
+    vout "ovr OPT_TRN_DECS: $OPT_TRN_DECS"
+    fi
 
-if [ ${a:2:5} == "delay" ]
-then
-OPT_DELAY=$a
-vout "ovr OPT_DELAY: $OPT_DELAY"
-fi
+    if [ ${a:2:9} == "trn-mtype" ]
+    then
+    OPT_TRN_MTYPE=$a
+    vout "ovr OPT_TRN_MTYPE: $OPT_TRN_MTYPE"
+    fi
 
-if [ ${a:2:4} == "help" ]
-then
-OPT_HELP=$a
-vout "ovr OPT_HELP: $OPT_HELP"
-fi
+    if [ ${a:2:9} == "trn-ftype" ]
+    then
+    OPT_TRN_FTYPE=$a
+    vout "ovr OPT_TRN_FTYPE: $OPT_TRN_FTYPE"
+    fi
+
+    if [ ${a:2:10} == "trn-fgrade" ]
+    then
+    OPT_TRN_FGRADE=$a
+    vout "ovr OPT_TRN_FGRADE: $OPT_TRN_FGRADE"
+    fi
+
+    if [ ${a:2:11} == "trn-mweight" ]
+    then
+    OPT_TRN_MWEIGHT=$a
+    vout "ovr OPT_TRN_MWEIGHT: $OPT_TRN_MWEIGHT"
+    fi
+
+    if [ ${a:2:8} == "trn-ncov" ]
+    then
+    OPT_TRN_NCOV=$a
+    vout "ovr OPT_TRN_NCOV: $OPT_TRN_NCOV"
+    fi
+
+    if [ ${a:2:8} == "trn-nerr" ]
+    then
+    OPT_TRN_NERR=$a
+    vout "ovr OPT_TRN_NERR: $OPT_TRN_NERR"
+    fi
+
+    if [ ${a:2:8} == "trn-ecov" ]
+    then
+    OPT_TRN_ECOV=$a
+    vout "ovr OPT_TRN_ECOV: $OPT_TRN_ECOV"
+    fi
+
+    if [ ${a:2:8} == "trn-eerr" ]
+    then
+    OPT_TRN_EERR=$a
+    vout "ovr OPT_TRN_EERR: $OPT_TRN_EERR"
+    fi
+
+    if [ ${a:2:10} == "trn-reinit" ]
+    then
+    OPT_TRN_REINIT=$a
+    vout "ovr OPT_TRN_REINIT: $OPT_TRN_REINIT"
+    fi
+
+    if [ ${a:2:11} == "reinit-gain" ]
+    then
+    OPT_REINIT_GAIN=$a
+    vout "ovr OPT_REINIT_GAIN: $OPT_REINIT_GAIN"
+    fi
+
+    if [ ${a:2:11} == "reinit-file" ]
+    then
+    OPT_REINIT_FILE=$a
+    vout "ovr OPT_REINIT_FILE: $OPT_REINIT_FILE"
+    fi
+
+    if [ ${a:2:15} == "reinit-xyoffset" ]
+    then
+    OPT_REINIT_XYOFFSET=$a
+    vout "ovr OPT_REINIT_XYOFFSET: $OPT_REINIT_XYOFFSET"
+    fi
+
+    if [ ${a:2:14} == "reinit-zoffset" ]
+    then
+    OPT_REINIT_ZOFFSET=$a
+    vout "ovr OPT_REINIT_ZOFFSET: $OPT_REINIT_ZOFFSET"
+    fi
+
+    if [ ${a:2:24} == "covariance-magnitude-max" ]
+    then
+    OPT_COVARIANCE_MAGNITUDE_MAX=$a
+    vout "ovr OPT_COVARIANCE_MAGNITUDE_MAX: $OPT_COVARIANCE_MAGNITUDE_MAX"
+    fi
+
+    if [ ${a:2:22} == "convergence-repeat-min" ]
+    then
+    OPT_CONVERGENCE_REPEAT_MIN=$a
+    vout "ovr OPT_CONVERGENCE_REPEAT_MIN: $OPT_CONVERGENCE_REPEAT_MIN"
+    fi
+
+    if [ ${a:2:7} == "trn-out" ]
+    then
+    OPT_TRNOUT=$a
+    vout "ovr OPT_TRNOUT: $OPT_TRNOUT"
+    fi
+
+    if [ ${a:2:6} == "trnhbt" ]
+    then
+    OPT_TRNHBT=$a
+    vout "ovr OPT_TRNHBT: $OPT_TRNHBT"
+    fi
+
+    if [ ${a:2:7} == "trnuhbt" ]
+    then
+    OPT_TRNUHBT=$a
+    vout "ovr OPT_TRNUHBT: $OPT_TRNUHBT"
+    fi
+
+    if [ ${a:2:6} == "mb-out" ]
+    then
+    OPT_MBOUT=$a
+    vout "ovr OPT_MBOUT: $OPT_MBOUT"
+    fi
+
+    if [ ${a:2:5} == "mbhbt" ]
+    then
+    OPT_MBHBT=$a
+    vout "ovr OPT_MBHBT: $OPT_MBHBT"
+    fi
+
+
+    if [ ${a:2:7} == "statsec" ]
+    then
+    OPT_STATSEC=$a
+    vout "ovr OPT_STATSEC: $OPT_STATSEC"
+    fi
+
+    if [ ${a:2:9} == "statflags" ]
+    then
+    OPT_STATFLAGS=$a
+    vout "ovr OPT_STATFLAGS: $OPT_STATFLAGS"
+    fi
+
+    if [ ${a:2:5} == "delay" ]
+    then
+    OPT_DELAY=$a
+    vout "ovr OPT_DELAY: $OPT_DELAY"
+    fi
+
+    if [ ${a:2:4} == "help" ]
+    then
+    OPT_HELP=$a
+    vout "ovr OPT_HELP: $OPT_HELP"
+    fi
 
 #    if [ ${a:2:7} == "trn-log" ]
 #    then

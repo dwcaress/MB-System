@@ -1,5 +1,4 @@
 #!/usr/local/bin/bash
-#/usr/bin/bash
 
 #########################################
 # Name: mbtrnpp-plot

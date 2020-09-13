@@ -205,25 +205,32 @@ unsigned int mb1_frame_calc_checksum(mb1_frame_t *self)
 void mb1_frame_show(mb1_frame_t *self, bool verbose, uint16_t indent)
 {
     if (NULL != self) {
-        fprintf(stderr,"%*s[self           %10p]\n",indent,(indent>0?" ":""), self);
-        fprintf(stderr,"%*s[type           %2s%08X]\n",indent,(indent>0?" ":"")," ", self->sounding->type);
-        fprintf(stderr,"%*s[size           %10u]\n",indent,(indent>0?" ":""), self->sounding->size);
-        fprintf(stderr,"%*s[ts         %10.3lf]\n",indent,(indent>0?" ":""), self->sounding->ts);
-        fprintf(stderr,"%*s[lat            %10.3lf]\n",indent,(indent>0?" ":""), self->sounding->lat);
-        fprintf(stderr,"%*s[lon            %10.3lf]\n",indent,(indent>0?" ":""), self->sounding->lon);
-        fprintf(stderr,"%*s[depth          %10.3lf]\n",indent,(indent>0?" ":""), self->sounding->depth);
-        fprintf(stderr,"%*s[hdg            %10.3lf]\n",indent,(indent>0?" ":""), self->sounding->hdg);
-        fprintf(stderr,"%*s[ping_number    %10d]\n",indent,(indent>0?" ":""), self->sounding->ping_number);
-        fprintf(stderr,"%*s[nbeams         %10u]\n",indent,(indent>0?" ":""), self->sounding->nbeams);
-        fprintf(stderr,"%*s[checksum       %2s%08X]\n",indent,(indent>0?" ":""), " ",*self->checksum);
+        int wkey=15;
+        int wval=15;
+        fprintf(stderr,"%*s%*s %*p\n",indent,(indent>0?" ":""),wkey,"self",wval,self);
+        fprintf(stderr,"%*s%*s %*s%08X\n",indent,(indent>0?" ":""),wkey,"type",wval-8," ",self->sounding->type);
+        fprintf(stderr,"%*s%*s %*u\n",indent,(indent>0?" ":""),wkey,"size",wval,self->sounding->size);
+        fprintf(stderr,"%*s%*s %*.3lf\n",indent,(indent>0?" ":""),wkey,"ts",wval,self->sounding->ts);
+        fprintf(stderr,"%*s%*s %*.3lf\n",indent,(indent>0?" ":""),wkey,"lat",wval,self->sounding->lat);
+        fprintf(stderr,"%*s%*s %*.3lf\n",indent,(indent>0?" ":""),wkey,"lon",wval,self->sounding->lon);
+        fprintf(stderr,"%*s%*s %*.3lf\n",indent,(indent>0?" ":""),wkey,"depth",wval,self->sounding->depth);
+        fprintf(stderr,"%*s%*s %*.3lf\n",indent,(indent>0?" ":""),wkey,"hdg",wval,self->sounding->hdg);
+        fprintf(stderr,"%*s%*s %*d\n",indent,(indent>0?" ":""),wkey,"ping_number",wval,self->sounding->ping_number);
+        fprintf(stderr,"%*s%*s %*u\n",indent,(indent>0?" ":""),wkey,"nbeams",wval,self->sounding->nbeams);
+        fprintf(stderr,"%*s%*s %*p\n",indent,(indent>0?" ":""),wkey,"&checksum",wval,self->checksum);
+        fprintf(stderr,"%*s%*s %*s%08X\n",indent,(indent>0?" ":""),wkey,"checksum",wval-8," ",*self->checksum);
+
         int nbeams = self->sounding->nbeams;
-        fprintf(stderr,"%*s[[ n ] beam     rhox      rhoy       rhoz   ]\n",indent+3,(indent>0?" ":""));
+
+        if(nbeams>0){
+        fprintf(stderr,"%*s[ n ] beam     rhox      rhoy       rhoz   \n",indent+3,(indent>0?" ":""));
         for(int i=0;i<nbeams;i++){
-            fprintf(stderr,"%*s[[%3d] %03u  %+10.3lf %+10.3lf %+10.3lf]\n",indent+3,(indent>0?" ":""), i,
+            fprintf(stderr,"%*s[%3d] %03u  %+10.3lf %+10.3lf %+10.3lf\n",indent+3,(indent>0?" ":""), i,
                     self->sounding->beams[i].beam_num,
                     self->sounding->beams[i].rhox,
                     self->sounding->beams[i].rhoy,
                     self->sounding->beams[i].rhoz);
+        }
         }
     }
 }
