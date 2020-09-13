@@ -231,14 +231,16 @@ void trnmsg_destroy(trnmsg_t **pself)
 void trnmsg_show(trnmsg_t *self, bool verbose, int indent)
 {
     if (NULL != self) {
-        fprintf(stderr,"%*s[self     %10p]\n",indent,(indent>0?" ":""), self);
-        fprintf(stderr,"%*s[hdr      %10p]\n",indent,(indent>0?" ":""), &self->hdr);
-        fprintf(stderr,"%*s[type     %10s]\n",indent,(indent>0?" ":""), trnmsg_idstr(self->hdr.msg_id));
-        fprintf(stderr,"%*s[sync     %10X]\n",indent,(indent>0?" ":""), self->hdr.sync);
-        fprintf(stderr,"%*s[data_len %10"PRIu32"]\n",indent,(indent>0?" ":""), self->hdr.data_len);
-        fprintf(stderr,"%*s[checksum %2s%08X]\n",indent,(indent>0?" ":""), " ",self->hdr.checksum);
+        int wkey=15;
+        int wval=15;
+        fprintf(stderr,"%*s%*s %*p\n",indent,(indent>0?" ":""),wkey,"self",wval,self);
+        fprintf(stderr,"%*s%*s %*p\n",indent,(indent>0?" ":""),wkey,"hdr",wval,&self->hdr);
+        fprintf(stderr,"%*s%*s %*s\n",indent,(indent>0?" ":""),wkey,"type",wval,trnmsg_idstr(self->hdr.msg_id));
+        fprintf(stderr,"%*s%*s %*X\n",indent,(indent>0?" ":""),wkey,"sync",wval,self->hdr.sync);
+        fprintf(stderr,"%*s%*s %*"PRIu32"]\n",indent,(indent>0?" ":""),wkey,"data_len",wval,self->hdr.data_len);
+        fprintf(stderr,"%*s%*s %*s%08X]\n",indent,(indent>0?" ":""),wkey,"checksum",wval-8," ",self->hdr.checksum);
         if(verbose && self->hdr.data_len>0){
-            fprintf(stderr,"%*s[data     %10s]\n",indent,(indent>0?" ":""),"");
+            fprintf(stderr,"%*s[%*s %*s]\n",indent,(indent>0?" ":""),wkey,"data",wval,"");
             trnmsg_hex_show(TRNIF_PDATA(self),self->hdr.data_len,16,true,indent);
         }
     }

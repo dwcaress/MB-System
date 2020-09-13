@@ -512,7 +512,10 @@ int mbsys_kmbes_preprocess(int verbose, void *mbio_ptr, void *store_ptr,
       if (skm->infoPart.numSamplesArray > 0) {
         xmt->xmtPingInfo.roll = skm->sample[skm->infoPart.numSamplesArray-1].KMdefault.roll_deg;
         xmt->xmtPingInfo.pitch = skm->sample[skm->infoPart.numSamplesArray-1].KMdefault.pitch_deg;
-        xmt->xmtPingInfo.heave = skm->sample[skm->infoPart.numSamplesArray-1].KMdefault.heave_m;
+        if (kluge_auvsentrysensordepth)
+          xmt->xmtPingInfo.heave = 0.0;
+        else
+          xmt->xmtPingInfo.heave = skm->sample[skm->infoPart.numSamplesArray-1].KMdefault.heave_m;
       }
 
       /* interpolate nav */
@@ -611,7 +614,10 @@ int mbsys_kmbes_preprocess(int verbose, void *mbio_ptr, void *store_ptr,
                                          time_d, &heave, &jattitude, &interp_error);
         xmt->xmtPingInfo.roll = roll;
         xmt->xmtPingInfo.pitch = pitch;
-        xmt->xmtPingInfo.heave = heave;
+        if (kluge_auvsentrysensordepth)
+          xmt->xmtPingInfo.heave = 0.0;
+        else
+          xmt->xmtPingInfo.heave = heave;
       }
 
       /* interpolate soundspeed */
