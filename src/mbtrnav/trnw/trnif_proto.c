@@ -886,7 +886,9 @@ int trnif_msg_handle_trnu(void *msg, netif_t *self, msock_connection_t *peer, in
 
     if(NULL!=msg && NULL!=self && NULL!=peer){
 
-        wtnav_t *trn = self->rr_res;
+        // get resource bundle
+        trnuif_res_t *resources=self->rr_res;
+
        int32_t send_len=0;
         char *msg_out=NULL;
 
@@ -905,14 +907,15 @@ int trnif_msg_handle_trnu(void *msg, netif_t *self, msock_connection_t *peer, in
         }
 
         if(strcmp(msg,PROTO_TRNU_RST)==0){
-            // reinit, return ACK
-            if(NULL!=trn){
-            wtnav_reinit_filter(trn,true);
-            msg_out=strdup(PROTO_TRNU_ACK);
-            send_len=strlen(PROTO_TRNU_ACK)+1;
-            mlog_tprintf(self->mlog_id,"trn_filt_reinit,%lf,[%s:%s]\n", msg_time,peer->chost, peer->service);
+            // reinit, return ACK/NACK
+            if(NULL!=resources && NULL!=resources->reset_callback){
+                int test=resources->reset_callback();
+                const char *ret_msg=(test==0 ? PROTO_TRNU_ACK : PROTO_TRNU_NACK);
+                msg_out=strdup(ret_msg);
+                send_len=strlen(ret_msg)+1;
+                mlog_tprintf(self->mlog_id,"trn_filt_reinit,%lf,[%s:%s],%d\n", msg_time,peer->chost, peer->service,test);
             }else{
-                mlog_tprintf(self->mlog_id,"trn_filt_reinit[NULL_instance],%lf,[%s,%s]\n", msg_time,peer->chost, peer->service);
+                mlog_tprintf(self->mlog_id,"trn_filt_reinit[NULL resuorce],%lf,[%s,%s],-1\n", msg_time,peer->chost, peer->service);
                 msg_out=strdup(PROTO_TRNU_NACK);
                 send_len=strlen(PROTO_TRNU_NACK)+1;
             }
