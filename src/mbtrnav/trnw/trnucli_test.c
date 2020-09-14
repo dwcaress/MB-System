@@ -1092,16 +1092,16 @@ static int s_trnucli_test_trnu_async(app_cfg_t *cfg)
             trnucli_ctx_stat_show(stats,true,5);
             if(NULL!=stats)free(stats);
 
-//            fprintf(stderr,"\nTRN Client Context\n");
-//            trnucli_ctx_show(ctx,false,5);
+            fprintf(stderr,"\nTRN Client Context\n");
+            trnucli_ctx_show(ctx,false,5);
 
             // show latest update...
-//            fprintf(stderr,"\nUpdate Data\n");
-//            trnu_pub_t latest={0};
-//            if(trnucli_ctx_last_update(ctx,&latest,NULL)==0){
-//                // format per config (pretty, hex, csv, etc.)
-//                s_trnucli_process_update(&latest,cfg);
-//            }
+            fprintf(stderr,"\nUpdate Data\n");
+            trnu_pub_t latest={0};
+            if(trnucli_ctx_last_update(ctx,&latest,NULL)==0){
+                // format per config (pretty, hex, csv, etc.)
+                s_trnucli_process_update(&latest,cfg);
+            }
 
             // delay
             if(cfg->async>0)
