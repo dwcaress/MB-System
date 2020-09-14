@@ -363,6 +363,11 @@ announced releases. The source distributions associated with all releases, major
 ### MB-System Version 5.7 Release Notes:
 --
 
+#### 5.7.6beta54 (September 14, 2020)
+
+Mbnavadjust: Changed "Zero All Z Offsets" action to apply to only the crossings
+or ties currently displayed in the list, not literally all set ties.
+
 #### 5.7.6beta53 (September 13, 2020)
 
 Format 261 (MBF_KEMKMALL): Fix to AUV Sentry mode for kmall format - zero heave

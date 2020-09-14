@@ -6743,16 +6743,159 @@ int mbnavadjust_zerozoffsets() {
       /* get structure */
       crossing = &(project.crossings[i]);
 
-      /* deal with each tie */
-      for (int j = 0; j < crossing->num_ties; j++) {
-        tie = &(crossing->ties[j]);
+      /* if one or more ties exist and crossing is in the current view then zero the z-offsets */
+      if (crossing->num_ties > 0) {
+        bool process = false;
+        if (mbna_view_list == MBNA_VIEW_LIST_CROSSINGS) {
+          if ((mbna_view_mode == MBNA_VIEW_MODE_ALL) ||
+              (mbna_view_mode == MBNA_VIEW_MODE_SURVEY &&
+               mbna_survey_select == project.files[crossing->file_id_1].block &&
+               mbna_survey_select == project.files[crossing->file_id_2].block) ||
+              (mbna_view_mode == MBNA_VIEW_MODE_FILE && mbna_file_select == crossing->file_id_1 &&
+               mbna_file_select == crossing->file_id_2) ||
+              (mbna_view_mode == MBNA_VIEW_MODE_WITHSURVEY &&
+               (mbna_survey_select == project.files[crossing->file_id_1].block ||
+                mbna_survey_select == project.files[crossing->file_id_2].block)) ||
+              (mbna_view_mode == MBNA_VIEW_MODE_BLOCK &&
+               ((mbna_block_select1 == project.files[crossing->file_id_1].block &&
+                 mbna_block_select2 == project.files[crossing->file_id_2].block) ||
+                (mbna_block_select2 == project.files[crossing->file_id_1].block &&
+                 mbna_block_select1 == project.files[crossing->file_id_2].block))) ||
+              (mbna_view_mode == MBNA_VIEW_MODE_WITHFILE &&
+               (mbna_file_select == crossing->file_id_1 || mbna_file_select == crossing->file_id_2)) ||
+              (mbna_view_mode == MBNA_VIEW_MODE_WITHSECTION && mbna_file_select == crossing->file_id_1 &&
+               mbna_section_select == crossing->section_1) ||
+              (mbna_view_mode == MBNA_VIEW_MODE_WITHSECTION && mbna_file_select == crossing->file_id_2 &&
+               mbna_section_select == crossing->section_2)) {
+            process = true;
+          }
+        }
+        else if (mbna_view_list == MBNA_VIEW_LIST_MEDIOCRECROSSINGS) {
+          if (crossing->overlap >= MBNA_MEDIOCREOVERLAP_THRESHOLD) {
+            if ((mbna_view_mode == MBNA_VIEW_MODE_ALL) ||
+                (mbna_view_mode == MBNA_VIEW_MODE_SURVEY &&
+                 mbna_survey_select == project.files[crossing->file_id_1].block &&
+                 mbna_survey_select == project.files[crossing->file_id_2].block) ||
+                (mbna_view_mode == MBNA_VIEW_MODE_FILE && mbna_file_select == crossing->file_id_1 &&
+                 mbna_file_select == crossing->file_id_2) ||
+                (mbna_view_mode == MBNA_VIEW_MODE_WITHSURVEY &&
+                 (mbna_survey_select == project.files[crossing->file_id_1].block ||
+                  mbna_survey_select == project.files[crossing->file_id_2].block)) ||
+                (mbna_view_mode == MBNA_VIEW_MODE_BLOCK &&
+                 ((mbna_block_select1 == project.files[crossing->file_id_1].block &&
+                   mbna_block_select2 == project.files[crossing->file_id_2].block) ||
+                  (mbna_block_select2 == project.files[crossing->file_id_1].block &&
+                   mbna_block_select1 == project.files[crossing->file_id_2].block))) ||
+                (mbna_view_mode == MBNA_VIEW_MODE_WITHFILE &&
+                 (mbna_file_select == crossing->file_id_1 || mbna_file_select == crossing->file_id_2)) ||
+                (mbna_view_mode == MBNA_VIEW_MODE_WITHSECTION && mbna_file_select == crossing->file_id_1 &&
+                 mbna_section_select == crossing->section_1) ||
+                (mbna_view_mode == MBNA_VIEW_MODE_WITHSECTION && mbna_file_select == crossing->file_id_2 &&
+                 mbna_section_select == crossing->section_2)) {
+              process = true;
+            }
+          }
+        }
+        else if (mbna_view_list == MBNA_VIEW_LIST_GOODCROSSINGS) {
+          if (crossing->overlap >= MBNA_GOODOVERLAP_THRESHOLD) {
+            if ((mbna_view_mode == MBNA_VIEW_MODE_ALL) ||
+                (mbna_view_mode == MBNA_VIEW_MODE_SURVEY &&
+                 mbna_survey_select == project.files[crossing->file_id_1].block &&
+                 mbna_survey_select == project.files[crossing->file_id_2].block) ||
+                (mbna_view_mode == MBNA_VIEW_MODE_FILE && mbna_file_select == crossing->file_id_1 &&
+                 mbna_file_select == crossing->file_id_2) ||
+                (mbna_view_mode == MBNA_VIEW_MODE_WITHSURVEY &&
+                 (mbna_survey_select == project.files[crossing->file_id_1].block ||
+                  mbna_survey_select == project.files[crossing->file_id_2].block)) ||
+                (mbna_view_mode == MBNA_VIEW_MODE_BLOCK &&
+                 ((mbna_block_select1 == project.files[crossing->file_id_1].block &&
+                   mbna_block_select2 == project.files[crossing->file_id_2].block) ||
+                  (mbna_block_select2 == project.files[crossing->file_id_1].block &&
+                   mbna_block_select1 == project.files[crossing->file_id_2].block))) ||
+                (mbna_view_mode == MBNA_VIEW_MODE_WITHFILE &&
+                 (mbna_file_select == crossing->file_id_1 || mbna_file_select == crossing->file_id_2)) ||
+                (mbna_view_mode == MBNA_VIEW_MODE_WITHSECTION && mbna_file_select == crossing->file_id_1 &&
+                 mbna_section_select == crossing->section_1) ||
+                (mbna_view_mode == MBNA_VIEW_MODE_WITHSECTION && mbna_file_select == crossing->file_id_2 &&
+                 mbna_section_select == crossing->section_2)) {
+              process = true;
+            }
+          }
+        }
+        else if (mbna_view_list == MBNA_VIEW_LIST_BETTERCROSSINGS) {
+          if (crossing->overlap >= MBNA_BETTEROVERLAP_THRESHOLD) {
+            if ((mbna_view_mode == MBNA_VIEW_MODE_ALL) ||
+                (mbna_view_mode == MBNA_VIEW_MODE_SURVEY &&
+                 mbna_survey_select == project.files[crossing->file_id_1].block &&
+                 mbna_survey_select == project.files[crossing->file_id_2].block) ||
+                (mbna_view_mode == MBNA_VIEW_MODE_FILE && mbna_file_select == crossing->file_id_1 &&
+                 mbna_file_select == crossing->file_id_2) ||
+                (mbna_view_mode == MBNA_VIEW_MODE_WITHSURVEY &&
+                 (mbna_survey_select == project.files[crossing->file_id_1].block ||
+                  mbna_survey_select == project.files[crossing->file_id_2].block)) ||
+                (mbna_view_mode == MBNA_VIEW_MODE_BLOCK &&
+                 ((mbna_block_select1 == project.files[crossing->file_id_1].block &&
+                   mbna_block_select2 == project.files[crossing->file_id_2].block) ||
+                  (mbna_block_select2 == project.files[crossing->file_id_1].block &&
+                   mbna_block_select1 == project.files[crossing->file_id_2].block))) ||
+                (mbna_view_mode == MBNA_VIEW_MODE_WITHFILE &&
+                 (mbna_file_select == crossing->file_id_1 || mbna_file_select == crossing->file_id_2)) ||
+                (mbna_view_mode == MBNA_VIEW_MODE_WITHSECTION && mbna_file_select == crossing->file_id_1 &&
+                 mbna_section_select == crossing->section_1) ||
+                (mbna_view_mode == MBNA_VIEW_MODE_WITHSECTION && mbna_file_select == crossing->file_id_2 &&
+                 mbna_section_select == crossing->section_2)) {
+              process = true;
+            }
+          }
+        }
+        else if (mbna_view_list == MBNA_VIEW_LIST_TRUECROSSINGS) {
+          if (crossing->truecrossing) {
+            if ((mbna_view_mode == MBNA_VIEW_MODE_ALL) ||
+                (mbna_view_mode == MBNA_VIEW_MODE_SURVEY &&
+                 mbna_survey_select == project.files[crossing->file_id_1].block &&
+                 mbna_survey_select == project.files[crossing->file_id_2].block) ||
+                (mbna_view_mode == MBNA_VIEW_MODE_FILE && mbna_file_select == crossing->file_id_1 &&
+                 mbna_file_select == crossing->file_id_2) ||
+                (mbna_view_mode == MBNA_VIEW_MODE_WITHSURVEY &&
+                 (mbna_survey_select == project.files[crossing->file_id_1].block ||
+                  mbna_survey_select == project.files[crossing->file_id_2].block)) ||
+                (mbna_view_mode == MBNA_VIEW_MODE_BLOCK &&
+                 ((mbna_block_select1 == project.files[crossing->file_id_1].block &&
+                   mbna_block_select2 == project.files[crossing->file_id_2].block) ||
+                  (mbna_block_select2 == project.files[crossing->file_id_1].block &&
+                   mbna_block_select1 == project.files[crossing->file_id_2].block))) ||
+                (mbna_view_mode == MBNA_VIEW_MODE_WITHFILE &&
+                 (mbna_file_select == crossing->file_id_1 || mbna_file_select == crossing->file_id_2)) ||
+                (mbna_view_mode == MBNA_VIEW_MODE_WITHSECTION && mbna_file_select == crossing->file_id_1 &&
+                 mbna_section_select == crossing->section_1) ||
+                (mbna_view_mode == MBNA_VIEW_MODE_WITHSECTION && mbna_file_select == crossing->file_id_2 &&
+                 mbna_section_select == crossing->section_2)) {
+              process = true;
+            }
+          }
+        }
+        else if (mbna_view_list == MBNA_VIEW_LIST_TIES || mbna_view_list == MBNA_VIEW_LIST_TIESSORTED) {
+          process = true;
+        }
+        else {
+          process = false;
+        }
 
-        /* zero the z offset */
-        tie->offset_z_m = 0.0;
+        /* zero the z offset if process true */
+        if (process) {
+          for (int j = 0; j < crossing->num_ties; j++) {
+            tie = &(crossing->ties[j]);
 
-        /* set inversion out of date */
-        if (project.inversion_status == MBNA_INVERSION_CURRENT)
-          project.inversion_status = MBNA_INVERSION_OLD;
+            if (tie->offset_z_m != 0.0) {
+              tie->offset_z_m = 0.0;
+
+              /* set inversion out of date */
+              if (project.inversion_status == MBNA_INVERSION_CURRENT)
+                project.inversion_status = MBNA_INVERSION_OLD;
+            }
+          }
+
+        }
       }
     }
 
