@@ -162,6 +162,9 @@ typedef struct app_cfg_s{
     /// @var app_cfg_s::demo
     /// @brief TBD
     int demo;
+    /// @var app_cfg_s::test_reset_mod
+    /// @brief TBD
+    int test_reset_mod;
     /// @var app_cfg_s::async
     /// @brief TBD
     uint32_t async;
@@ -286,6 +289,7 @@ static void s_show_help()
     " --block=[lc]  : block on connect/listen (L:listen C:connect)\n"
     " --update=n    : TRN update N\n"
     " --demo=n      : use trn_cli handler mechanism, w/ periodic TRN resets (mod n)\n"
+    " --test-reset=n : enable periodic TRN resets (mod n)\n"
     "\ntrncli_ctx API options:\n"
     " --rctos=n     : reconnect timeout sec (reconnect if no message received for n sec)\n"
     " --nddelms=n   : delay n ms on listen error\n"
@@ -352,6 +356,7 @@ void parse_args(int argc, char **argv, app_cfg_t *cfg)
         {"nddelms", required_argument, NULL, 0},
         {"rcdelms", required_argument, NULL, 0},
         {"demo", required_argument, NULL, 0},
+        {"test-reset", required_argument, NULL, 0},
         {"async", required_argument, NULL, 0},
         {"logstats", required_argument, NULL, 0},
         {NULL, 0, NULL, 0}};
@@ -486,6 +491,10 @@ void parse_args(int argc, char **argv, app_cfg_t *cfg)
                 // demo
                 else if (strcmp("demo", options[option_index].name) == 0) {
                     sscanf(optarg,"%d",&cfg->demo);
+                }
+                // test-reset
+                else if (strcmp("test-reset", options[option_index].name) == 0) {
+                    sscanf(optarg,"%d",&cfg->test_reset_mod);
                 }
                 // async
                 else if (strcmp("async", options[option_index].name) == 0) {
@@ -677,7 +686,7 @@ static void app_cfg_destroy(app_cfg_t **pself)
 static int s_app_cfg_show(app_cfg_t *self,bool verbose, int indent)
 {
     int retval=0;
-    int wkey=12;
+    int wkey=15;
     int wval=14;
     fprintf(stderr,"%*s%*s  %*s\n",indent,(indent>0?" ":""),wkey,"verbose",wval,(self->verbose?"Y":"N"));
     fprintf(stderr,"%*s%*s  %*s\n",indent,(indent>0?" ":""),wkey,"host",wval,self->trnu_host);
@@ -686,6 +695,7 @@ static int s_app_cfg_show(app_cfg_t *self,bool verbose, int indent)
     fprintf(stderr,"%*s%*s  %*s\n",indent,(indent>0?" ":""),wkey,"input_src",wval,s_app_input2str(self->input_src));
     fprintf(stderr,"%*s%*s  %*u\n",indent,(indent>0?" ":""),wkey,"async",wval,self->async);
     fprintf(stderr,"%*s%*s  %*d\n",indent,(indent>0?" ":""),wkey,"demo",wval,self->demo);
+    fprintf(stderr,"%*s%*s  %*d\n",indent,(indent>0?" ":""),wkey,"test_reset_mod",wval,self->test_reset_mod);
     fprintf(stderr,"%*s%*s  %*s\n",indent,(indent>0?" ":""),wkey,"ifile",wval,self->ifile);
     fprintf(stderr,"%*s%*s  %*s\n",indent,(indent>0?" ":""),wkey,"ofmt",wval,s_app_ofmt2str(self->ofmt));
     fprintf(stderr,"%*s%*s  %*s\n",indent,(indent>0?" ":""),wkey,"out",wval,s_app_ofile2str(self->ofile));
@@ -1050,10 +1060,20 @@ static int s_trnucli_test_trnu_async(app_cfg_t *cfg)
         }
 
         // app does things here...
-
+        int x=0;
         // this app prints status to demo API methods
         // until the use interrupts (CTRL-C)
         while(test==0 && !g_interrupt){
+
+            // reinit per config
+            if(NULL!=cfg && cfg->test_reset_mod>0 && x>0 && x%cfg->test_reset_mod==0 ){
+                fprintf(stderr,"\nTest Reset mod/update[%d/%d]\n",cfg->test_reset_mod,x);
+                int test=trnucli_ctx_reset_trn(ctx);
+                fprintf(stderr,"\nReset returned[%d]\n",test);
+            }else{
+                fprintf(stderr,"\nSkipping Test Reset mod/update[%d/%d]\n",cfg->test_reset_mod,x);
+            }
+            x++;
 
             // show the context...
             fprintf(stderr,"\nUpdate Status\n");

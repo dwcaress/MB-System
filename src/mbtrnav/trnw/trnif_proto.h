@@ -106,6 +106,13 @@ typedef struct trnif_res_s{
     wtnav_t *trn;
 }trnif_res_t;
 
+typedef int (*trnu_reset_callback_fn)(void);
+
+typedef struct trnuif_res_s{
+    wtnav_t *trn;
+    trnu_reset_callback_fn reset_callback;
+}trnuif_res_t;
+
 /////////////////////////
 // Exports
 /////////////////////////

@@ -652,6 +652,9 @@ wtnav_t *trn_instance = NULL;
 trnw_oflags_t trn_oflags=TRN_OUT_DFL;
 netif_t *trnsvr=NULL;
 netif_t *trnusvr=NULL;
+int s_mbtrnpp_trnu_reset_callback();
+trnuif_res_t rr_resources={0},*g_trnu_res=&rr_resources;
+
 #endif // WITH_MBTNAV
 
 typedef enum{RF_NONE=0,RF_FORCE_UPDATE=0x1,RF_RELEASE=0x2}mb_resource_flag_t;
@@ -667,6 +670,7 @@ typedef enum {
     MBTPP_EV_MB_FILE,
     MBTPP_EV_MB_xyoffset,
     MBTPP_EV_MB_offset_z,
+    MBTPP_EV_MB_TRNUCLI_RESET,
     MBTPP_EV_MB_EOF,
     MBTPP_EV_MB_NONSURVEY,
     MBTPP_EV_EMBGETALL,
@@ -723,7 +727,7 @@ typedef enum {
 // profiling - event channel labels
 const char *mbtrnpp_stevent_labels[] = {
     "mb_cycles", "mb_con", "mb_dis", "mb_pub_n", "mb_reinit", "mb_gain_lo", "mb_file",
-    "mb_xyoffset", "mb_offset_z", "mb_eof", "mb_nonsurvey", "e_mbgetall", "e_mbfailure",
+    "mb_xyoffset", "mb_offset_z", "mb_trnucli_reset", "mb_eof", "mb_nonsurvey", "e_mbgetall", "e_mbfailure",
     "e_mb_frame_rd", "e_mb_log_wr", "e_mbsocket", "e_mbcon" "e_mbpub"
 #ifdef WITH_MBTNAV
     ,"trn_proc_n","trnu_pub_n","trnu_pubempty_n","e_trnu_pub","e_trnu_pubempty"
@@ -3893,7 +3897,7 @@ int main(int argc, char **argv) {
       // force a reinit when data from the next file is opened
       if (mbtrn_cfg->reinit_file_enable && !reinit_flag) {
         fprintf(stderr, "--Reinit set due to closing input swath file\n");
-        mlog_tprintf(mbtrnpp_mlog_id,"i,mbtrnpp: set reinit due to closing input swath file [%s]\n", ifile);
+          mlog_tprintf(mbtrnpp_mlog_id,"i,mbtrnpp: set reinit due to closing input swath file [%s]\n", ifile);
         MST_COUNTER_INC(app_stats->stats->events[MBTPP_EV_MB_EOF]);
         reinit_flag = true;
       }
@@ -4766,7 +4770,7 @@ int mbtrnpp_trnu_pub_osocket(trn_update_t *update,
                         {update->mse_dat->covariance[0],update->mse_dat->covariance[2],update->mse_dat->covariance[5],update->mse_dat->covariance[1]}
                     },
                     {use_offset_time,use_offset_n,use_offset_e,use_offset_z,
-                        {use_covariance[0],use_covariance[2],use_covariance[5],use_covariance[1]}
+                        {use_covariance[0],use_covariance[1],use_covariance[2],use_covariance[3]}
                     },
                 },
                 update->reinit_count,
@@ -4827,8 +4831,8 @@ int mbtrnpp_trnu_pubempty_osocket(double time, double lat, double lon, double de
                     {dzero, dzero, dzero, dzero,
                         {dzero, dzero, dzero, dzero}
                     },
-                    {dzero, dzero, dzero, dzero,
-                        {dzero, dzero, dzero, dzero}
+                    {use_offset_time,use_offset_n,use_offset_e,use_offset_z,
+                        {use_covariance[0],use_covariance[1],use_covariance[2],use_covariance[3]}
                     },
                 },
                 izero,
@@ -4847,7 +4851,7 @@ int mbtrnpp_trnu_pubempty_osocket(double time, double lat, double lon, double de
                 dzero,
                 dzero,
             };
-
+            
             if( (iobytes=netif_pub(trnusvr,(char *)&pub_data, sizeof(pub_data)))>0){
                 retval=iobytes;
                 MST_COUNTER_INC(app_stats->stats->events[MBTPP_EV_TRNU_PUBEMPTYN]);
@@ -4998,6 +5002,40 @@ int mbtrnpp_init_mb1svr(netif_t **psvr, char *host, int port, bool verbose)
     return retval;
 }
 /*--------------------------------------------------------------------*/
+
+int s_mbtrnpp_trnu_reset_callback()
+{
+    int retval=0;
+    int reinits_pre=wtnav_get_num_reinits(trn_instance);
+
+    double reset_time = mtime_etime();
+
+    fprintf(stderr, "--reinit (cli_req) systime:%.6f centered on offset: %f %f %f\n",
+            reset_time, use_offset_e, use_offset_n, use_offset_z);
+
+    wtnav_reinit_filter_offset(trn_instance, true, use_offset_n, use_offset_e, use_offset_z);
+
+    mlog_tprintf(mbtrnpp_mlog_id, "i,trn filter reinit.cli systime:%.6f centered on offset: %f %f %f\n",
+                 reset_time, use_offset_e, use_offset_n, use_offset_z);
+
+    MST_COUNTER_INC(app_stats->stats->events[MBTPP_EV_MB_REINIT]);
+    MST_COUNTER_INC(app_stats->stats->events[MBTPP_EV_MB_TRNUCLI_RESET]);
+
+//    reinit_flag = false;
+    n_reinit++;
+
+    int reinit_post=wtnav_get_num_reinits(trn_instance);
+
+    if(reinit_post<=reinits_pre){
+        retval=-1;
+    }
+
+//    fprintf(stderr,"%s:%d - TRNU CLIENT REINIT REQ reinit pre/post[%d/%d]\n",__func__,__LINE__,reinits_pre,reinit_post);
+
+    return retval;
+}
+
+
 int mbtrnpp_init_trnusvr(netif_t **psvr, char *host, int port, wtnav_t *trn, bool verbose)
 {
     int retval = -1;
@@ -5015,7 +5053,12 @@ int mbtrnpp_init_trnusvr(netif_t **psvr, char *host, int port, wtnav_t *trn, boo
 
         if(NULL!=svr){
             *psvr = svr;
-            netif_set_reqres_res(svr,trn);
+            g_trnu_res->trn=trn_instance;
+            g_trnu_res->reset_callback=s_mbtrnpp_trnu_reset_callback;
+
+            netif_set_reqres_res(svr,g_trnu_res);
+            //            trnif_res_t rr_resources={trn};
+            //netif_set_reqres_res(svr,trn);
             fprintf(stderr,"trnusvr netif:\n");
             netif_show(svr,true,5);
             netif_init_log(svr, "trnusvr", (NULL!=mbtrn_cfg->trn_log_dir?mbtrn_cfg->trn_log_dir:"."), s_mbtrnpp_session_str(NULL,0,RF_NONE));

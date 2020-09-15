@@ -20,6 +20,7 @@ include "beta" in the tag name are preliminary and generally not announced.
 Distributions that do not include "beta" in the tag name correspond to the major,
 announced releases. The source distributions associated with all releases, major or beta, are equally accessible as tarballs through the Github interface.
 
+- Version 5.7.6beta54    September 14, 2020
 - Version 5.7.6beta53    September 13, 2020
 - Version 5.7.6beta52    September 9, 2020
 - Version 5.7.6beta51    September 4, 2020
@@ -367,6 +368,12 @@ announced releases. The source distributions associated with all releases, major
 
 Mbnavadjust: Changed "Zero All Z Offsets" action to apply to only the crossings
 or ties currently displayed in the list, not literally all set ties.
+
+Mbtrnpp: Fixed TRN content of TRN updates when TRN processing fails due to
+insufficient or inconsistent data.
+
+Mbtrnpp: Add support for trnu client reset callback (does reset using best
+offset) and supporting metrics, add file swap event to reinit plot
 
 #### 5.7.6beta53 (September 13, 2020)
 
