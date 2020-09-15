@@ -4770,7 +4770,7 @@ int mbtrnpp_trnu_pub_osocket(trn_update_t *update,
                         {update->mse_dat->covariance[0],update->mse_dat->covariance[2],update->mse_dat->covariance[5],update->mse_dat->covariance[1]}
                     },
                     {use_offset_time,use_offset_n,use_offset_e,use_offset_z,
-                        {use_covariance[0],use_covariance[2],use_covariance[5],use_covariance[1]}
+                        {use_covariance[0],use_covariance[1],use_covariance[2],use_covariance[3]}
                     },
                 },
                 update->reinit_count,
@@ -4831,8 +4831,8 @@ int mbtrnpp_trnu_pubempty_osocket(double time, double lat, double lon, double de
                     {dzero, dzero, dzero, dzero,
                         {dzero, dzero, dzero, dzero}
                     },
-                    {dzero, dzero, dzero, dzero,
-                        {dzero, dzero, dzero, dzero}
+                    {use_offset_time,use_offset_n,use_offset_e,use_offset_z,
+                        {use_covariance[0],use_covariance[1],use_covariance[2],use_covariance[3]}
                     },
                 },
                 izero,
@@ -4851,7 +4851,7 @@ int mbtrnpp_trnu_pubempty_osocket(double time, double lat, double lon, double de
                 dzero,
                 dzero,
             };
-
+            
             if( (iobytes=netif_pub(trnusvr,(char *)&pub_data, sizeof(pub_data)))>0){
                 retval=iobytes;
                 MST_COUNTER_INC(app_stats->stats->events[MBTPP_EV_TRNU_PUBEMPTYN]);
