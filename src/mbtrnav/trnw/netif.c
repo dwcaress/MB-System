@@ -214,7 +214,7 @@ static bool s_peer_idval_cmp(void *item, void *value)
     double connect_time=0.0;
     byte buf[NETIF_UDP_BUF_LEN]={0};
 
-    int iobytes=0;
+    int64_t iobytes=0;
 
     // clear buffer
     memset(buf,0,NETIF_UDP_BUF_LEN);
@@ -234,6 +234,7 @@ static bool s_peer_idval_cmp(void *item, void *value)
         case -1:
             if(errsave!=EAGAIN){
                 PMPRINT(MOD_NETIF,NETIF_V2,(stderr,"[UDPCON.%s]:ERR - recvfrom ret[-1] err[%d/%s]\n",self->port_name,errsave,strerror(errsave)));
+            }else{
                 MST_COUNTER_INC(self->profile->stats->events[NETIF_EV_EAGAIN]);
             }
             MST_COUNTER_INC(self->profile->stats->events[NETIF_EV_ECLI_RXE]);
@@ -247,7 +248,7 @@ static bool s_peer_idval_cmp(void *item, void *value)
             // get host name info from connection
             int svc = msock_connection_addr2str(peer);
 
-            PMPRINT(MOD_NETIF,NETIF_V4,(stderr,"[UDPCON.%s]:RX - ret[%d] bytes id[%s:%s]\n",
+            PMPRINT(MOD_NETIF,NETIF_V4,(stderr,"[UDPCON.%s]:RX - ret[%"PRId64"] bytes id[%s:%s]\n",
                                         self->port_name,iobytes, peer->chost, peer->service));
 
             // update client list
@@ -281,8 +282,9 @@ static bool s_peer_idval_cmp(void *item, void *value)
                 // invoke handler (if client sent connect message)
                 MST_METRIC_START(self->profile->stats->metrics[NETIF_CH_HANDLE_XT], mtime_dtime());
 
-                if( (iobytes = self->handle_fn(buf,self,pcon,&errout))>0){
-                    MST_COUNTER_ADD(self->profile->stats->status[NETIF_STA_CLI_TX_BYTES],iobytes);
+                int hret=self->handle_fn(buf,self,pcon,&errout);
+                if( hret > 0){
+                    MST_COUNTER_ADD(self->profile->stats->status[NETIF_STA_CLI_TX_BYTES],hret);
                 }
 
                 MST_METRIC_LAP(self->profile->stats->metrics[NETIF_CH_HANDLE_XT], mtime_dtime());
