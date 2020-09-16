@@ -20,6 +20,7 @@ include "beta" in the tag name are preliminary and generally not announced.
 Distributions that do not include "beta" in the tag name correspond to the major,
 announced releases. The source distributions associated with all releases, major or beta, are equally accessible as tarballs through the Github interface.
 
+- Version 5.7.6beta55    September 16, 2020
 - Version 5.7.6beta54    September 14, 2020
 - Version 5.7.6beta53    September 13, 2020
 - Version 5.7.6beta52    September 9, 2020
@@ -363,6 +364,11 @@ announced releases. The source distributions associated with all releases, major
 --
 ### MB-System Version 5.7 Release Notes:
 --
+
+#### 5.7.6beta55 (September 16, 2020)
+
+Mbtrnpp: Fix potential variable overflow and incorrect metrics value assignment
+in netif code.
 
 #### 5.7.6beta54 (September 14, 2020)
 

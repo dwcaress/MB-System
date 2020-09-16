@@ -178,7 +178,7 @@ static int s_get_acknak(trnucli_t *self, uint32_t retries, uint32_t delay)
     }//else invalid args
 
     return retval;
-}//s_send_recv
+}//s_get_acknak
 
 // send message, get ack/nack
 // return 0 if ACK/NACK, -1 otherwise
@@ -247,7 +247,9 @@ int trnucli_connect(trnucli_t *self, char *host, int port)
             PTRACE();
             PDPRINT((stderr,"CON failed [%d]\n",test));
         }
-    }else{PTRACE();}
+    }else{
+        PTRACE();
+    }
 
     return retval;
 }// end function trnucli_connect
@@ -376,7 +378,7 @@ double trnucli_update_hostage(trnu_pub_t *update)
         retval = mtime_etime()-update->update_time;
     }
     return retval;
-}// end trnucli_reset_trn trnucli_connect
+}// trnucli_update_hostage
 
 
 static int s_update_pretty_org(trnu_pub_t *update, char *dest, int len, int indent)
