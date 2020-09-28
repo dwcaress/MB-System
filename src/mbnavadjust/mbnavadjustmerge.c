@@ -1714,6 +1714,18 @@ int main(int argc, char **argv) {
                 project_output.datadir, k, j);
         // fprintf(stderr, "Executing in shell: %s\n", command);
         /* int shellstatus = */ system(command);
+
+        /* copy the triangle file if it exists */
+        struct stat file_status;
+        sprintf(command, "%s/nvs_%4.4d_%4.4d.mb71.tri", project_inputadd.datadir, i, j);
+        const int fstat = stat(command, &file_status);
+        if (fstat == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR
+                      && file_status.st_size > 0) {
+          sprintf(command, "cp %s/nvs_%4.4d_%4.4d.mb71.tri %s/nvs_%4.4d_%4.4d.mb71.tri",
+                  project_inputadd.datadir, i, j, project_output.datadir, k, j);
+          // fprintf(stderr, "Executing in shell: %s\n", command);
+          /* int shellstatus = */ system(command);
+        }
       }
     }
     fprintf(stderr, "\nCopied input add project to output project:\n\t%s\n", project_output_path);

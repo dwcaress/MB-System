@@ -296,12 +296,25 @@ int mbr_rt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 
 	int status = MB_SUCCESS;
 
+#ifdef MBF_EDGJSTAR_DEBUG
+fprintf(stderr, "\n%s:%d:%s: About to enter read loop  file offset:%ld\n",
+__FILE__, __LINE__, __FUNCTION__, ftell(mb_io_ptr->mbfp));
+#endif
+
 	/* loop over reading data until a full record of some sort is read */
 	bool done = false;
 	while (!done) {
 		/* read message header */
 		char buffer[MBSYS_JSTAR_SYSINFO_MAX];
-		if ((read_status = fread(buffer, MBSYS_JSTAR_MESSAGE_SIZE, 1, mb_io_ptr->mbfp)) == 1) {
+    int skip = 0;
+		read_status = fread(buffer, MBSYS_JSTAR_MESSAGE_SIZE, 1, mb_io_ptr->mbfp);
+    while (read_status == 1 && !(buffer[0] == 0x01 && buffer[1] == 0x16)) {
+      for (int i = 0; i < MBSYS_JSTAR_MESSAGE_SIZE - 1; i++)
+        buffer[i] = buffer[i + 1];
+      read_status = fread(&buffer[MBSYS_JSTAR_MESSAGE_SIZE-1], 1, 1, mb_io_ptr->mbfp);
+      skip++;
+    }
+    if (read_status == 1) {
 			/* extract the message header values */
 			index = 0;
 			mb_get_binary_short(true, &buffer[index], &(message.start_marker));
@@ -329,8 +342,11 @@ int mbr_rt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 
 			status = MB_SUCCESS;
 #ifdef MBF_EDGJSTAR_DEBUG
-			fprintf(stderr, "NEW MESSAGE HEADER: status:%d message.version:%d message.type:%d message.subsystem:%d channel:%d message.size:%d\n",
-			        status, message.version, message.type, message.subsystem, message.channel, message.size);
+      if (skip > 0)
+        fprintf(stderr, "%s:%d:%s: SKIPPED BYTES: %d\n", __FILE__, __LINE__, __FUNCTION__, skip);
+			fprintf(stderr, "%s:%d:%s: NEW MESSAGE HEADER: status:%d message.version:%d message.type:%d message.subsystem:%d channel:%d message.size:%d skip:%d file offset:%ld\n",
+			        __FILE__, __LINE__, __FUNCTION__, status, message.version, message.type,
+              message.subsystem, message.channel, message.size, skip, ftell(mb_io_ptr->mbfp));
 #endif
 		}
 
@@ -898,8 +914,10 @@ int mbr_rt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 					done = true;
 				}
 #ifdef MBF_EDGJSTAR_DEBUG
-				fprintf(stderr, "Done reading 1: %d  pingNum:%d %d   subsystem:%d %d\n", done, store->ssport.pingNum,
-				        store->ssstbd.pingNum, store->ssport.message.subsystem, store->ssstbd.message.subsystem);
+				fprintf(stderr, "%s:%d:%s: Done reading 1: %d  pingNum:%d %d   subsystem:%d %d  file offset:%ld\n",
+              __FILE__, __LINE__, __FUNCTION__, done, store->ssport.pingNum,
+				      store->ssstbd.pingNum, store->ssport.message.subsystem, store->ssstbd.message.subsystem,
+              ftell(mb_io_ptr->mbfp));
 #endif
 			}
 
@@ -1404,8 +1422,10 @@ int mbr_rt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 					done = true;
 				}
 #ifdef MBF_EDGJSTAR_DEBUG
-				fprintf(stderr, "Done reading 1: %d  pingNum:%d %d   subsystem:%d %d\n", done, store->ssport.pingNum,
-				        store->ssstbd.pingNum, store->ssport.message.subsystem, store->ssstbd.message.subsystem);
+				fprintf(stderr, "%s:%d:%s: Done reading 1: %d  pingNum:%d %d   subsystem:%d %d file offset:%ld\n",
+              __FILE__, __LINE__, __FUNCTION__, done, store->ssport.pingNum,
+				      store->ssstbd.pingNum, store->ssport.message.subsystem, store->ssstbd.message.subsystem,
+              ftell(mb_io_ptr->mbfp));
 #endif
 			}
 

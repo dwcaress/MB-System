@@ -5865,7 +5865,7 @@ int mbnavadjust_autosetsvsvertical() {
   struct mbna_section *section;
   struct mbna_crossing *crossing;
   struct mbna_tie *tie;
-  struct mbna_matrix matrix;
+  struct mbna_matrix matrix = { 0, 0, 0, NULL, NULL, NULL };
   bool *x_continuity = NULL;
   double *x_time_d = NULL;
   double *u = NULL;
@@ -6961,7 +6961,7 @@ int mbnavadjust_invertnav() {
   struct mbna_section *section2;
   struct mbna_crossing *crossing;
   struct mbna_tie *tie;
-  struct mbna_matrix matrix;
+  struct mbna_matrix matrix = { 0, 0, 0, NULL, NULL, NULL };
   bool *x_continuity = NULL;
   int *x_quality = NULL;
   int *x_num_ties = NULL;
@@ -7189,19 +7189,16 @@ int mbnavadjust_invertnav() {
     nsmooth = 0;
     for (int inav = 0; inav < nnav - 1; inav++) {
       if (x_continuity[inav + 1]) {
-        nsmooth++;
+        nsmooth += 3;
       }
     }
-    nsmooth = 3 * nsmooth;
 
     /* count second derivative smoothing points */
-    /*nsmooth = 0;
     for (int inav = 0; inav < nnav - 2; inav++) {
         if (x_continuity[inav + 1] && x_continuity[inav + 2]) {
-            nsmooth++;
+            nsmooth += 3;
         }
     }
-    nsmooth = 3 * nsmooth;*/
 
     /* get dimensions of inversion problem and initial misfit */
     ntie = 0;
@@ -8321,11 +8318,6 @@ int mbnavadjust_invertnav() {
               smooth_exp = MAX((smooth_max - iteration * d_smooth), project.smoothing);
             }
             smoothweight = pow(10.0, smooth_exp) / 100.0;
-            fprintf(stderr, "\n----------\n\nPreparing inversion iteration %d of %d with smoothing %f ==> %f\n\t\trows: %d %d  cols: %d %d\n",
-                    iteration, n_iteration_tot, smooth_exp,
-                    smoothweight, matrix.m, nrows, matrix.n, ncols);
-
-            /* loop over each crossing, applying offsets evenly to both points */
             int irow = 0;
             nrms = 0;
             rms_misfit_previous = 0.0;
@@ -8341,6 +8333,12 @@ int mbnavadjust_invertnav() {
             memset(matrix.nia, 0, nrows_alloc * sizeof(int));
             memset(matrix.ia, 0, 6 * nrows_alloc * sizeof(int));
             memset(matrix.a, 0, 6 * nrows_alloc * sizeof(double));
+
+            fprintf(stderr, "\n----------\n\nPreparing inversion iteration %d of %d with smoothing %f ==> %f\n\t\trows: %d %d  cols: %d %d\n",
+                    iteration, n_iteration_tot, smooth_exp,
+                    smoothweight, matrix.m, nrows, matrix.n, ncols);
+
+            /* loop over each crossing, applying offsets evenly to both points */
             for (int icrossing = 0; icrossing < project.num_crossings; icrossing++) {
                 crossing = &project.crossings[icrossing];
                 int nc1;
@@ -8763,8 +8761,10 @@ fprintf(stderr,"APPLYING WEIGHT: %f  ifile:%d isection:%d\n",weight,ifile,isecti
             }
 
             /* E1: loop over all navigation applying second derivative smoothing */
-            /* nnsmooth = 0;
+            nnsmooth = 0;
             for (int inav = 0; inav < nnav - 2; inav++) {
+                int index_m;
+                int index_n;
                 if (x_continuity[inav + 1] && x_continuity[inav + 2]) {
                     if (x_time_d[inav + 2] - x_time_d[inav] > 0.0) {
                         weight = smoothweight / (x_time_d[inav + 2] - x_time_d[inav]);
@@ -8829,7 +8829,7 @@ fprintf(stderr,"APPLYING WEIGHT: %f  ifile:%d isection:%d\n",weight,ifile,isecti
                     matrix.nia[irow] = 3;
                     irow++;
                 }
-            }*/
+            }
 
             /* F1: loop over all navigation applying L1 norm - minimize size of offset */
             /*for (int inav = 0; inav < nnav; inav++) {
@@ -10544,16 +10544,10 @@ fprintf(stderr, "Fix Z block %d to %f\n", iblock, bzfix[iblock]);
             sprintf(message, "Performing navigation inversion iteration %d of %d...", iteration +1, n_iteration);
             do_message_on(message);
 
-
             //smoothweight = pow(10.0, project.smoothing) / 100.0;
             //smooth_exp = MAX((smooth_max - iteration * d_smooth), project.smoothing);
             smooth_exp = project.smoothing;
             smoothweight = pow(10.0, smooth_exp) / 100.0;
-            fprintf(stderr, "\n----------\n\nPreparing inversion iteration %d with smoothing %f ==> %f\n\t\trows: %d %d  cols: %d %d\n",
-                    iteration, smooth_exp,
-                    smoothweight, matrix.m, nrows, matrix.n, ncols);
-
-            /* loop over each crossing, applying offsets evenly to both points */
             int irow = 0;
             nrms = 0;
             rms_misfit_previous = 0.0;
@@ -10569,6 +10563,12 @@ fprintf(stderr, "Fix Z block %d to %f\n", iblock, bzfix[iblock]);
             memset(matrix.nia, 0, nrows_alloc * sizeof(int));
             memset(matrix.ia, 0, 6 * nrows_alloc * sizeof(int));
             memset(matrix.a, 0, 6 * nrows_alloc * sizeof(double));
+
+            fprintf(stderr, "\n----------\n\nPreparing inversion iteration %d with smoothing %f ==> %f\n\t\trows: %d %d  cols: %d %d\n",
+                    iteration, smooth_exp,
+                    smoothweight, matrix.m, nrows, matrix.n, ncols);
+
+            /* loop over each crossing, applying offsets evenly to both points */
             for (int icrossing = 0; icrossing < project.num_crossings; icrossing++) {
                 crossing = &project.crossings[icrossing];
                 int nc1;
