@@ -20,6 +20,7 @@ include "beta" in the tag name are preliminary and generally not announced.
 Distributions that do not include "beta" in the tag name correspond to the major,
 announced releases. The source distributions associated with all releases, major or beta, are equally accessible as tarballs through the Github interface.
 
+- Version 5.7.6beta56    September 28, 2020
 - Version 5.7.6beta55    September 16, 2020
 - Version 5.7.6beta54    September 14, 2020
 - Version 5.7.6beta53    September 13, 2020
@@ -364,6 +365,21 @@ announced releases. The source distributions associated with all releases, major
 --
 ### MB-System Version 5.7 Release Notes:
 --
+
+#### 5.7.6beta56 (September 28, 2020)
+
+Mbsegylist: Add print option of 'l' for the line number contained in the segy file header.
+
+Format 132 (MBF_EDGJSTAR): Edgetech Jstar format. The i/o module has been modified
+to handle broken records gracefully by searching byte by byte for the next valid
+start of record.
+
+Mbnavadjust: Reinstated use of both first and second derivitive penalty function
+in the final stage of inversion for a navigation adjustment model.
+
+Mbnavadjustmerge: Now copies triangle files along with section swath files when
+copying a project. This means these triangle files will not need to be remade
+in the new project.
 
 #### 5.7.6beta55 (September 16, 2020)
 

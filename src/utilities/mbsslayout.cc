@@ -2397,7 +2397,10 @@ int main(int argc, char **argv) {
 				}
 
 				/* bin port trace */
-				int istart = rangemin / (soundspeed * sample_interval);
+				int istart = rangemin / (0.5 * soundspeed * sample_interval);
+//const double rr = 0.5 * soundspeed * sample_interval * std::max(num_samples_port, num_samples_stbd);
+//fprintf(stderr, "%s:%d:%s: sensordepth:%f altitude:%f swath_width:%f rr:%f rangemin:%f kstart:%d soundspeed:%f sample_interval:%f istart:%d\n",
+//__FILE__, __LINE__, __FUNCTION__, sensordepth, altitude, swath_width, rr, table_range[kstart], kstart, soundspeed, sample_interval, istart);
 				for (int i = istart; i < num_samples_port; i++) {
 					/* get sample range */
 					const double rr = 0.5 * soundspeed * sample_interval * i;
@@ -2432,6 +2435,7 @@ int main(int argc, char **argv) {
 						/* bin the value and position */
 						if (found) {
 							const int j = opixels_ss / 2 + (int)(xtrack / pixel_width);
+//fprintf(stderr, "port sample %d: rr:%f xtrack:%f pixel_width:%f j:%d\n", i, rr, xtrack, pixel_width, j);
 							if (j >= 0 && j < opixels_ss) {
 								oss[j] += raw_samples_port[i];
 								ossbincount[j]++;
@@ -2452,7 +2456,7 @@ int main(int argc, char **argv) {
 				}
 
 				/* bin stbd trace */
-				istart = rangemin / (soundspeed * sample_interval);
+				istart = rangemin / (0.5 * soundspeed * sample_interval);
 				for (int i = istart; i < num_samples_stbd; i++) {
 					/* get sample range */
 					const double rr = 0.5 * soundspeed * sample_interval * i;
