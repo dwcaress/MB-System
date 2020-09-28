@@ -40,6 +40,9 @@ current working directory. If, for instance, the \fIlibmbgmt\fP shared library
 has been installed in the file /usr/lib/libmbgmt.dylib, then the
 GMT_CUSTOM_LIBS parameter in a gmt.conf file can be set to:
         GMT_CUSTOM_LIBS = /usr/lib/libmbgmt.dylib
+        
+On a linux system use the mbsystem shared library, e.g.:
+        GMT_CUSTOM_LIBS = /usr/local/lib/mbsystem.so
 
 .SH MB-SYSTEM AUTHORSHIP
 David W. Caress
