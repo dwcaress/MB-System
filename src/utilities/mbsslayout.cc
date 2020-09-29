@@ -242,6 +242,7 @@ int main(int argc, char **argv) {
 	int layout_mode = MBSSLAYOUT_LAYOUT_FLATBOTTOM;
 	int ss_altitude_mode = MBSSLAYOUT_ALTITUDE_ALTITUDE;
 	double bottompick_threshold = 0.5;
+  double bottompick_blank = 0.0;
 	bool channel_swap = false;
 	double swath_width = 0.0;
 	int swath_mode = MBSSLAYOUT_SWATHWIDTH_VARIABLE;
@@ -367,7 +368,7 @@ int main(int argc, char **argv) {
 					ss_altitude_mode = MBSSLAYOUT_ALTITUDE_BOTTOMPICK;
 				}
 				else if (strcmp("altitude-bottompick-threshold", options[option_index].name) == 0) {
-					/* n = */ sscanf(optarg, "%lf", &bottompick_threshold);
+					/*n = */ sscanf(optarg, "%lf/%lf", &bottompick_threshold, &bottompick_blank);
 					ss_altitude_mode = MBSSLAYOUT_ALTITUDE_BOTTOMPICK;
 				}
 				else if ((strcmp("altitude-topo-grid", options[option_index].name) == 0)
@@ -635,6 +636,7 @@ int main(int argc, char **argv) {
 			fprintf(stderr, "dbg2       topo_grid_file:             %s\n", topo_grid_file);
 			fprintf(stderr, "dbg2       ss_altitude_mode:           %d\n", ss_altitude_mode);
 			fprintf(stderr, "dbg2       bottompick_threshold:       %f\n", bottompick_threshold);
+			fprintf(stderr, "dbg2       bottompick_blank:           %f\n", bottompick_blank);
 			fprintf(stderr, "dbg2       channel_swap:               %d\n", channel_swap);
 			fprintf(stderr, "dbg2       swath_mode:                 %d\n", swath_mode);
 			fprintf(stderr, "dbg2       swath_width:                %f\n", swath_width);
@@ -731,6 +733,7 @@ int main(int argc, char **argv) {
 		else if (ss_altitude_mode == MBSSLAYOUT_ALTITUDE_BOTTOMPICK) {
 			fprintf(stderr, "     ss_altitude_mode:         Altitude calculated using bottom pick in time series\n");
 			fprintf(stderr, "     bottompick_threshold:     %f\n", bottompick_threshold);
+			fprintf(stderr, "     bottompick_blank:         %f\n", bottompick_blank);
 		}
 		else if (layout_mode == MBSSLAYOUT_ALTITUDE_TOPO_GRID) {
 			fprintf(stderr, "     ss_altitude_mode:         Altitude calculated during 3D layout on topography model\n");
@@ -2308,6 +2311,8 @@ int main(int argc, char **argv) {
 
 				/* if specified get altitude from raw sidescan */
 				if (ss_altitude_mode == MBSSLAYOUT_ALTITUDE_BOTTOMPICK) {
+          int istart = bottompick_blank / sample_interval;
+
 					/* get bottom arrival in port trace */
 					channelmax = 0.0;
 					for (int i = 0; i < num_samples_port; i++) {
@@ -2315,8 +2320,8 @@ int main(int argc, char **argv) {
 					}
 					portchannelpick = 0;
 					threshold = bottompick_threshold * channelmax;
-					for (int i = 0; i < num_samples_port && portchannelpick == 0; i++) {
-						if (raw_samples_port[i] >= threshold)
+					for (int i = istart; i < num_samples_port && portchannelpick == 0; i++) {
+						if (portchannelpick == 0 && raw_samples_port[i] >= threshold)
 							portchannelpick = i;
 					}
 
@@ -2327,7 +2332,7 @@ int main(int argc, char **argv) {
 					}
 					stbdchannelpick = 0;
 					threshold = bottompick_threshold * channelmax;
-					for (int i = 0; i < num_samples_stbd && stbdchannelpick == 0; i++) {
+					for (int i = istart; i < num_samples_stbd && stbdchannelpick == 0; i++) {
 						if (raw_samples_stbd[i] >= threshold)
 							stbdchannelpick = i;
 					}

@@ -366,6 +366,12 @@ announced releases. The source distributions associated with all releases, major
 ### MB-System Version 5.7 Release Notes:
 --
 
+#### 5.7.6 (September 29, 2020)
+
+Mbsslayout: Add blanking interval to option --altitude-bottompick-threshold=threshold[/blank]
+so that when picking the bottom return in the sidescan time series, nearfield backscatter
+can be ignored out to the time interval in seconds given by the value blank.
+
 #### 5.7.6beta56 (September 28, 2020)
 
 Mbsegylist: Add print option of 'l' for the line number contained in the segy file header.
