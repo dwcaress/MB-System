@@ -1134,7 +1134,7 @@ int main(int argc, char **argv) {
 			if (error == MB_ERROR_NO_ERROR || error == MB_ERROR_TIME_GAP) {
 				/* if needed, attempt to get sidescan correction type */
 				if (ss_corr_type == MBP_SSCORR_UNKNOWN) {
-					status = mb_sidescantype(5, mbio_ptr, nullptr, &ss_type, &error);
+					status = mb_sidescantype(verbose, mbio_ptr, nullptr, &ss_type, &error);
 					if (status == MB_SUCCESS) {
 						if (ss_type == MB_SIDESCAN_LINEAR) {
 							ss_corr_type = MBP_SSCORR_DIVISION;

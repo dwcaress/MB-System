@@ -1,4 +1,4 @@
-.TH mbsslayout 1 "17 September 2017" "MB-System 5.0" "MB-System 5.0"
+.TH mbsslayout 1 "29 September 2020" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbsslayout\fP \- translate time-based sidescan sonar data into backscatter
 laid out into a regular array of pixels on the seafloor by projecting onto a
@@ -45,7 +45,7 @@ Version 5.0
 .br
 \fB\-\-altitude-bottomppick\fP
 .br
-\fB\-\-altitude-bottompick-threshold\fP=\fIvalue\fP
+\fB\-\-altitude-bottompick-threshold\fP=\fIthreshold[/blank]\fP
 .br
 \fB\-\-altitude-topo-grid\fP
 .br
@@ -328,10 +328,12 @@ sidescan value reaches 0.5 times the maximum value. The altitude value used for
 the overall layout is the average of the values found for the port and starboard
 channels.
 .TP
-.B \-\-altitude-bottompick-threshold\fP=\fIvalue\fP
+.B \-\-altitude-bottompick-threshold\fP=\fIthreshold[/blank]\fP
 .br
 Specifies the threshold used to pick the initial bottom return in the time series
-sidescan data. The default threshold is 0.5. This option turns the bottompick
+sidescan data. The default threshold is 0.5. If given, the value \fIblank\fP is
+the blanking interval in seconds that will be ignored in looking for the first
+bottom return. This option turns the bottompick
 altitude mode on, so it is unnecessary to also specify the \fB\-\-altitude-bottomppick\fP
 option.
 .TP

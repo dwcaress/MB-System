@@ -11,7 +11,7 @@
 <CENTER><H3><U>MB-System Unix Manual Page</U></H3></CENTER>
 <PRE>
 <H1>mbsslayout</H1>
-Section:  MB-System 5.0  (1)<BR>Updated:  17 September 2017 <BR><A HREF="#index">Index</A>
+Section:  MB-System 5.0  (1)<BR>Updated:  29 September 2020 <BR><A HREF="#index">Index</A>
 <HR>
 
 <A NAME="lbAB">&nbsp;</A>
@@ -85,7 +85,7 @@ Version 5.0
 <B>--altitude-bottomppick</B>
 <BR>
 
-<B>--altitude-bottompick-threshold</B>=<I>value</I>
+<B>--altitude-bottompick-threshold</B>=<I>threshold[/blank]</I>
 <BR>
 
 <B>--altitude-topo-grid</B>
@@ -447,13 +447,15 @@ picked for each channel (port and starboard) at the first time the time series
 sidescan value reaches 0.5 times the maximum value. The altitude value used for
 the overall layout is the average of the values found for the port and starboard
 channels.
-<DT><B>--altitude-bottompick-threshold</B>=<I>value</I>
+<DT><B>--altitude-bottompick-threshold</B>=<I>threshold[/blank]</I>
 
 <DD>
 <BR>
 
 Specifies the threshold used to pick the initial bottom return in the time series
-sidescan data. The default threshold is 0.5. This option turns the bottompick
+sidescan data. The default threshold is 0.5. If given, the value <I>blank</I> is
+the blanking interval in seconds that will be ignored in looking for the first
+bottom return. This option turns the bottompick
 altitude mode on, so it is unnecessary to also specify the <B>--altitude-bottomppick</B>
 option.
 <DT><B>--channel-swap</B>
@@ -820,7 +822,7 @@ Oh yeah.
 </PRE>
 
 <CENTER><P><BR>
-Last Updated: 17 September 2017</P></CENTER>
+Last Updated: 29 September 2020</P></CENTER>
 
 <HR>
 
