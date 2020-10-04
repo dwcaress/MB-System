@@ -1,4 +1,5 @@
 bin_PROGRAMS = mbphotomosaic mbgetphotocorrection mbphotogrammetry
+bin_SCRIPTS = mbm_makeimagelist
 
 include_HEADERS =
 

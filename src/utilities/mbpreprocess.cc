@@ -1000,10 +1000,11 @@ int main(int argc, char **argv) {
   struct mb_io_indextable_struct *i_indextable = nullptr;
 
   /* kluge various data fixes */
-  double kluge_first_time_d;
-  double kluge_last_time_d;
-  double dtime_d_expect;
-  double dtime_d;
+  double kluge_first_time_d = 0.0;
+  double kluge_last_time_d = 0.0;
+  double kluge_last_raw_time_d = 0.0;
+  double dtime_d_expect = 0.0;
+  double dtime_d = 0.0;
   bool kluge_fix_wissl_timestamps_setup1 = false;
   bool kluge_fix_wissl_timestamps_setup2 = false;
 
@@ -2629,26 +2630,50 @@ int main(int argc, char **argv) {
           /* call mb_extract_altitude to get altitude */
           status &= mb_extract_altitude(verbose, imbio_ptr, istore_ptr, &kind, &sensordepth_org, &altitude_org, &error);
 
-          /* apply time jump fix */
+          /* apply time jump fix to survey record time stamps */
           bool timestamp_changed = false;
+          double dtime_d_expect = 0.0;
+          double dtime_d_raw = 0.0;
+          double dtime_d = 0.0;
+          double time_d_raw = 0.0;
+//fprintf(stderr, "\n%s:%d:%s: kluge_timejumps:%d n_rt_data:%d kluge_first_time_d:%f kluge_last_time_d:%f time_d:%f dtime_d:%f\n",
+//__FILE__, __LINE__, __FUNCTION__,
+//kluge_timejumps, n_rt_data, kluge_first_time_d, kluge_last_time_d, time_d, time_d - kluge_last_raw_time_d);
           if (kluge_timejumps) {
             if (kind == MB_DATA_DATA) {
-              if (n_rf_data == 1)
+              if (n_rt_data == 1)
                 kluge_first_time_d = time_d;
+              time_d_raw = time_d;
             }
-            if (n_rf_data >= 2) {
+            if (n_rt_data > 2) {
+              dtime_d_expect = (kluge_last_time_d - kluge_first_time_d) / (n_rt_data - 2);
+              dtime_d_raw = time_d - kluge_last_raw_time_d;
               dtime_d = time_d - kluge_last_time_d;
               if (fabs(dtime_d - dtime_d_expect) >= kluge_timejumps_threshold) {
-                time_d = kluge_last_time_d + dtime_d_expect;
-                timestamp_changed = true;
+                if (fabs(dtime_d_raw - dtime_d_expect) >= kluge_timejumps_threshold) {
+                  time_d = kluge_last_time_d + dtime_d_expect;
+                  timestamp_changed = true;
+//fprintf(stderr, "%s:%d:%s: kluge_timejumps:%d n_rt_data:%d kluge_first_time_d:%f kluge_last_time_d:%f time_d:%f dtime_d:%f dtime_d_raw:%f  dtime_d_expect:%f* change:%f\n",
+//__FILE__, __LINE__, __FUNCTION__,
+//kluge_timejumps, n_rt_data, kluge_first_time_d, kluge_last_time_d, time_d, dtime_d, dtime_d_raw, dtime_d_expect, time_d - time_d_raw);
+                } else {
+                  time_d = kluge_last_time_d + dtime_d_raw;
+                  timestamp_changed = true;
+//fprintf(stderr, "%s:%d:%s: kluge_timejumps:%d n_rt_data:%d kluge_first_time_d:%f kluge_last_time_d:%f time_d:%f dtime_d:%f dtime_d_raw:%f* dtime_d_expect:%f  change:%f\n",
+//__FILE__, __LINE__, __FUNCTION__,
+//kluge_timejumps, n_rt_data, kluge_first_time_d, kluge_last_time_d, time_d, dtime_d, dtime_d_raw, dtime_d_expect, time_d - time_d_raw);
+                }
               }
             }
             if (kind == MB_DATA_DATA) {
+              dtime_d = time_d - kluge_last_time_d;
               kluge_last_time_d = time_d;
-              if (n_rf_data >= 2)
-                dtime_d_expect = (kluge_last_time_d - kluge_first_time_d) / (n_rf_data - 1);
+              kluge_last_raw_time_d = time_d_raw;
             }
           }
+//fprintf(stderr, "%s:%d:%s: kluge_timejumps:%d n_rt_data:%d kluge_first_time_d:%f kluge_last_time_d:%f time_d:%f dtime_d:%f\n",
+//__FILE__, __LINE__, __FUNCTION__,
+//kluge_timejumps, n_rt_data, kluge_first_time_d, kluge_last_time_d, time_d, dtime_d);
 
           /* if the input data are WiSSL data in format MBF_3DWISSLR
            * and kluge_fix_wissl_timestamps is enabled, call special function
