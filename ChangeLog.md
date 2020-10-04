@@ -20,6 +20,7 @@ include "beta" in the tag name are preliminary and generally not announced.
 Distributions that do not include "beta" in the tag name correspond to the major,
 announced releases. The source distributions associated with all releases, major or beta, are equally accessible as tarballs through the Github interface.
 
+- **Version 5.7.6        October 4, 2020
 - Version 5.7.6beta56    September 28, 2020
 - Version 5.7.6beta55    September 16, 2020
 - Version 5.7.6beta54    September 14, 2020
@@ -366,7 +367,20 @@ announced releases. The source distributions associated with all releases, major
 ### MB-System Version 5.7 Release Notes:
 --
 
-#### 5.7.6 (September 29, 2020)
+#### 5.7.6 (October 4, 2020)
+
+Mbnavlist: Fixed bug in parsing -O option that sometimes resulting in the output
+of undesired values.
+
+Mbm_makeimagelist: New macro that constructs imagelist files of stereo photograph
+pairs as collected by MBARI's low altitude survey system. This is the first
+Python3 macro in MB-System.
+
+Format 88 (MBF_RESON7KR): Fixed calculation of speed when using the mb_extract_nav()
+function for navigation records.
+
+Mbpreprocess: Fixed problems with the --kluge-time-jumps option for fixing
+jumps in timestamps.
 
 Mbsslayout: Add blanking interval to option --altitude-bottompick-threshold=threshold[/blank]
 so that when picking the bottom return in the sidescan time series, nearfield backscatter

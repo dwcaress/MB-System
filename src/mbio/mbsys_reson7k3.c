@@ -7510,6 +7510,9 @@ int mbsys_reson7k3_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int
     *time_d = store->time_d;
 
     /* get Navigation */
+    *speed = 0.0;
+    if (mb_io_ptr->nfix > 0)
+      mb_navint_interp(verbose, mbio_ptr, store->time_d, *heading, *speed, navlon, navlat, speed, error);
     *navlon = RTD * Navigation->longitude;
     *navlat = RTD * Navigation->latitude;
 
@@ -7544,6 +7547,8 @@ int mbsys_reson7k3_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int
 
     /* get navigation */
     *speed = 0.0;
+    if (mb_io_ptr->nfix > 0)
+      mb_navint_interp(verbose, mbio_ptr, store->time_d, *heading, *speed, navlon, navlat, speed, error);
     *navlon = RTD * Position->longitude_easting;
     *navlat = RTD * Position->latitude_northing;
 
