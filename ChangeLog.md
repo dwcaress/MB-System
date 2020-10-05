@@ -372,13 +372,17 @@ announced releases. The source distributions associated with all releases, major
 Version 5.7.6 is now the current release of MB-System. Changes since the 5.7.5
 release include:
 
-New programs:
+Many bug fixes to programs and data format i/o modules.
+
+New programs in optional photomosaicing section:
   mbgrd2obj
   mbphotomosaic
   mbgetphotocorrection
   mbphotogrammetry
   mbgrd2octree
   mbm_makeimagelist
+
+New program in optional Terrain Relative Navigation section:
   mbtrnpp
 
 Continuous Integration testing:
@@ -389,9 +393,11 @@ and are executed automatically whenever commits are made to the Github repositor
 
 Partial migration to C++:
 The source code for programs in the src/utilities directory has been migrated
-to C++.
+to C++. Also, much of the C and C++ code has been updated to be consistent with
+the C11 and C++11 standards.
 
-Deprecated programs: Several programs that are no longer part of the current data
+Deprecated programs:
+Several programs that are no longer part of the current data
 processing approach have been declared deprecated and have been moved from
 src/utilities to a new directory src/deprecated. These programs are:
     mb7k2jstar
