@@ -11,7 +11,7 @@
 <CENTER><H3><U>MB-System Unix Manual Page</U></H3></CENTER>
 <PRE>
 <H1>mbpreprocess</H1>
-Section:  MB-System 5.0  (1)<BR>Updated:  28 November 2018 <BR><A HREF="#index">Index</A>
+Section:  MB-System 5.0  (1)<BR>Updated:  4 October 2020 <BR><A HREF="#index">Index</A>
 <HR>
 
 <A NAME="lbAB">&nbsp;</A>
@@ -32,70 +32,131 @@ Version 5.0
 <BR>
 
 <B>--verbose</B>
+<BR>
+
 <B>--help</B>
+<BR>
+
 <B>--input</B>=<I>FILE</I>
+<BR>
+
 <B>--format</B>=<I>FORMATID</I>
 <BR>
 
 <B>--platform-file</B>=<I>FILE</I>
+<BR>
+
 <B>--platform-target-sensor</B>=<I>RECORDID</I>
 <BR>
 
 <B>--output-sensor-fnv</B>
 <BR>
 
+<B>--skip-existing</B>
+<BR>
+
 <B>--nav-file</B>=<I>FILE</I>
+<BR>
+
 <B>--nav-file-format</B>=<I>FORMATID</I>
+<BR>
+
 <B>--nav-async</B>=<I>RECORDTYPE</I>
+<BR>
+
 <B>--nav-sensor</B>=<I>SENSORID</I>
 <BR>
 
 <B>--sensordepth-file</B>=<I>FILE</I>
+<BR>
+
 <B>--sensordepth-file-format</B>=<I>FORMATID</I>
+<BR>
+
 <B>--sensordepth-async</B>=<I>RECORDTYPE</I>
+<BR>
+
 <B>--sensordepth-sensor</B>=<I>SENSORID</I>
 <BR>
 
 <B>--heading-file</B>=<I>FILE</I>
+<BR>
+
 <B>--heading-file-format</B>=<I>FORMATID</I>
+<BR>
+
 <B>--heading-async</B>=<I>RECORDTYPE</I>
+<BR>
+
 <B>--heading-sensor</B>=<I>SENSORID</I>
 <BR>
 
 <B>--altitude-file</B>=<I>FILE</I>
+<BR>
+
 <B>--altitude-file-format</B>=<I>FORMATID</I>
+<BR>
+
 <B>--altitude-async</B>=<I>RECORDTYPE</I>
+<BR>
+
 <B>--altitude-sensor</B>=<I>SENSORID</I>
 <BR>
 
 <B>--attitude-file</B>=<I>FILE</I>
+<BR>
+
 <B>--attitude-file-format</B>=<I>FORMATID</I>
+<BR>
+
 <B>--attitude-async</B>=<I>RECORDTYPE</I>
+<BR>
+
 <B>--attitude-sensor</B>=<I>SENSORID</I>
 <BR>
 
 <B>--soundspeed-file</B>=<I>FILE</I>
+<BR>
+
 <B>--soundspeed-file-format</B>=<I>FORMATID</I>
+<BR>
+
 <B>--soundspeed-async</B>=<I>RECORDTYPE</I>
+<BR>
+
 <B>--soundspeed-sensor</B>=<I>SENSORID</I>
 <BR>
 
 <B>--time-latency-file</B>=<I>FILE</I>
+<BR>
+
 <B>--time-latency-file-format</B>=<I>FORMATID</I>
+<BR>
+
 <B>--time-latency-constant</B>=<I>SECONDS</I>
 <BR>
 
 <B>--time-latency-apply-nav</B>
+<BR>
+
 <B>--time-latency-apply-sensordepth</B>
+<BR>
+
 <B>--time-latency-apply-heading</B>
 <BR>
 
 <B>--time-latency-apply-attitude</B>
+<BR>
+
 <B>--time-latency-apply-altitude</B>
+<BR>
+
 <B>--time-latency-apply-all-ancilliary</B>
 <BR>
 
 <B>--time-latency-apply-survey</B>
+<BR>
+
 <B>--time-latency-apply-all</B>
 <BR>
 
@@ -103,33 +164,72 @@ Version 5.0
 <BR>
 
 <B>--filter-apply-nav</B>
+<BR>
+
 <B>--filter-apply-sensordepth</B>
+<BR>
+
 <B>--filter-apply-heading</B>
 <BR>
 
 <B>--filter-apply-attitude</B>
+<BR>
+
 <B>--filter-apply-altitude</B>
+<BR>
+
 <B>--filter-apply-all-ancilliary</B>
 <BR>
 
 <B>--recalculate-bathymetry</B>
+<BR>
+
 <B>--no-change-survey</B>
-<B>--multibeam-sidescan-source</B>=<I>RECORDID</I>
+<BR>
+
+<B>--multibeam-sidescan-source</B>=<I>SOURCE</I>
+<BR>
+
 <B>--sounding-amplitude-filter</B>=<I>THRESHOLD</I>
+<BR>
+
 <B>--sounding-altitude-filter</B>=<I>THRESHOLD</I>
+<BR>
+
 <B>--ignore-water-column</B>
+<BR>
+
 <B>--head1-offsets</B>=<I>X/Y/Z/HEADING/ROLL/PITCH</I>
+<BR>
+
 <B>--head2-offsets</B>=<I>X/Y/Z/HEADING/ROLL/PITCH</I>
 <BR>
 
 <B>--kluge-time-jumps</B>=<I>SECONDS</I>
+<BR>
+
 <B>--kluge-ancilliary-time-jumps</B>=<I>SECONDS</I>
+<BR>
+
 <B>--kluge-mbaripressure-time-jumps</B>=<I>THRESHOLD</I>
+<BR>
+
 <B>--kluge-beam-tweak</B>=<I>FACTOR</I>
+<BR>
+
 <B>--kluge-soundspeed-tweak</B>=<I>FACTOR</I>
+<BR>
+
 <B>--kluge-zero-attitude-correction</B>
+<BR>
+
 <B>--kluge-zero-alongtrack-angles</B>
+<BR>
+
 <B>--kluge-fix-wissl-timestamps</B>
+<BR>
+
+<B>--kluge-auv-sentry-sensordepth</B>
 <BR>
 
 ]
@@ -205,9 +305,40 @@ convention.
 <DT><B>--platform-file=</B><I>FILE</I>
 
 <DD>
+Causes <B>mbpreprocess</B> to input and utilize an <B>MB-System</B> platform file,
+which provides a complete description of the relative geometry of sensors on a
+survey platform. Platform files can be constructed using the program <B>mbmakeplatform</B>.
+Most datasets do not require the use of a platform file, and only a few data formats
+are supported with preprocessing functionality utilizing platform files (e.g. the
+Reson 7k format 88, the Teledyne 7k3 format 89, the 3D at Depth lidar formats
+232 and 233). Platform files are needed only when survey data have been collected
+without integrating the asynchronous navigation and attitude data and when the
+positional and angular offsets between the survey sensor (e.g. multibeam sonar,
+lidar, stereo camera rig) have not been specified in the data stream. Most often
+this situation is associated with survey systems on submerged platforms like
+autonomous underwater vehicles (AUVs) or remotely operated vehicles (ROVs).
+In cases where the sonar control and data logging software have a full platform
+description and apply that to fully correct the survey data in real time, no
+platform file is needed for the preprocessing stage in <B>MB-System</B>. Specifically,
+all datasets collected using Kongsberg multibeam sonars do not require use of a
+platform file (the only exception to this would be if the positional offsets between
+sensors were incorrectly specified in the multibeam configuration).
 <DT><B>--platform-target-sensor=</B><I>SENSORID</I>
 
 <DD>
+If a platform file has been specified, this option defines the id of the sensor
+description associated with the survey data being preprocessed. This determines
+how lever arm calculations are done. For instance, if sensor 0 is the source of
+attitude and lateral position data (e.g. an inertial navigation system), sensor 1
+is the source of vertical position data (e.g. a pressure sensor), and sensor 2 is
+a multibeam sonar for which the bathymetry data are not initially motion corrected,
+then one should use <B>--platform-target-sensor</B>=<I>2</I> so that the lever arm
+calculations produce the position and attitude of the multibeam sonar. The
+multibeam bathymetry are then calculated using the corrected position and
+attitude data. This option is necessary because in general a platform may have
+multiple survey sensors (e.g. multibeam sonar, lidar, stereo camera rig, subbottom
+profiler, sidescan sonar), each of which will have a separate data processing
+workflow.
 <DT><B>--output-sensor-fnv</B>
 
 <DD>
@@ -218,6 +349,8 @@ positional and angular offsets defined in the platform file.
 <DT><B>--skip-existing</B>
 
 <DD>
+This option causes <B>mbpreprocess</B> to skip preprocessing when the output files
+already exist and are up to date relative to the inputs.
 <BR>
 
 <DT><B>--nav-file</B>=<I>filename</I>
@@ -225,16 +358,16 @@ positional and angular offsets defined in the platform file.
 <DD>
 <BR>
 
-Specifies an external file from which to merge sonar position (navigation),
-replacing any navigation data included in the input time series sidescan files.
-By default <B>mbsslayout</B> attempts to use navigation values included in the
+Specifies an external time series file from which to merge sonar position (navigation),
+replacing navigation data included in the data stream.
+By default <B>mbpreprocess</B> attempts to use navigation values included in the
 input data.
 <DT><B>--nav-file-format</B>=<I>format_id</I>
 
 <DD>
 <BR>
 
-Specifies the format of an external navigation file from which position values
+Specifies the format of an external navigation time series file from which position values
 are derived (as defined with <B>--nav-file</B>). Options for the <I>format_id</I>
 value are:
 <BR>
@@ -308,14 +441,17 @@ value are:
 <BR>
 
 <BR>&nbsp;&nbsp;&nbsp;9:&nbsp;ASCCI&nbsp;text&nbsp;file&nbsp;with&nbsp;white-space&nbsp;delimited&nbsp;lines&nbsp;of&nbsp;the&nbsp;form:
-<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;yr&nbsp;mon&nbsp;day&nbsp;hour&nbsp;min&nbsp;sec&nbsp;time_d&nbsp;lon&nbsp;lat&nbsp;heading&nbsp;speed&nbsp;sensordepth*
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;yr&nbsp;mon&nbsp;day&nbsp;hour&nbsp;min&nbsp;sec&nbsp;time_d&nbsp;lon&nbsp;lat&nbsp;heading&nbsp;speed&nbsp;sensordepth
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;or
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;yr&nbsp;mon&nbsp;day&nbsp;hour&nbsp;min&nbsp;sec&nbsp;time_d&nbsp;lon&nbsp;lat&nbsp;heading&nbsp;speed&nbsp;sensordepth&nbsp;roll&nbsp;pitch&nbsp;heave
 <BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;where&nbsp;yr&nbsp;is&nbsp;the&nbsp;four&nbsp;digit&nbsp;year,&nbsp;mon&nbsp;is&nbsp;the&nbsp;month,&nbsp;day&nbsp;is&nbsp;the&nbsp;day&nbsp;of&nbsp;the
 <BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;month,&nbsp;min&nbsp;is&nbsp;the&nbsp;minute,&nbsp;second&nbsp;is&nbsp;the&nbsp;decimal&nbsp;seconds,&nbsp;time_d&nbsp;is&nbsp;time&nbsp;in
 <BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;decimal&nbsp;epoch&nbsp;seconds&nbsp;(seconds&nbsp;since&nbsp;1970),&nbsp;lon&nbsp;is&nbsp;the&nbsp;longitude
 <BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;in&nbsp;decimal&nbsp;degrees,&nbsp;lat&nbsp;is&nbsp;the&nbsp;latitude&nbsp;in&nbsp;decimal&nbsp;degrees,&nbsp;heading&nbsp;is&nbsp;in
 <BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;decimal&nbsp;degrees,&nbsp;speed&nbsp;is&nbsp;in&nbsp;km/hour,&nbsp;and&nbsp;sensordepth&nbsp;is&nbsp;in&nbsp;meters.
 <BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;South&nbsp;latitudes&nbsp;are&nbsp;negative.&nbsp;Longitude&nbsp;may&nbsp;be&nbsp;defined&nbsp;on&nbsp;either&nbsp;the
-<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-180.0&nbsp;to&nbsp;+180.0&nbsp;or&nbsp;0.0&nbsp;to&nbsp;360.0&nbsp;domains.
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-180.0&nbsp;to&nbsp;+180.0&nbsp;or&nbsp;0.0&nbsp;to&nbsp;360.0&nbsp;domains.&nbsp;If&nbsp;present,&nbsp;roll&nbsp;and&nbsp;pitch&nbsp;are&nbsp;in
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;decimal&nbsp;degrees&nbsp;and&nbsp;heave&nbsp;is&nbsp;in&nbsp;meters.
 <BR>
 
 <BR>&nbsp;&nbsp;&nbsp;10:&nbsp;R2R&nbsp;(Rolling&nbsp;deck&nbsp;to&nbsp;Repository)&nbsp;navigation&nbsp;format&nbsp;with&nbsp;ASCCI&nbsp;text&nbsp;lines
@@ -342,165 +478,566 @@ are derived (as defined with <B>--nav-file-format</B>). Options for the
 <BR>
 
 What types of data records are present is format-dependent, as is the default
-choice of which record type is used as the navigation source by default. The
+choice of which record type is used as the navigation source. The
 program <B>mbinfo</B> can be used with the <B>-N</B> option to determine the numbers
 of different record types present in a data file.
 <DT><B>--nav-sensor=</B><I>SENSORID</I>
 
 <DD>
+If a platform file has been specified, this option defines the id of the sensor
+description associated with the navigation data being used, whether that
+derives from asynchronous records in the data stream or from an external
+navigation file. Note that if the external navigation has been calculated to
+define the location of the target survey sensor, then the sensor id should be
+the same as the survey sensor so that a null lever arm correction is made.
 <BR>
 
 <DT><B>--sensordepth-file=</B><I>FILE</I>
 
 <DD>
+Specifies an external time series file from which to merge sensor depth,
+replacing sensor depth data included in the data stream.
+By default <B>mbpreprocess</B> attempts to use sensor depth values included in the
+input data.
 <DT><B>--sensordepth-file-format=</B><I>FORMATID</I>
 
 <DD>
+<BR>
+
+Specifies the format of an external sensor depth time series file from which sensor depth values
+are derived (as defined with <B>--sensordepth-file</B>). Options for the <I>format_id</I>
+value are:
+<BR>
+
+<BR>&nbsp;&nbsp;&nbsp;1:&nbsp;ASCCI&nbsp;text&nbsp;file&nbsp;with&nbsp;lines&nbsp;of&nbsp;the&nbsp;form:
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;time_d&nbsp;sensordepth
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;where&nbsp;time_d&nbsp;is&nbsp;time&nbsp;in&nbsp;decimal&nbsp;epoch&nbsp;seconds&nbsp;(seconds&nbsp;since&nbsp;1970),&nbsp;and
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sensordepth&nbsp;values&nbsp;are&nbsp;in&nbsp;meters&nbsp;positive&nbsp;down.
+<BR>
+
+<BR>&nbsp;&nbsp;&nbsp;2:&nbsp;ASCCI&nbsp;text&nbsp;file&nbsp;with&nbsp;lines&nbsp;of&nbsp;the&nbsp;form:
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;year&nbsp;month&nbsp;day&nbsp;hour&nbsp;minute&nbsp;second&nbsp;sensordepth
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;where&nbsp;year,&nbsp;month,&nbsp;day,&nbsp;hour,&nbsp;and&nbsp;minute&nbsp;values&nbsp;are&nbsp;integers,&nbsp;the&nbsp;second
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;value&nbsp;is&nbsp;decimal,&nbsp;and&nbsp;sensordepth&nbsp;values&nbsp;are&nbsp;in&nbsp;meters&nbsp;positive&nbsp;down.
+<BR>
+
+<BR>&nbsp;&nbsp;&nbsp;3:&nbsp;ASCCI&nbsp;text&nbsp;file&nbsp;with&nbsp;lines&nbsp;of&nbsp;the&nbsp;form:
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;year&nbsp;julian_day&nbsp;hour&nbsp;minute&nbsp;second&nbsp;sensordepth
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;where&nbsp;year,&nbsp;julian_day,&nbsp;hour,&nbsp;and&nbsp;minute&nbsp;values&nbsp;are&nbsp;integers,&nbsp;the&nbsp;second
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;value&nbsp;is&nbsp;decimal,&nbsp;and&nbsp;sensordepth&nbsp;values&nbsp;are&nbsp;in&nbsp;meters&nbsp;positive&nbsp;down.
+<BR>
+
+<BR>&nbsp;&nbsp;&nbsp;4:&nbsp;ASCCI&nbsp;text&nbsp;file&nbsp;with&nbsp;lines&nbsp;of&nbsp;the&nbsp;form:
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;year&nbsp;julian_day&nbsp;day_minute&nbsp;second&nbsp;sensordepth
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;where&nbsp;year,&nbsp;julian_day,&nbsp;and&nbsp;day_minute&nbsp;values&nbsp;are&nbsp;integers,&nbsp;the&nbsp;second
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;value&nbsp;is&nbsp;decimal,&nbsp;and&nbsp;sensordepth&nbsp;values&nbsp;are&nbsp;in&nbsp;meters&nbsp;positive&nbsp;down.
+<BR>
+
+<BR>&nbsp;&nbsp;&nbsp;9:&nbsp;ASCCI&nbsp;text&nbsp;file&nbsp;with&nbsp;white-space&nbsp;delimited&nbsp;lines&nbsp;of&nbsp;the&nbsp;form:
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;yr&nbsp;mon&nbsp;day&nbsp;hour&nbsp;min&nbsp;sec&nbsp;time_d&nbsp;lon&nbsp;lat&nbsp;heading&nbsp;speed&nbsp;sensordepth
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;or
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;yr&nbsp;mon&nbsp;day&nbsp;hour&nbsp;min&nbsp;sec&nbsp;time_d&nbsp;lon&nbsp;lat&nbsp;heading&nbsp;speed&nbsp;sensordepth&nbsp;roll&nbsp;pitch&nbsp;heave
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;where&nbsp;yr&nbsp;is&nbsp;the&nbsp;four&nbsp;digit&nbsp;year,&nbsp;mon&nbsp;is&nbsp;the&nbsp;month,&nbsp;day&nbsp;is&nbsp;the&nbsp;day&nbsp;of&nbsp;the
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;month,&nbsp;min&nbsp;is&nbsp;the&nbsp;minute,&nbsp;second&nbsp;is&nbsp;the&nbsp;decimal&nbsp;seconds,&nbsp;time_d&nbsp;is&nbsp;time&nbsp;in
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;decimal&nbsp;epoch&nbsp;seconds&nbsp;(seconds&nbsp;since&nbsp;1970),&nbsp;lon&nbsp;is&nbsp;the&nbsp;longitude
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;in&nbsp;decimal&nbsp;degrees,&nbsp;lat&nbsp;is&nbsp;the&nbsp;latitude&nbsp;in&nbsp;decimal&nbsp;degrees,&nbsp;heading&nbsp;is&nbsp;in
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;decimal&nbsp;degrees,&nbsp;speed&nbsp;is&nbsp;in&nbsp;km/hour,&nbsp;and&nbsp;sensordepth&nbsp;is&nbsp;in&nbsp;meters.
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;South&nbsp;latitudes&nbsp;are&nbsp;negative.&nbsp;Longitude&nbsp;may&nbsp;be&nbsp;defined&nbsp;on&nbsp;either&nbsp;the
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-180.0&nbsp;to&nbsp;+180.0&nbsp;or&nbsp;0.0&nbsp;to&nbsp;360.0&nbsp;domains.&nbsp;If&nbsp;present,&nbsp;roll&nbsp;and&nbsp;pitch&nbsp;are&nbsp;in
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;decimal&nbsp;degrees&nbsp;and&nbsp;heave&nbsp;is&nbsp;in&nbsp;meters.
 <DT><B>--sensordepth-async=</B><I>RECORDTYPE</I>
 
 <DD>
+Specifies the type of data records from which sensor depth values
+are derived (as defined with <B>--sensordepth-file-format</B>). Options for the
+<I>record_kind</I> include:
+<BR>
+
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_DATA:&nbsp;&nbsp;1&nbsp;(survey&nbsp;data)
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_NAV:&nbsp;&nbsp;12&nbsp;(navigation&nbsp;data)
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_HEIGHT&nbsp;16&nbsp;(sensor&nbsp;height&nbsp;data)
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_NAV1:&nbsp;29&nbsp;(navigation&nbsp;data&nbsp;from&nbsp;navigation&nbsp;system&nbsp;1)
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_NAV2:&nbsp;30&nbsp;(navigation&nbsp;data&nbsp;from&nbsp;navigation&nbsp;system&nbsp;2)
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_NAV3:&nbsp;31&nbsp;(navigation&nbsp;data&nbsp;from&nbsp;navigation&nbsp;system&nbsp;3)
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_SONARDEPTH&nbsp;59&nbsp;(sensor&nbsp;depth&nbsp;data)
+<BR>
+
+What types of data records are present is format-dependent, as is the default
+choice of which record type is used as the sensor depth source. The
+program <B>mbinfo</B> can be used with the <B>-N</B> option to determine the numbers
+of different record types present in a data file.
 <DT><B>--sensordepth-sensor=</B><I>SENSORID</I>
 
 <DD>
+If a platform file has been specified, this option defines the id of the sensor
+description associated with the sensor depth data being used, whether that
+derives from asynchronous records in the data stream or from an external
+navigation file. Note that if the external sensor depth data have been calculated to
+define the vertical location of the target survey sensor, then the sensor id should be
+the same as the survey sensor so that a null lever arm correction is made.
 <BR>
 
 <DT><B>--heading-file=</B><I>FILE</I>
 
 <DD>
+Specifies an external time series file from which to merge heading,
+replacing heading data included in the data stream.
+By default <B>mbpreprocess</B> attempts to use heading values included in the
+input data.
 <DT><B>--heading-file-format=</B><I>FORMATID</I>
 
 <DD>
+Specifies the format of an external heading time series file from which heading values
+are derived (as defined with <B>--heading-file</B>). Options for the <I>format_id</I>
+value are:
+<BR>
+
+<BR>&nbsp;&nbsp;&nbsp;1:&nbsp;ASCCI&nbsp;text&nbsp;file&nbsp;with&nbsp;lines&nbsp;of&nbsp;the&nbsp;form:
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;time_d&nbsp;heading
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;where&nbsp;time_d&nbsp;is&nbsp;time&nbsp;in&nbsp;decimal&nbsp;epoch&nbsp;seconds&nbsp;(seconds&nbsp;since&nbsp;1970),&nbsp;and
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;heading&nbsp;values&nbsp;are&nbsp;in&nbsp;degrees&nbsp;positive&nbsp;clockwise&nbsp;from&nbsp;forward.
+<BR>
+
+<BR>&nbsp;&nbsp;&nbsp;2:&nbsp;ASCCI&nbsp;text&nbsp;file&nbsp;with&nbsp;lines&nbsp;of&nbsp;the&nbsp;form:
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;year&nbsp;month&nbsp;day&nbsp;hour&nbsp;minute&nbsp;second&nbsp;heading
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;where&nbsp;year,&nbsp;month,&nbsp;day,&nbsp;hour,&nbsp;and&nbsp;minute&nbsp;values&nbsp;are&nbsp;integers,&nbsp;the&nbsp;second
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;value&nbsp;is&nbsp;decimal,&nbsp;and&nbsp;heading&nbsp;values&nbsp;in&nbsp;degrees&nbsp;positive&nbsp;clockwise&nbsp;from&nbsp;forward.
+<BR>
+
+<BR>&nbsp;&nbsp;&nbsp;3:&nbsp;ASCCI&nbsp;text&nbsp;file&nbsp;with&nbsp;lines&nbsp;of&nbsp;the&nbsp;form:
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;year&nbsp;julian_day&nbsp;hour&nbsp;minute&nbsp;second&nbsp;heading
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;where&nbsp;year,&nbsp;julian_day,&nbsp;hour,&nbsp;and&nbsp;minute&nbsp;values&nbsp;are&nbsp;integers,&nbsp;the&nbsp;second
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;value&nbsp;is&nbsp;decimal,&nbsp;and&nbsp;heading&nbsp;values&nbsp;in&nbsp;degrees&nbsp;positive&nbsp;clockwise&nbsp;from&nbsp;forward.
+<BR>
+
+<BR>&nbsp;&nbsp;&nbsp;4:&nbsp;ASCCI&nbsp;text&nbsp;file&nbsp;with&nbsp;lines&nbsp;of&nbsp;the&nbsp;form:
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;year&nbsp;julian_day&nbsp;day_minute&nbsp;second&nbsp;heading
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;where&nbsp;year,&nbsp;julian_day,&nbsp;and&nbsp;day_minute&nbsp;values&nbsp;are&nbsp;integers,&nbsp;the&nbsp;second
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;value&nbsp;is&nbsp;decimal,&nbsp;and&nbsp;heading&nbsp;values&nbsp;in&nbsp;degrees&nbsp;positive&nbsp;clockwise&nbsp;from&nbsp;forward.
+<BR>
+
+<BR>&nbsp;&nbsp;&nbsp;9:&nbsp;ASCCI&nbsp;text&nbsp;file&nbsp;with&nbsp;white-space&nbsp;delimited&nbsp;lines&nbsp;of&nbsp;the&nbsp;form:
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;yr&nbsp;mon&nbsp;day&nbsp;hour&nbsp;min&nbsp;sec&nbsp;time_d&nbsp;lon&nbsp;lat&nbsp;heading&nbsp;speed&nbsp;sensordepth
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;or
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;yr&nbsp;mon&nbsp;day&nbsp;hour&nbsp;min&nbsp;sec&nbsp;time_d&nbsp;lon&nbsp;lat&nbsp;heading&nbsp;speed&nbsp;sensordepth&nbsp;roll&nbsp;pitch&nbsp;heave
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;where&nbsp;yr&nbsp;is&nbsp;the&nbsp;four&nbsp;digit&nbsp;year,&nbsp;mon&nbsp;is&nbsp;the&nbsp;month,&nbsp;day&nbsp;is&nbsp;the&nbsp;day&nbsp;of&nbsp;the
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;month,&nbsp;min&nbsp;is&nbsp;the&nbsp;minute,&nbsp;second&nbsp;is&nbsp;the&nbsp;decimal&nbsp;seconds,&nbsp;time_d&nbsp;is&nbsp;time&nbsp;in
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;decimal&nbsp;epoch&nbsp;seconds&nbsp;(seconds&nbsp;since&nbsp;1970),&nbsp;lon&nbsp;is&nbsp;the&nbsp;longitude
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;in&nbsp;decimal&nbsp;degrees,&nbsp;lat&nbsp;is&nbsp;the&nbsp;latitude&nbsp;in&nbsp;decimal&nbsp;degrees,&nbsp;heading&nbsp;is&nbsp;in
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;decimal&nbsp;degrees,&nbsp;speed&nbsp;is&nbsp;in&nbsp;km/hour,&nbsp;and&nbsp;heading&nbsp;is&nbsp;in&nbsp;meters.
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;South&nbsp;latitudes&nbsp;are&nbsp;negative.&nbsp;Longitude&nbsp;may&nbsp;be&nbsp;defined&nbsp;on&nbsp;either&nbsp;the
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-180.0&nbsp;to&nbsp;+180.0&nbsp;or&nbsp;0.0&nbsp;to&nbsp;360.0&nbsp;domains.&nbsp;If&nbsp;present,&nbsp;roll&nbsp;and&nbsp;pitch&nbsp;are&nbsp;in
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;decimal&nbsp;degrees&nbsp;and&nbsp;heave&nbsp;is&nbsp;in&nbsp;meters.
 <DT><B>--heading-async=</B><I>RECORDTYPE</I>
 
 <DD>
+Specifies the type of data records from which heading values
+are derived (as defined with <B>--heading-file-format</B>). Options for the
+<I>record_kind</I> include:
+<BR>
+
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_DATA:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1&nbsp;(survey&nbsp;data)
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_NAV:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;12&nbsp;(navigation&nbsp;data)
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_HEADING:&nbsp;&nbsp;17&nbsp;(heading&nbsp;data)
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_NAV1:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;29&nbsp;(navigation&nbsp;data&nbsp;from&nbsp;navigation&nbsp;system&nbsp;1)
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_NAV2:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;30&nbsp;(navigation&nbsp;data&nbsp;from&nbsp;navigation&nbsp;system&nbsp;2)
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_NAV3:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;31&nbsp;(navigation&nbsp;data&nbsp;from&nbsp;navigation&nbsp;system&nbsp;3)
+<BR>
+
+What types of data records are present is format-dependent, as is the default
+choice of which record type is used as the heading source. The
+program <B>mbinfo</B> can be used with the <B>-N</B> option to determine the numbers
+of different record types present in a data file.
 <DT><B>--heading-sensor=</B><I>SENSORID</I>
 
 <DD>
+If a platform file has been specified, this option defines the id of the sensor
+description associated with the heading data being used, whether that
+derives from asynchronous records in the data stream or from an external
+navigation file.
 <BR>
 
 <DT><B>--altitude-file=</B><I>FILE</I>
 
 <DD>
+Specifies an external time series file from which to merge altitude data,
+replacing altitude data included in the data stream.
+By default <B>mbpreprocess</B> attempts to use altitude values included in the
+input data. Typically altitude data are critical only for processing sidescan
+data in the absence of swath bathymetry.
 <DT><B>--altitude-file-format=</B><I>FORMATID</I>
 
 <DD>
+Specifies the format of an external altitude time series file from which altitude values
+are derived (as defined with <B>--altitude-file</B>). Options for the <I>format_id</I>
+value are:
+<BR>
+
+<BR>&nbsp;&nbsp;&nbsp;1:&nbsp;ASCCI&nbsp;text&nbsp;file&nbsp;with&nbsp;lines&nbsp;of&nbsp;the&nbsp;form:
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;time_d&nbsp;altitude
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;where&nbsp;time_d&nbsp;is&nbsp;time&nbsp;in&nbsp;decimal&nbsp;epoch&nbsp;seconds&nbsp;(seconds&nbsp;since&nbsp;1970),&nbsp;and
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;altitude&nbsp;values&nbsp;are&nbsp;in&nbsp;meters.
+<BR>
+
+<BR>&nbsp;&nbsp;&nbsp;2:&nbsp;ASCCI&nbsp;text&nbsp;file&nbsp;with&nbsp;lines&nbsp;of&nbsp;the&nbsp;form:
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;year&nbsp;month&nbsp;day&nbsp;hour&nbsp;minute&nbsp;second&nbsp;altitude
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;where&nbsp;year,&nbsp;month,&nbsp;day,&nbsp;hour,&nbsp;and&nbsp;minute&nbsp;values&nbsp;are&nbsp;integers,&nbsp;the&nbsp;second
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;value&nbsp;is&nbsp;decimal,&nbsp;and&nbsp;altitude&nbsp;values&nbsp;are&nbsp;in&nbsp;meters.
+<BR>
+
+<BR>&nbsp;&nbsp;&nbsp;3:&nbsp;ASCCI&nbsp;text&nbsp;file&nbsp;with&nbsp;lines&nbsp;of&nbsp;the&nbsp;form:
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;year&nbsp;julian_day&nbsp;hour&nbsp;minute&nbsp;second&nbsp;altitude
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;where&nbsp;year,&nbsp;julian_day,&nbsp;hour,&nbsp;and&nbsp;minute&nbsp;values&nbsp;are&nbsp;integers,&nbsp;the&nbsp;second
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;value&nbsp;is&nbsp;decimal,&nbsp;and&nbsp;altitude&nbsp;values&nbsp;are&nbsp;in&nbsp;meters.
+<BR>
+
+<BR>&nbsp;&nbsp;&nbsp;4:&nbsp;ASCCI&nbsp;text&nbsp;file&nbsp;with&nbsp;lines&nbsp;of&nbsp;the&nbsp;form:
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;year&nbsp;julian_day&nbsp;day_minute&nbsp;second&nbsp;altitude
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;where&nbsp;year,&nbsp;julian_day,&nbsp;and&nbsp;day_minute&nbsp;values&nbsp;are&nbsp;integers,&nbsp;the&nbsp;second
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;value&nbsp;is&nbsp;decimal,&nbsp;and&nbsp;altitude&nbsp;values&nbsp;are&nbsp;in&nbsp;meters.
 <DT><B>--altitude-async=</B><I>RECORDTYPE</I>
 
 <DD>
+Specifies the type of data records from which heading values
+are derived (as defined with <B>--heading-file-format</B>). Options for the
+<I>record_kind</I> include:
+<BR>
+
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_DATA:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1&nbsp;(survey&nbsp;data)
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_NAV:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;12&nbsp;(navigation&nbsp;data)
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_NAV1:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;29&nbsp;(navigation&nbsp;data&nbsp;from&nbsp;navigation&nbsp;system&nbsp;1)
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_NAV2:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;30&nbsp;(navigation&nbsp;data&nbsp;from&nbsp;navigation&nbsp;system&nbsp;2)
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_NAV3:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;31&nbsp;(navigation&nbsp;data&nbsp;from&nbsp;navigation&nbsp;system&nbsp;3)
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_ALTITUDE:&nbsp;60&nbsp;(altitude&nbsp;data)
+<BR>
+
+What types of data records are present is format-dependent, as is the default
+choice of which record type is used as the altitude source. The
+program <B>mbinfo</B> can be used with the <B>-N</B> option to determine the numbers
+of different record types present in a data file.
 <DT><B>--altitude-sensor=</B><I>SENSORID</I>
 
 <DD>
+If a platform file has been specified, this option defines the id of the sensor
+description associated with the navigation data being used, whether that
+derives from asynchronous records in the data stream or from an external
+navigation file.
 <BR>
 
 <DT><B>--attitude-file=</B><I>FILE</I>
 
 <DD>
+Specifies an external time series file from which to merge attitude data (roll and pitch, often also heave),
+replacing attitude data included in the data stream.
+By default <B>mbpreprocess</B> attempts to use attitude values included in the
+input data.
 <DT><B>--attitude-file-format=</B><I>FORMATID</I>
 
 <DD>
+Specifies the format of an external attitude time series file from which attitude values
+are derived (as defined with <B>--attitude-file</B>). Options for the <I>format_id</I>
+value are:
+<BR>
+
+<BR>&nbsp;&nbsp;&nbsp;1:&nbsp;ASCCI&nbsp;text&nbsp;file&nbsp;with&nbsp;lines&nbsp;of&nbsp;the&nbsp;form:
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;time_d&nbsp;roll&nbsp;pitch&nbsp;heave
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;where&nbsp;time_d&nbsp;is&nbsp;time&nbsp;in&nbsp;decimal&nbsp;epoch&nbsp;seconds&nbsp;(seconds&nbsp;since&nbsp;1970),&nbsp;and
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sensordepth&nbsp;values&nbsp;are&nbsp;in&nbsp;meters&nbsp;positive&nbsp;down.
+<BR>
+
+<BR>&nbsp;&nbsp;&nbsp;2:&nbsp;ASCCI&nbsp;text&nbsp;file&nbsp;with&nbsp;lines&nbsp;of&nbsp;the&nbsp;form:
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;year&nbsp;month&nbsp;day&nbsp;hour&nbsp;minute&nbsp;second&nbsp;roll&nbsp;pitch&nbsp;heave
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;where&nbsp;year,&nbsp;month,&nbsp;day,&nbsp;hour,&nbsp;and&nbsp;minute&nbsp;values&nbsp;are&nbsp;integers,&nbsp;the&nbsp;second
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;value&nbsp;is&nbsp;decimal,&nbsp;and&nbsp;sensordepth&nbsp;values&nbsp;are&nbsp;in&nbsp;meters&nbsp;positive&nbsp;down.
+<BR>
+
+<BR>&nbsp;&nbsp;&nbsp;3:&nbsp;ASCCI&nbsp;text&nbsp;file&nbsp;with&nbsp;lines&nbsp;of&nbsp;the&nbsp;form:
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;year&nbsp;julian_day&nbsp;hour&nbsp;minute&nbsp;second&nbsp;roll&nbsp;pitch&nbsp;heave
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;where&nbsp;year,&nbsp;julian_day,&nbsp;hour,&nbsp;and&nbsp;minute&nbsp;values&nbsp;are&nbsp;integers,&nbsp;the&nbsp;second
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;value&nbsp;is&nbsp;decimal,&nbsp;and&nbsp;sensordepth&nbsp;values&nbsp;are&nbsp;in&nbsp;meters&nbsp;positive&nbsp;down.
+<BR>
+
+<BR>&nbsp;&nbsp;&nbsp;4:&nbsp;ASCCI&nbsp;text&nbsp;file&nbsp;with&nbsp;lines&nbsp;of&nbsp;the&nbsp;form:
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;year&nbsp;julian_day&nbsp;day_minute&nbsp;second&nbsp;roll&nbsp;pitch&nbsp;heave
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;where&nbsp;year,&nbsp;julian_day,&nbsp;and&nbsp;day_minute&nbsp;values&nbsp;are&nbsp;integers,&nbsp;the&nbsp;second
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;value&nbsp;is&nbsp;decimal,&nbsp;and&nbsp;sensordepth&nbsp;values&nbsp;are&nbsp;in&nbsp;meters&nbsp;positive&nbsp;down.
+<BR>
+
+<BR>&nbsp;&nbsp;&nbsp;9:&nbsp;ASCCI&nbsp;text&nbsp;file&nbsp;with&nbsp;white-space&nbsp;delimited&nbsp;lines&nbsp;of&nbsp;the&nbsp;form:
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;yr&nbsp;mon&nbsp;day&nbsp;hour&nbsp;min&nbsp;sec&nbsp;time_d&nbsp;lon&nbsp;lat&nbsp;heading&nbsp;speed&nbsp;sensordepth&nbsp;roll&nbsp;pitch&nbsp;heave
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;where&nbsp;yr&nbsp;is&nbsp;the&nbsp;four&nbsp;digit&nbsp;year,&nbsp;mon&nbsp;is&nbsp;the&nbsp;month,&nbsp;day&nbsp;is&nbsp;the&nbsp;day&nbsp;of&nbsp;the
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;month,&nbsp;min&nbsp;is&nbsp;the&nbsp;minute,&nbsp;second&nbsp;is&nbsp;the&nbsp;decimal&nbsp;seconds,&nbsp;time_d&nbsp;is&nbsp;time&nbsp;in
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;decimal&nbsp;epoch&nbsp;seconds&nbsp;(seconds&nbsp;since&nbsp;1970),&nbsp;lon&nbsp;is&nbsp;the&nbsp;longitude
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;in&nbsp;decimal&nbsp;degrees,&nbsp;lat&nbsp;is&nbsp;the&nbsp;latitude&nbsp;in&nbsp;decimal&nbsp;degrees,&nbsp;heading&nbsp;is&nbsp;in
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;decimal&nbsp;degrees,&nbsp;speed&nbsp;is&nbsp;in&nbsp;km/hour,&nbsp;and&nbsp;sensordepth&nbsp;is&nbsp;in&nbsp;meters.
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;South&nbsp;latitudes&nbsp;are&nbsp;negative.&nbsp;Longitude&nbsp;may&nbsp;be&nbsp;defined&nbsp;on&nbsp;either&nbsp;the
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-180.0&nbsp;to&nbsp;+180.0&nbsp;or&nbsp;0.0&nbsp;to&nbsp;360.0&nbsp;domains.&nbsp;Roll&nbsp;and&nbsp;pitch&nbsp;are&nbsp;in
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;decimal&nbsp;degrees&nbsp;and&nbsp;heave&nbsp;is&nbsp;in&nbsp;meters.
 <DT><B>--attitude-async=</B><I>RECORDTYPE</I>
 
 <DD>
+Specifies the type of data records from which attitude values
+are derived (as defined with <B>--attitude-file-format</B>). Options for the
+<I>record_kind</I> include:
+<BR>
+
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_DATA:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1&nbsp;(survey&nbsp;data)
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_NAV:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;12&nbsp;(navigation&nbsp;data)
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_NAV1:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;29&nbsp;(navigation&nbsp;data&nbsp;from&nbsp;navigation&nbsp;system&nbsp;1)
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_NAV2:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;30&nbsp;(navigation&nbsp;data&nbsp;from&nbsp;navigation&nbsp;system&nbsp;2)
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_NAV3:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;31&nbsp;(navigation&nbsp;data&nbsp;from&nbsp;navigation&nbsp;system&nbsp;3)
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_ATTITUDE:&nbsp;&nbsp;18&nbsp;(attitude&nbsp;data)
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_ATTITUDE1:&nbsp;56&nbsp;(attitude&nbsp;data&nbsp;from&nbsp;attitude&nbsp;system&nbsp;1)
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_ATTITUDE2:&nbsp;57&nbsp;(attitude&nbsp;data&nbsp;from&nbsp;attitude&nbsp;system&nbsp;2)
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_ATTITUDE3:&nbsp;58&nbsp;(attitude&nbsp;data&nbsp;from&nbsp;attitude&nbsp;system&nbsp;3)
+#.br
+What types of data records are present is format-dependent, as is the default
+choice of which record type is used as the attitude source. The
+program <B>mbinfo</B> can be used with the <B>-N</B> option to determine the numbers
+of different record types present in a data file.
 <DT><B>--attitude-sensor=</B><I>SENSORID</I>
 
 <DD>
+If a platform file has been specified, this option defines the id of the sensor
+description associated with the navigation data being used, whether that
+derives from asynchronous records in the data stream or from an external
+navigation file.
 <BR>
 
 <DT><B>--soundspeed-file=</B><I>FILE</I>
 
 <DD>
+Specifies an external time series file from which to merge sound speed data,
+replacing sound speed data included in the data stream.
+By default <B>mbpreprocess</B> attempts to use sound speed values included in the
+input data. The sound speed values represent the speed of sound at the survey
+sensor (i.e. the sonar arrays); typically these are input only when the
+preprocessing includes recalculation of multibeam bathymetry.
 <DT><B>--soundspeed-file-format=</B><I>FORMATID</I>
 
 <DD>
+Specifies the format of an external soundspeed time series file from which soundspeed values
+are derived (as defined with <B>--soundspeed-file</B>). Options for the <I>format_id</I>
+value are:
+<BR>
+
+<BR>&nbsp;&nbsp;&nbsp;1:&nbsp;ASCCI&nbsp;text&nbsp;file&nbsp;with&nbsp;lines&nbsp;of&nbsp;the&nbsp;form:
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;time_d&nbsp;soundspeed
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;where&nbsp;time_d&nbsp;is&nbsp;time&nbsp;in&nbsp;decimal&nbsp;epoch&nbsp;seconds&nbsp;(seconds&nbsp;since&nbsp;1970),&nbsp;and
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;soundspeed&nbsp;values&nbsp;are&nbsp;in&nbsp;meters&nbsp;positive&nbsp;down.
+<BR>
+
+<BR>&nbsp;&nbsp;&nbsp;2:&nbsp;ASCCI&nbsp;text&nbsp;file&nbsp;with&nbsp;lines&nbsp;of&nbsp;the&nbsp;form:
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;year&nbsp;month&nbsp;day&nbsp;hour&nbsp;minute&nbsp;second&nbsp;soundspeed
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;where&nbsp;year,&nbsp;month,&nbsp;day,&nbsp;hour,&nbsp;and&nbsp;minute&nbsp;values&nbsp;are&nbsp;integers,&nbsp;the&nbsp;second
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;value&nbsp;is&nbsp;decimal,&nbsp;and&nbsp;soundspeed&nbsp;values&nbsp;are&nbsp;in&nbsp;meters&nbsp;positive&nbsp;down.
+<BR>
+
+<BR>&nbsp;&nbsp;&nbsp;3:&nbsp;ASCCI&nbsp;text&nbsp;file&nbsp;with&nbsp;lines&nbsp;of&nbsp;the&nbsp;form:
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;year&nbsp;julian_day&nbsp;hour&nbsp;minute&nbsp;second&nbsp;soundspeed
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;where&nbsp;year,&nbsp;julian_day,&nbsp;hour,&nbsp;and&nbsp;minute&nbsp;values&nbsp;are&nbsp;integers,&nbsp;the&nbsp;second
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;value&nbsp;is&nbsp;decimal,&nbsp;and&nbsp;soundspeed&nbsp;values&nbsp;are&nbsp;in&nbsp;meters&nbsp;positive&nbsp;down.
+<BR>
+
+<BR>&nbsp;&nbsp;&nbsp;4:&nbsp;ASCCI&nbsp;text&nbsp;file&nbsp;with&nbsp;lines&nbsp;of&nbsp;the&nbsp;form:
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;year&nbsp;julian_day&nbsp;day_minute&nbsp;second&nbsp;soundspeed
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;where&nbsp;year,&nbsp;julian_day,&nbsp;and&nbsp;day_minute&nbsp;values&nbsp;are&nbsp;integers,&nbsp;the&nbsp;second
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;value&nbsp;is&nbsp;decimal,&nbsp;and&nbsp;soundspeed&nbsp;values&nbsp;are&nbsp;in&nbsp;meters&nbsp;positive&nbsp;down.
 <DT><B>--soundspeed-async=</B><I>RECORDTYPE</I>
 
 <DD>
+Specifies the type of data records from which sound speed values
+are derived (as defined with <B>--soundspeed-file-format</B>). Options for the
+<I>record_kind</I> include:
+<BR>
+
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_DATA:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1&nbsp;(survey&nbsp;data)
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_SSV:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;19&nbsp;(sound&nbsp;speed&nbsp;data)
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_CTD:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;34&nbsp;(sound&nbsp;speed&nbsp;data)
+#.br
+What types of data records are present is format-dependent, as is the default
+choice of which record type is used as the sound speed source. The
+program <B>mbinfo</B> can be used with the <B>-N</B> option to determine the numbers
+of different record types present in a data file.
 <DT><B>--soundspeed-sensor=</B><I>SENSORID</I>
 
 <DD>
+If a platform file has been specified, this option defines the id of the sensor
+description associated with the navigation data being used, whether that
+derives from asynchronous records in the data stream or from an external
+navigation file.
 <BR>
 
 <DT><B>--time-latency-file=</B><I>FILE</I>
 
 <DD>
+Specifies an external time series file from which to read a time latency model to be applied
+to some or all of the timestamps in the data stream.
 <DT><B>--time-latency-file-format=</B><I>FORMATID</I>
 
 <DD>
+Specifies the format of an external time latency time series file from which time latency values
+are derived (as defined with <B>--time-latency-file</B>). Options for the <I>format_id</I>
+value are:
+<BR>
+
+<BR>&nbsp;&nbsp;&nbsp;1:&nbsp;ASCCI&nbsp;text&nbsp;file&nbsp;with&nbsp;lines&nbsp;of&nbsp;the&nbsp;form:
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;time_d&nbsp;timeshift
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;where&nbsp;time_d&nbsp;is&nbsp;time&nbsp;in&nbsp;decimal&nbsp;epoch&nbsp;seconds&nbsp;(seconds&nbsp;since&nbsp;1970),&nbsp;and
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;timeshift&nbsp;values&nbsp;are&nbsp;in&nbsp;seconds.
+<BR>
+
+<BR>&nbsp;&nbsp;&nbsp;2:&nbsp;ASCCI&nbsp;text&nbsp;file&nbsp;with&nbsp;lines&nbsp;of&nbsp;the&nbsp;form:
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;year&nbsp;month&nbsp;day&nbsp;hour&nbsp;minute&nbsp;second&nbsp;timeshift
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;where&nbsp;year,&nbsp;month,&nbsp;day,&nbsp;hour,&nbsp;and&nbsp;minute&nbsp;values&nbsp;are&nbsp;integers,&nbsp;the&nbsp;second
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;value&nbsp;is&nbsp;decimal,&nbsp;and&nbsp;timeshift&nbsp;values&nbsp;are&nbsp;in&nbsp;seconds.
+<BR>
+
+<BR>&nbsp;&nbsp;&nbsp;3:&nbsp;ASCCI&nbsp;text&nbsp;file&nbsp;with&nbsp;lines&nbsp;of&nbsp;the&nbsp;form:
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;year&nbsp;julian_day&nbsp;hour&nbsp;minute&nbsp;second&nbsp;timeshift
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;where&nbsp;year,&nbsp;julian_day,&nbsp;hour,&nbsp;and&nbsp;minute&nbsp;values&nbsp;are&nbsp;integers,&nbsp;the&nbsp;second
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;value&nbsp;is&nbsp;decimal,&nbsp;and&nbsp;timeshift&nbsp;values&nbsp;are&nbsp;in&nbsp;seconds.
+<BR>
+
+<BR>&nbsp;&nbsp;&nbsp;4:&nbsp;ASCCI&nbsp;text&nbsp;file&nbsp;with&nbsp;lines&nbsp;of&nbsp;the&nbsp;form:
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;year&nbsp;julian_day&nbsp;day_minute&nbsp;second&nbsp;timeshift
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;where&nbsp;year,&nbsp;julian_day,&nbsp;and&nbsp;day_minute&nbsp;values&nbsp;are&nbsp;integers,&nbsp;the&nbsp;second
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;value&nbsp;is&nbsp;decimal,&nbsp;and&nbsp;timeshift&nbsp;values&nbsp;are&nbsp;in&nbsp;seconds.
 <DT><B>--time-latency-constant=</B><I>SECONDS</I>
 
 <DD>
+Specifies a constant time latency value
 <DT><B>--time-latency-apply-nav</B>
 
 <DD>
+Specifies that the time latency correction will be applied to the time stamps
+associated with the navigation data merged with the survey data.
 <DT><B>--time-latency-apply-sensordepth</B>
 
 <DD>
+Specifies that the time latency correction will be applied to the time stamps
+associated with the sonar depth data merged with the survey data.
 <DT><B>--time-latency-apply-heading</B>
 
 <DD>
+Specifies that the time latency correction will be applied to the time stamps
+associated with the heading data merged with the survey data.
 <DT><B>--time-latency-apply-attitude</B>
 
 <DD>
+Specifies that the time latency correction will be applied to the time stamps
+associated with the attitude data merged with the survey data.
 <DT><B>--time-latency-apply-altitude</B>
 
 <DD>
+Specifies that the time latency correction will be applied to the time stamps
+associated with the altitude data merged with the survey data.
 <DT><B>--time-latency-apply-all-ancilliary</B>
 
 <DD>
+Specifies that the time latency correction will be applied to the time stamps
+associated with all of the ancilliary data merged with the survey data (i.e. the
+navigation, sensor depth, heading, attitude, and altitude data).
 <DT><B>--time-latency-apply-survey</B>
 
 <DD>
+Specifies that the time latency correction will be applied to the time stamps
+associated with the survey data.
 <DT><B>--time-latency-apply-all</B>
 
 <DD>
+Specifies that the time latency correction will be applied to all time stamps
+associated with survey data and ancilliary data.
 <BR>
 
 <DT><B>--filter=</B><I>SECONDS</I>
 
 <DD>
+Specifies the half width in seconds of a Gaussian smoothing filter that can be applied to
+ancilliary time series data prior to merging with the survey data. This includes
+the navigation, heading, sensor depth, attitude and altitude data.
 <DT><B>--filter-apply-nav</B>
 
 <DD>
+Specifies that the smoothing filtering will be applied to the navigation data
+merged with the survey data.
 <DT><B>--filter-apply-sensordepth</B>
 
 <DD>
+Specifies that the smoothing filtering will be applied to the sensor depth data
+merged with the survey data.
 <DT><B>--filter-apply-heading</B>
 
 <DD>
+Specifies that the smoothing filtering will be applied to the heading data
+merged with the survey data.
 <DT><B>--filter-apply-attitude</B>
 
 <DD>
+Specifies that the smoothing filtering will be applied to the attitude data
+merged with the survey data.
 <DT><B>--filter-apply-altitude</B>
 
 <DD>
+Specifies that the smoothing filtering will be applied to the altitude data
+merged with the survey data.
 <DT><B>--filter-apply-all-ancilliary</B>
 
 <DD>
+Specifies that the smoothing filtering will be will be applied to all of the a
+ncilliary data merged with the survey data (i.e. the
+navigation, sensor depth, heading, attitude, and altitude data).
 <BR>
 
 <DT><B>--recalculate-bathymetry</B>
 
 <DD>
+This option causes the bathymetry in the survey data to be recalculated during
+preprocessing. The specifics of the recalculation are format dependent.
 <DT><B>--no-change-survey</B>
 
 <DD>
-<DT><B>--multibeam-sidescan-source=</B><I>RECORDID</I>
+This option forces <B>mbpreprocess</B> to not modify the survey data.
+<DT><B>--multibeam-sidescan-source=</B><I>SOURCE</I>
 
 <DD>
+This option defines the source type for the backscatter used in calculating
+the sidescan imagery associated with multibeam data for multibeam data formats
+that have multiple types of backscatter records and may have more that one type
+available in a data stream. The relevant formats are Reson 7k (88), Teledyne 7k3 (89),
+and Kongsberg kmall (161). If <I>SOURCE</I> = S or s, then uncalibrated snippet
+records will be used. If <I>SOURCE</I> = C or c, then the source records will be
+calibrated snippets. If <I>SOURCE</I> = B or b, then the source will be wide
+beam backscatter that is provided in a sidescan-like port and starboard time
+series. Finally, if <I>SOURCE</I> = W or w, then the source records will be
+calibrated wide beam backscatter. By default, for the relevant formats
+<B>mbpreprocess</B> will attempt to use the best available source, with a
+preference order of calibrated snippets, then snippets, then calibrated wide
+beam, then wide beam.
 <DT><B>--sounding-amplitude-filter=</B><I>THRESHOLD</I>
 
 <DD>
+This option enables flagging soundings that have amplitude or intensity values
+less than the specified threshold value for some data formats. The two relevant
+formats are Reson 7k (88) and 3D at Depth lidar (232 and 233).
 <DT><B>--sounding-altitude-filter=</B><I>THRESHOLD</I>
 
 <DD>
+This option enables flagging soundings that have altitude values
+less than the specified threshold value for some data formats. The relevant
+formats are 3D at Depth lidar (232 and 233).
 <DT><B>--head1-offsets</B>=<I>X/Y/Z/HEADING/ROLL/PITCH</I>
 
 <DD>
+This option specifies the positional and angular offsets of optical head 1 relative
+to the origin for a dual head lidar system. The only relevant formats are for
+3D at Depth lidars (232 and 233).
 <DT><B>--head2-offsets</B>=<I>X/Y/Z/HEADING/ROLL/PITCH</I>
 
 <DD>
-<BR>
-
+This option specifies the positional and angular offsets of optical head 2 relative
+to the origin for a dual head lidar system. The only relevant formats are for
+3D at Depth lidars (232 and 233).
 <DT><B>--kluge-time-jumps=</B><I>SECONDS</I>
 
 <DD>
@@ -562,7 +1099,7 @@ Oh yeah.
 </PRE>
 
 <CENTER><P><BR>
-Last Updated: 28 November 2018</P></CENTER>
+Last Updated: 4 October 2020</P></CENTER>
 
 <HR>
 

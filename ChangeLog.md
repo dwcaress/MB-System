@@ -20,7 +20,7 @@ include "beta" in the tag name are preliminary and generally not announced.
 Distributions that do not include "beta" in the tag name correspond to the major,
 announced releases. The source distributions associated with all releases, major or beta, are equally accessible as tarballs through the Github interface.
 
-- **Version 5.7.6        October 4, 2020
+- **Version 5.7.6        October 5, 2020
 - Version 5.7.6beta56    September 28, 2020
 - Version 5.7.6beta55    September 16, 2020
 - Version 5.7.6beta54    September 14, 2020
@@ -367,7 +367,51 @@ announced releases. The source distributions associated with all releases, major
 ### MB-System Version 5.7 Release Notes:
 --
 
-#### 5.7.6 (October 4, 2020)
+#### 5.7.6 (October 5, 2020)
+
+Version 5.7.6 is now the current release of MB-System. Changes since the 5.7.5
+release include:
+
+New programs:
+  mbgrd2obj
+  mbphotomosaic
+  mbgetphotocorrection
+  mbphotogrammetry
+  mbgrd2octree
+  mbm_makeimagelist
+  mbtrnpp
+
+Continuous Integration testing:
+Continuous integration testing has been implemented using the Travis CI service
+integrated with Github. The tests are performed by running
+    make check
+and are executed automatically whenever commits are made to the Github repository.
+
+Partial migration to C++:
+The source code for programs in the src/utilities directory has been migrated
+to C++.
+
+Deprecated programs: Several programs that are no longer part of the current data
+processing approach have been declared deprecated and have been moved from
+src/utilities to a new directory src/deprecated. These programs are:
+    mb7k2jstar
+    mb7k2ss
+    mb7kpreprocess
+    mbauvnavusbl
+    mbhsdump
+    mbhysweeppreprocess
+    mbinsreprocess
+    mbkongsbergpreprocess
+    mbneptune2esf
+    mbrollbias
+    mbrphsbias
+    mbstripnan
+    mbswplspreprocess
+The deprecated programs have also been converted to C++ and are still built and
+installed as part of MB-System. We tentatively plan to remove these programs
+entirely from MB-System distributions at the time of the 6.0 release.
+
+#### 5.7.6preparation (October 4, 2020)
 
 Mbnavlist: Fixed bug in parsing -O option that sometimes resulting in the output
 of undesired values.
