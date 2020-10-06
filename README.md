@@ -269,24 +269,22 @@ MB-System produces Postscript based graphics. Most current Unix operating system
 
 - gv: Open source screen Postscript viewer. This package is a bit more sophisticated than ghostview and can handle poster-sized plots. The source code can be obtained from the GNU software archives of the Free Software Foundation.
 
-###Documentation
+### Documentation
 --
 
-The html documentation consists of a number of html documents and images in the
-directory mbsystem/share/doc/mbsystem/html. This documentation also comprises
-the MB-System web site available from the Lamont web site at:
-	http://www.ldeo.columbia.edu
-and the MBARI web site at:
-	http://www.mbari.org
-Users can access the documentation in their own MB-System installation by using
-a web browser and accessing the file:
+The MB-System web site has a variety of documentation, and is located at:
+	https://www.mbari.org/products/research-software/mb-system/
+
+Some documentation in the form of a number of html documents and images 
+are included in the source distribution in the directory mbsystem/share/doc/mbsystem/html. 
+If MB-System has been installed in /usr/local) then these web pages can 
+loaded from:
 	file:/usr/local/mbsystem/share/doc/mbsystem/html/index.html
-(here it is assumed that MB-System has been installed in /usr/local). The
-documentation includes some general information about MB-System (e.g. who
+These web pages include some general information about MB-System (e.g. who
 wrote, how to get it, how to install it) and a complete set of manual
 pages.
 
-###MB-System discussion list
+### MB-System discussion list
 --
 
 We maintain an MB-System discussion email list to facilitate communication
@@ -305,7 +303,7 @@ To subscribe to the list go to:
 To read the archives go to:
         http://listserver.mbari.org/sympa/arc/mbsystem
 
-###Suggestions
+### Suggestions
 --
 
 We are interested in your suggestions. Please post in the discussion list
