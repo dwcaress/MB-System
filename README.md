@@ -279,9 +279,7 @@ Some documentation in the form of a number of html documents and images
 are included in the source distribution in the directory mbsystem/share/doc/mbsystem/html. 
 These web pages include some general information about MB-System (e.g. who
 wrote, how to get it, how to install it) and a complete set of manual
-pages. If MB-System has been installed in /usr/local, then these web pages can 
-loaded from:
-	file:/usr/local/mbsystem/share/doc/mbsystem/html/index.html
+pages.
 
 ### MB-System discussion list
 --
