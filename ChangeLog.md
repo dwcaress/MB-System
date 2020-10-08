@@ -20,6 +20,7 @@ include "beta" in the tag name are preliminary and generally not announced.
 Distributions that do not include "beta" in the tag name correspond to the major,
 announced releases. The source distributions associated with all releases, major or beta, are equally accessible as tarballs through the Github interface.
 
+- Version 5.7.7beta02    October 8, 2020
 - Version 5.7.7beta01    October 7, 2020
 - **Version 5.7.6        October 5, 2020
 - Version 5.7.6beta56    September 28, 2020
@@ -367,6 +368,13 @@ announced releases. The source distributions associated with all releases, major
 --
 ### MB-System Version 5.7 Release Notes:
 --
+
+#### 5.7.7beta02 (October 8, 2020)
+
+Mbotps: Modified mbotps to place temporary files in the user's home directory
+instead of the current working directory when the latter case results in file
+paths greater than 80 characters long. This is because OTPS has it's filename
+variables defined as 80 character strings.
 
 #### 5.7.7beta01 (October 7, 2020)
 
