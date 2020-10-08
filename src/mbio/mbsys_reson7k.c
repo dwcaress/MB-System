@@ -7454,11 +7454,13 @@ int mbsys_reson7k_extract_nnav(int verbose, void *mbio_ptr, void *store_ptr, int
   s7kr_bathymetry *bathymetry = (s7kr_bathymetry *)&store->bathymetry;
   s7kr_bluefin *bluefin = (s7kr_bluefin *)&store->bluefin;
   s7kr_position *position = (s7kr_position *)&store->position;
-  // s7kr_depth *depth = (s7kr_depth *)&store->depth;
-  // s7kr_attitude *attitude = (s7kr_attitude *)&store->attitude;
+  s7kr_customattitude *customattitude = (s7kr_customattitude *) &store->customattitude;
+  s7kr_depth *depth = (s7kr_depth *)&store->depth;
+  s7kr_attitude *attitude = (s7kr_attitude *)&store->attitude;
   s7kr_reference *reference = (s7kr_reference *)&store->reference;
   s7kr_navigation *navigation = &(store->navigation);
   s7kr_rollpitchheave *rollpitchheave = &(store->rollpitchheave);
+  s7kr_heading *headings = &(store->heading);
 
   /* get data kind */
   *kind = store->kind;
@@ -7633,7 +7635,47 @@ int mbsys_reson7k_extract_nnav(int verbose, void *mbio_ptr, void *store_ptr, int
   }
 
   /* extract data from attitude structure */
-  else if (*kind == MB_DATA_ATTITUDE) {
+  else if (*kind == MB_DATA_ATTITUDE && store->type == R7KRECID_Attitude) {
+    *n = attitude->n;
+
+    for (int iatt=0; iatt < attitude->n; iatt++) {
+      /* get time */
+      time_d[iatt] = store->time_d + attitude->delta_time[iatt];
+      mb_get_date(verbose, time_d[iatt], &(time_i[7 * iatt]));
+
+      /* get interpolated nav heading and speed  */
+      speed[iatt] = 0.0;
+      heading[iatt] = RTD * attitude->heading[iatt];
+      if (mb_io_ptr->nfix > 0)
+        mb_navint_interp(verbose, mbio_ptr, time_d[iatt], heading[iatt], speed[iatt], &(navlon[iatt]), &(navlat[iatt]), &(speed[iatt]),
+                         error);
+      else if (bathymetry->optionaldata) {
+        navlon[iatt] = RTD * bathymetry->longitude;
+        navlat[iatt] = RTD * bathymetry->latitude;
+      }
+
+      /* get draft  */
+      if (mb_io_ptr->nsonardepth > 0) {
+        mb_depint_interp(verbose, mbio_ptr, time_d[iatt], &(draft[iatt]), error);
+      }
+      else if (bathymetry->optionaldata) {
+        draft[iatt] = -bathymetry->vehicle_height + reference->water_z;
+      }
+      else {
+        draft[iatt] = reference->water_z;
+      }
+
+      /* get attitude  */
+      roll[iatt] = RTD * attitude->roll[iatt];
+      pitch[iatt] = RTD * attitude->pitch[iatt];
+      heave[iatt] = attitude->heave[iatt];
+    }
+
+    /* done translating values */
+  }
+
+  /* extract data from attitude structure */
+  else if (*kind == MB_DATA_ATTITUDE && store->type == R7KRECID_RollPitchHeave) {
     /* just one navigation value */
     *n = 1;
 
@@ -7672,6 +7714,146 @@ int mbsys_reson7k_extract_nnav(int verbose, void *mbio_ptr, void *store_ptr, int
     roll[0] = RTD * rollpitchheave->roll;
     pitch[0] = RTD * rollpitchheave->pitch;
     heave[0] = rollpitchheave->heave;
+
+    /* done translating values */
+  }
+
+  /* extract data from customattitude structure */
+  else if (*kind == MB_DATA_ATTITUDE && store->type == R7KRECID_CustomAttitude) {
+    *n = customattitude->n;
+
+    for (int iatt=0; iatt < customattitude->n; iatt++) {
+      /* get time */
+      time_d[iatt] = (double)(store->time_d + ((double)iatt) / ((double)customattitude->frequency));
+      mb_get_date(verbose, time_d[iatt], &(time_i[7 * iatt]));
+
+      /* get interpolated nav heading and speed  */
+      speed[iatt] = 0.0;
+      heading[iatt] = RTD * customattitude->heading[iatt];
+      if (mb_io_ptr->nfix > 0)
+        mb_navint_interp(verbose, mbio_ptr, time_d[iatt], heading[iatt], speed[iatt], &(navlon[iatt]), &(navlat[iatt]), &(speed[iatt]),
+                         error);
+      else if (bathymetry->optionaldata) {
+        navlon[iatt] = RTD * bathymetry->longitude;
+        navlat[iatt] = RTD * bathymetry->latitude;
+      }
+
+      /* get draft  */
+      if (mb_io_ptr->nsonardepth > 0) {
+        mb_depint_interp(verbose, mbio_ptr, time_d[iatt], &(draft[iatt]), error);
+      }
+      else if (bathymetry->optionaldata) {
+        draft[iatt] = -bathymetry->vehicle_height + reference->water_z;
+      }
+      else {
+        draft[iatt] = reference->water_z;
+      }
+
+      /* get attitude  */
+      roll[iatt] = RTD * customattitude->roll[iatt];
+      pitch[iatt] = RTD * customattitude->pitch[iatt];
+      heave[iatt] = customattitude->heave[iatt];
+    }
+
+    /* done translating values */
+  }
+
+  /* extract data from heading structure */
+  else if (*kind == MB_DATA_HEADING) {
+    /* just one heading value */
+    *n = 1;
+
+    /* get time */
+    for (int i = 0; i < 7; i++)
+      time_i[i] = store->time_i[i];
+    time_d[0] = store->time_d;
+
+    /* get interpolated nav heading and speed  */
+    speed[0] = 0.0;
+    heading[0] = RTD * headings->heading;
+    if (mb_io_ptr->nfix > 0)
+      mb_navint_interp(verbose, mbio_ptr, store->time_d, heading[0], speed[0], &(navlon[0]), &(navlat[0]), &(speed[0]),
+                       error);
+    else if (bathymetry->optionaldata) {
+      navlon[0] = RTD * bathymetry->longitude;
+      navlat[0] = RTD * bathymetry->latitude;
+    }
+
+    /* get draft  */
+    if (mb_io_ptr->nsonardepth > 0) {
+      mb_depint_interp(verbose, mbio_ptr, store->time_d, &(draft[0]), error);
+    }
+    else if (bathymetry->optionaldata) {
+      draft[0] = -bathymetry->vehicle_height + reference->water_z;
+    }
+    else {
+      draft[0] = reference->water_z;
+    }
+
+    /* get attitude  */
+    if (mb_io_ptr->nattitude > 0) {
+      mb_attint_interp(verbose, mbio_ptr, store->time_d, &(heave[0]), &(roll[0]), &(pitch[0]), error);
+    }
+    else if (bathymetry->optionaldata) {
+      roll[0] = RTD * bathymetry->roll;
+      pitch[0] = RTD * bathymetry->pitch;
+      heave[0] = bathymetry->heave;
+    }
+    else {
+      roll[0] = 0.0;
+      pitch[0] = 0.0;
+      heave[0] = 0.0;
+    }
+
+    /* done translating values */
+  }
+
+  /* extract data from sonardepth structure */
+  else if (*kind == MB_DATA_SONARDEPTH) {
+    /* just one sonardepth value */
+    *n = 1;
+
+    /* get time */
+    for (int i = 0; i < 7; i++)
+      time_i[i] = store->time_i[i];
+    time_d[0] = store->time_d;
+
+    /* get interpolated nav heading and speed  */
+    speed[0] = 0.0;
+    heading[0] = RTD * headings->heading;
+    if (mb_io_ptr->nfix > 0)
+      mb_navint_interp(verbose, mbio_ptr, store->time_d, heading[0], speed[0], &(navlon[0]), &(navlat[0]), &(speed[0]),
+                       error);
+    else if (bathymetry->optionaldata) {
+      navlon[0] = RTD * bathymetry->longitude;
+      navlat[0] = RTD * bathymetry->latitude;
+    }
+
+    /* get draft  */
+    if (mb_io_ptr->nsonardepth > 0) {
+      mb_depint_interp(verbose, mbio_ptr, store->time_d, &(draft[0]), error);
+    }
+    else if (bathymetry->optionaldata) {
+      draft[0] = -bathymetry->vehicle_height + reference->water_z;
+    }
+    else {
+      draft[0] = reference->water_z;
+    }
+
+    /* get attitude  */
+    if (mb_io_ptr->nattitude > 0) {
+      mb_attint_interp(verbose, mbio_ptr, store->time_d, &(heave[0]), &(roll[0]), &(pitch[0]), error);
+    }
+    else if (bathymetry->optionaldata) {
+      roll[0] = RTD * bathymetry->roll;
+      pitch[0] = RTD * bathymetry->pitch;
+      heave[0] = bathymetry->heave;
+    }
+    else {
+      roll[0] = 0.0;
+      pitch[0] = 0.0;
+      heave[0] = 0.0;
+    }
 
     /* done translating values */
   }

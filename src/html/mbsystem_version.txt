@@ -1,2 +1,2 @@
-MB-System Version:  "5.7.6"
-MB-System Release Date:  "5 October 2020"
+MB-System Version:  "5.7.7beta01"
+MB-System Release Date:  "7 October 2020"
