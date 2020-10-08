@@ -20,6 +20,7 @@ include "beta" in the tag name are preliminary and generally not announced.
 Distributions that do not include "beta" in the tag name correspond to the major,
 announced releases. The source distributions associated with all releases, major or beta, are equally accessible as tarballs through the Github interface.
 
+- Version 5.7.7beta01    October 7, 2020
 - **Version 5.7.6        October 5, 2020
 - Version 5.7.6beta56    September 28, 2020
 - Version 5.7.6beta55    September 16, 2020
@@ -366,6 +367,15 @@ announced releases. The source distributions associated with all releases, major
 --
 ### MB-System Version 5.7 Release Notes:
 --
+
+#### 5.7.7beta01 (October 7, 2020)
+
+Format 88 (MBF_RESON7KR): Fixed handling of the various attitude data record
+types by function mb_extract_nnav(), which in turn allows mbnavlist to work
+correction with format 88 data when keyed to those data record types.
+
+Mblist: Added output option 'n' for survey line number. This value is only defined
+for SEGY format data files (format 160).
 
 #### 5.7.6 (October 5, 2020)
 

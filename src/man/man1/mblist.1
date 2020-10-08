@@ -1,4 +1,4 @@
-.TH mblist 1 "1 February 2020" "MB-System 5.0" "MB-System 5.0"
+.TH mblist 1 "7 October 2020" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmblist\fP \- List data in swath data files.
 
@@ -445,7 +445,10 @@ for unix (epoch) time in decimal seconds since 1/1/70 00:00:00
 for time in decimal seconds since first record
 .IP
 \fBN\fP
-for ping count
+for ping count (or shot number for SEGY files)
+.IP
+\fBn\fP
+for line number (only defined for SEGY files)
 .IP
 \fBP\fP  for pitch in degrees
 .IP

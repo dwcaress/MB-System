@@ -553,7 +553,7 @@ int main(int argc, char **argv) {
 				nread++;
 
 			if (verbose >= 2) {
-				fprintf(stderr, "\ndbg2  Nsv data read in program <%s>\n", program_name);
+				fprintf(stderr, "\ndbg2  Data read in program <%s>\n", program_name);
 				fprintf(stderr, "dbg2       kind:           %d\n", kind);
 				fprintf(stderr, "dbg2       error:          %d\n", error);
 				fprintf(stderr, "dbg2       status:         %d\n", status);

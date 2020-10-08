@@ -1104,6 +1104,7 @@ int main(int argc, char **argv) {
   bool use_gains = false;
   bool use_detects = true;
   bool use_pingnumber = false;
+  bool use_linenumber = false;
   bool check_bath = false;
   bool check_amp = false;
   bool check_ss = false;
@@ -1146,6 +1147,7 @@ int main(int argc, char **argv) {
   char comment[MB_COMMENT_MAXLINE];
   int icomment = 0;
   unsigned int pingnumber;
+  unsigned int linenumber;
 
   /* additional time variables */
   bool first_m = true;
@@ -2705,8 +2707,10 @@ int main(int argc, char **argv) {
             use_attitude = true;
           if (list[i] == 'Q' || list[i] == 'q')
             use_detects = true;
-          if (list[i] == 'N' || list[i] == 'n')
+          if (list[i] == 'N')
             use_pingnumber = true;
+          if (list[i] == 'n')
+            use_linenumber = true;
           if (list[i] == '.')
             raw_next_value = true;
           if (list[i] == '=')
@@ -2815,7 +2819,7 @@ int main(int argc, char **argv) {
       error = MB_ERROR_NO_ERROR;
 
       /* read a ping of data */
-      if (pings == 1 || use_attitude || use_detects || use_pingnumber) {
+      if (pings == 1 || use_attitude || use_detects || use_pingnumber || use_linenumber) {
         /* read next data record */
         status = mb_get_all(verbose, mbio_ptr, &store_ptr, &kind, time_i, &time_d, &navlon, &navlat, &speed, &heading,
                             &distance, &altitude, &sonardepth, &beams_bath, &beams_amp, &pixels_ss, beamflag, bath, amp,
@@ -2841,6 +2845,10 @@ int main(int argc, char **argv) {
         /* if survey data extract pingnumber */
         if (error == MB_ERROR_NO_ERROR && kind == MB_DATA_DATA && use_pingnumber)
           status = mb_pingnumber(verbose, mbio_ptr, &pingnumber, &error);
+        if (error == MB_ERROR_NO_ERROR && kind == MB_DATA_DATA && use_linenumber) {
+          unsigned int cdpnumber;
+          status = mb_segynumber(verbose, mbio_ptr, &linenumber, &pingnumber, &cdpnumber, &error);
+        }
       }
       else {
         status = mb_get(verbose, mbio_ptr, &kind, &pings_read, time_i, &time_d, &navlon, &navlat, &speed, &heading,
@@ -3368,11 +3376,19 @@ int main(int argc, char **argv) {
                   printsimplevalue(verbose, output[i], b, 0, 6, ascii, &invert_next_value, &signflip_next_value,
                                    &error);
                   break;
-                case 'N': /* ping counter */
+                case 'N': /* ping counter | ping number | shot number */
                   if (ascii)
                     fprintf(output[i], "%6u", pingnumber);
                   else {
                     b = pingnumber;
+                    fwrite(&b, sizeof(double), 1, outfile);
+                  }
+                  break;
+                case 'n': /* line number */
+                  if (ascii)
+                    fprintf(output[i], "%6u", linenumber);
+                  else {
+                    b = linenumber;
                     fwrite(&b, sizeof(double), 1, outfile);
                   }
                   break;
@@ -4191,6 +4207,14 @@ int main(int argc, char **argv) {
                     fprintf(output[i], "%6u", pingnumber);
                   else {
                     b = pingnumber;
+                    fwrite(&b, sizeof(double), 1, outfile);
+                  }
+                  break;
+                case 'n': /* line number */
+                  if (ascii)
+                    fprintf(output[i], "%6u", linenumber);
+                  else {
+                    b = linenumber;
                     fwrite(&b, sizeof(double), 1, outfile);
                   }
                   break;

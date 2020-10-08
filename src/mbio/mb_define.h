@@ -341,7 +341,7 @@ int mb_deall(int verbose, void *mbio_ptr, void **store_ptr, int *error);
 int mb_get_store(int verbose, void *mbio_ptr, void **store_ptr, int *error);
 int mb_dimensions(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbath, int *namp, int *nss, int *error);
 int mb_pingnumber(int verbose, void *mbio_ptr, unsigned int *pingnumber, int *error);
-int mb_segynumber(int verbose, void *mbio_ptr, int *line, int *shot, int *cdp, int *error);
+int mb_segynumber(int verbose, void *mbio_ptr, unsigned int *line, unsigned int *shot, unsigned int *cdp, int *error);
 int mb_beamwidths(int verbose, void *mbio_ptr, double *beamwidth_xtrack, double *beamwidth_ltrack, int *error);
 int mb_sonartype(int verbose, void *mbio_ptr, void *store_ptr, int *sonartype, int *error);
 int mb_sidescantype(int verbose, void *mbio_ptr, void *store_ptr, int *ss_type, int *error);
