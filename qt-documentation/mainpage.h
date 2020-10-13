@@ -8,9 +8,9 @@
  * \section build_sec Building
  *
  * \subsection build_deps Build Dependencies
- * - g++ package
- * - VTK 8.2+
- * - QT 5.14+
+ * - C++ version 2017+ compiler, linker, standard libraries
+ * - VTK version 8.2+
+ * - QT version 5.14+
  *
  *
  */
