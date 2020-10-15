@@ -1,4 +1,4 @@
-bin_PROGRAMS = mbqttest
+bin_PROGRAMS = qt-mbgrdviz-2
 
 include_HEADERS = BackEnd.h \
   MyTimer.h \
@@ -31,21 +31,21 @@ LIBS += ${libgmt_LIBS}
 LIBS += ${libnetcdf_LIBS}
 LIBS += $(LIBM)
 
-mbqttest_SOURCES =
-mbqttest_SOURCES += datavisualizationqml2/abstractdeclarative.cpp \
-mbqttest_SOURCES += datavisualizationqml2/colorgradient.cpp \
-mbqttest_SOURCES += datavisualizationqml2/datavisualizationqml2_plugin.cpp \
-mbqttest_SOURCES += datavisualizationqml2/declarativebars.cpp \
-mbqttest_SOURCES += datavisualizationqml2/declarativecolor.cpp \
-mbqttest_SOURCES += datavisualizationqml2/declarativerendernode.cpp \
-mbqttest_SOURCES += datavisualizationqml2/declarativescatter.cpp \
-mbqttest_SOURCES += datavisualizationqml2/declarativescene.cpp \
-mbqttest_SOURCES += datavisualizationqml2/declarativeseries.cpp \
-mbqttest_SOURCES += datavisualizationqml2/declarativesurface.cpp \
-mbqttest_SOURCES += datavisualizationqml2/declarativetheme.cpp \
-mbqttest_SOURCES += datavisualizationqml2/enumtostringmap.cpp \
-mbqttest_SOURCES += datavisualizationqml2/glstatestore.cpp \
-mbqttest_SOURCES += main.cpp \
-mbqttest_SOURCES += MyTimer.cpp \
-mbqttest_SOURCES += TopographicSeries.cpp \
-mbqttest_SOURCES += BackEnd.cpp
+qt-mbgrdviz-2_SOURCES =
+qt-mbgrdviz-2_SOURCES += datavisualizationqml2/abstractdeclarative.cpp \
+qt-mbgrdviz-2_SOURCES += datavisualizationqml2/colorgradient.cpp \
+qt-mbgrdviz-2_SOURCES += datavisualizationqml2/datavisualizationqml2_plugin.cpp \
+qt-mbgrdviz-2_SOURCES += datavisualizationqml2/declarativebars.cpp \
+qt-mbgrdviz-2_SOURCES += datavisualizationqml2/declarativecolor.cpp \
+qt-mbgrdviz-2_SOURCES += datavisualizationqml2/declarativerendernode.cpp \
+qt-mbgrdviz-2_SOURCES += datavisualizationqml2/declarativescatter.cpp \
+qt-mbgrdviz-2_SOURCES += datavisualizationqml2/declarativescene.cpp \
+qt-mbgrdviz-2_SOURCES += datavisualizationqml2/declarativeseries.cpp \
+qt-mbgrdviz-2_SOURCES += datavisualizationqml2/declarativesurface.cpp \
+qt-mbgrdviz-2_SOURCES += datavisualizationqml2/declarativetheme.cpp \
+qt-mbgrdviz-2_SOURCES += datavisualizationqml2/enumtostringmap.cpp \
+qt-mbgrdviz-2_SOURCES += datavisualizationqml2/glstatestore.cpp \
+qt-mbgrdviz-2_SOURCES += main.cpp \
+qt-mbgrdviz-2_SOURCES += MyTimer.cpp \
+qt-mbgrdviz-2_SOURCES += TopographicSeries.cpp \
+qt-mbgrdviz-2_SOURCES += BackEnd.cpp
