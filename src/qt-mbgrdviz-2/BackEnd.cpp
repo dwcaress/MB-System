@@ -10,8 +10,7 @@
 #include <QCoreApplication>
 #include <QValue3DAxis>
 #include <QValue3DAxisFormatter>
-
-#include <gmt.h>
+#include <gmt/gmt.h>
 
 #include "BackEnd.h"
 #include "TopographicSeries.h"
@@ -93,11 +92,11 @@ bool BackEnd::getQmlItems() {
 
     if (!object) {
         qCritical() << "Couldn't find \"selectedFile\" object in GUI";
-        return false;
+        return false;      
     }
 
     m_selectedFileText = object;
-
+    
     return true;
 }
 
@@ -124,16 +123,16 @@ void BackEnd::setGridFile(QUrl fileURL) {
       free((void *)m_gridFile);
     }
     m_gridFile = strdup(fileURL.toLocalFile().toLatin1().data());
-
+    
     if (m_topographicSeries) {
       // Need to remove series from surface before deleting the series
         m_surface->removeSeries(m_topographicSeries);
-
+      
         delete m_topographicSeries;
     }
     m_topographicSeries = new TopographicSeries();
 
-
+    
     void *gmtApi;
     GMT_GRID *gmtGrid =
       TopographicSeries::readGridFile(m_gridFile,
@@ -147,7 +146,7 @@ void BackEnd::setGridFile(QUrl fileURL) {
     qDebug() << "sizeof(QVector3D) " << sizeof(QVector3D);
     size_t bytesNeeded = gmtGrid->header->n_rows * gmtGrid->header->n_columns *
       sizeof(QVector3D);
-
+    
     qDebug() << "total " << gmtGrid->header->n_rows * gmtGrid->header->n_columns
 	     << " points, " << bytesNeeded << " bytes";
 
@@ -155,7 +154,7 @@ void BackEnd::setGridFile(QUrl fileURL) {
     qDebug() << "call setTopography()";
     m_topographicSeries->setTopography(gmtApi, gmtGrid);
     qDebug() << "returned from setTopography()";
-
+    
     m_topographicSeries->setItemLabelFormat(QStringLiteral("@yLabel m"));
     qDebug() << "surface3D width: " << m_surface->width();
     qDebug() << "surface3D height: " << m_surface->height();
@@ -213,7 +212,7 @@ void BackEnd::setGridFile(QUrl fileURL) {
 
     // Freeing data array causes segfault
     // m_topographicSeries->freeDataArray();
-
+    
     qDebug() << "after adding topo series, found " << m_surface->countSeriesFunc(&seriesList)
             << " series";
 

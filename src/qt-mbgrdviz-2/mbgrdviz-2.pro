@@ -1,14 +1,7 @@
-# The configure script copies this file to mbgrdviz-2.pro and then modifies it
-# with sed to include the relevant GMT compile and load flags
-# The configure script then runs qmake to generate a Makefile.qmake while
-# also generating a Makefile that calls "make -f Makefile.qmake"
-
 QT += quick
 QT += datavisualization
 
 CONFIG += c++11
-CONFIG-=app_bundle
-CONFIG += force_debug_info
 
 # The following define makes your compiler emit warnings if you use
 # any feature of Qt which as been marked deprecated (the exact warnings
@@ -39,10 +32,32 @@ SOURCES += \
     MyTimer.cpp \
     TopographicSeries.cpp \
     BackEnd.cpp
+ ##
+# User *MUST* set environment variable QT_HOME
+##INCDIR = $$(QT_HOME)
+##message(Using INCDIR $$INCDIR - ok?)
+
+##INCLUDEPATH += $$INCDIR/5.14.2/Src/qtdatavis3d/src/
+##INCLUDEPATH += $$INCDIR/5.14.2/Src/qtdatavis3d/src/datavisualization/global
+##INCLUDEPATH += $$INCDIR/5.14.2/Src/qtdatavis3d/src/datavisualization/engine/
+##INCLUDEPATH += $$INCDIR/5.14.2/Src/qtdatavis3d/src/datavisualization/data/
+##INCLUDEPATH += $$INCDIR/5.14.2/Src/qtdatavis3d/src/datavisualization/theme
 
 INCLUDEPATH += datavisualizationqml2
-INCLUDEPATH += renderingEngine
-INCLUDEPATH += /usr/local/include/gmt
+INCLUDEPATH += renderingEngine/
+
+RESOURCES += qml.qrc
+
+# Additional import path used to resolve QML modules in Qt Creator's code model
+QML_IMPORT_PATH =
+
+# Additional import path used to resolve QML modules just for Qt Quick Designer
+QML_DESIGNER_IMPORT_PATH =
+
+# Default rules for deployment.
+qnx: target.path = /tmp/$${TARGET}/bin
+else: unix:!android: target.path = /opt/$${TARGET}/bin
+!isEmpty(target.path): INSTALLS += target
 
 HEADERS += \
     TopographicSeries.h \
@@ -65,17 +80,4 @@ HEADERS += \
     TopographicSeries.h \
     BackEnd.h
 
-LIBS += -L/usr/local/lib -lgmt
-
-RESOURCES += qml.qrc
-
-# Additional import path used to resolve QML modules in Qt Creator's code model
-QML_IMPORT_PATH =
-
-# Additional import path used to resolve QML modules just for Qt Quick Designer
-QML_DESIGNER_IMPORT_PATH =
-
-# Default rules for deployment.
-target.path = /usr/local/bin
-target.files = mbgrdviz-2
-INSTALLS += target
+unix|win32: LIBS += -lgmt
