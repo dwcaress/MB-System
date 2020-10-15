@@ -1,15 +1,8 @@
-# The configure script copies this file to mbgrdviz-1.pro and then modifies it
-# with sed to include the relevant GMT compile and load flags
-# The configure script then runs qmake to generate a Makefile.qmake while
-# also generating a Makefile that calls "make -f Makefile.qmake"
-
 ## QT += quick quick3d-private
 # This from "lights.pro" demo
 QT += qml quick 3dcore 3drender 3dinput 3dquick 3dquickextras
 
 CONFIG += c++11
-CONFIG-=app_bundle
-CONFIG += force_debug_info
 
 # The following define makes your compiler emit warnings if you use
 # any Qt feature that has been marked deprecated (the exact warnings
@@ -25,17 +18,6 @@ DEFINES += QT_DEPRECATED_WARNINGS
 SOURCES += \
         main.cpp
 
-## HEADERS +=
-
-## DISTFILES += \
-
-INCLUDEPATH += /usr/local/include/gmt
-INCLUDEPATH += /opt/X11/include
-INCLUDEPATH += ../qt-mbgui
-
-LIBS += -L../qt-mbgui -lMBGui
-LIBS += -L/usr/local/lib -lgmt
-
 RESOURCES += qml.qrc
 
 # Additional import path used to resolve QML modules in Qt Creator's code model
@@ -45,6 +27,21 @@ QML_IMPORT_PATH =
 QML_DESIGNER_IMPORT_PATH =
 
 # Default rules for deployment.
-target.path = /usr/local/bin
-target.files = mbgrdviz-3
-INSTALLS += target
+qnx: target.path = /tmp/$${TARGET}/bin
+else: unix:!android: target.path = /opt/$${TARGET}/bin
+!isEmpty(target.path): INSTALLS += target
+
+## HEADERS += 
+
+
+
+INCLUDEPATH += ../qt-guilib
+
+QMAKE_RPATHDIR += ../qt-guilib/
+
+LIBS += -L../qt-guilib -lMBGui
+unix|win32|macos: LIBS += -lgmt
+### unix|win32|macos: LIBS += -lvtkCommonColor-8.2 -lvtkCommonCore-8.2 -lvtkCommonDataModel-8.2 -lvtkCommonExecutionModel-8.2 -lvtkInteractionWidgets-8.2 -lvtkInteractionStyle-8.2 -lvtkRenderingCore-8.2 -lvtkFiltersSources-8.2 -lvtkGeovisCore-8.2 -lvtkRenderingOpenGL2-8.2 -lvtkFiltersHybrid-8.2 -lvtkIOGeometry-8.2 -lvtkIOCore-8.2 -lvtkIOLegacy-8.2 -lvtkRenderingVolumeOpenGL2-8.2 -lvtkFiltersCore-8.2 -lvtkFiltersGeneral-8.2 -lvtksys-8.2
+
+
+unix|win32|macos: LIBS += -lgmt -lvtkGUISupportQt-8.2 -lvtkCommonColor-8.2 -lvtkRenderingFreeType-8.2 -lvtkRenderingAnnotation-8.2 -lvtkCommonTransforms-8.2 -lvtkCommonCore-8.2 -lvtkCommonDataModel-8.2 -lvtkCommonExecutionModel-8.2 -lvtkInteractionWidgets-8.2 -lvtkInteractionStyle-8.2 -lvtkRenderingCore-8.2 -lvtkFiltersSources-8.2 -lvtkGeovisCore-8.2 -lvtkRenderingOpenGL2-8.2 -lvtkFiltersHybrid-8.2 -lvtkIOGeometry-8.2 -lvtkIOCore-8.2 -lvtkIOLegacy-8.2 -lvtkRenderingVolumeOpenGL2-8.2 -lvtkFiltersCore-8.2 -lvtkFiltersGeneral-8.2 -lvtksys-8.2
