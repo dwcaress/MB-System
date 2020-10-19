@@ -48,6 +48,7 @@ HEADERS += \
     colorTables.h
 
 INCLUDEPATH += /usr/local/include/vtk-8.2
+INCLUDEPATH += $$(GMT_INCLUDEDIR)
 
 # Default rules for deployment.
 unix {
@@ -64,3 +65,4 @@ DISTFILES += \
     shaders/phong.vert \
     shaders/test.frag \
     shaders/test.vert
+
