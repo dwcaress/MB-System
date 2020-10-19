@@ -152,6 +152,7 @@ m4_ifdef([AM_PROG_AR], [AM_PROG_AR])
 AC_PROG_LN_S
 AC_PROG_MAKE_SET
 LT_INIT
+AC_PROG_SED
 AC_SUBST([LIBTOOL_DEPS])
 LT_LIB_M
 AM_PATH_PYTHON([3.6],, [:])
@@ -1081,39 +1082,59 @@ if test "$build_qttools" = "yes" ; then
     AC_SUBST([qt_CPPFLAGS], [$QT_CXXFLAGS])
     AC_SUBST([qt_MOC], [$QT_MOC])
 
-    AS_ECHO(["Constructing Qt project file mbgui.pro in src/qt-mbgui..."])
-    `cp src/qt-mbgui/mbgui.pro.init src/qt-mbgui/mbgui.pro`
-    `sed -i "" "s#__OPENGL_INCLUDEDIR__#$libopengl_INCLUDEDIR#" src/qt-mbgui/mbgui.pro`
-    `sed -i "" "s#__OPENGL_LIBS__#$libopengl_LIBS#" src/qt-mbgui/mbgui.pro`
-    `sed -i "" "s#__GMT_INCLUDEDIR__#$libgmt_INCLUDEDIR#" src/qt-mbgui/mbgui.pro`
-    `sed -i "" "s#__GMT_LIBS__#$libgmt_LIBS#" src/qt-mbgui/mbgui.pro`
-    `sed -i "" "s#__INSTALLDIR__#$prefix/lib#" src/qt-mbgui/mbgui.pro`
-    AS_ECHO(["Running qmake in src/qt-mbgui to generate src/qt-mbgui/Makefile.qmake..."])
-    `cd src/qt-mbgui ; qmake -makefile -o Makefile.qmake ; cd ../..`
+    sed_opt='-i ""'
+    # Detect the target system
+    case "${host_os}" in
+         linux*)
+        echo 'got linux'
+        sed_opt='-i'
+        ;;
+    cygwin*|mingw*)
+        echo 'got cygwin'
+        ;;
+    darwin*)
+        echo 'got mac'
+        sed_opt='-i ""'        
+        ;;
+    *)
+        AC_MSG_ERROR(["OS $host_os is not supported"])
+        ;;
+esac
 
-    AS_ECHO(["Constructing Qt project file mbgrdviz-1.pro in src/qt-mbgrdviz-1..."])
-    `cp src/qt-mbgrdviz-1/mbgrdviz-1.pro.init src/qt-mbgrdviz-1/mbgrdviz-1.pro`
-    `sed -i "" "s#__GMT_INCLUDEDIR__#$libgmt_INCLUDEDIR#" src/qt-mbgrdviz-1/mbgrdviz-1.pro`
-    `sed -i "" "s#__GMT_LIBS__#$libgmt_LIBS#" src/qt-mbgrdviz-1/mbgrdviz-1.pro`
-    `sed -i "" "s#__INSTALLDIR__#$prefix/bin#" src/qt-mbgrdviz-1/mbgrdviz-1.pro`
-    AS_ECHO(["Running qmake in src/qt-mbgrdviz-1 to generate src/qt-mbgrdviz-1/Makefile.qmake..."])
-    `cd src/qt-mbgrdviz-1 ; qmake -makefile -o Makefile.qmake ; cd ../..`
+    AS_ECHO(["Constructing Qt project file MBGui.pro in src/qt-guilib..."])
+    `cp src/qt-guilib/MBGui.pro.init src/qt-guilib/MBGui.pro`
+    `sed $sed_opt "s#__OPENGL_INCLUDEDIR__#$libopengl_INCLUDEDIR#" src/qt-guilib/MBGui.pro`
+    `sed $sed_opt "s#__OPENGL_LIBS__#$libopengl_LIBS#" src/qt-guilib/MBGui.pro`
+    ### `sed -i"" "s#__GMT_INCLUDEDIR__#$libgmt_INCLUDEDIR#" src/qt-guilib/MBGui.pro`
+    `sed $sed_opt "s#__GMT_INCLUDEDIR__#$libgmt_INCLUDEDIR#" src/qt-guilib/MBGui.pro`    
+    `sed $sed_opt "s#__GMT_LIBS__#$libgmt_LIBS#" src/qt-guilib/MBGui.pro`
+    `sed $sed_opt "s#__INSTALLDIR__#$prefix/lib#" src/qt-guilib/MBGui.pro`
+    AS_ECHO(["Running qmake in src/qt-guilib to generate src/qt-guilib/Makefile.qmake..."])
+    `cd src/qt-guilib ; qmake -makefile -o Makefile.qmake ; cd ../..`
 
-    AS_ECHO(["Constructing Qt project file mbgrdviz-2.pro in src/qt-mbgrdviz-2..."])
-    `cp src/qt-mbgrdviz-2/mbgrdviz-2.pro.init src/qt-mbgrdviz-2/mbgrdviz-2.pro`
-    `sed -i "" "s#__GMT_INCLUDEDIR__#$libgmt_INCLUDEDIR#" src/qt-mbgrdviz-2/mbgrdviz-2.pro`
-    `sed -i "" "s#__GMT_LIBS__#$libgmt_LIBS#" src/qt-mbgrdviz-2/mbgrdviz-2.pro`
-    `sed -i "" "s#__INSTALLDIR__#$prefix/bin#" src/qt-mbgrdviz-2/mbgrdviz-2.pro`
+    AS_ECHO(["Constructing Qt project file qt-mbgrdviz.pro in src/qt-mbgrdviz..."])
+    `cp src/qt-mbgrdviz/qt-mbgrdviz.pro.init src/qt-mbgrdviz/qt-mbgrdviz.pro`
+    `sed $sed_opt "s#__GMT_INCLUDEDIR__#$libgmt_INCLUDEDIR#" src/qt-mbgrdviz/qt-mbgrdviz.pro`
+    `sed $sed_opt "s#__GMT_LIBS__#$libgmt_LIBS#" src/qt-mbgrdviz/qt-mbgrdviz.pro`
+    `sed $sed_opt "s#__INSTALLDIR__#$prefix/bin#" src/qt-mbgrdviz/qt-mbgrdviz.pro`
+    AS_ECHO(["Running qmake in src/qt-mbgrdviz to generate src/qt-mbgrdviz/Makefile.qmake..."])
+    `cd src/qt-mbgrdviz ; qmake -makefile -o Makefile.qmake ; cd ../..`
+
+    AS_ECHO(["Constructing Qt project file qt-mbgrdviz-2.pro in src/qt-mbgrdviz-2..."])
+    `cp src/qt-mbgrdviz-2/qt-mbgrdviz-2.pro.init src/qt-mbgrdviz-2/qt-mbgrdviz-2.pro`
+    `sed $sed_opt "s#__GMT_INCLUDEDIR__#$libgmt_INCLUDEDIR#" src/qt-mbgrdviz-2/qt-mbgrdviz-2.pro`
+    `sed $sed_opt "s#__GMT_LIBS__#$libgmt_LIBS#" src/qt-mbgrdviz-2/qt-mbgrdviz-2.pro`
+    `sed $sed_opt "s#__INSTALLDIR__#$prefix/bin#" src/qt-mbgrdviz-2/qt-mbgrdviz-2.pro`
     AS_ECHO(["Running qmake in src/qt-mbgrdviz-2 to generate src/qt-mbgrdviz-2/Makefile.qmake..."])
     `cd src/qt-mbgrdviz-2 ; qmake -makefile -o Makefile.qmake ; cd ../..`
 
-    AS_ECHO(["Constructing Qt project file mbgrdviz-3.pro in src/qt-mbgrdviz-3..."])
-    `cp src/qt-mbgrdviz-3/mbgrdviz-3.pro.init src/qt-mbgrdviz-3/mbgrdviz-3.pro`
-    `sed -i "" "s#__OPENGL_INCLUDEDIR__#$libopengl_INCLUDEDIR#" src/qt-mbgrdviz-3/mbgrdviz-3.pro`
-    `sed -i "" "s#__OPENGL_LIBS__#$libopengl_LIBS#" src/qt-mbgrdviz-3/mbgrdviz-3.pro`
-    `sed -i "" "s#__GMT_INCLUDEDIR__#$libgmt_INCLUDEDIR#" src/qt-mbgrdviz-3/mbgrdviz-3.pro`
-    `sed -i "" "s#__GMT_LIBS__#$libgmt_LIBS#" src/qt-mbgrdviz-3/mbgrdviz-3.pro`
-    `sed -i "" "s#__INSTALLDIR__#$prefix/bin#" src/qt-mbgrdviz-3/mbgrdviz-3.pro`
+    AS_ECHO(["Constructing Qt project file qt-mbgrdviz-3.pro in src/qt-mbgrdviz-3..."])
+    `cp src/qt-mbgrdviz-3/qt-mbgrdviz-3.pro.init src/qt-mbgrdviz-3/qt-mbgrdviz-3.pro`
+    `sed $sed_opt "s#__OPENGL_INCLUDEDIR__#$libopengl_INCLUDEDIR#" src/qt-mbgrdviz-3/qt-mbgrdviz-3.pro`
+    `sed $sed_opt "s#__OPENGL_LIBS__#$libopengl_LIBS#" src/qt-mbgrdviz-3/qt-mbgrdviz-3.pro`
+    `sed $sed_opt "s#__GMT_INCLUDEDIR__#$libgmt_INCLUDEDIR#" src/qt-mbgrdviz-3/qt-mbgrdviz-3.pro`
+    `sed $sed_opt "s#__GMT_LIBS__#$libgmt_LIBS#" src/qt-mbgrdviz-3/qt-mbgrdviz-3.pro`
+    `sed $sed_opt "s#__INSTALLDIR__#$prefix/bin#" src/qt-mbgrdviz-3/qt-mbgrdviz-3.pro`
     AS_ECHO(["Running qmake in src/qt-mbgrdviz-3 to generate src/qt-mbgrdviz-3/Makefile.qmake..."])
     `cd src/qt-mbgrdviz-3 ; qmake -makefile -o Makefile.qmake ; cd ../..`
 
@@ -1339,8 +1360,8 @@ if test "$build_opencvtools" = "yes" ; then
 fi
 if test "$build_qttools" = "yes" ; then
     AC_CONFIG_FILES([\
-          src/qt-mbgui/Makefile \
-          src/qt-mbgrdviz-1/Makefile \
+          src/qt-guilib/Makefile \
+          src/qt-mbgrdviz/Makefile \
           src/qt-mbgrdviz-2/Makefile \
           src/qt-mbgrdviz-3/Makefile \
           ])
