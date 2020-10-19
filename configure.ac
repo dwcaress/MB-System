@@ -1082,18 +1082,19 @@ if test "$build_qttools" = "yes" ; then
     AC_SUBST([qt_CPPFLAGS], [$QT_CXXFLAGS])
     AC_SUBST([qt_MOC], [$QT_MOC])
 
-    sed_opt='-i ""'
+    # MacOS sed syntax by default
+    sed_opt='-i ""'     
     # Detect the target system
     case "${host_os}" in
          linux*)
-        echo 'got linux'
+        # echo 'got linux'
         sed_opt='-i'
         ;;
     cygwin*|mingw*)
-        echo 'got cygwin'
+        # echo 'got cygwin'
         ;;
     darwin*)
-        echo 'got mac'
+        # echo 'got mac'
         sed_opt='-i ""'        
         ;;
     *)
@@ -1105,7 +1106,6 @@ esac
     `cp src/qt-guilib/MBGui.pro.init src/qt-guilib/MBGui.pro`
     `sed $sed_opt "s#__OPENGL_INCLUDEDIR__#$libopengl_INCLUDEDIR#" src/qt-guilib/MBGui.pro`
     `sed $sed_opt "s#__OPENGL_LIBS__#$libopengl_LIBS#" src/qt-guilib/MBGui.pro`
-    ### `sed -i"" "s#__GMT_INCLUDEDIR__#$libgmt_INCLUDEDIR#" src/qt-guilib/MBGui.pro`
     `sed $sed_opt "s#__GMT_INCLUDEDIR__#$libgmt_INCLUDEDIR#" src/qt-guilib/MBGui.pro`    
     `sed $sed_opt "s#__GMT_LIBS__#$libgmt_LIBS#" src/qt-guilib/MBGui.pro`
     `sed $sed_opt "s#__INSTALLDIR__#$prefix/lib#" src/qt-guilib/MBGui.pro`
