@@ -1,7 +1,7 @@
 #ifndef GMTGRIDSURFACE_H
 #define GMTGRIDSURFACE_H
 #include <GL/gl.h>
-#include <gmt/gmt.h>
+#include "gmt.h"
 #include "Surface.h"
 #include "ColorMap.h"
 
