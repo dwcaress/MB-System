@@ -47,7 +47,7 @@ HEADERS += \
     Vertex.h \
     colorTables.h
 
-INCLUDEPATH += /usr/local/include/vtk-8.2
+INCLUDEPATH += $$(VTK_INCLUDEDIR)
 INCLUDEPATH += $$(GMT_INCLUDEDIR)
 
 # Default rules for deployment.
