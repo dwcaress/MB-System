@@ -65,8 +65,11 @@ HEADERS += \
     TopographicSeries.h \
     BackEnd.h
 
-LIBS += $$(GMT_LIBS)
 
+# GMT_LIBS may contain spaces, need to 'split'
+gmtLibs = $$getenv("GMT_LIBS")
+LIBS += $$split(gmtLibs, " ")
+          
 RESOURCES += qml.qrc
 
 # Additional import path used to resolve QML modules in Qt Creator's code model
@@ -77,5 +80,5 @@ QML_DESIGNER_IMPORT_PATH =
 
 # Default rules for deployment.
 target.path = $$(MB_INSTALLDIR)
-target.files = mbgrdviz-2
+target.files = qt-mbgrdviz-2
 INSTALLS += target
