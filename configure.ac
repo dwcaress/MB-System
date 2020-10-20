@@ -1082,59 +1082,24 @@ if test "$build_qttools" = "yes" ; then
     AC_SUBST([qt_CPPFLAGS], [$QT_CXXFLAGS])
     AC_SUBST([qt_MOC], [$QT_MOC])
 
-    # MacOS sed syntax by default
-    sed_opt='-i ""'     
-    # Detect the target system
-    case "${host_os}" in
-         linux*)
-        # echo 'got linux'
-        sed_opt='-i'
-        ;;
-    cygwin*|mingw*)
-        # echo 'got cygwin'
-        ;;
-    darwin*)
-        # echo 'got mac'
-        sed_opt='-i ""'        
-        ;;
-    *)
-        AC_MSG_ERROR(["OS $host_os is not supported"])
-        ;;
-esac
+    # Set environment variables for qmake
+    export OPENGL_INCLUDEDIR=$libopengl_INCLUDEDIR
+    export OPENGL_LIBS=$libopengl_LIBS
 
+    export GMT_INCLUDEDIR=$libgmt_INCLUDEDIR
+    export GMT_LIBS=$libgmt_LIBS
+
+    export MB_INSTALLDIR=$prefix/lib
+    
     AS_ECHO(["Constructing Qt project file MBGui.pro in src/qt-guilib..."])
-    `cp src/qt-guilib/MBGui.pro.init src/qt-guilib/MBGui.pro`
-    `sed $sed_opt "s#__OPENGL_INCLUDEDIR__#$libopengl_INCLUDEDIR#" src/qt-guilib/MBGui.pro`
-    `sed $sed_opt "s#__OPENGL_LIBS__#$libopengl_LIBS#" src/qt-guilib/MBGui.pro`
-    `sed $sed_opt "s#__GMT_INCLUDEDIR__#$libgmt_INCLUDEDIR#" src/qt-guilib/MBGui.pro`    
-    `sed $sed_opt "s#__GMT_LIBS__#$libgmt_LIBS#" src/qt-guilib/MBGui.pro`
-    `sed $sed_opt "s#__INSTALLDIR__#$prefix/lib#" src/qt-guilib/MBGui.pro`
-    AS_ECHO(["Running qmake in src/qt-guilib to generate src/qt-guilib/Makefile.qmake..."])
     `cd src/qt-guilib ; qmake -makefile -o Makefile.qmake ; cd ../..`
 
-    AS_ECHO(["Constructing Qt project file qt-mbgrdviz.pro in src/qt-mbgrdviz..."])
-    `cp src/qt-mbgrdviz/qt-mbgrdviz.pro.init src/qt-mbgrdviz/qt-mbgrdviz.pro`
-    `sed $sed_opt "s#__GMT_INCLUDEDIR__#$libgmt_INCLUDEDIR#" src/qt-mbgrdviz/qt-mbgrdviz.pro`
-    `sed $sed_opt "s#__GMT_LIBS__#$libgmt_LIBS#" src/qt-mbgrdviz/qt-mbgrdviz.pro`
-    `sed $sed_opt "s#__INSTALLDIR__#$prefix/bin#" src/qt-mbgrdviz/qt-mbgrdviz.pro`
     AS_ECHO(["Running qmake in src/qt-mbgrdviz to generate src/qt-mbgrdviz/Makefile.qmake..."])
     `cd src/qt-mbgrdviz ; qmake -makefile -o Makefile.qmake ; cd ../..`
 
-    AS_ECHO(["Constructing Qt project file qt-mbgrdviz-2.pro in src/qt-mbgrdviz-2..."])
-    `cp src/qt-mbgrdviz-2/qt-mbgrdviz-2.pro.init src/qt-mbgrdviz-2/qt-mbgrdviz-2.pro`
-    `sed $sed_opt "s#__GMT_INCLUDEDIR__#$libgmt_INCLUDEDIR#" src/qt-mbgrdviz-2/qt-mbgrdviz-2.pro`
-    `sed $sed_opt "s#__GMT_LIBS__#$libgmt_LIBS#" src/qt-mbgrdviz-2/qt-mbgrdviz-2.pro`
-    `sed $sed_opt "s#__INSTALLDIR__#$prefix/bin#" src/qt-mbgrdviz-2/qt-mbgrdviz-2.pro`
     AS_ECHO(["Running qmake in src/qt-mbgrdviz-2 to generate src/qt-mbgrdviz-2/Makefile.qmake..."])
     `cd src/qt-mbgrdviz-2 ; qmake -makefile -o Makefile.qmake ; cd ../..`
 
-    AS_ECHO(["Constructing Qt project file qt-mbgrdviz-3.pro in src/qt-mbgrdviz-3..."])
-    `cp src/qt-mbgrdviz-3/qt-mbgrdviz-3.pro.init src/qt-mbgrdviz-3/qt-mbgrdviz-3.pro`
-    `sed $sed_opt "s#__OPENGL_INCLUDEDIR__#$libopengl_INCLUDEDIR#" src/qt-mbgrdviz-3/qt-mbgrdviz-3.pro`
-    `sed $sed_opt "s#__OPENGL_LIBS__#$libopengl_LIBS#" src/qt-mbgrdviz-3/qt-mbgrdviz-3.pro`
-    `sed $sed_opt "s#__GMT_INCLUDEDIR__#$libgmt_INCLUDEDIR#" src/qt-mbgrdviz-3/qt-mbgrdviz-3.pro`
-    `sed $sed_opt "s#__GMT_LIBS__#$libgmt_LIBS#" src/qt-mbgrdviz-3/qt-mbgrdviz-3.pro`
-    `sed $sed_opt "s#__INSTALLDIR__#$prefix/bin#" src/qt-mbgrdviz-3/qt-mbgrdviz-3.pro`
     AS_ECHO(["Running qmake in src/qt-mbgrdviz-3 to generate src/qt-mbgrdviz-3/Makefile.qmake..."])
     `cd src/qt-mbgrdviz-3 ; qmake -makefile -o Makefile.qmake ; cd ../..`
 
