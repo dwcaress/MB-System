@@ -36,7 +36,12 @@ HEADERS += \
 INCLUDEPATH += /usr/local/include/vtk-8.2
 INCLUDEPATH += $(HOME)/projects/mb-system/MB-System/src/qt-guilib
 
-QMAKE_RPATHDIR += ../qt-guilib/
+# Default rules for deployment.
+target.path = $$(MB_INSTALLDIR)
+target.files = qt-mbgrdviz
+INSTALLS += target
+
+QMAKE_RPATHDIR += $$(PWD)/../qt-guilib/
 
 LIBS += -L../qt-guilib -lMBGui
 LIBS += $$(GMT_LIBS)
