@@ -76,6 +76,6 @@ QML_IMPORT_PATH =
 QML_DESIGNER_IMPORT_PATH =
 
 # Default rules for deployment.
-target.path = __INSTALLDIR__
+target.path = $$(MB_INSTALLDIR)
 target.files = mbgrdviz-2
 INSTALLS += target
