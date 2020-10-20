@@ -45,14 +45,13 @@ QMAKE_RPATHDIR += $$(PWD)/../qt-guilib/
 
 LIBS += -L../qt-guilib -lMBGui
 
+# GMT_LIBS may contain spaces, need to 'split'
 gmtLibs = $$getenv("GMT_LIBS")
-message(gmtLibs $$gmtLibs)
-
-gmtLibs = $$replace(gmtLibs, "\\", "")
-message(gmtLibs $$gmtLibs)
-
+message(gmtLibs: $$gmtLibs)
 LIBS += $$split(gmtLibs, " ")
 
-### LIBS += \\"$$(GMT_LIBS)\\"
+# VTK_LIBS may contain spaces, need to 'split'
+vtkLibs = $$getenv("VTK_LIBS")
+message(vtkLibs: $$vtkLibs)
+LIBS += $$split(vtkLibs, " ")
 
-unix|win32|macos: LIBS +=  -lvtkGUISupportQt-8.2 -lvtkCommonColor-8.2 -lvtkRenderingFreeType-8.2 -lvtkRenderingAnnotation-8.2 -lvtkCommonTransforms-8.2 -lvtkCommonCore-8.2 -lvtkCommonDataModel-8.2 -lvtkCommonExecutionModel-8.2 -lvtkInteractionWidgets-8.2 -lvtkInteractionStyle-8.2 -lvtkRenderingCore-8.2 -lvtkFiltersSources-8.2 -lvtkGeovisCore-8.2 -lvtkRenderingOpenGL2-8.2 -lvtkFiltersHybrid-8.2 -lvtkIOGeometry-8.2 -lvtkIOCore-8.2 -lvtkIOLegacy-8.2 -lvtkRenderingVolumeOpenGL2-8.2 -lvtkFiltersCore-8.2 -lvtkFiltersGeneral-8.2 -lvtksys-8.2
