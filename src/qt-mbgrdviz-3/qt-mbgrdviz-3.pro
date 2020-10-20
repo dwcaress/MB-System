@@ -43,11 +43,11 @@ QML_IMPORT_PATH =
 QML_DESIGNER_IMPORT_PATH =
 
 # Default rules for deployment.
-target.path = __INSTALLDIR__
-target.files = mbgrdviz-3
+target.path = $$(MB_INSTALLDIR)
+target.files = qt-mbgrdviz-3
 INSTALLS += target
 
-QMAKE_RPATHDIR += ../qt-guilib/
+QMAKE_RPATHDIR += $$(PWD)/../qt-guilib/
 
 LIBS += -L../qt-guilib -lMBGui
 LIBS += $$(GMT_LIBS)
