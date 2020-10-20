@@ -42,7 +42,7 @@ SOURCES += \
 
 INCLUDEPATH += datavisualizationqml2
 INCLUDEPATH += renderingEngine
-INCLUDEPATH += __GMT_INCLUDEDIR__
+INCLUDEPATH += $$(GMT_INCLUDEDIR)
 
 HEADERS += \
     TopographicSeries.h \
@@ -65,7 +65,7 @@ HEADERS += \
     TopographicSeries.h \
     BackEnd.h
 
-LIBS += __GMT_LIBS__
+LIBS += $$(GMT_LIBS)
 
 RESOURCES += qml.qrc
 
