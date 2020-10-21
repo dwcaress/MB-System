@@ -84,6 +84,8 @@ AS_ECHO(["        --with-opengl-include - location of OpenGL headers (optional)"
 AS_ECHO(["        --with-otps-dir       - location of OTPS installation (optional)"])
 AS_ECHO(["        --with-opencv-lib     - location of OpenCV libs (optional)"])
 AS_ECHO(["        --with-opencv-include - location of OpenCV headers (optional)"])
+AS_ECHO(["        --with-vtk-include    - location of VTK headers (required if qt enabled)"])
+AS_ECHO(["        --with-vtk-lib        - location of VTK libraries (required if qt enabled)"])
 AS_ECHO(["        --enable-opencv       - enable building tools using OpenCV (optional)"])
 AS_ECHO(["        --enable-mbtrn        - enable building terrain relative navigation (TRN) tools (optional)"])
 AS_ECHO(["        --enable-mbtnav       - enable building terrain relative navigation (TRN) tools (optional)"])
@@ -429,6 +431,7 @@ else
     dnl Looking for PROJ headers in the usual places...
     AS_ECHO(["Looking for PROJ headers in the usual places..."])
 fi
+
 save_CPPFLAGS=$CPPFLAGS
 save_CFLAGS=$CFLAGS
 if test "$FOUND_PROJ4" = "yes" ; then
@@ -1082,6 +1085,49 @@ if test "$build_qttools" = "yes" ; then
     AC_SUBST([qt_CPPFLAGS], [$QT_CXXFLAGS])
     AC_SUBST([qt_MOC], [$QT_MOC])
 
+    # Find VTK headers and libraries too
+    vtkLocSpecified=no
+    vtkFound=no
+    
+    AS_ECHO(["Check for VTK libraries"])
+
+    AC_ARG_WITH(vtk-lib, [  --with-vtk-lib=DIR    Location of VTK library],
+            [libvtk_libdir="${withval}"] [vtkLocSpecified=yes], [vtkLocSpecified=no])
+
+    if test "$vtkLocSpecified" = "yes" ; then
+       dnl VTK library location specified; check if libvtkCommonCore-8.2.so is there
+       AS_ECHO(["VTK library location specified; check if libvtkCommonCore-8.2.so is there..."])
+       # Save LDFLAGS...
+       save_LDFLAGS=$LDFLAGS
+       # Look for extern C function GetVTKVersion in vtkCommonCore library
+       LDFLAGS="$LDFLAGS -L$libvtk_libdir"
+       AC_CHECK_LIB([vtkCommonCore-8.2], [GetVTKVersion], [vtkFound=yes], [vtkFound=no])
+       # Restore LDFLAGS
+       LDFLAGS="save_LDFLAGS"
+       if test "$vtkFound" = "no"; then
+         AC_MSG_ERROR([Did not find VTK libraries in location specified by --with-vtk-lib - check installation])
+       fi
+       vtk_LIBS = "-L$vtk_libdir list of vtk libs goes here"
+       vtk_LDFLAGS = "-L$vtk_libdir"
+    else
+         AC_MSG_ERROR([Must specify VTK library location with --with-vtk-lib=DIR])
+    fi
+    AS_ECHO(["Check for VTK headers"])
+
+    AC_ARG_WITH(vtk-include, [  --with-vtk-include=DIR    Location of VTK headers],
+            [libvtk_includedir="${withval}"] [vtkLocSpecified=yes], [vtkLocSpecified=no])    
+
+    if test "vtkLocSpecified" = "yes" ; then
+       # Check for VTK header in specified location
+       AC_CHECK_FILE([$libvtk_includedir/vtkActor], [vtkFound=yes], [vtkFound=no])
+       if test "$vtkFound" = "no" ; then
+          AC_MSG_ERROR([Did not find VTK headers in specified location - check installation])
+       fi
+    else
+       # VTK header location not specified - this is currently an errro
+       AC_MSG_ERROR([Must specify vtk include location with --with-vtk-include=DIR])       
+    fi
+    
     # Set environment variables for qmake
     export OPENGL_INCLUDEDIR=$libopengl_INCLUDEDIR
     export OPENGL_LIBS=$libopengl_LIBS
@@ -1089,6 +1135,9 @@ if test "$build_qttools" = "yes" ; then
     export GMT_INCLUDEDIR=$libgmt_INCLUDEDIR
     export GMT_LIBS=$libgmt_LIBS
 
+    export VTK_INCLUDEDIR=$libvtk_INCLUDEDIR
+    export VTK_LIBS=$libvtk_LIBS
+    
     export MB_INSTALLDIR=$prefix/lib
     
     AS_ECHO(["Constructing Qt project file MBGui.pro in src/qt-guilib..."])
