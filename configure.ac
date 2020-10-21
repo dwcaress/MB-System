@@ -149,6 +149,7 @@ AM_PROG_CC_C_O
 AC_PROG_CC_STDC
 AC_PROG_CXX
 AC_PROG_INSTALL
+AC_PROG_AWK
 AM_PROG_AS
 m4_ifdef([AM_PROG_AR], [AM_PROG_AR])
 AC_PROG_LN_S
@@ -1088,7 +1089,10 @@ if test "$build_qttools" = "yes" ; then
     # Find VTK headers and libraries too
     vtkLocSpecified=no
     vtkFound=no
-    
+
+    # Required major and minor version for VTK
+    vtkMinMajor=8
+    vtkMinMinor=2
     AS_ECHO(["Check for VTK8.2 libraries"])
 
     AC_ARG_WITH(vtk-lib, [  --with-vtk-lib=DIR    Location of VTK library],
@@ -1127,6 +1131,17 @@ if test "$build_qttools" = "yes" ; then
        AC_CHECK_FILE([$vtk_includedir/vtkActor.h], [vtkFound=yes], [vtkFound=no])
        if test "$vtkFound" = "no" ; then
           AC_MSG_ERROR([Did not find VTK headers in $vtk_includedir - check installation])
+       else
+          AS_ECHO(["Verify that VTK meets minimum version requirement"])
+          vers=`$AWK -f build-utils/vtkVersionCheck.awk $vtkMinMajor $vtkMinMinor $vtk_includedir/vtkVersionMacros.h`
+          if [[ $? -eq 1 ]]
+          then
+            AC_MSG_ERROR([VTK does not meet minimum version requirement: $vers])
+          else
+            AS_ECHO(["VTK meets minimum version requirement"])
+          fi
+          vers=`echo $vers | cut -d ' ' -f 1`
+          echo "vers: $vers"
        fi
     else
        # VTK header location not specified - this is currently an errro
@@ -1141,7 +1156,7 @@ if test "$build_qttools" = "yes" ; then
     export GMT_LIBS=$libgmt_LIBS
 
     export VTK_INCLUDEDIR=$vtk_includedir
-    export VTK_LIBS="-L$vtk_libdir -lvtkGUISupportQt-8.2 -lvtkCommonColor-8.2 -lvtkRenderingFreeType-8.2 -lvtkRenderingAnnotation-8.2 -lvtkCommonTransforms-8.2 -lvtkCommonCore-8.2 -lvtkCommonDataModel-8.2 -lvtkCommonExecutionModel-8.2 -lvtkInteractionWidgets-8.2 -lvtkInteractionStyle-8.2 -lvtkRenderingCore-8.2 -lvtkFiltersSources-8.2 -lvtkGeovisCore-8.2 -lvtkRenderingOpenGL2-8.2 -lvtkFiltersHybrid-8.2 -lvtkIOGeometry-8.2 -lvtkIOCore-8.2 -lvtkIOLegacy-8.2 -lvtkRenderingVolumeOpenGL2-8.2 -lvtkFiltersCore-8.2 -lvtkFiltersGeneral-8.2 -lvtksys-8.2"
+    export VTK_LIBS="-L$vtk_libdir -lvtkGUISupportQt-$vers -lvtkCommonColor-$vers -lvtkRenderingFreeType-$vers -lvtkRenderingAnnotation-$vers -lvtkCommonTransforms-$vers -lvtkCommonCore-$vers -lvtkCommonDataModel-$vers -lvtkCommonExecutionModel-$vers -lvtkInteractionWidgets-$vers -lvtkInteractionStyle-$vers -lvtkRenderingCore-$vers -lvtkFiltersSources-$vers -lvtkGeovisCore-$vers -lvtkRenderingOpenGL2-$vers -lvtkFiltersHybrid-$vers -lvtkIOGeometry-$vers -lvtkIOCore-$vers -lvtkIOLegacy-$vers -lvtkRenderingVolumeOpenGL2-$vers -lvtkFiltersCore-$vers -lvtkFiltersGeneral-$vers -lvtksys-$vers"
     
     export MB_INSTALLDIR=$prefix/lib
     
@@ -1532,3 +1547,4 @@ AS_ECHO(["----------------------------------------------------------------------
 AS_ECHO(["See config.log for details of configure results"])
 AS_ECHO(["See INSTALL for further build instructions and hints"])
 AS_ECHO(["------------------------------------------------------------------------------"])
+
