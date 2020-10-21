@@ -1107,14 +1107,14 @@ if test "$build_qttools" = "yes" ; then
        LDFLAGS="$LDFLAGS -L$vtk_libdir"
        AC_CHECK_LIB([vtkCommonCore-8.2], [GetVTKVersion], [vtkFound=yes], [vtkFound=no])
        # Restore LDFLAGS
-       LDFLAGS="save_LDFLAGS"
+       LDFLAGS="$save_LDFLAGS"
        if test "$vtkFound" = "no"; then
-         AC_MSG_ERROR([Did not find VTK libraries in location specified by --with-vtk-lib - check installation])
+         AC_MSG_ERROR([Did not find VTK libraries - check installation])
        else
          AS_ECHO(["Found VTK libraries"])
        fi
     else
-         AC_MSG_ERROR([Must specify VTK library location with --with-vtk-lib=DIR])
+         AC_MSG_ERROR([Must specify VTK8.2 library location with --with-vtk-lib=DIR])
     fi
     AS_ECHO(["Check for VTK headers"])
 
