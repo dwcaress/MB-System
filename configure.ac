@@ -84,8 +84,8 @@ AS_ECHO(["        --with-opengl-include - location of OpenGL headers (optional)"
 AS_ECHO(["        --with-otps-dir       - location of OTPS installation (optional)"])
 AS_ECHO(["        --with-opencv-lib     - location of OpenCV libs (optional)"])
 AS_ECHO(["        --with-opencv-include - location of OpenCV headers (optional)"])
-AS_ECHO(["        --with-vtk-include    - location of VTK headers (required if qt enabled)"])
-AS_ECHO(["        --with-vtk-lib        - location of VTK libraries (required if qt enabled)"])
+AS_ECHO(["        --with-vtk-include    - location of VTK8.2 headers (required if qt enabled)"])
+AS_ECHO(["        --with-vtk-lib        - location of VTK8.2 libraries (required if qt enabled)"])
 AS_ECHO(["        --enable-opencv       - enable building tools using OpenCV (optional)"])
 AS_ECHO(["        --enable-mbtrn        - enable building terrain relative navigation (TRN) tools (optional)"])
 AS_ECHO(["        --enable-mbtnav       - enable building terrain relative navigation (TRN) tools (optional)"])
@@ -1089,43 +1089,48 @@ if test "$build_qttools" = "yes" ; then
     vtkLocSpecified=no
     vtkFound=no
     
-    AS_ECHO(["Check for VTK libraries"])
+    AS_ECHO(["Check for VTK8.2 libraries"])
 
     AC_ARG_WITH(vtk-lib, [  --with-vtk-lib=DIR    Location of VTK library],
-            [libvtk_libdir="${withval}"] [vtkLocSpecified=yes], [vtkLocSpecified=no])
+            [vtk_libdir="${withval}"] [vtkLocSpecified=yes], [vtkLocSpecified=no])
 
     if test "$vtkLocSpecified" = "yes" ; then
-       dnl VTK library location specified; check if libvtkCommonCore-8.2.so is there
-       AS_ECHO(["VTK library location specified; check if libvtkCommonCore-8.2.so is there..."])
+       dnl VTK library location specified
+       AS_ECHO(["VTK8.2 library location specified; check for directory existence..."])
+       AC_CHECK_FILE([$vtk_libdir], [vtkFound=yes], [vtkFound=no])
+       if test "$vtkFound" = "no" ; then
+          AC_MSG_ERROR([Did not find specified VTK8.2 library location $vtk_libdir - check installation])
+       fi
        # Save LDFLAGS...
        save_LDFLAGS=$LDFLAGS
        # Look for extern C function GetVTKVersion in vtkCommonCore library
-       LDFLAGS="$LDFLAGS -L$libvtk_libdir"
+       LDFLAGS="$LDFLAGS -L$vtk_libdir"
        AC_CHECK_LIB([vtkCommonCore-8.2], [GetVTKVersion], [vtkFound=yes], [vtkFound=no])
        # Restore LDFLAGS
        LDFLAGS="save_LDFLAGS"
        if test "$vtkFound" = "no"; then
          AC_MSG_ERROR([Did not find VTK libraries in location specified by --with-vtk-lib - check installation])
+       else
+         AS_ECHO(["Found VTK libraries"])
        fi
-       vtk_LIBS = "-L$vtk_libdir list of vtk libs goes here"
-       vtk_LDFLAGS = "-L$vtk_libdir"
     else
          AC_MSG_ERROR([Must specify VTK library location with --with-vtk-lib=DIR])
     fi
     AS_ECHO(["Check for VTK headers"])
 
     AC_ARG_WITH(vtk-include, [  --with-vtk-include=DIR    Location of VTK headers],
-            [libvtk_includedir="${withval}"] [vtkLocSpecified=yes], [vtkLocSpecified=no])    
+            [vtk_includedir="${withval}"] [vtkLocSpecified=yes], [vtkLocSpecified=no])    
 
-    if test "vtkLocSpecified" = "yes" ; then
+    if test "$vtkLocSpecified" = "yes" ; then
        # Check for VTK header in specified location
-       AC_CHECK_FILE([$libvtk_includedir/vtkActor], [vtkFound=yes], [vtkFound=no])
+       AS_ECHO(["Look for $vtk_includedir/vtkActor.h..."])
+       AC_CHECK_FILE([$vtk_includedir/vtkActor.h], [vtkFound=yes], [vtkFound=no])
        if test "$vtkFound" = "no" ; then
-          AC_MSG_ERROR([Did not find VTK headers in specified location - check installation])
+          AC_MSG_ERROR([Did not find VTK headers in $vtk_includedir - check installation])
        fi
     else
        # VTK header location not specified - this is currently an errro
-       AC_MSG_ERROR([Must specify vtk include location with --with-vtk-include=DIR])       
+       AC_MSG_ERROR([Must specify VTK include location with --with-vtk-include=DIR])       
     fi
     
     # Set environment variables for qmake
@@ -1135,8 +1140,8 @@ if test "$build_qttools" = "yes" ; then
     export GMT_INCLUDEDIR=$libgmt_INCLUDEDIR
     export GMT_LIBS=$libgmt_LIBS
 
-    export VTK_INCLUDEDIR=$libvtk_INCLUDEDIR
-    export VTK_LIBS=$libvtk_LIBS
+    export VTK_INCLUDEDIR=$vtk_includedir
+    export VTK_LIBS="-L$vtk_libdir -lvtkGUISupportQt-8.2 -lvtkCommonColor-8.2 -lvtkRenderingFreeType-8.2 -lvtkRenderingAnnotation-8.2 -lvtkCommonTransforms-8.2 -lvtkCommonCore-8.2 -lvtkCommonDataModel-8.2 -lvtkCommonExecutionModel-8.2 -lvtkInteractionWidgets-8.2 -lvtkInteractionStyle-8.2 -lvtkRenderingCore-8.2 -lvtkFiltersSources-8.2 -lvtkGeovisCore-8.2 -lvtkRenderingOpenGL2-8.2 -lvtkFiltersHybrid-8.2 -lvtkIOGeometry-8.2 -lvtkIOCore-8.2 -lvtkIOLegacy-8.2 -lvtkRenderingVolumeOpenGL2-8.2 -lvtkFiltersCore-8.2 -lvtkFiltersGeneral-8.2 -lvtksys-8.2"
     
     export MB_INSTALLDIR=$prefix/lib
     
