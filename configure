@@ -795,6 +795,7 @@ am__nodep
 AMDEPBACKSLASH
 AMDEP_FALSE
 AMDEP_TRUE
+am__quote
 am__include
 DEPDIR
 am__untar
@@ -855,6 +856,7 @@ infodir
 docdir
 oldincludedir
 includedir
+runstatedir
 localstatedir
 sharedstatedir
 sysconfdir
@@ -873,8 +875,7 @@ PACKAGE_VERSION
 PACKAGE_TARNAME
 PACKAGE_NAME
 PATH_SEPARATOR
-SHELL
-am__quote'
+SHELL'
 ac_subst_files=''
 ac_user_opts='
 enable_option_checking
@@ -904,6 +905,8 @@ with_opencv_lib
 with_opencv_include
 enable_qt
 with_x
+with_vtk_lib
+with_vtk_include
 enable_mbtrn
 enable_mbtnav
 enable_mbtools
@@ -980,6 +983,7 @@ datadir='${datarootdir}'
 sysconfdir='${prefix}/etc'
 sharedstatedir='${prefix}/com'
 localstatedir='${prefix}/var'
+runstatedir='${localstatedir}/run'
 includedir='${prefix}/include'
 oldincludedir='/usr/include'
 docdir='${datarootdir}/doc/${PACKAGE_TARNAME}'
@@ -1232,6 +1236,15 @@ do
   | -silent | --silent | --silen | --sile | --sil)
     silent=yes ;;
 
+  -runstatedir | --runstatedir | --runstatedi | --runstated \
+  | --runstate | --runstat | --runsta | --runst | --runs \
+  | --run | --ru | --r)
+    ac_prev=runstatedir ;;
+  -runstatedir=* | --runstatedir=* | --runstatedi=* | --runstated=* \
+  | --runstate=* | --runstat=* | --runsta=* | --runst=* | --runs=* \
+  | --run=* | --ru=* | --r=*)
+    runstatedir=$ac_optarg ;;
+
   -sbindir | --sbindir | --sbindi | --sbind | --sbin | --sbi | --sb)
     ac_prev=sbindir ;;
   -sbindir=* | --sbindir=* | --sbindi=* | --sbind=* | --sbin=* \
@@ -1369,7 +1382,7 @@ fi
 for ac_var in	exec_prefix prefix bindir sbindir libexecdir datarootdir \
 		datadir sysconfdir sharedstatedir localstatedir includedir \
 		oldincludedir docdir infodir htmldir dvidir pdfdir psdir \
-		libdir localedir mandir
+		libdir localedir mandir runstatedir
 do
   eval ac_val=\$$ac_var
   # Remove trailing slashes.
@@ -1522,6 +1535,7 @@ Fine tuning of the installation directories:
   --sysconfdir=DIR        read-only single-machine data [PREFIX/etc]
   --sharedstatedir=DIR    modifiable architecture-independent data [PREFIX/com]
   --localstatedir=DIR     modifiable single-machine data [PREFIX/var]
+  --runstatedir=DIR       modifiable per-process data [LOCALSTATEDIR/run]
   --libdir=DIR            object code libraries [EPREFIX/lib]
   --includedir=DIR        C header files [PREFIX/include]
   --oldincludedir=DIR     C header files for non-gcc [/usr/include]
@@ -1612,6 +1626,8 @@ Optional Packages:
   --with-opencv-lib=DIR    Location of OpenCV4 library
   --with-opencv-include=DIR    Location of OpenCV4 headers
   --with-x                use the X Window System
+  --with-vtk-lib=DIR    Location of VTK library
+  --with-vtk-include=DIR    Location of VTK headers
 
 Some influential environment variables:
   CXX         C++ compiler command
@@ -2801,6 +2817,8 @@ $as_echo "        --with-opengl-include - location of OpenGL headers (optional)"
 $as_echo "        --with-otps-dir       - location of OTPS installation (optional)"
 $as_echo "        --with-opencv-lib     - location of OpenCV libs (optional)"
 $as_echo "        --with-opencv-include - location of OpenCV headers (optional)"
+$as_echo "        --with-vtk-include    - location of VTK8.2 headers (required if qt enabled)"
+$as_echo "        --with-vtk-lib        - location of VTK8.2 libraries (required if qt enabled)"
 $as_echo "        --enable-opencv       - enable building tools using OpenCV (optional)"
 $as_echo "        --enable-mbtrn        - enable building terrain relative navigation (TRN) tools (optional)"
 $as_echo "        --enable-mbtnav       - enable building terrain relative navigation (TRN) tools (optional)"
@@ -4143,7 +4161,7 @@ $as_echo "#define HAVE_CXX11 1" >>confdefs.h
 
 
 
-am__api_version='1.16'
+am__api_version='1.15'
 
 # Find a good install program.  We prefer a C program (faster),
 # so one script is as good as another.  But avoid the broken or
@@ -4572,45 +4590,45 @@ DEPDIR="${am__leading_dot}deps"
 
 ac_config_commands="$ac_config_commands depfiles"
 
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking whether ${MAKE-make} supports the include directive" >&5
-$as_echo_n "checking whether ${MAKE-make} supports the include directive... " >&6; }
-cat > confinc.mk << 'END'
+
+am_make=${MAKE-make}
+cat > confinc << 'END'
 am__doit:
-	@echo this is the am__doit target >confinc.out
+	@echo this is the am__doit target
 .PHONY: am__doit
 END
+# If we don't find an include directive, just comment out the code.
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for style of include used by $am_make" >&5
+$as_echo_n "checking for style of include used by $am_make... " >&6; }
 am__include="#"
 am__quote=
-# BSD make does it like this.
-echo '.include "confinc.mk" # ignored' > confmf.BSD
-# Other make implementations (GNU, Solaris 10, AIX) do it like this.
-echo 'include confinc.mk # ignored' > confmf.GNU
-_am_result=no
-for s in GNU BSD; do
-  { echo "$as_me:$LINENO: ${MAKE-make} -f confmf.$s && cat confinc.out" >&5
-   (${MAKE-make} -f confmf.$s && cat confinc.out) >&5 2>&5
-   ac_status=$?
-   echo "$as_me:$LINENO: \$? = $ac_status" >&5
-   (exit $ac_status); }
-  case $?:`cat confinc.out 2>/dev/null` in #(
-  '0:this is the am__doit target') :
-    case $s in #(
-  BSD) :
-    am__include='.include' am__quote='"' ;; #(
-  *) :
-    am__include='include' am__quote='' ;;
-esac ;; #(
-  *) :
-     ;;
+_am_result=none
+# First try GNU make style include.
+echo "include confinc" > confmf
+# Ignore all kinds of additional output from 'make'.
+case `$am_make -s -f confmf 2> /dev/null` in #(
+*the\ am__doit\ target*)
+  am__include=include
+  am__quote=
+  _am_result=GNU
+  ;;
 esac
-  if test "$am__include" != "#"; then
-    _am_result="yes ($s style)"
-    break
-  fi
-done
-rm -f confinc.* confmf.*
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: ${_am_result}" >&5
-$as_echo "${_am_result}" >&6; }
+# Now try BSD make style include.
+if test "$am__include" = "#"; then
+   echo '.include "confinc"' > confmf
+   case `$am_make -s -f confmf 2> /dev/null` in #(
+   *the\ am__doit\ target*)
+     am__include=.include
+     am__quote="\""
+     _am_result=BSD
+     ;;
+   esac
+fi
+
+
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $_am_result" >&5
+$as_echo "$_am_result" >&6; }
+rm -f confinc confmf
 
 # Check whether --enable-dependency-tracking was given.
 if test "${enable_dependency_tracking+set}" = set; then :
@@ -4722,8 +4740,8 @@ MAKEINFO=${MAKEINFO-"${am_missing_run}makeinfo"}
 
 # For better backward compatibility.  To be removed once Automake 1.9.x
 # dies out for good.  For more background, see:
-# <https://lists.gnu.org/archive/html/automake/2012-07/msg00001.html>
-# <https://lists.gnu.org/archive/html/automake/2012-07/msg00014.html>
+# <http://lists.gnu.org/archive/html/automake/2012-07/msg00001.html>
+# <http://lists.gnu.org/archive/html/automake/2012-07/msg00014.html>
 mkdir_p='$(MKDIR_P)'
 
 # We need awk for the "check" target (and possibly the TAP driver).  The
@@ -4902,7 +4920,7 @@ END
 Aborting the configuration process, to ensure you take notice of the issue.
 
 You can download and install GNU coreutils to get an 'rm' implementation
-that behaves properly: <https://www.gnu.org/software/coreutils/>.
+that behaves properly: <http://www.gnu.org/software/coreutils/>.
 
 If you want to complete the configuration process using your problematic
 'rm' anyway, export the environment variable ACCEPT_INFERIOR_RM_PROGRAM
@@ -6215,6 +6233,48 @@ ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
 ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
 ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
+
+for ac_prog in gawk mawk nawk awk
+do
+  # Extract the first word of "$ac_prog", so it can be a program name with args.
+set dummy $ac_prog; ac_word=$2
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
+$as_echo_n "checking for $ac_word... " >&6; }
+if ${ac_cv_prog_AWK+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  if test -n "$AWK"; then
+  ac_cv_prog_AWK="$AWK" # Let the user override the test.
+else
+as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+for as_dir in $PATH
+do
+  IFS=$as_save_IFS
+  test -z "$as_dir" && as_dir=.
+    for ac_exec_ext in '' $ac_executable_extensions; do
+  if as_fn_executable_p "$as_dir/$ac_word$ac_exec_ext"; then
+    ac_cv_prog_AWK="$ac_prog"
+    $as_echo "$as_me:${as_lineno-$LINENO}: found $as_dir/$ac_word$ac_exec_ext" >&5
+    break 2
+  fi
+done
+  done
+IFS=$as_save_IFS
+
+fi
+fi
+AWK=$ac_cv_prog_AWK
+if test -n "$AWK"; then
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $AWK" >&5
+$as_echo "$AWK" >&6; }
+else
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+fi
+
+
+  test -n "$AWK" && break
+done
 
 # By default we simply use the C compiler to build assembly code.
 
@@ -7790,7 +7850,7 @@ linux* | k*bsd*-gnu | kopensolaris*-gnu | gnu*)
   lt_cv_deplibs_check_method=pass_all
   ;;
 
-netbsd*)
+netbsd* | netbsdelf*-gnu)
   if echo __ELF__ | $CC -E - | $GREP __ELF__ > /dev/null; then
     lt_cv_deplibs_check_method='match_pattern /lib[^/]+(\.so\.[0-9]+\.[0-9]+|_pic\.a)$'
   else
@@ -9904,11 +9964,16 @@ $as_echo "$lt_cv_ld_force_load" >&6; }
       _lt_dar_allow_undefined='$wl-undefined ${wl}suppress' ;;
     darwin1.*)
       _lt_dar_allow_undefined='$wl-flat_namespace $wl-undefined ${wl}suppress' ;;
-    darwin*)
-      case ${MACOSX_DEPLOYMENT_TARGET},$host in
-	10.[012],*|,*powerpc*)
+    darwin*) # darwin 5.x on
+      # if running on 10.5 or later, the deployment target defaults
+      # to the OS version, if on x86, and 10.4, the deployment
+      # target defaults to 10.4. Don't you love it?
+      case ${MACOSX_DEPLOYMENT_TARGET-10.0},$host in
+	10.0,*86*-darwin8*|10.0,*-darwin[91]*)
+	  _lt_dar_allow_undefined='$wl-undefined ${wl}dynamic_lookup' ;;
+	10.[012][,.]*)
 	  _lt_dar_allow_undefined='$wl-flat_namespace $wl-undefined ${wl}suppress' ;;
-	*)
+	10.*)
 	  _lt_dar_allow_undefined='$wl-undefined ${wl}dynamic_lookup' ;;
       esac
     ;;
@@ -11487,6 +11552,9 @@ $as_echo_n "checking whether the $compiler linker ($LD) supports shared librarie
   openbsd* | bitrig*)
     with_gnu_ld=no
     ;;
+  linux* | k*bsd*-gnu | gnu*)
+    link_all_deplibs=no
+    ;;
   esac
 
   ld_shlibs=yes
@@ -11741,7 +11809,7 @@ _LT_EOF
       fi
       ;;
 
-    netbsd*)
+    netbsd* | netbsdelf*-gnu)
       if echo __ELF__ | $CC -E - | $GREP __ELF__ >/dev/null; then
 	archive_cmds='$LD -Bshareable $libobjs $deplibs $linker_flags -o $lib'
 	wlarc=
@@ -12411,6 +12479,7 @@ $as_echo "$lt_cv_irix_exported_symbol" >&6; }
 	if test yes = "$lt_cv_irix_exported_symbol"; then
           archive_expsym_cmds='$CC -shared $pic_flag $libobjs $deplibs $compiler_flags $wl-soname $wl$soname `test -n "$verstring" && func_echo_all "$wl-set_version $wl$verstring"` $wl-update_registry $wl$output_objdir/so_locations $wl-exports_file $wl$export_symbols -o $lib'
 	fi
+	link_all_deplibs=no
       else
 	archive_cmds='$CC -shared $libobjs $deplibs $compiler_flags -soname $soname `test -n "$verstring" && func_echo_all "-set_version $verstring"` -update_registry $output_objdir/so_locations -o $lib'
 	archive_expsym_cmds='$CC -shared $libobjs $deplibs $compiler_flags -soname $soname `test -n "$verstring" && func_echo_all "-set_version $verstring"` -update_registry $output_objdir/so_locations -exports_file $export_symbols -o $lib'
@@ -12432,7 +12501,7 @@ $as_echo "$lt_cv_irix_exported_symbol" >&6; }
       esac
       ;;
 
-    netbsd*)
+    netbsd* | netbsdelf*-gnu)
       if echo __ELF__ | $CC -E - | $GREP __ELF__ >/dev/null; then
 	archive_cmds='$LD -Bshareable -o $lib $libobjs $deplibs $linker_flags'  # a.out
       else
@@ -13545,6 +13614,18 @@ fi
   # people can always --disable-shared, the test was removed, and we
   # assume the GNU/Linux dynamic linker is in use.
   dynamic_linker='GNU/Linux ld.so'
+  ;;
+
+netbsdelf*-gnu)
+  version_type=linux
+  need_lib_prefix=no
+  need_version=no
+  library_names_spec='${libname}${release}${shared_ext}$versuffix ${libname}${release}${shared_ext}$major ${libname}${shared_ext}'
+  soname_spec='${libname}${release}${shared_ext}$major'
+  shlibpath_var=LD_LIBRARY_PATH
+  shlibpath_overrides_runpath=no
+  hardcode_into_libs=yes
+  dynamic_linker='NetBSD ld.elf_so'
   ;;
 
 netbsd*)
@@ -16441,7 +16522,7 @@ lt_prog_compiler_static_CXX=
 	    ;;
 	esac
 	;;
-      netbsd*)
+      netbsd* | netbsdelf*-gnu)
 	;;
       *qnx* | *nto*)
         # QNX uses GNU C++, but need to define -shared option too, otherwise
@@ -16815,6 +16896,9 @@ $as_echo_n "checking whether the $compiler linker ($LD) supports shared librarie
       exclude_expsyms_CXX='[_]+GLOBAL_OFFSET_TABLE_|[_]+GLOBAL__[FID]_.*|[_]+head_[A-Za-z0-9_]+_dll|[A-Za-z0-9_]+_dll_iname'
       ;;
     esac
+    ;;
+  linux* | k*bsd*-gnu | gnu*)
+    link_all_deplibs_CXX=no
     ;;
   *)
     export_symbols_cmds_CXX='$NM $libobjs $convenience | $global_symbol_pipe | $SED '\''s/.* //'\'' | sort | uniq > $export_symbols'
@@ -17509,6 +17593,18 @@ fi
   dynamic_linker='GNU/Linux ld.so'
   ;;
 
+netbsdelf*-gnu)
+  version_type=linux
+  need_lib_prefix=no
+  need_version=no
+  library_names_spec='${libname}${release}${shared_ext}$versuffix ${libname}${release}${shared_ext}$major ${libname}${shared_ext}'
+  soname_spec='${libname}${release}${shared_ext}$major'
+  shlibpath_var=LD_LIBRARY_PATH
+  shlibpath_overrides_runpath=no
+  hardcode_into_libs=yes
+  dynamic_linker='NetBSD ld.elf_so'
+  ;;
+
 netbsd*)
   version_type=sunos
   need_lib_prefix=no
@@ -17858,6 +17954,75 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 # Only expand once:
 
 
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for a sed that does not truncate output" >&5
+$as_echo_n "checking for a sed that does not truncate output... " >&6; }
+if ${ac_cv_path_SED+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+            ac_script=s/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb/
+     for ac_i in 1 2 3 4 5 6 7; do
+       ac_script="$ac_script$as_nl$ac_script"
+     done
+     echo "$ac_script" 2>/dev/null | sed 99q >conftest.sed
+     { ac_script=; unset ac_script;}
+     if test -z "$SED"; then
+  ac_path_SED_found=false
+  # Loop through the user's path and test for each of PROGNAME-LIST
+  as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+for as_dir in $PATH
+do
+  IFS=$as_save_IFS
+  test -z "$as_dir" && as_dir=.
+    for ac_prog in sed gsed; do
+    for ac_exec_ext in '' $ac_executable_extensions; do
+      ac_path_SED="$as_dir/$ac_prog$ac_exec_ext"
+      as_fn_executable_p "$ac_path_SED" || continue
+# Check for GNU ac_path_SED and select it if it is found.
+  # Check for GNU $ac_path_SED
+case `"$ac_path_SED" --version 2>&1` in
+*GNU*)
+  ac_cv_path_SED="$ac_path_SED" ac_path_SED_found=:;;
+*)
+  ac_count=0
+  $as_echo_n 0123456789 >"conftest.in"
+  while :
+  do
+    cat "conftest.in" "conftest.in" >"conftest.tmp"
+    mv "conftest.tmp" "conftest.in"
+    cp "conftest.in" "conftest.nl"
+    $as_echo '' >> "conftest.nl"
+    "$ac_path_SED" -f conftest.sed < "conftest.nl" >"conftest.out" 2>/dev/null || break
+    diff "conftest.out" "conftest.nl" >/dev/null 2>&1 || break
+    as_fn_arith $ac_count + 1 && ac_count=$as_val
+    if test $ac_count -gt ${ac_path_SED_max-0}; then
+      # Best one so far, save it but keep looking for a better one
+      ac_cv_path_SED="$ac_path_SED"
+      ac_path_SED_max=$ac_count
+    fi
+    # 10*(2^10) chars as input seems more than enough
+    test $ac_count -gt 10 && break
+  done
+  rm -f conftest.in conftest.tmp conftest.nl conftest.out;;
+esac
+
+      $ac_path_SED_found && break 3
+    done
+  done
+  done
+IFS=$as_save_IFS
+  if test -z "$ac_cv_path_SED"; then
+    as_fn_error $? "no acceptable sed could be found in \$PATH" "$LINENO" 5
+  fi
+else
+  ac_cv_path_SED=$SED
+fi
+
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_path_SED" >&5
+$as_echo "$ac_cv_path_SED" >&6; }
+ SED="$ac_cv_path_SED"
+  rm -f conftest.sed
+
 
 LIBM=
 case $host in
@@ -18032,7 +18197,7 @@ if ${am_cv_pathless_PYTHON+:} false; then :
   $as_echo_n "(cached) " >&6
 else
 
-	for am_cv_pathless_PYTHON in python python2 python3  python3.9 python3.8 python3.7 python3.6 python3.5 python3.4 python3.3  python3.2 python3.1 python3.0  python2.7 python2.6 python2.5 python2.4 python2.3 python2.2 python2.1  python2.0 none; do
+	for am_cv_pathless_PYTHON in python python2 python3 python3.8 python3.7 python3.6 python3.5 python3.4 python3.3 python3.2 python3.1 python3.0 python2.7  python2.6 python2.5 python2.4 python2.3 python2.2 python2.1 python2.0 none; do
 	  test "$am_cv_pathless_PYTHON" = none && break
 	  prog="import sys
 # split strings by '.' and convert to numeric.  Append some zeros
@@ -20052,8 +20217,8 @@ $as_echo "no" >&6; }
 fi
 
 pkg_failed=no
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for proj" >&5
-$as_echo_n "checking for proj... " >&6; }
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for libproj" >&5
+$as_echo_n "checking for libproj... " >&6; }
 
 if test -n "$libproj_CFLAGS"; then
     pkg_cv_libproj_CFLAGS="$libproj_CFLAGS"
@@ -20093,7 +20258,7 @@ fi
 
 
 if test $pkg_failed = yes; then
-        { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+   	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
 $as_echo "no" >&6; }
 
 if $PKG_CONFIG --atleast-pkgconfig-version 0.20; then
@@ -20111,7 +20276,7 @@ fi
 
 	FOUND_PROJ_LIB=no
 elif test $pkg_failed = untried; then
-        { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+     	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
 $as_echo "no" >&6; }
 	FOUND_PROJ_LIB=no
 else
@@ -20341,6 +20506,7 @@ if test "$GOT_PROJ" = "yes" ; then
 else
         $as_echo "Looking for PROJ headers in the usual places..."
 fi
+
 save_CPPFLAGS=$CPPFLAGS
 save_CFLAGS=$CFLAGS
 if test "$FOUND_PROJ4" = "yes" ; then
@@ -20903,8 +21069,8 @@ else
         $as_echo "Look for pkg-config FFTW package..."
 
 pkg_failed=no
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for fftw3" >&5
-$as_echo_n "checking for fftw3... " >&6; }
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for libfftw3" >&5
+$as_echo_n "checking for libfftw3... " >&6; }
 
 if test -n "$libfftw3_CFLAGS"; then
     pkg_cv_libfftw3_CFLAGS="$libfftw3_CFLAGS"
@@ -20944,7 +21110,7 @@ fi
 
 
 if test $pkg_failed = yes; then
-        { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+   	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
 $as_echo "no" >&6; }
 
 if $PKG_CONFIG --atleast-pkgconfig-version 0.20; then
@@ -20962,7 +21128,7 @@ fi
 
 	GOT_FFTW=no
 elif test $pkg_failed = untried; then
-        { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+     	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
 $as_echo "no" >&6; }
 	GOT_FFTW=no
 else
@@ -21271,8 +21437,8 @@ fi
                 $as_echo "Look for pkg-config X11 package..."
 
 pkg_failed=no
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for openmotif" >&5
-$as_echo_n "checking for openmotif... " >&6; }
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for libXm" >&5
+$as_echo_n "checking for libXm... " >&6; }
 
 if test -n "$libXm_CFLAGS"; then
     pkg_cv_libXm_CFLAGS="$libXm_CFLAGS"
@@ -21312,7 +21478,7 @@ fi
 
 
 if test $pkg_failed = yes; then
-        { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+   	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
 $as_echo "no" >&6; }
 
 if $PKG_CONFIG --atleast-pkgconfig-version 0.20; then
@@ -21330,7 +21496,7 @@ fi
 
 	GOT_MOTIF=no
 elif test $pkg_failed = untried; then
-        { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+     	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
 $as_echo "no" >&6; }
 	GOT_MOTIF=no
 else
@@ -21581,8 +21747,8 @@ else
         $as_echo "Look for pkg-config OpenGL package..."
 
 pkg_failed=no
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for opengl" >&5
-$as_echo_n "checking for opengl... " >&6; }
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for libGLU" >&5
+$as_echo_n "checking for libGLU... " >&6; }
 
 if test -n "$libGLU_CFLAGS"; then
     pkg_cv_libGLU_CFLAGS="$libGLU_CFLAGS"
@@ -21622,7 +21788,7 @@ fi
 
 
 if test $pkg_failed = yes; then
-        { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+   	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
 $as_echo "no" >&6; }
 
 if $PKG_CONFIG --atleast-pkgconfig-version 0.20; then
@@ -21640,7 +21806,7 @@ fi
 
 	GOT_OPENGL=no
 elif test $pkg_failed = untried; then
-        { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+     	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
 $as_echo "no" >&6; }
 	GOT_OPENGL=no
 else
@@ -21905,8 +22071,8 @@ fi
                 $as_echo "Look for pkg-config OpenCV4 package..."
 
 pkg_failed=no
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for opencv4" >&5
-$as_echo_n "checking for opencv4... " >&6; }
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for OPENCV4" >&5
+$as_echo_n "checking for OPENCV4... " >&6; }
 
 if test -n "$OPENCV4_CFLAGS"; then
     pkg_cv_OPENCV4_CFLAGS="$OPENCV4_CFLAGS"
@@ -21946,7 +22112,7 @@ fi
 
 
 if test $pkg_failed = yes; then
-        { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+   	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
 $as_echo "no" >&6; }
 
 if $PKG_CONFIG --atleast-pkgconfig-version 0.20; then
@@ -21964,7 +22130,7 @@ fi
 
 	GOT_OPENCV4=no
 elif test $pkg_failed = untried; then
-        { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+     	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
 $as_echo "no" >&6; }
 	GOT_OPENCV4=no
 else
@@ -23041,39 +23207,185 @@ $as_echo "$ax_cv_qt_test_result" >&6; }
     qt_MOC=$QT_MOC
 
 
-    $as_echo "Constructing Qt project file mbgui.pro in src/qt-mbgui..."
-    `cp src/qt-mbgui/mbgui.pro.init src/qt-mbgui/mbgui.pro`
-    `sed -i "" "s#__OPENGL_INCLUDEDIR__#$libopengl_INCLUDEDIR#" src/qt-mbgui/mbgui.pro`
-    `sed -i "" "s#__OPENGL_LIBS__#$libopengl_LIBS#" src/qt-mbgui/mbgui.pro`
-    `sed -i "" "s#__GMT_INCLUDEDIR__#$libgmt_INCLUDEDIR#" src/qt-mbgui/mbgui.pro`
-    `sed -i "" "s#__GMT_LIBS__#$libgmt_LIBS#" src/qt-mbgui/mbgui.pro`
-    `sed -i "" "s#__INSTALLDIR__#$prefix/lib#" src/qt-mbgui/mbgui.pro`
-    $as_echo "Running qmake in src/qt-mbgui to generate src/qt-mbgui/Makefile.qmake..."
-    `cd src/qt-mbgui ; qmake -makefile -o Makefile.qmake ; cd ../..`
+    # Find VTK headers and libraries too
+    vtkLocSpecified=no
+    vtkFound=no
 
-    $as_echo "Constructing Qt project file mbgrdviz-1.pro in src/qt-mbgrdviz-1..."
-    `cp src/qt-mbgrdviz-1/mbgrdviz-1.pro.init src/qt-mbgrdviz-1/mbgrdviz-1.pro`
-    `sed -i "" "s#__GMT_INCLUDEDIR__#$libgmt_INCLUDEDIR#" src/qt-mbgrdviz-1/mbgrdviz-1.pro`
-    `sed -i "" "s#__GMT_LIBS__#$libgmt_LIBS#" src/qt-mbgrdviz-1/mbgrdviz-1.pro`
-    `sed -i "" "s#__INSTALLDIR__#$prefix/bin#" src/qt-mbgrdviz-1/mbgrdviz-1.pro`
-    $as_echo "Running qmake in src/qt-mbgrdviz-1 to generate src/qt-mbgrdviz-1/Makefile.qmake..."
-    `cd src/qt-mbgrdviz-1 ; qmake -makefile -o Makefile.qmake ; cd ../..`
+    # Required major and minor version for VTK
+    vtkMinMajor=8
+    vtkMinMinor=2
+    $as_echo "Check for VTK8.2 libraries"
 
-    $as_echo "Constructing Qt project file mbgrdviz-2.pro in src/qt-mbgrdviz-2..."
-    `cp src/qt-mbgrdviz-2/mbgrdviz-2.pro.init src/qt-mbgrdviz-2/mbgrdviz-2.pro`
-    `sed -i "" "s#__GMT_INCLUDEDIR__#$libgmt_INCLUDEDIR#" src/qt-mbgrdviz-2/mbgrdviz-2.pro`
-    `sed -i "" "s#__GMT_LIBS__#$libgmt_LIBS#" src/qt-mbgrdviz-2/mbgrdviz-2.pro`
-    `sed -i "" "s#__INSTALLDIR__#$prefix/bin#" src/qt-mbgrdviz-2/mbgrdviz-2.pro`
+
+# Check whether --with-vtk-lib was given.
+if test "${with_vtk_lib+set}" = set; then :
+  withval=$with_vtk_lib; vtk_libdir="${withval}" vtkLocSpecified=yes
+else
+  vtkLocSpecified=no
+fi
+
+
+    if test "$vtkLocSpecified" = "yes" ; then
+              $as_echo "VTK8.2 library location specified; check for directory existence..."
+       as_ac_File=`$as_echo "ac_cv_file_$vtk_libdir" | $as_tr_sh`
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for $vtk_libdir" >&5
+$as_echo_n "checking for $vtk_libdir... " >&6; }
+if eval \${$as_ac_File+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  test "$cross_compiling" = yes &&
+  as_fn_error $? "cannot check for file existence when cross compiling" "$LINENO" 5
+if test -r "$vtk_libdir"; then
+  eval "$as_ac_File=yes"
+else
+  eval "$as_ac_File=no"
+fi
+fi
+eval ac_res=\$$as_ac_File
+	       { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
+$as_echo "$ac_res" >&6; }
+if eval test \"x\$"$as_ac_File"\" = x"yes"; then :
+  vtkFound=yes
+else
+  vtkFound=no
+fi
+
+       if test "$vtkFound" = "no" ; then
+          as_fn_error $? "Did not find specified VTK8.2 library location $vtk_libdir - check installation" "$LINENO" 5
+       fi
+       # Save LDFLAGS...
+       save_LDFLAGS=$LDFLAGS
+       # Look for extern C function GetVTKVersion in vtkCommonCore library
+       LDFLAGS="$LDFLAGS -L$vtk_libdir"
+       { $as_echo "$as_me:${as_lineno-$LINENO}: checking for GetVTKVersion in -lvtkCommonCore-8.2" >&5
+$as_echo_n "checking for GetVTKVersion in -lvtkCommonCore-8.2... " >&6; }
+if ${ac_cv_lib_vtkCommonCore_8_2_GetVTKVersion+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-lvtkCommonCore-8.2  $LIBS"
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char GetVTKVersion ();
+int
+main ()
+{
+return GetVTKVersion ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  ac_cv_lib_vtkCommonCore_8_2_GetVTKVersion=yes
+else
+  ac_cv_lib_vtkCommonCore_8_2_GetVTKVersion=no
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_vtkCommonCore_8_2_GetVTKVersion" >&5
+$as_echo "$ac_cv_lib_vtkCommonCore_8_2_GetVTKVersion" >&6; }
+if test "x$ac_cv_lib_vtkCommonCore_8_2_GetVTKVersion" = xyes; then :
+  vtkFound=yes
+else
+  vtkFound=no
+fi
+
+       # Restore LDFLAGS
+       LDFLAGS="$save_LDFLAGS"
+       if test "$vtkFound" = "no"; then
+         as_fn_error $? "Did not find VTK libraries - check installation" "$LINENO" 5
+       else
+         $as_echo "Found VTK libraries"
+       fi
+    else
+         as_fn_error $? "Must specify VTK8.2 library location with --with-vtk-lib=DIR" "$LINENO" 5
+    fi
+    $as_echo "Check for VTK headers"
+
+
+# Check whether --with-vtk-include was given.
+if test "${with_vtk_include+set}" = set; then :
+  withval=$with_vtk_include; vtk_includedir="${withval}" vtkLocSpecified=yes
+else
+  vtkLocSpecified=no
+fi
+
+
+    if test "$vtkLocSpecified" = "yes" ; then
+       # Check for VTK header in specified location
+       $as_echo "Look for $vtk_includedir/vtkActor.h..."
+       as_ac_File=`$as_echo "ac_cv_file_$vtk_includedir/vtkActor.h" | $as_tr_sh`
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for $vtk_includedir/vtkActor.h" >&5
+$as_echo_n "checking for $vtk_includedir/vtkActor.h... " >&6; }
+if eval \${$as_ac_File+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  test "$cross_compiling" = yes &&
+  as_fn_error $? "cannot check for file existence when cross compiling" "$LINENO" 5
+if test -r "$vtk_includedir/vtkActor.h"; then
+  eval "$as_ac_File=yes"
+else
+  eval "$as_ac_File=no"
+fi
+fi
+eval ac_res=\$$as_ac_File
+	       { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
+$as_echo "$ac_res" >&6; }
+if eval test \"x\$"$as_ac_File"\" = x"yes"; then :
+  vtkFound=yes
+else
+  vtkFound=no
+fi
+
+       if test "$vtkFound" = "no" ; then
+          as_fn_error $? "Did not find VTK headers in $vtk_includedir - check installation" "$LINENO" 5
+       else
+          $as_echo "Verify that VTK meets minimum version requirement"
+          vers=`$AWK -f build-utils/vtkVersionCheck.awk $vtkMinMajor $vtkMinMinor $vtk_includedir/vtkVersionMacros.h`
+          if [ $? -eq 1 ]
+          then
+            as_fn_error $? "VTK does not meet minimum version requirement: $vers" "$LINENO" 5
+          else
+            $as_echo "VTK meets minimum version requirement"
+          fi
+          vers=`echo $vers | cut -d ' ' -f 1`
+          echo "vers: $vers"
+       fi
+    else
+       # VTK header location not specified - this is currently an errro
+       as_fn_error $? "Must specify VTK include location with --with-vtk-include=DIR" "$LINENO" 5
+    fi
+
+    # Set environment variables for qmake
+    export OPENGL_INCLUDEDIR=$libopengl_INCLUDEDIR
+    export OPENGL_LIBS=$libopengl_LIBS
+
+    export GMT_INCLUDEDIR=$libgmt_INCLUDEDIR
+    export GMT_LIBS=$libgmt_LIBS
+
+    export VTK_INCLUDEDIR=$vtk_includedir
+    export VTK_LIBS="-L$vtk_libdir -lvtkGUISupportQt-$vers -lvtkCommonColor-$vers -lvtkRenderingFreeType-$vers -lvtkRenderingAnnotation-$vers -lvtkCommonTransforms-$vers -lvtkCommonCore-$vers -lvtkCommonDataModel-$vers -lvtkCommonExecutionModel-$vers -lvtkInteractionWidgets-$vers -lvtkInteractionStyle-$vers -lvtkRenderingCore-$vers -lvtkFiltersSources-$vers -lvtkGeovisCore-$vers -lvtkRenderingOpenGL2-$vers -lvtkFiltersHybrid-$vers -lvtkIOGeometry-$vers -lvtkIOCore-$vers -lvtkIOLegacy-$vers -lvtkRenderingVolumeOpenGL2-$vers -lvtkFiltersCore-$vers -lvtkFiltersGeneral-$vers -lvtksys-$vers"
+
+    export MB_INSTALLDIR=$prefix/lib
+
+    $as_echo "Constructing Qt project file MBGui.pro in src/qt-guilib..."
+    `cd src/qt-guilib ; qmake -makefile -o Makefile.qmake ; cd ../..`
+
+    $as_echo "Running qmake in src/qt-mbgrdviz to generate src/qt-mbgrdviz/Makefile.qmake..."
+    `cd src/qt-mbgrdviz ; qmake -makefile -o Makefile.qmake ; cd ../..`
+
     $as_echo "Running qmake in src/qt-mbgrdviz-2 to generate src/qt-mbgrdviz-2/Makefile.qmake..."
     `cd src/qt-mbgrdviz-2 ; qmake -makefile -o Makefile.qmake ; cd ../..`
 
-    $as_echo "Constructing Qt project file mbgrdviz-3.pro in src/qt-mbgrdviz-3..."
-    `cp src/qt-mbgrdviz-3/mbgrdviz-3.pro.init src/qt-mbgrdviz-3/mbgrdviz-3.pro`
-    `sed -i "" "s#__OPENGL_INCLUDEDIR__#$libopengl_INCLUDEDIR#" src/qt-mbgrdviz-3/mbgrdviz-3.pro`
-    `sed -i "" "s#__OPENGL_LIBS__#$libopengl_LIBS#" src/qt-mbgrdviz-3/mbgrdviz-3.pro`
-    `sed -i "" "s#__GMT_INCLUDEDIR__#$libgmt_INCLUDEDIR#" src/qt-mbgrdviz-3/mbgrdviz-3.pro`
-    `sed -i "" "s#__GMT_LIBS__#$libgmt_LIBS#" src/qt-mbgrdviz-3/mbgrdviz-3.pro`
-    `sed -i "" "s#__INSTALLDIR__#$prefix/bin#" src/qt-mbgrdviz-3/mbgrdviz-3.pro`
     $as_echo "Running qmake in src/qt-mbgrdviz-3 to generate src/qt-mbgrdviz-3/Makefile.qmake..."
     `cd src/qt-mbgrdviz-3 ; qmake -makefile -o Makefile.qmake ; cd ../..`
 
@@ -23389,7 +23701,7 @@ if test "$build_opencvtools" = "yes" ; then
 
 fi
 if test "$build_qttools" = "yes" ; then
-    ac_config_files="$ac_config_files src/qt-mbgui/Makefile src/qt-mbgrdviz-1/Makefile src/qt-mbgrdviz-2/Makefile src/qt-mbgrdviz-3/Makefile"
+    ac_config_files="$ac_config_files src/qt-guilib/Makefile src/qt-mbgrdviz/Makefile src/qt-mbgrdviz-2/Makefile src/qt-mbgrdviz-3/Makefile"
 
 fi
 if test "$build_test" = "yes" ; then
@@ -24113,7 +24425,7 @@ cat >>$CONFIG_STATUS <<_ACEOF || ac_write_fail=1
 #
 # INIT-COMMANDS
 #
-AMDEP_TRUE="$AMDEP_TRUE" MAKE="${MAKE-make}"
+AMDEP_TRUE="$AMDEP_TRUE" ac_aux_dir="$ac_aux_dir"
 
 
 # The HP-UX ksh and POSIX shell print the target directory to stdout
@@ -24536,8 +24848,8 @@ do
     "src/mbtrnav/Makefile") CONFIG_FILES="$CONFIG_FILES src/mbtrnav/Makefile" ;;
     "src/mbtrnutils/Makefile") CONFIG_FILES="$CONFIG_FILES src/mbtrnutils/Makefile" ;;
     "src/photo/Makefile") CONFIG_FILES="$CONFIG_FILES src/photo/Makefile" ;;
-    "src/qt-mbgui/Makefile") CONFIG_FILES="$CONFIG_FILES src/qt-mbgui/Makefile" ;;
-    "src/qt-mbgrdviz-1/Makefile") CONFIG_FILES="$CONFIG_FILES src/qt-mbgrdviz-1/Makefile" ;;
+    "src/qt-guilib/Makefile") CONFIG_FILES="$CONFIG_FILES src/qt-guilib/Makefile" ;;
+    "src/qt-mbgrdviz/Makefile") CONFIG_FILES="$CONFIG_FILES src/qt-mbgrdviz/Makefile" ;;
     "src/qt-mbgrdviz-2/Makefile") CONFIG_FILES="$CONFIG_FILES src/qt-mbgrdviz-2/Makefile" ;;
     "src/qt-mbgrdviz-3/Makefile") CONFIG_FILES="$CONFIG_FILES src/qt-mbgrdviz-3/Makefile" ;;
     "third_party/Makefile") CONFIG_FILES="$CONFIG_FILES third_party/Makefile" ;;
@@ -25146,35 +25458,29 @@ $as_echo "$as_me: executing $ac_file commands" >&6;}
   # Older Autoconf quotes --file arguments for eval, but not when files
   # are listed without --file.  Let's play safe and only enable the eval
   # if we detect the quoting.
-  # TODO: see whether this extra hack can be removed once we start
-  # requiring Autoconf 2.70 or later.
-  case $CONFIG_FILES in #(
-  *\'*) :
-    eval set x "$CONFIG_FILES" ;; #(
-  *) :
-    set x $CONFIG_FILES ;; #(
-  *) :
-     ;;
-esac
+  case $CONFIG_FILES in
+  *\'*) eval set x "$CONFIG_FILES" ;;
+  *)   set x $CONFIG_FILES ;;
+  esac
   shift
-  # Used to flag and report bootstrapping failures.
-  am_rc=0
-  for am_mf
+  for mf
   do
     # Strip MF so we end up with the name of the file.
-    am_mf=`$as_echo "$am_mf" | sed -e 's/:.*$//'`
-    # Check whether this is an Automake generated Makefile which includes
-    # dependency-tracking related rules and includes.
-    # Grep'ing the whole file directly is not great: AIX grep has a line
+    mf=`echo "$mf" | sed -e 's/:.*$//'`
+    # Check whether this is an Automake generated Makefile or not.
+    # We used to match only the files named 'Makefile.in', but
+    # some people rename them; so instead we look at the file content.
+    # Grep'ing the first line is not enough: some people post-process
+    # each Makefile.in and add a new line on top of each file to say so.
+    # Grep'ing the whole file is not good either: AIX grep has a line
     # limit of 2048, but all sed's we know have understand at least 4000.
-    sed -n 's,^am--depfiles:.*,X,p' "$am_mf" | grep X >/dev/null 2>&1 \
-      || continue
-    am_dirpart=`$as_dirname -- "$am_mf" ||
-$as_expr X"$am_mf" : 'X\(.*[^/]\)//*[^/][^/]*/*$' \| \
-	 X"$am_mf" : 'X\(//\)[^/]' \| \
-	 X"$am_mf" : 'X\(//\)$' \| \
-	 X"$am_mf" : 'X\(/\)' \| . 2>/dev/null ||
-$as_echo X"$am_mf" |
+    if sed -n 's,^#.*generated by automake.*,X,p' "$mf" | grep X >/dev/null 2>&1; then
+      dirpart=`$as_dirname -- "$mf" ||
+$as_expr X"$mf" : 'X\(.*[^/]\)//*[^/][^/]*/*$' \| \
+	 X"$mf" : 'X\(//\)[^/]' \| \
+	 X"$mf" : 'X\(//\)$' \| \
+	 X"$mf" : 'X\(/\)' \| . 2>/dev/null ||
+$as_echo X"$mf" |
     sed '/^X\(.*[^/]\)\/\/*[^/][^/]*\/*$/{
 	    s//\1/
 	    q
@@ -25192,50 +25498,53 @@ $as_echo X"$am_mf" |
 	    q
 	  }
 	  s/.*/./; q'`
-    am_filepart=`$as_basename -- "$am_mf" ||
-$as_expr X/"$am_mf" : '.*/\([^/][^/]*\)/*$' \| \
-	 X"$am_mf" : 'X\(//\)$' \| \
-	 X"$am_mf" : 'X\(/\)' \| . 2>/dev/null ||
-$as_echo X/"$am_mf" |
-    sed '/^.*\/\([^/][^/]*\)\/*$/{
+    else
+      continue
+    fi
+    # Extract the definition of DEPDIR, am__include, and am__quote
+    # from the Makefile without running 'make'.
+    DEPDIR=`sed -n 's/^DEPDIR = //p' < "$mf"`
+    test -z "$DEPDIR" && continue
+    am__include=`sed -n 's/^am__include = //p' < "$mf"`
+    test -z "$am__include" && continue
+    am__quote=`sed -n 's/^am__quote = //p' < "$mf"`
+    # Find all dependency output files, they are included files with
+    # $(DEPDIR) in their names.  We invoke sed twice because it is the
+    # simplest approach to changing $(DEPDIR) to its actual value in the
+    # expansion.
+    for file in `sed -n "
+      s/^$am__include $am__quote\(.*(DEPDIR).*\)$am__quote"'$/\1/p' <"$mf" | \
+	 sed -e 's/\$(DEPDIR)/'"$DEPDIR"'/g'`; do
+      # Make sure the directory exists.
+      test -f "$dirpart/$file" && continue
+      fdir=`$as_dirname -- "$file" ||
+$as_expr X"$file" : 'X\(.*[^/]\)//*[^/][^/]*/*$' \| \
+	 X"$file" : 'X\(//\)[^/]' \| \
+	 X"$file" : 'X\(//\)$' \| \
+	 X"$file" : 'X\(/\)' \| . 2>/dev/null ||
+$as_echo X"$file" |
+    sed '/^X\(.*[^/]\)\/\/*[^/][^/]*\/*$/{
 	    s//\1/
 	    q
 	  }
-	  /^X\/\(\/\/\)$/{
+	  /^X\(\/\/\)[^/].*/{
 	    s//\1/
 	    q
 	  }
-	  /^X\/\(\/\).*/{
+	  /^X\(\/\/\)$/{
+	    s//\1/
+	    q
+	  }
+	  /^X\(\/\).*/{
 	    s//\1/
 	    q
 	  }
 	  s/.*/./; q'`
-    { echo "$as_me:$LINENO: cd "$am_dirpart" \
-      && sed -e '/# am--include-marker/d' "$am_filepart" \
-        | $MAKE -f - am--depfiles" >&5
-   (cd "$am_dirpart" \
-      && sed -e '/# am--include-marker/d' "$am_filepart" \
-        | $MAKE -f - am--depfiles) >&5 2>&5
-   ac_status=$?
-   echo "$as_me:$LINENO: \$? = $ac_status" >&5
-   (exit $ac_status); } || am_rc=$?
+      as_dir=$dirpart/$fdir; as_fn_mkdir_p
+      # echo "creating $dirpart/$file"
+      echo '# dummy' > "$dirpart/$file"
+    done
   done
-  if test $am_rc -ne 0; then
-    { { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
-$as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
-as_fn_error $? "Something went wrong bootstrapping makefile fragments
-    for automatic dependency tracking.  If GNU make was not used, consider
-    re-running the configure script with MAKE=\"gmake\" (or whatever is
-    necessary).  You can also try re-running configure with the
-    '--disable-dependency-tracking' option to at least be able to build
-    the package (albeit without support for automatic dependency tracking).
-See \`config.log' for more details" "$LINENO" 5; }
-  fi
-  { am_dirpart=; unset am_dirpart;}
-  { am_filepart=; unset am_filepart;}
-  { am_mf=; unset am_mf;}
-  { am_rc=; unset am_rc;}
-  rm -f conftest-deps.mk
 }
  ;;
     "libtool":C)
@@ -25253,7 +25562,6 @@ See \`config.log' for more details" "$LINENO" 5; }
     cat <<_LT_EOF >> "$cfgfile"
 #! $SHELL
 # Generated automatically by $as_me ($PACKAGE) $VERSION
-# Libtool was configured on host `(hostname || uname -n) 2>/dev/null | sed 1q`:
 # NOTE: Changes made to this file will be lost: look at ltmain.sh.
 
 # Provide generalized library-building support services.
@@ -26115,3 +26423,4 @@ $as_echo "----------------------------------------------------------------------
 $as_echo "See config.log for details of configure results"
 $as_echo "See INSTALL for further build instructions and hints"
 $as_echo "------------------------------------------------------------------------------"
+
