@@ -8,15 +8,42 @@
 cmake_minimum_required(VERSION 3.18)
 project(MB-Sytstem)
 
-### TEST FUNCTION
-function(findIncludeDir file var)
-  message("this is findIncludeDir()")
+# Find C include directory with specified name
+function(findCIncludeDir directory var)
+  message("***findCIncludeDir(): look for ${directory} in ${CMAKE_C_IMPLICIT_INCLUDE_DIRECTORIES}")
+  find_file(tmp ${directory}
+            PATHS ${CMAKE_C_IMPLICIT_INCLUDE_DIRECTORIES}
+            NO_DEFAULT_PATH
+            REQUIRED)
+
+message("***Found ${directory}: ${tmp}")
+set(${var} ${tmp} PARENT_SCOPE)
+  
 endfunction()
 
-function(findLibInStdLoc file var)
-  message("this is findLibInStdLoc()")
+
+# Find C++ include directory with specified name
+function(findCXXIncludeDir directory var)
+  message("***findCXXIncludeDir(): look for ${directory}")
+  find_file(tmp ${directory}
+            PATHS ${CMAKE_CXX_IMPLICIT_INCLUDE_DIRECTORIES}
+            NO_DEFAULT_PATH
+            REQUIRED)
+
+  message("***Found ${directory}: ${tmp}")  
+  set(${var} ${tmp} PARENT_SCOPE)
+  
 endfunction()
 
+
+# Look for specified library, set var to corresponding directory
+function(findLibraryDir library var)
+  message("findLibraryDir() - look for ${library}")
+  find_library(LIBFILE ${library} REQUIRED)
+  message("findLibraryDir(); set var ${var}")  
+  get_filename_component(tmp ${LIBFILE} DIRECTORY)
+  set(${var} ${tmp} PARENT_SCOPE)
+endfunction()
 
 set(MB_HOME ${CMAKE_CURRENT_SOURCE_DIR})
 
@@ -46,27 +73,33 @@ else()
   message(FATAL_ERROR "Building on unsupported OS")
 endif()
 
-if (NOT GMT_INCLUDE)
+if (NOT GMT_INCLUDE_DIR)
   # Look for includes in usual places
-  find_file(GMT_HEADER "gmt"
-            PATHS ${CMAKE_C_IMPLICIT_INCLUDE_DIRECTORIES}
-            REQUIRED)
-  message("GMT_HEADER: ${GMT_HEADER}")
-  get_filename_component(GMT_INCLUDE ${GMT_HEADER} DIRECTORY)
-  message("GMT_INCLUDE: ${GMT_INCLUDE}")  
-
+  findCIncludeDir(gmt GMT_INCLUDE_DIR)
 endif()
 
-if (NOT GMT_LIBS)
+if (NOT GMT_LIB_DIR)
   # Look for library in usual places
-  find_library(GMT_LIBS NAMES libgmt.so libgmt.dylib libgmt.a)
-  message("GMT_LIBS: ${GMT_LIBS}")
-  if (NOT GMT_LIBS)
-    message(FATAL_ERROR "GMT_LIBS not found")
-  endif()
+  ### find_library(GMT_LIB_DIR gmt REQUIRED)
+  findLibraryDir(gmt GMT_LIB_DIR)
+  message("returned from findLibraryDir() - GMT_LIB_DIR: ${GMT_LIB_DIR}")  
 endif()
 
-message("GMT_LIBS: ${GMT_LIBS}")
+if (NOT VTK_INCLUDE_DIR)
+  # Look for includes in usual places
+  findCXXIncludeDir(vtk-8.2 VTK_INCLUDE_DIR)
+endif()
+
+#[[
+if (NOT VTK_LIBS)
+  # Look for library in usual places
+  find_library(VTK_LIBS vtk REQUIRED)  
+endif()
+]]
+
+message("GMT_INCLUDE_DIR: ${GMT_INCLUDE_DIR}")
+message("GMT_LIB_DIR: ${GMT_LIB_DIR}")
+message("VTK_INCLUDE_DIR: ${VTK_INCLUDE_DIR}")
 
 
 add_subdirectory(src/mbaux)
