@@ -14,6 +14,12 @@
 cmake_minimum_required(VERSION 3.18)
 project(MB-System)
 
+# Test function
+function(foo)
+  message("this is foo!")
+endfunction()
+
+
 # Find C include directory with specified name
 function(findCIncludeDir directory var)
   message("***findCIncludeDir(): look for ${directory} in ${CMAKE_C_IMPLICIT_INCLUDE_DIRECTORIES}")
