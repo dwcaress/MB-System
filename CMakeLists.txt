@@ -1,23 +1,30 @@
-# Accepts the following _INCLUDE and _LIBS "-D" options on the command line:
+# Accepts the following _INCLUDE_DIR and _LIB_DIR "-D" options on the command line:
 # GMT_
 # PROJ_
 # OPENGL_
-# QT_
 # VTK_
+# MOTIF_
+# FFT_
+# OTPS_
+# OPENCV_
+# 
+# For Qt currently rely on qmake and .pro to determine Qt header
+# and library location
 
 cmake_minimum_required(VERSION 3.18)
-project(MB-Sytstem)
+project(MB-System)
 
 # Find C include directory with specified name
 function(findCIncludeDir directory var)
   message("***findCIncludeDir(): look for ${directory} in ${CMAKE_C_IMPLICIT_INCLUDE_DIRECTORIES}")
-  find_file(tmp ${directory}
+  find_file(${var} ${directory}
             PATHS ${CMAKE_C_IMPLICIT_INCLUDE_DIRECTORIES}
             NO_DEFAULT_PATH
             REQUIRED)
 
-message("***Found ${directory}: ${tmp}")
-set(${var} ${tmp} PARENT_SCOPE)
+message("***Found ${directory}: ${var}")
+# Set value in parent scope
+set(${var} ${${var}} PARENT_SCOPE)
   
 endfunction()
 
@@ -25,13 +32,13 @@ endfunction()
 # Find C++ include directory with specified name
 function(findCXXIncludeDir directory var)
   message("***findCXXIncludeDir(): look for ${directory}")
-  find_file(tmp ${directory}
+  find_file(${var} ${directory}
             PATHS ${CMAKE_CXX_IMPLICIT_INCLUDE_DIRECTORIES}
             NO_DEFAULT_PATH
             REQUIRED)
 
-  message("***Found ${directory}: ${tmp}")  
-  set(${var} ${tmp} PARENT_SCOPE)
+  message("***Found ${directory}: ${var}")  
+  set(${var} ${${var}} PARENT_SCOPE)
   
 endfunction()
 
@@ -39,8 +46,9 @@ endfunction()
 # Look for specified library, set var to corresponding directory
 function(findLibraryDir library var)
   message("findLibraryDir() - look for ${library}")
+  unset(LIBFILE CACHE)
   find_library(LIBFILE ${library} REQUIRED)
-  message("findLibraryDir(); set var ${var}")  
+  message("findLibraryDir(); found ${library}: ${LIBFILE}")  
   get_filename_component(tmp ${LIBFILE} DIRECTORY)
   set(${var} ${tmp} PARENT_SCOPE)
 endfunction()
@@ -78,28 +86,40 @@ if (NOT GMT_INCLUDE_DIR)
   findCIncludeDir(gmt GMT_INCLUDE_DIR)
 endif()
 
-if (NOT GMT_LIB_DIR)
-  # Look for library in usual places
-  ### find_library(GMT_LIB_DIR gmt REQUIRED)
-  findLibraryDir(gmt GMT_LIB_DIR)
-  message("returned from findLibraryDir() - GMT_LIB_DIR: ${GMT_LIB_DIR}")  
-endif()
 
 if (NOT VTK_INCLUDE_DIR)
   # Look for includes in usual places
   findCXXIncludeDir(vtk-8.2 VTK_INCLUDE_DIR)
 endif()
 
-#[[
-if (NOT VTK_LIBS)
-  # Look for library in usual places
-  find_library(VTK_LIBS vtk REQUIRED)  
+if (NOT PROJ_INCLUDE_DIR)
+  # Look for includes in usual places
+  findCXXIncludeDir(proj PROJ_INCLUDE_DIR)
 endif()
-]]
+
+if (NOT OPENGL_INCLUDE_DIR)
+  # Look for includes in usual places
+  findCIncludeDir(GL OPENGL_INCLUDE_DIR)
+endif()
+
+
+if (NOT VTK_LIB_DIR)
+  # Look for library in usual places
+  findLibraryDir(vtkIOCore-8.2 VTK_LIB_DIR)
+endif()
+
+if (NOT GMT_LIB_DIR)
+  # Look for library in usual places
+  findLibraryDir(gmt GMT_LIB_DIR)
+endif()
+
 
 message("GMT_INCLUDE_DIR: ${GMT_INCLUDE_DIR}")
-message("GMT_LIB_DIR: ${GMT_LIB_DIR}")
 message("VTK_INCLUDE_DIR: ${VTK_INCLUDE_DIR}")
+message("PROJ_INCLUDE_DIR: ${PROJ_INCLUDE_DIR}")
+message("OPENGL_INCLUDE_DIR: ${OPENGL_INCLUDE_DIR}")
+message("GMT_LIB_DIR: ${GMT_LIB_DIR}")
+message("VTK_LIB_DIR: ${VTK_LIB_DIR}")
 
 
 add_subdirectory(src/mbaux)
