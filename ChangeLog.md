@@ -20,6 +20,7 @@ include "beta" in the tag name are preliminary and generally not announced.
 Distributions that do not include "beta" in the tag name correspond to the major,
 announced releases. The source distributions associated with all releases, major or beta, are equally accessible as tarballs through the Github interface.
 
+- Version 5.7.7beta04    October 28, 2020
 - Version 5.7.7beta03    October 27, 2020
 - Version 5.7.7beta02    October 8, 2020
 - Version 5.7.7beta01    October 7, 2020
@@ -369,6 +370,14 @@ announced releases. The source distributions associated with all releases, major
 --
 ### MB-System Version 5.7 Release Notes:
 --
+
+#### 5.7.7beta04 (October 28, 2020)
+
+Mbvoxelclean: Added option to filter based on beam amplitude minimum and maximum
+values.
+
+Mbeditviz: Fixed coloring of soundings using beam amplitude values (colormap
+was applied incorrectly).
 
 #### 5.7.7beta03 (October 27, 2020)
 
