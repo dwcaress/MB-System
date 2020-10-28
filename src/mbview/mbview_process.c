@@ -2835,7 +2835,9 @@ int mbview_getcolor(double value, double min, double max, int colortablemode, fl
 	}
 
 	/* get color */
-	if (colortablemode == MBV_COLORTABLE_NORMAL)
+  if (max <= min)
+    factor = 0.5;
+  else if (colortablemode == MBV_COLORTABLE_NORMAL)
 		factor = (max - value) / (max - min);
 	else
 		factor = (value - min) / (max - min);

@@ -4489,6 +4489,7 @@ int mbsys_reson7k_preprocess(int verbose,     /* in: verbosity level set on comm
                              void *mbio_ptr,  /* in: see mb_io.h:/^struct mb_io_struct/ */
                              void *store_ptr, /* in: see mbsys_reson7k.h:/^struct mbsys_reson7k_struct/ */
                              void *platform_ptr, void *preprocess_pars_ptr, int *error) {
+
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -4503,16 +4504,17 @@ int mbsys_reson7k_preprocess(int verbose,     /* in: verbosity level set on comm
 
   /* check for non-null data */
   assert(mbio_ptr != NULL);
-  assert(store_ptr != NULL);
   assert(preprocess_pars_ptr != NULL);
 
   /* get mbio descriptor */
   struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
+  /* get preprocessing parameters */
+  struct mb_preprocess_struct *pars = (struct mb_preprocess_struct *)preprocess_pars_ptr;
+
   /* get data structure pointers */
   struct mbsys_reson7k_struct *store = (struct mbsys_reson7k_struct *)store_ptr;
   struct mb_platform_struct *platform = (struct mb_platform_struct *)platform_ptr;
-  struct mb_preprocess_struct *pars = (struct mb_preprocess_struct *)preprocess_pars_ptr;
 
   /* get saved values */
   double *pixel_size = (double *)&mb_io_ptr->saved1;
@@ -4597,8 +4599,15 @@ int mbsys_reson7k_preprocess(int verbose,     /* in: verbosity level set on comm
 
   int status = MB_SUCCESS;
 
+  /* if called with store_ptr == NULL then called after mb_read_init() but before
+      any data are read - for some formats this allows kluge options to set special
+      reading conditions/behaviors */
+  if (store_ptr == NULL) {
+
+  }
+
   /* deal with a survey record */
-  if (store->kind == MB_DATA_DATA) {
+  else if (store->kind == MB_DATA_DATA) {
 
     s7k_header *header = NULL;
     int time_i[7];

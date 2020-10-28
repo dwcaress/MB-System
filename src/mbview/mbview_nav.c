@@ -312,7 +312,7 @@ int mbview_freenavarrays(int verbose, double **time_d, double **navlon, double *
 // TODO(schwehr): bool navcdp
 int mbview_addnav(int verbose, size_t instance, int npoint, double *time_d, double *navlon, double *navlat, double *navz,
                   double *heading, double *speed, double *navportlon, double *navportlat, double *navstbdlon, double *navstbdlat,
-                  int *line, int *shot, int *cdp, int navcolor, int navsize, mb_path navname, int navpathstatus,
+                  unsigned int *line, unsigned int *shot, unsigned int *cdp, int navcolor, int navsize, mb_path navname, int navpathstatus,
                   mb_path navpathraw, mb_path navpathprocessed, int navformat, int navswathbounds, int navline, int navshot,
                   int navcdp, int decimation, int *error) {
 	if (verbose >= 2) {

@@ -695,6 +695,7 @@
 #define MB_PR_KLUGE_ZEROALONGTRACKANGLES 4
 #define MB_PR_KLUGE_FIXWISSLTIMESTAMPS 5
 #define MB_PR_KLUGE_AUVSENTRYSENSORDEPTH 6
+#define MB_PR_KLUGE_IGNORESNIPPETS 7
 
 /* structure holding mbpreprocess parameters to be passed to preprocess
  * functions of i/o modules */
@@ -944,7 +945,7 @@ struct mb_esf_struct {
   char esstream[MB_PATH_MAXLINE];
   int byteswapped;
   int version;
-    int mode;
+  int mode;
   int nedit;
   struct mb_edit_struct *edit;
   FILE *esffp;

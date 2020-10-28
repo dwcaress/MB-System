@@ -2725,14 +2725,16 @@ int do_mbgrdviz_saverisiscript(size_t instance, char *output_file_ptr) {
 
           /* write the route points */
           iscript = 0;
-          vvspeed = 0.15;
+          vvspeed = 0.20;
           settlingtime = 3.0;
-                    altitude = 3.0;
-                    heading = 0.0;
-                    turndirection = 1;
-                    /* for now set heading and altitude at start only */
-                    fprintf(sfp, "ALT, %.3f, 0.1, 3\r\n", altitude);
-                    fprintf(sfp, "HDG, %.3f, 1, 6, 3\r\n", heading);
+          altitude = 3.0;
+          heading = 0.0;
+          turndirection = 1;
+          double turns = 0.0;
+          double headinglast = 0.0;
+          /* for now set heading and altitude at start only */
+          fprintf(sfp, "ALT, %.3f, 0.1, 3\r\n", altitude);
+          fprintf(sfp, "HDG, %.3f, 1, 6, 3\r\n", heading);
           for (j = 0; j < npointtotal; j++) {
             if (!projection_initialized) {
               mb_coor_scale(verbose, routelat[j], &mtodeglon, &mtodeglat);
@@ -2745,11 +2747,14 @@ int do_mbgrdviz_saverisiscript(size_t instance, char *output_file_ptr) {
               xx = (routelon[j] - lon_origin) / mtodeglon;
               yy = (routelat[j] - lat_origin) / mtodeglat;
               zz = -altitude;
-                            heading = routebearing[j];
-                            if (j % 2 == 0)
-                                turndirection *= -1;
+              heading = routebearing[j];
+              if (j % 2 == 0)
+                  turndirection *= -1;
               fprintf(sfp, "POS, %.3f, %.3f, %.3f, %.3f, %.3f\r\n", yy, xx, zz, vvspeed, settlingtime);
-                            fprintf(sfp, "HDG, %.3f, %d, 6, %.3f\r\n", heading, turndirection, settlingtime);
+              fprintf(sfp, "HDG, %.3f, %d, 6, %.3f\r\n", heading, turndirection, settlingtime);
+              turns += turndirection * (heading - headinglast);
+              headinglast = heading;
+              fprintf(stderr, "j:%d turns: %f\n", j, turns);
             }
           }
 
@@ -3921,9 +3926,9 @@ int do_mbgrdviz_readnav(size_t instance, char *swathfile, int pathstatus, char *
   double *navportlat = NULL;
   double *navstbdlon = NULL;
   double *navstbdlat = NULL;
-  int *navline = NULL;
-  int *navshot = NULL;
-  int *navcdp = NULL;
+  unsigned int *navline = NULL;
+  unsigned int *navshot = NULL;
+  unsigned int *navcdp = NULL;
   int color;
   int size;
   mb_path name;

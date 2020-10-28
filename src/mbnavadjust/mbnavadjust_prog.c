@@ -5423,7 +5423,7 @@ int mbnavadjust_autopick(bool do_vertical) {
 
   // loop over all crossings, autopick those that are in the current view,
   // unanalyzed, have sufficient overlap, and for which both sections are
-  // sufficiently long (track length >=0.25 * file->sections[0].distance)
+  // sufficiently long (track length >=0.25 * project.section_length)
   if (project.open && project.num_crossings > 0) {
     /* set message dialog on */
     sprintf(message, "Autopicking offsets...");
@@ -5570,15 +5570,15 @@ int mbnavadjust_autopick(bool do_vertical) {
       }
 
       // check if section track lengths are long enough (at least 0.25 of the
-      // length of the first section for the file) - this excludes trying to
+      // current desired section length for the project) - this excludes trying to
       // match short sections at the end of a file */
       if (process) {
         file1 = &project.files[crossing->file_id_1];
         section1 = &file1->sections[crossing->section_1];
         file2 = &project.files[crossing->file_id_2];
         section2 = &file2->sections[crossing->section_2];
-        if (section1->distance < 0.25 * file1->sections[0].distance
-            || section2->distance < 0.25 * file2->sections[0].distance) {
+        if (section1->distance < 0.25 * project.section_length
+            || section2->distance < 0.25 * project.section_length) {
           process = false;
         }
       }
@@ -17053,9 +17053,9 @@ int mbnavadjust_open_visualization(int which_grid) {
   double *navportlat = NULL;
   double *navstbdlon = NULL;
   double *navstbdlat = NULL;
-  int *navline = NULL;
-  int *navshot = NULL;
-  int *navcdp = NULL;
+  unsigned int *navline = NULL;
+  unsigned int *navshot = NULL;
+  unsigned int *navcdp = NULL;
   int mbv_navcolor;
   int mbv_navsize;
   mb_path mbv_navname;
@@ -17064,9 +17064,9 @@ int mbnavadjust_open_visualization(int which_grid) {
   mb_path mbv_navpathprocessed;
   int mbv_navformatorg;
   int mbv_navswathbounds;
-  int mbv_navline;
-  int mbv_navshot;
-  int mbv_navcdp;
+  unsigned int mbv_navline;
+  unsigned int mbv_navshot;
+  unsigned int mbv_navcdp;
   int mbv_navdecimation;
 
   FILE *nfp;

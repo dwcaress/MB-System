@@ -855,6 +855,7 @@ int mbsys_simrad3_preprocess(int verbose,     /* in: verbosity level set on comm
                              void *mbio_ptr,  /* in: see mb_io.h:/^struct mb_io_struct/ */
                              void *store_ptr, /* in: see mbsys_reson7k.h:/^struct mbsys_reson7k_struct/ */
                              void *platform_ptr, void *preprocess_pars_ptr, int *error) {
+
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -865,19 +866,21 @@ int mbsys_simrad3_preprocess(int verbose,     /* in: verbosity level set on comm
 		fprintf(stderr, "dbg2       preprocess_pars_ptr:        %p\n", (void *)preprocess_pars_ptr);
 	}
 
+  *error = MB_ERROR_NO_ERROR;
+
 	/* check for non-null data */
 	assert(mbio_ptr != NULL);
-	assert(store_ptr != NULL);
 	assert(preprocess_pars_ptr != NULL);
 
 	/* get mbio descriptor */
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
+  /* get preprocessing parameters */
+  struct mb_preprocess_struct *pars = (struct mb_preprocess_struct *)preprocess_pars_ptr;
+
 	/* get data structure pointers */
 	struct mbsys_simrad3_struct *store = (struct mbsys_simrad3_struct *)store_ptr;
-	struct mbsys_simrad3_ping_struct *ping = (struct mbsys_simrad3_ping_struct *)&(store->pings[store->ping_index]);
 	// struct mb_platform_struct *platforms = (struct mb_platform_struct *)platform_ptr;
-	struct mb_preprocess_struct *pars = (struct mb_preprocess_struct *)preprocess_pars_ptr;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "dbg2       target_sensor:              %d\n", pars->target_sensor);
@@ -909,8 +912,23 @@ int mbsys_simrad3_preprocess(int verbose,     /* in: verbosity level set on comm
 
 	int status = MB_SUCCESS;
 
+  /* if called with store_ptr == NULL then called after mb_read_init() but before
+      any data are read - for some formats this allows kluge options to set special
+      reading conditions/behaviors */
+  if (store_ptr == NULL) {
+		for (int i = 0; i < pars->n_kluge; i++)
+			if (pars->kluge_id[i] == MB_PR_KLUGE_IGNORESNIPPETS) {
+        bool *ignore_snippets = (bool *)&mb_io_ptr->save4;
+        *ignore_snippets = true;
+      }
+  }
+
 	/* deal with a survey record */
-	if (store->kind == MB_DATA_DATA) {
+	else if (store->kind == MB_DATA_DATA) {
+
+  	/* get data structure pointers */
+    struct mbsys_simrad3_ping_struct *ping = (struct mbsys_simrad3_ping_struct *)&(store->pings[store->ping_index]);
+
 		/* depth sensor offsets - used in place of heave for underwater platforms */
 		int depthsensor_mode = MBSYS_SIMRAD3_ZMODE_UNKNOWN;
 
@@ -1331,7 +1349,10 @@ int mbsys_simrad3_preprocess(int verbose,     /* in: verbosity level set on comm
 		swath_width = (double *)&mb_io_ptr->saved2;
 		ping->png_pixel_size = 0;
 		ping->png_pixels_ss = 0;
-		status &= mbsys_simrad3_makess(verbose, mbio_ptr, store_ptr, false, pixel_size, false, swath_width, 1, error);
+    if (ping->png_ss_read)
+		  status = mbsys_simrad3_makess(verbose, mbio_ptr, store_ptr, false, pixel_size, false, swath_width, 1, error);
+    else
+      status = mbsys_simrad3_zero_ss(verbose, store_ptr, error);
 	}
 
 	if (verbose >= 2) {

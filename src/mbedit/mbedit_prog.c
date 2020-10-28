@@ -125,6 +125,7 @@ struct mbedit_ping_struct {
 	char *beamflag;
 	char *beamflagorg;
 	double *bath;
+	double *amp;
 	double *bathacrosstrack;
 	double *bathalongtrack;
 	int *detect;
@@ -227,6 +228,7 @@ static double info_altitude;
 static int info_beams_bath;
 static char info_beamflag;
 static double info_bath;
+static double info_amp;
 static double info_bathacrosstrack;
 static double info_bathalongtrack;
 static int info_detect;
@@ -2205,6 +2207,7 @@ int mbedit_action_mouse_info(int x_loc, int y_loc, int plwd, int exgr, int xntrv
 			info_beams_bath = ping[iping].beams_bath;
 			info_beamflag = ping[iping].beamflag[jbeam];
 			info_bath = ping[iping].bath[jbeam];
+			info_amp = ping[iping].amp[jbeam];
 			info_bathacrosstrack = ping[iping].bathacrosstrack[jbeam];
 			info_bathalongtrack = ping[iping].bathalongtrack[jbeam];
 			info_detect = ping[iping].detect[jbeam];
@@ -3618,11 +3621,9 @@ int mbedit_open_file(char *file, int form, bool savemode) {
 		if (error == MB_ERROR_NO_ERROR)
 			status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_AMPLITUDE, sizeof(double), (void **)&amp, &error);
 		if (error == MB_ERROR_NO_ERROR)
-			status =
-			    mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double), (void **)&bathacrosstrack, &error);
+			status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double), (void **)&bathacrosstrack, &error);
 		if (error == MB_ERROR_NO_ERROR)
-			status =
-			    mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double), (void **)&bathalongtrack, &error);
+			status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double), (void **)&bathalongtrack, &error);
 		if (error == MB_ERROR_NO_ERROR)
 			status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double), (void **)&ss, &error);
 		if (error == MB_ERROR_NO_ERROR)
@@ -3638,12 +3639,12 @@ int mbedit_open_file(char *file, int form, bool savemode) {
 		if (error == MB_ERROR_NO_ERROR)
 			status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(int), (void **)&editcount, &error);
 		if (error == MB_ERROR_NO_ERROR)
-			status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, MBEDIT_MAX_PINGS * sizeof(double),
-			                           (void **)&bathlist, &error);
+			status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, MBEDIT_MAX_PINGS * sizeof(double), (void **)&bathlist, &error);
 		for (int i = 0; i < MBEDIT_BUFFER_SIZE; i++) {
 			ping[i].allocated = 0;
 			ping[i].beamflag = NULL;
 			ping[i].bath = NULL;
+			ping[i].amp = NULL;
 			ping[i].bathacrosstrack = NULL;
 			ping[i].bathalongtrack = NULL;
 			ping[i].detect = NULL;
@@ -3737,6 +3738,7 @@ int mbedit_close_file() {
 			ping[i].allocated = 0;
 			free(ping[i].beamflag);
 			free(ping[i].bath);
+			free(ping[i].amp);
 			free(ping[i].bathacrosstrack);
 			free(ping[i].bathalongtrack);
 			free(ping[i].detect);
@@ -3858,6 +3860,7 @@ int mbedit_dump_data(int hold_size, int *ndumped, int *nbuffer) {
 				free(ping[iping].beamflag);
 				free(ping[iping].beamflagorg);
 				free(ping[iping].bath);
+				free(ping[iping].amp);
 				free(ping[iping].bathacrosstrack);
 				free(ping[iping].bathalongtrack);
 				free(ping[iping].detect);
@@ -3995,6 +3998,7 @@ int mbedit_load_data(int buffer_size, int *nloaded, int *nbuffer, int *ngood, in
 			free(ping[nbuff].beamflag);
 			free(ping[nbuff].beamflagorg);
 			free(ping[nbuff].bath);
+			free(ping[nbuff].amp);
 			free(ping[nbuff].bathacrosstrack);
 			free(ping[nbuff].bathalongtrack);
 			free(ping[nbuff].detect);
@@ -4007,6 +4011,7 @@ int mbedit_load_data(int buffer_size, int *nloaded, int *nbuffer, int *ngood, in
 			ping[nbuff].beamflag = NULL;
 			ping[nbuff].beamflagorg = NULL;
 			ping[nbuff].bath = NULL;
+			ping[nbuff].amp = NULL;
 			ping[nbuff].bathacrosstrack = NULL;
 			ping[nbuff].bathalongtrack = NULL;
 			ping[nbuff].bath_x = NULL;
@@ -4014,6 +4019,7 @@ int mbedit_load_data(int buffer_size, int *nloaded, int *nbuffer, int *ngood, in
 			ping[nbuff].beamflag = (char *)malloc(ping[nbuff].beams_bath * sizeof(char));
 			ping[nbuff].beamflagorg = (char *)malloc(ping[nbuff].beams_bath * sizeof(char));
 			ping[nbuff].bath = (double *)malloc(ping[nbuff].beams_bath * sizeof(double));
+			ping[nbuff].amp = (double *)malloc(ping[nbuff].beams_bath * sizeof(double));
 			ping[nbuff].bathacrosstrack = (double *)malloc(ping[nbuff].beams_bath * sizeof(double));
 			ping[nbuff].bathalongtrack = (double *)malloc(ping[nbuff].beams_bath * sizeof(double));
 			ping[nbuff].detect = (int *)malloc(ping[nbuff].beams_bath * sizeof(int));
@@ -4028,6 +4034,7 @@ int mbedit_load_data(int buffer_size, int *nloaded, int *nbuffer, int *ngood, in
 				ping[nbuff].beamflag[i] = beamflag[i];
 				ping[nbuff].beamflagorg[i] = beamflag[i];
 				ping[nbuff].bath[i] = bath[i];
+				ping[nbuff].amp[i] = amp[i];
 				ping[nbuff].bathacrosstrack[i] = bathacrosstrack[i];
 				ping[nbuff].bathalongtrack[i] = bathalongtrack[i];
 				ping[nbuff].detect[i] = detect[i];
@@ -4854,23 +4861,25 @@ int mbedit_plot_info() {
 		int xcen = xmin + (xmax - xmin) / 2;
 
 		char string[MB_PATH_MAXLINE];
-		sprintf(string, "Selected Sounding: Ping:%d Beam:%d", info_ping, info_beam);
 		sprintf(string, "Ping:%d  Beam:%d  Time: %2.2d/%2.2d/%4.4d %2.2d:%2.2d:%2.2d.%3.3d", info_ping, info_beam, info_time_i[1],
 		        info_time_i[2], info_time_i[0], info_time_i[3], info_time_i[4], info_time_i[5], (int)(0.001 * info_time_i[6]));
 		xg_justify(mbedit_xgid, string, &swidth, &sascent, &sdescent);
-		xg_drawstring(mbedit_xgid, xcen - swidth / 2, ymin - margin / 2 - 2 * (sascent + sdescent), string, pixel_values[BLACK],
+		xg_drawstring(mbedit_xgid, xcen - swidth / 2, ymin - margin / 2 - 2 * (sascent + sdescent) + 3, string, pixel_values[BLACK],
 		              XG_SOLIDLINE);
+    fprintf(stdout, "\nSelected soundng:\n%s\n", string);
 
-		sprintf(string, "Longitude:%.5f  Latitude:%.5f  Heading:%.1f  Speed:%.1f", info_navlon, info_navlat, info_heading,
-		        info_speed);
+		sprintf(string, "Lon:%.5f deg  Lat:%.5f deg  Hdg:%.1f deg  Spd:%.1f km/hr",
+            info_navlon, info_navlat, info_heading, info_speed);
 		xg_justify(mbedit_xgid, string, &swidth, &sascent, &sdescent);
-		xg_drawstring(mbedit_xgid, xcen - swidth / 2, ymin - margin / 2 - 1 * (sascent + sdescent), string, pixel_values[BLACK],
+		xg_drawstring(mbedit_xgid, xcen - swidth / 2, ymin - margin / 2 - 1 * (sascent + sdescent) + 3, string, pixel_values[BLACK],
 		              XG_SOLIDLINE);
+    fprintf(stdout, "%s\n", string);
 
-		sprintf(string, "Depth:%.2f  XTrack:%.2f  LTrack:%.2f  Altitude:%.2f  Detect:%s  Pulse:%s", info_bath,
-		        info_bathacrosstrack, info_bathalongtrack, info_altitude, detect_name[info_detect], pulse_name[info_pulse]);
+		sprintf(string, "Depth:%.2f  X:%.2f  L:%.2f  Alt:%.2f  Amp:%.2f  Detect:%s  Pulse:%s", info_bath,
+		        info_bathacrosstrack, info_bathalongtrack, info_altitude, info_amp, detect_name[info_detect], pulse_name[info_pulse]);
 		xg_justify(mbedit_xgid, string, &swidth, &sascent, &sdescent);
-		xg_drawstring(mbedit_xgid, xcen - swidth / 2, ymin - margin / 2, string, pixel_values[BLACK], XG_SOLIDLINE);
+		xg_drawstring(mbedit_xgid, xcen - swidth / 2, ymin - margin / 2 + 3, string, pixel_values[BLACK], XG_SOLIDLINE);
+    fprintf(stdout, "%s\n", string);
 	}
 
 	if (verbose >= 2) {
@@ -4970,28 +4979,22 @@ int mbedit_unplot_info() {
 		const int xcen = xmin + (xmax - xmin) / 2;
 
 		char string[MB_PATH_MAXLINE];
-		sprintf(string, "Selected Sounding: Ping:%d Beam:%d", info_ping, info_beam);
 		sprintf(string, "Ping:%d  Beam:%d  Time: %2.2d/%2.2d/%4.4d %2.2d:%2.2d:%2.2d.%3.3d", info_ping, info_beam, info_time_i[1],
 		        info_time_i[2], info_time_i[0], info_time_i[3], info_time_i[4], info_time_i[5], (int)(0.001 * info_time_i[6]));
 		xg_justify(mbedit_xgid, string, &swidth, &sascent, &sdescent);
-		xg_drawstring(mbedit_xgid, xcen - swidth / 2, ymin - margin / 2 - 2 * (sascent + sdescent), string, pixel_values[WHITE],
+		xg_drawstring(mbedit_xgid, xcen - swidth / 2, ymin - margin / 2 - 2 * (sascent + sdescent) + 3, string, pixel_values[WHITE],
 		              XG_SOLIDLINE);
 
-		sprintf(string, "Longitude:%.5f  Latitude:%.5f  Heading:%.1f  Speed:%.1f", info_navlon, info_navlat, info_heading,
-		        info_speed);
+		sprintf(string, "Lon:%.5f deg  Lat:%.5f deg  Hdg:%.1f deg  Spd:%.1f km/hr",
+                info_navlon, info_navlat, info_heading, info_speed);
 		xg_justify(mbedit_xgid, string, &swidth, &sascent, &sdescent);
-		xg_drawstring(mbedit_xgid, xcen - swidth / 2, ymin - margin / 2 - 1 * (sascent + sdescent), string, pixel_values[WHITE],
+		xg_drawstring(mbedit_xgid, xcen - swidth / 2, ymin - margin / 2 - 1 * (sascent + sdescent) + 3, string, pixel_values[WHITE],
 		              XG_SOLIDLINE);
 
-		sprintf(string, "Depth:%.2f  XTrack:%.2f  LTrack:%.2f  Altitude:%.2f  Detect:%d  Pulse:%d", info_bath,
-		        info_bathacrosstrack, info_bathalongtrack, info_altitude, info_detect, info_pulse);
+		sprintf(string, "Depth:%.2f  X:%.2f  L:%.2f  Alt:%.2f  Amp:%.2f  Detect:%s  Pulse:%s", info_bath,
+		        info_bathacrosstrack, info_bathalongtrack, info_altitude, info_amp, detect_name[info_detect], pulse_name[info_pulse]);
 		xg_justify(mbedit_xgid, string, &swidth, &sascent, &sdescent);
-		xg_drawstring(mbedit_xgid, xcen - swidth / 2, ymin - margin / 2, string, pixel_values[WHITE], XG_SOLIDLINE);
-
-		sprintf(string, "Depth:%.2f  XTrack:%.2f  LTrack:%.2f  Altitude:%.2f  Detect:%s  Pulse:%s", info_bath,
-		        info_bathacrosstrack, info_bathalongtrack, info_altitude, detect_name[info_detect], pulse_name[info_pulse]);
-		xg_justify(mbedit_xgid, string, &swidth, &sascent, &sdescent);
-		xg_drawstring(mbedit_xgid, xcen - swidth / 2, ymin - margin / 2, string, pixel_values[WHITE], XG_SOLIDLINE);
+		xg_drawstring(mbedit_xgid, xcen - swidth / 2, ymin - margin / 2 + 3, string, pixel_values[WHITE], XG_SOLIDLINE);
 	}
 
 	const int status = MB_SUCCESS;

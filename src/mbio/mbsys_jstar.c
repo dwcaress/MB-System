@@ -225,27 +225,6 @@ int mbsys_jstar_preprocess(int verbose,     /* in: verbosity level set on comman
                            void *mbio_ptr,  /* in: see mb_io.h:/^struct mb_io_struct/ */
                            void *store_ptr, /* in: see mbsys_reson7k.h:/^struct mbsys_reson7k_struct/ */
                            void *platform_ptr, void *preprocess_pars_ptr, int *error) {
-	struct mbsys_jstar_channel_struct *sbp;
-	struct mbsys_jstar_channel_struct *ssport;
-	struct mbsys_jstar_channel_struct *ssstbd;
-
-	int time_i[7], time_j[5];
-	double time_d = 0.0;
-	double navlon = 0.0;
-	double navlat = 0.0;
-	double sensordepth = 0.0;
-	double speed = 0.0;
-	double heading = 0.0;
-	double roll = 0.0;
-	double pitch = 0.0;
-	double heave = 0.0;
-	double altitude = 0.0;
-	int interp_error = MB_ERROR_NO_ERROR;
-	int jnav = 0;
-	int jsensordepth = 0;
-	int jheading = 0;
-	int jaltitude = 0;
-	int jattitude = 0;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -256,23 +235,21 @@ int mbsys_jstar_preprocess(int verbose,     /* in: verbosity level set on comman
 		fprintf(stderr, "dbg2       platform_ptr:               %p\n", (void *)platform_ptr);
 		fprintf(stderr, "dbg2       preprocess_pars_ptr:        %p\n", (void *)preprocess_pars_ptr);
 	}
-
-	/* always successful */
-	int status = MB_SUCCESS;
 	*error = MB_ERROR_NO_ERROR;
 
 	/* check for non-null data */
 	assert(mbio_ptr != NULL);
-	assert(store_ptr != NULL);
 	assert(preprocess_pars_ptr != NULL);
 
 	/* get mbio descriptor */
 	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
-	/* get data structure pointers */
+  /* get preprocessing parameters */
+  struct mb_preprocess_struct *pars = (struct mb_preprocess_struct *)preprocess_pars_ptr;
+
+  /* get data structure pointers */
 	struct mbsys_jstar_struct *store = (struct mbsys_jstar_struct *)store_ptr;
 	// struct mb_platform_struct *platform = (struct mb_platform_struct *)platform_ptr;
-	struct mb_preprocess_struct *pars = (struct mb_preprocess_struct *)preprocess_pars_ptr;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "dbg2       target_sensor:              %d\n", pars->target_sensor);
@@ -302,224 +279,259 @@ int mbsys_jstar_preprocess(int verbose,     /* in: verbosity level set on comman
 			fprintf(stderr, "dbg2       kluge_id[%d]:                    %d\n", i, pars->kluge_id[i]);
 	}
 
-	/* preprocess subbottom data */
-	if (store->kind == MB_DATA_SUBBOTTOM_SUBBOTTOM) {
-		/* get channel */
-		sbp = (struct mbsys_jstar_channel_struct *)&(store->sbp);
+	struct mbsys_jstar_channel_struct *sbp;
+	struct mbsys_jstar_channel_struct *ssport;
+	struct mbsys_jstar_channel_struct *ssstbd;
 
-		/* change timestamp if indicated */
-		if (pars->timestamp_changed) {
-			time_d = pars->time_d;
-			mb_get_date(verbose, time_d, time_i);
-			mb_get_jtime(verbose, time_i, time_j);
-			sbp->year = time_i[0];
-			sbp->day = time_j[1];
-			sbp->hour = time_i[3];
-			sbp->minute = time_i[4];
-			sbp->second = time_i[5];
-			sbp->millisecondsToday = 0.001 * time_i[6] + 1000 * (time_i[5] + 60.0 * (time_i[4] + 60.0 * time_i[3]));
-			fprintf(stderr,
-			        "Timestamp changed in function %s: "
-			        "%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d "
-			        "| ping_number:%d\n",
-			        __func__, time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6], sbp->pingNum);
-		}
+	int time_i[7], time_j[5];
+	double time_d = 0.0;
+	double navlon = 0.0;
+	double navlat = 0.0;
+	double sensordepth = 0.0;
+	double speed = 0.0;
+	double heading = 0.0;
+	double roll = 0.0;
+	double pitch = 0.0;
+	double heave = 0.0;
+	double altitude = 0.0;
+	int interp_error = MB_ERROR_NO_ERROR;
+	int jnav = 0;
+	int jsensordepth = 0;
+	int jheading = 0;
+	int jaltitude = 0;
+	int jattitude = 0;
 
-		/* get time */
-		time_j[0] = sbp->year;
-		time_j[1] = sbp->day;
-		time_j[2] = 60 * sbp->hour + sbp->minute;
-		time_j[3] = sbp->second;
-		time_j[4] = (int)1000 * (sbp->millisecondsToday - 1000 * floor(0.001 * ((double)sbp->millisecondsToday)));
-		mb_get_itime(verbose, time_j, time_i);
-		mb_get_time(verbose, time_i, &time_d);
-	}
+	/* always successful */
+	int status = MB_SUCCESS;
 
-	/* preprocess sidescan data */
-	else if (store->kind == MB_DATA_DATA || store->kind == MB_DATA_SIDESCAN2) {
-		/* get channels */
-		ssport = (struct mbsys_jstar_channel_struct *)&(store->ssport);
-		ssstbd = (struct mbsys_jstar_channel_struct *)&(store->ssstbd);
+  /* if called with store_ptr == NULL then called after mb_read_init() but before
+      any data are read - for some formats this allows kluge options to set special
+      reading conditions/behaviors */
+  if (store_ptr == NULL) {
 
-		/* change timestamp if indicated */
-		if (pars->timestamp_changed) {
-			time_d = pars->time_d;
-			mb_get_date(verbose, time_d, time_i);
-			mb_get_jtime(verbose, time_i, time_j);
-			ssport->year = time_i[0];
-			ssport->day = time_j[1];
-			ssport->hour = time_i[3];
-			ssport->minute = time_i[4];
-			ssport->second = time_i[5];
-			ssport->millisecondsToday = 0.001 * time_i[6] + 1000 * (time_i[5] + 60.0 * (time_i[4] + 60.0 * time_i[3]));
-			ssstbd->year = time_i[0];
-			ssstbd->day = time_j[1];
-			ssstbd->hour = time_i[3];
-			ssstbd->minute = time_i[4];
-			ssstbd->second = time_i[5];
-			ssstbd->millisecondsToday = 0.001 * time_i[6] + 1000 * (time_i[5] + 60.0 * (time_i[4] + 60.0 * time_i[3]));
-			fprintf(stderr,
-			        "Timestamp changed in function %s: "
-			        "%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d "
-			        "| ping_number:%d\n",
-			        __func__, time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6], ssport->pingNum);
-		}
+  }
 
-		/* get time */
-		time_j[0] = ssport->year;
-		time_j[1] = ssport->day;
-		time_j[2] = 60 * ssport->hour + ssport->minute;
-		time_j[3] = ssport->second;
-		time_j[4] = (int)1000 * (ssport->millisecondsToday - 1000 * floor(0.001 * ((double)ssport->millisecondsToday)));
-		mb_get_itime(verbose, time_j, time_i);
-		mb_get_time(verbose, time_i, &time_d);
-	}
+  /* preprocess data */
+  else {
+  	/* preprocess subbottom data */
+  	if (store->kind == MB_DATA_SUBBOTTOM_SUBBOTTOM) {
+  		/* get channel */
+  		sbp = (struct mbsys_jstar_channel_struct *)&(store->sbp);
 
-	// int interp_status = MB_SUCCESS;
+  		/* change timestamp if indicated */
+  		if (pars->timestamp_changed) {
+  			time_d = pars->time_d;
+  			mb_get_date(verbose, time_d, time_i);
+  			mb_get_jtime(verbose, time_i, time_j);
+  			sbp->year = time_i[0];
+  			sbp->day = time_j[1];
+  			sbp->hour = time_i[3];
+  			sbp->minute = time_i[4];
+  			sbp->second = time_i[5];
+  			sbp->millisecondsToday = 0.001 * time_i[6] + 1000 * (time_i[5] + 60.0 * (time_i[4] + 60.0 * time_i[3]));
+  			fprintf(stderr,
+  			        "Timestamp changed in function %s: "
+  			        "%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d "
+  			        "| ping_number:%d\n",
+  			        __func__, time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6], sbp->pingNum);
+  		}
 
-	if (store->kind == MB_DATA_SUBBOTTOM_SUBBOTTOM || store->kind == MB_DATA_DATA || store->kind == MB_DATA_SIDESCAN2) {
-		/* get nav sensordepth heading attitude values for record timestamp */
-		if (pars->n_nav > 1) {
-			/* interp_status = */ mb_linear_interp_longitude(verbose, pars->nav_time_d - 1, pars->nav_lon - 1, pars->n_nav, time_d, &navlon,
-		                                    &jnav, &interp_error);
-			/* interp_status = */ mb_linear_interp_latitude(verbose, pars->nav_time_d - 1, pars->nav_lat - 1, pars->n_nav, time_d, &navlat,
-		                                    &jnav, &interp_error);
-			/* interp_status = */ mb_linear_interp(verbose, pars->nav_time_d - 1, pars->nav_speed - 1, pars->n_nav, time_d, &speed,
-											&jnav, &interp_error);
-		}
+  		/* get time */
+  		time_j[0] = sbp->year;
+  		time_j[1] = sbp->day;
+  		time_j[2] = 60 * sbp->hour + sbp->minute;
+  		time_j[3] = sbp->second;
+  		time_j[4] = (int)1000 * (sbp->millisecondsToday - 1000 * floor(0.001 * ((double)sbp->millisecondsToday)));
+  		mb_get_itime(verbose, time_j, time_i);
+  		mb_get_time(verbose, time_i, &time_d);
+  	}
 
-		/* interpolate sensordepth */
-		if (pars->n_sensordepth > 1) {
-			/* interp_status = */ mb_linear_interp(verbose, pars->sensordepth_time_d - 1, pars->sensordepth_sensordepth - 1,
-		                                 pars->n_sensordepth, time_d, &sensordepth, &jsensordepth, &interp_error);
-		}
+  	/* preprocess sidescan data */
+  	else if (store->kind == MB_DATA_DATA || store->kind == MB_DATA_SIDESCAN2) {
+  		/* get channels */
+  		ssport = (struct mbsys_jstar_channel_struct *)&(store->ssport);
+  		ssstbd = (struct mbsys_jstar_channel_struct *)&(store->ssstbd);
 
-		/* interpolate heading */
-		if (pars->n_heading > 1) {
-			/* interp_status = */ mb_linear_interp_heading(verbose, pars->heading_time_d - 1, pars->heading_heading - 1, pars->n_heading,
-		                                         time_d, &heading, &jheading, &interp_error);
-		}
+  		/* change timestamp if indicated */
+  		if (pars->timestamp_changed) {
+  			time_d = pars->time_d;
+  			mb_get_date(verbose, time_d, time_i);
+  			mb_get_jtime(verbose, time_i, time_j);
+  			ssport->year = time_i[0];
+  			ssport->day = time_j[1];
+  			ssport->hour = time_i[3];
+  			ssport->minute = time_i[4];
+  			ssport->second = time_i[5];
+  			ssport->millisecondsToday = 0.001 * time_i[6] + 1000 * (time_i[5] + 60.0 * (time_i[4] + 60.0 * time_i[3]));
+  			ssstbd->year = time_i[0];
+  			ssstbd->day = time_j[1];
+  			ssstbd->hour = time_i[3];
+  			ssstbd->minute = time_i[4];
+  			ssstbd->second = time_i[5];
+  			ssstbd->millisecondsToday = 0.001 * time_i[6] + 1000 * (time_i[5] + 60.0 * (time_i[4] + 60.0 * time_i[3]));
+  			fprintf(stderr,
+  			        "Timestamp changed in function %s: "
+  			        "%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d "
+  			        "| ping_number:%d\n",
+  			        __func__, time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6], ssport->pingNum);
+  		}
 
-		/* interpolate altitude */
-		if (pars->n_altitude > 1) {
-			/* interp_status = */ mb_linear_interp(verbose, pars->altitude_time_d - 1, pars->altitude_altitude - 1, pars->n_altitude,
-		                                 time_d, &altitude, &jaltitude, &interp_error);
-		}
+  		/* get time */
+  		time_j[0] = ssport->year;
+  		time_j[1] = ssport->day;
+  		time_j[2] = 60 * ssport->hour + ssport->minute;
+  		time_j[3] = ssport->second;
+  		time_j[4] = (int)1000 * (ssport->millisecondsToday - 1000 * floor(0.001 * ((double)ssport->millisecondsToday)));
+  		mb_get_itime(verbose, time_j, time_i);
+  		mb_get_time(verbose, time_i, &time_d);
+  	}
 
-		/* interpolate attitude */
-		if (pars->n_attitude > 1) {
-			/* interp_status = */ mb_linear_interp(verbose, pars->attitude_time_d - 1, pars->attitude_roll - 1, pars->n_attitude, time_d,
-											 &roll, &jattitude, &interp_error);
-			/* interp_status = */ mb_linear_interp(verbose, pars->attitude_time_d - 1, pars->attitude_pitch - 1, pars->n_attitude, time_d,
-											 &pitch, &jattitude, &interp_error);
-			/* interp_status = */ mb_linear_interp(verbose, pars->attitude_time_d - 1, pars->attitude_heave - 1, pars->n_attitude, time_d,
-											 &heave, &jattitude, &interp_error);
-		}
-	}
+  	// int interp_status = MB_SUCCESS;
 
-	/* preprocess subbottom data */
-	if (store->kind == MB_DATA_SUBBOTTOM_SUBBOTTOM) {
-		/* get channel */
-		sbp = (struct mbsys_jstar_channel_struct *)&(store->sbp);
+  	if (store->kind == MB_DATA_SUBBOTTOM_SUBBOTTOM || store->kind == MB_DATA_DATA || store->kind == MB_DATA_SIDESCAN2) {
+  		/* get nav sensordepth heading attitude values for record timestamp */
+  		if (pars->n_nav > 1) {
+  			/* interp_status = */ mb_linear_interp_longitude(verbose, pars->nav_time_d - 1, pars->nav_lon - 1, pars->n_nav, time_d, &navlon,
+  		                                    &jnav, &interp_error);
+  			/* interp_status = */ mb_linear_interp_latitude(verbose, pars->nav_time_d - 1, pars->nav_lat - 1, pars->n_nav, time_d, &navlat,
+  		                                    &jnav, &interp_error);
+  			/* interp_status = */ mb_linear_interp(verbose, pars->nav_time_d - 1, pars->nav_speed - 1, pars->n_nav, time_d, &speed,
+  											&jnav, &interp_error);
+  		}
 
-		/* set navigation */
-		if (pars->n_nav > 1) {
-			if (navlon < 180.0)
-				navlon = navlon + 360.0;
-			if (navlon > 180.0)
-				navlon = navlon - 360.0;
-			sbp->coordX = (int)(600000.0 * navlon);
-			sbp->coordX = (int)(600000.0 * navlat);
-			sbp->coordUnits = 2;
-		}
+  		/* interpolate sensordepth */
+  		if (pars->n_sensordepth > 1) {
+  			/* interp_status = */ mb_linear_interp(verbose, pars->sensordepth_time_d - 1, pars->sensordepth_sensordepth - 1,
+  		                                 pars->n_sensordepth, time_d, &sensordepth, &jsensordepth, &interp_error);
+  		}
 
-		/* set heading */
-		if (pars->n_heading > 1) {
-			if (heading > 180.0)
-				heading -= 360.0;
-			if (heading < -180.0)
-				heading += 360.0;
-			sbp->heading = (short)(100.0 * heading);
-		}
+  		/* interpolate heading */
+  		if (pars->n_heading > 1) {
+  			/* interp_status = */ mb_linear_interp_heading(verbose, pars->heading_time_d - 1, pars->heading_heading - 1, pars->n_heading,
+  		                                         time_d, &heading, &jheading, &interp_error);
+  		}
 
-		/* set sonardepth */
-		if (pars->n_sensordepth > 1) {
-			sbp->startDepth = sensordepth / sbp->sampleInterval / 0.00000075;
-			sbp->sonarDepth = 1000 * sensordepth;
-		}
+  		/* interpolate altitude */
+  		if (pars->n_altitude > 1) {
+  			/* interp_status = */ mb_linear_interp(verbose, pars->altitude_time_d - 1, pars->altitude_altitude - 1, pars->n_altitude,
+  		                                 time_d, &altitude, &jaltitude, &interp_error);
+  		}
 
-		/* set altitude */
-		if (pars->n_altitude > 1) {
-			sbp->sonarAltitude = (int)(1000 * altitude);
-		}
+  		/* interpolate attitude */
+  		if (pars->n_attitude > 1) {
+  			/* interp_status = */ mb_linear_interp(verbose, pars->attitude_time_d - 1, pars->attitude_roll - 1, pars->n_attitude, time_d,
+  											 &roll, &jattitude, &interp_error);
+  			/* interp_status = */ mb_linear_interp(verbose, pars->attitude_time_d - 1, pars->attitude_pitch - 1, pars->n_attitude, time_d,
+  											 &pitch, &jattitude, &interp_error);
+  			/* interp_status = */ mb_linear_interp(verbose, pars->attitude_time_d - 1, pars->attitude_heave - 1, pars->n_attitude, time_d,
+  											 &heave, &jattitude, &interp_error);
+  		}
+  	}
 
-		/* set attitude */
-		if (pars->n_attitude > 1) {
-			sbp->roll = 32768 * roll / 180.0;
-			sbp->pitch = 32768 * pitch / 180.0;
-		}
-	}
+  	/* preprocess subbottom data */
+  	if (store->kind == MB_DATA_SUBBOTTOM_SUBBOTTOM) {
+  		/* get channel */
+  		sbp = (struct mbsys_jstar_channel_struct *)&(store->sbp);
 
-	/* preprocess sidescan data */
-	else if (store->kind == MB_DATA_DATA || store->kind == MB_DATA_SIDESCAN2) {
-		/* get channels */
-		ssport = (struct mbsys_jstar_channel_struct *)&(store->ssport);
-		ssstbd = (struct mbsys_jstar_channel_struct *)&(store->ssstbd);
+  		/* set navigation */
+  		if (pars->n_nav > 1) {
+  			if (navlon < 180.0)
+  				navlon = navlon + 360.0;
+  			if (navlon > 180.0)
+  				navlon = navlon - 360.0;
+  			sbp->coordX = (int)(600000.0 * navlon);
+  			sbp->coordX = (int)(600000.0 * navlat);
+  			sbp->coordUnits = 2;
+  		}
 
-		/* set navigation */
-		if (pars->n_nav > 1) {
-			if (navlon < 180.0)
-				navlon = navlon + 360.0;
-			if (navlon > 180.0)
-				navlon = navlon - 360.0;
-			ssport->coordX = 600000.0 * navlon;
-			ssport->coordY = 600000.0 * navlat;
-			ssport->coordUnits = 2;
-			ssstbd->coordX = 600000.0 * navlon;
-			ssstbd->coordY = 600000.0 * navlat;
-			ssstbd->coordUnits = 2;
-		}
+  		/* set heading */
+  		if (pars->n_heading > 1) {
+  			if (heading > 180.0)
+  				heading -= 360.0;
+  			if (heading < -180.0)
+  				heading += 360.0;
+  			sbp->heading = (short)(100.0 * heading);
+  		}
 
-		/* set heading and speed */
-		if (pars->n_heading > 1) {
-			if (heading > 180.0)
-				heading -= 360.0;
-			if (heading < -180.0)
-				heading += 360.0;
-			ssport->heading = (short)(100.0 * heading);
-			ssstbd->heading = (short)(100.0 * heading);
-		}
+  		/* set sonardepth */
+  		if (pars->n_sensordepth > 1) {
+  			sbp->startDepth = sensordepth / sbp->sampleInterval / 0.00000075;
+  			sbp->sonarDepth = 1000 * sensordepth;
+  		}
 
-		/* set sonardepth */
-		if (pars->n_sensordepth > 1) {
-			ssport->startDepth = sensordepth / ssport->sampleInterval / 0.00000075;
-			ssstbd->startDepth = sensordepth / ssstbd->sampleInterval / 0.00000075;
-			ssport->sonarDepth = 1000 * sensordepth;
-			ssstbd->sonarDepth = 1000 * sensordepth;
-		}
+  		/* set altitude */
+  		if (pars->n_altitude > 1) {
+  			sbp->sonarAltitude = (int)(1000 * altitude);
+  		}
 
-		/* set altitude */
-		if (pars->n_altitude > 1) {
-			ssport->sonarAltitude = (int)(1000 * altitude);
-			ssstbd->sonarAltitude = (int)(1000 * altitude);
-		}
+  		/* set attitude */
+  		if (pars->n_attitude > 1) {
+  			sbp->roll = 32768 * roll / 180.0;
+  			sbp->pitch = 32768 * pitch / 180.0;
+  		}
+  	}
 
-		/* set attitude */
-		if (pars->n_attitude > 1) {
-			ssport->roll = 32768 * roll / 180.0;
-			ssport->pitch = 32768 * pitch / 180.0;
-			ssstbd->roll = 32768 * roll / 180.0;
-			ssstbd->pitch = 32768 * pitch / 180.0;
-		}
-	}
+  	/* preprocess sidescan data */
+  	else if (store->kind == MB_DATA_DATA || store->kind == MB_DATA_SIDESCAN2) {
+  		/* get channels */
+  		ssport = (struct mbsys_jstar_channel_struct *)&(store->ssport);
+  		ssstbd = (struct mbsys_jstar_channel_struct *)&(store->ssstbd);
 
-	/* preprocess comment */
-	else if (store->kind == MB_DATA_COMMENT) {
-	}
+  		/* set navigation */
+  		if (pars->n_nav > 1) {
+  			if (navlon < 180.0)
+  				navlon = navlon + 360.0;
+  			if (navlon > 180.0)
+  				navlon = navlon - 360.0;
+  			ssport->coordX = 600000.0 * navlon;
+  			ssport->coordY = 600000.0 * navlat;
+  			ssport->coordUnits = 2;
+  			ssstbd->coordX = 600000.0 * navlon;
+  			ssstbd->coordY = 600000.0 * navlat;
+  			ssstbd->coordUnits = 2;
+  		}
 
-	/* preprocess anything else */
-	else {
-	}
+  		/* set heading and speed */
+  		if (pars->n_heading > 1) {
+  			if (heading > 180.0)
+  				heading -= 360.0;
+  			if (heading < -180.0)
+  				heading += 360.0;
+  			ssport->heading = (short)(100.0 * heading);
+  			ssstbd->heading = (short)(100.0 * heading);
+  		}
+
+  		/* set sonardepth */
+  		if (pars->n_sensordepth > 1) {
+  			ssport->startDepth = sensordepth / ssport->sampleInterval / 0.00000075;
+  			ssstbd->startDepth = sensordepth / ssstbd->sampleInterval / 0.00000075;
+  			ssport->sonarDepth = 1000 * sensordepth;
+  			ssstbd->sonarDepth = 1000 * sensordepth;
+  		}
+
+  		/* set altitude */
+  		if (pars->n_altitude > 1) {
+  			ssport->sonarAltitude = (int)(1000 * altitude);
+  			ssstbd->sonarAltitude = (int)(1000 * altitude);
+  		}
+
+  		/* set attitude */
+  		if (pars->n_attitude > 1) {
+  			ssport->roll = 32768 * roll / 180.0;
+  			ssport->pitch = 32768 * pitch / 180.0;
+  			ssstbd->roll = 32768 * roll / 180.0;
+  			ssstbd->pitch = 32768 * pitch / 180.0;
+  		}
+  	}
+
+  	/* preprocess comment */
+  	else if (store->kind == MB_DATA_COMMENT) {
+  	}
+
+  	/* preprocess anything else */
+  	else {
+  	}
+  }
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);

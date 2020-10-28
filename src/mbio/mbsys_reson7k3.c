@@ -4832,62 +4832,6 @@ int mbsys_reson7k3_preprocess(int verbose,     /* in: verbosity level set on com
                              void *mbio_ptr,  /* in: see mb_io.h:/^struct mb_io_struct/ */
                              void *store_ptr, /* in: see mbsys_reson7k.h:/^struct mbsys_reson7k3_struct/ */
                              void *platform_ptr, void *preprocess_pars_ptr, int *error) {
-  struct mb_platform_struct *platform;
-  struct mb_preprocess_struct *pars;
-
-  /* data structure pointers */
-  s7k3_header *header;
-  s7k3_SonarSettings *SonarSettings;
-  s7k3_segmentedrawdetectionrxdata *segmentedrawdetectionrxdata;
-
-  /* kluge parameters */
-  double kluge_beampatternsnellfactor = 1.0;
-  double kluge_soundspeedsnellfactor = 1.0;
-
-  /* variables for beam angle calculation */
-  mb_3D_orientation tx_align;
-  mb_3D_orientation tx_orientation;
-  double tx_steer;
-  mb_3D_orientation rx_align;
-  mb_3D_orientation rx_orientation;
-  double rx_steer;
-  double reference_heading;
-  double beamAzimuth;
-  double beamDepression;
-
-  s7k3_time s7kTime;
-  int time_i[7];
-  int time_j[5];
-  double time_d = 0.0;
-  double navlon = 0.0;
-  double navlat = 0.0;
-  double speed = 0.0;
-  double altitude = 0.0;
-  double sensordepth = 0.0;
-  double heading = 0.0;
-  double beamheading;
-  double roll = 0.0;
-  double beamroll;
-  double pitch = 0.0;
-  double beampitch;
-  double heave = 0.0;
-  double soundspeed;
-  double soundspeednew;
-  double soundspeedsnellfactor = 1.0;
-  double mtodeglon, mtodeglat;
-  double dx, dy, dt;
-  int jnav = 0;
-  int jsensordepth = 0;
-  int jheading = 0;
-  int jaltitude = 0;
-  int jAttitude = 0;
-  int jsoundspeed = 0;
-  int interp_error = MB_ERROR_NO_ERROR;
-  double *pixel_size;
-  double *swath_width;
-  mb_u_char *qualitycharptr;
-  mb_u_char beamflag;
-  double ttime;
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -4903,21 +4847,25 @@ int mbsys_reson7k3_preprocess(int verbose,     /* in: verbosity level set on com
 
   /* check for non-null data */
   assert(mbio_ptr != NULL);
-  assert(store_ptr != NULL);
   assert(preprocess_pars_ptr != NULL);
 
   /* get mbio descriptor */
   struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
+  /* get preprocessing parameters */
+  struct mb_preprocess_struct *pars = (struct mb_preprocess_struct *)preprocess_pars_ptr;
+
   /* get data structure pointers */
   struct mbsys_reson7k3_struct *store = (struct mbsys_reson7k3_struct *)store_ptr;
-  platform = (struct mb_platform_struct *)platform_ptr;
-  pars = (struct mb_preprocess_struct *)preprocess_pars_ptr;
+  struct mb_platform_struct *platform = (struct mb_platform_struct *)platform_ptr;
 
   /* get saved values */
-  pixel_size = (double *)&mb_io_ptr->saved1;
-  swath_width = (double *)&mb_io_ptr->saved2;
+  double *pixel_size = (double *)&mb_io_ptr->saved1;
+  double *swath_width = (double *)&mb_io_ptr->saved2;
 
+  /* kluge parameters */
+  double kluge_beampatternsnellfactor = 1.0;
+  double kluge_soundspeedsnellfactor = 1.0;
   bool kluge_beampatternsnell = false;
   bool kluge_soundspeedsnell = false;
   bool kluge_zeroAttitudecorrection = false;
@@ -4993,12 +4941,65 @@ int mbsys_reson7k3_preprocess(int verbose,     /* in: verbosity level set on com
 
   int status = MB_SUCCESS;
 
-  s7k3_bathydata *bathydata;
-  s7k3_rawdetectiondata *rawdetectiondata;
-  s7k3_VerticalDepth *VerticalDepth;
+  s7k3_header *header = NULL;
+  s7k3_SonarSettings *SonarSettings = NULL;
+  s7k3_segmentedrawdetectionrxdata *segmentedrawdetectionrxdata = NULL;
+  s7k3_bathydata *bathydata = NULL;
+  s7k3_rawdetectiondata *rawdetectiondata = NULL;
+  s7k3_VerticalDepth *VerticalDepth = NULL;
+
+  /* variables for beam angle calculation */
+  mb_3D_orientation tx_align;
+  mb_3D_orientation tx_orientation;
+  double tx_steer;
+  mb_3D_orientation rx_align;
+  mb_3D_orientation rx_orientation;
+  double rx_steer;
+  double reference_heading;
+  double beamAzimuth;
+  double beamDepression;
+
+  s7k3_time s7kTime;
+  int time_i[7];
+  int time_j[5];
+  double time_d = 0.0;
+  double navlon = 0.0;
+  double navlat = 0.0;
+  double speed = 0.0;
+  double altitude = 0.0;
+  double sensordepth = 0.0;
+  double heading = 0.0;
+  double beamheading;
+  double roll = 0.0;
+  double beamroll;
+  double pitch = 0.0;
+  double beampitch;
+  double heave = 0.0;
+  double soundspeed;
+  double soundspeednew;
+  double soundspeedsnellfactor = 1.0;
+  double mtodeglon, mtodeglat;
+  double dx, dy, dt;
+  int jnav = 0;
+  int jsensordepth = 0;
+  int jheading = 0;
+  int jaltitude = 0;
+  int jAttitude = 0;
+  int jsoundspeed = 0;
+  int interp_error = MB_ERROR_NO_ERROR;
+  mb_u_char *qualitycharptr;
+  mb_u_char beamflag;
+  double ttime;
+
+  /* if called with store_ptr == NULL then called after mb_read_init() but before
+      any data are read - for some formats this allows kluge options to set special
+      reading conditions/behaviors */
+  if (store_ptr == NULL) {
+
+  }
 
   /* deal with a survey record */
-  if (store->kind == MB_DATA_DATA) {
+  else if (store->kind == MB_DATA_DATA) {
     s7k3_Navigation *Navigation = &(store->Navigation);
     SonarSettings = &(store->SonarSettings);
     s7k3_MatchFilter *MatchFilter = &(store->MatchFilter);
@@ -9009,7 +9010,7 @@ int mbsys_reson7k3_makess_source(
   s7k3_segmentedrawdetectionrxdata *segmentedrawdetectionrxdata = NULL;
   s7k3_snippetdata *snippetdata = NULL;
   s7k3_snippetbackscatteringstrengthdata *snippetbackscatteringstrengthdata = NULL;
-  int nss;
+  int nss = 0;
   int ss_cnt[MBSYS_RESON7K_MAX_PIXELS];
   double ss[MBSYS_RESON7K_MAX_PIXELS];
   double ssacrosstrack[MBSYS_RESON7K_MAX_PIXELS];
@@ -9055,10 +9056,12 @@ int mbsys_reson7k3_makess_source(
 
 
   /* calculate SideScan from the desired source data if it is available */
-  if (store->kind == MB_DATA_DATA && ((source == R7KRECID_CalibratedSideScan && store->read_CalibratedSideScan) ||
-                                      (source == R7KRECID_SnippetBackscatteringStrength && store->read_SnippetBackscatteringStrength) ||
-                                      (source == R7KRECID_Snippet && store->read_Snippet) ||
-                                      (source == R7KRECID_SideScan && store->read_SideScan))) {
+  if (store->kind == MB_DATA_DATA
+        && (store->read_RawDetection || store->read_SegmentedRawDetection)
+        && ((source == R7KRECID_CalibratedSideScan && store->read_CalibratedSideScan) ||
+            (source == R7KRECID_SnippetBackscatteringStrength && store->read_SnippetBackscatteringStrength) ||
+            (source == R7KRECID_Snippet && store->read_Snippet) ||
+            (source == R7KRECID_SideScan && store->read_SideScan))) {
 
     int nbathsort = 0;
     // Handle case of bathymetry in RawDetection 7027 records

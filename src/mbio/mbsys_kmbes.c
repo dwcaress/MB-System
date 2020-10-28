@@ -324,6 +324,7 @@ int mbsys_kmbes_sidescantype(int verbose, void *mbio_ptr, void *store_ptr, int *
 int mbsys_kmbes_preprocess(int verbose, void *mbio_ptr, void *store_ptr,
                              void *platform_ptr, void *preprocess_pars_ptr,
                              int *error) {
+
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -334,33 +335,20 @@ int mbsys_kmbes_preprocess(int verbose, void *mbio_ptr, void *store_ptr,
     fprintf(stderr, "dbg2       preprocess_pars_ptr:        %p\n", (void *)preprocess_pars_ptr);
   }
 
-  int time_i[7];
-  double time_d;
-  double navlon;
-  double navlat;
-  double sensordepth;
-  double heading;
-  // double altitude;
-  double speed;
-  double roll;
-  double pitch;
-  double heave;
-  double soundspeed;
-  double soundspeednew;
-
   *error = MB_ERROR_NO_ERROR;
 
   /* check for non-null data */
   assert(mbio_ptr != NULL);
-  assert(store_ptr != NULL);
   assert(preprocess_pars_ptr != NULL);
 
   /* get mbio descriptor */
   struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
+  /* get preprocessing parameters */
+  struct mb_preprocess_struct *pars = (struct mb_preprocess_struct *)preprocess_pars_ptr;
+
   /* data structure pointers */
   // struct mb_platform_struct *platform = (struct mb_platform_struct *)platform_ptr;
-  struct mb_preprocess_struct *pars = (struct mb_preprocess_struct *)preprocess_pars_ptr;
   struct mbsys_kmbes_struct *store = (struct mbsys_kmbes_struct *)store_ptr;
   // struct mbsys_kmbes_mrz *mrz = (struct mbsys_kmbes_mrz *)&store->mrz[0];
   // struct mbsys_kmbes_xmt *xmt = (struct mbsys_kmbes_xmt *)&store->xmt[0];
@@ -440,8 +428,29 @@ int mbsys_kmbes_preprocess(int verbose, void *mbio_ptr, void *store_ptr,
 
   int status = MB_SUCCESS;
 
+  int time_i[7];
+  double time_d;
+  double navlon;
+  double navlat;
+  double sensordepth;
+  double heading;
+  // double altitude;
+  double speed;
+  double roll;
+  double pitch;
+  double heave;
+  double soundspeed;
+  double soundspeednew;
+
+  /* if called with store_ptr == NULL then called after mb_read_init() but before
+      any data are read - for some formats this allows kluge options to set special
+      reading conditions/behaviors */
+  if (store_ptr == NULL) {
+
+  }
+
   /* deal with a survey record */
-  if (store->kind == MB_DATA_DATA) {
+  else if (store->kind == MB_DATA_DATA) {
 
     /*--------------------------------------------------------------*/
     /* change timestamp if indicated */

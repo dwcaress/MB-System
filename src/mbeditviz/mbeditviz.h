@@ -112,6 +112,7 @@ struct mbev_ping_struct {
 	char *beamflagorg;
 	int *beamcolor;
 	double *bath;
+  double *amp;
 	double *bathacrosstrack;
 	double *bathalongtrack;
 	double *bathcorr;
