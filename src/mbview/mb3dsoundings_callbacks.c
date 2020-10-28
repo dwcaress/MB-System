@@ -2664,9 +2664,9 @@ soundingdata->num_soundings); */
 			  (struct mb3dsoundings_sounding_struct *)&(soundingdata->soundings[i]);
   		if (mb_beam_ok(sounding->beamflag)) {
         float r, g, b;
-        mbview_getcolor(sounding->a, ampmin, ampmax, MBV_COLORTABLE_NORMAL,
+        mbview_getcolor(sounding->a, 0.0, 32767.0, MBV_COLORTABLE_NORMAL,
                         (float)0.0, (float)0.0, (float)1.0, (float)1.0, (float)0.0, (float)0.0,
-                        colortable_bright_red, colortable_bright_blue, colortable_bright_green,
+                        colortable_bright_red, colortable_bright_green, colortable_haxby_blue,
                         &r, &g, &b);
   			glColor3f(r, g, b);
   			glVertex3f(sounding->glx, sounding->gly, sounding->glz);
@@ -2676,9 +2676,14 @@ soundingdata->num_soundings); */
   }
 	glEnd();
 
-	/* If in info mode and sounding picked plot it green */
+	/* If in info mode and sounding picked plot it green if view color by flag, black otherwise */
 	if (mb3dsoundings.edit_mode == MBS_EDIT_INFO && mb3dsoundings.last_sounding_defined) {
-		glColor3f(0.0, 1.0, 1.0);
+    if (mb3dsoundings.view_color == MBS_VIEW_COLOR_FLAG) {
+		  glColor3f(0.0, 1.0, 1.0);
+    }
+    else {
+      glColor3f(0.0, 0.0, 0.0);
+    }
 		glBegin(GL_POINTS);
 		struct mb3dsoundings_sounding_struct *sounding =
 			(struct mb3dsoundings_sounding_struct *)&(soundingdata->soundings[mb3dsoundings.last_sounding_edited]);

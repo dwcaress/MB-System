@@ -2841,8 +2841,6 @@ int mbview_getcolor(double value, double min, double max, int colortablemode, fl
 		factor = (max - value) / (max - min);
 	else
 		factor = (value - min) / (max - min);
-	/* factor = MAX(factor, 0.000001);
-	factor = MIN(factor, 0.999999);*/
 	if (factor <= 0.0) {
 		*red = below_red;
 		*green = below_green;
