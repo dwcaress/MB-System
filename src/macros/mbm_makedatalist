@@ -37,16 +37,17 @@ $program_name = "mbm_makedatalist";
 
 # Deal with command line arguments
 $command_line = "@ARGV";
-&MBGetopts('HhF:f:I:i:O:o:PpS:s:TtVv');
+&MBGetopts('HhF:f:I:i:LlO:o:PpS:s:TtVv');
 
-$format_specified =	($opt_F || $opt_f);
-$help =    			($opt_H || $opt_h);
-$directory = 		($opt_I || $opt_i);
-$datalist =    		($opt_O || $opt_o || "datalist.mb-1");
-$ignoreprocessed = 	($opt_P || $opt_p);
-$suffix =    		($opt_S || $opt_s);
-$disablesorting =   ($opt_T || $opt_t);
-$verbose = 			($opt_V || $opt_v);
+$format_specified =	  ($opt_F || $opt_f);
+$help =    			      ($opt_H || $opt_h);
+$directory = 		      ($opt_I || $opt_i);
+$skiplatest = 		    ($opt_L || $opt_l);
+$datalist =    		    ($opt_O || $opt_o || "datalist.mb-1");
+$ignoreprocessed = 	  ($opt_P || $opt_p);
+$suffix =    		      ($opt_S || $opt_s);
+$disablesorting =     ($opt_T || $opt_t);
+$verbose = 			      ($opt_V || $opt_v);
 
 # print out help message if required
 if ($help) {
@@ -65,7 +66,7 @@ if ($help) {
 	print "directives that, for example, determine whether parsing returns references to\n";
 	print "raw or processed data files. See the \fBMB-System\fP  manual page for details\n";
 	print "on the format and structure of datalists.  \n";
-	print "\nBasic Usage:\n\tmbm_makedatalist [-Fformat -Idirectory -Odatalist -P -Ssuffix -T -H -V]\n";
+	print "\nBasic Usage:\n\tmbm_makedatalist [-Fformat -Idirectory -L -Odatalist -P -Ssuffix -T -H -V]\n";
 	exit 0;
 }
 
@@ -138,7 +139,7 @@ foreach $file (@filelist) {
 		chop $format;
 	}
 
-	if ($format != 0 && ($file ne $datalist || $directory ne ".")) {
+	if ($format != 0 && ($file ne $datalist || $directory ne "." || $file ne "9999.all")) {
 		$count++;
 		push(@outfilelist, $file);
 		push(@outformatlist, $format);
@@ -176,6 +177,9 @@ if (($suffix eq ".all" || $suffix eq ".ALL" || $suffix eq ".mb56"
 
 # open output datalist
 $count = scalar(@outfilelist);
+if ($skiplatest && $count > 0) {
+  $count = $count - 1;
+}
 if ($count > 0) {
 	if (!open(DATALIST,">$datalist")) {
 		die "\n$program_name:\nUnable to output output datalist file $datalist\nExiting...\n";
@@ -185,7 +189,7 @@ if ($count > 0) {
 	if ($verbose) {
         print "\nOutputting $count file listings to datalist file $datalist\n";
     }
-	for ($i = 0; $i < scalar(@outfilelist); $i++) {
+	for ($i = 0; $i < $count; $i++) {
 		print DATALIST "$outfilelist[$i] $outformatlist[$i]\n";
 		if ($verbose) {
             print "$outfilelist[$i] $outformatlist[$i]\n";

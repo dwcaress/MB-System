@@ -46,7 +46,9 @@ void do_mb3dsdg_view_noprofile(Widget, XtPointer, XtPointer);
 void do_mb3dsdg_view_goodprofile(Widget, XtPointer, XtPointer);
 void do_mb3dsdg_view_allprofile(Widget, XtPointer, XtPointer);
 void do_mb3dsdg_view_scalewithflagged(Widget, XtPointer, XtPointer);
+void do_mb3dsdg_view_colorbyflag(Widget, XtPointer, XtPointer);
 void do_mb3dsdg_view_colorbytopo(Widget, XtPointer, XtPointer);
+void do_mb3dsdg_view_colorbyamp(Widget, XtPointer, XtPointer);
 void do_mb3dsdg_action_applybias(Widget, XtPointer, XtPointer);
 void do_mb3dsdg_action_flagsparsevoxels_A(Widget, XtPointer, XtPointer);
 void do_mb3dsdg_action_flagsparsevoxels_B(Widget, XtPointer, XtPointer);
@@ -734,6 +736,30 @@ Mb3dsdgDataPtr Mb3dsdgCreate(Mb3dsdgDataPtr class_in, Widget parent, String name
 
 	ac = 0;
 	{
+		XmString tmp0 = (XmString)BX_CONVERT(class_in->pulldownMenu_view, (char *)"Color by Flag State", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNfontList,
+		         BX_CONVERT(class_in->pulldownMenu_view, (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1", XmRFontList,
+		                    0, &argok));
+		if (argok)
+			ac++;
+		class_in->toggleButton_view_colorbyflag =
+		    XmCreateToggleButton(class_in->pulldownMenu_view, (char *)"toggleButton_view_colorbyflag", args, ac);
+		XtManageChild(class_in->toggleButton_view_colorbyflag);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(class_in->toggleButton_view_colorbyflag, XmNvalueChangedCallback, do_mb3dsdg_view_colorbyflag,
+	              (XtPointer)0);
+
+	ac = 0;
+	{
 		XmString tmp0 = (XmString)BX_CONVERT(class_in->pulldownMenu_view, (char *)"Color by Topography", XmRXmString, 0, &argok);
 		XtSetArg(args[ac], XmNlabelString, tmp0);
 		if (argok)
@@ -754,6 +780,30 @@ Mb3dsdgDataPtr Mb3dsdgCreate(Mb3dsdgDataPtr class_in, Widget parent, String name
 	}
 
 	XtAddCallback(class_in->toggleButton_view_colorbytopo, XmNvalueChangedCallback, do_mb3dsdg_view_colorbytopo,
+	              (XtPointer)0);
+
+	ac = 0;
+	{
+		XmString tmp0 = (XmString)BX_CONVERT(class_in->pulldownMenu_view, (char *)"Color by Amplitude", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNfontList,
+		         BX_CONVERT(class_in->pulldownMenu_view, (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1", XmRFontList,
+		                    0, &argok));
+		if (argok)
+			ac++;
+		class_in->toggleButton_view_colorbyamp =
+		    XmCreateToggleButton(class_in->pulldownMenu_view, (char *)"toggleButton_view_colorbyamp", args, ac);
+		XtManageChild(class_in->toggleButton_view_colorbyamp);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(class_in->toggleButton_view_colorbyamp, XmNvalueChangedCallback, do_mb3dsdg_view_colorbyamp,
 	              (XtPointer)0);
 
 	ac = 0;

@@ -322,9 +322,9 @@ int mb_esf_open(int verbose, const char *program_name, char *esffile, bool load,
 			if (load) {
 				sprintf(command, "cp %s %s.tmp\n", esffile, esffile);
 				/* shellstatus = */ system(command);
-				if (output == MBP_ESF_APPEND)
-					header = false;
 			}
+			if (output == MBP_ESF_APPEND)
+				header = false;
 		}
 
 		/* open the edit save file */

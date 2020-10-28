@@ -1680,17 +1680,6 @@ int mbsys_simrad2_preprocess(int verbose,     /* in: verbosity level set on comm
                              void *mbio_ptr,  /* in: see mb_io.h:/^struct mb_io_struct/ */
                              void *store_ptr, /* in: see mbsys_reson7k.h:/^struct mbsys_reson7k_struct/ */
                              void *platform_ptr, void *preprocess_pars_ptr, int *error) {
-	int time_i[7];
-	double time_d;
-	double navlon, navlat, sensordepth, speed, heading, roll, pitch, heave, altitude;
-
-	/* depth sensor offsets - used in place of heave for underwater platforms */
-	// int depthsensor_mode = MBSYS_SIMRAD2_ZMODE_UNKNOWN;
-
-	int interp_error = MB_ERROR_NO_ERROR;
-	// int ss_status = MB_SUCCESS;
-	// int ss_error = MB_ERROR_NO_ERROR;
-	int jnav, jsensordepth, jheading, jaltitude, jattitude;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -1702,19 +1691,22 @@ int mbsys_simrad2_preprocess(int verbose,     /* in: verbosity level set on comm
 		fprintf(stderr, "dbg2       preprocess_pars_ptr:        %p\n", (void *)preprocess_pars_ptr);
 	}
 
-	/* check for non-null data */
-	assert(mbio_ptr != NULL);
-	assert(store_ptr != NULL);
-	assert(preprocess_pars_ptr != NULL);
+  *error = MB_ERROR_NO_ERROR;
 
-	/* get mbio descriptor */
-	// struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+  /* check for non-null data */
+  assert(mbio_ptr != NULL);
+  assert(preprocess_pars_ptr != NULL);
 
-	/* get data structure pointers */
+  /* get mbio descriptor */
+  struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+
+  /* get preprocessing parameters */
+  struct mb_preprocess_struct *pars = (struct mb_preprocess_struct *)preprocess_pars_ptr;
+
+  /* get data structure pointers */
 	struct mbsys_simrad2_struct *store = (struct mbsys_simrad2_struct *)store_ptr;
 	struct mbsys_simrad2_ping_struct *ping = (struct mbsys_simrad2_ping_struct *)store->ping;
-	// struct mb_platform_struct *platform = (struct mb_platform_struct *)platform_ptr;
-	struct mb_preprocess_struct *pars = (struct mb_preprocess_struct *)preprocess_pars_ptr;
+  struct mb_platform_struct *platform = (struct mb_platform_struct *)platform_ptr;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "dbg2       target_sensor:              %d\n", pars->target_sensor);
@@ -1744,8 +1736,27 @@ int mbsys_simrad2_preprocess(int verbose,     /* in: verbosity level set on comm
 			fprintf(stderr, "dbg2       kluge_id[%d]:                    %d\n", i, pars->kluge_id[i]);
 	}
 
+	int time_i[7];
+	double time_d;
+	double navlon, navlat, sensordepth, speed, heading, roll, pitch, heave, altitude;
+
+	/* depth sensor offsets - used in place of heave for underwater platforms */
+	// int depthsensor_mode = MBSYS_SIMRAD2_ZMODE_UNKNOWN;
+
+	int interp_error = MB_ERROR_NO_ERROR;
+	// int ss_status = MB_SUCCESS;
+	// int ss_error = MB_ERROR_NO_ERROR;
+	int jnav, jsensordepth, jheading, jaltitude, jattitude;
+
+  /* if called with store_ptr == NULL then called after mb_read_init() but before
+      any data are read - for some formats this allows kluge options to set special
+      reading conditions/behaviors */
+  if (store_ptr == NULL) {
+
+  }
+
 	/* deal with a survey record */
-	if (store->kind == MB_DATA_DATA) {
+	else if (store->kind == MB_DATA_DATA) {
 		/*--------------------------------------------------------------*/
 		/* get depth sensor mode from the start record
 		    NI => Use heave

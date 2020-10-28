@@ -133,7 +133,8 @@ constexpr char usage_message[] =
     "\t--kluge-zero-attitude-correction\n"
     "\t--kluge-zero-alongtrack-angles\n"
     "\t--kluge-fix-wissl-timestamps\n"
-    "\t--kluge-auv-sentry-sensordepth\n";
+    "\t--kluge-auv-sentry-sensordepth\n"
+    "\t--kluge-ignore-snippets\n";
 
 /*--------------------------------------------------------------------*/
 
@@ -163,6 +164,8 @@ int main(int argc, char **argv) {
   double kluge_soundspeedtweak_factor = 1.0;
   bool kluge_soundspeedtweak = false;
   bool kluge_fix_wissl_timestamps = false;
+  bool kluge_auv_sentry_sensordepth = false;
+  bool kluge_ignore_snippets = false;
 
   mb_path sensordepth_file;
   memset(sensordepth_file, 0, sizeof(mb_path));
@@ -287,6 +290,7 @@ int main(int argc, char **argv) {
                                       {"kluge-zero-alongtrack-angles", no_argument, nullptr, 0},
                                       {"kluge-fix-wissl-timestamps", no_argument, nullptr, 0},
                                       {"kluge-auv-sentry-sensordepth", no_argument, nullptr, 0},
+                                      {"kluge-ignore-snippets", no_argument, nullptr, 0},
                                       {nullptr, 0, nullptr, 0}};
 
     int option_index;
@@ -643,6 +647,12 @@ int main(int argc, char **argv) {
         else if (strcmp("kluge-auv-sentry-sensordepth", options[option_index].name) == 0) {
           preprocess_pars.kluge_id[preprocess_pars.n_kluge] = MB_PR_KLUGE_AUVSENTRYSENSORDEPTH;
           preprocess_pars.n_kluge++;
+          kluge_auv_sentry_sensordepth = true;
+        }
+        else if (strcmp("kluge-ignore-snippets", options[option_index].name) == 0) {
+          preprocess_pars.kluge_id[preprocess_pars.n_kluge] = MB_PR_KLUGE_IGNORESNIPPETS;
+          preprocess_pars.n_kluge++;
+          kluge_ignore_snippets = true;
         }
         break;
       case '?':
@@ -792,6 +802,8 @@ int main(int argc, char **argv) {
     fprintf(stderr, "dbg2       kluge_soundspeedtweak:        %d\n", kluge_soundspeedtweak);
     fprintf(stderr, "dbg2       kluge_soundspeedtweak_factor: %f\n", kluge_soundspeedtweak_factor);
     fprintf(stderr, "dbg2       kluge_fix_wissl_timestamps:   %d\n", kluge_fix_wissl_timestamps);
+    fprintf(stderr, "dbg2       kluge_auv_sentry_sensordepth: %d\n", kluge_auv_sentry_sensordepth);
+    fprintf(stderr, "dbg2       kluge_ignore_snippets:        %d\n", kluge_ignore_snippets);
     fprintf(stderr, "dbg2  Additional output:\n");
     fprintf(stderr, "dbg2       output_sensor_fnv:            %d\n", output_sensor_fnv);
     fprintf(stderr, "dbg2  Skip existing output files:\n");
@@ -890,6 +902,8 @@ int main(int argc, char **argv) {
     fprintf(stderr, "     kluge_soundspeedtweak:        %d\n", kluge_soundspeedtweak);
     fprintf(stderr, "     kluge_soundspeedtweak_factor: %f\n", kluge_soundspeedtweak_factor);
     fprintf(stderr, "     kluge_fix_wissl_timestamps:   %d\n", kluge_fix_wissl_timestamps);
+    fprintf(stderr, "     kluge_auv_sentry_sensordepth: %d\n", kluge_auv_sentry_sensordepth);
+    fprintf(stderr, "     kluge_ignore_snippets:        %d\n", kluge_ignore_snippets);
     fprintf(stderr, "Additional output:\n");
     fprintf(stderr, "     output_sensor_fnv:            %d\n", output_sensor_fnv);
     fprintf(stderr, "Skip existing output files:\n");
@@ -1371,6 +1385,11 @@ int main(int argc, char **argv) {
       fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
       exit(error);
     }
+
+    /* call preprocess function with pars settings before reading any data
+        - for some formats this can set special read behavior
+        - passing store_ptr == NULL indicates this is the pre-reading call */
+    status = mb_preprocess(verbose, imbio_ptr, NULL, NULL, (void *)&preprocess_pars, &error);
 
     beamflag = nullptr;
     bath = nullptr;
@@ -2359,6 +2378,11 @@ int main(int argc, char **argv) {
         exit(error);
       }
 
+      /* call preprocess function with pars settings before reading any data
+          - for some formats this can set special read behavior
+          - passing store_ptr == NULL indicates this is the pre-reading call */
+      status = mb_preprocess(verbose, imbio_ptr, NULL, NULL, (void *)&preprocess_pars, &error);
+
       if (verbose > 0)
         fprintf(stderr, "Pass 2: Opening output file: %s %d\n", ofile, oformat);
 
@@ -2539,8 +2563,8 @@ int main(int argc, char **argv) {
       start_time_d = -1.0;
       end_time_d = -1.0;
 
-            if (kluge_fix_wissl_timestamps)
-                kluge_fix_wissl_timestamps_setup2 = false;
+      if (kluge_fix_wissl_timestamps)
+        kluge_fix_wissl_timestamps_setup2 = false;
 
       /* ------------------------------- */
       /* write comments to output file   */

@@ -20,6 +20,7 @@ include "beta" in the tag name are preliminary and generally not announced.
 Distributions that do not include "beta" in the tag name correspond to the major,
 announced releases. The source distributions associated with all releases, major or beta, are equally accessible as tarballs through the Github interface.
 
+- Version 5.7.7beta03    October 27, 2020
 - Version 5.7.7beta02    October 8, 2020
 - Version 5.7.7beta01    October 7, 2020
 - **Version 5.7.6        October 5, 2020
@@ -368,6 +369,53 @@ announced releases. The source distributions associated with all releases, major
 --
 ### MB-System Version 5.7 Release Notes:
 --
+
+#### 5.7.7beta03 (October 27, 2020)
+
+Mbeditviz: Added option to display the selected sounding point cloud with
+soundings colored according to associated amplitude value. Also added the
+sounding amplitude value to the information listed when soundings are selected
+in the "info" mode.
+
+Mbedit: Added the sounding amplitude value to the information listed when
+soundings are selected in the "info" mode.
+
+Mbnavadjust: Previously autopicking of crossings skipped crossings including
+short sections where short was defined as less than 0.25 times the length of
+the first section of the associated file. This is problematic when the survey
+platform is stationary at the beginning of a file, resulting in a first section
+with a short track length (sections are terminated either on track length or total
+number of soundings). Now short is defined as less than 0.25 times the current
+desired section length for the project.
+
+Format 58 (MBF_EM710RAW): This format supports third generation Kongsberg multibeam
+data as recorded in *.all files; the augmented format 59 (MBF_EM710MBA) is used
+for processing. Data are translated from format 58 to 59 using mbpreprocess. Data
+have been collected using a partially nonfunctional EM122 such that most of the
+backscatter snippet records are missing. The existing code treats pings for which
+the snippet records are missing as incomplete and drops them. The format 58 i/o
+module has been modified so that if a special flag is set, any snippet records
+will be ignored and all pings will be treated as having an empty but existing
+snippet record. Users can set this flag with a special --kluge-ignore-snippets
+argument to mbpreprocess.
+
+Mbpreprocess and i/o modules with defined preprocessing functions: All existing
+preprocess functions have been augmented so that a call with a null pointer to
+the data structure will trigger an option to set i/o flags after reading from a
+file is initialized but before any data are read. The only case at present where
+this is used is format 58 (MBF_EM710RAW), where the mbpreprocess option
+--kluge-ignore-snippets causes the reading code to treat pings with bathymetry
+as complete whether snippet records exist or not, and to zero the snippet information
+for those pings.
+
+Mbm_makedatalist: Added -L option which will omit the last file found from the
+output datalist. The  intent  of this  option  is  to exclude the most recent
+file in an actively data logging context, since the most recent file is still
+being logged. This presumes that filenames sort in time order as listed  by  the
+ls  command,  an assumption that does not hold for all file naming conditions or
+if the -T option has been used to disable time ordering. Also added a behavior
+particular to Kongsberg multibeam data as originally logged - files named "9999.all"
+are now ignored.
 
 #### 5.7.7beta02 (October 8, 2020)
 

@@ -321,6 +321,14 @@ int main(int argc, char **argv) {
 					}
 				}
 			}
+      else {
+				if (omode == OUTPUT_TEXT) {
+					int time_i[7];
+					mb_get_date(verbose, time_d, time_i);
+					fprintf(stdout, "** EDITS READ BUT IGNORED **: i:%d time: %f %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d beam:%d action:%d\n", i,
+					        time_d, time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6], beam, action);
+				}
+      }
 		}
 
 		fclose(iesffp);
