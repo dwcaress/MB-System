@@ -8,75 +8,45 @@
 # OTPS_
 # OPENCV_
 # 
-# For Qt currently rely on qmake and .pro to determine Qt header
+# For Qt we currently rely on qmake and .pro files to determine Qt header
 # and library location
 
 cmake_minimum_required(VERSION 3.18)
 project(MB-System)
 
-# Test function
-function(foo)
-  message("this is foo!")
-endfunction()
 
+# Add globally-needed compiler flags
+add_compile_options(-fPIC -DPIC -g)
 
-# Find C include directory with specified name
-function(findCIncludeDir directory var)
-  message("***findCIncludeDir(): look for ${directory} in ${CMAKE_C_IMPLICIT_INCLUDE_DIRECTORIES}")
-  find_file(${var} ${directory}
-            PATHS ${CMAKE_C_IMPLICIT_INCLUDE_DIRECTORIES}
-            NO_DEFAULT_PATH
-            REQUIRED)
-
-message("***Found ${directory}: ${var}")
-# Set value in parent scope
-set(${var} ${${var}} PARENT_SCOPE)
-  
-endfunction()
-
-
-# Find C++ include directory with specified name
-function(findCXXIncludeDir directory var)
-  message("***findCXXIncludeDir(): look for ${directory}")
-  find_file(${var} ${directory}
-            PATHS ${CMAKE_CXX_IMPLICIT_INCLUDE_DIRECTORIES}
-            NO_DEFAULT_PATH
-            REQUIRED)
-
-  message("***Found ${directory}: ${var}")  
-  set(${var} ${${var}} PARENT_SCOPE)
-  
-endfunction()
-
-
-# Look for specified library, set var to corresponding directory
-function(findLibraryDir library var)
-  message("findLibraryDir() - look for ${library}")
-  unset(LIBFILE CACHE)
-  find_library(LIBFILE ${library} REQUIRED)
-  message("findLibraryDir(); found ${library}: ${LIBFILE}")  
-  get_filename_component(tmp ${LIBFILE} DIRECTORY)
-  set(${var} ${tmp} PARENT_SCOPE)
-endfunction()
-
+# Get directory of this CMakeLists.txt file
 set(MB_HOME ${CMAKE_CURRENT_SOURCE_DIR})
-
 message("MB_HOME: ${MB_HOME}")
 
-# Add build-utils to module path
+message("Add build-utils/ subdirectory to module CMAKE_MODULE_PATH")
 list(APPEND CMAKE_MODULE_PATH ${MB_HOME}/build-utils/)
 message("CMAKE_MODULE_PATH now: ${CMAKE_MODULE_PATH}")
 
-# Use functions in cmakeUils.cmake
-###include(cmakeUtils.cmake)
+# Run script
+set(LIBNAME PROJ)
+set(HEADERNAME proj.h)
+set(HEADERSUBDIR proj)
+include(findLibrary)
+if (NOT PROJ_FOUND)
+  message("PROJ not found")
+else()
+  message("Found PROJ")
+endif()
 
 
-message("CMAKE_SYSTEM: ${CMAKE_SYSTEM}")
-message("CMAKE_SYSTEM_NAME: ${CMAKE_SYSTEM_NAME}")
-message("CMAKE_SYSTEM_INCLUDE_PATH: ${CMAKE_SYSTEM_INCLUDE_PATH}")
-message("CMAKE_SYSTEM_PREFIX_PATH: ${CMAKE_SYSTEM_PREFIX_PATH}")
-message("CMAKE_C_IMPLICIT_INCLUDE_DIRECTORIES: ${CMAKE_C_IMPLICIT_INCLUDE_DIRECTORIES}")
-message("CMAKE_CXX_IMPLICIT_INCLUDE_DIRECTORIES: ${CMAKE_CXX_IMPLICIT_INCLUDE_DIRECTORIES}")
+# Include my functions
+include(foo)
+include(findLibraryDir)
+include(findCIncludeDir)
+include(findCXXIncludeDir)
+
+message("executing foo()")
+foo()
+message("returned from foo()")
 
 # Set search paths for includes, libs based on host OS
 if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
@@ -128,4 +98,13 @@ message("GMT_LIB_DIR: ${GMT_LIB_DIR}")
 message("VTK_LIB_DIR: ${VTK_LIB_DIR}")
 
 
+# Libraries
 add_subdirectory(src/mbaux)
+add_subdirectory(src/mbio)
+add_subdirectory(src/mbview)
+add_subdirectory(src/gsf)
+add_subdirectory(src/bsio)
+add_subdirectory(src/surf)
+
+# Executables
+add_subdirectory(src/mbgrdviz)
