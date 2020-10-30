@@ -3,7 +3,7 @@
 
 message("in gsf")
 
-# Shared library
+# Static library
 add_library(gsf
             STATIC
             dump_gsf.c  gsf_compress.c  gsf_enc.c  gsf_indx.c
