@@ -13,27 +13,31 @@ target_include_directories(mbgrdviz
                            ${GMT_INCLUDE_DIR}
                            ${CMAKE_SOURCE_DIR}/src/mbio
                            ${CMAKE_SOURCE_DIR}/src/mbaux
-                           ${CMAKE_SOURCE_DIR}/src/mbview)
-
-
+                           ${CMAKE_SOURCE_DIR}/src/mbview
+                           ${CMAKE_SOURCE_DIR}/src/bsio
+                           ${CMAKE_SOURCE_DIR}/src/surf
+                           ${CMAKE_SOURCE_DIR}/src/gsf)                           
+# Why do libbsio.a, libmbsapi.a and libgsf.a require full path else
+# they aren't found by linker?
 target_link_libraries(mbgrdviz
-                      PRIVATE libmbio.a
-                      PRIVATE libmbaux.a
-                      PRIVATE libmbview.a
-                      PRIVATE ${CMAKE_BINARY_DIR}/src/bsio/libbsio.a
-                      PRIVATE ${CMAKE_BINARY_DIR}/src/surf/libmbsapi.a
-                      PRIVATE ${CMAKE_BINARY_DIR}/src/gsf/libgsf.a
-                      PUBLIC gmt
-                      PUBLIC Xm
-                      PUBLIC Xt
-                      PUBLIC X11
-                      PUBLIC GL
-                      PUBLIC GLU
-                      PUBLIC m
-                      PUBLIC netcdf
-                      PUBLIC gdal
-                      PUBLIC proj
-                      PUBLIC pthread)
+                      PRIVATE
+                      mbio
+                      mbaux
+                      mbview
+                      bsio
+                      mbsapi
+                      gsf
+                      gmt
+                      Xm
+                      Xt
+                      X11
+                      GL
+                      GLU
+                      m
+                      netcdf
+                      gdal
+                      proj
+                      pthread)
                            
                            
 
