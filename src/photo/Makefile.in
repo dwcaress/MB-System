@@ -91,7 +91,7 @@ POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
 bin_PROGRAMS = mbphotomosaic$(EXEEXT) mbgetphotocorrection$(EXEEXT) \
-	mbphotogrammetry$(EXEEXT)
+	mbphotogrammetry$(EXEEXT) mbimagecorrect$(EXEEXT)
 subdir = src/photo
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/ax_check_compile_flag.m4 \
@@ -119,6 +119,9 @@ AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
 am__v_lt_0 = --silent
 am__v_lt_1 = 
+am_mbimagecorrect_OBJECTS = mbimagecorrect.$(OBJEXT)
+mbimagecorrect_OBJECTS = $(am_mbimagecorrect_OBJECTS)
+mbimagecorrect_LDADD = $(LDADD)
 am_mbphotogrammetry_OBJECTS = mbphotogrammetry.$(OBJEXT)
 mbphotogrammetry_OBJECTS = $(am_mbphotogrammetry_OBJECTS)
 mbphotogrammetry_LDADD = $(LDADD)
@@ -169,7 +172,8 @@ DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)/src/mbio
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__maybe_remake_depfiles = depfiles
 am__depfiles_remade = ./$(DEPDIR)/mbgetphotocorrection.Po \
-	./$(DEPDIR)/mbphotogrammetry.Po ./$(DEPDIR)/mbphotomosaic.Po
+	./$(DEPDIR)/mbimagecorrect.Po ./$(DEPDIR)/mbphotogrammetry.Po \
+	./$(DEPDIR)/mbphotomosaic.Po
 am__mv = mv -f
 CXXCOMPILE = $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) \
 	$(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS)
@@ -189,8 +193,8 @@ AM_V_CXXLD = $(am__v_CXXLD_@AM_V@)
 am__v_CXXLD_ = $(am__v_CXXLD_@AM_DEFAULT_V@)
 am__v_CXXLD_0 = @echo "  CXXLD   " $@;
 am__v_CXXLD_1 = 
-SOURCES = $(mbgetphotocorrection_SOURCES) $(mbphotogrammetry_SOURCES) \
-	$(mbphotomosaic_SOURCES)
+SOURCES = $(mbgetphotocorrection_SOURCES) $(mbimagecorrect_SOURCES) \
+	$(mbphotogrammetry_SOURCES) $(mbphotomosaic_SOURCES)
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
     n|no|NO) false;; \
@@ -426,6 +430,7 @@ AM_LDFLAGS =
 mbphotomosaic_SOURCES = mbphotomosaic.cc
 mbgetphotocorrection_SOURCES = mbgetphotocorrection.cc
 mbphotogrammetry_SOURCES = mbphotogrammetry.cc
+mbimagecorrect_SOURCES = mbimagecorrect.cc
 all: all-am
 
 .SUFFIXES:
@@ -513,6 +518,10 @@ mbgetphotocorrection$(EXEEXT): $(mbgetphotocorrection_OBJECTS) $(mbgetphotocorre
 	@rm -f mbgetphotocorrection$(EXEEXT)
 	$(AM_V_CXXLD)$(CXXLINK) $(mbgetphotocorrection_OBJECTS) $(mbgetphotocorrection_LDADD) $(LIBS)
 
+mbimagecorrect$(EXEEXT): $(mbimagecorrect_OBJECTS) $(mbimagecorrect_DEPENDENCIES) $(EXTRA_mbimagecorrect_DEPENDENCIES) 
+	@rm -f mbimagecorrect$(EXEEXT)
+	$(AM_V_CXXLD)$(CXXLINK) $(mbimagecorrect_OBJECTS) $(mbimagecorrect_LDADD) $(LIBS)
+
 mbphotogrammetry$(EXEEXT): $(mbphotogrammetry_OBJECTS) $(mbphotogrammetry_DEPENDENCIES) $(EXTRA_mbphotogrammetry_DEPENDENCIES) 
 	@rm -f mbphotogrammetry$(EXEEXT)
 	$(AM_V_CXXLD)$(CXXLINK) $(mbphotogrammetry_OBJECTS) $(mbphotogrammetry_LDADD) $(LIBS)
@@ -563,6 +572,7 @@ distclean-compile:
 	-rm -f *.tab.c
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbgetphotocorrection.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbimagecorrect.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbphotogrammetry.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbphotomosaic.Po@am__quote@ # am--include-marker
 
@@ -717,6 +727,7 @@ clean-am: clean-binPROGRAMS clean-generic clean-libtool mostlyclean-am
 
 distclean: distclean-am
 		-rm -f ./$(DEPDIR)/mbgetphotocorrection.Po
+	-rm -f ./$(DEPDIR)/mbimagecorrect.Po
 	-rm -f ./$(DEPDIR)/mbphotogrammetry.Po
 	-rm -f ./$(DEPDIR)/mbphotomosaic.Po
 	-rm -f Makefile
@@ -765,6 +776,7 @@ installcheck-am:
 
 maintainer-clean: maintainer-clean-am
 		-rm -f ./$(DEPDIR)/mbgetphotocorrection.Po
+	-rm -f ./$(DEPDIR)/mbimagecorrect.Po
 	-rm -f ./$(DEPDIR)/mbphotogrammetry.Po
 	-rm -f ./$(DEPDIR)/mbphotomosaic.Po
 	-rm -f Makefile

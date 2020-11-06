@@ -3498,12 +3498,13 @@ int mb_imagelist_open(int verbose, void **imagelist_ptr, char *path, int *error)
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       imagelist_ptr:         %p\n", (void *)*imagelist_ptr);
     if (*imagelist_ptr != NULL) {
-      fprintf(stderr, "dbg2       imagelist->open:       %d\n", imagelist->open);
-      fprintf(stderr, "dbg2       imagelist->fp:         %p\n", (void *)imagelist->fp);
-      fprintf(stderr, "dbg2       imagelist->recursion:  %d\n", imagelist->recursion);
-      fprintf(stderr, "dbg2       imagelist->path:       %s\n", imagelist->path);
-      fprintf(stderr, "dbg2       imagelist->printed:    %d\n", imagelist->printed);
-      fprintf(stderr, "dbg2       imagelist->imagelist:   %p\n", (void *)imagelist->imagelist);
+      fprintf(stderr, "dbg2       imagelist->open:             %d\n", imagelist->open);
+      fprintf(stderr, "dbg2       imagelist->recursion:        %d\n", imagelist->recursion);
+      fprintf(stderr, "dbg2       imagelist->leftrightstereo:  %d\n", imagelist->leftrightstereo);
+      fprintf(stderr, "dbg2       imagelist->printed:          %d\n", imagelist->printed);
+      fprintf(stderr, "dbg2       imagelist->path:             %s\n", imagelist->path);
+      fprintf(stderr, "dbg2       imagelist->fp:               %p\n", (void *)imagelist->fp);
+      fprintf(stderr, "dbg2       imagelist->imagelist:        %p\n", (void *)imagelist->imagelist);
     }
     fprintf(stderr, "dbg2       error:         %d\n", *error);
     fprintf(stderr, "dbg2  Return status:\n");
@@ -3528,11 +3529,12 @@ int mb_imagelist_read(int verbose, void *imagelist_ptr, int *imagestatus,
 
   if (verbose >= 2) {
     fprintf(stderr, "dbg2       imagelist->open:             %d\n", imagelist->open);
-    fprintf(stderr, "dbg2       imagelist->fp:               %p\n", (void *)imagelist->fp);
     fprintf(stderr, "dbg2       imagelist->recursion:        %d\n", imagelist->recursion);
-    fprintf(stderr, "dbg2       imagelist->path:             %s\n", imagelist->path);
+    fprintf(stderr, "dbg2       imagelist->leftrightstereo:  %d\n", imagelist->leftrightstereo);
     fprintf(stderr, "dbg2       imagelist->printed:          %d\n", imagelist->printed);
-    fprintf(stderr, "dbg2       imagelist->imagelist:         %p\n", (void *)imagelist->imagelist);
+    fprintf(stderr, "dbg2       imagelist->path:             %s\n", imagelist->path);
+    fprintf(stderr, "dbg2       imagelist->fp:               %p\n", (void *)imagelist->fp);
+    fprintf(stderr, "dbg2       imagelist->imagelist:        %p\n", (void *)imagelist->imagelist);
   }
 
   int status = MB_SUCCESS;
@@ -3565,27 +3567,26 @@ int mb_imagelist_read(int verbose, void *imagelist_ptr, int *imagestatus,
             *error = MB_ERROR_EOF;
           }
 
-          /* check for special tags */
-          else if (buffer[0] == '#') {
-              if (strncmp(buffer, "#SINGLE", 7) == 0) {
+          /* Check for special tags $SINGLE, $LEFT, $RIGHT, $STEREO, with variants
+              #SINGLE, #LEFT, #RIGHT, #STEREO allowed.
+              Note that tags $SINGLECAMERA, $LEFTCAMERA, $RIGHTCAMERA, $STEREOCAMERA
+              and  #SINGLECAMERA, #LEFTCAMERA, #RIGHTCAMERA, #STEREOCAMERA
+              all work as well. */
+          else if (buffer[0] == '#' || buffer[0] == '$') {
+              if (strncmp(buffer, "$SINGLE", 7) == 0
+                  || strncmp(buffer, "#SINGLE", 7) == 0) {
                   imagelist->leftrightstereo = MB_IMAGESTATUS_LEFT;
               }
-              else if (strncmp(buffer, "#LEFT", 5) == 0) {
+              else if (strncmp(buffer, "$LEFT", 5) == 0
+                  || strncmp(buffer, "#LEFT", 5) == 0) {
                   imagelist->leftrightstereo = MB_IMAGESTATUS_LEFT;
               }
-              else if (strncmp(buffer, "#RIGHT", 6) == 0) {
+              else if (strncmp(buffer, "$RIGHT", 6) == 0
+                  || strncmp(buffer, "#RIGHT", 6) == 0) {
                   imagelist->leftrightstereo = MB_IMAGESTATUS_RIGHT;
               }
-              else if (strncmp(buffer, "#STEREO", 7) == 0) {
-                  imagelist->leftrightstereo = MB_IMAGESTATUS_STEREO;
-              }
-              else if (strncmp(buffer, "#LEFTCAMERA", 5) == 0) {
-                  imagelist->leftrightstereo = MB_IMAGESTATUS_LEFT;
-              }
-              else if (strncmp(buffer, "#RIGHTCAMERA", 6) == 0) {
-                  imagelist->leftrightstereo = MB_IMAGESTATUS_RIGHT;
-              }
-              else if (strncmp(buffer, "#STEREOCAMERA", 7) == 0) {
+              else if (strncmp(buffer, "$STEREO", 7) == 0
+                  || strncmp(buffer, "#STEREO", 7) == 0) {
                   imagelist->leftrightstereo = MB_IMAGESTATUS_STEREO;
               }
           }
@@ -3678,7 +3679,6 @@ int mb_imagelist_read(int verbose, void *imagelist_ptr, int *imagestatus,
                       /* check if path0 exists and can be opened */
                       const int fstat = stat(path0, &file_status);
                       if (fstat == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR && file_status.st_size > 0) {
-
                           /* set status */
                           if (imagelist->leftrightstereo == MB_IMAGESTATUS_SINGLE) {
                               *imagestatus = MB_IMAGESTATUS_SINGLE;
@@ -3738,6 +3738,7 @@ int mb_imagelist_read(int verbose, void *imagelist_ptr, int *imagestatus,
                                              error)) == MB_SUCCESS) {
                 imagelist2 = imagelist->imagelist;
                 imagelist2->recursion = imagelist->recursion + 1;
+                imagelist2->leftrightstereo = imagelist->leftrightstereo;
                 rdone = true;
               }
               else {
@@ -3773,11 +3774,13 @@ int mb_imagelist_read(int verbose, void *imagelist_ptr, int *imagestatus,
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       imagelist->open:             %d\n", imagelist->open);
-    fprintf(stderr, "dbg2       imagelist->fp:               %p\n", (void *)imagelist->fp);
     fprintf(stderr, "dbg2       imagelist->recursion:        %d\n", imagelist->recursion);
-    fprintf(stderr, "dbg2       imagelist->path:             %s\n", imagelist->path);
+    fprintf(stderr, "dbg2       imagelist->leftrightstereo:  %d\n", imagelist->leftrightstereo);
     fprintf(stderr, "dbg2       imagelist->printed:          %d\n", imagelist->printed);
-    fprintf(stderr, "dbg2       imagelist->imagelist:         %p\n", (void *)imagelist->imagelist);
+    fprintf(stderr, "dbg2       imagelist->path:             %s\n", imagelist->path);
+    fprintf(stderr, "dbg2       imagelist->fp:               %p\n", (void *)imagelist->fp);
+    fprintf(stderr, "dbg2       imagelist->imagelist:        %p\n", (void *)imagelist->imagelist);
+    fprintf(stderr, "dbg2       imagestatus: %d\n", *imagestatus);
     fprintf(stderr, "dbg2       path0:       %s\n", path0);
     fprintf(stderr, "dbg2       path1:       %s\n", path1);
     fprintf(stderr, "dbg2       dpath:       %s\n", dpath);

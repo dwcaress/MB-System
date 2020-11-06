@@ -421,27 +421,22 @@
 /*#define MBSYS_3DDWISSL_HEADB_OFFSET_Z_M           +0.062005210 */
 /*#define MBSYS_3DDWISSL_HEADB_OFFSET_HEADING_DEG   +1.20         // ICD value 0.0 */
 /*#define MBSYS_3DDWISSL_HEADB_OFFSET_ROLL_DEG      +21.440       // ICD value +22.08 */
-/*#define MBSYS_3DDWISSL_HEADB_OFFSET_PITCH_DEG     -4.230        // ICD value -5.01  pitch too much
-   1.5 cm = 0.143 deg, roll too much 2.5 cm = 0.239 deg */
+/*#define MBSYS_3DDWISSL_HEADB_OFFSET_PITCH_DEG     -4.230        // ICD value -5.01  pitch too much   1.5 cm = 0.143 deg, roll too much 2.5 cm = 0.239 deg */
 
 /* Values from Tank Test */
 /*#define MBSYS_3DDWISSL_FILEHEADER                 0 */
 /*#define MBSYS_3DDWISSL_HEADA                      1 */
 /*#define MBSYS_3DDWISSL_HEADB                      2 */
 /*#define MBSYS_3DDWISSL_COMMENT                    3 */
-/*#define MBSYS_3DDWISSL_HEADA_OFFSET_X_M           -0.031775996 // ICD value +0.012224004    -0.044
-   ==> -0.031775996 */
+/*#define MBSYS_3DDWISSL_HEADA_OFFSET_X_M           -0.031775996 // ICD value +0.012224004    -0.044   ==> -0.031775996 */
 /*#define MBSYS_3DDWISSL_HEADA_OFFSET_Y_M           -0.120281954 */
-/*#define MBSYS_3DDWISSL_HEADA_OFFSET_Z_M           +0.056005210 // ICD value +0.062005210   -0.012
-    ==> +0.056005210 */
+/*#define MBSYS_3DDWISSL_HEADA_OFFSET_Z_M           +0.056005210 // ICD value +0.062005210   -0.012    ==> +0.056005210 */
 /*#define MBSYS_3DDWISSL_HEADA_OFFSET_HEADING_DEG   -1.20        // ICD value 0.0 */
 /*#define MBSYS_3DDWISSL_HEADA_OFFSET_ROLL_DEG      -22.53       // ICD value -22.08 */
 /*#define MBSYS_3DDWISSL_HEADA_OFFSET_PITCH_DEG     -5.590       // ICD value -4.68 */
-/*#define MBSYS_3DDWISSL_HEADB_OFFSET_X_M           +0.031775996 // ICD value -0.012224004    +0.044
-   ==> +0.031775996 */
+/*#define MBSYS_3DDWISSL_HEADB_OFFSET_X_M           +0.031775996 // ICD value -0.012224004    +0.044   ==> +0.031775996 */
 /*#define MBSYS_3DDWISSL_HEADB_OFFSET_Y_M           +0.120281954 */
-/*#define MBSYS_3DDWISSL_HEADB_OFFSET_Z_M           +0.074005210 // ICD value  +0.062005210   +0.012
-    ==> +0.074005210 */
+/*#define MBSYS_3DDWISSL_HEADB_OFFSET_Z_M           +0.074005210 // ICD value  +0.062005210   +0.012    ==> +0.074005210 */
 /*#define MBSYS_3DDWISSL_HEADB_OFFSET_HEADING_DEG   +1.20        // ICD value 0.0 */
 /*#define MBSYS_3DDWISSL_HEADB_OFFSET_ROLL_DEG      +22.53       // ICD value +22.08 */
 /*#define MBSYS_3DDWISSL_HEADB_OFFSET_PITCH_DEG     -4.080       // ICD value -5.01 */
