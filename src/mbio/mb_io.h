@@ -802,9 +802,9 @@ struct mb_datalist_struct {
 struct mb_imagelist_struct {
   int open;
   int recursion;
-    int leftrightstereo;
-    int printed;
-   char path[MB_PATH_MAXLINE];
+  int leftrightstereo;
+  int printed;
+  char path[MB_PATH_MAXLINE];
   FILE *fp;
   struct mb_imagelist_struct *imagelist;
 };

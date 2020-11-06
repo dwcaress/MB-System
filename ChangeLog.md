@@ -20,6 +20,7 @@ include "beta" in the tag name are preliminary and generally not announced.
 Distributions that do not include "beta" in the tag name correspond to the major,
 announced releases. The source distributions associated with all releases, major or beta, are equally accessible as tarballs through the Github interface.
 
+- Version 5.7.7beta05    November 6, 2020
 - Version 5.7.7beta04    October 28, 2020
 - Version 5.7.7beta03    October 27, 2020
 - Version 5.7.7beta02    October 8, 2020
@@ -370,6 +371,19 @@ announced releases. The source distributions associated with all releases, major
 --
 ### MB-System Version 5.7 Release Notes:
 --
+
+#### 5.7.7beta05 (November 6, 2020)
+
+Format 261 (MBF_KEMKMALL): Fixed bug in handling version 0 MWC datagrams.
+
+Mbphotomosaic: Fixed bug in pixel processing that occasionally produced overflows
+leading to seg faults.
+
+Mbphotomosaic: Fixed bug in imagelist processing that prevented use of images
+taken with the right camera of a stereo pair.
+
+Mbimagecorrect: New program that performs some simple brightness and contrast
+corrections using standard OpenCV algorithms.
 
 #### 5.7.7beta04 (October 28, 2020)
 

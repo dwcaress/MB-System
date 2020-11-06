@@ -38,7 +38,7 @@
 #include "mbsys_kmbes.h"
 
 /* turn on debug statements here */
-//#define MBR_KEMKMALL_DEBUG 1
+// #define MBR_KEMKMALL_DEBUG 1
 
 /*--------------------------------------------------------------------*/
 int mbr_info_kemkmall(int verbose, int *system, int *beams_bath_max, int *beams_amp_max, int *pixels_ss_max, char *format_name,
@@ -2400,7 +2400,6 @@ int mbr_kemkmall_rd_mwc(int verbose, char *buffer, void *store_ptr, void *header
         index += 4;
       } else {
         mwc->beamData_p[i].detectedRangeInSamplesHighResolution = mwc->beamData_p[i].detectedRangeInSamples;
-        mwc->header.dgmVersion = 1;
       }
 
       /* Allocate sample amplitude array. Sample amplitudes are in 0.5 dB resolution */
@@ -2471,7 +2470,7 @@ int mbr_kemkmall_rd_mwc(int verbose, char *buffer, void *store_ptr, void *header
         if (status == MB_SUCCESS && verbose >= 5) {
           fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
           fprintf(stderr, "dbg5       #MWC receiver beam data %              d/%d:\n", i, mwc->rxInfo.numBeams);
-          fprintf(stderr, "dbg5       tiltAngleReTx_deg:                     %f\n", mwc->beamData_p[i].beamPointAngReVertical_deg);
+          fprintf(stderr, "dbg5       beamPointAngReVertical_deg:            %f\n", mwc->beamData_p[i].beamPointAngReVertical_deg);
           fprintf(stderr, "dbg5       startRangeSampleNum:                   %d\n", mwc->beamData_p[i].startRangeSampleNum);
           fprintf(stderr, "dbg5       detectedRangeInSamples:                %d\n", mwc->beamData_p[i].detectedRangeInSamples);
           fprintf(stderr, "dbg5       beamTxSectorNum:                       %d\n", mwc->beamData_p[i].beamTxSectorNum);
@@ -2494,6 +2493,10 @@ int mbr_kemkmall_rd_mwc(int verbose, char *buffer, void *store_ptr, void *header
       }
     }
   }
+
+  /* reset datagram version if necessary */
+  if (mwc->header.dgmVersion == 0)
+    mwc->header.dgmVersion = 1;
 
   /* set kind */
   if (status == MB_SUCCESS) {
