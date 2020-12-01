@@ -31,31 +31,12 @@ message("Add build-utils/ subdirectory to module CMAKE_MODULE_PATH")
 list(APPEND CMAKE_MODULE_PATH ${MB_HOME}/build-utils/)
 message("CMAKE_MODULE_PATH now: ${CMAKE_MODULE_PATH}")
 
-# Set variables for build-utils/findLibrary.cmake macro
-set(LIBNAME PROJ)
-set(HEADERNAME proj.h)
-set(HEADERSUBDIR proj)
-
-# run build-utils/findLibrary.cmake macro
-include(findLibrary)
-if (NOT PROJ_FOUND)
-  message("PROJ not found")
-else()
-  message("Found PROJ")
-endif()
-
-
 # Include my functions (these are not macros)
-include(foo)
 include(findLibraryDir)
 include(findCIncludeDir)
 include(findCXXIncludeDir)
 
-message("executing foo()")
-foo()
-message("returned from foo()")
-
-# Set search paths for includes, libs based on host OS
+# Verify that OS is supported
 if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
   message("Building on LINUX")
 elseif (CMAKE_SYSTEM_NAME STREQUAL "Darwin")
@@ -64,38 +45,37 @@ else()
   message(FATAL_ERROR "Building on unsupported OS")
 endif()
 
-if (NOT GMT_INCLUDE_DIR)
-  # Look for gmt 'C' headers in implicit C include directories
-  findCIncludeDir(gmt GMT_INCLUDE_DIR)
-  message("GMT_INCLUDE_DIR: ${GMT_INCLUDE_DIR}")
-endif()
 
-if (NOT VTK_INCLUDE_DIR)
-  # Look for vtk-8.2 C++ headers in implicit C++ include directories
-  findCXXIncludeDir(vtk-8.2 VTK_INCLUDE_DIR)
-endif()
+# TEST TEST TEST
+set(file "gmt")
+findCIncludeDir(${file} DUMMY)
+message("DUMMY: ${DUMMY}")
 
-if (NOT PROJ_INCLUDE_DIR)
-  # Look for proj C++ headers in implicit C++ include directories
-  findCXXIncludeDir(proj PROJ_INCLUDE_DIR)
-endif()
-
-if (NOT OPENGL_INCLUDE_DIR)
-  # Look for OpenGL 'C' headers in implicit C include directories  
-  findCIncludeDir(GL OPENGL_INCLUDE_DIR)
-endif()
+# TEST TEST TEST
+set(library "mbio")
+findLibraryDir(${library} DUMMY_DIR)
+message("DUMMY_DIR: ${DUMMY_DIR}")
 
 
-if (NOT VTK_LIB_DIR)
-  # Look for library in usual places
-  findLibraryDir(vtkIOCore-8.2 VTK_LIB_DIR)
-endif()
 
-if (NOT GMT_LIB_DIR)
-  # Look for library in usual places
-  findLibraryDir(gmt GMT_LIB_DIR)
-endif()
+# Look for gmt 'C' headers in implicit C include directories
+findCIncludeDir(gmt GMT_INCLUDE_DIR)
+message("GMT_INCLUDE_DIR: ${GMT_INCLUDE_DIR}")
 
+# Look for vtk-8.2 C++ headers in implicit C++ include directories
+findCXXIncludeDir(vtk-8.2 VTK_INCLUDE_DIR)
+
+# Look for proj C++ headers in implicit C++ include directories
+findCXXIncludeDir(proj PROJ_INCLUDE_DIR)
+
+# Look for OpenGL 'C' headers in implicit C include directories  
+findCIncludeDir(GL OPENGL_INCLUDE_DIR)
+
+# Look for library in usual places
+findLibraryDir(vtkIOCore-8.2 VTK_LIB_DIR)
+
+# Look for library in usual places
+findLibraryDir(gmt GMT_LIB_DIR)
 
 message("GMT_INCLUDE_DIR: ${GMT_INCLUDE_DIR}")
 message("VTK_INCLUDE_DIR: ${VTK_INCLUDE_DIR}")
