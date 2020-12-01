@@ -25,17 +25,16 @@ if (CMAKE_SCRIPT_MODE_FILE)
   set(CMAKE_FIND_LIBRARY_SUFFIXES ".a;.so")
 endif ()
 
-message("FOOBY: ${FOOBY}")
-message("CMAKE_SYSTEM_INCLUDE_PATH: ${CMAKE_SYSTEM_INCLUDE_PATH}")
+message("findLibrary.cmake: CMAKE_SYSTEM_INCLUDE_PATH: ${CMAKE_SYSTEM_INCLUDE_PATH}")
 
 find_package(PkgConfig)
-message("pkg_check_modules prefix: PC_${LIBNAME}")
+message("findLibrary.cmake: pkg_check_modules prefix: PC_${LIBNAME}")
 pkg_check_modules(PC_${LIBNAME} QUIET ${LIBNAME})
 
 # TEST TEST TEST
-set(PC_${LIBNAME}_INCLUDE_DIRS /usr/include;/usr/local/include)
+### set(PC_${LIBNAME}_INCLUDE_DIRS /usr/include;/usr/local/include)
 
-message("call find_path() for ${HEADERNAME}, look in ${PC_${LIBNAME}_INCLUDE_DIRS}")
+message("findLibrary.cmake: call find_path() for ${HEADERNAME}, look in ${PC_${LIBNAME}_INCLUDE_DIRS}")
 unset(${LIBNAME}_INCLUDE_DIR CACHE)
 find_path(${LIBNAME}_INCLUDE_DIR
     NAMES ${HEADERNAME}
@@ -44,11 +43,11 @@ find_path(${LIBNAME}_INCLUDE_DIR
 )
 
 if (NOT ${LIBNAME}_INCLUDE_DIR)
-  message("Could not find ${HEADERNAME}, dammit")
+  message("findLibrary.cmake: Could not find ${HEADERNAME}, dammit")
   unset(${LIBNAME}_FOUND)
   return()
 else()
-  message("found ${${LIBNAME}_INCLUDE_DIR}/${HEADERNAME}")
+  message("findLibrary.cmake: found ${${LIBNAME}_INCLUDE_DIR}/${HEADERNAME}")
 endif()
 
 set(${LIBNAME}_VERSION ${PC_${LIBNAME}_VERSION})
@@ -63,10 +62,10 @@ find_package_handle_standard_args(${LIBNAME}
     VERSION_VAR ${LIBNAME}_VERSION)
 
 if(${LIBNAME}_FOUND)
-    message("Found ${LIBNAME}!!!")
+    message("findLibrary.cmake: Found ${LIBNAME}!!!")
     set(${LIBNAME}_INCLUDE_DIRS ${${LIBNAME}_INCLUDE_DIR})
 else ()
-    message("Aw, ${LIBNAME} not found")
+    message("findLibrary.cmake: Aw, ${LIBNAME} not found")
 endif()
 
 if(${LIBNAME}_FOUND AND NOT TARGET ${LIBNAME}::${LIBNAME})
