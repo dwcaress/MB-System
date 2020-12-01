@@ -1,4 +1,5 @@
-# Accepts the following _INCLUDE_DIR and _LIB_DIR "-D" options on the command line:
+# Accepts the following _INCLUDE_DIR and _LIB_DIR "-D" options on the command
+# line:
 # GMT_
 # PROJ_
 # OPENGL_
@@ -22,14 +23,20 @@ add_compile_options(-fPIC -DPIC -g)
 set(MB_HOME ${CMAKE_CURRENT_SOURCE_DIR})
 message("MB_HOME: ${MB_HOME}")
 
+message("CMAKE_SYSTEM_PREFIX_PATH: ${CMAKE_SYSTEM_PREFIX_PATH}")
+message("CMAKE_C_IMPLICIT_INCLUDE_DIRECTORIES: ${CMAKE_C_IMPLICIT_INCLUDE_DIRECTORIES}")
+
+
 message("Add build-utils/ subdirectory to module CMAKE_MODULE_PATH")
 list(APPEND CMAKE_MODULE_PATH ${MB_HOME}/build-utils/)
 message("CMAKE_MODULE_PATH now: ${CMAKE_MODULE_PATH}")
 
-# Run script
+# Set variables for build-utils/findLibrary.cmake macro
 set(LIBNAME PROJ)
 set(HEADERNAME proj.h)
 set(HEADERSUBDIR proj)
+
+# run build-utils/findLibrary.cmake macro
 include(findLibrary)
 if (NOT PROJ_FOUND)
   message("PROJ not found")
@@ -38,7 +45,7 @@ else()
 endif()
 
 
-# Include my functions
+# Include my functions (these are not macros)
 include(foo)
 include(findLibraryDir)
 include(findCIncludeDir)
@@ -58,23 +65,23 @@ else()
 endif()
 
 if (NOT GMT_INCLUDE_DIR)
-  # Look for includes in usual places
+  # Look for gmt 'C' headers in implicit C include directories
   findCIncludeDir(gmt GMT_INCLUDE_DIR)
+  message("GMT_INCLUDE_DIR: ${GMT_INCLUDE_DIR}")
 endif()
 
-
 if (NOT VTK_INCLUDE_DIR)
-  # Look for includes in usual places
+  # Look for vtk-8.2 C++ headers in implicit C++ include directories
   findCXXIncludeDir(vtk-8.2 VTK_INCLUDE_DIR)
 endif()
 
 if (NOT PROJ_INCLUDE_DIR)
-  # Look for includes in usual places
+  # Look for proj C++ headers in implicit C++ include directories
   findCXXIncludeDir(proj PROJ_INCLUDE_DIR)
 endif()
 
 if (NOT OPENGL_INCLUDE_DIR)
-  # Look for includes in usual places
+  # Look for OpenGL 'C' headers in implicit C include directories  
   findCIncludeDir(GL OPENGL_INCLUDE_DIR)
 endif()
 
