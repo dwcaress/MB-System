@@ -246,6 +246,7 @@ editing or navigation editing components of the processing.
 
 ### Other required and suggested software and data
 --
+
 MB-System requires a number of other software packages and databases to be fully functional. These are:
 
 - GMT version 5.4 or later: MB-System makes use of the Generic Mapping Tools (GMT) libraries and programs for much of its graphics. GMT also includes a detailed global coastline database. GMT has been developed by Professor Paul Wessel of SOEST (School of Ocean and Earth Science and Technology at the Univeristy of Hawaii) and Dr. Walter H. F. Smith of NOAA. The GMT source code is available from the GMT web page.
