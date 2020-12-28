@@ -45,6 +45,7 @@ bin_PROGRAMS += mbset
 bin_PROGRAMS += mbsslayout
 bin_PROGRAMS += mbsvplist
 bin_PROGRAMS += $(MBSVPSELECT_PROG)
+bin_PROGRAMS += mbswath2las
 bin_PROGRAMS += mbtime
 bin_PROGRAMS += mbvoxelclean
 bin_PROGRAMS += $(FFTW_PROG)
@@ -125,6 +126,7 @@ mbsvplist_SOURCES = mbsvplist.cc
 if BUILD_MBSVPSELECT
 mbsvpselect_SOURCES = mbsvpselect.cc
 endif
+mbswath2las_SOURCES = mbswath2las.cc
 mbtime_SOURCES = mbtime.cc
 mbvoxelclean_SOURCES = mbvoxelclean.cc
 if BUILD_FFTW

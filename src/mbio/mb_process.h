@@ -681,6 +681,10 @@
 #define MB_PR_FILE_NOT_EXIST 2
 #define MB_PR_NO_PARAMETER_FILE 3
 
+/* mbprocess topo grid cache parameters */
+#define MB_PR_TOPOGRID_NUM_MAX 16
+#define MB_PR_TOPOGRID_NONUSE_MAX 16
+
 /* mbpreprocess defines */
 #define MB_PR_SSSOURCE_UNKNOWN 0
 #define MB_PR_SSSOURCE_CALIBRATEDSNIPPET 1
@@ -893,6 +897,9 @@ struct mb_process_struct {
   double mbp_ssrecalc_pixelsize;
   double mbp_ssrecalc_swathwidth;
   int mbp_ssrecalc_interpolate;
+
+  /* strip comments */
+  int mbp_strip_comments;
 
   /* metadata strings */
   char mbp_meta_vessel[MBP_FILENAMESIZE];

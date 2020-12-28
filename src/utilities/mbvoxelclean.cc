@@ -349,7 +349,7 @@ int main(int argc, char **argv) {
 
 	int error = MB_ERROR_NO_ERROR;
 
-	int uselockfiles = true;  // TODO(schwehr): mb_uselockfiles should use a bool
+	bool uselockfiles = true;
 	mb_uselockfiles(verbose, &uselockfiles);
 
 	/* get format if required */

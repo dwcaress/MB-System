@@ -177,7 +177,7 @@ static void *imbio_ptr = NULL;
 static int output_mode = MBEDIT_OUTPUT_EDIT;
 static bool run_mbprocess = false;
 static bool gui_mode = false;
-static int uselockfiles = true;
+static bool uselockfiles = true;
 
 /* mbio read and write values */
 static void *store_ptr = NULL;

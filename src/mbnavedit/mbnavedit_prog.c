@@ -155,7 +155,7 @@ static int beams_bath;
 static int beams_amp;
 static int pixels_ss;
 static void *imbio_ptr = NULL;
-static int uselockfiles = true;  // TODO(schwehr): bool
+static bool uselockfiles = true;
 
 /* mbio read and write values */
 static void *store_ptr = NULL;

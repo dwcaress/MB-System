@@ -1,4 +1,4 @@
-.TH mbprocess 1 "14 September 2018" "MB\-System 5.0" "MB\-System 5.0"
+.TH mbprocess 1 "28 December 2020" "MB\-System 5.0" "MB\-System 5.0"
 .SH NAME
 \fBmbprocess\fP \- this program performs a
 variety of swath data processing
@@ -16,7 +16,7 @@ and applying bathymetry edits from edit save files.
 Version 5.0
 
 .SH SYNOPSIS
-\fBmbprocess\fP \fB\-I\fP\fIinfile\fP [\fB\-F\fP\fIformat\fP
+\fBmbprocess\fP \fB\-I\fP\fIinfile\fP [\fB\-C\fP\fIthreads\fP \fB\-F\fP\fIformat\fP
 \fB\-N\fP \fB\-O\fP\fIoutfile\fP \fB\-P \-S \-T \-V \-H\fP]
 
 .SH DESCRIPTION
@@ -86,13 +86,18 @@ the parameter file (e.g. navigation files, edit save files,
 svp files). If the \fB\-P\fP option is specified, \fBmbprocess\fP
 will process every file, whether it needs it or not.
 
+As of release 5.7.7, \fBmbprocess\fP can process files in parallel using multiple
+threads. By default a single thread is used, but the \fB\-C\fP\fIthreads\fP option
+allows more threads to be used. The maximum number of threads available
+corresponds to the number of CPU cores available on the relevant computer.
+
 .SH MBPROCESS PARAMETER FILE COMMANDS
 
 The \fBmbprocess\fP commands found in parameter files are:
 
  GENERAL PARAMETERS:
    EXPLICIT
-        causes mbprocess to set modes implicitely
+        causes mbprocess to set modes implicitly
         \- e.g. the SVPFILE command will also set
           raytracing on even if the RAYTRACE command
           is not given [explicit mode commands required]
@@ -274,7 +279,7 @@ The \fBmbprocess\fP commands found in parameter files are:
           mode = 2 : min and max indicate start and end
                      acrosstrack distance (m) between which
                      data are flagged or zeroed
-          mode = 3 : min and max indicate minimumn and 
+          mode = 3 : min and max indicate minimumn and
                      platform speed (km/hr) between which
                      data are flagged or zeroed
    BATHCUTNUMBER min max
@@ -812,6 +817,13 @@ Christian do Santos Ferreira
   University of Bremen
 
 .SH OPTIONS
+.TP
+.B \-C
+\fIthreads\fP
+.br
+Sets the number of separate threads launched to process swath files in parallel.
+The default is 1; the maximum is system dependent as it is set to the number
+of CPU cores available on the relevant computer.
 .TP
 .B \-F
 \fIformat\fP
