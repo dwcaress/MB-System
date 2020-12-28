@@ -246,26 +246,30 @@ editing or navigation editing components of the processing.
 
 ### Other required and suggested software and data
 --
+
 MB-System requires a number of other software packages and databases to be fully functional. These are:
 
 - GMT version 5.4 or later: MB-System makes use of the Generic Mapping Tools (GMT) libraries and programs for much of its graphics. GMT also includes a detailed global coastline database. GMT has been developed by Professor Paul Wessel of SOEST (School of Ocean and Earth Science and Technology at the Univeristy of Hawaii) and Dr. Walter H. F. Smith of NOAA. The GMT source code is available from the GMT web page.
 
 - NetCDF version 4.0 or later: Both GMT and MB-System require the NCAR netCDF library.
-PROJ version 4 or later: PROJ is a generic coordinate transformation software that transforms geospatial coordinates from one coordinate reference system (CRS) to another. This includes cartographic projections as well as geodetic transformations.  MB-System depends on PROJ to deal with navigation in projected coordinate systems and to produce data products (e.g. grids) in coordinate systems other than WGS84 geographic. Support in MB-System from PROJ versions prior to 6.1 is deprecated, but still functional for MB-System version 5 releases.
-GDAL 1.11 or later: GDAL (Geospatial Data Abstraction Library) is a translator library for raster and vector geospatial data, and is now a prerequisite for GMT. Source code and documentation are available at the GDAL web page.
+
+- PROJ version 4 or later: PROJ is a generic coordinate transformation software that transforms geospatial coordinates from one coordinate reference system (CRS) to another. This includes cartographic projections as well as geodetic transformations.  MB-System depends on PROJ to deal with navigation in projected coordinate systems and to produce data products (e.g. grids) in coordinate systems other than WGS84 geographic. Support in MB-System from PROJ versions prior to 6.1 is deprecated, but still functional for MB-System version 5 releases.
+
+- GDAL 1.11 or later: GDAL (Geospatial Data Abstraction Library) is a translator library for raster and vector geospatial data, and is now a prerequisite for GMT. Source code and documentation are available at the GDAL web page.
 
 - Perl version 5.0 or later: Perl is a fast, well documented scripting language used widely in the Linux/Unix world. MB-System contains a number of perl scripts used both for installation and to ease common tasks. Most of the current Unix operating systems include perl. If you need to obtain the perl source code, first check with your local system administrator – you will probably find perl already available locally. The perl source code can be obtained from the GNU software archives of the Free Software Foundation.
-Perl Parallel-Forkmanager module: this Perl module is required for the parallel processing macros mbm_multicopy, mbm_multidatalist, and mbm_multiprocess to work. An easily installed package is available from from www.cpan.org.
+
+- Perl Parallel-Forkmanager module: this Perl module is required for the parallel processing macros mbm_multicopy, mbm_multidatalist, and mbm_multiprocess to work. An easily installed package is available from from www.cpan.org.
 
 - X11: The interactive graphical utilities in MB-System (MBedit, MBnavedit, MBvelocitytool, MBgrdviz, MBeditviz) use and require the X11 windowing system.
-Motif: The interactive graphical utilities in MB-System (MBedit, MBnavedit, MBvelocitytool, MBgrdviz, MBeditviz) use version 2 of the Motif widget set, and Motif libraries are required for these utilities to be built and to run. Most current Unix/Linux operating systems include the required Motif libraries, either in the original proprietary form (Motif), or the not-quite-open-source form (OpenMotif). If you do not have these libraries, the OpenMotif 2 source is available through Motifzone. An old alternative open source Motif-compatible distribution called LessTif does not work with the current OpenGL based MB-System programs (MBgrdviz, MBeditviz) and should be avoided.
+
+- Motif: The interactive graphical utilities in MB-System (MBedit, MBnavedit, MBvelocitytool, MBgrdviz, MBeditviz) use version 2 of the Motif widget set, and Motif libraries are required for these utilities to be built and to run. Most current Unix/Linux operating systems include the required Motif libraries, either in the original proprietary form (Motif), or the not-quite-open-source form (OpenMotif). If you do not have these libraries, the OpenMotif 2 source is available through Motifzone. An old alternative open source Motif-compatible distribution called LessTif does not work with the current OpenGL based MB-System programs (MBgrdviz, MBeditviz) and should be avoided.
 
 - FFTW: The “Fastest Fourier Transform in the West” package is used by the sonagram calculation program MBbsegypsd to calculate, well, Fast Fourier Transforms. FFTW is commonly used and thus available on or for most current Unix operating systems.
 
 - OTPS: The OSU Ocean Tide Prediction Software (OTPS) package is required for the tidal modeling program MBotps (which in fact is just a convenient front end for the old-style-batch interface of OTPS). The OTPS package can be obtained from the tidal modeling group at Oregon State University at https://www.tpxo.net. The global TPXO tidal models are made available for free to registered academic users, and can be licensed for a fee by non-academic groups.
 
 MB-System produces Postscript based graphics. Most current Unix operating systems provide a program which serves as a screen-based Postscript viewer. If you do not have a Postscript viewer, one option is to obtain one of several Ghostscript-based packages from the Free Software Foundation. The best is gv:
-
 
 - gv: Open source screen Postscript viewer. This package is a bit more sophisticated than ghostview and can handle poster-sized plots. The source code can be obtained from the GNU software archives of the Free Software Foundation.
 
@@ -306,7 +310,7 @@ To read the archives go to:
 We are interested in your suggestions. Please post in the discussion list
 rather than emailing the authors directly.
 
-###Bugs
+### Bugs
 --
 
 There are undoubtably bugs in this software. Although we make no promises about
