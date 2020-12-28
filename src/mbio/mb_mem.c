@@ -526,6 +526,7 @@ int mb_reallocd(int verbose, const char *sourcefile, int sourceline, size_t size
 }
 /*--------------------------------------------------------------------*/
 int mb_free(int verbose, void **ptr, int *error) {
+  verbose = 5;
   if (verbose >= 2 || mb_mem_debug) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -533,7 +534,8 @@ int mb_free(int verbose, void **ptr, int *error) {
     fprintf(stderr, "dbg2       ptr:        %p\n", (void *)*ptr);
   }
 
-  /* keep list of allocated memory */
+  /* if keeping list of allocated memory then free memory only if it is in
+      the list or list has overflowed */
   if (mb_memory_list_enabled) {
     /* check if pointer is in list */
     int iptr = -1;
@@ -557,6 +559,12 @@ int mb_free(int verbose, void **ptr, int *error) {
         mb_alloc_sourceline[i] = mb_alloc_sourceline[i + 1];
       }
       n_mb_alloc--;
+
+      /* free the memory */
+      if (*ptr != NULL) {
+        free(*ptr);
+        *ptr = NULL;
+      }
     }
 
     /* else heap overflow has occurred */
@@ -564,6 +572,10 @@ int mb_free(int verbose, void **ptr, int *error) {
 #ifdef MB_MEM_DEBUG
       fprintf(stderr, "NOTICE: mbm_mem overflow pointer freed %d in function %s\n", *ptr, __func__);
 #endif
+
+      /* free the memory */
+      free(*ptr);
+      *ptr = NULL;
     }
 
     if ((verbose >= 5 || mb_mem_debug) && iptr > -1) {
@@ -579,8 +591,8 @@ int mb_free(int verbose, void **ptr, int *error) {
     }
   }
 
-  /* free the memory */
-  if (*ptr != NULL) {
+  /* else if memory list is not being kept and *ptr != NULL, just free the memory */
+  else if (*ptr != NULL) {
     free(*ptr);
     *ptr = NULL;
   }
@@ -611,7 +623,8 @@ int mb_freed(int verbose, const char *sourcefile, int sourceline, void **ptr, in
     fprintf(stderr, "dbg2       ptr:        %p\n", (void *)*ptr);
   }
 
-  /* keep list of allocated memory */
+  /* if keeping list of allocated memory then free memory only if it is in
+      the list or list has overflowed */
   if (mb_memory_list_enabled) {
     /* check if pointer is in list */
     int iptr = -1;
@@ -633,6 +646,12 @@ int mb_freed(int verbose, const char *sourcefile, int sourceline, void **ptr, in
         mb_alloc_sourceline[i] = mb_alloc_sourceline[i + 1];
       }
       n_mb_alloc--;
+
+      /* free the memory */
+      if (*ptr != NULL) {
+        free(*ptr);
+        *ptr = NULL;
+      }
     }
 
     /* else  heap overflow has occurred */
@@ -640,6 +659,10 @@ int mb_freed(int verbose, const char *sourcefile, int sourceline, void **ptr, in
   #ifdef MB_MEM_DEBUG
       fprintf(stderr, "NOTICE: mbm_mem overflow pointer freed %d in function %s\n", *ptr, __func__);
   #endif
+
+      /* free the memory */
+      free(*ptr);
+      *ptr = NULL;
     }
 
     if ((verbose >= 5 || mb_mem_debug) && iptr > -1) {
@@ -655,8 +678,8 @@ int mb_freed(int verbose, const char *sourcefile, int sourceline, void **ptr, in
     }
   }
 
-  /* free the memory */
-  if (*ptr != NULL) {
+  /* else if memory list is not being kept and *ptr != NULL, just free the memory */
+  else if (*ptr != NULL) {
     free(*ptr);
     *ptr = NULL;
   }
@@ -682,7 +705,6 @@ int mb_memory_clear(int verbose, int *error) {
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
   }
-
 
   /* keep list of allocated memory */
   if (mb_memory_list_enabled) {
