@@ -78,7 +78,7 @@ double mbdef_btime_d;
 double mbdef_etime_d;
 double mbdef_speedmin;
 double mbdef_timegap;
-int mbdef_uselockfiles;  // TODO(schwehr): Make a bool
+bool mbdef_uselockfiles;
 
 /*--------------------------------------------------------------------*/
 int mbeditviz_init(int argc, char **argv) {

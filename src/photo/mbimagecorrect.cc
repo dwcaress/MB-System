@@ -1,18 +1,41 @@
-//
-// OpenCV code structure and CLAHE algorithm obtained from:
-//   https://stackoverflow.com/questions/24341114/simple-illumination-correction-in-images-opencv-c/24341809#24341809
-//
-// Gamma correction obtained from:
-//   https://github.com/DynamsoftRD/opencv-programming/blob/master/gamma-correction/gamma.cpp
-//
-// Note that OpenCV has arbitrary maximum image dimensions that are enforced when
-// reading images (but not when defining or writing images):
-//   size_t CV_IO_MAX_IMAGE_WIDTH   1 << 20 == 2^20 == 1048576
-//   size_t CV_IO_MAX_IMAGE_HEIGHT  1 << 20 == 2^20 == 1048576
-//   size_t CV_IO_MAX_IMAGE_PIXELS  1 << 30 == 2^30 == 1073741824
-// To work with images exceeding these limits set shell environment variables before
-// running the program, for instance to allow images with 2^40 (~1 trillion) pixels:
-//   export OPENCV_IO_MAX_IMAGE_PIXELS=1099511627776
+/*--------------------------------------------------------------------
+ *    The MB-system:    mbimagecorrect.cpp    10/17/2013
+ *
+ *    Copyright (c) 2020-2020 by
+ *    David W. Caress (caress@mbari.org)
+ *      Monterey Bay Aquarium Research Institute
+ *      Moss Landing, CA 95039
+ *    and Dale N. Chayes (dale@ldeo.columbia.edu)
+ *      Lamont-Doherty Earth Observatory
+ *      Palisades, NY 10964
+ *
+ *    See README file for copying and redistribution conditions.
+ *--------------------------------------------------------------------
+ *
+ * mbimagecorrect applies some simple brightness and contrast
+ * corrections to images using standard OpenCV algorithms.
+ *
+ * Author:    D. W. Caress
+ * Date:    November 6, 2020
+ *
+ *--------------------------------------------------------------------
+ *
+ * OpenCV code structure and CLAHE algorithm obtained from:
+ *   https://stackoverflow.com/questions/24341114/simple-illumination-correction-in-images-opencv-c/24341809#24341809
+ *
+ * Gamma correction obtained from:
+ *   https://github.com/DynamsoftRD/opencv-programming/blob/master/gamma-correction/gamma.cpp
+ *
+ * Note that OpenCV has arbitrary maximum image dimensions that are enforced when
+ * reading images (but not when defining or writing images):
+ *   size_t CV_IO_MAX_IMAGE_WIDTH   1 << 20 == 2^20 == 1048576
+ *   size_t CV_IO_MAX_IMAGE_HEIGHT  1 << 20 == 2^20 == 1048576
+ *   size_t CV_IO_MAX_IMAGE_PIXELS  1 << 30 == 2^30 == 1073741824
+ * To work with images exceeding these limits set shell environment variables before
+ * running the program, for instance to allow images with 2^40 (~1 trillion) pixels:
+ *   export OPENCV_IO_MAX_IMAGE_PIXELS=1099511627776
+ *
+ */
 
 #include <getopt.h>
 #include <vector>
@@ -38,7 +61,7 @@ using namespace cv;
 int main(int argc, char** argv)
 {
     char program_name[] = "mbimagecorrect";
-    char help_message[] =  "mbimagecorrect applies simple image corrections to an image or list of images";
+    char help_message[] =  "mbimagecorrect applies simple image corrections to an image";
     char usage_message[] = "mbimagecorrect \n"
                             "\t--verbose\n"
                             "\t--help\n"

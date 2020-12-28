@@ -382,14 +382,6 @@ LDFLAGS="-L/opt/X11/lib" \
 CFLAGS="-g -I/opt/X11/include" \
 ./configure \
     --prefix=/usr/local \
-    --with-proj-include=/usr/local/include \
-    --with-proj-lib=/usr/local/lib \
-    --with-fftw-include=/usr/local/include \
-    --with-fftw-lib=/usr/local/lib \
-    --with-motif-include=/usr/local/include \
-    --with-motif-lib=/usr/local/lib \
-    --with-opengl-include=/opt/X11/include \
-    --with-opengl-lib=/opt/X11/lib \
     --with-otps-dir=/usr/local/opt/otps \
     --enable-hardening \
     --enable-test \

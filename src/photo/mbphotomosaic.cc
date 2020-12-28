@@ -34,6 +34,7 @@
 #include <vector>
 #include <string>
 #include <algorithm>
+#include <thread>
 
 /* MB-System include files */
 extern "C"
@@ -58,6 +59,11 @@ using namespace cv;
 
 #define MBPM_PRIORITY_CENTRALITY_ONLY               1
 #define MBPM_PRIORITY_CENTRALITY_PLUS_STANDOFF      2
+
+void process_image(mb_path imageFile)
+{
+    fprintf(stdout, "Processing image %s\n", imageFile);
+}
 
 int main(int argc, char** argv)
 {
@@ -118,7 +124,7 @@ int main(int argc, char** argv)
     char    units[MB_PATH_MAXLINE];
     Mat     OutputImage;
     mb_path    OutputImageFile;
-    int        outputimage_specified = MB_NO;
+    bool       outputimage_specified = false;
     mb_path    OutputWorldFile;
     int    priority_mode = MBPM_PRIORITY_CENTRALITY_ONLY;
     float    *priority;
@@ -286,7 +292,7 @@ int main(int argc, char** argv)
     FILE *stream = NULL;
     FILE *tfp;
 
-    int use_this_image;
+    bool use_this_image = false;
     mb_path buffer;
     char *result;
     int lonflip;
@@ -431,7 +437,7 @@ int main(int argc, char** argv)
                 const int n = sscanf (optarg,"%s", OutputImageFile);
                 if (n == 1)
                     {
-                    outputimage_specified = MB_YES;
+                    outputimage_specified = true;
                     if (strlen(OutputImageFile) < 6
                         || ((strncmp(".tif", &OutputImageFile[strlen(OutputImageFile)-4], 4) != 0)
                             && (strncmp(".tiff", &OutputImageFile[strlen(OutputImageFile)-5], 5) != 0)))
@@ -672,6 +678,7 @@ int main(int argc, char** argv)
         fprintf(stream,"dbg2       use_camera_mode:             %d\n",use_camera_mode);
         fprintf(stream,"dbg2       imageQualityThreshold:       %f\n",imageQualityThreshold);
         fprintf(stream,"dbg2       show_images:                 %d\n",show_images);
+        fprintf(stream,"dbg2       outputimage_specified:       %d\n",outputimage_specified);
         fprintf(stream,"dbg2       OutputImageFile:             %s\n",OutputImageFile);
         fprintf(stream,"dbg2       bounds_specified:            %d\n",bounds_specified);
         fprintf(stream,"dbg2       Bounds: west:                %f\n",bounds[0]);
@@ -724,6 +731,7 @@ int main(int argc, char** argv)
         fprintf(stream,"  use_camera_mode:             %d\n",use_camera_mode);
         fprintf(stream,"  imageQualityThreshold:       %f\n",imageQualityThreshold);
         fprintf(stream,"  show_images:                 %d\n",show_images);
+        fprintf(stream,"  outputimage_specified:       %d\n",outputimage_specified);
         fprintf(stream,"  OutputImageFile:             %s\n",OutputImageFile);
         fprintf(stream,"  bounds_specified:            %d\n",bounds_specified);
         fprintf(stream,"  Bounds: west:                %f\n",bounds[0]);
@@ -1282,7 +1290,10 @@ bounds[0], bounds[1], bounds[2], bounds[3]);*/
     if (verbose >= 1)
         {
         fprintf(stdout,"\nOutput Image Parameters:\n");
-        fprintf(stream,"  OutputImageFile:    %s\n",OutputImageFile);
+        if (outputimage_specified)
+            fprintf(stream,"  OutputImageFile:    %s\n",OutputImageFile);
+        else
+            fprintf(stream,"  No image output - listing images that would be used for the defined area\n");
         if (use_projection == MB_YES)
             fprintf(stream,"  projection:         %s\n",projection_id);
         else
@@ -1666,27 +1677,27 @@ fprintf(stderr,"Done reading TopographyGridFile: %s\n", TopographyGridFile);
             }
 
             /* check to see if this image should be used */
-            use_this_image = MB_NO;
+            use_this_image = false;
             if (image_camera == MBPM_CAMERA_LEFT
                 && (use_camera_mode == MBPM_USE_LEFT || use_camera_mode == MBPM_USE_STEREO)) {
                      time_d = left_time_d;
                     strcpy(imageFile, imageLeftFile);
-                    use_this_image = MB_YES;
+                    use_this_image = true;
             }
             else if (image_camera == MBPM_CAMERA_RIGHT
                 && (use_camera_mode == MBPM_USE_RIGHT || use_camera_mode == MBPM_USE_STEREO)) {
                      time_d = left_time_d + time_diff;
                     strcpy(imageFile, imageRightFile);
-                    use_this_image = MB_YES;
+                    use_this_image = true;
             }
 
             /* check imageQuality value against threshold to see if this image should be used */
-            if (use_this_image == MB_YES && imageQuality < imageQualityThreshold) {
-              use_this_image = MB_NO;
+            if (use_this_image && imageQuality < imageQualityThreshold) {
+              use_this_image = false;
             }
 
             /* check navigation for location close to or inside destination image bounds */
-            if (use_this_image == MB_YES) {
+            if (use_this_image) {
                 if (nnav > 0 && time_d >= ntime[0] && time_d <= ntime[nnav-1]) {
                     /* get navigation for this image */
                     intstat = mb_linear_interp_longitude(verbose,
@@ -1699,25 +1710,40 @@ fprintf(stderr,"Done reading TopographyGridFile: %s\n", TopographyGridFile);
                             &error);
                     if (navlon < pbounds[0] || navlon > pbounds[1]
                         || navlat < pbounds[2] || navlat > pbounds[3]) {
-                        use_this_image = MB_NO;
+                        use_this_image = false;
                     }
                 }
                 else {
-                    use_this_image = MB_NO;
+                    use_this_image = false;
                 }
             }
 
+// Test thread use
+fprintf(stderr, "About to start thread\n");
+std:thread thread1(process_image, imageFile);
+thread1.join();
+fprintf(stderr, "Done with thread\n");
+
+            /* if no output specified but image would be used, print it out and
+                reset use_this_image flag off so it is not read and processed
+                - this lets us get a list of the images to be used without taking
+                the time to process them */
+            if (!outputimage_specified && use_this_image) {
+                fprintf(stdout,"%s\n", imageFile);
+                use_this_image = false;
+            }
+
             /* read the image */
-            if (use_this_image == MB_YES) {
+            if (use_this_image) {
                 /* read the image */
                 imageProcess = imread(imageFile);
                 if (imageProcess.empty()) {
-                    use_this_image = MB_NO;
+                    use_this_image = false;
                 }
             }
 
             /* process the image */
-            if (use_this_image == MB_YES) {
+            if (use_this_image) {
 
                 /* if calibration loaded, undistort the image */
                 if (calibration_specified == MB_YES) {
@@ -2243,14 +2269,13 @@ fprintf(stderr,"Done reading TopographyGridFile: %s\n", TopographyGridFile);
 
                             /* find the location and footprint of the input pixel
                                 in the output image */
-                            unsigned int iii, jjj, kkk;
+                            double diii, djjj;
                             double pixel_dx, pixel_dy;
                             if (use_projection == MB_YES) {
                                 /* pixel location */
                                 mb_proj_forward(verbose, pjptr, lon, lat, &xx, &yy, &error);
-                                iii = (xx - bounds[0] + 0.5 * dx) / dx;
-                                jjj = (bounds[3] - yy + 0.5 * dy) / dy;
-                                kkk = xdim * jjj + iii;
+                                diii = (xx - bounds[0] + 0.5 * dx) / dx;
+                                djjj = (bounds[3] - yy + 0.5 * dy) / dy;
 
                                 /* pixel footprint size */
                                 pixel_dx = 4.0 * rr * cos(DTR * theta) * tan (DTR * dtheta) / dx;
@@ -2259,9 +2284,8 @@ fprintf(stderr,"Done reading TopographyGridFile: %s\n", TopographyGridFile);
 
                             else {
                                 /* pixel location */
-                                iii = (lon - bounds[0] + 0.5 * dx) / dx;
-                                jjj = (bounds[3] - lat + 0.5 * dy) / dy;
-                                kkk = xdim * jjj + iii;
+                                diii = (lon - bounds[0] + 0.5 * dx) / dx;
+                                djjj = (bounds[3] - lat + 0.5 * dy) / dy;
 
                                 /* pixel footprint size */
                                 pixel_dx = 4.0 * rr * cos(DTR * theta) * tan (DTR * dtheta) * (mtodeglon / dx);
@@ -2269,10 +2293,21 @@ fprintf(stderr,"Done reading TopographyGridFile: %s\n", TopographyGridFile);
                             }
 
                             /* figure out the "footprint" extent of the mapped pixel */
-                            unsigned int iii1 = iii - floor(pixel_dx);
-                            unsigned int iii2 = iii + floor(pixel_dx);
-                            unsigned int jjj1 = jjj - floor(pixel_dy);
-                            unsigned int jjj2 = jjj + floor(pixel_dy);
+                            int iii1 = (int)(floor(diii) - floor(pixel_dx));
+                            int iii2 = (int)(floor(diii) + floor(pixel_dx));
+                            int jjj1 = (int)(floor(djjj) - floor(pixel_dy));
+                            int jjj2 = (int)(floor(djjj) + floor(pixel_dy));
+                            unsigned int uiii1 = (unsigned int)(MAX(iii1, 0));
+                            unsigned int uiii2 = (unsigned int)(MAX(MIN(iii2, xdim - 1), 0));
+                            unsigned int ujjj1 = (unsigned int)(MAX(jjj1, 0));
+                            unsigned int ujjj2 = (unsigned int)(MAX(MIN(jjj2, ydim - 1), 0));
+
+                            unsigned int iii = MIN(MAX((unsigned int)floor(diii), 2), xdim - 3);
+                            unsigned int jjj = MIN(MAX((unsigned int)floor(djjj), 2), ydim - 3);
+                            bool out_of_map = true;
+                            if (diii >= 2.0 && diii < xdim - 3.0 && djjj >= 2.0 && djjj < ydim - 3.0)
+                                out_of_map = false;
+
 //fprintf(stderr,"i:%d j:%d iii:%d:%d:%d jjj:%d:%d:%d theta:%f dtheta:%f pixel_dx:%f pixel_dy:%f dx:%g dy:%g mtodeglon:%g mtodeglat:%g\n",
 //i,j,iii1,iii,iii2,jjj1,jjj,jjj2,theta,dtheta,pixel_dx,pixel_dy,dx,dy,mtodeglon,mtodeglat);
 //fprintf(stderr,"iii:%d jjj:%d\n",iii,jjj);
@@ -2280,18 +2315,18 @@ fprintf(stderr,"Done reading TopographyGridFile: %s\n", TopographyGridFile);
 //fprintf(stderr,"       standoff:%f pixel_priority:%.3f\n", standoff, pixel_priority);
 //}
 
-                            for (unsigned int ipix=iii1;ipix<=iii2;ipix++) {
-                                for (unsigned int jpix=jjj1;jpix<=jjj2;jpix++) {
+                            for (unsigned int ipix=uiii1;ipix<=uiii2;ipix++) {
+                                for (unsigned int jpix=ujjj1;jpix<=ujjj2;jpix++) {
                                     unsigned int kpix = xdim * jpix + ipix;
-                                    if (ipix == iii && jpix == jjj)
+                                    if (out_of_map)
+                                        pixel_priority_use = 0.98 * pixel_priority;
+                                    else if (ipix == iii && jpix == jjj)
                                         pixel_priority_use = pixel_priority;
                                     else if (ipix > iii-2 && iii < iii+2 && jpix > jjj-2 && jpix < jjj+2)
                                         pixel_priority_use = 0.99 * pixel_priority;
                                     else
                                         pixel_priority_use = 0.98 * pixel_priority;
-                                    if (ipix >= 0 && ipix < xdim
-                                        && jpix >= 0 && jpix < ydim
-                                        && pixel_priority_use > priority[kpix]) {
+                                    if (pixel_priority_use > priority[kpix]) {
 //if (debugprint == MB_YES) {
 //fprintf(stderr,"              Pixel used: i:%d j:%d  ipix:%d jpix:%d  BGR:%d %d %d Priority:%f %f\n",
 //i,j,ipix,jpix,OutputImage.at<Vec3b>(jpix,ipix)[0],OutputImage.at<Vec3b>(jpix,ipix)[1],OutputImage.at<Vec3b>(jpix,ipix)[2],
@@ -2323,40 +2358,42 @@ fprintf(stderr,"Done reading TopographyGridFile: %s\n", TopographyGridFile);
     status = mb_imagelist_close(verbose, &imagelist_ptr, &error);
 
     /* Write out the ouput image */
-    status = imwrite(OutputImageFile,OutputImage);
-    if (status == MB_SUCCESS)
-        {
-        /* output world file */
-        strcpy(OutputWorldFile, OutputImageFile);
-        OutputWorldFile[strlen(OutputImageFile)-5] = '\0';
-        strcat(OutputWorldFile,".tfw");
-        if ((tfp = fopen(OutputWorldFile,"w")) == NULL)
+    if (outputimage_specified) {
+        status = imwrite(OutputImageFile,OutputImage);
+        if (status == MB_SUCCESS)
             {
-            error = MB_ERROR_OPEN_FAIL;
-            fprintf(stderr,"\nUnable to open output world file: %s\n",
-                  OutputWorldFile);
-            fprintf(stderr,"\nProgram <%s> Terminated\n",
-                  program_name);
-            exit(error);
+            /* output world file */
+            strcpy(OutputWorldFile, OutputImageFile);
+            OutputWorldFile[strlen(OutputImageFile)-5] = '\0';
+            strcat(OutputWorldFile,".tfw");
+            if ((tfp = fopen(OutputWorldFile,"w")) == NULL)
+                {
+                error = MB_ERROR_OPEN_FAIL;
+                fprintf(stderr,"\nUnable to open output world file: %s\n",
+                      OutputWorldFile);
+                fprintf(stderr,"\nProgram <%s> Terminated\n",
+                      program_name);
+                exit(error);
+                }
+
+            /* write out world file contents */
+            fprintf(tfp, "%.10g\r\n0.0\r\n0.0\r\n%.10g\r\n%.10g\r\n%.10g\r\n",
+                dx, -dy,
+                bounds[0] - 0.5 * dx,
+                bounds[3] + 0.5 * dy);
+
+            /* close the world file */
+            fclose(tfp);
+
+            /* announce it */
+            fprintf(stderr, "\nOutput photomosaic: %s\n",OutputImageFile);
+
             }
-
-        /* write out world file contents */
-        fprintf(tfp, "%.10g\r\n0.0\r\n0.0\r\n%.10g\r\n%.10g\r\n%.10g\r\n",
-            dx, -dy,
-            bounds[0] - 0.5 * dx,
-            bounds[3] + 0.5 * dy);
-
-        /* close the world file */
-        fclose(tfp);
-
-        /* announce it */
-        fprintf(stderr, "\nOutput photomosaic: %s\n",OutputImageFile);
-
-        }
-    else
-        {
-        fprintf(stderr, "Could not save: %s\n",OutputImageFile);
-        }
+        else
+            {
+            fprintf(stderr, "Could not save: %s\n",OutputImageFile);
+            }
+    }
 
     /* deallocate priority array */
     status = mb_freed(verbose,__FILE__,__LINE__,(void **)&priority,&error);

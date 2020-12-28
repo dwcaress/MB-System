@@ -186,7 +186,7 @@ int main(int argc, char **argv) {
   double speedmin;
   double timegap;
   status = mb_defaults(verbose, &format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
-  int uselockfiles;  // TODO(schwehr): Make mb_uselockfiles take a bool.
+  bool uselockfiles;
   mb_uselockfiles(verbose, &uselockfiles);
 
   /* reset all defaults but the format and lonflip */

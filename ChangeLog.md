@@ -20,7 +20,7 @@ include "beta" in the tag name are preliminary and generally not announced.
 Distributions that do not include "beta" in the tag name correspond to the major,
 announced releases. The source distributions associated with all releases, major or beta, are equally accessible as tarballs through the Github interface.
 
-- Version 5.7.7beta05    November 6, 2020
+- Version 5.7.7beta05    December 28, 2020
 - Version 5.7.7beta04    October 28, 2020
 - Version 5.7.7beta03    October 27, 2020
 - Version 5.7.7beta02    October 8, 2020
@@ -372,7 +372,7 @@ announced releases. The source distributions associated with all releases, major
 ### MB-System Version 5.7 Release Notes:
 --
 
-#### 5.7.7beta05 (November 6, 2020)
+#### 5.7.7beta05 (December 28, 2020)
 
 Format 261 (MBF_KEMKMALL): Fixed bug in handling version 0 MWC datagrams.
 
@@ -384,6 +384,19 @@ taken with the right camera of a stereo pair.
 
 Mbimagecorrect: New program that performs some simple brightness and contrast
 corrections using standard OpenCV algorithms.
+
+Mbprocess: Recast the program to process files in parallel using separate threads.
+This was implemented in the C++ main code using the C++11 standard thread API.
+The default is to use a single processing thread and therefore to process the
+files serially; the new -Cthreads option enables the use of multiple threads.
+For now, the built-in record keeping of memory allocation/deallocation is disabled
+for mbprocess because this functionality is not thread-safe.
+
+Mbnavadjust: The navigation adjustment inversion has been improved by tuning the
+parameters used for the overdetermined least squares solution.
+
+Mbswath2las: Shell for not-yet-working program to export soundings from swath data
+to some variant of the LAS format used for point cloud data.
 
 #### 5.7.7beta04 (October 28, 2020)
 
