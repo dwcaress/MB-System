@@ -20,6 +20,7 @@ include "beta" in the tag name are preliminary and generally not announced.
 Distributions that do not include "beta" in the tag name correspond to the major,
 announced releases. The source distributions associated with all releases, major or beta, are equally accessible as tarballs through the Github interface.
 
+- Version 5.7.7beta06    December 30, 2020
 - Version 5.7.7beta05    December 28, 2020
 - Version 5.7.7beta04    October 28, 2020
 - Version 5.7.7beta03    October 27, 2020
@@ -371,6 +372,11 @@ announced releases. The source distributions associated with all releases, major
 --
 ### MB-System Version 5.7 Release Notes:
 --
+
+#### 5.7.7beta05 (December 30, 2020)
+
+Mbprocess: Fixed raytracking library used by mbprocess so that it is thread
+safe. The relevant code is in mbsystem/src/mbaux/mb_rt.c
 
 #### 5.7.7beta05 (December 28, 2020)
 
