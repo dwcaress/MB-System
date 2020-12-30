@@ -13094,7 +13094,7 @@ ifile, isection, isnav);
       do_info_add(message, false);
       if (mbna_verbose == 0)
         fprintf(stderr, "%s", message);
-      sprintf(command, "cd %s ; mbprocess", project.datadir);
+      sprintf(command, "cd %s ; mbprocess -C4", project.datadir);
       fprintf(stderr, "Executing:\n%s\n\n", command);
       /* const int shellstatus = */ system(command);
     }
