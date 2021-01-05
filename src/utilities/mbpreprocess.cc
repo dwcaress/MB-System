@@ -183,6 +183,9 @@ int main(int argc, char **argv) {
   memset(platform_file, 0, sizeof(mb_path));
   mb_path read_file = "datalist.mb-1";
   memset(read_file, 0, sizeof(mb_path));
+  bool output_directory_set = false;
+  mb_path output_directory = "";
+  memset(output_directory, 0, sizeof(mb_path));
   struct mb_preprocess_struct preprocess_pars;
   memset(&preprocess_pars, 0, sizeof(struct mb_preprocess_struct));
 
@@ -228,6 +231,7 @@ int main(int argc, char **argv) {
                                       {"help", no_argument, nullptr, 0},
                                       {"input", required_argument, nullptr, 0},
                                       {"format", required_argument, nullptr, 0},
+                                      {"output-directory", required_argument, nullptr, 0},
                                       {"platform-file", required_argument, nullptr, 0},
                                       {"platform-target-sensor", required_argument, nullptr, 0},
                                       {"output-sensor-fnv", no_argument, nullptr, 0},
@@ -315,9 +319,14 @@ int main(int argc, char **argv) {
         else if (strcmp("format", options[option_index].name) == 0) {
           /* n = */ sscanf(optarg, "%d", &format);
         }
+        else if (strcmp("output-directory", options[option_index].name) == 0) {
+          const int n = sscanf(optarg, "%1023s", output_directory);
+          if (n == 1 && strlen(output_directory) > 0)
+            output_directory_set = true;
+        }
         else if (strcmp("platform-file", options[option_index].name) == 0) {
           const int n = sscanf(optarg, "%1023s", platform_file);
-          if (n == 1)
+          if (n == 1 && strlen(platform_file) > 0)
             use_platform_file = true;
         }
         else if (strcmp("platform-target-sensor", options[option_index].name) == 0) {
@@ -716,6 +725,11 @@ int main(int argc, char **argv) {
     fprintf(stderr, "dbg2  Input survey data to be preprocessed:\n");
     fprintf(stderr, "dbg2       read_file:                    %s\n", read_file);
     fprintf(stderr, "dbg2       format:                       %d\n", format);
+    fprintf(stderr, "dbg2  Output directory:\n");
+    if (output_directory_set)
+      fprintf(stderr, "dbg2       output_directory:             %s\n", output_directory);
+    else
+      fprintf(stderr, "dbg2       output_directory:             not specified, use working directory\n");
     fprintf(stderr, "dbg2  Source of platform model:\n");
     if (use_platform_file)
       fprintf(stderr, "dbg2       platform_file:                %s\n", platform_file);
@@ -816,6 +830,11 @@ int main(int argc, char **argv) {
     fprintf(stderr, "Input survey data to be preprocessed:\n");
     fprintf(stderr, "     read_file:                    %s\n", read_file);
     fprintf(stderr, "     format:                       %d\n", format);
+    fprintf(stderr, "Output directory:\n");
+    if (output_directory_set)
+      fprintf(stderr, "     output_directory:             %s\n", output_directory);
+    else
+      fprintf(stderr, "     output_directory:             not specified, use working directory\n");
     fprintf(stderr, "Source of platform model:\n");
     if (use_platform_file)
       fprintf(stderr, "     platform_file:                %s\n", platform_file);
@@ -2330,6 +2349,21 @@ int main(int argc, char **argv) {
     if (strcmp(ifile, ofile) == 0)
       sprintf(ofile, "%sr.mb%d", fileroot, oformat);
 
+    /* if a different output directory was set by user, reset file path */
+    if (output_directory_set) {
+      char buffer[MB_PATH_MAXLINE] = "";
+      strcpy(buffer, output_directory);
+      if (buffer[strlen(output_directory) - 1] != '/')
+        strcat(buffer, "/");
+      char *filenameptr;
+      if (strrchr(ofile, '/') != nullptr)
+        filenameptr = strrchr(ofile, '/') + 1;
+      else
+        filenameptr = ofile;
+      strcat(buffer, filenameptr);
+      strcpy(ofile, buffer);
+    }
+
     /* Figure out if the file should be preprocessed - don't if it looks like
       the file was previously preprocessed and looks up to date  AND the
       appropriate request has been made */
@@ -3165,7 +3199,7 @@ int main(int argc, char **argv) {
 
       /* close the input ("logged") swath file */
       status &= mb_close(verbose, &imbio_ptr, &error);
-	    n_rt_files++;
+      n_rt_files++;
 
       /* close the output ("raw") swath file */
       status &= mb_close(verbose, &ombio_ptr, &error);

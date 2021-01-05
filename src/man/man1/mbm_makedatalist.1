@@ -1,4 +1,4 @@
-.TH mbm_makedatalist 1 "27 October 2020" "MB-System 5.0" "MB-System 5.0"
+.TH mbm_makedatalist 1 "3 January 2021" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbm_makedatalist\fP \- Macro to generate a datalist of the swath
 files in a specified directory.
@@ -64,10 +64,11 @@ time order. However, Kongsberg multibeam data filenames usually start with a sur
 file number that restarts at 0001 whenever datalogging is stopped and restarted.
 Consequently, when data from multiple instances of logging are present in a
 single directory, the simple listing of files will not in general be in time
-order. If the file suffix is declared to be ".all" or ".ALL" using the \fB-S\fP
+order. If the file suffix is declared to be ".all", ".ALL", ".kmall", or ".KMALL" using the \fB-S\fP
 option, then \fBmbm_makedatalist\fP will attempt to sort the swath files into
 time order before generating the final datalist. This behavior can be disabled
-by specifying the \fB-T\fP option.
+by specifying the \fB-T\fP option. Kongsberg dataloggers often create junk data
+files with names such as "9999.all" or "9999.ALL"; these filenames are ignored.
 
 .SH MB-SYSTEM AUTHORSHIP
 David W. Caress

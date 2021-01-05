@@ -10,16 +10,20 @@ directory structure.
 ### MB-System Version 5 Releases:
 
 --
-In the list below, releases shown in bold type are major, announced releases. The other entries are test or "beta" releases that were not announced and generally not widely distributed. Prior to 5.7.1, the MB-System source code repository was a privately hosted
-Subversion archive. In that era, announced source distribution releases
-were made available for download by ftp. Starting with 5.7.1 the
+In the list below, releases shown in bold type are major, announced releases.
+The other entries are test or "beta" releases that were not announced and generally
+not widely distributed. Prior to 5.7.1, the MB-System source code repository was
+a privately hosted Subversion archive. In that era, announced source distribution
+releases were made available for download by ftp. Starting with 5.7.1 the
 MB-System source code repository is hosted by Github at
     https://github.com/dwcaress/MB-System/
 and each distribution corresponds to a discrete Github release tag. Releases that
 include "beta" in the tag name are preliminary and generally not announced.
 Distributions that do not include "beta" in the tag name correspond to the major,
-announced releases. The source distributions associated with all releases, major or beta, are equally accessible as tarballs through the Github interface.
+announced releases. The source distributions associated with all releases, major
+or beta, are equally accessible as tarballs through the Github interface.
 
+- Version 5.7.7beta07    January 5, 2020
 - Version 5.7.7beta06    December 30, 2020
 - Version 5.7.7beta05    December 28, 2020
 - Version 5.7.7beta04    October 28, 2020
@@ -75,7 +79,7 @@ announced releases. The source distributions associated with all releases, major
 - Version 5.7.6beta4     August 2, 2019
 - Version 5.7.6beta2     July 25, 2019
 - Version 5.7.6beta1     July 6, 2019
-- **Version 5.7.5          June 26, 2019**
+- **Version 5.7.5        June 26, 2019**
 - Version 5.7.5beta12    June 24, 2019
 - Version 5.7.5beta11    June 16, 2019
 - Version 5.7.5beta10    June 9, 2019
@@ -372,8 +376,24 @@ announced releases. The source distributions associated with all releases, major
 --
 ### MB-System Version 5.7 Release Notes:
 --
+#### 5.7.7beta07 (January 5, 2020)
 
-#### 5.7.7beta05 (December 30, 2020)
+Mbclean: Fixed two bugs. The first involved setting the left/right bounds of
+flagging by acrosstrack distance using the -Y option, and the other resulted in
+slope flagging being applied when not requested when the -Y option was used alone.
+
+Mbpreprocess: Added option to set directory where output files are written instead
+of writing the output files parallel to the input swath files.
+
+Format 121 (MBF_GSFGENMB): Modified handling of multibeam snippet backscatter so
+that samples associated with beams flagged as bad are nulled, and so that modified
+backscatter is written to the output file by mbprocess.
+
+Mbeditviz: Modified 3D sounding view so that the depth buffering is actually used.
+
+Mbm_makedatalist: Now ignores the most recent file when the -L option is used.
+
+#### 5.7.7beta06 (December 30, 2020)
 
 Mbprocess: Fixed raytracking library used by mbprocess so that it is thread
 safe. The relevant code is in mbsystem/src/mbaux/mb_rt.c

@@ -85,7 +85,7 @@
 #undef MBTRN_ENABLED
 
 /* Build graphical tools */
-#undef MBUTILS_ENABLED
+#undef MB_GRAPHICAL_ENABLED
 
 /* Build tools using OpenCV */
 #undef OPENCVTOOLS_ENABLED

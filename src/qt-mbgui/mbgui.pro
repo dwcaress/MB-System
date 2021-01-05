@@ -53,10 +53,10 @@ DISTFILES += \
     glsl-shaders/test.vert
 
 INCLUDEPATH += /usr/local/include/gmt
-INCLUDEPATH += /opt/X11/include
+INCLUDEPATH += 
 
 LIBS += -L/usr/local/lib -lgmt
-LIBS += -L/opt/X11/lib -lGL -lGLU
+LIBS += -lGL -lGLU
 
 RESOURCES += \
     resources.qrc
