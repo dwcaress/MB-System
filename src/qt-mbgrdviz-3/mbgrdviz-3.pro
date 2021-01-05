@@ -30,7 +30,7 @@ SOURCES += \
 ## DISTFILES += \
 
 INCLUDEPATH += /usr/local/include/gmt
-INCLUDEPATH += /opt/X11/include
+INCLUDEPATH += 
 INCLUDEPATH += ../qt-mbgui
 
 LIBS += -L../qt-mbgui -lMBGui

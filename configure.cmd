@@ -393,6 +393,17 @@ CFLAGS="-g -I/opt/X11/include" \
 #    --enable-qt \
 #    --enable-pcltools
 
+LDFLAGS="-L/opt/X11/lib" \
+CFLAGS="-g -I/opt/X11/include" \
+./configure \
+    --prefix=/usr/local \
+    --with-otps-dir=/usr/local/opt/otps \
+    --enable-hardening \
+    --enable-test \
+    --enable-mbtrn \
+    --enable-mbtnav \
+    --disable-mbtools
+
 make
 make check
 make install
