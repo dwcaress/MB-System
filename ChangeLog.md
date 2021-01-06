@@ -23,7 +23,7 @@ Distributions that do not include "beta" in the tag name correspond to the major
 announced releases. The source distributions associated with all releases, major
 or beta, are equally accessible as tarballs through the Github interface.
 
-- Version 5.7.7beta07    January 5, 2020
+- Version 5.7.7beta08    January 6, 2020
 - Version 5.7.7beta06    December 30, 2020
 - Version 5.7.7beta05    December 28, 2020
 - Version 5.7.7beta04    October 28, 2020
@@ -376,7 +376,7 @@ or beta, are equally accessible as tarballs through the Github interface.
 --
 ### MB-System Version 5.7 Release Notes:
 --
-#### 5.7.7beta07 (January 5, 2020)
+#### 5.7.7beta08 (January 6, 2020)
 
 Formats 88 (MBF_RESON7KR) and 89 (MBF_RESON7K3): Fixed bug in handling of
 PingMotion data records (7012) that caused memory overruns and seg faults.
