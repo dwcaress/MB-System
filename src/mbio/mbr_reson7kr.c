@@ -5635,7 +5635,6 @@ int mbr_reson7kr_rd_v2pingmotion(int verbose, char *buffer, void *store_ptr, int
   if (verbose >= 2)
 #endif
     mbsys_reson7k_print_v2pingmotion(verbose, v2pingmotion, error);
-mbsys_reson7k_print_v2pingmotion(1, v2pingmotion, error);
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
