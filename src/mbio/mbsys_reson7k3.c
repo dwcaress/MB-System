@@ -256,14 +256,14 @@ int mbsys_reson7k3_deall(int verbose, void *mbio_ptr, void **store_ptr, int *err
 
   /* Reson 7k ping MotionOverGround (record 7012) */
   s7k3_PingMotion *PingMotion = &store->PingMotion;
+  if (PingMotion->n > 0 && PingMotion->roll != NULL)
+    status = mb_freed(verbose, __FILE__, __LINE__, (void **)&(PingMotion->roll), error);
+  if (PingMotion->n > 0 && PingMotion->heading != NULL)
+    status = mb_freed(verbose, __FILE__, __LINE__, (void **)&(PingMotion->heading), error);
+  if (PingMotion->n > 0 && PingMotion->heave != NULL)
+    status = mb_freed(verbose, __FILE__, __LINE__, (void **)&(PingMotion->heave), error);
   PingMotion->n = 0;
   PingMotion->nalloc = 0;
-  if (PingMotion->roll != NULL)
-    status = mb_freed(verbose, __FILE__, __LINE__, (void **)&(PingMotion->roll), error);
-  if (PingMotion->heading != NULL)
-    status = mb_freed(verbose, __FILE__, __LINE__, (void **)&(PingMotion->heading), error);
-  if (PingMotion->heave != NULL)
-    status = mb_freed(verbose, __FILE__, __LINE__, (void **)&(PingMotion->heave), error);
 
   /* Reson 7k Adaptive Gate (record 7014) */
 

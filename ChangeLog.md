@@ -378,6 +378,9 @@ or beta, are equally accessible as tarballs through the Github interface.
 --
 #### 5.7.7beta07 (January 5, 2020)
 
+Formats 88 (MBF_RESON7KR) and 89 (MBF_RESON7K3): Fixed bug in handling of
+PingMotion data records (7012) that caused memory overruns and seg faults.
+
 Mbclean: Fixed two bugs. The first involved setting the left/right bounds of
 flagging by acrosstrack distance using the -Y option, and the other resulted in
 slope flagging being applied when not requested when the -Y option was used alone.

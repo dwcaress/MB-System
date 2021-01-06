@@ -1279,14 +1279,14 @@ int mbsys_reson7k_deall(int verbose, void *mbio_ptr, void **store_ptr, int *erro
 
   /* Reson 7k ping motion (record 7012) */
   s7kr_v2pingmotion *v2pingmotion = &store->v2pingmotion;
+  if (v2pingmotion->nalloc > 0 && v2pingmotion->roll != NULL)
+    status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&(v2pingmotion->roll), error);
+  if (v2pingmotion->nalloc > 0 && v2pingmotion->heading != NULL)
+    status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&(v2pingmotion->heading), error);
+  if (v2pingmotion->nalloc > 0 && v2pingmotion->heave != NULL)
+    status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&(v2pingmotion->heave), error);
   v2pingmotion->n = 0;
   v2pingmotion->nalloc = 0;
-  if (v2pingmotion->roll != NULL)
-    status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&(v2pingmotion->roll), error);
-  if (v2pingmotion->heading != NULL)
-    status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&(v2pingmotion->heading), error);
-  if (v2pingmotion->heave != NULL)
-    status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&(v2pingmotion->heave), error);
 
   /* Reson 7k beamformed magnitude and phase data (record 7018) */
   s7kr_v2beamformed *v2beamformed = &store->v2beamformed;

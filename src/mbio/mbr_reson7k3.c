@@ -4814,56 +4814,54 @@ int mbr_reson7k3_rd_PingMotion(int verbose, char *buffer, void *store_ptr, int *
 
   /* allocate memory for PingMotion if needed */
   if (status == MB_SUCCESS && PingMotion->nalloc < PingMotion->n) {
-    PingMotion->nalloc = sizeof(float) * PingMotion->n;
+    size_t size = sizeof(float) * PingMotion->n;
     if (status == MB_SUCCESS)
-      status = mb_reallocd(verbose, __FILE__, __LINE__, PingMotion->nalloc, (void **)&(PingMotion->roll), error);
-    if (status != MB_SUCCESS) {
-      PingMotion->nalloc = 0;
-    }
+      status = mb_reallocd(verbose, __FILE__, __LINE__, size, (void **)&(PingMotion->roll), error);
     if (status == MB_SUCCESS)
-      status = mb_reallocd(verbose, __FILE__, __LINE__, PingMotion->nalloc, (void **)&(PingMotion->heading), error);
-    if (status != MB_SUCCESS) {
-      PingMotion->nalloc = 0;
-    }
+      status = mb_reallocd(verbose, __FILE__, __LINE__, size, (void **)&(PingMotion->heading), error);
     if (status == MB_SUCCESS)
-      status = mb_reallocd(verbose, __FILE__, __LINE__, PingMotion->nalloc, (void **)&(PingMotion->heave), error);
-    if (status != MB_SUCCESS) {
-      PingMotion->nalloc = 0;
-    }
-  }
+      status = mb_reallocd(verbose, __FILE__, __LINE__, size, (void **)&(PingMotion->heave), error);
+    if (status == MB_SUCCESS) {
+      PingMotion->nalloc = PingMotion->n;
 
-  /* extract PingMotion data */
-  if (PingMotion->flags & 2) {
-    for (int i = 0; i < PingMotion->n; i++) {
-      mb_get_binary_float(true, &buffer[index], &(PingMotion->roll[i]));
-      index += 4;
+      /* extract PingMotion data */
+      if (PingMotion->flags & 2) {
+        for (int i = 0; i < PingMotion->n; i++) {
+          mb_get_binary_float(true, &buffer[index], &(PingMotion->roll[i]));
+          index += 4;
+        }
+      }
+      else {
+        for (int i = 0; i < PingMotion->n; i++) {
+          PingMotion->roll[i] = 0.0;
+        }
+      }
+      if (PingMotion->flags & 4) {
+        for (int i = 0; i < PingMotion->n; i++) {
+          mb_get_binary_float(true, &buffer[index], &(PingMotion->heading[i]));
+          index += 4;
+        }
+      }
+      else {
+        for (int i = 0; i < PingMotion->n; i++) {
+          PingMotion->heading[i] = 0.0;
+        }
+      }
+      if (PingMotion->flags & 8) {
+        for (int i = 0; i < PingMotion->n; i++) {
+          mb_get_binary_float(true, &buffer[index], &(PingMotion->heave[i]));
+          index += 4;
+        }
+      }
+      else {
+        for (int i = 0; i < PingMotion->n; i++) {
+          PingMotion->heave[i] = 0.0;
+        }
+      }
+
     }
-  }
-  else {
-    for (int i = 0; i < PingMotion->n; i++) {
-      PingMotion->roll[i] = 0.0;
-    }
-  }
-  if (PingMotion->flags & 4) {
-    for (int i = 0; i < PingMotion->n; i++) {
-      mb_get_binary_float(true, &buffer[index], &(PingMotion->heading[i]));
-      index += 4;
-    }
-  }
-  else {
-    for (int i = 0; i < PingMotion->n; i++) {
-      PingMotion->heading[i] = 0.0;
-    }
-  }
-  if (PingMotion->flags & 8) {
-    for (int i = 0; i < PingMotion->n; i++) {
-      mb_get_binary_float(true, &buffer[index], &(PingMotion->heave[i]));
-      index += 4;
-    }
-  }
-  else {
-    for (int i = 0; i < PingMotion->n; i++) {
-      PingMotion->heave[i] = 0.0;
+    else {
+      PingMotion->nalloc = 0;
     }
   }
 
