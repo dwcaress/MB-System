@@ -5555,14 +5555,8 @@ int mbr_reson7kr_rd_v2pingmotion(int verbose, char *buffer, void *store_ptr, int
     size_t size = sizeof(float) * v2pingmotion->n;
     if (status == MB_SUCCESS)
       status = mb_reallocd(verbose, __FILE__, __LINE__, size, (void **)&(v2pingmotion->roll), error);
-    if (status != MB_SUCCESS) {
-      v2pingmotion->nalloc = 0;
-    }
     if (status == MB_SUCCESS)
       status = mb_reallocd(verbose, __FILE__, __LINE__, size, (void **)&(v2pingmotion->heading), error);
-    if (status != MB_SUCCESS) {
-      v2pingmotion->nalloc = 0;
-    }
     if (status == MB_SUCCESS)
       status = mb_reallocd(verbose, __FILE__, __LINE__, size, (void **)&(v2pingmotion->heave), error);
     if (status == MB_SUCCESS) {
@@ -5602,7 +5596,7 @@ int mbr_reson7kr_rd_v2pingmotion(int verbose, char *buffer, void *store_ptr, int
           v2pingmotion->heave[i] = 0.0;
         }
       }
-      
+
     } else {
       v2pingmotion->nalloc = 0;
     }
