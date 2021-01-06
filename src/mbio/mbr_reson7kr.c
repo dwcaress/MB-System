@@ -5552,56 +5552,59 @@ int mbr_reson7kr_rd_v2pingmotion(int verbose, char *buffer, void *store_ptr, int
 
   /* allocate memory for v2pingmotion if needed */
   if (status == MB_SUCCESS && v2pingmotion->nalloc < v2pingmotion->n) {
-    v2pingmotion->nalloc = sizeof(float) * v2pingmotion->n;
+    size_t size = sizeof(float) * v2pingmotion->n;
     if (status == MB_SUCCESS)
-      status = mb_reallocd(verbose, __FILE__, __LINE__, v2pingmotion->nalloc, (void **)&(v2pingmotion->roll), error);
+      status = mb_reallocd(verbose, __FILE__, __LINE__, size, (void **)&(v2pingmotion->roll), error);
     if (status != MB_SUCCESS) {
       v2pingmotion->nalloc = 0;
     }
     if (status == MB_SUCCESS)
-      status = mb_reallocd(verbose, __FILE__, __LINE__, v2pingmotion->nalloc, (void **)&(v2pingmotion->heading), error);
+      status = mb_reallocd(verbose, __FILE__, __LINE__, size, (void **)&(v2pingmotion->heading), error);
     if (status != MB_SUCCESS) {
       v2pingmotion->nalloc = 0;
     }
     if (status == MB_SUCCESS)
-      status = mb_reallocd(verbose, __FILE__, __LINE__, v2pingmotion->nalloc, (void **)&(v2pingmotion->heave), error);
-    if (status != MB_SUCCESS) {
-      v2pingmotion->nalloc = 0;
-    }
-  }
+      status = mb_reallocd(verbose, __FILE__, __LINE__, size, (void **)&(v2pingmotion->heave), error);
+    if (status == MB_SUCCESS) {
+      v2pingmotion->nalloc = v2pingmotion->n;
 
-  /* extract v2pingmotion data */
-  if (v2pingmotion->flags & 2) {
-    for (int i = 0; i < v2pingmotion->n; i++) {
-      mb_get_binary_float(true, &buffer[index], &(v2pingmotion->roll[i]));
-      index += 4;
-    }
-  }
-  else {
-    for (int i = 0; i < v2pingmotion->n; i++) {
-      v2pingmotion->roll[i] = 0.0;
-    }
-  }
-  if (v2pingmotion->flags & 4) {
-    for (int i = 0; i < v2pingmotion->n; i++) {
-      mb_get_binary_float(true, &buffer[index], &(v2pingmotion->heading[i]));
-      index += 4;
-    }
-  }
-  else {
-    for (int i = 0; i < v2pingmotion->n; i++) {
-      v2pingmotion->heading[i] = 0.0;
-    }
-  }
-  if (v2pingmotion->flags & 8) {
-    for (int i = 0; i < v2pingmotion->n; i++) {
-      mb_get_binary_float(true, &buffer[index], &(v2pingmotion->heave[i]));
-      index += 4;
-    }
-  }
-  else {
-    for (int i = 0; i < v2pingmotion->n; i++) {
-      v2pingmotion->heave[i] = 0.0;
+      /* extract v2pingmotion data */
+      if (v2pingmotion->flags & 2) {
+        for (int i = 0; i < v2pingmotion->n; i++) {
+          mb_get_binary_float(true, &buffer[index], &(v2pingmotion->roll[i]));
+          index += 4;
+        }
+      }
+      else {
+        for (int i = 0; i < v2pingmotion->n; i++) {
+          v2pingmotion->roll[i] = 0.0;
+        }
+      }
+      if (v2pingmotion->flags & 4) {
+        for (int i = 0; i < v2pingmotion->n; i++) {
+          mb_get_binary_float(true, &buffer[index], &(v2pingmotion->heading[i]));
+          index += 4;
+        }
+      }
+      else {
+        for (int i = 0; i < v2pingmotion->n; i++) {
+          v2pingmotion->heading[i] = 0.0;
+        }
+      }
+      if (v2pingmotion->flags & 8) {
+        for (int i = 0; i < v2pingmotion->n; i++) {
+          mb_get_binary_float(true, &buffer[index], &(v2pingmotion->heave[i]));
+          index += 4;
+        }
+      }
+      else {
+        for (int i = 0; i < v2pingmotion->n; i++) {
+          v2pingmotion->heave[i] = 0.0;
+        }
+      }
+      
+    } else {
+      v2pingmotion->nalloc = 0;
     }
   }
 
@@ -5638,6 +5641,7 @@ int mbr_reson7kr_rd_v2pingmotion(int verbose, char *buffer, void *store_ptr, int
   if (verbose >= 2)
 #endif
     mbsys_reson7k_print_v2pingmotion(verbose, v2pingmotion, error);
+mbsys_reson7k_print_v2pingmotion(1, v2pingmotion, error);
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
