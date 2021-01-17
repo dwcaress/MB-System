@@ -23,6 +23,7 @@ Distributions that do not include "beta" in the tag name correspond to the major
 announced releases. The source distributions associated with all releases, major
 or beta, are equally accessible as tarballs through the Github interface.
 
+- **Version 5.7.7        January 17, 2020
 - Version 5.7.7beta09    January 17, 2020
 - Version 5.7.7beta08    January 6, 2020
 - Version 5.7.7beta06    December 30, 2020
@@ -377,9 +378,130 @@ or beta, are equally accessible as tarballs through the Github interface.
 --
 ### MB-System Version 5.7 Release Notes:
 --
+
+#### 5.7.7 (January 17, 2020)
+
+Version 5.7.7 is now the current release of MB-System. Changes since the 5.7.6
+release include:
+
+mbdatalist: Fixed memory leak in src/mbio/mb_check_info.c that could occur when
+parsing *.inf files.
+
+Configure: Fixed handling of X11 libraries and header files in the autotools
+build system in order to circumvent more changes to dependencies installed on
+Macs using the Homebrew package manager.
+
+Formats 88 (MBF_RESON7KR) and 89 (MBF_RESON7K3): Fixed bug in handling of
+PingMotion data records (7012) that caused memory overruns and seg faults.
+
+Mbclean: Fixed two bugs. The first involved setting the left/right bounds of
+flagging by acrosstrack distance using the -Y option, and the other resulted in
+slope flagging being applied when not requested when the -Y option was used alone.
+
+Mbpreprocess: Added option to set directory where output files are written instead
+of writing the output files parallel to the input swath files.
+
+Format 121 (MBF_GSFGENMB): Modified handling of multibeam snippet backscatter so
+that samples associated with beams flagged as bad are nulled, and so that modified
+backscatter is written to the output file by mbprocess.
+
+Mbeditviz: Modified 3D sounding view so that the depth buffering is actually used.
+
+Mbm_makedatalist: Now ignores the most recent file when the -L option is used.
+
+Mbprocess: Fixed raytracking library used by mbprocess so that it is thread
+safe. The relevant code is in mbsystem/src/mbaux/mb_rt.c
+
+Format 261 (MBF_KEMKMALL): Fixed bug in handling version 0 MWC datagrams.
+
+Mbphotomosaic: Fixed bug in pixel processing that occasionally produced overflows
+leading to seg faults.
+
+Mbphotomosaic: Fixed bug in imagelist processing that prevented use of images
+taken with the right camera of a stereo pair.
+
+Mbimagecorrect: New program that performs some simple brightness and contrast
+corrections using standard OpenCV algorithms.
+
+Mbprocess: Recast the program to process files in parallel using separate threads.
+This was implemented in the C++ main code using the C++11 standard thread API.
+The default is to use a single processing thread and therefore to process the
+files serially; the new -Cthreads option enables the use of multiple threads.
+For now, the built-in record keeping of memory allocation/deallocation is disabled
+for mbprocess because this functionality is not thread-safe.
+
+Mbnavadjust: The navigation adjustment inversion has been improved by tuning the
+parameters used for the overdetermined least squares solution.
+
+Mbswath2las: Shell for not-yet-working program to export soundings from swath data
+to some variant of the LAS format used for point cloud data.
+
+Mbvoxelclean: Added option to filter based on beam amplitude minimum and maximum
+values.
+
+Mbeditviz: Fixed coloring of soundings using beam amplitude values (colormap
+was applied incorrectly).
+
+Mbeditviz: Added option to display the selected sounding point cloud with
+soundings colored according to associated amplitude value. Also added the
+sounding amplitude value to the information listed when soundings are selected
+in the "info" mode.
+
+Mbedit: Added the sounding amplitude value to the information listed when
+soundings are selected in the "info" mode.
+
+Mbnavadjust: Previously autopicking of crossings skipped crossings including
+short sections where short was defined as less than 0.25 times the length of
+the first section of the associated file. This is problematic when the survey
+platform is stationary at the beginning of a file, resulting in a first section
+with a short track length (sections are terminated either on track length or total
+number of soundings). Now short is defined as less than 0.25 times the current
+desired section length for the project.
+
+Format 58 (MBF_EM710RAW): This format supports third generation Kongsberg multibeam
+data as recorded in *.all files; the augmented format 59 (MBF_EM710MBA) is used
+for processing. Data are translated from format 58 to 59 using mbpreprocess. Data
+have been collected using a partially nonfunctional EM122 such that most of the
+backscatter snippet records are missing. The existing code treats pings for which
+the snippet records are missing as incomplete and drops them. The format 58 i/o
+module has been modified so that if a special flag is set, any snippet records
+will be ignored and all pings will be treated as having an empty but existing
+snippet record. Users can set this flag with a special --kluge-ignore-snippets
+argument to mbpreprocess.
+
+Mbpreprocess and i/o modules with defined preprocessing functions: All existing
+preprocess functions have been augmented so that a call with a null pointer to
+the data structure will trigger an option to set i/o flags after reading from a
+file is initialized but before any data are read. The only case at present where
+this is used is format 58 (MBF_EM710RAW), where the mbpreprocess option
+--kluge-ignore-snippets causes the reading code to treat pings with bathymetry
+as complete whether snippet records exist or not, and to zero the snippet information
+for those pings.
+
+Mbm_makedatalist: Added -L option which will omit the last file found from the
+output datalist. The  intent  of this  option  is  to exclude the most recent
+file in an actively data logging context, since the most recent file is still
+being logged. This presumes that filenames sort in time order as listed  by  the
+ls  command,  an assumption that does not hold for all file naming conditions or
+if the -T option has been used to disable time ordering. Also added a behavior
+particular to Kongsberg multibeam data as originally logged - files named "9999.all"
+are now ignored.
+
+Mbotps: Modified mbotps to place temporary files in the user's home directory
+instead of the current working directory when the latter case results in file
+paths greater than 80 characters long. This is because OTPS has it's filename
+variables defined as 80 character strings.
+
+Format 88 (MBF_RESON7KR): Fixed handling of the various attitude data record
+types by function mb_extract_nnav(), which in turn allows mbnavlist to work
+correction with format 88 data when keyed to those data record types.
+
+Mblist: Added output option 'n' for survey line number. This value is only defined
+for SEGY format data files (format 160).
+
 #### 5.7.7beta09 (January 17, 2020)
 
-*.inf files: Fixed memory leak in src/mbio/mb_check_info.c that could occur when
+mbdatalist: Fixed memory leak in src/mbio/mb_check_info.c that could occur when
 parsing *.inf files.
 
 Configure: Fixed handling of X11 libraries and header files in the autotools
