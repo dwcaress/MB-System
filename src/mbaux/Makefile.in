@@ -152,7 +152,8 @@ libmbaux_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(libmbaux_la_LDFLAGS) $(LDFLAGS) -o $@
 @BUILD_MOTIF_TRUE@libmbxgr_la_DEPENDENCIES = $(am__DEPENDENCIES_1)
-@BUILD_MOTIF_TRUE@am_libmbxgr_la_OBJECTS = mb_xgraphics.lo
+@BUILD_MOTIF_TRUE@am_libmbxgr_la_OBJECTS =  \
+@BUILD_MOTIF_TRUE@	libmbxgr_la-mb_xgraphics.lo
 libmbxgr_la_OBJECTS = $(am_libmbxgr_la_OBJECTS)
 libmbxgr_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
@@ -173,11 +174,12 @@ am__v_at_1 =
 DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)/src/mbio
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__maybe_remake_depfiles = depfiles
-am__depfiles_remade = ./$(DEPDIR)/mb_cheb.Plo \
-	./$(DEPDIR)/mb_delaun.Plo ./$(DEPDIR)/mb_intersectgrid.Plo \
+am__depfiles_remade = ./$(DEPDIR)/libmbxgr_la-mb_xgraphics.Plo \
+	./$(DEPDIR)/mb_cheb.Plo ./$(DEPDIR)/mb_delaun.Plo \
+	./$(DEPDIR)/mb_intersectgrid.Plo \
 	./$(DEPDIR)/mb_readwritegrd.Plo ./$(DEPDIR)/mb_surface.Plo \
 	./$(DEPDIR)/mb_track.Plo ./$(DEPDIR)/mb_truecont.Plo \
-	./$(DEPDIR)/mb_xgraphics.Plo ./$(DEPDIR)/mb_zgrid.Plo
+	./$(DEPDIR)/mb_zgrid.Plo
 am__mv = mv -f
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
@@ -386,6 +388,7 @@ libgmt_INCLUDEDIR = @libgmt_INCLUDEDIR@
 libgmt_LDFLAGS = @libgmt_LDFLAGS@
 libgmt_LIBS = @libgmt_LIBS@
 libmotif_CPPFLAGS = @libmotif_CPPFLAGS@
+libmotif_LDFLAGS = @libmotif_LDFLAGS@
 libmotif_LIBS = @libmotif_LIBS@
 libnetcdf_CPPFLAGS = @libnetcdf_CPPFLAGS@
 libnetcdf_LIBS = @libnetcdf_LIBS@
@@ -395,6 +398,9 @@ libopengl_LIBS = @libopengl_LIBS@
 libproj_CFLAGS = @libproj_CFLAGS@
 libproj_CPPFLAGS = @libproj_CPPFLAGS@
 libproj_LIBS = @libproj_LIBS@
+libx11_CPPFLAGS = @libx11_CPPFLAGS@
+libx11_LDFLAGS = @libx11_LDFLAGS@
+libx11_LIBS = @libx11_LIBS@
 localedir = @localedir@
 localstatedir = @localstatedir@
 mandir = @mandir@
@@ -440,9 +446,10 @@ libmbaux_la_SOURCES = mb_cheb.c mb_delaun.c mb_intersectgrid.c \
 	mb_zgrid.c
 libmbaux_la_LIBADD = ${top_builddir}/src/mbio/libmbio.la $(MBTRNLIB) \
 	${libgmt_LIBS} ${libgdal_LIBS} ${libnetcdf_LIBS}
-@BUILD_MOTIF_TRUE@libmbxgr_la_LDFLAGS = -no-undefined -version-info 0:0:0
+@BUILD_MOTIF_TRUE@libmbxgr_la_CPPFLAGS = ${libx11_CPPFLAGS}
+@BUILD_MOTIF_TRUE@libmbxgr_la_LDFLAGS = -no-undefined -version-info 0:0:0 ${libx11_LDFLAGS}
 @BUILD_MOTIF_TRUE@libmbxgr_la_SOURCES = mb_xgraphics.c
-@BUILD_MOTIF_TRUE@libmbxgr_la_LIBADD = ${libmotif_LIBS}
+@BUILD_MOTIF_TRUE@libmbxgr_la_LIBADD = ${libx11_LIBS}
 all: all-am
 
 .SUFFIXES:
@@ -524,6 +531,7 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libmbxgr_la-mb_xgraphics.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mb_cheb.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mb_delaun.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mb_intersectgrid.Plo@am__quote@ # am--include-marker
@@ -531,7 +539,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mb_surface.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mb_track.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mb_truecont.Plo@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mb_xgraphics.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mb_zgrid.Plo@am__quote@ # am--include-marker
 
 $(am__depfiles_remade):
@@ -563,6 +570,13 @@ am--depfiles: $(am__depfiles_remade)
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='$<' object='$@' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LTCOMPILE) -c -o $@ $<
+
+libmbxgr_la-mb_xgraphics.lo: mb_xgraphics.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmbxgr_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libmbxgr_la-mb_xgraphics.lo -MD -MP -MF $(DEPDIR)/libmbxgr_la-mb_xgraphics.Tpo -c -o libmbxgr_la-mb_xgraphics.lo `test -f 'mb_xgraphics.c' || echo '$(srcdir)/'`mb_xgraphics.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libmbxgr_la-mb_xgraphics.Tpo $(DEPDIR)/libmbxgr_la-mb_xgraphics.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='mb_xgraphics.c' object='libmbxgr_la-mb_xgraphics.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmbxgr_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libmbxgr_la-mb_xgraphics.lo `test -f 'mb_xgraphics.c' || echo '$(srcdir)/'`mb_xgraphics.c
 
 mostlyclean-libtool:
 	-rm -f *.lo
@@ -685,14 +699,14 @@ clean-am: clean-generic clean-libLTLIBRARIES clean-libtool \
 	mostlyclean-am
 
 distclean: distclean-am
-		-rm -f ./$(DEPDIR)/mb_cheb.Plo
+		-rm -f ./$(DEPDIR)/libmbxgr_la-mb_xgraphics.Plo
+	-rm -f ./$(DEPDIR)/mb_cheb.Plo
 	-rm -f ./$(DEPDIR)/mb_delaun.Plo
 	-rm -f ./$(DEPDIR)/mb_intersectgrid.Plo
 	-rm -f ./$(DEPDIR)/mb_readwritegrd.Plo
 	-rm -f ./$(DEPDIR)/mb_surface.Plo
 	-rm -f ./$(DEPDIR)/mb_track.Plo
 	-rm -f ./$(DEPDIR)/mb_truecont.Plo
-	-rm -f ./$(DEPDIR)/mb_xgraphics.Plo
 	-rm -f ./$(DEPDIR)/mb_zgrid.Plo
 	-rm -f Makefile
 distclean-am: clean-am distclean-compile distclean-generic \
@@ -739,14 +753,14 @@ install-ps-am:
 installcheck-am:
 
 maintainer-clean: maintainer-clean-am
-		-rm -f ./$(DEPDIR)/mb_cheb.Plo
+		-rm -f ./$(DEPDIR)/libmbxgr_la-mb_xgraphics.Plo
+	-rm -f ./$(DEPDIR)/mb_cheb.Plo
 	-rm -f ./$(DEPDIR)/mb_delaun.Plo
 	-rm -f ./$(DEPDIR)/mb_intersectgrid.Plo
 	-rm -f ./$(DEPDIR)/mb_readwritegrd.Plo
 	-rm -f ./$(DEPDIR)/mb_surface.Plo
 	-rm -f ./$(DEPDIR)/mb_track.Plo
 	-rm -f ./$(DEPDIR)/mb_truecont.Plo
-	-rm -f ./$(DEPDIR)/mb_xgraphics.Plo
 	-rm -f ./$(DEPDIR)/mb_zgrid.Plo
 	-rm -f Makefile
 maintainer-clean-am: distclean-am maintainer-clean-generic

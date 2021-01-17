@@ -23,6 +23,7 @@ Distributions that do not include "beta" in the tag name correspond to the major
 announced releases. The source distributions associated with all releases, major
 or beta, are equally accessible as tarballs through the Github interface.
 
+- Version 5.7.7beta09    January 17, 2020
 - Version 5.7.7beta08    January 6, 2020
 - Version 5.7.7beta06    December 30, 2020
 - Version 5.7.7beta05    December 28, 2020
@@ -376,6 +377,15 @@ or beta, are equally accessible as tarballs through the Github interface.
 --
 ### MB-System Version 5.7 Release Notes:
 --
+#### 5.7.7beta09 (January 17, 2020)
+
+*.inf files: Fixed memory leak in src/mbio/mb_check_info.c that could occur when
+parsing *.inf files.
+
+Configure: Fixed handling of X11 libraries and header files in the autotools
+build system in order to circumvent more changes to dependencies installed on
+Macs using the Homebrew package manager.
+
 #### 5.7.7beta08 (January 6, 2020)
 
 Formats 88 (MBF_RESON7KR) and 89 (MBF_RESON7K3): Fixed bug in handling of

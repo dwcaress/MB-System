@@ -69,8 +69,6 @@ int mb_check_info(int verbose, char *file, int lonflip, double bounds[4], bool *
 		strcpy(file_inf, file);
 		strcat(file_inf, ".inf");
 
-		int *mask = NULL;
-
 		/* open if possible */
 		FILE *fp = fopen(file_inf, "r");
 		if (fp != NULL) {
@@ -82,6 +80,7 @@ int mb_check_info(int verbose, char *file, int lonflip, double bounds[4], bool *
 			double lat_max = 0.0;
 			int mask_nx = 0;
 			int mask_ny = 0;
+		  int *mask = NULL;
 
 			/* read the inf file */
 			char line[MB_PATH_MAXLINE];
@@ -154,7 +153,6 @@ int mb_check_info(int verbose, char *file, int lonflip, double bounds[4], bool *
 							    latnorth > bounds[2])
 								*file_in_bounds = true;
 						}
-					mb_freed(verbose, __FILE__, __LINE__, (void **)&mask, error);
 				}
 
 				/* else check whole file against desired input bounds */
@@ -191,6 +189,11 @@ int mb_check_info(int verbose, char *file, int lonflip, double bounds[4], bool *
 				if (verbose >= 4)
 					fprintf(stderr, "dbg4  No data listed in inf file so cannot check bounds...\n");
 			}
+
+    /* free the mask array */
+    if (mask_nx > 0 && mask_ny > 0 && mask != NULL) {
+      	mb_freed(verbose, __FILE__, __LINE__, (void **)&mask, error);
+    }
 
 			/* close the file */
 			fclose(fp);
