@@ -55,9 +55,9 @@ libmbview_la_LIBADD += ${libgmt_LIBS}
 libmbview_la_LIBADD += ${libnetcdf_LIBS}
 libmbview_la_LIBADD += ${libproj_LIBS}
 libmbview_la_LIBADD += ${MBTRNLIB}
-libmbview_la_LIBADD += ${libx11_LIBS}
-libmbview_la_LIBADD += ${libmotif_LIBS}
 libmbview_la_LIBADD += ${libopengl_LIBS}
+libmbview_la_LIBADD += ${libmotif_LIBS}
+libmbview_la_LIBADD += ${libx11_LIBS}
 libmbview_la_LIBADD += ${XDR_LIB}
 
 libmbview_la_LDFLAGS =

@@ -37,9 +37,9 @@ LIBS += ${libgmt_LIBS}
 LIBS += ${libnetcdf_LIBS}
 LIBS += ${libproj_LIBS}
 LIBS += $(MBTRNINCDIR)
-LIBS += ${libx11_LIBS}
-LIBS += ${libmotif_LIBS}
 LIBS += ${libopengl_LIBS}
+LIBS += ${libmotif_LIBS}
+LIBS += ${libx11_LIBS}
 LIBS += $(LIBM)
 
 mbnavadjust_SOURCES =

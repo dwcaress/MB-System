@@ -21,9 +21,9 @@ AM_CPPFLAGS += ${libmotif_CPPFLAGS}
 AM_CPPFLAGS += ${libopengl_CPPFLAGS}
 
 AM_LDFLAGS =
-AM_LDFLAGS +=  ${libx11_LDFLAGS}
-AM_LDFLAGS +=  ${libmotif_LDFLAGS}
 AM_LDFLAGS +=  ${libopengl_LDFLAGS}
+AM_LDFLAGS +=  ${libmotif_LDFLAGS}
+AM_LDFLAGS +=  ${libx11_LDFLAGS}
 
 mbgrdviz_SOURCES = mbgrdviz_main.c mbgrdviz_callbacks.c mbgrdviz_creation.c
 mbgrdviz_LDADD =

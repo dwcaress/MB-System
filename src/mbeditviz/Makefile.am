@@ -20,9 +20,9 @@ AM_CPPFLAGS += ${libmotif_CPPFLAGS}
 AM_CPPFLAGS += ${libopengl_CPPFLAGS}
 
 AM_LDFLAGS =
-AM_LDFLAGS +=  ${libx11_LDFLAGS}
-AM_LDFLAGS +=  ${libmotif_LDFLAGS}
 AM_LDFLAGS +=  ${libopengl_LDFLAGS}
+AM_LDFLAGS +=  ${libmotif_LDFLAGS}
+AM_LDFLAGS +=  ${libx11_LDFLAGS}
 
 mbeditviz_SOURCES = mbeditviz_main.c mbeditviz_callbacks.c mbeditviz_prog.c mbeditviz_creation.c
 mbeditviz_LDADD =

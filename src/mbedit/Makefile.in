@@ -233,8 +233,8 @@ LIBOBJS = @LIBOBJS@
 LIBS = $(top_builddir)/src/mbio/libmbio.la \
 	$(top_builddir)/src/mbaux/libmbaux.la \
 	$(top_builddir)/src/mbaux/libmbxgr.la ${libgmt_LIBS} \
-	${libnetcdf_LIBS} ${libproj_LIBS} ${libx11_LIBS} \
-	${libmotif_LIBS} $(MBTRNLIB) $(LIBM)
+	${libnetcdf_LIBS} ${libproj_LIBS} ${libmotif_LIBS} \
+	${libx11_LIBS} $(MBTRNLIB) $(LIBM)
 LIBTOOL = @LIBTOOL@
 LIBTOOL_DEPS = @LIBTOOL_DEPS@
 LIPO = @LIPO@
