@@ -29,8 +29,8 @@ LIBS += $(top_builddir)/src/mbaux/libmbxgr.la
 LIBS += ${libgmt_LIBS}
 LIBS += ${libnetcdf_LIBS}
 LIBS += ${libproj_LIBS}
-LIBS += ${libx11_LIBS}
 LIBS += ${libmotif_LIBS}
+LIBS += ${libx11_LIBS}
 LIBS += $(MBTRNLIB)
 LIBS += $(LIBM)
 

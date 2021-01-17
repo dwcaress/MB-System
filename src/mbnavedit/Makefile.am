@@ -18,8 +18,8 @@ AM_CPPFLAGS += ${libx11_CPPFLAGS}
 AM_CPPFLAGS += ${libmotif_CPPFLAGS}
 
 AM_LDFLAGS =
-AM_LDFLAGS +=  ${libx11_LDFLAGS}
 AM_LDFLAGS +=  ${libmotif_LDFLAGS}
+AM_LDFLAGS +=  ${libx11_LDFLAGS}
 
 LIBS =
 LIBS += ${top_builddir}/src/mbio/libmbio.la

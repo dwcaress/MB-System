@@ -470,8 +470,8 @@ libmbview_la_LIBADD = ${top_builddir}/src/bsio/libmbbsio.la \
 	${top_builddir}/src/surf/libmbsapi.la \
 	${top_builddir}/src/mbio/libmbio.la \
 	${top_builddir}/src/mbaux/libmbaux.la ${libgmt_LIBS} \
-	${libnetcdf_LIBS} ${libproj_LIBS} ${MBTRNLIB} ${libx11_LIBS} \
-	${libmotif_LIBS} ${libopengl_LIBS} ${XDR_LIB}
+	${libnetcdf_LIBS} ${libproj_LIBS} ${MBTRNLIB} \
+	${libopengl_LIBS} ${libmotif_LIBS} ${libx11_LIBS} ${XDR_LIB}
 libmbview_la_LDFLAGS = -no-undefined -version-info 0:0:0 \
 	${libx11_LDFLAGS} ${libmotif_LDFLAGS} ${libopengl_LDFLAGS}
 all: all-am

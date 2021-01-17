@@ -23,7 +23,8 @@ Distributions that do not include "beta" in the tag name correspond to the major
 announced releases. The source distributions associated with all releases, major
 or beta, are equally accessible as tarballs through the Github interface.
 
-- **Version 5.7.7        January 17, 2020
+- **Version 5.7.8        January 17, 2020
+- Version 5.7.7          January 17, 2020 (flawed, quickly superceded)
 - Version 5.7.7beta09    January 17, 2020
 - Version 5.7.7beta08    January 6, 2020
 - Version 5.7.7beta06    December 30, 2020
@@ -379,17 +380,19 @@ or beta, are equally accessible as tarballs through the Github interface.
 ### MB-System Version 5.7 Release Notes:
 --
 
-#### 5.7.7 (January 17, 2020)
+#### 5.7.8 (January 17, 2020)
 
-Version 5.7.7 is now the current release of MB-System. Changes since the 5.7.6
+Version 5.7.8 is now the current release of MB-System. Changes since the 5.7.6
 release include:
-
-mbdatalist: Fixed memory leak in src/mbio/mb_check_info.c that could occur when
-parsing *.inf files.
 
 Configure: Fixed handling of X11 libraries and header files in the autotools
 build system in order to circumvent more changes to dependencies installed on
-Macs using the Homebrew package manager.
+Macs using the Homebrew package manager. The first attempt at this turned out
+to cause X11 runtime failures on Linux systems, and so release 5.7.7 was rapidly
+superceded by this 5.7.8 release.
+
+mbdatalist: Fixed memory leak in src/mbio/mb_check_info.c that could occur when
+parsing *.inf files.
 
 Formats 88 (MBF_RESON7KR) and 89 (MBF_RESON7K3): Fixed bug in handling of
 PingMotion data records (7012) that caused memory overruns and seg faults.
@@ -498,6 +501,23 @@ correction with format 88 data when keyed to those data record types.
 
 Mblist: Added output option 'n' for survey line number. This value is only defined
 for SEGY format data files (format 160).
+
+#### 5.7.8beta01 (January 17, 2020)
+
+The autoconf build system had been changed so that libXt and libX11 come
+before libXm in the link commands. This fixes runtime errors in all of
+the graphical utilities on Linux systems. This problem probably relates
+more directly to the use of the gcc compiler system.
+
+#### 5.7.7 (January 17, 2020)
+
+The version 5.7.7 was fatally flawed in that the graphical tools would not run
+on Linux (or more probably, when built using gcc rather than llvm). The problem
+was that the autoconf build system had been changed in order to fix
+build failures in the Homebrew package manager, and these changes inadvertently
+including changing the library link order so that libXt and libX11 came before
+libXm. This problem was fixed rapidly and a new major release 5.7.8 put the
+same day.
 
 #### 5.7.7beta09 (January 17, 2020)
 
