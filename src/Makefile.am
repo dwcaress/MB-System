@@ -1,9 +1,7 @@
-if BUILD_MBUTILS
 if BUILD_MOTIF
 XBUILD_SUB_MOTIF = mbedit mbnavedit mbvelocitytool
 if BUILD_GL
 XBUILD_SUB_GL = mbview mbgrdviz mbeditviz mbnavadjust
-endif
 endif
 endif
 

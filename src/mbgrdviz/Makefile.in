@@ -119,7 +119,7 @@ mbgrdviz_DEPENDENCIES = ${top_builddir}/src/mbio/libmbio.la \
 	${top_builddir}/src/mbview/libmbview.la $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1)
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
 AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
 am__v_lt_0 = --silent
@@ -347,6 +347,7 @@ libgmt_INCLUDEDIR = @libgmt_INCLUDEDIR@
 libgmt_LDFLAGS = @libgmt_LDFLAGS@
 libgmt_LIBS = @libgmt_LIBS@
 libmotif_CPPFLAGS = @libmotif_CPPFLAGS@
+libmotif_LDFLAGS = @libmotif_LDFLAGS@
 libmotif_LIBS = @libmotif_LIBS@
 libnetcdf_CPPFLAGS = @libnetcdf_CPPFLAGS@
 libnetcdf_LIBS = @libnetcdf_LIBS@
@@ -356,6 +357,9 @@ libopengl_LIBS = @libopengl_LIBS@
 libproj_CFLAGS = @libproj_CFLAGS@
 libproj_CPPFLAGS = @libproj_CPPFLAGS@
 libproj_LIBS = @libproj_LIBS@
+libx11_CPPFLAGS = @libx11_CPPFLAGS@
+libx11_LDFLAGS = @libx11_LDFLAGS@
+libx11_LIBS = @libx11_LIBS@
 localedir = @localedir@
 localstatedir = @localstatedir@
 mandir = @mandir@
@@ -388,19 +392,20 @@ top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 @BUILD_MBTRN_TRUE@MBTRNINCDIR = -I${top_srcdir}/src/mbtrn/r7kr -I${top_srcdir}/src/mbtrn/utils -I${top_srcdir}/src/mbtrn/mframe/src
 @BUILD_MBTRN_TRUE@MBTRNLIB = ${top_builddir}/src/mbtrn/libr7kr.la
-AM_CFLAGS = ${libgmt_CFLAGS} ${libnetcdf_CFLAGS}
+AM_CFLAGS = ${libnetcdf_CFLAGS} ${libgmt_CFLAGS}
 AM_CPPFLAGS = -I${top_srcdir}/src/mbio -I${top_srcdir}/src/mbaux \
-	-I${top_srcdir}/src/mbview $(MBTRNINCDIR) ${libgmt_CPPFLAGS} \
-	${libnetcdf_CPPFLAGS} ${libmotif_CPPFLAGS} \
-	${libopengl_CPPFLAGS}
-AM_LDFLAGS = 
+	-I${top_srcdir}/src/mbview $(MBTRNINCDIR) \
+	${libnetcdf_CPPFLAGS} ${libgmt_CPPFLAGS} ${libx11_CPPFLAGS} \
+	${libmotif_CPPFLAGS} ${libopengl_CPPFLAGS}
+AM_LDFLAGS = ${libx11_LDFLAGS} ${libmotif_LDFLAGS} \
+	${libopengl_LDFLAGS}
 mbgrdviz_SOURCES = mbgrdviz_main.c mbgrdviz_callbacks.c mbgrdviz_creation.c
 mbgrdviz_LDADD = ${top_builddir}/src/mbio/libmbio.la \
 	${top_builddir}/src/mbaux/libmbaux.la \
 	${top_builddir}/src/mbaux/libmbxgr.la \
 	${top_builddir}/src/mbview/libmbview.la ${libgmt_LIBS} \
-	${libnetcdf_LIBS} ${libproj_LIBS} ${libmotif_LIBS} \
-	${libopengl_LIBS} $(LIBM)
+	${libnetcdf_LIBS} ${libproj_LIBS} ${libx11_LIBS} \
+	${libmotif_LIBS} ${libopengl_LIBS} $(LIBM)
 all: all-am
 
 .SUFFIXES:

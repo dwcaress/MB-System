@@ -45,7 +45,6 @@
 #include <sys/types.h>
 #include <unistd.h>
 
-#include <algorithm>
 #include <thread>
 
 #include "mb_aux.h"

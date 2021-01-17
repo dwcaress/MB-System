@@ -41,7 +41,8 @@ libmbaux_la_LIBADD += ${libgdal_LIBS}
 libmbaux_la_LIBADD += ${libnetcdf_LIBS}
 
 if BUILD_MOTIF
-  libmbxgr_la_LDFLAGS = -no-undefined -version-info 0:0:0
+  libmbxgr_la_CPPFLAGS = ${libx11_CPPFLAGS}
+  libmbxgr_la_LDFLAGS = -no-undefined -version-info 0:0:0 ${libx11_LDFLAGS}
   libmbxgr_la_SOURCES = mb_xgraphics.c
-  libmbxgr_la_LIBADD = ${libmotif_LIBS}
+  libmbxgr_la_LIBADD = ${libx11_LIBS}
 endif
