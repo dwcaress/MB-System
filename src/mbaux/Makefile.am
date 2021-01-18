@@ -10,19 +10,21 @@ endif
 lib_LTLIBRARIES = libmbaux.la ${XGRLIB}
 include_HEADERS = mb_aux.h ${XGRINC}
 
+AM_CFLAGS =
+AM_CFLAGS += ${libgmt_CFLAGS}
+AM_CFLAGS += ${libgdal_CFLAGS}
+AM_CFLAGS += ${libnetcdf_CFLAGS}
+
 AM_CPPFLAGS =
 AM_CPPFLAGS += -I${top_srcdir}/src/mbio
 AM_CPPFLAGS += $(MBTRNINCDIR)
 AM_CPPFLAGS += ${libgmt_CPPFLAGS}
 AM_CPPFLAGS += ${libgdal_CPPFLAGS}
 AM_CPPFLAGS += ${libnetcdf_CPPFLAGS}
-
-AM_CFLAGS =
-AM_CFLAGS += ${libgmt_CFLAGS}
-AM_CFLAGS += ${libgdal_CFLAGS}
-AM_CFLAGS += ${libnetcdf_CFLAGS}
+AM_CPPFLAGS += ${libx11_CPPFLAGS}
 
 libmbaux_la_LDFLAGS = -no-undefined -version-info 0:0:0
+
 libmbaux_la_SOURCES =
 libmbaux_la_SOURCES += mb_cheb.c
 libmbaux_la_SOURCES += mb_delaun.c

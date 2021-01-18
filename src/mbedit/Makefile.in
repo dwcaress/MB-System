@@ -394,8 +394,8 @@ top_srcdir = @top_srcdir@
 AM_CFLAGS = ${libnetcdf_CFLAGS} ${libgmt_CFLAGS}
 AM_CPPFLAGS = -I${top_srcdir}/src/mbio -I${top_srcdir}/src/mbaux \
 	-I${top_srcdir}/src/gsf $(MBTRNINCDIR) ${libnetcdf_CPPFLAGS} \
-	${libx11_CPPFLAGS} ${libmotif_CPPFLAGS}
-AM_LDFLAGS = ${libx11_LDFLAGS} ${libmotif_LDFLAGS}
+	${libmotif_CPPFLAGS} ${libx11_CPPFLAGS}
+AM_LDFLAGS = ${libmotif_LDFLAGS} ${libx11_LDFLAGS}
 mbedit_SOURCES = mbedit.c mbedit_bxutils.c mbedit_callbacks.c \
 	mbedit_creation.c mbedit_prog.c mbedit_creation.h mbedit.h
 all: all-am
