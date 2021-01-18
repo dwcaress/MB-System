@@ -431,9 +431,9 @@ AM_CFLAGS = ${libnetcdf_CFLAGS} ${libgmt_CFLAGS}
 AM_CPPFLAGS = -I${top_srcdir}/src/mbio -I${top_srcdir}/src/mbaux \
 	-I${top_srcdir}/src/mbview $(MBTRNINCDIR) \
 	-I${top_srcdir}/src/gsf ${libnetcdf_CPPFLAGS} \
-	${libmotif_CPPFLAGS} ${libopengl_CPPFLAGS}
-AM_LDFLAGS = ${libx11_LDFLAGS} ${libmotif_LDFLAGS} \
-	${libopengl_LDFLAGS}
+	${libopengl_CPPFLAGS} ${libmotif_CPPFLAGS} ${libx11_CPPFLAGS}
+AM_LDFLAGS = ${libopengl_LDFLAGS} ${libmotif_LDFLAGS} \
+	${libx11_LDFLAGS}
 mbnavadjust_SOURCES = mbnavadjust.c mbnavadjust.h \
 	mbnavadjust_callbacks.c mbnavadjust_creation.c \
 	mbnavadjust_creation.h mbnavadjust_extrawidgets.h \

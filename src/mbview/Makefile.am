@@ -17,9 +17,9 @@ AM_CPPFLAGS += -I${top_srcdir}/src/mbaux
 AM_CPPFLAGS += $(MBTRNINCDIR)
 AM_CPPFLAGS += ${libgmt_CPPFLAGS}
 AM_CPPFLAGS += ${libnetcdf_CPPFLAGS}
-AM_CPPFLAGS += ${libx11_CPPFLAGS}
-AM_CPPFLAGS += ${libmotif_CPPFLAGS}
 AM_CPPFLAGS += ${libopengl_CPPFLAGS}
+AM_CPPFLAGS += ${libmotif_CPPFLAGS}
+AM_CPPFLAGS += ${libx11_CPPFLAGS}
 
 libmbview_la_CFLAGS = -DMBVIEW_LIBRARY
 
@@ -62,6 +62,6 @@ libmbview_la_LIBADD += ${XDR_LIB}
 
 libmbview_la_LDFLAGS =
 libmbview_la_LDFLAGS += -no-undefined -version-info 0:0:0
-libmbview_la_LDFLAGS += ${libx11_LDFLAGS}
-libmbview_la_LDFLAGS += ${libmotif_LDFLAGS}
 libmbview_la_LDFLAGS += ${libopengl_LDFLAGS}
+libmbview_la_LDFLAGS += ${libmotif_LDFLAGS}
+libmbview_la_LDFLAGS += ${libx11_LDFLAGS}

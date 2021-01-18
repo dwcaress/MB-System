@@ -11,7 +11,7 @@ dnl    See README file for copying and redistribution conditions.
 dnl--------------------------------------------------------------------
 
 dnl Initialize and set version and version date
-AC_INIT([mbsystem],[5.7.8beta01],[http://listserver.mbari.org/sympa/arc/mbsystem],[mbsystem],[http://www.mbari.org/data/mbsystem/])
+AC_INIT([mbsystem],[5.7.8beta02],[http://listserver.mbari.org/sympa/arc/mbsystem],[mbsystem],[http://www.mbari.org/data/mbsystem/])
 AC_DEFINE(VERSION_DATE, ["17 January 2021"], [Set VERSION_DATE define in mb_config.h])
 
 AS_ECHO([" "])
@@ -172,8 +172,11 @@ fi
 dnl Check for headers
 AC_HEADER_STDC
 
-dnl Check for math lib
-AC_CHECK_LIB(m,exp,,,)
+dnl Check for math library
+AC_CHECK_LIB(m,exp,,)
+
+dnl Check for pthread library
+AC_CHECK_LIB(pthread,pthread_create,,)
 
 dnl Check for gsincos() and sincos() functions
 AC_CHECK_FUNCS(gsincos sincos,,)
@@ -1466,6 +1469,10 @@ if test $enable_shared = yes ; then
 else
     AS_ECHO(["Building Shared Libs: No"])
 fi
+AS_ECHO(["CFLAGS:            $CFLAGS"])
+AS_ECHO(["CPPFLAGS:          $CPPFLAGS"])
+AS_ECHO(["LDFLAGS:           $LDFLAGS"])
+AS_ECHO(["LIBS:              $LIBS"])
 if test $hardening != no ; then
     AS_ECHO(["Hardening Enabled: Yes"])
     AS_ECHO(["HARDEN_CFLAGS:     $HARDEN_CFLAGS"])

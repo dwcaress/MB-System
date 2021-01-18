@@ -15,8 +15,8 @@ AM_CPPFLAGS += -I${top_srcdir}/src/mbaux
 AM_CPPFLAGS += -I${top_srcdir}/src/gsf
 AM_CPPFLAGS += $(MBTRNINCDIR)
 AM_CPPFLAGS += ${libnetcdf_CPPFLAGS}
-AM_CPPFLAGS += ${libx11_CPPFLAGS}
 AM_CPPFLAGS += ${libmotif_CPPFLAGS}
+AM_CPPFLAGS += ${libx11_CPPFLAGS}
 
 AM_LDFLAGS =
 AM_LDFLAGS +=  ${libmotif_LDFLAGS}
@@ -29,8 +29,8 @@ LIBS += ${top_builddir}/src/mbaux/libmbxgr.la
 LIBS += ${libgmt_LIBS}
 LIBS += ${libnetcdf_LIBS}
 LIBS += ${libproj_LIBS}
-LIBS += ${libx11_LIBS}
 LIBS += ${libmotif_LIBS}
+LIBS += ${libx11_LIBS}
 LIBS += $(MBTRNLIB)
 LIBS += $(LIBM)
 
