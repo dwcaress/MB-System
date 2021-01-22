@@ -14,12 +14,13 @@ function(findCIncludeDir directory var)
     
   endif()
   message("${var} not yet set")  
-  message("***findCIncludeDir(): look for ${directory} in ${CMAKE_C_IMPLICIT_INCLUDE_DIRECTORIES} ${CMAKE_SYSTEM_PREFIX_PATH}")
+  message("***findCIncludeDir(): look for ${directory} in ${CMAKE_C_IMPLICIT_INCLUDE_DIRECTORIES} ${CMAKE_SYSTEM_PREFIX_PATH} ${CMAKE_SYSTEM_APPBUNDLE_PATH}")
 
   # Find specified file
   find_file(${var} ${directory}
             PATHS ${CMAKE_C_IMPLICIT_INCLUDE_DIRECTORIES}
             ${CMAKE_SYSTEM_PREFIX_PATH}
+	    ${CMAKE_SYSTEM_APPBUNDLE_PATH}
               NO_DEFAULT_PATH)
 
   message("***result: ${directory}: ${${var}}")
