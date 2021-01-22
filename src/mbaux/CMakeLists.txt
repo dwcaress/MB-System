@@ -15,6 +15,7 @@ target_include_directories(mbaux
                            PUBLIC
                            .
                            ${GMT_INCLUDE_DIR}
+                           ${GDAL_INCLUDE_DIR}
                            ${CMAKE_SOURCE_DIR}/src/mbio)
 
 # Static library
@@ -27,6 +28,7 @@ target_include_directories(mbxgr
                            PUBLIC
                            .
                            ${GMT_INCLUDE_DIR}
+                           ${GDAL_INCLUDE_DIR}
                            ${CMAKE_SOURCE_DIR}/src/mbio)
                            
 
@@ -40,6 +42,7 @@ target_include_directories(mbauxShared
                            PUBLIC
                            .
                            ${GMT_INCLUDE_DIR}
+                           ${GDAL_INCLUDE_DIR}
                            ${CMAKE_SOURCE_DIR}/src/mbio)
 
 
@@ -53,4 +56,5 @@ target_include_directories(mbxgrShared
                            PUBLIC
                            .
                            ${GMT_INCLUDE_DIR}
+                           ${GDAL_INCLUDE_DIR}
                            ${CMAKE_SOURCE_DIR}/src/mbio)
