@@ -46,19 +46,9 @@ else()
 endif()
 
 
-# TEST TEST TEST
-set(file "gmt")
-findCIncludeDir(${file} DUMMY)
-message("DUMMY: ${DUMMY}")
-
-# TEST TEST TEST
-set(library "mbio")
-findLibraryDir(${library} DUMMY_DIR)
-message("DUMMY_DIR: ${DUMMY_DIR}")
-
-
-
 # Look for gmt 'C' headers in implicit C include directories
+message("Look for gmt headers")
+message("CMAKE_SYSTEM_APPBUNDLE_PATH: ${CMAKE_SYSTEM_APPBUNDLE_PATH}")
 findCIncludeDir(gmt GMT_INCLUDE_DIR)
 message("GMT_INCLUDE_DIR: ${GMT_INCLUDE_DIR}")
 
