@@ -62,8 +62,8 @@ message("DUMMY_DIR: ${DUMMY_DIR}")
 findCIncludeDir(gmt GMT_INCLUDE_DIR)
 message("GMT_INCLUDE_DIR: ${GMT_INCLUDE_DIR}")
 
-# Look for vtk-8.2 C++ headers in implicit C++ include directories
-findCXXIncludeDir(vtk-8.2 VTK_INCLUDE_DIR)
+# Look for vtk C++ headers in implicit C++ include directories
+findCXXIncludeDir(vtk-9.0 VTK_INCLUDE_DIR)
 
 # Look for proj C++ headers in implicit C++ include directories
 findCXXIncludeDir(proj PROJ_INCLUDE_DIR)
@@ -72,7 +72,7 @@ findCXXIncludeDir(proj PROJ_INCLUDE_DIR)
 findCIncludeDir(GL OPENGL_INCLUDE_DIR)
 
 # Look for library in usual places
-findLibraryDir(vtkIOCore-8.2 VTK_LIB_DIR)
+findLibraryDir(vtkIOCore-9.0 VTK_LIB_DIR)
 
 # Look for library in usual places
 findLibraryDir(gmt GMT_LIB_DIR)
