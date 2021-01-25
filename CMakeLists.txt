@@ -8,6 +8,7 @@
 # FFT_
 # OTPS_
 # OPENCV_
+# GDAL
 # 
 # For Qt we currently rely on qmake and .pro files to determine Qt header
 # and library location
@@ -57,6 +58,9 @@ findCXXIncludeDir(vtk-8.2 VTK_INCLUDE_DIR)
 
 # Look for proj C++ headers in implicit C++ include directories
 findCXXIncludeDir(proj PROJ_INCLUDE_DIR)
+
+# Look for gdal C++ headers in implicit C++ include directories
+findCXXIncludeDir(gdal GDAL_INCLUDE_DIR)
 
 # Look for OpenGL 'C' headers in implicit C include directories  
 findCIncludeDir(GL OPENGL_INCLUDE_DIR)
