@@ -17,7 +17,10 @@ target_include_directories(mbgrdviz
                            ${CMAKE_SOURCE_DIR}/src/mbview
                            ${CMAKE_SOURCE_DIR}/src/bsio
                            ${CMAKE_SOURCE_DIR}/src/surf
-                           ${CMAKE_SOURCE_DIR}/src/gsf)                           
+                           ${CMAKE_SOURCE_DIR}/src/gsf)                        
+
+link_directories($GMT_LIB_DIR)
+   
 target_link_libraries(mbgrdviz
                       PRIVATE
                       mbio
