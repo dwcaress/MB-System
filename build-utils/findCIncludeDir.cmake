@@ -19,7 +19,7 @@ function(findCIncludeDir directory var)
   # Find specified file
   find_file(${var} ${directory}
             PATHS ${CMAKE_C_IMPLICIT_INCLUDE_DIRECTORIES}
-            ${CMAKE_SYSTEM_PREFIX_PATH}
+            ${CMAKE_SYSTEM_PREFIX_PATH} /usr/local/include
               NO_DEFAULT_PATH)
 
   message("***result: ${directory}: ${${var}}")
