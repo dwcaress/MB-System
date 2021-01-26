@@ -8,6 +8,7 @@
 # FFT_
 # OTPS_
 # OPENCV_
+# GDAL
 # 
 # For Qt we currently rely on qmake and .pro files to determine Qt header
 # and library location
@@ -46,19 +47,9 @@ else()
 endif()
 
 
-# TEST TEST TEST
-set(file "gmt")
-findCIncludeDir(${file} DUMMY)
-message("DUMMY: ${DUMMY}")
-
-# TEST TEST TEST
-set(library "mbio")
-findLibraryDir(${library} DUMMY_DIR)
-message("DUMMY_DIR: ${DUMMY_DIR}")
-
-
-
 # Look for gmt 'C' headers in implicit C include directories
+message("Look for gmt headers")
+message("CMAKE_SYSTEM_APPBUNDLE_PATH: ${CMAKE_SYSTEM_APPBUNDLE_PATH}")
 findCIncludeDir(gmt GMT_INCLUDE_DIR)
 message("GMT_INCLUDE_DIR: ${GMT_INCLUDE_DIR}")
 
@@ -67,6 +58,9 @@ findCXXIncludeDir(vtk-9.0 VTK_INCLUDE_DIR)
 
 # Look for proj C++ headers in implicit C++ include directories
 findCXXIncludeDir(proj PROJ_INCLUDE_DIR)
+
+# Look for gdal C++ headers in implicit C++ include directories
+findCXXIncludeDir(gdal GDAL_INCLUDE_DIR)
 
 # Look for OpenGL 'C' headers in implicit C include directories  
 findCIncludeDir(GL OPENGL_INCLUDE_DIR)
