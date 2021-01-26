@@ -34,8 +34,7 @@ message("CMAKE_MODULE_PATH now: ${CMAKE_MODULE_PATH}")
 
 # Include my functions (these are not macros)
 include(findLibraryDir)
-include(findCIncludeDir)
-include(findCXXIncludeDir)
+include(findHeaderPath)
 
 # Verify that OS is supported
 if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
@@ -49,21 +48,26 @@ endif()
 
 # Look for gmt 'C' headers in implicit C include directories
 message("Look for gmt headers")
-message("CMAKE_SYSTEM_APPBUNDLE_PATH: ${CMAKE_SYSTEM_APPBUNDLE_PATH}")
-findCIncludeDir(gmt GMT_INCLUDE_DIR)
+findHeaderPath(gmt GMT_INCLUDE_DIR)
 message("GMT_INCLUDE_DIR: ${GMT_INCLUDE_DIR}")
 
 # Look for vtk C++ headers in implicit C++ include directories
-findCXXIncludeDir(vtk-9.0 VTK_INCLUDE_DIR)
+findHeaderPath(vtk-9.0 VTK_INCLUDE_DIR)
 
 # Look for proj C++ headers in implicit C++ include directories
-findCXXIncludeDir(proj PROJ_INCLUDE_DIR)
+findHeaderPath(proj PROJ_INCLUDE_DIR)
 
 # Look for gdal C++ headers in implicit C++ include directories
-findCXXIncludeDir(gdal.h GDAL_INCLUDE_DIR)
+findHeaderPath(gdal.h GDAL_INCLUDE_DIR)
 
 # Look for OpenGL 'C' headers in implicit C include directories  
-findCIncludeDir(GL OPENGL_INCLUDE_DIR)
+findHeaderPath(GL OPENGL_INCLUDE_DIR)
+
+# Look for X11 'C' headers in implicit C include directories  
+findHeaderPath(X11 X11_INCLUDE_DIR)
+
+# Look for netcdf 'C' headers in implicit C include directories  
+findHeaderPath(netcdf.h NETCDF_INCLUDE_DIR)
 
 # Look for library in usual places
 findLibraryDir(vtkIOCore-9.0 VTK_LIB_DIR)
@@ -76,6 +80,8 @@ message("VTK_INCLUDE_DIR: ${VTK_INCLUDE_DIR}")
 message("PROJ_INCLUDE_DIR: ${PROJ_INCLUDE_DIR}")
 message("GDAL_INCLUDE_DIR: ${GDAL_INCLUDE_DIR}")
 message("OPENGL_INCLUDE_DIR: ${OPENGL_INCLUDE_DIR}")
+message("X11_INCLUDE_DIR: ${X11_INCLUDE_DIR}")
+message("NETCDF_INCLUDE_DIR: ${NETCDF_INCLUDE_DIR}")
 message("GMT_LIB_DIR: ${GMT_LIB_DIR}")
 message("VTK_LIB_DIR: ${VTK_LIB_DIR}")
 
