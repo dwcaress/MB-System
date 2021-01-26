@@ -60,7 +60,7 @@ findCXXIncludeDir(vtk-9.0 VTK_INCLUDE_DIR)
 findCXXIncludeDir(proj PROJ_INCLUDE_DIR)
 
 # Look for gdal C++ headers in implicit C++ include directories
-findCXXIncludeDir(gdal GDAL_INCLUDE_DIR)
+findCXXIncludeDir(gdal.h GDAL_INCLUDE_DIR)
 
 # Look for OpenGL 'C' headers in implicit C include directories  
 findCIncludeDir(GL OPENGL_INCLUDE_DIR)
@@ -74,6 +74,7 @@ findLibraryDir(gmt GMT_LIB_DIR)
 message("GMT_INCLUDE_DIR: ${GMT_INCLUDE_DIR}")
 message("VTK_INCLUDE_DIR: ${VTK_INCLUDE_DIR}")
 message("PROJ_INCLUDE_DIR: ${PROJ_INCLUDE_DIR}")
+message("GDAL_INCLUDE_DIR: ${GDAL_INCLUDE_DIR}")
 message("OPENGL_INCLUDE_DIR: ${OPENGL_INCLUDE_DIR}")
 message("GMT_LIB_DIR: ${GMT_LIB_DIR}")
 message("VTK_LIB_DIR: ${VTK_LIB_DIR}")
