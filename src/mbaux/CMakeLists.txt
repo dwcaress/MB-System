@@ -14,6 +14,7 @@ add_library(mbaux
 target_include_directories(mbaux
                            PUBLIC
                            .
+			   ${X11_INCLUDE_DIR}
                            ${GMT_INCLUDE_DIR}
                            ${GDAL_INCLUDE_DIR}
                            ${CMAKE_SOURCE_DIR}/src/mbio)
@@ -27,11 +28,13 @@ add_library(mbxgr
 target_include_directories(mbxgr
                            PUBLIC
                            .
+			   ${X11_INCLUDE_DIR}			   
                            ${GMT_INCLUDE_DIR}
                            ${GDAL_INCLUDE_DIR}
                            ${CMAKE_SOURCE_DIR}/src/mbio)
                            
 
+#[[
 # Shared library
 add_library(mbauxShared
 	    SHARED
@@ -41,6 +44,7 @@ add_library(mbauxShared
 target_include_directories(mbauxShared
                            PUBLIC
                            .
+			   ${X11_INCLUDE_DIR}			   
                            ${GMT_INCLUDE_DIR}
                            ${GDAL_INCLUDE_DIR}
                            ${CMAKE_SOURCE_DIR}/src/mbio)
@@ -55,6 +59,8 @@ add_library(mbxgrShared
 target_include_directories(mbxgrShared
                            PUBLIC
                            .
+			   ${X11_INCLUDE_DIR}			   
                            ${GMT_INCLUDE_DIR}
                            ${GDAL_INCLUDE_DIR}
                            ${CMAKE_SOURCE_DIR}/src/mbio)
+]]
