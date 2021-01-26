@@ -28,7 +28,21 @@ function(findCXXIncludeDir directory var)
             "Specify ${directory} location with -D ${var}=<directory> on command line")  
   endif()
   
-  set(${var} ${${var}} PARENT_SCOPE)
+  # Is the target file a directory? 
+  if (IS_DIRECTORY ${var}) 
+    message("target is a directory")
+    set(${var} ${$var}} PARENT_SCOPE)
+    message("early return")
+    return()
+  endif()
+
+  # Target file is not a directory, presumably header file itself. So 
+  # return the directory that contains it.
+  message("OK - get_filename_component(tmp ${${var}} DIRECTORY)")
+  get_filename_component(tmp ${${var}} DIRECTORY)
+  message("set ${var} to ${tmp}")
+  set(${var} ${tmp} PARENT_SCOPE)
+
   
 endfunction()
 
