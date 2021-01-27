@@ -3685,7 +3685,7 @@ int mbnavadjust_naverr_skip() {
         crossing->num_ties = 0;
         if (project.inversion_status == MBNA_INVERSION_CURRENT) {
           project.inversion_status = MBNA_INVERSION_OLD;
-                    project.modelplot_uptodate = false;
+          project.modelplot_uptodate = false;
         }
       }
       else if (crossing->status == MBNA_CROSSING_STATUS_NONE) {

@@ -23,6 +23,7 @@ Distributions that do not include "beta" in the tag name correspond to the major
 announced releases. The source distributions associated with all releases, major
 or beta, are equally accessible as tarballs through the Github interface.
 
+- Version 5.7.9beta02    January 27, 2020
 - Version 5.7.9beta01    January 18, 2020
 - **Version 5.7.8        January 17, 2020
 - Version 5.7.7          January 17, 2020 (flawed, quickly superceded)
@@ -381,7 +382,14 @@ or beta, are equally accessible as tarballs through the Github interface.
 ### MB-System Version 5.7 Release Notes:
 --
 
-#### 5.7.9beta01 (January 18, 2020)
+#### 5.7.9beta01 (January 27, 2020)
+
+Fixed bug in format 58 and 59 support for bathymetry recalculation. The per beam heave values were being calculated incorrectly when bathymetry was recalculated by raytracing.
+
+Fixed bug in format 57 in which reprocessing did not trigger recalculation of multibeam pseudosidescan.
+
+These bugs were introduced during the 2020 code modernization.
+#### 5.7.9beta02 (January 18, 2020)
 
 Mbedit and mbnavedit: Use extern for Widget definitions in mbedit_creation.h
 and mbnavedit_creation.h to avoid duplicate symbol link errors when building

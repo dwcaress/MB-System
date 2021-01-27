@@ -1705,7 +1705,6 @@ int mbsys_simrad2_preprocess(int verbose,     /* in: verbosity level set on comm
 
   /* get data structure pointers */
 	struct mbsys_simrad2_struct *store = (struct mbsys_simrad2_struct *)store_ptr;
-	struct mbsys_simrad2_ping_struct *ping = (struct mbsys_simrad2_ping_struct *)store->ping;
   struct mb_platform_struct *platform = (struct mb_platform_struct *)platform_ptr;
 
 	if (verbose >= 2) {
@@ -1744,8 +1743,6 @@ int mbsys_simrad2_preprocess(int verbose,     /* in: verbosity level set on comm
 	// int depthsensor_mode = MBSYS_SIMRAD2_ZMODE_UNKNOWN;
 
 	int interp_error = MB_ERROR_NO_ERROR;
-	// int ss_status = MB_SUCCESS;
-	// int ss_error = MB_ERROR_NO_ERROR;
 	int jnav, jsensordepth, jheading, jaltitude, jattitude;
 
   /* if called with store_ptr == NULL then called after mb_read_init() but before
@@ -1757,6 +1754,8 @@ int mbsys_simrad2_preprocess(int verbose,     /* in: verbosity level set on comm
 
 	/* deal with a survey record */
 	else if (store->kind == MB_DATA_DATA) {
+  	struct mbsys_simrad2_ping_struct *ping = (struct mbsys_simrad2_ping_struct *)store->ping;
+
 		/*--------------------------------------------------------------*/
 		/* get depth sensor mode from the start record
 		    NI => Use heave
@@ -1802,23 +1801,23 @@ int mbsys_simrad2_preprocess(int verbose,     /* in: verbosity level set on comm
 		time_i[6] = (ping->png_msec % 1000) * 1000;
 		mb_get_time(verbose, time_i, &time_d);
 
-		/* int interp_status = */ mb_linear_interp_longitude(verbose, pars->nav_time_d - 1, pars->nav_lon - 1, pars->n_nav, time_d, &navlon,
+		mb_linear_interp_longitude(verbose, pars->nav_time_d - 1, pars->nav_lon - 1, pars->n_nav, time_d, &navlon,
 		                                           &jnav, &interp_error);
 		if (navlon < -180.0)
 			navlon += 360.0;
 		else if (navlon > 180.0)
 			navlon -= 360.0;
-		/* interp_status &= */ mb_linear_interp_latitude(verbose, pars->nav_time_d - 1, pars->nav_lat - 1, pars->n_nav, time_d, &navlat,
+		 mb_linear_interp_latitude(verbose, pars->nav_time_d - 1, pars->nav_lat - 1, pars->n_nav, time_d, &navlat,
 		                                          &jnav, &interp_error);
-		/* interp_status &= */ mb_linear_interp(verbose, pars->nav_time_d - 1, pars->nav_speed - 1, pars->n_nav, time_d, &speed, &jnav,
+		 mb_linear_interp(verbose, pars->nav_time_d - 1, pars->nav_speed - 1, pars->n_nav, time_d, &speed, &jnav,
 		                                 &interp_error);
 
 		/* interpolate sensordepth */
-		/* interp_status &= */ mb_linear_interp(verbose, pars->sensordepth_time_d - 1, pars->sensordepth_sensordepth - 1,
+		 mb_linear_interp(verbose, pars->sensordepth_time_d - 1, pars->sensordepth_sensordepth - 1,
 		                                 pars->n_sensordepth, time_d, &sensordepth, &jsensordepth, &interp_error);
 
 		/* interpolate heading */
-		/* interp_status &= */ mb_linear_interp_heading(verbose, pars->heading_time_d - 1, pars->heading_heading - 1, pars->n_heading,
+		 mb_linear_interp_heading(verbose, pars->heading_time_d - 1, pars->heading_heading - 1, pars->n_heading,
 		                                         time_d, &heading, &jheading, &interp_error);
 		if (heading < 0.0)
 			heading += 360.0;
@@ -1826,15 +1825,15 @@ int mbsys_simrad2_preprocess(int verbose,     /* in: verbosity level set on comm
 			heading -= 360.0;
 
 		/* interpolate altitude */
-		/* interp_status &= */ mb_linear_interp(verbose, pars->altitude_time_d - 1, pars->altitude_altitude - 1, pars->n_altitude,
+		 mb_linear_interp(verbose, pars->altitude_time_d - 1, pars->altitude_altitude - 1, pars->n_altitude,
 		                                 time_d, &altitude, &jaltitude, &interp_error);
 
 		/* interpolate attitude */
-		/* interp_status &= */ mb_linear_interp(verbose, pars->attitude_time_d - 1, pars->attitude_roll - 1, pars->n_attitude, time_d,
+		 mb_linear_interp(verbose, pars->attitude_time_d - 1, pars->attitude_roll - 1, pars->n_attitude, time_d,
 		                                 &roll, &jattitude, &interp_error);
-		/* interp_status &= */ mb_linear_interp(verbose, pars->attitude_time_d - 1, pars->attitude_pitch - 1, pars->n_attitude, time_d,
+		 mb_linear_interp(verbose, pars->attitude_time_d - 1, pars->attitude_pitch - 1, pars->n_attitude, time_d,
 		                                 &pitch, &jattitude, &interp_error);
-		/* interp_status &= */ mb_linear_interp(verbose, pars->attitude_time_d - 1, pars->attitude_heave - 1, pars->n_attitude, time_d,
+		 mb_linear_interp(verbose, pars->attitude_time_d - 1, pars->attitude_heave - 1, pars->n_attitude, time_d,
 		                                 &heave, &jattitude, &interp_error);
 
 		/* insert navigation */
@@ -1854,14 +1853,14 @@ int mbsys_simrad2_preprocess(int verbose,     /* in: verbosity level set on comm
 		ping->png_heave = (int)rint(heave / 0.01);
 
 		/* generate processed sidescan */
-		// double *pixel_size = (double *)&mb_io_ptr->saved1;
-		// double *swath_width = (double *)&mb_io_ptr->saved2;
+		double *pixel_size = (double *)&mb_io_ptr->saved1;
+		double *swath_width = (double *)&mb_io_ptr->saved2;
 		ping->png_pixel_size = 0;
 		ping->png_pixels_ss = 0;
-		// ss_status = mbsys_simrad2_makess(verbose, mbio_ptr, store_ptr, false, pixel_size, false, swath_width, 1, &ss_error);
+		mbsys_simrad2_makess(verbose, mbio_ptr, store_ptr, false, pixel_size, false, swath_width, 1, error);
 	}
 
-	const int status = MB_SUCCESS;
+  const int status = MB_SUCCESS;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
