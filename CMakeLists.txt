@@ -1,9 +1,8 @@
-# Accepts the following _INCLUDE_DIR and _LIB_DIR "-D" options on the command
+# Accepts the following _INCLUDE_DIR and _LIBRARY "-D" options on the command
 # line:
 # GMT_
 # PROJ_
 # OPENGL_
-# VTK_
 # MOTIF_
 # FFT_
 # OTPS_
@@ -16,14 +15,6 @@
 cmake_minimum_required(VERSION 3.18)
 project(MB-System)
 
-### TEST TEST TEST
-set(packages GMT PROJ OpenGL VTK MOTIF OPENCV GDAL)
-message("process these: ${packages}")
-foreach(package ${packages})
-  message("Process package ${package}")
-endforeach()
-message("Done processing packages")
-
 # Add globally-needed compiler flags
 add_compile_options(-fPIC -DPIC -g)
 
@@ -35,7 +26,6 @@ message("CMAKE_INSTALL_PREFIX: ${CMAKE_INSTALL_PREFIX}")
 message("CMAKE_SYSTEM_PREFIX_PATH: ${CMAKE_SYSTEM_PREFIX_PATH}")
 message("CMAKE_C_IMPLICIT_INCLUDE_DIRECTORIES: ${CMAKE_C_IMPLICIT_INCLUDE_DIRECTORIES}")
 
-
 message("Add build-utils/ subdirectory to module CMAKE_MODULE_PATH")
 list(APPEND CMAKE_MODULE_PATH ${MB_HOME}/build-utils/)
 message("CMAKE_MODULE_PATH now: ${CMAKE_MODULE_PATH}")
@@ -44,6 +34,51 @@ message("CMAKE_MODULE_PATH now: ${CMAKE_MODULE_PATH}")
 include(findLibraryDir)
 include(findHeaderPath)
 include(FindNetCDF)
+include(FindGMT)
+include(FindProj)
+include(FindOpenCV)
+
+# Find required packages
+# Not all the Find modules we use conform to the variable-naming rules
+# described at
+# https://cmake.org/cmake/help/latest/manual/cmake-developer.7.html
+
+# FindNetCDF.cmake sets output NetCDF_INCLUDE_DIRS (plural name),
+# doesn't set NetCDF_INCLUDE_DIR or NETCDF_INCLUDE_DIR
+find_package("NetCDF")
+if (NetCDF_FOUND)
+  message("NetCDF_INCLUDE_DIRS: ${NetCDF_INCLUDE_DIRS}")
+  message("NetCDF_LIBRARIES: ${NetCDF_LIBRARIES}")
+else()
+  message("warning: NetCDF not found")
+endif()
+
+# FindOpenCV doesn't set OPENCV_INCLUDE_DIR
+
+# These Find modules all casefold package name to uppercase in output variable
+# names, so we process them as a list
+set(packages GMT Proj OpenGL X11 MOTIF GDAL)
+message("process these: ${packages}")
+foreach(package ${packages})
+  message("Process package ${package}")
+  find_package(${package})
+  # find_package() output variables typically uppercase
+  string(TOUPPER ${package} prefix)  
+  if (${prefix}_FOUND)
+    message("found ${package} - ${prefix}_INCLUDE_DIR: ${${prefix}_INCLUDE_DIR}")
+    message("found ${package} - ${prefix}_LIBRARY: ${${prefix}_LIBRARY}")  
+
+  else()
+    message("${package} not found")
+  endif()
+  
+endforeach()
+
+message("Done finding packages")
+
+# Make NetCDF variable names consistent
+set(NETCDF_INCLUDE_DIR ${NetCDF_INCLUDE_DIRS})
+set(NETCDF_LIBRARY ${NetCDF_LIBRARIES})
 
 # Verify that OS is supported
 if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
@@ -54,74 +89,24 @@ else()
   message(FATAL_ERROR "Building on unsupported OS")
 endif()
 
-
-# Look for gmt 'C' headers in implicit C include directories
-message("Look for gmt headers")
-findHeaderPath(gmt GMT_INCLUDE_DIR)
 message("GMT_INCLUDE_DIR: ${GMT_INCLUDE_DIR}")
-
-# Look for vtk C++ headers in implicit C++ include directories
-findHeaderPath(vtk-9.0 VTK_INCLUDE_DIR)
-
-# Look for proj C++ headers in implicit C++ include directories
-findHeaderPath(proj PROJ_INCLUDE_DIR)
-
-# Look for gdal C++ headers in implicit C++ include directories
-findHeaderPath(gdal.h GDAL_INCLUDE_DIR)
-message("findHeaderPath() found ${GDAL_INCLUDE_DIR}")
-find_package(GDAL)
-if (GDAL_FOUND)
-  message("find_package() found GDAL; headers at ${GDAL_INCLUDE_DIR}")
-else()
-  message("find_package() did not find GDAL")
-endif()
-
-# Look for OpenGL 'C' headers in implicit C include directories  
-findHeaderPath(GL OPENGL_INCLUDE_DIR)
-
-# Look for X11 'C' headers in implicit C include directories  
-findHeaderPath(X11 X11_INCLUDE_DIR)
-message("findHeaderPath() found ${X11_INCLUDE_DIR}")
-find_package(X11)
-if (X11_FOUND)
-  message("find_package() found X11; headers at ${X11_INCLUDE_DIR}")
-else()
-  message("find_package() did not find X11")
-endif()
-
-# Look for Motif 'C' headers in implicit C include directories  
-findHeaderPath(Xm MOTIF_INCLUDE_DIR)
-
-# Look for netcdf 'C' headers in implicit C include directories  
-findHeaderPath(netcdf.h NETCDF_INCLUDE_DIR)
-find_package(NetCDF)
-if (NetCDF_FOUND)
-  message("find_package() found NetCDF; headers at ${NetCDF_INCLUDE_DIRS}")
-else()
-  message("find_package() did not find NetCDF")
-endif()
-
-
-
-# Look for library in usual places
-findLibraryDir(vtkIOCore-9.0 VTK_LIB_DIR)
-
-# Look for library in usual places
-findLibraryDir(gmt GMT_LIB_DIR)
-
-message("GMT_INCLUDE_DIR: ${GMT_INCLUDE_DIR}")
-message("VTK_INCLUDE_DIR: ${VTK_INCLUDE_DIR}")
 message("PROJ_INCLUDE_DIR: ${PROJ_INCLUDE_DIR}")
 message("GDAL_INCLUDE_DIR: ${GDAL_INCLUDE_DIR}")
 message("OPENGL_INCLUDE_DIR: ${OPENGL_INCLUDE_DIR}")
 message("X11_INCLUDE_DIR: ${X11_INCLUDE_DIR}")
 message("MOTIF_INCLUDE_DIR: ${MOTIF_INCLUDE_DIR}")
 message("NETCDF_INCLUDE_DIR: ${NETCDF_INCLUDE_DIR}")
-message("GMT_LIB_DIR: ${GMT_LIB_DIR}")
-message("VTK_LIB_DIR: ${VTK_LIB_DIR}")
+
+message("GMT_LIBRARY: ${GMT_LIBRARY}")
+message("PROJ_LIBRARY: ${PROJ_LIBRARY}")
+message("GDAL_LIBRARY: ${GDAL_LIBRARY}")
+message("OPENGL_LIBRARY: ${OPENGL_LIBRARY}")
+message("X11_LIBRARY: ${X11_LIBRARY}")
+message("MOTIF_LIBRARY: ${MOTIF_LIBRARY}")
+message("NETCDF_LIBRARY: ${NETCDF_LIBRARY}")
 
 
-# Libraries
+# Utilities and libraries
 add_subdirectory(src/mbaux)
 add_subdirectory(src/mbio)
 add_subdirectory(src/mbview)
