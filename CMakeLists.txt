@@ -68,6 +68,10 @@ foreach(package ${packages})
     message("found ${package} - ${prefix}_INCLUDE_DIR: ${${prefix}_INCLUDE_DIR}")
     message("found ${package} - ${prefix}_LIBRARY: ${${prefix}_LIBRARY}")  
 
+    # Make library variable name consistent
+    if (${prefix}_LIBRARY)
+      set(${prefix}_LIBRARIES ${${prefix}_LIBRARY})
+    endif()
   else()
     message("${package} not found")
   endif()
@@ -97,13 +101,13 @@ message("X11_INCLUDE_DIR: ${X11_INCLUDE_DIR}")
 message("MOTIF_INCLUDE_DIR: ${MOTIF_INCLUDE_DIR}")
 message("NETCDF_INCLUDE_DIR: ${NETCDF_INCLUDE_DIR}")
 
-message("GMT_LIBRARY: ${GMT_LIBRARY}")
-message("PROJ_LIBRARY: ${PROJ_LIBRARY}")
-message("GDAL_LIBRARY: ${GDAL_LIBRARY}")
-message("OPENGL_LIBRARY: ${OPENGL_LIBRARY}")
-message("X11_LIBRARY: ${X11_LIBRARY}")
-message("MOTIF_LIBRARY: ${MOTIF_LIBRARY}")
-message("NETCDF_LIBRARY: ${NETCDF_LIBRARY}")
+message("GMT_LIBRARIES: ${GMT_LIBRARIES}")
+message("PROJ_LIBRARIES: ${PROJ_LIBRARIES}")
+message("GDAL_LIBRARIES: ${GDAL_LIBRARIES}")
+message("OPENGL_LIBRARIES: ${OPENGL_LIBRARIES}")
+message("X11_LIBRARIES: ${X11_LIBRARIES}")
+message("MOTIF_LIBRARIES: ${MOTIF_LIBRARIES}")
+message("NETCDF_LIBRARIES: ${NETCDF_LIBRARIES}")
 
 
 # Utilities and libraries
