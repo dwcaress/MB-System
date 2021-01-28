@@ -16,7 +16,7 @@ cmake_minimum_required(VERSION 3.18)
 project(MB-System)
 
 # Add globally-needed compiler flags
-add_compile_options(-fPIC -DPIC -MD -MP -MF  -fno-common -g -std=gnu11)
+add_compile_options(-DUSE_DEFAULT_FILE_FUNCTIONS -fPIC -DPIC -MD -MP -MF  -fno-common -g -std=gnu11)
 
 # Get directory of this CMakeLists.txt file
 set(MB_HOME ${CMAKE_CURRENT_SOURCE_DIR})
