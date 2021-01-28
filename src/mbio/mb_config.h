@@ -26,7 +26,7 @@
 #define HAVE_LIBM 1
 
 /* Have malloc.h */
-/* #undef HAVE_MALLOC_H */
+#define HAVE_MALLOC_H 1
 
 /* Define to 1 if you have the <memory.h> header file. */
 #define HAVE_MEMORY_H 1
@@ -38,7 +38,7 @@
 #define HAVE_RPC_TYPES_H 1
 
 /* Define to 1 if you have the `sincos' function. */
-/* #undef HAVE_SINCOS */
+#define HAVE_SINCOS 1
 
 /* Define to 1 if you have the <stdint.h> header file. */
 #define HAVE_STDINT_H 1
@@ -77,19 +77,19 @@
 #define MBSYSTEM_INSTALL_PREFIX "/usr/local"
 
 /* Set MBSYSTEM_OTPS_LOCATION define in mb_config.h */
-#define MBSYSTEM_OTPS_LOCATION "/usr/local/opt/otps"
+#define MBSYSTEM_OTPS_LOCATION "/usr/local/OTPS2"
 
 /* Build libmbtnav and embed TRN instance in mbtrnpp */
-#define MBTNAV_ENABLED 1
+/* #undef MBTNAV_ENABLED */
 
 /* Build libmbtrn and mbtrnpp */
-#define MBTRN_ENABLED 1
+/* #undef MBTRN_ENABLED */
 
 /* Build graphical tools */
 #define MBUTILS_ENABLED 1
 
 /* Build tools using OpenCV */
-#define OPENCVTOOLS_ENABLED 1
+/* #undef OPENCVTOOLS_ENABLED */
 
 /* Name of package */
 #define PACKAGE "mbsystem"
@@ -116,13 +116,13 @@
 /* #undef PCLTOOLS_ENABLED */
 
 /* Build tools using Qt5 */
-/* #undef QTTOOLS_ENABLED */
+#define QTTOOLS_ENABLED 1
 
 /* Define to 1 if you have the ANSI C header files. */
 #define STDC_HEADERS 1
 
 /* Building unit tests */
-#define TEST_ENABLED 1
+/* #undef TEST_ENABLED */
 
 /* Version number of package */
 #define VERSION "5.7.7beta02"
