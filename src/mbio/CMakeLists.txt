@@ -170,9 +170,11 @@ add_library(mbio
 
 target_include_directories(mbio
                            PUBLIC
+			   ${NETCDF_INCLUDE_DIR}
                            .
                            ${CMAKE_SOURCE_DIR}/src/gsf)
 
+#[[ comment out shared library build for now
 # Shared library
 add_library(mbioShared
 	    SHARED
@@ -181,6 +183,8 @@ add_library(mbioShared
 
 target_include_directories(mbioShared
                            PUBLIC
+			   ${NETCDF_INCLUDE_DIR}
                            .
                            ${CMAKE_SOURCE_DIR}/src/gsf)
 
+]]

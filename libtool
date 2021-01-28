@@ -281,7 +281,11 @@ finish_eval=""
 hardcode_into_libs=yes
 
 # Compile-time system search path for libraries.
+<<<<<<< HEAD
 sys_lib_search_path_spec="/usr/lib/gcc/x86_64-linux-gnu/7 /usr/lib/x86_64-linux-gnu /usr/lib /lib/x86_64-linux-gnu /lib "
+=======
+sys_lib_search_path_spec="/Library/Developer/CommandLineTools/usr/lib/clang/12.0.0  /usr/local/lib"
+>>>>>>> cacd328632c46a4e1ade87bdf3386bbc32240e35
 
 # Detected run-time system search path for libraries.
 sys_lib_dlsearch_path_spec="/lib /usr/lib /usr/lib/x86_64-linux-gnu/libfakeroot /usr/local/lib/i386-linux-gnu /lib/i386-linux-gnu /usr/lib/i386-linux-gnu /usr/local/lib/i686-linux-gnu /lib/i686-linux-gnu /usr/lib/i686-linux-gnu /usr/local/lib /usr/local/lib/x86_64-linux-gnu /lib/x86_64-linux-gnu /usr/lib/x86_64-linux-gnu /lib32 /usr/lib32 "
@@ -304,7 +308,11 @@ striplib="strip --strip-unneeded"
 
 
 # The linker used to build libraries.
+<<<<<<< HEAD
 LD="/usr/bin/ld -m elf_x86_64"
+=======
+LD="/Library/Developer/CommandLineTools/usr/bin/ld"
+>>>>>>> cacd328632c46a4e1ade87bdf3386bbc32240e35
 
 # How to create reloadable object files.
 reload_flag=" -r"
@@ -11669,7 +11677,11 @@ build_old_libs=`case $build_libtool_libs in yes) echo no;; *) echo yes;; esac`
 # ### BEGIN LIBTOOL TAG CONFIG: CXX
 
 # The linker used to build libraries.
+<<<<<<< HEAD
 LD="/usr/bin/ld -m elf_x86_64"
+=======
+LD="/Library/Developer/CommandLineTools/usr/bin/ld"
+>>>>>>> cacd328632c46a4e1ade87bdf3386bbc32240e35
 
 # How to create reloadable object files.
 reload_flag=" -r"

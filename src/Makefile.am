@@ -22,7 +22,7 @@ XBUILD_SUB_OPENCVTOOLS = photo
 endif
 
 if BUILD_QTTOOLS
-XBUILD_SUB_QTTOOLS = qt-mbgrdviz-1 qt-mbgrdviz-2 qt-mbgui qt-mbgrdviz-3
+XBUILD_SUB_QTTOOLS = qt-mbgrdviz qt-mbgrdviz-2 qt-guilib qt-mbgrdviz-3
 endif
 
 SUBDIRS =

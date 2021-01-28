@@ -27,12 +27,14 @@ function(findCXXIncludeDir directory var)
     message(FATAL_ERROR
             "Specify ${directory} location with -D ${var}=<directory> on command line")  
   endif()
+
+  # Resolve any symlink
+  get_filename_component(realPath ${${var}} REALPATH)
   
   # Is the target file a directory? 
-  if (IS_DIRECTORY ${var}) 
-    message("target is a directory")
-    set(${var} ${$var}} PARENT_SCOPE)
-    message("early return")
+  if (IS_DIRECTORY ${realPath})
+    message("target ${${var}} is a directory or symlink")
+    set(${var} ${${var}} PARENT_SCOPE)
     return()
   endif()
 

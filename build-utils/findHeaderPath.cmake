@@ -15,7 +15,7 @@ function(findHeaderPath target pathVar)
     
   endif()
   message("${pathVar} not yet set")  
-  message("***findHeaderPath(): look for ${target} in ${CMAKE_C_IMPLICIT_INCLUDE_DIRECTORIES} ${CMAKE_SYSTEM_PREFIX_PATH} ${CMAKE_SYSTEM_APPBUNDLE_PATH}")
+  message("***findHeaderPath(): look for ${target} in ${CMAKE_C_IMPLICIT_INCLUDE_DIRECTORIES} ${CMAKE_SYSTEM_PREFIX_PATH} /usr/local/include ${CMAKE_SYSTEM_APPBUNDLE_PATH}")
 
   # Find specified file
   find_file(${pathVar} ${target}
