@@ -1,15 +1,7 @@
-# Accepts the following _INCLUDE_DIR and _LIBRARY "-D" options on the command
-# line:
-# GMT_
-# PROJ_
-# OPENGL_
-# MOTIF_
-# FFT_
-# OTPS_
-# OPENCV_
-# GDAL
+# Find prerequesite packages and build Makefiles
+#
 # 
-# For Qt we currently rely on qmake and .pro files to determine Qt header
+# For Qt apps we currently rely on qmake and .pro files to determine Qt header
 # and library location
 
 cmake_minimum_required(VERSION 3.18)
@@ -30,62 +22,39 @@ message("Add build-utils/ subdirectory to module CMAKE_MODULE_PATH")
 list(APPEND CMAKE_MODULE_PATH ${MB_HOME}/build-utils/)
 message("CMAKE_MODULE_PATH now: ${CMAKE_MODULE_PATH}")
 
-# Include my functions (these are not macros)
-include(FindNetCDF)
-include(FindGMT)
-include(FindProj)
-include(FindOpenCV)
-include(FindXt)
-
 # Find required packages
-# Not all the Find modules we use conform to the variable-naming rules
-# described at
-# https://cmake.org/cmake/help/latest/manual/cmake-developer.7.html
-
-# FindNetCDF.cmake sets output NetCDF_INCLUDE_DIRS (plural name),
-# doesn't set NetCDF_INCLUDE_DIR or NETCDF_INCLUDE_DIR
-find_package("NetCDF")
-if (NetCDF_FOUND)
-  message("NetCDF_INCLUDE_DIRS: ${NetCDF_INCLUDE_DIRS}")
-  message("NetCDF_LIBRARIES: ${NetCDF_LIBRARIES}")
-else()
-  message("warning: NetCDF not found")
-endif()
-
-# FindOpenCV doesn't set OPENCV_INCLUDE_DIR
-
-# These Find modules all casefold package name to uppercase in output variable
-# names, so we process them as a list
-set(packages GMT Proj OpenGL X11 Xt MOTIF GDAL)
-message("process these: ${packages}")
+set(packages GMT Proj OpenGL X11 Xt MOTIF GDAL NetCDF)
+message("ok, find packages ${packages}")
 foreach(package ${packages})
-  message("Process package ${package}")
-  find_package(${package})
-  # find_package() output variables typically uppercase
-  string(TOUPPER ${package} prefix)  
-  if (${prefix}_FOUND)
-    message("found ${package} - ${prefix}_INCLUDE_DIR: ${${prefix}_INCLUDE_DIR}")
-    message("found ${package} - ${prefix}_LIBRARY: ${${prefix}_LIBRARY}")  
-
-    # Make library variable name consistent
-    if (${prefix}_LIBRARY)
-      set(${prefix}_LIBRARIES ${${prefix}_LIBRARY})
-    endif()
-  else()
-    message("${package} not found")
+  include(Find${package})
+  string(TOUPPER ${package} PACKAGE)
+  if (${PACKAGE}_LIBRARY)
+    message("rename ${PACKAGE}_LIBRARY (val=${${PACKAGE}_LIBRARY})")
+    set(${PACKAGE}_LIBRARIES ${${PACKAGE}_LIBRARY})
   endif()
-  
 endforeach()
 
 message("Done finding packages")
-message("X11_Xt_INCLUDE_PATH: ${X11_Xt_INCLUDE_PATH}")
-message("X11_Xt_LIB: ${X11_Xt_LIB}")
+# Not all the Find modules we use conform to the variable-naming rules
+# described at
+# https://cmake.org/cmake/help/latest/manual/cmake-developer.7.html
 set(X11_XT_INCLUDE_DIR ${X11_Xt_INCLUDE_PATH})
 set(X11_XT_LIBRARIES ${X11_Xt_LIB})
 
 # Make NetCDF variable names consistent
 set(NETCDF_INCLUDE_DIR ${NetCDF_INCLUDE_DIRS})
 set(NETCDF_LIBRARIES ${NetCDF_LIBRARIES})
+
+# Override header and library locations if specified on command line
+message("override header and library locations if specified on command line")
+foreach(package ${packages})
+  if (${package}_include)
+    message("override ${package} include directory with ${${package}_include}")
+  endif()
+  if (${package}_lib)
+    message("override ${package} library with ${${package}_lib}")
+  endif()
+endforeach()
 
 # Verify that OS is supported
 if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
@@ -96,18 +65,6 @@ else()
   message(FATAL_ERROR "Building on unsupported OS")
 endif()
 
-message("OPENGL_glu_LIBRARY: ${OPENGL_glu_LIBRARY}")
-message("OPENGL_glx_LIBRARY: ${OPENGL_glx_LIBRARY}")
-message("OPENGL_egl_LIBRARY: ${OPENGL_egl_LIBRARY}")
-if (TARGET OpenGL::GLX)
-   message("GLX is defined")
-endif()
-if (TARGET OpenGL::GLU)
-   message("GLU is defined")
-endif()
-if (TARGET OpenGL::EGL)
-   message("EGL is defined")
-endif()
 
 message("GMT_INCLUDE_DIR: ${GMT_INCLUDE_DIR}")
 message("PROJ_INCLUDE_DIR: ${PROJ_INCLUDE_DIR}")
