@@ -8,7 +8,7 @@ cmake_minimum_required(VERSION 3.18)
 project(MB-System)
 
 # Set list of required packages
-set(packages GMT Proj OpenGL X11 Xt MOTIF GDAL NetCDF)
+set(packages GMT Proj OpenGL X11 Xt Motif GDAL NetCDF)
 
 if (help)
   message("force package include directory with -Dpackage_include=path")
@@ -110,3 +110,4 @@ add_subdirectory(src/surf)
 
 # Executables
 add_subdirectory(src/mbgrdviz)
+add_subdirectory(src/utilities)
