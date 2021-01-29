@@ -1,19 +1,22 @@
-# Accepts the following _INCLUDE_DIR and _LIBRARY "-D" options on the command
-# line:
-# GMT_
-# PROJ_
-# OPENGL_
-# MOTIF_
-# FFT_
-# OTPS_
-# OPENCV_
-# GDAL
+# Find prerequesite packages and build Makefiles
+#
 # 
-# For Qt we currently rely on qmake and .pro files to determine Qt header
+# For Qt apps we currently rely on qmake and .pro files to determine Qt header
 # and library location
 
 cmake_minimum_required(VERSION 3.18)
 project(MB-System)
+
+# Set list of required packages
+set(packages GMT Proj OpenGL X11 Xt MOTIF GDAL NetCDF)
+
+if (help)
+  message("force package include directory with -Dpackage_include=path")
+  message("force package libraries with -Dpackage_lib=file")  
+  message("where package is one of the following:")
+  message("${packages}")
+  message(FATAL_ERROR "")
+endif()
 
 # Add globally-needed compiler flags
 add_compile_options(-DUSE_DEFAULT_FILE_FUNCTIONS -fPIC -DPIC -MD -MP -MF  -fno-common -g -std=gnu11)
@@ -30,59 +33,43 @@ message("Add build-utils/ subdirectory to module CMAKE_MODULE_PATH")
 list(APPEND CMAKE_MODULE_PATH ${MB_HOME}/build-utils/)
 message("CMAKE_MODULE_PATH now: ${CMAKE_MODULE_PATH}")
 
-# Include my functions (these are not macros)
-include(findLibraryDir)
-include(findHeaderPath)
-include(FindNetCDF)
-include(FindGMT)
-include(FindProj)
-include(FindOpenCV)
-
 # Find required packages
-# Not all the Find modules we use conform to the variable-naming rules
-# described at
-# https://cmake.org/cmake/help/latest/manual/cmake-developer.7.html
-
-# FindNetCDF.cmake sets output NetCDF_INCLUDE_DIRS (plural name),
-# doesn't set NetCDF_INCLUDE_DIR or NETCDF_INCLUDE_DIR
-find_package("NetCDF")
-if (NetCDF_FOUND)
-  message("NetCDF_INCLUDE_DIRS: ${NetCDF_INCLUDE_DIRS}")
-  message("NetCDF_LIBRARIES: ${NetCDF_LIBRARIES}")
-else()
-  message("warning: NetCDF not found")
-endif()
-
-# FindOpenCV doesn't set OPENCV_INCLUDE_DIR
-
-# These Find modules all casefold package name to uppercase in output variable
-# names, so we process them as a list
-set(packages GMT Proj OpenGL X11 MOTIF GDAL)
-message("process these: ${packages}")
+message("ok, find packages ${packages}")
 foreach(package ${packages})
-  message("Process package ${package}")
-  find_package(${package})
-  # find_package() output variables typically uppercase
-  string(TOUPPER ${package} prefix)  
-  if (${prefix}_FOUND)
-    message("found ${package} - ${prefix}_INCLUDE_DIR: ${${prefix}_INCLUDE_DIR}")
-    message("found ${package} - ${prefix}_LIBRARY: ${${prefix}_LIBRARY}")  
-
-    # Make library variable name consistent
-    if (${prefix}_LIBRARY)
-      set(${prefix}_LIBRARIES ${${prefix}_LIBRARY})
-    endif()
-  else()
-    message("${package} not found")
+  include(Find${package})
+  string(TOUPPER ${package} PACKAGE)
+  if (${PACKAGE}_LIBRARY)
+    message("rename ${PACKAGE}_LIBRARY (val=${${PACKAGE}_LIBRARY})")
+    set(${PACKAGE}_LIBRARIES ${${PACKAGE}_LIBRARY})
   endif()
-  
 endforeach()
 
 message("Done finding packages")
+# Not all the Find modules we use conform to the variable-naming rules
+# described at
+# https://cmake.org/cmake/help/latest/manual/cmake-developer.7.html
+set(X11_XT_INCLUDE_DIR ${X11_Xt_INCLUDE_PATH})
+set(X11_XT_LIBRARIES ${X11_Xt_LIB})
 
 # Make NetCDF variable names consistent
 set(NETCDF_INCLUDE_DIR ${NetCDF_INCLUDE_DIRS})
-set(NETCDF_LIBRARY ${NetCDF_LIBRARIES})
+set(NETCDF_LIBRARIES ${NetCDF_LIBRARIES})
+
+# Override header and library locations if specified on command line
+# with -D<package>_include or -D<package>_lib.
+message("override header and library locations if specified on command line")
+foreach(package ${packages})
+  if (${package}_include)
+    message("override ${package} include directory with ${${package}_include}")
+    string(TOUPPER ${package} PACKAGE)
+    set(${PACKAGE}_INCLUDE_DIR ${${package}_include})
+  endif()
+  if (${package}_lib)
+    message("override ${package} library with ${${package}_lib}")
+    string(TOUPPER ${package} PACKAGE)
+    set(${PACKAGE}_LIBRARIES ${${package}_lib})
+endif()
+endforeach()
 
 # Verify that OS is supported
 if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
@@ -93,6 +80,7 @@ else()
   message(FATAL_ERROR "Building on unsupported OS")
 endif()
 
+
 message("GMT_INCLUDE_DIR: ${GMT_INCLUDE_DIR}")
 message("PROJ_INCLUDE_DIR: ${PROJ_INCLUDE_DIR}")
 message("GDAL_INCLUDE_DIR: ${GDAL_INCLUDE_DIR}")
@@ -100,6 +88,7 @@ message("OPENGL_INCLUDE_DIR: ${OPENGL_INCLUDE_DIR}")
 message("X11_INCLUDE_DIR: ${X11_INCLUDE_DIR}")
 message("MOTIF_INCLUDE_DIR: ${MOTIF_INCLUDE_DIR}")
 message("NETCDF_INCLUDE_DIR: ${NETCDF_INCLUDE_DIR}")
+message("X11_XT_INCLUDE_DIR: ${X11_XT_INCLUDE_DIR}")
 
 message("GMT_LIBRARIES: ${GMT_LIBRARIES}")
 message("PROJ_LIBRARIES: ${PROJ_LIBRARIES}")
@@ -108,6 +97,7 @@ message("OPENGL_LIBRARIES: ${OPENGL_LIBRARIES}")
 message("X11_LIBRARIES: ${X11_LIBRARIES}")
 message("MOTIF_LIBRARIES: ${MOTIF_LIBRARIES}")
 message("NETCDF_LIBRARIES: ${NETCDF_LIBRARIES}")
+message("X11_XT_LIBRARIES: ${X11_XT_LIBRARIES}")
 
 
 # Utilities and libraries
