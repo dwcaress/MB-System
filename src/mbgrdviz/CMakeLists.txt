@@ -1,5 +1,5 @@
 #
-# Gets GMT_INCLUDE_DIR from root CMakeLists
+# Gets variables from root CMakeLists
 #
 
 message("in mbgrdviz")
