@@ -19,8 +19,8 @@ target_include_directories(mbgrdviz
                            ${CMAKE_SOURCE_DIR}/src/surf
                            ${CMAKE_SOURCE_DIR}/src/gsf)                        
 
-link_directories($GMT_LIBRARIES)
-   
+# link_directories($GMT_LIBRARIES)
+message("mbgrdviz: GMT_LIBRARIES: ${GMT_LIBRARIES}")   
 target_link_libraries(mbgrdviz
                       PRIVATE
                       mbio
@@ -29,16 +29,15 @@ target_link_libraries(mbgrdviz
                       bsio
                       mbsapi
                       gsf
-                      gmt
-                      Xm
-                      Xt
-                      X11
-                      GL
-                      GLU
+		      ${GMT_LIBRARIES}
+		      ${NETCDF_LIBRARIES}
+		      ${MOTIF_LIBRARIES}
+		      ${X11_LIBRARIES}
+		      ${X11_XT_LIBRARIES}		      
+		      ${OPENGL_LIBRARIES}
+		      ${GDAL_LIBRARIES}
+		      ${PROJ_LIBRARIES}
                       m
-                      netcdf
-                      gdal
-                      proj
                       pthread)
                            
                            
