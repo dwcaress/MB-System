@@ -7,6 +7,17 @@
 cmake_minimum_required(VERSION 3.18)
 project(MB-System)
 
+# Set list of required packages
+set(packages GMT Proj OpenGL X11 Xt MOTIF GDAL NetCDF)
+
+if (help)
+  message("force package include directory with -Dpackage_include=path")
+  message("force package libraries with -Dpackage_lib=file")  
+  message("where package is one of the following:")
+  message("${packages}")
+  message(FATAL_ERROR "")
+endif()
+
 # Add globally-needed compiler flags
 add_compile_options(-DUSE_DEFAULT_FILE_FUNCTIONS -fPIC -DPIC -MD -MP -MF  -fno-common -g -std=gnu11)
 
@@ -23,7 +34,6 @@ list(APPEND CMAKE_MODULE_PATH ${MB_HOME}/build-utils/)
 message("CMAKE_MODULE_PATH now: ${CMAKE_MODULE_PATH}")
 
 # Find required packages
-set(packages GMT Proj OpenGL X11 Xt MOTIF GDAL NetCDF)
 message("ok, find packages ${packages}")
 foreach(package ${packages})
   include(Find${package})
@@ -46,14 +56,19 @@ set(NETCDF_INCLUDE_DIR ${NetCDF_INCLUDE_DIRS})
 set(NETCDF_LIBRARIES ${NetCDF_LIBRARIES})
 
 # Override header and library locations if specified on command line
+# with -D<package>_include or -D<package>_lib.
 message("override header and library locations if specified on command line")
 foreach(package ${packages})
   if (${package}_include)
     message("override ${package} include directory with ${${package}_include}")
+    string(TOUPPER ${package} PACKAGE)
+    set(${PACKAGE}_INCLUDE_DIR ${${package}_include})
   endif()
   if (${package}_lib)
     message("override ${package} library with ${${package}_lib}")
-  endif()
+    string(TOUPPER ${package} PACKAGE)
+    set(${PACKAGE}_LIBRARIES ${${package}_lib})
+endif()
 endforeach()
 
 # Verify that OS is supported
