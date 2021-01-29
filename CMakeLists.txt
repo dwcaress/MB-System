@@ -19,7 +19,16 @@ if (help)
 endif()
 
 # Add globally-needed compiler flags
-add_compile_options(-DUSE_DEFAULT_FILE_FUNCTIONS -fPIC -DPIC -MD -MP -MF  -fno-common -g -std=gnu11)
+add_compile_options(-DUSE_DEFAULT_FILE_FUNCTIONS -fPIC -DPIC -MD -MP -MF  -fno-common -g)
+
+# C-only flags
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=gnu11")
+
+# C++-only flags
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+
+message("CMAKE_CXX_FLAGS: ${CMAKE_CXX_FLAGS}")
+
 
 # Get directory of this CMakeLists.txt file
 set(MB_HOME ${CMAKE_CURRENT_SOURCE_DIR})
