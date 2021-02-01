@@ -34,13 +34,15 @@ target_include_directories(mbxgr
                            ${CMAKE_SOURCE_DIR}/src/mbio)
                            
 
-#[[
+
 # Shared library
 add_library(mbauxShared
 	    SHARED
 	    mb_cheb.c mb_delaun.c mb_intersectgrid.c mb_readwritegrd.c 
             mb_surface.c mb_track.c mb_truecont.c mb_zgrid.c)
-            
+
+set_target_properties(mbauxShared PROPERTIES OUTPUT_NAME mbaux)
+
 target_include_directories(mbauxShared
                            PUBLIC
                            .
@@ -55,6 +57,7 @@ add_library(mbxgrShared
 	    SHARED
             mb_xgraphics.c)
 
+set_target_properties(mbxgrShared PROPERTIES OUTPUT_NAME mbxgr)
 
 target_include_directories(mbxgrShared
                            PUBLIC
@@ -63,4 +66,4 @@ target_include_directories(mbxgrShared
                            ${GMT_INCLUDE_DIR}
                            ${GDAL_INCLUDE_DIR}
                            ${CMAKE_SOURCE_DIR}/src/mbio)
-]]
+
