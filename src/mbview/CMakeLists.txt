@@ -25,7 +25,6 @@ target_include_directories(mbview
                            ${CMAKE_SOURCE_DIR}/src/mbio
                            ${CMAKE_SOURCE_DIR}/src/mbaux)
 
-#[[ Comment out shared lib build for now
 # Shared library
 add_library(mbviewShared SHARED
             MB3DNavList.c   MBpedit.c               mbview_primary.c
@@ -37,6 +36,7 @@ add_library(mbviewShared SHARED
             mb_glwdrawa.c    mbview_plot.c   mbview_vector.c)
 
 
+set_target_properties(mbviewShared PROPERTIES OUTPUT_NAME mbview)
 
 target_include_directories(mbviewShared
                            PUBLIC
@@ -47,5 +47,3 @@ target_include_directories(mbviewShared
                            ${CMAKE_SOURCE_DIR}/src/mbio
                            ${CMAKE_SOURCE_DIR}/src/mbaux)
                            
-]]
-
