@@ -8,7 +8,7 @@ cmake_minimum_required(VERSION 3.18)
 project(MB-System)
 
 # Set list of required packages
-set(packages GMT Proj OpenGL X11 Xt Motif GDAL NetCDF)
+set(packages GMT Proj OpenGL X11 Xt Motif GDAL NetCDF FFTW)
 
 if (help)
   message("force package include directory with -Dpackage_include=path")
@@ -47,9 +47,20 @@ message("ok, find packages ${packages}")
 foreach(package ${packages})
   include(Find${package})
   string(TOUPPER ${package} PACKAGE)
-  if (${PACKAGE}_LIBRARY)
-    message("rename ${PACKAGE}_LIBRARY (val=${${PACKAGE}_LIBRARY})")
-    set(${PACKAGE}_LIBRARIES ${${PACKAGE}_LIBRARY})
+  if (${package}_FOUND OR ${PACKAGE}_FOUND)
+    if (${PACKAGE}_LIBRARY)
+      message("rename ${PACKAGE}_LIBRARY (val=${${PACKAGE}_LIBRARY})")
+      set(${PACKAGE}_LIBRARIES ${${PACKAGE}_LIBRARY})
+    endif()
+  else()
+    # Check to see if specified on command line
+    if (${package}_include AND ${package}_lib)
+      continue()
+    endif()
+    message(FATAL_ERROR
+            "Package ${package} not found\n"
+            "Specify -D${package}_include=dir and -D${package}_lib=file on cmake command line")
+
   endif()
 endforeach()
 
@@ -91,6 +102,7 @@ endif()
 
 
 message("GMT_INCLUDE_DIR: ${GMT_INCLUDE_DIR}")
+message("FFTW_INCLUDE_DIR: ${FFTW_INCLUDE_DIR}")
 message("PROJ_INCLUDE_DIR: ${PROJ_INCLUDE_DIR}")
 message("GDAL_INCLUDE_DIR: ${GDAL_INCLUDE_DIR}")
 message("OPENGL_INCLUDE_DIR: ${OPENGL_INCLUDE_DIR}")
@@ -100,6 +112,7 @@ message("NETCDF_INCLUDE_DIR: ${NETCDF_INCLUDE_DIR}")
 message("X11_XT_INCLUDE_DIR: ${X11_XT_INCLUDE_DIR}")
 
 message("GMT_LIBRARIES: ${GMT_LIBRARIES}")
+message("FFTW_LIBRARIES: ${FFTW_LIBRARIES}")
 message("PROJ_LIBRARIES: ${PROJ_LIBRARIES}")
 message("GDAL_LIBRARIES: ${GDAL_LIBRARIES}")
 message("OPENGL_LIBRARIES: ${OPENGL_LIBRARIES}")
