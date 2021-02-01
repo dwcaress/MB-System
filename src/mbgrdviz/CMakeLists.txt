@@ -26,9 +26,9 @@ target_link_libraries(mbgrdviz
                       mbio
                       mbaux
                       mbview
-                      bsio
+                      mbbsio
                       mbsapi
-                      gsf
+                      mbgsf
 		      ${GMT_LIBRARIES}
 		      ${NETCDF_LIBRARIES}
 		      ${MOTIF_LIBRARIES}
