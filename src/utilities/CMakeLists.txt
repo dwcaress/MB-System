@@ -4,27 +4,43 @@
 
 message("in utilities")
 
-add_executable(mbabsorption
-               mbabsorption.cc)
+set(executables mbabsorption mbdatalist mbgrid mbnavlist mbsegypsd 
+    mbareaclean mbdefaults mbhistogram mbpreprocess mbset 
+    mbauvloglist mbdumpesf mbinfo mbprocess mbsslayout mbbackangle 
+    mbextractsegy mblevitus mbrolltimelag mbsvplist mbclean mbfilter mblist 
+    mbroutetime mbsvpselect mbconfig mbformat mbmakeplatform mbsegygrid 
+    mbtime mbcopy mbgetesf mbminirovnav mbsegyinfo mbvoxelclean mbctdlist 
+    mbgpstide mbmosaic mbsegylist)
 
-target_include_directories(mbabsorption
-                           PUBLIC
-                           .
-                           ${GMT_INCLUDE_DIR}
-                           ${NETCDF_INCLUDE_DIR}                           
-                           ${CMAKE_SOURCE_DIR}/src/mbio
-                           ${CMAKE_SOURCE_DIR}/src/mbaux
-                           ${CMAKE_SOURCE_DIR}/src/gsf)                        
+foreach(executable ${executables})
+  add_executable(${executable}
+                 ${executable}.cc)
 
-target_link_libraries(mbabsorption
-                      PRIVATE
-                      mbio
-                      mbaux
-                      gsf
-		      ${GMT_LIBRARIES}
-		      ${NETCDF_LIBRARIES}
-                      m
-                      pthread)
+  target_include_directories(${executable}
+                             PUBLIC
+                             .
+                             ${GMT_INCLUDE_DIR}
+                             ${NETCDF_INCLUDE_DIR}                           
+                             ${CMAKE_SOURCE_DIR}/src/mbio
+                             ${CMAKE_SOURCE_DIR}/src/mbaux
+                             ${CMAKE_SOURCE_DIR}/src/gsf)
+                             
+  target_link_libraries(${executable}
+                        PRIVATE
+                        mbioShared
+                        mbbsioShared
+                        mbauxShared
+                        mbsapiShared
+                        mbgsfShared
+	                ${GMT_LIBRARIES}
+                        ${NETCDF_LIBRARIES}
+                        ${GDAL_LIBRARIES}
+                        ${PROJ_LIBRARIES}
+                        ${FFTW_LIBRARIES}
+                        m
+                        pthread)
+
+endforeach()
                            
                            
 
