@@ -157,7 +157,6 @@ mbsys_wassp.c
 mbsys_xse.c
 mbr_gsfgenmb.c
 mbsys_gsf.c
-
 )
 
 
@@ -174,12 +173,14 @@ target_include_directories(mbio
                            .
                            ${CMAKE_SOURCE_DIR}/src/gsf)
 
-#[[ comment out shared library build for now
+
 # Shared library
 add_library(mbioShared
 	    SHARED
             ${SRC})
 
+
+set_target_properties(mbioShared PROPERTIES OUTPUT_NAME mbio)
 
 target_include_directories(mbioShared
                            PUBLIC
@@ -187,4 +188,4 @@ target_include_directories(mbioShared
                            .
                            ${CMAKE_SOURCE_DIR}/src/gsf)
 
-]]
+
