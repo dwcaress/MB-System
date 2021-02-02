@@ -68,6 +68,7 @@ message("Done finding packages")
 # Not all the Find modules we use conform to the variable-naming rules
 # described at
 # https://cmake.org/cmake/help/latest/manual/cmake-developer.7.html
+# Make names consistent...
 set(X11_XT_INCLUDE_DIR ${X11_Xt_INCLUDE_PATH})
 set(X11_XT_LIBRARIES ${X11_Xt_LIB})
 
@@ -121,12 +122,29 @@ message("MOTIF_LIBRARIES: ${MOTIF_LIBRARIES}")
 message("NETCDF_LIBRARIES: ${NETCDF_LIBRARIES}")
 message("X11_XT_LIBRARIES: ${X11_XT_LIBRARIES}")
 
+# MacOS requires all referred library symbols be specified when
+# building shared dylib
+if (APPLE)
+  list(APPEND EXTRA_LIBRARIES ${GMT_LIBRARIES})
+  list(APPEND EXTRA_LIBRARIES ${FFTW_LIBRARIES})
+  list(APPEND EXTRA_LIBRARIES ${PROJ_LIBRARIES})
+  list(APPEND EXTRA_LIBRARIES ${GDAL_LIBRARIES})
+  list(APPEND EXTRA_LIBRARIES ${OPENGL_LIBRARIES})  
+  list(APPEND EXTRA_LIBRARIES ${MOTIF_LIBRARIES})
+  list(APPEND EXTRA_LIBRARIES ${NETCDF_LIBRARIES})
+  list(APPEND EXTRA_LIBRARIES ${X11_LIBRARIES})      
+  list(APPEND EXTRA_LIBRARIES ${X11_XT_LIBRARIES})
+  message("EXTRA_LIBRARIES: ${EXTRA_LIBRARIES}")
+else()
+  set(EXTRA_LIBRARIES "")
+endif()
+
 
 # Utilities and libraries
+add_subdirectory(src/gsf)
 add_subdirectory(src/mbaux)
 add_subdirectory(src/mbio)
 add_subdirectory(src/mbview)
-add_subdirectory(src/gsf)
 add_subdirectory(src/bsio)
 add_subdirectory(src/surf)
 
