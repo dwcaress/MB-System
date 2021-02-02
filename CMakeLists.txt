@@ -155,4 +155,5 @@ add_subdirectory(src/surf)
 
 # Executables
 add_subdirectory(src/mbgrdviz)
+add_subdirectory(src/mbedit)
 add_subdirectory(src/utilities)
