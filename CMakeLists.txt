@@ -15,7 +15,7 @@ if (help)
   message("force package libraries with -Dpackage_lib=file")  
   message("where package is one of the following:")
   message("${packages}")
-  message("build with debugging, with -DCMAKE_BUILD_TYPE=Debug")
+  message("enable debugging with -DCMAKE_BUILD_TYPE=Debug")
   message(FATAL_ERROR "")
 endif()
 
@@ -23,14 +23,24 @@ endif()
 add_compile_options(-DUSE_DEFAULT_FILE_FUNCTIONS)
 
 
-set(CMAKE_C_STANDARD 11)
-set(CMAKE_C_STANDARD_REQUIRED ON)
-set(CMAKE_C_EXTENSIONS OFF)
+if (CMAKE_COMPILER_IS_GNUCC)
+  message("Using GNUCC")
+  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=gnu11")
+else()
+  message("Not using GNUCC")
+  # Setting these flags results in compile error S_IFDIR undeclared symbol,
+  # in gsf/gsf_indx.c
+  set(CMAKE_C_STANDARD 11)
+  set(CMAKE_C_STANDARD_REQUIRED ON)
+  set(CMAKE_C_EXTENSIONS OFF)
+endif()
+
+message("CMAKE_C_COMPILER_ID: ${CMAKE_C_COMPILER_ID}")
+
 
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
-
 
 message("CMAKE_CXX_FLAGS: ${CMAKE_CXX_FLAGS}")
 
