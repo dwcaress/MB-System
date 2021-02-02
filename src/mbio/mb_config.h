@@ -26,7 +26,7 @@
 #define HAVE_LIBM 1
 
 /* Have malloc.h */
-#define HAVE_MALLOC_H 1
+/* #undef HAVE_MALLOC_H */
 
 /* Define to 1 if you have the <memory.h> header file. */
 #define HAVE_MEMORY_H 1
@@ -38,7 +38,7 @@
 #define HAVE_RPC_TYPES_H 1
 
 /* Define to 1 if you have the `sincos' function. */
-#define HAVE_SINCOS 1
+/* #undef HAVE_SINCOS */
 
 /* Define to 1 if you have the <stdint.h> header file. */
 #define HAVE_STDINT_H 1
@@ -77,7 +77,7 @@
 #define MBSYSTEM_INSTALL_PREFIX "/usr/local"
 
 /* Set MBSYSTEM_OTPS_LOCATION define in mb_config.h */
-#define MBSYSTEM_OTPS_LOCATION "/usr/local/OTPS2"
+#define MBSYSTEM_OTPS_LOCATION "/usr/local/opt/otps"
 
 /* Build libmbtnav and embed TRN instance in mbtrnpp */
 /* #undef MBTNAV_ENABLED */
@@ -116,7 +116,7 @@
 /* #undef PCLTOOLS_ENABLED */
 
 /* Build tools using Qt5 */
-#define QTTOOLS_ENABLED 1
+/* #undef QTTOOLS_ENABLED */
 
 /* Define to 1 if you have the ANSI C header files. */
 #define STDC_HEADERS 1
