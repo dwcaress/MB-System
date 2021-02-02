@@ -15,17 +15,22 @@ if (help)
   message("force package libraries with -Dpackage_lib=file")  
   message("where package is one of the following:")
   message("${packages}")
+  message("build with debugging, with -DCMAKE_BUILD_TYPE=Debug")
   message(FATAL_ERROR "")
 endif()
 
 # Add globally-needed compiler flags
-add_compile_options(-DUSE_DEFAULT_FILE_FUNCTIONS -fPIC -DPIC -MD -MP -MF  -fno-common -g)
+add_compile_options(-DUSE_DEFAULT_FILE_FUNCTIONS)
 
-# C-only flags
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=gnu11")
 
-# C++-only flags
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+set(CMAKE_C_STANDARD 11)
+set(CMAKE_C_STANDARD_REQUIRED ON)
+set(CMAKE_C_EXTENSIONS OFF)
+
+set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+
 
 message("CMAKE_CXX_FLAGS: ${CMAKE_CXX_FLAGS}")
 
