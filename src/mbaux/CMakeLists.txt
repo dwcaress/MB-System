@@ -34,6 +34,7 @@ target_include_directories(mbxgr
                            ${CMAKE_SOURCE_DIR}/src/mbio)
                            
 
+if (NOT APPLE)
 
 # Shared library
 add_library(mbauxShared
@@ -52,6 +53,9 @@ target_include_directories(mbauxShared
                            ${CMAKE_SOURCE_DIR}/src/mbio)
 
 
+target_link_libraries(mbauxShared ${EXTRA_LIBRARIES})
+
+
 # Shared library
 add_library(mbxgrShared
 	    SHARED
@@ -67,3 +71,5 @@ target_include_directories(mbxgrShared
                            ${GDAL_INCLUDE_DIR}
                            ${CMAKE_SOURCE_DIR}/src/mbio)
 
+
+endif(NOT APPLE)
