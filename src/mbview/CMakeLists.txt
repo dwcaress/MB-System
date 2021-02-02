@@ -25,6 +25,10 @@ target_include_directories(mbview
                            ${CMAKE_SOURCE_DIR}/src/mbio
                            ${CMAKE_SOURCE_DIR}/src/mbaux)
 
+
+# Building dylib on Apple results in undefined symbols from third-party
+# libraries, not sure how to deal with those yet...
+if (NOT APPLE)
 # Shared library
 add_library(mbviewShared SHARED
             MB3DNavList.c   MBpedit.c               mbview_primary.c
@@ -47,3 +51,4 @@ target_include_directories(mbviewShared
                            ${CMAKE_SOURCE_DIR}/src/mbio
                            ${CMAKE_SOURCE_DIR}/src/mbaux)
                            
+endif(NOT APPLE)

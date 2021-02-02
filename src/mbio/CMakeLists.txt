@@ -174,6 +174,10 @@ target_include_directories(mbio
                            ${CMAKE_SOURCE_DIR}/src/gsf)
 
 
+# Building dylib on Apple results in undefined symbols from third-party
+# libraries, not sure how to deal with those yet...
+if (NOT APPLE)
+
 # Shared library
 add_library(mbioShared
 	    SHARED
@@ -188,4 +192,4 @@ target_include_directories(mbioShared
                            .
                            ${CMAKE_SOURCE_DIR}/src/gsf)
 
-
+endif(NOT APPLE)

@@ -1,5 +1,5 @@
 #
-#
+# Variables are passed from top-level CMakeLists.txt
 
 message("in gsf")
 
@@ -41,4 +41,5 @@ target_include_directories(mbgsfShared
                            .
                            ${CMAKE_SOURCE_DIR}/src/mbio)
 
+target_link_libraries(mbgsfShared ${EXTRA_LIBRARIES})
 
