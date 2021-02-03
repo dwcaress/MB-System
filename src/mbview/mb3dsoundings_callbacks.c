@@ -77,6 +77,7 @@ static char value_text[MB_PATH_MAXLINE];
 /*------------------------------------------------------------------------------*/
 /* code used in original BX application, not used for library */
 
+#define MBVIEW_LIBRARY TESTING
 #ifndef MBVIEW_LIBRARY
 
 #include "creation-c.h"
