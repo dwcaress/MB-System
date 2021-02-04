@@ -3,21 +3,6 @@
 
 message("in qt-guilib")
 
-find_package(Qt5 COMPONENTS Core Gui Quick REQUIRED)
-if (Qt5_FOUND)
-  message("Found Qt5 package")
-else()
-  message("Qt5 package not found")
-endif()
-
-#[[
-### TEST TEST
-get_cmake_property(_variableNames VARIABLES)
-list (SORT _variableNames)
-foreach (_variableName ${_variableNames})
-    message(STATUS "${_variableName}=${${_variableName}}")
-endforeach()
-]]
 
 set(src
     Camera.cpp
@@ -46,7 +31,8 @@ add_library(MBGui
 target_include_directories(MBGui
                            PUBLIC
                            .
-                           ${GMT_INCLUDE_DIRS}
+                           ${GMT_INCLUDE_DIR}
+                           ${VTK_INCLUDE_DIR}                           
                            ${Qt5Gui_INCLUDE_DIRS}
                            ${Qt5Quick_INCLUDE_DIRS})
 
@@ -62,7 +48,8 @@ set_target_properties(MBGuiShared PROPERTIES OUTPUT_NAME MBGui)
 target_include_directories(MBGuiShared
                            PUBLIC
                            .
-                           ${GMT_INCLUDE_DIRS}                           
+                           ${GMT_INCLUDE_DIR}
+                           ${VTK_INCLUDE_DIR}                           
                            ${Qt5Gui_INCLUDE_DIRS}
                            ${Qt5Quick_INCLUDE_DIRS})                           
 
