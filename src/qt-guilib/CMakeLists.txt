@@ -32,9 +32,8 @@ target_include_directories(MBGui
                            PUBLIC
                            .
                            ${GMT_INCLUDE_DIR}
-                           ${VTK_INCLUDE_DIR}                           
-                           ${Qt5Gui_INCLUDE_DIRS}
-                           ${Qt5Quick_INCLUDE_DIRS})
+                           ${VTK_INCLUDE_DIR}
+                           ${QT5_INCLUDE_DIR})
 
 set_target_properties(MBGui PROPERTIES POSITION_INDEPENDENT_CODE ON)
 
@@ -50,8 +49,7 @@ target_include_directories(MBGuiShared
                            .
                            ${GMT_INCLUDE_DIR}
                            ${VTK_INCLUDE_DIR}                           
-                           ${Qt5Gui_INCLUDE_DIRS}
-                           ${Qt5Quick_INCLUDE_DIRS})                           
+                           ${QT5_INCLUDE_DIR})
 
 target_link_libraries(MBGuiShared ${EXTRA_LIBRARIES})
 
