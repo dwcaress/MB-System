@@ -23,12 +23,13 @@ Distributions that do not include "beta" in the tag name correspond to the major
 announced releases. The source distributions associated with all releases, major
 or beta, are equally accessible as tarballs through the Github interface.
 
-- Version 5.7.9beta02    January 27, 2020
-- Version 5.7.9beta01    January 18, 2020
-- **Version 5.7.8        January 17, 2020
-- Version 5.7.7          January 17, 2020 (flawed, quickly superceded)
-- Version 5.7.7beta09    January 17, 2020
-- Version 5.7.7beta08    January 6, 2020
+- Version 5.7.9beta03    February 3, 2021
+- Version 5.7.9beta02    January 27, 2021
+- Version 5.7.9beta01    January 18, 2021
+- **Version 5.7.8        January 17, 2021
+- Version 5.7.7          January 17, 2021 (flawed, quickly superceded)
+- Version 5.7.7beta09    January 17, 2021
+- Version 5.7.7beta08    January 6, 2021
 - Version 5.7.7beta06    December 30, 2020
 - Version 5.7.7beta05    December 28, 2020
 - Version 5.7.7beta04    October 28, 2020
@@ -390,14 +391,14 @@ Fixed bug in format 57 in which reprocessing did not trigger recalculation of mu
 
 These bugs were introduced during the 2020 code modernization.
 
-#### 5.7.9beta01 (January 18, 2020)
+#### 5.7.9beta01 (January 18, 2021)
 
 Mbedit and mbnavedit: Use extern for Widget definitions in mbedit_creation.h
 and mbnavedit_creation.h to avoid duplicate symbol link errors when building
 code according to current C / C++ standards. The other graphical utilities
 already use this construct.
 
-#### 5.7.8 (January 17, 2020)
+#### 5.7.8 (January 17, 2021)
 
 Version 5.7.8 is now the current release of MB-System. Changes since the 5.7.6
 release include:
@@ -519,14 +520,14 @@ correction with format 88 data when keyed to those data record types.
 Mblist: Added output option 'n' for survey line number. This value is only defined
 for SEGY format data files (format 160).
 
-#### 5.7.8beta01 (January 17, 2020)
+#### 5.7.8beta01 (January 17, 2021)
 
 The autoconf build system had been changed so that libXt and libX11 come
 before libXm in the link commands. This fixes runtime errors in all of
 the graphical utilities on Linux systems. This problem probably relates
 more directly to the use of the gcc compiler system.
 
-#### 5.7.7 (January 17, 2020)
+#### 5.7.7 (January 17, 2021)
 
 The version 5.7.7 was fatally flawed in that the graphical tools would not run
 on Linux (or more probably, when built using gcc rather than llvm). The problem
@@ -536,7 +537,7 @@ including changing the library link order so that libXt and libX11 came before
 libXm. This problem was fixed rapidly and a new major release 5.7.8 put the
 same day.
 
-#### 5.7.7beta09 (January 17, 2020)
+#### 5.7.7beta09 (January 17, 2021)
 
 mbdatalist: Fixed memory leak in src/mbio/mb_check_info.c that could occur when
 parsing *.inf files.
@@ -545,7 +546,7 @@ Configure: Fixed handling of X11 libraries and header files in the autotools
 build system in order to circumvent more changes to dependencies installed on
 Macs using the Homebrew package manager.
 
-#### 5.7.7beta08 (January 6, 2020)
+#### 5.7.7beta08 (January 6, 2021)
 
 Formats 88 (MBF_RESON7KR) and 89 (MBF_RESON7K3): Fixed bug in handling of
 PingMotion data records (7012) that caused memory overruns and seg faults.

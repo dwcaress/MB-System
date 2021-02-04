@@ -21,8 +21,6 @@ AM_CPPFLAGS += ${libopengl_CPPFLAGS}
 AM_CPPFLAGS += ${libmotif_CPPFLAGS}
 AM_CPPFLAGS += ${libx11_CPPFLAGS}
 
-libmbview_la_CFLAGS = -DMBVIEW_LIBRARY
-
 libmbview_la_SOURCES =
 libmbview_la_SOURCES += MB3DView.c
 libmbview_la_SOURCES += MB3DSiteList.c
