@@ -7,15 +7,25 @@
 cmake_minimum_required(VERSION 3.18)
 project(MB-System)
 
-# Set list of required packages
-set(packages GMT Proj OpenGL X11 Xt Motif GDAL NetCDF FFTW)
+# Verify that OS is supported
+if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
+  message("Building on LINUX")
+elseif (CMAKE_SYSTEM_NAME STREQUAL "Darwin")
+  message("Building on Darwin")
+else()
+  message(FATAL_ERROR "Building on unsupported OS")
+endif()
+
+# Set list of required modules (i.e. packages with find modules)
+set(modules GMT Proj OpenGL X11 Xt Motif GDAL NetCDF FFTW)
 
 if (help)
   message("force package include directory with -Dpackage_include=path")
   message("force package libraries with -Dpackage_lib=file")  
   message("where package is one of the following:")
-  message("${packages}")
+  message("${modules} ${packages}")
   message("enable debugging with -DCMAKE_BUILD_TYPE=Debug")
+  message("you MUST specify -DVTK_include=<dir> -DVTK_lib=<libs>")
   message(FATAL_ERROR "")
 endif()
 
@@ -37,7 +47,6 @@ endif()
 
 message("CMAKE_C_COMPILER_ID: ${CMAKE_C_COMPILER_ID}")
 
-
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
@@ -57,30 +66,77 @@ message("Add build-utils/ subdirectory to module CMAKE_MODULE_PATH")
 list(APPEND CMAKE_MODULE_PATH ${MB_HOME}/build-utils/)
 message("CMAKE_MODULE_PATH now: ${CMAKE_MODULE_PATH}")
 
-# Find required packages
-message("ok, find packages ${packages}")
-foreach(package ${packages})
-  include(Find${package})
-  string(TOUPPER ${package} PACKAGE)
-  if (${package}_FOUND OR ${PACKAGE}_FOUND)
-    if (${PACKAGE}_LIBRARY)
-      message("rename ${PACKAGE}_LIBRARY (val=${${PACKAGE}_LIBRARY})")
-      set(${PACKAGE}_LIBRARIES ${${PACKAGE}_LIBRARY})
-    endif()
-  else()
-    # Check to see if specified on command line
-    if (${package}_include AND ${package}_lib)
-      continue()
-    endif()
-    message(FATAL_ERROR
-            "Package ${package} not found\n"
-            "Specify -D${package}_include=dir and -D${package}_lib=file on cmake command line")
-
+# Find required modules
+message("ok, find modules ${modules}")
+foreach(module ${modules})
+  # No need to search, if module's include and lib are specified as
+  # command line '-D' arguments
+  if (${module}_include AND ${module}_lib)
+    message("${module} include and lib are specified on command line")
+    continue()
   endif()
+
+  if (NOT ${module}_include OR  NOT ${module}_lib)
+    # Try to find module
+    include(Find${module})
+    string(TOUPPER ${module} MODULE)
+    if (${module}_FOUND OR ${MODULE}_FOUND)
+      if (${MODULE}_LIBRARY)
+        message("rename ${MODULE}_LIBRARY (val=${${MODULE}_LIBRARY})")
+        set(${MODULE}_LIBRARIES ${${MODULE}_LIBRARY})
+      endif()
+    else()
+      message(FATAL_ERROR
+              "Module ${module} not found\n"
+              "Specify -D${module}_include=dir and -D${module}_lib=file "
+              "on cmake command line")
+
+    endif()
+  endif()
+  
+endforeach()
+
+# Look for packages that don't have modules
+if (NOT Qt5_include OR NOT Qt5_lib)
+  find_package(Qt5 COMPONENTS Gui Quick REQUIRED)
+  if (Qt5_FOUND)
+    message("Found Qt5 package")
+    set(QT5_INCLUDE_DIR ${Qt5Gui_INCLUDE_DIRS})
+    list(APPEND QT5_INCLUDE_DIR ${Qt5Quick_INCLUDE_DIRS})
+    set(QT5_LIBRARIES ${Qt5Gui_LIBRARIES})
+    list(APPEND QT5_LIBRARIES ${Qt5Quick_LIBRARIES})
+  else()
+    message(FATAL_ERROR "Qt5 package not found")
+  endif()
+endif()
+
+if (VTK_include)
+  set(VTK_INCLUDE_DIR ${VTK_include})
+endif()
+
+if (VTK_lib)
+  set(VTK_LIBRARIES ${VTK_lib})
+endif()
+
+if (NOT VTK_include OR NOT VTK_lib)
+  find_package(VTK REQUIRED)
+  if (VTK_FOUND)
+    message("Found VTK package")
+  else()
+    message("VTK package not found")
+  endif()
+endif()
+
+
+### Print all accessible variables
+get_cmake_property(_variableNames VARIABLES)
+list (SORT _variableNames)
+foreach (_variableName ${_variableNames})
+###    message(STATUS "${_variableName}=${${_variableName}}")
 endforeach()
 
 message("Done finding packages")
-# Not all the Find modules we use conform to the variable-naming rules
+# Not all the Find packages we use conform to the variable-naming rules
 # described at
 # https://cmake.org/cmake/help/latest/manual/cmake-developer.7.html
 # Make names consistent...
@@ -94,27 +150,20 @@ set(NETCDF_LIBRARIES ${NetCDF_LIBRARIES})
 # Override header and library locations if specified on command line
 # with -D<package>_include or -D<package>_lib.
 message("override header and library locations if specified on command line")
-foreach(package ${packages})
-  if (${package}_include)
-    message("override ${package} include directory with ${${package}_include}")
-    string(TOUPPER ${package} PACKAGE)
-    set(${PACKAGE}_INCLUDE_DIR ${${package}_include})
+message("APPENDED modules to packages, now: ${packages}")
+foreach(module ${modules})
+  if (${module}_include)
+    message("override ${module} include directory with ${${module}_include}")
+    string(TOUPPER ${module} MODULE)
+    set(${MODULE}_INCLUDE_DIR ${${module}_include})
   endif()
-  if (${package}_lib)
-    message("override ${package} library with ${${package}_lib}")
-    string(TOUPPER ${package} PACKAGE)
-    set(${PACKAGE}_LIBRARIES ${${package}_lib})
+  if (${module}_lib)
+    message("override ${module} library with ${${module}_lib}")
+    string(TOUPPER ${module} MODULE)
+    set(${MODULE}_LIBRARIES ${${module}_lib})
 endif()
 endforeach()
 
-# Verify that OS is supported
-if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
-  message("Building on LINUX")
-elseif (CMAKE_SYSTEM_NAME STREQUAL "Darwin")
-  message("Building on Darwin")
-else()
-  message(FATAL_ERROR "Building on unsupported OS")
-endif()
 
 
 message("GMT_INCLUDE_DIR: ${GMT_INCLUDE_DIR}")
@@ -126,6 +175,8 @@ message("X11_INCLUDE_DIR: ${X11_INCLUDE_DIR}")
 message("MOTIF_INCLUDE_DIR: ${MOTIF_INCLUDE_DIR}")
 message("NETCDF_INCLUDE_DIR: ${NETCDF_INCLUDE_DIR}")
 message("X11_XT_INCLUDE_DIR: ${X11_XT_INCLUDE_DIR}")
+message("VTK_INCLUDE_DIR: ${VTK_INCLUDE_DIR}")
+message("QT5_INCLUDE_DIR: ${QT5_INCLUDE_DIR}")
 
 message("GMT_LIBRARIES: ${GMT_LIBRARIES}")
 message("FFTW_LIBRARIES: ${FFTW_LIBRARIES}")
@@ -136,6 +187,8 @@ message("X11_LIBRARIES: ${X11_LIBRARIES}")
 message("MOTIF_LIBRARIES: ${MOTIF_LIBRARIES}")
 message("NETCDF_LIBRARIES: ${NETCDF_LIBRARIES}")
 message("X11_XT_LIBRARIES: ${X11_XT_LIBRARIES}")
+message("VTK_LIBRARIES: ${VTK_LIBRARIES}")
+message("QT5_LIBRARIES: ${QT5_LIBRARIES}")
 
 # MacOS requires all referred library symbols be specified when
 # building shared dylib
@@ -149,6 +202,9 @@ if (APPLE)
   list(APPEND EXTRA_LIBRARIES ${NETCDF_LIBRARIES})
   list(APPEND EXTRA_LIBRARIES ${X11_LIBRARIES})      
   list(APPEND EXTRA_LIBRARIES ${X11_XT_LIBRARIES})
+  list(APPEND EXTRA_LIBRARIES ${QT5_LIBRARIES})
+  list(APPEND EXTRA_LIBRARIES ${VTK_LIBRARIES})
+  
   message("EXTRA_LIBRARIES: ${EXTRA_LIBRARIES}")
 else()
   set(EXTRA_LIBRARIES "")
@@ -171,3 +227,6 @@ add_subdirectory(src/mbnavadjust)
 add_subdirectory(src/mbnavedit)
 add_subdirectory(src/mbvelocitytool)
 add_subdirectory(src/utilities)
+
+add_subdirectory(src/qt-guilib)
+add_subdirectory(src/qt-mbgrdviz)
