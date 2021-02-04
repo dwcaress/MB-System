@@ -75,36 +75,6 @@ static Arg args[256];
 static char value_text[MB_PATH_MAXLINE];
 
 /*------------------------------------------------------------------------------*/
-/* code used in original BX application, not used for library */
-
-#ifndef MBVIEW_LIBRARY
-
-#include "creation-c.h"
-
-Widget BxFindTopShell(Widget);
-WidgetList BxWidgetIdsFromNames(Widget, char *, char *);
-
-/*      Function Name:  BxExitCB
- *
- *      Description:     This functions expects an integer to be passed in
- *             client data.  It calls the exit() system call with
- *      the integer value as the argument to the function.
- *
- *      Arguments:      Widget    w:   the activating widget.
- *      XtPointer  client:  the integer exit value.
- *      XtPointer  call:  the call data (unused).
- */
-
-/*---------------------------------------------------------------------------------------*/
-
-void BxExitCB(Widget w, XtPointer client, XtPointer call) {
-  (void)w;  // Unused parameter
-  (void)client;  // Unused parameter
-  (void)call;  // Unused parameter
-  exit(EXIT_FAILURE);
-}
-#endif
-/*------------------------------------------------------------------------------*/
 /* code below used for mb3dsoundings library                                           */
 /*------------------------------------------------------------------------------*/
 int mb3dsoundings_startup(int verbose, Widget parent, XtAppContext app, int *error) {

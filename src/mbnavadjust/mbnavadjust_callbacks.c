@@ -3897,6 +3897,14 @@ void do_quit(Widget w, XtPointer client_data, XtPointer call_data) {
 		do_update_naverr();
 		do_update_status();
 	}
+
+  /* write project file if there are outstanding changes */
+	int error = MB_ERROR_NO_ERROR;
+  if (project.save_count != 0) {
+    mbnavadjust_write_project(mbna_verbose, &project, &error);
+    project.save_count = 0;
+  }
+
 }
 
 /*--------------------------------------------------------------------*/
