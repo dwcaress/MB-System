@@ -156,7 +156,7 @@ void GmtGridSurface::setData(void *gmtApi, GMT_GRID *gmtGrid) {
           float red = 0.f, green = 0.f, blue = 0.f, alpha = 1.f;
 
           // Assign color based on z
-	  if (isnanf(z) || (seaLevelClip && z > 0.)) {
+	  if (isnan(z) || (seaLevelClip && z > 0.)) {
 	    alpha = 0.;   // transparent
 	  }
 	  else {
