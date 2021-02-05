@@ -3,11 +3,19 @@
 
 message("in qt-guilib")
 
+# Run moc when needed
+set(CMAKE_AUTOMOC ON)
 
+# Run rcc when needed
+set(CMAKE_AUTORCC ON)
+
+# Run uic automatically when needed.
+set(CMAKE_AUTOUIC ON)
+
+#[[
 set(src
     Camera.cpp
     MBQuickItem.cpp
-    moc_SurfaceRenderer.cpp
     ColorMap.cpp
     MBQuickView.cpp
     qrc_resources.cpp
@@ -16,10 +24,23 @@ set(src
     MBQuickItem.cpp
     QVtkRenderer.cpp
     GmtGridSurface.cpp
-    moc_MBQuickView.cpp
     Surface.cpp
     MBGui.cpp
-    moc_QVtkItem.cpp
+    SurfaceRenderer.cpp)
+]]
+
+set(src
+    Camera.cpp
+    MBQuickItem.cpp
+    ColorMap.cpp
+    MBQuickView.cpp
+    QVtkItem.cpp
+    GmtGridReader.cpp
+    MBQuickItem.cpp
+    QVtkRenderer.cpp
+    GmtGridSurface.cpp
+    Surface.cpp
+    MBGui.cpp
     SurfaceRenderer.cpp)
 
 
