@@ -36,9 +36,12 @@ add_library(MBGui
 target_include_directories(MBGui
                            PUBLIC
                            .
+			   ${OPENGL_INCLUDE_DIR}
                            ${GMT_INCLUDE_DIR}
                            ${VTK_INCLUDE_DIR}
                            ${QT5_INCLUDE_DIR})
+
+message("*** OPENGL_INCLUDE_DIR: ${OPENGL_INCLUDE_DIR}")
 
 set_target_properties(MBGui PROPERTIES POSITION_INDEPENDENT_CODE ON)
 
@@ -52,6 +55,7 @@ set_target_properties(MBGuiShared PROPERTIES OUTPUT_NAME MBGui)
 target_include_directories(MBGuiShared
                            PUBLIC
                            .
+			   ${OPENGL_INCLUDE_DIR}			   
                            ${GMT_INCLUDE_DIR}
                            ${VTK_INCLUDE_DIR}                           
                            ${QT5_INCLUDE_DIR})
