@@ -12,23 +12,6 @@ set(CMAKE_AUTORCC ON)
 # Run uic automatically when needed.
 set(CMAKE_AUTOUIC ON)
 
-#[[
-set(src
-    Camera.cpp
-    MBQuickItem.cpp
-    ColorMap.cpp
-    MBQuickView.cpp
-    qrc_resources.cpp
-    QVtkItem.cpp
-    GmtGridReader.cpp
-    MBQuickItem.cpp
-    QVtkRenderer.cpp
-    GmtGridSurface.cpp
-    Surface.cpp
-    MBGui.cpp
-    SurfaceRenderer.cpp)
-]]
-
 set(src
     Camera.cpp
     MBQuickItem.cpp
@@ -41,7 +24,8 @@ set(src
     GmtGridSurface.cpp
     Surface.cpp
     MBGui.cpp
-    SurfaceRenderer.cpp)
+    SurfaceRenderer.cpp
+    resources.qrc)
 
 
 # Static library
