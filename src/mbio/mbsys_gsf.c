@@ -558,8 +558,10 @@ int mbsys_gsf_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind, i
 	/* extract comment from structure */
 	else if (*kind == MB_DATA_COMMENT) {
 		/* copy comment */
-		if (records->comment.comment_length > 0 && records->comment.comment != NULL)
-			strcpy(comment, records->comment.comment);
+		if (records->comment.comment_length > 0 && records->comment.comment != NULL) {
+      memset((void *)comment, 0, MB_COMMENT_MAXLINE);
+		  strncpy(comment, records->comment.comment, MIN(MB_COMMENT_MAXLINE, records->comment.comment_length) - 1);
+    }
 		else
 			comment[0] = '\0';
 
@@ -802,11 +804,13 @@ int mbsys_gsf_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, int
 				status = MB_FAILURE;
 				*error = MB_ERROR_MEMORY_FAIL;
 				records->comment.comment_length = 0;
-			}
+			} else {
+        records->comment.comment_length = strlen(comment) + 1;
+      }
 		}
 		if (status == MB_SUCCESS && records->comment.comment != NULL) {
-			strcpy(records->comment.comment, comment);
-			records->comment.comment_length = strlen(comment) + 1;
+      memset((void *)records->comment.comment, 0, records->comment.comment_length);
+      strncpy(records->comment.comment, comment, MIN(records->comment.comment_length, MB_COMMENT_MAXLINE) - 1);
 			records->comment.comment_time.tv_sec = (int)time_d;
 			records->comment.comment_time.tv_nsec = (int)(1000000000 * (time_d - records->comment.comment_time.tv_sec));
 		}

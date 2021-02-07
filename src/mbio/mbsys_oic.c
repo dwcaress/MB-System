@@ -337,7 +337,8 @@ int mbsys_oic_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind, i
 	/* extract comment from structure */
 	else if (*kind == MB_DATA_COMMENT) {
 		/* copy comment */
-		strncpy(comment, store->client, MBSYS_OIC_MAX_COMMENT);
+    memset((void *)comment, 0, MB_COMMENT_MAXLINE);
+    strncpy(comment, store->client, MIN(MB_COMMENT_MAXLINE, MBSYS_OIC_MAX_COMMENT) - 1);
 
 		if (verbose >= 4) {
 			fprintf(stderr, "\ndbg4  New ping read by MBIO function <%s>\n", __func__);
@@ -547,9 +548,10 @@ int mbsys_oic_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, int
 
 	/* insert comment in structure */
 	else if (store->kind == MB_DATA_COMMENT) {
-		strncpy(store->client, comment, MBSYS_OIC_MAX_COMMENT);
-		store->client_size = strlen(comment) + 1;
 		store->type = OIC_ID_COMMENT;
+    memset((void *)store->client, 0, MBSYS_OIC_MAX_COMMENT);
+    strncpy(store->client, comment, MIN(MBSYS_OIC_MAX_COMMENT, MB_COMMENT_MAXLINE) - 1);
+    store->client_size = strlen(store->client) + 1;
 	}
 
 	if (verbose >= 2) {

@@ -416,7 +416,8 @@ int mbsys_reson8k_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kin
 	/* extract comment from structure */
 	else if (*kind == MB_DATA_COMMENT) {
 		/* copy comment */
-		strcpy(comment, store->comment);
+    memset((void *)comment, 0, MB_COMMENT_MAXLINE);
+    strncpy(comment, store->comment, MIN(MB_COMMENT_MAXLINE, MBSYS_RESON8K_COMMENT_LENGTH) - 1);
 
 		if (verbose >= 4) {
 			fprintf(stderr, "\ndbg4  New ping read by MBIO function <%s>\n", __func__);
@@ -570,7 +571,8 @@ int mbsys_reson8k_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind,
 
 	/* insert comment in structure */
 	else if (store->kind == MB_DATA_COMMENT) {
-		strncpy(store->comment, comment, 199);
+    memset((void *)store->comment, 0, MBSYS_RESON8K_COMMENT_LENGTH);
+    strncpy(store->comment, comment, MIN(MBSYS_RESON8K_COMMENT_LENGTH, MB_COMMENT_MAXLINE) - 1);
 	}
 
 	const int status = MB_SUCCESS;

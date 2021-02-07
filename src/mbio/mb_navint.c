@@ -1301,25 +1301,25 @@ int mb_loadnavdata(int verbose, char *merge_nav_file, int merge_nav_format, int 
 				else if (merge_nav_format == 5) {
 					strncpy(dummy, "", 128);
 					if (buffer[2] == '+') {
-						time_j[0] = atoi(strncpy(dummy, buffer, 2));
+						time_j[0] = strtol(strncpy(dummy, buffer, 2), NULL, 10);
 						mb_fix_y2k(verbose, time_j[0], &time_j[0]);
 						ioff = 3;
 					}
 					else {
-						time_j[0] = atoi(strncpy(dummy, buffer, 4));
+						time_j[0] = strtol(strncpy(dummy, buffer, 4), NULL, 10);
 						ioff = 5;
 					}
 					strncpy(dummy, "", 128);
-					time_j[1] = atoi(strncpy(dummy, buffer + ioff, 3));
+					time_j[1] = strtol(strncpy(dummy, buffer + ioff, 3), NULL, 10);
 					strncpy(dummy, "", 128);
 					ioff += 4;
-					hr = atoi(strncpy(dummy, buffer + ioff, 2));
+					hr = strtol(strncpy(dummy, buffer + ioff, 2), NULL, 10);
 					strncpy(dummy, "", 128);
 					ioff += 3;
-					time_j[2] = atoi(strncpy(dummy, buffer + ioff, 2)) + 60 * hr;
+					time_j[2] = strtol(strncpy(dummy, buffer + ioff, 2), NULL, 10) + 60 * hr;
 					strncpy(dummy, "", 128);
 					ioff += 3;
-					time_j[3] = atoi(strncpy(dummy, buffer + ioff, 2));
+					time_j[3] = strtol(strncpy(dummy, buffer + ioff, 2), NULL, 10);
 					time_j[4] = 0;
 					mb_get_itime(verbose, time_j, time_i);
 					mb_get_time(verbose, time_i, &time_d);
@@ -1330,19 +1330,19 @@ int mb_loadnavdata(int verbose, char *merge_nav_file, int merge_nav_format, int 
 					NorS[0] = buffer[ioff];
 					ioff += 1;
 					strncpy(dummy, "", 128);
-					mlat = atof(strncpy(dummy, buffer + ioff, 3));
+					mlat = strtod(strncpy(dummy, buffer + ioff, 3), NULL);
 					strncpy(dummy, "", 128);
 					ioff += 3;
-					llat = atof(strncpy(dummy, buffer + ioff, 8));
+					llat = strtod(strncpy(dummy, buffer + ioff, 8), NULL);
 					strncpy(EorW, "", sizeof(EorW));
 					ioff += 9;
 					EorW[0] = buffer[ioff];
 					strncpy(dummy, "", 128);
 					ioff += 1;
-					mlon = atof(strncpy(dummy, buffer + ioff, 4));
+					mlon = strtod(strncpy(dummy, buffer + ioff, 4), NULL);
 					strncpy(dummy, "", 128);
 					ioff += 4;
-					llon = atof(strncpy(dummy, buffer + ioff, 8));
+					llon = strtod(strncpy(dummy, buffer + ioff, 8), NULL);
 					n_lon[nrecord] = mlon + llon / 60.;
 					if (strncmp(EorW, "W", 1) == 0)
 						n_lon[nrecord] = -n_lon[nrecord];
@@ -1361,34 +1361,34 @@ int mb_loadnavdata(int verbose, char *merge_nav_file, int merge_nav_format, int 
 						if (strncmp(&buffer[3], "DAT", 3) == 0 && len > 15) {
 							time_set = false;
 							strncpy(dummy, "", 128);
-							time_i[0] = atoi(strncpy(dummy, buffer + 7, 4));
-							time_i[1] = atoi(strncpy(dummy, buffer + 11, 2));
-							time_i[2] = atoi(strncpy(dummy, buffer + 13, 2));
+							time_i[0] = strtol(strncpy(dummy, buffer + 7, 4), NULL, 10);
+							time_i[1] = strtol(strncpy(dummy, buffer + 11, 2), NULL, 10);
+							time_i[2] = strtol(strncpy(dummy, buffer + 13, 2), NULL, 10);
 						}
 						else if ((strncmp(&buffer[3], "ZDA", 3) == 0 || strncmp(&buffer[3], "UNX", 3) == 0) && len > 14) {
 							time_set = false;
 							/* find start of ",hhmmss.ss" */
 							if ((bufftmp = strchr(buffer, ',')) != NULL) {
 								strncpy(dummy, "", 128);
-								time_i[3] = atoi(strncpy(dummy, bufftmp + 1, 2));
+								time_i[3] = strtol(strncpy(dummy, bufftmp + 1, 2), NULL, 10);
 								strncpy(dummy, "", 128);
-								time_i[4] = atoi(strncpy(dummy, bufftmp + 3, 2));
+								time_i[4] = strtol(strncpy(dummy, bufftmp + 3, 2), NULL, 10);
 								strncpy(dummy, "", 128);
-								time_i[5] = atoi(strncpy(dummy, bufftmp + 5, 2));
+								time_i[5] = strtol(strncpy(dummy, bufftmp + 5, 2), NULL, 10);
 								if (bufftmp[7] == '.') {
 									strncpy(dummy, "", 128);
-									time_i[6] = 10000 * atoi(strncpy(dummy, bufftmp + 8, 2));
+									time_i[6] = 10000 * strtol(strncpy(dummy, bufftmp + 8, 2), NULL, 10);
 								}
 								else
 									time_i[6] = 0;
 								/* find start of ",dd,mm,yyyy" */
 								if ((bufftmp = strchr(&bufftmp[1], ',')) != NULL) {
 									strncpy(dummy, "", 128);
-									time_i[2] = atoi(strncpy(dummy, bufftmp + 1, 2));
+									time_i[2] = strtol(strncpy(dummy, bufftmp + 1, 2), NULL, 10);
 									strncpy(dummy, "", 128);
-									time_i[1] = atoi(strncpy(dummy, bufftmp + 4, 2));
+									time_i[1] = strtol(strncpy(dummy, bufftmp + 4, 2), NULL, 10);
 									strncpy(dummy, "", 128);
-									time_i[0] = atoi(strncpy(dummy, bufftmp + 7, 4));
+									time_i[0] = strtol(strncpy(dummy, bufftmp + 7, 4), NULL, 10);
 									time_set = true;
 								}
 							}
@@ -1402,9 +1402,9 @@ int mb_loadnavdata(int verbose, char *merge_nav_file, int merge_nav_format, int 
 								if (merge_nav_format == 7)
 									bufftmp = strchr(&bufftmp[1], ',');
 								strncpy(dummy, "", 128);
-								degree = atoi(strncpy(dummy, bufftmp + 1, 2));
+								degree = strtol(strncpy(dummy, bufftmp + 1, 2), NULL, 10);
 								strncpy(dummy, "", 128);
-								dminute = atof(strncpy(dummy, bufftmp + 3, 5));
+								dminute = strtod(strncpy(dummy, bufftmp + 3, 5), NULL);
 								strncpy(NorS, "", sizeof(NorS));
 								bufftmp = strchr(&bufftmp[1], ',');
 								strncpy(NorS, bufftmp + 1, 1);
@@ -1413,9 +1413,9 @@ int mb_loadnavdata(int verbose, char *merge_nav_file, int merge_nav_format, int 
 									n_lat[nrecord] = -n_lat[nrecord];
 								bufftmp = strchr(&bufftmp[1], ',');
 								strncpy(dummy, "", 128);
-								degree = atoi(strncpy(dummy, bufftmp + 1, 3));
+								degree = strtol(strncpy(dummy, bufftmp + 1, 3), NULL, 10);
 								strncpy(dummy, "", 128);
-								dminute = atof(strncpy(dummy, bufftmp + 4, 5));
+								dminute = strtod(strncpy(dummy, bufftmp + 4, 5), NULL);
 								bufftmp = strchr(&bufftmp[1], ',');
 								strncpy(EorW, "", sizeof(EorW));
 								strncpy(EorW, bufftmp + 1, 1);

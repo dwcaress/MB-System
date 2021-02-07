@@ -2734,7 +2734,7 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
 
 
-$as_echo "#define VERSION_DATE \"3 February 2021\"" >>confdefs.h
+$as_echo "#define VERSION_DATE \"7 February 2021\"" >>confdefs.h
 
 
 $as_echo " "

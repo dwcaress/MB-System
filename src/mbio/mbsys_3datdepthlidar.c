@@ -769,8 +769,10 @@ int mbsys_3datdepthlidar_extract(int verbose,     /* in: verbosity level set on 
 		status = MB_SUCCESS;
 	}
 
-	else if (*kind == MB_DATA_COMMENT)
-		strncpy(comment, store->comment, MB_COMMENT_MAXLINE);
+	else if (*kind == MB_DATA_COMMENT) {
+    memset((void *)comment, 0, sizeof(comment));
+		strncpy(comment, store->comment, MIN(sizeof(comment), sizeof(store->comment)) - 1);
+  }
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
@@ -887,7 +889,8 @@ int mbsys_3datdepthlidar_insert(int verbose,     /* in: verbosity level set on c
 	else if (store->kind == MB_DATA_COMMENT) {
 		store->time_d = time_d;
 		store->comment_len = strlen(comment) + 1;
-		strncpy(store->comment, comment, MB_COMMENT_MAXLINE);
+    memset((void *)store->comment, 0, sizeof(store->comment));
+		strncpy(store->comment, comment, MIN(sizeof(store->comment), sizeof(comment)) - 1);
 	}
 
 	/* deal with other records types  */

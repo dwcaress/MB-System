@@ -404,7 +404,7 @@ int mbnavadjust_align_arguments(int argc, char** argv, mbnavadjust_align_params 
                         }
                         break;
             case 'd' :  if(optarg != nullptr && optarg[0] != '-') {
-                            params.icpSettings.maxDistance = atoi(optarg);
+                            params.icpSettings.maxDistance = strtol(optarg, nullptr, 10);
                         }
                         else {
                             std::cerr << argv[0] << ": option requires an argument -- 'o'\n";
@@ -413,7 +413,7 @@ int mbnavadjust_align_arguments(int argc, char** argv, mbnavadjust_align_params 
                         }
                         break;
             case 'r' :  if(optarg != nullptr && optarg[0] != '-') {
-                            params.icpSettings.epsilonT = atof(optarg);
+                            params.icpSettings.epsilonT = strtod(optarg, nullptr);
                         }
                         else {
                             std::cerr << argv[0] << ": option requires an argument -- 'o'\n";
@@ -422,7 +422,7 @@ int mbnavadjust_align_arguments(int argc, char** argv, mbnavadjust_align_params 
                         }
                         break;
             case 'f' :  if(optarg != nullptr && optarg[0] != '-') {
-                            params.icpSettings.epsilonFit = atof(optarg);
+                            params.icpSettings.epsilonFit = strtod(optarg, nullptr);
                         }
                         else {
                             std::cerr << argv[0] << ": option requires an argument -- 'o'\n";

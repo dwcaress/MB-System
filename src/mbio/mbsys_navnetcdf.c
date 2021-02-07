@@ -535,7 +535,8 @@ int mbsys_navnetcdf_extract(int verbose, void *mbio_ptr, void *store_ptr, int *k
 	/* extract comment from structure */
 	else if (*kind == MB_DATA_COMMENT) {
 		/* copy comment */
-		strcpy(comment, store->comment);
+    memset((void *)comment, 0, sizeof(comment));
+    strncpy(comment, store->comment, MIN(sizeof(comment), sizeof(store->comment)) - 1);
 
 		if (verbose >= 4) {
 			fprintf(stderr, "\ndbg4  New ping read by MBIO function <%s>\n", __func__);
@@ -651,7 +652,8 @@ int mbsys_navnetcdf_insert(int verbose, void *mbio_ptr, void *store_ptr, int kin
 	/* insert comment in structure */
 	else if (store->kind == MB_DATA_COMMENT) {
 		/* copy in comment */
-		strcpy(store->comment, comment);
+    memset((void *)store->comment, 0, sizeof(store->comment));
+    strncpy(store->comment, comment, MIN(sizeof(store->comment), MB_COMMENT_MAXLINE) - 1);
 	}
 
 	const int status = MB_SUCCESS;

@@ -1445,10 +1445,10 @@ int mbsys_hysweep_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kin
 		*time_d = store->time_d;
 
 		/* copy comment */
-		if (strlen(store->COM_comment) > 0)
-			strncpy(comment, store->COM_comment, MB_COMMENT_MAXLINE);
-		else
-			comment[0] = '\0';
+    memset((void *)comment, 0, MB_COMMENT_MAXLINE);
+    if (strlen(store->COM_comment) > 0) {
+      strncpy(comment, store->COM_comment, MB_COMMENT_MAXLINE - 1);
+    }
 
 		if (verbose >= 4) {
 			fprintf(stderr, "\ndbg4  Comment extracted by MBIO function <%s>\n", __func__);
@@ -1684,7 +1684,8 @@ int mbsys_hysweep_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind,
 
 	/* insert comment in structure */
 	else if (store->kind == MB_DATA_COMMENT) {
-		strncpy(store->COM_comment, comment, MB_COMMENT_MAXLINE);
+    memset((void *)store->COM_comment, 0, MB_COMMENT_MAXLINE);
+    strncpy(store->COM_comment, comment, MB_COMMENT_MAXLINE - 1);
 	}
 
 	if (verbose >= 2) {

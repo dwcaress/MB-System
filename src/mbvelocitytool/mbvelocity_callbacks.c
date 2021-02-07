@@ -245,10 +245,11 @@ void BxSetValuesCB(Widget w, XtPointer client, XtPointer call) {
 	String rsc;
 	int i, count = 0;
 	Widget *current;
+  char *saveptr;
 
-	for (start = rscs; rscs && *rscs; rscs = strtok(NULL, "\n")) {
+	for (start = rscs; rscs && *rscs; rscs = strtok_r(NULL, "\n", &saveptr)) {
 		if (first) {
-			rscs = strtok(rscs, "\n");
+			rscs = strtok_r(rscs, "\n", &saveptr);
 			first = False;
 		}
 		valueList[count] = XtNewString(rscs);

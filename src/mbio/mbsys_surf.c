@@ -374,8 +374,8 @@ int mbsys_surf_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind, 
 	/* extract comment from structure */
 	else if (*kind == MB_DATA_COMMENT) {
 		/* copy comment */
-		/*		strncpy(comment,store->comment,
-		            MBSYS_SURF_COMMENT_LENGTH);*/
+    // memset((void *)comment, 0, MB_COMMENT_MAXLINE);
+    // strncpy(comment, store->comment, MIN(MB_COMMENT_MAXLINE, sizeof(store->comment)) - 1);
 
 		if (verbose >= 4) {
 			fprintf(stderr, "\ndbg4  New ping read by MBIO function <%s>\n", __func__);

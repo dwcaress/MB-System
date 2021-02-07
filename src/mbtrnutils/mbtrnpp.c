@@ -1555,8 +1555,9 @@ static int s_parse_opt_output(mbtrnpp_cfg_t *cfg, char *opt_str)
         // tokenize optarg
         char *ocopy = CHK_STRDUP(opt_str);
         char *tok[MBSYSOUT_OPT_N]={0};
+        char *saveptr;
         for(int i = 0; i < MBSYSOUT_OPT_N; i++){
-            tok[i] = (i==0  ? strtok(ocopy,",") : strtok(NULL,","));
+            tok[i] = (i==0  ? strtok_r(ocopy,",",&saveptr) : strtok_r(NULL,",",&saveptr));
             if(tok[i]==NULL)
                 break;
         }
@@ -1567,11 +1568,11 @@ static int s_parse_opt_output(mbtrnpp_cfg_t *cfg, char *opt_str)
             if (NULL!=strstr(tok[i], "socket:")) {
                 // enable mb1 socket (use specified IP)
                 char *acpy = strdup(tok[i]);
-                char *atok = strtok(acpy,":");
+                char *atok = strtok_r(acpy,":",&saveptr);
                 if(NULL!=atok){
                     // uses defaults if NULL
-                    char *shost = strtok(NULL,":");
-                    char *sport = strtok(NULL,":");
+                    char *shost = strtok_r(NULL,":",&saveptr);
+                    char *sport = strtok_r(NULL,":",&saveptr);
                     //                    fprintf(stderr,"shost[%s] sport[%s]\n",shost,sport);
 
                     if(NULL!=shost){
@@ -1595,7 +1596,7 @@ static int s_parse_opt_output(mbtrnpp_cfg_t *cfg, char *opt_str)
 
             if(NULL!=strstr(tok[i],"file:")){
                 char *acpy = strdup((tok[i]+strlen("file:")));
-                char *atok = strtok(acpy,":");
+                char *atok = strtok_r(acpy,":",&saveptr);
                 //                fprintf(stderr,"output_file[%s]\n",atok);
                 if(strlen(atok)>0){
                     strcpy(cfg->output_file,atok);
@@ -1623,8 +1624,9 @@ static int s_parse_opt_mbout(mbtrnpp_cfg_t *cfg, char *opt_str)
         // tokenize optarg
         char *ocopy = strdup(opt_str);
         char *tok[MBOUT_OPT_N] = {0};
+        char *saveptr;
         for(int i = 0; i < MBOUT_OPT_N; i++){
-            tok[i] = (i==0  ? strtok(ocopy,",") : strtok(NULL,","));
+            tok[i] = (i==0  ? strtok_r(ocopy,",",&saveptr) : strtok_r(NULL,",",&saveptr));
             if(tok[i]==NULL)
                 break;
         }
@@ -1635,11 +1637,11 @@ static int s_parse_opt_mbout(mbtrnpp_cfg_t *cfg, char *opt_str)
             if(strstr(tok[i], "mb1svr") != NULL) {
                 // enable mb1 socket output (optionally, specify host:port)
                 char *acpy = strdup(tok[i]);
-                char *atok = strtok(acpy, ":");
+                char *atok = strtok_r(acpy, ":",&saveptr);
                 if(NULL != atok){
                     // uses defaults if NULL
-                    char *shost = strtok(NULL,":");
-                    char *sport = strtok(NULL,":");
+                    char *shost = strtok_r(NULL,":",&saveptr);
+                    char *sport = strtok_r(NULL,":",&saveptr);
                     //                    fprintf(stderr,"shost[%s] sport[%s]\n",shost,sport);
 
                     if(NULL != shost){
@@ -1662,7 +1664,7 @@ static int s_parse_opt_mbout(mbtrnpp_cfg_t *cfg, char *opt_str)
             }
             if(NULL != strstr(tok[i], "file:")) {
                 char *acpy = strdup((tok[i] + strlen("file:")));
-                char *atok = strtok(acpy,":");
+                char *atok = strtok_r(acpy,":",&saveptr);
                 //                fprintf(stderr,"output_file[%s]\n",atok);
                 if(strlen(atok)>0){
                     strcpy(cfg->output_file,atok);
@@ -1710,8 +1712,9 @@ static int s_parse_opt_trnout(mbtrnpp_cfg_t *cfg, char *opt_str)
         // tokenize optarg
         char *ocopy = strdup(opt_str);
         char *tok[TRNOUT_OPT_N] = {0};
+        char *saveptr;
         for(int i = 0; i < TRNOUT_OPT_N; i++){
-            tok[i] = (i==0 ? strtok(ocopy,",") : strtok(NULL,","));
+            tok[i] = (i==0 ? strtok_r(ocopy,",",&saveptr) : strtok_r(NULL,",",&saveptr));
             //                fprintf(stderr,"tok[%d][%s]\n",i,tok[i]);
             if(tok[i] == NULL)
                 break;
@@ -1723,10 +1726,10 @@ static int s_parse_opt_trnout(mbtrnpp_cfg_t *cfg, char *opt_str)
             if(strstr(tok[i], "trnsvr")!=NULL) {
                 // enable trnsvr (mbsvr:host:port)
                 char *acpy = strdup(tok[i]);
-                char *atok = strtok(acpy,":");
+                char *atok = strtok_r(acpy,":",&saveptr);
                 if(NULL!=atok){
-                    char *shost = strtok(NULL,":");
-                    char *sport = strtok(NULL,":");
+                    char *shost = strtok_r(NULL,":",&saveptr);
+                    char *sport = strtok_r(NULL,":",&saveptr);
 
                     if(NULL!=shost){
                         MEM_CHKINVALIDATE(cfg->trnsvr_host);
@@ -1742,10 +1745,10 @@ static int s_parse_opt_trnout(mbtrnpp_cfg_t *cfg, char *opt_str)
             if(strstr(tok[i], "trnusvr")!=NULL){
                 // enable trnsvr (mbsvr:host:port)
                 char *acpy = strdup(tok[i]);
-                char *atok = strtok(acpy,":");
+                char *atok = strtok_r(acpy,":",&saveptr);
                 if(NULL != atok){
-                    char *shost = strtok(NULL,":");
-                    char *sport = strtok(NULL,":");
+                    char *shost = strtok_r(NULL,":",&saveptr);
+                    char *sport = strtok_r(NULL,":",&saveptr);
 
                     if(NULL != shost){
                         MEM_CHKINVALIDATE(cfg->trnusvr_host);
@@ -4851,7 +4854,7 @@ int mbtrnpp_trnu_pubempty_osocket(double time, double lat, double lon, double de
                 dzero,
                 dzero,
             };
-            
+
             if( (iobytes=netif_pub(trnusvr,(char *)&pub_data, sizeof(pub_data)))>0){
                 retval=iobytes;
                 MST_COUNTER_INC(app_stats->stats->events[MBTPP_EV_TRNU_PUBEMPTYN]);
@@ -5561,24 +5564,25 @@ int mbtrnpp_reson7kr_input_open(int verbose, void *mbio_ptr, char *definition, i
   // copy def (strtok is destructive)
   char *defcpy = strdup(definition);
   char *addr[2]={NULL,NULL};
+  char *saveptr;
   // separate hostname, numeric tokens
-  addr[0]=strtok(defcpy,":");
-  addr[1]=strtok(NULL,"");
+  addr[0]=strtok_r(defcpy,":",&saveptr);
+  addr[1]=strtok_r(NULL,"",&saveptr);
 
-    // parse hostname, port, size
-    if(NULL!=addr[0])
-    strcpy(hostname, addr[0]);
-    if(NULL!=addr[1])
-    sscanf(addr[1], "%d:%zu", &port, &size);
-    // release definition copy
-    free(defcpy);
+  // parse hostname, port, size
+  if(NULL!=addr[0])
+  strcpy(hostname, addr[0]);
+  if(NULL!=addr[1])
+  sscanf(addr[1], "%d:%zu", &port, &size);
+  // release definition copy
+  free(defcpy);
 
-    if (strlen(hostname) == 0)
-    strcpy(hostname, "localhost");
-    if (port == 0)
-    port = R7K_7KCENTER_PORT;
-    if (size == 0)
-    size = SONAR_READER_CAPACITY_DFL;
+  if (strlen(hostname) == 0)
+  strcpy(hostname, "localhost");
+  if (port == 0)
+  port = R7K_7KCENTER_PORT;
+  if (size == 0)
+  size = SONAR_READER_CAPACITY_DFL;
 
   PMPRINT(MOD_MBTRNPP, MM_DEBUG, (stderr, "configuring r7kr_reader using %s:%d\n", hostname, port));
   r7kr_reader_t *reader = r7kr_reader_new(hostname, port, size, reson_subs, reson_nsubs);
@@ -5822,13 +5826,14 @@ int mbtrnpp_kemkmall_input_open(int verbose, void *mbio_ptr, char *definition, i
   struct sockaddr_in localSock;
   struct ip_mreq group;
   char *token;
-  if ((token = strsep(&definition, ":")) != NULL) {
+  char *saveptr;
+  if ((token = strtok_r(definition, ":", &saveptr)) != NULL) {
     strncpy(hostInterface, token, sizeof(mb_path));
   }
-  if ((token = strsep(&definition, ":")) != NULL) {
+  if ((token = strtok_r(NULL, ":", &saveptr)) != NULL) {
     strncpy(bcastGrp, token, sizeof(mb_path));
   }
-  if ((token = strsep(&definition, ":")) != NULL) {
+  if ((token = strtok_r(NULL, ":", &saveptr)) != NULL) {
     sscanf(token, "%d", &port);
   }
 

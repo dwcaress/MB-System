@@ -117,7 +117,8 @@ int mbbs_tmparse(char *str, int tmmode, double *dtm) {
 	ts.tm_isdst = 0;
 
 	char *token;
-	if ((token = strtok(tmstrcp, ":/- ")) == (char *)0)
+  char *saveptr;
+	if ((token = strtok_r(tmstrcp, ":/- ", &saveptr)) == (char *)0)
 		return mbbs_rsttz(BS_BADARG);
 	char *cp;
 	ts.tm_year = (int)strtol(token, &cp, 10);
@@ -135,7 +136,7 @@ int mbbs_tmparse(char *str, int tmmode, double *dtm) {
 	}
 	ts.tm_year -= 1900;
 
-	if ((token = strtok((char *)0, ":/- ")) == (char *)0) {
+	if ((token = strtok_r((char *)0, ":/- ", &saveptr)) == (char *)0) {
 		const time_t tmt = mktime(&ts);
 		if (tmt == (time_t)-1)
 			return mbbs_rsttz(BS_FAILURE);
@@ -161,7 +162,7 @@ int mbbs_tmparse(char *str, int tmmode, double *dtm) {
 			return mbbs_rsttz(BS_BADARG);
 		ts.tm_mon -= 1;
 
-		if ((token = strtok((char *)0, ":/- ")) == (char *)0) {
+		if ((token = strtok_r((char *)0, ":/- ", &saveptr)) == (char *)0) {
 			mbbs_cal2jul(&ts);
 			const time_t tmt = mktime(&ts);
 			if (tmt == (time_t)-1)
@@ -178,7 +179,7 @@ int mbbs_tmparse(char *str, int tmmode, double *dtm) {
 		break;
 	}
 
-	if ((token = strtok((char *)0, ":/- ")) == (char *)0) {
+	if ((token = strtok_r((char *)0, ":/- ", &saveptr)) == (char *)0) {
 		const time_t tmt = mktime(&ts);
 		if (tmt == (time_t)-1)
 			return mbbs_rsttz(BS_FAILURE);
@@ -191,7 +192,7 @@ int mbbs_tmparse(char *str, int tmmode, double *dtm) {
 	if ((ts.tm_hour < 0) || (ts.tm_hour > 23))
 		return mbbs_rsttz(BS_BADARG);
 
-	if ((token = strtok((char *)0, ":/- ")) == (char *)0) {
+	if ((token = strtok_r((char *)0, ":/- ", &saveptr)) == (char *)0) {
 		const time_t tmt = mktime(&ts);
 		if (tmt == (time_t)-1)
 			return mbbs_rsttz(BS_FAILURE);
@@ -204,7 +205,7 @@ int mbbs_tmparse(char *str, int tmmode, double *dtm) {
 	if ((ts.tm_min < 0) || (ts.tm_min > 59))
 		return mbbs_rsttz(BS_BADARG);
 
-	if ((token = strtok((char *)0, ":/- ")) == (char *)0) {
+	if ((token = strtok_r((char *)0, ":/- ", &saveptr)) == (char *)0) {
 		const time_t tmt = mktime(&ts);
 		if (tmt == (time_t)-1)
 			return mbbs_rsttz(BS_FAILURE);

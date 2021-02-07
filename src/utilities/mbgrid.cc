@@ -607,7 +607,7 @@ int main(int argc, char **argv) {
       case 'K':
       case 'k':
         sscanf(optarg, "%1023s", backgroundfile);
-        if ((grdrasterid = atoi(backgroundfile)) <= 0)
+        if ((grdrasterid = (int)strtol(backgroundfile, NULL, 10)) <= 0)
           grdrasterid = -1;
         break;
       case 'L':
