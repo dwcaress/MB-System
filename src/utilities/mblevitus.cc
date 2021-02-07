@@ -104,9 +104,7 @@ int main(int argc, char **argv) {
   double longitude = 0.0;
   double latitude = 0.0;
 
-  // TODO(schwehr): Why restrict the ofile size to be so small?
-  //   Why not mb_path?
-  char ofile[128];
+  mb_path ofile;
   strcpy(ofile, "velocity");
 
   /* process argument list */
@@ -127,8 +125,9 @@ int main(int argc, char **argv) {
       case 'R':
       case 'r':
       {
-        const char *lonptr = strtok(optarg, "/");
-        const char *latptr = strtok(nullptr, "/");
+        char *saveptr;
+        const char *lonptr = strtok_r(optarg, "/", &saveptr);
+        const char *latptr = strtok_r(nullptr, "/", &saveptr);
         if (lonptr != nullptr && latptr != nullptr) {
           longitude = mb_ddmmss_to_degree(lonptr);
           latitude = mb_ddmmss_to_degree(latptr);
@@ -137,7 +136,7 @@ int main(int argc, char **argv) {
       }
       case 'O':
       case 'o':
-        sscanf(optarg, "%127s", ofile);
+        sscanf(optarg, "%s", ofile);
         break;
       case '?':
         errflg = true;
@@ -255,11 +254,10 @@ int main(int argc, char **argv) {
   int last_good = -1;
   float velocity[NDEPTH_MAX];
   for (int i = 0; i < NDEPTH_MAX; i++) {
-    if (i < NLEVITUS_MAX)
-      if (salinity[i][ilat] > MBLEVITUS_NO_DATA) {
-        last_good = i;
-        nvelocity++;
-      }
+    if (i < NLEVITUS_MAX && salinity[i][ilat] > MBLEVITUS_NO_DATA) {
+      last_good = i;
+      nvelocity++;
+    }
     if (last_good >= 0) {
       /* set counter */
       nvelocity_tot++;
@@ -293,8 +291,6 @@ int main(int argc, char **argv) {
                         pressure * (0.00000485639620015 * salinity[last_good][ilat] - 0.000340597039004)));
       velocity[i] = c0 + dltact + dltacs + dltacp + dcstp;
     }
-    else
-      velocity[i] = salinity[i][ilat];
   }
 
   /* check for existence of water velocity profile */

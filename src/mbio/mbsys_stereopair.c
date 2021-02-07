@@ -388,7 +388,8 @@ int mbsys_stereopair_extract(int verbose, void *mbio_ptr, void *store_ptr, int *
 		mb_get_date(verbose, *time_d, time_i);
 
 		/* copy comment */
-		strncpy(comment, store->comment, MIN(store->comment_len, MB_COMMENT_MAXLINE));
+    memset((void *)comment, 0, MB_COMMENT_MAXLINE);
+    strncpy(comment, store->comment, MIN(MB_COMMENT_MAXLINE, store->comment_len) - 1);
 
 		if (verbose >= 4) {
 			fprintf(stderr, "\ndbg4  Comment extracted by MBIO function <%s>\n", __func__);
@@ -577,9 +578,10 @@ int mbsys_stereopair_insert(int verbose, void *mbio_ptr, void *store_ptr, int ki
 
 	/* insert comment in structure */
 	else if (store->kind == MB_DATA_COMMENT) {
-		strncpy(store->comment, comment, MB_COMMENT_MAXLINE);
-		store->comment_len = strlen(store->comment) + 1;
-		store->comment_len += 4 - (store->comment_len % 4);
+		store->comment_len = strlen(store->comment) + 4 - (strlen(store->comment) % 4);
+    store->comment_len = MIN(store->comment_len, MB_COMMENT_MAXLINE - 4);
+    memset((void *)store->comment, 0, MB_COMMENT_MAXLINE);
+    strncpy(store->comment, comment, store->comment_len);
 	}
 
 	if (verbose >= 2) {

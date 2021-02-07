@@ -475,7 +475,8 @@ int mbsys_atlas_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
 	/* extract comment from structure */
 	else if (*kind == MB_DATA_COMMENT) {
 		/* copy comment */
-		strncpy(comment, store->comment, MBSYS_ATLAS_COMMENT_LENGTH);
+    memset((void *)comment, 0, MB_COMMENT_MAXLINE);
+    strncpy(comment, store->comment, MIN(MB_COMMENT_MAXLINE, MBSYS_ATLAS_COMMENT_LENGTH) - 1);
 
 		if (verbose >= 4) {
 			fprintf(stderr, "\ndbg4  New ping read by MBIO function <%s>\n", __func__);
@@ -639,7 +640,8 @@ int mbsys_atlas_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, i
 
 	/* insert comment in structure */
 	else if (store->kind == MB_DATA_COMMENT) {
-		strncpy(store->comment, comment, MBSYS_ATLAS_COMMENT_LENGTH);
+    memset((void *)store->comment, 0, MBSYS_ATLAS_COMMENT_LENGTH);
+    strncpy(store->comment, comment, MIN(MBSYS_ATLAS_COMMENT_LENGTH, MB_COMMENT_MAXLINE) - 1);
 	}
 
 	const int status = MB_SUCCESS;

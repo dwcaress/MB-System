@@ -1238,7 +1238,8 @@ int mbsys_3ddwissl_extract
 
   else if (*kind == MB_DATA_COMMENT)
     {
-    strncpy(comment, store->comment, MB_COMMENT_MAXLINE);
+    memset((void *)comment, 0, MB_COMMENT_MAXLINE);
+		strncpy(comment, store->comment, MB_COMMENT_MAXLINE - 1);
     }
 
   if (verbose >= 2)
@@ -1393,7 +1394,8 @@ int mbsys_3ddwissl_insert
     {
     store->time_d = time_d;
     store->comment_len = MIN(strlen(comment), MB_COMMENT_MAXLINE-1);
-    strncpy(store->comment, comment, MB_COMMENT_MAXLINE);
+    memset((void *)store->comment, 0, MB_COMMENT_MAXLINE);
+    strncpy(store->comment, comment, MB_COMMENT_MAXLINE - 1);
     }
 
   /* deal with other records types  */

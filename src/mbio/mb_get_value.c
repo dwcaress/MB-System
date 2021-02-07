@@ -41,7 +41,7 @@ static char tmp[MB_GET_VALUE_MAXLINE];
 int mb_get_double(double *value, char *str, int nchar) {
 	memset(tmp, 0, MB_GET_VALUE_MAXLINE);
 	*value = 0.0;
-	*value = atof(strncpy(tmp, str, nchar));
+	*value = strtod(strncpy(tmp, str, nchar), NULL);
 	return (0);
 }
 /*--------------------------------------------------------------------*/
@@ -49,7 +49,7 @@ int mb_get_double(double *value, char *str, int nchar) {
  */
 int mb_get_int(int *value, char *str, int nchar) {
 	memset(tmp, 0, MB_GET_VALUE_MAXLINE);
-	*value = atoi(strncpy(tmp, str, nchar));
+	*value = strtol(strncpy(tmp, str, nchar), NULL, 10);
 	return (0);
 }
 /*--------------------------------------------------------------------*/
@@ -213,12 +213,13 @@ int mb_put_binary_long(bool swapped, mb_s_long value, void *buffer) {
  *	form. This code derives from code in GMT (gmt_init.c).
  */
 int mb_get_bounds(char *text, double *bounds) {
-	char *result = strtok(text, "/");
+  char *saveptr;
+	char *result = strtok_r(text, "/", &saveptr);
 	int i = 0;
 	while (result && i < 4) {
 		bounds[i] = mb_ddmmss_to_degree(result);
 		i++;
-		result = strtok(NULL, "/");
+		result = strtok_r(NULL, "/", &saveptr);
 	}
 	int status = MB_SUCCESS;
 	if (i == 4)
@@ -257,7 +258,7 @@ double mb_ddmmss_to_degree(const char *text) {
 		degfrac = degree + copysign(minute / 60.0, degree);
 	}
 	else
-		degfrac = atof(text);
+		degfrac = strtod(text, NULL);
 
 	if (suffix == 'W' || suffix == 'w' || suffix == 'S' || suffix == 's')
 		degfrac = -degfrac; /* Sign was given implicitly */

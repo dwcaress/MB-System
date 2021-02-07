@@ -4079,9 +4079,10 @@ int mb_get_shortest_path(int verbose, char *path, int *error) {
 
     /* step through path */
     path[0] = '\0';
+    char *saveptr;
     if (tmppath[0] == '/')
       strcpy(path, "/");
-    char *result = strtok(tmppath, "/");
+    char *result = strtok_r(tmppath, "/", &saveptr);
     bool lasttokenordinary = false;
     while (result != NULL) {
       if (strcmp("..", result) == 0) {
@@ -4103,7 +4104,7 @@ int mb_get_shortest_path(int verbose, char *path, int *error) {
         lasttokenordinary = true;
         strcpy(lasttoken, result);
       }
-      result = strtok(NULL, "/");
+      result = strtok_r(NULL, "/", &saveptr);
     }
     if (lasttokenordinary)
       strcat(path, lasttoken);

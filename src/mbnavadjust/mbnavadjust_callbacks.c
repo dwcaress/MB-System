@@ -199,9 +199,10 @@ void BxSetValuesCB(Widget w, XtPointer client, XtPointer call) {
 	int count = 0;
 
 	char *start = rscs;
-	for (; rscs && *rscs; rscs = strtok(NULL, "\n")) {
+  char *saveptr;
+	for (; rscs && *rscs; rscs = strtok_r(NULL, "\n", &saveptr)) {
 		if (first) {
-			rscs = strtok(rscs, "\n");
+			rscs = strtok_r(rscs, "\n", &saveptr);
 			first = false;
 		}
 		valueList[count] = XtNewString(rscs);

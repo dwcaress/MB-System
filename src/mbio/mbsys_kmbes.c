@@ -1156,8 +1156,10 @@ int mbsys_kmbes_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
     *time_d = store->time_d;
 
     /* copy comment */
-    if (strlen(xmc->comment) > 0)
-      strncpy(comment, xmc->comment, MB_COMMENT_MAXLINE);
+    if (strlen(xmc->comment) > 0) {
+      memset((void *)comment, 0, MB_COMMENT_MAXLINE);
+		  strncpy(comment, xmc->comment, MB_COMMENT_MAXLINE - 1);
+    }
     else
       comment[0] = '\0';
 
@@ -1447,8 +1449,8 @@ int mbsys_kmbes_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, i
   /* insert comment in structure */
   else if (store->kind == MB_DATA_COMMENT) {
     /* copy comment */
-    strncpy(xmc->comment, comment, MB_COMMENT_MAXLINE-1);
-    xmc->comment[MB_COMMENT_MAXLINE-1] = '\0';
+    memset((void *)xmc->comment, 0, MB_COMMENT_MAXLINE);
+    strncpy(xmc->comment, comment, MB_COMMENT_MAXLINE - 1);
 
     /* have to construct this record now */
     const int numBytesComment = strlen(xmc->comment) + (strlen(xmc->comment) % 2);

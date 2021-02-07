@@ -23,7 +23,7 @@ Distributions that do not include "beta" in the tag name correspond to the major
 announced releases. The source distributions associated with all releases, major
 or beta, are equally accessible as tarballs through the Github interface.
 
-- Version 5.7.9beta03    February 3, 2021
+- Version 5.7.9beta03    February 7, 2021
 - Version 5.7.9beta02    January 27, 2021
 - Version 5.7.9beta01    January 18, 2021
 - **Version 5.7.8        January 17, 2021
@@ -383,7 +383,38 @@ or beta, are equally accessible as tarballs through the Github interface.
 ### MB-System Version 5.7 Release Notes:
 --
 
-#### 5.7.9beta02 (January 27, 2020)
+#### 5.7.9beta03 (February 7, 2021)
+
+General changes: Replacing use of strtok() function with strtok_r(). Strtok() is
+intrinsically not thread safe or reentrant and is considered poor use under all
+circumstances. Source files with this change include:
+  src/mbio/mbr_edgjstar.c src/mbio/mbr_hypc8101.c src/mbio/mbr_hysweep1.c
+  src/mbio/mb_format.c src/mbio/mb_get_value.c src/bsio/mbbs_tm.c
+  src/utilities/mblevitus.cc src/mbvelocitytool/mbvelocity_callbacks.c
+  src/mbnavedit/mbnavedit_callbacks.c src/mbnavadjust/mbnavadjust_callbacks.c
+
+General changes: Replace atof() with strtod() for thread safety. Source files
+with this change include:
+  src/gmt/mbgrdtifforg.c src/bsio/mbbs_tm.c src/mbio/mb_navint.c
+  src/mbio/mbr_edgjstar.c src/mbnavadjust/mbnavadjust_fine.c
+
+General changes: Replace atoi() with strtol() for thread safety. Source files
+with this change include:
+  src/gmt/mbcontour.c src/gmt/mbgrdtifforg.c src/gmt/mbswath.c
+  src/gsf/gsf.c src/utilities/mbgrid.cc src/utilities/mbprocess.cc
+
+General changes: Protect against overflows copying comments in all of the
+mbsys_XXX_extract() and mbsys_XXX_insert() functions the in the source files
+mbsys_XXX.c
+
+MBnavadjust: Fixed bug that failed to save new navigation ties if the program was
+closed without solving for a new model. Now closing the program will always save
+any unsaved ties.
+
+MBeditviz and MBview: Removed unneeded functions from mbview/mb3dsoundings_callbacks.c
+that were breaking test Cmake builds.
+
+#### 5.7.9beta02 (January 27, 2021)
 
 Fixed bug in format 58 and 59 support for bathymetry recalculation. The per beam heave values were being calculated incorrectly when bathymetry was recalculated by raytracing.
 

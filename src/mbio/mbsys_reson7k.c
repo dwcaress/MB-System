@@ -6298,10 +6298,10 @@ int mbsys_reson7k_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kin
     *time_d = store->time_d;
 
     /* copy comment */
-    if (systemeventmessage->message_length > 0)
-      strncpy(comment, systemeventmessage->message, MB_COMMENT_MAXLINE);
-    else
-      comment[0] = '\0';
+    memset((void *)comment, 0, MB_COMMENT_MAXLINE);
+    if (systemeventmessage->message_length > 0) {
+      strncpy(comment, systemeventmessage->message, MIN(MB_COMMENT_MAXLINE - 1, systemeventmessage->message_length));
+    }
 
     if (verbose >= 4) {
       fprintf(stderr, "\ndbg4  Comment extracted by MBIO function <%s>\n", __func__);
@@ -6650,6 +6650,7 @@ int mbsys_reson7k_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind,
       systemeventmessage->event_id = 1;
       systemeventmessage->message_length = msglen;
       systemeventmessage->event_identifier = 0;
+      memset((void *)systemeventmessage->message, 0, systemeventmessage->message_alloc);
       strncpy(systemeventmessage->message, comment, msglen);
       systemeventmessage->header.Size =
           MBSYS_RESON7K_RECORDHEADER_SIZE + R7KHDRSIZE_7kSystemEventMessage + msglen + MBSYS_RESON7K_RECORDTAIL_SIZE;

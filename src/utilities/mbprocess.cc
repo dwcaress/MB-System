@@ -1314,25 +1314,25 @@ void process_file(int verbose, struct mb_process_struct *process,
       else if (process->mbp_nav_format == 5) {
         strncpy(dummy, "", 128);
         if (buffer[2] == '+') {
-          time_j[0] = atoi(strncpy(dummy, buffer, 2));
+          time_j[0] = (int)strtol(strncpy(dummy, buffer, 2), NULL, 10);
           mb_fix_y2k(verbose, time_j[0], &time_j[0]);
           ioff = 3;
         }
         else {
-          time_j[0] = atoi(strncpy(dummy, buffer, 4));
+          time_j[0] = (int)strtol(strncpy(dummy, buffer, 4), NULL, 10);
           ioff = 5;
         }
         strncpy(dummy, "", 128);
-        time_j[1] = atoi(strncpy(dummy, buffer + ioff, 3));
+        time_j[1] = (int)strtol(strncpy(dummy, buffer + ioff, 3), NULL, 10);
         strncpy(dummy, "", 128);
         ioff += 4;
-        hr = atoi(strncpy(dummy, buffer + ioff, 2));
+        hr = (int)strtol(strncpy(dummy, buffer + ioff, 2), NULL, 10);
         strncpy(dummy, "", 128);
         ioff += 3;
-        time_j[2] = atoi(strncpy(dummy, buffer + ioff, 2)) + 60 * hr;
+        time_j[2] = (int)strtol(strncpy(dummy, buffer + ioff, 2), NULL, 10) + 60 * hr;
         strncpy(dummy, "", 128);
         ioff += 3;
-        time_j[3] = atoi(strncpy(dummy, buffer + ioff, 2));
+        time_j[3] = (int)strtol(strncpy(dummy, buffer + ioff, 2), NULL, 10);
         time_j[4] = 0;
         mb_get_itime(verbose, time_j, time_i);
         mb_get_time(verbose, time_i, &time_d);
@@ -1373,34 +1373,34 @@ void process_file(int verbose, struct mb_process_struct *process,
           if (strncmp(&buffer[3], "DAT", 3) == 0 && len > 15) {
             time_set = false;
             strncpy(dummy, "", 128);
-            time_i[0] = atoi(strncpy(dummy, buffer + 7, 4));
-            time_i[1] = atoi(strncpy(dummy, buffer + 11, 2));
-            time_i[2] = atoi(strncpy(dummy, buffer + 13, 2));
+            time_i[0] = (int)strtol(strncpy(dummy, buffer + 7, 4), NULL, 10);
+            time_i[1] = (int)strtol(strncpy(dummy, buffer + 11, 2), NULL, 10);
+            time_i[2] = (int)strtol(strncpy(dummy, buffer + 13, 2), NULL, 10);
           }
           else if ((strncmp(&buffer[3], "ZDA", 3) == 0 || strncmp(&buffer[3], "UNX", 3) == 0) && len > 14) {
             time_set = false;
             /* find start of ",hhmmss.ss" */
             if ((bufftmp = strchr(buffer, ',')) != nullptr) {
               strncpy(dummy, "", 128);
-              time_i[3] = atoi(strncpy(dummy, bufftmp + 1, 2));
+              time_i[3] = (int)strtol(strncpy(dummy, bufftmp + 1, 2), NULL, 10);
               strncpy(dummy, "", 128);
-              time_i[4] = atoi(strncpy(dummy, bufftmp + 3, 2));
+              time_i[4] = (int)strtol(strncpy(dummy, bufftmp + 3, 2), NULL, 10);
               strncpy(dummy, "", 128);
-              time_i[5] = atoi(strncpy(dummy, bufftmp + 5, 2));
+              time_i[5] = (int)strtol(strncpy(dummy, bufftmp + 5, 2), NULL, 10);
               if (bufftmp[7] == '.') {
                 strncpy(dummy, "", 128);
-                time_i[6] = 10000 * atoi(strncpy(dummy, bufftmp + 8, 2));
+                time_i[6] = 10000 * (int)strtol(strncpy(dummy, bufftmp + 8, 2), NULL, 10);
               }
               else
                 time_i[6] = 0;
               /* find start of ",dd,mm,yyyy" */
               if ((bufftmp = strchr(&bufftmp[1], ',')) != nullptr) {
                 strncpy(dummy, "", 128);
-                time_i[2] = atoi(strncpy(dummy, bufftmp + 1, 2));
+                time_i[2] = (int)strtol(strncpy(dummy, bufftmp + 1, 2), NULL, 10);
                 strncpy(dummy, "", 128);
-                time_i[1] = atoi(strncpy(dummy, bufftmp + 4, 2));
+                time_i[1] = (int)strtol(strncpy(dummy, bufftmp + 4, 2), NULL, 10);
                 strncpy(dummy, "", 128);
-                time_i[0] = atoi(strncpy(dummy, bufftmp + 7, 4));
+                time_i[0] = (int)strtol(strncpy(dummy, bufftmp + 7, 4), NULL, 10);
                 time_set = true;
               }
             }
@@ -1414,7 +1414,7 @@ void process_file(int verbose, struct mb_process_struct *process,
               if (process->mbp_nav_format == 7)
                 bufftmp = strchr(&bufftmp[1], ',');
               strncpy(dummy, "", 128);
-              degree = atoi(strncpy(dummy, bufftmp + 1, 2));
+              degree = (int)strtol(strncpy(dummy, bufftmp + 1, 2), NULL, 10);
               strncpy(dummy, "", 128);
               dminute = atof(strncpy(dummy, bufftmp + 3, 5));
               strncpy(NorS, "", sizeof(NorS));
@@ -1425,7 +1425,7 @@ void process_file(int verbose, struct mb_process_struct *process,
                 nlat[nnav] = -nlat[nnav];
               bufftmp = strchr(&bufftmp[1], ',');
               strncpy(dummy, "", 128);
-              degree = atoi(strncpy(dummy, bufftmp + 1, 3));
+              degree = (int)strtol(strncpy(dummy, bufftmp + 1, 3), NULL, 10);
               strncpy(dummy, "", 128);
               dminute = atof(strncpy(dummy, bufftmp + 4, 5));
               bufftmp = strchr(&bufftmp[1], ',');

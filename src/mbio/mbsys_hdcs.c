@@ -604,7 +604,8 @@ int mbsys_hdcs_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind, 
 	/* extract comment from structure */
 	else if (*kind == MB_DATA_COMMENT) {
 		/* copy comment */
-		strncpy(comment, store->comment, MBSYS_HDCS_MAX_COMMENT);
+    memset((void *)comment, 0, MB_COMMENT_MAXLINE);
+		strncpy(comment, store->comment, MIN(MB_COMMENT_MAXLINE, MBSYS_HDCS_MAX_COMMENT) - 1);
 
 		if (verbose >= 4) {
 			fprintf(stderr, "\ndbg4  New ping read by MBIO function <%s>\n", __func__);
@@ -772,7 +773,8 @@ int mbsys_hdcs_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, in
 
 	/* insert comment in structure */
 	else if (store->kind == MB_DATA_COMMENT) {
-		strncpy(store->comment, comment, MBSYS_HDCS_MAX_COMMENT);
+    memset((void *)store->comment, 0, MBSYS_HDCS_MAX_COMMENT);
+		strncpy(store->comment, comment, MIN(MBSYS_HDCS_MAX_COMMENT, MB_COMMENT_MAXLINE) - 1);
 	}
 
 	if (verbose >= 2) {

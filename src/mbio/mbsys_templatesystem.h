@@ -63,37 +63,42 @@
 #define MBSYS_TEMPLATESYSTEM_MAX_BEAMS 400
 #define MBSYS_TEMPLATESYSTEM_MAX_PIXELS 400
 
+/* Comment size definition */
+#define MBSYS_TEMPLATESYSTEM_MAX_COMMENT MB_COMMENT_MAXLINE
+
     /*---------------------------------------------------------------*/
 
     /* Structure size definitions (if needed because there are dynamically allocated substructures) */
 
     /* Internal data structure */
     struct mbsys_templatesystem_struct {
-	/* Type of most recently read data record */
-	int kind; /* MB-System record ID */
+      
+    /* Type of most recently read data record */
+    int kind; /* MB-System record ID */
 
-	/* MB-System time stamp of most recently read record */
-	double time_d;
-	int time_i[7];
+    /* MB-System time stamp of most recently read record */
+    double time_d;
+    int time_i[7];
 
-	/* Survey data
+    /* Survey data
 
-	/* Navigation and attitude associated with survey data */
+    /* Navigation and attitude associated with survey data */
 
-	/* Bathymetry and amplitude data */
+    /* Bathymetry and amplitude data */
 
-	/* Raw backscatter data */
+    /* Raw backscatter data */
 
-	/* Sidescan derived from raw backscatter */
+    /* Sidescan derived from raw backscatter */
 
-	/* Navigation data */
+    /* Navigation data */
 
-	/* Sensordepth */
+    /* Sensordepth */
 
-	/* Attitude data */
+    /* Attitude data */
 
-	/* Comment */
-};
+    /* Comment */
+    comment[MBSYS_TEMPLATESYSTEM_MAX_COMMENT];
+    };
 
 /*---------------------------------------------------------------*/
 

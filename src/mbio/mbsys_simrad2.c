@@ -2678,7 +2678,8 @@ int mbsys_simrad2_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kin
 	/* extract comment from structure */
 	else if (*kind == MB_DATA_COMMENT) {
 		/* copy comment */
-		strncpy(comment, store->par_com, MBSYS_SIMRAD2_COMMENT_LENGTH);
+    memset((void *)comment, 0, MB_COMMENT_MAXLINE);
+    strncpy(comment, store->par_com, MIN(MB_COMMENT_MAXLINE, MBSYS_SIMRAD2_COMMENT_LENGTH) - 1);
 
 		if (verbose >= 4) {
 			fprintf(stderr, "\ndbg4  New ping read by MBIO function <%s>\n", __func__);
@@ -3116,7 +3117,8 @@ int mbsys_simrad2_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind,
 
 	/* insert comment in structure */
 	else if (store->kind == MB_DATA_COMMENT) {
-		strncpy(store->par_com, comment, MBSYS_SIMRAD2_COMMENT_LENGTH);
+    memset((void *)store->par_com, 0, MBSYS_SIMRAD2_COMMENT_LENGTH);
+    strncpy(store->par_com, comment, MIN(MBSYS_SIMRAD2_COMMENT_LENGTH, MB_COMMENT_MAXLINE) - 1);
 	}
 
 	if (verbose >= 2) {

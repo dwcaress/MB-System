@@ -271,8 +271,6 @@ int mbr_rt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	int time_i[7];
 	int time_j[5];
 	double depthofsensor, offset;
-	char **nap, *nargv[25], *string;
-	int nargc;
 
 	/* get pointer to mbio descriptor */
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
@@ -1525,26 +1523,32 @@ __FILE__, __LINE__, __FUNCTION__, ftell(mb_io_ptr->mbfp));
 				mb_get_date(verbose, time_d, time_i);
 
 				/* break up NMEA string into arguments */
-				nargc = 0;
-				string = (char *)nmeastring;
-				for (nap = nargv; (*nap = strtok(string, ",*")) != NULL;) {
-					if (++nap >= &nargv[25])
-						break;
-					else
-						nargc++;
-				}
+				int nargc = 0;
+        char *nargv[25];
+				char *string = (char *)nmeastring;
+        char **nap = nargv;
+        char *saveptr;
+        *nap = strtok_r(string, ",*", &saveptr);
+        if (*nap != NULL) {
+          nargc++;
+          nap++;
+          while (nargc < 25 && (*nap = strtok_r(NULL, ",*", &saveptr)) != NULL) {
+            nargc++;
+            nap++;
+          }
+        }
 
 				/* parse NMEA string if possible */
 				if (strncmp(&(nargv[0][3]), "RMC", 3) == 0) {
-					rawvalue = atof(nargv[3]);
+					rawvalue = strtod(nargv[3], NULL);
 					navlat = floor(0.01 * rawvalue) + (rawvalue - 100.0 * floor(0.01 * rawvalue)) / 60.0;
 					if (nargv[4][0] == 'S')
 						navlat *= -1.0;
-					rawvalue = atof(nargv[5]);
+					rawvalue = strtod(nargv[5], NULL);
 					navlon = floor(0.01 * rawvalue) + (rawvalue - 100.0 * floor(0.01 * rawvalue)) / 60.0;
 					if (nargv[6][0] == 'W')
 						navlon *= -1.0;
-					heading = atof(nargv[8]);
+					heading = strtod(nargv[8], NULL);
 #ifdef MBF_EDGJSTAR_DEBUG
 					fprintf(stderr, "RMC: %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d navlon:%f navlat:%f heading:%f    %s\n",
 					        time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6], navlon, navlat, heading,
@@ -1559,7 +1563,7 @@ __FILE__, __LINE__, __FUNCTION__, ftell(mb_io_ptr->mbfp));
 
 				/* parse NMEA string if possible */
 				else if (strncmp(&(nargv[0][3]), "DBT", 3) == 0) {
-					altitude = atof(nargv[3]);
+					altitude = strtod(nargv[3], NULL);
 					mb_altint_add(verbose, mbio_ptr, time_d, altitude, error);
 #ifdef MBF_EDGJSTAR_DEBUG
 					fprintf(stderr, "DBT: %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d altitude:%f    %s\n", time_i[0], time_i[1],
@@ -1571,8 +1575,8 @@ __FILE__, __LINE__, __FUNCTION__, ftell(mb_io_ptr->mbfp));
 
 				/* parse NMEA string if possible */
 				else if (strncmp(&(nargv[0][3]), "DPT", 3) == 0) {
-					depthofsensor = atof(nargv[1]);
-					offset = atof(nargv[2]);
+					depthofsensor = strtod(nargv[1], NULL);
+					offset = strtod(nargv[2], NULL);
 					sonardepth = depthofsensor + offset;
 					mb_depint_add(verbose, mbio_ptr, time_d, sonardepth, error);
 #ifdef MBF_EDGJSTAR_DEBUG
