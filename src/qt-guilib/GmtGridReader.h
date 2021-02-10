@@ -13,7 +13,7 @@
 
 namespace mb_system {
   /**
-     GmtGrideader reads data stored in a GMT grid file (NetCDF format), 
+     GmtGridReader reads data stored in a GMT grid file (NetCDF format), 
      and outputs the data into a vtkPoints (vertices) and vtkCellArray 
      (triangles) where data can be accessed by the VTK pipeline.
   */
@@ -30,13 +30,18 @@ namespace mb_system {
     }
   
     /// Set grid file name
-    virtual void SetFileName(const char *fileName);
+    virtual void SetFileName(
+                             const char *fileName ///< [in] grid file name
+                             );
 
     /// Return pointer to gridPoints
     vtkPoints *gridPoints() { return gridPoints_; }
 
-    /// Get span of z values
-    void zBounds(float *zMin, float *zMax);
+    /** Get span of z values
+     */
+    void zBounds(float *zMin, ///< [out] minimum z value
+                 float *zMax  ///< [out] maximum z value
+                 );
 
     /// Get span of x, y, and z values
     void bounds(float *xMin, float *xMax, float *yMin, float *yMax,
