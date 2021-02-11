@@ -353,10 +353,10 @@ int mb_format_beamwidth(int verbose, int *format, double *beamwidth_xtrack, doub
    Get file's data format based on filename conventions 
 */
 int mb_get_format(int verbose,
-                  char *filename,  //< [in] data file name
-                  char *fileroot,  //< [in,out] if input not null, filename not including extension
-                  int *format,  //< [out] Inferred data format
-                  int *error    //< [out] MB_ERROR_BAD_FORMAT if returns MB_FAILURE
+                  char *filename,  ///< [in] data file name
+                  char *fileroot,  ///< [in,out] if input not null, filename not including extension
+                  int *format,  ///< [out] Inferred data format
+                  int *error    ///< [out] MB_ERROR_BAD_FORMAT if returns MB_FAILURE
                   );
 
 
@@ -395,7 +395,7 @@ int mb_swathbounds(int verbose, int checkgood, int nbath, int nss,
  @return MB_SUCCESS or MB_FAILURE
 */      
 int mb_read_init(int verbose, 
-                 char *file,
+                 char *file,   ///< [in] data file name
                  int format,
                  int pings,
                  int lonflip,

@@ -11,7 +11,8 @@
  *
  *    See README file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
-/*
+/**
+   @file
  * MBprocess is a tool for processing swath sonar bathymetry data.
  * This program performs a number of functions, including:
  *   - merging navigation
@@ -696,7 +697,7 @@
 #define MB_PR_KLUGE_FIXWISSLTIMESTAMPS 5
 #define MB_PR_KLUGE_AUVSENTRYSENSORDEPTH 6
 
-/* structure holding mbpreprocess parameters to be passed to preprocess
+/** structure holding mbpreprocess parameters to be passed to preprocess
  * functions of i/o modules */
 struct mb_preprocess_struct {
   int target_sensor;
@@ -761,7 +762,7 @@ struct mb_preprocess_struct {
   char kluge_pars[MB_PR_KLUGE_NUM_MAX * MB_PR_KLUGE_PAR_SIZE];
 };
 
-/* structure holding mbprocess parameters */
+/** structure holding mbprocess parameters */
 struct mb_process_struct {
   /* general parameters */
   int mbp_ifile_specified;

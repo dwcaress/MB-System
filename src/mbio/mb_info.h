@@ -11,7 +11,8 @@
  *
  *    See README file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
-/*
+/**
+   @file
  * mb_info.h defines file information and data structures used by
  * mbproject..
  *

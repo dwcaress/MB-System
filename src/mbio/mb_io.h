@@ -432,7 +432,7 @@ struct mb_io_ping_struct {
   double *sslat;
 };
 
-/* MBIO input/output control structure */
+/** MBIO input/output control structure */
 struct mb_io_struct {
   /* system byte swapping */
   int byteswapped; /* 0 = unswapped, 1 = swapped (Intel byte order) */
@@ -776,14 +776,14 @@ struct mb_io_struct {
 
 };
 
-/* MBIO buffer control structure */
+/** MBIO buffer control structure */
 struct mb_buffer_struct {
   void *buffer[MB_BUFFER_MAX];
   int buffer_kind[MB_BUFFER_MAX];
   int nbuffer;
 };
 
-/* MBIO datalist control structure */
+/** MBIO datalist control structure */
 #define MB_DATALIST_RECURSION_MAX 25
 struct mb_datalist_struct {
   bool open;
@@ -798,7 +798,7 @@ struct mb_datalist_struct {
   struct mb_datalist_struct *datalist;
 };
 
-/* MBIO imagelist control structure */
+/** MBIO imagelist control structure */
 #define MB_IMAGELIST_RECURSION_MAX 25
 struct mb_imagelist_struct {
   int open;
