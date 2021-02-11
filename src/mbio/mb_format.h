@@ -11,7 +11,8 @@
  *
  *    See README file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
-/*
+/**
+   @file
  * mb_format.h defines data format identifiers used by MBIO functions
  *
  * Author:	D. W. Caress
