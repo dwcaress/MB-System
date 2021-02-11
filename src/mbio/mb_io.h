@@ -323,16 +323,17 @@ struct mb_sensor_offset_struct {
   FILE *ofp; /* file pointer for integrated nav output by mbpreprocess */
 };
 
+/** Describes individual sensor */
 struct mb_sensor_struct {
   int type;
   mb_longname model;
   mb_longname manufacturer;
   mb_longname serialnumber;
-  int capability1; /* bitmask indicating position and attitude capabilities */
-  int capability2; /* bitmask indicating mapping and imaging capabilities */
-  int num_offsets; /* most sensors have one set of offsets, multibeam sonars
-                    * have two sets of offsets, one for the transmit and
-                    * one for the receive array */
+  int capability1; ///< bitmask indicating position and attitude capabilities
+  int capability2; ///< bitmask indicating mapping and imaging capabilities
+  int num_offsets; /**< most sensors have one set of offsets, multibeam sonars
+                    have two sets of offsets, one for the transmit and
+                    one for the receive array */
   int num_offsets_alloc;
   struct mb_sensor_offset_struct *offsets;
 
@@ -343,6 +344,7 @@ struct mb_sensor_struct {
   double *time_latency_time_d;
   double *time_latency_value;
 };
+
 struct mb_platform_struct {
   int type;
   mb_longname name;
@@ -394,7 +396,7 @@ struct mb_platform_struct {
 /* ---------------------------------------------------------------------------*/
 /* MBIO data storage and control structures */
 
-/* MBIO file index storage structure */
+/** MBIO file index storage structure */
 struct mb_io_indextable_struct {
     int file_index;
     int total_index_org;
@@ -409,7 +411,7 @@ struct mb_io_indextable_struct {
     mb_u_char read;
 };
 
-/* MBIO ping storage structure */
+/** MBIO ping storage structure */
 struct mb_io_ping_struct {
   double time_d;
   double navlon;
@@ -435,96 +437,98 @@ struct mb_io_ping_struct {
 /** MBIO input/output control structure */
 struct mb_io_struct {
   /* system byte swapping */
-  int byteswapped; /* 0 = unswapped, 1 = swapped (Intel byte order) */
+  int byteswapped; /**< 0 = unswapped, 1 = swapped (Intel byte order) */
 
   /* format parameters */
-  int format;           /* data format id */
-  int system;           /* sonar system id */
-  int beams_bath_max;   /* maximum number of bathymetry beams */
-  int beams_amp_max;    /* maximum number of amplitude beams
-                    - either 0 or = beams_bath */
-  int pixels_ss_max;    /* maximum number of sidescan pixels */
-  int beams_bath_alloc; /* allocated number of bathymetry beams */
-  int beams_amp_alloc;  /* allocated number of amplitude beams */
-  int pixels_ss_alloc;  /* allocated number of sidescan pixels */
+  int format;           /**< data format id */
+  int system;           /**< sonar system id */
+  int beams_bath_max;   /**< maximum number of bathymetry beams */
+
+  /** maximum number of amplitude beams - either 0 or = beams_bath */
+  int beams_amp_max; 
+                   
+  int pixels_ss_max;    /**< maximum number of sidescan pixels */
+  int beams_bath_alloc; /**< allocated number of bathymetry beams */
+  int beams_amp_alloc;  /**< allocated number of amplitude beams */
+  int pixels_ss_alloc;  /**< allocated number of sidescan pixels */
   char format_name[MB_NAME_LENGTH];
   char system_name[MB_NAME_LENGTH];
   char format_description[MB_DESCRIPTION_LENGTH];
-  int numfile;             /* the number of parallel files required for i/o */
-  int filetype;            /* type of files used (normal, single normal, xdr, or gsf) */
-  mb_filemode_enum filemode;            /* file mode (read or write) */
+  int numfile;             /**< the number of parallel files required for i/o */
+  int filetype;            /**< type of files used (normal, single normal, xdr, or gsf) */
+  mb_filemode_enum filemode; /**< file mode (read or write) */
   // TODO(schwehr): Bool
-  int variable_beams;      /* if true then number of beams variable */
-  int traveltime;          /* if true then traveltime and angle data supported */
-  int beam_flagging;       /* if true then beam flagging supported */
-  int platform_source;     /* data record type containing sensor offsets */
-  int nav_source;          /* data record type containing the primary navigation */
-  int sensordepth_source;  /* data record type containing the primary sensordepth */
-  int heading_source;      /* data record type containing the primary heading */
-  int attitude_source;     /* data record type containing the primary attitude */
-  int svp_source;          /* data record type containing the primary svp */
-  double beamwidth_xtrack; /* nominal acrosstrack beamwidth */
-  double beamwidth_ltrack; /* nominal alongtrack beamwidth */
+  int variable_beams;      /**< if true then number of beams variable */
+  int traveltime;          /**< if true then traveltime and angle data supported */
+  int beam_flagging;       /**< if true then beam flagging supported */
+  int platform_source;     /**< data record type containing sensor offsets */
+  int nav_source;          /**< data record type containing the primary navigation */
+  int sensordepth_source;  /**< data record type containing the primary sensordepth */
+  int heading_source;      /**< data record type containing the primary heading */
+  int attitude_source;     /**< data record type containing the primary attitude */
+  int svp_source;          /**< data record type containing the primary svp */
+  double beamwidth_xtrack; /**< nominal acrosstrack beamwidth */
+  double beamwidth_ltrack; /**< nominal alongtrack beamwidth */
 
   /* control parameters - see mbio manual pages for explanation */
-  int pings;        /* controls ping averaging */
-  int lonflip;      /* controls longitude range */
-  double bounds[4]; /* locations bounds of acceptable data */
-  int btime_i[7];   /* beginning time of acceptable data */
-  int etime_i[7];   /* ending time of acceptable data */
-  double btime_d;   /* beginning time of acceptable data
+  int pings;        /**< controls ping averaging */
+  int lonflip;      /**< controls longitude range */
+  double bounds[4]; /**< locations bounds of acceptable data */
+  int btime_i[7];   /**< beginning time of acceptable data */
+  int etime_i[7];   /**< ending time of acceptable data */
+  double btime_d;   /**< beginning time of acceptable data
                 in "_d" format (unix seconds) */
-  double etime_d;   /* ending time of acceptable data
+  double etime_d;   /**< ending time of acceptable data
                 in "_d" format (unix seconds) */
-  double speedmin;  /* minimum ship speed of acceptable data
+  double speedmin;  /**< minimum ship speed of acceptable data
                 in km/hr */
-  double timegap;   /* maximum time between pings without
+  double timegap;   /**< maximum time between pings without
                 a data gap */
 
-  // application defined i/o accessed through mb_input_init()
-  // rather than mb_read_init(), usually socket based */
+  /** application defined i/o accessed through mb_input_init()
+  rather than mb_read_init(), usually socket based */
   void *mbsp;
 
   /* file descriptor, file name, and usage flag */
-  FILE *mbfp;                  /* file descriptor */
-  mb_path file;                /* file name */
-  long file_pos;               /* file position at start of last record read */
-  long file_bytes;             /* number of bytes read from file */
-  char *file_iobuffer;         /* file i/o buffer for fread() and fwrite() calls */
-  FILE *mbfp2;                 /* file descriptor #2 */
-  char file2[MB_PATH_MAXLINE]; /* file name #2 */
-  long file2_pos;              /* file position #2 at start of last record read */
-  long file2_bytes;            /* number of bytes read from file */
-  FILE *mbfp3;                 /* file descriptor #3 */
-  char file3[MB_PATH_MAXLINE]; /* file name #3 */
-  long file3_pos;              /* file position #3 at start of last record read */
-  long file3_bytes;            /* number of bytes read from file */
-  int ncid;                    /* netCDF datastream ID */
-  int gsfid;                   /* GSF datastream ID */
-  void *xdrs;                  /* XDR stream handle */
-  void *xdrs2;                 /* XDR stream handle #2 */
-  void *xdrs3;                 /* XDR stream handle #2 */
+  FILE *mbfp;                  /**< file descriptor */
+  mb_path file;                /**< file name */
+  long file_pos;               /**< file position at start of last record read */
+  long file_bytes;             /**< number of bytes read from file */
+  char *file_iobuffer;         /**< file i/o buffer for fread() and fwrite() calls */
+  FILE *mbfp2;                 /**< file descriptor #2 */
+  char file2[MB_PATH_MAXLINE]; /**< file name #2 */
+  long file2_pos;              /**< file position #2 at start of last record read */
+  long file2_bytes;            /**< number of bytes read from file */
+  FILE *mbfp3;                 /**< file descriptor #3 */
+  char file3[MB_PATH_MAXLINE]; /**< file name #3 */
+  long file3_pos;              /**< file position #3 at start of last record read */
+  long file3_bytes;            /**< number of bytes read from file */
+  int ncid;                    /**< netCDF datastream ID */
+  int gsfid;                   /**< GSF datastream ID */
+  void *xdrs;                  /**< XDR stream handle */
+  void *xdrs2;                 /**< XDR stream handle #2 */
+  void *xdrs3;                 /**< XDR stream handle #2 */
 
 
-    /* file indexing (used by some formats) */
+  /** file indexing (used by some formats) */
     int num_indextable;
     int num_indextable_alloc;
     struct mb_io_indextable_struct *indextable;
 
   /* read or write history */
-  int fileheader;       /* indicates whether file header has
+  int fileheader;       /**< indicates whether file header has
                         been read or written */
-  int hdr_comment_size; /* number of characters in
+  int hdr_comment_size; /**< number of characters in
                    header_comment string */
-  int hdr_comment_loc;  /* number of characters already extracted
+  int hdr_comment_loc;  /**< number of characters already extracted
                     from header_comment string */
-  char *hdr_comment; /* placeholder for long comment strings
+  char *hdr_comment; /**< placeholder for long comment strings
              for formats using a single
              comment string in a file header */
-  int irecord_count; /* counting variable used for VMS derived
+  int irecord_count; /**< counting variable used for VMS derived
                  data formats to remove extra
                  bytes (e.g. sburivax format) */
-  int orecord_count; /* counting variable used for VMS derived
+  int orecord_count; /**< counting variable used for VMS derived
                  data formats to insert extra
                  bytes (e.g. sburivax format) */
 
@@ -536,12 +540,12 @@ struct mb_io_struct {
   void *store_data;
 
   /* working variables */
-  int ping_count;    /* number of pings read or written so far */
-  int nav_count;     /* number of nav records read or written so far */
-  int comment_count; /* number of comments read or written so far */
-  int pings_avg;     /* number of pings currently averaged */
-  int pings_read;    /* number of pings read this binning cycle */
-  int error_save;    /* saves time gap error to end of binning */
+  int ping_count;    /**< number of pings read or written so far */
+  int nav_count;     /**< number of nav records read or written so far */
+  int comment_count; /**< number of comments read or written so far */
+  int pings_avg;     /**< number of pings currently averaged */
+  int pings_read;    /**< number of pings read this binning cycle */
+  int error_save;    /**< saves time gap error to end of binning */
   double last_time_d;
   double last_lon;
   double last_lat;
@@ -582,10 +586,10 @@ struct mb_io_struct {
   double new_lat;
   double new_speed;
   double new_heading;
-  int new_beams_bath; /* number of bathymetry beams */
-  int new_beams_amp;  /* number of amplitude beams
+  int new_beams_bath; /**< number of bathymetry beams */
+  int new_beams_amp;  /**< number of amplitude beams
                   - either 0 or = beams_bath */
-  int new_pixels_ss;  /* number of sidescan pixels */
+  int new_pixels_ss;  /**< number of sidescan pixels */
   char *new_beamflag;
   double *new_bath;
   double *new_amp;
@@ -698,11 +702,15 @@ struct mb_io_struct {
   int (*mb_io_store_alloc)(int verbose, void *mbio_ptr, void **store_ptr, int *error);
   int (*mb_io_store_free)(int verbose, void *mbio_ptr, void **store_ptr, int *error);
 
-  /* function pointers for reading and writing records */
+  /** @name function pointers for reading and writing records */
+  ///@{
   int (*mb_io_read_ping)(int verbose, void *mbio_ptr, void *store_ptr, int *error);
   int (*mb_io_write_ping)(int verbose, void *mbio_ptr, void *store_ptr, int *error);
+  ///@}
 
-  /* function pointers for extracting and inserting data */
+  
+  /** @name function pointers for extracting and inserting data */
+  ///@{
   int (*mb_io_dimensions)(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbath, int *namp, int *nss, int *error);
   int (*mb_io_pingnumber)(int verbose, void *mbio_ptr, unsigned int *pingnumber, int *error);
   int (*mb_io_segynumber)(int verbose, void *mbio_ptr, unsigned int *line, unsigned int *shot, unsigned int *cdp, int *error);
@@ -764,16 +772,20 @@ struct mb_io_struct {
                                 double *sensor1, double *sensor2, double *sensor3, double *sensor4, double *sensor5,
                                 double *sensor6, double *sensor7, double *sensor8, int *error);
   int (*mb_io_copyrecord)(int verbose, void *mbio_ptr, void *store_ptr, void *copy_ptr, int *error);
-
-    /* function pointers used by mbpreprocess to fix timestamps */
-    int (*mb_io_indextablefix)(int verbose, void *mbio_ptr, int num_indextable, void *indextable_ptr, int *error);
+  ///@}
+  
+  /** @name function pointers used by mbpreprocess to fix timestamps */
+  ///@{
+  int (*mb_io_indextablefix)(int verbose, void *mbio_ptr, int num_indextable, void *indextable_ptr, int *error);
     int (*mb_io_indextableapply)(int verbose, void *mbio_ptr, int num_indextable, void *indextable_ptr, int n_file, int *error);
-
-  /* function pointers for reading from application defined input */
+  ///@}
+  
+  /** @name function pointers for reading from application defined input */
+  ///@{
   int (*mb_io_input_open)(int verbose, void *mbio_ptr, char *definition, int *error);
   int (*mb_io_input_read)(int verbose, void *mbio_ptr, size_t *size, char *buffer, int *error);
   int (*mb_io_input_close)(int verbose, void *mbio_ptr, int *error);
-
+  ///@}
 };
 
 /** MBIO buffer control structure */
@@ -783,8 +795,9 @@ struct mb_buffer_struct {
   int nbuffer;
 };
 
-/** MBIO datalist control structure */
 #define MB_DATALIST_RECURSION_MAX 25
+
+/** MBIO datalist control structure */
 struct mb_datalist_struct {
   bool open;
   int recursion;
@@ -798,8 +811,9 @@ struct mb_datalist_struct {
   struct mb_datalist_struct *datalist;
 };
 
-/** MBIO imagelist control structure */
 #define MB_IMAGELIST_RECURSION_MAX 25
+
+/** MBIO imagelist control structure */
 struct mb_imagelist_struct {
   int open;
   int recursion;
