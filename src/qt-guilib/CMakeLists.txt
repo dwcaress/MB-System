@@ -19,6 +19,7 @@ set(src
     MBQuickView.cpp
     QVtkItem.cpp
     GmtGridReader.cpp
+    SwathReader.cpp    
     MBQuickItem.cpp
     QVtkRenderer.cpp
     GmtGridSurface.cpp
@@ -36,6 +37,7 @@ add_library(MBGui
 target_include_directories(MBGui
                            PUBLIC
                            .
+                           ${MB_HOME}/src/mbio
 			   ${OPENGL_INCLUDE_DIR}
                            ${GMT_INCLUDE_DIR}
                            ${VTK_INCLUDE_DIR}
