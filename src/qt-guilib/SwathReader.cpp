@@ -21,7 +21,6 @@ using namespace mb_system;
 SwathReader::SwathReader() :
   fileName_(nullptr) {
   swathFormat_ = MB_SYS_NONE;
-  swathData_ = nullptr;
   mbioPtr_ = nullptr;
   
   points_ = vtkSmartPointer<vtkPoints>::New();
@@ -141,7 +140,7 @@ int SwathReader::RequestData(vtkInformation* request,
 }
 
 
-SwathData *SwathReader::readSwathFile(const char *swathFile) {
+bool SwathReader::readSwathFile(const char *swathFile) {
   
   fprintf(stderr, "readSwathFile(): swathFile: %s\n", swathFile);
   // Check for file existence and readability
@@ -151,12 +150,12 @@ SwathData *SwathReader::readSwathFile(const char *swathFile) {
       || (fileStatus.st_mode & S_IFMT) == S_IFDIR
       || fileStatus.st_size <= 0) {
     std::cerr << "Can not read \"" << swathFile << "\"" << std::endl;
-    return nullptr;
+    return false;
   }
 
   fprintf(stderr, "swathFile now: %s\n", swathFile);
   int error;
-  int verbose = 2;
+  int verbose = 1;
     
   int format;
     
@@ -166,7 +165,7 @@ SwathData *SwathReader::readSwathFile(const char *swathFile) {
                     &error) != MB_SUCCESS) {
     std::cerr << "Can't determine data format of \"" << swathFile << "\""
               << std::endl;      
-    return nullptr;
+    return false;
   }
 
   std::cout << "set variables" << std::endl;
@@ -193,9 +192,9 @@ SwathData *SwathReader::readSwathFile(const char *swathFile) {
       std::cerr << "mb_close() failed with error " << error 
                 << std::endl;
 
-      return nullptr;
+      return false;
     }
-    swathData_ = nullptr;
+    mbioPtr_ = nullptr;
   }
     
   // Initialize read
@@ -207,10 +206,8 @@ SwathData *SwathReader::readSwathFile(const char *swathFile) {
     std::cerr << "mb_read_init() failed with error " << error 
               << std::endl;
 
-    return nullptr;      
+    return false;
   }
-    
-  printf("swathData_: %p\n", swathData_);
     
   // Register/allocate arrays
   double *bathLon, *bathLat, *ampLon, *ampLat, *ssLon, *ssLat;
@@ -221,7 +218,7 @@ SwathData *SwathReader::readSwathFile(const char *swathFile) {
     std::cerr << "registerArrays() failed with error " << error 
               << std::endl;
 
-    return nullptr;      
+    return false;
   }
     
   // Read data
@@ -238,14 +235,19 @@ SwathData *SwathReader::readSwathFile(const char *swathFile) {
                          sideScan_, sideScanLon_, sideScanLat_,
                          comment, &error);
   }
-  std::cout << "mb_read() ended with error " << error << std::endl;
+  if (error == MB_ERROR_EOF) {
+    std::cout << "At EOF" << std::endl;
+  }
+  else {
+    std::cout << "mb_read() ended with error " << error << std::endl;
+  }
   
   std::cout << "call mb_close()" << std::endl;
   mb_close(verbose, &mbioPtr_, &error);
 
 
-  printf("return swathData_: %p\n", swathData_);
-  return swathData_;
+  // Success
+  return true;
 }
 
 

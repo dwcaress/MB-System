@@ -52,8 +52,8 @@ namespace mb_system {
 		float *zMin, float *zMax);
 
     /// Read data from file.
-    /// @return Returns nullptr on error, else returns pointer to data
-    SwathData *readSwathFile(const char *file);
+    /// @return false on error, else true
+    bool readSwathFile(const char *file);
 
     
   protected:
@@ -81,9 +81,6 @@ namespace mb_system {
     
     /// Name of data file
     char *fileName_;
-
-    /// Swath data
-    SwathData *swathData_;
 
     /// Format code of latest swath data file read
     int swathFormat_;
