@@ -19,6 +19,13 @@ public:
     mb_system::SwathReader *reader =
       vtkSmartPointer<mb_system::SwathReader>::New();
 
+    const char *datafile =
+      "/home/oreilly/projects/mb-system/testData/test.mb88";
+
+    cerr << "read " << datafile << endl;
+    bool success = reader->readSwathFile(datafile);
+    TSM_ASSERT("reader->read()", success);
+    
     cerr << "return from testReadSwath()" << endl;
   }
   
