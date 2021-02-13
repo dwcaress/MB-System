@@ -14,8 +14,6 @@
 
 namespace mb_system {
 
-  typedef unsigned char SwathData;
-  
   /**
      SwathReader reads raw data stored in a file format that is supported
      by MB-System, and outputs the data into a vtkPoints (vertices) and 
@@ -32,7 +30,7 @@ namespace mb_system {
     static SwathReader *New() {
       return new SwathReader();
     }
-  
+
     /// Set swath file name
     virtual void SetFileName(
                              const char *fileName ///< [in] swath file name
@@ -41,12 +39,11 @@ namespace mb_system {
     /// Return pointer to swathPoints
     vtkPoints *swathPoints() { return points_; }
 
-    /** Get span of z values
-     */
+    /// Get span of z values
     void zBounds(float *zMin, ///< [out] minimum z value
                  float *zMax  ///< [out] maximum z value
                  );
-
+    
     /// Get span of x, y, and z values
     void bounds(float *xMin, float *xMax, float *yMin, float *yMax,
 		float *zMin, float *zMax);
@@ -55,9 +52,14 @@ namespace mb_system {
     /// @return false on error, else true
     bool readSwathFile(const char *file);
 
-    
-  protected:
+    /// Normally PRIVATE, but TESTING HERE
+    /// Constructor - publicly accessed with New()
+    SwathReader();
   
+    /// Destructor - should be protected, accessed with Delete()
+    ~SwathReader(); ///// TEST TEST TESToverride;    
+  protected:
+
     /// Callback registered with the VariableArraySelection.
     static void SelectionModifiedCallback(vtkObject* caller, unsigned long eid,
 					  void* clientdata, void* calldata);
@@ -74,7 +76,7 @@ namespace mb_system {
     /// errors by calling vtkAlgorithm::GetErrorCode().
     int RequestData(vtkInformation* request, vtkInformationVector** inputVector,
 		    vtkInformationVector* outputVector) override;
-
+    
     /// Register arrays to be filled and handled by mbio
     /// library functions
     bool registerArrays(int verbose, int *error);
@@ -92,7 +94,8 @@ namespace mb_system {
     void *mbioPtr_;
 
     // Arrays allocated and filled by mbio library functions
-    
+    // NOTE: Important to initialize these pointers to NULL before
+    // calling registerArrays()
     char *beamFlags_;
     double *bathymetry_;
     double *sideScan_;
@@ -101,21 +104,23 @@ namespace mb_system {
     double *sideScanLat_;
     double *sideScanLon_;
     double *amplitude_;
+
+    /// Minimum bathymetry value in dataset
+    double zMin_;
     
-
+    /// Maximum bathymetry value in dataset
+    double zMax_;
+    
   private:
-  
-    /// Constructor - publicly accessed with New()
-    SwathReader();
-  
-    /// Destructor - should be protected, accessed with Delete()
-    ~SwathReader() override;
 
+    // Private constructor and destructor
 
     SwathReader(const SwathReader&) = delete;
     void operator=(const SwathReader&) = delete;
-  };
-}
+  
+
+  }; 
+};
 
 #endif
 

@@ -15,14 +15,19 @@
 
 #define VTK_CREATE(type, name) vtkSmartPointer<type> name = vtkSmartPointer<type>::New()
 
-
 using namespace mb_system;
 
 SwathReader::SwathReader() :
   fileName_(nullptr) {
+
+  std::cout << "SwathReader ctr" << std::endl;
   swathFormat_ = MB_SYS_NONE;
   mbioPtr_ = nullptr;
-  
+  beamFlags_ = nullptr;
+  bathymetry_ = bathymetryLat_ = bathymetryLon_ = nullptr;
+  sideScan_ = sideScanLat_ = sideScanLon_ = nullptr;
+  amplitude_ = nullptr;
+
   points_ = vtkSmartPointer<vtkPoints>::New();
   points_->SetDataTypeToFloat();
   polygons_ = vtkSmartPointer<vtkCellArray>::New();  
@@ -36,7 +41,6 @@ SwathReader::SwathReader() :
 
 SwathReader::~SwathReader() {
 }
-
 
 
 
@@ -68,7 +72,9 @@ int SwathReader::RequestData(vtkInformation* request,
 
   std::cerr << "PREMATURE END to SwathReader::requestData()" << std::endl;
   return 0;  ///// TEST TEST TEST
+
   /* ***
+
   // Read grid file
   std::cerr << "SwathReader::RequestData() - readGridFile()" << std::endl;  
   void *gmtApi;
@@ -136,9 +142,11 @@ int SwathReader::RequestData(vtkInformation* request,
   polyOutput->SetPolys(polygons_);  
   std::cerr << "SwathReader::RequestData() - done" << std::endl;
   return 1;
-  *** */
-}
 
+*** */
+  std::cerr << "RequestData() - bunch of stuff commented out!" << std::endl;
+  return 1;
+}
 
 bool SwathReader::readSwathFile(const char *swathFile) {
   
@@ -157,11 +165,11 @@ bool SwathReader::readSwathFile(const char *swathFile) {
   int error;
   int verbose = 1;
     
-  int format;
+  int swathFormat;
     
   // Determine sonar data format from filename
   std::cout << "call mg_get_format()" << std::endl;
-  if (mb_get_format(verbose, (char *)swathFile, nullptr, &format,
+  if (mb_get_format(verbose, (char *)swathFile, nullptr, &swathFormat,
                     &error) != MB_SUCCESS) {
     std::cerr << "Can't determine data format of \"" << swathFile << "\""
               << std::endl;      
@@ -169,8 +177,9 @@ bool SwathReader::readSwathFile(const char *swathFile) {
   }
 
   std::cout << "set variables" << std::endl;
-    
-  swathFormat_ = format;
+
+  
+  swathFormat_ = swathFormat;
 
   int pings = 1; // No ping averaging
   int lonRange = 0;  // -180 to +180
@@ -199,7 +208,7 @@ bool SwathReader::readSwathFile(const char *swathFile) {
     
   // Initialize read
   std::cout << "call mg_read_init()" << std::endl;    
-  if (mb_read_init(verbose, (char *)swathFile, format, pings, lonRange,
+  if (mb_read_init(verbose, (char *)swathFile, swathFormat, pings, lonRange,
                    areaBounds, beginTime, endTime, minSpeed, timeGap,
                    &mbioPtr_, &beginEpochSec, &endEpochSec, &maxBathBeams,
                    &maxAmpBeams, &maxSSPixels, &error) != MB_SUCCESS) {
@@ -210,8 +219,6 @@ bool SwathReader::readSwathFile(const char *swathFile) {
   }
     
   // Register/allocate arrays
-  double *bathLon, *bathLat, *ampLon, *ampLat, *ssLon, *ssLat;
-    
   std::cout << "call registerArray()s" << std::endl;    
   if (!registerArrays(verbose, &error)) {
 
@@ -220,7 +227,10 @@ bool SwathReader::readSwathFile(const char *swathFile) {
 
     return false;
   }
-    
+
+  zMin_ = std::numeric_limits<double>::max();
+  zMax_ = std::numeric_limits<double>::lowest();
+  
   // Read data
   char comment[MB_COMMENT_MAXLINE];
   int recordType, nBath, nAmp, nSS;
@@ -234,6 +244,24 @@ bool SwathReader::readSwathFile(const char *swathFile) {
                          amplitude_, bathymetryLon_, bathymetryLat_,
                          sideScan_, sideScanLon_, sideScanLat_,
                          comment, &error);
+
+    if (verbose > 1) {
+    std::cout << "recordType: " << recordType
+              << " nBath: " << nBath << std::endl;
+    }
+//    if (recordType == ***) {
+      for (int i = 0; i < nBath; i++) {
+        if (bathymetry_[i] < zMin_) {
+          zMin_ = bathymetry_[i];
+          std::cout << "new zMin: " << zMin_ << std::endl;
+        }
+        if (bathymetry_[i] > zMax_) {
+          zMax_ = bathymetry_[i];
+          std::cout << "new zMax: " << zMax_ << std::endl;          
+        }
+      }
+//    }
+    
   }
   if (error == MB_ERROR_EOF) {
     std::cout << "At EOF" << std::endl;
@@ -260,19 +288,20 @@ void SwathReader::SetFileName(const char *fileName) {
 }
 
 
-void SwathReader::SelectionModifiedCallback(vtkObject*, unsigned long, void* clientdata, void*)
+void SwathReader::SelectionModifiedCallback(vtkObject*, unsigned long,
+                                            void* clientdata, void*)
 {
   static_cast<SwathReader*>(clientdata)->Modified();
 }
 
 
+void SwathReader::zBounds(float *zMin, float *zMax) {
+  *zMin = zMin_;
+  *zMax = zMax_;
+}
+
+
 /* ***
-   void SwathReader::zBounds(float *zMin, float *zMax) {
-   *zMin = gmtGrid_->header->z_min;
-   *zMax = gmtGrid_->header->z_max;
-   }
-
-
    void SwathReader::bounds(float *xMin, float *xMax,
    float *yMin, float *yMax,
    float *zMin, float *zMax) {
@@ -299,27 +328,37 @@ void SwathReader::SelectionModifiedCallback(vtkObject*, unsigned long, void* cli
 bool SwathReader::registerArrays(int verbose, int *error) {
   int status = MB_SUCCESS;
 
+  std::cerr << "register beamFlags" << std::endl;
   mb_register_array(verbose, mbioPtr_, MB_MEM_TYPE_BATHYMETRY,
                     sizeof(char), (void **)&beamFlags_, error);
-  
+
+  std::cerr << "register bathymetry" << std::endl;  
   mb_register_array(verbose, mbioPtr_, MB_MEM_TYPE_BATHYMETRY,
                     sizeof(double), (void **)&bathymetry_, error);
 
+  std::cerr << "register bathymetryLat" << std::endl;  
   mb_register_array(verbose, mbioPtr_, MB_MEM_TYPE_BATHYMETRY,
                     sizeof(double), (void **)&bathymetryLat_, error);
 
+  std::cerr << "register bathymetryLon" << std::endl;    
   mb_register_array(verbose, mbioPtr_, MB_MEM_TYPE_BATHYMETRY,
                     sizeof(double), (void **)&bathymetryLon_, error);    
 
+  std::cerr << "register amplitude" << std::endl;      
   mb_register_array(verbose, mbioPtr_, MB_MEM_TYPE_AMPLITUDE,
                     sizeof(double), (void **)&amplitude_, error);  
 
+  std::cerr << "register sidescan" << std::endl;    
   mb_register_array(verbose, mbioPtr_, MB_MEM_TYPE_SIDESCAN,
                     sizeof(double), (void **)&sideScan_, error);
 
+  std::cerr << "register sidescanLat" << std::endl;
+  // fprintf(stderr, "register sideScanLat_ = %p\n", sideScanLat_);
+  sideScanLat_ = nullptr;
   mb_register_array(verbose, mbioPtr_, MB_MEM_TYPE_SIDESCAN,
                     sizeof(double), (void **)&sideScanLat_, error);
-  
+
+    std::cerr << "register sidescanLon" << std::endl;      
   mb_register_array(verbose, mbioPtr_, MB_MEM_TYPE_SIDESCAN,
                     sizeof(double), (void **)&sideScanLon_, error);
 
@@ -328,5 +367,6 @@ bool SwathReader::registerArrays(int verbose, int *error) {
     return false;
   }
 
+  std::cout << "Return from registerArrays(), no errors" << std::endl;
   return true;
 }
