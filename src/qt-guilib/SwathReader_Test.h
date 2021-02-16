@@ -28,6 +28,7 @@ public:
     mb_system::SwathReader *reader =
       vtkSmartPointer<mb_system::SwathReader>::New();
 
+    // In case constructor is public...
     // mb_system::SwathReader *reader = new mb_system::SwathReader();
     
     const char *datafile =
