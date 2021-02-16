@@ -53,7 +53,7 @@ directory to mount as `/opt/MBSWorkDir` in the container.
 
 > The launcher script will automatically download the image if not already
 > available locally, but you can get it beforehand with an explicit
-> `git pull` command, for example:
+> `docker pull` command, for example:
 >
 >       $ docker pull mbari/mbsystem:5.7.6beta37
 >       5.7.6beta37: Pulling from mbari/mbsystem
