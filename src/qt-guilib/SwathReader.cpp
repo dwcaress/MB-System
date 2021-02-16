@@ -230,6 +230,10 @@ bool SwathReader::readSwathFile(const char *swathFile) {
 
   zMin_ = std::numeric_limits<double>::max();
   zMax_ = std::numeric_limits<double>::lowest();
+  latMin_ = std::numeric_limits<double>::max();
+  latMax_ = std::numeric_limits<double>::lowest();
+  lonMin_ = std::numeric_limits<double>::max();
+  lonMax_ = std::numeric_limits<double>::lowest();
   
   // Read data
   char comment[MB_COMMENT_MAXLINE];
@@ -245,31 +249,66 @@ bool SwathReader::readSwathFile(const char *swathFile) {
                          sideScan_, sideScanLon_, sideScanLat_,
                          comment, &error);
 
-    if (verbose > 1) {
-    std::cout << "recordType: " << recordType
-              << " nBath: " << nBath << std::endl;
+
+    if (error == MB_ERROR_EOF) {
+      std::cout << "At EOF" << std::endl;
+      break;
     }
-//    if (recordType == ***) {
+    else {
+      std::cout << "mb_read(): error " << error << std::endl;
+    }
+  
+    if (verbose > 0) {
+      std::cout << "recordType: " << recordType << " (" <<
+        recordTypeMnem(recordType) << ") nBath: " << nBath << std::endl;
+    }
+
+    if (recordType == MB_DATA_DATA) {
+      // Survey data record
       for (int i = 0; i < nBath; i++) {
+
+        if (bathymetryLat_[i] < latMin_) {
+          latMin_ = bathymetryLat_[i];
+          std::cout << "new latMin: " << latMin_ << std::endl;
+        }
+        
+        if (bathymetryLat_[i] > latMax_) {
+          latMax_ = bathymetryLat_[i];
+          std::cout << "new latMax: " << latMax_ << std::endl;          
+        }
+
+        if (bathymetryLon_[i] < lonMin_) {
+          lonMin_ = bathymetryLon_[i];
+          std::cout << "new lonMin: " << lonMin_ << std::endl;
+        }
+        
+        if (bathymetryLon_[i] > lonMax_) {
+          lonMax_ = bathymetryLon_[i];
+          std::cout << "new lonMax: " << lonMax_ << std::endl;          
+        }        
+        
         if (bathymetry_[i] < zMin_) {
           zMin_ = bathymetry_[i];
           std::cout << "new zMin: " << zMin_ << std::endl;
         }
+        
         if (bathymetry_[i] > zMax_) {
           zMax_ = bathymetry_[i];
           std::cout << "new zMax: " << zMax_ << std::endl;          
         }
+        
       }
-//    }
-    
+    }
   }
-  if (error == MB_ERROR_EOF) {
-    std::cout << "At EOF" << std::endl;
-  }
-  else {
-    std::cout << "mb_read() ended with error " << error << std::endl;
-  }
+
+  double xMin, xMax, yMin, yMax, zMin, zMax;
+  bounds(&xMin, &xMax, &yMin, &yMax, &zMin, &zMax);
+
+  std::cout << "xMin: " << xMin << ", xMax: " << xMax << std::endl;
+  std::cout << "yMin: " << yMin << ", yMax: " << yMax << std::endl;
+  std::cout << "zMin: " << zMin << ", zMax: " << zMax << std::endl;
   
+  // Deallocate registered arrays, release resources
   std::cout << "call mb_close()" << std::endl;
   mb_close(verbose, &mbioPtr_, &error);
 
@@ -295,24 +334,25 @@ void SwathReader::SelectionModifiedCallback(vtkObject*, unsigned long,
 }
 
 
-void SwathReader::zBounds(float *zMin, float *zMax) {
+void SwathReader::zBounds(double *zMin, double *zMax) {
   *zMin = zMin_;
   *zMax = zMax_;
 }
 
 
-/* ***
-   void SwathReader::bounds(float *xMin, float *xMax,
-   float *yMin, float *yMax,
-   float *zMin, float *zMax) {
-   *xMin = gmtGrid_->header->wesn[0];
-   *xMax = gmtGrid_->header->wesn[1];
-   *yMin = gmtGrid_->header->wesn[2];
-   *yMax = gmtGrid_->header->wesn[3];
-   *zMin = gmtGrid_->header->z_min;
-   *zMax = gmtGrid_->header->z_max;
-   }
 
+void SwathReader::bounds(double *xMin, double *xMax,
+                         double *yMin, double *yMax,
+                         double *zMin, double *zMax) {
+  *xMin = lonMin_;
+  *xMax = lonMax_;
+  *yMin = latMin_;
+  *yMax = latMax_;
+  *zMin = zMin_;
+  *zMax = zMax_;
+}
+
+/* ***
    vtkIdType SwathReader::gridOffset(unsigned nRows, unsigned nCols, unsigned row, unsigned col) {
    if (row >= nRows || col >= nCols) { 
    // Out of bounds

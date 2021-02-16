@@ -40,13 +40,13 @@ namespace mb_system {
     vtkPoints *swathPoints() { return points_; }
 
     /// Get span of z values
-    void zBounds(float *zMin, ///< [out] minimum z value
-                 float *zMax  ///< [out] maximum z value
+    void zBounds(double *zMin, ///< [out] minimum z value
+                 double *zMax  ///< [out] maximum z value
                  );
     
     /// Get span of x, y, and z values
-    void bounds(float *xMin, float *xMax, float *yMin, float *yMax,
-		float *zMin, float *zMax);
+    void bounds(double *xMin, double *xMax, double *yMin, double *yMax,
+		double *zMin, double *zMax);
 
     /// Read data from file.
     /// @return false on error, else true
@@ -54,10 +54,11 @@ namespace mb_system {
 
     /// Normally PRIVATE, but TESTING HERE
     /// Constructor - publicly accessed with New()
-    SwathReader();
+    /// SwathReader();
   
     /// Destructor - should be protected, accessed with Delete()
-    ~SwathReader(); ///// TEST TEST TESToverride;    
+    /// ~SwathReader(); ///// TEST TEST TESToverride;
+    
   protected:
 
     /// Callback registered with the VariableArraySelection.
@@ -105,15 +106,55 @@ namespace mb_system {
     double *sideScanLon_;
     double *amplitude_;
 
+    /// Minimum latitude value in dataset
+    double latMin_;
+
+    /// Maximum latitude value in dataset
+    double latMax_;
+
+    /// Minimum longitude value in dataset
+    double lonMin_;
+
+    /// Maximum longitude value in dataset
+    double lonMax_;
+    
     /// Minimum bathymetry value in dataset
     double zMin_;
     
     /// Maximum bathymetry value in dataset
     double zMax_;
+
+    /// Return mnemonic for specified record type
+    static const char *recordTypeMnem(int type) {
+      switch (type) {
+      case 1:
+        return "survey";
+        break;
+
+      case 2:
+        return "comment";
+        break;
+
+      case 12:
+        return "nav";
+        break;
+        
+      default:
+        return "unknown";
+        
+      }
+    }
     
   private:
 
     // Private constructor and destructor
+
+    /// Normally PRIVATE, but TESTING HERE
+    /// Constructor - publicly accessed with New()
+    SwathReader();
+  
+    /// Destructor - should be protected, accessed with Delete()
+    ~SwathReader(); ///// TEST TEST TESToverride;
 
     SwathReader(const SwathReader&) = delete;
     void operator=(const SwathReader&) = delete;
