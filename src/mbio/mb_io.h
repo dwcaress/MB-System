@@ -575,7 +575,8 @@ struct mb_io_struct {
   double *ss_alongtrack;
   int *ss_num;
 
-  /* current ping variables */
+  /** @name current ping variables */
+  ///@{
   int need_new_ping;
   int new_kind;
   int new_error;
@@ -598,7 +599,8 @@ struct mb_io_struct {
   double *new_ss;
   double *new_ss_acrosstrack;
   double *new_ss_alongtrack;
-
+  ///@}
+  
   /* variables for projections to and from projected coordinates */
   int projection_initialized;  // TODO(schwehr): bool
   char projection_id[MB_NAME_LENGTH];

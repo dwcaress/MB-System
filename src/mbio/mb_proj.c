@@ -11,7 +11,7 @@
  *
  *    See README file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
-/*
+/** @file
  * mb_proj.c includes the "mb_" functions used to initialize
  * projections, and then to do forward (mb_proj_forward())
  * and inverse (mb_proj_inverse()) projections

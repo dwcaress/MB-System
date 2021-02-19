@@ -244,7 +244,7 @@ typedef enum {
 /** Get MB-System version details
 @return always returns MB_SUCCESS
 */
-int mb_version(int verbose, ///< [in] 1=verbose
+int mb_version(int verbose, ///< [in] 1=brief 2=debug
                char *version_string, ///< [out] PACKAGE_VERSION 
                int *version_id, ///<  [out] integer represent. of PACKAGE_VERSION
                int *version_major, ///< [out] major version# parsed from version_id
@@ -281,7 +281,7 @@ int mb_fbtversion(int verbose, int *fbtversion);
 Determine if lockfiles will be used based on $HOME/.mbio_defaults
 @return always return MB_SUCCESS
 */
-int mb_uselockfiles(int verbose,      ///< [in] non-zero->verbose mode
+int mb_uselockfiles(int verbose,      ///< [in] 1=brief 2=debug
                     int *uselockfiles ///< [out] non-zero = true (dflt)
                     );
 
@@ -293,7 +293,7 @@ roughly to a one megabyte buffer. fileiobuffer value of zero indicates that
 default block size will be used.
 @return always returns MB_SUCCESS
 */
-int mb_fileiobuffer(int verbose, ///< [in] non-zero->verbose- mode
+int mb_fileiobuffer(int verbose, ///< [in] 1=brief 2=debug
                     int *fileiobuffer ///< [out] i/o block size in KBytes
                     );
 
@@ -303,7 +303,7 @@ function pointers to read and allocate buffers for specified format.
 This function modifies some input values of format before setting in mbio_struct_ptr. 
 @return MB_SUCCESS or MB_FAILURE on error
 */
-int mb_format_register(int verbose, ///<[in] non-zero->verbose mode
+int mb_format_register(int verbose, ///<[in] 1=brief 2=debug
                        int *format, ///<[in,out] format code
                        void *mbio_ptr, ///<[in] mbio_struct_ptr
                        int *error ///< MB_SUCCESS or MB_ERROR_BAD_FORMAT
@@ -312,7 +312,7 @@ int mb_format_register(int verbose, ///<[in] non-zero->verbose mode
 /**
    Get details of specified data format
 */
-int mb_format_info(int verbose,
+  int mb_format_info(int verbose, ///<[in] 1=brief 2=debug
                    int *format,
                    int *system,
                    int *beams_bath_max,
@@ -352,9 +352,9 @@ int mb_format_beamwidth(int verbose, int *format, double *beamwidth_xtrack, doub
 /**
    Get file's data format based on filename conventions 
 */
-int mb_get_format(int verbose,
+  int mb_get_format(int verbose, ///<[in] 1=brief 2=debug
                   char *filename,  ///< [in] data file name
-                  char *fileroot,  ///< [in,out] if input not null, filename not including extension
+                  char *fileroot,  ///< [in,out] if input not null, output filename not including extension
                   int *format,  ///< [out] Inferred data format
                   int *error    ///< [out] MB_ERROR_BAD_FORMAT if returns MB_FAILURE
                   );
@@ -395,22 +395,23 @@ int mb_swathbounds(int verbose, int checkgood, int nbath, int nss,
  @return MB_SUCCESS or MB_FAILURE
 */      
 int mb_read_init(int verbose, 
-                 char *file,   ///< [in] data file name
-                 int format,
-                 int pings,
-                 int lonflip,
-                 double bounds[4],
-                 int btime_i[7],
-                 int etime_i[7],
-                 double speedmin,
-                 double timegap,
-                 void **mbio_ptr,
-                 double *btime_d,
-                 double *etime_d,
-                 int *beams_bath,
-                 int *beams_amp,
-                 int *pixels_ss,
-                 int *error);
+                 char *file,   ///<[in] data file name
+                 int format,   ///<[in] data format
+                 int pings,    ///<[in] ping averaging
+                 int lonflip,  ///<[in] longitude range
+                 double bounds[4], ///<[in] minlon,maxlon,minlat,maxlat window
+                 int btime_i[7],   ///<[in] time window begin y m h min sec usec
+                 int etime_i[7],   ///<[in] time window end y m h min sec usec
+                 double speedmin,  ///<[in] min ship speed
+                 double timegap,   ///<[in] min time interval to declare data gap
+                 void **mbio_ptr, ///<[out] pointer to MBIO descriptor structure
+                 double *btime_d, ///<[out] time window begin epoch sec
+                 double *etime_d, ///<[out] time window end epoch sec
+                 int *beams_bath, ///<[out] max bathymetry beams
+                 int *beams_amp, ///<[out] max amplitude beams
+                 int *pixels_ss, ///<[out] max sidescan pixels
+                 int *error ///<[out] error code
+                 );
 
   int mb_input_init(int verbose, char *socket_definition, int format, int pings,
                   int lonflip, double bounds[4], int btime_i[7], int etime_i[7],
@@ -451,32 +452,33 @@ int mb_get(int verbose, void *mbio_ptr, int *kind, int *pings, int time_i[7], do
  which has been initialized by mb_read_init(). Crosstrack distances
  are mapped into lon and lat.
 */
-int mb_read(int verbose,
-            void *mbio_ptr,
-            int *kind,
-            int *pings,
-            int time_i[7],
-            double *time_d,
-            double *navlon,
-            double *navlat,
-            double *speed,
-            double *heading,
-            double *distance,
-            double *altitude,
-            double *sonardepth,
-            int *nbath,
-            int *namp,
-            int *nss,
-            char *beamflag,
-            double *bath,
-            double *amp,
-            double *bathlon,
-            double *bathlat,
-            double *ss,
-            double *sslon,
-            double *sslat,
-            char *comment,
-            int *error);
+  int mb_read(int verbose, ///<[in] verbosity
+            void *mbio_ptr, ///<[in,out] pointer to MB IO structure
+            int *kind,  ///<[out] record type
+            int *pings, ///<[out] #pings averaged to give current data
+            int time_i[7], ///<[out] time of current ping in y/m/d hh mm ss us format
+            double *time_d, ///<[out] time of current ping in epoch seconds
+            double *navlon, ///<[out] pinger longitude
+            double *navlat, ///<[out] pinger latitude
+            double *speed, ///<[out] ship speed
+            double *heading, ///<[out] ship heading (deg)
+            double *distance, ///<[out] distance along track since prev ping (km)
+            double *altitude, ///<[out] pinger altitude (m)
+            double *sonardepth, ///<[out] pinger depth (m)
+            int *nbath, ///<[out] #bathymetry values
+            int *namp, ///<[out] #amplitude values
+            int *nss, ///<[out] #sidescan values
+            char *beamflag, ///<[out] bathymetry flags for each value
+            double *bath, ///<[out] bathymetry values
+            double *amp, ///<[out] amplitude values
+            double *bathlon, ///<[out] longitudes of bathymetry values
+            double *bathlat, ///<[out] latitudes of bathymetry values
+            double *ss, ///<[out] side-scan values
+            double *sslon, ///<[out] longitudes of side-scan values
+            double *sslat, ///<[out] latitudes of side-scan values
+            char *comment, ///<[out] comment
+            int *error ///<[out] error value
+            );
 
   
 int mb_write_ping(int verbose, void *mbio_ptr, void *store_ptr, int *error);
@@ -748,7 +750,16 @@ int mb_freed(int verbose, const char *sourcefile, int sourceline, void **ptr, in
 int mb_memory_clear(int verbose, int *error);
 int mb_memory_status(int verbose, int *nalloc, int *nallocmax, int *overflow, size_t *allocsize, int *error);
 int mb_memory_list(int verbose, int *error);
-int mb_register_array(int verbose, void *mbio_ptr, int type, size_t size, void **handle, int *error);
+
+/** Allocate array to hold swath data */
+int mb_register_array(int verbose, ///<[in] 1=brief 2=debug
+                      void *mbio_ptr, ///<[in] pointer to MBIO structure
+                      int type, ///<[in] 1 (bathy beams) 2 (ampl beams) or 3 (ss pixels)
+                      size_t size, ///<[in] array element size in bytes
+                      void **handle, ///<[in,out] array address
+                      int *error ///<[out] error code
+                      );
+  
 int mb_update_arrays(int verbose, void *mbio_ptr, int nbath, int namp, int nss, int *error);
 int mb_update_arrayptr(int verbose, void *mbio_ptr, void **handle, int *error);
 int mb_list_arrays(int verbose, void *mbio_ptr, int *error);
