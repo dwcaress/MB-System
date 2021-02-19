@@ -1,5 +1,5 @@
 /*--------------------------------------------------------------------
- *    The MB-system:  mbgrid.c  5/2/94
+ *    The MB-system:  mbgrid.cc  5/2/94
  *
  *    Copyright (c) 1993-2020 by
  *    David W. Caress (caress@mbari.org)
@@ -11,8 +11,9 @@
  *
  *    See README file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
-/*
- * MBGRID is an utility used to grid bathymetry, amplitude, or
+/**
+  @file
+ * mbgrid is a utility used to grid bathymetry, amplitude, or
  * sidescan data contained in a set of swath sonar data files.
  * This program uses one of four algorithms (gaussian weighted mean,
  * median filter, minimum filter, maximum filter) to grid regions

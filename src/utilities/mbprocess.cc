@@ -11,7 +11,7 @@
  *
  *    See README file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
-/*
+/** @file
  * mbprocess is a tool for processing swath sonar bathymetry data.
  * This program performs a number of functions, including:
  *   - merging navigation
