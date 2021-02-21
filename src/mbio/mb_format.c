@@ -38,7 +38,7 @@
 #include "mbsys_simrad3.h"
 
 /* Alias table for old (pre-version 4.0) format id's */
-static int format_alias_table[] = {
+const int format_alias_table[] = {
     0,  /* NULL */
     11, /* MBF_SBSIOMRG */
     12, /* MBF_SBSIOCEN */

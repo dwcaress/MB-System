@@ -1216,8 +1216,6 @@ int mbr_bchrxunb_rd_bath32(int verbose, FILE *mbfp, struct mbf_bchrxunb_struct *
 }
 /*--------------------------------------------------------------------*/
 int mbr_bchrxunb_rd_data(int verbose, void *mbio_ptr, int *error) {
-	short int *type;
-	static char label[2];
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -1236,9 +1234,10 @@ int mbr_bchrxunb_rd_data(int verbose, void *mbio_ptr, int *error) {
 	/* set file position */
 	mb_io_ptr->file_pos = mb_io_ptr->file_bytes;
 
-	type = (short int *)label;
-	*error = MB_ERROR_NO_ERROR;
 	int status = MB_SUCCESS;
+	*error = MB_ERROR_NO_ERROR;
+	char label[2];
+	short int *type = (short int *)label;
 	bool done = false;
 	while (!done) {
 		/* get next record label */
@@ -1516,9 +1515,6 @@ int mbr_rt_bchrxunb(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_bchrxunb_wr_comment(int verbose, FILE *mbfp, void *data_ptr, int *error) {
-	char line[ELAC_COMMENT_SIZE + 3];
-	short int label;
-	int len;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -1537,7 +1533,8 @@ int mbr_bchrxunb_wr_comment(int verbose, FILE *mbfp, void *data_ptr, int *error)
 	}
 
 	/* write the record label */
-	label = ELAC_COMMENT;
+	char line[ELAC_COMMENT_SIZE + 3];
+	short int label = ELAC_COMMENT;
 #ifdef BYTESWAPPED
 	label = (short)mb_swap_short(label);
 #endif
@@ -1552,7 +1549,7 @@ int mbr_bchrxunb_wr_comment(int verbose, FILE *mbfp, void *data_ptr, int *error)
 	/* write out the data */
 	if (status == MB_SUCCESS) {
 		/* construct record */
-		len = strlen(data->comment);
+		int len = strlen(data->comment);
 		if (len > MBSYS_ELAC_COMMENT_LENGTH)
 			len = MBSYS_ELAC_COMMENT_LENGTH;
 		for (int i = 0; i < len; i++)
@@ -1587,9 +1584,6 @@ int mbr_bchrxunb_wr_comment(int verbose, FILE *mbfp, void *data_ptr, int *error)
 }
 /*--------------------------------------------------------------------*/
 int mbr_bchrxunb_wr_parameter(int verbose, FILE *mbfp, void *data_ptr, int *error) {
-	char line[ELAC_XPARAMETER_SIZE + 3];
-	short int label;
-	short int *short_ptr;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -1638,7 +1632,9 @@ int mbr_bchrxunb_wr_parameter(int verbose, FILE *mbfp, void *data_ptr, int *erro
 	}
 
 	/* write the record label */
-	label = ELAC_PARAMETER;
+	short int *short_ptr;
+	char line[ELAC_XPARAMETER_SIZE + 3];
+	short int label = ELAC_PARAMETER;
 #ifdef BYTESWAPPED
 	label = (short)mb_swap_short(label);
 #endif
@@ -1784,10 +1780,6 @@ int mbr_bchrxunb_wr_parameter(int verbose, FILE *mbfp, void *data_ptr, int *erro
 }
 /*--------------------------------------------------------------------*/
 int mbr_bchrxunb_wr_pos(int verbose, FILE *mbfp, void *data_ptr, int *error) {
-	char line[ELAC_POS_SIZE + 3];
-	short int label;
-	short int *short_ptr;
-	int *int_ptr;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -1824,7 +1816,10 @@ int mbr_bchrxunb_wr_pos(int verbose, FILE *mbfp, void *data_ptr, int *error) {
 	}
 
 	/* write the record label */
-	label = ELAC_POS;
+	short int *short_ptr;
+	int *int_ptr;
+	char line[ELAC_POS_SIZE + 3];
+	short int label = ELAC_POS;
 #ifdef BYTESWAPPED
 	label = (short)mb_swap_short(label);
 #endif
@@ -1914,11 +1909,6 @@ int mbr_bchrxunb_wr_pos(int verbose, FILE *mbfp, void *data_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_bchrxunb_wr_svp(int verbose, FILE *mbfp, void *data_ptr, int *error) {
-	char line[ELAC_SVP_SIZE + 3];
-	short int label;
-	short int *short_ptr;
-	short int *short_ptr2;
-	int *int_ptr;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -1949,7 +1939,11 @@ int mbr_bchrxunb_wr_svp(int verbose, FILE *mbfp, void *data_ptr, int *error) {
 	}
 
 	/* write the record label */
-	label = ELAC_SVP;
+	short int *short_ptr;
+	short int *short_ptr2;
+	int *int_ptr;
+	char line[ELAC_SVP_SIZE + 3];
+	short int label = ELAC_SVP;
 #ifdef BYTESWAPPED
 	label = (short)mb_swap_short(label);
 #endif
@@ -2028,12 +2022,6 @@ int mbr_bchrxunb_wr_svp(int verbose, FILE *mbfp, void *data_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_bchrxunb_wr_bath56(int verbose, FILE *mbfp, void *data_ptr, int *error) {
-	char line[ELAC_XBATH56_SIZE + 3];
-	char *profile;
-	char *beam;
-	short int label;
-	short int *short_ptr;
-	int *int_ptr;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -2086,7 +2074,12 @@ int mbr_bchrxunb_wr_bath56(int verbose, FILE *mbfp, void *data_ptr, int *error) 
 	}
 
 	/* write the record label */
-	label = ELAC_XBATH56;
+	short int *short_ptr;
+	int *int_ptr;
+	char *profile;
+	char *beam;
+	char line[ELAC_XBATH56_SIZE + 3];
+	short int label = ELAC_XBATH56;
 #ifdef BYTESWAPPED
 	label = (short)mb_swap_short(label);
 #endif
@@ -2212,12 +2205,6 @@ int mbr_bchrxunb_wr_bath56(int verbose, FILE *mbfp, void *data_ptr, int *error) 
 }
 /*--------------------------------------------------------------------*/
 int mbr_bchrxunb_wr_bath40(int verbose, FILE *mbfp, void *data_ptr, int *error) {
-	char line[ELAC_XBATH40_SIZE + 3];
-	char *profile;
-	char *beam;
-	short int label;
-	short int *short_ptr;
-	int *int_ptr;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -2270,7 +2257,12 @@ int mbr_bchrxunb_wr_bath40(int verbose, FILE *mbfp, void *data_ptr, int *error) 
 	}
 
 	/* write the record label */
-	label = ELAC_XBATH40;
+	short int *short_ptr;
+	int *int_ptr;
+	char *profile;
+	char *beam;
+	char line[ELAC_XBATH40_SIZE + 3];
+	short int label = ELAC_XBATH40;
 #ifdef BYTESWAPPED
 	label = (short)mb_swap_short(label);
 #endif
@@ -2396,12 +2388,6 @@ int mbr_bchrxunb_wr_bath40(int verbose, FILE *mbfp, void *data_ptr, int *error) 
 }
 /*--------------------------------------------------------------------*/
 int mbr_bchrxunb_wr_bath32(int verbose, FILE *mbfp, void *data_ptr, int *error) {
-	char line[ELAC_XBATH32_SIZE + 3];
-	char *profile;
-	char *beam;
-	short int label;
-	short int *short_ptr;
-	int *int_ptr;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -2454,7 +2440,12 @@ int mbr_bchrxunb_wr_bath32(int verbose, FILE *mbfp, void *data_ptr, int *error) 
 	}
 
 	/* write the record label */
-	label = ELAC_XBATH32;
+	short int *short_ptr;
+	int *int_ptr;
+	char *profile;
+	char *beam;
+	char line[ELAC_XBATH32_SIZE + 3];
+	short int label = ELAC_XBATH32;
 #ifdef BYTESWAPPED
 	label = (short)mb_swap_short(label);
 #endif

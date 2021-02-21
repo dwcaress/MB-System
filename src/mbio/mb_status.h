@@ -216,7 +216,7 @@
 
 /* MBIO function error messages */
 #ifdef DEFINE_MB_MESSAGES
-static char *fatal_error_msg[] = {"No error",
+const char *fatal_error_msg[] = {"No error",
                                   "Unable to allocate memory, initialization failed",
                                   "Unable to open file, initialization failed",
                                   "Illegal format identifier, initialization failed",
@@ -234,7 +234,7 @@ static char *fatal_error_msg[] = {"No error",
                                   "This data file is not in the specified format!",
                                   "Required data are missing",
                                   "Bad time value"};
-static char *nonfatal_error_msg[] = {
+const char *nonfatal_error_msg[] = {
     "No error",
     "Time gap in data",
     "Data outside specified location bounds",
@@ -262,10 +262,10 @@ static char *nonfatal_error_msg[] = {
     "Initialization failed",
     "Sidescan ignored",
 };
-static char *unknown_error_msg[] = {"Unknown error identifier"};
+const char *unknown_error_msg[] = {"Unknown error identifier"};
 
 /* MBIO function notice messages */
-static char *notice_msg[] = {
+const char *notice_msg[] = {
     "Unknown notice identifier",
 
     /* notices for data record types */
@@ -348,7 +348,7 @@ static char *notice_msg[] = {
     "DATA PROBLEM (ID=3): Instantaneous speed exceeds 25 km/hr", "DATA PROBLEM (ID=4): Average speed exceeds 25 km/hr",
     "DATA PROBLEM (ID=5): Sounding depth exceeds 11000 m", "DATA PROBLEM (ID=6): Unsupported datagram or record",
 };
-static char *unknown_notice_msg[] = {"Unknown notice identifier"};
+const char *unknown_notice_msg[] = {"Unknown notice identifier"};
 #endif
 
 /* MBIO sidescan types

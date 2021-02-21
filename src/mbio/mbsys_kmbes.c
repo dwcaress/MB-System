@@ -15,7 +15,7 @@
  * mbsys_kmbes.c contains the MBIO functions for handling data from
  * the following data formats:
  *    MBSYS_KMBES formats (code in mbsys_kmbes.c and mbsys_kmbes.h):
- *      MBF_TEMPFORM : MBIO ID ??? (code in mbr_kmbes.c)
+ *      MBF_KEMKMALL : MBIO ID 261 (code in mbr_kemkmall.c)
  *
  * Author:  D. W. Caress
  * Date:  May 25, 2018
@@ -40,25 +40,23 @@
 #ifdef _WIN32
 
 /* Based on https://stackoverflow.com/questions/5404277/porting-clock-gettime-to-windows */
+/* - modified to not use static variables for thread safety */
 #include <Windows.h>
 #define CLOCK_REALTIME 0
 #if defined(_MSC_VER) && (_MSC_VER <= 1800)
 struct timespec { long tv_sec; long tv_nsec; };
 #endif
-static bool g_first_time = 1;
 static LARGE_INTEGER g_counts_per_sec;
 
 int clock_gettime(int dummy, struct timespec *ct) {
-    if (g_first_time) {
-        g_first_time = 0;
-
-        if (0 == QueryPerformanceFrequency(&g_counts_per_sec)) {
-            g_counts_per_sec.QuadPart = 0;
-        }
+    LARGE_INTEGER g_counts_per_sec, count;
+    if (NULL == ct) {
+      return -1;
     }
-
-    LARGE_INTEGER count;
-    if ((NULL == ct) || (g_counts_per_sec.QuadPart <= 0) || (0 == QueryPerformanceCounter(&count))) {
+    if (0 == QueryPerformanceFrequency(&g_counts_per_sec) || g_counts_per_sec.QuadPart == 0) {
+      return = -1;
+    }
+    if (0 == QueryPerformanceCounter(&count)) {
         return -1;
     }
 

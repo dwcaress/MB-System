@@ -11,7 +11,7 @@
 <CENTER><H3><U>MB-System Unix Manual Page</U></H3></CENTER>
 <PRE>
 <H1>mbm_makedatalist</H1>
-Section:  MB-System 5.0  (1)<BR>Updated:  27 October 2020 <BR><A HREF="#index">Index</A>
+Section:  MB-System 5.0  (1)<BR>Updated:  3 January 2021 <BR><A HREF="#index">Index</A>
 <HR>
 
 <A NAME="lbAB">&nbsp;</A>
@@ -87,10 +87,11 @@ time order. However, Kongsberg multibeam data filenames usually start with a sur
 file number that restarts at 0001 whenever datalogging is stopped and restarted.
 Consequently, when data from multiple instances of logging are present in a
 single directory, the simple listing of files will not in general be in time
-order. If the file suffix is declared to be &quot;.all&quot; or &quot;.ALL&quot; using the <B>-S</B>
+order. If the file suffix is declared to be &quot;.all&quot;, &quot;.ALL&quot;, &quot;.kmall&quot;, or &quot;.KMALL&quot; using the <B>-S</B>
 option, then <B>mbm_makedatalist</B> will attempt to sort the swath files into
 time order before generating the final datalist. This behavior can be disabled
-by specifying the <B>-T</B> option.
+by specifying the <B>-T</B> option. Kongsberg dataloggers often create junk data
+files with names such as &quot;9999.all&quot; or &quot;9999.ALL&quot;; these filenames are ignored.
 <P>
 <A NAME="lbAF">&nbsp;</A>
 <H2>MB-SYSTEM AUTHORSHIP</H2>
@@ -261,7 +262,7 @@ Only fake bugs here.
 </PRE>
 
 <CENTER><P><BR>
-Last Updated: 27 October 2020</P></CENTER>
+Last Updated: 3 January 2021</P></CENTER>
 
 <HR>
 

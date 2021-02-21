@@ -33,7 +33,7 @@
 #include "mb_define.h"
 #include "mb_status.h"
 
-static const char *HOME = "HOME";
+const char *HOME = "HOME";
 
 /*--------------------------------------------------------------------*/
 int mb_version(int verbose, char *version_string, int *version_id, int *version_major, int *version_minor, int *version_archive,

@@ -87,11 +87,12 @@
 #include "mbsys_ldeoih.h"
 
 /* define header sizes */
+#define MBF_MBLDEOIH_BUFFERSIZE 98
 static const int MBF_MBLDEOIH_V1HEADERSIZE = 38;
 static const int MBF_MBLDEOIH_V2HEADERSIZE = 44;
 static const int MBF_MBLDEOIH_V3HEADERSIZE = 48;
 static const int MBF_MBLDEOIH_V4HEADERSIZE = 90;
-#define MBF_MBLDEOIH_V5HEADERSIZE 98
+static const int MBF_MBLDEOIH_V5HEADERSIZE = 98;
 static const int MBF_MBLDEOIH_ID_COMMENT1 = 8995;  /* ## */
 static const int MBF_MBLDEOIH_ID_COMMENT2 = 25443; /* cc */
 static const int MBF_MBLDEOIH_ID_DATA1 = 25700;    /* dd */
@@ -230,7 +231,7 @@ int mbr_rt_mbldeoih(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	short short_altitude;
 	short short_beams_bath, short_beams_amp, short_pixels_ss, short_sensorhead;
 	int header_length;
-	char buffer[MBF_MBLDEOIH_V5HEADERSIZE];
+	char buffer[MBF_MBLDEOIH_BUFFERSIZE];
 	int index;
 	double newdepthscale = 1.0;
 	double depthmax;
@@ -842,7 +843,7 @@ int mbr_wt_mbldeoih(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	int write_size;
 	short *flag;
 	int header_length;
-	char buffer[MBF_MBLDEOIH_V5HEADERSIZE];
+	char buffer[MBF_MBLDEOIH_BUFFERSIZE];
 	int index;
 	double depthscale, newdepthscale;
 	double depthmax, transducer_depth;
