@@ -123,9 +123,7 @@ const char *mb_platform_type(mb_platform_enum platform);
 #define MB_SENSOR_TYPE_SOUNDSPEED 120
 
 #ifdef MB_NEED_SENSOR_TYPE
-// TODO(schwehr): Convert these from static header variables to
-// an accessor function.
-static int mb_sensor_type_id[] = {
+const int mb_sensor_type_id[] = {
     MB_SENSOR_TYPE_NONE,                    // 0
     MB_SENSOR_TYPE_SONAR_ECHOSOUNDER,       // 10
     MB_SENSOR_TYPE_SONAR_MULTIECHOSOUNDER,  // 11
@@ -149,7 +147,7 @@ static int mb_sensor_type_id[] = {
     MB_SENSOR_TYPE_PRESSURE,                // 111
     MB_SENSOR_TYPE_SOUNDSPEED,              // 120
 };
-static const char *mb_sensor_type_string[] = {"Unknown sensor type",
+const char *mb_sensor_type_string[] = {"Unknown sensor type",
                                         "Sonar echosounder",
                                         "Sonar multiechosounder",
                                         "Sonar sidescan",
@@ -511,7 +509,7 @@ struct mb_io_struct {
     struct mb_io_indextable_struct *indextable;
 
   /* read or write history */
-  int fileheader;       /* indicates whether file header has
+  bool fileheader;       /* indicates whether file header has
                         been read or written */
   int hdr_comment_size; /* number of characters in
                    header_comment string */
@@ -686,6 +684,9 @@ struct mb_io_struct {
   double saved3;
   double saved4;
   double saved5;
+  bool saveb1;
+  bool saveb2;
+  bool saveb3;
   void *saveptr1;
   void *saveptr2;
   void *saveptr3;

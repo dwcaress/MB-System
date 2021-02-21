@@ -33,23 +33,21 @@
 /* maximum line length in characters */
 #define MB_GET_VALUE_MAXLINE 200
 
-static char tmp[MB_GET_VALUE_MAXLINE];
-
 /*--------------------------------------------------------------------*/
 /*	function mb_get_double reads a double value from a string.
  */
 int mb_get_double(double *value, char *str, int nchar) {
-	memset(tmp, 0, MB_GET_VALUE_MAXLINE);
+  char tmp[MB_GET_VALUE_MAXLINE] = "";
 	*value = 0.0;
-	*value = strtod(strncpy(tmp, str, nchar), NULL);
+	*value = (double)strtod(strncpy(tmp, str, nchar), NULL);
 	return (0);
 }
 /*--------------------------------------------------------------------*/
 /*	function mb_get_int reads a int value from a string.
  */
 int mb_get_int(int *value, char *str, int nchar) {
-	memset(tmp, 0, MB_GET_VALUE_MAXLINE);
-	*value = strtol(strncpy(tmp, str, nchar), NULL, 10);
+  char tmp[MB_GET_VALUE_MAXLINE] = "";
+	*value = (int)strtol(strncpy(tmp, str, nchar), NULL, 10);
 	return (0);
 }
 /*--------------------------------------------------------------------*/

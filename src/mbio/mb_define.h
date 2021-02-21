@@ -359,6 +359,10 @@ int mb_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, int time_i
                 double speed, double heading, int nbath, int namp, int nss, char *beamflag, double *bath, double *amp,
                 double *bathacrosstrack, double *bathalongtrack, double *ss, double *ssacrosstrack, double *ssalongtrack,
                 char *comment, int *error);
+int mb_extract_lonlat(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int time_i[7], double *time_d, double *navlon,
+               double *navlat, double *speed, double *heading, int *nbath, int *namp, int *nss, char *beamflag, double *bath,
+               double *amp, double *bathlon, double *bathlat, double *ss, double *sslon,
+               double *sslat, char *comment, int *error);
 int mb_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int time_i[7], double *time_d, double *navlon,
                 double *navlat, double *speed, double *heading, double *draft, double *roll, double *pitch, double *heave,
                 int *error);

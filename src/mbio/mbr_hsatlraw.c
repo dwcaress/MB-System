@@ -218,6 +218,7 @@ int mbr_alm_hsatlraw(int verbose, void *mbio_ptr, int *error) {
 	mb_io_ptr->data_structure_size = 0;
 	int status = mb_mallocd(verbose, __FILE__, __LINE__, mb_io_ptr->structure_size, &mb_io_ptr->raw_data, error);
 	status &= mbsys_hsds_alloc(verbose, mbio_ptr, (void **)(&mb_io_ptr->store_data), error);
+	status &= mb_mallocd(verbose, __FILE__, __LINE__, MBF_HSATLRAW_MAXLINE, &mb_io_ptr->saveptr1, error);
 
 	/* get pointer to mbio descriptor */
 	struct mbf_hsatlraw_struct *data = (struct mbf_hsatlraw_struct *)mb_io_ptr->raw_data;
@@ -225,6 +226,15 @@ int mbr_alm_hsatlraw(int verbose, void *mbio_ptr, int *error) {
 
 	/* initialize everything to zeros */
 	mbr_zero_hsatlraw(verbose, data_ptr, ZERO_ALL, error);
+
+	char *raw_line = (char *) mb_io_ptr->saveptr1;
+	bool *line_save_flag = &mb_io_ptr->saveb1;
+	int *type = &mb_io_ptr->save1;
+	int *shift = &mb_io_ptr->save2;
+  memset((char *)raw_line, 0, MBF_HSATLRAW_MAXLINE);
+	*line_save_flag = false;
+	*type = MBF_HSATLRAW_NONE;
+	*shift = 0;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
@@ -251,6 +261,7 @@ int mbr_dem_hsatlraw(int verbose, void *mbio_ptr, int *error) {
 	/* deallocate memory for data descriptor */
 	int status = mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->raw_data, error);
 	status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->store_data, error);
+	status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->saveptr1, error);
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
@@ -692,10 +703,6 @@ int mbr_wt_hsatlraw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_hsatlraw_rd_data(int verbose, void *mbio_ptr, int *error) {
-	static bool line_save_flag = false;
-	static char raw_line[MBF_HSATLRAW_MAXLINE] = "";
-	static int type = MBF_HSATLRAW_NONE;
-	static int shift = 0;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -711,6 +718,10 @@ int mbr_hsatlraw_rd_data(int verbose, void *mbio_ptr, int *error) {
 	struct mbf_hsatlraw_struct *data = (struct mbf_hsatlraw_struct *)mb_io_ptr->raw_data;
 	char *data_ptr = (char *)data;
 	FILE *mbfp = mb_io_ptr->mbfp;
+	char *raw_line = (char *) mb_io_ptr->saveptr1;
+	bool *line_save_flag = &mb_io_ptr->saveb1;
+	int *type = &mb_io_ptr->save1;
+	int *shift = &mb_io_ptr->save2;
 
 	/* initialize everything to zeros */
 	mbr_zero_hsatlraw(verbose, data_ptr, ZERO_SOME, error);
@@ -724,12 +735,12 @@ int mbr_hsatlraw_rd_data(int verbose, void *mbio_ptr, int *error) {
 	while (!done) {
 
 		/* get next record label */
-		if (!line_save_flag) {
+		if (!(*line_save_flag)) {
 			mb_io_ptr->file_bytes = ftell(mbfp);
-			status = mbr_hsatlraw_rd_label(verbose, mbfp, raw_line, &type, &shift, error);
+			status = mbr_hsatlraw_rd_label(verbose, mbfp, raw_line, type, shift, error);
 		}
 		else
-			line_save_flag = false;
+			*line_save_flag = false;
 
 		/* read the appropriate data records */
 		if (status == MB_FAILURE && expect == MBF_HSATLRAW_NONE) {
@@ -742,8 +753,8 @@ int mbr_hsatlraw_rd_data(int verbose, void *mbio_ptr, int *error) {
 			*error = MB_ERROR_NO_ERROR;
 			status = MB_SUCCESS;
 		}
-		else if (type == MBF_HSATLRAW_RAW_LINE) {
-			strcpy(data->comment, raw_line + shift);
+		else if (*type == MBF_HSATLRAW_RAW_LINE) {
+			strcpy(data->comment, raw_line + *shift);
 			mb_io_ptr->file_bytes = ftell(mbfp);
 			done = true;
 			expect = MBF_HSATLRAW_NONE;
@@ -751,36 +762,36 @@ int mbr_hsatlraw_rd_data(int verbose, void *mbio_ptr, int *error) {
 			*error = MB_ERROR_UNINTELLIGIBLE;
 			status = MB_FAILURE;
 		}
-		else if (expect != MBF_HSATLRAW_NONE && expect != type) {
+		else if (expect != MBF_HSATLRAW_NONE && expect != *type) {
 			done = true;
-			line_save_flag = true;
+			*line_save_flag = true;
 		}
-		else if (type == MBF_HSATLRAW_ERGNHYDI) {
-			status = mbr_hsatlraw_rd_ergnhydi(verbose, mbfp, data, shift, error);
+		else if (*type == MBF_HSATLRAW_ERGNHYDI) {
+			status = mbr_hsatlraw_rd_ergnhydi(verbose, mbfp, data, *shift, error);
 			mb_io_ptr->file_bytes = ftell(mbfp);
 			if (status == MB_SUCCESS) {
 				done = true;
 				data->kind = MB_DATA_MEAN_VELOCITY;
 			}
 		}
-		else if (type == MBF_HSATLRAW_ERGNPARA) {
-			status = mbr_hsatlraw_rd_ergnpara(verbose, mbfp, data, shift, error);
+		else if (*type == MBF_HSATLRAW_ERGNPARA) {
+			status = mbr_hsatlraw_rd_ergnpara(verbose, mbfp, data, *shift, error);
 			mb_io_ptr->file_bytes = ftell(mbfp);
 			if (status == MB_SUCCESS) {
 				done = true;
 				data->kind = MB_DATA_STANDBY;
 			}
 		}
-		else if (type == MBF_HSATLRAW_ERGNPOSI) {
-			status = mbr_hsatlraw_rd_ergnposi(verbose, mbfp, data, shift, error);
+		else if (*type == MBF_HSATLRAW_ERGNPOSI) {
+			status = mbr_hsatlraw_rd_ergnposi(verbose, mbfp, data, *shift, error);
 			mb_io_ptr->file_bytes = ftell(mbfp);
 			if (status == MB_SUCCESS) {
 				done = true;
 				data->kind = MB_DATA_NAV_SOURCE;
 			}
 		}
-		else if (type == MBF_HSATLRAW_ERGNEICH) {
-			status = mbr_hsatlraw_rd_ergneich(verbose, mbfp, data, shift, error);
+		else if (*type == MBF_HSATLRAW_ERGNEICH) {
+			status = mbr_hsatlraw_rd_ergneich(verbose, mbfp, data, *shift, error);
 			mb_io_ptr->file_bytes = ftell(mbfp);
 			if (status == MB_SUCCESS) {
 				done = false;
@@ -788,8 +799,8 @@ int mbr_hsatlraw_rd_data(int verbose, void *mbio_ptr, int *error) {
 				expect = MBF_HSATLRAW_ERGNSLZT;
 			}
 		}
-		else if (type == MBF_HSATLRAW_ERGNMESS) {
-			status = mbr_hsatlraw_rd_ergnmess(verbose, mbfp, data, shift, error);
+		else if (*type == MBF_HSATLRAW_ERGNMESS) {
+			status = mbr_hsatlraw_rd_ergnmess(verbose, mbfp, data, *shift, error);
 			mb_io_ptr->file_bytes = ftell(mbfp);
 			if (status == MB_SUCCESS) {
 				done = false;
@@ -797,8 +808,8 @@ int mbr_hsatlraw_rd_data(int verbose, void *mbio_ptr, int *error) {
 				expect = MBF_HSATLRAW_ERGNSLZT;
 			}
 		}
-		else if (type == MBF_HSATLRAW_ERGNSLZT) {
-			status = mbr_hsatlraw_rd_ergnslzt(verbose, mbfp, data, shift, error);
+		else if (*type == MBF_HSATLRAW_ERGNSLZT) {
+			status = mbr_hsatlraw_rd_ergnslzt(verbose, mbfp, data, *shift, error);
 			mb_io_ptr->file_bytes = ftell(mbfp);
 			if (status == MB_SUCCESS && expect == MBF_HSATLRAW_ERGNSLZT) {
 				done = false;
@@ -811,16 +822,16 @@ int mbr_hsatlraw_rd_data(int verbose, void *mbio_ptr, int *error) {
 				status = MB_FAILURE;
 			}
 		}
-		else if (type == MBF_HSATLRAW_ERGNCTDS) {
-			status = mbr_hsatlraw_rd_ergnctds(verbose, mbfp, data, shift, error);
+		else if (*type == MBF_HSATLRAW_ERGNCTDS) {
+			status = mbr_hsatlraw_rd_ergnctds(verbose, mbfp, data, *shift, error);
 			mb_io_ptr->file_bytes = ftell(mbfp);
 			if (status == MB_SUCCESS) {
 				done = true;
 				data->kind = MB_DATA_VELOCITY_PROFILE;
 			}
 		}
-		else if (type == MBF_HSATLRAW_ERGNAMPL) {
-			status = mbr_hsatlraw_rd_ergnampl(verbose, mbfp, data, shift, error);
+		else if (*type == MBF_HSATLRAW_ERGNAMPL) {
+			status = mbr_hsatlraw_rd_ergnampl(verbose, mbfp, data, *shift, error);
 			mb_io_ptr->file_bytes = ftell(mbfp);
 			if (status == MB_SUCCESS && expect == MBF_HSATLRAW_ERGNAMPL) {
 				done = true;
@@ -833,8 +844,8 @@ int mbr_hsatlraw_rd_data(int verbose, void *mbio_ptr, int *error) {
 				status = MB_FAILURE;
 			}
 		}
-		else if (type == MBF_HSATLRAW_LDEOCMNT) {
-			status = mbr_hsatlraw_rd_ldeocmnt(verbose, mbfp, data, shift, error);
+		else if (*type == MBF_HSATLRAW_LDEOCMNT) {
+			status = mbr_hsatlraw_rd_ldeocmnt(verbose, mbfp, data, *shift, error);
 			mb_io_ptr->file_bytes = ftell(mbfp);
 			if (status == MB_SUCCESS) {
 				done = true;

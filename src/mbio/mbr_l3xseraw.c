@@ -135,6 +135,26 @@ int mbr_alm_l3xseraw(int verbose, void *mbio_ptr, int *error) {
 	const int status = mb_mallocd(verbose, __FILE__, __LINE__, MBSYS_XSE_BUFFER_SIZE, (void **)&mb_io_ptr->hdr_comment, error);
 	mbsys_xse_alloc(verbose, mbio_ptr, &mb_io_ptr->store_data, error);
 
+  char *label = (char *) mb_io_ptr->save_label;
+	int *frame_expect = (int *)&mb_io_ptr->save1;
+	bool *frame_save = (bool *)&mb_io_ptr->saveb1;
+	int *frame_id_save = (int *)&mb_io_ptr->save3;
+	int *frame_source_save = (int *)&mb_io_ptr->save4;
+	int *frame_sec_save = (int *)&mb_io_ptr->save5;
+	int *frame_usec_save = (int *)&mb_io_ptr->save6;
+	int *buffer_size_save = (int *)&mb_io_ptr->save7;
+	int *buffer_size_max = (int *)&mb_io_ptr->save8;
+	char *buffer = mb_io_ptr->hdr_comment;
+  memset((void *)label, 0, 12);
+  *frame_expect = MBSYS_XSE_NONE_FRAME;
+  *frame_save = false;
+  *frame_id_save = MBSYS_XSE_NONE_FRAME;
+  *frame_source_save = 0;
+  *frame_sec_save = 0;
+  *frame_usec_save = 0;
+  *buffer_size_save = 0;
+  *buffer_size_max = 0;
+
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -2808,27 +2828,6 @@ int mbr_l3xseraw_rd_nav(int verbose, int buffer_size, char *buffer, void *store_
 }
 /*--------------------------------------------------------------------*/
 int mbr_l3xseraw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	static char label[4];
-	int frame_id;
-	int frame_source;
-	int frame_sec;
-	int frame_usec;
-	int frame_transaction;
-	int frame_address;
-	int buffer_size;
-	int frame_size;
-	int *buffer_size_max;
-	int *frame_save;
-	int *frame_expect;
-	int *frame_id_save;
-	int *frame_source_save;
-	int *frame_sec_save;
-	int *frame_usec_save;
-	int *buffer_size_save;
-	char *buffer;
-	int index;
-	int read_len;
-	int skip;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -2847,17 +2846,19 @@ int mbr_l3xseraw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	/* set file position */
 	mb_io_ptr->file_pos = mb_io_ptr->file_bytes;
 
-	/* read until done */
+  /* set variables to be saved in mb_io structure */
 	*error = MB_ERROR_NO_ERROR;
-	frame_expect = (int *)&mb_io_ptr->save1;
-	frame_save = (int *)&mb_io_ptr->save2;
-	frame_id_save = (int *)&mb_io_ptr->save3;
-	frame_source_save = (int *)&mb_io_ptr->save4;
-	frame_sec_save = (int *)&mb_io_ptr->save5;
-	frame_usec_save = (int *)&mb_io_ptr->save6;
-	buffer_size_save = (int *)&mb_io_ptr->save7;
-	buffer_size_max = (int *)&mb_io_ptr->save8;
-	buffer = mb_io_ptr->hdr_comment;
+  char *label = (char *) mb_io_ptr->save_label;
+	int *frame_expect = (int *)&mb_io_ptr->save1;
+	bool *frame_save = (bool *)&mb_io_ptr->saveb1;
+	int *frame_id_save = (int *)&mb_io_ptr->save3;
+	int *frame_source_save = (int *)&mb_io_ptr->save4;
+	int *frame_sec_save = (int *)&mb_io_ptr->save5;
+	int *frame_usec_save = (int *)&mb_io_ptr->save6;
+	int *buffer_size_save = (int *)&mb_io_ptr->save7;
+	int *buffer_size_max = (int *)&mb_io_ptr->save8;
+	char *buffer = mb_io_ptr->hdr_comment;
+
 	store->sbm_properties = false;
 	store->sbm_hrp = false;
 	store->sbm_signal = false;
@@ -2867,8 +2868,20 @@ int mbr_l3xseraw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 		store->sid_frame = false;
 	}
 
+	int frame_id;
+	int frame_source;
+	int frame_sec;
+	int frame_usec;
+	int frame_transaction;
+	int frame_address;
+	int buffer_size;
+	int frame_size;
+	int index;
+	int read_len;
+	int skip = 0;
 	int status = MB_SUCCESS;
 
+	/* read until done */
 	bool done = false;
 	while (!done) {
 		/* use saved frame if available */

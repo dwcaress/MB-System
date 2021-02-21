@@ -411,7 +411,6 @@ int mbr_em710mba_chk_label(int verbose, void *mbio_ptr, char *label, short *type
 /*--------------------------------------------------------------------*/
 int mbr_em710mba_rd_puid(int verbose, void *mbio_ptr, int swap, struct mbsys_simrad3_struct *store, short type, short sonar,
                            int *goodend, int *error) {
-	(void)type; // unused
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -543,7 +542,6 @@ int mbr_em710mba_rd_puid(int verbose, void *mbio_ptr, int swap, struct mbsys_sim
 /*--------------------------------------------------------------------*/
 int mbr_em710mba_rd_status(int verbose, void *mbio_ptr, int swap, struct mbsys_simrad3_struct *store, short type, short sonar,
                            int *goodend, int *error) {
-	(void)type;  // unused
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);

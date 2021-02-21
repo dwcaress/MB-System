@@ -1255,8 +1255,9 @@ int mb_deall_ioarrays(int verbose, void *mbio_ptr, int *error) {
 
   /* deallocate registered arrays */
   for (int i = 0; i < mb_io_ptr->n_regarray; i++) {
-    if (status == MB_SUCCESS && mb_io_ptr->regarray_handle[i] != NULL)
+    if (status == MB_SUCCESS && mb_io_ptr->regarray_handle[i] != NULL) {
       status = mb_freed(verbose, __FILE__, __LINE__, (void **)(mb_io_ptr->regarray_handle[i]), error);
+    }
   }
   mb_io_ptr->n_regarray = 0;
   mb_io_ptr->n_regarray_alloc = 0;

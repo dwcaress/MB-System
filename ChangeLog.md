@@ -23,6 +23,7 @@ Distributions that do not include "beta" in the tag name correspond to the major
 announced releases. The source distributions associated with all releases, major
 or beta, are equally accessible as tarballs through the Github interface.
 
+- Version 5.7.9beta04    February 21, 2021
 - Version 5.7.9beta03    February 7, 2021
 - Version 5.7.9beta02    January 27, 2021
 - Version 5.7.9beta01    January 18, 2021
@@ -382,6 +383,25 @@ or beta, are equally accessible as tarballs through the Github interface.
 --
 ### MB-System Version 5.7 Release Notes:
 --
+
+#### 5.7.9beta04 (February 21, 2021)
+
+Mbpreprocess: Fixed handling of data formats that do not have specially defined
+preprocessing functions. This fix was prompted by problems with SeaBeam 2112 data
+in format 41 (MBF_SB2100RW).
+
+General changes: More work to achieve thread safety for mbprocess: removed use
+of static variables in several components of MBIO.
+
+Mbgrid: Fixed error handling so that if the program is shut down by an error,
+the exit code is nonzero.
+
+MBIO: Added extraction function mb_extract_lonlat(), which returns swath data
+similar to mb_extract() but with beam and pixel positions defined in longitude
+and latitude rather than acrosstrack and alongtrack distances relative to the
+reference point.
+
+Mbareaclean: Fixed memory management bug causing crashes.
 
 #### 5.7.9beta03 (February 7, 2021)
 

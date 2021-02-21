@@ -600,16 +600,16 @@ int main(int argc, char **argv) {
 	int beams_bath;
 	int beams_amp;
 	int pixels_ss;
-	char *beamflag;
-	char *beamflagorg;
-	int *detect;
-	double *bath;
-	double *amp;
-	double *bathlon;
-	double *bathlat;
-	double *ss;
-	double *sslon;
-	double *sslat;
+	char *beamflag = nullptr;
+	char *beamflagorg = nullptr;
+	int *detect = nullptr;
+	double *bath = nullptr;
+	double *amp = nullptr;
+	double *bathlon = nullptr;
+	double *bathlat = nullptr;
+	double *ss = nullptr;
+	double *sslon = nullptr;
+	double *sslat = nullptr;
 
 	/* save file control variables */
 	char esffile[MB_PATH_MAXLINE];
@@ -682,20 +682,10 @@ int main(int argc, char **argv) {
 		}
 
 		/* allocate memory for data arrays */
-		beamflag = nullptr;
-		beamflagorg = nullptr;
-		detect = nullptr;
-		bath = nullptr;
-		amp = nullptr;
-		bathlon = nullptr;
-		bathlat = nullptr;
-		ss = nullptr;
-		sslon = nullptr;
-		sslat = nullptr;
 		if (error == MB_ERROR_NO_ERROR)
 			status &= mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(char), (void **)&beamflag, &error);
 		if (error == MB_ERROR_NO_ERROR)
-			status &= mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(char), (void **)&detect, &error);
+			status &= mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(int), (void **)&detect, &error);
 		if (error == MB_ERROR_NO_ERROR)
 			status &= mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double), (void **)&bath, &error);
 		if (error == MB_ERROR_NO_ERROR)

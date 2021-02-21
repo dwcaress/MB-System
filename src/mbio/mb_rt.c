@@ -33,7 +33,6 @@
 static const double MB_RT_GRADIENT_TOLERANCE = 0.00001;
 static const int MB_RT_LAYER_HOMOGENEOUS = 0;;
 static const int MB_RT_LAYER_GRADIENT = 1;
-// static const int MB_RT_ERROR = 0;
 static const int MB_RT_DOWN = 1;
 static const int MB_RT_UP = 2;
 static const int MB_RT_DOWN_TURN = 3;
@@ -111,8 +110,7 @@ int mb_rt_init(int verbose, int number_node, double *depth, double *velocity, vo
 	status = mb_mallocd(verbose, __FILE__, __LINE__, number_node * sizeof(double), (void **)&(model->velocity), error);
 	model->number_layer = number_node - 1;
 	status = mb_mallocd(verbose, __FILE__, __LINE__, model->number_layer * sizeof(int), (void **)&(model->layer_mode), error);
-	status =
-	    mb_mallocd(verbose, __FILE__, __LINE__, model->number_layer * sizeof(double), (void **)&(model->layer_gradient), error);
+	status = mb_mallocd(verbose, __FILE__, __LINE__, model->number_layer * sizeof(double), (void **)&(model->layer_gradient), error);
 	status = mb_mallocd(verbose, __FILE__, __LINE__, model->number_layer * sizeof(double), (void **)&(model->layer_depth_center),
 	                    error);
 	if (status == MB_SUCCESS) {
@@ -884,6 +882,7 @@ int mb_rt(int verbose, void *modelptr, double source_depth, double source_angle,
 		diff_angle = asin(vel_ratio) * RTD;
 		source_angle = null_angle + diff_angle;
 	}
+  // else do nothing
 
 	/* now initialize ray */
 	if (source_angle > 0.0)
