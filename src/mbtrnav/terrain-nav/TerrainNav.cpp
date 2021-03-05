@@ -242,6 +242,8 @@ TerrainNav::~TerrainNav() {
 void TerrainNav::estimatePose(poseT* estimate, const int& type) {
 	//Cannot compute pose estimates if the filter motion has not been initialized
 	if(tNavFilter->lastNavPose == NULL) {
+		if (type == 2)
+			_trnLog->write();   // write the nav and meas inputs
 		logs(TL_OMASK(TL_TERRAIN_NAV, TL_LOG),"TerrainNav::Cannot compute pose estimate; motion has not been initialized.\n");
 		return;
 	}
@@ -375,8 +377,9 @@ void TerrainNav::measUpdate(measT* incomingMeas, const int& type) {
 		this->numWaitingMeas++;
 
 		logs(TL_OMASK(TL_TERRAIN_NAV, TL_LOG),"TerrainNav::Delayed incorporating measurement type %i from time = %.2f"
-			   " sec, ping # %u; waiting for more recent INS data...\n",
-			   currMeas.dataType, currMeas.time, currMeas.ping_number);
+			   " sec, ping # %u; waiting for INS data more recent than %.2f...\n",
+			   currMeas.dataType, currMeas.time, currMeas.ping_number,
+			   tNavFilter->lastNavPose->time);
 	// release dynamic memory resources
 		currMeas.clean();
 		return;
