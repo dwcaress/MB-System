@@ -249,6 +249,7 @@ int mbr_alm_sb2100rw(int verbose, void *mbio_ptr, int *error) {
 	mb_io_ptr->data_structure_size = 0;
 	int status = mb_mallocd(verbose, __FILE__, __LINE__, mb_io_ptr->structure_size, &mb_io_ptr->raw_data, error);
 	status &= mb_mallocd(verbose, __FILE__, __LINE__, sizeof(struct mbsys_sb2100_struct), &mb_io_ptr->store_data, error);
+	status &= mb_mallocd(verbose, __FILE__, __LINE__, MBF_SB2100RW_MAXLINE, &mb_io_ptr->saveptr1, error);
 
 	/* get store structure pointer */
 	struct mbsys_sb2100_struct *store = (struct mbsys_sb2100_struct *)mb_io_ptr->store_data;
@@ -258,6 +259,14 @@ int mbr_alm_sb2100rw(int verbose, void *mbio_ptr, int *error) {
 
 	/* initialize everything to zeros */
 	mbr_zero_sb2100rw(verbose, mb_io_ptr->raw_data, error);
+
+  char *raw_line = (char *) mb_io_ptr->saveptr1;
+  int *type = &mb_io_ptr->save1;
+  bool *line_save_flag = &mb_io_ptr->saveb1;
+
+  memset((void *) raw_line, 0, MBF_SB2100RW_MAXLINE);
+	*type = MBF_SB2100RW_NONE;
+	*line_save_flag = false;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
@@ -286,6 +295,7 @@ int mbr_dem_sb2100rw(int verbose, void *mbio_ptr, int *error) {
 	/* deallocate memory for data descriptor */
 	status = mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->raw_data, error);
 	status = mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->store_data, error);
+	status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->saveptr1, error);
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
@@ -314,7 +324,7 @@ int mbr_sb2100rw_read_line(int verbose, FILE *mbfp, int minimum_size, char *line
 	bool done = false;
 	do {
 		/* read next line in file */
-		strncpy(line, "", MBF_SB2100RW_MAXLINE);
+    memset((void *)line, 0, MBF_SB2100RW_MAXLINE);
 		result = fgets(line, MBF_SB2100RW_MAXLINE, mbfp);
 
 		/* check size of line */
@@ -882,8 +892,6 @@ int mbr_sb2100rw_rd_ss(int verbose, FILE *mbfp, struct mbf_sb2100rw_struct *data
 }
 /*--------------------------------------------------------------------*/
 int mbr_sb2100rw_rd_data(int verbose, void *mbio_ptr, int *error) {
-	static char raw_line[MBF_SB2100RW_MAXLINE] = "";
-	static int type = MBF_SB2100RW_NONE;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -906,21 +914,24 @@ int mbr_sb2100rw_rd_data(int verbose, void *mbio_ptr, int *error) {
 	/* get file position at record beginning */
 	mb_io_ptr->file_pos = mb_io_ptr->file_bytes;
 
+  char *raw_line = (char *) mb_io_ptr->saveptr1;
+  int *type = &mb_io_ptr->save1;
+  bool *line_save_flag = &mb_io_ptr->saveb1;
+
 	int status = MB_SUCCESS;
 	int expect = MBF_SB2100RW_NONE;
-	static bool line_save_flag = false;
 	bool done = false;
 	while (!done) {
 		/* get next record label */
-		if (!line_save_flag) {
+		if (!(*line_save_flag)) {
 			/* save position in file */
 			mb_io_ptr->file_bytes = ftell(mbfp);
 
 			/* read the label */
-			status = mbr_sb2100rw_rd_label(verbose, mbfp, raw_line, &type, error);
+			status = mbr_sb2100rw_rd_label(verbose, mbfp, raw_line, type, error);
 		}
 		else
-			line_save_flag = false;
+			*line_save_flag = false;
 
 		/* read the appropriate data records */
 		if (status == MB_FAILURE && expect == MBF_SB2100RW_NONE) {
@@ -933,12 +944,12 @@ int mbr_sb2100rw_rd_data(int verbose, void *mbio_ptr, int *error) {
 			*error = MB_ERROR_NO_ERROR;
 			status = MB_SUCCESS;
 		}
-		else if (expect != MBF_SB2100RW_NONE && expect != type) {
+		else if (expect != MBF_SB2100RW_NONE && expect != *type) {
 			done = true;
 			expect = MBF_SB2100RW_NONE;
-			line_save_flag = true;
+			*line_save_flag = true;
 		}
-		else if (type == MBF_SB2100RW_RAW_LINE) {
+		else if (*type == MBF_SB2100RW_RAW_LINE) {
 			strcpy(data->comment, raw_line);
 			mb_io_ptr->file_bytes = ftell(mbfp);
 			done = true;
@@ -946,7 +957,7 @@ int mbr_sb2100rw_rd_data(int verbose, void *mbio_ptr, int *error) {
 			*error = MB_ERROR_UNINTELLIGIBLE;
 			status = MB_FAILURE;
 		}
-		else if (type == MBF_SB2100RW_PR) {
+		else if (*type == MBF_SB2100RW_PR) {
 			status = mbr_sb2100rw_rd_pr(verbose, mbfp, data, error);
 			mb_io_ptr->file_bytes = ftell(mbfp);
 			if (status == MB_SUCCESS) {
@@ -954,7 +965,7 @@ int mbr_sb2100rw_rd_data(int verbose, void *mbio_ptr, int *error) {
 				data->kind = MB_DATA_VELOCITY_PROFILE;
 			}
 		}
-		else if (type == MBF_SB2100RW_TR) {
+		else if (*type == MBF_SB2100RW_TR) {
 			status = mbr_sb2100rw_rd_tr(verbose, mbfp, data, error);
 			mb_io_ptr->file_bytes = ftell(mbfp);
 			if (status == MB_SUCCESS) {
@@ -962,7 +973,7 @@ int mbr_sb2100rw_rd_data(int verbose, void *mbio_ptr, int *error) {
 				data->kind = MB_DATA_COMMENT;
 			}
 		}
-		else if (type == MBF_SB2100RW_DR) {
+		else if (*type == MBF_SB2100RW_DR) {
 			status = mbr_sb2100rw_rd_dr(verbose, mbfp, data, error);
 			mb_io_ptr->file_bytes = ftell(mbfp);
 			if (status == MB_SUCCESS) {
@@ -971,7 +982,7 @@ int mbr_sb2100rw_rd_data(int verbose, void *mbio_ptr, int *error) {
 				expect = MBF_SB2100RW_SS;
 			}
 		}
-		else if (type == MBF_SB2100RW_SS) {
+		else if (*type == MBF_SB2100RW_SS) {
 			status = mbr_sb2100rw_rd_ss(verbose, mbfp, data, error);
 			mb_io_ptr->file_bytes = ftell(mbfp);
 			if (status == MB_SUCCESS && expect == MBF_SB2100RW_SS) {

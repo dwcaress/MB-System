@@ -855,6 +855,7 @@ int mbsys_simrad3_preprocess(int verbose,     /* in: verbosity level set on comm
                              void *mbio_ptr,  /* in: see mb_io.h:/^struct mb_io_struct/ */
                              void *store_ptr, /* in: see mbsys_reson7k.h:/^struct mbsys_reson7k_struct/ */
                              void *platform_ptr, void *preprocess_pars_ptr, int *error) {
+
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -865,19 +866,21 @@ int mbsys_simrad3_preprocess(int verbose,     /* in: verbosity level set on comm
 		fprintf(stderr, "dbg2       preprocess_pars_ptr:        %p\n", (void *)preprocess_pars_ptr);
 	}
 
+  *error = MB_ERROR_NO_ERROR;
+
 	/* check for non-null data */
 	assert(mbio_ptr != NULL);
-	assert(store_ptr != NULL);
 	assert(preprocess_pars_ptr != NULL);
 
 	/* get mbio descriptor */
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
+  /* get preprocessing parameters */
+  struct mb_preprocess_struct *pars = (struct mb_preprocess_struct *)preprocess_pars_ptr;
+
 	/* get data structure pointers */
 	struct mbsys_simrad3_struct *store = (struct mbsys_simrad3_struct *)store_ptr;
-	struct mbsys_simrad3_ping_struct *ping = (struct mbsys_simrad3_ping_struct *)&(store->pings[store->ping_index]);
 	// struct mb_platform_struct *platforms = (struct mb_platform_struct *)platform_ptr;
-	struct mb_preprocess_struct *pars = (struct mb_preprocess_struct *)preprocess_pars_ptr;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "dbg2       target_sensor:              %d\n", pars->target_sensor);
@@ -909,8 +912,23 @@ int mbsys_simrad3_preprocess(int verbose,     /* in: verbosity level set on comm
 
 	int status = MB_SUCCESS;
 
+  /* if called with store_ptr == NULL then called after mb_read_init() but before
+      any data are read - for some formats this allows kluge options to set special
+      reading conditions/behaviors */
+  if (store_ptr == NULL) {
+		for (int i = 0; i < pars->n_kluge; i++)
+			if (pars->kluge_id[i] == MB_PR_KLUGE_IGNORESNIPPETS) {
+        bool *ignore_snippets = (bool *)&mb_io_ptr->save4;
+        *ignore_snippets = true;
+      }
+  }
+
 	/* deal with a survey record */
-	if (store->kind == MB_DATA_DATA) {
+	else if (store->kind == MB_DATA_DATA) {
+
+  	/* get data structure pointers */
+    struct mbsys_simrad3_ping_struct *ping = (struct mbsys_simrad3_ping_struct *)&(store->pings[store->ping_index]);
+
 		/* depth sensor offsets - used in place of heave for underwater platforms */
 		int depthsensor_mode = MBSYS_SIMRAD3_ZMODE_UNKNOWN;
 
@@ -965,28 +983,27 @@ int mbsys_simrad3_preprocess(int verbose,     /* in: verbosity level set on comm
 		double navlat;
 		int jnav;
     int interp_error = MB_ERROR_NO_ERROR;
-		int interp_status = mb_linear_interp_longitude(verbose, pars->nav_time_d - 1, pars->nav_lon - 1, pars->n_nav, time_d, &navlon,
+		mb_linear_interp_longitude(verbose, pars->nav_time_d - 1, pars->nav_lon - 1, pars->n_nav, time_d, &navlon,
 		                                           &jnav, &interp_error);
 		if (navlon < -180.0)
 			navlon += 360.0;
 		else if (navlon > 180.0)
 			navlon -= 360.0;
-		interp_status &= mb_linear_interp_latitude(verbose, pars->nav_time_d - 1, pars->nav_lat - 1, pars->n_nav, time_d, &navlat,
+		mb_linear_interp_latitude(verbose, pars->nav_time_d - 1, pars->nav_lat - 1, pars->n_nav, time_d, &navlat,
 		                                          &jnav, &interp_error);
 		double speed;
-		interp_status &=
-		    mb_linear_interp(verbose, pars->nav_time_d - 1, pars->nav_speed - 1, pars->n_nav, time_d, &speed, &jnav, &interp_error);
+		mb_linear_interp(verbose, pars->nav_time_d - 1, pars->nav_speed - 1, pars->n_nav, time_d, &speed, &jnav, &interp_error);
 
 		/* interpolate sensordepth */
 		double sensordepth;
 		int jsensordepth;
-		interp_status &= mb_linear_interp(verbose, pars->sensordepth_time_d - 1, pars->sensordepth_sensordepth - 1,
+		mb_linear_interp(verbose, pars->sensordepth_time_d - 1, pars->sensordepth_sensordepth - 1,
 		                                 pars->n_sensordepth, time_d, &sensordepth, &jsensordepth, &interp_error);
 
 		/* interpolate heading */
 		double heading;
 		int jheading;
-		interp_status &= mb_linear_interp_heading(verbose, pars->heading_time_d - 1, pars->heading_heading - 1, pars->n_heading,
+		mb_linear_interp_heading(verbose, pars->heading_time_d - 1, pars->heading_heading - 1, pars->n_heading,
 		                                         time_d, &heading, &jheading, &interp_error);
 		if (heading < 0.0)
 			heading += 360.0;
@@ -996,25 +1013,20 @@ int mbsys_simrad3_preprocess(int verbose,     /* in: verbosity level set on comm
 		/* interpolate altitude */
 		double altitude;
 		int jaltitude;
-		interp_status &= mb_linear_interp(verbose, pars->altitude_time_d - 1, pars->altitude_altitude - 1, pars->n_altitude,
+		mb_linear_interp(verbose, pars->altitude_time_d - 1, pars->altitude_altitude - 1, pars->n_altitude,
 		                                 time_d, &altitude, &jaltitude, &interp_error);
 
 		/* interpolate attitude */
 		double roll;
 		int jattitude;
-		interp_status &= mb_linear_interp(verbose, pars->attitude_time_d - 1, pars->attitude_roll - 1, pars->n_attitude, time_d,
+		mb_linear_interp(verbose, pars->attitude_time_d - 1, pars->attitude_roll - 1, pars->n_attitude, time_d,
 		                                 &roll, &jattitude, &interp_error);
 		double pitch;
-		interp_status &= mb_linear_interp(verbose, pars->attitude_time_d - 1, pars->attitude_pitch - 1, pars->n_attitude, time_d,
+		mb_linear_interp(verbose, pars->attitude_time_d - 1, pars->attitude_pitch - 1, pars->n_attitude, time_d,
 		                                 &pitch, &jattitude, &interp_error);
 		double heave;
-		interp_status &= mb_linear_interp(verbose, pars->attitude_time_d - 1, pars->attitude_heave - 1, pars->n_attitude, time_d,
+		mb_linear_interp(verbose, pars->attitude_time_d - 1, pars->attitude_heave - 1, pars->n_attitude, time_d,
 		                                 &heave, &jattitude, &interp_error);
-
-//		if (interp_status == MB_FAILURE) {
-//			fprintf(stderr, "%s:%4.4d:%s: WARNING: interp error is %d\n",
-//              __FILE__, __LINE__, __func__, *error);
-//		}
 
 		/* insert navigation */
 		ping->png_longitude = 10000000 * navlon;
@@ -1184,9 +1196,9 @@ int mbsys_simrad3_preprocess(int verbose,     /* in: verbosity level set on comm
 			const double receive_time_d = transmit_time_d + ping->png_raw_rxrange[i];
 
 			/* merge heading from best available source */
-			interp_status &= mb_linear_interp_heading(verbose, pars->heading_time_d - 1, pars->heading_heading - 1,
+			mb_linear_interp_heading(verbose, pars->heading_time_d - 1, pars->heading_heading - 1,
 			                                         pars->n_heading, transmit_time_d, &transmit_heading, &jheading, error);
-			interp_status &= mb_linear_interp_heading(verbose, pars->heading_time_d - 1, pars->heading_heading - 1,
+			mb_linear_interp_heading(verbose, pars->heading_time_d - 1, pars->heading_heading - 1,
 			                                         pars->n_heading, receive_time_d, &receive_heading, &jheading, error);
 			if (transmit_heading < 0.0)
 				transmit_heading += 360.0;
@@ -1198,28 +1210,24 @@ int mbsys_simrad3_preprocess(int verbose,     /* in: verbosity level set on comm
 				receive_heading -= 360.0;
 
 			/* get attitude from best available source */
-			interp_status &= mb_linear_interp(verbose, pars->attitude_time_d - 1, pars->attitude_roll - 1, pars->n_attitude,
+			mb_linear_interp(verbose, pars->attitude_time_d - 1, pars->attitude_roll - 1, pars->n_attitude,
 			                                 transmit_time_d, &transmit_roll, &jattitude, error);
-			if (interp_status == MB_SUCCESS)
-				interp_status = mb_linear_interp(verbose, pars->attitude_time_d - 1, pars->attitude_pitch - 1, pars->n_attitude,
+			mb_linear_interp(verbose, pars->attitude_time_d - 1, pars->attitude_pitch - 1, pars->n_attitude,
 				                                 transmit_time_d, &transmit_pitch, &jattitude, error);
-			if (interp_status == MB_SUCCESS)
-				interp_status = mb_linear_interp(verbose, pars->attitude_time_d - 1, pars->attitude_heave - 1, pars->n_attitude,
+			mb_linear_interp(verbose, pars->attitude_time_d - 1, pars->attitude_heave - 1, pars->n_attitude,
 				                                 transmit_time_d, &transmit_heave, &jattitude, error);
-			interp_status &= mb_linear_interp(verbose, pars->attitude_time_d - 1, pars->attitude_roll - 1, pars->n_attitude,
+			mb_linear_interp(verbose, pars->attitude_time_d - 1, pars->attitude_roll - 1, pars->n_attitude,
 			                                 receive_time_d, &receive_roll, &jattitude, error);
-			if (interp_status == MB_SUCCESS)
-				interp_status = mb_linear_interp(verbose, pars->attitude_time_d - 1, pars->attitude_pitch - 1, pars->n_attitude,
+			mb_linear_interp(verbose, pars->attitude_time_d - 1, pars->attitude_pitch - 1, pars->n_attitude,
 				                                 receive_time_d, &receive_pitch, &jattitude, error);
-			if (interp_status == MB_SUCCESS)
-				/* interp_status = */ mb_linear_interp(verbose, pars->attitude_time_d - 1, pars->attitude_heave - 1, pars->n_attitude,
+			mb_linear_interp(verbose, pars->attitude_time_d - 1, pars->attitude_heave - 1, pars->n_attitude,
 				                                 receive_time_d, &receive_heave, &jattitude, error);
 
 			/* use sensordepth instead of heave for submerged platforms */
 			if (depthsensor_mode == MBSYS_SIMRAD3_ZMODE_USE_SENSORDEPTH_ONLY) {
-				/* interp_status = */ mb_linear_interp(verbose, pars->sensordepth_time_d - 1, pars->sensordepth_sensordepth - 1,
+				mb_linear_interp(verbose, pars->sensordepth_time_d - 1, pars->sensordepth_sensordepth - 1,
 				                                 pars->n_sensordepth, transmit_time_d, &transmit_heave, &jsensordepth, error);
-				/* interp_status &= */ mb_linear_interp(verbose, pars->sensordepth_time_d - 1, pars->sensordepth_sensordepth - 1,
+				mb_linear_interp(verbose, pars->sensordepth_time_d - 1, pars->sensordepth_sensordepth - 1,
 				                                 pars->n_sensordepth, receive_time_d, &receive_heave, &jsensordepth, error);
 				heave = transmit_heave;
 			}
@@ -1331,7 +1339,10 @@ int mbsys_simrad3_preprocess(int verbose,     /* in: verbosity level set on comm
 		swath_width = (double *)&mb_io_ptr->saved2;
 		ping->png_pixel_size = 0;
 		ping->png_pixels_ss = 0;
-		status &= mbsys_simrad3_makess(verbose, mbio_ptr, store_ptr, false, pixel_size, false, swath_width, 1, error);
+    if (ping->png_ss_read)
+		  status = mbsys_simrad3_makess(verbose, mbio_ptr, store_ptr, false, pixel_size, false, swath_width, 1, error);
+    else
+      status = mbsys_simrad3_zero_ss(verbose, store_ptr, error);
 	}
 
 	if (verbose >= 2) {
@@ -2238,7 +2249,8 @@ int mbsys_simrad3_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kin
 	/* extract comment from structure */
 	else if (*kind == MB_DATA_COMMENT) {
 		/* copy comment */
-		strncpy(comment, store->par_com, MBSYS_SIMRAD3_COMMENT_LENGTH);
+    memset((void *)comment, 0, MB_COMMENT_MAXLINE);
+    strncpy(comment, store->par_com, MIN(MB_COMMENT_MAXLINE, MBSYS_SIMRAD3_COMMENT_LENGTH) - 1);
 
 		if (verbose >= 4) {
 			fprintf(stderr, "\ndbg4  New ping read by MBIO function <%s>\n", __func__);
@@ -2475,7 +2487,8 @@ int mbsys_simrad3_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind,
 
 	/* insert comment in structure */
 	else if (store->kind == MB_DATA_COMMENT) {
-		strncpy(store->par_com, comment, MBSYS_SIMRAD3_COMMENT_LENGTH);
+    memset((void *)store->par_com, 0, MBSYS_SIMRAD3_COMMENT_LENGTH);
+    strncpy(store->par_com, comment, MIN(MBSYS_SIMRAD3_COMMENT_LENGTH, MB_COMMENT_MAXLINE) - 1);
 	}
 
 	if (verbose >= 2) {

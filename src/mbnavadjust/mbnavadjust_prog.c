@@ -36,10 +36,10 @@
 
 /* Need to include windows.h BEFORE the the Xm stuff otherwise VC14+ barf with conflicts */
 #if defined(_MSC_VER) && (_MSC_VER >= 1900)
-#	ifndef WIN32
-#		define WIN32
-#	endif
-#	include <WinSock2.h>
+#  ifndef WIN32
+#    define WIN32
+#  endif
+#  include <WinSock2.h>
 #include <windows.h>
 #endif
 #include <X11/Intrinsic.h>
@@ -3685,7 +3685,7 @@ int mbnavadjust_naverr_skip() {
         crossing->num_ties = 0;
         if (project.inversion_status == MBNA_INVERSION_CURRENT) {
           project.inversion_status = MBNA_INVERSION_OLD;
-                    project.modelplot_uptodate = false;
+          project.modelplot_uptodate = false;
         }
       }
       else if (crossing->status == MBNA_CROSSING_STATUS_NONE) {
@@ -5423,7 +5423,7 @@ int mbnavadjust_autopick(bool do_vertical) {
 
   // loop over all crossings, autopick those that are in the current view,
   // unanalyzed, have sufficient overlap, and for which both sections are
-  // sufficiently long (track length >=0.25 * file->sections[0].distance)
+  // sufficiently long (track length >=0.25 * project.section_length)
   if (project.open && project.num_crossings > 0) {
     /* set message dialog on */
     sprintf(message, "Autopicking offsets...");
@@ -5570,15 +5570,15 @@ int mbnavadjust_autopick(bool do_vertical) {
       }
 
       // check if section track lengths are long enough (at least 0.25 of the
-      // length of the first section for the file) - this excludes trying to
+      // current desired section length for the project) - this excludes trying to
       // match short sections at the end of a file */
       if (process) {
         file1 = &project.files[crossing->file_id_1];
         section1 = &file1->sections[crossing->section_1];
         file2 = &project.files[crossing->file_id_2];
         section2 = &file2->sections[crossing->section_2];
-        if (section1->distance < 0.25 * file1->sections[0].distance
-            || section2->distance < 0.25 * file2->sections[0].distance) {
+        if (section1->distance < 0.25 * project.section_length
+            || section2->distance < 0.25 * project.section_length) {
           process = false;
         }
       }
@@ -5865,7 +5865,7 @@ int mbnavadjust_autosetsvsvertical() {
   struct mbna_section *section;
   struct mbna_crossing *crossing;
   struct mbna_tie *tie;
-  struct mbna_matrix matrix;
+  struct mbna_matrix matrix = { 0, 0, 0, NULL, NULL, NULL };
   bool *x_continuity = NULL;
   double *x_time_d = NULL;
   double *u = NULL;
@@ -6459,8 +6459,8 @@ int mbnavadjust_autosetsvsvertical() {
       for (int irow = 0; irow < nrows_ba; irow++)
         u[irow] = b[irow];
       damp = 0.0;
-      atol = 1.0e-6;   // releative precision of A matrix
-      btol = 1.0e-6;   // relative precision of data array
+      atol = 5.0e-7;   // releative precision of A matrix
+      btol = 5.0e-7;   // relative precision of data array
       relpr = 1.0e-16; // relative precision of double precision arithmetic
       conlim = 1 / (10 * sqrt(relpr));
       itnlim = 4 * matrix.n;
@@ -6961,7 +6961,7 @@ int mbnavadjust_invertnav() {
   struct mbna_section *section2;
   struct mbna_crossing *crossing;
   struct mbna_tie *tie;
-  struct mbna_matrix matrix;
+  struct mbna_matrix matrix = { 0, 0, 0, NULL, NULL, NULL };
   bool *x_continuity = NULL;
   int *x_quality = NULL;
   int *x_num_ties = NULL;
@@ -7189,19 +7189,16 @@ int mbnavadjust_invertnav() {
     nsmooth = 0;
     for (int inav = 0; inav < nnav - 1; inav++) {
       if (x_continuity[inav + 1]) {
-        nsmooth++;
+        nsmooth += 3;
       }
     }
-    nsmooth = 3 * nsmooth;
 
     /* count second derivative smoothing points */
-    /*nsmooth = 0;
     for (int inav = 0; inav < nnav - 2; inav++) {
         if (x_continuity[inav + 1] && x_continuity[inav + 2]) {
-            nsmooth++;
+            nsmooth += 3;
         }
     }
-    nsmooth = 3 * nsmooth;*/
 
     /* get dimensions of inversion problem and initial misfit */
     ntie = 0;
@@ -7649,8 +7646,8 @@ int mbnavadjust_invertnav() {
       for (int irow = 0; irow < nrows_ba; irow++)
         u[irow] = b[irow];
       damp = 0.0;
-      atol = 1.0e-6;   // releative precision of A matrix
-      btol = 1.0e-6;   // relative precision of data array
+      atol = 5.0e-7;   // releative precision of A matrix
+      btol = 5.0e-7;   // relative precision of data array
       relpr = 1.0e-16; // relative precision of double precision arithmetic
       conlim = 1 / (10 * sqrt(relpr));
       itnlim = 4 * matrix.n;
@@ -7804,10 +7801,10 @@ int mbnavadjust_invertnav() {
          */
 
         /* loop over all ties applying the offsets to the chunks partitioned according to survey quality */
-        n_iteration = 10000;
+        n_iteration = 100000;
         convergence = 1000.0;
-        convergence_threshold = 0.0001;
-        damping = 0.001;
+        convergence_threshold = 0.000005;
+        damping = 0.02;
         for (int iteration=0; iteration < n_iteration && convergence > convergence_threshold; iteration ++) {
             fprintf(stderr,"\nStage 2 relaxation iteration %d\n", iteration);
 
@@ -8321,11 +8318,6 @@ int mbnavadjust_invertnav() {
               smooth_exp = MAX((smooth_max - iteration * d_smooth), project.smoothing);
             }
             smoothweight = pow(10.0, smooth_exp) / 100.0;
-            fprintf(stderr, "\n----------\n\nPreparing inversion iteration %d of %d with smoothing %f ==> %f\n\t\trows: %d %d  cols: %d %d\n",
-                    iteration, n_iteration_tot, smooth_exp,
-                    smoothweight, matrix.m, nrows, matrix.n, ncols);
-
-            /* loop over each crossing, applying offsets evenly to both points */
             int irow = 0;
             nrms = 0;
             rms_misfit_previous = 0.0;
@@ -8341,6 +8333,12 @@ int mbnavadjust_invertnav() {
             memset(matrix.nia, 0, nrows_alloc * sizeof(int));
             memset(matrix.ia, 0, 6 * nrows_alloc * sizeof(int));
             memset(matrix.a, 0, 6 * nrows_alloc * sizeof(double));
+
+            fprintf(stderr, "\n----------\n\nPreparing inversion iteration %d of %d with smoothing %f ==> %f\n\t\trows: %d %d  cols: %d %d\n",
+                    iteration, n_iteration_tot, smooth_exp,
+                    smoothweight, matrix.m, nrows, matrix.n, ncols);
+
+            /* loop over each crossing, applying offsets evenly to both points */
             for (int icrossing = 0; icrossing < project.num_crossings; icrossing++) {
                 crossing = &project.crossings[icrossing];
                 int nc1;
@@ -8763,8 +8761,10 @@ fprintf(stderr,"APPLYING WEIGHT: %f  ifile:%d isection:%d\n",weight,ifile,isecti
             }
 
             /* E1: loop over all navigation applying second derivative smoothing */
-            /* nnsmooth = 0;
+            nnsmooth = 0;
             for (int inav = 0; inav < nnav - 2; inav++) {
+                int index_m;
+                int index_n;
                 if (x_continuity[inav + 1] && x_continuity[inav + 2]) {
                     if (x_time_d[inav + 2] - x_time_d[inav] > 0.0) {
                         weight = smoothweight / (x_time_d[inav + 2] - x_time_d[inav]);
@@ -8829,7 +8829,7 @@ fprintf(stderr,"APPLYING WEIGHT: %f  ifile:%d isection:%d\n",weight,ifile,isecti
                     matrix.nia[irow] = 3;
                     irow++;
                 }
-            }*/
+            }
 
             /* F1: loop over all navigation applying L1 norm - minimize size of offset */
             /*for (int inav = 0; inav < nnav; inav++) {
@@ -8868,8 +8868,8 @@ fprintf(stderr,"APPLYING WEIGHT: %f  ifile:%d isection:%d\n",weight,ifile,isecti
             for (int irow = 0; irow < matrix.m; irow++)
                 u[irow] = b[irow];
             damp = 0.0;
-            atol = 1.0e-6;   // releative precision of A matrix
-            btol = 1.0e-6;   // relative precision of data array
+            atol = 5.0e-7;   // releative precision of A matrix
+            btol = 5.0e-7;   // relative precision of data array
             relpr = 1.0e-16; // relative precision of double precision arithmetic
             conlim = 1 / (10 * sqrt(relpr));
             itnlim = 4 * matrix.n;
@@ -9060,6 +9060,11 @@ fprintf(stderr,"APPLYING WEIGHT: %f  ifile:%d isection:%d\n",weight,ifile,isecti
     /* get crossing offset results */
     sprintf(message, " > Nav Tie Offsets (m):  id  observed  solution  error\n");
     do_info_add(message, false);
+    mb_path tie_file;
+    strcpy(tie_file, project.path);
+    strcat(tie_file, project.name);
+    strcat(tie_file, "_tiesoln.txt");
+    FILE *ofp = fopen(tie_file, "w");
     for (int icrossing = 0; icrossing < project.num_crossings; icrossing++) {
       crossing = &project.crossings[icrossing];
 
@@ -9105,16 +9110,16 @@ fprintf(stderr,"APPLYING WEIGHT: %f  ifile:%d isection:%d\n",weight,ifile,isecti
             tie->dr1_m = fabs((tie->inversion_offset_x_m - tie->offset_x_m) * tie->sigmax1[0] +
                          (tie->inversion_offset_y_m - tie->offset_y_m) * tie->sigmax1[1] +
                          (tie->inversion_offset_z_m - tie->offset_z_m) * tie->sigmax1[2]) /
-                    tie->sigmar1;
+                         tie->sigmar1;
             tie->dr2_m = fabs((tie->inversion_offset_x_m - tie->offset_x_m) * tie->sigmax2[0] +
                          (tie->inversion_offset_y_m - tie->offset_y_m) * tie->sigmax2[1] +
                          (tie->inversion_offset_z_m - tie->offset_z_m) * tie->sigmax2[2]) /
-                    tie->sigmar2;
+                         tie->sigmar2;
             tie->dr3_m = fabs((tie->inversion_offset_x_m - tie->offset_x_m) * tie->sigmax3[0] +
                          (tie->inversion_offset_y_m - tie->offset_y_m) * tie->sigmax3[1] +
                          (tie->inversion_offset_z_m - tie->offset_z_m) * tie->sigmax3[2]) /
-                    tie->sigmar3;
-                        tie->rsigma_m = sqrt(tie->dr1_m * tie->dr1_m + tie->dr2_m * tie->dr2_m + tie->dr3_m * tie->dr3_m);
+                         tie->sigmar3;
+            tie->rsigma_m = sqrt(tie->dr1_m * tie->dr1_m + tie->dr2_m * tie->dr2_m + tie->dr3_m * tie->dr3_m);
           }
 
           sprintf(message, " >     %4d   %10.3f %10.3f %10.3f   %10.3f %10.3f %10.3f   %10.3f %10.3f %10.3f   %10.3f\n",
@@ -9122,9 +9127,34 @@ fprintf(stderr,"APPLYING WEIGHT: %f  ifile:%d isection:%d\n",weight,ifile,isecti
                             tie->inversion_offset_x_m, tie->inversion_offset_y_m, tie->inversion_offset_z_m,
                             tie->dx_m, tie->dy_m, tie->dz_m, tie->sigma_m);
           do_info_add(message, false);
+          int snav_1_time_i[7], snav_2_time_i[7];
+          double snav_1_time_d = project.files[crossing->file_id_1].sections[crossing->section_1].snav_time_d[tie->snav_1];
+          double snav_2_time_d = project.files[crossing->file_id_2].sections[crossing->section_2].snav_time_d[tie->snav_2];
+          //ZZZZZZZZZZZZ
+          mb_get_date(mbna_verbose, snav_1_time_d, snav_1_time_i);
+          mb_get_date(mbna_verbose, snav_2_time_d, snav_2_time_i);
+          double avg_tie_lon = 0.5 * (project.files[crossing->file_id_1].sections[crossing->section_1].snav_lon[tie->snav_1]
+                                      + project.files[crossing->file_id_2].sections[crossing->section_2].snav_lon[tie->snav_2]);
+          double avg_tie_lat = 0.5 * (project.files[crossing->file_id_1].sections[crossing->section_1].snav_lat[tie->snav_1]
+                                      + project.files[crossing->file_id_2].sections[crossing->section_2].snav_lat[tie->snav_2]);
+          fprintf(ofp,  "%2.2d:%4.4d:%3.3d:%2.2d %4.4d %2.2d %2.2d %2.2d:%2.2d:%2.2d.%6.6d  %.6f "
+                        "%2.2d:%4.4d:%3.3d:%2.2d %4.4d %2.2d %2.2d %2.2d:%2.2d:%2.2d.%6.6d  %.6f "
+                        "%14.9f %14.9f "
+                        "%8.2f %8.2f %8.2f   %8.2f %8.2f %8.2f   %8.2f %8.2f %8.2f\n",
+                      project.files[crossing->file_id_1].block, crossing->file_id_1, crossing->section_1, tie->snav_1,
+                      snav_1_time_i[0], snav_1_time_i[1], snav_1_time_i[2], snav_1_time_i[3], snav_1_time_i[4], snav_1_time_i[5], snav_1_time_i[6],
+                      snav_1_time_d,
+                      project.files[crossing->file_id_2].block, crossing->file_id_2, crossing->section_2, tie->snav_2,
+                      snav_2_time_i[0], snav_2_time_i[1], snav_2_time_i[2], snav_2_time_i[3], snav_2_time_i[4], snav_2_time_i[5], snav_2_time_i[6],
+                      snav_2_time_d,
+                      avg_tie_lon, avg_tie_lat,
+                      tie->offset_x_m, tie->offset_y_m, tie->offset_z_m,
+                      tie->inversion_offset_x_m, tie->inversion_offset_y_m, tie->inversion_offset_z_m,
+                      tie->dx_m, tie->dy_m, tie->dz_m);
         }
       }
     }
+    fclose(ofp);
 
     /* get global tie results */
     sprintf(message, " > Global Tie Offsets (m):  id  observed  solution  error\n");
@@ -9922,8 +9952,8 @@ fprintf(stderr, "Fix Z block %d to %f\n", iblock, bzfix[iblock]);
       for (int irow = 0; irow < nrows_ba; irow++)
         u[irow] = b[irow];
       damp = 0.0;
-      atol = 1.0e-6;   // releative precision of A matrix
-      btol = 1.0e-6;   // relative precision of data array
+      atol = 5.0e-7;   // releative precision of A matrix
+      btol = 5.0e-7;   // relative precision of data array
       relpr = 1.0e-16; // relative precision of double precision arithmetic
       conlim = 1 / (10 * sqrt(relpr));
       itnlim = 4 * matrix.n;
@@ -10544,16 +10574,10 @@ fprintf(stderr, "Fix Z block %d to %f\n", iblock, bzfix[iblock]);
             sprintf(message, "Performing navigation inversion iteration %d of %d...", iteration +1, n_iteration);
             do_message_on(message);
 
-
             //smoothweight = pow(10.0, project.smoothing) / 100.0;
             //smooth_exp = MAX((smooth_max - iteration * d_smooth), project.smoothing);
             smooth_exp = project.smoothing;
             smoothweight = pow(10.0, smooth_exp) / 100.0;
-            fprintf(stderr, "\n----------\n\nPreparing inversion iteration %d with smoothing %f ==> %f\n\t\trows: %d %d  cols: %d %d\n",
-                    iteration, smooth_exp,
-                    smoothweight, matrix.m, nrows, matrix.n, ncols);
-
-            /* loop over each crossing, applying offsets evenly to both points */
             int irow = 0;
             nrms = 0;
             rms_misfit_previous = 0.0;
@@ -10569,6 +10593,12 @@ fprintf(stderr, "Fix Z block %d to %f\n", iblock, bzfix[iblock]);
             memset(matrix.nia, 0, nrows_alloc * sizeof(int));
             memset(matrix.ia, 0, 6 * nrows_alloc * sizeof(int));
             memset(matrix.a, 0, 6 * nrows_alloc * sizeof(double));
+
+            fprintf(stderr, "\n----------\n\nPreparing inversion iteration %d with smoothing %f ==> %f\n\t\trows: %d %d  cols: %d %d\n",
+                    iteration, smooth_exp,
+                    smoothweight, matrix.m, nrows, matrix.n, ncols);
+
+            /* loop over each crossing, applying offsets evenly to both points */
             for (int icrossing = 0; icrossing < project.num_crossings; icrossing++) {
                 crossing = &project.crossings[icrossing];
                 int nc1;
@@ -11096,8 +11126,8 @@ fprintf(stderr,"APPLYING WEIGHT: %f  ifile:%d isection:%d\n",weight,ifile,isecti
             for (int irow = 0; irow < matrix.m; irow++)
                 u[irow] = b[irow];
             damp = 0.0;
-            atol = 1.0e-6;   // releative precision of A matrix
-            btol = 1.0e-6;   // relative precision of data array
+            atol = 5.0e-7;   // releative precision of A matrix
+            btol = 5.0e-7;   // relative precision of data array
             relpr = 1.0e-16; // relative precision of double precision arithmetic
             conlim = 1 / (10 * sqrt(relpr));
             itnlim = 4 * matrix.n;
@@ -12052,8 +12082,8 @@ int mbnavadjust_invertnav_old() {
       for (int irow = 0; irow < nrows_ba; irow++)
         u[irow] = b[irow];
       damp = 0.0;
-      atol = 1.0e-6;   // releative precision of A matrix
-      btol = 1.0e-6;   // relative precision of data array
+      atol = 5.0e-7;   // releative precision of A matrix
+      btol = 5.0e-7;   // relative precision of data array
       relpr = 1.0e-16; // relative precision of double precision arithmetic
       conlim = 1 / (10 * sqrt(relpr));
       itnlim = 4 * matrix.n;
@@ -12506,8 +12536,8 @@ int mbnavadjust_invertnav_old() {
     for (int irow = 0; irow < matrix.m; irow++)
       u[irow] = b[irow];
     damp = 0.0;
-    atol = 1.0e-6;   // releative precision of A matrix
-    btol = 1.0e-6;   // relative precision of data array
+    atol = 5.0e-7;   // releative precision of A matrix
+    btol = 5.0e-7;   // relative precision of data array
     relpr = 1.0e-16; // relative precision of double precision arithmetic
     conlim = 1 / (10 * sqrt(relpr));
     itnlim = 4 * matrix.n;
@@ -13064,7 +13094,7 @@ ifile, isection, isnav);
       do_info_add(message, false);
       if (mbna_verbose == 0)
         fprintf(stderr, "%s", message);
-      sprintf(command, "cd %s ; mbprocess", project.datadir);
+      sprintf(command, "cd %s ; mbprocess -C4", project.datadir);
       fprintf(stderr, "Executing:\n%s\n\n", command);
       /* const int shellstatus = */ system(command);
     }
@@ -17053,9 +17083,9 @@ int mbnavadjust_open_visualization(int which_grid) {
   double *navportlat = NULL;
   double *navstbdlon = NULL;
   double *navstbdlat = NULL;
-  int *navline = NULL;
-  int *navshot = NULL;
-  int *navcdp = NULL;
+  unsigned int *navline = NULL;
+  unsigned int *navshot = NULL;
+  unsigned int *navcdp = NULL;
   int mbv_navcolor;
   int mbv_navsize;
   mb_path mbv_navname;
@@ -17064,9 +17094,9 @@ int mbnavadjust_open_visualization(int which_grid) {
   mb_path mbv_navpathprocessed;
   int mbv_navformatorg;
   int mbv_navswathbounds;
-  int mbv_navline;
-  int mbv_navshot;
-  int mbv_navcdp;
+  unsigned int mbv_navline;
+  unsigned int mbv_navshot;
+  unsigned int mbv_navcdp;
   int mbv_navdecimation;
 
   FILE *nfp;

@@ -90,9 +90,9 @@ int mbr_info_em710mba(int verbose, int *system, int *beams_bath_max, int *beams_
 	strncpy(format_name, "EM710MBA", MB_NAME_LENGTH);
 	strncpy(system_name, "SIMRAD3", MB_NAME_LENGTH);
 	strncpy(format_description,
-	        "Format name:          MBF_EM710MBA\nInformal Description: Kongsberg current multibeam vendor format\nAttributes:    "
+	        "Format name:          MBF_EM710MBA\nInformal Description: Kongsberg current multibeam processing format\nAttributes:    "
 	        "       Kongsberg EM122, EM302, EM710,\n                      bathymetry, amplitude, and sidescan,\n                 "
-	        "     up to 400 beams, variable pixels, binary, Kongsberg.\n",
+	        "     up to 400 beams, variable pixels, binary, MBARI.\n",
 	        MB_DESCRIPTION_LENGTH);
 	*numfile = 1;
 	*filetype = MB_FILETYPE_SINGLE;
@@ -409,9 +409,139 @@ int mbr_em710mba_chk_label(int verbose, void *mbio_ptr, char *label, short *type
 	return (status);
 }
 /*--------------------------------------------------------------------*/
+int mbr_em710mba_rd_puid(int verbose, void *mbio_ptr, int swap, struct mbsys_simrad3_struct *store, short type, short sonar,
+                           int *goodend, int *error) {
+
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
+		fprintf(stderr, "dbg2       swap:       %d\n", swap);
+		fprintf(stderr, "dbg2       store:      %p\n", (void *)store);
+		fprintf(stderr, "dbg2       sonar:      %d\n", sonar);
+	}
+
+	/* set goodend false until a good end is found */
+	*goodend = false;
+
+	/* set kind and type values */
+	store->kind = MB_DATA_STATUS;
+	store->type = EM3_PU_ID;
+	store->sonar = sonar;
+
+	/* read binary values into char array */
+	size_t read_len = (size_t)(EM3_PU_ID_SIZE - 4);
+	char line[EM3_PU_ID_SIZE];
+	const int status = mb_fileio_get(verbose, mbio_ptr, (char *)line, &read_len, error);
+
+	/* get binary data */
+	if (status == MB_SUCCESS) {
+		mb_get_binary_int(swap, &line[0], &store->pid_date);
+		if (store->sts_date != 0)
+			store->date = store->sts_date;
+		mb_get_binary_int(swap, &line[4], &store->pid_msec);
+		if (store->sts_date != 0)
+			store->msec = store->pid_msec;
+		unsigned short ushort_val;
+		mb_get_binary_short(swap, &line[8], &ushort_val);
+		store->pid_byte_order_flag = (int)(ushort_val);
+		mb_get_binary_short(swap, &line[10], &ushort_val);
+		store->pid_serial = (int)(ushort_val);
+		mb_get_binary_short(swap, &line[12], &ushort_val);
+		store->pid_udp_port_1 = (int)(ushort_val);
+		mb_get_binary_short(swap, &line[14], &ushort_val);
+		store->pid_udp_port_2 = (int)(ushort_val);
+		mb_get_binary_short(swap, &line[16], &ushort_val);
+		store->pid_udp_port_3 = (int)(ushort_val);
+		mb_get_binary_short(swap, &line[18], &ushort_val);
+		store->pid_udp_port_4 = (int)(ushort_val);
+		mb_get_binary_int(swap, &line[20], &store->pid_sys_descriptor);
+    for (int i=0; i<16; i++) {
+      store->pid_pu_sw_version[i] = line[24+i];
+    }
+    for (int i=0; i<16; i++) {
+      store->pid_bsp_sw_version[i] = line[40+i];
+    }
+    for (int i=0; i<16; i++) {
+      store->pid_head1_version[i] = line[56+i];
+    }
+    for (int i=0; i<16; i++) {
+      store->pid_head2_version[i] = line[72+i];
+    }
+		mb_get_binary_int(swap, &line[88], &store->pid_host_ip);
+    store->pid_tx_opening_angle = line[92];
+    store->pid_rx_opening_angle = line[93];
+    for (int i=0; i<7; i++) {
+      store->pid_spare[i] = line[94+i];
+    }
+		if (line[EM3_PU_ID_SIZE - 7] == EM3_END)
+			*goodend = true;
+#ifdef MBR_em710mba_DEBUG
+		fprintf(stderr, "End Bytes: %2.2hhX %d | %2.2hhX %d | %2.2hhX %d\n", line[EM3_PU_ID_SIZE - 7],
+		        line[EM3_PU_ID_SIZE - 7], line[EM3_PU_ID_SIZE - 6], line[EM3_PU_ID_SIZE - 6],
+		        line[EM3_PU_ID_SIZE - 5], line[EM3_PU_ID_SIZE - 5]);
+#endif
+	}
+
+	if (verbose >= 5) {
+		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
+		fprintf(stderr, "dbg5       type:                %d\n", store->type);
+		fprintf(stderr, "dbg5       sonar:               %d\n", store->sonar);
+		fprintf(stderr, "dbg5       date:                %d\n", store->date);
+		fprintf(stderr, "dbg5       msec:                %d\n", store->msec);
+		fprintf(stderr, "dbg5       pid_date:            %d\n", store->pid_date);
+		fprintf(stderr, "dbg5       pid_msec:            %d\n", store->pid_msec);
+		fprintf(stderr, "dbg5       pid_byte_order_flag: %d\n", store->pid_byte_order_flag);
+		fprintf(stderr, "dbg5       pid_serial:          %d\n", store->pid_serial);
+		fprintf(stderr, "dbg5       pid_udp_port_1:      %d\n", store->pid_udp_port_1);
+		fprintf(stderr, "dbg5       pid_udp_port_2:      %d\n", store->pid_udp_port_2);
+		fprintf(stderr, "dbg5       pid_udp_port_3:      %d\n", store->pid_udp_port_3);
+		fprintf(stderr, "dbg5       pid_udp_port_4:      %d\n", store->pid_udp_port_4);
+		fprintf(stderr, "dbg5       pid_pu_sw_version:   ");
+    for (int i=0; i<16; i++) {
+      fprintf(stderr, "%c", store->pid_pu_sw_version[i]);
+    }
+    fprintf(stderr, "\n");
+		fprintf(stderr, "dbg5       pid_bsp_sw_version:   ");
+    for (int i=0; i<16; i++) {
+      fprintf(stderr, "%c", store->pid_bsp_sw_version[i]);
+    }
+    fprintf(stderr, "\n");
+		fprintf(stderr, "dbg5       pid_head1_version:   ");
+    for (int i=0; i<16; i++) {
+      fprintf(stderr, "%c", store->pid_head1_version[i]);
+    }
+    fprintf(stderr, "\n");
+		fprintf(stderr, "dbg5       pid_head2_version:   ");
+    for (int i=0; i<16; i++) {
+      fprintf(stderr, "%c", store->pid_head2_version[i]);
+    }
+    fprintf(stderr, "\n");
+		fprintf(stderr, "dbg5       pid_host_ip:         %d\n", store->pid_host_ip);
+		fprintf(stderr, "dbg5       pid_tx_opening_angle:%d\n", store->pid_tx_opening_angle);
+		fprintf(stderr, "dbg5       pid_rx_opening_angle:%d\n", store->pid_rx_opening_angle);
+		fprintf(stderr, "dbg5       pid_spare:           ");
+    for (int i=0; i<7; i++) {
+      fprintf(stderr, "%c", store->pid_spare[i]);
+    }
+    fprintf(stderr, "\n");
+	}
+
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       goodend:    %d\n", *goodend);
+		fprintf(stderr, "dbg2       error:      %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:  %d\n", status);
+	}
+
+	return (status);
+}
+/*--------------------------------------------------------------------*/
 int mbr_em710mba_rd_status(int verbose, void *mbio_ptr, int swap, struct mbsys_simrad3_struct *store, short type, short sonar,
                            int *goodend, int *error) {
-	(void)type;  // unused
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -4405,6 +4535,19 @@ Have a nice day...\n");
 #endif
 			done = false;
 		}
+		else if (type == EM3_PU_ID) {
+#ifdef MBR_em710mba_DEBUG
+			fprintf(stderr, "call mbr_em710mba_rd_puid type %x\n", type);
+#endif
+
+			status = mbr_em710mba_rd_puid(verbose, mbio_ptr, swap, store, type, sonar, &good_end_bytes, error);
+			if (status == MB_SUCCESS) {
+				done = true;
+			}
+#ifdef MBR_em710mba_DEBUG3
+			fprintf(stderr, "mbr_em710mba_rd_puid\n");
+#endif
+    }
 		else if (type == EM3_PU_STATUS) {
 #ifdef MBR_EM710MBA_DEBUG
 			fprintf(stderr, "call mbr_em710mba_rd_status type %x\n", type);
@@ -4691,7 +4834,7 @@ Have a nice day...\n");
 				done = false;
 			}
 #ifdef MBR_EM710MBA_DEBUG3
-			fprintf(stderr, "mbr_em710raw_rd_rawbeam4: ping_index:%d ping:%d serial:%d\n", store->ping_index,
+			fprintf(stderr, "mbr_em710mba_rd_rawbeam4: ping_index:%d ping:%d serial:%d\n", store->ping_index,
 			        store->pings[store->ping_index].png_raw_count, store->pings[store->ping_index].png_raw_serial);
 #endif
 		}
@@ -4706,7 +4849,7 @@ Have a nice day...\n");
 				done = false;
 			}
 #ifdef MBR_EM710MBA_DEBUG3
-			fprintf(stderr, "mbr_em710raw_rd_quality: ping_index:%d ping:%d serial:%d\n", store->ping_index,
+			fprintf(stderr, "mbr_em710mba_rd_quality: ping_index:%d ping:%d serial:%d\n", store->ping_index,
 			        store->pings[store->ping_index].png_quality_count, store->pings[store->ping_index].png_quality_serial);
 #endif
 		}
@@ -4729,7 +4872,7 @@ Have a nice day...\n");
 				}
 			}
 #ifdef MBR_EM710MBA_DEBUG3
-			fprintf(stderr, "mbr_em710raw_rd_ss2: ping_index:%d ping:%d serial:%d\n", store->ping_index,
+			fprintf(stderr, "mbr_em710mba_rd_ss2: ping_index:%d ping:%d serial:%d\n", store->ping_index,
 			        store->pings[store->ping_index].png_ss_count, store->pings[store->ping_index].png_ss_serial);
 #endif
 		}
@@ -5521,6 +5664,154 @@ int mbr_em710mba_wr_start(int verbose, void *mbio_ptr, int swap, struct mbsys_si
 	/* finally write out the data */
 	write_len = write_size;
 	const int status = mb_fileio_put(verbose, mbio_ptr, line, &write_len, error);
+
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       error:      %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:  %d\n", status);
+	}
+
+	return (status);
+}
+/*--------------------------------------------------------------------*/
+int mbr_em710mba_wr_puid(int verbose, void *mbio_ptr, int swap, struct mbsys_simrad3_struct *store, int *error) {
+	char line[EM3_PU_ID_SIZE];
+	short label;
+	char *labelchar;
+	size_t write_len;
+	int write_size;
+	unsigned short checksum;
+	mb_u_char *uchar_ptr;
+
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
+		fprintf(stderr, "dbg2       swap:       %d\n", swap);
+		fprintf(stderr, "dbg2       store:      %p\n", (void *)store);
+	}
+
+	if (verbose >= 5) {
+		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
+		fprintf(stderr, "dbg5       type:                %d\n", store->type);
+		fprintf(stderr, "dbg5       sonar:               %d\n", store->sonar);
+		fprintf(stderr, "dbg5       date:                %d\n", store->date);
+		fprintf(stderr, "dbg5       msec:                %d\n", store->msec);
+		fprintf(stderr, "dbg5       pid_date:            %d\n", store->pid_date);
+		fprintf(stderr, "dbg5       pid_msec:            %d\n", store->pid_msec);
+		fprintf(stderr, "dbg5       pid_byte_order_flag: %d\n", store->pid_byte_order_flag);
+		fprintf(stderr, "dbg5       pid_serial:          %d\n", store->pid_serial);
+		fprintf(stderr, "dbg5       pid_udp_port_1:      %d\n", store->pid_udp_port_1);
+		fprintf(stderr, "dbg5       pid_udp_port_2:      %d\n", store->pid_udp_port_2);
+		fprintf(stderr, "dbg5       pid_udp_port_3:      %d\n", store->pid_udp_port_3);
+		fprintf(stderr, "dbg5       pid_udp_port_4:      %d\n", store->pid_udp_port_4);
+		fprintf(stderr, "dbg5       pid_pu_sw_version:   ");
+    for (int i=0; i<16; i++) {
+      fprintf(stderr, "%c", store->pid_pu_sw_version[i]);
+    }
+    fprintf(stderr, "\n");
+		fprintf(stderr, "dbg5       pid_bsp_sw_version:   ");
+    for (int i=0; i<16; i++) {
+      fprintf(stderr, "%c", store->pid_bsp_sw_version[i]);
+    }
+    fprintf(stderr, "\n");
+		fprintf(stderr, "dbg5       pid_head1_version:   ");
+    for (int i=0; i<16; i++) {
+      fprintf(stderr, "%c", store->pid_head1_version[i]);
+    }
+    fprintf(stderr, "\n");
+		fprintf(stderr, "dbg5       pid_head2_version:   ");
+    for (int i=0; i<16; i++) {
+      fprintf(stderr, "%c", store->pid_head2_version[i]);
+    }
+    fprintf(stderr, "\n");
+		fprintf(stderr, "dbg5       pid_host_ip:         %d\n", store->pid_host_ip);
+		fprintf(stderr, "dbg5       pid_tx_opening_angle:%d\n", store->pid_tx_opening_angle);
+		fprintf(stderr, "dbg5       pid_rx_opening_angle:%d\n", store->pid_rx_opening_angle);
+		fprintf(stderr, "dbg5       pid_spare:           ");
+    for (int i=0; i<7; i++) {
+      fprintf(stderr, "%c", store->pid_spare[i]);
+    }
+    fprintf(stderr, "\n");
+	}
+
+	/* zero checksum */
+	checksum = 0;
+
+	/* write the record size */
+	mb_put_binary_int(swap, (int)(EM3_PU_ID_SIZE), (void *)&write_size);
+	write_len = 4;
+	mb_fileio_put(verbose, mbio_ptr, (char *)&write_size, &write_len, error);
+
+	/* write the record label */
+	labelchar = (char *)&label;
+	labelchar[0] = EM3_START_BYTE;
+	labelchar[1] = EM3_ID_PU_ID;
+	write_len = 2;
+	int status = mb_fileio_put(verbose, mbio_ptr, (char *)&label, &write_len, error);
+
+	/* compute checksum */
+	uchar_ptr = (mb_u_char *)&label;
+	checksum += uchar_ptr[1];
+
+	/* write the sonar id */
+	if (status == MB_SUCCESS) {
+		mb_put_binary_short(swap, (short)(store->sonar), (void *)&label);
+		write_len = 2;
+		status = mb_fileio_put(verbose, mbio_ptr, (char *)&label, &write_len, error);
+
+		/* compute checksum */
+		uchar_ptr = (mb_u_char *)&label;
+		checksum += uchar_ptr[0];
+		checksum += uchar_ptr[1];
+	}
+
+	/* construct binary data */
+	if (status == MB_SUCCESS) {
+		mb_put_binary_int(swap, (int)store->pid_date, (void *)&line[0]);
+		mb_put_binary_int(swap, (int)store->pid_msec, (void *)&line[4]);
+		mb_put_binary_short(swap, (unsigned short)store->pid_byte_order_flag, (void *)&line[8]);
+		mb_put_binary_short(swap, (unsigned short)store->pid_serial, (void *)&line[10]);
+		mb_put_binary_short(swap, (unsigned short)store->pid_udp_port_1, (void *)&line[12]);
+		mb_put_binary_short(swap, (unsigned short)store->pid_udp_port_2, (void *)&line[14]);
+		mb_put_binary_short(swap, (unsigned short)store->pid_udp_port_3, (void *)&line[16]);
+		mb_put_binary_short(swap, (unsigned short)store->pid_udp_port_4, (void *)&line[18]);
+		mb_put_binary_int(swap, (int)store->pid_sys_descriptor, (void *)&line[20]);
+    for (int i=0; i<16; i++){
+      line[24+i] = store->pid_pu_sw_version[i];
+    }
+    for (int i=0; i<16; i++){
+      line[40+i] = store->pid_bsp_sw_version[i];
+    }
+    for (int i=0; i<16; i++){
+      line[56+i] = store->pid_head1_version[i];
+    }
+    for (int i=0; i<16; i++){
+      line[72+i] = store->pid_head2_version[i];
+    }
+		mb_put_binary_int(swap, (int)store->pid_sys_descriptor, (void *)&line[88]);
+    line[92] = store->pid_tx_opening_angle;
+    line[93] = store->pid_tx_opening_angle;
+    for (int i=0; i<7; i++){
+      line[94+i] = store->pid_spare[i];
+    }
+		line[EM3_PU_ID_SIZE - 7] = 0x03;
+
+		/* compute checksum */
+		uchar_ptr = (mb_u_char *)line;
+		for (int j = 0; j < EM3_PU_ID_SIZE - 7; j++)
+			checksum += uchar_ptr[j];
+
+		/* set checksum */
+		mb_put_binary_short(swap, (unsigned short)checksum, (void *)&line[EM3_PU_ID_SIZE - 6]);
+
+		/* write out data */
+		write_len = EM3_PU_ID_SIZE - 4;
+		status = mb_fileio_put(verbose, mbio_ptr, line, &write_len, error);
+	}
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
@@ -8602,7 +8893,17 @@ int mbr_em710mba_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 #endif
 		status = mbr_em710mba_wr_start(verbose, mb_io_ptr, swap, store, error);
 	}
-	else if (store->kind == MB_DATA_STATUS) {
+	else if (store->kind == MB_DATA_STATUS && store->type == EM3_PU_ID) {
+#ifdef MBR_em710mba_DEBUG
+		fprintf(stderr, "call mbr_em710mba_wr_puid kind:%d type %x\n", store->kind, store->type);
+#else
+#ifdef MBR_em710mba_DEBUG3
+		fprintf(stderr, "type:%x sonar:%d                      mbr_em710mba_wr_puid\n\n", store->type, store->sonar);
+#endif
+#endif
+		status = mbr_em710mba_wr_puid(verbose, mbio_ptr, swap, store, error);
+	}
+	else if (store->kind == MB_DATA_STATUS && store->type == EM3_PU_STATUS) {
 #ifdef MBR_EM710MBA_DEBUG
 		fprintf(stderr, "call mbr_em710mba_wr_status kind:%d type %x\n", store->kind, store->type);
 #else

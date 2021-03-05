@@ -4123,8 +4123,6 @@ int mbr_rt_em300raw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	struct mbsys_simrad2_struct *store = (struct mbsys_simrad2_struct *)store_ptr;
 	struct mbsys_simrad2_attitude_struct *attitude = (struct mbsys_simrad2_attitude_struct *)store->attitude;
 	struct mbsys_simrad2_ping_struct *ping = (struct mbsys_simrad2_ping_struct *)store->ping;
-	double *pixel_size = (double *)&mb_io_ptr->saved1;
-	double *swath_width = (double *)&mb_io_ptr->saved2;
 
 	/* save fix if nav data */
 	if (status == MB_SUCCESS && store->kind == MB_DATA_NAV) {
@@ -4283,6 +4281,8 @@ int mbr_rt_em300raw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		/* generate processed sidescan */
 		ping->png_pixel_size = 0;
 		ping->png_pixels_ss = 0;
+	  double *pixel_size = (double *)&mb_io_ptr->saved1;
+	  double *swath_width = (double *)&mb_io_ptr->saved2;
 		status = mbsys_simrad2_makess(verbose, mbio_ptr, store_ptr, false, pixel_size, false, swath_width, 0, error);
 	}
 

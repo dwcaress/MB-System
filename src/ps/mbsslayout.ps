@@ -1,6 +1,6 @@
 %!PS-Adobe-3.0
 %%Creator: groff version 1.19.2
-%%CreationDate: Mon Sep 14 17:01:47 2020
+%%CreationDate: Sun Feb 21 01:33:55 2021
 %%DocumentNeededResources: font Times-Roman
 %%+ font Times-Bold
 %%+ font Times-Italic
@@ -252,7 +252,7 @@ F0(=)A F3(name)A F2(\255\255line-name2)108 345.6 Q F0(=)A F3(name)A F2
 (\255\255topo-grid-\214le)108 369.6 Q F0(=)A F3(\214lename)A F2
 (\255\255altitude-altitude)108 381.6 Q(\255\255altitude-bottomppick)108
 393.6 Q(\255\255altitude-bottompick-thr)108 405.6 Q(eshold)-.18 E F0(=)A
-F3(value)A F2(\255\255altitude-topo-grid)108 417.6 Q
+F3(thr)A(eshold[/blank])-.37 E F2(\255\255altitude-topo-grid)108 417.6 Q
 (\255\255channel-swap)108 429.6 Q(\255\255swath-width)108 441.6 Q F0(=)A
 F3(value)A F2(\255\255inter)108 453.6 Q(polation)-.1 E F0(=)A F3(value)A
 F2<adad6e61>108 465.6 Q(v-\214le)-.25 E F0(=)A F3(\214lename)A F2
@@ -279,7 +279,7 @@ F2(\255\255soundspeed-\214le-f)108 669.6 Q(ormat)-.25 E F0(=)A F3
 F3(\214lename)A F2(\255\255timeshift-constant)108 705.6 Q F0(=)A F3
 (value)A F2(\255\255timeshift-apply-na)108 717.6 Q(v)-.25 E
 (\255\255timeshift-apply-sensordepth)108 729.6 Q F0(MB-System 5.0)72 768
-Q(17 September 2017)131.775 E(1)190.115 E 0 Cg EP
+Q(29 September 2020)131.775 E(1)190.115 E 0 Cg EP
 %%Page: 2 2
 %%BeginPageSetup
 BP
@@ -381,7 +381,7 @@ red, the ancillary v)108 688.8 R .367(alues can be mer)-.25 F .367
 -2.5 E .203(Once the sidescan data ha)108 724.8 R .503 -.15(ve b)-.2 H
 .203(een laid out onto the sea\215oor and output to format 71 sw).15 F
 .203(ath \214les, the)-.1 F 2.703(yc)-.15 G .203(an be)-2.703 F
-(MB-System 5.0)72 768 Q(17 September 2017)131.775 E(2)190.115 E 0 Cg EP
+(MB-System 5.0)72 768 Q(29 September 2020)131.775 E(2)190.115 E 0 Cg EP
 %%Page: 3 3
 %%BeginPageSetup
 BP
@@ -477,7 +477,7 @@ r format in \214les with a *.jsf suf)-2.555 F .054(\214x, and)-.25 F
 -1.11(AT A)-.4 H 3.256(,M)1.11 G(B_D)-3.256 E -1.21 -1.11(AT A)-.4 H
 .756(_SIDESCAN2, and)1.11 F(MB_D)144 710.4 Q -1.21 -1.11(AT A)-.4 H
 (_SIDESCAN3 records present.)1.11 E(MB-System 5.0)72 768 Q
-(17 September 2017)131.775 E(3)190.115 E 0 Cg EP
+(29 September 2020)131.775 E(3)190.115 E 0 Cg EP
 %%Page: 4 4
 %%BeginPageSetup
 BP
@@ -594,7 +594,7 @@ E .724(ation or by picking the initial bottom return in)-.05 F
 -.25 F -.25(va)144 688.8 S .125(lue used for the o).25 F -.15(ve)-.15 G
 .125(rall layout is the a).15 F -.15(ve)-.2 G .125(rage of the v).15 F
 .125(alues found for the port and starboard chan-)-.25 F(nels.)144 700.8
-Q(MB-System 5.0)72 768 Q(17 September 2017)131.775 E(4)190.115 E 0 Cg EP
+Q(MB-System 5.0)72 768 Q(29 September 2020)131.775 E(4)190.115 E 0 Cg EP
 %%Page: 5 5
 %%BeginPageSetup
 BP
@@ -602,276 +602,280 @@ BP
 /F0 10/Times-Roman@0 SF 142.61(mbsslayout\(1\) MB-System)72 48 R 142.61
 (5.0 mbsslayout\(1\))2.5 F/F1 10/Times-Bold@0 SF
 (\255\255altitude-bottompick-thr)108 84 Q(eshold)-.18 E F0(=)A/F2 10
-/Times-Italic@0 SF(value)A F0 .638(Speci\214es the threshold used to pi\
-ck the initial bottom return in the time series sidescan data. The)144
-96 R(def)144 108 Q .364(ault threshold is 0.5. This option turns the bo\
-ttompick altitude mode on, so it is unnecessary to)-.1 F
-(also specify the)144 120 Q F1(\255\255altitude-bottomppick)2.5 E F0
-(option.)2.5 E F1(\255\255channel-swap)108 136.8 Q F0 .022
-(This option causes)144 148.8 R F1(mbsslay)2.522 E(out)-.25 E F0 .022
-(to sw)2.522 F .021
+/Times-Italic@0 SF(thr)A(eshold[/blank])-.37 E F0 .638(Speci\214es the \
+threshold used to pick the initial bottom return in the time series sid\
+escan data. The)144 96 R(def)144 108 Q .969
+(ault threshold is 0.5. If gi)-.1 F -.15(ve)-.25 G .969(n, the v).15 F
+(alue)-.25 E F2(blank)3.469 E F0 .97(is the blanking interv)3.469 F .97
+(al in seconds that will be)-.25 F .641(ignored in looking for the \214\
+rst bottom return. This option turns the bottompick altitude mode on,)
+144 120 R(so it is unnecessary to also specify the)144 132 Q F1
+(\255\255altitude-bottomppick)2.5 E F0(option.)2.5 E F1
+(\255\255channel-swap)108 148.8 Q F0 .021(This option causes)144 160.8 R
+F1(mbsslay)2.521 E(out)-.25 E F0 .021(to sw)2.521 F .022
 (ap the port and starboard time series sidescan channels before)-.1 F
-(laying out the sidescan data on the sea\215oor)144 160.8 Q(.)-.55 E F1
-(\255\255swath-width)108 177.6 Q F0(=)A F2(value)A F0 .487
-(Speci\214es a constant output sw)144 189.6 R .487
+(laying out the sidescan data on the sea\215oor)144 172.8 Q(.)-.55 E F1
+(\255\255swath-width)108 189.6 Q F0(=)A F2(value)A F0 .488
+(Speci\214es a constant output sw)144 201.6 R .487
 (ath width in meters. By def)-.1 F(ault,)-.1 E F1(mbsslay)2.987 E(out)
--.25 E F0 -.25(va)2.987 G .487(ries the sw).25 F .488(ath width)-.1 F
+-.25 E F0 -.25(va)2.987 G .487(ries the sw).25 F .487(ath width)-.1 F
 .479(according to the maximum range and altitude of the sidescan data. \
-See the description section for)144 201.6 R(details of the def)144 213.6
+See the description section for)144 213.6 R(details of the def)144 225.6
 Q(ault sw)-.1 E(ath width calculation and the sidescan layout process.)
--.1 E F1(\255\255inter)108 230.4 Q(polation)-.1 E F0(=)A F2(value)A F0
-1.238(Speci\214es the de)144 242.4 R 1.238(gree to which g)-.15 F 1.238
+-.1 E F1(\255\255inter)108 242.4 Q(polation)-.1 E F0(=)A F2(value)A F0
+1.238(Speci\214es the de)144 254.4 R 1.238(gree to which g)-.15 F 1.238
 (aps in the output sw)-.05 F 1.238
-(ath sidescan are \214lled by interpolation. The)-.1 F .46
-(interpolation v)144 254.4 R .459
-(alue corresponds to the maximum number of adjacent empty pix)-.25 F
-.459(els that is \214lled by)-.15 F 1.645(interpolation; lar)144 266.4 R
+(ath sidescan are \214lled by interpolation. The)-.1 F .459
+(interpolation v)144 266.4 R .459
+(alue corresponds to the maximum number of adjacent empty pix)-.25 F .46
+(els that is \214lled by)-.15 F 1.645(interpolation; lar)144 278.4 R
 1.645(ger g)-.18 F 1.645(aps are not \214lled by interpolation and rema\
-in empty in the output sw)-.05 F(ath)-.1 E(sidescan. The def)144 278.4 Q
-(ault is to do no interpolation.)-.1 E F1<adad6e61>108 295.2 Q(v-\214le)
--.25 E F0(=)A F2(\214lename)A F0 .799(Speci\214es an e)144 307.2 R .799
-(xternal \214le from which to mer)-.15 F .798(ge sonar position \(na)
--.18 F(vig)-.2 E .798(ation\), replacing an)-.05 F 3.298(yn)-.15 G -.2
-(av)-3.298 G(ig).2 E(a-)-.05 E .85
-(tion data included in the input time series sidescan \214les.)144 319.2
+in empty in the output sw)-.05 F(ath)-.1 E(sidescan. The def)144 290.4 Q
+(ault is to do no interpolation.)-.1 E F1<adad6e61>108 307.2 Q(v-\214le)
+-.25 E F0(=)A F2(\214lename)A F0 .798(Speci\214es an e)144 319.2 R .798
+(xternal \214le from which to mer)-.15 F .799(ge sonar position \(na)
+-.18 F(vig)-.2 E .799(ation\), replacing an)-.05 F 3.299(yn)-.15 G -.2
+(av)-3.299 G(ig).2 E(a-)-.05 E .85
+(tion data included in the input time series sidescan \214les.)144 331.2
 R .85(By def)5.85 F(ault)-.1 E F1(mbsslay)3.35 E(out)-.25 E F0 .85
-(attempts to use)3.35 F(na)144 331.2 Q(vig)-.2 E(ation v)-.05 E
-(alues included in the input data.)-.25 E F1<adad6e61>108 348 Q
+(attempts to use)3.35 F(na)144 343.2 Q(vig)-.2 E(ation v)-.05 E
+(alues included in the input data.)-.25 E F1<adad6e61>108 360 Q
 (v-\214le-f)-.25 E(ormat)-.25 E F0(=)A F2(format_id)A F0 1.897
-(Speci\214es the format of an e)144 360 R 1.897(xternal na)-.15 F(vig)
+(Speci\214es the format of an e)144 372 R 1.897(xternal na)-.15 F(vig)
 -.2 E 1.897(ation \214le from which position v)-.05 F 1.897
-(alues are deri)-.25 F -.15(ve)-.25 G 4.397(d\().15 G(as)-4.397 E
-(de\214ned with)144 372 Q F1<adad6e61>2.5 E(v-\214le)-.25 E F0
+(alues are deri)-.25 F -.15(ve)-.25 G 4.398(d\().15 G(as)-4.398 E
+(de\214ned with)144 384 Q F1<adad6e61>2.5 E(v-\214le)-.25 E F0
 (\). Options for the)A F2(format_id)2.5 E F0 -.25(va)2.5 G(lue are:).25
-E(1: ASCCI te)151.5 384 Q(xt \214le with lines of the form:)-.15 E
-(time_d longitude latitude speed)164 396 Q(where time_d is time in deci\
-mal epoch seconds \(seconds since 1970\), longitude)159 408 Q
-(and latitude are in decimal de)159 420 Q
+E(1: ASCCI te)151.5 396 Q(xt \214le with lines of the form:)-.15 E
+(time_d longitude latitude speed)164 408 Q(where time_d is time in deci\
+mal epoch seconds \(seconds since 1970\), longitude)159 420 Q
+(and latitude are in decimal de)159 432 Q
 (grees, and speed is in km/hour \(and is optional\).)-.15 E
-(South latitudes are ne)159 432 Q -.05(ga)-.15 G(ti).05 E -.15(ve)-.25 G
+(South latitudes are ne)159 444 Q -.05(ga)-.15 G(ti).05 E -.15(ve)-.25 G
 2.5(.L).15 G(ongitude may be de\214ned on either the)-2.5 E
-(-180.0 to +180.0 or 0.0 to 360.0 domains.)159 444 Q(2: ASCCI te)151.5
-456 Q(xt \214le with lines of the form:)-.15 E
-(year month day hour minute second longitude latitude)164 468 Q
-(where year)159 480 Q 2.5(,m)-.4 G(onth, day)-2.5 E 2.5(,h)-.65 G(our)
+(-180.0 to +180.0 or 0.0 to 360.0 domains.)159 456 Q(2: ASCCI te)151.5
+468 Q(xt \214le with lines of the form:)-.15 E
+(year month day hour minute second longitude latitude)164 480 Q
+(where year)159 492 Q 2.5(,m)-.4 G(onth, day)-2.5 E 2.5(,h)-.65 G(our)
 -2.5 E 2.5(,a)-.4 G(nd minute v)-2.5 E(alues are inte)-.25 E
-(gers, the second)-.15 E -.25(va)159 492 S
+(gers, the second)-.15 E -.25(va)159 504 S
 (lue is decimal, and longitude and latitude are in decimal de).25 E
-(grees.)-.15 E(South latitudes are ne)159 504 Q -.05(ga)-.15 G(ti).05 E
+(grees.)-.15 E(South latitudes are ne)159 516 Q -.05(ga)-.15 G(ti).05 E
 -.15(ve)-.25 G 2.5(.L).15 G(ongitude may be de\214ned on either the)-2.5
-E(-180.0 to +180.0 or 0.0 to 360.0 domains.)159 516 Q(3: ASCCI te)151.5
-528 Q(xt \214le with lines of the form:)-.15 E
-(year julian_day hour minute second longitude latitude)164 540 Q
-(where year)159 552 Q 2.5(,j)-.4 G(ulian_day)-2.5 E 2.5(,h)-.65 G(our)
+E(-180.0 to +180.0 or 0.0 to 360.0 domains.)159 528 Q(3: ASCCI te)151.5
+540 Q(xt \214le with lines of the form:)-.15 E
+(year julian_day hour minute second longitude latitude)164 552 Q
+(where year)159 564 Q 2.5(,j)-.4 G(ulian_day)-2.5 E 2.5(,h)-.65 G(our)
 -2.5 E 2.5(,a)-.4 G(nd minute v)-2.5 E(alues are inte)-.25 E
-(gers, the second)-.15 E -.25(va)159 564 S
+(gers, the second)-.15 E -.25(va)159 576 S
 (lue is decimal, and longitude and latitude are in decimal de).25 E
-(grees.)-.15 E(South latitudes are ne)159 576 Q -.05(ga)-.15 G(ti).05 E
+(grees.)-.15 E(South latitudes are ne)159 588 Q -.05(ga)-.15 G(ti).05 E
 -.15(ve)-.25 G 2.5(.L).15 G(ongitude may be de\214ned on either the)-2.5
-E(-180.0 to +180.0 or 0.0 to 360.0 domains.)159 588 Q(4: ASCCI te)151.5
-600 Q(xt \214le with lines of the form:)-.15 E
-(year julian_day day_minute second longitude latitude)164 612 Q
-(where year)159 624 Q 2.5(,j)-.4 G(ulian_day)-2.5 E 2.5(,a)-.65 G
+E(-180.0 to +180.0 or 0.0 to 360.0 domains.)159 600 Q(4: ASCCI te)151.5
+612 Q(xt \214le with lines of the form:)-.15 E
+(year julian_day day_minute second longitude latitude)164 624 Q
+(where year)159 636 Q 2.5(,j)-.4 G(ulian_day)-2.5 E 2.5(,a)-.65 G
 (nd day_minute v)-2.5 E(alues are inte)-.25 E(gers, the second)-.15 E
--.25(va)159 636 S
+-.25(va)159 648 S
 (lue is decimal, and longitude and latitude are in decimal de).25 E
-(grees.)-.15 E(South latitudes are ne)159 648 Q -.05(ga)-.15 G(ti).05 E
+(grees.)-.15 E(South latitudes are ne)159 660 Q -.05(ga)-.15 G(ti).05 E
 -.15(ve)-.25 G 2.5(.L).15 G(ongitude may be de\214ned on either the)-2.5
-E(-180.0 to +180.0 or 0.0 to 360.0 domains.)159 660 Q(5: ASCCI te)151.5
-672 Q(xt \214le in the 1990')-.15 E 2.5(se)-.55 G(ra L-DEO processed na)
--2.5 E 2.5(vf)-.2 G(ormat with lines)-2.5 E(of the form:)159 684 Q
-(yy+jjjhhmmssNddmmmmmmEdddmmmmmm)164 696 Q(where yy is the tw)159 708 Q
+E(-180.0 to +180.0 or 0.0 to 360.0 domains.)159 672 Q(5: ASCCI te)151.5
+684 Q(xt \214le in the 1990')-.15 E 2.5(se)-.55 G(ra L-DEO processed na)
+-2.5 E 2.5(vf)-.2 G(ormat with lines)-2.5 E(of the form:)159 696 Q
+(yy+jjjhhmmssNddmmmmmmEdddmmmmmm)164 708 Q(where yy is the tw)159 720 Q
 2.5(od)-.1 G(igit year \(after 1999 the "yy+" w)-2.5 E
-(as replaced by a four)-.1 E(digit year "yyyy"\), jjj is the julian_day)
-159 720 Q 2.5(,h)-.65 G 2.5(hi)-2.5 G 2.5(st)-2.5 G(he hour)-2.5 E 2.5
-(,m)-.4 G(m)-2.5 E(MB-System 5.0)72 768 Q(17 September 2017)131.775 E(5)
-190.115 E 0 Cg EP
+(as replaced by a four)-.1 E(MB-System 5.0)72 768 Q(29 September 2020)
+131.775 E(5)190.115 E 0 Cg EP
 %%Page: 6 6
 %%BeginPageSetup
 BP
 %%EndPageSetup
 /F0 10/Times-Roman@0 SF 142.61(mbsslayout\(1\) MB-System)72 48 R 142.61
-(5.0 mbsslayout\(1\))2.5 F
-(is minutes, and ss is seconds. The latitude is gi)159 84 Q -.15(ve)-.25
-G 2.5(na).15 G(s)-2.5 E
+(5.0 mbsslayout\(1\))2.5 F(digit year "yyyy"\), jjj is the julian_day)
+159 84 Q 2.5(,h)-.65 G 2.5(hi)-2.5 G 2.5(st)-2.5 G(he hour)-2.5 E 2.5
+(,m)-.4 G(m)-2.5 E(is minutes, and ss is seconds. The latitude is gi)159
+96 Q -.15(ve)-.25 G 2.5(na).15 G(s)-2.5 E
 (Nddmmmmmmand where N is 'N' for north and 'S' for south, dd are inte)
-159 96 Q(ger)-.15 E(de)159 108 Q
+159 108 Q(ger)-.15 E(de)159 120 Q
 (grees, and mmmmmm is minutes * 10000. The longitude is gi)-.15 E -.15
 (ve)-.25 G 2.5(na).15 G(s)-2.5 E
 (Edddmmmmmmand where E is 'E' for east and 'W' for west, ddd are inte)
-159 120 Q(ger)-.15 E(de)159 132 Q(grees, and mmmmmm is minutes * 10000.)
--.15 E 2.5(6o)151.5 144 S 2.5(r7)-2.5 G 2.5(:N)-2.5 G
-(MEA 0183 position strings)-2.5 E(Se)159 156 Q -.15(ve)-.25 G
+159 132 Q(ger)-.15 E(de)159 144 Q(grees, and mmmmmm is minutes * 10000.)
+-.15 E 2.5(6o)151.5 156 S 2.5(r7)-2.5 G 2.5(:N)-2.5 G
+(MEA 0183 position strings)-2.5 E(Se)159 168 Q -.15(ve)-.25 G
 (ral NMEA and NMEA-lik).15 E 2.5(es)-.1 G
 (trings containing position are recognized,)-2.5 E(and can be parsed wi\
-th and without line break characters. These strings)159 168 Q
-(include ZD)159 180 Q(A, GLL, GGA, D)-.4 E -1.02 -1.11(AT ,)-.4 H
-(and UNX.)3.61 E(8: Simrad 90 format na)151.5 192 Q(vig)-.2 E
-(ation \214les with lines)-.05 E(of the form:)159 204 Q
-(ddmmyy hhmmssss ddmmmmmmmN dddmmmmmmmE)164 216 Q
-(where dd is day of the month, mm is the month, yy is the tw)159 228 Q
-2.5(od)-.1 G(igit year)-2.5 E(,)-.4 E(hh is the hour)159 240 Q 2.5(,m)
+th and without line break characters. These strings)159 180 Q
+(include ZD)159 192 Q(A, GLL, GGA, D)-.4 E -1.02 -1.11(AT ,)-.4 H
+(and UNX.)3.61 E(8: Simrad 90 format na)151.5 204 Q(vig)-.2 E
+(ation \214les with lines)-.05 E(of the form:)159 216 Q
+(ddmmyy hhmmssss ddmmmmmmmN dddmmmmmmmE)164 228 Q
+(where dd is day of the month, mm is the month, yy is the tw)159 240 Q
+2.5(od)-.1 G(igit year)-2.5 E(,)-.4 E(hh is the hour)159 252 Q 2.5(,m)
 -.4 G 2.5(mi)-2.5 G 2.5(st)-2.5 G(he minute, and ssss is seconds * 100.)
--2.5 E(The latitude is gi)159 252 Q -.15(ve)-.25 G 2.5(na).15 G 2.5(sd)
+-2.5 E(The latitude is gi)159 264 Q -.15(ve)-.25 G 2.5(na).15 G 2.5(sd)
 -2.5 G(dmmmmmmmN where dd are inte)-2.5 E(ger de)-.15 E(grees,)-.15 E(m\
 mmmmmm is minutes * 100000, and N is 'N' for north and 'S' for south la\
-titude.)159 264 Q(The longitude is gi)159 276 Q -.15(ve)-.25 G 2.5(na)
+titude.)159 276 Q(The longitude is gi)159 288 Q -.15(ve)-.25 G 2.5(na)
 .15 G 2.5(sd)-2.5 G(ddmmmmmmmE where ddd are inte)-2.5 E(ger de)-.15 E
 (grees,)-.15 E(mmmmmmm is minutes * 100000, and E is 'E' for east and '\
-W' for west longitude.)159 288 Q(day_minute v)159 324 Q(alues are inte)
--.25 E(gers,)-.15 E(the second v)159 336 Q
+W' for west longitude.)159 300 Q(day_minute v)159 336 Q(alues are inte)
+-.25 E(gers,)-.15 E(the second v)159 348 Q
 (alue is decimal, and longitude and latitude are in decimal)-.25 E(de)
-159 348 Q(grees. The longitude is gi)-.15 E -.15(ve)-.25 G 2.5(na).15 G
+159 360 Q(grees. The longitude is gi)-.15 E -.15(ve)-.25 G 2.5(na).15 G
 (s)-2.5 E
 (Edddmmmmmmand where E is 'E' for east and 'W' for west, ddd are inte)
-159 360 Q(ger)-.15 E(de)159 372 Q(grees, and mmmmm is minutes * 10000.)
--.15 E(9: ASCCI te)151.5 384 Q
+159 372 Q(ger)-.15 E(de)159 384 Q(grees, and mmmmm is minutes * 10000.)
+-.15 E(9: ASCCI te)151.5 396 Q
 (xt \214le with white-space delimited lines of the form:)-.15 E
 (yr mon day hour min sec time_d lon lat heading speed sensordepth*)164
-396 Q(where yr is the four digit year)159 408 Q 2.5(,m)-.4 G
+408 Q(where yr is the four digit year)159 420 Q 2.5(,m)-.4 G
 (on is the month, day is the day of the)-2.5 E(month, min is the minute\
-, second is the decimal seconds, time_d is time in)159 420 Q
+, second is the decimal seconds, time_d is time in)159 432 Q
 (decimal epoch seconds \(seconds since 1970\), lon is the longitude)159
-432 Q(in decimal de)159 444 Q(grees, lat is the latitude in decimal de)
--.15 E(grees, heading is in)-.15 E(decimal de)159 456 Q
+444 Q(in decimal de)159 456 Q(grees, lat is the latitude in decimal de)
+-.15 E(grees, heading is in)-.15 E(decimal de)159 468 Q
 (grees, speed is in km/hour)-.15 E 2.5(,a)-.4 G
-(nd sensordepth is in meters.)-2.5 E(South latitudes are ne)159 468 Q
+(nd sensordepth is in meters.)-2.5 E(South latitudes are ne)159 480 Q
 -.05(ga)-.15 G(ti).05 E -.15(ve)-.25 G 2.5(.L).15 G
 (ongitude may be de\214ned on either the)-2.5 E
-(-180.0 to +180.0 or 0.0 to 360.0 domains.)159 480 Q
-(10: R2R \(Rolling deck to Repository\) na)151.5 492 Q(vig)-.2 E
-(ation format with ASCCI te)-.05 E(xt lines)-.15 E(of the form:)159 504
+(-180.0 to +180.0 or 0.0 to 360.0 domains.)159 492 Q
+(10: R2R \(Rolling deck to Repository\) na)151.5 504 Q(vig)-.2 E
+(ation format with ASCCI te)-.05 E(xt lines)-.15 E(of the form:)159 516
 Q(yyyy-mm-ddThh:mm:ss.sssZ lon lat quality nsat dilution height)166.5
-516 Q(where the lon and lat \214elds are in decimal de)159 528 Q
-(grees with south latitudes)-.15 E(and west longitudes ne)159 540 Q -.05
+528 Q(where the lon and lat \214elds are in decimal de)159 540 Q
+(grees with south latitudes)-.15 E(and west longitudes ne)159 552 Q -.05
 (ga)-.15 G(ti).05 E -.15(ve)-.25 G 2.5(,a).15 G
 (nd the last four quantities relating to)-2.5 E(GPS \214x quality)159
-552 Q(.)-.65 E/F1 10/Times-Bold@0 SF<adad6e61>108 568.8 Q(v-async)-.25 E
-F0(=)A/F2 10/Times-Italic@0 SF -.37(re)C(cor).37 E(d_kind)-.37 E F0 .426
-(Speci\214es the type of data records from which position v)144 580.8 R
-.427(alues are deri)-.25 F -.15(ve)-.25 G 2.927(d\().15 G .427
-(as de\214ned with)-2.927 F F1<adad6e61>2.927 E(v-)-.25 E(\214le-f)144
-592.8 Q(ormat)-.25 E F0(\). Options for the)A F2 -.37(re)2.5 G(cor).37 E
-(d_kind)-.37 E F0(include:)2.5 E(MB_D)154 604.8 Q -1.21 -1.11(AT A)-.4 H
+564 Q(.)-.65 E/F1 10/Times-Bold@0 SF<adad6e61>108 580.8 Q(v-async)-.25 E
+F0(=)A/F2 10/Times-Italic@0 SF -.37(re)C(cor).37 E(d_kind)-.37 E F0 .427
+(Speci\214es the type of data records from which position v)144 592.8 R
+.427(alues are deri)-.25 F -.15(ve)-.25 G 2.926(d\().15 G .426
+(as de\214ned with)-2.926 F F1<adad6e61>2.926 E(v-)-.25 E(\214le-f)144
+604.8 Q(ormat)-.25 E F0(\). Options for the)A F2 -.37(re)2.5 G(cor).37 E
+(d_kind)-.37 E F0(include:)2.5 E(MB_D)154 616.8 Q -1.21 -1.11(AT A)-.4 H
 (_D)1.11 E -1.21 -1.11(AT A)-.4 H 5(:1)1.11 G(\(surv)-2.5 E .3 -.15
-(ey d)-.15 H(ata\)).15 E(MB_D)154 616.8 Q -1.21 -1.11(AT A)-.4 H(_N)1.11
+(ey d)-.15 H(ata\)).15 E(MB_D)154 628.8 Q -1.21 -1.11(AT A)-.4 H(_N)1.11
 E -.54 -1.35(AV :)-.35 H(12 \(na)6.35 E(vig)-.2 E(ation data\))-.05 E
-(MB_D)154 628.8 Q -1.21 -1.11(AT A)-.4 H(_N)1.11 E -1.35(AV)-.35 G
+(MB_D)154 640.8 Q -1.21 -1.11(AT A)-.4 H(_N)1.11 E -1.35(AV)-.35 G
 (1: 29 \(na)1.35 E(vig)-.2 E(ation data from na)-.05 E(vig)-.2 E
-(ation system 1\))-.05 E(MB_D)154 640.8 Q -1.21 -1.11(AT A)-.4 H(_N)1.11
+(ation system 1\))-.05 E(MB_D)154 652.8 Q -1.21 -1.11(AT A)-.4 H(_N)1.11
 E -1.35(AV)-.35 G(2: 30 \(na)1.35 E(vig)-.2 E(ation data from na)-.05 E
-(vig)-.2 E(ation system 2\))-.05 E(MB_D)154 652.8 Q -1.21 -1.11(AT A)-.4
+(vig)-.2 E(ation system 2\))-.05 E(MB_D)154 664.8 Q -1.21 -1.11(AT A)-.4
 H(_N)1.11 E -1.35(AV)-.35 G(3: 31 \(na)1.35 E(vig)-.2 E
 (ation data from na)-.05 E(vig)-.2 E(ation system 3\))-.05 E 1.747(What\
  types of data records are present is format-dependent, as is the def)
-144 664.8 R 1.746(ault choice of which)-.1 F .327
-(record type is used as the na)144 676.8 R(vig)-.2 E .327
+144 676.8 R 1.747(ault choice of which)-.1 F .327
+(record type is used as the na)144 688.8 R(vig)-.2 E .327
 (ation source by def)-.05 F .327(ault. The program)-.1 F F1(mbinf)2.827
-E(o)-.25 E F0 .327(can be used with the)2.827 F F1(-N)144 688.8 Q F0
+E(o)-.25 E F0 .327(can be used with the)2.827 F F1(-N)144 700.8 Q F0
 (option to determine the numbers of dif)2.5 E
-(ferent record types present in a data \214le.)-.25 E F1
-(\255\255sensordepth-\214le)108 705.6 Q F0(=)A F2(\214lename)A F0 1.996
-(Speci\214es an e)144 717.6 R 1.996(xternal \214le from which to mer)
--.15 F 1.996(ge sensor depth, replacing an)-.18 F 4.495(ys)-.15 G 1.995
-(ensor depth data)-4.495 F 1.565
-(included in the input time series sidescan \214les.)144 729.6 R 1.566
-(By def)6.566 F(ault)-.1 E F1(mbsslay)4.066 E(out)-.25 E F0 1.566
-(attempts to use sensor)4.066 F(MB-System 5.0)72 768 Q
-(17 September 2017)131.775 E(6)190.115 E 0 Cg EP
+(ferent record types present in a data \214le.)-.25 E(MB-System 5.0)72
+768 Q(29 September 2020)131.775 E(6)190.115 E 0 Cg EP
 %%Page: 7 7
 %%BeginPageSetup
 BP
 %%EndPageSetup
 /F0 10/Times-Roman@0 SF 142.61(mbsslayout\(1\) MB-System)72 48 R 142.61
-(5.0 mbsslayout\(1\))2.5 F(depth v)144 84 Q
-(alues included in the input data.)-.25 E/F1 10/Times-Bold@0 SF
-(\255\255sensordepth-\214le-f)108 100.8 Q(ormat)-.25 E F0(=)A/F2 10
-/Times-Italic@0 SF(format_id)A F0 .014(Speci\214es the format of an e)
-144 112.8 R .014(xternal sensor depth \214le from which sensor depth v)
--.15 F .013(alues are deri)-.25 F -.15(ve)-.25 G 2.513(d\().15 G(as)
--2.513 E(de\214ned with)144 124.8 Q F1(\255\255sensordepth-\214le)2.5 E
-F0(\). Options for the)A F2(format_id)2.5 E F0 -.25(va)2.5 G(lue are:)
-.25 E(1: ASCCI te)151.5 136.8 Q(xt \214le with lines of the form:)-.15 E
-(time_d longitude latitude speed)164 148.8 Q(where time_d is time in de\
-cimal epoch seconds \(seconds since 1970\), longitude)159 160.8 Q
-(and latitude are in decimal de)159 172.8 Q
+(5.0 mbsslayout\(1\))2.5 F/F1 10/Times-Bold@0 SF
+(\255\255sensordepth-\214le)108 84 Q F0(=)A/F2 10/Times-Italic@0 SF
+(\214lename)A F0 1.995(Speci\214es an e)144 96 R 1.996
+(xternal \214le from which to mer)-.15 F 1.996
+(ge sensor depth, replacing an)-.18 F 4.496(ys)-.15 G 1.996
+(ensor depth data)-4.496 F 1.566
+(included in the input time series sidescan \214les.)144 108 R 1.566
+(By def)6.566 F(ault)-.1 E F1(mbsslay)4.066 E(out)-.25 E F0 1.565
+(attempts to use sensor)4.065 F(depth v)144 120 Q
+(alues included in the input data.)-.25 E F1
+(\255\255sensordepth-\214le-f)108 136.8 Q(ormat)-.25 E F0(=)A F2
+(format_id)A F0 .013(Speci\214es the format of an e)144 148.8 R .014
+(xternal sensor depth \214le from which sensor depth v)-.15 F .014
+(alues are deri)-.25 F -.15(ve)-.25 G 2.514(d\().15 G(as)-2.514 E
+(de\214ned with)144 160.8 Q F1(\255\255sensordepth-\214le)2.5 E F0
+(\). Options for the)A F2(format_id)2.5 E F0 -.25(va)2.5 G(lue are:).25
+E(1: ASCCI te)151.5 172.8 Q(xt \214le with lines of the form:)-.15 E
+(time_d longitude latitude speed)164 184.8 Q(where time_d is time in de\
+cimal epoch seconds \(seconds since 1970\), longitude)159 196.8 Q
+(and latitude are in decimal de)159 208.8 Q
 (grees, and speed is in km/hour \(and is optional\).)-.15 E
-(South latitudes are ne)159 184.8 Q -.05(ga)-.15 G(ti).05 E -.15(ve)-.25
+(South latitudes are ne)159 220.8 Q -.05(ga)-.15 G(ti).05 E -.15(ve)-.25
 G 2.5(.L).15 G(ongitude may be de\214ned on either the)-2.5 E
-(-180.0 to +180.0 or 0.0 to 360.0 domains.)159 196.8 Q(2: ASCCI te)151.5
-208.8 Q(xt \214le with lines of the form:)-.15 E
-(year month day hour minute second longitude latitude)164 220.8 Q
-(where year)159 232.8 Q 2.5(,m)-.4 G(onth, day)-2.5 E 2.5(,h)-.65 G(our)
+(-180.0 to +180.0 or 0.0 to 360.0 domains.)159 232.8 Q(2: ASCCI te)151.5
+244.8 Q(xt \214le with lines of the form:)-.15 E
+(year month day hour minute second longitude latitude)164 256.8 Q
+(where year)159 268.8 Q 2.5(,m)-.4 G(onth, day)-2.5 E 2.5(,h)-.65 G(our)
 -2.5 E 2.5(,a)-.4 G(nd minute v)-2.5 E(alues are inte)-.25 E
-(gers, the second)-.15 E -.25(va)159 244.8 S
+(gers, the second)-.15 E -.25(va)159 280.8 S
 (lue is decimal, and longitude and latitude are in decimal de).25 E
-(grees.)-.15 E(South latitudes are ne)159 256.8 Q -.05(ga)-.15 G(ti).05
+(grees.)-.15 E(South latitudes are ne)159 292.8 Q -.05(ga)-.15 G(ti).05
 E -.15(ve)-.25 G 2.5(.L).15 G(ongitude may be de\214ned on either the)
--2.5 E(-180.0 to +180.0 or 0.0 to 360.0 domains.)159 268.8 Q F1
-(\255\255sensordepth-async)108 285.6 Q F0(=)A F2 -.37(re)C(cor).37 E
-(d_kind)-.37 E F1(\255\255altitude-\214le)108 302.4 Q F0(=)A F2
-(\214lename)A F0 .436(Speci\214es an e)144 314.4 R .436
+-2.5 E(-180.0 to +180.0 or 0.0 to 360.0 domains.)159 304.8 Q F1
+(\255\255sensordepth-async)108 321.6 Q F0(=)A F2 -.37(re)C(cor).37 E
+(d_kind)-.37 E F1(\255\255altitude-\214le)108 338.4 Q F0(=)A F2
+(\214lename)A F0 .436(Speci\214es an e)144 350.4 R .436
 (xternal \214le from which to mer)-.15 F .436(ge altitude, replacing an)
--.18 F 2.936(ya)-.15 G .436(ltitude data included in the)-2.936 F .314
-(input time series sidescan \214les.)144 326.4 R .314(By def)5.314 F
-(ault)-.1 E F1(mbsslay)2.814 E(out)-.25 E F0 .313
-(attempts to use altitude v)2.814 F .313(alues included in)-.25 F
-(the input data.)144 338.4 Q F1(\255\255altitude_\214le-f)108 355.2 Q
-(ormat)-.25 E F0(=)A F2(format_id)A F1(\255\255altitude-async)108 372 Q
+-.18 F 2.936(ya)-.15 G .436(ltitude data included in the)-2.936 F .313
+(input time series sidescan \214les.)144 362.4 R .313(By def)5.313 F
+(ault)-.1 E F1(mbsslay)2.814 E(out)-.25 E F0 .314
+(attempts to use altitude v)2.814 F .314(alues included in)-.25 F
+(the input data.)144 374.4 Q F1(\255\255altitude_\214le-f)108 391.2 Q
+(ormat)-.25 E F0(=)A F2(format_id)A F1(\255\255altitude-async)108 408 Q
 F0(=)A F2 -.37(re)C(cor).37 E(d_kind)-.37 E F1(\255\255heading-\214le)
-108 388.8 Q F0(=)A F2(\214lename)A F0 .214(Speci\214es an e)144 400.8 R
-.214(xternal \214le from which to mer)-.15 F .215
-(ge heading, replacing an)-.18 F 2.715(yh)-.15 G .215
-(eading data included in the)-2.715 F .195
-(input time series sidescan \214les.)144 412.8 R .195(By def)5.195 F
+108 424.8 Q F0(=)A F2(\214lename)A F0 .215(Speci\214es an e)144 436.8 R
+.215(xternal \214le from which to mer)-.15 F .215
+(ge heading, replacing an)-.18 F 2.714(yh)-.15 G .214
+(eading data included in the)-2.714 F .195
+(input time series sidescan \214les.)144 448.8 R .195(By def)5.195 F
 (ault)-.1 E F1(mbsslay)2.695 E(out)-.25 E F0 .195
 (attempts to use heading v)2.695 F .195(alues included in)-.25 F
-(the input data.)144 424.8 Q F1(\255\255heading-\214le-f)108 441.6 Q
-(ormat)-.25 E F0(=)A F2(format_id)A F1(\255\255heading-async)108 458.4 Q
+(the input data.)144 460.8 Q F1(\255\255heading-\214le-f)108 477.6 Q
+(ormat)-.25 E F0(=)A F2(format_id)A F1(\255\255heading-async)108 494.4 Q
 F0(=)A F2 -.37(re)C(cor).37 E(d_kind)-.37 E F1(\255\255attitude-\214le)
-108 475.2 Q F0(=)A F2(\214lename)A F0 .399(Speci\214es an e)144 487.2 R
-.399(xternal \214le from which to mer)-.15 F .399
-(ge attitude \(roll and pitch\), replacing an)-.18 F 2.9(ya)-.15 G .4
-(ttitude data)-2.9 F 1.248
-(included in the input time series sidescan \214les.)144 499.2 R 1.248
-(By def)6.248 F(ault)-.1 E F1(mbsslay)3.748 E(out)-.25 E F0 1.247
-(attempts to use attitude)3.748 F -.25(va)144 511.2 S
+108 511.2 Q F0(=)A F2(\214lename)A F0 .4(Speci\214es an e)144 523.2 R .4
+(xternal \214le from which to mer)-.15 F .399
+(ge attitude \(roll and pitch\), replacing an)-.18 F 2.899(ya)-.15 G
+.399(ttitude data)-2.899 F 1.248
+(included in the input time series sidescan \214les.)144 535.2 R 1.248
+(By def)6.248 F(ault)-.1 E F1(mbsslay)3.748 E(out)-.25 E F0 1.248
+(attempts to use attitude)3.748 F -.25(va)144 547.2 S
 (lues included in the input data.).25 E F1(\255\255attitude-\214le-f)108
-528 Q(ormat)-.25 E F0(=)A F2(format_id)A F1(\255\255attitude-async)108
-544.8 Q F0(=)A F2 -.37(re)C(cor).37 E(d_kind)-.37 E F1
-(\255\255soundspeed-constant)108 561.6 Q F0(=)A F2(value)A F1
-(\255\255soundspeed-\214le)108 578.4 Q F0(=)A F2(\214lename)A F0 .37
-(Speci\214es an e)144 590.4 R .37(xternal \214le from which to mer)-.15
+564 Q(ormat)-.25 E F0(=)A F2(format_id)A F1(\255\255attitude-async)108
+580.8 Q F0(=)A F2 -.37(re)C(cor).37 E(d_kind)-.37 E F1
+(\255\255soundspeed-constant)108 597.6 Q F0(=)A F2(value)A F1
+(\255\255soundspeed-\214le)108 614.4 Q F0(=)A F2(\214lename)A F0 .37
+(Speci\214es an e)144 626.4 R .37(xternal \214le from which to mer)-.15
 F .37(ge w)-.18 F .37(ater sound speed, replacing an)-.1 F 2.87(ys)-.15
-G .37(ound speed data)-2.87 F 1.685
-(included in the input time series sidescan \214les.)144 602.4 R 1.684
-(By def)6.684 F(ault)-.1 E F1(mbsslay)4.184 E(out)-.25 E F0 1.684
-(attempts to use sound)4.184 F(speed v)144 614.4 Q
+G .37(ound speed data)-2.87 F 1.684
+(included in the input time series sidescan \214les.)144 638.4 R 1.684
+(By def)6.684 F(ault)-.1 E F1(mbsslay)4.184 E(out)-.25 E F0 1.685
+(attempts to use sound)4.185 F(speed v)144 650.4 Q
 (alues included in the input data.)-.25 E F1
-(\255\255soundspeed-\214le-f)108 631.2 Q(ormat)-.25 E F0(=)A F2
-(format_id)A F1(\255\255soundspeed-async)108 648 Q F0(=)A F2 -.37(re)C
-(cor).37 E(d_kind)-.37 E F1(\255\255timeshift-\214le)108 664.8 Q F0(=)A
-F2(\214lename)A F1(\255\255timeshift-constant)108 681.6 Q F0(=)A F2
-(value)A F1(\255\255timeshift-apply-na)108 698.4 Q(v)-.25 E F0
-(MB-System 5.0)72 768 Q(17 September 2017)131.775 E(7)190.115 E 0 Cg EP
+(\255\255soundspeed-\214le-f)108 667.2 Q(ormat)-.25 E F0(=)A F2
+(format_id)A F1(\255\255soundspeed-async)108 684 Q F0(=)A F2 -.37(re)C
+(cor).37 E(d_kind)-.37 E F1(\255\255timeshift-\214le)108 700.8 Q F0(=)A
+F2(\214lename)A F0(MB-System 5.0)72 768 Q(29 September 2020)131.775 E(7)
+190.115 E 0 Cg EP
 %%Page: 8 8
 %%BeginPageSetup
 BP
 %%EndPageSetup
 /F0 10/Times-Roman@0 SF 142.61(mbsslayout\(1\) MB-System)72 48 R 142.61
 (5.0 mbsslayout\(1\))2.5 F/F1 10/Times-Bold@0 SF
-(\255\255timeshift-apply-sensordepth)108 84 Q
-(\255\255timeshift-apply-altitude)108 100.8 Q
-(\255\255timeshift-apply-heading)108 117.6 Q
-(\255\255timeshift-apply-attitude)108 134.4 Q
-(\255\255timeshift-apply-all-ancilliary)108 151.2 Q
-(\255\255timeshift-apply-sur)108 168 Q -.1(ve)-.1 G(y).1 E
-(\255\255timeshift-apply-all)108 184.8 Q/F2 10.95/Times-Bold@0 SF
-(EXAMPLES)72 249.6 Q F0 1.6 -.8(To b)108 261.6 T 2.5(ew).8 G
-(ritten.....)-2.5 E F2(SEE ALSO)72 290.4 Q F1(mbsystem)108 302.4 Q F0
+(\255\255timeshift-constant)108 84 Q F0(=)A/F2 10/Times-Italic@0 SF
+(value)A F1(\255\255timeshift-apply-na)108 100.8 Q(v)-.25 E
+(\255\255timeshift-apply-sensordepth)108 117.6 Q
+(\255\255timeshift-apply-altitude)108 134.4 Q
+(\255\255timeshift-apply-heading)108 151.2 Q
+(\255\255timeshift-apply-attitude)108 168 Q
+(\255\255timeshift-apply-all-ancilliary)108 184.8 Q
+(\255\255timeshift-apply-sur)108 201.6 Q -.1(ve)-.1 G(y).1 E
+(\255\255timeshift-apply-all)108 218.4 Q/F3 10.95/Times-Bold@0 SF
+(EXAMPLES)72 283.2 Q F0 1.6 -.8(To b)108 295.2 T 2.5(ew).8 G
+(ritten.....)-2.5 E F3(SEE ALSO)72 324 Q F1(mbsystem)108 336 Q F0
 (\(1\),)A F1(mbdatalist)2.5 E F0(\(1\),)A F1(mbpr)2.5 E(ocess)-.18 E F0
-(\(1\))A F2 -.11(BU)72 331.2 S(GS).11 E F0(Oh yeah.)108 343.2 Q
-(MB-System 5.0)72 768 Q(17 September 2017)131.775 E(8)190.115 E 0 Cg EP
+(\(1\))A F3 -.11(BU)72 364.8 S(GS).11 E F0(Oh yeah.)108 376.8 Q
+(MB-System 5.0)72 768 Q(29 September 2020)131.775 E(8)190.115 E 0 Cg EP
 %%Trailer
 end
 %%EOF

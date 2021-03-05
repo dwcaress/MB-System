@@ -107,7 +107,7 @@ int main(int argc, char **argv) {
 	int fbtversion = 3;
 	status &= mb_fbtversion(verbose, &fbtversion);
 
-	int uselockfiles = 1;
+	bool uselockfiles = true;
 	status &= mb_uselockfiles(verbose, &uselockfiles);
 
 	int fileiobuffer = 0;
@@ -200,13 +200,13 @@ int main(int argc, char **argv) {
 				char argstring[MB_PATH_MAXLINE];
 				sscanf(optarg, "%1023s", argstring);
 				if (strncmp(argstring, "yes", 3) == 0 || strncmp(argstring, "YES", 3) == 0)
-					uselockfiles = 1;
+					uselockfiles = true;
 				else if (strncmp(argstring, "no", 2) == 0 || strncmp(argstring, "NO", 2) == 0)
-					uselockfiles = 0;
+					uselockfiles = false;
 				else if (strncmp(argstring, "1", 1) == 0)
-					uselockfiles = 1;
+					uselockfiles = true;
 				else if (strncmp(argstring, "0", 1) == 0)
-					uselockfiles = 0;
+					uselockfiles = false;
 				flag = true;
 				break;
 			}

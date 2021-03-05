@@ -205,12 +205,16 @@ int main(int argc, char **argv) {
 				break;
 			case 'O':
 			case 'o':
-				for (int j = 0, n_list = 0; j < (int)strlen(optarg); j++, n_list++)
-					if (n_list < MAX_OPTIONS) {
-						list[n_list] = optarg[j];
-						if (list[n_list] == '^')
-							use_projection = true;
-					}
+        if (strlen(optarg) > 0) {
+          n_list = MIN(strlen(optarg), MAX_OPTIONS);
+          for (int j = 0; j < n_list; j++){
+            if (j < MAX_OPTIONS) {
+              list[j] = optarg[j];
+              if (list[j] == '^')
+                use_projection = true;
+            }
+          }
+        }
 				break;
 			case 'R':
 			case 'r':
@@ -549,7 +553,7 @@ int main(int argc, char **argv) {
 				nread++;
 
 			if (verbose >= 2) {
-				fprintf(stderr, "\ndbg2  Nsv data read in program <%s>\n", program_name);
+				fprintf(stderr, "\ndbg2  Data read in program <%s>\n", program_name);
 				fprintf(stderr, "dbg2       kind:           %d\n", kind);
 				fprintf(stderr, "dbg2       error:          %d\n", error);
 				fprintf(stderr, "dbg2       status:         %d\n", status);

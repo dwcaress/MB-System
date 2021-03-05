@@ -397,8 +397,10 @@ int mbsys_templatesystem_extract(int verbose, void *mbio_ptr, void *store_ptr, i
 		*time_d = store->time_d;
 
 		/* copy comment */
-		if (store->comment > 0)
-			strncpy(comment, store->comment, MB_COMMENT_MAXLINE);
+		if (store->comment > 0) {
+      memset((void *)comment, 0, MB_COMMENT_MAXLINE);
+      strncpy(comment, store->comment, MIN(MB_COMMENT_MAXLINE, MBSYS_TEMPLATESYSTEM_MAX_COMMENT) - 1);
+    }
 		else
 			comment[0] = '\0';
 
@@ -607,7 +609,8 @@ int mbsys_templatesystem_insert(int verbose, void *mbio_ptr, void *store_ptr, in
 
 	/* insert comment in structure */
 	else if (store->kind == MB_DATA_COMMENT) {
-		strncpy(store->comment, comment, MB_COMMENT_MAXLINE);
+    memset((void *)store->comment, 0, MBSYS_TEMPLATESYSTEM_MAX_COMMENT);
+    strncpy(store->comment, comment, MIN(MBSYS_TEMPLATESYSTEM_MAX_COMMENT, MB_COMMENT_MAXLINE) - 1);
 	}
 
 	const int status = MB_SUCCESS;

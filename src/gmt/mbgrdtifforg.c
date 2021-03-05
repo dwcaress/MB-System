@@ -561,7 +561,7 @@ int GMT_mbgrdtiff_parse(struct GMT_CTRL *GMT, struct MBGRDTIFF_CTRL *Ctrl, struc
 			else if (opt->arg[0] == '\0')
 				Ctrl->E.dpi = 100; /* Default grid dpi */
 			else
-				Ctrl->E.dpi = atoi(opt->arg);
+				Ctrl->E.dpi = (int)strtol(opt->arg, NULL, 10);
 			break;
 		case 'G': /* 1-bit fore or background color for transparent masks */
 			Ctrl->G.active = true;
@@ -607,7 +607,7 @@ int GMT_mbgrdtiff_parse(struct GMT_CTRL *GMT, struct MBGRDTIFF_CTRL *Ctrl, struc
 				if (!gmt_access(GMT, opt->arg, R_OK)) /* Got a file */
 					Ctrl->Intensity.file = strdup(opt->arg);
 				else if (opt->arg[0] && !gmt_not_numeric(GMT, opt->arg)) { /* Looks like a constant value */
-					Ctrl->Intensity.value = atof(opt->arg);
+					Ctrl->Intensity.value = strtod(opt->arg, NULL);
 					Ctrl->Intensity.constant = true;
 				}
 				else {

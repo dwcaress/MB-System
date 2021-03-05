@@ -4814,56 +4814,54 @@ int mbr_reson7k3_rd_PingMotion(int verbose, char *buffer, void *store_ptr, int *
 
   /* allocate memory for PingMotion if needed */
   if (status == MB_SUCCESS && PingMotion->nalloc < PingMotion->n) {
-    PingMotion->nalloc = sizeof(float) * PingMotion->n;
+    size_t size = sizeof(float) * PingMotion->n;
     if (status == MB_SUCCESS)
-      status = mb_reallocd(verbose, __FILE__, __LINE__, PingMotion->nalloc, (void **)&(PingMotion->roll), error);
-    if (status != MB_SUCCESS) {
-      PingMotion->nalloc = 0;
-    }
+      status = mb_reallocd(verbose, __FILE__, __LINE__, size, (void **)&(PingMotion->roll), error);
     if (status == MB_SUCCESS)
-      status = mb_reallocd(verbose, __FILE__, __LINE__, PingMotion->nalloc, (void **)&(PingMotion->heading), error);
-    if (status != MB_SUCCESS) {
-      PingMotion->nalloc = 0;
-    }
+      status = mb_reallocd(verbose, __FILE__, __LINE__, size, (void **)&(PingMotion->heading), error);
     if (status == MB_SUCCESS)
-      status = mb_reallocd(verbose, __FILE__, __LINE__, PingMotion->nalloc, (void **)&(PingMotion->heave), error);
-    if (status != MB_SUCCESS) {
-      PingMotion->nalloc = 0;
-    }
-  }
+      status = mb_reallocd(verbose, __FILE__, __LINE__, size, (void **)&(PingMotion->heave), error);
+    if (status == MB_SUCCESS) {
+      PingMotion->nalloc = PingMotion->n;
 
-  /* extract PingMotion data */
-  if (PingMotion->flags & 2) {
-    for (int i = 0; i < PingMotion->n; i++) {
-      mb_get_binary_float(true, &buffer[index], &(PingMotion->roll[i]));
-      index += 4;
+      /* extract PingMotion data */
+      if (PingMotion->flags & 2) {
+        for (int i = 0; i < PingMotion->n; i++) {
+          mb_get_binary_float(true, &buffer[index], &(PingMotion->roll[i]));
+          index += 4;
+        }
+      }
+      else {
+        for (int i = 0; i < PingMotion->n; i++) {
+          PingMotion->roll[i] = 0.0;
+        }
+      }
+      if (PingMotion->flags & 4) {
+        for (int i = 0; i < PingMotion->n; i++) {
+          mb_get_binary_float(true, &buffer[index], &(PingMotion->heading[i]));
+          index += 4;
+        }
+      }
+      else {
+        for (int i = 0; i < PingMotion->n; i++) {
+          PingMotion->heading[i] = 0.0;
+        }
+      }
+      if (PingMotion->flags & 8) {
+        for (int i = 0; i < PingMotion->n; i++) {
+          mb_get_binary_float(true, &buffer[index], &(PingMotion->heave[i]));
+          index += 4;
+        }
+      }
+      else {
+        for (int i = 0; i < PingMotion->n; i++) {
+          PingMotion->heave[i] = 0.0;
+        }
+      }
+
     }
-  }
-  else {
-    for (int i = 0; i < PingMotion->n; i++) {
-      PingMotion->roll[i] = 0.0;
-    }
-  }
-  if (PingMotion->flags & 4) {
-    for (int i = 0; i < PingMotion->n; i++) {
-      mb_get_binary_float(true, &buffer[index], &(PingMotion->heading[i]));
-      index += 4;
-    }
-  }
-  else {
-    for (int i = 0; i < PingMotion->n; i++) {
-      PingMotion->heading[i] = 0.0;
-    }
-  }
-  if (PingMotion->flags & 8) {
-    for (int i = 0; i < PingMotion->n; i++) {
-      mb_get_binary_float(true, &buffer[index], &(PingMotion->heave[i]));
-      index += 4;
-    }
-  }
-  else {
-    for (int i = 0; i < PingMotion->n; i++) {
-      PingMotion->heave[i] = 0.0;
+    else {
+      PingMotion->nalloc = 0;
     }
   }
 
@@ -7085,10 +7083,10 @@ int mbr_reson7k3_rd_SystemEvents(int verbose, char *buffer, void *store_ptr, int
 /* print out the results */
 #ifdef MBR_RESON7K3_DEBUG
   fprintf(stderr,
-          "R7KRECID_SystemEvents:                  --7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) ping:%d size:%d "
+          "R7KRECID_SystemEvents:                  --7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) size:%d "
           "index:%d\n",
           store->time_i[0], store->time_i[1], store->time_i[2], store->time_i[3], store->time_i[4], store->time_i[5],
-          store->time_i[6], SystemEvents->ping_number, header->Size, index);
+          store->time_i[6], header->Size, index);
 #endif
 #ifdef MBR_RESON7K3_DEBUG2
   if (verbose > 0)
@@ -7336,10 +7334,10 @@ int mbr_reson7k3_rd_RDRStorageRecording(int verbose, char *buffer, void *store_p
 /* print out the results */
 #ifdef MBR_RESON7K3_DEBUG
   fprintf(stderr,
-          "R7KRECID_RDRStorageRecording:            7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) ping:%d size:%d "
+          "R7KRECID_RDRStorageRecording:            7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) size:%d "
           "index:%d\n",
           store->time_i[0], store->time_i[1], store->time_i[2], store->time_i[3], store->time_i[4], store->time_i[5],
-          store->time_i[6], RDRStorageRecording->ping_number, header->Size, index);
+          store->time_i[6], header->Size, index);
 #endif
 #ifdef MBR_RESON7K3_DEBUG2
   if (verbose > 0)
@@ -7454,10 +7452,10 @@ int mbr_reson7k3_rd_CalibrationStatus(int verbose, char *buffer, void *store_ptr
 /* print out the results */
 #ifdef MBR_RESON7K3_DEBUG
   fprintf(stderr,
-          "R7KRECID_CalibrationStatus:            7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) ping:%d size:%d "
+          "R7KRECID_CalibrationStatus:            7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) size:%d "
           "index:%d\n",
           store->time_i[0], store->time_i[1], store->time_i[2], store->time_i[3], store->time_i[4], store->time_i[5],
-          store->time_i[6], CalibrationStatus->ping_number, header->Size, index);
+          store->time_i[6], header->Size, index);
 #endif
 #ifdef MBR_RESON7K3_DEBUG2
   if (verbose > 0)
@@ -7939,10 +7937,10 @@ int mbr_reson7k3_rd_MB2Status(int verbose, char *buffer, void *store_ptr, int *e
 /* print out the results */
 #ifdef MBR_RESON7K3_DEBUG
   fprintf(stderr,
-          "R7KRECID_MB2Status:                     7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) ping:%d size:%d "
+          "R7KRECID_MB2Status:                     7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) size:%d "
           "index:%d\n",
           store->time_i[0], store->time_i[1], store->time_i[2], store->time_i[3], store->time_i[4], store->time_i[5],
-          store->time_i[6], MB2Status->ping_number, header->Size, index);
+          store->time_i[6], header->Size, index);
 #endif
 #ifdef MBR_RESON7K3_DEBUG2
   if (verbose > 0)
@@ -8559,10 +8557,10 @@ int mbr_reson7k3_rd_TimeMessage(int verbose, char *buffer, void *store_ptr, int 
 /* print out the results */
 #ifdef MBR_RESON7K3_DEBUG
   fprintf(stderr,
-          "R7KRECID_TimeMessage:                   --7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) ping:%d size:%d "
+          "R7KRECID_TimeMessage:                   --7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) size:%d "
           "index:%d\n",
           store->time_i[0], store->time_i[1], store->time_i[2], store->time_i[3], store->time_i[4], store->time_i[5],
-          store->time_i[6], TimeMessage->ping_number, header->Size, index);
+          store->time_i[6], header->Size, index);
 #endif
 #ifdef MBR_RESON7K3_DEBUG2
   if (verbose > 0)
@@ -9891,14 +9889,24 @@ Have a nice day...:                              %4.4X | %d\n", store->type, sto
 
     /* check for ping data already read in read error case */
     else if (status == MB_FAILURE && *last_ping >= 0) {
-      status = MB_SUCCESS;
-      *error = MB_ERROR_NO_ERROR;
-      done = true;
-      *save_flag = false;
-      *last_ping = -1;
-      store->kind = MB_DATA_DATA;
-      store->time_d = *last_7k_time_d;
-      mb_get_date(verbose, store->time_d, store->time_i);
+      if (store->read_RawDetection
+          || store->read_SegmentedRawDetection) {
+        status = MB_SUCCESS;
+        *error = MB_ERROR_NO_ERROR;
+        done = true;
+        *save_flag = false;
+        *last_ping = -1;
+        store->kind = MB_DATA_DATA;
+        store->time_d = *last_7k_time_d;
+        mb_get_date(verbose, store->time_d, store->time_i);
+      } else {
+        status = MB_FAILURE;
+        *error = MB_ERROR_EOF;
+        done = true;
+        *save_flag = false;
+        *last_ping = -1;
+        store->kind = MB_DATA_NONE;
+      }
     }
 
 #ifdef MBR_RESON7K3_DEBUG2
@@ -18139,7 +18147,7 @@ int mbr_reson7k3_wr_CalibrationStatus(int verbose, int *bufferalloc, char **buff
     buffer[index] = (char) s7kTime->Minutes;
     index++;
     for (int i = 0; i < 800; i++) {
-      buffer[index] = (char) CalibrationStatus->status_message;
+      buffer[index] = (char) CalibrationStatus->status_message[i];
       index++;
     }
     mb_put_binary_int(true, CalibrationStatus->sub_status, &buffer[index]);

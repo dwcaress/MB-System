@@ -79,7 +79,6 @@ constexpr char usage_message[] =
     "\t--skip-existing\n\n"
     "\t--nav-file=file\n"
     "\t--nav-file-format=format_id\n"
-    "\t--output-sensor-fnv\n"
     "\t--nav-async=record_kind\n"
     "\t--nav-sensor=sensor_id\n\n"
     "\t--sensordepth-file=file\n"
@@ -123,6 +122,7 @@ constexpr char usage_message[] =
     "\t--multibeam-sidescan-source=recordid\n"
     "\t--sounding-amplitude-filter=value\n"
     "\t--sounding-altitude-filter=value\n"
+    "\t--ignore-water-column\n"
     "\t--head1-offsets=x/y/z/heading/roll/pitch\n"
     "\t--head2-offsets=x/y/z/heading/roll/pitch\n"
     "\t--kluge-time-jumps=threshold\n"
@@ -133,7 +133,8 @@ constexpr char usage_message[] =
     "\t--kluge-zero-attitude-correction\n"
     "\t--kluge-zero-alongtrack-angles\n"
     "\t--kluge-fix-wissl-timestamps\n"
-    "\t--kluge-auv-sentry-sensordepth\n";
+    "\t--kluge-auv-sentry-sensordepth\n"
+    "\t--kluge-ignore-snippets\n";
 
 /*--------------------------------------------------------------------*/
 
@@ -163,6 +164,8 @@ int main(int argc, char **argv) {
   double kluge_soundspeedtweak_factor = 1.0;
   bool kluge_soundspeedtweak = false;
   bool kluge_fix_wissl_timestamps = false;
+  bool kluge_auv_sentry_sensordepth = false;
+  bool kluge_ignore_snippets = false;
 
   mb_path sensordepth_file;
   memset(sensordepth_file, 0, sizeof(mb_path));
@@ -180,6 +183,9 @@ int main(int argc, char **argv) {
   memset(platform_file, 0, sizeof(mb_path));
   mb_path read_file = "datalist.mb-1";
   memset(read_file, 0, sizeof(mb_path));
+  bool output_directory_set = false;
+  mb_path output_directory = "";
+  memset(output_directory, 0, sizeof(mb_path));
   struct mb_preprocess_struct preprocess_pars;
   memset(&preprocess_pars, 0, sizeof(struct mb_preprocess_struct));
 
@@ -225,6 +231,7 @@ int main(int argc, char **argv) {
                                       {"help", no_argument, nullptr, 0},
                                       {"input", required_argument, nullptr, 0},
                                       {"format", required_argument, nullptr, 0},
+                                      {"output-directory", required_argument, nullptr, 0},
                                       {"platform-file", required_argument, nullptr, 0},
                                       {"platform-target-sensor", required_argument, nullptr, 0},
                                       {"output-sensor-fnv", no_argument, nullptr, 0},
@@ -287,6 +294,7 @@ int main(int argc, char **argv) {
                                       {"kluge-zero-alongtrack-angles", no_argument, nullptr, 0},
                                       {"kluge-fix-wissl-timestamps", no_argument, nullptr, 0},
                                       {"kluge-auv-sentry-sensordepth", no_argument, nullptr, 0},
+                                      {"kluge-ignore-snippets", no_argument, nullptr, 0},
                                       {nullptr, 0, nullptr, 0}};
 
     int option_index;
@@ -311,9 +319,14 @@ int main(int argc, char **argv) {
         else if (strcmp("format", options[option_index].name) == 0) {
           /* n = */ sscanf(optarg, "%d", &format);
         }
+        else if (strcmp("output-directory", options[option_index].name) == 0) {
+          const int n = sscanf(optarg, "%1023s", output_directory);
+          if (n == 1 && strlen(output_directory) > 0)
+            output_directory_set = true;
+        }
         else if (strcmp("platform-file", options[option_index].name) == 0) {
           const int n = sscanf(optarg, "%1023s", platform_file);
-          if (n == 1)
+          if (n == 1 && strlen(platform_file) > 0)
             use_platform_file = true;
         }
         else if (strcmp("platform-target-sensor", options[option_index].name) == 0) {
@@ -547,7 +560,6 @@ int main(int argc, char **argv) {
             preprocess_pars.multibeam_sidescan_source = MB_PR_SSSOURCE_WIDEBEAMBACKSCATTER;
           else if (optarg[0] == 'W' || optarg[0] == 'w')
             preprocess_pars.multibeam_sidescan_source = MB_PR_SSSOURCE_CALIBRATEDWIDEBEAMBACKSCATTER;
-fprintf(stderr, "multibeam_sidescan_source:%d arg:%c\n", preprocess_pars.multibeam_sidescan_source, optarg[0]);
         }
         else if (strcmp("sounding-amplitude-filter", options[option_index].name) == 0) {
           const int n = sscanf(optarg, "%lf", &preprocess_pars.sounding_amplitude_threshold);
@@ -644,6 +656,12 @@ fprintf(stderr, "multibeam_sidescan_source:%d arg:%c\n", preprocess_pars.multibe
         else if (strcmp("kluge-auv-sentry-sensordepth", options[option_index].name) == 0) {
           preprocess_pars.kluge_id[preprocess_pars.n_kluge] = MB_PR_KLUGE_AUVSENTRYSENSORDEPTH;
           preprocess_pars.n_kluge++;
+          kluge_auv_sentry_sensordepth = true;
+        }
+        else if (strcmp("kluge-ignore-snippets", options[option_index].name) == 0) {
+          preprocess_pars.kluge_id[preprocess_pars.n_kluge] = MB_PR_KLUGE_IGNORESNIPPETS;
+          preprocess_pars.n_kluge++;
+          kluge_ignore_snippets = true;
         }
         break;
       case '?':
@@ -707,6 +725,11 @@ fprintf(stderr, "multibeam_sidescan_source:%d arg:%c\n", preprocess_pars.multibe
     fprintf(stderr, "dbg2  Input survey data to be preprocessed:\n");
     fprintf(stderr, "dbg2       read_file:                    %s\n", read_file);
     fprintf(stderr, "dbg2       format:                       %d\n", format);
+    fprintf(stderr, "dbg2  Output directory:\n");
+    if (output_directory_set)
+      fprintf(stderr, "dbg2       output_directory:             %s\n", output_directory);
+    else
+      fprintf(stderr, "dbg2       output_directory:             not specified, use working directory\n");
     fprintf(stderr, "dbg2  Source of platform model:\n");
     if (use_platform_file)
       fprintf(stderr, "dbg2       platform_file:                %s\n", platform_file);
@@ -793,6 +816,8 @@ fprintf(stderr, "multibeam_sidescan_source:%d arg:%c\n", preprocess_pars.multibe
     fprintf(stderr, "dbg2       kluge_soundspeedtweak:        %d\n", kluge_soundspeedtweak);
     fprintf(stderr, "dbg2       kluge_soundspeedtweak_factor: %f\n", kluge_soundspeedtweak_factor);
     fprintf(stderr, "dbg2       kluge_fix_wissl_timestamps:   %d\n", kluge_fix_wissl_timestamps);
+    fprintf(stderr, "dbg2       kluge_auv_sentry_sensordepth: %d\n", kluge_auv_sentry_sensordepth);
+    fprintf(stderr, "dbg2       kluge_ignore_snippets:        %d\n", kluge_ignore_snippets);
     fprintf(stderr, "dbg2  Additional output:\n");
     fprintf(stderr, "dbg2       output_sensor_fnv:            %d\n", output_sensor_fnv);
     fprintf(stderr, "dbg2  Skip existing output files:\n");
@@ -805,6 +830,11 @@ fprintf(stderr, "multibeam_sidescan_source:%d arg:%c\n", preprocess_pars.multibe
     fprintf(stderr, "Input survey data to be preprocessed:\n");
     fprintf(stderr, "     read_file:                    %s\n", read_file);
     fprintf(stderr, "     format:                       %d\n", format);
+    fprintf(stderr, "Output directory:\n");
+    if (output_directory_set)
+      fprintf(stderr, "     output_directory:             %s\n", output_directory);
+    else
+      fprintf(stderr, "     output_directory:             not specified, use working directory\n");
     fprintf(stderr, "Source of platform model:\n");
     if (use_platform_file)
       fprintf(stderr, "     platform_file:                %s\n", platform_file);
@@ -891,6 +921,8 @@ fprintf(stderr, "multibeam_sidescan_source:%d arg:%c\n", preprocess_pars.multibe
     fprintf(stderr, "     kluge_soundspeedtweak:        %d\n", kluge_soundspeedtweak);
     fprintf(stderr, "     kluge_soundspeedtweak_factor: %f\n", kluge_soundspeedtweak_factor);
     fprintf(stderr, "     kluge_fix_wissl_timestamps:   %d\n", kluge_fix_wissl_timestamps);
+    fprintf(stderr, "     kluge_auv_sentry_sensordepth: %d\n", kluge_auv_sentry_sensordepth);
+    fprintf(stderr, "     kluge_ignore_snippets:        %d\n", kluge_ignore_snippets);
     fprintf(stderr, "Additional output:\n");
     fprintf(stderr, "     output_sensor_fnv:            %d\n", output_sensor_fnv);
     fprintf(stderr, "Skip existing output files:\n");
@@ -1001,10 +1033,11 @@ fprintf(stderr, "multibeam_sidescan_source:%d arg:%c\n", preprocess_pars.multibe
   struct mb_io_indextable_struct *i_indextable = nullptr;
 
   /* kluge various data fixes */
-  double kluge_first_time_d;
-  double kluge_last_time_d;
-  double dtime_d_expect;
-  double dtime_d;
+  double kluge_first_time_d = 0.0;
+  double kluge_last_time_d = 0.0;
+  double kluge_last_raw_time_d = 0.0;
+  double dtime_d_expect = 0.0;
+  double dtime_d = 0.0;
   bool kluge_fix_wissl_timestamps_setup1 = false;
   bool kluge_fix_wissl_timestamps_setup2 = false;
 
@@ -1366,10 +1399,21 @@ fprintf(stderr, "multibeam_sidescan_source:%d arg:%c\n", preprocess_pars.multibe
                                &imbio_ptr, &btime_d, &etime_d, &beams_bath, &beams_amp, &pixels_ss, &error) != MB_SUCCESS) {
       char *message;
       mb_error(verbose, error, &message);
+      fprintf(stderr, "%s:%d:%s\n", __FILE__, __LINE__, __FUNCTION__);
       fprintf(stderr, "\nMBIO Error returned from function <mb_read_init>:\n%s\n", message);
       fprintf(stderr, "\nMultibeam File <%s> not initialized for reading\n", ifile);
       fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
       exit(error);
+    }
+
+    /* call preprocess function with pars settings before reading any data
+        - for some formats this can set special read behavior
+        - passing store_ptr == NULL indicates this is the pre-reading call
+        - if a preprocess function does not exist for this format then
+          standard preprocessing will be done - reset the error */
+    if (mb_preprocess(verbose, imbio_ptr, NULL, NULL, (void *)&preprocess_pars, &error) == MB_FAILURE) {
+      status = MB_SUCCESS;
+      error = MB_ERROR_NO_ERROR;
     }
 
     beamflag = nullptr;
@@ -1380,18 +1424,15 @@ fprintf(stderr, "multibeam_sidescan_source:%d arg:%c\n", preprocess_pars.multibe
     ss = nullptr;
     ssacrosstrack = nullptr;
     ssalongtrack = nullptr;
-    if (error == MB_ERROR_NO_ERROR)
-      status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(char), (void **)&beamflag, &error);
+    status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(char), (void **)&beamflag, &error);
     if (error == MB_ERROR_NO_ERROR)
       status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double), (void **)&bath, &error);
     if (error == MB_ERROR_NO_ERROR)
       status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_AMPLITUDE, sizeof(double), (void **)&amp, &error);
     if (error == MB_ERROR_NO_ERROR)
-      status =
-          mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double), (void **)&bathacrosstrack, &error);
+      status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double), (void **)&bathacrosstrack, &error);
     if (error == MB_ERROR_NO_ERROR)
-      status =
-          mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double), (void **)&bathalongtrack, &error);
+      status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double), (void **)&bathalongtrack, &error);
     if (error == MB_ERROR_NO_ERROR)
       status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double), (void **)&ss, &error);
     if (error == MB_ERROR_NO_ERROR)
@@ -1403,6 +1444,7 @@ fprintf(stderr, "multibeam_sidescan_source:%d arg:%c\n", preprocess_pars.multibe
     if (error != MB_ERROR_NO_ERROR) {
       char *message;
       mb_error(verbose, error, &message);
+      fprintf(stderr, "%s:%d:%s\n", __FILE__, __LINE__, __FUNCTION__);
       fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
       fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
       exit(error);
@@ -1501,6 +1543,7 @@ fprintf(stderr, "multibeam_sidescan_source:%d arg:%c\n", preprocess_pars.multibe
           if (error != MB_ERROR_NO_ERROR) {
             char *message;
             mb_error(verbose, error, &message);
+            fprintf(stderr, "%s:%d:%s\n", __FILE__, __LINE__, __FUNCTION__);
             fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
             fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
             exit(error);
@@ -1537,6 +1580,7 @@ fprintf(stderr, "multibeam_sidescan_source:%d arg:%c\n", preprocess_pars.multibe
           if (error != MB_ERROR_NO_ERROR) {
             char *message;
             mb_error(verbose, error, &message);
+            fprintf(stderr, "%s:%d:%s\n", __FILE__, __LINE__, __FUNCTION__);
             fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
             fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
             exit(error);
@@ -1569,6 +1613,7 @@ fprintf(stderr, "multibeam_sidescan_source:%d arg:%c\n", preprocess_pars.multibe
           if (error != MB_ERROR_NO_ERROR) {
             char *message;
             mb_error(verbose, error, &message);
+            fprintf(stderr, "%s:%d:%s\n", __FILE__, __LINE__, __FUNCTION__);
             fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
             fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
             exit(error);
@@ -1600,6 +1645,7 @@ fprintf(stderr, "multibeam_sidescan_source:%d arg:%c\n", preprocess_pars.multibe
           if (error != MB_ERROR_NO_ERROR) {
             char *message;
             mb_error(verbose, error, &message);
+            fprintf(stderr, "%s:%d:%s\n", __FILE__, __LINE__, __FUNCTION__);
             fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
             fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
             exit(error);
@@ -1634,6 +1680,7 @@ fprintf(stderr, "multibeam_sidescan_source:%d arg:%c\n", preprocess_pars.multibe
           if (error != MB_ERROR_NO_ERROR) {
             char *message;
             mb_error(verbose, error, &message);
+            fprintf(stderr, "%s:%d:%s\n", __FILE__, __LINE__, __FUNCTION__);
             fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
             fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
             exit(error);
@@ -1665,6 +1712,7 @@ fprintf(stderr, "multibeam_sidescan_source:%d arg:%c\n", preprocess_pars.multibe
         if (error != MB_ERROR_NO_ERROR) {
           char *message;
           mb_error(verbose, error, &message);
+          fprintf(stderr, "%s:%d:%s\n", __FILE__, __LINE__, __FUNCTION__);
           fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
           fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
           exit(error);
@@ -2302,6 +2350,8 @@ fprintf(stderr, "multibeam_sidescan_source:%d arg:%c\n", preprocess_pars.multibe
       oformat = MBF_3DWISSLP;
     else if (iformat == MBF_OICGEODA)
       oformat = MBF_OICMBARI;
+    else if (iformat == MBF_SB2100RW)
+      oformat = MBF_SB2100B2;
     else
       oformat = iformat;
 
@@ -2310,6 +2360,21 @@ fprintf(stderr, "multibeam_sidescan_source:%d arg:%c\n", preprocess_pars.multibe
     sprintf(ofile, "%s.mb%d", fileroot, oformat);
     if (strcmp(ifile, ofile) == 0)
       sprintf(ofile, "%sr.mb%d", fileroot, oformat);
+
+    /* if a different output directory was set by user, reset file path */
+    if (output_directory_set) {
+      char buffer[MB_PATH_MAXLINE] = "";
+      strcpy(buffer, output_directory);
+      if (buffer[strlen(output_directory) - 1] != '/')
+        strcat(buffer, "/");
+      char *filenameptr;
+      if (strrchr(ofile, '/') != nullptr)
+        filenameptr = strrchr(ofile, '/') + 1;
+      else
+        filenameptr = ofile;
+      strcat(buffer, filenameptr);
+      strcpy(ofile, buffer);
+    }
 
     /* Figure out if the file should be preprocessed - don't if it looks like
       the file was previously preprocessed and looks up to date  AND the
@@ -2353,10 +2418,21 @@ fprintf(stderr, "multibeam_sidescan_source:%d arg:%c\n", preprocess_pars.multibe
                      &imbio_ptr, &btime_d, &etime_d, &beams_bath, &beams_amp, &pixels_ss, &error) != MB_SUCCESS) {
         char *message;
         mb_error(verbose, error, &message);
+        fprintf(stderr, "%s:%d:%s\n", __FILE__, __LINE__, __FUNCTION__);
         fprintf(stderr, "\nMBIO Error returned from function <mb_read_init>:\n%s\n", message);
         fprintf(stderr, "\nMultibeam File <%s> not initialized for reading\n", ifile);
         fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
         exit(error);
+      }
+
+      /* call preprocess function with pars settings before reading any data
+          - for some formats this can set special read behavior
+          - passing store_ptr == NULL indicates this is the pre-reading call
+          - if a preprocess function does not exist for this format then
+            standard preprocessing will be done - reset the error */
+      if (mb_preprocess(verbose, imbio_ptr, NULL, NULL, (void *)&preprocess_pars, &error) == MB_FAILURE) {
+        status = MB_SUCCESS;
+        error = MB_ERROR_NO_ERROR;
       }
 
       if (verbose > 0)
@@ -2367,6 +2443,7 @@ fprintf(stderr, "multibeam_sidescan_source:%d arg:%c\n", preprocess_pars.multibe
         MB_SUCCESS) {
         char *message;
         mb_error(verbose, error, &message);
+        fprintf(stderr, "%s:%d:%s\n", __FILE__, __LINE__, __FUNCTION__);
         fprintf(stderr, "\nMBIO Error returned from function <mb_write_init>:\n%s\n", message);
         fprintf(stderr, "\nMultibeam File <%s> not initialized for writing\n", ofile);
         fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -2391,6 +2468,7 @@ fprintf(stderr, "multibeam_sidescan_source:%d arg:%c\n", preprocess_pars.multibe
                           &error) != MB_SUCCESS) {
           char *message = nullptr;
           mb_error(verbose, error, &message);
+          fprintf(stderr, "%s:%d:%s\n", __FILE__, __LINE__, __FUNCTION__);
           fprintf(stderr, "\nMBIO Error returned from function <mb_write_init>:\n%s\n", message);
           fprintf(stderr, "\nMultibeam File <%s> not initialized for writing\n", ofile);
           fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -2452,6 +2530,7 @@ fprintf(stderr, "multibeam_sidescan_source:%d arg:%c\n", preprocess_pars.multibe
       if (error != MB_ERROR_NO_ERROR) {
         char *message;
         mb_error(verbose, error, &message);
+        fprintf(stderr, "%s:%d:%s\n", __FILE__, __LINE__, __FUNCTION__);
         fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
         fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
         exit(error);
@@ -2539,8 +2618,8 @@ fprintf(stderr, "multibeam_sidescan_source:%d arg:%c\n", preprocess_pars.multibe
       start_time_d = -1.0;
       end_time_d = -1.0;
 
-            if (kluge_fix_wissl_timestamps)
-                kluge_fix_wissl_timestamps_setup2 = false;
+      if (kluge_fix_wissl_timestamps)
+        kluge_fix_wissl_timestamps_setup2 = false;
 
       /* ------------------------------- */
       /* write comments to output file   */
@@ -2630,26 +2709,50 @@ fprintf(stderr, "multibeam_sidescan_source:%d arg:%c\n", preprocess_pars.multibe
           /* call mb_extract_altitude to get altitude */
           status &= mb_extract_altitude(verbose, imbio_ptr, istore_ptr, &kind, &sensordepth_org, &altitude_org, &error);
 
-          /* apply time jump fix */
+          /* apply time jump fix to survey record time stamps */
           bool timestamp_changed = false;
+          double dtime_d_expect = 0.0;
+          double dtime_d_raw = 0.0;
+          double dtime_d = 0.0;
+          double time_d_raw = 0.0;
+//fprintf(stderr, "\n%s:%d:%s: kluge_timejumps:%d n_rt_data:%d kluge_first_time_d:%f kluge_last_time_d:%f time_d:%f dtime_d:%f\n",
+//__FILE__, __LINE__, __FUNCTION__,
+//kluge_timejumps, n_rt_data, kluge_first_time_d, kluge_last_time_d, time_d, time_d - kluge_last_raw_time_d);
           if (kluge_timejumps) {
             if (kind == MB_DATA_DATA) {
-              if (n_rf_data == 1)
+              if (n_rt_data == 1)
                 kluge_first_time_d = time_d;
+              time_d_raw = time_d;
             }
-            if (n_rf_data >= 2) {
+            if (n_rt_data > 2) {
+              dtime_d_expect = (kluge_last_time_d - kluge_first_time_d) / (n_rt_data - 2);
+              dtime_d_raw = time_d - kluge_last_raw_time_d;
               dtime_d = time_d - kluge_last_time_d;
               if (fabs(dtime_d - dtime_d_expect) >= kluge_timejumps_threshold) {
-                time_d = kluge_last_time_d + dtime_d_expect;
-                timestamp_changed = true;
+                if (fabs(dtime_d_raw - dtime_d_expect) >= kluge_timejumps_threshold) {
+                  time_d = kluge_last_time_d + dtime_d_expect;
+                  timestamp_changed = true;
+//fprintf(stderr, "%s:%d:%s: kluge_timejumps:%d n_rt_data:%d kluge_first_time_d:%f kluge_last_time_d:%f time_d:%f dtime_d:%f dtime_d_raw:%f  dtime_d_expect:%f* change:%f\n",
+//__FILE__, __LINE__, __FUNCTION__,
+//kluge_timejumps, n_rt_data, kluge_first_time_d, kluge_last_time_d, time_d, dtime_d, dtime_d_raw, dtime_d_expect, time_d - time_d_raw);
+                } else {
+                  time_d = kluge_last_time_d + dtime_d_raw;
+                  timestamp_changed = true;
+//fprintf(stderr, "%s:%d:%s: kluge_timejumps:%d n_rt_data:%d kluge_first_time_d:%f kluge_last_time_d:%f time_d:%f dtime_d:%f dtime_d_raw:%f* dtime_d_expect:%f  change:%f\n",
+//__FILE__, __LINE__, __FUNCTION__,
+//kluge_timejumps, n_rt_data, kluge_first_time_d, kluge_last_time_d, time_d, dtime_d, dtime_d_raw, dtime_d_expect, time_d - time_d_raw);
+                }
               }
             }
             if (kind == MB_DATA_DATA) {
+              dtime_d = time_d - kluge_last_time_d;
               kluge_last_time_d = time_d;
-              if (n_rf_data >= 2)
-                dtime_d_expect = (kluge_last_time_d - kluge_first_time_d) / (n_rf_data - 1);
+              kluge_last_raw_time_d = time_d_raw;
             }
           }
+//fprintf(stderr, "%s:%d:%s: kluge_timejumps:%d n_rt_data:%d kluge_first_time_d:%f kluge_last_time_d:%f time_d:%f dtime_d:%f\n",
+//__FILE__, __LINE__, __FUNCTION__,
+//kluge_timejumps, n_rt_data, kluge_first_time_d, kluge_last_time_d, time_d, dtime_d);
 
           /* if the input data are WiSSL data in format MBF_3DWISSLR
            * and kluge_fix_wissl_timestamps is enabled, call special function
@@ -2870,6 +2973,7 @@ fprintf(stderr, "multibeam_sidescan_source:%d arg:%c\n", preprocess_pars.multibe
           if (status != MB_SUCCESS) {
             char *message;
             mb_error(verbose, error, &message);
+            fprintf(stderr, "%s:%d:%s\n", __FILE__, __LINE__, __FUNCTION__);
             fprintf(stderr, "\nMBIO Error returned from function <mb_put>:\n%s\n", message);
             fprintf(stderr, "\nMultibeam Data Not Written To File <%s>\n", ofile);
             fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -3117,7 +3221,7 @@ fprintf(stderr, "multibeam_sidescan_source:%d arg:%c\n", preprocess_pars.multibe
 
       /* close the input ("logged") swath file */
       status &= mb_close(verbose, &imbio_ptr, &error);
-	    n_rt_files++;
+      n_rt_files++;
 
       /* close the output ("raw") swath file */
       status &= mb_close(verbose, &ombio_ptr, &error);

@@ -186,7 +186,7 @@ int main(int argc, char **argv) {
   double speedmin;
   double timegap;
   status = mb_defaults(verbose, &format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
-  int uselockfiles;  // TODO(schwehr): Make mb_uselockfiles take a bool.
+  bool uselockfiles;
   mb_uselockfiles(verbose, &uselockfiles);
 
   /* reset all defaults but the format and lonflip */
@@ -408,18 +408,9 @@ int main(int argc, char **argv) {
       {
         int optiony_mode_tmp;
         const int n = sscanf(optarg, "%lf/%lf/%d", &left, &right, &optiony_mode_tmp);
-        optiony_mode = (y_mode_t)optiony_mode_tmp;  // TODO(schwehr): Range check.
-	// double distance_left = 0.0;  // TODO(schwehr): When was distance_left supposed to be set?
         if (n == 1) {
-          // TODO(schwehr): Probable bug.
-          if (true /* distance_left >= 0.0 */ ) {
-            flag_distance_left = -left;
-            flag_distance_right = left;
-          }
-          else {
-            flag_distance_left = left;
-            flag_distance_right = -left;
-          }
+          flag_distance_left = -fabs(left);
+          flag_distance_right = fabs(left);
           flag_distance = true;
         }
         else if (n == 2) {
@@ -428,6 +419,10 @@ int main(int argc, char **argv) {
           flag_distance = true;
         }
         else if (n == 3) {
+          if (optiony_mode_tmp >= 1 && optiony_mode_tmp <= 4)
+            optiony_mode = (y_mode_t)optiony_mode_tmp;
+          else
+            optiony_mode = MBCLEAN_Y_MODE_DISTANCE_FLAG;
           if (optiony_mode == MBCLEAN_Y_MODE_DISTANCE_FLAG) {
             flag_distance_left = left;
             flag_distance_right = right;
@@ -474,7 +469,7 @@ int main(int argc, char **argv) {
   }
 
   /* turn on slope checking if nothing else is to be used */
-  if (!check_slope && !zap_beams && flag_distance && !unflag_distance && !zap_rails &&
+  if (!check_slope && !zap_beams && !flag_distance && !unflag_distance && !zap_rails &&
       !check_spike && !check_range && !check_fraction && !check_speed_good &&
       !check_deviation && !check_num_good_min && !check_position_bounds &&
       !check_zero_position && !fix_edit_timestamps &&

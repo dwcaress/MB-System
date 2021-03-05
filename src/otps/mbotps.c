@@ -555,7 +555,12 @@ int main(int argc, char **argv) {
     fclose(tfp);
 
     /* now get time and tide model values at the tide station location
-       first open temporary file of lat lon time*/
+       first open temporary file of lat lon time
+       - note: because predict_tide is a 1970's style Fortran batch program
+          that limits filenames to 80 (!) characters, we have to check the
+          string length of the filenames - if either filename is longer than
+          80 characters then we try to put the files in the user's home
+          directory, which hopefully leads to a shorter pathname. */
     int pid = getpid();
     mb_path wd = "";
     getcwd(wd, sizeof(wd));
@@ -563,6 +568,10 @@ int main(int argc, char **argv) {
     mb_path otpsfile = "";
     sprintf(lltfile, "%s/t%d.txt", wd, pid);
     sprintf(otpsfile, "%s/u%d.txt", wd, pid);
+    if (strlen(lltfile) > 0 || strlen(otpsfile) > 0) {
+      sprintf(lltfile, "%s/t%d.txt", getenv("HOME"), pid);
+      sprintf(otpsfile, "%s/u%d.txt", getenv("HOME"), pid);
+    }
     if ((tfp = fopen(lltfile, "w")) == NULL)
       {
       error = MB_ERROR_OPEN_FAIL;
@@ -766,6 +775,10 @@ int main(int argc, char **argv) {
     sprintf(lltfile, "%s/t%d.txt", wd, pid);
     sprintf(otpsfile, "%s/u%d.txt", wd, pid);
     FILE *tfp = NULL;
+    if (strlen(lltfile) > 0 || strlen(otpsfile) > 0) {
+      sprintf(lltfile, "%s/t%d.txt", getenv("HOME"), pid);
+      sprintf(otpsfile, "%s/u%d.txt", getenv("HOME"), pid);
+    }
     if ((tfp = fopen(lltfile, "w")) == NULL)
       {
       error = MB_ERROR_OPEN_FAIL;
@@ -1003,6 +1016,10 @@ int main(int argc, char **argv) {
     sprintf(lltfile, "%s/t%d.txt", wd, pid);
     sprintf(otpsfile, "%s/u%d.txt", wd, pid);
     FILE *tfp = NULL;
+    if (strlen(lltfile) > 0 || strlen(otpsfile) > 0) {
+      sprintf(lltfile, "%s/t%d.txt", getenv("HOME"), pid);
+      sprintf(otpsfile, "%s/u%d.txt", getenv("HOME"), pid);
+    }
     if ((tfp = fopen(lltfile, "w")) == NULL)
       {
       fprintf(stderr,

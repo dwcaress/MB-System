@@ -38,7 +38,7 @@
 
 
 const char *mb_platform_type(mb_platform_enum platform) {
-    static const char *platform_string[] = {
+    const char *platform_string[] = {
       "Unknown platform type", "Surface vessel", "Tow body", "ROV", "AUV",
       "Aircraft", "Satellite", "Mooring", "Fixed"};
     return platform_string[platform];

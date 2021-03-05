@@ -1,4 +1,4 @@
-.TH mbvoxelclean 1 "28 February 2018" "MB-System 5.0" "MB-System 5.0"
+.TH mbvoxelclean 1 "27 October 2020" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbvoxelclean\fP \- 3D density filter.used to flag and unflag swath soundings,
 particularly from lidar sensors.
@@ -40,6 +40,14 @@ Version 5.0
 .br
 \fB\-\-range-maximum\fP=\fIvalue\fP
 .br
+\fB\-\-acrosstrack-minimum\fP=\fIvalue\fP
+.br
+\fB\-\-acrosstrack-maximum\fP=\fIvalue\fP
+.br
+\fB\-\-amplitude-minimum\fP=\fIvalue\fP
+.br
+\fB\-\-amplitude-maximum\fP=\fIvalue\fP
+.br
 ]
 
 .SH DESCRIPTION
@@ -64,8 +72,8 @@ The user may specify one or both of the following actions:
   1) Previously unflagged soundings in an empty voxel are flagged as bad.
   2) Previously flagged soundings in a full voxel are unflagged.
 
-This program will also apply specified minimum and maximum range and
-minimum and maximum acrosstrack distance filters.
+This program will also apply specified minimum and maximum range,
+acrosstrack distance, and beam amplitude filters.
 If a sounding's flag status is changed, that flagging action is output
 to the edit save file of the swath file containing that sounding. This
 program will create edit save files if necessary, or append to those that
@@ -193,6 +201,22 @@ more to starboard of the sensor than \fImax-acrosstrack\fP are flagged. Because 
 filter is applied as the data are read, before density filtering, use of the
 \fB\-\-unflag-occupied\fP option could result in soundings flagged by this
 maximum acrosstrack filter being unflagged.
+.TP
+\fB\-\-amplitude-minimum\fP=\fImin-amplitude\fP
+.br
+If a \fImin-amplitude\fP value is specified, then any unflagged soundings that have
+beam amplitudes less than \fImin-amplitude\fP are flagged. Because this
+filter is applied as the data are read, before density filtering, use of the
+\fB\-\-unflag-occupied\fP option could result in soundings flagged by this
+minimum amplitude filter being unflagged.
+.TP
+\fB\-\-amplitude-maximum\fP=\fImax-amplitude\fP]";
+.br
+If a \fImax-amplitude\fP value is specified, then any unflagged soundings that have
+beam amplitudes greater than \fImax-amplitude\fP are flagged. Because this
+filter is applied as the data are read, before density filtering, use of the
+\fB\-\-unflag-occupied\fP option could result in soundings flagged by this
+maximum amplitude filter being unflagged.
 
 .SH EXAMPLES
 Suppose one wishes to filter the soundings in three lidar files in the format

@@ -510,6 +510,14 @@ int main(int argc, char **argv) {
 					interval = 0.000001 * traceheader.si_micros * traceheader.nsamps;
 					printsimplevalue(verbose, interval, 0, 6, ascii, &invert_next_value, &signflip_next_value, &error);
 					break;
+				case 'l': /* Line number from fileheader */
+					if (ascii)
+						printf("%6d", fileheader.line);
+					else {
+						const double b = fileheader.line;
+						fwrite(&b, sizeof(double), 1, stdout);
+					}
+					break;
 				case 'M': /* Decimal unix seconds since
 				        1/1/70 00:00:00 */
 					printsimplevalue(verbose, time_d, 0, 6, ascii, &invert_next_value, &signflip_next_value, &error);

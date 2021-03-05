@@ -328,7 +328,7 @@ int mbr_hypc8101_rd_data(int verbose, void *mbio_ptr, int *error) {
 	double lever_x, lever_y, lever_z;
 	double rr, xx, zz;
 	double ddummy1, ddummy2;
-	char *token;
+	char *token, *saveptr;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -581,8 +581,8 @@ int mbr_hypc8101_rd_data(int verbose, void *mbio_ptr, int *error) {
 
 			/* deal with multibeam data */
 			else if (strncmp(line, "SB2", 3) == 0) {
-				/* start strtok and get sb2_clock */
-				if (status == MB_SUCCESS && (token = strtok(line + 6, " ")) != NULL)
+				/* start strtok_r and get sb2_clock */
+				if (status == MB_SUCCESS && (token = strtok_r(line + 6, " ", &saveptr)) != NULL)
 					nscan = sscanf(token, "%lf", &sb2_clock);
 				else {
 					status = MB_FAILURE;
@@ -590,7 +590,7 @@ int mbr_hypc8101_rd_data(int verbose, void *mbio_ptr, int *error) {
 				}
 
 				/* get sb2_nbeams */
-				if (status == MB_SUCCESS && (token = strtok(NULL, " ")) != NULL)
+				if (status == MB_SUCCESS && (token = strtok_r(NULL, " ", &saveptr)) != NULL)
 					nscan = sscanf(token, "%d", &sb2_nvalues);
 				else {
 					status = MB_FAILURE;
@@ -598,7 +598,7 @@ int mbr_hypc8101_rd_data(int verbose, void *mbio_ptr, int *error) {
 				}
 
 				/* get sb2_ssv */
-				if (status == MB_SUCCESS && (token = strtok(NULL, " ")) != NULL)
+				if (status == MB_SUCCESS && (token = strtok_r(NULL, " ", &saveptr)) != NULL)
 					nscan = sscanf(token, "%lf", &sb2_ssv);
 				else {
 					status = MB_FAILURE;
@@ -612,7 +612,7 @@ int mbr_hypc8101_rd_data(int verbose, void *mbio_ptr, int *error) {
 					sb2_nbeams = floor(0.8 * (sb2_nvalues - 1));
 					sb2_nquality = sb2_nvalues - sb2_nbeams - 1;
 					for (int i = 0; i < sb2_nbeams; i++) {
-						if (status == MB_SUCCESS && (token = strtok(NULL, " ")) != NULL) {
+						if (status == MB_SUCCESS && (token = strtok_r(NULL, " ", &saveptr)) != NULL) {
 							if ((nscan = sscanf(token, "%lf", &sb2_range)) == 1) {
 								data->tt[sb2_nbeams_read] = 100 * sb2_range;
 								sb2_nbeams_read++;
@@ -629,7 +629,7 @@ int mbr_hypc8101_rd_data(int verbose, void *mbio_ptr, int *error) {
 				if (status == MB_SUCCESS) {
 					sb2_nquality_read = 0;
 					for (int i = 0; i < sb2_nquality; i++) {
-						if (status == MB_SUCCESS && (token = strtok(NULL, " ")) != NULL) {
+						if (status == MB_SUCCESS && (token = strtok_r(NULL, " ", &saveptr)) != NULL) {
 							if ((nscan = sscanf(token, "%lf", &sb2_quality)) == 1) {
 								iquality = sb2_quality;
 								data->quality[4 * sb2_nquality_read] = (iquality >> 6) & 3;

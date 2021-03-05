@@ -681,6 +681,10 @@
 #define MB_PR_FILE_NOT_EXIST 2
 #define MB_PR_NO_PARAMETER_FILE 3
 
+/* mbprocess topo grid cache parameters */
+#define MB_PR_TOPOGRID_NUM_MAX 16
+#define MB_PR_TOPOGRID_NONUSE_MAX 16
+
 /* mbpreprocess defines */
 #define MB_PR_SSSOURCE_UNKNOWN 0
 #define MB_PR_SSSOURCE_CALIBRATEDSNIPPET 1
@@ -695,6 +699,7 @@
 #define MB_PR_KLUGE_ZEROALONGTRACKANGLES 4
 #define MB_PR_KLUGE_FIXWISSLTIMESTAMPS 5
 #define MB_PR_KLUGE_AUVSENTRYSENSORDEPTH 6
+#define MB_PR_KLUGE_IGNORESNIPPETS 7
 
 /* structure holding mbpreprocess parameters to be passed to preprocess
  * functions of i/o modules */
@@ -893,6 +898,9 @@ struct mb_process_struct {
   double mbp_ssrecalc_swathwidth;
   int mbp_ssrecalc_interpolate;
 
+  /* strip comments */
+  int mbp_strip_comments;
+
   /* metadata strings */
   char mbp_meta_vessel[MBP_FILENAMESIZE];
   char mbp_meta_institution[MBP_FILENAMESIZE];
@@ -944,7 +952,7 @@ struct mb_esf_struct {
   char esstream[MB_PATH_MAXLINE];
   int byteswapped;
   int version;
-    int mode;
+  int mode;
   int nedit;
   struct mb_edit_struct *edit;
   FILE *esffp;

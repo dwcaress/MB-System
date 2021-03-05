@@ -34,6 +34,7 @@
 #include <vector>
 #include <string>
 #include <algorithm>
+#include <thread>
 
 /* MB-System include files */
 extern "C"
@@ -58,6 +59,11 @@ using namespace cv;
 
 #define MBPM_PRIORITY_CENTRALITY_ONLY               1
 #define MBPM_PRIORITY_CENTRALITY_PLUS_STANDOFF      2
+
+void process_image(mb_path imageFile)
+{
+    fprintf(stdout, "Processing image %s\n", imageFile);
+}
 
 int main(int argc, char** argv)
 {
@@ -118,14 +124,13 @@ int main(int argc, char** argv)
     char    units[MB_PATH_MAXLINE];
     Mat     OutputImage;
     mb_path    OutputImageFile;
-    int        outputimage_specified = MB_NO;
+    bool       outputimage_specified = false;
     mb_path    OutputWorldFile;
     int    priority_mode = MBPM_PRIORITY_CENTRALITY_ONLY;
     float    *priority;
     float    pixel_priority, standoff_priority, pixel_priority_use;
     double    standoff_target = 3.0;
     double    standoff_range = 1.0;
-    double    dstandoff = 0.0;
     double    range_max = 200.0;
 
     /* Input image variables */
@@ -270,21 +275,7 @@ int main(int argc, char** argv)
     int utm_zone = 1;
     char projection_pars[MB_PATH_MAXLINE];
     char projection_id[MB_PATH_MAXLINE];
-    int proj_status;
     void *pjptr;
-    double deglontokm, deglattokm;
-    double mtodeglon, mtodeglat;
-    unsigned char b, g, r;
-    int ib, ig, ir;
-    double db, dg, dr;
-    double xx, yy, zz, zzref, rr, rr2, rrxy, rrxysq, rrxy2, rrxysq2, rrxymax;
-    double phi, theta, theta2, dtheta;
-    double pixel_dx, pixel_dy;
-    double alpha, beta;
-    double vx, vy, vz;
-    double vxx, vyy, vzz;
-    double lon, lat, topo;
-    double cx, cy, cz, standoff;
 
     /* image display options */
     bool show_images = false;
@@ -301,11 +292,9 @@ int main(int argc, char** argv)
     FILE *stream = NULL;
     FILE *tfp;
 
-    int use_this_image;
+    bool use_this_image = false;
     mb_path buffer;
     char *result;
-    int size, len, nget, value_ok;
-    double xlon, ylat;
     int lonflip;
     double sec;
     double pbounds[4];
@@ -314,9 +303,6 @@ int main(int argc, char** argv)
     FileStorage fstorage;
     bool isVerticalStereo;
     int npairs, nimages, currentimages;
-    int iimage, isensor;
-    int i, j, k, n, iii, jjj, kkk, iii1, iii2, jjj1, jjj2, ipix, jpix, kpix;
-    int ii, jj;
 
     /* command line option definitions */
     /* mbphotomosaic
@@ -441,28 +427,32 @@ int main(int argc, char** argv)
             /* input */
             else if (strcmp("input", options[option_index].name) == 0)
                 {
-                n = sscanf (optarg,"%s", ImageListFile);
+                sscanf (optarg,"%s", ImageListFile);
                 }
 
             /* output */
             else if ((strcmp("output", options[option_index].name) == 0)
                     || (strcmp("image-file", options[option_index].name) == 0))
                 {
-                n = sscanf (optarg,"%s", OutputImageFile);
-                if (strlen(OutputImageFile) < 6
-                    || ((strncmp(".tif", &OutputImageFile[strlen(OutputImageFile)-4], 4) != 0)
-                        && (strncmp(".tiff", &OutputImageFile[strlen(OutputImageFile)-5], 5) != 0)))
+                const int n = sscanf (optarg,"%s", OutputImageFile);
+                if (n == 1)
                     {
-                    strcat(OutputImageFile, ".tiff");
+                    outputimage_specified = true;
+                    if (strlen(OutputImageFile) < 6
+                        || ((strncmp(".tif", &OutputImageFile[strlen(OutputImageFile)-4], 4) != 0)
+                            && (strncmp(".tiff", &OutputImageFile[strlen(OutputImageFile)-5], 5) != 0)))
+                        {
+                        strcat(OutputImageFile, ".tiff");
+                        }
                     }
-                outputimage_specified = MB_YES;
                 }
 
             /* image-dimensions */
             else if (strcmp("image-dimensions", options[option_index].name) == 0)
                 {
-                n = sscanf (optarg,"%d/%d", &xdim, &ydim);
-                set_dimensions = MB_YES;
+                const int n = sscanf (optarg,"%d/%d", &xdim, &ydim);
+                if (n == 2 && xdim > 0 && ydim > 0)
+                  set_dimensions = MB_YES;
                 }
 
             /* image-spacing */
@@ -473,17 +463,19 @@ int main(int argc, char** argv)
                     spacing_priority = MB_YES;
                     optarg[strlen(optarg)-1] = '\0';
                     }
-                n = sscanf (optarg,"%lf/%lf/%s", &dx_set, &dy_set, units);
-                if (n > 1)
+                const int n = sscanf (optarg,"%lf/%lf/%s", &dx_set, &dy_set, units);
+                if (n > 1 && dx_set > 0.0 && dy_set > 0.0)
+                    {
                     set_spacing = MB_YES;
-                if (n < 3)
-                    strcpy(units, "meters");
+                    if (n < 3)
+                        strcpy(units, "meters");
+                    }
                 }
 
             /* fov-fudgefactor */
             else if (strcmp("fov-fudgefactor", options[option_index].name) == 0)
                 {
-                n = sscanf (optarg,"%lf", &fov_fudgefactor);
+                sscanf (optarg,"%lf", &fov_fudgefactor);
                 }
 
             /* projection */
@@ -496,7 +488,7 @@ int main(int argc, char** argv)
             /* altitude */
             else if (strcmp("altitude", options[option_index].name) == 0)
                 {
-                n = sscanf (optarg,"%lf/%lf", &standoff_target, &standoff_range);
+                const int n = sscanf (optarg,"%lf/%lf", &standoff_target, &standoff_range);
                 if (n ==2 && standoff_target > 0.0 && standoff_range > 0.0)
                     priority_mode = MBPM_PRIORITY_CENTRALITY_PLUS_STANDOFF;
                 }
@@ -504,7 +496,7 @@ int main(int argc, char** argv)
             /* standoff */
             else if (strcmp("standoff", options[option_index].name) == 0)
                 {
-                n = sscanf (optarg,"%lf/%lf", &standoff_target, &standoff_range);
+                const int n = sscanf (optarg,"%lf/%lf", &standoff_target, &standoff_range);
                 if (n ==2 && standoff_target > 0.0 && standoff_range > 0.0)
                     priority_mode = MBPM_PRIORITY_CENTRALITY_PLUS_STANDOFF;
                 }
@@ -512,7 +504,7 @@ int main(int argc, char** argv)
             /* rangemax */
             else if (strcmp("rangemax", options[option_index].name) == 0)
                 {
-                n = sscanf (optarg,"%lf", &range_max);
+                sscanf (optarg,"%lf", &range_max);
                 }
 
             /* bounds */
@@ -524,19 +516,22 @@ int main(int argc, char** argv)
             /* bounds-buffer */
             else if (strcmp("bounds-buffer", options[option_index].name) == 0)
                 {
-                n = sscanf (optarg,"%lf", &bounds_buffer);
+                sscanf (optarg,"%lf", &bounds_buffer);
                 }
 
             /* correction-file */
             else if (strcmp("correction-file", options[option_index].name) == 0)
                 {
-                n = sscanf (optarg,"%s", ImageCorrectionFile);
-                if (strlen(ImageCorrectionFile) < 5
-                    || strncmp(".yml", &ImageCorrectionFile[strlen(ImageCorrectionFile)-4], 4) != 0)
+                const int n = sscanf (optarg,"%s", ImageCorrectionFile);
+                if (n == 1)
                     {
-                    strcat(ImageCorrectionFile, ".yml");
+                    correction_specified = MB_YES;
+                    if (strlen(ImageCorrectionFile) < 5
+                        || strncmp(".yml", &ImageCorrectionFile[strlen(ImageCorrectionFile)-4], 4) != 0)
+                        {
+                        strcat(ImageCorrectionFile, ".yml");
+                        }
                     }
-                correction_specified = MB_YES;
                 }
 
             /* brightness-correction */
@@ -555,37 +550,37 @@ int main(int argc, char** argv)
             /* camera-sensor */
             else if (strcmp("camera-sensor", options[option_index].name) == 0)
                 {
-                n = sscanf(optarg, "%d", &camera_sensor);
+                sscanf(optarg, "%d", &camera_sensor);
                 }
 
             /* nav-sensor */
             else if (strcmp("nav-sensor", options[option_index].name) == 0)
                 {
-                n = sscanf(optarg, "%d", &nav_sensor);
+                sscanf(optarg, "%d", &nav_sensor);
                 }
 
             /* sensordepth-sensor */
             else if (strcmp("sensordepth-sensor", options[option_index].name) == 0)
                 {
-                n = sscanf(optarg, "%d", &sensordepth_sensor);
+                sscanf(optarg, "%d", &sensordepth_sensor);
                 }
 
             /* heading-sensor */
             else if (strcmp("heading-sensor", options[option_index].name) == 0)
                 {
-                n = sscanf(optarg, "%d", &heading_sensor);
+                sscanf(optarg, "%d", &heading_sensor);
                 }
 
             /* altitude-sensor */
             else if (strcmp("altitude-sensor", options[option_index].name) == 0)
                 {
-                n = sscanf(optarg, "%d", &altitude_sensor);
+                sscanf(optarg, "%d", &altitude_sensor);
                 }
 
             /* attitude-sensor */
             else if (strcmp("attitude-sensor", options[option_index].name) == 0)
                 {
-                n = sscanf(optarg, "%d", &attitude_sensor);
+                sscanf(optarg, "%d", &attitude_sensor);
                 }
 
             /* use-left-camera */
@@ -609,7 +604,7 @@ int main(int argc, char** argv)
             /* image-quality-threshold  (0 <= imageQualityThreshold <= 1) */
             else if (strcmp("image-quality-threshold", options[option_index].name) == 0)
                 {
-                n = sscanf (optarg,"%lf", &imageQualityThreshold);
+                sscanf (optarg,"%lf", &imageQualityThreshold);
                 }
 
             /* calibration-file */
@@ -622,22 +617,25 @@ int main(int argc, char** argv)
             /* navigation-file */
             else if (strcmp("navigation-file", options[option_index].name) == 0)
                 {
-                n = sscanf (optarg,"%s", NavigationFile);
-                navigation_specified = MB_YES;
+                const int n = sscanf (optarg,"%s", NavigationFile);
+                if (n == 1)
+                    navigation_specified = MB_YES;
                 }
 
             /* tide-file */
             else if (strcmp("tide-file", options[option_index].name) == 0)
                 {
-                n = sscanf (optarg,"%s", TideFile);
-                use_tide = MB_YES;
+                const int n = sscanf (optarg,"%s", TideFile);
+                if (n == 1)
+                    use_tide = MB_YES;
                 }
 
             /* topography-grid */
             else if (strcmp("topography-grid", options[option_index].name) == 0)
                 {
-                n = sscanf (optarg,"%s", TopographyGridFile);
-                use_topography = MB_YES;
+                const int n = sscanf (optarg,"%s", TopographyGridFile);
+                if (n == 1)
+                    use_topography = MB_YES;
                 }
 
             break;
@@ -680,6 +678,7 @@ int main(int argc, char** argv)
         fprintf(stream,"dbg2       use_camera_mode:             %d\n",use_camera_mode);
         fprintf(stream,"dbg2       imageQualityThreshold:       %f\n",imageQualityThreshold);
         fprintf(stream,"dbg2       show_images:                 %d\n",show_images);
+        fprintf(stream,"dbg2       outputimage_specified:       %d\n",outputimage_specified);
         fprintf(stream,"dbg2       OutputImageFile:             %s\n",OutputImageFile);
         fprintf(stream,"dbg2       bounds_specified:            %d\n",bounds_specified);
         fprintf(stream,"dbg2       Bounds: west:                %f\n",bounds[0]);
@@ -732,6 +731,7 @@ int main(int argc, char** argv)
         fprintf(stream,"  use_camera_mode:             %d\n",use_camera_mode);
         fprintf(stream,"  imageQualityThreshold:       %f\n",imageQualityThreshold);
         fprintf(stream,"  show_images:                 %d\n",show_images);
+        fprintf(stream,"  outputimage_specified:       %d\n",outputimage_specified);
         fprintf(stream,"  OutputImageFile:             %s\n",OutputImageFile);
         fprintf(stream,"  bounds_specified:            %d\n",bounds_specified);
         fprintf(stream,"  Bounds: west:                %f\n",bounds[0]);
@@ -867,7 +867,7 @@ int main(int argc, char** argv)
         sensor_heave = &(platform->sensors[platform->source_heave]);
     if (camera_sensor < 0)
         {
-        for (isensor=0;isensor<platform->num_sensors;isensor++)
+        for (int isensor=0;isensor<platform->num_sensors;isensor++)
             {
             if (platform->sensors[isensor].type == MB_SENSOR_TYPE_CAMERA_STEREO)
                 {
@@ -980,7 +980,7 @@ fprintf(stderr, "z: %d %f %f %f\n", ncorr_z, corr_zmin, corr_zmax, bin_dz);
                 kbin_zcen = ncorr_z / 2;
                 int k0 = ncorr_z;
                 int k1 = -1;
-                for (k=0;k<ncorr_z;k++) {
+                for (int k=0;k<ncorr_z;k++) {
                     if (corr_table[icamera].at<float>(ibin_xcen, jbin_ycen, k) > 0.0) {
                         if (k0 > k)
                             k0 = k;
@@ -1011,9 +1011,9 @@ fprintf(stderr, "center: %d %d %d\n", ibin_xcen, jbin_ycen, kbin_zcen);
 fprintf(stderr, "referenceIntensity: %f\n", referenceIntensity);
 fprintf(stderr, "referenceIntensityCorrection[%d]: %f\n", icamera, referenceIntensityCorrection[icamera]);
 //fprintf(stderr, "\nCorrection Table[%d]:\n", icamera);
-//for (i=0;i<ncorr_x;i++) {
-//for (j=0;j<ncorr_y;j++) {
-//for (k=0;k<ncorr_z;k++) {
+//for (int i=0;i<ncorr_x;i++) {
+//for (int j=0;j<ncorr_y;j++) {
+//for (int k=0;k<ncorr_z;k++) {
 //fprintf(stderr,"    %d %d %d   %f\n", i, j, k, corr_table[icamera].at<float>(i, j, k));
 //}
 //}
@@ -1029,6 +1029,7 @@ fprintf(stderr, "referenceIntensityCorrection[%d]: %f\n", icamera, referenceInte
     }
 
     /* deal with projected gridding */
+    double mtodeglon, mtodeglat, deglontokm, deglattokm;
     if (use_projection == MB_YES)
         {
         /* check for UTM with undefined zone */
@@ -1054,7 +1055,7 @@ fprintf(stderr, "referenceIntensityCorrection[%d]: %f\n", icamera, referenceInte
             strcpy(projection_id, projection_pars);
 
         /* set projection flag */
-        proj_status = mb_proj_init(verbose,projection_id,
+        int proj_status = mb_proj_init(verbose,projection_id,
             &(pjptr), &error);
 
         /* if projection not successfully initialized then quit */
@@ -1076,8 +1077,9 @@ fprintf(stderr, "referenceIntensityCorrection[%d]: %f\n", icamera, referenceInte
             || bounds[3] < -90.0 || bounds[3] > 90.0)
             {
             /* first point */
-            xx = bounds[0];
-            yy = bounds[2];
+            double xx = bounds[0];
+            double yy = bounds[2];
+            double xlon, ylat;
             mb_proj_inverse(verbose, pjptr, xx, yy,
                     &xlon, &ylat, &error);
             mb_apply_lonflip(verbose, lonflip, &xlon);
@@ -1130,8 +1132,9 @@ fprintf(stderr, "referenceIntensityCorrection[%d]: %f\n", icamera, referenceInte
             pbounds[3] = bounds[3];
 
             /* first point */
-            xlon = pbounds[0];
-            ylat = pbounds[2];
+            double xx, yy;
+            double xlon = pbounds[0];
+            double ylat = pbounds[2];
             mb_proj_forward(verbose, pjptr, xlon, ylat,
                     &xx, &yy, &error);
             bounds[0] = xx;
@@ -1287,7 +1290,10 @@ bounds[0], bounds[1], bounds[2], bounds[3]);*/
     if (verbose >= 1)
         {
         fprintf(stdout,"\nOutput Image Parameters:\n");
-        fprintf(stream,"  OutputImageFile:    %s\n",OutputImageFile);
+        if (outputimage_specified)
+            fprintf(stream,"  OutputImageFile:    %s\n",OutputImageFile);
+        else
+            fprintf(stream,"  No image output - listing images that would be used for the defined area\n");
         if (use_projection == MB_YES)
             fprintf(stream,"  projection:         %s\n",projection_id);
         else
@@ -1304,8 +1310,8 @@ bounds[0], bounds[1], bounds[2], bounds[3]);*/
 
         /* Create an image */
     OutputImage.create(ydim, xdim, CV_8UC3);
-    //OutputImage = cvCreateImage(cvSize(xdim,ydim), IPL_DEPTH_8U, 3);
-    status = mb_mallocd(verbose,__FILE__,__LINE__,xdim*ydim*sizeof(float),(void **)&priority,&error);
+    size_t size = xdim*ydim*sizeof(float);
+    status = mb_mallocd(verbose,__FILE__,__LINE__,size,(void **)&priority,&error);
     if (status == MB_FAILURE)
         {
         fprintf(stderr,"\nUnable to allocate %.2f MBytes memory for mosaic priority array\n",((xdim*ydim*sizeof(float))/1048576.0));
@@ -1313,7 +1319,7 @@ bounds[0], bounds[1], bounds[2], bounds[3]);*/
             program_name);
         exit(error);
         }
-    for (kkk=0;kkk<xdim*ydim;kkk++)
+    for (unsigned int kkk=0;kkk<xdim*ydim;kkk++)
         priority[kkk] = 0.0;
 
     /* read in navigation if desired */
@@ -1335,7 +1341,6 @@ bounds[0], bounds[1], bounds[2], bounds[3]);*/
         /* allocate arrays for nav */
         if (nnav > 1)
             {
-            size = (nnav+1)*sizeof(double);
             status = mb_mallocd(verbose,__FILE__,__LINE__,nnav*sizeof(double),(void **)&ntime,&error);
             status = mb_mallocd(verbose,__FILE__,__LINE__,nnav*sizeof(double),(void **)&nlon,&error);
             status = mb_mallocd(verbose,__FILE__,__LINE__,nnav*sizeof(double),(void **)&nlat,&error);
@@ -1381,10 +1386,10 @@ bounds[0], bounds[1], bounds[2], bounds[3]);*/
             }
         while ((result = fgets(buffer,MB_PATH_MAXLINE,tfp)) == buffer)
             {
-            value_ok = MB_NO;
+            bool value_ok = false;
 
             /* read the navigation from an fnv file */
-            nget = sscanf(buffer,"%d %d %d %d %d %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf",
+            int nget = sscanf(buffer,"%d %d %d %d %d %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf",
                 &time_i[0],&time_i[1],&time_i[2],
                 &time_i[3],&time_i[4],&sec,
                 &ntime[nnav],
@@ -1392,10 +1397,10 @@ bounds[0], bounds[1], bounds[2], bounds[3]);*/
                 &nheading[nnav],&nspeed[nnav],&ndraft[nnav],
                 &nroll[nnav],&npitch[nnav],&nheave[nnav]);
             if (nget >= 15)
-                value_ok = MB_YES;
+                value_ok = true;
 
             /* make sure longitude is defined according to lonflip */
-            if (value_ok == MB_YES)
+            if (value_ok)
                 {
                 if (lonflip == -1 && nlon[nnav] > 0.0)
                     nlon[nnav] = nlon[nnav] - 360.0;
@@ -1408,7 +1413,7 @@ bounds[0], bounds[1], bounds[2], bounds[3]);*/
                 }
 
             /* output some debug values */
-            if (verbose >= 5 && value_ok == MB_YES)
+            if (verbose >= 5 && value_ok)
                 {
                 fprintf(stderr,"\ndbg5  New navigation point read in program <%s>\n",program_name);
                 fprintf(stderr,"dbg5       nav[%d]: %f %f %f\n",
@@ -1421,7 +1426,7 @@ bounds[0], bounds[1], bounds[2], bounds[3]);*/
                 }
 
             /* check for reverses or repeats in time */
-            if (value_ok == MB_YES)
+            if (value_ok)
                 {
                 if (nnav == 0)
                     nnav++;
@@ -1471,7 +1476,6 @@ bounds[0], bounds[1], bounds[2], bounds[3]);*/
         /* allocate arrays for tide */
         if (ntide > 1)
             {
-            size = (ntide+1)*sizeof(double);
             status = mb_mallocd(verbose,__FILE__,__LINE__,ntide*sizeof(double),(void **)&ttime,&error);
             status = mb_mallocd(verbose,__FILE__,__LINE__,ntide*sizeof(double),(void **)&ttide,&error);
 
@@ -1510,16 +1514,16 @@ bounds[0], bounds[1], bounds[2], bounds[3]);*/
             }
         while ((result = fgets(buffer,MB_PATH_MAXLINE,tfp)) == buffer)
             {
-            value_ok = MB_NO;
+            bool value_ok = false;
 
             /* read the navigation from an fnv file */
-            nget = sscanf(buffer,"%lf %lf",
+            int nget = sscanf(buffer,"%lf %lf",
                 &ttime[ntide], &ttide[ntide]);
             if (nget >= 2)
-                value_ok = MB_YES;
+                value_ok = true;
 
             /* output some debug values */
-            if (verbose >= 5 && value_ok == MB_YES)
+            if (verbose >= 5 && value_ok)
                 {
                 fprintf(stderr,"\ndbg5  New tide point read in program <%s>\n",program_name);
                 fprintf(stderr,"dbg5       tide[%d]: %f %f\n",
@@ -1532,7 +1536,7 @@ bounds[0], bounds[1], bounds[2], bounds[3]);*/
                 }
 
             /* check for reverses or repeats in time */
-            if (value_ok == MB_YES)
+            if (value_ok)
                 {
                 if (ntide == 0)
                     ntide++;
@@ -1661,7 +1665,7 @@ fprintf(stderr,"Done reading TopographyGridFile: %s\n", TopographyGridFile);
         }
 
         /* process any images */
-        for (iimage=0;iimage<currentimages;iimage++) {
+        for (int iimage=0;iimage<currentimages;iimage++) {
             /* set camera for stereo image */
             if (currentimages == 2) {
                 if (iimage == MBPM_CAMERA_LEFT) {
@@ -1673,27 +1677,27 @@ fprintf(stderr,"Done reading TopographyGridFile: %s\n", TopographyGridFile);
             }
 
             /* check to see if this image should be used */
-            use_this_image = MB_NO;
+            use_this_image = false;
             if (image_camera == MBPM_CAMERA_LEFT
                 && (use_camera_mode == MBPM_USE_LEFT || use_camera_mode == MBPM_USE_STEREO)) {
                      time_d = left_time_d;
                     strcpy(imageFile, imageLeftFile);
-                    use_this_image = MB_YES;
+                    use_this_image = true;
             }
             else if (image_camera == MBPM_CAMERA_RIGHT
                 && (use_camera_mode == MBPM_USE_RIGHT || use_camera_mode == MBPM_USE_STEREO)) {
                      time_d = left_time_d + time_diff;
                     strcpy(imageFile, imageRightFile);
-                    use_this_image = MB_YES;
+                    use_this_image = true;
             }
 
             /* check imageQuality value against threshold to see if this image should be used */
-            if (use_this_image == MB_YES && imageQuality < imageQualityThreshold) {
-              use_this_image = MB_NO;
+            if (use_this_image && imageQuality < imageQualityThreshold) {
+              use_this_image = false;
             }
 
             /* check navigation for location close to or inside destination image bounds */
-            if (use_this_image == MB_YES) {
+            if (use_this_image) {
                 if (nnav > 0 && time_d >= ntime[0] && time_d <= ntime[nnav-1]) {
                     /* get navigation for this image */
                     intstat = mb_linear_interp_longitude(verbose,
@@ -1706,25 +1710,40 @@ fprintf(stderr,"Done reading TopographyGridFile: %s\n", TopographyGridFile);
                             &error);
                     if (navlon < pbounds[0] || navlon > pbounds[1]
                         || navlat < pbounds[2] || navlat > pbounds[3]) {
-                        use_this_image = MB_NO;
+                        use_this_image = false;
                     }
                 }
                 else {
-                    use_this_image = MB_NO;
+                    use_this_image = false;
                 }
             }
 
+// Test thread use
+fprintf(stderr, "About to start thread\n");
+std:thread thread1(process_image, imageFile);
+thread1.join();
+fprintf(stderr, "Done with thread\n");
+
+            /* if no output specified but image would be used, print it out and
+                reset use_this_image flag off so it is not read and processed
+                - this lets us get a list of the images to be used without taking
+                the time to process them */
+            if (!outputimage_specified && use_this_image) {
+                fprintf(stdout,"%s\n", imageFile);
+                use_this_image = false;
+            }
+
             /* read the image */
-            if (use_this_image == MB_YES) {
+            if (use_this_image) {
                 /* read the image */
                 imageProcess = imread(imageFile);
                 if (imageProcess.empty()) {
-                    use_this_image = MB_NO;
+                    use_this_image = false;
                 }
             }
 
             /* process the image */
-            if (use_this_image == MB_YES) {
+            if (use_this_image) {
 
                 /* if calibration loaded, undistort the image */
                 if (calibration_specified == MB_YES) {
@@ -1812,7 +1831,7 @@ fprintf(stderr,"Done reading TopographyGridFile: %s\n", TopographyGridFile);
 
                 /* calculate reference "depth" for use in calculating ray angles for
                     individual pixels */
-                zzref = 0.5 * (0.5 * imageSize.width / tan(DTR * 0.5 * fov_x * fov_fudgefactor)
+                double zzref = 0.5 * (0.5 * imageSize.width / tan(DTR * 0.5 * fov_x * fov_fudgefactor)
                         + 0.5 * imageSize.height / tan(DTR * 0.5 * fov_y * fov_fudgefactor));
 
                 /* get navigation for this image */
@@ -1918,7 +1937,7 @@ fprintf(stderr,"Done reading TopographyGridFile: %s\n", TopographyGridFile);
                     normalize(b_hist, b_hist, 0, histImage.rows, NORM_MINMAX, -1, Mat() );
                     normalize(g_hist, g_hist, 0, histImage.rows, NORM_MINMAX, -1, Mat() );
                     normalize(r_hist, r_hist, 0, histImage.rows, NORM_MINMAX, -1, Mat() );
-                    for( int i = 1; i < histSize; i++ ) {
+                    for ( int i = 1; i < histSize; i++ ) {
                         line( histImage, Point( bin_w*(i-1), hist_h - cvRound(b_hist.at<float>(i-1)) ),
                               Point( bin_w*(i), hist_h - cvRound(b_hist.at<float>(i)) ),
                               Scalar( 255, 0, 0), 2, 8, 0  );
@@ -1937,22 +1956,22 @@ fprintf(stderr,"Done reading TopographyGridFile: %s\n", TopographyGridFile);
 
                 /* calculate the largest distance from center for this image for use
                     in calculating pixel priority */
-                xx = MAX(center_x, imageUndistort.cols - center_x);
-                yy = MAX(center_y, imageUndistort.rows - center_y);
-                rrxymax = sqrt(xx * xx + yy * yy);
+                double xx = MAX(center_x, imageUndistort.cols - center_x);
+                double yy = MAX(center_y, imageUndistort.rows - center_y);
+                double rrxymax = sqrt(xx * xx + yy * yy);
 
                 /* make and display a priority map */
                 if (show_priority_map) {
                     imagePriority = imageUndistort.clone();
-                    for(i=0; i<imageUndistort.cols; i++) {
-                        for(j=0; j<imageUndistort.rows; j++) {
+                    for (int i=0; i<imageUndistort.cols; i++) {
+                        for (int j=0; j<imageUndistort.rows; j++) {
                             /* calculate the pixel priority based on the distance
                                 from the image center */
                             xx = i - center_x;
                             yy = center_y - j;
-                            rrxy = sqrt(xx * xx + yy * yy);
-                            pixel_priority = (rrxymax - rrxy) / rrxymax;
-                            r = (unsigned char)(pixel_priority * 255);
+                            double rrxy = sqrt(xx * xx + yy * yy);
+                            double pixel_priority = (rrxymax - rrxy) / rrxymax;
+                            unsigned char r = (unsigned char)(pixel_priority * 255);
                             imagePriority.at<Vec3b>(j,i)[0] = r;
                             imagePriority.at<Vec3b>(j,i)[1] = r;
                             imagePriority.at<Vec3b>(j,i)[2] = r;
@@ -1985,21 +2004,23 @@ fprintf(stderr,"Done reading TopographyGridFile: %s\n", TopographyGridFile);
                 /* get unit vector for direction camera is pointing */
 
                 /* rotate center pixel location using attitude and zzref */
+                double zz;
                 mb_platform_math_attitude_rotate_beam(verbose,
                     0.0, 0.0, zzref,
                     camera_roll, camera_pitch, 0.0,
                     &xx, &yy, &zz,
                     &error);
-                rr = sqrt(xx * xx + yy * yy + zz * zz);
-                phi = RTD * atan2(yy, xx);
-                theta = RTD * acos(zz / rr);
+                double rr = sqrt(xx * xx + yy * yy + zz * zz);
+                double phi = RTD * atan2(yy, xx);
+                double theta = RTD * acos(zz / rr);
 
                 /* calculate unit vector relative to the camera rig */
-                vz = cos(DTR * theta);
-                vx = sin(DTR * theta) * cos(DTR * phi);
-                vy = sin(DTR * theta) * sin(DTR * phi);
+                double vx = sin(DTR * theta) * cos(DTR * phi);
+                double vy = sin(DTR * theta) * sin(DTR * phi);
+                double vz = cos(DTR * theta);
 
                 /* apply rotation of each camera relative to the rig */
+                double vxx, vyy, vzz;
                 if (image_camera == 1) {
                     vxx = vx * (R.at<double>(0,0)) + vy * (R.at<double>(0,1)) + vz * (R.at<double>(0,2));
                     vyy = vx * (R.at<double>(1,0)) + vy * (R.at<double>(1,1)) + vz * (R.at<double>(1,2));
@@ -2012,41 +2033,41 @@ fprintf(stderr,"Done reading TopographyGridFile: %s\n", TopographyGridFile);
                 }
 
                 /* rotate unit vector by camera rig heading */
-                cx = vxx * cos(DTR * camera_heading) + vyy * sin(DTR * camera_heading);
-                cy = -vxx * sin(DTR * camera_heading) + vyy * cos(DTR * camera_heading);
-                cz = vzz;
+                double cx = vxx * cos(DTR * camera_heading) + vyy * sin(DTR * camera_heading);
+                double cy = -vxx * sin(DTR * camera_heading) + vyy * cos(DTR * camera_heading);
+                double cz = vzz;
 
                 /* loop over the pixels */
-                for(i=0; i<imageUndistort.cols; i++) {
-                    for(j=0; j<imageUndistort.rows; j++) {
+                for (int i=0; i<imageUndistort.cols; i++) {
+                    for (int j=0; j<imageUndistort.rows; j++) {
                         /* calculate the pixel priority based on the distance
                             from the image center */
-                        xx = i - center_x;
-                        yy = center_y - j;
+                        double xx = i - center_x;
+                        double yy = center_y - j;
 //int debugprint = MB_NO;
 //int icenter_x = (int)center_x;
 //int icenter_y = (int)center_y;
 //if (i == icenter_x && j == icenter_y) {
 //debugprint = MB_YES;
 //}
-                        rrxysq = xx * xx + yy * yy;
-                        rrxy = sqrt(rrxysq);
-                        rr = sqrt(rrxysq + zzref * zzref);
-                        pixel_priority = (rrxymax - rrxy) / rrxymax;
+                        double rrxysq = xx * xx + yy * yy;
+                        double rrxy = sqrt(rrxysq);
+                        double rr = sqrt(rrxysq + zzref * zzref);
+                        double pixel_priority = (rrxymax - rrxy) / rrxymax;
 //if (debugprint == MB_YES) {
 //fprintf(stderr,"\nPRIORITY xx:%f yy:%f zzref:%f rr:%f rrxy:%f rrxymax:%f pixel_priority:%f\n",
 //xx,yy,zzref,rr,rrxy,rrxymax,pixel_priority);
 //}
 
                         /* calculate the pixel takeoff angles relative to the camera rig */
-                        phi = RTD * atan2(yy, xx);
-                        theta = RTD * acos(zzref / rr);
+                        double phi = RTD * atan2(yy, xx);
+                        double theta = RTD * acos(zzref / rr);
 
                         /* calculate the angular width of a single pixel */
-                        rrxysq2 = (rrxy + 1.0) * (rrxy + 1.0);
-                        rr2 = sqrt(rrxysq2 + zzref * zzref);
-                        theta2 = RTD * acos(zzref / rr2);
-                        dtheta = theta2 - theta;
+                        double rrxysq2 = (rrxy + 1.0) * (rrxy + 1.0);
+                        double rr2 = sqrt(rrxysq2 + zzref * zzref);
+                        double theta2 = RTD * acos(zzref / rr2);
+                        double dtheta = theta2 - theta;
 //if (debugprint == MB_YES) {
 //fprintf(stderr,"Camera: roll:%.3f pitch:%.3f\n", camera_roll, camera_pitch);
 //fprintf(stderr,"Rows:%d Cols:%d | %5d %5d BGR:%3.3d|%3.3d|%3.3d", imageUndistort.rows, imageUndistort.cols, i, j, b, g, r);
@@ -2054,6 +2075,7 @@ fprintf(stderr,"Done reading TopographyGridFile: %s\n", TopographyGridFile);
 //}
 
                         /* rotate pixel location using attitude and zzref */
+                        double zz;
                         mb_platform_math_attitude_rotate_beam(verbose,
                             xx, yy, zzref,
                             camera_roll, camera_pitch, 0.0,
@@ -2072,14 +2094,17 @@ fprintf(stderr,"Done reading TopographyGridFile: %s\n", TopographyGridFile);
 //}
 
                         /* calculate unit vector relative to the camera rig */
-                        vz = cos(DTR * theta);
-                        vx = sin(DTR * theta) * cos(DTR * phi);
-                        vy = sin(DTR * theta) * sin(DTR * phi);
+                        double vz = cos(DTR * theta);
+                        double vx = sin(DTR * theta) * cos(DTR * phi);
+                        double vy = sin(DTR * theta) * sin(DTR * phi);
 //if (debugprint == MB_YES) {
 //fprintf(stderr,"camera rig unit vector: %f %f %f\n",vx,vy,vz);
 //}
                         /* if takeoff angle is too vertical (this is a 2D photomosaic)
                             then do not use this pixel */
+                        double vxx, vyy, vzz;
+                        double standoff = 0.0;
+                        double lon, lat, topo;
                         if (theta <= 80.0) {
 
                             /* apply rotation of each camera relative to the rig */
@@ -2139,8 +2164,8 @@ fprintf(stderr,"Done reading TopographyGridFile: %s\n", TopographyGridFile);
 
                             /* modulate the source pixel priority by the standoff if desired */
                             if (priority_mode == MBPM_PRIORITY_CENTRALITY_PLUS_STANDOFF)  {
-                                dstandoff = (standoff - standoff_target) / standoff_range;
-                                standoff_priority = (float) (exp(-dstandoff * dstandoff));
+                                double dstandoff = (standoff - standoff_target) / standoff_range;
+                                double standoff_priority = (float) (exp(-dstandoff * dstandoff));
                                 pixel_priority *= standoff_priority;
                             }
 //if (debugprint == MB_YES) {
@@ -2232,9 +2257,9 @@ fprintf(stderr,"Done reading TopographyGridFile: %s\n", TopographyGridFile);
 //i,j,db,dg,dr,intensityCorrection,(double) imageUndistortYCrCb.at<Vec3b>(j,i)[0],dy);
 
                             /* apply the pixel correction */
-                            b = saturate_cast<unsigned char>(imageUndistort.at<Vec3b>(j,i)[0] + intensityChange);
-                            g = saturate_cast<unsigned char>(imageUndistort.at<Vec3b>(j,i)[1] + intensityChange);
-                            r = saturate_cast<unsigned char>(imageUndistort.at<Vec3b>(j,i)[2] + intensityChange);
+                            unsigned char b = saturate_cast<unsigned char>(imageUndistort.at<Vec3b>(j,i)[0] + intensityChange);
+                            unsigned char g = saturate_cast<unsigned char>(imageUndistort.at<Vec3b>(j,i)[1] + intensityChange);
+                            unsigned char r = saturate_cast<unsigned char>(imageUndistort.at<Vec3b>(j,i)[2] + intensityChange);
 //if (r+g+b < 20)
 //fprintf(stderr,"%5d %5d  rgb: %3d %3d %3d   %3d %3d %3d   intensityChange:%f\n",
 //i,j,imageUndistort.at<Vec3b>(j,i)[0],
@@ -2244,12 +2269,13 @@ fprintf(stderr,"Done reading TopographyGridFile: %s\n", TopographyGridFile);
 
                             /* find the location and footprint of the input pixel
                                 in the output image */
+                            double diii, djjj;
+                            double pixel_dx, pixel_dy;
                             if (use_projection == MB_YES) {
                                 /* pixel location */
                                 mb_proj_forward(verbose, pjptr, lon, lat, &xx, &yy, &error);
-                                iii = (xx - bounds[0] + 0.5 * dx) / dx;
-                                jjj = (bounds[3] - yy + 0.5 * dy) / dy;
-                                kkk = xdim * jjj + iii;
+                                diii = (xx - bounds[0] + 0.5 * dx) / dx;
+                                djjj = (bounds[3] - yy + 0.5 * dy) / dy;
 
                                 /* pixel footprint size */
                                 pixel_dx = 4.0 * rr * cos(DTR * theta) * tan (DTR * dtheta) / dx;
@@ -2258,9 +2284,8 @@ fprintf(stderr,"Done reading TopographyGridFile: %s\n", TopographyGridFile);
 
                             else {
                                 /* pixel location */
-                                iii = (lon - bounds[0] + 0.5 * dx) / dx;
-                                jjj = (bounds[3] - lat + 0.5 * dy) / dy;
-                                kkk = xdim * jjj + iii;
+                                diii = (lon - bounds[0] + 0.5 * dx) / dx;
+                                djjj = (bounds[3] - lat + 0.5 * dy) / dy;
 
                                 /* pixel footprint size */
                                 pixel_dx = 4.0 * rr * cos(DTR * theta) * tan (DTR * dtheta) * (mtodeglon / dx);
@@ -2268,10 +2293,21 @@ fprintf(stderr,"Done reading TopographyGridFile: %s\n", TopographyGridFile);
                             }
 
                             /* figure out the "footprint" extent of the mapped pixel */
-                            iii1 = iii - floor(pixel_dx);
-                            iii2 = iii + floor(pixel_dx);
-                            jjj1 = jjj - floor(pixel_dy);
-                            jjj2 = jjj + floor(pixel_dy);
+                            int iii1 = (int)(floor(diii) - floor(pixel_dx));
+                            int iii2 = (int)(floor(diii) + floor(pixel_dx));
+                            int jjj1 = (int)(floor(djjj) - floor(pixel_dy));
+                            int jjj2 = (int)(floor(djjj) + floor(pixel_dy));
+                            unsigned int uiii1 = (unsigned int)(MAX(iii1, 0));
+                            unsigned int uiii2 = (unsigned int)(MAX(MIN(iii2, xdim - 1), 0));
+                            unsigned int ujjj1 = (unsigned int)(MAX(jjj1, 0));
+                            unsigned int ujjj2 = (unsigned int)(MAX(MIN(jjj2, ydim - 1), 0));
+
+                            unsigned int iii = MIN(MAX((unsigned int)floor(diii), 2), xdim - 3);
+                            unsigned int jjj = MIN(MAX((unsigned int)floor(djjj), 2), ydim - 3);
+                            bool out_of_map = true;
+                            if (diii >= 2.0 && diii < xdim - 3.0 && djjj >= 2.0 && djjj < ydim - 3.0)
+                                out_of_map = false;
+
 //fprintf(stderr,"i:%d j:%d iii:%d:%d:%d jjj:%d:%d:%d theta:%f dtheta:%f pixel_dx:%f pixel_dy:%f dx:%g dy:%g mtodeglon:%g mtodeglat:%g\n",
 //i,j,iii1,iii,iii2,jjj1,jjj,jjj2,theta,dtheta,pixel_dx,pixel_dy,dx,dy,mtodeglon,mtodeglat);
 //fprintf(stderr,"iii:%d jjj:%d\n",iii,jjj);
@@ -2279,18 +2315,18 @@ fprintf(stderr,"Done reading TopographyGridFile: %s\n", TopographyGridFile);
 //fprintf(stderr,"       standoff:%f pixel_priority:%.3f\n", standoff, pixel_priority);
 //}
 
-                            for (ipix=iii1;ipix<=iii2;ipix++) {
-                                for (jpix=jjj1;jpix<=jjj2;jpix++) {
-                                    kpix = xdim * jpix + ipix;
-                                    if (ipix == iii && jpix == jjj)
+                            for (unsigned int ipix=uiii1;ipix<=uiii2;ipix++) {
+                                for (unsigned int jpix=ujjj1;jpix<=ujjj2;jpix++) {
+                                    unsigned int kpix = xdim * jpix + ipix;
+                                    if (out_of_map)
+                                        pixel_priority_use = 0.98 * pixel_priority;
+                                    else if (ipix == iii && jpix == jjj)
                                         pixel_priority_use = pixel_priority;
                                     else if (ipix > iii-2 && iii < iii+2 && jpix > jjj-2 && jpix < jjj+2)
                                         pixel_priority_use = 0.99 * pixel_priority;
                                     else
                                         pixel_priority_use = 0.98 * pixel_priority;
-                                    if (ipix >= 0 && ipix < xdim
-                                        && jpix >= 0 && jpix < ydim
-                                        && pixel_priority_use > priority[kpix]) {
+                                    if (pixel_priority_use > priority[kpix]) {
 //if (debugprint == MB_YES) {
 //fprintf(stderr,"              Pixel used: i:%d j:%d  ipix:%d jpix:%d  BGR:%d %d %d Priority:%f %f\n",
 //i,j,ipix,jpix,OutputImage.at<Vec3b>(jpix,ipix)[0],OutputImage.at<Vec3b>(jpix,ipix)[1],OutputImage.at<Vec3b>(jpix,ipix)[2],
@@ -2322,40 +2358,42 @@ fprintf(stderr,"Done reading TopographyGridFile: %s\n", TopographyGridFile);
     status = mb_imagelist_close(verbose, &imagelist_ptr, &error);
 
     /* Write out the ouput image */
-    status = imwrite(OutputImageFile,OutputImage);
-    if (status == MB_SUCCESS)
-        {
-        /* output world file */
-        strcpy(OutputWorldFile, OutputImageFile);
-        OutputWorldFile[strlen(OutputImageFile)-5] = '\0';
-        strcat(OutputWorldFile,".tfw");
-        if ((tfp = fopen(OutputWorldFile,"w")) == NULL)
+    if (outputimage_specified) {
+        status = imwrite(OutputImageFile,OutputImage);
+        if (status == MB_SUCCESS)
             {
-            error = MB_ERROR_OPEN_FAIL;
-            fprintf(stderr,"\nUnable to open output world file: %s\n",
-                  OutputWorldFile);
-            fprintf(stderr,"\nProgram <%s> Terminated\n",
-                  program_name);
-            exit(error);
+            /* output world file */
+            strcpy(OutputWorldFile, OutputImageFile);
+            OutputWorldFile[strlen(OutputImageFile)-5] = '\0';
+            strcat(OutputWorldFile,".tfw");
+            if ((tfp = fopen(OutputWorldFile,"w")) == NULL)
+                {
+                error = MB_ERROR_OPEN_FAIL;
+                fprintf(stderr,"\nUnable to open output world file: %s\n",
+                      OutputWorldFile);
+                fprintf(stderr,"\nProgram <%s> Terminated\n",
+                      program_name);
+                exit(error);
+                }
+
+            /* write out world file contents */
+            fprintf(tfp, "%.10g\r\n0.0\r\n0.0\r\n%.10g\r\n%.10g\r\n%.10g\r\n",
+                dx, -dy,
+                bounds[0] - 0.5 * dx,
+                bounds[3] + 0.5 * dy);
+
+            /* close the world file */
+            fclose(tfp);
+
+            /* announce it */
+            fprintf(stderr, "\nOutput photomosaic: %s\n",OutputImageFile);
+
             }
-
-        /* write out world file contents */
-        fprintf(tfp, "%.10g\r\n0.0\r\n0.0\r\n%.10g\r\n%.10g\r\n%.10g\r\n",
-            dx, -dy,
-            bounds[0] - 0.5 * dx,
-            bounds[3] + 0.5 * dy);
-
-        /* close the world file */
-        fclose(tfp);
-
-        /* announce it */
-        fprintf(stderr, "\nOutput photomosaic: %s\n",OutputImageFile);
-
-        }
-    else
-        {
-        fprintf(stderr, "Could not save: %s\n",OutputImageFile);
-        }
+        else
+            {
+            fprintf(stderr, "Could not save: %s\n",OutputImageFile);
+            }
+    }
 
     /* deallocate priority array */
     status = mb_freed(verbose,__FILE__,__LINE__,(void **)&priority,&error);

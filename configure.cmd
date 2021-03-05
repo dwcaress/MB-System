@@ -378,24 +378,20 @@ autoreconf --force --install
 
 # Run the configure script - here all possible optional targets are enabled
 # include the experimental and prototype tools (mbtrn, mbtnav, qt tools, opencv tools)
-LDFLAGS="-L/opt/X11/lib" \
-CFLAGS="-g -I/opt/X11/include" \
 ./configure \
     --prefix=/usr/local \
-    --with-proj-include=/usr/local/include \
-    --with-proj-lib=/usr/local/lib \
-    --with-fftw-include=/usr/local/include \
-    --with-fftw-lib=/usr/local/lib \
-    --with-motif-include=/usr/local/include \
-    --with-motif-lib=/usr/local/lib \
-    --with-opengl-include=/opt/X11/include \
-    --with-opengl-lib=/opt/X11/lib \
     --with-otps-dir=/usr/local/opt/otps \
     --enable-hardening \
     --enable-test \
     --enable-mbtrn \
     --enable-mbtnav \
     --enable-opencv \
+    --with-x11-lib=/opt/X11/lib \
+    --with-x11-include=/opt/X11/include \
+    --with-motif-lib=/usr/local/lib \
+    --with-motif-include=/usr/local/include \
+    --with-opengl-lib=/opt/X11/lib \
+    --with-opengl-include=/opt/X11/include \
     --with-opencv-include=/usr/local/include/opencv4 \
     --with-opencv-lib=/usr/local/lib
 #    --enable-qt \

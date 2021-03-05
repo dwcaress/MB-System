@@ -332,7 +332,7 @@ int mb_read_init(int verbose, char *file, int format, int pings, int lonflip, do
 	   directly with fopen */
 	if (mb_io_ptr->filetype == MB_FILETYPE_NORMAL || mb_io_ptr->filetype == MB_FILETYPE_XDR) {
 		/* open the first file */
-		static const char stdin_string[] = "stdin";
+		const char stdin_string[] = "stdin";
 		if (strncmp(file, stdin_string, 5) == 0)
 			mb_io_ptr->mbfp = stdin;
 		else if ((mb_io_ptr->mbfp = fopen(mb_io_ptr->file, "rb")) == NULL) {

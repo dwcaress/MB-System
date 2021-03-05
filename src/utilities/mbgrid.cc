@@ -607,7 +607,7 @@ int main(int argc, char **argv) {
       case 'K':
       case 'k':
         sscanf(optarg, "%1023s", backgroundfile);
-        if ((grdrasterid = atoi(backgroundfile)) <= 0)
+        if ((grdrasterid = (int)strtol(backgroundfile, NULL, 10)) <= 0)
           grdrasterid = -1;
         break;
       case 'L':
@@ -761,6 +761,7 @@ int main(int argc, char **argv) {
   }
 
   int error = MB_ERROR_NO_ERROR;
+  int memclear_error = MB_ERROR_NO_ERROR;
 
   /* if bounds not set get bounds of input data */
   if (!gbndset || (!set_spacing && !set_dimensions)) {
@@ -976,7 +977,7 @@ int main(int argc, char **argv) {
     if (proj_status != MB_SUCCESS) {
       fprintf(outfp, "\nOutput projection %s not found in database\n", projection_id);
       fprintf(outfp, "\nProgram <%s> Terminated\n", program_name);
-      mb_memory_clear(verbose, &error);
+      mb_memory_clear(verbose, &memclear_error);
       exit(MB_ERROR_BAD_PARAMETER);
     }
 
@@ -1493,7 +1494,7 @@ int main(int argc, char **argv) {
       mb_error(verbose, MB_ERROR_MEMORY_FAIL, &message);
       fprintf(outfp, "\nMBIO Error allocating background data array:\n%s\n", message);
       fprintf(outfp, "\nProgram <%s> Terminated\n", program_name);
-      mb_memory_clear(verbose, &error);
+      mb_memory_clear(verbose, &memclear_error);
       exit(MB_ERROR_MEMORY_FAIL);
     }
     memset((char *)bxdata, 0, nbackground_alloc * sizeof(float));
@@ -1506,7 +1507,7 @@ int main(int argc, char **argv) {
       mb_error(verbose, MB_ERROR_MEMORY_FAIL, &message);
       fprintf(outfp, "\nMBIO Error allocating background interpolation work arrays:\n%s\n", message);
       fprintf(outfp, "\nProgram <%s> Terminated\n", program_name);
-      mb_memory_clear(verbose, &error);
+      mb_memory_clear(verbose, &memclear_error);
       exit(MB_ERROR_MEMORY_FAIL);
     }
     memset((char *)bdata, 0, 3 * nbackground_alloc * sizeof(float));
@@ -1524,7 +1525,7 @@ int main(int argc, char **argv) {
       if (fork_status != 0) {
         fprintf(outfp, "\nExecution of command:\n\t%s\nby system() call failed....\nProgram <%s> Terminated\n", plot_cmd,
                 program_name);
-        mb_memory_clear(verbose, &error);
+        mb_memory_clear(verbose, &memclear_error);
         exit(MB_ERROR_BAD_PARAMETER);
       }
     }
@@ -1549,7 +1550,7 @@ int main(int argc, char **argv) {
         if (fork_status != 0) {
           fprintf(outfp, "\nExecution of command:\n\t%s\nby system() call failed....\nProgram <%s> Terminated\n",
                   plot_cmd, program_name);
-          mb_memory_clear(verbose, &error);
+          mb_memory_clear(verbose, &memclear_error);
           exit(MB_ERROR_BAD_PARAMETER);
         }
       }
@@ -1565,7 +1566,7 @@ int main(int argc, char **argv) {
       }
       fprintf(outfp, "\nProgram <%s> Terminated\n", program_name);
       error = MB_ERROR_BAD_PARAMETER;
-      mb_memory_clear(verbose, &error);
+      mb_memory_clear(verbose, &memclear_error);
       exit(MB_ERROR_BAD_PARAMETER);
     }
 
@@ -1582,7 +1583,7 @@ int main(int argc, char **argv) {
       fprintf(outfp, "\nExecution of command:\n\t%s\nby system() call failed....\nProgram <%s> Terminated\n", plot_cmd,
               program_name);
       error = MB_ERROR_BAD_PARAMETER;
-      mb_memory_clear(verbose, &error);
+      mb_memory_clear(verbose, &memclear_error);
       exit(MB_ERROR_BAD_PARAMETER);
     }
 
@@ -1629,7 +1630,7 @@ int main(int argc, char **argv) {
             fprintf(outfp, "\nMBIO Error reallocating background data array:\n%s\n", message);
             fprintf(outfp, "\nProgram <%s> Terminated at line %d in source file %s\n", program_name, __LINE__,
                     __FILE__);
-            mb_memory_clear(verbose, &error);
+            mb_memory_clear(verbose, &memclear_error);
             exit(MB_ERROR_MEMORY_FAIL);
           }
         }
@@ -1647,7 +1648,7 @@ int main(int argc, char **argv) {
             fprintf(outfp, "\nMBIO Error allocating background interpolation work arrays:\n%s\n", message);
             fprintf(outfp, "\nProgram <%s> Terminated at line %d in source file %s\n", program_name, __LINE__,
                     __FILE__);
-            mb_memory_clear(verbose, &error);
+            mb_memory_clear(verbose, &memclear_error);
             exit(MB_ERROR_MEMORY_FAIL);
           }
         }
@@ -1665,7 +1666,7 @@ int main(int argc, char **argv) {
       fprintf(outfp, "or the specified background dataset %d may not exist.\n", grdrasterid);
       fprintf(outfp, "\nProgram <%s> Terminated\n", program_name);
       error = MB_ERROR_BAD_PARAMETER;
-      mb_memory_clear(verbose, &error);
+      mb_memory_clear(verbose, &memclear_error);
       exit(MB_ERROR_BAD_PARAMETER);
     }
 
@@ -1677,7 +1678,7 @@ int main(int argc, char **argv) {
       fprintf(outfp, "\nExecution of command:\n\t%s\nby system() call failed....\nProgram <%s> Terminated\n", plot_cmd,
               program_name);
       error = MB_ERROR_BAD_PARAMETER;
-      mb_memory_clear(verbose, &error);
+      mb_memory_clear(verbose, &memclear_error);
       exit(MB_ERROR_BAD_PARAMETER);
     }
   }
@@ -1701,7 +1702,7 @@ int main(int argc, char **argv) {
     mb_error(verbose, error, &message);
     fprintf(outfp, "\nMBIO Error allocating data arrays:\n%s\n", message);
     fprintf(outfp, "\nProgram <%s> Terminated\n", program_name);
-    mb_memory_clear(verbose, &error);
+    mb_memory_clear(verbose, &memclear_error);
     exit(error);
   }
 
@@ -1739,7 +1740,7 @@ int main(int argc, char **argv) {
       mb_error(verbose, error, &message);
       fprintf(outfp, "\nMBIO Error allocating data arrays:\n%s\n", message);
       fprintf(outfp, "\nProgram <%s> Terminated\n", program_name);
-      mb_memory_clear(verbose, &error);
+      mb_memory_clear(verbose, &memclear_error);
       exit(error);
     }
 
@@ -1762,7 +1763,7 @@ int main(int argc, char **argv) {
       error = MB_ERROR_OPEN_FAIL;
       fprintf(outfp, "\nUnable to open data list file: %s\n", filelist);
       fprintf(outfp, "\nProgram <%s> Terminated\n", program_name);
-      mb_memory_clear(verbose, &error);
+      mb_memory_clear(verbose, &memclear_error);
       exit(MB_ERROR_OPEN_FAIL);
     }
     while (mb_datalist_read2(verbose, datalist, &pstatus, path, ppath, dpath, &format, &file_weight, &error) ==
@@ -1806,7 +1807,7 @@ int main(int argc, char **argv) {
             fprintf(outfp, "\nMBIO Error returned from function <mb_read_init>:\n%s\n", message);
             fprintf(outfp, "\nMultibeam File <%s> not initialized for reading\n", rfile);
             fprintf(outfp, "\nProgram <%s> Terminated\n", program_name);
-            mb_memory_clear(verbose, &error);
+            mb_memory_clear(verbose, &memclear_error);
             exit(error);
           }
 
@@ -1847,7 +1848,7 @@ int main(int argc, char **argv) {
             mb_error(verbose, error, &message);
             fprintf(outfp, "\nMBIO Error allocating data arrays:\n%s\n", message);
             fprintf(outfp, "\nProgram <%s> Terminated\n", program_name);
-            mb_memory_clear(verbose, &error);
+            mb_memory_clear(verbose, &memclear_error);
             exit(error);
           }
 
@@ -1973,7 +1974,7 @@ int main(int argc, char **argv) {
       mb_error(verbose, MB_ERROR_MEMORY_FAIL, &message);
       fprintf(outfp, "\nMBIO Error allocating interpolation work arrays:\n%s\n", message);
       fprintf(outfp, "\nProgram <%s> Terminated\n", program_name);
-      mb_memory_clear(verbose, &error);
+      mb_memory_clear(verbose, &memclear_error);
       exit(error);
     }
     memset((char *)sgrid, 0, sxdim * sydim * sizeof(float));
@@ -2015,7 +2016,7 @@ int main(int argc, char **argv) {
       mb_error(verbose, MB_ERROR_MEMORY_FAIL, &message);
       fprintf(outfp, "\nMBIO Error allocating interpolation work arrays:\n%s\n", message);
       fprintf(outfp, "\nProgram <%s> Terminated\n", program_name);
-      mb_memory_clear(verbose, &error);
+      mb_memory_clear(verbose, &memclear_error);
       exit(error);
     }
     memset((char *)sgrid, 0, sxdim * sydim * sizeof(float));
@@ -2096,7 +2097,7 @@ int main(int argc, char **argv) {
       error = MB_ERROR_OPEN_FAIL;
       fprintf(outfp, "\nUnable to open data list file: %s\n", filelist);
       fprintf(outfp, "\nProgram <%s> Terminated\n", program_name);
-      mb_memory_clear(verbose, &error);
+      mb_memory_clear(verbose, &memclear_error);
       exit(error);
     }
     while (mb_datalist_read2(verbose, datalist, &pstatus, path, ppath, dpath, &format, &file_weight, &error) ==
@@ -2140,7 +2141,7 @@ int main(int argc, char **argv) {
             fprintf(outfp, "\nMBIO Error returned from function <mb_read_init>:\n%s\n", message);
             fprintf(outfp, "\nMultibeam File <%s> not initialized for reading\n", rfile);
             fprintf(outfp, "\nProgram <%s> Terminated\n", program_name);
-            mb_memory_clear(verbose, &error);
+            mb_memory_clear(verbose, &memclear_error);
             exit(error);
           }
 
@@ -2181,7 +2182,7 @@ int main(int argc, char **argv) {
             mb_error(verbose, error, &message);
             fprintf(outfp, "\nMBIO Error allocating data arrays:\n%s\n", message);
             fprintf(outfp, "\nProgram <%s> Terminated\n", program_name);
-            mb_memory_clear(verbose, &error);
+            mb_memory_clear(verbose, &memclear_error);
             exit(error);
           }
 
@@ -2550,7 +2551,7 @@ int main(int argc, char **argv) {
       error = MB_ERROR_OPEN_FAIL;
       fprintf(outfp, "\nUnable to open data list file: %s\n", filelist);
       fprintf(outfp, "\nProgram <%s> Terminated\n", program_name);
-      mb_memory_clear(verbose, &error);
+      mb_memory_clear(verbose, &memclear_error);
       exit(error);
     }
     while (mb_datalist_read2(verbose, datalist, &pstatus, path, ppath, dpath, &format, &file_weight, &error) ==
@@ -2594,7 +2595,7 @@ int main(int argc, char **argv) {
             fprintf(outfp, "\nMBIO Error returned from function <mb_read_init>:\n%s\n", message);
             fprintf(outfp, "\nMultibeam File <%s> not initialized for reading\n", rfile);
             fprintf(outfp, "\nProgram <%s> Terminated\n", program_name);
-            mb_memory_clear(verbose, &error);
+            mb_memory_clear(verbose, &memclear_error);
             exit(error);
           }
 
@@ -2635,7 +2636,7 @@ int main(int argc, char **argv) {
             mb_error(verbose, error, &message);
             fprintf(outfp, "\nMBIO Error allocating data arrays:\n%s\n", message);
             fprintf(outfp, "\nProgram <%s> Terminated\n", program_name);
-            mb_memory_clear(verbose, &error);
+            mb_memory_clear(verbose, &memclear_error);
             exit(error);
           }
 
@@ -2973,7 +2974,7 @@ int main(int argc, char **argv) {
       mb_error(verbose, error, &message);
       fprintf(outfp, "\nMBIO Error allocating data arrays:\n%s\n", message);
       fprintf(outfp, "\nProgram <%s> Terminated\n", program_name);
-      mb_memory_clear(verbose, &error);
+      mb_memory_clear(verbose, &memclear_error);
       exit(error);
     }
 
@@ -2996,7 +2997,7 @@ int main(int argc, char **argv) {
       error = MB_ERROR_OPEN_FAIL;
       fprintf(outfp, "\nUnable to open data list file: %s\n", filelist);
       fprintf(outfp, "\nProgram <%s> Terminated\n", program_name);
-      mb_memory_clear(verbose, &error);
+      mb_memory_clear(verbose, &memclear_error);
       exit(error);
     }
     while (mb_datalist_read2(verbose, datalist, &pstatus, path, ppath, dpath, &format, &file_weight, &error) ==
@@ -3040,7 +3041,7 @@ int main(int argc, char **argv) {
             fprintf(outfp, "\nMBIO Error returned from function <mb_read_init>:\n%s\n", message);
             fprintf(outfp, "\nMultibeam File <%s> not initialized for reading\n", rfile);
             fprintf(outfp, "\nProgram <%s> Terminated\n", program_name);
-            mb_memory_clear(verbose, &error);
+            mb_memory_clear(verbose, &memclear_error);
             exit(error);
           }
 
@@ -3075,7 +3076,7 @@ int main(int argc, char **argv) {
             mb_error(verbose, error, &message);
             fprintf(outfp, "\nMBIO Error allocating data arrays:\n%s\n", message);
             fprintf(outfp, "\nProgram <%s> Terminated\n", program_name);
-            mb_memory_clear(verbose, &error);
+            mb_memory_clear(verbose, &memclear_error);
             exit(error);
           }
 
@@ -3156,7 +3157,7 @@ int main(int argc, char **argv) {
                         fprintf(outfp, "You could also try using ping averaging to\n");
                         fprintf(outfp, "reduce the number of data points to be gridded.\n");
                         fprintf(outfp, "\nProgram <%s> Terminated\n", program_name);
-                        mb_memory_clear(verbose, &error);
+                        mb_memory_clear(verbose, &memclear_error);
                         exit(error);
                       }
                     }
@@ -3234,7 +3235,7 @@ int main(int argc, char **argv) {
                         fprintf(outfp, "You could also try using ping averaging to\n");
                         fprintf(outfp, "reduce the number of data points to be gridded.\n");
                         fprintf(outfp, "\nProgram <%s> Terminated\n", program_name);
-                        mb_memory_clear(verbose, &error);
+                        mb_memory_clear(verbose, &memclear_error);
                         exit(error);
                       }
                     }
@@ -3311,7 +3312,7 @@ int main(int argc, char **argv) {
                         fprintf(outfp, "You could also try using ping averaging to\n");
                         fprintf(outfp, "reduce the number of data points to be gridded.\n");
                         fprintf(outfp, "\nProgram <%s> Terminated\n", program_name);
-                        mb_memory_clear(verbose, &error);
+                        mb_memory_clear(verbose, &memclear_error);
                         exit(error);
                       }
                     }
@@ -3366,7 +3367,7 @@ int main(int argc, char **argv) {
           error = MB_ERROR_OPEN_FAIL;
           fprintf(outfp, "\nUnable to open lon,lat,value triples data path: %s\n", path);
           fprintf(outfp, "\nProgram <%s> Terminated\n", program_name);
-          mb_memory_clear(verbose, &error);
+          mb_memory_clear(verbose, &memclear_error);
           exit(error);
         }
 
@@ -3407,7 +3408,7 @@ int main(int argc, char **argv) {
                 fprintf(outfp, "You could also try using ping averaging to\n");
                 fprintf(outfp, "reduce the number of data points to be gridded.\n");
                 fprintf(outfp, "\nProgram <%s> Terminated\n", program_name);
-                mb_memory_clear(verbose, &error);
+                mb_memory_clear(verbose, &memclear_error);
                 exit(error);
               }
             }
@@ -3516,7 +3517,7 @@ int main(int argc, char **argv) {
       mb_error(verbose, error, &message);
       fprintf(outfp, "\nMBIO Error allocating data arrays:\n%s\n", message);
       fprintf(outfp, "\nProgram <%s> Terminated\n", program_name);
-      mb_memory_clear(verbose, &error);
+      mb_memory_clear(verbose, &memclear_error);
       exit(error);
     }
 
@@ -3539,7 +3540,7 @@ int main(int argc, char **argv) {
       error = MB_ERROR_OPEN_FAIL;
       fprintf(outfp, "\nUnable to open data list file: %s\n", filelist);
       fprintf(outfp, "\nProgram <%s> Terminated\n", program_name);
-      mb_memory_clear(verbose, &error);
+      mb_memory_clear(verbose, &memclear_error);
       exit(error);
     }
     while (mb_datalist_read2(verbose, datalist, &pstatus, path, ppath, dpath, &format, &file_weight, &error) ==
@@ -3583,7 +3584,7 @@ int main(int argc, char **argv) {
             fprintf(outfp, "\nMBIO Error returned from function <mb_read_init>:\n%s\n", message);
             fprintf(outfp, "\nMultibeam File <%s> not initialized for reading\n", rfile);
             fprintf(outfp, "\nProgram <%s> Terminated\n", program_name);
-            mb_memory_clear(verbose, &error);
+            mb_memory_clear(verbose, &memclear_error);
             exit(error);
           }
 
@@ -3618,7 +3619,7 @@ int main(int argc, char **argv) {
             mb_error(verbose, error, &message);
             fprintf(outfp, "\nMBIO Error allocating data arrays:\n%s\n", message);
             fprintf(outfp, "\nProgram <%s> Terminated\n", program_name);
-            mb_memory_clear(verbose, &error);
+            mb_memory_clear(verbose, &memclear_error);
             exit(error);
           }
 
@@ -3985,7 +3986,7 @@ int main(int argc, char **argv) {
           error = MB_ERROR_OPEN_FAIL;
           fprintf(outfp, "\nUnable to open lon,lat,value triples data file1: %s\n", path);
           fprintf(outfp, "\nProgram <%s> Terminated\n", program_name);
-          mb_memory_clear(verbose, &error);
+          mb_memory_clear(verbose, &memclear_error);
           exit(error);
         }
 
@@ -4134,7 +4135,7 @@ int main(int argc, char **argv) {
       mb_error(verbose, error, &message);
       fprintf(outfp, "\nMBIO Error allocating data arrays:\n%s\n", message);
       fprintf(outfp, "\nProgram <%s> Terminated\n", program_name);
-      mb_memory_clear(verbose, &error);
+      mb_memory_clear(verbose, &memclear_error);
       exit(error);
     }
 
@@ -4158,7 +4159,7 @@ int main(int argc, char **argv) {
       error = MB_ERROR_OPEN_FAIL;
       fprintf(outfp, "\nUnable to open data list file: %s\n", filelist);
       fprintf(outfp, "\nProgram <%s> Terminated\n", program_name);
-      mb_memory_clear(verbose, &error);
+      mb_memory_clear(verbose, &memclear_error);
       exit(error);
     }
     while (mb_datalist_read2(verbose, datalist, &pstatus, path, ppath, dpath, &format, &file_weight, &error) ==
@@ -4202,7 +4203,7 @@ int main(int argc, char **argv) {
             fprintf(outfp, "\nMBIO Error returned from function <mb_read_init>:\n%s\n", message);
             fprintf(outfp, "\nMultibeam File <%s> not initialized for reading\n", rfile);
             fprintf(outfp, "\nProgram <%s> Terminated\n", program_name);
-            mb_memory_clear(verbose, &error);
+            mb_memory_clear(verbose, &memclear_error);
             exit(error);
           }
 
@@ -4237,7 +4238,7 @@ int main(int argc, char **argv) {
             mb_error(verbose, error, &message);
             fprintf(outfp, "\nMBIO Error allocating data arrays:\n%s\n", message);
             fprintf(outfp, "\nProgram <%s> Terminated\n", program_name);
-            mb_memory_clear(verbose, &error);
+            mb_memory_clear(verbose, &memclear_error);
             exit(error);
           }
 
@@ -4547,7 +4548,7 @@ int main(int argc, char **argv) {
       error = MB_ERROR_OPEN_FAIL;
       fprintf(outfp, "\nUnable to open data list file: %s\n", filelist);
       fprintf(outfp, "\nProgram <%s> Terminated\n", program_name);
-      mb_memory_clear(verbose, &error);
+      mb_memory_clear(verbose, &memclear_error);
       exit(error);
     }
     while (mb_datalist_read2(verbose, datalist, &pstatus, path, ppath, dpath, &format, &file_weight, &error) ==
@@ -4591,7 +4592,7 @@ int main(int argc, char **argv) {
             fprintf(outfp, "\nMBIO Error returned from function <mb_read_init>:\n%s\n", message);
             fprintf(outfp, "\nMultibeam File <%s> not initialized for reading\n", rfile);
             fprintf(outfp, "\nProgram <%s> Terminated\n", program_name);
-            mb_memory_clear(verbose, &error);
+            mb_memory_clear(verbose, &memclear_error);
             exit(error);
           }
 
@@ -4626,7 +4627,7 @@ int main(int argc, char **argv) {
             mb_error(verbose, error, &message);
             fprintf(outfp, "\nMBIO Error allocating data arrays:\n%s\n", message);
             fprintf(outfp, "\nProgram <%s> Terminated\n", program_name);
-            mb_memory_clear(verbose, &error);
+            mb_memory_clear(verbose, &memclear_error);
             exit(error);
           }
 
@@ -5011,7 +5012,7 @@ int main(int argc, char **argv) {
       mb_error(verbose, MB_ERROR_MEMORY_FAIL, &message);
       fprintf(outfp, "\nMBIO Error allocating interpolation work arrays:\n%s\n", message);
       fprintf(outfp, "\nProgram <%s> Terminated\n", program_name);
-      mb_memory_clear(verbose, &error);
+      mb_memory_clear(verbose, &memclear_error);
       exit(error);
     }
     memset((char *)sgrid, 0, gxdim * gydim * sizeof(float));
@@ -5093,7 +5094,7 @@ int main(int argc, char **argv) {
       mb_error(verbose, MB_ERROR_MEMORY_FAIL, &message);
       fprintf(outfp, "\nMBIO Error allocating interpolation work arrays:\n%s\n", message);
       fprintf(outfp, "\nProgram <%s> Terminated\n", program_name);
-      mb_memory_clear(verbose, &error);
+      mb_memory_clear(verbose, &memclear_error);
       exit(error);
     }
     memset((char *)sgrid, 0, gxdim * gydim * sizeof(float));
@@ -5183,7 +5184,7 @@ int main(int argc, char **argv) {
       mb_error(verbose, MB_ERROR_MEMORY_FAIL, &message);
       fprintf(outfp, "\nMBIO Error allocating interpolation work arrays:\n%s\n", message);
       fprintf(outfp, "\nProgram <%s> Terminated\n", program_name);
-      mb_memory_clear(verbose, &error);
+      mb_memory_clear(verbose, &memclear_error);
       exit(error);
     }
     memset((char *)smask, 0, (gxdim + gydim) * sizeof(bool));
@@ -5401,7 +5402,7 @@ int main(int argc, char **argv) {
       mb_error(verbose, MB_ERROR_MEMORY_FAIL, &message);
       fprintf(outfp, "\nMBIO Error allocating background data array:\n%s\n", message);
       fprintf(outfp, "\nProgram <%s> Terminated\n", program_name);
-      mb_memory_clear(verbose, &error);
+      mb_memory_clear(verbose, &memclear_error);
       exit(error);
     }
     memset((char *)sgrid, 0, gxdim * gydim * sizeof(float));
@@ -5418,7 +5419,7 @@ int main(int argc, char **argv) {
       mb_error(verbose, MB_ERROR_MEMORY_FAIL, &message);
       fprintf(outfp, "\nMBIO Error allocating background interpolation work arrays:\n%s\n", message);
       fprintf(outfp, "\nProgram <%s> Terminated\n", program_name);
-      mb_memory_clear(verbose, &error);
+      mb_memory_clear(verbose, &memclear_error);
       exit(error);
     }
     memset((char *)sgrid, 0, gxdim * gydim * sizeof(float));
@@ -5575,7 +5576,7 @@ int main(int argc, char **argv) {
     mb_error(verbose, error, &message);
     fprintf(outfp, "\nError writing output file: %s\n%s\n", ofile, message);
     fprintf(outfp, "\nProgram <%s> Terminated\n", program_name);
-    mb_memory_clear(verbose, &error);
+    mb_memory_clear(verbose, &memclear_error);
     exit(error);
   }
 
@@ -5623,7 +5624,7 @@ int main(int argc, char **argv) {
       mb_error(verbose, error, &message);
       fprintf(outfp, "\nError writing output file: %s\n%s\n", ofile, message);
       fprintf(outfp, "\nProgram <%s> Terminated\n", program_name);
-      mb_memory_clear(verbose, &error);
+      mb_memory_clear(verbose, &memclear_error);
       exit(error);
     }
 
@@ -5670,7 +5671,7 @@ int main(int argc, char **argv) {
       mb_error(verbose, error, &message);
       fprintf(outfp, "\nError writing output file: %s\n%s\n", ofile, message);
       fprintf(outfp, "\nProgram <%s> Terminated\n", program_name);
-      mb_memory_clear(verbose, &error);
+      mb_memory_clear(verbose, &memclear_error);
       exit(error);
     }
   }

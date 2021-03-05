@@ -34,7 +34,7 @@
 #include "mb_status.h"
 
 /* year-day conversion */
-static const int yday[] = {0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334};
+const int yday[] = {0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334};
 
 /*--------------------------------------------------------------------*/
 /*   function mb_get_time returns the number of seconds from

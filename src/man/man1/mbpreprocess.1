@@ -1,4 +1,4 @@
-.TH mbpreprocess 1 "28 November 2018" "MB-System 5.0" "MB-System 5.0"
+.TH mbpreprocess 1 "3 January 2021" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbpreprocess\fP \- performs preprocessing of swath sonar data as part of setting
 up an MB-System processing structure for a dataset.
@@ -10,87 +10,142 @@ Version 5.0
 \fBmbpreprocess\fP [
 .br
 \fB--verbose\fP
+.br
 \fB--help\fP
+.br
 \fB--input\fP=\fIFILE\fP
+.br
 \fB--format\fP=\fIFORMATID\fP
 .br
+\fB--output-directory\fP=\fIDIRECTORY\fP
+.br
 \fB--platform-file\fP=\fIFILE\fP
+.br
 \fB--platform-target-sensor\fP=\fIRECORDID\fP
 .br
 \fB--output-sensor-fnv\fP
 .br
+\fB--skip-existing\fP
+.br
 \fB--nav-file\fP=\fIFILE\fP
+.br
 \fB--nav-file-format\fP=\fIFORMATID\fP
+.br
 \fB--nav-async\fP=\fIRECORDTYPE\fP
+.br
 \fB--nav-sensor\fP=\fISENSORID\fP
 .br
 \fB--sensordepth-file\fP=\fIFILE\fP
+.br
 \fB--sensordepth-file-format\fP=\fIFORMATID\fP
+.br
 \fB--sensordepth-async\fP=\fIRECORDTYPE\fP
+.br
 \fB--sensordepth-sensor\fP=\fISENSORID\fP
 .br
 \fB--heading-file\fP=\fIFILE\fP
+.br
 \fB--heading-file-format\fP=\fIFORMATID\fP
+.br
 \fB--heading-async\fP=\fIRECORDTYPE\fP
+.br
 \fB--heading-sensor\fP=\fISENSORID\fP
 .br
 \fB--altitude-file\fP=\fIFILE\fP
+.br
 \fB--altitude-file-format\fP=\fIFORMATID\fP
+.br
 \fB--altitude-async\fP=\fIRECORDTYPE\fP
+.br
 \fB--altitude-sensor\fP=\fISENSORID\fP
 .br
 \fB--attitude-file\fP=\fIFILE\fP
+.br
 \fB--attitude-file-format\fP=\fIFORMATID\fP
+.br
 \fB--attitude-async\fP=\fIRECORDTYPE\fP
+.br
 \fB--attitude-sensor\fP=\fISENSORID\fP
 .br
 \fB--soundspeed-file\fP=\fIFILE\fP
+.br
 \fB--soundspeed-file-format\fP=\fIFORMATID\fP
+.br
 \fB--soundspeed-async\fP=\fIRECORDTYPE\fP
+.br
 \fB--soundspeed-sensor\fP=\fISENSORID\fP
 .br
 \fB--time-latency-file\fP=\fIFILE\fP
+.br
 \fB--time-latency-file-format\fP=\fIFORMATID\fP
+.br
 \fB--time-latency-constant\fP=\fISECONDS\fP
 .br
 \fB--time-latency-apply-nav\fP
+.br
 \fB--time-latency-apply-sensordepth\fP
+.br
 \fB--time-latency-apply-heading\fP
 .br
 \fB--time-latency-apply-attitude\fP
+.br
 \fB--time-latency-apply-altitude\fP
+.br
 \fB--time-latency-apply-all-ancilliary\fP
 .br
 \fB--time-latency-apply-survey\fP
+.br
 \fB--time-latency-apply-all\fP
 .br
 \fB--filter\fP=\fISECONDS\fP
 .br
 \fB--filter-apply-nav\fP
+.br
 \fB--filter-apply-sensordepth\fP
+.br
 \fB--filter-apply-heading\fP
 .br
 \fB--filter-apply-attitude\fP
+.br
 \fB--filter-apply-altitude\fP
+.br
 \fB--filter-apply-all-ancilliary\fP
 .br
 \fB--recalculate-bathymetry\fP
+.br
 \fB--no-change-survey\fP
-\fB--multibeam-sidescan-source\fP=\fIRECORDID\fP
+.br
+\fB--multibeam-sidescan-source\fP=\fISOURCE\fP
+.br
 \fB--sounding-amplitude-filter\fP=\fITHRESHOLD\fP
+.br
 \fB--sounding-altitude-filter\fP=\fITHRESHOLD\fP
+.br
 \fB--ignore-water-column\fP
+.br
 \fB--head1-offsets\fP=\fIX/Y/Z/HEADING/ROLL/PITCH\fP
+.br
 \fB--head2-offsets\fP=\fIX/Y/Z/HEADING/ROLL/PITCH\fP
 .br
 \fB--kluge-time-jumps\fP=\fISECONDS\fP
+.br
 \fB--kluge-ancilliary-time-jumps\fP=\fISECONDS\fP
+.br
 \fB--kluge-mbaripressure-time-jumps\fP=\fITHRESHOLD\fP
+.br
 \fB--kluge-beam-tweak\fP=\fIFACTOR\fP
+.br
 \fB--kluge-soundspeed-tweak\fP=\fIFACTOR\fP
+.br
 \fB--kluge-zero-attitude-correction\fP
+.br
 \fB--kluge-zero-alongtrack-angles\fP
+.br
 \fB--kluge-fix-wissl-timestamps\fP
+.br
+\fB--kluge-auv-sentry-sensordepth\fP
+.br
+\fB--kluge-ignore-snippets\fP
 .br
 ]
 
@@ -145,9 +200,45 @@ for the input file \fIFILE\fP specified with the
 infers the format from the "*.mbXX" \fBMB\-System\fP suffix
 convention.
 .TP
+.B --output-directory\fP=\fIDIRECTORY\fP
+By default the output files written by \fBmbpreprocess\fP are located in the same
+directory as the input swath files. This options allows the user to specify a
+different directory into which the output files are written.
+.TP
 .B --platform-file=\fIFILE\fP
+Causes \fBmbpreprocess\fP to input and utilize an \fBMB-System\fP platform file,
+which provides a complete description of the relative geometry of sensors on a
+survey platform. Platform files can be constructed using the program \fBmbmakeplatform\fP.
+Most datasets do not require the use of a platform file, and only a few data formats
+are supported with preprocessing functionality utilizing platform files (e.g. the
+Reson 7k format 88, the Teledyne 7k3 format 89, the 3D at Depth lidar formats
+232 and 233). Platform files are needed only when survey data have been collected
+without integrating the asynchronous navigation and attitude data and when the
+positional and angular offsets between the survey sensor (e.g. multibeam sonar,
+lidar, stereo camera rig) have not been specified in the data stream. Most often
+this situation is associated with survey systems on submerged platforms like
+autonomous underwater vehicles (AUVs) or remotely operated vehicles (ROVs).
+In cases where the sonar control and data logging software have a full platform
+description and apply that to fully correct the survey data in real time, no
+platform file is needed for the preprocessing stage in \fBMB-System\fP. Specifically,
+all datasets collected using Kongsberg multibeam sonars do not require use of a
+platform file (the only exception to this would be if the positional offsets between
+sensors were incorrectly specified in the multibeam configuration).
 .TP
 .B --platform-target-sensor=\fISENSORID\fP
+If a platform file has been specified, this option defines the id of the sensor
+description associated with the survey data being preprocessed. This determines
+how lever arm calculations are done. For instance, if sensor 0 is the source of
+attitude and lateral position data (e.g. an inertial navigation system), sensor 1
+is the source of vertical position data (e.g. a pressure sensor), and sensor 2 is
+a multibeam sonar for which the bathymetry data are not initially motion corrected,
+then one should use \fB--platform-target-sensor\fP=\fI2\fP so that the lever arm
+calculations produce the position and attitude of the multibeam sonar. The
+multibeam bathymetry are then calculated using the corrected position and
+attitude data. This option is necessary because in general a platform may have
+multiple survey sensors (e.g. multibeam sonar, lidar, stereo camera rig, subbottom
+profiler, sidescan sonar), each of which will have a separate data processing
+workflow.
 .TP
 .B --output-sensor-fnv
 Causes \fBmbpreprocess\fP to output "fast navigation" or *.fnv files for each
@@ -156,18 +247,20 @@ option. These *.fnv files will be corrected for the lever arms specified by the
 positional and angular offsets defined in the platform file.
 .TP
 .B --skip-existing
+This option causes \fBmbpreprocess\fP to skip preprocessing when the output files
+already exist and are up to date relative to the inputs.
 .br
 .TP
 .B \-\-nav-file\fP=\fIfilename\fP
 .br
-Specifies an external file from which to merge sonar position (navigation),
-replacing any navigation data included in the input time series sidescan files.
-By default \fBmbsslayout\fP attempts to use navigation values included in the
+Specifies an external time series file from which to merge sonar position (navigation),
+replacing navigation data included in the data stream.
+By default \fBmbpreprocess\fP attempts to use navigation values included in the
 input data.
 .TP
 .B \-\-nav-file-format\fP=\fIformat_id\fP
 .br
-Specifies the format of an external navigation file from which position values
+Specifies the format of an external navigation time series file from which position values
 are derived (as defined with \fB\-\-nav-file\fP). Options for the \fIformat_id\fP
 value are:
 .br
@@ -233,14 +326,17 @@ value are:
       degrees, and mmmmm is minutes * 10000.
 .br
    9: ASCCI text file with white-space delimited lines of the form:
-        yr mon day hour min sec time_d lon lat heading speed sensordepth*
+        yr mon day hour min sec time_d lon lat heading speed sensordepth
+      or
+        yr mon day hour min sec time_d lon lat heading speed sensordepth roll pitch heave
       where yr is the four digit year, mon is the month, day is the day of the
       month, min is the minute, second is the decimal seconds, time_d is time in
       decimal epoch seconds (seconds since 1970), lon is the longitude
       in decimal degrees, lat is the latitude in decimal degrees, heading is in
       decimal degrees, speed is in km/hour, and sensordepth is in meters.
       South latitudes are negative. Longitude may be defined on either the
-      -180.0 to +180.0 or 0.0 to 360.0 domains.
+      -180.0 to +180.0 or 0.0 to 360.0 domains. If present, roll and pitch are in
+      decimal degrees and heave is in meters.
 .br
    10: R2R (Rolling deck to Repository) navigation format with ASCCI text lines
       of the form:
@@ -262,110 +358,476 @@ are derived (as defined with \fB\-\-nav-file-format\fP). Options for the
     MB_DATA_NAV3: 31 (navigation data from navigation system 3)
 .br
 What types of data records are present is format-dependent, as is the default
-choice of which record type is used as the navigation source by default. The
+choice of which record type is used as the navigation source. The
 program \fBmbinfo\fP can be used with the \fB-N\fP option to determine the numbers
 of different record types present in a data file.
 .TP
 .B --nav-sensor=\fISENSORID\fP
+If a platform file has been specified, this option defines the id of the sensor
+description associated with the navigation data being used, whether that
+derives from asynchronous records in the data stream or from an external
+navigation file. Note that if the external navigation has been calculated to
+define the location of the target survey sensor, then the sensor id should be
+the same as the survey sensor so that a null lever arm correction is made.
 .br
 .TP
 .B --sensordepth-file=\fIFILE\fP
+Specifies an external time series file from which to merge sensor depth,
+replacing sensor depth data included in the data stream.
+By default \fBmbpreprocess\fP attempts to use sensor depth values included in the
+input data.
 .TP
 .B --sensordepth-file-format=\fIFORMATID\fP
+.br
+Specifies the format of an external sensor depth time series file from which sensor depth values
+are derived (as defined with \fB\-\-sensordepth-file\fP). Options for the \fIformat_id\fP
+value are:
+.br
+   1: ASCCI text file with lines of the form:
+        time_d sensordepth
+      where time_d is time in decimal epoch seconds (seconds since 1970), and
+      sensordepth values are in meters positive down.
+.br
+   2: ASCCI text file with lines of the form:
+        year month day hour minute second sensordepth
+      where year, month, day, hour, and minute values are integers, the second
+      value is decimal, and sensordepth values are in meters positive down.
+.br
+   3: ASCCI text file with lines of the form:
+        year julian_day hour minute second sensordepth
+      where year, julian_day, hour, and minute values are integers, the second
+      value is decimal, and sensordepth values are in meters positive down.
+.br
+   4: ASCCI text file with lines of the form:
+        year julian_day day_minute second sensordepth
+      where year, julian_day, and day_minute values are integers, the second
+      value is decimal, and sensordepth values are in meters positive down.
+.br
+   9: ASCCI text file with white-space delimited lines of the form:
+        yr mon day hour min sec time_d lon lat heading speed sensordepth
+      or
+        yr mon day hour min sec time_d lon lat heading speed sensordepth roll pitch heave
+      where yr is the four digit year, mon is the month, day is the day of the
+      month, min is the minute, second is the decimal seconds, time_d is time in
+      decimal epoch seconds (seconds since 1970), lon is the longitude
+      in decimal degrees, lat is the latitude in decimal degrees, heading is in
+      decimal degrees, speed is in km/hour, and sensordepth is in meters.
+      South latitudes are negative. Longitude may be defined on either the
+      -180.0 to +180.0 or 0.0 to 360.0 domains. If present, roll and pitch are in
+      decimal degrees and heave is in meters.
 .TP
 .B --sensordepth-async=\fIRECORDTYPE\fP
+Specifies the type of data records from which sensor depth values
+are derived (as defined with \fB\-\-sensordepth-file-format\fP). Options for the
+\fIrecord_kind\fP include:
+.br
+    MB_DATA_DATA:  1 (survey data)
+    MB_DATA_NAV:  12 (navigation data)
+    MB_DATA_HEIGHT 16 (sensor height data)
+    MB_DATA_NAV1: 29 (navigation data from navigation system 1)
+    MB_DATA_NAV2: 30 (navigation data from navigation system 2)
+    MB_DATA_NAV3: 31 (navigation data from navigation system 3)
+    MB_DATA_SONARDEPTH 59 (sensor depth data)
+.br
+What types of data records are present is format-dependent, as is the default
+choice of which record type is used as the sensor depth source. The
+program \fBmbinfo\fP can be used with the \fB-N\fP option to determine the numbers
+of different record types present in a data file.
 .TP
 .B --sensordepth-sensor=\fISENSORID\fP
+If a platform file has been specified, this option defines the id of the sensor
+description associated with the sensor depth data being used, whether that
+derives from asynchronous records in the data stream or from an external
+navigation file. Note that if the external sensor depth data have been calculated to
+define the vertical location of the target survey sensor, then the sensor id should be
+the same as the survey sensor so that a null lever arm correction is made.
 .br
 .TP
 .B --heading-file=\fIFILE\fP
+Specifies an external time series file from which to merge heading,
+replacing heading data included in the data stream.
+By default \fBmbpreprocess\fP attempts to use heading values included in the
+input data.
 .TP
 .B --heading-file-format=\fIFORMATID\fP
+Specifies the format of an external heading time series file from which heading values
+are derived (as defined with \fB\-\-heading-file\fP). Options for the \fIformat_id\fP
+value are:
+.br
+   1: ASCCI text file with lines of the form:
+        time_d heading
+      where time_d is time in decimal epoch seconds (seconds since 1970), and
+      heading values are in degrees positive clockwise from forward.
+.br
+   2: ASCCI text file with lines of the form:
+        year month day hour minute second heading
+      where year, month, day, hour, and minute values are integers, the second
+      value is decimal, and heading values in degrees positive clockwise from forward.
+.br
+   3: ASCCI text file with lines of the form:
+        year julian_day hour minute second heading
+      where year, julian_day, hour, and minute values are integers, the second
+      value is decimal, and heading values in degrees positive clockwise from forward.
+.br
+   4: ASCCI text file with lines of the form:
+        year julian_day day_minute second heading
+      where year, julian_day, and day_minute values are integers, the second
+      value is decimal, and heading values in degrees positive clockwise from forward.
+.br
+   9: ASCCI text file with white-space delimited lines of the form:
+        yr mon day hour min sec time_d lon lat heading speed sensordepth
+      or
+        yr mon day hour min sec time_d lon lat heading speed sensordepth roll pitch heave
+      where yr is the four digit year, mon is the month, day is the day of the
+      month, min is the minute, second is the decimal seconds, time_d is time in
+      decimal epoch seconds (seconds since 1970), lon is the longitude
+      in decimal degrees, lat is the latitude in decimal degrees, heading is in
+      decimal degrees, speed is in km/hour, and heading is in meters.
+      South latitudes are negative. Longitude may be defined on either the
+      -180.0 to +180.0 or 0.0 to 360.0 domains. If present, roll and pitch are in
+      decimal degrees and heave is in meters.
 .TP
 .B --heading-async=\fIRECORDTYPE\fP
+Specifies the type of data records from which heading values
+are derived (as defined with \fB\-\-heading-file-format\fP). Options for the
+\fIrecord_kind\fP include:
+.br
+    MB_DATA_DATA:      1 (survey data)
+    MB_DATA_NAV:      12 (navigation data)
+    MB_DATA_HEADING:  17 (heading data)
+    MB_DATA_NAV1:     29 (navigation data from navigation system 1)
+    MB_DATA_NAV2:     30 (navigation data from navigation system 2)
+    MB_DATA_NAV3:     31 (navigation data from navigation system 3)
+.br
+What types of data records are present is format-dependent, as is the default
+choice of which record type is used as the heading source. The
+program \fBmbinfo\fP can be used with the \fB-N\fP option to determine the numbers
+of different record types present in a data file.
 .TP
 .B --heading-sensor=\fISENSORID\fP
+If a platform file has been specified, this option defines the id of the sensor
+description associated with the heading data being used, whether that
+derives from asynchronous records in the data stream or from an external
+navigation file.
 .br
 .TP
 .B --altitude-file=\fIFILE\fP
+Specifies an external time series file from which to merge altitude data,
+replacing altitude data included in the data stream.
+By default \fBmbpreprocess\fP attempts to use altitude values included in the
+input data. Typically altitude data are critical only for processing sidescan
+data in the absence of swath bathymetry.
 .TP
 .B --altitude-file-format=\fIFORMATID\fP
+Specifies the format of an external altitude time series file from which altitude values
+are derived (as defined with \fB\-\-altitude-file\fP). Options for the \fIformat_id\fP
+value are:
+.br
+   1: ASCCI text file with lines of the form:
+        time_d altitude
+      where time_d is time in decimal epoch seconds (seconds since 1970), and
+      altitude values are in meters.
+.br
+   2: ASCCI text file with lines of the form:
+        year month day hour minute second altitude
+      where year, month, day, hour, and minute values are integers, the second
+      value is decimal, and altitude values are in meters.
+.br
+   3: ASCCI text file with lines of the form:
+        year julian_day hour minute second altitude
+      where year, julian_day, hour, and minute values are integers, the second
+      value is decimal, and altitude values are in meters.
+.br
+   4: ASCCI text file with lines of the form:
+        year julian_day day_minute second altitude
+      where year, julian_day, and day_minute values are integers, the second
+      value is decimal, and altitude values are in meters.
 .TP
 .B --altitude-async=\fIRECORDTYPE\fP
+Specifies the type of data records from which heading values
+are derived (as defined with \fB\-\-heading-file-format\fP). Options for the
+\fIrecord_kind\fP include:
+.br
+    MB_DATA_DATA:      1 (survey data)
+    MB_DATA_NAV:      12 (navigation data)
+    MB_DATA_NAV1:     29 (navigation data from navigation system 1)
+    MB_DATA_NAV2:     30 (navigation data from navigation system 2)
+    MB_DATA_NAV3:     31 (navigation data from navigation system 3)
+    MB_DATA_ALTITUDE: 60 (altitude data)
+.br
+What types of data records are present is format-dependent, as is the default
+choice of which record type is used as the altitude source. The
+program \fBmbinfo\fP can be used with the \fB-N\fP option to determine the numbers
+of different record types present in a data file.
 .TP
 .B --altitude-sensor=\fISENSORID\fP
+If a platform file has been specified, this option defines the id of the sensor
+description associated with the navigation data being used, whether that
+derives from asynchronous records in the data stream or from an external
+navigation file.
 .br
 .TP
 .B --attitude-file=\fIFILE\fP
+Specifies an external time series file from which to merge attitude data (roll and pitch, often also heave),
+replacing attitude data included in the data stream.
+By default \fBmbpreprocess\fP attempts to use attitude values included in the
+input data.
 .TP
 .B --attitude-file-format=\fIFORMATID\fP
+Specifies the format of an external attitude time series file from which attitude values
+are derived (as defined with \fB\-\-attitude-file\fP). Options for the \fIformat_id\fP
+value are:
+.br
+   1: ASCCI text file with lines of the form:
+        time_d roll pitch heave
+      where time_d is time in decimal epoch seconds (seconds since 1970), and
+      sensordepth values are in meters positive down.
+.br
+   2: ASCCI text file with lines of the form:
+        year month day hour minute second roll pitch heave
+      where year, month, day, hour, and minute values are integers, the second
+      value is decimal, and sensordepth values are in meters positive down.
+.br
+   3: ASCCI text file with lines of the form:
+        year julian_day hour minute second roll pitch heave
+      where year, julian_day, hour, and minute values are integers, the second
+      value is decimal, and sensordepth values are in meters positive down.
+.br
+   4: ASCCI text file with lines of the form:
+        year julian_day day_minute second roll pitch heave
+      where year, julian_day, and day_minute values are integers, the second
+      value is decimal, and sensordepth values are in meters positive down.
+.br
+   9: ASCCI text file with white-space delimited lines of the form:
+        yr mon day hour min sec time_d lon lat heading speed sensordepth roll pitch heave
+      where yr is the four digit year, mon is the month, day is the day of the
+      month, min is the minute, second is the decimal seconds, time_d is time in
+      decimal epoch seconds (seconds since 1970), lon is the longitude
+      in decimal degrees, lat is the latitude in decimal degrees, heading is in
+      decimal degrees, speed is in km/hour, and sensordepth is in meters.
+      South latitudes are negative. Longitude may be defined on either the
+      -180.0 to +180.0 or 0.0 to 360.0 domains. Roll and pitch are in
+      decimal degrees and heave is in meters.
 .TP
 .B --attitude-async=\fIRECORDTYPE\fP
+Specifies the type of data records from which attitude values
+are derived (as defined with \fB\-\-attitude-file-format\fP). Options for the
+\fIrecord_kind\fP include:
+.br
+    MB_DATA_DATA:       1 (survey data)
+    MB_DATA_NAV:       12 (navigation data)
+    MB_DATA_NAV1:      29 (navigation data from navigation system 1)
+    MB_DATA_NAV2:      30 (navigation data from navigation system 2)
+    MB_DATA_NAV3:      31 (navigation data from navigation system 3)
+    MB_DATA_ATTITUDE:  18 (attitude data)
+    MB_DATA_ATTITUDE1: 56 (attitude data from attitude system 1)
+    MB_DATA_ATTITUDE2: 57 (attitude data from attitude system 2)
+    MB_DATA_ATTITUDE3: 58 (attitude data from attitude system 3)
+#.br
+What types of data records are present is format-dependent, as is the default
+choice of which record type is used as the attitude source. The
+program \fBmbinfo\fP can be used with the \fB-N\fP option to determine the numbers
+of different record types present in a data file.
 .TP
 .B --attitude-sensor=\fISENSORID\fP
+If a platform file has been specified, this option defines the id of the sensor
+description associated with the navigation data being used, whether that
+derives from asynchronous records in the data stream or from an external
+navigation file.
 .br
 .TP
 .B --soundspeed-file=\fIFILE\fP
+Specifies an external time series file from which to merge sound speed data,
+replacing sound speed data included in the data stream.
+By default \fBmbpreprocess\fP attempts to use sound speed values included in the
+input data. The sound speed values represent the speed of sound at the survey
+sensor (i.e. the sonar arrays); typically these are input only when the
+preprocessing includes recalculation of multibeam bathymetry.
 .TP
 .B --soundspeed-file-format=\fIFORMATID\fP
+Specifies the format of an external soundspeed time series file from which soundspeed values
+are derived (as defined with \fB\-\-soundspeed-file\fP). Options for the \fIformat_id\fP
+value are:
+.br
+   1: ASCCI text file with lines of the form:
+        time_d soundspeed
+      where time_d is time in decimal epoch seconds (seconds since 1970), and
+      soundspeed values are in meters positive down.
+.br
+   2: ASCCI text file with lines of the form:
+        year month day hour minute second soundspeed
+      where year, month, day, hour, and minute values are integers, the second
+      value is decimal, and soundspeed values are in meters positive down.
+.br
+   3: ASCCI text file with lines of the form:
+        year julian_day hour minute second soundspeed
+      where year, julian_day, hour, and minute values are integers, the second
+      value is decimal, and soundspeed values are in meters positive down.
+.br
+   4: ASCCI text file with lines of the form:
+        year julian_day day_minute second soundspeed
+      where year, julian_day, and day_minute values are integers, the second
+      value is decimal, and soundspeed values are in meters positive down.
 .TP
 .B --soundspeed-async=\fIRECORDTYPE\fP
+Specifies the type of data records from which sound speed values
+are derived (as defined with \fB\-\-soundspeed-file-format\fP). Options for the
+\fIrecord_kind\fP include:
+.br
+    MB_DATA_DATA:       1 (survey data)
+    MB_DATA_SSV:       19 (sound speed data)
+    MB_DATA_CTD:       34 (sound speed data)
+#.br
+What types of data records are present is format-dependent, as is the default
+choice of which record type is used as the sound speed source. The
+program \fBmbinfo\fP can be used with the \fB-N\fP option to determine the numbers
+of different record types present in a data file.
 .TP
 .B --soundspeed-sensor=\fISENSORID\fP
+If a platform file has been specified, this option defines the id of the sensor
+description associated with the navigation data being used, whether that
+derives from asynchronous records in the data stream or from an external
+navigation file.
 .br
 .TP
 .B --time-latency-file=\fIFILE\fP
+Specifies an external time series file from which to read a time latency model to be applied
+to some or all of the timestamps in the data stream.
 .TP
 .B --time-latency-file-format=\fIFORMATID\fP
+Specifies the format of an external time latency time series file from which time latency values
+are derived (as defined with \fB\-\-time-latency-file\fP). Options for the \fIformat_id\fP
+value are:
+.br
+   1: ASCCI text file with lines of the form:
+        time_d timeshift
+      where time_d is time in decimal epoch seconds (seconds since 1970), and
+      timeshift values are in seconds.
+.br
+   2: ASCCI text file with lines of the form:
+        year month day hour minute second timeshift
+      where year, month, day, hour, and minute values are integers, the second
+      value is decimal, and timeshift values are in seconds.
+.br
+   3: ASCCI text file with lines of the form:
+        year julian_day hour minute second timeshift
+      where year, julian_day, hour, and minute values are integers, the second
+      value is decimal, and timeshift values are in seconds.
+.br
+   4: ASCCI text file with lines of the form:
+        year julian_day day_minute second timeshift
+      where year, julian_day, and day_minute values are integers, the second
+      value is decimal, and timeshift values are in seconds.
 .TP
 .B --time-latency-constant=\fISECONDS\fP
+Specifies a constant time latency value
 .TP
 .B --time-latency-apply-nav
+Specifies that the time latency correction will be applied to the time stamps
+associated with the navigation data merged with the survey data.
 .TP
 .B --time-latency-apply-sensordepth
+Specifies that the time latency correction will be applied to the time stamps
+associated with the sonar depth data merged with the survey data.
 .TP
 .B --time-latency-apply-heading
+Specifies that the time latency correction will be applied to the time stamps
+associated with the heading data merged with the survey data.
 .TP
 .B --time-latency-apply-attitude
+Specifies that the time latency correction will be applied to the time stamps
+associated with the attitude data merged with the survey data.
 .TP
 .B --time-latency-apply-altitude
+Specifies that the time latency correction will be applied to the time stamps
+associated with the altitude data merged with the survey data.
 .TP
 .B --time-latency-apply-all-ancilliary
+Specifies that the time latency correction will be applied to the time stamps
+associated with all of the ancilliary data merged with the survey data (i.e. the
+navigation, sensor depth, heading, attitude, and altitude data).
 .TP
 .B --time-latency-apply-survey
+Specifies that the time latency correction will be applied to the time stamps
+associated with the survey data.
 .TP
 .B --time-latency-apply-all
+Specifies that the time latency correction will be applied to all time stamps
+associated with survey data and ancilliary data.
 .br
 .TP
 .B --filter=\fISECONDS\fP
+Specifies the half width in seconds of a Gaussian smoothing filter that can be applied to
+ancilliary time series data prior to merging with the survey data. This includes
+the navigation, heading, sensor depth, attitude and altitude data.
 .TP
 .B --filter-apply-nav
+Specifies that the smoothing filtering will be applied to the navigation data
+merged with the survey data.
 .TP
 .B --filter-apply-sensordepth
+Specifies that the smoothing filtering will be applied to the sensor depth data
+merged with the survey data.
 .TP
 .B --filter-apply-heading
+Specifies that the smoothing filtering will be applied to the heading data
+merged with the survey data.
 .TP
 .B --filter-apply-attitude
+Specifies that the smoothing filtering will be applied to the attitude data
+merged with the survey data.
 .TP
 .B --filter-apply-altitude
+Specifies that the smoothing filtering will be applied to the altitude data
+merged with the survey data.
 .TP
 .B --filter-apply-all-ancilliary
+Specifies that the smoothing filtering will be will be applied to all of the a
+ncilliary data merged with the survey data (i.e. the
+navigation, sensor depth, heading, attitude, and altitude data).
 .br
 .TP
 .B --recalculate-bathymetry
+This option causes the bathymetry in the survey data to be recalculated during
+preprocessing. The specifics of the recalculation are format dependent.
 .TP
 .B --no-change-survey
+This option forces \fBmbpreprocess\fP to not modify the survey data.
 .TP
-.B --multibeam-sidescan-source=\fIRECORDID\fP
+.B --multibeam-sidescan-source=\fISOURCE\fP
+This option defines the source type for the backscatter used in calculating
+the sidescan imagery associated with multibeam data for multibeam data formats
+that have multiple types of backscatter records and may have more that one type
+available in a data stream. The relevant formats are Reson 7k (88), Teledyne 7k3 (89),
+and Kongsberg kmall (161). If \fISOURCE\fP = S or s, then uncalibrated snippet
+records will be used. If \fISOURCE\fP = C or c, then the source records will be
+calibrated snippets. If \fISOURCE\fP = B or b, then the source will be wide
+beam backscatter that is provided in a sidescan-like port and starboard time
+series. Finally, if \fISOURCE\fP = W or w, then the source records will be
+calibrated wide beam backscatter. By default, for the relevant formats
+\fBmbpreprocess\fP will attempt to use the best available source, with a
+preference order of calibrated snippets, then snippets, then calibrated wide
+beam, then wide beam.
 .TP
 .B --sounding-amplitude-filter=\fITHRESHOLD\fP
+This option enables flagging soundings that have amplitude or intensity values
+less than the specified threshold value for some data formats. The two relevant
+formats are Reson 7k (88) and 3D at Depth lidar (232 and 233).
 .TP
 .B --sounding-altitude-filter=\fITHRESHOLD\fP
+This option enables flagging soundings that have altitude values
+less than the specified threshold value for some data formats. The relevant
+formats are 3D at Depth lidar (232 and 233).
 .TP
 .B --head1-offsets\fP=\fIX/Y/Z/HEADING/ROLL/PITCH\fP
+This option specifies the positional and angular offsets of optical head 1 relative
+to the origin for a dual head lidar system. The only relevant formats are for
+3D at Depth lidars (232 and 233).
 .TP
 .B --head2-offsets\fP=\fIX/Y/Z/HEADING/ROLL/PITCH\fP
-.br
+This option specifies the positional and angular offsets of optical head 2 relative
+to the origin for a dual head lidar system. The only relevant formats are for
+3D at Depth lidars (232 and 233).
 .TP
 .B --kluge-time-jumps=\fISECONDS\fP
 .TP
@@ -382,7 +844,14 @@ of different record types present in a data file.
 .B --kluge-zero-alongtrack-angles
 .TP
 .B --kluge-fix-wissl-timestamps
-.br
+.TP
+.B --kluge-ignore-snippets
+This option was created to handle some Kongsberg EM122 data in *.all files (supported
+as format 58) in which most, but not all, of the snippet backscatter records are missing.
+The i/o module for this format views pings without snippet records as incomplete.
+When \fB--kluge-ignore-snippets\fP is specified, \fBmbpreprocess\fP creates an empty
+snippet record for each ping, and ignores any snippet records actually in the
+input datastream.
 
 .SH EXAMPLES
 To be written.....

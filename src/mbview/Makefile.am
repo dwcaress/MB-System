@@ -7,7 +7,9 @@ endif
 
 include_HEADERS = mbview.h
 
-AM_CFLAGS = ${libgmt_CFLAGS} ${libnetcdf_CFLAGS}
+AM_CFLAGS =
+AM_CFLAGS += ${libnetcdf_CFLAGS}
+AM_CFLAGS += ${libgmt_CFLAGS}
 
 AM_CPPFLAGS =
 AM_CPPFLAGS += -I${top_srcdir}/src/mbio
@@ -15,12 +17,11 @@ AM_CPPFLAGS += -I${top_srcdir}/src/mbaux
 AM_CPPFLAGS += $(MBTRNINCDIR)
 AM_CPPFLAGS += ${libgmt_CPPFLAGS}
 AM_CPPFLAGS += ${libnetcdf_CPPFLAGS}
-AM_CPPFLAGS += ${libmotif_CPPFLAGS}
 AM_CPPFLAGS += ${libopengl_CPPFLAGS}
+AM_CPPFLAGS += ${libmotif_CPPFLAGS}
+AM_CPPFLAGS += ${libx11_CPPFLAGS}
 
-libmbview_la_CFLAGS = -DMBVIEW_LIBRARY
-libmbview_la_LDFLAGS = -no-undefined -version-info 0:0:0
-libmbview_la_SOURCES :=
+libmbview_la_SOURCES =
 libmbview_la_SOURCES += MB3DView.c
 libmbview_la_SOURCES += MB3DSiteList.c
 libmbview_la_SOURCES += MB3DRouteList.c
@@ -43,7 +44,7 @@ libmbview_la_SOURCES += mb3dsoundings_callbacks.c
 libmbview_la_SOURCES += MBpedit.c
 libmbview_la_SOURCES += mbpingedit_callbacks.c
 
-libmbview_la_LIBADD :=
+libmbview_la_LIBADD =
 libmbview_la_LIBADD += ${top_builddir}/src/bsio/libmbbsio.la
 libmbview_la_LIBADD += ${top_builddir}/src/surf/libmbsapi.la
 libmbview_la_LIBADD += ${top_builddir}/src/mbio/libmbio.la
@@ -52,6 +53,13 @@ libmbview_la_LIBADD += ${libgmt_LIBS}
 libmbview_la_LIBADD += ${libnetcdf_LIBS}
 libmbview_la_LIBADD += ${libproj_LIBS}
 libmbview_la_LIBADD += ${MBTRNLIB}
-libmbview_la_LIBADD += ${libmotif_LIBS}
 libmbview_la_LIBADD += ${libopengl_LIBS}
+libmbview_la_LIBADD += ${libmotif_LIBS}
+libmbview_la_LIBADD += ${libx11_LIBS}
 libmbview_la_LIBADD += ${XDR_LIB}
+
+libmbview_la_LDFLAGS =
+libmbview_la_LDFLAGS += -no-undefined -version-info 0:0:0
+libmbview_la_LDFLAGS += ${libopengl_LDFLAGS}
+libmbview_la_LDFLAGS += ${libmotif_LDFLAGS}
+libmbview_la_LDFLAGS += ${libx11_LDFLAGS}

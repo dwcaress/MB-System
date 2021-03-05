@@ -226,7 +226,7 @@ int mbsys_singlebeam_pingnumber(int verbose, void *mbio_ptr, unsigned int *pingn
 	return (status);
 }
 /*--------------------------------------------------------------------*/
-int mbsys_singlebeam_segynumber(int verbose, void *mbio_ptr, int *line, int *shot, int *cdp, int *error) {
+int mbsys_singlebeam_segynumber(int verbose, void *mbio_ptr, unsigned int *line, unsigned int *shot, unsigned int *cdp, int *error) {
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -241,9 +241,9 @@ int mbsys_singlebeam_segynumber(int verbose, void *mbio_ptr, int *line, int *sho
 	struct mbsys_singlebeam_struct *store = (struct mbsys_singlebeam_struct *)mb_io_ptr->store_data;
 
 	/* extract data from structure */
-	*line = store->seismic_line;
-	*shot = store->seismic_shot;
-	*cdp = store->seismic_cdp;
+	*line = (unsigned int) store->seismic_line;
+	*shot = (unsigned int) store->seismic_shot;
+	*cdp = (unsigned int) store->seismic_cdp;
 
 	const int status = MB_SUCCESS;
 
@@ -345,7 +345,8 @@ int mbsys_singlebeam_extract(int verbose, void *mbio_ptr, void *store_ptr, int *
 	/* extract comment from structure */
 	else if (*kind == MB_DATA_COMMENT) {
 		/* copy comment */
-		strcpy(comment, store->comment);
+    memset((void *)comment, 0, MB_COMMENT_MAXLINE);
+    strncpy(comment, store->comment, MB_COMMENT_MAXLINE - 1);
 
 		if (verbose >= 4) {
 			fprintf(stderr, "\ndbg4  New ping read by MBIO function <%s>\n", __func__);
@@ -474,7 +475,8 @@ int mbsys_singlebeam_insert(int verbose, void *mbio_ptr, void *store_ptr, int ki
 
 	/* insert comment in structure */
 	else if (store->kind == MB_DATA_COMMENT) {
-		strcpy(store->comment, comment);
+    memset((void *)store->comment, 0, MB_COMMENT_MAXLINE);
+    strncpy(store->comment, comment, MB_COMMENT_MAXLINE - 1);
 	}
 
 	int status = MB_SUCCESS;

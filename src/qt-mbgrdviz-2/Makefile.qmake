@@ -17,7 +17,7 @@ CXX           = /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefau
 DEFINES       = -DQT_DEPRECATED_WARNINGS -DQT_NO_DEBUG -DQT_QUICK_LIB -DQT_DATAVISUALIZATION_LIB -DQT_GUI_LIB -DQT_QMLMODELS_LIB -DQT_QML_LIB -DQT_NETWORK_LIB -DQT_CORE_LIB
 CFLAGS        = -pipe -O2 -g $(EXPORT_ARCH_ARGS) -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk -mmacosx-version-min=10.13 -Wall -Wextra -fPIC $(DEFINES)
 CXXFLAGS      = -pipe -stdlib=libc++ -O2 -g -std=gnu++11 $(EXPORT_ARCH_ARGS) -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk -mmacosx-version-min=10.13 -Wall -Wextra -fPIC $(DEFINES)
-INCPATH       = -I. -Idatavisualizationqml2 -IrenderingEngine -I/usr/local/include/gmt -I../../../Qt/5.14.2/clang_64/lib/QtQuick.framework/Headers -I../../../Qt/5.14.2/clang_64/lib/QtDataVisualization.framework/Headers -I../../../Qt/5.14.2/clang_64/lib/QtGui.framework/Headers -I../../../Qt/5.14.2/clang_64/lib/QtQmlModels.framework/Headers -I../../../Qt/5.14.2/clang_64/lib/QtQml.framework/Headers -I../../../Qt/5.14.2/clang_64/lib/QtNetwork.framework/Headers -I../../../Qt/5.14.2/clang_64/lib/QtCore.framework/Headers -I. -I/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk/System/Library/Frameworks/OpenGL.framework/Headers -I/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk/System/Library/Frameworks/AGL.framework/Headers -I../../../Qt/5.14.2/clang_64/mkspecs/macx-clang -F/Users/caress/sandbox/Qt/5.14.2/clang_64/lib
+INCPATH       = -I. -Idatavisualizationqml2 -IrenderingEngine -I/usr/local/include/gmt -I../../../Qt/5.14.2/clang_64/lib/QtQuick.framework/Headers -I../../../Qt/5.14.2/clang_64/lib/QtDataVisualization.framework/Headers -I../../../Qt/5.14.2/clang_64/lib/QtGui.framework/Headers -I../../../Qt/5.14.2/clang_64/lib/QtQmlModels.framework/Headers -I../../../Qt/5.14.2/clang_64/lib/QtQml.framework/Headers -I../../../Qt/5.14.2/clang_64/lib/QtNetwork.framework/Headers -I../../../Qt/5.14.2/clang_64/lib/QtCore.framework/Headers -I. -I/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk/System/Library/Frameworks/OpenGL.framework/Headers -I/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk/System/Library/Frameworks/AGL.framework/Headers/ -I../../../Qt/5.14.2/clang_64/mkspecs/macx-clang -F/Users/caress/sandbox/Qt/5.14.2/clang_64/lib
 QMAKE         = /Users/caress/sandbox/Qt/5.14.2/clang_64/bin/qmake
 DEL_FILE      = rm -f
 CHK_DIR_EXISTS= test -d
@@ -297,6 +297,7 @@ DIST          = ../../../Qt/5.14.2/clang_64/mkspecs/features/spec_pre.prf \
 		../../../Qt/5.14.2/clang_64/mkspecs/features/qt_config.prf \
 		../../../Qt/5.14.2/clang_64/mkspecs/macx-clang/qmake.conf \
 		../../../Qt/5.14.2/clang_64/mkspecs/features/spec_post.prf \
+		.qmake.stash \
 		../../../Qt/5.14.2/clang_64/mkspecs/features/exclusive_builds.prf \
 		../../../Qt/5.14.2/clang_64/mkspecs/features/mac/sdk.prf \
 		../../../Qt/5.14.2/clang_64/mkspecs/features/toolchain.prf \
@@ -559,6 +560,7 @@ Makefile.qmake: mbgrdviz-2.pro ../../../Qt/5.14.2/clang_64/mkspecs/macx-clang/qm
 		../../../Qt/5.14.2/clang_64/mkspecs/features/qt_config.prf \
 		../../../Qt/5.14.2/clang_64/mkspecs/macx-clang/qmake.conf \
 		../../../Qt/5.14.2/clang_64/mkspecs/features/spec_post.prf \
+		.qmake.stash \
 		../../../Qt/5.14.2/clang_64/mkspecs/features/exclusive_builds.prf \
 		../../../Qt/5.14.2/clang_64/mkspecs/features/mac/sdk.prf \
 		../../../Qt/5.14.2/clang_64/mkspecs/features/toolchain.prf \
@@ -775,6 +777,7 @@ Makefile.qmake: mbgrdviz-2.pro ../../../Qt/5.14.2/clang_64/mkspecs/macx-clang/qm
 ../../../Qt/5.14.2/clang_64/mkspecs/features/qt_config.prf:
 ../../../Qt/5.14.2/clang_64/mkspecs/macx-clang/qmake.conf:
 ../../../Qt/5.14.2/clang_64/mkspecs/features/spec_post.prf:
+.qmake.stash:
 ../../../Qt/5.14.2/clang_64/mkspecs/features/exclusive_builds.prf:
 ../../../Qt/5.14.2/clang_64/mkspecs/features/mac/sdk.prf:
 ../../../Qt/5.14.2/clang_64/mkspecs/features/toolchain.prf:
@@ -837,6 +840,7 @@ clean: compiler_clean
 
 distclean: clean 
 	-$(DEL_FILE) $(TARGET) 
+	-$(DEL_FILE) .qmake.stash
 	-$(DEL_FILE) Makefile.qmake
 
 

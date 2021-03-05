@@ -33,7 +33,6 @@
 static const double MB_RT_GRADIENT_TOLERANCE = 0.00001;
 static const int MB_RT_LAYER_HOMOGENEOUS = 0;;
 static const int MB_RT_LAYER_GRADIENT = 1;
-// static const int MB_RT_ERROR = 0;
 static const int MB_RT_DOWN = 1;
 static const int MB_RT_UP = 2;
 static const int MB_RT_DOWN_TURN = 3;
@@ -88,9 +87,6 @@ struct velocity_model {
 	double *zz_plot;
 };
 
-/* global raytrace values */
-static struct velocity_model *model = NULL;
-
 /*--------------------------------------------------------------------------*/
 int mb_rt_init(int verbose, int number_node, double *depth, double *velocity, void **modelptr, int *error) {
 	if (verbose >= 2) {
@@ -107,15 +103,14 @@ int mb_rt_init(int verbose, int number_node, double *depth, double *velocity, vo
 	/* allocate memory for model structure */
 	int status = mb_mallocd(verbose, __FILE__, __LINE__, sizeof(struct velocity_model), (void **)modelptr, error);
 
-	/* set variables and allocate memory for velocity model */
-	model = (struct velocity_model *)*modelptr;
+  /* get velocity model struct * */
+  struct velocity_model *model = (struct velocity_model *)*modelptr;
 	model->number_node = number_node;
 	status = mb_mallocd(verbose, __FILE__, __LINE__, number_node * sizeof(double), (void **)&(model->depth), error);
 	status = mb_mallocd(verbose, __FILE__, __LINE__, number_node * sizeof(double), (void **)&(model->velocity), error);
 	model->number_layer = number_node - 1;
 	status = mb_mallocd(verbose, __FILE__, __LINE__, model->number_layer * sizeof(int), (void **)&(model->layer_mode), error);
-	status =
-	    mb_mallocd(verbose, __FILE__, __LINE__, model->number_layer * sizeof(double), (void **)&(model->layer_gradient), error);
+	status = mb_mallocd(verbose, __FILE__, __LINE__, model->number_layer * sizeof(double), (void **)&(model->layer_gradient), error);
 	status = mb_mallocd(verbose, __FILE__, __LINE__, model->number_layer * sizeof(double), (void **)&(model->layer_depth_center),
 	                    error);
 	if (status == MB_SUCCESS) {
@@ -189,7 +184,7 @@ int mb_rt_deall(int verbose, void **modelptr, int *error) {
 	}
 
 	/* deallocate memory for velocity model */
-	model = (struct velocity_model *)*modelptr;
+  struct velocity_model *model = (struct velocity_model *)*modelptr;
 	int status = mb_freed(verbose, __FILE__, __LINE__, (void **)&(model->depth), error);
 	status = mb_freed(verbose, __FILE__, __LINE__, (void **)&(model->velocity), error);
 	status = mb_freed(verbose, __FILE__, __LINE__, (void **)&(model->layer_mode), error);
@@ -208,15 +203,19 @@ int mb_rt_deall(int verbose, void **modelptr, int *error) {
 	return (status);
 }
 /*--------------------------------------------------------------------------*/
-int mb_rt_get_depth(int verbose, double beta, int dir_sign, int turn_sign, double *depth, int *error) {
+int mb_rt_get_depth(int verbose, void *modelptr, double beta, int dir_sign, int turn_sign, double *depth, int *error) {
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:          %d\n", verbose);
+		fprintf(stderr, "dbg2       modelptr:         %p\n", modelptr);
 		fprintf(stderr, "dbg2       beta:             %f\n", beta);
 		fprintf(stderr, "dbg2       dir_sign:         %d\n", dir_sign);
 		fprintf(stderr, "dbg2       turn_sign:        %d\n", turn_sign);
 	}
+
+  /* get velocity model struct * */
+  struct velocity_model *model = (struct velocity_model *)modelptr;
 
 	/* find depth */
 	const double alpha = model->pp * exp(dir_sign * model->tt_left * fabs(model->layer_gradient[model->layer]) + turn_sign * beta);
@@ -238,12 +237,16 @@ int mb_rt_get_depth(int verbose, double beta, int dir_sign, int turn_sign, doubl
 	return (status);
 }
 /*--------------------------------------------------------------------------*/
-int mb_rt_quad1(int verbose, int *error) {
+int mb_rt_quad1(int verbose, void *modelptr, int *error) {
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:          %d\n", verbose);
+		fprintf(stderr, "dbg2       modelptr:         %p\n", modelptr);
 	}
+
+  /* get velocity model struct * */
+  struct velocity_model *model = (struct velocity_model *)modelptr;
 
 	/* find circular path */
 	model->radius = fabs(1.0 / (model->pp * model->layer_gradient[model->layer]));
@@ -264,7 +267,7 @@ int mb_rt_quad1(int verbose, int *error) {
 
 		/* raypath ends before turning */
 		if (model->dt >= model->tt_left) {
-			mb_rt_get_depth(verbose, beta, -1, 1, &model->zf, error);
+			mb_rt_get_depth(verbose, modelptr, beta, -1, 1, &model->zf, error);
 			model->xf = model->xc - SAFESQRT(model->radius * model->radius - (model->zf - model->zc) * (model->zf - model->zc));
 			model->dt = model->tt_left;
 			model->tt_left = 0.0;
@@ -292,7 +295,7 @@ int mb_rt_quad1(int verbose, int *error) {
 			else if (model->dt > model->tt_left) {
 				model->turned = true;
 				model->ray_status = MB_RT_UP_TURN;
-				mb_rt_get_depth(verbose, beta, 1, -1, &model->zf, error);
+				mb_rt_get_depth(verbose, modelptr, beta, 1, -1, &model->zf, error);
 				model->xf =
 				    model->xc + SAFESQRT(model->radius * model->radius - (model->zf - model->zc) * (model->zf - model->zc));
 				model->dt = model->tt_left;
@@ -317,7 +320,7 @@ int mb_rt_quad1(int verbose, int *error) {
 		else if (model->dt > model->tt_left) {
 			model->turned = true;
 			model->ray_status = MB_RT_UP_TURN;
-			mb_rt_get_depth(verbose, beta, -1, 1, &model->zf, error);
+			mb_rt_get_depth(verbose, modelptr, beta, -1, 1, &model->zf, error);
 			model->xf = model->xc - SAFESQRT(model->radius * model->radius - (model->zf - model->zc) * (model->zf - model->zc));
 			model->dt = model->tt_left;
 			model->tt_left = 0.0;
@@ -335,12 +338,16 @@ int mb_rt_quad1(int verbose, int *error) {
 	return (status);
 }
 /*--------------------------------------------------------------------------*/
-int mb_rt_quad2(int verbose, int *error) {
+int mb_rt_quad2(int verbose, void *modelptr, int *error) {
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:          %d\n", verbose);
+		fprintf(stderr, "dbg2       modelptr:         %p\n", modelptr);
 	}
+
+  /* get velocity model struct * */
+  struct velocity_model *model = (struct velocity_model *)modelptr;
 
 	/* find circular path */
 	model->radius = fabs(1.0 / (model->pp * model->layer_gradient[model->layer]));
@@ -367,7 +374,7 @@ int mb_rt_quad2(int verbose, int *error) {
 	}
 	/* ray exhausts tt_left before exiting layer */
 	else if (model->dt > model->tt_left) {
-		mb_rt_get_depth(verbose, beta, 1, 1, &model->zf, error);
+		mb_rt_get_depth(verbose, modelptr, beta, 1, 1, &model->zf, error);
 		model->xf = model->xc + SAFESQRT(model->radius * model->radius - (model->zf - model->zc) * (model->zf - model->zc));
 		model->dt = model->tt_left;
 		model->tt_left = 0.0;
@@ -386,12 +393,16 @@ int mb_rt_quad2(int verbose, int *error) {
 	return (status);
 }
 /*--------------------------------------------------------------------------*/
-int mb_rt_quad3(int verbose, int *error) {
+int mb_rt_quad3(int verbose, void *modelptr, int *error) {
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:          %d\n", verbose);
+		fprintf(stderr, "dbg2       modelptr:         %p\n", modelptr);
 	}
+
+  /* get velocity model struct * */
+  struct velocity_model *model = (struct velocity_model *)modelptr;
 
 	/* find circular path */
 	model->radius = fabs(1.0 / (model->pp * model->layer_gradient[model->layer]));
@@ -417,7 +428,7 @@ int mb_rt_quad3(int verbose, int *error) {
 	}
 	/* ray exhausts tt_left before exiting layer */
 	else if (model->dt > model->tt_left) {
-		mb_rt_get_depth(verbose, beta, 1, 1, &model->zf, error);
+		mb_rt_get_depth(verbose, modelptr, beta, 1, 1, &model->zf, error);
 		model->xf = model->xc + SAFESQRT(model->radius * model->radius - (model->zf - model->zc) * (model->zf - model->zc));
 		model->dt = model->tt_left;
 		model->tt_left = 0.0;
@@ -436,12 +447,16 @@ int mb_rt_quad3(int verbose, int *error) {
 	return (status);
 }
 /*--------------------------------------------------------------------------*/
-int mb_rt_quad4(int verbose, int *error) {
+int mb_rt_quad4(int verbose, void *modelptr, int *error) {
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:          %d\n", verbose);
+		fprintf(stderr, "dbg2       modelptr:         %p\n", modelptr);
 	}
+
+  /* get velocity model struct * */
+  struct velocity_model *model = (struct velocity_model *)modelptr;
 
 	/* find circular path */
 	model->radius = fabs(1.0 / (model->pp * model->layer_gradient[model->layer]));
@@ -462,7 +477,7 @@ int mb_rt_quad4(int verbose, int *error) {
 
 		/* raypath ends before turning */
 		if (model->dt >= model->tt_left) {
-			mb_rt_get_depth(verbose, beta, -1, 1, &model->zf, error);
+			mb_rt_get_depth(verbose, modelptr, beta, -1, 1, &model->zf, error);
 			model->xf = model->xc - SAFESQRT(model->radius * model->radius - (model->zf - model->zc) * (model->zf - model->zc));
 			model->dt = model->tt_left;
 			model->tt_left = 0.0;
@@ -490,7 +505,7 @@ int mb_rt_quad4(int verbose, int *error) {
 			else if (model->dt > model->tt_left) {
 				model->turned = false;
 				model->ray_status = MB_RT_DOWN_TURN;
-				mb_rt_get_depth(verbose, beta, 1, -1, &model->zf, error);
+				mb_rt_get_depth(verbose, modelptr, beta, 1, -1, &model->zf, error);
 				model->xf =
 				    model->xc + SAFESQRT(model->radius * model->radius - (model->zf - model->zc) * (model->zf - model->zc));
 				model->dt = model->tt_left;
@@ -515,7 +530,7 @@ int mb_rt_quad4(int verbose, int *error) {
 		else if (model->dt > model->tt_left) {
 			model->turned = true;
 			model->ray_status = MB_RT_UP_TURN;
-			mb_rt_get_depth(verbose, beta, -1, 1, &model->zf, error);
+			mb_rt_get_depth(verbose, modelptr, beta, -1, 1, &model->zf, error);
 			model->xf = model->xc - SAFESQRT(model->radius * model->radius - (model->zf - model->zc) * (model->zf - model->zc));
 			model->dt = model->tt_left;
 			model->tt_left = 0.0;
@@ -533,12 +548,16 @@ int mb_rt_quad4(int verbose, int *error) {
 	return (status);
 }
 /*--------------------------------------------------------------------------*/
-int mb_rt_plot_circular(int verbose, int *error) {
+int mb_rt_plot_circular(int verbose, void *modelptr, int *error) {
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:          %d\n", verbose);
+		fprintf(stderr, "dbg2       modelptr:         %p\n", modelptr);
 	}
+
+  /* get velocity model struct * */
+  struct velocity_model *model = (struct velocity_model *)modelptr;
 
 	/* if full plot do circle segments */
 	if (model->plot_mode == MB_RT_PLOT_MODE_ON) {
@@ -577,28 +596,32 @@ int mb_rt_plot_circular(int verbose, int *error) {
 	return (status);
 }
 /*--------------------------------------------------------------------------*/
-int mb_rt_circular(int verbose, int *error) {
+int mb_rt_circular(int verbose, void *modelptr, int *error) {
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:          %d\n", verbose);
+		fprintf(stderr, "dbg2       modelptr:         %p\n", modelptr);
 	}
+
+  /* get velocity model struct * */
+  struct velocity_model *model = (struct velocity_model *)modelptr;
 
 	int status = MB_SUCCESS;
 
 	/* decide which case to use */
 	if (!model->turned && model->layer_gradient[model->layer] > 0.0)
-		status = mb_rt_quad1(verbose, error);
+		status = mb_rt_quad1(verbose, modelptr, error);
 	else if (!model->turned)
-		status = mb_rt_quad3(verbose, error);
+		status = mb_rt_quad3(verbose, modelptr, error);
 	else if (model->turned && model->layer_gradient[model->layer] > 0.0)
-		status = mb_rt_quad2(verbose, error);
+		status = mb_rt_quad2(verbose, modelptr, error);
 	else if (model->turned)
-		status = mb_rt_quad4(verbose, error);
+		status = mb_rt_quad4(verbose, modelptr, error);
 
 	/* put points in plotting arrays */
 	if (model->number_plot_max > 0)
-		status = mb_rt_plot_circular(verbose, error);
+		status = mb_rt_plot_circular(verbose, modelptr, error);
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
@@ -611,12 +634,16 @@ int mb_rt_circular(int verbose, int *error) {
 	return (status);
 }
 /*--------------------------------------------------------------------------*/
-int mb_rt_line(int verbose, int *error) {
+int mb_rt_line(int verbose, void *modelptr, int *error) {
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:          %d\n", verbose);
+		fprintf(stderr, "dbg2       modelptr:         %p\n", modelptr);
 	}
+
+  /* get velocity model struct * */
+  struct velocity_model *model = (struct velocity_model *)modelptr;
 
 	/* find linear path */
 	const double asin_arg = MIN(model->pp * model->layer_vel_top[model->layer], 1.000);
@@ -700,12 +727,16 @@ int mb_rt_line(int verbose, int *error) {
 	return (status);
 }
 /*--------------------------------------------------------------------------*/
-int mb_rt_vertical(int verbose, int *error) {
+int mb_rt_vertical(int verbose, void *modelptr, int *error) {
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:          %d\n", verbose);
+		fprintf(stderr, "dbg2       modelptr:         %p\n", modelptr);
 	}
+
+  /* get velocity model struct * */
+  struct velocity_model *model = (struct velocity_model *)modelptr;
 
 	/* find linear path */
 	const double vi = model->layer_vel_top[model->layer] +
@@ -771,7 +802,7 @@ int mb_rt(int verbose, void *modelptr, double source_depth, double source_angle,
           double surface_vel, double null_angle, int nplot_max, int *nplot, double *xplot, double *zplot, double *x, double *z,
           double *travel_time, int *ray_stat, int *error) {
 	/* get pointer to velocity model */
-	model = (struct velocity_model *)modelptr;
+	struct velocity_model *model = (struct velocity_model *)modelptr;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -851,6 +882,7 @@ int mb_rt(int verbose, void *modelptr, double source_depth, double source_angle,
 		diff_angle = asin(vel_ratio) * RTD;
 		source_angle = null_angle + diff_angle;
 	}
+  // else do nothing
 
 	/* now initialize ray */
 	if (source_angle > 0.0)
@@ -913,11 +945,11 @@ int mb_rt(int verbose, void *modelptr, double source_depth, double source_angle,
 	while (!model->done && !model->outofbounds) {
 		/* trace ray through current layer */
 		if (model->layer_mode[model->layer] == MB_RT_LAYER_GRADIENT && model->pp > 0.0)
-			status = mb_rt_circular(verbose, error);
+			status = mb_rt_circular(verbose, modelptr, error);
 		else if (model->layer_mode[model->layer] == MB_RT_LAYER_GRADIENT)
-			status = mb_rt_vertical(verbose, error);
+			status = mb_rt_vertical(verbose, modelptr, error);
 		else
-			status = mb_rt_line(verbose, error);
+			status = mb_rt_line(verbose, modelptr, error);
 
 		/* update ray */
 		model->tt = model->tt + model->dt;

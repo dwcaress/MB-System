@@ -322,9 +322,9 @@ int mb_esf_open(int verbose, const char *program_name, char *esffile, bool load,
 			if (load) {
 				sprintf(command, "cp %s %s.tmp\n", esffile, esffile);
 				/* shellstatus = */ system(command);
-				if (output == MBP_ESF_APPEND)
-					header = false;
 			}
+			if (output == MBP_ESF_APPEND)
+				header = false;
 		}
 
 		/* open the edit save file */
@@ -876,7 +876,7 @@ int mb_esf_close(int verbose, struct mb_esf_struct *esf, int *error) {
  */
 
 #define NATURAL
-static const int THRESHOLD = 16; /* Best choice for natural merge cut-off. */
+const int THRESHOLD = 16; /* Best choice for natural merge cut-off. */
 
 /* #define NATURAL to get hybrid natural merge.
  * (The default is pairwise merging.)

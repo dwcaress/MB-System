@@ -1208,8 +1208,6 @@ int mbr_bchrtunb_rd_bath32(int verbose, FILE *mbfp, struct mbf_bchrtunb_struct *
 }
 /*--------------------------------------------------------------------*/
 int mbr_bchrtunb_rd_data(int verbose, void *mbio_ptr, int *error) {
-	short int *type;
-	static char label[2];
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -1228,7 +1226,8 @@ int mbr_bchrtunb_rd_data(int verbose, void *mbio_ptr, int *error) {
 	/* set file position */
 	mb_io_ptr->file_pos = mb_io_ptr->file_bytes;
 
-	type = (short int *)label;
+  char label[2];
+	short int *type = (short int *)label;
 	*error = MB_ERROR_NO_ERROR;
 	int status = MB_SUCCESS;
 	bool done = false;
@@ -1510,7 +1509,6 @@ int mbr_rt_bchrtunb(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_bchrtunb_wr_comment(int verbose, FILE *mbfp, struct mbf_bchrtunb_struct *data, int *error) {
-	short int label;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -1526,7 +1524,7 @@ int mbr_bchrtunb_wr_comment(int verbose, FILE *mbfp, struct mbf_bchrtunb_struct 
 	}
 
 	/* write the record label */
-	label = ELAC_COMMENT;
+	short int label = ELAC_COMMENT;
 #ifdef BYTESWAPPED
 	label = (short)mb_swap_short(label);
 #endif
@@ -1577,8 +1575,6 @@ int mbr_bchrtunb_wr_comment(int verbose, FILE *mbfp, struct mbf_bchrtunb_struct 
 }
 /*--------------------------------------------------------------------*/
 int mbr_bchrtunb_wr_parameter(int verbose, FILE *mbfp, struct mbf_bchrtunb_struct *data, int *error) {
-	char line[ELAC_PARAMETER_SIZE + 3];
-	short int label;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -1625,7 +1621,8 @@ int mbr_bchrtunb_wr_parameter(int verbose, FILE *mbfp, struct mbf_bchrtunb_struc
 	}
 
 	/* write the record label */
-	label = ELAC_PARAMETER;
+	char line[ELAC_PARAMETER_SIZE + 3];
+	short int label = ELAC_PARAMETER;
 #ifdef BYTESWAPPED
 	label = (short)mb_swap_short(label);
 #endif
@@ -1775,8 +1772,6 @@ int mbr_bchrtunb_wr_parameter(int verbose, FILE *mbfp, struct mbf_bchrtunb_struc
 }
 /*--------------------------------------------------------------------*/
 int mbr_bchrtunb_wr_pos(int verbose, FILE *mbfp, struct mbf_bchrtunb_struct *data, int *error) {
-	char line[ELAC_POS_SIZE + 3];
-	short int label;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -1810,7 +1805,8 @@ int mbr_bchrtunb_wr_pos(int verbose, FILE *mbfp, struct mbf_bchrtunb_struct *dat
 	}
 
 	/* write the record label */
-	label = ELAC_POS;
+	char line[ELAC_POS_SIZE + 3];
+	short int label = ELAC_POS;
 #ifdef BYTESWAPPED
 	label = (short)mb_swap_short(label);
 #endif
@@ -1900,8 +1896,6 @@ int mbr_bchrtunb_wr_pos(int verbose, FILE *mbfp, struct mbf_bchrtunb_struct *dat
 }
 /*--------------------------------------------------------------------*/
 int mbr_bchrtunb_wr_svp(int verbose, FILE *mbfp, struct mbf_bchrtunb_struct *data, int *error) {
-	char line[ELAC_SVP_SIZE + 3];
-	short int label;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -1929,7 +1923,8 @@ int mbr_bchrtunb_wr_svp(int verbose, FILE *mbfp, struct mbf_bchrtunb_struct *dat
 	}
 
 	/* write the record label */
-	label = ELAC_SVP;
+	char line[ELAC_SVP_SIZE + 3];
+	short int label = ELAC_SVP;
 #ifdef BYTESWAPPED
 	label = (short)mb_swap_short(label);
 #endif
@@ -2008,10 +2003,6 @@ int mbr_bchrtunb_wr_svp(int verbose, FILE *mbfp, struct mbf_bchrtunb_struct *dat
 }
 /*--------------------------------------------------------------------*/
 int mbr_bchrtunb_wr_bath56(int verbose, FILE *mbfp, struct mbf_bchrtunb_struct *data, int *error) {
-	char line[ELAC_BATH56_SIZE + 3];
-	char *profile;
-	char *beam;
-	short int label;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -2061,7 +2052,10 @@ int mbr_bchrtunb_wr_bath56(int verbose, FILE *mbfp, struct mbf_bchrtunb_struct *
 	}
 
 	/* write the record label */
-	label = ELAC_BATH56;
+	char line[ELAC_BATH56_SIZE + 3];
+	char *profile;
+	char *beam;
+	short int label = ELAC_BATH56;
 #ifdef BYTESWAPPED
 	label = (short)mb_swap_short(label);
 #endif
@@ -2187,10 +2181,6 @@ int mbr_bchrtunb_wr_bath56(int verbose, FILE *mbfp, struct mbf_bchrtunb_struct *
 }
 /*--------------------------------------------------------------------*/
 int mbr_bchrtunb_wr_bath40(int verbose, FILE *mbfp, struct mbf_bchrtunb_struct *data, int *error) {
-	char line[ELAC_BATH40_SIZE + 3];
-	char *profile;
-	char *beam;
-	short int label;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -2240,7 +2230,10 @@ int mbr_bchrtunb_wr_bath40(int verbose, FILE *mbfp, struct mbf_bchrtunb_struct *
 	}
 
 	/* write the record label */
-	label = ELAC_BATH40;
+	char line[ELAC_BATH40_SIZE + 3];
+	char *profile;
+	char *beam;
+	short int label = ELAC_BATH40;
 #ifdef BYTESWAPPED
 	label = (short)mb_swap_short(label);
 #endif
@@ -2366,10 +2359,6 @@ int mbr_bchrtunb_wr_bath40(int verbose, FILE *mbfp, struct mbf_bchrtunb_struct *
 }
 /*--------------------------------------------------------------------*/
 int mbr_bchrtunb_wr_bath32(int verbose, FILE *mbfp, struct mbf_bchrtunb_struct *data, int *error) {
-	char line[ELAC_BATH32_SIZE + 3];
-	char *profile;
-	char *beam;
-	short int label;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -2419,7 +2408,10 @@ int mbr_bchrtunb_wr_bath32(int verbose, FILE *mbfp, struct mbf_bchrtunb_struct *
 	}
 
 	/* write the record label */
-	label = ELAC_BATH32;
+	char line[ELAC_BATH32_SIZE + 3];
+	char *profile;
+	char *beam;
+	short int label = ELAC_BATH32;
 #ifdef BYTESWAPPED
 	label = (short)mb_swap_short(label);
 #endif

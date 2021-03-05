@@ -442,10 +442,10 @@ int mbsys_wassp_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
 		*time_d = store->time_d;
 
 		/* copy comment */
-		if (mcomment->comment_length > 0)
-			strncpy(comment, mcomment->comment_message, MIN(mcomment->comment_length, MB_COMMENT_MAXLINE));
-		else
-			comment[0] = '\0';
+    memset((void *)comment, 0, MB_COMMENT_MAXLINE);
+		if (mcomment->comment_length > 0) {
+        strncpy(comment, mcomment->comment_message, MIN(mcomment->comment_length, MB_COMMENT_MAXLINE));
+    }
 
 		if (verbose >= 4) {
 			fprintf(stderr, "\ndbg4  Comment extracted by MBIO function <%s>\n", __func__);
@@ -659,12 +659,12 @@ int mbsys_wassp_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, i
 
 	/* insert comment in structure */
 	else if (store->kind == MB_DATA_COMMENT) {
-		strncpy(mcomment->comment_message, comment, MB_COMMENT_MAXLINE);
-		mcomment->comment_length = strlen(comment);
-		if (mcomment->comment_length % 2 == 1) {
-			mcomment->comment_length++;
-			mcomment->comment_message[mcomment->comment_length] = '\0';
-		}
+    mcomment->comment_length = MIN(strlen(comment) + 1, MB_COMMENT_MAXLINE);
+    if (mcomment->comment_length % 2 == 1) {
+      mcomment->comment_length = MIN(mcomment->comment_length + 1, MB_COMMENT_MAXLINE);
+    }
+    memset((void *)mcomment->comment_message, 0, MB_COMMENT_MAXLINE);
+    strncpy(mcomment->comment_message, comment, MB_COMMENT_MAXLINE - 1);
 	}
 
 	const int status = MB_SUCCESS;

@@ -150,3 +150,5 @@ src/mbtrn/mb12csv
 src/mbtrnutils/mbgrd2octree
 src/mbtrnav/trnusvr-test
 src/mbtrnav/bin/libtrn.a
+src/photo/mbimagecorrect
+src/utilities/mbswath2las

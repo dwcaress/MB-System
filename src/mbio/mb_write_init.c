@@ -287,7 +287,7 @@ int mb_write_init(int verbose, char *file, int format, void **mbio_ptr, int *bea
 	   directly with fopen */
 	if (mb_io_ptr->filetype == MB_FILETYPE_NORMAL || mb_io_ptr->filetype == MB_FILETYPE_XDR) {
 		/* open the first file */
-		static const char stdout_string[] = "stdout";
+		const char stdout_string[] = "stdout";
 		if (strncmp(file, stdout_string, 6) == 0)
 			mb_io_ptr->mbfp = stdout;
 		else if ((mb_io_ptr->mbfp = fopen(mb_io_ptr->file, "wb")) == NULL) {

@@ -7371,9 +7371,9 @@ gsfGetMBParams(const gsfRecords *rec, gsfMBParams *p, int *numArrays)
         else if (strncmp(rec->process_parameters.param[i], "NUMBER_OF_TRANSMITTERS", strlen("NUMBER_OF_TRANSMITTERS")) == 0)
         {
             sscanf (rec->process_parameters.param[i], "NUMBER_OF_TRANSMITTERS=%3s", str);
-            if ((atoi(str) >= 1) && (atoi(str) <= GSF_MAX_OFFSETS))
+            if (((int)strtol(str, NULL, 10) >= 1) && ((int)strtol(str, NULL, 10) <= GSF_MAX_OFFSETS))
             {
-                p->number_of_transmitters = atoi(str);
+                p->number_of_transmitters = (int)strtol(str, NULL, 10);
                 num_tx = p->number_of_transmitters;
             }
             else
@@ -7384,9 +7384,9 @@ gsfGetMBParams(const gsfRecords *rec, gsfMBParams *p, int *numArrays)
         else if (strncmp(rec->process_parameters.param[i], "NUMBER_OF_RECEIVERS", strlen("NUMBER_OF_RECEIVERS")) == 0)
         {
             sscanf (rec->process_parameters.param[i], "NUMBER_OF_RECEIVERS=%3s", str);
-            if ((atoi(str) >= 1) && (atoi(str) <= GSF_MAX_OFFSETS))
+            if (((int)strtol(str, NULL, 10) >= 1) && ((int)strtol(str, NULL, 10) <= GSF_MAX_OFFSETS))
             {
-                p->number_of_receivers = atoi(str);
+                p->number_of_receivers = (int)strtol(str, NULL, 10);
                 num_rx = p->number_of_receivers;
             }
             else
@@ -7453,9 +7453,9 @@ gsfGetMBParams(const gsfRecords *rec, gsfMBParams *p, int *numArrays)
         else if (strncmp(rec->process_parameters.param[i], "UTC_OFFSET", strlen("UTC_OFFSET")) == 0)
         {
             sscanf (rec->process_parameters.param[i], "UTC_OFFSET=%3s", str);
-            if ((abs(atoi(str)) >= 0) && (abs(atoi(str)) <= 12))
+            if ((abs((int)strtol(str, NULL, 10)) >= 0) && (abs((int)strtol(str, NULL, 10)) <= 12))
             {
-                p->utc_offset = atoi(str);
+                p->utc_offset = (int)strtol(str, NULL, 10);
             }
             else
             {

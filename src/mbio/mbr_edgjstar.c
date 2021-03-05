@@ -271,8 +271,6 @@ int mbr_rt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	int time_i[7];
 	int time_j[5];
 	double depthofsensor, offset;
-	char **nap, *nargv[25], *string;
-	int nargc;
 
 	/* get pointer to mbio descriptor */
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
@@ -296,12 +294,25 @@ int mbr_rt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 
 	int status = MB_SUCCESS;
 
+#ifdef MBF_EDGJSTAR_DEBUG
+fprintf(stderr, "\n%s:%d:%s: About to enter read loop  file offset:%ld\n",
+__FILE__, __LINE__, __FUNCTION__, ftell(mb_io_ptr->mbfp));
+#endif
+
 	/* loop over reading data until a full record of some sort is read */
 	bool done = false;
 	while (!done) {
 		/* read message header */
 		char buffer[MBSYS_JSTAR_SYSINFO_MAX];
-		if ((read_status = fread(buffer, MBSYS_JSTAR_MESSAGE_SIZE, 1, mb_io_ptr->mbfp)) == 1) {
+    int skip = 0;
+		read_status = fread(buffer, MBSYS_JSTAR_MESSAGE_SIZE, 1, mb_io_ptr->mbfp);
+    while (read_status == 1 && !(buffer[0] == 0x01 && buffer[1] == 0x16)) {
+      for (int i = 0; i < MBSYS_JSTAR_MESSAGE_SIZE - 1; i++)
+        buffer[i] = buffer[i + 1];
+      read_status = fread(&buffer[MBSYS_JSTAR_MESSAGE_SIZE-1], 1, 1, mb_io_ptr->mbfp);
+      skip++;
+    }
+    if (read_status == 1) {
 			/* extract the message header values */
 			index = 0;
 			mb_get_binary_short(true, &buffer[index], &(message.start_marker));
@@ -329,8 +340,11 @@ int mbr_rt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 
 			status = MB_SUCCESS;
 #ifdef MBF_EDGJSTAR_DEBUG
-			fprintf(stderr, "NEW MESSAGE HEADER: status:%d message.version:%d message.type:%d message.subsystem:%d channel:%d message.size:%d\n",
-			        status, message.version, message.type, message.subsystem, message.channel, message.size);
+      if (skip > 0)
+        fprintf(stderr, "%s:%d:%s: SKIPPED BYTES: %d\n", __FILE__, __LINE__, __FUNCTION__, skip);
+			fprintf(stderr, "%s:%d:%s: NEW MESSAGE HEADER: status:%d message.version:%d message.type:%d message.subsystem:%d channel:%d message.size:%d skip:%d file offset:%ld\n",
+			        __FILE__, __LINE__, __FUNCTION__, status, message.version, message.type,
+              message.subsystem, message.channel, message.size, skip, ftell(mb_io_ptr->mbfp));
 #endif
 		}
 
@@ -898,8 +912,10 @@ int mbr_rt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 					done = true;
 				}
 #ifdef MBF_EDGJSTAR_DEBUG
-				fprintf(stderr, "Done reading 1: %d  pingNum:%d %d   subsystem:%d %d\n", done, store->ssport.pingNum,
-				        store->ssstbd.pingNum, store->ssport.message.subsystem, store->ssstbd.message.subsystem);
+				fprintf(stderr, "%s:%d:%s: Done reading 1: %d  pingNum:%d %d   subsystem:%d %d  file offset:%ld\n",
+              __FILE__, __LINE__, __FUNCTION__, done, store->ssport.pingNum,
+				      store->ssstbd.pingNum, store->ssport.message.subsystem, store->ssstbd.message.subsystem,
+              ftell(mb_io_ptr->mbfp));
 #endif
 			}
 
@@ -1404,8 +1420,10 @@ int mbr_rt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 					done = true;
 				}
 #ifdef MBF_EDGJSTAR_DEBUG
-				fprintf(stderr, "Done reading 1: %d  pingNum:%d %d   subsystem:%d %d\n", done, store->ssport.pingNum,
-				        store->ssstbd.pingNum, store->ssport.message.subsystem, store->ssstbd.message.subsystem);
+				fprintf(stderr, "%s:%d:%s: Done reading 1: %d  pingNum:%d %d   subsystem:%d %d file offset:%ld\n",
+              __FILE__, __LINE__, __FUNCTION__, done, store->ssport.pingNum,
+				      store->ssstbd.pingNum, store->ssport.message.subsystem, store->ssstbd.message.subsystem,
+              ftell(mb_io_ptr->mbfp));
 #endif
 			}
 
@@ -1505,26 +1523,32 @@ int mbr_rt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 				mb_get_date(verbose, time_d, time_i);
 
 				/* break up NMEA string into arguments */
-				nargc = 0;
-				string = (char *)nmeastring;
-				for (nap = nargv; (*nap = strtok(string, ",*")) != NULL;) {
-					if (++nap >= &nargv[25])
-						break;
-					else
-						nargc++;
-				}
+				int nargc = 0;
+        char *nargv[25];
+				char *string = (char *)nmeastring;
+        char **nap = nargv;
+        char *saveptr;
+        *nap = strtok_r(string, ",*", &saveptr);
+        if (*nap != NULL) {
+          nargc++;
+          nap++;
+          while (nargc < 25 && (*nap = strtok_r(NULL, ",*", &saveptr)) != NULL) {
+            nargc++;
+            nap++;
+          }
+        }
 
 				/* parse NMEA string if possible */
 				if (strncmp(&(nargv[0][3]), "RMC", 3) == 0) {
-					rawvalue = atof(nargv[3]);
+					rawvalue = strtod(nargv[3], NULL);
 					navlat = floor(0.01 * rawvalue) + (rawvalue - 100.0 * floor(0.01 * rawvalue)) / 60.0;
 					if (nargv[4][0] == 'S')
 						navlat *= -1.0;
-					rawvalue = atof(nargv[5]);
+					rawvalue = strtod(nargv[5], NULL);
 					navlon = floor(0.01 * rawvalue) + (rawvalue - 100.0 * floor(0.01 * rawvalue)) / 60.0;
 					if (nargv[6][0] == 'W')
 						navlon *= -1.0;
-					heading = atof(nargv[8]);
+					heading = strtod(nargv[8], NULL);
 #ifdef MBF_EDGJSTAR_DEBUG
 					fprintf(stderr, "RMC: %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d navlon:%f navlat:%f heading:%f    %s\n",
 					        time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6], navlon, navlat, heading,
@@ -1539,7 +1563,7 @@ int mbr_rt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 
 				/* parse NMEA string if possible */
 				else if (strncmp(&(nargv[0][3]), "DBT", 3) == 0) {
-					altitude = atof(nargv[3]);
+					altitude = strtod(nargv[3], NULL);
 					mb_altint_add(verbose, mbio_ptr, time_d, altitude, error);
 #ifdef MBF_EDGJSTAR_DEBUG
 					fprintf(stderr, "DBT: %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d altitude:%f    %s\n", time_i[0], time_i[1],
@@ -1551,8 +1575,8 @@ int mbr_rt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 
 				/* parse NMEA string if possible */
 				else if (strncmp(&(nargv[0][3]), "DPT", 3) == 0) {
-					depthofsensor = atof(nargv[1]);
-					offset = atof(nargv[2]);
+					depthofsensor = strtod(nargv[1], NULL);
+					offset = strtod(nargv[2], NULL);
 					sonardepth = depthofsensor + offset;
 					mb_depint_add(verbose, mbio_ptr, time_d, sonardepth, error);
 #ifdef MBF_EDGJSTAR_DEBUG

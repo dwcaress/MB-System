@@ -1,5 +1,5 @@
 /*--------------------------------------------------------------------
- *    The MB-system:	mb_define.h	4/21/96
+ *    The MB-system:  mb_define.h  4/21/96
  *
  *    Copyright (c) 1996-2020 by
  *    David W. Caress (caress@mbari.org)
@@ -15,8 +15,8 @@
  * mb_define.h defines macros used by MB-System programs and functions
  * for degree/radian conversions and min/max calculations.
  *
- * Author:	D. W. Caress
- * Date:	April 21, 1996
+ * Author:  D. W. Caress
+ * Date:  April 21, 1996
  */
 
 #ifndef MB_DEFINE_H_
@@ -28,12 +28,12 @@
 #include <mb_config.h>
 
 #ifdef _WIN32
-	/* https://www.zachburlingame.com/2011/05/resolving-redefinition-errors-betwen-ws2def-h-and-winsock-h/ */
-#	ifndef WIN32
-#		define WIN32
-#	endif
-#	include <WinSock2.h>
-#	include <Windows.h>
+  /* https://www.zachburlingame.com/2011/05/resolving-redefinition-errors-betwen-ws2def-h-and-winsock-h/ */
+#  ifndef WIN32
+#    define WIN32
+#  endif
+#  include <WinSock2.h>
+#  include <Windows.h>
 #endif
 
 /* For XDR/RPC */
@@ -69,10 +69,10 @@ extern "C" {
 #define ftello ftell
 #define fseeko fseek
 #if !defined(isnan) && (_MSC_VER < 1900)
-#	define isnan(x) _isnan(x)
+#  define isnan(x) _isnan(x)
 #endif
 #if !defined(inline) && (_MSC_VER < 1900)
-#	define inline __inline
+#  define inline __inline
 #endif
 #endif
 
@@ -96,15 +96,15 @@ typedef long long mb_s_long;
 
 /* type definitions for structures used in beam angle calculations */
 typedef struct {
-	double x;
-	double y;
-	double z;
+  double x;
+  double y;
+  double z;
 } mb_3D_vector;
 
 typedef struct {
-	double roll;
-	double pitch;
-	double heading;
+  double roll;
+  double pitch;
+  double heading;
 } mb_3D_orientation;
 
 /* declare buffer maximum */
@@ -128,6 +128,9 @@ typedef struct {
 typedef char mb_path[MB_PATH_MAXLINE];
 typedef char mb_name[MB_NAME_LENGTH];
 typedef char mb_longname[MB_LONGNAME_LENGTH];
+
+/* maximum number of threads created by an MB-System program/function */
+#define MB_THREAD_MAX 16
 
 /* maximum number of asynchronous data saved */
 #define MB_ASYNCH_SAVE_MAX 10000
@@ -200,10 +203,10 @@ typedef enum {
 #define MB_SECONDS_01JAN2000 946684800.0
 
 /* water sound speed calculation algorithms */
-#define MB_SOUNDSPEEDALGORITHM_NONE 		0
-#define MB_SOUNDSPEEDALGORITHM_CHENMILLERO 	1
-#define MB_SOUNDSPEEDALGORITHM_WILSON 		2
-#define MB_SOUNDSPEEDALGORITHM_DELGROSSO 	3
+#define MB_SOUNDSPEEDALGORITHM_NONE     0
+#define MB_SOUNDSPEEDALGORITHM_CHENMILLERO   1
+#define MB_SOUNDSPEEDALGORITHM_WILSON     2
+#define MB_SOUNDSPEEDALGORITHM_DELGROSSO   3
 
 /* min max round define */
 #ifndef MIN
@@ -253,7 +256,7 @@ int mb_mbview_defaults(int verbose, int *primary_colortable, int *primary_colort
                        int *secondary_colortable_mode, double *illuminate_magnitude, double *illuminate_elevation,
                        double *illuminate_azimuth, double *slope_magnitude);
 int mb_fbtversion(int verbose, int *fbtversion);
-int mb_uselockfiles(int verbose, int *uselockfiles);
+int mb_uselockfiles(int verbose, bool *uselockfiles);
 int mb_fileiobuffer(int verbose, int *fileiobuffer);
 int mb_format_register(int verbose, int *format, void *mbio_ptr, int *error);
 int mb_format_info(int verbose, int *format, int *system, int *beams_bath_max, int *beams_amp_max, int *pixels_ss_max,
@@ -341,7 +344,7 @@ int mb_deall(int verbose, void *mbio_ptr, void **store_ptr, int *error);
 int mb_get_store(int verbose, void *mbio_ptr, void **store_ptr, int *error);
 int mb_dimensions(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbath, int *namp, int *nss, int *error);
 int mb_pingnumber(int verbose, void *mbio_ptr, unsigned int *pingnumber, int *error);
-int mb_segynumber(int verbose, void *mbio_ptr, int *line, int *shot, int *cdp, int *error);
+int mb_segynumber(int verbose, void *mbio_ptr, unsigned int *line, unsigned int *shot, unsigned int *cdp, int *error);
 int mb_beamwidths(int verbose, void *mbio_ptr, double *beamwidth_xtrack, double *beamwidth_ltrack, int *error);
 int mb_sonartype(int verbose, void *mbio_ptr, void *store_ptr, int *sonartype, int *error);
 int mb_sidescantype(int verbose, void *mbio_ptr, void *store_ptr, int *ss_type, int *error);
@@ -356,6 +359,10 @@ int mb_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, int time_i
                 double speed, double heading, int nbath, int namp, int nss, char *beamflag, double *bath, double *amp,
                 double *bathacrosstrack, double *bathalongtrack, double *ss, double *ssacrosstrack, double *ssalongtrack,
                 char *comment, int *error);
+int mb_extract_lonlat(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int time_i[7], double *time_d, double *navlon,
+               double *navlat, double *speed, double *heading, int *nbath, int *namp, int *nss, char *beamflag, double *bath,
+               double *amp, double *bathlon, double *bathlat, double *ss, double *sslon,
+               double *sslat, char *comment, int *error);
 int mb_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int time_i[7], double *time_d, double *navlon,
                 double *navlat, double *speed, double *heading, double *draft, double *roll, double *pitch, double *heave,
                 int *error);
@@ -576,14 +583,16 @@ int mb_absorption(int verbose, double frequency, double temperature, double sali
 int mb_potential_temperature(int verbose, double temperature, double salinity, double pressure, double *potential_temperature,
                              int *error);
 int mb_seabird_density(int verbose, double salinity, double temperature,
-					   double pressure, double *density, int *error);
+             double pressure, double *density, int *error);
 int mb_seabird_depth(int verbose, double pressure, double latitude, double *depth, int *error);
 int mb_seabird_salinity(int verbose, double conductivity, double temperature,
-						double pressure, double *salinity, int *error);
+            double pressure, double *salinity, int *error);
 int mb_seabird_soundspeed(int verbose, int algorithm, double salinity,
-						  double temperature, double pressure,
-						  double *soundspeed, int *error);
+              double temperature, double pressure,
+              double *soundspeed, int *error);
 
+int mb_mem_list_enable(int verbose, int *error);
+int mb_mem_list_disable(int verbose, int *error);
 int mb_mem_debug_on(int verbose, int *error);
 int mb_mem_debug_off(int verbose, int *error);
 int mb_malloc(int verbose, size_t size, void **ptr, int *error);

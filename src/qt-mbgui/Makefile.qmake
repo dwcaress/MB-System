@@ -17,7 +17,7 @@ CXX           = /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefau
 DEFINES       = -DMBGUI_LIBRARY -DQT_DEPRECATED_WARNINGS -DQT_NO_DEBUG -DQT_QUICK_LIB -DQT_GUI_LIB -DQT_QMLMODELS_LIB -DQT_QML_LIB -DQT_NETWORK_LIB -DQT_CORE_LIB
 CFLAGS        = -pipe -O2 -g $(EXPORT_ARCH_ARGS) -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk -mmacosx-version-min=10.13 -Wall -Wextra -fPIC $(DEFINES)
 CXXFLAGS      = -pipe -stdlib=libc++ -O2 -g -std=gnu++11 $(EXPORT_ARCH_ARGS) -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk -mmacosx-version-min=10.13 -Wall -Wextra -fPIC $(DEFINES)
-INCPATH       = -I. -I/usr/local/include/gmt -I/opt/X11/include -I../../../Qt/5.14.2/clang_64/lib/QtQuick.framework/Headers -I../../../Qt/5.14.2/clang_64/lib/QtGui.framework/Headers -I../../../Qt/5.14.2/clang_64/lib/QtQmlModels.framework/Headers -I../../../Qt/5.14.2/clang_64/lib/QtQml.framework/Headers -I../../../Qt/5.14.2/clang_64/lib/QtNetwork.framework/Headers -I../../../Qt/5.14.2/clang_64/lib/QtCore.framework/Headers -I. -I/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk/System/Library/Frameworks/OpenGL.framework/Headers -I/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk/System/Library/Frameworks/AGL.framework/Headers -I../../../Qt/5.14.2/clang_64/mkspecs/macx-clang -F/Users/caress/sandbox/Qt/5.14.2/clang_64/lib
+INCPATH       = -I. -I/usr/local/include/gmt -I../../../Qt/5.14.2/clang_64/lib/QtQuick.framework/Headers -I../../../Qt/5.14.2/clang_64/lib/QtGui.framework/Headers -I../../../Qt/5.14.2/clang_64/lib/QtQmlModels.framework/Headers -I../../../Qt/5.14.2/clang_64/lib/QtQml.framework/Headers -I../../../Qt/5.14.2/clang_64/lib/QtNetwork.framework/Headers -I../../../Qt/5.14.2/clang_64/lib/QtCore.framework/Headers -I. -I/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk/System/Library/Frameworks/OpenGL.framework/Headers -I/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk/System/Library/Frameworks/AGL.framework/Headers/ -I../../../Qt/5.14.2/clang_64/mkspecs/macx-clang -F/Users/caress/sandbox/Qt/5.14.2/clang_64/lib
 QMAKE         = /Users/caress/sandbox/Qt/5.14.2/clang_64/bin/qmake
 DEL_FILE      = rm -f
 CHK_DIR_EXISTS= test -d
@@ -40,7 +40,7 @@ DISTNAME      = mbgui1.0.0
 DISTDIR = /Users/caress/sandbox/MB-System/src/qt-mbgui/.tmp/mbgui1.0.0
 LINK          = /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang++
 LFLAGS        = -stdlib=libc++ -headerpad_max_install_names $(EXPORT_ARCH_ARGS) -Wl,-syslibroot,/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk -mmacosx-version-min=10.13 -Wl,-rpath,@executable_path/../Frameworks -Wl,-rpath,/Users/caress/sandbox/Qt/5.14.2/clang_64/lib -single_module -dynamiclib -compatibility_version	1.0 -current_version	1.0.0 -install_name	libmbgui.1.dylib
-LIBS          = $(SUBLIBS) -F/Users/caress/sandbox/Qt/5.14.2/clang_64/lib -L/usr/local/lib -lgmt -L/opt/X11/lib -lGL -lGLU -framework QtQuick -framework QtGui -framework AppKit -framework Metal -framework QtQmlModels -framework QtQml -framework QtNetwork -framework QtCore -framework DiskArbitration -framework IOKit -framework OpenGL -framework AGL   
+LIBS          = $(SUBLIBS) -F/Users/caress/sandbox/Qt/5.14.2/clang_64/lib -L/usr/local/lib -lgmt -lGL -lGLU -framework QtQuick -framework QtGui -framework AppKit -framework Metal -framework QtQmlModels -framework QtQml -framework QtNetwork -framework QtCore -framework DiskArbitration -framework IOKit -framework OpenGL -framework AGL   
 AR            = /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/ar cq
 RANLIB        = /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/ranlib -s
 SED           = sed
@@ -261,6 +261,7 @@ DIST          = glsl-shaders/phong.frag \
 		../../../Qt/5.14.2/clang_64/mkspecs/features/qt_config.prf \
 		../../../Qt/5.14.2/clang_64/mkspecs/macx-clang/qmake.conf \
 		../../../Qt/5.14.2/clang_64/mkspecs/features/spec_post.prf \
+		.qmake.stash \
 		../../../Qt/5.14.2/clang_64/mkspecs/features/exclusive_builds.prf \
 		../../../Qt/5.14.2/clang_64/mkspecs/features/mac/sdk.prf \
 		../../../Qt/5.14.2/clang_64/mkspecs/features/toolchain.prf \
@@ -520,6 +521,7 @@ Makefile.qmake: mbgui.pro ../../../Qt/5.14.2/clang_64/mkspecs/macx-clang/qmake.c
 		../../../Qt/5.14.2/clang_64/mkspecs/features/qt_config.prf \
 		../../../Qt/5.14.2/clang_64/mkspecs/macx-clang/qmake.conf \
 		../../../Qt/5.14.2/clang_64/mkspecs/features/spec_post.prf \
+		.qmake.stash \
 		../../../Qt/5.14.2/clang_64/mkspecs/features/exclusive_builds.prf \
 		../../../Qt/5.14.2/clang_64/mkspecs/features/mac/sdk.prf \
 		../../../Qt/5.14.2/clang_64/mkspecs/features/toolchain.prf \
@@ -735,6 +737,7 @@ Makefile.qmake: mbgui.pro ../../../Qt/5.14.2/clang_64/mkspecs/macx-clang/qmake.c
 ../../../Qt/5.14.2/clang_64/mkspecs/features/qt_config.prf:
 ../../../Qt/5.14.2/clang_64/mkspecs/macx-clang/qmake.conf:
 ../../../Qt/5.14.2/clang_64/mkspecs/features/spec_post.prf:
+.qmake.stash:
 ../../../Qt/5.14.2/clang_64/mkspecs/features/exclusive_builds.prf:
 ../../../Qt/5.14.2/clang_64/mkspecs/features/mac/sdk.prf:
 ../../../Qt/5.14.2/clang_64/mkspecs/features/toolchain.prf:
@@ -797,6 +800,7 @@ clean: compiler_clean
 distclean: clean 
 	-$(DEL_FILE) $(TARGET) 
 	-$(DEL_FILE) $(TARGET0) $(TARGET1) $(TARGET2) $(TARGETA)
+	-$(DEL_FILE) .qmake.stash
 	-$(DEL_FILE) Makefile.qmake
 
 
@@ -838,7 +842,7 @@ moc_Camera.cpp: Camera.h \
 		../../../Qt/5.14.2/clang_64/lib/QtCore.framework/Headers/qobject.h \
 		moc_predefs.h \
 		../../../Qt/5.14.2/clang_64/bin/moc
-	/Users/caress/sandbox/Qt/5.14.2/clang_64/bin/moc $(DEFINES) --include /Users/caress/sandbox/MB-System/src/qt-mbgui/moc_predefs.h -I/Users/caress/sandbox/Qt/5.14.2/clang_64/mkspecs/macx-clang -I/Users/caress/sandbox/MB-System/src/qt-mbgui -I/usr/local/include/gmt -I/opt/X11/include -I/Users/caress/sandbox/Qt/5.14.2/clang_64/lib/QtQuick.framework/Headers -I/Users/caress/sandbox/Qt/5.14.2/clang_64/lib/QtGui.framework/Headers -I/Users/caress/sandbox/Qt/5.14.2/clang_64/lib/QtQmlModels.framework/Headers -I/Users/caress/sandbox/Qt/5.14.2/clang_64/lib/QtQml.framework/Headers -I/Users/caress/sandbox/Qt/5.14.2/clang_64/lib/QtNetwork.framework/Headers -I/Users/caress/sandbox/Qt/5.14.2/clang_64/lib/QtCore.framework/Headers -I/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include/c++/v1 -I/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/11.0.3/include -I/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk/usr/include -I/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include -F/Users/caress/sandbox/Qt/5.14.2/clang_64/lib Camera.h -o moc_Camera.cpp
+	/Users/caress/sandbox/Qt/5.14.2/clang_64/bin/moc $(DEFINES) --include /Users/caress/sandbox/MB-System/src/qt-mbgui/moc_predefs.h -I/Users/caress/sandbox/Qt/5.14.2/clang_64/mkspecs/macx-clang -I/Users/caress/sandbox/MB-System/src/qt-mbgui -I/usr/local/include/gmt -I/Users/caress/sandbox/Qt/5.14.2/clang_64/lib/QtQuick.framework/Headers -I/Users/caress/sandbox/Qt/5.14.2/clang_64/lib/QtGui.framework/Headers -I/Users/caress/sandbox/Qt/5.14.2/clang_64/lib/QtQmlModels.framework/Headers -I/Users/caress/sandbox/Qt/5.14.2/clang_64/lib/QtQml.framework/Headers -I/Users/caress/sandbox/Qt/5.14.2/clang_64/lib/QtNetwork.framework/Headers -I/Users/caress/sandbox/Qt/5.14.2/clang_64/lib/QtCore.framework/Headers -I/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include/c++/v1 -I/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/11.0.3/include -I/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk/usr/include -I/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include -F/Users/caress/sandbox/Qt/5.14.2/clang_64/lib Camera.h -o moc_Camera.cpp
 
 moc_MBQuickItem.cpp: MBQuickItem.h \
 		../../../Qt/5.14.2/clang_64/lib/QtQuick.framework/Headers/QQuickItem \
@@ -846,9 +850,6 @@ moc_MBQuickItem.cpp: MBQuickItem.h \
 		../../../Qt/5.14.2/clang_64/lib/QtQml.framework/Headers/QQmlApplicationEngine \
 		../../../Qt/5.14.2/clang_64/lib/QtQml.framework/Headers/qqmlapplicationengine.h \
 		GmtGridSurface.h \
-		/opt/X11/include/GL/gl.h \
-		/opt/X11/include/GL/gl_mangle.h \
-		/opt/X11/include/GL/glext.h \
 		/usr/local/include/gmt/gmt.h \
 		/usr/local/include/gmt/declspec.h \
 		/usr/local/include/gmt/gmt_resources.h \
@@ -864,15 +865,12 @@ moc_MBQuickItem.cpp: MBQuickItem.h \
 		../../../Qt/5.14.2/clang_64/lib/QtGui.framework/Headers/qvector3d.h \
 		moc_predefs.h \
 		../../../Qt/5.14.2/clang_64/bin/moc
-	/Users/caress/sandbox/Qt/5.14.2/clang_64/bin/moc $(DEFINES) --include /Users/caress/sandbox/MB-System/src/qt-mbgui/moc_predefs.h -I/Users/caress/sandbox/Qt/5.14.2/clang_64/mkspecs/macx-clang -I/Users/caress/sandbox/MB-System/src/qt-mbgui -I/usr/local/include/gmt -I/opt/X11/include -I/Users/caress/sandbox/Qt/5.14.2/clang_64/lib/QtQuick.framework/Headers -I/Users/caress/sandbox/Qt/5.14.2/clang_64/lib/QtGui.framework/Headers -I/Users/caress/sandbox/Qt/5.14.2/clang_64/lib/QtQmlModels.framework/Headers -I/Users/caress/sandbox/Qt/5.14.2/clang_64/lib/QtQml.framework/Headers -I/Users/caress/sandbox/Qt/5.14.2/clang_64/lib/QtNetwork.framework/Headers -I/Users/caress/sandbox/Qt/5.14.2/clang_64/lib/QtCore.framework/Headers -I/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include/c++/v1 -I/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/11.0.3/include -I/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk/usr/include -I/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include -F/Users/caress/sandbox/Qt/5.14.2/clang_64/lib MBQuickItem.h -o moc_MBQuickItem.cpp
+	/Users/caress/sandbox/Qt/5.14.2/clang_64/bin/moc $(DEFINES) --include /Users/caress/sandbox/MB-System/src/qt-mbgui/moc_predefs.h -I/Users/caress/sandbox/Qt/5.14.2/clang_64/mkspecs/macx-clang -I/Users/caress/sandbox/MB-System/src/qt-mbgui -I/usr/local/include/gmt -I/Users/caress/sandbox/Qt/5.14.2/clang_64/lib/QtQuick.framework/Headers -I/Users/caress/sandbox/Qt/5.14.2/clang_64/lib/QtGui.framework/Headers -I/Users/caress/sandbox/Qt/5.14.2/clang_64/lib/QtQmlModels.framework/Headers -I/Users/caress/sandbox/Qt/5.14.2/clang_64/lib/QtQml.framework/Headers -I/Users/caress/sandbox/Qt/5.14.2/clang_64/lib/QtNetwork.framework/Headers -I/Users/caress/sandbox/Qt/5.14.2/clang_64/lib/QtCore.framework/Headers -I/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include/c++/v1 -I/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/11.0.3/include -I/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk/usr/include -I/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include -F/Users/caress/sandbox/Qt/5.14.2/clang_64/lib MBQuickItem.h -o moc_MBQuickItem.cpp
 
 moc_MBQuickView.cpp: MBQuickView.h \
 		../../../Qt/5.14.2/clang_64/lib/QtQuick.framework/Headers/QQuickView \
 		../../../Qt/5.14.2/clang_64/lib/QtQuick.framework/Headers/qquickview.h \
 		GmtGridSurface.h \
-		/opt/X11/include/GL/gl.h \
-		/opt/X11/include/GL/gl_mangle.h \
-		/opt/X11/include/GL/glext.h \
 		/usr/local/include/gmt/gmt.h \
 		/usr/local/include/gmt/declspec.h \
 		/usr/local/include/gmt/gmt_resources.h \
@@ -888,7 +886,7 @@ moc_MBQuickView.cpp: MBQuickView.h \
 		../../../Qt/5.14.2/clang_64/lib/QtGui.framework/Headers/qvector3d.h \
 		moc_predefs.h \
 		../../../Qt/5.14.2/clang_64/bin/moc
-	/Users/caress/sandbox/Qt/5.14.2/clang_64/bin/moc $(DEFINES) --include /Users/caress/sandbox/MB-System/src/qt-mbgui/moc_predefs.h -I/Users/caress/sandbox/Qt/5.14.2/clang_64/mkspecs/macx-clang -I/Users/caress/sandbox/MB-System/src/qt-mbgui -I/usr/local/include/gmt -I/opt/X11/include -I/Users/caress/sandbox/Qt/5.14.2/clang_64/lib/QtQuick.framework/Headers -I/Users/caress/sandbox/Qt/5.14.2/clang_64/lib/QtGui.framework/Headers -I/Users/caress/sandbox/Qt/5.14.2/clang_64/lib/QtQmlModels.framework/Headers -I/Users/caress/sandbox/Qt/5.14.2/clang_64/lib/QtQml.framework/Headers -I/Users/caress/sandbox/Qt/5.14.2/clang_64/lib/QtNetwork.framework/Headers -I/Users/caress/sandbox/Qt/5.14.2/clang_64/lib/QtCore.framework/Headers -I/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include/c++/v1 -I/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/11.0.3/include -I/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk/usr/include -I/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include -F/Users/caress/sandbox/Qt/5.14.2/clang_64/lib MBQuickView.h -o moc_MBQuickView.cpp
+	/Users/caress/sandbox/Qt/5.14.2/clang_64/bin/moc $(DEFINES) --include /Users/caress/sandbox/MB-System/src/qt-mbgui/moc_predefs.h -I/Users/caress/sandbox/Qt/5.14.2/clang_64/mkspecs/macx-clang -I/Users/caress/sandbox/MB-System/src/qt-mbgui -I/usr/local/include/gmt -I/Users/caress/sandbox/Qt/5.14.2/clang_64/lib/QtQuick.framework/Headers -I/Users/caress/sandbox/Qt/5.14.2/clang_64/lib/QtGui.framework/Headers -I/Users/caress/sandbox/Qt/5.14.2/clang_64/lib/QtQmlModels.framework/Headers -I/Users/caress/sandbox/Qt/5.14.2/clang_64/lib/QtQml.framework/Headers -I/Users/caress/sandbox/Qt/5.14.2/clang_64/lib/QtNetwork.framework/Headers -I/Users/caress/sandbox/Qt/5.14.2/clang_64/lib/QtCore.framework/Headers -I/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include/c++/v1 -I/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/11.0.3/include -I/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk/usr/include -I/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include -F/Users/caress/sandbox/Qt/5.14.2/clang_64/lib MBQuickView.h -o moc_MBQuickView.cpp
 
 moc_SurfaceRenderer.cpp: SurfaceRenderer.h \
 		../../../Qt/5.14.2/clang_64/lib/QtCore.framework/Headers/QObject \
@@ -906,7 +904,7 @@ moc_SurfaceRenderer.cpp: SurfaceRenderer.h \
 		Point.h \
 		moc_predefs.h \
 		../../../Qt/5.14.2/clang_64/bin/moc
-	/Users/caress/sandbox/Qt/5.14.2/clang_64/bin/moc $(DEFINES) --include /Users/caress/sandbox/MB-System/src/qt-mbgui/moc_predefs.h -I/Users/caress/sandbox/Qt/5.14.2/clang_64/mkspecs/macx-clang -I/Users/caress/sandbox/MB-System/src/qt-mbgui -I/usr/local/include/gmt -I/opt/X11/include -I/Users/caress/sandbox/Qt/5.14.2/clang_64/lib/QtQuick.framework/Headers -I/Users/caress/sandbox/Qt/5.14.2/clang_64/lib/QtGui.framework/Headers -I/Users/caress/sandbox/Qt/5.14.2/clang_64/lib/QtQmlModels.framework/Headers -I/Users/caress/sandbox/Qt/5.14.2/clang_64/lib/QtQml.framework/Headers -I/Users/caress/sandbox/Qt/5.14.2/clang_64/lib/QtNetwork.framework/Headers -I/Users/caress/sandbox/Qt/5.14.2/clang_64/lib/QtCore.framework/Headers -I/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include/c++/v1 -I/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/11.0.3/include -I/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk/usr/include -I/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include -F/Users/caress/sandbox/Qt/5.14.2/clang_64/lib SurfaceRenderer.h -o moc_SurfaceRenderer.cpp
+	/Users/caress/sandbox/Qt/5.14.2/clang_64/bin/moc $(DEFINES) --include /Users/caress/sandbox/MB-System/src/qt-mbgui/moc_predefs.h -I/Users/caress/sandbox/Qt/5.14.2/clang_64/mkspecs/macx-clang -I/Users/caress/sandbox/MB-System/src/qt-mbgui -I/usr/local/include/gmt -I/Users/caress/sandbox/Qt/5.14.2/clang_64/lib/QtQuick.framework/Headers -I/Users/caress/sandbox/Qt/5.14.2/clang_64/lib/QtGui.framework/Headers -I/Users/caress/sandbox/Qt/5.14.2/clang_64/lib/QtQmlModels.framework/Headers -I/Users/caress/sandbox/Qt/5.14.2/clang_64/lib/QtQml.framework/Headers -I/Users/caress/sandbox/Qt/5.14.2/clang_64/lib/QtNetwork.framework/Headers -I/Users/caress/sandbox/Qt/5.14.2/clang_64/lib/QtCore.framework/Headers -I/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include/c++/v1 -I/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/11.0.3/include -I/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk/usr/include -I/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include -F/Users/caress/sandbox/Qt/5.14.2/clang_64/lib SurfaceRenderer.h -o moc_SurfaceRenderer.cpp
 
 compiler_moc_objc_header_make_all:
 compiler_moc_objc_header_clean:
@@ -947,9 +945,6 @@ GmtGridSurface.o: GmtGridSurface.cpp ../../../Qt/5.14.2/clang_64/lib/QtCore.fram
 		../../../Qt/5.14.2/clang_64/lib/QtCore.framework/Headers/QDebug \
 		../../../Qt/5.14.2/clang_64/lib/QtCore.framework/Headers/qdebug.h \
 		GmtGridSurface.h \
-		/opt/X11/include/GL/gl.h \
-		/opt/X11/include/GL/gl_mangle.h \
-		/opt/X11/include/GL/glext.h \
 		/usr/local/include/gmt/gmt.h \
 		/usr/local/include/gmt/declspec.h \
 		/usr/local/include/gmt/gmt_resources.h \
@@ -984,9 +979,6 @@ MBQuickItem.o: MBQuickItem.cpp ../../../Qt/5.14.2/clang_64/lib/QtGui.framework/H
 		../../../Qt/5.14.2/clang_64/lib/QtQml.framework/Headers/QQmlApplicationEngine \
 		../../../Qt/5.14.2/clang_64/lib/QtQml.framework/Headers/qqmlapplicationengine.h \
 		GmtGridSurface.h \
-		/opt/X11/include/GL/gl.h \
-		/opt/X11/include/GL/gl_mangle.h \
-		/opt/X11/include/GL/glext.h \
 		/usr/local/include/gmt/gmt.h \
 		/usr/local/include/gmt/declspec.h \
 		/usr/local/include/gmt/gmt_resources.h \
@@ -1020,9 +1012,6 @@ MBQuickView.o: MBQuickView.cpp ../../../Qt/5.14.2/clang_64/lib/QtGui.framework/H
 		../../../Qt/5.14.2/clang_64/lib/QtQuick.framework/Headers/QQuickView \
 		../../../Qt/5.14.2/clang_64/lib/QtQuick.framework/Headers/qquickview.h \
 		GmtGridSurface.h \
-		/opt/X11/include/GL/gl.h \
-		/opt/X11/include/GL/gl_mangle.h \
-		/opt/X11/include/GL/glext.h \
 		/usr/local/include/gmt/gmt.h \
 		/usr/local/include/gmt/declspec.h \
 		/usr/local/include/gmt/gmt_resources.h \
@@ -1048,10 +1037,7 @@ MBQuickView.o: MBQuickView.cpp ../../../Qt/5.14.2/clang_64/lib/QtGui.framework/H
 		../../../Qt/5.14.2/clang_64/lib/QtGui.framework/Headers/qopenglshaderprogram.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o MBQuickView.o MBQuickView.cpp
 
-Surface.o: Surface.cpp /opt/X11/include/GL/gl.h \
-		/opt/X11/include/GL/gl_mangle.h \
-		/opt/X11/include/GL/glext.h \
-		Surface.h \
+Surface.o: Surface.cpp Surface.h \
 		Vertex.h \
 		../../../Qt/5.14.2/clang_64/lib/QtCore.framework/Headers/QtGlobal \
 		../../../Qt/5.14.2/clang_64/lib/QtCore.framework/Headers/qglobal.h \

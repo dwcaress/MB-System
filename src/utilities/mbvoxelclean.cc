@@ -110,7 +110,9 @@ constexpr char usage_message[] =
     "\t--range-minimum=value\n"
     "\t--range-maximum=value]\n"
     "\t--acrosstrack-minimum=value\n"
-    "\t--acrosstrack-maximum=value]";
+    "\t--acrosstrack-maximum=value\n"
+    "\t--amplitude-minimum=value\n"
+    "\t--amplitude-maximum=value]";
 
 /*--------------------------------------------------------------------*/
 
@@ -166,6 +168,10 @@ int main(int argc, char **argv) {
 	double acrosstrack_minimum = 0.0;
 	bool apply_acrosstrack_maximum = false;
 	double acrosstrack_maximum = 0.0;
+	bool apply_amplitude_minimum = false;
+	double amplitude_minimum = 0.0;
+	bool apply_amplitude_maximum = false;
+	double amplitude_maximum = 0.0;
 
 	/* output stream for basic stuff (stdout if verbose <= 1, stderr if verbose > 1) */
 	FILE *outfp;
@@ -187,6 +193,8 @@ int main(int argc, char **argv) {
 		    {"range-maximum", required_argument, nullptr, 0},
 		    {"acrosstrack-minimum", required_argument, nullptr, 0},
 		    {"acrosstrack-maximum", required_argument, nullptr, 0},
+		    {"amplitude-minimum", required_argument, nullptr, 0},
+		    {"amplitude-maximum", required_argument, nullptr, 0},
 		    {nullptr, 0, nullptr, 0}};
 		int option_index;
 		bool errflg = false;
@@ -255,6 +263,14 @@ int main(int argc, char **argv) {
 					apply_acrosstrack_maximum = true;
 					sscanf(optarg, "%lf", &acrosstrack_maximum);
 				}
+				else if (strcmp("amplitude-minimum", options[option_index].name) == 0) {
+					apply_amplitude_minimum = true;
+					sscanf(optarg, "%lf", &amplitude_minimum);
+				}
+				else if (strcmp("amplitude-maximum", options[option_index].name) == 0) {
+					apply_amplitude_maximum = true;
+					sscanf(optarg, "%lf", &amplitude_maximum);
+				}
 
 				break;
 
@@ -283,41 +299,45 @@ int main(int argc, char **argv) {
 			fprintf(outfp, "\ndbg2  Program <%s>\n", program_name);
 			fprintf(outfp, "dbg2  MB-system Version %s\n", MB_VERSION);
 			fprintf(outfp, "dbg2  Control Parameters:\n");
-			fprintf(outfp, "dbg2       verbose:	       %d\n", verbose);
-			fprintf(outfp, "dbg2       help:		  %d\n", help);
-			fprintf(outfp, "dbg2       defaultpings:	  %d\n", defaultpings);
-			fprintf(outfp, "dbg2       lonflip:	       %d\n", lonflip);
-			fprintf(outfp, "dbg2       btime_i[0]:	    %d\n", btime_i[0]);
-			fprintf(outfp, "dbg2       btime_i[1]:	    %d\n", btime_i[1]);
-			fprintf(outfp, "dbg2       btime_i[2]:	    %d\n", btime_i[2]);
-			fprintf(outfp, "dbg2       btime_i[3]:	    %d\n", btime_i[3]);
-			fprintf(outfp, "dbg2       btime_i[4]:	    %d\n", btime_i[4]);
-			fprintf(outfp, "dbg2       btime_i[5]:	    %d\n", btime_i[5]);
-			fprintf(outfp, "dbg2       btime_i[6]:	    %d\n", btime_i[6]);
-			fprintf(outfp, "dbg2       etime_i[0]:	    %d\n", etime_i[0]);
-			fprintf(outfp, "dbg2       etime_i[1]:	    %d\n", etime_i[1]);
-			fprintf(outfp, "dbg2       etime_i[2]:	    %d\n", etime_i[2]);
-			fprintf(outfp, "dbg2       etime_i[3]:	    %d\n", etime_i[3]);
-			fprintf(outfp, "dbg2       etime_i[4]:	    %d\n", etime_i[4]);
-			fprintf(outfp, "dbg2       etime_i[5]:	    %d\n", etime_i[5]);
-			fprintf(outfp, "dbg2       etime_i[6]:	    %d\n", etime_i[6]);
-			fprintf(outfp, "dbg2       speedmin:	      %f\n", speedmin);
-			fprintf(outfp, "dbg2       timegap:	       %f\n", timegap);
-			fprintf(outfp, "dbg2       file:		  %s\n", read_file);
-			fprintf(outfp, "dbg2       format:		%d\n", format);
-			fprintf(outfp, "dbg2       voxel_size_xy:	 %f\n", voxel_size_xy);
-			fprintf(outfp, "dbg2       voxel_size_z:	  %f\n", voxel_size_z);
-			fprintf(outfp, "dbg2       occupy_threshold:      %d\n", occupy_threshold);
-			fprintf(outfp, "dbg2       empty_mode:	    %d\n", empty_mode);
-			fprintf(outfp, "dbg2       occupied_mode:	 %d\n", occupied_mode);
-			fprintf(outfp, "dbg2       apply_range_minimum:   %d\n", apply_range_minimum);
-			fprintf(outfp, "dbg2       range_minimum:	 %f\n", range_minimum);
-			fprintf(outfp, "dbg2       apply_range_maximum:   %d\n", apply_range_maximum);
-			fprintf(outfp, "dbg2       range_maximum:	 %f\n", range_maximum);
+			fprintf(outfp, "dbg2       verbose:	                    %d\n", verbose);
+			fprintf(outfp, "dbg2       help:		                    %d\n", help);
+			fprintf(outfp, "dbg2       defaultpings:	              %d\n", defaultpings);
+			fprintf(outfp, "dbg2       lonflip:	                    %d\n", lonflip);
+			fprintf(outfp, "dbg2       btime_i[0]:	                %d\n", btime_i[0]);
+			fprintf(outfp, "dbg2       btime_i[1]:	                %d\n", btime_i[1]);
+			fprintf(outfp, "dbg2       btime_i[2]:	                %d\n", btime_i[2]);
+			fprintf(outfp, "dbg2       btime_i[3]:	                %d\n", btime_i[3]);
+			fprintf(outfp, "dbg2       btime_i[4]:	                %d\n", btime_i[4]);
+			fprintf(outfp, "dbg2       btime_i[5]:	                %d\n", btime_i[5]);
+			fprintf(outfp, "dbg2       btime_i[6]:	                %d\n", btime_i[6]);
+			fprintf(outfp, "dbg2       etime_i[0]:	                %d\n", etime_i[0]);
+			fprintf(outfp, "dbg2       etime_i[1]:	                %d\n", etime_i[1]);
+			fprintf(outfp, "dbg2       etime_i[2]:	                %d\n", etime_i[2]);
+			fprintf(outfp, "dbg2       etime_i[3]:	                %d\n", etime_i[3]);
+			fprintf(outfp, "dbg2       etime_i[4]:	                %d\n", etime_i[4]);
+			fprintf(outfp, "dbg2       etime_i[5]:	                %d\n", etime_i[5]);
+			fprintf(outfp, "dbg2       etime_i[6]:	                %d\n", etime_i[6]);
+			fprintf(outfp, "dbg2       speedmin:	                  %f\n", speedmin);
+			fprintf(outfp, "dbg2       timegap:	                    %f\n", timegap);
+			fprintf(outfp, "dbg2       file:		                    %s\n", read_file);
+			fprintf(outfp, "dbg2       format:                      %d\n", format);
+			fprintf(outfp, "dbg2       voxel_size_xy:	              %f\n", voxel_size_xy);
+			fprintf(outfp, "dbg2       voxel_size_z:	              %f\n", voxel_size_z);
+			fprintf(outfp, "dbg2       occupy_threshold:            %d\n", occupy_threshold);
+			fprintf(outfp, "dbg2       empty_mode:	                %d\n", empty_mode);
+			fprintf(outfp, "dbg2       occupied_mode:	              %d\n", occupied_mode);
+			fprintf(outfp, "dbg2       apply_range_minimum:         %d\n", apply_range_minimum);
+			fprintf(outfp, "dbg2       range_minimum:	              %f\n", range_minimum);
+			fprintf(outfp, "dbg2       apply_range_maximum:         %d\n", apply_range_maximum);
+			fprintf(outfp, "dbg2       range_maximum:	              %f\n", range_maximum);
 			fprintf(outfp, "dbg2       apply_acrosstrack_minimum:   %d\n", apply_acrosstrack_minimum);
-			fprintf(outfp, "dbg2       acrosstrack_minimum:	 %f\n", acrosstrack_minimum);
+			fprintf(outfp, "dbg2       acrosstrack_minimum:	        %f\n", acrosstrack_minimum);
 			fprintf(outfp, "dbg2       apply_acrosstrack_maximum:   %d\n", apply_acrosstrack_maximum);
-			fprintf(outfp, "dbg2       acrosstrack_maximum:	 %f\n", acrosstrack_maximum);
+			fprintf(outfp, "dbg2       acrosstrack_maximum:	        %f\n", acrosstrack_maximum);
+			fprintf(outfp, "dbg2       apply_amplitude_minimum:     %d\n", apply_amplitude_minimum);
+			fprintf(outfp, "dbg2       amplitude_minimum:	          %f\n", amplitude_minimum);
+			fprintf(outfp, "dbg2       apply_amplitude_maximum:     %d\n", apply_amplitude_maximum);
+			fprintf(outfp, "dbg2       amplitude_maximum:	          %f\n", amplitude_maximum);
 		}
 
 		if (help) {
@@ -329,7 +349,7 @@ int main(int argc, char **argv) {
 
 	int error = MB_ERROR_NO_ERROR;
 
-	int uselockfiles = true;  // TODO(schwehr): mb_uselockfiles should use a bool
+	bool uselockfiles = true;
 	mb_uselockfiles(verbose, &uselockfiles);
 
 	/* get format if required */
@@ -417,6 +437,8 @@ int main(int argc, char **argv) {
 	int n_maxrange_flag_tot = 0;
 	int n_minacrosstrack_flag_tot = 0;
 	int n_maxacrosstrack_flag_tot = 0;
+	int n_minamplitude_flag_tot = 0;
+	int n_maxamplitude_flag_tot = 0;
 
 	bool esffile_open = false;
 	bool locked = false;
@@ -600,6 +622,8 @@ int main(int argc, char **argv) {
 			int n_maxrange_flag = 0;
 			int n_minacrosstrack_flag = 0;
 			int n_maxacrosstrack_flag = 0;
+			int n_minamplitude_flag = 0;
+			int n_maxamplitude_flag = 0;
 
 			/* allocate memory for mb_get() data arrays */
 			if (error == MB_ERROR_NO_ERROR)
@@ -795,6 +819,29 @@ int main(int argc, char **argv) {
     								    j + pings[n_pings].multiplicity * MB_ESF_MULTIPLICITY_FACTOR,
     								    action, &error);
     								n_maxacrosstrack_flag++;
+                  }
+                }
+              }
+
+              // apply amplitude filter here where amplitude values are available
+              // = note that a density unflag setting could undo flags defined here
+              if (apply_amplitude_minimum || apply_amplitude_maximum) {
+                if (mb_beam_ok(pings[n_pings].beamflag[j])) {
+                  if (apply_amplitude_minimum && amp[j] < amplitude_minimum) {
+    								pings[n_pings].beamflag[j] = MB_FLAG_FLAG + MB_FLAG_FILTER;
+    								const int action = MBP_EDIT_FILTER;
+    								mb_esf_save(verbose, &esf, pings[n_pings].time_d,
+    								    j + pings[n_pings].multiplicity * MB_ESF_MULTIPLICITY_FACTOR,
+    								    action, &error);
+    								n_minamplitude_flag++;
+                  }
+                  if (apply_amplitude_maximum && amp[j] > amplitude_maximum) {
+    								pings[n_pings].beamflag[j] = MB_FLAG_FLAG + MB_FLAG_FILTER;
+    								const int action = MBP_EDIT_FILTER;
+    								mb_esf_save(verbose, &esf, pings[n_pings].time_d,
+    								    j + pings[n_pings].multiplicity * MB_ESF_MULTIPLICITY_FACTOR,
+    								    action, &error);
+    								n_maxamplitude_flag++;
                   }
                 }
               }
@@ -1019,6 +1066,8 @@ int main(int argc, char **argv) {
 			n_maxrange_flag_tot += n_maxrange_flag;
 			n_minacrosstrack_flag_tot += n_minacrosstrack_flag;
 			n_maxacrosstrack_flag_tot += n_maxacrosstrack_flag;
+			n_minamplitude_flag_tot += n_minamplitude_flag;
+			n_maxamplitude_flag_tot += n_maxamplitude_flag;
 
 			/* give the statistics */
 			if (verbose >= 1) {
@@ -1037,6 +1086,8 @@ int main(int argc, char **argv) {
 				fprintf(stderr, "%7d beams flagged by maximum range filter\n", n_maxrange_flag);
 				fprintf(stderr, "%7d beams flagged by minimum acrosstrack filter\n", n_minacrosstrack_flag);
 				fprintf(stderr, "%7d beams flagged by maximum acrosstrack filter\n", n_maxacrosstrack_flag);
+				fprintf(stderr, "%7d beams flagged by minimum amplitude filter\n", n_minamplitude_flag);
+				fprintf(stderr, "%7d beams flagged by maximum amplitude filter\n", n_maxamplitude_flag);
 			}
 		}
 
@@ -1070,8 +1121,10 @@ int main(int argc, char **argv) {
 		fprintf(stderr, "%d total beams unflagged by density filter\n", n_density_unflag_tot);
 		fprintf(stderr, "%d total beams flagged by minimum range filter\n", n_minrange_flag_tot);
 		fprintf(stderr, "%d total beams flagged by maximum range filter\n", n_maxrange_flag_tot);
-		fprintf(stderr, "%d total beams flagged by minimum acrosstrack filter\n", n_minrange_flag_tot);
-		fprintf(stderr, "%d total beams flagged by maximum acrosstrack filter\n", n_maxrange_flag_tot);
+		fprintf(stderr, "%d total beams flagged by minimum acrosstrack filter\n", n_minacrosstrack_flag_tot);
+		fprintf(stderr, "%d total beams flagged by maximum acrosstrack filter\n", n_maxacrosstrack_flag_tot);
+		fprintf(stderr, "%d total beams flagged by minimum amplitude filter\n", n_minamplitude_flag_tot);
+		fprintf(stderr, "%d total beams flagged by maximum amplitude filter\n", n_maxamplitude_flag_tot);
 	}
 
 	for (int i = 0; i<npings_alloc; i++) {
