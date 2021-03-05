@@ -132,14 +132,24 @@ setModifiedWeighting(const int use)
 			break;
   }
 
-  int i;
+  // RGH BUGFIX: numFilters is set to 2 by default, but no filters are
+  // instantiated until right here. currentNF will often == 2 when there
+  // is actually only one filter in the array.
+  // Temp solution: rather than iterate over currentNF filters (2),
+  // iterate over the actual size of the array (1).
+  int i, realNF = (int)(sizeof(bfLogs)/sizeof(bfLogs[0]));
 	if (bfLogs)
  	{
-	  for (i=0; i < currentNF;  i++)
+     logs(TL_OMASK(TL_TNAV_BANK_FILTER, TL_LOG),"TNavBF::deleting %d logs\n",
+     	  currentNF);
+     // iterate over the actual size of the array
+	  for (i=0; i < realNF;  i++)
 	  {
 			if (bfLogs[i]) delete bfLogs[i];
+			bfLogs[i] = NULL;
 	  }
-	  delete bfLogs;
+	  delete [] bfLogs;
+	  bfLogs = NULL;
 	}
 
   bfLogs = new TNavPFLog*[numFilters];
