@@ -10,13 +10,20 @@
 
 #include <stdio.h>
 #include <libconfig.h++>
-#include <lcmMessages/DataVectors.hpp>
+
+#include <lcm/lcm-cpp.hpp>
+#include "TethysLcmTypes/LrauvLcmMessage.hpp"
+#include "LcmMessageReader.h"
+#include "LcmMessageWriter.h"
+
 #include "structDefs.h"
 #include "TerrainNav.h"
 #include "TNavConfig.h"
 
 using namespace std;
 using namespace libconfig;
+using namespace TethysLcmTypes;
+using namespace lrauv_lcm_tools;
 
 #define  LCMTRN_CONFIG_ENV         "TRN_DATAFILES"
 #define  LCMTRN_DEFAULT_CONFIG     "lcm-trn.cfg"
@@ -50,9 +57,10 @@ typedef struct lcmconfig_
     const char *dvl, *xvel, *yvel, *zvel, *beam1, *beam2, *beam3, *beam4, *valid;
     const char *nav, *lat, *lon;
     const char *depth, *veh_depth, *pressure;
-    const char *trn, *mle, *mmse, *var, *reinits, *filter;
-    const char *cmd;
+    const char *trn, *mle, *mmse, *var, *reinits, *filter, *updatetime;
+    const char *cmd, *reinit, *estimate;
 } LcmConfig;
+
 typedef struct trnconfig_
 {
     int utm_zone;
@@ -63,7 +71,7 @@ typedef struct trnconfig_
 } TrnConfig;
 
 
-class LcmTrn 
+class LcmTrn
 {
   public:
 
@@ -80,28 +88,6 @@ class LcmTrn
     LcmConfig* getLcmConfig() { return &_lcmc; }
     TrnConfig* getTrnConfig() { return &_trnc; }
 
-    //const lcmMessages::FloatVector* getVector(const lcmMessages::DataVectors* msg,
-      //                                        std::string name);
-
-    // TODO: Flesh-out these functions
-    float  getVectorVal(std::vector<lcmMessages::FloatVector> v,
-                                               std::string name);
-
-    const lcmMessages::FloatVector*  getVector(std::vector<lcmMessages::FloatVector> v,
-                                               std::string name);
-
-    int getVector(std::vector<lcmMessages::IntVector> iv,
-                                               std::string name);
-
-    //const lcmMessages::IntVector*    getVector(std::vector<lcmMessages::IntVector> v,
-      //                                         std::string name);
-
-    const lcmMessages::DoubleVector* getVector(std::vector<lcmMessages::DoubleVector> v,
-                                               std::string name);
-
-    const lcmMessages::StringVector* getVector(std::vector<lcmMessages::StringVector> v,
-                                               std::string name);
-
 
   protected:
 
@@ -117,37 +103,32 @@ class LcmTrn
     void initLcm();
     bool verifyLcmConfig();
     void cleanLcm();
+    int  handleMessages();
+    void publishEstimates();
 
     void handleAhrs(const lcm::ReceiveBuffer* rbuf,
-                    const std::string& chan, 
-                    const lcmMessages::DataVectors* msg);
+                    const std::string& chan,
+                    const LrauvLcmMessage* msg);
     void handleDvl (const lcm::ReceiveBuffer* rbuf,
-                    const std::string& chan, 
-                    const lcmMessages::DataVectors* msg);
+                    const std::string& chan,
+                    const LrauvLcmMessage* msg);
     void handleDepth(const lcm::ReceiveBuffer* rbuf,
-                    const std::string& chan, 
-                    const lcmMessages::DataVectors* msg);
+                    const std::string& chan,
+                    const LrauvLcmMessage* msg);
     void handleCmd (const lcm::ReceiveBuffer* rbuf,
-                    const std::string& chan, 
-                    const lcmMessages::DataVectors* msg);
+                    const std::string& chan,
+                    const LrauvLcmMessage* msg);
     void handleNav (const lcm::ReceiveBuffer* rbuf,
-                    const std::string& chan, 
-                    const lcmMessages::DataVectors* msg);
+                    const std::string& chan,
+                    const LrauvLcmMessage* msg);
 
     bool time2Update();
     bool updateTrn();
 
-    lcmMessages::DataVectors _trnstate;
-    lcmMessages::FloatVector *mlev;
-    lcmMessages::FloatVector *mmsev;
-    lcmMessages::FloatVector *varv;
-    lcmMessages::IntVector   *reinitv;
-    lcmMessages::IntVector   *filterv;
-
     int64_t getTimeMillisec();
 
     // Config items
-    const char* _configfile;
+    const char *_configfile;
     Config  *_cfg;
 
     int _lcmtimeout;
@@ -164,9 +145,13 @@ class LcmTrn
     int _filterstate, _numreinits;
     int64_t _seqNo;
 
-    int64_t  _lastUpdateMillisec;
+    double  _lastUpdateTimestamp;
 
     bool _good;
+
+    LcmMessageReader _msg_reader;
+    LcmMessageWriter<std::string> _msg_writer;
+
 };
 
 }
