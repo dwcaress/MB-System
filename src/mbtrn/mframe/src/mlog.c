@@ -65,6 +65,7 @@ GNU General Public License for more details
 #include "mlog.h"
 #include "mfile.h"
 #include "mthread.h"
+#include "medebug.h"
 
 /////////////////////////
 // Macros
@@ -1110,6 +1111,7 @@ int mlog_delete(mlog_id_t id)
     int retval=-1;
     
     mlog_list_entry_t *plist = s_log_list;
+
     if (NULL != plist){
         mlog_list_entry_t *pbefore=NULL;
         mlog_list_entry_t *pafter=plist->next;
@@ -1136,7 +1138,8 @@ int mlog_delete(mlog_id_t id)
             pbefore = plist;
             plist   = plist->next;
             pafter  = plist->next;
-        }while (NULL != plist->next);
+
+        }while (NULL != plist);
         
     }// else list is NULL
    
