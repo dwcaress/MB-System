@@ -23,6 +23,7 @@ Distributions that do not include "beta" in the tag name correspond to the major
 announced releases. The source distributions associated with all releases, major
 or beta, are equally accessible as tarballs through the Github interface.
 
+- Version 5.7.9beta05    March 8, 2021
 - Version 5.7.9beta04    February 21, 2021
 - Version 5.7.9beta03    February 7, 2021
 - Version 5.7.9beta02    January 27, 2021
@@ -383,6 +384,27 @@ or beta, are equally accessible as tarballs through the Github interface.
 --
 ### MB-System Version 5.7 Release Notes:
 --
+
+#### 5.7.9beta05 (March 8, 2021)
+
+Mbauvloglist: Added available output field of speed calculated from the velocity
+vector in the kearfott.log log file, with tag calcKSpeed. Also added new -C option:
+in the case that navigation is being merged from an external file specified with
+the -N option, the -C option suppresses output of records with timestamps from
+before or after the time bounds of the navigation data. The default remains to
+output those records with zero values for the merged navigation outside the time
+bounds.
+
+General: Changed code that deletes temporary files from using a system()
+call to using the stdio function remove(). Affects src/mbio/mb_process.c,
+src/utilities/mbdatalist.cc, and src/mbvelocitytool/mbvelocity_prog.c.
+
+TRN: Updates to src/mbtrn, src/mbtrnav, src/mbtrnutils from Kent Headley.
+
+Mbm_grdplot, mbm_3dgrdplot, mbm_grdtiff, mbm_grdinfo: Changed " -r " tests for
+file readability to " -e " tests for file existence. This is to accommodate
+filesystems that use ACL rather than old style unix file modes - the old stat
+based readability test in Perl fails on ACL filesystems.
 
 #### 5.7.9beta04 (February 21, 2021)
 

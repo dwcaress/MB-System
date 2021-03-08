@@ -7,6 +7,10 @@ MBTNAV_INC=-I${top_builddir}/src/mbtrnav/terrain-nav -I${top_builddir}/src/mbtrn
 MBTNAV_OPT=-DWITH_MBTNAV
 endif
 
+if BUILD_MOTIF
+LIBMBXGR = $(top_builddir)/src/mbaux/libmbxgr.la
+endif
+
 AM_CFLAGS = ${libgmt_CFLAGS} ${libnetcdf_CFLAGS}
 
 # add -DMBTRN_VER="<version>" to override version defined in mbtrn.h
@@ -24,11 +28,12 @@ AM_CPPFLAGS = -g -O0 -I${top_srcdir}/src/mbtrn/r7kr -I${top_srcdir}/src/mbtrn/ut
 bin_PROGRAMS =  mbtrnpp mbgrd2octree
 
 mbtrnpp_SOURCES = mbtrnpp.c
+
 mbtrnpp_LDADD =  $(top_builddir)/src/mbio/libmbio.la \
-  $(top_builddir)/src/mbaux/libmbaux.la \
-  $(top_builddir)/src/mbaux/libmbxgr.la \
-  ${libgmt_LIBS} ${libnetcdf_LIBS} ${libproj_LIBS} \
-  $(top_builddir)/src/mbtrn/libr7kr.la $(TRNWLIBS) $(LIBM)
+	$(top_builddir)/src/mbaux/libmbaux.la \
+	$(LIBMBXGR) \
+	${libgmt_LIBS} ${libnetcdf_LIBS} ${libproj_LIBS} \
+	$(top_builddir)/src/mbtrn/libr7kr.la $(TRNWLIBS) $(LIBM)
 
 mbgrd2octree_SOURCES = mbgrd2octree.cc
 mbgrd2octree_LDADD =  \

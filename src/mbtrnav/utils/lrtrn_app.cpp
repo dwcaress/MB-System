@@ -9,9 +9,6 @@
 
 
 #include <stdio.h>
-#include <lcm/lcm-cpp.hpp>
-#include <lcmMessages/DataVectors.hpp>
-
 #include "LcmTrn.h"
 
 using namespace lcmTrn;
@@ -48,7 +45,7 @@ int main(int argc, char** argv)
   if (argc == 1)
     configfile = getDefaultConfig();
   else if (argc == 2)
-    configfile = strdup(argv[1]);
+    configfile = argv[1];
   else
     usage();
 
@@ -58,17 +55,21 @@ int main(int argc, char** argv)
 
   // Create LcmTrn object and run it
   //
-  lcmTrn::LcmTrn *_trn = new LcmTrn(configfile);
+  lcmTrn::LcmTrn _trn(configfile);
 
   // Run if the LcmTrn object setup was a success.
   // run() only stops when the LcmTrn object is not good.
   //
-  if (_trn->good()) _trn->run();
+  if (_trn.good())
+  {
+    fprintf(stderr, "%s listening for messages...\n", argv[0]);
+    _trn.run();
+  }
 
+  fprintf(stderr, "%s Done\n", argv[0]);
 
   // Clean
   //
-  DELOBJ(_trn);
   DELOBJ(configfile);
 
   return 0;

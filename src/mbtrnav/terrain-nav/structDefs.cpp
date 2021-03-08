@@ -484,22 +484,30 @@ measT::measT(unsigned int nummeas, int datatype)
 	dataType = datatype;
 	numMeas = nummeas;
 	ping_number = 0;
+
 	covariance = new double[numMeas];
 	memset(covariance, 0, sizeof(double)*numMeas);
+
 	ranges = new double[numMeas];
 	memset(ranges, 0, sizeof(double)*numMeas);
+
 	crossTrack = new double[numMeas];
 	memset(crossTrack, 0, sizeof(double)*numMeas);
+
 	alongTrack = new double[numMeas];
 	memset(alongTrack, 0, sizeof(double)*numMeas);
+
 	altitudes = new double[numMeas];
 	memset(altitudes, 0, sizeof(double)*numMeas);
+
 	alphas = new double[numMeas];
 	memset(alphas, 0, sizeof(double)*numMeas);
+
 	measStatus = new bool[numMeas];
-	memset(measStatus, 0, sizeof(double)*numMeas);
+	memset(measStatus, 0, sizeof(bool)*numMeas);
+
 	beamNums = new int[numMeas];
-	memset(beamNums, 0, sizeof(double)*numMeas);
+	memset(beamNums, 0, sizeof(int)*numMeas);
 }
 
 measT::~measT() {
