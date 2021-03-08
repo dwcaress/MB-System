@@ -176,15 +176,15 @@ if (!$file_data)
 	print "\a";
 	die "\nNo input file specified!\n$program_name aborted\n";
 	}
-elsif (! -r $file_data)
+elsif (! -e $file_data)
 	{
 	print "\a";
-	die "\nSpecified input file $file_data cannot be opened!\n$program_name aborted\n";
+	die "\nSpecified input file $file_data does not exist!\n$program_name aborted\n";
 	}
-if ($file_intensity && ! -r $file_intensity)
+if ($file_intensity && ! -e $file_intensity)
 	{
 	print "\a";
-	die "\nSpecified intensity input file $file_intensity cannot be opened!\n$program_name aborted\n";
+	die "\nSpecified intensity input file $file_intensity does not exist!\n$program_name aborted\n";
 	}
 if ($color_mode == 3 && !$file_intensity)
 	{

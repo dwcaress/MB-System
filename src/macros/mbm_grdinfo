@@ -85,10 +85,10 @@ if (!$file_input)
 	print "\a";
 	die "\nNo input file specified!\n$program_name aborted\n";
 	}
-elsif (! -r $file_input)
+elsif (! -e $file_input)
 	{
 	print "\a";
-	die "\nSpecified input file $file_data cannot be opened!\n$program_name aborted\n";
+	die "\nSpecified input file $file_data does not exist!\n$program_name aborted\n";
 	}
 
 # Save old GMT default double format and set new format

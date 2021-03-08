@@ -404,7 +404,7 @@ int main(int argc, char **argv) {
 					if (locked && remove_locks) {
 						char file[MB_PATH_MAXLINE];
 						sprintf(lockfile, "%s.lck", file);
-						sprintf(command, "/bin/rm -f %s", lockfile);
+            remove(lockfile);
 					}
 				}
 
@@ -468,7 +468,7 @@ int main(int argc, char **argv) {
 					else
 						filename = file;
 					if (nfile == 1)
-						/* shellstatus = */ system("rm datalist.mb-1");
+						/* shellstatus = */ remove("datalist.mb-1");
 					sprintf(command, "echo %s %d %f >> datalist.mb-1", filename, format, file_weight);
 					/* shellstatus = */ system(command);
 				}
@@ -540,8 +540,7 @@ int main(int argc, char **argv) {
 						if (locked && remove_locks) {
 							sprintf(lockfile, "%s.lck", file);
 							fprintf(output, "\tRemoving lock file %s\n", lockfile);
-							sprintf(command, "/bin/rm -f %s", lockfile);
-							/* shellstatus = */ system(command);
+              /* shellstatus = */ remove(lockfile);
 						}
 					}
 

@@ -4761,14 +4761,16 @@ int mb_pr_unlockswathfile(int verbose, const char *file, int purpose, const char
 		if (locked && strncmp(program_name, lock_program, MAX(strlen(program_name), strlen(lock_program))) == 0
 		    && strncmp(user, lock_user, MAX(strlen(user), strlen(lock_user))) == 0
 		    && purpose == lock_purpose) {
-			mb_path command;
-			sprintf(command, "/bin/rm -f %s", lockfile);
-			/* int shellstatus = */ system(command);
-			status = MB_SUCCESS;
-			*error = MB_ERROR_NO_ERROR;
+      if (remove(lockfile) == 0) {
+			  status = MB_SUCCESS;
+			  *error = MB_ERROR_NO_ERROR;
+      } else {
+			  status = MB_FAILURE;
+			  *error = MB_ERROR_FILE_LOCKED;
+      }
 		}
 		else {
-			status = MB_SUCCESS;
+			status = MB_FAILURE;
 			*error = MB_ERROR_FILE_LOCKED;
 		}
 	}
