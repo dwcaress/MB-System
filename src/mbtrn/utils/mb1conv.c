@@ -384,7 +384,7 @@ static int32_t s_read_mb1_rec( mb1_frame_t **pdest, mfile_file_t *src, app_cfg_t
                     retval=-1;
                 }
             }else{
-                fprintf(stderr,"%s:%d - ERR dest[%p] sounding[%p]\n",__func__,__LINE__,dest,dest->sounding);
+                fprintf(stderr,"%s:%d - ERR dest and/or sounding NULL\n",__func__,__LINE__);
             }
 
             if(NULL!=cfg && cfg->verbose>2){
@@ -609,7 +609,7 @@ static int s_app_main(app_cfg_t *cfg)
                         fprintf(stderr,"reached end of file\n");
                         quit=true;
                     }else{
-                        if(NULL!=cfg && cfg->verbose>=2)
+                        if(cfg->verbose>=2)
                         fprintf(stderr,"s_read_mb1_rec failed [%d] ecount[%u] fp/fsz[%"PRId64"/%"PRId64"]\n",test[0],err_count,mfile_seek(ifile,0,MFILE_CUR),mfile_fsize(ifile));
                     }
                 }
