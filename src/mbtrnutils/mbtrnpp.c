@@ -2549,7 +2549,7 @@ static int s_mbtrnpp_validate_config(mbtrnpp_cfg_t *cfg)
             if((cfg->output_flags&OUTPUT_MB1_SVR_EN)){
                 if(NULL==cfg->mb1svr_host ){
                     err_count++;
-                    fprintf(stderr,"ERR - mb1svr_host not set [%s]\n",cfg->mb1svr_host);
+                    fprintf(stderr,"ERR - mb1svr_host not set\n");
                 }
                 if((cfg->mb1svr_port<1024 || cfg->mb1svr_port>65535)){
                     err_count++;
@@ -2559,7 +2559,7 @@ static int s_mbtrnpp_validate_config(mbtrnpp_cfg_t *cfg)
             if((cfg->output_flags&OUTPUT_TRN_SVR_EN)){
                 if(NULL==cfg->trnsvr_host ){
                     err_count++;
-                    fprintf(stderr,"ERR - trnsvr_host not set [%s]\n",cfg->trnsvr_host);
+                    fprintf(stderr,"ERR - trnsvr_host not set\n");
                 }
                 if((cfg->trnsvr_port<1024 || cfg->trnsvr_port>65535)){
                     err_count++;
@@ -2569,7 +2569,7 @@ static int s_mbtrnpp_validate_config(mbtrnpp_cfg_t *cfg)
             if((cfg->output_flags&OUTPUT_TRNU_SVR_EN)){
                 if(NULL==cfg->trnusvr_host ){
                     err_count++;
-                    fprintf(stderr,"ERR - trnusvr_host not set [%s]\n",cfg->trnusvr_host);
+                    fprintf(stderr,"ERR - trnusvr_host not set\n");
                 }
                 if((cfg->trnusvr_port<1024 || cfg->trnusvr_port>65535)){
                     err_count++;
@@ -2579,7 +2579,7 @@ static int s_mbtrnpp_validate_config(mbtrnpp_cfg_t *cfg)
             if((cfg->output_flags&OUTPUT_TRNUM_SVR_EN)){
                 if(NULL==cfg->trnumsvr_group ){
                     err_count++;
-                    fprintf(stderr,"ERR - trnumsvr_group not set [%s]\n",cfg->trnumsvr_group);
+                    fprintf(stderr,"ERR - trnumsvr_group not set\n");
                 }
                 if((cfg->trnumsvr_port<1024 || cfg->trnumsvr_port>65535)){
                     err_count++;
@@ -5021,9 +5021,9 @@ int mbtrnpp_init_trnsvr(netif_t **psvr, wtnav_t *trn, char *host, int port, bool
 int mbtrnpp_init_mb1svr(netif_t **psvr, char *host, int port, bool verbose)
 {
     int retval = -1;
-    PMPRINT(MOD_MBTRNPP,MM_DEBUG,(stderr,"configuring MB1 server socket using %s:%d\n",host,port));
-    fprintf(stderr,"configuring MB1 server socket using %s:%d hbto[%lf]\n",host,port,mbtrn_cfg->mbsvr_hbto);
    if(NULL!=psvr && NULL!=host){
+       PMPRINT(MOD_MBTRNPP,MM_DEBUG,(stderr,"configuring MB1 server socket using %s:%d\n",host,port));
+       fprintf(stderr,"configuring MB1 server socket using %s:%d hbto[%lf]\n",host,port,mbtrn_cfg->mbsvr_hbto);
         netif_t *svr = netif_new("mb1svr",host,
                           port,
                           ST_UDP,
@@ -5469,97 +5469,95 @@ int mbtrnpp_trn_process_mb1(wtnav_t *tnav, mb1_t *mb1, trn_config_t *cfg)
                 wposet_t *pt = NULL;
                 trn_update_t trn_state={NULL,NULL,NULL,0,0,0,0,0.0,0.0},*pstate=&trn_state;
 
-                if(NULL!=tnav && NULL!=cfg){
+                // get TRN update
+                MST_METRIC_START(app_stats->stats->metrics[MBTPP_CH_TRN_UPDATE_XT], mtime_dtime());
 
-                    // get TRN update
-                    MST_METRIC_START(app_stats->stats->metrics[MBTPP_CH_TRN_UPDATE_XT], mtime_dtime());
+                int test=mbtrnpp_trn_update(tnav, mb1, &pt, &mt,cfg);
 
-                    int test=mbtrnpp_trn_update(tnav, mb1, &pt, &mt,cfg);
+                MST_METRIC_LAP(app_stats->stats->metrics[MBTPP_CH_TRN_UPDATE_XT], mtime_dtime());
 
-                    MST_METRIC_LAP(app_stats->stats->metrics[MBTPP_CH_TRN_UPDATE_XT], mtime_dtime());
+                if( test==0){
+                    // get TRN bias estimates
+                    MST_METRIC_START(app_stats->stats->metrics[MBTPP_CH_TRN_BIASEST_XT], mtime_dtime());
 
-                    if( test==0){
-                        // get TRN bias estimates
-                        MST_METRIC_START(app_stats->stats->metrics[MBTPP_CH_TRN_BIASEST_XT], mtime_dtime());
+                    test=mbtrnpp_trn_get_bias_estimates(tnav, pt, pstate);
 
-                        test=mbtrnpp_trn_get_bias_estimates(tnav, pt, pstate);
+                    MST_METRIC_LAP(app_stats->stats->metrics[MBTPP_CH_TRN_BIASEST_XT], mtime_dtime());
 
-                        MST_METRIC_LAP(app_stats->stats->metrics[MBTPP_CH_TRN_BIASEST_XT], mtime_dtime());
+                  if( test==0){
+                        if(NULL!=pstate->pt_dat &&  NULL!= pstate->mle_dat && NULL!=pstate->mse_dat ){
 
-                      if( test==0){
-                            if(NULL!=pstate->pt_dat &&  NULL!= pstate->mle_dat && NULL!=pstate->mse_dat ){
+                            // get number of reinits
+                            MST_METRIC_START(app_stats->stats->metrics[MBTPP_CH_TRN_NREINITS_XT], mtime_dtime());
 
-                                // get number of reinits
-                                MST_METRIC_START(app_stats->stats->metrics[MBTPP_CH_TRN_NREINITS_XT], mtime_dtime());
+                            // check if reinit will be required on next processing
+                            mbtrnpp_check_reinit(pstate, cfg);
 
-                                // check if reinit will be required on next processing
-                                mbtrnpp_check_reinit(pstate, cfg);
+                            pstate->reinit_count = wtnav_get_num_reinits(tnav);
+                            pstate->filter_state = wtnav_get_filter_state(tnav);
+                            pstate->is_converged = (wtnav_is_converged(tnav) ? 1 : 0);
+                            pstate->is_valid = use_trn_offset;
+                            // pstate->is_valid = ( (mb1->sounding.ts > 0. &&
+                            //                       pstate->mse_dat->covariance[0] <= cfg->max_northing_cov &&
+                            //                       pstate->mse_dat->covariance[2] <= cfg->max_easting_cov &&
+                            //                       fabs(pstate->mse_dat->x-pstate->pt_dat->x) <= cfg->max_northing_err &&
+                            //                       fabs(pstate->mse_dat->y-pstate->pt_dat->y) <= cfg->max_easting_err
+                            //                     )? 1 : 0);
+                            pstate->mb1_cycle=mb1_count;
+                            pstate->ping_number=mb1->sounding.ping_number;
+                            pstate->mb1_time=mb1->sounding.ts;
+                            pstate->update_time=mtime_etime();
 
-                                pstate->reinit_count = wtnav_get_num_reinits(tnav);
-                                pstate->filter_state = wtnav_get_filter_state(tnav);
-                                pstate->is_converged = (wtnav_is_converged(tnav) ? 1 : 0);
-                                pstate->is_valid = use_trn_offset;
-                                // pstate->is_valid = ( (mb1->sounding.ts > 0. &&
-                                //                       pstate->mse_dat->covariance[0] <= cfg->max_northing_cov &&
-                                //                       pstate->mse_dat->covariance[2] <= cfg->max_easting_cov &&
-                                //                       fabs(pstate->mse_dat->x-pstate->pt_dat->x) <= cfg->max_northing_err &&
-                                //                       fabs(pstate->mse_dat->y-pstate->pt_dat->y) <= cfg->max_easting_err
-                                //                     )? 1 : 0);
-                                pstate->mb1_cycle=mb1_count;
-                                pstate->ping_number=mb1->sounding.ping_number;
-                                pstate->mb1_time=mb1->sounding.ts;
-                                pstate->update_time=mtime_etime();
+                            MST_METRIC_LAP(app_stats->stats->metrics[MBTPP_CH_TRN_NREINITS_XT], mtime_dtime());
 
-                                MST_METRIC_LAP(app_stats->stats->metrics[MBTPP_CH_TRN_NREINITS_XT], mtime_dtime());
+                            // publish to selected outputs
+                            mbtrnpp_trn_publish(pstate, cfg);
 
-                                // publish to selected outputs
-                                mbtrnpp_trn_publish(pstate, cfg);
+                            retval=0;
 
-                                retval=0;
-
-                            }else{
-                                PMPRINT(MOD_MBTRNPP,MM_DEBUG,(stderr,"ERR: pt[%p] pt_dat[%p] mle_dat[%p] mse_dat[%p]\n",pt,pstate->pt_dat,pstate->mle_dat,pstate->mse_dat));
-                                mlog_tprintf(trnu_alog_id,"ERR: NULL data pt[%p] pt_dat[%p] mle_dat[%p] mse_dat[%p] ts[%.3lf] beams[%u] ping[%d] lat[%.5lf] lon[%.5lf] hdg[%.2lf] sd[%.1lf]\n",
-                                             pt,pstate->pt_dat,pstate->mle_dat,pstate->mse_dat,
-                                             mb1->sounding.ts, mb1->sounding.nbeams, mb1->sounding.ping_number,
-                                             mb1->sounding.lat, mb1->sounding.lon, mb1->sounding.hdg, mb1->sounding.depth);
-                            }
                         }else{
-                            mlog_tprintf(trnu_alog_id,"ERR: trncli_get_bias_estimates failed [%d] [%d/%s]\n",test,errno,strerror(errno));
-
-                            PMPRINT(MOD_MBTRNPP,MM_DEBUG|MBTRNPP_V3,(stderr,"ERR: trn_get_bias_estimates failed [%d] [%d/%s]\n",test,errno,strerror(errno)));
-
-                            int time_i[7];
-                            mb_get_date(0, mb1->sounding.ts, time_i);
-                            fprintf(stderr, "%4.4d/%2.2d/%2.2d-%2.2d:%2.2d:%2.2d.%6.6d %.6f "
-                                            "| %11.6f %11.6f %8.3f | %d filtered beams - Ping not used - failed bias estimate\n",
-                            time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6], mb1->sounding.ts,
-                            mb1->sounding.lon, mb1->sounding.lat, mb1->sounding.depth, mb1->sounding.nbeams);
-                            mbtrnpp_trnu_pubempty_osocket(mb1->sounding.ts, mb1->sounding.lat, mb1->sounding.lon, mb1->sounding.depth, trnusvr);
-                            mbtrnpp_trnu_pubempty_osocket(mb1->sounding.ts, mb1->sounding.lat, mb1->sounding.lon, mb1->sounding.depth, trnumsvr);
+                            PMPRINT(MOD_MBTRNPP,MM_DEBUG,(stderr,"ERR: pt[%p] pt_dat[%p] mle_dat[%p] mse_dat[%p]\n",pt,pstate->pt_dat,pstate->mle_dat,pstate->mse_dat));
+                            mlog_tprintf(trnu_alog_id,"ERR: NULL data pt[%p] pt_dat[%p] mle_dat[%p] mse_dat[%p] ts[%.3lf] beams[%u] ping[%d] lat[%.5lf] lon[%.5lf] hdg[%.2lf] sd[%.1lf]\n",
+                                         pt,pstate->pt_dat,pstate->mle_dat,pstate->mse_dat,
+                                         mb1->sounding.ts, mb1->sounding.nbeams, mb1->sounding.ping_number,
+                                         mb1->sounding.lat, mb1->sounding.lon, mb1->sounding.hdg, mb1->sounding.depth);
                         }
                     }else{
-                        mlog_tprintf(trnu_alog_id,"ERR: trncli_send_update failed [%d] [%d/%s]\n",test,errno,strerror(errno));
-                        PMPRINT(MOD_MBTRNPP,MM_DEBUG|MBTRNPP_V3,(stderr,"ERR: trn_update failed [%d] [%d/%s]\n",test,errno,strerror(errno)));
+                        mlog_tprintf(trnu_alog_id,"ERR: trncli_get_bias_estimates failed [%d] [%d/%s]\n",test,errno,strerror(errno));
+
+                        PMPRINT(MOD_MBTRNPP,MM_DEBUG|MBTRNPP_V3,(stderr,"ERR: trn_get_bias_estimates failed [%d] [%d/%s]\n",test,errno,strerror(errno)));
 
                         int time_i[7];
                         mb_get_date(0, mb1->sounding.ts, time_i);
                         fprintf(stderr, "%4.4d/%2.2d/%2.2d-%2.2d:%2.2d:%2.2d.%6.6d %.6f "
-                                        "| %11.6f %11.6f %8.3f | %d filtered beams - Ping not used - failed trn processing\n",
+                                        "| %11.6f %11.6f %8.3f | %d filtered beams - Ping not used - failed bias estimate\n",
                         time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6], mb1->sounding.ts,
                         mb1->sounding.lon, mb1->sounding.lat, mb1->sounding.depth, mb1->sounding.nbeams);
                         mbtrnpp_trnu_pubempty_osocket(mb1->sounding.ts, mb1->sounding.lat, mb1->sounding.lon, mb1->sounding.depth, trnusvr);
                         mbtrnpp_trnu_pubempty_osocket(mb1->sounding.ts, mb1->sounding.lat, mb1->sounding.lon, mb1->sounding.depth, trnumsvr);
                     }
-                    wmeast_destroy(mt);
-                    wposet_destroy(pt);
-                    if(NULL!=pstate->pt_dat)
-                    free(pstate->pt_dat);
-                    if(NULL!=pstate->mse_dat)
-                    free(pstate->mse_dat);
-                    if(NULL!=pstate->mle_dat)
-                    free(pstate->mle_dat);
+                }else{
+                    mlog_tprintf(trnu_alog_id,"ERR: trncli_send_update failed [%d] [%d/%s]\n",test,errno,strerror(errno));
+                    PMPRINT(MOD_MBTRNPP,MM_DEBUG|MBTRNPP_V3,(stderr,"ERR: trn_update failed [%d] [%d/%s]\n",test,errno,strerror(errno)));
+
+                    int time_i[7];
+                    mb_get_date(0, mb1->sounding.ts, time_i);
+                    fprintf(stderr, "%4.4d/%2.2d/%2.2d-%2.2d:%2.2d:%2.2d.%6.6d %.6f "
+                                    "| %11.6f %11.6f %8.3f | %d filtered beams - Ping not used - failed trn processing\n",
+                    time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6], mb1->sounding.ts,
+                    mb1->sounding.lon, mb1->sounding.lat, mb1->sounding.depth, mb1->sounding.nbeams);
+                    mbtrnpp_trnu_pubempty_osocket(mb1->sounding.ts, mb1->sounding.lat, mb1->sounding.lon, mb1->sounding.depth, trnusvr);
+                    mbtrnpp_trnu_pubempty_osocket(mb1->sounding.ts, mb1->sounding.lat, mb1->sounding.lon, mb1->sounding.depth, trnumsvr);
                 }
+                wmeast_destroy(mt);
+                wposet_destroy(pt);
+                if(NULL!=pstate->pt_dat)
+                free(pstate->pt_dat);
+                if(NULL!=pstate->mse_dat)
+                free(pstate->mse_dat);
+                if(NULL!=pstate->mle_dat)
+                free(pstate->mle_dat);
+
                 MST_METRIC_LAP(app_stats->stats->metrics[MBTPP_CH_TRN_PROC_XT], mtime_dtime());
             }// if tnav, mb1,cfg != NULL
             mlog_tprintf(trnu_alog_id,"trn_update_end,%lf,%d\n",mtime_etime(),retval);
