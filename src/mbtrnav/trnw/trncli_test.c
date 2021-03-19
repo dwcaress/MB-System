@@ -611,7 +611,7 @@ static int s_csv_to_mb1(mb1_t *dest, mfile_file_t *src)
         int32_t test = 0;
         if( (test=s_read_csv_rec(src,line,TRNCLI_CSV_LINE_BYTES))>0){
             test=s_tokenize(line, fields, "\n", MB1_FIELDS);
-            if( NULL!=fields && test>=MB1_FIXED_FIELDS ){
+            if( (NULL != *fields) && test>=MB1_FIXED_FIELDS ){
    
                 //            sscanf(fields[0],"%u",&dest->header.type);
                 //            sscanf(fields[1],"%u",&dest->header.size);
