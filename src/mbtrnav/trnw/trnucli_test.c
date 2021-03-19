@@ -1074,8 +1074,8 @@ static int s_trnucli_test_trnu_async(app_cfg_t *cfg)
                 // reinit per config
                 if(cfg->test_reset_mod>0 && x>0 && (x%cfg->test_reset_mod)==0 ){
                     fprintf(stderr,"\nTest Reset mod/update[%d/%d]\n",cfg->test_reset_mod,x);
-                    int test=trnucli_ctx_reset_trn(ctx);
-                    fprintf(stderr,"\nReset returned[%d]\n",test);
+                    int res=trnucli_ctx_reset_trn(ctx);
+                    fprintf(stderr,"\nReset returned[%d]\n",res);
                 }else{
                     fprintf(stderr,"\nSkipping Test Reset mod/update[%d/%d]\n",cfg->test_reset_mod,x);
                 }
@@ -1315,13 +1315,12 @@ static int s_app_main(app_cfg_t *cfg)
                 fprintf(stderr,"ERR - invalid input type [%d]\n",cfg->input_src);
                 break;
         }
+        double now=mtime_etime();
+        mlog_tprintf(cfg->log_id,"stop_time,%.3lf elapsed[%.3lf]\n",now,now-cfg->session_timer);
+        mlog_tprintf(cfg->log_id,"*** trnucli-test session end ***\n");
     }else{
         fprintf(stderr,"ERR - NULL config\n");
     }
-
-    double now=mtime_etime();
-    mlog_tprintf(cfg->log_id,"stop_time,%.3lf elapsed[%.3lf]\n",now,now-cfg->session_timer);
-    mlog_tprintf(cfg->log_id,"*** trnucli-test session end ***\n");
 
     return retval;
 }
