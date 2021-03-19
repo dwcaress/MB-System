@@ -81,25 +81,27 @@
 /////////////////////////
 // Macros
 /////////////////////////
-//#define TRNUC_WITH_STATIC
-// return true if block-on-connect flag set
-#define TRNUC_BLK_CON(f) ( ((f&TRNUC_BLK_CON)!=0) ? true : false)
-// return true if block-on-listen flag set
-#define TRNUC_BLK_LISTEN(f) ( ((f&TRNUC_BLK_LISTEN)!=0) ? true : false)
-// return true if enable connect message flag set
-#define TRNUC_CON_MSG(f) ( ((f&TRNUC_CON_MSG)!=0) ? true : false)
+// check flags
+// f: flag variable
+// m: mask (flags to check)
+#define UCF_ISSET(f,m)  ( (f&m) != 0 ? true : false )
+#define UCF_ISCLR(f,m)  ( (f&m) == 0 ? true : false )
+#define UCF_ANYSET(f,m) ( (f&m) != 0 ? true : false )
+#define UCF_ANYCLR(f,m) ( (f&m) != m ? true : false )
+#define UCF_ALLCLR(f,m) ( (f&m) == 0 ? true : false )
+#define UCF_ALLSET(f,m) ( (f&m) == m ? true : false )
 // set flags
 // pf: flag pointer
 // m: mask (flags to set)
-#define TRNUC_MSET(pf,m) do{ if(NULL!=pf)*pf|=m; }while(0)
+#define UCF_MSET(pf,m) do{ if(NULL!=pf)*pf|=m; }while(0)
 // clear flags
 // pf: flag pointer
 // m: mask (flags to set)
-#define TRNUC_MCLR(pf,m) do{ if(NULL!=pf)*pf&=~(m); }while(0)
+#define UCF_MCLR(pf,m) do{ if(NULL!=pf)*pf&=~(m); }while(0)
 // update string buffer len (holds max string)
 #define TRNUC_STR_LEN 2048
 // number of fields in CSV record
-#define TRNUC_CSV_FIELDS 41
+#define TRNUC_CSV_FIELDS 50 //41
 // max CSV record string length
 #define TRNUC_CSV_LINE_BYTES 512
 
@@ -117,11 +119,13 @@
 // TRNUC_BLK_CON    block on connect
 // TRNUC_BLK_LISTEN block on listen
 // TRNUC_CON_MSG    send connect message
+// TRNUC_MCAST      using multicast (unidirectional)
 typedef enum{
     TRNUC_BLK_CON   =0x010,
     TRNUC_BLK_LISTEN=0x020,
-    TRNUC_CON_MSG   =0x100
-}trnuc_flags_t;
+    TRNUC_CON_MSG   =0x100,
+    TRNUC_MCAST     =0x200
+}trnucli_flags_t;
 
 // callback function typedef
 typedef int (* update_callback_fn)(trnu_pub_t *update);
@@ -139,7 +143,7 @@ typedef struct trnucli_s{
     update_callback_fn update_fn;
     // struct trnucli_s::flags
     // configuration flags
-    trnuc_flags_t flags;
+    trnucli_flags_t flags;
     // struct trnucli_s::hbeat_to_sec
     // heartbeat timeout (s)
     double hbeat_to_sec;
@@ -165,9 +169,8 @@ typedef enum{
 }trnucli_action_t;
 
 typedef enum{
-    TRNU_LOG_DIS=0x0,
-    TRNU_LOG_EN=0x1
-}trnucli_logopt_t;
+    CTX_LOG_EN=0x1
+}trnuctx_flags_t;
 
 typedef struct trnucli_stats_s{
     // struct trnucli_stats_s::n_cycle
@@ -219,6 +222,9 @@ typedef struct trnucli_ctx_s{
     // struct trnucli_ctx_s::port
     // client host port
     int port;
+    // struct trnucli_ctx_s::ttl
+    // multicast ttl
+    int ttl;
     // struct trnucli_ctx_s::worker
     // client worker thread
     mthread_thread_t *worker;
@@ -285,9 +291,9 @@ typedef struct trnucli_ctx_s{
     // struct trnucli_ctx_s::stats
     // performance stats
     trnucli_stats_t stats;
-    /// @var trnucli_ctx_s::log_opts
+    /// @var trnucli_ctx_s::flags
     /// @brief TBD
-    trnucli_logopt_t log_opts;
+    trnuctx_flags_t flags;
     /// @var trnucli_ctx_s::log_cfg
     /// @brief TBD
     mlog_config_t *log_cfg;
@@ -347,7 +353,7 @@ extern "C" {
     // flags: blocking and other flags
     // hbeat_to_sec : heartbeat timeout (s)
     // returns new instance
-    trnucli_t *trnucli_new(update_callback_fn update_fn, trnuc_flags_t flags, double hbeat_to_sec);
+    trnucli_t *trnucli_new(update_callback_fn update_fn, trnucli_flags_t flags, double hbeat_to_sec);
 
     // release trnu_cli instance resources
     // pself : pointer to instance pointer
@@ -363,6 +369,13 @@ extern "C" {
     // disconnect from trnusvr
     // returns 0 on success, -1 otherwise
     int trnucli_disconnect(trnucli_t *self);
+
+    // connect to trnusvr
+    // host: host name or IP address
+    // port: port number
+    //  ttl: multicast time-to-live
+    // returns 0 on success, -1 otherwise
+    int trnucli_mcast_connect(trnucli_t *self, char *host, int port, int ttl);
 
     // optionally set a callback to be called by listen
     // when an update is received
@@ -408,35 +421,29 @@ extern "C" {
 
     // get a new trnu_ctx instance
     // caller must release resources using trnucli_ctx_destroy
-    // fn           : optional update callback (may be NULL)
-    // hbeat_to_sec : heartbeat timeout (s); set <=0 to disable
-    // erecon_delay_ms: delay between reconnect attempts (msec)
-    // enodata_delay_ms: delay if no data available (msec)
-    // recon_to_sec: reconnect timeout (if no data available for recon_to_sec)
+    // host             : host/multicast group
+    // port             : port
+    // ttl              : multicast time to live (TTL)
+    // ctx_flags        : context option flags (logging, multicast)
+    // cli_flags        : client option flags (blocking, multicast)
+    // hbeat_to_sec     : heartbeat timeout (s); set <=0 to disable
+    // recon_to_sec     : reconnect timeout (if no data available for recon_to_sec)
+    // listen_to_ms     : listen timeout (socket SO_RCVTIMEO for blocking reads)
+    // erecon_delay_ms  : delay between reconnect attempts (msec)
+    // enodata_delay_ms : delay if no data available (msec)
+    // update_fn        : optional update callback (NULL to disable)
     // returns new instance
-    trnucli_ctx_t *trnucli_ctx_new_dfl(char *host,
-                                       int port,
-                                       update_callback_fn update_fn,
-                                       double hbeat_to_sec,
-                                       double recon_to_sec);
-
     trnucli_ctx_t *trnucli_ctx_new(char *host,
-                                   int port, update_callback_fn update_fn,
+                                   int port,
+                                   int ttl,
+                                   trnuctx_flags_t ctx_flags,
+                                   trnucli_flags_t cli_flags,
                                    double hbeat_to_sec,
+                                   double recon_to_sec,
                                    uint32_t listen_to_ms,
                                    uint32_t enodata_delay_ms,
                                    uint32_t erecon_delay_ms,
-                                   double recon_to_sec);
-
-    trnucli_ctx_t *trnucli_ctx_newl(char *host,
-                                    int port,
-                                    update_callback_fn update_fn,
-                                    double hbeat_to_sec,
-                                    uint32_t listen_to_ms,
-                                    uint32_t enodata_delay_ms,
-                                    uint32_t erecon_delay_ms,
-                                    double recon_to_sec,
-                                    trnucli_logopt_t log_opts);
+                                   update_callback_fn update_fn);
 
     // release trnu_ctx instance resources
     // pself : pointer to instance pointer
