@@ -101,7 +101,7 @@ typedef enum{
     OUTPUT_TRN_SVR_EN  =0x0004, OUTPUT_TRNU_SVR_EN =0x0008, OUTPUT_MB1_BIN     =0x0010,
     OUTPUT_RESON_BIN   =0x0020, OUTPUT_TRNU_ASC    =0x0040, OUTPUT_TRNU_SOUT   =0x0080,
     OUTPUT_TRNU_SERR   =0x0100, OUTPUT_TRNU_DEBUG  =0x0200, OUTPUT_TRNU_BIN    =0x0400,
-    OUTPUT_MBTRNPP_MSG =0x0800, OUTPUT_MBSYS_STDOUT=0x1000,
+    OUTPUT_MBTRNPP_MSG =0x0800, OUTPUT_MBSYS_STDOUT=0x1000, OUTPUT_TRNUM_SVR_EN=0x2000,
     OUTPUT_ALL         =0x1FFF
 }output_mode_t;
 
@@ -159,6 +159,9 @@ typedef struct mbtrnpp_opts_s{
 
     // opt "trnuhbt"
     double trnuhbt;
+
+    // opt "trnumttl"
+    int trnumttl;
 
     // opt "delay"
     int64_t delay;
@@ -339,6 +342,15 @@ typedef struct mbtrnpp_cfg_s{
     // TRN UDP server port
     int trnusvr_port;
 
+    // TRN UDP MCAST server group
+    char *trnumsvr_group;//TRNU_GROUP_DFL
+
+    // TRN UDP MCAST server port
+    int trnumsvr_port;
+
+    // TRN UDP MCAST server TTL (time to live)
+    int trnumsvr_ttl;
+
     // TRN output flags
     output_mode_t output_flags;
 
@@ -508,6 +520,7 @@ s=NULL;\
 #define OPT_MBHBT_DFL                     MB1SVR_HBTO_DFL
 #define OPT_TRNHBT_DFL                    TRNSVR_HBTO_DFL
 #define OPT_TRNUHBT_DFL                   TRNUSVR_HBTO_DFL
+#define OPT_TRNUMTTL_DFL                  TRNUMSVR_TTL_DFL
 #define OPT_DELAY_DFL                     0
 #define OPT_STATSEC_DFL                   MBTRNPP_STAT_PERIOD_SEC
 #define OPT_STATFLAGS_DFL                 MBTRNPP_STAT_FLAGS_DFL
@@ -573,6 +586,10 @@ s=NULL;\
 #define TRNU_ALOG_DESC    "trnu log"
 #define TRNU_BLOG_NAME    "trnub"
 #define TRNU_BLOG_DESC    "trnu log (binary)"
+#define TRNUM_ALOG_NAME   "trnum"
+#define TRNUM_ALOG_DESC   "trnum log"
+#define TRNUM_BLOG_NAME   "trnumb"
+#define TRNUM_BLOG_DESC   "trnum log (binary)"
 #define MBTRNPP_LOG_EXT   ".log"
 #ifdef WITH_MBTNAV
 #define UTM_MONTEREY_BAY 10L
@@ -586,6 +603,10 @@ s=NULL;\
 #define TRN_OUT_DFL      (TRNW_ODEBUG|TRNW_OLOG)
 #define TRNU_HOST_DFL    "localhost"
 #define TRNU_PORT_DFL    8000
+//#define TRNUM_HOST_DFL   "localhost"
+#define TRNUM_GROUP_DFL  "239.255.76.67"
+#define TRNUM_PORT_DFL   7667
+#define TRNUM_TTL_DFL    64
 #define TRNSVR_HOST_DFL  "localhost"
 #define TRNSVR_PORT_DFL  28000
 #define TRN_XMIT_GAIN_RESON7K_DFL 200.0
@@ -604,6 +625,7 @@ s=NULL;\
 #define MB1SVR_HBTO_DFL  0.0
 #define TRNSVR_HBTO_DFL  0.0
 #define TRNUSVR_HBTO_DFL 0.0
+#define TRNUMSVR_TTL_DFL 64
 
 // MSF_STAT_FLAGS define stats processing options
 // may include
@@ -652,6 +674,7 @@ wtnav_t *trn_instance = NULL;
 trnw_oflags_t trn_oflags=TRN_OUT_DFL;
 netif_t *trnsvr=NULL;
 netif_t *trnusvr=NULL;
+netif_t *trnumsvr=NULL;
 int s_mbtrnpp_trnu_reset_callback();
 trnuif_res_t rr_resources={0},*g_trnu_res=&rr_resources;
 
@@ -714,11 +737,13 @@ typedef enum {
     MBTPP_CH_TRN_BIASEST_XT,
     MBTPP_CH_TRN_NREINITS_XT,
     MBTPP_CH_TRN_TRNU_PUB_XT,
+    MBTPP_CH_TRN_TRNUM_PUB_XT,
     MBTPP_CH_TRN_TRNU_LOG_XT,
     MBTPP_CH_TRN_TRNU_BLOG_XT,
     MBTPP_CH_TRN_PROC_XT,
     MBTPP_CH_TRN_TRNSVR_XT,
     MBTPP_CH_TRN_TRNUSVR_XT,
+    MBTPP_CH_TRN_TRNUMSVR_XT,
     MBTPP_CH_TRN_PROC_TRN_XT,
 #endif
     MBTPP_CH_COUNT
@@ -747,8 +772,8 @@ const char *mbtrnpp_stchan_labels[] = {
     "mb_proc_mb1_xt"
 #ifdef WITH_MBTNAV
     , "trn_update_xt", "trn_biasest_xt", "trn_nreinits_xt",
-    "trn_trnu_pub_xt", "trn_trnu_log_xt", "trn_trnu_blog_xt", "trn_proc_xt",
-    "trn_trnsvr_xt", "trn_trnusvr_xt", "trn_proc_trn_xt"
+    "trn_trnu_pub_xt", "trn_trnums_pub_xt", "trn_trnu_log_xt", "trn_trnu_blog_xt", "trn_proc_xt",
+    "trn_trnsvr_xt", "trn_trnusvr_xt", "trn_trnumsvr_xt", "trn_proc_trn_xt"
 #endif
 };
 
@@ -851,6 +876,7 @@ int mbtrnpp_init_trn(wtnav_t **pdest, int verbose, trn_config_t *cfg);
 int mbtrnpp_init_trnsvr(netif_t **psvr, wtnav_t *trn, char *host, int port, bool verbose);
 int mbtrnpp_init_mb1svr(netif_t **psvr, char *host, int port, bool verbose);
 int mbtrnpp_init_trnusvr(netif_t **psvr, char *host, int port, wtnav_t *trn, bool verbose);
+int mbtrnpp_init_trnumsvr(netif_t **psvr, char *host, int port, wtnav_t *trn, bool verbose);
 int mbtrnpp_trn_process_mb1(wtnav_t *tnav, mb1_t *mb1, trn_config_t *cfg);
 int mbtrnpp_trn_update(wtnav_t *self, mb1_t *src, wposet_t **pt_out, wmeast_t **mt_out, trn_config_t *cfg);
 int mbtrnpp_trn_get_bias_estimates(wtnav_t *self, wposet_t *pt, trn_update_t *pstate);
@@ -859,8 +885,9 @@ int mbtrnpp_check_reinit(trn_update_t *pstate, trn_config_t *cfg);
 int mbtrnpp_trn_pub_ostream(trn_update_t *update, FILE *stream);
 int mbtrnpp_trn_pub_odebug(trn_update_t *update);
 int mbtrnpp_trn_pub_olog(trn_update_t *update, mlog_id_t log_id);
-int mbtrnpp_trnu_pub_osocket(trn_update_t *update, msock_socket_t *pub_sock);
-int mbtrnpp_trnu_pubempty_osocket(double time, double lat, double lon, double depth, msock_socket_t *pub_sock);
+//int mbtrnpp_trnu_pub_osocket(trn_update_t *update, msock_socket_t *pub_sock);
+int mbtrnpp_trnu_pub_osocket(trn_update_t *update, netif_t *netif);
+int mbtrnpp_trnu_pubempty_osocket(double time, double lat, double lon, double depth, netif_t *netif);
 char *mbtrnpp_trn_updatestr(char *dest, int len, trn_update_t *update, int indent);
 #endif // WITH_MBTNAV
 
@@ -1280,11 +1307,14 @@ static int s_mbtrnpp_init_cfg(mbtrnpp_cfg_t *cfg)
         cfg->trnsvr_host=strdup(TRNSVR_HOST_DFL);
         cfg->trnusvr_port=TRNU_PORT_DFL;
         cfg->trnusvr_host=strdup(TRNU_HOST_DFL);
+        cfg->trnumsvr_port=TRNUM_PORT_DFL;
+        cfg->trnumsvr_group=strdup(TRNUM_GROUP_DFL);
         cfg->output_flags=OUTPUT_MBTRNPP_MSG;
         cfg->mbsvr_hbtok=MB1SVR_HBTOK_DFL;
         cfg->mbsvr_hbto=MB1SVR_HBTO_DFL;
         cfg->trnsvr_hbto=TRNSVR_HBTO_DFL;
         cfg->trnusvr_hbto=TRNUSVR_HBTO_DFL;
+        cfg->trnumsvr_ttl=TRNUMSVR_TTL_DFL;
         cfg->mbtrnpp_loop_delay_msec=0;
         cfg->trn_status_interval_sec=MBTRNPP_STAT_PERIOD_SEC;
         cfg->mbtrnpp_stat_flags=MBTRNPP_STAT_FLAGS_DFL;
@@ -1338,6 +1368,7 @@ static int s_mbtrnpp_init_opts(mbtrnpp_opts_t *opts)
         opts->mbhbt=OPT_MBHBT_DFL;
         opts->trnhbt=OPT_TRNHBT_DFL;
         opts->trnuhbt=OPT_TRNUHBT_DFL;
+        opts->trnumttl=OPT_TRNUMTTL_DFL;
         opts->delay=OPT_DELAY_DFL;
         opts->statsec=OPT_STATSEC_DFL;
         opts->statflags_str=strdup(OPT_STATFLAG_STR_DFL);
@@ -1445,8 +1476,11 @@ static int s_mbtrnpp_show_cfg(mbtrnpp_cfg_t *self, bool verbose, int indent)
         retval+=fprintf(stderr,"%*s %*s  %*d\n",indent,(indent>0?" ":""), wkey,"mb1svr_port",wval,self->mb1svr_port);
         retval+=fprintf(stderr,"%*s %*s  %*s\n",indent,(indent>0?" ":""), wkey,"trnsvr_host",wval,self->trnsvr_host);
         retval+=fprintf(stderr,"%*s %*s  %*d\n",indent,(indent>0?" ":""), wkey,"trnsvr_port",wval,self->trnsvr_port);
-        retval+=fprintf(stderr,"%*s %*s  %*s\n",indent,(indent>0?" ":""), wkey,"trnusvr_host",wval,self->trnsvr_host);
+        retval+=fprintf(stderr,"%*s %*s  %*s\n",indent,(indent>0?" ":""), wkey,"trnusvr_host",wval,self->trnusvr_host);
         retval+=fprintf(stderr,"%*s %*s  %*d\n",indent,(indent>0?" ":""), wkey,"trnusvr_port",wval,self->trnusvr_port);
+        retval+=fprintf(stderr,"%*s %*s  %*s\n",indent,(indent>0?" ":""), wkey,"trnumsvr_group",wval,self->trnumsvr_group);
+        retval+=fprintf(stderr,"%*s %*s  %*d\n",indent,(indent>0?" ":""), wkey,"trnumsvr_port",wval,self->trnumsvr_port);
+        retval+=fprintf(stderr,"%*s %*s  %*d\n",indent,(indent>0?" ":""), wkey,"trnumsvr_ttl",wval,self->trnumsvr_ttl);
         retval+=fprintf(stderr,"%*s %*s  %*X\n",indent,(indent>0?" ":""), wkey,"output_flags",wval,self->output_flags);
         retval+=fprintf(stderr,"%*s %*s  %*d\n",indent,(indent>0?" ":""), wkey,"mbsvr_hbtok",wval,self->mbsvr_hbtok);
         retval+=fprintf(stderr,"%*s %*s  %*.2lf\n",indent,(indent>0?" ":""), wkey,"mbsvr_hbto",wval,self->mbsvr_hbto);
@@ -1509,6 +1543,7 @@ static int s_mbtrnpp_show_opts(mbtrnpp_opts_t *self, bool verbose, int indent){
         retval+=fprintf(stderr,"%*s %*s  %*.2lf\n",indent,(indent>0?" ":""), wkey,"mbhbt",wval,self->mbhbt);
         retval+=fprintf(stderr,"%*s %*s  %*.2lf\n",indent,(indent>0?" ":""), wkey,"trnhbt",wval,self->trnhbt);
         retval+=fprintf(stderr,"%*s %*s  %*.2lf\n",indent,(indent>0?" ":""), wkey,"trnuhbt",wval,self->trnuhbt);
+        retval+=fprintf(stderr,"%*s %*s  %*d\n",indent,(indent>0?" ":""), wkey,"trnumttl",wval,self->trnumttl);
         retval+=fprintf(stderr,"%*s %*s  %*"PRId64"\n",indent,(indent>0?" ":""), wkey,"delay",wval,self->delay);
         retval+=fprintf(stderr,"%*s %*s  %*.2lf\n",indent,(indent>0?" ":""), wkey,"statsec",wval,self->statsec);
         retval+=fprintf(stderr,"%*s %*s  %*X/%s\n",indent,(indent>0?" ":""), wkey,"statflags",wval,self->statflags,self->statflags_str);
@@ -1764,6 +1799,34 @@ static int s_parse_opt_trnout(mbtrnpp_cfg_t *cfg, char *opt_str)
                 cfg->output_flags |= OUTPUT_TRNU_SVR_EN;
                 free(acpy);
             }
+            if(strstr(tok[i], "trnumsvr")!=NULL){
+                // enable trnumsvr (trnumsvr:host:port:ttl)
+                char *acpy = strdup(tok[i]);
+                char *atok = strtok_r(acpy,":",&saveptr);
+
+                if(NULL != atok){
+                    char *shost = strtok_r(NULL,":",&saveptr);
+                    char *sport = strtok_r(NULL,":",&saveptr);
+                    char *sttl = strtok_r(NULL,":",&saveptr);
+
+                    if(NULL != shost){
+                        MEM_CHKINVALIDATE(cfg->trnusvr_host);
+                        cfg->trnumsvr_group = strdup(shost);
+                        retval++;
+                    }
+                    if(NULL != sport){
+                        sscanf(sport,"%d",&cfg->trnumsvr_port);
+                        retval++;
+                    }
+                    if(NULL != sttl){
+                        sscanf(sttl,"%d",&cfg->trnumsvr_ttl);
+                        retval++;
+                    }
+                }
+                // fprintf(stderr,"trnusvr[%s:%d]\n",cfg->trnusvr_host,cfg->trnusvr_port);
+                cfg->output_flags |= OUTPUT_TRNUM_SVR_EN;
+                free(acpy);
+            }
             if(strcmp(tok[i],"trnu")==0){
                 // enable trn update data log
                 cfg->output_flags |= OUTPUT_TRNU_ASC;
@@ -1790,9 +1853,14 @@ static int s_parse_opt_trnout(mbtrnpp_cfg_t *cfg, char *opt_str)
                 MEM_CHKINVALIDATE(cfg->trnsvr_host);
             }
             if(strcmp(tok[i],"notrnusvr")==0){
-                // disable trnsvr
+                // disable trnusvr
                 cfg->output_flags &= ~OUTPUT_TRNU_SVR_EN;
                 MEM_CHKINVALIDATE(cfg->trnusvr_host);
+            }
+            if(strcmp(tok[i],"notrnumsvr")==0){
+                // disable trnumsvr
+                cfg->output_flags &= ~OUTPUT_TRNUM_SVR_EN;
+                MEM_CHKINVALIDATE(cfg->trnumsvr_group);
             }
         }
         free(ocopy);
@@ -1992,6 +2060,10 @@ static int s_mbtrnpp_kvparse_fn(char *key, char *val, void *cfg)
                 }
             }else if(strcmp(key,"trnuhbt")==0 ){
                 if(sscanf(val,"%lf",&opts->trnuhbt)==1){
+                    retval=0;
+                }
+            }else if(strcmp(key,"trnumttl")==0 ){
+                if(sscanf(val,"%d",&opts->trnumttl)==1){
                     retval=0;
                 }
             }else if(strcmp(key,"delay")==0 ){
@@ -2478,7 +2550,7 @@ static int s_mbtrnpp_validate_config(mbtrnpp_cfg_t *cfg)
                 }
                 if((cfg->mb1svr_port<1024 || cfg->mb1svr_port>65535)){
                     err_count++;
-                    fprintf(stderr,"ERR - invalid mb1svr_port [%d] valid range 1-255\n",cfg->mb1svr_port);
+                    fprintf(stderr,"ERR - invalid mb1svr_port [%d] valid range 1024-65535\n",cfg->mb1svr_port);
                 }
         	}
             if((cfg->output_flags&OUTPUT_TRN_SVR_EN)){
@@ -2488,7 +2560,7 @@ static int s_mbtrnpp_validate_config(mbtrnpp_cfg_t *cfg)
                 }
                 if((cfg->trnsvr_port<1024 || cfg->trnsvr_port>65535)){
                     err_count++;
-                    fprintf(stderr,"ERR - invalid trnsvr_port [%d] valid range 1-255\n",cfg->trnsvr_port);
+                    fprintf(stderr,"ERR - invalid trnsvr_port [%d] valid range 1024-65535\n",cfg->trnsvr_port);
                 }
             }
             if((cfg->output_flags&OUTPUT_TRNU_SVR_EN)){
@@ -2498,10 +2570,20 @@ static int s_mbtrnpp_validate_config(mbtrnpp_cfg_t *cfg)
                 }
                 if((cfg->trnusvr_port<1024 || cfg->trnusvr_port>65535)){
                     err_count++;
-                    fprintf(stderr,"ERR - invalid trnusvr_port [%d] valid range 1-255\n",cfg->trnusvr_port);
+                    fprintf(stderr,"ERR - invalid trnusvr_port [%d] valid range 1024-65535\n",cfg->trnusvr_port);
                 }
             }
-        }
+            if((cfg->output_flags&OUTPUT_TRNUM_SVR_EN)){
+                if(NULL==cfg->trnumsvr_group ){
+                    err_count++;
+                    fprintf(stderr,"ERR - trnumsvr_group not set [%s]\n",cfg->trnumsvr_group);
+                }
+                if((cfg->trnumsvr_port<1024 || cfg->trnumsvr_port>65535)){
+                    err_count++;
+                    fprintf(stderr,"ERR - invalid trnumsvr_port [%d] valid range 1024-65535\n",cfg->trnumsvr_port);
+                }
+            }
+       }
 
         retval=(err_count==0?0:-1);
     }
@@ -2930,9 +3012,16 @@ int main(int argc, char **argv) {
 
         if( (test=mbtrnpp_init_trnusvr(&trnusvr, mbtrn_cfg->trnusvr_host,mbtrn_cfg->trnusvr_port, trn_instance, true))==0){
 //            PMPRINT(MOD_MBTRNPP,MM_DEBUG,(stderr,"TRNU server netif OK [%s:%d]\n",mbtrn_cfg->trnusvr_host,mbtrn_cfg-> trnusvr_port));
-            fprintf(stderr,"TRNU server netif OK [%s:%d]\n",mbtrn_cfg->trnusvr_host,mbtrn_cfg-> trnusvr_port);
+            fprintf(stderr,"TRNU server netif OK [%s:%d]\n",mbtrn_cfg->trnusvr_host,mbtrn_cfg->trnusvr_port);
         }else{
             fprintf(stderr, "TRNU server netif init failed [%d] [%d %s]\n",test,errno,strerror(errno));
+        }
+
+        if( (test=mbtrnpp_init_trnumsvr(&trnumsvr, mbtrn_cfg->trnumsvr_group,mbtrn_cfg->trnumsvr_port, trn_instance, true))==0){
+            //            PMPRINT(MOD_MBTRNPP,MM_DEBUG,(stderr,"TRNUM server netif OK [%s:%d]\n",mbtrn_cfg->trnumsvr_group,mbtrn_cfg-> trnumsvr_port));
+            fprintf(stderr,"TRNUM server netif OK [%s:%d]\n",mbtrn_cfg->trnumsvr_group,mbtrn_cfg->trnumsvr_port);
+        }else{
+            fprintf(stderr, "TRNUM server netif init failed [%d] [%d %s]\n",test,errno,strerror(errno));
         }
 
         if (mbtrn_cfg->verbose != 0) {
@@ -3739,7 +3828,6 @@ int main(int argc, char **argv) {
                     reinit_flag = true;
                   }
                 }
-
                 // if ok pass filtered ping to TRN for processing
                 if (update_trn) {
 
@@ -3773,7 +3861,7 @@ int main(int argc, char **argv) {
                     time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6], ping[i_ping_process].time_d,
                     ping[i_ping_process].navlon, ping[i_ping_process].navlat, ping[i_ping_process].sonardepth);
                     mbtrnpp_trnu_pubempty_osocket(ping[i_ping_process].time_d, ping[i_ping_process].navlat,
-                      ping[i_ping_process].navlon, ping[i_ping_process].sonardepth,  trnusvr->socket);
+                      ping[i_ping_process].navlon, ping[i_ping_process].sonardepth,trnusvr);
                 }
 
 #endif // WITH_MBTNAV
@@ -3864,7 +3952,7 @@ int main(int argc, char **argv) {
               }
             }
             double dzero = 0.0;
-            mbtrnpp_trnu_pubempty_osocket(ping[idataread].time_d, dzero, dzero, dzero, trnusvr->socket);
+            mbtrnpp_trnu_pubempty_osocket(ping[idataread].time_d, dzero, dzero, dzero, trnusvr);
           }
         }
         MST_METRIC_LAP(app_stats->stats->metrics[MBTPP_CH_MB_GETFAIL_XT], mtime_dtime());
@@ -3997,6 +4085,7 @@ int main(int argc, char **argv) {
     mlog_tprintf(netif_log(mb1svr),"i,end session\n");
     mlog_tprintf(netif_log(trnsvr),"i,end session\n");
     mlog_tprintf(netif_log(trnusvr),"i,end session\n");
+    mlog_tprintf(netif_log(trnumsvr),"i,end session\n");
 
   fprintf(stderr, "\nExiting program - error mode:[%d]\n", error);
 
@@ -4373,6 +4462,8 @@ int mbtrnpp_update_stats(mstats_profile_t *stats, mlog_id_t log_id, mstats_flags
     mstats_update_stats(trnsvr_stats, NETIF_CH_COUNT, flags);
     mstats_t *trnusvr_stats = netif_stats(trnusvr);
     mstats_update_stats(trnusvr_stats, NETIF_CH_COUNT, flags);
+    mstats_t *trnumsvr_stats = netif_stats(trnumsvr);
+    mstats_update_stats(trnumsvr_stats, NETIF_CH_COUNT, flags);
 
     PMPRINT(MOD_MBTRNPP,  MBTRNPP_V4,
             (stderr, "cycle_xt.p: N[%"PRId64"] sum[%.3lf] min[%.3lf] max[%.3lf] avg[%.3lf]\n",
@@ -4408,6 +4499,7 @@ int mbtrnpp_update_stats(mstats_profile_t *stats, mlog_id_t log_id, mstats_flags
       mstats_log_stats(mb1svr_stats, stats_now, netif_log(mb1svr), flags);
       mstats_log_stats(trnsvr_stats, stats_now, netif_log(trnsvr), flags);
       mstats_log_stats(trnusvr_stats, stats_now, netif_log(trnusvr), flags);
+      mstats_log_stats(trnumsvr_stats, stats_now, netif_log(trnumsvr), flags);
 
       if (flags & MSF_READER) {
         mstats_log_stats(reader_stats, stats_now, log_id, flags);
@@ -4419,6 +4511,7 @@ int mbtrnpp_update_stats(mstats_profile_t *stats, mlog_id_t log_id, mstats_flags
       mstats_reset_pstats(mb1svr_stats, NETIF_CH_COUNT);
       mstats_reset_pstats(trnsvr_stats, NETIF_CH_COUNT);
       mstats_reset_pstats(trnusvr_stats, NETIF_CH_COUNT);
+      mstats_reset_pstats(trnumsvr_stats, NETIF_CH_COUNT);
 
       // reset period timer
       stats->stats->stat_period_start = stats_now;
@@ -4739,79 +4832,76 @@ int mbtrnpp_trn_pub_blog(trn_update_t *update,
 /*--------------------------------------------------------------------*/
 
 int mbtrnpp_trnu_pub_osocket(trn_update_t *update,
-                             msock_socket_t *pub_sock)
+                             netif_t *netif)
 {
     int retval=-1;
 
-    if(NULL!=update && NULL!=pub_sock){
+    if(NULL!=update && NULL!=netif){
         retval=0;
+        int iobytes=0;
 
-        if(NULL!=update && NULL!=pub_sock){
-            int iobytes=0;
+        double offset_n = update->mse_dat->x - update->pt_dat->x;
+        double offset_e = update->mse_dat->y - update->pt_dat->y;
+        double offset_z = update->mse_dat->z - update->pt_dat->z;
+//        double covariance_mag = sqrt(update->mse_dat->covariance[0] * update->mse_dat->covariance[0]
+//                                     + update->mse_dat->covariance[1] * update->mse_dat->covariance[1]
+//                                     + update->mse_dat->covariance[2] * update->mse_dat->covariance[2]);
 
-            double offset_n = update->mse_dat->x - update->pt_dat->x;
-            double offset_e = update->mse_dat->y - update->pt_dat->y;
-            double offset_z = update->mse_dat->z - update->pt_dat->z;
-            double covariance_mag = sqrt(update->mse_dat->covariance[0] * update->mse_dat->covariance[0]
-                      + update->mse_dat->covariance[1] * update->mse_dat->covariance[1]
-                      + update->mse_dat->covariance[2] * update->mse_dat->covariance[2]);
-
-            // serialize data
-            trnu_pub_t pub_data={
-                TRNU_PUB_SYNC,
-                {
-                    {update->pt_dat->time,update->pt_dat->x,update->pt_dat->y,update->pt_dat->z,
-                        {update->pt_dat->covariance[0],update->pt_dat->covariance[2],update->pt_dat->covariance[5],update->pt_dat->covariance[1]}
-                    },
-                    {update->mle_dat->time,update->mle_dat->x,update->mle_dat->y,update->mle_dat->z,
-                        {update->mle_dat->covariance[0],update->mle_dat->covariance[2],update->mle_dat->covariance[5],update->mle_dat->covariance[1]}
-                    },
-                    {update->mse_dat->time,update->mse_dat->x,update->mse_dat->y,update->mse_dat->z,
-                        {update->mse_dat->covariance[0],update->mse_dat->covariance[2],update->mse_dat->covariance[5],update->mse_dat->covariance[1]}
-                    },
-                    {update->mse_dat->time,offset_n,offset_e,offset_z,
-                        {update->mse_dat->covariance[0],update->mse_dat->covariance[2],update->mse_dat->covariance[5],update->mse_dat->covariance[1]}
-                    },
-                    {use_offset_time,use_offset_n,use_offset_e,use_offset_z,
-                        {use_covariance[0],use_covariance[1],use_covariance[2],use_covariance[3]}
-                    },
+        // serialize data
+        trnu_pub_t pub_data={
+            TRNU_PUB_SYNC,
+            {
+                {update->pt_dat->time,update->pt_dat->x,update->pt_dat->y,update->pt_dat->z,
+                    {update->pt_dat->covariance[0],update->pt_dat->covariance[2],update->pt_dat->covariance[5],update->pt_dat->covariance[1]}
                 },
-                update->reinit_count,
-                update->reinit_tlast,
-                update->filter_state,
-                update->success,
-                update->is_converged,
-                update->is_valid,
-                update->mb1_cycle,
-                update->ping_number,
-                n_converged_streak,
-                n_converged_tot,
-                n_unconverged_streak,
-                n_unconverged_tot,
-                update->mb1_time,
-                reinit_time,
-                update->update_time
-            };
+                {update->mle_dat->time,update->mle_dat->x,update->mle_dat->y,update->mle_dat->z,
+                    {update->mle_dat->covariance[0],update->mle_dat->covariance[2],update->mle_dat->covariance[5],update->mle_dat->covariance[1]}
+                },
+                {update->mse_dat->time,update->mse_dat->x,update->mse_dat->y,update->mse_dat->z,
+                    {update->mse_dat->covariance[0],update->mse_dat->covariance[2],update->mse_dat->covariance[5],update->mse_dat->covariance[1]}
+                },
+                {update->mse_dat->time,offset_n,offset_e,offset_z,
+                    {update->mse_dat->covariance[0],update->mse_dat->covariance[2],update->mse_dat->covariance[5],update->mse_dat->covariance[1]}
+                },
+                {use_offset_time,use_offset_n,use_offset_e,use_offset_z,
+                    {use_covariance[0],use_covariance[1],use_covariance[2],use_covariance[3]}
+                },
+            },
+            update->reinit_count,
+            update->reinit_tlast,
+            update->filter_state,
+            update->success,
+            update->is_converged,
+            update->is_valid,
+            update->mb1_cycle,
+            update->ping_number,
+            n_converged_streak,
+            n_converged_tot,
+            n_unconverged_streak,
+            n_unconverged_tot,
+            update->mb1_time,
+            reinit_time,
+            update->update_time
+        };
 
-            if( (iobytes=netif_pub(trnusvr,(char *)&pub_data, sizeof(pub_data)))>0){
-                retval=iobytes;
-                MST_COUNTER_INC(app_stats->stats->events[MBTPP_EV_TRNU_PUBN]);
-            }else{
-                MST_COUNTER_INC(app_stats->stats->events[MBTPP_EV_ETRNUPUB]);
-            }
+        if( (iobytes=netif_pub(netif,(char *)&pub_data, sizeof(pub_data)))>0){
+            retval=iobytes;
+            MST_COUNTER_INC(app_stats->stats->events[MBTPP_EV_TRNU_PUBN]);
+        }else{
+            MST_COUNTER_INC(app_stats->stats->events[MBTPP_EV_ETRNUPUB]);
         }
+
     }
     return retval;
 }
 
-int mbtrnpp_trnu_pubempty_osocket(double time, double lat, double lon, double depth, msock_socket_t *pub_sock)
+int mbtrnpp_trnu_pubempty_osocket(double time, double lat, double lon, double depth, netif_t *netif)
 {
     int retval=-1;
 
-    if(NULL!=pub_sock){
+    if(NULL!=netif){
         retval=0;
 
-        if(NULL!=pub_sock){
             int iobytes=0;
 
             int izero = 0;
@@ -4855,62 +4945,60 @@ int mbtrnpp_trnu_pubempty_osocket(double time, double lat, double lon, double de
                 dzero,
             };
 
-            if( (iobytes=netif_pub(trnusvr,(char *)&pub_data, sizeof(pub_data)))>0){
+            if( (iobytes=netif_pub(netif,(char *)&pub_data, sizeof(pub_data)))>0){
                 retval=iobytes;
                 MST_COUNTER_INC(app_stats->stats->events[MBTPP_EV_TRNU_PUBEMPTYN]);
             }else{
                 MST_COUNTER_INC(app_stats->stats->events[MBTPP_EV_ETRNUPUBEMPTY]);
             }
-        }
     }
     return retval;
 }
 
-int mbtrnpp_trnu_pub_osocket_org(trn_update_t *update,
-                             msock_socket_t *pub_sock)
-{
-    int retval=-1;
-
-    if(NULL!=update && NULL!=pub_sock){
-        retval=0;
-
-        if(NULL!=update && NULL!=pub_sock){
-            int iobytes=0;
-            // serialize data
-            trnu_pub_org_t pub_data={
-                TRNU_PUB_SYNC,
-                {
-                    {update->pt_dat->time,update->pt_dat->x,update->pt_dat->y,update->pt_dat->z,
-                        {update->pt_dat->covariance[0],update->pt_dat->covariance[2],update->pt_dat->covariance[5],update->pt_dat->covariance[1]}
-                    },
-                    {update->mle_dat->time,update->mle_dat->x,update->mle_dat->y,update->mle_dat->z,
-                        {update->mle_dat->covariance[0],update->mle_dat->covariance[2],update->mle_dat->covariance[5],update->mle_dat->covariance[1]}
-                    },
-                    {update->mse_dat->time,update->mse_dat->x,update->mse_dat->y,update->mse_dat->z,
-                        {update->mse_dat->covariance[0],update->mse_dat->covariance[2],update->mse_dat->covariance[5],update->mse_dat->covariance[1]}
-                    }
-                },
-                update->reinit_count,
-                update->reinit_tlast,
-                update->filter_state,
-                update->success,
-                update->is_converged,
-                update->is_valid,
-                update->mb1_cycle,
-                update->ping_number,
-                update->mb1_time,
-                update->update_time
-            };
-
-            if( (iobytes=netif_pub(trnusvr,(char *)&pub_data, sizeof(pub_data)))>0){
-                retval=iobytes;
-                MST_COUNTER_INC(app_stats->stats->events[MBTPP_EV_TRNU_PUBN]);
-            }
-        }
-    }
-    return retval;
-}
-
+//int mbtrnpp_trnu_pub_osocket_org(trn_update_t *update,
+//                             msock_socket_t *pub_sock)
+//{
+//    int retval=-1;
+//
+//    if(NULL!=update && NULL!=pub_sock){
+//        retval=0;
+//
+//            int iobytes=0;
+//            // serialize data
+//            trnu_pub_org_t pub_data={
+//                TRNU_PUB_SYNC,
+//                {
+//                    {update->pt_dat->time,update->pt_dat->x,update->pt_dat->y,update->pt_dat->z,
+//                        {update->pt_dat->covariance[0],update->pt_dat->covariance[2],update->pt_dat->covariance[5],update->pt_dat->covariance[1]}
+//                    },
+//                    {update->mle_dat->time,update->mle_dat->x,update->mle_dat->y,update->mle_dat->z,
+//                        {update->mle_dat->covariance[0],update->mle_dat->covariance[2],update->mle_dat->covariance[5],update->mle_dat->covariance[1]}
+//                    },
+//                    {update->mse_dat->time,update->mse_dat->x,update->mse_dat->y,update->mse_dat->z,
+//                        {update->mse_dat->covariance[0],update->mse_dat->covariance[2],update->mse_dat->covariance[5],update->mse_dat->covariance[1]}
+//                    }
+//                },
+//                update->reinit_count,
+//                update->reinit_tlast,
+//                update->filter_state,
+//                update->success,
+//                update->is_converged,
+//                update->is_valid,
+//                update->mb1_cycle,
+//                update->ping_number,
+//                update->mb1_time,
+//                update->update_time
+//            };
+//
+//            if( (iobytes=netif_pub(trnusvr,(char *)&pub_data, sizeof(pub_data)))>0){
+//                retval=iobytes;
+//                MST_COUNTER_INC(app_stats->stats->events[MBTPP_EV_TRNU_PUBN]);
+//            }
+//
+//    }
+//    return retval;
+//}
+//
 int mbtrnpp_init_trn(wtnav_t **pdest, int verbose, trn_config_t *cfg)
 {
     int retval = -1;
@@ -5077,6 +5165,44 @@ int mbtrnpp_init_trnusvr(netif_t **psvr, char *host, int port, wtnav_t *trn, boo
     return retval;
 }
 
+int mbtrnpp_init_trnumsvr(netif_t **psvr, char *host, int port, wtnav_t *trn, bool verbose)
+{
+    int retval = -1;
+    PMPRINT(MOD_MBTRNPP,MM_DEBUG,(stderr,"configuring trnum (update) server socket using %s:%d\n",host,port));
+    if(NULL!=psvr && NULL!=host){
+        netif_t *svr = netif_mcast_new("trnumsvr",host,
+                                 port,
+                                 ST_UDPM,
+                                 IFM_REQRES,
+                                 mbtrn_cfg->trnumsvr_ttl,
+                                 trnif_msg_read_trnu,
+                                 trnif_msg_handle_trnu,
+                                 trnif_msg_pub_trnu);
+
+
+        if(NULL!=svr){
+            *psvr = svr;
+            g_trnu_res->trn=trn_instance;
+            g_trnu_res->reset_callback=s_mbtrnpp_trnu_reset_callback;
+
+            netif_set_reqres_res(svr,g_trnu_res);
+            //            trnif_res_t rr_resources={trn};
+            //netif_set_reqres_res(svr,trn);
+            fprintf(stderr,"trnumsvr netif:\n");
+            netif_show(svr,true,5);
+            netif_init_log(svr, "trnumsvr", (NULL!=mbtrn_cfg->trn_log_dir?mbtrn_cfg->trn_log_dir:"."), s_mbtrnpp_session_str(NULL,0,RF_NONE));
+            mlog_tprintf(svr->mlog_id,"*** trnumsvr session start (TEST) ***\n");
+            mlog_tprintf(svr->mlog_id,"libnetif v[%s] build[%s]\n",netif_get_version(),netif_get_build());
+            retval = netif_connect(svr);
+        }else{
+            fprintf(stderr,"%s:%d - ERR allocation\n",__FUNCTION__,__LINE__);
+        }
+    }else{
+        fprintf(stderr,"%s:%d - ERR invalid args\n",__FUNCTION__,__LINE__);
+    }
+    return retval;
+}
+
 /*--------------------------------------------------------------------*/
 int mbtrnpp_trn_get_bias_estimates(wtnav_t *self, wposet_t *pt, trn_update_t *pstate) {
     int retval = -1;
@@ -5199,9 +5325,17 @@ int mbtrnpp_trn_publish(trn_update_t *pstate, trn_config_t *cfg)
 
             MST_METRIC_START(app_stats->stats->metrics[MBTPP_CH_TRN_TRNU_PUB_XT], mtime_dtime());
 
-            mbtrnpp_trnu_pub_osocket(pstate, trnusvr->socket);
+            mbtrnpp_trnu_pub_osocket(pstate, trnusvr);
 
             MST_METRIC_LAP(app_stats->stats->metrics[MBTPP_CH_TRN_TRNU_PUB_XT], mtime_dtime());
+        }
+        if( OUTPUT_FLAG_SET(OUTPUT_TRNUM_SVR_EN) ){
+
+            MST_METRIC_START(app_stats->stats->metrics[MBTPP_CH_TRN_TRNUM_PUB_XT], mtime_dtime());
+
+            mbtrnpp_trnu_pub_osocket(pstate, trnumsvr);
+
+            MST_METRIC_LAP(app_stats->stats->metrics[MBTPP_CH_TRN_TRNUM_PUB_XT], mtime_dtime());
         }
 // fprintf(stderr, "%s:%d:%s: pt_dat: %f  %f %f %f  %f %f %f %f  mle_dat: %f  %f %f %f  %f %f %f %f  mse_dat: %f  %f %f %f  %f %f %f %f"
 // " %d %f %d %d %d %d %d %d %f %f\n",
@@ -5353,12 +5487,20 @@ int mbtrnpp_trn_process_mb1(wtnav_t *tnav, mb1_t *mb1, trn_config_t *cfg)
         MST_METRIC_LAP(app_stats->stats->metrics[MBTPP_CH_TRN_TRNSVR_XT], mtime_dtime());
 
         MST_METRIC_START(app_stats->stats->metrics[MBTPP_CH_TRN_TRNUSVR_XT], mtime_dtime());
+
        // server: update (trnu server) client connections
         netif_update_connections(trnusvr);
         // server: service (trnu server) client requests
         netif_reqres(trnusvr);
 
         MST_METRIC_LAP(app_stats->stats->metrics[MBTPP_CH_TRN_TRNUSVR_XT], mtime_dtime());
+
+        MST_METRIC_START(app_stats->stats->metrics[MBTPP_CH_TRN_TRNUMSVR_XT], mtime_dtime());
+       // server: update (trnum server) client connections
+        netif_update_connections(trnumsvr);
+        // server: service (trnum server) client requests
+        netif_reqres(trnumsvr);
+        MST_METRIC_LAP(app_stats->stats->metrics[MBTPP_CH_TRN_TRNUMSVR_XT], mtime_dtime());
 
         if (do_process) {
             MST_COUNTER_INC(app_stats->stats->events[MBTPP_EV_TRN_PROCN]);
@@ -5390,7 +5532,7 @@ int mbtrnpp_trn_process_mb1(wtnav_t *tnav, mb1_t *mb1, trn_config_t *cfg)
 
                         MST_METRIC_LAP(app_stats->stats->metrics[MBTPP_CH_TRN_BIASEST_XT], mtime_dtime());
 
-                        if( test==0){
+                      if( test==0){
                             if(NULL!=pstate->pt_dat &&  NULL!= pstate->mle_dat && NULL!=pstate->mse_dat ){
 
                                 // get number of reinits
@@ -5439,7 +5581,8 @@ int mbtrnpp_trn_process_mb1(wtnav_t *tnav, mb1_t *mb1, trn_config_t *cfg)
                                             "| %11.6f %11.6f %8.3f | %d filtered beams - Ping not used - failed bias estimate\n",
                             time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6], mb1->sounding.ts,
                             mb1->sounding.lon, mb1->sounding.lat, mb1->sounding.depth, mb1->sounding.nbeams);
-                            mbtrnpp_trnu_pubempty_osocket(mb1->sounding.ts, mb1->sounding.lat, mb1->sounding.lon, mb1->sounding.depth, trnusvr->socket);
+                            mbtrnpp_trnu_pubempty_osocket(mb1->sounding.ts, mb1->sounding.lat, mb1->sounding.lon, mb1->sounding.depth, trnusvr);
+                            mbtrnpp_trnu_pubempty_osocket(mb1->sounding.ts, mb1->sounding.lat, mb1->sounding.lon, mb1->sounding.depth, trnumsvr);
                         }
                     }else{
                         mlog_tprintf(trnu_alog_id,"ERR: trncli_send_update failed [%d] [%d/%s]\n",test,errno,strerror(errno));
@@ -5451,7 +5594,8 @@ int mbtrnpp_trn_process_mb1(wtnav_t *tnav, mb1_t *mb1, trn_config_t *cfg)
                                         "| %11.6f %11.6f %8.3f | %d filtered beams - Ping not used - failed trn processing\n",
                         time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6], mb1->sounding.ts,
                         mb1->sounding.lon, mb1->sounding.lat, mb1->sounding.depth, mb1->sounding.nbeams);
-                        mbtrnpp_trnu_pubempty_osocket(mb1->sounding.ts, mb1->sounding.lat, mb1->sounding.lon, mb1->sounding.depth, trnusvr->socket);
+                        mbtrnpp_trnu_pubempty_osocket(mb1->sounding.ts, mb1->sounding.lat, mb1->sounding.lon, mb1->sounding.depth, trnusvr);
+                        mbtrnpp_trnu_pubempty_osocket(mb1->sounding.ts, mb1->sounding.lat, mb1->sounding.lon, mb1->sounding.depth, trnumsvr);
                     }
                     wmeast_destroy(mt);
                     wposet_destroy(pt);
