@@ -610,6 +610,7 @@ static int s_csv_to_mb1(mb1_t *dest, mfile_file_t *src)
         char **fields=NULL;
         int32_t test = 0;
         if( (test=s_read_csv_rec(src,line,TRNCLI_CSV_LINE_BYTES))>0){
+            // tokenize assigns value to fields and returns number of entries
             test=s_tokenize(line, fields, "\n", MB1_FIELDS);
             if( fields!=NULL && test>=MB1_FIXED_FIELDS ){
    
