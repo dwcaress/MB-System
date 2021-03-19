@@ -307,12 +307,9 @@ void msock_connection_free(void *pself)
 {
     if (NULL!=pself) {
         msock_connection_t *self = (msock_connection_t *)pself;
-        if (NULL!=self) {
-//            msock_addr_destroy(&self->addr);
-            msock_connection_destroy(&self);
-            free(self);
-            self=NULL;
-        }
+        msock_connection_destroy(&self);
+        free(self);
+        self=NULL;
     }
 }
 // End function msock_connection_free
