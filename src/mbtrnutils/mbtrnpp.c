@@ -1924,18 +1924,18 @@ static int s_parse_opt_input(mbtrnpp_cfg_t *cfg, char *opt_str)
             // parse option and set mode
             char *psdef=NULL;
             if ((psdef=strstr(opt_str, "socket:"))!=NULL) {
-                if(NULL!=psdef){
-                    size_t sdef_len=strlen(psdef);
-                    if(sdef_len>0 && sdef_len<MB_PATH_SIZE){
-                        psdef+=strlen("socket:");
-                        // set socket mode and definition
-                        cfg->input_mode = INPUT_MODE_SOCKET;
-                        sprintf(cfg->socket_definition,"%s",psdef);
-                    }else{
-                        fprintf(stderr,"socket definition length invalid [%s/%zu/%zu]\n",psdef,sdef_len,(size_t)MB_PATH_SIZE);
-                    }
-//            fprintf(stderr, "socket_definition|%s\n", cfg->socket_definition);
+
+                size_t sdef_len=strlen(psdef);
+                if(sdef_len>0 && sdef_len<MB_PATH_SIZE){
+                    psdef+=strlen("socket:");
+                    // set socket mode and definition
+                    cfg->input_mode = INPUT_MODE_SOCKET;
+                    sprintf(cfg->socket_definition,"%s",psdef);
+                }else{
+                    fprintf(stderr,"socket definition length invalid [%s/%zu/%zu]\n",psdef,sdef_len,(size_t)MB_PATH_SIZE);
                 }
+//            fprintf(stderr, "socket_definition|%s\n", cfg->socket_definition);
+    
             }else {
                 // cfg->input is input file name
                 cfg->input_mode = INPUT_MODE_FILE;
@@ -2260,25 +2260,25 @@ static int s_mbtrnpp_kvparse_fn(char *key, char *val, void *cfg)
         }
 
         // perform mnemonic substitutions
-        char *val=NULL;
-        s_sub_mnem(&opts->input,0,opts->input,CFG_MNEM_TRN_RESON_HOST,s_mnem_value(&val,0,CFG_MNEM_TRN_RESON_HOST));
-        MEM_CHKINVALIDATE(val);
-        s_sub_mnem(&opts->output,0,opts->output,CFG_MNEM_SESSION,s_mnem_value(&val,0,CFG_MNEM_SESSION));
-        MEM_CHKINVALIDATE(val);
-        s_sub_mnem(&opts->mb_out,0,opts->mb_out,CFG_MNEM_TRN_HOST,s_mnem_value(&val,0,CFG_MNEM_TRN_HOST));
-        MEM_CHKINVALIDATE(val);
-        s_sub_mnem(&opts->trn_out,0,opts->trn_out,CFG_MNEM_TRN_HOST,s_mnem_value(&val,0,CFG_MNEM_TRN_HOST));
-        MEM_CHKINVALIDATE(val);
-        s_sub_mnem(&opts->trn_mid,0,opts->trn_mid,CFG_MNEM_TRN_SESSION,s_mnem_value(&val,0,CFG_MNEM_TRN_SESSION));
-        MEM_CHKINVALIDATE(val);
-        s_sub_mnem(&opts->log_directory,0,opts->log_directory,CFG_MNEM_TRN_LOGFILES,s_mnem_value(&val,0,CFG_MNEM_TRN_LOGFILES));
-        MEM_CHKINVALIDATE(val);
-        s_sub_mnem(&opts->trn_map,0,opts->trn_map,CFG_MNEM_TRN_MAPFILES,s_mnem_value(&val,0,CFG_MNEM_TRN_MAPFILES));
-        MEM_CHKINVALIDATE(val);
-        s_sub_mnem(&opts->trn_par,0,opts->trn_par,CFG_MNEM_TRN_DATAFILES,s_mnem_value(&val,0,CFG_MNEM_TRN_DATAFILES));
-        MEM_CHKINVALIDATE(val);
-        s_sub_mnem(&opts->trn_cfg,0,opts->trn_cfg,CFG_MNEM_TRN_DATAFILES,s_mnem_value(&val,0,CFG_MNEM_TRN_DATAFILES));
-        MEM_CHKINVALIDATE(val);
+        char *mval=NULL;
+        s_sub_mnem(&opts->input,0,opts->input,CFG_MNEM_TRN_RESON_HOST,s_mnem_value(&mval,0,CFG_MNEM_TRN_RESON_HOST));
+        MEM_CHKINVALIDATE(mval);
+        s_sub_mnem(&opts->output,0,opts->output,CFG_MNEM_SESSION,s_mnem_value(&mval,0,CFG_MNEM_SESSION));
+        MEM_CHKINVALIDATE(mval);
+        s_sub_mnem(&opts->mb_out,0,opts->mb_out,CFG_MNEM_TRN_HOST,s_mnem_value(&mval,0,CFG_MNEM_TRN_HOST));
+        MEM_CHKINVALIDATE(mval);
+        s_sub_mnem(&opts->trn_out,0,opts->trn_out,CFG_MNEM_TRN_HOST,s_mnem_value(&mval,0,CFG_MNEM_TRN_HOST));
+        MEM_CHKINVALIDATE(mval);
+        s_sub_mnem(&opts->trn_mid,0,opts->trn_mid,CFG_MNEM_TRN_SESSION,s_mnem_value(&mval,0,CFG_MNEM_TRN_SESSION));
+        MEM_CHKINVALIDATE(mval);
+        s_sub_mnem(&opts->log_directory,0,opts->log_directory,CFG_MNEM_TRN_LOGFILES,s_mnem_value(&mval,0,CFG_MNEM_TRN_LOGFILES));
+        MEM_CHKINVALIDATE(mval);
+        s_sub_mnem(&opts->trn_map,0,opts->trn_map,CFG_MNEM_TRN_MAPFILES,s_mnem_value(&mval,0,CFG_MNEM_TRN_MAPFILES));
+        MEM_CHKINVALIDATE(mval);
+        s_sub_mnem(&opts->trn_par,0,opts->trn_par,CFG_MNEM_TRN_DATAFILES,s_mnem_value(&mval,0,CFG_MNEM_TRN_DATAFILES));
+        MEM_CHKINVALIDATE(mval);
+        s_sub_mnem(&opts->trn_cfg,0,opts->trn_cfg,CFG_MNEM_TRN_DATAFILES,s_mnem_value(&mval,0,CFG_MNEM_TRN_DATAFILES));
+        MEM_CHKINVALIDATE(mval);
     }else{
         fprintf(stderr, "ERR - NULL key/val [%s / %s]\n", (key==NULL?"":key),val);
     }
