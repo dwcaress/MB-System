@@ -3944,7 +3944,6 @@ int main(int argc, char **argv) {
 
             for (int i = 0; i < MB_DATA_KINDS; i++) {
               if (num_kinds_read[i] > 0) {
-                char *message = NULL;
                 if (mb_notice_message(mbtrn_cfg->verbose, i, &message) == MB_SUCCESS) {
                   fprintf(stderr, "     %6d %s\n", num_kinds_read[i], message);
                   num_kinds_read[i] = 0;
@@ -5200,17 +5199,13 @@ int mbtrnpp_check_reinit(trn_update_t *pstate, trn_config_t *cfg)
 
     if(NULL!=pstate && NULL!=cfg){
 
-        double offset_n = 0.0;
-        double offset_e = 0.0;
-        double offset_z = 0.0;
-        double covariance_mag = 0.0;
         if (use_offset_time == 0.0)
           use_offset_time = pstate->mse_dat->time;
         if (pstate->mse_dat->time > 0.0) {
-          offset_n = pstate->mse_dat->x - pstate->pt_dat->x;
-          offset_e = pstate->mse_dat->y - pstate->pt_dat->y;
-          offset_z = pstate->mse_dat->z - pstate->pt_dat->z;
-          covariance_mag = sqrt(pstate->mse_dat->covariance[0] * pstate->mse_dat->covariance[0]
+          double offset_n = pstate->mse_dat->x - pstate->pt_dat->x;
+          double offset_e = pstate->mse_dat->y - pstate->pt_dat->y;
+          double offset_z = pstate->mse_dat->z - pstate->pt_dat->z;
+          double covariance_mag = sqrt(pstate->mse_dat->covariance[0] * pstate->mse_dat->covariance[0]
                     + pstate->mse_dat->covariance[1] * pstate->mse_dat->covariance[1]
                     + pstate->mse_dat->covariance[2] * pstate->mse_dat->covariance[2]);
           if (covariance_mag <= mbtrn_cfg->covariance_magnitude_max) {

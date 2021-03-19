@@ -334,7 +334,7 @@ static int32_t s_read_mb1_rec( mb1_frame_t **pdest, mfile_file_t *src, app_cfg_t
                 readlen=MB1_HEADER_BYTES-1;
 
                 if(NULL!=cfg && cfg->verbose>2){
-                    fprintf(stderr,"%d: read_bytes[%lld] bp[%p] err[%d/%s] readlen[%u]\n",__LINE__,read_bytes,bp,errno,strerror(errno),readlen);
+                    fprintf(stderr,"%d: read_bytes[%"PRId64"] bp[%p] err[%d/%s] readlen[%u]\n",__LINE__,read_bytes,bp,errno,strerror(errno),readlen);
                 }
                 break;
             }
@@ -346,11 +346,11 @@ static int32_t s_read_mb1_rec( mb1_frame_t **pdest, mfile_file_t *src, app_cfg_t
             fprintf(stderr,"%d: sounding[%p]\n",__LINE__,dest->sounding);
             fprintf(stderr,"%d: chksum[%p]\n",__LINE__,dest->checksum);
             fprintf(stderr,"%d: readlen[%u]\n",__LINE__,readlen);
-            fprintf(stderr,"%d: sizeof double[%zd]\n",__LINE__,sizeof(double));
-            fprintf(stderr,"%d: sizeof int[%zd]\n",__LINE__,sizeof(int));
-            fprintf(stderr,"%d: sizeof mb1_sounding_t[%zd]\n",__LINE__,sizeof(mb1_sounding_t));
-            fprintf(stderr,"%d: sizeof mb1_beam_t[%zd]\n",__LINE__,sizeof(mb1_beam_t));
-            fprintf(stderr,"%d: sizeof mb1_frame_t[%zd]\n",__LINE__,sizeof(mb1_frame_t));
+            fprintf(stderr,"%d: sizeof double[%zu]\n",__LINE__,sizeof(double));
+            fprintf(stderr,"%d: sizeof int[%zu]\n",__LINE__,sizeof(int));
+            fprintf(stderr,"%d: sizeof mb1_sounding_t[%zu]\n",__LINE__,sizeof(mb1_sounding_t));
+            fprintf(stderr,"%d: sizeof mb1_beam_t[%zu]\n",__LINE__,sizeof(mb1_beam_t));
+            fprintf(stderr,"%d: sizeof mb1_frame_t[%zu]\n",__LINE__,sizeof(mb1_frame_t));
         }
 
         // if start of sync found, read header (fixed-length sounding bytes)

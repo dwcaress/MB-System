@@ -754,7 +754,7 @@ static int s_app_cfg_show(app_cfg_t *self,bool verbose, int indent)
     fprintf(stderr,"%*s%*s  %*.3lf\n",indent,(indent>0?" ":""),wkey,"logstats",wval,self->stats_log_period_sec);
     fprintf(stderr,"%*s%*s  %*s\n",indent,(indent>0?" ":""),wkey,"no-log",wval,(self->verbose?"Y":"N"));
 
-    fprintf(stderr,"%*s%*s  %*u\n",indent,(indent>0?" ":""),wkey,"update_n",wval,self->update_n);
+    fprintf(stderr,"%*s%*s  %*d\n",indent,(indent>0?" ":""),wkey,"update_n",wval,self->update_n);
     fprintf(stderr,"%*s%*s  %*d\n",indent,(indent>0?" ":""),wkey,"trnu_hbeat",wval,self->trnu_hbeat);
 
     return retval;
@@ -1015,113 +1015,117 @@ static int s_trnucli_test_csv(app_cfg_t *cfg)
 static int s_trnucli_test_trnu_async(app_cfg_t *cfg)
 {
     int retval=-1;
+    if(NULL!=cfg){
 
-    // configure a trnu async context instance
-    // applications may handle updates, or assign an update callback function
-    //    For this client:
-    //    - updates handled by app (NULL handler assigned)
-    //    - hbeat_to_sec     : heartbeat period
-    //    - enodata_delay_ms : delay if data not available
-    //    - erecon_delay_ms  : delay  if connect attempt fails
-    //    - recon_to_sec     : reconnect if data unavailable
-    trnucli_ctx_t *ctx =  trnucli_ctx_new(cfg->trnu_host,
-                          cfg->trnu_port,
-                          cfg->trnu_ttl,
-                          cfg->ctx_flags,
-                          cfg->cli_flags,
-                          cfg->hbeat_to_sec,
-                          cfg->recon_to_sec,
-                          cfg->listen_to_ms,
-                          cfg->enodata_delay_ms,
-                          cfg->erecon_delay_ms,
-                          NULL);
+        // configure a trnu async context instance
+        // applications may handle updates, or assign an update callback function
+        //    For this client:
+        //    - updates handled by app (NULL handler assigned)
+        //    - hbeat_to_sec     : heartbeat period
+        //    - enodata_delay_ms : delay if data not available
+        //    - erecon_delay_ms  : delay  if connect attempt fails
+        //    - recon_to_sec     : reconnect if data unavailable
+        trnucli_ctx_t *ctx =  trnucli_ctx_new(cfg->trnu_host,
+                                              cfg->trnu_port,
+                                              cfg->trnu_ttl,
+                                              cfg->ctx_flags,
+                                              cfg->cli_flags,
+                                              cfg->hbeat_to_sec,
+                                              cfg->recon_to_sec,
+                                              cfg->listen_to_ms,
+                                              cfg->enodata_delay_ms,
+                                              cfg->erecon_delay_ms,
+                                              NULL);
 
-    if(NULL!=ctx){
+        if(NULL!=ctx){
 
-        // configure stats logging
-        trnucli_ctx_set_stats_log_period(ctx,cfg->stats_log_period_sec);
+            // configure stats logging
+            trnucli_ctx_set_stats_log_period(ctx,cfg->stats_log_period_sec);
 
-        // start the client in a separate worker thread
-        //  - manages connection (reconnects on timeout)
-        //  - receives updates w/ optional update handler callback
-        int test=trnucli_ctx_start(ctx);
+            // start the client in a separate worker thread
+            //  - manages connection (reconnects on timeout)
+            //  - receives updates w/ optional update handler callback
+            int test=trnucli_ctx_start(ctx);
 
-        if(test==0){
-            // success
-            fprintf(stderr,"ctx start OK\n");
-            mlog_tprintf(cfg->log_id,"host             %s\n",cfg->trnu_host);
-            mlog_tprintf(cfg->log_id,"port             %d\n",cfg->trnu_port);
-            mlog_tprintf(cfg->log_id,"ctx_flags        %08X\n",cfg->ctx_flags);
-            mlog_tprintf(cfg->log_id,"cli_flags        %08X\n",cfg->cli_flags);
-            mlog_tprintf(cfg->log_id,"ttl              %d\n",cfg->trnu_ttl);
-            mlog_tprintf(cfg->log_id,"hbeat_to_sec     %.3lf\n",cfg->hbeat_to_sec);
-            mlog_tprintf(cfg->log_id,"listen_to_ms     %"PRIu32"\n",cfg->listen_to_ms);
-            mlog_tprintf(cfg->log_id,"enodata_delay_ms %"PRIu32"\n",cfg->enodata_delay_ms);
-            mlog_tprintf(cfg->log_id,"erecon_delay_ms  %"PRIu32"\n",cfg->erecon_delay_ms);
-            mlog_tprintf(cfg->log_id,"recon_to_sec     %.3lf\n",cfg->recon_to_sec);
-        }else{
-            fprintf(stderr,"ERR - ctx start failed\n");
-            mlog_tprintf(cfg->log_id,"ERR - ctx start failed\n");
-        }
-
-        // app does things here...
-        // this app prints status to demo API methods
-        // until the use interrupts (CTRL-C)
-        int x=0;
-        while(test==0 && !g_interrupt){
-
-            // reinit per config
-            if(NULL!=cfg && cfg->test_reset_mod>0 && x>0 && x%cfg->test_reset_mod==0 ){
-                fprintf(stderr,"\nTest Reset mod/update[%d/%d]\n",cfg->test_reset_mod,x);
-                int test=trnucli_ctx_reset_trn(ctx);
-                fprintf(stderr,"\nReset returned[%d]\n",test);
+            if(test==0){
+                // success
+                fprintf(stderr,"ctx start OK\n");
+                mlog_tprintf(cfg->log_id,"host             %s\n",cfg->trnu_host);
+                mlog_tprintf(cfg->log_id,"port             %d\n",cfg->trnu_port);
+                mlog_tprintf(cfg->log_id,"ctx_flags        %08X\n",cfg->ctx_flags);
+                mlog_tprintf(cfg->log_id,"cli_flags        %08X\n",cfg->cli_flags);
+                mlog_tprintf(cfg->log_id,"ttl              %d\n",cfg->trnu_ttl);
+                mlog_tprintf(cfg->log_id,"hbeat_to_sec     %.3lf\n",cfg->hbeat_to_sec);
+                mlog_tprintf(cfg->log_id,"listen_to_ms     %"PRIu32"\n",cfg->listen_to_ms);
+                mlog_tprintf(cfg->log_id,"enodata_delay_ms %"PRIu32"\n",cfg->enodata_delay_ms);
+                mlog_tprintf(cfg->log_id,"erecon_delay_ms  %"PRIu32"\n",cfg->erecon_delay_ms);
+                mlog_tprintf(cfg->log_id,"recon_to_sec     %.3lf\n",cfg->recon_to_sec);
             }else{
-                fprintf(stderr,"\nSkipping Test Reset mod/update[%d/%d]\n",cfg->test_reset_mod,x);
-            }
-            x++;
-
-            // show the context...
-            fprintf(stderr,"\nUpdate Status\n");
-            fprintf(stderr,"     updates since last read        [%"PRIu32"]\n",trnucli_ctx_new_count(ctx));
-            fprintf(stderr,"     update arrival time (arrtime)  [%.3lf]\n",trnucli_ctx_update_arrtime(ctx));
-            fprintf(stderr,"     update arrival age  (arrage)   [%.3lf]\n",trnucli_ctx_update_arrage(ctx));
-            fprintf(stderr,"     update data time    (mb1time)  [%.3lf]\n",trnucli_ctx_update_mb1time(ctx));
-            fprintf(stderr,"     update data age     (mb1age)   [%.3lf]\n",trnucli_ctx_update_mb1age(ctx));
-            fprintf(stderr,"     update host time    (hosttime) [%.3lf]\n",trnucli_ctx_update_hosttime(ctx));
-            fprintf(stderr,"     update host age     (hostage)  [%.3lf]\n",trnucli_ctx_update_hostage(ctx));
-
-            // show stats...
-            fprintf(stderr,"\nContext Stats\n");
-            trnucli_stats_t *stats=NULL;
-            trnucli_ctx_stats(ctx,&stats);
-            trnucli_ctx_stat_show(stats,true,5);
-            if(NULL!=stats)free(stats);
-
-            fprintf(stderr,"\nTRN Client Context\n");
-            trnucli_ctx_show(ctx,false,5);
-
-            // show latest update...
-            fprintf(stderr,"\nUpdate Data\n");
-            trnu_pub_t latest={0};
-            if(trnucli_ctx_last_update(ctx,&latest,NULL)==0){
-                // format per config (pretty, hex, csv, etc.)
-                s_trnucli_process_update(&latest,cfg);
+                fprintf(stderr,"ERR - ctx start failed\n");
+                mlog_tprintf(cfg->log_id,"ERR - ctx start failed\n");
             }
 
-            // delay
-            if(cfg->async>0)
-                mtime_delay_ms(cfg->async);
-        }// while !CTRL-C
+            // app does things here...
+            // this app prints status to demo API methods
+            // until the use interrupts (CTRL-C)
+            int x=0;
+            while(test==0 && !g_interrupt){
 
-        fprintf(stderr,"user interrupt - stopping\n");
-        mlog_tprintf(cfg->log_id,"user interrupt - stopping\n");
+                // reinit per config
+                if(cfg->test_reset_mod>0 && x>0 && (x%cfg->test_reset_mod)==0 ){
+                    fprintf(stderr,"\nTest Reset mod/update[%d/%d]\n",cfg->test_reset_mod,x);
+                    int test=trnucli_ctx_reset_trn(ctx);
+                    fprintf(stderr,"\nReset returned[%d]\n",test);
+                }else{
+                    fprintf(stderr,"\nSkipping Test Reset mod/update[%d/%d]\n",cfg->test_reset_mod,x);
+                }
 
-        // release client resources
-        fprintf(stderr,"destroying ctx\n");
-        mlog_tprintf(cfg->log_id,"destroying ctx\n");
-        trnucli_ctx_destroy(&ctx);
+                x++;
+
+                // show the context...
+                fprintf(stderr,"\nUpdate Status\n");
+                fprintf(stderr,"     updates since last read        [%"PRIu32"]\n",trnucli_ctx_new_count(ctx));
+                fprintf(stderr,"     update arrival time (arrtime)  [%.3lf]\n",trnucli_ctx_update_arrtime(ctx));
+                fprintf(stderr,"     update arrival age  (arrage)   [%.3lf]\n",trnucli_ctx_update_arrage(ctx));
+                fprintf(stderr,"     update data time    (mb1time)  [%.3lf]\n",trnucli_ctx_update_mb1time(ctx));
+                fprintf(stderr,"     update data age     (mb1age)   [%.3lf]\n",trnucli_ctx_update_mb1age(ctx));
+                fprintf(stderr,"     update host time    (hosttime) [%.3lf]\n",trnucli_ctx_update_hosttime(ctx));
+                fprintf(stderr,"     update host age     (hostage)  [%.3lf]\n",trnucli_ctx_update_hostage(ctx));
+
+                // show stats...
+                fprintf(stderr,"\nContext Stats\n");
+                trnucli_stats_t *stats=NULL;
+                trnucli_ctx_stats(ctx,&stats);
+                trnucli_ctx_stat_show(stats,true,5);
+                if(NULL!=stats)free(stats);
+
+                fprintf(stderr,"\nTRN Client Context\n");
+                trnucli_ctx_show(ctx,false,5);
+
+                // show latest update...
+                fprintf(stderr,"\nUpdate Data\n");
+                trnu_pub_t latest={0};
+                if(trnucli_ctx_last_update(ctx,&latest,NULL)==0){
+                    // format per config (pretty, hex, csv, etc.)
+                    s_trnucli_process_update(&latest,cfg);
+                }
+
+                // delay
+                if(cfg->async>0)
+                    mtime_delay_ms(cfg->async);
+            }// while !CTRL-C
+
+            fprintf(stderr,"user interrupt - stopping\n");
+            mlog_tprintf(cfg->log_id,"user interrupt - stopping\n");
+
+            // release client resources
+            fprintf(stderr,"destroying ctx\n");
+            mlog_tprintf(cfg->log_id,"destroying ctx\n");
+            trnucli_ctx_destroy(&ctx);
+        }
+    }else{
+        fprintf(stderr,"invalid arg - NULL cfg\n");
     }
-
     return retval;
 }
 
@@ -1266,11 +1270,10 @@ static int s_trnucli_test_trnu(app_cfg_t *cfg)
 static int s_trnucli_test_bin(app_cfg_t *cfg)
 {
     int retval=0;
-    int test=-1;
 
     if(NULL!=cfg){
         mfile_file_t *ifile = mfile_file_new(cfg->ifile);
-
+        int test=-1;
         if( (test=mfile_open(ifile, MFILE_RONLY))>0){
             bool quit=false;
             trnu_pub_t update_rec;
