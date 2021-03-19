@@ -4955,50 +4955,6 @@ int mbtrnpp_trnu_pubempty_osocket(double time, double lat, double lon, double de
     return retval;
 }
 
-//int mbtrnpp_trnu_pub_osocket_org(trn_update_t *update,
-//                             msock_socket_t *pub_sock)
-//{
-//    int retval=-1;
-//
-//    if(NULL!=update && NULL!=pub_sock){
-//        retval=0;
-//
-//            int iobytes=0;
-//            // serialize data
-//            trnu_pub_org_t pub_data={
-//                TRNU_PUB_SYNC,
-//                {
-//                    {update->pt_dat->time,update->pt_dat->x,update->pt_dat->y,update->pt_dat->z,
-//                        {update->pt_dat->covariance[0],update->pt_dat->covariance[2],update->pt_dat->covariance[5],update->pt_dat->covariance[1]}
-//                    },
-//                    {update->mle_dat->time,update->mle_dat->x,update->mle_dat->y,update->mle_dat->z,
-//                        {update->mle_dat->covariance[0],update->mle_dat->covariance[2],update->mle_dat->covariance[5],update->mle_dat->covariance[1]}
-//                    },
-//                    {update->mse_dat->time,update->mse_dat->x,update->mse_dat->y,update->mse_dat->z,
-//                        {update->mse_dat->covariance[0],update->mse_dat->covariance[2],update->mse_dat->covariance[5],update->mse_dat->covariance[1]}
-//                    }
-//                },
-//                update->reinit_count,
-//                update->reinit_tlast,
-//                update->filter_state,
-//                update->success,
-//                update->is_converged,
-//                update->is_valid,
-//                update->mb1_cycle,
-//                update->ping_number,
-//                update->mb1_time,
-//                update->update_time
-//            };
-//
-//            if( (iobytes=netif_pub(trnusvr,(char *)&pub_data, sizeof(pub_data)))>0){
-//                retval=iobytes;
-//                MST_COUNTER_INC(app_stats->stats->events[MBTPP_EV_TRNU_PUBN]);
-//            }
-//
-//    }
-//    return retval;
-//}
-//
 int mbtrnpp_init_trn(wtnav_t **pdest, int verbose, trn_config_t *cfg)
 {
     int retval = -1;
