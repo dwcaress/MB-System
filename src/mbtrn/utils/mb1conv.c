@@ -598,7 +598,7 @@ static int s_app_main(app_cfg_t *cfg)
                         }
                     }else{
                         err_count++;
-                        if(NULL!=cfg && cfg->verbose>0){
+                        if(cfg->verbose>0){
                             fprintf(stderr,"s_mb1_to_mb71v5 failed [%d] ecount[%u]\n",record_size,err_count);
                         }
                     }
