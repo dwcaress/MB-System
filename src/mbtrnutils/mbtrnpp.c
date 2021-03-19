@@ -2225,6 +2225,8 @@ static int s_mbtrnpp_kvparse_fn(char *key, char *val, void *cfg)
                 }
             }else if(strcmp(key,"config")==0 ){
                 retval=0;
+            }else {
+                fprintf(stderr, "WARN - unsupported key/val [%s/%s]\n", key,val);
             }
         }else{
             // val is NULL
@@ -2256,7 +2258,7 @@ static int s_mbtrnpp_kvparse_fn(char *key, char *val, void *cfg)
                 opts->help=true;
                 retval=0;
             }else {
-                fprintf(stderr, "WARN - unsupported key/val [%s/%s]\n", key,val);
+                fprintf(stderr, "WARN - unsupported key/val [%s/NULL]\n", key);
             }
         }
 
