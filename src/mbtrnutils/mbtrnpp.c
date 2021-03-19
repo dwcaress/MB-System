@@ -1935,7 +1935,7 @@ static int s_parse_opt_input(mbtrnpp_cfg_t *cfg, char *opt_str)
                     fprintf(stderr,"socket definition length invalid [%s/%zu/%zu]\n",psdef,sdef_len,(size_t)MB_PATH_SIZE);
                 }
 //            fprintf(stderr, "socket_definition|%s\n", cfg->socket_definition);
-    
+
             }else {
                 // cfg->input is input file name
                 cfg->input_mode = INPUT_MODE_FILE;
@@ -2227,28 +2227,29 @@ static int s_mbtrnpp_kvparse_fn(char *key, char *val, void *cfg)
                 retval=0;
             }
         }else{
+            // val is NULL
             // process args w/o required arguments
              if(strcmp(key,"trn-en")==0 ){
-                if( mkvc_parse_bool(val,&opts->trn_en)==0){
-                    retval=0;
-                }else{
+//                if( mkvc_parse_bool(val,&opts->trn_en)==0){
+//                    retval=0;
+//                }else{
                     opts->trn_en=true;
                     retval=0;
-                }
+//                }
             }else if(strcmp(key,"reinit-gain")==0 ){
-                if( mkvc_parse_bool(val,&opts->reinit_gain_enable)==0){
-                    retval=0;
-                }else{
+//                if( mkvc_parse_bool(val,&opts->reinit_gain_enable)==0){
+//                    retval=0;
+//                }else{
                     opts->reinit_gain_enable=true;
                     retval=0;
-                }
+//                }
             }else if(strcmp(key,"reinit-file")==0 ){
-                if( mkvc_parse_bool(val,&opts->reinit_file_enable)==0){
-                    retval=0;
-                }else{
+//                if( mkvc_parse_bool(val,&opts->reinit_file_enable)==0){
+//                    retval=0;
+//                }else{
                     opts->reinit_file_enable=true;
                     retval=0;
-                }
+//                }
             }else if(strcmp(key,"config")==0 ){
                 retval=0;
             }else if(strcmp(key,"help")==0 ){
