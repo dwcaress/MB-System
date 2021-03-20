@@ -298,12 +298,12 @@ int trnucli_mcast_connect(trnucli_t *self, char *host, int port, int ttl)
 
         msock_set_blocking(self->trnu->sock,false);
 
-        const int optionval = 1;
+        const int so_reuse = 1;
+
 #if !defined(__CYGWIN__)
-        msock_set_opt(self->trnu->sock, SO_REUSEPORT, &optionval, sizeof(optionval));
+        msock_set_opt(self->trnu->sock, SO_REUSEPORT, &so_reuse, sizeof(so_reuse));
 #endif
-        msock_set_opt(self->trnu->sock, SO_REUSEADDR, &optionval, sizeof(optionval));
-        msock_set_blocking(self->trnu->sock,false);
+        msock_set_opt(self->trnu->sock, SO_REUSEADDR, &so_reuse, sizeof(so_reuse));
 
         unsigned char mcast_loop=1;
         if(msock_lset_opt(self->trnu->sock, IPPROTO_IP, IP_MULTICAST_LOOP, &mcast_loop, sizeof(mcast_loop))) {
@@ -314,7 +314,16 @@ int trnucli_mcast_connect(trnucli_t *self, char *host, int port, int ttl)
             PDPRINT((stderr,"ERR - msock_set_opt IP_MULTICAST_TTL\r\n"));
         }
 
-        if(msock_bind(self->trnu->sock)!=0){
+//        if(msock_bind(self->trnu->sock)!=0){
+//            PDPRINT((stderr,"ERR - bind failed [%d/%s]\n",errno,strerror(errno)));
+//        }
+        struct sockaddr_in local_addr;
+        memset(&local_addr,0,sizeof(local_addr));
+        local_addr.sin_family=AF_INET;
+        local_addr.sin_addr.s_addr=htonl(INADDR_ANY);
+        local_addr.sin_port=htons(port);
+
+        if(bind(self->trnu->sock->fd,(struct sockaddr *)&local_addr,sizeof(local_addr))!=0){
             PDPRINT((stderr,"ERR - bind failed [%d/%s]\n",errno,strerror(errno)));
         }
 
