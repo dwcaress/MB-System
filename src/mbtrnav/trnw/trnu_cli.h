@@ -370,7 +370,7 @@ extern "C" {
     // returns 0 on success, -1 otherwise
     int trnucli_disconnect(trnucli_t *self);
 
-    // connect to trnusvr
+    // connect to trnumsvr (multicast UDP)
     // host: host name or IP address
     // port: port number
     //  ttl: multicast time-to-live
