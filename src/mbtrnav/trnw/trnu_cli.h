@@ -66,8 +66,19 @@
 /////////////////////////
 // Includes 
 /////////////////////////
+
+// Feature macros
+
+// WITH_ASYNC_TRNU
+// if enabled, builds asynchronous
+// TRNU client API (recommended)
 #define WITH_ASYNC_TRNU
 
+// WITH_MCAST_BIDIR
+// if enabled, sets IP_MULTICAST_LOOP, IP_MULTICAST_TTL
+// would be needed for outbound mcast
+// optional for inbound-only
+#undef WITH_MCAST_BIDIR
 
 #include "trnw.h"
 #include "mframe.h"
@@ -81,6 +92,7 @@
 /////////////////////////
 // Macros
 /////////////////////////
+
 // check flags
 // f: flag variable
 // m: mask (flags to check)

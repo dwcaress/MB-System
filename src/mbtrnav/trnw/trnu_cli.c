@@ -301,11 +301,18 @@ int trnucli_mcast_connect(trnucli_t *self, char *host, int port, int ttl)
 
         const int so_reuse = 1;
 
-#if !defined(__CYGWIN__)
-        msock_set_opt(self->trnu->sock, SO_REUSEPORT, &so_reuse, sizeof(so_reuse));
-#endif
+        // enable multiple clients on same host
         msock_set_opt(self->trnu->sock, SO_REUSEADDR, &so_reuse, sizeof(so_reuse));
+        
+#if !defined(__CYGWIN__)
+        // Cygwin doesn't define SO_REUSEPORT
+        // OSX requires this to reuse socket (linux optional)
+        msock_set_opt(self->trnu->sock, SO_REUSEPORT, &so_reuse, sizeof(so_reuse));
+#endif // CYGWIN
 
+
+#ifdef WITH_MCAST_BIDIR
+        // future expansion (for mcast outbound)
         unsigned char mcast_loop=1;
         if(msock_lset_opt(self->trnu->sock, IPPROTO_IP, IP_MULTICAST_LOOP, &mcast_loop, sizeof(mcast_loop))) {
             PDPRINT((stderr,"ERR - msock_set_opt IP_MULTICAST_LOOP\r\n"));
@@ -314,12 +321,12 @@ int trnucli_mcast_connect(trnucli_t *self, char *host, int port, int ttl)
         if(msock_lset_opt(self->trnu->sock, IPPROTO_IP, IP_MULTICAST_TTL, &ttl, sizeof(ttl))) {
             PDPRINT((stderr,"ERR - msock_set_opt IP_MULTICAST_TTL\r\n"));
         }
+#endif // WITH_MCAST_BIDIR
 
-		// bind the socket to INADDR_ANY (can't bind too socket mcast addr)
+		// bind the socket to INADDR_ANY (accept mcast on all interfaces)
         if(msock_bind(self->trnu->sock)!=0){
             PDPRINT((stderr,"ERR - bind failed [%d/%s]\n",errno,strerror(errno)));
         }
-
         struct ip_mreq mreq;
 
         // use setsockopt() to request that the kernel join a multicast group
