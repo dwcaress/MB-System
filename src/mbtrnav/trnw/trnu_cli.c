@@ -294,7 +294,8 @@ int trnucli_mcast_connect(trnucli_t *self, char *host, int port, int ttl)
         msock_socket_destroy(&self->trnu->sock);
     }
 
-    if((self->trnu->sock=msock_socket_new(host,port,ST_UDPM))!=NULL ){
+    // create socket using INADDR_ANY
+    if((self->trnu->sock=msock_socket_new("0.0.0.0",port,ST_UDPM))!=NULL ){
 
         msock_set_blocking(self->trnu->sock,false);
 
@@ -314,16 +315,8 @@ int trnucli_mcast_connect(trnucli_t *self, char *host, int port, int ttl)
             PDPRINT((stderr,"ERR - msock_set_opt IP_MULTICAST_TTL\r\n"));
         }
 
-//        if(msock_bind(self->trnu->sock)!=0){
-//            PDPRINT((stderr,"ERR - bind failed [%d/%s]\n",errno,strerror(errno)));
-//        }
-        struct sockaddr_in local_addr;
-        memset(&local_addr,0,sizeof(local_addr));
-        local_addr.sin_family=AF_INET;
-        local_addr.sin_addr.s_addr=htonl(INADDR_ANY);
-        local_addr.sin_port=htons(port);
-
-        if(bind(self->trnu->sock->fd,(struct sockaddr *)&local_addr,sizeof(local_addr))!=0){
+		// bind the socket to INADDR_ANY (can't bind too socket mcast addr)
+        if(msock_bind(self->trnu->sock)!=0){
             PDPRINT((stderr,"ERR - bind failed [%d/%s]\n",errno,strerror(errno)));
         }
 
