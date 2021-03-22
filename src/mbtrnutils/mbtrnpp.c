@@ -2690,7 +2690,7 @@ int main(int argc, char **argv) {
                          "\t--trn-ecov\n"
                          "\t--trn-eerr\n"
                          "\t--mb-out=mb1svr[:host:port]/mb1/reson\n"
-                         "\t--trn-out=trnsvr[:host:port]/trnusvr[:host:port]/trnu/sout/serr/debug\n"
+                         "\t--trn-out=trnsvr[:host:port]/trnusvr[:host:port]/trnumsvr[:group:port:ttl]/trnu/sout/serr/debug\n"
                          "\t--trn-decn\n"
                          "\t--trn-decs\n"
                          "\t--covariance-magnitude-max=covariance_magnitude_max\n"
