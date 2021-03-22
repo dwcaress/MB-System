@@ -253,6 +253,7 @@ extern "C" {
                        netif_msg_read_fn read_fn,
                        netif_msg_handle_fn handle_fn,
                        netif_msg_pub_fn pub_fn);
+
     netif_t *netif_mcast_new(char *name, char *host, int port,
                              msock_socket_ctype ctype,
                              netif_mode_t mode,
@@ -272,12 +273,6 @@ extern "C" {
                            netif_mode_t mode,
                            netif_msg_read_fn reader,
                            netif_msg_handle_fn handler);
-
-    netif_t *netif_udpm_new(char *name, char *host, int port,
-                            double hbto,
-                            netif_mode_t mode,
-                            netif_msg_read_fn reader,
-                            netif_msg_handle_fn handler);
 
     /// @fn void netif_destroy(netif_t **pself)
     /// @brief release netif_t resources
