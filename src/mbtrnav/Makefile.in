@@ -94,7 +94,7 @@ host_triplet = @host@
 bin_PROGRAMS = trn-server$(EXEEXT) trn-cli$(EXEEXT) \
 	netif-test$(EXEEXT) trnif-test$(EXEEXT) trnifsvr-test$(EXEEXT) \
 	trnclient-test$(EXEEXT) trnu-cli$(EXEEXT) \
-	trnusvr-test$(EXEEXT) mcpub$(EXEEXT) mcsub$(EXEEXT)
+	trnusvr-test$(EXEEXT) mmcpub$(EXEEXT) mmcsub$(EXEEXT)
 subdir = src/mbtrnav
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/ax_check_compile_flag.m4 \
@@ -248,12 +248,12 @@ libtrnw_la_OBJECTS = $(am_libtrnw_la_OBJECTS)
 libtrnw_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CXXLD) $(AM_CXXFLAGS) \
 	$(CXXFLAGS) $(libtrnw_la_LDFLAGS) $(LDFLAGS) -o $@
-am_mcpub_OBJECTS = trnw/mmcpub.$(OBJEXT)
-mcpub_OBJECTS = $(am_mcpub_OBJECTS)
-mcpub_DEPENDENCIES = $(top_builddir)/src/mbtrn/libmframe.la
-am_mcsub_OBJECTS = trnw/mmcsub.$(OBJEXT)
-mcsub_OBJECTS = $(am_mcsub_OBJECTS)
-mcsub_DEPENDENCIES = $(top_builddir)/src/mbtrn/libmframe.la
+am_mmcpub_OBJECTS = trnw/mmcpub.$(OBJEXT)
+mmcpub_OBJECTS = $(am_mmcpub_OBJECTS)
+mmcpub_DEPENDENCIES = $(top_builddir)/src/mbtrn/libmframe.la
+am_mmcsub_OBJECTS = trnw/mmcsub.$(OBJEXT)
+mmcsub_OBJECTS = $(am_mmcsub_OBJECTS)
+mmcsub_DEPENDENCIES = $(top_builddir)/src/mbtrn/libmframe.la
 am_netif_test_OBJECTS = utils/netif-test.$(OBJEXT)
 netif_test_OBJECTS = $(am_netif_test_OBJECTS)
 netif_test_DEPENDENCIES = libnetif.la \
@@ -469,8 +469,8 @@ am__v_CXXLD_0 = @echo "  CXXLD   " $@;
 am__v_CXXLD_1 = 
 SOURCES = $(libgeolib_la_SOURCES) $(libnetif_la_SOURCES) \
 	$(libnewmat_la_SOURCES) $(libqnx_la_SOURCES) \
-	$(libtnav_la_SOURCES) $(libtrnw_la_SOURCES) $(mcpub_SOURCES) \
-	$(mcsub_SOURCES) $(netif_test_SOURCES) $(trn_cli_SOURCES) \
+	$(libtnav_la_SOURCES) $(libtrnw_la_SOURCES) $(mmcpub_SOURCES) \
+	$(mmcsub_SOURCES) $(netif_test_SOURCES) $(trn_cli_SOURCES) \
 	$(trn_server_SOURCES) $(trnclient_test_SOURCES) \
 	$(trnif_test_SOURCES) $(trnifsvr_test_SOURCES) \
 	$(trnu_cli_SOURCES) $(trnusvr_test_SOURCES)
@@ -881,10 +881,10 @@ libnetif_la_LIBADD = libtrnw.la \
                 $(top_builddir)/src/mbtrn/libmframe.la \
                 -lm -lpthread
 
-mcpub_SOURCES = trnw/mmcpub.c
-mcpub_LDADD = $(top_builddir)/src/mbtrn/libmframe.la
-mcsub_SOURCES = trnw/mmcsub.c
-mcsub_LDADD = $(top_builddir)/src/mbtrn/libmframe.la
+mmcpub_SOURCES = trnw/mmcpub.c
+mmcpub_LDADD = $(top_builddir)/src/mbtrn/libmframe.la
+mmcsub_SOURCES = trnw/mmcsub.c
+mmcsub_LDADD = $(top_builddir)/src/mbtrn/libmframe.la
 trnu_cli_SOURCES = trnw/trnucli_test.c trnw/trnu_cli.c
 trnu_cli_LDADD = $(top_builddir)/src/mbtrn/libmframe.la libtrnw.la
 trn_cli_SOURCES = trnw/trncli_test.c trnw/trn_cli.c
@@ -1340,15 +1340,15 @@ libtrnw.la: $(libtrnw_la_OBJECTS) $(libtrnw_la_DEPENDENCIES) $(EXTRA_libtrnw_la_
 trnw/mmcpub.$(OBJEXT): trnw/$(am__dirstamp) \
 	trnw/$(DEPDIR)/$(am__dirstamp)
 
-mcpub$(EXEEXT): $(mcpub_OBJECTS) $(mcpub_DEPENDENCIES) $(EXTRA_mcpub_DEPENDENCIES) 
-	@rm -f mcpub$(EXEEXT)
-	$(AM_V_CCLD)$(LINK) $(mcpub_OBJECTS) $(mcpub_LDADD) $(LIBS)
+mmcpub$(EXEEXT): $(mmcpub_OBJECTS) $(mmcpub_DEPENDENCIES) $(EXTRA_mmcpub_DEPENDENCIES) 
+	@rm -f mmcpub$(EXEEXT)
+	$(AM_V_CCLD)$(LINK) $(mmcpub_OBJECTS) $(mmcpub_LDADD) $(LIBS)
 trnw/mmcsub.$(OBJEXT): trnw/$(am__dirstamp) \
 	trnw/$(DEPDIR)/$(am__dirstamp)
 
-mcsub$(EXEEXT): $(mcsub_OBJECTS) $(mcsub_DEPENDENCIES) $(EXTRA_mcsub_DEPENDENCIES) 
-	@rm -f mcsub$(EXEEXT)
-	$(AM_V_CCLD)$(LINK) $(mcsub_OBJECTS) $(mcsub_LDADD) $(LIBS)
+mmcsub$(EXEEXT): $(mmcsub_OBJECTS) $(mmcsub_DEPENDENCIES) $(EXTRA_mmcsub_DEPENDENCIES) 
+	@rm -f mmcsub$(EXEEXT)
+	$(AM_V_CCLD)$(LINK) $(mmcsub_OBJECTS) $(mmcsub_LDADD) $(LIBS)
 utils/$(am__dirstamp):
 	@$(MKDIR_P) utils
 	@: > utils/$(am__dirstamp)
