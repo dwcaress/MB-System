@@ -73,7 +73,7 @@ int main(int argc, char *argv[])
     const char *host_addr_s=NULL;
     int mcast_port=DFL_MCAST_PORT;
     u_char ttl=DFL_TTL;
-    u_char so_loop=0;
+    u_char so_loop=1;
     const int so_reuse=1;
     struct ip_mreq mreq;
 
@@ -111,7 +111,7 @@ int main(int argc, char *argv[])
                 host_addr_s = optarg;
                 break;
             case 'l':
-                so_loop = 1;
+                so_loop = 0;
                 break;
             case 'm':
                 mcast_if_s=optarg;
@@ -149,7 +149,7 @@ int main(int argc, char *argv[])
                 fprintf(stderr,"-m <addr>: mcast interface address\n");
                 fprintf(stderr,"-t <ttl> : mccast ttl\n");
                 fprintf(stderr,"-i <addr>: host IP address\n");
-                fprintf(stderr,"-l       : enable mcast loopback\n");
+                fprintf(stderr,"-l       : disable mcast loopback\n");
                 fprintf(stderr,"-b       : disable bind\n");
                 fprintf(stderr,"-u       : unidirectional (mcast pub->sub only)\n");
                 fprintf(stderr,"-o <fmt> : output where fmt is x+,x-: hex a+,a-: ascii\n");
@@ -172,9 +172,9 @@ int main(int argc, char *argv[])
     fprintf(stderr,"%*s %*c\n",wkey,"bind_en",wval,bind_en?'Y':'N');
     fprintf(stderr,"%*s %*c\n",wkey,"so_loop",wval,so_loop!=0?'Y':'N');
     fprintf(stderr,"%*s %*c\n",wkey,"so_reuse",wval,so_reuse!=0?'Y':'N');
-    fprintf(stderr,"%*s %*c\n",wkey,"bidir_en",wval,bidir_en?'N':'Y');
-    fprintf(stderr,"%*s %*c\n",wkey,"xout",wval,xout_en?'Y':'N');
-    fprintf(stderr,"%*s %*c\n",wkey,"aout",wval,aout_en?'Y':'N');
+    fprintf(stderr,"%*s %*c\n",wkey,"bidir_en",wval,bidir_en?'Y':'N');
+    fprintf(stderr,"%*s %*c\n",wkey,"xout_en",wval,xout_en?'Y':'N');
+    fprintf(stderr,"%*s %*c\n",wkey,"aout_en",wval,aout_en?'Y':'N');
     fprintf(stderr,"%*s %*d\n",wkey,"cycles",wval,cycles);
     fprintf(stderr,"%*s %*d\n",wkey,"PID",wval,getpid());
     fprintf(stderr,"\n");
