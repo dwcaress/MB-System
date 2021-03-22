@@ -502,6 +502,7 @@ s=NULL;\
 #define CFG_MNEM_TRN_MAPFILES  "TRN_MAPFILES"
 #define CFG_MNEM_TRN_DATAFILES "TRN_DATAFILES"
 #define CFG_MNEM_TRN_CFGFILES  "TRN_CFGFILES"
+#define CFG_MNEM_TRN_GROUP     "TRN_GROUP"
 #define CFG_TRN_LOG_DIR_DFL    "."
 
 #define OPT_VERBOSE_DFL                   0
@@ -1095,6 +1096,15 @@ char *s_mnem_value(char **pdest, size_t len, const char *key)
                     val=strdup("localhost");
                 }
             }
+        }else if(strcmp(key,CFG_MNEM_TRN_GROUP)==0){
+
+            // try env
+            val=CHK_STRDUP(getenv(key));
+
+            if(NULL==val){
+                // if unset, use default
+                val=strdup(TRNUM_GROUP_DFL);
+            }
         }else if(strcmp(key,CFG_MNEM_TRN_LOGFILES)==0 ||
                  strcmp(key,CFG_MNEM_TRN_MAPFILES)==0 ||
                  strcmp(key,CFG_MNEM_TRN_CFGFILES)==0 ||
@@ -1231,6 +1241,7 @@ static int s_test_mnem()
     char *opt_trnmap = strdup("test_trnmap-TRN_MAPFILES--");
     char *opt_trndata = strdup("test_trndata-TRN_DATAFILES--");
     char *opt_trncfg = strdup("test_trncfg-TRN_CFGFILES--");
+    char *opt_trngroup=strdup("test_trngroup-TRN_GROUP--");
 
     char *val=NULL;
     s_sub_mnem(&opt_session,0,opt_session,CFG_MNEM_SESSION,s_mnem_value(&val,0,CFG_MNEM_SESSION));
@@ -1238,6 +1249,8 @@ static int s_test_mnem()
     s_sub_mnem(&opt_rhost,0,opt_rhost,CFG_MNEM_TRN_RESON_HOST,s_mnem_value(&val,0,CFG_MNEM_TRN_RESON_HOST));
     MEM_CHKINVALIDATE(val);
     s_sub_mnem(&opt_trnhost,0,opt_trnhost,CFG_MNEM_TRN_HOST,s_mnem_value(&val,0,CFG_MNEM_TRN_HOST));
+    MEM_CHKINVALIDATE(val);
+    s_sub_mnem(&opt_trngroup,0,opt_trngroup,CFG_MNEM_TRN_GROUP,s_mnem_value(&val,0,CFG_MNEM_TRN_GROUP));
     MEM_CHKINVALIDATE(val);
     s_sub_mnem(&opt_trnsession,0,opt_trnsession,CFG_MNEM_TRN_SESSION,s_mnem_value(&val,0,CFG_MNEM_TRN_SESSION));
     MEM_CHKINVALIDATE(val);
@@ -1759,7 +1772,7 @@ static int s_parse_opt_trnout(mbtrnpp_cfg_t *cfg, char *opt_str)
             if(NULL == tok[i])
                 break;
             if(strstr(tok[i], "trnsvr")!=NULL) {
-                // enable trnsvr (mbsvr:host:port)
+                // enable trnsvr (trnsvr:host:port)
                 char *acpy = strdup(tok[i]);
                 char *atok = strtok_r(acpy,":",&saveptr);
                 if(NULL!=atok){
@@ -1778,7 +1791,7 @@ static int s_parse_opt_trnout(mbtrnpp_cfg_t *cfg, char *opt_str)
                 free(acpy);
             }
             if(strstr(tok[i], "trnusvr")!=NULL){
-                // enable trnsvr (mbsvr:host:port)
+                // enable trnsvr (trnusvr:host:port)
                 char *acpy = strdup(tok[i]);
                 char *atok = strtok_r(acpy,":",&saveptr);
                 if(NULL != atok){
@@ -1810,7 +1823,7 @@ static int s_parse_opt_trnout(mbtrnpp_cfg_t *cfg, char *opt_str)
                     char *sttl = strtok_r(NULL,":",&saveptr);
 
                     if(NULL != shost){
-                        MEM_CHKINVALIDATE(cfg->trnusvr_host);
+                        MEM_CHKINVALIDATE(cfg->trnumsvr_group);
                         cfg->trnumsvr_group = strdup(shost);
                         retval++;
                     }
@@ -1823,7 +1836,7 @@ static int s_parse_opt_trnout(mbtrnpp_cfg_t *cfg, char *opt_str)
                         retval++;
                     }
                 }
-                // fprintf(stderr,"trnusvr[%s:%d]\n",cfg->trnusvr_host,cfg->trnusvr_port);
+                // fprintf(stderr,"trnumsvr[%s:%d]\n",cfg->trnusmvr_host,cfg->trnumsvr_port);
                 cfg->output_flags |= OUTPUT_TRNUM_SVR_EN;
                 free(acpy);
             }
@@ -2271,6 +2284,8 @@ static int s_mbtrnpp_kvparse_fn(char *key, char *val, void *cfg)
         s_sub_mnem(&opts->mb_out,0,opts->mb_out,CFG_MNEM_TRN_HOST,s_mnem_value(&mval,0,CFG_MNEM_TRN_HOST));
         MEM_CHKINVALIDATE(mval);
         s_sub_mnem(&opts->trn_out,0,opts->trn_out,CFG_MNEM_TRN_HOST,s_mnem_value(&mval,0,CFG_MNEM_TRN_HOST));
+        MEM_CHKINVALIDATE(mval);
+        s_sub_mnem(&opts->trn_out,0,opts->trn_out,CFG_MNEM_TRN_GROUP,s_mnem_value(&mval,0,CFG_MNEM_TRN_GROUP));
         MEM_CHKINVALIDATE(mval);
         s_sub_mnem(&opts->trn_mid,0,opts->trn_mid,CFG_MNEM_TRN_SESSION,s_mnem_value(&mval,0,CFG_MNEM_TRN_SESSION));
         MEM_CHKINVALIDATE(mval);
