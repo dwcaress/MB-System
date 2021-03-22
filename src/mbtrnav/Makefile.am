@@ -187,8 +187,13 @@ libnetif_la_LIBADD = libtrnw.la \
                 $(top_builddir)/src/mbtrn/libmframe.la \
                 -lm -lpthread
 
-bin_PROGRAMS =   trn-server trn-cli netif-test trnif-test trnifsvr-test trnclient-test trnu-cli trnusvr-test #  readlog writelog
+bin_PROGRAMS =   trn-server trn-cli netif-test trnif-test trnifsvr-test trnclient-test trnu-cli trnusvr-test mcpub mcsub #  readlog writelog
 
+mcpub_SOURCES = trnw/mmcpub.c
+mcpub_LDADD = $(top_builddir)/src/mbtrn/libmframe.la
+
+mcsub_SOURCES = trnw/mmcsub.c
+mcsub_LDADD = $(top_builddir)/src/mbtrn/libmframe.la
 
 trnu_cli_SOURCES = trnw/trnucli_test.c trnw/trnu_cli.c
 trnu_cli_LDADD = $(top_builddir)/src/mbtrn/libmframe.la libtrnw.la

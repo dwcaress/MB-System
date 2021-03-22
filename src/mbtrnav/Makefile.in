@@ -94,7 +94,7 @@ host_triplet = @host@
 bin_PROGRAMS = trn-server$(EXEEXT) trn-cli$(EXEEXT) \
 	netif-test$(EXEEXT) trnif-test$(EXEEXT) trnifsvr-test$(EXEEXT) \
 	trnclient-test$(EXEEXT) trnu-cli$(EXEEXT) \
-	trnusvr-test$(EXEEXT)
+	trnusvr-test$(EXEEXT) mcpub$(EXEEXT) mcsub$(EXEEXT)
 subdir = src/mbtrnav
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/ax_check_compile_flag.m4 \
@@ -248,6 +248,12 @@ libtrnw_la_OBJECTS = $(am_libtrnw_la_OBJECTS)
 libtrnw_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CXXLD) $(AM_CXXFLAGS) \
 	$(CXXFLAGS) $(libtrnw_la_LDFLAGS) $(LDFLAGS) -o $@
+am_mcpub_OBJECTS = trnw/mmcpub.$(OBJEXT)
+mcpub_OBJECTS = $(am_mcpub_OBJECTS)
+mcpub_DEPENDENCIES = $(top_builddir)/src/mbtrn/libmframe.la
+am_mcsub_OBJECTS = trnw/mmcsub.$(OBJEXT)
+mcsub_OBJECTS = $(am_mcsub_OBJECTS)
+mcsub_DEPENDENCIES = $(top_builddir)/src/mbtrn/libmframe.la
 am_netif_test_OBJECTS = utils/netif-test.$(OBJEXT)
 netif_test_OBJECTS = $(am_netif_test_OBJECTS)
 netif_test_DEPENDENCIES = libnetif.la \
@@ -414,6 +420,7 @@ am__depfiles_remade = gctp/source/$(DEPDIR)/alberfor.Plo \
 	terrain-nav/$(DEPDIR)/myOutput.Plo \
 	terrain-nav/$(DEPDIR)/structDefs.Plo \
 	terrain-nav/$(DEPDIR)/trn_log.Plo trnw/$(DEPDIR)/mb1_msg.Plo \
+	trnw/$(DEPDIR)/mmcpub.Po trnw/$(DEPDIR)/mmcsub.Po \
 	trnw/$(DEPDIR)/netif.Plo trnw/$(DEPDIR)/trn_cli.Po \
 	trnw/$(DEPDIR)/trncli_test.Po trnw/$(DEPDIR)/trnif_msg.Plo \
 	trnw/$(DEPDIR)/trnif_proto.Plo trnw/$(DEPDIR)/trnu_cli.Po \
@@ -462,11 +469,11 @@ am__v_CXXLD_0 = @echo "  CXXLD   " $@;
 am__v_CXXLD_1 = 
 SOURCES = $(libgeolib_la_SOURCES) $(libnetif_la_SOURCES) \
 	$(libnewmat_la_SOURCES) $(libqnx_la_SOURCES) \
-	$(libtnav_la_SOURCES) $(libtrnw_la_SOURCES) \
-	$(netif_test_SOURCES) $(trn_cli_SOURCES) $(trn_server_SOURCES) \
-	$(trnclient_test_SOURCES) $(trnif_test_SOURCES) \
-	$(trnifsvr_test_SOURCES) $(trnu_cli_SOURCES) \
-	$(trnusvr_test_SOURCES)
+	$(libtnav_la_SOURCES) $(libtrnw_la_SOURCES) $(mcpub_SOURCES) \
+	$(mcsub_SOURCES) $(netif_test_SOURCES) $(trn_cli_SOURCES) \
+	$(trn_server_SOURCES) $(trnclient_test_SOURCES) \
+	$(trnif_test_SOURCES) $(trnifsvr_test_SOURCES) \
+	$(trnu_cli_SOURCES) $(trnusvr_test_SOURCES)
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
     n|no|NO) false;; \
@@ -874,11 +881,12 @@ libnetif_la_LIBADD = libtrnw.la \
                 $(top_builddir)/src/mbtrn/libmframe.la \
                 -lm -lpthread
 
+mcpub_SOURCES = trnw/mmcpub.c
+mcpub_LDADD = $(top_builddir)/src/mbtrn/libmframe.la
+mcsub_SOURCES = trnw/mmcsub.c
+mcsub_LDADD = $(top_builddir)/src/mbtrn/libmframe.la
 trnu_cli_SOURCES = trnw/trnucli_test.c trnw/trnu_cli.c
 trnu_cli_LDADD = $(top_builddir)/src/mbtrn/libmframe.la libtrnw.la
-
-#trnm_cli_SOURCES = trnw/trnm_cli.c
-#trnm_cli_LDADD = $(top_builddir)/src/mbtrn/libmframe.la libtrnw.la
 trn_cli_SOURCES = trnw/trncli_test.c trnw/trn_cli.c
 trn_cli_LDADD = $(top_builddir)/src/mbtrn/libmframe.la libtrnw.la
 trn_server_SOURCES = utils/trn_server.cpp
@@ -1329,6 +1337,18 @@ trnw/trnif_msg.lo: trnw/$(am__dirstamp) trnw/$(DEPDIR)/$(am__dirstamp)
 
 libtrnw.la: $(libtrnw_la_OBJECTS) $(libtrnw_la_DEPENDENCIES) $(EXTRA_libtrnw_la_DEPENDENCIES) 
 	$(AM_V_CXXLD)$(libtrnw_la_LINK) -rpath $(libdir) $(libtrnw_la_OBJECTS) $(libtrnw_la_LIBADD) $(LIBS)
+trnw/mmcpub.$(OBJEXT): trnw/$(am__dirstamp) \
+	trnw/$(DEPDIR)/$(am__dirstamp)
+
+mcpub$(EXEEXT): $(mcpub_OBJECTS) $(mcpub_DEPENDENCIES) $(EXTRA_mcpub_DEPENDENCIES) 
+	@rm -f mcpub$(EXEEXT)
+	$(AM_V_CCLD)$(LINK) $(mcpub_OBJECTS) $(mcpub_LDADD) $(LIBS)
+trnw/mmcsub.$(OBJEXT): trnw/$(am__dirstamp) \
+	trnw/$(DEPDIR)/$(am__dirstamp)
+
+mcsub$(EXEEXT): $(mcsub_OBJECTS) $(mcsub_DEPENDENCIES) $(EXTRA_mcsub_DEPENDENCIES) 
+	@rm -f mcsub$(EXEEXT)
+	$(AM_V_CCLD)$(LINK) $(mcsub_OBJECTS) $(mcsub_LDADD) $(LIBS)
 utils/$(am__dirstamp):
 	@$(MKDIR_P) utils
 	@: > utils/$(am__dirstamp)
@@ -1577,6 +1597,8 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@terrain-nav/$(DEPDIR)/structDefs.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@terrain-nav/$(DEPDIR)/trn_log.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@trnw/$(DEPDIR)/mb1_msg.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@trnw/$(DEPDIR)/mmcpub.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@trnw/$(DEPDIR)/mmcsub.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@trnw/$(DEPDIR)/netif.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@trnw/$(DEPDIR)/trn_cli.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@trnw/$(DEPDIR)/trncli_test.Po@am__quote@ # am--include-marker
@@ -1947,6 +1969,8 @@ distclean: distclean-am
 	-rm -f terrain-nav/$(DEPDIR)/structDefs.Plo
 	-rm -f terrain-nav/$(DEPDIR)/trn_log.Plo
 	-rm -f trnw/$(DEPDIR)/mb1_msg.Plo
+	-rm -f trnw/$(DEPDIR)/mmcpub.Po
+	-rm -f trnw/$(DEPDIR)/mmcsub.Po
 	-rm -f trnw/$(DEPDIR)/netif.Plo
 	-rm -f trnw/$(DEPDIR)/trn_cli.Po
 	-rm -f trnw/$(DEPDIR)/trncli_test.Po
@@ -2142,6 +2166,8 @@ maintainer-clean: maintainer-clean-am
 	-rm -f terrain-nav/$(DEPDIR)/structDefs.Plo
 	-rm -f terrain-nav/$(DEPDIR)/trn_log.Plo
 	-rm -f trnw/$(DEPDIR)/mb1_msg.Plo
+	-rm -f trnw/$(DEPDIR)/mmcpub.Po
+	-rm -f trnw/$(DEPDIR)/mmcsub.Po
 	-rm -f trnw/$(DEPDIR)/netif.Plo
 	-rm -f trnw/$(DEPDIR)/trn_cli.Po
 	-rm -f trnw/$(DEPDIR)/trncli_test.Po
