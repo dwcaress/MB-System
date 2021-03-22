@@ -73,7 +73,8 @@ int main(int argc, char *argv[])
     const char *host_addr_s=NULL;
     int mcast_port=DFL_MCAST_PORT;
     u_char ttl=DFL_TTL;
-    u_char loop=0;
+    u_char so_loop=0;
+    const int so_reuse=1;
     struct ip_mreq mreq;
 
     int opt_c=0;
@@ -110,7 +111,7 @@ int main(int argc, char *argv[])
                 host_addr_s = optarg;
                 break;
             case 'l':
-                loop = 1;
+                so_loop = 1;
                 break;
             case 'm':
                 mcast_if_s=optarg;
@@ -168,9 +169,10 @@ int main(int argc, char *argv[])
     fprintf(stderr,"%*s %*d\n",wkey,"mcast_port",wval,mcast_port);
     fprintf(stderr,"%*s %*s\n",wkey,"mcast_if",wval,(NULL!=mcast_if_s?mcast_if_s:""));
     fprintf(stderr,"%*s %*d\n",wkey,"ttl",wval,ttl);
-    fprintf(stderr,"%*s %*c\n",wkey,"bind",wval,bind_en?'Y':'N');
-    fprintf(stderr,"%*s %*c\n",wkey,"loopback",wval,loop!=0?'Y':'N');
-    fprintf(stderr,"%*s %*c\n",wkey,"unidir",wval,bidir_en?'N':'Y');
+    fprintf(stderr,"%*s %*c\n",wkey,"bind_en",wval,bind_en?'Y':'N');
+    fprintf(stderr,"%*s %*c\n",wkey,"so_loop",wval,so_loop!=0?'Y':'N');
+    fprintf(stderr,"%*s %*c\n",wkey,"so_reuse",wval,so_reuse!=0?'Y':'N');
+    fprintf(stderr,"%*s %*c\n",wkey,"bidir_en",wval,bidir_en?'N':'Y');
     fprintf(stderr,"%*s %*c\n",wkey,"xout",wval,xout_en?'Y':'N');
     fprintf(stderr,"%*s %*c\n",wkey,"aout",wval,aout_en?'Y':'N');
     fprintf(stderr,"%*s %*d\n",wkey,"cycles",wval,cycles);
@@ -196,8 +198,6 @@ int main(int argc, char *argv[])
 
     msock_set_blocking(sub,false);
 
-    const int so_reuse = 1;
-
     // enable multiple clients on same host
     if(msock_set_opt(sub, SO_REUSEADDR, &so_reuse, sizeof(so_reuse))==0){
         fprintf(stderr,"%*s %s\n",wstat,"msock_set_opt SO_REUSEADDR","OK");
@@ -222,8 +222,7 @@ int main(int argc, char *argv[])
 
     if(bidir_en){
         // future expansion (for mcast outbound)
-        unsigned char mcast_loop=1;
-        if(msock_lset_opt(sub, IPPROTO_IP, IP_MULTICAST_LOOP, &mcast_loop, sizeof(mcast_loop))==0) {
+        if(msock_lset_opt(sub, IPPROTO_IP, IP_MULTICAST_LOOP, &so_loop, sizeof(so_loop))==0) {
             fprintf(stderr,"%*s %s\n",wstat,"msock_lset_opt IP_MULTICAST_LOOP","OK");
         }else {
             fprintf(stderr,"%*s %s\n",wstat,"msock_lset_opt IP_MULTICAST_LOOP","ERR");
