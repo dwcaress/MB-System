@@ -605,9 +605,9 @@ s=NULL;\
 #define TRNU_HOST_DFL    "localhost"
 #define TRNU_PORT_DFL    8000
 //#define TRNUM_HOST_DFL   "localhost"
-#define TRNUM_GROUP_DFL  "239.255.76.67"
-#define TRNUM_PORT_DFL   7667
-#define TRNUM_TTL_DFL    64
+#define TRNUM_GROUP_DFL  "239.255.0.16"
+#define TRNUM_PORT_DFL   29000
+#define TRNUM_TTL_DFL    32
 #define TRNSVR_HOST_DFL  "localhost"
 #define TRNSVR_PORT_DFL  28000
 #define TRN_XMIT_GAIN_RESON7K_DFL 200.0
