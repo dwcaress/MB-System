@@ -211,6 +211,7 @@ struct netif_s{
     netif_msg_handle_fn handle_fn;
     netif_msg_pub_fn pub_fn;
     double hbto;
+    int ttl;
     netif_mode_t mode;
     mstats_profile_t *profile;
     mlog_id_t mlog_id;
@@ -252,6 +253,14 @@ extern "C" {
                        netif_msg_read_fn read_fn,
                        netif_msg_handle_fn handle_fn,
                        netif_msg_pub_fn pub_fn);
+
+    netif_t *netif_mcast_new(char *name, char *host, int port,
+                             msock_socket_ctype ctype,
+                             netif_mode_t mode,
+                             int ttl,
+                             netif_msg_read_fn read_fn,
+                             netif_msg_handle_fn handle_fn,
+                             netif_msg_pub_fn pub_fn);
 
     netif_t *netif_tcp_new(char *name, char *host, int port,
                            double hbto,

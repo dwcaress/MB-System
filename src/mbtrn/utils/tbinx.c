@@ -729,7 +729,7 @@ static int s_out_socket(msock_socket_t *s, mb1_sounding_t *sounding)
                 PEPRINT((stderr,"err - sendto ret[%d] cli[%d] [%d/%s]\n",iobytes,idx,errno,strerror(errno)));
             }
             // check heartbeat, remove expired peers
-            if (NULL!=psub && psub->heartbeat==0) {
+            if (psub->heartbeat==0) {
                 PMPRINT(MOD_TBINX,TBINX_V1,(stderr,"hbeat=0 cli[%d/%d] - removed\n",idx,psub->id));
                 mlist_remove(trn_plist,psub);
                 trn_cli_dis++;

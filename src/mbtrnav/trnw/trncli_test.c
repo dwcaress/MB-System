@@ -107,7 +107,7 @@
 
 
 #define TRNCLI_TEST_TRNSVR_HOST "127.0.0.1"
-#define TRNCLI_TEST_TRNSVR_PORT 27027
+#define TRNCLI_TEST_TRNSVR_PORT 28000 //27027
 #define TRNCLI_TEST_MBTRN_HOST "localhost"
 #define TRNCLI_TEST_MBTRN_PORT 27000
 #define TRNCLI_TEST_MBTRN_HBEAT 25
@@ -158,7 +158,7 @@ typedef struct app_cfg_s{
     int trnc_port;
     /// @var app_cfg_s::mb_hbeat
     /// @brief TBD
-    int trnc_hbeat;
+    int trnc_hbn;
     /// @var app_cfg_s::update_n
     /// @brief TBD
     int update_n;
@@ -180,6 +180,9 @@ typedef struct app_cfg_s{
     /// @var app_cfg_s::log_path
     /// @brief TBD
     char *log_path;
+    /// @var app_cfg_s::test_api
+    /// @brief TBD
+    int test_api;
 }app_cfg_t;
 
 
@@ -210,9 +213,7 @@ static void s_show_help()
     "--help      : output help message\n"
     "--version   : output version info\n"
     "--thost     : TRN server host\n"
-    "--tport     : TRN server port\n"
     "--mhost     : MB server host\n"
-    "--mport     : MB server port\n"
     "--input     : input type (M:mb1 C:csv T:trnc)\n"
     "--ifile     : input file\n"
     "--map       : TRN server map file (dir for tiles)\n"
@@ -223,6 +224,8 @@ static void s_show_help()
     "--mtype     : TRN server map type D:DEM B:BO\n"
     "--utm       : UTM zone\n"
     "--update    : TRN update N\n"
+    "--hbeat     : trn server heartbeat (modulus)\n"
+    "--test-api  : query status (modulus)\n"
     "--log       : enable logging\n"
     "\n";
     printf("%s",help_message);
@@ -248,6 +251,7 @@ void parse_args(int argc, char **argv, app_cfg_t *cfg)
         {"verbose", no_argument, NULL, 0},
         {"help", no_argument, NULL, 0},
         {"version", no_argument, NULL, 0},
+        {"hbeat", required_argument, NULL, 0},
         {"thost", required_argument, NULL, 0},
         {"mhost", required_argument, NULL, 0},
         {"input", required_argument, NULL, 0},
@@ -260,6 +264,7 @@ void parse_args(int argc, char **argv, app_cfg_t *cfg)
         {"mtype", required_argument, NULL, 0},
         {"utm", required_argument, NULL, 0},
         {"update", required_argument, NULL, 0},
+        {"test-api", required_argument, NULL, 0},
         {NULL, 0, NULL, 0}};
  
     // process argument list
@@ -434,6 +439,14 @@ void parse_args(int argc, char **argv, app_cfg_t *cfg)
                 else if (strcmp("update", options[option_index].name) == 0) {
                     sscanf(optarg,"%d",&cfg->update_n);
                 }
+                // hbeat
+                else if (strcmp("hbeat", options[option_index].name) == 0) {
+                    sscanf(optarg,"%d",&cfg->trnc_hbn);
+                }
+                // test-api
+                else if (strcmp("test-api", options[option_index].name) == 0) {
+                    sscanf(optarg,"%d",&cfg->test_api);
+                }
 
                 break;
             default:
@@ -459,7 +472,7 @@ void parse_args(int argc, char **argv, app_cfg_t *cfg)
     PDPRINT((stderr,"mhost     [%s]\n",cfg->trnc_host));
     PDPRINT((stderr,"mport     [%d]\n",cfg->trnc_port));
     PDPRINT((stderr,"utm       [%ld]\n",cfg->utm));
-    PDPRINT((stderr,"trnc_hb   [%d]\n",cfg->trnc_hbeat));
+    PDPRINT((stderr,"hbeat     [%d]\n",cfg->trnc_hbn));
     PDPRINT((stderr,"update_n  [%u]\n",cfg->update_n));
 }
 // End function parse_args
@@ -507,7 +520,7 @@ static app_cfg_t *app_cfg_new()
 
         instance->trnc_host=strdup(TRNCLI_TEST_MBTRN_HOST);
         instance->trnc_port=TRNCLI_TEST_MBTRN_PORT;
-        instance->trnc_hbeat=TRNCLI_TEST_MBTRN_HBEAT;
+        instance->trnc_hbn=TRNCLI_TEST_MBTRN_HBEAT;
         instance->update_n=TRNCLI_TEST_UPDATE_N;
         instance->log_cfg=mlog_config_new(ML_TFMT_ISO1806,ML_DFL_DEL,ML_MONO|ML_NOLIMIT,ML_FILE,0,0,0);
         instance->log_id=MLOG_ID_INVALID;
@@ -515,6 +528,7 @@ static app_cfg_t *app_cfg_new()
         instance->log_dir=strdup(TRNCLI_TEST_LOG_DIR);
         instance->log_path=(char *)malloc(512);
         instance->utm=TRNCLI_UTM_DFL;
+        instance->test_api=0;
     }
     return instance;
 }
@@ -596,7 +610,9 @@ static int s_csv_to_mb1(mb1_t *dest, mfile_file_t *src)
         char **fields=NULL;
         int32_t test = 0;
         if( (test=s_read_csv_rec(src,line,TRNCLI_CSV_LINE_BYTES))>0){
-            if( (test=s_tokenize(line, fields, "\n", MB1_FIELDS))>=MB1_FIXED_FIELDS){
+            // tokenize assigns value to fields and returns number of entries
+            test=s_tokenize(line, fields, "\n", MB1_FIELDS);
+            if( fields!=NULL && test>=MB1_FIXED_FIELDS ){
    
                 //            sscanf(fields[0],"%u",&dest->header.type);
                 //            sscanf(fields[1],"%u",&dest->header.size);
@@ -679,22 +695,24 @@ static int32_t s_trnc_read_mb1_rec( mb1_t *dest, msock_socket_t *src, app_cfg_t 
         int32_t test=0;
         // sync to start of record
         byte *bp = (byte *)&dest->header;
-//        msock_set_blocking(src,true);
-  
-        if( (test=msock_recvfrom(src,NULL,(byte *)bp,readlen,0))>0){
-             uint32_t record_bytes=readlen;
-             retval=record_bytes;
+        //        msock_set_blocking(src,true);
+
+        if( (test=msock_recvfrom(src,NULL,(byte *)bp,readlen,0))>MB1_BIN_HEADER_BYTES){
+            uint32_t record_bytes=readlen;
+            retval=record_bytes;
             
             fprintf(stderr,"%s - read [%d/%u] \n",__FUNCTION__,test,readlen);
             fprintf(stderr,"ts[%.3lf] beams[%u] ping[%d] \n",dest->sounding.ts, dest->sounding.nbeams, dest->sounding.ping_number);
             fprintf(stderr,"lat[%.5lf] lon[%.5lf] hdg[%.2lf] sd[%.1lf]\n\n",dest->sounding.lat, dest->sounding.lon, dest->sounding.hdg, dest->sounding.depth);
 
         }else{
-            if(errno!=EAGAIN){
-            fprintf(stderr,"ERR: read failed (%s) ret[%d/%u] [%d/%s]\n",__FUNCTION__,
-                    test,readlen, errno,strerror(errno));
-            mlog_tprintf(cfg->log_id,"ERR: read failed (%s) ret[%d/%u] [%d/%s]\n",__FUNCTION__,
-                    test,readlen, errno,strerror(errno));
+            if(test>0 && (strncmp((char *)bp,"ACK",3)==0 || strncmp((char *)bp,"NACK",4)==0)){
+                // received ACK, ignore
+            }else if(errno!=EAGAIN){
+                fprintf(stderr,"ERR: read failed (%s) ret[%d/%u] [%d/%s]\n",__FUNCTION__,
+                        test,readlen, errno,strerror(errno));
+                mlog_tprintf(cfg->log_id,"ERR: read failed (%s) ret[%d/%u] [%d/%s]\n",__FUNCTION__,
+                             test,readlen, errno,strerror(errno));
             }
         }
     }
@@ -792,7 +810,7 @@ static int s_trncli_test_trnc(trncli_t *dcli, app_cfg_t *cfg)
     msock_socket_t *isock = NULL;//msock_socket_new(cfg->trnc_host,cfg->trnc_port,ST_UDP);
     int err_count=0;
     bool quit=false;
-    int hbeat=cfg->trnc_hbeat;
+    int hbeat=cfg->trnc_hbn;
     byte req[4]="REQ", ack[4]={0};
 //    msock_set_blocking(isock,true);
     int count=0;
@@ -802,12 +820,13 @@ static int s_trncli_test_trnc(trncli_t *dcli, app_cfg_t *cfg)
 //    if( (test=msock_connect(isock))==0){
 //         if(msock_sendto(isock,NULL,req,4,0)==4){
 //            if(msock_recv(isock,ack,4,0)==4){
-//                hbeat=cfg->trnc_hbeat;
+//                hbeat=cfg->trnc_hbn;
 //            }
 //        }
 
         while( !g_interrupt && !quit ){
             int test=-1;
+            memset(&mb1,0,sizeof(mb1_t));
            if(!connected){
                 fprintf(stderr,"%s:%d connecting\n",__FUNCTION__,__LINE__);
                 msock_socket_destroy(&isock);
@@ -818,7 +837,7 @@ static int s_trncli_test_trnc(trncli_t *dcli, app_cfg_t *cfg)
                         if(msock_sendto(isock,NULL,req,4,0)==4){
                             memset(ack,0,4);
                             if(msock_recv(isock,ack,4,0)==4){
-                                hbeat=cfg->trnc_hbeat;
+                                hbeat=cfg->trnc_hbn;
                                 connected=true;
                                 msock_set_blocking(isock,false);
                                 err_count=0;
@@ -836,68 +855,142 @@ static int s_trncli_test_trnc(trncli_t *dcli, app_cfg_t *cfg)
             }else if( (test=s_trnc_read_mb1_rec(&mb1, isock, cfg))>0){
 //                fprintf(stderr,"%s:%d reading mb1\n",__FUNCTION__,__LINE__);
 
-                if(cfg->update_n>0 && ++count%cfg->update_n==0){
-                    if( (test=s_trncli_process_mb1(dcli,&mb1,cfg))==0){
-                        err_count=0;
-                    }else{
-                        err_count++;
-                        // these are the TRN server socket
-                        switch (test) {
-                            case EPIPE:
-//                                connected=false;
-                                mlog_tprintf(cfg->log_id,"ERR:EPIPE output disconnected [%s:%d]\n",cfg->trn_cfg->trn_host,cfg->trn_cfg->trn_port);
-                                break;
-                            case EINTR:
-                                mlog_tprintf(cfg->log_id,"ERR:EINTR s_trncli_process_mb1 [%s:%d]\n",cfg->trnc_host,cfg->trnc_port);
-                                quit=true;
-                                break;
-                                
-                            default:
-                                break;
-                        }
-                    }
+                if(cfg->update_n>0){
+                    if(++count%cfg->update_n==0){
+                        if( (test=s_trncli_process_mb1(dcli,&mb1,cfg))==0){
+                            // reset error count
+                            err_count=0;
+                        }else{
+                            err_count++;
+                            // these are the TRN server socket
+                            switch (test) {
+                                case EPIPE:
+                                    //                                connected=false;
+                                    mlog_tprintf(cfg->log_id,"ERR:EPIPE output disconnected [%s:%d]\n",cfg->trn_cfg->trn_host,cfg->trn_cfg->trn_port);
+                                    break;
+                                case EINTR:
+                                    mlog_tprintf(cfg->log_id,"ERR:EINTR s_trncli_process_mb1 [%s:%d]\n",cfg->trnc_host,cfg->trnc_port);
+                                    quit=true;
+                                    break;
 
+                                default:
+                                    break;
+                            }
+                        }
+                    }// if update
+                }else{
+                    // updates disabled, increment count
+                    count++;
+                    err_count=0;
                 }
-            
+
                 if( hbeat-- <= 0){
                     hbeat=0;
                     // send hbeat
 //                    fprintf(stderr,"TX HBEAT req[%s]\n",req);
                     if(msock_sendto(isock,NULL,req,4,0)==4){
                         // mbtrnpp doesn't ACK hbeat update
-                        hbeat=cfg->trnc_hbeat;
+                        hbeat=cfg->trnc_hbn;
+                    }
+                }
+
+                if( cfg->test_api>0  && (count%cfg->test_api) ==0 ){
+                    int pval=-1;
+                    bool bval=false;
+                    int err[8]={0};
+                    int i=0;
+                    bval=trncli_is_intialized(dcli);
+                    fprintf(stderr,"  is initialized [%c]\n",(bval?'Y':'N'));
+                    err[i++]=errno;
+
+                    bval=trncli_is_converged(dcli);
+                    fprintf(stderr,"    is converged [%c]\n",(bval?'Y':'N'));
+                    err[i++]=errno;
+
+                    bval=trncli_last_meas_succesful(dcli);
+                    fprintf(stderr,"   last meas val [%c]\n",(bval?'Y':'N'));
+                    err[i++]=errno;
+
+                    pval=trncli_reinit_count(dcli);
+                    fprintf(stderr,"    reinit count [%d]\n",pval);
+                    err[i++]=errno;
+
+                    pval=trncli_get_filter_type(dcli);
+                    fprintf(stderr,"     filter type [%d]\n",pval);
+                    err[i++]=errno;
+
+                    pval=trncli_get_filter_state(dcli);
+                    fprintf(stderr,"    filter state [%d]\n",pval);
+                    err[i++]=errno;
+
+                    bval=trncli_outstanding_meas(dcli);
+                    fprintf(stderr,"outstanding meas [%c]\n",(bval?'Y':'N'));
+                    err[i++]=errno;
+
+                    int j=0;
+                    bool recon_trn=false;
+                    for(j=0;j<i;j++){
+                        if(err[j]!=0){
+                            switch (err[j]) {
+                                case EPIPE:
+                                    recon_trn=true;
+                                    break;
+                                case EAGAIN:
+                                case ETIMEDOUT:
+                                    // ignore
+                                    break;
+                                default:
+                                    fprintf(stderr,"ERR[%d] [%d/%s]\n",j,err[j],strerror(err[j]));
+                                    break;
+                            }
+                        }
+                    }
+                    if(recon_trn){
+                        fprintf(stderr,"WARN: reconnecting to TRN\n");
+                        if( (test=trncli_connect(dcli, cfg->trn_cfg->trn_host, cfg->trn_cfg->trn_port))==0){
+                            fprintf(stderr,"connect OK\n");
+                            if( trncli_init_trn(dcli, cfg->trn_cfg)>0){
+                                fprintf(stderr,"init OK\n");
+                            }else{
+                                fprintf(stderr,"trncli_init_server failed [%d]\n",test);
+                            }
+                        }else{
+                            fprintf(stderr,"trncli_connect failed [%d]\n",test);
+                        }
+
                     }
                 }
             }else{
+                // MB1 read error
                 test=errno;
                 err_count++;
                 // these are the MBTRN server socket
 
-                fprintf(stderr,"%s:%d  ERR read mb1 failed errno[%d:%s] ecount[%d]\n",__FUNCTION__,__LINE__,errno,strerror(errno),err_count);
+//                fprintf(stderr,"%s:%d  ERR read mb1 failed errno[%d:%s] ecount[%d]\n",__FUNCTION__,__LINE__,errno,strerror(errno),err_count);
                 switch (test) {
                     case EPIPE:
                         connected=false;
-                        mlog_tprintf(cfg->log_id,"ERR:EPIPE input disconnected [%s:%d]\n",cfg->trnc_host,cfg->trnc_port);
+                        mlog_tprintf(cfg->log_id,"ERR: EPIPE input disconnected [%s:%d] ecount[%d]\n",cfg->trnc_host,cfg->trnc_port,err_count);
                         break;
                     case EINTR:
-                        mlog_tprintf(cfg->log_id,"ERR:EINTR s_trnc_read_mb1_rec [%s:%d]\n",cfg->trnc_host,cfg->trnc_port);
+                        mlog_tprintf(cfg->log_id,"ERR: EINTR s_trnc_read_mb1_rec [%s:%d] ecount[%d]\n",cfg->trnc_host,cfg->trnc_port,err_count);
                         quit=true;
                         break;
                     case EAGAIN:
                         sleep(1);
                         if(err_count>10){
                         connected=false;
-                        mlog_tprintf(cfg->log_id,"ERR:EAGAIN input disconnected [%s:%d]\n",cfg->trnc_host,cfg->trnc_port);
+                        mlog_tprintf(cfg->log_id,"ERR: EAGAIN input disconnected [%s:%d] ecount[%d]\n",cfg->trnc_host,cfg->trnc_port,err_count);
                         }
                         break;
 
                     default:
-                        fprintf(stderr,"ERR:? s_trnc_read_mb1_rec failed  [%d/%s]\n",errno,strerror(errno));
-                        mlog_tprintf(cfg->log_id,"s_trnc_read_mb1_rec failed  [%d/%s]\n",errno,strerror(errno));
+                        fprintf(stderr,"ERR: s_trnc_read_mb1_rec failed  [%d/%s]\n",errno,strerror(errno));
+                        mlog_tprintf(cfg->log_id,"s_trnc_read_mb1_rec failed  [%d/%s] ecount[%d]\n",errno,strerror(errno),err_count);
                         break;
                 }
 
-            }
+            }// else MB1 read error
             
         }// while
 
@@ -941,27 +1034,29 @@ static int s_trncli_test_mbin(trncli_t *dcli, app_cfg_t *cfg)
 static int s_app_main(app_cfg_t *cfg)
 {
     int retval=-1;
-    trncli_t *dcli = trncli_new(TCLI_DATA,cfg->utm);
+    trncli_t *dcli = trncli_new(cfg->utm);
     int test=-1;
   
     if( (test=trncli_connect(dcli, cfg->trn_cfg->trn_host, cfg->trn_cfg->trn_port))==0){
-        if( trncli_init_server(dcli, cfg->trn_cfg)>0){
-            switch (cfg->input_src) {
-                case SRC_CSV:
-                    retval=s_trncli_test_csv(dcli, cfg);
-                    break;
-                case SRC_MBIN:
-                    retval=s_trncli_test_mbin(dcli, cfg);
-                    break;
-                case SRC_TRNC:
-                    retval=s_trncli_test_trnc(dcli, cfg);
-                    break;
-                default:
-                    fprintf(stderr,"invalid input type [%d]\n",cfg->input_src);
-                    break;
-            }
+        fprintf(stderr,"connect OK\n");
+        if(trncli_init_trn(dcli, cfg->trn_cfg)>0){
+            fprintf(stderr,"init OK\n");
         }else{
-            fprintf(stderr,"trncli_init_server failed [%d]\n",test);
+            fprintf(stderr,"trncli_init_trn failed [%d]\n",test);
+        }
+        switch (cfg->input_src) {
+            case SRC_CSV:
+                retval=s_trncli_test_csv(dcli, cfg);
+                break;
+            case SRC_MBIN:
+                retval=s_trncli_test_mbin(dcli, cfg);
+                break;
+            case SRC_TRNC:
+                retval=s_trncli_test_trnc(dcli, cfg);
+                break;
+            default:
+                fprintf(stderr,"invalid input type [%d]\n",cfg->input_src);
+                break;
         }
     }else{
         fprintf(stderr,"trncli_connect failed [%d]\n",test);
@@ -1051,10 +1146,7 @@ int main(int argc, char **argv)
     
     s_app_main(cfg);
 
-    fprintf(stderr,"%s:%d\n",__FUNCTION__,__LINE__);
-
     app_cfg_destroy(&cfg);
-    fprintf(stderr,"%s:%d\n",__FUNCTION__,__LINE__);
 
     return retval;
 }

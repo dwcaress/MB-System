@@ -241,7 +241,6 @@ static bool s_peer_idval_cmp(void *item, void *value)
             break;
 
         default:
-
             // record arrival time
             connect_time= mtime_dtime();
 
@@ -400,10 +399,13 @@ int netif_update_connections(netif_t *self)
 
     if(NULL!=self){
         MST_METRIC_START(self->profile->stats->metrics[NETIF_CH_UDCON_XT], mtime_dtime());
-        if(self->ctype==ST_UDP)
+        if(self->ctype==ST_UDP){
             netif_udp_update_connections(self);
-        if(self->ctype==ST_TCP)
+        }else if(self->ctype==ST_UDPM){
+            netif_udp_update_connections(self);
+        }else if(self->ctype==ST_TCP){
             netif_tcp_update_connections(self);
+        }
         MST_METRIC_LAP(self->profile->stats->metrics[NETIF_CH_UDCON_XT], mtime_dtime());
     }
    return retval;
@@ -424,36 +426,40 @@ int netif_check_hbeat(netif_t *self, msock_connection_t **ppsub, int idx)
 
     if(NULL!=self && NULL!=ppsub){
         MST_METRIC_START(self->profile->stats->metrics[NETIF_CH_CHKHB_XT], mtime_dtime());
-        msock_connection_t *psub = *ppsub;
-        double now = mtime_dtime();
-        double tmout = self->hbto;
 
-        if (NULL!=psub && tmout>0.0 && ((now-psub->hbtime)>tmout)) {
+        if(self->ctype!=ST_UDPM){
+            // no hbeat for UDP mcast
+            msock_connection_t *psub = *ppsub;
+            double now = mtime_dtime();
+            double tmout = self->hbto;
 
-            PMPRINT(MOD_NETIF,NETIF_V1,(stderr,"[CHKHB.%s]:DEL_CLI - expired id[%d/%s:%s] - removed\n",self->port_name,idx,psub->chost, psub->service));
-            mlog_tprintf(self->mlog_id,"[CHKHB.%s]:DEL_CLI - expired id[%d/%s:%s] - removed\n",self->port_name,idx,psub->chost, psub->service);
+            if (NULL!=psub && tmout>0.0 && ((now-psub->hbtime)>tmout)) {
 
-            mlist_remove(self->list,psub);
-            *ppsub=NULL;
+                PMPRINT(MOD_NETIF,NETIF_V1,(stderr,"[CHKHB.%s]:DEL_CLI - expired id[%d/%s:%s] - removed\n",self->port_name,idx,psub->chost, psub->service));
+                mlog_tprintf(self->mlog_id,"[CHKHB.%s]:DEL_CLI - expired id[%d/%s:%s] - removed\n",self->port_name,idx,psub->chost, psub->service);
 
-            MST_COUNTER_INC(self->profile->stats->events[NETIF_EV_CLI_DISN]);
-            MST_COUNTER_SET(self->profile->stats->status[NETIF_STA_CLI_LIST_LEN],mlist_size(self->list));
+                mlist_remove(self->list,psub);
+                *ppsub=NULL;
 
-        }else{
-            if(NULL!=psub)
-            PMPRINT(MOD_NETIF,NETIF_V1,(stderr,"[CHKHB.%s]:OK id[%d/%s:%s] - %.3lf/%.3lf/%.3lf %lf\n",self->port_name,idx,psub->chost, psub->service, now,psub->hbtime,(now-psub->hbtime),tmout));
-        }
+                MST_COUNTER_INC(self->profile->stats->events[NETIF_EV_CLI_DISN]);
+                MST_COUNTER_SET(self->profile->stats->status[NETIF_STA_CLI_LIST_LEN],mlist_size(self->list));
+
+            }else{
+                if(NULL!=psub)
+                PMPRINT(MOD_NETIF,NETIF_V1,(stderr,"[CHKHB.%s]:OK id[%d/%s:%s] - %.3lf/%.3lf/%.3lf %lf\n",self->port_name,idx,psub->chost, psub->service, now,psub->hbtime,(now-psub->hbtime),tmout));
+            }
+        }// if !UDPM
+
         retval=0;
+
         MST_METRIC_LAP(self->profile->stats->metrics[NETIF_CH_CHKHB_XT], mtime_dtime());
     }
-
     return retval;
 }
 
 int netif_reqres(netif_t *self)
 {
     int retval=-1;
-
 
     if(NULL!=self && NULL!=self->read_fn && NULL!=self->handle_fn){
         MST_COUNTER_INC(self->profile->stats->events[NETIF_EV_CLI_REQRESN]);
@@ -467,7 +473,7 @@ int netif_reqres(netif_t *self)
         int merr=0;
 
         while (psub != NULL) {
-           cli++;
+            cli++;
 
             // read message
             // update hbeat
@@ -492,8 +498,8 @@ int netif_reqres(netif_t *self)
 
             }else{
                 if(errno!=EAGAIN)
-                PMPRINT(MOD_NETIF,NETIF_V4,(stderr,"[SVCCLI.%s]:ERR - recvfrom ret[%d] id[%d/%s:%s] err[%d/%s]\n",self->port_name,iobytes,cli,psub->chost, psub->service,errno,strerror(errno)));
-           }
+                    PMPRINT(MOD_NETIF,NETIF_V4,(stderr,"[SVCCLI.%s]:ERR - recvfrom ret[%d] id[%d/%s:%s] err[%d/%s]\n",self->port_name,iobytes,cli,psub->chost, psub->service,errno,strerror(errno)));
+            }
 
             // check hbeat, remove expired connections
             // (ignored if hbto <= 0)
@@ -523,7 +529,7 @@ int netif_reqres(netif_t *self)
                     MST_COUNTER_ADD(self->profile->stats->status[NETIF_STA_CLI_TX_BYTES],iobytes);
                     MST_COUNTER_ADD(self->profile->stats->status[NETIF_STA_CLI_RES_BYTES],iobytes);
                     MST_COUNTER_INC(self->profile->stats->events[NETIF_EV_CLI_RXN]);
-              }// else handle msg OK
+                }// else handle msg OK
 
                 MST_METRIC_LAP(self->profile->stats->metrics[NETIF_CH_HANDLE_XT], mtime_dtime());
 
@@ -552,38 +558,45 @@ int netif_pub(netif_t *self, char *output_buffer, size_t len)
     if(NULL!=self && NULL!=self->pub_fn && NULL!=output_buffer && len>0){
         MST_METRIC_START(self->profile->stats->metrics[NETIF_CH_PUB_XT], mtime_dtime());
 
-        // iterate over subscribers...
-        msock_connection_t *psub = (msock_connection_t *)mlist_first(self->list);
-        int idx=0;
-
-        while (psub != NULL) {
-            int iobytes = self->pub_fn(self,psub,output_buffer,len);
+        if(self->ctype==ST_UDPM){
+            int iobytes = self->pub_fn(self,NULL,output_buffer,len);
 
             if (  iobytes > 0) {
-                // update stats if publish successful
-                MST_COUNTER_INC(self->profile->stats->events[NETIF_EV_CLI_TXN]);
-                MST_COUNTER_ADD(self->profile->stats->status[NETIF_STA_CLI_TX_BYTES],iobytes);
-                MST_COUNTER_INC(self->profile->stats->events[NETIF_EV_CLI_PUBN]);
-                MST_COUNTER_ADD(self->profile->stats->status[NETIF_STA_CLI_PUB_BYTES],iobytes);
-
-                PMPRINT(MOD_NETIF,NETIF_V2,(stderr,"[SVCPUB.%s]:TX - ret[%5d] bytes id[%d/%s:%s] hbtime[%.2lf]\n", self->port_name,iobytes, idx, psub->chost, psub->service, psub->hbtime));
-
-            }else{
-                PMPRINT(MOD_NETIF,NETIF_V4,(stderr,"\n[SVCPUB.%s]:ERR - sendto ret[%d] id[%d/%s:%s] [%d/%s]\n",self->port_name,iobytes,idx,psub->chost, psub->service,errno,strerror(errno)));
-//                mlog_tprintf(self->mlog_id,"[PUB.%s]:ERR - sendto ret[%d] id[%d/%s:%s] [%d/%s]\n",self->port_name,iobytes,idx,psub->chost, psub->service,errno,strerror(errno));
-                MST_COUNTER_INC(self->profile->stats->events[NETIF_EV_EPUB_TX]);
+//                fprintf(stderr,"%s:%d iobytes[%d]\n",__func__,__LINE__,iobytes);
             }
+        }else{
+            // iterate over subscribers...
+            msock_connection_t *psub = (msock_connection_t *)mlist_first(self->list);
+            int idx=0;
+            while (psub != NULL) {
+                int iobytes = self->pub_fn(self,psub,output_buffer,len);
 
-            // check hbeat, remove expired connections
-            // (ignored if hbto <= 0)
-            netif_check_hbeat(self, &psub, idx);
+                if (  iobytes > 0) {
+                    // update stats if publish successful
+                    MST_COUNTER_INC(self->profile->stats->events[NETIF_EV_CLI_TXN]);
+                    MST_COUNTER_ADD(self->profile->stats->status[NETIF_STA_CLI_TX_BYTES],iobytes);
+                    MST_COUNTER_INC(self->profile->stats->events[NETIF_EV_CLI_PUBN]);
+                    MST_COUNTER_ADD(self->profile->stats->status[NETIF_STA_CLI_PUB_BYTES],iobytes);
 
-            psub=(msock_connection_t *)mlist_next(self->list);
-            idx++;
-        }// while psub
+                    PMPRINT(MOD_NETIF,NETIF_V2,(stderr,"[SVCPUB.%s]:TX - ret[%5d] bytes id[%d/%s:%s] hbtime[%.2lf]\n", self->port_name,iobytes, idx, psub->chost, psub->service, psub->hbtime));
+
+                }else{
+                    PMPRINT(MOD_NETIF,NETIF_V4,(stderr,"\n[SVCPUB.%s]:ERR - sendto ret[%d] id[%d/%s:%s] [%d/%s]\n",self->port_name,iobytes,idx,psub->chost, psub->service,errno,strerror(errno)));
+                    //                mlog_tprintf(self->mlog_id,"[PUB.%s]:ERR - sendto ret[%d] id[%d/%s:%s] [%d/%s]\n",self->port_name,iobytes,idx,psub->chost, psub->service,errno,strerror(errno));
+                    MST_COUNTER_INC(self->profile->stats->events[NETIF_EV_EPUB_TX]);
+                }
+
+                // check hbeat, remove expired connections
+                // (ignored if hbto <= 0)
+                netif_check_hbeat(self, &psub, idx);
+
+                psub=(msock_connection_t *)mlist_next(self->list);
+                idx++;
+            }// while psub
+        }// not UDPM
         retval=0;
         MST_METRIC_LAP(self->profile->stats->metrics[NETIF_CH_PUB_XT], mtime_dtime());
-    }
+    }//  invalid arg
 
     return retval;
 }
@@ -634,7 +647,41 @@ int netif_connect(netif_t *self)
                 MST_COUNTER_INC(self->profile->stats->events[NETIF_EV_ESRC_SOCKET]);
             }
         break;
-    case ST_TCP:
+        case ST_UDPM:
+            self->socket = msock_socket_new(self->host, self->port, ST_UDPM);
+            if(NULL!=self->socket){
+                const int optionval = 1;
+#if !defined(__CYGWIN__)
+                msock_set_opt(self->socket, SO_REUSEPORT, &optionval, sizeof(optionval));
+#endif
+                msock_set_opt(self->socket, SO_REUSEADDR, &optionval, sizeof(optionval));
+                msock_set_blocking(self->socket,false);
+
+                unsigned char mcast_loop=1;
+                if (msock_lset_opt(self->socket, IPPROTO_IP, IP_MULTICAST_LOOP, &mcast_loop, sizeof(mcast_loop))) {
+                    fprintf(stderr,"ERR - msock_set_opt IP_MULTICAST_LOOP\r\n");
+                }
+
+                if (msock_lset_opt(self->socket, IPPROTO_IP, IP_MULTICAST_TTL, &self->ttl, sizeof(self->ttl))) {
+                    fprintf(stderr,"ERR - msock_set_opt IP_MULTICAST_TTL\r\n");
+                }
+
+                struct ip_mreq mreq;
+
+                // use setsockopt() to request that the kernel join a multicast group
+                mreq.imr_multiaddr.s_addr=inet_addr(self->host);
+                mreq.imr_interface.s_addr=htonl(INADDR_ANY);
+                if (msock_lset_opt(self->socket, IPPROTO_IP, IP_ADD_MEMBERSHIP,&mreq,sizeof(mreq)) < 0) {
+                    fprintf(stderr,"ERR - msock_set_opt IP_ADD_MEMBERSHIP\r\n");
+                }
+
+                retval=0;
+            }else{
+                MST_COUNTER_INC(self->profile->stats->events[NETIF_EV_ESRC_SOCKET]);
+                fprintf(stderr,"ERR - msock_socket_new returned NULL\r\n");
+            }
+            break;
+   case ST_TCP:
         self->socket = msock_socket_new(self->host, self->port, ST_TCP);
             if(NULL!=self->socket){
                 msock_set_blocking(self->socket,false);
@@ -684,6 +731,43 @@ const char *netif_get_build()
 }
 // End function mbtrn_get_build
 
+netif_t *netif_new_dfl(char *name, char *host, int port,
+                   msock_socket_ctype ctype,
+                   netif_mode_t mode,
+                   netif_msg_read_fn read_fn,
+                   netif_msg_handle_fn handle_fn,
+                   netif_msg_pub_fn pub_fn)
+{
+    netif_t *instance =  (netif_t *)malloc(sizeof(netif_t));
+    if(NULL!=instance){
+        memset(instance,0,sizeof(netif_t));
+
+        instance->host=(NULL==host?NULL:strdup(host));
+        instance->port=port;
+        instance->socket = NULL;
+        instance->list = mlist_new();
+        instance->peer = msock_connection_new();
+        instance->hbto=0.0;
+        instance->ttl=0;
+        instance->mode=mode;
+        instance->port_name=strdup((NULL!=name?name:"?"));
+
+        mlist_autofree(instance->list,msock_connection_free);
+
+        instance->profile = mstats_profile_new(NETIF_EV_COUNT, NETIF_STA_COUNT, NETIF_CH_COUNT, prof_stats_labels, mtime_dtime(), netif_profile_interval_sec);
+        instance->mlog_id = MLOG_ID_INVALID;
+        instance->log_dir=strdup(NETIF_LOG_DIR_DFL);
+        instance->cmdline=NULL;
+        instance->ctype = ctype;
+        instance->stop=false;
+        instance->read_fn=read_fn;
+        instance->handle_fn=handle_fn;
+        instance->pub_fn=pub_fn;
+    }
+    return instance;
+}
+// End function
+
 netif_t *netif_new(char *name, char *host, int port,
                    msock_socket_ctype ctype,
                    netif_mode_t mode,
@@ -692,32 +776,34 @@ netif_t *netif_new(char *name, char *host, int port,
                    netif_msg_handle_fn handle_fn,
                    netif_msg_pub_fn pub_fn)
 {
-    netif_t *instance =  (netif_t *)malloc(sizeof(netif_t));
+    netif_t *instance =  netif_new_dfl(name,host,port,
+                                       ctype,mode,
+                                       read_fn,
+                                       handle_fn,
+                                       pub_fn);
 	if(NULL!=instance){
-        memset(instance,0,sizeof(netif_t));
-
-        instance->host=(NULL==host?NULL:strdup(host));
-        instance->port=port;
-        instance->socket = NULL;
-        instance->list = mlist_new();
-        instance->peer = msock_connection_new();
         instance->hbto=hbto;
-        instance->mode=mode;
-        instance->port_name=strdup((NULL!=name?name:"?"));
-
-        mlist_autofree(instance->list,msock_connection_free);
-
-        instance->profile = mstats_profile_new(NETIF_EV_COUNT, NETIF_STA_COUNT, NETIF_CH_COUNT, prof_stats_labels, mtime_dtime(), netif_profile_interval_sec);
-  		instance->mlog_id = MLOG_ID_INVALID;
-    	instance->log_dir=strdup(NETIF_LOG_DIR_DFL);
-     	instance->cmdline=NULL;
-        instance->ctype = ctype;
-        instance->stop=false;
-        instance->read_fn=read_fn;
-        instance->handle_fn=handle_fn;
-        instance->pub_fn=pub_fn;
     }
 	return instance;
+}
+// End function
+netif_t *netif_mcast_new(char *name, char *host, int port,
+                   msock_socket_ctype ctype,
+                   netif_mode_t mode,
+                   int ttl,
+                   netif_msg_read_fn read_fn,
+                   netif_msg_handle_fn handle_fn,
+                   netif_msg_pub_fn pub_fn)
+{
+    netif_t *instance =  netif_new_dfl(name,host,port,
+                                       ctype,mode,
+                                       read_fn,
+                                       handle_fn,
+                                       pub_fn);
+    if(NULL!=instance){
+        instance->ttl=ttl;
+    }
+    return instance;
 }
 // End function
 
@@ -742,7 +828,6 @@ netif_t *netif_udp_new(char *name, char *host, int port,
     return instance;
 }
 // End function
-
 
 void netif_destroy(netif_t **pself)
 {
@@ -797,6 +882,7 @@ void netif_show(netif_t *self, bool verbose, int indent)
         fprintf(stderr,"%*s%*s  %*s\n",indent,(indent>0?" ":""),wkey,"port_name",wval,self->port_name);
         fprintf(stderr,"%*s%*s  %*s\n",indent,(indent>0?" ":""),wkey,"host",wval,self->host);
         fprintf(stderr,"%*s%*s  %*d\n",indent,(indent>0?" ":""),wkey,"port",wval,self->port);
+        fprintf(stderr,"%*s%*s  %*d\n",indent,(indent>0?" ":""),wkey,"ttl",wval,self->ttl);
         fprintf(stderr,"%*s%*s  %*p\n",indent,(indent>0?" ":""),wkey,"socket",wval,self->socket);
         fprintf(stderr,"%*s%*s  %*p\n",indent,(indent>0?" ":""),wkey,"peer",wval,self->peer);
         fprintf(stderr,"%*s%*s  %*p\n",indent,(indent>0?" ":""), wkey,"list@",wval,self->list);

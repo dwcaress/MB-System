@@ -307,12 +307,9 @@ void msock_connection_free(void *pself)
 {
     if (NULL!=pself) {
         msock_connection_t *self = (msock_connection_t *)pself;
-        if (NULL!=self) {
-//            msock_addr_destroy(&self->addr);
-            msock_connection_destroy(&self);
-            free(self);
-            self=NULL;
-        }
+        msock_connection_destroy(&self);
+        free(self);
+        self=NULL;
     }
 }
 // End function msock_connection_free
@@ -898,11 +895,22 @@ msock_socket_t *msock_wrap_fd(int fd)
 
 int msock_get_opt(msock_socket_t *self, int opt_name, void *optval, socklen_t *optlen)
 {
-    return getsockopt(self->fd,SOL_SOCKET,opt_name,optval,(socklen_t *)optlen);
+    return msock_lget_opt(self, SOL_SOCKET, opt_name, optval, optlen);
 }
+
 int msock_set_opt(msock_socket_t *self, int opt_name, const void *optval, socklen_t optlen)
 {
-    return setsockopt(self->fd,SOL_SOCKET,opt_name,optval,(socklen_t)optlen);
+	    return msock_lset_opt(self, SOL_SOCKET, opt_name, optval, optlen);
+}
+
+int msock_lget_opt(msock_socket_t *self, int opt_level, int opt_name, void *optval, socklen_t *optlen)
+{
+    return getsockopt(self->fd, opt_level, opt_name, optval, (socklen_t *)optlen);
+}
+
+int msock_lset_opt(msock_socket_t *self, int opt_level, int opt_name, const void *optval, socklen_t optlen)
+{
+        return setsockopt(self->fd, opt_level, opt_name, optval, (socklen_t)optlen);
 }
 
 #ifdef WITH_MSOCKET_TEST

@@ -178,7 +178,7 @@ static int s_get_acknak(trnucli_t *self, uint32_t retries, uint32_t delay)
     }//else invalid args
 
     return retval;
-}//s_get_acknak
+}
 
 // send message, get ack/nack
 // return 0 if ACK/NACK, -1 otherwise
@@ -195,9 +195,9 @@ static int s_send_recv(trnucli_t *self, byte *msg, int32_t len)
     }
 
     return retval;
-}//s_send_recv
+}
 
-trnucli_t *trnucli_new(update_callback_fn update_fn, trnuc_flags_t flags, double hbeat_to_sec)
+trnucli_t *trnucli_new(update_callback_fn update_fn, trnucli_flags_t flags, double hbeat_to_sec)
 {
     trnucli_t *instance=(trnucli_t *)malloc(sizeof(trnucli_t));
     if(NULL!=instance){
@@ -210,7 +210,7 @@ trnucli_t *trnucli_new(update_callback_fn update_fn, trnuc_flags_t flags, double
     }
     
     return instance;
-}// end function trnucli_new
+}
 
 void trnucli_destroy(trnucli_t **pself)
 {
@@ -225,7 +225,7 @@ void trnucli_destroy(trnucli_t **pself)
         free(self);
         *pself=NULL;
     }
-}// end function trnucli_destroy
+}
 
 int trnucli_connect(trnucli_t *self, char *host, int port)
 {
@@ -252,22 +252,99 @@ int trnucli_connect(trnucli_t *self, char *host, int port)
     }
 
     return retval;
-}// end function trnucli_connect
+}
 
 int trnucli_disconnect(trnucli_t *self)
 {
     int retval=-1;
     if(NULL!=self && NULL!=self->trnu && NULL!=self->trnu->sock){
-    msock_set_blocking(self->trnu->sock,false);
-    char msg[8]={0};
-    sprintf(msg,PROTO_TRNU_DIS);
-    int32_t sret=msock_sendto(self->trnu->sock,NULL,(byte *)msg,4,0);
-    if(sret>0){
-        retval=0;
-    }
+        if(UCF_ISSET(self->flags,TRNUC_MCAST)){
+            // mcast clients: leave mcast group
+            struct ip_mreq mreq;
+            if(NULL!=self->trnu->addr && NULL!=self->trnu->sock->addr->host){
+                // use setsockopt() to leave a multicast group
+                mreq.imr_multiaddr.s_addr=inet_addr(self->trnu->sock->addr->host);
+                mreq.imr_interface.s_addr=htonl(INADDR_ANY);
+                if (msock_lset_opt (self->trnu->sock, IPPROTO_IP, IP_DROP_MEMBERSHIP,&mreq,sizeof(mreq)) == 0){
+                    retval=0;
+                }else{
+                    PTRACE();
+                    PDPRINT((stderr,"ERR - msock_set_opt IP_DROP_MEMBERSHIP\r\n"));
+                }
+            }
+        }else{
+            // udp clients: send disconnect messaage
+            msock_set_blocking(self->trnu->sock,false);
+            char msg[8]={0};
+            sprintf(msg,PROTO_TRNU_DIS);
+            int32_t sret=msock_sendto(self->trnu->sock,NULL,(byte *)msg,4,0);
+            if(sret>0){
+                retval=0;
+            }
+        }
     }
     return retval;
-}// end function trnucli_disconnect
+}
+
+int trnucli_mcast_connect(trnucli_t *self, char *host, int port, int ttl)
+{
+    int retval=-1;
+
+    if(NULL!=self->trnu->sock){
+        msock_socket_destroy(&self->trnu->sock);
+    }
+
+    // create socket using INADDR_ANY
+    if((self->trnu->sock=msock_socket_new("0.0.0.0",port,ST_UDPM))!=NULL ){
+
+        msock_set_blocking(self->trnu->sock,false);
+
+        const int so_reuse = 1;
+
+        // enable multiple clients on same host
+        msock_set_opt(self->trnu->sock, SO_REUSEADDR, &so_reuse, sizeof(so_reuse));
+        
+#if !defined(__CYGWIN__)
+        // Cygwin doesn't define SO_REUSEPORT
+        // OSX requires this to reuse socket (linux optional)
+        msock_set_opt(self->trnu->sock, SO_REUSEPORT, &so_reuse, sizeof(so_reuse));
+#endif // CYGWIN
+
+
+#ifdef WITH_MCAST_BIDIR
+        // future expansion (for mcast outbound)
+        unsigned char mcast_loop=1;
+        if(msock_lset_opt(self->trnu->sock, IPPROTO_IP, IP_MULTICAST_LOOP, &mcast_loop, sizeof(mcast_loop))) {
+            PDPRINT((stderr,"ERR - msock_set_opt IP_MULTICAST_LOOP\r\n"));
+        }
+
+        if(msock_lset_opt(self->trnu->sock, IPPROTO_IP, IP_MULTICAST_TTL, &ttl, sizeof(ttl))) {
+            PDPRINT((stderr,"ERR - msock_set_opt IP_MULTICAST_TTL\r\n"));
+        }
+#endif // WITH_MCAST_BIDIR
+
+		// bind the socket to INADDR_ANY (accept mcast on all interfaces)
+        if(msock_bind(self->trnu->sock)!=0){
+            PDPRINT((stderr,"ERR - bind failed [%d/%s]\n",errno,strerror(errno)));
+        }
+        struct ip_mreq mreq;
+
+        // use setsockopt() to request that the kernel join a multicast group
+        mreq.imr_multiaddr.s_addr=inet_addr(host);
+        mreq.imr_interface.s_addr=htonl(INADDR_ANY);
+        if (msock_lset_opt(self->trnu->sock, IPPROTO_IP, IP_ADD_MEMBERSHIP,&mreq,sizeof(mreq)) == 0){
+            retval=0;
+        }else{
+            PTRACE();
+            PDPRINT((stderr,"ERR - msock_set_opt IP_ADD_MEMBERSHIP\r\n"));
+        }
+
+    }else{
+        PTRACE();
+    }
+
+    return retval;
+}
 
 int trnucli_set_callback(trnucli_t *self, update_callback_fn func)
 {
@@ -277,8 +354,7 @@ int trnucli_set_callback(trnucli_t *self, update_callback_fn func)
         retval=0;
     }
     return retval;
-}// end function trnucli_set_callback
-
+}
 
 int trnucli_listen(trnucli_t *self, bool callback_en)
 {
@@ -290,7 +366,7 @@ int trnucli_listen(trnucli_t *self, bool callback_en)
         }
         if(NULL!=self->update){
             memset(self->update,0,TRNU_PUB_BYTES);
-            msock_set_blocking(self->trnu->sock,TRNUC_BLK_LISTEN(self->flags));
+            msock_set_blocking(self->trnu->sock,UCF_ISSET(self->flags,TRNUC_BLK_LISTEN));
             int32_t read_len=TRNU_PUB_BYTES;
             int64_t rret=msock_recvfrom(self->trnu->sock,self->trnu->sock->addr,(byte *)self->update,read_len,0);
             if(rret==read_len){
@@ -319,30 +395,30 @@ int trnucli_listen(trnucli_t *self, bool callback_en)
     }
 
     return retval;
-}//trnucli_listen
+}
 
 int trnucli_reset_trn(trnucli_t *self)
 {
     int retval=-1;
 
-    if(NULL!=self){
+    if(NULL!=self && !UCF_ISSET(self->flags,TRNUC_MCAST)){
         int32_t len=(strlen(PROTO_TRNU_RST)+1);
         retval=s_send_recv(self,(byte *)PROTO_TRNU_RST,len);
     }
     return retval;
-}//trnucli_reset_trn
+}
 
 int trnucli_hbeat(trnucli_t *self)
 {
     int retval=-1;
 
-    if(NULL!=self){
+    if(NULL!=self && !UCF_ISSET(self->flags,TRNUC_MCAST)){
         int32_t len=(strlen(PROTO_TRNU_HBT)+1);
         retval=s_send_recv(self,(byte *)PROTO_TRNU_HBT,len);
     }
 
     return retval;
-}// end trnucli_hbeat
+}
 
 double trnucli_update_mb1time(trnu_pub_t *update)
 {
@@ -351,7 +427,7 @@ double trnucli_update_mb1time(trnu_pub_t *update)
         retval = update->mb1_time;
     }
     return retval;
-}//trnucli_ctx_update_mb1time
+}
 
 double trnucli_update_mb1age(trnu_pub_t *update)
 {
@@ -360,7 +436,7 @@ double trnucli_update_mb1age(trnu_pub_t *update)
         retval = mtime_etime()-update->mb1_time;
     }
     return retval;
-}//trnucli_update_mb1time
+}
 
 double trnucli_update_hosttime(trnu_pub_t *update)
 {
@@ -369,161 +445,13 @@ double trnucli_update_hosttime(trnu_pub_t *update)
         retval = update->update_time;
     }
     return retval;
-}//trnucli_update_hosttime
+}
 
 double trnucli_update_hostage(trnu_pub_t *update)
 {
     double retval=-1.0;
     if(NULL!=update){
         retval = mtime_etime()-update->update_time;
-    }
-    return retval;
-}// trnucli_update_hostage
-
-
-static int s_update_pretty_org(trnu_pub_t *update, char *dest, int len, int indent)
-{
-    int retval=0;
-    if(NULL!=update && NULL!=dest && len>0){
-        int wkey=TRNUCLI_SHOW_WKEY;
-        int wval=TRNUCLI_SHOW_WVAL;
-        int rem=len;
-        char *dp=dest;
-        int wbytes=snprintf(dp,rem,"%*s %*s  %*p\n",indent,(indent>0?" ":""), wkey,"addr",wval,update);
-        rem-=(wbytes-1);
-        dp+=wbytes;
-        wbytes=snprintf(dp,rem,"%*s %*s  %*.3lf\n",indent,(indent>0?" ":""), wkey,"mb1_time",wval,update->mb1_time);
-        rem-=(wbytes-1);
-        dp+=wbytes;
-        wbytes=snprintf(dp,rem,"%*s %*s  %*.3lf\n",indent,(indent>0?" ":""), wkey,"update_time",wval,update->update_time);
-        rem-=(wbytes-1);
-        dp+=wbytes;
-        wbytes=snprintf(dp,rem,"%*s %*s  %*s%08X\n",indent,(indent>0?" ":""), wkey,"sync",(wval-8)," ",update->sync);
-        rem-=(wbytes-1);
-        dp+=wbytes;
-        wbytes=snprintf(dp,rem,"%*s %*s  %*d\n",indent,(indent>0?" ":""), wkey,"reinit_count",wval,update->reinit_count);
-        rem-=(wbytes-1);
-        dp+=wbytes;
-        wbytes=snprintf(dp,rem,"%*s %*s  %*.3lf\n",indent,(indent>0?" ":""), wkey,"reinit_t_update",wval,update->reinit_tlast);
-        rem-=(wbytes-1);
-        dp+=wbytes;
-        wbytes=snprintf(dp,rem,"%*s %*s  %*d\n",indent,(indent>0?" ":""), wkey,"filter_state",wval,update->filter_state);
-        rem-=(wbytes-1);
-        dp+=wbytes;
-        wbytes=snprintf(dp,rem,"%*s %*s  %*d\n",indent,(indent>0?" ":""), wkey,"success",wval,update->success);
-        rem-=(wbytes-1);
-        dp+=wbytes;
-        wbytes=snprintf(dp,rem,"%*s %*s  %*hd\n",indent,(indent>0?" ":""), wkey,"is_converged",wval,update->is_converged);
-        rem-=(wbytes-1);
-        dp+=wbytes;
-        wbytes=snprintf(dp,rem,"%*s %*s  %*hd\n",indent,(indent>0?" ":""), wkey,"is_valid",wval,update->is_valid);
-        rem-=(wbytes-1);
-        dp+=wbytes;
-        wbytes=snprintf(dp,rem,"%*s %*s  %*d\n",indent,(indent>0?" ":""), wkey,"mb1_cycle",wval,update->mb1_cycle);
-        rem-=(wbytes-1);
-        dp+=wbytes;
-        wbytes=snprintf(dp,rem,"%*s %*s  %*d\n",indent,(indent>0?" ":""), wkey,"ping_number",wval,update->ping_number);
-        rem-=(wbytes-1);
-        dp+=wbytes;
-        wbytes=snprintf(dp,rem,"%*s %*s\n",indent,(indent>0?" ":""), wkey,"estimates:");
-        rem-=(wbytes-1);
-        dp+=wbytes;
-        int i=0;
-        for(i=0;i<3;i++){
-            trnu_estimate_t *est = &update->est[i];
-            const char *est_labels[3]={"pt", "mle", "mmse"};
-            //            const char *cov_labels[4]={"pt.covx", "pt.covy","pt.covz","pt.covxy"};
-            wbytes=snprintf(dp,rem,"%*s %*s[%d]   %.3lf,%s,%.3lf,%.3lf,%.3lf,%.3lf,%.3lf,%.3lf,%.3lf\n",indent,(indent>0?" ":""),wkey-3," ",i,
-                    est->time,est_labels[i],
-                    est->x,est->y,est->z,
-                    est->cov[0],est->cov[1],est->cov[2],est->cov[3]);
-
-            rem-=(wbytes-1);
-            dp+=wbytes;
-        }
-
-        wbytes=snprintf(dp,rem,"%*s %*s\n",indent,(indent>0?" ":""), wkey,"Bias Estimates:");
-        rem-=(wbytes-1);
-        dp+=wbytes;
-        trnu_estimate_t *ept = &update->est[TRNU_EST_PT];
-        trnu_estimate_t *emle = &update->est[TRNU_EST_MLE];
-        trnu_estimate_t *emmse = &update->est[TRNU_EST_MMSE];
-        wbytes=snprintf(dp,rem,"%*s %*s %.3lf,%.3lf,%.3lf\n",indent,(indent>0?" ":""), wkey," MLE:",(emle->x-ept->x),(emle->y-ept->y),(emle->z-ept->z));
-        rem-=(wbytes-1);
-        dp+=wbytes;
-        wbytes=snprintf(dp,rem,"%*s %*s %.3lf,%.3lf,%.3lf\n",indent,(indent>0?" ":""), wkey,"MMSE:",(emmse->x-ept->x),(emmse->y-ept->y),(emmse->z-ept->z));
-        rem-=(wbytes-1);
-        dp+=wbytes;
-        snprintf(dp,rem,"%*s %*s %.3lf,%.3lf,%.3lf\n",indent,(indent>0?" ":""), wkey," COV:",sqrt(emmse->cov[0]),sqrt(emmse->cov[1]),sqrt(emmse->cov[2]));
-
-        retval=strlen(dest)+1;
-    }
-    return retval;
-}
-
-static int s_update_csv_org(trnu_pub_t *update, char *dest, int len)
-{
-    int retval=0;
-    if(NULL!=update && NULL!=dest && len>0){
-        int rem=len;
-        char *dp=dest;
-
-        int wbytes=snprintf(dp,rem,"%.3lf,",update->mb1_time);
-        rem-=(wbytes-1);
-        dp+=wbytes;
-        wbytes=snprintf(dp,rem,"%.3lf,",update->update_time);
-        rem-=(wbytes-1);
-        dp+=wbytes;
-        wbytes=snprintf(dp,rem,"%04X,",update->sync);
-        rem-=(wbytes-1);
-        dp+=wbytes;
-        wbytes=snprintf(dp,rem,"%d,",update->reinit_count);
-        rem-=(wbytes-1);
-        dp+=wbytes;
-        wbytes=snprintf(dp,rem,"%.3lf,",update->reinit_tlast);
-        rem-=(wbytes-1);
-        dp+=wbytes;
-        wbytes=snprintf(dp,rem,"%d,",update->filter_state);
-        rem-=(wbytes-1);
-        dp+=wbytes;
-        wbytes=snprintf(dp,rem,"%d,",update->success);
-        rem-=(wbytes-1);
-        dp+=wbytes;
-        wbytes=snprintf(dp,rem,"%hd,",update->is_converged);
-        rem-=(wbytes-1);
-        dp+=wbytes;
-        wbytes=snprintf(dp,rem,"%hd,",update->is_valid);
-        rem-=(wbytes-1);
-        dp+=wbytes;
-        wbytes=snprintf(dp,rem,"%d,",update->mb1_cycle);
-        rem-=(wbytes-1);
-        dp+=wbytes;
-        wbytes=snprintf(dp,rem,"%d,",update->ping_number);
-        rem-=(wbytes-1);
-        dp+=wbytes;
-        int i=0;
-        for(i=0;i<3;i++){
-            trnu_estimate_t *est = &update->est[i];
-            wbytes=snprintf(dp,rem,"%.3lf,%.3lf,%.3lf,%.3lf,%.3lf,%.3lf,%.3lf,",
-                            est->x,est->y,est->z,
-                            est->cov[0],est->cov[1],est->cov[2],est->cov[3]);
-
-            rem-=(wbytes-1);
-            dp+=wbytes;
-        }
-
-        trnu_estimate_t *ept = &update->est[TRNU_EST_PT];
-        trnu_estimate_t *emle = &update->est[TRNU_EST_MLE];
-        trnu_estimate_t *emmse = &update->est[TRNU_EST_MMSE];
-        wbytes=snprintf(dp,rem,"%.3lf,%.3lf,%.3lf,",(emle->x-ept->x),(emle->y-ept->y),(emle->z-ept->z));
-        rem-=(wbytes-1);
-        dp+=wbytes;
-        wbytes=snprintf(dp,rem,"%.3lf,%.3lf,%.3lf,",(emmse->x-ept->x),(emmse->y-ept->y),(emmse->z-ept->z));
-        rem-=(wbytes-1);
-        dp+=wbytes;
-        snprintf(dp,rem,"%.3lf,%.3lf,%.3lf",sqrt(emmse->cov[0]),sqrt(emmse->cov[1]),sqrt(emmse->cov[2]));
-
-        retval=strlen(dest)+1;
     }
     return retval;
 }
@@ -587,9 +515,6 @@ static int s_update_pretty(trnu_pub_t *update, char *dest, int len, int indent)
         wbytes=snprintf(dp,rem,"%*s %*s  %*d\n",indent,(indent>0?" ":""), wkey,"n_uncon_tot",wval,update->n_uncon_tot);
         rem-=(wbytes-1);
         dp+=wbytes;
-        wbytes=snprintf(dp,rem,"%*s %*s  %*d\n",indent,(indent>0?" ":""), wkey,"n_con_seq",wval,update->n_con_seq);
-        rem-=(wbytes-1);
-        dp+=wbytes;
         wbytes=snprintf(dp,rem,"%*s %*s\n",indent,(indent>0?" ":""), wkey,"estimates:");
         rem-=(wbytes-1);
         dp+=wbytes;
@@ -611,7 +536,7 @@ static int s_update_pretty(trnu_pub_t *update, char *dest, int len, int indent)
         rem-=(wbytes-1);
         dp+=wbytes;
         trnu_estimate_t *ept = &update->est[TRNU_EST_PT];
-        trnu_estimate_t *emle = &update->est[TRNU_EST_MLE];
+//        trnu_estimate_t *emle = &update->est[TRNU_EST_MLE];
         trnu_estimate_t *emmse = &update->est[TRNU_EST_MMSE];
         trnu_estimate_t *offset = &update->est[TRNU_EST_OFFSET];
         trnu_estimate_t *last_good = &update->est[TRNU_EST_LAST_GOOD];
@@ -724,7 +649,6 @@ static int s_update_csv(trnu_pub_t *update, char *dest, int len)
     return retval;
 }
 
-
 static int s_update_hex(trnu_pub_t *update, char *dest, int len, bool pretty)
 {
     int retval=0;
@@ -803,7 +727,6 @@ int trnucli_update_str(trnu_pub_t *self, char **dest, int len, trnuc_fmt_t fmt)
     return retval;
 }
 
-
 #ifdef WITH_ASYNC_TRNU
 
 #define TRNUCLI_TEST_LOG_NAME "trnuctx"
@@ -817,12 +740,11 @@ const char *g_ctx_action_strings[]={
     "NOP","CONNECT", "LISTEN","DISCONNECT"
 };
 
-
 static void s_init_log(trnucli_ctx_t *ctx)
 {
 
     // if enabled and not initialized...
-    if( (ctx->log_opts&TRNU_LOG_EN)!=0 && ctx->log_id==MLOG_ID_INVALID ){
+    if( UCF_ISSET(ctx->flags,CTX_LOG_EN) && ctx->log_id==MLOG_ID_INVALID ){
         char session_date[32] = {0};
 
         // make session time string to use
@@ -856,7 +778,6 @@ static void s_init_log(trnucli_ctx_t *ctx)
 
 void *s_trnucli_thread_fn(void *arg)
 {
-
     trnucli_ctx_t *ctx = (trnucli_ctx_t *)arg;
     ctx->stop=false;
     trnucli_disconnect(ctx->cli);
@@ -868,6 +789,8 @@ void *s_trnucli_thread_fn(void *arg)
 
     mlog_tprintf(ctx->log_id,"host             %s\n",ctx->host);
     mlog_tprintf(ctx->log_id,"port             %d\n",ctx->port);
+    mlog_tprintf(ctx->log_id,"ttl              %d\n",ctx->ttl);
+    mlog_tprintf(ctx->log_id,"flags            %08X\n",ctx->cli->flags);
     mlog_tprintf(ctx->log_id,"update_fn        %p\n",ctx->cli->update_fn);
     mlog_tprintf(ctx->log_id,"hbeat_to_sec     %.3lf\n",ctx->hbeat_to_sec);
     mlog_tprintf(ctx->log_id,"listen_to_ms     %.3lf\n",ctx->listen_to_ms);
@@ -884,11 +807,11 @@ void *s_trnucli_thread_fn(void *arg)
         switch (ctx->state) {
             case CTX_CONNECTING:
                 if(ctx->listening_timer>0.0)
-                ctx->stats.t_listening+=mtime_etime()-ctx->listening_timer;
+                    ctx->stats.t_listening+=mtime_etime()-ctx->listening_timer;
                 ctx->listening_timer=0.0;
 
                 if(ctx->connecting_timer==0.0)
-                ctx->connecting_timer=mtime_etime();
+                    ctx->connecting_timer=mtime_etime();
                 ctx->stats.t_connecting+=mtime_etime()-ctx->connecting_timer;
                 ctx->connecting_timer=mtime_etime();
 
@@ -896,11 +819,11 @@ void *s_trnucli_thread_fn(void *arg)
                 break;
             case CTX_LISTENING:
                 if(ctx->connecting_timer>0.0)
-                ctx->stats.t_connecting+=mtime_etime()-ctx->connecting_timer;
+                    ctx->stats.t_connecting+=mtime_etime()-ctx->connecting_timer;
                 ctx->connecting_timer=0.0;
 
                 if(ctx->listening_timer==0.0)
-                ctx->listening_timer=mtime_etime();
+                    ctx->listening_timer=mtime_etime();
                 ctx->stats.t_listening+=mtime_etime()-ctx->listening_timer;
                 ctx->listening_timer=mtime_etime();
 
@@ -912,7 +835,7 @@ void *s_trnucli_thread_fn(void *arg)
                 break;
             default:
                 fprintf(stderr,"ERR - illegal state[%d]\n",ctx->state);
-                    mlog_tprintf(ctx->log_id,"ERR - illegal state[%d]\n",ctx->state);
+                mlog_tprintf(ctx->log_id,"ERR - illegal state[%d]\n",ctx->state);
                 ctx->action=ACT_NOP;
                 ctx->stop=true;
                 break;
@@ -920,7 +843,11 @@ void *s_trnucli_thread_fn(void *arg)
 
         if( (ctx->stop==false) && (ctx->action==ACT_CONNECT) ){
             ctx->state=CTX_CONNECTING;
-            int test = trnucli_connect(ctx->cli,ctx->host,ctx->port);
+            int test=-1;
+            if(UCF_ISSET(ctx->cli->flags,TRNUC_MCAST))
+                test = trnucli_mcast_connect(ctx->cli,ctx->host,ctx->port,ctx->ttl);
+            else
+                test = trnucli_connect(ctx->cli,ctx->host,ctx->port);
             if(test==0){
                 double enow =mtime_etime();
                 ctx->rc_timer=enow;
@@ -934,7 +861,7 @@ void *s_trnucli_thread_fn(void *arg)
                 mlog_tprintf(ctx->log_id,"connect failed [%d/%s]\n",errno,strerror(errno));
                 ctx->stats.n_econnect++;
                 if(ctx->erecon_delay_ms>0)
-                mtime_delay_ms(ctx->erecon_delay_ms);
+                    mtime_delay_ms(ctx->erecon_delay_ms);
             }
         } // CONNECT
 
@@ -945,7 +872,7 @@ void *s_trnucli_thread_fn(void *arg)
 
             // set socket timeout/blocking if enabled
             if(ctx->listen_to_ms>0){
-                TRNUC_MSET(&ctx->cli->flags,TRNUC_BLK_LISTEN);
+                UCF_MSET(&ctx->cli->flags,TRNUC_BLK_LISTEN);
                 struct timeval tv;
                 tv.tv_sec = ctx->listen_to_ms/1000;
                 tv.tv_usec = (ctx->listen_to_ms%1000)*1000;
@@ -954,12 +881,12 @@ void *s_trnucli_thread_fn(void *arg)
                 }
             }
 
-             int test=trnucli_listen(ctx->cli,false);
+            int test=trnucli_listen(ctx->cli,false);
 
             if(test==0 && NULL!=ctx->cli->update_fn){
-            mthread_mutex_unlock(ctx->mtx);
+                mthread_mutex_unlock(ctx->mtx);
                 test=ctx->cli->update_fn(ctx->cli->update);
-            mthread_mutex_lock(ctx->mtx);
+                mthread_mutex_lock(ctx->mtx);
             }
 
             // restore socket timeout if enabled
@@ -970,7 +897,7 @@ void *s_trnucli_thread_fn(void *arg)
                 if(msock_set_opt(ctx->cli->trnu->sock,SO_RCVTIMEO,&tv,sizeof(tv))!=0){
                     fprintf(stderr,"setopt ERR [%d/%s]\n",errno,strerror(errno));
                 }
-                TRNUC_MCLR(&ctx->cli->flags,TRNUC_BLK_LISTEN);
+                UCF_MCLR(&ctx->cli->flags,TRNUC_BLK_LISTEN);
             }
 
             if(test==0){
@@ -984,7 +911,7 @@ void *s_trnucli_thread_fn(void *arg)
                 ctx->rc_timer=mtime_etime();
                 ctx->stats.n_update++;
                 ctx->new_count++;
-//                mlog_tprintf(ctx->log_id,"updates[%8d] cyc[%8d] elist[%8d] htime[%.3lf]\n",ctx->stats.n_update,ctx->stats.n_cycle,ctx->stats.n_elisten,ctx->update->update_time);
+                //                mlog_tprintf(ctx->log_id,"updates[%8d] cyc[%8d] elist[%8d] htime[%.3lf]\n",ctx->stats.n_update,ctx->stats.n_cycle,ctx->stats.n_elisten,ctx->update->update_time);
                 mlog_tprintf(ctx->log_id,"upd/cyc/elist/tsvr,%d,%d,%d,%.3lf\n",ctx->stats.n_update,ctx->stats.n_cycle,ctx->stats.n_elisten,ctx->update->update_time);
 
                 // end critical section
@@ -995,14 +922,17 @@ void *s_trnucli_thread_fn(void *arg)
                 mthread_mutex_unlock(ctx->mtx);
                 mtime_delay_ms(ctx->enodata_delay_ms);
                 ctx->stats.n_elisten++;
-           }
+            }
 
-            if(ctx->hbeat_to_sec>0.0 && (mtime_etime()-ctx->hb_timer)>=ctx->hbeat_to_sec){
-                mlog_tprintf(ctx->log_id,"hb_timer expired,%d\n",ctx->stats.n_hbeat);
-                // heartbeat timer expired
-                trnucli_hbeat(ctx->cli);
-                ctx->hb_timer=mtime_etime();
-                ctx->stats.n_hbeat++;
+            if(UCF_ISCLR(ctx->cli->flags,TRNUC_MCAST)){
+                // hbeat if not multicast
+                if(ctx->hbeat_to_sec>0.0 && (mtime_etime()-ctx->hb_timer)>=ctx->hbeat_to_sec){
+                    mlog_tprintf(ctx->log_id,"hb_timer expired,%d\n",ctx->stats.n_hbeat);
+                    // heartbeat timer expired
+                    trnucli_hbeat(ctx->cli);
+                    ctx->hb_timer=mtime_etime();
+                    ctx->stats.n_hbeat++;
+                }
             }
 
             if(ctx->recon_to_sec>0.0 && (mtime_etime()-ctx->rc_timer)>=ctx->recon_to_sec){
@@ -1047,29 +977,25 @@ void *s_trnucli_thread_fn(void *arg)
     return (void *)(&ctx->status);
 }
 
-trnucli_ctx_t *trnucli_ctx_new_dfl(char *host, int port, update_callback_fn update_fn, double hbeat_to_sec, double recon_to_sec)
-{
-    return trnucli_ctx_newl(host, port, update_fn, hbeat_to_sec,
-                            TRNUC_LISTEN_TO_MSEC_DFL,
-                            TRNUC_ENODATA_DEL_MSEC_DFL,
-                            TRNUC_ERECON_DEL_MSEC_DFL,
-                            recon_to_sec,
-                            true);
-}
-
-trnucli_ctx_t *trnucli_ctx_new(char *host, int port, update_callback_fn update_fn, double hbeat_to_sec, uint32_t listen_to_ms, uint32_t enodata_delay_ms, uint32_t erecon_delay_ms, double recon_to_sec)
-{
-    return trnucli_ctx_newl(host, port, update_fn, hbeat_to_sec, listen_to_ms, enodata_delay_ms, erecon_delay_ms, recon_to_sec, true);
-}
-
-trnucli_ctx_t *trnucli_ctx_newl(char *host, int port, update_callback_fn update_fn, double hbeat_to_sec, uint32_t listen_to_ms, uint32_t enodata_delay_ms, uint32_t erecon_delay_ms, double recon_to_sec, trnucli_logopt_t log_opts)
+trnucli_ctx_t *trnucli_ctx_new(char *host,
+                               int port,
+                               int ttl,
+                               trnuctx_flags_t ctx_flags,
+                               trnucli_flags_t cli_flags,
+                               double hbeat_to_sec,
+                               double recon_to_sec,
+                               uint32_t listen_to_ms,
+                               uint32_t enodata_delay_ms,
+                               uint32_t erecon_delay_ms,
+                               update_callback_fn update_fn)
 {
     trnucli_ctx_t *instance  = (trnucli_ctx_t *)malloc(sizeof(trnucli_ctx_t));
     if(NULL!=instance){
         memset(instance,0,sizeof(trnucli_ctx_t));
         instance->host=(NULL!=host ? strdup(host) : "localhost");
         instance->port=port;
-        instance->cli=trnucli_new(update_fn,0,hbeat_to_sec);
+        instance->ttl=ttl;
+        instance->cli=trnucli_new(update_fn,cli_flags,hbeat_to_sec);
         instance->worker=mthread_thread_new();
         instance->mtx=mthread_mutex_new();
         instance->update=(trnu_pub_t *)malloc(sizeof(trnu_pub_t));
@@ -1081,7 +1007,7 @@ trnucli_ctx_t *trnucli_ctx_newl(char *host, int port, update_callback_fn update_
         instance->erecon_delay_ms=erecon_delay_ms;
         instance->hbeat_to_sec=hbeat_to_sec;
 
-        instance->log_opts=log_opts;
+        instance->flags=ctx_flags;
         instance->log_cfg=mlog_config_new(ML_TFMT_ISO1806,ML_DFL_DEL,ML_MONO|ML_NOLIMIT,ML_FILE,0,0,0);
         instance->log_id=MLOG_ID_INVALID;
         instance->log_name=strdup(TRNUCLI_TEST_LOG_NAME);
@@ -1100,7 +1026,7 @@ trnucli_ctx_t *trnucli_ctx_newl(char *host, int port, update_callback_fn update_
         s_init_log(instance);
     }
     return instance;
-}//trnucli_ctx_new
+}
 
 void trnucli_ctx_destroy(trnucli_ctx_t **pself)
 {
@@ -1120,6 +1046,7 @@ void trnucli_ctx_destroy(trnucli_ctx_t **pself)
 
             // release trnu_cli intance
             trnucli_destroy(&self->cli);
+
             if(NULL!=self->host)
                 free(self->host);
             if(NULL!=self->update)
@@ -1142,7 +1069,7 @@ void trnucli_ctx_destroy(trnucli_ctx_t **pself)
         }
     }
     return;
-}// trnucli_ctx_destroy
+}
 
 int trnucli_ctx_start(trnucli_ctx_t *self)
 {
@@ -1160,7 +1087,7 @@ int trnucli_ctx_start(trnucli_ctx_t *self)
 
     }
     return retval;
-}//trnucli_ctx_start
+}
 
 int trnucli_ctx_stop(trnucli_ctx_t *self)
 {
@@ -1187,7 +1114,7 @@ int trnucli_ctx_stop(trnucli_ctx_t *self)
         }// else already stopped
     }
     return retval;
-}//trnucli_ctx_stop
+}
 
 int trnucli_ctx_set_callback(trnucli_ctx_t *self, update_callback_fn func)
 {
@@ -1198,7 +1125,7 @@ int trnucli_ctx_set_callback(trnucli_ctx_t *self, update_callback_fn func)
         mthread_mutex_unlock(self->mtx);
     }
     return retval;
-}//trnucli_ctx_set_callback
+}
 
 int trnucli_ctx_set_stats_log_period(trnucli_ctx_t *self, double interval_sec)
 {
@@ -1209,7 +1136,7 @@ int trnucli_ctx_set_stats_log_period(trnucli_ctx_t *self, double interval_sec)
         mthread_mutex_unlock(self->mtx);
     }
     return retval;
-}//trnucli_ctx_set_stats_log_period
+}
 
 int trnucli_ctx_last_update(trnucli_ctx_t *self, trnu_pub_t *dest, double *r_age)
 {
@@ -1227,7 +1154,7 @@ int trnucli_ctx_last_update(trnucli_ctx_t *self, trnu_pub_t *dest, double *r_age
         mthread_mutex_unlock(self->mtx);
     }
     return retval;
-}//trnucli_ctx_last_update
+}
 
 double trnucli_ctx_update_arrtime(trnucli_ctx_t *self)
 {
@@ -1238,7 +1165,7 @@ double trnucli_ctx_update_arrtime(trnucli_ctx_t *self)
         mthread_mutex_unlock(self->mtx);
     }
     return retval;
-}//trnucli_ctx_update_arrtime
+}
 
 double trnucli_ctx_update_arrage(trnucli_ctx_t *self)
 {
@@ -1249,7 +1176,7 @@ double trnucli_ctx_update_arrage(trnucli_ctx_t *self)
         mthread_mutex_unlock(self->mtx);
     }
     return retval;
-}//trnucli_ctx_update_arrage
+}
 
 double trnucli_ctx_update_mb1time(trnucli_ctx_t *self)
 {
@@ -1260,7 +1187,7 @@ double trnucli_ctx_update_mb1time(trnucli_ctx_t *self)
         mthread_mutex_unlock(self->mtx);
     }
     return retval;
-}//trnucli_ctx_update_mb1time
+}
 
 double trnucli_ctx_update_mb1age(trnucli_ctx_t *self)
 {
@@ -1271,7 +1198,7 @@ double trnucli_ctx_update_mb1age(trnucli_ctx_t *self)
         mthread_mutex_unlock(self->mtx);
     }
     return retval;
-}//trnucli_ctx_update_mb1age
+}
 
 double trnucli_ctx_update_hosttime(trnucli_ctx_t *self)
 {
@@ -1282,7 +1209,7 @@ double trnucli_ctx_update_hosttime(trnucli_ctx_t *self)
         mthread_mutex_unlock(self->mtx);
     }
     return retval;
-}//trnucli_ctx_update_hosttime
+}
 
 double trnucli_ctx_update_hostage(trnucli_ctx_t *self)
 {
@@ -1294,7 +1221,7 @@ double trnucli_ctx_update_hostage(trnucli_ctx_t *self)
     }
 
     return retval;
-}//trnucli_ctx_update_hostage
+}
 
 uint32_t trnucli_ctx_new_count(trnucli_ctx_t *self)
 {
@@ -1306,7 +1233,7 @@ uint32_t trnucli_ctx_new_count(trnucli_ctx_t *self)
     }
 
     return retval;
-}//trnucli_ctx_new_count
+}
 
 int trnucli_ctx_reset_trn(trnucli_ctx_t *self)
 {
@@ -1317,7 +1244,7 @@ int trnucli_ctx_reset_trn(trnucli_ctx_t *self)
         mthread_mutex_unlock(self->mtx);
     }
     return retval;
-}//trnucli_ctx_reset_trn
+}
 
 int trnucli_ctx_reconnect(trnucli_ctx_t *self)
 {
@@ -1330,7 +1257,7 @@ int trnucli_ctx_reconnect(trnucli_ctx_t *self)
         retval=0;
     }
     return retval;
-}//trnucli_ctx_reconnect
+}
 
 int trnucli_ctx_isconnected(trnucli_ctx_t *self)
 {
@@ -1341,7 +1268,7 @@ int trnucli_ctx_isconnected(trnucli_ctx_t *self)
         mthread_mutex_unlock(self->mtx);
     }
     return retval;
-}//trnucli_ctx_isconnected
+}
 
 trnucli_state_t trnucli_ctx_state(trnucli_ctx_t *self)
 {
@@ -1354,7 +1281,7 @@ trnucli_state_t trnucli_ctx_state(trnucli_ctx_t *self)
     }
 
     return retval;
-}// trnucli_ctx_state_str
+}
 
 const char *trnucli_ctx_state_str(trnucli_ctx_t *self)
 {
@@ -1366,7 +1293,7 @@ const char *trnucli_ctx_state_str(trnucli_ctx_t *self)
         mthread_mutex_unlock(self->mtx);
     }
     return retval;
-}// trnucli_ctx_state_str
+}
 
 int trnucli_ctx_stats(trnucli_ctx_t *self, trnucli_stats_t **pdest)
 {
@@ -1394,7 +1321,7 @@ int trnucli_ctx_stats(trnucli_ctx_t *self, trnucli_stats_t **pdest)
         }
     }
     return retval;
-}// trnucli_ctx_stats
+}
 
 int trnucli_ctx_show(trnucli_ctx_t *self,bool verbose, int indent)
 {
@@ -1407,12 +1334,15 @@ int trnucli_ctx_show(trnucli_ctx_t *self,bool verbose, int indent)
             retval+=fprintf(stderr,"%*s %*s  %*p\n",indent,(indent>0?" ":""), wkey,"self",wval,self);
         retval+=fprintf(stderr,"%*s %*s  %*s\n",indent,(indent>0?" ":""), wkey,"host",wval,self->host);
         retval+=fprintf(stderr,"%*s %*s  %*d\n",indent,(indent>0?" ":""), wkey,"port",wval,self->port);
+        retval+=fprintf(stderr,"%*s %*s  %*d\n",indent,(indent>0?" ":""), wkey,"ttl",wval,self->ttl);
+        retval+=fprintf(stderr,"%*s %*s  %*s%08X\n",indent,(indent>0?" ":""), wkey,"flags",wval-8,"",self->flags);
         retval+=fprintf(stderr,"%*s %*s  %*s [%d]\n",indent,(indent>0?" ":""),wkey,"state",wval,trnucli_ctx_state_str(self), self->state);
         retval+=fprintf(stderr,"%*s %*s  %*.3lf\n",indent,(indent>0?" ":""),wkey,"update_t",wval,self->update_trx);
         retval+=fprintf(stderr,"%*s %*s  %*.3lf\n",indent,(indent>0?" ":""),wkey,"recon_to_sec",wval,self->recon_to_sec);
         retval+=fprintf(stderr,"%*s %*s  %*"PRIu32"\n",indent,(indent>0?" ":""),wkey,"listen_to_ms",wval,self->listen_to_ms);
         retval+=fprintf(stderr,"%*s %*s  %*"PRIu32"\n",indent,(indent>0?" ":""),wkey,"enodata_delay_ms",wval,self->enodata_delay_ms);
         retval+=fprintf(stderr,"%*s %*s  %*"PRIu32"\n",indent,(indent>0?" ":""),wkey,"erecon_delay_ms",wval,self->erecon_delay_ms);
+        retval+=fprintf(stderr,"%*s %*s  %*d\n",indent,(indent>0?" ":""), wkey,"ttl",wval,self->ttl);
         retval+=fprintf(stderr,"%*s %*s  %*.3lf\n",indent,(indent>0?" ":""),wkey,"hbeat_to_sec",wval,self->hbeat_to_sec);
         retval+=fprintf(stderr,"%*s %*s  %*.3lf\n",indent,(indent>0?" ":""),wkey,"rc_timer",wval,self->rc_timer );
         retval+=fprintf(stderr,"%*s %*s  %*.3lf\n",indent,(indent>0?" ":""),wkey,"hb_timer",wval,self->hb_timer );
@@ -1423,7 +1353,7 @@ int trnucli_ctx_show(trnucli_ctx_t *self,bool verbose, int indent)
         }
     }
     return retval;
-}//trnucli_ctx_show
+}
 
 int trnucli_ctx_stat_show(trnucli_stats_t *self,bool verbose, int indent)
 {
@@ -1447,7 +1377,7 @@ int trnucli_ctx_stat_show(trnucli_stats_t *self,bool verbose, int indent)
         retval+=fprintf(stderr,"%*s %*s  %*.3lf\n",indent,(indent>0?" ":""), wkey,"t_listening",wval,self->t_listening);
     }
     return retval;
-}//trnucli_ctx_stat_show
+}
 
 int trnucli_ctx_stat_log(trnucli_ctx_t *self)
 {
@@ -1467,7 +1397,6 @@ int trnucli_ctx_stat_log(trnucli_ctx_t *self)
         retval+=mlog_tprintf(self->log_id,"t,%s,%.3lf\n","t_listening",self->stats.t_listening);
     }
     return retval;
-}//trnucli_ctx_stat_log
-
+}
 
 #endif

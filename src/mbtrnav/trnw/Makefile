@@ -155,12 +155,38 @@ TRNUSVR_TEST_SRC=trnusvr_test.c netif.c trnif_msg.c trnif_proto.c
 TRNUSVR_TEST_OBJ=$(TRNUSVR_TEST_SRC:%.c=$(BUILD_DIR)/%.o)
 TRNUSVR_TEST_LIBS = $(MFRAME_LIB) -lpthread -lm -lqnx -lnewmat -ltrn -ltrncli -lnetcdf -lgeolib -lstdc++
 
+# mcpub: multicast test publisher
+MCPUB=mcpub
+MCPUB_SRC=mcpub.c
+MCPUB_OBJ=$(MCPUB_SRC:%.c=$(BUILD_DIR)/%.o)
+MCPUB_LIBS =
+
+# mmcsub: multicast test publisher
+MCSUB=mcsub
+MCSUB_SRC=mcsub.c
+MCSUB_OBJ=$(MCSUB_SRC:%.c=$(BUILD_DIR)/%.o)
+MCSUB_LIBS =
+
+# mmcpub: multicast test publisher (uses mframe)
+MMCPUB=mmcpub
+MMCPUB_SRC=mmcpub.c
+MMCPUB_OBJ=$(MMCPUB_SRC:%.c=$(BUILD_DIR)/%.o)
+MMCPUB_LIBS = $(MFRAME_LIB)
+
+# mmcsub: multicast test publisher  (uses mframe)
+MMCSUB=mmcsub
+MMCSUB_SRC=mmcsub.c
+MMCSUB_OBJ=$(MMCSUB_SRC:%.c=$(BUILD_DIR)/%.o)
+MMCSUB_LIBS = $(MFRAME_LIB)
+
 # TRN clients
 TRNC_SRC+= $(LIBTRNCLI_SRC) $(TRNCLI_TEST_SRC) \
-$(LIBTRNUCLI_SRC) $(TRNUCLI_TEST_SRC) $(TRNUSVR_TEST_SRC)
+$(LIBTRNUCLI_SRC) $(TRNUCLI_TEST_SRC) $(TRNUSVR_TEST_SRC) \
+$(MMCPUB_SRC) $(MMCPUB_SRC) $(MCPUB_SRC) $(MCPUB_SRC)
 
 TRNC_TARGETS+=  $(OUTPUT_DIR)/$(LIBTRNCLI) $(OUTPUT_DIR)/$(TRNCLI_TEST) \
-$(OUTPUT_DIR)/$(LIBTRNUCLI) $(OUTPUT_DIR)/$(TRNUCLI_TEST) $(OUTPUT_DIR)/$(TRNUSVR_TEST)
+$(OUTPUT_DIR)/$(LIBTRNUCLI) $(OUTPUT_DIR)/$(TRNUCLI_TEST) $(OUTPUT_DIR)/$(TRNUSVR_TEST) \
+$(OUTPUT_DIR)/$(MMCPUB) $(OUTPUT_DIR)/$(MMCSUB) $(OUTPUT_DIR)/$(MCPUB) $(OUTPUT_DIR)/$(MCSUB)
 
 ########################################
 # Build Files (mostly for cleanup)
@@ -220,6 +246,30 @@ $(OUTPUT_DIR)/$(TRNUSVR_TEST): $(TRNUSVR_TEST_OBJ)
 	$(CXX) $(INC_PATHS) $(LIB_PATHS) $^ -o $@ $(LD_FLAGS) $(TRNUSVR_TEST_LIBS)
 	@echo
 
+# build mcpub utility
+$(OUTPUT_DIR)/$(MCPUB): $(MCPUB_OBJ)
+	@echo building $@...
+	$(CXX) $(INC_PATHS) $(LIB_PATHS) $^ -o $@ $(LD_FLAGS) $(MCPUB_LIBS)
+	@echo
+
+# build mcsub utility
+$(OUTPUT_DIR)/$(MCSUB): $(MCSUB_OBJ)
+	@echo building $@...
+	$(CXX) $(INC_PATHS) $(LIB_PATHS) $^ -o $@ $(LD_FLAGS) $(MCSUB_LIBS)
+	@echo
+
+# build mmcpub utility
+$(OUTPUT_DIR)/$(MMCPUB): $(MMCPUB_OBJ)
+	@echo building $@...
+	$(CXX) $(INC_PATHS) $(LIB_PATHS) $^ -o $@ $(LD_FLAGS) $(MMCPUB_LIBS)
+	@echo
+
+# build mmcsub utility
+$(OUTPUT_DIR)/$(MMCSUB): $(MMCSUB_OBJ)
+	@echo building $@...
+	$(CXX) $(INC_PATHS) $(LIB_PATHS) $^ -o $@ $(LD_FLAGS) $(MMCSUB_LIBS)
+	@echo
+
 # include the dependencies
 ifneq ($(MAKECMDGOALS),purge)
 ifneq ($(MAKECMDGOALS),clean)
@@ -276,3 +326,4 @@ ifneq ($(MAKECMDGOALS),clean)
 -include $(DEPENDS)
 endif
 endif
+
