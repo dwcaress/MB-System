@@ -658,74 +658,76 @@ int mbnavadjust_read_project(int verbose, char *projectpath, struct mbna_project
             for (k = 0; k < section->num_snav; k++) {
               if (status == MB_SUCCESS)
                 result = fgets(buffer, BUFFER_MAX, hfp);
-                            if (version_id >= 308) {
-                                if (status == MB_SUCCESS && result == buffer)
-                                    nscan = sscanf(buffer, "SNAV %d %d %lf %lf %lf %lf %lf %lf %lf %lf",
-                                                   &idummy, &section->snav_id[k], &section->snav_distance[k], &section->snav_time_d[k],
-                                                   &section->snav_lon[k], &section->snav_lat[k], &section->snav_sensordepth[k],
-                                                   &section->snav_lon_offset[k], &section->snav_lat_offset[k],
-                                                   &section->snav_z_offset[k]);
-                                section->snav_num_ties[k] = 0;
-                                if (result != buffer || nscan != 10) {
-                                    status = MB_FAILURE;
-                                    fprintf(stderr, "read failed on snav: %s\n", buffer);
-                                }
-                            }
-                            else {
-                                if (status == MB_SUCCESS && result == buffer)
-                                    nscan = sscanf(buffer, "SNAV %d %d %lf %lf %lf %lf %lf %lf %lf", &idummy, &section->snav_id[k],
-                                                   &section->snav_distance[k], &section->snav_time_d[k], &section->snav_lon[k],
-                                                   &section->snav_lat[k], &section->snav_lon_offset[k], &section->snav_lat_offset[k],
-                                                   &section->snav_z_offset[k]);
-                                section->snav_num_ties[k] = 0;
-                                section->snav_sensordepth[k] = 0.0;
-                                if (result == buffer && nscan == 6) {
-                                    section->snav_lon_offset[k] = 0.0;
-                                    section->snav_lat_offset[k] = 0.0;
-                                    section->snav_z_offset[k] = 0.0;
-                                }
-                                else if (result == buffer && nscan == 8) {
-                                    section->snav_z_offset[k] = 0.0;
-                                }
-                                else if (result != buffer || nscan != 9) {
-                                    status = MB_FAILURE;
-                                    fprintf(stderr, "read failed on snav: %s\n", buffer);
-                                }
+                if (version_id >= 308) {
+                    if (status == MB_SUCCESS && result == buffer)
+                        nscan = sscanf(buffer, "SNAV %d %d %lf %lf %lf %lf %lf %lf %lf %lf",
+                                       &idummy, &section->snav_id[k], &section->snav_distance[k], &section->snav_time_d[k],
+                                       &section->snav_lon[k], &section->snav_lat[k], &section->snav_sensordepth[k],
+                                       &section->snav_lon_offset[k], &section->snav_lat_offset[k],
+                                       &section->snav_z_offset[k]);
+                    section->snav_num_ties[k] = 0;
+                    if (section->snav_sensordepth[k] < 0.0 || section->snav_sensordepth[k] > 11000.0)
+                      section->snav_sensordepth[k] = 0.0;
+                    if (result != buffer || nscan != 10) {
+                        status = MB_FAILURE;
+                        fprintf(stderr, "read failed on snav: %s\n", buffer);
+                    }
+                }
+                else {
+                    if (status == MB_SUCCESS && result == buffer)
+                        nscan = sscanf(buffer, "SNAV %d %d %lf %lf %lf %lf %lf %lf %lf", &idummy, &section->snav_id[k],
+                                       &section->snav_distance[k], &section->snav_time_d[k], &section->snav_lon[k],
+                                       &section->snav_lat[k], &section->snav_lon_offset[k], &section->snav_lat_offset[k],
+                                       &section->snav_z_offset[k]);
+                    section->snav_num_ties[k] = 0;
+                    section->snav_sensordepth[k] = 0.0;
+                    if (result == buffer && nscan == 6) {
+                        section->snav_lon_offset[k] = 0.0;
+                        section->snav_lat_offset[k] = 0.0;
+                        section->snav_z_offset[k] = 0.0;
+                    }
+                    else if (result == buffer && nscan == 8) {
+                        section->snav_z_offset[k] = 0.0;
+                    }
+                    else if (result != buffer || nscan != 9) {
+                        status = MB_FAILURE;
+                        fprintf(stderr, "read failed on snav: %s\n", buffer);
+                    }
 
-                                /* reverse offset values if older values */
-                                if (version_id < 300) {
-                                    section->snav_lon_offset[k] *= -1.0;
-                                    section->snav_lat_offset[k] *= -1.0;
-                                    section->snav_z_offset[k] *= -1.0;
-                                }
-                            }
-                        }
+                    /* reverse offset values if older values */
+                    if (version_id < 300) {
+                        section->snav_lon_offset[k] *= -1.0;
+                        section->snav_lat_offset[k] *= -1.0;
+                        section->snav_z_offset[k] *= -1.0;
+                    }
+                }
+            }
 
             /* global fixed frame tie, whether defined or not */
-                        section->global_tie_status = MBNA_TIE_NONE;
-                        section->global_tie_snav = MBNA_SELECT_NONE;
-                        section->global_tie_inversion_status = MBNA_INVERSION_NONE;
-                        section->offset_x = 0.0;
-                        section->offset_y = 0.0;
-                        section->offset_x_m = 0.0;
-                        section->offset_y_m = 0.0;
-                        section->offset_z_m = 0.0;
-                        section->xsigma = 0.0;
-                        section->ysigma = 0.0;
-                        section->zsigma = 0.0;
-                        section->inversion_offset_x = 0.0;
-                        section->inversion_offset_y = 0.0;
-                        section->inversion_offset_x_m = 0.0;
-                        section->inversion_offset_y_m = 0.0;
-                        section->inversion_offset_z_m = 0.0;
-                        section->dx_m = 0.0;
-                        section->dy_m = 0.0;
-                        section->dz_m = 0.0;
-                        section->sigma_m = 0.0;
-                        section->dr1_m = 0.0;
-                        section->dr2_m = 0.0;
-                        section->dr3_m = 0.0;
-                        section->rsigma_m = 0.0;
+            section->global_tie_status = MBNA_TIE_NONE;
+            section->global_tie_snav = MBNA_SELECT_NONE;
+            section->global_tie_inversion_status = MBNA_INVERSION_NONE;
+            section->offset_x = 0.0;
+            section->offset_y = 0.0;
+            section->offset_x_m = 0.0;
+            section->offset_y_m = 0.0;
+            section->offset_z_m = 0.0;
+            section->xsigma = 0.0;
+            section->ysigma = 0.0;
+            section->zsigma = 0.0;
+            section->inversion_offset_x = 0.0;
+            section->inversion_offset_y = 0.0;
+            section->inversion_offset_x_m = 0.0;
+            section->inversion_offset_y_m = 0.0;
+            section->inversion_offset_z_m = 0.0;
+            section->dx_m = 0.0;
+            section->dy_m = 0.0;
+            section->dz_m = 0.0;
+            section->sigma_m = 0.0;
+            section->dr1_m = 0.0;
+            section->dr2_m = 0.0;
+            section->dr3_m = 0.0;
+            section->rsigma_m = 0.0;
 
             if (version_id >= 309) {
               if (status == MB_SUCCESS)

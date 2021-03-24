@@ -23,6 +23,7 @@ Distributions that do not include "beta" in the tag name correspond to the major
 announced releases. The source distributions associated with all releases, major
 or beta, are equally accessible as tarballs through the Github interface.
 
+- Version 5.7.9beta06    March 24, 2021
 - Version 5.7.9beta05    March 8, 2021
 - Version 5.7.9beta04    February 21, 2021
 - Version 5.7.9beta03    February 7, 2021
@@ -384,6 +385,19 @@ or beta, are equally accessible as tarballs through the Github interface.
 --
 ### MB-System Version 5.7 Release Notes:
 --
+
+Mblist: Fixed function of the -O%fnv and -O%FNV commands to produce *.fnv files.
+
+#### 5.7.9beta06 (March 24, 2021)
+
+Mbpreprocess: Fixed to work with the old s7k format (88) MBF_RESON7KR.
+
+Format 88 (MBF_RESON7KR): Fixed to not recognize collections of ping records
+that are mission bathymetry and/or travel time records as complete.
+
+Mbnavadjust: When importing files, only export navigation records to the *.mb166
+files in the project directory for ping records (previously data were output
+for input navigation records as well).
 
 #### 5.7.9beta05 (March 8, 2021)
 

@@ -98,6 +98,7 @@ int main(int argc, char **argv) {
 	double speedmin;
 	double timegap;
 	int status = mb_defaults(verbose, &format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
+  format = 0;
 
 	bool goodnavattitudeonly = true;
 	timefix_t fix_time_stamps = MB7KPREPROCESS_TIMEFIX_NONE;
@@ -1322,8 +1323,11 @@ int main(int argc, char **argv) {
 		}
 	}
 	/* get format if required */
-	if (format == 0)
+	if (format == 0) {
 		mb_get_format(verbose, read_file, nullptr, &format, &error);
+    if (format == MBF_RESON7K3) // This program only works with original 7k format data
+      format = MBF_RESON7KR;
+  }
 
 	/* determine whether to read one file or a list of files */
 	const bool read_datalist = format < 0;
@@ -4137,16 +4141,16 @@ int main(int argc, char **argv) {
 
 		/* loop over all files to be read */
 		while (read_data && format == MBF_RESON7KR) {
-			/* figure out the output file name */
+			/* figure out the output file name - assume format == MBF_RESON7KR as this program does not work with MBF_RESON7K3 */
 			if (!ofile_set) {
 				char fileroot[MB_PATH_MAXLINE] = "";
 				status = mb_get_format(verbose, ifile, fileroot, &testformat, &error);
-				if (testformat == MBF_RESON7KR && strncmp(".s7k", &ifile[strlen(ifile) - 4], 4) == 0)
-					sprintf(ofile, "%s.mb%d", fileroot, testformat);
-				else if (testformat == MBF_RESON7KR)
-					sprintf(ofile, "%sf.mb%d", fileroot, testformat);
+				if (strncmp(".s7k", &ifile[strlen(ifile) - 4], 4) == 0)
+					sprintf(ofile, "%s.mb%d", fileroot, format);
+				else if (strncmp(".mb88", &ifile[strlen(ifile) - 5], 5) == 0)
+					sprintf(ofile, "%sf.mb%d", fileroot, format);
 				else
-					sprintf(ofile, "%s.mb%d", ifile, testformat);
+					sprintf(ofile, "%s.mb%d", ifile, format);
 			}
 			/* initialize reading the input swath file */
 			if (mb_read_init(verbose, ifile, format, pings, lonflip, bounds, btime_i, etime_i, speedmin, timegap,
