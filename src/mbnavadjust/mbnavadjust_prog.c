@@ -974,7 +974,7 @@ int mbnavadjust_import_file(char *path, int iformat, bool firstfile) {
   bool first;
   double headingx, headingy, mtodeglon, mtodeglat;
   double lon, lat;
-  double navlon_old, navlat_old;
+  double navlon_old, navlat_old, sensordepth_old;
   FILE *nfp;
   struct mbna_file *file = NULL;
   struct mbna_section *section = NULL;
@@ -999,23 +999,6 @@ int mbnavadjust_import_file(char *path, int iformat, bool firstfile) {
   if (fstat != 0 || (file_status.st_mode & S_IFMT) == S_IFDIR) {
     strcpy(ipath, path);
   }
-
-  /* now look for existing mbnavadjust output files
-   * - increment output id so this mbnavadjust project outputs
-   *   a unique nav file for this input file */
-  /* Now only use a value of 0 for output_id  - all output navigation should be *.na0 files */
-  int output_id = 0;
-  //found = false;
-  //while (!found) {
-  //  sprintf(opath, "%s.na%d", path, output_id);
-  //  fstat = stat(opath, &file_status);
-  //  if (fstat != 0) {
-  //    found = true;
-  //  }
-  //  else {
-  //    output_id++;
-  //  }
-  //}
 
   /* turn on message */
   char *root = (char *)strrchr(ipath, '/');
@@ -1126,16 +1109,19 @@ int mbnavadjust_import_file(char *path, int iformat, bool firstfile) {
                                 &heading, &draft, &roll, &pitch, &heave, &error);
       }
 
-      /* ignore minor errors */
+      /* ignore minor errors - use these data */
       if (kind == MB_DATA_DATA && (error == MB_ERROR_TIME_GAP || error == MB_ERROR_OUT_BOUNDS ||
                                    error == MB_ERROR_OUT_TIME || error == MB_ERROR_SPEED_TOO_SMALL)) {
         status = MB_SUCCESS;
         error = MB_ERROR_NO_ERROR;
       }
 
-      /* do not ignore null navigation */
-      if (kind == MB_DATA_DATA && navlon == 0.0 && navlat == 0.0) {
-        error = MB_ERROR_IGNORE;
+      /* do not use data with null navigation or ludricous timestamp */
+      if (kind == MB_DATA_DATA) {
+        if (navlon == 0.0 && navlat == 0.0)
+          error = MB_ERROR_IGNORE;
+        if (time_d <= 0.0 || time_i[0] < 1962 || time_i[0] > 3000)
+          error = MB_ERROR_IGNORE;
       }
 
             /* deal with survey data */
@@ -1264,7 +1250,7 @@ int mbnavadjust_import_file(char *path, int iformat, bool firstfile) {
         file = &project.files[project.num_files];
         file->status = MBNA_FILE_GOODNAV;
         file->id = project.num_files;
-        file->output_id = output_id;
+        file->output_id = 0;
         strcpy(file->path, path);
         strcpy(file->file, path);
         mb_get_relative_path(mbna_verbose, file->file, project.path, &error);
@@ -1324,6 +1310,7 @@ int mbnavadjust_import_file(char *path, int iformat, bool firstfile) {
           section->snav_time_d[section->num_snav] = section->etime_d;
           section->snav_lon[section->num_snav] = navlon_old;
           section->snav_lat[section->num_snav] = navlat_old;
+          section->snav_sensordepth[section->num_snav] = sensordepth_old;
           section->snav_lon_offset[section->num_snav] = 0.0;
           section->snav_lat_offset[section->num_snav] = 0.0;
           section->snav_z_offset[section->num_snav] = 0.0;
@@ -1338,6 +1325,7 @@ int mbnavadjust_import_file(char *path, int iformat, bool firstfile) {
           section->snav_time_d[section->num_snav - 1] = section->etime_d;
           section->snav_lon[section->num_snav - 1] = navlon_old;
           section->snav_lat[section->num_snav - 1] = navlat_old;
+          section->snav_sensordepth[section->num_snav - 1] = sensordepth_old;
           section->snav_lon_offset[section->num_snav - 1] = 0.0;
           section->snav_lat_offset[section->num_snav - 1] = 0.0;
           section->snav_z_offset[section->num_snav - 1] = 0.0;
@@ -1485,6 +1473,7 @@ int mbnavadjust_import_file(char *path, int iformat, bool firstfile) {
         headingy = cos(DTR * heading);
         navlon_old = navlon;
         navlat_old = navlat;
+        sensordepth_old = draft - heave;
         section->etime_d = time_d;
         section->num_pings++;
         file->num_pings++;
@@ -1497,6 +1486,7 @@ int mbnavadjust_import_file(char *path, int iformat, bool firstfile) {
           section->snav_time_d[section->num_snav] = time_d;
           section->snav_lon[section->num_snav] = navlon;
           section->snav_lat[section->num_snav] = navlat;
+          section->snav_sensordepth[section->num_snav] = draft - heave;;
           section->snav_lon_offset[section->num_snav] = 0.0;
           section->snav_lat_offset[section->num_snav] = 0.0;
           section->snav_z_offset[section->num_snav] = 0.0;
@@ -1539,12 +1529,6 @@ int mbnavadjust_import_file(char *path, int iformat, bool firstfile) {
 
         /* write out bath data only to format 71 file */
         if (output_open) {
-          /*if (error <= MB_ERROR_NO_ERROR && kind == MB_DATA_DATA)
-          fprintf(stderr,"%3d %4d/%2d/%2d %2.2d:%2.2d:%2.2d.%6.6d %10f %10f %5.2f %6.2f %7.3f %7.3f %4d %4d %4d\n",
-          file->num_sections,
-          time_i[0],time_i[1],time_i[2],time_i[3],time_i[4],time_i[5],time_i[6],
-          navlon,navlat,speed,heading,distance,section->distance,
-          beams_bath,beams_amp,pixels_ss);*/
 
           /* get depth and distance scaling */
           depthmax = 0.0;
@@ -1571,24 +1555,13 @@ int mbnavadjust_import_file(char *path, int iformat, bool firstfile) {
                                         bathacrosstrack, bathalongtrack,
                               ss, ssacrosstrack, ssalongtrack, comment, &error);
         }
-      }
 
-      /* write out all nav data to format 166 file */
-      if ((kind == MB_DATA_DATA || kind == MB_DATA_NAV) && time_d > 0.0 && time_i[0] > 0 && nfp != NULL) {
-        /*fprintf(stderr, "%4.4d %2.2d %2.2d %2.2d %2.2d %2.2d.%6.6d %16.6f %.10f %.10f %.2f %.2f\r\n",
-            time_i[0], time_i[1], time_i[2], time_i[3],
-            time_i[4], time_i[5], time_i[6], time_d,
-            navlon, navlat, heading, speed);
-        fprintf(nfp, "%4.4d %2.2d %2.2d %2.2d %2.2d %2.2d.%6.6d %16.6f %.10f %.10f %.2f %.2f\r\n",
-            time_i[0], time_i[1], time_i[2], time_i[3],
-            time_i[4], time_i[5], time_i[6], time_d,
-            navlon, navlat, heading, speed);*/
-        /*fprintf(stderr, "%4.4d %2.2d %2.2d %2.2d %2.2d %2.2d.%6.6d %16.6f %.10f %.10f %.2f %.2f %.2f %.2f %.2f
-           %.2f\r\n", time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6], time_d, navlon, navlat,
-           heading, speed, draft, roll, pitch, heave);*/
-        fprintf(nfp, "%4.4d %2.2d %2.2d %2.2d %2.2d %2.2d.%6.6d %16.6f %.10f %.10f %.2f %.2f %.2f %.2f %.2f %.2f\r\n",
-                time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6], time_d, navlon, navlat,
-                heading, speed, draft, roll, pitch, heave);
+        /* write out nav data associated with bath to format 166 file */
+        if (nfp != NULL) {
+          fprintf(nfp, "%4.4d %2.2d %2.2d %2.2d %2.2d %2.2d.%6.6d %16.6f %.10f %.10f %.2f %.2f %.2f %.2f %.2f %.2f\r\n",
+                  time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6], time_d, navlon, navlat,
+                  heading, speed, draft, roll, pitch, heave);
+        }
       }
 
       /* increment counters */
@@ -13183,13 +13156,6 @@ int mbnavadjust_applynav() {
       sprintf(npath, "%s/nvs_%4.4d.mb166", project.datadir, ifile);
       sprintf(apath, "%s/nvs_%4.4d.na%d", project.datadir, ifile, file->output_id);
       sprintf(opath, "%s.na%d", file->path, file->output_id);
-      /*
-      if (file->status == MBNA_FILE_FIXEDNAV) {
-        sprintf(message, " > Not outputting updated nav to fixed file %s\n", opath);
-        do_info_add(message, false);
-        if (mbna_verbose == 0)
-          fprintf(stderr, "%s", message);
-      } else */
       if ((nfp = fopen(npath, "r")) == NULL) {
         status = MB_FAILURE;
         error = MB_ERROR_OPEN_FAIL;

@@ -3706,7 +3706,11 @@ int mbsys_3ddwissl_calculatebathymetry
         /* valid pulses have nonzero ranges */
         if (sounding->range > 0.001)
           {
-          /* apply pitch and roll */
+          //lidar_pitch_at_pulse = store->pitch + pulse->pitch_offset;
+          //lidar_roll_at_pulse = store->roll + pulse->roll_offset;
+          //lidar_heading_at_pulse = store->heading + pulse->heading_offset;
+
+          /* apply pitch and roll */  // TODO fix rotation w/ Giancarlo's functions
           alpha = angle_el_sign * pulse->angle_el + store->pitch
                   + head_offset_pitch_deg + pulse->pitch_offset;
           beta = 90.0 - (angle_az_sign * pulse->angle_az) + store->roll
@@ -3734,7 +3738,7 @@ int mbsys_3ddwissl_calculatebathymetry
 
           /* translate to takeoff coordinates */
           mb_rollpitch_to_takeoff(verbose, alpha, beta, &theta, &phi, error);
-          phi += head_offset_heading_deg + pulse->heading_offset;
+          phi += head_offset_heading_deg + pulse->heading_offset;    // TODO fix rotation w/ Giancarlo's functions
 
           /* get lateral and vertical components of range */
           xx = sounding->range * sin(DTR * theta);
