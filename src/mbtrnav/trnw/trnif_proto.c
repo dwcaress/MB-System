@@ -895,9 +895,9 @@ int trnif_msg_handle_trnu(void *msg, netif_t *self, msock_connection_t *peer, in
         double msg_time = mtime_etime();
 
         if(strcmp(msg,PROTO_TRNU_REQ)==0 ||
-           strcmp(msg,PROTO_TRNU_CON)==0||
-           strcmp(msg,PROTO_TRNU_HBT)==0||
-           strcmp(msg,PROTO_TRNU_DIS)==0||
+           strcmp(msg,PROTO_TRNU_CON)==0 ||
+           strcmp(msg,PROTO_TRNU_HBT)==0 ||
+           strcmp(msg,PROTO_TRNU_DIS)==0 ||
             strcmp(msg,PROTO_TRNU_PING)==0){
             msg_out=strdup(PROTO_TRNU_ACK);
             send_len=strlen(PROTO_TRNU_ACK)+1;
@@ -946,8 +946,11 @@ int trnif_msg_pub(netif_t *self, msock_connection_t *peer, char *data, size_t le
 {
     int retval=-1;
 
-    if(NULL!=self && NULL!=peer && NULL!=data && len>0){
-        if(self->ctype==ST_UDP){
+    // validate args (NULL peer OK for UDPM)
+    if(NULL!=self && NULL!=data && len>0){
+
+        if(self->ctype==ST_UDP && NULL!=peer){
+            // publish to UDP peer
             int flags=0;
 #if !defined(__APPLE__)
             flags=MSG_NOSIGNAL;
@@ -957,13 +960,27 @@ int trnif_msg_pub(netif_t *self, msock_connection_t *peer, char *data, size_t le
                 retval=iobytes;
             }
         }
-        if(self->ctype==ST_TCP){
+
+        if(self->ctype==ST_UDPM){
+            // publish to multicast socket
+            int flags=0;
+#if !defined(__APPLE__)
+            flags=MSG_NOSIGNAL;
+#endif
+            int64_t iobytes = msock_sendto(self->socket, self->socket->addr, (byte *)data, len, flags );
+            if ( iobytes > 0) {
+                retval=iobytes;
+            }
+        }
+
+        if(self->ctype==ST_TCP && NULL!=peer){
+            // publish to TCP peer
             int64_t iobytes = msock_send(peer->sock, (byte *)data, len );
             if ( iobytes > 0) {
                 retval=iobytes;
             }
         }
-    }
+    }// invalid arg
     return retval;
 }
 // End function

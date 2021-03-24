@@ -35,6 +35,8 @@ src/mbtrnutils/mbtrnpp
 src/mbtrn/r7kr_test
 src/mbtrnav/trn-cli
 src/mbtrnav/trn-server
+src/mbtrnav/mmcpub
+src/mbtrnav/mmcsub
 src/mbtrnsave/
 src/mbtrnavsave/
 src/mbtrnutilssave/

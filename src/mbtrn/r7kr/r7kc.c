@@ -374,23 +374,21 @@ void r7k_parser_show(r7k_parse_stat_t *self, bool verbose, uint16_t indent)
 char *r7k_parser_str(r7k_parse_stat_t *self, char *dest, uint32_t len, bool verbose, uint16_t indent)
 {
     char *retval=NULL;
-    char *dp=NULL;
-    char *wbuf=NULL;
-    char *fmt=NULL;
-    uint32_t wlen=len;
+
 //    uint32_t inc=256;
     
     if (NULL!=self) {
         
-        wbuf=(char *)malloc(R7K_STR_INC*sizeof(char));
-        memset(wbuf,0,len);
-    	dp=wbuf;
+        char *wbuf=(char *)malloc(R7K_STR_INC*sizeof(char));
 
         // TODO: check length/realloc
-        if (dp!=NULL) {
+        if (wbuf!=NULL) {
+            memset(wbuf,0,len);
+            char *dp=wbuf;
 
             uint32_t n=1;
-            fmt="%*s[self           %10p]\n";
+            char *fmt="%*s[self           %10p]\n";
+            uint32_t wlen=len;
             uint32_t wb = snprintf(NULL,0,fmt,indent,(indent>0?" ":""), self);
             wlen+=wb;
             if (wlen>R7K_STR_INC) {
