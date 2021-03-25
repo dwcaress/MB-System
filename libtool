@@ -1,5 +1,5 @@
 #! /bin/sh
-# Generated automatically by config.status (mbsystem) 5.7.9beta04
+# Generated automatically by config.status (mbsystem) 5.7.9beta05
 # Libtool was configured on host SIRENA-2:
 # NOTE: Changes made to this file will be lost: look at ltmain.sh.
 
@@ -67,13 +67,13 @@ PATH_SEPARATOR=":"
 
 # The host system.
 host_alias=
-host=x86_64-apple-darwin18.7.0
-host_os=darwin18.7.0
+host=x86_64-apple-darwin19.6.0
+host_os=darwin19.6.0
 
 # The build system.
 build_alias=
-build=x86_64-apple-darwin18.7.0
-build_os=darwin18.7.0
+build=x86_64-apple-darwin19.6.0
+build_os=darwin19.6.0
 
 # A sed program that does not truncate output.
 SED="/usr/bin/sed"
@@ -186,7 +186,7 @@ global_symbol_to_c_name_address_lib_prefix="sed -n -e 's/^: \\(.*\\) .*\$/  {\"\
 nm_interface="BSD nm"
 
 # Specify filename containing input files for $NM.
-nm_file_list_spec=""
+nm_file_list_spec="@"
 
 # The root where to search for dependent libraries,and where our libraries should be installed.
 lt_sysroot=
@@ -282,7 +282,7 @@ finish_eval=""
 hardcode_into_libs=no
 
 # Compile-time system search path for libraries.
-sys_lib_search_path_spec="/Applications/Xcode-10.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/10.0.0  /usr/local/lib"
+sys_lib_search_path_spec="/Applications/Xcode-124.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/12.0.0  /usr/local/lib"
 
 # Detected run-time system search path for libraries.
 sys_lib_dlsearch_path_spec="/usr/local/lib /lib /usr/lib"
@@ -305,7 +305,7 @@ striplib="strip -x"
 
 
 # The linker used to build libraries.
-LD="/Applications/Xcode-10.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/ld"
+LD="/Applications/Xcode-124.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/ld"
 
 # How to create reloadable object files.
 reload_flag=" -r"
@@ -11658,7 +11658,7 @@ build_old_libs=`case $build_libtool_libs in yes) echo no;; *) echo yes;; esac`
 # ### BEGIN LIBTOOL TAG CONFIG: CXX
 
 # The linker used to build libraries.
-LD="/Applications/Xcode-10.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/ld"
+LD="/Applications/Xcode-124.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/ld"
 
 # How to create reloadable object files.
 reload_flag=" -r"
