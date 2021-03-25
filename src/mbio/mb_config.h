@@ -32,7 +32,7 @@
 /* #undef HAVE_MALLOC_H */
 
 /* Define to 1 if you have the <memory.h> header file. */
-#define HAVE_MEMORY_H 1
+/* #undef HAVE_MEMORY_H */
 
 /* Define to 1 if you have the <rpc/rpc.h> header file. */
 #define HAVE_RPC_RPC_H 1
@@ -104,7 +104,7 @@
 #define PACKAGE_NAME "mbsystem"
 
 /* Define to the full name and version of this package. */
-#define PACKAGE_STRING "mbsystem 5.7.9beta04"
+#define PACKAGE_STRING "mbsystem 5.7.9beta05"
 
 /* Define to the one symbol short name of this package. */
 #define PACKAGE_TARNAME "mbsystem"
@@ -113,7 +113,7 @@
 #define PACKAGE_URL "http://www.mbari.org/data/mbsystem/"
 
 /* Define to the version of this package. */
-#define PACKAGE_VERSION "5.7.9beta04"
+#define PACKAGE_VERSION "5.7.9beta05"
 
 /* Build tools using PCL */
 /* #undef PCLTOOLS_ENABLED */
@@ -128,10 +128,10 @@
 /* #undef TEST_ENABLED */
 
 /* Version number of package */
-#define VERSION "5.7.9beta04"
+#define VERSION "5.7.9beta05"
 
 /* Set VERSION_DATE define in mb_config.h */
-#define VERSION_DATE "21 February 2021"
+#define VERSION_DATE "8 March 2021"
 
 /* Define WORDS_BIGENDIAN to 1 if your processor stores words with the most
    significant byte first (like Motorola and SPARC, unlike Intel). */
