@@ -457,20 +457,23 @@ function init_preset(key){
 // substitute current values for placeholders
 // (zero or more instances)
 // returns empty string if option value blank
-function sub_placeholder(form,optkey,pstr,pval){
+function sub_placeholder(form,optkey,n,pstr,pval){
 
     var retval="";
     var optstr='--'+optkey+'=';
     if(form.elements[optkey].value.length>0){
-        var tmp=form.elements[optkey].value;
-        // iterate until no placeholder instances
-        while(tmp.indexOf(pstr)>=0){
-            // replace next placeholder
-            b=tmp.indexOf(pstr);
-            var pre=tmp.substr(0,b);
-            var post=tmp.substr(b+pstr.length);
-            tmp = pre+pval+post+" "
-        }
+        var i=0
+            var tmp=form.elements[optkey].value;
+        for(i=0;i<n;i++){
+            // iterate until no placeholder instances
+            while(tmp.indexOf(pstr[i])>=0){
+                // replace next placeholder
+                b=tmp.indexOf(pstr[i]);
+                var pre=tmp.substr(0,b);
+                var post=tmp.substr(b+pstr[i].length);
+                tmp = pre+pval[i]+post+" "
+            }
+        } // for
         retval = optstr+tmp;
     }
     return retval;
@@ -558,16 +561,41 @@ function update(){
         text += '--tide-model='+x.elements["tide-model"].value+" ";
 
     // these parameters support substitutions
-    text += sub_placeholder(x,"input","TRN_RESON_HOST",TRN_RESON_HOST["current"]);
-    text += sub_placeholder(x,"log-directory","TRN_LOGFILES",TRN_LOGFILES["current"]);
-    text += sub_placeholder(x,"trn-map","TRN_MAPFILES",TRN_MAPFILES["current"]);
-    text += sub_placeholder(x,"trn-par","TRN_DATAFILES",TRN_DATAFILES["current"]);
-    text += sub_placeholder(x,"trn-cfg","TRN_DATAFILES",TRN_DATAFILES["current"]);
-    text += sub_placeholder(x,"output","SESSION",session_str());
-    text += sub_placeholder(x,"mb-out","TRN_HOST",TRN_HOST["current"]);
-    text += sub_placeholder(x,"trn-out","TRN_HOST",TRN_HOST["current"]);
-    text += sub_placeholder(x,"trn-out","TRN_GROUP",TRN_GROUP["current"]);
-    text += sub_placeholder(x,"trn-mid","TRN_SESSION",trn_session());
+    var subk=["TRN_RESON_HOST"];
+    var subv=[TRN_RESON_HOST["current"]];
+    text += sub_placeholder(x,"input",1,subk,subv);
+
+    subk = ["TRN_LOGFILES"];
+    subv = [TRN_LOGFILES["current"]];
+    text += sub_placeholder(x,"log-directory",1,subk,subv);
+
+    subk = ["TRN_MAPFILES"];
+    subv = [TRN_MAPFILES["current"]];
+    text += sub_placeholder(x,"trn-map",1,subk,subv);
+
+    subk = ["TRN_DATAFILES"];
+    subv = [TRN_DATAFILES["current"]];
+    text += sub_placeholder(x,"trn-par",1,subk,subv);
+
+    subk = ["TRN_DATAFILES"];
+    subv = [TRN_DATAFILES["current"]];
+    text += sub_placeholder(x,"trn-cfg",subk,subv);
+
+    subk = ["SESSION"];
+    subv = [session_str()];
+    text += sub_placeholder(x,"output",1,subk,subv);
+
+    subk = ["TRN_HOST"];
+    subv = [TRN_HOST["current"]];
+    text += sub_placeholder(x,"mb-out",1,subk,subv);
+
+    subk=["TRN_HOST","TRN_GROUP"];
+    subv=[TRN_HOST["current"],TRN_GROUP["current"]];
+    text += sub_placeholder(x,"trn-out",2,subk,subv);
+
+    subk=["TRN_SESSION"];
+    subv=[trn_session()];
+    text += sub_placeholder(x,"trn-mid",1,subk,subv);
 
     // set the output value
     var ofrm = document.getElementById("outtext");
