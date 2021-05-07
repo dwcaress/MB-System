@@ -186,6 +186,8 @@ int main(int argc, char **argv) {
   bool output_directory_set = false;
   mb_path output_directory = "";
   memset(output_directory, 0, sizeof(mb_path));
+  bool output_datalist_set = false;
+  mb_path output_datalist = "datalist.mb-1";
   struct mb_preprocess_struct preprocess_pars;
   memset(&preprocess_pars, 0, sizeof(struct mb_preprocess_struct));
 
@@ -323,6 +325,11 @@ int main(int argc, char **argv) {
           const int n = sscanf(optarg, "%1023s", output_directory);
           if (n == 1 && strlen(output_directory) > 0)
             output_directory_set = true;
+        }
+        else if (strcmp("output-datalist", options[option_index].name) == 0) {
+          const int n = sscanf(optarg, "%1023s", output_datalist);
+          if (n == 1 && strlen(output_datalist) > 0)
+            output_datalist_set = true;
         }
         else if (strcmp("platform-file", options[option_index].name) == 0) {
           const int n = sscanf(optarg, "%1023s", platform_file);
@@ -674,14 +681,6 @@ int main(int argc, char **argv) {
       exit(MB_ERROR_BAD_USAGE);
     }
 
-    /* if no affected data have been specified apply time_latency to all */
-    if (time_latency_mode != MB_SENSOR_TIME_LATENCY_NONE && time_latency_apply == MBPREPROCESS_TIME_LATENCY_APPLY_NONE)
-      time_latency_apply = MBPREPROCESS_TIME_LATENCY_APPLY_ALL_ANCILLIARY;
-
-    /* if no affected data have been specified apply filtering to all ancillary data */
-    if (filter_length > 0.0 && filter_apply == MBPREPROCESS_TIME_LATENCY_APPLY_NONE)
-      filter_apply = MBPREPROCESS_TIME_LATENCY_APPLY_ALL_ANCILLIARY;
-
     if (verbose == 1 || help) {
       fprintf(stderr, "\nProgram %s\n", program_name);
       fprintf(stderr, "MB-system Version %s\n", MB_VERSION);
@@ -693,6 +692,32 @@ int main(int argc, char **argv) {
       exit(error);
     }
   }
+
+  /* if no affected data have been specified apply time_latency to all */
+  if (time_latency_mode != MB_SENSOR_TIME_LATENCY_NONE && time_latency_apply == MBPREPROCESS_TIME_LATENCY_APPLY_NONE)
+    time_latency_apply = MBPREPROCESS_TIME_LATENCY_APPLY_ALL_ANCILLIARY;
+
+  /* if no affected data have been specified apply filtering to all ancillary data */
+  if (filter_length > 0.0 && filter_apply == MBPREPROCESS_TIME_LATENCY_APPLY_NONE)
+    filter_apply = MBPREPROCESS_TIME_LATENCY_APPLY_ALL_ANCILLIARY;
+
+  /* get read format if required */
+  {
+    mb_path fileroot;
+    int testformat = 0;
+    int formaterror = MB_ERROR_NO_ERROR;
+    mb_get_format(verbose, read_file, fileroot, &format, &formaterror);
+    if (format == 0)
+      format = testformat;
+
+    /* be sure that output datalist name does not conflict with input datalist name */
+    if (format < 0 && strcmp(read_file, output_datalist) == 0) {
+      sprintf(output_datalist, "%sr.mb-1", fileroot);
+    }
+  }
+
+  /* determine whether to read one file or a list of files */
+  const bool read_datalist = format < 0;
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  Program <%s>\n", program_name);
@@ -730,6 +755,10 @@ int main(int argc, char **argv) {
       fprintf(stderr, "dbg2       output_directory:             %s\n", output_directory);
     else
       fprintf(stderr, "dbg2       output_directory:             not specified, use working directory\n");
+    if (output_datalist_set)
+      fprintf(stderr, "dbg2       output_datalist:             %s\n", output_datalist);
+    else
+      fprintf(stderr, "dbg2       output_datalist:             not specified, use default: %s\n", output_datalist);
     fprintf(stderr, "dbg2  Source of platform model:\n");
     if (use_platform_file)
       fprintf(stderr, "dbg2       platform_file:                %s\n", platform_file);
@@ -835,6 +864,10 @@ int main(int argc, char **argv) {
       fprintf(stderr, "     output_directory:             %s\n", output_directory);
     else
       fprintf(stderr, "     output_directory:             not specified, use working directory\n");
+    if (output_datalist_set)
+      fprintf(stderr, "     output_datalist:             %s\n", output_datalist);
+    else
+      fprintf(stderr, "     output_datalist:             not specified, use default: %s\n", output_datalist);
     fprintf(stderr, "Source of platform model:\n");
     if (use_platform_file)
       fprintf(stderr, "     platform_file:                %s\n", platform_file);
@@ -1290,15 +1323,8 @@ int main(int argc, char **argv) {
 
   /* Do first pass through the data collecting ancillary data from the desired source records */
 
-  /* get format if required */
-  if (format == 0)
-    mb_get_format(verbose, read_file, nullptr, &format, &error);
-
-  /* determine whether to read one file or a list of files */
-  const bool read_datalist = format < 0;
-  bool read_data;
-
   /* open file list */
+  bool read_data = false;
   if (read_datalist) {
     const int look_processed = MB_DATALIST_LOOK_UNSET;
     if (mb_datalist_open(verbose, &datalist, read_file, look_processed, &error) != MB_SUCCESS) {
