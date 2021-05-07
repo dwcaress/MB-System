@@ -32,11 +32,11 @@
 #   macro.
 #
 # Basic Usage:
-#   mbm_histplot -Ifile [-Btickinfo -Gfill -H
+#   mbm_histplot -Ifile [-Btickinfo -C[xmin/xmax/]cellwidth -Gfill -H
 #            -Jprojection[/scale | width]
 #            -Ltitle -Oroot
 #            -Ppagesize -Uorientation -Q
-#            -Rw/e/s/n -V -Wpen -X]
+#            -Rxmin/xmax/fmin/fmax -V -Wpen -X]
 #
 # Miscellaneous Options:
 #            [ -MIErresolution -MITtype ]
@@ -146,7 +146,7 @@ $current_working_dir = `pwd`;
 $command_line = "@ARGV";
 &MBGetopts('B:b:C:c:G:g:HhI:i:J:j:L:l:M+m+O:o:P:p:QqR:r:U:u:VvW:w:Xx:');
 $tick_info = 		($opt_B || $opt_b);
-$cellwidth = 		($opt_C || $opt_c);
+$cellwidthraw = 		($opt_C || $opt_c);
 $fill = 		($opt_G || $opt_g || "gray");
 $help =    		($opt_H || $opt_h);
 $file_data =    	($opt_I || $opt_i);
@@ -257,57 +257,71 @@ if (!$root)
     $root = $file_data;
 }
 
-# use user defined bounds
-if ($bounds)
-	{
-	if ($bounds =~ /^\S+\/\S+\/\S+\/\S+$/)
+# open and read the file for xmin xmax
+open(F,$file_data) || die "Cannot open input file: $file_data\n$program_name aborted.\n";
+$count = 0;
+while ($data=<F>) {
+	if ($count == 0 || $data < $xmind)
 		{
-		($xmin,$xmax,$ymin,$ymax) = $bounds =~
-			/(\S+)\/(\S+)\/(\S+)\/(\S+)/;
-		$bounds_plot = $bounds;
+		$xmind = $data;
 		}
+	if ($count == 0 || $data > $xmaxd)
+		{
+		$xmaxd = $data;
+		}
+	$count++;
+}
+close(F);
+if ($count <= 0)
+	{
+	die "Input file: $file_data appears to contain no data.\n$program_name aborted.\n";
 	}
 
-# get limits of file.
-if (!$bounds)
+# use user defined bounds
+if ($bounds && $bounds =~ /^\S+\/\S+\/\S+\/\S+$/)
 	{
-	# open and read the file for xmin xmax
-	open(F,$file_data) || die "Cannot open input file: $file_data\n$program_name aborted.\n";
-	$count = 0;
-	while ($data=<F>) {
-		if ($data < $xmin || $count == 0)
-			{
-			$xmin = $data;
-			}
-		if ($data > $xmax || $count == 0)
-			{
-			$xmax = $data;
-			}
-  		$count++;
-		}
-	close(F);
-	if ($count <= 0)
-		{
-		die "Input file: $file_data appears to contain no data.\n$program_name aborted.\n";
-		}
+	($xmin,$xmax,$ymin,$ymax) = $bounds =~
+		/(\S+)\/(\S+)\/(\S+)\/(\S+)/;
+	$bounds_plot = $bounds;
+	}
+else
+  {
+  $xmin = $xmind;
+  $xmax = $xmaxd;
+  }
 
-	# if needed set cell bounds
-	if (!$cellwidth)
+# parse -C argument
+if ($cellwidthraw)
+  {
+	if ($cellwidthraw =~ /^\S+\/\S+\/\S+$/)
 		{
-		$cellwidth = ($xmax - $xmin) / 10;
-		}
+		($xmin,$xmax,$cellwidth) = $cellwidthraw =~ /^(\S+)\/(\S+)\/(\S+)$/;
+    }
+  else
+    {
+      $cellwidth = $cellwidthraw;
+    }
+  }
 
-	# make cells
-	$ncell = floor(($xmax - $xmin) / $cellwidth) + 5;
-	$nxmin = floor($xmin / $cellwidth) - 1;
-	$xmin = ($nxmin - 0.5) * $cellwidth;
-	$xmax = $xmin + $cellwidth * $ncell;
-	for ($i=0;$i<$ncell;$i++)
-		{
-		push(@cellcount, 0);
-		}
+# if needed set cell bounds
+if (!$cellwidth)
+	{
+	$cellwidth = ($xmax - $xmin) / 10;
+	}
 
-	# open and read the file for ymin ymax
+# make cells
+$ncell = floor(($xmax - $xmin) / $cellwidth) + 5;
+$nxmin = floor($xmin / $cellwidth) - 1;
+$xmin = ($nxmin - 0.5) * $cellwidth;
+$xmax = $xmin + $cellwidth * $ncell;
+for ($i=0;$i<$ncell;$i++)
+	{
+	push(@cellcount, 0);
+	}
+
+# open and read the file for ymin ymax
+if (!$bounds || !$bounds =~ /^\S+\/\S+\/\S+\/\S+$/)
+  {
 	open(F,$file_data) || die "Cannot open input file: $file_data\n$program_name aborted.\n";
 	while ($data=<F>) {
 		$i = floor(($data - $xmin) / $cellwidth);
@@ -752,8 +766,6 @@ $gmt_def = "COLOR_FOREGROUND/white";
 push(@gmt_macro_defs, $gmt_def);
 $gmt_def = "COLOR_NAN/white";
 push(@gmt_macro_defs, $gmt_def);
-$gmt_def = "FORMAT_GEO_MAP/$degree_format";
-push(@gmt_macro_defs, $gmt_def);
 
 # open the shellscript file
 if (!open(FCMD,">$cmdfile"))
@@ -876,7 +888,7 @@ printf FCMD "gmt pshistogram $file_data \\\n\t";
 printf FCMD "-J\$MAP_PROJECTION\$MAP_SCALE \\\n\t";
 printf FCMD "-R\$MAP_REGION \\\n\t";
 printf FCMD "$axes \\\n\t";
-printf FCMD "-W$cellwidth -Z1 \\\n\t";
+printf FCMD "-T$xmin/$xmax/$cellwidth -Z1 \\\n\t";
 if ($pen)
 	{
 	printf FCMD "-L$pen \\\n\t";

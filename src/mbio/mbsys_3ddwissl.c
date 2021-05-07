@@ -3702,6 +3702,15 @@ int mbsys_3ddwissl_calculatebathymetry
       for (int isounding=0; isounding<store->soundings_per_pulse; isounding++)
         {
         sounding = &pulse->soundings[isounding];
+        if (sounding->range > 0.001 && sounding->amplitude > amplitude_largest)
+            {
+            amplitude_largest = sounding->amplitude;
+            isounding_largest = isounding;
+            }
+        }
+      for (int isounding=0; isounding<store->soundings_per_pulse; isounding++)
+        {
+        sounding = &pulse->soundings[isounding];
 
         /* valid pulses have nonzero ranges */
         if (sounding->range > 0.001)
@@ -3732,7 +3741,9 @@ int mbsys_3ddwissl_calculatebathymetry
 
           /* set beamflag */
           if (sounding->amplitude * amplitude_factor >= amplitude_threshold)
-            sounding->beamflag = MB_FLAG_FLAG + MB_FLAG_SECONDARY;
+            sounding->beamflag = MB_FLAG_NONE;
+          else if (isounding_largest == isounding)
+            sounding->beamflag = MB_FLAG_FLAG + MB_FLAG_SONAR;
           else
             sounding->beamflag = MB_FLAG_NULL;
 
@@ -3750,13 +3761,6 @@ int mbsys_3ddwissl_calculatebathymetry
           sounding->alongtrack = xx * sin(DTR * phi) + head_offset_y_m
                                   + angle_el_sign * pulse->offset_el
                                   + pulse->alongtrack_offset;
-
-          /* check for largest amplitude */
-          if (sounding->amplitude > amplitude_largest)
-            {
-            amplitude_largest = sounding->amplitude;
-            isounding_largest = isounding;
-            }
           }
         else
           {
@@ -3766,14 +3770,6 @@ int mbsys_3ddwissl_calculatebathymetry
           sounding->acrosstrack = 0.0;
           sounding->alongtrack = 0.0;
           }
-        }
-
-      /* reset beam flags */
-      if (isounding_largest >= 0)
-        {
-        sounding = &pulse->soundings[isounding_largest];
-        if (sounding->beamflag != MB_FLAG_NULL)
-          sounding->beamflag = MB_FLAG_NONE;
         }
       }
 

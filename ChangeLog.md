@@ -23,6 +23,7 @@ Distributions that do not include "beta" in the tag name correspond to the major
 announced releases. The source distributions associated with all releases, major
 or beta, are equally accessible as tarballs through the Github interface.
 
+- Version 5.7.9beta07    May 7, 2021
 - Version 5.7.9beta06    March 24, 2021
 - Version 5.7.9beta05    March 8, 2021
 - Version 5.7.9beta04    February 21, 2021
@@ -385,6 +386,19 @@ or beta, are equally accessible as tarballs through the Github interface.
 --
 ### MB-System Version 5.7 Release Notes:
 --
+#### 5.7.9beta07 (May 7, 2021)
+
+mbm_histplot: Fixed the use of the -C option to specify cellwidth for the
+histogram to be plotted.
+
+Formats 232 (MBF_3DWISSLR) and 233 (MBF_3DWISSLP): Changed so that MB_FLAG_SECONDARY
+is no longer used for multiple picks per laser pulse.
+
+MBnavadjust and MBnavadjustmerge: Restructured the code so that more capability
+of mbnavadjust can be duplicated in the command line tool mbnavadjust merge. 
+Working to add ability to reimport surveys into a project.
+
+MBvoxelclean: Added --neighborhood option and fixed amplitude range options.
 
 Mblist: Fixed function of the -O%fnv and -O%FNV commands to produce *.fnv files.
 

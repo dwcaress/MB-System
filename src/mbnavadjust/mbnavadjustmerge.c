@@ -3126,7 +3126,7 @@ int main(int argc, char **argv) {
       for (int ifile = 0; ifile < project_output.num_files; ifile++) {
         file = &(project_output.files[ifile]);
         mb_path npath;
-        FILE *nfp;
+        FILE *nfp = NULL;
         sprintf(npath, "%s/nvs_%4.4d.mb166", project_output.datadir, ifile);
         struct stat file_status;
         if (stat(npath, &file_status) == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR
@@ -3145,6 +3145,10 @@ int main(int argc, char **argv) {
             mb_mallocd(verbose, __FILE__, __LINE__, nnav_alloc * sizeof(double), (void **)&nav_lon, &error);
             mb_mallocd(verbose, __FILE__, __LINE__, nnav_alloc * sizeof(double), (void **)&nav_lat, &error);
             mb_mallocd(verbose, __FILE__, __LINE__, nnav_alloc * sizeof(double), (void **)&nav_sensordepth, &error);
+            if (error > MB_ERROR_NO_ERROR) {
+              error = MB_ERROR_MEMORY_FAIL;
+              exit(error);
+            }
           }
           if (nnav_alloc > 0 && error == MB_ERROR_NO_ERROR) {
             fprintf(stderr, "Resetting snav_lon, snav_lat, and snav_sensordepth values for file %s\n", file->path);
@@ -3176,10 +3180,19 @@ int main(int argc, char **argv) {
                 mb_linear_interp(verbose, nav_time_d - 1, nav_sensordepth - 1, nnav, section->snav_time_d[isnav], &section->snav_sensordepth[isnav], &inavtime, &error);
               }
             }
+            mb_freed(verbose, __FILE__, __LINE__, (void **)&nav_time_d, &error);
+            mb_freed(verbose, __FILE__, __LINE__, (void **)&nav_lon, &error);
+            mb_freed(verbose, __FILE__, __LINE__, (void **)&nav_lat, &error);
+            mb_freed(verbose, __FILE__, __LINE__, (void **)&nav_sensordepth, &error);
+            nav_time_d = NULL;
+            nav_lon = NULL;
+            nav_lat = NULL;
+            nav_sensordepth = NULL;
           }
           else {
             fprintf(stderr, "Skipped resetting lon, lat, and sensordepth values for file %s\n", file->path);
           }
+        fclose(nfp);
         }
       }
       break;

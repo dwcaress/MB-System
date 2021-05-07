@@ -638,7 +638,6 @@ void do_update_status() {
 	char *filestatus_fixedxy = "fixedxy";
 	char *filestatus_fixedz = "fixedz ";
 	char *filestatus_unknown = "unknown";
-	int *tie_list = NULL;
 	int n_tcrossing = 0;
 	int n_50crossing = 0;
 	int n_25crossing = 0;
@@ -1472,9 +1471,9 @@ void do_update_status() {
 		if (project.num_files > 0) {
 			/* count crossing ties */
 			num_ties = 0;
-			for (int i = 0; i < project.num_crossings; i++) {
-				if (do_check_crossing_listok(i)) {
-					crossing = &(project.crossings[i]);
+			for (int icrossing = 0; icrossing < project.num_crossings; icrossing++) {
+				if (do_check_crossing_listok(icrossing)) {
+					crossing = &(project.crossings[icrossing]);
 					num_ties += crossing->num_ties;
 				}
 			}
@@ -1482,76 +1481,79 @@ void do_update_status() {
 			/* allocate strings for list */
 			xstr = (XmString *)malloc(num_ties * sizeof(XmString));
 
-            /* allocate array of tie pointers for list to be sorted */
-            tie_list = (int *) malloc(num_ties * sizeof(int));
+      /* allocate array of tie pointers for list to be sorted */
+      struct mbna_tie **tie_ptr_list = NULL;
+      tie_ptr_list = (struct mbna_tie **) malloc(num_ties * sizeof(struct mbna_tie *));
 
-            /* get list of tie pointers */
-            num_ties = 0;
-			for (int i = 0; i < project.num_crossings; i++) {
-				if (do_check_crossing_listok(i)) {
-					crossing = &(project.crossings[i]);
-					for (j = 0; j < crossing->num_ties; j++) {
-						tie_list[num_ties] = 100 * i + j;
-                        num_ties++;
-                    }
-                }
-            }
+      /* get list of ties */
+      num_ties = 0;
+			for (int icrossing = 0; icrossing < project.num_crossings; icrossing++) {
+				if (do_check_crossing_listok(icrossing)) {
+					crossing = &(project.crossings[icrossing]);
+					for (int itie = 0; itie < crossing->num_ties; itie++) {
+            struct mbna_tie *tie = &crossing->ties[itie];
+            tie->icrossing = icrossing;
+            tie->itie = itie;
+            tie_ptr_list[num_ties] = tie;
+            num_ties++;
+          }
+        }
+      }
 
-            /* sort the ties from smallest to largest model misfit */
-            qsort((void *)tie_list, (size_t) num_ties, sizeof(int), mbnavadjust_tie_compare);
+      /* sort the ties from smallest to largest model misfit */
+      qsort((void *)tie_ptr_list, (size_t) num_ties, sizeof(struct mbna_tie *), mbnavadjust_tie_compare);
 
 			/* generate list */
 			iselect = MBNA_SELECT_NONE;
-            kk = 0;
-            for (k  = num_ties - 1; k >= 0; k--) {
-                const int i = tie_list[k] / 100;
-                if (do_check_crossing_listok(i)) {
-                    crossing = &(project.crossings[i]);
-                    j = tie_list[k] % 100;
-                    tie = (struct mbna_tie *)&crossing->ties[j];
-                    if (tie->status == MBNA_TIE_XYZ)
-                        tiestatus = tiestatus_xyz;
-                    else if (tie->status == MBNA_TIE_XY)
-                        tiestatus = tiestatus_xy;
-                    else if (tie->status == MBNA_TIE_Z)
-                        tiestatus = tiestatus_z;
-                    if (tie->inversion_status == MBNA_INVERSION_CURRENT)
-                        sprintf(string,
-                                "%6d %2d %s %2.2d:%4.4d:%3.3d:%2.2d %2.2d:%4.4d:%3.3d:%2.2d "
-                                "%8.2f %8.2f %8.2f | %8.2f %8.2f %8.2f | %8.2f %8.2f %8.2f | %8.2f %6.3f",
-                                i, j, tiestatus, project.files[crossing->file_id_1].block, crossing->file_id_1,
-                                crossing->section_1, tie->snav_1, project.files[crossing->file_id_2].block,
-                                crossing->file_id_2, crossing->section_2, tie->snav_2,
-                                tie->offset_x_m, tie->offset_y_m, tie->offset_z_m,
-                                tie->sigmar1, tie->sigmar2, tie->sigmar3,
-                                tie->dx_m, tie->dy_m, tie->dz_m, tie->sigma_m, tie->rsigma_m);
-                    else if (tie->inversion_status == MBNA_INVERSION_OLD)
-                        sprintf(string,
-                                "%6d %2d %s %2.2d:%4.4d:%3.3d:%2.2d %2.2d:%4.4d:%3.3d:%2.2d "
-                                "%8.2f %8.2f %8.2f | %8.2f %8.2f %8.2f | %8.2f %8.2f %8.2f | %8.2f %6.3f ***",
-                                i, j, tiestatus, project.files[crossing->file_id_1].block, crossing->file_id_1,
-                                crossing->section_1, tie->snav_1, project.files[crossing->file_id_2].block,
-                                crossing->file_id_2, crossing->section_2, tie->snav_2,
-                                tie->offset_x_m, tie->offset_y_m, tie->offset_z_m,
-                                tie->sigmar1, tie->sigmar2, tie->sigmar3,
-                                tie->dx_m, tie->dy_m, tie->dz_m, tie->sigma_m, tie->rsigma_m);
-                    else
-                        sprintf(string,
-                                "%6d %2d %s %2.2d:%4.4d:%3.3d:%2.2d %2.2d:%4.4d:%3.3d:%2.2d "
-                                "%8.2f %8.2f %8.2f | %8.2f %8.2f %8.2f",
-                                i, j, tiestatus, project.files[crossing->file_id_1].block, crossing->file_id_1,
-                                crossing->section_1, tie->snav_1, project.files[crossing->file_id_2].block,
-                                crossing->file_id_2, crossing->section_2, tie->snav_2,
-                                tie->offset_x_m, tie->offset_y_m, tie->offset_z_m,
-                                tie->sigmar1, tie->sigmar2, tie->sigmar3);
-                    xstr[kk] = XmStringCreateLocalized(string);
-                    if (mbna_verbose > 0)
-                        fprintf(stderr, "%s\n", string);
-                    if (i == mbna_crossing_select && j == mbna_tie_select)
-                        iselect = kk;
-                    kk++;
-                }
-            }
+      kk = 0;
+      for (int ktie  = num_ties - 1; ktie >= 0; ktie--) {
+        struct mbna_tie *tie = tie_ptr_list[ktie];
+        if (do_check_crossing_listok(tie->icrossing)) {
+          crossing = &(project.crossings[tie->icrossing]);
+          tie = (struct mbna_tie *)&crossing->ties[tie->itie];
+          if (tie->status == MBNA_TIE_XYZ)
+            tiestatus = tiestatus_xyz;
+          else if (tie->status == MBNA_TIE_XY)
+            tiestatus = tiestatus_xy;
+          else if (tie->status == MBNA_TIE_Z)
+            tiestatus = tiestatus_z;
+          if (tie->inversion_status == MBNA_INVERSION_CURRENT)
+            sprintf(string,
+                    "%6d %2d %s %2.2d:%4.4d:%3.3d:%2.2d %2.2d:%4.4d:%3.3d:%2.2d "
+                    "%8.2f %8.2f %8.2f | %8.2f %8.2f %8.2f | %8.2f %8.2f %8.2f | %8.2f %6.3f",
+                    tie->icrossing, tie->itie, tiestatus, project.files[crossing->file_id_1].block, crossing->file_id_1,
+                    crossing->section_1, tie->snav_1, project.files[crossing->file_id_2].block,
+                    crossing->file_id_2, crossing->section_2, tie->snav_2,
+                    tie->offset_x_m, tie->offset_y_m, tie->offset_z_m,
+                    tie->sigmar1, tie->sigmar2, tie->sigmar3,
+                    tie->dx_m, tie->dy_m, tie->dz_m, tie->sigma_m, tie->rsigma_m);
+          else if (tie->inversion_status == MBNA_INVERSION_OLD)
+            sprintf(string,
+                    "%6d %2d %s %2.2d:%4.4d:%3.3d:%2.2d %2.2d:%4.4d:%3.3d:%2.2d "
+                    "%8.2f %8.2f %8.2f | %8.2f %8.2f %8.2f | %8.2f %8.2f %8.2f | %8.2f %6.3f ***",
+                    tie->icrossing, tie->itie, tiestatus, project.files[crossing->file_id_1].block, crossing->file_id_1,
+                    crossing->section_1, tie->snav_1, project.files[crossing->file_id_2].block,
+                    crossing->file_id_2, crossing->section_2, tie->snav_2,
+                    tie->offset_x_m, tie->offset_y_m, tie->offset_z_m,
+                    tie->sigmar1, tie->sigmar2, tie->sigmar3,
+                    tie->dx_m, tie->dy_m, tie->dz_m, tie->sigma_m, tie->rsigma_m);
+          else
+            sprintf(string,
+                    "%6d %2d %s %2.2d:%4.4d:%3.3d:%2.2d %2.2d:%4.4d:%3.3d:%2.2d "
+                    "%8.2f %8.2f %8.2f | %8.2f %8.2f %8.2f",
+                    tie->icrossing, tie->itie, tiestatus, project.files[crossing->file_id_1].block, crossing->file_id_1,
+                    crossing->section_1, tie->snav_1, project.files[crossing->file_id_2].block,
+                    crossing->file_id_2, crossing->section_2, tie->snav_2,
+                    tie->offset_x_m, tie->offset_y_m, tie->offset_z_m,
+                    tie->sigmar1, tie->sigmar2, tie->sigmar3);
+          xstr[kk] = XmStringCreateLocalized(string);
+          if (mbna_verbose > 0)
+            fprintf(stderr, "%s\n", string);
+          if (tie->icrossing == mbna_crossing_select && tie->itie == mbna_tie_select)
+            iselect = kk;
+          kk++;
+        }
+      }
 
 			XmListAddItems(list_data, xstr, num_ties, 0);
 			for (kk = 0; kk < num_ties; kk++) {
@@ -1559,7 +1561,7 @@ void do_update_status() {
 			}
 			free(xstr);
 
-            free(tie_list);
+      free(tie_ptr_list);
 		}
 		if (iselect != MBNA_SELECT_NONE) {
 			XmListSelectPos(list_data, iselect + 1, 0);
@@ -3955,19 +3957,30 @@ void do_fileselection_ok(Widget w, XtPointer client_data, XtPointer call_data) {
 	get_text_string(fileSelectionBox_text, ifile);
 
 	/* desl with selection */
+	int error = MB_ERROR_NO_ERROR;
+  char message[STRING_MAX];
 	if (file_mode == FILE_MODE_NEW) {
+    sprintf(message, "Creating new MBnavadjust project %s", ifile);
+    do_message_on(message);
 		status = mbnavadjust_file_new(ifile);
+    do_message_off();
 		do_update_status();
 	}
 	else if (file_mode == FILE_MODE_OPEN) {
+    sprintf(message, "Opening MBnavadjust project %s", ifile);
+    do_message_on(message);
 		status = mbnavadjust_file_open(ifile);
+    do_message_off();
 		do_update_status();
 	}
 	else if (file_mode == FILE_MODE_IMPORT) {
 		char format_text[40];
 		get_text_string(textField_format, format_text);
 		sscanf(format_text, "%d", &format);
-		status = mbnavadjust_import_data(ifile, format);
+    sprintf(message, "Importing data from %s %d", ifile, format);
+    do_message_on(message);
+		status = mbnavadjust_import_data(mbna_verbose, &project, ifile, format, &error);
+    do_message_off();
 
 		/* update datalist files and topography grids */
 		mbna_status = MBNA_STATUS_NAVSOLVE;
@@ -3982,7 +3995,7 @@ void do_fileselection_ok(Widget w, XtPointer client_data, XtPointer call_data) {
 			do_update_visualization_status();
 	}
 	else if (file_mode == FILE_MODE_REFERENCE) {
-		status = mbnavadjust_import_reference(ifile);
+		status = mbnavadjust_import_reference(mbna_verbose, &project, ifile, &error);
 		do_update_status();
 	}
 }
@@ -4633,7 +4646,17 @@ void do_action_checknewcrossings(Widget w, XtPointer client_data, XtPointer call
 
 	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
-	mbnavadjust_findcrossings();
+  /* turn on message */
+  char message[STRING_MAX];
+  sprintf(message, "Checking for crossings...");
+  do_message_on(message);
+
+	int error = MB_ERROR_NO_ERROR;
+	mbnavadjust_findcrossings(mbna_verbose, &project, &error);
+
+  /* turn off message */
+  do_message_off();
+
 	do_update_status();
 	if (project.modelplot) {
 		do_update_modelplot_status();
@@ -5339,17 +5362,11 @@ void do_mbnavadjust_addcrossing(Widget w, XtPointer client, XtPointer call) {
 	(void)call;  // Unused parameter
 
 	// XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call;
-	int error;
+	int error = MB_ERROR_NO_ERROR;
 	struct mbview_shareddata_struct *shareddata;
 
 	/* get shared data */
 	status = mbview_getsharedptr(mbna_verbose, &shareddata, &error);
-
-	// fprintf(stderr,"\n*************\ndo_mbnavadjust_addcrossing: selected: %d %d  navadjust: %d %d\n",
-	// shareddata->nav_selected[0],shareddata->nav_selected[1],
-	// shareddata->nav_selected_mbnavadjust[0],shareddata->nav_selected_mbnavadjust[1]);
-	// fprintf(stderr,"mbna_current_crossing:%d mbna_current_tie:%d mbna_crossing_select:%d mbna_tie_select:%d\n",
-	// mbna_current_crossing, mbna_current_tie, mbna_crossing_select, mbna_tie_select);
 
 	if (mbna_current_crossing == MBNA_SELECT_NONE && shareddata->nav_selected_mbnavadjust[0] != MBNA_SELECT_NONE &&
 	    shareddata->nav_selected_mbnavadjust[1] != MBNA_SELECT_NONE &&
@@ -5365,7 +5382,12 @@ void do_mbnavadjust_addcrossing(Widget w, XtPointer client, XtPointer call) {
 		int isection2;
 		sscanf(nav1->name, "%d:%d", &ifile1, &isection1);
 		sscanf(nav2->name, "%d:%d", &ifile2, &isection2);
-		status = mbnavadjust_addcrossing(ifile1, isection1, ifile2, isection2);
+		status = mbnavadjust_addcrossing(mbna_verbose, &project, ifile1, isection1, ifile2, isection2, &error);
+    if (status == MB_SUCCESS)
+      mbna_crossing_select = project.num_crossings - 1;
+    else
+      mbna_crossing_select = MBNA_SELECT_NONE;
+    mbna_tie_select = MBNA_SELECT_NONE;
 
 		/* bring up naverr window */
 		if (status == MB_SUCCESS) {

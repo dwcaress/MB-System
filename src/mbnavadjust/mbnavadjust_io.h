@@ -242,6 +242,8 @@ struct mbna_file {
 };
 struct mbna_tie {
   int status;
+  int icrossing;
+  int itie;
   int snav_1;
   double snav_1_time_d;
   int snav_2;
@@ -263,14 +265,14 @@ struct mbna_tie {
   double inversion_offset_x_m;
   double inversion_offset_y_m;
   double inversion_offset_z_m;
-    double dx_m;
-    double dy_m;
-    double dz_m;
-    double sigma_m;
-    double dr1_m;
-    double dr2_m;
-    double dr3_m;
-    double rsigma_m;
+  double dx_m;
+  double dy_m;
+  double dz_m;
+  double sigma_m;
+  double dr1_m;
+  double dr2_m;
+  double dr3_m;
+  double rsigma_m;
   int block_1;
   int block_2;
   int isurveyplotindex;
@@ -332,6 +334,9 @@ struct mbna_project {
   int num_ties;
   double section_length;
   int section_soundings;
+  int bin_beams_bath;
+  int bin_swathwidth;
+  double bin_pseudobeamwidth;
   int save_count;
 
   double lon_min;
@@ -364,11 +369,11 @@ struct mbna_project {
   int modelplot_uptodate;
 
   /* function pointers for contour plotting */
-    void (*mbnavadjust_plot)(double xx, double yy, int ipen);
-    void (*mbnavadjust_newpen)(int icolor);
-    void (*mbnavadjust_setline)(int linewidth);
-    void (*mbnavadjust_justify_string)(double height, char *string, double *s);
-    void (*mbnavadjust_plot_string)(double x, double y, double hgt, double angle, char *label);
+  void (*mbnavadjust_plot)(double xx, double yy, int ipen);
+  void (*mbnavadjust_newpen)(int icolor);
+  void (*mbnavadjust_setline)(int linewidth);
+  void (*mbnavadjust_justify_string)(double height, char *string, double *s);
+  void (*mbnavadjust_plot_string)(double x, double y, double hgt, double angle, char *label);
 
 };
 struct mbna_plot_vector {
@@ -439,5 +444,20 @@ int mbnavadjust_section_translate(int verbose, struct mbna_project *project,
 int mbnavadjust_section_contour(int verbose, struct mbna_project *project,
                                 int fileid, int sectionid, struct swath *swath,
                                 struct mbna_contour_vector *contour, int *error);
+int mbnavadjust_import_data(int verbose, struct mbna_project *project, char *path, int format, int *error);
+int mbnavadjust_import_file(int verbose, struct mbna_project *project, char *path, int format, bool firstfile, int *error);
+int mbnavadjust_import_reference(int verbose, struct mbna_project *project, char *path, int *error);
+int mbnavadjust_findcrossings(int verbose, struct mbna_project *project, int *error);
+int mbnavadjust_findcrossingsfile(int verbose, struct mbna_project *project, int ifile, int *error);
+int mbnavadjust_addcrossing(int verbose, struct mbna_project *project, int ifile1, int isection1, int ifile2, int isection2, int *error);
+bool mbnavadjust_sections_intersect(int verbose, struct mbna_project *project, int crossing_id, int *error);
+int mbnavadjust_bin_bathymetry(int verbose, struct mbna_project *project,
+                               double altitude, int beams_bath, char *beamflag, double *bath, double *bathacrosstrack,
+                               double *bathalongtrack, int mbna_bin_beams_bath, double mbna_bin_pseudobeamwidth,
+                               double mbna_bin_swathwidth, char *bin_beamflag, double *bin_bath, double *bin_bathacrosstrack,
+                               double *bin_bathalongtrack, int *error);
+int mbnavadjust_crossing_compare(const void *a, const void *b);
+int mbnavadjust_tie_compare(const void *a, const void *b);
+int mbnavadjust_info_add(int verbose, struct mbna_project *project, char *info, bool timetag, int *error);
 
 /*--------------------------------------------------------------------*/
