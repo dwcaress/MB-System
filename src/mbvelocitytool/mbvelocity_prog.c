@@ -148,6 +148,7 @@ int nraypathmax;
 int *nraypath = NULL;
 double **raypathx = NULL;
 double **raypathy = NULL;
+double **raypatht = NULL;
 double *depth = NULL;
 double *acrosstrack = NULL;
 double rayxmax;
@@ -2274,10 +2275,12 @@ int mbvt_open_swath_file(char *file, int form, int *numload) {
 	status = mb_mallocd(verbose, __FILE__, __LINE__, beams_bath * sizeof(int), (void **)&nraypath, &error);
 	status = mb_mallocd(verbose, __FILE__, __LINE__, beams_bath * sizeof(double *), (void **)&raypathx, &error);
 	status = mb_mallocd(verbose, __FILE__, __LINE__, beams_bath * sizeof(double *), (void **)&raypathy, &error);
+	status = mb_mallocd(verbose, __FILE__, __LINE__, beams_bath * sizeof(double *), (void **)&raypatht, &error);
 	nraypathmax = 100 * profile_edit.n;
 	for (i = 0; i < beams_bath; i++) {
 		status = mb_mallocd(verbose, __FILE__, __LINE__, nraypathmax * sizeof(double), (void **)&(raypathx[i]), &error);
 		status = mb_mallocd(verbose, __FILE__, __LINE__, nraypathmax * sizeof(double), (void **)&(raypathy[i]), &error);
+		status = mb_mallocd(verbose, __FILE__, __LINE__, nraypathmax * sizeof(double), (void **)&(raypatht[i]), &error);
 	}
 
 	/* if error initializing memory then quit */
@@ -2331,9 +2334,11 @@ int mbvt_deallocate_swath() {
 		for (i = 0; i < beams_bath; i++) {
 			mb_freed(verbose, __FILE__, __LINE__, (void **)&(raypathx[i]), &error);
 			mb_freed(verbose, __FILE__, __LINE__, (void **)&(raypathy[i]), &error);
+			mb_freed(verbose, __FILE__, __LINE__, (void **)&(raypatht[i]), &error);
 		}
 		mb_freed(verbose, __FILE__, __LINE__, (void **)&raypathx, &error);
 		mb_freed(verbose, __FILE__, __LINE__, (void **)&raypathy, &error);
+		mb_freed(verbose, __FILE__, __LINE__, (void **)&raypatht, &error);
 		mb_freed(verbose, __FILE__, __LINE__, (void **)&depth, &error);
 		mb_freed(verbose, __FILE__, __LINE__, (void **)&acrosstrack, &error);
 		mb_freed(verbose, __FILE__, __LINE__, (void **)&angle, &error);
@@ -2345,6 +2350,7 @@ int mbvt_deallocate_swath() {
 		nraypath = NULL;
 		raypathx = NULL;
 		raypathy = NULL;
+		raypatht = NULL;
 		depth = NULL;
 		acrosstrack = NULL;
 		angle = NULL;
@@ -2507,13 +2513,14 @@ int mbvt_process_multibeam() {
 					plotting list */
 					status =
 					    mb_rt(verbose, rt_svp, sonardepth, ping[k].angles[i], 0.5 * ping[k].ttimes[i], anglemode, ping[k].ssv,
-					          ping[k].angles_null[i], 0, NULL, NULL, NULL, &acrosstrack[i], &depth[i], &ttime, &ray_stat, &error);
+					          ping[k].angles_null[i], 0, NULL, NULL, NULL, NULL, &acrosstrack[i], &depth[i], &ttime, &ray_stat, &error);
 				}
 				else {
 					/* call raytracing keeping
 					plotting list */
-					status = mb_rt(verbose, rt_svp, sonardepth, ping[k].angles[i], 0.5 * ping[k].ttimes[i], anglemode,
-					               ping[k].ssv, ping[k].angles_null[i], nraypathmax, &nraypath[i], raypathx[i], raypathy[i],
+					status = mb_rt(verbose, rt_svp, sonardepth, ping[k].angles[i], 0.5 * ping[k].ttimes[i],
+                         anglemode, ping[k].ssv, ping[k].angles_null[i],
+                         nraypathmax, &nraypath[i], raypathx[i], raypathy[i], raypatht[i],
 					               &acrosstrack[i], &depth[i], &ttime, &ray_stat, &error);
 
 					/* reset acrosstrack distances */

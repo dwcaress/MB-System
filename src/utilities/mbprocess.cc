@@ -4583,7 +4583,7 @@ void process_file(int verbose, struct mb_process_struct *process,
 
             /* raytrace */
             *status = mb_rt(verbose, rt_svp, (depth_offset_use - static_shift), angles[i], 0.5 * ttimes[i],
-                           process->mbp_angle_mode, ssv, angles_null[i], 0, nullptr, nullptr, nullptr, &xx, &zz, &ttime,
+                           process->mbp_angle_mode, ssv, angles_null[i], 0, nullptr, nullptr, nullptr, nullptr, &xx, &zz, &ttime,
                            &ray_stat, error);
 
             /* apply static shift if any */
