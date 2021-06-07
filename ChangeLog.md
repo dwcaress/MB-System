@@ -390,6 +390,10 @@ or beta, are equally accessible as tarballs through the Github interface.
 --
 #### 5.7.9beta08 (June 7, 2021)
 
+Mb_rt raytracing functions: Added tracking of travel times in arrays returned by
+mb_rt() for plotting raypaths. This adds a parameter to the mb_rt() function call,
+which is used by utilities/mb_process.cc and mbvelocitytool/mbvelocity_prog.c.
+
 Mbm_grdplot: If \fB\-MGL\fP\fIF\fP is given in conjunction with \fB\-MGL\fP\fIscalebar\fP
 then the map scale will be surrounded by a white filled, black bounded box on
 top of the map.
