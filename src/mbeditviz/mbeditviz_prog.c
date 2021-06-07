@@ -382,8 +382,10 @@ int mbeditviz_import_file(char *path, int format) {
     root = path;
   else
     root++;
-  sprintf(message, "Importing format %d data from %s", format, root);
-  do_mbeditviz_message_on(message);
+  if (mbev_num_files % 100 == 0) {
+    sprintf(message, "Importing format %d data from %s", format, root);
+    do_mbeditviz_message_on(message);
+  }
 
   /* allocate mbpr_file_struct array if needed */
   mbev_status = MB_SUCCESS;
@@ -4247,7 +4249,7 @@ void mbeditviz_mb3dsoundings_flagsparsevoxels(int sizemultiplier, int nsoundingt
       if (mb_beam_ok(sounding->beamflag)) {
         const int i = (sounding->x - mbev_selected.xmin) / dx;
         const int j = (sounding->y - mbev_selected.ymin) / dy;
-        const int k = (sounding->z - mbev_selected.zmin) / dz;
+        const int k = (sounding->z - mbev_selected.zorigin - mbev_selected.zmin) / dz;
 
         /* loop over the neighborhood (+/- 1) of the voxel containing
          * this sounding, setting occupancy for the containing voxel and

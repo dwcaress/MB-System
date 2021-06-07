@@ -881,7 +881,7 @@ print FCMD "  /bin/rm gmt.conf\n";
 print FCMD "fi\n";
 print FCMD "#\n# Set temporary GMT defaults\n";
 print FCMD "echo Setting temporary GMT defaults...\n";
-foreach $gmt_def (@gmt_defs) {
+foreach $gmt_def (@gmt_macro_defs) {
 	($gmt_par, $gmt_var) = $gmt_def =~ /^([^\/]+)\/(.+)/;
 	print FCMD "gmt gmtset $gmt_par $gmt_var\n";
 	}
@@ -1157,26 +1157,6 @@ if ($data_scale)
 	printf FCMD "gmt grdmath \$DATA_FILE $data_scale x = \$DATA_FILE.scale\n";
 	$file_use = "\$DATA_FILE.scale";
 	}
-
-# get shading by illumination if needed
-#if ($color_mode == 2)
-#	{
-#	printf FCMD "#\n# Get shading array\n";
-#	printf FCMD "echo Getting shading array...\n";
-#	printf FCMD "echo Running gmt module grdgradient...\n";
-#	printf FCMD "gmt grdgradient $file_use -A$azimuth -G\$DATA_FILE.grad -N";
-#	if (!$gridprojected)
-#		{
-#		printf FCMD " -fg";
-#		}
-#	printf FCMD "\n";
-#	printf FCMD "echo Running gmt module grdhisteq...\n";
-#	printf FCMD "gmt grdhisteq \$DATA_FILE.grad -G\$DATA_FILE.eq -N\n";
-#	printf FCMD "echo Running gmt module grdmath...\n";
-#	printf FCMD "gmt grdmath \$DATA_FILE.eq $magnitude x = \$DATA_FILE.int\n";
-#	printf FCMD "/bin/rm -f \$DATA_FILE.grad \$DATA_FILE.eq\n";
-#	$file_shade = "\$DATA_FILE.int";
-#	}
 
 # get shading by illumination if needed
 if ($color_mode == 2)

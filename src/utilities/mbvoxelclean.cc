@@ -898,6 +898,64 @@ int main(int argc, char **argv) {
       /* close the swath file */
       status = mb_close(verbose, &mbio_ptr, &error);
 
+      /* apply acrosstrack filter to the soundings */
+      if (apply_acrosstrack_minimum || apply_acrosstrack_maximum) {
+        for (int i = 0; i < n_pings; i++) {
+          for (int j = 0; j< pings[i].beams_bath; j++) {
+            if (!mb_beam_check_flag_null(pings[i].beamflag[j])) {
+              if (apply_acrosstrack_minimum
+                && mb_beam_ok(pings[i].beamflag[j])
+                && pings[i].bathacrosstrack[j] < acrosstrack_minimum) {
+                pings[i].beamflag[j] = MB_FLAG_FLAG + MB_FLAG_FILTER;
+                const int action = MBP_EDIT_FILTER;
+                mb_esf_save(verbose, &esf, pings[i].time_d,
+                    j + pings[i].multiplicity * MB_ESF_MULTIPLICITY_FACTOR,
+                    action, &error);
+                n_minacrosstrack_flag++;
+              } else if (apply_acrosstrack_maximum
+                && mb_beam_ok(pings[i].beamflag[j])
+                && pings[i].bathacrosstrack[j] > acrosstrack_maximum) {
+                pings[i].beamflag[j] = MB_FLAG_FLAG + MB_FLAG_FILTER;
+                const int action = MBP_EDIT_FILTER;
+                mb_esf_save(verbose, &esf, pings[i].time_d,
+                    j + pings[i].multiplicity * MB_ESF_MULTIPLICITY_FACTOR,
+                    action, &error);
+                n_maxacrosstrack_flag++;
+              }
+            }
+          }
+        }
+      }
+
+      /* apply range filter to the soundings */
+      if (apply_range_minimum || apply_range_maximum) {
+        for (int i = 0; i < n_pings; i++) {
+          for (int j = 0; j< pings[i].beams_bath; j++) {
+            if (!mb_beam_check_flag_null(pings[i].beamflag[j])) {
+              if (apply_range_minimum
+                && mb_beam_ok(pings[i].beamflag[j])
+                && pings[i].bathr[j] < range_minimum) {
+                pings[i].beamflag[j] = MB_FLAG_FLAG + MB_FLAG_FILTER;
+                const int action = MBP_EDIT_FILTER;
+                mb_esf_save(verbose, &esf, pings[i].time_d,
+                    j + pings[i].multiplicity * MB_ESF_MULTIPLICITY_FACTOR,
+                    action, &error);
+                n_minrange_flag++;
+              } else if (apply_range_maximum
+                && mb_beam_ok(pings[i].beamflag[j])
+                && pings[i].bathr[j] > range_maximum) {
+                pings[i].beamflag[j] = MB_FLAG_FLAG + MB_FLAG_FILTER;
+                const int action = MBP_EDIT_FILTER;
+                mb_esf_save(verbose, &esf, pings[i].time_d,
+                    j + pings[i].multiplicity * MB_ESF_MULTIPLICITY_FACTOR,
+                    action, &error);
+                n_maxrange_flag++;
+              }
+            }
+          }
+        }
+      }
+
       // allocate arrays of voxel beam counts - use unsigned char so that beam
       // counts are capped at 255 - ergo the maximum occupied count threshold
       // is 254
