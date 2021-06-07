@@ -23,6 +23,7 @@ Distributions that do not include "beta" in the tag name correspond to the major
 announced releases. The source distributions associated with all releases, major
 or beta, are equally accessible as tarballs through the Github interface.
 
+- Version 5.7.9beta08    June 7, 2021
 - Version 5.7.9beta07    May 7, 2021
 - Version 5.7.9beta06    March 24, 2021
 - Version 5.7.9beta05    March 8, 2021
@@ -385,7 +386,42 @@ or beta, are equally accessible as tarballs through the Github interface.
 
 --
 ### MB-System Version 5.7 Release Notes:
+
 --
+#### 5.7.9beta08 (June 7, 2021)
+
+Mbm_grdplot: If \fB\-MGL\fP\fIF\fP is given in conjunction with \fB\-MGL\fP\fIscalebar\fP
+then the map scale will be surrounded by a white filled, black bounded box on
+top of the map.
+
+Mbm_grdplot: Chooses more reasonable easting/northing annotation intervals when
+plotting maps in projected coordinate systems like UTM.
+
+Mbm_grd2arc: Fixed so that the call to gmt convert is actually made.
+
+Mbm_grdtiff: Fixed so that the temporary GMT defaults are actually applied to the
+output image. By default this enforces a white background on the output GeoTiff
+image, which enables the new tool mbtiff2png to set the white areas to transparent
+when it converts a GeoTiff image to a PNG image for import into GIS.
+
+Mbeditviz: Fixed sparse filtering functions, which were inadvertently broken a
+few months ago.
+
+Mbgetphotocorrection: Made multithreaded.
+
+Mbphotomosaic: (1) Made multithreaded. (2) Added ability to map blocks of pixels from
+source images to the destination image instead of mapping individual pixels. The
+size of the square blocks is specified using --section=sizeInPixels. (3) Added PNG
+format image output, which allows no data regions to be transparent. PNG images
+cannot have geodetics embedded, and so depend on a *.pgw world file to be importable
+into GIS. (4) Added image correction modes based on source pixel range or standoff.
+
+Mbtiff2png: New tool that converts GeoTiff images to PNG images while setting no data
+regions transparent on the basis of being white, lighter than a specified threshold,
+black, or darker than a specified threshold.
+
+Mbvoxelclean: Fixed application of acrosstrack and range filters.
+
 #### 5.7.9beta07 (May 7, 2021)
 
 mbm_histplot: Fixed the use of the -C option to specify cellwidth for the
@@ -395,7 +431,7 @@ Formats 232 (MBF_3DWISSLR) and 233 (MBF_3DWISSLP): Changed so that MB_FLAG_SECON
 is no longer used for multiple picks per laser pulse.
 
 MBnavadjust and MBnavadjustmerge: Restructured the code so that more capability
-of mbnavadjust can be duplicated in the command line tool mbnavadjust merge. 
+of mbnavadjust can be duplicated in the command line tool mbnavadjust merge.
 Working to add ability to reimport surveys into a project.
 
 MBvoxelclean: Added --neighborhood option and fixed amplitude range options.

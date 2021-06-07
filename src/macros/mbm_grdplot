@@ -50,7 +50,7 @@
 #
 # Miscellaneous Options:
 #            [-MGDgmtdef/value -MGFscale_loc";
-#            -MGL[f][x]lon0/lat0/slat/length[units][+llabel]
+#            -MGL[f][x]lon0/lat0/slat/length[units][+llabel] -MGLF
 #            -MGQdpi -MGSscalefactor -MGTx/y/size/angle/font/just/text
 #            -MGU[/dx/dy/][label] -MCAanot_int/[ffont_size][aangle][/r/g/b][o]]
 #            -MCGgap/width -MCQcut -MCT[+|-][gap/length][:LH] -MCWtype[pen]
@@ -388,8 +388,12 @@ if ($misc)
         /^[Gg][Ff](\S+)/;
       }
 
-    # set map scale
-    if ($cmd =~ /^[Gg][Ll]./)
+    # set map scale frame or map scale
+    if ($cmd =~ /^[Gg][Ll]F/)
+      {
+      $length_scale_frame = 1;
+      }
+    elsif ($cmd =~ /^[Gg][Ll]./)
       {
       ($length_scale) = $cmd =~
         /^[Gg][Ll](\S+)/;
@@ -2885,6 +2889,10 @@ printf FCMD "echo Running gmt module psbasemap...\n";
 printf FCMD "gmt psbasemap -J\$MAP_PROJECTION\$MAP_SCALE \\\n\t";
 printf FCMD "-R\$MAP_REGION \\\n\t";
 printf FCMD "$axes \\\n\t";
+if ($length_scale && $length_scale_frame)
+  {
+  printf FCMD "-F+gwhite+p1 ";
+  }
 if ($length_scale)
   {
   printf FCMD "-L$length_scale \\\n\t";
@@ -3937,6 +3945,17 @@ sub GetBaseTick {
   elsif ($gridprojected == 1)
     {
     $base_tick = &min($base_tick_x, $base_tick_y);
+    if ($base_tick >= 10.0) {
+      $base_tick = int($base_tick);
+    } elsif ($base_tick >= 1.0) {
+        $base_tick = 0.1 * int(10 * $base_tick);
+    } elsif ($base_tick >= 0.1) {
+        $base_tick = 0.01 * int(100 * $base_tick);
+    } elsif ($base_tick >= 0.01) {
+        $base_tick = 0.001 * int(1000 * $base_tick);
+    } elsif ($base_tick >= 0.001) {
+        $base_tick = 0.0001 * int(10000 * $base_tick);
+    }
     $base_tick_x = $base_tick;
     $base_tick_y = $base_tick;
     }
