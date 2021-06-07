@@ -3560,7 +3560,7 @@ fprintf(stderr,"Done reading TopographyGridFile: %s\n", TopographyGridFile);
                 strcat(OutputWorldFile,".tfw");
             }
             else if (output_format == MBPM_FORMAT_PNG) {
-                strcat(OutputWorldFile,".tgw");
+                strcat(OutputWorldFile,".pgw");
             }
             if ((tfp = fopen(OutputWorldFile,"w")) == NULL)
                 {
