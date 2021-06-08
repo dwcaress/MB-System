@@ -89,25 +89,22 @@ Christian do Santos Ferreira
 <DD>
 This &quot;help&quot; flag cause the program to print out a description
 of its operation and then exit immediately.
-<DT><B>--input=</B>
+<DT><B>--input=</B><I>inputGeoTiffFile</I>
 
 <DD>
-<I>inputGeoTiffFile</I>
 <BR>
 
 Sets the filename of the input GeoTiff file. This file must have a valid parallel
 world file with suffix *.tfw
-<DT><B>--world=</B>
+<DT><B>--world=</B><I>inputWorldFile</I>
 
 <DD>
-<I>inputWorldFile</I>
 <BR>
 
 Sets the filename of the input world file. Image world files have the form
-<DT><B>--output=</B>
+<DT><B>--output=</B><I>outputPNGFile</I>
 
 <DD>
-<I>outputPNGFile</I>
 <BR>
 
 Sets the filename of the input GeoTiff file. This file must have a valid parallel
@@ -120,10 +117,9 @@ world file with suffix *.tfw
 Input pixels that are white, with BGR values all equal to 255, will be
 set transparent in the output PNG image file. The pixel colors are presumed to be
 defined by single byte blue, green, and red values with a range of 0 to 255.
-<DT><B>--transparency-light=</B>
+<DT><B>--transparency-light=</B><I>threshold</I>
 
 <DD>
-<I>threshold</I>
 <BR>
 
 Input pixels with BGR average values greater than or equal to <I>threshold</I> will be
@@ -139,10 +135,9 @@ The average BGR value is int((blue+green+red)/3).
 Input pixels that are black, with BGR values all equal to 0, will be
 set transparent in the output PNG image file. The pixel colors are presumed to be
 defined by single byte blue, green, and red values with a range of 0 to 255.
-<DT><B>--transparency-dark=</B>
+<DT><B>--transparency-dark=</B><I>threshold</I>
 
 <DD>
-<I>threshold</I>
 <BR>
 
 Input pixels with BGR average values less than or equal to <I>threshold</I> will be
