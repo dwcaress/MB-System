@@ -23,7 +23,7 @@ Distributions that do not include "beta" in the tag name correspond to the major
 announced releases. The source distributions associated with all releases, major
 or beta, are equally accessible as tarballs through the Github interface.
 
-- Version 5.7.9beta08    June 7, 2021
+- Version 5.7.9beta09    June 8, 2021
 - Version 5.7.9beta07    May 7, 2021
 - Version 5.7.9beta06    March 24, 2021
 - Version 5.7.9beta05    March 8, 2021
@@ -388,7 +388,7 @@ or beta, are equally accessible as tarballs through the Github interface.
 ### MB-System Version 5.7 Release Notes:
 
 --
-#### 5.7.9beta08 (June 7, 2021)
+#### 5.7.9beta09 (June 8, 2021)
 
 Mb_rt raytracing functions: Added tracking of travel times in arrays returned by
 mb_rt() for plotting raypaths. This adds a parameter to the mb_rt() function call,
