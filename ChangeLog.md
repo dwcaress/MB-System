@@ -23,6 +23,7 @@ Distributions that do not include "beta" in the tag name correspond to the major
 announced releases. The source distributions associated with all releases, major
 or beta, are equally accessible as tarballs through the Github interface.
 
+- Version 5.7.9beta10    June 16, 2021
 - Version 5.7.9beta09    June 8, 2021
 - Version 5.7.9beta07    May 7, 2021
 - Version 5.7.9beta06    March 24, 2021
@@ -386,8 +387,19 @@ or beta, are equally accessible as tarballs through the Github interface.
 
 --
 ### MB-System Version 5.7 Release Notes:
-
 --
+
+#### 5.7.9beta10 (June 16, 2021)
+
+Mbnavadjust: Fixed importation of swath files, which was failing. Fixed crash
+that happened when a navigation inversion was performed in the same session as
+swath data importation.
+
+Mbm_grdplot: Fixed histogram equalization in cases where grdhisteq returns an
+incomplete or short equalized color table.
+
+Mbauvloglist: Fixed parsing of short values in MBARI Dorado AUV MVC log files.
+
 #### 5.7.9beta09 (June 8, 2021)
 
 Mb_rt raytracing functions: Added tracking of travel times in arrays returned by

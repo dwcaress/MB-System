@@ -2112,10 +2112,17 @@ if ($color_mode && $color_mode < 6 && !$file_cpt)
       print "\tgmt grdhisteq $files_data[0] -C$ncolors -D\n";
       }
     @grdhisteq = `gmt grdhisteq $files_data[0] -C$ncolors -D`;
+    $dlast = 0.0;
+    $histfirst = 1;
     foreach $d (@grdhisteq) {
       ($d1, $d2) = $d =~ /(\S+)\s+(\S+).*/;
-      if ($d2 > $d1)
+      if ($histfirst || $d1 > $dlast)
         {
+        if ($histfirst)
+          {
+          $histfirst = 0;
+          }
+        $dlast = $d1;
         push(@hist, $d1);
         }
       }

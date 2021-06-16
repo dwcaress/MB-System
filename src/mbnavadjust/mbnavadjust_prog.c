@@ -6616,30 +6616,32 @@ int mbnavadjust_invertnav() {
                 file = &project.files[ifile];
                 for (int isection = 0; isection < file->num_sections; isection++) {
                     section = &file->sections[isection];
+                    if (section->global_tie_status != MBNA_TIE_NONE) {
 
-                    /* get absolute id for snav point */
-                    int k = x_chunk[section->snav_invert_id[section->global_tie_snav]];
+                        /* get absolute id for snav point */
+                        int k = x_chunk[section->snav_invert_id[section->global_tie_snav]];
 
-                    /* count global tie impact on chunks */
-                    nx[k]++;
+                        /* count global tie impact on chunks */
+                        nx[k]++;
 
-                    /* get and apply offset vector for this tie */
-                    if (section->global_tie_status == MBNA_TIE_XYZ || section->global_tie_status == MBNA_TIE_XY) {
-                        offset_x = section->offset_x_m
-                            - section->snav_lon_offset[section->global_tie_snav] / project.mtodeglon;
-                        offset_y = section->offset_y_m
-                            - section->snav_lat_offset[section->global_tie_snav] / project.mtodeglat;
-                        rms_misfit_previous += offset_x * offset_x + offset_y * offset_y;
-                        nrms += 2;
-                        x[3*k]   += -offset_x;
-                        x[3*k+1] += -offset_y;
-                    }
-                    if (section->global_tie_status == MBNA_TIE_XYZ || section->global_tie_status == MBNA_TIE_Z) {
-                        offset_z = section->offset_z_m
-                            - section->snav_z_offset[section->global_tie_snav];
-                        rms_misfit_previous += offset_z * offset_z;
-                        nrms += 1;
-                        x[3*k+2] += -offset_z;
+                        /* get and apply offset vector for this tie */
+                        if (section->global_tie_status == MBNA_TIE_XYZ || section->global_tie_status == MBNA_TIE_XY) {
+                            offset_x = section->offset_x_m
+                                - section->snav_lon_offset[section->global_tie_snav] / project.mtodeglon;
+                            offset_y = section->offset_y_m
+                                - section->snav_lat_offset[section->global_tie_snav] / project.mtodeglat;
+                            rms_misfit_previous += offset_x * offset_x + offset_y * offset_y;
+                            nrms += 2;
+                            x[3*k]   += -offset_x;
+                            x[3*k+1] += -offset_y;
+                        }
+                        if (section->global_tie_status == MBNA_TIE_XYZ || section->global_tie_status == MBNA_TIE_Z) {
+                            offset_z = section->offset_z_m
+                                - section->snav_z_offset[section->global_tie_snav];
+                            rms_misfit_previous += offset_z * offset_z;
+                            nrms += 1;
+                            x[3*k+2] += -offset_z;
+                        }
                     }
                 }
             }
