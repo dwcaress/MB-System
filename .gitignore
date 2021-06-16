@@ -154,3 +154,4 @@ src/mbtrnav/trnusvr-test
 src/mbtrnav/bin/libtrn.a
 src/photo/mbimagecorrect
 src/utilities/mbswath2las
+src/photo/mbtiff2png

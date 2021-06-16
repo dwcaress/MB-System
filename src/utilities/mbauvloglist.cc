@@ -38,9 +38,10 @@ constexpr int MAX_OPTIONS = 512;
 typedef enum {
     TYPE_UNKNOWN = 0,
     TYPE_TIMETAG = 1,
-    TYPE_INTEGER = 2,
-    TYPE_DOUBLE = 3,
-    TYPE_ANGLE = 4,
+    TYPE_SHORT = 2,
+    TYPE_INTEGER = 3,
+    TYPE_DOUBLE = 4,
+    TYPE_ANGLE = 5,
 } field_type_t;
 
 typedef enum {
@@ -537,6 +538,12 @@ int main(int argc, char **argv) {
 				fields[nfields].scale = 1.0;
 				recordsize += 4;
 			}
+			else if (strcmp(type, "short") == 0) {
+				fields[nfields].type = TYPE_SHORT;
+				fields[nfields].size = 2;
+				fields[nfields].scale = 1.0;
+				recordsize += 2;
+			}
 			else if (strcmp(type, "timeTag") == 0) {
 				fields[nfields].type = TYPE_TIMETAG;
 				fields[nfields].size = 8;
@@ -797,8 +804,6 @@ int main(int argc, char **argv) {
 	double potentialtemperature_calc = 0.0;
 	double density_calc = 0.0;
 
-	/* int interp_status;  TODO(schwehr): Remove or test. */
-
 	/* read the data records in the auv log file */
 	int nrecord = 0;
 	while (fread(buffer, recordsize, 1, fp) == 1) {
@@ -832,14 +837,14 @@ int main(int argc, char **argv) {
                                 thermistor);
             conductivity_calc = calcCond(&ctd_calibration, cond_frequency,
                                 temperature_calc, pressure_calc);
-            /* interp_status = */ mb_seabird_salinity(verbose, conductivity_calc, temperature_calc,
+            mb_seabird_salinity(verbose, conductivity_calc, temperature_calc,
                                 pressure_calc, &salinity_calc, &error);
-            /* interp_status = */ mb_seabird_soundspeed(verbose, MB_SOUNDSPEEDALGORITHM_DELGROSSO,
+            mb_seabird_soundspeed(verbose, MB_SOUNDSPEEDALGORITHM_DELGROSSO,
                                         salinity_calc, temperature_calc, pressure_calc,
                                         &soundspeed_calc, &error);
-            /* interp_status = */ mb_potential_temperature(verbose, temperature_calc, salinity_calc, pressure_calc,
+            mb_potential_temperature(verbose, temperature_calc, salinity_calc, pressure_calc,
                                         &potentialtemperature_calc, &error);
-            /* interp_status = */ mb_seabird_density(verbose, salinity_calc, temperature_calc, pressure_calc, &density_calc, &error);
+            mb_seabird_density(verbose, salinity_calc, temperature_calc, pressure_calc, &density_calc, &error);
         } else if (ctd_available) {
             /* else deal with existing values if available */
             for (int ii = 0; ii < nprintfields; ii++) {
@@ -852,12 +857,12 @@ int main(int argc, char **argv) {
       				else if (strcmp(fields[ii].name, "pressure") == 0)
       						mb_get_binary_double(true, &buffer[fields[ii].index], &pressure_calc);
       				}
-            /* interp_status = */ mb_seabird_soundspeed(verbose, MB_SOUNDSPEEDALGORITHM_DELGROSSO,
+            mb_seabird_soundspeed(verbose, MB_SOUNDSPEEDALGORITHM_DELGROSSO,
                                         salinity_calc, temperature_calc, pressure_calc,
                                         &soundspeed_calc, &error);
-            /* interp_status = */ mb_potential_temperature(verbose, temperature_calc, salinity_calc, pressure_calc,
+            mb_potential_temperature(verbose, temperature_calc, salinity_calc, pressure_calc,
                                         &potentialtemperature_calc, &error);
-            /* interp_status = */ mb_seabird_density(verbose, salinity_calc, temperature_calc, pressure_calc, &density_calc, &error);
+            mb_seabird_density(verbose, salinity_calc, temperature_calc, pressure_calc, &density_calc, &error);
         }
 
         /* calculate timestamp by adding Kearfott second-of-day value (utcTime) to seconds to the start of day
@@ -911,7 +916,7 @@ int main(int argc, char **argv) {
   			else if (index == INDEX_MERGE_LON) {
   				double dvalue = 0.0;
   				int jinterp = 0;
-  				/* interp_status = */ mb_linear_interp_longitude(verbose, nav_time_d - 1, nav_navlon - 1, nav_num, time_d, &dvalue,
+  				mb_linear_interp_longitude(verbose, nav_time_d - 1, nav_navlon - 1, nav_num, time_d, &dvalue,
   				                                           &jinterp, &error);
   				if (jinterp < 2 || jinterp > nav_num - 2)
   					dvalue = 0.0;
@@ -923,7 +928,7 @@ int main(int argc, char **argv) {
   			else if (index == INDEX_MERGE_LAT) {
   				double dvalue = 0.0;
   				int jinterp = 0;
-  				/* interp_status = */ mb_linear_interp_latitude(verbose, nav_time_d - 1, nav_navlat - 1, nav_num, time_d, &dvalue,
+  				mb_linear_interp_latitude(verbose, nav_time_d - 1, nav_navlat - 1, nav_num, time_d, &dvalue,
   				                                          &jinterp, &error);
   				if (jinterp < 2 || jinterp > nav_num - 2)
   					dvalue = 0.0;
@@ -935,7 +940,7 @@ int main(int argc, char **argv) {
   			else if (index == INDEX_MERGE_HEADING) {
   				double dvalue = 0.0;
   				int jinterp = 0;
-  				/* interp_status = */ mb_linear_interp_heading(verbose, nav_time_d - 1, nav_heading - 1, nav_num, time_d, &dvalue,
+  				mb_linear_interp_heading(verbose, nav_time_d - 1, nav_heading - 1, nav_num, time_d, &dvalue,
   				                                         &jinterp, &error);
   				if (jinterp < 2 || jinterp > nav_num - 2)
   					dvalue = 0.0;

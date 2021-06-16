@@ -3442,15 +3442,15 @@ int mbnavadjust_import_file(int verbose, struct mbna_project *project,
   char opath[STRING_MAX];
 
   /* MBIO control parameters */
-  int pings;
-  int lonflip;
-  double bounds[4];
-  int btime_i[7];
-  int etime_i[7];
-  double btime_d;
-  double etime_d;
-  double speedmin;
-  double timegap;
+  const int pings = 1;
+  const int lonflip = 0;
+  double bounds[4] = {-360, 360, -90, 90};
+  int btime_i[7] = {1962, 2, 21, 10, 30, 0, 0};
+  int etime_i[7] = {2062, 2, 21, 10, 30, 0, 0};
+  double btime_d = -248016600.0;
+  double etime_d = 2907743400.0;
+  double speedmin = 0.0;
+  double timegap = 1000000000.0;
 
   /* mbio read and write values */
   void *imbio_ptr = NULL;
@@ -3572,30 +3572,30 @@ int mbnavadjust_import_file(int verbose, struct mbna_project *project,
 
   /* allocate memory for data arrays */
   if (status == MB_SUCCESS) {
-    if (error == MB_ERROR_NO_ERROR)
+    if (*error == MB_ERROR_NO_ERROR)
       status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(char), (void **)&beamflag, error);
-    if (error == MB_ERROR_NO_ERROR)
+    if (*error == MB_ERROR_NO_ERROR)
       status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double), (void **)&bath, error);
-    if (error == MB_ERROR_NO_ERROR)
+    if (*error == MB_ERROR_NO_ERROR)
       status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_AMPLITUDE, sizeof(double), (void **)&amp, error);
-    if (error == MB_ERROR_NO_ERROR)
+    if (*error == MB_ERROR_NO_ERROR)
       status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double), (void **)&bathacrosstrack,
                                  error);
-    if (error == MB_ERROR_NO_ERROR)
+    if (*error == MB_ERROR_NO_ERROR)
       status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double), (void **)&bathalongtrack,
                                  error);
-    if (error == MB_ERROR_NO_ERROR)
+    if (*error == MB_ERROR_NO_ERROR)
       status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double), (void **)&ss, error);
-    if (error == MB_ERROR_NO_ERROR)
+    if (*error == MB_ERROR_NO_ERROR)
       status =
           mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double), (void **)&ssacrosstrack, error);
-    if (error == MB_ERROR_NO_ERROR)
+    if (*error == MB_ERROR_NO_ERROR)
       status =
           mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double), (void **)&ssalongtrack, error);
-    if (error == MB_ERROR_NO_ERROR)
+    if (*error == MB_ERROR_NO_ERROR)
 
     /* if error initializing memory then don't read the file */
-    if (error != MB_ERROR_NO_ERROR) {
+    if (*error != MB_ERROR_NO_ERROR) {
       mb_error(verbose, *error, &error_message);
       fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", error_message);
     }
@@ -3622,7 +3622,7 @@ int mbnavadjust_import_file(int verbose, struct mbna_project *project,
                           bathacrosstrack, bathalongtrack, ss, ssacrosstrack, ssalongtrack, comment, error);
 
       /* extract all nav values */
-      if (error == MB_ERROR_NO_ERROR && (kind == MB_DATA_NAV || kind == MB_DATA_DATA)) {
+      if (*error == MB_ERROR_NO_ERROR && (kind == MB_DATA_NAV || kind == MB_DATA_DATA)) {
         status = mb_extract_nav(verbose, imbio_ptr, istore_ptr, &kind, time_i, &time_d, &navlon, &navlat, &speed,
                                 &heading, &draft, &roll, &pitch, &heave, error);
       }
@@ -3764,7 +3764,7 @@ int mbnavadjust_import_file(int verbose, struct mbna_project *project,
       }
 
       /* deal with new file */
-      if (kind == MB_DATA_DATA && error == MB_ERROR_NO_ERROR && first) {
+      if (kind == MB_DATA_DATA && *error == MB_ERROR_NO_ERROR && first) {
         file = &project->files[project->num_files];
         file->status = MBNA_FILE_GOODNAV;
         file->id = project->num_files;
@@ -3807,7 +3807,7 @@ int mbnavadjust_import_file(int verbose, struct mbna_project *project,
       }
 
       /* check if new section needed */
-      else if (kind == MB_DATA_DATA && error == MB_ERROR_NO_ERROR && file != NULL
+      else if (kind == MB_DATA_DATA && *error == MB_ERROR_NO_ERROR && file != NULL
                && (section->distance + distance >= project->section_length ||
                 section->num_beams >= project->section_soundings)) {
         new_section = true;
@@ -3851,7 +3851,7 @@ int mbnavadjust_import_file(int verbose, struct mbna_project *project,
       }
 
       /* deal with new section */
-      if (kind == MB_DATA_DATA && error == MB_ERROR_NO_ERROR && new_section) {
+      if (kind == MB_DATA_DATA && *error == MB_ERROR_NO_ERROR && new_section) {
         /* end old section */
         if (output_open) {
           /* close the swath file */
@@ -3966,7 +3966,7 @@ int mbnavadjust_import_file(int verbose, struct mbna_project *project,
                               (void **)&ostore->bath_alongtrack, error);
 
           /* if error initializing memory then don't write the file */
-          if (error != MB_ERROR_NO_ERROR) {
+          if (*error != MB_ERROR_NO_ERROR) {
             mb_error(verbose, *error, &error_message);
             fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", error_message);
             status = mb_freed(verbose, __FILE__, __LINE__, (void **)&ostore->beamflag, error);
@@ -3980,11 +3980,11 @@ int mbnavadjust_import_file(int verbose, struct mbna_project *project,
       }
 
       /* update section distance for each data ping */
-      if (kind == MB_DATA_DATA && error == MB_ERROR_NO_ERROR && section->num_pings > 1)
+      if (kind == MB_DATA_DATA && *error == MB_ERROR_NO_ERROR && section->num_pings > 1)
         section->distance += distance;
 
       /* handle good bathymetry */
-      if (kind == MB_DATA_DATA && error == MB_ERROR_NO_ERROR) {
+      if (kind == MB_DATA_DATA && *error == MB_ERROR_NO_ERROR) {
         /* get statistics */
         mb_coor_scale(verbose, navlat, &mtodeglon, &mtodeglat);
         headingx = sin(DTR * heading);
@@ -4083,7 +4083,7 @@ int mbnavadjust_import_file(int verbose, struct mbna_project *project,
       }
 
       /* increment counters */
-      if (error == MB_ERROR_NO_ERROR)
+      if (*error == MB_ERROR_NO_ERROR)
         nread++;
 
       /* print debug statements */
@@ -4158,33 +4158,33 @@ int mbnavadjust_import_file(int verbose, struct mbna_project *project,
           ss = NULL;
           ssacrosstrack = NULL;
           ssalongtrack = NULL;
-          if (error == MB_ERROR_NO_ERROR)
+          if (*error == MB_ERROR_NO_ERROR)
             status = mb_register_array(verbose, ombio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(char),
                                        (void **)&beamflag, error);
-          if (error == MB_ERROR_NO_ERROR)
+          if (*error == MB_ERROR_NO_ERROR)
             status = mb_register_array(verbose, ombio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double),
                                        (void **)&bath, error);
-          if (error == MB_ERROR_NO_ERROR)
+          if (*error == MB_ERROR_NO_ERROR)
             status = mb_register_array(verbose, ombio_ptr, MB_MEM_TYPE_AMPLITUDE, sizeof(double), (void **)&amp,
                                        error);
-          if (error == MB_ERROR_NO_ERROR)
+          if (*error == MB_ERROR_NO_ERROR)
             status = mb_register_array(verbose, ombio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double),
                                        (void **)&bathacrosstrack, error);
-          if (error == MB_ERROR_NO_ERROR)
+          if (*error == MB_ERROR_NO_ERROR)
             status = mb_register_array(verbose, ombio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double),
                                        (void **)&bathalongtrack, error);
-          if (error == MB_ERROR_NO_ERROR)
+          if (*error == MB_ERROR_NO_ERROR)
             status = mb_register_array(verbose, ombio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double), (void **)&ss,
                                        error);
-          if (error == MB_ERROR_NO_ERROR)
+          if (*error == MB_ERROR_NO_ERROR)
             status = mb_register_array(verbose, ombio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double),
                                        (void **)&ssacrosstrack, error);
-          if (error == MB_ERROR_NO_ERROR)
+          if (*error == MB_ERROR_NO_ERROR)
             status = mb_register_array(verbose, ombio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double),
                                        (void **)&ssalongtrack, error);
 
           /* if error initializing memory then don't read the file */
-          if (error != MB_ERROR_NO_ERROR) {
+          if (*error != MB_ERROR_NO_ERROR) {
             mb_error(verbose, *error, &error_message);
             fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", error_message);
           }
@@ -4208,7 +4208,7 @@ int mbnavadjust_import_file(int verbose, struct mbna_project *project,
           }
 
           /* check for good bathymetry */
-          if (kind == MB_DATA_DATA && error == MB_ERROR_NO_ERROR) {
+          if (kind == MB_DATA_DATA && *error == MB_ERROR_NO_ERROR) {
             mb_coor_scale(verbose, navlat, &mtodeglon, &mtodeglat);
             headingx = sin(DTR * heading);
             headingy = cos(DTR * heading);
@@ -4410,30 +4410,30 @@ int mbnavadjust_reimport_file(int verbose, struct mbna_project *project,
 
   /* allocate memory for data arrays */
   if (status == MB_SUCCESS) {
-    if (error == MB_ERROR_NO_ERROR)
+    if (*error == MB_ERROR_NO_ERROR)
       status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(char), (void **)&beamflag, error);
-    if (error == MB_ERROR_NO_ERROR)
+    if (*error == MB_ERROR_NO_ERROR)
       status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double), (void **)&bath, error);
-    if (error == MB_ERROR_NO_ERROR)
+    if (*error == MB_ERROR_NO_ERROR)
       status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_AMPLITUDE, sizeof(double), (void **)&amp, error);
-    if (error == MB_ERROR_NO_ERROR)
+    if (*error == MB_ERROR_NO_ERROR)
       status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double), (void **)&bathacrosstrack,
                                  error);
-    if (error == MB_ERROR_NO_ERROR)
+    if (*error == MB_ERROR_NO_ERROR)
       status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double), (void **)&bathalongtrack,
                                  error);
-    if (error == MB_ERROR_NO_ERROR)
+    if (*error == MB_ERROR_NO_ERROR)
       status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double), (void **)&ss, error);
-    if (error == MB_ERROR_NO_ERROR)
+    if (*error == MB_ERROR_NO_ERROR)
       status =
           mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double), (void **)&ssacrosstrack, error);
-    if (error == MB_ERROR_NO_ERROR)
+    if (*error == MB_ERROR_NO_ERROR)
       status =
           mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double), (void **)&ssalongtrack, error);
-    if (error == MB_ERROR_NO_ERROR)
+    if (*error == MB_ERROR_NO_ERROR)
 
     /* if error initializing memory then don't read the file */
-    if (error != MB_ERROR_NO_ERROR) {
+    if (*error != MB_ERROR_NO_ERROR) {
       mb_error(verbose, *error, &error_message);
       fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", error_message);
     }
@@ -4461,7 +4461,7 @@ int mbnavadjust_reimport_file(int verbose, struct mbna_project *project,
                           bathacrosstrack, bathalongtrack, ss, ssacrosstrack, ssalongtrack, comment, error);
 
       /* extract all nav values */
-      if (error == MB_ERROR_NO_ERROR && (kind == MB_DATA_NAV || kind == MB_DATA_DATA)) {
+      if (*error == MB_ERROR_NO_ERROR && (kind == MB_DATA_NAV || kind == MB_DATA_DATA)) {
         status = mb_extract_nav(verbose, imbio_ptr, istore_ptr, &kind, time_i, &time_d, &navlon, &navlat, &speed,
                                 &heading, &draft, &roll, &pitch, &heave, error);
       }
@@ -4603,7 +4603,7 @@ int mbnavadjust_reimport_file(int verbose, struct mbna_project *project,
       }
 
       /* deal with start of file */
-      if (kind == MB_DATA_DATA && error == MB_ERROR_NO_ERROR && first) {
+      if (kind == MB_DATA_DATA && *error == MB_ERROR_NO_ERROR && first) {
 
         first = false;
         new_section = true;
@@ -4631,13 +4631,13 @@ int mbnavadjust_reimport_file(int verbose, struct mbna_project *project,
       }
 
       /* check if new section needed */
-      else if (kind == MB_DATA_DATA && error == MB_ERROR_NO_ERROR && file != NULL
+      else if (kind == MB_DATA_DATA && *error == MB_ERROR_NO_ERROR && file != NULL
                && time_d > section->etime_d) {
         new_section = true;
       }
 
       /* deal with new section */
-      if (kind == MB_DATA_DATA && error == MB_ERROR_NO_ERROR && new_section) {
+      if (kind == MB_DATA_DATA && *error == MB_ERROR_NO_ERROR && new_section) {
         new_section = false;
 
         /* end old section */
@@ -4696,7 +4696,7 @@ int mbnavadjust_reimport_file(int verbose, struct mbna_project *project,
                               (void **)&ostore->bath_alongtrack, error);
 
           /* if error initializing memory then don't write the file */
-          if (error != MB_ERROR_NO_ERROR) {
+          if (*error != MB_ERROR_NO_ERROR) {
             mb_error(verbose, *error, &error_message);
             fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", error_message);
             status = mb_freed(verbose, __FILE__, __LINE__, (void **)&ostore->beamflag, error);
@@ -4710,11 +4710,11 @@ int mbnavadjust_reimport_file(int verbose, struct mbna_project *project,
       }
 
       /* update section distance for each data ping */
-      if (kind == MB_DATA_DATA && error == MB_ERROR_NO_ERROR && section->num_pings > 1)
+      if (kind == MB_DATA_DATA && *error == MB_ERROR_NO_ERROR && section->num_pings > 1)
         section->distance += distance;
 
       /* handle good bathymetry */
-      if (kind == MB_DATA_DATA && error == MB_ERROR_NO_ERROR) {
+      if (kind == MB_DATA_DATA && *error == MB_ERROR_NO_ERROR) {
         /* get statistics */
         mb_coor_scale(verbose, navlat, &mtodeglon, &mtodeglat);
         headingx = sin(DTR * heading);
@@ -4811,7 +4811,7 @@ int mbnavadjust_reimport_file(int verbose, struct mbna_project *project,
       }
 
       /* increment counters */
-      if (error == MB_ERROR_NO_ERROR)
+      if (*error == MB_ERROR_NO_ERROR)
         nread++;
 
       /* print debug statements */
@@ -4886,33 +4886,33 @@ int mbnavadjust_reimport_file(int verbose, struct mbna_project *project,
           ss = NULL;
           ssacrosstrack = NULL;
           ssalongtrack = NULL;
-          if (error == MB_ERROR_NO_ERROR)
+          if (*error == MB_ERROR_NO_ERROR)
             status = mb_register_array(verbose, ombio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(char),
                                        (void **)&beamflag, error);
-          if (error == MB_ERROR_NO_ERROR)
+          if (*error == MB_ERROR_NO_ERROR)
             status = mb_register_array(verbose, ombio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double),
                                        (void **)&bath, error);
-          if (error == MB_ERROR_NO_ERROR)
+          if (*error == MB_ERROR_NO_ERROR)
             status = mb_register_array(verbose, ombio_ptr, MB_MEM_TYPE_AMPLITUDE, sizeof(double), (void **)&amp,
                                        error);
-          if (error == MB_ERROR_NO_ERROR)
+          if (*error == MB_ERROR_NO_ERROR)
             status = mb_register_array(verbose, ombio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double),
                                        (void **)&bathacrosstrack, error);
-          if (error == MB_ERROR_NO_ERROR)
+          if (*error == MB_ERROR_NO_ERROR)
             status = mb_register_array(verbose, ombio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double),
                                        (void **)&bathalongtrack, error);
-          if (error == MB_ERROR_NO_ERROR)
+          if (*error == MB_ERROR_NO_ERROR)
             status = mb_register_array(verbose, ombio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double), (void **)&ss,
                                        error);
-          if (error == MB_ERROR_NO_ERROR)
+          if (*error == MB_ERROR_NO_ERROR)
             status = mb_register_array(verbose, ombio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double),
                                        (void **)&ssacrosstrack, error);
-          if (error == MB_ERROR_NO_ERROR)
+          if (*error == MB_ERROR_NO_ERROR)
             status = mb_register_array(verbose, ombio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double),
                                        (void **)&ssalongtrack, error);
 
           /* if error initializing memory then don't read the file */
-          if (error != MB_ERROR_NO_ERROR) {
+          if (*error != MB_ERROR_NO_ERROR) {
             mb_error(verbose, *error, &error_message);
             fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", error_message);
           }
@@ -4936,7 +4936,7 @@ int mbnavadjust_reimport_file(int verbose, struct mbna_project *project,
           }
 
           /* check for good bathymetry */
-          if (kind == MB_DATA_DATA && error == MB_ERROR_NO_ERROR) {
+          if (kind == MB_DATA_DATA && *error == MB_ERROR_NO_ERROR) {
             mb_coor_scale(verbose, navlat, &mtodeglon, &mtodeglat);
             headingx = sin(DTR * heading);
             headingy = cos(DTR * heading);
