@@ -45,55 +45,56 @@
 #define NUMBER_MODS_MAX 1000
 #define MOD_MODE_NONE 0
 #define MOD_MODE_SET_GLOBAL_TIE 1
-#define MOD_MODE_SET_GLOBAL_TIE_XYZ 2
-#define MOD_MODE_SET_GLOBAL_TIE_XY 3
-#define MOD_MODE_SET_GLOBAL_TIE_Z 4
-#define MOD_MODE_UNSET_GLOBAL_TIE 5
-#define MOD_MODE_UNSET_ALL_GLOBAL_TIES 6
-#define MOD_MODE_ADD_CROSSING 7
-#define MOD_MODE_SET_TIE_VALUES_ALL 8
-#define MOD_MODE_SET_TIE_VALUES_XYZ 9
-#define MOD_MODE_SET_TIE_VALUES_Z 10
-#define MOD_MODE_SET_TIE_XYZ 11
-#define MOD_MODE_SET_TIE_XY 12
-#define MOD_MODE_SET_TIE_Z 13
-#define MOD_MODE_SET_TIES_XYZ_ALL 14
-#define MOD_MODE_SET_TIES_XY_ALL 15
-#define MOD_MODE_SET_TIES_Z_ALL 16
-#define MOD_MODE_SET_TIES_XYZ_FILE 17
-#define MOD_MODE_SET_TIES_XY_FILE 18
-#define MOD_MODE_SET_TIES_Z_FILE 19
-#define MOD_MODE_SET_TIES_XYZ_SURVEY 20
-#define MOD_MODE_SET_TIES_XY_SURVEY 21
-#define MOD_MODE_SET_TIES_Z_SURVEY 22
-#define MOD_MODE_SET_TIES_XYZ_BYSURVEY 23
-#define MOD_MODE_SET_TIES_XY_BYSURVEY 24
-#define MOD_MODE_SET_TIES_Z_BYSURVEY 25
-#define MOD_MODE_SET_TIES_XYZ_BLOCK 26
-#define MOD_MODE_SET_TIES_XY_BLOCK 27
-#define MOD_MODE_SET_TIES_Z_BLOCK 28
-#define MOD_MODE_SET_TIES_ZOFFSET_BLOCK 29
-#define MOD_MODE_SET_TIES_XY_BY_TIME 30
-#define MOD_MODE_UNSET_TIE 31
-#define MOD_MODE_UNSET_TIES_FILE 32
-#define MOD_MODE_UNSET_TIES_SURVEY 33
-#define MOD_MODE_UNSET_TIES_BYSURVEY 34
-#define MOD_MODE_UNSET_TIES_BLOCK 35
-#define MOD_MODE_UNSET_TIES_ALL 36
-#define MOD_MODE_SKIP_UNSET_CROSSINGS 37
-#define MOD_MODE_UNSET_SKIPPED_CROSSINGS 38
-#define MOD_MODE_UNSET_SKIPPED_CROSSINGS_BLOCK 39
-#define MOD_MODE_UNSET_SKIPPED_CROSSINGS_BETWEEN_SURVEYS 40
-#define MOD_MODE_INSERT_DISCONTINUITY 41
-#define MOD_MODE_MERGE_SURVEYS 42
-#define MOD_MODE_REIMPORT_FILE 43
-#define MOD_MODE_REIMPORT_ALL_FILES 44
-#define MOD_MODE_TRIANGULATE 45
-#define MOD_MODE_TRIANGULATE_SECTION 46
-#define MOD_MODE_UNSET_SHORT_SECTION_TIES 47
-#define MOD_MODE_SKIP_SHORT_SECTION_CROSSINGS 48
-#define MOD_MODE_REMAKE_MB166_FILES 49
-#define MOD_MODE_FIX_SENSORDEPTH 50
+#define MOD_MODE_SET_GLOBAL_TIE_RELATIVE 2
+#define MOD_MODE_SET_GLOBAL_TIE_XYZ 3
+#define MOD_MODE_SET_GLOBAL_TIE_XY 4
+#define MOD_MODE_SET_GLOBAL_TIE_Z 5
+#define MOD_MODE_UNSET_GLOBAL_TIE 6
+#define MOD_MODE_UNSET_ALL_GLOBAL_TIES 7
+#define MOD_MODE_ADD_CROSSING 8
+#define MOD_MODE_SET_TIE_VALUES_ALL 9
+#define MOD_MODE_SET_TIE_VALUES_XYZ 10
+#define MOD_MODE_SET_TIE_VALUES_Z 11
+#define MOD_MODE_SET_TIE_XYZ 12
+#define MOD_MODE_SET_TIE_XY 13
+#define MOD_MODE_SET_TIE_Z 14
+#define MOD_MODE_SET_TIES_XYZ_ALL 15
+#define MOD_MODE_SET_TIES_XY_ALL 16
+#define MOD_MODE_SET_TIES_Z_ALL 17
+#define MOD_MODE_SET_TIES_XYZ_FILE 18
+#define MOD_MODE_SET_TIES_XY_FILE 19
+#define MOD_MODE_SET_TIES_Z_FILE 20
+#define MOD_MODE_SET_TIES_XYZ_SURVEY 21
+#define MOD_MODE_SET_TIES_XY_SURVEY 22
+#define MOD_MODE_SET_TIES_Z_SURVEY 23
+#define MOD_MODE_SET_TIES_XYZ_BYSURVEY 24
+#define MOD_MODE_SET_TIES_XY_BYSURVEY 25
+#define MOD_MODE_SET_TIES_Z_BYSURVEY 26
+#define MOD_MODE_SET_TIES_XYZ_BLOCK 27
+#define MOD_MODE_SET_TIES_XY_BLOCK 28
+#define MOD_MODE_SET_TIES_Z_BLOCK 29
+#define MOD_MODE_SET_TIES_ZOFFSET_BLOCK 30
+#define MOD_MODE_SET_TIES_XY_BY_TIME 31
+#define MOD_MODE_UNSET_TIE 32
+#define MOD_MODE_UNSET_TIES_FILE 33
+#define MOD_MODE_UNSET_TIES_SURVEY 34
+#define MOD_MODE_UNSET_TIES_BYSURVEY 35
+#define MOD_MODE_UNSET_TIES_BLOCK 36
+#define MOD_MODE_UNSET_TIES_ALL 37
+#define MOD_MODE_SKIP_UNSET_CROSSINGS 38
+#define MOD_MODE_UNSET_SKIPPED_CROSSINGS 39
+#define MOD_MODE_UNSET_SKIPPED_CROSSINGS_BLOCK 40
+#define MOD_MODE_UNSET_SKIPPED_CROSSINGS_BETWEEN_SURVEYS 41
+#define MOD_MODE_INSERT_DISCONTINUITY 42
+#define MOD_MODE_MERGE_SURVEYS 43
+#define MOD_MODE_REIMPORT_FILE 44
+#define MOD_MODE_REIMPORT_ALL_FILES 45
+#define MOD_MODE_TRIANGULATE 46
+#define MOD_MODE_TRIANGULATE_SECTION 47
+#define MOD_MODE_UNSET_SHORT_SECTION_TIES 48
+#define MOD_MODE_SKIP_SHORT_SECTION_CROSSINGS 49
+#define MOD_MODE_REMAKE_MB166_FILES 50
+#define MOD_MODE_FIX_SENSORDEPTH 51
 #define IMPORT_NONE 0
 #define IMPORT_TIE 1
 #define IMPORT_GLOBALTIE 2
@@ -127,6 +128,7 @@ static char usage_message[] =
     "\t[--input=project_path\n"
     "\t--output=project_path\n"
     "\t--set-global-tie=file:section[:snav]/xoffset/yoffset/zoffset[/xsigma/ysigma/zsigma]\n"
+    "\t--set-global-tie-relative=file:section[:snav]/xoffset/yoffset/zoffset[/xsigma/ysigma/zsigma]\n"
     "\t--set-global-tie-xyz=file:section[:snav]\n"
     "\t--set-global-tie-xyonly=file:section[:snav]\n"
     "\t--set-global-tie-zonly=file:section[:snav]\n"
@@ -214,6 +216,7 @@ int main(int argc, char **argv) {
                                     {"input", required_argument, NULL, 0},
                                     {"output", required_argument, NULL, 0},
                                     {"set-global-tie", required_argument, NULL, 0},
+                                    {"set-global-tie-relative", required_argument, NULL, 0},
                                     {"set-global-tie-xyz", required_argument, NULL, 0},
                                     {"set-global-tie-xyonly", required_argument, NULL, 0},
                                     {"set-global-tie-zonly", required_argument, NULL, 0},
@@ -319,7 +322,7 @@ int main(int argc, char **argv) {
       }
 
       /*-------------------------------------------------------
-       * set global tie
+       * set global tie (relative to original or raw navigation)
           --set-global-tie=file:section:snav/xoffset/yoffset/zoffset/xsigma/ysigma/zsigma
           --set-global-tie=file:section/xoffset/yoffset/zoffset/xsigma/ysigma/zsigma
           --set-global-tie=file:section:snav/xoffset/yoffset/zoffset
@@ -365,7 +368,59 @@ int main(int argc, char **argv) {
           }
         }
         else {
-          fprintf(stderr, "Maximum number of mod commands reached:\n\t--add-crossing=%s command ignored\n\n", optarg);
+          fprintf(stderr, "Maximum number of mod commands reached:\n\t--set-global-tie=%s command ignored\n\n", optarg);
+        }
+      }
+
+      /*-------------------------------------------------------
+       * set global tie (relative to navigation of current inversion model)
+          --set-global-tie-relative=file:section:snav/xoffset/yoffset/zoffset/xsigma/ysigma/zsigma
+          --set-global-tie-relative=file:section/xoffset/yoffset/zoffset/xsigma/ysigma/zsigma
+          --set-global-tie-relative=file:section:snav/xoffset/yoffset/zoffset
+          --set-global-tie-relative=file:section/xoffset/yoffset/zoffset */
+      else if (strcmp("set-global-tie-relative", options[option_index].name) == 0) {
+        if (num_mods < NUMBER_MODS_MAX) {
+          int nscan;
+          double xoffset, yoffset, zoffset;
+          if ((nscan = sscanf(optarg, "%d:%d:%d/%lf/%lf/%lf/%lf/%lf/%lf", &mods[num_mods].file1,
+                              &mods[num_mods].section1, &mods[num_mods].snav1, &mods[num_mods].xoffset,
+                              &mods[num_mods].yoffset, &mods[num_mods].zoffset, &mods[num_mods].xsigma,
+                              &mods[num_mods].ysigma, &mods[num_mods].zsigma)) == 9) {
+            mods[num_mods].mode = MOD_MODE_SET_GLOBAL_TIE_RELATIVE;
+            num_mods++;
+          }
+          else if ((nscan =
+                        sscanf(optarg, "%d:%d/%lf/%lf/%lf/%lf/%lf/%lf", &mods[num_mods].file1, &mods[num_mods].section1,
+                               &mods[num_mods].xoffset, &mods[num_mods].yoffset, &mods[num_mods].zoffset,
+                               &mods[num_mods].xsigma, &mods[num_mods].ysigma, &mods[num_mods].zsigma)) == 8) {
+            mods[num_mods].mode = MOD_MODE_SET_GLOBAL_TIE_RELATIVE;
+            mods[num_mods].snav1 = 0;
+            num_mods++;
+          }
+          else if ((nscan = sscanf(optarg, "%d:%d:%d/%lf/%lf/%lf", &mods[num_mods].file1, &mods[num_mods].section1,
+                                   &mods[num_mods].snav1, &mods[num_mods].xoffset, &mods[num_mods].yoffset,
+                                   &mods[num_mods].zoffset)) == 6) {
+            mods[num_mods].mode = MOD_MODE_SET_GLOBAL_TIE_RELATIVE;
+            mods[num_mods].xsigma = 10.0;
+            mods[num_mods].ysigma = 10.0;
+            mods[num_mods].zsigma = 0.5;
+            num_mods++;
+          }
+          else if ((nscan = sscanf(optarg, "%d:%d/%lf/%lf/%lf", &mods[num_mods].file1, &mods[num_mods].section1,
+                                   &mods[num_mods].xoffset, &mods[num_mods].yoffset, &mods[num_mods].zoffset)) == 5) {
+            mods[num_mods].mode = MOD_MODE_SET_GLOBAL_TIE_RELATIVE;
+            mods[num_mods].snav1 = 0;
+            mods[num_mods].xsigma = 10.0;
+            mods[num_mods].ysigma = 10.0;
+            mods[num_mods].zsigma = 0.5;
+            num_mods++;
+          }
+          else {
+            fprintf(stderr, "Failure to parse --set-global-tie-relative=%s\n\tmod command ignored\n\n", optarg);
+          }
+        }
+        else {
+          fprintf(stderr, "Maximum number of mod commands reached:\n\t--set-global-tie-relative=%s command ignored\n\n", optarg);
         }
       }
 
@@ -434,7 +489,7 @@ int main(int argc, char **argv) {
           }
         }
         else {
-          fprintf(stderr, "Maximum number of mod commands reached:\n\t--add-crossing=%s command ignored\n\n", optarg);
+          fprintf(stderr, "Maximum number of mod commands reached:\n\t--set-global-tie-z=%s command ignored\n\n", optarg);
         }
       }
 
@@ -463,7 +518,7 @@ int main(int argc, char **argv) {
           num_mods++;
         }
         else {
-          fprintf(stderr, "Maximum number of mod commands reached:\n\t--add-crossing=%s command ignored\n\n", optarg);
+          fprintf(stderr, "Maximum number of mod commands reached:\n\tunset-global-tie=%s command ignored\n\n", optarg);
         }
       }
 
@@ -1806,7 +1861,7 @@ int main(int argc, char **argv) {
               mods[imod].xsigma, mods[imod].ysigma, mods[imod].zsigma);
 
       /* if this file, section, and snav exists apply the global tie as XYZ
-          if the file and section exist but the snav does not then
+          - if the file and section exist but the snav does not then
           unset the global tie */
       if (mods[imod].file1 >= 0 && mods[imod].file1 < project_output.num_files) {
         file1 = (struct mbna_file *)&project_output.files[mods[imod].file1];
@@ -1839,19 +1894,76 @@ int main(int argc, char **argv) {
             section1->ysigma = 0.0;
             section1->zsigma = 0.0;
           }
-                section1->inversion_offset_x = 0.0;
-                section1->inversion_offset_y = 0.0;
-                section1->inversion_offset_x_m = 0.0;
-                section1->inversion_offset_y_m = 0.0;
-                section1->inversion_offset_z_m = 0.0;
-                section1->dx_m = 0.0;
-                section1->dy_m = 0.0;
-                section1->dz_m = 0.0;
-                section1->sigma_m = 0.0;
-                section1->dr1_m = 0.0;
-                section1->dr2_m = 0.0;
-                section1->dr3_m = 0.0;
-                section1->rsigma_m = 0.0;
+          section1->inversion_offset_x = 0.0;
+          section1->inversion_offset_y = 0.0;
+          section1->inversion_offset_x_m = 0.0;
+          section1->inversion_offset_y_m = 0.0;
+          section1->inversion_offset_z_m = 0.0;
+          section1->dx_m = 0.0;
+          section1->dy_m = 0.0;
+          section1->dz_m = 0.0;
+          section1->sigma_m = 0.0;
+          section1->dr1_m = 0.0;
+          section1->dr2_m = 0.0;
+          section1->dr3_m = 0.0;
+          section1->rsigma_m = 0.0;
+        }
+      }
+      break;
+
+    case MOD_MODE_SET_GLOBAL_TIE_RELATIVE:
+      fprintf(stderr, "\nCommand set-global-tie-relative=%4.4d:%4.4d:%4.4d/%.3f/%.3f/%.3f/%.3f/%.3f/%.3f\n", mods[imod].file1,
+              mods[imod].section1, mods[imod].snav2, mods[imod].xoffset, mods[imod].yoffset, mods[imod].zoffset,
+              mods[imod].xsigma, mods[imod].ysigma, mods[imod].zsigma);
+
+      /* if this file, section, and snav exists apply the global tie as XYZ
+          relative to the current navigation model
+          - if the file and section exist but the snav does not then
+          unset the global tie */
+      if (mods[imod].file1 >= 0 && mods[imod].file1 < project_output.num_files) {
+        file1 = (struct mbna_file *)&project_output.files[mods[imod].file1];
+        if (mods[imod].section1 >= 0 && mods[imod].section1 < file1->num_sections) {
+          section1 = (struct mbna_section *)&file1->sections[mods[imod].section1];
+          mb_coor_scale(verbose, 0.5 * (section1->latmin + section1->latmax), &mtodeglon, &mtodeglat);
+          if (mods[imod].snav1 >= 0 && mods[imod].snav1 < section1->num_snav) {
+            section1->global_tie_status = MBNA_TIE_XYZ;
+            section1->global_tie_snav = mods[imod].snav1;
+            section1->global_tie_inversion_status = MBNA_INVERSION_NONE;
+            section1->offset_x = section1->snav_lon_offset[section1->global_tie_snav] + mods[imod].xoffset * mtodeglon;
+            section1->offset_y = section1->snav_lat_offset[section1->global_tie_snav] + mods[imod].yoffset * mtodeglat;
+            section1->offset_x_m = section1->offset_x / mtodeglon;
+            section1->offset_y_m = section1->offset_y / mtodeglat;
+            section1->offset_z_m = section1->snav_z_offset[section1->global_tie_snav] + mods[imod].zoffset;
+            section1->xsigma = mods[imod].xsigma;
+            section1->ysigma = mods[imod].ysigma;
+            section1->zsigma = mods[imod].zsigma;
+          }
+          else {
+            section1->global_tie_status = MBNA_TIE_NONE;
+            section1->global_tie_snav = MBNA_SELECT_NONE;
+            section1->global_tie_inversion_status = MBNA_INVERSION_NONE;
+            section1->offset_x = 0.0;
+            section1->offset_y = 0.0;
+            section1->offset_x_m = 0.0;
+            section1->offset_y_m = 0.0;
+            section1->offset_z_m = 0.0;
+            section1->xsigma = 0.0;
+            section1->ysigma = 0.0;
+            section1->zsigma = 0.0;
+          }
+          section1->inversion_offset_x = 0.0;
+          section1->inversion_offset_y = 0.0;
+          section1->inversion_offset_x_m = 0.0;
+          section1->inversion_offset_y_m = 0.0;
+          section1->inversion_offset_z_m = 0.0;
+          section1->dx_m = 0.0;
+          section1->dy_m = 0.0;
+          section1->dz_m = 0.0;
+          section1->sigma_m = 0.0;
+          section1->dr1_m = 0.0;
+          section1->dr2_m = 0.0;
+          section1->dr3_m = 0.0;
+          section1->rsigma_m = 0.0;
         }
       }
       break;

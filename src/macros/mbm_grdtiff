@@ -596,7 +596,7 @@ if (!$bounds || !$zbounds || $zmode == 1)
 			($zmin_f,$zmax_f) = $line =~
 				/\S+\s+zmin:\s+(\S+)\s+zmax:\s+(\S+)\s+name:\s+\S+/;
 			}
-		if ($line =~ /\S+\s+z_min:\s+\S+\s+z_max:\s+\S+\s+units:/)
+		elsif ($line =~ /\S+\s+z_min:\s+\S+\s+z_max:\s+\S+\s+units:/)
 			{
 			($zmin_f,$zmax_f,$zunits_s) = $line =~
 				/\S+\s+z_min:\s+(\S+)\s+z_max:\s+(\S+)\s+units:\s+(.+)/;
@@ -605,6 +605,11 @@ if (!$bounds || !$zbounds || $zmode == 1)
 			{
 			($zmin_f,$zmax_f,$zunits_s) = $line =~
 				/\S+\s+z_min:\s+(\S+)\s+z_max:\s+(\S+)\s+name:\s+(.+)/;
+			}
+		elsif ($line =~ /\S+\s+v_min:\s+\S+\s+v_max:\s+\S+\s+name:/)
+			{
+			($zmin_f,$zmax_f,$zunits_s) = $line =~
+				/\S+\s+v_min:\s+(\S+)\s+v_max:\s+(\S+)\s+name:\s+(.+)/;
 			}
 		}
 

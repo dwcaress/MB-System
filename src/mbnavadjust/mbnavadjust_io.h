@@ -203,19 +203,19 @@ struct mbna_section {
   double xsigma;
   double ysigma;
   double zsigma;
-    double inversion_offset_x;
+  double inversion_offset_x;
   double inversion_offset_y;
   double inversion_offset_x_m;
   double inversion_offset_y_m;
   double inversion_offset_z_m;
-    double dx_m;
-    double dy_m;
-    double dz_m;
-    double sigma_m;
-    double dr1_m;
-    double dr2_m;
-    double dr3_m;
-    double rsigma_m;
+  double dx_m;
+  double dy_m;
+  double dz_m;
+  double sigma_m;
+  double dr1_m;
+  double dr2_m;
+  double dr3_m;
+  double rsigma_m;
 };
 struct mbna_file {
   int status;

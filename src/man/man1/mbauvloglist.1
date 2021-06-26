@@ -1,4 +1,4 @@
-.TH mbauvloglist 1 "7 March 2021" "MB-System 5.0" "MB-System 5.0"
+.TH mbauvloglist 1 "17 June 2021" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbauvloglist\fP \- Lists table data from an MBARI AUV mission log file.
 
@@ -357,6 +357,7 @@ The valid valuename strings consist of those defined in the header of the
 log file being parsed, plus the following:
      zero
      timeTag
+     timeInterval
      mergeLon
      mergeLat
      mergeHeading
@@ -376,7 +377,17 @@ log file being parsed, plus the following:
      calcKTime
      calcKSpeed
 .br
-All of the special values are double values. Those beginning with "merge"
+The timeTag value corresponds to the
+record time tag reformatted as specified with \fB-F\fP\fItime_i\fP as:
+.br
+    year,month,day,hour,minute,second,microsecond
+.br
+or with \fB-F\fP\fItime_j\fP options as:
+.br
+    year,julien_day,hour,minute,second,microsecond
+.br
+All of the other special values are double values. The timeInterval is the time
+interval between the current record and the prior record. The values beginning with "merge"
 derive from interpolation of data from an external navigation file
 specified using the \fB-N\fP option. Those beginning with "calc" are defined
 only when the input file is fastcatlog.log, which contains both raw conductivity,

@@ -972,7 +972,7 @@ void process_image_sectioned(int verbose, struct mbpm_process_struct *process,
                                     use_pixel = false;
                                 else {
                                     for (int ii = MAX(i-1, 0); ii < MIN(i+2, imageUndistort.cols) && use_pixel; ii++) {
-                                        for (int jj = MAX(j-1, 0); jj < MIN(i+2, imageUndistort.rows) && use_pixel; jj++) {
+                                        for (int jj = MAX(j-1, 0); jj < MIN(j+2, imageUndistort.rows) && use_pixel; jj++) {
                                             if (imageUndistort.at<Vec3b>(jj,ii)[0]
                                                     + imageUndistort.at<Vec3b>(jj,ii)[1]
                                                     + imageUndistort.at<Vec3b>(jj,ii)[2] == 0) {
@@ -1255,7 +1255,7 @@ void process_image_sectioned(int verbose, struct mbpm_process_struct *process,
     }
 }
 /*--------------------------------------------------------------------*/
-void process_image_sectionbad(int verbose, struct mbpm_process_struct *process,
+void process_image_sectioned2(int verbose, struct mbpm_process_struct *process,
                   struct mbpm_control_struct *control, int *status, int *error)
 {
     // Working images
@@ -1270,6 +1270,7 @@ void process_image_sectionbad(int verbose, struct mbpm_process_struct *process,
         double fov_x, fov_y;
         double center_x, center_y;
         double intensityCorrection;
+        bool image_use = false;
 
         /* undistort the image */
         undistort(imageProcess, imageUndistort, control->cameraMatrix[process->image_camera], control->distCoeffs[process->image_camera], noArray());
@@ -1319,15 +1320,6 @@ void process_image_sectionbad(int verbose, struct mbpm_process_struct *process,
         double avgImageIntensityCorrection = 1.0;
         double brightnessCorrection = 70.0 / avgPixelIntensity.val[0];
 
-        /* Print information for image to be processed */
-        int time_i[7];
-        mb_get_date(verbose, process->time_d, time_i);
-        fprintf(stderr,"%4d Camera:%d %s %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d LLZ: %.10f %.10f %8.3f HRP: %6.2f %6.2f %6.2f Amp:%.3f\n",
-                process->image_count, process->image_camera, process->imageFile,
-                time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6],
-                process->camera_navlon, process->camera_navlat, process->camera_sensordepth,
-                process->camera_heading, process->camera_roll, process->camera_pitch, avgPixelIntensity.val[0]);
-
         /* get unit vector (cx, cy, cz) for direction camera is pointing */
         /* (1) rotate center pixel location using attitude and zzref */
         double zz;
@@ -1374,187 +1366,384 @@ void process_image_sectionbad(int verbose, struct mbpm_process_struct *process,
             nsection_y++;
         for (int isection=0; isection<nsection_x; isection++) {
             for (int jsection=0; jsection<nsection_y; jsection++) {
-                bool use_section = true;
-                int s_inp_bounds_i[5];
-                int s_inp_bounds_j[5];
-                double s_bounds_lon[5];
-                double s_bounds_lat[5];
-                double s_bounds_z[5];
-                double s_bounds_standoff[5];
-                int s_out_bounds_i[5];
-                int s_out_bounds_j[5];
-
                 int i0 = MAX(control->trimPixels, isection * control->sectionPixels);
-                int i1 = MIN((imageUndistort.cols - control->trimPixels - 1), (isection * control->sectionPixels - 1));
+                int i1 = MIN(((int)imageUndistort.cols - control->trimPixels - 1), ((isection + 1) * control->sectionPixels - 1));
                 int j0 = MAX(control->trimPixels, jsection * control->sectionPixels);
-                int j1 = MIN((imageUndistort.rows - control->trimPixels - 1), (jsection * control->sectionPixels - 1));
-                s_inp_bounds_i[0] = i0; // SW
-                s_inp_bounds_j[0] = j0; // SW
-                s_inp_bounds_i[1] = i0; // NW
-                s_inp_bounds_j[1] = j1; // NW
-                s_inp_bounds_i[2] = i1; // NE
-                s_inp_bounds_j[2] = j1; // NE
-                s_inp_bounds_i[3] = i1; // SE
-                s_inp_bounds_j[3] = j0; // SE
-                s_inp_bounds_i[4] = (i0 + i1) / 2; // center
-                s_inp_bounds_j[4] = (j0 + j1) / 2; // center
+                int j1 = MIN(((int)imageUndistort.rows - control->trimPixels - 1), ((jsection + 1) * control->sectionPixels - 1));
+                int ic = (i0 + i1) / 2; // center
+                int jc = (j0 + j1) / 2; // center
+                Point2f srcCorners[5], dstCorners[5];
+                Point2f dstCornersWide[5];
+                double range[5], standoff[5];
+                Point2i dstCornerPixels[5];
+                bool use_section = true;
+                double section_priority = 0.0;
+                double rrxy;
+                double dtheta;
 
-                // if entire section is trimmed ignore
-                if (i1 < i0 || j1 < j0)
+                /* if entire section or center point is trimmed ignore */
+                if (i1 < i0 || j1 < j0 || ic < i0 || ic > i1 || jc < j0 || jc > j1)
                     use_section = false;
 
-                // if center of section is black ignore
-                unsigned int sum = imageUndistort.at<Vec3b>(s_inp_bounds_j[4], s_inp_bounds_i[4])[0]
-                                    + imageUndistort.at<Vec3b>(s_inp_bounds_j[4], s_inp_bounds_i[4])[1]
-                                    + imageUndistort.at<Vec3b>(s_inp_bounds_j[4], s_inp_bounds_i[4])[2];
-                if (sum == 0)
-                    use_section = false;
-
-                // Get section bounds positions projected onto seafloor in lon lat depth
+                /* calculate the location and standoff of the section corners and center */
                 if (use_section) {
-                    for (int ib = 0; ib < 5; ib++) {
-                        double xx = s_inp_bounds_i[ib] - center_x;
-                        double yy = center_y - s_inp_bounds_j[ib];
+                    srcCorners[0].x = i0 - center_x; // lower left
+                    srcCorners[0].y = center_y - j0; // lower left
+                    srcCorners[1].x = i0 - center_x; // upper left
+                    srcCorners[1].y = center_y - j1; // upper left
+                    srcCorners[2].x = i1 - center_x; // upper right
+                    srcCorners[2].y = center_y - j1; // upper right
+                    srcCorners[3].x = i1 - center_x; // lower right
+                    srcCorners[3].y = center_y - j0; // lower right
+                    srcCorners[4].x = ic - center_x; // center
+                    srcCorners[4].y = center_y - jc; // center
 
-                        double rrxysq = xx * xx + yy * yy;
-                        double rrxy = sqrt(rrxysq);
-                        double rr = sqrt(rrxysq + zzref * zzref);
-
-                        /* calculate the pixel takeoff angles relative to the camera rig */
-                        phi = RTD * atan2(yy, xx);
-                        theta = RTD * acos(zzref / rr);
+                    for (int icorner = 0; icorner < 5 && use_section; icorner++) {
+                        double zz, lon, lat, topo;
 
                         /* rotate pixel location using attitude and zzref */
-                        double zz;
                         mb_platform_math_attitude_rotate_beam(verbose,
-                            xx, yy, zzref,
+                            srcCorners[icorner].x, srcCorners[icorner].y, zzref,
                             process->camera_roll, process->camera_pitch, 0.0,
                             &xx, &yy, &zz,
                             error);
 
-                        /* recalculate the pixel takeoff angles relative to the camera rig */
-                        rrxysq = xx * xx + yy * yy;
+                        /* calculate the pixel takeoff angles relative
+                            to the world frame vertical (but heading not yet applied) */
+                        double rrxysq = xx * xx + yy * yy;
                         rrxy = sqrt(rrxysq);
                         rr = sqrt(rrxysq + zz * zz);
                         phi = RTD * atan2(yy, xx);
                         theta = RTD * acos(zz / rr);
 
-                        /* calculate unit vector relative to the camera rig */
-                        vz = cos(DTR * theta);
-                        vx = sin(DTR * theta) * cos(DTR * phi);
-                        vy = sin(DTR * theta) * sin(DTR * phi);
-
-                        /* apply rotation of each camera relative to the rig */
-                        if (process->image_camera == 1) {
-                            vxx = vx * (control->R.at<double>(0,0)) + vy * (control->R.at<double>(0,1)) + vz * (control->R.at<double>(0,2));
-                            vyy = vx * (control->R.at<double>(1,0)) + vy * (control->R.at<double>(1,1)) + vz * (control->R.at<double>(1,2));
-                            vzz = vx * (control->R.at<double>(2,0)) + vy * (control->R.at<double>(2,1)) + vz * (control->R.at<double>(2,2));
-                        }
-                        else {
-                            vxx = vx;
-                            vyy = vy;
-                            vzz = vz;
-                        }
-
-                        /* rotate unit vector by camera rig heading */
-                        vx = vxx * cos(DTR * process->camera_heading) + vyy * sin(DTR * process->camera_heading);
-                        vy = -vxx * sin(DTR * process->camera_heading) + vyy * cos(DTR * process->camera_heading);
-                        vz = vzz;
-
-                        /* find the location where this vector intersects the grid */
-                        double topo;
-                        if (control->use_topography) {
-                            *status = mb_topogrid_intersect(verbose, control->topogrid_ptr,
-                                        process->camera_navlon, process->camera_navlat, 0.0, process->camera_sensordepth,
-                                        control->mtodeglon, control->mtodeglat, vx, vy, vz,
-                                        &s_bounds_lon[ib], &s_bounds_lat[ib], &topo, &rr, error);
-                        }
-                        else {
-                            rr = control->standoff_target / vz;
-                            s_bounds_lon[ib] = process->camera_navlon + control->mtodeglon * vx * rr;
-                            s_bounds_lat[ib] = process->camera_navlat + control->mtodeglon * vy * rr;
-                            topo = -process->camera_sensordepth -  control->standoff_target;
-                        }
-                        s_bounds_z[ib] = -process->camera_sensordepth - topo;
-
-                        /* standoff is dot product of camera vector with projected pixel vector */
-                        s_bounds_standoff[ib] = (cx * rr * vx) + (cy * rr * vy) + (cz * rr * vz);
-
-                        /* find the location of the input section bounds in the output image */
-                        if (control->use_projection) {
-                            mb_proj_forward(verbose, control->pjptr, s_bounds_lon[ib], s_bounds_lat[ib], &xx, &yy, error);
-                            s_out_bounds_i[ib] = (int)((xx - control->OutputBounds[0] + 0.5 * control->OutputDx[0]) / control->OutputDx[0]);
-                            s_out_bounds_j[ib] = (int)((control->OutputBounds[3] - yy + 0.5 * control->OutputDx[1]) / control->OutputDx[1]);
-                        }
-                        else {
-                            s_out_bounds_i[ib] = (int)((s_bounds_lon[ib] - control->OutputBounds[0] + 0.5 * control->OutputDx[0]) / control->OutputDx[0]);
-                            s_out_bounds_j[ib] = (int)((control->OutputBounds[3] - s_bounds_lat[ib] + 0.5 * control->OutputDx[1]) / control->OutputDx[1]);
-                        }
-
-                        /* clip bounds by bounds of output image */
-                        if (s_out_bounds_i[ib] < 0)
-                            s_out_bounds_i[ib] = 0;
-                        if (s_out_bounds_i[ib] >= control->OutputDim[0])
-                            s_out_bounds_i[ib] = control->OutputDim[0] - 1;
-                        if (s_out_bounds_j[ib] < 0)
-                            s_out_bounds_j[ib] = 0;
-                        if (s_out_bounds_j[ib] >= control->OutputDim[1])
-                            s_out_bounds_j[ib] = control->OutputDim[1] - 1;
-                    }
-
-                    /* check that the center point is inside the quad formed by
-                        the section corners after possible clipping - use cross products
-                        - if not then do not continue with this section */
-                    for (int ib1 = 0; ib1 < 4; ib1++) {
-                        int ib2 = ib1 + 1;
-                        if (ib2 == 4)
-                            ib2 = 0;
-                        double xprod = (double)((s_out_bounds_i[ib1] - s_out_bounds_i[4]) * (s_out_bounds_j[ib2] - s_out_bounds_j[4])
-                                        - (s_out_bounds_i[ib2] - s_out_bounds_i[4]) * (s_out_bounds_j[ib1] - s_out_bounds_j[4]));
-                        if (xprod >= 0.0)
+                        /* continue only if takeoff angle is not too vertical
+                            (this is a 2D photomosaic) */
+                        if (theta > 80.0)
                             use_section = false;
+                        if (use_section) {
+
+                            /* calculate unit direction vector of pixel */
+                            vz = cos(DTR * theta);
+                            vx = sin(DTR * theta) * cos(DTR * phi);
+                            vy = sin(DTR * theta) * sin(DTR * phi);
+
+                            /* apply rotation of each camera relative to the rig */
+                            if (process->image_camera == 1) {
+                                vxx = vx * (control->R.at<double>(0,0)) + vy * (control->R.at<double>(0,1)) + vz * (control->R.at<double>(0,2));
+                                vyy = vx * (control->R.at<double>(1,0)) + vy * (control->R.at<double>(1,1)) + vz * (control->R.at<double>(1,2));
+                                vzz = vx * (control->R.at<double>(2,0)) + vy * (control->R.at<double>(2,1)) + vz * (control->R.at<double>(2,2));
+                            }
+                            else {
+                                vxx = vx;
+                                vyy = vy;
+                                vzz = vz;
+                            }
+
+                            /* rotate unit vector by camera rig heading */
+                            vx = vxx * cos(DTR * process->camera_heading) + vyy * sin(DTR * process->camera_heading);
+                            vy = -vxx * sin(DTR * process->camera_heading) + vyy * cos(DTR * process->camera_heading);
+                            vz = vzz;
+
+                            /* find the location where this vector intersects the grid */
+                            if (control->use_topography) {
+                                *status = mb_topogrid_intersect(verbose, control->topogrid_ptr,
+                                            process->camera_navlon, process->camera_navlat, 0.0, process->camera_sensordepth,
+                                            control->mtodeglon, control->mtodeglat, vx, vy, vz,
+                                            &lon, &lat, &topo, &rr, error);
+                            }
+                            else {
+                                rr = control->standoff_target / vz;
+                                lon = process->camera_navlon + control->mtodeglon * vx * rr;
+                                lat = process->camera_navlat + control->mtodeglon * vy * rr;
+                                topo = -process->camera_sensordepth -  control->standoff_target;
+                            }
+                            zz = -process->camera_sensordepth - topo;
+                        }
+
+                        /* continue only if range not too large */
+                        if (use_section && rr > control->range_max)
+                            use_section = false;
+                        if (use_section) {
+
+                            /* standoff is dot product of camera vector with projected pixel vector */
+                            range[icorner] = rr;
+                            standoff[icorner] = (cx * rr * vx) + (cy * rr * vy) + (cz * rr * vz);
+
+                            /* find  location in the output image */
+                            if (control->use_projection) {
+                                mb_proj_forward(verbose, control->pjptr, lon, lat, &xx, &yy, error);
+                                dstCorners[icorner].x = ((xx - control->OutputBounds[0] + 0.5 * control->OutputDx[0]) / control->OutputDx[0]);
+                                dstCorners[icorner].y = ((control->OutputBounds[3] - yy + 0.5 * control->OutputDx[1]) / control->OutputDx[1]);
+                            } else {
+                                dstCorners[icorner].x = ((lon - control->OutputBounds[0] + 0.5 * control->OutputDx[0]) / control->OutputDx[0]);
+                                dstCorners[icorner].y = ((control->OutputBounds[3] - lat + 0.5 * control->OutputDx[1]) / control->OutputDx[1]);
+                            }
+                            dstCornersWide[icorner].x = dstCorners[icorner].x;
+                            dstCornersWide[icorner].y = dstCorners[icorner].y;
+                            dstCornerPixels[icorner].x = (int)dstCorners[icorner].x;
+                            dstCornerPixels[icorner].y = (int)dstCorners[icorner].y;
+
+                            /* at section center point calculate section priority, then
+                                check if section center is in the output image and if the
+                                priority of section center is greater than the existing priority
+                                at the corresponding point in the output image */
+                            if (icorner == 4) {
+                                /* calculate the section priority based on the distance
+                                    from the image center and if specified the standoff */
+                                section_priority = (rrxymax - rrxy) / rrxymax;
+                                if (control->priority_mode == MBPM_PRIORITY_CENTRALITY_PLUS_STANDOFF)  {
+                                    double dstandoff = (standoff[icorner] - control->standoff_target) / control->standoff_range;
+                                    double standoff_priority = (float) (exp(-dstandoff * dstandoff));
+                                    section_priority *= standoff_priority;
+                                }
+
+                                if (dstCornerPixels[icorner].x < 0 || dstCornerPixels[icorner].x >= control->OutputDim[0]
+                                    || dstCornerPixels[icorner].y < 0 || dstCornerPixels[icorner].y >= control->OutputDim[1]
+                                    || section_priority <= process->OutputPriority.at<float>(dstCornerPixels[icorner].y,dstCornerPixels[icorner].x))
+                                    use_section = false;
+                            }
+                        }
                     }
                 }
 
-                // Now loop over the pixels inside the section quad in the output
-                // image and find the corresponding values and priorities in the
-                // input image
+                /* if ok and higher priority, map entire section onto the output image */
                 if (use_section) {
-                    // get square bounds enclosing the quad
-                    int ii0 = s_out_bounds_i[0];
-                    int ii1 = ii0;
-                    int jj0 = s_out_bounds_j[0];
-                    int jj1 = jj0;
-                    for (int ib = 1; ib < 4; ib++) {
-                        ii0 = MIN(ii0, s_out_bounds_i[ib]);
-                        ii1 = MAX(ii1, s_out_bounds_i[ib]);
-                        jj0 = MIN(jj0, s_out_bounds_j[ib]);
-                        jj1 = MAX(jj1, s_out_bounds_j[ib]);
+
+                    /* Print information for image to be processed */
+                    if (!image_use) {
+                        image_use = true;
+                        int time_i[7];
+                        mb_get_date(verbose, process->time_d, time_i);
+                        fprintf(stderr,"%4d Camera:%d %s %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d LLZ: %.10f %.10f %8.3f HRP: %6.2f %6.2f %6.2f Amp:%.3f\n",
+                                process->image_count, process->image_camera, process->imageFile,
+                                time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6],
+                                process->camera_navlon, process->camera_navlat, process->camera_sensordepth,
+                                process->camera_heading, process->camera_roll, process->camera_pitch, avgPixelIntensity.val[0]);
                     }
 
-                    // loop over all pixels in this box - use cross product test
-                    // to find if each pixel is inside the section quad
-                    for (int ii = ii0; ii <= ii1; ii++) {
-                        for (int jj = jj0; jj <= jj1; jj++) {
+                    /* widen the quad in the destination image to avoid missing some pixels */
+                    for (int icorner = 0; icorner < 4; icorner++) {
+                        dstCornersWide[icorner].x += (dstCorners[icorner].x > dstCorners[4].x) ? 5.0 : -5.0;
+                        dstCornersWide[icorner].y += (dstCorners[icorner].y > dstCorners[4].y) ? 5.0 : -5.0;
+                        dstCornerPixels[icorner].x = (int)dstCornersWide[icorner].x;
+                        dstCornerPixels[icorner].y = (int)dstCornersWide[icorner].y;
+                    }
+
+                    /* Calculate non-affine transformation for this section
+                        allowing calculation of the corresponding source location
+                        for any pixel in the destination image. */
+                    Mat transformation = getPerspectiveTransform(dstCorners, srcCorners, DECOMP_LU);
+
+                    /* get bounds of the region of interest in the destination image */
+                    int di0 = dstCornerPixels[4].x;
+                    int di1 = dstCornerPixels[4].x;
+                    int dj0 = dstCornerPixels[4].y;
+                    int dj1 = dstCornerPixels[4].y;
+                    for (int icorner = 0; icorner < 4; icorner++) {
+                      di0 = MIN(di0, dstCornerPixels[icorner].x);
+                      di1 = MAX(di1, dstCornerPixels[icorner].x);
+                      dj0 = MIN(dj0, dstCornerPixels[icorner].y);
+                      dj1 = MAX(dj1, dstCornerPixels[icorner].y);
+                    }
+                    di0 = MAX(di0, 0);
+                    di1 = MIN(di1, control->OutputDim[0]-1);
+                    dj0 = MAX(dj0, 0);
+                    dj1 = MIN(dj1, control->OutputDim[1]-1);
+
+                    /* loop over the region of interest in the destination image
+                        - for each pixel actually inside the bounds of the
+                        projected section, get the color of the corresponding
+                        pixel in the source image */
+                    for (int di = di0; di <= di1; di++) {
+                        for (int dj = dj0; dj <= dj1; dj++) {
+                            /* Determine if the pixel di,dj is inside the quad
+                                defined by the section corners in the destination
+                                image. Since the corner points of the section are ordered
+                                counterclockwise, the z-component of the cross
+                                product between the vector from corner i to
+                                point di,dj with the vector between corner i and i+1
+                                will be positive if di,dj is "to the right" of the
+                                quad side. If the cross product z-components are
+                                positive for all four sides, the point di,dj is
+                                inside the section quad. */
+                            vector<Point2f> dstPoint(1), srcPoint(1);
+                            dstPoint[0].x = di;
+                            dstPoint[0].y = dj;
                             bool inside = true;
-                            for (int ib1 = 0; ib1 < 4; ib1++) {
-                                int ib2 = ib1 + 1;
-                                if (ib2 == 4)
-                                    ib2 = 0;
-                                double xprod = (double)((s_out_bounds_i[ib1] - s_out_bounds_i[4]) * (s_out_bounds_j[ib2] - s_out_bounds_j[4])
-                                                - (s_out_bounds_i[ib2] - s_out_bounds_i[4]) * (s_out_bounds_j[ib1] - s_out_bounds_j[4]));
-                                if (xprod >= 0.0)
+                            for (int icorner = 0; icorner < 4 && inside; icorner++) {
+                                int icorner2 = icorner + 1;
+                                if (icorner2 == 4)
+                                    icorner2 = 0;
+                                float xprod = ((dstPoint[0].x - dstCornersWide[icorner].x) * (dstCornersWide[icorner2].y - dstCornersWide[icorner].y)
+                                                - (dstPoint[0].y - dstCornersWide[icorner].y) * (dstCornersWide[icorner2].x - dstCornersWide[icorner].x));
+
+                                if (xprod < 0.0)
                                     inside = false;
                             }
 
-                            // get value for a pixel inside the section quad
+                            /* if pixel is inside the section calculate the corresponding
+                                point in the source image */
+                            bool use_pixel = false;
+                            int si, sj;
                             if (inside) {
-                                // use dot products to find position relative to
-                                // origin corner of quad
-                                double xfactor = (ii - s_out_bounds_i[0]) * (s_out_bounds_i[3] - s_out_bounds_i[0])
-                                                  + (jj - s_out_bounds_j[0]) * (s_out_bounds_j[3] - s_out_bounds_j[0]);
+                                perspectiveTransform(dstPoint, srcPoint, transformation);
+                                si = center_x + srcPoint[0].x;
+                                sj = center_y - srcPoint[0].y;
+
+                                /* check that source pixel is inside the source image */
+                                if (si < 0 || si >= imageUndistort.cols
+                                    || sj < 0 || sj >= imageUndistort.rows)
+                                    use_pixel = false;
+                                else
+                                    use_pixel = true;
                             }
 
+                            if (use_pixel) {
+
+                                /* Deal with problem of black pixels at the margins of the
+                                    undistorted images. If the user has not specified a trim
+                                    range for the image margins, then ignore all purely black
+                                    pixels and all pixels adjacent to purely black pixels. */
+                                if (control->trimPixels == 0) {
+                                    unsigned int sum = imageUndistort.at<Vec3b>(sj,si)[0]
+                                                        + imageUndistort.at<Vec3b>(sj,si)[1]
+                                                        + imageUndistort.at<Vec3b>(sj,si)[2];
+                                    if (sum == 0)
+                                        use_pixel = false;
+                                    else {
+                                        for (int ii = MAX(si-1, 0); ii < MIN(si+2, imageUndistort.cols) && use_pixel; ii++) {
+                                            for (int jj = MAX(sj-1, 0); jj < MIN(sj+2, imageUndistort.rows) && use_pixel; jj++) {
+                                                if (imageUndistort.at<Vec3b>(jj,ii)[0]
+                                                        + imageUndistort.at<Vec3b>(jj,ii)[1]
+                                                        + imageUndistort.at<Vec3b>(jj,ii)[2] == 0) {
+                                                    use_pixel = false;
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+
+                            if (use_pixel) {
+
+                                /* No correction - use original pixel BGR */
+                                unsigned char b, g, r;
+                                if (control->corr_mode == MBPM_CORRECTION_NONE) {
+                                    b = imageUndistort.at<Vec3b>(sj,si)[0];
+                                    g = imageUndistort.at<Vec3b>(sj,si)[1];
+                                    r = imageUndistort.at<Vec3b>(sj,si)[2];
+                                }
+
+                                /* Get intensity correction according to corr_mode */
+                                else {
+
+                                    /* Get intensity correction according to corr_mode */
+                                    /* Apply brightness correction to each image separately */
+                                    if (control->corr_mode == MBPM_CORRECTION_BRIGHTNESS) {
+                                        intensityCorrection = brightnessCorrection;
+                                    }
+
+                                    /* Apply range based correction to pixels */
+                                    else if (control->corr_mode == MBPM_CORRECTION_RANGE) {
+                                        intensityCorrection = exp(control->corr_range_coeff * (range[4] - control->corr_range_target));
+                                    }
+
+                                    /* Apply standoff based correction to pixels */
+                                    else if (control->corr_mode == MBPM_CORRECTION_STANDOFF) {
+                                        intensityCorrection = exp(control->corr_standoff_coeff * (standoff[4] - control->corr_standoff_target));
+                                    }
+
+                                    /* Apply correction by interpolation of 3D table generated by mbgetphotocorrection */
+                                    else if (control->corr_mode == MBPM_CORRECTION_FILE) {
+                                        int ibin_x1 = MIN(MAX(((int)((si + 0.5 * control->bin_dx) / control->bin_dx)), 0), control->ncorr_x - 2);
+                                        int ibin_x2 = ibin_x1 + 1;
+                                        double factor_x = ((double)si - 0.5 * control->bin_dx) / control->bin_dx - (double)ibin_x1;
+                                        int jbin_y1 = MIN(MAX(((int)((sj + 0.5 * control->bin_dy) / control->bin_dy)), 0), control->ncorr_y - 2);
+                                        int jbin_y2 = jbin_y1 + 1;
+                                        double factor_y = ((double)sj - 0.5 * control->bin_dy) / control->bin_dy - (double)jbin_y1;
+                                        int kbin_z1 = MIN(MAX(((int)((standoff[4] + 0.5 * control->bin_dz) / control->bin_dz)), 0), control->ncorr_z - 2);
+                                        int kbin_z2 = kbin_z1 + 1;
+                                        double factor_z = ((double)standoff[4] - 0.5 * control->bin_dz) / control->bin_dz - (double)kbin_z1;
+                                        factor_x = MIN(MAX(factor_x, 0.0), 1.0);
+                                        factor_y = MIN(MAX(factor_y, 0.0), 1.0);
+                                        factor_z = MIN(MAX(factor_z, 0.0), 1.0);
+
+                                        /* get reference intensity from center of image at the current standoff */
+                                        double table_intensity_ref
+                                            = (1.0 - factor_z) * control->corr_table[process->image_camera].at<float>(control->ibin_xcen, control->jbin_ycen, kbin_z1)
+                                                    + factor_z * control->corr_table[process->image_camera].at<float>(control->ibin_xcen, control->jbin_ycen, kbin_z2);
+
+                                        double v000 = control->corr_table[process->image_camera].at<float>(ibin_x1, jbin_y1, kbin_z1);
+                                        double v100 = control->corr_table[process->image_camera].at<float>(ibin_x2, jbin_y1, kbin_z1);
+                                        double v010 = control->corr_table[process->image_camera].at<float>(ibin_x1, jbin_y2, kbin_z1);
+                                        double v001 = control->corr_table[process->image_camera].at<float>(ibin_x1, jbin_y1, kbin_z2);
+                                        double v101 = control->corr_table[process->image_camera].at<float>(ibin_x2, jbin_y1, kbin_z2);
+                                        double v011 = control->corr_table[process->image_camera].at<float>(ibin_x1, jbin_y2, kbin_z2);
+                                        double v110 = control->corr_table[process->image_camera].at<float>(ibin_x2, jbin_y2, kbin_z1);
+                                        double v111 = control->corr_table[process->image_camera].at<float>(ibin_x2, jbin_y2, kbin_z2);
+                                        double vavg = v000 + v100 + v010 + v110 + v001 + v101 + v011 + v111;
+                                        int nvavg = 0;
+                                        if (v000 > 0.0) nvavg++;
+                                        if (v100 > 0.0) nvavg++;
+                                        if (v010 > 0.0) nvavg++;
+                                        if (v110 > 0.0) nvavg++;
+                                        if (v001 > 0.0) nvavg++;
+                                        if (v101 > 0.0) nvavg++;
+                                        if (v011 > 0.0) nvavg++;
+                                        if (v111 > 0.0) nvavg++;
+                                        if (nvavg > 0)
+                                            vavg /= nvavg;
+                                        if (v000 == 0.0) v000 = vavg;
+                                        if (v100 == 0.0) v100 = vavg;
+                                        if (v010 == 0.0) v010 = vavg;
+                                        if (v110 == 0.0) v110 = vavg;
+                                        if (v001 == 0.0) v001 = vavg;
+                                        if (v101 == 0.0) v101 = vavg;
+                                        if (v011 == 0.0) v011 = vavg;
+                                        if (v111 == 0.0) v111 = vavg;
+
+                                        /* use trilinear interpolation from http://paulbourke.net/miscellaneous/interpolation/ */
+                                        double table_intensity = v000 * (1.0 - factor_x) * (1.0 - factor_y) * (1.0 - factor_x)
+                                                + v100 * factor_x * (1.0 - factor_y) * (1.0 - factor_z)
+                                                + v010 * (1.0 - factor_x) * factor_y * (1.0 - factor_z)
+                                                + v001 * (1.0 - factor_x) * (1.0 - factor_y) * factor_z
+                                                + v101 * factor_x * (1.0 - factor_y) * factor_z
+                                                + v011 * (1.0 - factor_x) * factor_y * factor_z
+                                                + v110 * factor_x * factor_y * (1.0 - factor_z)
+                                                + v111 * factor_x * factor_y * factor_z;
+                                        if (table_intensity > 0.0 && control->referenceIntensity[process->image_camera] > 0.0)
+                                            intensityCorrection = control->referenceIntensity[process->image_camera]
+                                                                    / table_intensity;
+                                        else {
+                                            intensityCorrection = 1.0;
+                                        }
+
+                                    }
+
+                                    /* else do no correction */
+                                    else {
+                                        intensityCorrection = 1.0;
+                                    }
+
+                                    /* access the pixel value in YCrCb image */
+                                    unsigned char Y = imageUndistortYCrCb.at<Vec3b>(sj,si)[0];
+                                    unsigned char Cr = imageUndistortYCrCb.at<Vec3b>(sj,si)[1];
+                                    unsigned char Cb = imageUndistortYCrCb.at<Vec3b>(sj,si)[2];
+
+                                    /* correct Y (intensity) value */
+                                    Y = saturate_cast<unsigned char>(control->corr_intensity_gain * Y * intensityCorrection);
+
+                                    /* convert back to gbr */
+                                    b = saturate_cast<unsigned char>(Y + 1.773 * (Cb - 128));
+                                    g = saturate_cast<unsigned char>(Y - 0.714 * (Cr - 128) - 0.344 * (Cb - 128));
+                                    r = saturate_cast<unsigned char>(Y + 1.403 * (Cr - 128));
+                                }
+
+                                process->OutputImage.at<Vec3b>(dj,di)[0] = b;
+                                process->OutputImage.at<Vec3b>(dj,di)[1] = g;
+                                process->OutputImage.at<Vec3b>(dj,di)[2] = r;
+                                process->OutputPriority.at<float>(dj,di) = section_priority;
+                            }
                         }
                     }
                 }
@@ -3174,7 +3363,6 @@ control.OutputBounds[0], control.OutputBounds[1], control.OutputBounds[2], contr
         }
 
     /* Load topography grid if desired */
-fprintf(stderr,"About to read TopographyGridFile: %s\n", TopographyGridFile);
     if (control.use_topography)
         {
         status = mb_topogrid_init(verbose, TopographyGridFile, &lonflip, &control.topogrid_ptr, &error);
@@ -3187,7 +3375,6 @@ fprintf(stderr,"About to read TopographyGridFile: %s\n", TopographyGridFile);
             exit(error);
             }
         }
-fprintf(stderr,"Done reading TopographyGridFile: %s\n", TopographyGridFile);
 
     /* loop over the list of input images
        - this can be a list of single images or stereo images
@@ -3459,7 +3646,7 @@ fprintf(stderr,"Done reading TopographyGridFile: %s\n", TopographyGridFile);
 
                 if (control.sectionPixels > 0)
                     mbphotomosaicThreads[numThreadsSet]
-                        = std::thread(process_image_sectioned, verbose, &processPars[numThreadsSet], &control,
+                        = std::thread(process_image_sectioned2, verbose, &processPars[numThreadsSet], &control,
                                         &thread_status[numThreadsSet], &thread_error[numThreadsSet]);
                 else
                     mbphotomosaicThreads[numThreadsSet]
