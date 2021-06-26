@@ -7760,14 +7760,14 @@ fprintf(stderr,"APPLYING WEIGHT: %f  ifile:%d isection:%d\n",weight,ifile,isecti
                         section->dr2_m = section->inversion_offset_y_m / section->ysigma;
                         section->dr3_m = section->inversion_offset_z_m / section->zsigma;
                         section->rsigma_m = sqrt(section->dr1_m * section->dr1_m + section->dr2_m * section->dr2_m + section->dr3_m * section->dr3_m);
-                    }
-                    sprintf(message,
-                            " >     %2.2d:%2.2d:%2.2d %d   %10.3f %10.3f %10.3f   %10.3f %10.3f %10.3f   %10.3f %10.3f %10.3f\n",
-                            ifile, isection, section->global_tie_snav, section->global_tie_status,
-                            section->offset_x_m, section->offset_y_m, section->offset_z_m,
-                            section->inversion_offset_x_m, section->inversion_offset_y_m, section->inversion_offset_z_m,
-                            section->dx_m, section->dy_m, section->dz_m);
-                    do_info_add(message, false);
+          }
+          sprintf(message,
+                  " >     %2.2d:%2.2d:%2.2d %d   %10.3f %10.3f %10.3f   %10.3f %10.3f %10.3f   %10.3f %10.3f %10.3f\n",
+                  ifile, isection, section->global_tie_snav, section->global_tie_status,
+                  section->offset_x_m, section->offset_y_m, section->offset_z_m,
+                  section->inversion_offset_x_m, section->inversion_offset_y_m, section->inversion_offset_z_m,
+                  section->dx_m, section->dy_m, section->dz_m);
+          do_info_add(message, false);
         }
       }
     }

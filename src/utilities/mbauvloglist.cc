@@ -63,6 +63,7 @@ typedef enum {
     INDEX_CALC_DENSITY = -16,
     INDEX_CALC_KTIME = -17,
     INDEX_CALC_KSPEED = -18,
+    INDEX_TIME_INTERVAL = -19,
 } index_t;
 
 typedef enum {
@@ -237,6 +238,7 @@ int main(int argc, char **argv) {
 	bool recalculate_ctd = false;
 	int ctd_calibration_id = 0;
 	bool angles_in_degrees = false;
+  bool calculate_time_interval  = false;
 
 	{
 		bool errflg = false;
@@ -305,6 +307,8 @@ int main(int argc, char **argv) {
 					calc_ktime = true;
 				if (strcmp(printfields[nprintfields].name, "calcKSpeed") == 0)
 					calc_kspeed = true;
+        if (strcmp(printfields[nprintfields].name, "timeInterval") == 0)
+          calculate_time_interval = true;
 				printfields[nprintfields].index = -1;
 				nprintfields++;
 				break;
@@ -342,43 +346,44 @@ int main(int argc, char **argv) {
 			fprintf(stderr, "\ndbg2  Program <%s>\n", program_name);
 			fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
 			fprintf(stderr, "dbg2  Control Parameters:\n");
-			fprintf(stderr, "dbg2       verbose:              %d\n", verbose);
-			fprintf(stderr, "dbg2       help:                 %d\n", help);
-			fprintf(stderr, "dbg2       lonflip:              %d\n", lonflip);
-			fprintf(stderr, "dbg2       bounds[0]:            %f\n", bounds[0]);
-			fprintf(stderr, "dbg2       bounds[1]:            %f\n", bounds[1]);
-			fprintf(stderr, "dbg2       bounds[2]:            %f\n", bounds[2]);
-			fprintf(stderr, "dbg2       bounds[3]:            %f\n", bounds[3]);
-			fprintf(stderr, "dbg2       btime_i[0]:           %d\n", btime_i[0]);
-			fprintf(stderr, "dbg2       btime_i[1]:           %d\n", btime_i[1]);
-			fprintf(stderr, "dbg2       btime_i[2]:           %d\n", btime_i[2]);
-			fprintf(stderr, "dbg2       btime_i[3]:           %d\n", btime_i[3]);
-			fprintf(stderr, "dbg2       btime_i[4]:           %d\n", btime_i[4]);
-			fprintf(stderr, "dbg2       btime_i[5]:           %d\n", btime_i[5]);
-			fprintf(stderr, "dbg2       btime_i[6]:           %d\n", btime_i[6]);
-			fprintf(stderr, "dbg2       etime_i[0]:           %d\n", etime_i[0]);
-			fprintf(stderr, "dbg2       etime_i[1]:           %d\n", etime_i[1]);
-			fprintf(stderr, "dbg2       etime_i[2]:           %d\n", etime_i[2]);
-			fprintf(stderr, "dbg2       etime_i[3]:           %d\n", etime_i[3]);
-			fprintf(stderr, "dbg2       etime_i[4]:           %d\n", etime_i[4]);
-			fprintf(stderr, "dbg2       etime_i[5]:           %d\n", etime_i[5]);
-			fprintf(stderr, "dbg2       etime_i[6]:           %d\n", etime_i[6]);
-			fprintf(stderr, "dbg2       speedmin:             %f\n", speedmin);
-			fprintf(stderr, "dbg2       timegap:              %f\n", timegap);
-			fprintf(stderr, "dbg2       file:                 %s\n", file);
-			fprintf(stderr, "dbg2       nav_merge:            %d\n", nav_merge);
-			fprintf(stderr, "dbg2       nav_merge_clip:       %d\n", nav_merge_clip);
-			fprintf(stderr, "dbg2       nav_file:             %s\n", nav_file);
-			fprintf(stderr, "dbg2       output_mode:          %d\n", output_mode);
-			fprintf(stderr, "dbg2       printheader:          %d\n", printheader);
-			fprintf(stderr, "dbg2       angles_in_degrees:    %d\n", angles_in_degrees);
-			fprintf(stderr, "dbg2       calc_potentialtemp:   %d\n", calc_potentialtemp);
-			fprintf(stderr, "dbg2       recalculate_ctd:      %d\n", recalculate_ctd);
-			fprintf(stderr, "dbg2       ctd_calibration_id:   %d\n", ctd_calibration_id);
-			fprintf(stderr, "dbg2       calc_ktime:           %d\n", calc_ktime);
-			fprintf(stderr, "dbg2       nprintfields:         %d\n", nprintfields);
+			fprintf(stderr, "dbg2       verbose:                  %d\n", verbose);
+			fprintf(stderr, "dbg2       help:                     %d\n", help);
+			fprintf(stderr, "dbg2       lonflip:                  %d\n", lonflip);
+			fprintf(stderr, "dbg2       bounds[0]:                %f\n", bounds[0]);
+			fprintf(stderr, "dbg2       bounds[1]:                %f\n", bounds[1]);
+			fprintf(stderr, "dbg2       bounds[2]:                %f\n", bounds[2]);
+			fprintf(stderr, "dbg2       bounds[3]:                %f\n", bounds[3]);
+			fprintf(stderr, "dbg2       btime_i[0]:               %d\n", btime_i[0]);
+			fprintf(stderr, "dbg2       btime_i[1]:               %d\n", btime_i[1]);
+			fprintf(stderr, "dbg2       btime_i[2]:               %d\n", btime_i[2]);
+			fprintf(stderr, "dbg2       btime_i[3]:               %d\n", btime_i[3]);
+			fprintf(stderr, "dbg2       btime_i[4]:               %d\n", btime_i[4]);
+			fprintf(stderr, "dbg2       btime_i[5]:               %d\n", btime_i[5]);
+			fprintf(stderr, "dbg2       btime_i[6]:               %d\n", btime_i[6]);
+			fprintf(stderr, "dbg2       etime_i[0]:               %d\n", etime_i[0]);
+			fprintf(stderr, "dbg2       etime_i[1]:               %d\n", etime_i[1]);
+			fprintf(stderr, "dbg2       etime_i[2]:               %d\n", etime_i[2]);
+			fprintf(stderr, "dbg2       etime_i[3]:               %d\n", etime_i[3]);
+			fprintf(stderr, "dbg2       etime_i[4]:               %d\n", etime_i[4]);
+			fprintf(stderr, "dbg2       etime_i[5]:               %d\n", etime_i[5]);
+			fprintf(stderr, "dbg2       etime_i[6]:               %d\n", etime_i[6]);
+			fprintf(stderr, "dbg2       speedmin:                 %f\n", speedmin);
+			fprintf(stderr, "dbg2       timegap:                  %f\n", timegap);
+			fprintf(stderr, "dbg2       file:                     %s\n", file);
+			fprintf(stderr, "dbg2       nav_merge:                %d\n", nav_merge);
+			fprintf(stderr, "dbg2       nav_merge_clip:           %d\n", nav_merge_clip);
+			fprintf(stderr, "dbg2       nav_file:                 %s\n", nav_file);
+			fprintf(stderr, "dbg2       output_mode:              %d\n", output_mode);
+			fprintf(stderr, "dbg2       printheader:              %d\n", printheader);
+			fprintf(stderr, "dbg2       angles_in_degrees:        %d\n", angles_in_degrees);
+			fprintf(stderr, "dbg2       calc_potentialtemp:       %d\n", calc_potentialtemp);
+			fprintf(stderr, "dbg2       recalculate_ctd:          %d\n", recalculate_ctd);
+			fprintf(stderr, "dbg2       ctd_calibration_id:       %d\n", ctd_calibration_id);
+			fprintf(stderr, "dbg2       calc_ktime:               %d\n", calc_ktime);
+      fprintf(stderr, "dbg2       calculate_time_interval:  %d\n", calculate_time_interval);
+			fprintf(stderr, "dbg2       nprintfields:             %d\n", nprintfields);
 			for (int i = 0; i < nprintfields; i++)
-				fprintf(stderr, "dbg2         printfields[%d]:      %s %d %s\n", i, printfields[i].name, printfields[i].formatset,
+				fprintf(stderr, "dbg2         printfields[%d]:          %s %d %s\n", i, printfields[i].name, printfields[i].formatset,
 				        printfields[i].format);
 		}
 
@@ -767,6 +772,12 @@ int main(int argc, char **argv) {
 				strcpy(printfields[i].format, "%.3f");
 			}
 		}
+		else if (strcmp(printfields[i].name, "timeInterval") == 0) {
+			printfields[i].index = INDEX_TIME_INTERVAL;
+			if (!printfields[i].formatset) {
+				strcpy(printfields[i].format, "%.3f");
+			}
+		}
 		else {
 			for (int j = 0; j < nfields; j++) {
 				if (strcmp(printfields[i].name, fields[j].name) == 0)
@@ -803,6 +814,8 @@ int main(int argc, char **argv) {
 	double soundspeed_calc = 0.0;
 	double potentialtemperature_calc = 0.0;
 	double density_calc = 0.0;
+  double time_interval = 0.0;
+  double prior_time_d = 0.0;
 
 	/* read the data records in the auv log file */
 	int nrecord = 0;
@@ -818,6 +831,19 @@ int main(int argc, char **argv) {
           }
           if (time_d < nav_time_d[1] || time_d > nav_time_d[nav_num-2])
             output_ok = false;
+        }
+
+        /* calculate timeInterval */
+        if (calculate_time_interval) {
+          double time_d = 0.0;
+          for (int ii = 0; ii < nfields; ii++) {
+            if (strcmp(fields[ii].name, "time") == 0)
+              mb_get_binary_double(true, &buffer[fields[ii].index], &time_d);
+          }
+          if (prior_time_d > 0.0) {
+            time_interval = time_d - prior_time_d;
+          }
+          prior_time_d = time_d;
         }
 
         /* recalculate CTD data if requested */
@@ -1063,6 +1089,12 @@ int main(int argc, char **argv) {
   				else
   					fprintf(stdout, printfields[i].format, kspeed_calc);
   			}
+  			else if (index == INDEX_TIME_INTERVAL) {
+  				if (output_mode == OUTPUT_MODE_BINARY)
+  					fwrite(&time_interval, sizeof(double), 1, stdout);
+  				else
+  					fprintf(stdout, printfields[i].format, time_interval);
+  			}
   			else if (fields[index].type == TYPE_DOUBLE) {
   				double dvalue = 0.0;
   				mb_get_binary_double(true, &buffer[fields[index].index], &dvalue);
@@ -1080,6 +1112,14 @@ int main(int argc, char **argv) {
   				mb_get_binary_int(true, &buffer[fields[index].index], &ivalue);
   				if (output_mode == OUTPUT_MODE_BINARY)
   					fwrite(&ivalue, sizeof(int), 1, stdout);
+  				else
+  					fprintf(stdout, printfields[i].format, ivalue);
+  			}
+  			else if (fields[index].type == TYPE_SHORT) {
+  				short ivalue = 0;
+  				mb_get_binary_short(true, &buffer[fields[index].index], &ivalue);
+  				if (output_mode == OUTPUT_MODE_BINARY)
+  					fwrite(&ivalue, sizeof(short), 1, stdout);
   				else
   					fprintf(stdout, printfields[i].format, ivalue);
   			}

@@ -23,6 +23,7 @@ Distributions that do not include "beta" in the tag name correspond to the major
 announced releases. The source distributions associated with all releases, major
 or beta, are equally accessible as tarballs through the Github interface.
 
+- Version 5.7.9beta11    June 26, 2021
 - Version 5.7.9beta10    June 16, 2021
 - Version 5.7.9beta09    June 8, 2021
 - Version 5.7.9beta07    May 7, 2021
@@ -389,16 +390,36 @@ or beta, are equally accessible as tarballs through the Github interface.
 ### MB-System Version 5.7 Release Notes:
 --
 
+#### 5.7.9beta11 (June 26, 2021)
+
+Build system: The configure script and the resulting Makefiles are
+generated using GNU Autotools 2.71 instead of 2.69.
+
+Mbnavadjustmerge: Enabled new options --set-global-tie-relative
+which allows setting a global navigation tie with offsets calculated
+relative to the current navigation adjustment model.
+
+Mbphotomosaic: Improved algorithm for mapping the imagery from the
+source images to the destination image. Now the code loops over all
+destination pixels in each quadrilateral of interest and obtains the
+corresponding source image pixels. Therefore no gaps are left in the
+destination image due to a resolution and sampling mismatch between
+the source and destination images.
+
+Mbm_grdplot, mbm_grd3dplot, mbm_grdcut, mbm_grdinfo, mbm_grdtiff:
+Fixed thesemacros to work with the new gmt grdinfo output that
+changed for GMT 6.2.0.
+ 
 #### 5.7.9beta10 (June 16, 2021)
 
 Mbnavadjust: Fixed importation of swath files, which was failing. Fixed crash
 that happened when a navigation inversion was performed in the same session as
 swath data importation.
 
+Mbauvloglist: Fixed parsing of short values in MBARI Dorado AUV MVC log files.
+
 Mbm_grdplot: Fixed histogram equalization in cases where grdhisteq returns an
 incomplete or short equalized color table.
-
-Mbauvloglist: Fixed parsing of short values in MBARI Dorado AUV MVC log files.
 
 #### 5.7.9beta09 (June 8, 2021)
 

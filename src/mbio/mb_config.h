@@ -31,9 +31,6 @@
 /* Have malloc.h */
 /* #undef HAVE_MALLOC_H */
 
-/* Define to 1 if you have the <memory.h> header file. */
-#define HAVE_MEMORY_H 1
-
 /* Define to 1 if you have the <rpc/rpc.h> header file. */
 #define HAVE_RPC_RPC_H 1
 
@@ -45,6 +42,9 @@
 
 /* Define to 1 if you have the <stdint.h> header file. */
 #define HAVE_STDINT_H 1
+
+/* Define to 1 if you have the <stdio.h> header file. */
+#define HAVE_STDIO_H 1
 
 /* Define to 1 if you have the <stdlib.h> header file. */
 #define HAVE_STDLIB_H 1
@@ -104,7 +104,7 @@
 #define PACKAGE_NAME "mbsystem"
 
 /* Define to the full name and version of this package. */
-#define PACKAGE_STRING "mbsystem 5.7.9beta10"
+#define PACKAGE_STRING "mbsystem 5.7.9beta11"
 
 /* Define to the one symbol short name of this package. */
 #define PACKAGE_TARNAME "mbsystem"
@@ -113,7 +113,7 @@
 #define PACKAGE_URL "http://www.mbari.org/data/mbsystem/"
 
 /* Define to the version of this package. */
-#define PACKAGE_VERSION "5.7.9beta10"
+#define PACKAGE_VERSION "5.7.9beta11"
 
 /* Build tools using PCL */
 /* #undef PCLTOOLS_ENABLED */
@@ -121,17 +121,19 @@
 /* Build tools using Qt5 */
 /* #undef QTTOOLS_ENABLED */
 
-/* Define to 1 if you have the ANSI C header files. */
+/* Define to 1 if all of the C90 standard headers exist (not just the ones
+   required in a freestanding environment). This macro is provided for
+   backward compatibility; new code need not use it. */
 #define STDC_HEADERS 1
 
 /* Building unit tests */
 #define TEST_ENABLED 1
 
 /* Version number of package */
-#define VERSION "5.7.9beta10"
+#define VERSION "5.7.9beta11"
 
 /* Set VERSION_DATE define in mb_config.h */
-#define VERSION_DATE "16 June 2021"
+#define VERSION_DATE "26 June 2021"
 
 /* Define WORDS_BIGENDIAN to 1 if your processor stores words with the most
    significant byte first (like Motorola and SPARC, unlike Intel). */

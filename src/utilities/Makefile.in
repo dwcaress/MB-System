@@ -583,6 +583,7 @@ qt_CPPFLAGS = @qt_CPPFLAGS@
 qt_DIR = @qt_DIR@
 qt_LIBS = @qt_LIBS@
 qt_MOC = @qt_MOC@
+runstatedir = @runstatedir@
 sbindir = @sbindir@
 sharedstatedir = @sharedstatedir@
 srcdir = @srcdir@

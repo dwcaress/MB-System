@@ -1082,7 +1082,7 @@ if (!$bounds || !$zbounds || $zmode == 1)
       ($zmin_f,$zmax_f) = $line =~
         /\S+\s+zmin:\s+(\S+)\s+zmax:\s+(\S+)\s+name:\s+\S+/;
       }
-    if ($line =~ /\S+\s+z_min:\s+\S+\s+z_max:\s+\S+\s+units:/)
+    elsif ($line =~ /\S+\s+z_min:\s+\S+\s+z_max:\s+\S+\s+units:/)
       {
       ($zmin_f,$zmax_f,$zunits_s) = $line =~
         /\S+\s+z_min:\s+(\S+)\s+z_max:\s+(\S+)\s+units:\s+(.+)/;
@@ -1091,6 +1091,11 @@ if (!$bounds || !$zbounds || $zmode == 1)
       {
       ($zmin_f,$zmax_f,$zunits_s) = $line =~
         /\S+\s+z_min:\s+(\S+)\s+z_max:\s+(\S+)\s+name:\s+(.+)/;
+      }
+    elsif ($line =~ /\S+\s+v_min:\s+\S+\s+v_max:\s+\S+\s+name:/)
+      {
+      ($zmin_f,$zmax_f,$zunits_s) = $line =~
+        /\S+\s+v_min:\s+(\S+)\s+v_max:\s+(\S+)\s+name:\s+(.+)/;
       }
     }
 
@@ -1815,15 +1820,30 @@ if ($contour_file)
   while (@grdinfo)
     {
     $line = shift @grdinfo;
-    if ($line =~ /\S+\s+zmin:\s+(\S+)\s+zmax:\s+(\S+)\s+units:/)
+    if ($line =~ /\S+\s+zmin:\s+\S+\s+zmax:\s+\S+\s+units:\s+\S+/)
       {
       ($czmin,$czmax) = $line =~
-        /\S+\s+zmin:\s+(\S+)\s+zmax:\s+(\S+)\s+units:/;
+        /\S+\s+zmin:\s+(\S+)\s+zmax:\s+(\S+)\s+units:\s+\S+/;
       }
-    if ($line =~ /\S+\s+z_min:\s+(\S+)\s+z_max:\s+(\S+)\s+units:/)
+    elsif ($line =~ /\S+\s+zmin:\s+\S+\s+zmax:\s+\S+\s+name:\s+\S+/)
+      {
+      ($czmin,$czmax) = $line =~
+        /\S+\s+zmin:\s+(\S+)\s+zmax:\s+(\S+)\s+name:\s+\S+/;
+      }
+    elsif ($line =~ /\S+\s+z_min:\s+\S+\s+z_max:\s+\S+\s+units:/)
       {
       ($czmin,$czmax,$czunits) = $line =~
-        /\S+\s+z_min:\s+(\S+)\s+z_max:\s+(\S+)\s+units:\s+(\S+)/;
+        /\S+\s+z_min:\s+(\S+)\s+z_max:\s+(\S+)\s+units:\s+(.+)/;
+      }
+    elsif ($line =~ /\S+\s+z_min:\s+\S+\s+z_max:\s+\S+\s+name:/)
+      {
+      ($czmin,$czmax,$czunits) = $line =~
+        /\S+\s+z_min:\s+(\S+)\s+z_max:\s+(\S+)\s+name:\s+(.+)/;
+      }
+    elsif ($line =~ /\S+\s+v_min:\s+\S+\s+v_max:\s+\S+\s+name:/)
+      {
+      ($czmin,$czmax,$czunits) = $line =~
+        /\S+\s+v_min:\s+(\S+)\s+v_max:\s+(\S+)\s+name:\s+(.+)/;
       }
     }
   $cdzz = ($czmax - $czmin);

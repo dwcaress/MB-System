@@ -1689,6 +1689,7 @@ int main(int argc, char** argv)
 
     /* close imagelist file */
     status = mb_imagelist_close(verbose, &imagelist_ptr, &error);
+    fprintf(stderr, "Imagelist structure contained %d images and %d image pairs\n", nimages, npairs);
 
     /* if more than one thread was used, combine the correction tables into the image from
         the first thread */
