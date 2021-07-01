@@ -8040,7 +8040,8 @@ Have a nice day...\n");
     }
 
     /* check for ping data already read in read error case */
-    if (status == MB_FAILURE && *last_ping >= 0) {
+    if (status == MB_FAILURE && *last_ping >= 0
+      && (store->read_bathymetry || store->read_v2detection || store->read_v2rawdetection)) {
       status = MB_SUCCESS;
       *error = MB_ERROR_NO_ERROR;
       done = true;

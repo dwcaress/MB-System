@@ -50,7 +50,7 @@
 #
 # Miscellaneous Options:
 #            [-MGDgmtdef/value -MGFscale_loc";
-#            -MGL[f][x]lon0/lat0/slat/length[units][+llabel]
+#            -MGL[f][x]lon0/lat0/slat/length[units][+llabel] -MGLF
 #            -MGQdpi -MGSscalefactor -MGTx/y/size/angle/font/just/text
 #            -MGU[/dx/dy/][label] -MCAanot_int/[ffont_size][aangle][/r/g/b][o]]
 #            -MCGgap/width -MCQcut -MCT[+|-][gap/length][:LH] -MCWtype[pen]
@@ -320,10 +320,10 @@ else
     {
     $file_check = $file_data;
     }
-  if (! -r $file_check)
+  if (! -e $file_check)
     {
     print "\a";
-    die "\nSpecified input file $file_check cannot be opened!\n$program_name aborted\n";
+    die "\nSpecified input file $file_check does not exist!\n$program_name aborted\n";
     }
   }
 if ($file_intensity)
@@ -336,10 +336,10 @@ if ($file_intensity)
     {
     $file_check = $file_intensity;
     }
-  if (! -r $file_check)
+  if (! -e $file_check)
     {
     print "\a";
-    die "\nSpecified intensity input file $file_check cannot be opened!\n$program_name aborted\n";
+    die "\nSpecified intensity input file $file_check does not exist!\n$program_name aborted\n";
     }
   }
 if ($color_mode == 3 && !$file_intensity)
@@ -357,10 +357,10 @@ if ($contour_file)
                 {
                 $file_check = $contour_file;
                 }
-        if (! -r $file_check)
+        if (! -e $file_check)
                 {
                 print "\a";
-                die "\nSpecified contour input file $file_check cannot be opened!\n$program_name aborted\n";
+                die "\nSpecified contour input file $file_check does not exist!\n$program_name aborted\n";
                 }
         }
 
@@ -388,8 +388,12 @@ if ($misc)
         /^[Gg][Ff](\S+)/;
       }
 
-    # set map scale
-    if ($cmd =~ /^[Gg][Ll]./)
+    # set map scale frame or map scale
+    if ($cmd =~ /^[Gg][Ll]F/)
+      {
+      $length_scale_frame = 1;
+      }
+    elsif ($cmd =~ /^[Gg][Ll]./)
       {
       ($length_scale) = $cmd =~
         /^[Gg][Ll](\S+)/;
@@ -1078,7 +1082,7 @@ if (!$bounds || !$zbounds || $zmode == 1)
       ($zmin_f,$zmax_f) = $line =~
         /\S+\s+zmin:\s+(\S+)\s+zmax:\s+(\S+)\s+name:\s+\S+/;
       }
-    if ($line =~ /\S+\s+z_min:\s+\S+\s+z_max:\s+\S+\s+units:/)
+    elsif ($line =~ /\S+\s+z_min:\s+\S+\s+z_max:\s+\S+\s+units:/)
       {
       ($zmin_f,$zmax_f,$zunits_s) = $line =~
         /\S+\s+z_min:\s+(\S+)\s+z_max:\s+(\S+)\s+units:\s+(.+)/;
@@ -1087,6 +1091,11 @@ if (!$bounds || !$zbounds || $zmode == 1)
       {
       ($zmin_f,$zmax_f,$zunits_s) = $line =~
         /\S+\s+z_min:\s+(\S+)\s+z_max:\s+(\S+)\s+name:\s+(.+)/;
+      }
+    elsif ($line =~ /\S+\s+v_min:\s+\S+\s+v_max:\s+\S+\s+name:/)
+      {
+      ($zmin_f,$zmax_f,$zunits_s) = $line =~
+        /\S+\s+v_min:\s+(\S+)\s+v_max:\s+(\S+)\s+name:\s+(.+)/;
       }
     }
 
@@ -1811,15 +1820,30 @@ if ($contour_file)
   while (@grdinfo)
     {
     $line = shift @grdinfo;
-    if ($line =~ /\S+\s+zmin:\s+(\S+)\s+zmax:\s+(\S+)\s+units:/)
+    if ($line =~ /\S+\s+zmin:\s+\S+\s+zmax:\s+\S+\s+units:\s+\S+/)
       {
       ($czmin,$czmax) = $line =~
-        /\S+\s+zmin:\s+(\S+)\s+zmax:\s+(\S+)\s+units:/;
+        /\S+\s+zmin:\s+(\S+)\s+zmax:\s+(\S+)\s+units:\s+\S+/;
       }
-    if ($line =~ /\S+\s+z_min:\s+(\S+)\s+z_max:\s+(\S+)\s+units:/)
+    elsif ($line =~ /\S+\s+zmin:\s+\S+\s+zmax:\s+\S+\s+name:\s+\S+/)
+      {
+      ($czmin,$czmax) = $line =~
+        /\S+\s+zmin:\s+(\S+)\s+zmax:\s+(\S+)\s+name:\s+\S+/;
+      }
+    elsif ($line =~ /\S+\s+z_min:\s+\S+\s+z_max:\s+\S+\s+units:/)
       {
       ($czmin,$czmax,$czunits) = $line =~
-        /\S+\s+z_min:\s+(\S+)\s+z_max:\s+(\S+)\s+units:\s+(\S+)/;
+        /\S+\s+z_min:\s+(\S+)\s+z_max:\s+(\S+)\s+units:\s+(.+)/;
+      }
+    elsif ($line =~ /\S+\s+z_min:\s+\S+\s+z_max:\s+\S+\s+name:/)
+      {
+      ($czmin,$czmax,$czunits) = $line =~
+        /\S+\s+z_min:\s+(\S+)\s+z_max:\s+(\S+)\s+name:\s+(.+)/;
+      }
+    elsif ($line =~ /\S+\s+v_min:\s+\S+\s+v_max:\s+\S+\s+name:/)
+      {
+      ($czmin,$czmax,$czunits) = $line =~
+        /\S+\s+v_min:\s+(\S+)\s+v_max:\s+(\S+)\s+name:\s+(.+)/;
       }
     }
   $cdzz = ($czmax - $czmin);
@@ -2108,10 +2132,17 @@ if ($color_mode && $color_mode < 6 && !$file_cpt)
       print "\tgmt grdhisteq $files_data[0] -C$ncolors -D\n";
       }
     @grdhisteq = `gmt grdhisteq $files_data[0] -C$ncolors -D`;
+    $dlast = 0.0;
+    $histfirst = 1;
     foreach $d (@grdhisteq) {
       ($d1, $d2) = $d =~ /(\S+)\s+(\S+).*/;
-      if ($d2 > $d1)
+      if ($histfirst || $d1 > $dlast)
         {
+        if ($histfirst)
+          {
+          $histfirst = 0;
+          }
+        $dlast = $d1;
         push(@hist, $d1);
         }
       }
@@ -2885,6 +2916,10 @@ printf FCMD "echo Running gmt module psbasemap...\n";
 printf FCMD "gmt psbasemap -J\$MAP_PROJECTION\$MAP_SCALE \\\n\t";
 printf FCMD "-R\$MAP_REGION \\\n\t";
 printf FCMD "$axes \\\n\t";
+if ($length_scale && $length_scale_frame)
+  {
+  printf FCMD "-F+gwhite+p1 ";
+  }
 if ($length_scale)
   {
   printf FCMD "-L$length_scale \\\n\t";
@@ -3937,6 +3972,17 @@ sub GetBaseTick {
   elsif ($gridprojected == 1)
     {
     $base_tick = &min($base_tick_x, $base_tick_y);
+    if ($base_tick >= 10.0) {
+      $base_tick = int($base_tick);
+    } elsif ($base_tick >= 1.0) {
+        $base_tick = 0.1 * int(10 * $base_tick);
+    } elsif ($base_tick >= 0.1) {
+        $base_tick = 0.01 * int(100 * $base_tick);
+    } elsif ($base_tick >= 0.01) {
+        $base_tick = 0.001 * int(1000 * $base_tick);
+    } elsif ($base_tick >= 0.001) {
+        $base_tick = 0.0001 * int(10000 * $base_tick);
+    }
     $base_tick_x = $base_tick;
     $base_tick_y = $base_tick;
     }

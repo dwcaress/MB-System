@@ -23,6 +23,12 @@ Distributions that do not include "beta" in the tag name correspond to the major
 announced releases. The source distributions associated with all releases, major
 or beta, are equally accessible as tarballs through the Github interface.
 
+- Version 5.7.9beta11    June 26, 2021
+- Version 5.7.9beta10    June 16, 2021
+- Version 5.7.9beta09    June 8, 2021
+- Version 5.7.9beta07    May 7, 2021
+- Version 5.7.9beta06    March 24, 2021
+- Version 5.7.9beta05    March 8, 2021
 - Version 5.7.9beta04    February 21, 2021
 - Version 5.7.9beta03    February 7, 2021
 - Version 5.7.9beta02    January 27, 2021
@@ -383,6 +389,123 @@ or beta, are equally accessible as tarballs through the Github interface.
 --
 ### MB-System Version 5.7 Release Notes:
 --
+
+#### 5.7.9beta11 (June 26, 2021)
+
+Build system: The configure script and the resulting Makefiles are
+generated using GNU Autotools 2.71 instead of 2.69.
+
+Mbnavadjustmerge: Enabled new options --set-global-tie-relative
+which allows setting a global navigation tie with offsets calculated
+relative to the current navigation adjustment model.
+
+Mbphotomosaic: Improved algorithm for mapping the imagery from the
+source images to the destination image. Now the code loops over all
+destination pixels in each quadrilateral of interest and obtains the
+corresponding source image pixels. Therefore no gaps are left in the
+destination image due to a resolution and sampling mismatch between
+the source and destination images.
+
+Mbm_grdplot, mbm_grd3dplot, mbm_grdcut, mbm_grdinfo, mbm_grdtiff:
+Fixed thesemacros to work with the new gmt grdinfo output that
+changed for GMT 6.2.0.
+ 
+#### 5.7.9beta10 (June 16, 2021)
+
+Mbnavadjust: Fixed importation of swath files, which was failing. Fixed crash
+that happened when a navigation inversion was performed in the same session as
+swath data importation.
+
+Mbauvloglist: Fixed parsing of short values in MBARI Dorado AUV MVC log files.
+
+Mbm_grdplot: Fixed histogram equalization in cases where grdhisteq returns an
+incomplete or short equalized color table.
+
+#### 5.7.9beta09 (June 8, 2021)
+
+Mb_rt raytracing functions: Added tracking of travel times in arrays returned by
+mb_rt() for plotting raypaths. This adds a parameter to the mb_rt() function call,
+which is used by utilities/mb_process.cc and mbvelocitytool/mbvelocity_prog.c.
+
+Mbm_grdplot: If \fB\-MGL\fP\fIF\fP is given in conjunction with \fB\-MGL\fP\fIscalebar\fP
+then the map scale will be surrounded by a white filled, black bounded box on
+top of the map.
+
+Mbm_grdplot: Chooses more reasonable easting/northing annotation intervals when
+plotting maps in projected coordinate systems like UTM.
+
+Mbm_grd2arc: Fixed so that the call to gmt convert is actually made.
+
+Mbm_grdtiff: Fixed so that the temporary GMT defaults are actually applied to the
+output image. By default this enforces a white background on the output GeoTiff
+image, which enables the new tool mbtiff2png to set the white areas to transparent
+when it converts a GeoTiff image to a PNG image for import into GIS.
+
+Mbeditviz: Fixed sparse filtering functions, which were inadvertently broken a
+few months ago.
+
+Mbgetphotocorrection: Made multithreaded.
+
+Mbphotomosaic: (1) Made multithreaded. (2) Added ability to map blocks of pixels from
+source images to the destination image instead of mapping individual pixels. The
+size of the square blocks is specified using --section=sizeInPixels. (3) Added PNG
+format image output, which allows no data regions to be transparent. PNG images
+cannot have geodetics embedded, and so depend on a *.pgw world file to be importable
+into GIS. (4) Added image correction modes based on source pixel range or standoff.
+
+Mbtiff2png: New tool that converts GeoTiff images to PNG images while setting no data
+regions transparent on the basis of being white, lighter than a specified threshold,
+black, or darker than a specified threshold.
+
+Mbvoxelclean: Fixed application of acrosstrack and range filters.
+
+#### 5.7.9beta07 (May 7, 2021)
+
+mbm_histplot: Fixed the use of the -C option to specify cellwidth for the
+histogram to be plotted.
+
+Formats 232 (MBF_3DWISSLR) and 233 (MBF_3DWISSLP): Changed so that MB_FLAG_SECONDARY
+is no longer used for multiple picks per laser pulse.
+
+MBnavadjust and MBnavadjustmerge: Restructured the code so that more capability
+of mbnavadjust can be duplicated in the command line tool mbnavadjust merge.
+Working to add ability to reimport surveys into a project.
+
+MBvoxelclean: Added --neighborhood option and fixed amplitude range options.
+
+Mblist: Fixed function of the -O%fnv and -O%FNV commands to produce *.fnv files.
+
+#### 5.7.9beta06 (March 24, 2021)
+
+Mbpreprocess: Fixed to work with the old s7k format (88) MBF_RESON7KR.
+
+Format 88 (MBF_RESON7KR): Fixed to not recognize collections of ping records
+that are mission bathymetry and/or travel time records as complete.
+
+Mbnavadjust: When importing files, only export navigation records to the *.mb166
+files in the project directory for ping records (previously data were output
+for input navigation records as well).
+
+#### 5.7.9beta05 (March 8, 2021)
+
+Mbauvloglist: Added available output field of speed calculated from the velocity
+vector in the kearfott.log log file, with tag calcKSpeed. Also added new -C option:
+in the case that navigation is being merged from an external file specified with
+the -N option, the -C option suppresses output of records with timestamps from
+before or after the time bounds of the navigation data. The default remains to
+output those records with zero values for the merged navigation outside the time
+bounds.
+
+General: Changed code that deletes temporary files from using a system()
+call to using the stdio function remove(). Affects src/mbio/mb_process.c,
+src/utilities/mbdatalist.cc, and src/mbvelocitytool/mbvelocity_prog.c.
+
+TRN: Updates to src/mbtrn, src/mbtrnav, src/mbtrnutils from Kent Headley.
+
+Mbm_grdplot, mbm_3dgrdplot, mbm_grdtiff, mbm_grdinfo: Changed " -r " tests for
+file readability to " -e " tests for file existence. This is to accommodate
+filesystems that use ACL rather than old style unix file modes - the old stat
+based readability test in Perl fails on ACL filesystems.
 
 #### 5.7.9beta04 (February 21, 2021)
 

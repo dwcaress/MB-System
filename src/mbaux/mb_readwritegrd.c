@@ -372,8 +372,8 @@ int mb_write_gmt_grd(int verbose, const char *grdfile, float *grid,
     fprintf(stderr, "dbg2       xmax:       %f\n", xmax);
     fprintf(stderr, "dbg2       ymin:       %f\n", ymin);
     fprintf(stderr, "dbg2       ymax:       %f\n", ymax);
-    fprintf(stderr, "dbg2       dx:         %f\n", dx);
-    fprintf(stderr, "dbg2       dy:         %f\n", dy);
+    fprintf(stderr, "dbg2       dx:         %g\n", dx);
+    fprintf(stderr, "dbg2       dy:         %g\n", dy);
     fprintf(stderr, "dbg2       xlab:       %s\n", xlab);
     fprintf(stderr, "dbg2       ylab:       %s\n", ylab);
     fprintf(stderr, "dbg2       zlab:       %s\n", zlab);
@@ -581,8 +581,8 @@ int mb_write_gmt_grd(int verbose, const char *grdfile, float *grid,
     else {
       fprintf(stderr, "  Geographic Coordinate System Name: %s\n", projectionname);
       fprintf(stderr, "  Geographic Coordinate System ID:   %d\n", epsgid);
-      fprintf(stderr, "  Longitude:  %f %f  %f\n", header->wesn[0], header->wesn[1], header->inc[0]);
-      fprintf(stderr, "  Latitude:   %f %f  %f\n", header->wesn[2], header->wesn[3], header->inc[1]);
+      fprintf(stderr, "  Longitude:  %f %f  %g\n", header->wesn[0], header->wesn[1], header->inc[0]);
+      fprintf(stderr, "  Latitude:   %f %f  %g\n", header->wesn[2], header->wesn[3], header->inc[1]);
     }
     fprintf(stderr, "  Grid Projection Mode:     %d\n", grid_projection_mode);
     fprintf(stderr, "  Grid Projection ID:       %s\n", grid_projection_id);

@@ -300,10 +300,10 @@ else
 		{
 		$file_check = $file_data;
 		}
-	if (! -r $file_check)
+	if (! -e $file_check)
 		{
 		print "\a";
-		die "\nSpecified input file $file_check cannot be opened!\n$program_name aborted\n";
+		die "\nSpecified input file $file_check does not exist!\n$program_name aborted\n";
 		}
 	}
 if ($file_intensity)
@@ -316,10 +316,10 @@ if ($file_intensity)
 		{
 		$file_check = $file_intensity;
 		}
-	if (! -r $file_check)
+	if (! -e $file_check)
 		{
 		print "\a";
-		die "\nSpecified intensity input file $file_check cannot be opened!\n$program_name aborted\n";
+		die "\nSpecified intensity input file $file_check does not exist!\n$program_name aborted\n";
 		}
 	}
 if ($file_drape)
@@ -332,10 +332,10 @@ if ($file_drape)
 		{
 		$file_check = $file_drape;
 		}
-	if (! -r $file_check)
+	if (! -e $file_check)
 		{
 		print "\a";
-		die "\nSpecified drape input file $file_check cannot be opened!\n$program_name aborted\n";
+		die "\nSpecified drape input file $file_check does not exist!\n$program_name aborted\n";
 		}
 	}
 
@@ -769,7 +769,7 @@ if (!$bounds || !$zbounds)
 			($zmin,$zmax) = $line =~
 				/\S+\s+zmin:\s+(\S+)\s+zmax:\s+(\S+)\s+name:\s+\S+/;
 			}
-		if ($line =~ /\S+\s+z_min:\s+\S+\s+z_max:\s+\S+\s+units:/)
+		elsif ($line =~ /\S+\s+z_min:\s+\S+\s+z_max:\s+\S+\s+units:/)
 			{
 			($zmin,$zmax,$zunits_s) = $line =~
 				/\S+\s+z_min:\s+(\S+)\s+z_max:\s+(\S+)\s+units:\s+(.+)/;
@@ -778,6 +778,11 @@ if (!$bounds || !$zbounds)
 			{
 			($zmin,$zmax,$zunits_s) = $line =~
 				/\S+\s+z_min:\s+(\S+)\s+z_max:\s+(\S+)\s+name:\s+(.+)/;
+			}
+		elsif ($line =~ /\S+\s+v_min:\s+\S+\s+v_max:\s+\S+\s+name:/)
+			{
+			($zmin,$zmax,$zunits_s) = $line =~
+				/\S+\s+v_min:\s+(\S+)\s+v_max:\s+(\S+)\s+name:\s+(.+)/;
 			}
 		}
 

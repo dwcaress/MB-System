@@ -907,6 +907,7 @@ int main(int argc, char **argv) {
       case 'o':
         if (strcmp(optarg, "%fnv") == 0 || strcmp(optarg, "%FNV") == 0) {
           strncpy(list, "tMXYHScRPr=X=Y+X+Y", sizeof(list));
+          n_list = strlen(list);
         } else if (strlen(optarg) > 0) {
           n_list = MIN(strlen(optarg), MAX_OPTIONS);
           for (int j = 0; j < n_list; j++){

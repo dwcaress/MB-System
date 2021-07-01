@@ -650,8 +650,9 @@ int mb_beaudoin_unrotate(int verbose, mb_3D_vector orig, mb_3D_orientation rotat
 int mb_rt_init(int verbose, int number_node, double *depth, double *velocity, void **modelptr, int *error);
 int mb_rt_deall(int verbose, void **modelptr, int *error);
 int mb_rt(int verbose, void *modelptr, double source_depth, double source_angle, double end_time, int ssv_mode,
-          double surface_vel, double null_angle, int nplot_max, int *nplot, double *xplot, double *zplot, double *x, double *z,
-          double *travel_time, int *ray_stat, int *error);
+          double surface_vel, double null_angle, int nplot_max,
+          int *nplot, double *xplot, double *zplot, double *tplot,
+          double *x, double *z, double *travel_time, int *ray_stat, int *error);
 
 #ifdef __cplusplus
 }  /* extern "C" */

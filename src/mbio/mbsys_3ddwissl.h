@@ -754,10 +754,8 @@ struct mbsys_3ddwissl_struct
   struct mbsys_3ddwissl_calibration_v1s3_struct calibration_v1s3_b;
 
   /* Scan information from raw records */
-  unsigned short record_id;          /* head A (0x3D53 or 0x3D73) or head B (0x3D54 or
-                           0x3D74) */
-  unsigned int scan_size;            /* bytes of scan record minus 4 (record_id +
-                           scan_size) */
+  unsigned short record_id;          /* head A (0x3D53 or 0x3D73) or head B (0x3D54 or 0x3D74) */
+  unsigned int scan_size;            /* bytes of scan record minus 4 (record_id + scan_size) */
   unsigned short year;
   mb_u_char month;
   mb_u_char day;
@@ -772,7 +770,7 @@ struct mbsys_3ddwissl_struct
   float ctd_temperature;            /* ctd temperature degrees C */
   float ctd_salinity;              /* ctd salinity psu */
   float ctd_pressure;              /* ctd pressure dbar */
-  float index;
+  float index;                    /* index of refraction */
   float range_start;              /* range start processing meters */
   float range_end;              /* range end processing meters */
   unsigned int pulse_count;          /* pulse count for this scan */

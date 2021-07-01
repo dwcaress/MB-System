@@ -60,10 +60,1702 @@ using namespace cv;
 #define MBPM_PRIORITY_CENTRALITY_ONLY               1
 #define MBPM_PRIORITY_CENTRALITY_PLUS_STANDOFF      2
 
-void process_image(mb_path imageFile)
+#define MBPM_CORRECTION_NONE          0
+#define MBPM_CORRECTION_BRIGHTNESS    1
+#define MBPM_CORRECTION_RANGE         2
+#define MBPM_CORRECTION_STANDOFF      3
+#define MBPM_CORRECTION_FILE          4
+
+#define MBPM_FORMAT_NONE              0
+#define MBPM_FORMAT_TIFF              1
+#define MBPM_FORMAT_PNG               2
+
+// #define DEBUG 1
+
+/*--------------------------------------------------------------------*/
+
+struct mbpm_process_struct {
+
+    // input image and camera pose
+    unsigned int thread;
+    mb_path imageFile;
+    int image_count;
+    int image_camera;
+    double time_d;
+    double camera_navlon;
+    double camera_navlat;
+    double camera_sensordepth;
+    double camera_heading;
+    double camera_roll;
+    double camera_pitch;
+
+    // Output image and priority map
+    Mat OutputImage;
+    Mat OutputPriority;
+#ifdef DEBUG
+    Mat OutputIntensityCorrection;
+    Mat OutputStandoff;
+#endif
+};
+
+struct mbpm_control_struct {
+
+    // Output mosaic parameters
+    double OutputBounds[4];
+    double OutputDx[2];
+    int OutputDim[2];
+    double mtodeglon;
+    double mtodeglat;
+
+    // Projection
+    bool use_projection;
+    void *pjptr;
+
+    // Camera calibration model
+    bool calibration_set;
+    Mat cameraMatrix[2];
+    Mat distCoeffs[2];
+    Mat R;
+    Mat T;
+    Mat E;
+    Mat F;
+    Mat R1;
+    Mat R2;
+    Mat P1;
+    Mat P2;
+    Mat Q;
+    double SensorWidthMm;
+    double SensorHeightMm;
+    double SensorCellMm;
+    bool isVerticalStereo;
+
+    // Apply camera calibration model
+    Size imageSize;
+    double fovx[2];
+    double fovy[2];
+    double fov_fudgefactor;
+    double focalLength[2];
+    Point2d principalPoint[2];
+    double aspectRatio[2];
+
+    // Image correction
+    int corr_mode;
+    double corr_range_target;
+    double corr_range_coeff;
+    double corr_standoff_target;
+    double corr_standoff_coeff;
+    double corr_intensity_gain;
+    int ncorr_x;
+    int ncorr_y;
+    int ncorr_z;
+    double corr_xmin;
+    double corr_xmax;
+    double corr_ymin;
+    double corr_ymax;
+    double corr_zmin;
+    double corr_zmax;
+    double bin_dx;
+    double bin_dy;
+    double bin_dz;
+    int ibin_xcen;
+    int jbin_ycen;
+    int kbin_zcen;
+    double referenceIntensity[2];
+    Mat corr_bounds;
+    Mat corr_table[2];
+
+    // Topography grid
+    bool use_topography;
+    void *topogrid_ptr;
+
+    // Input pixel priority
+    int priority_mode;
+    double standoff_target;
+    double standoff_range;
+    double range_max;
+
+    // Input image trimming
+    int trimPixels;
+
+    // Input image section size (pixels)
+    int sectionPixels;
+};
+
+/*--------------------------------------------------------------------*/
+void process_image(int verbose, struct mbpm_process_struct *process,
+                  struct mbpm_control_struct *control, int *status, int *error)
 {
-    fprintf(stdout, "Processing image %s\n", imageFile);
+    // Working images
+    Mat imageProcess;
+    Mat imageUndistort;
+    Mat imageUndistortYCrCb;
+
+    /* read the image */
+    imageProcess = imread(process->imageFile);
+    if (!imageProcess.empty()) {
+
+        double fov_x, fov_y;
+        double center_x, center_y;
+        double intensityCorrection;
+
+        /* undistort the image */
+        undistort(imageProcess, imageUndistort, control->cameraMatrix[process->image_camera], control->distCoeffs[process->image_camera], noArray());
+        cvtColor(imageUndistort, imageUndistortYCrCb, COLOR_BGR2YCrCb);
+        imageProcess.release();
+
+        /* get field of view, offsets, and principal point to use */
+        fov_x = control->fovx[process->image_camera];
+        fov_y = control->fovy[process->image_camera];
+        center_x = control->principalPoint[process->image_camera].x / control->SensorCellMm;
+        center_y = control->principalPoint[process->image_camera].y / control->SensorCellMm;
+
+        /* calculate reference "depth" for use in calculating ray angles for
+            individual pixels */
+        double zzref = 0.5 * (0.5 * control->imageSize.width / tan(DTR * 0.5 * fov_x * control->fov_fudgefactor)
+                + 0.5 * control->imageSize.height / tan(DTR * 0.5 * fov_y * control->fov_fudgefactor));
+
+        /* Apply camera model translation */
+        double dlon, dlat, dz;
+        double headingx = sin(DTR * process->camera_heading);
+        double headingy = cos(DTR * process->camera_heading);
+        if (process->image_camera == 0) {
+            dlon = 0.5 * (control->T.at<double>(0)) * control->mtodeglon;
+            dlat = 0.5 * (control->T.at<double>(1)) * control->mtodeglat;
+            dz = 0.5 * (control->T.at<double>(2));
+        } else {
+            dlon = -0.5 * (control->T.at<double>(0)) * control->mtodeglon;
+            dlat = -0.5 * (control->T.at<double>(1)) * control->mtodeglat;
+            dz = -0.5 * (control->T.at<double>(2));
+        }
+        process->camera_navlon += (headingy * dlon + headingx * dlat);
+        process->camera_navlat += (-headingx * dlon + headingy * dlat);
+        process->camera_sensordepth += dz;
+
+        /* calculate the largest distance from center for this image for use
+            in calculating pixel priority */
+        double xx = MAX(center_x, imageUndistort.cols - center_x);
+        double yy = MAX(center_y, imageUndistort.rows - center_y);
+        double rrxymax = sqrt(xx * xx + yy * yy);
+
+        /* Do some calculations relevant to image correction:
+         * - calculate the average intensity of the image
+         * - if specified calculate the correction required to bring the
+         *    average intensity to a value of 70.0
+         */
+        Scalar avgPixelIntensity = mean(imageUndistortYCrCb);
+        double avgImageIntensityCorrection = 1.0;
+        double brightnessCorrection = 70.0 / avgPixelIntensity.val[0];
+
+        /* Print information for image to be processed */
+        int time_i[7];
+        mb_get_date(verbose, process->time_d, time_i);
+        fprintf(stderr,"%4d Camera:%d %s %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d LLZ: %.10f %.10f %8.3f HRP: %6.2f %6.2f %6.2f Amp:%.3f\n",
+                process->image_count, process->image_camera, process->imageFile,
+                time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6],
+                process->camera_navlon, process->camera_navlat, process->camera_sensordepth,
+                process->camera_heading, process->camera_roll, process->camera_pitch, avgPixelIntensity.val[0]);
+
+        /* get unit vector for direction camera is pointing */
+
+        /* rotate center pixel location using attitude and zzref */
+        double zz;
+        mb_platform_math_attitude_rotate_beam(verbose,
+            0.0, 0.0, zzref,
+            process->camera_roll, process->camera_pitch, 0.0,
+            &xx, &yy, &zz,
+            error);
+        double rr = sqrt(xx * xx + yy * yy + zz * zz);
+        double phi = RTD * atan2(yy, xx);
+        double theta = RTD * acos(zz / rr);
+
+        /* calculate unit vector relative to the camera rig */
+        double vx = sin(DTR * theta) * cos(DTR * phi);
+        double vy = sin(DTR * theta) * sin(DTR * phi);
+        double vz = cos(DTR * theta);
+
+        /* apply rotation of each camera relative to the rig */
+        double vxx, vyy, vzz;
+        if (process->image_camera == 1) {
+            vxx = vx * (control->R.at<double>(0,0)) + vy * (control->R.at<double>(0,1)) + vz * (control->R.at<double>(0,2));
+            vyy = vx * (control->R.at<double>(1,0)) + vy * (control->R.at<double>(1,1)) + vz * (control->R.at<double>(1,2));
+            vzz = vx * (control->R.at<double>(2,0)) + vy * (control->R.at<double>(2,1)) + vz * (control->R.at<double>(2,2));
+        }
+        else {
+            vxx = vx;
+            vyy = vy;
+            vzz = vz;
+        }
+
+        /* rotate unit vector by camera rig heading */
+        double cx = vxx * cos(DTR * process->camera_heading) + vyy * sin(DTR * process->camera_heading);
+        double cy = -vxx * sin(DTR * process->camera_heading) + vyy * cos(DTR * process->camera_heading);
+        double cz = vzz;
+
+        /* Loop over the pixels in the undistorted image. If trim is nonzero then
+            that number of pixels are ignored around the margins. This solves the
+            problem of black pixels being incorporated into the photomosaic. If
+            trim is not specified then code below will ignore both black pixels
+            and pixels that are adjacent to black pixels. */
+
+        for (int i=control->trimPixels; i<imageUndistort.cols-control->trimPixels; i++) {
+            for (int j=control->trimPixels; j<imageUndistort.rows-control->trimPixels; j++) {
+                bool use_pixel = true;
+                double xx;
+                double yy;
+                double rrxysq;
+                double rrxy;
+                double rrxysq2;
+                double rr2;
+                double theta2;
+                double dtheta;
+                double pixel_priority;
+                double standoff = 0.0;
+                double lon, lat, topo;
+
+                /* Deal with problem of black pixels at the margins of the
+                    undistorted images. If the user has not specified a trim
+                    range for the image margins, then ignore all purely black
+                    pixels and all pixels adjacent to purely black pixels. */
+                if (control->trimPixels == 0) {
+                    unsigned int sum = imageUndistort.at<Vec3b>(j,i)[0]
+                                        + imageUndistort.at<Vec3b>(j,i)[1]
+                                        + imageUndistort.at<Vec3b>(j,i)[2];
+                    if (sum == 0)
+                        use_pixel = false;
+                    else {
+                        for (int ii = MAX(i-1, 0); ii < MIN(i+2, imageUndistort.cols) && use_pixel; ii++) {
+                            for (int jj = MAX(j-1, 0); jj < MIN(i+2, imageUndistort.rows) && use_pixel; jj++) {
+                                if (imageUndistort.at<Vec3b>(jj,ii)[0]
+                                        + imageUndistort.at<Vec3b>(jj,ii)[1]
+                                        + imageUndistort.at<Vec3b>(jj,ii)[2] == 0) {
+                                    use_pixel = false;
+                                }
+                            }
+                        }
+                    }
+                }
+
+                if (use_pixel) {
+                    /* calculate the pixel priority based on the distance
+                        from the image center */
+                    xx = i - center_x;
+                    yy = center_y - j;
+    //int debugprint = MB_NO;
+    //int icenter_x = (int)center_x;
+    //int icenter_y = (int)center_y;
+    //if (i == icenter_x && j == icenter_y) {
+    //debugprint = MB_YES;
+    //}
+                    rrxysq = xx * xx + yy * yy;
+                    rrxy = sqrt(rrxysq);
+                    rr = sqrt(rrxysq + zzref * zzref);
+                    pixel_priority = (rrxymax - rrxy) / rrxymax;
+    //if (debugprint == MB_YES) {
+    //fprintf(stderr,"\nPRIORITY xx:%f yy:%f zzref:%f rr:%f rrxy:%f rrxymax:%f pixel_priority:%f\n",
+    //xx,yy,zzref,rr,rrxy,rrxymax,pixel_priority);
+    //}
+
+                    /* calculate the pixel takeoff angles relative to the camera rig */
+                    phi = RTD * atan2(yy, xx);
+                    theta = RTD * acos(zzref / rr);
+
+                    /* calculate the angular width of a single pixel */
+                    rrxysq2 = (rrxy + 1.0) * (rrxy + 1.0);
+                    rr2 = sqrt(rrxysq2 + zzref * zzref);
+                    theta2 = RTD * acos(zzref / rr2);
+                    dtheta = theta2 - theta;
+    //if (debugprint == MB_YES) {
+    //fprintf(stderr,"Camera: roll:%.3f pitch:%.3f\n", process->camera_roll, process->camera_pitch);
+    //fprintf(stderr,"Rows:%d Cols:%d | %5d %5d BGR:%3.3d|%3.3d|%3.3d",
+    //imageUndistort.rows, imageUndistort.cols, i, j,
+    //imageUndistort.at<Vec3b>(j,i)[0], imageUndistort.at<Vec3b>(j,i)[1], imageUndistort.at<Vec3b>(j,i)[2]);
+    //fprintf(stderr," xyz:%f %f %f r:%f   phi:%f theta:%f\n", xx, yy, zzref, rr, phi, theta);
+    //}
+
+                    /* rotate pixel location using attitude and zzref */
+                    double zz;
+                    mb_platform_math_attitude_rotate_beam(verbose,
+                        xx, yy, zzref,
+                        process->camera_roll, process->camera_pitch, 0.0,
+                        &xx, &yy, &zz,
+                        error);
+
+                    /* recalculate the pixel takeoff angles relative to the camera rig */
+                    rrxysq = xx * xx + yy * yy;
+                    rrxy = sqrt(rrxysq);
+                    rr = sqrt(rrxysq + zz * zz);
+                    phi = RTD * atan2(yy, xx);
+                    theta = RTD * acos(zz / rr);
+    //if (debugprint == MB_YES) {
+    //fprintf(stderr,"Rows:%d Cols:%d | %5d %5d BGR:%3.3d|%3.3d|%3.3d",
+    //imageUndistort.rows, imageUndistort.cols, i, j,
+    //imageUndistort.at<Vec3b>(j,i)[0], imageUndistort.at<Vec3b>(j,i)[1], imageUndistort.at<Vec3b>(j,i)[2]);
+    //fprintf(stderr," xyz:%f %f %f r:%f   phi:%f theta:%f\n", xx, yy, zz, rr, phi, theta);
+    //}
+
+                    /* calculate unit vector relative to the camera rig */
+                    vz = cos(DTR * theta);
+                    vx = sin(DTR * theta) * cos(DTR * phi);
+                    vy = sin(DTR * theta) * sin(DTR * phi);
+    //if (debugprint == MB_YES) {
+    //fprintf(stderr,"camera rig unit vector: %f %f %f\n",vx,vy,vz);
+    //}
+                    /* if takeoff angle is too vertical (this is a 2D photomosaic)
+                        then do not use this pixel */
+                    if (theta > 80.0)
+                        use_pixel = false;
+                }
+
+                if (use_pixel) {
+
+                    /* apply rotation of each camera relative to the rig */
+                    if (process->image_camera == 1) {
+                        vxx = vx * (control->R.at<double>(0,0)) + vy * (control->R.at<double>(0,1)) + vz * (control->R.at<double>(0,2));
+                        vyy = vx * (control->R.at<double>(1,0)) + vy * (control->R.at<double>(1,1)) + vz * (control->R.at<double>(1,2));
+                        vzz = vx * (control->R.at<double>(2,0)) + vy * (control->R.at<double>(2,1)) + vz * (control->R.at<double>(2,2));
+//if (debugprint == MB_YES) {
+//fprintf(stderr,"\nR:      %f %f %f\n",control->R.at<double>(0,0), control->R.at<double>(0,1), control->R.at<double>(0,2));
+//fprintf(stderr,"R:      %f %f %f\n",control->R.at<double>(1,0), control->R.at<double>(1,1), control->R.at<double>(1,2));
+//fprintf(stderr,"R:      %f %f %f\n",control->R.at<double>(2,0), control->R.at<double>(2,1), control->R.at<double>(2,2));
+//fprintf(stderr,"Rotation: camera 1 unit vector: %f %f %f    camera 0 unit vector: %f %f %f\n",vx,vy,vz,vxx,vyy,vzz);
+//}
+                    }
+                    else {
+                        vxx = vx;
+                        vyy = vy;
+                        vzz = vz;
+                    }
+//if (debugprint == MB_YES) {
+//fprintf(stderr,"camera unit vector:     %f %f %f\n",vx,vy,vz);
+//}
+
+                    /* rotate unit vector by camera rig heading */
+                    vx = vxx * cos(DTR * process->camera_heading) + vyy * sin(DTR * process->camera_heading);
+                    vy = -vxx * sin(DTR * process->camera_heading) + vyy * cos(DTR * process->camera_heading);
+                    vz = vzz;
+//if (debugprint == MB_YES) {
+//fprintf(stderr,"camera unit vector rotated by heading %f:     %f %f %f\n",process->camera_heading,vx,vy,vz);
+//}
+
+                    /* find the location where this vector intersects the grid */
+                    if (control->use_topography) {
+                        *status = mb_topogrid_intersect(verbose, control->topogrid_ptr,
+                                    process->camera_navlon, process->camera_navlat, 0.0, process->camera_sensordepth,
+                                    control->mtodeglon, control->mtodeglat, vx, vy, vz,
+                                    &lon, &lat, &topo, &rr, error);
+                    }
+                    else {
+                        rr = control->standoff_target / vz;
+                        lon = process->camera_navlon + control->mtodeglon * vx * rr;
+                        lat = process->camera_navlat + control->mtodeglon * vy * rr;
+                        topo = -process->camera_sensordepth -  control->standoff_target;
+                    }
+                    zz = -process->camera_sensordepth - topo;
+
+                    /* standoff is dot product of camera vector with projected pixel vector */
+                    standoff = (cx * rr * vx) + (cy * rr * vy) + (cz * rr * vz);
+//if (debugprint == MB_YES) {
+//fprintf(stderr," llz: %.10f %.10f %.3f  range:%.3f  standoff:%.3f\n", lon, lat, topo, rr, standoff);
+//}
+                    /* Don't use pixel if too vertical or range too large */
+                    if (theta > 80.0 || rr > control->range_max)
+                        use_pixel = false;
+                }
+
+                if (use_pixel) {
+
+                    /* modulate the source pixel priority by the standoff if desired */
+                    if (control->priority_mode == MBPM_PRIORITY_CENTRALITY_PLUS_STANDOFF)  {
+                        double dstandoff = (standoff - control->standoff_target) / control->standoff_range;
+                        double standoff_priority = (float) (exp(-dstandoff * dstandoff));
+                        pixel_priority *= standoff_priority;
+                    }
+//if (debugprint == MB_YES) {
+//fprintf(stderr," standoff:%f pixel_priority:%.3f\n", standoff, pixel_priority);
+//}
+
+                    /* No correction - use original pixel BGR */
+                    unsigned char b, g, r;
+                    if (control->corr_mode == MBPM_CORRECTION_NONE) {
+                        b = imageUndistort.at<Vec3b>(j,i)[0];
+                        g = imageUndistort.at<Vec3b>(j,i)[1];
+                        r = imageUndistort.at<Vec3b>(j,i)[2];
+                    }
+
+                    /* Get intensity correction according to corr_mode */
+                    else {
+
+                        /* Get intensity correction according to corr_mode */
+                        /* Apply brightness correction to each image separately */
+                        if (control->corr_mode == MBPM_CORRECTION_BRIGHTNESS) {
+                            intensityCorrection = brightnessCorrection;
+                        }
+
+                        /* Apply range based correction to pixels */
+                        else if (control->corr_mode == MBPM_CORRECTION_RANGE) {
+                            intensityCorrection = exp(control->corr_range_coeff * (rr - control->corr_range_target));
+    //fprintf(stderr, "Range intensityCorrection: %d %d range:%f standoff:%f corr: %f\n", i, j, rr, standoff, intensityCorrection);
+                        }
+
+                        /* Apply standoff based correction to pixels */
+                        else if (control->corr_mode == MBPM_CORRECTION_STANDOFF) {
+                            intensityCorrection = exp(control->corr_standoff_coeff * (standoff - control->corr_standoff_target));
+    //fprintf(stderr, "Standoff intensityCorrection: %d %d range:%f standoff:%f %f corr: %f\n",
+    //i, j, range, standoff, control->corr_standoff_target, intensityCorrection);
+                        }
+
+                        /* Apply correction by interpolation of 3D table generated by mbgetphotocorrection */
+                        else if (control->corr_mode == MBPM_CORRECTION_FILE) {
+                            int ibin_x1 = MIN(MAX(((int)((i + 0.5 * control->bin_dx) / control->bin_dx)), 0), control->ncorr_x - 2);
+                            int ibin_x2 = ibin_x1 + 1;
+                            double factor_x = ((double)i - 0.5 * control->bin_dx) / control->bin_dx - (double)ibin_x1;
+                            int jbin_y1 = MIN(MAX(((int)((j + 0.5 * control->bin_dy) / control->bin_dy)), 0), control->ncorr_y - 2);
+                            int jbin_y2 = jbin_y1 + 1;
+                            double factor_y = ((double)j - 0.5 * control->bin_dy) / control->bin_dy - (double)jbin_y1;
+                            int kbin_z1 = MIN(MAX(((int)((standoff + 0.5 * control->bin_dz) / control->bin_dz)), 0), control->ncorr_z - 2);
+                            int kbin_z2 = kbin_z1 + 1;
+                            double factor_z = ((double)standoff - 0.5 * control->bin_dz) / control->bin_dz - (double)kbin_z1;
+                            factor_x = MIN(MAX(factor_x, 0.0), 1.0);
+                            factor_y = MIN(MAX(factor_y, 0.0), 1.0);
+                            factor_z = MIN(MAX(factor_z, 0.0), 1.0);
+    //fprintf(stderr,"i:%d j:%d sensordepth:%f topo:%f standoff:%f kbin_z:%d %d\n",
+    //i,j,process->camera_sensordepth,topo,standoff,kbin_z1,kbin_z2);
+
+                            /* get reference intensity from center of image at the current standoff */
+                            double table_intensity_ref
+                                = (1.0 - factor_z) * control->corr_table[process->image_camera].at<float>(control->ibin_xcen, control->jbin_ycen, kbin_z1)
+                                        + factor_z * control->corr_table[process->image_camera].at<float>(control->ibin_xcen, control->jbin_ycen, kbin_z2);
+
+                            double v000 = control->corr_table[process->image_camera].at<float>(ibin_x1, jbin_y1, kbin_z1);
+                            double v100 = control->corr_table[process->image_camera].at<float>(ibin_x2, jbin_y1, kbin_z1);
+                            double v010 = control->corr_table[process->image_camera].at<float>(ibin_x1, jbin_y2, kbin_z1);
+                            double v001 = control->corr_table[process->image_camera].at<float>(ibin_x1, jbin_y1, kbin_z2);
+                            double v101 = control->corr_table[process->image_camera].at<float>(ibin_x2, jbin_y1, kbin_z2);
+                            double v011 = control->corr_table[process->image_camera].at<float>(ibin_x1, jbin_y2, kbin_z2);
+                            double v110 = control->corr_table[process->image_camera].at<float>(ibin_x2, jbin_y2, kbin_z1);
+                            double v111 = control->corr_table[process->image_camera].at<float>(ibin_x2, jbin_y2, kbin_z2);
+                            double vavg = v000 + v100 + v010 + v110 + v001 + v101 + v011 + v111;
+                            int nvavg = 0;
+                            if (v000 > 0.0) nvavg++;
+                            if (v100 > 0.0) nvavg++;
+                            if (v010 > 0.0) nvavg++;
+                            if (v110 > 0.0) nvavg++;
+                            if (v001 > 0.0) nvavg++;
+                            if (v101 > 0.0) nvavg++;
+                            if (v011 > 0.0) nvavg++;
+                            if (v111 > 0.0) nvavg++;
+                            if (nvavg > 0)
+                                vavg /= nvavg;
+                            if (v000 == 0.0) v000 = vavg;
+                            if (v100 == 0.0) v100 = vavg;
+                            if (v010 == 0.0) v010 = vavg;
+                            if (v110 == 0.0) v110 = vavg;
+                            if (v001 == 0.0) v001 = vavg;
+                            if (v101 == 0.0) v101 = vavg;
+                            if (v011 == 0.0) v011 = vavg;
+                            if (v111 == 0.0) v111 = vavg;
+
+                            /* use trilinear interpolation from http://paulbourke.net/miscellaneous/interpolation/ */
+                            double table_intensity = v000 * (1.0 - factor_x) * (1.0 - factor_y) * (1.0 - factor_x)
+                                    + v100 * factor_x * (1.0 - factor_y) * (1.0 - factor_z)
+                                    + v010 * (1.0 - factor_x) * factor_y * (1.0 - factor_z)
+                                    + v001 * (1.0 - factor_x) * (1.0 - factor_y) * factor_z
+                                    + v101 * factor_x * (1.0 - factor_y) * factor_z
+                                    + v011 * (1.0 - factor_x) * factor_y * factor_z
+                                    + v110 * factor_x * factor_y * (1.0 - factor_z)
+                                    + v111 * factor_x * factor_y * factor_z;
+                            if (table_intensity > 0.0 && control->referenceIntensity[process->image_camera] > 0.0)
+                                intensityCorrection = control->referenceIntensity[process->image_camera]
+                                                        / table_intensity;
+                            else {
+                                intensityCorrection = 1.0;
+                            }
+
+    //fprintf(stderr,"%d %d intensityCorrection:%f table_intensity_ref:%f table_intensity:%f referenceIntensity[%d]:%f\n",
+    //i, j, intensityCorrection, table_intensity_ref, table_intensity, process->image_camera, control->referenceIntensity[process->image_camera]);
+                        }
+
+                        /* else do no correction */
+                        else {
+                            intensityCorrection = 1.0;
+                        }
+
+                        /* access the pixel value in YCrCb image */
+                        unsigned char Y = imageUndistortYCrCb.at<Vec3b>(j,i)[0];
+                        unsigned char Cr = imageUndistortYCrCb.at<Vec3b>(j,i)[1];
+                        unsigned char Cb = imageUndistortYCrCb.at<Vec3b>(j,i)[2];
+
+                        /* correct Y (intensity) value */
+                        Y = saturate_cast<unsigned char>(control->corr_intensity_gain * Y * intensityCorrection);
+
+                        /* convert back to gbr */
+                        b = saturate_cast<unsigned char>(Y + 1.773 * (Cb - 128));
+                        g = saturate_cast<unsigned char>(Y - 0.714 * (Cr - 128) - 0.344 * (Cb - 128));
+                        r = saturate_cast<unsigned char>(Y + 1.403 * (Cr - 128));
+//fprintf(stderr, "%d %d  BGR: %d %d %d   Y:%d Cr:%d Cb:%d  %.3f    Y:%d Cr:%d Cb:%d  BGR: %d %d %d\n",
+//i, j, imageUndistort.at<Vec3b>(j,i)[0], imageUndistort.at<Vec3b>(j,i)[1], imageUndistort.at<Vec3b>(j,i)[2],
+//imageUndistortYCrCb.at<Vec3b>(j,i)[0], imageUndistortYCrCb.at<Vec3b>(j,i)[1], imageUndistortYCrCb.at<Vec3b>(j,i)[2],
+//intensityCorrection, Y, Cr, Cb, b, g, r);
+                    }
+
+                    /* find the location and footprint of the input pixel
+                        in the output image */
+                    double diii, djjj;
+                    double pixel_dx, pixel_dy;
+                    if (control->use_projection) {
+                        /* pixel location */
+                        mb_proj_forward(verbose, control->pjptr, lon, lat, &xx, &yy, error);
+                        diii = (xx - control->OutputBounds[0] + 0.5 * control->OutputDx[0]) / control->OutputDx[0];
+                        djjj = (control->OutputBounds[3] - yy + 0.5 * control->OutputDx[1]) / control->OutputDx[1];
+
+                        /* pixel footprint size */
+                        pixel_dx = 4.0 * rr * cos(DTR * theta) * tan (DTR * dtheta) / control->OutputDx[0];
+                        pixel_dy = 4.0 * rr * cos(DTR * theta) * tan (DTR * dtheta) / control->OutputDx[1];
+//fprintf(stderr, "%s:%d:%s: diii:%f djjj:%f pixel_dx:%f pixel_dy:%f\n",
+//__FILE__, __LINE__, __FUNCTION__, diii, djjj, pixel_dx, pixel_dy);
+                    }
+
+                    else {
+                        /* pixel location */
+                        diii = (lon - control->OutputBounds[0] + 0.5 * control->OutputDx[0]) / control->OutputDx[0];
+                        djjj = (control->OutputBounds[3] - lat + 0.5 * control->OutputDx[1]) / control->OutputDx[1];
+
+                        /* pixel footprint size */
+                        pixel_dx = 4.0 * rr * cos(DTR * theta) * tan (DTR * dtheta) * (control->mtodeglon / control->OutputDx[0]);
+                        pixel_dy = 4.0 * rr * cos(DTR * theta) * tan (DTR * dtheta) * (control->mtodeglat / control->OutputDx[1]);
+//fprintf(stderr, "%s:%d:%s: lon:%f lat:%f bounds: %f %f %f %f dx: %f %f   diii:%f djjj:%f pixel_dx:%f pixel_dy:%f\n",
+//__FILE__, __LINE__, __FUNCTION__, lon, lat,
+//control->OutputBounds[0], control->OutputBounds[1], control->OutputBounds[2], control->OutputBounds[3], control->OutputDx[0], control->OutputDx[1],
+//diii, djjj, pixel_dx, pixel_dy);
+                    }
+
+                    /* figure out the "footprint" extent of the mapped pixel */
+                    int iii1 = (int)(floor(diii) - floor(pixel_dx));
+                    int iii2 = (int)(floor(diii) + floor(pixel_dx));
+                    int jjj1 = (int)(floor(djjj) - floor(pixel_dy));
+                    int jjj2 = (int)(floor(djjj) + floor(pixel_dy));
+                    unsigned int uiii1 = (unsigned int)(MAX(iii1, 0));
+                    unsigned int uiii2 = (unsigned int)(MAX(MIN(iii2, control->OutputDim[0] - 1), 0));
+                    unsigned int ujjj1 = (unsigned int)(MAX(jjj1, 0));
+                    unsigned int ujjj2 = (unsigned int)(MAX(MIN(jjj2, control->OutputDim[1] - 1), 0));
+
+                    unsigned int iii = MIN(MAX((unsigned int)floor(diii), 2), control->OutputDim[0] - 3);
+                    unsigned int jjj = MIN(MAX((unsigned int)floor(djjj), 2), control->OutputDim[1] - 3);
+                    bool out_of_map = true;
+                    if (diii >= 2.0 && diii < control->OutputDim[0] - 3.0 && djjj >= 2.0 && djjj < control->OutputDim[1] - 3.0)
+                        out_of_map = false;
+
+//fprintf(stderr,"i:%d j:%d iii:%d:%d:%d jjj:%d:%d:%d theta:%f dtheta:%f pixel_dx:%f pixel_dy:%f mtodeglon:%g mtodeglat:%g\n",
+//i,j,iii1,iii,iii2,jjj1,jjj,jjj2,theta,dtheta,pixel_dx,pixel_dy,control->mtodeglon,control->mtodeglat);
+//fprintf(stderr,"iii:%d jjj:%d\n",iii,jjj);
+//if (debugprint == MB_YES) {
+//fprintf(stderr,"       standoff:%f pixel_priority:%.3f\n", standoff, pixel_priority);
+//}
+
+                    for (unsigned int ipix=uiii1;ipix<=uiii2;ipix++) {
+                        for (unsigned int jpix=ujjj1;jpix<=ujjj2;jpix++) {
+                            unsigned int kpix = control->OutputDim[0] * jpix + ipix;
+                            double pixel_priority_use;
+                            if (out_of_map)
+                                pixel_priority_use = 0.98 * pixel_priority;
+                            else if (ipix == iii && jpix == jjj)
+                                pixel_priority_use = pixel_priority;
+                            else if (ipix > iii-2 && iii < iii+2 && jpix > jjj-2 && jpix < jjj+2)
+                                pixel_priority_use = 0.99 * pixel_priority;
+                            else
+                                pixel_priority_use = 0.98 * pixel_priority;
+                            if (pixel_priority_use > process->OutputPriority.at<float>(jpix,ipix)) {
+                                process->OutputImage.at<Vec3b>(jpix,ipix)[0] = b;
+                                process->OutputImage.at<Vec3b>(jpix,ipix)[1] = g;
+                                process->OutputImage.at<Vec3b>(jpix,ipix)[2] = r;
+                                process->OutputPriority.at<float>(jpix,ipix) = pixel_priority_use;
+#ifdef DEBUG
+                                process->OutputIntensityCorrection.at<float>(jpix,ipix) = intensityCorrection;
+                                process->OutputStandoff.at<float>(jpix,ipix) = standoff;
+#endif
+//if (debugprint == MB_YES) {
+//fprintf(stderr,"              Pixel used: i:%d j:%d  ipix:%d jpix:%d  BGR:%d %d %d Priority:%f %f\n",
+//i,j,ipix,jpix,
+//process->OutputImage.at<Vec3b>(jpix,ipix)[0],
+//process->OutputImage.at<Vec3b>(jpix,ipix)[1],
+//process->OutputImage.at<Vec3b>(jpix,ipix)[2],
+//pixel_priority_use, process->OutputPriority.at<float>(jpix,ipix));
+//}
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        imageUndistortYCrCb.release();
+        imageUndistort.release();
+
+    }
 }
+/*--------------------------------------------------------------------*/
+void process_image_sectioned(int verbose, struct mbpm_process_struct *process,
+                  struct mbpm_control_struct *control, int *status, int *error)
+{
+    // Working images
+    Mat imageProcess;
+    Mat imageUndistort;
+    Mat imageUndistortYCrCb;
+
+    /* read the image */
+    imageProcess = imread(process->imageFile);
+    if (!imageProcess.empty()) {
+
+        double fov_x, fov_y;
+        double center_x, center_y;
+        double intensityCorrection;
+        bool image_use = false;
+
+        /* undistort the image */
+        undistort(imageProcess, imageUndistort, control->cameraMatrix[process->image_camera], control->distCoeffs[process->image_camera], noArray());
+        cvtColor(imageUndistort, imageUndistortYCrCb, COLOR_BGR2YCrCb);
+        imageProcess.release();
+
+        /* get field of view, offsets, and principal point to use */
+        fov_x = control->fovx[process->image_camera];
+        fov_y = control->fovy[process->image_camera];
+        center_x = control->principalPoint[process->image_camera].x / control->SensorCellMm;
+        center_y = control->principalPoint[process->image_camera].y / control->SensorCellMm;
+
+        /* calculate reference "depth" for use in calculating ray angles for
+            individual pixels */
+        double zzref = 0.5 * (0.5 * control->imageSize.width / tan(DTR * 0.5 * fov_x * control->fov_fudgefactor)
+                + 0.5 * control->imageSize.height / tan(DTR * 0.5 * fov_y * control->fov_fudgefactor));
+
+        /* Apply camera model translation */
+        double dlon, dlat, dz;
+        double headingx = sin(DTR * process->camera_heading);
+        double headingy = cos(DTR * process->camera_heading);
+        if (process->image_camera == 0) {
+            dlon = 0.5 * (control->T.at<double>(0)) * control->mtodeglon;
+            dlat = 0.5 * (control->T.at<double>(1)) * control->mtodeglat;
+            dz = 0.5 * (control->T.at<double>(2));
+        } else {
+            dlon = -0.5 * (control->T.at<double>(0)) * control->mtodeglon;
+            dlat = -0.5 * (control->T.at<double>(1)) * control->mtodeglat;
+            dz = -0.5 * (control->T.at<double>(2));
+        }
+        process->camera_navlon += (headingy * dlon + headingx * dlat);
+        process->camera_navlat += (-headingx * dlon + headingy * dlat);
+        process->camera_sensordepth += dz;
+
+        /* calculate the largest distance from center for this image for use
+            in calculating pixel priority */
+        double xx = MAX(center_x, imageUndistort.cols - center_x);
+        double yy = MAX(center_y, imageUndistort.rows - center_y);
+        double rrxymax = sqrt(xx * xx + yy * yy);
+
+        /* Do some calculations relevant to image correction:
+         * - calculate the average intensity of the image
+         * - if specified calculate the correction required to bring the
+         *    average intensity to a value of 70.0
+         */
+        Scalar avgPixelIntensity = mean(imageUndistortYCrCb);
+        double avgImageIntensityCorrection = 1.0;
+        double brightnessCorrection = 70.0 / avgPixelIntensity.val[0];
+
+        /* get unit vector (cx, cy, cz) for direction camera is pointing */
+        /* (1) rotate center pixel location using attitude and zzref */
+        double zz;
+        mb_platform_math_attitude_rotate_beam(verbose,
+            0.0, 0.0, zzref,
+            process->camera_roll, process->camera_pitch, 0.0,
+            &xx, &yy, &zz,
+            error);
+        double rr = sqrt(xx * xx + yy * yy + zz * zz);
+        double phi = RTD * atan2(yy, xx);
+        double theta = RTD * acos(zz / rr);
+
+        /* (2) calculate unit vector relative to the camera rig */
+        double vx = sin(DTR * theta) * cos(DTR * phi);
+        double vy = sin(DTR * theta) * sin(DTR * phi);
+        double vz = cos(DTR * theta);
+
+        /* (3) apply rotation of each camera relative to the rig */
+        double vxx, vyy, vzz;
+        if (process->image_camera == 1) {
+            vxx = vx * (control->R.at<double>(0,0)) + vy * (control->R.at<double>(0,1)) + vz * (control->R.at<double>(0,2));
+            vyy = vx * (control->R.at<double>(1,0)) + vy * (control->R.at<double>(1,1)) + vz * (control->R.at<double>(1,2));
+            vzz = vx * (control->R.at<double>(2,0)) + vy * (control->R.at<double>(2,1)) + vz * (control->R.at<double>(2,2));
+        }
+        else {
+            vxx = vx;
+            vyy = vy;
+            vzz = vz;
+        }
+
+        /* (4) rotate unit vector by camera rig heading */
+        double cx = vxx * cos(DTR * process->camera_heading) + vyy * sin(DTR * process->camera_heading);
+        double cy = -vxx * sin(DTR * process->camera_heading) + vyy * cos(DTR * process->camera_heading);
+        double cz = vzz;
+
+        /* Loop over sections of the undistorted image, and map those onto the
+           destination image as continuous quads. The priority determining if the
+           section is mapped is calculated for the center pixel of the section. */
+        unsigned int nsection_x = (imageUndistort.cols / control->sectionPixels);
+        if (imageUndistort.cols % control->sectionPixels)
+            nsection_x++;
+        unsigned int nsection_y = (imageUndistort.rows / control->sectionPixels);
+        if (imageUndistort.rows % control->sectionPixels)
+            nsection_y++;
+        for (int isection=0; isection<nsection_x; isection++) {
+            for (int jsection=0; jsection<nsection_y; jsection++) {
+                int i0 = MAX(control->trimPixels, isection * control->sectionPixels);
+                int i1 = MIN(((int)imageUndistort.cols - control->trimPixels - 1), ((isection + 1) * control->sectionPixels - 1));
+                int j0 = MAX(control->trimPixels, jsection * control->sectionPixels);
+                int j1 = MIN(((int)imageUndistort.rows - control->trimPixels - 1), ((jsection + 1) * control->sectionPixels - 1));
+                int ic = (i0 + i1) / 2; // center
+                int jc = (j0 + j1) / 2; // center
+                bool use_section = true;
+                double section_priority = 0.0;
+                double rrxy;
+                double dtheta;
+                double standoff;
+
+                /* if entire section or center point is trimmed ignore */
+                if (i1 < i0 || j1 < j0 || ic < i0 || ic > i1 || jc < j0 || jc > j1)
+                    use_section = false;
+
+                /* calculate the location and standoff of the section center */
+                if (use_section) {
+
+                    /* (1) center location */
+                    xx = ic - center_x;
+                    yy = center_y - jc;
+
+                    /* (2) calculate the pixel takeoff angles relative to the camera rig */
+                    double rrxysq = xx * xx + yy * yy;
+                    rrxy = sqrt(rrxysq);
+                    rr = sqrt(rrxysq + zzref * zzref);
+                    phi = RTD * atan2(yy, xx);
+                    theta = RTD * acos(zzref / rr);
+
+                    /* (3) calculate the angular width of a single pixel */
+                    double rrxysq2 = (rrxy + 1.0) * (rrxy + 1.0);
+                    double rr2 = sqrt(rrxysq2 + zzref * zzref);
+                    double theta2 = RTD * acos(zzref / rr2);
+                    dtheta = theta2 - theta;
+
+                    /* (4) rotate pixel location using attitude and zzref */
+                    double zz;
+                    mb_platform_math_attitude_rotate_beam(verbose,
+                        xx, yy, zzref,
+                        process->camera_roll, process->camera_pitch, 0.0,
+                        &xx, &yy, &zz,
+                        error);
+
+                    /* (5) recalculate the pixel takeoff angles, this time relative
+                        to the world frame vertical (but heading not yet applied) */
+                    rrxysq = xx * xx + yy * yy;
+                    rrxy = sqrt(rrxysq);
+                    rr = sqrt(rrxysq + zz * zz);
+                    phi = RTD * atan2(yy, xx);
+                    theta = RTD * acos(zz / rr);
+
+                    /* (6) calculate unit direction vector of pixel */
+                    vz = cos(DTR * theta);
+                    vx = sin(DTR * theta) * cos(DTR * phi);
+                    vy = sin(DTR * theta) * sin(DTR * phi);
+
+                    /* (7) if takeoff angle is too vertical (this is a 2D photomosaic)
+                        then do not use this section */
+                    if (theta > 80.0)
+                        use_section = false;
+                }
+
+                if (use_section) {
+                    /* apply rotation of each camera relative to the rig */
+                    if (process->image_camera == 1) {
+                        vxx = vx * (control->R.at<double>(0,0)) + vy * (control->R.at<double>(0,1)) + vz * (control->R.at<double>(0,2));
+                        vyy = vx * (control->R.at<double>(1,0)) + vy * (control->R.at<double>(1,1)) + vz * (control->R.at<double>(1,2));
+                        vzz = vx * (control->R.at<double>(2,0)) + vy * (control->R.at<double>(2,1)) + vz * (control->R.at<double>(2,2));
+                    }
+                    else {
+                        vxx = vx;
+                        vyy = vy;
+                        vzz = vz;
+                    }
+
+                    /* rotate unit vector by camera rig heading */
+                    vx = vxx * cos(DTR * process->camera_heading) + vyy * sin(DTR * process->camera_heading);
+                    vy = -vxx * sin(DTR * process->camera_heading) + vyy * cos(DTR * process->camera_heading);
+                    vz = vzz;
+
+                    /* find the location where this vector intersects the grid */
+                    double lon, lat, topo;
+                    if (control->use_topography) {
+                        *status = mb_topogrid_intersect(verbose, control->topogrid_ptr,
+                                    process->camera_navlon, process->camera_navlat, 0.0, process->camera_sensordepth,
+                                    control->mtodeglon, control->mtodeglat, vx, vy, vz,
+                                    &lon, &lat, &topo, &rr, error);
+                    }
+                    else {
+                        rr = control->standoff_target / vz;
+                        lon = process->camera_navlon + control->mtodeglon * vx * rr;
+                        lat = process->camera_navlat + control->mtodeglon * vy * rr;
+                        topo = -process->camera_sensordepth -  control->standoff_target;
+                    }
+                    zz = -process->camera_sensordepth - topo;
+
+                    /* standoff is dot product of camera vector with projected pixel vector */
+                    standoff = (cx * rr * vx) + (cy * rr * vy) + (cz * rr * vz);
+
+                    /* Don't use section if range too large */
+                    if (rr > control->range_max)
+                        use_section = false;
+
+                    /* calculate the section priority based on the distance
+                        from the image center and if specified the standoff */
+                    section_priority = (rrxymax - rrxy) / rrxymax;
+                    if (control->priority_mode == MBPM_PRIORITY_CENTRALITY_PLUS_STANDOFF)  {
+                        double dstandoff = (standoff - control->standoff_target) / control->standoff_range;
+                        double standoff_priority = (float) (exp(-dstandoff * dstandoff));
+                        section_priority *= standoff_priority;
+                    }
+
+                    /* find the location of the section center in the output image */
+                    int ipix, jpix;
+                    if (control->use_projection) {
+                        mb_proj_forward(verbose, control->pjptr, lon, lat, &xx, &yy, error);
+                        ipix = (int)((xx - control->OutputBounds[0] + 0.5 * control->OutputDx[0]) / control->OutputDx[0]);
+                        jpix = (int)((control->OutputBounds[3] - yy + 0.5 * control->OutputDx[1]) / control->OutputDx[1]);
+                    } else {
+                        ipix = (int)((lon - control->OutputBounds[0] + 0.5 * control->OutputDx[0]) / control->OutputDx[0]);
+                        jpix = (int)((control->OutputBounds[3] - lat + 0.5 * control->OutputDx[1]) / control->OutputDx[1]);
+                    }
+
+                    /* check if section center is in the output image and if the
+                        priority of section center is greater than the existing priority
+                        at the corresponding point in the output image */
+                    if (ipix < 0 || ipix >= control->OutputDim[0]
+                        || jpix < 0 || jpix >= control->OutputDim[1]
+                        || section_priority <= process->OutputPriority.at<float>(jpix,ipix))
+                        use_section = false;
+                }
+
+                /* if ok and higher priority, map entire section onto the output image */
+                if (use_section) {
+
+                    /* Print information for image to be processed */
+                    if (!image_use) {
+                        image_use = true;
+                        int time_i[7];
+                        mb_get_date(verbose, process->time_d, time_i);
+                        fprintf(stderr,"%4d Camera:%d %s %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d LLZ: %.10f %.10f %8.3f HRP: %6.2f %6.2f %6.2f Amp:%.3f\n",
+                                process->image_count, process->image_camera, process->imageFile,
+                                time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6],
+                                process->camera_navlon, process->camera_navlat, process->camera_sensordepth,
+                                process->camera_heading, process->camera_roll, process->camera_pitch, avgPixelIntensity.val[0]);
+                    }
+
+                    for (int i=i0; i<=i1; i++) {
+                        for (int j=j0; j<j1; j++) {
+                            bool use_pixel = true;
+                            double dtheta;
+                            double standoff = 0.0;
+                            double lon, lat, topo;
+                            double pixel_priority;
+
+                            /* Deal with problem of black pixels at the margins of the
+                                undistorted images. If the user has not specified a trim
+                                range for the image margins, then ignore all purely black
+                                pixels and all pixels adjacent to purely black pixels. */
+                            if (control->trimPixels == 0) {
+                                unsigned int sum = imageUndistort.at<Vec3b>(j,i)[0]
+                                                    + imageUndistort.at<Vec3b>(j,i)[1]
+                                                    + imageUndistort.at<Vec3b>(j,i)[2];
+                                if (sum == 0)
+                                    use_pixel = false;
+                                else {
+                                    for (int ii = MAX(i-1, 0); ii < MIN(i+2, imageUndistort.cols) && use_pixel; ii++) {
+                                        for (int jj = MAX(j-1, 0); jj < MIN(j+2, imageUndistort.rows) && use_pixel; jj++) {
+                                            if (imageUndistort.at<Vec3b>(jj,ii)[0]
+                                                    + imageUndistort.at<Vec3b>(jj,ii)[1]
+                                                    + imageUndistort.at<Vec3b>(jj,ii)[2] == 0) {
+                                                use_pixel = false;
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+
+                            if (use_pixel) {
+                                /* calculate the pixel priority based on the distance
+                                    from the image center */
+                                xx = i - center_x;
+                                yy = center_y - j;
+                                double rrxysq = xx * xx + yy * yy;
+                                rrxy = sqrt(rrxysq);
+                                rr = sqrt(rrxysq + zzref * zzref);
+                                pixel_priority = (rrxymax - rrxy) / rrxymax;
+
+                                /* calculate the pixel takeoff angles relative to the camera rig */
+                                phi = RTD * atan2(yy, xx);
+                                theta = RTD * acos(zzref / rr);
+
+                                /* calculate the angular width of a single pixel */
+                                double rrxysq2 = (rrxy + 1.0) * (rrxy + 1.0);
+                                double rr2 = sqrt(rrxysq2 + zzref * zzref);
+                                double theta2 = RTD * acos(zzref / rr2);
+                                dtheta = theta2 - theta;
+
+                                /* rotate pixel location using attitude and zzref */
+                                double zz;
+                                mb_platform_math_attitude_rotate_beam(verbose,
+                                    xx, yy, zzref,
+                                    process->camera_roll, process->camera_pitch, 0.0,
+                                    &xx, &yy, &zz,
+                                    error);
+
+                                /* recalculate the pixel takeoff angles relative to the camera rig */
+                                rrxysq = xx * xx + yy * yy;
+                                rrxy = sqrt(rrxysq);
+                                rr = sqrt(rrxysq + zz * zz);
+                                phi = RTD * atan2(yy, xx);
+                                theta = RTD * acos(zz / rr);
+
+                                /* calculate unit vector relative to the camera rig */
+                                vz = cos(DTR * theta);
+                                vx = sin(DTR * theta) * cos(DTR * phi);
+                                vy = sin(DTR * theta) * sin(DTR * phi);
+                                /* if takeoff angle is too vertical (this is a 2D photomosaic)
+                                    then do not use this pixel */
+                                if (theta > 80.0)
+                                    use_pixel = false;
+                            }
+
+                            if (use_pixel) {
+
+                                /* apply rotation of each camera relative to the rig */
+                                if (process->image_camera == 1) {
+                                    vxx = vx * (control->R.at<double>(0,0)) + vy * (control->R.at<double>(0,1)) + vz * (control->R.at<double>(0,2));
+                                    vyy = vx * (control->R.at<double>(1,0)) + vy * (control->R.at<double>(1,1)) + vz * (control->R.at<double>(1,2));
+                                    vzz = vx * (control->R.at<double>(2,0)) + vy * (control->R.at<double>(2,1)) + vz * (control->R.at<double>(2,2));
+                                }
+                                else {
+                                    vxx = vx;
+                                    vyy = vy;
+                                    vzz = vz;
+                                }
+
+                                /* rotate unit vector by camera rig heading */
+                                vx = vxx * cos(DTR * process->camera_heading) + vyy * sin(DTR * process->camera_heading);
+                                vy = -vxx * sin(DTR * process->camera_heading) + vyy * cos(DTR * process->camera_heading);
+                                vz = vzz;
+
+                                /* find the location where this vector intersects the grid */
+                                if (control->use_topography) {
+                                    *status = mb_topogrid_intersect(verbose, control->topogrid_ptr,
+                                                process->camera_navlon, process->camera_navlat, 0.0, process->camera_sensordepth,
+                                                control->mtodeglon, control->mtodeglat, vx, vy, vz,
+                                                &lon, &lat, &topo, &rr, error);
+                                }
+                                else {
+                                    rr = control->standoff_target / vz;
+                                    lon = process->camera_navlon + control->mtodeglon * vx * rr;
+                                    lat = process->camera_navlat + control->mtodeglon * vy * rr;
+                                    topo = -process->camera_sensordepth -  control->standoff_target;
+                                }
+                                zz = -process->camera_sensordepth - topo;
+
+                                /* standoff is dot product of camera vector with projected pixel vector */
+                                standoff = (cx * rr * vx) + (cy * rr * vy) + (cz * rr * vz);
+                                /* Don't use pixel if too vertical or range too large */
+                                if (theta > 80.0 || rr > control->range_max)
+                                    use_pixel = false;
+                            }
+
+                            if (use_pixel) {
+
+                                /* No correction - use original pixel BGR */
+                                unsigned char b, g, r;
+                                if (control->corr_mode == MBPM_CORRECTION_NONE) {
+                                    b = imageUndistort.at<Vec3b>(j,i)[0];
+                                    g = imageUndistort.at<Vec3b>(j,i)[1];
+                                    r = imageUndistort.at<Vec3b>(j,i)[2];
+                                }
+
+                                /* Get intensity correction according to corr_mode */
+                                else {
+
+                                    /* Get intensity correction according to corr_mode */
+                                    /* Apply brightness correction to each image separately */
+                                    if (control->corr_mode == MBPM_CORRECTION_BRIGHTNESS) {
+                                        intensityCorrection = brightnessCorrection;
+                                    }
+
+                                    /* Apply range based correction to pixels */
+                                    else if (control->corr_mode == MBPM_CORRECTION_RANGE) {
+                                        intensityCorrection = exp(control->corr_range_coeff * (rr - control->corr_range_target));
+                                    }
+
+                                    /* Apply standoff based correction to pixels */
+                                    else if (control->corr_mode == MBPM_CORRECTION_STANDOFF) {
+                                        intensityCorrection = exp(control->corr_standoff_coeff * (standoff - control->corr_standoff_target));
+                                    }
+
+                                    /* Apply correction by interpolation of 3D table generated by mbgetphotocorrection */
+                                    else if (control->corr_mode == MBPM_CORRECTION_FILE) {
+                                        int ibin_x1 = MIN(MAX(((int)((i + 0.5 * control->bin_dx) / control->bin_dx)), 0), control->ncorr_x - 2);
+                                        int ibin_x2 = ibin_x1 + 1;
+                                        double factor_x = ((double)i - 0.5 * control->bin_dx) / control->bin_dx - (double)ibin_x1;
+                                        int jbin_y1 = MIN(MAX(((int)((j + 0.5 * control->bin_dy) / control->bin_dy)), 0), control->ncorr_y - 2);
+                                        int jbin_y2 = jbin_y1 + 1;
+                                        double factor_y = ((double)j - 0.5 * control->bin_dy) / control->bin_dy - (double)jbin_y1;
+                                        int kbin_z1 = MIN(MAX(((int)((standoff + 0.5 * control->bin_dz) / control->bin_dz)), 0), control->ncorr_z - 2);
+                                        int kbin_z2 = kbin_z1 + 1;
+                                        double factor_z = ((double)standoff - 0.5 * control->bin_dz) / control->bin_dz - (double)kbin_z1;
+                                        factor_x = MIN(MAX(factor_x, 0.0), 1.0);
+                                        factor_y = MIN(MAX(factor_y, 0.0), 1.0);
+                                        factor_z = MIN(MAX(factor_z, 0.0), 1.0);
+
+                                        /* get reference intensity from center of image at the current standoff */
+                                        double table_intensity_ref
+                                            = (1.0 - factor_z) * control->corr_table[process->image_camera].at<float>(control->ibin_xcen, control->jbin_ycen, kbin_z1)
+                                                    + factor_z * control->corr_table[process->image_camera].at<float>(control->ibin_xcen, control->jbin_ycen, kbin_z2);
+
+                                        double v000 = control->corr_table[process->image_camera].at<float>(ibin_x1, jbin_y1, kbin_z1);
+                                        double v100 = control->corr_table[process->image_camera].at<float>(ibin_x2, jbin_y1, kbin_z1);
+                                        double v010 = control->corr_table[process->image_camera].at<float>(ibin_x1, jbin_y2, kbin_z1);
+                                        double v001 = control->corr_table[process->image_camera].at<float>(ibin_x1, jbin_y1, kbin_z2);
+                                        double v101 = control->corr_table[process->image_camera].at<float>(ibin_x2, jbin_y1, kbin_z2);
+                                        double v011 = control->corr_table[process->image_camera].at<float>(ibin_x1, jbin_y2, kbin_z2);
+                                        double v110 = control->corr_table[process->image_camera].at<float>(ibin_x2, jbin_y2, kbin_z1);
+                                        double v111 = control->corr_table[process->image_camera].at<float>(ibin_x2, jbin_y2, kbin_z2);
+                                        double vavg = v000 + v100 + v010 + v110 + v001 + v101 + v011 + v111;
+                                        int nvavg = 0;
+                                        if (v000 > 0.0) nvavg++;
+                                        if (v100 > 0.0) nvavg++;
+                                        if (v010 > 0.0) nvavg++;
+                                        if (v110 > 0.0) nvavg++;
+                                        if (v001 > 0.0) nvavg++;
+                                        if (v101 > 0.0) nvavg++;
+                                        if (v011 > 0.0) nvavg++;
+                                        if (v111 > 0.0) nvavg++;
+                                        if (nvavg > 0)
+                                            vavg /= nvavg;
+                                        if (v000 == 0.0) v000 = vavg;
+                                        if (v100 == 0.0) v100 = vavg;
+                                        if (v010 == 0.0) v010 = vavg;
+                                        if (v110 == 0.0) v110 = vavg;
+                                        if (v001 == 0.0) v001 = vavg;
+                                        if (v101 == 0.0) v101 = vavg;
+                                        if (v011 == 0.0) v011 = vavg;
+                                        if (v111 == 0.0) v111 = vavg;
+
+                                        /* use trilinear interpolation from http://paulbourke.net/miscellaneous/interpolation/ */
+                                        double table_intensity = v000 * (1.0 - factor_x) * (1.0 - factor_y) * (1.0 - factor_x)
+                                                + v100 * factor_x * (1.0 - factor_y) * (1.0 - factor_z)
+                                                + v010 * (1.0 - factor_x) * factor_y * (1.0 - factor_z)
+                                                + v001 * (1.0 - factor_x) * (1.0 - factor_y) * factor_z
+                                                + v101 * factor_x * (1.0 - factor_y) * factor_z
+                                                + v011 * (1.0 - factor_x) * factor_y * factor_z
+                                                + v110 * factor_x * factor_y * (1.0 - factor_z)
+                                                + v111 * factor_x * factor_y * factor_z;
+                                        if (table_intensity > 0.0 && control->referenceIntensity[process->image_camera] > 0.0)
+                                            intensityCorrection = control->referenceIntensity[process->image_camera]
+                                                                    / table_intensity;
+                                        else {
+                                            intensityCorrection = 1.0;
+                                        }
+
+                                    }
+
+                                    /* else do no correction */
+                                    else {
+                                        intensityCorrection = 1.0;
+                                    }
+
+                                    /* access the pixel value in YCrCb image */
+                                    unsigned char Y = imageUndistortYCrCb.at<Vec3b>(j,i)[0];
+                                    unsigned char Cr = imageUndistortYCrCb.at<Vec3b>(j,i)[1];
+                                    unsigned char Cb = imageUndistortYCrCb.at<Vec3b>(j,i)[2];
+
+                                    /* correct Y (intensity) value */
+                                    Y = saturate_cast<unsigned char>(control->corr_intensity_gain * Y * intensityCorrection);
+
+                                    /* convert back to gbr */
+                                    b = saturate_cast<unsigned char>(Y + 1.773 * (Cb - 128));
+                                    g = saturate_cast<unsigned char>(Y - 0.714 * (Cr - 128) - 0.344 * (Cb - 128));
+                                    r = saturate_cast<unsigned char>(Y + 1.403 * (Cr - 128));
+                                }
+
+                                /* find the location and footprint of the input pixel
+                                    in the output image */
+                                double diii, djjj;
+                                double pixel_dx, pixel_dy;
+                                if (control->use_projection) {
+                                    /* pixel location */
+                                    mb_proj_forward(verbose, control->pjptr, lon, lat, &xx, &yy, error);
+                                    diii = (xx - control->OutputBounds[0] + 0.5 * control->OutputDx[0]) / control->OutputDx[0];
+                                    djjj = (control->OutputBounds[3] - yy + 0.5 * control->OutputDx[1]) / control->OutputDx[1];
+
+                                    /* pixel footprint size */
+                                    pixel_dx = 4.0 * rr * cos(DTR * theta) * tan (DTR * dtheta) / control->OutputDx[0];
+                                    pixel_dy = 4.0 * rr * cos(DTR * theta) * tan (DTR * dtheta) / control->OutputDx[1];
+                                }
+
+                                else {
+                                    /* pixel location */
+                                    diii = (lon - control->OutputBounds[0] + 0.5 * control->OutputDx[0]) / control->OutputDx[0];
+                                    djjj = (control->OutputBounds[3] - lat + 0.5 * control->OutputDx[1]) / control->OutputDx[1];
+
+                                    /* pixel footprint size */
+                                    pixel_dx = 4.0 * rr * cos(DTR * theta) * tan (DTR * dtheta) * (control->mtodeglon / control->OutputDx[0]);
+                                    pixel_dy = 4.0 * rr * cos(DTR * theta) * tan (DTR * dtheta) * (control->mtodeglat / control->OutputDx[1]);
+                                }
+
+                                /* figure out the "footprint" extent of the mapped pixel */
+                                int iii1 = (int)(floor(diii) - floor(pixel_dx));
+                                int iii2 = (int)(floor(diii) + floor(pixel_dx));
+                                int jjj1 = (int)(floor(djjj) - floor(pixel_dy));
+                                int jjj2 = (int)(floor(djjj) + floor(pixel_dy));
+                                unsigned int uiii1 = (unsigned int)(MAX(iii1, 0));
+                                unsigned int uiii2 = (unsigned int)(MAX(MIN(iii2, control->OutputDim[0] - 1), 0));
+                                unsigned int ujjj1 = (unsigned int)(MAX(jjj1, 0));
+                                unsigned int ujjj2 = (unsigned int)(MAX(MIN(jjj2, control->OutputDim[1] - 1), 0));
+
+                                unsigned int iii = MIN(MAX((unsigned int)floor(diii), 2), control->OutputDim[0] - 3);
+                                unsigned int jjj = MIN(MAX((unsigned int)floor(djjj), 2), control->OutputDim[1] - 3);
+                                bool out_of_map = true;
+                                if (diii >= 2.0 && diii < control->OutputDim[0] - 3.0 && djjj >= 2.0 && djjj < control->OutputDim[1] - 3.0)
+                                    out_of_map = false;
+
+                                for (unsigned int ipix=uiii1;ipix<=uiii2;ipix++) {
+                                    for (unsigned int jpix=ujjj1;jpix<=ujjj2;jpix++) {
+                                        unsigned int kpix = control->OutputDim[0] * jpix + ipix;
+                                        double pixel_priority_use;
+                                        if (out_of_map)
+                                            pixel_priority_use = 0.98 * pixel_priority;
+                                        else if (ipix == iii && jpix == jjj)
+                                            pixel_priority_use = pixel_priority;
+                                        else if (ipix > iii-2 && iii < iii+2 && jpix > jjj-2 && jpix < jjj+2)
+                                            pixel_priority_use = 0.99 * pixel_priority;
+                                        else
+                                            pixel_priority_use = 0.98 * pixel_priority;
+                                        process->OutputImage.at<Vec3b>(jpix,ipix)[0] = b;
+                                        process->OutputImage.at<Vec3b>(jpix,ipix)[1] = g;
+                                        process->OutputImage.at<Vec3b>(jpix,ipix)[2] = r;
+                                        process->OutputPriority.at<float>(jpix,ipix) = pixel_priority_use;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        imageUndistortYCrCb.release();
+        imageUndistort.release();
+
+    }
+}
+/*--------------------------------------------------------------------*/
+void process_image_sectioned2(int verbose, struct mbpm_process_struct *process,
+                  struct mbpm_control_struct *control, int *status, int *error)
+{
+    // Working images
+    Mat imageProcess;
+    Mat imageUndistort;
+    Mat imageUndistortYCrCb;
+
+    /* read the image */
+    imageProcess = imread(process->imageFile);
+    if (!imageProcess.empty()) {
+
+        double fov_x, fov_y;
+        double center_x, center_y;
+        double intensityCorrection;
+        bool image_use = false;
+
+        /* undistort the image */
+        undistort(imageProcess, imageUndistort, control->cameraMatrix[process->image_camera], control->distCoeffs[process->image_camera], noArray());
+        cvtColor(imageUndistort, imageUndistortYCrCb, COLOR_BGR2YCrCb);
+        imageProcess.release();
+
+        /* get field of view, offsets, and principal point to use */
+        fov_x = control->fovx[process->image_camera];
+        fov_y = control->fovy[process->image_camera];
+        center_x = control->principalPoint[process->image_camera].x / control->SensorCellMm;
+        center_y = control->principalPoint[process->image_camera].y / control->SensorCellMm;
+
+        /* calculate reference "depth" for use in calculating ray angles for
+            individual pixels */
+        double zzref = 0.5 * (0.5 * control->imageSize.width / tan(DTR * 0.5 * fov_x * control->fov_fudgefactor)
+                + 0.5 * control->imageSize.height / tan(DTR * 0.5 * fov_y * control->fov_fudgefactor));
+
+        /* Apply camera model translation */
+        double dlon, dlat, dz;
+        double headingx = sin(DTR * process->camera_heading);
+        double headingy = cos(DTR * process->camera_heading);
+        if (process->image_camera == 0) {
+            dlon = 0.5 * (control->T.at<double>(0)) * control->mtodeglon;
+            dlat = 0.5 * (control->T.at<double>(1)) * control->mtodeglat;
+            dz = 0.5 * (control->T.at<double>(2));
+        } else {
+            dlon = -0.5 * (control->T.at<double>(0)) * control->mtodeglon;
+            dlat = -0.5 * (control->T.at<double>(1)) * control->mtodeglat;
+            dz = -0.5 * (control->T.at<double>(2));
+        }
+        process->camera_navlon += (headingy * dlon + headingx * dlat);
+        process->camera_navlat += (-headingx * dlon + headingy * dlat);
+        process->camera_sensordepth += dz;
+
+        /* calculate the largest distance from center for this image for use
+            in calculating pixel priority */
+        double xx = MAX(center_x, imageUndistort.cols - center_x);
+        double yy = MAX(center_y, imageUndistort.rows - center_y);
+        double rrxymax = sqrt(xx * xx + yy * yy);
+
+        /* Do some calculations relevant to image correction:
+         * - calculate the average intensity of the image
+         * - if specified calculate the correction required to bring the
+         *    average intensity to a value of 70.0
+         */
+        Scalar avgPixelIntensity = mean(imageUndistortYCrCb);
+        double avgImageIntensityCorrection = 1.0;
+        double brightnessCorrection = 70.0 / avgPixelIntensity.val[0];
+
+        /* get unit vector (cx, cy, cz) for direction camera is pointing */
+        /* (1) rotate center pixel location using attitude and zzref */
+        double zz;
+        mb_platform_math_attitude_rotate_beam(verbose,
+            0.0, 0.0, zzref,
+            process->camera_roll, process->camera_pitch, 0.0,
+            &xx, &yy, &zz,
+            error);
+        double rr = sqrt(xx * xx + yy * yy + zz * zz);
+        double phi = RTD * atan2(yy, xx);
+        double theta = RTD * acos(zz / rr);
+
+        /* (2) calculate unit vector relative to the camera rig */
+        double vx = sin(DTR * theta) * cos(DTR * phi);
+        double vy = sin(DTR * theta) * sin(DTR * phi);
+        double vz = cos(DTR * theta);
+
+        /* (3) apply rotation of each camera relative to the rig */
+        double vxx, vyy, vzz;
+        if (process->image_camera == 1) {
+            vxx = vx * (control->R.at<double>(0,0)) + vy * (control->R.at<double>(0,1)) + vz * (control->R.at<double>(0,2));
+            vyy = vx * (control->R.at<double>(1,0)) + vy * (control->R.at<double>(1,1)) + vz * (control->R.at<double>(1,2));
+            vzz = vx * (control->R.at<double>(2,0)) + vy * (control->R.at<double>(2,1)) + vz * (control->R.at<double>(2,2));
+        }
+        else {
+            vxx = vx;
+            vyy = vy;
+            vzz = vz;
+        }
+
+        /* (4) rotate unit vector by camera rig heading */
+        double cx = vxx * cos(DTR * process->camera_heading) + vyy * sin(DTR * process->camera_heading);
+        double cy = -vxx * sin(DTR * process->camera_heading) + vyy * cos(DTR * process->camera_heading);
+        double cz = vzz;
+
+        /* Loop over sections of the undistorted image, and map those onto the
+           destination image as continuous quads. The priority determining if the
+           section is mapped is calculated for the center pixel of the section. */
+        unsigned int nsection_x = (imageUndistort.cols / control->sectionPixels);
+        if (imageUndistort.cols % control->sectionPixels)
+            nsection_x++;
+        unsigned int nsection_y = (imageUndistort.rows / control->sectionPixels);
+        if (imageUndistort.rows % control->sectionPixels)
+            nsection_y++;
+        for (int isection=0; isection<nsection_x; isection++) {
+            for (int jsection=0; jsection<nsection_y; jsection++) {
+                int i0 = MAX(control->trimPixels, isection * control->sectionPixels);
+                int i1 = MIN(((int)imageUndistort.cols - control->trimPixels - 1), ((isection + 1) * control->sectionPixels - 1));
+                int j0 = MAX(control->trimPixels, jsection * control->sectionPixels);
+                int j1 = MIN(((int)imageUndistort.rows - control->trimPixels - 1), ((jsection + 1) * control->sectionPixels - 1));
+                int ic = (i0 + i1) / 2; // center
+                int jc = (j0 + j1) / 2; // center
+                Point2f srcCorners[5], dstCorners[5];
+                Point2f dstCornersWide[5];
+                double range[5], standoff[5];
+                Point2i dstCornerPixels[5];
+                bool use_section = true;
+                double section_priority = 0.0;
+                double rrxy;
+                double dtheta;
+
+                /* if entire section or center point is trimmed ignore */
+                if (i1 < i0 || j1 < j0 || ic < i0 || ic > i1 || jc < j0 || jc > j1)
+                    use_section = false;
+
+                /* calculate the location and standoff of the section corners and center */
+                if (use_section) {
+                    srcCorners[0].x = i0 - center_x; // lower left
+                    srcCorners[0].y = center_y - j0; // lower left
+                    srcCorners[1].x = i0 - center_x; // upper left
+                    srcCorners[1].y = center_y - j1; // upper left
+                    srcCorners[2].x = i1 - center_x; // upper right
+                    srcCorners[2].y = center_y - j1; // upper right
+                    srcCorners[3].x = i1 - center_x; // lower right
+                    srcCorners[3].y = center_y - j0; // lower right
+                    srcCorners[4].x = ic - center_x; // center
+                    srcCorners[4].y = center_y - jc; // center
+
+                    for (int icorner = 0; icorner < 5 && use_section; icorner++) {
+                        double zz, lon, lat, topo;
+
+                        /* rotate pixel location using attitude and zzref */
+                        mb_platform_math_attitude_rotate_beam(verbose,
+                            srcCorners[icorner].x, srcCorners[icorner].y, zzref,
+                            process->camera_roll, process->camera_pitch, 0.0,
+                            &xx, &yy, &zz,
+                            error);
+
+                        /* calculate the pixel takeoff angles relative
+                            to the world frame vertical (but heading not yet applied) */
+                        double rrxysq = xx * xx + yy * yy;
+                        rrxy = sqrt(rrxysq);
+                        rr = sqrt(rrxysq + zz * zz);
+                        phi = RTD * atan2(yy, xx);
+                        theta = RTD * acos(zz / rr);
+
+                        /* continue only if takeoff angle is not too vertical
+                            (this is a 2D photomosaic) */
+                        if (theta > 80.0)
+                            use_section = false;
+                        if (use_section) {
+
+                            /* calculate unit direction vector of pixel */
+                            vz = cos(DTR * theta);
+                            vx = sin(DTR * theta) * cos(DTR * phi);
+                            vy = sin(DTR * theta) * sin(DTR * phi);
+
+                            /* apply rotation of each camera relative to the rig */
+                            if (process->image_camera == 1) {
+                                vxx = vx * (control->R.at<double>(0,0)) + vy * (control->R.at<double>(0,1)) + vz * (control->R.at<double>(0,2));
+                                vyy = vx * (control->R.at<double>(1,0)) + vy * (control->R.at<double>(1,1)) + vz * (control->R.at<double>(1,2));
+                                vzz = vx * (control->R.at<double>(2,0)) + vy * (control->R.at<double>(2,1)) + vz * (control->R.at<double>(2,2));
+                            }
+                            else {
+                                vxx = vx;
+                                vyy = vy;
+                                vzz = vz;
+                            }
+
+                            /* rotate unit vector by camera rig heading */
+                            vx = vxx * cos(DTR * process->camera_heading) + vyy * sin(DTR * process->camera_heading);
+                            vy = -vxx * sin(DTR * process->camera_heading) + vyy * cos(DTR * process->camera_heading);
+                            vz = vzz;
+
+                            /* find the location where this vector intersects the grid */
+                            if (control->use_topography) {
+                                *status = mb_topogrid_intersect(verbose, control->topogrid_ptr,
+                                            process->camera_navlon, process->camera_navlat, 0.0, process->camera_sensordepth,
+                                            control->mtodeglon, control->mtodeglat, vx, vy, vz,
+                                            &lon, &lat, &topo, &rr, error);
+                            }
+                            else {
+                                rr = control->standoff_target / vz;
+                                lon = process->camera_navlon + control->mtodeglon * vx * rr;
+                                lat = process->camera_navlat + control->mtodeglon * vy * rr;
+                                topo = -process->camera_sensordepth -  control->standoff_target;
+                            }
+                            zz = -process->camera_sensordepth - topo;
+                        }
+
+                        /* continue only if range not too large */
+                        if (use_section && rr > control->range_max)
+                            use_section = false;
+                        if (use_section) {
+
+                            /* standoff is dot product of camera vector with projected pixel vector */
+                            range[icorner] = rr;
+                            standoff[icorner] = (cx * rr * vx) + (cy * rr * vy) + (cz * rr * vz);
+
+                            /* find  location in the output image */
+                            if (control->use_projection) {
+                                mb_proj_forward(verbose, control->pjptr, lon, lat, &xx, &yy, error);
+                                dstCorners[icorner].x = ((xx - control->OutputBounds[0] + 0.5 * control->OutputDx[0]) / control->OutputDx[0]);
+                                dstCorners[icorner].y = ((control->OutputBounds[3] - yy + 0.5 * control->OutputDx[1]) / control->OutputDx[1]);
+                            } else {
+                                dstCorners[icorner].x = ((lon - control->OutputBounds[0] + 0.5 * control->OutputDx[0]) / control->OutputDx[0]);
+                                dstCorners[icorner].y = ((control->OutputBounds[3] - lat + 0.5 * control->OutputDx[1]) / control->OutputDx[1]);
+                            }
+                            dstCornersWide[icorner].x = dstCorners[icorner].x;
+                            dstCornersWide[icorner].y = dstCorners[icorner].y;
+                            dstCornerPixels[icorner].x = (int)dstCorners[icorner].x;
+                            dstCornerPixels[icorner].y = (int)dstCorners[icorner].y;
+
+                            /* at section center point calculate section priority, then
+                                check if section center is in the output image and if the
+                                priority of section center is greater than the existing priority
+                                at the corresponding point in the output image */
+                            if (icorner == 4) {
+                                /* calculate the section priority based on the distance
+                                    from the image center and if specified the standoff */
+                                section_priority = (rrxymax - rrxy) / rrxymax;
+                                if (control->priority_mode == MBPM_PRIORITY_CENTRALITY_PLUS_STANDOFF)  {
+                                    double dstandoff = (standoff[icorner] - control->standoff_target) / control->standoff_range;
+                                    double standoff_priority = (float) (exp(-dstandoff * dstandoff));
+                                    section_priority *= standoff_priority;
+                                }
+
+                                if (dstCornerPixels[icorner].x < 0 || dstCornerPixels[icorner].x >= control->OutputDim[0]
+                                    || dstCornerPixels[icorner].y < 0 || dstCornerPixels[icorner].y >= control->OutputDim[1]
+                                    || section_priority <= process->OutputPriority.at<float>(dstCornerPixels[icorner].y,dstCornerPixels[icorner].x))
+                                    use_section = false;
+                            }
+                        }
+                    }
+                }
+
+                /* if ok and higher priority, map entire section onto the output image */
+                if (use_section) {
+
+                    /* Print information for image to be processed */
+                    if (!image_use) {
+                        image_use = true;
+                        int time_i[7];
+                        mb_get_date(verbose, process->time_d, time_i);
+                        fprintf(stderr,"%4d Camera:%d %s %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d LLZ: %.10f %.10f %8.3f HRP: %6.2f %6.2f %6.2f Amp:%.3f\n",
+                                process->image_count, process->image_camera, process->imageFile,
+                                time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6],
+                                process->camera_navlon, process->camera_navlat, process->camera_sensordepth,
+                                process->camera_heading, process->camera_roll, process->camera_pitch, avgPixelIntensity.val[0]);
+                    }
+
+                    /* widen the quad in the destination image to avoid missing some pixels */
+                    for (int icorner = 0; icorner < 4; icorner++) {
+                        dstCornersWide[icorner].x += (dstCorners[icorner].x > dstCorners[4].x) ? 5.0 : -5.0;
+                        dstCornersWide[icorner].y += (dstCorners[icorner].y > dstCorners[4].y) ? 5.0 : -5.0;
+                        dstCornerPixels[icorner].x = (int)dstCornersWide[icorner].x;
+                        dstCornerPixels[icorner].y = (int)dstCornersWide[icorner].y;
+                    }
+
+                    /* Calculate non-affine transformation for this section
+                        allowing calculation of the corresponding source location
+                        for any pixel in the destination image. */
+                    Mat transformation = getPerspectiveTransform(dstCorners, srcCorners, DECOMP_LU);
+
+                    /* get bounds of the region of interest in the destination image */
+                    int di0 = dstCornerPixels[4].x;
+                    int di1 = dstCornerPixels[4].x;
+                    int dj0 = dstCornerPixels[4].y;
+                    int dj1 = dstCornerPixels[4].y;
+                    for (int icorner = 0; icorner < 4; icorner++) {
+                      di0 = MIN(di0, dstCornerPixels[icorner].x);
+                      di1 = MAX(di1, dstCornerPixels[icorner].x);
+                      dj0 = MIN(dj0, dstCornerPixels[icorner].y);
+                      dj1 = MAX(dj1, dstCornerPixels[icorner].y);
+                    }
+                    di0 = MAX(di0, 0);
+                    di1 = MIN(di1, control->OutputDim[0]-1);
+                    dj0 = MAX(dj0, 0);
+                    dj1 = MIN(dj1, control->OutputDim[1]-1);
+
+                    /* loop over the region of interest in the destination image
+                        - for each pixel actually inside the bounds of the
+                        projected section, get the color of the corresponding
+                        pixel in the source image */
+                    for (int di = di0; di <= di1; di++) {
+                        for (int dj = dj0; dj <= dj1; dj++) {
+                            /* Determine if the pixel di,dj is inside the quad
+                                defined by the section corners in the destination
+                                image. Since the corner points of the section are ordered
+                                counterclockwise, the z-component of the cross
+                                product between the vector from corner i to
+                                point di,dj with the vector between corner i and i+1
+                                will be positive if di,dj is "to the right" of the
+                                quad side. If the cross product z-components are
+                                positive for all four sides, the point di,dj is
+                                inside the section quad. */
+                            vector<Point2f> dstPoint(1), srcPoint(1);
+                            dstPoint[0].x = di;
+                            dstPoint[0].y = dj;
+                            bool inside = true;
+                            for (int icorner = 0; icorner < 4 && inside; icorner++) {
+                                int icorner2 = icorner + 1;
+                                if (icorner2 == 4)
+                                    icorner2 = 0;
+                                float xprod = ((dstPoint[0].x - dstCornersWide[icorner].x) * (dstCornersWide[icorner2].y - dstCornersWide[icorner].y)
+                                                - (dstPoint[0].y - dstCornersWide[icorner].y) * (dstCornersWide[icorner2].x - dstCornersWide[icorner].x));
+
+                                if (xprod < 0.0)
+                                    inside = false;
+                            }
+
+                            /* if pixel is inside the section calculate the corresponding
+                                point in the source image */
+                            bool use_pixel = false;
+                            int si, sj;
+                            if (inside) {
+                                perspectiveTransform(dstPoint, srcPoint, transformation);
+                                si = center_x + srcPoint[0].x;
+                                sj = center_y - srcPoint[0].y;
+
+                                /* check that source pixel is inside the source image */
+                                if (si < 0 || si >= imageUndistort.cols
+                                    || sj < 0 || sj >= imageUndistort.rows)
+                                    use_pixel = false;
+                                else
+                                    use_pixel = true;
+                            }
+
+                            if (use_pixel) {
+
+                                /* Deal with problem of black pixels at the margins of the
+                                    undistorted images. If the user has not specified a trim
+                                    range for the image margins, then ignore all purely black
+                                    pixels and all pixels adjacent to purely black pixels. */
+                                if (control->trimPixels == 0) {
+                                    unsigned int sum = imageUndistort.at<Vec3b>(sj,si)[0]
+                                                        + imageUndistort.at<Vec3b>(sj,si)[1]
+                                                        + imageUndistort.at<Vec3b>(sj,si)[2];
+                                    if (sum == 0)
+                                        use_pixel = false;
+                                    else {
+                                        for (int ii = MAX(si-1, 0); ii < MIN(si+2, imageUndistort.cols) && use_pixel; ii++) {
+                                            for (int jj = MAX(sj-1, 0); jj < MIN(sj+2, imageUndistort.rows) && use_pixel; jj++) {
+                                                if (imageUndistort.at<Vec3b>(jj,ii)[0]
+                                                        + imageUndistort.at<Vec3b>(jj,ii)[1]
+                                                        + imageUndistort.at<Vec3b>(jj,ii)[2] == 0) {
+                                                    use_pixel = false;
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+
+                            if (use_pixel) {
+
+                                /* No correction - use original pixel BGR */
+                                unsigned char b, g, r;
+                                if (control->corr_mode == MBPM_CORRECTION_NONE) {
+                                    b = imageUndistort.at<Vec3b>(sj,si)[0];
+                                    g = imageUndistort.at<Vec3b>(sj,si)[1];
+                                    r = imageUndistort.at<Vec3b>(sj,si)[2];
+                                }
+
+                                /* Get intensity correction according to corr_mode */
+                                else {
+
+                                    /* Get intensity correction according to corr_mode */
+                                    /* Apply brightness correction to each image separately */
+                                    if (control->corr_mode == MBPM_CORRECTION_BRIGHTNESS) {
+                                        intensityCorrection = brightnessCorrection;
+                                    }
+
+                                    /* Apply range based correction to pixels */
+                                    else if (control->corr_mode == MBPM_CORRECTION_RANGE) {
+                                        intensityCorrection = exp(control->corr_range_coeff * (range[4] - control->corr_range_target));
+                                    }
+
+                                    /* Apply standoff based correction to pixels */
+                                    else if (control->corr_mode == MBPM_CORRECTION_STANDOFF) {
+                                        intensityCorrection = exp(control->corr_standoff_coeff * (standoff[4] - control->corr_standoff_target));
+                                    }
+
+                                    /* Apply correction by interpolation of 3D table generated by mbgetphotocorrection */
+                                    else if (control->corr_mode == MBPM_CORRECTION_FILE) {
+                                        int ibin_x1 = MIN(MAX(((int)((si + 0.5 * control->bin_dx) / control->bin_dx)), 0), control->ncorr_x - 2);
+                                        int ibin_x2 = ibin_x1 + 1;
+                                        double factor_x = ((double)si - 0.5 * control->bin_dx) / control->bin_dx - (double)ibin_x1;
+                                        int jbin_y1 = MIN(MAX(((int)((sj + 0.5 * control->bin_dy) / control->bin_dy)), 0), control->ncorr_y - 2);
+                                        int jbin_y2 = jbin_y1 + 1;
+                                        double factor_y = ((double)sj - 0.5 * control->bin_dy) / control->bin_dy - (double)jbin_y1;
+                                        int kbin_z1 = MIN(MAX(((int)((standoff[4] + 0.5 * control->bin_dz) / control->bin_dz)), 0), control->ncorr_z - 2);
+                                        int kbin_z2 = kbin_z1 + 1;
+                                        double factor_z = ((double)standoff[4] - 0.5 * control->bin_dz) / control->bin_dz - (double)kbin_z1;
+                                        factor_x = MIN(MAX(factor_x, 0.0), 1.0);
+                                        factor_y = MIN(MAX(factor_y, 0.0), 1.0);
+                                        factor_z = MIN(MAX(factor_z, 0.0), 1.0);
+
+                                        /* get reference intensity from center of image at the current standoff */
+                                        double table_intensity_ref
+                                            = (1.0 - factor_z) * control->corr_table[process->image_camera].at<float>(control->ibin_xcen, control->jbin_ycen, kbin_z1)
+                                                    + factor_z * control->corr_table[process->image_camera].at<float>(control->ibin_xcen, control->jbin_ycen, kbin_z2);
+
+                                        double v000 = control->corr_table[process->image_camera].at<float>(ibin_x1, jbin_y1, kbin_z1);
+                                        double v100 = control->corr_table[process->image_camera].at<float>(ibin_x2, jbin_y1, kbin_z1);
+                                        double v010 = control->corr_table[process->image_camera].at<float>(ibin_x1, jbin_y2, kbin_z1);
+                                        double v001 = control->corr_table[process->image_camera].at<float>(ibin_x1, jbin_y1, kbin_z2);
+                                        double v101 = control->corr_table[process->image_camera].at<float>(ibin_x2, jbin_y1, kbin_z2);
+                                        double v011 = control->corr_table[process->image_camera].at<float>(ibin_x1, jbin_y2, kbin_z2);
+                                        double v110 = control->corr_table[process->image_camera].at<float>(ibin_x2, jbin_y2, kbin_z1);
+                                        double v111 = control->corr_table[process->image_camera].at<float>(ibin_x2, jbin_y2, kbin_z2);
+                                        double vavg = v000 + v100 + v010 + v110 + v001 + v101 + v011 + v111;
+                                        int nvavg = 0;
+                                        if (v000 > 0.0) nvavg++;
+                                        if (v100 > 0.0) nvavg++;
+                                        if (v010 > 0.0) nvavg++;
+                                        if (v110 > 0.0) nvavg++;
+                                        if (v001 > 0.0) nvavg++;
+                                        if (v101 > 0.0) nvavg++;
+                                        if (v011 > 0.0) nvavg++;
+                                        if (v111 > 0.0) nvavg++;
+                                        if (nvavg > 0)
+                                            vavg /= nvavg;
+                                        if (v000 == 0.0) v000 = vavg;
+                                        if (v100 == 0.0) v100 = vavg;
+                                        if (v010 == 0.0) v010 = vavg;
+                                        if (v110 == 0.0) v110 = vavg;
+                                        if (v001 == 0.0) v001 = vavg;
+                                        if (v101 == 0.0) v101 = vavg;
+                                        if (v011 == 0.0) v011 = vavg;
+                                        if (v111 == 0.0) v111 = vavg;
+
+                                        /* use trilinear interpolation from http://paulbourke.net/miscellaneous/interpolation/ */
+                                        double table_intensity = v000 * (1.0 - factor_x) * (1.0 - factor_y) * (1.0 - factor_x)
+                                                + v100 * factor_x * (1.0 - factor_y) * (1.0 - factor_z)
+                                                + v010 * (1.0 - factor_x) * factor_y * (1.0 - factor_z)
+                                                + v001 * (1.0 - factor_x) * (1.0 - factor_y) * factor_z
+                                                + v101 * factor_x * (1.0 - factor_y) * factor_z
+                                                + v011 * (1.0 - factor_x) * factor_y * factor_z
+                                                + v110 * factor_x * factor_y * (1.0 - factor_z)
+                                                + v111 * factor_x * factor_y * factor_z;
+                                        if (table_intensity > 0.0 && control->referenceIntensity[process->image_camera] > 0.0)
+                                            intensityCorrection = control->referenceIntensity[process->image_camera]
+                                                                    / table_intensity;
+                                        else {
+                                            intensityCorrection = 1.0;
+                                        }
+
+                                    }
+
+                                    /* else do no correction */
+                                    else {
+                                        intensityCorrection = 1.0;
+                                    }
+
+                                    /* access the pixel value in YCrCb image */
+                                    unsigned char Y = imageUndistortYCrCb.at<Vec3b>(sj,si)[0];
+                                    unsigned char Cr = imageUndistortYCrCb.at<Vec3b>(sj,si)[1];
+                                    unsigned char Cb = imageUndistortYCrCb.at<Vec3b>(sj,si)[2];
+
+                                    /* correct Y (intensity) value */
+                                    Y = saturate_cast<unsigned char>(control->corr_intensity_gain * Y * intensityCorrection);
+
+                                    /* convert back to gbr */
+                                    b = saturate_cast<unsigned char>(Y + 1.773 * (Cb - 128));
+                                    g = saturate_cast<unsigned char>(Y - 0.714 * (Cr - 128) - 0.344 * (Cb - 128));
+                                    r = saturate_cast<unsigned char>(Y + 1.403 * (Cr - 128));
+                                }
+
+                                process->OutputImage.at<Vec3b>(dj,di)[0] = b;
+                                process->OutputImage.at<Vec3b>(dj,di)[1] = g;
+                                process->OutputImage.at<Vec3b>(dj,di)[2] = r;
+                                process->OutputPriority.at<float>(dj,di) = section_priority;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        imageUndistortYCrCb.release();
+        imageUndistort.release();
+
+    }
+}
+
+/*--------------------------------------------------------------------*/
 
 int main(int argc, char** argv)
 {
@@ -72,9 +1764,11 @@ int main(int argc, char** argv)
     char usage_message[] = "mbphotomosaic \n"
                             "\t--verbose\n"
                             "\t--help\n"
-                            "\t--show-images\n"
+                            "\t--threads=nthreads\n"
                             "\t--input=imagelist\n"
                             "\t--output=file\n"
+                            "\t--output-tiff\n"
+                            "\t--output-png\n"
                             "\t--image-dimensions=width/height\n"
                             "\t--image-spacing=dx/dy[/units]\n"
                             "\t--fov-fudgefactor=factor\n"
@@ -82,10 +1776,14 @@ int main(int argc, char** argv)
                             "\t--altitude=standoff_target/standoff_range\n"
                             "\t--standoff=standoff_target/standoff_range\n"
                             "\t--rangemax=range_max\n"
+                            "\t--trim=trim_pixels\n"
                             "\t--bounds=lonmin/lonmax/latmin/latmax | west/east/south/north\n"
                             "\t--bounds-buffer=bounds_buffer\n"
+                            "\t--correction-brightness\n"
+                            "\t--correction-range=target/coeff\n"
+                            "\t--correction-standoff=target/coeff\n"
                             "\t--correction-file=imagecorrection.yaml\n"
-                            "\t--brightness-correction\n"
+                            "\t--correction-gain=gain\n"
                             "\t--platform-file=platform.plf\n"
                             "\t--camera-sensor=camera_sensor_id\n"
                             "\t--nav-sensor=nav_sensor_id\n"
@@ -108,45 +1806,38 @@ int main(int argc, char** argv)
     int    help = 0;
     int    flag = 0;
 
+    /* parameter controls */
+    struct mbpm_process_struct processPars[MB_THREAD_MAX];
+    struct mbpm_control_struct control;
+
     /* Output image variables */
-    double  bounds[4];
-    int    bounds_specified = MB_NO;
+    bool    bounds_specified = false;
     double bounds_buffer = 6.0;
-    int    xdim = 0;
-    int    ydim = 0;
     int    spacing_priority = MB_NO;
     int    set_dimensions = MB_NO;
     int    set_spacing = MB_NO;
     double    dx_set = 0.0;
     double    dy_set = 0.0;
-    double    dx = 0.0;
-    double    dy = 0.0;
-    char    units[MB_PATH_MAXLINE];
-    Mat     OutputImage;
-    mb_path    OutputImageFile;
-    bool       outputimage_specified = false;
-    mb_path    OutputWorldFile;
-    int    priority_mode = MBPM_PRIORITY_CENTRALITY_ONLY;
-    float    *priority;
-    float    pixel_priority, standoff_priority, pixel_priority_use;
-    double    standoff_target = 3.0;
-    double    standoff_range = 1.0;
-    double    range_max = 200.0;
+    char      units[MB_PATH_MAXLINE];
+    mb_path   OutputImageFile;
+    bool      outputimage_specified = false;
+    int       output_format = MBPM_FORMAT_NONE;
+    control.priority_mode = MBPM_PRIORITY_CENTRALITY_ONLY;
+    control.standoff_target = 3.0;
+    control.standoff_range = 1.0;
+    control.range_max = 200.0;
+    control.trimPixels = 0;
+    control.sectionPixels = 0;
 
     /* Input image variables */
     mb_path    ImageListFile;
     mb_path    imageLeftFile;
     mb_path    imageRightFile;
     mb_path    imageFile;
-    Mat     imageProcess;
-    Mat    imageUndistort;
-    Mat    imageUndistortYCrCb;
-    Mat     imagePriority;
-    int    undistort_initialized = MB_NO;
     double    left_time_d;
     double    time_diff;
     double    time_d;
-    int    time_i[7];
+    int       time_i[7];
     double    navlon;
     double    navlat;
     double    speed;
@@ -186,62 +1877,40 @@ int main(int argc, char** argv)
     int use_camera_mode = MBPM_USE_STEREO;
     double imageQualityThreshold = 0.0;
     mb_path StereoCameraCalibrationFile;
-    int    calibration_specified = MB_NO;
-    Mat cameraMatrix[2], distCoeffs[2];
-    Mat R, T, E, F;
-    Mat R1, R2, P1, P2, Q;
-    Rect validRoi[2];
-    Size imageSize;
-    double SensorWidthMm = 8.789;
-    double SensorHeightMm = 6.610;
-    double SensorCellMm =0.00454;
-    double fovx[2], fov_x;
-    double fovy[2], fov_y;
-    double focalLength[2];
-    Point2d principalPoint[2];
-    double center_x, center_y;
-    double aspectRatio[2];
-    Mat rmap[2][2];
-    int use_simple_brightness_correction = MB_NO;
-    Scalar avgPixelIntensity;
-    float table_intensity, table_intensity_ref;
-    double referenceIntensityCorrection[2];
-    double avgImageIntensityCorrection;
-    double pixelIntensityCorrection;
-    double intensityCorrection;
-    double intensityChange;
-    double fov_fudgefactor = 1.0;
-    double camera_navlon;
-    double camera_navlat;
-    double camera_sensordepth;
-    double camera_heading;
-    double camera_roll;
-    double camera_pitch;
+    control.calibration_set = false;
+    control.SensorWidthMm = 8.789;
+    control.SensorHeightMm = 6.610;
+    control.SensorCellMm =0.00454;
+    control.fov_fudgefactor = 1.0;
+
+    bool undistort_initialized = false;
 
     /* Input image correction */
+    control.corr_mode = MBPM_CORRECTION_NONE;
+    control.corr_range_target = 3.0;
+    control.corr_range_coeff = 1.0;
+    control.corr_standoff_target = 3.0;
+    control.corr_standoff_coeff = 1.0;
+    control.corr_intensity_gain = 1.0;
     mb_path ImageCorrectionFile;
-    int correction_specified = MB_NO;
-    int ncorr_x = 21;
-    int ncorr_y = 21;
-    int ncorr_z = 100;
-    double corr_xmin = 0.0;
-    double corr_xmax = 10.0;
-    double corr_ymin = 0.0;
-    double corr_ymax = 10.0;
-    double corr_zmin = 0.0;
-    double corr_zmax = 10.0;
-    Mat corr_bounds;
-    Mat corr_table[2];
-    double bin_dx, bin_dy, bin_dz;
-    double vavg;
-    int nvavg;
-    int ibin_xcen, jbin_ycen, kbin_zcen;
-    double v000, v100, v010, v110, v001, v101, v011, v111;
-    int ibin_x1, ibin_x2, jbin_y1, jbin_y2, kbin_z1, kbin_z2;
-    double factor_x, factor_y, factor_z;
+    control.ncorr_x = 21;
+    control.ncorr_y = 21;
+    control.ncorr_z = 100;
+    control.corr_xmin = 0.0;
+    control.corr_xmax = 10.0;
+    control.corr_ymin = 0.0;
+    control.corr_ymax = 10.0;
+    control.corr_zmin = 0.0;
+    control.corr_zmax = 10.0;
+    control.bin_dx = 0.0;
+    control.bin_dy = 0.0;
+    control.bin_dz = 0.0;
+    control.ibin_xcen = 0;
+    control.jbin_ycen = 0;
+    control.kbin_zcen = 0;
 
     /* Input navigation variables */
-    int navigation_specified = MB_NO;
+    bool navigation_specified = false;
     mb_path NavigationFile;
     int intstat;
     int itime = 0;
@@ -258,28 +1927,23 @@ int main(int argc, char** argv)
     double *nheave = NULL;
 
     /* Input tide variables */
-    int use_tide = MB_NO;
+    bool use_tide = false;
     mb_path TideFile;
     int ntide = 0;
     double *ttime = NULL;
     double *ttide = NULL;
 
     /* topography parameters */
-    int use_topography = MB_NO;
+    control.use_topography = false;
     mb_path TopographyGridFile;
-    void *topogrid_ptr = NULL;
+    control.topogrid_ptr = NULL;
 
     /* projected image parameters */
-    int use_projection = MB_NO;
+    control.use_projection = false;
     double reference_lon, reference_lat;
     int utm_zone = 1;
     char projection_pars[MB_PATH_MAXLINE];
-    char projection_id[MB_PATH_MAXLINE];
-    void *pjptr;
-
-    /* image display options */
-    bool show_images = false;
-    bool show_priority_map = false;
+    char projection_id[MB_PATH_MAXLINE] = "Geographic";
 
     /* MBIO status variables */
     int status = MB_SUCCESS;
@@ -299,19 +1963,19 @@ int main(int argc, char** argv)
     double sec;
     double pbounds[4];
     double factor, scale;
-
     FileStorage fstorage;
-    bool isVerticalStereo;
+
     int npairs, nimages, currentimages;
 
     /* command line option definitions */
     /* mbphotomosaic
      *    --verbose
      *    --help
-     *    --show-image
-     *    --show-images
+     *    --threads=nthreads
      *    --input=imagelist
      *    --output=file
+     *    --output-tiff
+     *    --output-png
      *    --image-dimensions=width/height
      *    --image-spacing=dx/dy[/units]
      *    --fov-fudgefactor=factor
@@ -319,10 +1983,15 @@ int main(int argc, char** argv)
      *    --altitude=standoff_target/standoff_range
      *    --standoff=standoff_target/standoff_range
      *    --rangemax=range_max
+     *    --trim=trim_pixels
+     *    --section=section_pixels
      *    --bounds=lonmin/lonmax/latmin/latmax | west/east/south/north
      *    --bounds-buffer=bounds_buffer
+     *    --correction-brightness
+     *    --correction-range=target/coeff
+     *    --correction-standoff=target/coeff
      *    --correction-file=imagecorrection.yaml
-     *    --brightness-correction
+     *    --correction-gain=gain
      *    --platform-file=platform.plf
      *    --camera-sensor=camera_sensor_id
      *    --nav-sensor=nav_sensor_id
@@ -344,10 +2013,11 @@ int main(int argc, char** argv)
         {
         {"verbose",                     no_argument,            NULL,         0},
         {"help",                        no_argument,            NULL,         0},
-        {"show-image",                  no_argument,          NULL, 0},
-        {"show-images",                 no_argument,          NULL, 0},
+        {"threads",                     required_argument,      NULL,         0},
         {"input",                       required_argument,      NULL,         0},
         {"output",                      required_argument,      NULL,         0},
+        {"output-tiff",                 no_argument,            NULL,         0},
+        {"output-png",                  no_argument,            NULL,         0},
         {"image-file",                  required_argument,      NULL,         0},
         {"image-dimensions",            required_argument,      NULL,         0},
         {"image-spacing",               required_argument,      NULL,         0},
@@ -356,10 +2026,15 @@ int main(int argc, char** argv)
         {"altitude",                    required_argument,      NULL,         0},
         {"standoff",                    required_argument,      NULL,         0},
         {"rangemax",                    required_argument,      NULL,         0},
+        {"trim",                        required_argument,      NULL,         0},
+        {"section",                     required_argument,      NULL,         0},
         {"bounds",                      required_argument,      NULL,         0},
         {"bounds-buffer",               required_argument,      NULL,         0},
+        {"correction-brightness",       no_argument,            NULL,         0},
+        {"correction-range",            required_argument,      NULL,         0},
+        {"correction-standoff",         required_argument,      NULL,         0},
         {"correction-file",             required_argument,      NULL,         0},
-        {"brightness-correction",       no_argument,            NULL,         0},
+        {"correction-gain",             required_argument,      NULL,         0},
         {"platform-file",               required_argument,      NULL,         0},
         {"camera-sensor",               required_argument,      NULL,         0},
         {"nav-sensor",                  required_argument,      NULL,         0},
@@ -381,9 +2056,8 @@ int main(int argc, char** argv)
     /* set default imagelistfile name */
     sprintf(ImageListFile, "imagelist.mb-1");
     sprintf(ImageCorrectionFile, "imagelist_cameracorrection.yml");
-    sprintf(OutputImageFile, "testimage.tiff");
-    xdim = 1000;
-    ydim = 1000;
+    control.OutputDim[0] = 1000;
+    control.OutputDim[1] = 1000;
 
     /* initialize some other things */
     memset(StereoCameraCalibrationFile, 0, sizeof(mb_path));
@@ -391,6 +2065,13 @@ int main(int argc, char** argv)
     memset(NavigationFile, 0, sizeof(mb_path));
     memset(TideFile, 0, sizeof(mb_path));
     memset(TopographyGridFile, 0, sizeof(mb_path));
+
+    /* Thread handling */
+    unsigned int numThreads = 1;
+    unsigned int numConcurrency = std::thread::hardware_concurrency();
+    std::thread mbphotomosaicThreads[MB_THREAD_MAX];
+    int thread_status[MB_THREAD_MAX];
+    int thread_error[MB_THREAD_MAX];
 
     /* process argument list */
     while ((c = getopt_long(argc, argv, "", options, &option_index)) != -1)
@@ -411,14 +2092,15 @@ int main(int argc, char** argv)
                 }
 
             /*-------------------------------------------------------
-             * Image display options */
+             * Thread handling - desired number of threads */
 
-            /* show-images */
-            else if ((strcmp("show-image", options[option_index].name) == 0)
-                     || (strcmp("show-images", options[option_index].name) == 0))
+            /* threads */
+            else if (strcmp("threads", options[option_index].name) == 0)
                 {
-                show_images = true;
-                //show_priority_map = true;
+                sscanf (optarg,"%d", &numThreads);
+                if (numThreads < 1)
+                    numThreads = 1;
+                numThreads = MIN(numThreads, MIN(numConcurrency, MB_THREAD_MAX));
                 }
 
             /*-------------------------------------------------------
@@ -438,20 +2120,40 @@ int main(int argc, char** argv)
                 if (n == 1)
                     {
                     outputimage_specified = true;
-                    if (strlen(OutputImageFile) < 6
-                        || ((strncmp(".tif", &OutputImageFile[strlen(OutputImageFile)-4], 4) != 0)
-                            && (strncmp(".tiff", &OutputImageFile[strlen(OutputImageFile)-5], 5) != 0)))
-                        {
-                        strcat(OutputImageFile, ".tiff");
+                    if (output_format == MBPM_FORMAT_NONE) {
+                        if (strlen(OutputImageFile) >= 5
+                            && (strncmp(".png", &OutputImageFile[strlen(OutputImageFile)-4], 4) == 0
+                                || strncmp(".PNG", &OutputImageFile[strlen(OutputImageFile)-4], 4) == 0))
+                            output_format = MBPM_FORMAT_PNG;
+                        else if (strlen(OutputImageFile) >= 5
+                            && (strncmp(".tif", &OutputImageFile[strlen(OutputImageFile)-4], 4) == 0
+                                && strncmp(".TIF", &OutputImageFile[strlen(OutputImageFile)-4], 4) == 0))
+                            output_format = MBPM_FORMAT_TIFF;
+                        else if (strlen(OutputImageFile) >= 6
+                            && (strncmp(".tiff", &OutputImageFile[strlen(OutputImageFile)-5], 5) == 0
+                                && strncmp(".TIFF", &OutputImageFile[strlen(OutputImageFile)-5], 5) == 0))
+                            output_format = MBPM_FORMAT_TIFF;
                         }
                     }
+                }
+
+            /* output-tiff */
+            else if (strcmp("output-tiff", options[option_index].name) == 0)
+                {
+                output_format = MBPM_FORMAT_TIFF;
+                }
+
+            /* output-png */
+            else if (strcmp("output-png", options[option_index].name) == 0)
+                {
+                output_format = MBPM_FORMAT_PNG;
                 }
 
             /* image-dimensions */
             else if (strcmp("image-dimensions", options[option_index].name) == 0)
                 {
-                const int n = sscanf (optarg,"%d/%d", &xdim, &ydim);
-                if (n == 2 && xdim > 0 && ydim > 0)
+                const int n = sscanf (optarg,"%d/%d", &control.OutputDim[0], &control.OutputDim[1]);
+                if (n == 2 && control.OutputDim[0] > 0 && control.OutputDim[1] > 0)
                   set_dimensions = MB_YES;
                 }
 
@@ -475,42 +2177,54 @@ int main(int argc, char** argv)
             /* fov-fudgefactor */
             else if (strcmp("fov-fudgefactor", options[option_index].name) == 0)
                 {
-                sscanf (optarg,"%lf", &fov_fudgefactor);
+                sscanf (optarg,"%lf", &control.fov_fudgefactor);
                 }
 
             /* projection */
             else if (strcmp("projection", options[option_index].name) == 0)
                 {
                 sscanf (optarg,"%s", projection_pars);
-                use_projection = MB_YES;
+                control.use_projection = true;
                 }
 
             /* altitude */
             else if (strcmp("altitude", options[option_index].name) == 0)
                 {
-                const int n = sscanf (optarg,"%lf/%lf", &standoff_target, &standoff_range);
-                if (n ==2 && standoff_target > 0.0 && standoff_range > 0.0)
-                    priority_mode = MBPM_PRIORITY_CENTRALITY_PLUS_STANDOFF;
+                const int n = sscanf (optarg,"%lf/%lf", &control.standoff_target, &control.standoff_range);
+                if (n ==2 && control.standoff_target > 0.0 && control.standoff_range > 0.0)
+                    control.priority_mode = MBPM_PRIORITY_CENTRALITY_PLUS_STANDOFF;
                 }
 
             /* standoff */
             else if (strcmp("standoff", options[option_index].name) == 0)
                 {
-                const int n = sscanf (optarg,"%lf/%lf", &standoff_target, &standoff_range);
-                if (n ==2 && standoff_target > 0.0 && standoff_range > 0.0)
-                    priority_mode = MBPM_PRIORITY_CENTRALITY_PLUS_STANDOFF;
+                const int n = sscanf (optarg,"%lf/%lf", &control.standoff_target, &control.standoff_range);
+                if (n ==2 && control.standoff_target > 0.0 && control.standoff_range > 0.0)
+                    control.priority_mode = MBPM_PRIORITY_CENTRALITY_PLUS_STANDOFF;
+                }
+
+            /* trim */
+            else if (strcmp("trim", options[option_index].name) == 0)
+                {
+                const int n = sscanf (optarg,"%d", &control.trimPixels);
+                }
+
+            /* section */
+            else if (strcmp("section", options[option_index].name) == 0)
+                {
+                const int n = sscanf (optarg,"%d", &control.sectionPixels);
                 }
 
             /* rangemax */
             else if (strcmp("rangemax", options[option_index].name) == 0)
                 {
-                sscanf (optarg,"%lf", &range_max);
+                sscanf (optarg,"%lf", &control.range_max);
                 }
 
             /* bounds */
             else if (strcmp("bounds", options[option_index].name) == 0)
                 {
-                bounds_specified = mb_get_bounds(optarg, bounds);
+                bounds_specified = mb_get_bounds(optarg, control.OutputBounds);
                 }
 
             /* bounds-buffer */
@@ -519,13 +2233,35 @@ int main(int argc, char** argv)
                 sscanf (optarg,"%lf", &bounds_buffer);
                 }
 
+            /* correction-brightness */
+            else if (strcmp("correction-brightness", options[option_index].name) == 0)
+                {
+                control.corr_mode = MBPM_CORRECTION_BRIGHTNESS;
+                }
+
+            /* correction-range */
+            else if (strcmp("correction-range", options[option_index].name) == 0)
+                {
+                int n = sscanf (optarg,"%lf/%lf", &control.corr_range_target, &control.corr_range_coeff);
+                if (n == 2)
+                    control.corr_mode = MBPM_CORRECTION_RANGE;
+                }
+
+            /* correction-standoff */
+            else if (strcmp("correction-standoff", options[option_index].name) == 0)
+                {
+                int n = sscanf (optarg,"%lf/%lf", &control.corr_standoff_target, &control.corr_standoff_coeff);
+                if (n == 2)
+                    control.corr_mode = MBPM_CORRECTION_STANDOFF;
+                }
+
             /* correction-file */
             else if (strcmp("correction-file", options[option_index].name) == 0)
                 {
                 const int n = sscanf (optarg,"%s", ImageCorrectionFile);
                 if (n == 1)
                     {
-                    correction_specified = MB_YES;
+                    control.corr_mode = MBPM_CORRECTION_FILE;
                     if (strlen(ImageCorrectionFile) < 5
                         || strncmp(".yml", &ImageCorrectionFile[strlen(ImageCorrectionFile)-4], 4) != 0)
                         {
@@ -534,10 +2270,10 @@ int main(int argc, char** argv)
                     }
                 }
 
-            /* brightness-correction */
-            else if (strcmp("brightness-correction", options[option_index].name) == 0)
+            /* correction-offset */
+            else if (strcmp("correction-gain", options[option_index].name) == 0)
                 {
-                use_simple_brightness_correction = MB_YES;
+                int n = sscanf (optarg,"%lf", &control.corr_intensity_gain);
                 }
 
             /* platform-file */
@@ -611,7 +2347,7 @@ int main(int argc, char** argv)
             else if (strcmp("calibration-file", options[option_index].name) == 0)
                 {
                 strcpy(StereoCameraCalibrationFile, optarg);
-                calibration_specified = MB_YES;
+                control.calibration_set = true;
                 }
 
             /* navigation-file */
@@ -619,7 +2355,7 @@ int main(int argc, char** argv)
                 {
                 const int n = sscanf (optarg,"%s", NavigationFile);
                 if (n == 1)
-                    navigation_specified = MB_YES;
+                    navigation_specified = true;
                 }
 
             /* tide-file */
@@ -627,7 +2363,7 @@ int main(int argc, char** argv)
                 {
                 const int n = sscanf (optarg,"%s", TideFile);
                 if (n == 1)
-                    use_tide = MB_YES;
+                    use_tide = true;
                 }
 
             /* topography-grid */
@@ -635,7 +2371,7 @@ int main(int argc, char** argv)
                 {
                 const int n = sscanf (optarg,"%s", TopographyGridFile);
                 if (n == 1)
-                    use_topography = MB_YES;
+                    control.use_topography = true;
                 }
 
             break;
@@ -659,6 +2395,27 @@ int main(int argc, char** argv)
     else
         stream = stderr;
 
+    /* check output name and format - set format and suffix if necessary */
+    if (outputimage_specified) {
+        if (output_format == MBPM_FORMAT_NONE) {
+            output_format = MBPM_FORMAT_PNG;
+        }
+        if (output_format == MBPM_FORMAT_TIFF
+            && (strlen(OutputImageFile) < 5
+                || (strncmp(".tif", &OutputImageFile[strlen(OutputImageFile)-4], 4) != 0
+                    && strncmp(".tiff", &OutputImageFile[strlen(OutputImageFile)-5], 5) != 0
+                    && strncmp(".TIF", &OutputImageFile[strlen(OutputImageFile)-4], 4) != 0
+                    && strncmp(".TIFF", &OutputImageFile[strlen(OutputImageFile)-5], 5) != 0))) {
+            strcat(OutputImageFile, ".tif");
+        }
+        else if (output_format == MBPM_FORMAT_PNG
+            && (strlen(OutputImageFile) < 5
+                || (strncmp(".png", &OutputImageFile[strlen(OutputImageFile)-4], 4) != 0
+                    && strncmp(".PNG", &OutputImageFile[strlen(OutputImageFile)-4], 4) != 0))) {
+            strcat(OutputImageFile, ".png");
+        }
+    }
+
     /* print starting message */
     if (verbose == 1 || help)
         {
@@ -672,110 +2429,157 @@ int main(int argc, char** argv)
         fprintf(stream,"\ndbg2  Program <%s>\n",program_name);
         fprintf(stream,"dbg2  MB-system Version %s\n",MB_VERSION);
         fprintf(stream,"dbg2  Control Parameters:\n");
-        fprintf(stream,"dbg2       verbose:                     %d\n",verbose);
-        fprintf(stream,"dbg2       help:                        %d\n",help);
-        fprintf(stream,"dbg2       ImageListFile:               %s\n",ImageListFile);
-        fprintf(stream,"dbg2       use_camera_mode:             %d\n",use_camera_mode);
-        fprintf(stream,"dbg2       imageQualityThreshold:       %f\n",imageQualityThreshold);
-        fprintf(stream,"dbg2       show_images:                 %d\n",show_images);
-        fprintf(stream,"dbg2       outputimage_specified:       %d\n",outputimage_specified);
-        fprintf(stream,"dbg2       OutputImageFile:             %s\n",OutputImageFile);
-        fprintf(stream,"dbg2       bounds_specified:            %d\n",bounds_specified);
-        fprintf(stream,"dbg2       Bounds: west:                %f\n",bounds[0]);
-        fprintf(stream,"dbg2       Bounds: east:                %f\n",bounds[1]);
-        fprintf(stream,"dbg2       Bounds: south:               %f\n",bounds[2]);
-        fprintf(stream,"dbg2       Bounds: north:               %f\n",bounds[3]);
-        fprintf(stream,"dbg2       Bounds buffer:               %f\n",bounds_buffer);
-        fprintf(stream,"dbg2       set_spacing:                 %d\n",set_spacing);
-        fprintf(stream,"dbg2       spacing_priority:            %d\n",spacing_priority);
-        fprintf(stream,"dbg2       dx_set:                      %f\n",dx_set);
-        fprintf(stream,"dbg2       dy_set:                      %f\n",dy_set);
-        fprintf(stream,"dbg2       set_dimensions:              %d\n",set_dimensions);
-        fprintf(stream,"dbg2       xdim:                        %d\n",xdim);
-        fprintf(stream,"dbg2       ydim:                        %d\n",ydim);
-        fprintf(stream,"dbg2       use_projection:              %d\n",use_projection);
-        fprintf(stream,"dbg2       projection_pars:             %s\n",projection_pars);
-        fprintf(stream,"dbg2       navigation_specified:              %d\n",navigation_specified);
-        fprintf(stream,"dbg2       NavigationFile:              %s\n",NavigationFile);
-        fprintf(stream,"dbg2       use_tide:                    %d\n",use_tide);
-        fprintf(stream,"dbg2       TideFile:                    %s\n",TideFile);
-        fprintf(stream,"dbg2       use_topography:              %d\n",use_topography);
-        fprintf(stream,"dbg2       TopographyGridFile:          %s\n",TopographyGridFile);
-        fprintf(stream,"dbg2       calibration_specified:       %d\n",calibration_specified);
-        fprintf(stream,"dbg2       StereoCameraCalibrationFile: %s\n",StereoCameraCalibrationFile);
-        fprintf(stream,"dbg2       correction_specified:              %d\n",correction_specified);
-        fprintf(stream,"dbg2       ImageCorrectionFile:         %s\n",ImageCorrectionFile);
-        fprintf(stream,"dbg2       fov_fudgefactor:             %f\n",fov_fudgefactor);
-        fprintf(stream,"dbg2       PlatformFile:                %s\n",PlatformFile);
-        fprintf(stream,"dbg2       platform_specified:          %d\n",platform_specified);
-        fprintf(stream,"dbg2       camera_sensor:               %d\n",camera_sensor);
-        fprintf(stream,"dbg2       nav_sensor:                  %d\n",nav_sensor);
-        fprintf(stream,"dbg2       sensordepth_sensor:          %d\n",sensordepth_sensor);
-        fprintf(stream,"dbg2       heading_sensor:              %d\n",heading_sensor);
-        fprintf(stream,"dbg2       altitude_sensor:             %d\n",altitude_sensor);
-        fprintf(stream,"dbg2       attitude_sensor:             %d\n",attitude_sensor);
-        if (priority_mode == MBPM_PRIORITY_CENTRALITY_ONLY)
-            fprintf(stream,"dbg2       priority_mode:               %d (priority by centrality in source image only)\n",priority_mode);
+        fprintf(stream,"dbg2       verbose:                       %d\n",verbose);
+        fprintf(stream,"dbg2       help:                          %d\n",help);
+        fprintf(stream,"dbg2       numThreads:                    %d\n",numThreads);
+        fprintf(stream,"dbg2       ImageListFile:                 %s\n",ImageListFile);
+        fprintf(stream,"dbg2       use_camera_mode:               %d\n",use_camera_mode);
+        fprintf(stream,"dbg2       imageQualityThreshold:         %f\n",imageQualityThreshold);
+        fprintf(stream,"dbg2       outputimage_specified:         %d\n",outputimage_specified);
+        fprintf(stream,"dbg2       OutputImageFile:               %s\n",OutputImageFile);
+        fprintf(stream,"dbg2       output_format:                 %d\n",output_format);
+        fprintf(stream,"dbg2       bounds_specified:              %d\n",bounds_specified);
+        fprintf(stream,"dbg2       Bounds: west:                  %f\n",control.OutputBounds[0]);
+        fprintf(stream,"dbg2       Bounds: east:                  %f\n",control.OutputBounds[1]);
+        fprintf(stream,"dbg2       Bounds: south:                 %f\n",control.OutputBounds[2]);
+        fprintf(stream,"dbg2       Bounds: north:                 %f\n",control.OutputBounds[3]);
+        fprintf(stream,"dbg2       Bounds buffer:                 %f\n",bounds_buffer);
+        fprintf(stream,"dbg2       set_spacing:                   %d\n",set_spacing);
+        fprintf(stream,"dbg2       spacing_priority:              %d\n",spacing_priority);
+        fprintf(stream,"dbg2       dx_set:                        %f\n",dx_set);
+        fprintf(stream,"dbg2       dy_set:                        %f\n",dy_set);
+        fprintf(stream,"dbg2       set_dimensions:                %d\n",set_dimensions);
+        fprintf(stream,"dbg2       control.OutputDim[0]:          %d\n",control.OutputDim[0]);
+        fprintf(stream,"dbg2       control.OutputDim[1]:          %d\n",control.OutputDim[1]);
+        fprintf(stream,"dbg2       control.use_projection:        %d\n",control.use_projection);
+        if (control.use_projection)
+            fprintf(stream,"dbg2       projection_pars:               %s\n",projection_pars);
+        fprintf(stream,"dbg2       navigation_specified:          %d\n",navigation_specified);
+        fprintf(stream,"dbg2       NavigationFile:                %s\n",NavigationFile);
+        fprintf(stream,"dbg2       use_tide:                      %d\n",use_tide);
+        fprintf(stream,"dbg2       TideFile:                      %s\n",TideFile);
+        fprintf(stream,"dbg2       control.use_topography:        %d\n",control.use_topography);
+        fprintf(stream,"dbg2       TopographyGridFile:            %s\n",TopographyGridFile);
+        fprintf(stream,"dbg2       control.calibration_set:       %d\n",control.calibration_set);
+        fprintf(stream,"dbg2       StereoCameraCalibrationFile:   %s\n",StereoCameraCalibrationFile);
+        fprintf(stream,"dbg2       control.fov_fudgefactor:       %f\n",control.fov_fudgefactor);
+        if (control.corr_mode == MBPM_CORRECTION_BRIGHTNESS) {
+            fprintf(stream,"dbg2       control.corr_mode:             %d MBPM_CORRECTION_BRIGHTNESS\n",control.corr_mode);
+        }
+        else if (control.corr_mode == MBPM_CORRECTION_RANGE) {
+            fprintf(stream,"dbg2       control.corr_mode:             %d MBPM_CORRECTION_RANGE\n",control.corr_mode);
+            fprintf(stream,"dbg2       control.corr_range_target:     %f\n",control.corr_range_target);
+            fprintf(stream,"dbg2       control.corr_range_coeff:      %f\n",control.corr_range_coeff);
+        }
+        else if (control.corr_mode == MBPM_CORRECTION_STANDOFF) {
+            fprintf(stream,"dbg2       control.corr_mode:             %d MBPM_CORRECTION_STANDOFF\n",control.corr_mode);
+            fprintf(stream,"dbg2       control.corr_standoff_target:  %f\n",control.corr_standoff_target);
+            fprintf(stream,"dbg2       control.corr_standoff_coeff:   %f\n",control.corr_standoff_coeff);
+        }
+        else if (control.corr_mode == MBPM_CORRECTION_FILE) {
+            fprintf(stream,"dbg2       control.corr_mode:             %d MBPM_CORRECTION_FILE\n",control.corr_mode);
+            fprintf(stream,"dbg2       ImageCorrectionFile:           %s\n",ImageCorrectionFile);
+        }
+        else {
+            fprintf(stream,"dbg2       control.corr_mode:             %d MBPM_CORRECTION_NONE\n",control.corr_mode);
+        }
+        fprintf(stream,"dbg2       control.corr_intensity_gain:   %f\n",control.corr_intensity_gain);
+        fprintf(stream,"dbg2       PlatformFile:                  %s\n",PlatformFile);
+        fprintf(stream,"dbg2       platform_specified:            %d\n",platform_specified);
+        fprintf(stream,"dbg2       camera_sensor:                 %d\n",camera_sensor);
+        fprintf(stream,"dbg2       nav_sensor:                    %d\n",nav_sensor);
+        fprintf(stream,"dbg2       sensordepth_sensor:            %d\n",sensordepth_sensor);
+        fprintf(stream,"dbg2       heading_sensor:                %d\n",heading_sensor);
+        fprintf(stream,"dbg2       altitude_sensor:               %d\n",altitude_sensor);
+        fprintf(stream,"dbg2       attitude_sensor:               %d\n",attitude_sensor);
+        if (control.priority_mode == MBPM_PRIORITY_CENTRALITY_ONLY)
+            fprintf(stream,"dbg2       control.priority_mode:         %d (priority by centrality in source image only)\n",control.priority_mode);
         else
             {
-            fprintf(stream,"dbg2       priority_mode:               %d (priority by centrality in source image and difference from target standoff)\n",priority_mode);
-            fprintf(stream,"dbg2       standoff_target:             %f\n",standoff_target);
-            fprintf(stream,"dbg2       standoff_range:              %f\n",standoff_range);
+            fprintf(stream,"dbg2       control.priority_mode:         %d (priority by centrality in source image and difference from target standoff)\n",control.priority_mode);
+            fprintf(stream,"dbg2       control.standoff_target:       %f\n",control.standoff_target);
+            fprintf(stream,"dbg2       control.standoff_range:        %f\n",control.standoff_range);
             }
+        fprintf(stream,"dbg2       control.range_max:             %f\n",control.range_max);
+        fprintf(stream,"dbg2       control.trimPixels:            %u\n",control.trimPixels);
+        fprintf(stream,"dbg2       control.sectionPixels:         %u\n",control.sectionPixels);
         }
     else if (verbose == 1)
         {
         fprintf(stream,"\nProgram <%s>\n",program_name);
         fprintf(stream,"Control Parameters:\n");
-        fprintf(stream,"  ImageListFile:               %s\n",ImageListFile);
-        fprintf(stream,"  use_camera_mode:             %d\n",use_camera_mode);
-        fprintf(stream,"  imageQualityThreshold:       %f\n",imageQualityThreshold);
-        fprintf(stream,"  show_images:                 %d\n",show_images);
-        fprintf(stream,"  outputimage_specified:       %d\n",outputimage_specified);
-        fprintf(stream,"  OutputImageFile:             %s\n",OutputImageFile);
-        fprintf(stream,"  bounds_specified:            %d\n",bounds_specified);
-        fprintf(stream,"  Bounds: west:                %f\n",bounds[0]);
-        fprintf(stream,"  Bounds: east:                %f\n",bounds[1]);
-        fprintf(stream,"  Bounds: south:               %f\n",bounds[2]);
-        fprintf(stream,"  Bounds: north:               %f\n",bounds[3]);
-        fprintf(stream,"  Bounds buffer:               %f\n",bounds_buffer);
-        fprintf(stream,"  set_spacing:                 %d\n",set_spacing);
-        fprintf(stream,"  spacing_priority:            %d\n",spacing_priority);
-        fprintf(stream,"  dx_set:                      %f\n",dx_set);
-        fprintf(stream,"  dy_set:                      %f\n",dy_set);
-        fprintf(stream,"  set_dimensions:              %d\n",set_dimensions);
-        fprintf(stream,"  xdim:                        %d\n",xdim);
-        fprintf(stream,"  ydim:                        %d\n",ydim);
-        fprintf(stream,"  use_projection:              %d\n",use_projection);
-        fprintf(stream,"  projection_pars:             %s\n",projection_pars);
-        fprintf(stream,"  navigation_specified:              %d\n",navigation_specified);
-        fprintf(stream,"  NavigationFile:              %s\n",NavigationFile);
-        fprintf(stream,"  use_tide:                    %d\n",use_tide);
-        fprintf(stream,"  TideFile:                    %s\n",TideFile);
-        fprintf(stream,"  use_topography:              %d\n",use_topography);
-        fprintf(stream,"  TopographyGridFile:          %s\n",TopographyGridFile);
-        fprintf(stream,"  calibration_specified:       %d\n",calibration_specified);
-        fprintf(stream,"  StereoCameraCalibrationFile: %s\n",StereoCameraCalibrationFile);
-        fprintf(stream,"  correction_specified:        %d\n",correction_specified);
-        fprintf(stream,"  ImageCorrectionFile:         %s\n",ImageCorrectionFile);
-        fprintf(stream,"  fov_fudgefactor:             %f\n",fov_fudgefactor);
-        fprintf(stream,"  PlatformFile:                %s\n",PlatformFile);
-        fprintf(stream,"  platform_specified:          %d\n",platform_specified);
-        fprintf(stream,"  camera_sensor:               %d\n",camera_sensor);
-        fprintf(stream,"  nav_sensor:                  %d\n",nav_sensor);
-        fprintf(stream,"  sensordepth_sensor:          %d\n",sensordepth_sensor);
-        fprintf(stream,"  heading_sensor:              %d\n",heading_sensor);
-        fprintf(stream,"  altitude_sensor:             %d\n",altitude_sensor);
-        fprintf(stream,"  attitude_sensor:             %d\n",attitude_sensor);
-        if (priority_mode == MBPM_PRIORITY_CENTRALITY_ONLY)
-            fprintf(stream,"  priority_mode:               %d (priority by centrality in source image only)\n",priority_mode);
+        fprintf(stream,"  numThreads:                    %d\n",numThreads);
+        fprintf(stream,"  ImageListFile:                 %s\n",ImageListFile);
+        fprintf(stream,"  use_camera_mode:               %d\n",use_camera_mode);
+        fprintf(stream,"  imageQualityThreshold:         %f\n",imageQualityThreshold);
+        fprintf(stream,"  outputimage_specified:         %d\n",outputimage_specified);
+        fprintf(stream,"  OutputImageFile:               %s\n",OutputImageFile);
+        fprintf(stream,"  output_format:                 %d\n",output_format);
+        fprintf(stream,"  bounds_specified:              %d\n",bounds_specified);
+        fprintf(stream,"  Bounds: west:                  %f\n",control.OutputBounds[0]);
+        fprintf(stream,"  Bounds: east:                  %f\n",control.OutputBounds[1]);
+        fprintf(stream,"  Bounds: south:                 %f\n",control.OutputBounds[2]);
+        fprintf(stream,"  Bounds: north:                 %f\n",control.OutputBounds[3]);
+        fprintf(stream,"  Bounds buffer:                 %f\n",bounds_buffer);
+        fprintf(stream,"  set_spacing:                   %d\n",set_spacing);
+        fprintf(stream,"  spacing_priority:              %d\n",spacing_priority);
+        fprintf(stream,"  dx_set:                        %f\n",dx_set);
+        fprintf(stream,"  dy_set:                        %f\n",dy_set);
+        fprintf(stream,"  set_dimensions:                %d\n",set_dimensions);
+        fprintf(stream,"  control.OutputDim[0]:          %d\n",control.OutputDim[0]);
+        fprintf(stream,"  control.OutputDim[1]:          %d\n",control.OutputDim[1]);
+        fprintf(stream,"  control.use_projection:        %d\n",control.use_projection);
+        if (control.use_projection)
+            fprintf(stream,"  projection_pars:               %s\n",projection_pars);
+        fprintf(stream,"  navigation_specified:          %d\n",navigation_specified);
+        fprintf(stream,"  NavigationFile:                %s\n",NavigationFile);
+        fprintf(stream,"  use_tide:                      %d\n",use_tide);
+        fprintf(stream,"  TideFile:                      %s\n",TideFile);
+        fprintf(stream,"  control.use_topography:        %d\n",control.use_topography);
+        fprintf(stream,"  TopographyGridFile:            %s\n",TopographyGridFile);
+        fprintf(stream,"  control.calibration_set:       %d\n",control.calibration_set);
+        fprintf(stream,"  StereoCameraCalibrationFile:   %s\n",StereoCameraCalibrationFile);
+        fprintf(stream,"  control.fov_fudgefactor:       %f\n",control.fov_fudgefactor);
+        if (control.corr_mode == MBPM_CORRECTION_BRIGHTNESS) {
+            fprintf(stream,"  control.corr_mode:             %d MBPM_CORRECTION_BRIGHTNESS\n",control.corr_mode);
+        }
+        else if (control.corr_mode == MBPM_CORRECTION_RANGE) {
+            fprintf(stream,"  control.corr_mode:             %d MBPM_CORRECTION_RANGE\n",control.corr_mode);
+            fprintf(stream,"  control.corr_range_target:     %f\n",control.corr_range_target);
+            fprintf(stream,"  control.corr_range_coeff:      %f\n",control.corr_range_coeff);
+        }
+        else if (control.corr_mode == MBPM_CORRECTION_STANDOFF) {
+            fprintf(stream,"  control.corr_mode:             %d MBPM_CORRECTION_STANDOFF\n",control.corr_mode);
+            fprintf(stream,"  control.corr_standoff_target:  %f\n",control.corr_standoff_target);
+            fprintf(stream,"  control.corr_standoff_coeff:   %f\n",control.corr_standoff_coeff);
+        }
+        else if (control.corr_mode == MBPM_CORRECTION_FILE) {
+            fprintf(stream,"  control.corr_mode:             %d MBPM_CORRECTION_FILE\n",control.corr_mode);
+            fprintf(stream,"  ImageCorrectionFile:           %s\n",ImageCorrectionFile);
+        }
+        else {
+            fprintf(stream,"  control.corr_mode:             %d MBPM_CORRECTION_NONE\n",control.corr_mode);
+        }
+        fprintf(stream,"  control.corr_intensity_gain:   %f\n",control.corr_intensity_gain);
+        fprintf(stream,"  PlatformFile:                  %s\n",PlatformFile);
+        fprintf(stream,"  platform_specified:            %d\n",platform_specified);
+        fprintf(stream,"  camera_sensor:                 %d\n",camera_sensor);
+        fprintf(stream,"  nav_sensor:                    %d\n",nav_sensor);
+        fprintf(stream,"  sensordepth_sensor:            %d\n",sensordepth_sensor);
+        fprintf(stream,"  heading_sensor:                %d\n",heading_sensor);
+        fprintf(stream,"  altitude_sensor:               %d\n",altitude_sensor);
+        fprintf(stream,"  attitude_sensor:               %d\n",attitude_sensor);
+        if (control.priority_mode == MBPM_PRIORITY_CENTRALITY_ONLY)
+            fprintf(stream,"  control.priority_mode:         %d (priority by centrality in source image only)\n",control.priority_mode);
         else
             {
-            fprintf(stream,"  priority_mode:               %d (priority by centrality in source image and difference from target standoff)\n",priority_mode);
-            fprintf(stream,"  standoff_target:             %f\n",standoff_target);
-            fprintf(stream,"  standoff_range:              %f\n",standoff_range);
+            fprintf(stream,"  control.priority_mode:         %d (priority by centrality in source image and difference from target standoff)\n",control.priority_mode);
+            fprintf(stream,"  control.standoff_target:       %f\n",control.standoff_target);
+            fprintf(stream,"  control.standoff_range:        %f\n",control.standoff_range);
             }
-        fprintf(stream,"  range_max:                   %f\n",range_max);
+        fprintf(stream,"  control.range_max:             %f\n",control.range_max);
+        fprintf(stream,"  control.trimPixels:            %u\n",control.trimPixels);
+        fprintf(stream,"  control.sectionPixels:         %u\n",control.sectionPixels);
         }
 
     /* if help desired then print it and exit */
@@ -787,9 +2591,9 @@ int main(int argc, char** argv)
         }
 
     /* Load topography grid if desired */
-    if (use_topography == MB_YES)
+    if (control.use_topography)
         {
-        status = mb_topogrid_init(verbose, TopographyGridFile, &lonflip, &topogrid_ptr, &error);
+        status = mb_topogrid_init(verbose, TopographyGridFile, &lonflip, &control.topogrid_ptr, &error);
         if (error != MB_ERROR_NO_ERROR)
             {
             mb_error(verbose,error,&message);
@@ -802,14 +2606,15 @@ int main(int argc, char** argv)
         /* if photomosaic bounds not specified use grid bounds */
         if (bounds_specified == MB_NO)
             {
-            mb_topogrid_bounds(verbose, topogrid_ptr, bounds, &error);
+            mb_topogrid_bounds(verbose, control.topogrid_ptr, control.OutputBounds, &error);
             }
         }
 
     /* if bounds not specified then quit */
-    if (bounds[0] >= bounds[1] || bounds[2] >= bounds[3])
+    if (control.OutputBounds[0] >= control.OutputBounds[1] || control.OutputBounds[2] >= control.OutputBounds[3])
         {
-        fprintf(stream,"\nGrid bounds not properly specified:\n\t%f %f %f %f\n",bounds[0],bounds[1],bounds[2],bounds[3]);
+        fprintf(stream,"\nGrid bounds not properly specified:\n\t%f %f %f %f\n",
+        control.OutputBounds[0],control.OutputBounds[1],control.OutputBounds[2],control.OutputBounds[3]);
         fprintf(stream,"\nProgram <%s> Terminated\n",
             program_name);
         error = MB_ERROR_BAD_PARAMETER;
@@ -817,7 +2622,7 @@ int main(int argc, char** argv)
         }
 
     /* if stereo calibration not specified then quit */
-    if (calibration_specified == MB_NO)
+    if (!control.calibration_set)
         {
         fprintf(stream,"\nNo camera calibration file specified\n");
         fprintf(stream,"\nProgram <%s> Terminated\n",
@@ -879,24 +2684,24 @@ int main(int argc, char** argv)
         sensor_camera = &(platform->sensors[camera_sensor]);
 
     /* read intrinsic and extrinsic stereo camera calibration parameters */
-    if (calibration_specified == MB_YES)
+    if (control.calibration_set)
         {
         fstorage.open(StereoCameraCalibrationFile, FileStorage::READ);
         if(fstorage.isOpened() )
             {
-            fstorage["M1"] >> cameraMatrix[0];
-            fstorage["D1"] >> distCoeffs[0];
-            fstorage["M2"] >> cameraMatrix[1];
-            fstorage["D2"] >> distCoeffs[1];
-            fstorage["R"] >> R;
-            fstorage["T"] >> T;
-            fstorage["R1"] >> R1;
-            fstorage["R2"] >> R2;
-            fstorage["P1"] >> P1;
-            fstorage["P2"] >> P2;
-            fstorage["Q"] >> Q;
+            fstorage["M1"] >> control.cameraMatrix[0];
+            fstorage["D1"] >> control.distCoeffs[0];
+            fstorage["M2"] >> control.cameraMatrix[1];
+            fstorage["D2"] >> control.distCoeffs[1];
+            fstorage["R"] >> control.R;
+            fstorage["T"] >> control.T;
+            fstorage["R1"] >> control.R1;
+            fstorage["R2"] >> control.R2;
+            fstorage["P1"] >> control.P1;
+            fstorage["P2"] >> control.P2;
+            fstorage["Q"] >> control.Q;
             fstorage.release();
-            isVerticalStereo = fabs(P2.at<double>(1, 3)) > fabs(P2.at<double>(0, 3));
+            control.isVerticalStereo = fabs(control.P2.at<double>(1, 3)) > fabs(control.P2.at<double>(0, 3));
             }
         else
             {
@@ -913,29 +2718,29 @@ int main(int argc, char** argv)
         if (verbose > 0)
             {
             fprintf(stderr,"\nStereo Camera Calibration Parameters:\n");
-            cerr << "M1:" << endl << cameraMatrix[0] << endl << endl;
-            cerr << "D1:" << endl << distCoeffs[0] << endl << endl;
-            cerr << "M2:" << endl << cameraMatrix[1] << endl << endl;
-            cerr << "D2:" << endl << distCoeffs[1] << endl << endl;
-            cerr << "R:" << endl << R << endl << endl;
-            cerr << "T:" << endl << T << endl << endl;
-            cerr << "R1:" << endl << R1 << endl << endl;
-            cerr << "R2:" << endl << R2 << endl << endl;
-            cerr << "P1:" << endl << P1 << endl << endl;
-            cerr << "P2:" << endl << P2 << endl << endl;
-            cerr << "Q:" << endl << Q << endl << endl;
+            cerr << "M1:" << endl << control.cameraMatrix[0] << endl << endl;
+            cerr << "D1:" << endl << control.distCoeffs[0] << endl << endl;
+            cerr << "M2:" << endl << control.cameraMatrix[1] << endl << endl;
+            cerr << "D2:" << endl << control.distCoeffs[1] << endl << endl;
+            cerr << "R:" << endl << control.R << endl << endl;
+            cerr << "T:" << endl << control.T << endl << endl;
+            cerr << "R1:" << endl << control.R1 << endl << endl;
+            cerr << "R2:" << endl << control.R2 << endl << endl;
+            cerr << "P1:" << endl << control.P1 << endl << endl;
+            cerr << "P2:" << endl << control.P2 << endl << endl;
+            cerr << "Q:" << endl << control.Q << endl << endl;
             }
         }
 
     /* image correction table */
-    if (correction_specified == MB_YES) {
+    if (control.corr_mode == MBPM_CORRECTION_FILE) {
         /* read in the image correction table - this is expected to be a stereo correction table */
         fstorage.open(ImageCorrectionFile, FileStorage::READ);
         if(fstorage.isOpened() )
             {
-            fstorage["ImageCorrectionBounds"] >> corr_bounds;
-            fstorage["ImageCorrectionTable1"] >> corr_table[0];
-            fstorage["ImageCorrectionTable2"] >> corr_table[1];
+            fstorage["ImageCorrectionBounds"] >> control.corr_bounds;
+            fstorage["ImageCorrectionTable1"] >> control.corr_table[0];
+            fstorage["ImageCorrectionTable2"] >> control.corr_table[1];
             fstorage.release();
             }
         else
@@ -948,40 +2753,41 @@ int main(int argc, char** argv)
             mb_memory_clear(verbose, &error);
             exit(error);
             }
-        ncorr_x = corr_table[0].size[0];
-        ncorr_y = corr_table[0].size[1];
-        ncorr_z = corr_table[0].size[2];
-        corr_xmin = corr_bounds.at<float>(0, 0);
-        corr_xmax = corr_bounds.at<float>(0, 1);
-        bin_dx = corr_bounds.at<float>(0, 2);
-        corr_ymin = corr_bounds.at<float>(1, 0);
-        corr_ymax = corr_bounds.at<float>(1, 1);
-        bin_dy = corr_bounds.at<float>(1, 2);
-        corr_zmin = corr_bounds.at<float>(2, 0);
-        corr_zmax = corr_bounds.at<float>(2, 1);
-        bin_dz = corr_bounds.at<float>(2, 2);
-fprintf(stderr, "\nImage correction:\n");
-fprintf(stderr, "x: %d %f %f %f\n", ncorr_x, corr_xmin, corr_xmax, bin_dx);
-fprintf(stderr, "y: %d %f %f %f\n", ncorr_y, corr_ymin, corr_ymax, bin_dy);
-fprintf(stderr, "z: %d %f %f %f\n", ncorr_z, corr_zmin, corr_zmax, bin_dz);
+        control.ncorr_x = control.corr_table[0].size[0];
+        control.ncorr_y = control.corr_table[0].size[1];
+        control.ncorr_z = control.corr_table[0].size[2];
+        control.corr_xmin = control.corr_bounds.at<float>(0, 0);
+        control.corr_xmax = control.corr_bounds.at<float>(0, 1);
+        control.bin_dx = control.corr_bounds.at<float>(0, 2);
+        control.corr_ymin = control.corr_bounds.at<float>(1, 0);
+        control.corr_ymax = control.corr_bounds.at<float>(1, 1);
+        control.bin_dy = control.corr_bounds.at<float>(1, 2);
+        control.corr_zmin = control.corr_bounds.at<float>(2, 0);
+        control.corr_zmax = control.corr_bounds.at<float>(2, 1);
+        control.bin_dz = control.corr_bounds.at<float>(2, 2);
+//fprintf(stderr, "\nImage correction:\n");
+//fprintf(stderr, "x: %d %f %f %f\n", control.ncorr_x, control.corr_xmin, control.corr_xmax, control.bin_dx);
+//fprintf(stderr, "y: %d %f %f %f\n", control.ncorr_y, control.corr_ymin, control.corr_ymax, control.bin_dy);
+//fprintf(stderr, "z: %d %f %f %f\n", control.ncorr_z, control.corr_zmin, control.corr_zmax, control.bin_dz);
 
         /* Get reference intensity value for each camera.
          * If the target standoff value is specified use the correction table value
          * at the center x and y and the target standoff z. If no target standoff
          * value is specified use the correction table value at the x y center
          * which is located halfway between the first and last nonzero values */
-        ibin_xcen = ncorr_x / 2;
-        jbin_ycen = ncorr_y / 2;
+        control.ibin_xcen = control.ncorr_x / 2;
+        control.jbin_ycen = control.ncorr_y / 2;
+        control.kbin_zcen = control.ncorr_z / 2;
         for (int icamera = 0; icamera < 2; icamera++) {
-            if (priority_mode == MBPM_PRIORITY_CENTRALITY_PLUS_STANDOFF
-                && standoff_target > corr_zmin && standoff_target < corr_zmax) {
-                kbin_zcen = (standoff_target - corr_zmin) / bin_dz;
+            if (control.priority_mode == MBPM_PRIORITY_CENTRALITY_PLUS_STANDOFF
+                && control.standoff_target > control.corr_zmin && control.standoff_target < control.corr_zmax) {
+                control.kbin_zcen = (control.standoff_target - control.corr_zmin) / control.bin_dz;
             } else {
-                kbin_zcen = ncorr_z / 2;
-                int k0 = ncorr_z;
+                control.kbin_zcen = control.ncorr_z / 2;
+                int k0 = control.ncorr_z;
                 int k1 = -1;
-                for (int k=0;k<ncorr_z;k++) {
-                    if (corr_table[icamera].at<float>(ibin_xcen, jbin_ycen, k) > 0.0) {
+                for (int k=0;k<control.ncorr_z;k++) {
+                    if (control.corr_table[icamera].at<float>(control.ibin_xcen, control.jbin_ycen, k) > 0.0) {
                         if (k0 > k)
                             k0 = k;
                         k1 = k;
@@ -989,32 +2795,24 @@ fprintf(stderr, "z: %d %f %f %f\n", ncorr_z, corr_zmin, corr_zmax, bin_dz);
 
                     /* reset k0 because there is an isolated nonzero value at k == 0 */
                     else if (k == 1 && k0 == 0) {
-                      k0 = ncorr_z;
+                      k0 = control.ncorr_z;
                       k1 = -1;
                     }
                 }
                 if (k1 >= k0) {
-                  kbin_zcen = (k0 + k1) / 2;
+                  control.kbin_zcen = (k0 + k1) / 2;
                 }
             }
-            double referenceIntensity =  corr_table[icamera].at<float>(ibin_xcen, jbin_ycen, kbin_zcen);
+            control.referenceIntensity[icamera] =  control.corr_table[icamera].at<float>(control.ibin_xcen, control.jbin_ycen, control.kbin_zcen);
 
-            /* Get image correction factor required to bring a pixel intensity equal
-             * to the reference value up to a value of 70.0. */
-            if (referenceIntensity > 0.0)
-                referenceIntensityCorrection[icamera] = 70.0 / referenceIntensity;
-            else
-                referenceIntensityCorrection[icamera] = 1.0;
-
-fprintf(stderr, "\nImage correction camera: %d\n", icamera);
-fprintf(stderr, "center: %d %d %d\n", ibin_xcen, jbin_ycen, kbin_zcen);
-fprintf(stderr, "referenceIntensity: %f\n", referenceIntensity);
-fprintf(stderr, "referenceIntensityCorrection[%d]: %f\n", icamera, referenceIntensityCorrection[icamera]);
+//fprintf(stderr, "\nImage correction camera: %d\n", icamera);
+//fprintf(stderr, "center: %d %d %d\n", control.ibin_xcen, control.jbin_ycen, control.kbin_zcen);
+//fprintf(stderr, "control.referenceIntensity[%d]: %f\n", icamera, control.referenceIntensity[icamera]);
 //fprintf(stderr, "\nCorrection Table[%d]:\n", icamera);
-//for (int i=0;i<ncorr_x;i++) {
-//for (int j=0;j<ncorr_y;j++) {
-//for (int k=0;k<ncorr_z;k++) {
-//fprintf(stderr,"    %d %d %d   %f\n", i, j, k, corr_table[icamera].at<float>(i, j, k));
+//for (int i=0;i<control.ncorr_x;i++) {
+//for (int j=0;j<control.ncorr_y;j++) {
+//for (int k=0;k<control.ncorr_z;k++) {
+//fprintf(stderr,"    %d %d %d   %f\n", i, j, k, control.corr_table[icamera].at<float>(i, j, k));
 //}
 //}
 //}
@@ -1022,15 +2820,15 @@ fprintf(stderr, "referenceIntensityCorrection[%d]: %f\n", icamera, referenceInte
         }
     }
 
-    /* else the reference intensity correction is unity, e.g. neutral */
+    /* else the reference intensity is 70.0 */
     else {
-        referenceIntensityCorrection[0] = 1.0;
-        referenceIntensityCorrection[1] = 1.0;
+        control.referenceIntensity[0] = 1.0;
+        control.referenceIntensity[1] = 1.0;
     }
 
     /* deal with projected gridding */
-    double mtodeglon, mtodeglat, deglontokm, deglattokm;
-    if (use_projection == MB_YES)
+    double deglontokm, deglattokm;
+    if (control.use_projection)
         {
         /* check for UTM with undefined zone */
         if (strcmp(projection_pars, "UTM") == 0
@@ -1038,14 +2836,14 @@ fprintf(stderr, "referenceIntensityCorrection[%d]: %f\n", icamera, referenceInte
             || strcmp(projection_pars, "utm") == 0
             || strcmp(projection_pars, "u") == 0)
             {
-            reference_lon = 0.5 * (bounds[0] + bounds[1]);
+            reference_lon = 0.5 * (control.OutputBounds[0] + control.OutputBounds[1]);
             if (reference_lon < 180.0)
                 reference_lon += 360.0;
             if (reference_lon >= 180.0)
                 reference_lon -= 360.0;
             utm_zone = (int)(((reference_lon + 183.0)
                 / 6.0) + 0.5);
-            reference_lat = 0.5 * (bounds[2] + bounds[3]);
+            reference_lat = 0.5 * (control.OutputBounds[2] + control.OutputBounds[3]);
             if (reference_lat >= 0.0)
                 sprintf(projection_id, "UTM%2.2dN", utm_zone);
             else
@@ -1055,8 +2853,7 @@ fprintf(stderr, "referenceIntensityCorrection[%d]: %f\n", icamera, referenceInte
             strcpy(projection_id, projection_pars);
 
         /* set projection flag */
-        int proj_status = mb_proj_init(verbose,projection_id,
-            &(pjptr), &error);
+        int proj_status = mb_proj_init(verbose, projection_id, &(control.pjptr), &error);
 
         /* if projection not successfully initialized then quit */
         if (proj_status != MB_SUCCESS)
@@ -1071,16 +2868,16 @@ fprintf(stderr, "referenceIntensityCorrection[%d]: %f\n", icamera, referenceInte
             }
 
         /* tranlate lon lat bounds from UTM if required */
-        if (bounds[0] < -360.0 || bounds[0] > 360.0
-            || bounds[1] < -360.0 || bounds[1] > 360.0
-            || bounds[2] < -90.0 || bounds[2] > 90.0
-            || bounds[3] < -90.0 || bounds[3] > 90.0)
+        if (control.OutputBounds[0] < -360.0 || control.OutputBounds[0] > 360.0
+            || control.OutputBounds[1] < -360.0 || control.OutputBounds[1] > 360.0
+            || control.OutputBounds[2] < -90.0 || control.OutputBounds[2] > 90.0
+            || control.OutputBounds[3] < -90.0 || control.OutputBounds[3] > 90.0)
             {
             /* first point */
-            double xx = bounds[0];
-            double yy = bounds[2];
+            double xx = control.OutputBounds[0];
+            double yy = control.OutputBounds[2];
             double xlon, ylat;
-            mb_proj_inverse(verbose, pjptr, xx, yy,
+            mb_proj_inverse(verbose, control.pjptr, xx, yy,
                     &xlon, &ylat, &error);
             mb_apply_lonflip(verbose, lonflip, &xlon);
             pbounds[0] = xlon;
@@ -1089,9 +2886,9 @@ fprintf(stderr, "referenceIntensityCorrection[%d]: %f\n", icamera, referenceInte
             pbounds[3] = ylat;
 
             /* second point */
-            xx = bounds[1];
-            yy = bounds[2];
-            mb_proj_inverse(verbose, pjptr, xx, yy,
+            xx = control.OutputBounds[1];
+            yy = control.OutputBounds[2];
+            mb_proj_inverse(verbose, control.pjptr, xx, yy,
                     &xlon, &ylat, &error);
             mb_apply_lonflip(verbose, lonflip, &xlon);
             pbounds[0] = MIN(pbounds[0], xlon);
@@ -1100,9 +2897,9 @@ fprintf(stderr, "referenceIntensityCorrection[%d]: %f\n", icamera, referenceInte
             pbounds[3] = MAX(pbounds[3], ylat);
 
             /* third point */
-            xx = bounds[0];
-            yy = bounds[3];
-            mb_proj_inverse(verbose, pjptr, xx, yy,
+            xx = control.OutputBounds[0];
+            yy = control.OutputBounds[3];
+            mb_proj_inverse(verbose, control.pjptr, xx, yy,
                     &xlon, &ylat, &error);
             mb_apply_lonflip(verbose, lonflip, &xlon);
             pbounds[0] = MIN(pbounds[0], xlon);
@@ -1111,9 +2908,9 @@ fprintf(stderr, "referenceIntensityCorrection[%d]: %f\n", icamera, referenceInte
             pbounds[3] = MAX(pbounds[3], ylat);
 
             /* fourth point */
-            xx = bounds[1];
-            yy = bounds[3];
-            mb_proj_inverse(verbose, pjptr, xx, yy,
+            xx = control.OutputBounds[1];
+            yy = control.OutputBounds[3];
+            mb_proj_inverse(verbose, control.pjptr, xx, yy,
                     &xlon, &ylat, &error);
             mb_apply_lonflip(verbose, lonflip, &xlon);
             pbounds[0] = MIN(pbounds[0], xlon);
@@ -1126,64 +2923,64 @@ fprintf(stderr, "referenceIntensityCorrection[%d]: %f\n", icamera, referenceInte
         else
             {
             /* copy bounds to pbounds */
-            pbounds[0] = bounds[0];
-            pbounds[1] = bounds[1];
-            pbounds[2] = bounds[2];
-            pbounds[3] = bounds[3];
+            pbounds[0] = control.OutputBounds[0];
+            pbounds[1] = control.OutputBounds[1];
+            pbounds[2] = control.OutputBounds[2];
+            pbounds[3] = control.OutputBounds[3];
 
             /* first point */
             double xx, yy;
             double xlon = pbounds[0];
             double ylat = pbounds[2];
-            mb_proj_forward(verbose, pjptr, xlon, ylat,
+            mb_proj_forward(verbose, control.pjptr, xlon, ylat,
                     &xx, &yy, &error);
-            bounds[0] = xx;
-            bounds[1] = xx;
-            bounds[2] = yy;
-            bounds[3] = yy;
+            control.OutputBounds[0] = xx;
+            control.OutputBounds[1] = xx;
+            control.OutputBounds[2] = yy;
+            control.OutputBounds[3] = yy;
 
             /* second point */
             xlon = pbounds[1];
             ylat = pbounds[2];
-            mb_proj_forward(verbose, pjptr, xlon, ylat,
+            mb_proj_forward(verbose, control.pjptr, xlon, ylat,
                     &xx, &yy, &error);
-            bounds[0] = MIN(bounds[0], xx);
-            bounds[1] = MAX(bounds[1], xx);
-            bounds[2] = MIN(bounds[2], yy);
-            bounds[3] = MAX(bounds[3], yy);
+            control.OutputBounds[0] = MIN(control.OutputBounds[0], xx);
+            control.OutputBounds[1] = MAX(control.OutputBounds[1], xx);
+            control.OutputBounds[2] = MIN(control.OutputBounds[2], yy);
+            control.OutputBounds[3] = MAX(control.OutputBounds[3], yy);
 
             /* third point */
             xlon = pbounds[0];
             ylat = pbounds[3];
-            mb_proj_forward(verbose, pjptr, xlon, ylat,
+            mb_proj_forward(verbose, control.pjptr, xlon, ylat,
                     &xx, &yy, &error);
-            bounds[0] = MIN(bounds[0], xx);
-            bounds[1] = MAX(bounds[1], xx);
-            bounds[2] = MIN(bounds[2], yy);
-            bounds[3] = MAX(bounds[3], yy);
+            control.OutputBounds[0] = MIN(control.OutputBounds[0], xx);
+            control.OutputBounds[1] = MAX(control.OutputBounds[1], xx);
+            control.OutputBounds[2] = MIN(control.OutputBounds[2], yy);
+            control.OutputBounds[3] = MAX(control.OutputBounds[3], yy);
 
             /* fourth point */
             xlon = pbounds[1];
             ylat = pbounds[3];
-            mb_proj_forward(verbose, pjptr, xlon, ylat,
+            mb_proj_forward(verbose, control.pjptr, xlon, ylat,
                     &xx, &yy, &error);
-            bounds[0] = MIN(bounds[0], xx);
-            bounds[1] = MAX(bounds[1], xx);
-            bounds[2] = MIN(bounds[2], yy);
-            bounds[3] = MAX(bounds[3], yy);
+            control.OutputBounds[0] = MIN(control.OutputBounds[0], xx);
+            control.OutputBounds[1] = MAX(control.OutputBounds[1], xx);
+            control.OutputBounds[2] = MIN(control.OutputBounds[2], yy);
+            control.OutputBounds[3] = MAX(control.OutputBounds[3], yy);
             }
 
         /* calculate grid properties */
         if (set_spacing == MB_YES)
             {
-            xdim = (bounds[1] - bounds[0])/dx_set + 1;
+            control.OutputDim[0] = (control.OutputBounds[1] - control.OutputBounds[0])/dx_set + 1;
             if (dy_set <= 0.0)
                 dy_set = dx_set;
-            ydim = (bounds[3] - bounds[2])/dy_set + 1;
+            control.OutputDim[1] = (control.OutputBounds[3] - control.OutputBounds[2])/dy_set + 1;
             if (spacing_priority == MB_YES)
                 {
-                bounds[1] = bounds[0] + dx_set * (xdim - 1);
-                bounds[3] = bounds[2] + dy_set * (ydim - 1);
+                control.OutputBounds[1] = control.OutputBounds[0] + dx_set * (control.OutputDim[0] - 1);
+                control.OutputBounds[3] = control.OutputBounds[2] + dy_set * (control.OutputDim[1] - 1);
                 }
             if (units[0] == 'M' || units[0] == 'm')
                 strcpy(units, "meters");
@@ -1195,96 +2992,96 @@ fprintf(stderr, "referenceIntensityCorrection[%d]: %f\n", icamera, referenceInte
                 strcpy(units, "unknown");
             }
 
-        mb_coor_scale(verbose,0.5*(pbounds[2]+pbounds[3]),&mtodeglon,&mtodeglat);
+        mb_coor_scale(verbose,0.5*(pbounds[2]+pbounds[3]),&control.mtodeglon,&control.mtodeglat);
 
 /* fprintf(stream," Projected coordinates on: proj_status:%d  projection:%s\n",
 proj_status, projection_id);
 fprintf(stream," Lon Lat Bounds: %f %f %f %f\n",
 pbounds[0], pbounds[1], pbounds[2], pbounds[3]);
 fprintf(stream," XY Bounds: %f %f %f %f\n",
-bounds[0], bounds[1], bounds[2], bounds[3]);*/
+control.OutputBounds[0], control.OutputBounds[1], control.OutputBounds[2], control.OutputBounds[3]);*/
         }
 
     /* deal with no projection */
     else
         {
         /* calculate grid properties */
-        mb_coor_scale(verbose,0.5*(bounds[2]+bounds[3]),&mtodeglon,&mtodeglat);
-        deglontokm = 0.001/mtodeglon;
-        deglattokm = 0.001/mtodeglat;
+        mb_coor_scale(verbose,0.5*(control.OutputBounds[2]+control.OutputBounds[3]),&control.mtodeglon,&control.mtodeglat);
+        deglontokm = 0.001/control.mtodeglon;
+        deglattokm = 0.001/control.mtodeglat;
         if (set_spacing == MB_YES
             && (units[0] == 'M' || units[0] == 'm'))
             {
-            xdim = (bounds[1] - bounds[0])/(mtodeglon*dx_set) + 1;
+            control.OutputDim[0] = (control.OutputBounds[1] - control.OutputBounds[0])/(control.mtodeglon*dx_set) + 1;
             if (dy_set <= 0.0)
-                dy_set = mtodeglon * dx_set / mtodeglat;
-            ydim = (bounds[3] - bounds[2])/(mtodeglat*dy_set) + 1;
+                dy_set = control.mtodeglon * dx_set / control.mtodeglat;
+            control.OutputDim[1] = (control.OutputBounds[3] - control.OutputBounds[2])/(control.mtodeglat*dy_set) + 1;
             if (spacing_priority == MB_YES)
                 {
-                bounds[1] = bounds[0] + mtodeglon * dx_set * (xdim - 1);
-                bounds[3] = bounds[2] + mtodeglat * dy_set * (ydim - 1);
+                control.OutputBounds[1] = control.OutputBounds[0] + control.mtodeglon * dx_set * (control.OutputDim[0] - 1);
+                control.OutputBounds[3] = control.OutputBounds[2] + control.mtodeglat * dy_set * (control.OutputDim[1] - 1);
                 }
             strcpy(units, "meters");
             }
         else if (set_spacing == MB_YES
             && (units[0] == 'K' || units[0] == 'k'))
             {
-            xdim = (bounds[1] - bounds[0])*deglontokm/dx_set + 1;
+            control.OutputDim[0] = (control.OutputBounds[1] - control.OutputBounds[0])*deglontokm/dx_set + 1;
             if (dy_set <= 0.0)
                 dy_set = deglattokm * dx_set / deglontokm;
-            ydim = (bounds[3] - bounds[2])*deglattokm/dy_set + 1;
+            control.OutputDim[1] = (control.OutputBounds[3] - control.OutputBounds[2])*deglattokm/dy_set + 1;
             if (spacing_priority == MB_YES)
                 {
-                bounds[1] = bounds[0] + dx_set * (xdim - 1) / deglontokm;
-                bounds[3] = bounds[2] + dy_set * (ydim - 1) / deglattokm;
+                control.OutputBounds[1] = control.OutputBounds[0] + dx_set * (control.OutputDim[0] - 1) / deglontokm;
+                control.OutputBounds[3] = control.OutputBounds[2] + dy_set * (control.OutputDim[1] - 1) / deglattokm;
                 }
             strcpy(units, "km");
             }
         else if (set_spacing == MB_YES
             && (units[0] == 'F' || units[0] == 'f'))
             {
-            xdim = (bounds[1] - bounds[0])/(mtodeglon*0.3048*dx_set) + 1;
+            control.OutputDim[0] = (control.OutputBounds[1] - control.OutputBounds[0])/(control.mtodeglon*0.3048*dx_set) + 1;
             if (dy_set <= 0.0)
-                dy_set = mtodeglon * dx_set / mtodeglat;
-            ydim = (bounds[3] - bounds[2])/(mtodeglat*0.3048*dy_set) + 1;
+                dy_set = control.mtodeglon * dx_set / control.mtodeglat;
+            control.OutputDim[1] = (control.OutputBounds[3] - control.OutputBounds[2])/(control.mtodeglat*0.3048*dy_set) + 1;
             if (spacing_priority == MB_YES)
                 {
-                bounds[1] = bounds[0] + mtodeglon * 0.3048 * dx_set * (xdim - 1);
-                bounds[3] = bounds[2] + mtodeglat * 0.3048 * dy_set * (ydim - 1);
+                control.OutputBounds[1] = control.OutputBounds[0] + control.mtodeglon * 0.3048 * dx_set * (control.OutputDim[0] - 1);
+                control.OutputBounds[3] = control.OutputBounds[2] + control.mtodeglat * 0.3048 * dy_set * (control.OutputDim[1] - 1);
                 }
             strcpy(units, "feet");
             }
         else if (set_spacing == MB_YES)
             {
-            xdim = (bounds[1] - bounds[0])/dx_set + 1;
+            control.OutputDim[0] = (control.OutputBounds[1] - control.OutputBounds[0])/dx_set + 1;
             if (dy_set <= 0.0)
                 dy_set = dx_set;
-            ydim = (bounds[3] - bounds[2])/dy_set + 1;
+            control.OutputDim[1] = (control.OutputBounds[3] - control.OutputBounds[2])/dy_set + 1;
             if (spacing_priority == MB_YES)
                 {
-                bounds[1] = bounds[0] + dx_set * (xdim - 1);
-                bounds[3] = bounds[2] + dy_set * (ydim - 1);
+                control.OutputBounds[1] = control.OutputBounds[0] + dx_set * (control.OutputDim[0] - 1);
+                control.OutputBounds[3] = control.OutputBounds[2] + dy_set * (control.OutputDim[1] - 1);
                 }
             strcpy(units, "degrees");
             }
 
         /* copy bounds to pbounds */
-        pbounds[0] = bounds[0];
-        pbounds[1] = bounds[1];
-        pbounds[2] = bounds[2];
-        pbounds[3] = bounds[3];
+        pbounds[0] = control.OutputBounds[0];
+        pbounds[1] = control.OutputBounds[1];
+        pbounds[2] = control.OutputBounds[2];
+        pbounds[3] = control.OutputBounds[3];
         }
 
     /* calculate other grid properties */
-    dx = (bounds[1] - bounds[0])/(xdim-1);
-    dy = (bounds[3] - bounds[2])/(ydim-1);
+    control.OutputDx[0] = (control.OutputBounds[1] - control.OutputBounds[0])/(control.OutputDim[0]-1);
+    control.OutputDx[1] = (control.OutputBounds[3] - control.OutputBounds[2])/(control.OutputDim[1]-1);
 
     /* pbounds is used to check for images of interest using navigation
       - expand it a little to account for image size */
-    pbounds[0] -= mtodeglon * bounds_buffer;
-    pbounds[1] += mtodeglon * bounds_buffer;
-    pbounds[2] -= mtodeglat * bounds_buffer;
-    pbounds[3] += mtodeglat * bounds_buffer;
+    pbounds[0] -= control.mtodeglon * bounds_buffer;
+    pbounds[1] += control.mtodeglon * bounds_buffer;
+    pbounds[2] -= control.mtodeglat * bounds_buffer;
+    pbounds[3] += control.mtodeglat * bounds_buffer;
 
     /* output information */
     if (verbose >= 1)
@@ -1294,36 +3091,36 @@ bounds[0], bounds[1], bounds[2], bounds[3]);*/
             fprintf(stream,"  OutputImageFile:    %s\n",OutputImageFile);
         else
             fprintf(stream,"  No image output - listing images that would be used for the defined area\n");
-        if (use_projection == MB_YES)
+        if (control.use_projection)
             fprintf(stream,"  projection:         %s\n",projection_id);
         else
             fprintf(stream,"  projection:         Geographic\n");
-        fprintf(stream,"  Bounds: west:       %.9f\n",bounds[0]);
-        fprintf(stream,"  Bounds: east:       %.9f\n",bounds[1]);
-        fprintf(stream,"  Bounds: south:      %.9f\n",bounds[2]);
-        fprintf(stream,"  Bounds: north:      %.9f\n",bounds[3]);
-        fprintf(stream,"  dx:                 %.9f\n",dx);
-        fprintf(stream,"  dy:                 %.9f\n",dy);
-        fprintf(stream,"  xdim:               %d\n",xdim);
-        fprintf(stream,"  ydim:               %d\n",ydim);
+        fprintf(stream,"  control.OutputBounds[0]: west:       %.9f\n",control.OutputBounds[0]);
+        fprintf(stream,"  control.OutputBounds[1]: east:       %.9f\n",control.OutputBounds[1]);
+        fprintf(stream,"  control.OutputBounds[2]: south:      %.9f\n",control.OutputBounds[2]);
+        fprintf(stream,"  control.OutputBounds[3]: north:      %.9f\n",control.OutputBounds[3]);
+        fprintf(stream,"  control.OutputDx[0]: dx:             %.9f\n",control.OutputDx[0]);
+        fprintf(stream,"  control.OutputDx[1]: dy:             %.9f\n",control.OutputDx[1]);
+        fprintf(stream,"  control.OutputDim[0]: xdim:          %d\n",control.OutputDim[0]);
+        fprintf(stream,"  control.OutputDim[1]: ydim:          %d\n",control.OutputDim[1]);
         }
 
-        /* Create an image */
-    OutputImage.create(ydim, xdim, CV_8UC3);
-    size_t size = xdim*ydim*sizeof(float);
-    status = mb_mallocd(verbose,__FILE__,__LINE__,size,(void **)&priority,&error);
-    if (status == MB_FAILURE)
-        {
-        fprintf(stderr,"\nUnable to allocate %.2f MBytes memory for mosaic priority array\n",((xdim*ydim*sizeof(float))/1048576.0));
-        fprintf(stderr,"\nProgram <%s> Terminated\n",
-            program_name);
-        exit(error);
+    /* If output file specified then create an an output image and priority map
+        in the processing structure for each processing thread. The images will
+        be combined after all processing is complete. */
+    if (outputimage_specified) {
+        for (int ithread = 0; ithread < numThreads; ithread++) {
+            processPars[ithread].OutputImage.create(control.OutputDim[1], control.OutputDim[0], CV_8UC3);
+            processPars[ithread].OutputPriority.create(control.OutputDim[1], control.OutputDim[0], CV_32FC1);
+#ifdef DEBUG
+            processPars[ithread].OutputIntensityCorrection.create(control.OutputDim[1], control.OutputDim[0], CV_32FC1);
+            processPars[ithread].OutputStandoff.create(control.OutputDim[1], control.OutputDim[0], CV_32FC1);
+#endif
         }
-    for (unsigned int kkk=0;kkk<xdim*ydim;kkk++)
-        priority[kkk] = 0.0;
+    }
 
     /* read in navigation if desired */
-    if (navigation_specified == MB_YES)
+    if (navigation_specified)
         {
         if ((tfp = fopen(NavigationFile, "r")) == NULL)
             {
@@ -1458,7 +3255,7 @@ bounds[0], bounds[1], bounds[2], bounds[3]);*/
         }
 
     /* read in tide if desired */
-    if (use_tide == MB_YES)
+    if (use_tide)
         {
         if ((tfp = fopen(TideFile, "r")) == NULL)
             {
@@ -1566,10 +3363,9 @@ bounds[0], bounds[1], bounds[2], bounds[3]);*/
         }
 
     /* Load topography grid if desired */
-fprintf(stderr,"About to read TopographyGridFile: %s\n", TopographyGridFile);
-    if (use_topography == MB_YES)
+    if (control.use_topography)
         {
-        status = mb_topogrid_init(verbose, TopographyGridFile, &lonflip, &topogrid_ptr, &error);
+        status = mb_topogrid_init(verbose, TopographyGridFile, &lonflip, &control.topogrid_ptr, &error);
         if (error != MB_ERROR_NO_ERROR)
             {
             mb_error(verbose,error,&message);
@@ -1579,7 +3375,6 @@ fprintf(stderr,"About to read TopographyGridFile: %s\n", TopographyGridFile);
             exit(error);
             }
         }
-fprintf(stderr,"Done reading TopographyGridFile: %s\n", TopographyGridFile);
 
     /* loop over the list of input images
        - this can be a list of single images or stereo images
@@ -1598,22 +3393,13 @@ fprintf(stderr,"Done reading TopographyGridFile: %s\n", TopographyGridFile);
         exit(error);
         }
 
-    /* prepare to display images */
-    String windowNameImage = "Source Image & RGB Histograms";
-    if (show_images) {
-        namedWindow(windowNameImage, 0);
-    }
-    String windowNamePriority = "Priority Map";
-    if (show_priority_map) {
-        namedWindow(windowNamePriority, 0);
-    }
-
     /* loop over single images or stereo pairs in the imagelist file */
     npairs = 0;
     nimages = 0;
     int imageStatus = MB_IMAGESTATUS_NONE;
     double imageQuality = 0.0;
     mb_path dpath;
+    unsigned int numThreadsSet = 0;
     fprintf(stderr,"About to read ImageListFile: %s\n", ImageListFile);
 
     while ((status = mb_imagelist_read(verbose, imagelist_ptr, &imageStatus,
@@ -1666,6 +3452,14 @@ fprintf(stderr,"Done reading TopographyGridFile: %s\n", TopographyGridFile);
 
         /* process any images */
         for (int iimage=0;iimage<currentimages;iimage++) {
+            double time_d;
+            double camera_navlon;
+            double camera_navlat;
+            double camera_sensordepth;
+            double camera_heading;
+            double camera_roll;
+            double camera_pitch;
+
             /* set camera for stereo image */
             if (currentimages == 2) {
                 if (iimage == MBPM_CAMERA_LEFT) {
@@ -1718,131 +3512,8 @@ fprintf(stderr,"Done reading TopographyGridFile: %s\n", TopographyGridFile);
                 }
             }
 
-// Test thread use
-fprintf(stderr, "About to start thread\n");
-std:thread thread1(process_image, imageFile);
-thread1.join();
-fprintf(stderr, "Done with thread\n");
-
-            /* if no output specified but image would be used, print it out and
-                reset use_this_image flag off so it is not read and processed
-                - this lets us get a list of the images to be used without taking
-                the time to process them */
-            if (!outputimage_specified && use_this_image) {
-                fprintf(stdout,"%s\n", imageFile);
-                use_this_image = false;
-            }
-
-            /* read the image */
+            /* calculate camera pose */
             if (use_this_image) {
-                /* read the image */
-                imageProcess = imread(imageFile);
-                if (imageProcess.empty()) {
-                    use_this_image = false;
-                }
-            }
-
-            /* process the image */
-            if (use_this_image) {
-
-                /* if calibration loaded, undistort the image */
-                if (calibration_specified == MB_YES) {
-                    if (undistort_initialized == MB_NO) {
-                        imageSize = imageProcess.size();
-                        calibrationMatrixValues(cameraMatrix[0], imageSize,
-                                    SensorWidthMm, SensorHeightMm,
-                                    fovx[0], fovy[0], focalLength[0],
-                                    principalPoint[0], aspectRatio[0]);
-                        calibrationMatrixValues(cameraMatrix[1], imageSize,
-                                    SensorWidthMm, SensorHeightMm,
-                                    fovx[1], fovy[1], focalLength[1],
-                                    principalPoint[1], aspectRatio[1]);
-                        undistort_initialized = MB_YES;
-                        if (verbose > 0) {
-                            fprintf(stderr,"\nLeft Camera Characteristics:\n");
-                            fprintf(stderr,"  Image width (pixels):         %d\n", imageSize.width);
-                            fprintf(stderr,"  Image height (pixels):        %d\n", imageSize.height);
-                            fprintf(stderr,"  Sensor width (mm):            %f\n", SensorWidthMm);
-                            fprintf(stderr,"  Sensor height (mm):           %f\n", SensorHeightMm);
-                            fprintf(stderr,"  Horizontal field of view:     %f\n", fovx[0]);
-                            fprintf(stderr,"  Vertical field of view:       %f\n", fovy[0]);
-                            fprintf(stderr,"  Focal length (sensor pixels): %f\n", focalLength[0]);
-                            fprintf(stderr,"  Focal length (mm):            %f\n", focalLength[0] * SensorCellMm);
-                            fprintf(stderr,"  Principal point x:            %f\n", principalPoint[0].x);
-                            fprintf(stderr,"  Principal point y:            %f\n", principalPoint[0].y);
-                            fprintf(stderr,"  Principal point x (pixels):   %f\n", principalPoint[0].x / SensorCellMm);
-                            fprintf(stderr,"  Principal point y (pixels):   %f\n", principalPoint[0].y / SensorCellMm);
-                            fprintf(stderr,"  Aspect ratio:                 %f\n", aspectRatio[0]);
-                            fprintf(stderr,"\nRight Camera Characteristics:\n");
-                            fprintf(stderr,"  Image width (pixels):         %d\n", imageSize.width);
-                            fprintf(stderr,"  Image height (pixels):        %d\n", imageSize.height);
-                            fprintf(stderr,"  Sensor width (mm):            %f\n", SensorWidthMm);
-                            fprintf(stderr,"  Sensor height (mm):           %f\n", SensorHeightMm);
-                            fprintf(stderr,"  Horizontal field of view:     %f\n", fovx[1]);
-                            fprintf(stderr,"  Vertical field of view:       %f\n", fovy[1]);
-                            fprintf(stderr,"  Focal length (sensor pixels): %f\n", focalLength[1]);
-                            fprintf(stderr,"  Focal length (mm):            %f\n", focalLength[1] * SensorCellMm);
-                            fprintf(stderr,"  Principal point x (mm):       %f\n", principalPoint[1].x);
-                            fprintf(stderr,"  Principal point y (mm):       %f\n", principalPoint[1].y);
-                            fprintf(stderr,"  Principal point x (pixels):   %f\n", principalPoint[1].x / SensorCellMm);
-                            fprintf(stderr,"  Principal point y (pixels):   %f\n", principalPoint[1].y / SensorCellMm);
-                            fprintf(stderr,"  Aspect ratio:                 %f\n", aspectRatio[1]);
-                          }
-                      }
-
-                    /* undistort the image */
-                    undistort(imageProcess, imageUndistort, cameraMatrix[image_camera], distCoeffs[image_camera], noArray());
-
-                    /* get field of view, offsets, and principal point to use */
-                    if (image_camera == 0) {
-                        fov_x = fovx[0];
-                        fov_y = fovy[0];
-                        center_x = principalPoint[0].x / SensorCellMm;
-                        center_y = principalPoint[0].y / SensorCellMm;
-                    }
-                    else {
-                        fov_x = fovx[1];
-                        fov_y = fovy[1];
-                        center_x = principalPoint[1].x / SensorCellMm;
-                        center_y = principalPoint[1].y / SensorCellMm;
-                    }
-                }
-
-                /* else leave the image alone, treat the center as the principal point,
-                    and use specified offsets */
-                else {
-                    imageUndistort = imageProcess.clone();
-                    if (image_camera == 0) {
-                        fov_x = 77.36;
-                        fov_y = (fov_x * imageSize.height) / imageSize.width;
-                        center_x = imageSize.width / 2;
-                        center_y = imageSize.height / 2;
-                    }
-                    else {
-                        fov_x = 77.36;
-                        fov_y = (fov_x * imageSize.height) / imageSize.width;
-                        center_x = imageSize.width / 2;
-                        center_y = imageSize.height / 2;
-                    }
-                }
-
-                /* convert to YCrCb */
-                cvtColor(imageUndistort, imageUndistortYCrCb, COLOR_BGR2YCrCb);
-
-                /* calculate reference "depth" for use in calculating ray angles for
-                    individual pixels */
-                double zzref = 0.5 * (0.5 * imageSize.width / tan(DTR * 0.5 * fov_x * fov_fudgefactor)
-                        + 0.5 * imageSize.height / tan(DTR * 0.5 * fov_y * fov_fudgefactor));
-
-                /* get navigation for this image */
-                intstat = mb_linear_interp_longitude(verbose,
-                        ntime-1, nlon-1,
-                        nnav, time_d, &navlon, &itime,
-                        &error);
-                intstat = mb_linear_interp_latitude(verbose,
-                        ntime-1, nlat-1,
-                        nnav, time_d, &navlat, &itime,
-                        &error);
                 intstat = mb_linear_interp_heading(verbose,
                         ntime-1, nheading-1,
                         nnav, time_d, &heading, &itime,
@@ -1895,477 +3566,189 @@ fprintf(stderr, "Done with thread\n");
                                 heading, roll, pitch,
                                 &camera_heading, &camera_roll, &camera_pitch,
                                 &error);
+            }
 
-                /* Apply camera model translation */
-                double dlon, dlat, dz;
-                double headingx = sin(DTR * camera_heading);
-                double headingy = cos(DTR * camera_heading);
-                if (image_camera == 0) {
-                    dlon = 0.5 * (T.at<double>(0)) * mtodeglon;
-                    dlat = 0.5 * (T.at<double>(1)) * mtodeglat;
-                    dz = 0.5 * (T.at<double>(2));
-                } else {
-                    dlon = -0.5 * (T.at<double>(0)) * mtodeglon;
-                    dlat = -0.5 * (T.at<double>(1)) * mtodeglat;
-                    dz = -0.5 * (T.at<double>(2));
-                }
-                camera_navlon += (headingy * dlon + headingx * dlat);
-                camera_navlat += (-headingx * dlon + headingy * dlat);
-                camera_sensordepth += dz;
-//fprintf(stderr,"%s:%d:%s: Camera %d: %.9f %.9f %.3f %.3f %.3f   %.3f %.3f %.3f\n",
-//__FILE__, __LINE__, __func__, image_camera,
-//camera_navlon, camera_navlat, (camera_navlon - navlon) / mtodeglon, (camera_navlat - navlat) / mtodeglat, camera_sensordepth,
-//camera_heading, camera_roll, camera_pitch);
+            /* if no output specified but image would be used, print it out and
+                reset use_this_image flag off so it is not read and processed
+                - this lets us get a list of the images to be used without taking
+                the time to process them */
+            if (!outputimage_specified && use_this_image) {
+                fprintf(stdout,"%s\n", imageFile);
+                use_this_image = false;
+            }
 
-                /* Process this image */
+            // Start processing thread
+            else if (use_this_image) {
+                /* copy parameters to current processing parameter structure */
+                processPars[numThreadsSet].thread = numThreadsSet;
+                strcpy(processPars[numThreadsSet].imageFile, imageFile);
+                processPars[numThreadsSet].image_count = nimages - currentimages + iimage;
+                processPars[numThreadsSet].image_camera = image_camera;
+                processPars[numThreadsSet].time_d = time_d;
+                processPars[numThreadsSet].camera_navlon = camera_navlon;
+                processPars[numThreadsSet].camera_navlat = camera_navlat;
+                processPars[numThreadsSet].camera_sensordepth = camera_sensordepth;
+                processPars[numThreadsSet].camera_heading = camera_heading;
+                processPars[numThreadsSet].camera_roll = camera_roll;
+                processPars[numThreadsSet].camera_pitch = camera_pitch;
 
-                if (show_images) {
-                    /* get some statistics on this image */
-                    vector<Mat> bgr_planes;
-                    split( imageUndistort, bgr_planes );
-                    int histSize = 256;
-                    float range[] = { 0, 256 }; //the upper boundary is exclusive
-                    const float* histRange = { range };
-                    bool uniform = true, accumulate = false;
-                    Mat b_hist, g_hist, r_hist;
-                    calcHist( &bgr_planes[0], 1, 0, Mat(), b_hist, 1, &histSize, &histRange, uniform, accumulate );
-                    calcHist( &bgr_planes[1], 1, 0, Mat(), g_hist, 1, &histSize, &histRange, uniform, accumulate );
-                    calcHist( &bgr_planes[2], 1, 0, Mat(), r_hist, 1, &histSize, &histRange, uniform, accumulate );
-                    int hist_w = imageUndistort.cols, hist_h = imageUndistort.rows;
-                    int bin_w = cvRound( (double) hist_w/histSize );
-                    Mat histImage( hist_h, hist_w, CV_8UC3, Scalar( 0,0,0) );
-                    normalize(b_hist, b_hist, 0, histImage.rows, NORM_MINMAX, -1, Mat() );
-                    normalize(g_hist, g_hist, 0, histImage.rows, NORM_MINMAX, -1, Mat() );
-                    normalize(r_hist, r_hist, 0, histImage.rows, NORM_MINMAX, -1, Mat() );
-                    for ( int i = 1; i < histSize; i++ ) {
-                        line( histImage, Point( bin_w*(i-1), hist_h - cvRound(b_hist.at<float>(i-1)) ),
-                              Point( bin_w*(i), hist_h - cvRound(b_hist.at<float>(i)) ),
-                              Scalar( 255, 0, 0), 2, 8, 0  );
-                        line( histImage, Point( bin_w*(i-1), hist_h - cvRound(g_hist.at<float>(i-1)) ),
-                              Point( bin_w*(i), hist_h - cvRound(g_hist.at<float>(i)) ),
-                              Scalar( 0, 255, 0), 2, 8, 0  );
-                        line( histImage, Point( bin_w*(i-1), hist_h - cvRound(r_hist.at<float>(i-1)) ),
-                              Point( bin_w*(i), hist_h - cvRound(r_hist.at<float>(i)) ),
-                              Scalar( 0, 0, 255), 2, 8, 0  );
-                    }
-                    Mat imgConcat;
-                    hconcat(imageUndistort, histImage, imgConcat);
-                    imshow(windowNameImage, imgConcat );
-                    waitKey(1);
-                }
-
-                /* calculate the largest distance from center for this image for use
-                    in calculating pixel priority */
-                double xx = MAX(center_x, imageUndistort.cols - center_x);
-                double yy = MAX(center_y, imageUndistort.rows - center_y);
-                double rrxymax = sqrt(xx * xx + yy * yy);
-
-                /* make and display a priority map */
-                if (show_priority_map) {
-                    imagePriority = imageUndistort.clone();
-                    for (int i=0; i<imageUndistort.cols; i++) {
-                        for (int j=0; j<imageUndistort.rows; j++) {
-                            /* calculate the pixel priority based on the distance
-                                from the image center */
-                            xx = i - center_x;
-                            yy = center_y - j;
-                            double rrxy = sqrt(xx * xx + yy * yy);
-                            double pixel_priority = (rrxymax - rrxy) / rrxymax;
-                            unsigned char r = (unsigned char)(pixel_priority * 255);
-                            imagePriority.at<Vec3b>(j,i)[0] = r;
-                            imagePriority.at<Vec3b>(j,i)[1] = r;
-                            imagePriority.at<Vec3b>(j,i)[2] = r;
-//if (xx == yy)fprintf(stderr,"PRIORITY xx:%7.1f yy:%7.1f rrxy:%10.5f rrxymax:%10.5f pixel_priority:%10.8f %3u\n",
-//            xx,yy,rrxy,rrxymax,pixel_priority,r);
+                /* If this is the first image processed, and a camera model has
+                    been specified, then read the image here and
+                    initialize the use of the camera model. We assume that all
+                    images derive from the same camera rig and have the same
+                    dimensions. */
+                if (!undistort_initialized) {
+                    undistort_initialized = true;
+                    Mat imageFirst = imread(imageFile);
+                    if (!imageFirst.empty()) {
+                        control.imageSize = imageFirst.size();
+                        calibrationMatrixValues(control.cameraMatrix[0], control.imageSize,
+                                    control.SensorWidthMm, control.SensorHeightMm,
+                                    control.fovx[0], control.fovy[0], control.focalLength[0],
+                                    control.principalPoint[0], control.aspectRatio[0]);
+                        calibrationMatrixValues(control.cameraMatrix[1], control.imageSize,
+                                    control.SensorWidthMm, control.SensorHeightMm,
+                                    control.fovx[1], control.fovy[1], control.focalLength[1],
+                                    control.principalPoint[1], control.aspectRatio[1]);
+                        if (verbose > 0) {
+                            fprintf(stderr,"\nLeft Camera Characteristics:\n");
+                            fprintf(stderr,"  Image width (pixels):         %d\n", control.imageSize.width);
+                            fprintf(stderr,"  Image height (pixels):        %d\n", control.imageSize.height);
+                            fprintf(stderr,"  Sensor width (mm):            %f\n", control.SensorWidthMm);
+                            fprintf(stderr,"  Sensor height (mm):           %f\n", control.SensorHeightMm);
+                            fprintf(stderr,"  Horizontal field of view:     %f\n", control.fovx[0]);
+                            fprintf(stderr,"  Vertical field of view:       %f\n", control.fovy[0]);
+                            fprintf(stderr,"  Focal length (sensor pixels): %f\n", control.focalLength[0]);
+                            fprintf(stderr,"  Focal length (mm):            %f\n", control.focalLength[0] * control.SensorCellMm);
+                            fprintf(stderr,"  Principal point x:            %f\n", control.principalPoint[0].x);
+                            fprintf(stderr,"  Principal point y:            %f\n", control.principalPoint[0].y);
+                            fprintf(stderr,"  Principal point x (pixels):   %f\n", control.principalPoint[0].x / control.SensorCellMm);
+                            fprintf(stderr,"  Principal point y (pixels):   %f\n", control.principalPoint[0].y / control.SensorCellMm);
+                            fprintf(stderr,"  Aspect ratio:                 %f\n", control.aspectRatio[0]);
+                            fprintf(stderr,"\nRight Camera Characteristics:\n");
+                            fprintf(stderr,"  Image width (pixels):         %d\n", control.imageSize.width);
+                            fprintf(stderr,"  Image height (pixels):        %d\n", control.imageSize.height);
+                            fprintf(stderr,"  Sensor width (mm):            %f\n", control.SensorWidthMm);
+                            fprintf(stderr,"  Sensor height (mm):           %f\n", control.SensorHeightMm);
+                            fprintf(stderr,"  Horizontal field of view:     %f\n", control.fovx[1]);
+                            fprintf(stderr,"  Vertical field of view:       %f\n", control.fovy[1]);
+                            fprintf(stderr,"  Focal length (sensor pixels): %f\n", control.focalLength[1]);
+                            fprintf(stderr,"  Focal length (mm):            %f\n", control.focalLength[1] * control.SensorCellMm);
+                            fprintf(stderr,"  Principal point x (mm):       %f\n", control.principalPoint[1].x);
+                            fprintf(stderr,"  Principal point y (mm):       %f\n", control.principalPoint[1].y);
+                            fprintf(stderr,"  Principal point x (pixels):   %f\n", control.principalPoint[1].x / control.SensorCellMm);
+                            fprintf(stderr,"  Principal point y (pixels):   %f\n", control.principalPoint[1].y / control.SensorCellMm);
+                            fprintf(stderr,"  Aspect ratio:                 %f\n\n", control.aspectRatio[1]);
                         }
-                    }
-                    imshow(windowNamePriority, imagePriority);
-                    waitKey(500);
-                }
-
-                /* calculate the average intensity of the image
-                 * if specified calculate the correction required to bring the
-                 * average intensity to a value of 70.0
-                 */
-                avgPixelIntensity = mean(imageUndistortYCrCb);
-                if (use_simple_brightness_correction == MB_YES) {
-                    avgImageIntensityCorrection = 70.0 / avgPixelIntensity.val[0];
-                }
-                else {
-                     avgImageIntensityCorrection = 1.0;
-                }
-                mb_get_date(verbose, time_d, time_i);
-                fprintf(stderr,"%4d Camera:%d Image:%s %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d LLZ: %.10f %.10f %8.3f Tide:%7.3f H:%6.2f R:%6.2f P:%6.2f Avg Intensity:%.3f\n",
-                        (nimages - currentimages + iimage), image_camera, imageFile,
-                        time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6],
-                        camera_navlon, camera_navlat, camera_sensordepth, tide,
-                        camera_heading, camera_roll, camera_pitch, avgPixelIntensity.val[0]);
-
-                /* get unit vector for direction camera is pointing */
-
-                /* rotate center pixel location using attitude and zzref */
-                double zz;
-                mb_platform_math_attitude_rotate_beam(verbose,
-                    0.0, 0.0, zzref,
-                    camera_roll, camera_pitch, 0.0,
-                    &xx, &yy, &zz,
-                    &error);
-                double rr = sqrt(xx * xx + yy * yy + zz * zz);
-                double phi = RTD * atan2(yy, xx);
-                double theta = RTD * acos(zz / rr);
-
-                /* calculate unit vector relative to the camera rig */
-                double vx = sin(DTR * theta) * cos(DTR * phi);
-                double vy = sin(DTR * theta) * sin(DTR * phi);
-                double vz = cos(DTR * theta);
-
-                /* apply rotation of each camera relative to the rig */
-                double vxx, vyy, vzz;
-                if (image_camera == 1) {
-                    vxx = vx * (R.at<double>(0,0)) + vy * (R.at<double>(0,1)) + vz * (R.at<double>(0,2));
-                    vyy = vx * (R.at<double>(1,0)) + vy * (R.at<double>(1,1)) + vz * (R.at<double>(1,2));
-                    vzz = vx * (R.at<double>(2,0)) + vy * (R.at<double>(2,1)) + vz * (R.at<double>(2,2));
-                }
-                else {
-                    vxx = vx;
-                    vyy = vy;
-                    vzz = vz;
-                }
-
-                /* rotate unit vector by camera rig heading */
-                double cx = vxx * cos(DTR * camera_heading) + vyy * sin(DTR * camera_heading);
-                double cy = -vxx * sin(DTR * camera_heading) + vyy * cos(DTR * camera_heading);
-                double cz = vzz;
-
-                /* loop over the pixels */
-                for (int i=0; i<imageUndistort.cols; i++) {
-                    for (int j=0; j<imageUndistort.rows; j++) {
-                        /* calculate the pixel priority based on the distance
-                            from the image center */
-                        double xx = i - center_x;
-                        double yy = center_y - j;
-//int debugprint = MB_NO;
-//int icenter_x = (int)center_x;
-//int icenter_y = (int)center_y;
-//if (i == icenter_x && j == icenter_y) {
-//debugprint = MB_YES;
-//}
-                        double rrxysq = xx * xx + yy * yy;
-                        double rrxy = sqrt(rrxysq);
-                        double rr = sqrt(rrxysq + zzref * zzref);
-                        double pixel_priority = (rrxymax - rrxy) / rrxymax;
-//if (debugprint == MB_YES) {
-//fprintf(stderr,"\nPRIORITY xx:%f yy:%f zzref:%f rr:%f rrxy:%f rrxymax:%f pixel_priority:%f\n",
-//xx,yy,zzref,rr,rrxy,rrxymax,pixel_priority);
-//}
-
-                        /* calculate the pixel takeoff angles relative to the camera rig */
-                        double phi = RTD * atan2(yy, xx);
-                        double theta = RTD * acos(zzref / rr);
-
-                        /* calculate the angular width of a single pixel */
-                        double rrxysq2 = (rrxy + 1.0) * (rrxy + 1.0);
-                        double rr2 = sqrt(rrxysq2 + zzref * zzref);
-                        double theta2 = RTD * acos(zzref / rr2);
-                        double dtheta = theta2 - theta;
-//if (debugprint == MB_YES) {
-//fprintf(stderr,"Camera: roll:%.3f pitch:%.3f\n", camera_roll, camera_pitch);
-//fprintf(stderr,"Rows:%d Cols:%d | %5d %5d BGR:%3.3d|%3.3d|%3.3d", imageUndistort.rows, imageUndistort.cols, i, j, b, g, r);
-//fprintf(stderr," xyz:%f %f %f r:%f   phi:%f theta:%f\n", xx, yy, zzref, rr, phi, theta);
-//}
-
-                        /* rotate pixel location using attitude and zzref */
-                        double zz;
-                        mb_platform_math_attitude_rotate_beam(verbose,
-                            xx, yy, zzref,
-                            camera_roll, camera_pitch, 0.0,
-                            &xx, &yy, &zz,
-                            &error);
-
-                        /* recalculate the pixel takeoff angles relative to the camera rig */
-                        rrxysq = xx * xx + yy * yy;
-                        rrxy = sqrt(rrxysq);
-                        rr = sqrt(rrxysq + zz * zz);
-                        phi = RTD * atan2(yy, xx);
-                        theta = RTD * acos(zz / rr);
-//if (debugprint == MB_YES) {
-//fprintf(stderr,"Rows:%d Cols:%d | %5d %5d BGR:%3.3d|%3.3d|%3.3d", imageUndistort.rows, imageUndistort.cols, i, j, b, g, r);
-//fprintf(stderr," xyz:%f %f %f r:%f   phi:%f theta:%f\n", xx, yy, zz, rr, phi, theta);
-//}
-
-                        /* calculate unit vector relative to the camera rig */
-                        double vz = cos(DTR * theta);
-                        double vx = sin(DTR * theta) * cos(DTR * phi);
-                        double vy = sin(DTR * theta) * sin(DTR * phi);
-//if (debugprint == MB_YES) {
-//fprintf(stderr,"camera rig unit vector: %f %f %f\n",vx,vy,vz);
-//}
-                        /* if takeoff angle is too vertical (this is a 2D photomosaic)
-                            then do not use this pixel */
-                        double vxx, vyy, vzz;
-                        double standoff = 0.0;
-                        double lon, lat, topo;
-                        if (theta <= 80.0) {
-
-                            /* apply rotation of each camera relative to the rig */
-                            if (image_camera == 1) {
-                                vxx = vx * (R.at<double>(0,0)) + vy * (R.at<double>(0,1)) + vz * (R.at<double>(0,2));
-                                vyy = vx * (R.at<double>(1,0)) + vy * (R.at<double>(1,1)) + vz * (R.at<double>(1,2));
-                                vzz = vx * (R.at<double>(2,0)) + vy * (R.at<double>(2,1)) + vz * (R.at<double>(2,2));
-//    if (debugprint == MB_YES) {
-//    fprintf(stderr,"\nR:      %f %f %f\n",R.at<double>(0,0), R.at<double>(0,1), R.at<double>(0,2));
-//    fprintf(stderr,"R:      %f %f %f\n",R.at<double>(1,0), R.at<double>(1,1), R.at<double>(1,2));
-//    fprintf(stderr,"R:      %f %f %f\n",R.at<double>(2,0), R.at<double>(2,1), R.at<double>(2,2));
-//    fprintf(stderr,"Rotation: camera 1 unit vector: %f %f %f    camera 0 unit vector: %f %f %f\n",vx,vy,vz,vxx,vyy,vzz);
-//    }
-                            }
-                            else {
-                                vxx = vx;
-                                vyy = vy;
-                                vzz = vz;
-                            }
-//if (debugprint == MB_YES) {
-//fprintf(stderr,"camera unit vector:     %f %f %f\n",vx,vy,vz);
-//}
-
-                            /* rotate unit vector by camera rig heading */
-                            vx = vxx * cos(DTR * camera_heading) + vyy * sin(DTR * camera_heading);
-                            vy = -vxx * sin(DTR * camera_heading) + vyy * cos(DTR * camera_heading);
-                            vz = vzz;
-//if (debugprint == MB_YES) {
-//fprintf(stderr,"camera unit vector rotated by heading %f:     %f %f %f\n",camera_heading,vx,vy,vz);
-//}
-
-                            /* find the location where this vector intersects the grid */
-                            if (use_topography == MB_YES) {
-                                status = mb_topogrid_intersect(verbose, topogrid_ptr,
-                                            camera_navlon, camera_navlat, 0.0, camera_sensordepth,
-                                            mtodeglon, mtodeglat, vx, vy, vz,
-                                            &lon, &lat, &topo, &rr, &error);
-                            }
-                            else {
-                                rr = standoff_target / vz;
-                                lon = camera_navlon + mtodeglon * vx * rr;
-                                lat = camera_navlat + mtodeglon * vy * rr;
-                                topo = -camera_sensordepth -  standoff_target;
-                            }
-                            zz = -camera_sensordepth - topo;
-
-                            /* standoff is dot product of camera vector with projected pixel vector */
-                            standoff = (cx * rr * vx) + (cy * rr * vy) + (cz * rr * vz);
-//if (debugprint == MB_YES) {
-//fprintf(stderr," llz: %.10f %.10f %.3f  range:%.3f  standoff:%.3f\n", lon, lat, topo, rr, standoff);
-//}
-
-                        }
-
-                        /* use pixel if not too vertical or range too large */
-                        if (theta <= 80.0 && rr < range_max) {
-
-                            /* modulate the source pixel priority by the standoff if desired */
-                            if (priority_mode == MBPM_PRIORITY_CENTRALITY_PLUS_STANDOFF)  {
-                                double dstandoff = (standoff - standoff_target) / standoff_range;
-                                double standoff_priority = (float) (exp(-dstandoff * dstandoff));
-                                pixel_priority *= standoff_priority;
-                            }
-//if (debugprint == MB_YES) {
-//fprintf(stderr," standoff:%f pixel_priority:%.3f\n", standoff, pixel_priority);
-//}
-
-                            /* get the intensity correction using interpolation of the correction table */
-                            if (correction_specified == MB_YES) {
-                                ibin_x1 = MIN(MAX(((int)((i + 0.5 * bin_dx) / bin_dx)), 0), ncorr_x - 2);
-                                ibin_x2 = ibin_x1 + 1;
-                                factor_x = ((double)i - 0.5 * bin_dx) / bin_dx - (double)ibin_x1;
-                                jbin_y1 = MIN(MAX(((int)((j + 0.5 * bin_dy) / bin_dy)), 0), ncorr_y - 2);
-                                jbin_y2 = jbin_y1 + 1;
-                                factor_y = ((double)j - 0.5 * bin_dy) / bin_dy - (double)jbin_y1;
-                                kbin_z1 = MIN(MAX(((int)((standoff + 0.5 * bin_dz) / bin_dz)), 0), ncorr_z - 2);
-                                kbin_z2 = kbin_z1 + 1;
-                                factor_z = ((double)standoff - 0.5 * bin_dz) / bin_dz - (double)kbin_z1;
-                                factor_x = MIN(MAX(factor_x, 0.0), 1.0);
-                                factor_y = MIN(MAX(factor_y, 0.0), 1.0);
-                                factor_z = MIN(MAX(factor_z, 0.0), 1.0);
-//fprintf(stderr,"i:%d j:%d sensordepth:%f tide:%f sensordepth:%f topo:%f standoff:%f kbin_z:%d %d\n",
-//i,j,sensordepth,tide,sensordepth,topo,standoff,kbin_z1,kbin_z2);
-
-                                /* get reference intensity from center of image at the current standoff */
-                                table_intensity_ref =  (1.0 - factor_z) * corr_table[image_camera].at<float>(ibin_xcen, jbin_ycen, kbin_z1)
-                                            + factor_z * corr_table[image_camera].at<float>(ibin_xcen, jbin_ycen, kbin_z2);
-
-                                v000 = corr_table[image_camera].at<float>(ibin_x1, jbin_y1, kbin_z1);
-                                v100 = corr_table[image_camera].at<float>(ibin_x2, jbin_y1, kbin_z1);
-                                v010 = corr_table[image_camera].at<float>(ibin_x1, jbin_y2, kbin_z1);
-                                v001 = corr_table[image_camera].at<float>(ibin_x1, jbin_y1, kbin_z2);
-                                v101 = corr_table[image_camera].at<float>(ibin_x2, jbin_y1, kbin_z2);
-                                v011 = corr_table[image_camera].at<float>(ibin_x1, jbin_y2, kbin_z2);
-                                v110 = corr_table[image_camera].at<float>(ibin_x2, jbin_y2, kbin_z1);
-                                v111 = corr_table[image_camera].at<float>(ibin_x2, jbin_y2, kbin_z2);
-                                vavg = v000 + v100 + v010 + v110 + v001 + v101 + v011 + v111;
-                                nvavg = 0;
-                                if (v000 > 0.0) nvavg++;
-                                if (v100 > 0.0) nvavg++;
-                                if (v010 > 0.0) nvavg++;
-                                if (v110 > 0.0) nvavg++;
-                                if (v001 > 0.0) nvavg++;
-                                if (v101 > 0.0) nvavg++;
-                                if (v011 > 0.0) nvavg++;
-                                if (v111 > 0.0) nvavg++;
-                                if (nvavg > 0)
-                                    vavg /= nvavg;
-                                if (v000 == 0.0) v000 = vavg;
-                                if (v100 == 0.0) v100 = vavg;
-                                if (v010 == 0.0) v010 = vavg;
-                                if (v110 == 0.0) v110 = vavg;
-                                if (v001 == 0.0) v001 = vavg;
-                                if (v101 == 0.0) v101 = vavg;
-                                if (v011 == 0.0) v011 = vavg;
-                                if (v111 == 0.0) v111 = vavg;
-
-                                /* use trilinear interpolation from http://paulbourke.net/miscellaneous/interpolation/ */
-                                table_intensity = v000 * (1.0 - factor_x) * (1.0 - factor_y) * (1.0 - factor_x)
-                                        + v100 * factor_x * (1.0 - factor_y) * (1.0 - factor_z)
-                                        + v010 * (1.0 - factor_x) * factor_y * (1.0 - factor_z)
-                                        + v001 * (1.0 - factor_x) * (1.0 - factor_y) * factor_z
-                                        + v101 * factor_x * (1.0 - factor_y) * factor_z
-                                        + v011 * (1.0 - factor_x) * factor_y * factor_z
-                                        + v110 * factor_x * factor_y * (1.0 - factor_z)
-                                        + v111 * factor_x * factor_y * factor_z;
-                                if (table_intensity > 0.0)
-                                    pixelIntensityCorrection = table_intensity_ref / table_intensity;
-                                else {
-                                    pixelIntensityCorrection = 1.0;
-                                }
-
-//fprintf(stderr,"pixelIntensityCorrection:%f table_intensity_ref:%f table_intensity:%f\n",
-//pixelIntensityCorrection,table_intensity_ref,table_intensity);
-                            }
-
-                            /* else do no correction */
-                            else {
-                                pixelIntensityCorrection = 1.0;
-                            }
-
-                            /* apply intensity correction combining all specified corrections */
-                            intensityCorrection = referenceIntensityCorrection[image_camera]
-                                                    * avgImageIntensityCorrection
-                                                    * pixelIntensityCorrection;
-
-                            /* access the Y value from the YCrCb image */
-                            intensityChange = (intensityCorrection - 1.0) * ((double) imageUndistortYCrCb.at<Vec3b>(j,i)[0]);
-//fprintf(stderr,"i:%d j:%d BGR: %f %f %f  Correction:%f  Y: %f %f\n",
-//i,j,db,dg,dr,intensityCorrection,(double) imageUndistortYCrCb.at<Vec3b>(j,i)[0],dy);
-
-                            /* apply the pixel correction */
-                            unsigned char b = saturate_cast<unsigned char>(imageUndistort.at<Vec3b>(j,i)[0] + intensityChange);
-                            unsigned char g = saturate_cast<unsigned char>(imageUndistort.at<Vec3b>(j,i)[1] + intensityChange);
-                            unsigned char r = saturate_cast<unsigned char>(imageUndistort.at<Vec3b>(j,i)[2] + intensityChange);
-//if (r+g+b < 20)
-//fprintf(stderr,"%5d %5d  rgb: %3d %3d %3d   %3d %3d %3d   intensityChange:%f\n",
-//i,j,imageUndistort.at<Vec3b>(j,i)[0],
-//imageUndistort.at<Vec3b>(j,i)[1],
-//imageUndistort.at<Vec3b>(j,i)[2],
-//r,g,b,intensityChange);
-
-                            /* find the location and footprint of the input pixel
-                                in the output image */
-                            double diii, djjj;
-                            double pixel_dx, pixel_dy;
-                            if (use_projection == MB_YES) {
-                                /* pixel location */
-                                mb_proj_forward(verbose, pjptr, lon, lat, &xx, &yy, &error);
-                                diii = (xx - bounds[0] + 0.5 * dx) / dx;
-                                djjj = (bounds[3] - yy + 0.5 * dy) / dy;
-
-                                /* pixel footprint size */
-                                pixel_dx = 4.0 * rr * cos(DTR * theta) * tan (DTR * dtheta) / dx;
-                                pixel_dy = 4.0 * rr * cos(DTR * theta) * tan (DTR * dtheta) / dy;
-                            }
-
-                            else {
-                                /* pixel location */
-                                diii = (lon - bounds[0] + 0.5 * dx) / dx;
-                                djjj = (bounds[3] - lat + 0.5 * dy) / dy;
-
-                                /* pixel footprint size */
-                                pixel_dx = 4.0 * rr * cos(DTR * theta) * tan (DTR * dtheta) * (mtodeglon / dx);
-                                pixel_dy = 4.0 * rr * cos(DTR * theta) * tan (DTR * dtheta) * (mtodeglat / dy);
-                            }
-
-                            /* figure out the "footprint" extent of the mapped pixel */
-                            int iii1 = (int)(floor(diii) - floor(pixel_dx));
-                            int iii2 = (int)(floor(diii) + floor(pixel_dx));
-                            int jjj1 = (int)(floor(djjj) - floor(pixel_dy));
-                            int jjj2 = (int)(floor(djjj) + floor(pixel_dy));
-                            unsigned int uiii1 = (unsigned int)(MAX(iii1, 0));
-                            unsigned int uiii2 = (unsigned int)(MAX(MIN(iii2, xdim - 1), 0));
-                            unsigned int ujjj1 = (unsigned int)(MAX(jjj1, 0));
-                            unsigned int ujjj2 = (unsigned int)(MAX(MIN(jjj2, ydim - 1), 0));
-
-                            unsigned int iii = MIN(MAX((unsigned int)floor(diii), 2), xdim - 3);
-                            unsigned int jjj = MIN(MAX((unsigned int)floor(djjj), 2), ydim - 3);
-                            bool out_of_map = true;
-                            if (diii >= 2.0 && diii < xdim - 3.0 && djjj >= 2.0 && djjj < ydim - 3.0)
-                                out_of_map = false;
-
-//fprintf(stderr,"i:%d j:%d iii:%d:%d:%d jjj:%d:%d:%d theta:%f dtheta:%f pixel_dx:%f pixel_dy:%f dx:%g dy:%g mtodeglon:%g mtodeglat:%g\n",
-//i,j,iii1,iii,iii2,jjj1,jjj,jjj2,theta,dtheta,pixel_dx,pixel_dy,dx,dy,mtodeglon,mtodeglat);
-//fprintf(stderr,"iii:%d jjj:%d\n",iii,jjj);
-//if (debugprint == MB_YES) {
-//fprintf(stderr,"       standoff:%f pixel_priority:%.3f\n", standoff, pixel_priority);
-//}
-
-                            for (unsigned int ipix=uiii1;ipix<=uiii2;ipix++) {
-                                for (unsigned int jpix=ujjj1;jpix<=ujjj2;jpix++) {
-                                    unsigned int kpix = xdim * jpix + ipix;
-                                    if (out_of_map)
-                                        pixel_priority_use = 0.98 * pixel_priority;
-                                    else if (ipix == iii && jpix == jjj)
-                                        pixel_priority_use = pixel_priority;
-                                    else if (ipix > iii-2 && iii < iii+2 && jpix > jjj-2 && jpix < jjj+2)
-                                        pixel_priority_use = 0.99 * pixel_priority;
-                                    else
-                                        pixel_priority_use = 0.98 * pixel_priority;
-                                    if (pixel_priority_use > priority[kpix]) {
-//if (debugprint == MB_YES) {
-//fprintf(stderr,"              Pixel used: i:%d j:%d  ipix:%d jpix:%d  BGR:%d %d %d Priority:%f %f\n",
-//i,j,ipix,jpix,OutputImage.at<Vec3b>(jpix,ipix)[0],OutputImage.at<Vec3b>(jpix,ipix)[1],OutputImage.at<Vec3b>(jpix,ipix)[2],
-//pixel_priority_use, priority[kpix]);
-//}
-                                        OutputImage.at<Vec3b>(jpix,ipix)[0] = b;
-                                        OutputImage.at<Vec3b>(jpix,ipix)[1] = g;
-                                        OutputImage.at<Vec3b>(jpix,ipix)[2] = r;
-                                        priority[kpix] = pixel_priority_use;
-                                    }
-                                }
-                            }
-                        }
+                        imageFirst.release();
                     }
                 }
+
+                if (control.sectionPixels > 0)
+                    mbphotomosaicThreads[numThreadsSet]
+                        = std::thread(process_image_sectioned2, verbose, &processPars[numThreadsSet], &control,
+                                        &thread_status[numThreadsSet], &thread_error[numThreadsSet]);
+                else
+                    mbphotomosaicThreads[numThreadsSet]
+                        = std::thread(process_image, verbose, &processPars[numThreadsSet], &control,
+                                        &thread_status[numThreadsSet], &thread_error[numThreadsSet]);
+                numThreadsSet++;
+            }
+
+            /* If full set of threads has been started, wait to join them all and then reset */
+            if (numThreadsSet == numThreads) {
+                for (unsigned int ithread = 0; ithread < numThreadsSet; ithread++) {
+                  /* join the thread (wait until it completes) */
+                  mbphotomosaicThreads[ithread].join();
+                }
+                numThreadsSet = 0;
             }
         }
     }
 
-    /* end display images */
-    if (show_images) {
-        destroyWindow(windowNameImage);
-    }
-    if (show_images) {
-        destroyWindow(windowNamePriority);
+    /* If any threads has been started but not joined, wait to join them all and then reset */
+    if (numThreadsSet > 0) {
+        for (unsigned int ithread = 0; ithread < numThreadsSet; ithread++) {
+          /* join the thread (wait until it completes) */
+          mbphotomosaicThreads[ithread].join();
+        }
+        numThreadsSet = 0;
     }
 
     /* close imagelist file */
     status = mb_imagelist_close(verbose, &imagelist_ptr, &error);
 
+    /* if more than one thread was used, combine the images into the image from
+        the first thread */
+    if (numThreads > 1) {
+        fprintf(stderr, "\n");
+        for (int ithread = 1; ithread < numThreads; ithread++) {
+            fprintf(stderr, "Merging mosaic from thread %d of %d\n", ithread, numThreads);
+            for (int i = 0; i < control.OutputDim[0]; i++) {
+                for (int j = 0; j < control.OutputDim[1]; j++) {
+                    if (processPars[ithread].OutputPriority.at<float>(j,i) > processPars[0].OutputPriority.at<float>(j,i)) {
+                        processPars[0].OutputImage.at<Vec3b>(j,i)[0] = processPars[ithread].OutputImage.at<Vec3b>(j,i)[0];
+                        processPars[0].OutputImage.at<Vec3b>(j,i)[1] = processPars[ithread].OutputImage.at<Vec3b>(j,i)[1];
+                        processPars[0].OutputImage.at<Vec3b>(j,i)[2] = processPars[ithread].OutputImage.at<Vec3b>(j,i)[2];
+                        processPars[0].OutputPriority.at<float>(j,i) = processPars[ithread].OutputPriority.at<float>(j,i);
+#ifdef DEBUG
+                        processPars[0].OutputIntensityCorrection.at<float>(j,i) = processPars[ithread].OutputIntensityCorrection.at<float>(j,i);
+                        processPars[0].OutputStandoff.at<float>(j,i) = processPars[ithread].OutputStandoff.at<float>(j,i);
+#endif
+                    }
+                }
+            }
+            processPars[ithread].OutputImage.release();
+            processPars[ithread].OutputPriority.release();
+#ifdef DEBUG
+            processPars[ithread].OutputIntensityCorrection.release();
+            processPars[ithread].OutputStandoff.release();
+#endif
+        }
+    }
+
     /* Write out the ouput image */
     if (outputimage_specified) {
-        status = imwrite(OutputImageFile,OutputImage);
+        /* for tiff format just write out the existing image */
+        if (output_format == MBPM_FORMAT_TIFF) {
+            status = imwrite(OutputImageFile, processPars[0].OutputImage);
+            processPars[0].OutputImage.release();
+        }
+
+        /* for png format first add alpha channel and set black pixels to have
+            alpha=0 to make those pixels transparent */
+        else if (output_format == MBPM_FORMAT_PNG) {
+            Mat OutputImageBGRA;
+            cvtColor(processPars[0].OutputImage, OutputImageBGRA, COLOR_BGR2BGRA);
+            for (int j = 0; j < OutputImageBGRA.rows; ++j) {
+                for (int i = 0; i < OutputImageBGRA.cols; ++i)
+                {
+                    // if pixel is black set alpha to zero
+                    if (OutputImageBGRA.at<Vec4b>(j, i)[0] == 0
+                        && OutputImageBGRA.at<Vec4b>(j, i)[1] == 0
+                        && OutputImageBGRA.at<Vec4b>(j, i)[2] == 0) {
+                        OutputImageBGRA.at<Vec4b>(j, i)[3] = 0;
+                    }
+                }
+            }
+            status = imwrite(OutputImageFile, OutputImageBGRA);
+            processPars[0].OutputImage.release();
+            OutputImageBGRA.release();
+        }
+
+        /* write the corresponding world file */
         if (status == MB_SUCCESS)
             {
-            /* output world file */
+            /* open output world file */
+            mb_path OutputWorldFile;
             strcpy(OutputWorldFile, OutputImageFile);
-            OutputWorldFile[strlen(OutputImageFile)-5] = '\0';
-            strcat(OutputWorldFile,".tfw");
+            OutputWorldFile[strlen(OutputImageFile)-4] = '\0';
+            if (output_format == MBPM_FORMAT_TIFF) {
+                strcat(OutputWorldFile,".tfw");
+            }
+            else if (output_format == MBPM_FORMAT_PNG) {
+                strcat(OutputWorldFile,".pgw");
+            }
             if ((tfp = fopen(OutputWorldFile,"w")) == NULL)
                 {
                 error = MB_ERROR_OPEN_FAIL;
@@ -2378,12 +3761,103 @@ fprintf(stderr, "Done with thread\n");
 
             /* write out world file contents */
             fprintf(tfp, "%.10g\r\n0.0\r\n0.0\r\n%.10g\r\n%.10g\r\n%.10g\r\n",
-                dx, -dy,
-                bounds[0] - 0.5 * dx,
-                bounds[3] + 0.5 * dy);
+                control.OutputDx[0], -control.OutputDx[1],
+                control.OutputBounds[0] - 0.5 * control.OutputDx[0],
+                control.OutputBounds[3] + 0.5 * control.OutputDx[1]);
 
             /* close the world file */
             fclose(tfp);
+
+#ifdef DEBUG
+            /* write out grids of priority, range, standoff */
+            mb_path OutputGridFile;
+            mb_path xlabel;
+            mb_path ylabel;
+            mb_path zlabel;
+            mb_path title;
+            if (control.use_projection) {
+              sprintf(xlabel, "Easting (%s)", units);
+              sprintf(ylabel, "Northing (%s)", units);
+            }
+            else {
+              strcpy(xlabel, "Longitude");
+              strcpy(ylabel, "Latitude");
+            }
+            int xdim = control.OutputDim[0];
+            int ydim = control.OutputDim[1];
+            double xmin = control.OutputBounds[0];
+            double xmax = control.OutputBounds[1];
+            double ymin = control.OutputBounds[2];
+            double ymax = control.OutputBounds[3];
+            double zmin = processPars[0].OutputPriority.at<float>(0,0);
+            double zmax = zmin;
+            double dx = control.OutputDx[0];
+            double dy = control.OutputDx[1];
+            float *grid = nullptr;
+            int grid_status = mb_mallocd(verbose, __FILE__, __LINE__,
+                                xdim * ydim * sizeof(float),
+                                (void **)&grid, &error);
+            float NaN = std::numeric_limits<float>::quiet_NaN();
+
+            strcpy(OutputGridFile, OutputImageFile);
+            OutputWorldFile[strlen(OutputGridFile)-5] = '\0';
+            strcat(OutputGridFile,"_priority.grd");
+            strcpy(zlabel, "Topography (m)");
+            strcpy(title, "Pixel Priority Map");
+            for (int i = 0; i < xdim; i++) {
+                for (int j = 0; j < ydim; j++) {
+                    int k = i * ydim + (ydim - 1 - j);
+                    grid[k] = processPars[0].OutputPriority.at<float>(j,i);
+                    zmin = MIN(zmin, grid[k]);
+                    zmax = MAX(zmax, grid[k]);
+                }
+            }
+            mb_write_gmt_grd(verbose, OutputGridFile, grid,
+                                NaN, xdim, ydim,
+                                xmin, xmax, ymin, ymax, zmin, zmax, dx, dy,
+                                xlabel, ylabel, zlabel, title,
+                                projection_id, 2, argv, &error);
+
+            strcpy(OutputGridFile, OutputImageFile);
+            OutputWorldFile[strlen(OutputGridFile)-5] = '\0';
+            strcat(OutputGridFile,"_intensitychange.grd");
+            strcpy(zlabel, "Intensity Change");
+            strcpy(title, "Pixel Intensity Change Map");
+            for (int i = 0; i < xdim; i++) {
+                for (int j = 0; j < ydim; j++) {
+                    int k = i * ydim + (ydim - 1 - j);
+                    grid[k] = processPars[0].OutputIntensityCorrection.at<float>(j,i);
+                    zmin = MIN(zmin, grid[k]);
+                    zmax = MAX(zmax, grid[k]);
+                }
+            }
+            mb_write_gmt_grd(verbose, OutputGridFile, grid,
+                                NaN, xdim, ydim,
+                                xmin, xmax, ymin, ymax, zmin, zmax, dx, dy,
+                                xlabel, ylabel, zlabel, title,
+                                projection_id, 2, argv, &error);
+
+            strcpy(OutputGridFile, OutputImageFile);
+            OutputWorldFile[strlen(OutputGridFile)-5] = '\0';
+            strcat(OutputGridFile,"_standoff.grd");
+            strcpy(zlabel, "Topography (m)");
+            strcpy(title, "Pixel Standoff Map");
+            for (int i = 0; i < xdim; i++) {
+                for (int j = 0; j < ydim; j++) {
+                    int k = i * ydim + (ydim - 1 - j);
+                    grid[k] = processPars[0].OutputStandoff.at<float>(j,i);
+                    zmin = MIN(zmin, grid[k]);
+                    zmax = MAX(zmax, grid[k]);
+                }
+            }
+            mb_write_gmt_grd(verbose, OutputGridFile, grid,
+                                NaN, xdim, ydim,
+                                xmin, xmax, ymin, ymax, zmin, zmax, dx, dy,
+                                xlabel, ylabel, zlabel, title,
+                                projection_id, 2, argv, &error);
+
+            mb_freed(verbose, __FILE__, __LINE__, (void **)&grid, &error);
+#endif
 
             /* announce it */
             fprintf(stderr, "\nOutput photomosaic: %s\n",OutputImageFile);
@@ -2393,17 +3867,24 @@ fprintf(stderr, "Done with thread\n");
             {
             fprintf(stderr, "Could not save: %s\n",OutputImageFile);
             }
+
+        processPars[0].OutputPriority.release();
+#ifdef DEBUG
+        processPars[0].OutputIntensityCorrection.release();
+        processPars[0].OutputStandoff.release();
+#endif
     }
 
-    /* deallocate priority array */
-    status = mb_freed(verbose,__FILE__,__LINE__,(void **)&priority,&error);
-
     /* deallocate topography grid array if necessary */
-    if (use_topography == MB_YES)
-        status = mb_topogrid_deall(verbose, &topogrid_ptr, &error);
+    if (control.use_topography)
+        status = mb_topogrid_deall(verbose, &control.topogrid_ptr, &error);
+
+    /* deallocate projection */
+    if (control.use_projection)
+        int proj_status = mb_proj_free(verbose, &(control.pjptr), &error);
 
     /* deallocate navigation arrays if necessary */
-    if (navigation_specified == MB_YES)
+    if (navigation_specified)
         {
         status = mb_freed(verbose,__FILE__,__LINE__,(void **)&ntime,&error);
         status = mb_freed(verbose,__FILE__,__LINE__,(void **)&nlon,&error);
@@ -2420,3 +3901,4 @@ fprintf(stderr, "Done with thread\n");
     exit(status);
 
 }
+/*--------------------------------------------------------------------*/

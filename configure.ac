@@ -11,14 +11,14 @@ dnl    See README file for copying and redistribution conditions.
 dnl--------------------------------------------------------------------
 
 dnl Initialize and set version and version date
-AC_INIT([mbsystem],[5.7.9beta05],[http://listserver.mbari.org/sympa/arc/mbsystem],[mbsystem],[http://www.mbari.org/data/mbsystem/])
-AC_DEFINE(VERSION_DATE, ["8 March 2021"], [Set VERSION_DATE define in mb_config.h])
+AC_INIT([mbsystem],[5.7.9beta11],[http://listserver.mbari.org/sympa/arc/mbsystem],[mbsystem],[http://www.mbari.org/data/mbsystem/])
+AC_DEFINE(VERSION_DATE, ["26 June 2021"], [Set VERSION_DATE define in mb_config.h])
 
 AS_ECHO([" "])
 AS_ECHO(["------------------------------------------------------------------------------"])
 AS_ECHO(["    The MB-system:    configure    12/7/2011"])
 AS_ECHO([" "])
-AS_ECHO(["    Copyright (c) 2011-2020 by"])
+AS_ECHO(["    Copyright (c) 2011-2021 by"])
 AS_ECHO(["    D. W. Caress (caress@lamont.ldgo.columbia.edu)"])
 AS_ECHO(["    and D. N. Chayes (dale@lamont.ldgo.columbia.edu)"])
 AS_ECHO(["    Lamont-Doherty Earth Observatory"])
@@ -121,8 +121,8 @@ AS_ECHO(["----------------------------------------------------------------------
 AS_ECHO([" "])
 
 
-dnl Require automake 2.69 or later
-AC_PREREQ([2.69])
+dnl Require automake 2.71 or later
+AC_PREREQ([2.71])
 
 dnl Disable warnings about unrecognized options
 AC_DISABLE_OPTION_CHECKING
@@ -144,7 +144,6 @@ AC_CONFIG_HEADERS([src/mbio/mb_config.h])
 dnl Check for programs
 AC_PROG_CC
 AM_PROG_CC_C_O
-AC_PROG_CC_STDC
 AC_PROG_CXX
 AC_PROG_INSTALL
 AM_PROG_AS
@@ -168,9 +167,6 @@ if test BYTESWAP == "no" ; then
 else
     AC_DEFINE(BYTESWAPPED, 1, [Machine is littleendian, (Byteswapping on)])
 fi
-
-dnl Check for headers
-AC_HEADER_STDC
 
 dnl Check for math library
 AC_CHECK_LIB(m,exp,,)

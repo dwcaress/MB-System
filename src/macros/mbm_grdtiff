@@ -176,15 +176,15 @@ if (!$file_data)
 	print "\a";
 	die "\nNo input file specified!\n$program_name aborted\n";
 	}
-elsif (! -r $file_data)
+elsif (! -e $file_data)
 	{
 	print "\a";
-	die "\nSpecified input file $file_data cannot be opened!\n$program_name aborted\n";
+	die "\nSpecified input file $file_data does not exist!\n$program_name aborted\n";
 	}
-if ($file_intensity && ! -r $file_intensity)
+if ($file_intensity && ! -e $file_intensity)
 	{
 	print "\a";
-	die "\nSpecified intensity input file $file_intensity cannot be opened!\n$program_name aborted\n";
+	die "\nSpecified intensity input file $file_intensity does not exist!\n$program_name aborted\n";
 	}
 if ($color_mode == 3 && !$file_intensity)
 	{
@@ -596,7 +596,7 @@ if (!$bounds || !$zbounds || $zmode == 1)
 			($zmin_f,$zmax_f) = $line =~
 				/\S+\s+zmin:\s+(\S+)\s+zmax:\s+(\S+)\s+name:\s+\S+/;
 			}
-		if ($line =~ /\S+\s+z_min:\s+\S+\s+z_max:\s+\S+\s+units:/)
+		elsif ($line =~ /\S+\s+z_min:\s+\S+\s+z_max:\s+\S+\s+units:/)
 			{
 			($zmin_f,$zmax_f,$zunits_s) = $line =~
 				/\S+\s+z_min:\s+(\S+)\s+z_max:\s+(\S+)\s+units:\s+(.+)/;
@@ -605,6 +605,11 @@ if (!$bounds || !$zbounds || $zmode == 1)
 			{
 			($zmin_f,$zmax_f,$zunits_s) = $line =~
 				/\S+\s+z_min:\s+(\S+)\s+z_max:\s+(\S+)\s+name:\s+(.+)/;
+			}
+		elsif ($line =~ /\S+\s+v_min:\s+\S+\s+v_max:\s+\S+\s+name:/)
+			{
+			($zmin_f,$zmax_f,$zunits_s) = $line =~
+				/\S+\s+v_min:\s+(\S+)\s+v_max:\s+(\S+)\s+name:\s+(.+)/;
 			}
 		}
 
@@ -881,7 +886,7 @@ print FCMD "  /bin/rm gmt.conf\n";
 print FCMD "fi\n";
 print FCMD "#\n# Set temporary GMT defaults\n";
 print FCMD "echo Setting temporary GMT defaults...\n";
-foreach $gmt_def (@gmt_defs) {
+foreach $gmt_def (@gmt_macro_defs) {
 	($gmt_par, $gmt_var) = $gmt_def =~ /^([^\/]+)\/(.+)/;
 	print FCMD "gmt gmtset $gmt_par $gmt_var\n";
 	}
@@ -1157,26 +1162,6 @@ if ($data_scale)
 	printf FCMD "gmt grdmath \$DATA_FILE $data_scale x = \$DATA_FILE.scale\n";
 	$file_use = "\$DATA_FILE.scale";
 	}
-
-# get shading by illumination if needed
-#if ($color_mode == 2)
-#	{
-#	printf FCMD "#\n# Get shading array\n";
-#	printf FCMD "echo Getting shading array...\n";
-#	printf FCMD "echo Running gmt module grdgradient...\n";
-#	printf FCMD "gmt grdgradient $file_use -A$azimuth -G\$DATA_FILE.grad -N";
-#	if (!$gridprojected)
-#		{
-#		printf FCMD " -fg";
-#		}
-#	printf FCMD "\n";
-#	printf FCMD "echo Running gmt module grdhisteq...\n";
-#	printf FCMD "gmt grdhisteq \$DATA_FILE.grad -G\$DATA_FILE.eq -N\n";
-#	printf FCMD "echo Running gmt module grdmath...\n";
-#	printf FCMD "gmt grdmath \$DATA_FILE.eq $magnitude x = \$DATA_FILE.int\n";
-#	printf FCMD "/bin/rm -f \$DATA_FILE.grad \$DATA_FILE.eq\n";
-#	$file_shade = "\$DATA_FILE.int";
-#	}
 
 # get shading by illumination if needed
 if ($color_mode == 2)

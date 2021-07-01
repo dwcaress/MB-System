@@ -2841,12 +2841,12 @@ int mbview_getcolor(double value, double min, double max, int colortablemode, fl
 		factor = (max - value) / (max - min);
 	else
 		factor = (value - min) / (max - min);
-	if (factor <= 0.0) {
+	if (factor >= 1.0) {
 		*red = below_red;
 		*green = below_green;
 		*blue = below_blue;
 	}
-	else if (factor >= 1.0) {
+	else if (factor <= 0.0) {
 		*red = above_red;
 		*green = above_green;
 		*blue = above_blue;

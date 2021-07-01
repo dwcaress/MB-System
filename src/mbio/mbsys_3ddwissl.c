@@ -3702,11 +3702,24 @@ int mbsys_3ddwissl_calculatebathymetry
       for (int isounding=0; isounding<store->soundings_per_pulse; isounding++)
         {
         sounding = &pulse->soundings[isounding];
+        if (sounding->range > 0.001 && sounding->amplitude > amplitude_largest)
+            {
+            amplitude_largest = sounding->amplitude;
+            isounding_largest = isounding;
+            }
+        }
+      for (int isounding=0; isounding<store->soundings_per_pulse; isounding++)
+        {
+        sounding = &pulse->soundings[isounding];
 
         /* valid pulses have nonzero ranges */
         if (sounding->range > 0.001)
           {
-          /* apply pitch and roll */
+          //lidar_pitch_at_pulse = store->pitch + pulse->pitch_offset;
+          //lidar_roll_at_pulse = store->roll + pulse->roll_offset;
+          //lidar_heading_at_pulse = store->heading + pulse->heading_offset;
+
+          /* apply pitch and roll */  // TODO fix rotation w/ Giancarlo's functions
           alpha = angle_el_sign * pulse->angle_el + store->pitch
                   + head_offset_pitch_deg + pulse->pitch_offset;
           beta = 90.0 - (angle_az_sign * pulse->angle_az) + store->roll
@@ -3728,13 +3741,15 @@ int mbsys_3ddwissl_calculatebathymetry
 
           /* set beamflag */
           if (sounding->amplitude * amplitude_factor >= amplitude_threshold)
-            sounding->beamflag = MB_FLAG_FLAG + MB_FLAG_SECONDARY;
+            sounding->beamflag = MB_FLAG_NONE;
+          else if (isounding_largest == isounding)
+            sounding->beamflag = MB_FLAG_FLAG + MB_FLAG_SONAR;
           else
             sounding->beamflag = MB_FLAG_NULL;
 
           /* translate to takeoff coordinates */
           mb_rollpitch_to_takeoff(verbose, alpha, beta, &theta, &phi, error);
-          phi += head_offset_heading_deg + pulse->heading_offset;
+          phi += head_offset_heading_deg + pulse->heading_offset;    // TODO fix rotation w/ Giancarlo's functions
 
           /* get lateral and vertical components of range */
           xx = sounding->range * sin(DTR * theta);
@@ -3746,13 +3761,6 @@ int mbsys_3ddwissl_calculatebathymetry
           sounding->alongtrack = xx * sin(DTR * phi) + head_offset_y_m
                                   + angle_el_sign * pulse->offset_el
                                   + pulse->alongtrack_offset;
-
-          /* check for largest amplitude */
-          if (sounding->amplitude > amplitude_largest)
-            {
-            amplitude_largest = sounding->amplitude;
-            isounding_largest = isounding;
-            }
           }
         else
           {
@@ -3762,14 +3770,6 @@ int mbsys_3ddwissl_calculatebathymetry
           sounding->acrosstrack = 0.0;
           sounding->alongtrack = 0.0;
           }
-        }
-
-      /* reset beam flags */
-      if (isounding_largest >= 0)
-        {
-        sounding = &pulse->soundings[isounding_largest];
-        if (sounding->beamflag != MB_FLAG_NULL)
-          sounding->beamflag = MB_FLAG_NONE;
         }
       }
 

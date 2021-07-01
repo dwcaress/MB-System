@@ -179,7 +179,7 @@ while (@grdinfo)
 		($zmin_f,$zmax_f) = $line =~
 			/\S+\s+zmin:\s+(\S+)\s+zmax:\s+(\S+)\s+name:\s+\S+/;
 		}
-	if ($line =~ /\S+\s+z_min:\s+\S+\s+z_max:\s+\S+\s+units:/)
+	elsif ($line =~ /\S+\s+z_min:\s+\S+\s+z_max:\s+\S+\s+units:/)
 		{
 		($zmin_f,$zmax_f,$zunits_s) = $line =~
 			/\S+\s+z_min:\s+(\S+)\s+z_max:\s+(\S+)\s+units:\s+(.+)/;
@@ -189,13 +189,14 @@ while (@grdinfo)
 		($zmin_f,$zmax_f,$zunits_s) = $line =~
 			/\S+\s+z_min:\s+(\S+)\s+z_max:\s+(\S+)\s+name:\s+(.+)/;
 		}
+	elsif ($line =~ /\S+\s+v_min:\s+\S+\s+v_max:\s+\S+\s+name:/)
+		{
+		($zmin_f,$zmax_f,$zunits_s) = $line =~
+			/\S+\s+v_min:\s+(\S+)\s+v_max:\s+(\S+)\s+name:\s+(.+)/;
+		}
 	}
-print "MBM_GRDCUT: xminr:$xminr xmin_f:$xmin_f xinc_f:$xinc_f\n";
 
 # calculate acceptable output bounds
-$diffx = ($xminr - $xmin_f) / $xinc_f;
-$diffxn = int(($xminr - $xmin_f) / $xinc_f);
-print "diffx: $diffx $diffxn\n";
 $xminout = $xmin_f + $xinc_f * int(($xminr - $xmin_f) / $xinc_f);
 $xmaxout = $xmin_f + $xinc_f * int(($xmaxr - $xmin_f) / $xinc_f + 0.5);
 $yminout = $ymin_f + $yinc_f * int(($yminr - $ymin_f) / $yinc_f);

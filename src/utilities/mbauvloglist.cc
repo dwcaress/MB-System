@@ -38,9 +38,10 @@ constexpr int MAX_OPTIONS = 512;
 typedef enum {
     TYPE_UNKNOWN = 0,
     TYPE_TIMETAG = 1,
-    TYPE_INTEGER = 2,
-    TYPE_DOUBLE = 3,
-    TYPE_ANGLE = 4,
+    TYPE_SHORT = 2,
+    TYPE_INTEGER = 3,
+    TYPE_DOUBLE = 4,
+    TYPE_ANGLE = 5,
 } field_type_t;
 
 typedef enum {
@@ -61,6 +62,8 @@ typedef enum {
     INDEX_CALC_POTENTIALTEMP = -15,
     INDEX_CALC_DENSITY = -16,
     INDEX_CALC_KTIME = -17,
+    INDEX_CALC_KSPEED = -18,
+    INDEX_TIME_INTERVAL = -19,
 } index_t;
 
 typedef enum {
@@ -223,6 +226,7 @@ int main(int argc, char **argv) {
 	char file[MB_PATH_MAXLINE] = "";
 	mb_path nav_file = "";
 	bool nav_merge = false;
+  bool nav_merge_clip = false;
 	output_t output_mode = OUTPUT_MODE_TAB;
 	int nprintfields = 0;
 	struct printfield printfields[NFIELDSMAX];
@@ -230,16 +234,18 @@ int main(int argc, char **argv) {
 	bool calc_soundspeed = false;
 	bool calc_density = false;
 	bool calc_ktime = false;
+  bool calc_kspeed = false;
 	bool recalculate_ctd = false;
 	int ctd_calibration_id = 0;
 	bool angles_in_degrees = false;
+  bool calculate_time_interval  = false;
 
 	{
 		bool errflg = false;
 		int c;
 		bool help = false;
 		char printformat[MB_PATH_MAXLINE] = "default";  // TODO(schwehr): Is this used correctly?
-		while ((c = getopt(argc, argv, "F:f:I:i:L:l:M:m:N:n:O:o:PpR:r:SsVvWwHh")) != -1)
+		while ((c = getopt(argc, argv, "CcF:f:I:i:L:l:M:m:N:n:O:o:PpR:r:SsVvWwHh")) != -1)
 		{
 			switch (c) {
 			case 'H':
@@ -249,6 +255,10 @@ int main(int argc, char **argv) {
 			case 'V':
 			case 'v':
 				verbose++;
+				break;
+			case 'C':
+			case 'c':
+				nav_merge_clip = true;
 				break;
 			case 'F':
 			case 'f':
@@ -295,6 +305,10 @@ int main(int argc, char **argv) {
 					calc_density = true;
 				if (strcmp(printfields[nprintfields].name, "calcKTime") == 0)
 					calc_ktime = true;
+				if (strcmp(printfields[nprintfields].name, "calcKSpeed") == 0)
+					calc_kspeed = true;
+        if (strcmp(printfields[nprintfields].name, "timeInterval") == 0)
+          calculate_time_interval = true;
 				printfields[nprintfields].index = -1;
 				nprintfields++;
 				break;
@@ -332,41 +346,44 @@ int main(int argc, char **argv) {
 			fprintf(stderr, "\ndbg2  Program <%s>\n", program_name);
 			fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
 			fprintf(stderr, "dbg2  Control Parameters:\n");
-			fprintf(stderr, "dbg2       verbose:              %d\n", verbose);
-			fprintf(stderr, "dbg2       help:                 %d\n", help);
-			fprintf(stderr, "dbg2       lonflip:              %d\n", lonflip);
-			fprintf(stderr, "dbg2       bounds[0]:            %f\n", bounds[0]);
-			fprintf(stderr, "dbg2       bounds[1]:            %f\n", bounds[1]);
-			fprintf(stderr, "dbg2       bounds[2]:            %f\n", bounds[2]);
-			fprintf(stderr, "dbg2       bounds[3]:            %f\n", bounds[3]);
-			fprintf(stderr, "dbg2       btime_i[0]:           %d\n", btime_i[0]);
-			fprintf(stderr, "dbg2       btime_i[1]:           %d\n", btime_i[1]);
-			fprintf(stderr, "dbg2       btime_i[2]:           %d\n", btime_i[2]);
-			fprintf(stderr, "dbg2       btime_i[3]:           %d\n", btime_i[3]);
-			fprintf(stderr, "dbg2       btime_i[4]:           %d\n", btime_i[4]);
-			fprintf(stderr, "dbg2       btime_i[5]:           %d\n", btime_i[5]);
-			fprintf(stderr, "dbg2       btime_i[6]:           %d\n", btime_i[6]);
-			fprintf(stderr, "dbg2       etime_i[0]:           %d\n", etime_i[0]);
-			fprintf(stderr, "dbg2       etime_i[1]:           %d\n", etime_i[1]);
-			fprintf(stderr, "dbg2       etime_i[2]:           %d\n", etime_i[2]);
-			fprintf(stderr, "dbg2       etime_i[3]:           %d\n", etime_i[3]);
-			fprintf(stderr, "dbg2       etime_i[4]:           %d\n", etime_i[4]);
-			fprintf(stderr, "dbg2       etime_i[5]:           %d\n", etime_i[5]);
-			fprintf(stderr, "dbg2       etime_i[6]:           %d\n", etime_i[6]);
-			fprintf(stderr, "dbg2       speedmin:             %f\n", speedmin);
-			fprintf(stderr, "dbg2       timegap:              %f\n", timegap);
-			fprintf(stderr, "dbg2       file:                 %s\n", file);
-			fprintf(stderr, "dbg2       nav_file:             %s\n", nav_file);
-			fprintf(stderr, "dbg2       output_mode:          %d\n", output_mode);
-			fprintf(stderr, "dbg2       printheader:          %d\n", printheader);
-			fprintf(stderr, "dbg2       angles_in_degrees:    %d\n", angles_in_degrees);
-			fprintf(stderr, "dbg2       calc_potentialtemp:   %d\n", calc_potentialtemp);
-			fprintf(stderr, "dbg2       recalculate_ctd:      %d\n", recalculate_ctd);
-			fprintf(stderr, "dbg2       ctd_calibration_id:   %d\n", ctd_calibration_id);
-			fprintf(stderr, "dbg2       calc_ktime:           %d\n", calc_ktime);
-			fprintf(stderr, "dbg2       nprintfields:         %d\n", nprintfields);
+			fprintf(stderr, "dbg2       verbose:                  %d\n", verbose);
+			fprintf(stderr, "dbg2       help:                     %d\n", help);
+			fprintf(stderr, "dbg2       lonflip:                  %d\n", lonflip);
+			fprintf(stderr, "dbg2       bounds[0]:                %f\n", bounds[0]);
+			fprintf(stderr, "dbg2       bounds[1]:                %f\n", bounds[1]);
+			fprintf(stderr, "dbg2       bounds[2]:                %f\n", bounds[2]);
+			fprintf(stderr, "dbg2       bounds[3]:                %f\n", bounds[3]);
+			fprintf(stderr, "dbg2       btime_i[0]:               %d\n", btime_i[0]);
+			fprintf(stderr, "dbg2       btime_i[1]:               %d\n", btime_i[1]);
+			fprintf(stderr, "dbg2       btime_i[2]:               %d\n", btime_i[2]);
+			fprintf(stderr, "dbg2       btime_i[3]:               %d\n", btime_i[3]);
+			fprintf(stderr, "dbg2       btime_i[4]:               %d\n", btime_i[4]);
+			fprintf(stderr, "dbg2       btime_i[5]:               %d\n", btime_i[5]);
+			fprintf(stderr, "dbg2       btime_i[6]:               %d\n", btime_i[6]);
+			fprintf(stderr, "dbg2       etime_i[0]:               %d\n", etime_i[0]);
+			fprintf(stderr, "dbg2       etime_i[1]:               %d\n", etime_i[1]);
+			fprintf(stderr, "dbg2       etime_i[2]:               %d\n", etime_i[2]);
+			fprintf(stderr, "dbg2       etime_i[3]:               %d\n", etime_i[3]);
+			fprintf(stderr, "dbg2       etime_i[4]:               %d\n", etime_i[4]);
+			fprintf(stderr, "dbg2       etime_i[5]:               %d\n", etime_i[5]);
+			fprintf(stderr, "dbg2       etime_i[6]:               %d\n", etime_i[6]);
+			fprintf(stderr, "dbg2       speedmin:                 %f\n", speedmin);
+			fprintf(stderr, "dbg2       timegap:                  %f\n", timegap);
+			fprintf(stderr, "dbg2       file:                     %s\n", file);
+			fprintf(stderr, "dbg2       nav_merge:                %d\n", nav_merge);
+			fprintf(stderr, "dbg2       nav_merge_clip:           %d\n", nav_merge_clip);
+			fprintf(stderr, "dbg2       nav_file:                 %s\n", nav_file);
+			fprintf(stderr, "dbg2       output_mode:              %d\n", output_mode);
+			fprintf(stderr, "dbg2       printheader:              %d\n", printheader);
+			fprintf(stderr, "dbg2       angles_in_degrees:        %d\n", angles_in_degrees);
+			fprintf(stderr, "dbg2       calc_potentialtemp:       %d\n", calc_potentialtemp);
+			fprintf(stderr, "dbg2       recalculate_ctd:          %d\n", recalculate_ctd);
+			fprintf(stderr, "dbg2       ctd_calibration_id:       %d\n", ctd_calibration_id);
+			fprintf(stderr, "dbg2       calc_ktime:               %d\n", calc_ktime);
+      fprintf(stderr, "dbg2       calculate_time_interval:  %d\n", calculate_time_interval);
+			fprintf(stderr, "dbg2       nprintfields:             %d\n", nprintfields);
 			for (int i = 0; i < nprintfields; i++)
-				fprintf(stderr, "dbg2         printfields[%d]:      %s %d %s\n", i, printfields[i].name, printfields[i].formatset,
+				fprintf(stderr, "dbg2         printfields[%d]:          %s %d %s\n", i, printfields[i].name, printfields[i].formatset,
 				        printfields[i].format);
 		}
 
@@ -471,6 +488,7 @@ int main(int argc, char **argv) {
 	int nfields = 0;
 	int recordsize = 0;
 	bool ktime_available = false;
+  bool kvelocity_available = false;
 
 	/* auv log data */
 	struct field fields[NFIELDSMAX];
@@ -508,13 +526,12 @@ int main(int argc, char **argv) {
 				fields[nfields].size = 8;
 				/* TODO(schwehr): Is something missing? */
 				if (angles_in_degrees &&
-				    (/* strcmp(fields[nfields].name, "mLatK") == 0 || */ strcmp(fields[nfields].name, "mLonK") == 0 ||
-				     strcmp(fields[nfields].name, "mLatK") == 0 || strcmp(fields[nfields].name, "mRollK") == 0 ||
-				     strcmp(fields[nfields].name, "mPitchK") == 0 || strcmp(fields[nfields].name, "mHeadK") == 0 ||
-				     strcmp(fields[nfields].name, "mYawK") == 0 || strcmp(fields[nfields].name, "mLonCB") == 0 ||
-				     strcmp(fields[nfields].name, "mLatCB") == 0 || strcmp(fields[nfields].name, "mRollCB") == 0 ||
-				     strcmp(fields[nfields].name, "mPitchCB") == 0 || strcmp(fields[nfields].name, "mHeadCB") == 0 ||
-				     strcmp(fields[nfields].name, "mYawCB") == 0))
+				    (strcmp(fields[nfields].name, "mLonK") == 0   || strcmp(fields[nfields].name, "mLatK") == 0 ||
+             strcmp(fields[nfields].name, "mRollK") == 0  || strcmp(fields[nfields].name, "mPitchK") == 0 ||
+             strcmp(fields[nfields].name, "mHeadK") == 0  || strcmp(fields[nfields].name, "mYawK") == 0 ||
+             strcmp(fields[nfields].name, "mLonCB") == 0  || strcmp(fields[nfields].name, "mLatCB") == 0 ||
+             strcmp(fields[nfields].name, "mRollCB") == 0 || strcmp(fields[nfields].name, "mPitchCB") == 0 ||
+             strcmp(fields[nfields].name, "mHeadCB") == 0 || strcmp(fields[nfields].name, "mYawCB") == 0))
 					fields[nfields].scale = RTD;
 				else
 					fields[nfields].scale = 1.0;
@@ -525,6 +542,12 @@ int main(int argc, char **argv) {
 				fields[nfields].size = 4;
 				fields[nfields].scale = 1.0;
 				recordsize += 4;
+			}
+			else if (strcmp(type, "short") == 0) {
+				fields[nfields].type = TYPE_SHORT;
+				fields[nfields].size = 2;
+				fields[nfields].scale = 1.0;
+				recordsize += 2;
 			}
 			else if (strcmp(type, "timeTag") == 0) {
 				fields[nfields].type = TYPE_TIMETAG;
@@ -545,25 +568,29 @@ int main(int argc, char **argv) {
 				recordsize += 8;
 			}
 
-            /* check if kearfott time is in this file */
-            if (strcmp(fields[nfields].name, "utcTime") == 0)
-                ktime_available = true;
+      /* check if kearfott time is in this file */
+      if (strcmp(fields[nfields].name, "utcTime") == 0)
+          ktime_available = true;
 
-            /* check if raw and processed ctd data are in this file */
-            if (strcmp(fields[nfields].name, "cond_frequency") == 0)
-                cond_frequency_available = true;
-            else if (strcmp(fields[nfields].name, "temp_counts") == 0)
-                temp_counts_available = true;
-            else if (strcmp(fields[nfields].name, "pressure_counts") == 0)
-                pressure_counts_available = true;
-            else if (strcmp(fields[nfields].name, "pressure_temp_comp_voltage_reading") == 0)
-                thermistor_available = true;
-            else if (strcmp(fields[nfields].name, "conductivity") == 0)
-                conductivity_available = true;
-            else if (strcmp(fields[nfields].name, "temperature") == 0)
-                temperature_available = true;
-            else if (strcmp(fields[nfields].name, "pressure") == 0)
-                pressure_available = true;
+      /* check if kearfott velocity vector is in this file */
+      if (strcmp(fields[nfields].name, "mVbodyxK") == 0)
+          kvelocity_available = true;
+
+      /* check if raw and processed ctd data are in this file */
+      if (strcmp(fields[nfields].name, "cond_frequency") == 0)
+          cond_frequency_available = true;
+      else if (strcmp(fields[nfields].name, "temp_counts") == 0)
+          temp_counts_available = true;
+      else if (strcmp(fields[nfields].name, "pressure_counts") == 0)
+          pressure_counts_available = true;
+      else if (strcmp(fields[nfields].name, "pressure_temp_comp_voltage_reading") == 0)
+          thermistor_available = true;
+      else if (strcmp(fields[nfields].name, "conductivity") == 0)
+          conductivity_available = true;
+      else if (strcmp(fields[nfields].name, "temperature") == 0)
+          temperature_available = true;
+      else if (strcmp(fields[nfields].name, "pressure") == 0)
+          pressure_available = true;
 
             /* increment counter */
 			nfields++;
@@ -590,15 +617,15 @@ int main(int argc, char **argv) {
 
 	/* if recalculating CTD data then check for available raw CTD data */
 	if (recalculate_ctd) {
-	    if (!cond_frequency_available
+	  if (!cond_frequency_available
 	        || !temp_counts_available
 	        || !pressure_counts_available
 	        || !thermistor_available) {
-		fprintf(stderr, "\nUnable to recalculate CTD data as requested, raw CTD data not in file <%s>\n", file);
-		exit(MB_ERROR_BAD_FORMAT);
-	    } else {
+		  fprintf(stderr, "\nUnable to recalculate CTD data as requested, raw CTD data not in file <%s>\n", file);
+		  exit(MB_ERROR_BAD_FORMAT);
+	  } else {
 	        calibration_MAUV1_2017(&ctd_calibration);
-	    }
+	  }
 	}
 	bool ctd_available = false;
 	if (conductivity_available
@@ -616,6 +643,12 @@ int main(int argc, char **argv) {
 	            exit(status);
 	    }
 	}
+
+  /* if calculating speed from Kearfott velocity vector check for available Kearfott data */
+  if (calc_kspeed && !kvelocity_available) {
+		fprintf(stderr, "\nUnable to calculate speed from Kearfott data as requested, Kearfoot velocity data not in file <%s>\n", file);
+		exit(MB_ERROR_BAD_FORMAT);
+  }
 
 	/* check the fields to be printed */
 	for (int i = 0; i < nprintfields; i++) {
@@ -715,7 +748,7 @@ int main(int argc, char **argv) {
 				strcpy(printfields[i].format, "%.8f");
 			}
 		}
-		else if (strcmp(printfields[i].name, "CalcPotentialTemperature") == 0) {
+		else if (strcmp(printfields[i].name, "calcPotentialTemperature") == 0) {
 			printfields[i].index = INDEX_CALC_POTENTIALTEMP;
 			if (!printfields[i].formatset) {
 				strcpy(printfields[i].format, "%.8f");
@@ -731,6 +764,18 @@ int main(int argc, char **argv) {
 			printfields[i].index = INDEX_CALC_KTIME;
 			if (!printfields[i].formatset) {
 				strcpy(printfields[i].format, "%.8f");
+			}
+		}
+		else if (strcmp(printfields[i].name, "calcKSpeed") == 0) {
+			printfields[i].index = INDEX_CALC_KSPEED;
+			if (!printfields[i].formatset) {
+				strcpy(printfields[i].format, "%.3f");
+			}
+		}
+		else if (strcmp(printfields[i].name, "timeInterval") == 0) {
+			printfields[i].index = INDEX_TIME_INTERVAL;
+			if (!printfields[i].formatset) {
+				strcpy(printfields[i].format, "%.3f");
 			}
 		}
 		else {
@@ -769,12 +814,38 @@ int main(int argc, char **argv) {
 	double soundspeed_calc = 0.0;
 	double potentialtemperature_calc = 0.0;
 	double density_calc = 0.0;
-
-	/* int interp_status;  TODO(schwehr): Remove or test. */
+  double time_interval = 0.0;
+  double prior_time_d = 0.0;
 
 	/* read the data records in the auv log file */
 	int nrecord = 0;
 	while (fread(buffer, recordsize, 1, fp) == 1) {
+        bool output_ok = true;
+
+        /* if needed check timestamp */
+        if (nav_merge && nav_merge_clip) {
+          double time_d = 0.0;
+          for (int ii = 0; ii < nfields; ii++) {
+            if (strcmp(fields[ii].name, "time") == 0)
+              mb_get_binary_double(true, &buffer[fields[ii].index], &time_d);
+          }
+          if (time_d < nav_time_d[1] || time_d > nav_time_d[nav_num-2])
+            output_ok = false;
+        }
+
+        /* calculate timeInterval */
+        if (calculate_time_interval) {
+          double time_d = 0.0;
+          for (int ii = 0; ii < nfields; ii++) {
+            if (strcmp(fields[ii].name, "time") == 0)
+              mb_get_binary_double(true, &buffer[fields[ii].index], &time_d);
+          }
+          if (prior_time_d > 0.0) {
+            time_interval = time_d - prior_time_d;
+          }
+          prior_time_d = time_d;
+        }
+
         /* recalculate CTD data if requested */
         if (recalculate_ctd) {
             for (int ii = 0; ii < nfields; ii++) {
@@ -792,295 +863,338 @@ int main(int argc, char **argv) {
                                 thermistor);
             conductivity_calc = calcCond(&ctd_calibration, cond_frequency,
                                 temperature_calc, pressure_calc);
-            /* interp_status = */ mb_seabird_salinity(verbose, conductivity_calc, temperature_calc,
+            mb_seabird_salinity(verbose, conductivity_calc, temperature_calc,
                                 pressure_calc, &salinity_calc, &error);
-            /* interp_status = */ mb_seabird_soundspeed(verbose, MB_SOUNDSPEEDALGORITHM_DELGROSSO,
+            mb_seabird_soundspeed(verbose, MB_SOUNDSPEEDALGORITHM_DELGROSSO,
                                         salinity_calc, temperature_calc, pressure_calc,
                                         &soundspeed_calc, &error);
-            /* interp_status = */ mb_potential_temperature(verbose, temperature_calc, salinity_calc, pressure_calc,
+            mb_potential_temperature(verbose, temperature_calc, salinity_calc, pressure_calc,
                                         &potentialtemperature_calc, &error);
-            /* interp_status = */ mb_seabird_density(verbose, salinity_calc, temperature_calc, pressure_calc, &density_calc, &error);
+            mb_seabird_density(verbose, salinity_calc, temperature_calc, pressure_calc, &density_calc, &error);
         } else if (ctd_available) {
             /* else deal with existing values if available */
             for (int ii = 0; ii < nprintfields; ii++) {
-				if (strcmp(fields[ii].name, "temperature") == 0)
-						mb_get_binary_double(true, &buffer[fields[ii].index], &temperature_calc);
-				else if (strcmp(fields[ii].name, "calculated_salinity") == 0)
-						mb_get_binary_double(true, &buffer[fields[ii].index], &salinity_calc);
-				else if (strcmp(fields[ii].name, "conductivity") == 0)
-						mb_get_binary_double(true, &buffer[fields[ii].index], &conductivity_calc);
-				else if (strcmp(fields[ii].name, "pressure") == 0)
-						mb_get_binary_double(true, &buffer[fields[ii].index], &pressure_calc);
-				}
-            /* interp_status = */ mb_seabird_soundspeed(verbose, MB_SOUNDSPEEDALGORITHM_DELGROSSO,
+      				if (strcmp(fields[ii].name, "temperature") == 0)
+      						mb_get_binary_double(true, &buffer[fields[ii].index], &temperature_calc);
+      				else if (strcmp(fields[ii].name, "calculated_salinity") == 0)
+      						mb_get_binary_double(true, &buffer[fields[ii].index], &salinity_calc);
+      				else if (strcmp(fields[ii].name, "conductivity") == 0)
+      						mb_get_binary_double(true, &buffer[fields[ii].index], &conductivity_calc);
+      				else if (strcmp(fields[ii].name, "pressure") == 0)
+      						mb_get_binary_double(true, &buffer[fields[ii].index], &pressure_calc);
+      				}
+            mb_seabird_soundspeed(verbose, MB_SOUNDSPEEDALGORITHM_DELGROSSO,
                                         salinity_calc, temperature_calc, pressure_calc,
                                         &soundspeed_calc, &error);
-            /* interp_status = */ mb_potential_temperature(verbose, temperature_calc, salinity_calc, pressure_calc,
+            mb_potential_temperature(verbose, temperature_calc, salinity_calc, pressure_calc,
                                         &potentialtemperature_calc, &error);
-            /* interp_status = */ mb_seabird_density(verbose, salinity_calc, temperature_calc, pressure_calc, &density_calc, &error);
+            mb_seabird_density(verbose, salinity_calc, temperature_calc, pressure_calc, &density_calc, &error);
         }
-
-	/* calculate time by adding time of date  to Kearfott time of day value */
-	double ktime_calc = 0.0;
-
-	double time_d = 0.0;
 
         /* calculate timestamp by adding Kearfott second-of-day value (utcTime) to seconds to the start of day
          * from the overall timestamp (time) */
+	      double ktime_calc = 0.0;
+	      double time_d = 0.0;
         if (ktime_available && calc_ktime) {
             /* else deal with existing values if available */
             double startofday_time_d = 0.0;
             ktime_calc = 0.0;
             for (int ii = 0; ii < nfields; ii++) {
-				if (strcmp(fields[ii].name, "time") == 0) {
-                        mb_get_binary_double(true, &buffer[fields[ii].index], &time_d);
-                        startofday_time_d = MB_SECINDAY * floor(time_d / MB_SECINDAY);
-				}
-				else if (strcmp(fields[ii].name, "utcTime") == 0) {
-                        mb_get_binary_double(true, &buffer[fields[ii].index], &ktime_calc);
-				}
+        				if (strcmp(fields[ii].name, "time") == 0) {
+                  mb_get_binary_double(true, &buffer[fields[ii].index], &time_d);
+                  startofday_time_d = MB_SECINDAY * floor(time_d / MB_SECINDAY);
+        				}
+        				else if (strcmp(fields[ii].name, "utcTime") == 0) {
+                  mb_get_binary_double(true, &buffer[fields[ii].index], &ktime_calc);
+        				}
             }
             ktime_calc += startofday_time_d;
         }
 
+        /* calculate lateral speed in km/hr from x and y velocity components in Kearfott data */
+        double kspeed_calc = 0.0;
+        if (kvelocity_available && calc_kspeed) {
+          double mVbodyxK = 0.0;
+          double mVbodyyK = 0.0;
+          for (int ii = 0; ii < nfields; ii++) {
+      				if (strcmp(fields[ii].name, "mVbodyxK") == 0) {
+                mb_get_binary_double(true, &buffer[fields[ii].index], &mVbodyxK);
+      				}
+      				else if (strcmp(fields[ii].name, "mVbodyyK") == 0) {
+                mb_get_binary_double(true, &buffer[fields[ii].index], &mVbodyyK);
+      				}
+          }
+          kspeed_calc = 3.6 * sqrt(mVbodyxK * mVbodyxK + mVbodyyK * mVbodyyK);
+        }
+
 		/* loop over the printfields */
-		for (int i = 0; i < nprintfields; i++) {
-			const index_t index = static_cast<index_t>(printfields[i].index);
-			// TODO(schwehr): Make this a switch.
-			if (index == INDEX_ZERO) {
-				double dvalue = 0.0;
-				if (output_mode == OUTPUT_MODE_BINARY)
-					fwrite(&dvalue, sizeof(double), 1, stdout);
-				else
-					fprintf(stdout, printfields[i].format, dvalue);
-			}
-			else if (index == INDEX_MERGE_LON) {
-				double dvalue = 0.0;
-				int jinterp = 0;
-				/* interp_status = */ mb_linear_interp_longitude(verbose, nav_time_d - 1, nav_navlon - 1, nav_num, time_d, &dvalue,
-				                                           &jinterp, &error);
-				if (jinterp < 2 || jinterp > nav_num - 2)
-					dvalue = 0.0;
-				if (output_mode == OUTPUT_MODE_BINARY)
-					fwrite(&dvalue, sizeof(double), 1, stdout);
-				else
-					fprintf(stdout, printfields[i].format, dvalue);
-			}
-			else if (index == INDEX_MERGE_LAT) {
-				double dvalue = 0.0;
-				int jinterp = 0;
-				/* interp_status = */ mb_linear_interp_latitude(verbose, nav_time_d - 1, nav_navlat - 1, nav_num, time_d, &dvalue,
-				                                          &jinterp, &error);
-				if (jinterp < 2 || jinterp > nav_num - 2)
-					dvalue = 0.0;
-				if (output_mode == OUTPUT_MODE_BINARY)
-					fwrite(&dvalue, sizeof(double), 1, stdout);
-				else
-					fprintf(stdout, printfields[i].format, dvalue);
-			}
-			else if (index == INDEX_MERGE_HEADING) {
-				double dvalue = 0.0;
-				int jinterp = 0;
-				/* interp_status = */ mb_linear_interp_heading(verbose, nav_time_d - 1, nav_heading - 1, nav_num, time_d, &dvalue,
-				                                         &jinterp, &error);
-				if (jinterp < 2 || jinterp > nav_num - 2)
-					dvalue = 0.0;
-				if (output_mode == OUTPUT_MODE_BINARY)
-					fwrite(&dvalue, sizeof(double), 1, stdout);
-				else
-					fprintf(stdout, printfields[i].format, dvalue);
-			}
-			else if (index == INDEX_MERGE_SPEED) {
-				double dvalue = 0.0;
-				int jinterp = 0;
-				/* interp_status = */
-				    mb_linear_interp(verbose, nav_time_d - 1, nav_speed - 1, nav_num, time_d, &dvalue, &jinterp, &error);
-				if (jinterp < 2 || jinterp > nav_num - 2)
-					dvalue = 0.0;
-				if (output_mode == OUTPUT_MODE_BINARY)
-					fwrite(&dvalue, sizeof(double), 1, stdout);
-				else
-					fprintf(stdout, printfields[i].format, dvalue);
-			}
-			else if (index == INDEX_MERGE_SENSORDEPTH) {
-				double dvalue = 0.0;
-				int jinterp = 0;
-				/* interp_status = */
-				    mb_linear_interp(verbose, nav_time_d - 1, nav_sensordepth - 1, nav_num, time_d, &dvalue, &jinterp, &error);
-				if (jinterp < 2 || jinterp > nav_num - 2)
-					dvalue = 0.0;
-				if (output_mode == OUTPUT_MODE_BINARY)
-					fwrite(&dvalue, sizeof(double), 1, stdout);
-				else
-					fprintf(stdout, printfields[i].format, dvalue);
-			}
-			else if (index == INDEX_MERGE_ROLL) {
-				double dvalue = 0.0;
-				int jinterp = 0;
-				/* interp_status = */
-				    mb_linear_interp(verbose, nav_time_d - 1, nav_roll - 1, nav_num, time_d, &dvalue, &jinterp, &error);
-				if (jinterp < 2 || jinterp > nav_num - 2)
-					dvalue = 0.0;
-				if (output_mode == OUTPUT_MODE_BINARY)
-					fwrite(&dvalue, sizeof(double), 1, stdout);
-				else
-					fprintf(stdout, printfields[i].format, dvalue);
-			}
-			else if (index == INDEX_MERGE_PITCH) {
-				double dvalue = 0.0;
-				int jinterp = 0;
-				/* interp_status = */
-				    mb_linear_interp(verbose, nav_time_d - 1, nav_pitch - 1, nav_num, time_d, &dvalue, &jinterp, &error);
-				if (jinterp < 2 || jinterp > nav_num - 2)
-					dvalue = 0.0;
-				if (output_mode == OUTPUT_MODE_BINARY)
-					fwrite(&dvalue, sizeof(double), 1, stdout);
-				else
-					fprintf(stdout, printfields[i].format, dvalue);
-			}
-			else if (index == INDEX_MERGE_HEAVE) {
-				double dvalue = 0.0;
-				int jinterp = 0;
-				/* interp_status = */
-				    mb_linear_interp(verbose, nav_time_d - 1, nav_heave - 1, nav_num, time_d, &dvalue, &jinterp, &error);
-				if (jinterp < 2 || jinterp > nav_num - 2)
-					dvalue = 0.0;
-				if (output_mode == OUTPUT_MODE_BINARY)
-					fwrite(&dvalue, sizeof(double), 1, stdout);
-				else
-					fprintf(stdout, printfields[i].format, dvalue);
-			}
-			else if (index == INDEX_CALC_CONDUCTIVITY) {
-				if (output_mode == OUTPUT_MODE_BINARY)
-					fwrite(&conductivity_calc, sizeof(double), 1, stdout);
-				else
-					fprintf(stdout, printfields[i].format, conductivity_calc);
-			}
-			else if (index == INDEX_CALC_TEMPERATURE) {
-				if (output_mode == OUTPUT_MODE_BINARY)
-					fwrite(&temperature_calc, sizeof(double), 1, stdout);
-				else
-					fprintf(stdout, printfields[i].format, temperature_calc);
-			}
-			else if (index == INDEX_CALC_PRESSURE) {
-				if (output_mode == OUTPUT_MODE_BINARY)
-					fwrite(&pressure_calc, sizeof(double), 1, stdout);
-				else
-					fprintf(stdout, printfields[i].format, pressure_calc);
-			}
-			else if (index == INDEX_CALC_SALINITY) {
-				if (output_mode == OUTPUT_MODE_BINARY)
-					fwrite(&salinity_calc, sizeof(double), 1, stdout);
-				else
-					fprintf(stdout, printfields[i].format, salinity_calc);
-			}
-			else if (index == INDEX_CALC_SOUNDSPEED) {
-				if (output_mode == OUTPUT_MODE_BINARY)
-					fwrite(&soundspeed_calc, sizeof(double), 1, stdout);
-				else
-					fprintf(stdout, printfields[i].format, soundspeed_calc);
-			}
-			else if (index == INDEX_CALC_POTENTIALTEMP) {
-				if (output_mode == OUTPUT_MODE_BINARY)
-					fwrite(&potentialtemperature_calc, sizeof(double), 1, stdout);
-				else
-					fprintf(stdout, printfields[i].format, potentialtemperature_calc);
-			}
-			else if (index == INDEX_CALC_DENSITY) {
-				if (output_mode == OUTPUT_MODE_BINARY)
-					fwrite(&density_calc, sizeof(double), 1, stdout);
-				else
-					fprintf(stdout, printfields[i].format, density_calc);
-			}
-			else if (index == INDEX_CALC_KTIME) {
-				if (output_mode == OUTPUT_MODE_BINARY)
-					fwrite(&ktime_calc, sizeof(double), 1, stdout);
-				else
-					fprintf(stdout, printfields[i].format, ktime_calc);
-			}
-			else if (fields[index].type == TYPE_DOUBLE) {
-				double dvalue = 0.0;
-				mb_get_binary_double(true, &buffer[fields[index].index], &dvalue);
-				dvalue *= fields[index].scale;
-				if ((strcmp(fields[nfields].name, "mHeadK") == 0 || strcmp(fields[nfields].name, "mYawK") == 0) &&
-				    angles_in_degrees && dvalue < 0.0)
-					dvalue += 360.0;
-				if (output_mode == OUTPUT_MODE_BINARY)
-					fwrite(&dvalue, sizeof(double), 1, stdout);
-				else
-					fprintf(stdout, printfields[i].format, dvalue);
-			}
-			else if (fields[index].type == TYPE_INTEGER) {
-				int ivalue = 0;
-				mb_get_binary_int(true, &buffer[fields[index].index], &ivalue);
-				if (output_mode == OUTPUT_MODE_BINARY)
-					fwrite(&ivalue, sizeof(int), 1, stdout);
-				else
-					fprintf(stdout, printfields[i].format, ivalue);
-			}
-			else if (fields[index].type == TYPE_TIMETAG) {
-				double dvalue = 0.0;
-				mb_get_binary_double(true, &buffer[fields[index].index], &dvalue);
-				time_d = dvalue;
-				if (strcmp(printfields[i].format, "time_i") == 0) {
-					mb_get_date(verbose, time_d, time_i);
-					if (output_mode == OUTPUT_MODE_BINARY) {
-						fwrite(time_i, sizeof(int), 7, stdout);
-					}
-					else {
-						fprintf(stdout, "%4.4d %2.2d %2.2d %2.2d %2.2d %2.2d.%6.6d", time_i[0], time_i[1], time_i[2], time_i[3],
-						        time_i[4], time_i[5], time_i[6]);
-					}
-				}
-				else if (strcmp(printfields[i].format, "time_j") == 0) {
-					mb_get_date(verbose, time_d, time_i);
-					int time_j[5];
-					mb_get_jtime(verbose, time_i, time_j);
-					if (output_mode == OUTPUT_MODE_BINARY) {
-						fwrite(&time_i[0], sizeof(int), 1, stdout);
-						fwrite(&time_j[1], sizeof(int), 1, stdout);
-						fwrite(&time_i[3], sizeof(int), 1, stdout);
-						fwrite(&time_i[4], sizeof(int), 1, stdout);
-						fwrite(&time_i[5], sizeof(int), 1, stdout);
-						fwrite(&time_i[6], sizeof(int), 1, stdout);
-					}
-					else {
-						fprintf(stdout, "%4.4d %3.3d %2.2d %2.2d %2.2d.%6.6d", time_i[0], time_j[1], time_i[3], time_i[4],
-						        time_i[5], time_i[6]);
-					}
-				}
-				else {
-					if (output_mode == OUTPUT_MODE_BINARY)
-						fwrite(&dvalue, sizeof(double), 1, stdout);
-					else
-						fprintf(stdout, printfields[i].format, time_d);
-				}
-			}
-			else if (fields[index].type == TYPE_ANGLE) {
-				double dvalue = 0.0;
-				mb_get_binary_double(true, &buffer[fields[index].index], &dvalue);
-				dvalue *= fields[index].scale;
-				if (strcmp(fields[index].name, "mYawCB") == 0 && angles_in_degrees && dvalue < 0.0)
-					dvalue += 360.0;
-				if (output_mode == OUTPUT_MODE_BINARY)
-					fwrite(&dvalue, sizeof(double), 1, stdout);
-				else
-					fprintf(stdout, printfields[i].format, dvalue);
-			}
-			if (output_mode == OUTPUT_MODE_TAB) {
-				if (i < nprintfields - 1)
-					fprintf(stdout, "\t");
-				else
-					fprintf(stdout, "\n");
-			}
-			else if (output_mode == OUTPUT_MODE_CSV) {
-				if (i < nprintfields - 1)
-					fprintf(stdout, ",");
-				else
-					fprintf(stdout, "\n");
-			}
-		}
-		nrecord++;
+    if (output_ok) {
+  		for (int i = 0; i < nprintfields; i++) {
+  			const index_t index = static_cast<index_t>(printfields[i].index);
+  			// TODO(schwehr): Make this a switch.
+  			if (index == INDEX_ZERO) {
+  				double dvalue = 0.0;
+  				if (output_mode == OUTPUT_MODE_BINARY)
+  					fwrite(&dvalue, sizeof(double), 1, stdout);
+  				else
+  					fprintf(stdout, printfields[i].format, dvalue);
+  			}
+  			else if (index == INDEX_MERGE_LON) {
+  				double dvalue = 0.0;
+  				int jinterp = 0;
+  				mb_linear_interp_longitude(verbose, nav_time_d - 1, nav_navlon - 1, nav_num, time_d, &dvalue,
+  				                                           &jinterp, &error);
+  				if (jinterp < 2 || jinterp > nav_num - 2)
+  					dvalue = 0.0;
+  				if (output_mode == OUTPUT_MODE_BINARY)
+  					fwrite(&dvalue, sizeof(double), 1, stdout);
+  				else
+  					fprintf(stdout, printfields[i].format, dvalue);
+  			}
+  			else if (index == INDEX_MERGE_LAT) {
+  				double dvalue = 0.0;
+  				int jinterp = 0;
+  				mb_linear_interp_latitude(verbose, nav_time_d - 1, nav_navlat - 1, nav_num, time_d, &dvalue,
+  				                                          &jinterp, &error);
+  				if (jinterp < 2 || jinterp > nav_num - 2)
+  					dvalue = 0.0;
+  				if (output_mode == OUTPUT_MODE_BINARY)
+  					fwrite(&dvalue, sizeof(double), 1, stdout);
+  				else
+  					fprintf(stdout, printfields[i].format, dvalue);
+  			}
+  			else if (index == INDEX_MERGE_HEADING) {
+  				double dvalue = 0.0;
+  				int jinterp = 0;
+  				mb_linear_interp_heading(verbose, nav_time_d - 1, nav_heading - 1, nav_num, time_d, &dvalue,
+  				                                         &jinterp, &error);
+  				if (jinterp < 2 || jinterp > nav_num - 2)
+  					dvalue = 0.0;
+  				if (output_mode == OUTPUT_MODE_BINARY)
+  					fwrite(&dvalue, sizeof(double), 1, stdout);
+  				else
+  					fprintf(stdout, printfields[i].format, dvalue);
+  			}
+  			else if (index == INDEX_MERGE_SPEED) {
+  				double dvalue = 0.0;
+  				int jinterp = 0;
+  				/* interp_status = */
+  				    mb_linear_interp(verbose, nav_time_d - 1, nav_speed - 1, nav_num, time_d, &dvalue, &jinterp, &error);
+  				if (jinterp < 2 || jinterp > nav_num - 2)
+  					dvalue = 0.0;
+  				if (output_mode == OUTPUT_MODE_BINARY)
+  					fwrite(&dvalue, sizeof(double), 1, stdout);
+  				else
+  					fprintf(stdout, printfields[i].format, dvalue);
+  			}
+  			else if (index == INDEX_MERGE_SENSORDEPTH) {
+  				double dvalue = 0.0;
+  				int jinterp = 0;
+  				/* interp_status = */
+  				    mb_linear_interp(verbose, nav_time_d - 1, nav_sensordepth - 1, nav_num, time_d, &dvalue, &jinterp, &error);
+  				if (jinterp < 2 || jinterp > nav_num - 2)
+  					dvalue = 0.0;
+  				if (output_mode == OUTPUT_MODE_BINARY)
+  					fwrite(&dvalue, sizeof(double), 1, stdout);
+  				else
+  					fprintf(stdout, printfields[i].format, dvalue);
+  			}
+  			else if (index == INDEX_MERGE_ROLL) {
+  				double dvalue = 0.0;
+  				int jinterp = 0;
+  				/* interp_status = */
+  				    mb_linear_interp(verbose, nav_time_d - 1, nav_roll - 1, nav_num, time_d, &dvalue, &jinterp, &error);
+  				if (jinterp < 2 || jinterp > nav_num - 2)
+  					dvalue = 0.0;
+  				if (output_mode == OUTPUT_MODE_BINARY)
+  					fwrite(&dvalue, sizeof(double), 1, stdout);
+  				else
+  					fprintf(stdout, printfields[i].format, dvalue);
+  			}
+  			else if (index == INDEX_MERGE_PITCH) {
+  				double dvalue = 0.0;
+  				int jinterp = 0;
+  				/* interp_status = */
+  				    mb_linear_interp(verbose, nav_time_d - 1, nav_pitch - 1, nav_num, time_d, &dvalue, &jinterp, &error);
+  				if (jinterp < 2 || jinterp > nav_num - 2)
+  					dvalue = 0.0;
+  				if (output_mode == OUTPUT_MODE_BINARY)
+  					fwrite(&dvalue, sizeof(double), 1, stdout);
+  				else
+  					fprintf(stdout, printfields[i].format, dvalue);
+  			}
+  			else if (index == INDEX_MERGE_HEAVE) {
+  				double dvalue = 0.0;
+  				int jinterp = 0;
+  				/* interp_status = */
+  				    mb_linear_interp(verbose, nav_time_d - 1, nav_heave - 1, nav_num, time_d, &dvalue, &jinterp, &error);
+  				if (jinterp < 2 || jinterp > nav_num - 2)
+  					dvalue = 0.0;
+  				if (output_mode == OUTPUT_MODE_BINARY)
+  					fwrite(&dvalue, sizeof(double), 1, stdout);
+  				else
+  					fprintf(stdout, printfields[i].format, dvalue);
+  			}
+  			else if (index == INDEX_CALC_CONDUCTIVITY) {
+  				if (output_mode == OUTPUT_MODE_BINARY)
+  					fwrite(&conductivity_calc, sizeof(double), 1, stdout);
+  				else
+  					fprintf(stdout, printfields[i].format, conductivity_calc);
+  			}
+  			else if (index == INDEX_CALC_TEMPERATURE) {
+  				if (output_mode == OUTPUT_MODE_BINARY)
+  					fwrite(&temperature_calc, sizeof(double), 1, stdout);
+  				else
+  					fprintf(stdout, printfields[i].format, temperature_calc);
+  			}
+  			else if (index == INDEX_CALC_PRESSURE) {
+  				if (output_mode == OUTPUT_MODE_BINARY)
+  					fwrite(&pressure_calc, sizeof(double), 1, stdout);
+  				else
+  					fprintf(stdout, printfields[i].format, pressure_calc);
+  			}
+  			else if (index == INDEX_CALC_SALINITY) {
+  				if (output_mode == OUTPUT_MODE_BINARY)
+  					fwrite(&salinity_calc, sizeof(double), 1, stdout);
+  				else
+  					fprintf(stdout, printfields[i].format, salinity_calc);
+  			}
+  			else if (index == INDEX_CALC_SOUNDSPEED) {
+  				if (output_mode == OUTPUT_MODE_BINARY)
+  					fwrite(&soundspeed_calc, sizeof(double), 1, stdout);
+  				else
+  					fprintf(stdout, printfields[i].format, soundspeed_calc);
+  			}
+  			else if (index == INDEX_CALC_POTENTIALTEMP) {
+  				if (output_mode == OUTPUT_MODE_BINARY)
+  					fwrite(&potentialtemperature_calc, sizeof(double), 1, stdout);
+  				else
+  					fprintf(stdout, printfields[i].format, potentialtemperature_calc);
+  			}
+  			else if (index == INDEX_CALC_DENSITY) {
+  				if (output_mode == OUTPUT_MODE_BINARY)
+  					fwrite(&density_calc, sizeof(double), 1, stdout);
+  				else
+  					fprintf(stdout, printfields[i].format, density_calc);
+  			}
+  			else if (index == INDEX_CALC_KTIME) {
+  				if (output_mode == OUTPUT_MODE_BINARY)
+  					fwrite(&ktime_calc, sizeof(double), 1, stdout);
+  				else
+  					fprintf(stdout, printfields[i].format, ktime_calc);
+  			}
+  			else if (index == INDEX_CALC_KSPEED) {
+  				if (output_mode == OUTPUT_MODE_BINARY)
+  					fwrite(&kspeed_calc, sizeof(double), 1, stdout);
+  				else
+  					fprintf(stdout, printfields[i].format, kspeed_calc);
+  			}
+  			else if (index == INDEX_TIME_INTERVAL) {
+  				if (output_mode == OUTPUT_MODE_BINARY)
+  					fwrite(&time_interval, sizeof(double), 1, stdout);
+  				else
+  					fprintf(stdout, printfields[i].format, time_interval);
+  			}
+  			else if (fields[index].type == TYPE_DOUBLE) {
+  				double dvalue = 0.0;
+  				mb_get_binary_double(true, &buffer[fields[index].index], &dvalue);
+  				dvalue *= fields[index].scale;
+  				if ((strcmp(fields[nfields].name, "mHeadK") == 0 || strcmp(fields[nfields].name, "mYawK") == 0) &&
+  				    angles_in_degrees && dvalue < 0.0)
+  					dvalue += 360.0;
+  				if (output_mode == OUTPUT_MODE_BINARY)
+  					fwrite(&dvalue, sizeof(double), 1, stdout);
+  				else
+  					fprintf(stdout, printfields[i].format, dvalue);
+  			}
+  			else if (fields[index].type == TYPE_INTEGER) {
+  				int ivalue = 0;
+  				mb_get_binary_int(true, &buffer[fields[index].index], &ivalue);
+  				if (output_mode == OUTPUT_MODE_BINARY)
+  					fwrite(&ivalue, sizeof(int), 1, stdout);
+  				else
+  					fprintf(stdout, printfields[i].format, ivalue);
+  			}
+  			else if (fields[index].type == TYPE_SHORT) {
+  				short ivalue = 0;
+  				mb_get_binary_short(true, &buffer[fields[index].index], &ivalue);
+  				if (output_mode == OUTPUT_MODE_BINARY)
+  					fwrite(&ivalue, sizeof(short), 1, stdout);
+  				else
+  					fprintf(stdout, printfields[i].format, ivalue);
+  			}
+  			else if (fields[index].type == TYPE_TIMETAG) {
+  				double dvalue = 0.0;
+  				mb_get_binary_double(true, &buffer[fields[index].index], &dvalue);
+  				time_d = dvalue;
+  				if (strcmp(printfields[i].format, "time_i") == 0) {
+  					mb_get_date(verbose, time_d, time_i);
+  					if (output_mode == OUTPUT_MODE_BINARY) {
+  						fwrite(time_i, sizeof(int), 7, stdout);
+  					}
+  					else if (output_mode == OUTPUT_MODE_CSV) {
+  						fprintf(stdout, "%4.4d,%2.2d,%2.2d,%2.2d,%2.2d,%2.2d.%6.6d", time_i[0], time_i[1], time_i[2], time_i[3],
+  						        time_i[4], time_i[5], time_i[6]);
+            }
+            else {
+  						fprintf(stdout, "%4.4d %2.2d %2.2d %2.2d %2.2d %2.2d.%6.6d", time_i[0], time_i[1], time_i[2], time_i[3],
+  						        time_i[4], time_i[5], time_i[6]);
+  					}
+  				}
+  				else if (strcmp(printfields[i].format, "time_j") == 0) {
+  					mb_get_date(verbose, time_d, time_i);
+  					int time_j[5];
+  					mb_get_jtime(verbose, time_i, time_j);
+  					if (output_mode == OUTPUT_MODE_BINARY) {
+  						fwrite(&time_i[0], sizeof(int), 1, stdout);
+  						fwrite(&time_j[1], sizeof(int), 1, stdout);
+  						fwrite(&time_i[3], sizeof(int), 1, stdout);
+  						fwrite(&time_i[4], sizeof(int), 1, stdout);
+  						fwrite(&time_i[5], sizeof(int), 1, stdout);
+  						fwrite(&time_i[6], sizeof(int), 1, stdout);
+  					}
+  					else if (output_mode == OUTPUT_MODE_CSV) {
+  						fprintf(stdout, "%4.4d,%3.3d,%2.2d,%2.2d,%2.2d.%6.6d", time_i[0], time_j[1], time_i[3], time_i[4],
+  						        time_i[5], time_i[6]);
+            }
+  					else {
+  						fprintf(stdout, "%4.4d %3.3d %2.2d %2.2d %2.2d.%6.6d", time_i[0], time_j[1], time_i[3], time_i[4],
+  						        time_i[5], time_i[6]);
+  					}
+  				}
+  				else {
+  					if (output_mode == OUTPUT_MODE_BINARY)
+  						fwrite(&dvalue, sizeof(double), 1, stdout);
+  					else
+  						fprintf(stdout, printfields[i].format, time_d);
+  				}
+  			}
+  			else if (fields[index].type == TYPE_ANGLE) {
+  				double dvalue = 0.0;
+  				mb_get_binary_double(true, &buffer[fields[index].index], &dvalue);
+  				dvalue *= fields[index].scale;
+  				if (strcmp(fields[index].name, "mYawCB") == 0 && angles_in_degrees && dvalue < 0.0)
+  					dvalue += 360.0;
+  				if (output_mode == OUTPUT_MODE_BINARY)
+  					fwrite(&dvalue, sizeof(double), 1, stdout);
+  				else
+  					fprintf(stdout, printfields[i].format, dvalue);
+  			}
+  			if (output_mode == OUTPUT_MODE_TAB) {
+  				if (i < nprintfields - 1)
+  					fprintf(stdout, "\t");
+  				else
+  					fprintf(stdout, "\n");
+  			}
+  			else if (output_mode == OUTPUT_MODE_CSV) {
+  				if (i < nprintfields - 1)
+  					fprintf(stdout, ",");
+  				else
+  					fprintf(stdout, "\n");
+  			}
+  		}
+  		nrecord++;
+    }
 	}
 	fclose(fp);
 

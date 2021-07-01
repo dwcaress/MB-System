@@ -85,6 +85,7 @@ struct velocity_model {
 	double radius;
 	double *xx_plot;
 	double *zz_plot;
+	double *tt_plot;
 };
 
 /*--------------------------------------------------------------------------*/
@@ -162,6 +163,7 @@ int mb_rt_init(int verbose, int number_node, double *depth, double *velocity, vo
 	model->radius = 0.0;
 	model->xx_plot = NULL;
 	model->zz_plot = NULL;
+	model->tt_plot = NULL;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
@@ -567,11 +569,17 @@ int mb_rt_plot_circular(int verbose, void *modelptr, int *error) {
 		const double dang = (af - ai) / MB_RT_NUMBER_SEGMENTS;
 
 		/* add points to plotting arrays */
+    double tt = model->tt;
 		for (int i = 0; i < MB_RT_NUMBER_SEGMENTS; i++) {
 			const double angle = ai + (i + 1) * dang;
+      const double uz0 = cos(angle - dang); // starting z component of unit direction vector
+      const double uz1 = cos(angle); // ending z component of unit direction vector
 			if (model->number_plot < model->number_plot_max) {
 				model->xx_plot[model->number_plot] = model->sign_x * (model->xc + model->radius * sin(angle));
 				model->zz_plot[model->number_plot] = model->zc + model->radius * cos(angle);
+        tt += 0.5 * log(((1.0 + uz1)/(1.0 - uz1)) * ((1.0 - uz0)/(1.0 + uz0)))
+              / model->layer_gradient[model->layer];
+        model->tt_plot[model->number_plot] = tt;
 				model->number_plot++;
 			}
 		}
@@ -709,8 +717,10 @@ int mb_rt_line(int verbose, void *modelptr, int *error) {
 	/* put points in plotting arrays */
 	if (model->plot_mode != MB_RT_PLOT_MODE_OFF && model->number_plot < model->number_plot_max) {
 		model->xx_plot[model->number_plot] = model->sign_x * model->xf;
-		if (model->plot_mode == MB_RT_PLOT_MODE_ON)
+		if (model->plot_mode == MB_RT_PLOT_MODE_ON) {
 			model->zz_plot[model->number_plot] = model->zf;
+			model->tt_plot[model->number_plot] = model->tt + model->dt;
+		}
 		model->number_plot++;
 	}
 
@@ -780,8 +790,10 @@ int mb_rt_vertical(int verbose, void *modelptr, int *error) {
 	/* put points in plotting arrays */
 	if (model->plot_mode != MB_RT_PLOT_MODE_OFF && model->number_plot < model->number_plot_max) {
 		model->xx_plot[model->number_plot] = model->sign_x * model->xf;
-		if (model->plot_mode == MB_RT_PLOT_MODE_ON)
+		if (model->plot_mode == MB_RT_PLOT_MODE_ON) {
 			model->zz_plot[model->number_plot] = model->zf;
+			model->tt_plot[model->number_plot] = model->tt + model->dt;
+		}
 		model->number_plot++;
 	}
 
@@ -799,8 +811,9 @@ int mb_rt_vertical(int verbose, void *modelptr, int *error) {
 }
 /*--------------------------------------------------------------------------*/
 int mb_rt(int verbose, void *modelptr, double source_depth, double source_angle, double end_time, int ssv_mode,
-          double surface_vel, double null_angle, int nplot_max, int *nplot, double *xplot, double *zplot, double *x, double *z,
-          double *travel_time, int *ray_stat, int *error) {
+          double surface_vel, double null_angle, int nplot_max,
+          int *nplot, double *xplot, double *zplot, double *tplot,
+          double *x, double *z, double *travel_time, int *ray_stat, int *error) {
 	/* get pointer to velocity model */
 	struct velocity_model *model = (struct velocity_model *)modelptr;
 
@@ -926,6 +939,8 @@ int mb_rt(int verbose, void *modelptr, double source_depth, double source_angle,
 		if (model->plot_mode == MB_RT_PLOT_MODE_ON) {
 			model->zz_plot = zplot;
 			model->zz_plot[0] = model->zz;
+			model->tt_plot = tplot;
+			model->tt_plot[0] = model->tt;
 		}
 		model->number_plot++;
 	}
@@ -934,6 +949,7 @@ int mb_rt(int verbose, void *modelptr, double source_depth, double source_angle,
 		fprintf(stderr, "\ndbg2  About to trace ray in MB_RT function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2       xx:               %f\n", model->xx);
 		fprintf(stderr, "dbg2       zz:               %f\n", model->zz);
+		fprintf(stderr, "dbg2       tt:               %f\n", model->tt);
 		fprintf(stderr, "dbg2       layer:            %d\n", model->layer);
 		fprintf(stderr, "dbg2       layer_mode:       %d\n", model->layer_mode[model->layer]);
 		fprintf(stderr, "dbg2       vv_source:        %f\n", model->vv_source);
