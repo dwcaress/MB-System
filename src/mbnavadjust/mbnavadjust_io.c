@@ -764,6 +764,16 @@ int mbnavadjust_read_project(int verbose, char *projectpath, struct mbna_project
                                 section->global_tie_inversion_status = project->inversion_status;
                }
             }
+
+            if (section->global_tie_status == 0 && section->global_tie_snav == -1) {
+              section->global_tie_inversion_status = 0;
+              section->offset_x = 0.0;
+              section->offset_y = 0.0;
+              section->offset_z_m = 0.0;
+              section->xsigma = 0.0;
+              section->ysigma = 0.0;
+              section->zsigma = 0.0;
+            }
           }
         }
 
@@ -1376,6 +1386,15 @@ int mbnavadjust_write_project(int verbose, struct mbna_project *project, int *er
                             k, section->snav_id[k], section->snav_distance[k], section->snav_time_d[k],
                             section->snav_lon[k], section->snav_lat[k], section->snav_sensordepth[k],
                   section->snav_lon_offset[k], section->snav_lat_offset[k], section->snav_z_offset[k]);
+        }
+        if (section->global_tie_status == 0 && section->global_tie_snav == -1) {
+          section->global_tie_inversion_status = 0;
+          section->offset_x = 0.0;
+          section->offset_y = 0.0;
+          section->offset_z_m = 0.0;
+          section->xsigma = 0.0;
+          section->ysigma = 0.0;
+          section->zsigma = 0.0;
         }
         fprintf(hfp, "GLOBALTIE %2d %4d %2d %13.8f %13.8f %13.8f %13.8f %13.8f %13.8f\n",
                         section->global_tie_status, section->global_tie_snav, section->global_tie_inversion_status,
