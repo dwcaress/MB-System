@@ -43,6 +43,7 @@ TRN_MBTRNDIR=${TRN_MBTRNDIR:-"/usr/local/bin"}
 TRN_MAPFILES=${TRN_MAPFILES:-"./maps"}
 TRN_DATAFILES=${TRN_DATAFILES:-"./config"}
 TRN_LOGFILES=${TRN_LOGFILES:-"./logs/mbtrnpp"}
+TRN_GROUP=${TRN_GROUP:-"239.255.0.16"}
 
 #################################
 # Script variable initialization
@@ -255,10 +256,14 @@ printUsage(){
     echo "  -d path : enable console log, set directory"
     echo "  -e path : environment file"
     echo "  -h      : print use message"
-    echo "  -m path : override mbtrnpp dir   [$TRN_MBTRNDIR]"
-    echo "  -o addr : override local host    [$TRN_HOST]"
+    echo "  -G addr : TRN UDP multicast group [$TRN_GROUP]"
+    echo "  -D path : TRN config directory    [$TRN_DATAFILES]"
+    echo "  -L path : TRN log directory       [$TRN_LOGFILES]"
+    echo "  -M path : TRN maps directory      [$TRN_MAPFILES]"
+    echo "  -m path : override mbtrnpp dir    [$TRN_MBTRNDIR]"
+    echo "  -o addr : TRN host                [$TRN_HOST]"
     echo "             affects : [--trn-out, --mb-out]"
-    echo "  -r addr : override reson host    [$TRN_RESON_HOST]"
+    echo "  -r addr : TRN reson host          [$TRN_RESON_HOST]"
     echo "             affects: [--input]"
     echo "  -t      : test [print cmdline]"
     echo "  -v      : verbose output         [$VERBOSE]"
@@ -279,10 +284,11 @@ printUsage(){
     echo ""
     echo " Environment variables:"
     echo "  TRN_MAPFILES   - TRN map directory       [--trn-maps]"
-    echo "  TRN_CFGFILES   - TRN config directory    [--trn-cfg, --trn-par]"
+    echo "  TRN_DATAFILES  - TRN config directory    [--trn-cfg, --trn-par]"
     echo "  TRN_LOGFILES   - TRN log directory       [--trn-log]"
     echo "  TRN_RESON_HOST - TRN reson (or emu7k) IP [--input]"
     echo "  TRN_HOST       - TRN server IP           [--trn-out, --mb-out]"
+    echo "  TRN_GROUP      - TRN multicast group     [--trn-out]"
     echo "  TRN_MBTRNDIR   - mbtrnpp directory       [mbtrnpp path]"
     echo ""
 }
@@ -325,7 +331,7 @@ processCmdLine(){
     OPTIND=1
     #    vout "`basename $0` all args[$*]"
 
-while getopts a:c:d:e:hm:o:r:tvw: Option
+while getopts a:c:d:D:e:G:hL:M:m:o:r:tvw: Option
     do
         #    vout "processing $Option[$OPTARG]"
         case $Option in
@@ -337,6 +343,14 @@ while getopts a:c:d:e:hm:o:r:tvw: Option
         CONLOG_PATH=$OPTARG
         ;;
         e ) MBTRNPP_ENV=$OPTARG
+        ;;
+        G ) TRN_GROUP=$OPTARG
+        ;;
+        D ) TRN_DATAFILES=$OPTARG
+        ;;
+        L ) TRN_LOGFILES=$OPTARG
+        ;;
+        M ) TRN_MAPFILES=$OPTARG
         ;;
         h) DO_HELP="Y"
         ;;
