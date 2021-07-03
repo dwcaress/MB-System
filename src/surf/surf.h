@@ -7,11 +7,20 @@
 #ifndef SURF_SURF_H_
 #define SURF_SURF_H_
 
+#include <mb_config.h>
+
 #ifdef _WIN32
-#include "xdr_win32.h"
+# include "xdr_win32.h"
 #else
-#include <rpc/types.h>
-#include <rpc/xdr.h>
+# ifdef HAVE_RPC_RPC_H
+#  include <rpc/types.h>
+#  include <rpc/xdr.h>
+# else
+#  ifdef HAVE_TIRPC_RPC_RPC_H
+#   include <tirpc/rpc/types.h>
+#   include <tirpc/rpc/xdr.h>
+#  endif
+# endif
 #endif
 
 /*

@@ -37,12 +37,20 @@
 #endif
 
 /* For XDR/RPC */
-#ifdef HAVE_RPC_RPC_H
-#include <rpc/rpc.h>
-#endif
-#ifdef HAVE_RPC_TYPES_H
-#include <rpc/types.h>
-#include <rpc/xdr.h>
+#ifndef _WIN32
+# ifdef HAVE_RPC_RPC_H
+#  include <rpc/rpc.h>
+#  include <rpc/types.h>
+#  include <rpc/xdr.h>
+# else
+#  ifdef HAVE_TIRPC_RPC_RPC_H
+#   include <tirpc/rpc/rpc.h>
+#   include <tirpc/rpc/types.h>
+#   include <tirpc/rpc/xdr.h>
+#  endif
+# endif
+#else
+#	include "types_win32.h"
 #endif
 
 #ifdef __cplusplus
