@@ -413,13 +413,8 @@ int mbview_addnav(int verbose, size_t instance, int npoint, double *time_d, doub
 		status = mb_reallocd(mbv_verbose, __FILE__, __LINE__,
 		                     shared.shareddata.navs[inav].npoints_alloc * sizeof(struct mbview_linesegmentw_struct),
 		                     (void **)&(shared.shareddata.navs[inav].segments), error);
-		for (int j = 0; j < shared.shareddata.navs[inav].npoints_alloc - 1; j++) {
-			shared.shareddata.navs[inav].segments[j].nls = 0;
-			shared.shareddata.navs[inav].segments[j].nls_alloc = 0;
-			shared.shareddata.navs[inav].segments[j].lspoints = NULL;
-			shared.shareddata.navs[inav].segments[j].endpoints[0] = shared.shareddata.navs[inav].navpts[j].pointcntr;
-			shared.shareddata.navs[inav].segments[j].endpoints[1] = shared.shareddata.navs[inav].navpts[j + 1].pointcntr;
-		}
+    memset((void *)shared.shareddata.navs[inav].segments, 0,
+            (size_t)shared.shareddata.navs[inav].npoints_alloc * sizeof(struct mbview_linesegmentw_struct));
 	}
 
 	/* add the new nav */
@@ -552,6 +547,9 @@ int mbview_addnav(int verbose, size_t instance, int npoint, double *time_d, doub
 
 		/* drape the segments */
 		for (int i = 0; i < shared.shareddata.navs[inav].npoints - 1; i++) {
+			shared.shareddata.navs[inav].segments[i].endpoints[0] = shared.shareddata.navs[inav].navpts[i].pointcntr;
+			shared.shareddata.navs[inav].segments[i].endpoints[1] = shared.shareddata.navs[inav].navpts[i + 1].pointcntr;
+
 			/* drape the segment */
 			mbview_drapesegmentw(instance, &(shared.shareddata.navs[inav].segments[i]));
 

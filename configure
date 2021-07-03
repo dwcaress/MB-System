@@ -19335,47 +19335,23 @@ case "${host_os}" in
     ;;
 esac
 
-       for ac_header in rpc/rpc.h
-do :
-  ac_fn_c_check_header_compile "$LINENO" "rpc/rpc.h" "ac_cv_header_rpc_rpc_h" "$ac_includes_default"
+ac_fn_c_check_header_compile "$LINENO" "rpc/rpc.h" "ac_cv_header_rpc_rpc_h" "$ac_includes_default"
 if test "x$ac_cv_header_rpc_rpc_h" = xyes
 then :
-  printf "%s\n" "#define HAVE_RPC_RPC_H 1" >>confdefs.h
+
+printf "%s\n" "#define HAVE_RPC_RPC_H 1" >>confdefs.h
 
 else $as_nop
   ac_fn_c_check_header_compile "$LINENO" "tirpc/rpc/rpc.h" "ac_cv_header_tirpc_rpc_rpc_h" "$ac_includes_default"
 if test "x$ac_cv_header_tirpc_rpc_rpc_h" = xyes
 then :
-  printf "%s\n" "#define HAVE_TIRPC_RPC_RPC_H 1" >>confdefs.h
+
+printf "%s\n" "#define HAVE_TIRPC_RPC_RPC_H 1" >>confdefs.h
 
 fi
 
 fi
 
-done
-       for ac_header in rpc/types.h
-do :
-  ac_fn_c_check_header_compile "$LINENO" "rpc/types.h" "ac_cv_header_rpc_types_h" "$ac_includes_default"
-if test "x$ac_cv_header_rpc_types_h" = xyes
-then :
-  printf "%s\n" "#define HAVE_RPC_TYPES_H 1" >>confdefs.h
-
-else $as_nop
-         for ac_header in tirpc/rpc/types.h
-do :
-  ac_fn_c_check_header_compile "$LINENO" "tirpc/rpc/types.h" "ac_cv_header_tirpc_rpc_types_h" "$ac_includes_default"
-if test "x$ac_cv_header_tirpc_rpc_types_h" = xyes
-then :
-  printf "%s\n" "#define HAVE_TIRPC_RPC_TYPES_H 1" >>confdefs.h
-
-else $as_nop
-  as_fn_error $? "Required header <rpc/types.h> not found, check include path and installed development packages" "$LINENO" 5
-fi
-
-done
-fi
-
-done
 
 # AC_CHECK_LIB(uuid, main)
 # AC_CHECK_LIB(ole32, main)

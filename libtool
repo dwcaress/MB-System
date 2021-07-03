@@ -45,7 +45,7 @@ macro_revision=2.4.6
 build_libtool_libs=yes
 
 # Whether or not to build static libraries.
-build_old_libs=yes
+build_old_libs=no
 
 # What type of objects to build.
 pic_mode=default
@@ -67,13 +67,13 @@ PATH_SEPARATOR=":"
 
 # The host system.
 host_alias=
-host=x86_64-apple-darwin19.6.0
-host_os=darwin19.6.0
+host=x86_64-apple-darwin20.5.0
+host_os=darwin20.5.0
 
 # The build system.
 build_alias=
-build=x86_64-apple-darwin19.6.0
-build_os=darwin19.6.0
+build=x86_64-apple-darwin20.5.0
+build_os=darwin20.5.0
 
 # A sed program that does not truncate output.
 SED="/usr/bin/sed"
@@ -97,7 +97,7 @@ NM="/usr/bin/nm -B"
 LN_S="ln -s"
 
 # What is the maximum length of a command?
-max_cmd_len=196608
+max_cmd_len=786432
 
 # Object file suffix (normally "o").
 objext=o
@@ -282,7 +282,7 @@ finish_eval=""
 hardcode_into_libs=no
 
 # Compile-time system search path for libraries.
-sys_lib_search_path_spec="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/12.0.0  /usr/local/lib"
+sys_lib_search_path_spec="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/12.0.5  /usr/local/lib"
 
 # Detected run-time system search path for libraries.
 sys_lib_dlsearch_path_spec="/usr/local/lib /lib /usr/lib"

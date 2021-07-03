@@ -2,6 +2,7 @@
 var help_topics=[];
 var TRN_RESON_HOST=[];
 var TRN_HOST=[];
+var TRN_GROUP=[];
 var TRN_LOGFILES=[];
 var TRN_DATAFILES=[];
 var TRN_MAPFILES=[];
@@ -18,6 +19,7 @@ var MBARI_WINVM_IP="134.89.13.X";
 var CARSON_WINVM_IP="134.89.33.X";
 var HOME_WINVM_IP="192.168.1.86";
 var MAPPER1_RESON_IP="134.89.32.107";
+var GLOBAL_TRN_GROUP="239.255.0.16"
 var LINUXVM_IP_CURRENT=MBARI_LINUXVM_IP;
 var WINVM_IP_CURRENT=MBARI_WINVM_IP;
 var MBHBT_MAPPER1=0;
@@ -48,6 +50,7 @@ var SESSION=session_str();
 // initialize presets
 TRN_RESON_HOST["win.reson"]=MAPPER1_RESON_IP;
 TRN_HOST["win.reson"]=MAPPER1_RESON_IP;
+TRN_GROUP["win.reson"]=GLOBAL_TRN_GROUP;
 TRN_LOGFILES["win.reson"]=RESON_LOGFILES;
 TRN_DATAFILES["win.reson"]=RESON_DATAFILES;
 TRN_MAPFILES["win.reson"]=RESON_MAPFILES;
@@ -58,6 +61,7 @@ trnuhbt["win.reson"]=TRNUHBT_MAPPER1;
 
 TRN_RESON_HOST["linux.mbari"]=MBARI_LINUXVM_IP;
 TRN_HOST["linux.mbari"]=MBARI_LINUXVM_IP;
+TRN_GROUP["linux.mbari"]=GLOBAL_TRN_GROUP;
 TRN_LOGFILES["linux.mbari"]=LINUXVM_LOGFILES;
 TRN_DATAFILES["linux.mbari"]=LINUXVM_DATAFILES;
 TRN_MAPFILES["linux.mbari"]=LINUXVM_MAPFILES;
@@ -68,6 +72,7 @@ trnuhbt["linux.mbari"]=TRNUHBT_TEST;
 
 TRN_RESON_HOST["linux.carson"]=CARSON_LINUXVM_IP;
 TRN_HOST["linux.carson"]=CARSON_LINUXVM_IP;
+TRN_GROUP["linux.carson"]=GLOBAL_TRN_GROUP;
 TRN_LOGFILES["linux.carson"]=LINUXVM_LOGFILES;
 TRN_DATAFILES["linux.carson"]=LINUXVM_DATAFILES;
 TRN_MAPFILES["linux.carson"]=LINUXVM_MAPFILES;
@@ -78,6 +83,7 @@ trnuhbt["linux.carson"]=TRNUHBT_TEST;
 
 TRN_RESON_HOST["linux.home"]=HOME_LINUXVM_IP;
 TRN_HOST["linux.home"]=HOME_LINUXVM_IP;
+TRN_GROUP["linux.home"]=GLOBAL_TRN_GROUP;
 TRN_LOGFILES["linux.home"]=LINUXVM_LOGFILES;
 TRN_DATAFILES["linux.home"]=LINUXVM_DATAFILES;
 TRN_MAPFILES["linux.home"]=LINUXVM_MAPFILES;
@@ -88,6 +94,7 @@ trnuhbt["linux.home"]=TRNUHBT_TEST;
 
 TRN_RESON_HOST["winvm.mbari"]=MBARI_WINVM_IP;
 TRN_HOST["winvm.mbari"]=MBARI_WINVM_IP;
+TRN_GROUP["winvm.mbari"]=GLOBAL_TRN_GROUP;
 TRN_LOGFILES["winvm.mbari"]=WINVM_LOGFILES;
 TRN_DATAFILES["winvm.mbari"]=WINVM_DATAFILES;
 TRN_MAPFILES["winvm.mbari"]=WINVM_MAPFILES;
@@ -98,6 +105,7 @@ trnuhbt["winvm.mbari"]=TRNUHBT_TEST;
 
 TRN_RESON_HOST["winvm.carson"]=CARSON_WINVM_IP;
 TRN_HOST["winvm.carson"]=CARSON_WINVM_IP;
+TRN_GROUP["winvm.carson"]=GLOBAL_TRN_GROUP;
 TRN_LOGFILES["winvm.carson"]=WINVM_LOGFILES;
 TRN_DATAFILES["winvm.carson"]=WINVM_DATAFILES;
 TRN_MAPFILES["winvm.carson"]=WINVM_MAPFILES;
@@ -108,6 +116,7 @@ trnuhbt["winvm.carson"]=TRNUHBT_TEST;
 
 TRN_RESON_HOST["winvm.home"]=HOME_WINVM_IP;
 TRN_HOST["winvm.home"]=HOME_WINVM_IP;
+TRN_GROUP["winvm.home"]=GLOBAL_TRN_GROUP;
 TRN_LOGFILES["winvm.home"]=WINVM_LOGFILES;
 TRN_DATAFILES["winvm.home"]=WINVM_DATAFILES;
 TRN_MAPFILES["winvm.home"]=WINVM_MAPFILES;
@@ -118,6 +127,7 @@ trnuhbt["winvm.home"]=TRNUHBT_TEST;
 
 TRN_RESON_HOST["custom"]="";
 TRN_HOST["custom"]="";
+TRN_GROUP["custom"]="";
 TRN_LOGFILES["custom"]="";
 TRN_DATAFILES["custom"]="";
 TRN_MAPFILES["custom"]="";
@@ -129,7 +139,8 @@ trnuhbt["custom"]="";
 // help strings
 help_topics["TRN_MBTRNDIR"]="mbtrnpp binary directory";
 help_topics["TRN_TRN_RESON_HOST"]="7K center or emulator IP address";
-help_topics["TRN_HOST"]="TRN output host IP (for TRN, TRNU, MB1 servers, etc.";
+help_topics["TRN_HOST"]="TRN output host IP (for TRN, TRNU, MB1 servers, etc.)";
+help_topics["TRN_GROUP"]="TRN output UDP multicast group (for TRNUM server)";
 help_topics["TRN_DATAFILES"]="TRN_DATAFILES environment var\nSets TRN configuration output directory";
 help_topics["TRN_MAPFILES"]="TRN_LOGFILES environment var\nSets TRN map file directory";
 help_topics["TRN_LOGFILES"]="TRN_LOGFILES environment var\nSets TRN log output directory";
@@ -189,6 +200,7 @@ help_topics["trn-out"]="TRN output configuration\n\n\
 Options for TRN output are configured using one or more comma separated values:\n\n\
 trnsvr:<addr>:<port>  [enable TRN server (trn_server API)]\n\
 trnusvr:<addr>:<port> [enable TRN update server (pub/sub)]\n\
+trnumsvr:<group>:<port>:<ttl> [enable TRN update server (UDP multicast pub/sub)]\n\
 trnu                  [enable TRN update logging]\n\
 sout                  [enable TRN output to stdout]\n\
 debug                 [enable TRN module debug output]";
@@ -322,6 +334,7 @@ function load_ctx(){
     // initialize preset-specific/placeholder values
     x.elements["reson-host"].value=TRN_RESON_HOST[rkey];
     x.elements["out-host"].value=TRN_HOST[key];
+    x.elements["out-group"].value=TRN_GROUP[key];
     x.elements["mbtrndir"].value=TRN_MBTRNDIR[key];
     x.elements["trn_datafiles"].value=TRN_DATAFILES[key];
     x.elements["trn_mapfiles"].value=TRN_MAPFILES[key];
@@ -350,7 +363,7 @@ function load_ctx(){
     x.elements["trn-cfg"].value="TRN_DATAFILES/mappingAUV_specs.cfg";
     x.elements["trn-mid"].value="mb-TRN_SESSION";
     x.elements["trn-decn"].value="9";
-    x.elements["trn-out"].value="trnsvr:TRN_HOST:28000,trnu,trnusvr:TRN_HOST:8000";
+    x.elements["trn-out"].value="trnsvr:TRN_HOST:28000,trnu,trnusvr:TRN_HOST:8000,trnumsvr:TRN_GROUP:29000";
     x.elements["trn-en"].value="en";
     x.elements["trn-mtype"].value="1";
     x.elements["trn-ftype"].value="2";
@@ -386,6 +399,7 @@ function init_preset(key){
     x.elements["mbtrndir"].value=TRN_MBTRNDIR[key];
     x.elements["reson-host"].value=TRN_RESON_HOST[key];
     x.elements["out-host"].value=TRN_HOST[key];
+    x.elements["out-group"].value=TRN_GROUP[key];
     x.elements["trn_datafiles"].value=TRN_DATAFILES[key];
     x.elements["trn_mapfiles"].value=TRN_MAPFILES[key];
     x.elements["trn_logfiles"].value=TRN_LOGFILES[key];
@@ -413,7 +427,7 @@ function init_preset(key){
     x.elements["trn-cfg"].value="TRN_DATAFILES/mappingAUV_specs.cfg";
     x.elements["trn-mid"].value="mb-TRN_SESSION";
     x.elements["trn-decn"].value="9";
-    x.elements["trn-out"].value="trnsvr:TRN_HOST:28000,trnu,trnusvr:TRN_HOST:8000";
+    x.elements["trn-out"].value="trnsvr:TRN_HOST:28000,trnu,trnusvr:TRN_HOST:8000,trnumsvr:TRN_GROUP:29000";
     x.elements["trn-en"].value="en";
     x.elements["trn-mtype"].value="1";
     x.elements["trn-ftype"].value="2";
@@ -443,20 +457,23 @@ function init_preset(key){
 // substitute current values for placeholders
 // (zero or more instances)
 // returns empty string if option value blank
-function sub_placeholder(form,optkey,pstr,pval){
+function sub_placeholder(form,optkey,n,pstr,pval){
 
     var retval="";
     var optstr='--'+optkey+'=';
     if(form.elements[optkey].value.length>0){
-        var tmp=form.elements[optkey].value;
-        // iterate until no placeholder instances
-        while(tmp.indexOf(pstr)>=0){
-            // replace next placeholder
-            b=tmp.indexOf(pstr);
-            var pre=tmp.substr(0,b);
-            var post=tmp.substr(b+pstr.length);
-            tmp = pre+pval+post+" "
-        }
+        var i=0
+            var tmp=form.elements[optkey].value;
+        for(i=0;i<n;i++){
+            // iterate until no placeholder instances
+            while(tmp.indexOf(pstr[i])>=0){
+                // replace next placeholder
+                b=tmp.indexOf(pstr[i]);
+                var pre=tmp.substr(0,b);
+                var post=tmp.substr(b+pstr[i].length);
+                tmp = pre+pval[i]+post+" "
+            }
+        } // for
         retval = optstr+tmp;
     }
     return retval;
@@ -470,6 +487,7 @@ function update(){
     // update environment values with user inputs
     TRN_RESON_HOST["current"]=x.elements["reson-host"].value;
     TRN_HOST["current"]=x.elements["out-host"].value;
+    TRN_GROUP["current"]=x.elements["out-group"].value;
     TRN_MBTRNDIR["current"]=x.elements["mbtrndir"].value;
     TRN_DATAFILES["current"]=x.elements["trn_datafiles"].value;
     TRN_MAPFILES["current"]=x.elements["trn_mapfiles"].value;
@@ -543,15 +561,41 @@ function update(){
         text += '--tide-model='+x.elements["tide-model"].value+" ";
 
     // these parameters support substitutions
-    text += sub_placeholder(x,"input","TRN_RESON_HOST",TRN_RESON_HOST["current"]);
-    text += sub_placeholder(x,"log-directory","TRN_LOGFILES",TRN_LOGFILES["current"]);
-    text += sub_placeholder(x,"trn-map","TRN_MAPFILES",TRN_MAPFILES["current"]);
-    text += sub_placeholder(x,"trn-par","TRN_DATAFILES",TRN_DATAFILES["current"]);
-    text += sub_placeholder(x,"trn-cfg","TRN_DATAFILES",TRN_DATAFILES["current"]);
-    text += sub_placeholder(x,"output","SESSION",session_str());
-    text += sub_placeholder(x,"mb-out","TRN_HOST",TRN_HOST["current"]);
-    text += sub_placeholder(x,"trn-out","TRN_HOST",TRN_HOST["current"]);
-    text += sub_placeholder(x,"trn-mid","TRN_SESSION",trn_session());
+    var subk=["TRN_RESON_HOST"];
+    var subv=[TRN_RESON_HOST["current"]];
+    text += sub_placeholder(x,"input",1,subk,subv);
+
+    subk = ["TRN_LOGFILES"];
+    subv = [TRN_LOGFILES["current"]];
+    text += sub_placeholder(x,"log-directory",1,subk,subv);
+
+    subk = ["TRN_MAPFILES"];
+    subv = [TRN_MAPFILES["current"]];
+    text += sub_placeholder(x,"trn-map",1,subk,subv);
+
+    subk = ["TRN_DATAFILES"];
+    subv = [TRN_DATAFILES["current"]];
+    text += sub_placeholder(x,"trn-par",1,subk,subv);
+
+    subk = ["TRN_DATAFILES"];
+    subv = [TRN_DATAFILES["current"]];
+    text += sub_placeholder(x,"trn-cfg",subk,subv);
+
+    subk = ["SESSION"];
+    subv = [session_str()];
+    text += sub_placeholder(x,"output",1,subk,subv);
+
+    subk = ["TRN_HOST"];
+    subv = [TRN_HOST["current"]];
+    text += sub_placeholder(x,"mb-out",1,subk,subv);
+
+    subk=["TRN_HOST","TRN_GROUP"];
+    subv=[TRN_HOST["current"],TRN_GROUP["current"]];
+    text += sub_placeholder(x,"trn-out",2,subk,subv);
+
+    subk=["TRN_SESSION"];
+    subv=[trn_session()];
+    text += sub_placeholder(x,"trn-mid",1,subk,subv);
 
     // set the output value
     var ofrm = document.getElementById("outtext");
@@ -598,6 +642,7 @@ function cfg2str(){
         retval+="    #     input         TRN_RESON_HOST[1] input socket IP address\n";
         retval+="    #     mb-out        TRN_HOST[1]       TRN processing host IP\n";
         retval+="    #     trn-out       TRN_HOST\n";
+        retval+="    #                   TRN_GROUP         TRN UDP multicast group (trnumsvr)\n";
         retval+="    #     trn-mid       TRN_SESSION       TRN mission ID (YYYY-JJJ) (JJJ: year day)\n";
         retval+="    #     log-directory TRN_LOGFILES[2]   TRN log directory\n";
         retval+="    #     trn-map       TRN_MAPFILES[2]   TRN map file directory\n";
@@ -902,6 +947,7 @@ function cfg2str(){
         retval+="// trnu                - enable TRN update ascii logging\n";
         retval+="// trnub               - enable TRN update binary logging\n";
         retval+="// trnusvr:<ip>:<port> - enable TRN update server\n";
+        retval+="// trnumsvr:<group>:<port>:<ttl> - enable TRN update server (UDP multicast)\n";
         retval+="// sout                - enable TRN output to stdout\n";
         retval+="// serr                - enable TRN output to stderr\n";
         retval+="// debug               - enable TRN debug output\n";

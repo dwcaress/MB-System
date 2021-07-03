@@ -202,9 +202,7 @@ case "${host_os}" in
 esac
 
 dnl Check for RPC and XDR headers needed by MBIO library
-AC_CHECK_HEADERS(rpc/rpc.h, , [AC_CHECK_HEADERS(tirpc/rpc/rpc.h)], )
-AC_CHECK_HEADERS(rpc/types.h, ,
-    [AC_CHECK_HEADERS(tirpc/rpc/types.h, , [AC_MSG_ERROR([Required header <rpc/types.h> not found, check include path and installed development packages])],)],)
+AC_CHECK_HEADER(rpc/rpc.h, AC_DEFINE(HAVE_RPC_RPC_H, 1, [Have rpc/rpc.h]), AC_CHECK_HEADER(tirpc/rpc/rpc.h, AC_DEFINE(HAVE_TIRPC_RPC_RPC_H, 1, [Have tirpc/rpc/rpc.h])))
 
 dnl Check for WIN32 libraries
 # AC_CHECK_LIB(uuid, main)

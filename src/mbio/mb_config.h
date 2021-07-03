@@ -31,11 +31,8 @@
 /* Have malloc.h */
 /* #undef HAVE_MALLOC_H */
 
-/* Define to 1 if you have the <rpc/rpc.h> header file. */
+/* Have rpc/rpc.h */
 #define HAVE_RPC_RPC_H 1
-
-/* Define to 1 if you have the <rpc/types.h> header file. */
-#define HAVE_RPC_TYPES_H 1
 
 /* Define to 1 if you have the `sincos' function. */
 /* #undef HAVE_SINCOS */
@@ -61,11 +58,8 @@
 /* Define to 1 if you have the <sys/types.h> header file. */
 #define HAVE_SYS_TYPES_H 1
 
-/* Define to 1 if you have the <tirpc/rpc/rpc.h> header file. */
+/* Have tirpc/rpc/rpc.h */
 /* #undef HAVE_TIRPC_RPC_RPC_H */
-
-/* Define to 1 if you have the <tirpc/rpc/types.h> header file. */
-/* #undef HAVE_TIRPC_RPC_TYPES_H */
 
 /* Define to 1 if you have the <unistd.h> header file. */
 #define HAVE_UNISTD_H 1

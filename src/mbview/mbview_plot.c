@@ -2511,9 +2511,6 @@ int mbview_drapesegmentw_grid(size_t instance, struct mbview_linesegmentw_struct
 		jend = 0;
 	if (jend >= data->primary_n_columns)
 		jend = data->primary_n_rows - 1;
-	/* fprintf(stderr,"mbview_drapesegmentw_grid: xgridstart:%f xgridend:%f ygridstart:%f ygridend:%f\n",
-	xgridstart,xgridend,ygridstart,ygridend);
-	fprintf(stderr,"mbview_drapesegmentw_grid: istart:%d iend:%d jstart:%d jend:%d\n",istart,iend,jstart,jend);*/
 
 	int iadd;
 	int jadd;
@@ -2558,8 +2555,6 @@ int mbview_drapesegmentw_grid(size_t instance, struct mbview_linesegmentw_struct
 			}
 		}
 	}
-	/*fprintf(stderr,"mbview_drapesegmentw_grid: ni:%d nj:%d iadd:%d istart:%d iend:%d jadd:%d jstart:%d jend:%d\n",
-	ni,nj,iadd,istart,iend,jadd,jstart,jend);*/
 
 	/* if points needed and space allocated do it */
 	if (!done && ni + nj > 0) {
