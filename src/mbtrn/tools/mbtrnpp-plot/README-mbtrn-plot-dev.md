@@ -9,19 +9,25 @@ mbtrnpp-plot reads mbtrnpp log files to produce CSV input for qplot.
 
  
 ## Required Packages
+
 * qplot
 * bash 4+ (earlier versions do not support associative arrays)
 * gnuplot
 * ghostscript
 * libpng
 * libgd or gd2
+
 ### OSX requirements
+
 * macports or homebrew
+
 ### Windows requirements
+
 * cygwin 
 
 
 ## Quick Start
+
 * clone mbtrnpp-plot repository  
 `cd mbtrnpp-plot`
 * Run the example  
@@ -30,6 +36,7 @@ mbtrnpp-plot reads mbtrnpp log files to produce CSV input for qplot.
 * all plots are included in mbtrnpp-comb.pdf
 
 ## mbtrnpp-plot files
+
 The following files are used by mbtrrnpp-plot:
 
 |             File              |                              Description                            |
@@ -47,6 +54,7 @@ The following files are used by mbtrrnpp-plot:
  The configuration files are maintained by the user.
  
 ## Plot an existing data set
+
 Plot sets defined in qu_plotsets.conf may be plotted using it's index or key.  
 To list the existing plot set definitions, use the -l option; use -vl to see entry details.  
 	`mbtrnpp-plot.sh -l`  
@@ -56,6 +64,7 @@ To plot by key, use the -k option (may use more than once).
 	`mbtrnpp-plot.sh -k 'pExample -k 'p20191115m3_4v1'`   
 
 ## Plot a data set w/o a qu-plotsets-conf entry
+
 Datasets may be plotted on-the-fly using the -s option. The argument for this option is
 a data set specifier, a quoted, comma-delimited string containing:  
 * the path the the mbtrnpp log files
@@ -66,6 +75,7 @@ Example:
 `mbtrnpp-plot.sh -s "/path/to/logs,20200102-140700,02jan20 cruise mission 3 replay (20200102-140700)"`   
 
 ## Add a plotset to qu-plotsets-conf
+
 Plot set entries consist of 6 lines:  
 ```
 let "idx=$idx+1"  
@@ -89,6 +99,7 @@ QU_DATA_SET_IDS["$QU_KEY"]="example plot mission ($QU_SESSION_IDS[$QU_KEY])"
 `QU_DATA_SET_IDS["$QU_KEY"]="example plot mission ($QU_SESSION_IDS[$QU_KEY])"`
 
 ## Add a plot 
+
 * modify the relevant function in mbtrnpp-plot, e.g. plot_trnusvr()
   * define grep filter(s) and output CSV file names for plot set data
 ```
@@ -153,16 +164,19 @@ ${MBTRNPP_PROFILE}|${MBTRNPP_EVENTS}|${MBTRNPP_ERRORS}|${TRNSVR_PROFILE}|\
 ${TRNSVR_CLI}|${TRNUSVR_PROFILE}|${TRNUSVR_CLI}|${MB1SVR_PROFILE}|\
 ${MB1SVR_CLI}|${TRN_STATE1}|${TRN_STATE2}"
 ```
-## File Naming Conventions:
+## File Naming Conventions
+
 qp-\*.conf : qplot job configuration/job definitionos
 qu-\*.conf : mbtrnpp configuration/job definitions
 
-## Variable Naming Conventions:
+## Variable Naming Conventions
+
 QU_ prefix for user environment prevents naming conflicts
 QP_ prefix denotes qplot environment/variables
 QX_ prefix denotes local environment/variables
 
 ## Appendix: qplot Configuration
+
 qplot configuration files are used to configure plot images for one or more data sets.
 By convention, these are named   
 ```
@@ -183,26 +197,31 @@ Configuration files typically have the following general structure:
 * Plot configurations
 * define one or more plots
 
-### File Naming Conventions:
+### File Naming Conventions
+
 qp-\*.conf : qplot job configuration/job definitionos
 qu-\*.conf : mbtrnpp configuration/job definitions
 
 ### Variable Naming Convention
+
 Variables in cp configuration files and scripts use the following naming convention:
 * QP_ prefix denotes environment/variables that qplot depends upon (don't modify)
 * QU_ prefix for user environment prevents naming conflicts (may be imported/exported, i.e. shared between files)
 * QX_ prefix denotes local/application-specific variables (file scope)
 
 ### Bash version
+
 qplot uses Bash version 4 or later.  
 Earlier versions do not support associative arrays, which are used extensively in qplot.  
 OSX typically uses an older Bash; a more recent version may be installed using mac ports or homebrew.
 In that case, it may be necessary to modify the bash invocation (#!/bin/bash) in qplot and/or configuration files and scripts to reflect the path to the correct version.
 
 ### Annotated Configuation Example : qp-mbtrnpp.conf
+
 Importing shared environment:
 ```
 # import shared environment, variables
+
 source qp-shared.conf.sh
 ```
 Define some parameters that will be referenced in the plot definitions.
@@ -214,6 +233,7 @@ These include
 Note that QU_DATA_SET_ID is exported by mbtrnpp-plot:  
 ```
 # define plot titles and image names
+
 QU_MBTRNPP_PROFILE_PTITLE=${QU_PTITLE:-"MBTRNPP operation profile"}
 QU_MBTRNPP_PROFILE_STITLE=${QU_STITLE:-"\n${QU_DATA_SET_ID}"}
 export QU_MBTRNPP_PROFILE_OIMG_NAME="mbtrnpp-prof"
