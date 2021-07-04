@@ -23,6 +23,7 @@ Distributions that do not include "beta" in the tag name correspond to the major
 announced releases. The source distributions associated with all releases, major
 or beta, are equally accessible as tarballs through the Github interface.
 
+- Version 5.7.9beta12    July 4, 2021
 - Version 5.7.9beta11    June 26, 2021
 - Version 5.7.9beta10    June 16, 2021
 - Version 5.7.9beta09    June 8, 2021
@@ -390,6 +391,12 @@ or beta, are equally accessible as tarballs through the Github interface.
 ### MB-System Version 5.7 Release Notes:
 --
 
+#### 5.7.9beta12 (July 4, 2021)
+
+Build system: Fixed location of RPC and XDR headers for Ubuntu 21.
+
+TRN: updated TRN documentation.
+
 #### 5.7.9beta11 (June 26, 2021)
 
 Build system: The configure script and the resulting Makefiles are
@@ -409,7 +416,7 @@ the source and destination images.
 Mbm_grdplot, mbm_grd3dplot, mbm_grdcut, mbm_grdinfo, mbm_grdtiff:
 Fixed thesemacros to work with the new gmt grdinfo output that
 changed for GMT 6.2.0.
- 
+
 #### 5.7.9beta10 (June 16, 2021)
 
 Mbnavadjust: Fixed importation of swath files, which was failing. Fixed crash
