@@ -3337,7 +3337,7 @@ int main(int argc, char **argv) {
      * using functions defined in this code block and passed into the
      * init function as function pointers */
     if (strncmp(mbtrn_cfg->input, "socket", 6) == 0) {
-      if (mbtrn_cfg->format == MBF_RESON7KR) {
+      if (mbtrn_cfg->format == MBF_RESON7KR || mbtrn_cfg->format == MBF_RESON7K3) {
         mbtrnpp_input_open = &mbtrnpp_reson7kr_input_open;
         mbtrnpp_input_read = &mbtrnpp_reson7kr_input_read;
         mbtrnpp_input_close = &mbtrnpp_reson7kr_input_close;
