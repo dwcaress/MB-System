@@ -295,12 +295,12 @@ void parse_args(int argc, char **argv, app_cfg_t *cfg)
             exit(0);
         }
     }// while
-    PDPRINT((stderr,"verbose [%s]\n",(cfg->verbose?"Y":"N")));
-    PDPRINT((stderr,"host    [%s]\n",cfg->host));
-    PDPRINT((stderr,"port    [%d]\n",cfg->port));
-    PDPRINT((stderr,"block   [%s]\n",(cfg->blocking==0?"N":"Y")));
-    PDPRINT((stderr,"cycles  [%d]\n",cfg->cycles));
-    PDPRINT((stderr,"conn    [%"PRIu32"]\n",cfg->connections));
+    fprintf(stderr,"verbose [%s]\n",(cfg->verbose?"Y":"N"));
+    fprintf(stderr,"host    [%s]\n",cfg->host);
+    fprintf(stderr,"port    [%d]\n",cfg->port);
+    fprintf(stderr,"block   [%s]\n",(cfg->blocking==0?"N":"Y"));
+    fprintf(stderr,"cycles  [%d]\n",cfg->cycles);
+    fprintf(stderr,"conn    [%"PRIu32"]\n",cfg->connections);
 }
 // End function parse_args
 
@@ -314,7 +314,7 @@ static void s_termination_handler (int signum)
         case SIGINT:
         case SIGHUP:
         case SIGTERM:
-            PDPRINT((stderr,"sig received[%d]\n",signum));
+            fprintf(stderr,"sig received[%d]\n",signum);
             g_interrupt=true;
             break;
         default:
@@ -343,11 +343,11 @@ static int s_app_main(msock_socket_t *s, app_cfg_t *cfg)
         // init connection address info
         for (i=0; i<(int)cfg->connections; i++) {
             connections[i]=msock_connection_new();
-            PDPRINT((stderr,"connections[%p] peer[%02d] peer@[%p]  ainfo[%p] ai_addr[%p]\n",connections,i,connections[i],connections[i]->addr->ainfo,connections[i]->addr->ainfo->ai_addr));
+            fprintf(stderr,"connections[%p] peer[%02d] peer@[%p]  ainfo[%p] ai_addr[%p]\n",connections,i,connections[i],connections[i]->addr->ainfo,connections[i]->addr->ainfo->ai_addr);
         }
         
         // bind to port
-        PDPRINT((stderr,"binding [%s] fd[%d]\n",cfg->host,s->fd));
+        fprintf(stderr,"binding [%s] fd[%d]\n",cfg->host,s->fd);
         int test=0;
         const int optionval = 1;
 #if !defined(__CYGWIN__)
@@ -359,7 +359,7 @@ static int s_app_main(msock_socket_t *s, app_cfg_t *cfg)
             retval=0;
             do{
                 // clear buffers
-                PDPRINT((stderr,"waiting to receive (%s)...\n",(cfg->blocking==0?"non-blocking":"blocking")));
+                fprintf(stderr,"waiting to receive (%s)...\n",(cfg->blocking==0?"non-blocking":"blocking"));
                 
                 // clear buffer
                 memset(buf,0,UDPS_BUF_LEN);
@@ -375,12 +375,12 @@ static int s_app_main(msock_socket_t *s, app_cfg_t *cfg)
                 
                 switch (iobytes) {
                     case 0:
-                        PDPRINT((stderr,"msock_recvfrom peer[%d] returned 0; peer socket closed\n",con_idx));
+                        fprintf(stderr,"msock_recvfrom peer[%d] returned 0; peer socket closed\n",con_idx);
                         retval=-1;
                         break;
                     case -1:
                         if (cfg->verbose) {
-                            PDPRINT((stderr,"msock_recvfrom peer[%d] returned -1 [%d/%s]\n",con_idx,errno,strerror(errno)));
+                            fprintf(stderr,"msock_recvfrom peer[%d] returned -1 [%d/%s]\n",con_idx,errno,strerror(errno));
                         }
                         sleep(UDPS_RCVERR_DELAY_SEC);
                         break;
@@ -400,22 +400,22 @@ static int s_app_main(msock_socket_t *s, app_cfg_t *cfg)
                                 int svc = port;
                                 snprintf(trn_peer->service,NI_MAXSERV,"%d",svc);
                                 
-                                PDPRINT((stderr,"%11.3f Received %d bytes from peer[%d] %s:%s\n",
-                                       tarrival,iobytes, con_idx, trn_peer->chost, trn_peer->service));
+                                fprintf(stderr,"%11.3f Received %d bytes from peer[%d] %s:%s\n",
+                                       tarrival,iobytes, con_idx, trn_peer->chost, trn_peer->service);
                                 
                                 // send reply data to requesting peer
                                 if ( (iobytes = msock_sendto(s, trn_peer->addr, buf, UDPS_BUF_LEN, 0 )) > 0) {
                                     
-                                    PDPRINT((stderr,"%11.3f Sent %d bytes to peer[%d] %s:%s\n",
-                                           mtime_dtime(),iobytes, con_idx, trn_peer->chost, trn_peer->service));
+                                    fprintf(stderr,"%11.3f Sent %d bytes to peer[%d] %s:%s\n",
+                                           mtime_dtime(),iobytes, con_idx, trn_peer->chost, trn_peer->service);
                                     
                                 }else{
-                                    PDPRINT((stderr,"send peer[%d] failed [%d]\n",i,iobytes));
+                                    fprintf(stderr,"send peer[%d] failed [%d]\n",i,iobytes);
                                 }
                                 
                             }else{
-                                PDPRINT((stderr,"inet_ntop (recv) failed peer[%d] [%d %s]\n",con_idx,errno,strerror(errno)));
-                                PDPRINT((stderr,"peer[%d] received %d bytes\n",con_idx,iobytes));
+                                fprintf(stderr,"inet_ntop (recv) failed peer[%d] [%d %s]\n",con_idx,errno,strerror(errno));
+                                fprintf(stderr,"peer[%d] received %d bytes\n",con_idx,iobytes);
                             }
                         }
                         
@@ -433,10 +433,10 @@ static int s_app_main(msock_socket_t *s, app_cfg_t *cfg)
                 // instead of req/res
                 //                for (i=0; i<=(con_idx-1); i++) {
                 //                    if ( (iobytes = msock_sendto(s, connections[i]->addr, buf, UDPS_BUF_LEN, 0 )) > 0) {
-                //                        PDPRINT((stderr,"%11.3f Sent %zd bytes to connection[%d] %s:%s\n",
+                //                        fprintf(stderr,"%11.3f Sent %zd bytes to connection[%d] %s:%s\n",
                 //                               mtime_dtime(),iobytes, i, connections[i]->chost, connections[i]->service));
                 //                    }else{
-                //                        PDPRINT((stderr,"send connection[%d] failed [%d]\n",i,iobytes));
+                //                        fprintf(stderr,"send connection[%d] failed [%d]\n",i,iobytes));
                 //                    }
                 //                }
                 
@@ -445,7 +445,7 @@ static int s_app_main(msock_socket_t *s, app_cfg_t *cfg)
                     delay.tv_sec = cfg->delay_msec/1000;
                     delay.tv_nsec = (cfg->delay_msec%1000)*1000000L;
                     while (nanosleep(&delay,&rem)<0) {
-                        PDPRINT((stderr,"sleep interrupted\n"));
+                        fprintf(stderr,"sleep interrupted\n");
                         delay.tv_sec=rem.tv_sec;
                         delay.tv_nsec=rem.tv_nsec;
                     }
@@ -453,7 +453,7 @@ static int s_app_main(msock_socket_t *s, app_cfg_t *cfg)
             }while ( (--cfg->cycles != 0) && !g_interrupt);
             
         }else{
-            PEPRINT((stderr,"bind failed [%d]\n",test));
+            fprintf(stderr,"bind failed [%d]\n",test);
         }
         
         // free connections
@@ -464,7 +464,7 @@ static int s_app_main(msock_socket_t *s, app_cfg_t *cfg)
         free(connections);
         
     }else{
-        PEPRINT((stderr,"ERR - invalid argument\n"));
+        fprintf(stderr,"ERR - invalid argument\n");
     }
     return retval;
 }
@@ -526,7 +526,7 @@ int main(int argc, char **argv)
     msock_socket_destroy(&s);
     free(cfg->host);
     
-    PDPRINT((stderr,"done\n\n"));
+    fprintf(stderr,"done\n\n");
     return retval;
 }
 // End function main
