@@ -44,7 +44,8 @@ OPT_MARGIN_L=""
 OPT_MARGIN_R=""
 OPT_MARGIN_T="--margin-top 20mm"
 OPT_MARGIN_B="--margin-bottom 20mm"
-
+TXT_ASSET_PATTERN="*txt"
+PDF_ASSET_PATTERN="*pdf"
 PANDOC=$(which pandoc)
 HTMLTOPDF=$(which wkhtmltopdf)
 GS=$(which gs)
@@ -78,11 +79,7 @@ printUsage(){
     echo "  -N    : test                    [${TEST}]"
     echo ""
     echo " Examples:"
-    echo "  ./mkdoc/mkdoc.sh -vi hw-checkout-guide/hw-checkout-guide.md  -a hw-checkout-guide/media"
-    echo "  ./mkdoc/mkdoc.sh -vi controller-help/controller-help.md"
-	echo "  ./mkdoc/mkdoc.sh -vi system-guide/system-guide.md  -a system-guide/examples -a system-guide/media"
-    echo "  # make all doc in single session directory"
-    echo "  ./mkdoc/mkdoc-release.sh"
+    echo "  src/mbtrn/tools/bin/mkdoc.sh -vi README-mbtrncfg.md"
     echo ""
     echo
 }
@@ -199,12 +196,16 @@ fi
 fi
 
 
+
 if [ -z "${MKDOC_OPATH}" ]
 then
 MKDOC_OPATH=${MKDOC_OPATH:-"cwgdoc-${MKDOC_SESSION}"}
 fi
 
-CMD_LINE=" pandoc ${OPT_STANDALONE}  -c ${STYLE}  ${IFILE} --metadata title=${TITLE} -o ${HTML_OPATH}/${OFILE}"
+OFNAME=${OFILE%%.*}
+XFNAME=${OFNAME}-xa
+
+CMD_LINE=" pandoc ${OPT_STANDALONE}  -c ${STYLE}  ${IFILE} --metadata title=${TITLE} -o ${HTML_OPATH}/${OFNAME}.html"
 
 vout ""
 vout " MKDOC_SESSION [${MKDOC_SESSION}]"
@@ -265,7 +266,7 @@ then
 	cp -R ${STYLE_PATH}/${STYLE} ${MKDOC_OPATH}/styles/${STYLE}
 
 	# generate HTML
-    ${PANDOC} ${OPT_STANDALONE} -c ${STYLE_PATH}/${STYLE}  ${IFILE} --metadata title="${TITLE}" -o ${HTML_OPATH}/${OFILE}
+    ${PANDOC} ${OPT_STANDALONE} -c ${STYLE_PATH}/${STYLE}  ${IFILE} --metadata title="${TITLE}" -o ${HTML_OPATH}/${OFNAME}.html
 
     # copy assets
     for asset in ${assets[@]}
@@ -293,7 +294,7 @@ then
         vout "processing asset[$asset]"
 
         # add PDF assets to array
-        for pdf_asset in $(find ${asset} -name *pdf)
+        for pdf_asset in $(find ${asset} -name ${PDF_ASSET_PATTERN})
         do
             vout "pdf asset[$pdf_asset]"
             if [ -f $pdf_asset ]
@@ -303,7 +304,7 @@ then
         done
 
         # convert scripts to HTML/PDF
-        for text_asset in $(find ${asset} -name *scr)
+        for text_asset in $(find ${asset} -name ${TXT_ASSET_PATTERN})
         do
             vout "text asset[$text_asset]"
             asset_bname=`basename ${text_asset}`
@@ -320,19 +321,15 @@ then
     vout "text_assets ${#text_assets} ${text_assets}"
 
     # generate output PDF
-    URL_PATH=$(cd "$(dirname ${HTML_OPATH}/${OFILE})" && pwd)
-    OFNAME=${OFILE%%.*}
+    URL_PATH=$(cd "$(dirname ${HTML_OPATH}/${OFNAME}.html)" && pwd)
 
-${HTMLTOPDF} -s Letter ${OPT_MARGIN_L} ${OPT_MARGIN_R} ${OPT_MARGIN_T} ${OPT_MARGIN_B} --enable-local-file-access  ${URL_PATH}/${OFILE}  ${PDF_OPATH}/${OFNAME}.pdf
+    ${HTMLTOPDF} -s Letter ${OPT_MARGIN_L} ${OPT_MARGIN_R} ${OPT_MARGIN_T} ${OPT_MARGIN_B} --enable-local-file-access  ${URL_PATH}/${OFNAME}.html  ${PDF_OPATH}/${XFNAME}.pdf
 
     # combine PDF media resources (include PDF and converted script assets)
-    ${GS} -sDEVICE=pdfwrite -dNOPAUSE -dBATCH -dSAFER -sOutputFile=${PDF_OPATH}/${OFNAME}-sa.pdf ${PDF_OPATH}/${OFNAME}.pdf ${pdf_assets[*]} $(ls ${MKDOC_TMP}/*pdf)
+    ${GS} -sDEVICE=pdfwrite -dNOPAUSE -dBATCH -dSAFER -sOutputFile=${PDF_OPATH}/${OFNAME}.pdf ${PDF_OPATH}/${XFNAME}.pdf ${pdf_assets[*]} $(ls ${MKDOC_TMP}/*pdf)
 
-#    ${GS} -sDEVICE=pdfwrite -dNOPAUSE -dBATCH -dSAFER ${MKDOC_OPATH}/${OFNAME}.pdf ${pdf_assets[*]} $(ls ${MKDOC_TMP}/*pdf)
-
-    # remove temp directory
+    # remove production products
     rm -rf ${MKDOC_TMP}
-    rm -rf ${PDF_OPATH}/${OFNAME}.pdf
-
+    rm -rf ${PDF_OPATH}/${XFNAME}.pdf
 fi
 
