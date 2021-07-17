@@ -204,7 +204,7 @@ then
 MKDOC_OPATH=${MKDOC_OPATH:-"cwgdoc-${MKDOC_SESSION}"}
 fi
 
-CMD_LINE=" pandoc ${OPT_STANDALONE}  -c ${STYLE}  ${IFILE} --metadata title=${TITLE} -o ${MKDOC_OPATH}/${OFILE}"
+CMD_LINE=" pandoc ${OPT_STANDALONE}  -c ${STYLE}  ${IFILE} --metadata title=${TITLE} -o ${HTML_OPATH}/${OFILE}"
 
 vout ""
 vout " MKDOC_SESSION [${MKDOC_SESSION}]"
@@ -254,12 +254,18 @@ then
         fi
     fi
 
+	# make subdirs for html, pdf output
+    HTML_OPATH=${MKDOC_OPATH}/html
+    PDF_OPATH=${MKDOC_OPATH}/pdf
+    mkdir -p ${PDF_OPATH}
+    mkdir -p ${HTML_OPATH}
+
 	# translate style path to styles in output dir
 	mkdir ${MKDOC_OPATH}/styles
 	cp -R ${STYLE_PATH}/${STYLE} ${MKDOC_OPATH}/styles/${STYLE}
 
 	# generate HTML
-    ${PANDOC} ${OPT_STANDALONE} -c styles/${STYLE}  ${IFILE} --metadata title="${TITLE}" -o ${MKDOC_OPATH}/${OFILE}
+    ${PANDOC} ${OPT_STANDALONE} -c ${STYLE_PATH}/${STYLE}  ${IFILE} --metadata title="${TITLE}" -o ${HTML_OPATH}/${OFILE}
 
     # copy assets
     for asset in ${assets[@]}
@@ -314,18 +320,19 @@ then
     vout "text_assets ${#text_assets} ${text_assets}"
 
     # generate output PDF
-    URL_PATH=$(cd "$(dirname ${MKDOC_OPATH}/${OFILE})" && pwd)
+    URL_PATH=$(cd "$(dirname ${HTML_OPATH}/${OFILE})" && pwd)
     OFNAME=${OFILE%%.*}
 
-${HTMLTOPDF} -s Letter ${OPT_MARGIN_L} ${OPT_MARGIN_R} ${OPT_MARGIN_T} ${OPT_MARGIN_B} --enable-local-file-access  ${URL_PATH}/${OFILE}  ${MKDOC_OPATH}/${OFNAME}.pdf
+${HTMLTOPDF} -s Letter ${OPT_MARGIN_L} ${OPT_MARGIN_R} ${OPT_MARGIN_T} ${OPT_MARGIN_B} --enable-local-file-access  ${URL_PATH}/${OFILE}  ${PDF_OPATH}/${OFNAME}.pdf
 
     # combine PDF media resources (include PDF and converted script assets)
-#    ${GS} -sDEVICE=pdfwrite -dNOPAUSE -dBATCH -dSAFER -sOutputFile=${MKDOC_OPATH}/${OFNAME}-sa.pdf ${MKDOC_OPATH}/${OFNAME}.pdf ${pdf_assets[*]} $(ls ${MKDOC_TMP}/*pdf)
+    ${GS} -sDEVICE=pdfwrite -dNOPAUSE -dBATCH -dSAFER -sOutputFile=${PDF_OPATH}/${OFNAME}-sa.pdf ${PDF_OPATH}/${OFNAME}.pdf ${pdf_assets[*]} $(ls ${MKDOC_TMP}/*pdf)
 
-    ${GS} -sDEVICE=pdfwrite -dNOPAUSE -dBATCH -dSAFER ${MKDOC_OPATH}/${OFNAME}.pdf ${pdf_assets[*]} $(ls ${MKDOC_TMP}/*pdf)
+#    ${GS} -sDEVICE=pdfwrite -dNOPAUSE -dBATCH -dSAFER ${MKDOC_OPATH}/${OFNAME}.pdf ${pdf_assets[*]} $(ls ${MKDOC_TMP}/*pdf)
 
     # remove temp directory
     rm -rf ${MKDOC_TMP}
+    rm -rf ${PDF_OPATH}/${OFNAME}.pdf
 
 fi
 
