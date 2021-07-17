@@ -19,6 +19,7 @@ description="Generate mbtrn tools doc package"
 # set package name (used to name output directory)
 PKG_NAME="mbtrn"
 VERBOSE="N"
+TARGZ="N"
 # set session ID and other common environment used by all doc
 export MKDOC_SESSION=${PKG_REL_DATE:-$(date +%y%m%d-%H%M%S)}
 MKDOC_HOME_DFL=$(cd "$(dirname ${0})" && pwd)
@@ -58,6 +59,7 @@ printUsage(){
     echo " usage: `basename $0` [options]"
     echo " Options:"
     echo "  -h    : print use message"
+    echo "  -t    : create tar.gz   [${TGZ}]"
     echo "  -v    : verbose output  [${VERBOSE}]"
     echo ""
     echo " Examples:"
@@ -78,12 +80,14 @@ processCmdLine(){
     OPTIND=1
     vout "`basename $0` all args[$*]"
 
-while getopts hv Option
+while getopts htv Option
     do
         vout "processing $Option[$OPTARG]"
         case $Option in
             h) printUsage
                 exit 0
+            ;;
+            t) TGZ="Y"
             ;;
             v) VERBOSE="Y"
             ;;
@@ -102,6 +106,8 @@ then
 vout " env:"
 env|grep -e MKDOC -e PKG_
 fi
+
+ORIG_PWD=`pwd`
 
 # generate doc sets
 # see mkdoc.sh for use notes (e.g. style selection, PDF/text assets)
@@ -146,6 +152,12 @@ cd ${MKDOC_OPATH}
 ${PANDOC} -s -c styles/radar.css  ${CONTENTS_NAME}.md --metadata title="Documentation Package Contents" -o ${CONTENTS_NAME}.html
 ${HTMLTOPDF} -s Letter --margin-bottom 25mm --margin-top 25mm --margin-left 20mm --margin-right 20mm --enable-local-file-access ${CONTENTS_NAME}.html ${CONTENTS_NAME}.pdf
 rm ${CONTENTS_NAME}.html
+
+if [ "${TGZ}" == "Y" ]
+then
+cd ${ORIG_PWD}
+DISABLE_COPYFILE=1 tar czvf ${MKDOC_OPATH}.tar.gz ${MKDOC_OPATH}
+fi
 
 fi
 
