@@ -107,7 +107,7 @@ LIB_PATHS = -L/usr/local/lib -L$(OUTPUT_DIR) -L$(MFRAME_LIB_DIR) $(OS_LIB_PATH)
 LIBTRNW=libtrnw.a
 LIBTRNW_SRC=trnw.cpp
 LIBTRNW_OBJ=$(LIBTRNW_SRC:%.cpp=$(BUILD_DIR)/%.o)
-LIBTRNW_LIBS = -ltrn -lqnx -lnewmat -lmframe -lpthread
+LIBTRNW_LIBS = -ltrn -lqnx -lnewmat -lpthread
 TNAV_OBJ=$(BUILD_DIR)/TerrainNav.o \
 $(BUILD_DIR)/PositionLog.o \
 $(BUILD_DIR)/TerrainNavLog.o \
@@ -190,11 +190,12 @@ $(OUTPUT_DIR)/$(MMCPUB) $(OUTPUT_DIR)/$(MMCSUB) $(OUTPUT_DIR)/$(MCPUB) $(OUTPUT_
 
 ########################################
 # Build Files (mostly for cleanup)
-SOURCES =  $(TRNC_SRC)
-
-CPP_SOURCES = $(LIBTRNW_SRC)
-OBJECTS = $(SOURCES:%.c=$(BUILD_DIR)/%.o) $(CPP_SOURCES:%.cpp=$(BUILD_DIR)/%.o)
-DEPENDS = $(SOURCES:%.c=$(BUILD_DIR)/%.d)
+TRNC_SOURCES =  $(TRNC_SRC)
+TRNW_SOURCES =  $(LIBTRNW_SRC)
+TRNC_OBJECTS = $(TRNC_SOURCES:%.c=$(BUILD_DIR)/%.o)
+TRNW_OBJECTS = $(TRNW_SOURCES:%.cpp=$(BUILD_DIR)/%.o)
+TRNC_DEPENDS = $(TRNC_SOURCES:%.c=$(BUILD_DIR)/%.d)
+TRNW_DEPENDS = $(TRNW_SOURCES:%.cpp=$(BUILD_DIR)/%.d)
 BINARIES =  $(OUTPUT_DIR)/$(LIBTRNW) $(TRNC_TARGETS)
 
 CLEANUP = gmon.out
@@ -271,9 +272,17 @@ $(OUTPUT_DIR)/$(MMCSUB): $(MMCSUB_OBJ)
 	@echo
 
 # include the dependencies
-ifneq ($(MAKECMDGOALS),purge)
+ifeq ($(MAKECMDGOALS),trnc)
+-include $(TRNC_DEPENDS)
+endif
+ifeq ($(MAKECMDGOALS),all)
+-include $(TRNW_DEPENDS)
+endif
+ifneq ($(MAKECMDGOALS),trnc)
 ifneq ($(MAKECMDGOALS),clean)
--include $(DEPENDS)
+ifneq ($(MAKECMDGOALS),purge)
+-include $(TRNW_DEPENDS)
+endif
 endif
 endif
 
@@ -297,6 +306,14 @@ $(BUILD_DIR)/%.d :%.c
 	| awk '/o:/ {printf "%s", "$@ $(BUILD_DIR)/"} {print}' > $@; \
 	[ -s $@ ] || rm -f $@
 	@echo
+$(BUILD_DIR)/%.d :%.cpp
+	@[ -d $(BUILD_DIR) ] || mkdir -p $(BUILD_DIR)
+	@[ -d $(OUTPUT_DIR) ] || mkdir -p $(OUTPUT_DIR)
+	@echo generating dependency file for $<
+	@set -e; $(CXX) -MM $(CFLAGS) $(INC_PATHS) $< \
+	| awk '/o:/ {printf "%s", "$@ $(BUILD_DIR)/"} {print}' > $@; \
+	[ -s $@ ] || rm -f $@
+	@echo
 
 
 install:
@@ -312,18 +329,10 @@ install:
 
 # clean : delete object, dependency, binary files
 clean:
-	rm -f $(OBJECTS) $(DEPENDS) $(BINARIES)
+	rm -f $(TRNW_OBJECTS) $(TRNW_DEPENDS) $(TRNC_OBJECTS) $(TRNC_DEPENDS) $(BINARIES)
 	$(RM_DSYMS)
 
 # purge : delete delete object, dependency, binary files, build directories
 purge:
-	rm -f $(BINARIES) $(OBJECTS) $(DEPENDS) $(CLEANUP)
+	rm -f $(BINARIES) $(TRNW_OBJECTS) $(TRNW_DEPENDS) (TRNC_OBJECTS) $(TRNC_DEPENDS) $(CLEANUP)
 	rm -rf $(OUTPUT_DIR) $(BUILD_DIR) $(DSYMS)
-
-# include the dependencies
-ifneq ($(MAKECMDGOALS),purge)
-ifneq ($(MAKECMDGOALS),clean)
--include $(DEPENDS)
-endif
-endif
-

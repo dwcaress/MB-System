@@ -70,12 +70,12 @@ trnuctx-20200905-162653-560bc2a09330-0000.log
 
 Each time one of the scripts is run, it generates:  
 
-|  |  |
-|---|---|  
-|       jobs directory|contains plots, intermediate CSV data, and images|
+|                     |                           |
+|---------------------|---------------------------|  
+|       jobs directory|plot session subdirectories|
 |  plot-data directory|intermediate data|
-|plot-output directory|job directories|
-|     job subdirectory|plots and images (so it is not overwritten)|
+|plot-output directory|intermediate output|
+|     job subdirectory|plot data, images and PDF|
 |       CSV data files|for each plot parameter|
 |          plot images|PNG format|
 |        PDF plot file|combining all plots|

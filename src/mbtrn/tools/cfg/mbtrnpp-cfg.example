@@ -254,3 +254,11 @@ reinit-xyoffset=150.0
 // reinitialize TRN whenever the converged z-offset
 // is is outside specified range.
 reinit-zoffset=-2.0/2.0
+
+// opt "convergence-repeat-min" [double]
+// number of consecutive converged pings required for validation
+//convergence-repeat-min=200
+
+// opt "covariance-magnitude-max" [double]
+// maximum covariance magnitude required for validation
+//covariance-magnitude-max=5

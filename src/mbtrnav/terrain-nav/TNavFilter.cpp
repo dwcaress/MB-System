@@ -236,7 +236,6 @@ increaseInitSearchWin(double* windowVarIncrement) {
 void
 TNavFilter::
 initVariables() {
-   setDistribToSave(SAVE_PARTICLES);
 	vehicle->displayVehicleInfo();
 	lastNavPose = NULL;
 	interpMeasAttitude = false;
@@ -255,6 +254,9 @@ initVariables() {
 
 	//initialize distribution type to Uniform
 	initDistribType = 0;
+
+        //initialize the type of distrib file to save
+        setDistribToSave(SAVE_PARTICLES);
 
 #ifdef USE_MATLAB
 	//start Matlab engine
