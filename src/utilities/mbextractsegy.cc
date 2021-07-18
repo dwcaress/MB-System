@@ -1387,10 +1387,10 @@ int main(int argc, char **argv) {
           fprintf(sfp, "%s", command);
 
           sprintf(command,
-                  "mbm_grdplot -I %s_%4.4d_%2.2d_section.grd \\\n\t%s -Z%s \\\n\t-Ba250/a0.05g0.05 -G1 -W1/4 -D -V "
-                  "\\\n\t-O %s_%4.4d_%2.2d_sectionplot \\\n\t-L\"%s Line %d Plot %d of %d\"\n",
-                  lineroot, linenumber, i + 1, scale, zbounds, lineroot, linenumber, i + 1, lineroot, linenumber, i + 1,
-                  nplot);
+                  "mbm_grdplot -I %s_%4.4d_%2.2d_section.grd \\\n\t%s -MGO2/2 -Z%s \\\n\t-Ba250/a0.05g0.05 -G1 "
+                  "-W1/4 -D -V \\\n\t-O %s_%4.4d_%2.2d_sectionplot \\\n\t-L\"%s Line %d Plot %d of %d\"\\\n\t-MIE300 -MITg\n",
+                  lineroot, linenumber, i + 1, scale, zbounds, lineroot, linenumber, i + 1, lineroot,
+                  linenumber, i + 1, nplot);
           fprintf(stderr, "%s", command);
           fprintf(sfp, "%s", command);
 
@@ -1398,10 +1398,6 @@ int main(int argc, char **argv) {
           fprintf(stderr, "%s", command);
           fprintf(sfp, "%s", command);
 
-          sprintf(command, "gmt psconvert %s_%4.4d_%2.2d_sectionplot.ps -Tj -A -E300 -P\n\n",
-              lineroot, linenumber, i + 1);
-          fprintf(stderr, "%s", command);
-          fprintf(sfp, "%s", command);
           fflush(sfp);
         }
 
