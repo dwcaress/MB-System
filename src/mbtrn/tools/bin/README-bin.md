@@ -64,3 +64,62 @@ While not strictly required, using the wrapper script ensures that mbtrnpp is re
   TRN_MBTRNDIR   - mbtrnpp directory       [mbtrnpp path]
 
 ```
+
+## mdoc-release.sh, mkdoc.sh
+
+mkdoc-release.sh is a shell script that generates a PDF and HTML document package from the mbtrn/tools README files.
+mkdoc-release.sh creates a (timestamped) output directory for each session.
+
+mkdoc-release.sh uses the mkdoc.sh script, which converts markdown (and text/PDF assets) to html and PDF using pandoc, ghostscript.  
+
+Generally, users just call mkdoc-release.sh; it is not necessary to call mkdoc.sh directly.
+
+### Features
+
+* Generates CONTENTS doc 
+* markdown may include PDF and text file assets
+* Multiple styles available
+
+### Dependencies
+* wkhtmltopdf
+* ghostscript
+* pandoc
+
+__mkdoc-release.sh__
+```
+Description: Generate mbtrn tools doc package
+
+usage: mkdoc-release.sh [options]
+Options:
+-h    : print use message
+-v    : verbose output  [N]
+
+Examples:
+src/mbtrn/tools/bin/mkdoc-release.sh -v
+
+```
+__mkdoc.sh__
+```
+Description: Convert markdown to HTML, PDF using pandoc
+
+usage: mkdoc.sh [options]
+Options:
+-h    : print use message
+-a p  : asset (file or directory)
+may include more than once
+-i f  : input file              []
+-o f  : output file             []
+-s s  : style                   [radar]
+options                [ foghorn  ghostwriter  github  markdown  new-modern  radar  vostok ]
+-S p  : style path              [/Volumes/linux-share/git/mbsys-trn/MB-System/src/mbtrn/tools/bin/../doc/styles]
+-t s  : title                   []
+-L m  : left margin   e.g. 20mm []
+-R m  : right margin  e.g. 20mm []
+-T m  : top margin    e.g. 20mm [20mm]
+-B m  : bottom margin e.g. 20mm [20mm]
+-N    : test                    [N]
+
+Examples:
+ src/mbtrn/tools/bin/mkdoc.sh -vi README-mbtrncfg.md
+```
+

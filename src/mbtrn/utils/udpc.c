@@ -176,8 +176,8 @@ static bool g_interrupt=false;
 /// @return none
 static void s_show_help()
 {
-    char help_message[] = "\nUDP server\n";
-    char usage_message[] = "\nudps [options]\n"
+    char help_message[] = "\nUDP client\n";
+    char usage_message[] = "\nudpc [options]\n"
     "--verbose  : verbose output\n"
     "--help     : output help message\n"
     "--version  : output version info\n"
@@ -267,11 +267,11 @@ void parse_args(int argc, char **argv, app_cfg_t *cfg)
             exit(0);
         }
     }// while
-    PDPRINT((stderr,"verbose [%s]\n",(cfg->verbose?"Y":"N")));
-    PDPRINT((stderr,"host    [%s]\n",cfg->host));
-    PDPRINT((stderr,"port    [%d]\n",cfg->port));
-    PDPRINT((stderr,"block   [%s]\n",(cfg->blocking==0?"N":"Y")));
-    PDPRINT((stderr,"cycles  [%d]\n",cfg->cycles));
+    fprintf(stderr,"verbose [%s]\n",(cfg->verbose?"Y":"N"));
+    fprintf(stderr,"host    [%s]\n",cfg->host);
+    fprintf(stderr,"port    [%d]\n",cfg->port);
+    fprintf(stderr,"block   [%s]\n",(cfg->blocking==0?"N":"Y"));
+    fprintf(stderr,"cycles  [%d]\n",cfg->cycles);
 }
 // End function parse_args
 
@@ -285,7 +285,7 @@ static void s_termination_handler (int signum)
         case SIGINT:
         case SIGHUP:
         case SIGTERM:
-            PDPRINT((stderr,"sig received[%d]\n",signum));
+            fprintf(stderr,"sig received[%d]\n",signum);
             g_interrupt=true;
             break;
         default:
@@ -309,24 +309,24 @@ static int s_app_main(msock_socket_t *s, app_cfg_t *cfg)
         byte buf[UDPC_BUF_LEN]={0};
         int cycles=cfg->cycles;
         
-        PDPRINT((stderr,"connect [%s:%d]\n",cfg->host,cfg->port));
+        fprintf(stderr,"connect [%s:%d]\n",cfg->host,cfg->port);
         if ( (test=msock_connect(s))==0) {
             bool done=false;
             do{
                 if( (test=msock_sendto(s,NULL,(byte *)"REQ",4,0))>0){
-                    PDPRINT((stderr,"sendto OK [%d]\n",test));
+                    fprintf(stderr,"sendto OK [%d]\n",test);
                     retval=0;
                     memset(buf,0,128);
                     
-                    PDPRINT((stderr,"fd[%d] waiting for server (%s)...\n",s->fd,(cfg->blocking==0?"non-blocking":"blocking")));
+                    fprintf(stderr,"fd[%d] waiting for server (%s)...\n",s->fd,(cfg->blocking==0?"non-blocking":"blocking"));
                     test = msock_recvfrom(s, NULL, buf, UDPC_BUF_LEN,0);
                     switch (test) {
                         case 0:
-                            PDPRINT((stderr,"msock_recvfrom returned 0; peer socket closed\n"));
+                            fprintf(stderr,"msock_recvfrom returned 0; peer socket closed\n");
                             retval=-1;
                             break;
                         case -1:
-                            PDPRINT((stderr,"msock_recvfrom returned -1 [%d/%s]\n",errno,strerror(errno)));
+                            fprintf(stderr,"msock_recvfrom returned -1 [%d/%s]\n",errno,strerror(errno));
                             
                             switch (errno) {
                                 case ENOTCONN:
@@ -337,13 +337,13 @@ static int s_app_main(msock_socket_t *s, app_cfg_t *cfg)
                                     break;
                                     
                                 default:
-                                    PDPRINT((stderr,"msock_recvfrom error [%d/%s]\n",errno,strerror(errno)));
+                                    fprintf(stderr,"msock_recvfrom error [%d/%s]\n",errno,strerror(errno));
                                     break;
                             }
                             break;
                             
                         default:
-                            PDPRINT((stderr,"fd[%d] received %d bytes\n",s->fd,test));
+                            fprintf(stderr,"fd[%d] received %d bytes\n",s->fd,test);
                             break;
                     }
                     // check cycles or wait
@@ -355,11 +355,11 @@ static int s_app_main(msock_socket_t *s, app_cfg_t *cfg)
                 }
             }while( !done && !g_interrupt);
         }else{
-            PEPRINT((stderr,"connect failed [%d]\n",test));
+            fprintf(stderr,"connect failed [%d]\n",test);
         }
         
     }else{
-        PEPRINT((stderr,"ERR - invalid argument\n"));
+        fprintf(stderr,"ERR - invalid argument\n");
     }
     
     return retval;
@@ -413,7 +413,7 @@ int main(int argc, char **argv)
     // release resources
     free(cfg->host);
     msock_socket_destroy(&s);
-    PDPRINT((stderr,"done\n\n"));
+    fprintf(stderr,"done\n\n");
     return retval;
 }
 // End function main
