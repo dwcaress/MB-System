@@ -489,7 +489,6 @@ int mbr_sb2100rw_rd_pr(int verbose, FILE *mbfp, struct mbf_sb2100rw_struct *data
 int mbr_sb2100rw_rd_tr(int verbose, FILE *mbfp, struct mbf_sb2100rw_struct *data, int *error) {
 	int status = MB_SUCCESS;
 	char line[MBF_SB2100RW_MAXLINE];
-	int nchars;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -504,8 +503,8 @@ int mbr_sb2100rw_rd_tr(int verbose, FILE *mbfp, struct mbf_sb2100rw_struct *data
 
 	/* copy comment into data structure */
 	if (status == MB_SUCCESS) {
-		nchars = strlen(line);
-		strncpy(data->comment, line, nchars - 1);
+    memset(data->comment, 0, MBF_SB2100RW_MAXLINE);
+		strncpy(data->comment, line, MBF_SB2100RW_MAXLINE - 1);
 	}
 
 	if (verbose >= 5) {

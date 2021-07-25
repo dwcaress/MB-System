@@ -180,7 +180,7 @@ void BinaryFile::get(CharData *charData)
       throw Exception(errorBuf);
     }
   }
-  else 
+  else
     charData->setValue(value);
 }
 
@@ -200,7 +200,7 @@ void BinaryFile::get(ShortData *shortData)
       throw Exception(errorBuf);
     }
   }
-  else 
+  else
     shortData->setValue(value);
 }
 
@@ -219,7 +219,7 @@ void BinaryFile::get(IntegerData *integerData)
       throw Exception(errorBuf);
     }
   }
-  else 
+  else
     integerData->setValue(value);
 }
 
@@ -267,7 +267,7 @@ void BinaryFile::get(StringData *stringData)
 {
   char errorBuf[MAX_EXC_STRING_LEN];
 
-  // Right now we have a hard-wired upper bound to the length of 
+  // Right now we have a hard-wired upper bound to the length of
   // the string!!!
   char string[100];
   size_t nCopiedBytes = 0;
@@ -308,4 +308,3 @@ void BinaryFile::endRecord()
 //  fflush(_file);
   return;
 }
-

@@ -1126,20 +1126,8 @@ int mb_platform_write(int verbose, char *platform_file, void *platform_ptr, int 
     /* open and write platform file */
     FILE *fp = fopen(platform_file, "w");
     if (fp != NULL) {
-      const time_t right_now = time((time_t *)0);
-      char date[32];
-      strcpy(date, ctime(&right_now));
-      date[strlen(date) - 1] = '\0';
-      char user[MB_PATH_MAXLINE];
-      char *user_ptr = getenv("USER");
-      if (user_ptr == NULL)
-        user_ptr = getenv("LOGNAME");
-      if (user_ptr != NULL)
-        strcpy(user, user_ptr);
-      else
-        strcpy(user, "unknown");
-      char host[MB_PATH_MAXLINE];
-      gethostname(host, MB_PATH_MAXLINE);
+      char user[256], host[256], date[32];
+      status = mb_user_host_date(verbose, user, host, date, error);
       fprintf(fp, "## MB-System Platform Definition File\n");
       fprintf(fp, "MB-SYSTEM_VERSION        %s\n", MB_VERSION);
       fprintf(fp, "FILE_VERSION             1.00\n");

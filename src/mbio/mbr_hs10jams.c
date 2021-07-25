@@ -317,10 +317,9 @@ int mbr_rt_hs10jams(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	if (status == MB_SUCCESS && store != NULL) {
 		/* deal with comment */
 		if (line[0] == '#') {
-			for (int i = 0; i < MBSYS_HS10_COMMENT; i++)
-				store->comment[i] = '\0';
+      memset(store->comment, 0, MBSYS_HS10_COMMENT);
+      strncpy(store->comment, &line[2], MBSYS_HS10_COMMENT - 1);
 			store->kind = MB_DATA_COMMENT;
-			strncpy(store->comment, &line[2], MIN(MBSYS_HS10_COMMENT, strlen(&line[2]) - 2));
 		}
 
 		/* deal with survey ping */

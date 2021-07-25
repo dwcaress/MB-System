@@ -4121,8 +4121,6 @@ int mbtrnpp_openlog(int verbose, mb_path log_directory, FILE **logfp, int *error
   struct timezone timezone;
   double time_d;
   int time_i[7];
-  char date[32], user[128], *user_ptr;
-  mb_path host;
   mb_path log_file;
   char log_message[LOG_MSG_BUF_SZ]={0};
 
@@ -4142,18 +4140,13 @@ int mbtrnpp_openlog(int verbose, mb_path log_directory, FILE **logfp, int *error
   }
 
   /* get time and user data */
+  char user[256], host[256], date[32];
+  status = mb_user_host_date(verbose, user, host, date, error);
   gettimeofday(&timeofday, &timezone);
   time_d = timeofday.tv_sec + 0.000001 * timeofday.tv_usec;
   status = mb_get_date(verbose, time_d, time_i);
   sprintf(date, "%4.4d%2.2d%2.2d_%2.2d%2.2d%2.2d%6.6d", time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5],
           time_i[6]);
-  if ((user_ptr = getenv("USER")) == NULL)
-    user_ptr = getenv("LOGNAME");
-  if (user_ptr != NULL)
-    strcpy(user, user_ptr);
-  else
-    strcpy(user, "unknown");
-  gethostname(host, sizeof(mb_path));
 
   /* open new log file */
   sprintf(log_file, "%s/%s_mbtrnpp_log.txt", log_directory, date);

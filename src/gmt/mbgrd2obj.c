@@ -326,22 +326,9 @@ int GMT_mbgrd2obj(void *V_API, int mode, void *args) {
 	}
 
 	/* Output user information */
-
-	const time_t right_now = time((time_t *)0);
-	char date[32];
-	strcpy(date, ctime(&right_now));
-	date[strlen(date) - 1] = '\0';
-	char *user_ptr = getenv("USER");
-	if (user_ptr == NULL)
-		user_ptr = getenv("LOGNAME");
-	char user[MB_PATH_MAXLINE] = "";
-	if (user_ptr != NULL)
-		strcpy(user, user_ptr);
-	else
-		strcpy(user, "unknown");
-	char host[MB_PATH_MAXLINE] = "";
-	gethostname(host, MB_PATH_MAXLINE);
-
+  char user[256], host[256], date[32];
+  const int verbose = 0;
+  int status = mb_user_host_date(verbose, user, host, date, &error);
 	fprintf(fp, "# OBJ format 3D model file\n");
 	fprintf(fp, "# This file created by mbgrd2obs\n");
 	fprintf(fp, "# MB-System Version %s\n", MB_VERSION);

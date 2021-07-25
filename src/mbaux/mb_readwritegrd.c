@@ -490,28 +490,9 @@ int mb_write_gmt_grd(int verbose, const char *grdfile, float *grid,
     strncpy(program_name, argv[0], MB_PATH_MAXLINE);
   else
     strcpy(program_name, "");
-  const time_t right_now = time((time_t *)0);
-  char date[32];
-  strcpy(date, ctime(&right_now));
-  date[strlen(date) - 1] = '\0';
-  char user[MB_PATH_MAXLINE];
-  char *user_ptr = getenv("USER");
-  if (user_ptr == NULL)
-    if ((user_ptr = getenv("LOGNAME")) == NULL)
-      user_ptr = getenv("USERNAME");
-  if (user_ptr != NULL)
-    strcpy(user, user_ptr);
-  else
-    strcpy(user, "unknown");
-  char host[MB_PATH_MAXLINE] = {""};
-  gethostname(host, MB_PATH_MAXLINE);
-  if (host[0] == '\0') /* Don't know why but the above fails on Win. So get the same info from ENV */
-  {
-    const char *host_ptr = getenv("USERDOMAIN");
-    if (host_ptr != NULL)
-      strcpy(host, host_ptr);
-  }
-  mb_path remark = "";
+  char user[256], host[256], date[32];
+  status = mb_user_host_date(verbose, user, host, date, error);
+  mb_path remark = {0};
   sprintf(remark, "\n\tProjection: %s\n\tGrid created by %s\n\tMB-system Version %s\n\tRun by <%s> on <%s> at <%s>", projection,
           program_name, MB_VERSION, user, host, date);
 

@@ -212,8 +212,12 @@ int mbr_rt_sburivax(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	if (status == MB_SUCCESS && mb_io_ptr->irecord_count >= 5) {
 		mb_io_ptr->irecord_count = 0;
 		short dummy;
-		fread(&dummy, 1, sizeof(short), mb_io_ptr->mbfp);
-		mb_io_ptr->file_bytes += sizeof(short);
+		if (fread(&dummy, 1, sizeof(short), mb_io_ptr->mbfp) == sizeof(short))
+		    mb_io_ptr->file_bytes += sizeof(short);
+    else {
+		  status = MB_FAILURE;
+		  *error = MB_ERROR_EOF;
+    }
 	}
 
 /* byte swap the data if necessary */
@@ -296,7 +300,7 @@ int mbr_rt_sburivax(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		store->minor = data->minor;
 
 		/* comment */
-		strncpy(store->comment, &datacomment[2], MBSYS_SB_MAXLINE);
+		strncpy(store->comment, &datacomment[2], mb_io_ptr->data_structure_size - 3);
 	}
 
 	if (verbose >= 2) {

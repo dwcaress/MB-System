@@ -29,6 +29,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
+#include <unistd.h>
 
 #include "mb_define.h"
 #include "mb_status.h"
@@ -67,6 +69,51 @@ int mb_version(int verbose, char *version_string, int *version_id, int *version_
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
+    fprintf(stderr, "dbg2       error:      %d\n", *error);
+    fprintf(stderr, "dbg2  Return status:\n");
+    fprintf(stderr, "dbg2       status:     %d\n", status);
+  }
+
+  return (status);
+}
+/*--------------------------------------------------------------------*/
+int mb_user_host_date(int verbose, char user[256], char host[256], char date[32],
+               int *error) {
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+    fprintf(stderr, "dbg2  Input arguments:\n");
+    fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+  }
+
+  memset(user, 0, 256);
+  char *user_ptr = NULL;
+  char *unknown = "Unknown";
+	if ((user_ptr = getenv("USER")) == NULL)
+		if ((user_ptr = getenv("LOGNAME")) == NULL)
+      user_ptr = unknown;
+	strncpy(user, user_ptr, 255);
+
+  memset(host, 0, 256);
+	gethostname(host, 255);
+  if (host[0] == '\0') { // Don't know why but gethostname() fails on Windows, so get the same info from ENV
+    const char *host_ptr = getenv("USERDOMAIN");
+    if (host_ptr != NULL)
+      strncpy(host, host_ptr, 255);
+  }
+
+  memset(date, 0, 32);
+	time_t right_now = time((time_t *)0);
+	strncpy(date, ctime(&right_now), 31);
+  date[strlen(date) - 1] = '\0'; // trim line return
+
+  const int status = MB_SUCCESS;
+
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
+    fprintf(stderr, "dbg2  Return values:\n");
+    fprintf(stderr, "dbg2       user:       %s\n", user);
+    fprintf(stderr, "dbg2       host:       %s\n", host);
+    fprintf(stderr, "dbg2       date:       %s\n", date);
     fprintf(stderr, "dbg2       error:      %d\n", *error);
     fprintf(stderr, "dbg2  Return status:\n");
     fprintf(stderr, "dbg2       status:     %d\n", status);

@@ -2469,7 +2469,7 @@ int mbr_kemkmall_rd_mwc(int verbose, char *buffer, void *store_ptr, void *header
 
         if (status == MB_SUCCESS && verbose >= 5) {
           fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
-          fprintf(stderr, "dbg5       #MWC receiver beam data %              d/%d:\n", i, mwc->rxInfo.numBeams);
+          fprintf(stderr, "dbg5       #MWC receiver beam data          %d/%d:\n", i, mwc->rxInfo.numBeams);
           fprintf(stderr, "dbg5       beamPointAngReVertical_deg:            %f\n", mwc->beamData_p[i].beamPointAngReVertical_deg);
           fprintf(stderr, "dbg5       startRangeSampleNum:                   %d\n", mwc->beamData_p[i].startRangeSampleNum);
           fprintf(stderr, "dbg5       detectedRangeInSamples:                %d\n", mwc->beamData_p[i].detectedRangeInSamples);
