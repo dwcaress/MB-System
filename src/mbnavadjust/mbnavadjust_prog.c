@@ -11522,15 +11522,8 @@ int mbnavadjust_updategrid() {
             fprintf(stderr, "%s", message);
 
           /* write file header */
-          right_now = time((time_t *)0);
-          strcpy(date, ctime(&right_now));
-          date[strlen(date) - 1] = '\0';
-          if ((user_ptr = getenv("USER")) == NULL)
-            user_ptr = getenv("LOGNAME");
-          if (user_ptr != NULL)
-            strcpy(user, user_ptr);
-          else
-            strcpy(user, "unknown");
+          char user[256], host[256], date[32];
+          status = mb_user_host_date(mbna_verbose, user, host, date, &error);
           gethostname(host, MBP_FILENAMESIZE);
           sprintf(ostring, "# Adjusted navigation generated using MBnavadjust\n");
           fprintf(afp, "%s", ostring);
@@ -11771,16 +11764,8 @@ int mbnavadjust_applynav() {
           fprintf(stderr, "%s", message);
 
         /* write file header */
-        right_now = time((time_t *)0);
-        strcpy(date, ctime(&right_now));
-        date[strlen(date) - 1] = '\0';
-        if ((user_ptr = getenv("USER")) == NULL)
-          user_ptr = getenv("LOGNAME");
-        if (user_ptr != NULL)
-          strcpy(user, user_ptr);
-        else
-          strcpy(user, "unknown");
-        gethostname(host, MBP_FILENAMESIZE);
+        char user[256], host[256], date[32];
+        status = mb_user_host_date(mbna_verbose, user, host, date, &error);
         sprintf(ostring, "# Adjusted navigation generated using MBnavadjust\n");
         fprintf(ofp, "%s", ostring);
         fprintf(afp, "%s", ostring);

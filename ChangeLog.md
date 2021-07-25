@@ -23,6 +23,7 @@ Distributions that do not include "beta" in the tag name correspond to the major
 announced releases. The source distributions associated with all releases, major
 or beta, are equally accessible as tarballs through the Github interface.
 
+- Version 5.7.9beta14    July 25, 2021
 - Version 5.7.9beta13    July 18, 2021
 - Version 5.7.9beta12    July 4, 2021
 - Version 5.7.9beta11    June 26, 2021
@@ -391,6 +392,15 @@ or beta, are equally accessible as tarballs through the Github interface.
 --
 ### MB-System Version 5.7 Release Notes:
 --
+
+#### 5.7.9beta14 (July 25, 2021)
+
+Most programs: Fixed possible overflow associated with code that sets user, host,
+and date information to be included in output files. This functionality has been
+concentrated into a function mb_user_host_date() found in src/mbio/mb_defaults.c
+
+Many programs and i/o modules: Increased use of assert() to prevent overflow
+conditions when using sprintf to construct strings.
 
 #### 5.7.9beta13 (July 18, 2021)
 

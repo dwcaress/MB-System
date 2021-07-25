@@ -1216,20 +1216,8 @@ int main(int argc, char **argv) {
 		fprintf(stderr, "\nUnable to open plotting script file <%s> \n", scriptfile);
 		exit(status);
 	} else {
-		const time_t right_now = time((time_t *)0);
-		char date[32];
-		strcpy(date, ctime(&right_now));
-		date[strlen(date) - 1] = '\0';
-		char *user_ptr = getenv("USER");
-		if (user_ptr == nullptr)
-			user_ptr = getenv("LOGNAME");
-		char user[MB_PATH_MAXLINE];
-		if (user_ptr != nullptr)
-			strcpy(user, user_ptr);
-		else
-			strcpy(user, "unknown");
-		char host[MB_PATH_MAXLINE];
-		/* i = */ gethostname(host, MB_PATH_MAXLINE);
+    char user[256], host[256], date[32];
+    status = mb_user_host_date(verbose, user, host, date, &error);
 		fprintf(sfp, "# Swath plot generation script\n");
 		fprintf(sfp, "#   Written by MB-System program %s\n", program_name);
 		fprintf(sfp, "#   MB-system Version %s\n", MB_VERSION);

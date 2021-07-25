@@ -79,6 +79,7 @@ double center_lat,false_east,false_north;
 double azimuth,lat_orig,lon_orig,lon1,lat1,lon2,lat2;
 long mode,iflg;
 FILE *ptr;
+size_t nread = 0;
 
 ind = -1;
 
@@ -135,9 +136,9 @@ if (ptr == NULL)
       return(22);
       }
 fseek(ptr,(ind) * 432, 0);
-fread(pname,1,32,ptr);
-fread(&id,sizeof(long),1,ptr);
-fread(table,sizeof(double),9,ptr);
+nread = fread(pname,1,32,ptr);
+nread = fread(&id,sizeof(long),1,ptr);
+nread = fread(table,sizeof(double),9,ptr);
 fclose(ptr);
 
 if (id <= 0)

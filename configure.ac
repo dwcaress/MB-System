@@ -11,8 +11,8 @@ dnl    See README file for copying and redistribution conditions.
 dnl--------------------------------------------------------------------
 
 dnl Initialize and set version and version date
-AC_INIT([mbsystem],[5.7.9beta13],[http://listserver.mbari.org/sympa/arc/mbsystem],[mbsystem],[http://www.mbari.org/data/mbsystem/])
-AC_DEFINE(VERSION_DATE, ["18 July 2021"], [Set VERSION_DATE define in mb_config.h])
+AC_INIT([mbsystem],[5.7.9beta14],[http://listserver.mbari.org/sympa/arc/mbsystem],[mbsystem],[http://www.mbari.org/data/mbsystem/])
+AC_DEFINE(VERSION_DATE, ["21 July 2021"], [Set VERSION_DATE define in mb_config.h])
 
 AS_ECHO([" "])
 AS_ECHO(["------------------------------------------------------------------------------"])
@@ -202,7 +202,13 @@ case "${host_os}" in
 esac
 
 dnl Check for RPC and XDR headers needed by MBIO library
-AC_CHECK_HEADER(rpc/rpc.h, AC_DEFINE(HAVE_RPC_RPC_H, 1, [Have rpc/rpc.h]), AC_CHECK_HEADER(tirpc/rpc/rpc.h, AC_DEFINE(HAVE_TIRPC_RPC_RPC_H, 1, [Have tirpc/rpc/rpc.h])))
+dnl If the headers have been placed in /usr/include/tirpc/rpc then modify CFLAGS and CPPFLAGS first
+AC_CHECK_FILE(/usr/include/tirpc/rpc/rpc.h, RPC_IN_TIRPC=yes, RPC_IN_TIRPC=no)
+if test "$RPC_IN_TIRPC" = "yes" ; then
+  CPPFLAGS="$CPPFLAGS -I/usr/include/tirpc"
+  CFLAGS="$CFLAGS -I/usr/include/tirpc"
+fi
+AC_CHECK_HEADER(rpc/rpc.h, [AC_DEFINE(HAVE_RPC_RPC_H, 1, [Have rpc/rpc.h])] [GOT_RPC=yes], [GOT_RPC=no])
 
 dnl Check for WIN32 libraries
 # AC_CHECK_LIB(uuid, main)

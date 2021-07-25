@@ -751,11 +751,6 @@ int mbvt_save_edit_profile(char *file) {
 	FILE *fp;
 	int i;
 
-	/* time, user, host variables */
-	time_t right_now;
-	char date[32], *user_ptr;
-	mb_path user, host;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input values:\n");
@@ -777,16 +772,8 @@ int mbvt_save_edit_profile(char *file) {
 	fprintf(fp, "## Water Sound Velocity Profile (SVP)\n");
 	fprintf(fp, "## Output by Program %s\n", program_name);
 	fprintf(fp, "## MB-System Version %s\n", MB_VERSION);
-	right_now = time((time_t *)0);
-	strcpy(date, ctime(&right_now));
-	date[strlen(date) - 1] = '\0';
-	if ((user_ptr = getenv("USER")) == NULL)
-		user_ptr = getenv("LOGNAME");
-	if (user_ptr != NULL)
-		strcpy(user, user_ptr);
-	else
-		strcpy(user, "unknown");
-	gethostname(host, MB_PATH_MAXLINE);
+  char user[256], host[256], date[32];
+  status = mb_user_host_date(verbose, user, host, date, &error);
 	fprintf(fp, "## Run by user <%s> on cpu <%s> at <%s>\n", user, host, date);
 	fprintf(fp, "## Number of SVP Points: %d\n", profile->n);
 	for (i = 0; i < profile->n; i++)
@@ -827,11 +814,6 @@ int mbvt_save_swath_profile(char *file) {
 	mb_path oldfile;
 	int i;
 
-	/* time, user, host variables */
-	time_t right_now;
-	char date[32], *user_ptr;
-	mb_path user, host;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input values:\n");
@@ -857,16 +839,8 @@ int mbvt_save_swath_profile(char *file) {
 		fprintf(fp, "## Water Sound Velocity Profile (SVP)\n");
 		fprintf(fp, "## Output by Program %s\n", program_name);
 		fprintf(fp, "## MB-System Version %s\n", MB_VERSION);
-		right_now = time((time_t *)0);
-		strcpy(date, ctime(&right_now));
-		date[strlen(date) - 1] = '\0';
-		if ((user_ptr = getenv("USER")) == NULL)
-			user_ptr = getenv("LOGNAME");
-		if (user_ptr != NULL)
-			strcpy(user, user_ptr);
-		else
-			strcpy(user, "unknown");
-		gethostname(host, MB_PATH_MAXLINE);
+    char user[256], host[256], date[32];
+    status = mb_user_host_date(verbose, user, host, date, &error);
 		fprintf(fp, "## Run by user <%s> on cpu <%s> at <%s>\n", user, host, date);
 		fprintf(fp, "## Swath File: %s\n", swathfile);
 		fprintf(fp, "## Number of SVP Points: %d\n", profile->n);
@@ -912,11 +886,6 @@ int mbvt_save_residuals(char *file) {
 	double rr, xx, dangle;
 	int i;
 
-	/* time, user, host variables */
-	time_t right_now;
-	char date[32], *user_ptr;
-	mb_path user, host;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input values:\n");
@@ -925,6 +894,8 @@ int mbvt_save_residuals(char *file) {
 
 	/* do this if edit profile exists and swath data read */
 	if (profile_edit.n > 2 && nbuffer > 0) {
+    char user[256], host[256], date[32];
+    status = mb_user_host_date(verbose, user, host, date, &error);
 
 		/* open the *.sbo file if possible */
 		sprintf(file, "%s.sbo", swathfile);
@@ -939,16 +910,6 @@ int mbvt_save_residuals(char *file) {
 		fprintf(fp, "## Static Beam Offset (SBO)\n");
 		fprintf(fp, "## Output by Program %s\n", program_name);
 		fprintf(fp, "## MB-System Version %s\n", MB_VERSION);
-		right_now = time((time_t *)0);
-		strcpy(date, ctime(&right_now));
-		date[strlen(date) - 1] = '\0';
-		if ((user_ptr = getenv("USER")) == NULL)
-			user_ptr = getenv("LOGNAME");
-		if (user_ptr != NULL)
-			strcpy(user, user_ptr);
-		else
-			strcpy(user, "unknown");
-		gethostname(host, MB_PATH_MAXLINE);
 		fprintf(fp, "## Run by user <%s> on cpu <%s> at <%s>\n", user, host, date);
 		fprintf(fp, "## Swath File: %s\n", swathfile);
 		fprintf(fp, "## Number of Static Beam Offset Points: %d\n", nbeams);
@@ -975,20 +936,10 @@ int mbvt_save_residuals(char *file) {
 			return (status);
 		}
 
-		/* write the sbo file */
+		/* write the sbao file */
 		fprintf(fp, "## Static Beam Angle Offset (SBAO)\n");
 		fprintf(fp, "## Output by Program %s\n", program_name);
 		fprintf(fp, "## MB-System Version %s\n", MB_VERSION);
-		right_now = time((time_t *)0);
-		strcpy(date, ctime(&right_now));
-		date[strlen(date) - 1] = '\0';
-		if ((user_ptr = getenv("USER")) == NULL)
-			user_ptr = getenv("LOGNAME");
-		if (user_ptr != NULL)
-			strcpy(user, user_ptr);
-		else
-			strcpy(user, "unknown");
-		gethostname(host, MB_PATH_MAXLINE);
 		fprintf(fp, "## Run by user <%s> on cpu <%s> at <%s>\n", user, host, date);
 		fprintf(fp, "## Swath File: %s\n", swathfile);
 		fprintf(fp, "## Number of Static Beam Angle Offset Points: %d\n", nbeams);

@@ -1833,7 +1833,6 @@ int mbr_hsatlraw_rd_ergnampl(int verbose, FILE *mbfp, struct mbf_hsatlraw_struct
 /*--------------------------------------------------------------------*/
 int mbr_hsatlraw_rd_ldeocmnt(int verbose, FILE *mbfp, struct mbf_hsatlraw_struct *data, int shift, int *error) {
 	char line[MBF_HSATLRAW_MAXLINE];
-	int nchars;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -1849,11 +1848,9 @@ int mbr_hsatlraw_rd_ldeocmnt(int verbose, FILE *mbfp, struct mbf_hsatlraw_struct
 
 	/* copy comment into data structure */
 	if (status == MB_SUCCESS) {
-		nchars = strlen(line + shift);
-		if (nchars > 0)
-			strncpy(data->comment, line + shift, nchars);
-		else
-			data->comment[0] = '\0';
+    memset(data->comment, 0 , MBF_HSATLRAW_MAXLINE);
+		if (strlen(line + shift) > 0)
+			strncpy(data->comment, line + shift, MBF_HSATLRAW_MAXLINE - 1);
 	}
 
 	if (verbose >= 5) {

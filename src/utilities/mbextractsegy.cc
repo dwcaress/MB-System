@@ -20,6 +20,7 @@
  * Date:  April 18, 2004
  */
 
+#include <assert.h>
 #include <cmath>
 #include <cstdio>
 #include <cstdlib>
@@ -88,9 +89,9 @@ int main(int argc, char **argv) {
   double zmax = 50;
   bool checkroutebearing = false;
   double rangethreshold = 25.0;
-  mb_path timelist_file = "";
+  mb_path timelist_file = {0};
   bool timelist_file_set = false;
-  mb_path output_file = "";
+  mb_path output_file = {0};
   bool output_file_set = false;
   waypoint_t waypoint;
 
@@ -282,10 +283,8 @@ int main(int argc, char **argv) {
   char *buffer = nullptr;
 
   /* route and auto-line data */
-  int ntimepoint = 0;
   double *routetime_d = nullptr;
   int nroutepoint = 0;
-  int nroutepointalloc = 0;
   double lon;
   double lat;
   double topo;
@@ -315,10 +314,10 @@ int main(int argc, char **argv) {
   double linedistance;
   double linebearing;
   int nplot = 0;
-  mb_path zbounds = "";
+  mb_path zbounds = {0};
 
-  mb_path command = "";
-  mb_path scale = "";
+  mb_command command = {0};
+  mb_path scale = {0};
   double mtodeglon, mtodeglat;
   double headingdiff;
   int oktowrite;
@@ -340,6 +339,7 @@ int main(int argc, char **argv) {
   int error = MB_ERROR_NO_ERROR;
 
   /* if specified read route time list file */
+  int nroutepointalloc = 0;
   if (timelist_file_set) {
     /* open the input file */
     if ((fp = fopen(timelist_file, "r")) == nullptr) {
@@ -348,30 +348,27 @@ int main(int argc, char **argv) {
       exit(status);
     }
     // rawroutefile = false;
-    int ntimepointalloc = 0;
     while ((result = fgets(comment, MB_PATH_MAXLINE, fp)) == comment) {
       if (comment[0] != '#') {
         {
-          int i;  // TODO(schwehr): Use a more informative variable name.
+          int cnt;
           int tmp;
           /* const int nget = */
-          sscanf(comment, "%d %d %lf %lf %lf %lf", &i, &tmp, &lon, &lat, &heading, &time_d);
-          waypoint = (waypoint_t)tmp;  // TODO(schwehr): Range check
+          sscanf(comment, "%d %d %lf %lf %lf %lf", &cnt, &tmp, &lon, &lat, &heading, &time_d);
+          if (tmp >= 0 && tmp <= 4)
+            waypoint = (waypoint_t)tmp;
+          else
+            waypoint = MBES_ROUTE_WAYPOINT_NONE;
         }
 
         /* if good data check for need to allocate more space */
-        if (ntimepoint + 1 > ntimepointalloc) {
-          ntimepointalloc += MBES_ALLOC_NUM;
-          int reallocd_status =
-              mb_reallocd(verbose, __FILE__, __LINE__, ntimepointalloc * sizeof(double), (void **)&routelon, &error);
-          reallocd_status &=
-              mb_reallocd(verbose, __FILE__, __LINE__, ntimepointalloc * sizeof(double), (void **)&routelat, &error);
-          reallocd_status &= mb_reallocd(verbose, __FILE__, __LINE__, ntimepointalloc * sizeof(double), (void **)&routeheading,
-                               &error);
-          reallocd_status &=
-              mb_reallocd(verbose, __FILE__, __LINE__, ntimepointalloc * sizeof(int), (void **)&routewaypoint, &error);
-          reallocd_status &=
-              mb_reallocd(verbose, __FILE__, __LINE__, ntimepointalloc * sizeof(double), (void **)&routetime_d, &error);
+        if (nroutepoint + 1 > nroutepointalloc) {
+          nroutepointalloc += MBES_ALLOC_NUM;
+          int reallocd_status = mb_reallocd(verbose, __FILE__, __LINE__, nroutepointalloc * sizeof(double), (void **)&routelon, &error);
+          reallocd_status &= mb_reallocd(verbose, __FILE__, __LINE__, nroutepointalloc * sizeof(double), (void **)&routelat, &error);
+          reallocd_status &= mb_reallocd(verbose, __FILE__, __LINE__, nroutepointalloc * sizeof(double), (void **)&routeheading, &error);
+          reallocd_status &= mb_reallocd(verbose, __FILE__, __LINE__, nroutepointalloc * sizeof(int), (void **)&routewaypoint, &error);
+          reallocd_status &= mb_reallocd(verbose, __FILE__, __LINE__, nroutepointalloc * sizeof(double), (void **)&routetime_d, &error);
           if (reallocd_status != MB_SUCCESS) {
             char *message;
             mb_error(verbose, error, &message);
@@ -382,13 +379,13 @@ int main(int argc, char **argv) {
         }
 
         /* add good point to route */
-        if (ntimepointalloc > ntimepoint) {
-          routewaypoint[ntimepoint] = waypoint;
-          routelon[ntimepoint] = lon;
-          routelat[ntimepoint] = lat;
-          routeheading[ntimepoint] = heading;
-          routetime_d[ntimepoint] = time_d;
-          ntimepoint++;
+        if (nroutepointalloc > nroutepoint) {
+          routewaypoint[nroutepoint] = waypoint;
+          routelon[nroutepoint] = lon;
+          routelat[nroutepoint] = lat;
+          routeheading[nroutepoint] = heading;
+          routetime_d[nroutepoint] = time_d;
+          nroutepoint++;
         }
       }
     }
@@ -414,7 +411,7 @@ int main(int argc, char **argv) {
     /* output status */
     if (verbose > 0) {
       /* output info on file output */
-      fprintf(stderr, "Read %d waypoints from time list file: %s\n", ntimepoint, timelist_file);
+      fprintf(stderr, "Read %d waypoints from time list file: %s\n", nroutepoint, timelist_file);
     }
   }
 
@@ -454,14 +451,10 @@ int main(int argc, char **argv) {
         /* if good data check for need to allocate more space */
         if (point_ok && nroutepoint + 1 > nroutepointalloc) {
           nroutepointalloc += MBES_ALLOC_NUM;
-          int reallocd_status =
-              mb_reallocd(verbose, __FILE__, __LINE__, nroutepointalloc * sizeof(double), (void **)&routelon, &error);
-          reallocd_status &=
-              mb_reallocd(verbose, __FILE__, __LINE__, nroutepointalloc * sizeof(double), (void **)&routelat, &error);
-          reallocd_status &= mb_reallocd(verbose, __FILE__, __LINE__, nroutepointalloc * sizeof(double), (void **)&routeheading,
-                               &error);
-          reallocd_status &=
-              mb_reallocd(verbose, __FILE__, __LINE__, nroutepointalloc * sizeof(int), (void **)&routewaypoint, &error);
+          int reallocd_status = mb_reallocd(verbose, __FILE__, __LINE__, nroutepointalloc * sizeof(double), (void **)&routelon, &error);
+          reallocd_status &= mb_reallocd(verbose, __FILE__, __LINE__, nroutepointalloc * sizeof(double), (void **)&routelat, &error);
+          reallocd_status &= mb_reallocd(verbose, __FILE__, __LINE__, nroutepointalloc * sizeof(double), (void **)&routeheading, &error);
+          reallocd_status &= mb_reallocd(verbose, __FILE__, __LINE__, nroutepointalloc * sizeof(int), (void **)&routewaypoint, &error);
           if (reallocd_status != MB_SUCCESS) {
             char *message;
             mb_error(verbose, error, &message);
@@ -543,13 +536,16 @@ int main(int argc, char **argv) {
   }
 
   /* set up plotting script file */
-  if ((route_file_set && nroutepoint > 1) || (timelist_file_set && ntimepoint > 1)) {
+  if ((route_file_set && nroutepoint > 1) || (timelist_file_set && nroutepoint > 1)) {
+    assert(strlen(lineroot) < MB_PATH_MAXLINE - 12);
     sprintf(scriptfile, "%s_section.cmd", lineroot);
   }
   else if (!output_file_set || read_datalist) {
+    assert(strlen(read_file) < MB_PATH_MAXLINE - 12);
     sprintf(scriptfile, "%s_section.cmd", read_file);
   }
   else {
+    assert(strlen(file) < MB_PATH_MAXLINE - 12);
     sprintf(scriptfile, "%s_section.cmd", file);
   }
   if ((sfp = fopen(scriptfile, "w")) == nullptr) {
@@ -595,8 +591,7 @@ int main(int argc, char **argv) {
   for (int i = 0; i < 338; i++)
     segyfileheader.extra[i] = 0;
 
-  bool linechange;
-  int index;  // TODO(schwehr: Localize
+  bool linechange = false;
 
   /* loop over all files to be read */
   while (read_data) {
@@ -683,11 +678,11 @@ int main(int argc, char **argv) {
           lastdistance = distance;
 
         /* to set lines check survey data time against time list */
-        if (ntimepoint > 1) {
+        if (nroutepoint > 1) {
           const double dx = (navlon - routelon[activewaypoint]) / mtodeglon;
           const double dy = (navlat - routelat[activewaypoint]) / mtodeglat;
           range = sqrt(dx * dx + dy * dy);
-          if (activewaypoint < ntimepoint && time_d >= routetime_d[activewaypoint]) {
+          if (activewaypoint < nroutepoint && time_d >= routetime_d[activewaypoint]) {
             linechange = true;
           }
         }
@@ -817,9 +812,7 @@ int main(int argc, char **argv) {
 
           /* increment active waypoint */
           activewaypoint++;
-        // TODO(schwehr): Is there some reason there was a second if needed here?
-        // }
-        // if (linechange) {
+
           mb_coor_scale(verbose, routelat[activewaypoint], &mtodeglon, &mtodeglat);
           rangelast = 1000 * rangethreshold;
           seafloordepthmin = -1.0;
@@ -914,19 +907,21 @@ int main(int argc, char **argv) {
         }
         else if (activewaypoint > 0)
           oktowrite = MBES_ONLINE_COUNT;
-        else if (nroutepoint == 0 && ntimepoint == 0)
+        else if (nroutepoint == 0 && nroutepoint == 0)
           oktowrite = MBES_ONLINE_COUNT;
 
         /* open output segy file if needed */
         if (fp == nullptr && oktowrite > 0) {
           /* set up output filename */
           if (!output_file_set) {
-            if (nroutepoint > 1 || ntimepoint > 1) {
+            memset(output_file, 0, MB_PATH_MAXLINE);
+            if (nroutepoint > 1) {
+              assert(strlen(lineroot) < MB_PATH_MAXLINE - 10);
               sprintf(output_file, "%s_%4.4d.segy", lineroot, linenumber);
             }
             else {
-              strcpy(output_file, file);
-              strcat(output_file, ".segy");
+              assert(strlen(file) < MB_PATH_MAXLINE - 5);
+              strcat(output_file, "%s.segy");
             }
           }
 
@@ -1030,7 +1025,7 @@ int main(int argc, char **argv) {
               segyfileheader.number_samples = segytraceheader.nsamps;
 
               /* insert file header data into output buffer */
-              index = 0;
+              int index = 0;
               mb_put_binary_int(false, segyfileheader.jobid, (void *)&(buffer[index]));
               index += 4;
               mb_put_binary_int(false, segyfileheader.line, (void *)&(buffer[index]));
@@ -1104,7 +1099,7 @@ int main(int argc, char **argv) {
             }
 
             /* insert segy header data into output buffer */
-            index = 0;
+            int index = 0;
             mb_put_binary_int(false, segytraceheader.seq_num, (void *)&buffer[index]);
             index += 4;
             mb_put_binary_int(false, segytraceheader.seq_reel, (void *)&buffer[index]);
@@ -1297,7 +1292,7 @@ int main(int argc, char **argv) {
     }
 
     /* close output file if conditions warrant */
-    if (!read_data || (!output_file_set && nroutepoint < 2 && ntimepoint < 2)) {
+    if (!read_data || (!output_file_set && nroutepoint < 2)) {
       /* close current output file */
       if (fp != nullptr) {
         fclose(fp);
@@ -1418,11 +1413,12 @@ int main(int argc, char **argv) {
   // TODO(schwehr): Check the shellstatus
 
   /* deallocate route arrays */
-  if (route_file_set) {
+  if (nroutepointalloc > 0) {
     status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&routelon, &error);
     status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&routelat, &error);
     status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&routeheading, &error);
     status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&routewaypoint, &error);
+    status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&routetime_d, &error);
   }
 
   /* check memory */

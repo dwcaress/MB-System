@@ -13,24 +13,24 @@
 /////////////////////////
 /*
  Copyright Information
-  
+
  Copyright 2002-2017 MBARI
  Monterey Bay Aquarium Research Institute, all rights reserved.
- 
+
  Terms of Use
- 
+
  This program is free software; you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
  the Free Software Foundation; either version 3 of the License, or
  (at your option) any later version. You can access the GPLv3 license at
  http://www.gnu.org/licenses/gpl-3.0.html
- 
+
  This program is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  GNU General Public License for more details
  (http://www.gnu.org/licenses/gpl-3.0.html)
- 
+
  MBARI provides the documentation and software code "as is", with no warranty,
  express or implied, as to the software, title, non-infringement of third party
  rights, merchantability, or fitness for any particular purpose, the accuracy of
@@ -38,7 +38,7 @@
  assume the entire risk associated with use of the code, and you agree to be
  responsible for the entire cost of repair or servicing of the program with
  which you are using the code.
- 
+
  In no event shall MBARI be liable for any damages, whether general, special,
  incidental or consequential damages, arising out of your use of the software,
  including, but not limited to, the loss or corruption of your data or damages
@@ -48,11 +48,11 @@
  liability or expense, including attorneys' fees, resulting from loss of or
  damage to property or the injury to or death of any person arising out of the
  use of the software.
- 
+
  The MBARI software is provided without obligation on the part of the
  Monterey Bay Aquarium Research Institute to assist in its use, correction,
  modification, or enhancement.
- 
+
  MBARI assumes no responsibility or liability for any third party and/or
  commercial software required for the database or applications. Licensee agrees
  to obtain and maintain valid licenses for any additional third party software
@@ -60,7 +60,7 @@
  */
 
 /////////////////////////
-// Headers 
+// Headers
 /////////////////////////
 #include "mframe.h"
 #include "mutils.h"
@@ -69,7 +69,7 @@
 // Macros
 /////////////////////////
 
-// These macros should only be defined for 
+// These macros should only be defined for
 // application main files rather than general C files
 /*
 /// @def PRODUCT
@@ -89,7 +89,7 @@
 */
 
 /////////////////////////
-// Declarations 
+// Declarations
 /////////////////////////
 
 /////////////////////////
@@ -151,7 +151,7 @@ void mfu_hex_show(byte *data, uint32_t len, uint16_t cols, bool show_offsets, ui
             }
             fprintf(stderr,"%*s ]\n",3*(cols-rem)," ");
         }
-        
+
     }
 }
 // End function mfu_hex_show
@@ -189,7 +189,7 @@ void mfu_trim(char *buf, uint32_t len)
     if (NULL!=buf && len>0) {
         char *phead=buf;
         char *ptail=buf+len;
-        
+
         while (phead<ptail) {
             if (!isspace(*phead) || *phead=='\0') {
                 break;
@@ -217,35 +217,35 @@ void mfu_trim(char *buf, uint32_t len)
 char *mfu_vsprint(int sz_hint, const char *fmt, ...)
 {
     char *retval=NULL;
-    
+
     int size = (sz_hint>=0 ? sz_hint : 32);
     char *p=NULL, *np=NULL;
     va_list ap;
-    
+
     if ((p = malloc(size)) == NULL)
         return NULL;
-    
+
     while (1) {
         // Try to print in the allocated space
         va_start(ap, fmt);
         int n = vsnprintf(p, size, fmt, ap);
         va_end(ap);
-        
+
         // Check error code
         if (n < 0){
             break;
         }
-        
+
         // If that worked, return the string
         if (n < size){
             retval=p;
             break;
         }
-        
+
         // Else try again with more space
         // Precisely what is needed
         size = n + 1;
-        
+
         if ((np = realloc (p, size)) == NULL) {
             free(p);
             break;
@@ -253,7 +253,7 @@ char *mfu_vsprint(int sz_hint, const char *fmt, ...)
             p = np;
         }
     }
-    
+
     return retval;
 }
 
@@ -263,12 +263,12 @@ int mfu_vbprint(char **dest, size_t len, off_t ofs, const char *fmt, ...)
     if (NULL!=dest && NULL!=*dest && ofs<(off_t)len) {
         int n=0;
         char *bp=*dest;
-        
+
         va_list ap;
         va_start(ap,fmt);
         n = vsnprintf(bp,0,fmt,ap);
         va_end(ap);
-        
+
         char *new_mem=NULL;
         if (n>0) {
             size_t new_len=strlen(*dest)+n+1;
@@ -290,28 +290,28 @@ int mfu_vbprint(char **dest, size_t len, off_t ofs, const char *fmt, ...)
     return retval;
 }
 
-void mfu_fmt_xml(int fd,const char *buf, const char *del, int indent)
+void mfu_fmt_xml(int fd, const char *buf, const char *del, int indent)
 {
     const char *end=NULL;
     const char *ip=buf;
     const char *tp=buf;
     typedef enum{CONTENT,OPENING,CLOSING,}state_t;
     typedef enum{NOP=0x0,SKIP_BYTE=0x1,PRINT_BYTE=0x2,NEWLINE=0x4,COLLAPSE=0x8}action_t;
-   state_t state=CONTENT;
+    state_t state=CONTENT;
     action_t action=NOP;
+    ssize_t nwrite = 0;
 
-    
     if (fd>=0 && NULL!=buf) {
     	int i=0;
         int level=0;
 
         end=buf+strlen(buf);
-        
+
         // sync to first tag
         while(*ip!='<' && ip<end )ip++;
-        
+
         for(i=0;i<(level+indent);i++){
-            write(fd," ",1);
+            nwrite += write(fd," ",1);
         }
 
         while(ip>=buf && ip<end ){
@@ -355,38 +355,38 @@ void mfu_fmt_xml(int fd,const char *buf, const char *del, int indent)
                         }
                     }
                     break;
-                    
+
                 case ' ':
                 case '\t':
                 case '\n':
                 case '\r':
                     action=COLLAPSE;
                     break;
-                    
+
                 default:
                     action=PRINT_BYTE;
                     break;
             }
             if ( (action&PRINT_BYTE) !=0 ) {
-                write(fd,ip++,1);
+                nwrite = write(fd,ip++,1);
             }
 
             if ( (action&NEWLINE) !=0 ) {
 	            int j=0;
                 if(NULL!=del){
-                    write(fd,del,strlen(del));
+                    nwrite += write(fd,del,strlen(del));
                 }
                 for(j=0;j<(level+indent);j++){
-                    write(fd," ",1);
+                    nwrite += write(fd," ",1);
                 }
             }
-            
+
             if ( (action&COLLAPSE) !=0) {
                 while(isspace(*ip))ip++;
             }
         }
         if(NULL!=del){
-            write(fd,del,strlen(del));
+            nwrite += write(fd,del,strlen(del));
         }
 
     }else{
@@ -399,7 +399,7 @@ int mfu_test(int verbose)
 {
     int retval=-1;
     unsigned int err_count=0;
-    
+
     char buf[64]={0};
     char *bp=buf;
     sprintf(buf,"ABCDEFGHIJK0123456789\n");
@@ -407,7 +407,7 @@ int mfu_test(int verbose)
 
     memset(buf,0x02,64);
     if(mfu_checksum((byte *)buf,64)!=128)err_count|=(1<<0);
-    
+
     char *str = mfu_vsprint(32,"mfu_vsprint\n");
     if(!(NULL!=str && strcmp(str,"mfu_vsprint\n")==0))err_count|=(1<<1);
     if(NULL!=str)free(str);

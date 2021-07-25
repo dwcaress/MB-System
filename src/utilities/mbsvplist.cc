@@ -658,20 +658,8 @@ int main(int argc, char **argv) {
             fprintf(svp_fp, "## Water Sound Velocity Profile (SVP)\n");
             fprintf(svp_fp, "## Output by Program %s\n", program_name);
             fprintf(svp_fp, "## MB-System Version %s\n", MB_VERSION);
-            const time_t right_now = time((time_t *)0);
-            char date[32];
-            strcpy(date, ctime(&right_now));
-            date[strlen(date) - 1] = '\0';
-            char *user_ptr = getenv("USER");
-            if (user_ptr == nullptr)
-              user_ptr = getenv("LOGNAME");
-            char user[MB_PATH_MAXLINE];
-            if (user_ptr != nullptr)
-              strcpy(user, user_ptr);
-            else
-              strcpy(user, "unknown");
-            char host[MB_PATH_MAXLINE];
-            gethostname(host, MB_PATH_MAXLINE);
+            char user[256], host[256], date[32];
+            status = mb_user_host_date(verbose, user, host, date, &error);
             fprintf(svp_fp, "## Run by user <%s> on cpu <%s> at <%s>\n", user, host, date);
             fprintf(svp_fp, "## Swath File: %s\n", file);
             fprintf(svp_fp, "## Start Time: %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d\n", svp_time_i[0],

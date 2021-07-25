@@ -1707,14 +1707,9 @@ int mbr_wt_nvnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 
 		/* save new comment */
 		else {
-			if ((user_ptr = getenv("USER")) == NULL)
-				user_ptr = getenv("LOGNAME");
-			if (user_ptr != NULL)
-				strncpy(&(storelocal->mbHistAutor[(*commentwrite) * storelocal->mbNameLength]), user_ptr,
-				        MBSYS_NAVNETCDF_NAMELEN);
-			else
-				strncpy(&(storelocal->mbHistAutor[(*commentwrite) * storelocal->mbNameLength]), "Unknown",
-				        MBSYS_NAVNETCDF_NAMELEN);
+      char user[256], host[256], date[32];
+      status = mb_user_host_date(verbose, user, host, date, error);
+			strncpy(&(storelocal->mbHistAutor[(*commentwrite) * storelocal->mbNameLength]), user, MBSYS_NAVNETCDF_NAMELEN);
 			strncpy(&(storelocal->mbHistModule[(*commentwrite) * storelocal->mbNameLength]), "MB-System",
 			        MBSYS_NAVNETCDF_NAMELEN);
 			strncpy(&(storelocal->mbHistComment[(*commentwrite) * storelocal->mbCommentLength]), store->comment,

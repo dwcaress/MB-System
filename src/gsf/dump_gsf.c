@@ -415,11 +415,11 @@ static void printMBPing(int rec_number) {
 			strncat(str, tstr, (512 - strlen(str) - 1));
 		}
 		if (gsfRec.mb_ping.quality_flags != NULL) {
-			sprintf(tstr, " %0.7d", gsfRec.mb_ping.quality_flags[i]);
+			sprintf(tstr, " %.7d", gsfRec.mb_ping.quality_flags[i]);
 			strncat(str, tstr, (512 - strlen(str) - 1));
 		}
 		if (gsfRec.mb_ping.beam_flags != NULL) {
-			sprintf(tstr, " %0.7d", gsfRec.mb_ping.beam_flags[i]);
+			sprintf(tstr, " %.7d", gsfRec.mb_ping.beam_flags[i]);
 			strncat(str, tstr, (512 - strlen(str) - 1));
 		}
 		fprintf(stdout, "%s\n", str);

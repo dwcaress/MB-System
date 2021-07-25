@@ -5541,20 +5541,9 @@ int do_info_add(char *info, int timetag) {
 
 	/* put time tag in if requested */
 	if (timetag) {
-		time_t right_now = time((time_t *)0);
-		char date[32];
-		strcpy(date, ctime(&right_now));
-		date[strlen(date) - 1] = '\0';
-		const char *user_ptr = getenv("USER");
-		if (user_ptr == NULL)
-			user_ptr = getenv("LOGNAME");
-		char user[128];
-		if (user_ptr != NULL)
-			strcpy(user, user_ptr);
-		else
-			strcpy(user, "unknown");
-		char host[128];
-		gethostname(host, 128);
+	  int error = MB_ERROR_NO_ERROR;
+    char user[256], host[256], date[32];
+    int status = mb_user_host_date(mbna_verbose, user, host, date, &error);
 		char tag[STRING_MAX];
 		sprintf(tag, " > User <%s> on cpu <%s> at <%s>\n", user, host, date);
 		pos = XmTextGetLastPosition(text_messages);

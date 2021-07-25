@@ -334,20 +334,6 @@ int main(int argc, char **argv) {
 	/* put version header at beginning */
 	if (status == MB_SUCCESS) {
 		memset(esf_header, 0, MB_PATH_MAXLINE);
-		const time_t right_now = time((time_t *)0);
-		char date[32];
-		strcpy(date, ctime(&right_now));
-		date[strlen(date) - 1] = '\0';
-		char *user_ptr = getenv("USER");
-		if (user_ptr == nullptr)
-			user_ptr = getenv("LOGNAME");
-		char user[MBP_FILENAMESIZE];
-		if (user_ptr != nullptr)
-			strcpy(user, user_ptr);
-		else
-			strcpy(user, "unknown");
-		char host[MBP_FILENAMESIZE];
-		gethostname(host, MBP_FILENAMESIZE);
 		if (mode == MBGETESF_IMPLICITBEST) {
 			if (format == MBF_3DWISSLR || format == MBF_3DWISSLP) {
 				esf_mode = MB_ESF_MODE_IMPLICIT_NULL;
@@ -362,6 +348,8 @@ int main(int argc, char **argv) {
 			esf_mode = MB_ESF_MODE_IMPLICIT_GOOD;
 		else
 			esf_mode = MB_ESF_MODE_EXPLICIT;
+    char user[256], host[256], date[32];
+    status = mb_user_host_date(verbose, user, host, date, &error);
 		sprintf(esf_header,
 				"ESFVERSION03\nESF Mode: %d\nMB-System Version %s\nProgram: %s\nUser: %s\nCPU: %s\nDate: %s\n",
 				esf_mode, MB_VERSION, program_name, user, host, date);

@@ -1328,16 +1328,8 @@ int mbnavadjust_write_project(int verbose, struct mbna_project *project, int *er
   /* open and write home file */
   if ((hfp = fopen(project->home, "w")) != NULL) {
     fprintf(stderr, "Writing project %s (file version 3.09)\n", project->name);
-    right_now = time((time_t *)0);
-    strcpy(date, ctime(&right_now));
-    date[strlen(date) - 1] = '\0';
-    if ((user_ptr = getenv("USER")) == NULL)
-      user_ptr = getenv("LOGNAME");
-    if (user_ptr != NULL)
-      strcpy(user, user_ptr);
-    else
-      strcpy(user, "unknown");
-    gethostname(host, MB_PATH_MAXLINE);
+    char user[256], host[256], date[32];
+    status = mb_user_host_date(verbose, user, host, date, error);
     fprintf(hfp, "##MBNAVADJUST PROJECT\n");
     fprintf(hfp, "MB-SYSTEM_VERSION\t%s\n", MB_VERSION);
     fprintf(hfp, "PROGRAM_VERSION\t3.09\n");
@@ -1513,14 +1505,8 @@ int mbnavadjust_write_project(int verbose, struct mbna_project *project, int *er
     fprintf(hfp, "## Route File Version %s\n", ROUTE_VERSION);
     fprintf(hfp, "## Output by Program %s\n", program_name);
     fprintf(hfp, "## MB-System Version %s\n", MB_VERSION);
-    strncpy(date, "", 25);
-    right_now = time((time_t *)0);
-    strcpy(date, ctime(&right_now));
-    date[strlen(date) - 1] = '\0';
-    if ((user_ptr = getenv("USER")) == NULL)
-      if ((user_ptr = getenv("LOGNAME")) == NULL)
-        user_ptr = unknown;
-    gethostname(host, MB_PATH_MAXLINE);
+    char user[256], host[256], date[32];
+    status = mb_user_host_date(verbose, user, host, date, error);
     fprintf(hfp, "## Run by user <%s> on cpu <%s> at <%s>\n", user_ptr, host, date);
     fprintf(hfp, "## Number of routes: %d\n", ncrossings_true);
     fprintf(hfp, "## Route point format:\n");
@@ -1590,14 +1576,8 @@ int mbnavadjust_write_project(int verbose, struct mbna_project *project, int *er
     fprintf(hfp, "## Route File Version %s\n", ROUTE_VERSION);
     fprintf(hfp, "## Output by Program %s\n", program_name);
     fprintf(hfp, "## MB-System Version %s\n", MB_VERSION);
-    strncpy(date, "", 25);
-    right_now = time((time_t *)0);
-    strcpy(date, ctime(&right_now));
-    date[strlen(date) - 1] = '\0';
-    if ((user_ptr = getenv("USER")) == NULL)
-      if ((user_ptr = getenv("LOGNAME")) == NULL)
-        user_ptr = unknown;
-    gethostname(host, MB_PATH_MAXLINE);
+    char user[256], host[256], date[32];
+    status = mb_user_host_date(verbose, user, host, date, error);
     fprintf(hfp, "## Run by user <%s> on cpu <%s> at <%s>\n", user_ptr, host, date);
     fprintf(hfp, "## Number of routes: %d\n", ncrossings_gt50);
     fprintf(hfp, "## Route point format:\n");
@@ -1668,14 +1648,8 @@ int mbnavadjust_write_project(int verbose, struct mbna_project *project, int *er
     fprintf(hfp, "## Route File Version %s\n", ROUTE_VERSION);
     fprintf(hfp, "## Output by Program %s\n", program_name);
     fprintf(hfp, "## MB-System Version %s\n", MB_VERSION);
-    strncpy(date, "", 25);
-    right_now = time((time_t *)0);
-    strcpy(date, ctime(&right_now));
-    date[strlen(date) - 1] = '\0';
-    if ((user_ptr = getenv("USER")) == NULL)
-      if ((user_ptr = getenv("LOGNAME")) == NULL)
-        user_ptr = unknown;
-    gethostname(host, MB_PATH_MAXLINE);
+    char user[256], host[256], date[32];
+    status = mb_user_host_date(verbose, user, host, date, error);
     fprintf(hfp, "## Run by user <%s> on cpu <%s> at <%s>\n", user_ptr, host, date);
     fprintf(hfp, "## Number of routes: %d\n", ncrossings_gt25);
     fprintf(hfp, "## Route point format:\n");
@@ -1746,14 +1720,8 @@ int mbnavadjust_write_project(int verbose, struct mbna_project *project, int *er
     fprintf(hfp, "## Route File Version %s\n", ROUTE_VERSION);
     fprintf(hfp, "## Output by Program %s\n", program_name);
     fprintf(hfp, "## MB-System Version %s\n", MB_VERSION);
-    strncpy(date, "", 25);
-    right_now = time((time_t *)0);
-    strcpy(date, ctime(&right_now));
-    date[strlen(date) - 1] = '\0';
-    if ((user_ptr = getenv("USER")) == NULL)
-      if ((user_ptr = getenv("LOGNAME")) == NULL)
-        user_ptr = unknown;
-    gethostname(host, MB_PATH_MAXLINE);
+    char user[256], host[256], date[32];
+    status = mb_user_host_date(verbose, user, host, date, error);
     fprintf(hfp, "## Run by user <%s> on cpu <%s> at <%s>\n", user_ptr, host, date);
     fprintf(hfp, "## Number of routes: %d\n", ncrossings_lt25);
     fprintf(hfp, "## Route point format:\n");
@@ -1823,14 +1791,8 @@ int mbnavadjust_write_project(int verbose, struct mbna_project *project, int *er
     fprintf(hfp, "## Route File Version %s\n", ROUTE_VERSION);
     fprintf(hfp, "## Output by Program %s\n", program_name);
     fprintf(hfp, "## MB-System Version %s\n", MB_VERSION);
-    strncpy(date, "", 25);
-    right_now = time((time_t *)0);
-    strcpy(date, ctime(&right_now));
-    date[strlen(date) - 1] = '\0';
-    if ((user_ptr = getenv("USER")) == NULL)
-      if ((user_ptr = getenv("LOGNAME")) == NULL)
-        user_ptr = unknown;
-    gethostname(host, MB_PATH_MAXLINE);
+    char user[256], host[256], date[32];
+    status = mb_user_host_date(verbose, user, host, date, error);
     fprintf(hfp, "## Run by user <%s> on cpu <%s> at <%s>\n", user_ptr, host, date);
     fprintf(hfp, "## Number of routes: %d\n", ncrossings_fixed);
     fprintf(hfp, "## Route point format:\n");
@@ -1900,14 +1862,8 @@ int mbnavadjust_write_project(int verbose, struct mbna_project *project, int *er
     fprintf(hfp, "## Route File Version %s\n", ROUTE_VERSION);
     fprintf(hfp, "## Output by Program %s\n", program_name);
     fprintf(hfp, "## MB-System Version %s\n", MB_VERSION);
-    strncpy(date, "", 25);
-    right_now = time((time_t *)0);
-    strcpy(date, ctime(&right_now));
-    date[strlen(date) - 1] = '\0';
-    if ((user_ptr = getenv("USER")) == NULL)
-      if ((user_ptr = getenv("LOGNAME")) == NULL)
-        user_ptr = unknown;
-    gethostname(host, MB_PATH_MAXLINE);
+    char user[256], host[256], date[32];
+    status = mb_user_host_date(verbose, user, host, date, error);
     fprintf(hfp, "## Run by user <%s> on cpu <%s> at <%s>\n", user_ptr, host, date);
     fprintf(hfp, "## Number of routes: %d\n", nties_unfixed);
     fprintf(hfp, "## Route point format:\n");
@@ -1976,14 +1932,8 @@ int mbnavadjust_write_project(int verbose, struct mbna_project *project, int *er
     fprintf(hfp, "## Route File Version %s\n", ROUTE_VERSION);
     fprintf(hfp, "## Output by Program %s\n", program_name);
     fprintf(hfp, "## MB-System Version %s\n", MB_VERSION);
-    strncpy(date, "", 25);
-    right_now = time((time_t *)0);
-    strcpy(date, ctime(&right_now));
-    date[strlen(date) - 1] = '\0';
-    if ((user_ptr = getenv("USER")) == NULL)
-      if ((user_ptr = getenv("LOGNAME")) == NULL)
-        user_ptr = unknown;
-    gethostname(host, MB_PATH_MAXLINE);
+    char user[256], host[256], date[32];
+    status = mb_user_host_date(verbose, user, host, date, error);
     fprintf(hfp, "## Run by user <%s> on cpu <%s> at <%s>\n", user_ptr, host, date);
     fprintf(hfp, "## Number of routes: %d\n", nties_fixed);
     fprintf(hfp, "## Route point format:\n");
@@ -5494,20 +5444,9 @@ int mbnavadjust_info_add(int verbose, struct mbna_project *project, char *info, 
 
 	/* put time tag in if requested */
 	if (timetag) {
-		time_t right_now = time((time_t *)0);
-		char date[32];
-		strcpy(date, ctime(&right_now));
-		date[strlen(date) - 1] = '\0';
-		const char *user_ptr = getenv("USER");
-		if (user_ptr == NULL)
-			user_ptr = getenv("LOGNAME");
-		char user[128];
-		if (user_ptr != NULL)
-			strcpy(user, user_ptr);
-		else
-			strcpy(user, "unknown");
-		char host[128];
-		gethostname(host, 128);
+    char user[256], host[256], date[32];
+	  int error = MB_ERROR_NO_ERROR;
+    int status = mb_user_host_date(verbose, user, host, date, &error);
 		char tag[STRING_MAX];
 		sprintf(tag, " > User <%s> on cpu <%s> at <%s>\n", user, host, date);
 		if (project->logfp != NULL)
