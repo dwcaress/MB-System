@@ -198,6 +198,8 @@ void SurfaceRenderer::initialize(Surface *surface, CoordinateMirroring cm)
 
   char vertShaderName[64];
   char fragShaderName[64];
+  // May need to modify shader inclusion strategy when using cmake.
+  // See https://community.khronos.org/t/glsl-shaders-and-cmake/70653/3
   sprintf(vertShaderName, ":/glsl-shaders/%s.vert", ShaderName);
   sprintf(fragShaderName, ":/glsl-shaders/%s.frag", ShaderName);
   
