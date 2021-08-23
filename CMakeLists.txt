@@ -4,6 +4,9 @@
 # For Qt apps we currently rely on qmake and .pro files to determine Qt header
 # and library location
 
+message("VTK_include at start: ${VTK_include}")
+message("VTK_lib at start: ${VTK_lib}")
+
 cmake_minimum_required(VERSION 3.18)
 project(MB-System)
 
@@ -16,6 +19,7 @@ else()
   message(FATAL_ERROR "Building on unsupported OS")
 endif()
 
+
 # Set list of required modules (i.e. packages with find modules)
 set(modules GMT Proj OpenGL X11 Xt Motif GDAL NetCDF FFTW)
 
@@ -25,9 +29,23 @@ if (help)
   message("where package is one of the following:")
   message("${modules} ${packages}")
   message("enable debugging with -DCMAKE_BUILD_TYPE=Debug")
+  message("built Qt-based GUIs with -DbuildQt=1")
   message("you MUST specify -DVTK_include=<dir> -DVTK_lib=<libs>")
   message(FATAL_ERROR "")
 endif()
+
+# NOTE: VTK_lib is specified as a space-delimited list of libraries, and so
+# so those spaces must be quoted when specified with cmake -D command line
+# option. E.g. suppose $VTK_LIBS is a bash shell variable. Then specify 
+# VTK_lib to cmake like this:
+#   % cmake -DVTK_lib="VTK_LIBS" ..
+#
+# Note the double-quotes around VTK_LIBS, and note that -D options must
+# precede the final argument that specifies location of the CMakeLists.txt
+# file, which is .. in this case.
+
+
+message("VTK_lib: ${VTK_lib}")
 
 # Add globally-needed compiler flags
 add_compile_options(-DUSE_DEFAULT_FILE_FUNCTIONS)
