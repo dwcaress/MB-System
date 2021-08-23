@@ -4,9 +4,6 @@
 # For Qt apps we currently rely on qmake and .pro files to determine Qt header
 # and library location
 
-message("VTK_include at start: ${VTK_include}")
-message("VTK_lib at start: ${VTK_lib}")
-
 cmake_minimum_required(VERSION 3.18)
 project(MB-System)
 
@@ -44,8 +41,6 @@ endif()
 # precede the final argument that specifies location of the CMakeLists.txt
 # file, which is .. in this case.
 
-
-message("VTK_lib: ${VTK_lib}")
 
 # Add globally-needed compiler flags
 add_compile_options(-DUSE_DEFAULT_FILE_FUNCTIONS)
