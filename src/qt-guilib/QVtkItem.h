@@ -26,7 +26,9 @@ namespace mb_system {
 
     QVtkItem();
 
-    /// Create renderer
+    /// Create and return renderer.
+    /// Called by Qt framework, overrides
+    /// QQuickFramebufferObject::createRenderer()
     QQuickFramebufferObject::Renderer *createRenderer() const override;
 
     /// Set grid file name
