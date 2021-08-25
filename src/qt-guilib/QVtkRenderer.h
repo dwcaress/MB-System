@@ -56,7 +56,7 @@ namespace mb_system {
     /// Display properties copied from QVtkItem
     const DisplayProperties *displayProperties_;
     
-    /// Initialize renderer; build VTK filter chain
+    /// Initialize renderer; build VTK pipeline
     void initialize();
 
     /// Initilize VTK pipeline; returns true on success, false on error.
