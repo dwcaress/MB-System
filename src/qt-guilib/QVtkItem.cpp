@@ -6,8 +6,7 @@ using namespace mb_system;
 QVtkItem::QVtkItem() :
     gridFilename_(nullptr)
 {
-    qDebug() << "QVtkItem constructor";
-    setAcceptedMouseButtons(Qt::RightButton);
+    setAcceptedMouseButtons(Qt::LeftButton | Qt::RightButton);
 }
 
 QQuickFramebufferObject::Renderer *QVtkItem::createRenderer() const {
@@ -28,19 +27,20 @@ void QVtkItem::wheelEvent(QWheelEvent *event) {
     wheelEvent_->ignore();
     event->accept();
 
-    // Trigger synchronize with render thread
+    // Schedule re-render
     update();
 }
 
 void QVtkItem::mousePressEvent(QMouseEvent *event) {
-    qDebug() << "QVtkItem::mousePressEvent";
-    if (event->buttons() & Qt::RightButton) {
-        mouseButtonEvent_ = std::make_shared<QMouseEvent>(*event);
-        mouseButtonEvent_->ignore();
-        event->accept();
+  
+    qDebug() << "\nQVtkItem::mousePressEvent!!!";
 
-        update();
-    }
+    mouseButtonEvent_ = std::make_shared<QMouseEvent>(*event);
+    mouseButtonEvent_->ignore();
+    event->accept();
+
+    // Schedule re-render
+    update();
 }
 
 void QVtkItem::mouseReleaseEvent(QMouseEvent *event) {
@@ -49,6 +49,7 @@ void QVtkItem::mouseReleaseEvent(QMouseEvent *event) {
     mouseButtonEvent_->ignore();
     event->accept();
 
+    // Schedule re-render
     update();
 }
 
@@ -58,6 +59,7 @@ void QVtkItem::mouseMoveEvent(QMouseEvent *event) {
     mouseMoveEvent_->ignore();
     event->accept();
 
+    // Schedule re-render
     update();
 }
 
