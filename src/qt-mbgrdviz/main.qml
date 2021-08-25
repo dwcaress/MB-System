@@ -250,21 +250,6 @@ ApplicationWindow {
                 anchors.fill: parent
                 width: 1000
                 height: 1000
-
-                MouseArea {
-                    acceptedButtons: Qt.LeftButton
-                    anchors.fill: parent
-
-                    onPositionChanged: {
-                     //   canvasHandler.mouseMoveEvent(pressedButtons, mouseX, mouseY);
-                    }
-                    onPressed: {
-                     //   canvasHandler.mousePressEvent(pressedButtons, mouseX, mouseY);
-                    }
-                    onReleased: {
-                       // canvasHandler.mouseReleaseEvent(pressedButtons, mouseX, mouseY);
-                    }
-                }
             }           
         }
     }
