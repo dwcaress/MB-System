@@ -340,16 +340,18 @@ bool QVtkRenderer::initializePipeline(const char *gridFilename) {
   //  renderWindowInteractor_->EnableRenderOff();
   renderWindowInteractor_->EnableRenderOn();  
 
-  vtkSmartPointer<vtkInteractorStyleTrackballCamera> style =
-  vtkSmartPointer<vtkInteractorStyleTrackballCamera>::New();
+  //  vtkSmartPointer<vtkInteractorStyleTrackballCamera> style =
+  // vtkSmartPointer<vtkInteractorStyleTrackballCamera>::New();
 
-  /* **
   vtkSmartPointer<CellPickerInteractor> style =
       vtkSmartPointer<CellPickerInteractor>::New();
 
+  gridReader_->Update();
   style->polyData_ = gridReader_->GetOutput();
-  ** */
-  // style->SetDefaultRenderer(renderer_);
+  qDebug() << "style->polyData_ details";
+  style->polyData_->PrintSelf(std::cout, vtkIndent(1));
+  
+  style->SetDefaultRenderer(renderer_);
 
   renderWindowInteractor_->SetInteractorStyle(style);
   
@@ -366,8 +368,6 @@ bool QVtkRenderer::initializePipeline(const char *gridFilename) {
 
   // Initialize the OpenGL context for the renderer
   renderWindow_->OpenGLInitContext();
-
-  qDebug() << "rendererr->AddActor()";
 
   return true;
 }
