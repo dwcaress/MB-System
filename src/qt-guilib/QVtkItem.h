@@ -72,7 +72,7 @@ namespace mb_system {
 
     /// Display properties, e.g. visible axes, etc.
     DisplayProperties displayProperties_;
-    
+
     /// Handle mouse wheel event
     virtual void wheelEvent(QWheelEvent *event) override;
 
@@ -84,7 +84,8 @@ namespace mb_system {
 
     /// Handle mouse move event
     virtual void mouseMoveEvent(QMouseEvent *event) override;
-
+    
+    
     /// Name of associated grid file
     char *gridFilename_;
 

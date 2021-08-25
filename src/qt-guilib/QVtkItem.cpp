@@ -21,8 +21,10 @@ void QVtkItem::setGridFilename(char *gridFilename) {
     gridFilename_ = strdup(gridFilename);
 }
 
+
 void QVtkItem::wheelEvent(QWheelEvent *event) {
     qDebug() << "QVtkItem::wheelEvent()";
+
     wheelEvent_ = std::make_shared<QWheelEvent>(*event);
     wheelEvent_->ignore();
     event->accept();
@@ -45,6 +47,7 @@ void QVtkItem::mousePressEvent(QMouseEvent *event) {
 
 void QVtkItem::mouseReleaseEvent(QMouseEvent *event) {
     qDebug() << "QVtkItem::mouseReleaseEvent";
+
     mouseButtonEvent_ = std::make_shared<QMouseEvent>(*event);
     mouseButtonEvent_->ignore();
     event->accept();
@@ -55,6 +58,7 @@ void QVtkItem::mouseReleaseEvent(QMouseEvent *event) {
 
 void QVtkItem::mouseMoveEvent(QMouseEvent *event) {
     qDebug() << "QVtkItem::mouseMoveEvent";
+
     mouseMoveEvent_ = std::make_shared<QMouseEvent>(*event);
     mouseMoveEvent_->ignore();
     event->accept();
@@ -62,4 +66,5 @@ void QVtkItem::mouseMoveEvent(QMouseEvent *event) {
     // Schedule re-render
     update();
 }
+
 
