@@ -73,13 +73,14 @@ void QVtkRenderer::render() {
   if (mouseButtonEvent_ && !mouseButtonEvent_->isAccepted()) {
     qDebug() << "render(): handle mouseButtonEvent";
 
-    renderWindowInteractor_->SetEventInformationFlipY(mouseButtonEvent_->x(),
-						      mouseButtonEvent_->y(),
-						      (mouseButtonEvent_->modifiers() & Qt::ControlModifier) > 0 ? 1 : 0,
-						      (mouseButtonEvent_->modifiers() & Qt::ShiftModifier) > 0 ? 1 : 0, 0,
-						      mouseButtonEvent_->type() == QEvent::MouseButtonDblClick ? 1 : 0);
+
 
     if (mouseButtonEvent_->type() == QEvent::MouseButtonPress) {
+      renderWindowInteractor_->SetEventInformationFlipY(mouseButtonEvent_->x(),
+                                                        mouseButtonEvent_->y(),
+                                                        (mouseButtonEvent_->modifiers() & Qt::ControlModifier) > 0 ? 1 : 0,
+                                                        (mouseButtonEvent_->modifiers() & Qt::ShiftModifier) > 0 ? 1 : 0, 0,
+                                                        mouseButtonEvent_->type() == QEvent::MouseButtonDblClick ? 1 : 0);
       qDebug() << "QVtkRenderer: mouse button press";
       if (mouseButtonEvent_->buttons() & Qt::LeftButton) {
         qDebug() << "QVtkRenderer() - got left button";
@@ -93,19 +94,18 @@ void QVtkRenderer::render() {
         qDebug() << "QVtkRenderer() - got middle button";
         renderWindowInteractor_->InvokeEvent(vtkCommand::MiddleButtonPressEvent);        
       }      
-      
     }
     else if (mouseButtonEvent_->type() == QEvent::MouseButtonRelease) {
-
-      if (mouseButtonEvent_->buttons() & Qt::LeftButton) {
+      qDebug() << "QVtkRenderer: mouse button release";
+      if (mouseButtonEvent_->button() == Qt::LeftButton) {
         qDebug() << "QVtkRenderer: left mouse button release";
         renderWindowInteractor_->InvokeEvent(vtkCommand::LeftButtonReleaseEvent);
       }
-      else if (mouseButtonEvent_->buttons() & Qt::RightButton) {
+      else if (mouseButtonEvent_->button() == Qt::RightButton) {
         qDebug() << "QVtkRenderer: right mouse button release";
         renderWindowInteractor_->InvokeEvent(vtkCommand::RightButtonReleaseEvent);
       }
-      else if (mouseButtonEvent_->buttons() & Qt::MiddleButton) {
+      else if (mouseButtonEvent_->button() == Qt::MiddleButton) {
         qDebug() << "QVtkRenderer: right mouse button release";
         renderWindowInteractor_->InvokeEvent(vtkCommand::MiddleButtonReleaseEvent);
       }      
@@ -115,8 +115,7 @@ void QVtkRenderer::render() {
 
   if (mouseMoveEvent_ && !mouseMoveEvent_->isAccepted()) {
     qDebug() << "QVtkRenderer::render() - mouse move event";
-    if (mouseMoveEvent_->type() == QEvent::MouseMove &&
-	mouseMoveEvent_->buttons() & Qt::LeftButton) {
+    if (mouseMoveEvent_->type() == QEvent::MouseMove) {
       // Got left-button mouse-drag
       qDebug() << "QVtkRenderer::render(): command mouse move; x=" <<
 	mouseMoveEvent_->x() << ", y=" <<
@@ -130,9 +129,6 @@ void QVtkRenderer::render() {
 
       renderWindowInteractor_->InvokeEvent(vtkCommand::MouseMoveEvent);
       mouseMoveEvent_->accept();
-    }
-    else {
-      qDebug() << "render(): no action on mouseMove event";
     }
   }
 
