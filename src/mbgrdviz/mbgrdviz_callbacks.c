@@ -170,7 +170,7 @@ int do_mbgrdviz_savedegdecmin(size_t instance, char *output_file_ptr);
 int do_mbgrdviz_savelnw(size_t instance, char *output_file_ptr);
 int do_mbgrdviz_savegreenseayml(size_t instance, char *output_file_ptr);
 int do_mbgrdviz_saveprofile(size_t instance, char *output_file_ptr);
-int do_mbgrdviz_opennav(size_t instance, int swathbounds, char *input_file_ptr);
+int do_mbgrdviz_opennav(size_t instance, bool swathbounds, char *input_file_ptr);
 int do_mbgrdviz_readnav(size_t instance, char *swathfile, int pathstatus, char *pathraw, char *pathprocessed, int format,
                         int formatorg, double weight, int *error);
 int do_mbgrdviz_readgrd(size_t instance, char *grdfile, int *grid_projection_mode, char *grid_projection_id, float *nodatavalue,
@@ -2405,7 +2405,7 @@ int do_mbgrdviz_saveroute(size_t instance, char *output_file_ptr) {
   int routecolor;
   int routesize;
   mb_path routename;
-  int selected;  // TODO(schwehr): bool
+  bool selected;
   int iroute, j;
 
   /* time, user, host variables */
@@ -2584,7 +2584,7 @@ int do_mbgrdviz_saverisiscript(size_t instance, char *output_file_ptr) {
   int routecolor;
   int routesize;
   mb_path routename;
-  int selected;
+  bool selected;
   int iroute, j;
   bool projection_initialized = false;
   double lon_origin, lat_origin;
@@ -3304,7 +3304,7 @@ int do_mbgrdviz_savegreenseayml(size_t instance, char *output_file_ptr) {
   int routecolor;
   int routesize;
   mb_path routename;
-  int selected;
+  bool selected;
   // char *error_message;
   // char projection_id[MB_PATH_MAXLINE];
   // void *pjptr = NULL;
@@ -3750,8 +3750,7 @@ int do_mbgrdviz_saveprofile(size_t instance, char *output_file_ptr) {
   return (status);
 }
 /*---------------------------------------------------------------------------------------*/
-// TODO(schwehr): bool swathbounds
-int do_mbgrdviz_opennav(size_t instance, int swathbounds, char *input_file_ptr) {
+int do_mbgrdviz_opennav(size_t instance, bool swathbounds, char *input_file_ptr) {
   int status = MB_SUCCESS;
   void *datalist;
   mb_path swathfile;
@@ -3902,7 +3901,7 @@ int do_mbgrdviz_readnav(size_t instance, char *swathfile, int pathstatus, char *
   int color;
   int size;
   mb_path name;
-  int swathbounds;
+  bool swathbounds;
   int line;
   int shot;
   int cdp;
@@ -5030,7 +5029,7 @@ void do_mbgrdviz_generate_survey(Widget w, XtPointer client_data, XtPointer call
   double dx, dy, r, dxuse, dyuse, dxd, dyd, dxextra, dyextra;
   double rrr[4], xxx, yyy;
   int iline, jendpoint;
-  int ok;  // TODO(schwehr): bool
+  bool ok;
   int startcorner, endcorner, jstart, kend;
   int nlines_alloc = 0;
   int i, j, k;

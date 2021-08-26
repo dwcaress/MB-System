@@ -715,7 +715,7 @@ int mbview_addpicknotify(int verbose, size_t instance, int picktype, void(mbview
 int mbview_setsensitivitynotify(int verbose, size_t instance, void(mbview_sensitivity_notify)(), int *error);
 int mbview_setcolorchangenotify(int verbose, size_t instance, void(mbview_colorchange_notify)(size_t), int *error);
 void mbview_resize(Widget w, XtPointer client_data, XEvent *event, Boolean *unused);
-int mbview_destroy(int verbose, size_t instance, int destroywidgets, int *error);
+int mbview_destroy(int verbose, size_t instance, bool destroywidgets, int *error);
 int mbview_quit(int verbose, int *error);
 int do_mbview_message_on(char *message, size_t instance);
 int do_mbview_message_off(size_t instance);
@@ -750,9 +750,9 @@ int mbview_setsecondaryname(int verbose, size_t instance, char *name, int *error
 
 /* mbview_process.c function prototypes */
 int mbview_projectdata(size_t instance);
-int mbview_projectforward(size_t instance, int needlonlat, double xgrid, double ygrid, double zdata, double *xlon, double *ylat,
+int mbview_projectforward(size_t instance, bool needlonlat, double xgrid, double ygrid, double zdata, double *xlon, double *ylat,
                           double *xdisplay, double *ydisplay, double *zdisplay);
-int mbview_projectinverse(size_t instance, int needlonlat, double xdisplay, double ydisplay, double zdisplay, double *xlon,
+int mbview_projectinverse(size_t instance, bool needlonlat, double xdisplay, double ydisplay, double zdisplay, double *xlon,
                           double *ylat, double *xgrid, double *ygrid);
 int mbview_projectfromlonlat(size_t instance, double xlon, double ylat, double zdata, double *xgrid, double *ygrid,
                              double *xdisplay, double *ydisplay, double *zdisplay);
@@ -764,8 +764,7 @@ int mbview_projectll2display(size_t instance, double xlon, double ylat, double z
 int mbview_projectdisplay2ll(size_t instance, double xdisplay, double ydisplay, double zdisplay, double *xlon, double *ylat);
 int mbview_projectdistance(size_t instance, double xlon1, double ylat1, double zdata1, double xlon2, double ylat2, double zdata2,
                            double *distancelateral, double *distanceoverground, double *slope);
-int mbview_getzdata(size_t instance, double xgrid, double ygrid, int *found, double *zdata);
-int mbview_getzdata(size_t instance, double xgrid, double ygrid, int *found, double *zdata);
+int mbview_getzdata(size_t instance, double xgrid, double ygrid, bool *found, double *zdata);
 int mbview_colorvalue_instance(size_t instance, double value, float *r, float *g, float *b);
 
 /* mbview_plot.c function prototypes */
@@ -797,8 +796,8 @@ int mbview_freenavarrays(int verbose, double **time_d, double **navlon, double *
 int mbview_addnav(int verbose, size_t instance, int npoint, double *time_d, double *navlon, double *navlat, double *navz,
                   double *heading, double *speed, double *navportlon, double *navportlat, double *navstbdlon, double *navstbdlat,
                   unsigned int *line, unsigned int *shot, unsigned int *cdp, int navcolor, int navsize, mb_path navname, int navpathstatus,
-                  mb_path navpathraw, mb_path navpathprocessed, int navformat, int navswathbounds, int navline, int navshot,
-                  int navcdp, int decimation, int *error);
+                  mb_path navpathraw, mb_path navpathprocessed, int navformat, bool navswathbounds, bool navline, bool navshot,
+                  bool navcdp, int decimation, int *error);
 int mbview_enableviewnavs(int verbose, size_t instance, int *error);
 int mbview_enableadjustnavs(int verbose, size_t instance, int *error);
 int mbview_picknavbyname(int verbose, size_t instance, char *name, int *error);
@@ -820,7 +819,7 @@ int mbview_drawvector(size_t instance, int rez);
 /* mbview_route.c function prototypes */
 int mbview_getroutecount(int verbose, size_t instance, int *nroute, int *error);
 int mbview_getroutepointcount(int verbose, size_t instance, int route, int *npoint, int *nintpoint, int *error);
-int mbview_getrouteselected(int verbose, size_t instance, int route, int *selected, int *error);
+int mbview_getrouteselected(int verbose, size_t instance, int route, bool *selected, int *error);
 int mbview_getrouteinfo(int verbose, size_t instance, int working_route, int *nroutewaypoint, int *nroutpoint, char *routename,
                         int *routecolor, int *routesize, double *routedistancelateral, double *routedistancetopo, int *error);
 int mbview_allocroutearrays(int verbose, int npointtotal, double **routelon, double **routelat, int **waypoint,

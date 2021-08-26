@@ -386,7 +386,7 @@ extern char statmask[8];
 
 /* mbview_callbacks.c function prototypes */
 int mbview_startup(int verbose, Widget parent, XtAppContext app, int *error);
-int mbview_reset_shared(int mode);
+int mbview_reset_shared(bool mode);
 int mbview_reset(size_t instance);
 int mbview_init(int verbose, size_t *instance, int *error);
 int mbview_quit(int verbose, int *error);
@@ -428,7 +428,7 @@ void do_mbview_glwda_resize(Widget w, XtPointer client_data, XtPointer call_data
 void do_mbview_glwda_input(Widget w, XtPointer client_data, XtPointer call_data);
 void do_mbview_dismiss(Widget w, XtPointer client_data, XtPointer call_data);
 void do_mbview_goaway(Widget w, XtPointer client_data, XtPointer call_data);
-int mbview_destroy(int verbose, size_t instance, int destroywidgets, int *error);
+int mbview_destroy(int verbose, size_t instance, bool destroywidgets, int *error);
 int mbview_quit(int verbose, int *error);
 void do_mbview_display_2D(Widget w, XtPointer client_data, XtPointer call_data);
 void do_mbview_display_3D(Widget w, XtPointer client_data, XtPointer call_data);
@@ -457,7 +457,7 @@ void do_mbview_mouse_rmode(Widget w, XtPointer client_data, XtPointer call_data)
 void do_mbview_mouse_mode(Widget w, XtPointer client_data, XtPointer call_data);
 void set_mbview_mouse_mode(size_t instance, int mode);
 void set_mbview_grid_mode(size_t instance, int mode);
-void set_mbview_histogram_mode(size_t instance, int mode);
+void set_mbview_histogram_mode(size_t instance, bool mode);
 void set_mbview_shade_mode(size_t instance, int mode);
 void set_mbview_contour_mode(size_t instance, int mode);
 void set_mbview_site_view_mode(size_t instance, int mode);
@@ -555,9 +555,9 @@ int mbview_zscalepointw(size_t instance, int globalview, double offset_factor, s
 int mbview_updatepointw(size_t instance, struct mbview_pointw_struct *pointw);
 int mbview_updatesegmentw(size_t instance, struct mbview_linesegmentw_struct *segmentw);
 int mbview_zscale(size_t instance);
-int mbview_projectforward(size_t instance, int needlonlat, double xgrid, double ygrid, double zdata, double *xlon, double *ylat,
+int mbview_projectforward(size_t instance, bool needlonlat, double xgrid, double ygrid, double zdata, double *xlon, double *ylat,
                           double *xdisplay, double *ydisplay, double *zdisplay);
-int mbview_projectinverse(size_t instance, int needlonlat, double xdisplay, double ydisplay, double zdisplay, double *xlon,
+int mbview_projectinverse(size_t instance, bool needlonlat, double xdisplay, double ydisplay, double zdisplay, double *xlon,
                           double *ylat, double *xgrid, double *ygrid);
 int mbview_projectfromlonlat(size_t instance, double xlon, double ylat, double zdata, double *xgrid, double *ygrid,
                              double *xdisplay, double *ydisplay, double *zdisplay);
@@ -569,7 +569,7 @@ int mbview_projectll2display(size_t instance, double xlon, double ylat, double z
 int mbview_projectdisplay2ll(size_t instance, double xdisplay, double ydisplay, double zdisplay, double *xlon, double *ylat);
 int mbview_projectdistance(size_t instance, double xlon1, double ylat1, double zdata1, double xlon2, double ylat2, double zdata2,
                            double *distancelateral, double *distanceoverground, double *slope);
-int mbview_sphere_setup(size_t instance, int earthcentered, double xlon, double ylat);
+int mbview_sphere_setup(size_t instance, bool earthcentered, double xlon, double ylat);
 int mbview_sphere_forward(size_t instance, double xlon, double ylat, double *xx, double *yy, double *zz);
 int mbview_sphere_inverse(size_t instance, double xx, double yy, double zz, double *xlon, double *ylat);
 int mbview_sphere_matrix(double phi, double theta, double psi, double *eulermatrix);
@@ -596,7 +596,7 @@ int mbview_getcolor_histogram(double value, double min, double max, int colortab
 int mbview_applyshade(double intensity, float *r, float *g, float *b);
 int mbview_getsecondaryvalue(struct mbview_world_struct *view, struct mbview_struct *data, int i, int j, double *secondary_value);
 int mbview_contour(size_t instance, int rez);
-int mbview_getzdata(size_t instance, double xgrid, double ygrid, int *found, double *zdata);
+int mbview_getzdata(size_t instance, double xgrid, double ygrid, bool *found, double *zdata);
 
 /* mbview_plot.c function prototypes */
 int mbview_reset_glx(size_t instance);
@@ -609,9 +609,9 @@ int mbview_plotlowhigh(size_t instance);
 int mbview_plothigh(size_t instance);
 int mbview_plotfull(size_t instance);
 int mbview_plot(size_t instance, int rez);
-int mbview_findpoint(size_t instance, int xpixel, int ypixel, int *found, double *xgrid, double *ygrid, double *xlon,
+int mbview_findpoint(size_t instance, int xpixel, int ypixel, bool *found, double *xgrid, double *ygrid, double *xlon,
                      double *ylat, double *zdata, double *xdisplay, double *ydisplay, double *zdisplay);
-int mbview_findpointrez(size_t instance, int rez, int xpixel, int ypixel, int ijbounds[4], int *found, double *xgrid,
+int mbview_findpointrez(size_t instance, int rez, int xpixel, int ypixel, int ijbounds[4], bool *found, double *xgrid,
                         double *ygrid, double *xlon, double *ylat, double *zdata, double *xdisplay, double *ydisplay,
                         double *zdisplay);
 int mbview_viewbounds(size_t instance);
@@ -647,8 +647,8 @@ int mbview_freenavarrays(int verbose, double **time_d, double **navlon, double *
 int mbview_addnav(int verbose, size_t instance, int npoint, double *time_d, double *navlon, double *navlat, double *navz,
                   double *heading, double *speed, double *navportlon, double *navportlat, double *navstbdlon, double *navstbdlat,
                   unsigned int *line, unsigned int *shot, unsigned int *cdp, int navcolor, int navsize, mb_path navname, int navpathstatus,
-                  mb_path navpathraw, mb_path navpathprocessed, int navformat, int navswathbounds, int navline, int navshot,
-                  int navcdp, int decimation, int *error);
+                  mb_path navpathraw, mb_path navpathprocessed, int navformat, bool navswathbounds, bool navline, bool navshot,
+                  bool navcdp, int decimation, int *error);
 int mbview_enableviewnavs(int verbose, size_t instance, int *error);
 int mbview_pick_nav_select(size_t instance, int select, int which, int xpixel, int ypixel);
 int mbview_extract_nav_profile(size_t instance);
@@ -661,7 +661,7 @@ int mbview_updatenavlist(void);
 /* mbview_route.c function prototypes */
 int mbview_getroutecount(int verbose, size_t instance, int *nroute, int *error);
 int mbview_getroutepointcount(int verbose, size_t instance, int route, int *npoint, int *nintpoint, int *error);
-int mbview_getrouteselected(int verbose, size_t instance, int route, int *selected, int *error);
+int mbview_getrouteselected(int verbose, size_t instance, int route, bool *selected, int *error);
 int mbview_getrouteinfo(int verbose, size_t instance, int working_route, int *nroutewaypoint, int *nroutpoint, char *routename,
                         int *routecolor, int *routesize, double *routedistancelateral, double *routedistancetopo, int *error);
 int mbview_allocroutearrays(int verbose, int npointtotal, double **routelon, double **routelat, int **waypoint,

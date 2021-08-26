@@ -5030,6 +5030,9 @@ int mbnavadjust_findcrossings(int verbose, struct mbna_project *project, int *er
       }
     }
 
+    /* write updated project */
+    mbnavadjust_write_project(verbose, project, error);
+    project->save_count = 0;
     project->modelplot_uptodate = false;
   }
 
