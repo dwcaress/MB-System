@@ -1,10 +1,10 @@
 #ifndef POINT_H
 #define POINT_H
 
-#define X 0
-#define Y 1
-#define Z 2
-#define W 3
+#define X_ 0
+#define Y_ 1
+#define Z_ 2
+#define W_ 3
 
 namespace mb_system {
   
@@ -15,28 +15,28 @@ namespace mb_system {
   public:
     Point3D() {}
     Point3D(float x, float y, float z) {
-      data_[X] = x;
-      data_[Y] = y;
-      data_[Z] = z;
+      data_[X_] = x;
+      data_[Y_] = y;
+      data_[Z_] = z;
     }
 
     /// Return x element
-    float x() { return data_[X]; }
+    float x() { return data_[X_]; }
 
     /// Return y element
-    float y() { return data_[Y]; }
+    float y() { return data_[Y_]; }
 
     /// Return z element
-    float z() { return data_[Z]; }    
+    float z() { return data_[Z_]; }    
   
     /// Set x element
-    void setX(float x) { data_[X] = x; }
+    void setX(float x) { data_[X_] = x; }
 
     /// Set y element
-    void setY(float y) { data_[Y] = y; }
+    void setY(float y) { data_[Y_] = y; }
 
     /// Set z element
-    void setZ(float z) { data_[Z] = z; }  
+    void setZ(float z) { data_[Z_] = z; }  
 
   protected:
     float data_[3];
@@ -49,10 +49,10 @@ namespace mb_system {
   public:
     Point4D() {}
     Point4D(float x, float y, float z, float w) {
-      data_[X] = x;
-      data_[Y] = y;
-      data_[Z] = z;
-      data_[W] = w;
+      data_[X_] = x;
+      data_[Y_] = y;
+      data_[Z_] = z;
+      data_[W_] = w;
     }
 
   protected:
