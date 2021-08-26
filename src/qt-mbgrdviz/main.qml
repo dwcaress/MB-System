@@ -1,4 +1,5 @@
 import QtQuick 2.9
+import Qt.labs.platform 1.1
 import QtQuick.Controls 2.3
 import QtQuick.Dialogs 1.1
 import QtDataVisualization 1.14
@@ -275,4 +276,33 @@ ApplicationWindow {
         Component.onCompleted: visible = false
     }
 
+
+    SystemTrayIcon {
+        visible: true
+        icon.source: "qrc:mbsystem_logo.gif"
+
+        onActivated: {
+            window.show()
+            window.raise()
+            window.requestActivate()
+        }
+    }
+        Menu {
+            MenuItem {
+                text: qsTr("Open up!")
+                onTriggered: {
+                    app.showNormal()
+                }
+            }
+            MenuItem {
+                text: qsTr("Quit right now")
+                onTriggered: Qt.quit()
+            }
+        }
+
 }
+
+
+
+
+
