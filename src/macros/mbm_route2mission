@@ -897,18 +897,19 @@ for ($i = $nmissionpoints-1; $i > 0; $i--)
 	else
 		{
 		$distance = $mdistances[$i] - $mdistances[$i-1];
+    $ddepth = -($mmissiondepths[$i] - $mmissiondepths[$i-1]);
         if ($distance < 1.0) {
             $slope = 0.0;
         }
         else {
-            $slope = -($mmissiondepths[$i] - $mmissiondepths[$i-1])/$distance;
+            $slope = $ddepth / $distance;
         }
 		}
 	if ($slope > $maxslope)
 		{
-# print "EXCESSIVE SLOPE: $i $slope Change vehicle depth from $mmissiondepths[$i-1] to ";
+print "EXCESSIVE SLOPE: $i : slope $slope exceeds max slope $maxslope  : Change vehicle depth from $mmissiondepths[$i-1] to ";
 		$mmissiondepths[$i-1] = $mmissiondepths[$i] + $maxslope * $distance;
-# print "$mmissiondepths[$i-1]\r\n";
+print "$mmissiondepths[$i-1]\r\n";
 		$slope = -($mmissiondepths[$i] - $mmissiondepths[$i-1])/$distance;
 		}
 	}
@@ -1862,6 +1863,17 @@ print "Behavior: delta_t (startup, logMode = $logmode)\r\n";
 			print MFILE "speed        = ASCENTDESCENT_SPEED; \r\n";
 			print MFILE "} \r\n";
 print "Behavior: waypoint\n";
+  		print MFILE "# \r\n";
+			print MFILE "# Acoustic update 5 - sent status ping at end of startSurvey - Jordan's squawk \r\n";
+			print MFILE "# This modem squawk was added following the suggestion of Jordan Caress \r\n";
+			print MFILE "# (at the insistence of Eric Martin) \r\n";
+			print MFILE "# \r\n";
+			print MFILE "behavior acousticUpdate \r\n";
+			print MFILE "{ \r\n";
+			print MFILE "duration  = 2; \r\n";
+			print MFILE "dummy  = 1; \r\n";
+			print MFILE "} \r\n";
+print "Behavior: acousticUpdate\n";
 			print MFILE "# \r\n";
       if ($startsurvey == 1)
         {
@@ -1915,7 +1927,7 @@ print "Behavior: spiral descend\n";
   			print MFILE "} \r\n";
 print "Behavior: kearfott (disable DVL aiding)\n";
       }
-			print MFILE "# Acoustic update 5 - sent status ping after end of line \r\n";
+			print MFILE "# Acoustic update 3 - sent status ping at start of descent \r\n";
 			print MFILE "# \r\n";
 			print MFILE "behavior acousticUpdate \r\n";
 			print MFILE "{ \r\n";

@@ -5785,7 +5785,7 @@ int mbnavadjust_invertnav() {
             nrms += 1;
             //ntie += 1;
           }
-                    ntie += 3;
+          ntie += 3;
         }
       }
     }
@@ -5821,11 +5821,11 @@ int mbnavadjust_invertnav() {
           nfixed += 1 * section->num_snav;
       }
     }
-        if (nrms > 0) {
-            rms_misfit_initial /= nrms;
-            rms_misfit_previous = rms_misfit_initial;
-            rms_misfit_current = rms_misfit_initial;
-        }
+    if (nrms > 0) {
+      rms_misfit_initial /= nrms;
+      rms_misfit_previous = rms_misfit_initial;
+      rms_misfit_current = rms_misfit_initial;
+    }
 
     /* only do block average solution if there is more than one block */
     if (nblock > 1) {
@@ -6227,32 +6227,32 @@ int mbnavadjust_invertnav() {
       mblsqr_lsqr(nrows_ba, ncols_ba, &mb_aprod, damp, &matrix, u, v, w, x, se, atol, btol, conlim, itnlim, stderr,
                   &istop_out, &itn_out, &anorm_out, &acond_out, &rnorm_out, &arnorm_out, &xnorm_out);
 
-        /* save solution */
-        double rms_solution = 0.0;
-        double rms_solution_total = 0.0;
-        int nrms = 0;
-        for (int ifile = 0; ifile < project.num_files; ifile++) {
-            file = &project.files[ifile];
-        file->block_offset_x = x[3 * file->block];
-        file->block_offset_y = x[3 * file->block + 1];
-        file->block_offset_z = x[3 * file->block + 2];
-        for (int isection = 0; isection < file->num_sections; isection++) {
-            section = &file->sections[isection];
-            for (int isnav = 0; isnav < section->num_snav; isnav++) {
-                section->snav_lon_offset[isnav] = file->block_offset_x * project.mtodeglon;
-                section->snav_lat_offset[isnav] = file->block_offset_y * project.mtodeglat;
-                section->snav_z_offset[isnav] = file->block_offset_z;
-                rms_solution += file->block_offset_x * file->block_offset_x;
-                rms_solution += file->block_offset_y * file->block_offset_y;
-                rms_solution += file->block_offset_z * file->block_offset_z;
-                nrms += 3;
-            }
-        }
-    }
-    if (nrms > 0) {
-        rms_solution = sqrt(rms_solution);
-        rms_solution_total = rms_solution;
-    }
+      /* save solution */
+      double rms_solution = 0.0;
+      double rms_solution_total = 0.0;
+      int nrms = 0;
+      for (int ifile = 0; ifile < project.num_files; ifile++) {
+          file = &project.files[ifile];
+          file->block_offset_x = x[3 * file->block];
+          file->block_offset_y = x[3 * file->block + 1];
+          file->block_offset_z = x[3 * file->block + 2];
+          for (int isection = 0; isection < file->num_sections; isection++) {
+              section = &file->sections[isection];
+              for (int isnav = 0; isnav < section->num_snav; isnav++) {
+                  section->snav_lon_offset[isnav] = file->block_offset_x * project.mtodeglon;
+                  section->snav_lat_offset[isnav] = file->block_offset_y * project.mtodeglat;
+                  section->snav_z_offset[isnav] = file->block_offset_z;
+                  rms_solution += file->block_offset_x * file->block_offset_x;
+                  rms_solution += file->block_offset_y * file->block_offset_y;
+                  rms_solution += file->block_offset_z * file->block_offset_z;
+                  nrms += 3;
+              }
+          }
+      }
+      if (nrms > 0) {
+          rms_solution = sqrt(rms_solution);
+          rms_solution_total = rms_solution;
+      }
 
       fprintf(stderr, "\nInversion by LSQR completed\n");
       fprintf(stderr, "\tReason for termination:       %d\n", istop_out);
@@ -15178,44 +15178,94 @@ int mbnavadjust_modelplot_plot_tieoffsets() {
       mbna_modelplot_tiestart = 0;
       mbna_modelplot_tieend = mbna_num_ties_plot - 1;
     }
-    for (int isurvey2 = 0; isurvey2 < num_surveys; isurvey2++) {
-      for (int isurvey1 = 0; isurvey1 <= isurvey2; isurvey1++) {
-        /* loop over all ties looking for ones in current plot block
-            - current plot block is for ties between
-            surveys isurvey1 and isurvey2 */
-        for (int i = 0; i < project.num_crossings; i++) {
-          crossing = &project.crossings[i];
-          for (int j = 0; j < crossing->num_ties; j++) {
-            tie = &crossing->ties[j];
 
-            /* check if this tie is between the desired surveys */
-            if (tie->isurveyplotindex >= 0 && ((tie->block_1 == isurvey1 && tie->block_2 == isurvey2) ||
-                                               (tie->block_2 == isurvey1 && tie->block_1 == isurvey2))) {
-              /* set plot index for tie */
-              tie->isurveyplotindex = plot_index;
+    /* deal with single block, survey, file, or section */
+    if (mbna_view_mode == MBNA_VIEW_MODE_BLOCK
+        || mbna_view_mode == MBNA_VIEW_MODE_SURVEY
+        || mbna_view_mode == MBNA_VIEW_MODE_FILE) {
+      /* loop over all ties looking for ones in current plot block
+          - current plot block is for ties between
+          surveys isurvey1 and isurvey2 */
+      for (int i = 0; i < project.num_crossings; i++) {
+        crossing = &project.crossings[i];
+        for (int j = 0; j < crossing->num_ties; j++) {
+          tie = &crossing->ties[j];
 
-              /* increment plot_index */
-              plot_index++;
+          /* check if this tie is between the desired surveys */
+          if (tie->isurveyplotindex >= 0) {
+            /* set plot index for tie */
+            tie->isurveyplotindex = plot_index;
 
-              /* if tie will be plotted (check for zoom) use it for min max */
-              if (tie->isurveyplotindex >= 0 && (tie->isurveyplotindex >= mbna_modelplot_tiestart &&
-                                                 tie->isurveyplotindex <= mbna_modelplot_tieend)) {
-                if (first) {
-                  lon_offset_min = tie->offset_x_m;
-                  lon_offset_max = tie->offset_x_m;
-                  lat_offset_min = tie->offset_y_m;
-                  lat_offset_max = tie->offset_y_m;
-                  z_offset_min = tie->offset_z_m;
-                  z_offset_max = tie->offset_z_m;
-                  first = false;
-                }
-                else {
-                  lon_offset_min = MIN(lon_offset_min, tie->offset_x_m);
-                  lon_offset_max = MAX(lon_offset_max, tie->offset_x_m);
-                  lat_offset_min = MIN(lat_offset_min, tie->offset_y_m);
-                  lat_offset_max = MAX(lat_offset_max, tie->offset_y_m);
-                  z_offset_min = MIN(z_offset_min, tie->offset_z_m);
-                  z_offset_max = MAX(z_offset_max, tie->offset_z_m);
+            /* increment plot_index */
+            plot_index++;
+
+            /* if tie will be plotted (check for zoom) use it for min max */
+            if (tie->isurveyplotindex >= 0 && (tie->isurveyplotindex >= mbna_modelplot_tiestart &&
+                                               tie->isurveyplotindex <= mbna_modelplot_tieend)) {
+              if (first) {
+                lon_offset_min = tie->offset_x_m;
+                lon_offset_max = tie->offset_x_m;
+                lat_offset_min = tie->offset_y_m;
+                lat_offset_max = tie->offset_y_m;
+                z_offset_min = tie->offset_z_m;
+                z_offset_max = tie->offset_z_m;
+                first = false;
+              }
+              else {
+                lon_offset_min = MIN(lon_offset_min, tie->offset_x_m);
+                lon_offset_max = MAX(lon_offset_max, tie->offset_x_m);
+                lat_offset_min = MIN(lat_offset_min, tie->offset_y_m);
+                lat_offset_max = MAX(lat_offset_max, tie->offset_y_m);
+                z_offset_min = MIN(z_offset_min, tie->offset_z_m);
+                z_offset_max = MAX(z_offset_max, tie->offset_z_m);
+              }
+            }
+          }
+        }
+      }
+    }
+
+    /* deal with showing multiple blocks */
+    else {
+      for (int isurvey2 = 0; isurvey2 < num_surveys; isurvey2++) {
+        for (int isurvey1 = 0; isurvey1 <= isurvey2; isurvey1++) {
+          /* loop over all ties looking for ones in current plot block
+              - current plot block is for ties between
+              surveys isurvey1 and isurvey2 */
+          for (int i = 0; i < project.num_crossings; i++) {
+            crossing = &project.crossings[i];
+            for (int j = 0; j < crossing->num_ties; j++) {
+              tie = &crossing->ties[j];
+
+              /* check if this tie is between the desired surveys */
+              if (tie->isurveyplotindex >= 0 && ((tie->block_1 == isurvey1 && tie->block_2 == isurvey2) ||
+                                                 (tie->block_2 == isurvey1 && tie->block_1 == isurvey2))) {
+                /* set plot index for tie */
+                tie->isurveyplotindex = plot_index;
+
+                /* increment plot_index */
+                plot_index++;
+
+                /* if tie will be plotted (check for zoom) use it for min max */
+                if (tie->isurveyplotindex >= 0 && (tie->isurveyplotindex >= mbna_modelplot_tiestart &&
+                                                   tie->isurveyplotindex <= mbna_modelplot_tieend)) {
+                  if (first) {
+                    lon_offset_min = tie->offset_x_m;
+                    lon_offset_max = tie->offset_x_m;
+                    lat_offset_min = tie->offset_y_m;
+                    lat_offset_max = tie->offset_y_m;
+                    z_offset_min = tie->offset_z_m;
+                    z_offset_max = tie->offset_z_m;
+                    first = false;
+                  }
+                  else {
+                    lon_offset_min = MIN(lon_offset_min, tie->offset_x_m);
+                    lon_offset_max = MAX(lon_offset_max, tie->offset_x_m);
+                    lat_offset_min = MIN(lat_offset_min, tie->offset_y_m);
+                    lat_offset_max = MAX(lat_offset_max, tie->offset_y_m);
+                    z_offset_min = MIN(z_offset_min, tie->offset_z_m);
+                    z_offset_max = MAX(z_offset_max, tie->offset_z_m);
+                  }
                 }
               }
             }
@@ -15395,81 +15445,149 @@ int mbnavadjust_modelplot_plot_tieoffsets() {
     /* set clipping */
     xg_setclip(pmodp_xgid, mbna_modelplot_xo, 0, plot_width, mbna_modelplot_height);
 
-    /* loop over surveys to locate each tie in plot */
-    plot_index = 0;
-    for (int isurvey2 = 0; isurvey2 < num_surveys; isurvey2++) {
-      for (int isurvey1 = 0; isurvey1 <= isurvey2; isurvey1++) {
-        num_ties_block = 0;
+    /* plot ties from a single block, survey, file, or section */
+    if (mbna_view_mode == MBNA_VIEW_MODE_BLOCK
+        || mbna_view_mode == MBNA_VIEW_MODE_SURVEY
+        || mbna_view_mode == MBNA_VIEW_MODE_FILE) {
+      /* loop over all ties looking for ones in current plot block
+          - current plot block for a specified survey, a specified file, or for
+            ties between two specified surveys */
 
-        /* loop over all ties looking for ones in current plot block
-            - current plot block is for ties between
-            surveys isurvey1 and isurvey2 */
-        for (int i = 0; i < project.num_crossings; i++) {
-          crossing = &project.crossings[i];
-          for (int j = 0; j < crossing->num_ties; j++) {
-            tie = &crossing->ties[j];
+      plot_index = 0;
+      num_ties_block = 0;
 
-            /* check if this tie is between the desired surveys */
-            if (tie->isurveyplotindex >= 0 && ((tie->block_1 == isurvey1 && tie->block_2 == isurvey2) ||
-                                               (tie->block_2 == isurvey1 && tie->block_1 == isurvey2))) {
-              if (tie->isurveyplotindex >= mbna_modelplot_tiestart &&
-                  tie->isurveyplotindex <= mbna_modelplot_tieend) {
-                /* plot tie */
-                if (tie->inversion_status == MBNA_INVERSION_CURRENT)
-                  pixel = pixel_values[mbna_color_foreground];
-                else
-                  pixel = pixel_values[BLUE];
+      for (int i = 0; i < project.num_crossings; i++) {
+        crossing = &project.crossings[i];
+        for (int j = 0; j < crossing->num_ties; j++) {
+          tie = &crossing->ties[j];
 
-                ix = mbna_modelplot_xo +
-                     (int)(mbna_modelplot_xscale * (tie->isurveyplotindex - mbna_modelplot_tiestart));
+          /* check if this tie is between the desired start and end */
+          if (tie->isurveyplotindex >= 0) {
+            if (tie->isurveyplotindex >= mbna_modelplot_tiestart &&
+                tie->isurveyplotindex <= mbna_modelplot_tieend) {
+              /* plot tie */
+              if (tie->inversion_status == MBNA_INVERSION_CURRENT)
+                pixel = pixel_values[mbna_color_foreground];
+              else
+                pixel = pixel_values[BLUE];
 
-                iy = mbna_modelplot_yo_lon - (int)(mbna_modelplot_yscale * tie->offset_x_m);
-                if (i == mbna_current_crossing && j == mbna_current_tie) {
-                  xg_fillrectangle(pmodp_xgid, ix - 3, iy - 3, 7, 7, pixel_values[RED], XG_SOLIDLINE);
-                  xg_drawrectangle(pmodp_xgid, ix - 3, iy - 3, 7, 7, pixel_values[mbna_color_foreground],
-                                   XG_SOLIDLINE);
-                }
-                else
-                  xg_drawrectangle(pmodp_xgid, ix - 2, iy - 2, 5, 5, pixel, XG_SOLIDLINE);
+              ix = mbna_modelplot_xo +
+                   (int)(mbna_modelplot_xscale * (tie->isurveyplotindex - mbna_modelplot_tiestart));
 
-                iy = mbna_modelplot_yo_lat - (int)(mbna_modelplot_yscale * tie->offset_y_m);
-                if (i == mbna_current_crossing && j == mbna_current_tie) {
-                  xg_fillrectangle(pmodp_xgid, ix - 3, iy - 3, 7, 7, pixel_values[RED], XG_SOLIDLINE);
-                  xg_drawrectangle(pmodp_xgid, ix - 3, iy - 3, 7, 7, pixel_values[mbna_color_foreground],
-                                   XG_SOLIDLINE);
-                }
-                else
-                  xg_drawrectangle(pmodp_xgid, ix - 2, iy - 2, 5, 5, pixel, XG_SOLIDLINE);
-
-                iy = mbna_modelplot_yo_z - (int)(mbna_modelplot_yzscale * tie->offset_z_m);
-                if (i == mbna_current_crossing && j == mbna_current_tie) {
-                  xg_fillrectangle(pmodp_xgid, ix - 3, iy - 3, 7, 7, pixel_values[RED], XG_SOLIDLINE);
-                  xg_drawrectangle(pmodp_xgid, ix - 3, iy - 3, 7, 7, pixel_values[mbna_color_foreground],
-                                   XG_SOLIDLINE);
-                }
-                else
-                  xg_drawrectangle(pmodp_xgid, ix - 2, iy - 2, 5, 5, pixel, XG_SOLIDLINE);
+              iy = mbna_modelplot_yo_lon - (int)(mbna_modelplot_yscale * tie->offset_x_m);
+              if (i == mbna_current_crossing && j == mbna_current_tie) {
+                xg_fillrectangle(pmodp_xgid, ix - 3, iy - 3, 7, 7, pixel_values[RED], XG_SOLIDLINE);
+                xg_drawrectangle(pmodp_xgid, ix - 3, iy - 3, 7, 7, pixel_values[mbna_color_foreground],
+                                 XG_SOLIDLINE);
               }
+              else
+                xg_drawrectangle(pmodp_xgid, ix - 2, iy - 2, 5, 5, pixel, XG_SOLIDLINE);
 
-              /* increment plot_index */
-              plot_index++;
+              iy = mbna_modelplot_yo_lat - (int)(mbna_modelplot_yscale * tie->offset_y_m);
+              if (i == mbna_current_crossing && j == mbna_current_tie) {
+                xg_fillrectangle(pmodp_xgid, ix - 3, iy - 3, 7, 7, pixel_values[RED], XG_SOLIDLINE);
+                xg_drawrectangle(pmodp_xgid, ix - 3, iy - 3, 7, 7, pixel_values[mbna_color_foreground],
+                                 XG_SOLIDLINE);
+              }
+              else
+                xg_drawrectangle(pmodp_xgid, ix - 2, iy - 2, 5, 5, pixel, XG_SOLIDLINE);
 
-              /* increment num_ties_block */
-              num_ties_block++;
+              iy = mbna_modelplot_yo_z - (int)(mbna_modelplot_yzscale * tie->offset_z_m);
+              if (i == mbna_current_crossing && j == mbna_current_tie) {
+                xg_fillrectangle(pmodp_xgid, ix - 3, iy - 3, 7, 7, pixel_values[RED], XG_SOLIDLINE);
+                xg_drawrectangle(pmodp_xgid, ix - 3, iy - 3, 7, 7, pixel_values[mbna_color_foreground],
+                                 XG_SOLIDLINE);
+              }
+              else
+                xg_drawrectangle(pmodp_xgid, ix - 2, iy - 2, 5, 5, pixel, XG_SOLIDLINE);
             }
+
+            /* increment plot_index */
+            plot_index++;
+
+            /* increment num_ties_block */
+            num_ties_block++;
           }
         }
+      }
+    }
 
-        /* plot line for boundary between plot blocks */
-        if (num_ties_block > 0) {
+    /* else loop over survey by survey blocks to locate each tie in plot */
+    else {
+      for (int isurvey2 = 0; isurvey2 < num_surveys; isurvey2++) {
+        for (int isurvey1 = 0; isurvey1 <= isurvey2; isurvey1++) {
+          num_ties_block = 0;
+
+          /* loop over all ties looking for ones in current plot block
+              - current plot block is for ties between
+              surveys isurvey1 and isurvey2 */
+          for (int i = 0; i < project.num_crossings; i++) {
+            crossing = &project.crossings[i];
+            for (int j = 0; j < crossing->num_ties; j++) {
+              tie = &crossing->ties[j];
+
+              /* check if this tie is between the desired surveys */
+              if (tie->isurveyplotindex >= 0 && ((tie->block_1 == isurvey1 && tie->block_2 == isurvey2) ||
+                                                 (tie->block_2 == isurvey1 && tie->block_1 == isurvey2))) {
+                if (tie->isurveyplotindex >= mbna_modelplot_tiestart &&
+                    tie->isurveyplotindex <= mbna_modelplot_tieend) {
+                  /* plot tie */
+                  if (tie->inversion_status == MBNA_INVERSION_CURRENT)
+                    pixel = pixel_values[mbna_color_foreground];
+                  else
+                    pixel = pixel_values[BLUE];
+
+                  ix = mbna_modelplot_xo +
+                       (int)(mbna_modelplot_xscale * (tie->isurveyplotindex - mbna_modelplot_tiestart));
+
+                  iy = mbna_modelplot_yo_lon - (int)(mbna_modelplot_yscale * tie->offset_x_m);
+                  if (i == mbna_current_crossing && j == mbna_current_tie) {
+                    xg_fillrectangle(pmodp_xgid, ix - 3, iy - 3, 7, 7, pixel_values[RED], XG_SOLIDLINE);
+                    xg_drawrectangle(pmodp_xgid, ix - 3, iy - 3, 7, 7, pixel_values[mbna_color_foreground],
+                                     XG_SOLIDLINE);
+                  }
+                  else
+                    xg_drawrectangle(pmodp_xgid, ix - 2, iy - 2, 5, 5, pixel, XG_SOLIDLINE);
+
+                  iy = mbna_modelplot_yo_lat - (int)(mbna_modelplot_yscale * tie->offset_y_m);
+                  if (i == mbna_current_crossing && j == mbna_current_tie) {
+                    xg_fillrectangle(pmodp_xgid, ix - 3, iy - 3, 7, 7, pixel_values[RED], XG_SOLIDLINE);
+                    xg_drawrectangle(pmodp_xgid, ix - 3, iy - 3, 7, 7, pixel_values[mbna_color_foreground],
+                                     XG_SOLIDLINE);
+                  }
+                  else
+                    xg_drawrectangle(pmodp_xgid, ix - 2, iy - 2, 5, 5, pixel, XG_SOLIDLINE);
+
+                  iy = mbna_modelplot_yo_z - (int)(mbna_modelplot_yzscale * tie->offset_z_m);
+                  if (i == mbna_current_crossing && j == mbna_current_tie) {
+                    xg_fillrectangle(pmodp_xgid, ix - 3, iy - 3, 7, 7, pixel_values[RED], XG_SOLIDLINE);
+                    xg_drawrectangle(pmodp_xgid, ix - 3, iy - 3, 7, 7, pixel_values[mbna_color_foreground],
+                                     XG_SOLIDLINE);
+                  }
+                  else
+                    xg_drawrectangle(pmodp_xgid, ix - 2, iy - 2, 5, 5, pixel, XG_SOLIDLINE);
+                }
+
+                /* increment plot_index */
+                plot_index++;
+
+                /* increment num_ties_block */
+                num_ties_block++;
+              }
+            }
+          }
+
           /* plot line for boundary between plot blocks */
-          ix = mbna_modelplot_xo + (int)(mbna_modelplot_xscale * (plot_index - mbna_modelplot_tiestart - 0.5));
-          xg_drawline(pmodp_xgid, ix, mbna_modelplot_yo_lon - plot_height / 2, ix,
-                      mbna_modelplot_yo_lon + plot_height / 2, pixel_values[GREEN], XG_DASHLINE);
-          xg_drawline(pmodp_xgid, ix, mbna_modelplot_yo_lat - plot_height / 2, ix,
-                      mbna_modelplot_yo_lat + plot_height / 2, pixel_values[GREEN], XG_DASHLINE);
-          xg_drawline(pmodp_xgid, ix, mbna_modelplot_yo_z - plot_height / 2, ix, mbna_modelplot_yo_z + plot_height / 2,
-                      pixel_values[GREEN], XG_DASHLINE);
+          if (num_ties_block > 0) {
+            /* plot line for boundary between plot blocks */
+            ix = mbna_modelplot_xo + (int)(mbna_modelplot_xscale * (plot_index - mbna_modelplot_tiestart - 0.5));
+            xg_drawline(pmodp_xgid, ix, mbna_modelplot_yo_lon - plot_height / 2, ix,
+                        mbna_modelplot_yo_lon + plot_height / 2, pixel_values[GREEN], XG_DASHLINE);
+            xg_drawline(pmodp_xgid, ix, mbna_modelplot_yo_lat - plot_height / 2, ix,
+                        mbna_modelplot_yo_lat + plot_height / 2, pixel_values[GREEN], XG_DASHLINE);
+            xg_drawline(pmodp_xgid, ix, mbna_modelplot_yo_z - plot_height / 2, ix, mbna_modelplot_yo_z + plot_height / 2,
+                        pixel_values[GREEN], XG_DASHLINE);
+          }
         }
       }
     }

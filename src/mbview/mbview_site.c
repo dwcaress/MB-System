@@ -475,7 +475,7 @@ int mbview_pick_site_select(size_t instance, int which, int xpixel, int ypixel) 
 	if (shared.shareddata.site_mode != MBV_SITE_OFF && shared.shareddata.nsite > 0 &&
 	    (which == MBV_PICK_DOWN || shared.shareddata.site_selected == MBV_SELECT_NONE)) {
 		/* look for point */
-		int found;
+		bool found;
 		double xgrid, ygrid;
 		double xlon, ylat, zdata;
 		double xdisplay, ydisplay, zdisplay;
@@ -511,7 +511,7 @@ int mbview_pick_site_select(size_t instance, int which, int xpixel, int ypixel) 
 	else if (shared.shareddata.site_mode != MBV_SITE_OFF && shared.shareddata.nsite > 0 &&
 	         (which == MBV_PICK_MOVE && shared.shareddata.site_selected != MBV_SELECT_NONE)) {
 		/* look for point */
-		int found;
+		bool found;
 		double xgrid, ygrid;
 		double xlon, ylat, zdata;
 		double xdisplay, ydisplay, zdisplay;
@@ -621,7 +621,7 @@ int mbview_pick_site_add(size_t instance, int which, int xpixel, int ypixel) {
 	if (shared.shareddata.site_mode == MBV_SITE_EDIT &&
 	    (which == MBV_PICK_DOWN || shared.shareddata.site_selected == MBV_SELECT_NONE)) {
 		/* look for point */
-		int found;
+		bool found;
 		double xgrid, ygrid;
 		double xlon, ylat, zdata;
 		double xdisplay, ydisplay, zdisplay;
@@ -694,7 +694,7 @@ int mbview_pick_site_add(size_t instance, int which, int xpixel, int ypixel) {
 	else if (shared.shareddata.site_mode != MBV_SITE_OFF && shared.shareddata.nsite > 0 &&
 	         (which == MBV_PICK_MOVE && shared.shareddata.site_selected != MBV_SELECT_NONE)) {
 		/* look for point */
-		int found;
+		bool found;
 		double xgrid, ygrid;
 		double xlon, ylat, zdata;
 		double xdisplay, ydisplay, zdisplay;
@@ -792,7 +792,7 @@ int mbview_pick_site_delete(size_t instance, int xpixel, int ypixel) {
 	/* only delete a selected site if enabled */
 	if (shared.shareddata.site_mode == MBV_SITE_EDIT && shared.shareddata.site_selected != MBV_SELECT_NONE) {
 		/* look for point */
-		int found;
+		bool found;
 		double xgrid, ygrid;
 		double xlon, ylat, zdata;
 		double xdisplay, ydisplay, zdisplay;

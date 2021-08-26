@@ -162,7 +162,7 @@ int mbview_getroutepointcount(int verbose, size_t instance, int route, int *npoi
 	return (status);
 }
 /*------------------------------------------------------------------------------*/
-int mbview_getrouteselected(int verbose, size_t instance, int route, int *selected, int *error) {
+int mbview_getrouteselected(int verbose, size_t instance, int route, bool *selected, int *error) {
 	/* local variables */
 	int status = MB_SUCCESS;
 
@@ -1079,7 +1079,7 @@ int mbview_pick_route_select(int verbose, size_t instance, int which, int xpixel
 	int status = MB_SUCCESS;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
-	int found;
+	bool found;
 	double xgrid, ygrid;
 	double xlon, ylat, zdata;
 	double xdisplay, ydisplay, zdisplay;
@@ -1426,7 +1426,7 @@ int mbview_pick_route_add(int verbose, size_t instance, int which, int xpixel, i
 	int status = MB_SUCCESS;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
-	int found;
+	bool found;
 	double xgrid, ygrid;
 	double xlon, ylat, zdata;
 	double xdisplay, ydisplay, zdisplay;
@@ -1643,7 +1643,7 @@ int mbview_pick_route_delete(int verbose, size_t instance, int xpixel, int ypixe
 
 	/* local variables */
 	int status = MB_SUCCESS;
-	int found;
+	bool found;
 	double xgrid, ygrid;
 	double xlon, ylat, zdata;
 	double xdisplay, ydisplay, zdisplay;

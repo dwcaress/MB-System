@@ -306,15 +306,11 @@ int mbview_freenavarrays(int verbose, double **time_d, double **navlon, double *
 }
 
 /*------------------------------------------------------------------------------*/
-// TODO(schwehr): bool navswathbounds
-// TODO(schwehr): bool navline
-// TODO(schwehr): bool navshot
-// TODO(schwehr): bool navcdp
 int mbview_addnav(int verbose, size_t instance, int npoint, double *time_d, double *navlon, double *navlat, double *navz,
                   double *heading, double *speed, double *navportlon, double *navportlat, double *navstbdlon, double *navstbdlat,
                   unsigned int *line, unsigned int *shot, unsigned int *cdp, int navcolor, int navsize, mb_path navname, int navpathstatus,
-                  mb_path navpathraw, mb_path navpathprocessed, int navformat, int navswathbounds, int navline, int navshot,
-                  int navcdp, int decimation, int *error) {
+                  mb_path navpathraw, mb_path navpathprocessed, int navformat, bool navswathbounds, bool navline, bool navshot,
+                  bool navcdp, int decimation, int *error) {
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
@@ -785,7 +781,7 @@ int mbview_pick_nav_select(size_t instance, int select, int which, int xpixel, i
 			/* select first pick - usually this is an MBV_PICK_DOWN event */
 			if (which == MBV_PICK_DOWN || shared.shareddata.nav_selected[0] == MBV_SELECT_NONE) {
 				/* look for point */
-				int found;
+				bool found;
 				double xgrid;
 				double ygrid;
 				double xlon;
@@ -870,7 +866,7 @@ int mbview_pick_nav_select(size_t instance, int select, int which, int xpixel, i
 			/* select second point if MBV_PICK_MOVE event */
 			else if (which == MBV_PICK_MOVE) {
 				/* look for point */
-				int found;
+				bool found;
 				double xgrid;
 				double ygrid;
 				double xlon;
@@ -1058,7 +1054,7 @@ int mbview_pick_nav_select(size_t instance, int select, int which, int xpixel, i
 				}
 
 				/* look for point */
-				int found;
+				bool found;
 				double xgrid;
 				double ygrid;
 				double xlon;
@@ -1138,7 +1134,7 @@ int mbview_pick_nav_select(size_t instance, int select, int which, int xpixel, i
 			/* select second point if MBV_PICK_MOVE event */
 			else if (which == MBV_PICK_MOVE) {
 				/* look for point */
-				int found;
+				bool found;
 				double xgrid;
 				double ygrid;
 				double xlon;
@@ -1786,7 +1782,7 @@ int mbview_navpicksize(size_t instance) {
 			    shared.shareddata.navpick.xpoints[i].ydisplay[instance], shared.shareddata.navpick.xpoints[i].zdisplay[instance],
 			    &shared.shareddata.navpick.xpoints[i].xlon, &shared.shareddata.navpick.xpoints[i].ylat,
 			    &shared.shareddata.navpick.xpoints[i].xgrid[instance], &shared.shareddata.navpick.xpoints[i].ygrid[instance]);
-			int found;
+			bool found;
 			mbview_getzdata(instance, shared.shareddata.navpick.xpoints[i].xgrid[instance],
 			                shared.shareddata.navpick.xpoints[i].ygrid[instance], &found,
 			                &shared.shareddata.navpick.xpoints[i].zdata);
@@ -1833,7 +1829,7 @@ int mbview_navpicksize(size_t instance) {
 			    shared.shareddata.navpick.xpoints[i].ydisplay[instance], shared.shareddata.navpick.xpoints[i].zdisplay[instance],
 			    &shared.shareddata.navpick.xpoints[i].xlon, &shared.shareddata.navpick.xpoints[i].ylat,
 			    &shared.shareddata.navpick.xpoints[i].xgrid[instance], &shared.shareddata.navpick.xpoints[i].ygrid[instance]);
-			int found;
+			bool found;
 			mbview_getzdata(instance, shared.shareddata.navpick.xpoints[i].xgrid[instance],
 			                shared.shareddata.navpick.xpoints[i].ygrid[instance], &found,
 			                &shared.shareddata.navpick.xpoints[i].zdata);
@@ -2044,17 +2040,11 @@ int mbview_drawnav(size_t instance, int rez) {
 	else
 		stride = data->lorez_navdecimate;
 
-	// TODO(schwehr): Localize
-	int error = MB_ERROR_NO_ERROR;
-	int icolor;
-	int inav;
-	struct mbview_linesegmentw_struct segment;
-
 	/* draw navigation */
 	if (shared.shareddata.nav_mode != MBV_NAV_OFF && data->nav_view_mode == MBV_VIEW_ON && shared.shareddata.nnav > 0) {
 		/* loop over the navs plotting xyz navigation */
-		for (inav = 0; inav < shared.shareddata.nnav; inav++) {
-			icolor = shared.shareddata.navs[inav].color;
+		for (int inav = 0; inav < shared.shareddata.nnav; inav++) {
+			int icolor = shared.shareddata.navs[inav].color;
 			glLineWidth((float)(shared.shareddata.navs[inav].size));
 			glBegin(GL_LINE_STRIP);
 			for (int jpoint = 0; jpoint < shared.shareddata.navs[inav].npoints; jpoint += stride) {
@@ -2083,8 +2073,8 @@ int mbview_drawnav(size_t instance, int rez) {
 	/* draw draped navigation */
 	if (shared.shareddata.nav_mode != MBV_NAV_OFF && data->navdrape_view_mode == MBV_VIEW_ON && shared.shareddata.nnav > 0) {
 		/* loop over the navs plotting draped navigation */
-		for (inav = 0; inav < shared.shareddata.nnav; inav++) {
-			icolor = shared.shareddata.navs[inav].color;
+		for (int inav = 0; inav < shared.shareddata.nnav; inav++) {
+			int icolor = shared.shareddata.navs[inav].color;
 			glLineWidth((float)(shared.shareddata.navs[inav].size));
 			glBegin(GL_LINE_STRIP);
 			for (int jpoint = 0; jpoint < shared.shareddata.navs[inav].npoints - stride; jpoint += stride) {
@@ -2129,12 +2119,13 @@ int mbview_drawnav(size_t instance, int rez) {
 	if (shared.shareddata.nav_mode != MBV_NAV_OFF &&
 	    (data->nav_view_mode == MBV_VIEW_ON || data->navdrape_view_mode == MBV_VIEW_ON) && shared.shareddata.nnav > 0) {
 		/* initialize on the fly draping segment */
+	  struct mbview_linesegmentw_struct segment;
 		segment.nls = 0;
 		segment.nls_alloc = 0;
 		segment.lspoints = NULL;
 
 		/* loop over the navs plotting swathbounds */
-		for (inav = 0; inav < shared.shareddata.nnav; inav++) {
+		for (int inav = 0; inav < shared.shareddata.nnav; inav++) {
 			const double timegapuse = 60.0 * shared.shareddata.navs[inav].decimation * view->timegap;
 			if (shared.shareddata.navs[inav].swathbounds && shared.shareddata.navs[inav].nselected > 0) {
 				glColor3f(colortable_object_red[MBV_COLOR_YELLOW], colortable_object_green[MBV_COLOR_YELLOW],
@@ -2275,6 +2266,7 @@ int mbview_drawnav(size_t instance, int rez) {
 
 		/* deallocate on the fly draping segment */
 		if (segment.nls_alloc > 0 && segment.lspoints != NULL) {
+      int error = MB_ERROR_NO_ERROR;
 			status = mb_freed(mbv_verbose, __FILE__, __LINE__, (void **)&segment.lspoints, &error);
 			segment.nls_alloc = 0;
 		}

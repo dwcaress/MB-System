@@ -23,6 +23,7 @@ Distributions that do not include "beta" in the tag name correspond to the major
 announced releases. The source distributions associated with all releases, major
 or beta, are equally accessible as tarballs through the Github interface.
 
+- Version 5.7.9beta15    August 26, 2021
 - Version 5.7.9beta14    July 25, 2021
 - Version 5.7.9beta13    July 18, 2021
 - Version 5.7.9beta12    July 4, 2021
@@ -392,6 +393,17 @@ or beta, are equally accessible as tarballs through the Github interface.
 --
 ### MB-System Version 5.7 Release Notes:
 --
+
+#### 5.7.9beta15 (August 26, 2021)
+
+Mbnavadjust: Speeded up model tie plots and insured that changes to projects will
+be saved when users quit.
+
+Mbview (mbgrdviz, mbeditviz, mbnavadjust): Addressed a number of code style issues
+particularly using bool rather than int for true/false values.
+
+Mbm_route2mission: added acoustic modem status signal to MBARI AUV missions
+immediately at the end of the "start survey" behavior.
 
 #### 5.7.9beta14 (July 25, 2021)
 

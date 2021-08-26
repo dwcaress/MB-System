@@ -64,10 +64,6 @@
 #include "mbview.h"
 #include "mbviewprivate.h"
 
-// TODO(schwehr): Can these be localized without the static?
-static Cardinal ac;
-static Arg args[256];
-
 // #define MBV_DEBUG_GLX 1
 // #define MBV_GET_GLX_ERRORS 1
 
@@ -105,6 +101,9 @@ int mbview_reset_glx(size_t instance) {
 		mbview_glerrorcheck(instance, __FILE__, __LINE__, __func__);
 #endif
 	}
+
+  Cardinal ac;
+  Arg args[256];
 
 	/* set up a new opengl context */
 	ac = 0;
@@ -1069,7 +1068,7 @@ int mbview_plot(size_t instance, int rez) {
 }
 
 /*------------------------------------------------------------------------------*/
-int mbview_findpoint(size_t instance, int xpixel, int ypixel, int *found, double *xgrid, double *ygrid, double *xlon,
+int mbview_findpoint(size_t instance, int xpixel, int ypixel, bool *found, double *xgrid, double *ygrid, double *xlon,
                      double *ylat, double *zdata, double *xdisplay, double *ydisplay, double *zdisplay) {
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -1202,7 +1201,7 @@ int mbview_findpoint(size_t instance, int xpixel, int ypixel, int *found, double
 }
 
 /*------------------------------------------------------------------------------*/
-int mbview_findpointrez(size_t instance, int rez, int xpixel, int ypixel, int ijbounds[4], int *found, double *xgrid,
+int mbview_findpointrez(size_t instance, int rez, int xpixel, int ypixel, int ijbounds[4], bool *found, double *xgrid,
                         double *ygrid, double *xlon, double *ylat, double *zdata, double *xdisplay, double *ydisplay,
                         double *zdisplay) {
 	if (mbv_verbose >= 2) {
@@ -1483,7 +1482,7 @@ int mbview_viewbounds(size_t instance) {
 
 		// float left2d, right2d;
 		// float bottom2d, top2d;
-		int found;
+		bool found;
 		float rgba[4];
 		int ijbounds[4];
 
@@ -1526,17 +1525,18 @@ int mbview_viewbounds(size_t instance) {
 					const int k = i * data->primary_n_rows + j;
 					if (data->primary_data[k] != data->primary_nodatavalue && data->primary_x[k] >= left2d &&
 					    data->primary_x[k] <= right2d && data->primary_y[k] >= bottom2d && data->primary_y[k] <= top2d) {
-						if (!found) { // TODO(schwehr): if (found)
+            if (found) {
+							data->viewbounds[0] = MIN(i, data->viewbounds[0]);
+							data->viewbounds[1] = MAX(i + stride, data->viewbounds[1]);
+							data->viewbounds[2] = MIN(j, data->viewbounds[2]);
+							data->viewbounds[3] = MAX(j + stride, data->viewbounds[3]);
+            }
+						else {
 							data->viewbounds[0] = i;
 							data->viewbounds[1] = i + stride;
 							data->viewbounds[2] = j;
 							data->viewbounds[3] = j + stride;
 							found = true;
-						} else {
-							data->viewbounds[0] = MIN(i, data->viewbounds[0]);
-							data->viewbounds[1] = MAX(i + stride, data->viewbounds[1]);
-							data->viewbounds[2] = MIN(j, data->viewbounds[2]);
-							data->viewbounds[3] = MAX(j + stride, data->viewbounds[3]);
 						}
 					}
 				}
@@ -1546,18 +1546,18 @@ int mbview_viewbounds(size_t instance) {
 					const int k = i * data->primary_n_rows + j;
 					if (data->primary_data[k] != data->primary_nodatavalue && data->primary_x[k] >= left2d &&
 					    data->primary_x[k] <= right2d && data->primary_y[k] >= bottom2d && data->primary_y[k] <= top2d) {
-						if (!found) {  // TODO(schwehr): if (found)
+						if (found) {
+							data->viewbounds[0] = MIN(i, data->viewbounds[0]);
+							data->viewbounds[1] = MAX(i + stride, data->viewbounds[1]);
+							data->viewbounds[2] = MIN(j, data->viewbounds[2]);
+							data->viewbounds[3] = MAX(j + stride, data->viewbounds[3]);
+						}
+						else {
 							data->viewbounds[0] = i;
 							data->viewbounds[1] = i + stride;
 							data->viewbounds[2] = j;
 							data->viewbounds[3] = j + stride;
 							found = true;
-						}
-						else {
-							data->viewbounds[0] = MIN(i, data->viewbounds[0]);
-							data->viewbounds[1] = MAX(i + stride, data->viewbounds[1]);
-							data->viewbounds[2] = MIN(j, data->viewbounds[2]);
-							data->viewbounds[3] = MAX(j + stride, data->viewbounds[3]);
 						}
 					}
 				}
@@ -1688,24 +1688,19 @@ int mbview_viewbounds(size_t instance) {
 					if (rgba[0] != 1.0 && rgba[1] != 1.0) {
 						const int i = ipickstride * ((int)rint((MBV_PICK_DIVISION + 1.0) * rgba[0]));
 						const int j = jpickstride * ((int)rint((MBV_PICK_DIVISION + 1.0) * rgba[1]));
-						if (!found) {  // TODO(schwehr): if (found)
+						if (found) {
+							data->viewbounds[0] = MIN(i, data->viewbounds[0]);
+							data->viewbounds[1] = MAX(i + stride, data->viewbounds[1]);
+							data->viewbounds[2] = MIN(j, data->viewbounds[2]);
+							data->viewbounds[3] = MAX(j + stride, data->viewbounds[3]);
+						}
+						else {
 							data->viewbounds[0] = i;
 							data->viewbounds[1] = i + stride;
 							data->viewbounds[2] = j;
 							data->viewbounds[3] = j + stride;
 							found = true;
 						}
-						else {
-							data->viewbounds[0] = MIN(i, data->viewbounds[0]);
-							data->viewbounds[1] = MAX(i + stride, data->viewbounds[1]);
-							data->viewbounds[2] = MIN(j, data->viewbounds[2]);
-							data->viewbounds[3] = MAX(j + stride, data->viewbounds[3]);
-						}
-						/*fprintf(stderr,"i:%d j:%d data->viewbounds: %d %d %d %d\n",
-						i,j,data->viewbounds[0],
-						data->viewbounds[1],
-						data->viewbounds[2],
-						data->viewbounds[3]);*/
 					}
 				}
 			}
@@ -1727,24 +1722,19 @@ int mbview_viewbounds(size_t instance) {
 							ijbounds[1] = MIN(i + 2 * ipickstride - 1, data->primary_n_columns - 1);
 							ijbounds[3] = MIN(j + 2 * jpickstride - 1, data->primary_n_rows - 1);
 						}
-						if (!found) {  // TODO(schwehr): if (found)
+						if (found) {
+							data->viewbounds[0] = MIN(ijbounds[0], data->viewbounds[0]);
+							data->viewbounds[1] = MAX(ijbounds[1], data->viewbounds[1]);
+							data->viewbounds[2] = MIN(ijbounds[2], data->viewbounds[2]);
+							data->viewbounds[3] = MAX(ijbounds[3], data->viewbounds[3]);
+						}
+						else {
 							data->viewbounds[0] = ijbounds[0];
 							data->viewbounds[1] = ijbounds[1];
 							data->viewbounds[2] = ijbounds[2];
 							data->viewbounds[3] = ijbounds[3];
 							found = true;
 						}
-						else {
-							data->viewbounds[0] = MIN(ijbounds[0], data->viewbounds[0]);
-							data->viewbounds[1] = MAX(ijbounds[1], data->viewbounds[1]);
-							data->viewbounds[2] = MIN(ijbounds[2], data->viewbounds[2]);
-							data->viewbounds[3] = MAX(ijbounds[3], data->viewbounds[3]);
-						}
-						/*fprintf(stderr,"CORNERS: i:%d j:%d data->viewbounds: %d %d %d %d\n",
-						i,j,data->viewbounds[0],
-						data->viewbounds[1],
-						data->viewbounds[2],
-						data->viewbounds[3]);*/
 					}
 				}
 			}

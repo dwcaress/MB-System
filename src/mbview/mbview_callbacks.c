@@ -88,10 +88,6 @@
 Widget BxFindTopShell(Widget);
 WidgetList BxWidgetIdsFromNames(Widget, char *, char *);
 
-// TODO(schwehr): Can these be moved into the functions and drop static?
-static Arg args[256];
-static char value_text[MB_PATH_MAXLINE];
-
 /*------------------------------------------------------------------------------*/
 int mbview_startup(int verbose, Widget parent, XtAppContext app, int *error) {
 	mbv_verbose = verbose;
@@ -129,7 +125,8 @@ int mbview_startup(int verbose, Widget parent, XtAppContext app, int *error) {
 
 	/* create and manage site list window */
 	shared.init_sitelist = MBV_WINDOW_NULL;
-	Cardinal ac = 0;
+	Arg args[256];
+  Cardinal ac = 0;
 	XtSetArg(args[ac], XmNtitle, "Site List");
 	ac++;
 	shared.topLevelShell_sitelist = XtCreatePopupShell("topLevelShell", topLevelShellWidgetClass, parent_widget, args, ac);
@@ -200,8 +197,7 @@ int mbview_startup(int verbose, Widget parent, XtAppContext app, int *error) {
 }
 
 /*------------------------------------------------------------------------------*/
-// TODO(schwehr): bool mode
-int mbview_reset_shared(int mode) {
+int mbview_reset_shared(bool mode) {
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
@@ -1661,7 +1657,8 @@ int mbview_open(int verbose, size_t instance, int *error) {
 	/* if not yet created then create the MB3DView class in
 	    a topLevelShell as a child of Widget parent */
 	if (view->init != MBV_WINDOW_VISIBLE) {
-		Cardinal ac = 0;
+		Arg args[256];
+    Cardinal ac = 0;
 		XtSetArg(args[ac], XmNtitle, data->title);
 		ac++;
 		XtSetArg(args[ac], XmNwidth, data->width + LEFT_WIDTH);
@@ -2007,6 +2004,7 @@ int mbview_open(int verbose, size_t instance, int *error) {
 	}
 
 	/* set about version label */
+  mb_path value_text;
 	sprintf(value_text, "::#TimesMedium14:t\"MB-System Release %s\"#TimesMedium14\"%s\"", MB_VERSION, MB_BUILD_DATE);
 	set_mbview_label_multiline_string(view->mb3dview.mbview_label_about_version, value_text);
 
@@ -2117,7 +2115,8 @@ int mbview_update_sensitivity(int verbose, size_t instance, int *error) {
 
 	/* set widget sensitivity */
 
-	Cardinal ac = 0;
+	Arg args[256];
+  Cardinal ac = 0;
 	if (data->display_projection_mode == MBV_PROJECTION_SPHEROID) {
 		XtSetArg(args[ac], XmNsensitive, False);
 		ac++;
@@ -2378,7 +2377,8 @@ int mbview_action_sensitivity(size_t instance) {
 	/* now set action buttons according to current pick states */
 	for (int i = 0; i < view->naction; i++) {
 		if (view->pushButton_action[i] != NULL) {
-			Cardinal ac = 0;
+			Arg args[256];
+      Cardinal ac = 0;
 			XtSetArg(args[ac], XmNsensitive, False);
 			if (view->actionsensitive[i] == MBV_PICKMASK_NONE) {
 				XtSetArg(args[ac], XmNsensitive, True);
@@ -2540,10 +2540,10 @@ int mbview_addaction(int verbose, size_t instance, void(mbview_action_notify)(Wi
 	struct mbview_world_struct *view = &(mbviews[instance]);
 
 	/* add pushbutton to action menu */
-	Cardinal ac = 0;
+	Arg args[256];
+  Cardinal ac = 0;
 	Boolean argok = False;
 	XmString tmp0 = (XmString)BX_CONVERT(view->mb3dview.mbview_pulldownMenu_action, label, XmRXmString, 0, &argok);
-	Arg args[256];
 	XtSetArg(args[ac], XmNlabelString, tmp0);
 	if (argok)
 		ac++;
@@ -2715,7 +2715,8 @@ void mbview_resize(Widget w, XtPointer client_data, XEvent *event, Boolean *unus
 			/* set drawing area size */
 			data->width = width - LEFT_WIDTH;
 			data->height = height - LEFT_HEIGHT;
-			Cardinal ac = 0;
+			Arg args[256];
+      Cardinal ac = 0;
 			XtSetArg(args[ac], XmNwidth, data->width);
 			ac++;
 			XtSetArg(args[ac], XmNheight, data->height);
@@ -2757,7 +2758,8 @@ void do_mbview_projection_popup(Widget w, XtPointer client_data, XtPointer call_
 	(void)client_data;  // Unused parameter
 	(void)call_data;  // Unused parameter
 
-	Cardinal ac = 0;
+	Arg args[256];
+  Cardinal ac = 0;
 	size_t instance;
 	XtSetArg(args[ac], XmNuserData, (XtPointer)&instance);
 	ac++;
@@ -2806,6 +2808,7 @@ void do_mbview_set_projection_label(size_t instance) {
 	struct mbview_struct *data = &(view->data);
 
 	/* set projection label */
+  mb_path value_text;
 	sprintf(value_text, ":::t\"Primary Grid Projection:\"");
 	if (data->primary_grid_projection_mode == MBV_PROJECTION_GEOGRAPHIC) {
 		strcat(value_text, ":t\"  Geographic\"");
@@ -2982,7 +2985,8 @@ void do_mbview_projection_popdown(Widget w, XtPointer client_data, XtPointer cal
 	(void)client_data;  // Unused parameter
 	(void)call_data;  // Unused parameter
 
-	Cardinal ac = 0;
+	Arg args[256];
+  Cardinal ac = 0;
 	size_t instance;
 	XtSetArg(args[ac], XmNuserData, (XtPointer)&instance);
 	ac++;
@@ -3001,7 +3005,8 @@ void do_mbview_display_spheroid(Widget w, XtPointer client_data, XtPointer call_
 	(void)client_data;  // Unused parameter
 	(void)call_data;  // Unused parameter
 
-	Cardinal ac = 0;
+	Arg args[256];
+  Cardinal ac = 0;
 	size_t instance;
 	XtSetArg(args[ac], XmNuserData, (XtPointer)&instance);
 	ac++;
@@ -3040,7 +3045,8 @@ void do_mbview_display_geographic(Widget w, XtPointer client_data, XtPointer cal
 	(void)client_data;  // Unused parameter
 	(void)call_data;  // Unused parameter
 
-	Cardinal ac = 0;
+	Arg args[256];
+  Cardinal ac = 0;
 	size_t instance;
 	XtSetArg(args[ac], XmNuserData, (XtPointer)&instance);
 	ac++;
@@ -3083,7 +3089,8 @@ void do_mbview_display_utm(Widget w, XtPointer client_data, XtPointer call_data)
 	double reference_lon;
 	double reference_lat;
 
-	Cardinal ac = 0;
+	Arg args[256];
+  Cardinal ac = 0;
 	XtSetArg(args[ac], XmNuserData, (XtPointer)&instance);
 	ac++;
 	XtGetValues(w, args, ac);
@@ -3133,7 +3140,8 @@ void do_mbview_annotation_degreesminutes(Widget w, XtPointer client_data, XtPoin
 	(void)call_data;  // Unused parameter
 	size_t instance;
 
-	Cardinal ac = 0;
+	Arg args[256];
+  Cardinal ac = 0;
 	XtSetArg(args[ac], XmNuserData, (XtPointer)&instance);
 	ac++;
 	XtGetValues(w, args, ac);
@@ -3155,7 +3163,8 @@ void do_mbview_annotation_degreesdecimal(Widget w, XtPointer client_data, XtPoin
 	(void)call_data;  // Unused parameter
 	size_t instance;
 
-	Cardinal ac = 0;
+	Arg args[256];
+  Cardinal ac = 0;
 	XtSetArg(args[ac], XmNuserData, (XtPointer)&instance);
 	ac++;
 	XtGetValues(w, args, ac);
@@ -3179,7 +3188,8 @@ void do_mbview_glwda_expose(Widget w, XtPointer client_data, XtPointer call_data
 	// mbGLwDrawingAreaCallbackStruct *acs = (mbGLwDrawingAreaCallbackStruct *)call_data;
 	size_t instance;
 
-	Cardinal ac = 0;
+	Arg args[256];
+  Cardinal ac = 0;
 	XtSetArg(args[ac], XmNuserData, (XtPointer)&instance);
 	ac++;
 	XtGetValues(w, args, ac);
@@ -3197,7 +3207,8 @@ void do_mbview_glwda_resize(Widget w, XtPointer client_data, XtPointer call_data
 	// mbGLwDrawingAreaCallbackStruct *acs = (mbGLwDrawingAreaCallbackStruct *)call_data;
 	size_t instance;
 
-	Cardinal ac = 0;
+	Arg args[256];
+  Cardinal ac = 0;
 	XtSetArg(args[ac], XmNuserData, (XtPointer)&instance);
 	ac++;
 	XtGetValues(w, args, ac);
@@ -3205,7 +3216,8 @@ void do_mbview_glwda_resize(Widget w, XtPointer client_data, XtPointer call_data
 /*------------------------------------------------------------------------------*/
 
 void do_mbview_glwda_input(Widget w, XtPointer client_data, XtPointer call_data) {
-	Cardinal ac = 0;
+	Arg args[256];
+  Cardinal ac = 0;
 	size_t instance;
 	XtSetArg(args[ac], XmNuserData, (XtPointer)&instance);
 	ac++;
@@ -3681,6 +3693,7 @@ void do_mbview_glwda_input(Widget w, XtPointer client_data, XtPointer call_data)
 						view->offset2d_y = view->offset2d_y_save - (view->button_move_y - view->button_down_y) *
 						                                               (view->top - view->bottom) / data->height;
 						if (XtIsManaged(view->mb3dview.mbview_textField_view_2doffsetx)) {
+              mb_path value_text;
 							sprintf(value_text, "%g", view->offset2d_x);
 							XmTextFieldSetString(view->mb3dview.mbview_textField_view_2doffsetx, value_text);
 							sprintf(value_text, "%g", view->offset2d_y);
@@ -3694,6 +3707,7 @@ void do_mbview_glwda_input(Widget w, XtPointer client_data, XtPointer call_data)
 						                                               view->aspect_ratio * view->aspect_ratio *
 						                                               MBV_OPENGL_WIDTH * MBV_OPENGL_WIDTH / data->height;
 						if (XtIsManaged(view->mb3dview.mbview_textField_view_3doffsetx)) {
+              mb_path value_text;
 							sprintf(value_text, "%g", view->offset3d_x);
 							XmTextFieldSetString(view->mb3dview.mbview_textField_view_3doffsetx, value_text);
 							sprintf(value_text, "%g", view->offset3d_y);
@@ -3720,6 +3734,7 @@ void do_mbview_glwda_input(Widget w, XtPointer client_data, XtPointer call_data)
 					    view->modelelevation3d_save +
 					    180.0 * ((double)(view->button_move_y - view->button_down_y)) / ((double)data->height);
 					if (XtIsManaged(view->mb3dview.mbview_textField_model_azimuth)) {
+            mb_path value_text;
 						sprintf(value_text, "%g", data->modelazimuth3d);
 						XmTextFieldSetString(view->mb3dview.mbview_textField_model_azimuth, value_text);
 						sprintf(value_text, "%g", data->modelelevation3d);
@@ -3757,6 +3772,7 @@ void do_mbview_glwda_input(Widget w, XtPointer client_data, XtPointer call_data)
 						    view->illuminate_elevation_save +
 						    180.0 * ((double)(view->button_move_y - view->button_down_y)) / ((double)data->height);
 						if (XtIsManaged(view->mb3dview.mbview_textField_illum_azi)) {
+              mb_path value_text;
 							sprintf(value_text, "%g", data->illuminate_azimuth);
 							XmTextFieldSetString(view->mb3dview.mbview_textField_illum_azi, value_text);
 							sprintf(value_text, "%g", data->illuminate_elevation);
@@ -3784,6 +3800,7 @@ void do_mbview_glwda_input(Widget w, XtPointer client_data, XtPointer call_data)
 					    view->viewelevation3d_save +
 					    180.0 * ((double)(view->button_move_y - view->button_down_y)) / ((double)data->height);
 					if (XtIsManaged(view->mb3dview.mbview_textField_view_azimuth)) {
+            mb_path value_text;
 						sprintf(value_text, "%g", data->viewazimuth3d);
 						XmTextFieldSetString(view->mb3dview.mbview_textField_view_azimuth, value_text);
 						sprintf(value_text, "%g", data->viewelevation3d);
@@ -3874,6 +3891,7 @@ void do_mbview_glwda_input(Widget w, XtPointer client_data, XtPointer call_data)
 						view->size2d = view->size2d_save *
 						               exp(((double)(view->button_down_y - view->button_move_y)) / ((double)data->height));
 						if (XtIsManaged(view->mb3dview.mbview_textField_view_2dzoom)) {
+              mb_path value_text;
 							sprintf(value_text, "%g", view->size2d);
 							XmTextFieldSetString(view->mb3dview.mbview_textField_view_2dzoom, value_text);
 						}
@@ -3884,6 +3902,7 @@ void do_mbview_glwda_input(Widget w, XtPointer client_data, XtPointer call_data)
 						view->offset3d_z = view->offset3d_z_save +
 						                   2.0 * (((double)(view->button_down_y - view->button_move_y)) / ((double)data->height));
 						if (XtIsManaged(view->mb3dview.mbview_textField_model_3dzoom)) {
+              mb_path value_text;
 							sprintf(value_text, "%g", view->offset3d_z);
 							XmTextFieldSetString(view->mb3dview.mbview_textField_model_3dzoom, value_text);
 						}
@@ -3908,6 +3927,7 @@ void do_mbview_glwda_input(Widget w, XtPointer client_data, XtPointer call_data)
 						view->zorigin = data->exageration * 0.5 * (data->primary_min + data->primary_max);
 					}
 					if (XtIsManaged(view->mb3dview.mbview_textField_exageration)) {
+            mb_path value_text;
 						sprintf(value_text, "%g", data->exageration);
 						XmTextFieldSetString(view->mb3dview.mbview_textField_exageration, value_text);
 					}
@@ -3949,6 +3969,7 @@ void do_mbview_glwda_input(Widget w, XtPointer client_data, XtPointer call_data)
 						    view->illuminate_magnitude_save *
 						    exp(((double)(view->button_down_y - view->button_move_y)) / ((double)data->height));
 						if (XtIsManaged(view->mb3dview.mbview_textField_illum_amp)) {
+              mb_path value_text;
 							sprintf(value_text, "%g", data->illuminate_magnitude);
 							XmTextFieldSetString(view->mb3dview.mbview_textField_illum_amp, value_text);
 						}
@@ -3971,6 +3992,7 @@ void do_mbview_glwda_input(Widget w, XtPointer client_data, XtPointer call_data)
 						    view->slope_magnitude_save *
 						    exp(((double)(view->button_down_y - view->button_move_y)) / ((double)data->height));
 						if (XtIsManaged(view->mb3dview.mbview_textField_slope_amp)) {
+              mb_path value_text;
 							sprintf(value_text, "%g", data->slope_magnitude);
 							XmTextFieldSetString(view->mb3dview.mbview_textField_slope_amp, value_text);
 						}
@@ -3993,6 +4015,7 @@ void do_mbview_glwda_input(Widget w, XtPointer client_data, XtPointer call_data)
 						    view->overlay_shade_magnitude_save *
 						    exp(((double)(view->button_down_y - view->button_move_y)) / ((double)data->height));
 						if (XtIsManaged(view->mb3dview.mbview_textField_overlay_amp)) {
+              mb_path value_text;
 							sprintf(value_text, "%g", data->overlay_shade_magnitude);
 							XmTextFieldSetString(view->mb3dview.mbview_textField_overlay_amp, value_text);
 						}
@@ -4016,6 +4039,7 @@ void do_mbview_glwda_input(Widget w, XtPointer client_data, XtPointer call_data)
 						view->size2d = view->size2d_save *
 						               exp(((double)(view->button_down_y - view->button_move_y)) / ((double)data->height));
 						if (XtIsManaged(view->mb3dview.mbview_textField_view_2dzoom)) {
+              mb_path value_text;
 							sprintf(value_text, "%g", view->size2d);
 							XmTextFieldSetString(view->mb3dview.mbview_textField_view_2dzoom, value_text);
 						}
@@ -4027,6 +4051,7 @@ void do_mbview_glwda_input(Widget w, XtPointer client_data, XtPointer call_data)
 						    view->viewoffset3d_z_save +
 						    2.0 * (((double)(view->button_down_y - view->button_move_y)) / ((double)data->height));
 						if (XtIsManaged(view->mb3dview.mbview_textField_view_3dzoom)) {
+							mb_path value_text;
 							sprintf(value_text, "%g", view->viewoffset3d_z);
 							XmTextFieldSetString(view->mb3dview.mbview_textField_view_3dzoom, value_text);
 						}
@@ -4356,7 +4381,8 @@ void do_mbview_dismiss(Widget w, XtPointer client_data, XtPointer call_data) {
 	(void)client_data;  // Unused parameter
 	(void)call_data;  // Unused parameter
 
-	Cardinal ac = 0;
+	Arg args[256];
+  Cardinal ac = 0;
 	size_t instance;
 	XtSetArg(args[ac], XmNuserData, (XtPointer)&instance);
 	ac++;
@@ -4381,7 +4407,8 @@ void do_mbview_goaway(Widget w, XtPointer client_data, XtPointer call_data) {
 	(void)client_data;  // Unused parameter
 	(void)call_data;  // Unused parameter
 
-	Cardinal ac = 0;
+	Arg args[256];
+  Cardinal ac = 0;
 	size_t instance;
 	XtSetArg(args[ac], XmNuserData, (XtPointer)&instance);
 	ac++;
@@ -4397,8 +4424,7 @@ void do_mbview_goaway(Widget w, XtPointer client_data, XtPointer call_data) {
 	}
 }
 /*------------------------------------------------------------------------------*/
-// TODO(schwehr): bool destroywidgets
-int mbview_destroy(int verbose, size_t instance, int destroywidgets, int *error) {
+int mbview_destroy(int verbose, size_t instance, bool destroywidgets, int *error) {
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
@@ -4667,7 +4693,8 @@ void do_mbview_display_2D(Widget w, XtPointer client_data, XtPointer call_data) 
 	(void)client_data;  // Unused parameter
 	(void)call_data;  // Unused parameter
 
-	Cardinal ac = 0;
+	Arg args[256];
+  Cardinal ac = 0;
 	size_t instance;
 	XtSetArg(args[ac], XmNuserData, (XtPointer)&instance);
 	ac++;
@@ -4705,7 +4732,8 @@ void do_mbview_display_3D(Widget w, XtPointer client_data, XtPointer call_data) 
 	(void)client_data;  // Unused parameter
 	(void)call_data;  // Unused parameter
 
-	Cardinal ac = 0;
+	Arg args[256];
+  Cardinal ac = 0;
 	size_t instance;
 	XtSetArg(args[ac], XmNuserData, (XtPointer)&instance);
 	ac++;
@@ -4743,7 +4771,8 @@ void do_mbview_data_primary(Widget w, XtPointer client_data, XtPointer call_data
 	(void)client_data;  // Unused parameter
 	(void)call_data;  // Unused parameter
 
-	Cardinal ac = 0;
+	Arg args[256];
+  Cardinal ac = 0;
 	size_t instance;
 	XtSetArg(args[ac], XmNuserData, (XtPointer)&instance);
 	ac++;
@@ -4784,7 +4813,8 @@ void do_mbview_data_primaryslope(Widget w, XtPointer client_data, XtPointer call
 	(void)client_data;  // Unused parameter
 	(void)call_data;  // Unused parameter
 
-	Cardinal ac = 0;
+	Arg args[256];
+  Cardinal ac = 0;
 	size_t instance;
 	XtSetArg(args[ac], XmNuserData, (XtPointer)&instance);
 	ac++;
@@ -4825,7 +4855,8 @@ void do_mbview_data_secondary(Widget w, XtPointer client_data, XtPointer call_da
 	(void)client_data;  // Unused parameter
 	(void)call_data;  // Unused parameter
 
-	Cardinal ac = 0;
+	Arg args[256];
+  Cardinal ac = 0;
 	size_t instance;
 	XtSetArg(args[ac], XmNuserData, (XtPointer)&instance);
 	ac++;
@@ -4866,7 +4897,8 @@ void do_mbview_histogram(Widget w, XtPointer client_data, XtPointer call_data) {
 	(void)client_data;  // Unused parameter
 	(void)call_data;  // Unused parameter
 
-	Cardinal ac = 0;
+	Arg args[256];
+  Cardinal ac = 0;
 	size_t instance;
 	XtSetArg(args[ac], XmNuserData, (XtPointer)&instance);
 	ac++;
@@ -4910,7 +4942,8 @@ void do_mbview_overlay_none(Widget w, XtPointer client_data, XtPointer call_data
 	(void)client_data;  // Unused parameter
 	(void)call_data;  // Unused parameter
 
-	Cardinal ac = 0;
+	Arg args[256];
+  Cardinal ac = 0;
 	size_t instance;
 	XtSetArg(args[ac], XmNuserData, (XtPointer)&instance);
 	ac++;
@@ -4955,7 +4988,8 @@ void do_mbview_overlay_slope(Widget w, XtPointer client_data, XtPointer call_dat
 	(void)client_data;  // Unused parameter
 	(void)call_data;  // Unused parameter
 
-	Cardinal ac = 0;
+	Arg args[256];
+  Cardinal ac = 0;
 	size_t instance;
 	XtSetArg(args[ac], XmNuserData, (XtPointer)&instance);
 	ac++;
@@ -5001,7 +5035,8 @@ void do_mbview_overlay_illumination(Widget w, XtPointer client_data, XtPointer c
 	(void)client_data;  // Unused parameter
 	(void)call_data;  // Unused parameter
 
-	Cardinal ac = 0;
+	Arg args[256];
+  Cardinal ac = 0;
 	size_t instance;
 	XtSetArg(args[ac], XmNuserData, (XtPointer)&instance);
 	ac++;
@@ -5046,7 +5081,8 @@ void do_mbview_overlay_secondary(Widget w, XtPointer client_data, XtPointer call
 	(void)client_data;  // Unused parameter
 	(void)call_data;  // Unused parameter
 
-	Cardinal ac = 0;
+	Arg args[256];
+  Cardinal ac = 0;
 	size_t instance;
 	XtSetArg(args[ac], XmNuserData, (XtPointer)&instance);
 	ac++;
@@ -5091,7 +5127,8 @@ void do_mbview_overlay_contour(Widget w, XtPointer client_data, XtPointer call_d
 	(void)client_data;  // Unused parameter
 	(void)call_data;  // Unused parameter
 
-	Cardinal ac = 0;
+	Arg args[256];
+  Cardinal ac = 0;
 	size_t instance;
 	XtSetArg(args[ac], XmNuserData, (XtPointer)&instance);
 	ac++;
@@ -5116,7 +5153,8 @@ void do_mbview_site(Widget w, XtPointer client_data, XtPointer call_data) {
 	(void)client_data;  // Unused parameter
 	(void)call_data;  // Unused parameter
 
-	Cardinal ac = 0;
+	Arg args[256];
+  Cardinal ac = 0;
 	size_t instance;
 	XtSetArg(args[ac], XmNuserData, (XtPointer)&instance);
 	ac++;
@@ -5160,7 +5198,8 @@ void do_mbview_route(Widget w, XtPointer client_data, XtPointer call_data) {
 	(void)client_data;  // Unused parameter
 	(void)call_data;  // Unused parameter
 
-	Cardinal ac = 0;
+	Arg args[256];
+  Cardinal ac = 0;
 	size_t instance;
 	XtSetArg(args[ac], XmNuserData, (XtPointer)&instance);
 	ac++;
@@ -5206,7 +5245,8 @@ void do_mbview_nav(Widget w, XtPointer client_data, XtPointer call_data) {
 	(void)client_data;  // Unused parameter
 	(void)call_data;  // Unused parameter
 
-	Cardinal ac = 0;
+	Arg args[256];
+  Cardinal ac = 0;
 	size_t instance;
 	XtSetArg(args[ac], XmNuserData, (XtPointer)&instance);
 	ac++;
@@ -5243,7 +5283,8 @@ void do_mbview_navdrape(Widget w, XtPointer client_data, XtPointer call_data) {
 	(void)client_data;  // Unused parameter
 	(void)call_data;  // Unused parameter
 
-	Cardinal ac = 0;
+	Arg args[256];
+  Cardinal ac = 0;
 	size_t instance;
 	XtSetArg(args[ac], XmNuserData, (XtPointer)&instance);
 	ac++;
@@ -5278,7 +5319,8 @@ void do_mbview_vector(Widget w, XtPointer client_data, XtPointer call_data) {
 	(void)client_data;  // Unused parameter
 	(void)call_data;  // Unused parameter
 
-	Cardinal ac = 0;
+	Arg args[256];
+  Cardinal ac = 0;
 	size_t instance;
 	XtSetArg(args[ac], XmNuserData, (XtPointer)&instance);
 	ac++;
@@ -5314,7 +5356,8 @@ void do_mbview_colortable_haxby(Widget w, XtPointer client_data, XtPointer call_
 	(void)client_data;  // Unused parameter
 	(void)call_data;  // Unused parameter
 
-	Cardinal ac = 0;
+	Arg args[256];
+  Cardinal ac = 0;
 	size_t instance;
 	XtSetArg(args[ac], XmNuserData, (XtPointer)&instance);
 	ac++;
@@ -5362,7 +5405,8 @@ void do_mbview_colortable_bright(Widget w, XtPointer client_data, XtPointer call
 	(void)client_data;  // Unused parameter
 	(void)call_data;  // Unused parameter
 
-	Cardinal ac = 0;
+	Arg args[256];
+  Cardinal ac = 0;
 	size_t instance;
 	XtSetArg(args[ac], XmNuserData, (XtPointer)&instance);
 	ac++;
@@ -5410,7 +5454,8 @@ void do_mbview_colortable_muted(Widget w, XtPointer client_data, XtPointer call_
 	(void)client_data;  // Unused parameter
 	(void)call_data;  // Unused parameter
 
-	Cardinal ac = 0;
+	Arg args[256];
+  Cardinal ac = 0;
 	size_t instance;
 	XtSetArg(args[ac], XmNuserData, (XtPointer)&instance);
 	ac++;
@@ -5458,7 +5503,8 @@ void do_mbview_colortable_gray(Widget w, XtPointer client_data, XtPointer call_d
 	(void)client_data;  // Unused parameter
 	(void)call_data;  // Unused parameter
 
-	Cardinal ac = 0;
+	Arg args[256];
+  Cardinal ac = 0;
 	size_t instance;
 	XtSetArg(args[ac], XmNuserData, (XtPointer)&instance);
 	ac++;
@@ -5506,7 +5552,8 @@ void do_mbview_colortable_flat(Widget w, XtPointer client_data, XtPointer call_d
 	(void)client_data;  // Unused parameter
 	(void)call_data;  // Unused parameter
 
-	Cardinal ac = 0;
+	Arg args[256];
+  Cardinal ac = 0;
 	size_t instance;
 	XtSetArg(args[ac], XmNuserData, (XtPointer)&instance);
 	ac++;
@@ -5555,7 +5602,8 @@ void do_mbview_colortable_sealevel1(Widget w, XtPointer client_data, XtPointer c
 	(void)client_data;  // Unused parameter
 	(void)call_data;  // Unused parameter
 
-	Cardinal ac = 0;
+	Arg args[256];
+  Cardinal ac = 0;
 	size_t instance;
 	XtSetArg(args[ac], XmNuserData, (XtPointer)&instance);
 	ac++;
@@ -5603,7 +5651,8 @@ void do_mbview_colortable_sealevel2(Widget w, XtPointer client_data, XtPointer c
 	(void)client_data;  // Unused parameter
 	(void)call_data;  // Unused parameter
 
-	Cardinal ac = 0;
+	Arg args[256];
+  Cardinal ac = 0;
 	size_t instance;
 	XtSetArg(args[ac], XmNuserData, (XtPointer)&instance);
 	ac++;
@@ -5659,7 +5708,8 @@ void do_mbview_mouse_rmode(Widget w, XtPointer client_data, XtPointer call_data)
 
 	/* do nothing unless calling widget is set */
 	if (acs->event != NULL && acs->set > 0) {
-		Cardinal ac = 0;
+		Arg args[256];
+    Cardinal ac = 0;
 		size_t instance;
 		XtSetArg(args[ac], XmNuserData, (XtPointer)&instance);
 		ac++;
@@ -5764,7 +5814,8 @@ void do_mbview_mouse_mode(Widget w, XtPointer client_data, XtPointer call_data) 
 	// do nothing unless calling widget is set
 	// if (acs->event != NULL && acs->set > 0)
 	{
-		Cardinal ac = 0;
+		Arg args[256];
+    Cardinal ac = 0;
 		size_t instance;
 		XtSetArg(args[ac], XmNuserData, (XtPointer)&instance);
 		ac++;
@@ -5938,8 +5989,9 @@ void set_mbview_mouse_mode(size_t instance, int mode) {
 	}
 
 	/* set label */
+	mb_path value_text;
 	if (data->mouse_mode == MBV_MOUSE_MOVE)
-		sprintf(value_text, ":::t\"Mouse Mode:\":t\"L: Pick\":t\"M: Pan\":t\"R: Zoom\"");
+    sprintf(value_text, ":::t\"Mouse Mode:\":t\"L: Pick\":t\"M: Pan\":t\"R: Zoom\"");
 	else if (data->mouse_mode == MBV_MOUSE_ROTATE)
 		sprintf(value_text, ":::t\"Mouse Mode:\":t\"L: Pick\":t\"M: Rotate\":t\"R:Exageration\"");
 	else if (data->mouse_mode == MBV_MOUSE_SHADE)
@@ -5979,15 +6031,14 @@ void set_mbview_grid_mode(size_t instance, int mode) {
 }
 
 /*------------------------------------------------------------------------------*/
-// TODO(schwehr): bool mode
-void set_mbview_histogram_mode(size_t instance, int mode) {
+void set_mbview_histogram_mode(size_t instance, bool mode) {
 	if (mbv_verbose >= 2)
 		fprintf(stderr, "set_mbview_histogram_mode: instance:%zu mode:%d\n", instance, mode);
 
 	struct mbview_world_struct *view = &(mbviews[instance]);
 
 	MB3DViewData *mb3dviewptr = &(view->mb3dview);
-	// TODO(schwehr): Replace mode with "mode != MBV_SHADE_VIEW_NONE"?
+
 	const Boolean value = mode;
 	XmToggleButtonSetState(mb3dviewptr->mbview_toggleButton_histogram, value, False);
 }
@@ -6144,7 +6195,8 @@ void do_mbview_aboutpopdown(Widget w, XtPointer client_data, XtPointer call_data
 	(void)client_data;  // Unused parameter
 	(void)call_data;  // Unused parameter
 
-	Cardinal ac = 0;
+	Arg args[256];
+  Cardinal ac = 0;
 	size_t instance;
 	XtSetArg(args[ac], XmNuserData, (XtPointer)&instance);
 	ac++;
@@ -6163,7 +6215,8 @@ void do_mbview_aboutpopup(Widget w, XtPointer client_data, XtPointer call_data) 
 	(void)client_data;  // Unused parameter
 	(void)call_data;  // Unused parameter
 
-	Cardinal ac = 0;
+	Arg args[256];
+  Cardinal ac = 0;
 	size_t instance;
 	XtSetArg(args[ac], XmNuserData, (XtPointer)&instance);
 	ac++;
@@ -6183,7 +6236,8 @@ void do_mbview_colorboundspopup(Widget w, XtPointer client_data, XtPointer call_
 	(void)client_data;  // Unused parameter
 	(void)call_data;  // Unused parameter
 
-	Cardinal ac = 0;
+	Arg args[256];
+  Cardinal ac = 0;
 	size_t instance;
 	XtSetArg(args[ac], XmNuserData, (XtPointer)&instance);
 	ac++;
@@ -6196,6 +6250,8 @@ void do_mbview_colorboundspopup(Widget w, XtPointer client_data, XtPointer call_
 	struct mbview_struct *data = &(view->data);
 
 	XtManageChild(view->mb3dview.mbview_bulletinBoard_colorbounds);
+
+	mb_path value_text;
 
 	/* set values of widgets */
 	sprintf(value_text, "%g", data->primary_colortable_min);
@@ -6237,7 +6293,8 @@ void do_mbview_colorboundspopdown(Widget w, XtPointer client_data, XtPointer cal
 	(void)client_data;  // Unused parameter
 	(void)call_data;  // Unused parameter
 
-	Cardinal ac = 0;
+	Arg args[256];
+  Cardinal ac = 0;
 	size_t instance;
 	XtSetArg(args[ac], XmNuserData, (XtPointer)&instance);
 	ac++;
@@ -6256,7 +6313,8 @@ void do_mbview_colorboundsapply(Widget w, XtPointer client_data, XtPointer call_
 	(void)client_data;  // Unused parameter
 	(void)call_data;  // Unused parameter
 
-	Cardinal ac = 0;
+	Arg args[256];
+  Cardinal ac = 0;
 	size_t instance;
 	XtSetArg(args[ac], XmNuserData, (XtPointer)&instance);
 	ac++;
@@ -6267,6 +6325,8 @@ void do_mbview_colorboundsapply(Widget w, XtPointer client_data, XtPointer call_
 
 	struct mbview_world_struct *view = &(mbviews[instance]);
 	struct mbview_struct *data = &(view->data);
+
+	mb_path value_text;
 
 	/* get values of widgets */
 
@@ -6378,7 +6438,8 @@ void do_mbview_shadeparmspopup(Widget w, XtPointer client_data, XtPointer call_d
 	(void)client_data;  // Unused parameter
 	(void)call_data;  // Unused parameter
 
-	Cardinal ac = 0;
+	Arg args[256];
+  Cardinal ac = 0;
 	size_t instance;
 	XtSetArg(args[ac], XmNuserData, (XtPointer)&instance);
 	ac++;
@@ -6391,6 +6452,8 @@ void do_mbview_shadeparmspopup(Widget w, XtPointer client_data, XtPointer call_d
 	struct mbview_struct *data = &(view->data);
 
 	XtManageChild(view->mb3dview.mbview_bulletinBoard_shadeparms);
+
+	mb_path value_text;
 
 	/* set values of widgets */
 	sprintf(value_text, "%g", data->illuminate_magnitude);
@@ -6418,7 +6481,8 @@ void do_mbview_shadeparmspopdown(Widget w, XtPointer client_data, XtPointer call
 	(void)client_data;  // Unused parameter
 	(void)call_data;  // Unused parameter
 
-	Cardinal ac = 0;
+	Arg args[256];
+  Cardinal ac = 0;
 	size_t instance;
 	XtSetArg(args[ac], XmNuserData, (XtPointer)&instance);
 	ac++;
@@ -6437,7 +6501,8 @@ void do_mbview_shadeparmsapply(Widget w, XtPointer client_data, XtPointer call_d
 	(void)client_data;  // Unused parameter
 	(void)call_data;  // Unused parameter
 
-	Cardinal ac = 0;
+	Arg args[256];
+  Cardinal ac = 0;
 	size_t instance;
 	XtSetArg(args[ac], XmNuserData, (XtPointer)&instance);
 	ac++;
@@ -6463,6 +6528,7 @@ void do_mbview_shadeparmsapply(Widget w, XtPointer client_data, XtPointer call_d
 	/* handle illumination */
 	bool change = false;
 
+	mb_path value_text;
 	get_mbview_text_string(view->mb3dview.mbview_textField_illum_amp, value_text);
 	double dvalue;
 	sscanf(value_text, "%lf", &dvalue);
@@ -6544,6 +6610,8 @@ int do_mbview_3dparmstext(size_t instance) {
 	struct mbview_world_struct *view = &(mbviews[instance]);
 	struct mbview_struct *data = &(view->data);
 
+	mb_path value_text;
+
 	/* set values of widgets */
 	sprintf(value_text, "%g", data->modelazimuth3d);
 	XmTextFieldSetString(view->mb3dview.mbview_textField_model_azimuth, value_text);
@@ -6572,7 +6640,8 @@ void do_mbview_3dparmspopup(Widget w, XtPointer client_data, XtPointer call_data
 	(void)client_data;  // Unused parameter
 	(void)call_data;  // Unused parameter
 
-	Cardinal ac = 0;
+	Arg args[256];
+  Cardinal ac = 0;
 	size_t instance;
 	XtSetArg(args[ac], XmNuserData, (XtPointer)&instance);
 	ac++;
@@ -6594,7 +6663,8 @@ void do_mbview_3dparmspopdown(Widget w, XtPointer client_data, XtPointer call_da
 	(void)client_data;  // Unused parameter
 	(void)call_data;  // Unused parameter
 
-	Cardinal ac = 0;
+	Arg args[256];
+  Cardinal ac = 0;
 	size_t instance;
 	XtSetArg(args[ac], XmNuserData, (XtPointer)&instance);
 	ac++;
@@ -6613,7 +6683,8 @@ void do_mbview_3dparmsapply(Widget w, XtPointer client_data, XtPointer call_data
 	(void)client_data;  // Unused parameter
 	(void)call_data;  // Unused parameter
 
-	Cardinal ac = 0;
+	Arg args[256];
+  Cardinal ac = 0;
 	size_t instance;
 	XtSetArg(args[ac], XmNuserData, (XtPointer)&instance);
 	ac++;
@@ -6628,6 +6699,7 @@ void do_mbview_3dparmsapply(Widget w, XtPointer client_data, XtPointer call_data
 	/* get values of widgets */
 
 	bool change = false;
+	mb_path value_text;
 
 	get_mbview_text_string(view->mb3dview.mbview_textField_model_azimuth, value_text);
 	double dvalue;
@@ -6734,6 +6806,8 @@ int do_mbview_2dparmstext(size_t instance) {
 
 	struct mbview_world_struct *view = &(mbviews[instance]);
 
+	mb_path value_text;
+
 	/* set values of widgets */
 	sprintf(value_text, "%g", view->offset2d_x);
 	XmTextFieldSetString(view->mb3dview.mbview_textField_view_2doffsetx, value_text);
@@ -6750,7 +6824,8 @@ void do_mbview_2dparmspopup(Widget w, XtPointer client_data, XtPointer call_data
 	(void)client_data;  // Unused parameter
 	(void)call_data;  // Unused parameter
 
-	Cardinal ac = 0;
+	Arg args[256];
+  Cardinal ac = 0;
 	size_t instance;
 	XtSetArg(args[ac], XmNuserData, (XtPointer)&instance);
 	ac++;
@@ -6772,7 +6847,8 @@ void do_mbview_2dparmspopdown(Widget w, XtPointer client_data, XtPointer call_da
 	(void)client_data;  // Unused parameter
 	(void)call_data;  // Unused parameter
 
-	Cardinal ac = 0;
+	Arg args[256];
+  Cardinal ac = 0;
 	size_t instance;
 	XtSetArg(args[ac], XmNuserData, (XtPointer)&instance);
 	ac++;
@@ -6791,7 +6867,8 @@ void do_mbview_2dparmsapply(Widget w, XtPointer client_data, XtPointer call_data
 	(void)client_data;  // Unused parameter
 	(void)call_data;  // Unused parameter
 
-	Cardinal ac = 0;
+	Arg args[256];
+  Cardinal ac = 0;
 	size_t instance;
 	XtSetArg(args[ac], XmNuserData, (XtPointer)&instance);
 	ac++;
@@ -6806,6 +6883,7 @@ void do_mbview_2dparmsapply(Widget w, XtPointer client_data, XtPointer call_data
 	/* get values of widgets */
 
 	bool change = false;
+	mb_path value_text;
 
 	get_mbview_text_string(view->mb3dview.mbview_textField_view_2doffsetx, value_text);
 	double dvalue;
@@ -6854,7 +6932,8 @@ void do_mbview_resolutionpopup(Widget w, XtPointer client_data, XtPointer call_d
 	(void)client_data;  // Unused parameter
 	(void)call_data;  // Unused parameter
 
-	Cardinal ac = 0;
+	Arg args[256];
+  Cardinal ac = 0;
 	size_t instance;
 	XtSetArg(args[ac], XmNuserData, (XtPointer)&instance);
 	ac++;
@@ -6881,7 +6960,8 @@ void do_mbview_resolutionpopdown(Widget w, XtPointer client_data, XtPointer call
 	(void)client_data;  // Unused parameter
 	(void)call_data;  // Unused parameter
 
-	Cardinal ac = 0;
+	Arg args[256];
+  Cardinal ac = 0;
 	size_t instance;
 	XtSetArg(args[ac], XmNuserData, (XtPointer)&instance);
 	ac++;
@@ -6899,7 +6979,8 @@ void do_mbview_resolutionchange(Widget w, XtPointer client_data, XtPointer call_
 	(void)client_data;  // Unused parameter
 	(void)call_data;  // Unused parameter
 
-	Cardinal ac = 0;
+	Arg args[256];
+  Cardinal ac = 0;
 	size_t instance;
 	XtSetArg(args[ac], XmNuserData, (XtPointer)&instance);
 	ac++;
@@ -7010,7 +7091,8 @@ void do_mbview_sitelistselect(Widget w, XtPointer client_data, XtPointer call_da
 		fprintf(stderr, "do_mbview_sitelistselect:\n");
 
 	/* get position of selected list item */
-	Cardinal ac = 0;
+	Arg args[256];
+  Cardinal ac = 0;
 	int position_count = 0;
 	XtSetArg(args[ac], XmNselectedPositionCount, (XtPointer)&position_count);
 	ac++;
@@ -7073,7 +7155,8 @@ void do_mbview_routelistselect(Widget w, XtPointer client_data, XtPointer call_d
 		fprintf(stderr, "do_mbview_routelistselect:\n");
 
 	/* get position of selected list item */
-	Cardinal ac = 0;
+	Arg args[256];
+  Cardinal ac = 0;
 	int position_count = 0;
 	XtSetArg(args[ac], XmNselectedPositionCount, (XtPointer)&position_count);
 	ac++;
@@ -7168,7 +7251,8 @@ void do_mbview_navlistselect(Widget w, XtPointer client_data, XtPointer call_dat
 		fprintf(stderr, "do_mbview_navlistselect:\n");
 
 	/* get position of selected list item */
-	Cardinal ac = 0;
+	Arg args[256];
+  Cardinal ac = 0;
 	int position_count = 0;
 	XtSetArg(args[ac], XmNselectedPositionCount, (XtPointer)&position_count);
 	ac++;
@@ -7276,7 +7360,8 @@ void do_mbview_sitelist_delete(Widget w, XtPointer client_data, XtPointer call_d
 		fprintf(stderr, "do_mbview_sitelist_delete:\n");
 
 	/* get position of selected list item */
-	Cardinal ac = 0;
+	Arg args[256];
+  Cardinal ac = 0;
 	int position_count = 0;
 	XtSetArg(args[ac], XmNselectedPositionCount, (XtPointer)&position_count);
 	ac++;
@@ -7336,7 +7421,8 @@ void do_mbview_routelist_delete(Widget w, XtPointer client_data, XtPointer call_
 		fprintf(stderr, "do_mbview_routelist_delete:\n");
 
 	/* get position of selected list item */
-	Cardinal ac = 0;
+	Arg args[256];
+  Cardinal ac = 0;
 	int position_count = 0;
 	XtSetArg(args[ac], XmNselectedPositionCount, (XtPointer)&position_count);
 	ac++;
@@ -7425,7 +7511,8 @@ void do_mbview_navlist_delete(Widget w, XtPointer client_data, XtPointer call_da
 		fprintf(stderr, "do_mbview_navlist_delete:\n");
 
 	/* get position of selected list item */
-	Cardinal ac = 0;
+	Arg args[256];
+  Cardinal ac = 0;
 	int position_count = 0;
 	XtSetArg(args[ac], XmNselectedPositionCount, (XtPointer)&position_count);
 	ac++;
@@ -7535,7 +7622,8 @@ void do_mbview_full_render(Widget w, XtPointer client_data, XtPointer call_data)
 	(void)client_data;  // Unused parameter
 	(void)call_data;  // Unused parameter
 
-	Cardinal ac = 0;
+	Arg args[256];
+  Cardinal ac = 0;
 	size_t instance;
 	XtSetArg(args[ac], XmNuserData, (XtPointer)&instance);
 	ac++;
@@ -7558,7 +7646,8 @@ void do_mbview_reset_view(Widget w, XtPointer client_data, XtPointer call_data) 
 	(void)client_data;  // Unused parameter
 	(void)call_data;  // Unused parameter
 
-	Cardinal ac = 0;
+	Arg args[256];
+  Cardinal ac = 0;
 	size_t instance;
 	XtSetArg(args[ac], XmNuserData, (XtPointer)&instance);
 	ac++;
@@ -7620,7 +7709,8 @@ void do_mbview_clearpicks(Widget w, XtPointer client_data, XtPointer call_data) 
 	(void)client_data;  // Unused parameter
 	(void)call_data;  // Unused parameter
 
-	Cardinal ac = 0;
+	Arg args[256];
+  Cardinal ac = 0;
 	size_t instance;
 	XtSetArg(args[ac], XmNuserData, (XtPointer)&instance);
 	ac++;
@@ -7637,7 +7727,8 @@ void do_mbview_profile_dismiss(Widget w, XtPointer client_data, XtPointer call_d
 	(void)client_data;  // Unused parameter
 	(void)call_data;  // Unused parameter
 
-	Cardinal ac = 0;
+	Arg args[256];
+  Cardinal ac = 0;
 	size_t instance;
 	XtSetArg(args[ac], XmNuserData, (XtPointer)&instance);
 	ac++;
@@ -7675,7 +7766,8 @@ void do_mbview_view_profile(Widget w, XtPointer client_data, XtPointer call_data
 	(void)client_data;  // Unused parameter
 	(void)call_data;  // Unused parameter
 
-	Cardinal ac = 0;
+	Arg args[256];
+  Cardinal ac = 0;
 	size_t instance;
 	XtSetArg(args[ac], XmNuserData, (XtPointer)&instance);
 	ac++;
@@ -7768,7 +7860,8 @@ void do_mbview_profile_exager(Widget w, XtPointer client_data, XtPointer call_da
 
 	XmScaleCallbackStruct *acs = (XmScaleCallbackStruct *)call_data;
 
-	Cardinal ac = 0;
+	Arg args[256];
+  Cardinal ac = 0;
 	size_t instance;
 	XtSetArg(args[ac], XmNuserData, (XtPointer)&instance);
 	ac++;
@@ -7795,7 +7888,8 @@ void do_mbview_profile_width(Widget w, XtPointer client_data, XtPointer call_dat
 	(void)client_data;  // Unused parameter
 	XmScaleCallbackStruct *acs = (XmScaleCallbackStruct *)call_data;
 
-	Cardinal ac = 0;
+	Arg args[256];
+  Cardinal ac = 0;
 	size_t instance;
 	XtSetArg(args[ac], XmNuserData, (XtPointer)&instance);
 	ac++;
@@ -7822,7 +7916,8 @@ void do_mbview_profile_slope(Widget w, XtPointer client_data, XtPointer call_dat
 	(void)client_data;  // Unused parameter
 	XmScaleCallbackStruct *acs = (XmScaleCallbackStruct *)call_data;
 
-	Cardinal ac = 0;
+	Arg args[256];
+  Cardinal ac = 0;
 	size_t instance;
 	XtSetArg(args[ac], XmNuserData, (XtPointer)&instance);
 	ac++;
