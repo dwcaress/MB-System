@@ -385,11 +385,11 @@ int mbnavadjust_read_project(int verbose, char *projectpath, struct mbna_project
         if (version_id >= 306) {
           if (status == MB_SUCCESS &&
               ((result = fgets(buffer, BUFFER_MAX, hfp)) != buffer ||
-               (nscan = sscanf(buffer, "%s %d", label, &project->num_blocks)) != 2 || strcmp(label, "NUMBLOCKS") != 0))
+               (nscan = sscanf(buffer, "%s %d", label, &project->num_surveys)) != 2 || strcmp(label, "NUMBLOCKS") != 0))
             status = MB_FAILURE;
         }
         else {
-          project->num_blocks = 0;
+          project->num_surveys = 0;
         }
         if (status == MB_FAILURE) {
           fprintf(stderr, "Die at line:%d file:%s buffer:%s\n", __LINE__, __FILE__, buffer);
@@ -813,19 +813,17 @@ fprintf(stderr,"Project version %d previous to 3.08: Adding sensordepth values t
                     status = mbnavadjust_fix_section_sensordepth(verbose, project, error);
                 }
 
-        /* count the number of blocks */
-        if (version_id < 306) {
-          project->num_blocks = 0;
-          for (int ifile = 0; ifile < project->num_files; ifile++) {
-            struct mbna_file *file = &project->files[ifile];
-            if (ifile == 0 || !file->sections[0].continuity) {
-              project->num_blocks++;
-            }
-            file->block = project->num_blocks - 1;
-            file->block_offset_x = 0.0;
-            file->block_offset_y = 0.0;
-            file->block_offset_z = 0.0;
+        /* recount the number of blocks */
+        project->num_surveys = 0;
+        for (int ifile = 0; ifile < project->num_files; ifile++) {
+          struct mbna_file *file = &project->files[ifile];
+          if (ifile == 0 || !file->sections[0].continuity) {
+            project->num_surveys++;
           }
+          file->block = project->num_surveys - 1;
+          file->block_offset_x = 0.0;
+          file->block_offset_y = 0.0;
+          file->block_offset_z = 0.0;
         }
 
         /* now do scaling of global ties since mtodeglon and mtodeglat are defined */
@@ -1340,7 +1338,7 @@ int mbnavadjust_write_project(int verbose, struct mbna_project *project, int *er
     fprintf(hfp, "HOME\t%s\n", project->home);
     fprintf(hfp, "DATADIR\t%s\n", project->datadir);
     fprintf(hfp, "NUMFILES\t%d\n", project->num_files);
-    fprintf(hfp, "NUMBLOCKS\t%d\n", project->num_blocks);
+    fprintf(hfp, "NUMBLOCKS\t%d\n", project->num_surveys);
     fprintf(hfp, "NUMCROSSINGS\t%d\n", project->num_crossings);
     fprintf(hfp, "SECTIONLENGTH\t%f\n", project->section_length);
     fprintf(hfp, "SECTIONSOUNDINGS\t%d\n", project->section_soundings);
@@ -3333,13 +3331,13 @@ int mbnavadjust_import_data(int verbose, struct mbna_project *project,
   status = mbnavadjust_findcrossings(verbose, project, error);
 
   /* count the number of blocks */
-  project->num_blocks = 0;
+  project->num_surveys = 0;
   for (int i = 0; i < project->num_files; i++) {
     file = &project->files[i];
     if (i == 0 || !file->sections[0].continuity) {
-      project->num_blocks++;
+      project->num_surveys++;
     }
-    file->block = project->num_blocks - 1;
+    file->block = project->num_surveys - 1;
     file->block_offset_x = 0.0;
     file->block_offset_y = 0.0;
     file->block_offset_z = 0.0;
