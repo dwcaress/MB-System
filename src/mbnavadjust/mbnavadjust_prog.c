@@ -192,7 +192,7 @@ int mbnavadjust_init_globals() {
   project.num_files = 0;
   project.num_files_alloc = 0;
   project.files = NULL;
-  project.num_blocks = 0;
+  project.num_surveys = 0;
   project.num_snavs = 0;
   project.num_pings = 0;
   project.num_beams = 0;

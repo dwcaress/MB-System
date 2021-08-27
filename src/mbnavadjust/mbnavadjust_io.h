@@ -320,7 +320,7 @@ struct mbna_project {
   int num_files;
   int num_files_alloc;
   struct mbna_file *files;
-  int num_blocks;
+  int num_surveys;
   int num_snavs;
   int num_pings;
   int num_beams;
