@@ -26,6 +26,7 @@ set(src
     Surface.cpp
     MBGui.cpp
     SurfaceRenderer.cpp
+    PickerInteractorStyle.cpp
     resources.qrc)
 
 
