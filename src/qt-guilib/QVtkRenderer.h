@@ -6,6 +6,7 @@
 #include <QOpenGLFunctions>
 #include <vtkGenericOpenGLRenderWindow.h>
 #include <vtkGenericRenderWindowInteractor.h>
+#include <vtkInteractorStyleTrackballCamera.h>
 #include <vtkRenderer.h>
 #include <vtkActor.h>
 #include <vtkCubeAxesActor.h>
@@ -14,6 +15,7 @@
 #include <vtkPolyDataMapper.h>
 #include "GmtGridReader.h"
 #include "DisplayProperties.h"
+#include "PickerInteractorStyle.h"
 
 namespace mb_system {
 
@@ -95,6 +97,9 @@ namespace mb_system {
     /// VTK mouse/key interactor
     vtkSmartPointer<vtkGenericRenderWindowInteractor> renderWindowInteractor_;
 
+    /// VTK interactor style
+    vtkSmartPointer<PickerInteractorStyle> interactorStyle_;
+    
     /// Name of associated grid file
     char *gridFilename_;
 
@@ -108,6 +113,7 @@ namespace mb_system {
     std::shared_ptr<QMouseEvent> mouseMoveEvent_;
 
   };
+
 }
 
 #endif // QVTKRENDERER_H

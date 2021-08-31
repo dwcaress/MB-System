@@ -13,8 +13,7 @@
 #include <vtkStringArray.h>
 #include "QVtkRenderer.h"
 #include "QVtkItem.h"
-#include "GmtGridReader.h"
-#include "CellPickerInteractor.h"
+
 
 using namespace mb_system;
 
@@ -27,7 +26,6 @@ QVtkRenderer::QVtkRenderer() :
   mouseButtonEvent_(nullptr),
   mouseMoveEvent_(nullptr)
 {
-
 }
 
 QOpenGLFramebufferObject *QVtkRenderer::createFramebufferObject(const QSize &size) {
@@ -42,8 +40,9 @@ QOpenGLFramebufferObject *QVtkRenderer::createFramebufferObject(const QSize &siz
 
 
 void QVtkRenderer::render() {
+  
   qDebug() << "QVtkRenderer::render()";
-  if (!renderWindow_) {
+  if (!renderWindow_ || !renderWindowInteractor_) {
     qDebug() << "renderWindow not yet defined";
     return;
   }
@@ -52,11 +51,13 @@ void QVtkRenderer::render() {
   initializeOpenGLState();
   renderWindow_->Start();
 
+
   if (!initialized_) {
     initialize();
     initialized_ = true;
   }
 
+  
   axesActor_->SetVisibility(displayProperties_->drawAxes);
 
   if (wheelEvent_ && !wheelEvent_->isAccepted()) {
@@ -76,18 +77,34 @@ void QVtkRenderer::render() {
 
 
     if (mouseButtonEvent_->type() == QEvent::MouseButtonPress) {
-      renderWindowInteractor_->SetEventInformationFlipY(mouseButtonEvent_->x(),
-                                                        mouseButtonEvent_->y(),
-                                                        (mouseButtonEvent_->modifiers() & Qt::ControlModifier) > 0 ? 1 : 0,
-                                                        (mouseButtonEvent_->modifiers() & Qt::ShiftModifier) > 0 ? 1 : 0, 0,
-                                                        mouseButtonEvent_->type() == QEvent::MouseButtonDblClick ? 1 : 0);
-      qDebug() << "QVtkRenderer: mouse button press";
+
+      bool cntrlKey =
+        (mouseButtonEvent_->modifiers() & Qt::ControlModifier) > 0 ? 1 : 0;
+      
+      bool shiftKey =
+        (mouseButtonEvent_->modifiers() & Qt::ShiftModifier) > 0 ? 1 : 0;
+      
+      bool dblClick =
+        mouseButtonEvent_->type() == QEvent::MouseButtonDblClick ? 1 : 0;
+        
       if (mouseButtonEvent_->buttons() & Qt::LeftButton) {
         qDebug() << "QVtkRenderer() - got left button";
+        renderWindowInteractor_->SetEventInformation(mouseButtonEvent_->x(),
+                                                     mouseButtonEvent_->y(),
+                                                     cntrlKey,
+                                                     shiftKey,
+                                                     dblClick);
+
         renderWindowInteractor_->InvokeEvent(vtkCommand::LeftButtonPressEvent);
       }
       else if (mouseButtonEvent_->buttons() & Qt::RightButton) {
         qDebug() << "QVtkRenderer() - got right button";
+        renderWindowInteractor_->SetEventInformationFlipY(mouseButtonEvent_->x(),
+                                                          mouseButtonEvent_->y(),
+                                                          cntrlKey,
+                                                          shiftKey,
+                                                          dblClick);
+        
         renderWindowInteractor_->InvokeEvent(vtkCommand::RightButtonPressEvent);
       }
       else if (mouseButtonEvent_->buttons() & Qt::MiddleButton) {
@@ -115,6 +132,16 @@ void QVtkRenderer::render() {
 
   if (mouseMoveEvent_ && !mouseMoveEvent_->isAccepted()) {
     qDebug() << "QVtkRenderer::render() - mouse move event";
+    
+    bool cntrlKey =
+      (mouseButtonEvent_->modifiers() & Qt::ControlModifier) > 0 ? 1 : 0;
+      
+    bool shiftKey =
+      (mouseButtonEvent_->modifiers() & Qt::ShiftModifier) > 0 ? 1 : 0;
+      
+    bool dblClick =
+      mouseButtonEvent_->type() == QEvent::MouseButtonDblClick ? 1 : 0;
+    
     if (mouseMoveEvent_->type() == QEvent::MouseMove) {
       // Got left-button mouse-drag
       qDebug() << "QVtkRenderer::render(): command mouse move; x=" <<
@@ -123,9 +150,9 @@ void QVtkRenderer::render() {
 
       renderWindowInteractor_->SetEventInformationFlipY(mouseMoveEvent_->x(),
 							mouseMoveEvent_->y(),
-							(mouseMoveEvent_->modifiers() & Qt::ControlModifier) > 0 ? 1 : 0,
-							(mouseMoveEvent_->modifiers() & Qt::ShiftModifier) > 0 ? 1 : 0, 0,
-							mouseMoveEvent_->type() == QEvent::MouseButtonDblClick ? 1 : 0);
+                                                        cntrlKey,
+                                                        shiftKey,
+                                                        dblClick);
 
       renderWindowInteractor_->InvokeEvent(vtkCommand::MouseMoveEvent);
       mouseMoveEvent_->accept();
@@ -139,8 +166,10 @@ void QVtkRenderer::render() {
       renderWindow_->SetSize(item_->width(), item_->height());
     }
 
-  renderWindow_->Render();
 
+  renderWindow_->Render();
+  // renderWindowInteractor_->Start();
+  
   // Done with render. Reset OpenGL state
   renderWindow_->PopState();
   item_->window()->resetOpenGLState();;
@@ -254,15 +283,9 @@ bool QVtkRenderer::initializePipeline(const char *gridFilename) {
 
   // Visualize the data...
 
-  // Create VTK renderer (not the same as QT renderer)
-  qDebug() << "create vtk renderer";
-  renderer_ =
-    vtkSmartPointer<vtkRenderer>::New();
-
   // Create mapper
   qDebug() << "create vtk mapper";
   mapper_ = vtkSmartPointer<vtkPolyDataMapper>::New();
-
   qDebug() << "mapper->SetInputConnection()";
   mapper_->SetInputConnection(elevColorizer_->GetOutputPort());
 
@@ -273,6 +296,50 @@ bool QVtkRenderer::initializePipeline(const char *gridFilename) {
   // Assign mapper to actor
   qDebug() << "assign mapper to actor";
   surfaceActor_->SetMapper(mapper_);
+
+  // Create VTK renderer (not the same as QT renderer)
+  qDebug() << "create vtk renderer";
+  renderer_ =
+    vtkSmartPointer<vtkRenderer>::New();
+
+  // Create vtk renderWindow
+  qDebug() << "create renderWindow";
+  renderWindow_ =
+    vtkSmartPointer<vtkGenericOpenGLRenderWindow>::New();
+
+  // Add renderer to the renderWindow
+  qDebug() << "add renderer to renderWindow";
+  renderWindow_->AddRenderer(renderer_);
+
+  // Create vtk renderWindowInteractor
+  qDebug() << "create renderWindowInteractor";
+  renderWindowInteractor_ =
+    vtkSmartPointer<vtkGenericRenderWindowInteractor>::New();
+
+  renderWindowInteractor_->SetRenderWindow(renderWindow_);
+  renderWindowInteractor_->Initialize();
+  renderWindowInteractor_->EnableRenderOff();
+  
+  // Per QtVTK example
+  renderWindowInteractor_->EnableRenderOff();
+
+  //  vtkSmartPointer<vtkInteractorStyleTrackballCamera> style =
+  // vtkSmartPointer<vtkInteractorStyleTrackballCamera>::New();
+
+  interactorStyle_ =
+    vtkSmartPointer<PickerInteractorStyle>::New();  
+
+  interactorStyle_->initialize(item_);
+  
+  interactorStyle_->SetDefaultRenderer(renderer_);
+  interactorStyle_->polyData_ = gridReader_->GetOutput();
+  qDebug() << "style->polyData_ details";
+  interactorStyle_->polyData_->PrintSelf(std::cout, vtkIndent(1));
+
+  renderWindowInteractor_->SetInteractorStyle(interactorStyle_);
+  
+  renderer_->AddActor(surfaceActor_);
+
 
   // Colors for axes
   vtkSmartPointer<vtkNamedColors> colors = 
@@ -285,10 +352,7 @@ bool QVtkRenderer::initializePipeline(const char *gridFilename) {
   axesActor_ = vtkSmartPointer<vtkCubeAxesActor>::New();
   axesActor_->SetUseTextActor3D(0);
 
-  double *bounds = gridReader_->GetOutput()->GetBounds();
-  printf("xMin: %.f, xMax: %.f\n", bounds[0], bounds[1]);
-  printf("yMin: %.f, yMax: %.f\n", bounds[2], bounds[3]);
-  printf("zMin: %.f, zMax: %.f\n", bounds[4], bounds[5]);  
+
   axesActor_->SetBounds(gridReader_->GetOutput()->GetBounds());
   axesActor_->SetCamera(renderer_->GetActiveCamera());
   axesActor_->GetTitleTextProperty(0)->SetColor(axisColor.GetData());
@@ -323,43 +387,6 @@ bool QVtkRenderer::initializePipeline(const char *gridFilename) {
 
   axesActor_->SetFlyModeToStaticEdges();
   
-  // Create vtk renderWindow
-  qDebug() << "create renderWindow";
-  renderWindow_ =
-    vtkSmartPointer<vtkGenericOpenGLRenderWindow>::New();
-
-  // Add renderer to the renderWindow
-  qDebug() << "add renderer to renderWindow";
-  renderWindow_->AddRenderer(renderer_);
-
-  // Create vtk renderWindowInteractor
-  qDebug() << "create renderWindowInteractor";
-  renderWindowInteractor_ =
-    vtkSmartPointer<vtkGenericRenderWindowInteractor>::New();
-
-  //  renderWindowInteractor_->EnableRenderOff();
-  renderWindowInteractor_->EnableRenderOn();  
-
-  //  vtkSmartPointer<vtkInteractorStyleTrackballCamera> style =
-  // vtkSmartPointer<vtkInteractorStyleTrackballCamera>::New();
-
-  vtkSmartPointer<CellPickerInteractor> style =
-      vtkSmartPointer<CellPickerInteractor>::New();
-
-  gridReader_->Update();
-  style->polyData_ = gridReader_->GetOutput();
-  qDebug() << "style->polyData_ details";
-  style->polyData_->PrintSelf(std::cout, vtkIndent(1));
-  
-  style->SetDefaultRenderer(renderer_);
-
-  renderWindowInteractor_->SetInteractorStyle(style);
-  
-  qDebug() << "renderWindow_->SetInteractor()";
-  renderWindow_->SetInteractor(renderWindowInteractor_);
-
-  renderer_->AddActor(surfaceActor_);
-
   axesActor_->SetVisibility(displayProperties_->drawAxes);
   
   renderer_->AddActor(axesActor_);    
@@ -380,4 +407,5 @@ void QVtkRenderer::initializeOpenGLState()
   QOpenGLFunctions::initializeOpenGLFunctions();
   QOpenGLFunctions::glUseProgram(0);
 }
+
 
