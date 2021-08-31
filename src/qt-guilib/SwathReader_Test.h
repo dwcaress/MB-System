@@ -25,18 +25,20 @@ public:
   void testReadSwath(void) {
     cerr << "create reader" << endl;
 
-    mb_system::SwathReader *reader =
+    vtkSmartPointer<mb_system::SwathReader> reader =
       vtkSmartPointer<mb_system::SwathReader>::New();
 
-    // In case constructor is public...
-    // mb_system::SwathReader *reader = new mb_system::SwathReader();
+    cout << "ready to call dummy()" << endl;
+    reader->dummy();
     
     const char *datafile =
       "/home/oreilly/projects/mb-system/testData/test.mb88";
 
+    //    reader->SetFileName(datafile);
+    
     cerr << "read " << datafile << endl;
     bool success = reader->readSwathFile(datafile);
-    TSM_ASSERT("reader->read()", success);
+    TSM_ASSERT("reader->readSwathFile()", success);
     
     cerr << "return from testReadSwath()" << endl;
   }
