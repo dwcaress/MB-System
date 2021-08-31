@@ -18,8 +18,8 @@ public:
 		   QObject *parent = nullptr);
 
   /// Create and register singleton
-  static bool registerSingleton(int argc, char **argv, QQmlApplicationEngine *engine);
-
+  static bool registerSingleton(int argc, char **argv,
+                                QQmlApplicationEngine *engine);
   /// Specify grid file to display
   Q_INVOKABLE bool setGridFile(QUrl file);
 
@@ -39,6 +39,7 @@ protected:
 
   /// Selected file name item
   QObject *selectedFileItem_;
+
 };
 
 #endif // BACKEND_H
