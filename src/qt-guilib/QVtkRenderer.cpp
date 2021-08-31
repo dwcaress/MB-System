@@ -341,12 +341,35 @@ bool QVtkRenderer::initializePipeline(const char *gridFilename) {
   renderer_->AddActor(surfaceActor_);
 
 
+  // Axes actor
+  setupAxes();
+  
+  renderer_->ResetCamera();
+
+  // Initialize the OpenGL context for the renderer
+  renderWindow_->OpenGLInitContext();
+
+  return true;
+}
+
+
+void QVtkRenderer::initializeOpenGLState()
+{
+  renderWindow_->OpenGLInitState();
+  renderWindow_->MakeCurrent();
+  QOpenGLFunctions::initializeOpenGLFunctions();
+  QOpenGLFunctions::glUseProgram(0);
+}
+
+
+
+void QVtkRenderer::setupAxes() {
+
   // Colors for axes
   vtkSmartPointer<vtkNamedColors> colors = 
     vtkSmartPointer<vtkNamedColors>::New();
 
   vtkColor3d axisColor = colors->GetColor3d("Black");
-  vtkColor3d labelColor = colors->GetColor3d("Red");
 
   // Axes actor
   axesActor_ = vtkSmartPointer<vtkCubeAxesActor>::New();
@@ -387,25 +410,7 @@ bool QVtkRenderer::initializePipeline(const char *gridFilename) {
 
   axesActor_->SetFlyModeToStaticEdges();
   
-  axesActor_->SetVisibility(displayProperties_->drawAxes);
-  
   renderer_->AddActor(axesActor_);    
-  
-  renderer_->ResetCamera();
-
-  // Initialize the OpenGL context for the renderer
-  renderWindow_->OpenGLInitContext();
-
-  return true;
-}
-
-
-void QVtkRenderer::initializeOpenGLState()
-{
-  renderWindow_->OpenGLInitState();
-  renderWindow_->MakeCurrent();
-  QOpenGLFunctions::initializeOpenGLFunctions();
-  QOpenGLFunctions::glUseProgram(0);
 }
 
 

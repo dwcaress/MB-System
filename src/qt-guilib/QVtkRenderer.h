@@ -67,6 +67,9 @@ namespace mb_system {
     /// Initialize OpenGL state
     virtual void initializeOpenGLState();
 
+    /// Setup axes
+    void setupAxes();
+    
     // Item being rendered
     QVtkItem *item_;
     
