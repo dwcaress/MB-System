@@ -45,7 +45,6 @@ endif()
 # Add globally-needed compiler flags
 add_compile_options(-DUSE_DEFAULT_FILE_FUNCTIONS)
 
-
 if (CMAKE_COMPILER_IS_GNUCC)
   message("Using GNUCC")
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=gnu11")
