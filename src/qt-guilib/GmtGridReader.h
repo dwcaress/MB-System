@@ -46,7 +46,7 @@ namespace mb_system {
     /// Get span of x, y, and z values
     void bounds(float *xMin, float *xMax, float *yMin, float *yMax,
 		float *zMin, float *zMax);
-    
+
   protected:
   
     /// Callback registered with the VariableArraySelection.

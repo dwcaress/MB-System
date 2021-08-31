@@ -31,8 +31,6 @@ GmtGridReader::~GmtGridReader() {
 }
 
 
-
-
 int GmtGridReader::RequestData(vtkInformation* request,
 			       vtkInformationVector** inputVector,
 			       vtkInformationVector* outputVector) {
@@ -121,8 +119,8 @@ int GmtGridReader::RequestData(vtkInformation* request,
   }
   std::cout << "nCells=" << nCells << std::endl;
 
+  // Save to object's points and polygons
   polyOutput->SetPoints(gridPoints_);
-  // std::cerr << "SKIPPING POLYGONS FOR NOW" << std::endl;
   polyOutput->SetPolys(gridPolygons_);  
   std::cerr << "GmtGridReader::RequestData() - done" << std::endl;
   return 1;
@@ -171,9 +169,12 @@ GMT_GRID *GmtGridReader::readGridFile(const char *gridFile, void **api) {
 
 
 void GmtGridReader::SetFileName(const char *fileName) {
+  fprintf(stderr, "In GmtGridReader::SetFileName()\n");
   if (fileName_) {
+    fprintf(stderr, "GmtGridReader::SetFileName: free fileName_\n");
     free((void *)fileName_);
   }
+  fprintf(stderr, "GmtGridReader::SetFileName: call strdup()\n");
   fileName_ = strdup((char *)fileName);
 }
 
