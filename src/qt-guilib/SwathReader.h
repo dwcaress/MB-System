@@ -25,6 +25,9 @@ namespace mb_system {
 
     vtkTypeMacro(SwathReader,vtkAbstractPolyDataReader);
 
+    // TEST TEST TEST
+    void dummy();
+    
     /// Get a new SwathReader object
     /// For use with vtkSmartPointer
     static SwathReader *New() {
@@ -48,17 +51,11 @@ namespace mb_system {
     void bounds(double *xMin, double *xMax, double *yMin, double *yMax,
 		double *zMin, double *zMax);
 
-    /// Read data from file.
+    /// Read data from file, load into vtk geometry.
     /// @return false on error, else true
-    bool readSwathFile(const char *file);
+    bool readSwathFile(const char *file ///<[in] swath data file
+                       );
 
-    /// Normally PRIVATE, but TESTING HERE
-    /// Constructor - publicly accessed with New()
-    /// SwathReader();
-  
-    /// Destructor - should be protected, accessed with Delete()
-    /// ~SwathReader(); ///// TEST TEST TESToverride;
-    
   protected:
 
     /// Callback registered with the VariableArraySelection.
@@ -70,7 +67,6 @@ namespace mb_system {
     vtkIdType dataOffset(unsigned nRows, unsigned nCols,
                          unsigned row, unsigned col);
 
-  
     /// Load data from source into vtkDataSet. This function *must* call
     /// VtkAlgorithm::SetErrorCode() in case it encounters errors,
     /// so that apps that call vtkPolyDataAlgorithm::Update() can check for
@@ -94,18 +90,37 @@ namespace mb_system {
     /// Pointer to MBIO input/output control structure
     void *mbioPtr_;
 
-    // Arrays allocated and filled by mbio library functions
-    // NOTE: Important to initialize these pointers to NULL before
-    // calling registerArrays()
+    /** @name Arrays allocated and filled by mbio library functions
+        NOTE: Important to initialize these pointers to NULL before
+        calling registerArrays(). These arrays will be deallocated when
+        mb_close() is called. */
+    ///@{
+    
+    /// Beam quality flags
     char *beamFlags_;
+    /// Bathymetry array
     double *bathymetry_;
+
+    /// Sidescan array
     double *sideScan_;
+
+    /// Latitudes corresponding to each bathymetry point
     double *bathymetryLat_;
+
+    /// Longitudes corresponding to each bathymetry point
     double *bathymetryLon_;
+
+    /// Latitudes corresponding to each sideScan point
     double *sideScanLat_;
+
+    /// Longitudes corresponding to each sideScan point
     double *sideScanLon_;
+
+    /// Amplitudes at each point
     double *amplitude_;
 
+    ///@}
+    
     /// Minimum latitude value in dataset
     double latMin_;
 

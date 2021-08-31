@@ -29,7 +29,7 @@ SwathReader::SwathReader() :
   amplitude_ = nullptr;
 
   points_ = vtkSmartPointer<vtkPoints>::New();
-  points_->SetDataTypeToFloat();
+  points_->SetDataTypeToDouble();
   polygons_ = vtkSmartPointer<vtkCellArray>::New();  
 
   this->SetNumberOfInputPorts(0);
@@ -40,8 +40,8 @@ SwathReader::SwathReader() :
 }
 
 SwathReader::~SwathReader() {
+  std::cout << "SwathReader destructor" << std::endl;
 }
-
 
 
 int SwathReader::RequestData(vtkInformation* request,
@@ -70,83 +70,19 @@ int SwathReader::RequestData(vtkInformation* request,
     return 0;
   }
 
-  std::cerr << "PREMATURE END to SwathReader::requestData()" << std::endl;
-  return 0;  ///// TEST TEST TEST
-
-  /* ***
-
-  // Read grid file
-  std::cerr << "SwathReader::RequestData() - readGridFile()" << std::endl;  
-  void *gmtApi;
-  gmtGrid_ = readGridFile(fileName_, &gmtApi);
-  if (!gmtGrid_) {
-  std::cerr << "error while reading " << fileName_ << std::endl;
-  SetErrorCode(vtkErrorCode::CannotOpenFileError);
-  return 0;
-  }
-
-  // Reset/clear points
-  points_->Reset();
-
-  unsigned nRows = gmtGrid_->header->n_rows;
-  unsigned nCols = gmtGrid_->header->n_columns;
-  
-  // Pre-allocate points memory
-  if (!points_->Allocate(nRows * nCols)) {
-  std::cerr << "failed to allocat "
-  <<  nRows * nCols << " points"
-  << std::endl;
-  }
-
-  // Load points read from grid file
-  std::cerr << "SwathReader::RequestData() - load points" << std::endl;    
-  for (unsigned row = 0; row < gmtGrid_->header->n_rows; row++) {
-  for (unsigned col = 0; col < gmtGrid_->header->n_columns; col++) {
-  unsigned dataIndex = GMT_Get_Index(gmtApi, gmtGrid_->header, row, col);
-  points_->InsertNextPoint(row, col,
-  gmtGrid_->data[dataIndex]);
-  }
-  }
-
-  // Set triangle vertices
-  if (!polygons_->Allocate(nRows * nCols * 2)) {
-  std::cerr << "failed to allocat "
-  <<  nRows * nCols *2 << " polygons"
-  << std::endl;
-  }    
-  vtkIdType triangleVertexId[3];
-  int nCells = 0;
-  // Triangles must stay within row and column bounds
-  for (unsigned row = 0; row < nRows-1; row++) {
-  for (unsigned col = 0; col < nCols-1; col++) {
-
-  // First triangle
-  triangleVertexId[0] = gridOffset(nRows, nCols, row, col);
-  triangleVertexId[1] = gridOffset(nRows, nCols, row, col+1);
-  triangleVertexId[2] = gridOffset(nRows, nCols, row+1, col+1);      
-  polygons_->InsertNextCell(3, triangleVertexId);
-  nCells++;
-      
-  // Second triangle
-  triangleVertexId[0] = gridOffset(nRows, nCols, row, col);
-  triangleVertexId[1] = gridOffset(nRows, nCols, row+1, col+1);
-  triangleVertexId[2] = gridOffset(nRows, nCols, row+1, col);      
-  polygons_->InsertNextCell(3, triangleVertexId);
-  nCells++;
-  }
-  }
-  std::cout << "nCells=" << nCells << std::endl;
+  std::cout << "call readSwathData() with fileName " << fileName_ << std::endl;
+  readSwathFile(fileName_);
 
   polyOutput->SetPoints(points_);
-  // std::cerr << "SKIPPING POLYGONS FOR NOW" << std::endl;
-  polyOutput->SetPolys(polygons_);  
-  std::cerr << "SwathReader::RequestData() - done" << std::endl;
-  return 1;
 
-*** */
-  std::cerr << "RequestData() - bunch of stuff commented out!" << std::endl;
   return 1;
 }
+
+
+void SwathReader::dummy() {
+  fprintf(stderr, "We are in dummy() now\n");
+}
+
 
 bool SwathReader::readSwathFile(const char *swathFile) {
   
@@ -176,15 +112,12 @@ bool SwathReader::readSwathFile(const char *swathFile) {
     return false;
   }
 
-  std::cout << "set variables" << std::endl;
-
-  
   swathFormat_ = swathFormat;
 
   int pings = 1; // No ping averaging
   int lonRange = 0;  // -180 to +180
 
-  // Got these values from mbedit_prog.c
+  // Got these initial values from mbedit_prog.c
   double areaBounds[] = {-180., 180., -90., 90.};
   int beginTime[] = {1962, 1, 1, 0, 0, 0, 0};
   int endTime[] = {2062, 1, 1, 0, 0, 0, 0};
@@ -205,8 +138,8 @@ bool SwathReader::readSwathFile(const char *swathFile) {
     }
     mbioPtr_ = nullptr;
   }
-    
-  // Initialize read
+
+  // Initialize read based on metadata/data in file
   std::cout << "call mg_read_init()" << std::endl;    
   if (mb_read_init(verbose, (char *)swathFile, swathFormat, pings, lonRange,
                    areaBounds, beginTime, endTime, minSpeed, timeGap,
@@ -217,7 +150,10 @@ bool SwathReader::readSwathFile(const char *swathFile) {
 
     return false;
   }
-    
+
+  // Access mbioPtr_ structure members
+  mb_io_struct *mbioStruct = (mb_io_struct *)mbioPtr_;
+  
   // Register/allocate arrays
   std::cout << "call registerArray()s" << std::endl;    
   if (!registerArrays(verbose, &error)) {
@@ -228,6 +164,9 @@ bool SwathReader::readSwathFile(const char *swathFile) {
     return false;
   }
 
+  std::cout << "beams_bath_alloc: " << mbioStruct->beams_bath_alloc
+            << std::endl;
+  
   zMin_ = std::numeric_limits<double>::max();
   zMax_ = std::numeric_limits<double>::lowest();
   latMin_ = std::numeric_limits<double>::max();
@@ -239,7 +178,25 @@ bool SwathReader::readSwathFile(const char *swathFile) {
   char comment[MB_COMMENT_MAXLINE];
   int recordType, nBath, nAmp, nSS;
   double lat, lon, speed, heading, distance, altitude, sonarDepth;
+
+  points_->Initialize();
+  bool pointsAllocated = false;
   error = MB_ERROR_NO_ERROR;
+  int nRec = 0;
+  int nPoints = 0;
+
+  // Initialize proj structure; needed to convert lat/lon to utm
+  char projection[1024] = "Geographic";
+  void *projPtr = nullptr;
+  if (mb_proj_init(verbose, projection, &projPtr, &error) != MB_SUCCESS) {
+    std::cerr << "mb_proj_init() failed" << std::endl;
+    return false;
+  }
+  else {
+    std::cerr << "mb_proj_init() OK" << std::endl;    
+  }
+  
+  error = MB_ERROR_NO_ERROR;  
   while (error <= MB_ERROR_NO_ERROR) {
     int status = mb_read(verbose, mbioPtr_, &recordType, &pings,
                          beginTime, &beginEpochSec, &lon, &lat,
@@ -254,17 +211,24 @@ bool SwathReader::readSwathFile(const char *swathFile) {
       std::cout << "At EOF" << std::endl;
       break;
     }
-    else {
+    else if (error != MB_ERROR_NO_ERROR) {
       std::cout << "mb_read(): error " << error << std::endl;
+      continue;
     }
-  
+
+    /* ***
     if (verbose > 0) {
       std::cout << "recordType: " << recordType << " (" <<
         recordTypeMnem(recordType) << ") nBath: " << nBath << std::endl;
+      
+      std::cout << "bathymetryLon_[0]: " << bathymetryLon_[0] << std::endl;
     }
-
+    *** */
+    
     if (recordType == MB_DATA_DATA) {
       // Survey data record
+      nPoints += nBath;
+      // Determine dataset geometric bounds
       for (int i = 0; i < nBath; i++) {
 
         if (bathymetryLat_[i] < latMin_) {
@@ -296,18 +260,56 @@ bool SwathReader::readSwathFile(const char *swathFile) {
           zMax_ = bathymetry_[i];
           std::cout << "new zMax: " << zMax_ << std::endl;          
         }
-        
       }
     }
+
+    if (!pointsAllocated) {
+      // Working on first scan - Allocate initial row of VTK points
+      if (!points_->Allocate(nPoints)) {
+        std::cerr << "Error allocating VTK points" << std::endl;
+        break;
+      }
+      
+      pointsAllocated = true;
+    }
+    else {
+      // Allocate another row of VTK points
+      if (!points_->Resize(nPoints)) {
+        std::cerr << "Error resizing VTK points" << std::endl;        
+      }
+    }
+
+    // Add this bathymetry swath to VTK points
+    for (int i = 0; i < nBath; i++) {
+      
+      // Convert lat/lon to utm
+      double northing, easting;
+      mb_proj_forward(verbose, projPtr, bathymetryLon_[i], bathymetryLat_[i],
+                      &easting, &northing, &error);
+
+      if (verbose) {
+        std::cout << "lat: " << bathymetryLat_[i] << " lon: " <<
+          bathymetryLon_[i] << " easting: " << easting << " northing: " <<
+          northing << std::endl;
+      }
+      
+      points_->InsertNextPoint(easting, northing, bathymetry_[i]);
+    }
+    
+    nRec++;
   }
 
+  mb_proj_free(verbose, &projPtr, &error);
+  
   double xMin, xMax, yMin, yMax, zMin, zMax;
   bounds(&xMin, &xMax, &yMin, &yMax, &zMin, &zMax);
 
   std::cout << "xMin: " << xMin << ", xMax: " << xMax << std::endl;
   std::cout << "yMin: " << yMin << ", yMax: " << yMax << std::endl;
   std::cout << "zMin: " << zMin << ", zMax: " << zMax << std::endl;
-  
+
+  std::cout << "nRec: " << nRec << ", nPoints: " << nPoints << std::endl;
+
   // Deallocate registered arrays, release resources
   std::cout << "call mb_close()" << std::endl;
   mb_close(verbose, &mbioPtr_, &error);
