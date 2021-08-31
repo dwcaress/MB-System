@@ -26,7 +26,8 @@ BackEnd::BackEnd(QQmlApplicationEngine *engine,
     }
 }
 
-bool BackEnd::registerSingleton(int argc, char **argv, QQmlApplicationEngine *qmlEngine) {
+bool BackEnd::registerSingleton(int argc, char **argv,
+                                QQmlApplicationEngine *qmlEngine) {
     if (singleInstance_) {
         qInfo() << "BackEnd::registerSingleton(): Delete existing instance";
         delete singleInstance_;
@@ -89,8 +90,6 @@ bool BackEnd::setGridFile(QUrl fileURL) {
 
     selectedFileItem_->setProperty("text", fileURL.toLocalFile());
 
-      
-    
     return true;
 }
 
