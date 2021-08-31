@@ -2,6 +2,7 @@
 #define QVTKITEM_H
 
 #include <QObject>
+#include <QString>
 #include <QQuickFramebufferObject>
 #include "QVtkRenderer.h"
 #include "DisplayProperties.h"
@@ -22,6 +23,8 @@ namespace mb_system {
   {
     Q_OBJECT
 
+    Q_PROPERTY(QString pickedPoint READ getPickedPoint WRITE setPickedPoint NOTIFY pickedPointChanged)
+    
   public:
 
     QVtkItem();
@@ -68,6 +71,21 @@ namespace mb_system {
     }
     
 
+  signals:
+
+    /// User picked a point on the vtk surface
+    void pickedPointChanged(QString msg);
+
+  public slots:
+
+  public:
+    
+    /// Set user-picked point coordinates
+    void setPickedPoint(QString msg);
+
+    QString getPickedPoint();
+
+    
   protected:
 
     /// Display properties, e.g. visible axes, etc.
@@ -98,6 +116,8 @@ namespace mb_system {
     /// Latest mouse move event
     std::shared_ptr<QMouseEvent> mouseMoveEvent_;
 
+    /// Latest user-picked point coordinates
+    QString pickedCoords_;
   };
 
 

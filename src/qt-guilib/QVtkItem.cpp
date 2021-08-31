@@ -68,3 +68,18 @@ void QVtkItem::mouseMoveEvent(QMouseEvent *event) {
 }
 
 
+void QVtkItem::setPickedPoint(QString coordMsg) {
+
+  bool newPoint = false;
+  if (pickedCoords_.compare(coordMsg)) {
+    pickedCoords_ = QString(coordMsg);
+    qDebug() << "emit new pointPicked()";
+    emit pickedPointChanged(coordMsg);    
+  }
+}
+
+
+QString QVtkItem::getPickedPoint() {
+  return pickedCoords_;
+}
+
