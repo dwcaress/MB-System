@@ -235,6 +235,17 @@ ApplicationWindow {
             color: "black"
         }
 
+        Text {
+            id: pickedCoords
+            objectName: "pickedCoords"
+            text: "picked coords go here"
+            anchors.top: selectedFile.bottom
+            anchors.topMargin: 5
+            font.family: "courier"
+            font.pointSize: 18
+            color: "black"
+        }
+
         Item {
             width: 964
             anchors.bottom: parent.bottom
@@ -251,6 +262,12 @@ ApplicationWindow {
                 anchors.fill: parent
                 width: 1000
                 height: 1000
+
+                onPickedPointChanged: {
+                  console.log("user picked a point!")
+                  console.log("this one: " + pickedPoint)
+                  pickedCoords.text = pickedPoint
+                }
             }           
         }
     }
@@ -279,7 +296,7 @@ ApplicationWindow {
 
     SystemTrayIcon {
         visible: true
-        icon.source: "qrc:mbsystem_logo.gif"
+        // icon.source: "qrc:mbsystem_logo.gif"
 
         onActivated: {
             window.show()
