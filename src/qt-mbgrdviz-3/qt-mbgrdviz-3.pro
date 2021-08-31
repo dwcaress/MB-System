@@ -26,10 +26,12 @@ SOURCES += \
         main.cpp
 
 ## HEADERS +=
-
+        
 ## DISTFILES += \
 
-INCLUDEPATH += $$(GMT_INCLUDEDIR)
+QMAKE_CFLAGS_ISYSTEM = -I
+
+INCLUDEPATH += $$(GMT_INCLUDEDIR)/gmt
 INCLUDEPATH += $$(OPENGL_INCLUDEDIR)
 INCLUDEPATH += ../qt-guilib
 
