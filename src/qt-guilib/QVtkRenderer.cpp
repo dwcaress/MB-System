@@ -11,6 +11,8 @@
 #include <vtkNamedColors.h>
 #include <vtkColor.h>
 #include <vtkStringArray.h>
+#include <vtkVectorText.h>
+#include <vtkFollower.h>
 #include "QVtkRenderer.h"
 #include "QVtkItem.h"
 
@@ -261,6 +263,7 @@ void QVtkRenderer::initialize() {
 }
 
 
+
 bool QVtkRenderer::initializePipeline(const char *gridFilename) {
   qDebug() << "QVtkRenderer::initializePipeline() " << gridFilename;
 
@@ -277,9 +280,14 @@ bool QVtkRenderer::initializePipeline(const char *gridFilename) {
 
   elevColorizer_->SetInputConnection(gridReader_->GetOutputPort());
   float xMin, xMax, yMin, yMax, zMin, zMax;
-  gridReader_->bounds(&xMin, &xMax, &yMin, &yMax, &zMax, &zMin);
+  gridReader_->bounds(&xMin, &xMax, &yMin, &yMax, &zMin, &zMax);
+  qDebug() << "gridReader->bounds():";
+  qDebug() << "xMin: " << xMin << ", xMax: " << xMax;    
+  qDebug() << "yMin: " << yMin << ", yMax: " << yMax;  
+  qDebug() << "zMin: " << zMin << ", zMax: " << zMax;
   elevColorizer_->SetLowPoint(0, 0, zMin);
   elevColorizer_->SetHighPoint(0, 0, zMax);
+  
 
   // Visualize the data...
 
@@ -323,9 +331,6 @@ bool QVtkRenderer::initializePipeline(const char *gridFilename) {
   // Per QtVTK example
   renderWindowInteractor_->EnableRenderOff();
 
-  //  vtkSmartPointer<vtkInteractorStyleTrackballCamera> style =
-  // vtkSmartPointer<vtkInteractorStyleTrackballCamera>::New();
-
   interactorStyle_ =
     vtkSmartPointer<PickerInteractorStyle>::New();  
 
@@ -337,7 +342,7 @@ bool QVtkRenderer::initializePipeline(const char *gridFilename) {
   interactorStyle_->polyData_->PrintSelf(std::cout, vtkIndent(1));
 
   renderWindowInteractor_->SetInteractorStyle(interactorStyle_);
-  
+
   renderer_->AddActor(surfaceActor_);
 
 
@@ -351,6 +356,84 @@ bool QVtkRenderer::initializePipeline(const char *gridFilename) {
 
   return true;
 }
+
+
+
+/* ***
+bool QVtkRenderer::initializePipeline(const char *gridFilename) {
+  qDebug() << "QVtkRenderer::initializePipeline() " << gridFilename;
+
+  gridReader_ =
+    vtkSmartPointer<GmtGridReader>::New();
+
+  vtkNew<vtkNamedColors> colors;
+
+  // Create some text
+  vtkNew<vtkVectorText> textSource;
+  textSource->SetText("Hello");
+
+  // Create mapper
+  qDebug() << "create vtk mapper";
+  mapper_ = vtkSmartPointer<vtkPolyDataMapper>::New();
+  qDebug() << "mapper->SetInputConnection()";
+  mapper_->SetInputConnection(textSource->GetOutputPort());
+
+   // Create a subclass of vtkActor: a vtkFollower that remains facing the camera
+  vtkNew<vtkFollower> follower;
+  follower->SetMapper(mapper_);
+  follower->GetProperty()->SetColor(colors->GetColor3d("Gold").GetData());
+
+  // Create VTK renderer (not the same as QT renderer)
+  qDebug() << "create vtk renderer";
+  renderer_ =
+    vtkSmartPointer<vtkRenderer>::New();
+
+  // Create vtk renderWindow
+  qDebug() << "create renderWindow";
+  renderWindow_ =
+    vtkSmartPointer<vtkGenericOpenGLRenderWindow>::New();
+
+  // Add renderer to the renderWindow
+  qDebug() << "add renderer to renderWindow";
+  renderWindow_->AddRenderer(renderer_);
+
+  // Create vtk renderWindowInteractor
+  qDebug() << "create renderWindowInteractor";
+  renderWindowInteractor_ =
+    vtkSmartPointer<vtkGenericRenderWindowInteractor>::New();
+
+  renderWindowInteractor_->SetRenderWindow(renderWindow_);
+  renderWindowInteractor_->Initialize();
+  renderWindowInteractor_->EnableRenderOff();
+  
+  // Per QtVTK example
+  renderWindowInteractor_->EnableRenderOff();
+
+  interactorStyle_ =
+    vtkSmartPointer<PickerInteractorStyle>::New();  
+
+  interactorStyle_->initialize(item_);
+  
+  interactorStyle_->SetDefaultRenderer(renderer_);
+  interactorStyle_->polyData_ = gridReader_->GetOutput();
+  qDebug() << "style->polyData_ details";
+  interactorStyle_->polyData_->PrintSelf(std::cout, vtkIndent(1));
+
+  renderWindowInteractor_->SetInteractorStyle(interactorStyle_);
+
+  renderer_->AddActor(follower);
+
+  // Axes actor
+  setupAxes();
+  
+  renderer_->ResetCamera();
+
+  // Initialize the OpenGL context for the renderer
+  renderWindow_->OpenGLInitContext();
+
+  return true;
+}
+*** */
 
 
 void QVtkRenderer::initializeOpenGLState()
@@ -408,7 +491,7 @@ void QVtkRenderer::setupAxes() {
   axesActor_->YAxisMinorTickVisibilityOff();
   axesActor_->ZAxisMinorTickVisibilityOff();
 
-  axesActor_->SetFlyModeToStaticEdges();
+  // axesActor_->SetFlyModeToStaticEdges();
   
   renderer_->AddActor(axesActor_);    
 }
