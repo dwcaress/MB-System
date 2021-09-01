@@ -361,6 +361,7 @@ static int s_app_main (app_cfg_t *cfg)
         PMPRINT(MOD_F7K,F7K_V2,(stderr,"connecting reader [%s/%d]\n",cfg->host,R7K_7KCENTER_PORT));
         
         retval=0;
+        int read_retries=5;
         while ( (forever || (count<cfg->cycles)) && !g_stop_flag) {
             int istat=0;
             count++;
@@ -368,7 +369,8 @@ static int s_app_main (app_cfg_t *cfg)
             memset(frame_buf,0,MAX_FRAME_BYTES_7K);
             // read frame
             if( (istat = r7kr_read_frame(reader, frame_buf, MAX_FRAME_BYTES_7K, R7KR_NET_STREAM, 0.0, R7KR_READ_TMOUT_MSEC,&lost_bytes )) > 0){
-                
+                read_retries=5;
+
                 PMPRINT(MOD_F7K,F7K_V1,(stderr,"r7kr_read_frame cycle[%d/%d] ret[%d] lost[%"PRIu32"]\n",count,cfg->cycles,istat,lost_bytes));
                 // show contents
                 if (cfg->verbose>=1) {
@@ -385,11 +387,12 @@ static int s_app_main (app_cfg_t *cfg)
                 }
             }else{
                 // read error
-                PEPRINT((stderr,"ERR - r7kr_read_frame - cycle[%d/%d] ret[%d] lost[%d]\n",count+1,cfg->cycles,istat,lost_bytes));
-                if (me_errno==ME_ESOCK || me_errno==ME_EOF || me_errno==ME_ERECV) {
+                PEPRINT((stderr,"ERR - r7kr_read_frame - cycle[%d/%d] ret[%d] me_err[%d] lost[%d]\n",count+1, cfg->cycles, istat, (me_errno-ME_ERRORNO_BASE), lost_bytes));
+                if (me_errno==ME_ESOCK || me_errno==ME_EOF || me_errno==ME_ERECV || (read_retries-- <= 0)) {
                     PEPRINT((stderr,"socket closed - reconnecting in 5 sec\n"));
                     sleep(5);
                     r7kr_reader_connect(reader,true);
+                    read_retries=5;
                 }
             }
         }
