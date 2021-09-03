@@ -1,4 +1,5 @@
 #include <string.h>
+// #include <GL/glext.h> // GENERATES MANY COMPILE ERRORS
 #include <QQuickWindow>
 #include <QOpenGLFramebufferObjectFormat>
 #include <QDebug>
@@ -12,10 +13,15 @@
 #include <vtkColor.h>
 #include <vtkStringArray.h>
 #include <vtkVectorText.h>
+#include <vtkAxes.h>
 #include <vtkFollower.h>
 #include "QVtkRenderer.h"
 #include "QVtkItem.h"
 
+/// How to include this prototype??? '#include <GL/glext.h> ' generates many errors
+extern "C" {
+void glGenQueries(GLsizei n, GLuint *ids);
+}
 
 using namespace mb_system;
 
@@ -50,6 +56,7 @@ void QVtkRenderer::render() {
   }
 
   renderWindow_->PushState();
+  
   initializeOpenGLState();
   renderWindow_->Start();
 
@@ -91,11 +98,11 @@ void QVtkRenderer::render() {
         
       if (mouseButtonEvent_->buttons() & Qt::LeftButton) {
         qDebug() << "QVtkRenderer() - got left button";
-        renderWindowInteractor_->SetEventInformation(mouseButtonEvent_->x(),
-                                                     mouseButtonEvent_->y(),
-                                                     cntrlKey,
-                                                     shiftKey,
-                                                     dblClick);
+        renderWindowInteractor_->SetEventInformationFlipY(mouseButtonEvent_->x(),
+                                                          mouseButtonEvent_->y(),
+                                                          cntrlKey,
+                                                          shiftKey,
+                                                          dblClick);
 
         renderWindowInteractor_->InvokeEvent(vtkCommand::LeftButtonPressEvent);
       }
@@ -263,7 +270,7 @@ void QVtkRenderer::initialize() {
 }
 
 
-
+/* ***
 bool QVtkRenderer::initializePipeline(const char *gridFilename) {
   qDebug() << "QVtkRenderer::initializePipeline() " << gridFilename;
 
@@ -273,23 +280,28 @@ bool QVtkRenderer::initializePipeline(const char *gridFilename) {
   gridReader_->SetFileName ( gridFilename );
   qDebug() << "reader->Update()";
   gridReader_->Update();
-
+  if (gridReader_->GetErrorCode()) {
+    std::cerr << "Error during gridReader Update(): " <<
+      gridReader_->GetErrorCode() << std::endl;
+    
+    return false;
+  }
+  
+  float zMin, zMax;
+  gridReader_->zBounds(&zMin, &zMax);
+  
   // Color data points based on z-value
   elevColorizer_ =
     vtkSmartPointer<vtkElevationFilter>::New();
 
   elevColorizer_->SetInputConnection(gridReader_->GetOutputPort());
-  float xMin, xMax, yMin, yMax, zMin, zMax;
-  gridReader_->bounds(&xMin, &xMax, &yMin, &yMax, &zMin, &zMax);
-  qDebug() << "gridReader->bounds():";
-  qDebug() << "xMin: " << xMin << ", xMax: " << xMax;    
-  qDebug() << "yMin: " << yMin << ", yMax: " << yMax;  
-  qDebug() << "zMin: " << zMin << ", zMax: " << zMax;
   elevColorizer_->SetLowPoint(0, 0, zMin);
   elevColorizer_->SetHighPoint(0, 0, zMax);
-  
 
-  // Visualize the data...
+  // Create VTK renderer (not the same as QT renderer)
+  qDebug() << "create vtk renderer";
+  renderer_ =
+    vtkSmartPointer<vtkRenderer>::New();
 
   // Create mapper
   qDebug() << "create vtk mapper";
@@ -305,89 +317,9 @@ bool QVtkRenderer::initializePipeline(const char *gridFilename) {
   qDebug() << "assign mapper to actor";
   surfaceActor_->SetMapper(mapper_);
 
-  // Create VTK renderer (not the same as QT renderer)
-  qDebug() << "create vtk renderer";
-  renderer_ =
-    vtkSmartPointer<vtkRenderer>::New();
-
-  // Create vtk renderWindow
-  qDebug() << "create renderWindow";
-  renderWindow_ =
-    vtkSmartPointer<vtkGenericOpenGLRenderWindow>::New();
-
-  // Add renderer to the renderWindow
-  qDebug() << "add renderer to renderWindow";
-  renderWindow_->AddRenderer(renderer_);
-
-  // Create vtk renderWindowInteractor
-  qDebug() << "create renderWindowInteractor";
-  renderWindowInteractor_ =
-    vtkSmartPointer<vtkGenericRenderWindowInteractor>::New();
-
-  renderWindowInteractor_->SetRenderWindow(renderWindow_);
-  renderWindowInteractor_->Initialize();
-  renderWindowInteractor_->EnableRenderOff();
-  
-  // Per QtVTK example
-  renderWindowInteractor_->EnableRenderOff();
-
-  interactorStyle_ =
-    vtkSmartPointer<PickerInteractorStyle>::New();  
-
-  interactorStyle_->initialize(item_);
-  
-  interactorStyle_->SetDefaultRenderer(renderer_);
-  interactorStyle_->polyData_ = gridReader_->GetOutput();
-  qDebug() << "style->polyData_ details";
-  interactorStyle_->polyData_->PrintSelf(std::cout, vtkIndent(1));
-
-  renderWindowInteractor_->SetInteractorStyle(interactorStyle_);
-
+  // Add actor to renderer
   renderer_->AddActor(surfaceActor_);
 
-
-  // Axes actor
-  setupAxes();
-  
-  renderer_->ResetCamera();
-
-  // Initialize the OpenGL context for the renderer
-  renderWindow_->OpenGLInitContext();
-
-  return true;
-}
-
-
-
-/* ***
-bool QVtkRenderer::initializePipeline(const char *gridFilename) {
-  qDebug() << "QVtkRenderer::initializePipeline() " << gridFilename;
-
-  gridReader_ =
-    vtkSmartPointer<GmtGridReader>::New();
-
-  vtkNew<vtkNamedColors> colors;
-
-  // Create some text
-  vtkNew<vtkVectorText> textSource;
-  textSource->SetText("Hello");
-
-  // Create mapper
-  qDebug() << "create vtk mapper";
-  mapper_ = vtkSmartPointer<vtkPolyDataMapper>::New();
-  qDebug() << "mapper->SetInputConnection()";
-  mapper_->SetInputConnection(textSource->GetOutputPort());
-
-   // Create a subclass of vtkActor: a vtkFollower that remains facing the camera
-  vtkNew<vtkFollower> follower;
-  follower->SetMapper(mapper_);
-  follower->GetProperty()->SetColor(colors->GetColor3d("Gold").GetData());
-
-  // Create VTK renderer (not the same as QT renderer)
-  qDebug() << "create vtk renderer";
-  renderer_ =
-    vtkSmartPointer<vtkRenderer>::New();
-
   // Create vtk renderWindow
   qDebug() << "create renderWindow";
   renderWindow_ =
@@ -402,29 +334,39 @@ bool QVtkRenderer::initializePipeline(const char *gridFilename) {
   renderWindowInteractor_ =
     vtkSmartPointer<vtkGenericRenderWindowInteractor>::New();
 
-  renderWindowInteractor_->SetRenderWindow(renderWindow_);
-  renderWindowInteractor_->Initialize();
-  renderWindowInteractor_->EnableRenderOff();
-  
-  // Per QtVTK example
-  renderWindowInteractor_->EnableRenderOff();
-
+  // Create interactor style
   interactorStyle_ =
     vtkSmartPointer<PickerInteractorStyle>::New();  
 
   interactorStyle_->initialize(item_);
-  
   interactorStyle_->SetDefaultRenderer(renderer_);
   interactorStyle_->polyData_ = gridReader_->GetOutput();
   qDebug() << "style->polyData_ details";
   interactorStyle_->polyData_->PrintSelf(std::cout, vtkIndent(1));
 
   renderWindowInteractor_->SetInteractorStyle(interactorStyle_);
-
-  renderer_->AddActor(follower);
+  renderWindowInteractor_->SetRenderWindow(renderWindow_);
+  //  renderWindowInteractor_->Initialize();
+  
+  // Per QtVTK example
+  renderWindowInteractor_->EnableRenderOff();
 
   // Axes actor
-  setupAxes();
+  axesActor_ = vtkSmartPointer<vtkCubeAxesActor>::New();
+  
+  // Colors for axes
+  vtkSmartPointer<vtkNamedColors> colors = 
+    vtkSmartPointer<vtkNamedColors>::New();
+
+  vtkColor3d axisColor = colors->GetColor3d("Black");
+  
+  // Set up axes
+  setupAxes(axesActor_, axisColor,
+            gridReader_->GetOutput()->GetBounds());
+
+  axesActor_->SetCamera(renderer_->GetActiveCamera());
+
+  renderer_->AddActor(axesActor_);    
   
   renderer_->ResetCamera();
 
@@ -434,6 +376,60 @@ bool QVtkRenderer::initializePipeline(const char *gridFilename) {
   return true;
 }
 *** */
+
+bool QVtkRenderer::initializePipeline(const char *gridFilename) {
+  qDebug() << "QVtkRenderer::initializePipeline() " << gridFilename;
+
+  gridReader_ =
+    vtkSmartPointer<GmtGridReader>::New();
+
+  // Color data points based on z-value
+  elevColorizer_ =
+    vtkSmartPointer<vtkElevationFilter>::New();
+
+  // Create VTK renderer (not the same as QT renderer)
+  qDebug() << "create vtk renderer";
+  renderer_ =
+    vtkSmartPointer<vtkRenderer>::New();
+
+  // Create mapper
+  qDebug() << "create vtk mapper";
+  mapper_ = vtkSmartPointer<vtkPolyDataMapper>::New();
+
+  // Create actor for grid surface
+  qDebug() << "create vtk actor";
+  surfaceActor_ = vtkSmartPointer<vtkActor>::New();
+
+  // Create vtk renderWindow
+  qDebug() << "create renderWindow";
+  renderWindow_ =
+    vtkSmartPointer<vtkGenericOpenGLRenderWindow>::New();
+
+  // Create vtk renderWindowInteractor
+  qDebug() << "create renderWindowInteractor";
+  renderWindowInteractor_ =
+    vtkSmartPointer<vtkGenericRenderWindowInteractor>::New();
+
+  // Create interactor style
+  interactorStyle_ =
+    vtkSmartPointer<PickerInteractorStyle>::New();  
+
+  interactorStyle_->initialize(item_, renderWindowInteractor_);
+
+  // Axes actor
+  axesActor_ = vtkSmartPointer<vtkCubeAxesActor>::New();
+
+  return assemblePipeline(gridReader_, gridFilename_,
+                          elevColorizer_, renderer_, mapper_,
+                          renderWindow_, renderWindowInteractor_,
+                          interactorStyle_, surfaceActor_, axesActor_);
+
+  /* ***
+  return assembleTestPipeline(renderer_, renderWindow_,
+                          renderWindowInteractor_,
+                          interactorStyle_);
+                          *** */
+}
 
 
 void QVtkRenderer::initializeOpenGLState()
@@ -446,54 +442,208 @@ void QVtkRenderer::initializeOpenGLState()
 
 
 
-void QVtkRenderer::setupAxes() {
+void QVtkRenderer::setupAxes(vtkCubeAxesActor *axesActor,
+                             vtkColor3d &axisColor, double *bounds) {
+
+  
+  axesActor->SetUseTextActor3D(0);
+
+
+  axesActor->SetBounds(bounds);
+  axesActor->GetTitleTextProperty(0)->SetColor(axisColor.GetData());
+  axesActor->GetTitleTextProperty(0)->SetFontSize(48);
+  axesActor->GetLabelTextProperty(0)->SetColor(axisColor.GetData());
+
+  axesActor->GetTitleTextProperty(1)->SetColor(axisColor.GetData());
+  axesActor->GetLabelTextProperty(1)->SetColor(axisColor.GetData());
+
+  axesActor->GetTitleTextProperty(2)->SetColor(axisColor.GetData());
+  axesActor->GetLabelTextProperty(2)->SetColor(axisColor.GetData());
+
+  axesActor->DrawXGridlinesOn();
+  axesActor->DrawYGridlinesOn();
+  axesActor->DrawZGridlinesOn();
+  
+  axesActor->SetXTitle("Easting");
+  axesActor->SetYTitle("Northing");
+  axesActor->SetZTitle("Depth");
+
+#if VTK_MAJOR_VERSION == 6
+  axesActor->SetGridLineLocation(VTK_GRID_LINES_FURTHEST);
+#endif
+#if VTK_MAJOR_VERSION > 6
+  axesActor->SetGridLineLocation(
+				  axesActor->VTK_GRID_LINES_FURTHEST);
+#endif
+  
+  axesActor->XAxisMinorTickVisibilityOff();
+  axesActor->YAxisMinorTickVisibilityOff();
+  axesActor->ZAxisMinorTickVisibilityOff();
+
+  // axesActor->SetFlyModeToStaticEdges();
+  
+}
+
+
+/// Start window interactor and render
+void QVtkRenderer::startAndRenderWindow() {
+  // Start the interactor
+  qDebug() << "start render window interactor";
+
+  renderWindow_->MakeCurrent();
+  
+  qDebug() << "render window";
+  renderWindow_->Render();      
+
+  // Create OpenGL context, per this post:
+  // https://gitlab.kitware.com/vtk/vtk/-/issues/17280
+  GLuint StartQuery = 0;
+  glGenQueries(1, static_cast<GLuint*>(&StartQuery));
+  
+  renderWindowInteractor_->Start();
+  // Render
+}
+
+bool QVtkRenderer::assemblePipeline(mb_system::GmtGridReader *gridReader,
+                                    const char *gridFilename,
+                                    vtkElevationFilter *elevColorizer,
+                                    vtkRenderer *renderer,
+                                    vtkPolyDataMapper *surfaceMapper,
+                                    vtkGenericOpenGLRenderWindow *renderWindow,
+                                    vtkGenericRenderWindowInteractor *windowInteractor,
+                                    PickerInteractorStyle *interactorStyle,
+                                    vtkActor *surfaceActor,
+                                    vtkCubeAxesActor *axesActor) {
+
+  qDebug() << "QVtkRenderer::assemblePipeline() " << gridFilename;
+
+  qDebug() << "Skip most stuff TEST TEST TEST!!!!!!";
+  
+  gridReader->SetFileName ( gridFilename );
+  qDebug() << "reader->Update()";
+  gridReader->Update();
+  if (gridReader->GetErrorCode()) {
+    std::cerr << "Error during gridReader Update(): " <<
+      gridReader->GetErrorCode() << std::endl;
+    
+    return false;
+  }
+
+  float zMin, zMax;
+  gridReader->zBounds(&zMin, &zMax);
+  
+  // Color data points based on z-value
+  elevColorizer->SetInputConnection(gridReader->GetOutputPort());
+  elevColorizer->SetLowPoint(0, 0, zMin);
+  elevColorizer->SetHighPoint(0, 0, zMax);
+
+  qDebug() << "surfaceMapper->SetInputConnection()";
+  surfaceMapper->SetInputConnection(elevColorizer->GetOutputPort());
+
+  // Assign surfaceMapper to actor
+  qDebug() << "assign surfaceMapper to actor";
+  surfaceActor->SetMapper(surfaceMapper);
+
+  // Add actor to renderer
+  renderer->AddActor(surfaceActor);
+
+  // Add renderer to the renderWindow
+  qDebug() << "add renderer to renderWindow";
+  renderWindow->AddRenderer(renderer);
+
+  interactorStyle->SetDefaultRenderer(renderer);
+  interactorStyle->polyData_ = gridReader->GetOutput();
+  qDebug() << "style->polyData_ details";
+  interactorStyle->polyData_->PrintSelf(std::cout, vtkIndent(1));
+
+  windowInteractor->SetInteractorStyle(interactorStyle);
+  windowInteractor->SetRenderWindow(renderWindow);
+  //  windowInteractor_->Initialize();
+  
+  // Per QtVTK example
+  windowInteractor->EnableRenderOff();
 
   // Colors for axes
   vtkSmartPointer<vtkNamedColors> colors = 
     vtkSmartPointer<vtkNamedColors>::New();
 
-  vtkColor3d axisColor = colors->GetColor3d("Black");
-
-  // Axes actor
-  axesActor_ = vtkSmartPointer<vtkCubeAxesActor>::New();
-  axesActor_->SetUseTextActor3D(0);
-
-
-  axesActor_->SetBounds(gridReader_->GetOutput()->GetBounds());
-  axesActor_->SetCamera(renderer_->GetActiveCamera());
-  axesActor_->GetTitleTextProperty(0)->SetColor(axisColor.GetData());
-  axesActor_->GetTitleTextProperty(0)->SetFontSize(48);
-  axesActor_->GetLabelTextProperty(0)->SetColor(axisColor.GetData());
-
-  axesActor_->GetTitleTextProperty(1)->SetColor(axisColor.GetData());
-  axesActor_->GetLabelTextProperty(1)->SetColor(axisColor.GetData());
-
-  axesActor_->GetTitleTextProperty(2)->SetColor(axisColor.GetData());
-  axesActor_->GetLabelTextProperty(2)->SetColor(axisColor.GetData());
-
-  axesActor_->DrawXGridlinesOn();
-  axesActor_->DrawYGridlinesOn();
-  axesActor_->DrawZGridlinesOn();
+  vtkColor3d axisColor = colors->GetColor3d("White");
   
-  axesActor_->SetXTitle("Easting");
-  axesActor_->SetYTitle("Northing");
-  axesActor_->SetZTitle("Depth");
+  // Set up axes
+  setupAxes(axesActor, axisColor,
+            gridReader->GetOutput()->GetBounds());
 
-#if VTK_MAJOR_VERSION == 6
-  axesActor_->SetGridLineLocation(VTK_GRID_LINES_FURTHEST);
-#endif
-#if VTK_MAJOR_VERSION > 6
-  axesActor_->SetGridLineLocation(
-				  axesActor_->VTK_GRID_LINES_FURTHEST);
-#endif
-  
-  axesActor_->XAxisMinorTickVisibilityOff();
-  axesActor_->YAxisMinorTickVisibilityOff();
-  axesActor_->ZAxisMinorTickVisibilityOff();
+  axesActor->SetCamera(renderer->GetActiveCamera());
 
-  // axesActor_->SetFlyModeToStaticEdges();
-  
-  renderer_->AddActor(axesActor_);    
+  renderer->AddActor(axesActor);    
+
+  renderer->ResetCamera();
+
+  // Initialize the OpenGL context for the renderer
+  renderWindow->OpenGLInitContext();
+
+  return true;
 }
 
 
+
+bool QVtkRenderer::assembleTestPipeline(
+                                    vtkRenderer *renderer,
+                                    vtkGenericOpenGLRenderWindow *renderWindow,
+                                    vtkGenericRenderWindowInteractor *interactor,
+                                    PickerInteractorStyle *style) {
+
+
+  vtkNew<vtkNamedColors> colors;
+
+  // Create the axes and the associated mapper and actor.
+  vtkNew<vtkAxes> axes;
+  axes->SetOrigin(0, 0, 0);
+  vtkNew<vtkPolyDataMapper> axesMapper;
+  axesMapper->SetInputConnection(axes->GetOutputPort());
+  vtkNew<vtkActor> axesActor;
+  axesActor->SetMapper(axesMapper);
+
+  // Create the 3D text and the associated mapper and follower (a type of
+  // actor).  Position the text so it is displayed over the origin of the
+  // axes.
+  vtkNew<vtkVectorText> atext;
+  atext->SetText("Origin");
+  vtkNew<vtkPolyDataMapper> textMapper;
+  textMapper->SetInputConnection(atext->GetOutputPort());
+  vtkNew<vtkFollower> textActor;
+  textActor->SetMapper(textMapper);
+  textActor->SetScale(0.2, 0.2, 0.2);
+  textActor->AddPosition(0, -0.1, 0);
+  textActor->GetProperty()->SetColor(colors->GetColor3d("Peacock").GetData());
+
+  renderWindow->AddRenderer(renderer);
+  renderWindow->SetSize(640, 480);
+
+  interactor->SetRenderWindow(renderWindow);
+
+  interactor->SetInteractorStyle(style);
+  
+  // Per QtVTK example
+  interactor->EnableRenderOff();
+  
+  // Add the actors to the renderer.
+  renderer->AddActor(axesActor);
+  renderer->AddActor(textActor);
+  renderer->SetBackground(colors->GetColor3d("Silver").GetData());
+
+  // Zoom in closer.
+  renderer->ResetCamera();
+  renderer->GetActiveCamera()->Zoom(1.6);
+
+  // Reset the clipping range of the camera; set the camera of the
+  // follower; render.
+  renderer->ResetCameraClippingRange();
+  textActor->SetCamera(renderer->GetActiveCamera());
+
+  // Initialize the OpenGL context for the renderer
+  renderWindow->OpenGLInitContext();
+
+  return true;
+  
+}

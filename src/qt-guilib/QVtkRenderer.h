@@ -52,7 +52,44 @@ namespace mb_system {
     /// Render the VTK scene
     void render() override;
 
+    /// Set grid filename
+    void setGridFilename(char *filename) {
+      if (gridFilename_) {
+        free((void *)gridFilename_);
+      }
+      gridFilename_ = strdup(filename);
+    }
 
+    /// Set DisplayProperties
+    void setDisplayProperties(DisplayProperties *properties) {
+      displayProperties_ = properties;
+    }
+    
+    /// Start window interactor and render
+    void startAndRenderWindow();
+    
+    /// Initilize VTK pipeline; returns true on success, false on error.
+    /// 'public' access so can access from test app
+    bool initializePipeline(const char *grdFilename);
+
+    /// Connect pipeline components
+    static bool assemblePipeline(mb_system::GmtGridReader *reader,
+                                 const char *gridFilename,
+                                 vtkElevationFilter *elevColorizer,
+                                 vtkRenderer *renderer,
+                                 vtkPolyDataMapper *surfaceMapper,
+                                 vtkGenericOpenGLRenderWindow *renderWindow,
+                                 vtkGenericRenderWindowInteractor *windowInteractor,
+                                 PickerInteractorStyle *interactorStyle,
+                                 vtkActor *surfaceActor,
+                                 vtkCubeAxesActor *axesActor);
+
+    static bool assembleTestPipeline(
+                                     vtkRenderer *renderer,
+                                     vtkGenericOpenGLRenderWindow *renderWindow,
+                                     vtkGenericRenderWindowInteractor *interactor,
+                                     PickerInteractorStyle *style);
+  
   protected:
 
     /// Display properties copied from QVtkItem
@@ -61,14 +98,13 @@ namespace mb_system {
     /// Initialize renderer; build VTK pipeline
     void initialize();
 
-    /// Initilize VTK pipeline; returns true on success, false on error.
-    bool initializePipeline(const char *grdFilename);
-
     /// Initialize OpenGL state
     virtual void initializeOpenGLState();
 
     /// Setup axes
-    void setupAxes();
+    static void setupAxes(vtkCubeAxesActor *axesActor,
+                          vtkColor3d &axisColor,
+                          double *bounds);
     
     // Item being rendered
     QVtkItem *item_;
