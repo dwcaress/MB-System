@@ -25,7 +25,7 @@
 #include <vtkSmartPointer.h>
 #include <vtkTriangleFilter.h>
 #include <vtkUnstructuredGrid.h>
-
+#include <vtkRenderWindowInteractor.h>
 
 
 namespace mb_system {
@@ -51,8 +51,10 @@ public:
   PickerInteractorStyle();
 
   /// Initialize - REQUIRED
-  void initialize(mb_system::QVtkItem *item) {
+  void initialize(mb_system::QVtkItem *item,
+                  vtkRenderWindowInteractor *interactor) {
     item_ = item;
+    interactor_ = interactor;
   }
   
   /// Pick cell
@@ -66,6 +68,9 @@ protected:
 
   /// QVtkItem associated with this 
   mb_system::QVtkItem *item_;
+
+  /// Associated interactor
+  vtkRenderWindowInteractor *interactor_;
   
 };
 
