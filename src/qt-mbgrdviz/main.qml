@@ -21,7 +21,7 @@ ApplicationWindow {
     width: 1000
     height: 880
     title: "mbgrdviz-4"
-
+    
     property int selectedAxisLabel: -1
     property real dragSpeedModifier: 100.0
     property int currentMouseX: -1
@@ -248,10 +248,12 @@ ApplicationWindow {
 
         Item {
             width: 964
+            height: 964
             anchors.bottom: parent.bottom
             anchors.bottomMargin: 0
             anchors.top: selectedFile.bottom
-            anchors.topMargin: -36
+            // anchors.topMargin: -36
+            anchors.topMargin: 36            
             objectName: "surface3DItem"
 
 	    
@@ -263,6 +265,7 @@ ApplicationWindow {
                 width: 1000
                 height: 1000
 
+                // Update picked coordinate text
                 onPickedPointChanged: {
                   console.log("user picked a point!")
                   console.log("this one: " + pickedPoint)
