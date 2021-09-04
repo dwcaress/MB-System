@@ -459,7 +459,11 @@ void QVtkRenderer::setupAxes(vtkCubeAxesActor *axesActor,
 
   axesActor->GetTitleTextProperty(2)->SetColor(axisColor.GetData());
   axesActor->GetLabelTextProperty(2)->SetColor(axisColor.GetData());
-
+  
+  axesActor->GetXAxesLinesProperty()->SetColor(axisColor.GetData());
+  axesActor->GetYAxesLinesProperty()->SetColor(axisColor.GetData());
+  axesActor->GetZAxesLinesProperty()->SetColor(axisColor.GetData());    
+  
   axesActor->DrawXGridlinesOn();
   axesActor->DrawYGridlinesOn();
   axesActor->DrawZGridlinesOn();
@@ -567,7 +571,7 @@ bool QVtkRenderer::assemblePipeline(mb_system::GmtGridReader *gridReader,
   vtkSmartPointer<vtkNamedColors> colors = 
     vtkSmartPointer<vtkNamedColors>::New();
 
-  vtkColor3d axisColor = colors->GetColor3d("White");
+  vtkColor3d axisColor = colors->GetColor3d("black");
   
   // Set up axes
   setupAxes(axesActor, axisColor,
