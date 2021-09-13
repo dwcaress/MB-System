@@ -179,6 +179,7 @@ Value <=0 disables heartbeat; abandoned sockets persist";
 help_topics["trnuhbt"]="trnu (TRN update pub/sub) server heartbeat timeout (s)\n\n\
 Drop client connections after timeout\n\
 Value <=0 disables heartbeat; abandoned sockets persist";
+help_topics["trn-dev"]="TRN Device (7125_400, 7125_200, T50)";
 help_topics["trn-utm"]="TRN UTM zone (10:Monterey Bay)";
 help_topics["mb-out"]="TRN MB1 output configuration\n\n\
 Options for MB1 record output are selected using one or more comma separated values:\n\n\
@@ -356,6 +357,7 @@ function load_ctx(){
     x.elements["statsec"].value="30";
     x.elements["statflags"].value="MSF_STATUS|MSF_EVENT|MSF_ASTAT|MSF_PSTAT";
     x.elements["delay"].value="0";
+    x.elements["trn-dev"].value="T50";
     x.elements["trn-utm"].value="10";
     x.elements["mb-out"].value="mb1svr:TRN_HOST:27000";
     x.elements["trn-map"].value="TRN_MAPFILES/PortTiles";
@@ -420,6 +422,7 @@ function init_preset(key){
     x.elements["statsec"].value="30";
     x.elements["statflags"].value="MSF_STATUS|MSF_EVENT|MSF_ASTAT|MSF_PSTAT";
     x.elements["delay"].value="0";
+    x.elements["trn-dev"].value="T50";
     x.elements["trn-utm"].value="10";
     x.elements["mb-out"].value="mb1svr:TRN_HOST:27000";
     x.elements["trn-map"].value="TRN_MAPFILES/PortTiles";
@@ -517,8 +520,10 @@ function update(){
     	text += '--trnhbt='+x.elements["trnhbt"].value+" ";
     if(x.elements["trnuhbt"].value.length>0)
     	text += '--trnuhbt='+x.elements["trnuhbt"].value+" ";
+    if(x.elements["trn-dev"].value.length>0)
+        text += '--trn-dev='+x.elements["trn-dev"].value+" ";
     if(x.elements["trn-utm"].value.length>0)
-    	text += '--trn-utm='+x.elements["trn-utm"].value+" ";
+        text += '--trn-utm='+x.elements["trn-utm"].value+" ";
     if(x.elements["trn-decn"].value.length>0)
     	text += '--trn-decn='+x.elements["trn-decn"].value+" "
     if(x.elements["trn-en"].value.length>0)
@@ -798,6 +803,16 @@ function cfg2str(){
         retval+="// use Y/1: enable N/0: disable\n";
     }
     retval+="trn-en="+x.elements["trn-en"].value+"\n";
+
+    retval+="\n";
+    if(verbose){
+        retval+="// opt trn-dev [char*]\n";
+        retval+="// TRN device mnemonic maps to 7K Center device ID and system enumerator\n";
+        retval+="// 7125_200 : Seabat 7125 200 kHz\n";
+        retval+="// 7125_400 : Seabat 7125 400 kHz\n";
+        retval+="// T50      : T50-S, T50-R\n";
+    }
+    retval+="trn-devm="+x.elements["trn-dev"].value+"\n";
 
     retval+="\n";
     if(verbose){

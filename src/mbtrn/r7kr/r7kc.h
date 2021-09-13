@@ -418,6 +418,40 @@ typedef struct r7k_rth_7501_ack_s{
     byte tracking_number[16];
 }r7k_rth_7501_ack_t;
 
+// @typedef struct r7k_rth_7001_rd_s r7k_rth_7001_rd_t
+/// @brief 7k center record type header : 7501 message ACK.
+/// @sa Reson Data Record Format documentation
+typedef struct r7k_rth_7001_rd_s{
+    /// @var r7k_rth_7001_rd_s::sonar_sn
+    /// @brief sonar serial number.
+    uint64_t sonar_sn;
+    /// @var r7k_rth_7001_rd_s::device_count
+    /// @brief number of devices
+    uint32_t device_count;
+}r7k_rth_7001_rd_t;
+
+// @typedef struct r7k_7001_rd_hdr_s r7k_7001_rd_hdr_t
+/// @brief 7k center record type header : 7501 message ACK.
+/// @sa Reson Data Record Format documentation
+typedef struct r7k_7001_rd_hdr_s{
+    /// @var r7k_7001_rd_hdr_s::sonar_sn
+    /// @brief tbd
+    uint32_t unique_id;
+    /// @var r7k_7001_rd_hdr_s::desc
+    /// @brief tbd
+    uint8_t desc[60];
+    /// @var r7k_7001_rd_hdr_s::alph_data_type
+    /// @brief tbd
+    uint32_t alph_data_type;
+    /// @var r7k_7001_rd_hdr_s::alph_data_type
+    /// @brief tbd
+    uint64_t serial_number;
+    /// @var r7k_7001_rd_hdr_s::alph_data_type
+    /// @brief tbd
+    uint32_t info_bytes;
+    ///  char [info_bytes] follows
+}r7k_7001_dev_info_t;
+
 /// @typedef struct r7k_sub_rd_s r7k_sub_rd_t
 /// @brief reson 7k center record data : subscribe message data.
 /// @sa Reson Data Record Format documentation
@@ -431,6 +465,16 @@ typedef struct r7k_sub_rd_s
     // followed by
     // uint32_t records[record_count];
 }r7k_sub_rd_t;
+
+/// @typedef struct r7k_reqrec_rd_s r7k_sub_rd_t
+/// @brief reson 7k center record data : subscribe message data.
+/// @sa Reson Data Record Format documentation
+typedef struct r7k_reqrec_rd_s
+{
+    /// @var r7k_sub_rd_s::record_count
+    /// @brief empty byte
+    uint32_t record_type;
+}r7k_reqrec_rd_t;
 
 /// @typedef struct r7k_rth_rcack_s r7k_rth_rcack_t
 /// @brief 7k center record type header : 7501 remote control ACK.
@@ -463,39 +507,53 @@ typedef struct r7k_rd_rcnak_s
 
 #pragma pack(pop)
 
+#define R7K_MNEM_INVALID "INVALID"
+#define R7K_MNEM_7125_200KHZ "7125_200"
+#define R7K_MNEM_7125_400KHZ "7125_400"
+#define R7K_MNEM_T50 "T50"
+
+/// @typedef enum r7kr_device_t r7kr_device_t
+/// @brief supported devices (used by applications to select device ID and enumerator, etc.
+typedef enum{
+    R7KC_DEV_INVALID=-1,
+    R7KC_DEV_7125_200KHZ=0,
+    R7KC_DEV_7125_400KHZ,
+    R7KC_DEV_T50
+}r7k_device_t;
+
 /////////////////////////
 // Macros
 /////////////////////////
 
 /// @def R7K_7KCENTER_PORT
 /// @brief 7K Center IP port.
-#define R7K_7KCENTER_PORT       7000
+#define R7K_7KCENTER_PORT 7000
 /// @def R7K_RT_REMCON
 /// @brief 7K Center message type ID remote control.
-#define R7K_RT_REMCON           7500
+#define R7K_RT_REMCON 7500
 /// @def R7K_RT_REMCON_ACK
 /// @brief 7K Center message type ID remote control ACK.
-#define R7K_RT_REMCON_ACK       7501
+#define R7K_RT_REMCON_ACK 7501
 /// @def R7K_RT_REMCON_NACK
 /// @brief 7K Center message type ID remote control NACK.
-#define R7K_RT_REMCON_NACK      7502
+#define R7K_RT_REMCON_NACK 7502
 /// @def R7K_RT_CONFIG_DATA
 /// @brief 7K Center message type config data.
-#define R7K_RT_CONFIG_DATA      7001
+#define R7K_RT_CONFIG_DATA 7001
 /// @def R7K_RT_RC_SONAR
 /// @brief 7K Center message type remote control sonar.
-#define R7K_RT_RC_SONAR         7503
+#define R7K_RT_RC_SONAR 7503
 /// @def R7K_RT_SYSTEM_STATE
 /// @brief 7K Center message type system state.
-#define R7K_RT_SYSTEM_STATE     7503
+#define R7K_RT_SYSTEM_STATE 7503
 // max frame bytes is defined in Reson DRF.
 /// @def R7K_MAX_FRAME_BYTES
 /// @brief max 7k center frame size (bytes).
-#define R7K_MAX_FRAME_BYTES    600000 //60000
+#define R7K_MAX_FRAME_BYTES 600000 //60000
 // max frames/record is a guess
 /// @def R7K_MAX_RECORD_FRAMES
 /// @brief max record frames per ping (empirical/estimate).
-#define R7K_MAX_RECORD_FRAMES     16
+#define R7K_MAX_RECORD_FRAMES 16
 // max record bytes depends on
 // number of frames in a record
 /// @def R7K_MAX_RECORD_BYTES
@@ -510,49 +568,62 @@ typedef struct r7k_rd_rcnak_s
 /// per record, etc.
 #define R7K_MAX_PING_RECORDS 32
 
+/// @def R7K_RTID_REQ_REC
+/// @brief 7K Center message type subscribe to message streams.
+#define R7K_RTID_REQ_REC 1050
 /// @def R7K_RTID_SUB
 /// @brief 7K Center message type subscribe to message streams.
-#define R7K_RTID_SUB            1051
+#define R7K_RTID_SUB 1051
 /// @def R7K_RTID_UNSUB
 /// @brief 7K Center message type unsubscribe from message streams.
-#define R7K_RTID_UNSUB          1052
+#define R7K_RTID_UNSUB 1052
 
 /// @def R7K_NF_PROTO_VER
 /// @brief Network Frame protocol version.
-#define R7K_NF_PROTO_VER        5
+#define R7K_NF_PROTO_VER 5
 /// @def R7K_NF_DEVID_UNUSED
 /// @brief Network Frame device ID unused value.
-#define R7K_NF_DEVID_UNUSED     0xFFFFFFFF
+#define R7K_NF_DEVID_UNUSED 0xFFFFFFFF
 
 /// @def R7K_DEVID_7KCENTER
 /// @brief 7K Center device ID : 7K Center.
-#define R7K_DEVID_7KCENTER      7000
+#define R7K_DEVID_7KCENTER 7000
+/// @def R7K_DEVID_7125
+/// @brief 7K Center device ID : Seabat 7125 sonar
+#define R7K_DEVID_7125 7125
+/// @def R7K_DEVID_T50
+/// @brief 7K Center device ID : T50 sonar
+#define R7K_DEVID_T50 50
 /// @def R7K_DEVID_7KCENTER_UI
 /// @brief 7K Center device ID : 7K Center User Interface.
-#define R7K_DEVID_7KCENTER_UI   7001
+#define R7K_DEVID_7KCENTER_UI 7001
 /// @def R7K_DEVID_7KLOGGER
 /// @brief 7K Center device ID : 7K Center logger.
-#define R7K_DEVID_7KLOGGER      7004
+#define R7K_DEVID_7KLOGGER 7004
 
 /// @def R7K_DRF_PROTO_VER
 /// @brief Data Record Frame protocol version.
-#define R7K_DRF_PROTO_VER       5
+#define R7K_DRF_PROTO_VER 5
 /// @def R7K_DRF_SYS_ENUM_200KHZ
 /// @brief Data Record Frame system enumerator 200khz.
 #define R7K_DRF_SYS_ENUM_200KHZ 0
 /// @def R7K_DRF_SYS_ENUM_400KHZ
 /// @brief Data Record Frame system enumerator 400khz.
 #define R7K_DRF_SYS_ENUM_400KHZ 1
+/// @def R7K_DRF_SYS_ENUM_DFL
+/// @brief Data Record Frame system enumerator default.
+#define R7K_DRF_SYS_ENUM_DFL 0
+#define R7K_DRF_SYS_ENUM_ALL 0
 /// @def R7K_DRF_RECORD_VER
 /// @brief Data Record Frame record version.
-#define R7K_DRF_RECORD_VER      1
+#define R7K_DRF_RECORD_VER 1
 /// @def R7K_DRF_SYNC_PATTERN
 /// @brief TBD
-#define R7K_DRF_SYNC_PATTERN    0x0000FFFF
+#define R7K_DRF_SYNC_PATTERN 0x0000FFFF
 /// @def R7K_DRF_SYNC_OFFSET
 /// @brief Data Record Frame offset of sync pattern.
 /// (in bytes, relative to start of DRF)
-#define R7K_DRF_SYNC_OFFSET     (2*sizeof(uint16_t))
+#define R7K_DRF_SYNC_OFFSET (2*sizeof(uint16_t))
 
 /// @def R7K_EMPTY_FRAME_BYTES
 /// @brief size of empty network frame headers (nf, drf, w/o data, checksum).
@@ -669,8 +740,11 @@ typedef struct r7k_rd_rcnak_s
 
 // R7K utility API
 
-int  r7k_subscribe(msock_socket_t *s, uint32_t *records, uint32_t len);
+int  r7k_subscribe(msock_socket_t *s, r7k_device_t device_id, uint32_t *records, uint32_t len);
 int  r7k_unsubscribe(msock_socket_t *s);
+int r7k_req_config(msock_socket_t *s);
+r7k_device_t r7k_parse_devid(const char *key);
+const char *r7k_devidstr(int dev_id);
 
 uint16_t r7k_txid();
 uint32_t r7k_checksum(byte *pdata, uint32_t len);

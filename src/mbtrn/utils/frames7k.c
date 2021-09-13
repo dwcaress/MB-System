@@ -167,6 +167,9 @@ typedef struct app_cfg_s{
     /// @var app_cfg_s::size
     /// @brief frame buffer size
     uint32_t size;
+    /// @var app_cfg_s::id
+    /// @brief reader id
+    r7k_device_t dev;
 }app_cfg_t;
 
 static void s_show_help();
@@ -196,6 +199,7 @@ static void s_show_help()
     "  --host      : reson host name or IP address\n"
     "  --cycles    : number of cycles (dfl 0 - until CTRL-C)\n"
     "  --size      : reader capacity (bytes)\n"
+    "  --dev=s     : device  [e.g. T50, 7125_400]\n"
     "\n";
     printf("%s",help_message);
     printf("%s",usage_message);
@@ -223,14 +227,15 @@ void parse_args(int argc, char **argv, app_cfg_t *cfg)
         {"host", required_argument, NULL, 0},
         {"cycles", required_argument, NULL, 0},
         {"size", required_argument, NULL, 0},
+        {"dev", required_argument, NULL, 0},
         {NULL, 0, NULL, 0}};
 
     /* process argument list */
     while ((c = getopt_long(argc, argv, "", options, &option_index)) != -1){
         switch (c) {
-                /* long options all return c=0 */
+                // long options all return c=0
             case 0:
-                /* verbose */
+                // verbose
                 if (strcmp("verbose", options[option_index].name) == 0) {
                     sscanf(optarg,"%d",&cfg->verbose);
                 }
@@ -239,22 +244,29 @@ void parse_args(int argc, char **argv, app_cfg_t *cfg)
                     version=true;
                 }
                 
-                /* help */
+                // help
                 else if (strcmp("help", options[option_index].name) == 0) {
                     help = true;
                 }
                 
-                /* host */
+                // host
                 else if (strcmp("host", options[option_index].name) == 0) {
                     cfg->host=strdup(optarg);
                 }
-                /* cycles */
+                // cycles
                 else if (strcmp("cycles", options[option_index].name) == 0) {
                     sscanf(optarg,"%d",&cfg->cycles);
                 }
-                /* size */
+                // size
                 else if (strcmp("size", options[option_index].name) == 0) {
                     sscanf(optarg,"%u",&cfg->size);
+                }
+                // dev
+                else if (strcmp("dev", options[option_index].name) == 0) {
+                    r7k_device_t test = R7KC_DEV_INVALID;
+                    if( (test=r7k_parse_devid(optarg)) != R7KC_DEV_INVALID){
+                        cfg->dev = test;
+                    }
                 }
                 break;
             default:
@@ -296,11 +308,17 @@ void parse_args(int argc, char **argv, app_cfg_t *cfg)
             mmd_channel_en(MOD_F7K,S7K_V1);
             mmd_channel_en(MOD_F7K,S7K_V2);
             mmd_channel_en(MOD_F7K,MM_DEBUG);
-            mmd_channel_en(MOD_MSOCK,MM_DEBUG);
-            mmd_channel_en(MOD_R7K,MM_DEBUG);
             mmd_channel_en(MOD_R7KR,MM_DEBUG);
             break;
         default:
+            if(cfg->verbose>2){
+                mmd_channel_en(MOD_F7K,S7K_V1);
+                mmd_channel_en(MOD_F7K,S7K_V2);
+                mmd_channel_en(MOD_F7K,MM_DEBUG);
+                mmd_channel_en(MOD_MSOCK,MM_DEBUG);
+                mmd_channel_en(MOD_R7K,MM_DEBUG|R7K_V2);
+                mmd_channel_en(MOD_R7KR,MM_DEBUG);
+            }
             break;
     }
 }
@@ -347,18 +365,18 @@ static int s_app_main (app_cfg_t *cfg)
         
         // initialize reader
         // create and open socket connection
-        r7kr_reader_t *reader = r7kr_reader_new(cfg->host,R7K_7KCENTER_PORT,cfg->size, subs, nsubs);
+        r7kr_reader_t *reader = r7kr_reader_new(cfg->dev, cfg->host,R7K_7KCENTER_PORT,cfg->size, subs, nsubs);
         
         // show reader config
         if (cfg->verbose>1) {
             r7kr_reader_show(reader,true, 5);
         }
-        
+
         uint32_t lost_bytes=0;
         // test r7kr_read_frame
         byte frame_buf[MAX_FRAME_BYTES_7K]={0};
         
-        PMPRINT(MOD_F7K,F7K_V2,(stderr,"connecting reader [%s/%d]\n",cfg->host,R7K_7KCENTER_PORT));
+        PMPRINT(MOD_F7K,F7K_V2,(stderr,"reader connected [%s/%d] err(%s)\n",cfg->host,R7K_7KCENTER_PORT,me_strerror(me_errno)));
         
         retval=0;
         int read_retries=5;
@@ -380,9 +398,11 @@ static int s_app_main (app_cfg_t *cfg)
                     r7k_nf_show(nf,false,5);
                     PMPRINT(MOD_F7K,F7K_V1,(stderr,"DRF:\n"));
                     r7k_drf_show(drf,false,5);
-                    PMPRINT(MOD_F7K,F7K_V1,(stderr,"data:\n"));
-                    if (istat>0 && cfg->verbose>1) {
-                        r7k_hex_show(frame_buf,istat,16,true,5);
+                    if(cfg->verbose>3){
+                        PMPRINT(MOD_F7K,F7K_V1,(stderr,"data:\n"));
+                        if (istat>0 && cfg->verbose>1) {
+                            r7k_hex_show(frame_buf,istat,16,true,5);
+                        }
                     }
                 }
             }else{
@@ -427,7 +447,7 @@ int main(int argc, char **argv)
     saStruct.sa_handler = s_termination_handler;
     sigaction(SIGINT, &saStruct, NULL);
     
-    app_cfg_t cfg_s = {1,strdup(RESON_HOST_DFL),0,MAX_FRAME_BYTES_7K};
+    app_cfg_t cfg_s = {1,strdup(RESON_HOST_DFL),0,MAX_FRAME_BYTES_7K,R7KC_DEV_7125_400KHZ};
     app_cfg_t *cfg = &cfg_s;
 
     // parse command line options

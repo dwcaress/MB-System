@@ -251,6 +251,9 @@ typedef struct mbtrnpp_opts_s{
     double reinit_zoffset_min;
     double reinit_zoffset_max;
 
+    // opt "trn-dev"
+    int trn_dev;
+
     // opt "help"
     bool help;
 
@@ -459,6 +462,9 @@ typedef struct mbtrnpp_cfg_s{
     // TRN reinit offset_z max
     double reinit_zoffset_max;
 
+    // TRN device enum
+    int trn_dev;
+
 }mbtrnpp_cfg_t;
 
 // ping buffer size default
@@ -504,6 +510,7 @@ s=NULL;\
 #define CFG_MNEM_TRN_CFGFILES  "TRN_CFGFILES"
 #define CFG_MNEM_TRN_GROUP     "TRN_GROUP"
 #define CFG_TRN_LOG_DIR_DFL    "."
+#define CFG_TRN_DEV_DFL        R7KC_DEV_T50
 
 #define OPT_VERBOSE_DFL                   0
 #define OPT_INPUT_DFL                     CFG_INPUT_DFL
@@ -555,6 +562,7 @@ s=NULL;\
 #define OPT_REINIT_ZOFFSET_MIN_DFL        0.0
 #define OPT_REINIT_ZOFFSET_MAX_DFL        0.0
 #define OPT_HELP_DFL                      false
+#define OPT_TRN_DEV_DFL                   R7KC_DEV_T50
 
 #define MNEM_MAX_LEN 64
 #define HOSTNAME_BUF_LEN 256
@@ -1357,6 +1365,7 @@ static int s_mbtrnpp_init_cfg(mbtrnpp_cfg_t *cfg)
         cfg->reinit_zoffset_enable = false;
         cfg->reinit_zoffset_min = 0.0;
         cfg->reinit_zoffset_max = 0.0;
+        cfg->trn_dev = CFG_TRN_DEV_DFL;
         retval=0;
     }
     return retval;
@@ -1414,6 +1423,7 @@ static int s_mbtrnpp_init_opts(mbtrnpp_opts_t *opts)
         opts->reinit_zoffset_enable = OPT_REINIT_ZOFFSET_ENABLE_DFL;
         opts->reinit_zoffset_min = OPT_REINIT_ZOFFSET_MIN_DFL;
         opts->reinit_zoffset_max = OPT_REINIT_ZOFFSET_MAX_DFL;
+        opts->trn_dev = OPT_TRN_DEV_DFL;
         opts->help=OPT_HELP_DFL;
         retval=0;
     }
@@ -1502,6 +1512,7 @@ static int s_mbtrnpp_show_cfg(mbtrnpp_cfg_t *self, bool verbose, int indent)
         retval+=fprintf(stderr,"%*s %*s  %*"PRId64"\n",indent,(indent>0?" ":""), wkey,"mbtrnpp_loop_delay_msec",wval,self->mbtrnpp_loop_delay_msec);
         retval+=fprintf(stderr,"%*s %*s  %*.2lf\n",indent,(indent>0?" ":""), wkey,"trn_status_interval_sec",wval,self->trn_status_interval_sec);
         retval+=fprintf(stderr,"%*s %*s  %*X\n",indent,(indent>0?" ":""), wkey,"mbtrnpp_stat_flags",wval,self->mbtrnpp_stat_flags);
+        retval+=fprintf(stderr,"%*s %*s  %*s/%d\n",indent,(indent>0?" ":""), wkey,"trn_dev",wval,r7k_devidstr(self->trn_dev),self->trn_dev);
         retval+=fprintf(stderr,"%*s %*s  %*c\n",indent,(indent>0?" ":""), wkey,"trn_enable",wval,BOOL2YNC(self->trn_enable));
         retval+=fprintf(stderr,"%*s %*s  %*ld\n",indent,(indent>0?" ":""), wkey,"trn_utm_zone",wval,self->trn_utm_zone);
         retval+=fprintf(stderr,"%*s %*s  %*d\n",indent,(indent>0?" ":""), wkey,"trn_mtype",wval,self->trn_mtype);
@@ -1561,7 +1572,8 @@ static int s_mbtrnpp_show_opts(mbtrnpp_opts_t *self, bool verbose, int indent){
         retval+=fprintf(stderr,"%*s %*s  %*.2lf\n",indent,(indent>0?" ":""), wkey,"statsec",wval,self->statsec);
         retval+=fprintf(stderr,"%*s %*s  %*X/%s\n",indent,(indent>0?" ":""), wkey,"statflags",wval,self->statflags,self->statflags_str);
         retval+=fprintf(stderr,"%*s %*s  %*c\n",indent,(indent>0?" ":""), wkey,"trn-en",wval,BOOL2YNC(self->trn_en));
-        retval+=fprintf(stderr,"%*s %*s  %*ld\n",indent,(indent>0?" ":""), wkey,"trn-utm",wval,self->trn_utm);
+        retval+=fprintf(stderr,"%*s %*s  %*s/%d\n",indent,(indent>0?" ":""), wkey,"trn-dev",wval,r7k_devidstr(self->trn_dev),self->trn_dev);
+       retval+=fprintf(stderr,"%*s %*s  %*ld\n",indent,(indent>0?" ":""), wkey,"trn-utm",wval,self->trn_utm);
         retval+=fprintf(stderr,"%*s %*s  %*s\n",indent,(indent>0?" ":""), wkey,"trn-map",wval,self->trn_map);
         retval+=fprintf(stderr,"%*s %*s  %*s\n",indent,(indent>0?" ":""), wkey,"trn-cfg",wval,self->trn_cfg);
         retval+=fprintf(stderr,"%*s %*s  %*s\n",indent,(indent>0?" ":""), wkey,"trn-par",wval,self->trn_par);
@@ -2236,6 +2248,12 @@ static int s_mbtrnpp_kvparse_fn(char *key, char *val, void *cfg)
                     opts->trn_en=true;
                     retval=0;
                 }
+            }else if(strcmp(key,"trn-dev")==0 ){
+                r7k_device_t test = R7KC_DEV_INVALID;
+                if( (test=r7k_parse_devid(val)) != R7KC_DEV_INVALID){
+                    opts->trn_dev = test;
+                }
+                retval=0;
             }else if(strcmp(key,"config")==0 ){
                 retval=0;
             }else {
@@ -2466,6 +2484,8 @@ static int s_mbtrnpp_configure(mbtrnpp_cfg_t *cfg, mbtrnpp_opts_t *opts)
         }else{
             cfg->median_filter_en = false;
         }
+        // device
+        cfg->trn_dev=opts->trn_dev;
         retval=0;
     }else{
         fprintf(stderr, "ERR - invalid argument (NULL opts)\n");
@@ -2690,6 +2710,7 @@ int main(int argc, char **argv) {
                          "\t--trnuhbt=n\n"
                          "\t--delay=n\n"
                          "\t--trn-en\n"
+                         "\t--trn-dev=s\n"
                          "\t--trn-utm\n"
                          "\t--trn-map\n"
                          "\t--trn-par\n"
@@ -5696,7 +5717,7 @@ int mbtrnpp_reson7kr_input_open(int verbose, void *mbio_ptr, char *definition, i
   size = SONAR_READER_CAPACITY_DFL;
 
   PMPRINT(MOD_MBTRNPP, MM_DEBUG, (stderr, "configuring r7kr_reader using %s:%d\n", hostname, port));
-  r7kr_reader_t *reader = r7kr_reader_new(hostname, port, size, reson_subs, reson_nsubs);
+  r7kr_reader_t *reader = r7kr_reader_new(mbtrn_cfg->trn_dev,hostname, port, size, reson_subs, reson_nsubs);
 
   if (NULL != mb_io_ptr && NULL != reader) {
 
