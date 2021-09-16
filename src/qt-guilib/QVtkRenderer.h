@@ -12,6 +12,8 @@
 #include <vtkCubeAxesActor.h>
 #include <vtkSmartPointer.h>
 #include <vtkElevationFilter.h>
+#include <vtkTransform.h>
+#include <vtkTransformFilter.h>
 #include <vtkPolyDataMapper.h>
 #include "GmtGridReader.h"
 #include "DisplayProperties.h"
@@ -82,7 +84,9 @@ namespace mb_system {
                                  vtkGenericRenderWindowInteractor *windowInteractor,
                                  PickerInteractorStyle *interactorStyle,
                                  vtkActor *surfaceActor,
-                                 vtkCubeAxesActor *axesActor);
+                                 vtkCubeAxesActor *axesActor,
+                                 vtkTransform *transform,
+                                 vtkTransformFilter *transformFilter);
 
     static bool assembleTestPipeline(
                                      vtkRenderer *renderer,
@@ -118,6 +122,12 @@ namespace mb_system {
     /// Elevation color filter
     vtkSmartPointer<vtkElevationFilter> elevColorizer_;
 
+    /// Transform matrix
+    vtkSmartPointer<vtkTransform> transform_;
+    
+    /// Transform filter
+    vtkSmartPointer<vtkTransformFilter> transformFilter_;
+    
     /// VTK mapper
     vtkSmartPointer<vtkPolyDataMapper> mapper_;
 
