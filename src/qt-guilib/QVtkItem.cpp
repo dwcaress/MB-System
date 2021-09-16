@@ -7,6 +7,8 @@ QVtkItem::QVtkItem() :
     gridFilename_(nullptr)
 {
     setAcceptedMouseButtons(Qt::LeftButton | Qt::RightButton);
+    qDebug() << "mirrorVertically: " << mirrorVertically();
+    setMirrorVertically(true);
 }
 
 QQuickFramebufferObject::Renderer *QVtkItem::createRenderer() const {
