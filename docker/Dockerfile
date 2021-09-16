@@ -9,6 +9,7 @@ RUN yum -y groupinstall "Development Tools" && \
             netcdf-devel \
             openmotif \
             openmotif-devel \
+            openssh-server \
             perl \
             python3 \
             cmake3 \
@@ -71,6 +72,10 @@ WORKDIR  /opt/MBSWorkDir
 
 # due to programs failing to load libgmt
 ENV LD_LIBRARY_PATH ${LD_LIBRARY_PATH:+$LD_LIBRARY_PATH:}/usr/local/lib64
+
+# Permit executing MB-System commands via ssh from another container
+RUN echo "export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}" >> /root/.bashrc
+RUN /usr/bin/ssh-keygen -A
 
 # No explicit cmd or entry_point. Launcher script will typically run `bash`
 # but also allow to run any other program in the container.
