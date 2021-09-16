@@ -392,6 +392,10 @@ bool QVtkRenderer::initializePipeline(const char *gridFilename) {
   renderer_ =
     vtkSmartPointer<vtkRenderer>::New();
 
+  // Create rotation transform and filter
+  transform_ = vtkSmartPointer<vtkTransform>::New();
+  transformFilter_ = vtkSmartPointer<vtkTransformFilter>::New();
+  
   // Create mapper
   qDebug() << "create vtk mapper";
   mapper_ = vtkSmartPointer<vtkPolyDataMapper>::New();
@@ -419,10 +423,12 @@ bool QVtkRenderer::initializePipeline(const char *gridFilename) {
   // Axes actor
   axesActor_ = vtkSmartPointer<vtkCubeAxesActor>::New();
 
+
   return assemblePipeline(gridReader_, gridFilename_,
                           elevColorizer_, renderer_, mapper_,
                           renderWindow_, renderWindowInteractor_,
-                          interactorStyle_, surfaceActor_, axesActor_);
+                          interactorStyle_, surfaceActor_, axesActor_,
+                          transform_, transformFilter_);
 
   /* ***
   return assembleTestPipeline(renderer_, renderWindow_,
@@ -517,7 +523,9 @@ bool QVtkRenderer::assemblePipeline(mb_system::GmtGridReader *gridReader,
                                     vtkGenericRenderWindowInteractor *windowInteractor,
                                     PickerInteractorStyle *interactorStyle,
                                     vtkActor *surfaceActor,
-                                    vtkCubeAxesActor *axesActor) {
+                                    vtkCubeAxesActor *axesActor,
+                                    vtkTransform *transform,
+                                    vtkTransformFilter *transformFilter) {
 
   qDebug() << "QVtkRenderer::assemblePipeline() " << gridFilename;
 
@@ -535,14 +543,20 @@ bool QVtkRenderer::assemblePipeline(mb_system::GmtGridReader *gridReader,
 
   float zMin, zMax;
   gridReader->zBounds(&zMin, &zMax);
+
   
-  // Color data points based on z-value
-  elevColorizer->SetInputConnection(gridReader->GetOutputPort());
+  elevColorizer->SetInputConnection(gridReader->GetOutputPort());  
   elevColorizer->SetLowPoint(0, 0, zMin);
   elevColorizer->SetHighPoint(0, 0, zMax);
 
-  qDebug() << "surfaceMapper->SetInputConnection()";
-  surfaceMapper->SetInputConnection(elevColorizer->GetOutputPort());
+  /* ***
+  transform->RotateX(180);
+  transformFilter->SetTransform(transform);
+  transformFilter->SetInputConnection(elevColorizer->GetOutputPort());
+
+  surfaceMapper->SetInputConnection(transformFilter->GetOutputPort());
+  *** */
+  surfaceMapper->SetInputConnection(elevColorizer->GetOutputPort());  
 
   // Assign surfaceMapper to actor
   qDebug() << "assign surfaceMapper to actor";
@@ -597,6 +611,7 @@ bool QVtkRenderer::assembleTestPipeline(
                                     vtkGenericRenderWindowInteractor *interactor,
                                     PickerInteractorStyle *style) {
 
+  bool applyTransform = false;
 
   vtkNew<vtkNamedColors> colors;
 
@@ -613,8 +628,21 @@ bool QVtkRenderer::assembleTestPipeline(
   // axes.
   vtkNew<vtkVectorText> atext;
   atext->SetText("Origin");
+
   vtkNew<vtkPolyDataMapper> textMapper;
-  textMapper->SetInputConnection(atext->GetOutputPort());
+
+  if (applyTransform) {
+    vtkNew<vtkTransform> transform;
+    transform->RotateX(180);
+    vtkNew<vtkTransformFilter> filter;
+    filter->SetTransform(transform);
+    filter->SetInputConnection(atext->GetOutputPort());
+    textMapper->SetInputConnection(filter->GetOutputPort());
+  }
+  else {
+    textMapper->SetInputConnection(atext->GetOutputPort());
+  }
+  
   vtkNew<vtkFollower> textActor;
   textActor->SetMapper(textMapper);
   textActor->SetScale(0.2, 0.2, 0.2);
