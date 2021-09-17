@@ -84,9 +84,8 @@ namespace mb_system {
                                  vtkGenericRenderWindowInteractor *windowInteractor,
                                  PickerInteractorStyle *interactorStyle,
                                  vtkActor *surfaceActor,
-                                 vtkCubeAxesActor *axesActor,
-                                 vtkTransform *transform,
-                                 vtkTransformFilter *transformFilter);
+                                 vtkCubeAxesActor *axesActor);
+
 
     static bool assembleTestPipeline(
                                      vtkRenderer *renderer,
@@ -109,8 +108,12 @@ namespace mb_system {
     static void setupAxes(vtkCubeAxesActor *axesActor,
                           vtkColor3d &axisColor,
                           double *bounds);
+
+    /// If item_ grid filename differs from gridFilename_, copy it and
+    /// return true, else return false
+    bool gridFilenameChanged(char *filename);
     
-    // Item being rendered
+    /// Item being rendered
     QVtkItem *item_;
     
     /// Flag indicates if rendered scene has been initialized

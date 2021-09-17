@@ -49,7 +49,9 @@ QOpenGLFramebufferObject *QVtkRenderer::createFramebufferObject(const QSize &siz
 
 void QVtkRenderer::render() {
   
-  qDebug() << "QVtkRenderer::render()";
+  qDebug() << "QVtkRenderer::render() ************ start";
+  item_->setAppBusy(true);
+  
   if (!renderWindow_ || !renderWindowInteractor_) {
     qDebug() << "renderWindow not yet defined";
     return;
@@ -182,6 +184,9 @@ void QVtkRenderer::render() {
   // Done with render. Reset OpenGL state
   renderWindow_->PopState();
   item_->window()->resetOpenGLState();;
+
+  qDebug() << "QVtkRenderer::render() ************ DONE";
+  item_->setAppBusy(false);
 }
 
 
@@ -197,31 +202,14 @@ void QVtkRenderer::synchronize(QQuickFramebufferObject *item) {
 
   displayProperties_ = item_->displayProperties();
   
-  char *gridFilename = item_->getGridFilename();
-  bool filenameChanged = false;
-  if (!gridFilename && gridFilename_) {
-    // Item now has no gridFilename, free renderer's and set to null
-    free((void *)gridFilename_);
-    gridFilename_ = nullptr;
-    filenameChanged = true;
-  }
-  else if (gridFilename && !gridFilename_) {
-    // Item now has gridFilename, renderer doesn't - copy it
-    gridFilename_ = strdup(gridFilename);
-    filenameChanged = true;
-  }
-  else if (gridFilename && gridFilename_) {
-    if (strcmp(gridFilename, gridFilename_)) {
-      // Item gridFilename differs from renderer's - copy it
-      filenameChanged = true;
-      free((void *)gridFilename_);
-      gridFilename_ = strdup(gridFilename);
-    }
-  }
-  if (filenameChanged) {
+  if (gridFilenameChanged(item_->getGridFilename())) {
     // New grid file specified - load it into vtk pipeline
     initializePipeline(gridFilename_);
   }
+  else {
+    qDebug() << "grid filename has not changed";
+  }
+  
 
   // Mouse wheel moved
   if (item_->latestWheelEvent() &&
@@ -263,123 +251,23 @@ void QVtkRenderer::initialize() {
   qDebug() << "QVtkRenderer::initialize()";
 
   // If gridFileanme specified, initialize pipeline
-  if (gridFilename_ && !initializePipeline(gridFilename_)) {
+  if (
+      gridFilenameChanged(item_->getGridFilename()) &&
+      gridFilename_ &&
+      !initializePipeline(gridFilename_)) {
+    
     qCritical() << "initializePipeline() failed for" << gridFilename_;
   }
   initialized_ = true;
 }
 
 
-/* ***
-bool QVtkRenderer::initializePipeline(const char *gridFilename) {
-  qDebug() << "QVtkRenderer::initializePipeline() " << gridFilename;
-
-  gridReader_ =
-    vtkSmartPointer<GmtGridReader>::New();
-
-  gridReader_->SetFileName ( gridFilename );
-  qDebug() << "reader->Update()";
-  gridReader_->Update();
-  if (gridReader_->GetErrorCode()) {
-    std::cerr << "Error during gridReader Update(): " <<
-      gridReader_->GetErrorCode() << std::endl;
-    
-    return false;
-  }
-  
-  float zMin, zMax;
-  gridReader_->zBounds(&zMin, &zMax);
-  
-  // Color data points based on z-value
-  elevColorizer_ =
-    vtkSmartPointer<vtkElevationFilter>::New();
-
-  elevColorizer_->SetInputConnection(gridReader_->GetOutputPort());
-  elevColorizer_->SetLowPoint(0, 0, zMin);
-  elevColorizer_->SetHighPoint(0, 0, zMax);
-
-  // Create VTK renderer (not the same as QT renderer)
-  qDebug() << "create vtk renderer";
-  renderer_ =
-    vtkSmartPointer<vtkRenderer>::New();
-
-  // Create mapper
-  qDebug() << "create vtk mapper";
-  mapper_ = vtkSmartPointer<vtkPolyDataMapper>::New();
-  qDebug() << "mapper->SetInputConnection()";
-  mapper_->SetInputConnection(elevColorizer_->GetOutputPort());
-
-  // Create actor for grid surface
-  qDebug() << "create vtk actor";
-  surfaceActor_ = vtkSmartPointer<vtkActor>::New();
-
-  // Assign mapper to actor
-  qDebug() << "assign mapper to actor";
-  surfaceActor_->SetMapper(mapper_);
-
-  // Add actor to renderer
-  renderer_->AddActor(surfaceActor_);
-
-  // Create vtk renderWindow
-  qDebug() << "create renderWindow";
-  renderWindow_ =
-    vtkSmartPointer<vtkGenericOpenGLRenderWindow>::New();
-
-  // Add renderer to the renderWindow
-  qDebug() << "add renderer to renderWindow";
-  renderWindow_->AddRenderer(renderer_);
-
-  // Create vtk renderWindowInteractor
-  qDebug() << "create renderWindowInteractor";
-  renderWindowInteractor_ =
-    vtkSmartPointer<vtkGenericRenderWindowInteractor>::New();
-
-  // Create interactor style
-  interactorStyle_ =
-    vtkSmartPointer<PickerInteractorStyle>::New();  
-
-  interactorStyle_->initialize(item_);
-  interactorStyle_->SetDefaultRenderer(renderer_);
-  interactorStyle_->polyData_ = gridReader_->GetOutput();
-  qDebug() << "style->polyData_ details";
-  interactorStyle_->polyData_->PrintSelf(std::cout, vtkIndent(1));
-
-  renderWindowInteractor_->SetInteractorStyle(interactorStyle_);
-  renderWindowInteractor_->SetRenderWindow(renderWindow_);
-  //  renderWindowInteractor_->Initialize();
-  
-  // Per QtVTK example
-  renderWindowInteractor_->EnableRenderOff();
-
-  // Axes actor
-  axesActor_ = vtkSmartPointer<vtkCubeAxesActor>::New();
-  
-  // Colors for axes
-  vtkSmartPointer<vtkNamedColors> colors = 
-    vtkSmartPointer<vtkNamedColors>::New();
-
-  vtkColor3d axisColor = colors->GetColor3d("Black");
-  
-  // Set up axes
-  setupAxes(axesActor_, axisColor,
-            gridReader_->GetOutput()->GetBounds());
-
-  axesActor_->SetCamera(renderer_->GetActiveCamera());
-
-  renderer_->AddActor(axesActor_);    
-  
-  renderer_->ResetCamera();
-
-  // Initialize the OpenGL context for the renderer
-  renderWindow_->OpenGLInitContext();
-
-  return true;
-}
-*** */
 
 bool QVtkRenderer::initializePipeline(const char *gridFilename) {
   qDebug() << "QVtkRenderer::initializePipeline() " << gridFilename;
 
+  item_->setAppBusy(true);
+  
   gridReader_ =
     vtkSmartPointer<GmtGridReader>::New();
 
@@ -424,12 +312,15 @@ bool QVtkRenderer::initializePipeline(const char *gridFilename) {
   axesActor_ = vtkSmartPointer<vtkCubeAxesActor>::New();
 
 
-  return assemblePipeline(gridReader_, gridFilename_,
-                          elevColorizer_, renderer_, mapper_,
-                          renderWindow_, renderWindowInteractor_,
-                          interactorStyle_, surfaceActor_, axesActor_,
-                          transform_, transformFilter_);
+  bool status = assemblePipeline(gridReader_, gridFilename_,
+                                 elevColorizer_, renderer_, mapper_,
+                                 renderWindow_, renderWindowInteractor_,
+                                 interactorStyle_, surfaceActor_, axesActor_);
 
+  item_->setAppBusy(false);
+
+  return status;
+  
   /* ***
   return assembleTestPipeline(renderer_, renderWindow_,
                           renderWindowInteractor_,
@@ -523,17 +414,15 @@ bool QVtkRenderer::assemblePipeline(mb_system::GmtGridReader *gridReader,
                                     vtkGenericRenderWindowInteractor *windowInteractor,
                                     PickerInteractorStyle *interactorStyle,
                                     vtkActor *surfaceActor,
-                                    vtkCubeAxesActor *axesActor,
-                                    vtkTransform *transform,
-                                    vtkTransformFilter *transformFilter) {
+                                    vtkCubeAxesActor *axesActor) {
+
 
   qDebug() << "QVtkRenderer::assemblePipeline() " << gridFilename;
 
-  qDebug() << "Skip most stuff TEST TEST TEST!!!!!!";
-  
   gridReader->SetFileName ( gridFilename );
   qDebug() << "reader->Update()";
   gridReader->Update();
+
   if (gridReader->GetErrorCode()) {
     std::cerr << "Error during gridReader Update(): " <<
       gridReader->GetErrorCode() << std::endl;
@@ -549,13 +438,6 @@ bool QVtkRenderer::assemblePipeline(mb_system::GmtGridReader *gridReader,
   elevColorizer->SetLowPoint(0, 0, zMin);
   elevColorizer->SetHighPoint(0, 0, zMax);
 
-  /* ***
-  transform->RotateX(180);
-  transformFilter->SetTransform(transform);
-  transformFilter->SetInputConnection(elevColorizer->GetOutputPort());
-
-  surfaceMapper->SetInputConnection(transformFilter->GetOutputPort());
-  *** */
   surfaceMapper->SetInputConnection(elevColorizer->GetOutputPort());  
 
   // Assign surfaceMapper to actor
@@ -571,8 +453,8 @@ bool QVtkRenderer::assemblePipeline(mb_system::GmtGridReader *gridReader,
 
   interactorStyle->SetDefaultRenderer(renderer);
   interactorStyle->polyData_ = gridReader->GetOutput();
-  qDebug() << "style->polyData_ details";
-  interactorStyle->polyData_->PrintSelf(std::cout, vtkIndent(1));
+  //  qDebug() << "style->polyData_ details";
+  //  interactorStyle->polyData_->PrintSelf(std::cout, vtkIndent(1));
 
   windowInteractor->SetInteractorStyle(interactorStyle);
   windowInteractor->SetRenderWindow(renderWindow);
@@ -677,5 +559,31 @@ bool QVtkRenderer::assembleTestPipeline(
   renderWindow->OpenGLInitContext();
 
   return true;
+}
+
+
+bool QVtkRenderer::gridFilenameChanged(char *filename) {
+  bool changed = false;
+
+  if (!filename && gridFilename_) {
+    // Item now has no gridFilename, free renderer's member and set to null
+    free((void *)gridFilename_);
+    gridFilename_ = nullptr;
+    changed = true;
+  }
+  else if (filename && !gridFilename_) {
+    // Item now has gridFilename, renderer doesn't - copy it
+    gridFilename_ = strdup(filename);
+    changed = true;
+  }
+  else if (filename && gridFilename_) {
+    if (strcmp(filename, gridFilename_)) {
+      // Item filename differs from renderer's - copy it
+      changed = true;
+      free((void *)gridFilename_);
+      gridFilename_ = strdup(filename);
+    }
+  }
   
+  return changed;
 }
