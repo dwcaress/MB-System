@@ -40,7 +40,7 @@ QVtkRenderer::QVtkRenderer() :
 
 QOpenGLFramebufferObject *QVtkRenderer::createFramebufferObject(const QSize &size) {
 
-  qDebug() << "QVtkRenderer::createFrameBufferObject";
+  // qDebug() << "QVtkRenderer::createFrameBufferObject";
   QOpenGLFramebufferObjectFormat format;
   format.setAttachment(QOpenGLFramebufferObject::CombinedDepthStencil);
 
@@ -79,7 +79,7 @@ void QVtkRenderer::render() {
   axesActor_->SetVisibility(displayProperties_->drawAxes);
 
   if (wheelEvent_ && !wheelEvent_->isAccepted()) {
-    qDebug() << "render(): handle wheelEvent";
+    // qDebug() << "render(): handle wheelEvent";
     if (wheelEvent_->delta() > 0) {
       renderWindowInteractor_->InvokeEvent(vtkCommand::MouseWheelForwardEvent);
     }
@@ -90,7 +90,7 @@ void QVtkRenderer::render() {
   }
   
   if (mouseButtonEvent_ && !mouseButtonEvent_->isAccepted()) {
-    qDebug() << "render(): handle mouseButtonEvent";
+    // qDebug() << "render(): handle mouseButtonEvent";
 
 
 
@@ -106,7 +106,7 @@ void QVtkRenderer::render() {
         mouseButtonEvent_->type() == QEvent::MouseButtonDblClick ? 1 : 0;
         
       if (mouseButtonEvent_->buttons() & Qt::LeftButton) {
-        qDebug() << "QVtkRenderer() - got left button";
+        // qDebug() << "QVtkRenderer() - got left button";
         renderWindowInteractor_->SetEventInformationFlipY(mouseButtonEvent_->x(),
                                                           mouseButtonEvent_->y(),
                                                           cntrlKey,
@@ -116,7 +116,7 @@ void QVtkRenderer::render() {
         renderWindowInteractor_->InvokeEvent(vtkCommand::LeftButtonPressEvent);
       }
       else if (mouseButtonEvent_->buttons() & Qt::RightButton) {
-        qDebug() << "QVtkRenderer() - got right button";
+        // qDebug() << "QVtkRenderer() - got right button";
         renderWindowInteractor_->SetEventInformationFlipY(mouseButtonEvent_->x(),
                                                           mouseButtonEvent_->y(),
                                                           cntrlKey,
@@ -126,22 +126,22 @@ void QVtkRenderer::render() {
         renderWindowInteractor_->InvokeEvent(vtkCommand::RightButtonPressEvent);
       }
       else if (mouseButtonEvent_->buttons() & Qt::MiddleButton) {
-        qDebug() << "QVtkRenderer() - got middle button";
+        // qDebug() << "QVtkRenderer() - got middle button";
         renderWindowInteractor_->InvokeEvent(vtkCommand::MiddleButtonPressEvent);        
       }      
     }
     else if (mouseButtonEvent_->type() == QEvent::MouseButtonRelease) {
-      qDebug() << "QVtkRenderer: mouse button release";
+      // qDebug() << "QVtkRenderer: mouse button release";
       if (mouseButtonEvent_->button() == Qt::LeftButton) {
-        qDebug() << "QVtkRenderer: left mouse button release";
+        // qDebug() << "QVtkRenderer: left mouse button release";
         renderWindowInteractor_->InvokeEvent(vtkCommand::LeftButtonReleaseEvent);
       }
       else if (mouseButtonEvent_->button() == Qt::RightButton) {
-        qDebug() << "QVtkRenderer: right mouse button release";
+        // qDebug() << "QVtkRenderer: right mouse button release";
         renderWindowInteractor_->InvokeEvent(vtkCommand::RightButtonReleaseEvent);
       }
       else if (mouseButtonEvent_->button() == Qt::MiddleButton) {
-        qDebug() << "QVtkRenderer: right mouse button release";
+        // qDebug() << "QVtkRenderer: right mouse button release";
         renderWindowInteractor_->InvokeEvent(vtkCommand::MiddleButtonReleaseEvent);
       }      
     }
@@ -149,7 +149,7 @@ void QVtkRenderer::render() {
   }
 
   if (mouseMoveEvent_ && !mouseMoveEvent_->isAccepted()) {
-    qDebug() << "QVtkRenderer::render() - mouse move event";
+    // qDebug() << "QVtkRenderer::render() - mouse move event";
     
     bool cntrlKey =
       (mouseButtonEvent_->modifiers() & Qt::ControlModifier) > 0 ? 1 : 0;
@@ -162,9 +162,9 @@ void QVtkRenderer::render() {
     
     if (mouseMoveEvent_->type() == QEvent::MouseMove) {
       // Got left-button mouse-drag
-      qDebug() << "QVtkRenderer::render(): command mouse move; x=" <<
-	mouseMoveEvent_->x() << ", y=" <<
-	mouseMoveEvent_->y();
+      // qDebug() << "QVtkRenderer::render(): command mouse move; x=" <<
+      // mouseMoveEvent_->x() << ", y=" <<
+      // mouseMoveEvent_->y();
 
       renderWindowInteractor_->SetEventInformationFlipY(mouseMoveEvent_->x(),
 							mouseMoveEvent_->y(),
@@ -221,7 +221,9 @@ void QVtkRenderer::synchronize(QQuickFramebufferObject *item) {
     // Handle things when worker thread finishes
     connect(worker, &QThread::finished, this, &QVtkRenderer::handleFileLoaded);
 
+    qDebug() << "render(): start worker thread";
     worker->start();
+    qDebug() << "render(): worker started!";
   }
   else {
     qDebug() << "grid filename has not changed";
@@ -231,7 +233,7 @@ void QVtkRenderer::synchronize(QQuickFramebufferObject *item) {
   if (item_->latestWheelEvent() &&
       !item_->latestWheelEvent()->isAccepted()) {
     // Copy and accept latest wheel event
-    qDebug() << "synchronize() - copy wheelEvent";
+    // qDebug() << "synchronize() - copy wheelEvent";
     // Get latest wheel event generated by the QVtkItem
     wheelEvent_ = std::make_shared<QWheelEvent>(*item_->latestWheelEvent());
     item_->latestWheelEvent()->accept();
@@ -240,7 +242,7 @@ void QVtkRenderer::synchronize(QQuickFramebufferObject *item) {
   // Mouse button pressed/released
   if (item_->latestMouseButtonEvent() &&
       !item_->latestMouseButtonEvent()->isAccepted()) {
-    qDebug() << "synchronize() - copy mouseButtonEvent";
+    // qDebug() << "synchronize() - copy mouseButtonEvent";
     // Get latest mouse button event generated by the QVtkItem
     mouseButtonEvent_ =
       std::make_shared<QMouseEvent>(*item_->latestMouseButtonEvent());
@@ -250,13 +252,14 @@ void QVtkRenderer::synchronize(QQuickFramebufferObject *item) {
   // Mouse moved
   if (item_->latestMouseMoveEvent() &&
       !item_->latestMouseMoveEvent()->isAccepted()) {
-    qDebug() << "synchronize() - copy mouseMoveEvent";
+    // qDebug() << "synchronize() - copy mouseMoveEvent";
     // Get latest mouse move event generated by the QVtkItem    
     mouseMoveEvent_ =
       std::make_shared<QMouseEvent>(*item_->latestMouseMoveEvent());
     item_->latestMouseMoveEvent()->accept();
   }
-  
+
+  qDebug() << "Done with synchronize()";
 }
 
 
@@ -403,11 +406,11 @@ void QVtkRenderer::setupAxes(vtkCubeAxesActor *axesActor,
 /// Start window interactor and render
 void QVtkRenderer::startAndRenderWindow() {
   // Start the interactor
-  qDebug() << "start render window interactor";
+  // qDebug() << "start render window interactor";
 
   renderWindow_->MakeCurrent();
   
-  qDebug() << "render window";
+  // qDebug() << "render window";
   renderWindow_->Render();      
 
   // Create OpenGL context, per this post:
@@ -435,8 +438,9 @@ bool QVtkRenderer::assemblePipeline(mb_system::GmtGridReader *gridReader,
 
   // Grid reader should aleady be loaded by worker thread by this time
   //  gridReader->SetFileName ( gridFilename );
-  qDebug() << "reader->Update()";
-  gridReader->Update();
+  /* ***
+  // qDebug() << "reader->Update()";
+  // gridReader->Update();
 
   if (gridReader->GetErrorCode()) {
     std::cerr << "Error during gridReader Update(): " <<
@@ -444,7 +448,8 @@ bool QVtkRenderer::assemblePipeline(mb_system::GmtGridReader *gridReader,
     
     return false;
   }
-
+  *** */
+  
   float zMin, zMax;
   gridReader->zBounds(&zMin, &zMax);
 
@@ -604,9 +609,10 @@ bool QVtkRenderer::gridFilenameChanged(char *filename) {
 
 
 void QVtkRenderer::handleFileLoaded() {
-  qDebug() << "**** handleFileLoaded()";
+  qDebug() << "**** handleFileLoaded() - initialize pipeline";
   // Grid file is loaded - initialize pipeline
   initializePipeline(gridFilename_);
+  qDebug() << "**** handleFileLoaded() - pipeline ready";  
   pipelineReady_ = true;
   
   item_->update();
@@ -622,6 +628,15 @@ void QVtkRenderer::LoadFileWorker::run() {
   qDebug() << "QVtkRenderer::LoadFileLoader::run()";
 
   parent_.gridReader_->SetFileName(parent_.gridFilename_);
+  parent_.gridReader_->Update();
+
+  if (parent_.gridReader_->GetErrorCode()) {
+    std::cerr << "Error during gridReader Update(): " <<
+      parent_.gridReader_->GetErrorCode() << std::endl;
+    
+    return;
+  }
+  
   parent_.gridReaderLoaded_ = true;
   
   qDebug() << "QVtkRenderer::LoadFileLoader::run() finished";
