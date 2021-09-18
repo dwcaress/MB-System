@@ -245,6 +245,13 @@ ApplicationWindow {
             font.pointSize: 18
             color: "black"
         }
+        
+        BusyIndicator {
+            id: busyIndicator
+            objectName: "busyIndicator"
+            anchors.bottom: parent.bottom
+            running: image.status === Image.Loading
+        }
 
         Item {
             width: 964
@@ -264,12 +271,19 @@ ApplicationWindow {
                 anchors.fill: parent
                 width: 1000
                 height: 1000
-
+                /// enabled: false   // TEST TEST TEST
+                
                 // Update picked coordinate text
                 onPickedPointChanged: {
                   console.log("user picked a point!")
                   console.log("this one: " + pickedPoint)
                   pickedCoords.text = pickedPoint
+                }
+
+                // Update busy status
+                onBusyChanged: {
+                  console.log("busy state changed to " + busy)
+                  busyIndicator.running = busy
                 }
             }           
         }
