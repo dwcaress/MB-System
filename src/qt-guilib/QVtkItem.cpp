@@ -4,10 +4,12 @@
 using namespace mb_system;
 
 QVtkItem::QVtkItem() :
-    gridFilename_(nullptr)
+  gridFilename_(nullptr),
+  appTaskBusy_(false)
 {
     setAcceptedMouseButtons(Qt::LeftButton | Qt::RightButton);
     qDebug() << "mirrorVertically: " << mirrorVertically();
+    // Fix coordinate system handed-ness
     setMirrorVertically(true);
 }
 
@@ -83,5 +85,17 @@ void QVtkItem::setPickedPoint(QString coordMsg) {
 
 QString QVtkItem::getPickedPoint() {
   return pickedCoords_;
+}
+
+
+void QVtkItem::setAppBusy(bool busy) {
+  qDebug() << "**** setAppBusy to " << busy;
+  appTaskBusy_ = busy;
+  emit busyChanged(busy);
+}
+
+
+bool QVtkItem::getAppBusy() {
+  return appTaskBusy_;
 }
 

@@ -23,7 +23,12 @@ namespace mb_system {
   {
     Q_OBJECT
 
-    Q_PROPERTY(QString pickedPoint READ getPickedPoint WRITE setPickedPoint NOTIFY pickedPointChanged)
+    Q_PROPERTY(QString pickedPoint READ getPickedPoint
+               WRITE setPickedPoint NOTIFY pickedPointChanged)
+
+    /// Indicate whether app task is busy
+    Q_PROPERTY(bool busy READ getAppBusy WRITE setAppBusy NOTIFY busyChanged)
+
     
   public:
 
@@ -76,6 +81,8 @@ namespace mb_system {
     /// User picked a point on the vtk surface
     void pickedPointChanged(QString msg);
 
+    void busyChanged(bool busy);
+
   public slots:
 
   public:
@@ -83,8 +90,15 @@ namespace mb_system {
     /// Set user-picked point coordinates
     void setPickedPoint(QString msg);
 
+    /// Get string representation of picked point
     QString getPickedPoint();
 
+    /// Set app busy status
+    void setAppBusy(bool busy);
+
+    /// Get app busy status
+    bool getAppBusy();
+    
     
   protected:
 
@@ -106,7 +120,7 @@ namespace mb_system {
     
     /// Name of associated grid file
     char *gridFilename_;
-
+ 
     /// Latest wheel event
     std::shared_ptr<QWheelEvent> wheelEvent_;
 
@@ -118,6 +132,9 @@ namespace mb_system {
 
     /// Latest user-picked point coordinates
     QString pickedCoords_;
+
+    /// Indicate to gui whether app task is busy
+    bool appTaskBusy_;
   };
 
 
