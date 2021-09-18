@@ -4,6 +4,7 @@
 #include <QObject>
 #include <QQuickFramebufferObject>
 #include <QOpenGLFunctions>
+#include <QThread>
 #include <vtkGenericOpenGLRenderWindow.h>
 #include <vtkGenericRenderWindowInteractor.h>
 #include <vtkInteractorStyleTrackballCamera.h>
@@ -36,9 +37,12 @@ namespace mb_system {
      See https://www.qt.io/blog/2015/05/11/integrating-custom-opengl-rendering-with-qt-quick-via-qquickframebufferobject
   */
 
-  class QVtkRenderer : public QQuickFramebufferObject::Renderer,
-		       protected QOpenGLFunctions
+  class QVtkRenderer : public QObject,
+                       public QQuickFramebufferObject::Renderer,
+                       protected QOpenGLFunctions
   {
+      Q_OBJECT
+    
   public:
     QVtkRenderer();
 
@@ -70,7 +74,8 @@ namespace mb_system {
     /// Start window interactor and render
     void startAndRenderWindow();
     
-    /// Initilize VTK pipeline; returns true on success, false on error.
+    /// Initilize and assemble VTK pipeline; returns true on success,
+    /// false on error.
     /// 'public' access so can access from test app
     bool initializePipeline(const char *grdFilename);
 
@@ -92,7 +97,13 @@ namespace mb_system {
                                      vtkGenericOpenGLRenderWindow *renderWindow,
                                      vtkGenericRenderWindowInteractor *interactor,
                                      PickerInteractorStyle *style);
-  
+
+  public slots:
+
+    /// Called when worker thread finishes
+    void handleFileLoaded();
+    
+    
   protected:
 
     /// Display properties copied from QVtkItem
@@ -164,6 +175,25 @@ namespace mb_system {
     /// Latest mouse move event
     std::shared_ptr<QMouseEvent> mouseMoveEvent_;
 
+    /// Indicates that file data has been loaded into gridReader 
+    bool gridReaderLoaded_;
+    
+    /// Indicates that pipeline is fully assembled, ready for rendering
+    bool pipelineReady_;
+
+    /// Worker thread to load grid file
+    class LoadFileWorker : public QThread {
+
+    public:
+      LoadFileWorker(QVtkRenderer &parent);
+        
+    protected:
+      void run() override;
+
+      QVtkRenderer &parent_;
+      
+    };
+    
   };
 
 }

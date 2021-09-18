@@ -32,7 +32,9 @@ QVtkRenderer::QVtkRenderer() :
   gridFilename_(nullptr),
   wheelEvent_(nullptr),
   mouseButtonEvent_(nullptr),
-  mouseMoveEvent_(nullptr)
+  mouseMoveEvent_(nullptr),
+  pipelineReady_(false),
+  gridReaderLoaded_(false)  
 {
 }
 
@@ -48,7 +50,13 @@ QOpenGLFramebufferObject *QVtkRenderer::createFramebufferObject(const QSize &siz
 
 
 void QVtkRenderer::render() {
-  
+
+  /* **
+  if (!pipelineReady_) {
+    qDebug() << "QVtkRenderer::render() pipeline not ready yet";
+    return;
+  }
+  ** */
   qDebug() << "QVtkRenderer::render() ************ start";
   item_->setAppBusy(true);
   
@@ -67,7 +75,6 @@ void QVtkRenderer::render() {
     initialize();
     initialized_ = true;
   }
-
   
   axesActor_->SetVisibility(displayProperties_->drawAxes);
 
@@ -200,17 +207,26 @@ void QVtkRenderer::synchronize(QQuickFramebufferObject *item) {
     item_ = static_cast<QVtkItem *>(item);
   }
 
+  // Copy pointer to display properties
   displayProperties_ = item_->displayProperties();
   
   if (gridFilenameChanged(item_->getGridFilename())) {
-    // New grid file specified - load it into vtk pipeline
-    initializePipeline(gridFilename_);
+    // New grid file specified - load its data into vtk pipeline
+    gridReaderLoaded_ = false;
+    pipelineReady_ = false;
+    gridReader_ = vtkSmartPointer<GmtGridReader>::New();    
+    // Create and start worker thread to load data and assemble pipeline
+    LoadFileWorker *worker = new LoadFileWorker(*this);
+
+    // Handle things when worker thread finishes
+    connect(worker, &QThread::finished, this, &QVtkRenderer::handleFileLoaded);
+
+    worker->start();
   }
   else {
     qDebug() << "grid filename has not changed";
   }
   
-
   // Mouse wheel moved
   if (item_->latestWheelEvent() &&
       !item_->latestWheelEvent()->isAccepted()) {
@@ -241,15 +257,12 @@ void QVtkRenderer::synchronize(QQuickFramebufferObject *item) {
     item_->latestMouseMoveEvent()->accept();
   }
   
-  
-  // Copy pointer to display properties
-  displayProperties_ = item_->displayProperties();
 }
 
 
 void QVtkRenderer::initialize() {
   qDebug() << "QVtkRenderer::initialize()";
-
+  /* ***
   // If gridFileanme specified, initialize pipeline
   if (
       gridFilenameChanged(item_->getGridFilename()) &&
@@ -258,6 +271,7 @@ void QVtkRenderer::initialize() {
     
     qCritical() << "initializePipeline() failed for" << gridFilename_;
   }
+  *** */
   initialized_ = true;
 }
 
@@ -267,9 +281,9 @@ bool QVtkRenderer::initializePipeline(const char *gridFilename) {
   qDebug() << "QVtkRenderer::initializePipeline() " << gridFilename;
 
   item_->setAppBusy(true);
-  
-  gridReader_ =
-    vtkSmartPointer<GmtGridReader>::New();
+
+  // Create gridReader_ before launching LoadFileWorker
+  // gridReader_ = vtkSmartPointer<GmtGridReader>::New();
 
   // Color data points based on z-value
   elevColorizer_ =
@@ -419,7 +433,8 @@ bool QVtkRenderer::assemblePipeline(mb_system::GmtGridReader *gridReader,
 
   qDebug() << "QVtkRenderer::assemblePipeline() " << gridFilename;
 
-  gridReader->SetFileName ( gridFilename );
+  // Grid reader should aleady be loaded by worker thread by this time
+  //  gridReader->SetFileName ( gridFilename );
   qDebug() << "reader->Update()";
   gridReader->Update();
 
@@ -453,12 +468,9 @@ bool QVtkRenderer::assemblePipeline(mb_system::GmtGridReader *gridReader,
 
   interactorStyle->SetDefaultRenderer(renderer);
   interactorStyle->polyData_ = gridReader->GetOutput();
-  //  qDebug() << "style->polyData_ details";
-  //  interactorStyle->polyData_->PrintSelf(std::cout, vtkIndent(1));
 
   windowInteractor->SetInteractorStyle(interactorStyle);
   windowInteractor->SetRenderWindow(renderWindow);
-  //  windowInteractor_->Initialize();
   
   // Per QtVTK example
   windowInteractor->EnableRenderOff();
@@ -482,6 +494,7 @@ bool QVtkRenderer::assemblePipeline(mb_system::GmtGridReader *gridReader,
   // Initialize the OpenGL context for the renderer
   renderWindow->OpenGLInitContext();
 
+  qDebug() << "pipeline assembled";  
   return true;
 }
 
@@ -587,3 +600,31 @@ bool QVtkRenderer::gridFilenameChanged(char *filename) {
   
   return changed;
 }
+
+
+
+void QVtkRenderer::handleFileLoaded() {
+  qDebug() << "**** handleFileLoaded()";
+  // Grid file is loaded - initialize pipeline
+  initializePipeline(gridFilename_);
+  pipelineReady_ = true;
+  
+  item_->update();
+}
+
+
+
+QVtkRenderer::LoadFileWorker::LoadFileWorker(QVtkRenderer &parent) :
+  parent_(parent) {}
+  
+
+void QVtkRenderer::LoadFileWorker::run() {
+  qDebug() << "QVtkRenderer::LoadFileLoader::run()";
+
+  parent_.gridReader_->SetFileName(parent_.gridFilename_);
+  parent_.gridReaderLoaded_ = true;
+  
+  qDebug() << "QVtkRenderer::LoadFileLoader::run() finished";
+  
+}
+
