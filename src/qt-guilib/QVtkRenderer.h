@@ -193,6 +193,9 @@ namespace mb_system {
       QVtkRenderer &parent_;
       
     };
+
+    /// Worker thread pointer
+    LoadFileWorker *worker_;
     
   };
 

@@ -36,6 +36,12 @@ QVtkRenderer::QVtkRenderer() :
   pipelineReady_(false),
   gridReaderLoaded_(false)  
 {
+    worker_ = new LoadFileWorker(*this);
+
+    // Handle things when worker thread finishes
+    connect(worker_, &QThread::finished, this, &QVtkRenderer::handleFileLoaded,
+            Qt::QueuedConnection);
+  
 }
 
 QOpenGLFramebufferObject *QVtkRenderer::createFramebufferObject(const QSize &size) {
@@ -58,7 +64,6 @@ void QVtkRenderer::render() {
   }
   ** */
   qDebug() << "QVtkRenderer::render() ************ start";
-  item_->setAppBusy(true);
   
   if (!renderWindow_ || !renderWindowInteractor_) {
     qDebug() << "renderWindow not yet defined";
@@ -192,15 +197,19 @@ void QVtkRenderer::render() {
   renderWindow_->PopState();
   item_->window()->resetOpenGLState();;
 
+  qDebug() << "render() current thread: ";
+  qDebug() << QThread::currentThread();
+  
   qDebug() << "QVtkRenderer::render() ************ DONE";
-  item_->setAppBusy(false);
 }
 
 
 // Copy data from item to this renderer
 void QVtkRenderer::synchronize(QQuickFramebufferObject *item) {
   qDebug() << "QVtkRenderer::synchronize()";
-
+  qDebug() << "synchronize() current thread: ";
+  qDebug() << QThread::currentThread();
+  
   if (!item_) {
     // The item argument is the QVtkItem associated with this renderer;
     // keep a copy as item_ member
@@ -214,16 +223,14 @@ void QVtkRenderer::synchronize(QQuickFramebufferObject *item) {
     // New grid file specified - load its data into vtk pipeline
     gridReaderLoaded_ = false;
     pipelineReady_ = false;
-    gridReader_ = vtkSmartPointer<GmtGridReader>::New();    
-    // Create and start worker thread to load data and assemble pipeline
-    LoadFileWorker *worker = new LoadFileWorker(*this);
+    gridReader_ = vtkSmartPointer<GmtGridReader>::New();
+    
+    qDebug() << "synchronize(): change busy state to true";
+    item_->setAppBusy(true);
 
-    // Handle things when worker thread finishes
-    connect(worker, &QThread::finished, this, &QVtkRenderer::handleFileLoaded);
-
-    qDebug() << "render(): start worker thread";
-    worker->start();
-    qDebug() << "render(): worker started!";
+    qDebug() << "synchronize(): start worker thread";
+    worker_->start();
+    qDebug() << "synchronize(): worker started!";
   }
   else {
     qDebug() << "grid filename has not changed";
@@ -283,8 +290,6 @@ void QVtkRenderer::initialize() {
 bool QVtkRenderer::initializePipeline(const char *gridFilename) {
   qDebug() << "QVtkRenderer::initializePipeline() " << gridFilename;
 
-  item_->setAppBusy(true);
-
   // Create gridReader_ before launching LoadFileWorker
   // gridReader_ = vtkSmartPointer<GmtGridReader>::New();
 
@@ -334,7 +339,6 @@ bool QVtkRenderer::initializePipeline(const char *gridFilename) {
                                  renderWindow_, renderWindowInteractor_,
                                  interactorStyle_, surfaceActor_, axesActor_);
 
-  item_->setAppBusy(false);
 
   return status;
   
@@ -609,13 +613,27 @@ bool QVtkRenderer::gridFilenameChanged(char *filename) {
 
 
 void QVtkRenderer::handleFileLoaded() {
+  // Called when worker thread is finished
+
+  
+  qDebug() << "handleFileLoaded() current thread: ";
+  qDebug() << QThread::currentThread();
+
+    
   qDebug() << "**** handleFileLoaded() - initialize pipeline";
   // Grid file is loaded - initialize pipeline
   initializePipeline(gridFilename_);
   qDebug() << "**** handleFileLoaded() - pipeline ready";  
   pipelineReady_ = true;
+
+  // Render the FBO again
+  update();
+
   
-  item_->update();
+  qDebug() << "handleFileLoaded(): change busy state to false";
+  item_->setAppBusy(false);
+
+  
 }
 
 
