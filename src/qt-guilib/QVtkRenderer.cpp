@@ -32,9 +32,7 @@ QVtkRenderer::QVtkRenderer() :
   gridFilename_(nullptr),
   wheelEvent_(nullptr),
   mouseButtonEvent_(nullptr),
-  mouseMoveEvent_(nullptr),
-  pipelineReady_(false),
-  gridReaderLoaded_(false)  
+  mouseMoveEvent_(nullptr)
 {
     worker_ = new LoadFileWorker(*this);
 
@@ -57,12 +55,12 @@ QOpenGLFramebufferObject *QVtkRenderer::createFramebufferObject(const QSize &siz
 
 void QVtkRenderer::render() {
 
-  /* **
-  if (!pipelineReady_) {
-    qDebug() << "QVtkRenderer::render() pipeline not ready yet";
+
+  if (!worker_->okToRender()) {
+    qDebug() << "QVtkRenderer::render() do not render yet";
     return;
   }
-  ** */
+
   qDebug() << "QVtkRenderer::render() ************ start";
   
   if (!renderWindow_ || !renderWindowInteractor_) {
@@ -220,9 +218,7 @@ void QVtkRenderer::synchronize(QQuickFramebufferObject *item) {
   displayProperties_ = item_->displayProperties();
   
   if (gridFilenameChanged(item_->getGridFilename())) {
-    // New grid file specified - load its data into vtk pipeline
-    gridReaderLoaded_ = false;
-    pipelineReady_ = false;
+
     gridReader_ = vtkSmartPointer<GmtGridReader>::New();
     
     qDebug() << "synchronize(): change busy state to true";
@@ -272,16 +268,6 @@ void QVtkRenderer::synchronize(QQuickFramebufferObject *item) {
 
 void QVtkRenderer::initialize() {
   qDebug() << "QVtkRenderer::initialize()";
-  /* ***
-  // If gridFileanme specified, initialize pipeline
-  if (
-      gridFilenameChanged(item_->getGridFilename()) &&
-      gridFilename_ &&
-      !initializePipeline(gridFilename_)) {
-    
-    qCritical() << "initializePipeline() failed for" << gridFilename_;
-  }
-  *** */
   initialized_ = true;
 }
 
@@ -501,7 +487,7 @@ bool QVtkRenderer::assemblePipeline(mb_system::GmtGridReader *gridReader,
   renderer->ResetCamera();
 
   // Initialize the OpenGL context for the renderer
-  renderWindow->OpenGLInitContext();
+  ///  renderWindow->OpenGLInitContext();
 
   qDebug() << "pipeline assembled";  
   return true;
@@ -619,16 +605,12 @@ void QVtkRenderer::handleFileLoaded() {
   qDebug() << "handleFileLoaded() current thread: ";
   qDebug() << QThread::currentThread();
 
-    
-  qDebug() << "**** handleFileLoaded() - initialize pipeline";
-  // Grid file is loaded - initialize pipeline
-  initializePipeline(gridFilename_);
-  qDebug() << "**** handleFileLoaded() - pipeline ready";  
-  pipelineReady_ = true;
-
   // Render the FBO again
   update();
 
+  // Initialize the OpenGL context for the renderer
+  qDebug() << "initialize OpenGL context for renderer";
+  renderWindow_->OpenGLInitContext();
   
   qDebug() << "handleFileLoaded(): change busy state to false";
   item_->setAppBusy(false);
@@ -643,6 +625,7 @@ QVtkRenderer::LoadFileWorker::LoadFileWorker(QVtkRenderer &parent) :
   
 
 void QVtkRenderer::LoadFileWorker::run() {
+  okToRender_ = true;
   qDebug() << "QVtkRenderer::LoadFileLoader::run()";
 
   parent_.gridReader_->SetFileName(parent_.gridFilename_);
@@ -654,10 +637,16 @@ void QVtkRenderer::LoadFileWorker::run() {
     
     return;
   }
-  
-  parent_.gridReaderLoaded_ = true;
-  
+
+  // Critical region - don't render during this phase
+  okToRender_ = false;
+  qDebug() << "**** handleFileLoaded() - initialize pipeline";
+  // Grid file is loaded - initialize pipeline
+  parent_.initializePipeline(parent_.gridFilename_);
+  qDebug() << "**** handleFileLoaded() - pipeline ready";    
+
+  // All done - ok to render
+  okToRender_ = true;  
   qDebug() << "QVtkRenderer::LoadFileLoader::run() finished";
-  
 }
 

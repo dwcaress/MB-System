@@ -175,21 +175,24 @@ namespace mb_system {
     /// Latest mouse move event
     std::shared_ptr<QMouseEvent> mouseMoveEvent_;
 
-    /// Indicates that file data has been loaded into gridReader 
-    bool gridReaderLoaded_;
-    
-    /// Indicates that pipeline is fully assembled, ready for rendering
-    bool pipelineReady_;
-
     /// Worker thread to load grid file
     class LoadFileWorker : public QThread {
 
     public:
       LoadFileWorker(QVtkRenderer &parent);
-        
+
+      /// Return true if OK to render FBO now, else false
+      bool okToRender() {
+        return okToRender_;
+      }
+      
+      
     protected:
       void run() override;
 
+      /// True if OK to render FBO now, else false
+      bool okToRender_;
+      
       QVtkRenderer &parent_;
       
     };
