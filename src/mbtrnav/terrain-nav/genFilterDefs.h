@@ -128,16 +128,28 @@ should be turned on.  */
 /******************************************************************************
  FILTER INITIALIZATION PARAMETERS
 ******************************************************************************/
+// [XYZ]_STDDEV_INIT values establish a map search radius; values are application-specific.
+// If set incorrectly, TRN may fail to initialize correctly, resulting in errors, e.g.:
+// TerrainNav::Filter not initialized - vehicle is currently within a non-valid region of the reference map
+// TerrainNav::Cannot compute pose estimate; motion has not been initialized.
+// Typical values include:
+// [XY]_STDDEV_INIT
+//   60.0 Portuguese Ledge/Dorado
+//   600.0 Axial/Sentry
+// [Z]_STDDEV_INIT
+//   5.0 Portuguese Ledge/Dorado, Axial/Sentry
+//   10.0 ?
+
 #ifndef X_STDDEV_INIT       //! x standard deviation (m) for initialization
-#define X_STDDEV_INIT 600.0 //100.0 // 80.0 //
+#define X_STDDEV_INIT 600.0 
 #endif
 
 #ifndef Y_STDDEV_INIT       //!  y standard deviation (m) for initialization
-#define Y_STDDEV_INIT 600.0 //100.0 //80.0 //
+#define Y_STDDEV_INIT 600.0 
 #endif
 
-#ifndef Z_STDDEV_INIT     //! z standard deviation (m) for initialization
-#define Z_STDDEV_INIT 5.0 //10.0 //
+#ifndef Z_STDDEV_INIT       //! z standard deviation (m) for initialization
+#define Z_STDDEV_INIT 5.0 
 #endif
 
 #ifndef PHI_STDDEV_INIT   //! roll standard deviation (rad) for initialization
