@@ -347,7 +347,9 @@ void QVtkRenderer::initializeOpenGLState()
 
 
 void QVtkRenderer::setupAxes(vtkCubeAxesActor *axesActor,
-                             vtkColor3d &axisColor, double *bounds) {
+                             vtkColor3d &axisColor, double *bounds,
+                             const char *xUnits, const char *yUnits,
+                             const char *zUnits) {
 
   
   axesActor->SetUseTextActor3D(0);
@@ -372,9 +374,9 @@ void QVtkRenderer::setupAxes(vtkCubeAxesActor *axesActor,
   axesActor->DrawYGridlinesOn();
   axesActor->DrawZGridlinesOn();
   
-  axesActor->SetXTitle("Easting");
-  axesActor->SetYTitle("Northing");
-  axesActor->SetZTitle("Depth");
+  axesActor->SetXTitle(xUnits);
+  axesActor->SetYTitle(yUnits);
+  axesActor->SetZTitle(zUnits);
 
 #if VTK_MAJOR_VERSION == 6
   axesActor->SetGridLineLocation(VTK_GRID_LINES_FURTHEST);
@@ -478,7 +480,8 @@ bool QVtkRenderer::assemblePipeline(mb_system::GmtGridReader *gridReader,
   
   // Set up axes
   setupAxes(axesActor, axisColor,
-            gridReader->GetOutput()->GetBounds());
+            gridReader->GetOutput()->GetBounds(),
+            gridReader->xUnits(), gridReader->yUnits(), gridReader->zUnits());
 
   axesActor->SetCamera(renderer->GetActiveCamera());
 

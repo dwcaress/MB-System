@@ -118,7 +118,9 @@ namespace mb_system {
     /// Setup axes
     static void setupAxes(vtkCubeAxesActor *axesActor,
                           vtkColor3d &axisColor,
-                          double *bounds);
+                          double *bounds,
+                          const char *xUnits, const char *yUnits,
+                          const char *zUnits);
 
     /// If item_ grid filename differs from gridFilename_, copy it and
     /// return true, else return false
