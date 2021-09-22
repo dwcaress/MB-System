@@ -47,6 +47,22 @@ namespace mb_system {
     void bounds(float *xMin, float *xMax, float *yMin, float *yMax,
 		float *zMin, float *zMax);
 
+    /// Get x-axis units
+    const char *xUnits() {
+      return xUnits_;
+    }
+
+    /// Get y-axis units
+    const char *yUnits() {
+      return yUnits_;
+    }
+
+    /// Get z-axis units
+    const char *zUnits() {
+      return zUnits_;
+    }
+    
+    
   protected:
   
     /// Callback registered with the VariableArraySelection.
@@ -75,7 +91,11 @@ namespace mb_system {
     GMT_GRID *gmtGrid_;
   
     vtkSmartPointer<vtkPoints> gridPoints_;
-    vtkSmartPointer<vtkCellArray> gridPolygons_;  
+    vtkSmartPointer<vtkCellArray> gridPolygons_;
+
+    const char *xUnits_;
+    const char *yUnits_;
+    const char *zUnits_;
 
 
   private:

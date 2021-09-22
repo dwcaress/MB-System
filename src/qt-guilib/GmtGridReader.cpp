@@ -14,7 +14,9 @@
 using namespace mb_system;
 
 GmtGridReader::GmtGridReader() :
-  fileName_(nullptr) {
+  fileName_(nullptr),
+  xUnits_(nullptr), yUnits_(nullptr), zUnits_(nullptr)
+{
   
   gridPoints_ = vtkSmartPointer<vtkPoints>::New();
   gridPoints_->SetDataTypeToFloat();
@@ -67,6 +69,25 @@ int GmtGridReader::RequestData(vtkInformation* request,
     return 0;
   }
 
+  std::cout << "x units: " << gmtGrid_->header->x_units << std::endl;
+  std::cout << "y units: " << gmtGrid_->header->y_units << std::endl;
+  std::cout << "z units: " << gmtGrid_->header->z_units << std::endl;
+
+  if (xUnits_) {
+    free((void *)xUnits_);
+  }
+  if (yUnits_) {
+    free((void *)yUnits_);
+  }
+  if (zUnits_) {
+    free((void *)zUnits_);
+  }
+  
+  xUnits_ = (const char *)strdup(gmtGrid_->header->x_units);
+  yUnits_ = (const char *)strdup(gmtGrid_->header->y_units);
+  zUnits_ = (const char *)strdup(gmtGrid_->header->z_units);  
+
+  
   // Reset/clear points
   gridPoints_->Reset();
 
@@ -179,7 +200,8 @@ void GmtGridReader::SetFileName(const char *fileName) {
 }
 
 
-void GmtGridReader::SelectionModifiedCallback(vtkObject*, unsigned long, void* clientdata, void*)
+void GmtGridReader::SelectionModifiedCallback(vtkObject*, unsigned long,
+                                              void* clientdata, void*)
 {
   static_cast<GmtGridReader*>(clientdata)->Modified();
 }
