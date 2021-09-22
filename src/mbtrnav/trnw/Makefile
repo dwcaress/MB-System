@@ -1,4 +1,5 @@
 ########################################
+# libtrnav/trnw Makefile
 # Build Environment
 # version and build configuration
 
@@ -185,8 +186,10 @@ $(LIBTRNUCLI_SRC) $(TRNUCLI_TEST_SRC) $(TRNUSVR_TEST_SRC) \
 $(MMCPUB_SRC) $(MMCPUB_SRC) $(MCPUB_SRC) $(MCPUB_SRC)
 
 TRNC_TARGETS+=  $(OUTPUT_DIR)/$(LIBTRNCLI) $(OUTPUT_DIR)/$(TRNCLI_TEST) \
-$(OUTPUT_DIR)/$(LIBTRNUCLI) $(OUTPUT_DIR)/$(TRNUCLI_TEST) $(OUTPUT_DIR)/$(TRNUSVR_TEST) \
-$(OUTPUT_DIR)/$(MMCPUB) $(OUTPUT_DIR)/$(MMCSUB) $(OUTPUT_DIR)/$(MCPUB) $(OUTPUT_DIR)/$(MCSUB)
+			$(OUTPUT_DIR)/$(LIBTRNUCLI) $(OUTPUT_DIR)/$(TRNUCLI_TEST)\
+			$(OUTPUT_DIR)/$(TRNUSVR_TEST) \
+			$(OUTPUT_DIR)/$(MMCPUB) $(OUTPUT_DIR)/$(MMCSUB) \
+			$(OUTPUT_DIR)/$(MCPUB) $(OUTPUT_DIR)/$(MCSUB)
 
 ########################################
 # Build Files (mostly for cleanup)
@@ -196,6 +199,8 @@ TRNC_OBJECTS = $(TRNC_SOURCES:%.c=$(BUILD_DIR)/%.o)
 TRNW_OBJECTS = $(TRNW_SOURCES:%.cpp=$(BUILD_DIR)/%.o)
 TRNC_DEPENDS = $(TRNC_SOURCES:%.c=$(BUILD_DIR)/%.d)
 TRNW_DEPENDS = $(TRNW_SOURCES:%.cpp=$(BUILD_DIR)/%.d)
+CLEAN_OBJECTS = $(TRNC_OBJECTS) $(TRNW_OBJECTS) $(MCSUB_OBJ) $(MMCSUB_OBJ)
+CLEAN_DEPENDS = $(TRNC_DEPENDS) $(TRNW_DEPENDS)
 BINARIES =  $(OUTPUT_DIR)/$(LIBTRNW) $(TRNC_TARGETS)
 
 CLEANUP = gmon.out
@@ -329,7 +334,7 @@ install:
 
 # clean : delete object, dependency, binary files
 clean:
-	rm -f $(TRNW_OBJECTS) $(TRNW_DEPENDS) $(TRNC_OBJECTS) $(TRNC_DEPENDS) $(BINARIES)
+	rm -f $(CLEAN_OBJECTS) $(CLEAN_DEPENDS) $(BINARIES)
 	$(RM_DSYMS)
 
 # purge : delete delete object, dependency, binary files, build directories
