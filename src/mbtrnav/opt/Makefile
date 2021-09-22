@@ -108,7 +108,7 @@ libs:
 	@echo "Building libs..."
 	cd $(REPO_TOP_DIR); make
 
-apps: libs dorado lrauv
+apps: dorado lrauv
 
 dorado: libs
 	@echo "Building dorado..."

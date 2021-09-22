@@ -70,26 +70,29 @@ LIB_PATHS = -L/usr/local/lib -L$(OUTPUT_DIR) $(OS_LIB_PATH)
 ########################################
 # Target Definitions
 
-TNAV_CLIENT_OBJ=$(BUILD_DIR)/TerrainNavClient.o
+LIB_TNAVC=libtnavc.a
+LIB_TNAVC_OBJ=$(BUILD_DIR)/TerrainNavClient.o
+
 MBARI_MAIN=mbari-main
 MBARI_MAIN_SRC=mainMbari.cpp
 MBARI_MAIN_OBJ = $(MBARI_MAIN_SRC:%.cpp=$(BUILD_DIR)/%.o)
-MBARI_MAIN_LIBS = -ltrn  -lnewmat -lqnx -lnetcdf -lm -lpthread $(OS_LIBS)
+MBARI_MAIN_LIBS = -ltrn  -lnewmat -lqnx -lnetcdf -lm -lpthread -ltnavc $(OS_LIBS)
 
 REPLAY=trn-replay
 REPLAY_SRC=Replay.cpp trn_replay.cpp
 REPLAY_OBJ = $(REPLAY_SRC:%.cpp=$(BUILD_DIR)/%.o)
-REPLAY_LIBS = -ltrn  -lnewmat -lqnx -lnetcdf -lm -lpthread -lgeolib $(OS_LIBS)
+REPLAY_LIBS = -ltrn  -lnewmat -lqnx -lnetcdf -lm -lpthread -lgeolib -ltnavc $(OS_LIBS)
 
 ########################################
 # Build Files (mostly for cleanup)
 SOURCES =  $(MBARI_MAIN_SRC) \
-		$(REPLAY_SRC) 
+		$(REPLAY_SRC)
 
 OBJECTS = $(SOURCES:%.cpp=$(BUILD_DIR)/%.o)
 DEPENDS = $(SOURCES:%.cpp=$(BUILD_DIR)/%.d)
-BINARIES = $(OUTPUT_DIR)/$(MBARI_MAIN) \
-		$(OUTPUT_DIR)/$(REPLAY) 
+LIBS = $(OUTPUT_DIR)/$(LIB_TNAVC)
+BINARIES =  $(OUTPUT_DIR)/$(MBARI_MAIN) \
+			$(OUTPUT_DIR)/$(REPLAY) \
 
 CLEANUP = gmon.out
 # dSYMs : XCode debug symbol file folders
@@ -99,16 +102,21 @@ CLEANUP = gmon.out
 ########################################
 # Rules: build targets
 
-all: $(BINARIES)
+all: $(LIBS) $(BINARIES)
+
+# build TerrainNavClient lib
+$(OUTPUT_DIR)/$(LIB_TNAVC):
+	@echo building $@...
+	ar -rcs $@ $(LIB_TNAVC_OBJ)
 
 # build mbari_main utility
-$(OUTPUT_DIR)/$(MBARI_MAIN): $(MBARI_MAIN_OBJ) $(TNAV_CLIENT_OBJ)
+$(OUTPUT_DIR)/$(MBARI_MAIN): $(MBARI_MAIN_OBJ)
 	@echo building $@...
 	$(CXX) $(CFLAGS) $(INC_PATHS) $(LIB_PATHS) $^ -o $@ $(LD_FLAGS) $(MBARI_MAIN_LIBS)
 	@echo
 
 # build replay utility
-$(OUTPUT_DIR)/$(REPLAY): $(REPLAY_OBJ)  $(TNAV_CLIENT_OBJ)
+$(OUTPUT_DIR)/$(REPLAY): $(REPLAY_OBJ)
 	@echo building $@...
 	$(CXX) $(CFLAGS) $(INC_PATHS) $(LIB_PATHS) $^ -o $@ $(LD_FLAGS) $(REPLAY_LIBS)
 	@echo
@@ -142,13 +150,12 @@ install:
 
 ########################################
 # Rules:
-
 .PHONY: clean
 .PHONY: purge
 
 # clean : delete object, dependency, binary files
 clean:
-	rm -f $(OBJECTS) $(DEPENDS) $(BINARIES)
+	rm -f $(OBJECTS) $(DEPENDS) $(LIBS) $(BINARIES)
 	$(RM_DSYMS)
 
 # purge : delete delete object, dependency, binary files, build directories
