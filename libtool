@@ -1,6 +1,6 @@
 #! /bin/sh
 # Generated automatically by config.status (mbsystem) 5.7.9beta11
-# Libtool was configured on host sirena-2.shore.mbari.org:
+# Libtool was configured on host sirena.shore.mbari.org:
 # NOTE: Changes made to this file will be lost: look at ltmain.sh.
 
 # Provide generalized library-building support services.
