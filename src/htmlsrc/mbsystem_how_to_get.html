@@ -60,7 +60,7 @@
   <dd>brew upgrade</dd>
 </dl>
 <p><strong><u>Fink for MacOs</u></strong></p>
-<p>MB-System has been packaged for MacOS X as part of the <a href="http://www.finkproject.org/">Fink Project</a>. for several years. Unfortunately, as of May 2017 there are library namespace issues associated with the OpenMotif package that result in MB-System graphical utilities not working. For now, we recommend installing MB-System on MacOS computers using the Homebrew package manager. Until further notice, we are not attempting to maintain or update the MB-System distribution in Fink.</p> 
+<p>MB-System has been packaged for MacOS X as part of the <a href="http://www.finkproject.org/">Fink Project</a>. for several years. Unfortunately, as of May 2017 there are library namespace issues associated with the OpenMotif package that result in MB-System graphical utilities not working. For now, we recommend installing MB-System on MacOS computers using the Homebrew package manager. Until further notice, we are not attempting to maintain or update the MB-System distribution in Fink.</p>
 	<p>The MB-System Fink package can be found at:</p>
 <dl>
 	<dd><a href="http://pdb.finkproject.org/pdb/package.php/mbsystem">http://pdb.finkproject.org/pdb/package.php/mbsystem</a></dd>
@@ -84,7 +84,7 @@ by anonymous ftp to the Monterey Bay Aquarium Research Institute (MBARI).
 This archive file is about 16 megabytes in size and, depending on the
 speed of your internet connection, may take a few minutes to transfer.</p>
 <p>Click<a
- href="ftp://mbsystemftp@ftp.mbari.org/mbsystem-5.5.2303.tar.gz"> here to ftp</a> 
+ href="ftp://mbsystemftp@ftp.mbari.org/mbsystem-5.5.2303.tar.gz"> here to ftp</a>
 the current MB-System release as a compressed tar archive.</p>
 <p>Click <a href="ftp://mbsystemftp@ftp.mbari.org/">here to
 get point-and-click ftp access</a> to all of the MB-System related
@@ -94,7 +94,7 @@ distributions of MB-System ).</p>
 terminal shell.
 The following commands represent a typical anonymous ftp session (note
 that literally_anything literally means anything or nothing followed by
-a return, and 
+a return, and
 that many modern ftp clients do not require the "binary" command).</p>
 	<dl>
 	<dd>% ftp mbsystemftp@ftp.mbari.org</dd>
@@ -275,28 +275,28 @@ the applications that depend on these packages.</p>
 						architecture-dependent files should be relative to
 						exec_prefix.
 						[Default: ${prefix} ==&gt; /usr/local]</dd><br>
-	<dt>--datarootdir</dt> 			
+	<dt>--datarootdir</dt>
 					<dd>The root of the directory tree for read-only architecture
 						-independent data files.
 						[Default: ${exec_prefix}/share ==&gt; /usr/local/share]</dd><br>
-<dt>--bindir</dt> 			
+<dt>--bindir</dt>
 					<dd>The directory for installing executables that users run.
 						[Default: ${exec_prefix}/bin ==&gt; /usr/local/bin]</dd><br>
-<dt>--libdir</dt> 			
+<dt>--libdir</dt>
 					<dd>The directory for installing object code libraries.
 						[Default: ${exec_prefix}/lib ==&gt; /usr/local/lib]</dd><br>
-<dt>--includedir</dt> 			
+<dt>--includedir</dt>
 					<dd>The directory for installing C header files.
 						[Default: ${exec_prefix}/include ==&gt; /usr/local/include]</dd>
 </dl></ul>
-<p>MB-System depends on librarys from a number of different packages, including NetCDF, GMT5, GDAL, FFTW3, X11, and Motif. Sometimes a user will have more than one installation of a package available, and specifying which is used is desirable. Also, unfortunately the configure script does not always successfully find all needed packages. Consequently, the configure script allows users to set the locations on the command line when necessary. 
+<p>MB-System depends on librarys from a number of different packages, including NetCDF, GMT5, GDAL, FFTW3, X11, and Motif. Sometimes a user will have more than one installation of a package available, and specifying which is used is desirable. Also, unfortunately the configure script does not always successfully find all needed packages. Consequently, the configure script allows users to set the locations on the command line when necessary.
 The configure command line options controlling the locations of prerequisites are:</p>
 <ul><dl>
-<dt>--with-netcdf-config</dt> 	
+<dt>--with-netcdf-config</dt>
 	<dd>Location of NetCDF configuration script nc-config</dd><br>
-<dt>--with-gdal-config</dt> 	
+<dt>--with-gdal-config</dt>
 	<dd>Location of GDAL configuration script gdal-config</dd><br>
-<dt>--with-gmt-config</dt> 	
+<dt>--with-gmt-config</dt>
 	<dd>Location of GMT configuration script gmt-config</dd><br>
 <dt>--with-proj-lib</dt>
 	<dd>Location of PROJ libs (optional)</dd><br>
@@ -440,7 +440,7 @@ home directory.</p>
 <dd>--with-otps-dir=/usr/local/OTPS2</dd>
 </dl></ul>
 <strong><u>Prerequisite Installation and Configure Arguments for Ubuntu Linux</u></strong>
-<p>For Ubuntu Linux 16, the following use of the apt-get utility will install 
+<p>For Ubuntu Linux 16, the following use of the apt-get utility will install
   all of the MB-System prerequisites excepting OTPS:</p>
 <ul><dl>
 	<dt>sudo apt-get install  \</dt>
@@ -478,7 +478,7 @@ home directory.</p>
 </ul>
 
 <p>MB-System now requires GMT 5.2.1 or later. Although the standard Ubuntu package manager apt-get installs a current GMT on Ubuntu 16, on Ubuntu 12 and 14 the available GMT version is 5.1, with the consequence that a manual GMT installation is required before MB-System can be installed. Also, many of the prerequisite package names are different in the older Ubuntu distributions than in Ubuntu 16.</p>
-<p>For Ubuntu Linux 12 or 14, the following use of the apt-get utility will install 
+<p>For Ubuntu Linux 12 or 14, the following use of the apt-get utility will install
 all of the MB-System prerequisites excepting GMT5 and OTPS:</p>
 <ul><dl>
 <dt>sudo apt-get install \<dt>
@@ -492,7 +492,7 @@ all of the MB-System prerequisites excepting GMT5 and OTPS:</p>
   <dt><a href="http://andrewjmoodie.com/2014/12/installing-the-generic-mapping-tools-5-gmt-5-1-x-on-ubuntu-linux/">http://andrewjmoodie.com/2014/12/installing-the-generic-mapping-tools-5-gmt-5-1-x-on-ubuntu-linux/</a></dt>
 	</dl></ul>
 <p><strong><u>Prerequisite Installation and Configure Arguments for CentOs or Red Hat Linux</u></strong></p>
-<p>The package manager usually used on CentOs or Red Hat Linux systems is yum. To install 
+<p>The package manager usually used on CentOs or Red Hat Linux systems is yum. To install
 all of the MB-System prerequisites use the command:</p>
 <ul><dl>
 	<dt>sudo yum install \</dt>
@@ -513,5 +513,9 @@ install MB-System in /usr/local, then only a simple call to configure is require
 Last Updated: $Id$</p>
 </center>
 <hr width="67%">
+<center>
+<p>
+<a href="mbsystem.html"><< Manual page for the MB-System package</a> | <a href="https://www.mbari.org/products/research-software/mb-system/">MB-System website >></a></p>
+</center>
 </body>
 </html>

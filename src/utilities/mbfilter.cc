@@ -1132,20 +1132,8 @@ int main(int argc, char **argv) {
 		status = mb_put_comment(verbose, ombio_ptr, comment, &error);
 		sprintf(comment, "MB-system Version %s", MB_VERSION);
 		status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
-		const time_t right_now = time((time_t *)0);
-		char date[32];
-		strcpy(date, ctime(&right_now));
-		date[strlen(date) - 1] = '\0';
-		char *user_ptr = getenv("USER");
-		if (user_ptr == nullptr)
-			user_ptr = getenv("LOGNAME");
-		char user[128];
-		if (user_ptr != nullptr)
-			strcpy(user, user_ptr);
-		else
-			strcpy(user, "unknown");
-		char host[MB_PATH_MAXLINE];
-		gethostname(host, MB_PATH_MAXLINE);
+    char user[256], host[256], date[32];
+    status = mb_user_host_date(verbose, user, host, date, &error);
 		sprintf(comment, "Run by user <%s> on cpu <%s> at <%s>", user, host, date);
 		status &= mb_put_comment(verbose, ombio_ptr, comment, &error);
 		if (datakind == MBFILTER_BATH) {

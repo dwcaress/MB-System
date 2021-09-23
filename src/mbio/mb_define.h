@@ -37,12 +37,20 @@
 #endif
 
 /* For XDR/RPC */
-#ifdef HAVE_RPC_RPC_H
-#include <rpc/rpc.h>
-#endif
-#ifdef HAVE_RPC_TYPES_H
-#include <rpc/types.h>
-#include <rpc/xdr.h>
+#ifndef _WIN32
+# ifdef HAVE_RPC_RPC_H
+#  include <rpc/rpc.h>
+#  include <rpc/types.h>
+#  include <rpc/xdr.h>
+# else
+#  ifdef HAVE_TIRPC_RPC_RPC_H
+#   include <tirpc/rpc/rpc.h>
+#   include <tirpc/rpc/types.h>
+#   include <tirpc/rpc/xdr.h>
+#  endif
+# endif
+#else
+#	include "types_win32.h"
 #endif
 
 #ifdef __cplusplus
@@ -91,7 +99,7 @@ typedef signed char mb_s_char;
 #endif
 
 /* type definitions of signed and unsigned long int (64 bit integer) */
-typedef unsigned long long mb_u_long;
+typedef long long unsigned mb_u_long;
 typedef long long mb_s_long;
 
 /* type definitions for structures used in beam angle calculations */
@@ -120,6 +128,7 @@ typedef struct {
 #define MB_NAME_LENGTH 32
 #define MB_LONGNAME_LENGTH 128
 #define MB_DESCRIPTION_LENGTH 2048
+#define MB_COMMAND_LENGTH 8192 // Windows command line maximum
 
 /* maximum UDP packet size */
 #define MB_UDP_SIZE_MAX 65536
@@ -128,6 +137,7 @@ typedef struct {
 typedef char mb_path[MB_PATH_MAXLINE];
 typedef char mb_name[MB_NAME_LENGTH];
 typedef char mb_longname[MB_LONGNAME_LENGTH];
+typedef char mb_command[MB_COMMAND_LENGTH];
 
 /* maximum number of threads created by an MB-System program/function */
 #define MB_THREAD_MAX 16
@@ -245,6 +255,7 @@ typedef enum {
 /* MBIO core function prototypes */
 int mb_version(int verbose, char *version_string, int *version_id, int *version_major, int *version_minor, int *version_archive,
                int *error);
+int mb_user_host_date(int verbose, char user[256], char host[256], char date[32], int *error);
 int mb_default_defaults(int verbose, int *format, int *pings, int *lonflip, double bounds[4], int *btime_i, int *etime_i,
                 double *speedmin, double *timegap);
 int mb_defaults(int verbose, int *format, int *pings, int *lonflip, double bounds[4], int *btime_i, int *etime_i,

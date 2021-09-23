@@ -2931,6 +2931,10 @@ void process_file(int verbose, struct mb_process_struct *process,
   if (*status == MB_FAILURE) {
     fprintf(stderr, "WARNING: status is MB_FAILURE.\n");
   }
+
+  char user[256], host[256], date[32];
+  *status = mb_user_host_date(verbose, user, host, date, error);
+
   /* reset error */
   *error = MB_ERROR_NO_ERROR;
   *status = MB_SUCCESS;
@@ -2947,20 +2951,6 @@ void process_file(int verbose, struct mb_process_struct *process,
   } else {
     /* put version header at beginning */
     memset(resf_header, 0, MB_PATH_MAXLINE);
-    const time_t right_now = time((time_t *)0);
-    char date[32];
-    strcpy(date, ctime(&right_now));
-    date[strlen(date) - 1] = '\0';
-    char *user_ptr = getenv("USER");
-    if (user_ptr == nullptr)
-      user_ptr = getenv("LOGNAME");
-    char user[MBP_FILENAMESIZE];
-    if (user_ptr != nullptr)
-      strcpy(user, user_ptr);
-    else
-      strcpy(user, "unknown");
-    char host[MBP_FILENAMESIZE];
-    gethostname(host, MBP_FILENAMESIZE);
     const int resf_mode = MB_ESF_MODE_EXPLICIT;
     sprintf(resf_header,
         "ESFVERSION03\nESF Mode: %d\nMB-System Version %s\nProgram: %s\nUser: %s\nCPU: %s\nDate: %s\n",
@@ -3124,20 +3114,6 @@ void process_file(int verbose, struct mb_process_struct *process,
     *status = mb_put_comment(verbose, ombio_ptr, comment, error);
     if (*error == MB_ERROR_NO_ERROR)
       ocomment++;
-    const time_t right_now = time((time_t *)0);
-    char date[32];
-    strcpy(date, ctime(&right_now));
-    date[strlen(date) - 1] = '\0';
-    char *user_ptr = getenv("USER");
-    if (user_ptr == nullptr)
-      user_ptr = getenv("LOGNAME");
-    char user[MBP_FILENAMESIZE];
-    if (user_ptr != nullptr)
-      strcpy(user, user_ptr);
-    else
-      strcpy(user, "unknown");
-    char host[MBP_FILENAMESIZE];
-    gethostname(host, MBP_FILENAMESIZE);
     strncpy(comment, "", MBP_FILENAMESIZE);
     sprintf(comment, "Run by user <%s> on cpu <%s> at <%s>", user, host, date);
     *status = mb_put_comment(verbose, ombio_ptr, comment, error);
@@ -5524,7 +5500,7 @@ void process_file(int verbose, struct mb_process_struct *process,
 
   // use mbinfo to generate the inf file - specify the mask bounds so that
   // only one read pass is necessary
-  char command[MB_PATH_MAXLINE];
+  mb_command command;
   sprintf(command, "mbinfo -F %d -I %s -G -N -O -M10/10/%.9f/%.9f/%.9f/%.9f",
           process->mbp_format, process->mbp_ofile,
           mask_bounds[0], mask_bounds[1], mask_bounds[2], mask_bounds[3]);

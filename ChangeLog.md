@@ -23,6 +23,11 @@ Distributions that do not include "beta" in the tag name correspond to the major
 announced releases. The source distributions associated with all releases, major
 or beta, are equally accessible as tarballs through the Github interface.
 
+- Version 5.7.9beta16    August 27, 2021
+- Version 5.7.9beta15    August 26, 2021
+- Version 5.7.9beta14    July 25, 2021
+- Version 5.7.9beta13    July 18, 2021
+- Version 5.7.9beta12    July 4, 2021
 - Version 5.7.9beta11    June 26, 2021
 - Version 5.7.9beta10    June 16, 2021
 - Version 5.7.9beta09    June 8, 2021
@@ -390,6 +395,42 @@ or beta, are equally accessible as tarballs through the Github interface.
 ### MB-System Version 5.7 Release Notes:
 --
 
+#### 5.7.9beta16 (August 27, 2021)
+
+Mbnavadjust: Made listing of survey vs survey blocks much faster.
+
+#### 5.7.9beta15 (August 26, 2021)
+
+Mbnavadjust: Speeded up model tie plots and insured that changes to projects will
+be saved when users quit.
+
+Mbview (mbgrdviz, mbeditviz, mbnavadjust): Addressed a number of code style issues
+particularly using bool rather than int for true/false values.
+
+Mbm_route2mission: added acoustic modem status signal to MBARI AUV missions
+immediately at the end of the "start survey" behavior.
+
+#### 5.7.9beta14 (July 25, 2021)
+
+Most programs: Fixed possible overflow associated with code that sets user, host,
+and date information to be included in output files. This functionality has been
+concentrated into a function mb_user_host_date() found in src/mbio/mb_defaults.c
+
+Many programs and i/o modules: Increased use of assert() to prevent overflow
+conditions when using sprintf to construct strings.
+
+#### 5.7.9beta13 (July 18, 2021)
+
+Mbextractsegy - fixed plotting so that the last plot is correct.
+
+TRN: updated TRN documentation.
+
+#### 5.7.9beta12 (July 4, 2021)
+
+Build system: Fixed location of RPC and XDR headers for Ubuntu 21.
+
+TRN: updated TRN documentation.
+
 #### 5.7.9beta11 (June 26, 2021)
 
 Build system: The configure script and the resulting Makefiles are
@@ -409,7 +450,7 @@ the source and destination images.
 Mbm_grdplot, mbm_grd3dplot, mbm_grdcut, mbm_grdinfo, mbm_grdtiff:
 Fixed thesemacros to work with the new gmt grdinfo output that
 changed for GMT 6.2.0.
- 
+
 #### 5.7.9beta10 (June 16, 2021)
 
 Mbnavadjust: Fixed importation of swath files, which was failing. Fixed crash

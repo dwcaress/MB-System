@@ -11,7 +11,7 @@
 <CENTER><H3><U>MB-System Unix Manual Page</U></H3></CENTER>
 <PRE>
 <H1>mbauvloglist</H1>
-Section:  MB-System 5.0  (1)<BR>Updated:  7 March 2021 <BR><A HREF="#index">Index</A>
+Section:  MB-System 5.0  (1)<BR>Updated:  17 June 2021 <BR><A HREF="#index">Index</A>
 <HR>
 
 <A NAME="lbAB">&nbsp;</A>
@@ -417,6 +417,7 @@ The valid valuename strings consist of those defined in the header of the
 log file being parsed, plus the following:
 <BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;zero
 <BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;timeTag
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;timeInterval
 <BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;mergeLon
 <BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;mergeLat
 <BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;mergeHeading
@@ -437,7 +438,21 @@ log file being parsed, plus the following:
 <BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;calcKSpeed
 <BR>
 
-All of the special values are double values. Those beginning with &quot;merge&quot;
+The timeTag value corresponds to the
+record time tag reformatted as specified with <B>-F</B><I>time_i</I> as:
+<BR>
+
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;year,month,day,hour,minute,second,microsecond
+<BR>
+
+or with <B>-F</B><I>time_j</I> options as:
+<BR>
+
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;year,julien_day,hour,minute,second,microsecond
+<BR>
+
+All of the other special values are double values. The timeInterval is the time
+interval between the current record and the prior record. The values beginning with &quot;merge&quot;
 derive from interpolation of data from an external navigation file
 specified using the <B>-N</B> option. Those beginning with &quot;calc&quot; are defined
 only when the input file is fastcatlog.log, which contains both raw conductivity,
@@ -541,9 +556,12 @@ Indubitably.
 </PRE>
 
 <CENTER><P><BR>
-Last Updated: 7 March 2021</P></CENTER>
+Last Updated: 17 June 2021</P></CENTER>
 
 <HR>
-
+<center>
+<p>
+<a href="mbsystem.html"><< Manual page for the MB-System package</a> | <a href="https://www.mbari.org/products/research-software/mb-system/">MB-System website >></a></p>
+</center>
 </BODY>
 </HTML>

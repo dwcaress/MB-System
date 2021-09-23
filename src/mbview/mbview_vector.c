@@ -466,7 +466,7 @@ int mbview_pick_vector_select(size_t instance, int select, int which, int xpixel
 	/* only select one vector point if enabled and not in move mode */
 	if (shared.shareddata.vector_mode != MBV_VECTOR_OFF && shared.shareddata.nvector > 0 &&
 	    (which == MBV_PICK_DOWN || shared.shareddata.vector_selected == MBV_SELECT_NONE)) {
-		int found;
+		bool found;
 		double xgrid;
 		double ygrid;
 		double xlon;

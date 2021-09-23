@@ -25,6 +25,7 @@
  *
  */
 
+#include <assert.h>
 #include <math.h>
 #include <stdio.h>
 #include <string.h>
@@ -264,9 +265,9 @@ int mbr_zero_em12ifrm(int verbose, char *data_ptr, int *error) {
 int mbr_alm_em12ifrm(int verbose, void *mbio_ptr, int *error) {
 	struct stat imgfile_status, navfile_status;
 	int imgfile_stat, navfile_stat;
-	char path[MB_PATH_MAXLINE];
-	char imgtest[MB_PATH_MAXLINE];
-	char navtest[MB_PATH_MAXLINE];
+	mb_path path;
+	mb_path imgtest;
+	mb_path navtest;
 	char *tag_ptr;
 	char *name;
 	double *pixel_size;
@@ -303,6 +304,7 @@ int mbr_alm_em12ifrm(int verbose, void *mbio_ptr, int *error) {
 	   - works only if main input is *.SO
 	   - nav file is then *.NA
 	   - imagery file is then *.IM */
+assert(strlen(mb_io_ptr->file) < MB_PATH_MAXLINE - 12);
 
 	/* first look for imagery file */
 	if ((tag_ptr = strstr(mb_io_ptr->file, ".SO")) != NULL) {
@@ -325,9 +327,11 @@ int mbr_alm_em12ifrm(int verbose, void *mbio_ptr, int *error) {
 			if ((name = strrchr(mb_io_ptr->file, '/')) != NULL) {
 				strcpy(path, mb_io_ptr->file);
 				path[strlen(path) - strlen(name)] = '\0';
+        assert(strlen(path) + strlen(name) + 8 < MB_PATH_MAXLINE);
 				sprintf(imgtest, "%s/../imag%s", path, name);
 			}
 			else {
+        assert(strlen(mb_io_ptr->file) + 8 < MB_PATH_MAXLINE);
 				sprintf(imgtest, "../imag/%s", mb_io_ptr->file);
 			}
 			tag_ptr = strstr(imgtest, ".SO");
@@ -364,9 +368,11 @@ int mbr_alm_em12ifrm(int verbose, void *mbio_ptr, int *error) {
 			if ((name = strrchr(mb_io_ptr->file, '/')) != NULL) {
 				strcpy(path, mb_io_ptr->file);
 				path[strlen(path) - strlen(name)] = '\0';
+        assert(strlen(path) + strlen(name) + 7 < MB_PATH_MAXLINE);
 				sprintf(navtest, "%s/../nav%s", path, name);
 			}
 			else {
+        assert(strlen(mb_io_ptr->file) + 7 < MB_PATH_MAXLINE);
 				sprintf(navtest, "../nav/%s", mb_io_ptr->file);
 			}
 			tag_ptr = strstr(navtest, ".SO");

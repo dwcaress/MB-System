@@ -118,7 +118,6 @@ static wchar_t *CStrCommonWideCharsGet() {
 	static wchar_t *CommonWideChars = NULL;
 	// If you add to this array, don't forget to change the enum in
 	// the TYPEDEFS and DEFINES section above to correspond to this array.
-	// TODO(schwehr): const char *
 	if (CommonWideChars == NULL) {
 		static const char *characters[] = {
 			(char *)"\000", (char *)"\t", (char *)"\n", (char *)"\r", (char *)"\f", (char *)"\v",
@@ -2772,7 +2771,7 @@ void InitAppDefaults(Widget parent, UIAppDefault *defs) {
 				// If we found a '.' that means that this is not
 				// a simple widget name, but a sub specification so
 				// we need to split this into several quarks.
-				char *copy = XtNewString(defs->wName); 
+				char *copy = XtNewString(defs->wName);
 
 				for (char *ptr = strtok(copy, "."); ptr != NULL; ptr = strtok(NULL, ".")) {
 					rsc[rscIdx++] = XrmStringToQuark(ptr);

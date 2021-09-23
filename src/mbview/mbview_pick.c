@@ -65,10 +65,6 @@
 #include "mbview.h"
 #include "mbviewprivate.h"
 
-// TODO(schwehr): Localize?
-static char value_text[MB_PATH_MAXLINE];
-static char value_list[MB_PATH_MAXLINE];
-
 /*------------------------------------------------------------------------------*/
 int mbview_clearpicks(size_t instance) {
 	if (mbv_verbose >= 2) {
@@ -261,7 +257,7 @@ int mbview_pick(size_t instance, int which, int xpixel, int ypixel) {
 	struct mbview_world_struct *view = &(mbviews[instance]);
 	struct mbview_struct *data = &(view->data);
 
-	int found;  // TODO(schwehr): bool found
+	bool found;
 	double xgrid, ygrid;
 	double xlon, ylat, zdata;
 	double xdisplay, ydisplay, zdisplay;
@@ -471,7 +467,7 @@ int mbview_picksize(size_t instance) {
 	struct mbview_world_struct *view = &(mbviews[instance]);
 	struct mbview_struct *data = &(view->data);
 
-	int found;  // TODO(schwehr): bool found
+	bool found;
 
 	double xlength = 0.0;
 
@@ -575,6 +571,9 @@ int mbview_pick_text(size_t instance) {
 	struct mbview_world_struct *view = &(mbviews[instance]);
 	struct mbview_struct *data = &(view->data);
 	// fprintf(stderr,"mbview_pick_text: instance:%zu pickinfo_mode:%d\n",instance,data->pickinfo_mode);
+
+  char value_text[MB_PATH_MAXLINE];
+  char value_list[MB_PATH_MAXLINE];
 
 	int time_i[7];
 	char londstr0[24], londstr1[24], lonmstr0[24], lonmstr1[24];
@@ -924,14 +923,12 @@ int mbview_setlonlatstrings(double lon, double lat, char *londstring, char *latd
 	sprintf(londstring, "%.7f", lon);
 	sprintf(latdstring, "%.7f", lat);
 
-	// TODO(schwehr): Make a char char for W/E and S/N.
-	/* degress + minutes (style == MBV_LONLAT_DEGREESMINUTES) */
+	/* degrees + minutes (style == MBV_LONLAT_DEGREESMINUTES) */
 	const int lon_degree = (int)fabs(lon);
 	const double lon_minute = 60.0 * (fabs(lon) - lon_degree);
-	if (lon < 0.0)
-		sprintf(lonmstring, "%3d %10.6f W", lon_degree, lon_minute);
-	else
-		sprintf(lonmstring, "%3d %10.6f E", lon_degree, lon_minute);
+  char EorW;
+  EorW = lon >= 0 ? 'E' : 'W';
+	sprintf(lonmstring, "%3d %10.6f %c", lon_degree, lon_minute, EorW);
 
 	const int degree = (int)fabs(lat);
 	const double minute = 60.0 * (fabs(lat) - degree);
@@ -970,7 +967,7 @@ int mbview_region(size_t instance, int which, int xpixel, int ypixel) {
 	struct mbview_world_struct *view = &(mbviews[instance]);
 	struct mbview_struct *data = &(view->data);
 
-	int found;  // TODO(schwehr): bool found
+	bool found;
 	double xgrid, ygrid;
 	double xlon, ylat, zdata;
 	double xdisplay, ydisplay, zdisplay;
@@ -1288,7 +1285,7 @@ int mbview_region(size_t instance, int which, int xpixel, int ypixel) {
 		}
 	}
 
-	int ok;  // TODO(schwehr): bool ok
+	bool ok;
 
 	/* recalculate any good quad region */
 	if (data->region_type == MBV_REGION_QUAD && which != MBV_REGION_UP) {
@@ -1430,12 +1427,6 @@ int mbview_area(size_t instance, int which, int xpixel, int ypixel) {
 	struct mbview_world_struct *view = &(mbviews[instance]);
 	struct mbview_struct *data = &(view->data);
 
-	// TODO(schwehr): Can these be localized?
-	int found;
-	double xgrid, ygrid;
-	double xlon, ylat, zdata;
-	double xdisplay, ydisplay, zdisplay;
-
 	/* check to see if pick is at existing end points */
 	if (which == MBV_AREALENGTH_DOWN && data->area_type == MBV_AREA_QUAD) {
 		/* look for match to existing endpoints in neighborhood of pick */
@@ -1444,6 +1435,10 @@ int mbview_area(size_t instance, int which, int xpixel, int ypixel) {
 		bool match1 = false;
 
 		/* look for point */
+	  bool found = false;
+  	double xgrid, ygrid;
+  	double xlon, ylat, zdata;
+  	double xdisplay, ydisplay, zdisplay;
 		mbview_findpoint(instance, xpixel, ypixel, &found, &xgrid, &ygrid, &xlon, &ylat, &zdata, &xdisplay, &ydisplay, &zdisplay);
 
 		const double dx = 0.10 * (data->area.endpoints[1].xdisplay - data->area.endpoints[0].xdisplay);
@@ -1465,6 +1460,10 @@ int mbview_area(size_t instance, int which, int xpixel, int ypixel) {
 		/* if no match then start new area */
 		if (!match) {
 			/* look for point */
+    	bool found = false;
+    	double xgrid, ygrid;
+    	double xlon, ylat, zdata;
+    	double xdisplay, ydisplay, zdisplay;
 			mbview_findpoint(instance, xpixel, ypixel, &found, &xgrid, &ygrid, &xlon, &ylat, &zdata, &xdisplay, &ydisplay,
 			                 &zdisplay);
 
@@ -1487,6 +1486,10 @@ int mbview_area(size_t instance, int which, int xpixel, int ypixel) {
 		/* else if match 0 then reset endpoint 0 */
 		else if (match0) {
 			/* look for point */
+    	bool found = false;
+    	double xgrid, ygrid;
+    	double xlon, ylat, zdata;
+    	double xdisplay, ydisplay, zdisplay;
 			mbview_findpoint(instance, xpixel, ypixel, &found, &xgrid, &ygrid, &xlon, &ylat, &zdata, &xdisplay, &ydisplay,
 			                 &zdisplay);
 
@@ -1509,6 +1512,10 @@ int mbview_area(size_t instance, int which, int xpixel, int ypixel) {
 		/* else if match 1 then reset endpoint 1 */
 		else if (match1) {
 			/* look for point */
+    	bool found = false;
+    	double xgrid, ygrid;
+    	double xlon, ylat, zdata;
+    	double xdisplay, ydisplay, zdisplay;
 			mbview_findpoint(instance, xpixel, ypixel, &found, &xgrid, &ygrid, &xlon, &ylat, &zdata, &xdisplay, &ydisplay,
 			                 &zdisplay);
 
@@ -1532,6 +1539,10 @@ int mbview_area(size_t instance, int which, int xpixel, int ypixel) {
 	/* deal with start of new area */
 	else if ((which == MBV_AREALENGTH_DOWN || which == MBV_AREALENGTH_MOVE) && data->area_type == MBV_AREA_NONE) {
 		/* look for point */
+  	bool found = false;
+  	double xgrid, ygrid;
+  	double xlon, ylat, zdata;
+  	double xdisplay, ydisplay, zdisplay;
 		mbview_findpoint(instance, xpixel, ypixel, &found, &xgrid, &ygrid, &xlon, &ylat, &zdata, &xdisplay, &ydisplay, &zdisplay);
 
 		/* use any good point */
@@ -1553,6 +1564,10 @@ int mbview_area(size_t instance, int which, int xpixel, int ypixel) {
 	/* deal with definition or change of first endpoint */
 	else if (which == MBV_AREALENGTH_MOVE && data->area_pickendpoint == MBV_AREA_PICKENDPOINT0) {
 		/* look for point */
+  	bool found = false;
+  	double xgrid, ygrid;
+  	double xlon, ylat, zdata;
+  	double xdisplay, ydisplay, zdisplay;
 		mbview_findpoint(instance, xpixel, ypixel, &found, &xgrid, &ygrid, &xlon, &ylat, &zdata, &xdisplay, &ydisplay, &zdisplay);
 
 		/* ignore an identical pair of points */
@@ -1584,6 +1599,10 @@ int mbview_area(size_t instance, int which, int xpixel, int ypixel) {
 	/* deal with definition or change of second endpoint */
 	else if (which == MBV_AREALENGTH_MOVE && data->area_pickendpoint == MBV_AREA_PICKENDPOINT1) {
 		/* look for point */
+  	bool found = false;
+  	double xgrid, ygrid;
+  	double xlon, ylat, zdata;
+  	double xdisplay, ydisplay, zdisplay;
 		mbview_findpoint(instance, xpixel, ypixel, &found, &xgrid, &ygrid, &xlon, &ylat, &zdata, &xdisplay, &ydisplay, &zdisplay);
 
 		/* ignore an identical pair of points */
@@ -1666,7 +1685,7 @@ int mbview_area(size_t instance, int which, int xpixel, int ypixel) {
 					    data->area.segments[i].endpoints[j].ydisplay, data->area.segments[i].endpoints[j].zdisplay,
 					    &(data->area.segments[i].endpoints[j].xlon), &(data->area.segments[i].endpoints[j].ylat),
 					    &(data->area.segments[i].endpoints[j].xgrid), &(data->area.segments[i].endpoints[j].ygrid));
-					int ok;
+					bool ok;
 					mbview_getzdata(instance, data->area.segments[i].endpoints[j].xgrid,
 					                data->area.segments[i].endpoints[j].ygrid, &ok, &(data->area.segments[i].endpoints[j].zdata));
 					if (!ok && ((i == 0) || (i == 1 && j == 0) || (i == 3 && j == 1)))
@@ -1770,7 +1789,7 @@ int mbview_area(size_t instance, int which, int xpixel, int ypixel) {
 			/* now project the segment endpoints */
 			for (int i = 0; i < 4; i++) {
 				for (int j = 0; j < 2; j++) {
-					int ok;
+					bool ok;
 					mbview_getzdata(instance, data->area.segments[i].endpoints[j].xgrid,
 					                data->area.segments[i].endpoints[j].ygrid, &ok, &(data->area.segments[i].endpoints[j].zdata));
 					if (!ok && ((i == 0) || (i == 1 && j == 0) || (i == 3 && j == 1)))

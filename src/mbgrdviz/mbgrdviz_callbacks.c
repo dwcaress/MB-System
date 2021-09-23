@@ -170,7 +170,7 @@ int do_mbgrdviz_savedegdecmin(size_t instance, char *output_file_ptr);
 int do_mbgrdviz_savelnw(size_t instance, char *output_file_ptr);
 int do_mbgrdviz_savegreenseayml(size_t instance, char *output_file_ptr);
 int do_mbgrdviz_saveprofile(size_t instance, char *output_file_ptr);
-int do_mbgrdviz_opennav(size_t instance, int swathbounds, char *input_file_ptr);
+int do_mbgrdviz_opennav(size_t instance, bool swathbounds, char *input_file_ptr);
 int do_mbgrdviz_readnav(size_t instance, char *swathfile, int pathstatus, char *pathraw, char *pathprocessed, int format,
                         int formatorg, double weight, int *error);
 int do_mbgrdviz_readgrd(size_t instance, char *grdfile, int *grid_projection_mode, char *grid_projection_id, float *nodatavalue,
@@ -2051,11 +2051,6 @@ int do_mbgrdviz_savesite(size_t instance, char *output_file_ptr) {
   mb_path *sitename;
   int i;
 
-  /* time, user, host variables */
-  time_t right_now;
-  char date[32], *user_ptr, host[MB_PATH_MAXLINE];
-  char *unknown = "Unknown";
-
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -2109,14 +2104,9 @@ int do_mbgrdviz_savesite(size_t instance, char *output_file_ptr) {
         fprintf(sfp, "## Site File Version %s\n", MBGRDVIZ_SITE_VERSION);
         fprintf(sfp, "## Output by Program %s\n", program_name);
         fprintf(sfp, "## MB-System Version %s\n", MB_VERSION);
-        right_now = time((time_t *)0);
-        strcpy(date, ctime(&right_now));
-        date[strlen(date) - 1] = '\0';
-        if ((user_ptr = getenv("USER")) == NULL)
-          if ((user_ptr = getenv("LOGNAME")) == NULL)
-            user_ptr = unknown;
-        gethostname(host, MB_PATH_MAXLINE);
-        fprintf(sfp, "## Run by user <%s> on cpu <%s> at <%s>\n", user_ptr, host, date);
+        char user[256], host[256], date[32];
+        status = mb_user_host_date(verbose, user, host, date, &error);
+        fprintf(sfp, "## Run by user <%s> on cpu <%s> at <%s>\n", user, host, date);
         fprintf(sfp, "## Number of sites: %d\n", nsite);
 
         /* loop over the sites */
@@ -2219,13 +2209,8 @@ int do_mbgrdviz_savesitewpt(size_t instance, char *output_file_ptr) {
         fprintf(sfp, "## Site File Version %s\n", MBGRDVIZ_SITE_VERSION);
         fprintf(sfp, "## Output by Program %s\n", program_name);
         fprintf(sfp, "## MB-System Version %s\n", MB_VERSION);
-        right_now = time((time_t *)0);
-        strcpy(date, ctime(&right_now));
-        date[strlen(date) - 1] = '\0';
-        if ((user_ptr = getenv("USER")) == NULL)
-          if ((user_ptr = getenv("LOGNAME")) == NULL)
-            user_ptr = unknown;
-        gethostname(host, MB_PATH_MAXLINE);
+        char user[256], host[256], date[32];
+        status = mb_user_host_date(verbose, user, host, date, &error);
         fprintf(sfp, "## Run by user <%s> on cpu <%s> at <%s>\n", user_ptr, host, date);
         fprintf(sfp, "## Number of sites: %d\n", nsite);
 
@@ -2420,7 +2405,7 @@ int do_mbgrdviz_saveroute(size_t instance, char *output_file_ptr) {
   int routecolor;
   int routesize;
   mb_path routename;
-  int selected;  // TODO(schwehr): bool
+  bool selected;
   int iroute, j;
 
   /* time, user, host variables */
@@ -2461,13 +2446,8 @@ int do_mbgrdviz_saveroute(size_t instance, char *output_file_ptr) {
         fprintf(sfp, "## Route File Version %s\n", MBGRDVIZ_ROUTE_VERSION);
         fprintf(sfp, "## Output by Program %s\n", program_name);
         fprintf(sfp, "## MB-System Version %s\n", MB_VERSION);
-        right_now = time((time_t *)0);
-        strcpy(date, ctime(&right_now));
-        date[strlen(date) - 1] = '\0';
-        if ((user_ptr = getenv("USER")) == NULL)
-          if ((user_ptr = getenv("LOGNAME")) == NULL)
-            user_ptr = unknown;
-        gethostname(host, MB_PATH_MAXLINE);
+        char user[256], host[256], date[32];
+        status = mb_user_host_date(verbose, user, host, date, &error);
         fprintf(sfp, "## Run by user <%s> on cpu <%s> at <%s>\n", user_ptr, host, date);
         fprintf(sfp, "## Number of routes: %d\n", nroutewrite);
         fprintf(sfp, "## Route point format:\n");
@@ -2604,7 +2584,7 @@ int do_mbgrdviz_saverisiscript(size_t instance, char *output_file_ptr) {
   int routecolor;
   int routesize;
   mb_path routename;
-  int selected;
+  bool selected;
   int iroute, j;
   bool projection_initialized = false;
   double lon_origin, lat_origin;
@@ -2655,13 +2635,8 @@ int do_mbgrdviz_saverisiscript(size_t instance, char *output_file_ptr) {
         fprintf(sfp, "## Risi Script Version %s\r\n", MBGRDVIZ_RISISCRIPT_VERSION);
         fprintf(sfp, "## Output by Program %s\r\n", program_name);
         fprintf(sfp, "## MB-System Version %s\r\n", MB_VERSION);
-        right_now = time((time_t *)0);
-        strcpy(date, ctime(&right_now));
-        date[strlen(date) - 1] = '\0';
-        if ((user_ptr = getenv("USER")) == NULL)
-          if ((user_ptr = getenv("LOGNAME")) == NULL)
-            user_ptr = unknown;
-        gethostname(host, MB_PATH_MAXLINE);
+        char user[256], host[256], date[32];
+        status = mb_user_host_date(verbose, user, host, date, &error);
         fprintf(sfp, "## Run by user <%s> on cpu <%s> at <%s>\r\n", user_ptr, host, date);
         fprintf(sfp, "## Number of routes: %d\r\n", nroutewrite);
         fprintf(sfp, "## Risi script format:\r\n");
@@ -3329,7 +3304,7 @@ int do_mbgrdviz_savegreenseayml(size_t instance, char *output_file_ptr) {
   int routecolor;
   int routesize;
   mb_path routename;
-  int selected;
+  bool selected;
   // char *error_message;
   // char projection_id[MB_PATH_MAXLINE];
   // void *pjptr = NULL;
@@ -3706,13 +3681,8 @@ int do_mbgrdviz_saveprofile(size_t instance, char *output_file_ptr) {
         fprintf(sfp, "## Profile File Version %s\n", MBGRDVIZ_PROFILE_VERSION);
         fprintf(sfp, "## Output by Program %s\n", program_name);
         fprintf(sfp, "## MB-System Version %s\n", MB_VERSION);
-        right_now = time((time_t *)0);
-        strcpy(date, ctime(&right_now));
-        date[strlen(date) - 1] = '\0';
-        if ((user_ptr = getenv("USER")) == NULL)
-          if ((user_ptr = getenv("LOGNAME")) == NULL)
-            user_ptr = unknown;
-        gethostname(host, MB_PATH_MAXLINE);
+        char user[256], host[256], date[32];
+        status = mb_user_host_date(verbose, user, host, date, &error);
         fprintf(sfp, "## Run by user <%s> on cpu <%s> at <%s>\n", user_ptr, host, date);
         fprintf(sfp, "## Number of profile points: %d\n", npoints);
         fprintf(sfp, "## Profile point format:\n");
@@ -3780,8 +3750,7 @@ int do_mbgrdviz_saveprofile(size_t instance, char *output_file_ptr) {
   return (status);
 }
 /*---------------------------------------------------------------------------------------*/
-// TODO(schwehr): bool swathbounds
-int do_mbgrdviz_opennav(size_t instance, int swathbounds, char *input_file_ptr) {
+int do_mbgrdviz_opennav(size_t instance, bool swathbounds, char *input_file_ptr) {
   int status = MB_SUCCESS;
   void *datalist;
   mb_path swathfile;
@@ -3932,7 +3901,7 @@ int do_mbgrdviz_readnav(size_t instance, char *swathfile, int pathstatus, char *
   int color;
   int size;
   mb_path name;
-  int swathbounds;
+  bool swathbounds;
   int line;
   int shot;
   int cdp;
@@ -5060,7 +5029,7 @@ void do_mbgrdviz_generate_survey(Widget w, XtPointer client_data, XtPointer call
   double dx, dy, r, dxuse, dyuse, dxd, dyd, dxextra, dyextra;
   double rrr[4], xxx, yyy;
   int iline, jendpoint;
-  int ok;  // TODO(schwehr): bool
+  bool ok;
   int startcorner, endcorner, jstart, kend;
   int nlines_alloc = 0;
   int i, j, k;

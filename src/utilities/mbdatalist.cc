@@ -20,6 +20,7 @@
  * Date:	October 10, 2001
  */
 
+#include <assert.h>
 #include <cmath>
 #include <cstdio>
 #include <cstdlib>
@@ -286,9 +287,10 @@ int main(int argc, char **argv) {
 
 	if (make_datalistp) {
 		/* figure out data format and fileroot if possible */
-		char fileroot[MB_PATH_MAXLINE];
+		char fileroot[MB_PATH_MAXLINE] = {0};
 		status = mb_get_format(verbose, read_file, fileroot, &format, &error);
-		char file[MB_PATH_MAXLINE];
+    assert(strlen(fileroot) < MB_PATH_MAXLINE - 6);
+    char file[MB_PATH_MAXLINE];
 		sprintf(file, "%sp.mb-1", fileroot);
 
 		FILE *fp = fopen(file, "w");
@@ -313,7 +315,7 @@ int main(int argc, char **argv) {
 
 	void *datalist;
 	double file_weight = 1.0;
-	char command[MB_PATH_MAXLINE];
+	mb_command command;
 	int nfile = 0;
 	int nparproblem;
 	int ndataproblem;
@@ -402,8 +404,8 @@ int main(int argc, char **argv) {
 							fprintf(output, "\t<Locked>");
 					}
 					if (locked && remove_locks) {
-						char file[MB_PATH_MAXLINE];
-						sprintf(lockfile, "%s.lck", file);
+            assert(strlen(read_file) < MB_PATH_MAXLINE - 4);
+						sprintf(lockfile, "%s.lck", read_file);
             remove(lockfile);
 					}
 				}
@@ -421,13 +423,13 @@ int main(int argc, char **argv) {
 			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
 			exit(MB_ERROR_OPEN_FAIL);
 		}
-		char file[MB_PATH_MAXLINE];
-		char dfile[MB_PATH_MAXLINE];
-		char dfilelast[MB_PATH_MAXLINE];
+		mb_path file;
+		mb_path dfile;
+		mb_path dfilelast;
 		while (mb_datalist_read(verbose, datalist, file, dfile, &format, &file_weight, &error) == MB_SUCCESS) {
 			nfile++;
-			char pwd[MB_PATH_MAXLINE];
-			/* char *bufptr = */ getcwd(pwd, MB_PATH_MAXLINE);
+			mb_path pwd;
+      assert(getcwd(pwd, MB_PATH_MAXLINE) != NULL);
 			mb_get_relative_path(verbose, file, pwd, &error);
 			mb_get_relative_path(verbose, dfile, pwd, &error);
 
@@ -538,6 +540,7 @@ int main(int argc, char **argv) {
 								fprintf(output, "\t<Locked>");
 						}
 						if (locked && remove_locks) {
+              assert(strlen(file) < MB_PATH_MAXLINE - 4);
 							sprintf(lockfile, "%s.lck", file);
 							fprintf(output, "\tRemoving lock file %s\n", lockfile);
               /* shellstatus = */ remove(lockfile);

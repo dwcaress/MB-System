@@ -1318,21 +1318,8 @@ int main(int argc, char **argv) {
     fprintf(outfile, "\";\n");
     fprintf(outfile, "\t:mbsystem_version = \"%s\";\n", MB_VERSION);
 
-    const time_t right_now = time((time_t *)0);
-    char date[32];
-    strcpy(date, ctime(&right_now));
-    date[strlen(date) - 1] = '\0';
-    char *user_ptr = (char *)getenv("USER");
-    if (user_ptr == nullptr)
-      user_ptr = (char *)getenv("LOGNAME");
-    char user[128];
-    if (user_ptr != nullptr)
-      strcpy(user, user_ptr);
-    else
-      strcpy(user, "unknown");
-    char host[128];
-    gethostname(host, 128);
-
+    char user[256], host[256], date[32];
+    status = mb_user_host_date(verbose, user, host, date, &error);
     fprintf(outfile, "\t:run = \"by <%s> on cpu <%s> at <%s>\";\n\n", user, host, date);
 
     /* get temporary output file for each variable */

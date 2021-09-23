@@ -638,11 +638,6 @@ void do_update_status() {
 	char *filestatus_fixedxy = "fixedxy";
 	char *filestatus_fixedz = "fixedz ";
 	char *filestatus_unknown = "unknown";
-	int n_tcrossing = 0;
-	int n_50crossing = 0;
-	int n_25crossing = 0;
-	int n_allcrossing = 0;
-	int n_tie = 0;
 	int j, k, kk;
 
 	/* set list_data */
@@ -734,59 +729,73 @@ void do_update_status() {
 		if (mbna_verbose > 0)
 			fprintf(stderr, "%s\n", string);
 		if (project.num_files > 0) {
-			/* count the number of blocks */
-			num_surveys = 0;
-			num_blocks = 0;
-			for (int i = 0; i < project.num_files; i++) {
-				file = &(project.files[i]);
-				if (file->block == num_surveys) {
-					num_surveys++;
-					num_blocks += num_surveys;
-				}
-			}
+			/* calculate the number of blocks */
+      num_blocks = project.num_surveys + (project.num_surveys * (project.num_surveys - 1) / 2);
 			xstr = (XmString *)malloc(num_blocks * sizeof(XmString));
-
+			int *survey1 = (int *)malloc(num_blocks * sizeof(int));
+			int *survey2 = (int *)malloc(num_blocks * sizeof(int));
+			int *n_tcrossing = (int *)malloc(num_blocks * sizeof(int));
+			int *n_50crossing = (int *)malloc(num_blocks * sizeof(int));
+			int *n_25crossing = (int *)malloc(num_blocks * sizeof(int));
+			int *n_allcrossing = (int *)malloc(num_blocks * sizeof(int));
+			int *n_tie = (int *)malloc(num_blocks * sizeof(int));
+      memset(survey1, 0, (num_blocks * sizeof(int)));
+      memset(survey2, 0, (num_blocks * sizeof(int)));
+      memset(n_tcrossing, 0, (num_blocks * sizeof(int)));
+      memset(n_50crossing, 0, (num_blocks * sizeof(int)));
+      memset(n_25crossing, 0, (num_blocks * sizeof(int)));
+      memset(n_allcrossing, 0, (num_blocks * sizeof(int)));
+      memset(n_tie, 0, (num_blocks * sizeof(int)));
+      int iblock = 0;
+      for (int isurvey2=0; isurvey2 < project.num_surveys; isurvey2++) {
+        for (int isurvey1 = 0; isurvey1 <= isurvey2; isurvey1++) {
+          survey1[iblock] = isurvey1;
+          survey2[iblock] = isurvey2;
+          iblock++;
+        }
+      }
 			/* generate list */
-			num_blocks = 0;
-			for (int i = 0; i < num_surveys; i++) {
-				for (j = 0; j <= i; j++) {
-					n_tcrossing = 0;
-					n_50crossing = 0;
-					n_25crossing = 0;
-					n_allcrossing = 0;
-					n_tie = 0;
-					for (k = 0; k < project.num_crossings; k++) {
-						crossing = &project.crossings[k];
-						if ((project.files[crossing->file_id_1].block == i && project.files[crossing->file_id_2].block == j) ||
-						    (project.files[crossing->file_id_2].block == i && project.files[crossing->file_id_1].block == j)) {
-							if (crossing->truecrossing)
-								n_tcrossing++;
-							if (crossing->overlap >= 50)
-								n_50crossing++;
-							if (crossing->overlap >= 25)
-								n_25crossing++;
-							n_allcrossing++;
-							n_tie += crossing->num_ties;
-						}
-					}
-					sprintf(string, "block %4.4d: Survey %2.2d vs Survey %2.2d : Crossings: %4d %4d %4d %4d : Ties: %4d",
-					        num_blocks, j, i, n_tcrossing, n_50crossing, n_25crossing, n_allcrossing, n_tie);
-					xstr[num_blocks] = XmStringCreateLocalized(string);
-					if (mbna_verbose > 0)
-						fprintf(stderr, "%s\n", string);
-					num_blocks++;
-				}
-			}
+			for (k = 0; k < project.num_crossings; k++) {
+				crossing = &project.crossings[k];
+        int iblock = project.files[crossing->file_id_1].block
+                  + (project.files[crossing->file_id_2].block * (project.files[crossing->file_id_2].block + 1) / 2);
+        if (crossing->truecrossing)
+					n_tcrossing[iblock]++;
+				if (crossing->overlap >= 50)
+					n_50crossing[iblock]++;
+				if (crossing->overlap >= 25)
+					n_25crossing[iblock]++;
+				n_allcrossing[iblock]++;
+				n_tie[iblock] += crossing->num_ties;
+      }
+
+      for (int iblock=0; iblock < num_blocks; iblock++) {
+  			sprintf(string, "block %4.4d: Survey %2.2d vs Survey %2.2d : Crossings: %4d %4d %4d %4d : Ties: %4d",
+  			        iblock, survey1[iblock], survey2[iblock],
+                n_tcrossing[iblock], n_50crossing[iblock], n_25crossing[iblock],
+                n_allcrossing[iblock], n_tie[iblock]);
+  			xstr[iblock] = XmStringCreateLocalized(string);
+  			if (mbna_verbose > 0)
+  				fprintf(stderr, "%s\n", string);
+      }
+
 			XmListAddItems(list_data, xstr, num_blocks, 0);
-			for (int i = 0; i < num_surveys; i++) {
-				XmStringFree(xstr[i]);
+			for (int iblock = 0; iblock < num_blocks; iblock++) {
+				XmStringFree(xstr[iblock]);
 			}
 			free(xstr);
-		}
-		if (mbna_block_select != MBNA_SELECT_NONE) {
-			XmListSelectPos(list_data, mbna_block_select + 1, 0);
-			XmListSetPos(list_data, MAX(mbna_block_select + 1 - 5, 1));
-		}
+      free(survey1);
+      free(survey2);
+      free(n_tcrossing);
+      free(n_50crossing);
+      free(n_25crossing);
+      free(n_allcrossing);
+      free(n_tie);
+  		if (mbna_block_select != MBNA_SELECT_NONE) {
+  			XmListSelectPos(list_data, mbna_block_select + 1, 0);
+  			XmListSetPos(list_data, MAX(mbna_block_select + 1 - 5, 1));
+  		}
+    }
 	}
 	else if (mbna_view_list == MBNA_VIEW_LIST_FILES) {
 		if (mbna_view_mode == MBNA_VIEW_MODE_ALL)
@@ -2387,7 +2396,7 @@ void do_list_data_select(Widget w, XtPointer client_data, XtPointer call_data) {
 				}
 			}
 			// fprintf(stderr,"mbna_survey_select:%d:%d:%d\n",mbna_survey_select,mbna_file_select,mbna_section_select);
-            project.modelplot_uptodate = false;
+      project.modelplot_uptodate = false;
 		}
 		else if (mbna_view_list == MBNA_VIEW_LIST_BLOCKS) {
 			mbna_block_select = position_list[0] - 1;
@@ -2407,7 +2416,7 @@ void do_list_data_select(Widget w, XtPointer client_data, XtPointer call_data) {
 				}
 			}
 			// fprintf(stderr,"mbna_block_select:%d:%d:%d\n",mbna_block_select,mbna_block_select1,mbna_block_select2);
-            project.modelplot_uptodate = false;
+      project.modelplot_uptodate = false;
 		}
 		else if (mbna_view_list == MBNA_VIEW_LIST_FILES) {
 			num_files = 0;
@@ -2428,7 +2437,7 @@ void do_list_data_select(Widget w, XtPointer client_data, XtPointer call_data) {
 					num_files++;
 				}
 			}
-            project.modelplot_uptodate = false;
+      project.modelplot_uptodate = false;
 		}
 		else if (mbna_view_list == MBNA_VIEW_LIST_FILESECTIONS) {
 			/* get selected section from list */
@@ -5541,20 +5550,9 @@ int do_info_add(char *info, int timetag) {
 
 	/* put time tag in if requested */
 	if (timetag) {
-		time_t right_now = time((time_t *)0);
-		char date[32];
-		strcpy(date, ctime(&right_now));
-		date[strlen(date) - 1] = '\0';
-		const char *user_ptr = getenv("USER");
-		if (user_ptr == NULL)
-			user_ptr = getenv("LOGNAME");
-		char user[128];
-		if (user_ptr != NULL)
-			strcpy(user, user_ptr);
-		else
-			strcpy(user, "unknown");
-		char host[128];
-		gethostname(host, 128);
+	  int error = MB_ERROR_NO_ERROR;
+    char user[256], host[256], date[32];
+    int status = mb_user_host_date(mbna_verbose, user, host, date, &error);
 		char tag[STRING_MAX];
 		sprintf(tag, " > User <%s> on cpu <%s> at <%s>\n", user, host, date);
 		pos = XmTextGetLastPosition(text_messages);
