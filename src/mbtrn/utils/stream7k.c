@@ -165,6 +165,9 @@ typedef struct app_cfg_s{
     /// @var app_cfg_s::cycles
     /// @brief number of cycles
     int cycles;
+    /// @var app_cfg_s::id
+    /// @brief reader id
+    r7k_device_t dev;
 }app_cfg_t;
 
 static void s_show_help();
@@ -193,6 +196,7 @@ static void s_show_help()
     "  --verbose=n : verbose output\n"
     "  --host      : reson host name or IP address\n"
     "  --cycles    : number of cycles (dfl 0 - until CTRL-C)\n"
+    "  --dev=s     : device [e.g. T50, 7125_400]\n"
     "\n";
     printf("%s",help_message);
     printf("%s",usage_message);
@@ -219,6 +223,7 @@ void parse_args(int argc, char **argv, app_cfg_t *cfg)
         {"version", no_argument, NULL, 0},
         {"host", required_argument, NULL, 0},
         {"cycles", required_argument, NULL, 0},
+        {"dev", required_argument, NULL, 0},
         {NULL, 0, NULL, 0}};
 
     // process argument list 
@@ -249,6 +254,13 @@ void parse_args(int argc, char **argv, app_cfg_t *cfg)
                 else if (strcmp("cycles", options[option_index].name) == 0) {
                     sscanf(optarg,"%d",&cfg->cycles);
                 }
+                // dev
+                else if (strcmp("dev", options[option_index].name) == 0) {
+                    r7k_device_t test = R7KC_DEV_INVALID;
+                    if( (test=r7k_parse_devid(optarg)) != R7KC_DEV_INVALID){
+                        cfg->dev = test;
+                    }
+                }
                 break;
             default:
                 help=true;
@@ -276,24 +288,32 @@ void parse_args(int argc, char **argv, app_cfg_t *cfg)
 
     switch (cfg->verbose) {
         case 0:
-            mmd_channel_set(MOD_S7K,0);
+            mmd_channel_set(MOD_F7K,0);
             mmd_channel_set(MOD_R7K,0);
             mmd_channel_set(MOD_R7KR,0);
             mmd_channel_set(MOD_MSOCK,0);
             break;
         case 1:
-            mmd_channel_en(MOD_S7K,S7K_V1);
-            mmd_channel_en(MOD_S7K,MM_DEBUG);
+            mmd_channel_en(MOD_F7K,S7K_V1);
+            mmd_channel_en(MOD_F7K,MM_DEBUG);
             break;
         case 2:
-            mmd_channel_en(MOD_S7K,S7K_V1);
-            mmd_channel_en(MOD_S7K,S7K_V2);
-            mmd_channel_en(MOD_S7K,MM_DEBUG);
+            mmd_channel_en(MOD_F7K,S7K_V1);
+            mmd_channel_en(MOD_F7K,S7K_V2);
+            mmd_channel_en(MOD_F7K,MM_DEBUG);
             mmd_channel_en(MOD_MSOCK,MM_DEBUG);
             mmd_channel_en(MOD_R7K,MM_DEBUG);
             mmd_channel_en(MOD_R7KR,MM_DEBUG);
             break;
         default:
+            if(cfg->verbose>2){
+                mmd_channel_en(MOD_F7K,S7K_V1);
+                mmd_channel_en(MOD_F7K,S7K_V2);
+                mmd_channel_en(MOD_F7K,MM_DEBUG);
+                mmd_channel_en(MOD_MSOCK,MM_DEBUG);
+                mmd_channel_en(MOD_R7K,MM_DEBUG|R7K_V2);
+                mmd_channel_en(MOD_R7KR,MM_DEBUG);
+            }
             break;
 	}
 }
@@ -309,7 +329,7 @@ static void s_termination_handler (int signum)
         case SIGINT:
         case SIGHUP:
         case SIGTERM:
-            PMPRINT(MOD_S7K,S7K_V2,(stderr,"received sig[%d]\n",signum));
+            PMPRINT(MOD_F7K,S7K_V2,(stderr,"received sig[%d]\n",signum));
             g_stop_flag=true;
             break;
         default:
@@ -339,37 +359,43 @@ static int s_app_main (app_cfg_t *cfg)
         while (!g_stop_flag) {
             s = msock_socket_new(cfg->host, R7K_7KCENTER_PORT, ST_TCP);
             if (NULL != s) {
-                PMPRINT(MOD_S7K,S7K_V1,(stderr,"connecting [%s]\n",cfg->host));
+                PMPRINT(MOD_F7K,S7K_V1,(stderr,"connecting host[%s] dev[%d]\n",cfg->host,cfg->dev));
                 if (msock_connect(s)==0) {
-                    
-                    if(r7k_subscribe(s, subs, nsubs)==0){
+                    s->status=SS_CONNECTED;
+
+                    if(mmd_channel_isset(MOD_R7KR,MM_DEBUG)){
+                        PMPRINT(MOD_R7KR,MM_DEBUG,(stderr,"requesting 7k device config data"));
+                        r7k_req_config(s);
+                    }
+
+                    if(r7k_subscribe(s, cfg->dev, subs, nsubs)==0){
                         int test=msock_set_blocking(s,true);
-                        PMPRINT(MOD_S7K,S7K_V1,(stderr,"set_blocking ret[%d]\n",test));
-                        PMPRINT(MOD_S7K,S7K_V1,(stderr,"subscribing [%u]\n",nsubs));
-                        PMPRINT(MOD_S7K,S7K_V1,(stderr,"streaming c[%d]\n",cfg->cycles));
+                        PMPRINT(MOD_F7K,S7K_V1,(stderr,"set_blocking ret[%d]\n",test));
+                        PMPRINT(MOD_F7K,S7K_V1,(stderr,"subscribing [%u]\n",nsubs));
+                        PMPRINT(MOD_F7K,S7K_V1,(stderr,"streaming c[%d]\n",cfg->cycles));
                         r7k_stream_show(s,1024, 350, cfg->cycles,&g_stop_flag);
                         cycle_count++;
                     }else{
-                        PMPRINT(MOD_S7K,S7K_V1,(stderr,"subscribe failed [%d/%s]\n",me_errno,strerror(me_errno)));
+                        PMPRINT(MOD_F7K,S7K_V1,(stderr,"subscribe failed [%d/%s]\n",me_errno,strerror(me_errno)));
                     }
                 }else{
-                    PMPRINT(MOD_S7K,S7K_V1,(stderr,"connect failed [%d/%s]\n",me_errno,strerror(me_errno)));
+                    PMPRINT(MOD_F7K,S7K_V1,(stderr,"connect failed [%d/%s]\n",me_errno,strerror(me_errno)));
                 }
             }else{
-                PMPRINT(MOD_S7K,S7K_V1,(stderr,"msock_socket_new failed [%d/%s]\n",me_errno,strerror(me_errno)));
+                PMPRINT(MOD_F7K,S7K_V1,(stderr,"msock_socket_new failed [%d/%s]\n",me_errno,strerror(me_errno)));
             }
             if (cfg->cycles>0 && (cycle_count>=cfg->cycles)) {
                 g_stop_flag=true;
             }else{
                 if (!g_stop_flag) {
-                    PMPRINT(MOD_S7K,S7K_V1,(stderr,"retrying connection in 5 s\n"));
+                    PMPRINT(MOD_F7K,S7K_V1,(stderr,"retrying connection in 5 s\n"));
                     msock_socket_destroy(&s);
                     sleep(5);
                 }
             }
         }
         if (g_stop_flag) {
-            PMPRINT(MOD_S7K,S7K_V2,(stderr,"stop flag set\n"));
+            PMPRINT(MOD_F7K,S7K_V2,(stderr,"stop flag set\n"));
         }
     }// else invalid argument
     return retval;
@@ -396,7 +422,7 @@ int main(int argc, char **argv)
     saStruct.sa_handler = s_termination_handler;
     sigaction(SIGINT, &saStruct, NULL);
 
-    app_cfg_t cfg_s = {true,strdup(RESON_HOST_DFL),0};
+    app_cfg_t cfg_s = {true,strdup(RESON_HOST_DFL),0,R7KC_DEV_7125_400KHZ};
     app_cfg_t *cfg = &cfg_s;
     
     // parse command line options

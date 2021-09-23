@@ -62,14 +62,10 @@ void DataLogReader::readHeader()
     mnem = type = format = lname = units = NULL;
 
     // Read a line
-    char *result = fgets(buffer, sizeof(buffer), fileStream());
+    fgets(buffer, sizeof(buffer), fileStream());
 
-    if (result == NULL)
-      // EOF before entire header read and parsed, set parseError
-      parseError = True;
-      continue;
 
-    if (buffer[strlen(buffer)-1] == '\n')
+    if (buffer[strlen(buffer)-1] == '\n') 
       // Strip off trailing newlien
       buffer[strlen(buffer)-1] = '\0';
 
@@ -77,7 +73,7 @@ void DataLogReader::readHeader()
 
     token = strtok(buffer, DEL_BY_WHTSPC);
 
-    if (token == 0)
+    if (token == 0) 
       // Blank line; skip it
       continue;
 
@@ -88,40 +84,40 @@ void DataLogReader::readHeader()
     }
 
     switch (state) {
-
+      
     case ReadFormat:
 
       // Read file format mnemonic
       token = strtok(0, DEL_BY_WHTSPC);
       if (token == 0) {
-      	// No token? Parse error
-      	parseError = True;
-      	continue;
+	// No token? Parse error
+	parseError = True;
+	continue;
       }
 
       if (!strcmp(token, AsciiFormatMnem)) {
-      	_fileFormat = AsciiFormat;
-      	_logFile = new AsciiFile(fileStream());
+	_fileFormat = AsciiFormat;
+	_logFile = new AsciiFile(fileStream());
       }
       else if (!strcmp(token, BinaryFormatMnem)) {
-      	_fileFormat = BinaryFormat;
-      	_logFile = new BinaryFile(fileStream());
+	_fileFormat = BinaryFormat;
+	_logFile = new BinaryFile(fileStream());
       }
       else {
-      	_fileFormat = UnknownFormat;
-      	snprintf(errorBuf, sizeof(errorBuf),
-      		"DataLogReader::readHeader() - Unknown file format \"%s\"",
-      		token);
+	_fileFormat = UnknownFormat;
+	snprintf(errorBuf, sizeof(errorBuf), 
+		"DataLogReader::readHeader() - Unknown file format \"%s\"",
+		token);
 
-      	throw Exception(errorBuf);
+	throw Exception(errorBuf);
       }
 
       // Read object name
       token = strtok(0, DEL_BY_WHTSPC);
       if (token == 0) {
-      	// No token? Parse error
-      	parseError = True;
-      	continue;
+	// No token? Parse error
+	parseError = True;
+	continue;
       }
       setName(token);
       setMnemonic(token);
@@ -140,7 +136,7 @@ void DataLogReader::readHeader()
       // retained default values (e.g., format = %8.8e)
       // Now, extract all the tokens in one step,
       // then create the field with the tokens.
-      //
+      // 
       const char Type=1, Mnem=2, Format=3, LName=4, Units=5, Done=6;
       char *type, *mnem, *format, *lname, *units;
       char *tokenDelimiter = DEL_BY_WHTSPC;
@@ -161,7 +157,7 @@ void DataLogReader::readHeader()
         //     :
         //   else
         //     default stuff
-        //
+        //     
         if (nTokens == 0)
         {
           // This should be "#"
@@ -202,7 +198,7 @@ void DataLogReader::readHeader()
           //field->setUnits(token);
         }
         else
-        {
+        { 
           parseError = True;
         }
       }
@@ -235,7 +231,7 @@ void DataLogReader::readHeader()
 
   if (parseError) {
     const char *ns = "(NULL)";
-    snprintf(errorBuf,  sizeof(errorBuf),
+    snprintf(errorBuf,  sizeof(errorBuf), 
             "DataLogReader::readHeader() parse error %s %s %s %s %s",
             (type   != NULL ? type   : ns), (mnem  !=NULL ? mnem  : ns),
             (format != NULL ? format : ns), (lname !=NULL ? lname : ns),
@@ -261,7 +257,7 @@ int DataLogReader::read()
     if (field != NULL) field->read(_logFile);
     else
     {
-      snprintf(errorBuf,  sizeof(errorBuf),
+      snprintf(errorBuf,  sizeof(errorBuf), 
                "DataLogReader::read() expected field %d where none was found",
                i);
       throw Exception(errorBuf);
@@ -305,3 +301,7 @@ void DataLogReader::print()
     return;
   }
 }
+
+
+
+

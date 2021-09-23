@@ -206,8 +206,15 @@ int r7kr_reader_connect(r7kr_reader_t *self, bool replace_socket)
         PMPRINT(MOD_R7KR,MM_DEBUG,(stderr,"connecting to 7k center [%s]\n",self->sockif->addr->host));
         if(msock_connect(self->sockif)==0){
             self->state=R7KR_CONNECTED;
+            self->sockif->status=SS_CONNECTED;
+
+            if(mmd_channel_isset(MOD_R7KR,MM_DEBUG)){
+            PMPRINT(MOD_R7KR,MM_DEBUG,(stderr,"requesting 7k device config data"));
+            r7k_req_config(r7kr_reader_sockif(self));
+            }
+
             PMPRINT(MOD_R7KR,MM_DEBUG,(stderr,"subscribing to 7k center [%s]\n",self->sockif->addr->host));
-            if (r7k_subscribe(r7kr_reader_sockif(self),self->sub_list,self->sub_count)==0) {
+            if (r7k_subscribe(r7kr_reader_sockif(self), self->device, self->sub_list, self->sub_count)==0) {
                 self->state=R7KR_SUBSCRIBED;
                 retval=0;
             }else{
@@ -234,7 +241,7 @@ int r7kr_reader_connect(r7kr_reader_t *self, bool replace_socket)
 /// @param[in] slist 7k center message subscription list
 /// @param[in] slist_len length of subscription list
 /// @return new reson reader reference on success, NULL otherwise
-r7kr_reader_t *r7kr_reader_new(const char *host, int port, uint32_t capacity, uint32_t *slist,  uint32_t slist_len)
+r7kr_reader_t *r7kr_reader_new(r7k_device_t device, const char *host, int port, uint32_t capacity, uint32_t *slist,  uint32_t slist_len)
 {
     r7kr_reader_t *self = (r7kr_reader_t *)malloc(sizeof(r7kr_reader_t));
     if (NULL != self) {
@@ -250,9 +257,11 @@ r7kr_reader_t *r7kr_reader_new(const char *host, int port, uint32_t capacity, ui
         self->log_id=MLOG_ID_INVALID;
         self->logstream=NULL;
         self->state=R7KR_INITIALIZED;
+        self->device=device;
 
         if (NULL != self->sockif) {
             r7kr_reader_connect(self, false);
+            if(me_errno != ME_OK)fprintf(stderr,"connect error (%s)\n",me_strerror(me_errno));
         }else{
             self->state=ME_ECREATE;
         }
@@ -641,6 +650,11 @@ int64_t r7kr_read_nf(r7kr_reader_t *self, byte *dest, uint32_t len,
         // read and validate header
         while (state != R7KR_STATE_NF_VALID ) {
 
+            if(errno==EINTR){
+                // quit on user interrupt
+                break;
+            }
+
             switch (state) {
 
                 case R7KR_STATE_START:
@@ -751,7 +765,11 @@ int64_t r7kr_read_nf(r7kr_reader_t *self, byte *dest, uint32_t len,
                             MST_COUNTER_INC(self->stats->events[R7KR_EV_ENFREAD]);
                             break;
                         }
-                    }// else incomplete read
+                   }// else incomplete read
+                    if(errno==EINTR){
+                        // quit on user interrupt
+                        break;
+                    }
 
                     if ( state!=R7KR_STATE_READ_OK && ((pbuf+read_len-dest) > (int32_t)len) ) {
                         state=R7KR_STATE_READ_ERR;
@@ -1890,7 +1908,7 @@ int r7kr_test(int argc, char **argv)
     // initialize reader
     // create and open socket connection
 
-    r7kr_reader_t *reader = r7kr_reader_new(host,port,MAX_FRAME_BYTES_7K, subs, nsubs);
+    r7kr_reader_t *reader = r7kr_reader_new(R7KC_DEV_7125_400KHZ, host,port,MAX_FRAME_BYTES_7K, subs, nsubs);
 
     // show reader config
     if(verbose>1)

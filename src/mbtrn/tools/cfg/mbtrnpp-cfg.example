@@ -70,6 +70,18 @@ format=88
 // cartographic(?) projection ID
 #projection=
 
+// opt "trn_" [char*]
+// sonar mnemonic mapped to
+// 7K Center device ID and system enumerator
+// during message subcription.
+// - Default set using mbtrnpp.c:CFG_TRN_DEV_DFL
+// - Affects only reson sonars
+// Valid values:
+//  7125_200 : Seabat 7125 200 kHz
+//  7125_400 : Seabat 7125 400 kHz
+//  T50      : T50-S, T50-R
+#trn-dev=T50
+
 // opt "mbhbn" [int]
 // MB1 server heartbeat modulus
 // (timeout preferred, use mbhbt)
