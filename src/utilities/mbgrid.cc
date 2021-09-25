@@ -562,16 +562,18 @@ int main(int argc, char **argv) {
         }
         else {
           int tmp;
-          sscanf(optarg, "%d", &tmp);
+          int nscan = sscanf(optarg, "%d", &tmp);
           // Range check
-          if (tmp >= 1 && tmp <= 4) {
+          if (nscan == 1 && tmp >= 1 && tmp <= 4) {
             gridkind = (grid_type_t)tmp;
             if (gridkind == MBGRID_CDFGRD) {
               gridkind = MBGRID_GMTGRD;
               gridkindstring[0] = '\0';
             }
-          } else if (tmp >= MBGRID_GMTGRD && tmp <= MBGRID_GMTGRD + 11) {
-            sprintf(gridkindstring, "=%d", (gridkind - 100));
+          } else if (optarg[0] == 'n' || optarg[0] == 'c' || optarg[0] == 'b'
+                    || optarg[0] == 'r' || optarg[0] == 's' || optarg[0] == 'a'
+                    || optarg[0] == 'e' || optarg[0] == 'g'){
+            sprintf(gridkindstring, "=%s", optarg);
             gridkind = MBGRID_GMTGRD;
           } else {
             fprintf(stdout, "Invalid gridkind option: -G%s\n\n", optarg);
