@@ -159,6 +159,12 @@ const char *me_strerror(int merrno)
         case ME_ENOMEM:
             retval="ENOMEM";
             break;
+        case ME_ERECV:
+            retval="ERECV";
+            break;
+        case ME_ESUB:
+            retval="ESUB";
+            break;
         default:
             if (NULL != me_strerror_ext) {
                 retval = (*me_strerror_ext)(merrno);

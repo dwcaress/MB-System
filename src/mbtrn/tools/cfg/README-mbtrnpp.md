@@ -187,6 +187,7 @@ The annotated example configuration file in MB-System ```src/mbtrn/tools/mbtrnpp
 | delay=\<s\>                  | MB-1 processing loop delay (s)                                |  0 | |
 | statsec=\<s\>                | TRN profiling logging interval (s)                            | 30 | |
 | trn-en=\<bool\>              | enable/disable TRN processing                                 |  Y | use Y/1: enable N/0: disable |
+| trn-dev=\<char\*\>              | specify sonar (reson only)                                 |  see Note [6]   |
 | trn-utm=\<n\>                | UTM zone for TRN processing (int, 1-60)                       |  9 | 9:axial 10:monterey bay      |
 | trn-map=\<path\>             | TRN server map file path                                      | /home/mappingauv/maps/AxialTiles  | required for TRN processing; may be a directory path for tiled map |
 | trn-cfg=\<path\>             | TRN configuration file                                        | TRN_DATAFILES/mappingAUV_specs.cfg| required for TRN processing|
@@ -265,6 +266,22 @@ The annotated example configuration file in MB-System ```src/mbtrn/tools/mbtrnpp
    <group> may be specified using mnemonic TRN_GROUP
 e.g.
   trn-out=trnsvr:TRN_HOST:28000,trnu,trnusvr:TRN_HOST:8000,trnumsvr:TRN_GROUP
+```
+
+[6] trn-dev sonar selection values
+```
+7125_200 - Seabat 7125 200 kHz
+7125_400 - Seabat 7125 400 kHz
+T50      - T50-S, T50-R
+
+The mnemonic is translated to a numeric ID that is passed into the reson reader, where it is 
+mapped to the correct device ID and system enumerator required for the subscription message.
+
+The mnemonic values and associated IDs are defined in r7kc.h
+The mbtrnpp default is set using mbtrnpp.c:OPT_TRN_DEV_DFL
+
+The option may be set for mbtrnpp and mbtrnpp.sh using --trn-dev
+The option may be set for frames7k and stream7k using --dev
 ```
 <div style="page-break-after: always">  </div>
 
@@ -477,13 +494,30 @@ fails. The issue may only appear initially and clear up on subsequent builds.
 
 *Note: undefined reference to PSL_... errors may occur during src/gmt build.*
 This appears to happen because gmt dependencies are generated configure using
-	gmt-config --libs 
-which returns 
-	-L/usr/local/lib -lgmt
-but doesn't include a dependency on libpostscriptlight
-A workaround is to include the necessary args in LDFLAGS passed to make
-make LDFLAGS="-no-undefined -L/usrlocal/lib -lpostscriptlight"
 
+```
+gmt-config --libs 
+```
+which returns 
+
+```
+-L/usr/local/lib -lgmt
+```
+but doesn't include a dependency on libpostscriptlight
+A workaround is to include the necessary args in LDFLAGS passed to make (AFTER mbtrn has built)
+
+```
+make LDFLAGS="-no-undefined -L/usrlocal/lib -lpostscriptlight"
+```
+This warning may be ignored
+```
+*** Warning: linker path does not have real file for library -lpostscriptlight.dll.a.
+*** I have the capability to make that library automatically link in when
+*** you link to this library.  But I can only do this if you have a
+*** shared version of the library, which you do not appear to have
+*** because I did check the linker path looking for a file starting
+*** with libpostscriptlight.dll.a but no candidates were found. (...for file magic test)
+```
 ----
 
 ----

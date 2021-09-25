@@ -89,10 +89,27 @@ GNU General Public License for more details
 
 // string buffer expansion increment
 #define R7K_STR_INC 256
-
+#define TRACKING_BYTES 16
 /////////////////////////
 // Declarations 
 /////////////////////////
+uint32_t g_ticket=0;
+byte g_tracking_number[TRACKING_BYTES]={0};
+
+void s_get_ticket(uint32_t *dest){
+    *dest = g_ticket++;
+}
+
+void s_get_tracking_number(byte *dest){
+    memcpy(dest,g_tracking_number,TRACKING_BYTES);
+    int i=TRACKING_BYTES;
+    bool stop=false;
+    for(i=0;i<TRACKING_BYTES && !stop;i++){
+        if(g_tracking_number[i]<0xFF)
+            stop=true;
+        g_tracking_number[i]++;
+    }
+}
 
 // define module IDs in mconfig.h
 
@@ -156,7 +173,203 @@ GNU General Public License for more details
 /// @param[in] records record subscription list
 /// @param[in] record_count sub list length
 /// @return 0 on success, -1 otherwise
-int r7k_subscribe(msock_socket_t *s, uint32_t *records, uint32_t record_count)
+int r7k_req_config(msock_socket_t *s)
+{
+    int retval=-1;
+
+    if (NULL != s ) {
+
+        size_t rth_len = sizeof(r7k_rth_7500_rc_t);
+        size_t rd_len = sizeof(r7k_reqrec_rd_t);
+
+        r7k_msg_t *msg = r7k_msg_new(rth_len+rd_len);
+
+        if (msg) {
+
+            // set NF fields
+            msg->nf->tx_id            = r7k_txid();
+            msg->nf->protocol_version = R7K_NF_PROTO_VER;
+            msg->nf->seq_number      = 0;
+            msg->nf->offset          = sizeof(r7k_nf_t);
+            msg->nf->packet_size     = R7K_MSG_NF_PACKET_SIZE(msg);
+            msg->nf->total_size      = R7K_MSG_NF_TOTAL_SIZE(msg);
+            msg->nf->dest_dev_id     = 0;
+            msg->nf->dest_enumerator = 0;
+            msg->nf->src_enumerator  = 0;
+            msg->nf->src_dev_id      = 0;
+
+            // set DRF fields
+            msg->drf->size           = R7K_MSG_DRF_SIZE(msg);
+            msg->drf->record_type_id = R7K_RT_REMCON;
+            msg->drf->device_id      = R7K_DEVID_7KCENTER;
+            msg->drf->sys_enumerator = R7K_DRF_SYS_ENUM_DFL;
+
+
+            // set record type header info
+            r7k_rth_7500_rc_t *prth =(r7k_rth_7500_rc_t *)(msg->data);
+            prth->remcon_id = R7K_RTID_REQ_REC;
+            s_get_ticket(&prth->ticket);
+            s_get_tracking_number(prth->tracking_number);
+            // set record data (record type only)
+            r7k_reqrec_rd_t *prdata = (r7k_reqrec_rd_t *)(msg->data+rth_len);
+            prdata->record_type = R7K_RT_CONFIG_DATA;
+
+            // set checksum [do last]
+            r7k_msg_set_checksum(msg);
+
+            // serialize, send
+            PMPRINT(MOD_R7K,MM_DEBUG,(stderr,"sending CONFIG_DATA request:\n"));
+            if(mmd_channel_isset(MOD_R7K,MM_ERR|MM_WARN|R7K_V2)){
+                r7k_msg_show(msg,true,3);
+            }
+            r7k_msg_send(s, msg);
+
+            // get ACK/NAK
+            r7k_msg_t *reply = NULL;
+            r7k_msg_receive(s, &reply, R7K_SUBSCRIBE_TIMEOUT_MS);
+
+            if(NULL!=reply){
+
+                // show ACK/NAK
+                char *rep_str="?";
+                if(reply->drf->record_type_id==R7K_RT_REMCON_ACK)
+                    rep_str="ACK";
+                if(reply->drf->record_type_id==R7K_RT_REMCON_NACK)
+                    rep_str="NACK";
+
+                PMPRINT(MOD_R7K,MM_DEBUG,(stderr,"CONFIG_DATA reply received %s [%p]:\n",rep_str,reply));
+                if(mmd_channel_isset(MOD_R7K,MM_ERR|MM_WARN|R7K_V2)){
+                    r7k_msg_show(reply,true,3);
+                }
+
+                if(reply->drf->record_type_id==R7K_RT_REMCON_ACK){
+                    // if ACK, read/show config data message
+                    PMPRINT(MOD_R7K,MM_DEBUG,(stderr,"CONFIG_DATA reading config data\n"));
+
+                    // release reply memory and reuse for config data
+                    r7k_msg_destroy(&reply);
+                    reply=NULL;
+                    int status = -1;
+
+                    if( (status=r7k_msg_receive(s, &reply, R7K_SUBSCRIBE_TIMEOUT_MS)) > 0 && NULL!=reply){
+                        PMPRINT(MOD_R7K,MM_DEBUG,(stderr,"CONFIG_DATA message received [%p/%d]:\n",reply,status));
+
+                        if(mmd_channel_isset(MOD_R7K,MM_ERR|MM_WARN|R7K_V2)){
+                            r7k_msg_show(reply,true,3);
+
+                            if(reply->drf->record_type_id==R7K_RT_CONFIG_DATA){
+
+                                r7k_rth_7001_rd_t *rdata = (r7k_rth_7001_rd_t *)reply->data;
+                                r7k_7001_dev_info_t *dev_inf = (r7k_7001_dev_info_t *)((byte *)reply->data+sizeof(r7k_rth_7001_rd_t));
+                                int indent=3;
+                                int wkey=15;
+                                int wval=8;
+
+                                PMPRINT(MOD_R7K,MM_DEBUG,(stderr,"%*s%*s %*"PRIu64"\n",indent," ",wkey,"sonar_sn",wval,rdata->sonar_sn));
+                                PMPRINT(MOD_R7K,MM_DEBUG,(stderr,"%*s%*s %*"PRIu32"\n\n",indent," ",wkey,"device_count",wval,rdata->device_count));
+
+                                int i=0;
+                                for(i=0;i<rdata->device_count;i++){
+                                    PMPRINT(MOD_R7K,MM_DEBUG,(stderr,"%*s%*s [%*d/%d] ***\n",indent," ",wkey,"*** Device",3,(i+1),rdata->device_count));
+                                    // fixed length device info header
+                                    PMPRINT(MOD_R7K,MM_DEBUG,(stderr,"%*s%*s %*"PRIu32"\n",indent," ",wkey,"unique_id",wval,dev_inf->unique_id));
+                                    PMPRINT(MOD_R7K,MM_DEBUG,(stderr,"%*s%*s %*s\n",indent," ",wkey,"desc",wval,dev_inf->desc));
+                                    PMPRINT(MOD_R7K,MM_DEBUG,(stderr,"%*s%*s %*"PRIu32"\n",indent," ",wkey,"alph_data",wval,dev_inf->alph_data_type));
+                                    PMPRINT(MOD_R7K,MM_DEBUG,(stderr,"%*s%*s %*"PRIu64"\n",indent," ",wkey,"serial_number",wval,dev_inf->serial_number));
+                                    PMPRINT(MOD_R7K,MM_DEBUG,(stderr,"%*s%*s %*"PRIu32"\n",indent," ",wkey,"info_bytes",wval,dev_inf->info_bytes));
+                                    // variable length device data XML
+                                    byte *pinfo = (byte *)(&dev_inf->info_bytes) + sizeof(uint32_t);
+                                    if(dev_inf->info_bytes){
+                                        PMPRINT(MOD_R7K,MM_DEBUG,(stderr,"%*s%*s\n%s\n",indent," ",wkey,"device XML:",(char *)pinfo));
+                                    }
+                                    // point to next device info
+                                    dev_inf = (r7k_7001_dev_info_t *)(pinfo + dev_inf->info_bytes);
+                                }
+                                PMPRINT(MOD_R7K,MM_DEBUG,(stderr,"\n"));
+                            }
+                        }
+                    }
+                }
+            }
+
+            // validate reply
+            // release resources
+            r7k_msg_destroy(&msg);
+            r7k_msg_destroy(&reply);
+            retval=0;
+        }
+    }else{
+        PEPRINT((stderr,"ERR - invalid argument\n"));
+    }
+    return retval;
+}
+
+static void s_dev2drfid(r7k_device_t device_id, uint32_t *dev_id, uint16_t *sys_enum){
+
+    if(NULL!=dev_id && NULL!=sys_enum){
+        if(device_id==R7KC_DEV_7125_200KHZ){
+            // for 7125, use 7KCenter ID
+            *dev_id = R7K_DEVID_7KCENTER;
+            *sys_enum = R7K_DRF_SYS_ENUM_200KHZ;
+        }else if(device_id==R7KC_DEV_7125_400KHZ){
+            // for 7125, use 7KCenter ID
+            *dev_id = R7K_DEVID_7KCENTER;
+            *sys_enum = R7K_DRF_SYS_ENUM_400KHZ;
+        }else if(device_id==R7KC_DEV_T50){
+            *dev_id = R7K_DEVID_T50;
+            *sys_enum = R7K_DRF_SYS_ENUM_DFL;
+        }
+    }
+}
+
+r7k_device_t r7k_parse_devid(const char *key)
+{
+
+    r7k_device_t retval = R7KC_DEV_INVALID;
+
+    if(NULL!=key){
+        if(strcasecmp(key,R7K_MNEM_7125_200KHZ)==0){
+            retval=R7KC_DEV_7125_200KHZ;
+        }else if(strcasecmp(key,R7K_MNEM_7125_400KHZ)==0){
+            retval=R7KC_DEV_7125_400KHZ;
+        }else if(strcasecmp(key,R7K_MNEM_T50)==0){
+            retval=R7KC_DEV_T50;
+        }
+    }
+    return retval;
+}
+
+const char *r7k_devidstr(int dev_id)
+{
+
+    const char *retval = R7K_MNEM_INVALID;
+    switch (dev_id) {
+        case R7KC_DEV_7125_200KHZ:
+            retval=R7K_MNEM_7125_200KHZ;
+            break;
+        case R7KC_DEV_7125_400KHZ:
+            retval=R7K_MNEM_7125_400KHZ;
+            break;
+        case R7KC_DEV_T50:
+            retval=R7K_MNEM_T50;
+            break;
+
+        default:
+            break;
+    }
+    return retval;
+}
+
+
+/// @fn int r7k_subscribe(msock_socket_t * s, uint32_t * records, uint32_t record_count)
+/// @brief subscribe to reson 7k center messages.
+/// @param[in] s socket reference
+/// @param[in] device_id device ID
+/// @param[in] enum_id system enumerator
+/// @param[in] records record subscription list
+/// @param[in] record_count sub list length
+/// @return 0 on success, -1 otherwise
+int  r7k_subscribe(msock_socket_t *s, r7k_device_t device_id, uint32_t *records, uint32_t record_count)
 {
     int retval=-1;
     
@@ -184,13 +397,17 @@ int r7k_subscribe(msock_socket_t *s, uint32_t *records, uint32_t record_count)
             // set DRF fields
             msg->drf->size           = R7K_MSG_DRF_SIZE(msg);
             msg->drf->record_type_id = R7K_RT_REMCON;
-            msg->drf->device_id      = R7K_DEVID_7KCENTER;
-            msg->drf->sys_enumerator = R7K_DRF_SYS_ENUM_400KHZ;
-            
-            
+
+            // map generic device ID to correct 7K Center DRF
+            // device ID and system enumerator
+            s_dev2drfid(device_id, &msg->drf->device_id, &msg->drf->sys_enumerator);
+
             // set record type header info
             r7k_rth_7500_rc_t *prth =(r7k_rth_7500_rc_t *)(msg->data);
             prth->remcon_id = R7K_RTID_SUB;
+            s_get_ticket(&prth->ticket);
+            s_get_tracking_number(prth->tracking_number);
+
             r7k_sub_rd_t *prdata = (r7k_sub_rd_t *)(msg->data+rth_len);
             prdata->record_count = record_count;
             
@@ -204,24 +421,33 @@ int r7k_subscribe(msock_socket_t *s, uint32_t *records, uint32_t record_count)
             // serialize, send
            PMPRINT(MOD_R7K,MM_DEBUG,(stderr,"sending SUB request:\n"));
             if(mmd_channel_isset(MOD_R7K,MM_ERR|MM_WARN|R7K_V2)){
-            r7k_msg_show(msg,true,3);
+                r7k_msg_show(msg,true,3);
             }
             r7k_msg_send(s, msg);
             
             // get ACK/NAK
             r7k_msg_t *reply = NULL;
             r7k_msg_receive(s, &reply, R7K_SUBSCRIBE_TIMEOUT_MS);
-            
-           PMPRINT(MOD_R7K,MM_DEBUG,(stderr,"SUB reply received [%p]:\n",reply));
+
+            char *rt_str="?";
+            if(NULL!=reply){
+                if(reply->drf->record_type_id==R7K_RT_REMCON_ACK){
+                    rt_str="ACK";
+                    retval=0;
+                }
+                if(reply->drf->record_type_id==R7K_RT_REMCON_NACK){
+                    rt_str="NACK";
+                    PMPRINT(MOD_R7K,MM_DEBUG,(stderr,"SUB request returned NAK - possibly invalid device (%d/%s)\n",device_id,r7k_devidstr(device_id)));
+                }
+            }
+            PMPRINT(MOD_R7K,MM_DEBUG,(stderr,"SUB reply received [%p/%s]:\n",reply,rt_str));
             if(mmd_channel_isset(MOD_R7K,MM_ERR|MM_WARN|R7K_V2)){
-            r7k_msg_show(reply,true,3);
+                r7k_msg_show(reply,true,3);
             }
             // validate reply
-            
             // release resources
             r7k_msg_destroy(&msg);
             r7k_msg_destroy(&reply);
-            retval=0;
         }
     }else{
     	PEPRINT((stderr,"ERR - invalid argument\n"));
@@ -1496,11 +1722,14 @@ void r7k_msg_show(r7k_msg_t *self, bool verbose, uint16_t indent)
         }
         fprintf(stderr,"%*s[data_size %10u]\n",indent,(indent>0?" ":""), self->data_size);
         fprintf(stderr,"%*s[data       %10p]\n",indent,(indent>0?" ":""), self->data);
-//        if (verbose) {
-//            r7k_hex_show(self->data,self->data_size,16,true,indent+3);
-//        }
+        if (verbose) {
+            r7k_hex_show(self->data,self->data_size,16,true,indent+3);
+        }
 
         fprintf(stderr,"%*s[checksum 0x%08X]\n",indent,(indent>0?" ":""), self->checksum);
+    }else{
+        fprintf(stderr,"%*s[self %10p (NULL message)]\n",indent,(indent>0?" ":""), self);
+
     }
 }
 // End function r7k_msg_show
@@ -1588,7 +1817,7 @@ int r7k_msg_receive(msock_socket_t *s, r7k_msg_t **dest, uint32_t timeout_msec)
     int retval=-1;
     if (NULL != s && s->status==SS_CONNECTED) {
         
-        int64_t nbytes=0;
+       int64_t nbytes=0;
         // read nf, drf headers
         int64_t header_len = sizeof(r7k_nf_headers_t);
 
@@ -1599,7 +1828,7 @@ int r7k_msg_receive(msock_socket_t *s, r7k_msg_t **dest, uint32_t timeout_msec)
         memset(headers,0,header_len);
         if ( (nbytes=msock_read_tmout(s,headers,header_len,timeout_msec)) == header_len) {
             int64_t total_len=nbytes;
-           PMPRINT(MOD_R7K,MM_DEBUG,(stderr,"read headers [%"PRId64"/%"PRId64"]\n",nbytes,header_len));
+            PMPRINT(MOD_R7K,MM_DEBUG,(stderr,"read headers [%"PRId64"/%"PRId64"]\n",nbytes,header_len));
             // get frame content
             r7k_nf_t *nf = (r7k_nf_t *)(headers);
             r7k_drf_t *drf = (r7k_drf_t *)(headers+sizeof(r7k_nf_t));
@@ -1610,7 +1839,7 @@ int r7k_msg_receive(msock_socket_t *s, r7k_msg_t **dest, uint32_t timeout_msec)
 //            r7k_nf_show(nf,true,5);
 //           PMPRINT(MOD_R7K,MM_DEBUG,(stderr,"ACK drf:\n"));
 //            r7k_drf_show(drf,true,5);
-           PMPRINT(MOD_R7K,MM_DEBUG,(stderr,"data_len[%u] read_len[%u]\n",data_len,read_len));
+            PMPRINT(MOD_R7K,MM_DEBUG,(stderr,"data_len[%u] read_len[%u]\n",data_len,read_len));
             // read rth/rd/od [if any], checksum
             if (read_len>0) {
                 //byte data[read_len];		// INVALID C. JL
@@ -1633,21 +1862,21 @@ int r7k_msg_receive(msock_socket_t *s, r7k_msg_t **dest, uint32_t timeout_msec)
                         *dest=m;
                         retval=total_len;
                     }else{
-                        PEPRINT((stderr,"msg_new failed\n"));
+                        PEPRINT((stderr,"recv - msg_new failed\n"));
                     }
                 }else{
-                   PMPRINT(MOD_R7K,MM_DEBUG,(stderr,"incomplete data read nbytes[%"PRId64"] data_len[%u]\n",nbytes,data_len));
+                   PMPRINT(MOD_R7K,MM_DEBUG,(stderr,"recv - incomplete data read nbytes[%"PRId64"] data_len[%u]\n",nbytes,data_len));
                 }
                 free(data);
             }else{
-               PMPRINT(MOD_R7K,MM_DEBUG,(stderr,"read_len <= 0 nbytes[%"PRId64"] read_len[%u]\n",nbytes,read_len));
+               PMPRINT(MOD_R7K,MM_DEBUG,(stderr,"recv - read_len <= 0 nbytes[%"PRId64"] read_len[%u]\n",nbytes,read_len));
             }
         }else{
-           PMPRINT(MOD_R7K,MM_DEBUG,(stderr,"incomplete header read? nbytes[%"PRId64"] header_len[%"PRId64"]\n",nbytes,header_len));
+           PMPRINT(MOD_R7K,MM_DEBUG,(stderr,"recv - incomplete header read? nbytes[%"PRId64"] header_len[%"PRId64"]\n",nbytes,header_len));
         }
         free(headers);
     }else{
-        PMPRINT(MOD_R7K,MM_DEBUG,(stderr,"invalid socket or status s[%p]\n",s));
+        PMPRINT(MOD_R7K,MM_DEBUG,(stderr,"recv - invalid socket or status s[%p, %d/%d]\n",s, (s!=NULL?s->status:0),SS_CONNECTED));
     }
         
     return retval;
@@ -1671,6 +1900,7 @@ int r7k_msg_send(msock_socket_t *s, r7k_msg_t *self)
 
         if( (status=msock_send(s,buf,self->msg_len))>0){
             retval=0;
+            PMPRINT(MOD_R7K,MM_DEBUG,(stderr,"send OK s[%p, %d]\n",s, s->status));
         }else{
             PEPRINT((stderr,"send failed [%"PRId64"] [%d/%s]\n",status,errno,strerror(errno)));
         }
@@ -1696,7 +1926,7 @@ int r7k_test()
     msock_socket_t *s = msock_socket_new("localhost",R7K_7KCENTER_PORT,ST_TCP);
     msock_connect(s);
    PMPRINT(MOD_R7K,MM_DEBUG,(stderr,"subscribing...\n"));
-    retval = r7k_subscribe(s,sub_recs,2);
+    retval = r7k_subscribe(s,R7KC_DEV_7125_400KHZ,sub_recs,2);
    PMPRINT(MOD_R7K,MM_DEBUG,(stderr,"releasing resources...\n"));
     msock_socket_destroy(&s);
     
