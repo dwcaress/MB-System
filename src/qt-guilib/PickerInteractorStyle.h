@@ -31,7 +31,7 @@
 namespace mb_system {
 
   /// Forward class declaration
-  class QVtkItem;
+  class QVtkRenderer;
 
 // Catch mouse events
 class PickerInteractorStyle : public vtkInteractorStyleTrackballCamera
@@ -51,9 +51,9 @@ public:
   PickerInteractorStyle();
 
   /// Initialize - REQUIRED
-  void initialize(mb_system::QVtkItem *item,
+  void initialize(mb_system::QVtkRenderer *renderer,
                   vtkRenderWindowInteractor *interactor) {
-    item_ = item;
+    qVtkRenderer_ = renderer;
     interactor_ = interactor;
   }
   
@@ -66,9 +66,12 @@ public:
 
 protected:
 
-  /// QVtkItem associated with this 
-  mb_system::QVtkItem *item_;
+  /// Print point id, world coords for a range of y-values
+  void testPoints(int x, int y, vtkRenderer *renderer);
 
+  /// Associated renderer
+  mb_system::QVtkRenderer *qVtkRenderer_;
+  
   /// Associated interactor
   vtkRenderWindowInteractor *interactor_;
   
