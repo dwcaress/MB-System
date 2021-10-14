@@ -9,8 +9,9 @@ QVtkItem::QVtkItem() :
 {
     setAcceptedMouseButtons(Qt::LeftButton | Qt::RightButton);
     qDebug() << "mirrorVertically: " << mirrorVertically();
-    // Fix coordinate system handed-ness
+    // Qt and OpenGL apparently have opposite y-axis direction
     setMirrorVertically(true);
+
 }
 
 QQuickFramebufferObject::Renderer *QVtkItem::createRenderer() const {
@@ -50,8 +51,6 @@ void QVtkItem::mousePressEvent(QMouseEvent *event) {
 }
 
 void QVtkItem::mouseReleaseEvent(QMouseEvent *event) {
-    qDebug() << "QVtkItem::mouseReleaseEvent";
-
     mouseButtonEvent_ = std::make_shared<QMouseEvent>(*event);
     mouseButtonEvent_->ignore();
     event->accept();
@@ -61,8 +60,6 @@ void QVtkItem::mouseReleaseEvent(QMouseEvent *event) {
 }
 
 void QVtkItem::mouseMoveEvent(QMouseEvent *event) {
-    qDebug() << "QVtkItem::mouseMoveEvent";
-
     mouseMoveEvent_ = std::make_shared<QMouseEvent>(*event);
     mouseMoveEvent_->ignore();
     event->accept();
