@@ -155,8 +155,8 @@ int GmtGridReader::RequestData(vtkInformation* request,
 
   vtkIdType triangleVertexId[3];
   // Triangles must stay within row and column bounds
-  for (unsigned col = 0; col < nCols-1; col++) {
-    for (unsigned row = 0; row < nRows-1; row++) {
+  for (unsigned row = 0; row < nRows-1; row++) {
+    for (unsigned col = 0; col < nCols-1; col++) {
 
       // First triangle
       triangleVertexId[0] = gridOffset(nRows, nCols, row, col);
