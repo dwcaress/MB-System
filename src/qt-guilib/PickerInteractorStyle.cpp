@@ -21,41 +21,22 @@ void PickerInteractorStyle::OnLeftButtonDown() {
   std::cout << "Pixel x,y: " << x
             << " " << y << std::endl;
 
-
-  vtkRenderer *renderer;
-
-  renderer = 
-    this->Interactor->GetRenderWindow()->GetRenderers()->GetFirstRenderer();
-
+  vtkRenderer *renderer = GetDefaultRenderer();
   int *rendererSize = renderer->GetSize();
- std:cout << "FirstRenderer size: " << rendererSize[0] <<  " " <<
-          rendererSize[1] << std::endl;
-
-  rendererSize = interactor_->FindPokedRenderer(x, y)->GetSize();
   
-  std::cout << "poked renderer size: " << rendererSize[0] << " " <<
-            rendererSize[1] << std::endl;
-  
-  std::cout << "renderer w: " << rendererSize[0] <<
-    ", renderer h: " << rendererSize[1] <<
-    std::endl;
-
   std::cout << "rendererSize[1]: " << rendererSize[1] << " y: " << y <<
     std::endl;
 
-  // Correct y coordinate for y-axis flip between Qt and VTK coordinate
-  // systems
-  int yCorr = rendererSize[1] - y + 1;
+  // Convert from Qt coordinate system (origin at upper left) to
+  // VTK coordinate system (origin at lower left)
+  y = rendererSize[1] - y + 1;
     
   std::cout << "Corr Pixel x,y: " << x
-            << " " << yCorr << std::endl;  
+            << " " << y << std::endl;  
 
   vtkNew<vtkPointPicker> picker;
     
-  picker->Pick(x, yCorr,
-               0, // always zero.
-               renderer);
-
+  picker->Pick(x, y, 0, renderer);
 
   vtkIdType pointId = picker->GetPointId();
   
