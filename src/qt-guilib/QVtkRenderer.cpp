@@ -18,11 +18,6 @@
 #include "QVtkRenderer.h"
 #include "QVtkItem.h"
 
-/// How to include this prototype??? '#include <GL/glext.h> ' generates many errors
-extern "C" {
-void glGenQueries(GLsizei n, GLuint *ids);
-}
-
 using namespace mb_system;
 
 QVtkRenderer::QVtkRenderer() :
@@ -61,8 +56,6 @@ void QVtkRenderer::render() {
     return;
   }
 
-  qDebug() << "QVtkRenderer::render() ************ start";
-  
   if (!renderWindow_ || !renderWindowInteractor_) {
     qDebug() << "renderWindow not yet defined";
     return;
@@ -79,7 +72,7 @@ void QVtkRenderer::render() {
     initialized_ = true;
   }
   
-  axesActor_->SetVisibility(displayProperties_->drawAxes);
+  axesActor_->SetVisibility(displayProperties_->showAxes);
 
   if (wheelEvent_ && !wheelEvent_->isAccepted()) {
     // qDebug() << "render(): handle wheelEvent";
@@ -110,21 +103,24 @@ void QVtkRenderer::render() {
         
       if (mouseButtonEvent_->buttons() & Qt::LeftButton) {
         // qDebug() << "QVtkRenderer() - got left button";
-        renderWindowInteractor_->SetEventInformationFlipY(mouseButtonEvent_->x(),
-                                                          mouseButtonEvent_->y(),
-                                                          cntrlKey,
-                                                          shiftKey,
-                                                          dblClick);
+        qDebug() << "x: " << mouseButtonEvent_->x() <<
+          " y: " << mouseButtonEvent_->y();
+        
+        renderWindowInteractor_->SetEventInformation(mouseButtonEvent_->x(),
+                                                     mouseButtonEvent_->y(),
+                                                     cntrlKey,
+                                                     shiftKey,
+                                                     dblClick);
 
         renderWindowInteractor_->InvokeEvent(vtkCommand::LeftButtonPressEvent);
       }
       else if (mouseButtonEvent_->buttons() & Qt::RightButton) {
         // qDebug() << "QVtkRenderer() - got right button";
-        renderWindowInteractor_->SetEventInformationFlipY(mouseButtonEvent_->x(),
-                                                          mouseButtonEvent_->y(),
-                                                          cntrlKey,
-                                                          shiftKey,
-                                                          dblClick);
+        renderWindowInteractor_->SetEventInformation(mouseButtonEvent_->x(),
+                                                     mouseButtonEvent_->y(),
+                                                     cntrlKey,
+                                                     shiftKey,
+                                                     dblClick);
         
         renderWindowInteractor_->InvokeEvent(vtkCommand::RightButtonPressEvent);
       }
@@ -169,11 +165,11 @@ void QVtkRenderer::render() {
       // mouseMoveEvent_->x() << ", y=" <<
       // mouseMoveEvent_->y();
 
-      renderWindowInteractor_->SetEventInformationFlipY(mouseMoveEvent_->x(),
-							mouseMoveEvent_->y(),
-                                                        cntrlKey,
-                                                        shiftKey,
-                                                        dblClick);
+      renderWindowInteractor_->SetEventInformation(mouseMoveEvent_->x(),
+                                                   mouseMoveEvent_->y(),
+                                                   cntrlKey,
+                                                   shiftKey,
+                                                   dblClick);
 
       renderWindowInteractor_->InvokeEvent(vtkCommand::MouseMoveEvent);
       mouseMoveEvent_->accept();
@@ -195,18 +191,11 @@ void QVtkRenderer::render() {
   renderWindow_->PopState();
   item_->window()->resetOpenGLState();;
 
-  qDebug() << "render() current thread: ";
-  qDebug() << QThread::currentThread();
-  
-  qDebug() << "QVtkRenderer::render() ************ DONE";
 }
 
 
 // Copy data from item to this renderer
 void QVtkRenderer::synchronize(QQuickFramebufferObject *item) {
-  qDebug() << "QVtkRenderer::synchronize()";
-  qDebug() << "synchronize() current thread: ";
-  qDebug() << QThread::currentThread();
   
   if (!item_) {
     // The item argument is the QVtkItem associated with this renderer;
@@ -227,9 +216,6 @@ void QVtkRenderer::synchronize(QQuickFramebufferObject *item) {
     qDebug() << "synchronize(): start worker thread";
     worker_->start();
     qDebug() << "synchronize(): worker started!";
-  }
-  else {
-    qDebug() << "grid filename has not changed";
   }
   
   // Mouse wheel moved
@@ -261,8 +247,6 @@ void QVtkRenderer::synchronize(QQuickFramebufferObject *item) {
       std::make_shared<QMouseEvent>(*item_->latestMouseMoveEvent());
     item_->latestMouseMoveEvent()->accept();
   }
-
-  qDebug() << "Done with synchronize()";
 }
 
 
@@ -314,7 +298,7 @@ bool QVtkRenderer::initializePipeline(const char *gridFilename) {
   interactorStyle_ =
     vtkSmartPointer<PickerInteractorStyle>::New();  
 
-  interactorStyle_->initialize(item_, renderWindowInteractor_);
+  interactorStyle_->initialize(this, renderWindowInteractor_);
 
   // Axes actor
   axesActor_ = vtkSmartPointer<vtkCubeAxesActor>::New();
@@ -351,6 +335,10 @@ void QVtkRenderer::setupAxes(vtkCubeAxesActor *axesActor,
                              const char *xUnits, const char *yUnits,
                              const char *zUnits) {
 
+  qDebug() << "setupAxes(): " <<
+    " xMin: " << bounds[0] << ", xMax: " << bounds[1] <<
+    ", yMin: " << bounds[2] << ", yMax: " << bounds[3] <<
+    ", zMin: " << bounds[4] << ", zMax: " << bounds[5];
   
   axesActor->SetUseTextActor3D(0);
 
@@ -395,24 +383,6 @@ void QVtkRenderer::setupAxes(vtkCubeAxesActor *axesActor,
 }
 
 
-/// Start window interactor and render
-void QVtkRenderer::startAndRenderWindow() {
-  // Start the interactor
-  // qDebug() << "start render window interactor";
-
-  renderWindow_->MakeCurrent();
-  
-  // qDebug() << "render window";
-  renderWindow_->Render();      
-
-  // Create OpenGL context, per this post:
-  // https://gitlab.kitware.com/vtk/vtk/-/issues/17280
-  GLuint StartQuery = 0;
-  glGenQueries(1, static_cast<GLuint*>(&StartQuery));
-  
-  renderWindowInteractor_->Start();
-  // Render
-}
 
 bool QVtkRenderer::assemblePipeline(mb_system::GmtGridReader *gridReader,
                                     const char *gridFilename,
@@ -428,27 +398,34 @@ bool QVtkRenderer::assemblePipeline(mb_system::GmtGridReader *gridReader,
 
   qDebug() << "QVtkRenderer::assemblePipeline() " << gridFilename;
 
-  // Grid reader should aleady be loaded by worker thread by this time
-  //  gridReader->SetFileName ( gridFilename );
-  /* ***
-  // qDebug() << "reader->Update()";
-  // gridReader->Update();
+  float bounds[6];
+  gridReader->bounds(&bounds[0], &bounds[1],
+                     &bounds[2], &bounds[3],
+                     &bounds[4], &bounds[5]);
+  
+  qDebug() << "xMin: " << bounds[0] << ", xMax: " << bounds[1] <<
+    "yMin: " << bounds[2] << ", yMax: " << bounds[3] <<
+    "zMin: " << bounds[4] << ", zMax: " << bounds[5];
 
-  if (gridReader->GetErrorCode()) {
-    std::cerr << "Error during gridReader Update(): " <<
-      gridReader->GetErrorCode() << std::endl;
-    
-    return false;
+
+  double *dBounds = gridReader->GetOutput()->GetBounds();
+  
+  qDebug() << "GetBounds() - xMin: " << dBounds[0] << ", xMax: " <<
+    dBounds[1] <<
+    "yMin: " << dBounds[2] << ", yMax: " << dBounds[3] <<
+    "zMin: " << dBounds[4] << ", zMax: " << dBounds[5];
+  
+
+  /* ***
+  double dBounds[6];
+  for (int i = 0; i < 6; i++) {
+    dBounds[i] = bounds[i];
   }
   *** */
   
-  float zMin, zMax;
-  gridReader->zBounds(&zMin, &zMax);
-
-  
   elevColorizer->SetInputConnection(gridReader->GetOutputPort());  
-  elevColorizer->SetLowPoint(0, 0, zMin);
-  elevColorizer->SetHighPoint(0, 0, zMax);
+  elevColorizer->SetLowPoint(0, 0, bounds[4]);
+  elevColorizer->SetHighPoint(0, 0, bounds[5]);
 
   surfaceMapper->SetInputConnection(elevColorizer->GetOutputPort());  
 
@@ -479,9 +456,16 @@ bool QVtkRenderer::assemblePipeline(mb_system::GmtGridReader *gridReader,
   vtkColor3d axisColor = colors->GetColor3d("black");
   
   // Set up axes
+
   setupAxes(axesActor, axisColor,
             gridReader->GetOutput()->GetBounds(),
             gridReader->xUnits(), gridReader->yUnits(), gridReader->zUnits());
+
+  /* ***
+  setupAxes(axesActor, axisColor,
+            dBounds,
+            gridReader->xUnits(), gridReader->yUnits(), gridReader->zUnits());
+              *** */
 
   axesActor->SetCamera(renderer->GetActiveCamera());
 
