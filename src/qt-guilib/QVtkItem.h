@@ -72,7 +72,7 @@ namespace mb_system {
 
     /// Toggle axes display
     void showAxes(bool show) {
-      displayProperties_.drawAxes = show;
+      displayProperties_.showAxes = show;
     }
     
 
