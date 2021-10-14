@@ -8,7 +8,7 @@ namespace mb_system {
   */
   struct DisplayProperties {
     /// Draw axes
-    bool drawAxes;
+    bool showAxes;
   };
 
 }
