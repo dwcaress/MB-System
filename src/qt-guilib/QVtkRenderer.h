@@ -47,7 +47,8 @@ namespace mb_system {
     QVtkRenderer();
 
     /// Create rendering surface
-    QOpenGLFramebufferObject * createFramebufferObject(const QSize &size) override;
+    QOpenGLFramebufferObject * createFramebufferObject(const QSize &size)
+      override;
 
     /// Copy new user inputs received by the accompanying QVtkItem
     /// running in the GUI thread. The synchronize() function is
@@ -71,9 +72,6 @@ namespace mb_system {
       displayProperties_ = properties;
     }
     
-    /// Start window interactor and render
-    void startAndRenderWindow();
-    
     /// Initilize and assemble VTK pipeline; returns true on success,
     /// false on error.
     /// 'public' access so can access from test app
@@ -92,12 +90,19 @@ namespace mb_system {
                                  vtkCubeAxesActor *axesActor);
 
 
+    /// Get item member
+    QVtkItem *getItem() {
+      return item_;
+    }
+    
     static bool assembleTestPipeline(
                                      vtkRenderer *renderer,
                                      vtkGenericOpenGLRenderWindow *renderWindow,
-                                     vtkGenericRenderWindowInteractor *interactor,
+                                     vtkGenericRenderWindowInteractor *interactr,
                                      PickerInteractorStyle *style);
 
+                                                                  
+                                                                 
   public slots:
 
     /// Called when worker thread finishes
