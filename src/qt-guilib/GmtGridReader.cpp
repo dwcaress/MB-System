@@ -105,45 +105,78 @@ int GmtGridReader::RequestData(vtkInformation* request,
   std::cerr << "GmtGridReader::RequestData() - load points" << std::endl;    
   for (unsigned row = 0; row < gmtGrid_->header->n_rows; row++) {
     for (unsigned col = 0; col < gmtGrid_->header->n_columns; col++) {
+      // print debug info
+      //      fprintf(stderr, "1) x[%d]: %.8f\n", col, gmtGrid_->x[col]);
+
       unsigned dataIndex = GMT_Get_Index(gmtApi, gmtGrid_->header, row, col);
-      gridPoints_->InsertNextPoint(row, col,
-				   gmtGrid_->data[dataIndex]);
+
+      vtkIdType id = gridPoints_->InsertNextPoint(gmtGrid_->x[col],
+                                                  gmtGrid_->y[row],
+                                                  gmtGrid_->data[dataIndex]);
     }
   }
 
+  // DEBUG DEBUG DEBUG
+  int row = 0;
+  int col = 0;
+  unsigned dataIndex = GMT_Get_Index(gmtApi, gmtGrid_->header, row, col);
+  fprintf(stderr, "NW - x[%d]: %f, y[%d]: %f, data[%d]: %f\n",
+          col, gmtGrid_->x[col], row, gmtGrid_->y[row],
+          dataIndex, gmtGrid_->data[dataIndex]);
+          
+
+  row = gmtGrid_->header->n_rows-1;
+  col = 0;
+  dataIndex = GMT_Get_Index(gmtApi, gmtGrid_->header, row, col);
+  fprintf(stderr, "SW - x[%d]: %f, y[%d]: %f, data[%d]: %f\n",
+          col, gmtGrid_->x[col], row, gmtGrid_->y[row],
+          dataIndex, gmtGrid_->data[dataIndex]);
+
+  row = 0;
+  col = gmtGrid_->header->n_columns - 1;
+  dataIndex = GMT_Get_Index(gmtApi, gmtGrid_->header, row, col);
+  fprintf(stderr, "NE - x[%d]: %f, y[%d]: %f, data[%d]: %f\n",
+          col, gmtGrid_->x[col], row, gmtGrid_->y[row],
+          dataIndex, gmtGrid_->data[dataIndex]);  
+
+  row = gmtGrid_->header->n_rows - 1;
+  col = gmtGrid_->header->n_columns - 1;
+  dataIndex = GMT_Get_Index(gmtApi, gmtGrid_->header, row, col);
+  fprintf(stderr, "SE - x[%d]: %f, y[%d]: %f, data[%d]: %f\n",
+          col, gmtGrid_->x[col], row, gmtGrid_->y[row],
+          dataIndex, gmtGrid_->data[dataIndex]);  
+  
   // Set triangle vertices
   if (!gridPolygons_->Allocate(nRows * nCols * 2)) {
     std::cerr << "failed to allocat "
 	      <<  nRows * nCols *2 << " polygons"
 	      << std::endl;
-  }    
+  }
+
   vtkIdType triangleVertexId[3];
-  int nCells = 0;
   // Triangles must stay within row and column bounds
-  for (unsigned row = 0; row < nRows-1; row++) {
-    for (unsigned col = 0; col < nCols-1; col++) {
+  for (unsigned col = 0; col < nCols-1; col++) {
+    for (unsigned row = 0; row < nRows-1; row++) {
 
       // First triangle
       triangleVertexId[0] = gridOffset(nRows, nCols, row, col);
       triangleVertexId[1] = gridOffset(nRows, nCols, row, col+1);
       triangleVertexId[2] = gridOffset(nRows, nCols, row+1, col+1);      
       gridPolygons_->InsertNextCell(3, triangleVertexId);
-      nCells++;
       
       // Second triangle
       triangleVertexId[0] = gridOffset(nRows, nCols, row, col);
       triangleVertexId[1] = gridOffset(nRows, nCols, row+1, col+1);
       triangleVertexId[2] = gridOffset(nRows, nCols, row+1, col);      
       gridPolygons_->InsertNextCell(3, triangleVertexId);
-      nCells++;
     }
   }
-  std::cout << "nCells=" << nCells << std::endl;
 
   // Save to object's points and polygons
   polyOutput->SetPoints(gridPoints_);
   polyOutput->SetPolys(gridPolygons_);  
   std::cerr << "GmtGridReader::RequestData() - done" << std::endl;
+
   return 1;
 }
 
@@ -166,7 +199,8 @@ GMT_GRID *GmtGridReader::readGridFile(const char *gridFile, void **api) {
             GMT_Create_Session("Topography::loadGrid()", 2U, 0U, nullptr);
 
     if (!*api) {
-      std::cerr << "Could not get GMT API for \"" << gridFile << "\"" << std::endl;
+      std::cerr << "Could not get GMT API for \"" << gridFile << "\""
+                << std::endl;
         return nullptr;
     }
 
@@ -175,16 +209,29 @@ GMT_GRID *GmtGridReader::readGridFile(const char *gridFile, void **api) {
     GMT_GRID *grid = nullptr;
     // Try to read header and grid
     for (int nTry = 0; nTry < 100; nTry++) {
-        grid = (struct GMT_GRID *)GMT_Read_Data(*api, GMT_IS_GRID, GMT_IS_FILE, GMT_IS_SURFACE,
-                                                GMT_GRID_ALL, nullptr, gridFile, nullptr);
+        grid =
+          (struct GMT_GRID *)GMT_Read_Data(*api, GMT_IS_GRID, GMT_IS_FILE,
+                                           GMT_IS_SURFACE,
+                                           GMT_GRID_ALL, nullptr,
+                                           gridFile, nullptr);
         if (grid) break;
         usleep(1000);
     }
 
     if (!grid) {
-      std::cerr << "Unable to read GMT grid from \"" << gridFile << "\"" << std::endl;
-        return nullptr;
+      std::cerr << "Unable to read GMT grid from \"" << gridFile <<
+        "\"" << std::endl;
+      return nullptr;
     }
+    bool debug = false;
+    if (debug) {
+      // print debug info
+      for (int col = 0; col < grid->header->n_columns; col++) {
+        fprintf(stderr, "x[%d]: %.8f\n", col, grid->x[col]);
+      }
+    }
+    
+    
     return grid;
 }
 
@@ -225,13 +272,15 @@ void GmtGridReader::bounds(float *xMin, float *xMax,
 }
 
 
-vtkIdType GmtGridReader::gridOffset(unsigned nRows, unsigned nCols, unsigned row, unsigned col) {
+vtkIdType GmtGridReader::gridOffset(unsigned nRows, unsigned nCols,
+                                    unsigned row, unsigned col) {
   if (row >= nRows || col >= nCols) { 
     // Out of bounds
-    fprintf(stderr, "getGridOffset(): out-of-bounds: row=%d, nRows=%d, col=%d, nCols=%d\n",
+    fprintf(stderr,
+            "getGridOffset(): out-of-bounds: row=%d, nRows=%d, col=%d, nCols=%d\n",
 	    row, nRows, col, nCols);
   }
-    
-  return (col + row * nCols);
+
+  return  (col + row * nCols);
 }
 
