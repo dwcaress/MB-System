@@ -94,7 +94,8 @@ host_triplet = @host@
 bin_PROGRAMS = trn-server$(EXEEXT) trn-cli$(EXEEXT) \
 	netif-test$(EXEEXT) trnif-test$(EXEEXT) trnifsvr-test$(EXEEXT) \
 	trnclient-test$(EXEEXT) trnu-cli$(EXEEXT) \
-	trnusvr-test$(EXEEXT) mmcpub$(EXEEXT) mmcsub$(EXEEXT)
+	trnusvr-test$(EXEEXT) mmcpub$(EXEEXT) mmcsub$(EXEEXT) \
+	trn-replay$(EXEEXT)
 subdir = src/mbtrnav
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/ax_check_compile_flag.m4 \
@@ -262,6 +263,11 @@ am_trn_cli_OBJECTS = trnw/trncli_test.$(OBJEXT) trnw/trn_cli.$(OBJEXT)
 trn_cli_OBJECTS = $(am_trn_cli_OBJECTS)
 trn_cli_DEPENDENCIES = $(top_builddir)/src/mbtrn/libmframe.la \
 	libtrnw.la
+am_trn_replay_OBJECTS = opt/dorado/Replay.$(OBJEXT) \
+	opt/dorado/trn_replay.$(OBJEXT) \
+	utils/TerrainNavClient.$(OBJEXT)
+trn_replay_OBJECTS = $(am_trn_replay_OBJECTS)
+trn_replay_DEPENDENCIES =
 am_trn_server_OBJECTS = utils/trn_server.$(OBJEXT)
 trn_server_OBJECTS = $(am_trn_server_OBJECTS)
 trn_server_DEPENDENCIES = libtnav.la libqnx.la libnewmat.la libtnav.la \
@@ -381,7 +387,9 @@ am__depfiles_remade = gctp/source/$(DEPDIR)/alberfor.Plo \
 	newmat/$(DEPDIR)/newmat8.Plo newmat/$(DEPDIR)/newmat9.Plo \
 	newmat/$(DEPDIR)/newmatex.Plo newmat/$(DEPDIR)/newmatrm.Plo \
 	newmat/$(DEPDIR)/sort.Plo newmat/$(DEPDIR)/submat.Plo \
-	newmat/$(DEPDIR)/svd.Plo qnx-utils/$(DEPDIR)/AngleData.Plo \
+	newmat/$(DEPDIR)/svd.Plo opt/dorado/$(DEPDIR)/Replay.Po \
+	opt/dorado/$(DEPDIR)/trn_replay.Po \
+	qnx-utils/$(DEPDIR)/AngleData.Plo \
 	qnx-utils/$(DEPDIR)/AsciiFile.Plo \
 	qnx-utils/$(DEPDIR)/BinaryFile.Plo \
 	qnx-utils/$(DEPDIR)/CharData.Plo \
@@ -471,9 +479,10 @@ SOURCES = $(libgeolib_la_SOURCES) $(libnetif_la_SOURCES) \
 	$(libnewmat_la_SOURCES) $(libqnx_la_SOURCES) \
 	$(libtnav_la_SOURCES) $(libtrnw_la_SOURCES) $(mmcpub_SOURCES) \
 	$(mmcsub_SOURCES) $(netif_test_SOURCES) $(trn_cli_SOURCES) \
-	$(trn_server_SOURCES) $(trnclient_test_SOURCES) \
-	$(trnif_test_SOURCES) $(trnifsvr_test_SOURCES) \
-	$(trnu_cli_SOURCES) $(trnusvr_test_SOURCES)
+	$(trn_replay_SOURCES) $(trn_server_SOURCES) \
+	$(trnclient_test_SOURCES) $(trnif_test_SOURCES) \
+	$(trnifsvr_test_SOURCES) $(trnu_cli_SOURCES) \
+	$(trnusvr_test_SOURCES)
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
     n|no|NO) false;; \
@@ -883,6 +892,8 @@ libnetif_la_LIBADD = libtrnw.la \
                 $(top_builddir)/src/mbtrn/libmframe.la \
                 -lm -lpthread
 
+trn_replay_SOURCES = opt/dorado/Replay.cpp opt/dorado/trn_replay.cpp utils/TerrainNavClient.cpp
+trn_replay_LDADD = -ltnav  -lnewmat -lqnx -lnetcdf -lm -lpthread -lgeolib 
 mmcpub_SOURCES = trnw/mmcpub.c
 mmcpub_LDADD = $(top_builddir)/src/mbtrn/libmframe.la
 mmcsub_SOURCES = trnw/mmcsub.c
@@ -1371,6 +1382,22 @@ trnw/trn_cli.$(OBJEXT): trnw/$(am__dirstamp) \
 trn-cli$(EXEEXT): $(trn_cli_OBJECTS) $(trn_cli_DEPENDENCIES) $(EXTRA_trn_cli_DEPENDENCIES) 
 	@rm -f trn-cli$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(trn_cli_OBJECTS) $(trn_cli_LDADD) $(LIBS)
+opt/dorado/$(am__dirstamp):
+	@$(MKDIR_P) opt/dorado
+	@: > opt/dorado/$(am__dirstamp)
+opt/dorado/$(DEPDIR)/$(am__dirstamp):
+	@$(MKDIR_P) opt/dorado/$(DEPDIR)
+	@: > opt/dorado/$(DEPDIR)/$(am__dirstamp)
+opt/dorado/Replay.$(OBJEXT): opt/dorado/$(am__dirstamp) \
+	opt/dorado/$(DEPDIR)/$(am__dirstamp)
+opt/dorado/trn_replay.$(OBJEXT): opt/dorado/$(am__dirstamp) \
+	opt/dorado/$(DEPDIR)/$(am__dirstamp)
+utils/TerrainNavClient.$(OBJEXT): utils/$(am__dirstamp) \
+	utils/$(DEPDIR)/$(am__dirstamp)
+
+trn-replay$(EXEEXT): $(trn_replay_OBJECTS) $(trn_replay_DEPENDENCIES) $(EXTRA_trn_replay_DEPENDENCIES) 
+	@rm -f trn-replay$(EXEEXT)
+	$(AM_V_CXXLD)$(CXXLINK) $(trn_replay_OBJECTS) $(trn_replay_LDADD) $(LIBS)
 utils/trn_server.$(OBJEXT): utils/$(am__dirstamp) \
 	utils/$(DEPDIR)/$(am__dirstamp)
 
@@ -1380,8 +1407,6 @@ trn-server$(EXEEXT): $(trn_server_OBJECTS) $(trn_server_DEPENDENCIES) $(EXTRA_tr
 utils/trnclient_test.$(OBJEXT): utils/$(am__dirstamp) \
 	utils/$(DEPDIR)/$(am__dirstamp)
 utils/TrnClient.$(OBJEXT): utils/$(am__dirstamp) \
-	utils/$(DEPDIR)/$(am__dirstamp)
-utils/TerrainNavClient.$(OBJEXT): utils/$(am__dirstamp) \
 	utils/$(DEPDIR)/$(am__dirstamp)
 
 trnclient-test$(EXEEXT): $(trnclient_test_OBJECTS) $(trnclient_test_DEPENDENCIES) $(EXTRA_trnclient_test_DEPENDENCIES) 
@@ -1455,6 +1480,7 @@ mostlyclean-compile:
 	-rm -f gctp/source/*.lo
 	-rm -f newmat/*.$(OBJEXT)
 	-rm -f newmat/*.lo
+	-rm -f opt/dorado/*.$(OBJEXT)
 	-rm -f qnx-utils/*.$(OBJEXT)
 	-rm -f qnx-utils/*.lo
 	-rm -f terrain-nav/*.$(OBJEXT)
@@ -1557,6 +1583,8 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@newmat/$(DEPDIR)/sort.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@newmat/$(DEPDIR)/submat.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@newmat/$(DEPDIR)/svd.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@opt/dorado/$(DEPDIR)/Replay.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@opt/dorado/$(DEPDIR)/trn_replay.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@qnx-utils/$(DEPDIR)/AngleData.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@qnx-utils/$(DEPDIR)/AsciiFile.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@qnx-utils/$(DEPDIR)/BinaryFile.Plo@am__quote@ # am--include-marker
@@ -1819,6 +1847,8 @@ distclean-generic:
 	-rm -f gctp/source/$(am__dirstamp)
 	-rm -f newmat/$(DEPDIR)/$(am__dirstamp)
 	-rm -f newmat/$(am__dirstamp)
+	-rm -f opt/dorado/$(DEPDIR)/$(am__dirstamp)
+	-rm -f opt/dorado/$(am__dirstamp)
 	-rm -f qnx-utils/$(DEPDIR)/$(am__dirstamp)
 	-rm -f qnx-utils/$(am__dirstamp)
 	-rm -f terrain-nav/$(DEPDIR)/$(am__dirstamp)
@@ -1929,6 +1959,8 @@ distclean: distclean-am
 	-rm -f newmat/$(DEPDIR)/sort.Plo
 	-rm -f newmat/$(DEPDIR)/submat.Plo
 	-rm -f newmat/$(DEPDIR)/svd.Plo
+	-rm -f opt/dorado/$(DEPDIR)/Replay.Po
+	-rm -f opt/dorado/$(DEPDIR)/trn_replay.Po
 	-rm -f qnx-utils/$(DEPDIR)/AngleData.Plo
 	-rm -f qnx-utils/$(DEPDIR)/AsciiFile.Plo
 	-rm -f qnx-utils/$(DEPDIR)/BinaryFile.Plo
@@ -2126,6 +2158,8 @@ maintainer-clean: maintainer-clean-am
 	-rm -f newmat/$(DEPDIR)/sort.Plo
 	-rm -f newmat/$(DEPDIR)/submat.Plo
 	-rm -f newmat/$(DEPDIR)/svd.Plo
+	-rm -f opt/dorado/$(DEPDIR)/Replay.Po
+	-rm -f opt/dorado/$(DEPDIR)/trn_replay.Po
 	-rm -f qnx-utils/$(DEPDIR)/AngleData.Plo
 	-rm -f qnx-utils/$(DEPDIR)/AsciiFile.Plo
 	-rm -f qnx-utils/$(DEPDIR)/BinaryFile.Plo

@@ -82,7 +82,8 @@
 /////////////////////////
 // Type Definitions
 /////////////////////////
-/// @typedef enum r7kr_event_id r7kr_stevent_id
+
+/// @typedef enum r7kr_event_id r7kr_event_id
 /// @brief diagnostic event (counter) IDs
 typedef enum{
     R7KR_EV_FRAME_VALID=0,
@@ -232,6 +233,9 @@ typedef struct r7kr_reader_s
     /// @var r7kr_reader_s::watch
     /// @brief timing stopwatch
     mtime_stopwatch_t *watch;
+    /// @var r7kr_reader_s::device
+    /// @brief device ID
+    r7k_device_t device;
 }r7kr_reader_t;
 
 /////////////////////////
@@ -320,7 +324,7 @@ typedef struct r7kr_reader_s
 
 
 // r7krn reader API
-r7kr_reader_t *r7kr_reader_new(const char *host, int port, uint32_t capacity, uint32_t *slist,  uint32_t slist_len);
+r7kr_reader_t *r7kr_reader_new(r7k_device_t device, const char *host, int port, uint32_t capacity, uint32_t *slist,  uint32_t slist_len);
 r7kr_reader_t *r7kr_freader_new(mfile_file_t *file, uint32_t capacity, uint32_t *slist,  uint32_t slist_len);
 void r7kr_reader_destroy(r7kr_reader_t **pself);
 int r7kr_reader_connect(r7kr_reader_t *self, bool replace_socket);
