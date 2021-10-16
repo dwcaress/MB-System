@@ -77,7 +77,7 @@
  *      // X-datagrams (eXtra - defined only for MB-System)
  *      XMB, // The presence of this datagram indicates this file/stream has been
  *           // written by MB-System.
- *           // - this means that pings include a sidescan datagram MMS after the MRZ datagrams
+ *           // - this means that pings include a sidescan datagram XMS after the MRZ datagrams
  *           // - this means that MB-System beamflags are embedded in the MRZ datagram soundings
  *      XMC, // Comment datagram (MB-System only)
  *      XMS, // MB-System multibeam pseudosidescan derived from multibeam backscatter (MB-System only)

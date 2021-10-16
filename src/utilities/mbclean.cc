@@ -1218,9 +1218,9 @@ int main(int argc, char **argv) {
             } else {
               heading_rate = 0.0;
             }
-            printf("heading rate: %.3f deg/s",heading_rate);
-            if (fabs(heading_rate) > max_heading_rate) printf(" ********");
-            printf("\n");
+            //printf("heading rate: %.3f deg/s",heading_rate);
+            //if (fabs(heading_rate) > max_heading_rate) printf(" ********");
+            //printf("\n");
 
             for (int i = 0; i < ping[irec].beams_bath; i++) {
               if (fabs(heading_rate) > max_heading_rate) {

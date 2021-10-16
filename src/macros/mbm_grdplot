@@ -1099,6 +1099,19 @@ if (!$bounds || !$zbounds || $zmode == 1)
       }
     }
 
+  if ($zmin_f >= $zmax_f)
+    {
+    if ($zbounds)
+      {
+      $zmin_f = $zmin;
+      $zmax_f = $zmax;
+      }
+    else
+      {
+      $zmax_f = $zmin_f + 1.0;
+      }
+    }
+
   if (!$first_grd)
     {
     $first_grd = 1;
