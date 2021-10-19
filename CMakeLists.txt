@@ -165,6 +165,8 @@ set(NETCDF_LIBRARIES ${NetCDF_LIBRARIES})
 # with -D<package>_include or -D<package>_lib.
 message("override header and library locations if specified on command line")
 message("APPENDED modules to packages, now: ${packages}")
+# Set variables ${MODULE}_INCLUDE_DIR an ${MODULE}_LIBRARIES for each required
+# MODULE
 foreach(module ${modules})
   if (${module}_include)
     message("override ${module} include directory with ${${module}_include}")
@@ -245,5 +247,6 @@ add_subdirectory(src/utilities)
 if (buildQt)
   add_subdirectory(src/qt-guilib)
   add_subdirectory(src/qt-mbgrdviz)
+  add_subdirectory(src/qvtkTest)  
 endif(buildQt)
 
