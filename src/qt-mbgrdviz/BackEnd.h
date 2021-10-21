@@ -27,6 +27,10 @@ public:
   Q_INVOKABLE void showAxes(bool show);
 
 
+public slots:
+  // Slot for qml-generated signals
+  void qmlSlot(const QString &msg);
+  
 signals:
 
 protected:

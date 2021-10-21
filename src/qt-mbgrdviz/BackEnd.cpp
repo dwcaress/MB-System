@@ -4,6 +4,9 @@
 #include "BackEnd.h"
 #include "QVtkItem.h"
 
+#define VERTICAL_EXAGG "verticalExagg"
+#define SHOW_AXES "showAxes"
+
 /// Initialize singleton to null
 BackEnd *BackEnd::singleInstance_ = nullptr;
 
@@ -12,12 +15,16 @@ BackEnd::BackEnd(QQmlApplicationEngine *engine,
   qVtkItem_(nullptr)
 {
     QObject *rootObject = engine->rootObjects().first();
+
+    QObject::connect(rootObject, SIGNAL(qmlSignal(QString)),
+                     this, SLOT(qmlSlot(QString)));
+
+    
     qVtkItem_ = rootObject->findChild<mb_system::QVtkItem *>("qVtkItem");
     if (!qVtkItem_) {
         qCritical() << "Could not find \"qVtkItem\" in QML";
         exit(1);
     }
-    qDebug() << "got qVtkItem";
 
     selectedFileItem_ = rootObject->findChild<QObject *>("selectedFile");    
     if (!selectedFileItem_) {
@@ -100,3 +107,26 @@ void BackEnd::showAxes(bool show) {
   qVtkItem_->update();
 }
 
+void BackEnd::qmlSlot(const QString &qmsg) {
+    qDebug() << "qmlSlot() qmsg: " << qmsg;
+
+    QByteArray a;
+    a.append(qmsg);
+    char *msg = a.data();
+    std::cout << "msg: " << msg << std::endl;
+
+    if (!strncmp(msg, VERTICAL_EXAGG, strlen(VERTICAL_EXAGG))) {
+      float verticalExagg = atof(msg + strlen(VERTICAL_EXAGG));
+      std::cout << "vertical exagg: " << verticalExagg << std::endl;
+      qVtkItem_->setVerticalExagg(verticalExagg);
+      qVtkItem_->update();
+    }
+    else if (!strncmp(msg, SHOW_AXES, strlen(SHOW_AXES))) {
+      if (strstr(msg, "true")) {
+        showAxes(true);
+      }
+      else {
+        showAxes(false);
+      }
+    }
+  }
