@@ -11,7 +11,7 @@ QVtkItem::QVtkItem() :
     qDebug() << "mirrorVertically: " << mirrorVertically();
     // Qt and OpenGL apparently have opposite y-axis direction
     setMirrorVertically(true);
-
+    displayProperties_.verticalExagg = 1.;
 }
 
 QQuickFramebufferObject::Renderer *QVtkItem::createRenderer() const {
