@@ -9,6 +9,9 @@ namespace mb_system {
   struct DisplayProperties {
     /// Draw axes
     bool showAxes;
+
+    /// Vertical exaggeration
+    float verticalExagg;
   };
 
 }
