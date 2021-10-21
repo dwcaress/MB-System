@@ -37,15 +37,18 @@ namespace mb_system {
     /// Return pointer to gridPoints
     vtkPoints *gridPoints() { return gridPoints_; }
 
-    /** Get span of z values
-     */
-    void zBounds(float *zMin, ///< [out] minimum z value
-                 float *zMax  ///< [out] maximum z value
+    /// Get span of z values
+    void zBounds(double *zMin, ///< [out] minimum z value
+                 double *zMax  ///< [out] maximum z value
                  );
 
-    /// Get span of x, y, and z values
-    void bounds(float *xMin, float *xMax, float *yMin, float *yMax,
-		float *zMin, float *zMax);
+    /// Get span of x, y, and z values in stored grid
+    void gridBounds(double *xMin, double *xMax, double *yMin, double *yMax,
+		double *zMin, double *zMax);
+
+    /// Get span of x, y, and z values in stored grid;
+    /// saved in order xmin,xmax,ymin,ymax,zmin,zmax
+    void gridBounds(double *bounds);
 
     /// Get x-axis units
     const char *xUnits() {
@@ -61,7 +64,14 @@ namespace mb_system {
     const char *zUnits() {
       return zUnits_;
     }
-    
+
+    /// Compute z-scale factor based on lat and lon ranges
+    static float zScaleLatLon(float latRange, float lonRange,
+                              float zRange);
+
+    /// Return true if corresponding file stores x-y values as UTM
+    bool fileInUTM();
+
     
   protected:
   
@@ -71,8 +81,8 @@ namespace mb_system {
 
     /// Get offset from start of data grid.
     /// It's an error if row or col are out-of-range
-    vtkIdType gridOffset(unsigned nRows, unsigned nCols, unsigned row, unsigned col);
-
+    vtkIdType gridOffset(unsigned nRows, unsigned nCols,
+                         unsigned row, unsigned col);
   
     /// Load data from source into vtkDataSet. This function *must* call
     /// VtkAlgorithm::SetErrorCode() in case it encounters errors,

@@ -1,6 +1,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
+#include <proj.h>
 #include "vtkDataSet.h"
 #include "vtkErrorCode.h"
 #include "vtkSetGet.h"
@@ -9,6 +10,9 @@
 #include "GmtGridReader.h"
 
 #define VTK_CREATE(type, name) vtkSmartPointer<type> name = vtkSmartPointer<type>::New()
+
+#define UTM_X_NAME "Easting (meters)"
+#define UTM_Y_NAME "Northing (meters)"
 
 
 using namespace mb_system;
@@ -87,6 +91,44 @@ int GmtGridReader::RequestData(vtkInformation* request,
   yUnits_ = (const char *)strdup(gmtGrid_->header->y_units);
   zUnits_ = (const char *)strdup(gmtGrid_->header->z_units);  
 
+  PJ *proj = nullptr;
+  PJ_CONTEXT *projContext = nullptr;
+  bool convertToUTM = !fileInUTM();
+  // If x and y are not in UTM, must convert them to UTM
+  // Set up PROJ software first...
+
+  if (convertToUTM) {
+    std::cout << "file projection is not UTM" << std::endl;
+
+    // Get UTM zone of grid's W edge
+    int utmZone = ((gmtGrid_->header->wesn[0] + 180)/6 + 0.5);
+
+    PJ_CONTEXT *projContext = proj_context_create();
+    const char *srcCRS = "EPSG:4326";
+    char targCRS[64];
+    sprintf(targCRS, "+proj=utm +zone=%d +datum=WGS84", utmZone); 
+    proj = proj_create_crs_to_crs (projContext,
+                                       srcCRS,
+                                       targCRS,
+                                       nullptr);
+    if (!proj) {
+      vtkErrorMacro(<< "failed to create proj");
+      SetErrorCode(vtkErrorCode::UserError);
+      return 0;      
+    }
+
+    // Ensure proper coordinate order
+    PJ* normProj = proj_normalize_for_visualization(projContext,
+                                                    proj);
+      proj_destroy(proj);
+    if (!normProj) {
+      vtkErrorMacro(<< "failed to create norm proj");
+      SetErrorCode(vtkErrorCode::UserError);
+      return 0;      
+    }
+
+    proj = normProj;
+  }
   
   // Reset/clear points
   gridPoints_->Reset();
@@ -105,17 +147,33 @@ int GmtGridReader::RequestData(vtkInformation* request,
   std::cerr << "GmtGridReader::RequestData() - load points" << std::endl;    
   for (unsigned row = 0; row < gmtGrid_->header->n_rows; row++) {
     for (unsigned col = 0; col < gmtGrid_->header->n_columns; col++) {
-      // print debug info
-      //      fprintf(stderr, "1) x[%d]: %.8f\n", col, gmtGrid_->x[col]);
-
       unsigned dataIndex = GMT_Get_Index(gmtApi, gmtGrid_->header, row, col);
 
-      vtkIdType id = gridPoints_->InsertNextPoint(gmtGrid_->x[col],
-                                                  gmtGrid_->y[row],
-                                                  gmtGrid_->data[dataIndex]);
+      if (!convertToUTM) {
+        vtkIdType id = gridPoints_->InsertNextPoint(gmtGrid_->x[col],
+                                                    gmtGrid_->y[row],
+                                                    gmtGrid_->data[dataIndex]);
+      }
+      else {
+        // Convert lat/lon to UTM
+        PJ_COORD latLon = proj_coord(gmtGrid_->x[col],
+                                     gmtGrid_->y[row],
+                                     0, 0);
+
+        PJ_COORD utm = proj_trans(proj, PJ_FWD, latLon);
+        vtkIdType id = gridPoints_->InsertNextPoint(utm.enu.e,
+                                                    utm.enu.n,
+                                                    gmtGrid_->data[dataIndex]);       }
     }
   }
 
+  // Clean up proj UTM conversion stuff
+  if (convertToUTM) {
+    proj_destroy(proj);
+    proj_context_destroy(projContext);
+  }
+
+  
   // DEBUG DEBUG DEBUG
   int row = 0;
   int col = 0;
@@ -154,6 +212,7 @@ int GmtGridReader::RequestData(vtkInformation* request,
   }
 
   vtkIdType triangleVertexId[3];
+  int nTriangles = 0;
   // Triangles must stay within row and column bounds
   for (unsigned row = 0; row < nRows-1; row++) {
     for (unsigned col = 0; col < nCols-1; col++) {
@@ -169,9 +228,12 @@ int GmtGridReader::RequestData(vtkInformation* request,
       triangleVertexId[1] = gridOffset(nRows, nCols, row+1, col+1);
       triangleVertexId[2] = gridOffset(nRows, nCols, row+1, col);      
       gridPolygons_->InsertNextCell(3, triangleVertexId);
+
+      nTriangles++;
     }
   }
 
+  std::cout << "nTriangles=" << nTriangles << std::endl;
   // Save to object's points and polygons
   polyOutput->SetPoints(gridPoints_);
   polyOutput->SetPolys(gridPolygons_);  
@@ -254,21 +316,31 @@ void GmtGridReader::SelectionModifiedCallback(vtkObject*, unsigned long,
 }
 
 
-void GmtGridReader::zBounds(float *zMin, float *zMax) {
+void GmtGridReader::zBounds(double *zMin, double *zMax) {
   *zMin = gmtGrid_->header->z_min;
   *zMax = gmtGrid_->header->z_max;
 }
 
 
-void GmtGridReader::bounds(float *xMin, float *xMax,
-			   float *yMin, float *yMax,
-			   float *zMin, float *zMax) {
+void GmtGridReader::gridBounds(double *xMin, double *xMax,
+                               double *yMin, double *yMax,
+                               double *zMin, double *zMax) {
   *xMin = gmtGrid_->header->wesn[0];
   *xMax = gmtGrid_->header->wesn[1];
   *yMin = gmtGrid_->header->wesn[2];
   *yMax = gmtGrid_->header->wesn[3];
   *zMin = gmtGrid_->header->z_min;
   *zMax = gmtGrid_->header->z_max;
+}
+
+
+void GmtGridReader::gridBounds(double *bounds) {
+  bounds[0] = gmtGrid_->header->wesn[0];
+  bounds[1] = gmtGrid_->header->wesn[1];
+  bounds[2] = gmtGrid_->header->wesn[2];
+  bounds[3] = gmtGrid_->header->wesn[3];
+  bounds[4] = gmtGrid_->header->z_min;
+  bounds[5] = gmtGrid_->header->z_max;
 }
 
 
@@ -282,5 +354,25 @@ vtkIdType GmtGridReader::gridOffset(unsigned nRows, unsigned nCols,
   }
 
   return  (col + row * nCols);
+}
+
+
+
+float GmtGridReader::zScaleLatLon(float latRange, float lonRange,
+                                  float zRange) {
+
+  float avgLatLonRange = (latRange + lonRange) / 2.;
+
+  return avgLatLonRange / zRange;
+}
+
+
+
+bool GmtGridReader::fileInUTM() {
+  if (!strcmp(xUnits_, UTM_X_NAME) &&
+      !strcmp(yUnits_, UTM_Y_NAME)) {
+    return true;
+  }
+  return false;
 }
 
