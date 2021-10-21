@@ -1,5 +1,4 @@
 #include <string.h>
-// #include <GL/glext.h> // GENERATES MANY COMPILE ERRORS
 #include <QQuickWindow>
 #include <QOpenGLFramebufferObjectFormat>
 #include <QDebug>
@@ -9,7 +8,6 @@
 #include <vtkInteractorStyleTrackballCamera.h>
 #include <vtkTextProperty.h>
 #include <vtkCamera.h>
-#include <vtkNamedColors.h>
 #include <vtkColor.h>
 #include <vtkStringArray.h>
 #include <vtkVectorText.h>
@@ -55,7 +53,7 @@ void QVtkRenderer::render() {
     return;
   }
 
-  if (!renderWindow_ || !renderWindowInteractor_) {
+  if (!renderWindow_ || !windowInteractor_) {
     qDebug() << "renderWindow not yet defined";
     return;
   }
@@ -72,16 +70,16 @@ void QVtkRenderer::render() {
     initialize();
     initialized_ = true;
   }
-  
+
   axesActor_->SetVisibility(displayProperties_->showAxes);
 
   if (wheelEvent_ && !wheelEvent_->isAccepted()) {
     // qDebug() << "render(): handle wheelEvent";
     if (wheelEvent_->delta() > 0) {
-      renderWindowInteractor_->InvokeEvent(vtkCommand::MouseWheelForwardEvent);
+      windowInteractor_->InvokeEvent(vtkCommand::MouseWheelForwardEvent);
     }
     else {
-      renderWindowInteractor_->InvokeEvent(vtkCommand::MouseWheelBackwardEvent);
+      windowInteractor_->InvokeEvent(vtkCommand::MouseWheelBackwardEvent);
     }
     wheelEvent_->accept();
   }
@@ -107,42 +105,42 @@ void QVtkRenderer::render() {
         qDebug() << "x: " << mouseButtonEvent_->x() <<
           " y: " << mouseButtonEvent_->y();
         
-        renderWindowInteractor_->SetEventInformation(mouseButtonEvent_->x(),
-                                                     mouseButtonEvent_->y(),
-                                                     cntrlKey,
-                                                     shiftKey,
-                                                     dblClick);
+        windowInteractor_->SetEventInformation(mouseButtonEvent_->x(),
+                                               mouseButtonEvent_->y(),
+                                               cntrlKey,
+                                               shiftKey,
+                                               dblClick);
 
-        renderWindowInteractor_->InvokeEvent(vtkCommand::LeftButtonPressEvent);
+        windowInteractor_->InvokeEvent(vtkCommand::LeftButtonPressEvent);
       }
       else if (mouseButtonEvent_->buttons() & Qt::RightButton) {
         // qDebug() << "QVtkRenderer() - got right button";
-        renderWindowInteractor_->SetEventInformation(mouseButtonEvent_->x(),
-                                                     mouseButtonEvent_->y(),
-                                                     cntrlKey,
-                                                     shiftKey,
-                                                     dblClick);
+        windowInteractor_->SetEventInformation(mouseButtonEvent_->x(),
+                                               mouseButtonEvent_->y(),
+                                               cntrlKey,
+                                               shiftKey,
+                                               dblClick);
         
-        renderWindowInteractor_->InvokeEvent(vtkCommand::RightButtonPressEvent);
+        windowInteractor_->InvokeEvent(vtkCommand::RightButtonPressEvent);
       }
       else if (mouseButtonEvent_->buttons() & Qt::MiddleButton) {
         // qDebug() << "QVtkRenderer() - got middle button";
-        renderWindowInteractor_->InvokeEvent(vtkCommand::MiddleButtonPressEvent);        
+        windowInteractor_->InvokeEvent(vtkCommand::MiddleButtonPressEvent);        
       }      
     }
     else if (mouseButtonEvent_->type() == QEvent::MouseButtonRelease) {
       // qDebug() << "QVtkRenderer: mouse button release";
       if (mouseButtonEvent_->button() == Qt::LeftButton) {
         // qDebug() << "QVtkRenderer: left mouse button release";
-        renderWindowInteractor_->InvokeEvent(vtkCommand::LeftButtonReleaseEvent);
+        windowInteractor_->InvokeEvent(vtkCommand::LeftButtonReleaseEvent);
       }
       else if (mouseButtonEvent_->button() == Qt::RightButton) {
         // qDebug() << "QVtkRenderer: right mouse button release";
-        renderWindowInteractor_->InvokeEvent(vtkCommand::RightButtonReleaseEvent);
+        windowInteractor_->InvokeEvent(vtkCommand::RightButtonReleaseEvent);
       }
       else if (mouseButtonEvent_->button() == Qt::MiddleButton) {
         // qDebug() << "QVtkRenderer: right mouse button release";
-        renderWindowInteractor_->InvokeEvent(vtkCommand::MiddleButtonReleaseEvent);
+        windowInteractor_->InvokeEvent(vtkCommand::MiddleButtonReleaseEvent);
       }      
     }
     mouseButtonEvent_->accept();
@@ -166,13 +164,13 @@ void QVtkRenderer::render() {
       // mouseMoveEvent_->x() << ", y=" <<
       // mouseMoveEvent_->y();
 
-      renderWindowInteractor_->SetEventInformation(mouseMoveEvent_->x(),
-                                                   mouseMoveEvent_->y(),
-                                                   cntrlKey,
-                                                   shiftKey,
-                                                   dblClick);
+      windowInteractor_->SetEventInformation(mouseMoveEvent_->x(),
+                                             mouseMoveEvent_->y(),
+                                             cntrlKey,
+                                             shiftKey,
+                                             dblClick);
 
-      renderWindowInteractor_->InvokeEvent(vtkCommand::MouseMoveEvent);
+      windowInteractor_->InvokeEvent(vtkCommand::MouseMoveEvent);
       mouseMoveEvent_->accept();
     }
   }
@@ -259,8 +257,9 @@ void QVtkRenderer::initialize() {
 bool QVtkRenderer::initializePipeline(const char *gridFilename) {
   qDebug() << "QVtkRenderer::initializePipeline() " << gridFilename;
 
-  // Create gridReader_ before launching LoadFileWorker
-  // gridReader_ = vtkSmartPointer<GmtGridReader>::New();
+  // Colors for axes
+  namedColors_ = vtkSmartPointer<vtkNamedColors>::New();
+
 
   // Color data points based on z-value
   elevColorizer_ =
@@ -277,7 +276,7 @@ bool QVtkRenderer::initializePipeline(const char *gridFilename) {
   
   // Create mapper
   qDebug() << "create vtk mapper";
-  mapper_ = vtkSmartPointer<vtkPolyDataMapper>::New();
+  surfaceMapper_ = vtkSmartPointer<vtkPolyDataMapper>::New();
 
   // Create actor for grid surface
   qDebug() << "create vtk actor";
@@ -288,27 +287,30 @@ bool QVtkRenderer::initializePipeline(const char *gridFilename) {
   renderWindow_ =
     vtkSmartPointer<vtkGenericOpenGLRenderWindow>::New();
 
-  // Create vtk renderWindowInteractor
-  qDebug() << "create renderWindowInteractor";
-  renderWindowInteractor_ =
+  // Create vtk windowInteractor
+  qDebug() << "create windowInteractor";
+  windowInteractor_ =
     vtkSmartPointer<vtkGenericRenderWindowInteractor>::New();
 
   // Create interactor style
   interactorStyle_ =
     vtkSmartPointer<PickerInteractorStyle>::New();  
 
-  interactorStyle_->initialize(this, renderWindowInteractor_);
+  interactorStyle_->initialize(this, windowInteractor_);
 
   // Axes actor
   axesActor_ = vtkSmartPointer<vtkCubeAxesActor>::New();
 
 
-  bool status = assemblePipeline(gridReader_, gridFilename_,
-                                 elevColorizer_, renderer_, mapper_,
-                                 renderWindow_, renderWindowInteractor_,
+  /* ***
+  bool status = assemblePipelineTest(gridReader_, gridFilename_,
+                                 elevColorizer_, renderer_, surfaceMapper_,
+                                 renderWindow_, windowInteractor_,
                                  interactorStyle_, surfaceActor_, axesActor_,
                                  displayProperties_);
+                                 *** */
 
+  bool status = assemblePipeline();
 
   return status;
 }
@@ -384,18 +386,103 @@ void QVtkRenderer::setupAxes(vtkCubeAxesActor *axesActor,
 }
 
 
+bool QVtkRenderer::assemblePipeline() {
 
-bool QVtkRenderer::assemblePipeline(mb_system::GmtGridReader *gridReader,
-                                    const char *gridFilename,
-                                    vtkElevationFilter *elevColorizer,
-                                    vtkRenderer *renderer,
-                                    vtkPolyDataMapper *surfaceMapper,
-                                    vtkGenericOpenGLRenderWindow *renderWindow,
-                                    vtkGenericRenderWindowInteractor *windowInteractor,
-                                    PickerInteractorStyle *interactorStyle,
-                                    vtkActor *surfaceActor,
-                                    vtkCubeAxesActor *axesActor,
-                                    const DisplayProperties *displayProperties) {
+  qDebug() << "QVtkRenderer::assemblePipeline() for " << gridFilename_;
+
+  double gridBounds[6];
+  gridReader_->gridBounds(&gridBounds[0], &gridBounds[1],
+                          &gridBounds[2], &gridBounds[3],
+                          &gridBounds[4], &gridBounds[5]);
+  
+  qDebug() << "xMin: " << gridBounds[0] << ", xMax: " << gridBounds[1] <<
+    "yMin: " << gridBounds[2] << ", yMax: " << gridBounds[3] <<
+    "zMin: " << gridBounds[4] << ", zMax: " << gridBounds[5];
+
+
+  double *dBounds = gridReader_->GetOutput()->GetBounds();
+  
+  qDebug() << "GetBounds() - xMin: " << dBounds[0] << ", xMax: " <<
+    dBounds[1] <<
+    "yMin: " << dBounds[2] << ", yMax: " << dBounds[3] <<
+    "zMin: " << dBounds[4] << ", zMax: " << dBounds[5];
+
+  elevColorizer_->SetInputConnection(gridReader_->GetOutputPort());  
+  elevColorizer_->SetLowPoint(0, 0, gridBounds[4]);
+  elevColorizer_->SetHighPoint(0, 0, gridBounds[5]);
+
+  float zScale = 1.;
+  
+  bool scaleZ = true;
+  if (scaleZ) {
+    zScale = displayProperties_->verticalExagg;
+    
+    std::cout << "zScale " << zScale << std::endl;
+
+    qDebug() << "zScale: " << zScale;
+    transform_->Scale(1., 1., zScale);
+    transformFilter_->SetTransform(transform_);
+    transformFilter_->SetInputConnection(elevColorizer_->GetOutputPort());
+  
+    surfaceMapper_->SetInputConnection(transformFilter_->GetOutputPort());
+  }
+  else {
+    surfaceMapper_->SetInputConnection(elevColorizer_->GetOutputPort());
+  }
+  
+  // Assign surfaceMapper to actor
+  qDebug() << "assign surfaceMapper to actor";
+  surfaceActor_->SetMapper(surfaceMapper_);
+
+  // Add actor to renderer
+  renderer_->AddActor(surfaceActor_);
+
+  // Add renderer to the renderWindow
+  qDebug() << "add renderer to renderWindow";
+  renderWindow_->AddRenderer(renderer_);
+
+  interactorStyle_->SetDefaultRenderer(renderer_);
+  interactorStyle_->polyData_ = gridReader_->GetOutput();
+
+  windowInteractor_->SetInteractorStyle(interactorStyle_);
+  windowInteractor_->SetRenderWindow(renderWindow_);
+  
+  // Per QtVTK example
+  windowInteractor_->EnableRenderOff();
+
+  vtkColor3d axisColor = namedColors_->GetColor3d("black");
+
+  // Set up axes
+  setupAxes(axesActor_, axisColor,
+            surfaceMapper_->GetBounds(),
+            gridBounds,
+            gridReader_->xUnits(), gridReader_->yUnits(),
+            gridReader_->zUnits());
+
+  axesActor_->SetCamera(renderer_->GetActiveCamera());
+
+  renderer_->AddActor(axesActor_);    
+
+  renderer_->ResetCamera();
+
+  qDebug() << "pipeline assembled";  
+  return true;
+
+}
+
+
+
+bool QVtkRenderer::assemblePipelineTest(mb_system::GmtGridReader *gridReader,
+                                        const char *gridFilename,
+                                        vtkElevationFilter *elevColorizer,
+                                        vtkRenderer *renderer,
+                                        vtkPolyDataMapper *surfaceMapper,
+                                        vtkGenericOpenGLRenderWindow *renderWindow,
+                                        vtkGenericRenderWindowInteractor *windowInteractor,
+                                        PickerInteractorStyle *interactorStyle,
+                                        vtkActor *surfaceActor,
+                                        vtkCubeAxesActor *axesActor,
+                                        const DisplayProperties *displayProperties) {
 
 
   qDebug() << "QVtkRenderer::assemblePipeline() " << gridFilename;

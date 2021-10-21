@@ -16,6 +16,7 @@
 #include <vtkTransform.h>
 #include <vtkTransformFilter.h>
 #include <vtkPolyDataMapper.h>
+#include <vtkNamedColors.h>
 #include "GmtGridReader.h"
 #include "DisplayProperties.h"
 #include "PickerInteractorStyle.h"
@@ -72,24 +73,18 @@ namespace mb_system {
       displayProperties_ = properties;
     }
     
-    /// Initilize and assemble VTK pipeline; returns true on success,
-    /// false on error.
-    /// 'public' access so can access from test app
-    bool initializePipeline(const char *grdFilename);
-
-    /// Connect pipeline components
-    static bool assemblePipeline(mb_system::GmtGridReader *reader,
-                                 const char *gridFilename,
-                                 vtkElevationFilter *elevColorizer,
-                                 vtkRenderer *renderer,
-                                 vtkPolyDataMapper *surfaceMapper,
-                                 vtkGenericOpenGLRenderWindow *renderWindow,
-                                 vtkGenericRenderWindowInteractor *windowInteractor,
-                                 PickerInteractorStyle *interactorStyle,
-                                 vtkActor *surfaceActor,
-                                 vtkCubeAxesActor *axesActor,
-                                 const DisplayProperties *displayProperties);
-
+    /// Connect pipeline components (static method for standalone testing)
+    static bool assemblePipelineTest(mb_system::GmtGridReader *reader,
+                                     const char *gridFilename,
+                                     vtkElevationFilter *elevColorizer,
+                                     vtkRenderer *renderer,
+                                     vtkPolyDataMapper *surfaceMapper,
+                                     vtkGenericOpenGLRenderWindow *renderWindow,
+                                     vtkGenericRenderWindowInteractor *intactor,
+                                     PickerInteractorStyle *interactorStyle,
+                                     vtkActor *surfaceActor,
+                                     vtkCubeAxesActor *axesActor,
+                                     const DisplayProperties *properties);
 
     /// Get item member
     QVtkItem *getItem() {
@@ -108,6 +103,13 @@ namespace mb_system {
     /// Display properties copied from QVtkItem
     const DisplayProperties *displayProperties_;
     
+    /// Initilize VTK pipeline member objects, then assemble (connect) ; return
+    /// false on error.
+    bool initializePipeline(const char *grdFilename);
+
+    /// Connect pipeline components
+    bool assemblePipeline();
+
     /// Initialize renderer; build VTK pipeline
     void initialize();
 
@@ -145,7 +147,7 @@ namespace mb_system {
     vtkSmartPointer<vtkTransformFilter> transformFilter_;
     
     /// VTK mapper
-    vtkSmartPointer<vtkPolyDataMapper> mapper_;
+    vtkSmartPointer<vtkPolyDataMapper> surfaceMapper_;
 
     /// Grid surface actor
     vtkSmartPointer<vtkActor> surfaceActor_;
@@ -160,10 +162,13 @@ namespace mb_system {
     vtkSmartPointer<vtkGenericOpenGLRenderWindow> renderWindow_;
 
     /// VTK mouse/key interactor
-    vtkSmartPointer<vtkGenericRenderWindowInteractor> renderWindowInteractor_;
+    vtkSmartPointer<vtkGenericRenderWindowInteractor> windowInteractor_;
 
     /// VTK interactor style
     vtkSmartPointer<PickerInteractorStyle> interactorStyle_;
+
+    /// VTK named colors
+    vtkSmartPointer<vtkNamedColors> namedColors_;
     
     /// Name of associated grid file
     char *gridFilename_;
