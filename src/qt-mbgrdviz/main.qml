@@ -15,12 +15,15 @@ See https://qml.guide/singletons/
 *** */
 
 ApplicationWindow {
-    id: applicationWindow
+    id: mainWindow
     objectName: "mainWindow"
     visible: true
     width: 1000
     height: 880
-    title: "mbgrdviz-4"
+    title: "qt-mbgrdviz"
+
+    // Define signals
+    signal qmlSignal(string msg)
     
     property int selectedAxisLabel: -1
     property real dragSpeedModifier: 100.0
@@ -118,10 +121,15 @@ ApplicationWindow {
             Action { checkable: true; text: qsTr("&Sites") }
             Action { checkable: true; text: qsTr("&Routes") }
             Action { checkable: true; text: qsTr("&Vector") }
-            Action { checkable: true; text: qsTr("&Profile window") }
+            
+            Action { checkable: true; text: qsTr("&Profile window")
+            }
+            
             Action { checkable: true; text: qsTr("&Axes")
-	    onTriggered: { console.log("axes triggered: ", checked);
-	    BackEnd.showAxes(checked)}}	    
+	      onTriggered: { console.log("axes triggered: ", checked);
+              mainWindow.qmlSignal("showAxes " + checked)
+              }}
+            
             MenuSeparator {}
             Menu {
                 title: "Shading"
@@ -250,7 +258,6 @@ ApplicationWindow {
             id: busyIndicator
             objectName: "busyIndicator"
             anchors.bottom: parent.bottom
-            running: image.status === Image.Loading
         }
 
         Item {
@@ -259,7 +266,6 @@ ApplicationWindow {
             anchors.bottom: parent.bottom
             anchors.bottomMargin: 0
             anchors.top: selectedFile.bottom
-            // anchors.topMargin: -36
             anchors.topMargin: 36            
             objectName: "surface3DItem"
 
@@ -271,8 +277,7 @@ ApplicationWindow {
                 anchors.fill: parent
                 width: 1000
                 height: 1000
-                /// enabled: false   // TEST TEST TEST
-                
+
                 // Update picked coordinate text
                 onPickedPointChanged: {
                   console.log("user picked a point!")
