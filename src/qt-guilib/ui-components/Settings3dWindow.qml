@@ -162,12 +162,17 @@ Window {
                     fontSizeMode: Text.Fit
                     font.pixelSize: 18
                 }
-
-                TextField {
-                    id: textField
-                    objectName: "3dVerticalExaggeration"
-                    placeholderText: qsTr("1")
+                Label { text: "Vertical exagg" }
+                Slider {
+                    id: zScale
+                    Layout.fillWidth: true
+                    from: 1
+                    to: 50
+                    value: 1
+                    onValueChanged: mainWindow.qmlSignal("verticalExagg " + value)
                 }
+                // Set displayed decimal places on slider label
+                Label { text: zScale.toFixed(2) }                
             }
         }
 
