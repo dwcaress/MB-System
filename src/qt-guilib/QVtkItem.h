@@ -74,6 +74,12 @@ namespace mb_system {
     void showAxes(bool show) {
       displayProperties_.showAxes = show;
     }
+
+    /// Vertical exaggeration
+    void setVerticalExagg(float verticalExagg) {
+      qDebug() << "setVerticalExagg() " << verticalExagg;
+      displayProperties_.verticalExagg = verticalExagg;
+    }
     
 
   signals:
