@@ -87,7 +87,8 @@ namespace mb_system {
                                  vtkGenericRenderWindowInteractor *windowInteractor,
                                  PickerInteractorStyle *interactorStyle,
                                  vtkActor *surfaceActor,
-                                 vtkCubeAxesActor *axesActor);
+                                 vtkCubeAxesActor *axesActor,
+                                 const DisplayProperties *displayProperties);
 
 
     /// Get item member
@@ -95,13 +96,6 @@ namespace mb_system {
       return item_;
     }
     
-    static bool assembleTestPipeline(
-                                     vtkRenderer *renderer,
-                                     vtkGenericOpenGLRenderWindow *renderWindow,
-                                     vtkGenericRenderWindowInteractor *interactr,
-                                     PickerInteractorStyle *style);
-
-                                                                  
                                                                  
   public slots:
 
@@ -123,7 +117,8 @@ namespace mb_system {
     /// Setup axes
     static void setupAxes(vtkCubeAxesActor *axesActor,
                           vtkColor3d &axisColor,
-                          double *bounds,
+                          double *surfaceBounds,
+                          double *gridBounds,
                           const char *xUnits, const char *yUnits,
                           const char *zUnits);
 
