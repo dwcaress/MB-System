@@ -110,7 +110,7 @@ Window {
                     text: qsTr("Apply")
                     onClicked: {
                         console.log("clicked OK");
-                        BackEnd.settings2dUpdated();
+                        mainWindow.qmlSignal("settings2dUpdated")              
                     }
 
                 }
