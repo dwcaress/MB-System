@@ -15,8 +15,6 @@ Window {
     property alias element8: element8
     title: qsTr("3D settings")
 
-
-
     GridLayout {
         id: gridLayout1
         rowSpacing: 2
@@ -40,7 +38,6 @@ Window {
                 height: 400
                 rows: 3
                 columns: 2
-
 
                 Text {
                     id: element1
@@ -134,15 +131,7 @@ Window {
                     objectName: "3dModelZoom"
                     placeholderText:  qsTr("1")
                 }
-
-
             }
-
-
-
-
-
-
         }
 
         Frame {
@@ -156,23 +145,30 @@ Window {
                 rows: 1
                 columns: 2
 
+                /* ***
                 Text {
                     id: element4
                     text: qsTr("Vertical exagg")
                     fontSizeMode: Text.Fit
                     font.pixelSize: 18
                 }
-                Label { text: "Vertical exagg" }
+                *** */
+                Label {
+                    text: qsTr("Vertical exagg")
+                    fontSizeMode: Text.Fit
+                    font.pixelSize: 18                    
+                }
+                
                 Slider {
                     id: zScale
                     Layout.fillWidth: true
                     from: 1
-                    to: 50
+                    to: 5
                     value: 1
                     onValueChanged: mainWindow.qmlSignal("verticalExagg " + value)
                 }
                 // Set displayed decimal places on slider label
-                Label { text: zScale.toFixed(2) }                
+                Label { text: "val: " + zScale.value }                
             }
         }
 
@@ -229,10 +225,8 @@ Window {
                     text: qsTr("Apply")
                     onClicked: {
                         console.log("clicked OK");
-                        BackEnd.settings3dUpdated();
+                        mainWindow.qmlSignal("settings3dUpdated")          
                     }
-
-
                 }
 
                 Button {
