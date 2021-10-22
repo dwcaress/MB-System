@@ -148,7 +148,8 @@ TerrainNavLog::~TerrainNavLog()
   if (_mleZ) delete _mleZ;
   if (_mlePsiBerg) delete _mlePsiBerg;
   if (_mleVarPsiBerg) delete _mleVarPsiBerg;
-  
+  if (_numReinits) delete _numReinits;
+
 }
 
 // These log functions takes the place of the setFields()

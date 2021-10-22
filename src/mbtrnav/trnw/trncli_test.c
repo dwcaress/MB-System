@@ -1036,7 +1036,10 @@ static int s_app_main(app_cfg_t *cfg)
     int retval=-1;
     trncli_t *dcli = trncli_new(cfg->utm);
     int test=-1;
-  
+    bool quit=false;
+
+    while( !g_interrupt && !quit ){
+    fprintf(stderr,"connecting %s:%d\n",cfg->trn_cfg->trn_host, cfg->trn_cfg->trn_port);
     if( (test=trncli_connect(dcli, cfg->trn_cfg->trn_host, cfg->trn_cfg->trn_port))==0){
         fprintf(stderr,"connect OK\n");
         if(trncli_init_trn(dcli, cfg->trn_cfg)>0){
@@ -1047,21 +1050,26 @@ static int s_app_main(app_cfg_t *cfg)
         switch (cfg->input_src) {
             case SRC_CSV:
                 retval=s_trncli_test_csv(dcli, cfg);
+                quit=true;
                 break;
             case SRC_MBIN:
                 retval=s_trncli_test_mbin(dcli, cfg);
+                quit=true;
                 break;
             case SRC_TRNC:
                 retval=s_trncli_test_trnc(dcli, cfg);
+                quit=true;
                 break;
             default:
                 fprintf(stderr,"invalid input type [%d]\n",cfg->input_src);
+                quit=true;
                 break;
         }
     }else{
         fprintf(stderr,"trncli_connect failed [%d]\n",test);
+        sleep(5);
     }
-    
+    }
     if( (test=trncli_disconnect(dcli))!=0){
         fprintf(stderr,"trncli_disconnect failed [%d]\n",test);
     }

@@ -66,6 +66,8 @@
 /////////////////////////
 // Includes
 /////////////////////////
+#include "trn_common.h"
+#include <stdint.h>
 
 /////////////////////////
 // Macros
@@ -137,6 +139,12 @@
 #define TRN_MSG_FILT_STATE  'H'
 #define TRN_MSG_N_REINITS   'R'
 #define TRN_MSG_FILT_REINIT 'r'
+#define TRN_MSG_FILT_REINIT_OFFSET 'o'
+#define TRN_MSG_FILT_REINIT_BOX 'b'
+#define TRN_MSG_SET_INITSTDDEVXYZ 'x'
+#define TRN_MSG_GET_INITSTDDEVXYZ 'X'
+#define TRN_MSG_SET_ESTNAVOFS 'j'
+#define TRN_MSG_GET_ESTNAVOFS 'J'
 // extension
 #define TRN_MSG_PING        '?'
 #define TRN_MSG_IS_INIT     'i'
@@ -212,6 +220,7 @@ typedef struct pt_cdata_s{
 
 }pt_cdata_t;
 #pragma pack(pop)
+
 #define TRNU_EST_DIM 5
 #define TRNU_COV_DIM 4
 
@@ -419,6 +428,8 @@ typedef struct ct_cdata_s{
     float vdr;
     wposet_t *pt;
     wmeast_t *mt;
+    d_triplet_t xyz_sdev;
+    d_triplet_t est_nav_ofs;
     char *mapname;
     char *cfgname;
     char *particlename;

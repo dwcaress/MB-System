@@ -64,6 +64,7 @@
 /////////////////////////
 #include "trnu_cli.h"
 #include "trnif_proto.h"
+#include "mtime.h"
 
 /////////////////////////
 // Macros

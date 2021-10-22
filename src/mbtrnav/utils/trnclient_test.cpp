@@ -251,7 +251,7 @@ int main(int argc, char** argv)
     int c=0;
     double delay_sec=0.0;
 
-    while ( (c = getopt(argc, argv, "a:f:h:l:m:o:p:st:v:")) != EOF )
+    while ( (c = getopt(argc, argv, "a:f:hl:m:o:p:st:v:")) != EOF )
     {
         if (c == 'l'){
             if(NULL!=worker->logdir)

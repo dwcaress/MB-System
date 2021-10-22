@@ -1,10 +1,11 @@
 #include "TerrainMapDEM.h"
 
-#include "mapio.h"
-#include <cmath>
-#include "genFilterDefs.h"
-
 #include <iostream>
+#include <cmath>
+#include "mapio.h"
+#include "genFilterDefs.h"
+#include "trn_log.h"
+
 
 double
 TerrainMapDEM::

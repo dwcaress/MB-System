@@ -10,8 +10,9 @@
  ******************************************************************************/
 
 #include <sys/types.h>
-#include <sys/socket.h>
+#include <sys/stat.h>
 #include <unistd.h>
+#include <sys/socket.h>
 #include <errno.h>
 #ifdef _QNX
 #include "Exception.h"
@@ -41,17 +42,35 @@
 //static int transitionMatrix[5][3] = {{2,0,1},{1,1,1},{1,2,2},{2,2,2},{2,2,2}};
 
 TerrainNavClient::TerrainNavClient()
-  :TerrainNav()
+  :TerrainNav(),
+_logdir(NULL),
+_connected(false),
+_mbtrn_server_type(true),
+_server_ip(NULL),
+_sockfd(-1),
+_sockport(-1)
 {
-
+    this->mapFile = NULL;
+    this->vehicleSpecFile = NULL;
+    this->saveDirectory = NULL;
+    this->particlesFile = NULL;
+    this->tNavFilter = NULL;
+    this->terrainMap = NULL;
+    this->filterType = 1;
+    this->mapType = 1;
+    this->allowFilterReinits = true;
+    memset(_comms_buf,0,TRN_MSG_SIZE);
+    _initialized = false;
 }
 
 // Just establish a connection to a server that does not need initialization.
 // Used to connect to the Trn server in mbtrnpp
 TerrainNavClient::TerrainNavClient(char *server_ip, int port)
-  :TerrainNav(), _connected(false), _mbtrn_server_type(true), _server_ip(NULL), _sockport(port)
+:TerrainNav(), _connected(false), _mbtrn_server_type(true), _server_ip(NULL),
+_sockfd(-1), _sockport(port)
 {
   _server_ip = (NULL!=server_ip ? strdup(server_ip) : NULL);
+    memset(_comms_buf,0,TRN_MSG_SIZE);
   init_comms();
   _initialized = true;
 }
@@ -60,7 +79,7 @@ TerrainNavClient::TerrainNavClient(char *server_ip, int port)
 TerrainNavClient::TerrainNavClient(char *server_ip, int port,
            char *mapName, char *vehicleSpecs, char *particlefile, char *logdir,
            const int &filterType, const int &mapType)
-  : TerrainNav(), _sockport(port)
+: TerrainNav(), _connected(false), _mbtrn_server_type(true), _sockfd(-1), _sockport(port)
 {
   // initialize member variables from the argument list
   // do not load maps, do not call initVariables() as those are uneeded
@@ -73,14 +92,20 @@ TerrainNavClient::TerrainNavClient(char *server_ip, int port,
   this->filterType = filterType;
   this->mapType = mapType;
   this->allowFilterReinits = true;
+    memset(_comms_buf,0,TRN_MSG_SIZE);
+
+    if(this->mapType == 1) {
+        terrainMap = new TerrainMapDEM(this->mapFile);
+    } else {
+        terrainMap = new TerrainMapOctree(this->mapFile);
+    }
 
   // Initialize TNavConfig
   TNavConfig::instance()->setMapFile(this->mapFile);
   TNavConfig::instance()->setVehicleSpecsFile(this->vehicleSpecFile);
   TNavConfig::instance()->setParticlesFile(this->particlesFile);
   TNavConfig::instance()->setLogDir(this->saveDirectory);
-
-  _server_ip = (NULL!=server_ip ? strdup(server_ip) : NULL);
+  _server_ip = STRDUPNULL(server_ip);
   _logdir    = (NULL!=logdir ? strdup(logdir) : NULL);
   _initialized = false;
 
@@ -92,8 +117,9 @@ TerrainNavClient::TerrainNavClient(char *server_ip, int port,
 
 TerrainNavClient::~TerrainNavClient()
 {
-  close(_sockfd);
-  if (NULL!=_server_ip) delete _server_ip;
+    close(_sockfd);
+    free(_server_ip);
+    free(_logdir);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -223,7 +249,7 @@ char TerrainNavClient::get_msg()
 
     if (len > 0) {
       _server_msg.unserialize(_comms_buf, TRN_MSG_SIZE);
-      //printf("TerrainNavClient got %s\n", _server_msg.to_s(_comms_buf, TRN_MSG_SIZE));
+        // fprintf(stderr,"%s:%d %s - %s/%d/%d\n",__FILE__,__LINE__,__func__, _server_msg.to_s(_comms_buf, TRN_MSG_SIZE),len,TRN_MSG_SIZE);
     }
     //printf("got %d bytes in response\n", len);
 
@@ -307,7 +333,7 @@ size_t TerrainNavClient::send_msg(commsT& msg)
     }
   }
   else {
-    printf("TerrainNavClient::send_msg() - Can't send - no server connection!\n");
+      fprintf(stderr,"TerrainNavClient::send_msg() - Can't send - no server connection!\n");
     throw Exception("TRN Server connection lost");
   }
   return sl;
@@ -316,38 +342,48 @@ size_t TerrainNavClient::send_msg(commsT& msg)
 // Initialize the server with map and config filenames.
 void TerrainNavClient::init_server()
 {
-  // filter type and map type encoded in single integer
-  // param = filter*100 + map
-  char cmt = char(mapType);
-  cmt *= 10;
-  char cft = char(filterType);
-  char param = cmt + cft;
+    // filter type and map type encoded in single integer
+    // param = filter*100 + map
+    char cmt = char(mapType);
+    cmt *= 10;
+    char cft = char(filterType);
+    char param = cmt + cft;
 
-  // Use basenames (no pathnames) of files and folders when connecting
-  // to trn-server. Let the server find the files in its environment.
-  printf("TerrainNavClient::init_server() - server initializatiing...\n");
-  commsT init(TRN_INIT, param,
-              TRNUtils::basename(TNavConfig::instance()->getMapFile()),
-              TRNUtils::basename(TNavConfig::instance()->getVehicleSpecsFile()),
-              TRNUtils::basename(TNavConfig::instance()->getParticlesFile()),
-              TRNUtils::basename(TNavConfig::instance()->getLogDir())
-             );
+    // Use basenames (no pathnames) of files and folders when connecting
+    // to trn-server. Let the server find the files in its environment.
+    fprintf(stderr,"TerrainNavClient::init_server() - server initializatiing...\n");
+    // TNavConfig::get* use strdup - caller must free
+    char *map = TNavConfig::instance()->getMapFile();
+    char *veh=TNavConfig::instance()->getVehicleSpecsFile();
+    char *par=TNavConfig::instance()->getParticlesFile();
+    char *log=TNavConfig::instance()->getLogDir();
 
-  _initialized = false;
-  if (0 != send_msg(init)) {
-    // Check for ack response
-    if (TRN_ACK != get_msg()) {
-      printf("TerrainNavClient::init_server() - server initialization failed!\n");
-      _initialized = false;
+    commsT init(TRN_INIT, param,
+                TRNUtils::basename(map),
+                TRNUtils::basename(veh),
+                TRNUtils::basename(par),
+                TRNUtils::basename(log)
+                );
+
+    free(map);
+    free(veh);
+    free(par);
+    free(log);
+    _initialized = false;
+    if (0 != send_msg(init)) {
+        // Check for ack response
+        if (TRN_ACK != get_msg()) {
+            fprintf(stderr,"TerrainNavClient::init_server() - server initialization failed!\n");
+            _initialized = false;
+        }
+        else {
+            _initialized = true;
+        }
     }
     else {
-      _initialized = true;
+        _initialized = false;
     }
-  }
-  else {
-    _initialized = false;
-  }
-  if( !_initialized ) throw Exception("TRN Server initialization failed!");
+    if( !_initialized ) throw Exception("TRN Server initialization failed!");
 }
 
 void TerrainNavClient::estimatePose(poseT* estimate, const int &type)
@@ -770,24 +806,132 @@ void TerrainNavClient::reinitFilter(const bool lowInfoTransition)
   }
 }
 
+void TerrainNavClient::reinitFilterOffset(const bool lowInfoTransition,
+                                       double ofs_x, double ofs_y, double ofs_z)
+{
+    commsT reinit(TRN_FILT_REINIT_OFFSET,(lowInfoTransition?1:0),
+                  ofs_x, ofs_y, ofs_z);
+
+    reinit.serialize(_comms_buf);
+
+    if(!requestAndConfirm(reinit, TRN_ACK)) {
+        printf("TerrainNavClient::reinitFilterBox() - comms failure\n");
+    }
+}
+
+void TerrainNavClient::reinitFilterBox(const bool lowInfoTransition,
+                                       double ofs_x, double ofs_y, double ofs_z,
+                                       double sdev_x, double sdev_y, double sdev_z)
+{
+    commsT reinit(TRN_FILT_REINIT_BOX,(lowInfoTransition?1:0),
+                  ofs_x, ofs_y, ofs_z,
+                  sdev_x, sdev_y, sdev_z);
+
+    reinit.serialize(_comms_buf);
+
+    if(!requestAndConfirm(reinit, TRN_ACK)) {
+        printf("TerrainNavClient::reinitFilterBox() - comms failure\n");
+    }
+}
+
+
+void TerrainNavClient::setEstNavOffset(double offset_x, double offset_y, double offset_z)
+{
+    commsT seteno(TRN_SET_ESTNAVOFS, offset_x, offset_y, offset_z);
+
+    seteno.serialize(_comms_buf);
+
+    if (!requestAndConfirm(seteno, TRN_ACK)){
+        printf("TerrainNavClient::setEstNavOffset() - comms failure\n");
+    }
+    return;
+}
+
+d_triplet_t *TerrainNavClient::getEstNavOffset(d_triplet_t *dest)
+{
+    d_triplet_t *retval = NULL;
+    commsT seteno(TRN_GET_ESTNAVOFS, 0., 0., 0.);
+    seteno.serialize(_comms_buf);
+
+    if (requestAndConfirm(seteno, TRN_GET_ESTNAVOFS)){
+        if(NULL != dest){
+            if(_server_msg.msg_type == TRN_GET_ESTNAVOFS){
+                memcpy(dest, &_server_msg.est_nav_ofs, sizeof(d_triplet_t));
+                retval = dest;
+            }
+        }
+    }else{
+        printf("TerrainNavClient::getEstNavOffset() - comms failure\n");
+    }
+
+    return retval;
+}
+
+void TerrainNavClient::setInitStdDevXYZ(double sdev_x, double sdev_y, double sdev_z)
+{
+    commsT seteno(TRN_SET_INITSTDDEVXYZ, sdev_x, sdev_y, sdev_z);
+
+    seteno.serialize(_comms_buf);
+
+    if (!requestAndConfirm(seteno, TRN_ACK)){
+        printf("TerrainNavClient::setEstNavOffset() - comms failure\n");
+    }
+    return;
+}
+
+d_triplet_t *TerrainNavClient::getInitStdDevXYZ(d_triplet_t *dest)
+{
+    d_triplet_t *retval = NULL;
+    commsT seteno(TRN_GET_INITSTDDEVXYZ, 0., 0., 0.);
+
+    seteno.serialize(_comms_buf);
+
+    if (requestAndConfirm(seteno, TRN_GET_INITSTDDEVXYZ)){
+        if(NULL != dest){
+            if(_server_msg.msg_type == TRN_GET_INITSTDDEVXYZ){
+                memcpy(dest, &_server_msg.xyz_sdev, sizeof(d_triplet_t));
+                retval = dest;
+            }else{
+                fprintf(stderr,"%s:%d ERR msg type[%d]\n",__func__,__LINE__,_server_msg.msg_type);
+            }
+        }
+    }else{
+        printf("TerrainNavClient::getEstNavOffset() - comms failure\n");
+    }
+
+    return retval;
+}
+
+void TerrainNavClient::setInitVars(InitVars *init_vars)
+{
+    fprintf(stderr,"%s:%d - %s not implemented\n",__FILE__,__LINE__,__func__);
+    return;
+}
+
+
 bool TerrainNavClient::requestAndConfirm(commsT& msg,
 					    char expected_ret_type)
 {
-  const int MAX_SEND_ATTEMPTS = 3;
+    const int MAX_SEND_ATTEMPTS = 3;
 
-  for (int i = 0; i < MAX_SEND_ATTEMPTS; i++) {
-    if (0 != send_msg(msg)) {
-      // Check the response if any
-      char ret_msg = get_msg();
-      if (expected_ret_type != ret_msg) {
-        //printf("%d: TerrainNavClient::requestAndConfirm()-unexpected response",
-        //i+1);
-        //printf("%s", _server_msg.to_s(_comms_buf, TRN_MSG_SIZE));
-      }
-      else return true;
+    for (int i = 0; i < MAX_SEND_ATTEMPTS; i++) {
+        size_t test=0;
+        if ( (test=send_msg(msg)) !=0 ) {
+            // Check the response if any
+            char ret_msg = get_msg();
+            if (expected_ret_type != ret_msg) {
+                fprintf(stderr,"%s:%d %s - unexpected response %d/%d\n",__FILE__,__LINE__,__func__,expected_ret_type, ret_msg);
+                //printf("%d: TerrainNavClient::requestAndConfirm()-unexpected response",
+                //i+1);
+                //printf("%s", _server_msg.to_s(_comms_buf, TRN_MSG_SIZE));
+            }else{
+                return true;
+            }
+        }else{
+            fprintf(stderr,"%s:%d %s - ERR send_msg ret [%zu]\n",__FILE__,__LINE__,__func__,test);
+        }
     }
-  }
 
-  return false;
+    return false;
 }
 

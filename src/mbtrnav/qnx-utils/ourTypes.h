@@ -35,8 +35,9 @@ typedef unsigned char Boolean;
 
 #define callMemberFunction(objPtr, memberPtr) ((objPtr)->*(memberPtr))
 
+#if defined(__APPLE__) 
 #define max(a,b)  (((a) > (b)) ? (a) : (b))
 #define min(a,b)  (((a) < (b)) ? (a) : (b))
-
+#endif
 
 #endif
