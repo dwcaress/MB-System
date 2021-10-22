@@ -44,9 +44,12 @@ void PickerInteractorStyle::OnLeftButtonDown() {
     
   double *worldCoord = picker->GetPickPosition();
     
-  std::cout << "WorldCoord value: " << worldCoord[0] << " " << worldCoord[1] << " "
-            << worldCoord[2] << std::endl;
+  std::cout << "WorldCoord value: " << worldCoord[0] << " " <<
+    worldCoord[1] << " " << worldCoord[2] << std::endl;
 
+  // Correct elevation for vertical exaggeration
+  worldCoord[2] /= qVtkRenderer_->getDisplayProperties()->verticalExagg;
+  
   char buf[256];
   if (pointId != -1) {
 
