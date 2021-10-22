@@ -72,6 +72,12 @@ namespace mb_system {
     void setDisplayProperties(DisplayProperties *properties) {
       displayProperties_ = properties;
     }
+
+    /// Return pointer to DisplayProperties member
+    const DisplayProperties* getDisplayProperties() {
+      return (const DisplayProperties *)displayProperties_;
+    }
+
     
     /// Connect pipeline components (static method for standalone testing)
     static bool assemblePipelineTest(mb_system::GmtGridReader *reader,
@@ -182,6 +188,9 @@ namespace mb_system {
     /// Latest mouse move event
     std::shared_ptr<QMouseEvent> mouseMoveEvent_;
 
+    /// Most recent displayed z-scale
+    float prevZScale_;
+    
     /// Worker thread to load grid file
     class LoadFileWorker : public QThread {
 

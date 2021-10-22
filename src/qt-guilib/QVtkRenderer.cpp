@@ -25,7 +25,8 @@ QVtkRenderer::QVtkRenderer() :
   gridFilename_(nullptr),
   wheelEvent_(nullptr),
   mouseButtonEvent_(nullptr),
-  mouseMoveEvent_(nullptr)
+  mouseMoveEvent_(nullptr),
+  prevZScale_(1.)
 {
     worker_ = new LoadFileWorker(*this);
 
@@ -72,7 +73,13 @@ void QVtkRenderer::render() {
   }
 
   axesActor_->SetVisibility(displayProperties_->showAxes);
-
+  
+  // User changed vertical scale - rebuild pipeline
+  if (displayProperties_->verticalExagg != prevZScale_) {
+    assemblePipeline();
+    prevZScale_ = displayProperties_->verticalExagg;
+  }
+  
   if (wheelEvent_ && !wheelEvent_->isAccepted()) {
     // qDebug() << "render(): handle wheelEvent";
     if (wheelEvent_->delta() > 0) {
@@ -411,24 +418,16 @@ bool QVtkRenderer::assemblePipeline() {
   elevColorizer_->SetLowPoint(0, 0, gridBounds[4]);
   elevColorizer_->SetHighPoint(0, 0, gridBounds[5]);
 
-  float zScale = 1.;
+  float zScale = displayProperties_->verticalExagg;
+  qDebug() << "zScale: " << zScale;
+  /// Do we have to recreate transform and transform filter each time?
+  transform_ = vtkSmartPointer<vtkTransform>::New();
+  transformFilter_ = vtkSmartPointer<vtkTransformFilter>::New();  
+  transform_->Scale(1., 1., zScale);
+  transformFilter_->SetTransform(transform_);
+  transformFilter_->SetInputConnection(elevColorizer_->GetOutputPort());
   
-  bool scaleZ = true;
-  if (scaleZ) {
-    zScale = displayProperties_->verticalExagg;
-    
-    std::cout << "zScale " << zScale << std::endl;
-
-    qDebug() << "zScale: " << zScale;
-    transform_->Scale(1., 1., zScale);
-    transformFilter_->SetTransform(transform_);
-    transformFilter_->SetInputConnection(elevColorizer_->GetOutputPort());
-  
-    surfaceMapper_->SetInputConnection(transformFilter_->GetOutputPort());
-  }
-  else {
-    surfaceMapper_->SetInputConnection(elevColorizer_->GetOutputPort());
-  }
+  surfaceMapper_->SetInputConnection(transformFilter_->GetOutputPort());
   
   // Assign surfaceMapper to actor
   qDebug() << "assign surfaceMapper to actor";
