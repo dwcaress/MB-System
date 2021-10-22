@@ -109,6 +109,8 @@ using namespace std;
 //#define NIS_WINDOW_LENGTH 	20		//Length of NIS window
 //#endif
 
+#define LOGDIR_DFL "session"
+
 class PositionLog;
 class TerrainNavLog;
 
@@ -393,26 +395,8 @@ class TerrainNav
    */
   virtual inline void setFilterReinit(const bool allow){this->allowFilterReinits = allow;}
 
-  /* Helper Function: setEstNavOffset
-   * Usage: setEstNavOffset(offset_x, offset_y, offset_z)
-   * -------------------------------------------------------------------------*/
-  /*! This function sets the x, y, z values of the estNavOffset structure that
-   * holds the prior offset estimate. This function is used prior to a particle
-   * filter reinit callvin order to force the reinit to be centered on a particular
-   * offset value rather than the actual last offset estimate. This capability
-   * was created for use by the MB-System program mbtrnpp so that reinit could,
-   * if necessary, be forced to be centered on a zero offset or a prior very good
-   * offset estimate if that is known. Resetting the prior offset estimate
-   * addresses the occasional tendency of TRN to converge on similar topoography
-   * far from the actual location - when this occurs convergence will soon be lost,
-   * but the reinit should be centered on a more likely position if that is known
-   * external to TRN.
-   * 29-Aug-2020 David Caress MBARI
-   */
-  void setEstNavOffset(double offset_x, double offset_y, double offset_z);
-
   /* Helper Function: reinitFilter
-   * Usage: reinitFilter()
+   * Usage: reinitFilter(lowInfoTransition, init_vars)
    * -------------------------------------------------------------------------*/
   /*! This function reinitializes the filter.  It will copy relevant information
    * from the current filter object, delete that object, then re-create the
@@ -421,7 +405,79 @@ class TerrainNav
    * 23-Aug-2016 RGH : Exposing for use with TerrainAid and TerrainNavClient
    */
   //old state machine version: void reinitFilter(int newState, bool lowInfoTransition);
-  void reinitFilter(bool lowInfoTransition);
+  virtual void reinitFilter(bool lowInfoTransition);
+
+  virtual void reinitFilterOffset(bool lowInfoTransition,
+                                  double offset_x, double offset_y, double offset_z);
+  virtual void reinitFilterBox(bool lowInfoTransition,
+                               double offset_x, double offset_y, double offset_z,
+                               double sdev_x, double sdev_y, double sdev_z);
+
+
+    /* Helper Function: setEstNavOffset
+     * Usage: setEstNavOffset(offset_x, offset_y, offset_z)
+     * -------------------------------------------------------------------------*/
+    /*!This function sets the x, y, z values of the estNavOffset structure that
+     * holds the prior offset estimate. This function is used prior to a particle
+     * filter reinit callvin order to force the reinit to be centered on a particular
+     * offset value rather than the actual last offset estimate. This capability
+     * was created for use by the MB-System program mbtrnpp so that reinit could,
+     * if necessary, be forced to be centered on a zero offset or a prior very good
+     * offset estimate if that is known. Resetting the prior offset estimate
+     * addresses the occasional tendency of TRN to converge on similar topoography
+     * far from the actual location - when this occurs convergence will soon be lost,
+     * but the reinit should be centered on a more likely position if that is known
+     * external to TRN.
+     * 29-Aug-2020 David Caress MBARI
+     */
+    virtual inline void setEstNavOffset(double offset_x, double offset_y, double offset_z){
+        // estNavOffset is a poseT, interpreted as relative offsets
+        estNavOffset.x = offset_x;
+        estNavOffset.y = offset_y;
+        estNavOffset.z = offset_z;
+    }
+
+    virtual inline d_triplet_t *getEstNavOffset(d_triplet_t *dest){
+        // estNavOffset is a poseT, interpreted as relative offsets
+        d_triplet_t *retval=NULL;
+        if(NULL!=dest){
+            dest->x = estNavOffset.x;
+            dest->y = estNavOffset.y;
+            dest->z = estNavOffset.z;
+            retval=dest;
+        }else{
+            fprintf(stderr,"%s: NULL dest\n",__func__);
+        }
+        return retval;
+    }
+
+    /* Helper Function: setInitVars
+     * Usage: setInitVars(init_vars)
+     * -------------------------------------------------------------------------*/
+    /* Values potentially used in reinitFilter and estimatePose
+     * Replaces _initVars member variable, use NULL to reset to defaults
+     * Using the method except immediately before filter reinitialization
+     * (i.e. on a running filter) may give undefined output.
+     * 2021-09-27 k headley MBARI
+     */
+    virtual inline void setInitStdDevXYZ(double sdev_x, double sdev_y, double sdev_z){
+        _initVars.setXYZ(sdev_x, sdev_y, sdev_z);
+    }
+
+    virtual inline d_triplet_t *getInitStdDevXYZ(d_triplet_t *dest){
+        d_triplet_t *retval=NULL;
+        if(NULL!=dest){
+            retval=_initVars.getXYZ(dest);
+        }else{
+            fprintf(stderr,"%s: NULL dest\n",__func__);
+        }
+
+        return retval;
+    }
+
+    virtual inline void setInitVars(InitVars *init_vars){
+        fprintf(stderr,"%s:%d - %s not implemented\n",__FILE__,__LINE__,__func__);
+    }
 
 	/* Function: setModifiedWeighting(use)
    * Usage: tercom->tNavFilter->setModifiedWeighting(use)
@@ -476,6 +532,8 @@ class TerrainNav
   }
 
  protected:
+
+    char *getSessionDir(char *dir_prefix, char *dest, size_t len, bool create);
 
   /* Function: copyToLogDir() - copies configuration files to the log directory
    *                            for future reference
@@ -684,6 +742,10 @@ class TerrainNav
 
   // log files
   TerrainNavLog *_trnLog;
+
+  // TRN filter reinit variables (e.g. x_stddev_init, etc)
+  // (used in conjunction with estNavOffset by reinitFilterBox)
+  InitVars _initVars;
 
 };
 

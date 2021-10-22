@@ -11,6 +11,7 @@
 
 #include "matrixArrayCalcs.h"
 #include "trn_log.h"
+#include "MathP.h"
 
 #ifdef USE_MATLAB
 Engine* matlabEng;

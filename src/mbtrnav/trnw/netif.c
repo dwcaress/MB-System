@@ -1065,9 +1065,7 @@ mlog_id_t netif_log(netif_t *self)
 }
 
 #ifdef WITH_NETIF_TEST
-//#include "trn_msg.h"
 #include "trnw.h"
-//#include "trnif_proto.h"
 
 static int s_netif_pub_msg(netif_t *self, msock_connection_t *peer, char *data, size_t len)
 {

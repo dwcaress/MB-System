@@ -49,14 +49,22 @@ int main(int argc, char* argv[])
   // 
   while ( (c = getopt(argc, argv, "m:h:p:l:vf:L")) != EOF )
   {
-    if (c == 'l')
-      logdir = strdup(optarg);   // Log directory
-    else if (c == 'L')
-      host = strdup(LCM_HOST);   // Send updates to LCM channels
-    else if (c == 'h')
-      host = strdup(optarg);     // TRN host overrides host in config file
-    else if (c == 'm')
-      map = strdup(optarg);      // TRN map overrides map in config file
+      if (c == 'l'){
+          free(logdir);
+          logdir = strdup(optarg);   // Log directory
+      }
+      else if (c == 'L'){
+          free(host);
+          host = strdup(LCM_HOST);   // Send updates to LCM channels
+      }
+      else if (c == 'h'){
+          free(host);
+          host = strdup(optarg);     // TRN host overrides host in config file
+      }
+      else if (c == 'm'){
+          free(map);
+          map = strdup(optarg);      // TRN map overrides map in config file
+      }
     else if (c == 'p')
       port = atol(optarg);       // TRN port overrides port in config file
     else if (c == 'v')
@@ -94,6 +102,10 @@ int main(int argc, char* argv[])
                   "    -f p|h  Directive to log filter distributions in filterDistrib.txt (can be very large), log particles or histograms\n"
                   );
 //                  "  Use the \"make_replay_csvs.sh\" utility to convert the QNX logs to compressed zip files\n");
+      free(logdir);
+      free(host);
+      free(map);
+      delete pfile;
     return 1;
   }
 
@@ -123,9 +135,14 @@ int main(int argc, char* argv[])
   // on the server.
   // 
   TerrainNav *_tercom = r->connectTRN();
-  if (!_tercom)
+  if (NULL==_tercom)
   {
     fprintf(stderr," TRN server connection failed.\n");
+      free(logdir);
+      free(host);
+      free(map);
+      delete pfile;
+      delete r;
     return 1;
   }
 
@@ -149,13 +166,13 @@ int main(int argc, char* argv[])
   poseT pt, mle, mse;
   measT mt;
   mt.numMeas    = 4;
-  mt.ranges     = new double[11]; //mt.numMeas];
-  mt.crossTrack = new double[11]; //mt.numMeas];
-  mt.alongTrack = new double[11]; //mt.numMeas];
-  mt.beamNums   = new int[11]; //mt.numMeas];
-  mt.altitudes  = new double[11]; //mt.numMeas];
-  mt.alphas     = new double[11]; //mt.numMeas];
-  mt.measStatus = new bool[11];   //mt.numMeas];
+  mt.ranges     = (double *)malloc(11*sizeof(double));
+  mt.crossTrack = (double *)malloc(11*sizeof(double));
+  mt.alongTrack = (double *)malloc(11*sizeof(double));
+  mt.beamNums   = (int *)malloc(11*sizeof(int));
+  mt.altitudes  = (double *)malloc(11*sizeof(double));
+  mt.alphas     = (double *)malloc(11*sizeof(double));
+  mt.measStatus = (bool *)malloc(11*sizeof(bool));
 
   // Conntinue as long as measure and motion update
   // data remains in the mission log files.
@@ -209,14 +226,14 @@ int main(int argc, char* argv[])
 
       //display tercom estimate biases
       printf("MLE: %.2f , ",mle.time);
-      printf("%.4f , %.4f , %.4f , ",
+      printf("%9.4f , %9.4f , %9.4f , ",
         mle.x-pt.x, mle.y-pt.y, mle.z-pt.z);
       printf("MSE: %.2f , ", mse.time);
-      printf("%.4f , %.4f , %.4f , ",
+      printf("%9.4f , %9.4f , %9.4f , ",
        mse.x-pt.x, mse.y-pt.y, mse.z-pt.z);
        
       if (N_COVAR >= 6)
-        printf("COVAR: %.2f , %.2f , %.2f\n",
+        printf("COVAR: %8.2f , %8.2f , %8.2f\n",
               sqrt(mse.covariance[0]),
               sqrt(mse.covariance[2]),
               sqrt(mse.covariance[5]));
@@ -241,8 +258,13 @@ int main(int argc, char* argv[])
   // 
   fprintf(stderr,"Done. Close the connection after %ld updates, %ld good meas"
                 " and %d reinits...\n", nu, ng, numReinits);
+    free(logdir);
+    free(host);
+    free(map);
+    delete pfile;
+    delete r;
   delete _tercom;
-
+    TNavConfig::instance(true);
   return 0;
 }
 

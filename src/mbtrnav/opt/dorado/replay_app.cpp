@@ -63,6 +63,8 @@ int main(int argc, char* argv[])
                   "Usage:\n  replay -l logdir [-h host -p port] \n"
                   "  Uses a native TerrainNav object rather than a TRN server when host is \"native\"\n"
                   "  Use the \"make_replay_csvs.sh\" utility to convert the QNX logs to compressed zip files\n");
+      free(logdir);
+      free(host);
     return 1;
   }
 
@@ -95,6 +97,9 @@ int main(int argc, char* argv[])
   if (!_tercom)
   {
     fprintf(stderr," TRN server connection failed.\n");
+      free(logdir);
+      free(host);
+      delete r;
     return 1;
   }
 
@@ -186,7 +191,15 @@ int main(int argc, char* argv[])
   // 
   fprintf(stderr,"Done. Close the connection after %ld updates"
                 " and %d reinits...\n", nupdates, numReinits);
+    free(logdir);
+    free(host);
+    delete r;
+
   delete _tercom;
+//    delete pt;
+//    delete mle;
+//    delete mse;
+//    delete mt;
 
   return 0;
 }

@@ -120,6 +120,9 @@ const char *trnmsg_id_names[TRNIF_MSG_ID_COUNT]={
 "TRNIF_FILT_STATE",
 "TRNIF_FILT_REINITS",
 "TRNIF_FILT_REINIT",
+"TRNIF_FILT_REINIT_BOX",
+"TRNIF_SET_INITXYZ",
+"TRNIF_SET_ESTNAVOFS",
 "TRNIF_PING"
 };
 
@@ -211,6 +214,20 @@ trnmsg_t *trnmsg_new_meas_msg(trnmsg_id_t id, int parameter, wmeast_t *mt)
         char *data = TRNIF_TPDATA(instance,char);
         wmeast_serialize(&data,mt,data_len-sizeof(trn_meas_t));
         hdr->data_len = data_len;
+    }
+    return instance;
+}
+// End function
+
+trnmsg_t *trnmsg_new_triplet_msg(trnmsg_id_t id, int parameter, double x, double y, double z)
+{
+    trnmsg_t *instance = trnmsg_dnew(id,sizeof(trn_triplet_t));
+    if(NULL!=instance){
+        trn_triplet_t *data = TRNIF_TPDATA(instance,trn_triplet_t);
+        data->parameter = parameter;
+        data->data.x = x;
+        data->data.y = y;
+        data->data.z = z;
     }
     return instance;
 }

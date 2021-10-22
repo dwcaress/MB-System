@@ -264,6 +264,52 @@ bool wtnav_is_converged(wtnav_t *self)
     return retval;
 }
 
+void wtnav_set_est_nav_offset(wtnav_t *self, double ofs_x, double ofs_y, double ofs_z)
+{
+    if(NULL!=self){
+        TerrainNav *obj = static_cast<TerrainNav *>(self->obj);
+        if(NULL!=obj){
+            obj->setEstNavOffset(ofs_x, ofs_y, ofs_z);
+        }
+        return ;
+    }
+}
+
+d_triplet_t *wtnav_get_est_nav_offset(wtnav_t *self, d_triplet_t *dest)
+{
+    d_triplet_t *retval=NULL;
+    if(NULL!=self){
+        TerrainNav *obj = static_cast<TerrainNav *>(self->obj);
+        if(NULL!=obj){
+            retval=obj->getEstNavOffset(dest);
+        }
+    }
+    return retval;
+}
+
+void wtnav_set_init_stddev_xyz(wtnav_t *self, double sdev_x, double sdev_y, double sdev_z)
+{
+    if(NULL!=self){
+        TerrainNav *obj = static_cast<TerrainNav *>(self->obj);
+        if(NULL!=obj){
+            obj->setInitStdDevXYZ(sdev_x, sdev_y, sdev_z);
+        }
+        return ;
+    }
+}
+
+d_triplet_t *wtnav_get_init_stddev_xyz(wtnav_t *self, d_triplet_t *dest)
+{
+    d_triplet_t *retval=NULL;
+    if(NULL!=self){
+        TerrainNav *obj = static_cast<TerrainNav *>(self->obj);
+        if(NULL!=obj){
+            retval=obj->getInitStdDevXYZ(dest);
+        }
+    }
+    return retval;
+}
+
 void wtnav_reinit_filter(wtnav_t *self, bool lowInfoTransition)
 {
     if(NULL!=self){
@@ -275,16 +321,29 @@ void wtnav_reinit_filter(wtnav_t *self, bool lowInfoTransition)
     }
 }
 
-void wtnav_reinit_filter_offset(wtnav_t *self, bool lowInfoTransition, double offsetx, double offsety, double offsetz)
+void wtnav_reinit_filter_offset(wtnav_t *self, bool lowInfoTransition,
+                             double offset_x, double offset_y, double offset_z)
 {
     if(NULL!=self){
         TerrainNav *obj = static_cast<TerrainNav *>(self->obj);
         if(NULL!=obj){
-        obj->setEstNavOffset(offsetx, offsety, offsetz);
-        obj->reinitFilter(lowInfoTransition);
+            obj->reinitFilterOffset(lowInfoTransition, offset_x, offset_y, offset_z);
         }
-        return ;
     }
+    return;
+}
+
+void wtnav_reinit_filter_box(wtnav_t *self, bool lowInfoTransition,
+                             double offset_x, double offset_y, double offset_z,
+                             double sdev_x, double sdev_y, double sdev_z)
+{
+    if(NULL!=self){
+        TerrainNav *obj = static_cast<TerrainNav *>(self->obj);
+        if(NULL!=obj){
+            obj->reinitFilterBox(lowInfoTransition, offset_x, offset_y, offset_z,sdev_x, sdev_y, sdev_z);
+        }
+    }
+    return;
 }
 
 int wtnav_get_filter_type(wtnav_t *self)
@@ -298,6 +357,7 @@ int wtnav_get_filter_type(wtnav_t *self)
     }
     return retval;
 }
+
 int wtnav_get_filter_state(wtnav_t *self)
 {
     int retval = -1;
@@ -309,6 +369,7 @@ int wtnav_get_filter_state(wtnav_t *self)
     }
     return retval;
 }
+
 void wtnav_use_highgrade_filter(wtnav_t *self)
 {
     if(NULL!=self){
@@ -319,6 +380,7 @@ void wtnav_use_highgrade_filter(wtnav_t *self)
     }
     return ;
 }
+
 void wtnav_use_lowgrade_filter(wtnav_t *self)
 {
     if(NULL!=self){
@@ -329,6 +391,7 @@ void wtnav_use_lowgrade_filter(wtnav_t *self)
     }
     return ;
 }
+
 void wtnav_set_filter_reinit(wtnav_t *self, const bool allow)
 {
     if(NULL!=self){
@@ -339,6 +402,7 @@ void wtnav_set_filter_reinit(wtnav_t *self, const bool allow)
     }
     return ;
 }
+
 int wtnav_get_num_reinits(wtnav_t *self)
 {
     int retval=-1;
@@ -350,6 +414,7 @@ int wtnav_get_num_reinits(wtnav_t *self)
     }
     return retval;
 }
+
 void wtnav_set_interp_meas_attitude(wtnav_t *self, const bool set)
 {
     if(NULL!=self){
@@ -683,6 +748,28 @@ char wcommst_get_msg_type(wcommst_t *self)
     if(NULL!=self){
         commsT *ct = static_cast<commsT *>(self->obj);
         retval = ct->msg_type;
+    }
+    return retval;
+}
+
+d_triplet_t *wcommst_get_xyz_sdev(wcommst_t *self, d_triplet_t *dest)
+{
+    d_triplet_t *retval=NULL;
+    if(NULL!=self && NULL!=dest){
+        commsT *ct = static_cast<commsT *>(self->obj);
+        memcpy(dest,&ct->xyz_sdev, sizeof(d_triplet_t));
+        retval = dest;
+    }
+    return retval;
+}
+
+d_triplet_t *wcommst_get_est_nav_offset(wcommst_t *self, d_triplet_t *dest)
+{
+    d_triplet_t *retval=NULL;
+    if(NULL!=self && NULL!=dest){
+        commsT *ct = static_cast<commsT *>(self->obj);
+        memcpy(dest,&ct->est_nav_ofs, sizeof(d_triplet_t));
+        retval = dest;
     }
     return retval;
 }
@@ -1549,6 +1636,51 @@ int32_t trnw_nack_msg(char **pdest)
     return trnw_type_msg(pdest,TRN_NACK);
 }
 
+int32_t trnw_triplet_msg(char **dest, char msg_type, d_triplet_t *src)
+{
+    int retval=-1;
+    char *msg = (char *)malloc(TRN_MSG_SIZE);
+    if(NULL!=msg){
+        memset(msg,0,TRN_MSG_SIZE);
+        commsT ct(msg_type,src->x, src->y, src->z);
+        ct.serialize(msg,TRN_MSG_SIZE);
+        *dest=msg;
+        retval=TRN_MSG_SIZE;
+    }
+    return retval;
+}
+
+int32_t trnw_reinit_offset_msg(char **dest, char msg_type, bool lowInfoTransition,
+                            double offset_x, double offset_y, double offset_z )
+{
+    int retval=-1;
+    char *msg = (char *)malloc(TRN_MSG_SIZE);
+    if(NULL!=msg){
+        memset(msg,0,TRN_MSG_SIZE);
+        commsT ct(msg_type, (lowInfoTransition ? 1 : 0),offset_x, offset_y, offset_z);
+        ct.serialize(msg,TRN_MSG_SIZE);
+        *dest=msg;
+        retval=TRN_MSG_SIZE;
+    }
+    return retval;
+}
+
+int32_t trnw_reinit_box_msg(char **dest, char msg_type, bool lowInfoTransition,
+                            double offset_x, double offset_y, double offset_z,
+                            double sdev_x, double sdev_y, double sdev_z )
+{
+    int retval=-1;
+    char *msg = (char *)malloc(TRN_MSG_SIZE);
+    if(NULL!=msg){
+        memset(msg,0,TRN_MSG_SIZE);
+        commsT ct(msg_type, (lowInfoTransition ? 1 : 0),offset_x, offset_y, offset_z, sdev_x, sdev_y, sdev_z);
+        ct.serialize(msg,TRN_MSG_SIZE);
+        *dest=msg;
+        retval=TRN_MSG_SIZE;
+    }
+    return retval;
+}
+
 void trnw_msg_show(char *msg, bool verbose, int indent)
 {
     if (NULL != msg) {
@@ -1562,6 +1694,8 @@ void trnw_msg_show(char *msg, bool verbose, int indent)
         fprintf(stderr,"%*s[cfg      %10s]\n",indent,(indent>0?" ":""), obj->cfgname);
         fprintf(stderr,"%*s[particle %10s]\n",indent,(indent>0?" ":""), obj->particlename);
         fprintf(stderr,"%*s[logdir   %10s]\n",indent,(indent>0?" ":""), obj->logname);
+        fprintf(stderr,"%*s[est_nav  %10lf,%lf,%lf]\n",indent,(indent>0?" ":""), obj->est_nav_ofs.x, obj->est_nav_ofs.y, obj->est_nav_ofs.z);
+        fprintf(stderr,"%*s[xyz_def  %10lf,%lf,%lf]\n",indent,(indent>0?" ":""), obj->xyz_sdev.x, obj->xyz_sdev.y, obj->xyz_sdev.z);
         if(verbose){
             fprintf(stderr,"%*s[pt       %10p]\n",indent,(indent>0?" ":""), &obj->pt);
             poset_show(&obj->pt,verbose,indent);

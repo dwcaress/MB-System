@@ -74,8 +74,8 @@
 #include <stdio.h>
 #include <memory.h>
 
-#include "trn_msg.h"
 #include "trnw.h"
+#include "trn_common.h"
 
 /////////////////////////
 // Macros
@@ -103,7 +103,7 @@ typedef enum {
     MSG_EOK=0,
     MSG_ENODATA,
     MSG_ECHK
-}trn_msg_err_t;
+}trnmsg_err_t;
 
 typedef enum{
     TRNIF_INIT=0,
@@ -127,6 +127,12 @@ typedef enum{
     TRNIF_FILT_STATE,
     TRNIF_FILT_REINITS,
     TRNIF_FILT_REINIT,
+    TRNIF_FILT_REINIT_OFFSET,
+    TRNIF_FILT_REINIT_BOX,
+    TRNIF_SET_INITSTDDEVXYZ,
+    TRNIF_SET_ESTNAVOFS,
+    TRNIF_GET_INITSTDDEVXYZ,
+    TRNIF_GET_ESTNAVOFS,
     TRNIF_PING,
     TRNIF_MSG_ID_COUNT
 }trnmsg_id_t;
@@ -169,6 +175,17 @@ typedef struct trn_meas_s{
     // serialized wmeast_t (variable len)
 }trn_meas_t;
 
+typedef struct trn_triplet_s{
+    int32_t parameter;
+    d_triplet_t data;
+}trn_triplet_t;
+
+typedef struct trn_box_s{
+    int32_t parameter;
+    d_triplet_t est_nav_ofs;
+    d_triplet_t xyz_sdev;
+}trn_box_t;
+
 
 // MOTN, MLE, MMSE
 // contain single pt_cdata_t (pose)
@@ -192,7 +209,13 @@ typedef trn_type_t trn_lastmeas_t;
 typedef trn_type_t trn_isconv_t;
 typedef trn_type_t trn_filttype_t;
 typedef trn_type_t trn_filtstate_t;
-typedef trn_type_t trn_reinits_t;
+typedef trn_type_t trn_filtreinits_t;
+typedef trn_type_t trn_filtreinit_t;
+typedef trn_box_t trn_filtreinitbox_t;
+typedef trn_triplet_t trn_setxyzinit_t;
+typedef trn_triplet_t trn_setestnavofs_t;
+typedef trn_triplet_t trn_getxyzinit_t;
+typedef trn_triplet_t trn_getestnavofs_t;
 typedef pt_cdata_t trn_motn_t;
 typedef pt_cdata_t trn_mle_t;
 typedef pt_cdata_t trn_mmse_t;
@@ -214,6 +237,7 @@ extern "C" {
     trnmsg_t *trnmsg_new_pose_msg(trnmsg_id_t id, wposet_t *pt);
     trnmsg_t *trnmsg_new_meas_msg(trnmsg_id_t id, int parameter, wmeast_t *mt);
     trnmsg_t *trnmsg_new_init_msg(trnmsg_id_t id, int parameter, char *map, char *cfg, char *particles, char *logdir);
+    trnmsg_t *trnmsg_new_triplet_msg(trnmsg_id_t id, int parameter, double x, double y, double z);
 
     void trnmsg_destroy(trnmsg_t **pself);
     void trnmsg_show(trnmsg_t *self, bool verbose, int indent);

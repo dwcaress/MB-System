@@ -30,9 +30,9 @@
 #include <unistd.h>
 
 #include "structDefs.h"       // Contains definitions of commsT class
+#include "trn_common.h"
 #include "TerrainNav.h"
 #include "TNavConfig.h"
-#include "genFilterDefs.h"
 #include "trn_log.h"
 
 // Use a macro to standardize extracting the message from an exception
@@ -61,6 +61,8 @@ static bool _connected;
 static struct commsT _ct;
 static struct commsT _ack(TRN_ACK);
 static struct commsT _nack(TRN_NACK);
+static struct commsT _offset(TRN_GET_ESTNAVOFS,0.,0.,0.);
+static struct commsT _sdev(TRN_GET_INITSTDDEVXYZ,0.,0.,0.);
 
 static struct sockaddr_in _server_addr;     // Server Socket object
 
@@ -215,16 +217,17 @@ int init() {
     char mapname[MAPNAME_BUF_BYTES], cfgname[CFGNAME_BUF_BYTES], particlename[PARTICLENAME_BUF_BYTES];//, logname[300];
 	char* mapPath = getenv("TRN_MAPFILES");
     char* cfgPath = getenv("TRN_DATAFILES");
-	char* logPath = getenv("TRN_LOGFILES");
+    char* logPath = getenv("TRN_LOGFILES");
 
-   fprintf(stderr, "ENV: maps:%s, cfgs:%s, and logs:%s\n", mapPath, cfgPath, logPath);
+    fprintf(stderr, "ENV: maps:%s cfgs:%s logs:%s\n", mapPath, cfgPath, logPath);
+    fprintf(stderr, "CT: map:%s cfg:%s par:%s\n", _ct.mapname, _ct.cfgname, _ct.particlename);
 
 	char dotSlash[] = "./";
 	if(mapPath == NULL) {
-		mapPath = dotSlash;    //"./";
+		mapPath = dotSlash;
 	}
 	if(cfgPath == NULL) {
-		cfgPath = dotSlash;    //"./";
+		cfgPath = dotSlash;
 	}
 
         sprintf(mapname, "%s/%s", mapPath, _ct.mapname);
@@ -248,10 +251,10 @@ int init() {
            throw Exception("trn_server: vehicle cfg file not found");
         }
 
-        if (0 != access(particlename, F_OK))
+        if ( (NULL!=_ct.particlename) && (0 != access(particlename, F_OK)) )
         {
-           logs(TL_OMASK(TL_TRN_SERVER, (TL_LOG|TL_SERR)),"Particles %s not found",
-                particlename);
+           logs(TL_OMASK(TL_TRN_SERVER, (TL_LOG|TL_SERR)),"Particles %s not found - p/s/l[%p/%s/%zu]",
+                particlename,_ct.particlename,_ct.particlename,strlen(_ct.particlename));
            throw Exception("trn_server: particles file not found");
         }
 
@@ -533,11 +536,11 @@ int filter_state() {
 //
 int num_reinits() {
 
-	logs(TL_OMASK(TL_TRN_SERVER, TL_LOG),"Returning number of reinits...");
+	logs(TL_OMASK(TL_TRN_SERVER, TL_LOG|TL_SERR),"Returning number of reinits...");
 	if(_tercom) {
 		_ack.parameter = _tercom->getNumReinits();
 
-		logs(TL_OMASK(TL_TRN_SERVER, TL_LOG),"parameter = %d\n", _ack.parameter);
+		logs(TL_OMASK(TL_TRN_SERVER, TL_LOG|TL_SERR),"%s - parameter = %d\n",__func__, _ack.parameter);
 		send_msg(_ack);
 	} else {
 		logs(TL_OMASK(TL_TRN_SERVER, (TL_LOG|TL_SERR)),"No TRN object! Have you initialized yet?");
@@ -745,6 +748,81 @@ int send_mmse() {
 
 }
 
+// set initialization xyz
+//
+int set_init_stddev_xyz() {
+
+    int retval=-1;
+
+    logs(TL_OMASK(TL_TRN_SERVER, (TL_LOG|TL_SERR)),"%s %lf,%lf,%lf", __func__, _ct.xyz_sdev.x, _ct.xyz_sdev.y, _ct.xyz_sdev.z);
+
+    if(_tercom) {
+        _tercom->setInitStdDevXYZ(_ct.xyz_sdev.x, _ct.xyz_sdev.y, _ct.xyz_sdev.z);
+        send_msg(_ack);
+        retval=0;
+    } else {
+        logs(TL_OMASK(TL_TRN_SERVER, (TL_LOG|TL_SERR)),"No TRN object! Have you initialized yet?");
+        send_msg(_nack);
+    }
+
+    return retval;
+
+}
+
+int get_init_stddev_xyz() {
+
+    int retval=-1;
+
+    if(_tercom) {
+        _tercom->getInitStdDevXYZ(&_sdev.xyz_sdev);
+        logs(TL_OMASK(TL_TRN_SERVER, (TL_LOG|TL_SERR)),"%s %lf,%lf,%lf", __func__,  _sdev.xyz_sdev.x, _sdev.xyz_sdev.y, _sdev.xyz_sdev.z);
+        _sdev.parameter = 0;
+        send_msg(_sdev);
+        retval=0;
+    } else {
+        logs(TL_OMASK(TL_TRN_SERVER, (TL_LOG|TL_SERR)),"No TRN object! Have you initialized yet?");
+        send_msg(_nack);
+    }
+
+    return retval;
+
+}
+
+int set_est_nav_ofs() {
+    int retval=-1;
+    logs(TL_OMASK(TL_TRN_SERVER, (TL_LOG|TL_SERR)),"%s %lf,%lf,%lf", __func__, _ct.est_nav_ofs.x, _ct.est_nav_ofs.y, _ct.est_nav_ofs.z);
+
+    if(_tercom) {
+        _tercom->setEstNavOffset(_ct.est_nav_ofs.x, _ct.est_nav_ofs.y, _ct.est_nav_ofs.z);
+        send_msg(_ack);
+        retval=0;
+    } else {
+        logs(TL_OMASK(TL_TRN_SERVER, (TL_LOG|TL_SERR)),"No TRN object! Have you initialized yet?");
+        send_msg(_nack);
+    }
+
+    return retval;
+
+}
+
+int get_est_nav_ofs() {
+    int retval=-1;
+
+    if(_tercom) {
+        _tercom->getEstNavOffset(&_offset.est_nav_ofs);
+        logs(TL_OMASK(TL_TRN_SERVER, (TL_LOG|TL_SERR)),"%s %lf,%lf,%lf\n",__func__,
+             _offset.est_nav_ofs.x, _offset.est_nav_ofs.y, _offset.est_nav_ofs.z);
+        _offset.parameter = 0;
+        send_msg(_offset);
+        retval=0;
+    } else {
+        logs(TL_OMASK(TL_TRN_SERVER, (TL_LOG|TL_SERR)),"No TRN object! Have you initialized yet?");
+        send_msg(_nack);
+    }
+
+    return retval;
+
+}
 
 // Main function for server process.
 //
@@ -790,7 +868,8 @@ int main(int argc, char** argv) {
     // Initial trn_server output will go to stderr,
     // unless otherwise specified.
     // See trn_Log.h
-          tl_mconfig(TL_TRN_SERVER, TL_SERR, TL_ALL);
+//            tl_mconfig(TL_TRN_SERVER, TL_SERR, TL_ALL);
+    tl_mconfig(TL_TRN_SERVER, TL_SERR, TL_NC);
     //    tl_mconfig(TL_STRUCT_DEFS, TL_SERR, TL_NC);
           tl_mconfig(TL_TERRAIN_NAV, TL_SERR, TL_NC);
     //    tl_mconfig(TL_TERRAIN_NAV_AID_LOG, TL_SERR, TL_NC);
@@ -859,8 +938,8 @@ int main(int argc, char** argv) {
       int sockopt = 1;
       setsockopt(_connfd, SOL_SOCKET, SO_REUSEADDR,
                                 (const void *)&sockopt, sizeof(int));
-      logs(TL_OMASK(TL_TRN_SERVER, (TL_LOG)),"Client connected!\n");
-		logs(TL_SERR, "Client connected!\n");
+      logs(TL_OMASK(TL_TRN_SERVER, (TL_LOG|TL_SERR)),"Client connected!\n");
+//      logs(TL_SERR, "Client connected!\n");
 
 
 		///////////////////////////////////////////////////////////////////////
@@ -906,98 +985,131 @@ int main(int argc, char** argv) {
 			}
 
 			try
-			{
-			switch(_ct.msg_type) {
-				case TRN_BYE:
-//					logg("Client closing connection\n");
-//					logs(TL_OMASK(TL_TRN_SERVER, TL_BOTH),"Client closing connection\n");
- 				        logs(TL_SERR|TL_LOG,"Client closing connection\n");
-					//close(_connfd);
-					//_connected = false;
-					break;
+            {
+                logs(TL_OMASK(TL_TRN_SERVER, (TL_LOG|TL_SERR)),"msg [%3d/%c]  %s\n",_ct.msg_type,_ct.msg_type,commsT::typestr(_ct.msg_type));
 
-				case TRN_INIT:
-               fprintf(stderr, "init()...\n");
- 					init();
-					break;
+                switch(_ct.msg_type) {
+                    case TRN_BYE:
+                        logs(TL_SERR|TL_LOG,"Client closing connection\n");
+                        //close(_connfd);
+                        //_connected = false;
+                        break;
 
-				case TRN_SET_IMA:
-					set_ima();
-					break;
+                    case TRN_INIT:
+                        init();
+                        break;
 
-				case TRN_SET_VDR:
-					set_vdr();
-					break;
+                    case TRN_SET_IMA:
+                        set_ima();
+                        break;
 
-				case TRN_MEAS:
-					measure_update();
-					break;
+                    case TRN_SET_VDR:
+                        set_vdr();
+                        break;
 
-				case TRN_MOTN:
-					motion_update();
-					break;
+                    case TRN_MEAS:
+                        measure_update();
+                        break;
 
-				case TRN_MLE:
-					send_mle();
-					break;
+                    case TRN_MOTN:
+                        motion_update();
+                        break;
 
-				case TRN_MMSE:
-					send_mmse();
-					break;
+                    case TRN_MLE:
+                        send_mle();
+                        break;
 
-				case TRN_SET_MW:
-					set_mw();
-					break;
+                    case TRN_MMSE:
+                        send_mmse();
+                        break;
 
-				case TRN_SET_FR:
-					set_fr();
-					break;
+                    case TRN_SET_MW:
+                        set_mw();
+                        break;
 
-				case TRN_SET_MIM:
-					set_mim();
-					break;
+                    case TRN_SET_FR:
+                        set_fr();
+                        break;
 
-				case TRN_FILT_GRD:
-					filter_grd();
-					break;
+                    case TRN_SET_MIM:
+                        set_mim();
+                        break;
 
-				case TRN_OUT_MEAS:
-					out_meas();
-					break;
+                    case TRN_FILT_GRD:
+                        filter_grd();
+                        break;
 
-				case TRN_LAST_MEAS:
-					last_meas();
-					break;
+                    case TRN_OUT_MEAS:
+                        out_meas();
+                        break;
 
-				case TRN_IS_CONV:
-					is_conv();
-					break;
+                    case TRN_LAST_MEAS:
+                        last_meas();
+                        break;
 
-				case TRN_FILT_TYPE:
-					filter_type();
-					break;
+                    case TRN_IS_CONV:
+                        is_conv();
+                        break;
 
-				case TRN_FILT_STATE:
-					filter_state();
-					break;
+                    case TRN_FILT_TYPE:
+                        filter_type();
+                        break;
 
-				case TRN_N_REINITS:
-					num_reinits();
-					break;
+                    case TRN_FILT_STATE:
+                        filter_state();
+                        break;
 
-				case TRN_FILT_REINIT:
-				   _tercom->reinitFilter(true);
-					logs(TL_OMASK(TL_TRN_SERVER, TL_BOTH),"Filter reinitialized: id[%0x]\n", _ct.msg_type);
-					send_msg(_ack);
-					break;
+                    case TRN_N_REINITS:
+                        num_reinits();
+                        break;
 
-				case TRN_ACK:
-				case TRN_NACK:
-				default:
-					logs(TL_OMASK(TL_TRN_SERVER, TL_BOTH),"No handler for message: id[%0x]\n", _ct.msg_type);
-					send_msg(_nack);
-			}
-			}
+                    case TRN_FILT_REINIT:
+                        _tercom->reinitFilter((_ct.parameter!=0));
+                        logs(TL_OMASK(TL_TRN_SERVER, (TL_LOG|TL_SERR)),"Filter reinitialized: id[%0x]\n", _ct.msg_type);
+                        send_msg(_ack);
+                        break;
+
+                    case TRN_FILT_REINIT_OFFSET:
+                        _tercom->reinitFilterOffset((_ct.parameter!=0), _ct.est_nav_ofs.x, _ct.est_nav_ofs.y, _ct.est_nav_ofs.z);
+
+                        logs(TL_OMASK(TL_TRN_SERVER, (TL_LOG|TL_SERR)),"Filter reinitialized w/ offset: id[%0x] ofs[%lf, %lf, %lf]\n",
+                             _ct.msg_type, _ct.est_nav_ofs.x, _ct.est_nav_ofs.y, _ct.est_nav_ofs.z);
+
+                        send_msg(_ack);
+                        break;
+                    case TRN_FILT_REINIT_BOX:
+                        _tercom->reinitFilterBox((_ct.parameter!=0), _ct.est_nav_ofs.x, _ct.est_nav_ofs.y, _ct.est_nav_ofs.z, _ct.xyz_sdev.x, _ct.xyz_sdev.y, _ct.xyz_sdev.z );
+
+                        logs(TL_OMASK(TL_TRN_SERVER, (TL_LOG|TL_SERR)),"Filter reinitialized w/ box: id[%0x] ofs[%lf, %lf, %lf] sdev[%lf, %lf, %lf]\n",
+                             _ct.msg_type, _ct.est_nav_ofs.x, _ct.est_nav_ofs.y, _ct.est_nav_ofs.z,
+                             _ct.xyz_sdev.x, _ct.xyz_sdev.y, _ct.xyz_sdev.z);
+
+                        send_msg(_ack);
+                        break;
+
+                    case TRN_SET_INITSTDDEVXYZ:
+                        set_init_stddev_xyz();
+                        break;
+
+                    case TRN_GET_INITSTDDEVXYZ:
+                        get_init_stddev_xyz();
+                        break;
+
+                    case TRN_SET_ESTNAVOFS:
+                        set_est_nav_ofs();
+                        break;
+
+                    case TRN_GET_ESTNAVOFS:
+                        get_est_nav_ofs();
+                        break;
+
+                    case TRN_ACK:
+                    case TRN_NACK:
+                    default:
+                        logs(TL_OMASK(TL_TRN_SERVER, TL_BOTH),"No handler for message: id[%0x]\n", _ct.msg_type);
+                        send_msg(_nack);
+                }
+            }
 			catch (Exception e)
 			{
 				sprintf(logbuf, "trn_server: Exception during %c msg: %s",

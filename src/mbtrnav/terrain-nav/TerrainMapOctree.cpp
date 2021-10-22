@@ -91,7 +91,7 @@ TerrainMapOctree::~TerrainMapOctree()
       for (int i = 0; i < numTiles_; i++)
       {
          if (tiles_[i].octreeMap) tiles_[i].unload();
-         if (tiles_[i].mapName) delete tiles_[i].mapName;
+          if (tiles_[i].mapName) free(tiles_[i].mapName); //delete tiles_[i].mapName;
       }
       delete [] tiles_;
       tiles_ = NULL;

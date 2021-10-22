@@ -26,13 +26,12 @@
 #include "structDefs.h"
 #include "myOutput.h"
 #include "trn_log.h"
-
 #include "TerrainMap.h"
+#include "MathP.h"
 
 #include <newmatap.h>
 #include <newmatio.h>
 
-#include <math.h>
 #include <fstream>
 #include <iomanip>
 #include <time.h>
