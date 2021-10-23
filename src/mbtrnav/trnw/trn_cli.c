@@ -339,6 +339,86 @@ int trncli_ptype_set(trncli_t *self, int msg_type, int param)
     return retval;
 }// end function trncli_ptype_set
 
+int trncli_triplet_get(trncli_t *self, int msg_type, d_triplet_t *dest)
+{
+    int retval=-1;
+
+    if(NULL!=self && NULL!=dest){
+        byte *msg=NULL;
+        int32_t mlen=0;
+        // create a message
+        if( (mlen=trnw_triplet_msg((char **)&msg, msg_type, dest))>0){
+#if defined(WITH_PDEBUG)
+            fprintf(stderr,"TX MSG:\n");
+            trnw_msg_show((char *)msg, true, 5);
+#endif
+            // send message, get response
+            if(s_trncli_send_recv(self, msg, mlen, true)>0){
+
+                // deserialize and get return value
+                ct_cdata_t *ct_dat=NULL;
+                if( wcommst_cdata_unserialize(&ct_dat,(char *)msg)==0 && NULL!=ct_dat){
+                    if(ct_dat->msg_type==TRN_MSG_GET_INITSTDDEVXYZ){
+                        memcpy(dest, &ct_dat->xyz_sdev, sizeof(d_triplet_t));
+                        retval = ct_dat->parameter;
+                    }else if(ct_dat->msg_type==TRN_MSG_GET_ESTNAVOFS){
+                        memcpy(dest, &ct_dat->est_nav_ofs, sizeof(d_triplet_t));
+                        retval = ct_dat->parameter;
+                    }else{
+                        fprintf(stderr,"%s: no ACK[%c] \n",__func__,ct_dat->msg_type);
+                    }
+                }
+                // release cdata resources
+                if(NULL!=ct_dat){
+                    wcommst_cdata_destroy(&ct_dat);
+                }
+            }
+
+            // release message resources
+            if(NULL!=msg){
+                free(msg);
+            }
+        }
+    }
+    return retval;
+}// end function trncli_triplet_get
+
+int trncli_triplet_set(trncli_t *self, int msg_type, d_triplet_t *src)
+{
+    int retval=-1;
+
+    if(NULL!=self){
+        byte *msg=NULL;
+        int32_t mlen=0;
+        // create a message
+        if( trnw_triplet_msg((char **)&msg, msg_type, src)>0){
+#if defined(WITH_PDEBUG)
+            fprintf(stderr,"TX MSG:\n");
+            trnw_msg_show((char *)msg, true, 5);
+#endif
+            // send message, get response
+            if(s_trncli_send_recv(self, msg, mlen, true)>0){
+
+                // deserialize and get return value
+                ct_cdata_t *ct_dat=NULL;
+                if( wcommst_cdata_unserialize(&ct_dat,(char *)msg)==0 && NULL!=ct_dat){
+                    retval = ( (ct_dat->msg_type==TRN_MSG_ACK) ? 0 : -1);
+                }
+                // release cdata resources
+                if(NULL!=ct_dat){
+                    wcommst_cdata_destroy(&ct_dat);
+                }
+            }
+
+            // release message resources
+            if(NULL!=msg){
+                free(msg);
+            }
+        }
+    }
+    return retval;
+}// end function trncli_triplet_set
+
 int trncli_mb1_to_meas(wmeast_t **dest, mb1_t *src, long int utmZone)
 {
     return wmeast_mb1_to_meas(dest, src,utmZone);
@@ -464,6 +544,62 @@ int trncli_reinit_filter(trncli_t *self)
     return trncli_ptype_set(self,TRN_MSG_FILT_REINIT,0);
 } // end function trncli_reinit_filter
 
+int trncli_reinit_filter_offset(trncli_t *self, bool lowInfoTransition,
+                             double offset_x, double offset_y, double offset_z)
+{
+    int retval=-1;
+    if(NULL!=self){
+        byte *msg=NULL;
+        int32_t mlen=0;
+
+        if( (mlen=trnw_reinit_offset_msg((char **)&msg, TRN_MSG_FILT_REINIT_OFFSET, lowInfoTransition,
+                                      offset_x, offset_y, offset_z))>0){
+#if defined(WITH_PDEBUG)
+            fprintf(stderr,"TX - INIT:\n");
+            trnw_msg_show((char *)msg,true,5);
+#endif
+            retval=s_trncli_send_recv(self, msg, mlen, true);
+
+#if defined(WITH_PDEBUG)
+            fprintf(stderr,"RX - INIT ret[%"PRId32"]\n",retval);
+            trnw_msg_show((char *)msg,true,5);
+#endif
+            free(msg);
+        }
+
+    }
+    return retval;
+}
+
+int trncli_reinit_filter_box(trncli_t *self, bool lowInfoTransition,
+                             double offset_x, double offset_y, double offset_z,
+                             double sdev_x, double sdev_y, double sdev_z)
+{
+    int retval=-1;
+    if(NULL!=self){
+        byte *msg=NULL;
+        int32_t mlen=0;
+
+        if( (mlen=trnw_reinit_box_msg((char **)&msg, TRN_MSG_FILT_REINIT_BOX, lowInfoTransition,
+                                      offset_x, offset_y, offset_z,
+                                      sdev_x, sdev_y, sdev_z))>0){
+#if defined(WITH_PDEBUG)
+            fprintf(stderr,"TX - INIT:\n");
+            trnw_msg_show((char *)msg,true,5);
+#endif
+            retval=s_trncli_send_recv(self, msg, mlen, true);
+
+#if defined(WITH_PDEBUG)
+            fprintf(stderr,"RX - INIT ret[%"PRId32"]\n",retval);
+            trnw_msg_show((char *)msg,true,5);
+#endif
+            free(msg);
+        }
+
+    }
+    return retval;
+}
+
 int trncli_get_filter_type(trncli_t *self)
 {
     return trncli_ptype_get(self,TRN_MSG_FILT_TYPE);
@@ -512,6 +648,26 @@ int trncli_set_utm(trncli_t *self, long int utm_zone)
         retval=0;
     }
     return retval;
+} // end function
+
+int trncli_get_init_stddev_xyz(trncli_t *self, d_triplet_t *dest)
+{
+    return trncli_triplet_get(self,TRN_MSG_GET_INITSTDDEVXYZ, dest);
+} // end function
+
+int trncli_set_init_stddev_xyz(trncli_t *self, d_triplet_t *src)
+{
+    return trncli_triplet_set(self,TRN_MSG_SET_INITSTDDEVXYZ, src);
+} // end function
+
+int trncli_get_est_nav_ofs(trncli_t *self, d_triplet_t *dest)
+{
+    return trncli_triplet_get(self, TRN_MSG_GET_ESTNAVOFS, dest);
+} // end function
+
+int trncli_set_est_nav_ofs(trncli_t *self, d_triplet_t *src)
+{
+    return trncli_triplet_set(self,TRN_MSG_SET_ESTNAVOFS, src);
 } // end function
 
 bool trncli_last_meas_succesful(trncli_t *self)

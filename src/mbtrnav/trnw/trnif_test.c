@@ -70,6 +70,7 @@
 #include "netif.h"
 #include "trn_msg.h"
 #include "trnw.h"
+#include "trnif_msg.h"
 #include "trnif_proto.h"
 
 #include "mframe.h"

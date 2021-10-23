@@ -184,9 +184,16 @@ extern "C" {
     bool wtnav_outstanding_meas(wtnav_t *self);
     bool wtnav_initialized(wtnav_t *self);
     bool wtnav_is_converged(wtnav_t *self);
+    void wtnav_set_est_nav_offset(wtnav_t *self, double ofs_x, double ofs_y, double ofs_z);
+    d_triplet_t *wtnav_get_est_nav_offset(wtnav_t *self, d_triplet_t *dest);
+    void wtnav_set_init_stddev_xyz(wtnav_t *self, double sdev_x, double sdev_y, double sdev_z);
+    d_triplet_t *wtnav_get_init_stddev_xyz(wtnav_t *self, d_triplet_t *dest);
     void wtnav_reinit_filter(wtnav_t *self, bool lowInfoTransition);
     void wtnav_reinit_filter_offset(wtnav_t *self, bool lowInfoTransition,
-                            double offset_x, double offset_y, double offset_z);
+                             double ofs_x, double ofs_y, double ofs_z);
+    void wtnav_reinit_filter_box(wtnav_t *self, bool lowInfoTransition,
+                             double ofs_x, double ofs_y, double ofs_z,
+                             double sdev_x, double sdev_y, double sdev_z);
     int  wtnav_get_filter_type(wtnav_t *self);
     int  wtnav_get_filter_state(wtnav_t *self);
     void wtnav_use_highgrade_filter(wtnav_t *self);
@@ -199,7 +206,6 @@ extern "C" {
     void wtnav_set_modified_weighting(wtnav_t *self, const int use);
     void wtnav_release_map(wtnav_t *self);
     void *wtnav_obj_addr(wtnav_t *self);
-
 
     // comms (msg) API
     wcommst_t *wcommst_dnew();
@@ -216,6 +222,8 @@ extern "C" {
     int wcommst_set_mt(wcommst_t *self, wmeast_t *wmt);
     int wcommst_get_parameter(wcommst_t *self);
     float wcommst_get_vdr(wcommst_t *self);
+    d_triplet_t *wcommst_get_xyz_sdev(wcommst_t *self, d_triplet_t *dest);
+    d_triplet_t *wcommst_get_est_nav_offset(wcommst_t *self, d_triplet_t *dest);
     char wcommst_get_msg_type(wcommst_t *self);
     int  wcommst_serialize(char **dest, wcommst_t *src, int len);
     int  wcommst_unserialize(wcommst_t **dest, char *src, int len);
@@ -257,6 +265,12 @@ extern "C" {
     int32_t trnw_type_msg(char **dest, char type);
     int32_t trnw_ack_msg(char **dest);
     int32_t trnw_nack_msg(char **dest);
+    int32_t trnw_triplet_msg(char **dest, char msg_type, d_triplet_t *src);
+    int32_t trnw_reinit_offset_msg(char **dest, char msg_type, bool lowInfoTransition,
+                                double offset_x, double offset_y, double offset_z );
+    int32_t trnw_reinit_box_msg(char **dest, char msg_type, bool lowInfoTransition,
+                                double offset_x, double offset_y, double offset_z,
+                                double sdev_x, double sdev_y, double sdev_z );
     void trnw_msg_show(char *msg, bool verbose, int indent);
 
     // utils

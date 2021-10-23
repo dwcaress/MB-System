@@ -40,8 +40,6 @@ struct poseT;
 struct measT;
 class TerrainNav;
 
-#define  Boolean  bool
-
 
 struct TRN_attr
 {
@@ -55,8 +53,8 @@ struct TRN_attr
     char *_terrainNavServer;
     char *_lrauvDvlFilename;
     long  _terrainNavPort;
-    Boolean _forceLowGradeFilter;
-    Boolean _allowFilterReinits;
+    bool _forceLowGradeFilter;
+    bool _allowFilterReinits;
     long _useModifiedWeighting;
     long _samplePeriod;
     double _maxNorthingCov;
@@ -64,9 +62,11 @@ struct TRN_attr
     double _maxNorthingError;
     double _maxEastingError;
     double _phiBias;
-    Boolean _useIDTData;
-    Boolean _useDvlSide;
-    Boolean _useMbTrnData;
+    bool _useIDTData;
+    bool _useDvlSide;
+    bool _useMbTrnData;
+    TRN_attr();
+    ~TRN_attr();
 };
 
 
@@ -74,20 +74,17 @@ class TrnClient : public TerrainNavClient {
     
 public:
     
-    TrnClient(const char *host=0, int port=0);
+    TrnClient(const char *host=NULL, int port=0);
+    TrnClient(const char *svr_log_dir=NULL, const char *host=NULL, int port=0);
     ~TrnClient();
     
-    int loadCfgAttributes();
+    int loadCfgAttributes(const char *cfg_file);
     int getNextKeyValue(FILE *cfg, char key[], char value[]);
     int setVerbose(int val);
     TerrainNav* connectTRN();
-//    virtual int send_msg(commsT& msg);
-
 protected:
-    char *logdir;
-    double lastTime;
-    TRN_attr *trn_attr;
-    long nupdates, nreinits;
+    char *_cfg_file;
+    TRN_attr *_trn_attr;
     int verbose;
     
 };

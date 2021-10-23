@@ -210,7 +210,7 @@ trn_server_LDADD = libtnav.la libqnx.la libnewmat.la libtnav.la libgeolib.la
 netif_test_SOURCES = utils/netif-test.c
 netif_test_LDADD = libnetif.la ${top_builddir}/src/mbtrn/libr7kr.la libtrnw.la
 
-trnif_test_SOURCES =  utils/trnif-test.c
+trnif_test_SOURCES =  trnw/trnif_test.c
 trnif_test_LDADD = libnetif.la  ${top_builddir}/src/mbtrn/libr7kr.la libtrnw.la
 
 trnifsvr_test_SOURCES = utils/trnifsvr-test.c

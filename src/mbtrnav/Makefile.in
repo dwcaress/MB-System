@@ -276,7 +276,7 @@ am_trnclient_test_OBJECTS = utils/trnclient_test.$(OBJEXT) \
 	utils/TrnClient.$(OBJEXT) utils/TerrainNavClient.$(OBJEXT)
 trnclient_test_OBJECTS = $(am_trnclient_test_OBJECTS)
 trnclient_test_DEPENDENCIES = libtnav.la
-am_trnif_test_OBJECTS = utils/trnif-test.$(OBJEXT)
+am_trnif_test_OBJECTS = trnw/trnif_test.$(OBJEXT)
 trnif_test_OBJECTS = $(am_trnif_test_OBJECTS)
 trnif_test_DEPENDENCIES = libnetif.la \
 	${top_builddir}/src/mbtrn/libr7kr.la libtrnw.la
@@ -431,13 +431,14 @@ am__depfiles_remade = gctp/source/$(DEPDIR)/alberfor.Plo \
 	trnw/$(DEPDIR)/mmcpub.Po trnw/$(DEPDIR)/mmcsub.Po \
 	trnw/$(DEPDIR)/netif.Plo trnw/$(DEPDIR)/trn_cli.Po \
 	trnw/$(DEPDIR)/trncli_test.Po trnw/$(DEPDIR)/trnif_msg.Plo \
-	trnw/$(DEPDIR)/trnif_proto.Plo trnw/$(DEPDIR)/trnu_cli.Po \
-	trnw/$(DEPDIR)/trnucli_test.Po trnw/$(DEPDIR)/trnusvr_test.Po \
-	trnw/$(DEPDIR)/trnw.Plo utils/$(DEPDIR)/TerrainNavClient.Po \
+	trnw/$(DEPDIR)/trnif_proto.Plo trnw/$(DEPDIR)/trnif_test.Po \
+	trnw/$(DEPDIR)/trnu_cli.Po trnw/$(DEPDIR)/trnucli_test.Po \
+	trnw/$(DEPDIR)/trnusvr_test.Po trnw/$(DEPDIR)/trnw.Plo \
+	utils/$(DEPDIR)/TerrainNavClient.Po \
 	utils/$(DEPDIR)/TrnClient.Po utils/$(DEPDIR)/netif-test.Po \
 	utils/$(DEPDIR)/trn_server.Po \
 	utils/$(DEPDIR)/trnclient_test.Po \
-	utils/$(DEPDIR)/trnif-test.Po utils/$(DEPDIR)/trnifsvr-test.Po
+	utils/$(DEPDIR)/trnifsvr-test.Po
 am__mv = mv -f
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
@@ -906,7 +907,7 @@ trn_server_SOURCES = utils/trn_server.cpp
 trn_server_LDADD = libtnav.la libqnx.la libnewmat.la libtnav.la libgeolib.la
 netif_test_SOURCES = utils/netif-test.c
 netif_test_LDADD = libnetif.la ${top_builddir}/src/mbtrn/libr7kr.la libtrnw.la
-trnif_test_SOURCES = utils/trnif-test.c
+trnif_test_SOURCES = trnw/trnif_test.c
 trnif_test_LDADD = libnetif.la  ${top_builddir}/src/mbtrn/libr7kr.la libtrnw.la
 trnifsvr_test_SOURCES = utils/trnifsvr-test.c
 trnifsvr_test_LDADD = libnetif.la  ${top_builddir}/src/mbtrn/libr7kr.la libtrnw.la
@@ -1412,8 +1413,8 @@ utils/TrnClient.$(OBJEXT): utils/$(am__dirstamp) \
 trnclient-test$(EXEEXT): $(trnclient_test_OBJECTS) $(trnclient_test_DEPENDENCIES) $(EXTRA_trnclient_test_DEPENDENCIES) 
 	@rm -f trnclient-test$(EXEEXT)
 	$(AM_V_CXXLD)$(CXXLINK) $(trnclient_test_OBJECTS) $(trnclient_test_LDADD) $(LIBS)
-utils/trnif-test.$(OBJEXT): utils/$(am__dirstamp) \
-	utils/$(DEPDIR)/$(am__dirstamp)
+trnw/trnif_test.$(OBJEXT): trnw/$(am__dirstamp) \
+	trnw/$(DEPDIR)/$(am__dirstamp)
 
 trnif-test$(EXEEXT): $(trnif_test_OBJECTS) $(trnif_test_DEPENDENCIES) $(EXTRA_trnif_test_DEPENDENCIES) 
 	@rm -f trnif-test$(EXEEXT)
@@ -1634,6 +1635,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@trnw/$(DEPDIR)/trncli_test.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@trnw/$(DEPDIR)/trnif_msg.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@trnw/$(DEPDIR)/trnif_proto.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@trnw/$(DEPDIR)/trnif_test.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@trnw/$(DEPDIR)/trnu_cli.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@trnw/$(DEPDIR)/trnucli_test.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@trnw/$(DEPDIR)/trnusvr_test.Po@am__quote@ # am--include-marker
@@ -1643,7 +1645,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@utils/$(DEPDIR)/netif-test.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@utils/$(DEPDIR)/trn_server.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@utils/$(DEPDIR)/trnclient_test.Po@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@utils/$(DEPDIR)/trnif-test.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@utils/$(DEPDIR)/trnifsvr-test.Po@am__quote@ # am--include-marker
 
 $(am__depfiles_remade):
@@ -2010,6 +2011,7 @@ distclean: distclean-am
 	-rm -f trnw/$(DEPDIR)/trncli_test.Po
 	-rm -f trnw/$(DEPDIR)/trnif_msg.Plo
 	-rm -f trnw/$(DEPDIR)/trnif_proto.Plo
+	-rm -f trnw/$(DEPDIR)/trnif_test.Po
 	-rm -f trnw/$(DEPDIR)/trnu_cli.Po
 	-rm -f trnw/$(DEPDIR)/trnucli_test.Po
 	-rm -f trnw/$(DEPDIR)/trnusvr_test.Po
@@ -2019,7 +2021,6 @@ distclean: distclean-am
 	-rm -f utils/$(DEPDIR)/netif-test.Po
 	-rm -f utils/$(DEPDIR)/trn_server.Po
 	-rm -f utils/$(DEPDIR)/trnclient_test.Po
-	-rm -f utils/$(DEPDIR)/trnif-test.Po
 	-rm -f utils/$(DEPDIR)/trnifsvr-test.Po
 	-rm -f Makefile
 distclean-am: clean-am distclean-compile distclean-generic \
@@ -2209,6 +2210,7 @@ maintainer-clean: maintainer-clean-am
 	-rm -f trnw/$(DEPDIR)/trncli_test.Po
 	-rm -f trnw/$(DEPDIR)/trnif_msg.Plo
 	-rm -f trnw/$(DEPDIR)/trnif_proto.Plo
+	-rm -f trnw/$(DEPDIR)/trnif_test.Po
 	-rm -f trnw/$(DEPDIR)/trnu_cli.Po
 	-rm -f trnw/$(DEPDIR)/trnucli_test.Po
 	-rm -f trnw/$(DEPDIR)/trnusvr_test.Po
@@ -2218,7 +2220,6 @@ maintainer-clean: maintainer-clean-am
 	-rm -f utils/$(DEPDIR)/netif-test.Po
 	-rm -f utils/$(DEPDIR)/trn_server.Po
 	-rm -f utils/$(DEPDIR)/trnclient_test.Po
-	-rm -f utils/$(DEPDIR)/trnif-test.Po
 	-rm -f utils/$(DEPDIR)/trnifsvr-test.Po
 	-rm -f Makefile
 maintainer-clean-am: distclean-am maintainer-clean-generic

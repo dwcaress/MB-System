@@ -69,8 +69,6 @@
 
 #include "trnw.h"
 #include "mb1_msg.h"
-#include "trn_msg.h"
-#include "mframe.h"
 #include "msocket.h"
 #include "medebug.h"
 
@@ -137,6 +135,13 @@ extern "C" {
     int32_t trncli_init_trn(trncli_t *self, trn_config_t *cfg);
     // filter reinit
     int trncli_reinit_filter(trncli_t *self);
+    // filter reinit w/ offset
+    int trncli_reinit_filter_offset(trncli_t *self, bool lowInfoTransition,
+                             double offset_x, double offset_y, double offset_z);
+    // filter reinit w/ offset, variance bound inits
+    int trncli_reinit_filter_box(trncli_t *self, bool lowInfoTransition,
+                        double offset_x, double offset_y, double offset_z,
+                        double sdev_x, double sdev_y, double sdev_z);
     // get filter type
     int trncli_get_filter_type(trncli_t *self);
     // get filter state
@@ -155,6 +160,14 @@ extern "C" {
     int trncli_set_filter_gradient(trncli_t *self, int value);
     // set UTM zone
     int trncli_set_utm(trncli_t *self, long int utm_zone);
+    // get init xyz (reinit variance bounds)
+    int trncli_get_init_stddev_xyz(trncli_t *self, d_triplet_t *dest);
+    // set init xyz (reinit variance bounds)
+    int trncli_set_init_stddev_xyz(trncli_t *self, d_triplet_t *src);
+    // get est_nav_offset (reinit offset)
+    int trncli_get_est_nav_ofs(trncli_t *self, d_triplet_t *dest);
+    // set est_nav_offset (reinit offset)
+    int trncli_set_est_nav_ofs(trncli_t *self, d_triplet_t *src);
 
 	/// Status API
 

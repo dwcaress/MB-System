@@ -1,6 +1,8 @@
 #ifndef _genFilterDefs_h_
 #define _genFilterDefs_h_
 
+#include <math.h>
+
 //*** TODO THIS IS TEMPORARY!!!  (NIS_WINDOW_LENGTH is used by the filter, MAX_NIS_VALUE is used by TerrainNav)
 #ifndef NIS_WINDOW_LENGTH
 #define NIS_WINDOW_LENGTH 	20		//Length of NIS window
@@ -34,10 +36,6 @@
 #ifndef AVERAGE
 #define	AVERAGE 0       /*!< Boolean indicating if measurements should be
 			 *   averaged at a given time step */
-#endif
-
-#ifndef PI
-#define PI 3.14159265358979
 #endif
 
 /******************************************************************************
@@ -128,10 +126,12 @@ should be turned on.  */
 /******************************************************************************
  FILTER INITIALIZATION PARAMETERS
 ******************************************************************************/
-// [XYZ]_STDDEV_INIT values establish a map search radius; values are application-specific.
+// [XYZ]_STDDEV_INIT values establish a map search area; values are application-specific.
+// If the distribution is uniform, these comprise a box (see initDistribType, TNavFilter.h).
 // If set incorrectly, TRN may fail to initialize correctly, resulting in errors, e.g.:
-// TerrainNav::Filter not initialized - vehicle is currently within a non-valid region of the reference map
-// TerrainNav::Cannot compute pose estimate; motion has not been initialized.
+//   TerrainNav::Filter not initialized - vehicle is currently within a non-valid
+//   region of the reference map
+//   TerrainNav::Cannot compute pose estimate; motion has not been initialized.
 // Typical values include:
 // [XY]_STDDEV_INIT
 //   60.0 Portuguese Ledge/Dorado
@@ -141,11 +141,11 @@ should be turned on.  */
 //   10.0 ?
 
 #ifndef X_STDDEV_INIT       //! x standard deviation (m) for initialization
-#define X_STDDEV_INIT 600.0 
+#define X_STDDEV_INIT 60.0 
 #endif
 
 #ifndef Y_STDDEV_INIT       //!  y standard deviation (m) for initialization
-#define Y_STDDEV_INIT 600.0 
+#define Y_STDDEV_INIT 60.0 
 #endif
 
 #ifndef Z_STDDEV_INIT       //! z standard deviation (m) for initialization
@@ -211,6 +211,7 @@ should be turned on.  */
 #ifndef USE_PARTICLE_FILE  //Boolean to initialize using a prespecified set of points in particles.cfg file
 #define USE_PARTICLE_FILE 0 //1=true, 0=false (default)
 #endif
+
 
 /******************************************************************************
  FILTER MOTION UPDATE PARAMETERS

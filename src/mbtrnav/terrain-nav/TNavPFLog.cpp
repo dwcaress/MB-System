@@ -59,5 +59,7 @@ TNavPFLog::~TNavPFLog()
     if (_meanExpMeasDif[i]) delete _meanExpMeasDif[i];
     if (_alpha[i]) delete _alpha[i];
   }
+    if (_sumWeights) delete _sumWeights;
+    if (_sumSquaredError) delete _sumSquaredError;
 }
 

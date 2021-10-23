@@ -71,7 +71,7 @@ LIB_PATHS = -L/usr/local/lib -L$(OUTPUT_DIR) $(OS_LIB_PATH)
 # Target Definitions
 
 LIB_TNAVC=libtnavc.a
-LIB_TNAVC_OBJ=$(BUILD_DIR)/TerrainNavClient.o
+LIB_TNAVC_OBJ=$(BUILD_DIR)/TerrainNavClient.o $(BUILD_DIR)/TRNUtils.o
 
 MBARI_MAIN=mbari-main
 MBARI_MAIN_SRC=mainMbari.cpp
