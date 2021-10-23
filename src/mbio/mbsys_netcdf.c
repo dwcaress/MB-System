@@ -1129,6 +1129,48 @@ int mbsys_netcdf_deall(int verbose, void *mbio_ptr, void **store_ptr, int *error
 		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbReceiveBeamwidth, error);
 	if (store->mbTransmitPulseLength != NULL)
 		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbTransmitPulseLength, error);
+	if (store->mbOperatorStationStatus != NULL)
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbOperatorStationStatus, error);
+	if (store->mbProcessingUnitStatus != NULL)
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbProcessingUnitStatus, error);
+	if (store->mbBSPStatus != NULL)
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbBSPStatus, error);
+	if (store->mbSonarStatus != NULL)
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbSonarStatus, error);
+	if (store->mbFilterIdentifier != NULL)
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbFilterIdentifier, error);
+	if (store->mbParamMinimumDepth != NULL)
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbParamMinimumDepth, error);
+	if (store->mbParamMaximumDepth != NULL)
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbParamMaximumDepth, error);
+	if (store->mbAbsorptionCoefficient != NULL)
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbAbsorptionCoefficient, error);
+	if (store->mbTransmitPowerReMax != NULL)
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbTransmitPowerReMax, error);
+	if (store->mbReceiveBandwidth != NULL)
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbReceiveBandwidth, error);
+	if (store->mbReceiverFixedGain != NULL)
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbReceiverFixedGain, error);
+	if (store->mbTVGLawCrossoverAngle != NULL)
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbTVGLawCrossoverAngle, error);
+	if (store->mbTransVelocitySource != NULL)
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbTransVelocitySource, error);
+	if (store->mbMaxPortWidth != NULL)
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbMaxPortWidth, error);
+	if (store->mbBeamSpacing != NULL)
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbBeamSpacing, error);
+	if (store->mbMaxPortCoverage != NULL)
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbMaxPortCoverage, error);
+	if (store->mbYawPitchStabMode != NULL)
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbYawPitchStabMode, error);
+	if (store->mbMaxStarboardCoverage != NULL)
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbMaxStarboardCoverage, error);
+	if (store->mbMaxStarboardWidth != NULL)
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbMaxStarboardWidth, error);
+	if (store->mbDurotongSpeed != NULL)
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbDurotongSpeed, error);
+	if (store->mbHiLoAbsorptionRatio != NULL)
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbHiLoAbsorptionRatio, error);
 	if (store->mbAlongDistance != NULL)
 		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbAlongDistance, error);
 	if (store->mbAcrossDistance != NULL)
@@ -1143,6 +1185,8 @@ int mbsys_netcdf_deall(int verbose, void *mbio_ptr, void **store_ptr, int *error
 		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbRange, error);
 	if (store->mbSoundingBias != NULL)
 		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbSoundingBias, error);
+	if (store->mbSQuality != NULL)
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbQuality, error);
 	if (store->mbSQuality != NULL)
 		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&store->mbSQuality, error);
 	if (store->mbReflectivity != NULL)
@@ -1307,11 +1351,16 @@ int mbsys_netcdf_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind
 			bathacrosstrack[i] = distancescale * store->mbAcrossDistance[i];
 			bathalongtrack[i] = distancescale * store->mbAlongDistance[i];
 			if (store->mbReflectivity_id >= 0) {
-				amp[i] = store->mbReflectivity[i] * store->mbReflectivity_scale_factor;
+        if (store->mbReflectivity[i] != store->mbReflectivity_missing_value) {
+				  amp[i] = store->mbReflectivity[i] * store->mbReflectivity_scale_factor
+                    + store->mbReflectivity_add_offset;
+        } else {
+          amp[i] = 0.0;
+        }
 			}
 		}
 
-		if (verbose >= 5) {
+		if (verbose >= 4) {
 			fprintf(stderr, "\ndbg4  Data extracted by MBIO function <%s>\n", __func__);
 			fprintf(stderr, "dbg4  Extracted values:\n");
 			fprintf(stderr, "dbg4       kind:       %d\n", *kind);

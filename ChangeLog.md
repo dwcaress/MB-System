@@ -23,6 +23,7 @@ Distributions that do not include "beta" in the tag name correspond to the major
 announced releases. The source distributions associated with all releases, major
 or beta, are equally accessible as tarballs through the Github interface.
 
+- Version 5.7.9beta17    October 16, 2021
 - Version 5.7.9beta16    August 27, 2021
 - Version 5.7.9beta15    August 26, 2021
 - Version 5.7.9beta14    July 25, 2021
@@ -394,6 +395,23 @@ or beta, are equally accessible as tarballs through the Github interface.
 --
 ### MB-System Version 5.7 Release Notes:
 --
+
+#### 5.7.9beta17 (October 16, 2021)
+
+Mbgrid and mbmosaic: Fixed setting output grid format with the -G option. The
+definition and parsing of the options is now consistent with GMT 6.
+
+Mbnavadjust: Added option to unset skipped crossings.
+
+Mbnavadjust: Changed vertical scaling of the time series model plot and the
+tie plots so that these are centered on the midpoint values rather than zero.
+
+Mbgrdviz: Changed how routes are output as Risi survey scripts - now the lateral
+positions of waypoints are relative east and north meters in UTM rather than
+local x,y calculated using mtodeglon and mtodeglat from a simple spheroid.
+
+Mbm_grdplot: Fixed so that it does not crash if the input grid has either no
+valid values (all are NaN) or all valid values are the same.
 
 #### 5.7.9beta16 (August 27, 2021)
 

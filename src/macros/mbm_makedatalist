@@ -154,7 +154,7 @@ print "Adding to list: file:$file format:$format\n";
 if (($suffix eq ".all" || $suffix eq ".ALL" || $suffix eq ".mb56"
      || $suffix eq ".mb57" || $suffix eq ".mb58" || $suffix eq ".mb59")
         && !$disablesorting) {
-    # loop over the list of files
+  # loop over the list of files
   for ($i = 0; $i < scalar(@outfilelist); $i++) {
     $file = $outfilelist[$i];
     $format = $outformatlist[$i];

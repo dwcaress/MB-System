@@ -137,6 +137,7 @@ EXTERNAL Widget pushButton_autosetsvsvertical;
 EXTERNAL Widget pushButton_newcrossings;
 EXTERNAL Widget pushButton_analyzecrossings;
 EXTERNAL Widget pushButton_zerozoffsets;
+EXTERNAL Widget pushButton_unsetskipped;
 EXTERNAL Widget pushButton_invertnav;
 EXTERNAL Widget pushButton_updategrids;
 EXTERNAL Widget pushButton_applynav;

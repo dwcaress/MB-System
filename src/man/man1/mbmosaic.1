@@ -1,4 +1,4 @@
-.TH mbmosaic 1 "3 January 2017" "MB-System 5.0" "MB-System 5.0"
+.TH mbmosaic 1 "25 September 2021" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbmosaic\fP \- Mosaic amplitude or sidescan data
 from swath mapping sonar data files.
@@ -62,7 +62,7 @@ the mosaicing (\fB\-F\fP), the preferred look azimuth (\fB\-U\fP), the
 maximum distance from data points that the spline interpolation is
 used (\fB\-C\fP), the format of the output files, and other parameters.
 
-By default, \fBmbmosaic\fP generates mosiacs in Geographic coordinates,
+By default, \fBmbmosaic\fP generates mosaics in Geographic coordinates,
 meaning that position is defined in longitude and latitude using
 the WGS84 horizontal datum. The \fB\-J\fP option can be used to specify
 an alternate, projected coordinate system (PCS). When a PCS is used,
@@ -100,7 +100,7 @@ the working grid in both longitude and latitude.  The program reads all
 pings which lie within the data input bounds, and accepts all data
 values with locations within the working grid.
 
-The sample priorities are set according to three criteria. 
+The sample priorities are set according to three criteria.
 The first criteria is set by using the \fB\-Y\fP option
 to specify a file containing a list of data priorities
 as a function of apparent grazing angle (this angle is the
@@ -259,7 +259,7 @@ and 2 (topography) are not allowed. Bathymetry and topography should be gridded 
 If "F" is appended to \fIdatatype\fP, then \fBmbmosaic\fP will attempt
 to mosaic amplitude or sidescan data that have been filtered with \fBmbfilter\fP.
 If the desired filtered data files do not exist, data input will fail and
-\fBmbmosiac\fP will exit with an error message. Filtered amplitude
+\fBmbmosaic\fP will exit with an error message. Filtered amplitude
 data are stored in ancillary files ending with ".ffa", and filtered
 sidescan files end in ".ffs". Appending "F" to \fImode\fP values of 5-7 will have no effect.
 Default: \fIdatatype\fP = 4 (sidescan).
@@ -306,7 +306,7 @@ grid dimensions are calculated using the grid bounds and
 grid cell spacings. However, slight adjustments to the
 grid cell spacings are usually required to keep
 the grid bounds as specified. Appending an ! to the end of
-the \fB\-E\fP arguments forces \fBmbgrid\fP to use the
+the \fB\-E\fP arguments forces \fBmbmosaic\fP to use the
 exact grid cell spacing values specified by adjusting the
 grid bounds.
 Default: If neither the \fB\-E\fP or \fB\-D\fP options are specified,
@@ -337,83 +337,100 @@ its priority to get the value weight.
 \fIgridkind\fP
 .br
 This option sets the format of the output grid file.
-The default is to output a GMT netCDF 4-byte float grid.
-The user may specify the grid format either by using an
-identifier number, or by using the \fBGMT\fP grid format
-syntax, which allows for scaling and offsets of the data.
-
-First, the simple grid format identifiers are:
- 	\fIgridkind\fP = 1:	ASCII table
- 	\fIgridkind\fP = 2:	binary file (\fBGMT\fP version 1 GRD file)
- 	\fIgridkind\fP = 3:	netCDF file (\fBGMT\fP version 2 GRD file)
- 	\fIgridkind\fP = 4:	Arc/Info and ArcView ASCII grid
- 	\fIgridkind\fP = 100:	GMT netCDF 4-byte float format [Default]
- 	\fIgridkind\fP = 101:	Native binary single precision floats in scanlines with leading grd header
- 	\fIgridkind\fP = 102:	Native binary short integers in scanlines with leading grd header
- 	\fIgridkind\fP = 103:	8-bit standard Sun rasterfile (colormap ignored)
- 	\fIgridkind\fP = 104:	Native binary unsigned char in scanlines with leading grd header
- 	\fIgridkind\fP = 105:	Native binary bits in scanlines with leading grd header
- 	\fIgridkind\fP = 106:	Native binary ``surfer'' grid files
- 	\fIgridkind\fP = 107:	netCDF 1-byte byte format
- 	\fIgridkind\fP = 108:	netCDF 1-byte char format
- 	\fIgridkind\fP = 109:	netCDF 2-byte int format
- 	\fIgridkind\fP = 110:	netCDF 4-byte int format
- 	\fIgridkind\fP = 111:	netCDF 8-byte double format
+The default is to output a current generation GMT COARDS-compliant netCDF 4-byte
+float grid.  To output a different grid format, specify a two-letter \fBGMT\fP grid
+format id listed below, or use the full \fBGMT\fP grid format syntax, which allows for
+scaling and offsets of the data. The \fBGMT\fP grid format ids are:
 .br
-
-Second, a \fBGMT\fP grid format string has the form:
+  -----------------------------
+  GMT 4 netCDF standard formats
+  -----------------------------
+  nb  GMT netCDF format (8-bit integer, COARDS, CF-1.5)
+  ns  GMT netCDF format (16-bit integer, COARDS, CF-1.5)
+  ni  GMT netCDF format (32-bit integer, COARDS, CF-1.5)
+  nf  GMT netCDF format (32-bit float, COARDS, CF-1.5)
+  nd  GMT netCDF format (64-bit float, COARDS, CF-1.5)
+.br
+  -----------------------------
+  GMT 3 netCDF legacy formats
+  -----------------------------
+  cb  GMT netCDF format (8-bit integer, depreciated)
+  cs  GMT netCDF format (16-bit integer, depreciated)
+  ci  GMT netCDF format (32-bit integer, depreciated)
+  cf  GMT netCDF format (32-bit float, depreciated)
+  cd  GMT netCDF format (64-bit float, depreciated)
+.br
+  -----------------------------
+  GMT native binary formats
+  -----------------------------
+  bm  GMT native, C-binary format (bit-mask)
+  bb  GMT native, C-binary format (8-bit integer)
+  bs  GMT native, C-binary format (16-bit integer)
+  bi  GMT native, C-binary format (32-bit integer)
+  bf  GMT native, C-binary format (32-bit float)
+  bd  GMT native, C-binary format (64-bit float)
+.br
+  -----------------------------
+  Miscellaneous grid formats
+  -----------------------------
+  rb  SUN raster file format (8-bit standard)
+  rf  GEODAS grid format GRD98 (NCEI)
+  sf  Golden Software Surfer format 6 (32-bit float)
+  sd  Golden Software Surfer format 7 (64-bit float)
+  af  Atlantic Geoscience Center AGC (32-bit float)
+  ei  ESRI Arc/Info ASCII Grid Interchange format (ASCII integer)
+  ef  ESRI Arc/Info ASCII Grid Interchange format (ASCII float)
+  gd  Import/export via GDAL 19
+.br
+The full \fBGMT\fP grid format string has the form:
 .br
  	=id[/scale/offset[/nan]]
 .br
-where id is the \fBGMT\fP format id, and the other values
+where id is one of the \fBGMT\fP format ids listed above, and the other values
 are optional. If \fIscale\fP and \fIoffset\fP are given, the
 data will be multiplied by \fIscale\fP and offset by \fIoffset\fP
 prior to being output. The \fInan\fP value sets the value used for
-"not-a-number". The \fBGMT\fP format id's for these format strings are:
- 	\fIid\fP = 0:	GMT netCDF 4-byte float format [Default]
- 	\fIid\fP = 1:	Native binary single precision floats in scanlines with leading grd header
- 	\fIid\fP = 2:	Native binary short integers in scanlines with leading grd header
- 	\fIid\fP = 3:	8-bit standard Sun rasterfile (colormap ignored)
- 	\fIid\fP = 4:	Native binary unsigned char in scanlines with leading grd header
- 	\fIid\fP = 5:	Native binary bits in scanlines with leading grd header
- 	\fIid\fP = 6:	Native binary ``surfer'' grid files
- 	\fIid\fP = 7:	netCDF 1-byte byte format
- 	\fIid\fP = 8:	netCDF 1-byte char format
- 	\fIid\fP = 9:	netCDF 2-byte int format
- 	\fIid\fP = 10:	netCDF 4-byte int format
- 	\fIid\fP = 11:	netCDF 8-byte double format
+"not-a-number".
+.br
+For backward compatibility with earlier versions of \fBMB-System\fP, the user
+may also specify the grid format using a numeric identifier between 1-4.
+.break
+    \fIgridkind\fP = 1:	ASCII table
+    \fIgridkind\fP = 2:	binary file (\fBGMT\fP version 1 GRD file)
+    \fIgridkind\fP = 3:	netCDF file (\fBGMT\fP version 2 GRD file)
+    \fIgridkind\fP = 4:	Arc/Info and ArcView ASCII grid
 .br
 Note that the following arguments are equivalent because they
 all produce a standard \fBGMT\fP netCDF 4-byte float grid:
- 	\fB\-G\fP\fI3\fP
- 	\fB\-G\fP\fI100\fP
- 	\fB\-G\fP\fI=0\fP
+ 	no \fB\-G\fP specified
+ 	\fB\-G\fP\fInf\fP
+ 	\fB\-G\fP\fI=nf\fP
 .br
 Should the user wish to produce a grid in native binary floats,
 then the following two arguments will work:
- 	\fB\-G\fP\fI101\fP
- 	\fB\-G\fP\fI=1\fP
+ 	\fB\-G\fP\fIbf\fP
+ 	\fB\-G\fP\fI=bf\fP
 .br
 Should the user wish to produce a grid in native short int format
 with a scaling factor of 10, an offset of 32000, and a NaN value
 of 32767, then the following arguments will suffice:
 .br
- 	\fB\-G\fP\fI=2/10/32000/32767\fP
-
-If \fIgridkind\fP = 3 or \fIgridkind\fP >= 100,
-\fBmbgrid\fP also outputs shellscripts
+ 	\fB\-G\fP\fI=bs/10/32000/32767\fP
+.br
+If any of the \fBGMT\fP output formats are specified, then
+\fBmbmosaic\fP also outputs shellscripts
 which run \fBGMT\fP programs to provide preliminary color
 fill maps of the gridded data. These shellscripts are
 generated using the \fBmbm_grdplot\fP macro.
-
-If \fIgridkind\fP = 4, the output grids will be in the Arc/Info ASCII
+.br
+If \fIgridkind\fP is 4, =ei, or =ef, the output grids will be in the ESRI ASCII
 grid format.  Arc/Info ASCII grids use "square" bins,
 meaning that the longitude and latitude grid cell spacings must
-be identical. Thus, whenever the \fIgridkind\fP = 4 option is
+be identical. Thus, whenever these options are
 used, the \fB\-E\fP option must also be used in a way which
 ensures equal grid cell spacings (see the \fB\-E\fP documentation
 above).
-Default: \fIgridkind\fP = 100.
+Default: \fIgridkind\fP = "=nf".
 .TP
 .B \-H
 This "help" flag cause the program to print out a description
@@ -436,7 +453,7 @@ Default: \fIdatalist\fP = datalist.mb-1
 .TP
 .B \-J
 \fIprojection\fP
-By default, \fBmbgrid\fP generates grids in Geographic coordinates,
+By default, \fBmbmosaic\fP generates grids in Geographic coordinates,
 meaning that position is defined in longitude and latitude using
 the WGS84 geographic coordinate system.
 The \fB\-J\fP option can be used to specify
@@ -444,7 +461,7 @@ an alternate, projected coordinate system (PCS). When a PCS is used,
 position will be defined in eastings and northings (meters) relative
 to the origin of the particular PCS. Universal Transverse Mercator
 is the most commonly used PCS in the oceanographic community, but
-\fBmbgrid\fP supports a large number of other PCS's as well.
+\fBmbmosaic\fP supports a large number of other PCS's as well.
 The underlying projection functions derive from the \fBPROJ.4\fP library
 written by Gerald Evenden, then of the U.S. Geological Survey.
 
