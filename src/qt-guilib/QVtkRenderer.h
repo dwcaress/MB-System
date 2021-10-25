@@ -146,6 +146,9 @@ namespace mb_system {
     /// Elevation color filter
     vtkSmartPointer<vtkElevationFilter> elevColorizer_;
 
+    /// Bathymetry lookup table
+    vtkSmartPointer<vtkLookupTable> elevLookupTable_;
+    
     /// Transform matrix
     vtkSmartPointer<vtkTransform> transform_;
     
