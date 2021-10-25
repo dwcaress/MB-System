@@ -15,6 +15,7 @@
 #include <vtkFollower.h>
 #include "QVtkRenderer.h"
 #include "QVtkItem.h"
+#include "Utilities.h"
 
 using namespace mb_system;
 
@@ -272,6 +273,11 @@ bool QVtkRenderer::initializePipeline(const char *gridFilename) {
   elevColorizer_ =
     vtkSmartPointer<vtkElevationFilter>::New();
 
+  
+  elevLookupTable_ =
+    vtkSmartPointer<vtkLookupTable>::New();
+  
+  
   // Create VTK renderer (not the same as QT renderer)
   qDebug() << "create vtk renderer";
   renderer_ =
@@ -307,15 +313,6 @@ bool QVtkRenderer::initializePipeline(const char *gridFilename) {
 
   // Axes actor
   axesActor_ = vtkSmartPointer<vtkCubeAxesActor>::New();
-
-
-  /* ***
-  bool status = assemblePipelineTest(gridReader_, gridFilename_,
-                                 elevColorizer_, renderer_, surfaceMapper_,
-                                 renderWindow_, windowInteractor_,
-                                 interactorStyle_, surfaceActor_, axesActor_,
-                                 displayProperties_);
-                                 *** */
 
   bool status = assemblePipeline();
 
@@ -414,21 +411,46 @@ bool QVtkRenderer::assemblePipeline() {
     "yMin: " << dBounds[2] << ", yMax: " << dBounds[3] <<
     "zMin: " << dBounds[4] << ", zMax: " << dBounds[5];
 
+
   elevColorizer_->SetInputConnection(gridReader_->GetOutputPort());  
   elevColorizer_->SetLowPoint(0, 0, gridBounds[4]);
   elevColorizer_->SetHighPoint(0, 0, gridBounds[5]);
+  elevColorizer_->SetScalarRange(gridBounds[4], gridBounds[5]);
+  
+  bool doTransform = true;
+  if (doTransform) {
+    float zScale = displayProperties_->verticalExagg;
+    qDebug() << "zScale: " << zScale;
+    /// Do we have to recreate transform and transform filter each time?
+    transform_ = vtkSmartPointer<vtkTransform>::New();
+    transformFilter_ = vtkSmartPointer<vtkTransformFilter>::New();  
+    transform_->Scale(1., 1., zScale);
+    transformFilter_->SetTransform(transform_);
 
-  float zScale = displayProperties_->verticalExagg;
-  qDebug() << "zScale: " << zScale;
-  /// Do we have to recreate transform and transform filter each time?
-  transform_ = vtkSmartPointer<vtkTransform>::New();
-  transformFilter_ = vtkSmartPointer<vtkTransformFilter>::New();  
-  transform_->Scale(1., 1., zScale);
-  transformFilter_->SetTransform(transform_);
-  transformFilter_->SetInputConnection(elevColorizer_->GetOutputPort());
-  
-  surfaceMapper_->SetInputConnection(transformFilter_->GetOutputPort());
-  
+    // transformFilter_->SetInputConnection(elevColorizer_->GetOutputPort());
+    transformFilter_->SetInputConnection(elevColorizer_->GetOutputPort());
+    surfaceMapper_->SetInputConnection(transformFilter_->GetOutputPort());
+  }
+  else {
+    surfaceMapper_->SetInputConnection(elevColorizer_->GetOutputPort());    
+  }
+
+  qDebug() << "create LUT";
+  makeLookupTable(3, elevLookupTable_);
+
+  double *mapperBounds = surfaceMapper_->GetBounds();
+  qDebug() << "mapper z bounds: " << mapperBounds[4] <<
+    " " << mapperBounds[5];
+    
+  qDebug() << "SetScalarRange " << dBounds[4] << "  " << dBounds[5];
+  surfaceMapper_->SetScalarRange(dBounds[4], dBounds[5]);
+  surfaceMapper_->ScalarVisibilityOn();
+  surfaceMapper_->SetLookupTable(elevLookupTable_);
+
+  mapperBounds = surfaceMapper_->GetBounds();
+  qDebug() << "NOW - mapper z bounds: " << mapperBounds[4] <<
+    " " << mapperBounds[5];
+    
   // Assign surfaceMapper to actor
   qDebug() << "assign surfaceMapper to actor";
   surfaceActor_->SetMapper(surfaceMapper_);
