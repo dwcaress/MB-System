@@ -48,9 +48,9 @@ using namespace NEWMAT;
 
 #define sign(a)   ((a > 0) - (a < 0))
 
-#ifndef PI
-#define PI 3.14159265358979
-#endif
+//#ifndef PI
+//#define PI 3.14159265358979
+//#endif
 
 /* Function: round
  * Usage: roundedNum = round(num);

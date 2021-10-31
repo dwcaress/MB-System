@@ -271,15 +271,36 @@ class TerrainNavClient : public TerrainNav
    */
   virtual void reinitFilter(const bool lowInfoTransition);
 
-  bool is_connected();
+    /* Function: reinitFilterBox(bool lowInfoTransition,
+     *                           double offset_x, double offset_y, double offset_z,
+     *                           double sdev_x, double sdev_y, double sdev_z)
+     * Usage: filterType = tercom->reinitFilterBox(true,...);
+     * ------------------------------------------------------------------------*/
+    /*! Reinitializes the TRN filter.
+     */
+    virtual void reinitFilterBox(const bool lowInfoTransition,
+                                 double offset_x, double offset_y, double offset_z,
+                                 double sdev_x, double sdev_y, double sdev_z);
+
+    virtual void reinitFilterOffset(const bool lowInfoTransition,
+                                 double offset_x, double offset_y, double offset_z);
+
+    virtual void setEstNavOffset(double offset_x, double offset_y, double offset_z);
+
+    virtual d_triplet_t *getEstNavOffset(d_triplet_t *dest);
+
+    virtual void setInitStdDevXYZ(double sdev_x, double sdev_y, double sdev_z);
+
+    virtual d_triplet_t *getInitStdDevXYZ(d_triplet_t *dest);
+
+    virtual void setInitVars(InitVars *init_vars);
+
+    bool is_connected();
 
  protected:
 
   //////////////////////////////////////////////////////////////////////
   // Other important state variables
-  char *_map_name;
-  char *_vehicle_specs;
-  char *_particles;       // name of the particles file on the server
   char *_logdir;          // name of the log directory on the MVC
 
   //////////////////////////////////////////////////////////////////////

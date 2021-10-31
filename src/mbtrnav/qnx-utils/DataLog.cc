@@ -74,6 +74,7 @@ DataLog::~DataLog()
     fclose(_logFileStream);
 
   free((void *)_name);
+  free((void *)_mnemonic);
 }
 
 

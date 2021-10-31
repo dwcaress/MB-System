@@ -17,6 +17,7 @@
 #define _TIMETAG_H
 
 #include "DoubleData.h"
+#include "ourTypes.h"
 
 
 #define TimeTagTypeMnem "timeTag"

@@ -12,6 +12,8 @@
 #include <sys/stat.h>
 #include <unistd.h>
 #include <libgen.h>
+#include <cmath>
+#include <math.h>
 
 #include "TerrainNav.h"
 #include "TerrainNavLog.h"
@@ -44,8 +46,10 @@ particlesFile(NULL), mapFile(NULL),
 filterType(1),mapType(1),
 terrainMap(NULL),_trnLog(NULL)
 {
-
+    _initVars.setXYZ(X_STDDEV_INIT,Y_STDDEV_INIT,Z_STDDEV_INIT);
+    // NOTE: should NOT call initVariables
 }
+
 TerrainNav::TerrainNav(char* mapName) {
 	//initialize pointers
 	this->mapFile = STRDUPNULL(mapName);
@@ -64,6 +68,7 @@ TerrainNav::TerrainNav(char* mapName) {
 	} else {
 		terrainMap = new TerrainMapOctree(this->mapFile);
 	}
+    _initVars.setXYZ(X_STDDEV_INIT,Y_STDDEV_INIT,Z_STDDEV_INIT);
 	//initialize terrainNav private variables
 	initVariables();
 
@@ -87,7 +92,7 @@ TerrainNav::TerrainNav(char* mapName, char* vehicleSpecs) {
 	} else {
 		this->terrainMap = new TerrainMapOctree(this->mapFile);
 	}
-
+    _initVars.setXYZ(X_STDDEV_INIT,Y_STDDEV_INIT,Z_STDDEV_INIT);
 	//initialize terrainNav private variables
 	initVariables();
 }
@@ -111,7 +116,7 @@ TerrainNav::TerrainNav(char* mapName, char* vehicleSpecs,
 	} else {
 		this->terrainMap = new TerrainMapOctree(this->mapFile);
 	}
-
+    _initVars.setXYZ(X_STDDEV_INIT,Y_STDDEV_INIT,Z_STDDEV_INIT);
 	//initialize terrainNav private variables
 	initVariables();
 }
@@ -135,7 +140,7 @@ TerrainNav::TerrainNav(char* mapName, char* vehicleSpecs,
 	} else {
 		this->terrainMap = new TerrainMapOctree(this->mapFile);
 	}
-
+    _initVars.setXYZ(X_STDDEV_INIT,Y_STDDEV_INIT,Z_STDDEV_INIT);
 	//initialize terrainNav private variables
 	initVariables();
 }
@@ -158,7 +163,7 @@ TerrainNav::TerrainNav(char* mapName, char* vehicleSpecs,
 	} else {
 		this->terrainMap = new TerrainMapOctree(this->mapFile);
 	}
-
+    _initVars.setXYZ(X_STDDEV_INIT,Y_STDDEV_INIT,Z_STDDEV_INIT);
 	//initialize terrainNav private variables
 	initVariables();
 }
@@ -182,7 +187,7 @@ TerrainNav::TerrainNav(char* mapName, char* vehicleSpecs,
 	} else {
 		this->terrainMap = new TerrainMapOctree(this->mapFile);
 	}
-
+    _initVars.setXYZ(X_STDDEV_INIT,Y_STDDEV_INIT,Z_STDDEV_INIT);
 	//initialize terrainNav private variables
 	initVariables();
 }
@@ -207,7 +212,9 @@ TerrainNav::TerrainNav(char* mapName, char* vehicleSpecs, char* particles,
 	} else {
 		this->terrainMap = new TerrainMapOctree(this->mapFile);
 	}
-
+    _initVars.setXYZ(X_STDDEV_INIT,Y_STDDEV_INIT,Z_STDDEV_INIT);
+    // initialize using compilation defaults
+    // call reinitFilter with new InitVars to customize
 	//initialize terrainNav private variables
 	initVariables();
 	logs(TL_OMASK(TL_TERRAIN_NAV, TL_LOG),"TerrainNav::Constructor finished.\n");
@@ -234,9 +241,10 @@ TerrainNav::~TerrainNav() {
 	if(this->particlesFile !=NULL)free(this->particlesFile);
 	this->particlesFile=NULL;
 
+    if(_trnLog !=NULL) delete _trnLog;
 //	if (_posLog) delete _posLog;
 
-	logs(TL_OMASK(TL_TERRAIN_NAV, TL_LOG),"TerrainNav::Number of reinitializations: %i\n", numReinits);
+	logs(TL_OMASK(TL_TERRAIN_NAV, (TL_LOG|TL_SERR)),"%s - Number of reinitializations: %i\n", __func__,numReinits);
 }
 
 void TerrainNav::estimatePose(poseT* estimate, const int& type) {
@@ -298,8 +306,8 @@ void TerrainNav::estimatePose(poseT* estimate, const int& type) {
 	////*estimate += estNavOffset;
 
 	if(std::isnan(estimate->x) || std::isnan(estimate->y)){
-		estimate->covariance[0] = X_STDDEV_INIT*X_STDDEV_INIT;
-		estimate->covariance[2] = Y_STDDEV_INIT*Y_STDDEV_INIT;
+		estimate->covariance[0] = _initVars.x()*_initVars.x();
+		estimate->covariance[2] = _initVars.y()*_initVars.y();
 	}
 
 	/* Log to a data file */
@@ -649,7 +657,7 @@ void TerrainNav::createFilter(const int filterType, const double* windowVar) {
 	}
 	tNavFilter = NULL;
 
-	logs(TL_OMASK(TL_TERRAIN_NAV, TL_LOG),"Loading vehicle config file... %s\n", this->vehicleSpecFile);
+	logs(TL_OMASK(TL_TERRAIN_NAV, TL_LOG),"%s: Loading vehicle config file... %s\n", __func__,this->vehicleSpecFile);
 
 	//create new filter based on given filter type
 	switch(filterType) {
@@ -676,16 +684,15 @@ void TerrainNav::createFilter(const int filterType, const double* windowVar) {
 }
 
 
-
 void TerrainNav::initVariables() {
 	_initialized = false;
 	bool mapOk = true;
 
 	//initialize default variance for window size
 	double windowVar[N_COVAR] =
-			{X_STDDEV_INIT * X_STDDEV_INIT,
-			 0.0, Y_STDDEV_INIT * Y_STDDEV_INIT,
-			 0.0, 0.0, Z_STDDEV_INIT * Z_STDDEV_INIT,
+			{_initVars.x() * _initVars.x(),
+             0.0, _initVars.y() * _initVars.y(),
+             0.0, 0.0, _initVars.z() * _initVars.z(),
 			 0.0, 0.0, 0.0, PHI_STDDEV_INIT * PHI_STDDEV_INIT,
 			 0.0, 0.0, 0.0, 0.0, THETA_STDDEV_INIT * THETA_STDDEV_INIT,
 			 0.0, 0.0, 0.0, 0.0, 0.0, PSI_STDDEV_INIT * PSI_STDDEV_INIT,
@@ -698,7 +705,9 @@ void TerrainNav::initVariables() {
 
 	//create log objects
 	_trnLog = new TerrainNavLog(DataLog::BinaryFormat);
-  tl_new_logfile(dirname(STRDUPNULL(_trnLog->fileName())));
+    char *log_copy =STRDUPNULL(_trnLog->fileName());
+    tl_new_logfile(dirname(log_copy));
+    free(log_copy);
 
 	// Initialize TNavConfig
 	TNavConfig::instance()->setMapFile(this->mapFile);
@@ -706,8 +715,8 @@ void TerrainNav::initVariables() {
 	TNavConfig::instance()->setParticlesFile(this->particlesFile);
 	TNavConfig::instance()->setLogDir(this->saveDirectory);
 
-	//
 	// Shut off measWeights.txt debug.  It is too large.
+    free(saveDirectory);
 	this->saveDirectory = NULL;
 
 
@@ -1044,28 +1053,13 @@ void TerrainNav::checkRangeValidity(measT& currMeas) {
 	else {
 		return;
 	}
-
-}
-
-// Function void TerrainNav::setEstNavOffset() allows an external reset of the prior
-// offset estimate. This function is used prior to a particle filter reinit call
-// in order to force the reinit to be centered on a particular offset value rather than
-// the actual last offset estimate. This capability was created for use by the
-// MB-System program mbtrnpp so that reinit could, if necessary, be forced to be
-// centered on a zero offset or a prior very good offset estimate if that is known.
-// This addresses the occasional tendency of TRN to converge on similar topoography
-// far from the actual location - when this occurs convergence will soon be lost,
-// but the reinit should be centered on a more likely position.
-// David Caress MBARI August 29, 2020
-void TerrainNav::setEstNavOffset(double offset_x, double offset_y, double offset_z) {
-        estNavOffset.x = offset_x;
-        estNavOffset.y = offset_y;
-        estNavOffset.z = offset_z;
 }
 
 //void TerrainNav::reinitFilter(int newState, bool lowInfoTransition) {
 //old state machine declaratino: void TerrainNav::reinitFilter(int newState, bool lowInfoTransition) {
 void TerrainNav::reinitFilter(bool lowInfoTransition) {
+    logs(TL_OMASK(TL_TERRAIN_NAV, TL_LOG),"%s [%c]\n",__func__,
+         (lowInfoTransition?'Y':'N'));
 	int interpMapMethod = 1;
 	bool interpMeasAttitude = true;
 	double driftRate = 1;
@@ -1074,16 +1068,16 @@ void TerrainNav::reinitFilter(bool lowInfoTransition) {
 
 	//Default initialization window --> mainly used for broad area reinitializations
 	double windowVar[N_COVAR] = {
-			 X_STDDEV_INIT * X_STDDEV_INIT,
-			 0.0, Y_STDDEV_INIT * Y_STDDEV_INIT,
-			 0.0, 0.0, Z_STDDEV_INIT * Z_STDDEV_INIT,
-			 0.0, 0.0, 0.0, PHI_STDDEV_INIT * PHI_STDDEV_INIT,
-			 0.0, 0.0, 0.0, 0.0, THETA_STDDEV_INIT * THETA_STDDEV_INIT,
-			 0.0, 0.0, 0.0, 0.0, 0.0, PSI_STDDEV_INIT * PSI_STDDEV_INIT,
-			 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, GYRO_BIAS_STDDEV_INIT * GYRO_BIAS_STDDEV_INIT,
-			 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, GYRO_BIAS_STDDEV_INIT * GYRO_BIAS_STDDEV_INIT,
-			 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, PSI_BERG_STDDEV_INIT * PSI_BERG_STDDEV_INIT
-						   };
+        _initVars.x() * _initVars.x(),
+        0.0, _initVars.y() * _initVars.y(),
+        0.0, 0.0, _initVars.z() * _initVars.z(),
+        0.0, 0.0, 0.0, PHI_STDDEV_INIT * PHI_STDDEV_INIT,
+        0.0, 0.0, 0.0, 0.0, THETA_STDDEV_INIT * THETA_STDDEV_INIT,
+        0.0, 0.0, 0.0, 0.0, 0.0, PSI_STDDEV_INIT * PSI_STDDEV_INIT,
+        0.0, 0.0, 0.0, 0.0, 0.0, 0.0, GYRO_BIAS_STDDEV_INIT * GYRO_BIAS_STDDEV_INIT,
+        0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, GYRO_BIAS_STDDEV_INIT * GYRO_BIAS_STDDEV_INIT,
+        0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, PSI_BERG_STDDEV_INIT * PSI_BERG_STDDEV_INIT
+    };
 	int i;
 	poseT* temp = new poseT;
 
@@ -1173,6 +1167,27 @@ void TerrainNav::reinitFilter(bool lowInfoTransition) {
 	lastBottomLockTime = -1.0;
 	numReinits++;
 	delete temp;
+}
+
+void TerrainNav::reinitFilterOffset(bool lowInfoTransition,
+                                 double offset_x, double offset_y,double offset_z)
+{
+    logs(TL_OMASK(TL_TERRAIN_NAV, TL_LOG),"%s [%c {%lf,%lf,%lf}]\n",__func__,
+         (lowInfoTransition?'Y':'N'),offset_x, offset_y, offset_z);
+    setEstNavOffset(offset_x, offset_y, offset_z);
+    reinitFilter(lowInfoTransition);
+}
+
+void TerrainNav::reinitFilterBox(bool lowInfoTransition,
+                     double offset_x, double offset_y,double offset_z,
+                     double sdev_x, double sdev_y, double sdev_z)
+{
+    logs(TL_OMASK(TL_TERRAIN_NAV, TL_LOG),"%s [%c {%lf,%lf,%lf} {%lf,%lf,%lf}]\n",__func__,
+         (lowInfoTransition?'Y':'N'),offset_x, offset_y, offset_z,
+         sdev_x, sdev_y, sdev_z);
+    setEstNavOffset(offset_x, offset_y, offset_z);
+    setInitStdDevXYZ(sdev_x, sdev_y, sdev_z);
+    reinitFilter(lowInfoTransition);
 }
 
 
@@ -1316,6 +1331,55 @@ bool TerrainNav::checkFilterHealth() {
 
 }
 
+char *TerrainNav::getSessionDir(char *dir_prefix, char *dest, size_t len, bool create)
+{
+    char *retval=NULL;
+    char sessiondir[512]={0};
+    struct stat sb;
+    // note: 0 is unused (foo-TRN, foo-TRN.01...)
+    int dir_count=1;
+
+    char dot[]=".";
+    char* logPath = getenv("TRN_LOGFILES");
+    char dir_base[128] = {0};
+    sprintf(dir_base, "%s",dir_prefix!=NULL ? dir_prefix : LOGDIR_DFL);
+    if(NULL==logPath){
+        logPath=dot;
+    }
+
+    // iterate until directory not found
+    // Note that sequence skips index zero:
+    //  <dir_base>-TRN, <dir_base>-TRN.01...
+
+    sprintf(sessiondir, "%s/%s-TRN", logPath, dir_base);
+//    fprintf(stderr, "%s - trying session directory [%s]\n",__func__, sessiondir);
+
+    while(stat(sessiondir, &sb)==0 && S_ISDIR(sb.st_mode)){
+        sprintf(sessiondir, "%s/%s-TRN.%02d", logPath, dir_base, dir_count++);
+//        fprintf(stderr,"%s - trying session directory [%s]\n",__func__, sessiondir);
+    }
+
+    // session dir points to next avail (non-existing)
+    if(create){
+        // create the diretory
+        mkdir(sessiondir, 0777);
+    }else{
+        // return last tried (even if it doesn't exist)
+        if(dir_count>1){
+            sprintf(sessiondir, "%s/%s-TRN.%02d", logPath, dir_base, --dir_count);
+        }
+    }
+    // check dest size and copy
+    if(NULL!=dest && len>(strlen(sessiondir)+1)){
+        sprintf(dest,"%s/",sessiondir);
+        retval=dest;
+    }
+
+    logs(TL_OMASK(TL_TERRAIN_NAV, (TL_LOG|TL_SERR)), "session directory is %s\n", retval);
+
+    return retval;
+}
+
 /* Function: copyToLogDir() - copies configuration files to the log directory
 *			     for future reference
 *  A log directory (saveDirectory) must be specified in the initialization
@@ -1328,40 +1392,29 @@ void TerrainNav::copyToLogDir()
 
 	// Copy only if there is a place for the files to land
 	//
-	char *slash = NULL;
 	if (NULL != this->saveDirectory)
 	{
+
+        char *slash = NULL;
 		char* trnLogDir = getenv("TRN_LOGFILES");
-                char dot[]=".";
+        char dot[]=".";
 		if (!trnLogDir) trnLogDir = dot;
-		char dir_spec[500];  // Reusable buffer to write log directory paths
+		char dir_spec[512];  // Reusable buffer to write log directory paths
 
 		// Create the log directory
-		//
+		// remove last component of directory prefix, if any (shouldn't exist)
+        // klh - intentional? or is it meant to remove trailing slash?
 		if( ( slash = strrchr( this->saveDirectory, '/' ) ) )
 		{
 		   *slash = '\0';
 		}
-		sprintf(dir_spec, "%s/%s-TRN", trnLogDir, this->saveDirectory);
 
-		for (int n = 1; 0 != mkdir(dir_spec, 0777); n++)
-		{
-       if ( errno != EEXIST )
-       {
-          // If the error is about something other than EEXIST
-          //
-          fprintf(stderr,"\n\n\t\tTerrainNav::copyToLogDir() - ERR: mkdir(%s) failed"
-          " [%d,%s]\n\n", dir_spec, errno, strerror(errno));
-          trnLogDir = dot;
-	  break;
-       }
-       else sprintf(dir_spec, "%s/%s-TRN.%02d", trnLogDir, this->saveDirectory, n);
-		}
+        getSessionDir(this->saveDirectory,dir_spec,512,true);
 
+        // update saveDirectory (used to store filter files)
 		free(this->saveDirectory);
 		this->saveDirectory = STRDUPNULL(dir_spec);
 		logs(TL_OMASK(TL_TERRAIN_NAV, TL_LOG), "TRN log directory is %s\n", this->saveDirectory);
-
 
 		// Create a latest link that points to the log directory
 		//

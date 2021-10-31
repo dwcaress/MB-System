@@ -3876,6 +3876,15 @@ int main(int argc, char **argv) {
                     fprintf(stderr, "--reinit time_d:%.6f centered on offset: %f %f %f\n",
                                   ping[i_ping_process].time_d, use_offset_e, use_offset_n, use_offset_z);
                     wtnav_reinit_filter_offset(trn_instance, true, use_offset_n, use_offset_e, use_offset_z);
+                      // TODO: replace wtnav_reinit_filter_offset with the following,
+                      // which correspond 1:1 with TerrainNav method calls
+                      // use existing xyz sdev init values
+//                      d_triplet_t xyz_sdev={0., 0., 0.};
+//                      wtnav_get_init_stddev_xyz(trn_instance, &xyz_sdev);
+//
+//                      wtnav_reinit_filter_box(trn_instance, true, use_offset_n, use_offset_e, use_offset_z,
+//                                              xyz_sdev.x, xyz_sdev.y, xyz_sdev.z);
+
                     mlog_tprintf(mbtrnpp_mlog_id, "i,trn filter reinit time_d:%.6f centered on offset: %f %f %f\n",
                                   ping[i_ping_process].time_d, use_offset_e, use_offset_n, use_offset_z);
                     MST_COUNTER_INC(app_stats->stats->events[MBTPP_EV_MB_REINIT]);
@@ -5091,7 +5100,15 @@ int s_mbtrnpp_trnu_reset_callback()
     fprintf(stderr, "--reinit (cli_req) systime:%.6f centered on offset: %f %f %f\n",
             reset_time, use_offset_e, use_offset_n, use_offset_z);
 
+    // TODO: replace wtnav_reinit_filter_offset with wtnav_reinit_filter_box
     wtnav_reinit_filter_offset(trn_instance, true, use_offset_n, use_offset_e, use_offset_z);
+
+    // TODO: use current values, or generate in mbtrnpp?
+//    d_triplet_t xyz_sdev={0., 0., 0.};
+//    wtnav_get_init_stddev_xyz(trn_instance, &xyz_sdev);
+//
+//    wtnav_reinit_filter_box(trn_instance, true, use_offset_n, use_offset_e, use_offset_z,
+//                            xyz_sdev.x, xyz_sdev.y, xyz_sdev.z);
 
     mlog_tprintf(mbtrnpp_mlog_id, "i,trn filter reinit.cli systime:%.6f centered on offset: %f %f %f\n",
                  reset_time, use_offset_e, use_offset_n, use_offset_z);
