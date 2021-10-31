@@ -1,4 +1,4 @@
-.TH mbgrid 1 "25 September 2021" "MB-System 5.0" "MB-System 5.0"
+.TH mbgrid 1 "31 October 2021" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbgrid\fP \- Grid bathymetry, amplitude, or sidescan data
 from swath sonar data files.
@@ -15,7 +15,7 @@ Version 5.0
 \fB\-L\fIlonflip\fP \fB\-M \-N \-P\fIpings\fP \fB\-Q\fP
 \fB\-R\fIwest/east/south/north\fP \fB\-R\fIfactor\fP
 \fB\-S\fIspeed\fP \fB\-T\fItension\fP \fB\-U\fItime\fP
-\fB\-V\fP \-W\fIscale\fP \fB\-X\fIextend\fP]
+\fB\-V\fP \-W\fIscale\fP \fB\-X\fIextend\fP \fB\-Y\fIshiftx/shifty\fP]
 
 .SH DESCRIPTION
 \fBmbgrid\fP is a utility used to grid bathymetry, amplitude, or sidescan
@@ -707,6 +707,13 @@ extension is \fIextend\fP times the grid width/height to each side.
 Thus, if \fIextend\fP=1.0, then the internal grid will have dimensions
 three times the output grid.
 Default: \fIextend\fP = 0.0
+.TP
+.B \-Y
+\fIshiftx/shifty\fP
+.br
+This option shifts the location of the output grid bounds by \fIshiftx\fP
+meters east and \fIshifty\fP meters north.
+Default: \fIshiftx\fP = \fIshifty\fP = 0.0
 .SH EXAMPLES
 Suppose you want to grid some Hydrosweep data in six data files over
 a region with longitude bounds of 139.9W to 139.65W and latitude bounds

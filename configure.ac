@@ -11,8 +11,8 @@ dnl    See README file for copying and redistribution conditions.
 dnl--------------------------------------------------------------------
 
 dnl Initialize and set version and version date
-AC_INIT([mbsystem],[5.7.9beta17],[http://listserver.mbari.org/sympa/arc/mbsystem],[mbsystem],[http://www.mbari.org/data/mbsystem/])
-AC_DEFINE(VERSION_DATE, ["16 October 2021"], [Set VERSION_DATE define in mb_config.h])
+AC_INIT([mbsystem],[5.7.9beta18],[http://listserver.mbari.org/sympa/arc/mbsystem],[mbsystem],[http://www.mbari.org/data/mbsystem/])
+AC_DEFINE(VERSION_DATE, ["31 October 2021"], [Set VERSION_DATE define in mb_config.h])
 
 AS_ECHO([" "])
 AS_ECHO(["------------------------------------------------------------------------------"])
@@ -375,7 +375,7 @@ if test "$GOT_PROJ" = "yes" ; then
 else
     dnl Look for pkg-config PROJ package...
     AS_ECHO(["Look for pkg-config PROJ package..."])
-    PKG_CHECK_MODULES([libproj], [proj], [FOUND_PROJ_LIB=yes], [FOUND_PROJ_LIB=no])
+    PKG_CHECK_MODULES([libproj], [proj], [FOUND_PROJ_PKG=yes], [FOUND_PROJ_PKG=no])
     AC_CHECK_LIB([proj], [proj_normalize_for_visualization], [FOUND_PROJ_LIB=yes], [FOUND_PROJ_LIB=no], )
     if test "$FOUND_PROJ_LIB" = "yes"; then
         FOUND_PROJ6=yes
@@ -388,7 +388,13 @@ else
         fi
     fi
     if test "$FOUND_PROJ_LIB" = "no"; then
-        AC_MSG_ERROR([Did not find PROJ library pkg-config package...])
+        if test "$FOUND_PRING_PKG" = "yes"; then
+            dnl Proj pkg-config package exists, assume proj >= 6
+                FOUND_PROJ6=yes
+                FOUND_PROJ_LIB=yes
+        else
+            AC_MSG_ERROR([Did not find PROJ library pkg-config package...])
+        fi
     fi
     libproj_LIBS="-lproj"
     libproj_LDFLAGS=""
