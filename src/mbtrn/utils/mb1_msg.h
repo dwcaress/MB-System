@@ -72,6 +72,7 @@
 /////////////////////////
 // Macros
 /////////////////////////
+
 /// @def MB1_MAX_BEAMS
 /// @brief maximum number of beams
 #define MB1_MAX_BEAMS 512
@@ -80,7 +81,7 @@
 #define MB1_TYPE_ID 0x4D423100
 /// @def MB1_HEADER_BYTES
 /// @brief MB1 header (static field) size (bytes)
-#define MB1_HEADER_BYTES   56
+#define MB1_HEADER_BYTES   sizeof(mb1_header_t) //56
 /// @def MB1_TYPE_BYTES
 /// @brief MB1 type size (bytes)
 #define MB1_TYPE_BYTES   4
@@ -92,7 +93,7 @@
 #define MB1_BEAM_BYTES     28
 /// @def MB1_CHECKSUM_BYTES
 /// @brief MB1 checksum size
-#define MB1_CHECKSUM_BYTES  4
+#define MB1_CHECKSUM_BYTES  sizeof(mb1_checksum_t) //4
 /// @def MB1_BEAM_ARRAY_BYTES
 /// @brief size of beam array
 /// @param[in] beams number of beams
@@ -104,14 +105,35 @@
 /// @def MB1_MAX_FRAME_BYTES
 /// @brief max size of MB1 data frame
 #define MB1_MAX_FRAME_BYTES MB1_FRAME_BYTES(MB1_MAX_BEAMS)
+/// @def MB1_EMPTY_FRAME_BYTES
+/// @brief max size of MB1 data frame
+#define MB1_EMPTY_FRAME_BYTES MB1_FRAME_BYTES(0)
 /// @def MB1_PCHECKSUM_U32(pframe)
 /// @brief checksum pointer (unsigned int *)
 //#define MB1_PCHECKSUM_U32(pframe) (NULL!=pframe ? (unsigned int *) (((unsigned char *)pframe)+sizeof(mb1_frame_t)+pframe->sounding->size-MB1_CHECKSUM_BYTES) : NULL)
 #define MB1_PCHECKSUM_U32(pframe) ((unsigned int *) (((unsigned char *)pframe)+sizeof(mb1_frame_t)+pframe->sounding->size-MB1_CHECKSUM_BYTES))
 
+/// @def MB1_PSNDCHKSUM_U32(psounding)
+/// @brief checksum pointer (unsigned int *)
+#define MB1_SND_PCHKSUM_U32(psounding) ((mb1_checksum_t *) (((unsigned char *)psounding)+psounding->size-MB1_CHECKSUM_BYTES))
+
+/// @def MB1_PSNDCHKSUM_U32(psounding)
+/// @brief checksum pointer (unsigned int *)
+#define MB1_SND_GET_CHKSUM(psounding) (mb1_checksum_t)(*MB1_SND_PCHKSUM_U32(psounding))
+
+/// @def MB1_SOUNDING_BYTES(beams)
+/// @brief sounding size (bytes)
+#define MB1_SOUNDING_BYTES(beams) (MB1_HEADER_BYTES+beams*MB1_BEAM_BYTES+MB1_CHECKSUM_BYTES)
+
+/// @def MB1_PBEAMS(psounding)
+/// @brief pointer to start of beam data
+#define MB1_PBEAMS(psounding) ((mb1_beam_t *) (((unsigned char *)psounding)+MB1_HEADER_BYTES))
+
 /////////////////////////
 // Type Definitions
 /////////////////////////
+
+typedef uint32_t mb1_checksum_t;
 
 /// @typedef enum mb1_resize_flags_t
 /// @brief resize flags (indicate which fields to clear)
@@ -134,7 +156,7 @@ typedef struct mb1_beam_s
     /// @var mb1_beam_s::beam_num
     /// @brief beam number
      // beam number (0 is port-most beam)
-    unsigned int beam_num;
+    uint32_t beam_num;
     /// @var mb1_beam_s::rhox
     /// @brief along track position wrt sonar (m)
     double rhox;
@@ -146,16 +168,16 @@ typedef struct mb1_beam_s
     double rhoz;
 }mb1_beam_t;
 
-/// @typedef struct mb1_sounding_s mb1_sounding_t
-/// @brief
-typedef struct mb1_sounding_s
+/// @typedef struct mb1_header_s mb1_header_t
+/// @brief static header struct (for convenience)
+typedef struct mb1_header_s
 {
     /// @var mb1_sounding_s::type
     /// @brief record type ID ('M''B''1''\0')
-    unsigned int type;
+    uint32_t type;
     /// @var mb1_sounding_s::size
     /// @brief total bytes, including header and checksum
-    unsigned int size;
+    uint32_t size;
     /// @var mb1_sounding_s::ts
     /// @brief epoch time of ping
     double ts;
@@ -173,13 +195,46 @@ typedef struct mb1_sounding_s
     double hdg;
     /// @var mb1_sounding_s::ping_number
     /// @brief ping number
-    int ping_number;
+    int32_t ping_number;
     /// @var mb1_sounding_s::nbeams
     /// @brief number of beams
-    unsigned int nbeams;
+    uint32_t nbeams;
+}mb1_header_t;
+
+/// @typedef struct mb1_sounding_s mb1_sounding_t
+/// @brief
+typedef struct mb1_sounding_s
+{
+    /// @var mb1_sounding_s::type
+    /// @brief record type ID ('M''B''1''\0')
+    uint32_t type;
+    /// @var mb1_sounding_s::size
+    /// @brief total bytes, including header and checksum
+    uint32_t size;
+    /// @var mb1_sounding_s::ts
+    /// @brief epoch time of ping
+    double ts;
+    /// @var mb1_sounding_s::lat
+    /// @brief latitude
+    double lat;
+    /// @var mb1_sounding_s::lon
+    /// @brief longitude
+    double lon;
+    /// @var mb1_sounding_s::depth
+    /// @brief vehicle position depth meters
+    double depth;
+    /// @var mb1_sounding_s::hdg
+    /// @brief heading
+    double hdg;
+    /// @var mb1_sounding_s::ping_number
+    /// @brief ping number
+    int32_t ping_number;
+    /// @var mb1_sounding_s::nbeams
+    /// @brief number of beams
+    uint32_t nbeams;
     /// @var mb1_sounding_s::beams
     /// @brief beam data array
-    mb1_beam_t beams[];
+        mb1_beam_t beams[];
     /// 32-bit checksum follows beam array
 }mb1_sounding_t;
 
@@ -215,7 +270,7 @@ extern "C" {
     /// @brief allocate new MB1 data frame. Caller must release using mb1_frame_destroy.
     /// @param[in] beams number of beams (>=0)
     /// @return new mb1_frame_t pointer on success, NULL otherwise
-    mb1_frame_t *mb1_frame_new(int beams);
+//    mb1_frame_t *mb1_frame_new(int beams);
     
     /// @fn mb1_frame_t *mb1_frame_resize(mb1_frame_t **pself, int beams,  int flags)
     /// @brief resize MB1 data frame (e.g. add/remove beam data)
@@ -223,7 +278,7 @@ extern "C" {
     /// @param[in] beams number of beams (>=0)
     /// @param[in] flags indicate what fields to initialize to zero (checksum always cleared)
     /// @return new mb1_frame_t pointer on success, NULL otherwise
-    mb1_frame_t *mb1_frame_resize(mb1_frame_t **pself, int beams,  int flags);
+//    mb1_frame_t *mb1_frame_resize(mb1_frame_t **pself, int beams,  int flags);
 
     /// @fn int mb1_frame_zero(mb1_frame_t **pself, int flags)
     /// @brief zero MB1 data frame

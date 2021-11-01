@@ -1,4 +1,4 @@
-lib_LTLIBRARIES = libmframe.la libr7kr.la
+lib_LTLIBRARIES = libmframe.la libr7kr.la libmb1r.la
 
 include_HEADERS = \
         mframe/src/mframe.h \
@@ -18,18 +18,20 @@ include_HEADERS = \
         utils/mb1_msg.h \
         utils/mb71_msg.h \
         r7kr/r7k-reader.h \
-        r7kr/r7kc.h
+        r7kr/r7kc.h \
+        mb1r/mb1-reader.h \
+        mb1r/mb1-io.h
 
 AM_CFLAGS = ${libgmt_CFLAGS} ${libnetcdf_CFLAGS}
 
 # configure mframe compilation flags
 BUILD_DATE=`date +%Y/%m/%dT%H:%M:%S%z`
 MFRAME_VERSIONS=-DMFRAME_BUILD="${BUILD_DATE}" -DTRNC_VER=1.0 -DFRAMES7K_VER=1.0 -DSTREAM7K_VER=1.0 -DTBINX_VER=1.0 -DEMU7K_VER=1.0
-MFRAME_TESTS=-DWITH_TESTS -DWITH_R7KR_TEST
+MFRAME_TESTS=-DWITH_TESTS -DWITH_R7KR_TEST -DWITH_MB1R_TEST
 MFRAME_FEATURES=-DWITH_MST_MSTATS -DMST_STATS_EN -DWITH_MMDEBUG
 MFRAME_OPTS=$(MFRAME_VERSIONS) $(MFRAME_FEATURES) $(MFRAME_TESTS)
 
-AM_CPPFLAGS = -g -O0 -I${top_srcdir}/src/mbtrn/r7kr -I${top_srcdir}/src/mbtrn/utils -I${top_srcdir}/src/mbtrn/mframe/src -I${top_srcdir}/src/mbtrnav/trnw -I${top_srcdir}/src/mbtrnav/terrain-nav \
+AM_CPPFLAGS = -g -O0 -I${top_srcdir}/src/mbtrn/r7kr -I${top_srcdir}/src/mbtrn/mb1r -I${top_srcdir}/src/mbtrn/utils -I${top_srcdir}/src/mbtrn/mframe/src -I${top_srcdir}/src/mbtrnav/trnw -I${top_srcdir}/src/mbtrnav/terrain-nav \
  -DHAVE_CONFIG_H  -D_GNU_SOURCE $(MFRAME_OPTS)
 
 libmframe_la_LDFLAGS =  -no-undefined -version-info 0:0:0
@@ -62,7 +64,18 @@ libr7kr_la_SOURCES =  utils/mconfig.c \
 
 libr7kr_la_LIBADD = libmframe.la -lpthread
 
-bin_PROGRAMS =  stream7k frames7k emu7k trnc tbinx udps udpc mb1conv mb12csv r7kr_test mbtnav-cli
+
+libmb1r_la_LDFLAGS =  -no-undefined -version-info 0:0:0
+
+libmb1r_la_SOURCES =  utils/mconfig.c \
+        utils/mb1_msg.c \
+        utils/mb71_msg.c \
+        mb1r/mb1-reader.c \
+        mb1r/mb1-io.c
+
+libmb1r_la_LIBADD = libmframe.la -lpthread
+
+bin_PROGRAMS =  stream7k frames7k emu7k trnc tbinx udps udpc mb1conv mb12csv r7kr_test mb1r_test mbtnav-cli
 
 stream7k_SOURCES = utils/stream7k.c
 stream7k_LDADD = libr7kr.la
@@ -93,6 +106,9 @@ mb12csv_LDADD = libr7kr.la
 
 r7kr_test_SOURCES = r7kr/r7kr-test.c
 r7kr_test_LDADD = libr7kr.la
+
+mb1r_test_SOURCES = mb1r/mb1r-test.c
+mb1r_test_LDADD = libmb1r.la
 
 mbtnav_cli_SOURCES = utils/mbtnav_cli.c
 mbtnav_cli_LDADD = libr7kr.la
