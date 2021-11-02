@@ -13,7 +13,7 @@
 /////////////////////////
 /*
  Copyright Information
-  
+ 
  Copyright 2002-YYYY MBARI
  Monterey Bay Aquarium Research Institute, all rights reserved.
  
@@ -163,7 +163,7 @@ typedef struct mb1_beam_s
 {
     /// @var mb1_beam_s::beam_num
     /// @brief beam number
-     // beam number (0 is port-most beam)
+    // beam number (0 is port-most beam)
     uint32_t beam_num;
     /// @var mb1_beam_s::rhox
     /// @brief along track position wrt sonar (m)
@@ -242,7 +242,7 @@ typedef struct mb1_sounding_s
     uint32_t nbeams;
     /// @var mb1_sounding_s::beams
     /// @brief beam data array
-        mb1_beam_t beams[];
+    mb1_beam_t beams[];
     /// 32-bit checksum follows beam array
 }mb1_sounding_t;
 

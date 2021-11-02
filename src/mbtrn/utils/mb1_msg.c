@@ -76,21 +76,21 @@
 // These macros should only be defined for 
 // application main files rather than general C files
 /*
-/// @def PRODUCT
-/// @brief header software product name
-#define PRODUCT "TBD_PRODUCT"
+ /// @def PRODUCT
+ /// @brief header software product name
+ #define PRODUCT "TBD_PRODUCT"
 
-/// @def COPYRIGHT
-/// @brief header software copyright info
-#define COPYRIGHT "Copyright 2002-YYYY MBARI Monterey Bay Aquarium Research Institute, all rights reserved."
-/// @def NOWARRANTY
-/// @brief header software terms of use
-#define NOWARRANTY  \
-"This program is distributed in the hope that it will be useful,\n"\
-"but WITHOUT ANY WARRANTY; without even the implied warranty of\n"\
-"MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the\n"\
-"GNU General Public License for more details (http://www.gnu.org/licenses/gpl-3.0.html)\n"
-*/
+ /// @def COPYRIGHT
+ /// @brief header software copyright info
+ #define COPYRIGHT "Copyright 2002-YYYY MBARI Monterey Bay Aquarium Research Institute, all rights reserved."
+ /// @def NOWARRANTY
+ /// @brief header software terms of use
+ #define NOWARRANTY  \
+ "This program is distributed in the hope that it will be useful,\n"\
+ "but WITHOUT ANY WARRANTY; without even the implied warranty of\n"\
+ "MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the\n"\
+ "GNU General Public License for more details (http://www.gnu.org/licenses/gpl-3.0.html)\n"
+ */
 
 /////////////////////////
 // Declarations 
@@ -156,7 +156,6 @@ void mb1_hex_show(byte *data, uint32_t len, uint16_t cols, bool show_offsets, ui
             }
             fprintf(stderr,"%*s ]\n",3*(cols-rem)," ");
         }
-
     }
 }
 // End function mb1_hex_show
@@ -169,7 +168,6 @@ mb1_sounding_t *mb1_sounding_new(uint32_t beams)
         instance = (mb1_sounding_t *)malloc(alloc_size);
         if(NULL!=instance){
             memset(instance,0,alloc_size);
-
             instance->type = MB1_TYPE_ID;
             instance->size=alloc_size;
             instance->ts=0;
