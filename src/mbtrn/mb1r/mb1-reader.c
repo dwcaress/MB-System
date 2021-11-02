@@ -893,7 +893,7 @@ static int s_sm_act_read_header(mb1r_reader_t *self, mb1r_sm_ctx_t *pctx)
                     pctx->cx++;
                 }
 
-                if(pctx->cx==0 && pctx->psnd->size < MB1_EMPTY_FRAME_BYTES){
+                if(pctx->cx==0 && pctx->psnd->size < MB1_EMPTY_SOUNDING_BYTES){
                     PMPRINT(MOD_MB1R,MM_DEBUG,(stderr,"INFO - header  size invalid [%"PRIu32"]\n",pctx->psnd->size));
                     MST_COUNTER_INC(self->stats->events[MB1R_EV_EHDRSZ]);
                     pctx->cx++;
@@ -1333,7 +1333,7 @@ static void *s_test_worker(void *pargs)
         fd_set read_fds;
         fd_set write_fds;
         fd_set err_fds;
-        byte iobuf[MB1_MAX_FRAME_BYTES]; // buffer for client data
+        byte iobuf[MB1_MAX_SOUNDING_BYTES]; // buffer for client data
         struct sockaddr_storage client_addr={0};
         socklen_t addr_size=0;
 
@@ -1581,7 +1581,7 @@ int mb1r_test(int argc, char **argv)
 
     // initialize reader
     // create and open socket connection
-    mb1r_reader_t *reader = mb1r_reader_new(cfg->host, cfg->port, MAX_MB1_FRAME_BYTES);
+    mb1r_reader_t *reader = mb1r_reader_new(cfg->host, cfg->port, MB1_MAX_SOUNDING_BYTES);
 
     // show reader config
     if(cfg->verbose>1)
@@ -1589,7 +1589,7 @@ int mb1r_test(int argc, char **argv)
 
     uint32_t lost_bytes=0;
     // test mb1r_read_frame
-    byte frame_buf[MAX_MB1_FRAME_BYTES]={0};
+    byte frame_buf[MB1_MAX_SOUNDING_BYTES]={0};
     int frames_read=0;
 
     if(cfg->verbose>1)
@@ -1598,11 +1598,11 @@ int mb1r_test(int argc, char **argv)
     int retries=cfg->retries;
     while ( (frames_read<cfg->cycles) && retries>0 ) {
          // clear frame buffer
-        memset(frame_buf,0,MAX_MB1_FRAME_BYTES);
+        memset(frame_buf,0,MB1_MAX_SOUNDING_BYTES);
         // read frame
         int istat=0;
-        fprintf(stderr,"reading frame ret[%d]\n",retries);
-        if( (istat = mb1r_read_frame(reader, frame_buf, MAX_MB1_FRAME_BYTES, MB1R_NOFLAGS, 0.0, MB1R_READ_TMOUT_MSEC, &lost_bytes )) > 0){
+        fprintf(stderr,"reading sounding ret[%d]\n",retries);
+        if( (istat = mb1r_read_frame(reader, frame_buf, MB1_MAX_SOUNDING_BYTES, MB1R_NOFLAGS, 0.0, MB1R_READ_TMOUT_MSEC, &lost_bytes )) > 0){
 
             frames_read++;
 

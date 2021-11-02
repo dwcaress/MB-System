@@ -274,7 +274,7 @@ typedef struct mb1r_reader_s
 
 /// @def MAX_MB1_FRAME_BYTES
 /// @brief max MB1 bytes
-#define MAX_MB1_FRAME_BYTES        MB1_SOUNDING_BYTES(512)
+//#define MAX_MB1_FRAME_BYTES        MB1_SOUNDING_BYTES(512)
 /// @def IP_PORT_MB1
 /// @brief reson 7k center IP port
 #define MB1_IO_PORT               7007

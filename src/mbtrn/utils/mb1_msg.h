@@ -77,8 +77,10 @@
 /// @brief maximum number of beams
 #define MB1_MAX_BEAMS 512
 /// @def MB1_TYPE_ID
-/// @brief MB1 record type ID (0x53423100='M''B''1''\0')
-#define MB1_TYPE_ID 0x4D423100
+/// @brief MB1 record type ID (0x4D423100='M''B''1''\0')
+//#define MB1_TYPE_ID 0x4D423100
+#define MB1_TYPE_ID 0x0031424D
+
 /// @def MB1_HEADER_BYTES
 /// @brief MB1 header (static field) size (bytes)
 #define MB1_HEADER_BYTES   sizeof(mb1_header_t) //56
@@ -98,16 +100,7 @@
 /// @brief size of beam array
 /// @param[in] beams number of beams
 #define MB1_BEAM_ARRAY_BYTES(beams) (beams*MB1_BEAM_BYTES)
-/// @def MB1_FRAME_BYTES
-/// @brief size of complete MB1 data frame
-/// @param[in] beams number of beams
-#define MB1_FRAME_BYTES(beams) (MB1_HEADER_BYTES+beams*MB1_BEAM_BYTES+MB1_CHECKSUM_BYTES)
-/// @def MB1_MAX_FRAME_BYTES
-/// @brief max size of MB1 data frame
-#define MB1_MAX_FRAME_BYTES MB1_FRAME_BYTES(MB1_MAX_BEAMS)
-/// @def MB1_EMPTY_FRAME_BYTES
-/// @brief max size of MB1 data frame
-#define MB1_EMPTY_FRAME_BYTES MB1_FRAME_BYTES(0)
+
 /// @def MB1_PCHECKSUM_U32(pframe)
 /// @brief checksum pointer (unsigned int *)
 //#define MB1_PCHECKSUM_U32(pframe) (NULL!=pframe ? (unsigned int *) (((unsigned char *)pframe)+sizeof(mb1_frame_t)+pframe->sounding->size-MB1_CHECKSUM_BYTES) : NULL)
@@ -115,7 +108,9 @@
 
 /// @def MB1_PSNDCHKSUM_U32(psounding)
 /// @brief checksum pointer (unsigned int *)
-#define MB1_SND_PCHKSUM_U32(psounding) ((mb1_checksum_t *) (((unsigned char *)psounding)+psounding->size-MB1_CHECKSUM_BYTES))
+#define MB1_SND_PCHKSUM_U32(psounding)  ((uint32_t *) (((unsigned char *)psounding)+psounding->size-MB1_CHECKSUM_BYTES))
+
+#define MB1_SND_CHKSUM_BYTES(psounding) (psounding->size-MB1_CHECKSUM_BYTES)
 
 /// @def MB1_PSNDCHKSUM_U32(psounding)
 /// @brief checksum pointer (unsigned int *)
@@ -124,10 +119,27 @@
 /// @def MB1_SOUNDING_BYTES(beams)
 /// @brief sounding size (bytes)
 #define MB1_SOUNDING_BYTES(beams) (MB1_HEADER_BYTES+beams*MB1_BEAM_BYTES+MB1_CHECKSUM_BYTES)
+#define MB1_MAX_SOUNDING_BYTES MB1_SOUNDING_BYTES(MB1_MAX_BEAMS)
+#define MB1_EMPTY_SOUNDING_BYTES MB1_SOUNDING_BYTES(0)
 
 /// @def MB1_PBEAMS(psounding)
 /// @brief pointer to start of beam data
 #define MB1_PBEAMS(psounding) ((mb1_beam_t *) (((unsigned char *)psounding)+MB1_HEADER_BYTES))
+
+
+#ifdef WITH_MB1_FRAME
+/// @def MB1_FRAME_BYTES
+/// @brief size of complete MB1 data frame
+/// @param[in] beams number of beams
+//#define MB1_FRAME_BYTES(beams) (MB1_HEADER_BYTES+beams*MB1_BEAM_BYTES+MB1_CHECKSUM_BYTES)
+/// @def MB1_MAX_FRAME_BYTES
+/// @brief max size of MB1 data frame
+//#define MB1_MAX_FRAME_BYTES MB1_FRAME_BYTES(MB1_MAX_BEAMS)
+/// @def MB1_EMPTY_FRAME_BYTES
+/// @brief max size of MB1 data frame
+//#define MB1_EMPTY_FRAME_BYTES MB1_FRAME_BYTES(0)
+#endif
+
 
 /////////////////////////
 // Type Definitions
@@ -238,6 +250,9 @@ typedef struct mb1_sounding_s
     /// 32-bit checksum follows beam array
 }mb1_sounding_t;
 
+
+#ifdef WITH_MB1_FRAME
+
 /// @typedef struct mb1_frame_s mb1_frame_t
 /// @brief MB1 data frame.
 /// Structure is variable length; sounding and checksum
@@ -256,6 +271,8 @@ typedef struct mb1_frame_s
     /// sounding points to start of sounding header
     /// checksum points to checksum (after variable length beam data array)
 }mb1_frame_t;
+#endif // WITH_MB1_FRAME
+
 
 #pragma pack(pop)
 
@@ -266,11 +283,13 @@ typedef struct mb1_frame_s
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+#ifdef WITH_MB1_FRAME
     /// @fn mb1_frame_t *mb1_frame_new(int beams)
     /// @brief allocate new MB1 data frame. Caller must release using mb1_frame_destroy.
     /// @param[in] beams number of beams (>=0)
     /// @return new mb1_frame_t pointer on success, NULL otherwise
-//    mb1_frame_t *mb1_frame_new(int beams);
+    mb1_frame_t *mb1_frame_new(int beams);
     
     /// @fn mb1_frame_t *mb1_frame_resize(mb1_frame_t **pself, int beams,  int flags)
     /// @brief resize MB1 data frame (e.g. add/remove beam data)
@@ -278,7 +297,7 @@ extern "C" {
     /// @param[in] beams number of beams (>=0)
     /// @param[in] flags indicate what fields to initialize to zero (checksum always cleared)
     /// @return new mb1_frame_t pointer on success, NULL otherwise
-//    mb1_frame_t *mb1_frame_resize(mb1_frame_t **pself, int beams,  int flags);
+    mb1_frame_t *mb1_frame_resize(mb1_frame_t **pself, int beams,  int flags);
 
     /// @fn int mb1_frame_zero(mb1_frame_t **pself, int flags)
     /// @brief zero MB1 data frame
@@ -306,6 +325,8 @@ extern "C" {
     /// @param[in] indent  output indentation (spaces)
     /// @return none
     void mb1_frame_show(mb1_frame_t *self, bool verbose, uint16_t indent);
+#endif //WITH_MB1_FRAME
+
 #ifdef __cplusplus
 }
 #endif

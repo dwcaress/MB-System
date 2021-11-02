@@ -61,6 +61,7 @@ GNU General Public License for more details
 
 #include "mb1-io.h"
 #include "merror.h"
+#include "mmdebug.h"
 #include "medebug.h"
 #include "mconfig.h"
 

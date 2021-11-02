@@ -106,6 +106,7 @@
 // Function Definitions
 /////////////////////////
 
+#ifdef WITH_MB1_FRAME
 mb1_frame_t *mb1_frame_new(int beams)
 {
     mb1_frame_t *instance =NULL;
@@ -234,4 +235,4 @@ void mb1_frame_show(mb1_frame_t *self, bool verbose, uint16_t indent)
         }
     }
 }
-
+#endif // WITH_MB1_FRAME

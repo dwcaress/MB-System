@@ -69,8 +69,8 @@
 // Includes
 /////////////////////////
 
+#include <stdint.h>
 #include "msocket.h"
-#include "mmdebug.h"
 #include "mb1_msg.h"
 
 /////////////////////////

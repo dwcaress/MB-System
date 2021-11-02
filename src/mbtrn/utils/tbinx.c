@@ -70,6 +70,7 @@
 #include "msocket.h"
 #include "r7k-reader.h"
 #include "mb1_msg.h"
+#include "mb1-io.h"
 
 /////////////////////////
 // Macros
@@ -715,7 +716,7 @@ static int s_out_socket(msock_socket_t *s, mb1_sounding_t *sounding)
             
             psub->heartbeat--;
             
-            uint32_t message_len=MB1_FRAME_BYTES(sounding->nbeams);
+            uint32_t message_len=MB1_SOUNDING_BYTES(sounding->nbeams);
             
             if ( (iobytes = msock_sendto(trn_osocket, psub->addr, (byte *)sounding, message_len, 0 )) > 0) {
                 trn_tx_count++;
@@ -797,10 +798,9 @@ int s_process_file(app_cfg_t *cfg)
             if ( (test=mfile_open(ifile,MFILE_RONLY)) > 0) {
                 PMPRINT(MOD_TBINX,TBINX_V2,(stderr,"open OK [%s]\n",cfg->files[i]));
                 
-                byte msg_buf[MB1_MAX_FRAME_BYTES+sizeof(mb1_frame_t)]={0};
-                mb1_frame_t *mb1= (mb1_frame_t *) &msg_buf[0]; //&frame;
-                mb1->sounding = (mb1_sounding_t *)((byte *)msg_buf+sizeof(mb1_frame_t));
-                byte *ptype = (byte *)(&(mb1->sounding->type));
+                byte msg_buf[MB1_MAX_SOUNDING_BYTES+sizeof(mb1_sounding_t)]={0};
+                mb1_sounding_t *mb1= (mb1_sounding_t *) &msg_buf[0];
+                byte *ptype = (byte *)(&(mb1->type));
 
                 double prev_time =0.0;
                 
@@ -808,7 +808,7 @@ int s_process_file(app_cfg_t *cfg)
                 int64_t rbytes=0;
                 bool sync_valid=false;
                 while (!ferror) {
-                    byte *sp = (byte *)mb1->sounding;
+                    byte *sp = (byte *)mb1;
                     bool header_valid=false;
                     bool rec_valid=false;
                     while (!sync_valid) {
@@ -854,25 +854,25 @@ int s_process_file(app_cfg_t *cfg)
 
                     if (sync_valid && !ferror) {
                         // read the rest of the sounding header
-                        byte *psnd = (byte *)&mb1->sounding->size;
+                        byte *psnd = (byte *)&mb1->size;
                         uint32_t readlen =(MB1_HEADER_BYTES-MB1_TYPE_BYTES);
                         if( ((rbytes=mfile_read(ifile,psnd,readlen))==readlen)){
                             
-                            int32_t cmplen = MB1_FRAME_BYTES(mb1->sounding->nbeams);
+                            int32_t cmplen = MB1_SOUNDING_BYTES(mb1->nbeams);
                             
-                            if ((int32_t)mb1->sounding->size == cmplen ) {
+                            if ((int32_t)mb1->size == cmplen ) {
                                 header_valid=true;
                                 PMPRINT(MOD_TBINX,TBINX_V2,(stderr,"sounding header read len[%"PRIu32"/%"PRId64"]\n",(uint32_t)readlen,rbytes));
-                                PMPRINT(MOD_TBINX,TBINX_V3,(stderr,"  size   [%d]\n",mb1->sounding->size));
-                                PMPRINT(MOD_TBINX,TBINX_V3,(stderr,"  time   [%.3f]\n",mb1->sounding->ts));
-                                PMPRINT(MOD_TBINX,TBINX_V3,(stderr,"  lat    [%.3f]\n",mb1->sounding->lat));
-                                PMPRINT(MOD_TBINX,TBINX_V3,(stderr,"  lon    [%.3f]\n",mb1->sounding->lon));
-                                PMPRINT(MOD_TBINX,TBINX_V3,(stderr,"  depth  [%.3f]\n",mb1->sounding->depth));
-                                PMPRINT(MOD_TBINX,TBINX_V3,(stderr,"  hdg    [%.3f]\n",mb1->sounding->hdg));
-                                PMPRINT(MOD_TBINX,TBINX_V3,(stderr,"  ping   [%06d]\n",mb1->sounding->ping_number));
-                                PMPRINT(MOD_TBINX,TBINX_V3,(stderr,"  nbeams [%d]\n",mb1->sounding->nbeams));
+                                PMPRINT(MOD_TBINX,TBINX_V3,(stderr,"  size   [%d]\n",mb1->size));
+                                PMPRINT(MOD_TBINX,TBINX_V3,(stderr,"  time   [%.3f]\n",mb1->ts));
+                                PMPRINT(MOD_TBINX,TBINX_V3,(stderr,"  lat    [%.3f]\n",mb1->lat));
+                                PMPRINT(MOD_TBINX,TBINX_V3,(stderr,"  lon    [%.3f]\n",mb1->lon));
+                                PMPRINT(MOD_TBINX,TBINX_V3,(stderr,"  depth  [%.3f]\n",mb1->depth));
+                                PMPRINT(MOD_TBINX,TBINX_V3,(stderr,"  hdg    [%.3f]\n",mb1->hdg));
+                                PMPRINT(MOD_TBINX,TBINX_V3,(stderr,"  ping   [%06d]\n",mb1->ping_number));
+                                PMPRINT(MOD_TBINX,TBINX_V3,(stderr,"  nbeams [%d]\n",mb1->nbeams));
                             }else{
-                                PMPRINT(MOD_TBINX,MM_WARN,(stderr,"message len invalid l[%d] l*[%d]\n",mb1->sounding->size,cmplen));
+                                PMPRINT(MOD_TBINX,MM_WARN,(stderr,"message len invalid l[%d] l*[%d]\n",mb1->size,cmplen));
                             }
                         }else{
                             PEPRINT((stderr,"could not read header bytes [%"PRId64"]\n",rbytes));
@@ -883,10 +883,10 @@ int s_process_file(app_cfg_t *cfg)
                     
                     if (header_valid && ferror==false ) {
                         
-                        if(mb1->sounding->nbeams>0){
+                        if(mb1->nbeams>0){
                             // read beam data
-                            byte *bp = (byte *)mb1->sounding->beams;
-                            uint32_t readlen = MB1_BEAM_ARRAY_BYTES(mb1->sounding->nbeams);
+                            byte *bp = (byte *)mb1->beams;
+                            uint32_t readlen = MB1_BEAM_ARRAY_BYTES(mb1->nbeams);
                             if( ((rbytes=mfile_read(ifile,bp,readlen))==readlen)){
                                 
                                 //                                PMPRINT(MOD_TBINX,TBINX_V2,(stderr,"beams read blen[%d/%"PRId64"]\n",beamsz,rbytes));
@@ -898,7 +898,7 @@ int s_process_file(app_cfg_t *cfg)
 
                         }
                         
-                        byte *cp = (byte *)MB1_PCHECKSUM_U32(mb1);
+                        byte *cp = (byte *)MB1_SND_PCHKSUM_U32(mb1);
 
                         if( ((rbytes=mfile_read(ifile,cp,MB1_CHECKSUM_BYTES))==MB1_CHECKSUM_BYTES)){
                             //                                    PMPRINT(MOD_TBINX,TBINX_V2,(stderr,"chksum read clen[%"PRId64"]\n",rbytes));
@@ -915,27 +915,27 @@ int s_process_file(app_cfg_t *cfg)
                     
                     if (rec_valid && ferror==false) {
 
-                        trn_msg_bytes+=mb1->sounding->size;
+                        trn_msg_bytes+=mb1->size;
                         trn_msg_count++;
 
-                        s_delay_message(mb1->sounding, prev_time, cfg);
-                        prev_time=mb1->sounding->ts;
+                        s_delay_message(mb1, prev_time, cfg);
+                        prev_time=mb1->ts;
                         
                         if (cfg->oflags&OF_SOUT) {
-                            s_out_stdx(stdout,mb1->sounding) ;
+                            s_out_stdx(stdout,mb1) ;
                         }
                         if (cfg->oflags&OF_SERR) {
-                            s_out_stdx(stderr,mb1->sounding) ;
+                            s_out_stdx(stderr,mb1) ;
                         }
                         if ( (cfg->oflags&OF_CSV) && (NULL!=csv_file) ) {
-                            s_out_csv(csv_file,mb1->sounding);
+                            s_out_csv(csv_file,mb1);
                         }
                         if ( (cfg->oflags&OF_SOCKET) && (NULL!=trn_osocket) ) {
                             int test_con=0;
                             do{
                                 // send message to socket
                                 // or wait until clients connected
-                                if( (test_con=s_out_socket(trn_osocket,mb1->sounding)) != 0 ){
+                                if( (test_con=s_out_socket(trn_osocket,mb1)) != 0 ){
                                     sleep(TBX_SOCKET_DELAY_SEC);
                                 }
                             }while (test_con!=0);

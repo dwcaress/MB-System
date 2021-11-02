@@ -84,13 +84,13 @@ frames7k_SOURCES = utils/frames7k.c
 frames7k_LDADD = libr7kr.la
 
 trnc_SOURCES = utils/trnc.c
-trnc_LDADD = libr7kr.la
+trnc_LDADD = libmb1r.la
 
 emu7k_SOURCES = utils/emu7k.c
 emu7k_LDADD = libr7kr.la
 
 tbinx_SOURCES = utils/tbinx.c
-tbinx_LDADD = libr7kr.la
+tbinx_LDADD = libmb1r.la libr7kr.la
 
 udps_SOURCES = utils/udps.c
 udps_LDADD = libr7kr.la
@@ -99,10 +99,10 @@ udpc_SOURCES = utils/udpc.c
 udpc_LDADD = libr7kr.la
 
 mb1conv_SOURCES = utils/mb1conv.c
-mb1conv_LDADD = libr7kr.la
+mb1conv_LDADD = libmb1r.la
 
 mb12csv_SOURCES = utils/mb12csv.c
-mb12csv_LDADD = libr7kr.la
+mb12csv_LDADD = libmb1r.la
 
 r7kr_test_SOURCES = r7kr/r7kr-test.c
 r7kr_test_LDADD = libr7kr.la
