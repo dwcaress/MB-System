@@ -397,7 +397,7 @@ static int32_t s_read_mb1_rec( mb1_sounding_t **pdest, mfile_file_t *src, app_cf
         if(NULL!=cfg && cfg->verbose>2){
             fprintf(stderr,"%d: read sync err[%d/%s]\n",__LINE__,errno,strerror(errno));
             fprintf(stderr,"%d: sounding[%p]\n",__LINE__,dest);
-            fprintf(stderr,"%d: chksum[%p]\n",__LINE__,MB1_SND_PCHKSUM_U32(dest));
+            fprintf(stderr,"%d: chksum[%p]\n",__LINE__,MB1_PCHECKSUM(dest));
             fprintf(stderr,"%d: readlen[%u]\n",__LINE__,readlen);
             fprintf(stderr,"%d: sizeof double[%zu]\n",__LINE__,sizeof(double));
             fprintf(stderr,"%d: sizeof int[%zu]\n",__LINE__,sizeof(int));
@@ -443,9 +443,9 @@ static int32_t s_read_mb1_rec( mb1_sounding_t **pdest, mfile_file_t *src, app_cf
             if(NULL!=cfg && cfg->verbose>2){
                 fprintf(stderr,"%d: sounding->sz[%"PRIu32"] read[%"PRId64"/%"PRIu32"] err[%d/%s]\n",__LINE__,dest->size,read_bytes,readlen,errno,strerror(errno));
                 fprintf(stderr,"%d: sounding->type[%08X]\n",__LINE__,dest->type);
-                fprintf(stderr,"%d: sounding->checksum[%p]\n",__LINE__,MB1_SND_PCHKSUM_U32(dest));
+                fprintf(stderr,"%d: sounding->checksum[%p]\n",__LINE__,MB1_PCHECKSUM(dest));
                 if(readlen>0)
-                    fprintf(stderr,"%d: sounding->checksum[%"PRIu32"]\n",__LINE__,MB1_SND_GET_CHKSUM(dest));
+                    fprintf(stderr,"%d: sounding->checksum[%"PRIu32"]\n",__LINE__,MB1_GET_CHECKSUM(dest));
             }
 
             // if header OK, read sounding data (variable length)
@@ -453,7 +453,7 @@ static int32_t s_read_mb1_rec( mb1_sounding_t **pdest, mfile_file_t *src, app_cf
             if(readlen>0 && (read_bytes=mfile_read(src,(byte *)bp,readlen))==readlen){
                 record_bytes+=read_bytes;
 
-                bp=(byte *)MB1_SND_PCHKSUM_U32(dest);
+                bp=(byte *)MB1_PCHECKSUM(dest);
                 readlen=MB1_CHECKSUM_BYTES;
 
                 // read checksum
@@ -461,13 +461,8 @@ static int32_t s_read_mb1_rec( mb1_sounding_t **pdest, mfile_file_t *src, app_cf
                     record_bytes+=read_bytes;
                     retval=record_bytes;
 
-                    uint32_t cs_bytes = MB1_SND_CHKSUM_BYTES(dest);
-                    mb1_checksum_t cs_val = MB1_SND_GET_CHKSUM(dest);
-
-                    unsigned int checksum = mb1_checksum((byte *)dest, cs_bytes);
-
-                    if(checksum!=cs_val){
-                        fprintf(stderr,"checksum err (calc/read)[%08X/%08X] failed fp/fsz[%"PRId64"/%"PRId64"]\n",checksum,cs_val,mfile_seek(src,0,MFILE_CUR),mfile_fsize(src));
+                    if(mb1_sounding_validate_checksum(dest)!=0){
+                        fprintf(stderr,"checksum err (calc/read)[%08X/%08X] failed fp/fsz[%"PRId64"/%"PRId64"]\n",mb1_calc_checksum(dest),MB1_GET_CHECKSUM(dest),mfile_seek(src,0,MFILE_CUR),mfile_fsize(src));
                     }
                 }else{
                     fprintf(stderr,"%d: read failed err[%d/%s] fp/fsz[%"PRId64"/%"PRId64"]\n",__LINE__,errno,strerror(errno),mfile_seek(src,0,MFILE_CUR),mfile_fsize(src));

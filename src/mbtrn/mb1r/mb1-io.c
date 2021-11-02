@@ -151,22 +151,18 @@ GNU General Public License for more details
 // Function Definitions
 /////////////////////////
 
-uint32_t mb1_checksum(byte *pdata, uint32_t len)
+uint32_t mb1_checksum_u32(byte *pdata, uint32_t len)
 {
     uint32_t checksum=0;
     if (NULL!=pdata) {
         byte *bp = pdata;
-//        fprintf(stderr,"\n");
         for (uint32_t i=0; i<len; i++) {
             checksum += (byte)(*(bp+i));
-//            fprintf(stderr,"%x ",(*(bp+i)));
         }
     }
-//    fprintf(stderr,"\nret[%08X]\n",checksum);
     return checksum;
 }
 // End function mb1_checksum
-
 
 void mb1_hex_show(byte *data, uint32_t len, uint16_t cols, bool show_offsets, uint16_t indent)
 {
@@ -341,54 +337,6 @@ char *mb1_parser_str(mb1_parse_stat_t *self, char *dest, uint32_t len, bool verb
 }
 // End function mb1_parser_str
 
-int mb1_stream_show(msock_socket_t *s, int sz, uint32_t tmout_ms, int cycles, bool *interrupt)
-{
-    int retval=-1;
-    int x=(sz<=0?16:sz);
-    byte *buf=(byte *)malloc(x);
-
-    if(NULL!=buf){
-        int good=0,err=0,zero=0,tmout=0;
-        int status = 0;
-        bool forever=true;
-        int count=0;
-
-        if (cycles>0) {
-            forever=false;
-        }
-        //    PEPRINT((stderr,"cycles[%d] forever[%s] c||f[%s]\n",cycles,(forever?"Y":"N"),(forever || (cycles>0) ? "Y" :"N")));
-        
-        // read cycles or forever (cycles<=0)
-        while ( (forever || (count++ < cycles)) &&
-               (NULL!=interrupt && !(*interrupt)) ) {
-            memset(buf,0,x);
-            int64_t test = msock_read_tmout(s, buf, x, tmout_ms);
-            if(test>0){
-                good++;
-                mb1_hex_show(buf, test, 16, true, 3);
-                fprintf(stderr,"c[%d/%d] ret[%"PRId64"/%u] stat[%d] good/zero/tmout/err [%d/%d/%d/%d]\n",count,cycles,test,sz,status,good,zero,tmout,err);
-                retval=0;
-            }else if(test<0){
-                PMPRINT(MOD_MB1,MM_DEBUG,(stderr,"ERR [%d/%s]\n",me_errno,me_strerror(me_errno)));
-                err++;
-                tmout = (me_errno==ME_ETMOUT ? tmout+1 : tmout );
-                if (me_errno==ME_ETMOUT || me_errno==ME_EOF || me_errno==ME_ESOCK) {
-                    break;
-                }
-            }else{
-                PMPRINT(MOD_MB1,MM_DEBUG,(stderr,"read returned 0\n"));
-                zero++;
-                if (me_errno==ME_ESOCK || me_errno==ME_EOF) {
-                    break;
-                }
-            }
-        }
-        free(buf);
-    }
-    return retval;
-}
-// End function mb1_stream_show
-
 mb1_sounding_t *mb1_sounding_new(uint32_t beams)
 {
     mb1_sounding_t *instance =NULL;
@@ -468,7 +416,7 @@ int mb1_sounding_zero(mb1_sounding_t *self, int flags)
                     memset((byte *)self,0,MB1_HEADER_BYTES);
                 }
                 // always clear the checksum
-                mb1_checksum_t *pchk = MB1_SND_PCHKSUM_U32(self);
+                mb1_checksum_t *pchk = MB1_PCHECKSUM(self);
                 memset((byte *)pchk,0,MB1_CHECKSUM_BYTES);
             }
             retval=0;
@@ -494,7 +442,7 @@ void mb1_sounding_show(mb1_sounding_t *self, bool verbose, uint16_t indent)
         fprintf(stderr,"%*s%*s %*.3lf\n",indent,(indent>0?" ":""),wkey,"hdg",wval,self->hdg);
         fprintf(stderr,"%*s%*s %*d\n",indent,(indent>0?" ":""),wkey,"ping_number",wval,self->ping_number);
         fprintf(stderr,"%*s%*s %*u\n",indent,(indent>0?" ":""),wkey,"nbeams",wval,self->nbeams);
-        uint32_t *pchk = MB1_SND_PCHKSUM_U32(self);
+        uint32_t *pchk = MB1_PCHECKSUM(self);
         fprintf(stderr,"%*s%*s %*p\n",indent,(indent>0?" ":""),wkey,"&checksum",wval,pchk);
         fprintf(stderr,"%*s%*s %*s%08X\n",indent,(indent>0?" ":""),wkey,"checksum",wval-8," ",*pchk);
 
@@ -518,6 +466,18 @@ void mb1_sounding_show(mb1_sounding_t *self, bool verbose, uint16_t indent)
 }
 // End function mb1_sounding_show
 
+    uint32_t mb1_calc_checksum(mb1_sounding_t *self)
+    {
+        uint32_t retval=0;
+        if(NULL!=self){
+
+            retval=mb1_checksum_u32((byte *)self, MB1_CHECKSUM_LEN_BYTES(self));
+        }
+        return retval;
+    }
+    // End function mb1_calc_checksum
+
+
 uint32_t mb1_sounding_set_checksum(mb1_sounding_t *self)
 {
     uint32_t retval=0;
@@ -525,10 +485,9 @@ uint32_t mb1_sounding_set_checksum(mb1_sounding_t *self)
         // compute checksum over
         // sounding and beam data, excluding checksum bytes
         byte *bp = (byte *)self;
-        uint32_t *pchk = MB1_SND_PCHKSUM_U32(self);
-        uint32_t cs_len = MB1_SOUNDING_BYTES(self->nbeams) - MB1_CHECKSUM_BYTES;
-        *pchk = mb1_checksum(bp,cs_len);
-        fprintf(stderr,"%s - snd[%p] pchk[%p/%08X] len[%"PRIu32"] ofs[%ld]\n",__func__,bp,pchk,*pchk,cs_len,(long)((byte *)pchk-bp));
+        uint32_t *pchk = MB1_PCHECKSUM(self);
+        *pchk = mb1_calc_checksum(self);
+        fprintf(stderr,"%s - snd[%p] pchk[%p/%08X] ofs[%ld]\n",__func__,bp,pchk,*pchk,(long)((byte *)pchk-bp));
         retval = *pchk;
     }
     return retval;
@@ -541,11 +500,9 @@ int mb1_sounding_validate_checksum(mb1_sounding_t *self)
     if (NULL!=self) {
         // compute checksum over
         // sounding and beam data, excluding checksum bytes
-        byte *bp = (byte *)self;
-        uint32_t *pchk = MB1_SND_PCHKSUM_U32(self);
-        uint32_t cs_len = MB1_SOUNDING_BYTES(self->nbeams) - MB1_CHECKSUM_BYTES;
-        uint32_t chksum = mb1_checksum(bp,cs_len);
-        retval = ( *pchk==chksum ? -1 : 0) ;
+        uint32_t cs_val = MB1_GET_CHECKSUM(self);
+        uint32_t cs_calc = mb1_calc_checksum(self);
+        retval = ( cs_val==cs_calc ? 0 : -1) ;
     }
     return retval;
 }
@@ -578,6 +535,63 @@ byte *mb1_sounding_serialize(mb1_sounding_t *self, size_t *r_size)
     return retval;
 }
 // End function mb1_sounding_serialize
+
+int mb1_test()
+{
+    int retval=-1;
+    fprintf(stderr,"%s not implemented\n",__func__);
+    return retval;
+}
+// End function mb1_test
+
+int mb1_stream_show(msock_socket_t *s, int sz, uint32_t tmout_ms, int cycles, bool *interrupt)
+{
+    int retval=-1;
+    int x=(sz<=0?16:sz);
+    byte *buf=(byte *)malloc(x);
+
+    if(NULL!=buf){
+        int good=0,err=0,zero=0,tmout=0;
+        int status = 0;
+        bool forever=true;
+        int count=0;
+
+        if (cycles>0) {
+            forever=false;
+        }
+        //    PEPRINT((stderr,"cycles[%d] forever[%s] c||f[%s]\n",cycles,(forever?"Y":"N"),(forever || (cycles>0) ? "Y" :"N")));
+
+        // read cycles or forever (cycles<=0)
+        while ( (forever || (count++ < cycles)) &&
+               (NULL!=interrupt && !(*interrupt)) ) {
+            memset(buf,0,x);
+            int64_t test = msock_read_tmout(s, buf, x, tmout_ms);
+            if(test>0){
+                good++;
+                mb1_hex_show(buf, test, 16, true, 3);
+                fprintf(stderr,"c[%d/%d] ret[%"PRId64"/%u] stat[%d] good/zero/tmout/err [%d/%d/%d/%d]\n",count,cycles,test,sz,status,good,zero,tmout,err);
+                retval=0;
+            }else if(test<0){
+                PMPRINT(MOD_MB1,MM_DEBUG,(stderr,"ERR [%d/%s]\n",me_errno,me_strerror(me_errno)));
+                err++;
+                tmout = (me_errno==ME_ETMOUT ? tmout+1 : tmout );
+                if (me_errno==ME_ETMOUT || me_errno==ME_EOF || me_errno==ME_ESOCK) {
+                    break;
+                }
+            }else{
+                PMPRINT(MOD_MB1,MM_DEBUG,(stderr,"read returned 0\n"));
+                zero++;
+                if (me_errno==ME_ESOCK || me_errno==ME_EOF) {
+                    break;
+                }
+            }
+        }
+        free(buf);
+    }
+    return retval;
+}
+// End function mb1_stream_show
+
 
 int mb1_sounding_receive(msock_socket_t *s, mb1_sounding_t **dest, uint32_t timeout_msec)
 {
@@ -672,28 +686,3 @@ int mb1_sounding_send(msock_socket_t *s, mb1_sounding_t *self)
 }
 // End function mb1_sounding_send
 
-int mb1_test()
-{
-    int retval=-1;
-   PMPRINT(MOD_MB1,MM_DEBUG,(stderr,"entering...\n"));
-
-    PMPRINT(MOD_MB1,MM_DEBUG,(stderr,"create/connect socket...\n"));
-    msock_socket_t *s = msock_socket_new("localhost",MB1_IO_PORT,ST_TCP);
-    msock_connect(s);
-
-    PMPRINT(MOD_MB1,MM_DEBUG,(stderr,"releasing resources...\n"));
-    msock_socket_destroy(&s);
-    
-//    byte random[50];
-//    for (int i=0; i<50; i++) {
-//        random[i]=i%256+20;
-//    }
-//   PMPRINT(MOD_MB1,MM_DEBUG,(stderr,"hex_show 30/9/f/5\n"));
-//    mb1_hex_show(random,30,9,false,5);
-//   PMPRINT(MOD_MB1,MM_DEBUG,(stderr,"hex_show 30/7/t/5\n"));
-//    mb1_hex_show(random,30,7,true,5);
-//   PMPRINT(MOD_MB1,MM_DEBUG,(stderr,"hex_show 30/10/t,5\n"));
-//    mb1_hex_show(random,30,10,true,5);
-    return retval;
-}
-// End function mb1_test

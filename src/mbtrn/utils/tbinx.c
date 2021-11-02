@@ -898,7 +898,7 @@ int s_process_file(app_cfg_t *cfg)
 
                         }
                         
-                        byte *cp = (byte *)MB1_SND_PCHKSUM_U32(mb1);
+                        byte *cp = (byte *)MB1_PCHECKSUM(mb1);
 
                         if( ((rbytes=mfile_read(ifile,cp,MB1_CHECKSUM_BYTES))==MB1_CHECKSUM_BYTES)){
                             //                                    PMPRINT(MOD_TBINX,TBINX_V2,(stderr,"chksum read clen[%"PRId64"]\n",rbytes));

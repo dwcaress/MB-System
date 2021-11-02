@@ -123,12 +123,12 @@ typedef struct mb1_parse_stat_s
 
 // MB1 utility API
 
-/// @fn uint32_t mb1_checksum(byte * pdata, uint32_t len)
-/// @brief return mb1 checksum for data.
+/// @fn uint32_t mb1_checksum_u32(byte * pdata, uint32_t len)
+/// @brief return 32-bit checksum for data of arbitrary length
 /// @param[in] pdata data pointer
 /// @param[in] len length of data.
-/// @return mb1 checksum value (sum of bytes).
-uint32_t mb1_checksum(byte *pdata, uint32_t len);
+/// @return 32-bit checksum value (sum of bytes).
+uint32_t mb1_checksum_u32(byte *pdata, uint32_t len);
 
 /// @fn void mb1_hex_show(byte * data, uint32_t len, uint16_t cols, _Bool show_offsets, uint16_t indent)
 /// @brief output data buffer bytes in hex to stderr.
@@ -139,15 +139,6 @@ uint32_t mb1_checksum(byte *pdata, uint32_t len);
 /// @param[in] indent output indent spaces
 /// @return none
 void mb1_hex_show(byte *data, uint32_t len, uint16_t cols, bool show_offsets, uint16_t indent);
-
-/// @fn int mb1_stream_show(msock_socket_t * s, int sz, uint32_t tmout_ms, int cycles)
-/// @brief output raw mb1 stream to stderr as formatted ASCII hex.
-/// @param[in] s mb1 host socket
-/// @param[in] sz read buffer size (read sz bytes at a time)
-/// @param[in] tmout_ms read timeout
-/// @param[in] cycles number of cycles to read (<=0 read forever)
-/// @return 0 on success, -1 otherwise
-int mb1_stream_show(msock_socket_t *s, int sz, uint32_t tmout_ms, int cycles, bool *interrupt);
 
 /// @fn void mb1_parser_show(mb1_parse_stat_t * self, _Bool verbose, uint16_t indent)
 /// @brief output mb1 parser statistics to stderr.
@@ -205,6 +196,12 @@ int mb1_sounding_zero(mb1_sounding_t *self, int flags);
 /// @return none
 void mb1_sounding_show(mb1_sounding_t *self, bool verbose, uint16_t indent);
 
+/// @fn uint32_t mb1_calc_checksum(mb1_sounding_t *self)
+/// @brief return mb1 checksum for data.
+/// @param[in] self mb1 message reference
+/// @return mb1 checksum value (sum of bytes).
+uint32_t mb1_calc_checksum(mb1_sounding_t *self);
+
 /// @fn uint32_t mb1_sounding_set_checksum(mb1_sounding_t * self)
 /// @brief set the checksum for an mb1 message structure.
 /// @param[in] self mb1 message reference
@@ -225,6 +222,26 @@ int mb1_sounding_validate_checksum(mb1_sounding_t *self);
 /// @return new network frame buffer on success, NULL otherwise
 byte* mb1_sounding_serialize(mb1_sounding_t *self, size_t *r_size);
 
+// Tests
+
+/// @fn int mb1_test()
+/// @brief mb1 unit test(s).
+/// currently subscribes to test server (exercising most of the mb1 API).
+/// @return 0 on success, -1 otherwise
+int mb1_test();
+
+// Network
+
+/// @fn int mb1_stream_show(msock_socket_t * s, int sz, uint32_t tmout_ms, int cycles)
+/// @brief output raw mb1 stream to stderr as formatted ASCII hex.
+/// @param[in] s mb1 host socket
+/// @param[in] sz read buffer size (read sz bytes at a time)
+/// @param[in] tmout_ms read timeout
+/// @param[in] cycles number of cycles to read (<=0 read forever)
+/// @return 0 on success, -1 otherwise
+int mb1_stream_show(msock_socket_t *s, int sz, uint32_t tmout_ms, int cycles, bool *interrupt);
+
+
 /// @fn int mb1_sounding_send(msock_socket_t * s, mb1_sounding_t * self)
 /// @brief serialize and send an mb1 message
 /// @param[in] s socket reference
@@ -240,14 +257,5 @@ int mb1_sounding_send(msock_socket_t *s, mb1_sounding_t *self);
 /// @return number of bytes received on success, -1 otherwise.
 int mb1_sounding_receive(msock_socket_t *s, mb1_sounding_t **dest, uint32_t timeout_msec);
 
-// Tests
 
-/// @fn int mb1_test()
-/// @brief mb1 unit test(s).
-/// currently subscribes to test server (exercising most of the mb1 API).
-/// @return 0 on success, -1 otherwise
-int mb1_test();
-
-
-// include guard
-#endif
+#endif // MB1_IO_H

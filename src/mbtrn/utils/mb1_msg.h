@@ -101,30 +101,33 @@
 /// @param[in] beams number of beams
 #define MB1_BEAM_ARRAY_BYTES(beams) (beams*MB1_BEAM_BYTES)
 
-/// @def MB1_PCHECKSUM_U32(pframe)
-/// @brief checksum pointer (unsigned int *)
-//#define MB1_PCHECKSUM_U32(pframe) (NULL!=pframe ? (unsigned int *) (((unsigned char *)pframe)+sizeof(mb1_frame_t)+pframe->sounding->size-MB1_CHECKSUM_BYTES) : NULL)
-#define MB1_PCHECKSUM_U32(pframe) ((unsigned int *) (((unsigned char *)pframe)+sizeof(mb1_frame_t)+pframe->sounding->size-MB1_CHECKSUM_BYTES))
-
 /// @def MB1_PSNDCHKSUM_U32(psounding)
 /// @brief checksum pointer (unsigned int *)
-#define MB1_SND_PCHKSUM_U32(psounding)  ((uint32_t *) (((unsigned char *)psounding)+psounding->size-MB1_CHECKSUM_BYTES))
-
-#define MB1_SND_CHKSUM_BYTES(psounding) (psounding->size-MB1_CHECKSUM_BYTES)
-
-/// @def MB1_PSNDCHKSUM_U32(psounding)
-/// @brief checksum pointer (unsigned int *)
-#define MB1_SND_GET_CHKSUM(psounding) (mb1_checksum_t)(*MB1_SND_PCHKSUM_U32(psounding))
-
-/// @def MB1_SOUNDING_BYTES(beams)
-/// @brief sounding size (bytes)
-#define MB1_SOUNDING_BYTES(beams) (MB1_HEADER_BYTES+beams*MB1_BEAM_BYTES+MB1_CHECKSUM_BYTES)
-#define MB1_MAX_SOUNDING_BYTES MB1_SOUNDING_BYTES(MB1_MAX_BEAMS)
-#define MB1_EMPTY_SOUNDING_BYTES MB1_SOUNDING_BYTES(0)
+#define MB1_PCHECKSUM(psounding)  ((uint32_t *) (((unsigned char *)psounding)+psounding->size-MB1_CHECKSUM_BYTES))
 
 /// @def MB1_PBEAMS(psounding)
 /// @brief pointer to start of beam data
 #define MB1_PBEAMS(psounding) ((mb1_beam_t *) (((unsigned char *)psounding)+MB1_HEADER_BYTES))
+
+/// @def MB1_CHECKSUM_LEN_BYTES(psounding)
+/// @brief number of bytes over which checksum is calculated (header+beams)
+#define MB1_CHECKSUM_LEN_BYTES(psounding) (psounding->size-MB1_CHECKSUM_BYTES)
+
+/// @def MB1_PSNDCHKSUM_U32(psounding)
+/// @brief checksum pointer (unsigned int *)
+#define MB1_GET_CHECKSUM(psounding) (mb1_checksum_t)(*MB1_PCHECKSUM(psounding))
+
+/// @def MB1_SOUNDING_BYTES(beams)
+/// @brief sounding size (bytes)
+#define MB1_SOUNDING_BYTES(beams) (MB1_HEADER_BYTES+beams*MB1_BEAM_BYTES+MB1_CHECKSUM_BYTES)
+
+/// @def MB1_MAX_SOUNDING_BYTES
+/// @brief sounding size (bytes) for MB1_MAX_BEAMS
+#define MB1_MAX_SOUNDING_BYTES MB1_SOUNDING_BYTES(MB1_MAX_BEAMS)
+
+/// @def MB1_EMPTY_SOUNDING_BYTES
+/// @brief empty sounding size (bytes) for 0 beams
+#define MB1_EMPTY_SOUNDING_BYTES MB1_SOUNDING_BYTES(0)
 
 
 #ifdef WITH_MB1_FRAME

@@ -1051,7 +1051,7 @@ static int s_sm_act_read_data(mb1r_reader_t *self, mb1r_sm_ctx_t *pctx)
                 pctx->cx=0;
 
                 if(pctx->cx==0 && mb1_sounding_validate_checksum(pctx->psnd)==0 ){
-                    PMPRINT(MOD_MB1R,MM_DEBUG,(stderr,"INFO - read_data  checksum invalid [%"PRIu32"]\n",MB1_SND_GET_CHKSUM(pctx->psnd)));
+                    PMPRINT(MOD_MB1R,MM_DEBUG,(stderr,"INFO - read_data  checksum invalid [%"PRIu32"]\n",MB1_GET_CHECKSUM(pctx->psnd)));
                     MST_COUNTER_INC(self->stats->events[MB1R_EV_ECHKSUM]);
                     pctx->cx++;
                 }
@@ -1444,13 +1444,12 @@ static void *s_test_worker(void *pargs)
                             snd->nbeams = test_beams;
                             snd->ping_number = cx;
                             snd->ts = mtime_dtime();
-                            mb1_beam_t *beam = MB1_PBEAMS(snd);
                             int k=0;
                             for(k=0;k<test_beams;k++){
-                                beam[k].beam_num=k;
-                                beam[k].rhox = cx*1.;
-                                beam[k].rhoy = cx*2;
-                                beam[k].rhoz = cx*4;
+                                snd->beams[k].beam_num=k;
+                                snd->beams[k].rhox = cx*1.;
+                                snd->beams[k].rhoy = cx*2.;
+                                snd->beams[k].rhoz = cx*4.;
                             }
 
                             mb1_sounding_set_checksum(snd);
