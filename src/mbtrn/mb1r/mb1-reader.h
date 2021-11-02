@@ -129,13 +129,20 @@ typedef enum{
 
 /// @typedef enum mb1r_cstate mb1r_cstate
 /// @brief connection state enum
-typedef enum {CS_NEW,CS_INITIALIZED,CS_CONNECTED} mb1r_cstate;
+typedef enum {CS_NEW, CS_INITIALIZED, CS_CONNECTED} mb1r_cstate;
 /// @typedef enum mb1r_ctype mb1r_ctype
 /// @brief connection endpoint types
-typedef enum {CT_NULL,CT_STDIN,CT_STDOUT,CT_STDERR,CT_FILE,CT_SOCKET} mb1r_ctype;
+typedef enum {CT_NULL, CT_STDIN, CT_STDOUT, CT_STDERR, CT_FILE, CT_SOCKET} mb1r_ctype;
 /// @typedef enum mb1r_state_t mb1r_state_t
 /// @brief reader state enum
-typedef enum {MB1R_NEW,MB1R_INITIALIZED,MB1R_CONNECTED,MB1R_SUBSCRIBED} mb1r_state_t;
+/// Changes to this enum must be reflected in mb1r_strstate()
+typedef enum {
+    MB1R_NEW,
+    MB1R_INITIALIZED,
+    MB1R_CONNECTED,
+    MB1R_SUBSCRIBED
+} mb1r_state_t;
+
 /// @typedef enum mb1r_flags_t mb1r_flags_t
 /// @brief reader behavior flags
 typedef enum{
@@ -156,17 +163,15 @@ typedef enum{
 } mb1r_flags_t;
 
 /// @typedef enum mb1r_parse_state_t mb1r_parse_state_t
-/// @brief 7k frame parsing states
+/// @brief 7k frame parsing states.
+/// Changes to this enum must be reflected in mb1r_ctx_strstate()
 typedef enum{
     MB1R_STATE_START=0,
     MB1R_STATE_READ_ERR,
     MB1R_STATE_READ_OK,
     MB1R_STATE_READING,
-//    MB1R_STATE_CHECKSUM_VALID,
-//    MB1R_STATE_TIMESTAMP_VALID,
     MB1R_STATE_DATA_VALID,
     MB1R_STATE_DATA_INVALID,
-//    MB1R_STATE_DATA_REJECTED,
     MB1R_STATE_HEADER_INVALID,
     MB1R_STATE_HEADER_VALID,
     MB1R_STATE_FRAME_VALID,
@@ -177,6 +182,7 @@ typedef enum{
 
 /// @typedef enum mb1r_parse_action_t mb1r_parse_action_t
 /// @brief 7k frame parsing actions
+/// Changes to this enum must be reflected in mb1r_ctx_straction()
 typedef enum{
     MB1R_ACTION_NOOP=0,
     MB1R_ACTION_READ,
@@ -184,8 +190,6 @@ typedef enum{
     MB1R_ACTION_VALIDATE_DATA,
     MB1R_ACTION_READ_HEADER,
     MB1R_ACTION_READ_DATA,
-//    MB1R_ACTION_VALIDATE_CHECKSUM,
-//    MB1R_ACTION_VALIDATE_TIMESTAMP,
     MB1R_ACTION_RESYNC,
     MB1R_ACTION_QUIT
 } mb1r_parse_action_t;
@@ -272,19 +276,12 @@ typedef struct mb1r_reader_s
 
 #define MB1R_VERSION_STR VERSION_STRING(MB1R_VER)
 
-/// @def MAX_MB1_FRAME_BYTES
-/// @brief max MB1 bytes
-//#define MAX_MB1_FRAME_BYTES        MB1_SOUNDING_BYTES(512)
-/// @def IP_PORT_MB1
-/// @brief reson 7k center IP port
-#define MB1_IO_PORT               7007
 /// @def MB1R_POLL_TIMEOUT_MSEC
 /// @brief reader poll timeout default
 #define MB1R_POLL_TIMEOUT_MSEC    5000
 /// @def MB1R_FLUSH_RETRIES
 /// @brief reader poll retries default
 #define MB1R_FLUSH_RETRIES          10
-
 /// @def MB1R_READ_RETRIES
 /// @brief read retries
 #define MB1R_READ_RETRIES           8
@@ -302,15 +299,13 @@ typedef struct mb1r_reader_s
 /////////////////////////
 // Exports
 /////////////////////////
-//mmd_module_config_t *mmd_mb1r_config;
 
-// mb1rn utility API
+// mb1r utility API
 //const char *mb1r_get_version();
 //const char *mb1r_get_build();
 //void mb1r_show_app_version(const char *app_name, const char *app_version);
 
-
-// mb1rn reader API
+// mb1r reader API
 mb1r_reader_t *mb1r_reader_new(const char *host, int port, uint32_t capacity);
 mb1r_reader_t *mb1r_freader_new(mfile_file_t *file, uint32_t capacity, uint32_t *slist,  uint32_t slist_len);
 void mb1r_reader_destroy(mb1r_reader_t **pself);
@@ -333,16 +328,15 @@ int64_t mb1r_read_frame(mb1r_reader_t *self, byte *dest, uint32_t len, mb1r_flag
 const char *mb1r_ctx_strstate(mb1r_parse_state_t state);
 const char *mb1r_ctx_straction(mb1r_parse_action_t state);
 
-
+#ifdef WITH_MB1R_PEER_CMP
 // functions for peer comparisons
-// used in mb1rnpreprocess
-
+// used in mbtrnpp
 bool mb1r_peer_cmp(void *a, void *b);
 bool mb1r_peer_vcmp(void *item, void *value);
+#endif // WITH_MB1R_PEER_CMP
 
 #ifdef WITH_MB1R_TEST
 int mb1r_test(int argc, char **argv);
 #endif // WITH_MB1R_TEST
 
-// include guard
-#endif
+#endif // MB1_READER_H

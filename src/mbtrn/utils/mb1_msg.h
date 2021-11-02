@@ -13,7 +13,7 @@
 /////////////////////////
 /*
  Copyright Information
- 
+
  Copyright 2002-YYYY MBARI
  Monterey Bay Aquarium Research Institute, all rights reserved.
  
@@ -256,25 +256,6 @@ typedef struct mb1_sounding_s
 extern "C" {
 #endif
 
-// MB1 utility API
-
-/// @fn uint32_t mb1_checksum_u32(byte * pdata, uint32_t len)
-/// @brief return 32-bit checksum for data of arbitrary length
-/// @param[in] pdata data pointer
-/// @param[in] len length of data.
-/// @return 32-bit checksum value (sum of bytes).
-uint32_t mb1_checksum_u32(byte *pdata, uint32_t len);
-
-/// @fn void mb1_hex_show(byte * data, uint32_t len, uint16_t cols, _Bool show_offsets, uint16_t indent)
-/// @brief output data buffer bytes in hex to stderr.
-/// @param[in] data buffer pointer
-/// @param[in] len number of bytes to display
-/// @param[in] cols number of columns to display
-/// @param[in] show_offsets show starting offset for each row
-/// @param[in] indent output indent spaces
-/// @return none
-void mb1_hex_show(byte *data, uint32_t len, uint16_t cols, bool show_offsets, uint16_t indent);
-
 // mb1_sounding API (used by mbtrn_server)
 
 /// @fn mb1_sounding_t * mb1_sounding_new(uint32_t data_len)
@@ -338,6 +319,25 @@ int mb1_sounding_validate_checksum(mb1_sounding_t *self);
 /// @param[in] self mb1 message reference
 /// @return new network frame buffer on success, NULL otherwise
 byte* mb1_sounding_serialize(mb1_sounding_t *self, size_t *r_size);
+
+// MB1 utility API
+
+/// @fn uint32_t mb1_checksum_u32(byte * pdata, uint32_t len)
+/// @brief return 32-bit checksum for data of arbitrary length
+/// @param[in] pdata data pointer
+/// @param[in] len length of data.
+/// @return 32-bit checksum value (sum of bytes).
+uint32_t mb1_checksum_u32(byte *pdata, uint32_t len);
+
+/// @fn void mb1_hex_show(byte * data, uint32_t len, uint16_t cols, _Bool show_offsets, uint16_t indent)
+/// @brief output data buffer bytes in hex to stderr.
+/// @param[in] data buffer pointer
+/// @param[in] len number of bytes to display
+/// @param[in] cols number of columns to display
+/// @param[in] show_offsets show starting offset for each row
+/// @param[in] indent output indent spaces
+/// @return none
+void mb1_hex_show(byte *data, uint32_t len, uint16_t cols, bool show_offsets, uint16_t indent);
 
 // Tests
 

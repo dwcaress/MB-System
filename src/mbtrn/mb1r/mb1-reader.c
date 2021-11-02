@@ -153,7 +153,7 @@ static const char **mb1r_stats_labels[MSLABEL_COUNT]={
 ///// @return version string
 //const char *mb1r_get_version()
 //{
-//    return LIBMB1R_VERSION;
+//    return MB1R_VERSION_STR;
 //}
 //// End function mb1r_get_version
 //
@@ -162,7 +162,7 @@ static const char **mb1r_stats_labels[MSLABEL_COUNT]={
 ///// @return version string
 //const char *mb1r_get_build()
 //{
-//    return LIBMB1R_BUILD;
+//    return MB1R_BUILD;
 //}
 //// End function mb1r_get_build
 //
@@ -1271,6 +1271,8 @@ int64_t mb1r_read_frame(mb1r_reader_t *self,
  }
 // End function mb1r_read_frame
 
+#ifdef WITH_MB1R_PEER_CMP
+
 /// @fn _Bool mb1r_peer_cmp(void * a, void * b)
 /// @brief compare msock_connection_t IDs. Used by mlist.
 /// @param[in] a void pointer to msock_connection_t
@@ -1306,6 +1308,7 @@ bool mb1r_peer_vcmp(void *item, void *value)
     return retval;
 }
 // End function mb1r_peer_vcmp
+#endif // WITH_MB1R_PEER_CMP
 
 #ifdef WITH_MB1R_TEST
 #include <getopt.h>
@@ -1497,7 +1500,7 @@ int mb1r_test(int argc, char **argv)
     int i=0;
     mb1_test_cfg_t cfg_s = {
         "localhost",
-        MB1_IO_PORT,
+        MB1_IP_PORT_DFL,
         3,// cycles
         5,// retries
         3,// err_mod

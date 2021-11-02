@@ -108,58 +108,6 @@
 // Function Definitions
 /////////////////////////
 
-uint32_t mb1_checksum_u32(byte *pdata, uint32_t len)
-{
-    uint32_t checksum=0;
-    if (NULL!=pdata) {
-        byte *bp = pdata;
-        for (uint32_t i=0; i<len; i++) {
-            checksum += (byte)(*(bp+i));
-        }
-    }
-    return checksum;
-}
-// End function mb1_checksum
-
-void mb1_hex_show(byte *data, uint32_t len, uint16_t cols, bool show_offsets, uint16_t indent)
-{
-    if (NULL!=data && len>0 && cols>0) {
-        int rows = len/cols;
-        int rem = len%cols;
-
-        byte *p=data;
-        for (int i=0; i<rows; i++) {
-            if (show_offsets) {
-                fprintf(stderr,"%*s%04ld [",indent,(indent>0?" ":""),(long int)(p-data));
-            }else{
-                fprintf(stderr,"%*s[",indent,(indent>0?" ":""));
-            }
-            for (int j=0; j<cols; j++) {
-                if (p>=data && p<(data+len)) {
-                    byte b = (*p);
-                    fprintf(stderr," %02x",b);
-                    p++;
-                }else{
-                    fprintf(stderr,"   ");
-                }
-            }
-            fprintf(stderr," ]\n");
-        }
-        if (rem>0) {
-            if (show_offsets) {
-                fprintf(stderr,"%*s%04ld [",indent,(indent>0?" ":""),(long int)(p-data));
-            }else{
-                fprintf(stderr,"%*s[",indent,(indent>0?" ":""));
-            }
-            for (int j=0; j<rem; j++) {
-                fprintf(stderr," %02x",*p++);
-            }
-            fprintf(stderr,"%*s ]\n",3*(cols-rem)," ");
-        }
-    }
-}
-// End function mb1_hex_show
-
 mb1_sounding_t *mb1_sounding_new(uint32_t beams)
 {
     mb1_sounding_t *instance =NULL;
@@ -356,6 +304,58 @@ byte *mb1_sounding_serialize(mb1_sounding_t *self, size_t *r_size)
     return retval;
 }
 // End function mb1_sounding_serialize
+
+uint32_t mb1_checksum_u32(byte *pdata, uint32_t len)
+{
+    uint32_t checksum=0;
+    if (NULL!=pdata) {
+        byte *bp = pdata;
+        for (uint32_t i=0; i<len; i++) {
+            checksum += (byte)(*(bp+i));
+        }
+    }
+    return checksum;
+}
+// End function mb1_checksum
+
+void mb1_hex_show(byte *data, uint32_t len, uint16_t cols, bool show_offsets, uint16_t indent)
+{
+    if (NULL!=data && len>0 && cols>0) {
+        int rows = len/cols;
+        int rem = len%cols;
+
+        byte *p=data;
+        for (int i=0; i<rows; i++) {
+            if (show_offsets) {
+                fprintf(stderr,"%*s%04ld [",indent,(indent>0?" ":""),(long int)(p-data));
+            }else{
+                fprintf(stderr,"%*s[",indent,(indent>0?" ":""));
+            }
+            for (int j=0; j<cols; j++) {
+                if (p>=data && p<(data+len)) {
+                    byte b = (*p);
+                    fprintf(stderr," %02x",b);
+                    p++;
+                }else{
+                    fprintf(stderr,"   ");
+                }
+            }
+            fprintf(stderr," ]\n");
+        }
+        if (rem>0) {
+            if (show_offsets) {
+                fprintf(stderr,"%*s%04ld [",indent,(indent>0?" ":""),(long int)(p-data));
+            }else{
+                fprintf(stderr,"%*s[",indent,(indent>0?" ":""));
+            }
+            for (int j=0; j<rem; j++) {
+                fprintf(stderr," %02x",*p++);
+            }
+            fprintf(stderr,"%*s ]\n",3*(cols-rem)," ");
+        }
+    }
+}
+// End function mb1_hex_show
 
 int mb1_test()
 {
