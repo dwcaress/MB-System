@@ -69,17 +69,24 @@
 // Includes
 /////////////////////////
 
-#include <stdint.h>
-#include "msocket.h"
+#include <stdlib.h>
+#include <stdio.h>
+#include <stdbool.h>
+#include <inttypes.h>
+#include <string.h>
 #include "mb1_msg.h"
+#ifdef WITH_MB1_UTILS
+#include "msocket.h"
+#endif //WITH_MB1_UTILS
 
 /////////////////////////
 // Type Definitions
 /////////////////////////
 
+typedef unsigned char byte;
 
+#ifdef WITH_MB1_PARSE_STAT
 #pragma pack(push, 1)
-
 /// @typedef struct mb1_parse_stat_s mb1_parse_stat_t
 /// @brief mb1 raw data parser status information
 typedef struct mb1_parse_stat_s
@@ -106,15 +113,15 @@ typedef struct mb1_parse_stat_s
     /// @brief exit status: ME_ error or ME_OK
     int status;
 }mb1_parse_stat_t;
-
 #pragma pack(pop)
+#endif // WITH_MB1_PARSE_STAT
 
 /////////////////////////
 // Macros
 /////////////////////////
 /// @def IP_PORT_MB1
 /// @brief reson 7k center IP port
-#define MB1_IO_PORT               7007
+#define MB1_IP_PORT_DFL 7007
 
 /////////////////////////
 // Exports
@@ -139,24 +146,6 @@ uint32_t mb1_checksum_u32(byte *pdata, uint32_t len);
 /// @param[in] indent output indent spaces
 /// @return none
 void mb1_hex_show(byte *data, uint32_t len, uint16_t cols, bool show_offsets, uint16_t indent);
-
-/// @fn void mb1_parser_show(mb1_parse_stat_t * self, _Bool verbose, uint16_t indent)
-/// @brief output mb1 parser statistics to stderr.
-/// @param[in] self parser stats structure reference
-/// @param[in] verbose use verbose output
-/// @param[in] indent output indent spaces
-/// @return none
-void mb1_parser_show(mb1_parse_stat_t *self, bool verbose, uint16_t indent);
-
-/// @fn char * mb1_parser_str(mb1_parse_stat_t * self, char * dest, uint32_t len, _Bool verbose, uint16_t indent)
-/// @brief output parser statistics to a string. Caller must free.
-/// @param[in] self parser stat struct reference
-/// @param[in] dest string output buffer, use NULL to allocate new string
-/// @param[in] len buffer length
-/// @param[in] verbose use verbose output
-/// @param[in] indent output indent spaces
-/// @return new string (if dest==NULL) or dest on success, NULL otherwise. May truncate if buffer length is insufficient.
-char *mb1_parser_str(mb1_parse_stat_t *self, char *dest, uint32_t len, bool verbose, uint16_t indent);
 
 // mb1_sounding API (used by mbtrn_server)
 
@@ -230,7 +219,28 @@ byte* mb1_sounding_serialize(mb1_sounding_t *self, size_t *r_size);
 /// @return 0 on success, -1 otherwise
 int mb1_test();
 
+#ifdef WITH_MB1_PARSE_STAT
+/// @fn void mb1_parser_show(mb1_parse_stat_t * self, _Bool verbose, uint16_t indent)
+/// @brief output mb1 parser statistics to stderr.
+/// @param[in] self parser stats structure reference
+/// @param[in] verbose use verbose output
+/// @param[in] indent output indent spaces
+/// @return none
+void mb1_parser_show(mb1_parse_stat_t *self, bool verbose, uint16_t indent);
+
+/// @fn char * mb1_parser_str(mb1_parse_stat_t * self, char * dest, uint32_t len, _Bool verbose, uint16_t indent)
+/// @brief output parser statistics to a string. Caller must free.
+/// @param[in] self parser stat struct reference
+/// @param[in] dest string output buffer, use NULL to allocate new string
+/// @param[in] len buffer length
+/// @param[in] verbose use verbose output
+/// @param[in] indent output indent spaces
+/// @return new string (if dest==NULL) or dest on success, NULL otherwise. May truncate if buffer length is insufficient.
+char *mb1_parser_str(mb1_parse_stat_t *self, char *dest, uint32_t len, bool verbose, uint16_t indent);
+#endif // WITH_MB1_PARSE_STAT
+
 // Network
+#ifdef WITH_MB1_UTILS
 
 /// @fn int mb1_stream_show(msock_socket_t * s, int sz, uint32_t tmout_ms, int cycles)
 /// @brief output raw mb1 stream to stderr as formatted ASCII hex.
@@ -256,6 +266,7 @@ int mb1_sounding_send(msock_socket_t *s, mb1_sounding_t *self);
 /// @param[in] timeout_msec read timeout
 /// @return number of bytes received on success, -1 otherwise.
 int mb1_sounding_receive(msock_socket_t *s, mb1_sounding_t **dest, uint32_t timeout_msec);
+#endif //WITH_MB1_UTILS
 
 
 #endif // MB1_IO_H

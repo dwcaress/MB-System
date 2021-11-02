@@ -58,12 +58,21 @@ GNU General Public License for more details
 /////////////////////////
 // Headers 
 /////////////////////////
-
+#include <stdlib.h>
+#include <stdio.h>
+#include <stdbool.h>
+#include <inttypes.h>
+#include <string.h>
 #include "mb1-io.h"
+#include "mb1_msg.h"
+
+#ifdef WITH_MB1_UTILS
+#include "msocket.h"
 #include "merror.h"
 #include "mmdebug.h"
 #include "medebug.h"
 #include "mconfig.h"
+#endif //WITH_MB1_UTILS
 
 /////////////////////////
 // Macros
@@ -203,139 +212,6 @@ void mb1_hex_show(byte *data, uint32_t len, uint16_t cols, bool show_offsets, ui
     }
 }
 // End function mb1_hex_show
-
-void mb1_parser_show(mb1_parse_stat_t *self, bool verbose, uint16_t indent)
-{
-    if (NULL!=self) {
-        fprintf(stderr,"%*s[self           %10p]\n",indent,(indent>0?" ":""), self);
-        fprintf(stderr,"%*s[src_bytes      %10u]\n",indent,(indent>0?" ":""), self->src_bytes);
-        fprintf(stderr,"%*s[sync_bytes     %10u]\n",indent,(indent>0?" ":""), self->sync_bytes);
-        fprintf(stderr,"%*s[unread_bytes   %10u]\n",indent,(indent>0?" ":""), self->unread_bytes);
-        fprintf(stderr,"%*s[parsed_records %10u]\n",indent,(indent>0?" ":""), self->parsed_records);
-        fprintf(stderr,"%*s[parsed_bytes   %10u]\n",indent,(indent>0?" ":""), self->parsed_bytes);
-        fprintf(stderr,"%*s[resync_count   %10u]\n",indent,(indent>0?" ":""), self->resync_count);
-        fprintf(stderr,"%*s[status         %10d]\n",indent,(indent>0?" ":""), self->status);
-    }
-}
-// End function mb1_parser_show
-
-char *mb1_parser_str(mb1_parse_stat_t *self, char *dest, uint32_t len, bool verbose, uint16_t indent)
-{
-    char *retval=NULL;
-
-//    uint32_t inc=256;
-    
-    if (NULL!=self) {
-        
-        char *wbuf=(char *)malloc(MB1_STR_INC*sizeof(char));
-
-        // TODO: check length/realloc
-        if (wbuf!=NULL) {
-            memset(wbuf,0,len);
-            char *dp=wbuf;
-
-            uint32_t n=1;
-            char *fmt="%*s[self           %10p]\n";
-            uint32_t wlen=len;
-            uint32_t wb = snprintf(NULL,0,fmt,indent,(indent>0?" ":""), self);
-            wlen+=wb;
-            if (wlen>MB1_STR_INC) {
-                n++;
-                wbuf=(char *)realloc(wbuf,n*MB1_STR_INC*sizeof(char));
-                dp = wbuf+strlen(wbuf);
-            }
-            sprintf(dp,fmt,indent,(indent>0?" ":""), self);
-            dp = wbuf+strlen(wbuf);
-            
-            fmt="%*s[src_bytes      %10u]\n";
-            wb = snprintf(NULL,0,fmt,indent,(indent>0?" ":""), self->src_bytes);
-            wlen+=wb;
-            if (wlen>MB1_STR_INC) {
-                n++;
-                wbuf=(char *)realloc(wbuf,n*MB1_STR_INC*sizeof(char));
-                dp = wbuf+strlen(wbuf);
-            }
-            sprintf(dp,fmt,indent,(indent>0?" ":""), self->src_bytes);
-            dp = wbuf+strlen(wbuf);
-            
-            fmt="%*s[sync_bytes     %10u]\n";
-            wb = snprintf(NULL,0,fmt,indent,(indent>0?" ":""), self->sync_bytes);
-            wlen+=wb;
-            if (wlen>MB1_STR_INC) {
-                n++;
-                wbuf=(char *)realloc(wbuf,n*MB1_STR_INC*sizeof(char));
-                dp = wbuf+strlen(wbuf);
-            }
-            sprintf(dp,fmt,indent,(indent>0?" ":""), self->sync_bytes);
-            dp = wbuf+strlen(wbuf);
-            
-            fmt="%*s[unread_bytes   %10u]\n";
-            wb = snprintf(NULL,0,fmt,indent,(indent>0?" ":""), self->unread_bytes);
-            wlen+=wb;
-            if (wlen>MB1_STR_INC) {
-                n++;
-                wbuf=(char *)realloc(wbuf,n*MB1_STR_INC*sizeof(char));
-                dp = wbuf+strlen(wbuf);
-            }
-            sprintf(dp,fmt,indent,(indent>0?" ":""), self->unread_bytes);
-            dp = wbuf+strlen(wbuf);
-            
-            
-            fmt="%*s[parsed_records %10u]\n";
-            wb = snprintf(NULL,0,fmt,indent,(indent>0?" ":""), self->parsed_records);
-            wlen+=wb;
-            if (wlen>MB1_STR_INC) {
-                n++;
-                wbuf=(char *)realloc(wbuf,n*MB1_STR_INC*sizeof(char));
-                dp = wbuf+strlen(wbuf);
-            }
-            sprintf(dp,fmt,indent,(indent>0?" ":""), self->parsed_records);
-            dp = wbuf+strlen(wbuf);
-            
-            fmt="%*s[parsed_bytes   %10u]\n";
-            wb = snprintf(NULL,0,fmt,indent,(indent>0?" ":""), self->parsed_bytes);
-            wlen+=wb;
-            if (wlen>MB1_STR_INC) {
-                n++;
-                wbuf=(char *)realloc(wbuf,n*MB1_STR_INC*sizeof(char));
-                dp = wbuf+strlen(wbuf);
-            }
-            sprintf(dp,fmt,indent,(indent>0?" ":""), self->parsed_bytes);
-            dp = wbuf+strlen(wbuf);
-            
-            fmt="%*s[resync_count   %10u]\n";
-            wb = snprintf(NULL,0,fmt,indent,(indent>0?" ":""), self->resync_count);
-            wlen+=wb;
-            if (wlen>MB1_STR_INC) {
-                n++;
-                wbuf=(char *)realloc(wbuf,n*MB1_STR_INC*sizeof(char));
-                dp = wbuf+strlen(wbuf);
-            }
-            sprintf(dp,fmt,indent,(indent>0?" ":""), self->resync_count);
-            dp = wbuf+strlen(wbuf);
-            
-            fmt="%*s[status         %10d]\n";
-            wb = snprintf(NULL,0,fmt,indent,(indent>0?" ":""), self->status);
-            wlen+=wb;
-            if (wlen>MB1_STR_INC) {
-                n++;
-                wbuf=(char *)realloc(wbuf,n*MB1_STR_INC*sizeof(char));
-                dp = wbuf+strlen(wbuf);
-            }
-            sprintf(dp,fmt,indent,(indent>0?" ":""), self->status);
-            
-            if (NULL!=dest) {
-                snprintf(dest,(len<wlen?len:wlen),"%s",wbuf);
-                free(wbuf);
-                retval=dest;
-            }else{
-                retval=wbuf;
-            }
-        }
-    }
-    return retval;
-}
-// End function mb1_parser_str
 
 mb1_sounding_t *mb1_sounding_new(uint32_t beams)
 {
@@ -484,10 +360,9 @@ uint32_t mb1_sounding_set_checksum(mb1_sounding_t *self)
     if (NULL!=self) {
         // compute checksum over
         // sounding and beam data, excluding checksum bytes
-        byte *bp = (byte *)self;
         uint32_t *pchk = MB1_PCHECKSUM(self);
         *pchk = mb1_calc_checksum(self);
-        fprintf(stderr,"%s - snd[%p] pchk[%p/%08X] ofs[%ld]\n",__func__,bp,pchk,*pchk,(long)((byte *)pchk-bp));
+//        fprintf(stderr,"%s - snd[%p] pchk[%p/%08X] ofs[%ld]\n",__func__,self,pchk,*pchk,(long)((byte *)pchk-bp));
         retval = *pchk;
     }
     return retval;
@@ -529,7 +404,7 @@ byte *mb1_sounding_serialize(mb1_sounding_t *self, size_t *r_size)
             }
         }
     }else{
-        PEPRINT((stderr,"invalid argument\n"));
+        fprintf(stderr,"invalid argument\n");
     }
     
     return retval;
@@ -544,6 +419,142 @@ int mb1_test()
 }
 // End function mb1_test
 
+#ifdef WITH_MB1_PARSE_STAT
+    void mb1_parser_show(mb1_parse_stat_t *self, bool verbose, uint16_t indent)
+    {
+        if (NULL!=self) {
+            fprintf(stderr,"%*s[self           %10p]\n",indent,(indent>0?" ":""), self);
+            fprintf(stderr,"%*s[src_bytes      %10u]\n",indent,(indent>0?" ":""), self->src_bytes);
+            fprintf(stderr,"%*s[sync_bytes     %10u]\n",indent,(indent>0?" ":""), self->sync_bytes);
+            fprintf(stderr,"%*s[unread_bytes   %10u]\n",indent,(indent>0?" ":""), self->unread_bytes);
+            fprintf(stderr,"%*s[parsed_records %10u]\n",indent,(indent>0?" ":""), self->parsed_records);
+            fprintf(stderr,"%*s[parsed_bytes   %10u]\n",indent,(indent>0?" ":""), self->parsed_bytes);
+            fprintf(stderr,"%*s[resync_count   %10u]\n",indent,(indent>0?" ":""), self->resync_count);
+            fprintf(stderr,"%*s[status         %10d]\n",indent,(indent>0?" ":""), self->status);
+        }
+    }
+    // End function mb1_parser_show
+
+    char *mb1_parser_str(mb1_parse_stat_t *self, char *dest, uint32_t len, bool verbose, uint16_t indent)
+    {
+        char *retval=NULL;
+
+        //    uint32_t inc=256;
+
+        if (NULL!=self) {
+
+            char *wbuf=(char *)malloc(MB1_STR_INC*sizeof(char));
+
+            // TODO: check length/realloc
+            if (wbuf!=NULL) {
+                memset(wbuf,0,len);
+                char *dp=wbuf;
+
+                uint32_t n=1;
+                char *fmt="%*s[self           %10p]\n";
+                uint32_t wlen=len;
+                uint32_t wb = snprintf(NULL,0,fmt,indent,(indent>0?" ":""), self);
+                wlen+=wb;
+                if (wlen>MB1_STR_INC) {
+                    n++;
+                    wbuf=(char *)realloc(wbuf,n*MB1_STR_INC*sizeof(char));
+                    dp = wbuf+strlen(wbuf);
+                }
+                sprintf(dp,fmt,indent,(indent>0?" ":""), self);
+                dp = wbuf+strlen(wbuf);
+
+                fmt="%*s[src_bytes      %10u]\n";
+                wb = snprintf(NULL,0,fmt,indent,(indent>0?" ":""), self->src_bytes);
+                wlen+=wb;
+                if (wlen>MB1_STR_INC) {
+                    n++;
+                    wbuf=(char *)realloc(wbuf,n*MB1_STR_INC*sizeof(char));
+                    dp = wbuf+strlen(wbuf);
+                }
+                sprintf(dp,fmt,indent,(indent>0?" ":""), self->src_bytes);
+                dp = wbuf+strlen(wbuf);
+
+                fmt="%*s[sync_bytes     %10u]\n";
+                wb = snprintf(NULL,0,fmt,indent,(indent>0?" ":""), self->sync_bytes);
+                wlen+=wb;
+                if (wlen>MB1_STR_INC) {
+                    n++;
+                    wbuf=(char *)realloc(wbuf,n*MB1_STR_INC*sizeof(char));
+                    dp = wbuf+strlen(wbuf);
+                }
+                sprintf(dp,fmt,indent,(indent>0?" ":""), self->sync_bytes);
+                dp = wbuf+strlen(wbuf);
+
+                fmt="%*s[unread_bytes   %10u]\n";
+                wb = snprintf(NULL,0,fmt,indent,(indent>0?" ":""), self->unread_bytes);
+                wlen+=wb;
+                if (wlen>MB1_STR_INC) {
+                    n++;
+                    wbuf=(char *)realloc(wbuf,n*MB1_STR_INC*sizeof(char));
+                    dp = wbuf+strlen(wbuf);
+                }
+                sprintf(dp,fmt,indent,(indent>0?" ":""), self->unread_bytes);
+                dp = wbuf+strlen(wbuf);
+
+
+                fmt="%*s[parsed_records %10u]\n";
+                wb = snprintf(NULL,0,fmt,indent,(indent>0?" ":""), self->parsed_records);
+                wlen+=wb;
+                if (wlen>MB1_STR_INC) {
+                    n++;
+                    wbuf=(char *)realloc(wbuf,n*MB1_STR_INC*sizeof(char));
+                    dp = wbuf+strlen(wbuf);
+                }
+                sprintf(dp,fmt,indent,(indent>0?" ":""), self->parsed_records);
+                dp = wbuf+strlen(wbuf);
+
+                fmt="%*s[parsed_bytes   %10u]\n";
+                wb = snprintf(NULL,0,fmt,indent,(indent>0?" ":""), self->parsed_bytes);
+                wlen+=wb;
+                if (wlen>MB1_STR_INC) {
+                    n++;
+                    wbuf=(char *)realloc(wbuf,n*MB1_STR_INC*sizeof(char));
+                    dp = wbuf+strlen(wbuf);
+                }
+                sprintf(dp,fmt,indent,(indent>0?" ":""), self->parsed_bytes);
+                dp = wbuf+strlen(wbuf);
+
+                fmt="%*s[resync_count   %10u]\n";
+                wb = snprintf(NULL,0,fmt,indent,(indent>0?" ":""), self->resync_count);
+                wlen+=wb;
+                if (wlen>MB1_STR_INC) {
+                    n++;
+                    wbuf=(char *)realloc(wbuf,n*MB1_STR_INC*sizeof(char));
+                    dp = wbuf+strlen(wbuf);
+                }
+                sprintf(dp,fmt,indent,(indent>0?" ":""), self->resync_count);
+                dp = wbuf+strlen(wbuf);
+
+                fmt="%*s[status         %10d]\n";
+                wb = snprintf(NULL,0,fmt,indent,(indent>0?" ":""), self->status);
+                wlen+=wb;
+                if (wlen>MB1_STR_INC) {
+                    n++;
+                    wbuf=(char *)realloc(wbuf,n*MB1_STR_INC*sizeof(char));
+                    dp = wbuf+strlen(wbuf);
+                }
+                sprintf(dp,fmt,indent,(indent>0?" ":""), self->status);
+
+                if (NULL!=dest) {
+                    snprintf(dest,(len<wlen?len:wlen),"%s",wbuf);
+                    free(wbuf);
+                    retval=dest;
+                }else{
+                    retval=wbuf;
+                }
+            }
+        }
+        return retval;
+    }
+    // End function mb1_parser_str
+#endif // WITH_MB1_PARSE_STAT
+
+#ifdef WITH_MB1_UTILS
 int mb1_stream_show(msock_socket_t *s, int sz, uint32_t tmout_ms, int cycles, bool *interrupt)
 {
     int retval=-1;
@@ -686,3 +697,4 @@ int mb1_sounding_send(msock_socket_t *s, mb1_sounding_t *self)
 }
 // End function mb1_sounding_send
 
+#endif // WITH_MB1_UTILS
