@@ -66,6 +66,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdbool.h>
+#include <inttypes.h>
 #include <string.h>
 #include "mb1_msg.h"
 

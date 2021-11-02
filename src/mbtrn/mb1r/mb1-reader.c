@@ -1050,8 +1050,8 @@ static int s_sm_act_read_data(mb1r_reader_t *self, mb1r_sm_ctx_t *pctx)
                 pctx->state = MB1R_STATE_DATA_INVALID;
                 pctx->cx=0;
 
-                if(pctx->cx==0 && mb1_sounding_validate_checksum(pctx->psnd)==0 ){
-                    PMPRINT(MOD_MB1R,MM_DEBUG,(stderr,"INFO - read_data  checksum invalid [%"PRIu32"]\n",MB1_GET_CHECKSUM(pctx->psnd)));
+                if(pctx->cx==0 && mb1_sounding_validate_checksum(pctx->psnd)!=0 ){
+                    PMPRINT(MOD_MB1R,MM_DEBUG,(stderr,"INFO - read_data checksum invalid [%08X/%08X]\n",MB1_GET_CHECKSUM(pctx->psnd),mb1_calc_checksum(pctx->psnd)));
                     MST_COUNTER_INC(self->stats->events[MB1R_EV_ECHKSUM]);
                     pctx->cx++;
                 }
