@@ -83,7 +83,6 @@
 // Type Definitions
 /////////////////////////
 
-typedef unsigned char byte;
 
 #ifdef WITH_MB1_PARSE_STAT
 #pragma pack(push, 1)
@@ -116,108 +115,92 @@ typedef struct mb1_parse_stat_s
 #pragma pack(pop)
 #endif // WITH_MB1_PARSE_STAT
 
+#ifdef WITH_MB1_FRAME
+
+/// @typedef struct mb1_frame_s mb1_frame_t
+/// @brief MB1 data frame.
+/// Structure is variable length; sounding and checksum
+/// pointers are at the beginning, followed by sounding
+/// data (variable length) and checksum, which must be
+/// contiguous.
+typedef struct mb1_frame_s
+{
+    /// @var mb1_frame_s::sounding
+    /// @brief sounding data
+    mb1_sounding_t *sounding;
+    /// @var mb1_frame_s::checksum
+    /// @brief 32-bit checksum (byte sum over header and beam data)
+    uint32_t *checksum;
+    /// sounding data (variable length, contiguous) follows checksum pointer
+    /// sounding points to start of sounding header
+    /// checksum points to checksum (after variable length beam data array)
+}mb1_frame_t;
+#endif // WITH_MB1_FRAME
+
+
 /////////////////////////
 // Macros
 /////////////////////////
-/// @def IP_PORT_MB1
-/// @brief reson 7k center IP port
-#define MB1_IP_PORT_DFL 7007
+#ifdef WITH_MB1_FRAME
+/// @def MB1_FRAME_BYTES
+/// @brief size of complete MB1 data frame
+/// @param[in] beams number of beams
+//#define MB1_FRAME_BYTES(beams) (MB1_HEADER_BYTES+beams*MB1_BEAM_BYTES+MB1_CHECKSUM_BYTES)
+/// @def MB1_MAX_FRAME_BYTES
+/// @brief max size of MB1 data frame
+//#define MB1_MAX_FRAME_BYTES MB1_FRAME_BYTES(MB1_MAX_BEAMS)
+/// @def MB1_EMPTY_FRAME_BYTES
+/// @brief max size of MB1 data frame
+//#define MB1_EMPTY_FRAME_BYTES MB1_FRAME_BYTES(0)
+#endif
 
 /////////////////////////
 // Exports
 /////////////////////////
 // mmd_module_config_t *mmd_mb1c_config;
 
-// MB1 utility API
+#ifdef WITH_MB1_FRAME
+/// @fn mb1_frame_t *mb1_frame_new(int beams)
+/// @brief allocate new MB1 data frame. Caller must release using mb1_frame_destroy.
+/// @param[in] beams number of beams (>=0)
+/// @return new mb1_frame_t pointer on success, NULL otherwise
+mb1_frame_t *mb1_frame_new(int beams);
 
-/// @fn uint32_t mb1_checksum_u32(byte * pdata, uint32_t len)
-/// @brief return 32-bit checksum for data of arbitrary length
-/// @param[in] pdata data pointer
-/// @param[in] len length of data.
-/// @return 32-bit checksum value (sum of bytes).
-uint32_t mb1_checksum_u32(byte *pdata, uint32_t len);
+/// @fn mb1_frame_t *mb1_frame_resize(mb1_frame_t **pself, int beams,  int flags)
+/// @brief resize MB1 data frame (e.g. add/remove beam data)
+/// @param[in] pself pointer to mb1_frame_t ref.
+/// @param[in] beams number of beams (>=0)
+/// @param[in] flags indicate what fields to initialize to zero (checksum always cleared)
+/// @return new mb1_frame_t pointer on success, NULL otherwise
+mb1_frame_t *mb1_frame_resize(mb1_frame_t **pself, int beams,  int flags);
 
-/// @fn void mb1_hex_show(byte * data, uint32_t len, uint16_t cols, _Bool show_offsets, uint16_t indent)
-/// @brief output data buffer bytes in hex to stderr.
-/// @param[in] data buffer pointer
-/// @param[in] len number of bytes to display
-/// @param[in] cols number of columns to display
-/// @param[in] show_offsets show starting offset for each row
-/// @param[in] indent output indent spaces
-/// @return none
-void mb1_hex_show(byte *data, uint32_t len, uint16_t cols, bool show_offsets, uint16_t indent);
-
-// mb1_sounding API (used by mbtrn_server)
-
-/// @fn mb1_sounding_t * mb1_sounding_new(uint32_t data_len)
-/// @brief create new mb1 protocol message structure.
-/// mb1 messages  must be explicitly serialized before sending.
-/// @param[in] beams number of bathymetry beams
-/// @return new message reference on success, NULL otherwise.
-mb1_sounding_t *mb1_sounding_new(uint32_t beams);
-
-/// @fn void mb1_sounding_destroy(mb1_sounding_t ** pself)
-/// @brief release message structure resources.
-/// @param[in] pself pointer to message reference
-/// @return none
-void mb1_sounding_destroy(mb1_sounding_t **pself);
-
-/// @fn mb1_sounding_t *mb1_sounding_resize(mb1_sounding_t **pself, uint32_t beams,  int flags)
-/// @brief resize an exsiting sounding
-/// @param[in] pself pointer to sounding reference
-/// @param[in] beams number of bathymetry beams
-/// @param[in] flags flags indicating what fields to zero
-/// @return new sounding reference on success, NULL otherwise.
-mb1_sounding_t *mb1_sounding_resize(mb1_sounding_t **pself, uint32_t beams,  int flags);
-
-/// @fn int mb1_sounding_zero(mb1_sounding_t *self, int flags)
-/// @brief clear (set to zero) all/part of a sounding
-/// @param[in] self sounding reference
-/// @param[in] flags flags indicating what fields to zero
-/// @return 0 on success, -1 otherwise.
-int mb1_sounding_zero(mb1_sounding_t *self, int flags);
-
-/// @fn void mb1_sounding_show(mb1_sounding_t * self, _Bool verbose, uint16_t indent)
-/// @brief output mb1 message parameter summary to stderr.
-/// @param[in] self mb1 message reference
-/// @param[in] verbose use verbose output
-/// @param[in] indent output indent spaces
-/// @return none
-void mb1_sounding_show(mb1_sounding_t *self, bool verbose, uint16_t indent);
-
-/// @fn uint32_t mb1_calc_checksum(mb1_sounding_t *self)
-/// @brief return mb1 checksum for data.
-/// @param[in] self mb1 message reference
-/// @return mb1 checksum value (sum of bytes).
-uint32_t mb1_calc_checksum(mb1_sounding_t *self);
-
-/// @fn uint32_t mb1_sounding_set_checksum(mb1_sounding_t * self)
-/// @brief set the checksum for an mb1 message structure.
-/// @param[in] self mb1 message reference
-/// @return previous checksum value.
-uint32_t mb1_sounding_set_checksum(mb1_sounding_t *self);
-
-/// @fn int mb1_sounding_validate_checksum(mb1_sounding_t * self)
-/// @brief validate the checksum for an mb1 message structure.
-/// @param[in] self mb1 message reference
-/// @return 0 if valid, -1 otherwise
-int mb1_sounding_validate_checksum(mb1_sounding_t *self);
-
-/// @fn byte * mb1_sounding_serialize(mb1_sounding_t * self)
-/// @brief serialize mb1 message into new buffer.
-/// Really just validating and copying, since memory is contiguous.
-/// caller must release buffer resources using free.
-/// @param[in] self mb1 message reference
-/// @return new network frame buffer on success, NULL otherwise
-byte* mb1_sounding_serialize(mb1_sounding_t *self, size_t *r_size);
-
-// Tests
-
-/// @fn int mb1_test()
-/// @brief mb1 unit test(s).
-/// currently subscribes to test server (exercising most of the mb1 API).
+/// @fn int mb1_frame_zero(mb1_frame_t **pself, int flags)
+/// @brief zero MB1 data frame
+/// @param[in] pself pointer to mb1_frame_t ref.
+/// @param[in] flags indicate what fields to initialize to zero (checksum always cleared)
 /// @return 0 on success, -1 otherwise
-int mb1_test();
+int mb1_frame_zero(mb1_frame_t *self, int flags);
+
+/// @fn void mb1_frame_destroy(mb1_frame_t **pself);
+/// @brief release resources for mb1_frame_t.
+/// @param[in] pself pointer to mb1_frame_t ref.
+/// @return none
+void mb1_frame_destroy(mb1_frame_t **pself);
+
+/// @fn unsigned int mb1_frame_calc_checksum(mb1_frame_t *self);
+/// @brief calculate 32-bit checksum.
+/// @param[in] self pointer to mb1_frame_t ref.
+/// @return 32-bit (unsigned int) checksum) on success, 0xFFFF otherwise
+unsigned int mb1_frame_calc_checksum(mb1_frame_t *self);
+
+/// @fn void mb1_frame_show(mb1_frame_t *self, bool verbose, uint16_t indent)
+/// @brief write frame summary to console (stderr)
+/// @param[in] self    frame reference
+/// @param[in] verbose indent extra output (if implemented)
+/// @param[in] indent  output indentation (spaces)
+/// @return none
+void mb1_frame_show(mb1_frame_t *self, bool verbose, uint16_t indent);
+#endif //WITH_MB1_FRAME
 
 #ifdef WITH_MB1_PARSE_STAT
 /// @fn void mb1_parser_show(mb1_parse_stat_t * self, _Bool verbose, uint16_t indent)

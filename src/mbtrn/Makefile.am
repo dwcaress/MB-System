@@ -19,8 +19,8 @@ include_HEADERS = \
         utils/mb71_msg.h \
         r7kr/r7k-reader.h \
         r7kr/r7kc.h \
-        mb1r/mb1-reader.h \
-        mb1r/mb1-io.h
+        mb1r/mb1-reader.h
+        
 
 AM_CFLAGS = ${libgmt_CFLAGS} ${libnetcdf_CFLAGS}
 
@@ -67,11 +67,11 @@ libr7kr_la_LIBADD = libmframe.la -lpthread
 
 libmb1r_la_LDFLAGS =  -no-undefined -version-info 0:0:0
 
-libmb1r_la_SOURCES =  utils/mconfig.c \
+libmb1r_la_SOURCES =  \
         utils/mb1_msg.c \
         utils/mb71_msg.c \
-        mb1r/mb1-reader.c \
-        mb1r/mb1-io.c
+        utils/mconfig.c \
+        mb1r/mb1-reader.c
 
 libmb1r_la_LIBADD = libmframe.la -lpthread
 

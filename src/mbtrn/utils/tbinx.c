@@ -70,7 +70,6 @@
 #include "msocket.h"
 #include "r7k-reader.h"
 #include "mb1_msg.h"
-#include "mb1-io.h"
 
 /////////////////////////
 // Macros

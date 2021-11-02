@@ -68,7 +68,6 @@
 #include "medebug.h"
 #include "mutils.h"
 #include "mb1_msg.h"
-#include "mb1-io.h"
 
 /////////////////////////
 // Macros

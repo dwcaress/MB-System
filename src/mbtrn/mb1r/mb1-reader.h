@@ -77,7 +77,7 @@
 #include "mfile.h"
 #include "mconfig.h"
 #include "mstats.h"
-#include "mb1-io.h"
+#include "mb1_msg.h"
 
 /////////////////////////
 // Type Definitions

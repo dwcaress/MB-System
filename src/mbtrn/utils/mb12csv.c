@@ -65,10 +65,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <getopt.h>
-//#include <math.h>
 
 #include "mb12csv.h"
-#include "mb1-io.h"
 #include "mb1_msg.h"
 #include "mframe.h"
 #include "mfile.h"
