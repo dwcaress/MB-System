@@ -1,10 +1,13 @@
 lib_LTLIBRARIES = libgeolib.la libnewmat.la libqnx.la libtnav.la libtrnw.la libnetif.la libmb1.la
 
+LIBMFRAME = $(top_builddir)/src/mbtrn/libmframe.la
+MFRAME_INC = -I${top_srcdir}/src/mbtrn/mframe/src
+
 include_HEADERS =
 
 AM_CFLAGS = ${libgmt_CFLAGS} ${libnetcdf_CFLAGS}
 
-AM_CPPFLAGS = -g -O0 -I${top_srcdir}/src/mbtrnav/trnw -I${top_srcdir}/src/mbtrnav/utils -I${top_srcdir}/src/mbtrnav/terrain-nav -I${top_srcdir}/src/mbtrnav/qnx-utils -I${top_srcdir}/src/mbtrnav/newmat  -I${top_srcdir}/src/mbtrnav/gctp/source  -I${top_srcdir}/src/mbtrn/utils -I${top_srcdir}/src/mbtrn/mframe/src -DHAVE_CONFIG_H  -DWITH_TESTS -DWITH_MMDEBUG -D_GNU_SOURCE  -DWITH_MST_MSTATS -DMST_STATS_EN
+AM_CPPFLAGS = -g -O0 -I${top_srcdir}/src/mbtrnav/trnw -I${top_srcdir}/src/mbtrnav/utils -I${top_srcdir}/src/mbtrnav/terrain-nav -I${top_srcdir}/src/mbtrnav/qnx-utils -I${top_srcdir}/src/mbtrnav/newmat  -I${top_srcdir}/src/mbtrnav/gctp/source  -I${top_srcdir}/src/mbtrn/utils ${MFRAME_INC} -DHAVE_CONFIG_H  -DWITH_TESTS -DWITH_MMDEBUG -D_GNU_SOURCE  -DWITH_MST_MSTATS -DMST_STATS_EN
 
 libgeolib_la_LDFLAGS =  -no-undefined -version-info 0:0:0
 
@@ -183,7 +186,7 @@ libnetif_la_SOURCES = \
                 trnw/trnif_proto.c
 
 libnetif_la_LIBADD = libtrnw.la \
-                $(top_builddir)/src/mbtrn/libmframe.la \
+                ${LIBMFRAME} \
                 -lm -lpthread
 
 libmb1_la_LDFLAGS =  -no-undefined -version-info 0:0:0
@@ -192,43 +195,40 @@ libmb1_la_SOURCES = trnw/mb1_msg.c
 
 libmb1_la_LIBADD =
 
-bin_PROGRAMS =   trn-server trn-cli netif-test trnif-test trnifsvr-test trnclient-test trnu-cli trnusvr-test mmcpub mmcsub trn-replay #  readlog writelog
-
-trn_replay_SOURCES = opt/dorado/Replay.cpp opt/dorado/trn_replay.cpp utils/TerrainNavClient.cpp
-trn_replay_LDADD = -ltnav  -lnewmat -lqnx -lnetcdf -lm -lpthread -lgeolib 
-
-mmcpub_SOURCES = trnw/mmcpub.c
-mmcpub_LDADD = $(top_builddir)/src/mbtrn/libmframe.la
-
-mmcsub_SOURCES = trnw/mmcsub.c
-mmcsub_LDADD = $(top_builddir)/src/mbtrn/libmframe.la
-
-trnu_cli_SOURCES = trnw/trnucli_test.c trnw/trnu_cli.c
-trnu_cli_LDADD = $(top_builddir)/src/mbtrn/libmframe.la libtrnw.la
-
-trn_cli_SOURCES = trnw/trncli_test.c trnw/trn_cli.c
-trn_cli_LDADD = $(top_builddir)/src/mbtrn/libmframe.la libtrnw.la
+bin_PROGRAMS =  trn-server trn-replay trnclient-test mmcpub mmcsub trnu-cli trn-cli trnif-test trnusvr-test netif-test trnifsvr-test #  readlog writelog
 
 trn_server_SOURCES = utils/trn_server.cpp
 trn_server_LDADD = libtnav.la libqnx.la libnewmat.la libtnav.la libgeolib.la
 
-# ${top_builddir}/src/mbtrn/libr7kr.la
-netif_test_SOURCES = utils/netif-test.c
-netif_test_LDADD = libnetif.la  libtrnw.la
-
-#${top_builddir}/src/mbtrn/libr7kr.la
-trnif_test_SOURCES =  trnw/trnif_test.c
-trnif_test_LDADD = libnetif.la  libtrnw.la
-
-#${top_builddir}/src/mbtrn/libr7kr.la
-trnifsvr_test_SOURCES = utils/trnifsvr-test.c
-trnifsvr_test_LDADD = libnetif.la  libtrnw.la
+trn_replay_SOURCES = opt/dorado/Replay.cpp opt/dorado/trn_replay.cpp utils/TerrainNavClient.cpp
+trn_replay_LDADD = -ltnav  -lnewmat -lqnx -lnetcdf -lm -lpthread -lgeolib 
 
 trnclient_test_SOURCES =  utils/trnclient_test.cpp utils/TrnClient.cpp utils/TerrainNavClient.cpp
 trnclient_test_LDADD = libtnav.la
 
+mmcpub_SOURCES = trnw/mmcpub.c
+mmcpub_LDADD = ${LIBMFRAME}
+
+mmcsub_SOURCES = trnw/mmcsub.c
+mmcsub_LDADD = ${LIBMFRAME}
+
+trnu_cli_SOURCES = trnw/trnucli_test.c trnw/trnu_cli.c
+trnu_cli_LDADD = ${LIBMFRAME} libtrnw.la
+
+trn_cli_SOURCES = trnw/trncli_test.c trnw/trn_cli.c
+trn_cli_LDADD = ${LIBMFRAME} libtrnw.la
+
+trnif_test_SOURCES =  trnw/trnif_test.c
+trnif_test_LDADD = libnetif.la  libtrnw.la
+
 trnusvr_test_SOURCES = trnw/trnusvr_test.c
 trnusvr_test_LDADD = libnetif.la libtrnw.la
+
+netif_test_SOURCES = utils/netif-test.c
+netif_test_LDADD = libnetif.la  libtrnw.la
+
+trnifsvr_test_SOURCES = utils/trnifsvr-test.c
+trnifsvr_test_LDADD = libnetif.la  libtrnw.la
 
 dist_bin_SCRIPTS =
 
