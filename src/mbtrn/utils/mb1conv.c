@@ -312,7 +312,7 @@ static void app_cfg_destroy(app_cfg_t **pself)
     }
 }
 
-static int32_t s_read_mb1_rec( mb1_sounding_t **pdest, mfile_file_t *src, app_cfg_t *cfg)
+static int32_t s_read_mb1_rec( mb1_t **pdest, mfile_file_t *src, app_cfg_t *cfg)
 {
     int32_t retval=-1;
 
@@ -321,7 +321,7 @@ static int32_t s_read_mb1_rec( mb1_sounding_t **pdest, mfile_file_t *src, app_cf
         uint32_t readlen = 1;
         uint32_t record_bytes=0;
         int64_t read_bytes=0;
-        mb1_sounding_t *dest = *pdest;
+        mb1_t *dest = *pdest;
 
         // sync to start of record
         bp = (byte *)dest;
@@ -347,7 +347,7 @@ static int32_t s_read_mb1_rec( mb1_sounding_t **pdest, mfile_file_t *src, app_cf
             fprintf(stderr,"%d: readlen[%u]\n",__LINE__,readlen);
             fprintf(stderr,"%d: sizeof double[%zu]\n",__LINE__,sizeof(double));
             fprintf(stderr,"%d: sizeof int[%zu]\n",__LINE__,sizeof(int));
-            fprintf(stderr,"%d: sizeof mb1_sounding_t[%zu]\n",__LINE__,sizeof(mb1_sounding_t));
+            fprintf(stderr,"%d: sizeof mb1_t[%zu]\n",__LINE__,sizeof(mb1_t));
             fprintf(stderr,"%d: sizeof mb1_beam_t[%zu]\n",__LINE__,sizeof(mb1_beam_t));
             fprintf(stderr,"%d: sizeof checksum[%zu]\n",__LINE__,sizeof(mb1_checksum_t));
         }
@@ -368,7 +368,7 @@ static int32_t s_read_mb1_rec( mb1_sounding_t **pdest, mfile_file_t *src, app_cf
             if(NULL!=dest && NULL!=dest ){
                 if(dest->type==MB1_TYPE_ID){
                     if(dest->nbeams>0 && dest->nbeams<=MB1_MAX_BEAMS){
-                        if(mb1_sounding_resize(&dest, dest->nbeams, MB1_RS_BEAMS)!=NULL){
+                        if(mb1_resize(&dest, dest->nbeams, MB1_RS_BEAMS)!=NULL){
                             bp=(byte *)&dest->beams[0];
                             readlen = dest->size-(MB1_HEADER_BYTES+MB1_CHECKSUM_BYTES);
                             *pdest=dest;
@@ -407,7 +407,7 @@ static int32_t s_read_mb1_rec( mb1_sounding_t **pdest, mfile_file_t *src, app_cf
                     record_bytes+=read_bytes;
                     retval=record_bytes;
 
-                    if(mb1_sounding_validate_checksum(dest)!=0){
+                    if(mb1_validate_checksum(dest)!=0){
                         fprintf(stderr,"checksum err (calc/read)[%08X/%08X] failed fp/fsz[%"PRId64"/%"PRId64"]\n",mb1_calc_checksum(dest),MB1_GET_CHECKSUM(dest),mfile_seek(src,0,MFILE_CUR),mfile_fsize(src));
                     }
                 }else{
@@ -432,7 +432,7 @@ static int32_t s_read_mb1_rec( mb1_sounding_t **pdest, mfile_file_t *src, app_cf
     return retval;
 }
 
-static int32_t s_mb1_to_mb71v5(byte **dest, int32_t size, mb1_sounding_t *src, app_cfg_t *cfg)
+static int32_t s_mb1_to_mb71v5(byte **dest, int32_t size, mb1_t *src, app_cfg_t *cfg)
 {
     int32_t retval=-1;
     
@@ -544,7 +544,7 @@ static int s_app_main(app_cfg_t *cfg)
         mfile_file_t *ifile = mfile_file_new(cfg->ifile);
         mfile_file_t *ofile = mfile_file_new(cfg->ofile);
         byte *mb71_bytes=NULL;
-        mb1_sounding_t *mb1=NULL;
+        mb1_t *mb1=NULL;
         mb71v5_t *pmb71 = NULL;
         
         if( (test[0]=mfile_open(ifile, MFILE_RONLY))>0 &&
@@ -558,7 +558,7 @@ static int s_app_main(app_cfg_t *cfg)
             while( !g_interrupt && !quit && input_bytes<file_size){
                 
                 // reset frame (or create if NULL)
-                mb1_sounding_resize(&mb1,0,MB1_RS_ALL);
+                mb1_resize(&mb1,0,MB1_RS_ALL);
                 
                 if((test[0]=s_read_mb1_rec(&mb1, ifile,cfg))>0){
                     rec_count++;
@@ -569,7 +569,7 @@ static int s_app_main(app_cfg_t *cfg)
                         pmb71 = (mb71v5_t *)mb71_bytes;
                         output_bytes+=mb71_size;
                         if( cfg->verbose>2){
-                            mb1_sounding_show(mb1,5,true);
+                            mb1_show(mb1,5,true);
                         }
                         if( cfg->verbose>1){
                             mb71v5_show(pmb71,5,true);
@@ -623,7 +623,7 @@ static int s_app_main(app_cfg_t *cfg)
         if(NULL!=mb71_bytes){
             free(mb71_bytes);
         }
-        mb1_sounding_destroy(&mb1);
+        mb1_destroy(&mb1);
         retval=0;
         
         if(cfg->verbose>0){

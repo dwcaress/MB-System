@@ -1,5 +1,5 @@
 ///
-/// @file mb1_msg.c
+/// @file mb1-msg.c
 /// @authors k. headley
 /// @date 11 aug 2019
 
@@ -68,7 +68,7 @@
 #include <stdbool.h>
 #include <inttypes.h>
 #include <string.h>
-#include "mb1_msg.h"
+#include "mb1-msg.h"
 
 /////////////////////////
 // Macros

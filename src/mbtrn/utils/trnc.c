@@ -432,7 +432,7 @@ static int s_trnc_state_machine(msock_socket_t *s, app_cfg_t *cfg)
 //        trn_message_t message;
 //        trn_message_t *pmessage = &message;
 //        mbtrn_header_t *pheader = &pmessage->data.header;
-//        mbtrn_sounding_t *psounding = &pmessage->data.sounding;
+//        mbtrn_t *psounding = &pmessage->data.sounding;
 //        memset(pmessage,0,sizeof(message));
         byte msg_buf[MB1_MAX_SOUNDING_BYTES]={0};
         int hbeat_counter=0;
@@ -516,7 +516,7 @@ static int s_trnc_state_machine(msock_socket_t *s, app_cfg_t *cfg)
                     
                     // check message type
 
-                    mb1_sounding_t *mb1=(mb1_sounding_t *)(msg_buf);
+                    mb1_t *mb1=(mb1_t *)(msg_buf);
 
                     if (mb1->type==MBTRN_MSGTYPE_ACK) {
                         PMPRINT(MOD_TRNC,MM_DEBUG,(stderr,"%s - received ACK ret[%"PRId64"] [%08X]\n",__FUNCTION__,test,mb1->type));
@@ -587,7 +587,7 @@ static int s_trnc_state_machine(msock_socket_t *s, app_cfg_t *cfg)
 //                            bd->rhoz));
 //                }
 
-                mb1_sounding_t *mb1=(mb1_sounding_t *)(msg_buf);
+                mb1_t *mb1=(mb1_t *)(msg_buf);
 
                 PMPRINT(MOD_TRNC,MM_DEBUG|TRNC_V1|TRNC_V2,(stderr,"\nts[%.3f] ping[%06d] lat[%.4lf] lon[%.4lf]\nsd[%7.2lf] hdg[%6.2lf] nb[%03"PRIu32"]\n",
                                                            mb1->ts,

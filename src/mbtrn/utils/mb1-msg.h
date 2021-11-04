@@ -1,5 +1,5 @@
 ///
-/// @file mb1_msg.h
+/// @file mb1-msg.h
 /// @authors k. headley
 /// @date 09 jul 2019
 
@@ -60,8 +60,8 @@
  */
 
 // Always do this
-#ifndef MB1_MSG_H
-#define MB1_MSG_H
+#ifndef NEW_MB1_MSG_H
+#define NEW_MB1_MSG_H
 
 /////////////////////////
 // Includes 

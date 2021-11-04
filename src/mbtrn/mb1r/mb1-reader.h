@@ -129,10 +129,10 @@ typedef enum{
 
 /// @typedef enum mb1r_cstate mb1r_cstate
 /// @brief connection state enum
-typedef enum {CS_NEW, CS_INITIALIZED, CS_CONNECTED} mb1r_cstate;
+//typedef enum {CS_NEW, CS_INITIALIZED, CS_CONNECTED} mb1r_cstate;
 /// @typedef enum mb1r_ctype mb1r_ctype
 /// @brief connection endpoint types
-typedef enum {CT_NULL, CT_STDIN, CT_STDOUT, CT_STDERR, CT_FILE, CT_SOCKET} mb1r_ctype;
+//typedef enum {CT_NULL, CT_STDIN, CT_STDOUT, CT_STDERR, CT_FILE, CT_SOCKET} mb1r_ctype;
 /// @typedef enum mb1r_state_t mb1r_state_t
 /// @brief reader state enum
 /// Changes to this enum must be reflected in mb1r_strstate()
@@ -212,7 +212,7 @@ typedef struct mb1r_sm_ctx_s
     bool sync_found;
 
     int merrno;
-    mb1_sounding_t *psnd;
+    mb1_t *psnd;
     byte *dest;
     byte *pbuf;
     byte *psync;

@@ -443,7 +443,7 @@ static void parse_args(int argc, char **argv, app_cfg_t *cfg)
 /// @param[in] prev_time previous message timestamp
 /// @param[in] cfg app configuration reference
 /// @return 0 on success, -1 otherwise
-static int s_delay_message(mb1_sounding_t *sounding, double prev_time, app_cfg_t *cfg)
+static int s_delay_message(mb1_t *sounding, double prev_time, app_cfg_t *cfg)
 {
     int retval=-1;
     
@@ -513,12 +513,12 @@ static int s_delay_message(mb1_sounding_t *sounding, double prev_time, app_cfg_t
 }
 // End function s_delay_message
 
-/// @fn int s_out_stdx(FILE *dest, mb1_sounding_t *sounding)
+/// @fn int s_out_stdx(FILE *dest, mb1_t *sounding)
 /// @brief export message to dest (FILE *)
 /// @param[in] dest destination FILE pointer
 /// @param[in] message message reference
 /// @return 0 on success, -1 otherwise
-static int s_out_stdx(FILE *dest, mb1_sounding_t *sounding)
+static int s_out_stdx(FILE *dest, mb1_t *sounding)
 {
     int retval=0;
     
@@ -555,7 +555,7 @@ static int s_out_stdx(FILE *dest, mb1_sounding_t *sounding)
 /// @param[in] dest CSV file reference
 /// @param[in] message message reference
 /// @return 0 on success, -1 otherwise
-static int s_out_csv(mfile_file_t *dest, mb1_sounding_t *sounding)
+static int s_out_csv(mfile_file_t *dest, mb1_t *sounding)
 {
     int retval=0;
     
@@ -591,7 +591,7 @@ static int s_out_csv(mfile_file_t *dest, mb1_sounding_t *sounding)
 /// @param[in] s socket reference
 /// @param[in] message message reference
 /// @return 0 on success, -1 otherwise
-static int s_out_socket(msock_socket_t *s, mb1_sounding_t *sounding)
+static int s_out_socket(msock_socket_t *s, mb1_t *sounding)
 {
     int retval=-1;
     
@@ -797,8 +797,8 @@ int s_process_file(app_cfg_t *cfg)
             if ( (test=mfile_open(ifile,MFILE_RONLY)) > 0) {
                 PMPRINT(MOD_TBINX,TBINX_V2,(stderr,"open OK [%s]\n",cfg->files[i]));
                 
-                byte msg_buf[MB1_MAX_SOUNDING_BYTES+sizeof(mb1_sounding_t)]={0};
-                mb1_sounding_t *mb1= (mb1_sounding_t *) &msg_buf[0];
+                byte msg_buf[MB1_MAX_SOUNDING_BYTES+sizeof(mb1_t)]={0};
+                mb1_t *mb1= (mb1_t *) &msg_buf[0];
                 byte *ptype = (byte *)(&(mb1->type));
 
                 double prev_time =0.0;

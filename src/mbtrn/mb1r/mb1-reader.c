@@ -639,7 +639,7 @@ static int s_sm_act_resync(mb1r_reader_t *self, mb1r_sm_ctx_t *pctx)
     while( pctx->sync_found==false &&
           (pctx->psync < (pctx->pbuf-MB1_HEADER_BYTES))){
 
-        mb1_sounding_t *pframe = (mb1_sounding_t *)pctx->psync;
+        mb1_t *pframe = (mb1_t *)pctx->psync;
 
         // match only type ID...
         // we'll be back if other parts are invalid, and
@@ -694,7 +694,7 @@ static int s_sm_act_resync(mb1r_reader_t *self, mb1r_sm_ctx_t *pctx)
                         // move the bytes we have to the
                         // start of the buffer
                         memmove(pctx->dest, pctx->psync, pframe->size);
-                        pframe = (mb1_sounding_t *)pctx->dest;
+                        pframe = (mb1_t *)pctx->dest;
 
                         // clean up buffer
                         memset((pctx->dest+pframe->size), 0, (pctx->len-pframe->size));
@@ -1050,7 +1050,7 @@ static int s_sm_act_read_data(mb1r_reader_t *self, mb1r_sm_ctx_t *pctx)
                 pctx->state = MB1R_STATE_DATA_INVALID;
                 pctx->cx=0;
 
-                if(pctx->cx==0 && mb1_sounding_validate_checksum(pctx->psnd)!=0 ){
+                if(pctx->cx==0 && mb1_validate_checksum(pctx->psnd)!=0 ){
                     PMPRINT(MOD_MB1R,MM_DEBUG,(stderr,"INFO - read_data checksum invalid [%08X/%08X]\n",MB1_GET_CHECKSUM(pctx->psnd),mb1_calc_checksum(pctx->psnd)));
                     MST_COUNTER_INC(self->stats->events[MB1R_EV_ECHKSUM]);
                     pctx->cx++;
@@ -1093,7 +1093,7 @@ static int s_sm_update(mb1r_reader_t *self, mb1r_sm_ctx_t *pctx)
             pctx->action = MB1R_ACTION_READ_HEADER;
 
             pctx->pbuf = pctx->dest;
-            pctx->psnd = (mb1_sounding_t *)pctx->dest;
+            pctx->psnd = (mb1_t *)pctx->dest;
             memset(pctx->dest,0,pctx->len);
             pctx->frame_bytes=0;
             break;
@@ -1184,7 +1184,7 @@ int64_t mb1r_read_frame(mb1r_reader_t *self,
     pctx->sync_bytes = sync_bytes;
     pctx->rflags = 0;
     pctx->pbuf = dest;
-    pctx->psnd = (mb1_sounding_t *)dest;
+    pctx->psnd = (mb1_t *)dest;
     pctx->psync = dest;
     pctx->frame_bytes = 0;
     pctx->lost_bytes = 0;
@@ -1440,7 +1440,7 @@ static void *s_test_worker(void *pargs)
                             fprintf(stderr,"server socket ready to write fd[%d]\n",i);
                         }else{
                             fprintf(stderr,"client socket ready to write fd[%d]\n",i);
-                            mb1_sounding_t *snd = (mb1_sounding_t *)iobuf;
+                            mb1_t *snd = (mb1_t *)iobuf;
                             uint32_t test_beams = cfg->test_beams;
                             snd->type = MB1_TYPE_ID;
                             snd->size = MB1_SOUNDING_BYTES(test_beams);
@@ -1455,7 +1455,7 @@ static void *s_test_worker(void *pargs)
                                 snd->beams[k].rhoz = cx*4.;
                             }
 
-                            mb1_sounding_set_checksum(snd);
+                            mb1_set_checksum(snd);
 
                             if(cfg->err_mod>0 && ++cx%cfg->err_mod==0){
                                 snd->ts+=1;
@@ -1464,7 +1464,7 @@ static void *s_test_worker(void *pargs)
                             int nbytes = send(i,iobuf,MB1_SOUNDING_BYTES(test_beams),0);
 
                             fprintf(stderr,"server sent frame len[%d]:\n",nbytes);
-                            mb1_sounding_show(snd,true,5);
+                            mb1_show(snd,true,5);
                             fprintf(stderr,"\n");
                             mb1_hex_show((byte *)snd,snd->size,16,true,5);
                         }
@@ -1614,7 +1614,7 @@ int mb1r_test(int argc, char **argv)
             // show contents
             if (cfg->verbose>=1) {
                 PMPRINT(MOD_F7K,F7K_V1,(stderr,"MB1:\n"));
-//                mb1_sounding_t *psnd = (mb1_sounding_t *)(frame_buf);
+//                mb1_t *psnd = (mb1_t *)(frame_buf);
 //                mb1_show(psnd,false,5);
 
                 if(cfg->verbose>1)
