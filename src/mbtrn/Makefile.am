@@ -73,7 +73,7 @@ libmb1r_la_SOURCES =  \
 
 libmb1r_la_LIBADD = ${top_srcdir}/src/mbtrnav/libmb1.la libmframe.la -lpthread
 
-bin_PROGRAMS =  stream7k frames7k emu7k trnc tbinx udps udpc mb1conv mb12csv r7kr_test mb1r_test mbtnav-cli
+bin_PROGRAMS =  stream7k frames7k emu7k udps udpc r7kr_test mbtnav-cli trnc tbinx mb1conv mb12csv mb1r_test 
 
 stream7k_SOURCES = utils/stream7k.c
 stream7k_LDADD = libr7kr.la
@@ -81,14 +81,8 @@ stream7k_LDADD = libr7kr.la
 frames7k_SOURCES = utils/frames7k.c
 frames7k_LDADD = libr7kr.la
 
-trnc_SOURCES = utils/trnc.c
-trnc_LDADD = libmb1r.la ${top_srcdir}/src/mbtrnav/libmb1.la
-
 emu7k_SOURCES = utils/emu7k.c
 emu7k_LDADD = libr7kr.la
-
-tbinx_SOURCES = utils/tbinx.c
-tbinx_LDADD = libmb1r.la libr7kr.la ${top_srcdir}/src/mbtrnav/libmb1.la
 
 udps_SOURCES = utils/udps.c
 udps_LDADD = libr7kr.la
@@ -96,20 +90,26 @@ udps_LDADD = libr7kr.la
 udpc_SOURCES = utils/udpc.c
 udpc_LDADD = libr7kr.la
 
+r7kr_test_SOURCES = r7kr/r7kr-test.c
+r7kr_test_LDADD = libr7kr.la
+
+mbtnav_cli_SOURCES = utils/mbtnav_cli.c
+mbtnav_cli_LDADD = libr7kr.la
+
+trnc_SOURCES = utils/trnc.c
+trnc_LDADD = libmb1r.la ${top_srcdir}/src/mbtrnav/libmb1.la
+
+tbinx_SOURCES = utils/tbinx.c
+tbinx_LDADD = libmb1r.la libr7kr.la ${top_srcdir}/src/mbtrnav/libmb1.la
+
 mb1conv_SOURCES = utils/mb1conv.c
 mb1conv_LDADD = libmb1r.la ${top_srcdir}/src/mbtrnav/libmb1.la
 
 mb12csv_SOURCES = utils/mb12csv.c
 mb12csv_LDADD = libmb1r.la ${top_srcdir}/src/mbtrnav/libmb1.la
 
-r7kr_test_SOURCES = r7kr/r7kr-test.c
-r7kr_test_LDADD = libr7kr.la
-
 mb1r_test_SOURCES = mb1r/mb1r-test.c
 mb1r_test_LDADD = libmb1r.la ${top_srcdir}/src/mbtrnav/libmb1.la
-
-mbtnav_cli_SOURCES = utils/mbtnav_cli.c
-mbtnav_cli_LDADD = libr7kr.la
 
 dist_bin_SCRIPTS = tools/bin/mbtrnpp.sh emu7k.sh
 

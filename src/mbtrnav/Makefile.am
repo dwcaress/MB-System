@@ -212,14 +212,17 @@ trn_cli_LDADD = $(top_builddir)/src/mbtrn/libmframe.la libtrnw.la
 trn_server_SOURCES = utils/trn_server.cpp
 trn_server_LDADD = libtnav.la libqnx.la libnewmat.la libtnav.la libgeolib.la
 
+# ${top_builddir}/src/mbtrn/libr7kr.la
 netif_test_SOURCES = utils/netif-test.c
-netif_test_LDADD = libnetif.la ${top_builddir}/src/mbtrn/libr7kr.la libtrnw.la
+netif_test_LDADD = libnetif.la  libtrnw.la
 
+#${top_builddir}/src/mbtrn/libr7kr.la
 trnif_test_SOURCES =  trnw/trnif_test.c
-trnif_test_LDADD = libnetif.la  ${top_builddir}/src/mbtrn/libr7kr.la libtrnw.la
+trnif_test_LDADD = libnetif.la  libtrnw.la
 
+#${top_builddir}/src/mbtrn/libr7kr.la
 trnifsvr_test_SOURCES = utils/trnifsvr-test.c
-trnifsvr_test_LDADD = libnetif.la  ${top_builddir}/src/mbtrn/libr7kr.la libtrnw.la
+trnifsvr_test_LDADD = libnetif.la  libtrnw.la
 
 trnclient_test_SOURCES =  utils/trnclient_test.cpp utils/TrnClient.cpp utils/TerrainNavClient.cpp
 trnclient_test_LDADD = libtnav.la
