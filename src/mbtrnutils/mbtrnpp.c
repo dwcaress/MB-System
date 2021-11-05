@@ -64,6 +64,9 @@
 #include "mb1-reader.h"
 #endif // WITH_MBTNAV
 
+// Features
+#define WITH_MB1R_INPUT
+
 /* ping structure definition */
 struct mbtrnpp_ping_struct {
   int count;
@@ -624,6 +627,9 @@ s=NULL;\
 #define TRNSVR_PORT_DFL  28000
 #define TRN_XMIT_GAIN_RESON7K_DFL 200.0
 #define TRN_XMIT_GAIN_KMALL_DFL -20.0
+#ifdef WITH_NEW_MB1_MSG
+#define TRN_XMIT_GAIN_MB1_DFL 0.0
+#endif // WITH_NEW_MB1_MSG
 
 #endif //WITH_MBTNAV
 #define SZ_1M (1024 * 1024)
@@ -828,6 +834,11 @@ int mbtrnpp_reson7kr_input_close(int verbose, void *mbio_ptr, int *error);
 int mbtrnpp_kemkmall_input_open(int verbose, void *mbio_ptr, char *definition, int *error);
 int mbtrnpp_kemkmall_input_read(int verbose, void *mbio_ptr, size_t *size, char *buffer, int *error);
 int mbtrnpp_kemkmall_input_close(int verbose, void *mbio_ptr, int *error);
+#ifdef WITH_MB1R_INPUT
+int mbtrnpp_mb1r_input_open(int verbose, void *mbio_ptr, char *definition, int *error);
+int mbtrnpp_mb1r_input_read(int verbose, void *mbio_ptr, size_t *size, char *buffer, int *error);
+int mbtrnpp_mb1r_input_close(int verbose, void *mbio_ptr, int *error);
+#endif // WITH_MB1R_INPUT
 
 // Configuration helper functions
 
@@ -3298,6 +3309,11 @@ int main(int argc, char **argv) {
     else if (mbtrn_cfg->format == MBF_KEMKMALL) {
         transmit_gain_threshold = TRN_XMIT_GAIN_KMALL_DFL;
     }
+#ifdef WITH_NEW_MB1_MSG
+    else if (mbtrn_cfg->format == MBF_MBARIMB1) {
+        transmit_gain_threshold = TRN_XMIT_GAIN_MB1_DFL;
+    }
+#endif // WITH_NEW_MB1_MSG
     mlog_tprintf(mbtrnpp_mlog_id, "i,transmit gain threshold[%.2lf]\n", transmit_gain_threshold);
   }
 
@@ -3379,12 +3395,19 @@ int main(int argc, char **argv) {
         mbtrnpp_input_open = &mbtrnpp_reson7kr_input_open;
         mbtrnpp_input_read = &mbtrnpp_reson7kr_input_read;
         mbtrnpp_input_close = &mbtrnpp_reson7kr_input_close;
-      }
-      else if (mbtrn_cfg->format == MBF_KEMKMALL) {
+      } else if (mbtrn_cfg->format == MBF_KEMKMALL) {
         mbtrnpp_input_open = &mbtrnpp_kemkmall_input_open;
         mbtrnpp_input_read = &mbtrnpp_kemkmall_input_read;
         mbtrnpp_input_close = &mbtrnpp_kemkmall_input_close;
-      }else{
+      }
+#ifdef WITH_NEW_MB1_MSG
+      else if (mbtrn_cfg->format == MBF_MBARIMB1) {
+          mbtrnpp_input_open = &mbtrnpp_mb1r_input_open;
+          mbtrnpp_input_read = &mbtrnpp_mb1r_input_read;
+          mbtrnpp_input_close = &mbtrnpp_mb1r_input_close;
+      }
+#endif // WITH_NEW_MB1_MSG
+      else{
           fprintf(stderr,"ERR - Invalid output format [%d]\n",mbtrn_cfg->format);
       }
       if ((status = mb_input_init(mbtrn_cfg->verbose, mbtrn_cfg->socket_definition, mbtrn_cfg->format, pings, lonflip, bounds,
@@ -6386,7 +6409,6 @@ int mbtrnpp_kemkmall_input_close(int verbose, void *mbio_ptr, int *error) {
   /* return */
   return (status);
 }
-
 #ifdef WITH_MB1R_INPUT
 /*--------------------------------------------------------------------*/
 int mbtrnpp_mb1r_input_open(int verbose, void *mbio_ptr, char *definition, int *error) {
@@ -6411,8 +6433,8 @@ int mbtrnpp_mb1r_input_open(int verbose, void *mbio_ptr, char *definition, int *
     status = MB_SUCCESS;
 
     /* Open and initialize the socket based input for reading using function
-     * mbtrnpp_reson7kr_input_read(). Allocate an internal, hidden buffer to hold data from
-     * full s7k records while waiting to return bytes from those records as
+     * mbtrnpp_mb1r_input_read(). Allocate an internal, hidden buffer to hold data from
+     * full mb1 records while waiting to return bytes from those records as
      * requested by the MBIO read functions.
      * Store the relevant pointers and parameters within the
      * mb_io_struct structure *mb_io_ptr. */
@@ -6496,6 +6518,19 @@ int mbtrnpp_mb1r_input_open(int verbose, void *mbio_ptr, char *definition, int *
 
     /* return */
     return (status);
+}
+
+int mbtrnpp_mb1r_input_read(int verbose, void *mbio_ptr, size_t *size, char *buffer, int *error)
+{
+    int retval = -1;
+    fprintf(stderr,"%s - ERR not implemented",__func__);
+    return retval;
+}
+int mbtrnpp_mb1r_input_close(int verbose, void *mbio_ptr, int *error)
+{
+    int retval = -1;
+    fprintf(stderr,"%s - ERR not implemented",__func__);
+    return retval;
 }
 #endif // WITH_NEW_MB1_MSG
 
