@@ -1,19 +1,8 @@
-lib_LTLIBRARIES = libmframe.la libr7kr.la libmb1r.la
+lib_LTLIBRARIES = libr7kr.la libmb1r.la
+
+LIBMFRAME = ${top_srcdir}/src/mbtrnframe/libmframe.la
 
 include_HEADERS = \
-        mframe/src/mframe.h \
-        mframe/src/mcbuf.h \
-        mframe/src/msocket.h \
-        mframe/src/mthread.h \
-        mframe/src/mfile.h \
-        mframe/src/mtime.h\
-        mframe/src/medebug.h \
-        mframe/src/mmdebug.h \
-        mframe/src/merror.h \
-        mframe/src/mlog.h \
-        mframe/src/mlist.h \
-        mframe/src/mstats.h \
-        mframe/src/mkvconf.h \
         utils/mconfig.h \
         utils/mb71_msg.h \
         r7kr/r7k-reader.h \
@@ -30,28 +19,8 @@ MFRAME_TESTS=-DWITH_TESTS -DWITH_R7KR_TEST -DWITH_MB1R_TEST
 MFRAME_FEATURES=-DWITH_MST_MSTATS -DMST_STATS_EN -DWITH_MMDEBUG
 MFRAME_OPTS=$(MFRAME_VERSIONS) $(MFRAME_FEATURES) $(MFRAME_TESTS)
 
-AM_CPPFLAGS = -g -O0 -I${top_srcdir}/src/mbtrn/r7kr -I${top_srcdir}/src/mbtrn/mb1r -I${top_srcdir}/src/mbtrn/utils -I${top_srcdir}/src/mbtrn/mframe/src -I${top_srcdir}/src/mbtrnav/trnw -I${top_srcdir}/src/mbtrnav/terrain-nav \
+AM_CPPFLAGS = -g -O0 -I${top_srcdir}/src/mbtrn/r7kr -I${top_srcdir}/src/mbtrn/mb1r -I${top_srcdir}/src/mbtrn/utils -I${top_srcdir}/src/mbtrnframe/mframe/src -I${top_srcdir}/src/mbtrnframe/utils -I${top_srcdir}/src/mbtrnav/trnw -I${top_srcdir}/src/mbtrnav/terrain-nav \
  -DHAVE_CONFIG_H  -D_GNU_SOURCE $(MFRAME_OPTS)
-
-libmframe_la_LDFLAGS =  -no-undefined -version-info 0:0:0
-
-libmframe_la_SOURCES = mframe/src/mframe.c \
-        mframe/src/mcbuf.c \
-        mframe/src/msocket.c \
-        mframe/src/mthread.c \
-        mframe/src/mfile.c \
-        mframe/src/mtime.c\
-        mframe/src/mmdebug.c \
-        mframe/src/merror.c \
-        mframe/src/mlog.c \
-        mframe/src/mlist.c \
-        mframe/src/mstats.c \
-        mframe/src/mswap.c \
-        mframe/src/mutils.c \
-        mframe/src/mkvconf.c \
-        utils/mconfig.c
-
-libmframe_la_LIBADD =
 
 libr7kr_la_LDFLAGS =  -no-undefined -version-info 0:0:0
 
@@ -61,7 +30,7 @@ libr7kr_la_SOURCES =  utils/mconfig.c \
 		r7kr/r7k-reader.c \
 		r7kr/r7kc.c
 
-libr7kr_la_LIBADD = libmframe.la -lpthread
+libr7kr_la_LIBADD = ${LIBMFRAME} -lpthread
 
 
 libmb1r_la_LDFLAGS =  -no-undefined -version-info 0:0:0
@@ -71,18 +40,19 @@ libmb1r_la_SOURCES =  \
 		utils/mconfig.c \
 		mb1r/mb1-reader.c
 
-libmb1r_la_LIBADD = ${top_srcdir}/src/mbtrnav/libmb1.la libmframe.la -lpthread
+libmb1r_la_LIBADD = ${top_srcdir}/src/mbtrnav/libmb1.la ${LIBMFRAME} -lpthread
 
 bin_PROGRAMS =  udps udpc mbtnav-cli stream7k frames7k emu7k r7kr_test trnc tbinx mb1conv mb12csv mb1r_test
 
+
 udps_SOURCES = utils/udps.c
-udps_LDADD = libmframe.la
+udps_LDADD = ${LIBMFRAME}
 
 udpc_SOURCES = utils/udpc.c
-udpc_LDADD = libmframe.la
+udpc_LDADD = ${LIBMFRAME}
 
 mbtnav_cli_SOURCES = utils/mbtnav_cli.c
-mbtnav_cli_LDADD = libmframe.la
+mbtnav_cli_LDADD = ${LIBMFRAME}
 
 stream7k_SOURCES = utils/stream7k.c
 stream7k_LDADD = libr7kr.la
