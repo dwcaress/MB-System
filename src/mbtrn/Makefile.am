@@ -3,12 +3,10 @@ lib_LTLIBRARIES = libr7kr.la libmb1r.la
 LIBMFRAME = ${top_srcdir}/src/mbtrnframe/libmframe.la
 
 include_HEADERS = \
-        utils/mconfig.h \
         utils/mb71_msg.h \
         r7kr/r7k-reader.h \
         r7kr/r7kc.h \
         mb1r/mb1-reader.h
-        
 
 AM_CFLAGS = ${libgmt_CFLAGS} ${libnetcdf_CFLAGS}
 
@@ -19,13 +17,12 @@ MFRAME_TESTS=-DWITH_TESTS -DWITH_R7KR_TEST -DWITH_MB1R_TEST
 MFRAME_FEATURES=-DWITH_MST_MSTATS -DMST_STATS_EN -DWITH_MMDEBUG
 MFRAME_OPTS=$(MFRAME_VERSIONS) $(MFRAME_FEATURES) $(MFRAME_TESTS)
 
-AM_CPPFLAGS = -g -O0 -I${top_srcdir}/src/mbtrn/r7kr -I${top_srcdir}/src/mbtrn/mb1r -I${top_srcdir}/src/mbtrn/utils -I${top_srcdir}/src/mbtrnframe/mframe/src -I${top_srcdir}/src/mbtrnframe/utils -I${top_srcdir}/src/mbtrnav/trnw -I${top_srcdir}/src/mbtrnav/terrain-nav \
- -DHAVE_CONFIG_H  -D_GNU_SOURCE $(MFRAME_OPTS)
+AM_CPPFLAGS = -g -O0 -I${top_srcdir}/src/mbtrn/r7kr -I${top_srcdir}/src/mbtrn/mb1r -I${top_srcdir}/src/mbtrn/utils -I${top_srcdir}/src/mbtrnframe/usr  -I${top_srcdir}/src/mbtrnframe/mframe/src -I${top_srcdir}/src/mbtrnav/trnw -I${top_srcdir}/src/mbtrnav/terrain-nav -DHAVE_CONFIG_H  -D_GNU_SOURCE $(MFRAME_OPTS)
 
 libr7kr_la_LDFLAGS =  -no-undefined -version-info 0:0:0
 
 
-libr7kr_la_SOURCES =  utils/mconfig.c \
+libr7kr_la_SOURCES =  \
 		utils/mb71_msg.c \
 		r7kr/r7k-reader.c \
 		r7kr/r7kc.c
@@ -37,7 +34,6 @@ libmb1r_la_LDFLAGS =  -no-undefined -version-info 0:0:0
 
 libmb1r_la_SOURCES =  \
 		utils/mb71_msg.c \
-		utils/mconfig.c \
 		mb1r/mb1-reader.c
 
 libmb1r_la_LIBADD = ${top_srcdir}/src/mbtrnav/libmb1.la ${LIBMFRAME} -lpthread

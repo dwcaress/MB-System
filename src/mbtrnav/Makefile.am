@@ -1,7 +1,7 @@
 lib_LTLIBRARIES = libgeolib.la libnewmat.la libqnx.la libtnav.la libtrnw.la libnetif.la libmb1.la
 
 LIBMFRAME = $(top_builddir)/src/mbtrnframe/libmframe.la
-MFRAME_INC = -I${top_srcdir}/src/mbtrn/mframe/src
+MFRAME_INC = -I${top_srcdir}/src/mbtrnframe/usr -I${top_srcdir}/src/mbtrnframe/mframe/src 
 
 include_HEADERS =
 
@@ -185,8 +185,9 @@ libnetif_la_SOURCES = \
                 trnw/netif.c \
                 trnw/trnif_proto.c
 
-libnetif_la_LIBADD = libtrnw.la \
+libnetif_la_LIBADD = \
                 ${LIBMFRAME} \
+                libtrnw.la \
                 -lm -lpthread
 
 libmb1_la_LDFLAGS =  -no-undefined -version-info 0:0:0
