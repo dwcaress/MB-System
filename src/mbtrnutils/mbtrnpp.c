@@ -65,7 +65,7 @@
 #endif // WITH_MBTNAV
 
 // Features
-#define WITH_MB1R_INPUT
+#define WITH_MB1_READER
 
 /* ping structure definition */
 struct mbtrnpp_ping_struct {
@@ -627,9 +627,9 @@ s=NULL;\
 #define TRNSVR_PORT_DFL  28000
 #define TRN_XMIT_GAIN_RESON7K_DFL 200.0
 #define TRN_XMIT_GAIN_KMALL_DFL -20.0
-#ifdef WITH_NEW_MB1_MSG
+#ifdef WITH_MB1_READER
 #define TRN_XMIT_GAIN_MB1_DFL 0.0
-#endif // WITH_NEW_MB1_MSG
+#endif // WITH_MB1_READER
 
 #endif //WITH_MBTNAV
 #define SZ_1M (1024 * 1024)
@@ -834,11 +834,11 @@ int mbtrnpp_reson7kr_input_close(int verbose, void *mbio_ptr, int *error);
 int mbtrnpp_kemkmall_input_open(int verbose, void *mbio_ptr, char *definition, int *error);
 int mbtrnpp_kemkmall_input_read(int verbose, void *mbio_ptr, size_t *size, char *buffer, int *error);
 int mbtrnpp_kemkmall_input_close(int verbose, void *mbio_ptr, int *error);
-#ifdef WITH_MB1R_INPUT
+#ifdef WITH_MB1_READER
 int mbtrnpp_mb1r_input_open(int verbose, void *mbio_ptr, char *definition, int *error);
 int mbtrnpp_mb1r_input_read(int verbose, void *mbio_ptr, size_t *size, char *buffer, int *error);
 int mbtrnpp_mb1r_input_close(int verbose, void *mbio_ptr, int *error);
-#endif // WITH_MB1R_INPUT
+#endif // WITH_MB1_READER
 
 // Configuration helper functions
 
@@ -1759,10 +1759,16 @@ static int s_parse_opt_mbout(mbtrnpp_cfg_t *cfg, char *opt_str)
                 // enable reson frame data log
                 cfg->output_flags |= OUTPUT_RESON_BIN;
             }
+#ifdef WITH_MB1_READER
             if(strcmp(tok[i],"mb1r")==0){
-                // enable reson frame data log
+                // enable mb1 frame data log
                 cfg->output_flags |= OUTPUT_MB1R_BIN;
             }
+            if(strcmp(tok[i],"nomb1r")==0){
+                // disable mb1 frame data log
+                cfg->output_flags &= ~OUTPUT_MB1R_BIN;
+            }
+#endif
             if(strcmp(tok[i],"nomb1")==0){
                 // disable mb1 data log
                 cfg->output_flags &= ~OUTPUT_MB1_BIN;
@@ -1770,10 +1776,6 @@ static int s_parse_opt_mbout(mbtrnpp_cfg_t *cfg, char *opt_str)
             if(strcmp(tok[i],"noreson")==0){
                 // disable reson frame data log
                 cfg->output_flags &= ~OUTPUT_RESON_BIN;
-            }
-            if(strcmp(tok[i],"nomb1r")==0){
-                // disable reson frame data log
-                cfg->output_flags &= ~OUTPUT_MB1R_BIN;
             }
             if(strcmp(tok[i],"nombsvr")==0){
                 // disable mb1svr
@@ -2681,8 +2683,10 @@ static void s_mbtrnpp_release_resources()
     mlog_delete_instance(reson_blog_id);
     mlog_delete_instance(trnu_alog_id);
     mlog_delete_instance(trnu_blog_id);
+#ifdef WITH_MB1_READER
     mlog_delete_instance(mb1r_blog_id);
-
+    MEM_CHKFREE(mb1r_blog_path);
+#endif
     fprintf(stderr,"release log paths...\n");
     // release log paths
     MEM_CHKFREE(mb1_blog_path);
@@ -2690,7 +2694,6 @@ static void s_mbtrnpp_release_resources()
     MEM_CHKFREE(reson_blog_path);
     MEM_CHKFREE(trnu_alog_path);
     MEM_CHKFREE(trnu_blog_path);
-    MEM_CHKFREE(mb1r_blog_path);
 
     fprintf(stderr,"release app configuration...\n");
     // release app configuration
@@ -3309,11 +3312,11 @@ int main(int argc, char **argv) {
     else if (mbtrn_cfg->format == MBF_KEMKMALL) {
         transmit_gain_threshold = TRN_XMIT_GAIN_KMALL_DFL;
     }
-#ifdef WITH_NEW_MB1_MSG
+#ifdef WITH_MB1_READER
     else if (mbtrn_cfg->format == MBF_MBARIMB1) {
         transmit_gain_threshold = TRN_XMIT_GAIN_MB1_DFL;
     }
-#endif // WITH_NEW_MB1_MSG
+#endif // WITH_MB1_READER
     mlog_tprintf(mbtrnpp_mlog_id, "i,transmit gain threshold[%.2lf]\n", transmit_gain_threshold);
   }
 
@@ -3400,13 +3403,13 @@ int main(int argc, char **argv) {
         mbtrnpp_input_read = &mbtrnpp_kemkmall_input_read;
         mbtrnpp_input_close = &mbtrnpp_kemkmall_input_close;
       }
-#ifdef WITH_NEW_MB1_MSG
+#ifdef WITH_MB1_READER
       else if (mbtrn_cfg->format == MBF_MBARIMB1) {
           mbtrnpp_input_open = &mbtrnpp_mb1r_input_open;
           mbtrnpp_input_read = &mbtrnpp_mb1r_input_read;
           mbtrnpp_input_close = &mbtrnpp_mb1r_input_close;
       }
-#endif // WITH_NEW_MB1_MSG
+#endif // WITH_MB1_READER
       else{
           fprintf(stderr,"ERR - Invalid output format [%d]\n",mbtrn_cfg->format);
       }
@@ -6409,7 +6412,7 @@ int mbtrnpp_kemkmall_input_close(int verbose, void *mbio_ptr, int *error) {
   /* return */
   return (status);
 }
-#ifdef WITH_MB1R_INPUT
+#ifdef WITH_MB1_READER
 /*--------------------------------------------------------------------*/
 int mbtrnpp_mb1r_input_open(int verbose, void *mbio_ptr, char *definition, int *error) {
 
@@ -6532,5 +6535,5 @@ int mbtrnpp_mb1r_input_close(int verbose, void *mbio_ptr, int *error)
     fprintf(stderr,"%s - ERR not implemented",__func__);
     return retval;
 }
-#endif // WITH_NEW_MB1_MSG
+#endif // WITH_MB1_READER
 
