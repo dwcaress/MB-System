@@ -783,7 +783,7 @@ libqnx_la_SOURCES = qnx-utils/AsciiFile.cc qnx-utils/AngleData.cc \
 	qnx-utils/IntegerData.cc qnx-utils/FloatData.cc \
 	qnx-utils/DoubleData.cc qnx-utils/DataField.cc \
 	qnx-utils/DataFieldFactory.cc qnx-utils/LogFile.cc
-libqnx_la_LIBADD = libgeolib.la
+libqnx_la_LIBADD = libgeolib.la -lm -lstdc++
 libtnav_la_LDFLAGS = -no-undefined -version-info 0:0:0
 libtnav_la_SOURCES = terrain-nav/TerrainNav.cpp \
 	terrain-nav/TNavConfig.cpp terrain-nav/TNavFilter.cpp \
@@ -2175,7 +2175,6 @@ uninstall-am: uninstall-binPROGRAMS uninstall-dist_binSCRIPTS \
 
 .PRECIOUS: Makefile
 
-				-lm -lstdc++
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
