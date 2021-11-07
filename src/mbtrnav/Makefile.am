@@ -22,7 +22,6 @@ AM_CPPFLAGS += -D_GNU_SOURCE
 AM_CPPFLAGS += -DWITH_MST_MSTATS
 AM_CPPFLAGS += -DMST_STATS_EN
 
-
 libgeolib_la_LDFLAGS =  -no-undefined -version-info 0:0:0
 
 libgeolib_la_SOURCES =
@@ -54,7 +53,7 @@ libgeolib_la_SOURCES += gctp/source/merinv.c
 libgeolib_la_SOURCES += gctp/source/millfor.c
 libgeolib_la_SOURCES += gctp/source/millinv.c
 libgeolib_la_SOURCES += gctp/source/molwfor.c
-libgeolib_la_SOURCES += gctp/source/molwinv.c 
+libgeolib_la_SOURCES += gctp/source/molwinv.c
 libgeolib_la_SOURCES += gctp/source/obleqfor.c
 libgeolib_la_SOURCES += gctp/source/obleqinv.c
 libgeolib_la_SOURCES += gctp/source/omerfor.c
@@ -149,8 +148,7 @@ libqnx_la_SOURCES += qnx-utils/DataField.cc
 libqnx_la_SOURCES += qnx-utils/DataFieldFactory.cc
 libqnx_la_SOURCES += qnx-utils/LogFile.cc
 
-libqnx_la_LIBADD = libgeolib.la
-				-lm -lstdc++
+libqnx_la_LIBADD = libgeolib.la -lm -lstdc++
 
 libtnav_la_LDFLAGS =  -no-undefined -version-info 0:0:0
 
