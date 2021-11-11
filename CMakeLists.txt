@@ -35,7 +35,7 @@ endif()
 # so those spaces must be quoted when specified with cmake -D command line
 # option. E.g. suppose $VTK_LIBS is a bash shell variable. Then specify 
 # VTK_lib to cmake like this:
-#   % cmake -DVTK_lib="VTK_LIBS" ..
+#   % cmake -DVTK_lib="$VTK_LIBS" ..
 #
 # Note the double-quotes around VTK_LIBS, and note that -D options must
 # precede the final argument that specifies location of the CMakeLists.txt
