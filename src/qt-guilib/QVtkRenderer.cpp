@@ -436,7 +436,7 @@ bool QVtkRenderer::assemblePipeline() {
   }
 
   qDebug() << "create LUT";
-  makeLookupTable(3, elevLookupTable_);
+  makeLookupTable(Haxby, elevLookupTable_);
 
   double *mapperBounds = surfaceMapper_->GetBounds();
   qDebug() << "mapper z bounds: " << mapperBounds[4] <<
