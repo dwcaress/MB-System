@@ -5,10 +5,11 @@
 message("in mbedit")
 
 add_executable(mbedit
-               mbedit_creation
-	       mbedit_bxutils
-	       mbedit_prog
-	       mbedit_callbacks)
+               mbedit.c
+               mbedit_creation.c
+	       mbedit_bxutils.c
+	       mbedit_prog.c
+	       mbedit_callbacks.c)
 
 target_include_directories(mbedit
                            PUBLIC
