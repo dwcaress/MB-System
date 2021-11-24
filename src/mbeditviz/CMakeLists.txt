@@ -5,10 +5,10 @@
 message("in mbeditviz")
 
 add_executable(mbeditviz
-	       mbeditviz_main
-               mbeditviz_creation
-	       mbeditviz_prog
-	       mbeditviz_callbacks)
+	       mbeditviz_main.c
+               mbeditviz_creation.c
+	       mbeditviz_prog.c
+	       mbeditviz_callbacks.c)
 
 target_include_directories(mbeditviz
                            PUBLIC
