@@ -5,11 +5,11 @@
 message("in mbvelocitytool")
 
 add_executable(mbvelocitytool
-               mbvelocity
-               mbvelocity_bxutils	       
-	       mbvelocity_callbacks
-               mbvelocity_creation
-	       mbvelocity_prog)
+               mbvelocity.c
+               mbvelocity_bxutils.c
+	       mbvelocity_callbacks.c
+               mbvelocity_creation.c
+	       mbvelocity_prog.c)
 	       
 	      
 target_include_directories(mbvelocitytool
