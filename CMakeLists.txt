@@ -18,7 +18,7 @@ endif()
 
 
 # Set list of required modules (i.e. packages with find modules)
-set(modules GMT Proj OpenGL X11 Xt Motif GDAL NetCDF FFTW)
+set(modules GMT Proj OpenGL X11 Motif GDAL NetCDF FFTW)
 
 if (help)
   message("force package include directory with -Dpackage_include=path")
@@ -77,6 +77,15 @@ message("CMAKE_C_IMPLICIT_INCLUDE_DIRECTORIES: ${CMAKE_C_IMPLICIT_INCLUDE_DIRECT
 message("Add build-utils/ subdirectory to module CMAKE_MODULE_PATH")
 list(APPEND CMAKE_MODULE_PATH ${MB_HOME}/build-utils/)
 message("CMAKE_MODULE_PATH now: ${CMAKE_MODULE_PATH}")
+### TEST TEST TEST
+find_path(Z proj_api.h)
+message("TEST TEST TEST: proj header path: ${Z}")
+find_library(X proj)
+message("TEST TEST TEST: proj library: ${X}")
+find_package(Proj)
+message("TEST TEST TEST: find_package PROJ_FOUND: ${PROJ_FOUND}")
+include(FindProj)
+message("TEST TEST TEST: find_package PROJ_FOUND: ${PROJ_FOUND}")
 
 # Find required modules
 message("ok, find modules ${modules}")
@@ -91,6 +100,7 @@ foreach(module ${modules})
   if (NOT ${module}_include OR  NOT ${module}_lib)
     # Try to find module
     include(Find${module})
+    ### find_package(${module})
     string(TOUPPER ${module} MODULE)
     if (${module}_FOUND OR ${MODULE}_FOUND)
       if (${MODULE}_LIBRARY)
