@@ -5,12 +5,12 @@
 message("in mbnavadjust")
 
 add_executable(mbnavadjust
-	       mbnavadjust_callbacks
-               mbnavadjust_creation
-               mbnavadjust_io
-	       mbnavadjust_prog
-	       mbnavadjust_util
-	       mbnavadjustmerge)
+	       mbnavadjust_callbacks.c
+               mbnavadjust_creation.c
+               mbnavadjust_io.c
+	       mbnavadjust_prog.c
+	       mbnavadjust_util.c
+	       mbnavadjustmerge.c)
 
 target_include_directories(mbnavadjust
                            PUBLIC
