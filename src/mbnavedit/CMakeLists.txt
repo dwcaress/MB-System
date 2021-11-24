@@ -5,10 +5,10 @@
 message("in mbnavedit")
 
 add_executable(mbnavedit
-	       mbnavedit_callbacks
-               mbnavedit_creation
-	       mbnavedit_prog
-	       mbnavedit_util)
+	       mbnavedit_callbacks.c
+               mbnavedit_creation.c
+	       mbnavedit_prog.c
+	       mbnavedit_util.c)
 
 target_include_directories(mbnavedit
                            PUBLIC
