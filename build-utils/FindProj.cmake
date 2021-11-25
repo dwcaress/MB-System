@@ -26,7 +26,7 @@ IF (APPLE)
       OR NOT CMAKE_FIND_FRAMEWORK)
     SET (CMAKE_FIND_FRAMEWORK_save ${CMAKE_FIND_FRAMEWORK} CACHE STRING "" FORCE)
     SET (CMAKE_FIND_FRAMEWORK "ONLY" CACHE STRING "" FORCE)
-    #FIND_PATH(PROJ_INCLUDE_DIR PROJ/proj_api.h)
+    #FIND_PATH(PROJ_INCLUDE_DIR PROJ/proj.h)
     FIND_LIBRARY(PROJ_LIBRARY PROJ)
     IF (PROJ_LIBRARY)
       # FIND_PATH doesn't add "Headers" for a framework
@@ -36,7 +36,7 @@ IF (APPLE)
   ENDIF ()
 ENDIF (APPLE)
 
-FIND_PATH(PROJ_INCLUDE_DIR proj_api.h
+FIND_PATH(PROJ_INCLUDE_DIR proj.h
   "$ENV{INCLUDE}"
   "$ENV{LIB_DIR}/include"
   )
@@ -61,7 +61,7 @@ IF (PROJ_FOUND)
        MESSAGE (FATAL_ERROR "Cannot build QGIS using Proj ${PROJ_VERSION_MAJOR}.${PROJ_VERSION_MINOR}.${PROJ_VERSION_PATCH} Use 6.3.1 or higher.")
      ENDIF ((PROJ_VERSION_MAJOR EQUAL 6) AND ((PROJ_VERSION_MINOR LESS 3) OR (PROJ_VERSION_MINOR EQUAL 3 AND PROJ_VERSION_PATCH LESS 1)))
    ELSE(EXISTS ${PROJ_INCLUDE_DIR}/proj.h AND EXISTS ${PROJ_INCLUDE_DIR}/proj_experimental.h)
-     FILE(READ ${PROJ_INCLUDE_DIR}/proj_api.h proj_version)
+     FILE(READ ${PROJ_INCLUDE_DIR}/proj.h proj_version)
      STRING(REGEX REPLACE "^.*PJ_VERSION ([0-9]+).*$" "\\1" PJ_VERSION "${proj_version}")
 
      # This will break if 4.10.0 ever will be released (highly unlikely)
