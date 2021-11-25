@@ -77,18 +77,9 @@ message("CMAKE_C_IMPLICIT_INCLUDE_DIRECTORIES: ${CMAKE_C_IMPLICIT_INCLUDE_DIRECT
 message("Add build-utils/ subdirectory to module CMAKE_MODULE_PATH")
 list(APPEND CMAKE_MODULE_PATH ${MB_HOME}/build-utils/)
 message("CMAKE_MODULE_PATH now: ${CMAKE_MODULE_PATH}")
-### TEST TEST TEST
-find_path(Z proj_api.h)
-message("TEST TEST TEST: proj header path: ${Z}")
-find_library(X proj)
-message("TEST TEST TEST: proj library: ${X}")
-find_package(Proj)
-message("TEST TEST TEST: find_package PROJ_FOUND: ${PROJ_FOUND}")
-include(FindProj)
-message("TEST TEST TEST: find_package PROJ_FOUND: ${PROJ_FOUND}")
 
 # Find required modules
-message("ok, find modules ${modules}")
+message("find modules: ${modules}")
 foreach(module ${modules})
   # No need to search, if module's include and lib are specified as
   # command line '-D' arguments
@@ -153,11 +144,11 @@ if (buildQt)
 endif(buildQt)  
 
 ### Print all accessible variables
-get_cmake_property(_variableNames VARIABLES)
-list (SORT _variableNames)
-foreach (_variableName ${_variableNames})
+### get_cmake_property(_variableNames VARIABLES)
+### list (SORT _variableNames)
+### foreach (_variableName ${_variableNames})
 ###    message(STATUS "${_variableName}=${${_variableName}}")
-endforeach()
+### endforeach()
 
 message("Done finding packages")
 # Not all the Find packages we use conform to the variable-naming rules
