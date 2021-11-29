@@ -1700,7 +1700,28 @@ int main(int argc, char **argv) {
           fprintf(outfile, "\t\t%s:units = \"", variable);
 
           fprintf(outfile, "year, julian day, minute, second, nanosecond\";\n");
+          break;
 
+        case 'K': /* proportion of non-null beams that are unflagged */
+          strcpy(variable, "goodbeamfraction");
+          fprintf(output[i], "\t%s = ", variable);
+          fprintf(outfile, "\tfloat %s(data);\n", variable);
+          fprintf(outfile, "\t\t%s:long_name = \"Good beam fraction of non-null beams\";\n", variable);
+          fprintf(outfile, "\t\t%s:units = \"", variable);
+          fprintf(outfile, "number of good beams divided by number of non-null beams\";\n");
+          signflip_next_value = false;
+          invert_next_value = false;
+          break;
+
+        case 'k': /* proportion of all possible beams that are unflagged */
+          strcpy(variable, "goodbeamfractionall");
+          fprintf(output[i], "\t%s = ", variable);
+          fprintf(outfile, "\tfloat %s(data);\n", variable);
+          fprintf(outfile, "\t\t%s:long_name = \"Good beam fraction of all possible beams\";\n", variable);
+          fprintf(outfile, "\t\t%s:units = \"", variable);
+          fprintf(outfile, "number of good beams divided by number of possible beams\";\n");
+          signflip_next_value = false;
+          invert_next_value = false;
           break;
 
         case 'L': /* along-track distance (km) */
@@ -2920,6 +2941,21 @@ int main(int argc, char **argv) {
         fprintf(stderr, "%s\n", comment);
       }
 
+      /* count beams */
+      int beams_null = 0;
+      int beams_flagged = 0;
+      int beams_unflagged = 0;
+      double goodbeamfraction = 0.0;
+      for (int k = 0; k < beams_bath; k++) {
+        if (mb_beam_ok(beamflag[k])) {
+          beams_unflagged++;
+        } else if (beamflag[k] == MB_FLAG_NULL) {
+          beams_null++;
+        } else {
+          beams_flagged++;
+        }
+      }
+
       /* set output beams and pixels */
       if (error == MB_ERROR_NO_ERROR) {
         /* find vertical-most non-null beam (the nadir beam)
@@ -3074,8 +3110,7 @@ int main(int argc, char **argv) {
               beam_status = MB_FAILURE;
           if (use_time_interval && first)
             beam_status = MB_FAILURE;
-          // TODO(schwehr): should the last check be navlat?
-          if (check_nav && (navlon == 0.0 /* || navlon == 0.0 */ ))
+          if (check_nav && (navlon == 0.0 || navlat == 0.0))
             beam_status = MB_FAILURE;
 
           /* print out good beams */
@@ -3340,6 +3375,22 @@ int main(int argc, char **argv) {
                     b = time_j[4];
                     fwrite(&b, sizeof(double), 1, outfile);
                   }
+                  break;
+                case 'K': /* proportion of good beams over non-null beams */
+                  if (beams_bath - beams_null > 0)
+                    goodbeamfraction = ((double)beams_unflagged) / ((double)(beams_bath - beams_null));
+                  else
+                    goodbeamfraction = 0.0;
+                  printsimplevalue(verbose, output[i], goodbeamfraction, 8, 4, ascii, &invert_next_value,
+                                   &signflip_next_value, &error);
+                  break;
+                case 'k': /* proportion of good beams over all possible beams */
+                  if (beams_bath > 0)
+                    goodbeamfraction = ((double)beams_unflagged) / ((double)beams_bath);
+                  else
+                    goodbeamfraction = 0.0;
+                  printsimplevalue(verbose, output[i], goodbeamfraction, 8, 4, ascii, &invert_next_value,
+                                   &signflip_next_value, &error);
                   break;
                 case 'L': /* along-track distance (km) */
                   printsimplevalue(verbose, output[i], distance_total, 8, 4, ascii, &invert_next_value,
@@ -4166,6 +4217,22 @@ int main(int argc, char **argv) {
                     b = time_j[4];
                     fwrite(&b, sizeof(double), 1, outfile);
                   }
+                  break;
+                case 'K': /* proportion of non-null beams that are unflagged */
+                  if (beams_bath - beams_null > 0)
+                    goodbeamfraction = ((double)beams_unflagged) / ((double)(beams_bath - beams_null));
+                  else
+                    goodbeamfraction = 0.0;
+                  printsimplevalue(verbose, output[i], goodbeamfraction, 8, 4, ascii, &invert_next_value,
+                                   &signflip_next_value, &error);
+                  break;
+                case 'k': /* proportion of all possible beams that are unflagged */
+                  if (beams_bath > 0)
+                    goodbeamfraction = ((double)beams_unflagged) / ((double)beams_bath);
+                  else
+                    goodbeamfraction = 0.0;
+                  printsimplevalue(verbose, output[i], goodbeamfraction, 8, 4, ascii, &invert_next_value,
+                                   &signflip_next_value, &error);
                   break;
                 case 'L': /* along-track distance (km) */
                   printsimplevalue(verbose, output[i], distance_total, 8, 4, ascii, &invert_next_value,
