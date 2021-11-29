@@ -23,6 +23,7 @@ Distributions that do not include "beta" in the tag name correspond to the major
 announced releases. The source distributions associated with all releases, major
 or beta, are equally accessible as tarballs through the Github interface.
 
+- Version 5.7.9beta18    October 31, 2021
 - Version 5.7.9beta17    October 16, 2021
 - Version 5.7.9beta16    August 27, 2021
 - Version 5.7.9beta15    August 26, 2021
@@ -395,6 +396,12 @@ or beta, are equally accessible as tarballs through the Github interface.
 --
 ### MB-System Version 5.7 Release Notes:
 --
+
+#### 5.7.9beta18 (October 31, 2021)
+
+Mbgrid: Enabled shifting of output grid bounds using a new -Yshiftx/shifty option.
+
+Mbtrnpp: Fixed build issue TRN libraries.
 
 #### 5.7.9beta17 (October 16, 2021)
 

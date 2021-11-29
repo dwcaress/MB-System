@@ -444,8 +444,11 @@ int main(int argc, char **argv) {
   char projection_id[MB_PATH_MAXLINE] = "Geographic";
   double gbnd[4] = {0.0, 0.0, 0.0, 0.0};
   bool gbndset = false;
-  double extend = 0.0;
   double scale = 1.0;
+  double extend = 0.0;
+  double shift_x = 0.0;
+  double shift_y = 0.0;
+  bool shift = false;
   bool first_in_stays = true;
   bool check_time = false;
   double timediff = 300.0;
@@ -454,7 +457,7 @@ int main(int argc, char **argv) {
 #else
   double tension = 0.0;
 #endif
-        ;
+
   double boundsfactor = 0.0;
   bool bathy_in_feet = false;
   bool more = false;
@@ -479,7 +482,7 @@ int main(int argc, char **argv) {
     bool errflg = false;
     int c;
     bool help = false;
-    while ((c = getopt(argc, argv, "A:a:B:b:C:c:D:d:E:e:F:f:G:g:HhI:i:J:j:K:k:L:l:MmNnO:o:P:p:QqR:r:S:s:T:t:U:u:VvW:w:X:x:")) !=
+    while ((c = getopt(argc, argv, "A:a:B:b:C:c:D:d:E:e:F:f:G:g:HhI:i:J:j:K:k:L:l:MmNnO:o:P:p:QqR:r:S:s:T:t:U:u:VvW:w:X:x:Y:y:")) !=
            -1)
     {
       switch (c) {
@@ -668,6 +671,12 @@ int main(int argc, char **argv) {
       case 'x':
         sscanf(optarg, "%lf", &extend);
         break;
+      case 'Y':
+      case 'y':
+        if (int n = sscanf(optarg, "%lf/%lf", &shift_x, &shift_y) == 2) {
+          shift = true;
+        }
+        break;
       case '?':
         errflg = true;
       }
@@ -734,6 +743,9 @@ int main(int argc, char **argv) {
       fprintf(outfp, "dbg2       setborder:            %d\n", setborder);
       fprintf(outfp, "dbg2       border:               %f\n", border);
       fprintf(outfp, "dbg2       extend:               %f\n", extend);
+      fprintf(outfp, "dbg2       shift:                %d\n", shift);
+      fprintf(outfp, "dbg2       shift_x:              %f\n", shift_x);
+      fprintf(outfp, "dbg2       shift_y:              %f\n", shift_y);
       fprintf(outfp, "dbg2       bathy_in_feet:        %d\n", bathy_in_feet);
       fprintf(outfp, "dbg2       projection_pars:      %s\n", projection_pars);
       fprintf(outfp, "dbg2       proj flag 1:          %d\n", projection_pars_f);
@@ -1396,6 +1408,16 @@ int main(int argc, char **argv) {
         fprintf(outfp, "Specified Longitude interval: %f %s\n", dx_set, units);
         fprintf(outfp, "Specified Latitude interval:  %f %s\n", dy_set, units);
       }
+    }
+    if (shift && use_projection) {
+      fprintf(outfp, "Grid shift (applied to the bounds of output grids):\n");
+      fprintf(outfp, "  East shift:   %9.4f m\n", shift_x);
+      fprintf(outfp, "  North shift:  %9.4f m\n", shift_y);
+    }
+    else if (shift) {
+      fprintf(outfp, "Grid shift (applied to the bounds of output grids):\n");
+      fprintf(outfp, "  Longitude interval: %f degrees or %f m\n", shift_x * mtodeglon, shift_x);
+      fprintf(outfp, "  Latitude interval:  %f degrees or %f m\n", shift_y * mtodeglat, shift_y);
     }
     fprintf(outfp, "Input data bounds:\n");
     fprintf(outfp, "  Longitude: %9.4f %9.4f\n", bounds[0], bounds[1]);
@@ -5519,6 +5541,20 @@ int main(int argc, char **argv) {
   fprintf(outfp, "Maximum number of data in a bin: %d\n", nmax);
   fprintf(outfp, "Minimum value: %10.2f   Maximum value: %10.2f\n", zmin, zmax);
   fprintf(outfp, "Minimum sigma: %10.5f   Maximum sigma: %10.5f\n", smin, smax);
+
+  /* Apply shift to the output grid bounds if specified */
+  if (shift && use_projection) {
+    gbnd[0] += shift_x;
+    gbnd[1] += shift_x;
+    gbnd[2] += shift_y;
+    gbnd[3] += shift_y;
+  }
+  else if (shift) {
+    gbnd[0] += shift_x * mtodeglon;
+    gbnd[1] += shift_x * mtodeglon;
+    gbnd[2] += shift_y * mtodeglat;
+    gbnd[3] += shift_y * mtodeglat;
+  }
 
   /* write first output file */
   if (verbose > 0)

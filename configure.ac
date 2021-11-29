@@ -11,8 +11,8 @@ dnl    See README file for copying and redistribution conditions.
 dnl--------------------------------------------------------------------
 
 dnl Initialize and set version and version date
-AC_INIT([mbsystem],[5.7.9beta17],[http://listserver.mbari.org/sympa/arc/mbsystem],[mbsystem],[http://www.mbari.org/data/mbsystem/])
-AC_DEFINE(VERSION_DATE, ["16 October 2021"], [Set VERSION_DATE define in mb_config.h])
+AC_INIT([mbsystem],[5.7.9beta19],[http://listserver.mbari.org/sympa/arc/mbsystem],[mbsystem],[http://www.mbari.org/data/mbsystem/])
+AC_DEFINE(VERSION_DATE, ["7 November 2021"], [Set VERSION_DATE define in mb_config.h])
 
 AS_ECHO([" "])
 AS_ECHO(["------------------------------------------------------------------------------"])
@@ -375,7 +375,7 @@ if test "$GOT_PROJ" = "yes" ; then
 else
     dnl Look for pkg-config PROJ package...
     AS_ECHO(["Look for pkg-config PROJ package..."])
-    PKG_CHECK_MODULES([libproj], [proj], [FOUND_PROJ_LIB=yes], [FOUND_PROJ_LIB=no])
+    PKG_CHECK_MODULES([libproj], [proj], [FOUND_PROJ_PKG=yes], [FOUND_PROJ_PKG=no])
     AC_CHECK_LIB([proj], [proj_normalize_for_visualization], [FOUND_PROJ_LIB=yes], [FOUND_PROJ_LIB=no], )
     if test "$FOUND_PROJ_LIB" = "yes"; then
         FOUND_PROJ6=yes
@@ -387,7 +387,21 @@ else
             AS_ECHO(["Found PROJ library libproj with PROJ4 api available"])
         fi
     fi
-    if test "$FOUND_PROJ_LIB" = "no"; then
+    dnl As of November 7 2021 there is different behavior on ARM than on Intel
+    dnl when building on MacOs. The PKG_CHECK_MODULES() macro will correctly find
+    dnl installation of proj using pkg-config. However, the AC_CHECK_LIB() macro
+    dnl works right on intel but not on ARM - it will fail to find either old or
+    dnl new proj functions on ARM (except it works right within homebrew...)
+    dnl Since the ARM case will always be using new proj, if the package is found
+    dnl and neither old nor new are identified, assume new. This complexity will
+    dnl hopefully not be needed always.
+    if test $FOUND_PROJ_PKG = "yes"; then
+        if test "$FOUND_PROJ_LIB" = "no"; then
+            dnl Proj pkg-config package exists, assume proj >= 6
+            FOUND_PROJ6=yes
+            FOUND_PROJ_LIB=yes
+        fi
+    else
         AC_MSG_ERROR([Did not find PROJ library pkg-config package...])
     fi
     libproj_LIBS="-lproj"
