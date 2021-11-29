@@ -16,9 +16,8 @@ AM_CPPFLAGS += -I${top_srcdir}/src/mbtrnav/newmat
 AM_CPPFLAGS += -I${top_srcdir}/src/mbtrnav/gctp/source
 AM_CPPFLAGS += -I${top_srcdir}/src/mbtrn/utils
 AM_CPPFLAGS += -I${top_srcdir}/src/mbtrn/mb1r
-AM_CPPFLAGS += -I${top_srcdir}/src/mbtrn/mframe/src
-AM_CPPFLAGS += ${libgmt_CFLAGS}
-AM_CPPFLAGS += ${libnetcdf_CFLAGS}
+AM_CPPFLAGS += -I${top_srcdir}/src/mbtrnframe/usr
+AM_CPPFLAGS += -I${top_srcdir}/src/mbtrnframe/mframe/src
 AM_CPPFLAGS += -DHAVE_CONFIG_H
 AM_CPPFLAGS += -DWITH_TESTS
 AM_CPPFLAGS += -DWITH_MMDEBUG
@@ -201,14 +200,17 @@ libnetif_la_SOURCES =
 libnetif_la_SOURCES += trnw/netif.c
 libnetif_la_SOURCES += trnw/trnif_proto.c
 
-libnetif_la_LIBADD = libtrnw.la
-libnetif_la_LIBADD += ${LIBMFRAME}
+libnetif_la_LIBADD = ${LIBMFRAME}
+libnetif_la_LIBADD += libtrnw.la
 libnetif_la_LIBADD += -lm -lpthread
 
 
-libmb1_la_SOURCES = trnw/mb1_msg.c
-libmb1_la_LIBADD =
 libmb1_la_LDFLAGS =  -no-undefined -version-info 0:0:0
+
+libmb1_la_SOURCES =
+libmb1_la_SOURCES += trnw/mb1_msg.c
+
+libmb1_la_LIBADD =
 
 bin_PROGRAMS =  trn-server trn-replay trnclient-test mmcpub mmcsub trnu-cli trn-cli trnif-test trnusvr-test netif-test trnifsvr-test mb1rs #  readlog writelog
 
