@@ -241,8 +241,7 @@ void mb1_show(mb1_t *self, bool verbose, uint16_t indent)
             }
         }
     }else{
-        fprintf(stderr,"%*s[self %10p (NULL message)]\n",indent,(indent>0?" ":""), self);
-
+        fprintf(stderr,"%*s%*s %*p\n",indent,(indent>0?" ":""),wkey,"self",wval,self);
     }
 }
 // End function mb1_show

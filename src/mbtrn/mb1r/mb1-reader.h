@@ -307,7 +307,7 @@ typedef struct mb1r_reader_s
 
 // mb1r reader API
 mb1r_reader_t *mb1r_reader_new(const char *host, int port, uint32_t capacity);
-mb1r_reader_t *mb1r_freader_new(mfile_file_t *file, uint32_t capacity, uint32_t *slist,  uint32_t slist_len);
+mb1r_reader_t *mb1r_freader_new(mfile_file_t *file, uint32_t capacity);
 void mb1r_reader_destroy(mb1r_reader_t **pself);
 int mb1r_reader_connect(mb1r_reader_t *self, bool replace_socket);
 void mb1r_reader_set_log(mb1r_reader_t *self, mlog_id_t id);
@@ -323,6 +323,7 @@ bool mb1r_reader_issub(mb1r_reader_t *self, uint32_t record_type);
 void mb1r_reader_reset_socket(mb1r_reader_t *self);
 int mb1r_reader_set_file(mb1r_reader_t *self, mfile_file_t *file);
 void mb1r_reader_flush(mb1r_reader_t *self, uint32_t len, int32_t retries, uint32_t tmout_ms);
+void mb1r_reader_purge(mb1r_reader_t *self);
 
 int64_t mb1r_read_frame(mb1r_reader_t *self, byte *dest, uint32_t len, mb1r_flags_t flags, double newer_than, uint32_t timeout_msec, uint32_t *sync_bytes);
 const char *mb1r_ctx_strstate(mb1r_parse_state_t state);

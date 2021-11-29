@@ -60,12 +60,18 @@
 /////////////////////////
 // Headers
 /////////////////////////
-
 #include "mb1-reader.h"
+#include "mb1_msg.h"
+#include "mframe.h"
+#include "mlog.h"
+#include "msocket.h"
+#include "mfile.h"
+#include "mconfig.h"
+#include "mstats.h"
+#include "mtime.h"
 #include "mmdebug.h"
 #include "medebug.h"
 #include "merror.h"
-#include "mtime.h"
 
 /////////////////////////
 // Macros
@@ -201,7 +207,7 @@ int mb1r_reader_connect(mb1r_reader_t *self, bool replace_socket)
         if(msock_connect(self->sockif)==0){
             self->state=MB1R_CONNECTED;
             self->sockif->status=SS_CONNECTED;
-
+            retval=0;
         }else{
             PMPRINT(MOD_MB1R,MM_DEBUG,(stderr,"connect failed [%s]\n",self->sockif->addr->host));
             me_errno=ME_ECONNECT;
@@ -253,7 +259,7 @@ mb1r_reader_t *mb1r_reader_new(const char *host, int port, uint32_t capacity)
 /// @param[in] slist 7k center message subscription list
 /// @param[in] slist_len length of subscription list
 /// @return new reson reader reference on success, NULL otherwise
-mb1r_reader_t *mb1r_freader_new(mfile_file_t *file, uint32_t capacity, uint32_t *slist,  uint32_t slist_len)
+mb1r_reader_t *mb1r_freader_new(mfile_file_t *file, uint32_t capacity)
 {
     mb1r_reader_t *self = (mb1r_reader_t *)malloc(sizeof(mb1r_reader_t));
     if (NULL != self) {
@@ -282,7 +288,7 @@ mb1r_reader_t *mb1r_freader_new(mfile_file_t *file, uint32_t capacity, uint32_t 
 // End function mb1r_reader_create
 
 /// @fn void mb1r_reader_destroy(mb1r_reader_t ** pself)
-/// @brief release reason 7k center reader resources.
+/// @brief release  reader resources.
 /// @param[in] pself pointer to instance reference
 /// @return none
 void mb1r_reader_destroy(mb1r_reader_t **pself)
@@ -290,6 +296,12 @@ void mb1r_reader_destroy(mb1r_reader_t **pself)
     if (NULL != pself) {
         mb1r_reader_t *self = *pself;
         if (NULL != self) {
+            if (self->sockif) {
+                msock_socket_destroy(&self->sockif);
+            }
+            if (self->fileif) {
+                mfile_file_destroy(&self->fileif);
+            }
             if (self->stats) {
                 mstats_destroy(&self->stats);
             }
@@ -781,7 +793,7 @@ static int s_sm_act_read_header(mb1r_reader_t *self, mb1r_sm_ctx_t *pctx)
         pctx->header_pending = true;
         pctx->pending_bytes = 0;
 
-        while (pctx->state != MB1R_STATE_COMPLETE ) {
+        while (pctx->state != MB1R_STATE_COMPLETE && pctx->state!=MB1R_STATE_READ_ERR) {
 
             if(errno==EINTR){
                 // quit on user interrupt
@@ -856,6 +868,7 @@ static int s_sm_act_read_header(mb1r_reader_t *self, mb1r_sm_ctx_t *pctx)
                         pctx->state=MB1R_STATE_READ_OK;
 
                     }else{
+                        fprintf(stderr,"%s:%d errno[%d/%s] merrno[[%d/%s]\n",__func__,__LINE__,errno,strerror(errno),me_errno,me_strerror(me_errno));
                         MST_COUNTER_INC(self->stats->events[MB1R_EV_HDR_SHORT_READ]);
                         if (pctx->read_bytes>=0) {
                             // short read, keep going
@@ -864,11 +877,13 @@ static int s_sm_act_read_header(mb1r_reader_t *self, mb1r_sm_ctx_t *pctx)
                             pctx->frame_bytes += pctx->read_bytes;
 
                             if (me_errno==ME_ESOCK || me_errno==ME_EOF) {
+                                fprintf(stderr,"%s:%d\n",__func__,__LINE__);
                                 pctx->state=MB1R_STATE_READ_ERR;
                                 MST_COUNTER_INC(self->stats->events[MB1R_EV_ESOCK]);
                                 break;
                             }
                         }else{
+                            fprintf(stderr,"%s:%d\n",__func__,__LINE__);
                             // error
                             pctx->state=MB1R_STATE_READ_ERR;
                             // let errorno bubble up
@@ -930,7 +945,6 @@ static int s_sm_act_read_header(mb1r_reader_t *self, mb1r_sm_ctx_t *pctx)
                 pctx->state=MB1R_STATE_COMPLETE;
             }
         }// while
-
     }
     return retval;
 }
@@ -948,7 +962,7 @@ static int s_sm_act_read_data(mb1r_reader_t *self, mb1r_sm_ctx_t *pctx)
         pctx->sync_found = false;
         pctx->pending_bytes = 0;
 
-        while (pctx->state != MB1R_STATE_COMPLETE ) {
+        while (pctx->state != MB1R_STATE_COMPLETE && pctx->state!=MB1R_STATE_READ_ERR) {
 
             if(errno==EINTR){
                 // quit on user interrupt
@@ -1018,6 +1032,8 @@ static int s_sm_act_read_data(mb1r_reader_t *self, mb1r_sm_ctx_t *pctx)
                         pctx->state=MB1R_STATE_READ_OK;
 
                     }else{
+                        fprintf(stderr,"%s:%d errno[%d/%s] merrno[[%d/%s]\n",__func__,__LINE__,errno,strerror(errno),me_errno,me_strerror(me_errno));
+
                         PMPRINT(MOD_MB1R,MM_DEBUG,(stderr,"read_data SHORT READ [%"PRId64"]\n",pctx->read_bytes));
                         MST_COUNTER_INC(self->stats->events[MB1R_EV_DATA_SHORT_READ]);
                         if (pctx->read_bytes>=0) {
@@ -1027,11 +1043,13 @@ static int s_sm_act_read_data(mb1r_reader_t *self, mb1r_sm_ctx_t *pctx)
                             pctx->frame_bytes += pctx->read_bytes;
 
                             if (me_errno==ME_ESOCK || me_errno==ME_EOF) {
+                                fprintf(stderr,"%s:%d\n",__func__,__LINE__);
                                 pctx->state=MB1R_STATE_READ_ERR;
                                 MST_COUNTER_INC(self->stats->events[MB1R_EV_ESOCK]);
                                 break;
                             }
                         }else{
+                            fprintf(stderr,"%s:%d\n",__func__,__LINE__);
                             // error
                             pctx->state=MB1R_STATE_READ_ERR;
                             // let errorno bubble up
@@ -1270,6 +1288,17 @@ int64_t mb1r_read_frame(mb1r_reader_t *self,
     return retval;
  }
 // End function mb1r_read_frame
+
+/// @fn void void mb1r_reader_purge(mb1r_reader_t *self)
+/// @brief empty reader frame container.
+/// @param[in] self reader reference
+/// @return none;
+void mb1r_reader_purge(mb1r_reader_t *self)
+{
+    // do nothing
+    fprintf(stderr,"%s - WARN not implemented\n",__func__);
+}
+// End function mb1r_reader_purge
 
 #ifdef WITH_MB1R_PEER_CMP
 

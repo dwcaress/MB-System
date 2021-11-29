@@ -417,7 +417,7 @@ static int32_t s_read_mb1_rec( mb1_t **pdest, mfile_file_t *src, app_cfg_t *cfg)
             readlen=0;
             retval=record_bytes;
 
-            if(NULL!=dest && NULL!=dest ){
+            if(NULL!=dest ){
                 if(dest->type==MB1_TYPE_ID){
                     if(dest->nbeams>0 && dest->nbeams<=MB1_MAX_BEAMS){
                         if(mb1_resize(&dest, dest->nbeams, MB1_RS_BEAMS)!=NULL){

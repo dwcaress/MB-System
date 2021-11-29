@@ -7,7 +7,7 @@ include_HEADERS =
 
 AM_CFLAGS = ${libgmt_CFLAGS} ${libnetcdf_CFLAGS}
 
-AM_CPPFLAGS = -g -O0 -I${top_srcdir}/src/mbtrnav/trnw -I${top_srcdir}/src/mbtrnav/utils -I${top_srcdir}/src/mbtrnav/terrain-nav -I${top_srcdir}/src/mbtrnav/qnx-utils -I${top_srcdir}/src/mbtrnav/newmat  -I${top_srcdir}/src/mbtrnav/gctp/source  -I${top_srcdir}/src/mbtrn/utils ${MFRAME_INC} -DHAVE_CONFIG_H  -DWITH_TESTS -DWITH_MMDEBUG -D_GNU_SOURCE  -DWITH_MST_MSTATS -DMST_STATS_EN
+AM_CPPFLAGS = -g -O0 -I${top_srcdir}/src/mbtrnav/trnw -I${top_srcdir}/src/mbtrnav/utils -I${top_srcdir}/src/mbtrnav/terrain-nav -I${top_srcdir}/src/mbtrnav/qnx-utils -I${top_srcdir}/src/mbtrnav/newmat  -I${top_srcdir}/src/mbtrnav/gctp/source  -I${top_srcdir}/src/mbtrn/utils -I${top_srcdir}/src/mbtrn/mb1r ${MFRAME_INC} -DHAVE_CONFIG_H  -DWITH_TESTS -DWITH_MMDEBUG -D_GNU_SOURCE  -DWITH_MST_MSTATS -DMST_STATS_EN
 
 libgeolib_la_LDFLAGS =  -no-undefined -version-info 0:0:0
 
@@ -196,7 +196,7 @@ libmb1_la_SOURCES = trnw/mb1_msg.c
 
 libmb1_la_LIBADD =
 
-bin_PROGRAMS =  trn-server trn-replay trnclient-test mmcpub mmcsub trnu-cli trn-cli trnif-test trnusvr-test netif-test trnifsvr-test #  readlog writelog
+bin_PROGRAMS =  trn-server trn-replay trnclient-test mmcpub mmcsub trnu-cli trn-cli trnif-test trnusvr-test netif-test trnifsvr-test mb1rs #  readlog writelog
 
 trn_server_SOURCES = utils/trn_server.cpp
 trn_server_LDADD = libtnav.la libqnx.la libnewmat.la libtnav.la libgeolib.la
@@ -230,6 +230,9 @@ netif_test_LDADD = libnetif.la  libtrnw.la
 
 trnifsvr_test_SOURCES = utils/trnifsvr-test.c
 trnifsvr_test_LDADD = libnetif.la  libtrnw.la
+
+mb1rs_SOURCES = utils/mb1rs.c utils/mb1rs-app.c
+mb1rs_LDADD = ${LIBMFRAME} libmb1.la
 
 dist_bin_SCRIPTS =
 
