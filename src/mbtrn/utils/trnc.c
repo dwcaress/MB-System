@@ -432,9 +432,9 @@ static int s_trnc_state_machine(msock_socket_t *s, app_cfg_t *cfg)
 //        trn_message_t message;
 //        trn_message_t *pmessage = &message;
 //        mbtrn_header_t *pheader = &pmessage->data.header;
-//        mbtrn_sounding_t *psounding = &pmessage->data.sounding;
+//        mbtrn_t *psounding = &pmessage->data.sounding;
 //        memset(pmessage,0,sizeof(message));
-        byte msg_buf[MB1_MAX_FRAME_BYTES]={0};
+        byte msg_buf[MB1_MAX_SOUNDING_BYTES]={0};
         int hbeat_counter=0;
         int64_t test=0;
         byte *pread=NULL;
@@ -450,7 +450,7 @@ static int s_trnc_state_machine(msock_socket_t *s, app_cfg_t *cfg)
             switch (state) {
                 case TRNSM_INIT:
 //                    memset(&message,0,MBTRN_MAX_MSG_BYTES);
-                    memset(&msg_buf,0,MB1_MAX_FRAME_BYTES);
+                    memset(&msg_buf,0,MB1_MAX_SOUNDING_BYTES);
                     action = TRNAT_CONNECT;
                     break;
                 case TRNSM_CONNECTED:
@@ -459,7 +459,7 @@ static int s_trnc_state_machine(msock_socket_t *s, app_cfg_t *cfg)
                 case TRNSM_REQ_PENDING:
                 case TRNSM_SUBSCRIBED:
 //                    memset(&message,0,MBTRN_MAX_MSG_BYTES);
-                    memset(&msg_buf,0,MB1_MAX_FRAME_BYTES);
+                    memset(&msg_buf,0,MB1_MAX_SOUNDING_BYTES);
                     action=TRNAT_RD_MSG;
                     break;
                 case TRNSM_HBEAT_EXPIRED:
@@ -503,7 +503,7 @@ static int s_trnc_state_machine(msock_socket_t *s, app_cfg_t *cfg)
 //                pread = (byte *)&message;
 //                readlen = MBTRN_MAX_MSG_BYTES;
                 pread = msg_buf;
-                readlen = MB1_MAX_FRAME_BYTES;
+                readlen = MB1_MAX_SOUNDING_BYTES;
                 
                 // request message
                 if ((test = msock_recvfrom(s, NULL, pread, readlen,0))>0) {
@@ -515,19 +515,15 @@ static int s_trnc_state_machine(msock_socket_t *s, app_cfg_t *cfg)
                     mfu_hex_show(msg_buf, test, 16, true, 5);
                     
                     // check message type
-                    mb1_frame_t frame = {0},*mb1=&frame;
 
-                    mb1->sounding=(mb1_sounding_t *)(msg_buf);
-                    mb1->checksum=MB1_PCHECKSUM_U32(mb1);
-                    
-//                    mb1->sounding = (mb1_sounding_t *)(msg_buf+sizeof(mb1_frame_t));
-//                    mb1->checksum = MB1_PCHECKSUM_U32(mb1);
-                    if (mb1->sounding->type==MBTRN_MSGTYPE_ACK) {
-                        PMPRINT(MOD_TRNC,MM_DEBUG,(stderr,"%s - received ACK ret[%"PRId64"] [%08X]\n",__FUNCTION__,test,mb1->sounding->type));
+                    mb1_t *mb1=(mb1_t *)(msg_buf);
+
+                    if (mb1->type==MBTRN_MSGTYPE_ACK) {
+                        PMPRINT(MOD_TRNC,MM_DEBUG,(stderr,"%s - received ACK ret[%"PRId64"] [%08X]\n",__FUNCTION__,test,mb1->type));
                         hbeat_counter=0;
                         state=TRNSM_SUBSCRIBED;
-                    }else if (mb1->sounding->type==MBTRN_MSGTYPE_MB1) {
-                        PMPRINT(MOD_TRNC,MM_DEBUG,(stderr,"%s - received MSG ret[%"PRId64"] type[%08X] size[%d] ping[%06d]\n",__FUNCTION__,test,mb1->sounding->type,mb1->sounding->size,mb1->sounding->ping_number));
+                    }else if (mb1->type==MBTRN_MSGTYPE_MB1) {
+                        PMPRINT(MOD_TRNC,MM_DEBUG,(stderr,"%s - received MSG ret[%"PRId64"] type[%08X] size[%d] ping[%06d]\n",__FUNCTION__,test,mb1->type,mb1->size,mb1->ping_number));
                         trn_msg_count++;
                         trn_msg_bytes+=test;
                         
@@ -543,7 +539,7 @@ static int s_trnc_state_machine(msock_socket_t *s, app_cfg_t *cfg)
                         }
                     }else{
                         // response not recognized
-                        PMPRINT(MOD_TRNC,MM_DEBUG,(stderr,"%s - invalid message [%08X]\n",__FUNCTION__,mb1->sounding->type));
+                        PMPRINT(MOD_TRNC,MM_DEBUG,(stderr,"%s - invalid message [%08X]\n",__FUNCTION__,mb1->type));
                     }
                 }else{
                     // read returned error
@@ -590,22 +586,20 @@ static int s_trnc_state_machine(msock_socket_t *s, app_cfg_t *cfg)
 //                            bd->rhoy,
 //                            bd->rhoz));
 //                }
-                
-                mb1_frame_t frame = {0},*mb1=&frame;
-                
-                mb1->sounding=(mb1_sounding_t *)(msg_buf);
-                mb1->checksum=MB1_PCHECKSUM_U32(mb1);
+
+                mb1_t *mb1=(mb1_t *)(msg_buf);
+
                 PMPRINT(MOD_TRNC,MM_DEBUG|TRNC_V1|TRNC_V2,(stderr,"\nts[%.3f] ping[%06d] lat[%.4lf] lon[%.4lf]\nsd[%7.2lf] hdg[%6.2lf] nb[%03"PRIu32"]\n",
-                                                           mb1->sounding->ts,
-                                                           mb1->sounding->ping_number,
-                                                           mb1->sounding->lat,
-                                                           mb1->sounding->lon,
-                                                           mb1->sounding->depth,
-                                                           mb1->sounding->hdg,
-                                                           (uint32_t)mb1->sounding->nbeams));
+                                                           mb1->ts,
+                                                           mb1->ping_number,
+                                                           mb1->lat,
+                                                           mb1->lon,
+                                                           mb1->depth,
+                                                           mb1->hdg,
+                                                           (uint32_t)mb1->nbeams));
                 uint32_t j=0;
-                mb1_beam_t *bd=mb1->sounding->beams;
-                for (j=0; j<mb1->sounding->nbeams; j++,bd++){
+                mb1_beam_t *bd=mb1->beams;
+                for (j=0; j<mb1->nbeams; j++,bd++){
                     PMPRINT(MOD_TRNC,MM_DEBUG|TRNC_V2,(stderr,"n[%03"PRIu32"] atrk/X[% 10.3lf] ctrk/Y[% 10.3lf] dpth/Z[% 10.3lf]\n",
                                                        (uint32_t)bd->beam_num,
                                                        bd->rhox,

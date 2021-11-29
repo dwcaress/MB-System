@@ -149,7 +149,7 @@ void trncli_destroy(trncli_t **pself)
             wmeast_destroy(self->measurement);
         }
         free(self);
-        *pself=NULL;
+       *pself=NULL;
     }
 }// end function trncli_destroy
 
@@ -157,7 +157,12 @@ int trncli_connect(trncli_t *self, char *host, int port)
 {
     int retval=-1;
     if( (self->trn->sock=msock_socket_new(host,port,ST_TCP))!=NULL ){
-        msock_set_blocking(self->trn->sock,true);
+        const int optionval = 1;
+#if !defined(__CYGWIN__)
+        msock_set_opt(self->trn->sock, SO_REUSEPORT, &optionval, sizeof(optionval));
+#endif
+       msock_set_opt(self->trn->sock, SO_REUSEADDR, &optionval, sizeof(optionval));
+       msock_set_blocking(self->trn->sock,true);
 
         if ( msock_connect(self->trn->sock)==0) {
             retval=0;
@@ -171,14 +176,13 @@ int trncli_disconnect(trncli_t *self)
     int retval=-1;
     byte *msg=NULL;
     int32_t mlen=0;
-    if( (mlen=trnw_type_msg((char **)&msg,TRN_MSG_BYE))>0){
-        
-        retval=(s_trncli_send_recv(self, msg, mlen, true)>0?0:-1);
 
+    if( (mlen=trnw_type_msg((char **)&msg,TRN_MSG_BYE))>0){
+        retval=(s_trncli_send_recv(self, msg, mlen, false)>0?0:-1);
         free(msg);
-        
+        retval=0;
     }
-   return retval;
+    return retval;
 }// end function trncli_disconnect
 
 int trncli_send_update(trncli_t *self, mb1_t *src, wposet_t **pt_out, wmeast_t **mt_out)

@@ -901,6 +901,12 @@ int main(int argc, char** argv) {
 	_server_addr.sin_addr.s_addr = htonl(INADDR_ANY);
 	_server_addr.sin_port = htons(port);
 
+    const int optionval = 1;
+#if !defined(__CYGWIN__)
+    setsockopt(_servfd, SOL_SOCKET, SO_REUSEPORT, &optionval, sizeof(optionval));
+#endif
+    setsockopt(_servfd, SOL_SOCKET, SO_REUSEADDR, &optionval, sizeof(optionval));
+
 	len = ::bind(_servfd, (struct sockaddr*)&_server_addr, sizeof(_server_addr));
     err=errno;
 	if(len < 0) {

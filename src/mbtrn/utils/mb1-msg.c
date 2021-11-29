@@ -1,5 +1,5 @@
 ///
-/// @file mb1_msg.c
+/// @file mb1-msg.c
 /// @authors k. headley
 /// @date 11 aug 2019
 
@@ -68,7 +68,7 @@
 #include <stdbool.h>
 #include <inttypes.h>
 #include <string.h>
-#include "mb1_msg.h"
+#include "mb1-msg.h"
 
 /////////////////////////
 // Macros
@@ -109,12 +109,12 @@
 // Function Definitions
 /////////////////////////
 
-mb1_t *mb1_new(uint32_t beams)
+mb1_sounding_t *mb1_sounding_new(uint32_t beams)
 {
-    mb1_t *instance =NULL;
+    mb1_sounding_t *instance =NULL;
     if(beams>=0){
         uint32_t alloc_size = MB1_SOUNDING_BYTES(beams);
-        instance = (mb1_t *)malloc(alloc_size);
+        instance = (mb1_sounding_t *)malloc(alloc_size);
         if(NULL!=instance){
             memset(instance,0,alloc_size);
             instance->type = MB1_TYPE_ID;
@@ -126,57 +126,57 @@ mb1_t *mb1_new(uint32_t beams)
             instance->hdg=0.;
             instance->ping_number=0;
             instance->nbeams=beams;
-            mb1_set_checksum(instance);
+            mb1_sounding_set_checksum(instance);
         }
     }
     return instance;
 }
-// End function mb1_new
+// End function mb1_sounding_new
 
-void mb1_destroy(mb1_t **pself)
+void mb1_sounding_destroy(mb1_sounding_t **pself)
 {
     if (pself) {
-        mb1_t *self = *pself;
+        mb1_sounding_t *self = *pself;
         if (self) {
             free(self);
         }
         *pself=NULL;
     }
 }
-// End function mb1_destroy
+// End function mb1_sounding_destroy
 
-mb1_t *mb1_resize(mb1_t **pself, uint32_t beams,  int flags)
+mb1_sounding_t *mb1_sounding_resize(mb1_sounding_t **pself, uint32_t beams,  int flags)
 {
-    mb1_t *instance =NULL;
+    mb1_sounding_t *instance =NULL;
 
     if(NULL!=pself && beams>=0){
         uint32_t alloc_size = MB1_SOUNDING_BYTES(beams);
         if(NULL==*pself){
-            instance = mb1_new(beams);
+            instance = mb1_sounding_new(beams);
         }else{
-            instance = (mb1_t *)realloc((*pself),alloc_size);
+            instance = (mb1_sounding_t *)realloc((*pself),alloc_size);
         }
         if(NULL!=instance){
             instance->type = MB1_TYPE_ID;
             instance->size=alloc_size;
             instance->nbeams=beams;
             // always clears checksum (caller must set)
-            mb1_zero(instance,flags);
+            mb1_sounding_zero(instance,flags);
             *pself = instance;
         }
     }
     return instance;
 }
-// End function mb1_new
+// End function mb1_sounding_new
 
-int mb1_zero(mb1_t *self, int flags)
+int mb1_sounding_zero(mb1_sounding_t *self, int flags)
 {
     int retval=-1;
     if(NULL!=self){
         uint32_t beams=self->nbeams;
         if(beams>0 && beams<=MB1_MAX_BEAMS){
+            uint32_t zlen = MB1_SOUNDING_BYTES(beams);
             if(flags==MB1_RS_ALL){
-                uint32_t zlen = MB1_SOUNDING_BYTES(beams);
                 memset((byte *)self,0,zlen);
             }else{
                 if( (flags&MB1_RS_BEAMS)){
@@ -195,20 +195,10 @@ int mb1_zero(mb1_t *self, int flags)
     }
     return retval;
 }
-// End function mb1_zero
+// End function mb1_sounding_zero
 
-int mb1_zero_len(mb1_t *self, size_t len)
-{
-    int retval=-1;
-    if(NULL!=self){
-        memset((byte *)self, 0, len);
-        retval=0;
-    }
-    return retval;
-}
-// End function mb1_zero_len
 
-void mb1_show(mb1_t *self, bool verbose, uint16_t indent)
+void mb1_sounding_show(mb1_sounding_t *self, bool verbose, uint16_t indent)
 {
     int wkey=15;
     int wval=15;
@@ -241,12 +231,13 @@ void mb1_show(mb1_t *self, bool verbose, uint16_t indent)
             }
         }
     }else{
-        fprintf(stderr,"%*s%*s %*p\n",indent,(indent>0?" ":""),wkey,"self",wval,self);
+        fprintf(stderr,"%*s[self %10p (NULL message)]\n",indent,(indent>0?" ":""), self);
+
     }
 }
-// End function mb1_show
+// End function mb1_sounding_show
 
-uint32_t mb1_calc_checksum(mb1_t *self)
+uint32_t mb1_calc_checksum(mb1_sounding_t *self)
 {
     uint32_t retval=0;
     if(NULL!=self){
@@ -258,7 +249,7 @@ uint32_t mb1_calc_checksum(mb1_t *self)
 // End function mb1_calc_checksum
 
 
-uint32_t mb1_set_checksum(mb1_t *self)
+uint32_t mb1_sounding_set_checksum(mb1_sounding_t *self)
 {
     uint32_t retval=0;
     if (NULL!=self) {
@@ -271,9 +262,9 @@ uint32_t mb1_set_checksum(mb1_t *self)
     }
     return retval;
 }
-// End function mb1_set_checksum
+// End function mb1_sounding_set_checksum
 
-int mb1_validate_checksum(mb1_t *self)
+int mb1_sounding_validate_checksum(mb1_sounding_t *self)
 {
     int retval=-1;
     if (NULL!=self) {
@@ -285,9 +276,9 @@ int mb1_validate_checksum(mb1_t *self)
     }
     return retval;
 }
-// End function mb1_validate_checksum
+// End function mb1_sounding_validate_checksum
 
-byte *mb1_serialize(mb1_t *self, size_t *r_size)
+byte *mb1_sounding_serialize(mb1_sounding_t *self, size_t *r_size)
 {
     byte *retval = NULL;
     if ( (NULL!=self)
@@ -296,7 +287,7 @@ byte *mb1_serialize(mb1_t *self, size_t *r_size)
         &&
         (self->size == MB1_SOUNDING_BYTES(self->nbeams))) {
 
-        //        fprintf(stderr,"mb1_serialize - bufsz[%"PRIu32"] msg->data_size[%"PRIu32"]\n",bufsz,self->data_size);
+        //        fprintf(stderr,"mb1_sounding_serialize - bufsz[%"PRIu32"] msg->data_size[%"PRIu32"]\n",bufsz,self->data_size);
         retval = (byte *)malloc( self->size );
 
         if (retval) {
@@ -313,7 +304,7 @@ byte *mb1_serialize(mb1_t *self, size_t *r_size)
 
     return retval;
 }
-// End function mb1_serialize
+// End function mb1_sounding_serialize
 
 uint32_t mb1_checksum_u32(byte *pdata, uint32_t len)
 {

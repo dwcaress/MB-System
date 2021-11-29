@@ -1,5 +1,5 @@
 ///
-/// @file mb1_msg.h
+/// @file mb1-msg.h
 /// @authors k. headley
 /// @date 09 jul 2019
 
@@ -60,8 +60,8 @@
  */
 
 // Always do this
-#ifndef MB1_MSG_H
-#define MB1_MSG_H
+#ifndef NEW_MB1_MSG_H
+#define NEW_MB1_MSG_H
 
 /////////////////////////
 // Includes 
@@ -135,14 +135,6 @@
 /// @brief empty sounding size (bytes) for 0 beams
 #define MB1_EMPTY_SOUNDING_BYTES MB1_SOUNDING_BYTES(0)
 
-// TODO: update legacy fields
-// CSV does not include size or type
-#define MB1_CSV_HEADER_FIELDS 7
-#define MB1_BEAM_FIELDS 4
-#define MB1_CSV_BEAM_FIELDS(nbeams) (nbeams*MB1_BEAM_FIELDS)
-#define MB1_CSV_CHECKSUM_FIELDS 1
-#define MB1_CSV_SOUNDING_FIELDS(nbeams) (MB1_CSV_HEADER_FIELDS+(nbeams*MB1_BEAM_FIELDS)+MB1_CSV_CHECKSUM_FIELDS)
-#define MB1_CSV_MAX_FIELDS MB1_CSV_SOUNDING_FIELDS(MB1_MAX_BEAMS)
 
 /////////////////////////
 // Type Definitions
@@ -155,12 +147,15 @@ typedef uint32_t mb1_checksum_t;
 /// @typedef enum mb1_resize_flags_t
 /// @brief resize flags (indicate which fields to clear)
 typedef enum{
-    MB1_RS_NONE=0x0,
     MB1_RS_BEAMS=0x1,
     MB1_RS_HEADER=0x2,
-    MB1_RS_CHECKSUM=0x4,
-    MB1_RS_ALL=0x7
+    MB1_RS_CHECKSUM=0x4
 } mb1_resize_flags_t;
+
+/// @def MB1_RS_ALL
+/// @brief clear whole frame on resize
+#define MB1_RS_ALL (MB1_RS_BEAMS|MB1_RS_HEADER|MB1_RS_CHECKSUM)
+
 
 #pragma pack(push,1)
 /// @typedef struct mb1_beam_s mb1_beam_t
@@ -186,71 +181,71 @@ typedef struct mb1_beam_s
 /// @brief static header struct (for convenience)
 typedef struct mb1_header_s
 {
-    /// @var mb1_s::type
+    /// @var mb1_sounding_s::type
     /// @brief record type ID ('M''B''1''\0')
     uint32_t type;
-    /// @var mb1_s::size
+    /// @var mb1_sounding_s::size
     /// @brief total bytes, including header and checksum
     uint32_t size;
-    /// @var mb1_s::ts
+    /// @var mb1_sounding_s::ts
     /// @brief epoch time of ping
     double ts;
-    /// @var mb1_s::lat
+    /// @var mb1_sounding_s::lat
     /// @brief latitude
     double lat;
-    /// @var mb1_s::lon
+    /// @var mb1_sounding_s::lon
     /// @brief longitude
     double lon;
-    /// @var mb1_s::depth
+    /// @var mb1_sounding_s::depth
     /// @brief vehicle position depth meters
     double depth;
-    /// @var mb1_s::hdg
+    /// @var mb1_sounding_s::hdg
     /// @brief heading
     double hdg;
-    /// @var mb1_s::ping_number
+    /// @var mb1_sounding_s::ping_number
     /// @brief ping number
     int32_t ping_number;
-    /// @var mb1_s::nbeams
+    /// @var mb1_sounding_s::nbeams
     /// @brief number of beams
     uint32_t nbeams;
 }mb1_header_t;
 
-/// @typedef struct mb1_s mb1_t
+/// @typedef struct mb1_sounding_s mb1_sounding_t
 /// @brief
-typedef struct mb1_s
+typedef struct mb1_sounding_s
 {
-    /// @var mb1_s::type
+    /// @var mb1_sounding_s::type
     /// @brief record type ID ('M''B''1''\0')
     uint32_t type;
-    /// @var mb1_s::size
+    /// @var mb1_sounding_s::size
     /// @brief total bytes, including header and checksum
     uint32_t size;
-    /// @var mb1_s::ts
+    /// @var mb1_sounding_s::ts
     /// @brief epoch time of ping
     double ts;
-    /// @var mb1_s::lat
+    /// @var mb1_sounding_s::lat
     /// @brief latitude
     double lat;
-    /// @var mb1_s::lon
+    /// @var mb1_sounding_s::lon
     /// @brief longitude
     double lon;
-    /// @var mb1_s::depth
+    /// @var mb1_sounding_s::depth
     /// @brief vehicle position depth meters
     double depth;
-    /// @var mb1_s::hdg
+    /// @var mb1_sounding_s::hdg
     /// @brief heading
     double hdg;
-    /// @var mb1_s::ping_number
+    /// @var mb1_sounding_s::ping_number
     /// @brief ping number
     int32_t ping_number;
-    /// @var mb1_s::nbeams
+    /// @var mb1_sounding_s::nbeams
     /// @brief number of beams
     uint32_t nbeams;
-    /// @var mb1_s::beams
+    /// @var mb1_sounding_s::beams
     /// @brief beam data array
     mb1_beam_t beams[];
     /// 32-bit checksum follows beam array
-}mb1_t;
+}mb1_sounding_t;
 
 #pragma pack(pop)
 
@@ -264,68 +259,67 @@ extern "C" {
 
 // mb1_sounding API (used by mbtrn_server)
 
-/// @fn mb1_t * mb1_new(uint32_t data_len)
+/// @fn mb1_sounding_t * mb1_sounding_new(uint32_t data_len)
 /// @brief create new mb1 protocol message structure.
 /// mb1 messages  must be explicitly serialized before sending.
 /// @param[in] beams number of bathymetry beams
 /// @return new message reference on success, NULL otherwise.
-mb1_t *mb1_new(uint32_t beams);
+mb1_sounding_t *mb1_sounding_new(uint32_t beams);
 
-/// @fn void mb1_destroy(mb1_t ** pself)
+/// @fn void mb1_sounding_destroy(mb1_sounding_t ** pself)
 /// @brief release message structure resources.
 /// @param[in] pself pointer to message reference
 /// @return none
-void mb1_destroy(mb1_t **pself);
+void mb1_sounding_destroy(mb1_sounding_t **pself);
 
-/// @fn mb1_t *mb1_resize(mb1_t **pself, uint32_t beams,  int flags)
+/// @fn mb1_sounding_t *mb1_sounding_resize(mb1_sounding_t **pself, uint32_t beams,  int flags)
 /// @brief resize an exsiting sounding
 /// @param[in] pself pointer to sounding reference
 /// @param[in] beams number of bathymetry beams
 /// @param[in] flags flags indicating what fields to zero
 /// @return new sounding reference on success, NULL otherwise.
-mb1_t *mb1_resize(mb1_t **pself, uint32_t beams,  int flags);
+mb1_sounding_t *mb1_sounding_resize(mb1_sounding_t **pself, uint32_t beams,  int flags);
 
-/// @fn int mb1_zero(mb1_t *self, int flags)
+/// @fn int mb1_sounding_zero(mb1_sounding_t *self, int flags)
 /// @brief clear (set to zero) all/part of a sounding
 /// @param[in] self sounding reference
 /// @param[in] flags flags indicating what fields to zero
 /// @return 0 on success, -1 otherwise.
-int mb1_zero(mb1_t *self, int flags);
-int mb1_zero_len(mb1_t *self, size_t len);
+int mb1_sounding_zero(mb1_sounding_t *self, int flags);
 
-/// @fn void mb1_show(mb1_t * self, _Bool verbose, uint16_t indent)
+/// @fn void mb1_sounding_show(mb1_sounding_t * self, _Bool verbose, uint16_t indent)
 /// @brief output mb1 message parameter summary to stderr.
 /// @param[in] self mb1 message reference
 /// @param[in] verbose use verbose output
 /// @param[in] indent output indent spaces
 /// @return none
-void mb1_show(mb1_t *self, bool verbose, uint16_t indent);
+void mb1_sounding_show(mb1_sounding_t *self, bool verbose, uint16_t indent);
 
-/// @fn uint32_t mb1_calc_checksum(mb1_t *self)
+/// @fn uint32_t mb1_calc_checksum(mb1_sounding_t *self)
 /// @brief return mb1 checksum for data.
 /// @param[in] self mb1 message reference
 /// @return mb1 checksum value (sum of bytes).
-uint32_t mb1_calc_checksum(mb1_t *self);
+uint32_t mb1_calc_checksum(mb1_sounding_t *self);
 
-/// @fn uint32_t mb1_set_checksum(mb1_t * self)
+/// @fn uint32_t mb1_sounding_set_checksum(mb1_sounding_t * self)
 /// @brief set the checksum for an mb1 message structure.
 /// @param[in] self mb1 message reference
 /// @return previous checksum value.
-uint32_t mb1_set_checksum(mb1_t *self);
+uint32_t mb1_sounding_set_checksum(mb1_sounding_t *self);
 
-/// @fn int mb1_validate_checksum(mb1_t * self)
+/// @fn int mb1_sounding_validate_checksum(mb1_sounding_t * self)
 /// @brief validate the checksum for an mb1 message structure.
 /// @param[in] self mb1 message reference
 /// @return 0 if valid, -1 otherwise
-int mb1_validate_checksum(mb1_t *self);
+int mb1_sounding_validate_checksum(mb1_sounding_t *self);
 
-/// @fn byte * mb1_serialize(mb1_t * self)
+/// @fn byte * mb1_sounding_serialize(mb1_sounding_t * self)
 /// @brief serialize mb1 message into new buffer.
 /// Really just validating and copying, since memory is contiguous.
 /// caller must release buffer resources using free.
 /// @param[in] self mb1 message reference
 /// @return new network frame buffer on success, NULL otherwise
-byte* mb1_serialize(mb1_t *self, size_t *r_size);
+byte* mb1_sounding_serialize(mb1_sounding_t *self, size_t *r_size);
 
 // MB1 utility API
 

@@ -135,7 +135,7 @@ LIBTRNCLI_LIBS = -lmframe -lpthread -lm
 
 # trncli-test: trn_cli unit test
 TRNCLI_TEST=trncli-test
-TRNCLI_TEST_SRC=trncli_test.c
+TRNCLI_TEST_SRC=trncli_test.c mb1_msg.c
 TRNCLI_TEST_OBJ=$(TRNCLI_TEST_SRC:%.c=$(BUILD_DIR)/%.o)
 TRNCLI_TEST_LIBS = -lmframe -ltrnw -lpthread -lm -lqnx -lnewmat -ltrn -ltrncli -lnetcdf -lgeolib -lstdc++
 
@@ -147,7 +147,7 @@ LIBTRNUCLI_LIBS = -lmframe -lpthread -lm
 
 # trnucli-test: trnu_cli unit test
 TRNUCLI_TEST=trnucli-test
-TRNUCLI_TEST_SRC=trnucli_test.c
+TRNUCLI_TEST_SRC=trnucli_test.c 
 TRNUCLI_TEST_OBJ=$(TRNUCLI_TEST_SRC:%.c=$(BUILD_DIR)/%.o)
 TRNUCLI_TEST_LIBS = $(MFRAME_LIB) -ltrnucli -lpthread -lm -lqnx -lnewmat -ltrn -ltrncli -lnetcdf -lgeolib 
 
