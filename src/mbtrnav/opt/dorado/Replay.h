@@ -100,6 +100,7 @@ public:
   int loadCfgAttributes();
   int openLogFiles();
   int getNextRecordSet(poseT *pt, measT *mt);
+  int getNextTRNRecordSet(poseT *pt, measT *mt);
 
   Boolean useTRNServer();
   Boolean useLcmTrn();
@@ -112,7 +113,7 @@ protected:
   long nupdates, nreinits;
 
   // Use file streams instead of DataLogReaders
-  DataLogReader *trn_log, *dvl_log, *nav_log, *mbtrn_log;
+  DataLogReader *trn_log, *dvl_log, *nav_log, *mbtrn_log, *tnav_log;
   FILE *dvl_csv;
 
   int getNextKeyValue(FILE *cfg, char key[], char value[]);

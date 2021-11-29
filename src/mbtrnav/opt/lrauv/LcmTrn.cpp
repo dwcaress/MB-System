@@ -1,9 +1,66 @@
- /*
-  Class LcmTrn - A Terrain-Relative Navigation implementation that uses LCM for
-                 external comms. After initialization an object of this class
-                 can listen on the configured LCM channels for vehicle position
-                 data, beam data, and commands (e.g., reinit, change map, etc.)
-*/
+/*****************************************************************************
+ * Copyright (c) 2002-2021 MBARI
+ * Monterey Bay Aquarium Research Institute, all rights reserved.
+ *****************************************************************************
+ * @file    LcmTrn.cpp
+ * @authors r. henthorn
+ * @date    03/04/2021
+ * @brief   TRN implementation interfacing with LCM. For LRAUV.
+ *
+ * Project: Precision Control
+ * Summary: A Terrain-Relative Navigation implementation that uses LCM for
+            external comms. After initialization an object of this class
+            can listen on the configured LCM channels for vehicle position
+            data, beam data, and commands (e.g., reinit, change map, etc.)
+ *****************************************************************************/
+/*****************************************************************************
+ * Copyright Information:
+ * Copyright 2002-2021 MBARI
+ * Monterey Bay Aquarium Research Institute, all rights reserved.
+ *
+ * Terms of Use:
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the Free
+ * Software Foundation; either version 3 of the License, or (at your option)
+ * any later version. You can access the GPLv3 license at
+ * http://www.gnu.org/licenses/gpl-3.0.html
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ * more details (http://www.gnu.org/licenses/gpl-3.0.html).
+ *
+ * MBARI provides the documentation and software code "as is", with no
+ * warranty, express or implied, as to the software, title, non-infringement
+ * of third party rights, merchantability, or fitness for any particular
+ * purpose, the accuracy of the code, or the performance or results which you
+ * may obtain from its use. You assume the entire risk associated with use of
+ * the code, and you agree to be responsible for the entire cost of repair or
+ * servicing of the program with which you are using the code.
+ *
+ * In no event shall MBARI be liable for any damages,whether general, special,
+ * incidental or consequential damages, arising out of your use of the
+ * software, including, but not limited to,the loss or corruption of your data
+ * or damages of any kind resulting from use of the software, any prohibited
+ * use, or your inability to use the software. You agree to defend, indemnify
+ * and hold harmless MBARI and its officers, directors, and employees against
+ * any claim,loss,liability or expense,including attorneys' fees,resulting from
+ * loss of or damage to property or the injury to or death of any person
+ * arising out of the use of the software.
+ *
+ * The MBARI software is provided without obligation on the part of the
+ * Monterey Bay Aquarium Research Institute to assist in its use, correction,
+ * modification, or enhancement.
+ *
+ * MBARI assumes no responsibility or liability for any third party and/or
+ * commercial software required for the database or applications. Licensee
+ * agrees to obtain and maintain valid licenses for any additional third party
+ * software required.
+ *****************************************************************************/
+
+/***********************************************************************
+ * Headers
+ ***********************************************************************/
 
 #include <sys/time.h>
 #include <unistd.h>
@@ -11,9 +68,15 @@
 
 #include "NavUtils.h"
 #include "MathP.h"
-#include "config_defs.h"
 #include "LcmTrn.h"
 
+/***********************************************************************
+ * Macros
+ ***********************************************************************/
+
+#define TRN_TIMES_EQUIVALENT_SEC 0.10  // When pose and meas time are within this threshold
+                                       // consider them equivalent
+#define N_DVL_BEAMS 4
 #define N_DIM    3        // number of dimensions in output estimates (x,y,z)
 #define N_COVARS 4        // number of dimensions in output covars (x,y,z,psi)
 #define N_INT_VECTORS   2 // reinits, filter
@@ -32,11 +95,15 @@
 #define COVAR_Y    2
 #define COVAR_Z    5
 #define COVAR_PSI  44
+#define TRN_MLE_EST 1
+#define TRN_MMSE_EST 2
 
 static const int  tl_both = TL_OMASK(TL_TRN_SERVER, TL_BOTH);
 static const int  tl_log  = TL_OMASK(TL_TRN_SERVER, TL_LOG);
 
 static const char *STR_LCM_TIMEOUT   = "lcm.timeout_sec";
+static const char *STR_LCM_INITIAL_TO= "lcm.initial_timeout_msec";
+static const char *STR_LCM_MAX_TO    = "lcm.max_timeout_msec";
 static const char *STR_LCM_TRNNAME   = "lcm.trn_channel";
 static const char *STR_LCM_CMDNAME   = "lcm.cmd_channel";
 static const char *STR_LCM_AHRSNAME  = "lcm.ahrs_channel";
@@ -61,10 +128,16 @@ static const int LCM_HANDLETIMEOUT   = 50;   // handleTimeout(50 ms)
 
 using namespace lcmTrn;
 
+/***********************************************************************
+ * Code
+ ***********************************************************************/
+
 // Ctor. All initialization info resides in a libconfig configuration file.
 //
 LcmTrn::LcmTrn(const char* configfilepath)
   : _configfile(NULL),  _cfg(NULL), _lcm(NULL), _tnav(NULL),
+    _lastAHRSTimestamp(-1.0), _lastDvlTimestamp(-1.0), _lastNavTimestamp(-1.0),
+    _lastDepthTimestamp(-1.0), _lastCmdTimestamp(-1.0),
     _lastUpdateTimestamp(-1.0), _good(false)
 {
   logs(tl_both,"LcmTrn::LcmTrn() - configuration file %s\n", configfilepath);
@@ -89,6 +162,7 @@ LcmTrn::LcmTrn(const char* configfilepath)
   _lcmc.beam2 = _lcmc.beam3 = _lcmc.beam4 = NULL;
   _lcmc.nav = _lcmc.lat = _lcmc.lon = _lcmc.depth = _lcmc.trn = NULL;
   _lcmc.cmd = _lcmc.reinit = _lcmc.estimate = _lcmc.updatetime = NULL;
+  _lcmc.initial_timeout_msec = _lcmc.max_timeout_msec = 0;
 
   // Set config filename
   //
@@ -194,7 +268,8 @@ void LcmTrn::initTrnState()
 //
 void LcmTrn::run()
 {
-  logs(tl_both, "LcmTrn::run()\n");
+  logs(tl_both, "LcmTrn::run() using bursty timeouts of %d and %d msec\n",
+     _lcmc.initial_timeout_msec, _lcmc.max_timeout_msec);
 
   // As long as the status is good, process Lcm messages
   //
@@ -221,29 +296,83 @@ bool LcmTrn::updateTrn()
   // Note latest TRN update time is the timestamp that triggered this update
   _lastUpdateTimestamp = fmax(_thisPose.time, _thisMeas.time);
 
+  // If the timestamps are within 100 ms, call them equal for TRN to process
+  if (fabs(_thisPose.time - _thisMeas.time) < TRN_TIMES_EQUIVALENT_SEC) {
+     _thisPose.time = _thisMeas.time;
+     logs(tl_both,"LcmTrn::updateTrn() equating pose %.2f and meas times %.2f",
+               _thisPose.time, _thisMeas.time);
+  }
+
+  logs(tl_both,"LcmTrn::updateTrn() >>>> pose time %.2f, meas time %.2f <<<<\n",
+            _thisPose.time, _thisMeas.time);
+
   // Execute motion and measure updates
-  if (_thisPose.time <= _lastMeas.time)
+  if (_thisPose.time <= _thisMeas.time)
   {
+    logs(tl_both,"LcmTrn::updateTrn() motionUpdate first");
+
     _tnav->motionUpdate(&_thisPose);
-    _tnav->measUpdate(&_thisMeas, _thisMeas.dataType);
+    if (_thisPose.dvlValid)                                   // Update meas only if valid
+       _tnav->measUpdate(&_thisMeas, _thisMeas.dataType);
   }
   else
   {
-    _tnav->measUpdate(&_thisMeas, _thisMeas.dataType);
+    logs(tl_both,"LcmTrn::updateTrn() measUpdate first");
+
+    if (_thisPose.dvlValid)                                   // Update meas only if valid
+       _tnav->measUpdate(&_thisMeas, _thisMeas.dataType);
     _tnav->motionUpdate(&_thisPose);
   }
 
   // Keep this data around for the next round
   _lastMeas = _thisMeas;
   _lastPose = _thisPose;
+  _thisPose.time = _thisMeas.time = 0.;
 
   // Request the estimates and TRN state
-  _tnav->estimatePose(&_mle, 1);
-  _tnav->estimatePose(&_mmse, 2);
+  _tnav->estimatePose(&_mle, TRN_MLE_EST);
+  _tnav->estimatePose(&_mmse, TRN_MMSE_EST);
   _filterstate = _tnav->getFilterState();
   _numreinits  = _tnav->getNumReinits();
 
   return true;
+}
+
+int LcmTrn::getLcmTimeout(unsigned int initial_msec, unsigned int max_msec)
+{
+  // We're tracking number of messages and the time it took to handle them
+  int _nLcmMessages = 0;
+  int _nLcmMillis   = 0;
+
+  // See if there are messages to handle
+  int n = _lcm->handleTimeout(initial_msec);
+
+  // Get the start time
+  struct timeval now{};
+  gettimeofday(&now, nullptr);
+  time_t startTimeMs = (now.tv_sec * 1000) + (now.tv_usec / 1000);
+  time_t nowTimeMs = startTimeMs;
+
+  // Handle messages if there are any and up to the maximum
+  // for (int i = 0; i < (_eliConfig._lcmMaxMsgs-1) && n > 0; i++) {
+  int i = 0;
+  for (i = 1; (nowTimeMs - startTimeMs) < max_msec && n > 0; i++) {
+    _nLcmMessages += n;
+    n = _lcm->handleTimeout(initial_msec);
+
+    gettimeofday(&now, nullptr);
+    nowTimeMs = (now.tv_sec * 1000) + (now.tv_usec / 1000);
+  }
+
+  // Get the finish time
+  //gettimeofday(&now, nullptr);
+  //time_t endTimeMs = (now.tv_sec * 1000) + (now.tv_usec / 1000);
+  _nLcmMillis = (nowTimeMs - startTimeMs);
+
+  if (_nLcmMessages > 0) logs(tl_both, "%d msgs in %ld ms and %d handle calls",
+                           _nLcmMessages, _nLcmMillis, i);
+
+  return _nLcmMessages;
 }
 
 // Listen for and handle messages on my channels.
@@ -288,8 +417,9 @@ int LcmTrn::handleMessages()
     logs(tl_both,"LcmTrn::handleMessage() - lcm->handleTimeout internal error after %d msgs, lcm->good() = %d\n",
                     totalmsgs, _lcm->good());
 
-  logs(tl_both,"LcmTrn::handleMessages() - handling %d messages took %.2f ms and %d calls...\n",
-    totalmsgs, acc, handled);
+  else if (nmsgs > 0)
+    logs(tl_both,"LcmTrn::handleMessages() - handling %d messages took %.2f ms and %d calls...\n",
+                    totalmsgs, acc, handled);
 
   return totalmsgs;
 }
@@ -299,7 +429,8 @@ int LcmTrn::handleMessages()
 void LcmTrn::cycle()
 {
   // If no messages were handled there is no need to update TRN
-  if (0 == handleMessages()) return;
+  // if (0 == handleMessages()) return;
+  if (0 == getLcmTimeout(_lcmc.initial_timeout_msec, _lcmc.max_timeout_msec)) return;
 
   // If we have fresh data, publish the latest TRN state to
   // the TRN channel. updateTrn() performs motion and measure updates
@@ -374,11 +505,12 @@ void LcmTrn::handleAhrs(const lcm::ReceiveBuffer* rbuf,
   // The timestamp recorded in the poseT object is that associated with the
   // AHRS data, not the position data from the DVL.
   _thisPose.time = (double)msg->epochMillisec / 1000;
+  _lastAHRSTimestamp = (double)msg->epochMillisec / 1000;
 
   // Get heading, pitch, and roll from AHRS message
   const DoubleArray *da = NULL;
   if ((da = _msg_reader.getDoubleArray(_lcmc.heading)))
-     _thisPose.phi = da->data[SCALAR];
+     _thisPose.psi = da->data[SCALAR];
   else
      logs(tl_both, "handleAhrs() - %s item not found in ahrs msg", _lcmc.heading);
 
@@ -388,7 +520,7 @@ void LcmTrn::handleAhrs(const lcm::ReceiveBuffer* rbuf,
      logs(tl_both, "handleAhrs() - %s item not found in ahrs msg", _lcmc.pitch);
 
   if ((da = _msg_reader.getDoubleArray(_lcmc.roll)))
-     _thisPose.psi = da->data[SCALAR];
+     _thisPose.phi = da->data[SCALAR];
   else
      logs(tl_both, "handleAhrs() - %s item not found in ahrs msg", _lcmc.roll);
 
@@ -414,6 +546,7 @@ void LcmTrn::handleNav(const lcm::ReceiveBuffer* rbuf,
 
 
   _thisPose.time = (double)msg->epochMillisec / 1000;
+  _lastNavTimestamp = (double)msg->epochMillisec / 1000;
 
   // Get lat, lon, and depth from nav message, assume units are degrees.
   // Convert to radians and/or UTM if necessary using NavUtils.
@@ -452,6 +585,8 @@ void LcmTrn::handleDvl(const lcm::ReceiveBuffer* rbuf,
   // The timestamp recorded in the measT object is that associated with the
   // DVL beam data.
   _thisMeas.time = (double)msg->epochMillisec / 1000;
+  _lastDvlTimestamp = (double)msg->epochMillisec / 1000;
+
   if (_lastMeas.time < 1.) _lastMeas.time = _thisMeas.time;
 
   _thisMeas.numMeas = 4;
@@ -478,19 +613,12 @@ void LcmTrn::handleDvl(const lcm::ReceiveBuffer* rbuf,
 
 
   const char* keys[] = {_lcmc.beam1, _lcmc.beam2, _lcmc.beam3, _lcmc.beam4};
-  for (int b = 0; b < 4; b++)
-  {
-     if ((fa = _msg_reader.getFloatArray(keys[b])))
-     {
+  for (int b = 0; b < N_DVL_BEAMS; b++) {
+     if ((fa = _msg_reader.getFloatArray(keys[b]))) {
         _thisMeas.ranges[b] = fa->data[SCALAR];
         _thisMeas.measStatus[b] = true;
-       if (_thisPose.z > 45.0)
-       {
-          if (_thisMeas.ranges[b] < 0.1) _thisMeas.ranges[b] = (long)_thisMeas.time % 34;
-       }
      }
-     else
-     {
+     else {
         _thisMeas.ranges[b] = 0;
         _thisMeas.measStatus[b] = false;
         logs(tl_both, "handleDVL() - %s item not found in dvl msg", keys[b]);
@@ -498,12 +626,10 @@ void LcmTrn::handleDvl(const lcm::ReceiveBuffer* rbuf,
   }
 
   const IntArray *ia = NULL;
-  if ((ia = _msg_reader.getIntArray(_lcmc.valid)))
-  {
+  if ((ia = _msg_reader.getIntArray(_lcmc.valid))) {
      _thisPose.bottomLock = ia->data[SCALAR];
   }
-  else
-  {
+  else {
      _thisPose.bottomLock = 0;
      logs(tl_both, "handleDVL() - %s item not found in dvl msg", _lcmc.valid);
   }
@@ -531,6 +657,8 @@ void LcmTrn::handleDepth(const lcm::ReceiveBuffer* rbuf,
   long long sec = msg->epochMillisec;
   long long seq = msg->seqNo;
 
+  _lastDepthTimestamp = (double)msg->epochMillisec / 1000;
+
   // Get depth data from message
   const FloatArray *fa = NULL;
   if ((fa = _msg_reader.getFloatArray(_lcmc.veh_depth)))
@@ -540,6 +668,8 @@ void LcmTrn::handleDepth(const lcm::ReceiveBuffer* rbuf,
     _thisPose.z = 0;
     logs(tl_both, "handleDepth() - %s item not found in dvl msg", _lcmc.veh_depth);
   }
+
+  _thisPose.gpsValid = (_thisPose.z < 0.6);
 
   logs(tl_both,"handleDepth()-%s msg: %lld epoch sec; seqNo:%lld; depth %.2f\n",
     _lcmc.depth, sec, seq, _thisPose.z);
@@ -627,10 +757,6 @@ void LcmTrn::initTrn()
   );
 
   TNavConfig::instance()->setIgnoreGps(1);
-
-//  free(mapn);
-//  free(cfgn);
-//  free(partn);
 
   // Continue with initial settings
   //
@@ -751,19 +877,22 @@ bool LcmTrn::verifyTrnConfig()
     logs(tl_both,"LcmTrn::verifyTrnConfig() - Unrecognized instrument specified in %s.\n", _configfile);
     isgood = false;
   }
-  if (_trnc.weighting < TRN_WEIGHT_NONE && _trnc.weighting > TRN_WEIGHT_SBNIS)
+  // The weighting can
+  if (_trnc.weighting < TRN_WEIGHT_NONE || _trnc.weighting > TRN_WEIGHT_SBNIS)
   {
     logs(tl_both,"LcmTrn::verifyTrnConfig() - Unrecognized weighting specified in %s.\n", _configfile);
     isgood = false;
   }
-  if (_trnc.filtertype < TRN_FILTER_PM && _trnc.filtertype > TRN_FILTER_PMB)
+  // Only Particle filter and Point Mass filter are supported
+  if (_trnc.filtertype != TRN_FILTER_PM && _trnc.filtertype != TRN_FILTER_PF)
   {
     logs(tl_both,"LcmTrn::verifyTrnConfig() - Unrecognized filter type specified in %s.\n", _configfile);
     isgood = false;
   }
+
   if (!isgood)
   {
-    logs(tl_both,"LcmTrn::verifyTrnConfig() - Incomplete TRN settings in %s.\n", _configfile);
+    logs(tl_both,"LcmTrn::verifyTrnConfig() - Incomplete or unsupported settings in %s.\n", _configfile);
   }
   return isgood;
 }
@@ -798,7 +927,9 @@ void LcmTrn::loadConfig()
   if (!_cfg->lookupValue(STR_TRN_LOGNAME, _trnc.logd))    _trnc.logd    = NULL;
 
   // Load the required LCM stuff next. Flag error unless all are present
-  if (!_cfg->lookupValue(STR_LCM_TIMEOUT, _lcmc.timeout))  _lcmc.timeout = -1.;
+  if (!_cfg->lookupValue(STR_LCM_TIMEOUT, _lcmc.timeout))  _lcmc.timeout = LCMTRN_DEFAULT_PERIOD;
+  if (!_cfg->lookupValue(STR_LCM_INITIAL_TO, _lcmc.initial_timeout_msec))  _lcmc.initial_timeout_msec = LCMTRN_DEFAULT_INITIAL;
+  if (!_cfg->lookupValue(STR_LCM_MAX_TO, _lcmc.max_timeout_msec))  _lcmc.max_timeout_msec = LCMTRN_DEFAULT_MAXIMUM;
 
   if (!_cfg->lookupValue(STR_LCM_AHRSNAME, _lcmc.ahrs))      _lcmc.ahrs    = NULL;
   if (!_cfg->lookupValue("lcm.ahrs_heading", _lcmc.heading)) _lcmc.heading = NULL;
@@ -866,9 +997,21 @@ void LcmTrn::loadConfig()
 // Return true if it is time to perform TRN updates
 bool LcmTrn::time2Update()
 {
+  // Need data from all sources before updates
+  if (_lastAHRSTimestamp < 0. || _lastDvlTimestamp < 0. ||
+      _lastNavTimestamp < 0.  || _lastDepthTimestamp < 0.) {
+     logs(tl_both,"Waiting for fresh data: AHRS(%.2f), Dvl(%.2f), Nav(%.2f), Depth(%.2f)",
+        _lastAHRSTimestamp, _lastDvlTimestamp, _lastNavTimestamp, _lastDepthTimestamp);
+     return false;
+  }
+
+  // Need new version of poseT before updates
+  if (_thisPose.time < 0.1) return false;
+
+  // Special handling for re-running missions LCM logs
   // Reset timestamps when running replays
-  if (_thisMeas.time < _lastMeas.time) _lastMeas.time = _thisMeas.time;
-  if (_thisPose.time < _lastPose.time) _lastPose.time = _thisPose.time;
+  if (_thisMeas.time > 1. && _thisMeas.time < _lastMeas.time) _lastMeas.time = _thisMeas.time;
+  if (_thisPose.time > 1. && _thisPose.time < _lastPose.time) _lastPose.time = _thisPose.time;
 
   // Has the trn period expired yet?
   // If the TRN period has passed since the last TRN update, then yes.
