@@ -189,4 +189,6 @@ src/mbtrn/mframe/build/merror.d
 src/mbtrn/mframe/build/medebug-test.d
 src/mbtrn/mframe/build/mconfig.d
 src/mbtrn/mframe/build/mcbuf.d
+src/photo/mbtiff2png
 src/mbtrn/mframe/build/mbbuf.d
+src/photo/mbtiff2png
