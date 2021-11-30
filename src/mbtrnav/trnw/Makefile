@@ -1,4 +1,5 @@
 ########################################
+# libtrnav/trnw Makefile
 # Build Environment
 # version and build configuration
 
@@ -107,7 +108,8 @@ LIB_PATHS = -L/usr/local/lib -L$(OUTPUT_DIR) -L$(MFRAME_LIB_DIR) $(OS_LIB_PATH)
 LIBTRNW=libtrnw.a
 LIBTRNW_SRC=trnw.cpp
 LIBTRNW_OBJ=$(LIBTRNW_SRC:%.cpp=$(BUILD_DIR)/%.o)
-LIBTRNW_LIBS = -ltrn -lqnx -lnewmat -lmframe -lpthread
+LIBTRNW_LIBS = -ltrn -lqnx -lnewmat -lpthread
+
 TNAV_OBJ=$(BUILD_DIR)/TerrainNav.o \
 $(BUILD_DIR)/PositionLog.o \
 $(BUILD_DIR)/TerrainNavLog.o \
@@ -135,7 +137,7 @@ LIBTRNCLI_LIBS = -lmframe -lpthread -lm
 TRNCLI_TEST=trncli-test
 TRNCLI_TEST_SRC=trncli_test.c
 TRNCLI_TEST_OBJ=$(TRNCLI_TEST_SRC:%.c=$(BUILD_DIR)/%.o)
-TRNCLI_TEST_LIBS = $(MFRAME_LIB) -ltrnw -lpthread -lm -lqnx -lnewmat -ltrn -ltrncli -lnetcdf -lgeolib -lstdc++
+TRNCLI_TEST_LIBS = -lmframe -ltrnw -lpthread -lm -lqnx -lnewmat -ltrn -ltrncli -lnetcdf -lgeolib -lstdc++
 
 # libtrnucli: TRNU client lib
 LIBTRNUCLI=libtrnucli.a
@@ -153,23 +155,65 @@ TRNUCLI_TEST_LIBS = $(MFRAME_LIB) -ltrnucli -lpthread -lm -lqnx -lnewmat -ltrn -
 TRNUSVR_TEST=trnusvr-test
 TRNUSVR_TEST_SRC=trnusvr_test.c netif.c trnif_msg.c trnif_proto.c
 TRNUSVR_TEST_OBJ=$(TRNUSVR_TEST_SRC:%.c=$(BUILD_DIR)/%.o)
-TRNUSVR_TEST_LIBS = $(MFRAME_LIB) -lpthread -lm -lqnx -lnewmat -ltrn -ltrncli -lnetcdf -lgeolib -lstdc++
+TRNUSVR_TEST_LIBS = -lmframe -ltrnw -lpthread -lm -lqnx -lnewmat -ltrn -ltrncli -lnetcdf -lgeolib -lstdc++
+
+# mcpub: multicast test publisher
+MCPUB=mcpub
+MCPUB_SRC=mcpub.c
+MCPUB_OBJ=$(MCPUB_SRC:%.c=$(BUILD_DIR)/%.o)
+MCPUB_LIBS =
+
+# mmcsub: multicast test publisher
+MCSUB=mcsub
+MCSUB_SRC=mcsub.c
+MCSUB_OBJ=$(MCSUB_SRC:%.c=$(BUILD_DIR)/%.o)
+MCSUB_LIBS =
+
+# mmcpub: multicast test publisher (uses mframe)
+MMCPUB=mmcpub
+MMCPUB_SRC=mmcpub.c
+MMCPUB_OBJ=$(MMCPUB_SRC:%.c=$(BUILD_DIR)/%.o)
+MMCPUB_LIBS = $(MFRAME_LIB) -lm
+
+# mmcsub: multicast test publisher  (uses mframe)
+MMCSUB=mmcsub
+MMCSUB_SRC=mmcsub.c
+MMCSUB_OBJ=$(MMCSUB_SRC:%.c=$(BUILD_DIR)/%.o)
+MMCSUB_LIBS = $(MFRAME_LIB) -lm
+
+LIBNETIF=libnetif.a
+LIBNETIF_SRC=netif.c #trnif_proto.c trnif_msg.c
+LIBNETIF_OBJ=$(LIBNETIF_SRC:%.c=$(BUILD_DIR)/%.o)
+LIBNETIF_LIBS = -lmframe -ltrnw
+
+TRNIF_TEST=trnif-test
+TRNIF_TEST_SRC=trnif_test.c trnif_proto.c trnif_msg.c
+TRNIF_TEST_OBJ = $(TRNIF_TEST_SRC:%.c=$(BUILD_DIR)/%.o)
+TRNIF_TEST_LIBS = -lnetif -lmframe -ltrnw -lpthread -lm -lqnx -lnewmat -ltrn -lnetcdf -lgeolib -lstdc++
 
 # TRN clients
 TRNC_SRC+= $(LIBTRNCLI_SRC) $(TRNCLI_TEST_SRC) \
-$(LIBTRNUCLI_SRC) $(TRNUCLI_TEST_SRC) $(TRNUSVR_TEST_SRC)
+$(LIBTRNUCLI_SRC) $(TRNUCLI_TEST_SRC) $(TRNUSVR_TEST_SRC) \
+$(MMCPUB_SRC) $(MMCPUB_SRC) $(MCPUB_SRC) $(MCPUB_SRC) \
+$(TRNCLI_TEST_SRC) $(TRNIF_TEST_SRC)
 
 TRNC_TARGETS+=  $(OUTPUT_DIR)/$(LIBTRNCLI) $(OUTPUT_DIR)/$(TRNCLI_TEST) \
-$(OUTPUT_DIR)/$(LIBTRNUCLI) $(OUTPUT_DIR)/$(TRNUCLI_TEST) $(OUTPUT_DIR)/$(TRNUSVR_TEST)
+			$(OUTPUT_DIR)/$(LIBTRNUCLI) $(OUTPUT_DIR)/$(TRNUCLI_TEST)\
+			$(OUTPUT_DIR)/$(TRNUSVR_TEST) \
+			$(OUTPUT_DIR)/$(MMCPUB) $(OUTPUT_DIR)/$(MMCSUB) \
+			$(OUTPUT_DIR)/$(MCPUB) $(OUTPUT_DIR)/$(MCSUB) $(OUTPUT_DIR)/$(TRNIF_TEST)
 
 ########################################
 # Build Files (mostly for cleanup)
-SOURCES =  $(TRNC_SRC)
-
-CPP_SOURCES = $(LIBTRNW_SRC)
-OBJECTS = $(SOURCES:%.c=$(BUILD_DIR)/%.o) $(CPP_SOURCES:%.cpp=$(BUILD_DIR)/%.o)
-DEPENDS = $(SOURCES:%.c=$(BUILD_DIR)/%.d)
-BINARIES =  $(OUTPUT_DIR)/$(LIBTRNW) $(TRNC_TARGETS)
+TRNC_SOURCES =  $(TRNC_SRC)
+TRNW_SOURCES =  $(LIBTRNW_SRC)
+TRNC_OBJECTS = $(TRNC_SOURCES:%.c=$(BUILD_DIR)/%.o)
+TRNW_OBJECTS = $(TRNW_SOURCES:%.cpp=$(BUILD_DIR)/%.o)
+TRNC_DEPENDS = $(TRNC_SOURCES:%.c=$(BUILD_DIR)/%.d)
+TRNW_DEPENDS = $(TRNW_SOURCES:%.cpp=$(BUILD_DIR)/%.d)
+CLEAN_OBJECTS = $(TRNC_OBJECTS) $(TRNW_OBJECTS) $(MCSUB_OBJ) $(MMCSUB_OBJ) $(LIBNETIF_OBJ)
+CLEAN_DEPENDS = $(TRNC_DEPENDS) $(TRNW_DEPENDS) 
+BINARIES =  $(OUTPUT_DIR)/$(LIBTRNW) $(OUTPUT_DIR)/$(TRNC_TARGETS) $(OUTPUT_DIR)/$(LIBNETIF)
 
 CLEANUP = gmon.out
 # dSYMs : XCode debug symbol file folders
@@ -178,14 +222,16 @@ CLEANUP = gmon.out
 
 ########################################
 # Rules: build targets
-all:  $(OUTPUT_DIR)/$(LIBTRNW)
-
-trnc: $(TRNC_TARGETS)
+all: $(OUTPUT_DIR)/$(LIBTRNW)
 	
-# build trnnet library
-$(OUTPUT_DIR)/$(LIBTRNIF): $(LIBTRNIF_OBJ)
+
+trnc: $(OUTPUT_DIR)/$(LIBTRNW) $(OUTPUT_DIR)/$(LIBNETIF) $(TRNC_TARGETS)
 	@echo building $@...
-	ar -r $@ $(LIBTRNIF_OBJ)
+	
+# build netif library
+$(OUTPUT_DIR)/$(LIBNETIF): $(LIBNETIF_OBJ) 
+	@echo building $@...
+	ar -r $@ $(LIBNETIF_OBJ)  
 
 # build trn wrapper library
 $(OUTPUT_DIR)/$(LIBTRNW): $(LIBTRNW_OBJ)
@@ -195,7 +241,7 @@ $(OUTPUT_DIR)/$(LIBTRNW): $(LIBTRNW_OBJ)
 # build trn client library
 $(OUTPUT_DIR)/$(LIBTRNCLI): $(LIBTRNCLI_OBJ)
 	@echo building $@...
-	ar rcs $@  $(LIBTRNCLI_OBJ) $(MFRAME_LIB) $(BUILD_DIR)/*.o
+	ar rcs $@ $(LIBTRNCLI_OBJ) $(MFRAME_LIB) $(BUILD_DIR)/*.o
 
 # build trncli-test utility
 $(OUTPUT_DIR)/$(TRNCLI_TEST): $(TRNCLI_TEST_OBJ) $(LIBTRNW_OBJ) $(LIBTRNCLI_OBJ)
@@ -220,10 +266,47 @@ $(OUTPUT_DIR)/$(TRNUSVR_TEST): $(TRNUSVR_TEST_OBJ)
 	$(CXX) $(INC_PATHS) $(LIB_PATHS) $^ -o $@ $(LD_FLAGS) $(TRNUSVR_TEST_LIBS)
 	@echo
 
+# build mcpub utility
+$(OUTPUT_DIR)/$(MCPUB): $(MCPUB_OBJ)
+	@echo building $@...
+	$(CXX) $(INC_PATHS) $(LIB_PATHS) $^ -o $@ $(LD_FLAGS) $(MCPUB_LIBS)
+	@echo
+
+# build mcsub utility
+$(OUTPUT_DIR)/$(MCSUB): $(MCSUB_OBJ)
+	@echo building $@...
+	$(CXX) $(INC_PATHS) $(LIB_PATHS) $^ -o $@ $(LD_FLAGS) $(MCSUB_LIBS)
+	@echo
+
+# build mmcpub utility
+$(OUTPUT_DIR)/$(MMCPUB): $(MMCPUB_OBJ)
+	@echo building $@...
+	$(CXX) $(INC_PATHS) $(LIB_PATHS) $^ -o $@ $(LD_FLAGS) $(MMCPUB_LIBS)
+	@echo
+
+# build mmcsub utility
+$(OUTPUT_DIR)/$(MMCSUB): $(MMCSUB_OBJ)
+	@echo building $@...
+	$(CXX) $(INC_PATHS) $(LIB_PATHS) $^ -o $@ $(LD_FLAGS) $(MMCSUB_LIBS)
+	@echo
+
+# build trnif-test utility
+$(OUTPUT_DIR)/$(TRNIF_TEST): $(TRNIF_TEST_OBJ)
+	@echo building $@...
+	$(CXX) $(INC_PATHS) $(LIB_PATHS) $^ -o $@ $(LD_FLAGS) $(TRNIF_TEST_LIBS)
+
 # include the dependencies
-ifneq ($(MAKECMDGOALS),purge)
+ifeq ($(MAKECMDGOALS),trnc)
+-include $(TRNC_DEPENDS)
+endif
+ifeq ($(MAKECMDGOALS),all)
+-include $(TRNW_DEPENDS)
+endif
+ifneq ($(MAKECMDGOALS),trnc)
 ifneq ($(MAKECMDGOALS),clean)
--include $(DEPENDS)
+ifneq ($(MAKECMDGOALS),purge)
+-include $(TRNW_DEPENDS)
+endif
 endif
 endif
 
@@ -247,6 +330,14 @@ $(BUILD_DIR)/%.d :%.c
 	| awk '/o:/ {printf "%s", "$@ $(BUILD_DIR)/"} {print}' > $@; \
 	[ -s $@ ] || rm -f $@
 	@echo
+$(BUILD_DIR)/%.d :%.cpp
+	@[ -d $(BUILD_DIR) ] || mkdir -p $(BUILD_DIR)
+	@[ -d $(OUTPUT_DIR) ] || mkdir -p $(OUTPUT_DIR)
+	@echo generating dependency file for $<
+	@set -e; $(CXX) -MM $(CFLAGS) $(INC_PATHS) $< \
+	| awk '/o:/ {printf "%s", "$@ $(BUILD_DIR)/"} {print}' > $@; \
+	[ -s $@ ] || rm -f $@
+	@echo
 
 
 install:
@@ -259,20 +350,14 @@ install:
 .PHONY: clean
 .PHONY: purge
 .PHONY: trnc
+.PHONY: trnw
 
 # clean : delete object, dependency, binary files
 clean:
-	rm -f $(OBJECTS) $(DEPENDS) $(BINARIES)
+	rm -f $(CLEAN_OBJECTS) $(CLEAN_DEPENDS) $(BINARIES)
 	$(RM_DSYMS)
 
 # purge : delete delete object, dependency, binary files, build directories
 purge:
-	rm -f $(BINARIES) $(OBJECTS) $(DEPENDS) $(CLEANUP)
+	rm -f $(BINARIES) $(TRNW_OBJECTS) $(TRNW_DEPENDS) (TRNC_OBJECTS) $(TRNC_DEPENDS) $(CLEANUP)
 	rm -rf $(OUTPUT_DIR) $(BUILD_DIR) $(DSYMS)
-
-# include the dependencies
-ifneq ($(MAKECMDGOALS),purge)
-ifneq ($(MAKECMDGOALS),clean)
--include $(DEPENDS)
-endif
-endif

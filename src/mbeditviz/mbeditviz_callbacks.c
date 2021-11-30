@@ -973,9 +973,9 @@ void do_mbeditviz_viewgrid() {
   double *navportlat = NULL;
   double *navstbdlon = NULL;
   double *navstbdlat = NULL;
-  int *navline = NULL;
-  int *navshot = NULL;
-  int *navcdp = NULL;
+  unsigned int *navline = NULL;
+  unsigned int *navshot = NULL;
+  unsigned int *navcdp = NULL;
   int ifile, iping;
 
   /* display grid */
@@ -1792,7 +1792,7 @@ void do_mbeditviz_regrid_notify(Widget w, XtPointer client_data, XtPointer call_
 }
 /*------------------------------------------------------------------------------*/
 void do_mbeditviz_colorchange_notify(size_t instance) {
-  if (mbev_verbose >= 0) {
+  if (mbev_verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       instance:    %zu\n", instance);

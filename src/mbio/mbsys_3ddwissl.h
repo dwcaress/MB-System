@@ -421,27 +421,22 @@
 /*#define MBSYS_3DDWISSL_HEADB_OFFSET_Z_M           +0.062005210 */
 /*#define MBSYS_3DDWISSL_HEADB_OFFSET_HEADING_DEG   +1.20         // ICD value 0.0 */
 /*#define MBSYS_3DDWISSL_HEADB_OFFSET_ROLL_DEG      +21.440       // ICD value +22.08 */
-/*#define MBSYS_3DDWISSL_HEADB_OFFSET_PITCH_DEG     -4.230        // ICD value -5.01  pitch too much
-   1.5 cm = 0.143 deg, roll too much 2.5 cm = 0.239 deg */
+/*#define MBSYS_3DDWISSL_HEADB_OFFSET_PITCH_DEG     -4.230        // ICD value -5.01  pitch too much   1.5 cm = 0.143 deg, roll too much 2.5 cm = 0.239 deg */
 
 /* Values from Tank Test */
 /*#define MBSYS_3DDWISSL_FILEHEADER                 0 */
 /*#define MBSYS_3DDWISSL_HEADA                      1 */
 /*#define MBSYS_3DDWISSL_HEADB                      2 */
 /*#define MBSYS_3DDWISSL_COMMENT                    3 */
-/*#define MBSYS_3DDWISSL_HEADA_OFFSET_X_M           -0.031775996 // ICD value +0.012224004    -0.044
-   ==> -0.031775996 */
+/*#define MBSYS_3DDWISSL_HEADA_OFFSET_X_M           -0.031775996 // ICD value +0.012224004    -0.044   ==> -0.031775996 */
 /*#define MBSYS_3DDWISSL_HEADA_OFFSET_Y_M           -0.120281954 */
-/*#define MBSYS_3DDWISSL_HEADA_OFFSET_Z_M           +0.056005210 // ICD value +0.062005210   -0.012
-    ==> +0.056005210 */
+/*#define MBSYS_3DDWISSL_HEADA_OFFSET_Z_M           +0.056005210 // ICD value +0.062005210   -0.012    ==> +0.056005210 */
 /*#define MBSYS_3DDWISSL_HEADA_OFFSET_HEADING_DEG   -1.20        // ICD value 0.0 */
 /*#define MBSYS_3DDWISSL_HEADA_OFFSET_ROLL_DEG      -22.53       // ICD value -22.08 */
 /*#define MBSYS_3DDWISSL_HEADA_OFFSET_PITCH_DEG     -5.590       // ICD value -4.68 */
-/*#define MBSYS_3DDWISSL_HEADB_OFFSET_X_M           +0.031775996 // ICD value -0.012224004    +0.044
-   ==> +0.031775996 */
+/*#define MBSYS_3DDWISSL_HEADB_OFFSET_X_M           +0.031775996 // ICD value -0.012224004    +0.044   ==> +0.031775996 */
 /*#define MBSYS_3DDWISSL_HEADB_OFFSET_Y_M           +0.120281954 */
-/*#define MBSYS_3DDWISSL_HEADB_OFFSET_Z_M           +0.074005210 // ICD value  +0.062005210   +0.012
-    ==> +0.074005210 */
+/*#define MBSYS_3DDWISSL_HEADB_OFFSET_Z_M           +0.074005210 // ICD value  +0.062005210   +0.012    ==> +0.074005210 */
 /*#define MBSYS_3DDWISSL_HEADB_OFFSET_HEADING_DEG   +1.20        // ICD value 0.0 */
 /*#define MBSYS_3DDWISSL_HEADB_OFFSET_ROLL_DEG      +22.53       // ICD value +22.08 */
 /*#define MBSYS_3DDWISSL_HEADB_OFFSET_PITCH_DEG     -4.080       // ICD value -5.01 */
@@ -759,10 +754,8 @@ struct mbsys_3ddwissl_struct
   struct mbsys_3ddwissl_calibration_v1s3_struct calibration_v1s3_b;
 
   /* Scan information from raw records */
-  unsigned short record_id;          /* head A (0x3D53 or 0x3D73) or head B (0x3D54 or
-                           0x3D74) */
-  unsigned int scan_size;            /* bytes of scan record minus 4 (record_id +
-                           scan_size) */
+  unsigned short record_id;          /* head A (0x3D53 or 0x3D73) or head B (0x3D54 or 0x3D74) */
+  unsigned int scan_size;            /* bytes of scan record minus 4 (record_id + scan_size) */
   unsigned short year;
   mb_u_char month;
   mb_u_char day;
@@ -777,7 +770,7 @@ struct mbsys_3ddwissl_struct
   float ctd_temperature;            /* ctd temperature degrees C */
   float ctd_salinity;              /* ctd salinity psu */
   float ctd_pressure;              /* ctd pressure dbar */
-  float index;
+  float index;                    /* index of refraction */
   float range_start;              /* range start processing meters */
   float range_end;              /* range end processing meters */
   unsigned int pulse_count;          /* pulse count for this scan */

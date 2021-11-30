@@ -1068,8 +1068,7 @@ int mbview_zscale(size_t instance) {
 }
 
 /*------------------------------------------------------------------------------*/
-// TODO(schwehr): bool needlonlat
-int mbview_projectforward(size_t instance, int needlonlat, double xgrid, double ygrid, double zdata, double *xlon, double *ylat,
+int mbview_projectforward(size_t instance, bool needlonlat, double xgrid, double ygrid, double zdata, double *xlon, double *ylat,
                           double *xdisplay, double *ydisplay, double *zdisplay) {
 	double xx, yy, zz;
 
@@ -1124,7 +1123,7 @@ int mbview_projectforward(size_t instance, int needlonlat, double xgrid, double 
 }
 
 /*------------------------------------------------------------------------------*/
-int mbview_projectinverse(size_t instance, int needlonlat, double xdisplay, double ydisplay, double zdisplay, double *xlon,
+int mbview_projectinverse(size_t instance, bool needlonlat, double xdisplay, double ydisplay, double zdisplay, double *xlon,
                           double *ylat, double *xgrid, double *ygrid) {
 	double xx, yy;
 
@@ -1610,8 +1609,7 @@ int mbview_projectdistance(size_t instance, double xlon1, double ylat1, double z
 	return (status);
 }
 /*------------------------------------------------------------------------------*/
-// TODO(schwehr): bool earthcentered
-int mbview_sphere_setup(size_t instance, int earthcentered, double xlon, double ylat) {
+int mbview_sphere_setup(size_t instance, bool earthcentered, double xlon, double ylat) {
 	double phi, theta, psi;
 	int j;
 
@@ -2835,21 +2833,21 @@ int mbview_getcolor(double value, double min, double max, int colortablemode, fl
 	}
 
 	/* get color */
-	if (colortablemode == MBV_COLORTABLE_NORMAL)
+  if (max <= min)
+    factor = 0.5;
+  else if (colortablemode == MBV_COLORTABLE_NORMAL)
 		factor = (max - value) / (max - min);
 	else
 		factor = (value - min) / (max - min);
-	/* factor = MAX(factor, 0.000001);
-	factor = MIN(factor, 0.999999);*/
-	if (factor <= 0.0) {
-		*red = below_red;
-		*green = below_green;
-		*blue = below_blue;
-	}
-	else if (factor >= 1.0) {
+	if (factor >= 1.0) {
 		*red = above_red;
 		*green = above_green;
 		*blue = above_blue;
+	}
+	else if (factor <= 0.0) {
+		*red = below_red;
+		*green = below_green;
+		*blue = below_blue;
 	}
 	else {
 		i = (int)(factor * (MBV_NUM_COLORS - 1));
@@ -3436,7 +3434,7 @@ int mbview_contour(size_t instance, int rez) {
 	return (status);
 }
 /*------------------------------------------------------------------------------*/
-int mbview_getzdata(size_t instance, double xgrid, double ygrid, int *found, double *zdata) {
+int mbview_getzdata(size_t instance, double xgrid, double ygrid, bool *found, double *zdata) {
 	int nsum;
 	double zdatasum;
 	int i, j, k, l, m, n;

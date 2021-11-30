@@ -10,16 +10,44 @@ directory structure.
 ### MB-System Version 5 Releases:
 
 --
-In the list below, releases shown in bold type are major, announced releases. The other entries are test or "beta" releases that were not announced and generally not widely distributed. Prior to 5.7.1, the MB-System source code repository was a privately hosted
-Subversion archive. In that era, announced source distribution releases
-were made available for download by ftp. Starting with 5.7.1 the
+In the list below, releases shown in bold type are major, announced releases.
+The other entries are test or "beta" releases that were not announced and generally
+not widely distributed. Prior to 5.7.1, the MB-System source code repository was
+a privately hosted Subversion archive. In that era, announced source distribution
+releases were made available for download by ftp. Starting with 5.7.1 the
 MB-System source code repository is hosted by Github at
     https://github.com/dwcaress/MB-System/
 and each distribution corresponds to a discrete Github release tag. Releases that
 include "beta" in the tag name are preliminary and generally not announced.
 Distributions that do not include "beta" in the tag name correspond to the major,
-announced releases. The source distributions associated with all releases, major or beta, are equally accessible as tarballs through the Github interface.
+announced releases. The source distributions associated with all releases, major
+or beta, are equally accessible as tarballs through the Github interface.
 
+- Version 5.7.9beta18    October 31, 2021
+- Version 5.7.9beta17    October 16, 2021
+- Version 5.7.9beta16    August 27, 2021
+- Version 5.7.9beta15    August 26, 2021
+- Version 5.7.9beta14    July 25, 2021
+- Version 5.7.9beta13    July 18, 2021
+- Version 5.7.9beta12    July 4, 2021
+- Version 5.7.9beta11    June 26, 2021
+- Version 5.7.9beta10    June 16, 2021
+- Version 5.7.9beta09    June 8, 2021
+- Version 5.7.9beta07    May 7, 2021
+- Version 5.7.9beta06    March 24, 2021
+- Version 5.7.9beta05    March 8, 2021
+- Version 5.7.9beta04    February 21, 2021
+- Version 5.7.9beta03    February 7, 2021
+- Version 5.7.9beta02    January 27, 2021
+- Version 5.7.9beta01    January 18, 2021
+- **Version 5.7.8        January 17, 2021
+- Version 5.7.7          January 17, 2021 (flawed, quickly superceded)
+- Version 5.7.7beta09    January 17, 2021
+- Version 5.7.7beta08    January 6, 2021
+- Version 5.7.7beta06    December 30, 2020
+- Version 5.7.7beta05    December 28, 2020
+- Version 5.7.7beta04    October 28, 2020
+- Version 5.7.7beta03    October 27, 2020
 - Version 5.7.7beta02    October 8, 2020
 - Version 5.7.7beta01    October 7, 2020
 - **Version 5.7.6        October 5, 2020
@@ -71,7 +99,7 @@ announced releases. The source distributions associated with all releases, major
 - Version 5.7.6beta4     August 2, 2019
 - Version 5.7.6beta2     July 25, 2019
 - Version 5.7.6beta1     July 6, 2019
-- **Version 5.7.5          June 26, 2019**
+- **Version 5.7.5        June 26, 2019**
 - Version 5.7.5beta12    June 24, 2019
 - Version 5.7.5beta11    June 16, 2019
 - Version 5.7.5beta10    June 9, 2019
@@ -368,6 +396,501 @@ announced releases. The source distributions associated with all releases, major
 --
 ### MB-System Version 5.7 Release Notes:
 --
+
+#### 5.7.9beta18 (October 31, 2021)
+
+Mbgrid: Enabled shifting of output grid bounds using a new -Yshiftx/shifty option.
+
+Mbtrnpp: Fixed build issue TRN libraries.
+
+#### 5.7.9beta17 (October 16, 2021)
+
+Mbgrid and mbmosaic: Fixed setting output grid format with the -G option. The
+definition and parsing of the options is now consistent with GMT 6.
+
+Mbnavadjust: Added option to unset skipped crossings.
+
+Mbnavadjust: Changed vertical scaling of the time series model plot and the
+tie plots so that these are centered on the midpoint values rather than zero.
+
+Mbgrdviz: Changed how routes are output as Risi survey scripts - now the lateral
+positions of waypoints are relative east and north meters in UTM rather than
+local x,y calculated using mtodeglon and mtodeglat from a simple spheroid.
+
+Mbm_grdplot: Fixed so that it does not crash if the input grid has either no
+valid values (all are NaN) or all valid values are the same.
+
+#### 5.7.9beta16 (August 27, 2021)
+
+Mbnavadjust: Made listing of survey vs survey blocks much faster.
+
+#### 5.7.9beta15 (August 26, 2021)
+
+Mbnavadjust: Speeded up model tie plots and insured that changes to projects will
+be saved when users quit.
+
+Mbview (mbgrdviz, mbeditviz, mbnavadjust): Addressed a number of code style issues
+particularly using bool rather than int for true/false values.
+
+Mbm_route2mission: added acoustic modem status signal to MBARI AUV missions
+immediately at the end of the "start survey" behavior.
+
+#### 5.7.9beta14 (July 25, 2021)
+
+Most programs: Fixed possible overflow associated with code that sets user, host,
+and date information to be included in output files. This functionality has been
+concentrated into a function mb_user_host_date() found in src/mbio/mb_defaults.c
+
+Many programs and i/o modules: Increased use of assert() to prevent overflow
+conditions when using sprintf to construct strings.
+
+#### 5.7.9beta13 (July 18, 2021)
+
+Mbextractsegy - fixed plotting so that the last plot is correct.
+
+TRN: updated TRN documentation.
+
+#### 5.7.9beta12 (July 4, 2021)
+
+Build system: Fixed location of RPC and XDR headers for Ubuntu 21.
+
+TRN: updated TRN documentation.
+
+#### 5.7.9beta11 (June 26, 2021)
+
+Build system: The configure script and the resulting Makefiles are
+generated using GNU Autotools 2.71 instead of 2.69.
+
+Mbnavadjustmerge: Enabled new options --set-global-tie-relative
+which allows setting a global navigation tie with offsets calculated
+relative to the current navigation adjustment model.
+
+Mbphotomosaic: Improved algorithm for mapping the imagery from the
+source images to the destination image. Now the code loops over all
+destination pixels in each quadrilateral of interest and obtains the
+corresponding source image pixels. Therefore no gaps are left in the
+destination image due to a resolution and sampling mismatch between
+the source and destination images.
+
+Mbm_grdplot, mbm_grd3dplot, mbm_grdcut, mbm_grdinfo, mbm_grdtiff:
+Fixed thesemacros to work with the new gmt grdinfo output that
+changed for GMT 6.2.0.
+
+#### 5.7.9beta10 (June 16, 2021)
+
+Mbnavadjust: Fixed importation of swath files, which was failing. Fixed crash
+that happened when a navigation inversion was performed in the same session as
+swath data importation.
+
+Mbauvloglist: Fixed parsing of short values in MBARI Dorado AUV MVC log files.
+
+Mbm_grdplot: Fixed histogram equalization in cases where grdhisteq returns an
+incomplete or short equalized color table.
+
+#### 5.7.9beta09 (June 8, 2021)
+
+Mb_rt raytracing functions: Added tracking of travel times in arrays returned by
+mb_rt() for plotting raypaths. This adds a parameter to the mb_rt() function call,
+which is used by utilities/mb_process.cc and mbvelocitytool/mbvelocity_prog.c.
+
+Mbm_grdplot: If \fB\-MGL\fP\fIF\fP is given in conjunction with \fB\-MGL\fP\fIscalebar\fP
+then the map scale will be surrounded by a white filled, black bounded box on
+top of the map.
+
+Mbm_grdplot: Chooses more reasonable easting/northing annotation intervals when
+plotting maps in projected coordinate systems like UTM.
+
+Mbm_grd2arc: Fixed so that the call to gmt convert is actually made.
+
+Mbm_grdtiff: Fixed so that the temporary GMT defaults are actually applied to the
+output image. By default this enforces a white background on the output GeoTiff
+image, which enables the new tool mbtiff2png to set the white areas to transparent
+when it converts a GeoTiff image to a PNG image for import into GIS.
+
+Mbeditviz: Fixed sparse filtering functions, which were inadvertently broken a
+few months ago.
+
+Mbgetphotocorrection: Made multithreaded.
+
+Mbphotomosaic: (1) Made multithreaded. (2) Added ability to map blocks of pixels from
+source images to the destination image instead of mapping individual pixels. The
+size of the square blocks is specified using --section=sizeInPixels. (3) Added PNG
+format image output, which allows no data regions to be transparent. PNG images
+cannot have geodetics embedded, and so depend on a *.pgw world file to be importable
+into GIS. (4) Added image correction modes based on source pixel range or standoff.
+
+Mbtiff2png: New tool that converts GeoTiff images to PNG images while setting no data
+regions transparent on the basis of being white, lighter than a specified threshold,
+black, or darker than a specified threshold.
+
+Mbvoxelclean: Fixed application of acrosstrack and range filters.
+
+#### 5.7.9beta07 (May 7, 2021)
+
+mbm_histplot: Fixed the use of the -C option to specify cellwidth for the
+histogram to be plotted.
+
+Formats 232 (MBF_3DWISSLR) and 233 (MBF_3DWISSLP): Changed so that MB_FLAG_SECONDARY
+is no longer used for multiple picks per laser pulse.
+
+MBnavadjust and MBnavadjustmerge: Restructured the code so that more capability
+of mbnavadjust can be duplicated in the command line tool mbnavadjust merge.
+Working to add ability to reimport surveys into a project.
+
+MBvoxelclean: Added --neighborhood option and fixed amplitude range options.
+
+Mblist: Fixed function of the -O%fnv and -O%FNV commands to produce *.fnv files.
+
+#### 5.7.9beta06 (March 24, 2021)
+
+Mbpreprocess: Fixed to work with the old s7k format (88) MBF_RESON7KR.
+
+Format 88 (MBF_RESON7KR): Fixed to not recognize collections of ping records
+that are mission bathymetry and/or travel time records as complete.
+
+Mbnavadjust: When importing files, only export navigation records to the *.mb166
+files in the project directory for ping records (previously data were output
+for input navigation records as well).
+
+#### 5.7.9beta05 (March 8, 2021)
+
+Mbauvloglist: Added available output field of speed calculated from the velocity
+vector in the kearfott.log log file, with tag calcKSpeed. Also added new -C option:
+in the case that navigation is being merged from an external file specified with
+the -N option, the -C option suppresses output of records with timestamps from
+before or after the time bounds of the navigation data. The default remains to
+output those records with zero values for the merged navigation outside the time
+bounds.
+
+General: Changed code that deletes temporary files from using a system()
+call to using the stdio function remove(). Affects src/mbio/mb_process.c,
+src/utilities/mbdatalist.cc, and src/mbvelocitytool/mbvelocity_prog.c.
+
+TRN: Updates to src/mbtrn, src/mbtrnav, src/mbtrnutils from Kent Headley.
+
+Mbm_grdplot, mbm_3dgrdplot, mbm_grdtiff, mbm_grdinfo: Changed " -r " tests for
+file readability to " -e " tests for file existence. This is to accommodate
+filesystems that use ACL rather than old style unix file modes - the old stat
+based readability test in Perl fails on ACL filesystems.
+
+#### 5.7.9beta04 (February 21, 2021)
+
+Mbpreprocess: Fixed handling of data formats that do not have specially defined
+preprocessing functions. This fix was prompted by problems with SeaBeam 2112 data
+in format 41 (MBF_SB2100RW).
+
+General changes: More work to achieve thread safety for mbprocess: removed use
+of static variables in several components of MBIO.
+
+Mbgrid: Fixed error handling so that if the program is shut down by an error,
+the exit code is nonzero.
+
+MBIO: Added extraction function mb_extract_lonlat(), which returns swath data
+similar to mb_extract() but with beam and pixel positions defined in longitude
+and latitude rather than acrosstrack and alongtrack distances relative to the
+reference point.
+
+Mbareaclean: Fixed memory management bug causing crashes.
+
+#### 5.7.9beta03 (February 7, 2021)
+
+General changes: Replacing use of strtok() function with strtok_r(). Strtok() is
+intrinsically not thread safe or reentrant and is considered poor use under all
+circumstances. Source files with this change include:
+  src/mbio/mbr_edgjstar.c src/mbio/mbr_hypc8101.c src/mbio/mbr_hysweep1.c
+  src/mbio/mb_format.c src/mbio/mb_get_value.c src/bsio/mbbs_tm.c
+  src/utilities/mblevitus.cc src/mbvelocitytool/mbvelocity_callbacks.c
+  src/mbnavedit/mbnavedit_callbacks.c src/mbnavadjust/mbnavadjust_callbacks.c
+
+General changes: Replace atof() with strtod() for thread safety. Source files
+with this change include:
+  src/gmt/mbgrdtifforg.c src/bsio/mbbs_tm.c src/mbio/mb_navint.c
+  src/mbio/mbr_edgjstar.c src/mbnavadjust/mbnavadjust_fine.c
+
+General changes: Replace atoi() with strtol() for thread safety. Source files
+with this change include:
+  src/gmt/mbcontour.c src/gmt/mbgrdtifforg.c src/gmt/mbswath.c
+  src/gsf/gsf.c src/utilities/mbgrid.cc src/utilities/mbprocess.cc
+
+General changes: Protect against overflows copying comments in all of the
+mbsys_XXX_extract() and mbsys_XXX_insert() functions the in the source files
+mbsys_XXX.c
+
+MBnavadjust: Fixed bug that failed to save new navigation ties if the program was
+closed without solving for a new model. Now closing the program will always save
+any unsaved ties.
+
+MBeditviz and MBview: Removed unneeded functions from mbview/mb3dsoundings_callbacks.c
+that were breaking test Cmake builds.
+
+#### 5.7.9beta02 (January 27, 2021)
+
+Fixed bug in format 58 and 59 support for bathymetry recalculation. The per beam heave values were being calculated incorrectly when bathymetry was recalculated by raytracing.
+
+Fixed bug in format 57 in which reprocessing did not trigger recalculation of multibeam pseudosidescan.
+
+These bugs were introduced during the 2020 code modernization.
+
+#### 5.7.9beta01 (January 18, 2021)
+
+Mbedit and mbnavedit: Use extern for Widget definitions in mbedit_creation.h
+and mbnavedit_creation.h to avoid duplicate symbol link errors when building
+code according to current C / C++ standards. The other graphical utilities
+already use this construct.
+
+#### 5.7.8 (January 17, 2021)
+
+Version 5.7.8 is now the current release of MB-System. Changes since the 5.7.6
+release include:
+
+Configure: Fixed handling of X11 libraries and header files in the autotools
+build system in order to circumvent more changes to dependencies installed on
+Macs using the Homebrew package manager. The first attempt at this turned out
+to cause X11 runtime failures on Linux systems, and so release 5.7.7 was rapidly
+superceded by this 5.7.8 release.
+
+mbdatalist: Fixed memory leak in src/mbio/mb_check_info.c that could occur when
+parsing *.inf files.
+
+Formats 88 (MBF_RESON7KR) and 89 (MBF_RESON7K3): Fixed bug in handling of
+PingMotion data records (7012) that caused memory overruns and seg faults.
+
+Mbclean: Fixed two bugs. The first involved setting the left/right bounds of
+flagging by acrosstrack distance using the -Y option, and the other resulted in
+slope flagging being applied when not requested when the -Y option was used alone.
+
+Mbpreprocess: Added option to set directory where output files are written instead
+of writing the output files parallel to the input swath files.
+
+Format 121 (MBF_GSFGENMB): Modified handling of multibeam snippet backscatter so
+that samples associated with beams flagged as bad are nulled, and so that modified
+backscatter is written to the output file by mbprocess.
+
+Mbeditviz: Modified 3D sounding view so that the depth buffering is actually used.
+
+Mbm_makedatalist: Now ignores the most recent file when the -L option is used.
+
+Mbprocess: Fixed raytracking library used by mbprocess so that it is thread
+safe. The relevant code is in mbsystem/src/mbaux/mb_rt.c
+
+Format 261 (MBF_KEMKMALL): Fixed bug in handling version 0 MWC datagrams.
+
+Mbphotomosaic: Fixed bug in pixel processing that occasionally produced overflows
+leading to seg faults.
+
+Mbphotomosaic: Fixed bug in imagelist processing that prevented use of images
+taken with the right camera of a stereo pair.
+
+Mbimagecorrect: New program that performs some simple brightness and contrast
+corrections using standard OpenCV algorithms.
+
+Mbprocess: Recast the program to process files in parallel using separate threads.
+This was implemented in the C++ main code using the C++11 standard thread API.
+The default is to use a single processing thread and therefore to process the
+files serially; the new -Cthreads option enables the use of multiple threads.
+For now, the built-in record keeping of memory allocation/deallocation is disabled
+for mbprocess because this functionality is not thread-safe.
+
+Mbnavadjust: The navigation adjustment inversion has been improved by tuning the
+parameters used for the overdetermined least squares solution.
+
+Mbswath2las: Shell for not-yet-working program to export soundings from swath data
+to some variant of the LAS format used for point cloud data.
+
+Mbvoxelclean: Added option to filter based on beam amplitude minimum and maximum
+values.
+
+Mbeditviz: Fixed coloring of soundings using beam amplitude values (colormap
+was applied incorrectly).
+
+Mbeditviz: Added option to display the selected sounding point cloud with
+soundings colored according to associated amplitude value. Also added the
+sounding amplitude value to the information listed when soundings are selected
+in the "info" mode.
+
+Mbedit: Added the sounding amplitude value to the information listed when
+soundings are selected in the "info" mode.
+
+Mbnavadjust: Previously autopicking of crossings skipped crossings including
+short sections where short was defined as less than 0.25 times the length of
+the first section of the associated file. This is problematic when the survey
+platform is stationary at the beginning of a file, resulting in a first section
+with a short track length (sections are terminated either on track length or total
+number of soundings). Now short is defined as less than 0.25 times the current
+desired section length for the project.
+
+Format 58 (MBF_EM710RAW): This format supports third generation Kongsberg multibeam
+data as recorded in *.all files; the augmented format 59 (MBF_EM710MBA) is used
+for processing. Data are translated from format 58 to 59 using mbpreprocess. Data
+have been collected using a partially nonfunctional EM122 such that most of the
+backscatter snippet records are missing. The existing code treats pings for which
+the snippet records are missing as incomplete and drops them. The format 58 i/o
+module has been modified so that if a special flag is set, any snippet records
+will be ignored and all pings will be treated as having an empty but existing
+snippet record. Users can set this flag with a special --kluge-ignore-snippets
+argument to mbpreprocess.
+
+Mbpreprocess and i/o modules with defined preprocessing functions: All existing
+preprocess functions have been augmented so that a call with a null pointer to
+the data structure will trigger an option to set i/o flags after reading from a
+file is initialized but before any data are read. The only case at present where
+this is used is format 58 (MBF_EM710RAW), where the mbpreprocess option
+--kluge-ignore-snippets causes the reading code to treat pings with bathymetry
+as complete whether snippet records exist or not, and to zero the snippet information
+for those pings.
+
+Mbm_makedatalist: Added -L option which will omit the last file found from the
+output datalist. The  intent  of this  option  is  to exclude the most recent
+file in an actively data logging context, since the most recent file is still
+being logged. This presumes that filenames sort in time order as listed  by  the
+ls  command,  an assumption that does not hold for all file naming conditions or
+if the -T option has been used to disable time ordering. Also added a behavior
+particular to Kongsberg multibeam data as originally logged - files named "9999.all"
+are now ignored.
+
+Mbotps: Modified mbotps to place temporary files in the user's home directory
+instead of the current working directory when the latter case results in file
+paths greater than 80 characters long. This is because OTPS has it's filename
+variables defined as 80 character strings.
+
+Format 88 (MBF_RESON7KR): Fixed handling of the various attitude data record
+types by function mb_extract_nnav(), which in turn allows mbnavlist to work
+correction with format 88 data when keyed to those data record types.
+
+Mblist: Added output option 'n' for survey line number. This value is only defined
+for SEGY format data files (format 160).
+
+#### 5.7.8beta01 (January 17, 2021)
+
+The autoconf build system had been changed so that libXt and libX11 come
+before libXm in the link commands. This fixes runtime errors in all of
+the graphical utilities on Linux systems. This problem probably relates
+more directly to the use of the gcc compiler system.
+
+#### 5.7.7 (January 17, 2021)
+
+The version 5.7.7 was fatally flawed in that the graphical tools would not run
+on Linux (or more probably, when built using gcc rather than llvm). The problem
+was that the autoconf build system had been changed in order to fix
+build failures in the Homebrew package manager, and these changes inadvertently
+including changing the library link order so that libXt and libX11 came before
+libXm. This problem was fixed rapidly and a new major release 5.7.8 put the
+same day.
+
+#### 5.7.7beta09 (January 17, 2021)
+
+mbdatalist: Fixed memory leak in src/mbio/mb_check_info.c that could occur when
+parsing *.inf files.
+
+Configure: Fixed handling of X11 libraries and header files in the autotools
+build system in order to circumvent more changes to dependencies installed on
+Macs using the Homebrew package manager.
+
+#### 5.7.7beta08 (January 6, 2021)
+
+Formats 88 (MBF_RESON7KR) and 89 (MBF_RESON7K3): Fixed bug in handling of
+PingMotion data records (7012) that caused memory overruns and seg faults.
+
+Mbclean: Fixed two bugs. The first involved setting the left/right bounds of
+flagging by acrosstrack distance using the -Y option, and the other resulted in
+slope flagging being applied when not requested when the -Y option was used alone.
+
+Mbpreprocess: Added option to set directory where output files are written instead
+of writing the output files parallel to the input swath files.
+
+Format 121 (MBF_GSFGENMB): Modified handling of multibeam snippet backscatter so
+that samples associated with beams flagged as bad are nulled, and so that modified
+backscatter is written to the output file by mbprocess.
+
+Mbeditviz: Modified 3D sounding view so that the depth buffering is actually used.
+
+Mbm_makedatalist: Now ignores the most recent file when the -L option is used.
+
+#### 5.7.7beta06 (December 30, 2020)
+
+Mbprocess: Fixed raytracking library used by mbprocess so that it is thread
+safe. The relevant code is in mbsystem/src/mbaux/mb_rt.c
+
+#### 5.7.7beta05 (December 28, 2020)
+
+Format 261 (MBF_KEMKMALL): Fixed bug in handling version 0 MWC datagrams.
+
+Mbphotomosaic: Fixed bug in pixel processing that occasionally produced overflows
+leading to seg faults.
+
+Mbphotomosaic: Fixed bug in imagelist processing that prevented use of images
+taken with the right camera of a stereo pair.
+
+Mbimagecorrect: New program that performs some simple brightness and contrast
+corrections using standard OpenCV algorithms.
+
+Mbprocess: Recast the program to process files in parallel using separate threads.
+This was implemented in the C++ main code using the C++11 standard thread API.
+The default is to use a single processing thread and therefore to process the
+files serially; the new -Cthreads option enables the use of multiple threads.
+For now, the built-in record keeping of memory allocation/deallocation is disabled
+for mbprocess because this functionality is not thread-safe.
+
+Mbnavadjust: The navigation adjustment inversion has been improved by tuning the
+parameters used for the overdetermined least squares solution.
+
+Mbswath2las: Shell for not-yet-working program to export soundings from swath data
+to some variant of the LAS format used for point cloud data.
+
+#### 5.7.7beta04 (October 28, 2020)
+
+Mbvoxelclean: Added option to filter based on beam amplitude minimum and maximum
+values.
+
+Mbeditviz: Fixed coloring of soundings using beam amplitude values (colormap
+was applied incorrectly).
+
+#### 5.7.7beta03 (October 27, 2020)
+
+Mbeditviz: Added option to display the selected sounding point cloud with
+soundings colored according to associated amplitude value. Also added the
+sounding amplitude value to the information listed when soundings are selected
+in the "info" mode.
+
+Mbedit: Added the sounding amplitude value to the information listed when
+soundings are selected in the "info" mode.
+
+Mbnavadjust: Previously autopicking of crossings skipped crossings including
+short sections where short was defined as less than 0.25 times the length of
+the first section of the associated file. This is problematic when the survey
+platform is stationary at the beginning of a file, resulting in a first section
+with a short track length (sections are terminated either on track length or total
+number of soundings). Now short is defined as less than 0.25 times the current
+desired section length for the project.
+
+Format 58 (MBF_EM710RAW): This format supports third generation Kongsberg multibeam
+data as recorded in *.all files; the augmented format 59 (MBF_EM710MBA) is used
+for processing. Data are translated from format 58 to 59 using mbpreprocess. Data
+have been collected using a partially nonfunctional EM122 such that most of the
+backscatter snippet records are missing. The existing code treats pings for which
+the snippet records are missing as incomplete and drops them. The format 58 i/o
+module has been modified so that if a special flag is set, any snippet records
+will be ignored and all pings will be treated as having an empty but existing
+snippet record. Users can set this flag with a special --kluge-ignore-snippets
+argument to mbpreprocess.
+
+Mbpreprocess and i/o modules with defined preprocessing functions: All existing
+preprocess functions have been augmented so that a call with a null pointer to
+the data structure will trigger an option to set i/o flags after reading from a
+file is initialized but before any data are read. The only case at present where
+this is used is format 58 (MBF_EM710RAW), where the mbpreprocess option
+--kluge-ignore-snippets causes the reading code to treat pings with bathymetry
+as complete whether snippet records exist or not, and to zero the snippet information
+for those pings.
+
+Mbm_makedatalist: Added -L option which will omit the last file found from the
+output datalist. The  intent  of this  option  is  to exclude the most recent
+file in an actively data logging context, since the most recent file is still
+being logged. This presumes that filenames sort in time order as listed  by  the
+ls  command,  an assumption that does not hold for all file naming conditions or
+if the -T option has been used to disable time ordering. Also added a behavior
+particular to Kongsberg multibeam data as originally logged - files named "9999.all"
+are now ignored.
 
 #### 5.7.7beta02 (October 8, 2020)
 

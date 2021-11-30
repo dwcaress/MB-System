@@ -3729,6 +3729,23 @@ object pushButton_zerozoffsets : XmPushButton widget {
 !(BX)    };
 };
 
+object pushButton_unsetskipped : XmPushButton widget {
+    arguments {
+        arguments Style_use2;
+        XmNlabelString = compound_string("Unset Skipped Crossings in List");
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_use2Reasons;
+        MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_pushButton_unsetskipped);
+        XmNactivateCallback = procedure do_unsetskipped();
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_use2Handlers;
+!(BX)    };
+};
+
 object separator16 : XmSeparator widget {
     arguments {
     };

@@ -8,7 +8,7 @@
 /* Project  : Iceberg AUV                                                   */
 /* Version  : 1.0                                                           */
 /* Created  : 07/03/2017                                                    */
-/* Modified : 09/06/2019  - Added filter logging option                     */
+/* Modified :                                                               */
 /* Archived :                                                               */
 /****************************************************************************/
 /* Modification History:                                                    */
@@ -25,60 +25,34 @@
 #include <sys/time.h>
 
 #include "Replay.h"
-#include "matrixArrayCalcs.h"
-#include "TNavConfig.h"
 #include "TerrainNavClient.h"
 
 static int numReinits = 0;
 
 // Verbose mode print facility
 // 
-void print(long int n, measT *mt, poseT *pt, poseT *mle, poseT *mse, char goodMeas);
+void print(measT *mt, poseT *pt, poseT *mle, poseT *mse, char goodMeas);
 
 int main(int argc, char* argv[])
 {
   // Get the connection parameters from the command line
   //
-  char *map = 0, *host=0, *logdir=0, verbose=0;
-  ofstream *pfile = NULL;
-  unsigned int ptype = SAVE_PARTICLES;
+  char *host=0, *logdir=0, verbose=0;
   long port=27027;
   int c;
 
   // Deal with cmd-line options
   // 
-  while ( (c = getopt(argc, argv, "m:h:p:l:vf:L")) != EOF )
+  while ( (c = getopt(argc, argv, "h:p:l:v")) != EOF )
   {
     if (c == 'l')
       logdir = strdup(optarg);   // Log directory
-    else if (c == 'L')
-      host = strdup(LCM_HOST);   // Send updates to LCM channels
     else if (c == 'h')
       host = strdup(optarg);     // TRN host overrides host in config file
-    else if (c == 'm')
-      map = strdup(optarg);      // TRN map overrides map in config file
     else if (c == 'p')
       port = atol(optarg);       // TRN port overrides port in config file
     else if (c == 'v')
       verbose = 1;
-    else if (c == 'f')
-    {
-      if      (!strncasecmp(optarg,"h", 1))
-        ptype = HISTOGRAMTOFILE;   // Log histograms
-      else if (!strncasecmp(optarg,"p", 1))
-        ptype = PARTICLESTOFILE;   // Log particles
-      else
-      {
-        fprintf(stderr, "\n\tBad filter log option:%s - using %s\n\n",
-          optarg, SAVE_PARTICLES? "particles" : "histogram");
-        ptype = SAVE_PARTICLES;
-      }
-
-      fprintf(stderr, "\tFilter log option set to:%s \n",
-        ptype == PARTICLESTOFILE? "particles" : "histogram");
-
-      pfile = new ofstream;
-    }
   }
 
   // Log directory is required argument
@@ -86,14 +60,11 @@ int main(int argc, char* argv[])
   if (!logdir)
   {
     fprintf(stderr," No log directory specified.\n"
-                  "Usage:\n  trn_replay -l dir [-h ip -p num -m map -f p|h ] \n"
-                  "    -l dir  The Dorado log directory created by the mission you want to replay\n"
-                  "    -h ip   Alternate TRN server ip address to override the address in terrainAid.cfg (use \"native\" to run locally)\n"
-                  "    -p num  Alternate TRN server port to override the port in terrainAid.cfg or the default port\n"
-                  "    -m map  Alternate map name to override the map specified in terrainAid.cfg\n"
-                  "    -f p|h  Directive to log filter distributions in filterDistrib.txt (can be very large), log particles or histograms\n"
-                  );
-//                  "  Use the \"make_replay_csvs.sh\" utility to convert the QNX logs to compressed zip files\n");
+                  "Usage:\n  replay -l logdir [-h host -p port] \n"
+                  "  Uses a native TerrainNav object rather than a TRN server when host is \"native\"\n"
+                  "  Use the \"make_replay_csvs.sh\" utility to convert the QNX logs to compressed zip files\n");
+      free(logdir);
+      free(host);
     return 1;
   }
 
@@ -107,7 +78,7 @@ int main(int argc, char* argv[])
 
   // Create and initialize the Replay object
   // 
-  Replay *r = new Replay(logdir, map, host, port);
+  Replay *r = new Replay(logdir, host, port);
 
   // Load the terrainAid.cfg from the given log dir
   // 
@@ -126,17 +97,10 @@ int main(int argc, char* argv[])
   if (!_tercom)
   {
     fprintf(stderr," TRN server connection failed.\n");
+      free(logdir);
+      free(host);
+      delete r;
     return 1;
-  }
-
-  // User has opted to save the filter distrib
-  //
-  if (pfile)
-  {
-    char filename[512];
-    pfile->open(charCat(filename, TNavConfig::instance()->getLogDir(),
-                                  "/filterDistrib.txt"));
-    _tercom->tNavFilter->setDistribToSave(ptype);
   }
 
   // ********************** MAIN LOOP *******************
@@ -145,31 +109,20 @@ int main(int argc, char* argv[])
   // motion and measure updates that were used by TRN in
   // this mission, and send them again.
   // 
-  long int nupdates, nu, ng;
+  long int nupdates;
   poseT pt, mle, mse;
   measT mt;
-  mt.numMeas    = 4;
-  mt.ranges     = new double[11]; //mt.numMeas];
-  mt.crossTrack = new double[11]; //mt.numMeas];
-  mt.alongTrack = new double[11]; //mt.numMeas];
-  mt.beamNums   = new int[11]; //mt.numMeas];
-  mt.altitudes  = new double[11]; //mt.numMeas];
-  mt.alphas     = new double[11]; //mt.numMeas];
-  mt.measStatus = new bool[11];   //mt.numMeas];
+//  mt.numMeas    = 4;
+//  mt.ranges     = new double[mt.numMeas];
+//  mt.altitudes  = new double[mt.numMeas];
+//  mt.alphas     = new double[mt.numMeas];
+//  mt.measStatus = new bool[mt.numMeas];
 
   // Conntinue as long as measure and motion update
   // data remains in the mission log files.
   // 
-  int s;
-  for (nupdates=0, nu=0, ng=0; (s = r->getNextRecordSet(&pt, &mt)) != 0; nupdates += 2)
+  for (nupdates = 0; r->getNextRecordSet(&pt, &mt); nupdates += 2)
   {
-    // Skip this record if indicated
-    // 
-    if (s < 0) continue;
-
-    nu++;
-    //sleep(3);
-
     //continue;
     // Order is significant, so if the measT timestamp is
     // earlier then perform a measUpdate first.
@@ -199,14 +152,11 @@ int main(int argc, char* argv[])
     char goodMeas = _tercom->lastMeasSuccessful();
     if (verbose)
     {
-      print(nu, &mt, &pt, &mle, &mse, goodMeas);
+      print(&mt, &pt, &mle, &mse, goodMeas);
     }
 
     if (goodMeas)
     {
-      ng++;
-      if (pfile) _tercom->tNavFilter->saveCurrDistrib(*pfile);
-
       //display tercom estimate biases
       printf("MLE: %.2f , ",mle.time);
       printf("%.4f , %.4f , %.4f , ",
@@ -224,33 +174,40 @@ int main(int argc, char* argv[])
 
     // Continue to invoke tercom like a normal mission
     // 
+    int fs = _tercom->getFilterState();
     int nr = _tercom->getNumReinits();
     if (nr > numReinits)
     {
-      fprintf(stderr,"TRN reinit number %d\n", nr);
-      //sleep(1);
+      fprintf(stderr,"TRN reinit number %d", nr);
+      sleep(1);
       numReinits = nr;
     }
-
-    if (pfile) _tercom->tNavFilter->saveCurrDistrib(*pfile);
-
-//    char buf[10]; usleep(200000L); gets(buf);
+    char buf[10];
+//    usleep(200000L);
+//    gets(buf);
   }
 
   // Done
   // 
-  fprintf(stderr,"Done. Close the connection after %ld updates, %ld good meas"
-                " and %d reinits...\n", nu, ng, numReinits);
+  fprintf(stderr,"Done. Close the connection after %ld updates"
+                " and %d reinits...\n", nupdates, numReinits);
+    free(logdir);
+    free(host);
+    delete r;
+
   delete _tercom;
+//    delete pt;
+//    delete mle;
+//    delete mse;
+//    delete mt;
 
   return 0;
 }
 
 // Verbose mode print facility
 // 
-void print(long int nu, measT *mt, poseT *pt, poseT *mle, poseT *mse, char goodMeas)
+void print(measT *mt, poseT *pt, poseT *mle, poseT *mse, char goodMeas)
 {
-  fprintf(stderr, "Iteration: %ld\n",nu);
   fprintf(stderr,"\nposeT: %.6f\n"
          "  x    : %.6f\n"
          "  y    : %.6f\n"
@@ -266,7 +223,7 @@ void print(long int nu, measT *mt, poseT *pt, poseT *mle, poseT *mse, char goodM
                   pt->dvlValid, pt->gpsValid, pt->bottomLock);
 
   if (mt->numMeas >= 4)
-    fprintf(stderr,"\nmeasT: %.6f\t%d beams\n"
+    fprintf(stderr,"\nmeasT: %.6f\n"
          "  beam1: %.6f\n"
          "  beam2: %.6f\n"
          "  beam3: %.6f\n"
@@ -274,7 +231,7 @@ void print(long int nu, measT *mt, poseT *pt, poseT *mle, poseT *mse, char goodM
          "  phi  : %.6f\n"
          "  theta: %.6f\n"
          "  psi  : %.6f\n",
-         mt->time, mt->numMeas, mt->ranges[0], mt->ranges[1], mt->ranges[2], mt->ranges[3],
+         mt->time, mt->ranges[0], mt->ranges[1], mt->ranges[2], mt->ranges[3],
          mt->phi, mt->theta, mt->psi);
 
   // Print position estimates only when they were successful

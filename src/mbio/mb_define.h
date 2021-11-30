@@ -1,5 +1,5 @@
 /*--------------------------------------------------------------------
- *    The MB-system:	mb_define.h	4/21/96
+ *    The MB-system:  mb_define.h  4/21/96
  *
  *    Copyright (c) 1996-2020 by
  *    David W. Caress (caress@mbari.org)
@@ -11,12 +11,12 @@
  *
  *    See README file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
-/** @file
+/*
  * mb_define.h defines macros used by MB-System programs and functions
  * for degree/radian conversions and min/max calculations.
  *
- * Author:	D. W. Caress
- * Date:	April 21, 1996
+ * Author:  D. W. Caress
+ * Date:  April 21, 1996
  */
 
 #ifndef MB_DEFINE_H_
@@ -28,21 +28,29 @@
 #include <mb_config.h>
 
 #ifdef _WIN32
-	/* https://www.zachburlingame.com/2011/05/resolving-redefinition-errors-betwen-ws2def-h-and-winsock-h/ */
-#	ifndef WIN32
-#		define WIN32
-#	endif
-#	include <WinSock2.h>
-#	include <Windows.h>
+  /* https://www.zachburlingame.com/2011/05/resolving-redefinition-errors-betwen-ws2def-h-and-winsock-h/ */
+#  ifndef WIN32
+#    define WIN32
+#  endif
+#  include <WinSock2.h>
+#  include <Windows.h>
 #endif
 
 /* For XDR/RPC */
-#ifdef HAVE_RPC_RPC_H
-#include <rpc/rpc.h>
-#endif
-#ifdef HAVE_RPC_TYPES_H
-#include <rpc/types.h>
-#include <rpc/xdr.h>
+#ifndef _WIN32
+# ifdef HAVE_RPC_RPC_H
+#  include <rpc/rpc.h>
+#  include <rpc/types.h>
+#  include <rpc/xdr.h>
+# else
+#  ifdef HAVE_TIRPC_RPC_RPC_H
+#   include <tirpc/rpc/rpc.h>
+#   include <tirpc/rpc/types.h>
+#   include <tirpc/rpc/xdr.h>
+#  endif
+# endif
+#else
+#	include "types_win32.h"
 #endif
 
 #ifdef __cplusplus
@@ -69,10 +77,10 @@ extern "C" {
 #define ftello ftell
 #define fseeko fseek
 #if !defined(isnan) && (_MSC_VER < 1900)
-#	define isnan(x) _isnan(x)
+#  define isnan(x) _isnan(x)
 #endif
 #if !defined(inline) && (_MSC_VER < 1900)
-#	define inline __inline
+#  define inline __inline
 #endif
 #endif
 
@@ -91,20 +99,20 @@ typedef signed char mb_s_char;
 #endif
 
 /* type definitions of signed and unsigned long int (64 bit integer) */
-typedef unsigned long long mb_u_long;
+typedef long long unsigned mb_u_long;
 typedef long long mb_s_long;
 
 /* type definitions for structures used in beam angle calculations */
 typedef struct {
-	double x;
-	double y;
-	double z;
+  double x;
+  double y;
+  double z;
 } mb_3D_vector;
 
 typedef struct {
-	double roll;
-	double pitch;
-	double heading;
+  double roll;
+  double pitch;
+  double heading;
 } mb_3D_orientation;
 
 /* declare buffer maximum */
@@ -120,6 +128,7 @@ typedef struct {
 #define MB_NAME_LENGTH 32
 #define MB_LONGNAME_LENGTH 128
 #define MB_DESCRIPTION_LENGTH 2048
+#define MB_COMMAND_LENGTH 8192 // Windows command line maximum
 
 /* maximum UDP packet size */
 #define MB_UDP_SIZE_MAX 65536
@@ -128,6 +137,10 @@ typedef struct {
 typedef char mb_path[MB_PATH_MAXLINE];
 typedef char mb_name[MB_NAME_LENGTH];
 typedef char mb_longname[MB_LONGNAME_LENGTH];
+typedef char mb_command[MB_COMMAND_LENGTH];
+
+/* maximum number of threads created by an MB-System program/function */
+#define MB_THREAD_MAX 16
 
 /* maximum number of asynchronous data saved */
 #define MB_ASYNCH_SAVE_MAX 10000
@@ -200,10 +213,10 @@ typedef enum {
 #define MB_SECONDS_01JAN2000 946684800.0
 
 /* water sound speed calculation algorithms */
-#define MB_SOUNDSPEEDALGORITHM_NONE 		0
-#define MB_SOUNDSPEEDALGORITHM_CHENMILLERO 	1
-#define MB_SOUNDSPEEDALGORITHM_WILSON 		2
-#define MB_SOUNDSPEEDALGORITHM_DELGROSSO 	3
+#define MB_SOUNDSPEEDALGORITHM_NONE     0
+#define MB_SOUNDSPEEDALGORITHM_CHENMILLERO   1
+#define MB_SOUNDSPEEDALGORITHM_WILSON     2
+#define MB_SOUNDSPEEDALGORITHM_DELGROSSO   3
 
 /* min max round define */
 #ifndef MIN
@@ -240,107 +253,29 @@ typedef enum {
 #define MB_PROJECTION_PROJECTED 1
 
 /* MBIO core function prototypes */
-
-/** Get MB-System version details
-@return always returns MB_SUCCESS
-*/
-int mb_version(int verbose, ///< [in] 1=brief 2=debug
-               char *version_string, ///< [out] PACKAGE_VERSION 
-               int *version_id, ///<  [out] integer represent. of PACKAGE_VERSION
-               int *version_major, ///< [out] major version# parsed from version_id
-               int *version_minor, ///< [out] minor version# parsed from version_id
-               int *version_archive, ///< [out] archive# parsed from version_id
-               int *error ///< [out] MB_SUCCESS or MB_ERROR_UNINTELLIGIBLE
-               );
-
-  
+int mb_version(int verbose, char *version_string, int *version_id, int *version_major, int *version_minor, int *version_archive,
+               int *error);
+int mb_user_host_date(int verbose, char user[256], char host[256], char date[32], int *error);
 int mb_default_defaults(int verbose, int *format, int *pings, int *lonflip, double bounds[4], int *btime_i, int *etime_i,
                 double *speedmin, double *timegap);
-
 int mb_defaults(int verbose, int *format, int *pings, int *lonflip, double bounds[4], int *btime_i, int *etime_i,
                 double *speedmin, double *timegap);
-  
 int mb_env(int verbose, char *psdisplay, char *imgdisplay, char *mbproject);
-
-/**
-Get longitude range from $HOME/.mbio_defaults
-@return always returns MB_SUCCESS
-*/
-int mb_lonflip(int verbose,  ///< [in] non-zero-> verbose mode
-               int *lonflip  ///< [out] -1:-360 to 0, 0:-180 to 180 (dflt), 1:0 to 360
-               );
-  
+int mb_lonflip(int verbose, int *lonflip);
 int mb_mbview_defaults(int verbose, int *primary_colortable, int *primary_colortable_mode, int *primary_shade_mode,
                        int *slope_colortable, int *slope_colortable_mode, int *secondary_colortable,
                        int *secondary_colortable_mode, double *illuminate_magnitude, double *illuminate_elevation,
                        double *illuminate_azimuth, double *slope_magnitude);
-
 int mb_fbtversion(int verbose, int *fbtversion);
-
-/**
-Determine if lockfiles will be used based on $HOME/.mbio_defaults
-@return always return MB_SUCCESS
-*/
-int mb_uselockfiles(int verbose,      ///< [in] 1=brief 2=debug
-                    int *uselockfiles ///< [out] non-zero = true (dflt)
-                    );
-
-/**
-Get file i/o block buffer size for certain formats (currently formats 88 and 58)
-from $HOME/.mbio_defaults.
-The fileiobuffer value is in kilobytes, so fileiobuffer = 1000 corresponds
-roughly to a one megabyte buffer. fileiobuffer value of zero indicates that
-default block size will be used.
-@return always returns MB_SUCCESS
-*/
-int mb_fileiobuffer(int verbose, ///< [in] 1=brief 2=debug
-                    int *fileiobuffer ///< [out] i/o block size in KBytes
-                    );
-
-/**
-Set members of specified mbio_struct_ptr to handle specified format, including
-function pointers to read and allocate buffers for specified format.
-This function modifies some input values of format before setting in mbio_struct_ptr. 
-@return MB_SUCCESS or MB_FAILURE on error
-*/
-int mb_format_register(int verbose, ///<[in] 1=brief 2=debug
-                       int *format, ///<[in,out] format code
-                       void *mbio_ptr, ///<[in] mbio_struct_ptr
-                       int *error ///< MB_SUCCESS or MB_ERROR_BAD_FORMAT
-                       );
-
-/**
-   Get details of specified data format
-*/
-  int mb_format_info(int verbose, ///<[in] 1=brief 2=debug
-                   int *format,
-                   int *system,
-                   int *beams_bath_max,
-                   int *beams_amp_max,
-                   int *pixels_ss_max,
-                   char *format_name,
-                   char *system_name,
-                   char *format_description,
-                   int *numfile,
-                   int *filetype,
-                   int *variable_beams,
-                   int *traveltime,
-                   int *beam_flagging,
-                   int *platform_source,
-                   int *nav_source,
-                   int *sonardepth_source,
-                   int *heading_source,
-                   int *attitude_source,
-                   int *svp_source,
-                   double *beamwidth_xtrack,
+int mb_uselockfiles(int verbose, bool *uselockfiles);
+int mb_fileiobuffer(int verbose, int *fileiobuffer);
+int mb_format_register(int verbose, int *format, void *mbio_ptr, int *error);
+int mb_format_info(int verbose, int *format, int *system, int *beams_bath_max, int *beams_amp_max, int *pixels_ss_max,
+                   char *format_name, char *system_name, char *format_description, int *numfile, int *filetype,
+                   int *variable_beams, int *traveltime, int *beam_flagging, int *platform_source, int *nav_source,
+                   int *sonardepth_source, int *heading_source, int *attitude_source, int *svp_source, double *beamwidth_xtrack,
                    double *beamwidth_ltrack, int *error);
-
-/** 
-    Call mb_format_info() to get details of specified data format, prints details to stderr
-*/
 int mb_format(int verbose, int *format, int *error);
-
-
 int mb_format_system(int verbose, int *format, int *system, int *error);
 int mb_format_description(int verbose, int *format, char *description, int *error);
 int mb_format_dimensions(int verbose, int *format, int *beams_bath_max, int *beams_amp_max, int *pixels_ss_max, int *error);
@@ -348,18 +283,7 @@ int mb_format_flags(int verbose, int *format, int *variable_beams, int *travelti
 int mb_format_source(int verbose, int *format, int *platform_source, int *nav_source, int *sonardepth_source, int *heading_source,
                      int *attitude_source, int *svp_source, int *error);
 int mb_format_beamwidth(int verbose, int *format, double *beamwidth_xtrack, double *beamwidth_ltrack, int *error);
-
-/**
-   Get file's data format based on filename conventions 
-*/
-  int mb_get_format(int verbose, ///<[in] 1=brief 2=debug
-                  char *filename,  ///< [in] data file name
-                  char *fileroot,  ///< [in,out] if input not null, output filename not including extension
-                  int *format,  ///< [out] Inferred data format
-                  int *error    ///< [out] MB_ERROR_BAD_FORMAT if returns MB_FAILURE
-                  );
-
-
+int mb_get_format(int verbose, char *filename, char *fileroot, int *format, int *error);
 int mb_datalist_open(int verbose, void **datalist_ptr, char *path, int look_processed, int *error);
 int mb_datalist_read(int verbose, void *datalist_ptr, char *path, char *dpath, int *format, double *weight, int *error);
 int mb_datalist_read2(int verbose, void *datalist_ptr, int *pstatus, char *path, char *ppath, char *dpath, int *format,
@@ -388,32 +312,10 @@ int mb_swathbounds(int verbose, int checkgood, int nbath, int nss,
                   double *ss, double *ssacrosstrack,
                   int *ibeamport, int *ibeamcntr, int *ibeamstbd,
                   int *ipixelport, int *ipixelcntr, int *ipixelstbd, int *error);
-
-/**
- Open and initialize a multibeam data file                                 
- for reading with mb_read() or mb_get().                                                  
- @return MB_SUCCESS or MB_FAILURE
-*/      
-int mb_read_init(int verbose, 
-                 char *file,   ///<[in] data file name
-                 int format,   ///<[in] data format
-                 int pings,    ///<[in] ping averaging
-                 int lonflip,  ///<[in] longitude range
-                 double bounds[4], ///<[in] minlon,maxlon,minlat,maxlat window
-                 int btime_i[7],   ///<[in] time window begin y m h min sec usec
-                 int etime_i[7],   ///<[in] time window end y m h min sec usec
-                 double speedmin,  ///<[in] min ship speed
-                 double timegap,   ///<[in] min time interval to declare data gap
-                 void **mbio_ptr, ///<[out] pointer to MBIO descriptor structure
-                 double *btime_d, ///<[out] time window begin epoch sec
-                 double *etime_d, ///<[out] time window end epoch sec
-                 int *beams_bath, ///<[out] max bathymetry beams
-                 int *beams_amp, ///<[out] max amplitude beams
-                 int *pixels_ss, ///<[out] max sidescan pixels
-                 int *error ///<[out] error code
-                 );
-
-  int mb_input_init(int verbose, char *socket_definition, int format, int pings,
+int mb_read_init(int verbose, char *file, int format, int pings, int lonflip, double bounds[4], int btime_i[7], int etime_i[7],
+                  double speedmin, double timegap, void **mbio_ptr, double *btime_d, double *etime_d, int *beams_bath,
+                  int *beams_amp, int *pixels_ss, int *error);
+int mb_input_init(int verbose, char *socket_definition, int format, int pings,
                   int lonflip, double bounds[4], int btime_i[7], int etime_i[7],
                   double speedmin, double timegap, void **mbio_ptr,
                   double *btime_d, double *etime_d, int *beams_bath,
@@ -424,21 +326,9 @@ int mb_read_init(int verbose,
                   int *error);
 int mb_write_init(int verbose, char *file, int format, void **mbio_ptr, int *beams_bath, int *beams_amp, int *pixels_ss,
                   int *error);
-
-
 int mb_close(int verbose, void **mbio_ptr, int *error);
-
-/**
-  Calls the appropriate mbr_ routine for reading
-  the next ping from a multibeam data file.  The new ping data
-  will be placed in the "new_" variables in the mbio structure pointed
-  to by mbio_ptr.
-*/
 int mb_read_ping(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *error);
-
-
-
-  int mb_get_all(int verbose, void *mbio_ptr, void **store_ptr, int *kind, int time_i[7], double *time_d, double *navlon,
+int mb_get_all(int verbose, void *mbio_ptr, void **store_ptr, int *kind, int time_i[7], double *time_d, double *navlon,
                   double *navlat, double *speed, double *heading, double *distance, double *altitude, double *sonardepth, int *nbath,
                   int *namp, int *nss, char *beamflag, double *bath, double *amp, double *bathacrosstrack, double *bathalongtrack,
                   double *ss, double *ssacrosstrack, double *ssalongtrack, char *comment, int *error);
@@ -446,41 +336,10 @@ int mb_get(int verbose, void *mbio_ptr, int *kind, int *pings, int time_i[7], do
                   double *speed, double *heading, double *distance, double *altitude, double *sonardepth, int *nbath, int *namp,
                   int *nss, char *beamflag, double *bath, double *amp, double *bathacrosstrack, double *bathalongtrack, double *ss,
                   double *ssacrosstrack, double *ssalongtrack, char *comment, int *error);
-
-/**
- read and average multibeam data from a file
- which has been initialized by mb_read_init(). Crosstrack distances
- are mapped into lon and lat.
-*/
-  int mb_read(int verbose, ///<[in] verbosity
-            void *mbio_ptr, ///<[in,out] pointer to MB IO structure
-            int *kind,  ///<[out] record type
-            int *pings, ///<[out] #pings averaged to give current data
-            int time_i[7], ///<[out] time of current ping in y/m/d hh mm ss us format
-            double *time_d, ///<[out] time of current ping in epoch seconds
-            double *navlon, ///<[out] pinger longitude
-            double *navlat, ///<[out] pinger latitude
-            double *speed, ///<[out] ship speed
-            double *heading, ///<[out] ship heading (deg)
-            double *distance, ///<[out] distance along track since prev ping (km)
-            double *altitude, ///<[out] pinger altitude (m)
-            double *sonardepth, ///<[out] pinger depth (m)
-            int *nbath, ///<[out] #bathymetry values
-            int *namp, ///<[out] #amplitude values
-            int *nss, ///<[out] #sidescan values
-            char *beamflag, ///<[out] bathymetry flags for each value
-            double *bath, ///<[out] bathymetry values
-            double *amp, ///<[out] amplitude values
-            double *bathlon, ///<[out] longitudes of bathymetry values
-            double *bathlat, ///<[out] latitudes of bathymetry values
-            double *ss, ///<[out] side-scan values
-            double *sslon, ///<[out] longitudes of side-scan values
-            double *sslat, ///<[out] latitudes of side-scan values
-            char *comment, ///<[out] comment
-            int *error ///<[out] error value
-            );
-
-  
+int mb_read(int verbose, void *mbio_ptr, int *kind, int *pings, int time_i[7], double *time_d, double *navlon, double *navlat,
+                  double *speed, double *heading, double *distance, double *altitude, double *sonardepth, int *nbath, int *namp,
+                  int *nss, char *beamflag, double *bath, double *amp, double *bathlon, double *bathlat, double *ss, double *sslon,
+                  double *sslat, char *comment, int *error);
 int mb_write_ping(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 int mb_put_all(int verbose, void *mbio_ptr, void *store_ptr, int usevalues, int kind, int time_i[7], double time_d, double navlon,
                   double navlat, double speed, double heading, int nbath, int namp, int nss, char *beamflag, double *bath,
@@ -511,6 +370,10 @@ int mb_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, int time_i
                 double speed, double heading, int nbath, int namp, int nss, char *beamflag, double *bath, double *amp,
                 double *bathacrosstrack, double *bathalongtrack, double *ss, double *ssacrosstrack, double *ssalongtrack,
                 char *comment, int *error);
+int mb_extract_lonlat(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int time_i[7], double *time_d, double *navlon,
+               double *navlat, double *speed, double *heading, int *nbath, int *namp, int *nss, char *beamflag, double *bath,
+               double *amp, double *bathlon, double *bathlat, double *ss, double *sslon,
+               double *sslat, char *comment, int *error);
 int mb_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int time_i[7], double *time_d, double *navlon,
                 double *navlat, double *speed, double *heading, double *draft, double *roll, double *pitch, double *heave,
                 int *error);
@@ -731,14 +594,16 @@ int mb_absorption(int verbose, double frequency, double temperature, double sali
 int mb_potential_temperature(int verbose, double temperature, double salinity, double pressure, double *potential_temperature,
                              int *error);
 int mb_seabird_density(int verbose, double salinity, double temperature,
-					   double pressure, double *density, int *error);
+             double pressure, double *density, int *error);
 int mb_seabird_depth(int verbose, double pressure, double latitude, double *depth, int *error);
 int mb_seabird_salinity(int verbose, double conductivity, double temperature,
-						double pressure, double *salinity, int *error);
+            double pressure, double *salinity, int *error);
 int mb_seabird_soundspeed(int verbose, int algorithm, double salinity,
-						  double temperature, double pressure,
-						  double *soundspeed, int *error);
+              double temperature, double pressure,
+              double *soundspeed, int *error);
 
+int mb_mem_list_enable(int verbose, int *error);
+int mb_mem_list_disable(int verbose, int *error);
 int mb_mem_debug_on(int verbose, int *error);
 int mb_mem_debug_off(int verbose, int *error);
 int mb_malloc(int verbose, size_t size, void **ptr, int *error);
@@ -750,16 +615,7 @@ int mb_freed(int verbose, const char *sourcefile, int sourceline, void **ptr, in
 int mb_memory_clear(int verbose, int *error);
 int mb_memory_status(int verbose, int *nalloc, int *nallocmax, int *overflow, size_t *allocsize, int *error);
 int mb_memory_list(int verbose, int *error);
-
-/** Allocate array to hold swath data */
-int mb_register_array(int verbose, ///<[in] 1=brief 2=debug
-                      void *mbio_ptr, ///<[in] pointer to MBIO structure
-                      int type, ///<[in] 1 (bathy beams) 2 (ampl beams) or 3 (ss pixels)
-                      size_t size, ///<[in] array element size in bytes
-                      void **handle, ///<[in,out] array address
-                      int *error ///<[out] error code
-                      );
-  
+int mb_register_array(int verbose, void *mbio_ptr, int type, size_t size, void **handle, int *error);
 int mb_update_arrays(int verbose, void *mbio_ptr, int nbath, int namp, int nss, int *error);
 int mb_update_arrayptr(int verbose, void *mbio_ptr, void **handle, int *error);
 int mb_list_arrays(int verbose, void *mbio_ptr, int *error);
@@ -805,8 +661,9 @@ int mb_beaudoin_unrotate(int verbose, mb_3D_vector orig, mb_3D_orientation rotat
 int mb_rt_init(int verbose, int number_node, double *depth, double *velocity, void **modelptr, int *error);
 int mb_rt_deall(int verbose, void **modelptr, int *error);
 int mb_rt(int verbose, void *modelptr, double source_depth, double source_angle, double end_time, int ssv_mode,
-          double surface_vel, double null_angle, int nplot_max, int *nplot, double *xplot, double *zplot, double *x, double *z,
-          double *travel_time, int *ray_stat, int *error);
+          double surface_vel, double null_angle, int nplot_max,
+          int *nplot, double *xplot, double *zplot, double *tplot,
+          double *x, double *z, double *travel_time, int *ray_stat, int *error);
 
 #ifdef __cplusplus
 }  /* extern "C" */

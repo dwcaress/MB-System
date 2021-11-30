@@ -1,4 +1,4 @@
-.TH mbauvloglist 1 "2 July 2017" "MB-System 5.0" "MB-System 5.0"
+.TH mbauvloglist 1 "17 June 2021" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbauvloglist\fP \- Lists table data from an MBARI AUV mission log file.
 
@@ -6,7 +6,7 @@
 Version 5.0
 
 .SH SYNOPSIS
-\fBmbauvloglist\fP \fB\-I\fP\fIfile\fP [\fB\-F\fP\fIprintformat\fP \fB\-L\fP\fIlonflip\fP
+\fBmbauvloglist\fP \fB\-I\fP\fIfile\fP [\fB-C\fP \fB\-F\fP\fIprintformat\fP \fB\-L\fP\fIlonflip\fP
 \fB\-M\fP\fImode\fP \fB\-N\fP\fInavfile\fP \fB\-O\fP\fIlist\fP \fB\-P\fP \fB\-R\fP\fIid\fP \-S\fP \fB\-V \-H\fP ]
 
 .SH DESCRIPTION
@@ -58,7 +58,7 @@ then the output will binary values (8-btye double or 4-byte int values) with not
 the desired fields.
 
 For log files that do not include navigation, an external navigation file in the "fnv"
-format may be specified using the \fB-N\fP option. 
+format may be specified using the \fB-N\fP option.
 
 As of August 2009, the contents of the MBARI Mapping AUV missions logs are:
 
@@ -343,7 +343,10 @@ from these data can be specified for output using the
      mergePitch
      mergeHeave
 .br
-valuenames in the \fB-O\fP option.
+valuenames in the \fB-O\fP option. The merged values will be zero when the primary
+output data timestamp is from before the beginning or after the end of the navigation
+data. The \fB-C\fP option can be used to suppress output of records with timestamps
+outside the start and end bounds of the navigation.
 .TP
 .B \-O
 \fIvaluename\fP
@@ -354,6 +357,7 @@ The valid valuename strings consist of those defined in the header of the
 log file being parsed, plus the following:
      zero
      timeTag
+     timeInterval
      mergeLon
      mergeLat
      mergeHeading
@@ -370,8 +374,20 @@ log file being parsed, plus the following:
      calcSoundspeed
      calcPotentialTemperature
      calcDensity
+     calcKTime
+     calcKSpeed
 .br
-All of the special values are double values. Those beginning with "merge"
+The timeTag value corresponds to the
+record time tag reformatted as specified with \fB-F\fP\fItime_i\fP as:
+.br
+    year,month,day,hour,minute,second,microsecond
+.br
+or with \fB-F\fP\fItime_j\fP options as:
+.br
+    year,julien_day,hour,minute,second,microsecond
+.br
+All of the other special values are double values. The timeInterval is the time
+interval between the current record and the prior record. The values beginning with "merge"
 derive from interpolation of data from an external navigation file
 specified using the \fB-N\fP option. Those beginning with "calc" are defined
 only when the input file is fastcatlog.log, which contains both raw conductivity,
@@ -379,7 +395,12 @@ temperature, and pressure values from a SeaBird SBE49 Fastcat CTD and
 temperature, pressure, and salinity values derived from the raw values. If
 the \fB\-R\fP\fIid\fP option is used, then the temperature, conductivity, salinity,
 and pressure values will be recalculated using the calibration coefficients
-referenced by the \fIid\fP value.
+referenced by the \fIid\fP value. Those beginning with "calcK" are defined only
+when the input file is kearfott.log, which contains the output of the Kearfott
+inertial navigation system. The calcKtime value is a timestamp calculated by adding
+the Kearfott second-of-day value (utcTime) to the start of day (in seconds) from the
+overall timestamp (time). The calcKspeed is the lateral (x-y) speed calculated from
+the x and y rate values (mVbodyxK and mVbodyyK) in the kearfott.log file.
 .TP
 .B \-P
 .br
@@ -401,6 +422,14 @@ CTD used on MBARI Mapping AUV 1 during 2016 and 2017.
 .B \-S
 .br
 Scales angular values to be in degrees instead of radians.
+.TP
+.B \-C
+.br
+If merging with external navigation has been specified with the \fB-N\fP option,
+then the \fB-C\fP option causes input records with times before the beginning or
+after the end of the external navigation to not be output by \fBmbauvloglist\fP.
+The default behavior is to output all records, and for the values merged from the
+external navigation to be zero when outside the navigation time bounds.
 .TP
 .B \-V
 The \fB\-V\fP option causes the program to be verbose.

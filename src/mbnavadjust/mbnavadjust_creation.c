@@ -188,6 +188,7 @@ extern void do_action_checknewcrossings(Widget, XtPointer, XtPointer);
 extern void do_naverr_init(Widget, XtPointer, XtPointer);
 extern void do_action_analyzecrossings(Widget, XtPointer, XtPointer);
 extern void do_zerozoffsets(Widget, XtPointer, XtPointer);
+extern void do_unsetskipped(Widget, XtPointer, XtPointer);
 extern void do_action_invertnav(Widget, XtPointer, XtPointer);
 extern void do_action_updategrids(Widget, XtPointer, XtPointer);
 extern void do_apply_nav(Widget, XtPointer, XtPointer);
@@ -1554,6 +1555,30 @@ Widget CreatemainWindow(Widget parent) {
 	}
 
 	XtAddCallback(pushButton_zerozoffsets, XmNactivateCallback, do_zerozoffsets, (XtPointer)0);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(pulldownMenu_action, (char *)"Unset Skipped Crossings in List", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(
+		    args[ac], XmNfontList,
+		    BX_CONVERT(pulldownMenu_action, (char *)"-*-" SANS "-bold-r-*-*-*-120-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		pushButton_unsetskipped = XmCreatePushButton(pulldownMenu_action, (char *)"pushButton_unsetskipped", args, ac);
+		XtManageChild(pushButton_unsetskipped);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(pushButton_unsetskipped, XmNactivateCallback, do_unsetskipped, (XtPointer)0);
 
 	ac = 0;
 	separator16 = XmCreateSeparator(pulldownMenu_action, (char *)"separator16", args, ac);

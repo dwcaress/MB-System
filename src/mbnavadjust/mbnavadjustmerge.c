@@ -45,53 +45,56 @@
 #define NUMBER_MODS_MAX 1000
 #define MOD_MODE_NONE 0
 #define MOD_MODE_SET_GLOBAL_TIE 1
-#define MOD_MODE_SET_GLOBAL_TIE_XYZ 2
-#define MOD_MODE_SET_GLOBAL_TIE_XY 3
-#define MOD_MODE_SET_GLOBAL_TIE_Z 4
-#define MOD_MODE_UNSET_GLOBAL_TIE 5
-#define MOD_MODE_UNSET_ALL_GLOBAL_TIES 6
-#define MOD_MODE_ADD_CROSSING 7
-#define MOD_MODE_SET_TIE_VALUES_ALL 8
-#define MOD_MODE_SET_TIE_VALUES_XYZ 9
-#define MOD_MODE_SET_TIE_VALUES_Z 10
-#define MOD_MODE_SET_TIE_XYZ 11
-#define MOD_MODE_SET_TIE_XY 12
-#define MOD_MODE_SET_TIE_Z 13
-#define MOD_MODE_SET_TIES_XYZ_ALL 14
-#define MOD_MODE_SET_TIES_XY_ALL 15
-#define MOD_MODE_SET_TIES_Z_ALL 16
-#define MOD_MODE_SET_TIES_XYZ_FILE 17
-#define MOD_MODE_SET_TIES_XY_FILE 18
-#define MOD_MODE_SET_TIES_Z_FILE 19
-#define MOD_MODE_SET_TIES_XYZ_SURVEY 20
-#define MOD_MODE_SET_TIES_XY_SURVEY 21
-#define MOD_MODE_SET_TIES_Z_SURVEY 22
-#define MOD_MODE_SET_TIES_XYZ_BYSURVEY 23
-#define MOD_MODE_SET_TIES_XY_BYSURVEY 24
-#define MOD_MODE_SET_TIES_Z_BYSURVEY 25
-#define MOD_MODE_SET_TIES_XYZ_BLOCK 26
-#define MOD_MODE_SET_TIES_XY_BLOCK 27
-#define MOD_MODE_SET_TIES_Z_BLOCK 28
-#define MOD_MODE_SET_TIES_ZOFFSET_BLOCK 29
-#define MOD_MODE_SET_TIES_XY_BY_TIME 30
-#define MOD_MODE_UNSET_TIE 31
-#define MOD_MODE_UNSET_TIES_FILE 32
-#define MOD_MODE_UNSET_TIES_SURVEY 33
-#define MOD_MODE_UNSET_TIES_BYSURVEY 34
-#define MOD_MODE_UNSET_TIES_BLOCK 35
-#define MOD_MODE_UNSET_TIES_ALL 36
-#define MOD_MODE_SKIP_UNSET_CROSSINGS 37
-#define MOD_MODE_UNSET_SKIPPED_CROSSINGS 38
-#define MOD_MODE_UNSET_SKIPPED_CROSSINGS_BLOCK 39
-#define MOD_MODE_UNSET_SKIPPED_CROSSINGS_BETWEEN_SURVEYS 40
-#define MOD_MODE_INSERT_DISCONTINUITY 41
-#define MOD_MODE_MERGE_SURVEYS 42
-#define MOD_MODE_REIMPORT_FILE 43
-#define MOD_MODE_REIMPORT_ALL_FILES 44
-#define MOD_MODE_TRIANGULATE 45
-#define MOD_MODE_TRIANGULATE_SECTION 46
-#define MOD_MODE_UNSET_SHORT_SECTION_TIES 47
-#define MOD_MODE_SKIP_SHORT_SECTION_CROSSINGS 48
+#define MOD_MODE_SET_GLOBAL_TIE_RELATIVE 2
+#define MOD_MODE_SET_GLOBAL_TIE_XYZ 3
+#define MOD_MODE_SET_GLOBAL_TIE_XY 4
+#define MOD_MODE_SET_GLOBAL_TIE_Z 5
+#define MOD_MODE_UNSET_GLOBAL_TIE 6
+#define MOD_MODE_UNSET_ALL_GLOBAL_TIES 7
+#define MOD_MODE_ADD_CROSSING 8
+#define MOD_MODE_SET_TIE_VALUES_ALL 9
+#define MOD_MODE_SET_TIE_VALUES_XYZ 10
+#define MOD_MODE_SET_TIE_VALUES_Z 11
+#define MOD_MODE_SET_TIE_XYZ 12
+#define MOD_MODE_SET_TIE_XY 13
+#define MOD_MODE_SET_TIE_Z 14
+#define MOD_MODE_SET_TIES_XYZ_ALL 15
+#define MOD_MODE_SET_TIES_XY_ALL 16
+#define MOD_MODE_SET_TIES_Z_ALL 17
+#define MOD_MODE_SET_TIES_XYZ_FILE 18
+#define MOD_MODE_SET_TIES_XY_FILE 19
+#define MOD_MODE_SET_TIES_Z_FILE 20
+#define MOD_MODE_SET_TIES_XYZ_SURVEY 21
+#define MOD_MODE_SET_TIES_XY_SURVEY 22
+#define MOD_MODE_SET_TIES_Z_SURVEY 23
+#define MOD_MODE_SET_TIES_XYZ_BYSURVEY 24
+#define MOD_MODE_SET_TIES_XY_BYSURVEY 25
+#define MOD_MODE_SET_TIES_Z_BYSURVEY 26
+#define MOD_MODE_SET_TIES_XYZ_BLOCK 27
+#define MOD_MODE_SET_TIES_XY_BLOCK 28
+#define MOD_MODE_SET_TIES_Z_BLOCK 29
+#define MOD_MODE_SET_TIES_ZOFFSET_BLOCK 30
+#define MOD_MODE_SET_TIES_XY_BY_TIME 31
+#define MOD_MODE_UNSET_TIE 32
+#define MOD_MODE_UNSET_TIES_FILE 33
+#define MOD_MODE_UNSET_TIES_SURVEY 34
+#define MOD_MODE_UNSET_TIES_BYSURVEY 35
+#define MOD_MODE_UNSET_TIES_BLOCK 36
+#define MOD_MODE_UNSET_TIES_ALL 37
+#define MOD_MODE_SKIP_UNSET_CROSSINGS 38
+#define MOD_MODE_UNSET_SKIPPED_CROSSINGS 39
+#define MOD_MODE_UNSET_SKIPPED_CROSSINGS_BLOCK 40
+#define MOD_MODE_UNSET_SKIPPED_CROSSINGS_BETWEEN_SURVEYS 41
+#define MOD_MODE_INSERT_DISCONTINUITY 42
+#define MOD_MODE_MERGE_SURVEYS 43
+#define MOD_MODE_REIMPORT_FILE 44
+#define MOD_MODE_REIMPORT_ALL_FILES 45
+#define MOD_MODE_TRIANGULATE 46
+#define MOD_MODE_TRIANGULATE_SECTION 47
+#define MOD_MODE_UNSET_SHORT_SECTION_TIES 48
+#define MOD_MODE_SKIP_SHORT_SECTION_CROSSINGS 49
+#define MOD_MODE_REMAKE_MB166_FILES 50
+#define MOD_MODE_FIX_SENSORDEPTH 51
 #define IMPORT_NONE 0
 #define IMPORT_TIE 1
 #define IMPORT_GLOBALTIE 2
@@ -125,6 +128,7 @@ static char usage_message[] =
     "\t[--input=project_path\n"
     "\t--output=project_path\n"
     "\t--set-global-tie=file:section[:snav]/xoffset/yoffset/zoffset[/xsigma/ysigma/zsigma]\n"
+    "\t--set-global-tie-relative=file:section[:snav]/xoffset/yoffset/zoffset[/xsigma/ysigma/zsigma]\n"
     "\t--set-global-tie-xyz=file:section[:snav]\n"
     "\t--set-global-tie-xyonly=file:section[:snav]\n"
     "\t--set-global-tie-zonly=file:section[:snav]\n"
@@ -174,8 +178,10 @@ static char usage_message[] =
     "\t--triangulate-all\n"
     "\t--triangulate-scale=scale\n"
     "\t--triangulate-section=file:section\n"
-    "\t--unset-short-section-ties=min_length"
-    "\t--skip-short-section-crossings=min_length"
+    "\t--unset-short-section-ties=min_length\n"
+    "\t--skip-short-section-crossings=min_length\n"
+    "\t--remake-mb166-files\n"
+    "\t--fix-sensordepth\n"
     "\t--verbose --help]\n";
 
 /*--------------------------------------------------------------------*/
@@ -210,6 +216,7 @@ int main(int argc, char **argv) {
                                     {"input", required_argument, NULL, 0},
                                     {"output", required_argument, NULL, 0},
                                     {"set-global-tie", required_argument, NULL, 0},
+                                    {"set-global-tie-relative", required_argument, NULL, 0},
                                     {"set-global-tie-xyz", required_argument, NULL, 0},
                                     {"set-global-tie-xyonly", required_argument, NULL, 0},
                                     {"set-global-tie-zonly", required_argument, NULL, 0},
@@ -260,6 +267,8 @@ int main(int argc, char **argv) {
                                     {"triangulate-scale", required_argument, NULL, 0},
                                     {"unset-short-section-ties", required_argument, NULL, 0},
                                     {"skip-short-section-crossings", required_argument, NULL, 0},
+                                    {"remake-mb166-files", no_argument, NULL, 0},
+                                    {"fix-sensordepth", no_argument, NULL, 0},
                                     {NULL, 0, NULL, 0}};
 
   int option_index;
@@ -313,7 +322,7 @@ int main(int argc, char **argv) {
       }
 
       /*-------------------------------------------------------
-       * set global tie
+       * set global tie (relative to original or raw navigation)
           --set-global-tie=file:section:snav/xoffset/yoffset/zoffset/xsigma/ysigma/zsigma
           --set-global-tie=file:section/xoffset/yoffset/zoffset/xsigma/ysigma/zsigma
           --set-global-tie=file:section:snav/xoffset/yoffset/zoffset
@@ -359,7 +368,59 @@ int main(int argc, char **argv) {
           }
         }
         else {
-          fprintf(stderr, "Maximum number of mod commands reached:\n\t--add-crossing=%s command ignored\n\n", optarg);
+          fprintf(stderr, "Maximum number of mod commands reached:\n\t--set-global-tie=%s command ignored\n\n", optarg);
+        }
+      }
+
+      /*-------------------------------------------------------
+       * set global tie (relative to navigation of current inversion model)
+          --set-global-tie-relative=file:section:snav/xoffset/yoffset/zoffset/xsigma/ysigma/zsigma
+          --set-global-tie-relative=file:section/xoffset/yoffset/zoffset/xsigma/ysigma/zsigma
+          --set-global-tie-relative=file:section:snav/xoffset/yoffset/zoffset
+          --set-global-tie-relative=file:section/xoffset/yoffset/zoffset */
+      else if (strcmp("set-global-tie-relative", options[option_index].name) == 0) {
+        if (num_mods < NUMBER_MODS_MAX) {
+          int nscan;
+          double xoffset, yoffset, zoffset;
+          if ((nscan = sscanf(optarg, "%d:%d:%d/%lf/%lf/%lf/%lf/%lf/%lf", &mods[num_mods].file1,
+                              &mods[num_mods].section1, &mods[num_mods].snav1, &mods[num_mods].xoffset,
+                              &mods[num_mods].yoffset, &mods[num_mods].zoffset, &mods[num_mods].xsigma,
+                              &mods[num_mods].ysigma, &mods[num_mods].zsigma)) == 9) {
+            mods[num_mods].mode = MOD_MODE_SET_GLOBAL_TIE_RELATIVE;
+            num_mods++;
+          }
+          else if ((nscan =
+                        sscanf(optarg, "%d:%d/%lf/%lf/%lf/%lf/%lf/%lf", &mods[num_mods].file1, &mods[num_mods].section1,
+                               &mods[num_mods].xoffset, &mods[num_mods].yoffset, &mods[num_mods].zoffset,
+                               &mods[num_mods].xsigma, &mods[num_mods].ysigma, &mods[num_mods].zsigma)) == 8) {
+            mods[num_mods].mode = MOD_MODE_SET_GLOBAL_TIE_RELATIVE;
+            mods[num_mods].snav1 = 0;
+            num_mods++;
+          }
+          else if ((nscan = sscanf(optarg, "%d:%d:%d/%lf/%lf/%lf", &mods[num_mods].file1, &mods[num_mods].section1,
+                                   &mods[num_mods].snav1, &mods[num_mods].xoffset, &mods[num_mods].yoffset,
+                                   &mods[num_mods].zoffset)) == 6) {
+            mods[num_mods].mode = MOD_MODE_SET_GLOBAL_TIE_RELATIVE;
+            mods[num_mods].xsigma = 10.0;
+            mods[num_mods].ysigma = 10.0;
+            mods[num_mods].zsigma = 0.5;
+            num_mods++;
+          }
+          else if ((nscan = sscanf(optarg, "%d:%d/%lf/%lf/%lf", &mods[num_mods].file1, &mods[num_mods].section1,
+                                   &mods[num_mods].xoffset, &mods[num_mods].yoffset, &mods[num_mods].zoffset)) == 5) {
+            mods[num_mods].mode = MOD_MODE_SET_GLOBAL_TIE_RELATIVE;
+            mods[num_mods].snav1 = 0;
+            mods[num_mods].xsigma = 10.0;
+            mods[num_mods].ysigma = 10.0;
+            mods[num_mods].zsigma = 0.5;
+            num_mods++;
+          }
+          else {
+            fprintf(stderr, "Failure to parse --set-global-tie-relative=%s\n\tmod command ignored\n\n", optarg);
+          }
+        }
+        else {
+          fprintf(stderr, "Maximum number of mod commands reached:\n\t--set-global-tie-relative=%s command ignored\n\n", optarg);
         }
       }
 
@@ -428,7 +489,7 @@ int main(int argc, char **argv) {
           }
         }
         else {
-          fprintf(stderr, "Maximum number of mod commands reached:\n\t--add-crossing=%s command ignored\n\n", optarg);
+          fprintf(stderr, "Maximum number of mod commands reached:\n\t--set-global-tie-z=%s command ignored\n\n", optarg);
         }
       }
 
@@ -457,7 +518,7 @@ int main(int argc, char **argv) {
           num_mods++;
         }
         else {
-          fprintf(stderr, "Maximum number of mod commands reached:\n\t--add-crossing=%s command ignored\n\n", optarg);
+          fprintf(stderr, "Maximum number of mod commands reached:\n\tunset-global-tie=%s command ignored\n\n", optarg);
         }
       }
 
@@ -1266,6 +1327,35 @@ int main(int argc, char **argv) {
       }
 
       /*-------------------------------------------------------*/
+      // regenerate the *.mb166 files (navigation for each swath file)
+      // - needed because MBnavadjust was mistakenly including navigation
+      //   from nav records as well as ping records
+      else if (strcmp("remake-mb166-files", options[option_index].name) == 0) {
+        if (num_mods < NUMBER_MODS_MAX) {
+          mods[num_mods].mode = MOD_MODE_REMAKE_MB166_FILES;
+          num_mods++;
+        }
+        else {
+          fprintf(stderr,
+                  "Maximum number of mod commands reached:\n\tremake-mb166-files command ignored\n\n");
+        }
+      }
+
+      /*-------------------------------------------------------*/
+      // reset S_NAV sensordepth values from the *.mb166 files
+      else if (strcmp("fix-sensordepth", options[option_index].name) == 0) {
+        if (num_mods < NUMBER_MODS_MAX) {
+          mods[num_mods].mode = MOD_MODE_FIX_SENSORDEPTH;
+          num_mods++;
+          fprintf(stderr, "called fix-sensordepth\n");
+        }
+        else {
+          fprintf(stderr,
+                  "Maximum number of mod commands reached:\n\tfix-sensordepth command ignored\n\n");
+        }
+      }
+
+      /*-------------------------------------------------------*/
 
       break;
     case '?':
@@ -1431,7 +1521,7 @@ int main(int argc, char **argv) {
     project_output.num_files = project_inputbase.num_files;
     project_output.num_files_alloc = 0;
     project_output.files = NULL;
-    project_output.num_blocks = project_inputbase.num_blocks;
+    project_output.num_surveys = project_inputbase.num_surveys;
     project_output.num_snavs = project_inputbase.num_snavs;
     project_output.num_pings = project_inputbase.num_pings;
     project_output.num_beams = project_inputbase.num_beams;
@@ -1620,7 +1710,7 @@ int main(int argc, char **argv) {
     for (int i = 0; i < project_inputadd.num_files && status == MB_SUCCESS; i++) {
       const int j = project_output.num_files + i;
       project_output.files[j].id += project_output.num_files;
-      project_output.files[j].block += project_output.num_blocks;
+      project_output.files[j].block += project_output.num_surveys;
 
       /* allocate and then copy the sections in this file */
       project_output.files[j].sections = NULL;
@@ -1668,8 +1758,8 @@ int main(int argc, char **argv) {
         project_output.crossings[j].file_id_1 = project_inputadd.crossings[i].file_id_1 + project_output.num_files;
         project_output.crossings[j].file_id_2 = project_inputadd.crossings[i].file_id_2 + project_output.num_files;
         for (int k = 0; k < project_output.crossings[j].num_ties; k++) {
-          project_output.crossings[j].ties[k].block_1 += project_output.num_blocks;
-          project_output.crossings[j].ties[k].block_2 += project_output.num_blocks;
+          project_output.crossings[j].ties[k].block_1 += project_output.num_surveys;
+          project_output.crossings[j].ties[k].block_2 += project_output.num_surveys;
         }
       }
     }
@@ -1734,7 +1824,7 @@ int main(int argc, char **argv) {
 
     /* finally update all of the global counters */
     project_output.num_files += project_inputadd.num_files;
-    project_output.num_blocks += project_inputadd.num_blocks;
+    project_output.num_surveys += project_inputadd.num_surveys;
     project_output.num_snavs += project_inputadd.num_snavs;
     project_output.num_pings += project_inputadd.num_pings;
     project_output.num_beams += project_inputadd.num_beams;
@@ -1771,7 +1861,7 @@ int main(int argc, char **argv) {
               mods[imod].xsigma, mods[imod].ysigma, mods[imod].zsigma);
 
       /* if this file, section, and snav exists apply the global tie as XYZ
-          if the file and section exist but the snav does not then
+          - if the file and section exist but the snav does not then
           unset the global tie */
       if (mods[imod].file1 >= 0 && mods[imod].file1 < project_output.num_files) {
         file1 = (struct mbna_file *)&project_output.files[mods[imod].file1];
@@ -1804,19 +1894,76 @@ int main(int argc, char **argv) {
             section1->ysigma = 0.0;
             section1->zsigma = 0.0;
           }
-                section1->inversion_offset_x = 0.0;
-                section1->inversion_offset_y = 0.0;
-                section1->inversion_offset_x_m = 0.0;
-                section1->inversion_offset_y_m = 0.0;
-                section1->inversion_offset_z_m = 0.0;
-                section1->dx_m = 0.0;
-                section1->dy_m = 0.0;
-                section1->dz_m = 0.0;
-                section1->sigma_m = 0.0;
-                section1->dr1_m = 0.0;
-                section1->dr2_m = 0.0;
-                section1->dr3_m = 0.0;
-                section1->rsigma_m = 0.0;
+          section1->inversion_offset_x = 0.0;
+          section1->inversion_offset_y = 0.0;
+          section1->inversion_offset_x_m = 0.0;
+          section1->inversion_offset_y_m = 0.0;
+          section1->inversion_offset_z_m = 0.0;
+          section1->dx_m = 0.0;
+          section1->dy_m = 0.0;
+          section1->dz_m = 0.0;
+          section1->sigma_m = 0.0;
+          section1->dr1_m = 0.0;
+          section1->dr2_m = 0.0;
+          section1->dr3_m = 0.0;
+          section1->rsigma_m = 0.0;
+        }
+      }
+      break;
+
+    case MOD_MODE_SET_GLOBAL_TIE_RELATIVE:
+      fprintf(stderr, "\nCommand set-global-tie-relative=%4.4d:%4.4d:%4.4d/%.3f/%.3f/%.3f/%.3f/%.3f/%.3f\n", mods[imod].file1,
+              mods[imod].section1, mods[imod].snav2, mods[imod].xoffset, mods[imod].yoffset, mods[imod].zoffset,
+              mods[imod].xsigma, mods[imod].ysigma, mods[imod].zsigma);
+
+      /* if this file, section, and snav exists apply the global tie as XYZ
+          relative to the current navigation model
+          - if the file and section exist but the snav does not then
+          unset the global tie */
+      if (mods[imod].file1 >= 0 && mods[imod].file1 < project_output.num_files) {
+        file1 = (struct mbna_file *)&project_output.files[mods[imod].file1];
+        if (mods[imod].section1 >= 0 && mods[imod].section1 < file1->num_sections) {
+          section1 = (struct mbna_section *)&file1->sections[mods[imod].section1];
+          mb_coor_scale(verbose, 0.5 * (section1->latmin + section1->latmax), &mtodeglon, &mtodeglat);
+          if (mods[imod].snav1 >= 0 && mods[imod].snav1 < section1->num_snav) {
+            section1->global_tie_status = MBNA_TIE_XYZ;
+            section1->global_tie_snav = mods[imod].snav1;
+            section1->global_tie_inversion_status = MBNA_INVERSION_NONE;
+            section1->offset_x = section1->snav_lon_offset[section1->global_tie_snav] + mods[imod].xoffset * mtodeglon;
+            section1->offset_y = section1->snav_lat_offset[section1->global_tie_snav] + mods[imod].yoffset * mtodeglat;
+            section1->offset_x_m = section1->offset_x / mtodeglon;
+            section1->offset_y_m = section1->offset_y / mtodeglat;
+            section1->offset_z_m = section1->snav_z_offset[section1->global_tie_snav] + mods[imod].zoffset;
+            section1->xsigma = mods[imod].xsigma;
+            section1->ysigma = mods[imod].ysigma;
+            section1->zsigma = mods[imod].zsigma;
+          }
+          else {
+            section1->global_tie_status = MBNA_TIE_NONE;
+            section1->global_tie_snav = MBNA_SELECT_NONE;
+            section1->global_tie_inversion_status = MBNA_INVERSION_NONE;
+            section1->offset_x = 0.0;
+            section1->offset_y = 0.0;
+            section1->offset_x_m = 0.0;
+            section1->offset_y_m = 0.0;
+            section1->offset_z_m = 0.0;
+            section1->xsigma = 0.0;
+            section1->ysigma = 0.0;
+            section1->zsigma = 0.0;
+          }
+          section1->inversion_offset_x = 0.0;
+          section1->inversion_offset_y = 0.0;
+          section1->inversion_offset_x_m = 0.0;
+          section1->inversion_offset_y_m = 0.0;
+          section1->inversion_offset_z_m = 0.0;
+          section1->dx_m = 0.0;
+          section1->dy_m = 0.0;
+          section1->dz_m = 0.0;
+          section1->sigma_m = 0.0;
+          section1->dr1_m = 0.0;
+          section1->dr2_m = 0.0;
+          section1->dr3_m = 0.0;
+          section1->rsigma_m = 0.0;
         }
       }
       break;
@@ -1926,42 +2073,42 @@ int main(int argc, char **argv) {
       }
       break;
 
-        case MOD_MODE_UNSET_ALL_GLOBAL_TIES:
-            for (int ifile = 0; ifile < project_output.num_files; ifile++) {
-                file = &project_output.files[ifile];
-                for (int isection = 0; isection < file->num_sections; isection++) {
-                    section1 = &file->sections[isection];
-                    if (section1->global_tie_status != MBNA_TIE_NONE) {
-                        section1->global_tie_status = MBNA_TIE_NONE;
-                        section1->global_tie_snav = 0;
-                        section1->global_tie_status = MBNA_TIE_NONE;
-                        section1->global_tie_snav = MBNA_SELECT_NONE;
-                        section1->global_tie_inversion_status = MBNA_INVERSION_NONE;
-                        section1->offset_x = 0.0;
-                        section1->offset_y = 0.0;
-                        section1->offset_x_m = 0.0;
-                        section1->offset_y_m = 0.0;
-                        section1->offset_z_m = 0.0;
-                        section1->xsigma = 0.0;
-                        section1->ysigma = 0.0;
-                        section1->zsigma = 0.0;
-                        section1->inversion_offset_x = 0.0;
-                        section1->inversion_offset_y = 0.0;
-                        section1->inversion_offset_x_m = 0.0;
-                        section1->inversion_offset_y_m = 0.0;
-                        section1->inversion_offset_z_m = 0.0;
-                        section1->dx_m = 0.0;
-                        section1->dy_m = 0.0;
-                        section1->dz_m = 0.0;
-                        section1->sigma_m = 0.0;
-                        section1->dr1_m = 0.0;
-                        section1->dr2_m = 0.0;
-                        section1->dr3_m = 0.0;
-                        section1->rsigma_m = 0.0;
-                    }
-                }
-            }
-            break;
+    case MOD_MODE_UNSET_ALL_GLOBAL_TIES:
+      for (int ifile = 0; ifile < project_output.num_files; ifile++) {
+          file = &project_output.files[ifile];
+          for (int isection = 0; isection < file->num_sections; isection++) {
+              section1 = &file->sections[isection];
+              if (section1->global_tie_status != MBNA_TIE_NONE) {
+                  section1->global_tie_status = MBNA_TIE_NONE;
+                  section1->global_tie_snav = 0;
+                  section1->global_tie_status = MBNA_TIE_NONE;
+                  section1->global_tie_snav = MBNA_SELECT_NONE;
+                  section1->global_tie_inversion_status = MBNA_INVERSION_NONE;
+                  section1->offset_x = 0.0;
+                  section1->offset_y = 0.0;
+                  section1->offset_x_m = 0.0;
+                  section1->offset_y_m = 0.0;
+                  section1->offset_z_m = 0.0;
+                  section1->xsigma = 0.0;
+                  section1->ysigma = 0.0;
+                  section1->zsigma = 0.0;
+                  section1->inversion_offset_x = 0.0;
+                  section1->inversion_offset_y = 0.0;
+                  section1->inversion_offset_x_m = 0.0;
+                  section1->inversion_offset_y_m = 0.0;
+                  section1->inversion_offset_z_m = 0.0;
+                  section1->dx_m = 0.0;
+                  section1->dy_m = 0.0;
+                  section1->dz_m = 0.0;
+                  section1->sigma_m = 0.0;
+                  section1->dr1_m = 0.0;
+                  section1->dr2_m = 0.0;
+                  section1->dr3_m = 0.0;
+                  section1->rsigma_m = 0.0;
+              }
+          }
+      }
+      break;
 
     case MOD_MODE_ADD_CROSSING:
       fprintf(stderr, "\nCommand add-crossing=%4.4d:%4.4d/%4.4d:%4.4d\n", mods[imod].file1, mods[imod].section1,
@@ -2926,8 +3073,8 @@ int main(int argc, char **argv) {
     case MOD_MODE_MERGE_SURVEYS:
       fprintf(stderr, "\nCommand merge-surveys=%2.2d/%2.2d\n", mods[imod].survey1, mods[imod].survey2);
 
-      if (mods[imod].survey1 >= 0 && mods[imod].survey1 < project_output.num_blocks
-          && mods[imod].survey2 >= 0 && mods[imod].survey2 < project_output.num_blocks
+      if (mods[imod].survey1 >= 0 && mods[imod].survey1 < project_output.num_surveys
+          && mods[imod].survey2 >= 0 && mods[imod].survey2 < project_output.num_surveys
           && mods[imod].survey2 == mods[imod].survey1 + 1) {
         // loop over files,resetting block id for all files with blocks (surveys) >= survey2 to be one less
         for (int ifile=0; ifile < project_output.num_files; ifile++) {
@@ -2940,7 +3087,7 @@ int main(int argc, char **argv) {
             fprintf(stderr, "Reset file %d to be in survey %d instead of %d\n", ifile, file1->block, file1->block +1);
           }
         }
-        project_output.num_blocks--;
+        project_output.num_surveys--;
       }
       break;
 
@@ -3054,6 +3201,110 @@ int main(int argc, char **argv) {
                   crossing->file_id_1, crossing->section_1, file2->block, crossing->file_id_2, crossing->section_2);
           crossing->num_ties = 0;
           crossing->status = MBNA_CROSSING_STATUS_SKIP;
+        }
+      }
+      break;
+
+    case MOD_MODE_REMAKE_MB166_FILES:
+
+      // loop over all files copying *.fnv files from the source files and
+      // renaming them *.mb166 files
+      for (int ifile = 0; ifile < project_output.num_files; ifile++) {
+        file = &(project_output.files[ifile]);
+        mb_path fnvfile;
+        mb_path command;
+        sprintf(fnvfile, "%s.fnv", file->path);
+        struct stat file_status;
+        if (stat(fnvfile, &file_status) == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR
+                      && file_status.st_size > 0) {
+          sprintf(command, "cp %s %s/nvs_%4.4d.mb166",
+                  fnvfile, project_output.datadir, ifile);
+          fprintf(stderr, "Executing in shell: %s\n", command);
+          /* int shellstatus = */ system(command);
+        }
+        else if (stat(file->path, &file_status) == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR
+                      && file_status.st_size > 0) {
+          sprintf(command, "mblist -I %s -OtMXYHScRPr=X=Y+X+Y > %s/nvs_%4.4d.mb166",
+                  file->path, project_output.datadir, ifile);
+          fprintf(stderr, "Executing in shell: %s\n", command);
+          /* int shellstatus = */ system(command);
+        }
+      }
+      break;
+
+    case MOD_MODE_FIX_SENSORDEPTH:
+
+      // reset S_NAV sensordepth values from the *.mb166 files
+      for (int ifile = 0; ifile < project_output.num_files; ifile++) {
+        file = &(project_output.files[ifile]);
+        mb_path npath;
+        FILE *nfp = NULL;
+        sprintf(npath, "%s/nvs_%4.4d.mb166", project_output.datadir, ifile);
+        struct stat file_status;
+        if (stat(npath, &file_status) == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR
+                      && file_status.st_size > 0 && (nfp = fopen(npath, "r")) != NULL) {
+          char buffer[BUFFER_MAX];
+          char *result;
+          int time_i[7];
+          double seconds, time_d, navlon, navlat, heading, speed, draft, roll, pitch, heave = 0.0;
+          double *nav_time_d, *nav_lon, *nav_lat, *nav_sensordepth = NULL;
+          int nnav_alloc = 0;
+          while ((result = fgets(buffer, BUFFER_MAX, nfp)) == buffer)
+            nnav_alloc++;
+          rewind(nfp);
+          if (nnav_alloc > 0) {
+            mb_mallocd(verbose, __FILE__, __LINE__, nnav_alloc * sizeof(double), (void **)&nav_time_d, &error);
+            mb_mallocd(verbose, __FILE__, __LINE__, nnav_alloc * sizeof(double), (void **)&nav_lon, &error);
+            mb_mallocd(verbose, __FILE__, __LINE__, nnav_alloc * sizeof(double), (void **)&nav_lat, &error);
+            mb_mallocd(verbose, __FILE__, __LINE__, nnav_alloc * sizeof(double), (void **)&nav_sensordepth, &error);
+            if (error > MB_ERROR_NO_ERROR) {
+              error = MB_ERROR_MEMORY_FAIL;
+              exit(error);
+            }
+          }
+          if (nnav_alloc > 0 && error == MB_ERROR_NO_ERROR) {
+            fprintf(stderr, "Resetting snav_lon, snav_lat, and snav_sensordepth values for file %s\n", file->path);
+            bool done = false;
+            int nnav = 0;
+            while (!done) {
+              int nscan = 0;
+              if ((result = fgets(buffer, BUFFER_MAX, nfp)) != buffer) {
+                done = true;
+              }
+              else if ((nscan = sscanf(buffer, "%d %d %d %d %d %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf", &time_i[0],
+                                       &time_i[1], &time_i[2], &time_i[3], &time_i[4], &seconds, &time_d, &navlon, &navlat,
+                                       &heading, &speed, &draft, &roll, &pitch, &heave)) >= 11) {
+                nav_time_d[nnav] = time_d;
+                nav_lon[nnav] = navlon;
+                nav_lat[nnav] = navlat;
+                nav_sensordepth[nnav] = draft - heave;
+                nnav++;
+              }
+            }
+
+            /* now recalculate the lon lat and sensordepth for each s_nav based on the time_d */
+            int inavtime = 0;
+            for (int isection = 0; isection < file->num_sections; isection++) {
+              section = &file->sections[isection];
+              for (int isnav = 0; isnav < section->num_snav; isnav++) {
+                mb_linear_interp_longitude(verbose, nav_time_d - 1, nav_lon - 1, nnav, section->snav_time_d[isnav], &section->snav_lon[isnav], &inavtime, &error);
+                mb_linear_interp_latitude(verbose, nav_time_d - 1, nav_lat - 1, nnav, section->snav_time_d[isnav], &section->snav_lat[isnav], &inavtime, &error);
+                mb_linear_interp(verbose, nav_time_d - 1, nav_sensordepth - 1, nnav, section->snav_time_d[isnav], &section->snav_sensordepth[isnav], &inavtime, &error);
+              }
+            }
+            mb_freed(verbose, __FILE__, __LINE__, (void **)&nav_time_d, &error);
+            mb_freed(verbose, __FILE__, __LINE__, (void **)&nav_lon, &error);
+            mb_freed(verbose, __FILE__, __LINE__, (void **)&nav_lat, &error);
+            mb_freed(verbose, __FILE__, __LINE__, (void **)&nav_sensordepth, &error);
+            nav_time_d = NULL;
+            nav_lon = NULL;
+            nav_lat = NULL;
+            nav_sensordepth = NULL;
+          }
+          else {
+            fprintf(stderr, "Skipped resetting lon, lat, and sensordepth values for file %s\n", file->path);
+          }
+        fclose(nfp);
         }
       }
       break;

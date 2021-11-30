@@ -16,23 +16,12 @@
 #define _structDefs_h_
 
 #include "matrixArrayCalcs.h"
-#include "myOutput.h"
-#include "trn_log.h"
-
-#include "math.h"
-#include <fstream>
-#include "string.h"
-
-#include <newmatap.h>
-#include <newmatio.h>
+#include "genFilterDefs.h"
+#include "trn_common.h"
 
 // Define safer versions of strdup(char*)
 // If original is NULL, copy is null
 #define  STRDUPNULL(char_star) (char_star != NULL ? strdup(char_star) : NULL)
-
-#ifndef PI
-#define PI 3.14159265358979
-#endif
 
 #define TRN_MAX_BEAMS  91
 
@@ -43,6 +32,42 @@
 #define  TRN_SENSOR_PENCIL  3
 #define  TRN_SENSOR_HOMER   4
 #define  TRN_SENSOR_DELTAT  5
+
+
+// InitVars is a structure that enables TRN reinits
+// with search radius that may be configured at run time.
+// TerrainNav uses a default version in it's constructor.
+// To customize, callers must call reinitFilter, passing in an InitVars
+// instance. Calling reinitFilter is currently the only
+// way to change the values, ensuring that the values are not changed
+// while the filter is running.
+struct InitVars{
+    trn_initvars_t vars;
+    // TODO: incorporate other parameters?
+    // default CTOR
+    InitVars();
+
+    // initializing CTOR
+    InitVars(double x, double y, double z);
+
+    InitVars(d_triplet_t *xyz);
+
+    // copy CTOR
+    InitVars(InitVars *xyz);
+
+    // DTOR
+    ~InitVars();
+
+    d_triplet_t *getXYZ(d_triplet_t *dest);
+
+    int setXYZ(d_triplet_t *src);
+
+    int setXYZ(double x, double y, double z);
+
+    double x();
+    double y();
+    double z();
+};
 
 //!The mapT struct stores data in a gridded Matrix.
 struct mapT {
@@ -198,32 +223,37 @@ struct vehicleT
 //
 struct commsT
 {
-  char msg_type;
-  int  parameter;
-  float vdr;
+    char msg_type;
+    int  parameter;
+    float vdr;
     poseT pt;
     measT mt;
-  char *mapname;
-  char *cfgname;
-  char *particlename;
-  char *logname;
+    d_triplet_t xyz_sdev;
+    d_triplet_t est_nav_ofs;
+    char *mapname;
+    char *cfgname;
+    char *particlename;
+    char *logname;
 
-  // Changing parameter from a char to an int
-  //
-  commsT();
-  commsT(char msg_type);
-  commsT(char msg_type, int parameter);
-  commsT(char msg_type, int parameter, float vdr);
-  commsT(char msg_type, poseT& pt);
-  commsT(char msg_type, int parameter, measT& mt);
-  commsT(char msg_type, int parameter, char *map, char *cfg, char *particles, char *logdir);
-  ~commsT();
+    commsT();
+    commsT(char msg_type);
+    commsT(char msg_type, int parameter);
+    commsT(char msg_type, int parameter, float vdr);
+    commsT(char msg_type, poseT& pt);
+    commsT(char msg_type, int parameter, measT& mt);
+    commsT(char msg_type, int parameter, char *map, char *cfg, char *particles, char *logdir);
+    commsT(char msg_type, double x, double y, double z);
+    commsT(char msg_type, int parameter, double x, double y, double z);
+    commsT(char msg_type, int parameter, double ofs_x, double ofs_y, double ofs_z,
+                 double sdev_x, double sdev_y, double sdev_z);
+    ~commsT();
 
-  char* to_s(char *buf, int buflen); // Write a string representation of the object
+    char* to_s(char *buf, int buflen); // Write a string representation of the object
     void clean();                     // Clear state
     void release();                   // release resources
-  int   serialize(char *buf, int buflen=TRN_MSG_SIZE);
-  int unserialize(char *buf, int buflen=TRN_MSG_SIZE);
+    int   serialize(char *buf, int buflen=TRN_MSG_SIZE);
+    int unserialize(char *buf, int buflen=TRN_MSG_SIZE);
+    static const char *typestr(char type);
 };
 
 // Conversations are initiated by the client through request messages.
@@ -424,6 +454,28 @@ enum
 //
 
 #define TRN_FILT_REINIT 'r'
+
+// Server returns a integer describing the number
+// of reinitializations in the
+// parameter of the returned message.
+//
+
+#define TRN_FILT_REINIT_BOX 'b'
+#define TRN_FILT_REINIT_OFFSET 'o'
+
+// Server sets the values if [xyz]_sdev_init used for filter reinitialization.
+// (particle window variance)
+//
+
+#define TRN_SET_INITSTDDEVXYZ 'x'
+#define TRN_GET_INITSTDDEVXYZ 'X'
+
+// Server sets the values if estNavOffset used for filter reinitialization.
+// (particle window variance)
+//
+
+#define TRN_SET_ESTNAVOFS 'j'
+#define TRN_GET_ESTNAVOFS 'J'
 
 // Server instruct TRN to reinitialize its filter
 //

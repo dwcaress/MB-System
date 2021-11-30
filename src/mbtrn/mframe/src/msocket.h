@@ -154,7 +154,7 @@ typedef struct msock_connection_s msock_connection_t;
 
 /// @typedef enum msock_socket_ctype msock_socket_ctype
 /// @brief socket connection types (TCP, UDP)
-typedef enum {ST_TCP=1,ST_UDP}msock_socket_ctype;
+typedef enum {ST_TCP=1,ST_UDP,ST_UDPM}msock_socket_ctype;
 
 /// @typedef enum msock_status_t msock_status_t
 /// @brief socket states
@@ -303,7 +303,10 @@ extern "C" {
     
     int msock_get_opt(msock_socket_t *self, int opt_name, void *optval, socklen_t *optlen);
     int msock_set_opt(msock_socket_t *self, int opt_name, const void *optval, socklen_t optlen);
-    
+
+    int msock_lget_opt(msock_socket_t *self, int opt_level, int opt_name, void *optval, socklen_t *optlen);
+    int msock_lset_opt(msock_socket_t *self, int opt_level, int opt_name, const void *optval, socklen_t optlen);
+
     int msock_test();
     
 #ifdef __cplusplus

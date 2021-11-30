@@ -13,7 +13,7 @@
  *--------------------------------------------------------------------*/
 /*
  * mbr_sb2100bi.c contains the functions for reading and writing
- * multibeam data in the SB2100B2 format.
+ * multibeam data in the SB2100BI format.
  * These functions include:
  *   mbr_alm_sb2100bi	- allocate read/write memory
  *   mbr_dem_sb2100bi	- deallocate read/write memory
@@ -362,10 +362,6 @@ Record End                      03338           2       varies  unsigned short\n
 \n\r\n\
 "};
 
-/* read & write buffer */
-static char buffer[4 * MBSYS_SB2100_PIXELS];
-
-
 /*--------------------------------------------------------------------*/
 int mbr_info_sb2100b1(int verbose, int *system, int *beams_bath_max, int *beams_amp_max, int *pixels_ss_max, char *format_name,
                       char *system_name, char *format_description, int *numfile, int *filetype, int *variable_beams,
@@ -635,7 +631,8 @@ int mbr_alm_sb2100bi(int verbose, void *mbio_ptr, int *error) {
 	/* allocate memory for data structure */
 	mb_io_ptr->structure_size = sizeof(struct mbsys_sb2100_struct);
 	mb_io_ptr->data_structure_size = 0;
-	const int status = mb_mallocd(verbose, __FILE__, __LINE__, sizeof(struct mbsys_sb2100_struct), &mb_io_ptr->store_data, error);
+	int status = mb_mallocd(verbose, __FILE__, __LINE__, sizeof(struct mbsys_sb2100_struct), &mb_io_ptr->store_data, error);
+	status &= mb_mallocd(verbose, __FILE__, __LINE__, 4 * MBSYS_SB2100_PIXELS, &mb_io_ptr->saveptr1, error);
 
 	/* get store structure pointer */
 	struct mbsys_sb2100_struct *store = (struct mbsys_sb2100_struct *)mb_io_ptr->store_data;
@@ -669,7 +666,8 @@ int mbr_dem_sb2100bi(int verbose, void *mbio_ptr, int *error) {
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* deallocate memory for data descriptor */
-	const int status = mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->store_data, error);
+	int status = mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->store_data, error);
+	status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->saveptr1, error);
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
@@ -682,7 +680,7 @@ int mbr_dem_sb2100bi(int verbose, void *mbio_ptr, int *error) {
 	return (status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_sb2100bi_rd_fh(int verbose, FILE *mbfp, int record_length, int *error) {
+int mbr_sb2100bi_rd_fh(int verbose, FILE *mbfp, char *buffer, int record_length, int *error) {
 	int status = MB_SUCCESS;
 	int nread;
 	int nlast;
@@ -692,6 +690,7 @@ int mbr_sb2100bi_rd_fh(int verbose, FILE *mbfp, int record_length, int *error) {
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbfp:       %p\n", (void *)mbfp);
+		fprintf(stderr, "dbg2       buffer:     %p\n", (void *)buffer);
 		fprintf(stderr, "dbg2       record_len: %d\n", record_length);
 	}
 
@@ -729,7 +728,7 @@ int mbr_sb2100bi_rd_fh(int verbose, FILE *mbfp, int record_length, int *error) {
 	return (status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_sb2100bi_rd_pr(int verbose, FILE *mbfp, struct mbsys_sb2100_struct *store, short record_length, int *error) {
+int mbr_sb2100bi_rd_pr(int verbose, FILE *mbfp, char *buffer, struct mbsys_sb2100_struct *store, short record_length, int *error) {
 	int status = MB_SUCCESS;
 	int read_length;
 	unsigned int checksum_read;
@@ -742,6 +741,7 @@ int mbr_sb2100bi_rd_pr(int verbose, FILE *mbfp, struct mbsys_sb2100_struct *stor
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbfp:       %p\n", (void *)mbfp);
+		fprintf(stderr, "dbg2       buffer:     %p\n", (void *)buffer);
 		fprintf(stderr, "dbg2       store:      %p\n", (void *)store);
 		fprintf(stderr, "dbg2       record_len: %d\n", record_length);
 	}
@@ -854,7 +854,7 @@ int mbr_sb2100bi_rd_pr(int verbose, FILE *mbfp, struct mbsys_sb2100_struct *stor
 	return (status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_sb2100bi_rd_tr(int verbose, FILE *mbfp, struct mbsys_sb2100_struct *store, short record_length, int *error) {
+int mbr_sb2100bi_rd_tr(int verbose, FILE *mbfp, char *buffer, struct mbsys_sb2100_struct *store, short record_length, int *error) {
 	int status = MB_SUCCESS;
 	int read_length;
 	unsigned int checksum_read;
@@ -866,6 +866,7 @@ int mbr_sb2100bi_rd_tr(int verbose, FILE *mbfp, struct mbsys_sb2100_struct *stor
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbfp:       %p\n", (void *)mbfp);
+		fprintf(stderr, "dbg2       buffer:     %p\n", (void *)buffer);
 		fprintf(stderr, "dbg2       store:      %p\n", (void *)store);
 		fprintf(stderr, "dbg2       record_len: %d\n", record_length);
 	}
@@ -927,7 +928,7 @@ int mbr_sb2100bi_rd_tr(int verbose, FILE *mbfp, struct mbsys_sb2100_struct *stor
 	return (status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_sb2100bi_rd_dh(int verbose, FILE *mbfp, struct mbsys_sb2100_struct *store, short record_length, int *error) {
+int mbr_sb2100bi_rd_dh(int verbose, FILE *mbfp, char *buffer, struct mbsys_sb2100_struct *store, short record_length, int *error) {
 	int status = MB_SUCCESS;
 	int read_length;
 	unsigned int checksum_read;
@@ -940,6 +941,7 @@ int mbr_sb2100bi_rd_dh(int verbose, FILE *mbfp, struct mbsys_sb2100_struct *stor
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbfp:       %p\n", (void *)mbfp);
+		fprintf(stderr, "dbg2       buffer:     %p\n", (void *)buffer);
 		fprintf(stderr, "dbg2       store:      %p\n", (void *)store);
 		fprintf(stderr, "dbg2       record_len: %d\n", record_length);
 	}
@@ -1094,7 +1096,7 @@ int mbr_sb2100bi_rd_dh(int verbose, FILE *mbfp, struct mbsys_sb2100_struct *stor
 	return (status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_sb2100bi_rd_br(int verbose, FILE *mbfp, struct mbsys_sb2100_struct *store, short record_length, int *error) {
+int mbr_sb2100bi_rd_br(int verbose, FILE *mbfp, char *buffer, struct mbsys_sb2100_struct *store, short record_length, int *error) {
 	int status = MB_SUCCESS;
 	int read_length;
 	unsigned int checksum_read;
@@ -1107,6 +1109,7 @@ int mbr_sb2100bi_rd_br(int verbose, FILE *mbfp, struct mbsys_sb2100_struct *stor
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbfp:       %p\n", (void *)mbfp);
+		fprintf(stderr, "dbg2       buffer:     %p\n", (void *)buffer);
 		fprintf(stderr, "dbg2       store:      %p\n", (void *)store);
 		fprintf(stderr, "dbg2       record_len: %d\n", record_length);
 	}
@@ -1201,7 +1204,7 @@ int mbr_sb2100bi_rd_br(int verbose, FILE *mbfp, struct mbsys_sb2100_struct *stor
 	return (status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_sb2100bi_rd_sr(int verbose, FILE *mbfp, struct mbsys_sb2100_struct *store, short record_length, int *error) {
+int mbr_sb2100bi_rd_sr(int verbose, FILE *mbfp, char *buffer, struct mbsys_sb2100_struct *store, short record_length, int *error) {
 	int status = MB_SUCCESS;
 	int read_length;
 	unsigned int checksum_read;
@@ -1216,6 +1219,7 @@ int mbr_sb2100bi_rd_sr(int verbose, FILE *mbfp, struct mbsys_sb2100_struct *stor
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbfp:       %p\n", (void *)mbfp);
+		fprintf(stderr, "dbg2       buffer:     %p\n", (void *)buffer);
 		fprintf(stderr, "dbg2       store:      %p\n", (void *)store);
 		fprintf(stderr, "dbg2       record_len: %d\n", record_length);
 	}
@@ -1311,6 +1315,7 @@ int mbr_sb2100bi_rd_data(int verbose, void *mbio_ptr, char *store_ptr, int *erro
 	/* get pointer to raw data structure */
 	struct mbsys_sb2100_struct *store = (struct mbsys_sb2100_struct *)store_ptr;
 	FILE *mbfp = mb_io_ptr->mbfp;
+	char *buffer = (char *) mb_io_ptr->saveptr1;
 
 	/* get saved values */
 	char *label = (char *)mb_io_ptr->save_label;
@@ -1389,7 +1394,7 @@ int mbr_sb2100bi_rd_data(int verbose, void *mbio_ptr, char *store_ptr, int *erro
 			*label_save_flag = true;
 		}
 		else if (type == MBF_SB2100BI_FH) {
-			status = mbr_sb2100bi_rd_fh(verbose, mbfp, record_length_fh, error);
+			status = mbr_sb2100bi_rd_fh(verbose, mbfp, buffer, record_length_fh, error);
 			if (status == MB_SUCCESS) {
 				done = false;
 				expect = MBF_SB2100BI_NONE;
@@ -1397,21 +1402,21 @@ int mbr_sb2100bi_rd_data(int verbose, void *mbio_ptr, char *store_ptr, int *erro
 			}
 		}
 		else if (type == MBF_SB2100BI_PR) {
-			status = mbr_sb2100bi_rd_pr(verbose, mbfp, store, record_length, error);
+			status = mbr_sb2100bi_rd_pr(verbose, mbfp, buffer, store, record_length, error);
 			if (status == MB_SUCCESS) {
 				done = true;
 				store->kind = MB_DATA_VELOCITY_PROFILE;
 			}
 		}
 		else if (type == MBF_SB2100BI_TR) {
-			status = mbr_sb2100bi_rd_tr(verbose, mbfp, store, record_length, error);
+			status = mbr_sb2100bi_rd_tr(verbose, mbfp, buffer, store, record_length, error);
 			if (status == MB_SUCCESS) {
 				done = true;
 				store->kind = MB_DATA_COMMENT;
 			}
 		}
 		else if (type == MBF_SB2100BI_DH) {
-			status = mbr_sb2100bi_rd_dh(verbose, mbfp, store, record_length, error);
+			status = mbr_sb2100bi_rd_dh(verbose, mbfp, buffer, store, record_length, error);
 			if (status == MB_SUCCESS) {
 				done = false;
 				store->kind = MB_DATA_DATA;
@@ -1419,7 +1424,7 @@ int mbr_sb2100bi_rd_data(int verbose, void *mbio_ptr, char *store_ptr, int *erro
 			}
 		}
 		else if (type == MBF_SB2100BI_BR) {
-			status = mbr_sb2100bi_rd_br(verbose, mbfp, store, record_length, error);
+			status = mbr_sb2100bi_rd_br(verbose, mbfp, buffer, store, record_length, error);
 			if (status == MB_SUCCESS && expect == MBF_SB2100BI_BR) {
 				done = false;
 				store->kind = MB_DATA_DATA;
@@ -1437,7 +1442,7 @@ int mbr_sb2100bi_rd_data(int verbose, void *mbio_ptr, char *store_ptr, int *erro
 			}
 		}
 		else if (type == MBF_SB2100BI_SR) {
-			status = mbr_sb2100bi_rd_sr(verbose, mbfp, store, record_length, error);
+			status = mbr_sb2100bi_rd_sr(verbose, mbfp, buffer, store, record_length, error);
 			if (status == MB_SUCCESS && expect == MBF_SB2100BI_SR) {
 				done = true;
 			}
@@ -1592,7 +1597,7 @@ int mbr_sb2100bi_wr_fh(int verbose, FILE *mbfp, int *error) {
 	return (status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_sb2100bi_wr_pr(int verbose, FILE *mbfp, struct mbsys_sb2100_struct *store, int *error) {
+int mbr_sb2100bi_wr_pr(int verbose, FILE *mbfp, char *buffer, struct mbsys_sb2100_struct *store, int *error) {
 	int status = MB_SUCCESS;
 	short record_length;
 	int write_length;
@@ -1604,6 +1609,7 @@ int mbr_sb2100bi_wr_pr(int verbose, FILE *mbfp, struct mbsys_sb2100_struct *stor
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbfp:       %p\n", (void *)mbfp);
+		fprintf(stderr, "dbg2       buffer:     %p\n", (void *)buffer);
 		fprintf(stderr, "dbg2       store:      %p\n", (void *)store);
 	}
 
@@ -1725,7 +1731,7 @@ int mbr_sb2100bi_wr_pr(int verbose, FILE *mbfp, struct mbsys_sb2100_struct *stor
 	return (status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_sb2100bi_wr_tr(int verbose, FILE *mbfp, struct mbsys_sb2100_struct *store, int *error) {
+int mbr_sb2100bi_wr_tr(int verbose, FILE *mbfp, char *buffer, struct mbsys_sb2100_struct *store, int *error) {
 	int status = MB_SUCCESS;
 	short record_length;
 	int write_length;
@@ -1737,6 +1743,7 @@ int mbr_sb2100bi_wr_tr(int verbose, FILE *mbfp, struct mbsys_sb2100_struct *stor
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbfp:       %p\n", (void *)mbfp);
+		fprintf(stderr, "dbg2       buffer:     %p\n", (void *)buffer);
 		fprintf(stderr, "dbg2       store:      %p\n", (void *)store);
 	}
 
@@ -1813,7 +1820,7 @@ int mbr_sb2100bi_wr_tr(int verbose, FILE *mbfp, struct mbsys_sb2100_struct *stor
 	return (status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_sb2100bi_wr_dh(int verbose, FILE *mbfp, struct mbsys_sb2100_struct *store, int *error) {
+int mbr_sb2100bi_wr_dh(int verbose, FILE *mbfp, char *buffer, struct mbsys_sb2100_struct *store, int *error) {
 	int status = MB_SUCCESS;
 	short record_length;
 	int write_length;
@@ -1825,6 +1832,7 @@ int mbr_sb2100bi_wr_dh(int verbose, FILE *mbfp, struct mbsys_sb2100_struct *stor
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbfp:       %p\n", (void *)mbfp);
+		fprintf(stderr, "dbg2       buffer:     %p\n", (void *)buffer);
 		fprintf(stderr, "dbg2       store:      %p\n", (void *)store);
 	}
 
@@ -1988,7 +1996,7 @@ int mbr_sb2100bi_wr_dh(int verbose, FILE *mbfp, struct mbsys_sb2100_struct *stor
 	return (status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_sb2100bi_wr_br(int verbose, FILE *mbfp, struct mbsys_sb2100_struct *store, int *error) {
+int mbr_sb2100bi_wr_br(int verbose, FILE *mbfp, char *buffer, struct mbsys_sb2100_struct *store, int *error) {
 	int status = MB_SUCCESS;
 	short record_length;
 	int write_length;
@@ -2000,6 +2008,7 @@ int mbr_sb2100bi_wr_br(int verbose, FILE *mbfp, struct mbsys_sb2100_struct *stor
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbfp:       %p\n", (void *)mbfp);
+		fprintf(stderr, "dbg2       buffer:     %p\n", (void *)buffer);
 		fprintf(stderr, "dbg2       store:      %p\n", (void *)store);
 	}
 
@@ -2101,7 +2110,7 @@ int mbr_sb2100bi_wr_br(int verbose, FILE *mbfp, struct mbsys_sb2100_struct *stor
 	return (status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_sb2100bi_wr_sr(int verbose, FILE *mbfp, struct mbsys_sb2100_struct *store, int *error) {
+int mbr_sb2100bi_wr_sr(int verbose, FILE *mbfp, char *buffer, struct mbsys_sb2100_struct *store, int *error) {
 	int status = MB_SUCCESS;
 	short record_length;
 	int write_length;
@@ -2115,6 +2124,7 @@ int mbr_sb2100bi_wr_sr(int verbose, FILE *mbfp, struct mbsys_sb2100_struct *stor
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbfp:       %p\n", (void *)mbfp);
+		fprintf(stderr, "dbg2       buffer:     %p\n", (void *)buffer);
 		fprintf(stderr, "dbg2       store:      %p\n", (void *)store);
 	}
 
@@ -2212,6 +2222,7 @@ int mbr_sb2100bi_wr_data(int verbose, void *mbio_ptr, char *store_ptr, int *erro
 	/* get pointer to raw data structure */
 	struct mbsys_sb2100_struct *store = (struct mbsys_sb2100_struct *)store_ptr;
 	FILE *mbfp = mb_io_ptr->mbfp;
+	char *buffer = (char *) mb_io_ptr->saveptr1;
 
 	int status = MB_SUCCESS;
 
@@ -2222,15 +2233,15 @@ int mbr_sb2100bi_wr_data(int verbose, void *mbio_ptr, char *store_ptr, int *erro
 	}
 
 	if (store->kind == MB_DATA_VELOCITY_PROFILE) {
-		status = mbr_sb2100bi_wr_pr(verbose, mbfp, store, error);
+		status = mbr_sb2100bi_wr_pr(verbose, mbfp, buffer, store, error);
 	}
 	else if (store->kind == MB_DATA_COMMENT) {
-		status = mbr_sb2100bi_wr_tr(verbose, mbfp, store, error);
+		status = mbr_sb2100bi_wr_tr(verbose, mbfp, buffer, store, error);
 	}
 	else if (store->kind == MB_DATA_DATA) {
-		status = mbr_sb2100bi_wr_dh(verbose, mbfp, store, error);
-		status = mbr_sb2100bi_wr_br(verbose, mbfp, store, error);
-		status = mbr_sb2100bi_wr_sr(verbose, mbfp, store, error);
+		status = mbr_sb2100bi_wr_dh(verbose, mbfp, buffer, store, error);
+		status = mbr_sb2100bi_wr_br(verbose, mbfp, buffer, store, error);
+		status = mbr_sb2100bi_wr_sr(verbose, mbfp, buffer, store, error);
 	}
 	else {
 		status = MB_FAILURE;

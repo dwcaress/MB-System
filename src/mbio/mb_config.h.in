@@ -24,23 +24,23 @@
 /* Define to 1 if you have the `m' library (-lm). */
 #undef HAVE_LIBM
 
+/* Define to 1 if you have the `pthread' library (-lpthread). */
+#undef HAVE_LIBPTHREAD
+
 /* Have malloc.h */
 #undef HAVE_MALLOC_H
 
-/* Define to 1 if you have the <memory.h> header file. */
-#undef HAVE_MEMORY_H
-
-/* Define to 1 if you have the <rpc/rpc.h> header file. */
+/* Have rpc/rpc.h */
 #undef HAVE_RPC_RPC_H
-
-/* Define to 1 if you have the <rpc/types.h> header file. */
-#undef HAVE_RPC_TYPES_H
 
 /* Define to 1 if you have the `sincos' function. */
 #undef HAVE_SINCOS
 
 /* Define to 1 if you have the <stdint.h> header file. */
 #undef HAVE_STDINT_H
+
+/* Define to 1 if you have the <stdio.h> header file. */
+#undef HAVE_STDIO_H
 
 /* Define to 1 if you have the <stdlib.h> header file. */
 #undef HAVE_STDLIB_H
@@ -56,12 +56,6 @@
 
 /* Define to 1 if you have the <sys/types.h> header file. */
 #undef HAVE_SYS_TYPES_H
-
-/* Define to 1 if you have the <tirpc/rpc/rpc.h> header file. */
-#undef HAVE_TIRPC_RPC_RPC_H
-
-/* Define to 1 if you have the <tirpc/rpc/types.h> header file. */
-#undef HAVE_TIRPC_RPC_TYPES_H
 
 /* Define to 1 if you have the <unistd.h> header file. */
 #undef HAVE_UNISTD_H
@@ -85,7 +79,7 @@
 #undef MBTRN_ENABLED
 
 /* Build graphical tools */
-#undef MBUTILS_ENABLED
+#undef MB_GRAPHICAL_ENABLED
 
 /* Build tools using OpenCV */
 #undef OPENCVTOOLS_ENABLED
@@ -117,7 +111,9 @@
 /* Build tools using Qt5 */
 #undef QTTOOLS_ENABLED
 
-/* Define to 1 if you have the ANSI C header files. */
+/* Define to 1 if all of the C90 standard headers exist (not just the ones
+   required in a freestanding environment). This macro is provided for
+   backward compatibility; new code need not use it. */
 #undef STDC_HEADERS
 
 /* Building unit tests */

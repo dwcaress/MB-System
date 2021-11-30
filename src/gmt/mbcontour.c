@@ -492,7 +492,7 @@ int GMT_mbcontour_parse(struct GMT_CTRL *GMT, struct MBCONTOUR_CTRL *Ctrl, struc
 			break;
 		case 'p': /* Sets the ping averaging */
 			Ctrl->p.active = true;
-			Ctrl->p.pings = atoi(opt->arg);
+			Ctrl->p.pings = (int)strtol(opt->arg, NULL, 10);
 			if (Ctrl->p.pings < 0) {
 				GMT_Report(API, GMT_MSG_NORMAL, "Error -p option: Don't invent, number of pings must be >= 0\n");
 				Ctrl->p.pings = 1;

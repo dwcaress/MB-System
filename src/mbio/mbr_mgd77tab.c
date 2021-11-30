@@ -25,6 +25,7 @@
  *
  */
 
+#include <assert.h>
 #include <math.h>
 #include <stdio.h>
 #include <string.h>
@@ -872,9 +873,9 @@ int mbr_mgd77tab_rd_data(int verbose, void *mbio_ptr, int *error) {
 
 		/* else check for header lines */
 		else if (strncmp(line, "SURVEY_ID", 9) == 0 || ntabs > 26) {
+      memset(data->comment, 0, MB_COMMENT_MAXLINE);
+			strncpy(data->comment, line, MB_COMMENT_MAXLINE - 1);
 			data->kind = MB_DATA_HEADER;
-			strncpy(data->comment, line, line_len - 2);
-			data->comment[line_len - 2] = '\0';
 		}
 
 		/* else parse data record */
@@ -1424,13 +1425,15 @@ int mbr_mgd77tab_wr_data(int verbose, void *mbio_ptr, void *data_ptr, int *error
 		fprintf(stderr, "dbg5       data->comment:              %s\n", data->comment);
 	}
 
-	char line[MB_COMMENT_MAXLINE] = "";
+	char line[MB_COMMENT_MAXLINE] = {0};
 
 	/* handle the data */
 	if (data->kind == MB_DATA_HEADER) {
+    assert(strlen(data->comment) < MB_COMMENT_MAXLINE - 2);
 		sprintf(line, "%s\r\n", data->comment);
 	}
 	else if (data->kind == MB_DATA_COMMENT) {
+    assert(strlen(data->comment) < MB_COMMENT_MAXLINE - 3);
 		sprintf(line, "#%s\r\n", data->comment);
 	}
 	else if (data->kind == MB_DATA_DATA) {

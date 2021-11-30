@@ -3,17 +3,17 @@
 ## Contents
 * [Synopsis](#synopsis)
 * [File Contents](#file-contents)
- * [Environment File](#environment-file)
- * [Config File](#mbtrnpp-config-file)
-* [Operation Overview](#operation-overview)
- * [Example](#example)
- * [Tips](#tips)
- * [Output](#output)
+  * [Environment File](#environment-file)
+  * [Config File](#mbtrnpp-config-file)
+* [Operation Overview](#operation-overview)  
+  * [Example](#example)
+  * [Tips](#tips)
+  * [Output](#output)
 * [Troubleshooting](#troubleshooting)
 * [Appendices](#appendices)
- * [Building MB System](#building-mb-system)
- * [Code Signing gdb](#code-signing-ggdb)
- * [Formatting Markdown](#formatting-markdown)
+  * [Building MB System](#building-mb-system)
+  * [Code Signing gdb](#code-signing-ggdb)
+  * [Formatting Markdown](#formatting-markdown)
 
 <div style="page-break-after: always">  </div>
 
@@ -53,6 +53,7 @@ The environment file is typically used before running mbtrnpp, and defines these
 | -------------: | :----------------------------------- | :----------------------------- |  
 | TRN_RESON_HOST | mbtrnpp socket input IP address      | "192.168.100.1" |
 | TRN_HOST       | TRN server host                      | "192.168.100.100" |
+| TRN_GROUP      | TRN multicast group                  | "239.255.0.16" |
 | TRN_MBTRNDIR   | mbtrnpp executable directory         | "/usr/local/bin"|
 | TRN_MAPFILES   | TRN server map file directory path   | "/home/mappingauv/maps"|
 | TRN_DATAFILES  | TRN server data file directory path  | "/home/mappingauv/config"|
@@ -71,7 +72,8 @@ TRN_RESON_HOST
 
     Source:
      * environment variable if set
-     * gethostbyname/inet_ntoa
+     * config file definition
+     * command line definition
      * defaults to "localhost" if errors occur
 
 
@@ -82,8 +84,18 @@ TRN_HOST
 
     Source:
      * environment variable if set
-     * gethostbyname/inet_ntoa
      * defaults to "localhost" if errors occur
+
+TRN_GROUP
+
+    Description:
+     Multicast group IP address
+     Applies to trnum output interface
+
+    Source:
+     * environment variable if set
+     * defaults to TRNUM_GROUP_DFL in mbtrnpp.c (239.255.0.16) 
+
 
 TRN_LOGFILES
 
@@ -175,6 +187,7 @@ The annotated example configuration file in MB-System ```src/mbtrn/tools/mbtrnpp
 | delay=\<s\>                  | MB-1 processing loop delay (s)                                |  0 | |
 | statsec=\<s\>                | TRN profiling logging interval (s)                            | 30 | |
 | trn-en=\<bool\>              | enable/disable TRN processing                                 |  Y | use Y/1: enable N/0: disable |
+| trn-dev=\<char\*\>              | specify sonar (reson only)                                 |  see Note [6]   |
 | trn-utm=\<n\>                | UTM zone for TRN processing (int, 1-60)                       |  9 | 9:axial 10:monterey bay      |
 | trn-map=\<path\>             | TRN server map file path                                      | /home/mappingauv/maps/AxialTiles  | required for TRN processing; may be a directory path for tiled map |
 | trn-cfg=\<path\>             | TRN configuration file                                        | TRN_DATAFILES/mappingAUV_specs.cfg| required for TRN processing|
@@ -238,15 +251,37 @@ The annotated example configuration file in MB-System ```src/mbtrn/tools/mbtrnpp
 [5] trn-out spec list elements
 ```
  trnsvr:<ip>:<port>  - enable trn server interface (use default port if unspecified)
+ trnusvr:<ip>:<port> - enable TRN update server
+ trnumsvr:<group>    - enable TRN UDP multicast server
  trnu                - enable TRN update ascii logging
  trnub               - enable TRN update binary logging
- trnusvr:<ip>:<port> - enable TRN update server
  sout                - enable TRN output to stdout
  serr                - enable TRN output to stderr
  debug               - enable TRN debug output
  notrnsvr            - disable trn server interface
  notrnusvr           - disable TRN update server
 
+ Note that mnemonics may be used in the config files to load selected parameters from the environment:
+   <ip> may be specified using mnemonic TRN_HOST
+   <group> may be specified using mnemonic TRN_GROUP
+e.g.
+  trn-out=trnsvr:TRN_HOST:28000,trnu,trnusvr:TRN_HOST:8000,trnumsvr:TRN_GROUP
+```
+
+[6] trn-dev sonar selection values
+```
+7125_200 - Seabat 7125 200 kHz
+7125_400 - Seabat 7125 400 kHz
+T50      - T50-S, T50-R
+
+The mnemonic is translated to a numeric ID that is passed into the reson reader, where it is 
+mapped to the correct device ID and system enumerator required for the subscription message.
+
+The mnemonic values and associated IDs are defined in r7kc.h
+The mbtrnpp default is set using mbtrnpp.c:OPT_TRN_DEV_DFL
+
+The option may be set for mbtrnpp and mbtrnpp.sh using --trn-dev
+The option may be set for frames7k and stream7k using --dev
 ```
 <div style="page-break-after: always">  </div>
 
@@ -333,7 +368,9 @@ env|grep TRN
 * Tools like netstat and wireshark are potentially helpful
 
 ### Segfaults
-gdb (or ggdb on OSX) are useful for debugging segfaults
+
+segfaults are uncommon in the production code. In the event that one occurs, 
+gdb (or ggdb on OSX) are useful for debugging; OSX and linux are slightly different, and may be need to run under libtool.
 
 ```
 # on linux
@@ -395,22 +432,92 @@ CFLAGS="-I/opt/local/include -Wall" LDFLAGS=-L/opt/local/lib CPPFLAGS="-I/opt/lo
 
 ### Cygwin
 
-Building for cygwin requires the --disable-dependency-tracking configure option, an make must be invoked with LDFLAGS=-no-undefined:
+
+Cygwin dependencies:
+
+Use the cygwin setup utility to install the following packages:
 
 ```
-./configure --enable-mbtrn --enable-mbtnav --disable-mbtools —-disable-dependency-tracking 
+gcc-g++
+rpc-devel, gambas3-devel, libproj-devel, libproj12, libnetcdf-devel, libnetcdf19
+libgdal-devl, libgdal19, libfftw3-devel, libfftw3, libpcre, glib, ghostscript, cmake, curl
+```
+The generic mapping tools package (libgmt) is also required, but must be built and installed from source.
+The source package may be downloaded from the project website:
+```
+https://www.generic-mapping-tools.org/download
+support data must also be downloaded from
+https://github.com/GenericMappingTools/gshhg-gmt/releases/download/2.3.7/gshhg-gmt-2.3.7.tar.gz
+```
+There is a windows installer on the gmt project website, but it does not install the required libraries and headers.
+Full instructions for building from source are available on the project website
+
+```
+https://github.com/GenericMappingTools/gmt/blob/master/BUILDING.md
+```
+
+The basic steps include:
+
+	download and uncompress the source tar.gz
+	cd gmt-<version>
+	optionally copy and modify 
+	   cmake/ConfigUserTemplate.cmake -> cmake/ConfigUser.cmake 
+	   cmake/ConfigUserAdvancedTemplate.cmake -. cmake/ConfigUserAdvanced.cmake
+	mkdir build
+	cd build
+	cmake ..
+	make
+	make install
+
+Building mbtrnpp for cygwin requires the --disable-dependency-tracking configure option, and make must be invoked with LDFLAGS=-no-undefined:
+
+```
+./configure  —-disable-dependency-tracking  --enable-mbtrn --enable-mbtnav --disable-mbtools
 make clean
 make LDFLAGS=-no-undefined
 
 ```
-*Note --disable-dependency-tracking configure option may have an ordering sensitivity:*
-	./configure --enable-mbtrn --enable-mbtnav --disable-mbtools —-disable-dependency-tracking 
-fails but
-	./configure —-disable-dependency-tracking --enable-mbtrn --enable-mbtnav --disable-mbtools  
-does not fail
-It may only appear initially and clear up no subsequent builds
 
+*Note --disable-dependency-tracking configure option may have an ordering sensitivity:*  
 
+```
+./configure —-disable-dependency-tracking --enable-mbtrn --enable-mbtnav --disable-mbtools  
+```
+
+succeeds but
+
+```
+./configure --enable-mbtrn --enable-mbtnav --disable-mbtools —-disable-dependency-tracking 
+```
+
+fails. The issue may only appear initially and clear up on subsequent builds.
+
+*Note: undefined reference to PSL_... errors may occur during src/gmt build.*
+This appears to happen because gmt dependencies are generated configure using
+
+```
+gmt-config --libs 
+```
+which returns 
+
+```
+-L/usr/local/lib -lgmt
+```
+but doesn't include a dependency on libpostscriptlight
+A workaround is to include the necessary args in LDFLAGS passed to make (AFTER mbtrn has built)
+
+```
+make LDFLAGS="-no-undefined -L/usrlocal/lib -lpostscriptlight"
+```
+This warning may be ignored
+```
+*** Warning: linker path does not have real file for library -lpostscriptlight.dll.a.
+*** I have the capability to make that library automatically link in when
+*** you link to this library.  But I can only do this if you have a
+*** shared version of the library, which you do not appear to have
+*** because I did check the linker path looking for a file starting
+*** with libpostscriptlight.dll.a but no candidates were found. (...for file magic test)
+```
 ----
 
 ----

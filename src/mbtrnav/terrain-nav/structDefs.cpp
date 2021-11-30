@@ -7,6 +7,8 @@
  *****************************************************************************/
 
 #include "structDefs.h"
+#include "trn_log.h"
+#include "MathP.h"
 
 // Use a macro to standardize extracting the message from an exception
 //
@@ -19,6 +21,77 @@
 #endif
 
 #define BEAM_DEBUG 0
+
+/*----------------------------------------------------------------------------
+ /InitVars member functions
+ /----------------------------------------------------------------------------*/
+InitVars::InitVars(){
+    // initialize using compile-time defaults
+    vars.xyz_sdev.x = X_STDDEV_INIT;
+    vars.xyz_sdev.y = Y_STDDEV_INIT;
+    vars.xyz_sdev.z = Z_STDDEV_INIT;
+}
+
+// initializing CTOR
+InitVars::InitVars(double x, double y, double z){
+    vars.xyz_sdev.x = x;
+    vars.xyz_sdev.y = y;
+    vars.xyz_sdev.z = z;
+}
+
+InitVars::InitVars(d_triplet_t *xyz){
+    if(NULL!=xyz){
+        vars.xyz_sdev.x = xyz->x;
+        vars.xyz_sdev.y = xyz->y;
+        vars.xyz_sdev.z = xyz->z;
+    }
+}
+
+// copy CTOR
+InitVars::InitVars(InitVars *xyz){
+    if(NULL!=xyz){
+        vars.xyz_sdev.x = xyz->x();
+        vars.xyz_sdev.y = xyz->y();
+        vars.xyz_sdev.z = xyz->z();
+    }
+}
+
+// DTOR
+InitVars::~InitVars(){};
+
+d_triplet_t *InitVars::getXYZ(d_triplet_t *dest){
+    d_triplet_t *retval=NULL;
+    if(NULL!=dest){
+        memcpy(dest, &vars.xyz_sdev, sizeof(d_triplet_t));
+        retval=dest;
+    }
+    return retval;
+}
+
+int InitVars::setXYZ(d_triplet_t *src){
+    int retval=-1;
+    if(NULL!=src){
+        retval = setXYZ(src->x, src->y, src->z);
+    }
+    return retval;
+}
+
+int InitVars::setXYZ(double x, double y, double z){
+    vars.xyz_sdev.x = x;
+    vars.xyz_sdev.y = y;
+    vars.xyz_sdev.z = z;
+    return 0;
+}
+
+double InitVars::x(){
+    return vars.xyz_sdev.x;
+}
+double InitVars::y(){
+    return vars.xyz_sdev.y;
+}
+double InitVars::z(){
+    return vars.xyz_sdev.z;
+}
 
 /*----------------------------------------------------------------------------
 /mapT member functions
@@ -478,84 +551,73 @@ measT::measT() {
 /*----------------------------------------------------------------------------
 /measT ctor with datatype and numMeas
 /----------------------------------------------------------------------------*/
+
 measT::measT(unsigned int nummeas, int datatype)
 {
-	time = phi = theta = psi = x = y = z = 0.;
-	dataType = datatype;
-	numMeas = nummeas;
-	ping_number = 0;
-	covariance = new double[numMeas];
-	memset(covariance, 0, sizeof(double)*numMeas);
-	ranges = new double[numMeas];
-	memset(ranges, 0, sizeof(double)*numMeas);
-	crossTrack = new double[numMeas];
-	memset(crossTrack, 0, sizeof(double)*numMeas);
-	alongTrack = new double[numMeas];
-	memset(alongTrack, 0, sizeof(double)*numMeas);
-	altitudes = new double[numMeas];
-	memset(altitudes, 0, sizeof(double)*numMeas);
-	alphas = new double[numMeas];
-	memset(alphas, 0, sizeof(double)*numMeas);
-	measStatus = new bool[numMeas];
-	memset(measStatus, 0, sizeof(double)*numMeas);
-	beamNums = new int[numMeas];
-	memset(beamNums, 0, sizeof(double)*numMeas);
+    time = phi = theta = psi = x = y = z = 0.;
+    dataType = datatype;
+    numMeas = nummeas;
+    ping_number = 0;
+    size_t asz = numMeas*sizeof(double);
+    size_t iasz = numMeas*sizeof(int);
+    size_t basz = numMeas*sizeof(bool);
+
+    // use malloc b/c some apps (Replay)
+    // need to resize them and realloc
+    // is not guaranteed to work correctly
+    // with new/delete
+    covariance = (double *)malloc(asz);
+    memset(covariance, 0, asz);
+    ranges = (double *)malloc(asz);
+    memset(ranges, 0, asz);
+    crossTrack = (double *)malloc(asz);
+    memset(crossTrack, 0, asz);
+    alongTrack = (double *)malloc(asz);
+    memset(alongTrack, 0, asz);
+    altitudes = (double *)malloc(asz);
+    memset(altitudes, 0, asz);
+    alphas = (double *)malloc(asz);
+    memset(alphas, 0, asz);
+    measStatus = (bool *)malloc(basz);
+    memset(measStatus, 0, basz);
+    beamNums = (int *)malloc(iasz);
+    memset(beamNums, 0, iasz);
+
 }
 
 measT::~measT() {
 	// although clean() exists
     // maybe preferable not to
     // call methods in destructor
-    delete [] covariance;
-    delete [] ranges;
-    delete [] crossTrack;
-    delete [] alongTrack;
-    delete [] altitudes;
-    delete [] alphas;
-    delete [] measStatus;
-    delete [] beamNums;
+    free(covariance);
+    free(ranges);
+    free(crossTrack);
+    free(alongTrack);
+    free(altitudes);
+    free(alphas);
+    free(measStatus);
+    free(beamNums);
 }
 
 // release all dynamic memory resources of the struct
 void measT::clean() {
-	if(covariance != NULL) {
-		delete [] covariance;
-	}
+    
+    free(covariance);
+    free(ranges);
+    free(crossTrack);
+    free(alongTrack);
+    free(altitudes);
+    free(alphas);
+    free(measStatus);
+    free(beamNums);
+
 	covariance = NULL;
-
-	if(ranges != NULL) {
-		delete [] ranges;
-	}
 	ranges = NULL;
-
-	if(crossTrack != NULL) {
-		delete [] crossTrack;
-	}
 	crossTrack = NULL;
-
-	if(alongTrack != NULL) {
-		delete [] alongTrack;
-	}
 	alongTrack = NULL;
-
-	if(altitudes != NULL) {
-		delete [] altitudes;
-	}
 	altitudes = NULL;
-
-	if(alphas != NULL) {
-		delete [] alphas;
-	}
 	alphas = NULL;
-
-	if(measStatus != NULL) {
-		delete [] measStatus;
-	}
 	measStatus = NULL;
-
-	if(beamNums != NULL) {
-		delete [] beamNums;
-	}
 	beamNums = NULL;
 
 	time = 0.;
@@ -571,29 +633,31 @@ measT& measT::operator=(measT& rhs) {
 		//if the two measT structs have different datatype or number of
 		//measurements, we need to delete and recreate memory for the
 		//new measT struct.
+        size_t dasz = rhs.numMeas*sizeof(double);
+        size_t iasz = rhs.numMeas*sizeof(int);
+        size_t basz = rhs.numMeas*sizeof(bool);
 		if(numMeas != rhs.numMeas || dataType != rhs.dataType) {
 			this->clean();
 			if(rhs.dataType == TRN_SENSOR_MB ||
 			   rhs.dataType == TRN_SENSOR_HOMER) {
-				crossTrack = new double[rhs.numMeas];
-				alongTrack = new double[rhs.numMeas];
-				altitudes = new double[rhs.numMeas];
-				ranges = new double[rhs.numMeas];
+                crossTrack = (double *)realloc(crossTrack, dasz);
+                alongTrack = (double *)realloc(alongTrack, dasz);
+                altitudes = (double *)realloc(altitudes, dasz);
+                ranges = (double *)realloc(ranges, dasz);
 			} else {
-				ranges = new double[rhs.numMeas];
+                ranges = (double *)realloc(ranges, dasz);
 			}
 
 			// MB-sys beam numbers
-			if(rhs.dataType == TRN_SENSOR_MB)
-			  beamNums = new int[rhs.numMeas];
+            if(rhs.dataType == TRN_SENSOR_MB)
+                beamNums = (int *)realloc(beamNums, iasz);
 
-   		alphas = new double[rhs.numMeas];
-			measStatus = new bool[rhs.numMeas];
+            alphas = (double *)realloc(alphas, dasz);
+            measStatus = (bool *)realloc(measStatus, basz);
 		}
 
 		if(rhs.covariance != NULL) {
-			if (covariance) delete [] covariance;
-			covariance = new double[rhs.numMeas];
+            covariance = (double *)realloc(covariance, dasz);
 		}
 
 		//copy non-array values
@@ -842,21 +906,25 @@ int measT::unserialize(char* buf, int buflen) { //TODO buflen is unused?
 	  printf("\n");
 #endif
 
-		measStatus = new bool[nm];
+        measStatus = (bool *)realloc(measStatus, nm*sizeof(bool));
 		for(int i = 0; i < nm; i++) {
 			measStatus[i] = (buf[len++] != 0 ? true : false);
 #if BEAM_DEBUG
 			printf("\t\tRecv measStatus[%d] == %d\n", i, measStatus[i]);
 #endif
 		}
-		// Using ranges or tracks and altitudes?
+        size_t dasz = nm*sizeof(double);
+        size_t iasz = nm*sizeof(int);
+
+        // Using ranges or tracks and altitudes?
 		//
 		if(abs(dataType) == TRN_SENSOR_MB ||
 		   abs(dataType) == TRN_SENSOR_HOMER) {
-			crossTrack = new double[nm];
-			alongTrack = new double[nm];
-			altitudes  = new double[nm];
-			ranges     = new double[nm];
+
+            crossTrack = (double *)realloc(crossTrack, dasz);
+            alongTrack = (double *)realloc(alongTrack, dasz);
+            altitudes = (double *)realloc(altitudes, dasz);
+            ranges = (double *)realloc(ranges, dasz);
 
 			// Again, order is significant
 			//
@@ -870,14 +938,14 @@ int measT::unserialize(char* buf, int buflen) { //TODO buflen is unused?
 			len += nm * sizeof(double);
 
 		} else {
-			ranges = new double[nm];
+            ranges = (double *)realloc(ranges, dasz);
 			memcpy(ranges,     &buf[len], nm * sizeof(double));
 			len += nm * sizeof(double);
 		}
 
 		// MB-sys beam numbers
 		if(abs(dataType) == TRN_SENSOR_MB) {
-			beamNums = new int[nm];
+            beamNums = (int *)realloc(beamNums, iasz);
 			memcpy(beamNums,  &buf[len], nm * sizeof(int));
 			len += nm * sizeof(int);
 		}
@@ -887,7 +955,7 @@ int measT::unserialize(char* buf, int buflen) { //TODO buflen is unused?
 		// are no covariances in this measT
 		//
 		if(dataType >= 0) {
-			covariance = new double[nm];
+            covariance = (double *)realloc(covariance, dasz);
 			memcpy(covariance, &buf[len], nm * sizeof(double));
 			len += nm * sizeof(double);
 			//printf("measT has covariance values\n");
@@ -909,7 +977,7 @@ int measT::unserialize(char* buf, int buflen) { //TODO buflen is unused?
 		  }
 		// Alphas
 		//
-   	alphas = new double[nm];
+        alphas = (double *)realloc(alphas, dasz);
 		memcpy(alphas, &buf[len], nm * sizeof(double));
 		len += nm * sizeof(double);
 
@@ -1230,48 +1298,63 @@ void vehicleT::displayVehicleInfo() {
 commsT::commsT()
 	: msg_type(0), parameter(0), vdr(0.0),
 	  mapname(NULL), cfgname(NULL), particlename(NULL), logname(NULL) {
+          memset(&xyz_sdev,0, sizeof(d_triplet_t));
+          memset(&est_nav_ofs,0, sizeof(est_nav_ofs));
 }
 
 commsT::commsT(char type)
 	: msg_type(type), parameter(0), vdr(0.0),
 	  mapname(NULL), cfgname(NULL), particlename(NULL), logname(NULL) {
+          memset(&xyz_sdev,0, sizeof(d_triplet_t));
+          memset(&est_nav_ofs,0, sizeof(est_nav_ofs));
 }
 
 commsT::commsT(char type, int param)
 	: msg_type(type), parameter(param), vdr(0.0),
 	  mapname(NULL), cfgname(NULL), particlename(NULL), logname(NULL) {
+          memset(&xyz_sdev,0, sizeof(d_triplet_t));
+          memset(&est_nav_ofs,0, sizeof(est_nav_ofs));
 }
 
 commsT::commsT(char type, int param, float dr)// TODO char param unused
 	: msg_type(type), parameter(0), vdr(dr),
 	  mapname(NULL), cfgname(NULL), particlename(NULL), logname(NULL) {
+          memset(&xyz_sdev,0, sizeof(d_triplet_t));
+          memset(&est_nav_ofs,0, sizeof(est_nav_ofs));
 }
 
 commsT::commsT(char type, int param, char* map, char* cfg,
 	            char* partfile, char* logdir)
 	: msg_type(type), parameter(param), vdr(0.0),
-	  mapname(NULL), cfgname(NULL), particlename(NULL), logname(NULL) {
-	mapname = STRDUPNULL(map);
-	cfgname = STRDUPNULL(cfg);
-	logname = STRDUPNULL(logdir);
-	particlename = STRDUPNULL(partfile);
-	if (!(map && cfg && logdir && partfile))
-		fprintf(stderr,"%s: WARNING - converted NULL parameters to empty string\n",
-			__func__);
+	  mapname(NULL), cfgname(NULL), particlename(NULL), logname(NULL)
+{
+    memset(&xyz_sdev,0, sizeof(d_triplet_t));
+    memset(&est_nav_ofs,0, sizeof(est_nav_ofs));
+    mapname = STRDUPNULL(map);
+    cfgname = STRDUPNULL(cfg);
+    logname = STRDUPNULL(logdir);
+    particlename = STRDUPNULL(partfile);
 
+    if (!(map && cfg && logdir && partfile)){
+        fprintf(stderr,"%s: WARNING - converted NULL parameters to empty string\n",
+                __func__);
+    }
 }
 
 commsT::commsT(char type, int param, measT& m)
-	: msg_type(type), parameter(param), vdr(0.0),
-	  mapname(NULL), cfgname(NULL), particlename(NULL), logname(NULL) {
-	// Measure update message?
-	//
-	if(msg_type == TRN_MEAS) {
-		mt = m;
-	} else {
-		fprintf(stderr,"%s: MU msg NOT created\n", __func__);
-	}
-	//printf("MU msg created\n");
+: msg_type(type), parameter(param), vdr(0.0),
+mapname(NULL), cfgname(NULL), particlename(NULL), logname(NULL) {
+
+    memset(&xyz_sdev,0, sizeof(d_triplet_t));
+    memset(&est_nav_ofs,0, sizeof(est_nav_ofs));
+    // Measure update message?
+    //
+    if(msg_type == TRN_MEAS) {
+        mt = m;
+    } else {
+        fprintf(stderr,"%s: MU msg NOT created\n", __func__);
+    }
+    //printf("MU msg created\n");
 }
 
 commsT::commsT(char type, poseT& p)
@@ -1285,6 +1368,52 @@ commsT::commsT(char type, poseT& p)
 	} else {
 		fprintf(stderr,"%s, EP/ACK msg NOT created\n", __func__);
 	}
+}
+
+commsT::commsT(char type, double x, double y, double z)
+: msg_type(type), parameter(0), vdr(0.0),
+mapname(NULL), cfgname(NULL), particlename(NULL), logname(NULL) {
+    if( (msg_type == TRN_SET_INITSTDDEVXYZ) ||
+       (msg_type == TRN_GET_INITSTDDEVXYZ)) {
+        xyz_sdev.x = x;
+        xyz_sdev.y = y;
+        xyz_sdev.z = z;
+    }else if( (msg_type == TRN_SET_ESTNAVOFS) ||
+             (msg_type == TRN_GET_ESTNAVOFS)) {
+        est_nav_ofs.x = x;
+        est_nav_ofs.y = y;
+        est_nav_ofs.z = z;
+    }else {
+        fprintf(stderr,"%s: SET_INITSTDDEVXYZ/SET_ESTNAVOFS msg NOT created\n", __func__);
+    }
+}
+
+commsT::commsT(char type, int param, double ofs_x, double ofs_y, double ofs_z)
+: msg_type(type), parameter(param), vdr(0.0),
+mapname(NULL), cfgname(NULL), particlename(NULL), logname(NULL) {
+    if(msg_type == TRN_FILT_REINIT_OFFSET) {
+        est_nav_ofs.x = ofs_x;
+        est_nav_ofs.y = ofs_y;
+        est_nav_ofs.z = ofs_z;
+    } else {
+        fprintf(stderr,"%s: FILT_REINIT_OFFSET msg NOT created\n", __func__);
+    }
+}
+
+commsT::commsT(char type, int param, double ofs_x, double ofs_y, double ofs_z,
+               double sdev_x, double sdev_y, double sdev_z)
+: msg_type(type), parameter(param), vdr(0.0),
+mapname(NULL), cfgname(NULL), particlename(NULL), logname(NULL) {
+    if(msg_type == TRN_FILT_REINIT_BOX) {
+        xyz_sdev.x = sdev_x;
+        xyz_sdev.y = sdev_y;
+        xyz_sdev.z = sdev_z;
+        est_nav_ofs.x = ofs_x;
+        est_nav_ofs.y = ofs_y;
+        est_nav_ofs.z = ofs_z;
+    } else {
+        fprintf(stderr,"%s: FILT_REINIT_BOX msg NOT created\n", __func__);
+    }
 }
 
 commsT::~commsT() {
@@ -1338,15 +1467,53 @@ int commsT::serialize(char* buf, int buf_length) {
 	// Initialization message?
 	//
 	else if(msg_type == TRN_INIT) {
-		strcpy(buf + len, mapname);
-		len += strlen(mapname) + 1;
-		strcpy(buf + len, cfgname);
-		len += strlen(cfgname) + 1;
-		strcpy(buf + len, particlename);
-		len += strlen(particlename) + 1;
-		strcpy(buf + len, logname);
-		len += strlen(logname) + 1;
+        if(NULL==mapname){
+            strcpy(buf + len, "");
+            len += 1;
+        }else{
+            strcpy(buf + len, mapname);
+            len += strlen(mapname) + 1;
+        }
+        if(NULL==cfgname){
+            strcpy(buf + len, "");
+            len += 1;
+        }else{
+            strcpy(buf + len, cfgname);
+            len += strlen(cfgname) + 1;
+        }
+        if(NULL==particlename){
+            strcpy(buf + len, "");
+            len += 1;
+        }else{
+            strcpy(buf + len, particlename);
+            len += strlen(particlename) + 1;
+        }
+        if(NULL==logname){
+            strcpy(buf + len, "");
+            len += 1;
+        }else{
+            strcpy(buf + len, logname);
+            len += strlen(logname) + 1;
+        }
 	}
+    // Set xyz_sdev_init message?
+    //
+    else if(msg_type == TRN_SET_INITSTDDEVXYZ || msg_type == TRN_GET_INITSTDDEVXYZ ) {
+        memcpy(buf + len, &xyz_sdev, sizeof(xyz_sdev));
+        len += sizeof(xyz_sdev);
+    }
+    else if(msg_type == TRN_SET_ESTNAVOFS ||
+            msg_type == TRN_GET_ESTNAVOFS ||
+            msg_type == TRN_FILT_REINIT_OFFSET ) {
+        memcpy(buf + len, &est_nav_ofs, sizeof(est_nav_ofs));
+        len += sizeof(est_nav_ofs);
+    }
+    else if(msg_type == TRN_FILT_REINIT_BOX) {
+        memcpy(buf + len, &xyz_sdev, sizeof(xyz_sdev));
+        len += sizeof(xyz_sdev);
+        memcpy(buf + len, &est_nav_ofs, sizeof(est_nav_ofs));
+        len += sizeof(est_nav_ofs);
+    }
 
 	ml = len - sizeof(msg_type) + sizeof(parameter) - sizeof(unsigned int);
 	memcpy(p_ml, &ml, sizeof(ml));
@@ -1401,6 +1568,24 @@ int commsT::unserialize(char* buf, int buf_length) {
       LOGM("commsT::serialize - setting log name [%s]\n",logname);
 
 	}
+    // Set xyz_sdev_init message?
+    //
+    else if(msg_type == TRN_SET_INITSTDDEVXYZ || msg_type == TRN_GET_INITSTDDEVXYZ) {
+        memcpy(&xyz_sdev, buf + len, sizeof(xyz_sdev));
+        len += sizeof(xyz_sdev);
+    }
+    else if(msg_type == TRN_SET_ESTNAVOFS ||
+            msg_type == TRN_GET_ESTNAVOFS ||
+            msg_type == TRN_FILT_REINIT_OFFSET) {
+        memcpy(&est_nav_ofs, buf + len, sizeof(est_nav_ofs));
+        len += sizeof(est_nav_ofs);
+    }
+    else if(msg_type == TRN_FILT_REINIT_BOX) {
+        memcpy(&xyz_sdev, buf + len, sizeof(xyz_sdev));
+        len += sizeof(xyz_sdev);
+        memcpy(&est_nav_ofs, buf + len, sizeof(est_nav_ofs));
+        len += sizeof(est_nav_ofs);
+    }
 
 	return len;
 }
@@ -1414,8 +1599,8 @@ char* commsT::to_s(char* buf, int buflen) {
 				mapname = NULL;
 				cfgname = NULL;
 			}
-			sprintf(buf, "commsT {type:%c|parameter:%d|vdr:%f|map:%s|cfg:%s|poseT time:%.2f|measT time:%.2f|numMeas:%d}",
-					msg_type, parameter, vdr, mapname, cfgname, pt.time, mt.time, mt.numMeas);
+			sprintf(buf, "commsT {type:%c|parameter:%d|vdr:%f|map:%s|cfg:%s|poseT time:%.2f|measT time:%.2f|numMeas:%d|xyz:%lf,%lf,%lf|ofs:%lf,%lf,%lf}",
+					msg_type, parameter, vdr, mapname, cfgname, pt.time, mt.time, mt.numMeas,xyz_sdev.x,xyz_sdev.y,xyz_sdev.z,est_nav_ofs.x,est_nav_ofs.y,est_nav_ofs.z);
 //			int len = sprintf(buf, "commsT {type:%c|parameter:%d|vdr:%f|map:%s|cfg:%s|poseT time:%.2f|measT time:%.2f|numMeas:%d}",
 //				msg_type, parameter, vdr, mapname, cfgname, pt.time, mt.time, mt.numMeas);
 //			printf("%d\n", len);
@@ -1440,8 +1625,12 @@ void commsT::clean() {
     if(cfgname) {
         free(cfgname);
     }
+    if(particlename) {
+        free(particlename);
+    }
     mapname=NULL;
     cfgname=NULL;
+    particlename=NULL;
 }
 
 // Release resources
@@ -1466,4 +1655,52 @@ void commsT::release() {
     cfgname=NULL;
     particlename=NULL;
     logname=NULL;
+}
+
+typedef struct tname_entry_s{
+    char type;
+    const char *name;
+}tname_entry_t;
+
+static tname_entry_t type_names[]={
+    {TRN_INIT,"TRN_INIT"},
+    {TRN_MEAS,"TRN_MEAS"},
+    {TRN_MOTN,"TRN_MOTN"},
+    {TRN_MLE,"TRN_MLE"},
+    {TRN_MMSE,"TRN_MMSE"},
+    {TRN_SET_MW,"TRN_SET_MW"},
+    {TRN_SET_FR,"TRN_SET_FR"},
+    {TRN_SET_IMA,"TRN_SET_IMA"},
+    {TRN_SET_VDR,"TRN_SET_VDR"},
+    {TRN_SET_MIM,"TRN_SET_MIM"},
+    {TRN_FILT_GRD,"TRN_FILT_GRD"},
+    {TRN_ACK,"TRN_ACK"},
+    {TRN_BYE,"TRN_BYE"},
+    {TRN_OUT_MEAS,"TRN_OUT_MEAS"},
+    {TRN_LAST_MEAS,"TRN_LAST_MEAS"},
+    {TRN_IS_CONV,"TRN_IS_CONV"},
+    {TRN_FILT_TYPE,"TRN_FILT_TYPE"},
+    {TRN_FILT_STATE,"TRN_FILT_STATE"},
+    {TRN_N_REINITS,"TRN_N_REINITS"},
+    {TRN_FILT_REINIT,"TRN_FILT_REINIT"},
+    {TRN_FILT_REINIT_OFFSET,"TRN_FILT_REINIT_OFFSET"},
+    {TRN_FILT_REINIT_BOX,"TRN_FILT_REINIT_BOX"},
+    {TRN_SET_INITSTDDEVXYZ,"TRN_SET_INITSTDDEVXYZ"},
+    {TRN_GET_INITSTDDEVXYZ,"TRN_GET_INITSTDDEVXYZ"},
+    {TRN_SET_ESTNAVOFS,"TRN_SET_ESTNAVOFS"},
+    {TRN_GET_ESTNAVOFS,"TRN_GET_ESTNAVOFS"},
+    {TRN_INIT,"TRN_INIT"},
+    {'\0',"?"}
+};
+
+const char *commsT::typestr(char type)
+{
+    tname_entry_t *tp = &type_names[0];
+    while(tp->type!='\0'){
+        if(tp->type == type)
+            break;
+        tp++;
+    }
+
+    return tp->name;
 }

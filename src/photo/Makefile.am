@@ -1,4 +1,4 @@
-bin_PROGRAMS = mbphotomosaic mbgetphotocorrection mbphotogrammetry
+bin_PROGRAMS = mbphotomosaic mbgetphotocorrection mbphotogrammetry mbimagecorrect mbtiff2png
 bin_SCRIPTS = mbm_makeimagelist
 
 include_HEADERS =
@@ -18,3 +18,5 @@ LIBS += ${opencv4_LIBS}
 mbphotomosaic_SOURCES = mbphotomosaic.cc
 mbgetphotocorrection_SOURCES = mbgetphotocorrection.cc
 mbphotogrammetry_SOURCES = mbphotogrammetry.cc
+mbimagecorrect_SOURCES = mbimagecorrect.cc
+mbtiff2png_SOURCES = mbtiff2png.cc

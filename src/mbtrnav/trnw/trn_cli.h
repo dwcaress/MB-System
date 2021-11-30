@@ -69,8 +69,6 @@
 
 #include "trnw.h"
 #include "mb1_msg.h"
-#include "trn_msg.h"
-#include "mframe.h"
 #include "msocket.h"
 #include "medebug.h"
 
@@ -86,20 +84,12 @@
 /////////////////////////
 // Type Definitions
 /////////////////////////
-typedef enum {
-    TCLI_SUB=0,
-    TCLI_DATA,
-    TCLI_CONF
-} trncli_type_id;
-
 
 typedef struct trncli_s{
     msock_connection_t *trn;
-    trncli_type_id type;
     long int utm_zone;
     wmeast_t *measurement;
 }trncli_t;
-
 
 /////////////////////////
 // Exports
@@ -108,23 +98,93 @@ typedef struct trncli_s{
 #ifdef __cplusplus
 extern "C" {
 #endif
-    trncli_t *trncli_new(trncli_type_id type, long int utm_zone);
+    trncli_t *trncli_new(long int utm_zone);
     void trncli_destroy(trncli_t **pself);
     int trncli_connect(trncli_t *self, char *host, int port);
     int trncli_disconnect(trncli_t *self);
-    int trncli_set_utm(trncli_t *self, long int utm_zone);
-    int32_t trncli_init_server(trncli_t *self, trn_config_t *cfg);
-    int32_t trncli_update_measurement(trncli_t *self, wmeast_t *meas);
-    int32_t trncli_update_motion(trncli_t *self, wposet_t *pose);
-    int32_t trncli_estimate_pose(trncli_t *self, wposet_t **pose, char msg_type);
-    bool trncli_last_meas_valid(trncli_t *self);
-    int32_t trncli_reinit_filter(trncli_t *self);
-    int trncli_mb1_to_meas(wmeast_t **dest, mb1_t *src, long int utmZone);
-    int trncli_motion_to_pose(wposet_t **dest, pt_cdata_t *src);
-    
+
+    /// High-level API
+    // translate MB1 to meas/pose, update motion. update meas
     int trncli_send_update(trncli_t *self, mb1_t *src, wposet_t **pt_out, wmeast_t **mt_out);
+
+    // mle estimate, mmse estimates, if last meas valid, fill _out structs
     int trncli_get_bias_estimates(trncli_t *self, wposet_t *pt, pt_cdata_t **pt_out, pt_cdata_t **mle_out, pt_cdata_t **mse_out);
 
+    // return commsT parameter value for specified message
+    // for boolean messages, 1: true 0: false
+    int trncli_ptype_get(trncli_t *self, int msg_type);
+
+    // return 0 if successful (ACK received), -1 otherwise
+    int trncli_ptype_set(trncli_t *self, int msg_type, int param);
+
+    // Conversion helper functions
+    int trncli_mb1_to_meas(wmeast_t **dest, mb1_t *src, long int utmZone);
+    int trncli_cdata_to_pose(wposet_t **dest, pt_cdata_t *src);
+    int trncli_cdata_to_meas(wmeast_t **dest, mt_cdata_t *src);
+
+    /// Low-level API
+    // meas update
+    int32_t trncli_update_measurement(trncli_t *self, wmeast_t *meas);
+    // motion update
+    int32_t trncli_update_motion(trncli_t *self, wposet_t *pose);
+    // estimate pose (mle estimate, mmse estimate)
+    int32_t trncli_estimate_pose(trncli_t *self, wposet_t **pose, char msg_type);
+
+    /// Control API
+    // init TRN
+    int32_t trncli_init_trn(trncli_t *self, trn_config_t *cfg);
+    // filter reinit
+    int trncli_reinit_filter(trncli_t *self);
+    // filter reinit w/ offset
+    int trncli_reinit_filter_offset(trncli_t *self, bool lowInfoTransition,
+                             double offset_x, double offset_y, double offset_z);
+    // filter reinit w/ offset, variance bound inits
+    int trncli_reinit_filter_box(trncli_t *self, bool lowInfoTransition,
+                        double offset_x, double offset_y, double offset_z,
+                        double sdev_x, double sdev_y, double sdev_z);
+    // get filter type
+    int trncli_get_filter_type(trncli_t *self);
+    // get filter state
+    int trncli_get_filter_state(trncli_t *self);
+    // set filter reinit
+    int trncli_set_filter_reinit(trncli_t *self, int value);
+    // set modified weighting
+    int trncli_set_modified_weighting(trncli_t *self, int value);
+    // set interp meas alt (IMA)
+    int trncli_set_ima(trncli_t *self, int value);
+    // set map interp method (MIM)
+    int trncli_set_mim(trncli_t *self, int value);
+    // set vehicle drift rate (VDR)
+    int trncli_set_vdr(trncli_t *self, int value);
+    // set filter gradient
+    int trncli_set_filter_gradient(trncli_t *self, int value);
+    // set UTM zone
+    int trncli_set_utm(trncli_t *self, long int utm_zone);
+    // get init xyz (reinit variance bounds)
+    int trncli_get_init_stddev_xyz(trncli_t *self, d_triplet_t *dest);
+    // set init xyz (reinit variance bounds)
+    int trncli_set_init_stddev_xyz(trncli_t *self, d_triplet_t *src);
+    // get est_nav_offset (reinit offset)
+    int trncli_get_est_nav_ofs(trncli_t *self, d_triplet_t *dest);
+    // set est_nav_offset (reinit offset)
+    int trncli_set_est_nav_ofs(trncli_t *self, d_triplet_t *src);
+
+	/// Status API
+
+    // last meas successful
+    bool trncli_last_meas_succesful(trncli_t *self);
+    // num reinits
+    int trncli_reinit_count(trncli_t *self);
+    // outstanding meas
+    bool trncli_outstanding_meas(trncli_t *self);
+    // is converged
+    bool trncli_is_converged(trncli_t *self);
+    // is intialized
+    bool trncli_is_intialized(trncli_t *self);
+    // ping
+    bool trncli_ping(trncli_t *self);
+    // ack
+    int32_t trncli_ack_server(trncli_t *self);
 
 #ifdef __cplusplus
 }

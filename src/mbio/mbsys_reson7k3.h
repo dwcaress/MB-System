@@ -380,7 +380,7 @@
 // Structure size definitions
 #define MBSYS_RESON7K_BUFFER_STARTSIZE 32768
 #define MBSYS_RESON7K_MAX_DEVICE 73
-#define MBSYS_RESON7K_MAX_BEAMS 512
+#define MBSYS_RESON7K_MAX_BEAMS 1024
 #define MBSYS_RESON7K_MAX_SOUNDINGS 2560
 #define MBSYS_RESON7K_MAX_SEGMENTS 320
 #define MBSYS_RESON7K_MAX_PIXELS 2048
@@ -888,7 +888,7 @@ typedef struct s7k3_ContactOutput_struct {
 // Processed sidescan - MB-System extension to s7k3 format (record 3199)
 typedef struct s7k3_ProcessedSideScan_struct {
   s7k3_header header;
-  mb_u_long serial_number;      // Sonar serial number
+  u64 serial_number;            // Sonar serial number
   u32 ping_number;              // Sequential number
   u16 multi_ping;               // Flag to indicate multi-ping mode
                                 //      0 = no multi-ping

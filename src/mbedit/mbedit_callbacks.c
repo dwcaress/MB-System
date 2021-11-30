@@ -1981,12 +1981,12 @@ void do_event(Widget w, XtPointer client_data, XtPointer call_data) {
 					/* If the button is still pressed then read the location */
 					/* of the pointer and run the action mouse function again */
 					if (mode_reverse_mouse) {
-						if ((mask_return & 1024) == 1024 && mode_pick != MODE_TOGGLE && mode_pick != MODE_PICK)
+						if ((mask_return & 1024) == 1024 && mode_pick != MODE_TOGGLE && mode_pick != MODE_PICK && mode_pick != MODE_INFO)
 							doit = 1;
 						else
 							doit = 0;
 					} else /* if (!mode_reverse_mouse) */ {
-						if ((mask_return & 256) == 256 && mode_pick != MODE_TOGGLE && mode_pick != MODE_PICK)
+						if ((mask_return & 256) == 256 && mode_pick != MODE_TOGGLE && mode_pick != MODE_PICK && mode_pick != MODE_INFO)
 							doit = 1;
 						else
 							doit = 0;

@@ -173,13 +173,7 @@ int mb_esf_open(int verbose, const char *program_name, char *esffile, bool load,
 	struct stat file_status;
 	int fstat;
 	char fmode[16];
-
-	/* time, user, host variables */
-	time_t right_now;
-	char date[32], user[MBP_FILENAMESIZE], *user_ptr, host[MBP_FILENAMESIZE];
 	mb_path esf_header;
-
-	int nedit;
 
 	/* initialize the esf structure */
 	strcpy(esf->esffile, esffile);
@@ -258,7 +252,7 @@ int mb_esf_open(int verbose, const char *program_name, char *esffile, bool load,
 				}
 
 				*error = MB_ERROR_NO_ERROR;
-				nedit = 0;
+				int nedit = 0;
 				while (nedit < esf->nedit && *error == MB_ERROR_NO_ERROR) {
 					if (fread(&(esf->edit[nedit].time_d), sizeof(double), 1, esffp) != 1 ||
 					    fread(&(esf->edit[nedit].beam), sizeof(int), 1, esffp) != 1 ||
@@ -275,7 +269,10 @@ int mb_esf_open(int verbose, const char *program_name, char *esffile, bool load,
 						nedit++;
 					}
 					else {
-						fread(esf_header, MB_PATH_MAXLINE - (sizeof(double) + 2 * sizeof(int)), 1, esffp);
+						if (fread(esf_header, MB_PATH_MAXLINE - (sizeof(double) + 2 * sizeof(int)), 1, esffp) != 1) {
+              status = MB_FAILURE;
+              *error = MB_ERROR_EOF;
+            }
 					}
 				}
 				esf->nedit = nedit;
@@ -321,10 +318,14 @@ int mb_esf_open(int verbose, const char *program_name, char *esffile, bool load,
 			/* copy old edit save file to tmp file */
 			if (load) {
 				sprintf(command, "cp %s %s.tmp\n", esffile, esffile);
-				/* shellstatus = */ system(command);
-				if (output == MBP_ESF_APPEND)
-					header = false;
+				if (system(command) != 0) {
+    			status = MB_FAILURE;
+    			*error = MB_ERROR_OPEN_FAIL;
+    			fprintf(stderr,"Failed to copy existing esffile %s\n",esf->esffile);
+        }
 			}
+			if (output == MBP_ESF_APPEND)
+				header = false;
 		}
 
 		/* open the edit save file */
@@ -337,35 +338,27 @@ int mb_esf_open(int verbose, const char *program_name, char *esffile, bool load,
 		if ((esf->esffp = fopen(esf->esffile, fmode)) == NULL) {
 			status = MB_FAILURE;
 			*error = MB_ERROR_OPEN_FAIL;
-			fprintf(stderr,"failed to open esffile %s with file mode %s\n",esf->esffile,fmode);
+			fprintf(stderr,"Failed to open esffile %s with file mode %s\n", esf->esffile, fmode);
 		}
 		//else
-		//	fprintf(stderr,"esffile %s opened with file mode %s\n",esf->esffile,fmode);
+		//	fprintf(stderr,"esffile %s opened with file mode %s\n", esf->esffile, fmode);
 
 		/* open the edit save stream file */
 		if (status == MB_SUCCESS) {
 			if ((esf->essfp = fopen(esf->esstream, fmode)) == NULL) {
 				status = MB_FAILURE;
 				*error = MB_ERROR_OPEN_FAIL;
-				fprintf(stderr,"failed to open esstream %s with file mode %s\n",esf->esstream,fmode);
+				fprintf(stderr,"Failed to open esstream %s with file mode %s\n", esf->esstream, fmode);
 			}
 			//else
-			//	fprintf(stderr,"esstream %s opened with file mode %s\n",esf->esstream,fmode);
+			//	fprintf(stderr,"esstream %s opened with file mode %s\n", esf->esstream, fmode);
 		}
 
 		/* if writing a new esf file then put version header at beginning */
 		if (status == MB_SUCCESS && header) {
+      char user[256], host[256], date[32];
+      status = mb_user_host_date(verbose, user, host, date, error);
 			memset(esf_header, 0, MB_PATH_MAXLINE);
-			right_now = time((time_t *)0);
-			strcpy(date, ctime(&right_now));
-			date[strlen(date) - 1] = '\0';
-			if ((user_ptr = getenv("USER")) == NULL)
-				user_ptr = getenv("LOGNAME");
-			if (user_ptr != NULL)
-				strcpy(user, user_ptr);
-			else
-				strcpy(user, "unknown");
-			gethostname(host, MBP_FILENAMESIZE);
 			sprintf(esf_header,
 			        "ESFVERSION03\nESF Mode: %d\nMB-System Version %s\nProgram: %s\nUser: %s\nCPU: %s\nDate: %s\n",
 			        esf->mode, MB_VERSION, program_name, user, host, date);
@@ -876,7 +869,7 @@ int mb_esf_close(int verbose, struct mb_esf_struct *esf, int *error) {
  */
 
 #define NATURAL
-static const int THRESHOLD = 16; /* Best choice for natural merge cut-off. */
+const int THRESHOLD = 16; /* Best choice for natural merge cut-off. */
 
 /* #define NATURAL to get hybrid natural merge.
  * (The default is pairwise merging.)

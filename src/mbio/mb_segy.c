@@ -459,6 +459,9 @@ int mb_segy_close(int verbose, void **mbsegyio_ptr, int *error) {
 	fclose(mb_segyio_ptr->fp);
 	mb_segyio_ptr->fp = NULL;
 
+  /* deallocate segyio structure */
+	mb_freed(verbose, __FILE__, __LINE__, mbsegyio_ptr, error);
+
 	const int status = MB_SUCCESS;
 
 	if (verbose >= 2) {
@@ -749,7 +752,7 @@ int mb_segy_read_trace(int verbose, void *mbsegyio_ptr, struct mb_segytraceheade
 		*traceptr = trace;
 	}
 
-	if (verbose >= 2) {
+	if (verbose >= 2 && *error <= MB_ERROR_NO_ERROR) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return value:\n");
 		fprintf(stderr, "dbg2       seq_num:       %d\n", traceheader->seq_num);
@@ -821,6 +824,13 @@ int mb_segy_read_trace(int verbose, void *mbsegyio_ptr, struct mb_segytraceheade
 		fprintf(stderr, "dbg2       heading:       %f\n", traceheader->heading);
 		for (int i = 0; i < traceheader->nsamps; i++)
 			fprintf(stderr, "dbg2       trace[%d]:%f\n", i, trace[i]);
+		fprintf(stderr, "dbg2       error:         %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:       %d\n", status);
+	}
+	else if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
+		fprintf(stderr, "dbg2  Return value:\n");
 		fprintf(stderr, "dbg2       error:         %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
 		fprintf(stderr, "dbg2       status:       %d\n", status);

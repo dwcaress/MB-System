@@ -1,4 +1,4 @@
-.TH mbpreprocess 1 "4 October 2020" "MB-System 5.0" "MB-System 5.0"
+.TH mbpreprocess 1 "3 January 2021" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbpreprocess\fP \- performs preprocessing of swath sonar data as part of setting
 up an MB-System processing structure for a dataset.
@@ -16,6 +16,8 @@ Version 5.0
 \fB--input\fP=\fIFILE\fP
 .br
 \fB--format\fP=\fIFORMATID\fP
+.br
+\fB--output-directory\fP=\fIDIRECTORY\fP
 .br
 \fB--platform-file\fP=\fIFILE\fP
 .br
@@ -143,6 +145,8 @@ Version 5.0
 .br
 \fB--kluge-auv-sentry-sensordepth\fP
 .br
+\fB--kluge-ignore-snippets\fP
+.br
 ]
 
 .SH DESCRIPTION
@@ -195,6 +199,11 @@ for the input file \fIFILE\fP specified with the
 \fB\--input\fP option. By default, \fBmbpreprocess\fP
 infers the format from the "*.mbXX" \fBMB\-System\fP suffix
 convention.
+.TP
+.B --output-directory\fP=\fIDIRECTORY\fP
+By default the output files written by \fBmbpreprocess\fP are located in the same
+directory as the input swath files. This options allows the user to specify a
+different directory into which the output files are written.
 .TP
 .B --platform-file=\fIFILE\fP
 Causes \fBmbpreprocess\fP to input and utilize an \fBMB-System\fP platform file,
@@ -835,7 +844,14 @@ to the origin for a dual head lidar system. The only relevant formats are for
 .B --kluge-zero-alongtrack-angles
 .TP
 .B --kluge-fix-wissl-timestamps
-.br
+.TP
+.B --kluge-ignore-snippets
+This option was created to handle some Kongsberg EM122 data in *.all files (supported
+as format 58) in which most, but not all, of the snippet backscatter records are missing.
+The i/o module for this format views pings without snippet records as incomplete.
+When \fB--kluge-ignore-snippets\fP is specified, \fBmbpreprocess\fP creates an empty
+snippet record for each ping, and ignores any snippet records actually in the
+input datastream.
 
 .SH EXAMPLES
 To be written.....

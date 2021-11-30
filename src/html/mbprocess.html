@@ -11,7 +11,7 @@
 <CENTER><H3><U>MB-System Unix Manual Page</U></H3></CENTER>
 <PRE>
 <H1>mbprocess</H1>
-Section:  MB\-System 5.0  (1)<BR>Updated:  14 September 2018 <BR><A HREF="#index">Index</A>
+Section:  MB\-System 5.0  (1)<BR>Updated:  28 December 2020 <BR><A HREF="#index">Index</A>
 <HR>
 
 <A NAME="lbAB">&nbsp;</A>
@@ -37,7 +37,7 @@ Version 5.0
 <A NAME="lbAD">&nbsp;</A>
 <H2>SYNOPSIS</H2>
 
-<B>mbprocess</B> <B>-I</B><I>infile</I> [<B>-F</B><I>format</I>
+<B>mbprocess</B> <B>-I</B><I>infile</I> [<B>-C</B><I>threads</I> <B>-F</B><I>format</I>
 <B>-N</B> <B>-O</B><I>outfile</I> <B>-P -S -T -V -H</B>]
 <P>
 <A NAME="lbAE">&nbsp;</A>
@@ -109,6 +109,11 @@ the parameter file (e.g. navigation files, edit save files,
 svp files). If the <B>-P</B> option is specified, <B>mbprocess</B>
 will process every file, whether it needs it or not.
 <P>
+As of release 5.7.7, <B>mbprocess</B> can process files in parallel using multiple
+threads. By default a single thread is used, but the <B>-C</B><I>threads</I> option
+allows more threads to be used. The maximum number of threads available
+corresponds to the number of CPU cores available on the relevant computer.
+<P>
 <A NAME="lbAF">&nbsp;</A>
 <H2>MBPROCESS PARAMETER FILE COMMANDS</H2>
 
@@ -117,7 +122,7 @@ The <B>mbprocess</B> commands found in parameter files are:
 <P>
 <BR>&nbsp;GENERAL&nbsp;PARAMETERS:
 <BR>&nbsp;&nbsp;&nbsp;EXPLICIT
-<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;causes&nbsp;mbprocess&nbsp;to&nbsp;set&nbsp;modes&nbsp;implicitely
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;causes&nbsp;mbprocess&nbsp;to&nbsp;set&nbsp;modes&nbsp;implicitly
 <BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;e.g.&nbsp;the&nbsp;SVPFILE&nbsp;command&nbsp;will&nbsp;also&nbsp;set
 <BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;raytracing&nbsp;on&nbsp;even&nbsp;if&nbsp;the&nbsp;RAYTRACE&nbsp;command
 <BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;is&nbsp;not&nbsp;given&nbsp;[explicit&nbsp;mode&nbsp;commands&nbsp;required]
@@ -299,7 +304,7 @@ The <B>mbprocess</B> commands found in parameter files are:
 <BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;mode&nbsp;=&nbsp;2&nbsp;:&nbsp;min&nbsp;and&nbsp;max&nbsp;indicate&nbsp;start&nbsp;and&nbsp;end
 <BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;acrosstrack&nbsp;distance&nbsp;(m)&nbsp;between&nbsp;which
 <BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;data&nbsp;are&nbsp;flagged&nbsp;or&nbsp;zeroed
-<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;mode&nbsp;=&nbsp;3&nbsp;:&nbsp;min&nbsp;and&nbsp;max&nbsp;indicate&nbsp;minimumn&nbsp;and&nbsp;
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;mode&nbsp;=&nbsp;3&nbsp;:&nbsp;min&nbsp;and&nbsp;max&nbsp;indicate&nbsp;minimumn&nbsp;and
 <BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;platform&nbsp;speed&nbsp;(km/hr)&nbsp;between&nbsp;which
 <BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;data&nbsp;are&nbsp;flagged&nbsp;or&nbsp;zeroed
 <BR>&nbsp;&nbsp;&nbsp;BATHCUTNUMBER&nbsp;min&nbsp;max
@@ -853,6 +858,15 @@ Christian do Santos Ferreira
 <H2>OPTIONS</H2>
 
 <DL COMPACT>
+<DT><B>-C</B>
+
+<DD>
+<I>threads</I>
+<BR>
+
+Sets the number of separate threads launched to process swath files in parallel.
+The default is 1; the maximum is system dependent as it is set to the number
+of CPU cores available on the relevant computer.
 <DT><B>-F</B>
 
 <DD>
@@ -1509,9 +1523,12 @@ You tell me.
 </PRE>
 
 <CENTER><P><BR>
-Last Updated: 14 September 2018</P></CENTER>
+Last Updated: 28 December 2020</P></CENTER>
 
 <HR>
-
+<center>
+<p>
+<a href="mbsystem.html"><< Manual page for the MB-System package</a> | <a href="https://www.mbari.org/products/research-software/mb-system/">MB-System website >></a></p>
+</center>
 </BODY>
 </HTML>

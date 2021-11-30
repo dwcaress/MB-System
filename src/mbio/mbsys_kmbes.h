@@ -77,7 +77,7 @@
  *      // X-datagrams (eXtra - defined only for MB-System)
  *      XMB, // The presence of this datagram indicates this file/stream has been
  *           // written by MB-System.
- *           // - this means that pings include a sidescan datagram MMS after the MRZ datagrams
+ *           // - this means that pings include a sidescan datagram XMS after the MRZ datagrams
  *           // - this means that MB-System beamflags are embedded in the MRZ datagram soundings
  *      XMC, // Comment datagram (MB-System only)
  *      XMS, // MB-System multibeam pseudosidescan derived from multibeam backscatter (MB-System only)
@@ -121,7 +121,7 @@
 /* X-datagrams */
 #define MBSYS_KMBES_X_MBSYSTEM                  "#XMB" // Indicates these data written by MB-System (MB-System only)
 #define MBSYS_KMBES_X_COMMENT                   "#XMC" // Comment datagram (MB-System only)
-#define MBSYS_KMBES_X_EXTENSION                 "#XMT" // Multibeam pseudosidescan derived from multibeam backscatter (MB-System only)
+#define MBSYS_KMBES_X_EXTENSION                 "#XMT" // MB-System corrected navigation, attitude, beam travel times, and angles (MB-System only)
 #define MBSYS_KMBES_X_PSEUDOSIDESCAN            "#XMS" // Multibeam pseudosidescan derived from multibeam backscatter (MB-System only)
 
 #define MBSYS_KMBES_SYNC_CHAR 0x23  // ascii "#"
@@ -1587,7 +1587,7 @@ struct mbsys_kmbes_struct {
     int n_mrz_needed;  // Number of MRZ datagrams for the current ping = mrz[mrz.cmnPart.rxFanIndex].cmnPart.rxFansPerPing
     struct mbsys_kmbes_mrz mrz[MBSYS_KMBES_MAX_NUM_MRZ_DGMS];
 
-    /* #XMT - MB-System corrected navigation, attitude, and beam travel times, and angles */
+    /* #XMT - MB-System corrected navigation, attitude, beam travel times, and angles */
     struct mbsys_kmbes_xmt xmt[MBSYS_KMBES_MAX_NUM_MRZ_DGMS];
 
     /* #XMS - MB-System pseudosidescan (included after MRZ datagrams when written by MB-System) */

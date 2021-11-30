@@ -11,14 +11,14 @@ dnl    See README file for copying and redistribution conditions.
 dnl--------------------------------------------------------------------
 
 dnl Initialize and set version and version date
-AC_INIT([mbsystem],[5.7.7beta02],[http://listserver.mbari.org/sympa/arc/mbsystem],[mbsystem],[http://www.mbari.org/data/mbsystem/])
-AC_DEFINE(VERSION_DATE, ["8 October 2020"], [Set VERSION_DATE define in mb_config.h])
+AC_INIT([mbsystem],[5.7.9beta19],[http://listserver.mbari.org/sympa/arc/mbsystem],[mbsystem],[http://www.mbari.org/data/mbsystem/])
+AC_DEFINE(VERSION_DATE, ["7 November 2021"], [Set VERSION_DATE define in mb_config.h])
 
 AS_ECHO([" "])
 AS_ECHO(["------------------------------------------------------------------------------"])
 AS_ECHO(["    The MB-system:    configure    12/7/2011"])
 AS_ECHO([" "])
-AS_ECHO(["    Copyright (c) 2011-2020 by"])
+AS_ECHO(["    Copyright (c) 2011-2021 by"])
 AS_ECHO(["    D. W. Caress (caress@lamont.ldgo.columbia.edu)"])
 AS_ECHO(["    and D. N. Chayes (dale@lamont.ldgo.columbia.edu)"])
 AS_ECHO(["    Lamont-Doherty Earth Observatory"])
@@ -123,8 +123,8 @@ AS_ECHO(["----------------------------------------------------------------------
 AS_ECHO([" "])
 
 
-dnl Require automake 2.69 or later
-AC_PREREQ([2.69])
+dnl Require automake 2.71 or later
+AC_PREREQ([2.71])
 
 dnl Disable warnings about unrecognized options
 AC_DISABLE_OPTION_CHECKING
@@ -146,7 +146,6 @@ AC_CONFIG_HEADERS([src/mbio/mb_config.h])
 dnl Check for programs
 AC_PROG_CC
 AM_PROG_CC_C_O
-AC_PROG_CC_STDC
 AC_PROG_CXX
 AC_PROG_INSTALL
 AC_PROG_AWK
@@ -173,11 +172,11 @@ else
     AC_DEFINE(BYTESWAPPED, 1, [Machine is littleendian, (Byteswapping on)])
 fi
 
-dnl Check for headers
-AC_HEADER_STDC
+dnl Check for math library
+AC_CHECK_LIB(m,exp,,)
 
-dnl Check for math lib
-AC_CHECK_LIB(m,exp,,,)
+dnl Check for pthread library
+AC_CHECK_LIB(pthread,pthread_create,,)
 
 dnl Check for gsincos() and sincos() functions
 AC_CHECK_FUNCS(gsincos sincos,,)
@@ -207,9 +206,13 @@ case "${host_os}" in
 esac
 
 dnl Check for RPC and XDR headers needed by MBIO library
-AC_CHECK_HEADERS(rpc/rpc.h, , [AC_CHECK_HEADERS(tirpc/rpc/rpc.h)], )
-AC_CHECK_HEADERS(rpc/types.h, ,
-    [AC_CHECK_HEADERS(tirpc/rpc/types.h, , [AC_MSG_ERROR([Required header <rpc/types.h> not found, check include path and installed development packages])],)],)
+dnl If the headers have been placed in /usr/include/tirpc/rpc then modify CFLAGS and CPPFLAGS first
+AC_CHECK_FILE(/usr/include/tirpc/rpc/rpc.h, RPC_IN_TIRPC=yes, RPC_IN_TIRPC=no)
+if test "$RPC_IN_TIRPC" = "yes" ; then
+  CPPFLAGS="$CPPFLAGS -I/usr/include/tirpc"
+  CFLAGS="$CFLAGS -I/usr/include/tirpc"
+fi
+AC_CHECK_HEADER(rpc/rpc.h, [AC_DEFINE(HAVE_RPC_RPC_H, 1, [Have rpc/rpc.h])] [GOT_RPC=yes], [GOT_RPC=no])
 
 dnl Check for WIN32 libraries
 # AC_CHECK_LIB(uuid, main)
@@ -376,7 +379,7 @@ if test "$GOT_PROJ" = "yes" ; then
 else
     dnl Look for pkg-config PROJ package...
     AS_ECHO(["Look for pkg-config PROJ package..."])
-    PKG_CHECK_MODULES([libproj], [proj], [FOUND_PROJ_LIB=yes], [FOUND_PROJ_LIB=no])
+    PKG_CHECK_MODULES([libproj], [proj], [FOUND_PROJ_PKG=yes], [FOUND_PROJ_PKG=no])
     AC_CHECK_LIB([proj], [proj_normalize_for_visualization], [FOUND_PROJ_LIB=yes], [FOUND_PROJ_LIB=no], )
     if test "$FOUND_PROJ_LIB" = "yes"; then
         FOUND_PROJ6=yes
@@ -388,7 +391,21 @@ else
             AS_ECHO(["Found PROJ library libproj with PROJ4 api available"])
         fi
     fi
-    if test "$FOUND_PROJ_LIB" = "no"; then
+    dnl As of November 7 2021 there is different behavior on ARM than on Intel
+    dnl when building on MacOs. The PKG_CHECK_MODULES() macro will correctly find
+    dnl installation of proj using pkg-config. However, the AC_CHECK_LIB() macro
+    dnl works right on intel but not on ARM - it will fail to find either old or
+    dnl new proj functions on ARM (except it works right within homebrew...)
+    dnl Since the ARM case will always be using new proj, if the package is found
+    dnl and neither old nor new are identified, assume new. This complexity will
+    dnl hopefully not be needed always.
+    if test $FOUND_PROJ_PKG = "yes"; then
+        if test "$FOUND_PROJ_LIB" = "no"; then
+            dnl Proj pkg-config package exists, assume proj >= 6
+            FOUND_PROJ6=yes
+            FOUND_PROJ_LIB=yes
+        fi
+    else
         AC_MSG_ERROR([Did not find PROJ library pkg-config package...])
     fi
     libproj_LIBS="-lproj"
@@ -509,7 +526,7 @@ else
     fi
     AC_MSG_RESULT($NETCDF_INC)
     if test ! -f $NETCDF_INC/netcdf.h; then
-        AC_MSG_WARN([[netcdf.h can not be found in $NETCDF_INC]])
+        AC_MSG_WARN([[netcdf.h cannot be found in $NETCDF_INC]])
     fi
     AC_MSG_CHECKING(for netCDF library directory)
     if test "X$NETCDF_LIB" = "X"; then
@@ -727,220 +744,308 @@ fi
 AM_CONDITIONAL([BUILD_FFTW], [test "$GOT_FFTW" = yes])
 
 dnl--------------------------------------------------------------------
+dnl Build graphical tools?
+dnl - optionally do not build X11/Motif and X11/Motif/OpenGL programs
+dnl--------------------------------------------------------------------
+
+dnl Check if the mbsys tools should be built
+AS_ECHO(["Check if the graphical tools should be built"])
+AC_ARG_ENABLE(mbtools, [AS_HELP_STRING([--disable-mbtools], [do not build graphical tools])],
+        [build_mbtools=no], [build_mbtools=yes])
+if test "$build_mbtools" = "yes" ; then
+    dnl Building X11/Motif and X11/Motif/OpenGL programs
+    AS_ECHO(["Building graphical tools"])
+    AC_DEFINE(MB_GRAPHICAL_ENABLED, 1, [Build graphical tools])
+else
+    dnl Not building X11/Motif and X11/Motif/OpenGL programs
+    AS_ECHO(["Not building graphical tools"])
+fi
+
+
+dnl--------------------------------------------------------------------
 dnl X11/Motif Section
 dnl--------------------------------------------------------------------
 
-dnl Check for X11 libraries libX11 libXt and X11 header file X11/Intrinsic.h
-AS_ECHO(["Check for X11 libraries libX11 libXt and X11 header file X11/Intrinsic.h"])
-AC_CHECK_LIB([Xt], [XtAppMainLoop], [GOT_X11=yes], [GOT_X11=no])
-if test "$GOT_X11" = "yes" ; then
-    AC_CHECK_LIB([X11], [XSendEvent], [GOT_X11=yes], [GOT_X11=no])
-fi
-if test "$GOT_X11" = "yes" ; then
-    AC_CHECK_HEADER(X11/Intrinsic.h, [GOT_X11=yes], [GOT_X11=no],)
-    if test "$GOT_X11" = "yes" ; then
-        AS_ECHO(["Found X11 libraries libX11 libXt and X11 header file X11/Intrinsic.h"])
-    else
-        AS_ECHO(["Found X11 libraries libX11 libXt but did not find X11 header file X11/Intrinsic.h - graphical tools cannot be built"])
-    fi
-else
-    AS_ECHO(["Did not find X11 libraries libX11 libXt - graphical tools cannot be built"])
-fi
-
+dnl Set default lack of X11, Motif, OpenGL
+GOT_X11=no
 GOT_MOTIF=no
-MOTIF_SETTING=no
-if test "$GOT_X11" = "yes" ; then
+GOT_OPENGL=no
 
-    dnl Check for Motif library libXm
-    AS_ECHO(["Check for Motif library libXm"])
-    AC_ARG_WITH(motif-lib, [  --with-motif-lib=DIR    Location of MOTIF library],
-            [motif_libdir="${withval}"] [GOT_MOTIF=yes], [GOT_MOTIF=no])
-    if test "$GOT_MOTIF" = "yes" ; then
-        dnl Motif library location specified: $motif_libdir - check if libXm is there...
-        AS_ECHO(["Motif library location specified: $motif_libdir - check if libXm is there..."])
+dnl Only look for X11 and Motif if graphical tools should be built
+if test "$build_mbtools" = "yes" ; then
+
+    dnl Check for X11 libraries libX11 libXt and X11 header file X11/Intrinsic.h
+    AS_ECHO(["Check for X11 libraries libX11 libXt and X11 header file X11/Intrinsic.h"])
+    AC_ARG_WITH(x11-lib, [  --with-x11-lib=DIR    Location of X11 libraries],
+                [x11_libdir="${withval}"] [X11_LIB_SET=yes], [X11_LIB_SET=no])
+    if test "$X11_LIB_SET" = "yes" ; then
+        dnl X11 library location specified: $x11_libdir - check if libX11 and libXt are there...
+        AS_ECHO(["X11 library location specified: $x11_libdir - check if libX11 and libXt are there..."])
         save_LDFLAGS=$LDFLAGS
-        LDFLAGS="$LDFLAGS -L$motif_libdir"
-        AC_CHECK_LIB([Xm], [XmCreatePushButton], [MOTIF_SETTING=yes], [MOTIF_SETTING=no], )
+        LDFLAGS="$LDFLAGS -L$x11_libdir"
+        AC_CHECK_LIB([Xt], [XtAppMainLoop], [GOT_X11=yes], [GOT_X11=no])
+        if test "$GOT_X11" = "yes" ; then
+            AC_CHECK_LIB([X11], [XSendEvent], [GOT_X11=yes], [GOT_X11=no])
+        fi
         LDFLAGS="$save_LDFLAGS"
-        if test "$MOTIF_SETTING" = "no"; then
-            AC_MSG_ERROR([Did not find libXm according to --with-motif-lib - check the installation!])
+        if test "$GOT_X11" = "yes"; then
+            libx11_LIBS="-lXt -lX11"
+            libx11_LDFLAGS="-L$x11_libdir -R $x11_libdir"
         fi
-        libmotif_LIBS="-L$motif_libdir -R $motif_libdir -lXm -lXt -lX11"
-        libmotif_LDFLAGS="-L$motif_libdir"
     else
-        dnl Look for pkg-config X11 package...
-        AS_ECHO(["Look for pkg-config X11 package..."])
-        PKG_CHECK_MODULES([libXm], [openmotif], [GOT_MOTIF=yes], [GOT_MOTIF=no])
-        libmotif_LIBS="-lXm -lXt -lX11"
-        libmotif_LDFLAGS=""
-    fi
-    if test "$GOT_MOTIF" = "no" ; then
-        dnl Did not find Motif library pkg-config package, looking in the usual places...
-        AS_ECHO(["Did not find Motif library pkg-config package, looking in the usual places..."])
-        AC_CHECK_LIB([Xm], [XmCreatePushButton], [MOTIF_SETTING=yes], [MOTIF_SETTING=no],)
-        if test "$MOTIF_SETTING" = "yes" ; then
-            GOT_MOTIF=yes
-            AS_ECHO(["Using pre-installed libXm..."])
-            libmotif_LIBS="-lXm -lXt -lX11"
-            libmotif_LDFLAGS=""
-        else
-            AS_ECHO(["Did not find Motif library anywhere, use --with-motif-lib to set the location"])
-            AC_MSG_ERROR([Did not find Motif library anywhere, use --with-motif-lib to set the location])
+        dnl X11 library location not specified - check for libX11 and libXt in the usual places...
+        AS_ECHO(["X11 library location not specified - check for libX11 and libXt in the usual places..."])
+        AC_CHECK_LIB([Xt], [XtAppMainLoop], [GOT_X11=yes], [GOT_X11=no])
+        if test "$GOT_X11" = "yes" ; then
+            AC_CHECK_LIB([X11], [XSendEvent], [GOT_X11=yes], [GOT_X11=no])
+        fi
+        if test "$GOT_X11" = "yes"; then
+            libx11_LIBS="-lXt -lX11"
+            libx11_LDFLAGS=" "
         fi
     fi
-    dnl Done checking for Motif library libmotif
+    if test "$GOT_X11" = "yes"; then
+        AS_ECHO(["X11 libraries found!"])
+    else
+        AC_MSG_ERROR([Did not find libX11 or libXt - check the installation!])
+    fi
 
-    if test "$GOT_MOTIF" = "yes" ; then
-        dnl Check for Motif headers
-        AS_ECHO(["Check for Motif headers"])
-        GOT_MOTIF=no
-        MOTIF_SETTING=no
-        dnl First check if Motif location specified on the command line
-        AC_ARG_WITH(motif-include, [  --with-motif-include=DIR    Location of Motif headers],
-                [libmotif_CPPFLAGS="-I${withval}"] [GOT_MOTIF=yes], [GOT_MOTIF=no])
-        if test "$GOT_MOTIF" = "yes" ; then
-            dnl Motif header location specified: $libmotif_CPPFLAGS - check if Xm/Xm.h is there...
-            AS_ECHO(["Motif header location specified: $libmotif_CPPFLAGS - check if Xm/Xm.h is there..."])
+    dnl If the X11 libraries are found then check for header files
+    if test "$GOT_X11" = "yes" ; then
+        AC_ARG_WITH(x11-include, [  --with-x11-include=DIR    Location of X11 headers],
+                [x11_includedir="${withval}"] [X11_INCLUDE_SET=yes], [X11_INCLUDE_SET=no])
+        if test "$X11_INCLUDE_SET" = "yes" ; then
+            dnl X11 header location specified: $x11_includedir - check if X11/Intrinsic.h is there...
+            AS_ECHO(["X11 header location specified: $x11_includedir - check if X11/Intrinsic.h is there..."])
             save_CPPFLAGS=$CPPFLAGS
             save_CFLAGS=$CFLAGS
-            CPPFLAGS="$CPPFLAGS $libmotif_CPPFLAGS"
-            CFLAGS="$CFLAGS $libmotif_CPPFLAGS"
-            AC_CHECK_HEADER(Xm/Xm.h, [MOTIF_SETTING=yes], [MOTIF_SETTING=no],)
+            CPPFLAGS="$CPPFLAGS -I$x11_includedir"
+            CFLAGS="$CFLAGS -I$x11_includedir"
+            AC_CHECK_HEADER(X11/Intrinsic.h, [GOT_X11=yes], [GOT_X11=no],)
             CPPFLAGS=$save_CPPFLAGS
             CFLAGS=$save_CFLAGS
-            if test "$MOTIF_SETTING" = "no"; then
-                AC_MSG_ERROR([Did not find Xm/Xm.h according to --with-motif-include - check the installation!])
+            if test "$GOT_X11" = "yes"; then
+                libx11_CPPFLAGS="-I$x11_includedir"
             fi
         else
-            dnl Looking for Motif headers in the usual places...
-            AS_ECHO(["Looking for Motif headers in the usual places..."])
-            AC_CHECK_HEADER(Xm/Xm.h, [MOTIF_SETTING=yes], [MOTIF_SETTING=no])
-            if test "$MOTIF_SETTING" = "yes" ; then
-                GOT_MOTIF=yes
-                AS_ECHO(["Using pre-installed Motif headers..."])
-            else
-                AS_ECHO(["Did not find Motif headers anywhere, use --with-motif-include to set the location"])
-                AC_MSG_ERROR([Did not find Motif headers anywhere, use --with-motif-include to set the location])
+            AC_CHECK_HEADER(X11/Intrinsic.h, [GOT_X11=yes], [GOT_X11=no],)
+            if test "$GOT_X11" = "yes"; then
+                libx11_CPPFLAGS=""
             fi
         fi
-        dnl Done checking for Motif headers
+        if test "$GOT_X11" = "yes"; then
+            AS_ECHO(["X11 headers found!"])
+        else
+            AC_MSG_ERROR([Did not find X11/Intrinsic.h - check the installation!])
+        fi
     fi
 
-    dnl Substitute Motif library and header arguments
-    AC_SUBST([libmotif_LIBS], [$libmotif_LIBS])
-    AC_SUBST([libmotif_CPPFLAGS], [$libmotif_CPPFLAGS])
+    if test "$GOT_X11" = "yes" ; then
 
-else
-    dnl Failed to find X11 libraries and headers - unable to build graphical tools
-    AS_ECHO(["Failed to find X11 libraries and headers - unable to build graphical tools"])
+        dnl Check for Motif library libXm
+        AS_ECHO(["Check for Motif library libXm"])
+        AC_ARG_WITH(motif-lib, [  --with-motif-lib=DIR    Location of MOTIF library],
+                [motif_libdir="${withval}"] [MOTIF_LIB_SET=yes], [MOTIF_LIB_SET=no])
+        if test "$MOTIF_LIB_SET" = "yes" ; then
+            dnl Motif library location specified: $motif_libdir - check if libXm is there...
+            AS_ECHO(["Motif library location specified: $motif_libdir - check if libXm is there..."])
+            save_LDFLAGS=$LDFLAGS
+            LDFLAGS="$LDFLAGS -L$motif_libdir"
+            AC_CHECK_LIB([Xm], [XmCreatePushButton], [GOT_MOTIF=yes], [GOT_MOTIF=no], )
+            LDFLAGS="$save_LDFLAGS"
+            if test "$GOT_MOTIF" = "yes"; then
+                libmotif_LIBS="-lXm"
+                libmotif_LDFLAGS="-L$motif_libdir -R $motif_libdir"
+            else
+                AC_MSG_ERROR(["Did not find libXm according to --with-motif-lib - check the installation!"])
+            fi
+        else
+            dnl First look for pkg-config OpenMotif entry...
+            AS_ECHO(["Look for pkg-config OpenMotif package..."])
+            PKG_CHECK_MODULES([libXm], [openmotif], [GOT_MOTIF=yes], [GOT_MOTIF=no])
+            if test "$GOT_MOTIF" = "yes"; then
+                AS_ECHO([Found libXm using pkg-config...])
+                libmotif_LIBS="-lXm"
+                libmotif_LDFLAGS=""
+            else
+                AS_ECHO(["Did not find libXm using pkg-config, looking in the usual places..."])
+                AC_CHECK_LIB([Xm], [XmCreatePushButton], [GOT_MOTIF=yes], [GOT_MOTIF=no],)
+                if test "$GOT_MOTIF" = "yes" ; then
+                    AS_ECHO(["Found libXm!"])
+                    libmotif_LIBS="-lXm"
+                    libmotif_LDFLAGS=""
+                else
+                    AC_MSG_ERROR(["Did not find Motif library anywhere, use --with-motif-lib to set the location"])
+                fi
+            fi
+        fi
+
+        if test "$GOT_MOTIF" = "yes" ; then
+            dnl Check for Motif headers
+            AS_ECHO(["Check for Motif headers"])
+            dnl First check if Motif location specified on the command line
+            AC_ARG_WITH(motif-include, [  --with-motif-include=DIR    Location of Motif headers],
+                    [motif_includedir="${withval}"] [MOTIF_INCLUDE_SET=yes], [MOTIF_INCLUDE_SET=no])
+            if test "$MOTIF_INCLUDE_SET" = "yes" ; then
+                dnl Motif header location specified: $motif_includedir - check if Xm/Xm.h is there...
+                AS_ECHO(["Motif header location specified: $motif_includedir - check if Xm/Xm.h is there..."])
+                save_CPPFLAGS=$CPPFLAGS
+                CPPFLAGS="$CPPFLAGS -I$motif_includedir"
+                AS_ECHO(["Looking for Motif headers: CPPFLAGS=$CPPFLAGS"])
+                AC_CHECK_HEADER(Xm/Xm.h, [GOT_MOTIF=yes], [GOT_MOTIF=no],)
+                AS_ECHO(["Done looking for Motif headers: GOT_MOTIF=$GOT_MOTIF"])
+                CPPFLAGS=$save_CPPFLAGS
+                if test "$GOT_MOTIF" = "yes"; then
+                    libmotif_CPPFLAGS="-I$motif_includedir"
+                else
+                    dnl Failed header check - try brute force check if Xm/Xm.h exists
+                    AS_ECHO(["Failed header check - try brute force check if Xm/Xm.h exists"])
+                     if test -f $motif_includedir/Xm/Xm.h ; then
+                         libmotif_CPPFLAGS="-I$motif_includedir"
+                         GOT_MOTIF=yes
+                     else
+                        AC_MSG_ERROR(["Did not find Xm/Xm.h according to --with-motif-include - check the installation!"])
+                     fi
+                fi
+            else
+                dnl Looking for Motif headers in the usual places...
+                AS_ECHO(["Looking for Motif headers in the usual places..."])
+                AC_CHECK_HEADER(Xm/Xm.h, [GOT_MOTIF=yes], [GOT_MOTIF=no])
+                if test "$GOT_MOTIF" = "yes" ; then
+                    libmotif_CPPFLAGS=""
+                else
+                    AC_MSG_ERROR([Did not find Motif headers anywhere, use --with-motif-include to set the location])
+                fi
+            fi
+        fi
+
+    else
+        dnl Failed to find X11 libraries and headers - unable to build graphical tools
+        AS_ECHO(["Failed to find X11 libraries and headers - unable to build graphical tools"])
+    fi
+
+dnl End looking for X11 and Motif if graphical tools to be built
 fi
 
+dnl Substitute Motif library and header arguments
 AM_CONDITIONAL([BUILD_MOTIF], [test "$GOT_MOTIF" = yes])
+AC_SUBST([libx11_LIBS], [$libx11_LIBS])
+AC_SUBST([libx11_CPPFLAGS], [$libx11_CPPFLAGS])
+AC_SUBST([libx11_LDFLAGS], [$libx11_LDFLAGS])
+AC_SUBST([libmotif_LIBS], [$libmotif_LIBS])
+AC_SUBST([libmotif_CPPFLAGS], [$libmotif_CPPFLAGS])
+AC_SUBST([libmotif_LDFLAGS], [$libmotif_LDFLAGS])
 dnl End check for Motif library and headers
 
 dnl--------------------------------------------------------------------
 dnl OpenGL Section
 dnl--------------------------------------------------------------------
 
-dnl Check for OpenGL libraries libGL libGLU and header files GL/gl.h GL/glu.h GL/glx.h
-AS_ECHO(["Check for OpenGL libraries libGL libGLU and header files GL/gl.h GL/glu.h GL/glx.h"])
-GOT_OPENGL=no
-OPENGL_SETTING=no
+dnl Only look for OpenGL if graphical tools should be built and X11 and Motif have been found
+if test "$build_mbtools" = "yes" ; then
 
-dnl Check for OpenGL libraries libGLU libGL
-AS_ECHO(["Check for OpenGL libraries libGLU libGL"])
-AC_ARG_WITH(opengl-lib, [  --with-opengl-lib=DIR    Location of OpenGL library],
-        [opengl_libdir="${withval}"] [GOT_OPENGL=yes], [GOT_OPENGL=no])
-if test "$GOT_OPENGL" = "yes" ; then
-    dnl OpenGL library location specified: $opengl_libdir - check if libGLU libGL is there...
-    AS_ECHO(["OpenGL library location specified: $opengl_libdir - check if libGL libGLU are there..."])
-    save_LDFLAGS=$LDFLAGS
-    LDFLAGS="$LDFLAGS -L$opengl_libdir"
-    AC_CHECK_LIB([GL], [glBegin], [OPENGL_SETTING=yes], [OPENGL_SETTING=no], )
-    if test "$OPENGL_SETTING" = "yes"; then
-        AC_CHECK_LIB([GLU], [gluScaleImage], [OPENGL_SETTING=yes], [OPENGL_SETTING=no], )
-    fi
-    LDFLAGS="$save_LDFLAGS"
-    if test "$OPENGL_SETTING" = "no"; then
-        AC_MSG_ERROR([Did not find libGLU libGL according to --with-opengl-lib - check the installation!])
-    fi
-    libopengl_LIBS="-L$opengl_libdir -lGL -lGLU"
-    libopengl_LDFLAGS="-L$opengl_libdir"
-else
-    dnl Look for pkg-config OpenGL package...
-    AS_ECHO(["Look for pkg-config OpenGL package..."])
-    PKG_CHECK_MODULES([libGLU], [opengl], [GOT_OPENGL=yes], [GOT_OPENGL=no])
-    libopengl_LIBS="-lGL -lGLU"
-    libopengl_LDFLAGS=""
-fi
-if test "$GOT_OPENGL" = "no" ; then
-    dnl Did not find OpenGL library pkg-config package, looking in the usual places...
-    AS_ECHO(["Did not find OpenGL library pkg-config package, looking in the usual places..."])
-    AC_CHECK_LIB([GL], [glBegin], [OPENGL_SETTING=yes], [OPENGL_SETTING=no], )
-    if test "$OPENGL_SETTING" = "yes"; then
-        AC_CHECK_LIB([GLU], [gluScaleImage], [OPENGL_SETTING=yes], [OPENGL_SETTING=no], )
-    fi
-    if test "$OPENGL_SETTING" = "yes" ; then
-        GOT_OPENGL=yes
-        AS_ECHO(["Using pre-installed libGLU libGL..."])
-        libopengl_LIBS="-lGL -lGLU"
-        libopengl_LDFLAGS=""
-    else
-        AS_ECHO(["Did not find OpenGL library anywhere, use --with-opengl-lib to set the location"])
-        AC_MSG_ERROR([Did not find OpenGL library anywhere, use --with-opengl-lib to set the location])
-    fi
-fi
-dnl Done checking for OpenGL libraries libGLU libGL
-
-if test "$GOT_OPENGL" = "yes" ; then
-    dnl Check for OpenGL headers
-    AS_ECHO(["Check for OpenGL headers"])
+    dnl Check for OpenGL libraries libGL libGLU and header files GL/gl.h GL/glu.h GL/glx.h
+    AS_ECHO(["Check for OpenGL libraries libGL libGLU and header files GL/gl.h GL/glu.h GL/glx.h"])
     GOT_OPENGL=no
     OPENGL_SETTING=no
-    dnl First check if OpenGL location specified on the command line
-    AC_ARG_WITH(opengl-include, [  --with-opengl-include=DIR    Location of OpenGL headers],
-            [libopengl_INCLUDEDIR="${withval}"] [GOT_OPENGL=yes], [GOT_OPENGL=no])
+
+    dnl Check for OpenGL libraries libGLU libGL
+    AS_ECHO(["Check for OpenGL libraries libGLU libGL"])
+    AC_ARG_WITH(opengl-lib, [  --with-opengl-lib=DIR    Location of OpenGL library],
+            [opengl_libdir="${withval}"] [GOT_OPENGL=yes], [GOT_OPENGL=no])
     if test "$GOT_OPENGL" = "yes" ; then
-        libopengl_CPPFLAGS="-I$libopengl_INCLUDEDIR"
-        dnl OpenGL header location specified: $libopengl_CPPFLAGS - check if GL/gl.h is there...
-        AS_ECHO(["OpenGL header location specified: $libopengl_CPPFLAGS - check if GL/gl.h is there..."])
-        save_CPPFLAGS=$CPPFLAGS
-        save_CFLAGS=$CFLAGS
-        CPPFLAGS="$CPPFLAGS $libopengl_CPPFLAGS"
-        CFLAGS="$CFLAGS $libopengl_CPPFLAGS"
-        AC_CHECK_HEADER(GL/gl.h, [OPENGL_SETTING=yes], [OPENGL_SETTING=no],)
-        CPPFLAGS=$save_CPPFLAGS
-        CFLAGS=$save_CFLAGS
-        if test "$OPENGL_SETTING" = "no"; then
-            AC_MSG_ERROR([Did not find GL/gl.h according to --with-opengl-include - check the installation!])
+        dnl OpenGL library location specified: $opengl_libdir - check if libGLU libGL is there...
+        AS_ECHO(["OpenGL library location specified: $opengl_libdir - check if libGL libGLU are there..."])
+        save_LDFLAGS=$LDFLAGS
+        LDFLAGS="$LDFLAGS -L$opengl_libdir"
+        AC_CHECK_LIB([GL], [glBegin], [OPENGL_SETTING=yes], [OPENGL_SETTING=no], )
+        if test "$OPENGL_SETTING" = "yes"; then
+            AC_CHECK_LIB([GLU], [gluScaleImage], [OPENGL_SETTING=yes], [OPENGL_SETTING=no], )
         fi
+        LDFLAGS="$save_LDFLAGS"
+        if test "$OPENGL_SETTING" = "no"; then
+            AC_MSG_ERROR([Did not find libGLU libGL according to --with-opengl-lib - check the installation!])
+        fi
+        libopengl_LIBS="-L$opengl_libdir -lGL -lGLU"
+        libopengl_LDFLAGS="-L$opengl_libdir"
     else
-        dnl Looking for OpenGL headers in the usual places...
-        AS_ECHO(["Looking for OpenGL headers in the usual places..."])
-        AC_CHECK_HEADER(GL/gl.h, [OPENGL_SETTING=yes], [OPENGL_SETTING=no])
+        dnl Look for pkg-config OpenGL package...
+        AS_ECHO(["Look for pkg-config OpenGL package..."])
+        PKG_CHECK_MODULES([libGLU], [opengl], [GOT_OPENGL=yes], [GOT_OPENGL=no])
+        libopengl_LIBS="-lGL -lGLU"
+        libopengl_LDFLAGS=""
+    fi
+    if test "$GOT_OPENGL" = "no" ; then
+        dnl Did not find OpenGL library pkg-config package, looking in the usual places...
+        AS_ECHO(["Did not find OpenGL library pkg-config package, looking in the usual places..."])
+        AC_CHECK_LIB([GL], [glBegin], [OPENGL_SETTING=yes], [OPENGL_SETTING=no], )
+        if test "$OPENGL_SETTING" = "yes"; then
+            AC_CHECK_LIB([GLU], [gluScaleImage], [OPENGL_SETTING=yes], [OPENGL_SETTING=no], )
+        fi
         if test "$OPENGL_SETTING" = "yes" ; then
             GOT_OPENGL=yes
-            AS_ECHO(["Using pre-installed OpenGL headers..."])
+            AS_ECHO(["Using pre-installed libGLU libGL..."])
+            libopengl_LIBS="-lGL -lGLU"
+            libopengl_LDFLAGS=""
         else
-            AS_ECHO(["Did not find OpenGL headers anywhere, use --with-opengl-include to set the location"])
-            AC_MSG_ERROR([Did not find OpenGL headers anywhere, use --with-opengl-include to set the location])
+            AS_ECHO(["Did not find OpenGL library anywhere, use --with-opengl-lib to set the location"])
+            AC_MSG_ERROR([Did not find OpenGL library anywhere, use --with-opengl-lib to set the location])
         fi
     fi
-    dnl Done checking for OpenGL headers
-fi
+    dnl Done checking for OpenGL libraries libGLU libGL
 
-dnl Substitute OpenGL library and header arguments
-AC_SUBST([libopengl_LIBS], [$libopengl_LIBS])
-AC_SUBST([libopengl_INCLUDEDIR], [$libopengl_INCLUDEDIR])
-AC_SUBST([libopengl_CPPFLAGS], [$libopengl_CPPFLAGS])
+    if test "$GOT_OPENGL" = "yes" ; then
+        dnl Check for OpenGL headers
+        AS_ECHO(["Check for OpenGL headers"])
+        GOT_OPENGL=no
+        OPENGL_SETTING=no
+        dnl First check if OpenGL location specified on the command line
+        AC_ARG_WITH(opengl-include, [  --with-opengl-include=DIR    Location of OpenGL headers],
+                [libopengl_INCLUDEDIR="${withval}"] [GOT_OPENGL=yes], [GOT_OPENGL=no])
+        if test "$GOT_OPENGL" = "yes" ; then
+            libopengl_CPPFLAGS="-I$libopengl_INCLUDEDIR"
+            dnl OpenGL header location specified: $libopengl_CPPFLAGS - check if GL/gl.h is there...
+            AS_ECHO(["OpenGL header location specified: $libopengl_CPPFLAGS - check if GL/gl.h is there..."])
+            save_CPPFLAGS=$CPPFLAGS
+            save_CFLAGS=$CFLAGS
+            CPPFLAGS="$CPPFLAGS $libopengl_CPPFLAGS"
+            CFLAGS="$CFLAGS $libopengl_CPPFLAGS"
+            AC_CHECK_HEADER(GL/gl.h, [OPENGL_SETTING=yes], [OPENGL_SETTING=no],)
+            CPPFLAGS=$save_CPPFLAGS
+            CFLAGS=$save_CFLAGS
+            if test "$OPENGL_SETTING" = "no"; then
+                AC_MSG_ERROR([Did not find GL/gl.h according to --with-opengl-include - check the installation!])
+            fi
+        else
+            dnl Looking for OpenGL headers in the usual places...
+            AS_ECHO(["Looking for OpenGL headers in the usual places..."])
+            AC_CHECK_HEADER(GL/gl.h, [OPENGL_SETTING=yes], [OPENGL_SETTING=no])
+            if test "$OPENGL_SETTING" = "yes" ; then
+                GOT_OPENGL=yes
+                AS_ECHO(["Using pre-installed OpenGL headers..."])
+            else
+                AS_ECHO(["Did not find OpenGL headers anywhere, use --with-opengl-include to set the location"])
+                AC_MSG_ERROR([Did not find OpenGL headers anywhere, use --with-opengl-include to set the location])
+            fi
+        fi
+        dnl Done checking for OpenGL headers
+    fi
+
+    dnl Substitute OpenGL library and header arguments
+    AC_SUBST([libopengl_LIBS], [$libopengl_LIBS])
+    AC_SUBST([libopengl_INCLUDEDIR], [$libopengl_INCLUDEDIR])
+    AC_SUBST([libopengl_CPPFLAGS], [$libopengl_CPPFLAGS])
+
+    dnl End check for OpenGL library and headers
+    if test "$GOT_OPENGL" = "no" ; then
+        dnl Failed to find OpenGL libraries and headers - unable to build OpenGL based visualization tools
+        AS_ECHO(["Failed to find OpenGL libraries and headers - unable to build OpenGL based visualization tools"])
+    fi
+
+dnl End looking for OpenGL if graphical tools to be built
+fi
 
 AM_CONDITIONAL([BUILD_GL], [test "$GOT_OPENGL" = yes])
-dnl End check for OpenGL library and headers
-
-if test "$GOT_OPENGL" = "no" ; then
-    dnl Failed to find OpenGL libraries and headers - unable to build OpenGL based visualization tools
-    AS_ECHO(["Failed to find OpenGL libraries and headers - unable to build OpenGL based visualization tools"])
-fi
 
 dnl--------------------------------------------------------------------
 dnl OpenCV4 Section
@@ -1232,24 +1337,6 @@ else
 fi
 
 dnl--------------------------------------------------------------------
-dnl UTILS Section - optionally build utils
-dnl--------------------------------------------------------------------
-
-dnl Check if the mbsys tools should be built
-AS_ECHO(["Check if the graphical utils should be built"])
-AC_ARG_ENABLE(mbtools, [AS_HELP_STRING([--disable-mbtools], [do not build graphical tools])],
-        [build_mbtools=no], [build_mbtools=yes])
-AM_CONDITIONAL([BUILD_MBUTILS], [test $build_mbtools = yes])
-if test "$build_mbtools" = "yes" ; then
-    dnl Building mbsys tools
-    AS_ECHO(["Building graphical tools"])
-    AC_DEFINE(MBUTILS_ENABLED, 1, [Build graphical tools])
-else
-    dnl Not building mbsys tools
-    AS_ECHO(["Not building graphical tools"])
-fi
-
-dnl--------------------------------------------------------------------
 dnl Point Cloud Library Section - optionally build ICP based feature matching
 dnl in mbnavadjust - uses ICP algorithm in Point Cloud Library (PCL)
 dnl--------------------------------------------------------------------
@@ -1270,7 +1357,23 @@ fi
 
 dnl If tools using PCL are being built then look for PCL libraries and headers
 if test "$build_pcltools" = "yes" ; then
-    AC_CHECK_LIB([libpcl_common], [XSendEvent], [GOT_libpcl_common=yes], [GOT_libpcl_common=no])
+    AC_LANG_PUSH([C++])
+    LDFLAGS="$LDFLAGS -L/usr/local/lib"
+    AX_CXX_CHECK_LIB([pcl_io], [pcl::ASCIIReader::setInputFields], [GOT_libpcl=yes], [GOT_libpcl=no])
+    AX_CXX_CHECK_LIB([boost_thread-mt], [boost::thread], [GOT_boost=yes], [GOT_boost=no])
+    AX_CXX_CHECK_LIB(boost_regex, [boost::RegEx::Position (int i = 0) const], [GOT_boost=yes], [GOT_boost=no])
+    LDFLAGS=$save_LDFLAGS
+    AC_LANG_POP([C++])
+    if test "$GOT_libpcl" = "yes" ; then
+        AS_ECHO(["Found libpcl_io"])
+    else
+        AS_ECHO(["Did not find libpcl_io"])
+    fi
+    if test "$GOT_boost" = "yes" ; then
+        AS_ECHO(["Found boost"])
+    else
+        AS_ECHO(["Did not find boost"])
+    fi
 fi
 
 dnl--------------------------------------------------------------------
@@ -1435,6 +1538,10 @@ if test $enable_shared = yes ; then
 else
     AS_ECHO(["Building Shared Libs: No"])
 fi
+AS_ECHO(["CFLAGS:            $CFLAGS"])
+AS_ECHO(["CPPFLAGS:          $CPPFLAGS"])
+AS_ECHO(["LDFLAGS:           $LDFLAGS"])
+AS_ECHO(["LIBS:              $LIBS"])
 if test $hardening != no ; then
     AS_ECHO(["Hardening Enabled: Yes"])
     AS_ECHO(["HARDEN_CFLAGS:     $HARDEN_CFLAGS"])
@@ -1476,6 +1583,11 @@ if test "$GOT_FFTW" = "yes" ; then
 else
     AS_ECHO(["FFTW Support: Disabled"])
 fi
+if test "$build_mbtools" = "yes" ; then
+	AS_ECHO(["Build graphical tools: Enabled"])
+else
+	AS_ECHO(["Build graphical tools: Disabled"])
+fi
 if test "$GOT_MOTIF" = "yes" ; then
     AS_ECHO(["Motif Support: Enabled"])
 else
@@ -1496,11 +1608,6 @@ if test "$build_mbtnav" = "yes" ; then
 	AS_ECHO(["Build mbtnav tools: Enabled"])
 else
 	AS_ECHO(["Build mbtnav tools: Disabled"])
-fi
-if test "$build_mbtools" = "yes" ; then
-	AS_ECHO(["Build graphical tools: Enabled"])
-else
-	AS_ECHO(["Build graphical tools: Disabled"])
 fi
 if test "$GOT_OPENCV4" = "yes" ; then
 	AS_ECHO(["Build OpenCV4 tools: Enabled"])

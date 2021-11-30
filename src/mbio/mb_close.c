@@ -101,6 +101,11 @@ int mb_close(int verbose, void **mbio_ptr, int *error) {
     SAPI_close();
   }
 
+	/* else handle segy files to be opened with mb_segy */
+	else if (mb_io_ptr->filetype == MB_FILETYPE_SEGY) {
+    status = mb_segy_close(verbose, (void **)&(mb_io_ptr->mbfp),error);
+	}
+
   /* else if MB_FILETYPE_INPUT (usually socket) deallocate mbsp if non-null */
   else if (mb_io_ptr->filetype == MB_FILETYPE_INPUT) {
     if (mb_io_ptr->mbsp != NULL)

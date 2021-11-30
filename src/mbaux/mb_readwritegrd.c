@@ -372,8 +372,8 @@ int mb_write_gmt_grd(int verbose, const char *grdfile, float *grid,
     fprintf(stderr, "dbg2       xmax:       %f\n", xmax);
     fprintf(stderr, "dbg2       ymin:       %f\n", ymin);
     fprintf(stderr, "dbg2       ymax:       %f\n", ymax);
-    fprintf(stderr, "dbg2       dx:         %f\n", dx);
-    fprintf(stderr, "dbg2       dy:         %f\n", dy);
+    fprintf(stderr, "dbg2       dx:         %g\n", dx);
+    fprintf(stderr, "dbg2       dy:         %g\n", dy);
     fprintf(stderr, "dbg2       xlab:       %s\n", xlab);
     fprintf(stderr, "dbg2       ylab:       %s\n", ylab);
     fprintf(stderr, "dbg2       zlab:       %s\n", zlab);
@@ -490,28 +490,9 @@ int mb_write_gmt_grd(int verbose, const char *grdfile, float *grid,
     strncpy(program_name, argv[0], MB_PATH_MAXLINE);
   else
     strcpy(program_name, "");
-  const time_t right_now = time((time_t *)0);
-  char date[32];
-  strcpy(date, ctime(&right_now));
-  date[strlen(date) - 1] = '\0';
-  char user[MB_PATH_MAXLINE];
-  char *user_ptr = getenv("USER");
-  if (user_ptr == NULL)
-    if ((user_ptr = getenv("LOGNAME")) == NULL)
-      user_ptr = getenv("USERNAME");
-  if (user_ptr != NULL)
-    strcpy(user, user_ptr);
-  else
-    strcpy(user, "unknown");
-  char host[MB_PATH_MAXLINE] = {""};
-  gethostname(host, MB_PATH_MAXLINE);
-  if (host[0] == '\0') /* Don't know why but the above fails on Win. So get the same info from ENV */
-  {
-    const char *host_ptr = getenv("USERDOMAIN");
-    if (host_ptr != NULL)
-      strcpy(host, host_ptr);
-  }
-  mb_path remark = "";
+  char user[256], host[256], date[32];
+  status = mb_user_host_date(verbose, user, host, date, error);
+  mb_path remark = {0};
   sprintf(remark, "\n\tProjection: %s\n\tGrid created by %s\n\tMB-system Version %s\n\tRun by <%s> on <%s> at <%s>", projection,
           program_name, MB_VERSION, user, host, date);
 
@@ -581,8 +562,8 @@ int mb_write_gmt_grd(int verbose, const char *grdfile, float *grid,
     else {
       fprintf(stderr, "  Geographic Coordinate System Name: %s\n", projectionname);
       fprintf(stderr, "  Geographic Coordinate System ID:   %d\n", epsgid);
-      fprintf(stderr, "  Longitude:  %f %f  %f\n", header->wesn[0], header->wesn[1], header->inc[0]);
-      fprintf(stderr, "  Latitude:   %f %f  %f\n", header->wesn[2], header->wesn[3], header->inc[1]);
+      fprintf(stderr, "  Longitude:  %f %f  %g\n", header->wesn[0], header->wesn[1], header->inc[0]);
+      fprintf(stderr, "  Latitude:   %f %f  %g\n", header->wesn[2], header->wesn[3], header->inc[1]);
     }
     fprintf(stderr, "  Grid Projection Mode:     %d\n", grid_projection_mode);
     fprintf(stderr, "  Grid Projection ID:       %s\n", grid_projection_id);

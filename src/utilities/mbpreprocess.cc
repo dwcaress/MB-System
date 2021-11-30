@@ -133,7 +133,8 @@ constexpr char usage_message[] =
     "\t--kluge-zero-attitude-correction\n"
     "\t--kluge-zero-alongtrack-angles\n"
     "\t--kluge-fix-wissl-timestamps\n"
-    "\t--kluge-auv-sentry-sensordepth\n";
+    "\t--kluge-auv-sentry-sensordepth\n"
+    "\t--kluge-ignore-snippets\n";
 
 /*--------------------------------------------------------------------*/
 
@@ -163,6 +164,8 @@ int main(int argc, char **argv) {
   double kluge_soundspeedtweak_factor = 1.0;
   bool kluge_soundspeedtweak = false;
   bool kluge_fix_wissl_timestamps = false;
+  bool kluge_auv_sentry_sensordepth = false;
+  bool kluge_ignore_snippets = false;
 
   mb_path sensordepth_file;
   memset(sensordepth_file, 0, sizeof(mb_path));
@@ -180,6 +183,11 @@ int main(int argc, char **argv) {
   memset(platform_file, 0, sizeof(mb_path));
   mb_path read_file = "datalist.mb-1";
   memset(read_file, 0, sizeof(mb_path));
+  bool output_directory_set = false;
+  mb_path output_directory = "";
+  memset(output_directory, 0, sizeof(mb_path));
+  bool output_datalist_set = false;
+  mb_path output_datalist = "datalist.mb-1";
   struct mb_preprocess_struct preprocess_pars;
   memset(&preprocess_pars, 0, sizeof(struct mb_preprocess_struct));
 
@@ -225,6 +233,7 @@ int main(int argc, char **argv) {
                                       {"help", no_argument, nullptr, 0},
                                       {"input", required_argument, nullptr, 0},
                                       {"format", required_argument, nullptr, 0},
+                                      {"output-directory", required_argument, nullptr, 0},
                                       {"platform-file", required_argument, nullptr, 0},
                                       {"platform-target-sensor", required_argument, nullptr, 0},
                                       {"output-sensor-fnv", no_argument, nullptr, 0},
@@ -287,6 +296,7 @@ int main(int argc, char **argv) {
                                       {"kluge-zero-alongtrack-angles", no_argument, nullptr, 0},
                                       {"kluge-fix-wissl-timestamps", no_argument, nullptr, 0},
                                       {"kluge-auv-sentry-sensordepth", no_argument, nullptr, 0},
+                                      {"kluge-ignore-snippets", no_argument, nullptr, 0},
                                       {nullptr, 0, nullptr, 0}};
 
     int option_index;
@@ -311,9 +321,19 @@ int main(int argc, char **argv) {
         else if (strcmp("format", options[option_index].name) == 0) {
           /* n = */ sscanf(optarg, "%d", &format);
         }
+        else if (strcmp("output-directory", options[option_index].name) == 0) {
+          const int n = sscanf(optarg, "%1023s", output_directory);
+          if (n == 1 && strlen(output_directory) > 0)
+            output_directory_set = true;
+        }
+        else if (strcmp("output-datalist", options[option_index].name) == 0) {
+          const int n = sscanf(optarg, "%1023s", output_datalist);
+          if (n == 1 && strlen(output_datalist) > 0)
+            output_datalist_set = true;
+        }
         else if (strcmp("platform-file", options[option_index].name) == 0) {
           const int n = sscanf(optarg, "%1023s", platform_file);
-          if (n == 1)
+          if (n == 1 && strlen(platform_file) > 0)
             use_platform_file = true;
         }
         else if (strcmp("platform-target-sensor", options[option_index].name) == 0) {
@@ -643,6 +663,12 @@ int main(int argc, char **argv) {
         else if (strcmp("kluge-auv-sentry-sensordepth", options[option_index].name) == 0) {
           preprocess_pars.kluge_id[preprocess_pars.n_kluge] = MB_PR_KLUGE_AUVSENTRYSENSORDEPTH;
           preprocess_pars.n_kluge++;
+          kluge_auv_sentry_sensordepth = true;
+        }
+        else if (strcmp("kluge-ignore-snippets", options[option_index].name) == 0) {
+          preprocess_pars.kluge_id[preprocess_pars.n_kluge] = MB_PR_KLUGE_IGNORESNIPPETS;
+          preprocess_pars.n_kluge++;
+          kluge_ignore_snippets = true;
         }
         break;
       case '?':
@@ -655,14 +681,6 @@ int main(int argc, char **argv) {
       exit(MB_ERROR_BAD_USAGE);
     }
 
-    /* if no affected data have been specified apply time_latency to all */
-    if (time_latency_mode != MB_SENSOR_TIME_LATENCY_NONE && time_latency_apply == MBPREPROCESS_TIME_LATENCY_APPLY_NONE)
-      time_latency_apply = MBPREPROCESS_TIME_LATENCY_APPLY_ALL_ANCILLIARY;
-
-    /* if no affected data have been specified apply filtering to all ancillary data */
-    if (filter_length > 0.0 && filter_apply == MBPREPROCESS_TIME_LATENCY_APPLY_NONE)
-      filter_apply = MBPREPROCESS_TIME_LATENCY_APPLY_ALL_ANCILLIARY;
-
     if (verbose == 1 || help) {
       fprintf(stderr, "\nProgram %s\n", program_name);
       fprintf(stderr, "MB-system Version %s\n", MB_VERSION);
@@ -674,6 +692,32 @@ int main(int argc, char **argv) {
       exit(error);
     }
   }
+
+  /* if no affected data have been specified apply time_latency to all */
+  if (time_latency_mode != MB_SENSOR_TIME_LATENCY_NONE && time_latency_apply == MBPREPROCESS_TIME_LATENCY_APPLY_NONE)
+    time_latency_apply = MBPREPROCESS_TIME_LATENCY_APPLY_ALL_ANCILLIARY;
+
+  /* if no affected data have been specified apply filtering to all ancillary data */
+  if (filter_length > 0.0 && filter_apply == MBPREPROCESS_TIME_LATENCY_APPLY_NONE)
+    filter_apply = MBPREPROCESS_TIME_LATENCY_APPLY_ALL_ANCILLIARY;
+
+  /* get read format if required */
+  {
+    mb_path fileroot;
+    int testformat = 0;
+    int formaterror = MB_ERROR_NO_ERROR;
+    mb_get_format(verbose, read_file, fileroot, &format, &formaterror);
+    if (format == 0)
+      format = testformat;
+
+    /* be sure that output datalist name does not conflict with input datalist name */
+    if (format < 0 && strcmp(read_file, output_datalist) == 0) {
+      sprintf(output_datalist, "%sr.mb-1", fileroot);
+    }
+  }
+
+  /* determine whether to read one file or a list of files */
+  const bool read_datalist = format < 0;
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  Program <%s>\n", program_name);
@@ -706,6 +750,15 @@ int main(int argc, char **argv) {
     fprintf(stderr, "dbg2  Input survey data to be preprocessed:\n");
     fprintf(stderr, "dbg2       read_file:                    %s\n", read_file);
     fprintf(stderr, "dbg2       format:                       %d\n", format);
+    fprintf(stderr, "dbg2  Output directory:\n");
+    if (output_directory_set)
+      fprintf(stderr, "dbg2       output_directory:             %s\n", output_directory);
+    else
+      fprintf(stderr, "dbg2       output_directory:             not specified, use working directory\n");
+    if (output_datalist_set)
+      fprintf(stderr, "dbg2       output_datalist:             %s\n", output_datalist);
+    else
+      fprintf(stderr, "dbg2       output_datalist:             not specified, use default: %s\n", output_datalist);
     fprintf(stderr, "dbg2  Source of platform model:\n");
     if (use_platform_file)
       fprintf(stderr, "dbg2       platform_file:                %s\n", platform_file);
@@ -792,6 +845,8 @@ int main(int argc, char **argv) {
     fprintf(stderr, "dbg2       kluge_soundspeedtweak:        %d\n", kluge_soundspeedtweak);
     fprintf(stderr, "dbg2       kluge_soundspeedtweak_factor: %f\n", kluge_soundspeedtweak_factor);
     fprintf(stderr, "dbg2       kluge_fix_wissl_timestamps:   %d\n", kluge_fix_wissl_timestamps);
+    fprintf(stderr, "dbg2       kluge_auv_sentry_sensordepth: %d\n", kluge_auv_sentry_sensordepth);
+    fprintf(stderr, "dbg2       kluge_ignore_snippets:        %d\n", kluge_ignore_snippets);
     fprintf(stderr, "dbg2  Additional output:\n");
     fprintf(stderr, "dbg2       output_sensor_fnv:            %d\n", output_sensor_fnv);
     fprintf(stderr, "dbg2  Skip existing output files:\n");
@@ -804,6 +859,15 @@ int main(int argc, char **argv) {
     fprintf(stderr, "Input survey data to be preprocessed:\n");
     fprintf(stderr, "     read_file:                    %s\n", read_file);
     fprintf(stderr, "     format:                       %d\n", format);
+    fprintf(stderr, "Output directory:\n");
+    if (output_directory_set)
+      fprintf(stderr, "     output_directory:             %s\n", output_directory);
+    else
+      fprintf(stderr, "     output_directory:             not specified, use working directory\n");
+    if (output_datalist_set)
+      fprintf(stderr, "     output_datalist:             %s\n", output_datalist);
+    else
+      fprintf(stderr, "     output_datalist:             not specified, use default: %s\n", output_datalist);
     fprintf(stderr, "Source of platform model:\n");
     if (use_platform_file)
       fprintf(stderr, "     platform_file:                %s\n", platform_file);
@@ -890,6 +954,8 @@ int main(int argc, char **argv) {
     fprintf(stderr, "     kluge_soundspeedtweak:        %d\n", kluge_soundspeedtweak);
     fprintf(stderr, "     kluge_soundspeedtweak_factor: %f\n", kluge_soundspeedtweak_factor);
     fprintf(stderr, "     kluge_fix_wissl_timestamps:   %d\n", kluge_fix_wissl_timestamps);
+    fprintf(stderr, "     kluge_auv_sentry_sensordepth: %d\n", kluge_auv_sentry_sensordepth);
+    fprintf(stderr, "     kluge_ignore_snippets:        %d\n", kluge_ignore_snippets);
     fprintf(stderr, "Additional output:\n");
     fprintf(stderr, "     output_sensor_fnv:            %d\n", output_sensor_fnv);
     fprintf(stderr, "Skip existing output files:\n");
@@ -1257,15 +1323,8 @@ int main(int argc, char **argv) {
 
   /* Do first pass through the data collecting ancillary data from the desired source records */
 
-  /* get format if required */
-  if (format == 0)
-    mb_get_format(verbose, read_file, nullptr, &format, &error);
-
-  /* determine whether to read one file or a list of files */
-  const bool read_datalist = format < 0;
-  bool read_data;
-
   /* open file list */
+  bool read_data = false;
   if (read_datalist) {
     const int look_processed = MB_DATALIST_LOOK_UNSET;
     if (mb_datalist_open(verbose, &datalist, read_file, look_processed, &error) != MB_SUCCESS) {
@@ -1366,10 +1425,21 @@ int main(int argc, char **argv) {
                                &imbio_ptr, &btime_d, &etime_d, &beams_bath, &beams_amp, &pixels_ss, &error) != MB_SUCCESS) {
       char *message;
       mb_error(verbose, error, &message);
+      fprintf(stderr, "%s:%d:%s\n", __FILE__, __LINE__, __FUNCTION__);
       fprintf(stderr, "\nMBIO Error returned from function <mb_read_init>:\n%s\n", message);
       fprintf(stderr, "\nMultibeam File <%s> not initialized for reading\n", ifile);
       fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
       exit(error);
+    }
+
+    /* call preprocess function with pars settings before reading any data
+        - for some formats this can set special read behavior
+        - passing store_ptr == NULL indicates this is the pre-reading call
+        - if a preprocess function does not exist for this format then
+          standard preprocessing will be done - reset the error */
+    if (mb_preprocess(verbose, imbio_ptr, NULL, NULL, (void *)&preprocess_pars, &error) == MB_FAILURE) {
+      status = MB_SUCCESS;
+      error = MB_ERROR_NO_ERROR;
     }
 
     beamflag = nullptr;
@@ -1380,18 +1450,15 @@ int main(int argc, char **argv) {
     ss = nullptr;
     ssacrosstrack = nullptr;
     ssalongtrack = nullptr;
-    if (error == MB_ERROR_NO_ERROR)
-      status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(char), (void **)&beamflag, &error);
+    status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(char), (void **)&beamflag, &error);
     if (error == MB_ERROR_NO_ERROR)
       status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double), (void **)&bath, &error);
     if (error == MB_ERROR_NO_ERROR)
       status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_AMPLITUDE, sizeof(double), (void **)&amp, &error);
     if (error == MB_ERROR_NO_ERROR)
-      status =
-          mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double), (void **)&bathacrosstrack, &error);
+      status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double), (void **)&bathacrosstrack, &error);
     if (error == MB_ERROR_NO_ERROR)
-      status =
-          mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double), (void **)&bathalongtrack, &error);
+      status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double), (void **)&bathalongtrack, &error);
     if (error == MB_ERROR_NO_ERROR)
       status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double), (void **)&ss, &error);
     if (error == MB_ERROR_NO_ERROR)
@@ -1403,6 +1470,7 @@ int main(int argc, char **argv) {
     if (error != MB_ERROR_NO_ERROR) {
       char *message;
       mb_error(verbose, error, &message);
+      fprintf(stderr, "%s:%d:%s\n", __FILE__, __LINE__, __FUNCTION__);
       fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
       fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
       exit(error);
@@ -1501,6 +1569,7 @@ int main(int argc, char **argv) {
           if (error != MB_ERROR_NO_ERROR) {
             char *message;
             mb_error(verbose, error, &message);
+            fprintf(stderr, "%s:%d:%s\n", __FILE__, __LINE__, __FUNCTION__);
             fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
             fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
             exit(error);
@@ -1537,6 +1606,7 @@ int main(int argc, char **argv) {
           if (error != MB_ERROR_NO_ERROR) {
             char *message;
             mb_error(verbose, error, &message);
+            fprintf(stderr, "%s:%d:%s\n", __FILE__, __LINE__, __FUNCTION__);
             fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
             fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
             exit(error);
@@ -1569,6 +1639,7 @@ int main(int argc, char **argv) {
           if (error != MB_ERROR_NO_ERROR) {
             char *message;
             mb_error(verbose, error, &message);
+            fprintf(stderr, "%s:%d:%s\n", __FILE__, __LINE__, __FUNCTION__);
             fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
             fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
             exit(error);
@@ -1600,6 +1671,7 @@ int main(int argc, char **argv) {
           if (error != MB_ERROR_NO_ERROR) {
             char *message;
             mb_error(verbose, error, &message);
+            fprintf(stderr, "%s:%d:%s\n", __FILE__, __LINE__, __FUNCTION__);
             fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
             fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
             exit(error);
@@ -1634,6 +1706,7 @@ int main(int argc, char **argv) {
           if (error != MB_ERROR_NO_ERROR) {
             char *message;
             mb_error(verbose, error, &message);
+            fprintf(stderr, "%s:%d:%s\n", __FILE__, __LINE__, __FUNCTION__);
             fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
             fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
             exit(error);
@@ -1665,6 +1738,7 @@ int main(int argc, char **argv) {
         if (error != MB_ERROR_NO_ERROR) {
           char *message;
           mb_error(verbose, error, &message);
+          fprintf(stderr, "%s:%d:%s\n", __FILE__, __LINE__, __FUNCTION__);
           fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
           fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
           exit(error);
@@ -2302,6 +2376,8 @@ int main(int argc, char **argv) {
       oformat = MBF_3DWISSLP;
     else if (iformat == MBF_OICGEODA)
       oformat = MBF_OICMBARI;
+    else if (iformat == MBF_SB2100RW)
+      oformat = MBF_SB2100B2;
     else
       oformat = iformat;
 
@@ -2310,6 +2386,21 @@ int main(int argc, char **argv) {
     sprintf(ofile, "%s.mb%d", fileroot, oformat);
     if (strcmp(ifile, ofile) == 0)
       sprintf(ofile, "%sr.mb%d", fileroot, oformat);
+
+    /* if a different output directory was set by user, reset file path */
+    if (output_directory_set) {
+      char buffer[MB_PATH_MAXLINE] = "";
+      strcpy(buffer, output_directory);
+      if (buffer[strlen(output_directory) - 1] != '/')
+        strcat(buffer, "/");
+      char *filenameptr;
+      if (strrchr(ofile, '/') != nullptr)
+        filenameptr = strrchr(ofile, '/') + 1;
+      else
+        filenameptr = ofile;
+      strcat(buffer, filenameptr);
+      strcpy(ofile, buffer);
+    }
 
     /* Figure out if the file should be preprocessed - don't if it looks like
       the file was previously preprocessed and looks up to date  AND the
@@ -2353,10 +2444,21 @@ int main(int argc, char **argv) {
                      &imbio_ptr, &btime_d, &etime_d, &beams_bath, &beams_amp, &pixels_ss, &error) != MB_SUCCESS) {
         char *message;
         mb_error(verbose, error, &message);
+        fprintf(stderr, "%s:%d:%s\n", __FILE__, __LINE__, __FUNCTION__);
         fprintf(stderr, "\nMBIO Error returned from function <mb_read_init>:\n%s\n", message);
         fprintf(stderr, "\nMultibeam File <%s> not initialized for reading\n", ifile);
         fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
         exit(error);
+      }
+
+      /* call preprocess function with pars settings before reading any data
+          - for some formats this can set special read behavior
+          - passing store_ptr == NULL indicates this is the pre-reading call
+          - if a preprocess function does not exist for this format then
+            standard preprocessing will be done - reset the error */
+      if (mb_preprocess(verbose, imbio_ptr, NULL, NULL, (void *)&preprocess_pars, &error) == MB_FAILURE) {
+        status = MB_SUCCESS;
+        error = MB_ERROR_NO_ERROR;
       }
 
       if (verbose > 0)
@@ -2367,6 +2469,7 @@ int main(int argc, char **argv) {
         MB_SUCCESS) {
         char *message;
         mb_error(verbose, error, &message);
+        fprintf(stderr, "%s:%d:%s\n", __FILE__, __LINE__, __FUNCTION__);
         fprintf(stderr, "\nMBIO Error returned from function <mb_write_init>:\n%s\n", message);
         fprintf(stderr, "\nMultibeam File <%s> not initialized for writing\n", ofile);
         fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -2391,6 +2494,7 @@ int main(int argc, char **argv) {
                           &error) != MB_SUCCESS) {
           char *message = nullptr;
           mb_error(verbose, error, &message);
+          fprintf(stderr, "%s:%d:%s\n", __FILE__, __LINE__, __FUNCTION__);
           fprintf(stderr, "\nMBIO Error returned from function <mb_write_init>:\n%s\n", message);
           fprintf(stderr, "\nMultibeam File <%s> not initialized for writing\n", ofile);
           fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -2452,6 +2556,7 @@ int main(int argc, char **argv) {
       if (error != MB_ERROR_NO_ERROR) {
         char *message;
         mb_error(verbose, error, &message);
+        fprintf(stderr, "%s:%d:%s\n", __FILE__, __LINE__, __FUNCTION__);
         fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
         fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
         exit(error);
@@ -2539,8 +2644,8 @@ int main(int argc, char **argv) {
       start_time_d = -1.0;
       end_time_d = -1.0;
 
-            if (kluge_fix_wissl_timestamps)
-                kluge_fix_wissl_timestamps_setup2 = false;
+      if (kluge_fix_wissl_timestamps)
+        kluge_fix_wissl_timestamps_setup2 = false;
 
       /* ------------------------------- */
       /* write comments to output file   */
@@ -2894,6 +2999,7 @@ int main(int argc, char **argv) {
           if (status != MB_SUCCESS) {
             char *message;
             mb_error(verbose, error, &message);
+            fprintf(stderr, "%s:%d:%s\n", __FILE__, __LINE__, __FUNCTION__);
             fprintf(stderr, "\nMBIO Error returned from function <mb_put>:\n%s\n", message);
             fprintf(stderr, "\nMultibeam Data Not Written To File <%s>\n", ofile);
             fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -3141,7 +3247,7 @@ int main(int argc, char **argv) {
 
       /* close the input ("logged") swath file */
       status &= mb_close(verbose, &imbio_ptr, &error);
-	    n_rt_files++;
+      n_rt_files++;
 
       /* close the output ("raw") swath file */
       status &= mb_close(verbose, &ombio_ptr, &error);

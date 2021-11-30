@@ -125,6 +125,18 @@ int mbr_alm_sbifremr(int verbose, void *mbio_ptr, int *error) {
 	mb_io_ptr->data_structure_size = 0;
 	int status = mb_mallocd(verbose, __FILE__, __LINE__, mb_io_ptr->structure_size, &mb_io_ptr->raw_data, error);
 	status &= mb_mallocd(verbose, __FILE__, __LINE__, sizeof(struct mbsys_sb_struct), &mb_io_ptr->store_data, error);
+	status &= mb_mallocd(verbose, __FILE__, __LINE__, MBF_SBIFREMR_MAXLINE, &mb_io_ptr->saveptr1, error);
+
+  int *ping_num_save = &mb_io_ptr->save1;
+  double *heading_save = &mb_io_ptr->saved1;
+  int *sounding_num_save = &mb_io_ptr->save2;
+  bool *first = &mb_io_ptr->saveb1;
+  bool *line_save = &mb_io_ptr->saveb2;
+  *ping_num_save = 0;
+  *heading_save = 0.0;
+  *sounding_num_save = 0;
+  *first = true;
+  *line_save = false;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
@@ -151,6 +163,7 @@ int mbr_dem_sbifremr(int verbose, void *mbio_ptr, int *error) {
 	/* deallocate memory for data descriptor */
 	int status = mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->raw_data, error);
 	status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->store_data, error);
+	status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->saveptr1, error);
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
@@ -170,9 +183,6 @@ int mbr_sbifremr_rd_data(int verbose, void *mbio_ptr, int *error) {
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
 	}
-	static char line[MBF_SBIFREMR_MAXLINE];
-	static int ping_num_save = 0;
-	static double heading_save = 0.0;
 
 	/* get pointer to mbio descriptor */
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
@@ -180,6 +190,11 @@ int mbr_sbifremr_rd_data(int verbose, void *mbio_ptr, int *error) {
 	/* get pointer to raw data structure */
 	struct mbf_sbifremr_struct *data = (struct mbf_sbifremr_struct *)mb_io_ptr->raw_data;
 	FILE *mbfp = mb_io_ptr->mbfp;
+	char *line = (char *) mb_io_ptr->saveptr1;
+  int *ping_num_save = &mb_io_ptr->save1;
+  double *heading_save = &mb_io_ptr->saved1;
+  bool *first = &mb_io_ptr->saveb1;
+  bool *line_save = &mb_io_ptr->saveb2;
 
 	/* initialize beams to zeros */
 	for (int i = 0; i < MBF_SBIFREMR_NUM_BEAMS; i++) {
@@ -199,20 +214,18 @@ int mbr_sbifremr_rd_data(int verbose, void *mbio_ptr, int *error) {
 	*error = MB_ERROR_NO_ERROR;
 	int center = MBF_SBIFREMR_NUM_BEAMS / 2;
 	mb_io_ptr->file_pos = mb_io_ptr->file_bytes;
-	static bool first = true;
-	static bool line_save = false;
 	bool done = false;
 	while (!done) {
 
 		char *result = NULL;
 		/* get next line */
-		if (!line_save) {
+		if (!(*line_save)) {
 			mb_io_ptr->file_bytes = ftell(mbfp);
 			strncpy(line, "", MBF_SBIFREMR_MAXLINE);
 			result = fgets(line, MBF_SBIFREMR_MAXLINE, mbfp);
 		}
 		else {
-			line_save = false;
+			*line_save = false;
 			result = line;
 		}
 
@@ -231,7 +244,7 @@ int mbr_sbifremr_rd_data(int verbose, void *mbio_ptr, int *error) {
 			strncpy(data->comment, &line[2], MBF_SBIFREMR_MAXLINE - 3);
 			data->kind = MB_DATA_COMMENT;
 			done = true;
-			first = true;
+			*first = true;
 		}
 
 		/* deal with good line */
@@ -244,10 +257,10 @@ int mbr_sbifremr_rd_data(int verbose, void *mbio_ptr, int *error) {
 			beam_num = 19 - beam_num;
 
 			/* check if new ping */
-			if (ping_num != ping_num_save && !first) {
+			if (ping_num != *ping_num_save && !(*first)) {
 				done = true;
-				line_save = true;
-				first = true;
+				*line_save = true;
+				*first = true;
 			}
 
 			/* else convert and store the data */
@@ -282,8 +295,8 @@ int mbr_sbifremr_rd_data(int verbose, void *mbio_ptr, int *error) {
 				if (NorS == 'S')
 					data->lat[beam_num] = -1.0 * data->lat[beam_num];
 				data->deph[beam_num] = -depth;
-				first = false;
-				ping_num_save = ping_num;
+				*first = false;
+				*ping_num_save = ping_num;
 			}
 		}
 	}
@@ -343,13 +356,13 @@ int mbr_sbifremr_rd_data(int verbose, void *mbio_ptr, int *error) {
 					heading = heading - 360.0;
 			}
 			else
-				heading = heading_save;
+				heading = *heading_save;
 		}
 		else
-			heading = heading_save;
+			heading = *heading_save;
 
 		/* do heading */
-		heading_save = heading;
+		*heading_save = heading;
 		data->sbhdg = (short int)(heading * 182.044444);
 
 		/* if needed try to get center beam lon and lat */
@@ -500,15 +513,15 @@ int mbr_sbifremr_wr_data(int verbose, void *mbio_ptr, int *error) {
 		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
 	}
 
-       	static int ping_num_save = 0;
-	static int sounding_num_save = 0;
-
 	/* get pointer to mbio descriptor */
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get pointer to raw data structure */
 	struct mbf_sbifremr_struct *data = (struct mbf_sbifremr_struct *)mb_io_ptr->raw_data;
 	FILE *mbfp = mb_io_ptr->mbfp;
+
+  int *ping_num_save = &mb_io_ptr->save1;
+  int *sounding_num_save = &mb_io_ptr->save2;
 
 	int status = MB_SUCCESS;
 
@@ -529,7 +542,7 @@ int mbr_sbifremr_wr_data(int verbose, void *mbio_ptr, int *error) {
 	/* write data */
 	else if (data->kind == MB_DATA_DATA) {
 		/* increment ping counter */
-		ping_num_save++;
+		(*ping_num_save)++;
 
 		/* get time */
 		int time_j[5];
@@ -569,7 +582,7 @@ int mbr_sbifremr_wr_data(int verbose, void *mbio_ptr, int *error) {
 		for (int i = 0; i < MBF_SBIFREMR_NUM_BEAMS; i++) {
 			if (data->deph[i] != 0) {
 				/* increment sounding counter */
-				sounding_num_save++;
+				(*sounding_num_save)++;
 
 				/* get lon lat for beam */
 				data->lon[i] = lon + headingy * mtodeglon * data->dist[i];
@@ -604,7 +617,7 @@ int mbr_sbifremr_wr_data(int verbose, void *mbio_ptr, int *error) {
 				fprintf(mbfp, "%c%2.2d%8.4f %c%3.3d%8.4f", NorS, lat_deg, lat_min, EorW, lon_deg, lon_min);
 				const double depth = -data->deph[i];
 				fprintf(mbfp, "%11.3f ****************", depth);
-				fprintf(mbfp, "%7d%4d%7d    0 ", ping_num_save, beam_num, sounding_num_save);
+				fprintf(mbfp, "%7d%4d%7d    0 ", *ping_num_save, beam_num, *sounding_num_save);
 				fprintf(mbfp, "%2d/%2d/%2d %2dh%2dm%2ds00\n", day, month, year, hour, minute, second);
 			}
 		}

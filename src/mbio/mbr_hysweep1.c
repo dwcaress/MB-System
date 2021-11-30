@@ -397,13 +397,14 @@ int mbr_hysweep1_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 					status = mbr_hysweep1_rd_line(verbose, mb_io_ptr->mbfp, line, error);
 
 					/* parse the line */
-					if (status == MB_SUCCESS && (token = strtok(line + 0, " ")) != NULL) {
+          char *saveptr;
+					if (status == MB_SUCCESS && (token = strtok_r(line + 0, " ", &saveptr)) != NULL) {
 						nread = 0;
 						for (int i = 0; i < store->RMB_num_beams && token != NULL; i++) {
 							nscan = sscanf(token, "%lf", &(store->RMB_beam_ranges[i]));
 							if (nscan == 1)
 								nread++;
-							token = strtok(NULL, " ");
+							token = strtok_r(NULL, " ", &saveptr);
 						}
 						if (nread != store->RMB_num_beams) {
 							status = MB_FAILURE;
@@ -418,13 +419,14 @@ int mbr_hysweep1_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 					status = mbr_hysweep1_rd_line(verbose, mb_io_ptr->mbfp, line, error);
 
 					/* parse the line */
-					if (status == MB_SUCCESS && (token = strtok(line + 0, " ")) != NULL) {
+          char *saveptr;
+					if (status == MB_SUCCESS && (token = strtok_r(line + 0, " ", &saveptr)) != NULL) {
 						nread = 0;
 						for (int i = 0; i < store->RMB_num_beams && token != NULL; i++) {
 							nscan = sscanf(token, "%lf", &(store->RMB_multi_ranges[i]));
 							if (nscan == 1)
 								nread++;
-							token = strtok(NULL, " ");
+							token = strtok_r(NULL, " ", &saveptr);
 						}
 						if (nread != store->RMB_num_beams) {
 							status = MB_FAILURE;
@@ -439,13 +441,14 @@ int mbr_hysweep1_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 					status = mbr_hysweep1_rd_line(verbose, mb_io_ptr->mbfp, line, error);
 
 					/* parse the line */
-					if (status == MB_SUCCESS && (token = strtok(line + 0, " ")) != NULL) {
+          char *saveptr;
+					if (status == MB_SUCCESS && (token = strtok_r(line + 0, " ", &saveptr)) != NULL) {
 						nread = 0;
 						for (int i = 0; i < store->RMB_num_beams && token != NULL; i++) {
 							nscan = sscanf(token, "%lf", &(store->RMB_sounding_eastings[i]));
 							if (nscan == 1)
 								nread++;
-							token = strtok(NULL, " ");
+							token = strtok_r(NULL, " ", &saveptr);
 						}
 						if (nread != store->RMB_num_beams) {
 							status = MB_FAILURE;
@@ -460,13 +463,14 @@ int mbr_hysweep1_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 					status = mbr_hysweep1_rd_line(verbose, mb_io_ptr->mbfp, line, error);
 
 					/* parse the line */
-					if (status == MB_SUCCESS && (token = strtok(line + 0, " ")) != NULL) {
+          char *saveptr;
+					if (status == MB_SUCCESS && (token = strtok_r(line + 0, " ", &saveptr)) != NULL) {
 						nread = 0;
 						for (int i = 0; i < store->RMB_num_beams && token != NULL; i++) {
 							nscan = sscanf(token, "%lf", &(store->RMB_sounding_northings[i]));
 							if (nscan == 1)
 								nread++;
-							token = strtok(NULL, " ");
+							token = strtok_r(NULL, " ", &saveptr);
 						}
 						if (nread != store->RMB_num_beams) {
 							status = MB_FAILURE;
@@ -481,13 +485,14 @@ int mbr_hysweep1_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 					status = mbr_hysweep1_rd_line(verbose, mb_io_ptr->mbfp, line, error);
 
 					/* parse the line */
-					if (status == MB_SUCCESS && (token = strtok(line + 0, " ")) != NULL) {
+          char *saveptr;
+					if (status == MB_SUCCESS && (token = strtok_r(line + 0, " ", &saveptr)) != NULL) {
 						nread = 0;
 						for (int i = 0; i < store->RMB_num_beams && token != NULL; i++) {
 							nscan = sscanf(token, "%lf", &(store->RMB_sounding_depths[i]));
 							if (nscan == 1)
 								nread++;
-							token = strtok(NULL, " ");
+							token = strtok_r(NULL, " ", &saveptr);
 						}
 						if (nread != store->RMB_num_beams) {
 							status = MB_FAILURE;
@@ -502,13 +507,14 @@ int mbr_hysweep1_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 					status = mbr_hysweep1_rd_line(verbose, mb_io_ptr->mbfp, line, error);
 
 					/* parse the line */
-					if (status == MB_SUCCESS && (token = strtok(line + 0, " ")) != NULL) {
+          char *saveptr;
+					if (status == MB_SUCCESS && (token = strtok_r(line + 0, " ", &saveptr)) != NULL) {
 						nread = 0;
 						for (int i = 0; i < store->RMB_num_beams && token != NULL; i++) {
 							nscan = sscanf(token, "%lf", &(store->RMB_sounding_along[i]));
 							if (nscan == 1)
 								nread++;
-							token = strtok(NULL, " ");
+							token = strtok_r(NULL, " ", &saveptr);
 						}
 						if (nread != store->RMB_num_beams) {
 							status = MB_FAILURE;
@@ -523,13 +529,14 @@ int mbr_hysweep1_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 					status = mbr_hysweep1_rd_line(verbose, mb_io_ptr->mbfp, line, error);
 
 					/* parse the line */
-					if (status == MB_SUCCESS && (token = strtok(line + 0, " ")) != NULL) {
+          char *saveptr;
+					if (status == MB_SUCCESS && (token = strtok_r(line + 0, " ", &saveptr)) != NULL) {
 						nread = 0;
 						for (int i = 0; i < store->RMB_num_beams && token != NULL; i++) {
 							nscan = sscanf(token, "%lf", &(store->RMB_sounding_across[i]));
 							if (nscan == 1)
 								nread++;
-							token = strtok(NULL, " ");
+							token = strtok_r(NULL, " ", &saveptr);
 						}
 						if (nread != store->RMB_num_beams) {
 							status = MB_FAILURE;
@@ -544,13 +551,14 @@ int mbr_hysweep1_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 					status = mbr_hysweep1_rd_line(verbose, mb_io_ptr->mbfp, line, error);
 
 					/* parse the line */
-					if (status == MB_SUCCESS && (token = strtok(line + 0, " ")) != NULL) {
+          char *saveptr;
+					if (status == MB_SUCCESS && (token = strtok_r(line + 0, " ", &saveptr)) != NULL) {
 						nread = 0;
 						for (int i = 0; i < store->RMB_num_beams && token != NULL; i++) {
 							nscan = sscanf(token, "%lf", &(store->RMB_sounding_pitchangles[i]));
 							if (nscan == 1)
 								nread++;
-							token = strtok(NULL, " ");
+							token = strtok_r(NULL, " ", &saveptr);
 						}
 						if (nread != store->RMB_num_beams) {
 							status = MB_FAILURE;
@@ -565,13 +573,14 @@ int mbr_hysweep1_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 					status = mbr_hysweep1_rd_line(verbose, mb_io_ptr->mbfp, line, error);
 
 					/* parse the line */
-					if (status == MB_SUCCESS && (token = strtok(line + 0, " ")) != NULL) {
+          char *saveptr;
+					if (status == MB_SUCCESS && (token = strtok_r(line + 0, " ", &saveptr)) != NULL) {
 						nread = 0;
 						for (int i = 0; i < store->RMB_num_beams && token != NULL; i++) {
 							nscan = sscanf(token, "%lf", &(store->RMB_sounding_rollangles[i]));
 							if (nscan == 1)
 								nread++;
-							token = strtok(NULL, " ");
+							token = strtok_r(NULL, " ", &saveptr);
 						}
 						if (nread != store->RMB_num_beams) {
 							status = MB_FAILURE;
@@ -586,13 +595,14 @@ int mbr_hysweep1_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 					status = mbr_hysweep1_rd_line(verbose, mb_io_ptr->mbfp, line, error);
 
 					/* parse the line */
-					if (status == MB_SUCCESS && (token = strtok(line + 0, " ")) != NULL) {
+          char *saveptr;
+					if (status == MB_SUCCESS && (token = strtok_r(line + 0, " ", &saveptr)) != NULL) {
 						nread = 0;
 						for (int i = 0; i < store->RMB_num_beams && token != NULL; i++) {
 							nscan = sscanf(token, "%lf", &(store->RMB_sounding_takeoffangles[i]));
 							if (nscan == 1)
 								nread++;
-							token = strtok(NULL, " ");
+							token = strtok_r(NULL, " ", &saveptr);
 						}
 						if (nread != store->RMB_num_beams) {
 							status = MB_FAILURE;
@@ -607,13 +617,14 @@ int mbr_hysweep1_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 					status = mbr_hysweep1_rd_line(verbose, mb_io_ptr->mbfp, line, error);
 
 					/* parse the line */
-					if (status == MB_SUCCESS && (token = strtok(line + 0, " ")) != NULL) {
+          char *saveptr;
+					if (status == MB_SUCCESS && (token = strtok_r(line + 0, " ", &saveptr)) != NULL) {
 						nread = 0;
 						for (int i = 0; i < store->RMB_num_beams && token != NULL; i++) {
 							nscan = sscanf(token, "%lf", &(store->RMB_sounding_azimuthalangles[i]));
 							if (nscan == 1)
 								nread++;
-							token = strtok(NULL, " ");
+							token = strtok_r(NULL, " ", &saveptr);
 						}
 						if (nread != store->RMB_num_beams) {
 							status = MB_FAILURE;
@@ -628,13 +639,14 @@ int mbr_hysweep1_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 					status = mbr_hysweep1_rd_line(verbose, mb_io_ptr->mbfp, line, error);
 
 					/* parse the line */
-					if (status == MB_SUCCESS && (token = strtok(line + 0, " ")) != NULL) {
+          char *saveptr;
+					if (status == MB_SUCCESS && (token = strtok_r(line + 0, " ", &saveptr)) != NULL) {
 						nread = 0;
 						for (int i = 0; i < store->RMB_num_beams && token != NULL; i++) {
 							nscan = sscanf(token, "%d", &(store->RMB_sounding_timedelays[i]));
 							if (nscan == 1)
 								nread++;
-							token = strtok(NULL, " ");
+							token = strtok_r(NULL, " ", &saveptr);
 						}
 						if (nread != store->RMB_num_beams) {
 							status = MB_FAILURE;
@@ -649,13 +661,14 @@ int mbr_hysweep1_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 					status = mbr_hysweep1_rd_line(verbose, mb_io_ptr->mbfp, line, error);
 
 					/* parse the line */
-					if (status == MB_SUCCESS && (token = strtok(line + 0, " ")) != NULL) {
+          char *saveptr;
+					if (status == MB_SUCCESS && (token = strtok_r(line + 0, " ", &saveptr)) != NULL) {
 						nread = 0;
 						for (int i = 0; i < store->RMB_num_beams && token != NULL; i++) {
 							nscan = sscanf(token, "%d", &(store->RMB_sounding_intensities[i]));
 							if (nscan == 1)
 								nread++;
-							token = strtok(NULL, " ");
+							token = strtok_r(NULL, " ", &saveptr);
 						}
 						if (nread != store->RMB_num_beams) {
 							status = MB_FAILURE;
@@ -670,13 +683,14 @@ int mbr_hysweep1_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 					status = mbr_hysweep1_rd_line(verbose, mb_io_ptr->mbfp, line, error);
 
 					/* parse the line */
-					if (status == MB_SUCCESS && (token = strtok(line + 0, " ")) != NULL) {
+          char *saveptr;
+					if (status == MB_SUCCESS && (token = strtok_r(line + 0, " ", &saveptr)) != NULL) {
 						nread = 0;
 						for (int i = 0; i < store->RMB_num_beams && token != NULL; i++) {
 							nscan = sscanf(token, "%d", &(store->RMB_sounding_quality[i]));
 							if (nscan == 1)
 								nread++;
-							token = strtok(NULL, " ");
+							token = strtok_r(NULL, " ", &saveptr);
 						}
 						if (nread != store->RMB_num_beams) {
 							status = MB_FAILURE;
@@ -691,13 +705,14 @@ int mbr_hysweep1_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 					status = mbr_hysweep1_rd_line(verbose, mb_io_ptr->mbfp, line, error);
 
 					/* parse the line */
-					if (status == MB_SUCCESS && (token = strtok(line + 0, " ")) != NULL) {
+          char *saveptr;
+					if (status == MB_SUCCESS && (token = strtok_r(line + 0, " ", &saveptr)) != NULL) {
 						nread = 0;
 						for (int i = 0; i < store->RMB_num_beams && token != NULL; i++) {
 							nscan = sscanf(token, "%d", &(store->RMB_sounding_flags[i]));
 							if (nscan == 1)
 								nread++;
-							token = strtok(NULL, " ");
+							token = strtok_r(NULL, " ", &saveptr);
 						}
 						if (nread != store->RMB_num_beams) {
 							status = MB_FAILURE;
@@ -855,13 +870,14 @@ int mbr_hysweep1_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 					status = mbr_hysweep1_rd_line(verbose, mb_io_ptr->mbfp, line, error);
 
 					/* parse the line */
-					if (status == MB_SUCCESS && (token = strtok(line + 0, " ")) != NULL) {
+          char *saveptr;
+					if (status == MB_SUCCESS && (token = strtok_r(line + 0, " ", &saveptr)) != NULL) {
 						nread = 0;
 						for (int i = 0; i < store->RSS_port_num_samples && token != NULL; i++) {
 							nscan = sscanf(token, "%d", &(store->RSS_port[i]));
 							if (nscan == 1)
 								nread++;
-							token = strtok(NULL, " ");
+							token = strtok_r(NULL, " ", &saveptr);
 						}
 						if (nread != store->RSS_port_num_samples) {
 							status = MB_FAILURE;
@@ -876,13 +892,14 @@ int mbr_hysweep1_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 					status = mbr_hysweep1_rd_line(verbose, mb_io_ptr->mbfp, line, error);
 
 					/* parse the line */
-					if (status == MB_SUCCESS && (token = strtok(line + 0, " ")) != NULL) {
+          char *saveptr;
+					if (status == MB_SUCCESS && (token = strtok_r(line + 0, " ", &saveptr)) != NULL) {
 						nread = 0;
 						for (int i = 0; i < store->RSS_starboard_num_samples && token != NULL; i++) {
 							nscan = sscanf(token, "%d", &(store->RSS_starboard[i]));
 							if (nscan == 1)
 								nread++;
-							token = strtok(NULL, " ");
+							token = strtok_r(NULL, " ", &saveptr);
 						}
 						if (nread != store->RSS_starboard_num_samples) {
 							status = MB_FAILURE;
@@ -966,13 +983,14 @@ int mbr_hysweep1_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 					status = mbr_hysweep1_rd_line(verbose, mb_io_ptr->mbfp, line, error);
 
 					/* parse the line */
-					if (status == MB_SUCCESS && (token = strtok(line + 0, " ")) != NULL) {
+          char *saveptr;
+					if (status == MB_SUCCESS && (token = strtok_r(line + 0, " ", &saveptr)) != NULL) {
 						nread = 0;
 						for (int i = 0; i < store->MSS_num_pixels && token != NULL; i++) {
 							nscan = sscanf(token, "%lf", &(store->MSS_ss[i]));
 							if (nscan == 1)
 								nread++;
-							token = strtok(NULL, " ");
+							token = strtok_r(NULL, " ", &saveptr);
 						}
 						if (nread != store->MSS_num_pixels) {
 							status = MB_FAILURE;
@@ -987,13 +1005,14 @@ int mbr_hysweep1_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 					status = mbr_hysweep1_rd_line(verbose, mb_io_ptr->mbfp, line, error);
 
 					/* parse the line */
-					if (status == MB_SUCCESS && (token = strtok(line + 0, " ")) != NULL) {
+          char *saveptr;
+					if (status == MB_SUCCESS && (token = strtok_r(line + 0, " ", &saveptr)) != NULL) {
 						nread = 0;
 						for (int i = 0; i < store->MSS_num_pixels && token != NULL; i++) {
 							nscan = sscanf(token, "%lf", &(store->MSS_ss_along[i]));
 							if (nscan == 1)
 								nread++;
-							token = strtok(NULL, " ");
+							token = strtok_r(NULL, " ", &saveptr);
 						}
 						if (nread != store->MSS_num_pixels) {
 							status = MB_FAILURE;
@@ -1266,14 +1285,15 @@ int mbr_hysweep1_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 				store->type = MBSYS_HYSWEEP_RECORDTYPE_DEV;
 
 				/* parse the first line */
-				token = strtok(line + 4, " ");
+        char *saveptr;
+				token = strtok_r(line + 4, " ", &saveptr);
 				nscan = sscanf(token, "%d", &(DEV_device_number));
 				if (nscan == 1) {
-					token = strtok(NULL, " ");
+					token = strtok_r(NULL, " ", &saveptr);
 					nscan = sscanf(token, "%d", &(DEV_device_capability));
 				}
 				if (nscan == 1) {
-					token = strtok(NULL, "\"");
+					token = strtok_r(NULL, "\"", &saveptr);
 					strcpy(DEV_device_name, token);
 					nscan = 3;
 				}
@@ -1302,6 +1322,7 @@ int mbr_hysweep1_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 				store->type = MBSYS_HYSWEEP_RECORDTYPE_DV2;
 
 				/* parse the first line */
+        char *saveptr;
 				nscan = sscanf(line + 4, "%d %x %d %d", &(DV2_device_number), &(DV2_device_capability), &(DV2_towfish),
 				               &(DV2_enabled));
 				if (nscan == 4) {
@@ -1513,35 +1534,36 @@ int mbr_hysweep1_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 						store->INF_tide_correction = 0.0;
 				}
 				else {
-					if ((token = strtok(line + 3, "\"")) != NULL) {
-						token = strtok(NULL, "\"");
+          char *saveptr;
+					if ((token = strtok_r(line + 3, "\"", &saveptr)) != NULL) {
+						token = strtok_r(NULL, "\"", &saveptr);
 						if (token != NULL && token[0] != ' ') {
 							strcpy(store->INF_surveyor, token);
-							token = strtok(NULL, "\"");
+							token = strtok_r(NULL, "\"", &saveptr);
 						}
 						else
 							store->INF_surveyor[0] = '\0';
 
-						token = strtok(NULL, "\"");
+						token = strtok_r(NULL, "\"", &saveptr);
 						if (token != NULL && token[0] != ' ') {
 							strcpy(store->INF_boat, token);
-							token = strtok(NULL, "\"");
+							token = strtok_r(NULL, "\"", &saveptr);
 						}
 						else
 							store->INF_boat[0] = '\0';
 
-						token = strtok(NULL, "\"");
+						token = strtok_r(NULL, "\"", &saveptr);
 						if (token != NULL && token[0] != ' ') {
 							strcpy(store->INF_project, token);
-							token = strtok(NULL, "\"");
+							token = strtok_r(NULL, "\"", &saveptr);
 						}
 						else
 							store->INF_project[0] = '\0';
 
-						token = strtok(NULL, "\"");
+						token = strtok_r(NULL, "\"", &saveptr);
 						if (token != NULL && token[0] != ' ') {
 							strcpy(store->INF_area, token);
-							token = strtok(NULL, "\"");
+							token = strtok_r(NULL, "\"", &saveptr);
 						}
 						else
 							store->INF_area[0] = '\0';

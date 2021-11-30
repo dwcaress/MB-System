@@ -1,4 +1,4 @@
-.TH mbm_makedatalist 1 "21 September 2017" "MB-System 5.0" "MB-System 5.0"
+.TH mbm_makedatalist 1 "3 January 2021" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbm_makedatalist\fP \- Macro to generate a datalist of the swath
 files in a specified directory.
@@ -7,7 +7,7 @@ files in a specified directory.
 Version 5.0
 
 .SH SYNOPSIS
-\fBmbm_makedatalist\fP [\fB\-F\fP\fIformat\fP \fB\-I\fP\fIdirectory\fP
+\fBmbm_makedatalist\fP [\fB\-F\fP\fIformat\fP \fB\-I\fP\fIdirectory\fP \fB-L\fP
 \fB\-O\fP\fIdatalist\fP \fB-P\fP \fB-S\fP\fIsuffix\fP \fB\-T -H \-V\fP]
 
 .SH DESCRIPTION
@@ -21,7 +21,7 @@ file entry taking up a single line. These lists may contain references to other
 datalists, making them recursive. Datalists may also contain comments and parsing
 directives that, for example, determine whether parsing returns references to
 raw or processed data files. See the \fBMB-System\fP manual page for details
-on the format and structure of datalists.  
+on the format and structure of datalists.
 
 This macro is used to easily construct a datalist referencing swath files in a
 directory, often as part of setting up the \fBMB-System\fP processing environment
@@ -64,10 +64,11 @@ time order. However, Kongsberg multibeam data filenames usually start with a sur
 file number that restarts at 0001 whenever datalogging is stopped and restarted.
 Consequently, when data from multiple instances of logging are present in a
 single directory, the simple listing of files will not in general be in time
-order. If the file suffix is declared to be ".all" or ".ALL" using the \fB-S\fP
+order. If the file suffix is declared to be ".all", ".ALL", ".kmall", or ".KMALL" using the \fB-S\fP
 option, then \fBmbm_makedatalist\fP will attempt to sort the swath files into
 time order before generating the final datalist. This behavior can be disabled
-by specifying the \fB-T\fP option.
+by specifying the \fB-T\fP option. Kongsberg dataloggers often create junk data
+files with names such as "9999.all" or "9999.ALL"; these filenames are ignored.
 
 .SH MB-SYSTEM AUTHORSHIP
 David W. Caress
@@ -103,6 +104,15 @@ of its operation and then exit immediately.
 \fIdirectory\fP
 .br
 Sets the path of the target directory.
+.TP
+.B \-L
+.br
+Causes the last file in a directory listing to be omitted from the output datalist.
+The intent of this option is to exclude the most recent file in an actively data
+logging context, since the most recent file is still being logged. This presumes
+that filenames sort in time order as listed by the \fBls\fP command, an assumption
+that does not hold for all file naming conditions or if the \fB-T\fP option has
+been used to disable time ordering.
 .TP
 .B \-O
 \fIdatalist\fP

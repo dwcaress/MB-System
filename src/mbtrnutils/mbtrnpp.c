@@ -101,7 +101,7 @@ typedef enum{
     OUTPUT_TRN_SVR_EN  =0x0004, OUTPUT_TRNU_SVR_EN =0x0008, OUTPUT_MB1_BIN     =0x0010,
     OUTPUT_RESON_BIN   =0x0020, OUTPUT_TRNU_ASC    =0x0040, OUTPUT_TRNU_SOUT   =0x0080,
     OUTPUT_TRNU_SERR   =0x0100, OUTPUT_TRNU_DEBUG  =0x0200, OUTPUT_TRNU_BIN    =0x0400,
-    OUTPUT_MBTRNPP_MSG =0x0800, OUTPUT_MBSYS_STDOUT=0x1000,
+    OUTPUT_MBTRNPP_MSG =0x0800, OUTPUT_MBSYS_STDOUT=0x1000, OUTPUT_TRNUM_SVR_EN=0x2000,
     OUTPUT_ALL         =0x1FFF
 }output_mode_t;
 
@@ -159,6 +159,9 @@ typedef struct mbtrnpp_opts_s{
 
     // opt "trnuhbt"
     double trnuhbt;
+
+    // opt "trnumttl"
+    int trnumttl;
 
     // opt "delay"
     int64_t delay;
@@ -247,6 +250,9 @@ typedef struct mbtrnpp_opts_s{
     bool reinit_zoffset_enable;
     double reinit_zoffset_min;
     double reinit_zoffset_max;
+
+    // opt "trn-dev"
+    int trn_dev;
 
     // opt "help"
     bool help;
@@ -338,6 +344,15 @@ typedef struct mbtrnpp_cfg_s{
 
     // TRN UDP server port
     int trnusvr_port;
+
+    // TRN UDP MCAST server group
+    char *trnumsvr_group;//TRNU_GROUP_DFL
+
+    // TRN UDP MCAST server port
+    int trnumsvr_port;
+
+    // TRN UDP MCAST server TTL (time to live)
+    int trnumsvr_ttl;
 
     // TRN output flags
     output_mode_t output_flags;
@@ -447,6 +462,9 @@ typedef struct mbtrnpp_cfg_s{
     // TRN reinit offset_z max
     double reinit_zoffset_max;
 
+    // TRN device enum
+    int trn_dev;
+
 }mbtrnpp_cfg_t;
 
 // ping buffer size default
@@ -490,7 +508,9 @@ s=NULL;\
 #define CFG_MNEM_TRN_MAPFILES  "TRN_MAPFILES"
 #define CFG_MNEM_TRN_DATAFILES "TRN_DATAFILES"
 #define CFG_MNEM_TRN_CFGFILES  "TRN_CFGFILES"
+#define CFG_MNEM_TRN_GROUP     "TRN_GROUP"
 #define CFG_TRN_LOG_DIR_DFL    "."
+#define CFG_TRN_DEV_DFL        R7KC_DEV_T50
 
 #define OPT_VERBOSE_DFL                   0
 #define OPT_INPUT_DFL                     CFG_INPUT_DFL
@@ -508,6 +528,7 @@ s=NULL;\
 #define OPT_MBHBT_DFL                     MB1SVR_HBTO_DFL
 #define OPT_TRNHBT_DFL                    TRNSVR_HBTO_DFL
 #define OPT_TRNUHBT_DFL                   TRNUSVR_HBTO_DFL
+#define OPT_TRNUMTTL_DFL                  TRNUMSVR_TTL_DFL
 #define OPT_DELAY_DFL                     0
 #define OPT_STATSEC_DFL                   MBTRNPP_STAT_PERIOD_SEC
 #define OPT_STATFLAGS_DFL                 MBTRNPP_STAT_FLAGS_DFL
@@ -541,6 +562,7 @@ s=NULL;\
 #define OPT_REINIT_ZOFFSET_MIN_DFL        0.0
 #define OPT_REINIT_ZOFFSET_MAX_DFL        0.0
 #define OPT_HELP_DFL                      false
+#define OPT_TRN_DEV_DFL                   R7KC_DEV_T50
 
 #define MNEM_MAX_LEN 64
 #define HOSTNAME_BUF_LEN 256
@@ -573,6 +595,10 @@ s=NULL;\
 #define TRNU_ALOG_DESC    "trnu log"
 #define TRNU_BLOG_NAME    "trnub"
 #define TRNU_BLOG_DESC    "trnu log (binary)"
+#define TRNUM_ALOG_NAME   "trnum"
+#define TRNUM_ALOG_DESC   "trnum log"
+#define TRNUM_BLOG_NAME   "trnumb"
+#define TRNUM_BLOG_DESC   "trnum log (binary)"
 #define MBTRNPP_LOG_EXT   ".log"
 #ifdef WITH_MBTNAV
 #define UTM_MONTEREY_BAY 10L
@@ -586,6 +612,10 @@ s=NULL;\
 #define TRN_OUT_DFL      (TRNW_ODEBUG|TRNW_OLOG)
 #define TRNU_HOST_DFL    "localhost"
 #define TRNU_PORT_DFL    8000
+//#define TRNUM_HOST_DFL   "localhost"
+#define TRNUM_GROUP_DFL  "239.255.0.16"
+#define TRNUM_PORT_DFL   29000
+#define TRNUM_TTL_DFL    32
 #define TRNSVR_HOST_DFL  "localhost"
 #define TRNSVR_PORT_DFL  28000
 #define TRN_XMIT_GAIN_RESON7K_DFL 200.0
@@ -604,6 +634,7 @@ s=NULL;\
 #define MB1SVR_HBTO_DFL  0.0
 #define TRNSVR_HBTO_DFL  0.0
 #define TRNUSVR_HBTO_DFL 0.0
+#define TRNUMSVR_TTL_DFL 64
 
 // MSF_STAT_FLAGS define stats processing options
 // may include
@@ -652,6 +683,7 @@ wtnav_t *trn_instance = NULL;
 trnw_oflags_t trn_oflags=TRN_OUT_DFL;
 netif_t *trnsvr=NULL;
 netif_t *trnusvr=NULL;
+netif_t *trnumsvr=NULL;
 int s_mbtrnpp_trnu_reset_callback();
 trnuif_res_t rr_resources={0},*g_trnu_res=&rr_resources;
 
@@ -714,11 +746,13 @@ typedef enum {
     MBTPP_CH_TRN_BIASEST_XT,
     MBTPP_CH_TRN_NREINITS_XT,
     MBTPP_CH_TRN_TRNU_PUB_XT,
+    MBTPP_CH_TRN_TRNUM_PUB_XT,
     MBTPP_CH_TRN_TRNU_LOG_XT,
     MBTPP_CH_TRN_TRNU_BLOG_XT,
     MBTPP_CH_TRN_PROC_XT,
     MBTPP_CH_TRN_TRNSVR_XT,
     MBTPP_CH_TRN_TRNUSVR_XT,
+    MBTPP_CH_TRN_TRNUMSVR_XT,
     MBTPP_CH_TRN_PROC_TRN_XT,
 #endif
     MBTPP_CH_COUNT
@@ -747,8 +781,8 @@ const char *mbtrnpp_stchan_labels[] = {
     "mb_proc_mb1_xt"
 #ifdef WITH_MBTNAV
     , "trn_update_xt", "trn_biasest_xt", "trn_nreinits_xt",
-    "trn_trnu_pub_xt", "trn_trnu_log_xt", "trn_trnu_blog_xt", "trn_proc_xt",
-    "trn_trnsvr_xt", "trn_trnusvr_xt", "trn_proc_trn_xt"
+    "trn_trnu_pub_xt", "trn_trnums_pub_xt", "trn_trnu_log_xt", "trn_trnu_blog_xt", "trn_proc_xt",
+    "trn_trnsvr_xt", "trn_trnusvr_xt", "trn_trnumsvr_xt", "trn_proc_trn_xt"
 #endif
 };
 
@@ -851,6 +885,7 @@ int mbtrnpp_init_trn(wtnav_t **pdest, int verbose, trn_config_t *cfg);
 int mbtrnpp_init_trnsvr(netif_t **psvr, wtnav_t *trn, char *host, int port, bool verbose);
 int mbtrnpp_init_mb1svr(netif_t **psvr, char *host, int port, bool verbose);
 int mbtrnpp_init_trnusvr(netif_t **psvr, char *host, int port, wtnav_t *trn, bool verbose);
+int mbtrnpp_init_trnumsvr(netif_t **psvr, char *host, int port, wtnav_t *trn, bool verbose);
 int mbtrnpp_trn_process_mb1(wtnav_t *tnav, mb1_t *mb1, trn_config_t *cfg);
 int mbtrnpp_trn_update(wtnav_t *self, mb1_t *src, wposet_t **pt_out, wmeast_t **mt_out, trn_config_t *cfg);
 int mbtrnpp_trn_get_bias_estimates(wtnav_t *self, wposet_t *pt, trn_update_t *pstate);
@@ -859,8 +894,9 @@ int mbtrnpp_check_reinit(trn_update_t *pstate, trn_config_t *cfg);
 int mbtrnpp_trn_pub_ostream(trn_update_t *update, FILE *stream);
 int mbtrnpp_trn_pub_odebug(trn_update_t *update);
 int mbtrnpp_trn_pub_olog(trn_update_t *update, mlog_id_t log_id);
-int mbtrnpp_trnu_pub_osocket(trn_update_t *update, msock_socket_t *pub_sock);
-int mbtrnpp_trnu_pubempty_osocket(double time, double lat, double lon, double depth, msock_socket_t *pub_sock);
+//int mbtrnpp_trnu_pub_osocket(trn_update_t *update, msock_socket_t *pub_sock);
+int mbtrnpp_trnu_pub_osocket(trn_update_t *update, netif_t *netif);
+int mbtrnpp_trnu_pubempty_osocket(double time, double lat, double lon, double depth, netif_t *netif);
 char *mbtrnpp_trn_updatestr(char *dest, int len, trn_update_t *update, int indent);
 #endif // WITH_MBTNAV
 
@@ -1068,6 +1104,15 @@ char *s_mnem_value(char **pdest, size_t len, const char *key)
                     val=strdup("localhost");
                 }
             }
+        }else if(strcmp(key,CFG_MNEM_TRN_GROUP)==0){
+
+            // try env
+            val=CHK_STRDUP(getenv(key));
+
+            if(NULL==val){
+                // if unset, use default
+                val=strdup(TRNUM_GROUP_DFL);
+            }
         }else if(strcmp(key,CFG_MNEM_TRN_LOGFILES)==0 ||
                  strcmp(key,CFG_MNEM_TRN_MAPFILES)==0 ||
                  strcmp(key,CFG_MNEM_TRN_CFGFILES)==0 ||
@@ -1204,6 +1249,7 @@ static int s_test_mnem()
     char *opt_trnmap = strdup("test_trnmap-TRN_MAPFILES--");
     char *opt_trndata = strdup("test_trndata-TRN_DATAFILES--");
     char *opt_trncfg = strdup("test_trncfg-TRN_CFGFILES--");
+    char *opt_trngroup=strdup("test_trngroup-TRN_GROUP--");
 
     char *val=NULL;
     s_sub_mnem(&opt_session,0,opt_session,CFG_MNEM_SESSION,s_mnem_value(&val,0,CFG_MNEM_SESSION));
@@ -1211,6 +1257,8 @@ static int s_test_mnem()
     s_sub_mnem(&opt_rhost,0,opt_rhost,CFG_MNEM_TRN_RESON_HOST,s_mnem_value(&val,0,CFG_MNEM_TRN_RESON_HOST));
     MEM_CHKINVALIDATE(val);
     s_sub_mnem(&opt_trnhost,0,opt_trnhost,CFG_MNEM_TRN_HOST,s_mnem_value(&val,0,CFG_MNEM_TRN_HOST));
+    MEM_CHKINVALIDATE(val);
+    s_sub_mnem(&opt_trngroup,0,opt_trngroup,CFG_MNEM_TRN_GROUP,s_mnem_value(&val,0,CFG_MNEM_TRN_GROUP));
     MEM_CHKINVALIDATE(val);
     s_sub_mnem(&opt_trnsession,0,opt_trnsession,CFG_MNEM_TRN_SESSION,s_mnem_value(&val,0,CFG_MNEM_TRN_SESSION));
     MEM_CHKINVALIDATE(val);
@@ -1280,11 +1328,14 @@ static int s_mbtrnpp_init_cfg(mbtrnpp_cfg_t *cfg)
         cfg->trnsvr_host=strdup(TRNSVR_HOST_DFL);
         cfg->trnusvr_port=TRNU_PORT_DFL;
         cfg->trnusvr_host=strdup(TRNU_HOST_DFL);
+        cfg->trnumsvr_port=TRNUM_PORT_DFL;
+        cfg->trnumsvr_group=strdup(TRNUM_GROUP_DFL);
         cfg->output_flags=OUTPUT_MBTRNPP_MSG;
         cfg->mbsvr_hbtok=MB1SVR_HBTOK_DFL;
         cfg->mbsvr_hbto=MB1SVR_HBTO_DFL;
         cfg->trnsvr_hbto=TRNSVR_HBTO_DFL;
         cfg->trnusvr_hbto=TRNUSVR_HBTO_DFL;
+        cfg->trnumsvr_ttl=TRNUMSVR_TTL_DFL;
         cfg->mbtrnpp_loop_delay_msec=0;
         cfg->trn_status_interval_sec=MBTRNPP_STAT_PERIOD_SEC;
         cfg->mbtrnpp_stat_flags=MBTRNPP_STAT_FLAGS_DFL;
@@ -1314,6 +1365,7 @@ static int s_mbtrnpp_init_cfg(mbtrnpp_cfg_t *cfg)
         cfg->reinit_zoffset_enable = false;
         cfg->reinit_zoffset_min = 0.0;
         cfg->reinit_zoffset_max = 0.0;
+        cfg->trn_dev = CFG_TRN_DEV_DFL;
         retval=0;
     }
     return retval;
@@ -1338,6 +1390,7 @@ static int s_mbtrnpp_init_opts(mbtrnpp_opts_t *opts)
         opts->mbhbt=OPT_MBHBT_DFL;
         opts->trnhbt=OPT_TRNHBT_DFL;
         opts->trnuhbt=OPT_TRNUHBT_DFL;
+        opts->trnumttl=OPT_TRNUMTTL_DFL;
         opts->delay=OPT_DELAY_DFL;
         opts->statsec=OPT_STATSEC_DFL;
         opts->statflags_str=strdup(OPT_STATFLAG_STR_DFL);
@@ -1370,6 +1423,7 @@ static int s_mbtrnpp_init_opts(mbtrnpp_opts_t *opts)
         opts->reinit_zoffset_enable = OPT_REINIT_ZOFFSET_ENABLE_DFL;
         opts->reinit_zoffset_min = OPT_REINIT_ZOFFSET_MIN_DFL;
         opts->reinit_zoffset_max = OPT_REINIT_ZOFFSET_MAX_DFL;
+        opts->trn_dev = OPT_TRN_DEV_DFL;
         opts->help=OPT_HELP_DFL;
         retval=0;
     }
@@ -1445,8 +1499,11 @@ static int s_mbtrnpp_show_cfg(mbtrnpp_cfg_t *self, bool verbose, int indent)
         retval+=fprintf(stderr,"%*s %*s  %*d\n",indent,(indent>0?" ":""), wkey,"mb1svr_port",wval,self->mb1svr_port);
         retval+=fprintf(stderr,"%*s %*s  %*s\n",indent,(indent>0?" ":""), wkey,"trnsvr_host",wval,self->trnsvr_host);
         retval+=fprintf(stderr,"%*s %*s  %*d\n",indent,(indent>0?" ":""), wkey,"trnsvr_port",wval,self->trnsvr_port);
-        retval+=fprintf(stderr,"%*s %*s  %*s\n",indent,(indent>0?" ":""), wkey,"trnusvr_host",wval,self->trnsvr_host);
+        retval+=fprintf(stderr,"%*s %*s  %*s\n",indent,(indent>0?" ":""), wkey,"trnusvr_host",wval,self->trnusvr_host);
         retval+=fprintf(stderr,"%*s %*s  %*d\n",indent,(indent>0?" ":""), wkey,"trnusvr_port",wval,self->trnusvr_port);
+        retval+=fprintf(stderr,"%*s %*s  %*s\n",indent,(indent>0?" ":""), wkey,"trnumsvr_group",wval,self->trnumsvr_group);
+        retval+=fprintf(stderr,"%*s %*s  %*d\n",indent,(indent>0?" ":""), wkey,"trnumsvr_port",wval,self->trnumsvr_port);
+        retval+=fprintf(stderr,"%*s %*s  %*d\n",indent,(indent>0?" ":""), wkey,"trnumsvr_ttl",wval,self->trnumsvr_ttl);
         retval+=fprintf(stderr,"%*s %*s  %*X\n",indent,(indent>0?" ":""), wkey,"output_flags",wval,self->output_flags);
         retval+=fprintf(stderr,"%*s %*s  %*d\n",indent,(indent>0?" ":""), wkey,"mbsvr_hbtok",wval,self->mbsvr_hbtok);
         retval+=fprintf(stderr,"%*s %*s  %*.2lf\n",indent,(indent>0?" ":""), wkey,"mbsvr_hbto",wval,self->mbsvr_hbto);
@@ -1455,6 +1512,7 @@ static int s_mbtrnpp_show_cfg(mbtrnpp_cfg_t *self, bool verbose, int indent)
         retval+=fprintf(stderr,"%*s %*s  %*"PRId64"\n",indent,(indent>0?" ":""), wkey,"mbtrnpp_loop_delay_msec",wval,self->mbtrnpp_loop_delay_msec);
         retval+=fprintf(stderr,"%*s %*s  %*.2lf\n",indent,(indent>0?" ":""), wkey,"trn_status_interval_sec",wval,self->trn_status_interval_sec);
         retval+=fprintf(stderr,"%*s %*s  %*X\n",indent,(indent>0?" ":""), wkey,"mbtrnpp_stat_flags",wval,self->mbtrnpp_stat_flags);
+        retval+=fprintf(stderr,"%*s %*s  %*s/%d\n",indent,(indent>0?" ":""), wkey,"trn_dev",wval,r7k_devidstr(self->trn_dev),self->trn_dev);
         retval+=fprintf(stderr,"%*s %*s  %*c\n",indent,(indent>0?" ":""), wkey,"trn_enable",wval,BOOL2YNC(self->trn_enable));
         retval+=fprintf(stderr,"%*s %*s  %*ld\n",indent,(indent>0?" ":""), wkey,"trn_utm_zone",wval,self->trn_utm_zone);
         retval+=fprintf(stderr,"%*s %*s  %*d\n",indent,(indent>0?" ":""), wkey,"trn_mtype",wval,self->trn_mtype);
@@ -1509,11 +1567,13 @@ static int s_mbtrnpp_show_opts(mbtrnpp_opts_t *self, bool verbose, int indent){
         retval+=fprintf(stderr,"%*s %*s  %*.2lf\n",indent,(indent>0?" ":""), wkey,"mbhbt",wval,self->mbhbt);
         retval+=fprintf(stderr,"%*s %*s  %*.2lf\n",indent,(indent>0?" ":""), wkey,"trnhbt",wval,self->trnhbt);
         retval+=fprintf(stderr,"%*s %*s  %*.2lf\n",indent,(indent>0?" ":""), wkey,"trnuhbt",wval,self->trnuhbt);
+        retval+=fprintf(stderr,"%*s %*s  %*d\n",indent,(indent>0?" ":""), wkey,"trnumttl",wval,self->trnumttl);
         retval+=fprintf(stderr,"%*s %*s  %*"PRId64"\n",indent,(indent>0?" ":""), wkey,"delay",wval,self->delay);
         retval+=fprintf(stderr,"%*s %*s  %*.2lf\n",indent,(indent>0?" ":""), wkey,"statsec",wval,self->statsec);
         retval+=fprintf(stderr,"%*s %*s  %*X/%s\n",indent,(indent>0?" ":""), wkey,"statflags",wval,self->statflags,self->statflags_str);
         retval+=fprintf(stderr,"%*s %*s  %*c\n",indent,(indent>0?" ":""), wkey,"trn-en",wval,BOOL2YNC(self->trn_en));
-        retval+=fprintf(stderr,"%*s %*s  %*ld\n",indent,(indent>0?" ":""), wkey,"trn-utm",wval,self->trn_utm);
+        retval+=fprintf(stderr,"%*s %*s  %*s/%d\n",indent,(indent>0?" ":""), wkey,"trn-dev",wval,r7k_devidstr(self->trn_dev),self->trn_dev);
+       retval+=fprintf(stderr,"%*s %*s  %*ld\n",indent,(indent>0?" ":""), wkey,"trn-utm",wval,self->trn_utm);
         retval+=fprintf(stderr,"%*s %*s  %*s\n",indent,(indent>0?" ":""), wkey,"trn-map",wval,self->trn_map);
         retval+=fprintf(stderr,"%*s %*s  %*s\n",indent,(indent>0?" ":""), wkey,"trn-cfg",wval,self->trn_cfg);
         retval+=fprintf(stderr,"%*s %*s  %*s\n",indent,(indent>0?" ":""), wkey,"trn-par",wval,self->trn_par);
@@ -1555,8 +1615,9 @@ static int s_parse_opt_output(mbtrnpp_cfg_t *cfg, char *opt_str)
         // tokenize optarg
         char *ocopy = CHK_STRDUP(opt_str);
         char *tok[MBSYSOUT_OPT_N]={0};
+        char *saveptr;
         for(int i = 0; i < MBSYSOUT_OPT_N; i++){
-            tok[i] = (i==0  ? strtok(ocopy,",") : strtok(NULL,","));
+            tok[i] = (i==0  ? strtok_r(ocopy,",",&saveptr) : strtok_r(NULL,",",&saveptr));
             if(tok[i]==NULL)
                 break;
         }
@@ -1567,11 +1628,11 @@ static int s_parse_opt_output(mbtrnpp_cfg_t *cfg, char *opt_str)
             if (NULL!=strstr(tok[i], "socket:")) {
                 // enable mb1 socket (use specified IP)
                 char *acpy = strdup(tok[i]);
-                char *atok = strtok(acpy,":");
+                char *atok = strtok_r(acpy,":",&saveptr);
                 if(NULL!=atok){
                     // uses defaults if NULL
-                    char *shost = strtok(NULL,":");
-                    char *sport = strtok(NULL,":");
+                    char *shost = strtok_r(NULL,":",&saveptr);
+                    char *sport = strtok_r(NULL,":",&saveptr);
                     //                    fprintf(stderr,"shost[%s] sport[%s]\n",shost,sport);
 
                     if(NULL!=shost){
@@ -1595,7 +1656,7 @@ static int s_parse_opt_output(mbtrnpp_cfg_t *cfg, char *opt_str)
 
             if(NULL!=strstr(tok[i],"file:")){
                 char *acpy = strdup((tok[i]+strlen("file:")));
-                char *atok = strtok(acpy,":");
+                char *atok = strtok_r(acpy,":",&saveptr);
                 //                fprintf(stderr,"output_file[%s]\n",atok);
                 if(strlen(atok)>0){
                     strcpy(cfg->output_file,atok);
@@ -1623,8 +1684,9 @@ static int s_parse_opt_mbout(mbtrnpp_cfg_t *cfg, char *opt_str)
         // tokenize optarg
         char *ocopy = strdup(opt_str);
         char *tok[MBOUT_OPT_N] = {0};
+        char *saveptr;
         for(int i = 0; i < MBOUT_OPT_N; i++){
-            tok[i] = (i==0  ? strtok(ocopy,",") : strtok(NULL,","));
+            tok[i] = (i==0  ? strtok_r(ocopy,",",&saveptr) : strtok_r(NULL,",",&saveptr));
             if(tok[i]==NULL)
                 break;
         }
@@ -1635,11 +1697,11 @@ static int s_parse_opt_mbout(mbtrnpp_cfg_t *cfg, char *opt_str)
             if(strstr(tok[i], "mb1svr") != NULL) {
                 // enable mb1 socket output (optionally, specify host:port)
                 char *acpy = strdup(tok[i]);
-                char *atok = strtok(acpy, ":");
+                char *atok = strtok_r(acpy, ":",&saveptr);
                 if(NULL != atok){
                     // uses defaults if NULL
-                    char *shost = strtok(NULL,":");
-                    char *sport = strtok(NULL,":");
+                    char *shost = strtok_r(NULL,":",&saveptr);
+                    char *sport = strtok_r(NULL,":",&saveptr);
                     //                    fprintf(stderr,"shost[%s] sport[%s]\n",shost,sport);
 
                     if(NULL != shost){
@@ -1662,7 +1724,7 @@ static int s_parse_opt_mbout(mbtrnpp_cfg_t *cfg, char *opt_str)
             }
             if(NULL != strstr(tok[i], "file:")) {
                 char *acpy = strdup((tok[i] + strlen("file:")));
-                char *atok = strtok(acpy,":");
+                char *atok = strtok_r(acpy,":",&saveptr);
                 //                fprintf(stderr,"output_file[%s]\n",atok);
                 if(strlen(atok)>0){
                     strcpy(cfg->output_file,atok);
@@ -1710,8 +1772,9 @@ static int s_parse_opt_trnout(mbtrnpp_cfg_t *cfg, char *opt_str)
         // tokenize optarg
         char *ocopy = strdup(opt_str);
         char *tok[TRNOUT_OPT_N] = {0};
+        char *saveptr;
         for(int i = 0; i < TRNOUT_OPT_N; i++){
-            tok[i] = (i==0 ? strtok(ocopy,",") : strtok(NULL,","));
+            tok[i] = (i==0 ? strtok_r(ocopy,",",&saveptr) : strtok_r(NULL,",",&saveptr));
             //                fprintf(stderr,"tok[%d][%s]\n",i,tok[i]);
             if(tok[i] == NULL)
                 break;
@@ -1721,12 +1784,12 @@ static int s_parse_opt_trnout(mbtrnpp_cfg_t *cfg, char *opt_str)
             if(NULL == tok[i])
                 break;
             if(strstr(tok[i], "trnsvr")!=NULL) {
-                // enable trnsvr (mbsvr:host:port)
+                // enable trnsvr (trnsvr:host:port)
                 char *acpy = strdup(tok[i]);
-                char *atok = strtok(acpy,":");
+                char *atok = strtok_r(acpy,":",&saveptr);
                 if(NULL!=atok){
-                    char *shost = strtok(NULL,":");
-                    char *sport = strtok(NULL,":");
+                    char *shost = strtok_r(NULL,":",&saveptr);
+                    char *sport = strtok_r(NULL,":",&saveptr);
 
                     if(NULL!=shost){
                         MEM_CHKINVALIDATE(cfg->trnsvr_host);
@@ -1740,12 +1803,12 @@ static int s_parse_opt_trnout(mbtrnpp_cfg_t *cfg, char *opt_str)
                 free(acpy);
             }
             if(strstr(tok[i], "trnusvr")!=NULL){
-                // enable trnsvr (mbsvr:host:port)
+                // enable trnsvr (trnusvr:host:port)
                 char *acpy = strdup(tok[i]);
-                char *atok = strtok(acpy,":");
+                char *atok = strtok_r(acpy,":",&saveptr);
                 if(NULL != atok){
-                    char *shost = strtok(NULL,":");
-                    char *sport = strtok(NULL,":");
+                    char *shost = strtok_r(NULL,":",&saveptr);
+                    char *sport = strtok_r(NULL,":",&saveptr);
 
                     if(NULL != shost){
                         MEM_CHKINVALIDATE(cfg->trnusvr_host);
@@ -1759,6 +1822,34 @@ static int s_parse_opt_trnout(mbtrnpp_cfg_t *cfg, char *opt_str)
                 }
                 // fprintf(stderr,"trnusvr[%s:%d]\n",cfg->trnusvr_host,cfg->trnusvr_port);
                 cfg->output_flags |= OUTPUT_TRNU_SVR_EN;
+                free(acpy);
+            }
+            if(strstr(tok[i], "trnumsvr")!=NULL){
+                // enable trnumsvr (trnumsvr:host:port:ttl)
+                char *acpy = strdup(tok[i]);
+                char *atok = strtok_r(acpy,":",&saveptr);
+
+                if(NULL != atok){
+                    char *shost = strtok_r(NULL,":",&saveptr);
+                    char *sport = strtok_r(NULL,":",&saveptr);
+                    char *sttl = strtok_r(NULL,":",&saveptr);
+
+                    if(NULL != shost){
+                        MEM_CHKINVALIDATE(cfg->trnumsvr_group);
+                        cfg->trnumsvr_group = strdup(shost);
+                        retval++;
+                    }
+                    if(NULL != sport){
+                        sscanf(sport,"%d",&cfg->trnumsvr_port);
+                        retval++;
+                    }
+                    if(NULL != sttl){
+                        sscanf(sttl,"%d",&cfg->trnumsvr_ttl);
+                        retval++;
+                    }
+                }
+                // fprintf(stderr,"trnumsvr[%s:%d]\n",cfg->trnusmvr_host,cfg->trnumsvr_port);
+                cfg->output_flags |= OUTPUT_TRNUM_SVR_EN;
                 free(acpy);
             }
             if(strcmp(tok[i],"trnu")==0){
@@ -1787,9 +1878,14 @@ static int s_parse_opt_trnout(mbtrnpp_cfg_t *cfg, char *opt_str)
                 MEM_CHKINVALIDATE(cfg->trnsvr_host);
             }
             if(strcmp(tok[i],"notrnusvr")==0){
-                // disable trnsvr
+                // disable trnusvr
                 cfg->output_flags &= ~OUTPUT_TRNU_SVR_EN;
                 MEM_CHKINVALIDATE(cfg->trnusvr_host);
+            }
+            if(strcmp(tok[i],"notrnumsvr")==0){
+                // disable trnumsvr
+                cfg->output_flags &= ~OUTPUT_TRNUM_SVR_EN;
+                MEM_CHKINVALIDATE(cfg->trnumsvr_group);
             }
         }
         free(ocopy);
@@ -1853,18 +1949,18 @@ static int s_parse_opt_input(mbtrnpp_cfg_t *cfg, char *opt_str)
             // parse option and set mode
             char *psdef=NULL;
             if ((psdef=strstr(opt_str, "socket:"))!=NULL) {
-                if(NULL!=psdef){
-                    size_t sdef_len=strlen(psdef);
-                    if(sdef_len>0 && sdef_len<MB_PATH_SIZE){
-                        psdef+=strlen("socket:");
-                        // set socket mode and definition
-                        cfg->input_mode = INPUT_MODE_SOCKET;
-                        sprintf(cfg->socket_definition,"%s",psdef);
-                    }else{
-                        fprintf(stderr,"socket definition length invalid [%s/%zu/%zu]\n",psdef,sdef_len,(size_t)MB_PATH_SIZE);
-                    }
-//            fprintf(stderr, "socket_definition|%s\n", cfg->socket_definition);
+
+                size_t sdef_len=strlen(psdef);
+                if(sdef_len>0 && sdef_len<MB_PATH_SIZE){
+                    psdef+=strlen("socket:");
+                    // set socket mode and definition
+                    cfg->input_mode = INPUT_MODE_SOCKET;
+                    sprintf(cfg->socket_definition,"%s",psdef);
+                }else{
+                    fprintf(stderr,"socket definition length invalid [%s/%zu/%zu]\n",psdef,sdef_len,(size_t)MB_PATH_SIZE);
                 }
+//            fprintf(stderr, "socket_definition|%s\n", cfg->socket_definition);
+
             }else {
                 // cfg->input is input file name
                 cfg->input_mode = INPUT_MODE_FILE;
@@ -1989,6 +2085,10 @@ static int s_mbtrnpp_kvparse_fn(char *key, char *val, void *cfg)
                 }
             }else if(strcmp(key,"trnuhbt")==0 ){
                 if(sscanf(val,"%lf",&opts->trnuhbt)==1){
+                    retval=0;
+                }
+            }else if(strcmp(key,"trnumttl")==0 ){
+                if(sscanf(val,"%d",&opts->trnumttl)==1){
                     retval=0;
                 }
             }else if(strcmp(key,"delay")==0 ){
@@ -2148,62 +2248,73 @@ static int s_mbtrnpp_kvparse_fn(char *key, char *val, void *cfg)
                     opts->trn_en=true;
                     retval=0;
                 }
+            }else if(strcmp(key,"trn-dev")==0 ){
+                r7k_device_t test = R7KC_DEV_INVALID;
+                if( (test=r7k_parse_devid(val)) != R7KC_DEV_INVALID){
+                    opts->trn_dev = test;
+                }
+                retval=0;
             }else if(strcmp(key,"config")==0 ){
                 retval=0;
+            }else {
+                fprintf(stderr, "WARN - unsupported key/val [%s/%s]\n", key,val);
             }
         }else{
+            // val is NULL
             // process args w/o required arguments
              if(strcmp(key,"trn-en")==0 ){
-                if( mkvc_parse_bool(val,&opts->trn_en)==0){
-                    retval=0;
-                }else{
+//                if( mkvc_parse_bool(val,&opts->trn_en)==0){
+//                    retval=0;
+//                }else{
                     opts->trn_en=true;
                     retval=0;
-                }
+//                }
             }else if(strcmp(key,"reinit-gain")==0 ){
-                if( mkvc_parse_bool(val,&opts->reinit_gain_enable)==0){
-                    retval=0;
-                }else{
+//                if( mkvc_parse_bool(val,&opts->reinit_gain_enable)==0){
+//                    retval=0;
+//                }else{
                     opts->reinit_gain_enable=true;
                     retval=0;
-                }
+//                }
             }else if(strcmp(key,"reinit-file")==0 ){
-                if( mkvc_parse_bool(val,&opts->reinit_file_enable)==0){
-                    retval=0;
-                }else{
+//                if( mkvc_parse_bool(val,&opts->reinit_file_enable)==0){
+//                    retval=0;
+//                }else{
                     opts->reinit_file_enable=true;
                     retval=0;
-                }
+//                }
             }else if(strcmp(key,"config")==0 ){
                 retval=0;
             }else if(strcmp(key,"help")==0 ){
                 opts->help=true;
                 retval=0;
             }else {
-                fprintf(stderr, "WARN - unsupported key/val [%s/%s]\n", key,val);
+                fprintf(stderr, "WARN - unsupported key/val [%s/NULL]\n", key);
             }
         }
 
         // perform mnemonic substitutions
-        char *val=NULL;
-        s_sub_mnem(&opts->input,0,opts->input,CFG_MNEM_TRN_RESON_HOST,s_mnem_value(&val,0,CFG_MNEM_TRN_RESON_HOST));
-        MEM_CHKINVALIDATE(val);
-        s_sub_mnem(&opts->output,0,opts->output,CFG_MNEM_SESSION,s_mnem_value(&val,0,CFG_MNEM_SESSION));
-        MEM_CHKINVALIDATE(val);
-        s_sub_mnem(&opts->mb_out,0,opts->mb_out,CFG_MNEM_TRN_HOST,s_mnem_value(&val,0,CFG_MNEM_TRN_HOST));
-        MEM_CHKINVALIDATE(val);
-        s_sub_mnem(&opts->trn_out,0,opts->trn_out,CFG_MNEM_TRN_HOST,s_mnem_value(&val,0,CFG_MNEM_TRN_HOST));
-        MEM_CHKINVALIDATE(val);
-        s_sub_mnem(&opts->trn_mid,0,opts->trn_mid,CFG_MNEM_TRN_SESSION,s_mnem_value(&val,0,CFG_MNEM_TRN_SESSION));
-        MEM_CHKINVALIDATE(val);
-        s_sub_mnem(&opts->log_directory,0,opts->log_directory,CFG_MNEM_TRN_LOGFILES,s_mnem_value(&val,0,CFG_MNEM_TRN_LOGFILES));
-        MEM_CHKINVALIDATE(val);
-        s_sub_mnem(&opts->trn_map,0,opts->trn_map,CFG_MNEM_TRN_MAPFILES,s_mnem_value(&val,0,CFG_MNEM_TRN_MAPFILES));
-        MEM_CHKINVALIDATE(val);
-        s_sub_mnem(&opts->trn_par,0,opts->trn_par,CFG_MNEM_TRN_DATAFILES,s_mnem_value(&val,0,CFG_MNEM_TRN_DATAFILES));
-        MEM_CHKINVALIDATE(val);
-        s_sub_mnem(&opts->trn_cfg,0,opts->trn_cfg,CFG_MNEM_TRN_DATAFILES,s_mnem_value(&val,0,CFG_MNEM_TRN_DATAFILES));
-        MEM_CHKINVALIDATE(val);
+        char *mval=NULL;
+        s_sub_mnem(&opts->input,0,opts->input,CFG_MNEM_TRN_RESON_HOST,s_mnem_value(&mval,0,CFG_MNEM_TRN_RESON_HOST));
+        MEM_CHKINVALIDATE(mval);
+        s_sub_mnem(&opts->output,0,opts->output,CFG_MNEM_SESSION,s_mnem_value(&mval,0,CFG_MNEM_SESSION));
+        MEM_CHKINVALIDATE(mval);
+        s_sub_mnem(&opts->mb_out,0,opts->mb_out,CFG_MNEM_TRN_HOST,s_mnem_value(&mval,0,CFG_MNEM_TRN_HOST));
+        MEM_CHKINVALIDATE(mval);
+        s_sub_mnem(&opts->trn_out,0,opts->trn_out,CFG_MNEM_TRN_HOST,s_mnem_value(&mval,0,CFG_MNEM_TRN_HOST));
+        MEM_CHKINVALIDATE(mval);
+        s_sub_mnem(&opts->trn_out,0,opts->trn_out,CFG_MNEM_TRN_GROUP,s_mnem_value(&mval,0,CFG_MNEM_TRN_GROUP));
+        MEM_CHKINVALIDATE(mval);
+        s_sub_mnem(&opts->trn_mid,0,opts->trn_mid,CFG_MNEM_TRN_SESSION,s_mnem_value(&mval,0,CFG_MNEM_TRN_SESSION));
+        MEM_CHKINVALIDATE(mval);
+        s_sub_mnem(&opts->log_directory,0,opts->log_directory,CFG_MNEM_TRN_LOGFILES,s_mnem_value(&mval,0,CFG_MNEM_TRN_LOGFILES));
+        MEM_CHKINVALIDATE(mval);
+        s_sub_mnem(&opts->trn_map,0,opts->trn_map,CFG_MNEM_TRN_MAPFILES,s_mnem_value(&mval,0,CFG_MNEM_TRN_MAPFILES));
+        MEM_CHKINVALIDATE(mval);
+        s_sub_mnem(&opts->trn_par,0,opts->trn_par,CFG_MNEM_TRN_DATAFILES,s_mnem_value(&mval,0,CFG_MNEM_TRN_DATAFILES));
+        MEM_CHKINVALIDATE(mval);
+        s_sub_mnem(&opts->trn_cfg,0,opts->trn_cfg,CFG_MNEM_TRN_DATAFILES,s_mnem_value(&mval,0,CFG_MNEM_TRN_DATAFILES));
+        MEM_CHKINVALIDATE(mval);
     }else{
         fprintf(stderr, "ERR - NULL key/val [%s / %s]\n", (key==NULL?"":key),val);
     }
@@ -2373,6 +2484,8 @@ static int s_mbtrnpp_configure(mbtrnpp_cfg_t *cfg, mbtrnpp_opts_t *opts)
         }else{
             cfg->median_filter_en = false;
         }
+        // device
+        cfg->trn_dev=opts->trn_dev;
         retval=0;
     }else{
         fprintf(stderr, "ERR - invalid argument (NULL opts)\n");
@@ -2471,34 +2584,44 @@ static int s_mbtrnpp_validate_config(mbtrnpp_cfg_t *cfg)
             if((cfg->output_flags&OUTPUT_MB1_SVR_EN)){
                 if(NULL==cfg->mb1svr_host ){
                     err_count++;
-                    fprintf(stderr,"ERR - mb1svr_host not set [%s]\n",cfg->mb1svr_host);
+                    fprintf(stderr,"ERR - mb1svr_host not set\n");
                 }
                 if((cfg->mb1svr_port<1024 || cfg->mb1svr_port>65535)){
                     err_count++;
-                    fprintf(stderr,"ERR - invalid mb1svr_port [%d] valid range 1-255\n",cfg->mb1svr_port);
+                    fprintf(stderr,"ERR - invalid mb1svr_port [%d] valid range 1024-65535\n",cfg->mb1svr_port);
                 }
         	}
             if((cfg->output_flags&OUTPUT_TRN_SVR_EN)){
                 if(NULL==cfg->trnsvr_host ){
                     err_count++;
-                    fprintf(stderr,"ERR - trnsvr_host not set [%s]\n",cfg->trnsvr_host);
+                    fprintf(stderr,"ERR - trnsvr_host not set\n");
                 }
                 if((cfg->trnsvr_port<1024 || cfg->trnsvr_port>65535)){
                     err_count++;
-                    fprintf(stderr,"ERR - invalid trnsvr_port [%d] valid range 1-255\n",cfg->trnsvr_port);
+                    fprintf(stderr,"ERR - invalid trnsvr_port [%d] valid range 1024-65535\n",cfg->trnsvr_port);
                 }
             }
             if((cfg->output_flags&OUTPUT_TRNU_SVR_EN)){
                 if(NULL==cfg->trnusvr_host ){
                     err_count++;
-                    fprintf(stderr,"ERR - trnusvr_host not set [%s]\n",cfg->trnusvr_host);
+                    fprintf(stderr,"ERR - trnusvr_host not set\n");
                 }
                 if((cfg->trnusvr_port<1024 || cfg->trnusvr_port>65535)){
                     err_count++;
-                    fprintf(stderr,"ERR - invalid trnusvr_port [%d] valid range 1-255\n",cfg->trnusvr_port);
+                    fprintf(stderr,"ERR - invalid trnusvr_port [%d] valid range 1024-65535\n",cfg->trnusvr_port);
                 }
             }
-        }
+            if((cfg->output_flags&OUTPUT_TRNUM_SVR_EN)){
+                if(NULL==cfg->trnumsvr_group ){
+                    err_count++;
+                    fprintf(stderr,"ERR - trnumsvr_group not set\n");
+                }
+                if((cfg->trnumsvr_port<1024 || cfg->trnumsvr_port>65535)){
+                    err_count++;
+                    fprintf(stderr,"ERR - invalid trnumsvr_port [%d] valid range 1024-65535\n",cfg->trnumsvr_port);
+                }
+            }
+       }
 
         retval=(err_count==0?0:-1);
     }
@@ -2587,6 +2710,7 @@ int main(int argc, char **argv) {
                          "\t--trnuhbt=n\n"
                          "\t--delay=n\n"
                          "\t--trn-en\n"
+                         "\t--trn-dev=s\n"
                          "\t--trn-utm\n"
                          "\t--trn-map\n"
                          "\t--trn-par\n"
@@ -2602,7 +2726,7 @@ int main(int argc, char **argv) {
                          "\t--trn-ecov\n"
                          "\t--trn-eerr\n"
                          "\t--mb-out=mb1svr[:host:port]/mb1/reson\n"
-                         "\t--trn-out=trnsvr[:host:port]/trnusvr[:host:port]/trnu/sout/serr/debug\n"
+                         "\t--trn-out=trnsvr[:host:port]/trnusvr[:host:port]/trnumsvr[:group:port:ttl]/trnu/sout/serr/debug\n"
                          "\t--trn-decn\n"
                          "\t--trn-decs\n"
                          "\t--covariance-magnitude-max=covariance_magnitude_max\n"
@@ -2927,9 +3051,16 @@ int main(int argc, char **argv) {
 
         if( (test=mbtrnpp_init_trnusvr(&trnusvr, mbtrn_cfg->trnusvr_host,mbtrn_cfg->trnusvr_port, trn_instance, true))==0){
 //            PMPRINT(MOD_MBTRNPP,MM_DEBUG,(stderr,"TRNU server netif OK [%s:%d]\n",mbtrn_cfg->trnusvr_host,mbtrn_cfg-> trnusvr_port));
-            fprintf(stderr,"TRNU server netif OK [%s:%d]\n",mbtrn_cfg->trnusvr_host,mbtrn_cfg-> trnusvr_port);
+            fprintf(stderr,"TRNU server netif OK [%s:%d]\n",mbtrn_cfg->trnusvr_host,mbtrn_cfg->trnusvr_port);
         }else{
             fprintf(stderr, "TRNU server netif init failed [%d] [%d %s]\n",test,errno,strerror(errno));
+        }
+
+        if( (test=mbtrnpp_init_trnumsvr(&trnumsvr, mbtrn_cfg->trnumsvr_group,mbtrn_cfg->trnumsvr_port, trn_instance, true))==0){
+            //            PMPRINT(MOD_MBTRNPP,MM_DEBUG,(stderr,"TRNUM server netif OK [%s:%d]\n",mbtrn_cfg->trnumsvr_group,mbtrn_cfg-> trnumsvr_port));
+            fprintf(stderr,"TRNUM server netif OK [%s:%d]\n",mbtrn_cfg->trnumsvr_group,mbtrn_cfg->trnumsvr_port);
+        }else{
+            fprintf(stderr, "TRNUM server netif init failed [%d] [%d %s]\n",test,errno,strerror(errno));
         }
 
         if (mbtrn_cfg->verbose != 0) {
@@ -3227,7 +3358,7 @@ int main(int argc, char **argv) {
      * using functions defined in this code block and passed into the
      * init function as function pointers */
     if (strncmp(mbtrn_cfg->input, "socket", 6) == 0) {
-      if (mbtrn_cfg->format == MBF_RESON7KR) {
+      if (mbtrn_cfg->format == MBF_RESON7KR || mbtrn_cfg->format == MBF_RESON7K3) {
         mbtrnpp_input_open = &mbtrnpp_reson7kr_input_open;
         mbtrnpp_input_read = &mbtrnpp_reson7kr_input_read;
         mbtrnpp_input_close = &mbtrnpp_reson7kr_input_close;
@@ -3736,7 +3867,6 @@ int main(int argc, char **argv) {
                     reinit_flag = true;
                   }
                 }
-
                 // if ok pass filtered ping to TRN for processing
                 if (update_trn) {
 
@@ -3746,6 +3876,15 @@ int main(int argc, char **argv) {
                     fprintf(stderr, "--reinit time_d:%.6f centered on offset: %f %f %f\n",
                                   ping[i_ping_process].time_d, use_offset_e, use_offset_n, use_offset_z);
                     wtnav_reinit_filter_offset(trn_instance, true, use_offset_n, use_offset_e, use_offset_z);
+                      // TODO: replace wtnav_reinit_filter_offset with the following,
+                      // which correspond 1:1 with TerrainNav method calls
+                      // use existing xyz sdev init values
+//                      d_triplet_t xyz_sdev={0., 0., 0.};
+//                      wtnav_get_init_stddev_xyz(trn_instance, &xyz_sdev);
+//
+//                      wtnav_reinit_filter_box(trn_instance, true, use_offset_n, use_offset_e, use_offset_z,
+//                                              xyz_sdev.x, xyz_sdev.y, xyz_sdev.z);
+
                     mlog_tprintf(mbtrnpp_mlog_id, "i,trn filter reinit time_d:%.6f centered on offset: %f %f %f\n",
                                   ping[i_ping_process].time_d, use_offset_e, use_offset_n, use_offset_z);
                     MST_COUNTER_INC(app_stats->stats->events[MBTPP_EV_MB_REINIT]);
@@ -3770,7 +3909,7 @@ int main(int argc, char **argv) {
                     time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6], ping[i_ping_process].time_d,
                     ping[i_ping_process].navlon, ping[i_ping_process].navlat, ping[i_ping_process].sonardepth);
                     mbtrnpp_trnu_pubempty_osocket(ping[i_ping_process].time_d, ping[i_ping_process].navlat,
-                      ping[i_ping_process].navlon, ping[i_ping_process].sonardepth,  trnusvr->socket);
+                      ping[i_ping_process].navlon, ping[i_ping_process].sonardepth,trnusvr);
                 }
 
 #endif // WITH_MBTNAV
@@ -3853,7 +3992,6 @@ int main(int argc, char **argv) {
 
             for (int i = 0; i < MB_DATA_KINDS; i++) {
               if (num_kinds_read[i] > 0) {
-                char *message = NULL;
                 if (mb_notice_message(mbtrn_cfg->verbose, i, &message) == MB_SUCCESS) {
                   fprintf(stderr, "     %6d %s\n", num_kinds_read[i], message);
                   num_kinds_read[i] = 0;
@@ -3861,7 +3999,7 @@ int main(int argc, char **argv) {
               }
             }
             double dzero = 0.0;
-            mbtrnpp_trnu_pubempty_osocket(ping[idataread].time_d, dzero, dzero, dzero, trnusvr->socket);
+            mbtrnpp_trnu_pubempty_osocket(ping[idataread].time_d, dzero, dzero, dzero, trnusvr);
           }
         }
         MST_METRIC_LAP(app_stats->stats->metrics[MBTPP_CH_MB_GETFAIL_XT], mtime_dtime());
@@ -3994,6 +4132,7 @@ int main(int argc, char **argv) {
     mlog_tprintf(netif_log(mb1svr),"i,end session\n");
     mlog_tprintf(netif_log(trnsvr),"i,end session\n");
     mlog_tprintf(netif_log(trnusvr),"i,end session\n");
+    mlog_tprintf(netif_log(trnumsvr),"i,end session\n");
 
   fprintf(stderr, "\nExiting program - error mode:[%d]\n", error);
 
@@ -4012,8 +4151,6 @@ int mbtrnpp_openlog(int verbose, mb_path log_directory, FILE **logfp, int *error
   struct timezone timezone;
   double time_d;
   int time_i[7];
-  char date[32], user[128], *user_ptr;
-  mb_path host;
   mb_path log_file;
   char log_message[LOG_MSG_BUF_SZ]={0};
 
@@ -4033,18 +4170,13 @@ int mbtrnpp_openlog(int verbose, mb_path log_directory, FILE **logfp, int *error
   }
 
   /* get time and user data */
+  char user[256], host[256], date[32];
+  status = mb_user_host_date(verbose, user, host, date, error);
   gettimeofday(&timeofday, &timezone);
   time_d = timeofday.tv_sec + 0.000001 * timeofday.tv_usec;
   status = mb_get_date(verbose, time_d, time_i);
   sprintf(date, "%4.4d%2.2d%2.2d_%2.2d%2.2d%2.2d%6.6d", time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5],
           time_i[6]);
-  if ((user_ptr = getenv("USER")) == NULL)
-    user_ptr = getenv("LOGNAME");
-  if (user_ptr != NULL)
-    strcpy(user, user_ptr);
-  else
-    strcpy(user, "unknown");
-  gethostname(host, sizeof(mb_path));
 
   /* open new log file */
   sprintf(log_file, "%s/%s_mbtrnpp_log.txt", log_directory, date);
@@ -4370,6 +4502,8 @@ int mbtrnpp_update_stats(mstats_profile_t *stats, mlog_id_t log_id, mstats_flags
     mstats_update_stats(trnsvr_stats, NETIF_CH_COUNT, flags);
     mstats_t *trnusvr_stats = netif_stats(trnusvr);
     mstats_update_stats(trnusvr_stats, NETIF_CH_COUNT, flags);
+    mstats_t *trnumsvr_stats = netif_stats(trnumsvr);
+    mstats_update_stats(trnumsvr_stats, NETIF_CH_COUNT, flags);
 
     PMPRINT(MOD_MBTRNPP,  MBTRNPP_V4,
             (stderr, "cycle_xt.p: N[%"PRId64"] sum[%.3lf] min[%.3lf] max[%.3lf] avg[%.3lf]\n",
@@ -4405,6 +4539,7 @@ int mbtrnpp_update_stats(mstats_profile_t *stats, mlog_id_t log_id, mstats_flags
       mstats_log_stats(mb1svr_stats, stats_now, netif_log(mb1svr), flags);
       mstats_log_stats(trnsvr_stats, stats_now, netif_log(trnsvr), flags);
       mstats_log_stats(trnusvr_stats, stats_now, netif_log(trnusvr), flags);
+      mstats_log_stats(trnumsvr_stats, stats_now, netif_log(trnumsvr), flags);
 
       if (flags & MSF_READER) {
         mstats_log_stats(reader_stats, stats_now, log_id, flags);
@@ -4416,6 +4551,7 @@ int mbtrnpp_update_stats(mstats_profile_t *stats, mlog_id_t log_id, mstats_flags
       mstats_reset_pstats(mb1svr_stats, NETIF_CH_COUNT);
       mstats_reset_pstats(trnsvr_stats, NETIF_CH_COUNT);
       mstats_reset_pstats(trnusvr_stats, NETIF_CH_COUNT);
+      mstats_reset_pstats(trnumsvr_stats, NETIF_CH_COUNT);
 
       // reset period timer
       stats->stats->stat_period_start = stats_now;
@@ -4736,79 +4872,76 @@ int mbtrnpp_trn_pub_blog(trn_update_t *update,
 /*--------------------------------------------------------------------*/
 
 int mbtrnpp_trnu_pub_osocket(trn_update_t *update,
-                             msock_socket_t *pub_sock)
+                             netif_t *netif)
 {
     int retval=-1;
 
-    if(NULL!=update && NULL!=pub_sock){
+    if(NULL!=update && NULL!=netif){
         retval=0;
+        int iobytes=0;
 
-        if(NULL!=update && NULL!=pub_sock){
-            int iobytes=0;
+        double offset_n = update->mse_dat->x - update->pt_dat->x;
+        double offset_e = update->mse_dat->y - update->pt_dat->y;
+        double offset_z = update->mse_dat->z - update->pt_dat->z;
+//        double covariance_mag = sqrt(update->mse_dat->covariance[0] * update->mse_dat->covariance[0]
+//                                     + update->mse_dat->covariance[1] * update->mse_dat->covariance[1]
+//                                     + update->mse_dat->covariance[2] * update->mse_dat->covariance[2]);
 
-            double offset_n = update->mse_dat->x - update->pt_dat->x;
-            double offset_e = update->mse_dat->y - update->pt_dat->y;
-            double offset_z = update->mse_dat->z - update->pt_dat->z;
-            double covariance_mag = sqrt(update->mse_dat->covariance[0] * update->mse_dat->covariance[0]
-                      + update->mse_dat->covariance[1] * update->mse_dat->covariance[1]
-                      + update->mse_dat->covariance[2] * update->mse_dat->covariance[2]);
-
-            // serialize data
-            trnu_pub_t pub_data={
-                TRNU_PUB_SYNC,
-                {
-                    {update->pt_dat->time,update->pt_dat->x,update->pt_dat->y,update->pt_dat->z,
-                        {update->pt_dat->covariance[0],update->pt_dat->covariance[2],update->pt_dat->covariance[5],update->pt_dat->covariance[1]}
-                    },
-                    {update->mle_dat->time,update->mle_dat->x,update->mle_dat->y,update->mle_dat->z,
-                        {update->mle_dat->covariance[0],update->mle_dat->covariance[2],update->mle_dat->covariance[5],update->mle_dat->covariance[1]}
-                    },
-                    {update->mse_dat->time,update->mse_dat->x,update->mse_dat->y,update->mse_dat->z,
-                        {update->mse_dat->covariance[0],update->mse_dat->covariance[2],update->mse_dat->covariance[5],update->mse_dat->covariance[1]}
-                    },
-                    {update->mse_dat->time,offset_n,offset_e,offset_z,
-                        {update->mse_dat->covariance[0],update->mse_dat->covariance[2],update->mse_dat->covariance[5],update->mse_dat->covariance[1]}
-                    },
-                    {use_offset_time,use_offset_n,use_offset_e,use_offset_z,
-                        {use_covariance[0],use_covariance[1],use_covariance[2],use_covariance[3]}
-                    },
+        // serialize data
+        trnu_pub_t pub_data={
+            TRNU_PUB_SYNC,
+            {
+                {update->pt_dat->time,update->pt_dat->x,update->pt_dat->y,update->pt_dat->z,
+                    {update->pt_dat->covariance[0],update->pt_dat->covariance[2],update->pt_dat->covariance[5],update->pt_dat->covariance[1]}
                 },
-                update->reinit_count,
-                update->reinit_tlast,
-                update->filter_state,
-                update->success,
-                update->is_converged,
-                update->is_valid,
-                update->mb1_cycle,
-                update->ping_number,
-                n_converged_streak,
-                n_converged_tot,
-                n_unconverged_streak,
-                n_unconverged_tot,
-                update->mb1_time,
-                reinit_time,
-                update->update_time
-            };
+                {update->mle_dat->time,update->mle_dat->x,update->mle_dat->y,update->mle_dat->z,
+                    {update->mle_dat->covariance[0],update->mle_dat->covariance[2],update->mle_dat->covariance[5],update->mle_dat->covariance[1]}
+                },
+                {update->mse_dat->time,update->mse_dat->x,update->mse_dat->y,update->mse_dat->z,
+                    {update->mse_dat->covariance[0],update->mse_dat->covariance[2],update->mse_dat->covariance[5],update->mse_dat->covariance[1]}
+                },
+                {update->mse_dat->time,offset_n,offset_e,offset_z,
+                    {update->mse_dat->covariance[0],update->mse_dat->covariance[2],update->mse_dat->covariance[5],update->mse_dat->covariance[1]}
+                },
+                {use_offset_time,use_offset_n,use_offset_e,use_offset_z,
+                    {use_covariance[0],use_covariance[1],use_covariance[2],use_covariance[3]}
+                },
+            },
+            update->reinit_count,
+            update->reinit_tlast,
+            update->filter_state,
+            update->success,
+            update->is_converged,
+            update->is_valid,
+            update->mb1_cycle,
+            update->ping_number,
+            n_converged_streak,
+            n_converged_tot,
+            n_unconverged_streak,
+            n_unconverged_tot,
+            update->mb1_time,
+            reinit_time,
+            update->update_time
+        };
 
-            if( (iobytes=netif_pub(trnusvr,(char *)&pub_data, sizeof(pub_data)))>0){
-                retval=iobytes;
-                MST_COUNTER_INC(app_stats->stats->events[MBTPP_EV_TRNU_PUBN]);
-            }else{
-                MST_COUNTER_INC(app_stats->stats->events[MBTPP_EV_ETRNUPUB]);
-            }
+        if( (iobytes=netif_pub(netif,(char *)&pub_data, sizeof(pub_data)))>0){
+            retval=iobytes;
+            MST_COUNTER_INC(app_stats->stats->events[MBTPP_EV_TRNU_PUBN]);
+        }else{
+            MST_COUNTER_INC(app_stats->stats->events[MBTPP_EV_ETRNUPUB]);
         }
+
     }
     return retval;
 }
 
-int mbtrnpp_trnu_pubempty_osocket(double time, double lat, double lon, double depth, msock_socket_t *pub_sock)
+int mbtrnpp_trnu_pubempty_osocket(double time, double lat, double lon, double depth, netif_t *netif)
 {
     int retval=-1;
 
-    if(NULL!=pub_sock){
+    if(NULL!=netif){
         retval=0;
 
-        if(NULL!=pub_sock){
             int iobytes=0;
 
             int izero = 0;
@@ -4851,59 +4984,13 @@ int mbtrnpp_trnu_pubempty_osocket(double time, double lat, double lon, double de
                 dzero,
                 dzero,
             };
-            
-            if( (iobytes=netif_pub(trnusvr,(char *)&pub_data, sizeof(pub_data)))>0){
+
+            if( (iobytes=netif_pub(netif,(char *)&pub_data, sizeof(pub_data)))>0){
                 retval=iobytes;
                 MST_COUNTER_INC(app_stats->stats->events[MBTPP_EV_TRNU_PUBEMPTYN]);
             }else{
                 MST_COUNTER_INC(app_stats->stats->events[MBTPP_EV_ETRNUPUBEMPTY]);
             }
-        }
-    }
-    return retval;
-}
-
-int mbtrnpp_trnu_pub_osocket_org(trn_update_t *update,
-                             msock_socket_t *pub_sock)
-{
-    int retval=-1;
-
-    if(NULL!=update && NULL!=pub_sock){
-        retval=0;
-
-        if(NULL!=update && NULL!=pub_sock){
-            int iobytes=0;
-            // serialize data
-            trnu_pub_org_t pub_data={
-                TRNU_PUB_SYNC,
-                {
-                    {update->pt_dat->time,update->pt_dat->x,update->pt_dat->y,update->pt_dat->z,
-                        {update->pt_dat->covariance[0],update->pt_dat->covariance[2],update->pt_dat->covariance[5],update->pt_dat->covariance[1]}
-                    },
-                    {update->mle_dat->time,update->mle_dat->x,update->mle_dat->y,update->mle_dat->z,
-                        {update->mle_dat->covariance[0],update->mle_dat->covariance[2],update->mle_dat->covariance[5],update->mle_dat->covariance[1]}
-                    },
-                    {update->mse_dat->time,update->mse_dat->x,update->mse_dat->y,update->mse_dat->z,
-                        {update->mse_dat->covariance[0],update->mse_dat->covariance[2],update->mse_dat->covariance[5],update->mse_dat->covariance[1]}
-                    }
-                },
-                update->reinit_count,
-                update->reinit_tlast,
-                update->filter_state,
-                update->success,
-                update->is_converged,
-                update->is_valid,
-                update->mb1_cycle,
-                update->ping_number,
-                update->mb1_time,
-                update->update_time
-            };
-
-            if( (iobytes=netif_pub(trnusvr,(char *)&pub_data, sizeof(pub_data)))>0){
-                retval=iobytes;
-                MST_COUNTER_INC(app_stats->stats->events[MBTPP_EV_TRNU_PUBN]);
-            }
-        }
     }
     return retval;
 }
@@ -4972,9 +5059,9 @@ int mbtrnpp_init_trnsvr(netif_t **psvr, wtnav_t *trn, char *host, int port, bool
 int mbtrnpp_init_mb1svr(netif_t **psvr, char *host, int port, bool verbose)
 {
     int retval = -1;
-    PMPRINT(MOD_MBTRNPP,MM_DEBUG,(stderr,"configuring MB1 server socket using %s:%d\n",host,port));
-    fprintf(stderr,"configuring MB1 server socket using %s:%d hbto[%lf]\n",host,port,mbtrn_cfg->mbsvr_hbto);
    if(NULL!=psvr && NULL!=host){
+       PMPRINT(MOD_MBTRNPP,MM_DEBUG,(stderr,"configuring MB1 server socket using %s:%d\n",host,port));
+       fprintf(stderr,"configuring MB1 server socket using %s:%d hbto[%lf]\n",host,port,mbtrn_cfg->mbsvr_hbto);
         netif_t *svr = netif_new("mb1svr",host,
                           port,
                           ST_UDP,
@@ -5013,7 +5100,15 @@ int s_mbtrnpp_trnu_reset_callback()
     fprintf(stderr, "--reinit (cli_req) systime:%.6f centered on offset: %f %f %f\n",
             reset_time, use_offset_e, use_offset_n, use_offset_z);
 
+    // TODO: replace wtnav_reinit_filter_offset with wtnav_reinit_filter_box
     wtnav_reinit_filter_offset(trn_instance, true, use_offset_n, use_offset_e, use_offset_z);
+
+    // TODO: use current values, or generate in mbtrnpp?
+//    d_triplet_t xyz_sdev={0., 0., 0.};
+//    wtnav_get_init_stddev_xyz(trn_instance, &xyz_sdev);
+//
+//    wtnav_reinit_filter_box(trn_instance, true, use_offset_n, use_offset_e, use_offset_z,
+//                            xyz_sdev.x, xyz_sdev.y, xyz_sdev.z);
 
     mlog_tprintf(mbtrnpp_mlog_id, "i,trn filter reinit.cli systime:%.6f centered on offset: %f %f %f\n",
                  reset_time, use_offset_e, use_offset_n, use_offset_z);
@@ -5074,6 +5169,44 @@ int mbtrnpp_init_trnusvr(netif_t **psvr, char *host, int port, wtnav_t *trn, boo
     return retval;
 }
 
+int mbtrnpp_init_trnumsvr(netif_t **psvr, char *host, int port, wtnav_t *trn, bool verbose)
+{
+    int retval = -1;
+    PMPRINT(MOD_MBTRNPP,MM_DEBUG,(stderr,"configuring trnum (update) server socket using %s:%d\n",host,port));
+    if(NULL!=psvr && NULL!=host){
+        netif_t *svr = netif_mcast_new("trnumsvr",host,
+                                 port,
+                                 ST_UDPM,
+                                 IFM_REQRES,
+                                 mbtrn_cfg->trnumsvr_ttl,
+                                 trnif_msg_read_trnu,
+                                 trnif_msg_handle_trnu,
+                                 trnif_msg_pub_trnu);
+
+
+        if(NULL!=svr){
+            *psvr = svr;
+            g_trnu_res->trn=trn_instance;
+            g_trnu_res->reset_callback=s_mbtrnpp_trnu_reset_callback;
+
+            netif_set_reqres_res(svr,g_trnu_res);
+            //            trnif_res_t rr_resources={trn};
+            //netif_set_reqres_res(svr,trn);
+            fprintf(stderr,"trnumsvr netif:\n");
+            netif_show(svr,true,5);
+            netif_init_log(svr, "trnumsvr", (NULL!=mbtrn_cfg->trn_log_dir?mbtrn_cfg->trn_log_dir:"."), s_mbtrnpp_session_str(NULL,0,RF_NONE));
+            mlog_tprintf(svr->mlog_id,"*** trnumsvr session start (TEST) ***\n");
+            mlog_tprintf(svr->mlog_id,"libnetif v[%s] build[%s]\n",netif_get_version(),netif_get_build());
+            retval = netif_connect(svr);
+        }else{
+            fprintf(stderr,"%s:%d - ERR allocation\n",__FUNCTION__,__LINE__);
+        }
+    }else{
+        fprintf(stderr,"%s:%d - ERR invalid args\n",__FUNCTION__,__LINE__);
+    }
+    return retval;
+}
+
 /*--------------------------------------------------------------------*/
 int mbtrnpp_trn_get_bias_estimates(wtnav_t *self, wposet_t *pt, trn_update_t *pstate) {
     int retval = -1;
@@ -5115,17 +5248,13 @@ int mbtrnpp_check_reinit(trn_update_t *pstate, trn_config_t *cfg)
 
     if(NULL!=pstate && NULL!=cfg){
 
-        double offset_n = 0.0;
-        double offset_e = 0.0;
-        double offset_z = 0.0;
-        double covariance_mag = 0.0;
         if (use_offset_time == 0.0)
           use_offset_time = pstate->mse_dat->time;
         if (pstate->mse_dat->time > 0.0) {
-          offset_n = pstate->mse_dat->x - pstate->pt_dat->x;
-          offset_e = pstate->mse_dat->y - pstate->pt_dat->y;
-          offset_z = pstate->mse_dat->z - pstate->pt_dat->z;
-          covariance_mag = sqrt(pstate->mse_dat->covariance[0] * pstate->mse_dat->covariance[0]
+          double offset_n = pstate->mse_dat->x - pstate->pt_dat->x;
+          double offset_e = pstate->mse_dat->y - pstate->pt_dat->y;
+          double offset_z = pstate->mse_dat->z - pstate->pt_dat->z;
+          double covariance_mag = sqrt(pstate->mse_dat->covariance[0] * pstate->mse_dat->covariance[0]
                     + pstate->mse_dat->covariance[1] * pstate->mse_dat->covariance[1]
                     + pstate->mse_dat->covariance[2] * pstate->mse_dat->covariance[2]);
           if (covariance_mag <= mbtrn_cfg->covariance_magnitude_max) {
@@ -5196,9 +5325,17 @@ int mbtrnpp_trn_publish(trn_update_t *pstate, trn_config_t *cfg)
 
             MST_METRIC_START(app_stats->stats->metrics[MBTPP_CH_TRN_TRNU_PUB_XT], mtime_dtime());
 
-            mbtrnpp_trnu_pub_osocket(pstate, trnusvr->socket);
+            mbtrnpp_trnu_pub_osocket(pstate, trnusvr);
 
             MST_METRIC_LAP(app_stats->stats->metrics[MBTPP_CH_TRN_TRNU_PUB_XT], mtime_dtime());
+        }
+        if( OUTPUT_FLAG_SET(OUTPUT_TRNUM_SVR_EN) ){
+
+            MST_METRIC_START(app_stats->stats->metrics[MBTPP_CH_TRN_TRNUM_PUB_XT], mtime_dtime());
+
+            mbtrnpp_trnu_pub_osocket(pstate, trnumsvr);
+
+            MST_METRIC_LAP(app_stats->stats->metrics[MBTPP_CH_TRN_TRNUM_PUB_XT], mtime_dtime());
         }
 // fprintf(stderr, "%s:%d:%s: pt_dat: %f  %f %f %f  %f %f %f %f  mle_dat: %f  %f %f %f  %f %f %f %f  mse_dat: %f  %f %f %f  %f %f %f %f"
 // " %d %f %d %d %d %d %d %d %f %f\n",
@@ -5350,12 +5487,20 @@ int mbtrnpp_trn_process_mb1(wtnav_t *tnav, mb1_t *mb1, trn_config_t *cfg)
         MST_METRIC_LAP(app_stats->stats->metrics[MBTPP_CH_TRN_TRNSVR_XT], mtime_dtime());
 
         MST_METRIC_START(app_stats->stats->metrics[MBTPP_CH_TRN_TRNUSVR_XT], mtime_dtime());
+
        // server: update (trnu server) client connections
         netif_update_connections(trnusvr);
         // server: service (trnu server) client requests
         netif_reqres(trnusvr);
 
         MST_METRIC_LAP(app_stats->stats->metrics[MBTPP_CH_TRN_TRNUSVR_XT], mtime_dtime());
+
+        MST_METRIC_START(app_stats->stats->metrics[MBTPP_CH_TRN_TRNUMSVR_XT], mtime_dtime());
+       // server: update (trnum server) client connections
+        netif_update_connections(trnumsvr);
+        // server: service (trnum server) client requests
+        netif_reqres(trnumsvr);
+        MST_METRIC_LAP(app_stats->stats->metrics[MBTPP_CH_TRN_TRNUMSVR_XT], mtime_dtime());
 
         if (do_process) {
             MST_COUNTER_INC(app_stats->stats->events[MBTPP_EV_TRN_PROCN]);
@@ -5370,95 +5515,95 @@ int mbtrnpp_trn_process_mb1(wtnav_t *tnav, mb1_t *mb1, trn_config_t *cfg)
                 wposet_t *pt = NULL;
                 trn_update_t trn_state={NULL,NULL,NULL,0,0,0,0,0.0,0.0},*pstate=&trn_state;
 
-                if(NULL!=tnav && NULL!=cfg){
+                // get TRN update
+                MST_METRIC_START(app_stats->stats->metrics[MBTPP_CH_TRN_UPDATE_XT], mtime_dtime());
 
-                    // get TRN update
-                    MST_METRIC_START(app_stats->stats->metrics[MBTPP_CH_TRN_UPDATE_XT], mtime_dtime());
+                int test=mbtrnpp_trn_update(tnav, mb1, &pt, &mt,cfg);
 
-                    int test=mbtrnpp_trn_update(tnav, mb1, &pt, &mt,cfg);
+                MST_METRIC_LAP(app_stats->stats->metrics[MBTPP_CH_TRN_UPDATE_XT], mtime_dtime());
 
-                    MST_METRIC_LAP(app_stats->stats->metrics[MBTPP_CH_TRN_UPDATE_XT], mtime_dtime());
+                if( test==0){
+                    // get TRN bias estimates
+                    MST_METRIC_START(app_stats->stats->metrics[MBTPP_CH_TRN_BIASEST_XT], mtime_dtime());
 
-                    if( test==0){
-                        // get TRN bias estimates
-                        MST_METRIC_START(app_stats->stats->metrics[MBTPP_CH_TRN_BIASEST_XT], mtime_dtime());
+                    test=mbtrnpp_trn_get_bias_estimates(tnav, pt, pstate);
 
-                        test=mbtrnpp_trn_get_bias_estimates(tnav, pt, pstate);
+                    MST_METRIC_LAP(app_stats->stats->metrics[MBTPP_CH_TRN_BIASEST_XT], mtime_dtime());
 
-                        MST_METRIC_LAP(app_stats->stats->metrics[MBTPP_CH_TRN_BIASEST_XT], mtime_dtime());
+                  if( test==0){
+                        if(NULL!=pstate->pt_dat &&  NULL!= pstate->mle_dat && NULL!=pstate->mse_dat ){
 
-                        if( test==0){
-                            if(NULL!=pstate->pt_dat &&  NULL!= pstate->mle_dat && NULL!=pstate->mse_dat ){
+                            // get number of reinits
+                            MST_METRIC_START(app_stats->stats->metrics[MBTPP_CH_TRN_NREINITS_XT], mtime_dtime());
 
-                                // get number of reinits
-                                MST_METRIC_START(app_stats->stats->metrics[MBTPP_CH_TRN_NREINITS_XT], mtime_dtime());
+                            // check if reinit will be required on next processing
+                            mbtrnpp_check_reinit(pstate, cfg);
 
-                                // check if reinit will be required on next processing
-                                mbtrnpp_check_reinit(pstate, cfg);
+                            pstate->reinit_count = wtnav_get_num_reinits(tnav);
+                            pstate->filter_state = wtnav_get_filter_state(tnav);
+                            pstate->is_converged = (wtnav_is_converged(tnav) ? 1 : 0);
+                            pstate->is_valid = use_trn_offset;
+                            // pstate->is_valid = ( (mb1->sounding.ts > 0. &&
+                            //                       pstate->mse_dat->covariance[0] <= cfg->max_northing_cov &&
+                            //                       pstate->mse_dat->covariance[2] <= cfg->max_easting_cov &&
+                            //                       fabs(pstate->mse_dat->x-pstate->pt_dat->x) <= cfg->max_northing_err &&
+                            //                       fabs(pstate->mse_dat->y-pstate->pt_dat->y) <= cfg->max_easting_err
+                            //                     )? 1 : 0);
+                            pstate->mb1_cycle=mb1_count;
+                            pstate->ping_number=mb1->sounding.ping_number;
+                            pstate->mb1_time=mb1->sounding.ts;
+                            pstate->update_time=mtime_etime();
 
-                                pstate->reinit_count = wtnav_get_num_reinits(tnav);
-                                pstate->filter_state = wtnav_get_filter_state(tnav);
-                                pstate->is_converged = (wtnav_is_converged(tnav) ? 1 : 0);
-                                pstate->is_valid = use_trn_offset;
-                                // pstate->is_valid = ( (mb1->sounding.ts > 0. &&
-                                //                       pstate->mse_dat->covariance[0] <= cfg->max_northing_cov &&
-                                //                       pstate->mse_dat->covariance[2] <= cfg->max_easting_cov &&
-                                //                       fabs(pstate->mse_dat->x-pstate->pt_dat->x) <= cfg->max_northing_err &&
-                                //                       fabs(pstate->mse_dat->y-pstate->pt_dat->y) <= cfg->max_easting_err
-                                //                     )? 1 : 0);
-                                pstate->mb1_cycle=mb1_count;
-                                pstate->ping_number=mb1->sounding.ping_number;
-                                pstate->mb1_time=mb1->sounding.ts;
-                                pstate->update_time=mtime_etime();
+                            MST_METRIC_LAP(app_stats->stats->metrics[MBTPP_CH_TRN_NREINITS_XT], mtime_dtime());
 
-                                MST_METRIC_LAP(app_stats->stats->metrics[MBTPP_CH_TRN_NREINITS_XT], mtime_dtime());
+                            // publish to selected outputs
+                            mbtrnpp_trn_publish(pstate, cfg);
 
-                                // publish to selected outputs
-                                mbtrnpp_trn_publish(pstate, cfg);
+                            retval=0;
 
-                                retval=0;
-
-                            }else{
-                                PMPRINT(MOD_MBTRNPP,MM_DEBUG,(stderr,"ERR: pt[%p] pt_dat[%p] mle_dat[%p] mse_dat[%p]\n",pt,pstate->pt_dat,pstate->mle_dat,pstate->mse_dat));
-                                mlog_tprintf(trnu_alog_id,"ERR: NULL data pt[%p] pt_dat[%p] mle_dat[%p] mse_dat[%p] ts[%.3lf] beams[%u] ping[%d] lat[%.5lf] lon[%.5lf] hdg[%.2lf] sd[%.1lf]\n",
-                                             pt,pstate->pt_dat,pstate->mle_dat,pstate->mse_dat,
-                                             mb1->sounding.ts, mb1->sounding.nbeams, mb1->sounding.ping_number,
-                                             mb1->sounding.lat, mb1->sounding.lon, mb1->sounding.hdg, mb1->sounding.depth);
-                            }
                         }else{
-                            mlog_tprintf(trnu_alog_id,"ERR: trncli_get_bias_estimates failed [%d] [%d/%s]\n",test,errno,strerror(errno));
-
-                            PMPRINT(MOD_MBTRNPP,MM_DEBUG|MBTRNPP_V3,(stderr,"ERR: trn_get_bias_estimates failed [%d] [%d/%s]\n",test,errno,strerror(errno)));
-
-                            int time_i[7];
-                            mb_get_date(0, mb1->sounding.ts, time_i);
-                            fprintf(stderr, "%4.4d/%2.2d/%2.2d-%2.2d:%2.2d:%2.2d.%6.6d %.6f "
-                                            "| %11.6f %11.6f %8.3f | %d filtered beams - Ping not used - failed bias estimate\n",
-                            time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6], mb1->sounding.ts,
-                            mb1->sounding.lon, mb1->sounding.lat, mb1->sounding.depth, mb1->sounding.nbeams);
-                            mbtrnpp_trnu_pubempty_osocket(mb1->sounding.ts, mb1->sounding.lat, mb1->sounding.lon, mb1->sounding.depth, trnusvr->socket);
+                            PMPRINT(MOD_MBTRNPP,MM_DEBUG,(stderr,"ERR: pt[%p] pt_dat[%p] mle_dat[%p] mse_dat[%p]\n",pt,pstate->pt_dat,pstate->mle_dat,pstate->mse_dat));
+                            mlog_tprintf(trnu_alog_id,"ERR: NULL data pt[%p] pt_dat[%p] mle_dat[%p] mse_dat[%p] ts[%.3lf] beams[%u] ping[%d] lat[%.5lf] lon[%.5lf] hdg[%.2lf] sd[%.1lf]\n",
+                                         pt,pstate->pt_dat,pstate->mle_dat,pstate->mse_dat,
+                                         mb1->sounding.ts, mb1->sounding.nbeams, mb1->sounding.ping_number,
+                                         mb1->sounding.lat, mb1->sounding.lon, mb1->sounding.hdg, mb1->sounding.depth);
                         }
                     }else{
-                        mlog_tprintf(trnu_alog_id,"ERR: trncli_send_update failed [%d] [%d/%s]\n",test,errno,strerror(errno));
-                        PMPRINT(MOD_MBTRNPP,MM_DEBUG|MBTRNPP_V3,(stderr,"ERR: trn_update failed [%d] [%d/%s]\n",test,errno,strerror(errno)));
+                        mlog_tprintf(trnu_alog_id,"ERR: trncli_get_bias_estimates failed [%d] [%d/%s]\n",test,errno,strerror(errno));
+
+                        PMPRINT(MOD_MBTRNPP,MM_DEBUG|MBTRNPP_V3,(stderr,"ERR: trn_get_bias_estimates failed [%d] [%d/%s]\n",test,errno,strerror(errno)));
 
                         int time_i[7];
                         mb_get_date(0, mb1->sounding.ts, time_i);
                         fprintf(stderr, "%4.4d/%2.2d/%2.2d-%2.2d:%2.2d:%2.2d.%6.6d %.6f "
-                                        "| %11.6f %11.6f %8.3f | %d filtered beams - Ping not used - failed trn processing\n",
+                                        "| %11.6f %11.6f %8.3f | %d filtered beams - Ping not used - failed bias estimate\n",
                         time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6], mb1->sounding.ts,
                         mb1->sounding.lon, mb1->sounding.lat, mb1->sounding.depth, mb1->sounding.nbeams);
-                        mbtrnpp_trnu_pubempty_osocket(mb1->sounding.ts, mb1->sounding.lat, mb1->sounding.lon, mb1->sounding.depth, trnusvr->socket);
+                        mbtrnpp_trnu_pubempty_osocket(mb1->sounding.ts, mb1->sounding.lat, mb1->sounding.lon, mb1->sounding.depth, trnusvr);
+                        mbtrnpp_trnu_pubempty_osocket(mb1->sounding.ts, mb1->sounding.lat, mb1->sounding.lon, mb1->sounding.depth, trnumsvr);
                     }
-                    wmeast_destroy(mt);
-                    wposet_destroy(pt);
-                    if(NULL!=pstate->pt_dat)
-                    free(pstate->pt_dat);
-                    if(NULL!=pstate->mse_dat)
-                    free(pstate->mse_dat);
-                    if(NULL!=pstate->mle_dat)
-                    free(pstate->mle_dat);
+                }else{
+                    mlog_tprintf(trnu_alog_id,"ERR: trncli_send_update failed [%d] [%d/%s]\n",test,errno,strerror(errno));
+                    PMPRINT(MOD_MBTRNPP,MM_DEBUG|MBTRNPP_V3,(stderr,"ERR: trn_update failed [%d] [%d/%s]\n",test,errno,strerror(errno)));
+
+                    int time_i[7];
+                    mb_get_date(0, mb1->sounding.ts, time_i);
+                    fprintf(stderr, "%4.4d/%2.2d/%2.2d-%2.2d:%2.2d:%2.2d.%6.6d %.6f "
+                                    "| %11.6f %11.6f %8.3f | %d filtered beams - Ping not used - failed trn processing\n",
+                    time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6], mb1->sounding.ts,
+                    mb1->sounding.lon, mb1->sounding.lat, mb1->sounding.depth, mb1->sounding.nbeams);
+                    mbtrnpp_trnu_pubempty_osocket(mb1->sounding.ts, mb1->sounding.lat, mb1->sounding.lon, mb1->sounding.depth, trnusvr);
+                    mbtrnpp_trnu_pubempty_osocket(mb1->sounding.ts, mb1->sounding.lat, mb1->sounding.lon, mb1->sounding.depth, trnumsvr);
                 }
+                wmeast_destroy(mt);
+                wposet_destroy(pt);
+                if(NULL!=pstate->pt_dat)
+                free(pstate->pt_dat);
+                if(NULL!=pstate->mse_dat)
+                free(pstate->mse_dat);
+                if(NULL!=pstate->mle_dat)
+                free(pstate->mle_dat);
+
                 MST_METRIC_LAP(app_stats->stats->metrics[MBTPP_CH_TRN_PROC_XT], mtime_dtime());
             }// if tnav, mb1,cfg != NULL
             mlog_tprintf(trnu_alog_id,"trn_update_end,%lf,%d\n",mtime_etime(),retval);
@@ -5561,27 +5706,28 @@ int mbtrnpp_reson7kr_input_open(int verbose, void *mbio_ptr, char *definition, i
   // copy def (strtok is destructive)
   char *defcpy = strdup(definition);
   char *addr[2]={NULL,NULL};
+  char *saveptr;
   // separate hostname, numeric tokens
-  addr[0]=strtok(defcpy,":");
-  addr[1]=strtok(NULL,"");
+  addr[0]=strtok_r(defcpy,":",&saveptr);
+  addr[1]=strtok_r(NULL,"",&saveptr);
 
-    // parse hostname, port, size
-    if(NULL!=addr[0])
-    strcpy(hostname, addr[0]);
-    if(NULL!=addr[1])
-    sscanf(addr[1], "%d:%zu", &port, &size);
-    // release definition copy
-    free(defcpy);
+  // parse hostname, port, size
+  if(NULL!=addr[0])
+  strcpy(hostname, addr[0]);
+  if(NULL!=addr[1])
+  sscanf(addr[1], "%d:%zu", &port, &size);
+  // release definition copy
+  free(defcpy);
 
-    if (strlen(hostname) == 0)
-    strcpy(hostname, "localhost");
-    if (port == 0)
-    port = R7K_7KCENTER_PORT;
-    if (size == 0)
-    size = SONAR_READER_CAPACITY_DFL;
+  if (strlen(hostname) == 0)
+  strcpy(hostname, "localhost");
+  if (port == 0)
+  port = R7K_7KCENTER_PORT;
+  if (size == 0)
+  size = SONAR_READER_CAPACITY_DFL;
 
   PMPRINT(MOD_MBTRNPP, MM_DEBUG, (stderr, "configuring r7kr_reader using %s:%d\n", hostname, port));
-  r7kr_reader_t *reader = r7kr_reader_new(hostname, port, size, reson_subs, reson_nsubs);
+  r7kr_reader_t *reader = r7kr_reader_new(mbtrn_cfg->trn_dev,hostname, port, size, reson_subs, reson_nsubs);
 
   if (NULL != mb_io_ptr && NULL != reader) {
 
@@ -5822,13 +5968,14 @@ int mbtrnpp_kemkmall_input_open(int verbose, void *mbio_ptr, char *definition, i
   struct sockaddr_in localSock;
   struct ip_mreq group;
   char *token;
-  if ((token = strsep(&definition, ":")) != NULL) {
+  char *saveptr;
+  if ((token = strtok_r(definition, ":", &saveptr)) != NULL) {
     strncpy(hostInterface, token, sizeof(mb_path));
   }
-  if ((token = strsep(&definition, ":")) != NULL) {
+  if ((token = strtok_r(NULL, ":", &saveptr)) != NULL) {
     strncpy(bcastGrp, token, sizeof(mb_path));
   }
-  if ((token = strsep(&definition, ":")) != NULL) {
+  if ((token = strtok_r(NULL, ":", &saveptr)) != NULL) {
     sscanf(token, "%d", &port);
   }
 

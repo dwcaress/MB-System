@@ -11,7 +11,7 @@
 <CENTER><H3><U>MB-System Unix Manual Page</U></H3></CENTER>
 <PRE>
 <H1>mbmosaic</H1>
-Section:  MB-System 5.0  (1)<BR>Updated:  3 January 2017 <BR><A HREF="#index">Index</A>
+Section:  MB-System 5.0  (1)<BR>Updated:  25 September 2021 <BR><A HREF="#index">Index</A>
 <HR>
 
 <A NAME="lbAB">&nbsp;</A>
@@ -85,7 +85,7 @@ the mosaicing (<B>-F</B>), the preferred look azimuth (<B>-U</B>), the
 maximum distance from data points that the spline interpolation is
 used (<B>-C</B>), the format of the output files, and other parameters.
 <P>
-By default, <B>mbmosaic</B> generates mosiacs in Geographic coordinates,
+By default, <B>mbmosaic</B> generates mosaics in Geographic coordinates,
 meaning that position is defined in longitude and latitude using
 the WGS84 horizontal datum. The <B>-J</B> option can be used to specify
 an alternate, projected coordinate system (PCS). When a PCS is used,
@@ -123,7 +123,7 @@ the working grid in both longitude and latitude.  The program reads all
 pings which lie within the data input bounds, and accepts all data
 values with locations within the working grid.
 <P>
-The sample priorities are set according to three criteria. 
+The sample priorities are set according to three criteria.
 The first criteria is set by using the <B>-Y</B> option
 to specify a file containing a list of data priorities
 as a function of apparent grazing angle (this angle is the
@@ -300,7 +300,7 @@ and 2 (topography) are not allowed. Bathymetry and topography should be gridded 
 If &quot;F&quot; is appended to <I>datatype</I>, then <B>mbmosaic</B> will attempt
 to mosaic amplitude or sidescan data that have been filtered with <B>mbfilter</B>.
 If the desired filtered data files do not exist, data input will fail and
-<B>mbmosiac</B> will exit with an error message. Filtered amplitude
+<B>mbmosaic</B> will exit with an error message. Filtered amplitude
 data are stored in ancillary files ending with &quot;.ffa&quot;, and filtered
 sidescan files end in &quot;.ffs&quot;. Appending &quot;F&quot; to <I>mode</I> values of 5-7 will have no effect.
 Default: <I>datatype</I> = 4 (sidescan).
@@ -355,7 +355,7 @@ grid dimensions are calculated using the grid bounds and
 grid cell spacings. However, slight adjustments to the
 grid cell spacings are usually required to keep
 the grid bounds as specified. Appending an ! to the end of
-the <B>-E</B> arguments forces <B>mbgrid</B> to use the
+the <B>-E</B> arguments forces <B>mbmosaic</B> to use the
 exact grid cell spacing values specified by adjusting the
 grid bounds.
 Default: If neither the <B>-E</B> or <B>-D</B> options are specified,
@@ -390,67 +390,90 @@ its priority to get the value weight.
 <BR>
 
 This option sets the format of the output grid file.
-The default is to output a GMT netCDF 4-byte float grid.
-The user may specify the grid format either by using an
-identifier number, or by using the <B>GMT</B> grid format
-syntax, which allows for scaling and offsets of the data.
-<P>
-First, the simple grid format identifiers are:
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><I>gridkind</I>&nbsp;=&nbsp;1:<TT>&nbsp;&nbsp;&nbsp;</TT>ASCII&nbsp;table<BR>
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><I>gridkind</I>&nbsp;=&nbsp;2:<TT>&nbsp;&nbsp;&nbsp;</TT>binary&nbsp;file&nbsp;(<B>GMT</B>&nbsp;version&nbsp;1&nbsp;GRD&nbsp;file)<BR>
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><I>gridkind</I>&nbsp;=&nbsp;3:<TT>&nbsp;&nbsp;&nbsp;</TT>netCDF&nbsp;file&nbsp;(<B>GMT</B>&nbsp;version&nbsp;2&nbsp;GRD&nbsp;file)<BR>
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><I>gridkind</I>&nbsp;=&nbsp;4:<TT>&nbsp;&nbsp;&nbsp;</TT>Arc/Info&nbsp;and&nbsp;ArcView&nbsp;ASCII&nbsp;grid<BR>
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><I>gridkind</I>&nbsp;=&nbsp;100:<TT>&nbsp;</TT>GMT&nbsp;netCDF&nbsp;4-byte&nbsp;float&nbsp;format&nbsp;[Default]<BR>
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><I>gridkind</I>&nbsp;=&nbsp;101:<TT>&nbsp;</TT>Native&nbsp;binary&nbsp;single&nbsp;precision&nbsp;floats&nbsp;in&nbsp;scanlines&nbsp;with&nbsp;leading&nbsp;grd&nbsp;header<BR>
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><I>gridkind</I>&nbsp;=&nbsp;102:<TT>&nbsp;</TT>Native&nbsp;binary&nbsp;short&nbsp;integers&nbsp;in&nbsp;scanlines&nbsp;with&nbsp;leading&nbsp;grd&nbsp;header<BR>
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><I>gridkind</I>&nbsp;=&nbsp;103:<TT>&nbsp;</TT>8-bit&nbsp;standard&nbsp;Sun&nbsp;rasterfile&nbsp;(colormap&nbsp;ignored)<BR>
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><I>gridkind</I>&nbsp;=&nbsp;104:<TT>&nbsp;</TT>Native&nbsp;binary&nbsp;unsigned&nbsp;char&nbsp;in&nbsp;scanlines&nbsp;with&nbsp;leading&nbsp;grd&nbsp;header<BR>
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><I>gridkind</I>&nbsp;=&nbsp;105:<TT>&nbsp;</TT>Native&nbsp;binary&nbsp;bits&nbsp;in&nbsp;scanlines&nbsp;with&nbsp;leading&nbsp;grd&nbsp;header<BR>
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><I>gridkind</I>&nbsp;=&nbsp;106:<TT>&nbsp;</TT>Native&nbsp;binary&nbsp;``surfer''&nbsp;grid&nbsp;files<BR>
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><I>gridkind</I>&nbsp;=&nbsp;107:<TT>&nbsp;</TT>netCDF&nbsp;1-byte&nbsp;byte&nbsp;format<BR>
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><I>gridkind</I>&nbsp;=&nbsp;108:<TT>&nbsp;</TT>netCDF&nbsp;1-byte&nbsp;char&nbsp;format<BR>
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><I>gridkind</I>&nbsp;=&nbsp;109:<TT>&nbsp;</TT>netCDF&nbsp;2-byte&nbsp;int&nbsp;format<BR>
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><I>gridkind</I>&nbsp;=&nbsp;110:<TT>&nbsp;</TT>netCDF&nbsp;4-byte&nbsp;int&nbsp;format<BR>
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><I>gridkind</I>&nbsp;=&nbsp;111:<TT>&nbsp;</TT>netCDF&nbsp;8-byte&nbsp;double&nbsp;format<BR>
+The default is to output a current generation GMT COARDS-compliant netCDF 4-byte
+float grid.  To output a different grid format, specify a two-letter <B>GMT</B> grid
+format id listed below, or use the full <B>GMT</B> grid format syntax, which allows for
+scaling and offsets of the data. The <B>GMT</B> grid format ids are:
 <BR>
 
-<P>
-Second, a <B>GMT</B> grid format string has the form:
+<BR>&nbsp;&nbsp;-----------------------------
+<BR>&nbsp;&nbsp;GMT&nbsp;4&nbsp;netCDF&nbsp;standard&nbsp;formats
+<BR>&nbsp;&nbsp;-----------------------------
+<BR>&nbsp;&nbsp;nb&nbsp;&nbsp;GMT&nbsp;netCDF&nbsp;format&nbsp;(8-bit&nbsp;integer,&nbsp;COARDS,&nbsp;CF-1.5)
+<BR>&nbsp;&nbsp;ns&nbsp;&nbsp;GMT&nbsp;netCDF&nbsp;format&nbsp;(16-bit&nbsp;integer,&nbsp;COARDS,&nbsp;CF-1.5)
+<BR>&nbsp;&nbsp;ni&nbsp;&nbsp;GMT&nbsp;netCDF&nbsp;format&nbsp;(32-bit&nbsp;integer,&nbsp;COARDS,&nbsp;CF-1.5)
+<BR>&nbsp;&nbsp;nf&nbsp;&nbsp;GMT&nbsp;netCDF&nbsp;format&nbsp;(32-bit&nbsp;float,&nbsp;COARDS,&nbsp;CF-1.5)
+<BR>&nbsp;&nbsp;nd&nbsp;&nbsp;GMT&nbsp;netCDF&nbsp;format&nbsp;(64-bit&nbsp;float,&nbsp;COARDS,&nbsp;CF-1.5)
+<BR>
+
+<BR>&nbsp;&nbsp;-----------------------------
+<BR>&nbsp;&nbsp;GMT&nbsp;3&nbsp;netCDF&nbsp;legacy&nbsp;formats
+<BR>&nbsp;&nbsp;-----------------------------
+<BR>&nbsp;&nbsp;cb&nbsp;&nbsp;GMT&nbsp;netCDF&nbsp;format&nbsp;(8-bit&nbsp;integer,&nbsp;depreciated)
+<BR>&nbsp;&nbsp;cs&nbsp;&nbsp;GMT&nbsp;netCDF&nbsp;format&nbsp;(16-bit&nbsp;integer,&nbsp;depreciated)
+<BR>&nbsp;&nbsp;ci&nbsp;&nbsp;GMT&nbsp;netCDF&nbsp;format&nbsp;(32-bit&nbsp;integer,&nbsp;depreciated)
+<BR>&nbsp;&nbsp;cf&nbsp;&nbsp;GMT&nbsp;netCDF&nbsp;format&nbsp;(32-bit&nbsp;float,&nbsp;depreciated)
+<BR>&nbsp;&nbsp;cd&nbsp;&nbsp;GMT&nbsp;netCDF&nbsp;format&nbsp;(64-bit&nbsp;float,&nbsp;depreciated)
+<BR>
+
+<BR>&nbsp;&nbsp;-----------------------------
+<BR>&nbsp;&nbsp;GMT&nbsp;native&nbsp;binary&nbsp;formats
+<BR>&nbsp;&nbsp;-----------------------------
+<BR>&nbsp;&nbsp;bm&nbsp;&nbsp;GMT&nbsp;native,&nbsp;C-binary&nbsp;format&nbsp;(bit-mask)
+<BR>&nbsp;&nbsp;bb&nbsp;&nbsp;GMT&nbsp;native,&nbsp;C-binary&nbsp;format&nbsp;(8-bit&nbsp;integer)
+<BR>&nbsp;&nbsp;bs&nbsp;&nbsp;GMT&nbsp;native,&nbsp;C-binary&nbsp;format&nbsp;(16-bit&nbsp;integer)
+<BR>&nbsp;&nbsp;bi&nbsp;&nbsp;GMT&nbsp;native,&nbsp;C-binary&nbsp;format&nbsp;(32-bit&nbsp;integer)
+<BR>&nbsp;&nbsp;bf&nbsp;&nbsp;GMT&nbsp;native,&nbsp;C-binary&nbsp;format&nbsp;(32-bit&nbsp;float)
+<BR>&nbsp;&nbsp;bd&nbsp;&nbsp;GMT&nbsp;native,&nbsp;C-binary&nbsp;format&nbsp;(64-bit&nbsp;float)
+<BR>
+
+<BR>&nbsp;&nbsp;-----------------------------
+<BR>&nbsp;&nbsp;Miscellaneous&nbsp;grid&nbsp;formats
+<BR>&nbsp;&nbsp;-----------------------------
+<BR>&nbsp;&nbsp;rb&nbsp;&nbsp;SUN&nbsp;raster&nbsp;file&nbsp;format&nbsp;(8-bit&nbsp;standard)
+<BR>&nbsp;&nbsp;rf&nbsp;&nbsp;GEODAS&nbsp;grid&nbsp;format&nbsp;GRD98&nbsp;(NCEI)
+<BR>&nbsp;&nbsp;sf&nbsp;&nbsp;Golden&nbsp;Software&nbsp;Surfer&nbsp;format&nbsp;6&nbsp;(32-bit&nbsp;float)
+<BR>&nbsp;&nbsp;sd&nbsp;&nbsp;Golden&nbsp;Software&nbsp;Surfer&nbsp;format&nbsp;7&nbsp;(64-bit&nbsp;float)
+<BR>&nbsp;&nbsp;af&nbsp;&nbsp;Atlantic&nbsp;Geoscience&nbsp;Center&nbsp;AGC&nbsp;(32-bit&nbsp;float)
+<BR>&nbsp;&nbsp;ei&nbsp;&nbsp;ESRI&nbsp;Arc/Info&nbsp;ASCII&nbsp;Grid&nbsp;Interchange&nbsp;format&nbsp;(ASCII&nbsp;integer)
+<BR>&nbsp;&nbsp;ef&nbsp;&nbsp;ESRI&nbsp;Arc/Info&nbsp;ASCII&nbsp;Grid&nbsp;Interchange&nbsp;format&nbsp;(ASCII&nbsp;float)
+<BR>&nbsp;&nbsp;gd&nbsp;&nbsp;Import/export&nbsp;via&nbsp;GDAL&nbsp;19
+<BR>
+
+The full <B>GMT</B> grid format string has the form:
 <BR>
 
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>=id[/scale/offset[/nan]]<BR>
 <BR>
 
-where id is the <B>GMT</B> format id, and the other values
+where id is one of the <B>GMT</B> format ids listed above, and the other values
 are optional. If <I>scale</I> and <I>offset</I> are given, the
 data will be multiplied by <I>scale</I> and offset by <I>offset</I>
 prior to being output. The <I>nan</I> value sets the value used for
-&quot;not-a-number&quot;. The <B>GMT</B> format id's for these format strings are:
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><I>id</I>&nbsp;=&nbsp;0:<TT>&nbsp;</TT>GMT&nbsp;netCDF&nbsp;4-byte&nbsp;float&nbsp;format&nbsp;[Default]<BR>
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><I>id</I>&nbsp;=&nbsp;1:<TT>&nbsp;</TT>Native&nbsp;binary&nbsp;single&nbsp;precision&nbsp;floats&nbsp;in&nbsp;scanlines&nbsp;with&nbsp;leading&nbsp;grd&nbsp;header<BR>
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><I>id</I>&nbsp;=&nbsp;2:<TT>&nbsp;</TT>Native&nbsp;binary&nbsp;short&nbsp;integers&nbsp;in&nbsp;scanlines&nbsp;with&nbsp;leading&nbsp;grd&nbsp;header<BR>
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><I>id</I>&nbsp;=&nbsp;3:<TT>&nbsp;</TT>8-bit&nbsp;standard&nbsp;Sun&nbsp;rasterfile&nbsp;(colormap&nbsp;ignored)<BR>
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><I>id</I>&nbsp;=&nbsp;4:<TT>&nbsp;</TT>Native&nbsp;binary&nbsp;unsigned&nbsp;char&nbsp;in&nbsp;scanlines&nbsp;with&nbsp;leading&nbsp;grd&nbsp;header<BR>
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><I>id</I>&nbsp;=&nbsp;5:<TT>&nbsp;</TT>Native&nbsp;binary&nbsp;bits&nbsp;in&nbsp;scanlines&nbsp;with&nbsp;leading&nbsp;grd&nbsp;header<BR>
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><I>id</I>&nbsp;=&nbsp;6:<TT>&nbsp;</TT>Native&nbsp;binary&nbsp;``surfer''&nbsp;grid&nbsp;files<BR>
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><I>id</I>&nbsp;=&nbsp;7:<TT>&nbsp;</TT>netCDF&nbsp;1-byte&nbsp;byte&nbsp;format<BR>
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><I>id</I>&nbsp;=&nbsp;8:<TT>&nbsp;</TT>netCDF&nbsp;1-byte&nbsp;char&nbsp;format<BR>
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><I>id</I>&nbsp;=&nbsp;9:<TT>&nbsp;</TT>netCDF&nbsp;2-byte&nbsp;int&nbsp;format<BR>
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><I>id</I>&nbsp;=&nbsp;10:<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>netCDF&nbsp;4-byte&nbsp;int&nbsp;format<BR>
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><I>id</I>&nbsp;=&nbsp;11:<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>netCDF&nbsp;8-byte&nbsp;double&nbsp;format<BR>
+&quot;not-a-number&quot;.
+<BR>
+
+For backward compatibility with earlier versions of <B>MB-System</B>, the user
+may also specify the grid format using a numeric identifier between 1-4.
+<BR>
+
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;<I>gridkind</I>&nbsp;=&nbsp;1:<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>ASCII&nbsp;table<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;<I>gridkind</I>&nbsp;=&nbsp;2:<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>binary&nbsp;file&nbsp;(<B>GMT</B>&nbsp;version&nbsp;1&nbsp;GRD&nbsp;file)<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;<I>gridkind</I>&nbsp;=&nbsp;3:<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>netCDF&nbsp;file&nbsp;(<B>GMT</B>&nbsp;version&nbsp;2&nbsp;GRD&nbsp;file)<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;<I>gridkind</I>&nbsp;=&nbsp;4:<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Arc/Info&nbsp;and&nbsp;ArcView&nbsp;ASCII&nbsp;grid<BR>
 <BR>
 
 Note that the following arguments are equivalent because they
 all produce a standard <B>GMT</B> netCDF 4-byte float grid:
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><B>-G</B><I>3</I><BR>
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><B>-G</B><I>100</I><BR>
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><B>-G</B><I>=0</I><BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>no&nbsp;<B>-G</B>&nbsp;specified<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><B>-G</B><I>nf</I><BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><B>-G</B><I>=nf</I><BR>
 <BR>
 
 Should the user wish to produce a grid in native binary floats,
 then the following two arguments will work:
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><B>-G</B><I>101</I><BR>
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><B>-G</B><I>=1</I><BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><B>-G</B><I>bf</I><BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><B>-G</B><I>=bf</I><BR>
 <BR>
 
 Should the user wish to produce a grid in native short int format
@@ -458,22 +481,24 @@ with a scaling factor of 10, an offset of 32000, and a NaN value
 of 32767, then the following arguments will suffice:
 <BR>
 
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><B>-G</B><I>=2/10/32000/32767</I><BR>
-<P>
-If <I>gridkind</I> = 3 or <I>gridkind</I> &gt;= 100,
-<B>mbgrid</B> also outputs shellscripts
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><B>-G</B><I>=bs/10/32000/32767</I><BR>
+<BR>
+
+If any of the <B>GMT</B> output formats are specified, then
+<B>mbmosaic</B> also outputs shellscripts
 which run <B>GMT</B> programs to provide preliminary color
 fill maps of the gridded data. These shellscripts are
 generated using the <B>mbm_grdplot</B> macro.
-<P>
-If <I>gridkind</I> = 4, the output grids will be in the Arc/Info ASCII
+<BR>
+
+If <I>gridkind</I> is 4, =ei, or =ef, the output grids will be in the ESRI ASCII
 grid format.  Arc/Info ASCII grids use &quot;square&quot; bins,
 meaning that the longitude and latitude grid cell spacings must
-be identical. Thus, whenever the <I>gridkind</I> = 4 option is
+be identical. Thus, whenever these options are
 used, the <B>-E</B> option must also be used in a way which
 ensures equal grid cell spacings (see the <B>-E</B> documentation
 above).
-Default: <I>gridkind</I> = 100.
+Default: <I>gridkind</I> = &quot;=nf&quot;.
 <DT><B>-H</B>
 
 <DD>
@@ -501,7 +526,7 @@ Default: <I>datalist</I> = datalist.mb-1
 
 <DD>
 <I>projection</I>
-By default, <B>mbgrid</B> generates grids in Geographic coordinates,
+By default, <B>mbmosaic</B> generates grids in Geographic coordinates,
 meaning that position is defined in longitude and latitude using
 the WGS84 geographic coordinate system.
 The <B>-J</B> option can be used to specify
@@ -509,7 +534,7 @@ an alternate, projected coordinate system (PCS). When a PCS is used,
 position will be defined in eastings and northings (meters) relative
 to the origin of the particular PCS. Universal Transverse Mercator
 is the most commonly used PCS in the oceanographic community, but
-<B>mbgrid</B> supports a large number of other PCS's as well.
+<B>mbmosaic</B> supports a large number of other PCS's as well.
 The underlying projection functions derive from the <B>PROJ.4</B> library
 written by Gerald Evenden, then of the U.S. Geological Survey.
 <P>
@@ -8591,9 +8616,12 @@ the <B>-J</B> option, e.g. <B>-J</B><I>UTM10N</I> or <B>-J</B><I>epsg32749</I>.
 </PRE>
 
 <CENTER><P><BR>
-Last Updated: 3 January 2017</P></CENTER>
+Last Updated: 25 September 2021</P></CENTER>
 
 <HR>
-
+<center>
+<p>
+<a href="mbsystem.html"><< Manual page for the MB-System package</a> | <a href="https://www.mbari.org/products/research-software/mb-system/">MB-System website >></a></p>
+</center>
 </BODY>
 </HTML>

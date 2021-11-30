@@ -44,15 +44,15 @@ int mb_error(int verbose, int error, char **message) {
 
 	/* set the message and status */
 	if (error < MB_ERROR_MIN || error > MB_ERROR_MAX) {
-		*message = unknown_error_msg[0];
+		*message = (char *) unknown_error_msg[0];
 		status = MB_FAILURE;
 	}
 	else if (error > MB_ERROR_NO_ERROR) {
-		*message = fatal_error_msg[error];
+		*message = (char *) fatal_error_msg[error];
 		status = MB_SUCCESS;
 	}
 	else {
-		*message = nonfatal_error_msg[-error];
+		*message = (char *) nonfatal_error_msg[-error];
 		status = MB_SUCCESS;
 	}
 
@@ -200,11 +200,11 @@ int mb_notice_message(int verbose, int notice, char **message) {
 
 	/* set the message and status */
 	if (notice < 0 || notice >= MB_NOTICE_MAX) {
-		*message = unknown_notice_msg[0];
+		*message = (char *) unknown_notice_msg[0];
 		status = MB_FAILURE;
 	}
 	else {
-		*message = notice_msg[notice];
+		*message = (char *) notice_msg[notice];
 		status = MB_SUCCESS;
 	}
 

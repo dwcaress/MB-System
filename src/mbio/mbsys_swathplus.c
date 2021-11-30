@@ -622,11 +622,9 @@ int mbsys_swathplus_extract(int verbose, void *mbio_ptr, void *store_ptr, int *k
 		*time_d = store->time_d;
 
 		/* copy comment */
+    memset((void *)comment, 0, MB_COMMENT_MAXLINE);
 		if (store->comment.nchars > 0) {
-			strncpy(comment, store->comment.message, MB_COMMENT_MAXLINE);
-		}
-		else {
-			comment[0] = '\0';
+      strncpy(comment, store->comment.message, MIN(MB_COMMENT_MAXLINE, store->comment.nchars) - 1);
 		}
 
 		if (verbose >= 4) {
@@ -892,7 +890,8 @@ int mbsys_swathplus_insert(int verbose, void *mbio_ptr, void *store_ptr, int kin
 
 		if (status == MB_SUCCESS) {
 			ocomment->nchars = nchars;
-			strcpy(ocomment->message, comment);
+      memset((void *)ocomment->message, 0, ocomment->message_alloc);
+      strncpy(ocomment->message, comment, MIN(ocomment->message_alloc, MB_COMMENT_MAXLINE) - 1);
 		}
 		else {
 			kind = MB_DATA_NONE;

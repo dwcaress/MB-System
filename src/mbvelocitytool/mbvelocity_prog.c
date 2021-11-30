@@ -148,6 +148,7 @@ int nraypathmax;
 int *nraypath = NULL;
 double **raypathx = NULL;
 double **raypathy = NULL;
+double **raypatht = NULL;
 double *depth = NULL;
 double *acrosstrack = NULL;
 double rayxmax;
@@ -750,11 +751,6 @@ int mbvt_save_edit_profile(char *file) {
 	FILE *fp;
 	int i;
 
-	/* time, user, host variables */
-	time_t right_now;
-	char date[32], *user_ptr;
-	mb_path user, host;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input values:\n");
@@ -776,16 +772,8 @@ int mbvt_save_edit_profile(char *file) {
 	fprintf(fp, "## Water Sound Velocity Profile (SVP)\n");
 	fprintf(fp, "## Output by Program %s\n", program_name);
 	fprintf(fp, "## MB-System Version %s\n", MB_VERSION);
-	right_now = time((time_t *)0);
-	strcpy(date, ctime(&right_now));
-	date[strlen(date) - 1] = '\0';
-	if ((user_ptr = getenv("USER")) == NULL)
-		user_ptr = getenv("LOGNAME");
-	if (user_ptr != NULL)
-		strcpy(user, user_ptr);
-	else
-		strcpy(user, "unknown");
-	gethostname(host, MB_PATH_MAXLINE);
+  char user[256], host[256], date[32];
+  status = mb_user_host_date(verbose, user, host, date, &error);
 	fprintf(fp, "## Run by user <%s> on cpu <%s> at <%s>\n", user, host, date);
 	fprintf(fp, "## Number of SVP Points: %d\n", profile->n);
 	for (i = 0; i < profile->n; i++)
@@ -826,11 +814,6 @@ int mbvt_save_swath_profile(char *file) {
 	mb_path oldfile;
 	int i;
 
-	/* time, user, host variables */
-	time_t right_now;
-	char date[32], *user_ptr;
-	mb_path user, host;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input values:\n");
@@ -856,16 +839,8 @@ int mbvt_save_swath_profile(char *file) {
 		fprintf(fp, "## Water Sound Velocity Profile (SVP)\n");
 		fprintf(fp, "## Output by Program %s\n", program_name);
 		fprintf(fp, "## MB-System Version %s\n", MB_VERSION);
-		right_now = time((time_t *)0);
-		strcpy(date, ctime(&right_now));
-		date[strlen(date) - 1] = '\0';
-		if ((user_ptr = getenv("USER")) == NULL)
-			user_ptr = getenv("LOGNAME");
-		if (user_ptr != NULL)
-			strcpy(user, user_ptr);
-		else
-			strcpy(user, "unknown");
-		gethostname(host, MB_PATH_MAXLINE);
+    char user[256], host[256], date[32];
+    status = mb_user_host_date(verbose, user, host, date, &error);
 		fprintf(fp, "## Run by user <%s> on cpu <%s> at <%s>\n", user, host, date);
 		fprintf(fp, "## Swath File: %s\n", swathfile);
 		fprintf(fp, "## Number of SVP Points: %d\n", profile->n);
@@ -911,11 +886,6 @@ int mbvt_save_residuals(char *file) {
 	double rr, xx, dangle;
 	int i;
 
-	/* time, user, host variables */
-	time_t right_now;
-	char date[32], *user_ptr;
-	mb_path user, host;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input values:\n");
@@ -924,6 +894,8 @@ int mbvt_save_residuals(char *file) {
 
 	/* do this if edit profile exists and swath data read */
 	if (profile_edit.n > 2 && nbuffer > 0) {
+    char user[256], host[256], date[32];
+    status = mb_user_host_date(verbose, user, host, date, &error);
 
 		/* open the *.sbo file if possible */
 		sprintf(file, "%s.sbo", swathfile);
@@ -938,16 +910,6 @@ int mbvt_save_residuals(char *file) {
 		fprintf(fp, "## Static Beam Offset (SBO)\n");
 		fprintf(fp, "## Output by Program %s\n", program_name);
 		fprintf(fp, "## MB-System Version %s\n", MB_VERSION);
-		right_now = time((time_t *)0);
-		strcpy(date, ctime(&right_now));
-		date[strlen(date) - 1] = '\0';
-		if ((user_ptr = getenv("USER")) == NULL)
-			user_ptr = getenv("LOGNAME");
-		if (user_ptr != NULL)
-			strcpy(user, user_ptr);
-		else
-			strcpy(user, "unknown");
-		gethostname(host, MB_PATH_MAXLINE);
 		fprintf(fp, "## Run by user <%s> on cpu <%s> at <%s>\n", user, host, date);
 		fprintf(fp, "## Swath File: %s\n", swathfile);
 		fprintf(fp, "## Number of Static Beam Offset Points: %d\n", nbeams);
@@ -974,20 +936,10 @@ int mbvt_save_residuals(char *file) {
 			return (status);
 		}
 
-		/* write the sbo file */
+		/* write the sbao file */
 		fprintf(fp, "## Static Beam Angle Offset (SBAO)\n");
 		fprintf(fp, "## Output by Program %s\n", program_name);
 		fprintf(fp, "## MB-System Version %s\n", MB_VERSION);
-		right_now = time((time_t *)0);
-		strcpy(date, ctime(&right_now));
-		date[strlen(date) - 1] = '\0';
-		if ((user_ptr = getenv("USER")) == NULL)
-			user_ptr = getenv("LOGNAME");
-		if (user_ptr != NULL)
-			strcpy(user, user_ptr);
-		else
-			strcpy(user, "unknown");
-		gethostname(host, MB_PATH_MAXLINE);
 		fprintf(fp, "## Run by user <%s> on cpu <%s> at <%s>\n", user, host, date);
 		fprintf(fp, "## Swath File: %s\n", swathfile);
 		fprintf(fp, "## Number of Static Beam Angle Offset Points: %d\n", nbeams);
@@ -2254,7 +2206,7 @@ int mbvt_open_swath_file(char *file, int form, int *numload) {
 		sprintf(command, "mblevitus -R%f/%f -Ombvt_levitus_tmp.svp\n", navlon_levitus, navlat_levitus);
 		/* const int shellstatus = */ system(command);
 		mbvt_open_display_profile("mbvt_levitus_tmp.svp");
-		/* const int shellstatus = */ system("rm -f mbvt_levitus_tmp.svp");
+		/* const int shellstatus = */ remove("mbvt_levitus_tmp.svp");
 	}
 
 	/* load svp files generated by mbsvplist if available */
@@ -2274,10 +2226,12 @@ int mbvt_open_swath_file(char *file, int form, int *numload) {
 	status = mb_mallocd(verbose, __FILE__, __LINE__, beams_bath * sizeof(int), (void **)&nraypath, &error);
 	status = mb_mallocd(verbose, __FILE__, __LINE__, beams_bath * sizeof(double *), (void **)&raypathx, &error);
 	status = mb_mallocd(verbose, __FILE__, __LINE__, beams_bath * sizeof(double *), (void **)&raypathy, &error);
+	status = mb_mallocd(verbose, __FILE__, __LINE__, beams_bath * sizeof(double *), (void **)&raypatht, &error);
 	nraypathmax = 100 * profile_edit.n;
 	for (i = 0; i < beams_bath; i++) {
 		status = mb_mallocd(verbose, __FILE__, __LINE__, nraypathmax * sizeof(double), (void **)&(raypathx[i]), &error);
 		status = mb_mallocd(verbose, __FILE__, __LINE__, nraypathmax * sizeof(double), (void **)&(raypathy[i]), &error);
+		status = mb_mallocd(verbose, __FILE__, __LINE__, nraypathmax * sizeof(double), (void **)&(raypatht[i]), &error);
 	}
 
 	/* if error initializing memory then quit */
@@ -2331,9 +2285,11 @@ int mbvt_deallocate_swath() {
 		for (i = 0; i < beams_bath; i++) {
 			mb_freed(verbose, __FILE__, __LINE__, (void **)&(raypathx[i]), &error);
 			mb_freed(verbose, __FILE__, __LINE__, (void **)&(raypathy[i]), &error);
+			mb_freed(verbose, __FILE__, __LINE__, (void **)&(raypatht[i]), &error);
 		}
 		mb_freed(verbose, __FILE__, __LINE__, (void **)&raypathx, &error);
 		mb_freed(verbose, __FILE__, __LINE__, (void **)&raypathy, &error);
+		mb_freed(verbose, __FILE__, __LINE__, (void **)&raypatht, &error);
 		mb_freed(verbose, __FILE__, __LINE__, (void **)&depth, &error);
 		mb_freed(verbose, __FILE__, __LINE__, (void **)&acrosstrack, &error);
 		mb_freed(verbose, __FILE__, __LINE__, (void **)&angle, &error);
@@ -2345,6 +2301,7 @@ int mbvt_deallocate_swath() {
 		nraypath = NULL;
 		raypathx = NULL;
 		raypathy = NULL;
+		raypatht = NULL;
 		depth = NULL;
 		acrosstrack = NULL;
 		angle = NULL;
@@ -2507,13 +2464,14 @@ int mbvt_process_multibeam() {
 					plotting list */
 					status =
 					    mb_rt(verbose, rt_svp, sonardepth, ping[k].angles[i], 0.5 * ping[k].ttimes[i], anglemode, ping[k].ssv,
-					          ping[k].angles_null[i], 0, NULL, NULL, NULL, &acrosstrack[i], &depth[i], &ttime, &ray_stat, &error);
+					          ping[k].angles_null[i], 0, NULL, NULL, NULL, NULL, &acrosstrack[i], &depth[i], &ttime, &ray_stat, &error);
 				}
 				else {
 					/* call raytracing keeping
 					plotting list */
-					status = mb_rt(verbose, rt_svp, sonardepth, ping[k].angles[i], 0.5 * ping[k].ttimes[i], anglemode,
-					               ping[k].ssv, ping[k].angles_null[i], nraypathmax, &nraypath[i], raypathx[i], raypathy[i],
+					status = mb_rt(verbose, rt_svp, sonardepth, ping[k].angles[i], 0.5 * ping[k].ttimes[i],
+                         anglemode, ping[k].ssv, ping[k].angles_null[i],
+                         nraypathmax, &nraypath[i], raypathx[i], raypathy[i], raypatht[i],
 					               &acrosstrack[i], &depth[i], &ttime, &ray_stat, &error);
 
 					/* reset acrosstrack distances */

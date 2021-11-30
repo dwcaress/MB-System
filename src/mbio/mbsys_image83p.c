@@ -226,7 +226,8 @@ int mbsys_image83p_extract(int verbose, void *mbio_ptr, void *store_ptr, int *ki
 	/* extract comment from structure */
 	else if (*kind == MB_DATA_COMMENT) {
 		/* copy comment */
-		strncpy(comment, store->comment, MBSYS_IMAGE83P_COMMENTLEN);
+    memset((void *)comment, 0, MB_COMMENT_MAXLINE);
+		strncpy(comment, store->comment, MIN(MB_COMMENT_MAXLINE, MBSYS_IMAGE83P_COMMENTLEN) - 1);
 
 		if (verbose >= 4) {
 			fprintf(stderr, "\ndbg4  New ping read by MBIO function <%s>\n", __func__);
@@ -365,7 +366,8 @@ int mbsys_image83p_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind
 
 	/* insert data in structure */
 	else if (store->kind == MB_DATA_COMMENT) {
-		strncpy(store->comment, comment, MBSYS_IMAGE83P_COMMENTLEN);
+    memset((void *)store->comment, 0, MBSYS_IMAGE83P_COMMENTLEN);
+		strncpy(store->comment, comment, MIN(MBSYS_IMAGE83P_COMMENTLEN, MB_COMMENT_MAXLINE) - 1);
 	}
 
 	const int status = MB_SUCCESS;

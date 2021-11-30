@@ -11,7 +11,7 @@
 <CENTER><H3><U>MB-System Unix Manual Page</U></H3></CENTER>
 <PRE>
 <H1>mbvoxelclean</H1>
-Section:  MB-System 5.0  (1)<BR>Updated:  28 February 2018 <BR><A HREF="#index">Index</A>
+Section:  MB-System 5.0  (1)<BR>Updated:  27 October 2020 <BR><A HREF="#index">Index</A>
 <HR>
 
 <A NAME="lbAB">&nbsp;</A>
@@ -77,6 +77,18 @@ Version 5.0
 <B>--range-maximum</B>=<I>value</I>
 <BR>
 
+<B>--acrosstrack-minimum</B>=<I>value</I>
+<BR>
+
+<B>--acrosstrack-maximum</B>=<I>value</I>
+<BR>
+
+<B>--amplitude-minimum</B>=<I>value</I>
+<BR>
+
+<B>--amplitude-maximum</B>=<I>value</I>
+<BR>
+
 ]
 <P>
 </DL>
@@ -104,8 +116,8 @@ The user may specify one or both of the following actions:
 <BR>&nbsp;&nbsp;1)&nbsp;Previously&nbsp;unflagged&nbsp;soundings&nbsp;in&nbsp;an&nbsp;empty&nbsp;voxel&nbsp;are&nbsp;flagged&nbsp;as&nbsp;bad.
 <BR>&nbsp;&nbsp;2)&nbsp;Previously&nbsp;flagged&nbsp;soundings&nbsp;in&nbsp;a&nbsp;full&nbsp;voxel&nbsp;are&nbsp;unflagged.
 <P>
-This program will also apply specified minimum and maximum range and
-minimum and maximum acrosstrack distance filters.
+This program will also apply specified minimum and maximum range,
+acrosstrack distance, and beam amplitude filters.
 If a sounding's flag status is changed, that flagging action is output
 to the edit save file of the swath file containing that sounding. This
 program will create edit save files if necessary, or append to those that
@@ -243,6 +255,22 @@ more to starboard of the sensor than <I>max-acrosstrack</I> are flagged. Because
 filter is applied as the data are read, before density filtering, use of the
 <B>--unflag-occupied</B> option could result in soundings flagged by this
 maximum acrosstrack filter being unflagged.
+<DT><B>--amplitude-minimum</B>=<I>min-amplitude</I><DD>
+<BR>
+
+If a <I>min-amplitude</I> value is specified, then any unflagged soundings that have
+beam amplitudes less than <I>min-amplitude</I> are flagged. Because this
+filter is applied as the data are read, before density filtering, use of the
+<B>--unflag-occupied</B> option could result in soundings flagged by this
+minimum amplitude filter being unflagged.
+<DT><B>--amplitude-maximum</B>=<I>max-amplitude</I>]&quot;;<DD>
+<BR>
+
+If a <I>max-amplitude</I> value is specified, then any unflagged soundings that have
+beam amplitudes greater than <I>max-amplitude</I> are flagged. Because this
+filter is applied as the data are read, before density filtering, use of the
+<B>--unflag-occupied</B> option could result in soundings flagged by this
+maximum amplitude filter being unflagged.
 <P>
 </DL>
 <A NAME="lbAH">&nbsp;</A>
@@ -358,9 +386,12 @@ Hay errores aqui.
 </PRE>
 
 <CENTER><P><BR>
-Last Updated: 28 February 2018</P></CENTER>
+Last Updated: 27 October 2020</P></CENTER>
 
 <HR>
-
+<center>
+<p>
+<a href="mbsystem.html"><< Manual page for the MB-System package</a> | <a href="https://www.mbari.org/products/research-software/mb-system/">MB-System website >></a></p>
+</center>
 </BODY>
 </HTML>

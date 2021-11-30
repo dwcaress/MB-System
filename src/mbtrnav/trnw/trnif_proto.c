@@ -64,6 +64,7 @@
 // Headers
 /////////////////////////
 #include "trnif_proto.h"
+#include "trnif_msg.h"
 #include "mutils.h"
 #include "medebug.h"
 #include "mmdebug.h"
@@ -566,6 +567,8 @@ int trnif_msg_handle_ct(void *msg, netif_t *self, msock_connection_t *peer, int 
         char msg_type =wcommst_get_msg_type(ct);
         int param=0;
         double dparam=0.0;
+        d_triplet_t xyz_sdev, *pxyz_sdev=NULL;
+        d_triplet_t est_nav_ofs, *pest_nav_ofs=NULL;
         static int ensemble_count=0;
 
         if(mmd_channel_isset(MOD_NETIF,(MM_DEBUG))){
@@ -700,6 +703,42 @@ int trnif_msg_handle_ct(void *msg, netif_t *self, msock_connection_t *peer, int 
                 mlog_tprintf(self->mlog_id,"trn_filt_reinit,%lf,[%s:%s]\n", msg_time,peer->chost, peer->service);
                 break;
 
+            case TRN_MSG_FILT_REINIT_OFFSET:
+                // reinit, return ACK
+                pest_nav_ofs = wcommst_get_est_nav_offset(ct, &est_nav_ofs);
+                if(NULL!=pxyz_sdev && NULL!=pest_nav_ofs){
+                    param = wcommst_get_parameter(ct);
+                    bool lowInfoTransition = (param == 0 ? false : true );
+                    wtnav_reinit_filter_offset(trn,lowInfoTransition,
+                                            pest_nav_ofs->x, pest_nav_ofs->y, pest_nav_ofs->z);
+                    send_len=trnw_ack_msg(&msg_out);
+                    mlog_tprintf(self->mlog_id,"trn_filt_reinit_offset,%lf,%lf,%lf,%lf,[%s:%s]\n", msg_time,pest_nav_ofs->x, pest_nav_ofs->y, pest_nav_ofs->z,
+                                 peer->chost, peer->service);
+                }else{
+                    send_len=trnw_nack_msg(&msg_out);
+                    mlog_tprintf(self->mlog_id,"trn_filt_reinit_offset,[%s:%s]\n", peer->chost, peer->service);
+                }
+                break;
+
+            case TRN_MSG_FILT_REINIT_BOX:
+                // reinit, return ACK
+                pxyz_sdev = wcommst_get_xyz_sdev(ct, &xyz_sdev);
+                pest_nav_ofs = wcommst_get_est_nav_offset(ct, &est_nav_ofs);
+                if(NULL!=pxyz_sdev && NULL!=pest_nav_ofs){
+                    param = wcommst_get_parameter(ct);
+                    bool lowInfoTransition = (param == 0 ? false : true );
+                wtnav_reinit_filter_box(trn,lowInfoTransition,
+                                        pest_nav_ofs->x, pest_nav_ofs->y, pest_nav_ofs->z,
+                                        pxyz_sdev->x, pxyz_sdev->y, pxyz_sdev->z);
+                send_len=trnw_ack_msg(&msg_out);
+                    mlog_tprintf(self->mlog_id,"trn_filt_reinit_box,%lf,%lf,%lf,%lf,%lf,%lf,%lf,[%s:%s]\n", msg_time,pest_nav_ofs->x, pest_nav_ofs->y, pest_nav_ofs->z,
+                                 pxyz_sdev->x, pxyz_sdev->y, pxyz_sdev->z, peer->chost, peer->service);
+                }else{
+                    send_len=trnw_nack_msg(&msg_out);
+                    mlog_tprintf(self->mlog_id,"trn_filt_reinit_box,[%s:%s]\n", peer->chost, peer->service);
+                }
+                break;
+
             case TRN_MSG_SET_MW:
                 // set modified weighting, return ACK
                 param = wcommst_get_parameter(ct);
@@ -738,6 +777,56 @@ int trnif_msg_handle_ct(void *msg, netif_t *self, msock_connection_t *peer, int 
                 wtnav_set_vehicle_drift_rate(trn, dparam);
                 send_len=trnw_ack_msg(&msg_out);
                 mlog_tprintf(self->mlog_id,"trn_set_vdr,%lf,%lf,[%s:%s]\n", msg_time,dparam, peer->chost, peer->service);
+                break;
+
+            case TRN_MSG_SET_INITSTDDEVXYZ:
+                // set init xyz, return ACK
+                pxyz_sdev = wcommst_get_xyz_sdev(ct, &xyz_sdev);
+                if(NULL!=pxyz_sdev){
+                    wtnav_set_init_stddev_xyz(trn, pxyz_sdev->x, pxyz_sdev->y, pxyz_sdev->z );
+                    send_len=trnw_ack_msg(&msg_out);
+                    mlog_tprintf(self->mlog_id,"trn_set_initxyz,%lf,%lf,%lf,%lf,[%s:%s]\n", msg_time, pxyz_sdev->x, pxyz_sdev->y, pxyz_sdev->z, peer->chost, peer->service);
+                }else{
+                    send_len=trnw_nack_msg(&msg_out);
+                    mlog_tprintf(self->mlog_id,"trn_set_initxyz,[%s:%s]\n", peer->chost, peer->service);
+                }
+                break;
+
+            case TRN_MSG_GET_INITSTDDEVXYZ:
+                // get xyz_sdev, return values
+                pxyz_sdev=wtnav_get_init_stddev_xyz(trn, &xyz_sdev);
+                if(NULL != pxyz_sdev){
+                    send_len=trnw_triplet_msg(&msg_out, TRN_MSG_GET_INITSTDDEVXYZ, pxyz_sdev);
+                    mlog_tprintf(self->mlog_id,"trn_get_initxyz,%lf,[%s:%s]\n",msg_time,peer->chost, peer->service);
+                }else{
+                    send_len=trnw_nack_msg(&msg_out);
+                    mlog_tprintf(self->mlog_id,"trn_get_initxyz,[%s:%s]\n", peer->chost, peer->service);
+                }
+                break;
+
+            case TRN_MSG_SET_ESTNAVOFS:
+                // set estNavOffset, return ACK
+                pest_nav_ofs = wcommst_get_est_nav_offset(ct, &est_nav_ofs);
+                if(NULL!=pest_nav_ofs){
+                    wtnav_set_est_nav_offset(trn, pest_nav_ofs->x, pest_nav_ofs->y, pest_nav_ofs->z );
+                    send_len=trnw_ack_msg(&msg_out);
+                    mlog_tprintf(self->mlog_id,"trn_set_estnavofs,%lf,%lf,%lf,%lf,[%s:%s]\n", msg_time, pest_nav_ofs->x, pest_nav_ofs->y, pest_nav_ofs->z, peer->chost, peer->service);
+                }else{
+                    send_len=trnw_nack_msg(&msg_out);
+                    mlog_tprintf(self->mlog_id,"trn_set_estnavofs,[%s:%s]\n", peer->chost, peer->service);
+                }
+                break;
+
+            case TRN_MSG_GET_ESTNAVOFS:
+                // get xyz_sdev, return values
+                pest_nav_ofs = wtnav_get_est_nav_offset(trn, &est_nav_ofs);
+                if(NULL != pest_nav_ofs){
+                    send_len=trnw_triplet_msg(&msg_out, TRN_MSG_GET_ESTNAVOFS, pest_nav_ofs);
+                    mlog_tprintf(self->mlog_id,"trn_get_estnavofs,%lf,[%s:%s]\n",msg_time,peer->chost, peer->service);
+                }else{
+                    send_len=trnw_nack_msg(&msg_out);
+                    mlog_tprintf(self->mlog_id,"trn_get_estnavofs,[%s:%s]\n", peer->chost, peer->service);
+                }
                 break;
 
             case TRN_MSG_FILT_GRD:
@@ -895,9 +984,9 @@ int trnif_msg_handle_trnu(void *msg, netif_t *self, msock_connection_t *peer, in
         double msg_time = mtime_etime();
 
         if(strcmp(msg,PROTO_TRNU_REQ)==0 ||
-           strcmp(msg,PROTO_TRNU_CON)==0||
-           strcmp(msg,PROTO_TRNU_HBT)==0||
-           strcmp(msg,PROTO_TRNU_DIS)==0||
+           strcmp(msg,PROTO_TRNU_CON)==0 ||
+           strcmp(msg,PROTO_TRNU_HBT)==0 ||
+           strcmp(msg,PROTO_TRNU_DIS)==0 ||
             strcmp(msg,PROTO_TRNU_PING)==0){
             msg_out=strdup(PROTO_TRNU_ACK);
             send_len=strlen(PROTO_TRNU_ACK)+1;
@@ -946,8 +1035,11 @@ int trnif_msg_pub(netif_t *self, msock_connection_t *peer, char *data, size_t le
 {
     int retval=-1;
 
-    if(NULL!=self && NULL!=peer && NULL!=data && len>0){
-        if(self->ctype==ST_UDP){
+    // validate args (NULL peer OK for UDPM)
+    if(NULL!=self && NULL!=data && len>0){
+
+        if(self->ctype==ST_UDP && NULL!=peer){
+            // publish to UDP peer
             int flags=0;
 #if !defined(__APPLE__)
             flags=MSG_NOSIGNAL;
@@ -957,13 +1049,27 @@ int trnif_msg_pub(netif_t *self, msock_connection_t *peer, char *data, size_t le
                 retval=iobytes;
             }
         }
-        if(self->ctype==ST_TCP){
+
+        if(self->ctype==ST_UDPM){
+            // publish to multicast socket
+            int flags=0;
+#if !defined(__APPLE__)
+            flags=MSG_NOSIGNAL;
+#endif
+            int64_t iobytes = msock_sendto(self->socket, self->socket->addr, (byte *)data, len, flags );
+            if ( iobytes > 0) {
+                retval=iobytes;
+            }
+        }
+
+        if(self->ctype==ST_TCP && NULL!=peer){
+            // publish to TCP peer
             int64_t iobytes = msock_send(peer->sock, (byte *)data, len );
             if ( iobytes > 0) {
                 retval=iobytes;
             }
         }
-    }
+    }// invalid arg
     return retval;
 }
 // End function

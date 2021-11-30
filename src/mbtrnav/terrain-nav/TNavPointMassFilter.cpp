@@ -10,7 +10,7 @@
  *****************************************************************************/
 
 #include "TNavPointMassFilter.h"
-
+#include "MathP.h"
 #include "TerrainMapDEM.h"
 #include "mapio.h"
 #include "trn_log.h"

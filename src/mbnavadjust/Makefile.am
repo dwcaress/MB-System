@@ -9,7 +9,9 @@ endif
 
 bin_PROGRAMS = mbnavadjust mbnavadjustmerge $(MBNAVADJUSTFINE)
 
-AM_CFLAGS =  ${libgmt_CFLAGS} ${libnetcdf_CFLAGS}
+AM_CFLAGS =
+AM_CFLAGS += ${libnetcdf_CFLAGS}
+AM_CFLAGS += ${libgmt_CFLAGS}
 
 AM_CPPFLAGS =
 AM_CPPFLAGS += -I${top_srcdir}/src/mbio
@@ -18,10 +20,14 @@ AM_CPPFLAGS += -I${top_srcdir}/src/mbview
 AM_CPPFLAGS += $(MBTRNINCDIR)
 AM_CPPFLAGS += -I${top_srcdir}/src/gsf
 AM_CPPFLAGS += ${libnetcdf_CPPFLAGS}
-AM_CPPFLAGS += ${libmotif_CPPFLAGS}
 AM_CPPFLAGS += ${libopengl_CPPFLAGS}
+AM_CPPFLAGS += ${libmotif_CPPFLAGS}
+AM_CPPFLAGS += ${libx11_CPPFLAGS}
 
 AM_LDFLAGS =
+AM_LDFLAGS +=  ${libopengl_LDFLAGS}
+AM_LDFLAGS +=  ${libmotif_LDFLAGS}
+AM_LDFLAGS +=  ${libx11_LDFLAGS}
 
 LIBS =
 LIBS += ${top_builddir}/src/mbio/libmbio.la
@@ -32,8 +38,9 @@ LIBS += ${libgmt_LIBS}
 LIBS += ${libnetcdf_LIBS}
 LIBS += ${libproj_LIBS}
 LIBS += $(MBTRNINCDIR)
-LIBS += ${libmotif_LIBS}
 LIBS += ${libopengl_LIBS}
+LIBS += ${libmotif_LIBS}
+LIBS += ${libx11_LIBS}
 LIBS += $(LIBM)
 
 mbnavadjust_SOURCES =

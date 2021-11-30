@@ -69,11 +69,7 @@
 
 #include "netif.h"
 #include "trnw.h"
-#include "trn_msg.h"
-#include "trnif_msg.h"
-#include "mframe.h"
 #include "msocket.h"
-#include "mb1_msg.h"
 
 /////////////////////////
 // Macros

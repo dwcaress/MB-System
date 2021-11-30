@@ -255,20 +255,9 @@ int main(int argc, char **argv) {
 
   /* print starting verbose */
   if (verbose == 1) {
-    const time_t right_now = time((time_t *)0);
-    char date[32];
-    strcpy(date, ctime(&right_now));
-    date[strlen(date) - 1] = '\0';
-    char *user_ptr = getenv("USER");
-    if (user_ptr == nullptr)
-      user_ptr = getenv("LOGNAME");
-    char user[128];
-    if (user_ptr != nullptr)
-      strcpy(user, user_ptr);
-    else
-      strcpy(user, "unknown");
-    char host[128];
-    gethostname(host, 128);
+    int error = MB_ERROR_NO_ERROR;
+    char user[256], host[256], date[32];
+    int status = mb_user_host_date(verbose, user, host, date, &error);
     fprintf(stdout, "Run by user <%s> on cpu <%s> at <%s>\n", user, host, date);
     fprintf(stdout, "Control Parameters:\n");
     fprintf(stdout, "\tverbose:                      %d\n", verbose);

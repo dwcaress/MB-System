@@ -66,6 +66,8 @@
 /////////////////////////
 // Includes
 /////////////////////////
+#include "trn_common.h"
+#include <stdint.h>
 
 /////////////////////////
 // Macros
@@ -137,6 +139,12 @@
 #define TRN_MSG_FILT_STATE  'H'
 #define TRN_MSG_N_REINITS   'R'
 #define TRN_MSG_FILT_REINIT 'r'
+#define TRN_MSG_FILT_REINIT_OFFSET 'o'
+#define TRN_MSG_FILT_REINIT_BOX 'b'
+#define TRN_MSG_SET_INITSTDDEVXYZ 'x'
+#define TRN_MSG_GET_INITSTDDEVXYZ 'X'
+#define TRN_MSG_SET_ESTNAVOFS 'j'
+#define TRN_MSG_GET_ESTNAVOFS 'J'
 // extension
 #define TRN_MSG_PING        '?'
 #define TRN_MSG_IS_INIT     'i'
@@ -212,6 +220,9 @@ typedef struct pt_cdata_s{
 
 }pt_cdata_t;
 #pragma pack(pop)
+
+#define TRNU_EST_DIM 5
+#define TRNU_COV_DIM 4
 
 #define TRNU_EST_PT   0
 #define TRNU_EST_MLE  1
@@ -311,6 +322,7 @@ typedef struct trnu_pub_s{
     double update_time;
 }trnu_pub_t;
 
+#if !defined(__QNX__)
 typedef struct trnu_pub_future_s{
     // sync bytes (see TRNU_PUB_SYNC)
     uint32_t sync;
@@ -359,6 +371,7 @@ typedef struct trnu_pub_future_s{
     double reinit_time; // Time of most recent reinit (epoch seconds)
     double update_time; // TRN update time (taken in mbtrnpp)
 }trnu_pub_future_t;
+#endif
 #pragma pack(pop)
 
 typedef struct trn_update_s{
@@ -394,8 +407,11 @@ typedef struct mt_cdata_s{
     double* alongTrack;
     double* altitudes;
     double* alphas;
+#if defined(__QNX__)
+    Boolean* measStatus;
+#else
     bool* measStatus;
-
+#endif
     // For use in sensors that vary the number of beams (e.g., MB-system)
     int* beamNums;
 }mt_cdata_t;
@@ -412,6 +428,8 @@ typedef struct ct_cdata_s{
     float vdr;
     wposet_t *pt;
     wmeast_t *mt;
+    d_triplet_t xyz_sdev;
+    d_triplet_t est_nav_ofs;
     char *mapname;
     char *cfgname;
     char *particlename;

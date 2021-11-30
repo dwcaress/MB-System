@@ -217,7 +217,7 @@
 
 /* MBIO function error messages */
 #ifdef DEFINE_MB_MESSAGES
-static char *fatal_error_msg[] = {"No error",
+const char *fatal_error_msg[] = {"No error",
                                   "Unable to allocate memory, initialization failed",
                                   "Unable to open file, initialization failed",
                                   "Illegal format identifier, initialization failed",
@@ -235,7 +235,7 @@ static char *fatal_error_msg[] = {"No error",
                                   "This data file is not in the specified format!",
                                   "Required data are missing",
                                   "Bad time value"};
-static char *nonfatal_error_msg[] = {
+const char *nonfatal_error_msg[] = {
     "No error",
     "Time gap in data",
     "Data outside specified location bounds",
@@ -263,10 +263,10 @@ static char *nonfatal_error_msg[] = {
     "Initialization failed",
     "Sidescan ignored",
 };
-static char *unknown_error_msg[] = {"Unknown error identifier"};
+const char *unknown_error_msg[] = {"Unknown error identifier"};
 
 /* MBIO function notice messages */
-static char *notice_msg[] = {
+const char *notice_msg[] = {
     "Unknown notice identifier",
 
     /* notices for data record types */
@@ -349,7 +349,7 @@ static char *notice_msg[] = {
     "DATA PROBLEM (ID=3): Instantaneous speed exceeds 25 km/hr", "DATA PROBLEM (ID=4): Average speed exceeds 25 km/hr",
     "DATA PROBLEM (ID=5): Sounding depth exceeds 11000 m", "DATA PROBLEM (ID=6): Unsupported datagram or record",
 };
-static char *unknown_notice_msg[] = {"Unknown notice identifier"};
+const char *unknown_notice_msg[] = {"Unknown notice identifier"};
 #endif
 
 /* MBIO sidescan types
@@ -445,7 +445,8 @@ static char *unknown_notice_msg[] = {"Unknown notice identifier"};
 #define mb_beam_check_flag_sonar(F) ((int)((F & MB_FLAG_SONAR) && (F & MB_FLAG_FLAG)))
 //#define mb_beam_check_flag_gt_1x_iho(F) ((int)((F & MB_FLAG_GT_1X_IHO) && (F & MB_FLAG_FLAG)))
 //#define mb_beam_check_flag_gt_2x_iho(F) ((int)((F & MB_FLAG_GT_2X_IHO) && (F & MB_FLAG_FLAG)))
-#define mb_beam_check_flag_unusable(F) ((int)((F == MB_FLAG_NULL) || ((F & MB_FLAG_FLAG) && ((F & MB_FLAG_INTERPOLATE) || (F & MB_FLAG_SECONDARY)))))
+//#define mb_beam_check_flag_unusable(F) ((int)((F == MB_FLAG_NULL) || ((F & MB_FLAG_FLAG) && ((F & MB_FLAG_INTERPOLATE) || (F & MB_FLAG_SECONDARY)))))
+#define mb_beam_check_flag_unusable(F) ((int)((F == MB_FLAG_NULL) || ((F & MB_FLAG_FLAG) && ((F & MB_FLAG_INTERPOLATE)))))
 #define mb_beam_set_flag_null(F) (0x01)
 #define mb_beam_set_flag_none(F) (0x00)
 #define mb_beam_set_flag_manual(F) (F | 0x05)

@@ -587,10 +587,10 @@ int mbsys_3ddwissl_dimensions
 /*--------------------------------------------------------------------*/
 int mbsys_3ddwissl_pingnumber
 (
-  int verbose,                /* in: verbosity level set on command line 0..N */
-  void *mbio_ptr,                  /* in: see mb_io.h:/^struct mb_io_struct/ */
-  unsigned int *pingnumber,                  /* out: ping number */
-  int *error                  /* out: see mb_status.h:/MB_ERROR/ */
+  int verbose,                    /* in: verbosity level set on command line 0..N */
+  void *mbio_ptr,                 /* in: see mb_io.h:/^struct mb_io_struct/ */
+  unsigned int *pingnumber,       /* out: ping number */
+  int *error                      /* out: see mb_status.h:/MB_ERROR/ */
 )
 {
   assert(mbio_ptr != NULL);
@@ -648,36 +648,21 @@ int mbsys_3ddwissl_preprocess
     fprintf(stderr, "dbg2       preprocess_pars_ptr:        %p\n", (void *)preprocess_pars_ptr);
     }
 
-  double navlon;
-  double navlat;
-  double heading;  /* heading (degrees) */
-  double sensordepth;
-  double roll;  /* roll (degrees) */
-  double pitch;  /* pitch (degrees) */
-  double speed;  /* speed (degrees) */
-  double mtodeglon, mtodeglat;
-  double dlonm, dlatm;
-  double headingx, headingy;
-  int interp_error = MB_ERROR_NO_ERROR;
-  // int ipulse;
-  int jnav = 0;
-  int jsensordepth = 0;
-  int jheading = 0;
-  /* int  jaltitude = 0; */
-  int jattitude = 0;
-
-  /* always successful */
-  int status = MB_SUCCESS;
   *error = MB_ERROR_NO_ERROR;
 
+  /* check for non-null data */
   assert(mbio_ptr != NULL);
-  assert(store_ptr != NULL);
   assert(preprocess_pars_ptr != NULL);
+
+  /* get mbio descriptor */
+  struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+
+  /* get preprocessing parameters */
+  struct mb_preprocess_struct *pars = (struct mb_preprocess_struct *)preprocess_pars_ptr;
 
   /* get data structure pointers */
   struct mbsys_3ddwissl_struct *store = (struct mbsys_3ddwissl_struct *)store_ptr;
-  // struct mb_platform_struct *platform = (struct mb_platform_struct *)platform_ptr;
-  struct mb_preprocess_struct *pars = (struct mb_preprocess_struct *)preprocess_pars_ptr;
+  struct mb_platform_struct *platform = (struct mb_platform_struct *)platform_ptr;
 
   /* get kluges */
   bool kluge_beampatternsnell = false;
@@ -723,270 +708,161 @@ int mbsys_3ddwissl_preprocess
     }
   }
 
+  double navlon;
+  double navlat;
+  double heading;  /* heading (degrees) */
+  double sensordepth;
+  double roll;  /* roll (degrees) */
+  double pitch;  /* pitch (degrees) */
+  double speed;  /* speed (degrees) */
+  double mtodeglon, mtodeglat;
+  double dlonm, dlatm;
+  double headingx, headingy;
+  int interp_error = MB_ERROR_NO_ERROR;
+  // int ipulse;
+  int jnav = 0;
+  int jsensordepth = 0;
+  int jheading = 0;
+  /* int  jaltitude = 0; */
+  int jattitude = 0;
   int time_i[7];
   int time_j[5];
-  /* change timestamp if indicated */
-  if (pars->timestamp_changed)
-    {
-    store->time_d = pars->time_d;
-    mb_get_date(verbose, pars->time_d, time_i);
-    mb_get_jtime(verbose, time_i, time_j);
-    store->year = time_i[0];
-    store->month = time_i[1];
-    store->day = time_i[2];
-    store->jday = time_j[1];
-    store->hour = time_i[3];
-    store->minutes = time_i[4];
-    store->seconds = time_i[5];
-    store->nanoseconds = 1000 * ((unsigned int)time_i[6]);
-    }
 
-  /* interpolate navigation and attitude */
-  double time_d = store->time_d;
-  mb_get_date(verbose, time_d, time_i);
+  /* always successful */
+  int status = MB_SUCCESS;
 
-  /* get nav sensordepth heading attitude values for record timestamp
-     - this will generally conform to the first pulse of the scan */
-  // int interp_status = MB_SUCCESS;
-  if (pars->n_nav > 0)
-    {
-    /* interp_status = */ mb_linear_interp_longitude(verbose,
-      pars->nav_time_d - 1,
-      pars->nav_lon - 1,
-      pars->n_nav,
-      time_d,
-      &store->navlon,
-      &jnav,
-      &interp_error);
-    /* interp_status = */ mb_linear_interp_latitude(verbose,
-      pars->nav_time_d - 1,
-      pars->nav_lat - 1,
-      pars->n_nav,
-      time_d,
-      &store->navlat,
-      &jnav,
-      &interp_error);
-    /* interp_status = */ mb_linear_interp(verbose,
-      pars->nav_time_d - 1,
-      pars->nav_speed - 1,
-      pars->n_nav,
-      time_d,
-      &speed,
-      &jnav,
-      &interp_error);
-    store->speed = (float)speed;
-    }
-  if (pars->n_sensordepth > 0)
-    /* interp_status = */ mb_linear_interp(verbose,
-      pars->sensordepth_time_d - 1,
-      pars->sensordepth_sensordepth - 1,
-      pars->n_sensordepth,
-      time_d,
-      &store->sensordepth,
-      &jsensordepth,
-      &interp_error);
-  if (pars->n_heading > 0)
-    {
-    /* interp_status = */ mb_linear_interp_heading(verbose,
-      pars->heading_time_d - 1,
-      pars->heading_heading - 1,
-      pars->n_heading,
-      time_d,
-      &heading,
-      &jheading,
-      &interp_error);
-    store->heading = (float)heading;
-    }
-  /* if (pars->n_altitude > 0) */
-  /*  { */
-  /*  interp_status = mb_linear_interp(verbose, */
-  /*        pars->altitude_time_d-1, pars->altitude_altitude-1, pars->n_altitude, */
-  /*        time_d, &store->altitude, &jaltitude, */
-  /*        &interp_error); */
-  /*  } */
-  if (pars->n_attitude > 0)
-    {
-    /* interp_status = */ mb_linear_interp(verbose,
-      pars->attitude_time_d - 1,
-      pars->attitude_roll - 1,
-      pars->n_attitude,
-      time_d,
-      &roll,
-      &jattitude,
-      &interp_error);
-    store->roll = (float)roll;
-    /* interp_status = */ mb_linear_interp(verbose,
-      pars->attitude_time_d - 1,
-      pars->attitude_pitch - 1,
-      pars->n_attitude,
-      time_d,
-      &pitch,
-      &jattitude,
-      &interp_error);
-    store->pitch = (float)pitch;
-    }
+  /* if called with store_ptr == NULL then called after mb_read_init() but before
+      any data are read - for some formats this allows kluge options to set special
+      reading conditions/behaviors */
+  if (store_ptr == NULL) {
 
-  /* do lever arm correction */
-  if (platform_ptr != NULL)
-    {
+  }
 
-    /* calculate sonar position */
-    status = mb_platform_position(verbose,
-      platform_ptr,
-      pars->target_sensor,
-      0,
-      store->navlon,
-      store->navlat,
-      store->sensordepth,
-      heading,
-      roll,
-      pitch,
-      &store->navlon,
-      &store->navlat,
-      &store->sensordepth,
-      error);
+	/* deal with a survey record */
+	else if (store->kind == MB_DATA_DATA) {
 
-    /* calculate sonar attitude */
-    status = mb_platform_orientation_target(verbose,
-      platform_ptr,
-      pars->target_sensor,
-      0,
-      heading,
-      roll,
-      pitch,
-      &heading,
-      &roll,
-      &pitch,
-      error);
-    store->heading = (float)heading;
-    store->roll = (float)roll;
-    store->pitch = (float)pitch;
-    }
+    /* change timestamp if indicated */
+    if (pars->timestamp_changed)
+      {
+      store->time_d = pars->time_d;
+      mb_get_date(verbose, pars->time_d, time_i);
+      mb_get_jtime(verbose, time_i, time_j);
+      store->year = time_i[0];
+      store->month = time_i[1];
+      store->day = time_i[2];
+      store->jday = time_j[1];
+      store->hour = time_i[3];
+      store->minutes = time_i[4];
+      store->seconds = time_i[5];
+      store->nanoseconds = 1000 * ((unsigned int)time_i[6]);
+      }
 
-  /* get scaling */
-  mb_coor_scale(verbose, store->navlat, &mtodeglon, &mtodeglat);
-  headingx = sin(store->heading * DTR);
-  headingy = cos(store->heading * DTR);
+    /* interpolate navigation and attitude */
+    double time_d = store->time_d;
+    mb_get_date(verbose, time_d, time_i);
 
-  /* loop over all pulses */
-  for (int ipulse = 0; ipulse < store->pulses_per_scan; ipulse++)
-    {
-    /* get pulse */
-    struct mbsys_3ddwissl_pulse_struct *pulse = (struct mbsys_3ddwissl_pulse_struct *)&store->pulses[ipulse];
-
-    /* set time */
-    pulse->time_d = store->time_d + (double)pulse->time_offset;
-
-    /* initialize values */
-    navlon = store->navlon;
-    navlat = store->navlat;
-    sensordepth = store->sensordepth;
-    heading = store->heading;
-    roll = store->roll;
-    pitch = store->pitch;
-    pulse->acrosstrack_offset = 0.0;
-    pulse->alongtrack_offset = 0.0;
-    pulse->sensordepth_offset = 0.0;
-    pulse->heading_offset = 0.0;
-    pulse->roll_offset = 0.0;
-    pulse->pitch_offset = 0.0;
-
-    /* get nav sensordepth heading attitude values for record timestamp */
+    /* get nav sensordepth heading attitude values for record timestamp
+       - this will generally conform to the first pulse of the scan */
+    // int interp_status = MB_SUCCESS;
     if (pars->n_nav > 0)
       {
       /* interp_status = */ mb_linear_interp_longitude(verbose,
         pars->nav_time_d - 1,
         pars->nav_lon - 1,
         pars->n_nav,
-        pulse->time_d,
-        &navlon,
+        time_d,
+        &store->navlon,
         &jnav,
         &interp_error);
       /* interp_status = */ mb_linear_interp_latitude(verbose,
         pars->nav_time_d - 1,
         pars->nav_lat - 1,
         pars->n_nav,
-        pulse->time_d,
-        &navlat,
+        time_d,
+        &store->navlat,
         &jnav,
         &interp_error);
-      dlonm = (navlon - store->navlon) / mtodeglon;
-      dlatm = (navlat - store->navlat) / mtodeglat;
-      pulse->acrosstrack_offset = dlonm * headingx + dlatm * headingy;
-      pulse->alongtrack_offset = dlonm * headingy - dlatm * headingx;
+      /* interp_status = */ mb_linear_interp(verbose,
+        pars->nav_time_d - 1,
+        pars->nav_speed - 1,
+        pars->n_nav,
+        time_d,
+        &speed,
+        &jnav,
+        &interp_error);
+      store->speed = (float)speed;
       }
     if (pars->n_sensordepth > 0)
-      {
-      /* interp_status = */mb_linear_interp(verbose,
+      /* interp_status = */ mb_linear_interp(verbose,
         pars->sensordepth_time_d - 1,
         pars->sensordepth_sensordepth - 1,
         pars->n_sensordepth,
-        pulse->time_d,
-        &sensordepth,
+        time_d,
+        &store->sensordepth,
         &jsensordepth,
         &interp_error);
-      pulse->sensordepth_offset = (float)(sensordepth - store->sensordepth);
-      }
     if (pars->n_heading > 0)
       {
       /* interp_status = */ mb_linear_interp_heading(verbose,
         pars->heading_time_d - 1,
         pars->heading_heading - 1,
         pars->n_heading,
-        pulse->time_d,
+        time_d,
         &heading,
         &jheading,
         &interp_error);
-      pulse->heading_offset = (float)(heading - store->heading);
+      store->heading = (float)heading;
       }
+    /* if (pars->n_altitude > 0) */
+    /*  { */
+    /*  interp_status = mb_linear_interp(verbose, */
+    /*        pars->altitude_time_d-1, pars->altitude_altitude-1, pars->n_altitude, */
+    /*        time_d, &store->altitude, &jaltitude, */
+    /*        &interp_error); */
+    /*  } */
     if (pars->n_attitude > 0)
       {
       /* interp_status = */ mb_linear_interp(verbose,
         pars->attitude_time_d - 1,
         pars->attitude_roll - 1,
         pars->n_attitude,
-        pulse->time_d,
+        time_d,
         &roll,
         &jattitude,
         &interp_error);
-      pulse->roll_offset = (float)(roll - store->roll);
-
+      store->roll = (float)roll;
       /* interp_status = */ mb_linear_interp(verbose,
         pars->attitude_time_d - 1,
         pars->attitude_pitch - 1,
         pars->n_attitude,
-        pulse->time_d,
+        time_d,
         &pitch,
         &jattitude,
         &interp_error);
-      pulse->pitch_offset = (float)(pitch - store->pitch);
+      store->pitch = (float)pitch;
       }
 
     /* do lever arm correction */
     if (platform_ptr != NULL)
       {
-      /* calculate sensor position position */
+
+      /* calculate sonar position */
       status = mb_platform_position(verbose,
         platform_ptr,
         pars->target_sensor,
         0,
-        navlon,
-        navlat,
-        sensordepth,
+        store->navlon,
+        store->navlat,
+        store->sensordepth,
         heading,
         roll,
         pitch,
-        &navlon,
-        &navlat,
-        &sensordepth,
+        &store->navlon,
+        &store->navlat,
+        &store->sensordepth,
         error);
-      dlonm = (navlon - store->navlon) / mtodeglon;
-      dlatm = (navlat - store->navlat) / mtodeglat;
-      pulse->acrosstrack_offset = dlonm * headingx + dlatm * headingy;
-      pulse->alongtrack_offset = dlonm * headingy - dlatm * headingx;
-      pulse->sensordepth_offset = (float)(sensordepth - store->sensordepth);
 
-      /* calculate sensor attitude */
+      /* calculate sonar attitude */
       status = mb_platform_orientation_target(verbose,
         platform_ptr,
         pars->target_sensor,
@@ -998,48 +874,189 @@ int mbsys_3ddwissl_preprocess
         &roll,
         &pitch,
         error);
-      pulse->heading_offset = (float)(heading - store->heading);
-      pulse->roll_offset = (float)(roll - store->roll);
-      pulse->pitch_offset = (float)(pitch - store->pitch);
+      store->heading = (float)heading;
+      store->roll = (float)roll;
+      store->pitch = (float)pitch;
       }
 
-      /* if requested apply kluge scaling of rx beam angles */
-      if (kluge_beampatternsnell) {
-        pulse->angle_az = RTD * asin(MAX(-1.0, MIN(1.0, kluge_beampatternsnellfactor * sin(DTR * pulse->angle_az))));
-      }
-    }
+    /* get scaling */
+    mb_coor_scale(verbose, store->navlat, &mtodeglon, &mtodeglat);
+    headingx = sin(store->heading * DTR);
+    headingy = cos(store->heading * DTR);
 
-  /* calculate the bathymetry using the newly inserted values */
-  double amplitude_threshold;
-  if (pars->sounding_amplitude_filter)
-    amplitude_threshold = pars->sounding_amplitude_threshold;
-  else
-    amplitude_threshold = MBSYS_3DDWISSL_DEFAULT_AMPLITUDE_THRESHOLD;
-  double target_altitude;
-  if (pars->sounding_altitude_filter)
-    target_altitude = pars->sounding_target_altitude;
-  else
-    target_altitude = MBSYS_3DDWISSL_DEFAULT_TARGET_ALTITUDE;
-  if (pars->head1_offsets)
-    {
-    store->heada_offset_x_m = pars->head1_offsets_x;
-    store->heada_offset_y_m = pars->head1_offsets_y;
-    store->heada_offset_z_m = pars->head1_offsets_z;
-    store->heada_offset_heading_deg = pars->head1_offsets_heading;
-    store->heada_offset_roll_deg = pars->head1_offsets_roll;
-    store->heada_offset_pitch_deg = pars->head1_offsets_pitch;
-    }
-  if (pars->head2_offsets)
-    {
-    store->headb_offset_x_m = pars->head2_offsets_x;
-    store->headb_offset_y_m = pars->head2_offsets_y;
-    store->headb_offset_z_m = pars->head2_offsets_z;
-    store->headb_offset_heading_deg = pars->head2_offsets_heading;
-    store->headb_offset_roll_deg = pars->head2_offsets_roll;
-    store->headb_offset_pitch_deg = pars->head2_offsets_pitch;
-    }
-  status = mbsys_3ddwissl_calculatebathymetry(verbose, mbio_ptr, store_ptr,
-                amplitude_threshold, target_altitude, error);
+    /* loop over all pulses */
+    for (int ipulse = 0; ipulse < store->pulses_per_scan; ipulse++)
+      {
+      /* get pulse */
+      struct mbsys_3ddwissl_pulse_struct *pulse = (struct mbsys_3ddwissl_pulse_struct *)&store->pulses[ipulse];
+
+      /* set time */
+      pulse->time_d = store->time_d + (double)pulse->time_offset;
+
+      /* initialize values */
+      navlon = store->navlon;
+      navlat = store->navlat;
+      sensordepth = store->sensordepth;
+      heading = store->heading;
+      roll = store->roll;
+      pitch = store->pitch;
+      pulse->acrosstrack_offset = 0.0;
+      pulse->alongtrack_offset = 0.0;
+      pulse->sensordepth_offset = 0.0;
+      pulse->heading_offset = 0.0;
+      pulse->roll_offset = 0.0;
+      pulse->pitch_offset = 0.0;
+
+      /* get nav sensordepth heading attitude values for record timestamp */
+      if (pars->n_nav > 0)
+        {
+        /* interp_status = */ mb_linear_interp_longitude(verbose,
+          pars->nav_time_d - 1,
+          pars->nav_lon - 1,
+          pars->n_nav,
+          pulse->time_d,
+          &navlon,
+          &jnav,
+          &interp_error);
+        /* interp_status = */ mb_linear_interp_latitude(verbose,
+          pars->nav_time_d - 1,
+          pars->nav_lat - 1,
+          pars->n_nav,
+          pulse->time_d,
+          &navlat,
+          &jnav,
+          &interp_error);
+        dlonm = (navlon - store->navlon) / mtodeglon;
+        dlatm = (navlat - store->navlat) / mtodeglat;
+        pulse->acrosstrack_offset = dlonm * headingx + dlatm * headingy;
+        pulse->alongtrack_offset = dlonm * headingy - dlatm * headingx;
+        }
+      if (pars->n_sensordepth > 0)
+        {
+        /* interp_status = */mb_linear_interp(verbose,
+          pars->sensordepth_time_d - 1,
+          pars->sensordepth_sensordepth - 1,
+          pars->n_sensordepth,
+          pulse->time_d,
+          &sensordepth,
+          &jsensordepth,
+          &interp_error);
+        pulse->sensordepth_offset = (float)(sensordepth - store->sensordepth);
+        }
+      if (pars->n_heading > 0)
+        {
+        /* interp_status = */ mb_linear_interp_heading(verbose,
+          pars->heading_time_d - 1,
+          pars->heading_heading - 1,
+          pars->n_heading,
+          pulse->time_d,
+          &heading,
+          &jheading,
+          &interp_error);
+        pulse->heading_offset = (float)(heading - store->heading);
+        }
+      if (pars->n_attitude > 0)
+        {
+        /* interp_status = */ mb_linear_interp(verbose,
+          pars->attitude_time_d - 1,
+          pars->attitude_roll - 1,
+          pars->n_attitude,
+          pulse->time_d,
+          &roll,
+          &jattitude,
+          &interp_error);
+        pulse->roll_offset = (float)(roll - store->roll);
+
+        /* interp_status = */ mb_linear_interp(verbose,
+          pars->attitude_time_d - 1,
+          pars->attitude_pitch - 1,
+          pars->n_attitude,
+          pulse->time_d,
+          &pitch,
+          &jattitude,
+          &interp_error);
+        pulse->pitch_offset = (float)(pitch - store->pitch);
+        }
+
+      /* do lever arm correction */
+      if (platform_ptr != NULL)
+        {
+        /* calculate sensor position position */
+        status = mb_platform_position(verbose,
+          platform_ptr,
+          pars->target_sensor,
+          0,
+          navlon,
+          navlat,
+          sensordepth,
+          heading,
+          roll,
+          pitch,
+          &navlon,
+          &navlat,
+          &sensordepth,
+          error);
+        dlonm = (navlon - store->navlon) / mtodeglon;
+        dlatm = (navlat - store->navlat) / mtodeglat;
+        pulse->acrosstrack_offset = dlonm * headingx + dlatm * headingy;
+        pulse->alongtrack_offset = dlonm * headingy - dlatm * headingx;
+        pulse->sensordepth_offset = (float)(sensordepth - store->sensordepth);
+
+        /* calculate sensor attitude */
+        status = mb_platform_orientation_target(verbose,
+          platform_ptr,
+          pars->target_sensor,
+          0,
+          heading,
+          roll,
+          pitch,
+          &heading,
+          &roll,
+          &pitch,
+          error);
+        pulse->heading_offset = (float)(heading - store->heading);
+        pulse->roll_offset = (float)(roll - store->roll);
+        pulse->pitch_offset = (float)(pitch - store->pitch);
+        }
+
+        /* if requested apply kluge scaling of rx beam angles */
+        if (kluge_beampatternsnell) {
+          pulse->angle_az = RTD * asin(MAX(-1.0, MIN(1.0, kluge_beampatternsnellfactor * sin(DTR * pulse->angle_az))));
+        }
+      }
+
+    /* calculate the bathymetry using the newly inserted values */
+    double amplitude_threshold;
+    if (pars->sounding_amplitude_filter)
+      amplitude_threshold = pars->sounding_amplitude_threshold;
+    else
+      amplitude_threshold = MBSYS_3DDWISSL_DEFAULT_AMPLITUDE_THRESHOLD;
+    double target_altitude;
+    if (pars->sounding_altitude_filter)
+      target_altitude = pars->sounding_target_altitude;
+    else
+      target_altitude = MBSYS_3DDWISSL_DEFAULT_TARGET_ALTITUDE;
+    if (pars->head1_offsets)
+      {
+      store->heada_offset_x_m = pars->head1_offsets_x;
+      store->heada_offset_y_m = pars->head1_offsets_y;
+      store->heada_offset_z_m = pars->head1_offsets_z;
+      store->heada_offset_heading_deg = pars->head1_offsets_heading;
+      store->heada_offset_roll_deg = pars->head1_offsets_roll;
+      store->heada_offset_pitch_deg = pars->head1_offsets_pitch;
+      }
+    if (pars->head2_offsets)
+      {
+      store->headb_offset_x_m = pars->head2_offsets_x;
+      store->headb_offset_y_m = pars->head2_offsets_y;
+      store->headb_offset_z_m = pars->head2_offsets_z;
+      store->headb_offset_heading_deg = pars->head2_offsets_heading;
+      store->headb_offset_roll_deg = pars->head2_offsets_roll;
+      store->headb_offset_pitch_deg = pars->head2_offsets_pitch;
+      }
+    status = mbsys_3ddwissl_calculatebathymetry(verbose, mbio_ptr, store_ptr,
+                  amplitude_threshold, target_altitude, error);
+  }
 
   if (verbose >= 2)
     {
@@ -1221,7 +1238,8 @@ int mbsys_3ddwissl_extract
 
   else if (*kind == MB_DATA_COMMENT)
     {
-    strncpy(comment, store->comment, MB_COMMENT_MAXLINE);
+    memset((void *)comment, 0, MB_COMMENT_MAXLINE);
+		strncpy(comment, store->comment, MB_COMMENT_MAXLINE - 1);
     }
 
   if (verbose >= 2)
@@ -1376,7 +1394,8 @@ int mbsys_3ddwissl_insert
     {
     store->time_d = time_d;
     store->comment_len = MIN(strlen(comment), MB_COMMENT_MAXLINE-1);
-    strncpy(store->comment, comment, MB_COMMENT_MAXLINE);
+    memset((void *)store->comment, 0, MB_COMMENT_MAXLINE);
+    strncpy(store->comment, comment, MB_COMMENT_MAXLINE - 1);
     }
 
   /* deal with other records types  */
@@ -3683,11 +3702,24 @@ int mbsys_3ddwissl_calculatebathymetry
       for (int isounding=0; isounding<store->soundings_per_pulse; isounding++)
         {
         sounding = &pulse->soundings[isounding];
+        if (sounding->range > 0.001 && sounding->amplitude > amplitude_largest)
+            {
+            amplitude_largest = sounding->amplitude;
+            isounding_largest = isounding;
+            }
+        }
+      for (int isounding=0; isounding<store->soundings_per_pulse; isounding++)
+        {
+        sounding = &pulse->soundings[isounding];
 
         /* valid pulses have nonzero ranges */
         if (sounding->range > 0.001)
           {
-          /* apply pitch and roll */
+          //lidar_pitch_at_pulse = store->pitch + pulse->pitch_offset;
+          //lidar_roll_at_pulse = store->roll + pulse->roll_offset;
+          //lidar_heading_at_pulse = store->heading + pulse->heading_offset;
+
+          /* apply pitch and roll */  // TODO fix rotation w/ Giancarlo's functions
           alpha = angle_el_sign * pulse->angle_el + store->pitch
                   + head_offset_pitch_deg + pulse->pitch_offset;
           beta = 90.0 - (angle_az_sign * pulse->angle_az) + store->roll
@@ -3709,13 +3741,15 @@ int mbsys_3ddwissl_calculatebathymetry
 
           /* set beamflag */
           if (sounding->amplitude * amplitude_factor >= amplitude_threshold)
-            sounding->beamflag = MB_FLAG_FLAG + MB_FLAG_SECONDARY;
+            sounding->beamflag = MB_FLAG_NONE;
+          else if (isounding_largest == isounding)
+            sounding->beamflag = MB_FLAG_FLAG + MB_FLAG_SONAR;
           else
             sounding->beamflag = MB_FLAG_NULL;
 
           /* translate to takeoff coordinates */
           mb_rollpitch_to_takeoff(verbose, alpha, beta, &theta, &phi, error);
-          phi += head_offset_heading_deg + pulse->heading_offset;
+          phi += head_offset_heading_deg + pulse->heading_offset;    // TODO fix rotation w/ Giancarlo's functions
 
           /* get lateral and vertical components of range */
           xx = sounding->range * sin(DTR * theta);
@@ -3727,13 +3761,6 @@ int mbsys_3ddwissl_calculatebathymetry
           sounding->alongtrack = xx * sin(DTR * phi) + head_offset_y_m
                                   + angle_el_sign * pulse->offset_el
                                   + pulse->alongtrack_offset;
-
-          /* check for largest amplitude */
-          if (sounding->amplitude > amplitude_largest)
-            {
-            amplitude_largest = sounding->amplitude;
-            isounding_largest = isounding;
-            }
           }
         else
           {
@@ -3743,14 +3770,6 @@ int mbsys_3ddwissl_calculatebathymetry
           sounding->acrosstrack = 0.0;
           sounding->alongtrack = 0.0;
           }
-        }
-
-      /* reset beam flags */
-      if (isounding_largest >= 0)
-        {
-        sounding = &pulse->soundings[isounding_largest];
-        if (sounding->beamflag != MB_FLAG_NULL)
-          sounding->beamflag = MB_FLAG_NONE;
         }
       }
 

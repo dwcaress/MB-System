@@ -51,6 +51,14 @@ Replay::Replay(const char* loghome, const char *map, const char *host, int port)
   try
   {
     trn_attr = new TRN_attr;
+      trn_attr->_mapFileName = NULL;
+      trn_attr->_particlesName = NULL;
+      trn_attr->_vehicleCfgName = NULL;
+      trn_attr->_dvlCfgName = NULL;
+      trn_attr->_resonCfgName = NULL;
+      trn_attr->_terrainNavServer = NULL;
+      trn_attr->_lrauvDvlFilename = NULL;
+
     if (0 != loadCfgAttributes())
     {
       fprintf(stderr, "\nreplay - Log directory %s not found\n\n", logdir);
@@ -70,45 +78,54 @@ Replay::Replay(const char* loghome, const char *map, const char *host, int port)
     fprintf(stderr, "\nreplay - DeltaT data replay not implemented at the moment\n\n");
   }
 
-  char par_format[] = "Particles   :";
-  if (!strcmp("NotSpecified", trn_attr->_particlesName))
-  {
-      strcpy(trn_attr->_particlesName, "");
-      strcpy(par_format, "");
-  }
-
   // Use TRN config from the command line
   // for map, host, and port if they were provided.
   if (map)
   {
-    if (trn_attr->_mapFileName) delete trn_attr->_mapFileName;
+    if (trn_attr->_mapFileName) free(trn_attr->_mapFileName);
     trn_attr->_mapFileName = strdup(map);
   }
 
   if (host)
   {
+    free(trn_attr->_terrainNavServer);
     trn_attr->_terrainNavServer = strdup(host);
     trn_attr->_terrainNavPort = port;
   }
 
   fprintf(stderr, "\n"
-                "Server      : %s  %d\n"
-                "Vehicle Cfg : %s\n"
-                "Map File    : %s Type %ld\n"
-                "%s %s\n\n",
-                host, port, trn_attr->_vehicleCfgName, trn_attr->_mapFileName,
-                trn_attr->_map_type, par_format, trn_attr->_particlesName);
-
+          "Server      : %s  %d\n"
+          "Vehicle Cfg : %s\n"
+          "Map File    : %s Type %ld\n"
+          "Particles   : %s\n\n",
+          host, port,
+          trn_attr->_vehicleCfgName,
+          trn_attr->_mapFileName, trn_attr->_map_type,
+          trn_attr->_particlesName);
 }
 
 Replay::~Replay()
 {
-  if (trn_attr) delete trn_attr;
-  if (logdir)   delete logdir;
-  if (trn_log)  delete(trn_log);
-  if (dvl_log)  delete(dvl_log);
-  if (nav_log)  delete(nav_log);
-  if (mbtrn_log)  delete(mbtrn_log);
+
+    free(logdir);
+    if (trn_log)  delete(trn_log);
+    if (dvl_log)  delete(dvl_log);
+    if (nav_log)  delete(nav_log);
+    if (mbtrn_log)  delete(mbtrn_log);
+    free(trn_attr->_mapFileName);
+    free(trn_attr->_particlesName);
+    free(trn_attr->_vehicleCfgName);
+    free(trn_attr->_dvlCfgName);
+    free(trn_attr->_resonCfgName);
+    free(trn_attr->_terrainNavServer);
+    free(trn_attr->_lrauvDvlFilename);
+    fclose(dvl_csv);
+    if(NULL!=trn_log) delete trn_log;
+    if(NULL!=dvl_log) delete dvl_log;
+    if(NULL!=nav_log) delete nav_log;
+    if(NULL!=mbtrn_log) delete mbtrn_log;
+//    if (trn_attr) delete trn_attr;
+    delete trn_attr;
 }
 
 /*
@@ -441,6 +458,13 @@ int Replay::loadCfgAttributes()
   }
 
   // Initialize to default values
+    free(trn_attr->_mapFileName);
+    free(trn_attr->_particlesName);
+    free(trn_attr->_vehicleCfgName);
+    free(trn_attr->_dvlCfgName);
+    free(trn_attr->_resonCfgName);
+    free(trn_attr->_terrainNavServer);
+    free(trn_attr->_lrauvDvlFilename);
   trn_attr->_mapFileName = NULL;
   trn_attr->_map_type = 2;
   trn_attr->_filter_type = 2;
@@ -469,15 +493,36 @@ int Replay::loadCfgAttributes()
   char key[100], value[200];
   while (getNextKeyValue(cfg, key, value))
   {
-    if      (!strcmp("mapFileName",          key))  trn_attr->_mapFileName = strdup(value);
+      if      (!strcmp("mapFileName",          key)){
+          free(trn_attr->_mapFileName);
+          trn_attr->_mapFileName = strdup(value);
+      }
+    else if (!strcmp("particlesName",        key)){
+        free(trn_attr->_particlesName);
+        trn_attr->_particlesName = strdup(value);
+    }
+    else if (!strcmp("vehicleCfgName",       key)){
+        free(trn_attr->_vehicleCfgName);
+        trn_attr->_vehicleCfgName = strdup(value);
+    }
+    else if (!strcmp("dvlCfgName",           key)){
+        free(trn_attr->_dvlCfgName);
+        trn_attr->_dvlCfgName = strdup(value);
+    }
+    else if (!strcmp("resonCfgName",         key)){
+        free(trn_attr->_resonCfgName);
+        trn_attr->_resonCfgName = strdup(value);
+    }
+    else if (!strcmp("terrainNavServer",     key)){
+        free(trn_attr->_terrainNavServer);
+        trn_attr->_terrainNavServer = strdup(value);
+    }
+    else if (!strcmp("lrauvDvlFilename",     key)){
+        free(trn_attr->_lrauvDvlFilename);
+        trn_attr->_lrauvDvlFilename = strdup(value);
+    }
     else if (!strcmp("map_type",             key))  trn_attr->_map_type = atoi(value);
     else if (!strcmp("filterType",           key))  trn_attr->_filter_type = atoi(value);
-    else if (!strcmp("particlesName",        key))  trn_attr->_particlesName = strdup(value);
-    else if (!strcmp("vehicleCfgName",       key))  trn_attr->_vehicleCfgName = strdup(value);
-    else if (!strcmp("dvlCfgName",           key))  trn_attr->_dvlCfgName = strdup(value);
-    else if (!strcmp("resonCfgName",         key))  trn_attr->_resonCfgName = strdup(value);
-    else if (!strcmp("terrainNavServer",     key))  trn_attr->_terrainNavServer = strdup(value);
-    else if (!strcmp("lrauvDvlFilename",     key))  trn_attr->_lrauvDvlFilename = strdup(value);
     else if (!strcmp("terrainNavPort",       key))  trn_attr->_terrainNavPort = atol(value);
     else if (!strcmp("forceLowGradeFilter",  key))  trn_attr->_forceLowGradeFilter = strcasecmp("false", value);
     else if (!strcmp("allowFilterReinits",   key))  trn_attr->_allowFilterReinits = strcasecmp("false", value);
@@ -498,6 +543,7 @@ int Replay::loadCfgAttributes()
       fprintf(stderr, "\n\tReplay: Unknown key in cfg: %s\n\n", key);
   }
 
+    fclose(cfg);
   return 0;
 }
 
@@ -535,95 +581,106 @@ int Replay::getNextKeyValue(FILE *cfg, char key[], char value[])
 // Common to QNX and NIX versions
 TerrainNav* Replay::connectTRN()
 {
-  TerrainNav *_tercom = 0;
+    TerrainNav *_tercom = 0;
 
-  fprintf(stdout, "replay - Using TerrainNav at %s on port %ld\n",
-    trn_attr->_terrainNavServer, trn_attr->_terrainNavPort);
-  fprintf(stdout, "replay - Using TerrainNav with map %s and config %s\n",
-   trn_attr->_mapFileName, trn_attr->_vehicleCfgName);
+    fprintf(stdout, "replay - Using TerrainNav at %s on port %ld\n",
+            trn_attr->_terrainNavServer, trn_attr->_terrainNavPort);
+    fprintf(stdout, "replay - Using TerrainNav with map %s and config %s\n",
+            trn_attr->_mapFileName, trn_attr->_vehicleCfgName);
 
-  try
-  {
-    char buf[REPLAY_PATHNAME_LENGTH];
-    char *mapdir  = getenv("TRN_MAPFILES");
-    char *datadir = getenv("TRN_DATAFILES");
-    sprintf(buf, "%s/%s", mapdir, trn_attr->_mapFileName);
-    free(trn_attr->_mapFileName); trn_attr->_mapFileName = strdup(buf);
-    sprintf(buf, "%s/%s", datadir, trn_attr->_vehicleCfgName);
-    free(trn_attr->_vehicleCfgName); trn_attr->_vehicleCfgName = strdup(buf);
-    sprintf(buf, "%s/%s", datadir, trn_attr->_particlesName);
-    free(trn_attr->_particlesName); trn_attr->_particlesName = strdup(buf);
-    fprintf(stdout, "%s\n%s\n%s\n", trn_attr->_mapFileName, trn_attr->_vehicleCfgName, trn_attr->_particlesName);
-
-    if (useLcmTrn())
+    try
     {
+        char buf[REPLAY_PATHNAME_LENGTH];
+        char *mapdir  = getenv("TRN_MAPFILES");
+        char *datadir = getenv("TRN_DATAFILES");
+
+        // set path names (only if configured in trn_attr)
+        memset(buf,0,REPLAY_PATHNAME_LENGTH);
+        if(NULL!=trn_attr->_mapFileName){
+            sprintf(buf, "%s/%s", mapdir, trn_attr->_mapFileName);
+            free(trn_attr->_mapFileName); trn_attr->_mapFileName = strdup(buf);
+        }
+        memset(buf,0,REPLAY_PATHNAME_LENGTH);
+        if(NULL!=trn_attr->_vehicleCfgName){
+            sprintf(buf, "%s/%s", datadir, trn_attr->_vehicleCfgName);
+            free(trn_attr->_vehicleCfgName); trn_attr->_vehicleCfgName = strdup(buf);
+        }
+        memset(buf,0,REPLAY_PATHNAME_LENGTH);
+        if(NULL!=trn_attr->_particlesName){
+            sprintf(buf, "%s/%s", datadir, trn_attr->_particlesName);
+            free(trn_attr->_particlesName); trn_attr->_particlesName = strdup(buf);
+        }
+        fprintf(stdout, "%s:%d - %s\n%s\n%s\n", __FILE__,__LINE__,trn_attr->_mapFileName, trn_attr->_vehicleCfgName, trn_attr->_particlesName);
+
+        if (useLcmTrn())
+        {
 #ifdef _LCMTRN
-      printf("Connecting to %s ...\n", trn_attr->_terrainNavServer);
-      _tercom = new TerrainNavLcmClient();
+            fprintf(stderr,"Connecting to %s ...\n", trn_attr->_terrainNavServer);
+            _tercom = new TerrainNavLcmClient();
 #endif
-    }
-    else if (useTRNServer())
-    {
-      printf("Connecting to %s in 2...\n", trn_attr->_terrainNavServer);
-      sleep(1);
-      _tercom = new TerrainNavClient(trn_attr->_terrainNavServer,
-                                     trn_attr->_terrainNavPort,
-                                     trn_attr->_mapFileName,
+        }
+        else if (useTRNServer())
+        {
+            fprintf(stderr,"Connecting to %s in 2...\n", trn_attr->_terrainNavServer);
+            sleep(1);
+            _tercom = new TerrainNavClient(trn_attr->_terrainNavServer,
+                                           trn_attr->_terrainNavPort,
+                                           trn_attr->_mapFileName,
+                                           trn_attr->_vehicleCfgName,
+                                           trn_attr->_particlesName,
+                                           TRNUtils::basename(logdir),
+                                           trn_attr->_filter_type, trn_attr->_map_type);
+        }
+        else
+        {
+            // On macOS, linux, and cygwin, we can use a native TerrainNav object
+            // instead of relying on a trn_server. Call useTRNServer() to decide.
+            _tercom = new TerrainNav(trn_attr->_mapFileName,
                                      trn_attr->_vehicleCfgName,
                                      trn_attr->_particlesName,
-                                     TRNUtils::basename(logdir),
-                                     trn_attr->_filter_type, trn_attr->_map_type);
+                                     trn_attr->_filter_type,
+                                     trn_attr->_map_type,
+                                     TRNUtils::basename(logdir));
+        }
     }
-    else
+    catch (Exception e)
     {
-      // On macOS, linux, and cygwin, we can use a native TerrainNav object
-      // instead of relying on a trn_server. Call useTRNServer() to decide.
-      _tercom = new TerrainNav(trn_attr->_mapFileName,
-                               trn_attr->_vehicleCfgName,
-                               trn_attr->_particlesName,
-                               trn_attr->_filter_type,
-                               trn_attr->_map_type,
-                               TRNUtils::basename(logdir));
+        fprintf(stderr, "replay - Failed TRN connection. Check TRN error messages...\n");
+        _tercom = 0;
     }
-  }
-  catch (Exception e)
-  {
-    fprintf(stderr, "replay - Failed TRN connection. Check TRN error messages...\n");
-    _tercom = 0;
-  }
 
-  if (_tercom)
-  {
-    // After moving is_connected() to public section, we can use this code block
-    if (_tercom &&  (!_tercom->is_connected() || !_tercom->initialized()))
+    if (_tercom)
     {
-      fprintf(stderr, "replay -:Not initialized. See trn_server error messages...\n");
-      //return -1;
+        // After moving is_connected() to public section, we can use this code block
+        if (_tercom &&  (!_tercom->is_connected() || !_tercom->initialized()))
+        {
+            fprintf(stderr, "replay -:Not initialized. See trn_server error messages...\n");
+            //return -1;
+        }
+
+        // If we reach here then we've connected
+        fprintf(stdout, "replay -:Should be Connected to server if no error messages...\n");
+
+        fprintf(stdout, "replay -:Lets just set the interpret measure attitude flag to true...\n");
+
+        // The following calls to setup TRN lifted from TerrainAidDriver
+        _tercom->setInterpMeasAttitude(true);
+
+        //choose filter settings based on whether kearfott is available and if
+        //filter forcing is set
+        if(trn_attr->_forceLowGradeFilter)
+            _tercom->useLowGradeFilter();
+        else
+            _tercom->useHighGradeFilter();
+
+        //turn on filter reintialization if set in terrainAid.cfg
+        _tercom->setFilterReinit(trn_attr->_allowFilterReinits);
+
+        //turn on modified weighting if set in terrainAid.cfg
+        _tercom->setModifiedWeighting(trn_attr->_useModifiedWeighting);
     }
 
-    // If we reach here then we've connected
-    fprintf(stdout, "replay -:Should be Connected to server if no error messages...\n");
-
-    fprintf(stdout, "replay -:Lets just set the interpret measure attitude flag to true...\n");
-
-    // The following calls to setup TRN lifted from TerrainAidDriver
-    _tercom->setInterpMeasAttitude(true);
-
-    //choose filter settings based on whether kearfott is available and if
-    //filter forcing is set
-    if(trn_attr->_forceLowGradeFilter)
-      _tercom->useLowGradeFilter();
-    else
-      _tercom->useHighGradeFilter();
-
-    //turn on filter reintialization if set in terrainAid.cfg
-    _tercom->setFilterReinit(trn_attr->_allowFilterReinits);
-
-    //turn on modified weighting if set in terrainAid.cfg
-    _tercom->setModifiedWeighting(trn_attr->_useModifiedWeighting);
-  }
-
-  return _tercom;
+    return _tercom;
 
 }
 
@@ -631,7 +688,8 @@ TerrainNav* Replay::connectTRN()
 
 int Replay::parseDvlCsvLine(const char *line, poseT *pt, measT *mt)
 {
-  char *buf = strdup(line);
+  char *lcopy = strdup(line);
+    char *buf = lcopy;
 
   mt->dataType = TRN_SENSOR_DVL;
   mt->numMeas  = 0;
@@ -645,6 +703,7 @@ int Replay::parseDvlCsvLine(const char *line, poseT *pt, measT *mt)
     if (NULL == token)
     {
       fprintf(stderr, "Replay - unexpected EOL parsing line %ld\n", nupdates);
+        free(lcopy);
       return 0;
     }
     //printf("  %s\n", token);
@@ -654,8 +713,10 @@ int Replay::parseDvlCsvLine(const char *line, poseT *pt, measT *mt)
       pt->time = atof(token);
 
       // Ensure that measurements are at least 3 seconds apart
-      if (pt->time < lastTime + DVL_SAMPLE_PERIOD)
-        return -1;
+        if (pt->time < lastTime + DVL_SAMPLE_PERIOD){
+            free(lcopy);
+            return -1;
+        }
 
       lastTime = pt->time;
     }
@@ -687,6 +748,14 @@ int Replay::parseDvlCsvLine(const char *line, poseT *pt, measT *mt)
   mt->alphas     = (double*)realloc(mt->alphas,     mt->numMeas*sizeof(double));
   mt->measStatus = (bool*)  realloc(mt->measStatus, mt->numMeas*sizeof(bool));
 
+    memset(mt->covariance,0,N_COVAR*sizeof(double));
+    memset(mt->ranges,0,mt->numMeas*sizeof(double));
+    memset(mt->crossTrack,0,mt->numMeas*sizeof(double));
+    memset(mt->alongTrack,0,mt->numMeas*sizeof(double));
+    memset(mt->altitudes,0,mt->numMeas*sizeof(double));
+    memset(mt->alphas,0,mt->numMeas*sizeof(double));
+    memset(mt->measStatus,0,mt->numMeas*sizeof(bool));
+
   // There are 3 data items per beam, 3 * numMeas
   for (int b = 0; b < mt->numMeas * 3; b++)
   {
@@ -696,6 +765,7 @@ int Replay::parseDvlCsvLine(const char *line, poseT *pt, measT *mt)
     if (NULL == token)
     {
       fprintf(stderr, "Replay - unexpected EOL parsing line %ld\n", nupdates);
+        free(lcopy);
       return 0;
     }
     //printf("  %d = %s\n", b/3, token);
@@ -716,6 +786,7 @@ int Replay::parseDvlCsvLine(const char *line, poseT *pt, measT *mt)
     fprintf(stderr, "Replay - unexpected tokens at the end of line %ld\n",
       nupdates);
   }
+    free(lcopy);
 
   return 1;
 }

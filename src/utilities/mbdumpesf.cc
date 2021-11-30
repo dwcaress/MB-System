@@ -212,20 +212,8 @@ int main(int argc, char **argv) {
 			if (omode == OUTPUT_ESF && oesffp != nullptr) {
 				memset(esf_header, 0, MB_PATH_MAXLINE);
 				const int esf_mode = MB_ESF_MODE_EXPLICIT;
-				const time_t right_now = time((time_t *)0);
-				char date[32];
-				strcpy(date, ctime(&right_now));
-				date[strlen(date) - 1] = '\0';
-				const char *user_ptr = getenv("USER");
-				if (user_ptr == nullptr)
-					user_ptr = getenv("LOGNAME");
-				char user[MBP_FILENAMESIZE];
-				if (user_ptr != nullptr)
-					strcpy(user, user_ptr);
-				else
-					strcpy(user, "unknown");
-				char host[MBP_FILENAMESIZE];
-				gethostname(host, MBP_FILENAMESIZE);
+        char user[256], host[256], date[32];
+        status = mb_user_host_date(verbose, user, host, date, &error);
 				sprintf(esf_header,
 				        "ESFVERSION03\nESF Mode: %d\nMB-System Version %s\nProgram: %s\nUser: %s\nCPU: %s\nDate: %s\n",
 				        esf_mode, MB_VERSION, program_name, user, host, date);
@@ -321,6 +309,14 @@ int main(int argc, char **argv) {
 					}
 				}
 			}
+      else {
+				if (omode == OUTPUT_TEXT) {
+					int time_i[7];
+					mb_get_date(verbose, time_d, time_i);
+					fprintf(stdout, "** EDITS READ BUT IGNORED **: i:%d time: %f %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d beam:%d action:%d\n", i,
+					        time_d, time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6], beam, action);
+				}
+      }
 		}
 
 		fclose(iesffp);

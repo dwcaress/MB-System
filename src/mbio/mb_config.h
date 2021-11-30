@@ -25,23 +25,23 @@
 /* Define to 1 if you have the `m' library (-lm). */
 #define HAVE_LIBM 1
 
+/* Define to 1 if you have the `pthread' library (-lpthread). */
+#define HAVE_LIBPTHREAD 1
+
 /* Have malloc.h */
 /* #undef HAVE_MALLOC_H */
 
-/* Define to 1 if you have the <memory.h> header file. */
-#define HAVE_MEMORY_H 1
-
-/* Define to 1 if you have the <rpc/rpc.h> header file. */
+/* Have rpc/rpc.h */
 #define HAVE_RPC_RPC_H 1
-
-/* Define to 1 if you have the <rpc/types.h> header file. */
-#define HAVE_RPC_TYPES_H 1
 
 /* Define to 1 if you have the `sincos' function. */
 /* #undef HAVE_SINCOS */
 
 /* Define to 1 if you have the <stdint.h> header file. */
 #define HAVE_STDINT_H 1
+
+/* Define to 1 if you have the <stdio.h> header file. */
+#define HAVE_STDIO_H 1
 
 /* Define to 1 if you have the <stdlib.h> header file. */
 #define HAVE_STDLIB_H 1
@@ -57,12 +57,6 @@
 
 /* Define to 1 if you have the <sys/types.h> header file. */
 #define HAVE_SYS_TYPES_H 1
-
-/* Define to 1 if you have the <tirpc/rpc/rpc.h> header file. */
-/* #undef HAVE_TIRPC_RPC_RPC_H */
-
-/* Define to 1 if you have the <tirpc/rpc/types.h> header file. */
-/* #undef HAVE_TIRPC_RPC_TYPES_H */
 
 /* Define to 1 if you have the <unistd.h> header file. */
 #define HAVE_UNISTD_H 1
@@ -86,7 +80,7 @@
 /* #undef MBTRN_ENABLED */
 
 /* Build graphical tools */
-#define MBUTILS_ENABLED 1
+#define MB_GRAPHICAL_ENABLED 1
 
 /* Build tools using OpenCV */
 /* #undef OPENCVTOOLS_ENABLED */
@@ -101,7 +95,7 @@
 #define PACKAGE_NAME "mbsystem"
 
 /* Define to the full name and version of this package. */
-#define PACKAGE_STRING "mbsystem 5.7.7beta02"
+#define PACKAGE_STRING "mbsystem 5.7.9beta19"
 
 /* Define to the one symbol short name of this package. */
 #define PACKAGE_TARNAME "mbsystem"
@@ -110,7 +104,7 @@
 #define PACKAGE_URL "http://www.mbari.org/data/mbsystem/"
 
 /* Define to the version of this package. */
-#define PACKAGE_VERSION "5.7.7beta02"
+#define PACKAGE_VERSION "5.7.9beta19"
 
 /* Build tools using PCL */
 /* #undef PCLTOOLS_ENABLED */
@@ -118,17 +112,19 @@
 /* Build tools using Qt5 */
 /* #undef QTTOOLS_ENABLED */
 
-/* Define to 1 if you have the ANSI C header files. */
+/* Define to 1 if all of the C90 standard headers exist (not just the ones
+   required in a freestanding environment). This macro is provided for
+   backward compatibility; new code need not use it. */
 #define STDC_HEADERS 1
 
 /* Building unit tests */
 /* #undef TEST_ENABLED */
 
 /* Version number of package */
-#define VERSION "5.7.7beta02"
+#define VERSION "5.7.9beta19"
 
 /* Set VERSION_DATE define in mb_config.h */
-#define VERSION_DATE "8 October 2020"
+#define VERSION_DATE "7 November 2021"
 
 /* Define WORDS_BIGENDIAN to 1 if your processor stores words with the most
    significant byte first (like Motorola and SPARC, unlike Intel). */

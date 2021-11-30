@@ -180,20 +180,8 @@ int write_ascii(int verbose, char *outfile, float *grid, int nx, int ny, double 
 		status = MB_FAILURE;
 	} else {
 		fprintf(fp, "grid created by program mbmosaic\n");
-		const time_t right_now = time((time_t *)0);
-		char date[32];
-		strcpy(date, ctime(&right_now));
-		date[strlen(date) - 1] = '\0';
-		char *user_ptr = getenv("USER");
-		if (user_ptr == nullptr)
-			user_ptr = getenv("LOGNAME");
-		char user[MB_PATH_MAXLINE] = "";
-		if (user_ptr != nullptr)
-			strcpy(user, user_ptr);
-		else
-			strcpy(user, "unknown");
-		char host[MB_PATH_MAXLINE] = "";
-		/* i = */ gethostname(host, MB_PATH_MAXLINE);
+    char user[256], host[256], date[32];
+    status = mb_user_host_date(verbose, user, host, date, error);
 		fprintf(fp, "program run by %s on %s at %s\n", user, host, date);
 		fprintf(fp, "%d %d\n%f %f %f %f\n", nx, ny, xmin, xmax, ymin, ymax);
 		for (int i = 0; i < nx * ny; i++) {
@@ -1170,16 +1158,18 @@ int main(int argc, char **argv) {
         }
         else {
           int tmp;
-          sscanf(optarg, "%d", &tmp);
+          int nscan = sscanf(optarg, "%d", &tmp);
           // Range check
-          if (tmp >= 1 && tmp <= 4) {
+          if (nscan == 1 && tmp >= 1 && tmp <= 4) {
             gridkind = (grid_type_t)tmp;
             if (gridkind == MBMOSAIC_CDFGRD) {
               gridkind = MBMOSAIC_GMTGRD;
               gridkindstring[0] = '\0';
             }
-          } else if (tmp >= MBMOSAIC_GMTGRD && tmp <= MBMOSAIC_GMTGRD + 11) {
-            sprintf(gridkindstring, "=%d", (gridkind - 100));
+          } else if (optarg[0] == 'n' || optarg[0] == 'c' || optarg[0] == 'b'
+                    || optarg[0] == 'r' || optarg[0] == 's' || optarg[0] == 'a'
+                    || optarg[0] == 'e' || optarg[0] == 'g'){
+            sprintf(gridkindstring, "=%s", optarg);
             gridkind = MBMOSAIC_GMTGRD;
           } else {
             fprintf(stdout, "Invalid gridkind option: -G%s\n\n", optarg);

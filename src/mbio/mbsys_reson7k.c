@@ -1279,14 +1279,14 @@ int mbsys_reson7k_deall(int verbose, void *mbio_ptr, void **store_ptr, int *erro
 
   /* Reson 7k ping motion (record 7012) */
   s7kr_v2pingmotion *v2pingmotion = &store->v2pingmotion;
+  if (v2pingmotion->nalloc > 0 && v2pingmotion->roll != NULL)
+    status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&(v2pingmotion->roll), error);
+  if (v2pingmotion->nalloc > 0 && v2pingmotion->heading != NULL)
+    status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&(v2pingmotion->heading), error);
+  if (v2pingmotion->nalloc > 0 && v2pingmotion->heave != NULL)
+    status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&(v2pingmotion->heave), error);
   v2pingmotion->n = 0;
   v2pingmotion->nalloc = 0;
-  if (v2pingmotion->roll != NULL)
-    status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&(v2pingmotion->roll), error);
-  if (v2pingmotion->heading != NULL)
-    status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&(v2pingmotion->heading), error);
-  if (v2pingmotion->heave != NULL)
-    status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&(v2pingmotion->heave), error);
 
   /* Reson 7k beamformed magnitude and phase data (record 7018) */
   s7kr_v2beamformed *v2beamformed = &store->v2beamformed;
@@ -4489,6 +4489,7 @@ int mbsys_reson7k_preprocess(int verbose,     /* in: verbosity level set on comm
                              void *mbio_ptr,  /* in: see mb_io.h:/^struct mb_io_struct/ */
                              void *store_ptr, /* in: see mbsys_reson7k.h:/^struct mbsys_reson7k_struct/ */
                              void *platform_ptr, void *preprocess_pars_ptr, int *error) {
+
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -4503,16 +4504,17 @@ int mbsys_reson7k_preprocess(int verbose,     /* in: verbosity level set on comm
 
   /* check for non-null data */
   assert(mbio_ptr != NULL);
-  assert(store_ptr != NULL);
   assert(preprocess_pars_ptr != NULL);
 
   /* get mbio descriptor */
   struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
+  /* get preprocessing parameters */
+  struct mb_preprocess_struct *pars = (struct mb_preprocess_struct *)preprocess_pars_ptr;
+
   /* get data structure pointers */
   struct mbsys_reson7k_struct *store = (struct mbsys_reson7k_struct *)store_ptr;
   struct mb_platform_struct *platform = (struct mb_platform_struct *)platform_ptr;
-  struct mb_preprocess_struct *pars = (struct mb_preprocess_struct *)preprocess_pars_ptr;
 
   /* get saved values */
   double *pixel_size = (double *)&mb_io_ptr->saved1;
@@ -4597,8 +4599,15 @@ int mbsys_reson7k_preprocess(int verbose,     /* in: verbosity level set on comm
 
   int status = MB_SUCCESS;
 
+  /* if called with store_ptr == NULL then called after mb_read_init() but before
+      any data are read - for some formats this allows kluge options to set special
+      reading conditions/behaviors */
+  if (store_ptr == NULL) {
+
+  }
+
   /* deal with a survey record */
-  if (store->kind == MB_DATA_DATA) {
+  else if (store->kind == MB_DATA_DATA) {
 
     s7k_header *header = NULL;
     int time_i[7];
@@ -6289,10 +6298,10 @@ int mbsys_reson7k_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kin
     *time_d = store->time_d;
 
     /* copy comment */
-    if (systemeventmessage->message_length > 0)
-      strncpy(comment, systemeventmessage->message, MB_COMMENT_MAXLINE);
-    else
-      comment[0] = '\0';
+    memset((void *)comment, 0, MB_COMMENT_MAXLINE);
+    if (systemeventmessage->message_length > 0) {
+      strncpy(comment, systemeventmessage->message, MIN(MB_COMMENT_MAXLINE - 1, systemeventmessage->message_length));
+    }
 
     if (verbose >= 4) {
       fprintf(stderr, "\ndbg4  Comment extracted by MBIO function <%s>\n", __func__);
@@ -6641,6 +6650,7 @@ int mbsys_reson7k_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind,
       systemeventmessage->event_id = 1;
       systemeventmessage->message_length = msglen;
       systemeventmessage->event_identifier = 0;
+      memset((void *)systemeventmessage->message, 0, systemeventmessage->message_alloc);
       strncpy(systemeventmessage->message, comment, msglen);
       systemeventmessage->header.Size =
           MBSYS_RESON7K_RECORDHEADER_SIZE + R7KHDRSIZE_7kSystemEventMessage + msglen + MBSYS_RESON7K_RECORDTAIL_SIZE;

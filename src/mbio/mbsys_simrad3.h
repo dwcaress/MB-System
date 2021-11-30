@@ -330,6 +330,7 @@
 #define EM3_ID_BATH3_MBA 0xE5
 
 /* datagram sizes where constant */
+#define EM3_PU_ID_SIZE 108
 #define EM3_PU_STATUS_SIZE 88
 #define EM3_EXTRAPARAMETERS_HEADER_SIZE 14
 #define EM3_RUN_PARAMETER_SIZE 52
@@ -885,6 +886,70 @@ struct mbsys_simrad3_struct {
 	                              Feb 26, 1995 = 19950226 */
 	int msec; /* Time since midnight in msec
 	                              08:12:51.234 = 29570234 */
+
+	/* processing unit id values */
+	int pid_date; /* Status date = year*10000 + month*100 + day
+	                                  Feb 26, 1995 = 19950226 */
+	int pid_msec; /* Status time since midnight in msec
+	                                  08:12:51.234 = 29570234 */
+	int pid_byte_order_flag; /* Byte order flag (always 1) */
+	int pid_serial;          /* System 1 or 2 serial number */
+	int pid_udp_port_1;      /* Sensor input UDP port 1 - Command datagrams */
+	int pid_udp_port_2;      /* Sensor input UDP port 2 - Sensor datagrams except motion sensor */
+	int pid_udp_port_3;      /* Sensor input UDP port 3 - First motion sensor datagrams */
+	int pid_udp_port_4;      /* Sensor input UDP port 4 - Second motion sensor datagrams */
+  int pid_sys_descriptor;  /* System descriptor (Information for internal use) :
+                              CPU configuration (hex format):
+                              • 00xxxxxxh–OldCPUcard
+                              • 01 xx xx xxh – VIPer or CoolMonster
+                              • 02xxxxxxh–CT7
+                              • 03 xx xx xxh – Kontron
+                              • 04 xx xx xxh – Kontron and BSP67B for EM 710
+                              • 05 xx xx xxh – Concurrent Technologies PP432
+                              • 06 xx xx xxh – EM2000 AUV
+                              • 07 xx xx xxh – Concurrent Technologies PP 833
+                              For EM 122, EM 302, EM 710, EM 2040 and EM 2040C (binary format, 16 LSB shown):
+                              • xxxx xxxx xxxx xxx0b – Single RX / Single Head
+                              • xxxx xxxx xxxx xxx1b – Dual RX / Dual Head
+                              • xxxx xxxx xxxx xx0xb – Single swath
+                              • xxxx xxxx xxxx xx1xb – Dual swath
+                              • xxxx xxxx xxxx x0xxb – BSP 67B
+                              • xxxx xxxx xxxx x1xxb – CBMF
+                              • xxxx xxxx xxxx 1xxxb – PTP (IEEE 1588 clock sync) supported
+                              • xxxx xxxx xxx0 xxxxb – Deep water sonar head
+                              • xxxx xxxx xxx1 xxxxb – Shallow water sonar head
+                              • xxxx xxxx xx1x xxxxb – Extra detections supported
+                              • xxxx xxxx x1xx xxxxb – RS 422 serial lines supported
+                              • xxxx xxx0 0xxx xxxxb – EM 2040 Normal
+                              • xxxx xxx0 1xxx xxxxb – EM 2040 Dual TX (2*TX and 2*RX)
+                              • xxxx xxx1 0xxx xxxxb – spare
+                              • xxxx xxx1 1xxx xxxxb – EM 2040P
+                              • xxxx x00x xxxx xxxxb – EM 710
+                              • xxxx x01x xxxx xxxxb – EM 710–MK2
+                              Old sounders (hex format):
+                              • xxxxxx01h–EM1002S
+                              • xxxxxx02h–EM952
+                              • xx xx xx 03h – EM 1002: with Hull Unit
+                              • xx xx xx 04h – EM 1002S: with Hull Unit
+                              • xxxxxx05h–EM952: withHullUnit
+                              • xxxxxx08h–EM3001
+                              • xx xx xx 09h – EM 3002 long pulse available
+                              • xx xx x1 xxh – EM 3002 Rx gain not available */
+  char pid_pu_sw_version[16]; /* PU software version */
+  char pid_bsp_sw_version[16]; /* BSP software version */
+  char pid_head1_version[16]; /* Sonar head/tranceiver software version */
+  char pid_head2_version[16]; /* Sonar head/tranceiver software version */
+  int pid_host_ip;           /* Host ip number */
+  int pid_tx_opening_angle;  /* TX Opening angle:
+                                0 = 0.5 degrees, valid for EM 122, EM 302 and EM 710.
+                                1 = 1 degree, valid for EM 122, EM 302 and EM 710.
+                                2 = 2 degrees, valid for EM 122, EM 302 and EM 710.
+                                4 = 4 degrees, valid for EM 122 and EM 302. */
+  int pid_rx_opening_angle;  /* RX Opening angle:
+                                1 = 1 degree, valid for EM 122, EM 302 and EM 710.
+                                2 = 2 degrees, valid for EM 122, EM 302 and EM 710.
+                                4 = 4 degrees, valid for EM 122 and EM 302. */
+	char pid_spare[7];         /* Spare */
 
 	/* processing unit status parameter values */
 	int sts_date; /* Status date = year*10000 + month*100 + day

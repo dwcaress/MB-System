@@ -310,9 +310,6 @@ int mbsys_gsf_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind, i
                       double *navlat, double *speed, double *heading, int *nbath, int *namp, int *nss, char *beamflag,
                       double *bath, double *amp, double *bathacrosstrack, double *bathalongtrack, double *ss,
                       double *ssacrosstrack, double *ssalongtrack, char *comment, int *error) {
-	gsfTimeSeriesIntensity *snippet;
-	double ss_spacing, ss_spacing_use;
-	double vertical, range, beam_foot, sint, angle;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -482,6 +479,8 @@ int mbsys_gsf_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind, i
 			}
 
 		/* read multibeam sidescan if available */
+	  double ss_spacing, ss_spacing_use;
+	  double vertical, range, beam_foot, sint, angle;
 		if (mb_ping->brb_inten != NULL) {
 			/* get sample rate and raw sidescan sample size */
 			if (mb_ping->sensor_id == GSF_SWATH_BATHY_SUBRECORD_RESON_8101_SPECIFIC ||
@@ -504,7 +503,7 @@ int mbsys_gsf_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind, i
 			*nss = 0;
 			for (int i = 0; i < *nbath; i++) {
 				/* get pixel sample size */
-				snippet = &(mb_ping->brb_inten->time_series[i]);
+	      gsfTimeSeriesIntensity *snippet = &(mb_ping->brb_inten->time_series[i]);
 				vertical = mb_ping->depth[i] - mb_ping->depth_corrector;
 				range = sqrt(vertical * vertical + bathacrosstrack[i] * bathacrosstrack[i]);
 				angle = 90.0 - fabs(mb_ping->beam_angle[i]);
@@ -515,11 +514,14 @@ int mbsys_gsf_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind, i
 				else
 					ss_spacing_use = ss_spacing / sint;
 				for (int j = 0; j < snippet->sample_count; j++) {
-					ss[*nss] = snippet->samples[j];
+          if (mb_beam_ok(mb_ping->beam_flags[i]))
+					  ss[*nss] = snippet->samples[j];
+          else
+					  ss[*nss] = MB_SIDESCAN_NULL;
 					ssacrosstrack[*nss] = bathacrosstrack[i] + ss_spacing_use * (j - snippet->detect_sample);
 					ssalongtrack[*nss] = bathalongtrack[i];
 					(*nss)++;
-				}
+        }
 			}
 		}
 
@@ -556,8 +558,10 @@ int mbsys_gsf_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind, i
 	/* extract comment from structure */
 	else if (*kind == MB_DATA_COMMENT) {
 		/* copy comment */
-		if (records->comment.comment_length > 0 && records->comment.comment != NULL)
-			strcpy(comment, records->comment.comment);
+		if (records->comment.comment_length > 0 && records->comment.comment != NULL) {
+      memset((void *)comment, 0, MB_COMMENT_MAXLINE);
+		  strncpy(comment, records->comment.comment, MIN(MB_COMMENT_MAXLINE, records->comment.comment_length) - 1);
+    }
 		else
 			comment[0] = '\0';
 
@@ -776,6 +780,18 @@ int mbsys_gsf_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, int
 				mb_ping->mr_amplitude[i] = amp[i];
 			}
 
+    /* read multibeam sidescan into storage arrays */
+    int k = 0;
+    for (int i = 0; i < nbath; i++) {
+			gsfTimeSeriesIntensity *snippet = &(mb_ping->brb_inten->time_series[i]);
+			for (int j = 0; j < snippet->sample_count; j++) {
+        if (k < nss) {
+          snippet->samples[j] = ss[k];
+			    k++;
+        }
+      }
+		}
+
 		/* reset GSF scale factors if needed */
 		mbsys_gsf_setscalefactors(verbose, false, mb_ping, error);
 	}
@@ -788,11 +804,13 @@ int mbsys_gsf_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, int
 				status = MB_FAILURE;
 				*error = MB_ERROR_MEMORY_FAIL;
 				records->comment.comment_length = 0;
-			}
+			} else {
+        records->comment.comment_length = strlen(comment) + 1;
+      }
 		}
 		if (status == MB_SUCCESS && records->comment.comment != NULL) {
-			strcpy(records->comment.comment, comment);
-			records->comment.comment_length = strlen(comment) + 1;
+      memset((void *)records->comment.comment, 0, records->comment.comment_length);
+      strncpy(records->comment.comment, comment, MIN(records->comment.comment_length, MB_COMMENT_MAXLINE) - 1);
 			records->comment.comment_time.tv_sec = (int)time_d;
 			records->comment.comment_time.tv_nsec = (int)(1000000000 * (time_d - records->comment.comment_time.tv_sec));
 		}

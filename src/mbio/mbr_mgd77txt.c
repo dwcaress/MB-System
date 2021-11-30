@@ -57,7 +57,7 @@
  */
 
 /* header and data record in bytes */
-static const int  MBF_MGD77TXT_HEADER_NUM = 16;
+static const int MBF_MGD77TXT_HEADER_NUM = 16;
 static const int MBF_MGD77TXT_DATA_LEN = 128;
 
 struct mbf_mgd77txt_struct {
@@ -405,7 +405,7 @@ int mbr_mgd77txt_rd_data(int verbose, void *mbio_ptr, int *error) {
 	int status = MB_SUCCESS;
 
 	/* read next record */
-	char line[MB_COMMENT_MAXLINE] = "";
+	char line[MB_COMMENT_MAXLINE] = {0};
 	char *read_ptr = NULL;
 	if ((read_ptr = fgets(line, MB_PATH_MAXLINE, mb_io_ptr->mbfp)) != NULL) {
 		mb_io_ptr->file_bytes += strlen(line);
@@ -422,16 +422,16 @@ int mbr_mgd77txt_rd_data(int verbose, void *mbio_ptr, int *error) {
 	if (status == MB_SUCCESS && *header_read > 0 && *header_read < MBF_MGD77TXT_HEADER_NUM) {
 		data->kind = MB_DATA_HEADER;
 		(*header_read)++;
-		strncpy(data->comment, line, MAX(strlen(line) - 2, 0));
+		strncpy(data->comment, line, MB_COMMENT_MAXLINE - 2);
 	}
 	else if (status == MB_SUCCESS && (line[0] == '1' || line[0] == '4')) {
 		data->kind = MB_DATA_HEADER;
 		(*header_read) = 1;
-		strncpy(data->comment, line, strlen(line) - 2);
+		strncpy(data->comment, line, MB_COMMENT_MAXLINE - 2);
 	}
 	else if (status == MB_SUCCESS && line[0] == '#') {
 		data->kind = MB_DATA_COMMENT;
-		strncpy(data->comment, &line[1], strlen(line) - 3);
+		strncpy(data->comment, &line[1], MB_COMMENT_MAXLINE - 3);
 	}
 	else if (status == MB_SUCCESS && line[0] == '3') {
 		data->kind = MB_DATA_DATA;
@@ -755,12 +755,16 @@ int mbr_mgd77txt_wr_data(int verbose, void *mbio_ptr, void *data_ptr, int *error
 	struct mbf_mgd77txt_struct *data = (struct mbf_mgd77txt_struct *)data_ptr;
 
 	/* handle the data */
-	char line[MB_COMMENT_MAXLINE] = "";
+	char line[MB_COMMENT_MAXLINE] = {0};
 	if (data->kind == MB_DATA_HEADER) {
-		sprintf(line, "%s\r\n", data->comment);
+    char formatstring[32];
+    sprintf(formatstring, "%c%d%c%c%c", '%', MB_COMMENT_MAXLINE - 4, 's', '\r', '\n');
+		sprintf(line, formatstring, data->comment);
 	}
 	else if (data->kind == MB_DATA_COMMENT) {
-		sprintf(line, "#%s\r\n", data->comment);
+    char formatstring[32];
+    sprintf(formatstring, "%c%c%d%c%c%c", '#', '%', MB_COMMENT_MAXLINE - 4, 's', '\r', '\n');
+		sprintf(line, formatstring, data->comment);
 	}
 	else if (data->kind == MB_DATA_DATA) {
 		/* set data record id */

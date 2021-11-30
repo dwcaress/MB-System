@@ -69,8 +69,6 @@ int mb_check_info(int verbose, char *file, int lonflip, double bounds[4], bool *
 		strcpy(file_inf, file);
 		strcat(file_inf, ".inf");
 
-		int *mask = NULL;
-
 		/* open if possible */
 		FILE *fp = fopen(file_inf, "r");
 		if (fp != NULL) {
@@ -82,6 +80,7 @@ int mb_check_info(int verbose, char *file, int lonflip, double bounds[4], bool *
 			double lat_max = 0.0;
 			int mask_nx = 0;
 			int mask_ny = 0;
+		  int *mask = NULL;
 
 			/* read the inf file */
 			char line[MB_PATH_MAXLINE];
@@ -101,7 +100,7 @@ int mb_check_info(int verbose, char *file, int lonflip, double bounds[4], bool *
 					status = mb_mallocd(verbose, __FILE__, __LINE__, mask_nx * mask_ny * sizeof(int), (void **)&mask, error);
 					for (int j = mask_ny - 1; j >= 0; j--) {
 						char *startptr = NULL;
-						if ((startptr = fgets(line, 128, fp)) != NULL) {
+						if ((startptr = fgets(line, MB_PATH_MAXLINE, fp)) != NULL) {
 							startptr = &line[6];
 							for (int i = 0; i < mask_nx; i++) {
 								int k = i + j * mask_nx;
@@ -154,7 +153,6 @@ int mb_check_info(int verbose, char *file, int lonflip, double bounds[4], bool *
 							    latnorth > bounds[2])
 								*file_in_bounds = true;
 						}
-					mb_freed(verbose, __FILE__, __LINE__, (void **)&mask, error);
 				}
 
 				/* else check whole file against desired input bounds */
@@ -191,6 +189,11 @@ int mb_check_info(int verbose, char *file, int lonflip, double bounds[4], bool *
 				if (verbose >= 4)
 					fprintf(stderr, "dbg4  No data listed in inf file so cannot check bounds...\n");
 			}
+
+    /* free the mask array */
+    if (mask_nx > 0 && mask_ny > 0 && mask != NULL) {
+      	mb_freed(verbose, __FILE__, __LINE__, (void **)&mask, error);
+    }
 
 			/* close the file */
 			fclose(fp);
@@ -337,44 +340,44 @@ int mb_get_info(int verbose, char *file, struct mb_info_struct *mb_info, int lon
 			}
 
 			else if (strncmp(line, "Start of Data:", 14) == 0) {
-				if ((startptr = fgets(line, 128, fp)) != NULL) {
+				if ((startptr = fgets(line, MB_PATH_MAXLINE, fp)) != NULL) {
 					int time_i[7];
 					nscan = sscanf(line, "Time:  %d %d %d %d:%d:%d.%d  JD", &time_i[1], &time_i[2], &time_i[0], &time_i[3],
 					               &time_i[4], &time_i[5], &time_i[6]);
 					if (nscan == 7)
 						mb_get_time(verbose, time_i, &(mb_info->time_start));
 				}
-				if ((startptr = fgets(line, 128, fp)) != NULL) {
+				if ((startptr = fgets(line, MB_PATH_MAXLINE, fp)) != NULL) {
 					nscan = sscanf(line, "Lon: %lf	 Lat: %lf Depth: %lf meters", &mb_info->lon_start, &mb_info->lat_start,
 					               &mb_info->depth_start);
 				}
-				if ((startptr = fgets(line, 128, fp)) != NULL) {
+				if ((startptr = fgets(line, MB_PATH_MAXLINE, fp)) != NULL) {
 					nscan = sscanf(line, "Speed: %lf km/hr ( %lf knots)  Heading: %lf degrees", &mb_info->speed_start, &speedkts,
 					               &mb_info->heading_start);
 				}
-				if ((startptr = fgets(line, 128, fp)) != NULL) {
+				if ((startptr = fgets(line, MB_PATH_MAXLINE, fp)) != NULL) {
 					nscan = sscanf(line, "Sonar Depth:  %lf m  Sonar Altitude:   %lf m", &mb_info->sonardepth_start,
 					               &mb_info->sonaraltitude_start);
 				}
 			}
 
 			else if (strncmp(line, "End of Data:", 12) == 0) {
-				if ((startptr = fgets(line, 128, fp)) != NULL) {
+				if ((startptr = fgets(line, MB_PATH_MAXLINE, fp)) != NULL) {
 					int time_i[7];
 					nscan = sscanf(line, "Time:  %d %d %d %d:%d:%d.%d  JD", &time_i[1], &time_i[2], &time_i[0], &time_i[3],
 					               &time_i[4], &time_i[5], &time_i[6]);
 					if (nscan == 7)
 						mb_get_time(verbose, time_i, &(mb_info->time_end));
 				}
-				if ((startptr = fgets(line, 128, fp)) != NULL) {
+				if ((startptr = fgets(line, MB_PATH_MAXLINE, fp)) != NULL) {
 					nscan = sscanf(line, "Lon: %lf	 Lat: %lf Depth: %lf meters", &mb_info->lon_end, &mb_info->lat_end,
 					               &mb_info->depth_end);
 				}
-				if ((startptr = fgets(line, 128, fp)) != NULL) {
+				if ((startptr = fgets(line, MB_PATH_MAXLINE, fp)) != NULL) {
 					nscan = sscanf(line, "Speed: %lf km/hr ( %lf knots)  Heading: %lf degrees", &mb_info->speed_end, &speedkts,
 					               &mb_info->heading_end);
 				}
-				if ((startptr = fgets(line, 128, fp)) != NULL) {
+				if ((startptr = fgets(line, MB_PATH_MAXLINE, fp)) != NULL) {
 					nscan = sscanf(line, "Sonar Depth:  %lf m  Sonar Altitude:   %lf m", &mb_info->sonardepth_end,
 					               &mb_info->sonaraltitude_end);
 				}
@@ -422,7 +425,7 @@ int mb_get_info(int verbose, char *file, struct mb_info_struct *mb_info, int lon
 				int mask_ny;
 				sscanf(line, "CM dimensions: %d %d", &mask_nx, &mask_ny);
 				for (int j = 0; j < mask_ny; j++)
-					fgets(line, 128, fp);
+					startptr = fgets(line, MB_PATH_MAXLINE, fp);
 			}
 		}
 
@@ -626,6 +629,9 @@ int mb_make_info(int verbose, bool force, char *file, int format, int *error) {
 		fnvmodtime = file_status.st_mtime;
 	}
 
+	int status = MB_SUCCESS;
+	int shellstatus = 0;
+
 	/* make new inf file if not there or out of date */
 	if (force || (datmodtime > 0 && datmodtime > infmodtime)) {
 		if (verbose >= 1)
@@ -634,31 +640,29 @@ int mb_make_info(int verbose, bool force, char *file, int format, int *error) {
 		sprintf(command, "mbinfo -F %d -I %s -G -N -O -M10/10", format, file);
 		if (verbose >= 2)
 			fprintf(stderr, "\t%s\n", command);
-		/* int shellstatus = */ system(command);
-		/* TODO(schwehr): Check the result of shellstatus */
+		  if ((shellstatus = system(command)) != 0)
+        status = MB_FAILURE;
 	}
 
 	/* make new fbt file if not there or out of date */
 	if ((force || (datmodtime > 0 && datmodtime > fbtmodtime)) && mb_should_make_fbt(verbose, format)) {
 		if (verbose >= 1)
 			fprintf(stderr, "Generating fbt file for %s\n", file);
-		char command[MB_PATH_MAXLINE];
-		sprintf(command, "mbcopy -F %d/71 -I %s -D -O %s.fbt", format, file, file);
-		/* int shellstatus = */ system(command);
-		/* TODO(schwehr): Check the result of shellstatus */
+		  char command[MB_PATH_MAXLINE];
+		  sprintf(command, "mbcopy -F %d/71 -I %s -D -O %s.fbt", format, file, file);
+		  if ((shellstatus = system(command)) != 0)
+        status = MB_FAILURE;
 	}
 
 	/* make new fnv file if not there or out of date */
 	if ((force || (datmodtime > 0 && datmodtime > fnvmodtime)) && mb_should_make_fnv(verbose, format)) {
 		if (verbose >= 1)
 			fprintf(stderr, "Generating fnv file for %s\n", file);
-		char command[MB_PATH_MAXLINE];
-		sprintf(command, "mblist -F %d -I %s -O tMXYHScRPr=X=Y+X+Y -UN > %s.fnv", format, file, file);
-		/* int shellstatus = */ system(command);
-		/* TODO(schwehr): Check the result of shellstatus */
+		  char command[MB_PATH_MAXLINE];
+		  sprintf(command, "mblist -F %d -I %s -O tMXYHScRPr=X=Y+X+Y -UN > %s.fnv", format, file, file);
+		  if ((shellstatus = system(command)) != 0)
+        status = MB_FAILURE;
 	}
-
-	const int status = MB_SUCCESS;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);

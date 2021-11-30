@@ -93,7 +93,7 @@ $command = "gmt grdconvert $ifile -G$ofile=ef+n$nodata -V";
 if ($verbose) {
   print "Calling: $command\n";
 }
-`command`;
+`$command`;
 
 exit 0;
 

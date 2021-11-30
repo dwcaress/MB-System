@@ -25,9 +25,6 @@
 TNavConfig::TNavConfig()
 {
    _mapFile = _particlesFile = _vehicleSpecsFile = _logDir = NULL;
-    char pfile[]="particles.cfg";
-   setParticlesFile(pfile);          // default name
-
    _ignoreGps = 0;  // Pay heed unless told not to
 }
 
@@ -81,6 +78,7 @@ void TNavConfig::setMapFile(char *filename)
 
 char* TNavConfig::getMapFile()
 {
+    // caller owns return value - must free it
    char *cp = (_mapFile ? strdup(_mapFile) : NULL);
    return cp;
 }
@@ -106,6 +104,7 @@ void TNavConfig::setVehicleSpecsFile(char *filename)
 
 char* TNavConfig::getVehicleSpecsFile()
 {
+    // caller owns return value - must free it
    char *cp = (_vehicleSpecsFile ? strdup(_vehicleSpecsFile) : NULL);
    return cp;
 }
@@ -158,6 +157,7 @@ void TNavConfig::setLogDir(char *filename)
 
 char* TNavConfig::getLogDir()
 {
+    // caller owns return value - must free it
    char *cp = (_logDir ? strdup(_logDir) : NULL);
    return cp;
 }

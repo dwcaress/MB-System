@@ -256,14 +256,14 @@ int mbsys_reson7k3_deall(int verbose, void *mbio_ptr, void **store_ptr, int *err
 
   /* Reson 7k ping MotionOverGround (record 7012) */
   s7k3_PingMotion *PingMotion = &store->PingMotion;
+  if (PingMotion->n > 0 && PingMotion->roll != NULL)
+    status = mb_freed(verbose, __FILE__, __LINE__, (void **)&(PingMotion->roll), error);
+  if (PingMotion->n > 0 && PingMotion->heading != NULL)
+    status = mb_freed(verbose, __FILE__, __LINE__, (void **)&(PingMotion->heading), error);
+  if (PingMotion->n > 0 && PingMotion->heave != NULL)
+    status = mb_freed(verbose, __FILE__, __LINE__, (void **)&(PingMotion->heave), error);
   PingMotion->n = 0;
   PingMotion->nalloc = 0;
-  if (PingMotion->roll != NULL)
-    status = mb_freed(verbose, __FILE__, __LINE__, (void **)&(PingMotion->roll), error);
-  if (PingMotion->heading != NULL)
-    status = mb_freed(verbose, __FILE__, __LINE__, (void **)&(PingMotion->heading), error);
-  if (PingMotion->heave != NULL)
-    status = mb_freed(verbose, __FILE__, __LINE__, (void **)&(PingMotion->heave), error);
 
   /* Reson 7k Adaptive Gate (record 7014) */
 
@@ -1473,7 +1473,7 @@ int mbsys_reson7k3_print_ProcessedSideScan(int verbose, s7k3_ProcessedSideScan *
     fprintf(stderr, "\n%sMBIO function <%s> called\n", first, __func__);
   }
   fprintf(stderr, "%sStructure Contents:\n", first);
-  fprintf(stderr, "%s     serial_number:              %llu\n", first, ProcessedSideScan->serial_number);
+  fprintf(stderr, "%s     serial_number:              %llu\n", first, (long long unsigned) ProcessedSideScan->serial_number);
   fprintf(stderr, "%s     ping_number:                %u\n", first, ProcessedSideScan->ping_number);
   fprintf(stderr, "%s     multi_ping:                 %u\n", first, ProcessedSideScan->multi_ping);
   fprintf(stderr, "%s     recordversion:              %u\n", first, ProcessedSideScan->recordversion);
@@ -1521,7 +1521,7 @@ int mbsys_reson7k3_print_SonarSettings(int verbose, s7k3_SonarSettings *SonarSet
     fprintf(stderr, "\n%sMBIO function <%s> called\n", first, __func__);
   }
   fprintf(stderr, "%sStructure Contents:\n", first);
-  fprintf(stderr, "%s     serial_number:              %llu\n", first, SonarSettings->serial_number);
+  fprintf(stderr, "%s     serial_number:              %llu\n", first, (long long unsigned) SonarSettings->serial_number);
   fprintf(stderr, "%s     ping_number:                %u\n", first, SonarSettings->ping_number);
   fprintf(stderr, "%s     multi_ping:                 %u\n", first, SonarSettings->multi_ping);
   fprintf(stderr, "%s     frequency:                  %f\n", first, SonarSettings->frequency);
@@ -1594,7 +1594,7 @@ int mbsys_reson7k3_print_device(int verbose, s7k3_device *device, int *error) {
   fprintf(stderr, "%sStructure Contents:\n", first);
   fprintf(stderr, "%s     magic_number:               %d\n", first, device->magic_number);
   fprintf(stderr, "%s     description:                %s\n", first, device->description);
-  fprintf(stderr, "%s     serial_number:              %llu\n", first, device->serial_number);
+  fprintf(stderr, "%s     serial_number:              %llu\n", first, (long long unsigned) device->serial_number);
   fprintf(stderr, "%s     info_length:                %d\n", first, device->info_length);
   fprintf(stderr, "%s     info_alloc:                 %d\n", first, device->info_alloc);
   fprintf(stderr, "%s     info:                       %s\n", first, device->info);
@@ -1633,8 +1633,8 @@ int mbsys_reson7k3_print_Configuration(int verbose, s7k3_Configuration *Configur
     fprintf(stderr, "\n%sMBIO function <%s> called\n", first, __func__);
   }
   fprintf(stderr, "%sStructure Contents:\n", first);
-  fprintf(stderr, "%s     serial_number:              %llu\n", first, Configuration->serial_number);
-  fprintf(stderr, "%s     number_devices:             %llu\n", first, Configuration->number_devices);
+  fprintf(stderr, "%s     serial_number:              %llu\n", first, (long long unsigned) Configuration->serial_number);
+  fprintf(stderr, "%s     number_devices:             %llu\n", first, (long long unsigned) Configuration->number_devices);
   for (int i = 0; i < Configuration->number_devices; i++)
     mbsys_reson7k3_print_device(verbose, &Configuration->device[i], error);
 
@@ -1672,7 +1672,7 @@ int mbsys_reson7k3_print_MatchFilter(int verbose, s7k3_MatchFilter *MatchFilter,
     fprintf(stderr, "\n%sMBIO function <%s> called\n", first, __func__);
   }
   fprintf(stderr, "%sStructure Contents:\n", first);
-  fprintf(stderr, "%s     serial_number:              %llu\n", first, MatchFilter->serial_number);
+  fprintf(stderr, "%s     serial_number:              %llu\n", first, (long long unsigned) MatchFilter->serial_number);
   fprintf(stderr, "%s     ping_number:                %u\n", first, MatchFilter->ping_number);
   fprintf(stderr, "%s     operation:                  %d\n", first, MatchFilter->operation);
   fprintf(stderr, "%s     start_frequency:            %f\n", first, MatchFilter->start_frequency);
@@ -1759,7 +1759,7 @@ int mbsys_reson7k3_print_BeamGeometry(int verbose, s7k3_BeamGeometry *BeamGeomet
     fprintf(stderr, "\n%sMBIO function <%s> called\n", first, __func__);
   }
   fprintf(stderr, "%sStructure Contents:\n", first);
-  fprintf(stderr, "%s     serial_number:              %llu\n", first, BeamGeometry->serial_number);
+  fprintf(stderr, "%s     serial_number:              %llu\n", first, (long long unsigned) BeamGeometry->serial_number);
   fprintf(stderr, "%s     number_beams:               %u\n", first, BeamGeometry->number_beams);
   for (int i = 0; i < BeamGeometry->number_beams; i++)
     fprintf(stderr,
@@ -1801,7 +1801,7 @@ int mbsys_reson7k3_print_Bathymetry(int verbose, s7k3_Bathymetry *Bathymetry, in
     fprintf(stderr, "\n%sMBIO function <%s> called\n", first, __func__);
   }
   fprintf(stderr, "%sStructure Contents:\n", first);
-  fprintf(stderr, "%s     serial_number:              %llu\n", first, Bathymetry->serial_number);
+  fprintf(stderr, "%s     serial_number:              %llu\n", first, (long long unsigned) Bathymetry->serial_number);
   fprintf(stderr, "%s     ping_number:                %u\n", first, Bathymetry->ping_number);
   fprintf(stderr, "%s     multi_ping:                 %u\n", first, Bathymetry->multi_ping);
   fprintf(stderr, "%s     number_beams:               %u\n", first, Bathymetry->number_beams);
@@ -1862,7 +1862,7 @@ int mbsys_reson7k3_print_SideScan(int verbose, s7k3_SideScan *SideScan, int *err
     fprintf(stderr, "\n%sMBIO function <%s> called\n", first, __func__);
   }
   fprintf(stderr, "%sStructure Contents:\n", first);
-  fprintf(stderr, "%s     serial_number:              %llu\n", first, SideScan->serial_number);
+  fprintf(stderr, "%s     serial_number:              %llu\n", first, (long long unsigned) SideScan->serial_number);
   fprintf(stderr, "%s     ping_number:                %u\n", first, SideScan->ping_number);
   fprintf(stderr, "%s     multi_ping:                 %u\n", first, SideScan->multi_ping);
   fprintf(stderr, "%s     beam_position:              %f\n", first, SideScan->beam_position);
@@ -1944,7 +1944,7 @@ int mbsys_reson7k3_print_WaterColumn(int verbose, s7k3_WaterColumn *WaterColumn,
     fprintf(stderr, "\n%sMBIO function <%s> called\n", first, __func__);
   }
   fprintf(stderr, "%sStructure Contents:\n", first);
-  fprintf(stderr, "%s     serial_number:              %llu\n", first, WaterColumn->serial_number);
+  fprintf(stderr, "%s     serial_number:              %llu\n", first,(long long unsigned)  WaterColumn->serial_number);
   fprintf(stderr, "%s     ping_number:                %u\n", first, WaterColumn->ping_number);
   fprintf(stderr, "%s     multi_ping:                 %u\n", first, WaterColumn->multi_ping);
   fprintf(stderr, "%s     number_beams:               %u\n", first, WaterColumn->number_beams);
@@ -2086,7 +2086,7 @@ int mbsys_reson7k3_print_TVG(int verbose, s7k3_TVG *TVG, int *error) {
     fprintf(stderr, "\n%sMBIO function <%s> called\n", first, __func__);
   }
   fprintf(stderr, "%sStructure Contents:\n", first);
-  fprintf(stderr, "%s     serial_number:              %llu\n", first, TVG->serial_number);
+  fprintf(stderr, "%s     serial_number:              %llu\n", first, (long long unsigned) TVG->serial_number);
   fprintf(stderr, "%s     ping_number:                %u\n", first, TVG->ping_number);
   fprintf(stderr, "%s     multi_ping:                 %u\n", first, TVG->multi_ping);
   fprintf(stderr, "%s     n:                          %d\n", first, TVG->n);
@@ -2194,7 +2194,7 @@ int mbsys_reson7k3_print_PingMotion(int verbose, s7k3_PingMotion *PingMotion, in
     fprintf(stderr, "\n%sMBIO function <%s> called\n", first, __func__);
   }
   fprintf(stderr, "%sStructure Contents:\n", first);
-  fprintf(stderr, "%s     serial_number:              %llu\n", first, PingMotion->serial_number);
+  fprintf(stderr, "%s     serial_number:              %llu\n", first, (long long unsigned) PingMotion->serial_number);
   fprintf(stderr, "%s     ping_number:                %u\n", first, PingMotion->ping_number);
   fprintf(stderr, "%s     multi_ping:                 %u\n", first, PingMotion->multi_ping);
   fprintf(stderr, "%s     n:                          %d\n", first, PingMotion->n);
@@ -2246,7 +2246,7 @@ int mbsys_reson7k3_print_AdaptiveGate(int verbose, s7k3_AdaptiveGate *AdaptiveGa
   }
   fprintf(stderr, "%sStructure Contents:\n", first);
   fprintf(stderr, "%s     record_size:                %u\n", first, AdaptiveGate->record_size);
-  fprintf(stderr, "%s     serial_number:              %llu\n", first, AdaptiveGate->serial_number);
+  fprintf(stderr, "%s     serial_number:              %llu\n", first, (long long unsigned) AdaptiveGate->serial_number);
   fprintf(stderr, "%s     ping_number:                %u\n", first, AdaptiveGate->ping_number);
   fprintf(stderr, "%s     multi_ping:                 %u\n", first, AdaptiveGate->multi_ping);
   fprintf(stderr, "%s     n:               %u\n", first, AdaptiveGate->n);
@@ -2293,7 +2293,7 @@ int mbsys_reson7k3_print_DetectionDataSetup(int verbose, s7k3_DetectionDataSetup
     fprintf(stderr, "\n%sMBIO function <%s> called\n", first, __func__);
   }
   fprintf(stderr, "%sStructure Contents:\n", first);
-  fprintf(stderr, "%s     serial_number:              %llu\n", first, DetectionDataSetup->serial_number);
+  fprintf(stderr, "%s     serial_number:              %llu\n", first, (long long unsigned) DetectionDataSetup->serial_number);
   fprintf(stderr, "%s     ping_number:                %u\n", first, DetectionDataSetup->ping_number);
   fprintf(stderr, "%s     multi_ping:                 %u\n", first, DetectionDataSetup->multi_ping);
   fprintf(stderr, "%s     number_beams:               %u\n", first, DetectionDataSetup->number_beams);
@@ -2356,7 +2356,7 @@ int mbsys_reson7k3_print_Beamformed(int verbose, s7k3_Beamformed *Beamformed, in
     fprintf(stderr, "\n%sMBIO function <%s> called\n", first, __func__);
   }
   fprintf(stderr, "%sStructure Contents:\n", first);
-  fprintf(stderr, "%s     serial_number:              %llu\n", first, Beamformed->serial_number);
+  fprintf(stderr, "%s     serial_number:              %llu\n", first, (long long unsigned) Beamformed->serial_number);
   fprintf(stderr, "%s     ping_number:                %u\n", first, Beamformed->ping_number);
   fprintf(stderr, "%s     multi_ping:                 %u\n", first, Beamformed->multi_ping);
   fprintf(stderr, "%s     number_beams:               %u\n", first, Beamformed->number_beams);
@@ -2411,7 +2411,7 @@ int mbsys_reson7k3_print_VernierProcessingDataRaw(int verbose, s7k3_VernierProce
     fprintf(stderr, "\n%sMBIO function <%s> called\n", first, __func__);
   }
   fprintf(stderr, "%sStructure Contents:\n", first);
-  fprintf(stderr, "%s     serial_number:              %llu\n", first, VernierProcessingDataRaw->serial_number);
+  fprintf(stderr, "%s     serial_number:              %llu\n", first, (long long unsigned) VernierProcessingDataRaw->serial_number);
   fprintf(stderr, "%s     ping_number:                %u\n", first, VernierProcessingDataRaw->ping_number);
   fprintf(stderr, "%s     multi_ping:                 %u\n", first, VernierProcessingDataRaw->multi_ping);
   fprintf(stderr, "%s     reference_array:            %u\n", first, VernierProcessingDataRaw->reference_array);
@@ -2507,7 +2507,7 @@ int mbsys_reson7k3_print_BITE(int verbose, s7k3_BITE *BITE, int *error) {
     fprintf(stderr, "%s     number_bite:                %u\n", first, bitereport->number_bite);
     fprintf(stderr, "%s     bite_status:                ", first);
     for (int j = 0; j < 4; j++)
-      fprintf(stderr, "%llu ", bitereport->bite_status[j]);
+      fprintf(stderr, "%llu ", (long long unsigned) bitereport->bite_status[j]);
     fprintf(stderr, "\n");
     for (int j = 0; j < bitereport->number_bite; j++) {
       s7k3_bitefield *bitefield = &(bitereport->bitefield[j]);
@@ -2627,7 +2627,7 @@ int mbsys_reson7k3_print_RawDetection(int verbose, s7k3_RawDetection *RawDetecti
     fprintf(stderr, "\n%sMBIO function <%s> called\n", first, __func__);
   }
   fprintf(stderr, "%sStructure Contents:\n", first);
-  fprintf(stderr, "%s     serial_number:              %llu\n", first, RawDetection->serial_number);
+  fprintf(stderr, "%s     serial_number:              %llu\n", first, (long long unsigned) RawDetection->serial_number);
   fprintf(stderr, "%s     ping_number:                %u\n", first, RawDetection->ping_number);
   fprintf(stderr, "%s     multi_ping:                 %u\n", first, RawDetection->multi_ping);
   fprintf(stderr, "%s     number_beams:               %u\n", first, RawDetection->number_beams);
@@ -2707,7 +2707,7 @@ int mbsys_reson7k3_print_Snippet(int verbose, s7k3_Snippet *Snippet, int *error)
     fprintf(stderr, "\n%sMBIO function <%s> called\n", first, __func__);
   }
   fprintf(stderr, "%sStructure Contents:\n", first);
-  fprintf(stderr, "%s     serial_number:              %llu\n", first, Snippet->serial_number);
+  fprintf(stderr, "%s     serial_number:              %llu\n", first, (long long unsigned) Snippet->serial_number);
   fprintf(stderr, "%s     ping_number:                %u\n", first, Snippet->ping_number);
   fprintf(stderr, "%s     multi_ping:                 %u\n", first, Snippet->multi_ping);
   fprintf(stderr, "%s     number_beams:               %u\n", first, Snippet->number_beams);
@@ -2788,7 +2788,7 @@ int mbsys_reson7k3_print_VernierProcessingDataFiltered(int verbose, s7k3_Vernier
     fprintf(stderr, "\n%sMBIO function <%s> called\n", first, __func__);
   }
   fprintf(stderr, "%sStructure Contents:\n", first);
-  fprintf(stderr, "%s     serial_number:              %llu\n", first, VernierProcessingDataFiltered->serial_number);
+  fprintf(stderr, "%s     serial_number:              %llu\n", first, (long long unsigned) VernierProcessingDataFiltered->serial_number);
   fprintf(stderr, "%s     ping_number:                %u\n", first, VernierProcessingDataFiltered->ping_number);
   fprintf(stderr, "%s     multi_ping:                 %u\n", first, VernierProcessingDataFiltered->multi_ping);
   fprintf(stderr, "%s     number_soundings:           %u\n", first, VernierProcessingDataFiltered->number_soundings);
@@ -2972,7 +2972,7 @@ int mbsys_reson7k3_print_CompressedWaterColumn(int verbose, s7k3_CompressedWater
     fprintf(stderr, "\n%sMBIO function <%s> called\n", first, __func__);
   }
   fprintf(stderr, "%sStructure Contents:\n", first);
-  fprintf(stderr, "%s     serial_number:              %llu\n", first, CompressedWaterColumn->serial_number);
+  fprintf(stderr, "%s     serial_number:              %llu\n", first, (long long unsigned) CompressedWaterColumn->serial_number);
   fprintf(stderr, "%s     ping_number:                %u\n", first, CompressedWaterColumn->ping_number);
   fprintf(stderr, "%s     multi_ping:                 %u\n", first, CompressedWaterColumn->multi_ping);
   fprintf(stderr, "%s     number_beams:               %u\n", first, CompressedWaterColumn->number_beams);
@@ -3071,7 +3071,7 @@ int mbsys_reson7k3_print_SegmentedRawDetection(int verbose, s7k3_SegmentedRawDet
   fprintf(stderr, "%s     segment_field_size:         %u\n", first, SegmentedRawDetection->segment_field_size);
   fprintf(stderr, "%s     n_rx:                       %u\n", first, SegmentedRawDetection->n_rx);
   fprintf(stderr, "%s     rx_field_size:              %u\n", first, SegmentedRawDetection->rx_field_size);
-  fprintf(stderr, "%s     serial_number:              %llu\n", first, SegmentedRawDetection->serial_number);
+  fprintf(stderr, "%s     serial_number:              %llu\n", first, (long long unsigned) SegmentedRawDetection->serial_number);
   fprintf(stderr, "%s     ping_number:                %u\n", first, SegmentedRawDetection->ping_number);
   fprintf(stderr, "%s     multi_ping:                 %u\n", first, SegmentedRawDetection->multi_ping);
   fprintf(stderr, "%s     sound_velocity:             %f\n", first, SegmentedRawDetection->sound_velocity);
@@ -3183,7 +3183,7 @@ int mbsys_reson7k3_print_CalibratedBeam(int verbose, s7k3_CalibratedBeam *Calibr
     fprintf(stderr, "\n%sMBIO function <%s> called\n", first, __func__);
   }
   fprintf(stderr, "%sStructure Contents:\n", first);
-  fprintf(stderr, "%s     serial_number:              %llu\n", first, CalibratedBeam->serial_number);
+  fprintf(stderr, "%s     serial_number:              %llu\n", first, (long long unsigned) CalibratedBeam->serial_number);
   fprintf(stderr, "%s     ping_number:                %u\n", first, CalibratedBeam->ping_number);
   fprintf(stderr, "%s     multi_ping:                 %u\n", first, CalibratedBeam->multi_ping);
   fprintf(stderr, "%s     first_beam:                 %u\n", first, CalibratedBeam->first_beam);
@@ -3233,7 +3233,7 @@ int mbsys_reson7k3_print_SystemEvents(int verbose, s7k3_SystemEvents *SystemEven
     fprintf(stderr, "\n%sMBIO function <%s> called\n", first, __func__);
   }
   fprintf(stderr, "%sStructure Contents:\n", first);
-  fprintf(stderr, "%s     serial_number:              %llu\n", first, SystemEvents->serial_number);
+  fprintf(stderr, "%s     serial_number:              %llu\n", first, (long long unsigned) SystemEvents->serial_number);
   fprintf(stderr, "%s     number_events:              %d\n", first, SystemEvents->number_events);
   fprintf(stderr, "%s     nalloc:                     %d\n", first, SystemEvents->nalloc);
   for (int i = 0; i < SystemEvents->number_events; i++) {
@@ -3283,7 +3283,7 @@ int mbsys_reson7k3_print_SystemEventMessage(int verbose, s7k3_SystemEventMessage
     fprintf(stderr, "\n%sMBIO function <%s> called\n", first, __func__);
   }
   fprintf(stderr, "%sStructure Contents:\n", first);
-  fprintf(stderr, "%s     serial_number:              %llu\n", first, SystemEventMessage->serial_number);
+  fprintf(stderr, "%s     serial_number:              %llu\n", first, (long long unsigned) SystemEventMessage->serial_number);
   fprintf(stderr, "%s     event_id:                   %d\n", first, SystemEventMessage->event_id);
   fprintf(stderr, "%s     message_length:             %d\n", first, SystemEventMessage->message_length);
   fprintf(stderr, "%s     event_identifier:           %d\n", first, SystemEventMessage->event_identifier);
@@ -3345,14 +3345,14 @@ int mbsys_reson7k3_print_RDRStorageRecording(int verbose, s7k3_RDRStorageRecordi
   fprintf(stderr, "%sStructure Contents:\n", first);
   fprintf(stderr, "%s     diskfree_percentage:        %u\n", first, RDRStorageRecording->diskfree_percentage);
   fprintf(stderr, "%s     number_records:             %u\n", first, RDRStorageRecording->number_records);
-  fprintf(stderr, "%s     size:                       %llu\n", first, RDRStorageRecording->size);
+  fprintf(stderr, "%s     size:                       %llu\n", first, (long long unsigned) RDRStorageRecording->size);
   for (int i = 0; i < 4; i++) {
     fprintf(stderr, "%s     reserved[%d]:                %u\n", first, i, RDRStorageRecording->reserved[i]);
   }
   fprintf(stderr, "%s     mode:                       %u\n", first, RDRStorageRecording->mode);
   fprintf(stderr, "%s     file_name:                  %s\n", first, RDRStorageRecording->file_name);
   fprintf(stderr, "%s     RDR_error:                  %u\n", first, RDRStorageRecording->RDR_error);
-  fprintf(stderr, "%s     data_rate:                  %llu\n", first, RDRStorageRecording->data_rate);
+  fprintf(stderr, "%s     data_rate:                  %llu\n", first, (long long unsigned) RDRStorageRecording->data_rate);
   fprintf(stderr, "%s     minutes_left:               %u\n", first, RDRStorageRecording->minutes_left);
 
   const int status = MB_SUCCESS;
@@ -3389,7 +3389,7 @@ int mbsys_reson7k3_print_CalibrationStatus(int verbose, s7k3_CalibrationStatus *
     fprintf(stderr, "\n%sMBIO function <%s> called\n", first, __func__);
   }
   fprintf(stderr, "%sStructure Contents:\n", first);
-  fprintf(stderr, "%s     serial_number:              %llu\n", first, CalibrationStatus->serial_number);
+  fprintf(stderr, "%s     serial_number:              %llu\n", first, (long long unsigned) CalibrationStatus->serial_number);
   fprintf(stderr, "%s     calibration_status:         %u\n", first, CalibrationStatus->calibration_status);
   fprintf(stderr, "%s     percent_complete:           %u\n", first, CalibrationStatus->percent_complete);
   fprintf(stderr, "%s     s7kTime:                    %4u-%3.3u-%2.2u:%2.2u:%9.6f\n",
@@ -3444,7 +3444,7 @@ int mbsys_reson7k3_print_CalibratedSideScan(int verbose, s7k3_CalibratedSideScan
     fprintf(stderr, "\n%sMBIO function <%s> called\n", first, __func__);
   }
   fprintf(stderr, "%sStructure Contents:\n", first);
-  fprintf(stderr, "%s     serial_number:              %llu\n", first, CalibratedSideScan->serial_number);
+  fprintf(stderr, "%s     serial_number:              %llu\n", first, (long long unsigned) CalibratedSideScan->serial_number);
   fprintf(stderr, "%s     ping_number:                %u\n", first, CalibratedSideScan->ping_number);
   fprintf(stderr, "%s     multi_ping:                 %u\n", first, CalibratedSideScan->multi_ping);
   fprintf(stderr, "%s     beam_position:              %f\n", first, CalibratedSideScan->beam_position);
@@ -3504,7 +3504,7 @@ int mbsys_reson7k3_print_SnippetBackscatteringStrength(int verbose, s7k3_Snippet
     fprintf(stderr, "\n%sMBIO function <%s> called\n", first, __func__);
   }
   fprintf(stderr, "%sStructure Contents:\n", first);
-  fprintf(stderr, "%s     serial_number:              %llu\n", first, SnippetBackscatteringStrength->serial_number);
+  fprintf(stderr, "%s     serial_number:              %llu\n", first, (long long unsigned) SnippetBackscatteringStrength->serial_number);
   fprintf(stderr, "%s     ping_number:                %u\n", first, SnippetBackscatteringStrength->ping_number);
   fprintf(stderr, "%s     multi_ping:                 %u\n", first, SnippetBackscatteringStrength->multi_ping);
   fprintf(stderr, "%s     number_beams:               %u\n", first, SnippetBackscatteringStrength->number_beams);
@@ -3641,13 +3641,13 @@ int mbsys_reson7k3_print_FileHeader(int verbose, s7k3_FileHeader *FileHeader, in
   fprintf(stderr, "%sStructure Contents:\n", first);
   fprintf(stderr, "%s     file_identifier:            0x", first);
   for (int i = 0; i < 2; i++)
-    fprintf(stderr, "%llx", FileHeader->file_identifier[i]);
+    fprintf(stderr, "%llx", (long long unsigned) FileHeader->file_identifier[i]);
   fprintf(stderr, "\n");
   fprintf(stderr, "%s     version:                    %d\n", first, FileHeader->version);
   fprintf(stderr, "%s     reserved:                   %d\n", first, FileHeader->reserved);
   fprintf(stderr, "%s     session_identifier:         0x", first);
   for (int i = 0; i < 2; i++)
-    fprintf(stderr, "%llx", FileHeader->session_identifier[i]);
+    fprintf(stderr, "%llx", (long long unsigned) FileHeader->session_identifier[i]);
   fprintf(stderr, "\n");
   fprintf(stderr, "%s     record_data_size:           %d\n", first, FileHeader->record_data_size);
   fprintf(stderr, "%s     number_subsystems:          %d\n", first, FileHeader->number_devices);
@@ -3662,7 +3662,7 @@ int mbsys_reson7k3_print_FileHeader(int verbose, s7k3_FileHeader *FileHeader, in
   }
   fprintf(stderr, "%s     optionaldata:                 %d\n", first, FileHeader->optionaldata);
   fprintf(stderr, "%s     file_catalog_size:            %u\n", first, FileHeader->file_catalog_size);
-  fprintf(stderr, "%s     file_catalog_offset:          %llu\n", first, FileHeader->file_catalog_offset);
+  fprintf(stderr, "%s     file_catalog_offset:          %llu\n", first, (long long unsigned) FileHeader->file_catalog_offset);
 
   const int status = MB_SUCCESS;
 
@@ -3709,7 +3709,7 @@ int mbsys_reson7k3_print_FileCatalog(int verbose, s7k3_FileCatalog *FileCatalog,
     filecatalogdata = &FileCatalog->filecatalogdata[i];
     fprintf(stderr, "%s     %7d %7d %8u %llu %5u %4u %2u %4u-%3.3u-%2.2u:%2.2u:%9.6f %.6f %u %u %u %u %u %u %u %u %u\n",
           first, i, filecatalogdata->sequence,
-          filecatalogdata->size, filecatalogdata->offset,
+          filecatalogdata->size, (long long unsigned) filecatalogdata->offset,
           filecatalogdata->record_type, filecatalogdata->device_id,
           filecatalogdata->system_enumerator,
           filecatalogdata->s7kTime.Year,
@@ -4154,7 +4154,7 @@ int mbsys_reson7k3_print_TimeMessage(int verbose, s7k3_TimeMessage *TimeMessage,
   fprintf(stderr, "%s     pulse_flag:                 %u\n", first, TimeMessage->pulse_flag);
   fprintf(stderr, "%s     port_id:                    %u\n", first, TimeMessage->port_id);
   fprintf(stderr, "%s     reserved:                   %u\n", first, TimeMessage->reserved);
-  fprintf(stderr, "%s     reserved2:                  %llu\n", first, TimeMessage->reserved2);
+  fprintf(stderr, "%s     reserved2:                  %llu\n", first, (long long unsigned) TimeMessage->reserved2);
   fprintf(stderr, "%s     optionaldata:               %d\n", first, TimeMessage->optionaldata);
   fprintf(stderr, "%s     utctime:                    %f\n", first, TimeMessage->utctime);
   fprintf(stderr, "%s     external_time:              %f\n", first, TimeMessage->external_time);
@@ -4225,7 +4225,7 @@ int mbsys_reson7k3_print_RemoteControlSonarSettings(int verbose, s7k3_RemoteCont
     fprintf(stderr, "\n%sMBIO function <%s> called\n", first, __func__);
   }
   fprintf(stderr, "%sStructure Contents:\n", first);
-  fprintf(stderr, "%s     serial_number:              %llu\n", first, RemoteControlSonarSettings->serial_number);
+  fprintf(stderr, "%s     serial_number:              %llu\n", first, (long long unsigned) RemoteControlSonarSettings->serial_number);
   fprintf(stderr, "%s     ping_number:                %u\n", first, RemoteControlSonarSettings->ping_number);
   fprintf(stderr, "%s     frequency:                  %f\n", first, RemoteControlSonarSettings->frequency);
   fprintf(stderr, "%s     sample_rate:                %f\n", first, RemoteControlSonarSettings->sample_rate);
@@ -4331,7 +4331,7 @@ int mbsys_reson7k3_print_CommonSystemSettings(int verbose, s7k3_CommonSystemSett
     fprintf(stderr, "\n%sMBIO function <%s> called\n", first, __func__);
   }
   fprintf(stderr, "%sStructure Contents:\n", first);
-  fprintf(stderr, "%s     serial_number:              %llu\n", first, CommonSystemSettings->serial_number);
+  fprintf(stderr, "%s     serial_number:              %llu\n", first, (long long unsigned) CommonSystemSettings->serial_number);
   fprintf(stderr, "%s     ping_number:                %u\n", first, CommonSystemSettings->ping_number);
   fprintf(stderr, "%s     sound_velocity:             %f\n", first, CommonSystemSettings->sound_velocity);
   fprintf(stderr, "%s     absorption:                 %f\n", first, CommonSystemSettings->absorption);
@@ -4832,62 +4832,6 @@ int mbsys_reson7k3_preprocess(int verbose,     /* in: verbosity level set on com
                              void *mbio_ptr,  /* in: see mb_io.h:/^struct mb_io_struct/ */
                              void *store_ptr, /* in: see mbsys_reson7k.h:/^struct mbsys_reson7k3_struct/ */
                              void *platform_ptr, void *preprocess_pars_ptr, int *error) {
-  struct mb_platform_struct *platform;
-  struct mb_preprocess_struct *pars;
-
-  /* data structure pointers */
-  s7k3_header *header;
-  s7k3_SonarSettings *SonarSettings;
-  s7k3_segmentedrawdetectionrxdata *segmentedrawdetectionrxdata;
-
-  /* kluge parameters */
-  double kluge_beampatternsnellfactor = 1.0;
-  double kluge_soundspeedsnellfactor = 1.0;
-
-  /* variables for beam angle calculation */
-  mb_3D_orientation tx_align;
-  mb_3D_orientation tx_orientation;
-  double tx_steer;
-  mb_3D_orientation rx_align;
-  mb_3D_orientation rx_orientation;
-  double rx_steer;
-  double reference_heading;
-  double beamAzimuth;
-  double beamDepression;
-
-  s7k3_time s7kTime;
-  int time_i[7];
-  int time_j[5];
-  double time_d = 0.0;
-  double navlon = 0.0;
-  double navlat = 0.0;
-  double speed = 0.0;
-  double altitude = 0.0;
-  double sensordepth = 0.0;
-  double heading = 0.0;
-  double beamheading;
-  double roll = 0.0;
-  double beamroll;
-  double pitch = 0.0;
-  double beampitch;
-  double heave = 0.0;
-  double soundspeed;
-  double soundspeednew;
-  double soundspeedsnellfactor = 1.0;
-  double mtodeglon, mtodeglat;
-  double dx, dy, dt;
-  int jnav = 0;
-  int jsensordepth = 0;
-  int jheading = 0;
-  int jaltitude = 0;
-  int jAttitude = 0;
-  int jsoundspeed = 0;
-  int interp_error = MB_ERROR_NO_ERROR;
-  double *pixel_size;
-  double *swath_width;
-  mb_u_char *qualitycharptr;
-  mb_u_char beamflag;
-  double ttime;
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -4903,21 +4847,25 @@ int mbsys_reson7k3_preprocess(int verbose,     /* in: verbosity level set on com
 
   /* check for non-null data */
   assert(mbio_ptr != NULL);
-  assert(store_ptr != NULL);
   assert(preprocess_pars_ptr != NULL);
 
   /* get mbio descriptor */
   struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
+  /* get preprocessing parameters */
+  struct mb_preprocess_struct *pars = (struct mb_preprocess_struct *)preprocess_pars_ptr;
+
   /* get data structure pointers */
   struct mbsys_reson7k3_struct *store = (struct mbsys_reson7k3_struct *)store_ptr;
-  platform = (struct mb_platform_struct *)platform_ptr;
-  pars = (struct mb_preprocess_struct *)preprocess_pars_ptr;
+  struct mb_platform_struct *platform = (struct mb_platform_struct *)platform_ptr;
 
   /* get saved values */
-  pixel_size = (double *)&mb_io_ptr->saved1;
-  swath_width = (double *)&mb_io_ptr->saved2;
+  double *pixel_size = (double *)&mb_io_ptr->saved1;
+  double *swath_width = (double *)&mb_io_ptr->saved2;
 
+  /* kluge parameters */
+  double kluge_beampatternsnellfactor = 1.0;
+  double kluge_soundspeedsnellfactor = 1.0;
   bool kluge_beampatternsnell = false;
   bool kluge_soundspeedsnell = false;
   bool kluge_zeroAttitudecorrection = false;
@@ -4993,12 +4941,65 @@ int mbsys_reson7k3_preprocess(int verbose,     /* in: verbosity level set on com
 
   int status = MB_SUCCESS;
 
-  s7k3_bathydata *bathydata;
-  s7k3_rawdetectiondata *rawdetectiondata;
-  s7k3_VerticalDepth *VerticalDepth;
+  s7k3_header *header = NULL;
+  s7k3_SonarSettings *SonarSettings = NULL;
+  s7k3_segmentedrawdetectionrxdata *segmentedrawdetectionrxdata = NULL;
+  s7k3_bathydata *bathydata = NULL;
+  s7k3_rawdetectiondata *rawdetectiondata = NULL;
+  s7k3_VerticalDepth *VerticalDepth = NULL;
+
+  /* variables for beam angle calculation */
+  mb_3D_orientation tx_align;
+  mb_3D_orientation tx_orientation;
+  double tx_steer;
+  mb_3D_orientation rx_align;
+  mb_3D_orientation rx_orientation;
+  double rx_steer;
+  double reference_heading;
+  double beamAzimuth;
+  double beamDepression;
+
+  s7k3_time s7kTime;
+  int time_i[7];
+  int time_j[5];
+  double time_d = 0.0;
+  double navlon = 0.0;
+  double navlat = 0.0;
+  double speed = 0.0;
+  double altitude = 0.0;
+  double sensordepth = 0.0;
+  double heading = 0.0;
+  double beamheading;
+  double roll = 0.0;
+  double beamroll;
+  double pitch = 0.0;
+  double beampitch;
+  double heave = 0.0;
+  double soundspeed;
+  double soundspeednew;
+  double soundspeedsnellfactor = 1.0;
+  double mtodeglon, mtodeglat;
+  double dx, dy, dt;
+  int jnav = 0;
+  int jsensordepth = 0;
+  int jheading = 0;
+  int jaltitude = 0;
+  int jAttitude = 0;
+  int jsoundspeed = 0;
+  int interp_error = MB_ERROR_NO_ERROR;
+  mb_u_char *qualitycharptr;
+  mb_u_char beamflag;
+  double ttime;
+
+  /* if called with store_ptr == NULL then called after mb_read_init() but before
+      any data are read - for some formats this allows kluge options to set special
+      reading conditions/behaviors */
+  if (store_ptr == NULL) {
+
+  }
 
   /* deal with a survey record */
-  if (store->kind == MB_DATA_DATA) {
+  else if (store->kind == MB_DATA_DATA) {
     s7k3_Navigation *Navigation = &(store->Navigation);
     SonarSettings = &(store->SonarSettings);
     s7k3_MatchFilter *MatchFilter = &(store->MatchFilter);
@@ -6509,10 +6510,10 @@ int mbsys_reson7k3_extract(int verbose, void *mbio_ptr, void *store_ptr, int *ki
     *time_d = store->time_d;
 
     /* copy comment */
-    if (SystemEventMessage->message_length > 0)
-      strncpy(comment, SystemEventMessage->message, MB_COMMENT_MAXLINE);
-    else
-      comment[0] = '\0';
+    memset((void *)comment, 0, MB_COMMENT_MAXLINE);
+    if (SystemEventMessage->message_length > 0) {
+      strncpy(comment, SystemEventMessage->message, MIN(MB_COMMENT_MAXLINE - 1, SystemEventMessage->message_length));
+    }
 
     if (verbose >= 4) {
       fprintf(stderr, "\ndbg4  Comment extracted by MBIO function <%s>\n", __func__);
@@ -6867,6 +6868,7 @@ int mbsys_reson7k3_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind
       SystemEventMessage->event_id = 1;
       SystemEventMessage->message_length = msglen;
       SystemEventMessage->event_identifier = 0;
+      memset((void *)SystemEventMessage->message, 0, SystemEventMessage->message_alloc);
       strncpy(SystemEventMessage->message, comment, msglen);
       SystemEventMessage->header.Version = 5;
       SystemEventMessage->header.Offset = 60;
@@ -9009,7 +9011,7 @@ int mbsys_reson7k3_makess_source(
   s7k3_segmentedrawdetectionrxdata *segmentedrawdetectionrxdata = NULL;
   s7k3_snippetdata *snippetdata = NULL;
   s7k3_snippetbackscatteringstrengthdata *snippetbackscatteringstrengthdata = NULL;
-  int nss;
+  int nss = 0;
   int ss_cnt[MBSYS_RESON7K_MAX_PIXELS];
   double ss[MBSYS_RESON7K_MAX_PIXELS];
   double ssacrosstrack[MBSYS_RESON7K_MAX_PIXELS];
@@ -9055,10 +9057,12 @@ int mbsys_reson7k3_makess_source(
 
 
   /* calculate SideScan from the desired source data if it is available */
-  if (store->kind == MB_DATA_DATA && ((source == R7KRECID_CalibratedSideScan && store->read_CalibratedSideScan) ||
-                                      (source == R7KRECID_SnippetBackscatteringStrength && store->read_SnippetBackscatteringStrength) ||
-                                      (source == R7KRECID_Snippet && store->read_Snippet) ||
-                                      (source == R7KRECID_SideScan && store->read_SideScan))) {
+  if (store->kind == MB_DATA_DATA
+        && (store->read_RawDetection || store->read_SegmentedRawDetection)
+        && ((source == R7KRECID_CalibratedSideScan && store->read_CalibratedSideScan) ||
+            (source == R7KRECID_SnippetBackscatteringStrength && store->read_SnippetBackscatteringStrength) ||
+            (source == R7KRECID_Snippet && store->read_Snippet) ||
+            (source == R7KRECID_SideScan && store->read_SideScan))) {
 
     int nbathsort = 0;
     // Handle case of bathymetry in RawDetection 7027 records

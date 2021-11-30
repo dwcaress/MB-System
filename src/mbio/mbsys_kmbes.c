@@ -15,7 +15,7 @@
  * mbsys_kmbes.c contains the MBIO functions for handling data from
  * the following data formats:
  *    MBSYS_KMBES formats (code in mbsys_kmbes.c and mbsys_kmbes.h):
- *      MBF_TEMPFORM : MBIO ID ??? (code in mbr_kmbes.c)
+ *      MBF_KEMKMALL : MBIO ID 261 (code in mbr_kemkmall.c)
  *
  * Author:  D. W. Caress
  * Date:  May 25, 2018
@@ -40,25 +40,23 @@
 #ifdef _WIN32
 
 /* Based on https://stackoverflow.com/questions/5404277/porting-clock-gettime-to-windows */
+/* - modified to not use static variables for thread safety */
 #include <Windows.h>
 #define CLOCK_REALTIME 0
 #if defined(_MSC_VER) && (_MSC_VER <= 1800)
 struct timespec { long tv_sec; long tv_nsec; };
 #endif
-static bool g_first_time = 1;
 static LARGE_INTEGER g_counts_per_sec;
 
 int clock_gettime(int dummy, struct timespec *ct) {
-    if (g_first_time) {
-        g_first_time = 0;
-
-        if (0 == QueryPerformanceFrequency(&g_counts_per_sec)) {
-            g_counts_per_sec.QuadPart = 0;
-        }
+    LARGE_INTEGER g_counts_per_sec, count;
+    if (NULL == ct) {
+      return -1;
     }
-
-    LARGE_INTEGER count;
-    if ((NULL == ct) || (g_counts_per_sec.QuadPart <= 0) || (0 == QueryPerformanceCounter(&count))) {
+    if (0 == QueryPerformanceFrequency(&g_counts_per_sec) || g_counts_per_sec.QuadPart == 0) {
+      return = -1;
+    }
+    if (0 == QueryPerformanceCounter(&count)) {
         return -1;
     }
 
@@ -324,6 +322,7 @@ int mbsys_kmbes_sidescantype(int verbose, void *mbio_ptr, void *store_ptr, int *
 int mbsys_kmbes_preprocess(int verbose, void *mbio_ptr, void *store_ptr,
                              void *platform_ptr, void *preprocess_pars_ptr,
                              int *error) {
+
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -334,33 +333,20 @@ int mbsys_kmbes_preprocess(int verbose, void *mbio_ptr, void *store_ptr,
     fprintf(stderr, "dbg2       preprocess_pars_ptr:        %p\n", (void *)preprocess_pars_ptr);
   }
 
-  int time_i[7];
-  double time_d;
-  double navlon;
-  double navlat;
-  double sensordepth;
-  double heading;
-  // double altitude;
-  double speed;
-  double roll;
-  double pitch;
-  double heave;
-  double soundspeed;
-  double soundspeednew;
-
   *error = MB_ERROR_NO_ERROR;
 
   /* check for non-null data */
   assert(mbio_ptr != NULL);
-  assert(store_ptr != NULL);
   assert(preprocess_pars_ptr != NULL);
 
   /* get mbio descriptor */
   struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
+  /* get preprocessing parameters */
+  struct mb_preprocess_struct *pars = (struct mb_preprocess_struct *)preprocess_pars_ptr;
+
   /* data structure pointers */
   // struct mb_platform_struct *platform = (struct mb_platform_struct *)platform_ptr;
-  struct mb_preprocess_struct *pars = (struct mb_preprocess_struct *)preprocess_pars_ptr;
   struct mbsys_kmbes_struct *store = (struct mbsys_kmbes_struct *)store_ptr;
   // struct mbsys_kmbes_mrz *mrz = (struct mbsys_kmbes_mrz *)&store->mrz[0];
   // struct mbsys_kmbes_xmt *xmt = (struct mbsys_kmbes_xmt *)&store->xmt[0];
@@ -440,8 +426,29 @@ int mbsys_kmbes_preprocess(int verbose, void *mbio_ptr, void *store_ptr,
 
   int status = MB_SUCCESS;
 
+  int time_i[7];
+  double time_d;
+  double navlon;
+  double navlat;
+  double sensordepth;
+  double heading;
+  // double altitude;
+  double speed;
+  double roll;
+  double pitch;
+  double heave;
+  double soundspeed;
+  double soundspeednew;
+
+  /* if called with store_ptr == NULL then called after mb_read_init() but before
+      any data are read - for some formats this allows kluge options to set special
+      reading conditions/behaviors */
+  if (store_ptr == NULL) {
+
+  }
+
   /* deal with a survey record */
-  if (store->kind == MB_DATA_DATA) {
+  else if (store->kind == MB_DATA_DATA) {
 
     /*--------------------------------------------------------------*/
     /* change timestamp if indicated */
@@ -1147,8 +1154,10 @@ int mbsys_kmbes_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
     *time_d = store->time_d;
 
     /* copy comment */
-    if (strlen(xmc->comment) > 0)
-      strncpy(comment, xmc->comment, MB_COMMENT_MAXLINE);
+    if (strlen(xmc->comment) > 0) {
+      memset((void *)comment, 0, MB_COMMENT_MAXLINE);
+		  strncpy(comment, xmc->comment, MB_COMMENT_MAXLINE - 1);
+    }
     else
       comment[0] = '\0';
 
@@ -1438,8 +1447,8 @@ int mbsys_kmbes_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, i
   /* insert comment in structure */
   else if (store->kind == MB_DATA_COMMENT) {
     /* copy comment */
-    strncpy(xmc->comment, comment, MB_COMMENT_MAXLINE-1);
-    xmc->comment[MB_COMMENT_MAXLINE-1] = '\0';
+    memset((void *)xmc->comment, 0, MB_COMMENT_MAXLINE);
+    strncpy(xmc->comment, comment, MB_COMMENT_MAXLINE - 1);
 
     /* have to construct this record now */
     const int numBytesComment = strlen(xmc->comment) + (strlen(xmc->comment) % 2);
