@@ -11,7 +11,8 @@
  *
  *    See README file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
-/*
+/**
+   @file
  * mbsys_atlas.h defines the MBIO data structures for handling data from
  * STN Atlas Marine Electronics multibeam sonars.
  * The relevant sonars include Hydrosweep DS2 and Fansweep sonars.

@@ -33,7 +33,7 @@
 #include <limits>
 #include <QtDataVisualization/QSurface3DSeries>
 
-#include <gmt.h>
+#include <gmt/gmt.h>
 
 using namespace QtDataVisualization;
 
@@ -54,7 +54,7 @@ public:
   /// Read grid from GMT file; return pointer to GMT_GRID if
   /// successful, else return nullptr
   static GMT_GRID *readGridFile(const char *filename, void **gmtApi);
-
+    
   /// Toggle between color map and solid color
   void toggleColorMap(bool on);
 
@@ -99,7 +99,7 @@ public Q_SLOTS:
   double m_maxHeight;
 
   QSurfaceDataArray *m_dataArray;
-
+  
 };
 
 #endif // TOPOGRAPHICSERIES_H

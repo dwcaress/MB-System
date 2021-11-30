@@ -84,6 +84,8 @@ AS_ECHO(["        --with-opengl-include - location of OpenGL headers (optional)"
 AS_ECHO(["        --with-otps-dir       - location of OTPS installation (optional)"])
 AS_ECHO(["        --with-opencv-lib     - location of OpenCV libs (optional)"])
 AS_ECHO(["        --with-opencv-include - location of OpenCV headers (optional)"])
+AS_ECHO(["        --with-vtk-include    - location of VTK8.2+ headers (required if qt enabled)"])
+AS_ECHO(["        --with-vtk-lib        - location of VTK8.2+ libraries (required if qt enabled)"])
 AS_ECHO(["        --enable-opencv       - enable building tools using OpenCV (optional)"])
 AS_ECHO(["        --enable-mbtrn        - enable building terrain relative navigation (TRN) tools (optional)"])
 AS_ECHO(["        --enable-mbtnav       - enable building terrain relative navigation (TRN) tools (optional)"])
@@ -146,11 +148,13 @@ AC_PROG_CC
 AM_PROG_CC_C_O
 AC_PROG_CXX
 AC_PROG_INSTALL
+AC_PROG_AWK
 AM_PROG_AS
 m4_ifdef([AM_PROG_AR], [AM_PROG_AR])
 AC_PROG_LN_S
 AC_PROG_MAKE_SET
 LT_INIT
+AC_PROG_SED
 AC_SUBST([LIBTOOL_DEPS])
 LT_LIB_M
 AM_PATH_PYTHON([3.6],, [:])
@@ -445,6 +449,7 @@ else
     dnl Looking for PROJ headers in the usual places...
     AS_ECHO(["Looking for PROJ headers in the usual places..."])
 fi
+
 save_CPPFLAGS=$CPPFLAGS
 save_CFLAGS=$CFLAGS
 if test "$FOUND_PROJ4" = "yes" ; then
@@ -1186,39 +1191,89 @@ if test "$build_qttools" = "yes" ; then
     AC_SUBST([qt_CPPFLAGS], [$QT_CXXFLAGS])
     AC_SUBST([qt_MOC], [$QT_MOC])
 
-    AS_ECHO(["Constructing Qt project file mbgui.pro in src/qt-mbgui..."])
-    `cp src/qt-mbgui/mbgui.pro.init src/qt-mbgui/mbgui.pro`
-    `sed -i "" "s#__OPENGL_INCLUDEDIR__#$libopengl_INCLUDEDIR#" src/qt-mbgui/mbgui.pro`
-    `sed -i "" "s#__OPENGL_LIBS__#$libopengl_LIBS#" src/qt-mbgui/mbgui.pro`
-    `sed -i "" "s#__GMT_INCLUDEDIR__#$libgmt_INCLUDEDIR#" src/qt-mbgui/mbgui.pro`
-    `sed -i "" "s#__GMT_LIBS__#$libgmt_LIBS#" src/qt-mbgui/mbgui.pro`
-    `sed -i "" "s#__INSTALLDIR__#$prefix/lib#" src/qt-mbgui/mbgui.pro`
-    AS_ECHO(["Running qmake in src/qt-mbgui to generate src/qt-mbgui/Makefile.qmake..."])
-    `cd src/qt-mbgui ; qmake -makefile -o Makefile.qmake ; cd ../..`
+    # Find VTK headers and libraries too
+    vtkLocSpecified=no
+    vtkFound=no
 
-    AS_ECHO(["Constructing Qt project file mbgrdviz-1.pro in src/qt-mbgrdviz-1..."])
-    `cp src/qt-mbgrdviz-1/mbgrdviz-1.pro.init src/qt-mbgrdviz-1/mbgrdviz-1.pro`
-    `sed -i "" "s#__GMT_INCLUDEDIR__#$libgmt_INCLUDEDIR#" src/qt-mbgrdviz-1/mbgrdviz-1.pro`
-    `sed -i "" "s#__GMT_LIBS__#$libgmt_LIBS#" src/qt-mbgrdviz-1/mbgrdviz-1.pro`
-    `sed -i "" "s#__INSTALLDIR__#$prefix/bin#" src/qt-mbgrdviz-1/mbgrdviz-1.pro`
-    AS_ECHO(["Running qmake in src/qt-mbgrdviz-1 to generate src/qt-mbgrdviz-1/Makefile.qmake..."])
-    `cd src/qt-mbgrdviz-1 ; qmake -makefile -o Makefile.qmake ; cd ../..`
+    # Required major and minor version for VTK
+    vtkMinMajor=8
+    vtkMinMinor=2
+    AS_ECHO(["Check for VTK8.2 libraries"])
 
-    AS_ECHO(["Constructing Qt project file mbgrdviz-2.pro in src/qt-mbgrdviz-2..."])
-    `cp src/qt-mbgrdviz-2/mbgrdviz-2.pro.init src/qt-mbgrdviz-2/mbgrdviz-2.pro`
-    `sed -i "" "s#__GMT_INCLUDEDIR__#$libgmt_INCLUDEDIR#" src/qt-mbgrdviz-2/mbgrdviz-2.pro`
-    `sed -i "" "s#__GMT_LIBS__#$libgmt_LIBS#" src/qt-mbgrdviz-2/mbgrdviz-2.pro`
-    `sed -i "" "s#__INSTALLDIR__#$prefix/bin#" src/qt-mbgrdviz-2/mbgrdviz-2.pro`
+    AC_ARG_WITH(vtk-lib, [  --with-vtk-lib=DIR    Location of VTK library],
+            [vtk_libdir="${withval}"] [vtkLocSpecified=yes], [vtkLocSpecified=no])
+
+    if test "$vtkLocSpecified" = "yes" ; then
+       dnl VTK library location specified
+       AS_ECHO(["VTK8.2 library location specified; check for directory existence..."])
+       AC_CHECK_FILE([$vtk_libdir], [vtkFound=yes], [vtkFound=no])
+       if test "$vtkFound" = "no" ; then
+          AC_MSG_ERROR([Did not find specified VTK8.2 library location $vtk_libdir - check installation])
+       fi
+       # Save LDFLAGS...
+       save_LDFLAGS=$LDFLAGS
+       # Look for extern C function GetVTKVersion in vtkCommonCore library
+       LDFLAGS="$LDFLAGS -L$vtk_libdir"
+       AC_CHECK_LIB([vtkCommonCore-8.2], [GetVTKVersion], [vtkFound=yes], [vtkFound=no])
+       # Restore LDFLAGS
+       LDFLAGS="$save_LDFLAGS"
+       if test "$vtkFound" = "no"; then
+         AC_MSG_ERROR([Did not find VTK libraries - check installation])
+       else
+         AS_ECHO(["Found VTK libraries"])
+       fi
+    else
+         AC_MSG_ERROR([Must specify VTK8.2 library location with --with-vtk-lib=DIR])
+    fi
+    AS_ECHO(["Check for VTK headers"])
+
+    AC_ARG_WITH(vtk-include, [  --with-vtk-include=DIR    Location of VTK headers],
+            [vtk_includedir="${withval}"] [vtkLocSpecified=yes], [vtkLocSpecified=no])    
+
+    if test "$vtkLocSpecified" = "yes" ; then
+       # Check for VTK header in specified location
+       AS_ECHO(["Look for $vtk_includedir/vtkActor.h..."])
+       AC_CHECK_FILE([$vtk_includedir/vtkActor.h], [vtkFound=yes], [vtkFound=no])
+       if test "$vtkFound" = "no" ; then
+          AC_MSG_ERROR([Did not find VTK headers in $vtk_includedir - check installation])
+       else
+          AS_ECHO(["Verify that VTK meets minimum version requirement"])
+          vers=`$AWK -f build-utils/vtkVersionCheck.awk $vtkMinMajor $vtkMinMinor $vtk_includedir/vtkVersionMacros.h`
+          if [[ $? -eq 1 ]]
+          then
+            AC_MSG_ERROR([VTK does not meet minimum version requirement: $vers])
+          else
+            AS_ECHO(["VTK meets minimum version requirement"])
+          fi
+          vers=`echo $vers | cut -d ' ' -f 1`
+          echo "vers: $vers"
+       fi
+    else
+       # VTK header location not specified - this is currently an errro
+       AC_MSG_ERROR([Must specify VTK include location with --with-vtk-include=DIR])       
+    fi
+    
+    # Set environment variables for qmake
+    export OPENGL_INCLUDEDIR=$libopengl_INCLUDEDIR
+    export OPENGL_LIBS=$libopengl_LIBS
+
+    export GMT_INCLUDEDIR=$libgmt_INCLUDEDIR
+    export GMT_LIBS=$libgmt_LIBS
+
+    export VTK_INCLUDEDIR=$vtk_includedir
+    export VTK_LIBS="-L$vtk_libdir -lvtkGUISupportQt-$vers -lvtkCommonColor-$vers -lvtkRenderingFreeType-$vers -lvtkRenderingAnnotation-$vers -lvtkCommonTransforms-$vers -lvtkCommonCore-$vers -lvtkCommonDataModel-$vers -lvtkCommonExecutionModel-$vers -lvtkInteractionWidgets-$vers -lvtkInteractionStyle-$vers -lvtkRenderingCore-$vers -lvtkFiltersSources-$vers -lvtkGeovisCore-$vers -lvtkRenderingOpenGL2-$vers -lvtkFiltersHybrid-$vers -lvtkIOGeometry-$vers -lvtkIOCore-$vers -lvtkIOLegacy-$vers -lvtkRenderingVolumeOpenGL2-$vers -lvtkFiltersCore-$vers -lvtkFiltersGeneral-$vers -lvtksys-$vers"
+    
+    export MB_INSTALLDIR=$prefix/lib
+    
+    AS_ECHO(["Constructing Qt project file MBGui.pro in src/qt-guilib..."])
+    `cd src/qt-guilib ; qmake -makefile -o Makefile.qmake ; cd ../..`
+
+    AS_ECHO(["Running qmake in src/qt-mbgrdviz to generate src/qt-mbgrdviz/Makefile.qmake..."])
+    `cd src/qt-mbgrdviz ; qmake -makefile -o Makefile.qmake ; cd ../..`
+
     AS_ECHO(["Running qmake in src/qt-mbgrdviz-2 to generate src/qt-mbgrdviz-2/Makefile.qmake..."])
     `cd src/qt-mbgrdviz-2 ; qmake -makefile -o Makefile.qmake ; cd ../..`
 
-    AS_ECHO(["Constructing Qt project file mbgrdviz-3.pro in src/qt-mbgrdviz-3..."])
-    `cp src/qt-mbgrdviz-3/mbgrdviz-3.pro.init src/qt-mbgrdviz-3/mbgrdviz-3.pro`
-    `sed -i "" "s#__OPENGL_INCLUDEDIR__#$libopengl_INCLUDEDIR#" src/qt-mbgrdviz-3/mbgrdviz-3.pro`
-    `sed -i "" "s#__OPENGL_LIBS__#$libopengl_LIBS#" src/qt-mbgrdviz-3/mbgrdviz-3.pro`
-    `sed -i "" "s#__GMT_INCLUDEDIR__#$libgmt_INCLUDEDIR#" src/qt-mbgrdviz-3/mbgrdviz-3.pro`
-    `sed -i "" "s#__GMT_LIBS__#$libgmt_LIBS#" src/qt-mbgrdviz-3/mbgrdviz-3.pro`
-    `sed -i "" "s#__INSTALLDIR__#$prefix/bin#" src/qt-mbgrdviz-3/mbgrdviz-3.pro`
     AS_ECHO(["Running qmake in src/qt-mbgrdviz-3 to generate src/qt-mbgrdviz-3/Makefile.qmake..."])
     `cd src/qt-mbgrdviz-3 ; qmake -makefile -o Makefile.qmake ; cd ../..`
 
@@ -1442,8 +1497,8 @@ if test "$build_opencvtools" = "yes" ; then
 fi
 if test "$build_qttools" = "yes" ; then
     AC_CONFIG_FILES([\
-          src/qt-mbgui/Makefile \
-          src/qt-mbgrdviz-1/Makefile \
+          src/qt-guilib/Makefile \
+          src/qt-mbgrdviz/Makefile \
           src/qt-mbgrdviz-2/Makefile \
           src/qt-mbgrdviz-3/Makefile \
           ])
@@ -1599,3 +1654,4 @@ AS_ECHO(["----------------------------------------------------------------------
 AS_ECHO(["See config.log for details of configure results"])
 AS_ECHO(["See INSTALL for further build instructions and hints"])
 AS_ECHO(["------------------------------------------------------------------------------"])
+

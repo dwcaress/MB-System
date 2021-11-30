@@ -33,7 +33,7 @@
 #include <cmath>
 #include "TopographicSeries.h"
 
-#define MAX_QVECTOR_SIZE 2147483647
+#define MAX_QVECTOR_BYTES 2147483647
 
 using namespace QtDataVisualization;
 
@@ -69,13 +69,13 @@ void TopographicSeries::setTopography(void *gmtApi, GMT_GRID *grid)
 
   size_t bytesNeeded = nRows * nCols * sizeof(QVector3D);
   qDebug() << "need " << bytesNeeded << " bytes";
-  qDebug() << "max QVector size: " << MAX_QVECTOR_SIZE;
+  qDebug() << "max QVector size: " << MAX_QVECTOR_BYTES;
 
   // Might need to subsample grid data to stay within QVector limits
   int subInterval = 1;      // subsample interval
   while ((nRows/subInterval + nRows % subInterval) *
 	 (nCols/subInterval + nCols % subInterval) *
-	 sizeof(QVector3D) > MAX_QVECTOR_SIZE/16) {
+	 sizeof(QVector3D) > MAX_QVECTOR_BYTES/16) {
     // Dataset too big for QVector; increase subsample interval
     subInterval++;
   }
@@ -109,7 +109,7 @@ void TopographicSeries::setTopography(void *gmtApi, GMT_GRID *grid)
   
   // Reserve space for rows (latitudes)  
   m_dataArray->reserve(nSubRows);
-  
+  int nPoints = 0;
   for (int row = 0; row < nRows; row += subInterval) {
     QSurfaceDataRow *newRow = new QSurfaceDataRow(nSubCols);
     int subCol = 0;   // sub-sampled column
@@ -119,7 +119,8 @@ void TopographicSeries::setTopography(void *gmtApi, GMT_GRID *grid)
       float dataValue = (float )grid->data[index];
 
       (*newRow)[subCol++].setPosition(QVector3D(longit[col], dataValue, latit[row]));
-
+      nPoints++;
+      
       // Check longitude range
       m_minLongit = std::min<double>(m_minLongit, longit[col]);
       m_maxLongit = std::max<double>(m_maxLongit, longit[col]);
@@ -138,10 +139,13 @@ void TopographicSeries::setTopography(void *gmtApi, GMT_GRID *grid)
 
     // delete newRow;  // Delete here causes crash in addSeries()
   }
+  
+  qDebug() << "**** nPoints: " << nPoints;
 
   // Set Surface3DSeries data
   dataProxy()->resetArray(m_dataArray);
   // delete dataArray; // Delete here causes crash in addSeries()
+
 
 }
 

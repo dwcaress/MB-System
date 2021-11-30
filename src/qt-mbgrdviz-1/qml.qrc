@@ -1,9 +1,0 @@
-<RCC>
-    <qresource prefix="/">
-        <file>main.qml</file>
-        <file>ui-components/MessageDialog.qml</file>
-        <file>ui-components/Settings2dWindow.qml</file>
-        <file>ui-components/Settings3dWindow.qml</file>
-        <file>ui-components/Popup.qml</file>
-    </qresource>
-</RCC>
