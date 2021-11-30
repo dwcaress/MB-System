@@ -1,5 +1,5 @@
 /*--------------------------------------------------------------------
- *    The MB-system:    mbphotomosaic.cpp    6/6/2021
+ *    The MB-system:    mbtiff2png.cpp    6/6/2021
  *
  *    Copyright (c) 2021-2021 by
  *    David W. Caress (caress@mbari.org)
@@ -12,7 +12,7 @@
  *    See README file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
 /*
- * mbphotomosaic makes a mosaic of navigated downlooking photographs.
+ * mbtiff2png converts GeoTiff images to PNG format images setting no data regions to be transparent.
  *
  * Author:    D. W. Caress
  * Date:    June 6, 2021
@@ -59,7 +59,7 @@ int main(int argc, char** argv)
 {
     char program_name[] = "mbtiff2png";
     char help_message[] =  "mbtiff2png c";
-    char usage_message[] = "mbphotomosaic \n"
+    char usage_message[] = "mbtiff2png \n"
                             "\t--verbose\n"
                             "\t--help\n"
                             "\t--input=tiffimage\n"
@@ -92,7 +92,7 @@ int main(int argc, char** argv)
     int transparency_threshold = 0;
 
     /* command line option definitions */
-    /* mbphotomosaic
+    /* mbtiff2png
      *    --verbose
      *    --help
      *    --input=tiffimage
