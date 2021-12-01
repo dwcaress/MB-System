@@ -23,6 +23,7 @@ Distributions that do not include "beta" in the tag name correspond to the major
 announced releases. The source distributions associated with all releases, major
 or beta, are equally accessible as tarballs through the Github interface.
 
+- Version 5.7.9beta19    December 1, 2021
 - Version 5.7.9beta18    October 31, 2021
 - Version 5.7.9beta17    October 16, 2021
 - Version 5.7.9beta16    August 27, 2021
@@ -396,6 +397,21 @@ or beta, are equally accessible as tarballs through the Github interface.
 --
 ### MB-System Version 5.7 Release Notes:
 --
+
+#### 5.7.9beta19 (December 1, 2021)
+
+Mblist: Added K and k options to the output, where K prints the fraction of non-null
+beams that are good (unflagged) and k prints the fraction of all possible beams
+that are good. These fractions are by definition bounded by 0 and 1.
+
+Format 89 (MBF_RESON7K3): Increased the maximum possible number of beams from 512
+to 1024.
+
+Mbphotomosaic, mbgetphotocorrection, mbphotogrammetry: Added capability to load
+a time series of image quality values through new options:
+  --image-quality-file=file
+  --image-quality-threshold=value
+  --image-quality-filter-length=value
 
 #### 5.7.9beta18 (October 31, 2021)
 

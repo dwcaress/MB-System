@@ -1794,10 +1794,12 @@ int main(int argc, char** argv)
                             "\t--use-left-camera\n"
                             "\t--use-right-camera\n"
                             "\t--use-both-cameras\n"
-                            "\t--image-quality-threshold=value\n"
                             "\t--calibration-file=stereocalibration.yaml\n"
                             "\t--navigation-file=file\n"
                             "\t--tide-file=file\n"
+                            "\t--image-quality-file=file\n"
+                            "\t--image-quality-threshold=value\n"
+                            "\t--image-quality-filter-length=value\n"
                             "\t--topography-grid=file";
     extern char *optarg;
     int    option_index;
@@ -1875,7 +1877,6 @@ int main(int argc, char** argv)
     int imagelist_camera;
     int image_camera = MBPM_CAMERA_LEFT;
     int use_camera_mode = MBPM_USE_STEREO;
-    double imageQualityThreshold = 0.0;
     mb_path StereoCameraCalibrationFile;
     control.calibration_set = false;
     control.SensorWidthMm = 8.789;
@@ -1913,8 +1914,7 @@ int main(int argc, char** argv)
     bool navigation_specified = false;
     mb_path NavigationFile;
     int intstat;
-    int itime = 0;
-    int iitime = 0;
+    int intime = 0;
     int nnav = 0;
     double *ntime = NULL;
     double *nlon = NULL;
@@ -1929,9 +1929,21 @@ int main(int argc, char** argv)
     /* Input tide variables */
     bool use_tide = false;
     mb_path TideFile;
+    int ittime = 0;
     int ntide = 0;
     double *ttime = NULL;
     double *ttide = NULL;
+
+    /* Input quality variables */
+    bool use_imagequality = false;
+    double imageQualityThreshold = 0.0;
+    double imageQualityFilterLength = 0.0;
+    bool ImageQualityFile_specified = false;
+    mb_path ImageQualityFile;
+    int iqtime = 0;
+    int nquality = 0;
+    double *qtime = NULL;
+    double *qquality = NULL;
 
     /* topography parameters */
     control.use_topography = false;
@@ -2002,10 +2014,12 @@ int main(int argc, char** argv)
      *    --use-left-camera
      *    --use-right-camera
      *    --use-both-cameras
-     *    --image-quality-threshold=value
      *    --calibration-file=stereocalibration.yaml
      *    --navigation-file=file
      *    --tide-file=file
+     *    --image-quality-file=file
+     *    --image-quality-threshold=value
+     *    --image-quality-filter-length=value
      *    --topography-grid=file
      *
      */
@@ -2045,10 +2059,12 @@ int main(int argc, char** argv)
         {"use-left-camera",             no_argument,            NULL,         0},
         {"use-right-camera",            no_argument,            NULL,         0},
         {"use-both-cameras",            no_argument,            NULL,         0},
-        {"image-quality-threshold",     required_argument,      NULL,         0},
         {"calibration-file",            required_argument,      NULL,         0},
         {"navigation-file",             required_argument,      NULL,         0},
         {"tide-file",                   required_argument,      NULL,         0},
+        {"image-quality-file",          required_argument,      NULL,         0},
+        {"image-quality-threshold",     required_argument,      NULL,         0},
+        {"image-quality-filter-length", required_argument,      NULL,         0},
         {"topography-grid",             required_argument,      NULL,         0},
         {NULL,                          0,                      NULL,         0}
         };
@@ -2064,6 +2080,7 @@ int main(int argc, char** argv)
     memset(PlatformFile, 0, sizeof(mb_path));
     memset(NavigationFile, 0, sizeof(mb_path));
     memset(TideFile, 0, sizeof(mb_path));
+    memset(ImageQualityFile, 0, sizeof(mb_path));
     memset(TopographyGridFile, 0, sizeof(mb_path));
 
     /* Thread handling */
@@ -2337,12 +2354,6 @@ int main(int argc, char** argv)
                 use_camera_mode = MBPM_USE_STEREO;
                 }
 
-            /* image-quality-threshold  (0 <= imageQualityThreshold <= 1) */
-            else if (strcmp("image-quality-threshold", options[option_index].name) == 0)
-                {
-                sscanf (optarg,"%lf", &imageQualityThreshold);
-                }
-
             /* calibration-file */
             else if (strcmp("calibration-file", options[option_index].name) == 0)
                 {
@@ -2364,6 +2375,28 @@ int main(int argc, char** argv)
                 const int n = sscanf (optarg,"%s", TideFile);
                 if (n == 1)
                     use_tide = true;
+                }
+
+            /* image-quality-file */
+            else if (strcmp("image-quality-file", options[option_index].name) == 0)
+                {
+                const int n = sscanf (optarg,"%s", ImageQualityFile);
+                if (n == 1)
+                    ImageQualityFile_specified = true;
+                }
+
+            /* image-quality-threshold  (0 <= imageQualityThreshold <= 1) */
+            else if (strcmp("image-quality-threshold", options[option_index].name) == 0)
+                {
+                sscanf (optarg,"%lf", &imageQualityThreshold);
+                use_imagequality = true;
+                }
+
+            /* image-quality-filter-length */
+            else if (strcmp("image-quality-filter-length", options[option_index].name) == 0)
+                {
+                sscanf (optarg,"%lf", &imageQualityFilterLength);
+                use_imagequality = true;
                 }
 
             /* topography-grid */
@@ -2434,7 +2467,6 @@ int main(int argc, char** argv)
         fprintf(stream,"dbg2       numThreads:                    %d\n",numThreads);
         fprintf(stream,"dbg2       ImageListFile:                 %s\n",ImageListFile);
         fprintf(stream,"dbg2       use_camera_mode:               %d\n",use_camera_mode);
-        fprintf(stream,"dbg2       imageQualityThreshold:         %f\n",imageQualityThreshold);
         fprintf(stream,"dbg2       outputimage_specified:         %d\n",outputimage_specified);
         fprintf(stream,"dbg2       OutputImageFile:               %s\n",OutputImageFile);
         fprintf(stream,"dbg2       output_format:                 %d\n",output_format);
@@ -2458,6 +2490,11 @@ int main(int argc, char** argv)
         fprintf(stream,"dbg2       NavigationFile:                %s\n",NavigationFile);
         fprintf(stream,"dbg2       use_tide:                      %d\n",use_tide);
         fprintf(stream,"dbg2       TideFile:                      %s\n",TideFile);
+        fprintf(stream,"dbg2       ImageQualityFile_specified:    %d\n",ImageQualityFile_specified);
+        fprintf(stream,"dbg2       ImageQualityFile:              %s\n",ImageQualityFile);
+        fprintf(stream,"dbg2       use_imagequality:              %d\n",use_imagequality);
+        fprintf(stream,"dbg2       imageQualityThreshold:         %f\n",imageQualityThreshold);
+        fprintf(stream,"dbg2       imageQualityFilterLength:      %f\n",imageQualityFilterLength);
         fprintf(stream,"dbg2       control.use_topography:        %d\n",control.use_topography);
         fprintf(stream,"dbg2       TopographyGridFile:            %s\n",TopographyGridFile);
         fprintf(stream,"dbg2       control.calibration_set:       %d\n",control.calibration_set);
@@ -2511,7 +2548,6 @@ int main(int argc, char** argv)
         fprintf(stream,"  numThreads:                    %d\n",numThreads);
         fprintf(stream,"  ImageListFile:                 %s\n",ImageListFile);
         fprintf(stream,"  use_camera_mode:               %d\n",use_camera_mode);
-        fprintf(stream,"  imageQualityThreshold:         %f\n",imageQualityThreshold);
         fprintf(stream,"  outputimage_specified:         %d\n",outputimage_specified);
         fprintf(stream,"  OutputImageFile:               %s\n",OutputImageFile);
         fprintf(stream,"  output_format:                 %d\n",output_format);
@@ -2535,6 +2571,11 @@ int main(int argc, char** argv)
         fprintf(stream,"  NavigationFile:                %s\n",NavigationFile);
         fprintf(stream,"  use_tide:                      %d\n",use_tide);
         fprintf(stream,"  TideFile:                      %s\n",TideFile);
+        fprintf(stream,"  ImageQualityFile_specified:    %d\n",ImageQualityFile_specified);
+        fprintf(stream,"  ImageQualityFile:              %s\n",ImageQualityFile);
+        fprintf(stream,"  use_imagequality:              %d\n",use_imagequality);
+        fprintf(stream,"  imageQualityThreshold:         %f\n",imageQualityThreshold);
+        fprintf(stream,"  imageQualityFilterLength:      %f\n",imageQualityFilterLength);
         fprintf(stream,"  control.use_topography:        %d\n",control.use_topography);
         fprintf(stream,"  TopographyGridFile:            %s\n",TopographyGridFile);
         fprintf(stream,"  control.calibration_set:       %d\n",control.calibration_set);
@@ -3260,7 +3301,7 @@ control.OutputBounds[0], control.OutputBounds[1], control.OutputBounds[2], contr
         if ((tfp = fopen(TideFile, "r")) == NULL)
             {
             error = MB_ERROR_OPEN_FAIL;
-            fprintf(stderr,"\nUnable to Open Tide File <%s> for reading\n",TideFile);
+            fprintf(stderr,"\nUnable to open tide file <%s> for reading\n",TideFile);
             fprintf(stderr,"\nProgram <%s> Terminated\n",
                 program_name);
             exit(error);
@@ -3304,7 +3345,7 @@ control.OutputBounds[0], control.OutputBounds[1], control.OutputBounds[2], contr
         if ((tfp = fopen(TideFile, "r")) == NULL)
             {
             error = MB_ERROR_OPEN_FAIL;
-            fprintf(stderr,"\nUnable to Open Navigation File <%s> for reading\n",NavigationFile);
+            fprintf(stderr,"\nUnable to open tide file <%s> for reading\n",TideFile);
             fprintf(stderr,"\nProgram <%s> Terminated\n",
                 program_name);
             exit(error);
@@ -3313,9 +3354,8 @@ control.OutputBounds[0], control.OutputBounds[1], control.OutputBounds[2], contr
             {
             bool value_ok = false;
 
-            /* read the navigation from an fnv file */
-            int nget = sscanf(buffer,"%lf %lf",
-                &ttime[ntide], &ttide[ntide]);
+            /* read the tide values */
+            int nget = sscanf(buffer,"%lf %lf", &ttime[ntide], &ttide[ntide]);
             if (nget >= 2)
                 value_ok = true;
 
@@ -3359,6 +3399,119 @@ control.OutputBounds[0], control.OutputBounds[1], control.OutputBounds[2], contr
             fprintf(stdout,"\nTide Parameters:\n");
             fprintf(stream,"  TideFile:     %s\n",TideFile);
             fprintf(stream,"  ntide:        %d\n",ntide);
+            }
+        }
+
+    /* read in image quality if desired */
+    if (ImageQualityFile_specified)
+        {
+        if ((tfp = fopen(ImageQualityFile, "r")) == NULL)
+            {
+            error = MB_ERROR_OPEN_FAIL;
+            fprintf(stderr,"\nUnable to open image quality file <%s> for reading\n",ImageQualityFile);
+            fprintf(stderr,"\nProgram <%s> Terminated\n",
+                program_name);
+            exit(error);
+            }
+        nquality = 0;
+        while ((result = fgets(buffer,MB_PATH_MAXLINE,tfp)) == buffer)
+            nquality++;
+        fclose(tfp);
+
+        /* allocate arrays for quality */
+        if (nquality > 1)
+            {
+            status = mb_mallocd(verbose,__FILE__,__LINE__,nquality*sizeof(double),(void **)&qtime,&error);
+            status = mb_mallocd(verbose,__FILE__,__LINE__,nquality*sizeof(double),(void **)&qquality,&error);
+
+            /* if error initializing memory then quit */
+            if (error != MB_ERROR_NO_ERROR)
+                {
+                fclose(tfp);
+                mb_error(verbose,error,&message);
+                fprintf(stderr,"\nMBIO Error allocating data arrays:\n%s\n",message);
+                fprintf(stderr,"\nProgram <%s> Terminated\n",
+                    program_name);
+                exit(error);
+                }
+            }
+
+        /* if no image quality data then quit */
+        else
+            {
+            fclose(tfp);
+            error = MB_ERROR_BAD_DATA;
+            fprintf(stderr,"\nUnable to read data from image quality file <%s>\n",ImageQualityFile);
+            fprintf(stderr,"\nProgram <%s> Terminated\n",
+                program_name);
+            exit(error);
+            }
+
+        /* read the data points in the image quality file */
+        nquality = 0;
+        if ((tfp = fopen(ImageQualityFile, "r")) == NULL)
+            {
+            error = MB_ERROR_OPEN_FAIL;
+            fprintf(stderr,"\nUnable to open image quality file <%s> for reading\n",ImageQualityFile);
+            fprintf(stderr,"\nProgram <%s> Terminated\n",
+                program_name);
+            exit(error);
+            }
+        while ((result = fgets(buffer,MB_PATH_MAXLINE,tfp)) == buffer)
+            {
+            bool value_ok = false;
+
+            /* read the image quality values */
+            int nget = sscanf(buffer,"%lf %lf",
+                &qtime[nquality], &qquality[nquality]);
+            if (nget >= 2)
+                value_ok = true;
+
+            /* output some debug values */
+            if (verbose >= 5 && value_ok)
+                {
+                fprintf(stderr,"\ndbg5  New image quality point read in program <%s>\n",program_name);
+                fprintf(stderr,"dbg5       quality[%d]: %f %f\n",
+                    nquality,qtime[nquality],qquality[nquality]);
+                }
+            else if (verbose >= 5)
+                {
+                fprintf(stderr,"\ndbg5  Error parsing line in image quality file in program <%s>\n",program_name);
+                fprintf(stderr,"dbg5       line: %s\n",buffer);
+                }
+
+            /* check for reverses or repeats in time */
+            if (value_ok)
+                {
+                if (nquality == 0)
+                    nquality++;
+                else if (qtime[nquality] > qtime[nquality-1])
+                    nquality++;
+                else if (nquality > 0 && qtime[nquality] <= qtime[nquality-1]
+                    && verbose >= 5)
+                    {
+                    fprintf(stderr,"\ndbg5  Tide time error in program <%s>\n",program_name);
+                    fprintf(stderr,"dbg5       quality[%d]: %f %f\n",
+                        nquality-1,qtime[nquality-1],qquality[nquality-1]);
+                    fprintf(stderr,"dbg5       quality[%d]: %f %f\n",
+                        nquality,qtime[nquality],qquality[nquality]);
+                    }
+                }
+            strncpy(buffer,"\0",sizeof(buffer));
+            }
+        fclose(tfp);
+        if (nquality > 0) {
+            use_imagequality = true;
+            if (imageQualityFilterLength > 0.0)
+                mb_apply_time_filter(verbose, nquality, qtime, qquality, imageQualityFilterLength, &error);
+        }
+
+        /* output information */
+        if (verbose >= 1)
+            {
+            fprintf(stdout,"\nImage Quality Parameters:\n");
+            fprintf(stream,"  ImageQualityFile:  %s\n",ImageQualityFile);
+            fprintf(stream,"  nquality:          %d\n",nquality);
             }
         }
 
@@ -3486,8 +3639,16 @@ control.OutputBounds[0], control.OutputBounds[1], control.OutputBounds[2], contr
             }
 
             /* check imageQuality value against threshold to see if this image should be used */
-            if (use_this_image && imageQuality < imageQualityThreshold) {
-              use_this_image = false;
+            if (use_this_image && use_imagequality) {
+                if (nquality > 1) {
+                    intstat = mb_linear_interp(verbose, qtime-1, qquality-1, nquality,
+                                                time_d, &imageQuality, &iqtime, &error);
+                }
+                if (imageQuality < imageQualityThreshold) {
+                    use_this_image = false;
+                }
+fprintf(stderr, "Image quality: %f Threshold:%f   Use: %d\n",
+imageQuality, imageQualityThreshold, use_this_image);
             }
 
             /* check navigation for location close to or inside destination image bounds */
@@ -3496,11 +3657,11 @@ control.OutputBounds[0], control.OutputBounds[1], control.OutputBounds[2], contr
                     /* get navigation for this image */
                     intstat = mb_linear_interp_longitude(verbose,
                             ntime-1, nlon-1,
-                            nnav, time_d, &navlon, &itime,
+                            nnav, time_d, &navlon, &intime,
                             &error);
                     intstat = mb_linear_interp_latitude(verbose,
                             ntime-1, nlat-1,
-                            nnav, time_d, &navlat, &itime,
+                            nnav, time_d, &navlat, &intime,
                             &error);
                     if (navlon < pbounds[0] || navlon > pbounds[1]
                         || navlat < pbounds[2] || navlat > pbounds[3]) {
@@ -3516,27 +3677,27 @@ control.OutputBounds[0], control.OutputBounds[1], control.OutputBounds[2], contr
             if (use_this_image) {
                 intstat = mb_linear_interp_heading(verbose,
                         ntime-1, nheading-1,
-                        nnav, time_d, &heading, &itime,
+                        nnav, time_d, &heading, &intime,
                         &error);
                 intstat = mb_linear_interp(verbose,
                         ntime-1, nspeed-1,
-                        nnav, time_d, &speed, &itime,
+                        nnav, time_d, &speed, &intime,
                         &error);
                 intstat = mb_linear_interp(verbose,
                         ntime-1, ndraft-1,
-                        nnav, time_d, &draft, &itime,
+                        nnav, time_d, &draft, &intime,
                         &error);
                 intstat = mb_linear_interp(verbose,
                         ntime-1, nroll-1,
-                        nnav, time_d, &roll, &itime,
+                        nnav, time_d, &roll, &intime,
                         &error);
                 intstat = mb_linear_interp(verbose,
                         ntime-1, npitch-1,
-                        nnav, time_d, &pitch, &itime,
+                        nnav, time_d, &pitch, &intime,
                         &error);
                 intstat = mb_linear_interp(verbose,
                         ntime-1, nheave-1,
-                        nnav, time_d, &heave, &itime,
+                        nnav, time_d, &heave, &intime,
                         &error);
                 if (heading < 0.0)
                     heading += 360.0;
@@ -3547,10 +3708,8 @@ control.OutputBounds[0], control.OutputBounds[1], control.OutputBounds[2], contr
                 /* get tide for this image */
                 tide = 0.0;
                 if (ntide > 1) {
-                    intstat = mb_linear_interp(verbose,
-                            ttime-1, ttide-1,
-                            ntide, time_d, &tide, &iitime,
-                            &error);
+                    intstat = mb_linear_interp(verbose, ttime-1, ttide-1,
+                            ntide, time_d, &tide, &ittime, &error);
                 }
                 sensordepth = sensordepth - tide;
 
@@ -3884,7 +4043,7 @@ control.OutputBounds[0], control.OutputBounds[1], control.OutputBounds[2], contr
         int proj_status = mb_proj_free(verbose, &(control.pjptr), &error);
 
     /* deallocate navigation arrays if necessary */
-    if (navigation_specified)
+    if (navigation_specified && nnav > 0)
         {
         status = mb_freed(verbose,__FILE__,__LINE__,(void **)&ntime,&error);
         status = mb_freed(verbose,__FILE__,__LINE__,(void **)&nlon,&error);
@@ -3895,6 +4054,22 @@ control.OutputBounds[0], control.OutputBounds[1], control.OutputBounds[2], contr
         status = mb_freed(verbose,__FILE__,__LINE__,(void **)&nroll,&error);
         status = mb_freed(verbose,__FILE__,__LINE__,(void **)&npitch,&error);
         status = mb_freed(verbose,__FILE__,__LINE__,(void **)&nheave,&error);
+        }
+
+    /* deallocate tide arrays if necessary */
+    if (ntide > 0)
+        {
+        status = mb_freed(verbose,__FILE__,__LINE__,(void **)&ttime,&error);
+        status = mb_freed(verbose,__FILE__,__LINE__,(void **)&ttide,&error);
+        ntide = 0;
+        }
+
+    /* deallocate image quality arrays if necessary */
+    if (nquality > 0)
+        {
+        status = mb_freed(verbose,__FILE__,__LINE__,(void **)&qtime,&error);
+        status = mb_freed(verbose,__FILE__,__LINE__,(void **)&qquality,&error);
+        nquality = 0;
         }
 
     /* end it all */

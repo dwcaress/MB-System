@@ -124,7 +124,7 @@
 #define VERSION "5.7.9beta19"
 
 /* Set VERSION_DATE define in mb_config.h */
-#define VERSION_DATE "7 November 2021"
+#define VERSION_DATE "1 December 2021"
 
 /* Define WORDS_BIGENDIAN to 1 if your processor stores words with the most
    significant byte first (like Motorola and SPARC, unlike Intel). */

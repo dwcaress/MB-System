@@ -3289,7 +3289,7 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
 
 
-printf "%s\n" "#define VERSION_DATE \"7 November 2021\"" >>confdefs.h
+printf "%s\n" "#define VERSION_DATE \"1 December 2021\"" >>confdefs.h
 
 
 printf "%s\n" " "
@@ -28021,5 +28021,4 @@ printf "%s\n" "-----------------------------------------------------------------
 printf "%s\n" "See config.log for details of configure results"
 printf "%s\n" "See INSTALL for further build instructions and hints"
 printf "%s\n" "------------------------------------------------------------------------------"
-
 
