@@ -12,7 +12,7 @@ dnl--------------------------------------------------------------------
 
 dnl Initialize and set version and version date
 AC_INIT([mbsystem],[5.7.9beta19],[http://listserver.mbari.org/sympa/arc/mbsystem],[mbsystem],[http://www.mbari.org/data/mbsystem/])
-AC_DEFINE(VERSION_DATE, ["7 November 2021"], [Set VERSION_DATE define in mb_config.h])
+AC_DEFINE(VERSION_DATE, ["1 December 2021"], [Set VERSION_DATE define in mb_config.h])
 
 AS_ECHO([" "])
 AS_ECHO(["------------------------------------------------------------------------------"])
@@ -1228,7 +1228,7 @@ if test "$build_qttools" = "yes" ; then
     AS_ECHO(["Check for VTK headers"])
 
     AC_ARG_WITH(vtk-include, [  --with-vtk-include=DIR    Location of VTK headers],
-            [vtk_includedir="${withval}"] [vtkLocSpecified=yes], [vtkLocSpecified=no])    
+            [vtk_includedir="${withval}"] [vtkLocSpecified=yes], [vtkLocSpecified=no])
 
     if test "$vtkLocSpecified" = "yes" ; then
        # Check for VTK header in specified location
@@ -1250,9 +1250,9 @@ if test "$build_qttools" = "yes" ; then
        fi
     else
        # VTK header location not specified - this is currently an errro
-       AC_MSG_ERROR([Must specify VTK include location with --with-vtk-include=DIR])       
+       AC_MSG_ERROR([Must specify VTK include location with --with-vtk-include=DIR])
     fi
-    
+
     # Set environment variables for qmake
     export OPENGL_INCLUDEDIR=$libopengl_INCLUDEDIR
     export OPENGL_LIBS=$libopengl_LIBS
@@ -1262,9 +1262,9 @@ if test "$build_qttools" = "yes" ; then
 
     export VTK_INCLUDEDIR=$vtk_includedir
     export VTK_LIBS="-L$vtk_libdir -lvtkGUISupportQt-$vers -lvtkCommonColor-$vers -lvtkRenderingFreeType-$vers -lvtkRenderingAnnotation-$vers -lvtkCommonTransforms-$vers -lvtkCommonCore-$vers -lvtkCommonDataModel-$vers -lvtkCommonExecutionModel-$vers -lvtkInteractionWidgets-$vers -lvtkInteractionStyle-$vers -lvtkRenderingCore-$vers -lvtkFiltersSources-$vers -lvtkGeovisCore-$vers -lvtkRenderingOpenGL2-$vers -lvtkFiltersHybrid-$vers -lvtkIOGeometry-$vers -lvtkIOCore-$vers -lvtkIOLegacy-$vers -lvtkRenderingVolumeOpenGL2-$vers -lvtkFiltersCore-$vers -lvtkFiltersGeneral-$vers -lvtksys-$vers"
-    
+
     export MB_INSTALLDIR=$prefix/lib
-    
+
     AS_ECHO(["Constructing Qt project file MBGui.pro in src/qt-guilib..."])
     `cd src/qt-guilib ; qmake -makefile -o Makefile.qmake ; cd ../..`
 
@@ -1654,4 +1654,3 @@ AS_ECHO(["----------------------------------------------------------------------
 AS_ECHO(["See config.log for details of configure results"])
 AS_ECHO(["See INSTALL for further build instructions and hints"])
 AS_ECHO(["------------------------------------------------------------------------------"])
-

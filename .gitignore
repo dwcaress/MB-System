@@ -4,6 +4,7 @@
 /config.log
 /config.status
 autom4te.cache/*
+build/*
 src/**/*.o
 src/**/*.lo
 src/**/*.la
@@ -146,15 +147,15 @@ src/qt-mbgui/libmbgui.1.0.0.dylib
 src/photo/mbphotogrammetry
 src/photo/mbphotomosaic
 src/photo/mbgetphotocorrection
+src/photo/mbtiff2png
+src/photo/mbimagecorrect
 src/qt-mbgui/qrc_resources.cpp
 src/mbtrnav/trnu-cli
 src/mbtrn/mb12csv
 src/mbtrnutils/mbgrd2octree
 src/mbtrnav/trnusvr-test
 src/mbtrnav/bin/libtrn.a
-src/photo/mbimagecorrect
 src/utilities/mbswath2las
-src/photo/mbtiff2png
 *.a
 src/mbtrnav/bin/writelog
 src/mbtrnav/bin/readlog
@@ -189,6 +190,4 @@ src/mbtrn/mframe/build/merror.d
 src/mbtrn/mframe/build/medebug-test.d
 src/mbtrn/mframe/build/mconfig.d
 src/mbtrn/mframe/build/mcbuf.d
-src/photo/mbtiff2png
 src/mbtrn/mframe/build/mbbuf.d
-src/photo/mbtiff2png
