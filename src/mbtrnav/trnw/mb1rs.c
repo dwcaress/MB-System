@@ -64,11 +64,10 @@
 #include <stdbool.h>
 #include <inttypes.h>
 #include <getopt.h>
-#include <mthread.h>
 #include <math.h>
 #include "mb1rs.h"
 #include "mb1_msg.h"
-//#include "mb1-reader.h"
+#include "mthread.h"
 #include "msocket.h"
 #include "mmdebug.h"
 #include "medebug.h"
@@ -115,37 +114,33 @@ static const char *g_state_str[] = {
     "RUNNING"
 };
 
-
 /////////////////////////
 // Function Definitions
 /////////////////////////
 
-///// @fn const char *mb1rs_get_version()
-///// @brief get version string.
-///// @return version string
-//const char *mb1rs_get_version()
-//{
-//    return MB1RS_VERSION_STR;
-//}
-//// End function mb1rs_get_version
-//
-///// @fn const char *mb1rs_get_build()
-///// @brief get build string.
-///// @return version string
-//const char *mb1rs_get_build()
-//{
-//    return MB1RS_BUILD;
-//}
-//// End function mb1rs_get_build
-//
-///// @fn void mb1r_show_app_version(const char *app_version)
-///// @brief get version string.
-///// @return version string
-//void mb1rs_show_app_version(const char *app_name, const char *app_version)
-//{
-//    printf("\n %s built[%s] libmb1rs[v%s / %s] \n\n",app_name, app_version, mb1rs_get_version(),mb1rs_get_build());
-//}
-//// End function mb1rs_show_app_version
+/// @fn const char *mb1rs_get_version()
+/// @brief get version string.
+/// @return version string
+const char *mb1rs_get_version()
+{
+    return MB1RS_VERSION_STR;
+}
+
+/// @fn const char *mb1rs_get_build()
+/// @brief get build string.
+/// @return version string
+const char *mb1rs_get_build()
+{
+    return MB1RS_BUILD_STR;
+}
+
+/// @fn void mb1r_show_app_version(const char *app_version)
+/// @brief get version string.
+/// @return version string
+void mb1rs_show_app_version(const char *app_name, const char *app_version)
+{
+    printf("\n %s built[%s] libmb1rs[v%s / %s]\n\n",app_name, app_version, mb1rs_get_version(),mb1rs_get_build());
+}
 
 int64_t s_file_frame_fn(mb1rs_ctx_t *ctx, byte *r_buf, uint32_t len)
 {
@@ -197,29 +192,25 @@ int64_t s_file_frame_fn(mb1rs_ctx_t *ctx, byte *r_buf, uint32_t len)
                             if(mb1_resize(&dest, dest->nbeams, MB1_RS_BEAMS)!=NULL){
                                 bp=(byte *)&dest->beams[0];
                                 readlen = dest->size-(MB1_HEADER_BYTES+MB1_CHECKSUM_BYTES);
-//                                *pdest=dest;
-                            }else{
-                                fprintf(stderr,"%s:%d - ERR frame_resize\n",__func__,__LINE__);
-                            }
+                                }else{
+                                    fprintf(stderr,"%s:%d - ERR frame_resize\n",__func__,__LINE__);
+                                }
                         }else{
                             // don't resize
                         }
                     }else{
-//                        if(NULL!=cfg && cfg->verbose>=2)
-                            fprintf(stderr,"%s:%d - ERR invalid type[%08X/%08X]\n",__func__,__LINE__,dest->type,MB1_TYPE_ID);
+                        fprintf(stderr,"%s:%d - ERR invalid type[%08X/%08X]\n",__func__,__LINE__,dest->type,MB1_TYPE_ID);
                         retval=-1;
                     }
                 }else{
                     fprintf(stderr,"%s:%d - ERR dest and/or sounding NULL\n",__func__,__LINE__);
                 }
 
-//                if(NULL!=cfg && cfg->verbose>2){
-                    fprintf(stderr,"%d: sounding->sz[%"PRIu32"] read[%"PRId64"/%"PRIu32"] err[%d/%s]\n",__LINE__,dest->size,read_bytes,readlen,errno,strerror(errno));
-                    fprintf(stderr,"%d: sounding->type[%08X]\n",__LINE__,dest->type);
-                    fprintf(stderr,"%d: sounding->checksum[%p]\n",__LINE__,MB1_PCHECKSUM(dest));
-                    if(readlen>0)
-                        fprintf(stderr,"%d: sounding->checksum[%"PRIu32"]\n",__LINE__,MB1_GET_CHECKSUM(dest));
-//                }
+                fprintf(stderr,"%d: sounding->sz[%"PRIu32"] read[%"PRId64"/%"PRIu32"] err[%d/%s]\n",__LINE__,dest->size,read_bytes,readlen,errno,strerror(errno));
+                fprintf(stderr,"%d: sounding->type[%08X]\n",__LINE__,dest->type);
+                fprintf(stderr,"%d: sounding->checksum[%p]\n",__LINE__,MB1_PCHECKSUM(dest));
+                if(readlen>0)
+                    fprintf(stderr,"%d: sounding->checksum[%"PRIu32"]\n",__LINE__,MB1_GET_CHECKSUM(dest));
 
                 // if header OK, read sounding data (variable length)
                 read_bytes=0;
@@ -247,15 +238,11 @@ int64_t s_file_frame_fn(mb1rs_ctx_t *ctx, byte *r_buf, uint32_t len)
                 }
             }else{
                 if(mfile_seek(ctx->rfile,0,MFILE_CUR)==mfile_fsize(ctx->rfile)){
-//                    if(NULL!=cfg && cfg->verbose>0)
-                        fprintf(stderr,"%d: read failed end of file reached fp/fsz[%"PRId64"/%"PRId64"] err[%d/%s]\n",__LINE__,mfile_seek(ctx->rfile,0,MFILE_CUR),mfile_fsize(ctx->rfile),errno,strerror(errno));
+                    fprintf(stderr,"%d: read failed end of file reached fp/fsz[%"PRId64"/%"PRId64"] err[%d/%s]\n",__LINE__,mfile_seek(ctx->rfile,0,MFILE_CUR),mfile_fsize(ctx->rfile),errno,strerror(errno));
                 }else{
                     fprintf(stderr,"%d: read failed err[%d/%s]\n",__LINE__,errno,strerror(errno));
                 }
             }
-//            if(NULL!=cfg && cfg->verbose>2){
-//                fprintf(stderr,"%d: record_bytes[%"PRIu32"] retval[%d] err[%d/%s]\n",__LINE__,record_bytes,retval,errno,strerror(errno));
-//            }
             mb1_destroy(&dest);
         }
     }
@@ -265,7 +252,6 @@ int64_t s_file_frame_fn(mb1rs_ctx_t *ctx, byte *r_buf, uint32_t len)
 int64_t s_auto_frame_fn(mb1rs_ctx_t *ctx, byte *dest, uint32_t len)
 {
     int64_t retval=-1;
-    static int cx=0;
     static double lat=35.0;
     static double lon=-122.0;
     double stime = mtime_dtime();
@@ -280,6 +266,7 @@ int64_t s_auto_frame_fn(mb1rs_ctx_t *ctx, byte *dest, uint32_t len)
     uint32_t nbeams_hint = ( ((NULL!=ctx) && (NULL!= ctx->cfg)) ? ctx->cfg->auto_nbeams : 0);
     uint32_t snd_sz =MB1_SOUNDING_BYTES(nbeams_hint);
     if(NULL!=dest && len>=snd_sz){
+        static int cx=0;
         mb1_t *snd = (mb1_t *)dest;
 
         snd->type = MB1_TYPE_ID;
@@ -296,7 +283,7 @@ int64_t s_auto_frame_fn(mb1rs_ctx_t *ctx, byte *dest, uint32_t len)
             snd->beams[k].beam_num=k;
             snd->beams[k].rhox = RX-0.02*k*nbeams_hint+0.01*k*k;
             snd->beams[k].rhoy = RY-0.03*k*nbeams_hint+0.01*k*k;
-            snd->beams[k].rhoz = RZ-10*sin(k*M_PI/180.);//+0.01*k*nbeams_hint+0.01*k*k;
+            snd->beams[k].rhoz = RZ-10*sin(k*M_PI/180.);
         }
         mb1_set_checksum(snd);
         cx++;
@@ -318,7 +305,8 @@ static void *s_server_function(void *pargs)
         fd_set read_fds;
         fd_set write_fds;
         fd_set err_fds;
-        byte iobuf[MB1_MAX_SOUNDING_BYTES]; // buffer for client data
+        // buffer for client data
+        byte iobuf[MB1_MAX_SOUNDING_BYTES];
         struct sockaddr_storage client_addr={0};
         socklen_t addr_size=0;
 
@@ -405,7 +393,7 @@ static void *s_server_function(void *pargs)
                         }
                     }else{
                         // fd[i] not ready to read
-                        //                        MMINFO(APP1,"readfs fd[%d/%d] ISSET:%s\n",i,fdmax,(FD_ISSET(i,&read_fds)?"TRUE":"FALSE"));
+                        // MMINFO(APP1,"readfs fd[%d/%d] ISSET:%s\n",i,fdmax,(FD_ISSET(i,&read_fds)?"TRUE":"FALSE"));
                     }
 
                     if (FD_ISSET(i, &err_fds)){
@@ -450,13 +438,14 @@ static void *s_server_function(void *pargs)
 
                     if (do_close) {
                         fprintf(stderr,"ERR - closing fd[%d]\n", i);
-                        FD_CLR(i, &active_set); // remove from active_set
-                        close(i); // bye!
+                        // remove from active_set
+                        FD_CLR(i, &active_set);
+                        close(i);
                     }
                 }// for client
             }else{
                 // select failed
-                //                    MMINFO(APP1,"select failed stat[%d] [%d/%s]\n",stat,errno,strerror(errno));
+                // MMINFO(APP1,"select failed stat[%d] [%d/%s]\n",stat,errno,strerror(errno));
                 tv.tv_sec = cfg->rto_ms/1000;
                 tv.tv_usec = ((cfg->rto_ms%1000)*1000L);
             }
@@ -471,6 +460,7 @@ static void *s_server_function(void *pargs)
         }//while
         fprintf(stderr,"server stop_req set--exiting\n");
         close(s->fd);
+        msock_socket_destroy(&s);
         ctx->state=MB1RS_ST_STOPPED;
     }
     pthread_exit((void *)NULL);
@@ -488,6 +478,7 @@ mb1rs_cfg_t *mb1rs_cfg_new()
         instance->ifile=NULL;
         instance->lim_cyc=0;
         instance->lim_ret=0;
+        instance->lim_sec=0.0;
         instance->err_mod=0;
         instance->auto_nbeams=0;
         instance->verbose=0;
@@ -515,9 +506,9 @@ void mb1rs_cfg_destroy(mb1rs_cfg_t **pself)
 
 void mb1rs_cfg_show(mb1rs_cfg_t *self, bool verbose, uint16_t indent)
 {
-    int wkey=15;
-    int wval=15;
     if (self) {
+        int wkey=15;
+        int wval=15;
         fprintf(stderr,"%*s%*s %*p\n",indent,(indent>0?" ":""),wkey,"self",wval,self);
     }
 }
@@ -570,6 +561,9 @@ void mb1rs_destroy(mb1rs_ctx_t **pself)
             if(NULL!=self->worker)
                 mthread_thread_destroy(&self->worker);
             mb1rs_cfg_destroy(&self->cfg);
+            mfile_file_destroy(&self->rfile);
+            mb1rs_cfg_destroy(&self->cfg);
+            free(self);
             *pself = NULL;
         }
     }
@@ -593,9 +587,9 @@ const char *mb1rs_statestr(mb1rs_state_t state)
 
 void mb1rs_show(mb1rs_ctx_t *self, bool verbose, uint16_t indent)
 {
-    int wkey=15;
-    int wval=15;
     if (self) {
+        int wkey=15;
+        int wval=15;
         fprintf(stderr,"%*s%*s %*p\n",indent,(indent>0?" ":""),wkey,"self",wval,self);
         fprintf(stderr,"%*s%*s %*p\n",indent,(indent>0?" ":""),wkey,"cfg",wval,self->cfg);
         fprintf(stderr,"%*s%*s %*p\n",indent,(indent>0?" ":""),wkey,"frame_func",wval,self->frame_func);

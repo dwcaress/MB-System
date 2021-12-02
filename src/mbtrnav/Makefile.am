@@ -247,7 +247,7 @@ netif_test_LDADD = libnetif.la  libtrnw.la
 trnifsvr_test_SOURCES = utils/trnifsvr-test.c
 trnifsvr_test_LDADD = libnetif.la  libtrnw.la
 
-mb1rs_SOURCES = utils/mb1rs.c utils/mb1rs-app.c
+mb1rs_SOURCES = trnw/mb1rs.c trnw/mb1rs-app.c
 mb1rs_LDADD = ${LIBMFRAME} libmb1.la
 
 dist_bin_SCRIPTS =

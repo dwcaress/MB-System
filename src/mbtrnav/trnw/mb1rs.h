@@ -74,7 +74,6 @@
 #include <mthread.h>
 #include "mfile.h"
 #include "mb1_msg.h"
-//#include "mb1-reader.h"
 
 /////////////////////////
 // Macros
@@ -88,16 +87,17 @@
 /// w/ -DMB1RS_VER=<version>
 #define MB1RS_VER (dev)
 #endif
+
 #ifndef MB1RS_BUILD
 /// @def MB1RS_BUILD
 /// @brief MB1RS library build date.
 /// Sourced from CFLAGS in Makefile
 /// w/ -DMB1R_BUILD=`date`
-//#define MB1RS_BUILD "0000/00/00T00:00:00-0000"
-#define MB1RS_BUILD VERSION_STRING(FRAMES7K_VER)" "LIBMFRAME_BUILD
+#define MB1RS_BUILD "0000/00/00T00:00:00-0000"
 #endif
 
 #define MB1RS_VERSION_STR VERSION_STRING(MB1RS_VER)
+#define MB1RS_BUILD_STR VERSION_STRING(MB1RS_BUILD)
 
 /// @def MB1RS_HOST_DFL
 /// @brief default host address
@@ -148,6 +148,9 @@ typedef struct mb1rs_cfg_s{
     /// @var mb1rs_cfg_s::lim_retries
     /// @brief retries
     int lim_ret;
+    /// @var mb1rs_cfg_s::lim_sec
+    /// @brief run time limit
+    double lim_sec;
     /// @var mb1rs_cfg_s::err_mod
     /// @brief error modulus (<=0 disable)
     int err_mod;
@@ -187,13 +190,23 @@ typedef struct mb1rs_ctx_s
     /// @var mb1rs_ctx_s::stop_req
     /// @brief thread stop request (!=0)
     int stop_req;
-
-//    mb1r_reader_t *freader;
+    /// @var mb1rs_ctx_s::rfile
+    /// @brief input file
     mfile_file_t *rfile;
+    /// @var mb1rs_ctx_s::cyc_count
+    /// @brief server cycles
     uint32_t cyc_count;
+    /// @var mb1rs_ctx_s::ret_count
+    /// @brief retry counter
     uint32_t ret_count;
+    /// @var mb1rs_ctx_s::err_count
+    /// @brief error counter
     uint32_t err_count;
+    /// @var mb1rs_ctx_s::tx_count
+    /// @brief transmit (reply) counter
     uint32_t tx_count;
+    /// @var mb1rs_ctx_s::tx_bytes
+    /// @brief transmit (reply) cumulative bytes
     int64_t tx_bytes;
 }mb1rs_ctx_t;
 
@@ -219,12 +232,15 @@ mb1rs_cfg_t *mb1rs_cfg_new();
 /// @return none
 void mb1rs_cfg_destroy(mb1rs_cfg_t **pself);
 
-/// @fn mb1rs_t *mb1rs_new(const char *host, int port)
+/// @fn mb1rs_t *mb1rs_dfl_new())
 /// @brief create new mb1rs server instance
-/// @param[in] host host address
-/// @param[in] port host IP port
 /// @return new instance reference on success, NULL otherwise.
 mb1rs_ctx_t *mb1rs_dfl_new();
+
+/// @fn mb1rs_t *mb1rs_new(const char *host, int port)
+/// @brief create new mb1rs server instance
+/// @param[in] cfg configuration instance
+/// @return new instance reference on success, NULL otherwise.
 mb1rs_ctx_t *mb1rs_new(mb1rs_cfg_t *cfg);
 
 /// @fn void mb1rs_destroy(mb1rs_t **pself)
@@ -252,6 +268,13 @@ int mb1rs_start(mb1rs_ctx_t *self);
 /// @param[in] self instance reference
 /// @return none
 int mb1rs_stop(mb1rs_ctx_t *self);
+
+/// @fn void mb1rs_show_app_version(const char *app_name, const char *app_version)
+/// @brief show version info (stdout)
+/// @param[in] app_name app name string
+/// @param[in] app_version app version string
+/// @return none
+void mb1rs_show_app_version(const char *app_name, const char *app_version);
 
 #ifdef __cplusplus
 }

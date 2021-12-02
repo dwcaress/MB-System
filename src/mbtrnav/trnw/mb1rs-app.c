@@ -68,7 +68,6 @@
 #include <mthread.h>
 #include "mb1rs.h"
 #include "mb1_msg.h"
-//#include "mb1-reader.h"
 #include "msocket.h"
 #include "mmdebug.h"
 #include "medebug.h"
@@ -128,14 +127,15 @@ static void s_show_help()
     char help_message[] = "\nMB1 record test server\n";
     char usage_message[] = "\nmb1rs [options]\n"
     "--help      : output help message\n"
-    //    "--version   : output version info\n"
+    "--version   : output version info\n"
     "--verbose=n : verbose output\n"
     "--host=s:n  : server host (addr[:port])\n"
     "--src=s     : input source (file:<path>, auto:<nbeams>)\n"
     "--rto-ms=n  : read timeout msec\n"
     "--del-ms=n  : loop delay msec\n"
-    "--cycles=n  : quit after n cycles\n"
-    "--retries=n : quit after n retries\n"
+    "--lim-cyc=n : quit after n cycles\n"
+    "--lim-ret=n : quit after n retries\n"
+    "--lim-sec=d : quit after d seconds\n"
     "\n";
     printf("%s",help_message);
     printf("%s",usage_message);
@@ -157,7 +157,7 @@ static void s_parse_args(int argc, char **argv, mb1rs_cfg_t *cfg)
     bool version=false;
     static struct option options[] = {
         {"help", no_argument, NULL, 0},
-        //        {"version", no_argument, NULL, 0},
+        {"version", no_argument, NULL, 0},
         {"verbose", required_argument, NULL, 0},
         {"host", required_argument, NULL, 0},
         {"src", required_argument, NULL, 0},
@@ -165,6 +165,7 @@ static void s_parse_args(int argc, char **argv, mb1rs_cfg_t *cfg)
         {"del-ms", required_argument, NULL, 0},
         {"lim-cyc", required_argument, NULL, 0},
         {"lim-ret", required_argument, NULL, 0},
+        {"lim-sec", required_argument, NULL, 0},
         {NULL, 0, NULL, 0}};
 
     // process argument list
@@ -179,7 +180,6 @@ static void s_parse_args(int argc, char **argv, mb1rs_cfg_t *cfg)
                 if (strcmp("verbose", options[option_index].name) == 0) {
                     sscanf(optarg,"%d",&cfg->verbose);
                 }
-
                 // help
                 else if (strcmp("help", options[option_index].name) == 0) {
                     help = true;
@@ -232,18 +232,21 @@ static void s_parse_args(int argc, char **argv, mb1rs_cfg_t *cfg)
                 else if (strcmp("lim-ret", options[option_index].name) == 0) {
                     sscanf(optarg,"%"PRIu32"",&cfg->lim_ret);
                 }
+                // seconds
+                else if (strcmp("lim-sec", options[option_index].name) == 0) {
+                    sscanf(optarg,"%lf",&cfg->lim_sec);
+                }
                 break;
             default:
                 help=true;
                 break;
         }
         if (version) {
-            //            mbtrn_show_app_version(MB1RS_NAME,MB1RS_BUILD);
-            fprintf(stderr,"%s build %s\n",MB1RS_NAME,MB1RS_BUILD);
+            mb1rs_show_app_version(MB1RS_NAME,MB1RS_BUILD_STR);
             exit(0);
         }
         if (help) {
-            //            mbtrn_show_app_version(MB1RS_NAME,MB1RS_BUILD);
+            mb1rs_show_app_version(MB1RS_NAME,MB1RS_BUILD_STR);
             s_show_help();
             exit(0);
         }
@@ -258,15 +261,16 @@ static void s_parse_args(int argc, char **argv, mb1rs_cfg_t *cfg)
 
 
     PDPRINT((stderr,"verbose   [%d]\n",cfg->verbose));
-    PDPRINT((stderr,"host      [%s:%d]\n",cfg->host,,cfg->port));
+    PDPRINT((stderr,"host      [%s:%d]\n",cfg->host,cfg->port));
     if(MB1RS_GET_MSK(&cfg->flags,MB1RS_MODE_AUTO))
         PDPRINT((stderr,"src       [a:%"PRIu32"]\n",cfg->auto_nbeams));
     else
         PDPRINT((stderr,"src       [f:%s]\n",cfg->ifile));
     PDPRINT((stderr,"rto_ms    [%"PRIu32"]\n",cfg->rto_ms));
-    PDPRINT((stderr,"del_ms    [%"PRIu32"]\n",cfg->delay_ms));
+    PDPRINT((stderr,"del_ms    [%"PRIu32"]\n",cfg->del_ms));
     PDPRINT((stderr,"lim_cyc   [%"PRIu32"]\n",cfg->lim_cyc));
     PDPRINT((stderr,"lim_ret   [%"PRIu32"]\n",cfg->lim_ret));
+    PDPRINT((stderr,"lim_sec   [%lf]\n",cfg->lim_sec));
 }
 // End function parse_args
 
@@ -307,12 +311,16 @@ int main(int argc, char **argv)
 
     s_parse_args(argc, argv, cfg);
 
-
     mb1rs_ctx_t *svr = mb1rs_new(cfg);
 
     mb1rs_start(svr);
+    double run_start=mtime_dtime();
     while(!g_interrupt){
         sleep(5);
+        if(cfg->lim_sec>0 && ((mtime_dtime()-run_start) > cfg->lim_sec)){
+            fprintf(stderr,"run time limit exceeded");
+            break;
+        }
     }
 
     if(svr->err_count==0)
