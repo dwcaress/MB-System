@@ -60,11 +60,25 @@ using namespace cv;
 #define MBPM_PRIORITY_CENTRALITY_ONLY               1
 #define MBPM_PRIORITY_CENTRALITY_PLUS_STANDOFF      2
 
-#define MBPM_CORRECTION_NONE          0
-#define MBPM_CORRECTION_BRIGHTNESS    1
-#define MBPM_CORRECTION_RANGE         2
-#define MBPM_CORRECTION_STANDOFF      3
-#define MBPM_CORRECTION_FILE          4
+/* Image correction modes: */
+/*   MBPM_CORRECTION_NONE: use images as is, no correction at all */
+/*   MBPM_CORRECTION_BRIGHTNESS: correct image so that the average magnitude */
+/*                               of each pixel is 70 out of 0->255 */
+/*   MBPM_CORRECTION_RANGE: correct for pixel range from camera (as projected */
+/*                               onto the seafloor) after correcting for gain and */
+/*                               exposure */
+/*   MBPM_CORRECTION_STANDOFF: correct for pixel standoff from seafloor (as projected */
+/*                               onto the seafloor) after correcting for gain and */
+/*                               exposure */
+/*   MBPM_CORRECTION_FILE: correct using 3D correction table from  */
+/*                               mbgetphotocorrection after correcting for gain  */
+/*                               and exposure */
+#define MBPM_CORRECTION_NONE            0
+#define MBPM_CORRECTION_BRIGHTNESS      1
+#define MBPM_CORRECTION_CAMERA_SETTINGS 2
+#define MBPM_CORRECTION_RANGE           3
+#define MBPM_CORRECTION_STANDOFF        4
+#define MBPM_CORRECTION_FILE            5
 
 #define MBPM_FORMAT_NONE              0
 #define MBPM_FORMAT_TIFF              1
@@ -81,6 +95,9 @@ struct mbpm_process_struct {
     mb_path imageFile;
     int image_count;
     int image_camera;
+    double image_quality;
+    double image_gain;
+    double image_exposure;
     double time_d;
     double camera_navlon;
     double camera_navlat;
@@ -140,11 +157,14 @@ struct mbpm_control_struct {
 
     // Image correction
     int corr_mode;
+    double reference_gain;
+    double reference_exposure;
     double corr_range_target;
     double corr_range_coeff;
     double corr_standoff_target;
     double corr_standoff_coeff;
-    double corr_intensity_gain;
+
+    // Image correction table
     int ncorr_x;
     int ncorr_y;
     int ncorr_z;
@@ -237,23 +257,17 @@ void process_image(int verbose, struct mbpm_process_struct *process,
         double yy = MAX(center_y, imageUndistort.rows - center_y);
         double rrxymax = sqrt(xx * xx + yy * yy);
 
-        /* Do some calculations relevant to image correction:
-         * - calculate the average intensity of the image
-         * - if specified calculate the correction required to bring the
-         *    average intensity to a value of 70.0
-         */
+        /* Calculate the average intensity of the image */
         Scalar avgPixelIntensity = mean(imageUndistortYCrCb);
-        double avgImageIntensityCorrection = 1.0;
-        double brightnessCorrection = 70.0 / avgPixelIntensity.val[0];
 
         /* Print information for image to be processed */
         int time_i[7];
         mb_get_date(verbose, process->time_d, time_i);
-        fprintf(stderr,"%4d Camera:%d %s %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d LLZ: %.10f %.10f %8.3f HRP: %6.2f %6.2f %6.2f Amp:%.3f\n",
+        fprintf(stderr,"%4d Camera:%d %s %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d LLZ: %.8f %.8f %8.3f HRP: %6.2f %5.2f %5.2f A:%.3f Q:%.2f\n",
                 process->image_count, process->image_camera, process->imageFile,
                 time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6],
                 process->camera_navlon, process->camera_navlat, process->camera_sensordepth,
-                process->camera_heading, process->camera_roll, process->camera_pitch, avgPixelIntensity.val[0]);
+                process->camera_heading, process->camera_roll, process->camera_pitch, avgPixelIntensity.val[0], process->image_quality);
 
         /* get unit vector for direction camera is pointing */
 
@@ -290,6 +304,36 @@ void process_image(int verbose, struct mbpm_process_struct *process,
         double cx = vxx * cos(DTR * process->camera_heading) + vyy * sin(DTR * process->camera_heading);
         double cy = -vxx * sin(DTR * process->camera_heading) + vyy * cos(DTR * process->camera_heading);
         double cz = vzz;
+
+        /* Calculate intensity correction for this image - this will be modified
+            if range, standoff, or lookup table correction is specified */
+        double imageIntensityCorrection = 1.0;
+
+        /* Apply no image correction */
+        if (control->corr_mode == MBPM_CORRECTION_NONE) {
+            imageIntensityCorrection = 1.0;
+        }
+
+        /* Apply brightness correction to each image separately
+           - correct each image so the average intensity is a value of 70.0 */
+        else if (control->corr_mode == MBPM_CORRECTION_BRIGHTNESS) {
+            imageIntensityCorrection = 70.0 / avgPixelIntensity.val[0];
+        }
+
+        /* Image correction starts by correcting for camera gain and
+            exposure followed by correction for range or standoff or
+            using a 3D correction table from mbgetphotocorrection */
+        else {
+            imageIntensityCorrection = 1.0;
+
+            /* get correction for embedded camera gain */
+            if (control->reference_gain > 0.0)
+                imageIntensityCorrection *= pow(10.0, (process->image_gain - control->reference_gain) / 20.0);
+
+            /* get correction for embedded camera exposure time */
+            if (process->image_exposure > 0.0 && control->reference_exposure > 0.0)
+                imageIntensityCorrection *= control->reference_exposure / process->image_exposure;
+        }
 
         /* Loop over the pixels in the undistorted image. If trim is nonzero then
             that number of pixels are ignored around the margins. This solves the
@@ -482,26 +526,21 @@ void process_image(int verbose, struct mbpm_process_struct *process,
                         r = imageUndistort.at<Vec3b>(j,i)[2];
                     }
 
-                    /* Get intensity correction according to corr_mode */
+                    /* Apply specified image correction */
                     else {
-
-                        /* Get intensity correction according to corr_mode */
-                        /* Apply brightness correction to each image separately */
-                        if (control->corr_mode == MBPM_CORRECTION_BRIGHTNESS) {
-                            intensityCorrection = brightnessCorrection;
-                        }
+                        double intensityCorrection = imageIntensityCorrection;
 
                         /* Apply range based correction to pixels */
-                        else if (control->corr_mode == MBPM_CORRECTION_RANGE) {
-                            intensityCorrection = exp(control->corr_range_coeff * (rr - control->corr_range_target));
-    //fprintf(stderr, "Range intensityCorrection: %d %d range:%f standoff:%f corr: %f\n", i, j, rr, standoff, intensityCorrection);
+                        if (control->corr_mode == MBPM_CORRECTION_RANGE) {
+                            intensityCorrection *= exp(control->corr_range_coeff * (rr - control->corr_range_target));
+//fprintf(stderr, "Range intensityCorrection: %d %d range:%f standoff:%f corr: %f\n", i, j, rr, standoff, intensityCorrection);
                         }
 
                         /* Apply standoff based correction to pixels */
                         else if (control->corr_mode == MBPM_CORRECTION_STANDOFF) {
-                            intensityCorrection = exp(control->corr_standoff_coeff * (standoff - control->corr_standoff_target));
-    //fprintf(stderr, "Standoff intensityCorrection: %d %d range:%f standoff:%f %f corr: %f\n",
-    //i, j, range, standoff, control->corr_standoff_target, intensityCorrection);
+                            intensityCorrection *= exp(control->corr_standoff_coeff * (standoff - control->corr_standoff_target));
+//fprintf(stderr, "Standoff intensityCorrection: %d %d range:%f standoff:%f %f corr: %f\n",
+//i, j, range, standoff, control->corr_standoff_target, intensityCorrection);
                         }
 
                         /* Apply correction by interpolation of 3D table generated by mbgetphotocorrection */
@@ -518,8 +557,8 @@ void process_image(int verbose, struct mbpm_process_struct *process,
                             factor_x = MIN(MAX(factor_x, 0.0), 1.0);
                             factor_y = MIN(MAX(factor_y, 0.0), 1.0);
                             factor_z = MIN(MAX(factor_z, 0.0), 1.0);
-    //fprintf(stderr,"i:%d j:%d sensordepth:%f topo:%f standoff:%f kbin_z:%d %d\n",
-    //i,j,process->camera_sensordepth,topo,standoff,kbin_z1,kbin_z2);
+//fprintf(stderr,"i:%d j:%d sensordepth:%f topo:%f standoff:%f kbin_z:%d %d\n",
+//i,j,process->camera_sensordepth,topo,standoff,kbin_z1,kbin_z2);
 
                             /* get reference intensity from center of image at the current standoff */
                             double table_intensity_ref
@@ -564,39 +603,34 @@ void process_image(int verbose, struct mbpm_process_struct *process,
                                     + v011 * (1.0 - factor_x) * factor_y * factor_z
                                     + v110 * factor_x * factor_y * (1.0 - factor_z)
                                     + v111 * factor_x * factor_y * factor_z;
-                            if (table_intensity > 0.0 && control->referenceIntensity[process->image_camera] > 0.0)
-                                intensityCorrection = control->referenceIntensity[process->image_camera]
+                            if (table_intensity > 0.0 && control->referenceIntensity[process->image_camera] > 0.0) {
+                                intensityCorrection *= control->referenceIntensity[process->image_camera]
                                                         / table_intensity;
-                            else {
-                                intensityCorrection = 1.0;
                             }
-
-    //fprintf(stderr,"%d %d intensityCorrection:%f table_intensity_ref:%f table_intensity:%f referenceIntensity[%d]:%f\n",
-    //i, j, intensityCorrection, table_intensity_ref, table_intensity, process->image_camera, control->referenceIntensity[process->image_camera]);
+                            //else {
+                            //    intensityCorrection *= 1.0;
+                            // }
+//fprintf(stderr,"%d %d intensityCorrection:%f table_intensity_ref:%f table_intensity:%f referenceIntensity[%d]:%f\n",
+//i, j, intensityCorrection, table_intensity_ref, table_intensity, process->image_camera, control->referenceIntensity[process->image_camera]);
                         }
+                    }
 
-                        /* else do no correction */
-                        else {
-                            intensityCorrection = 1.0;
-                        }
+                    /* access the pixel value in YCrCb image */
+                    unsigned char Y = imageUndistortYCrCb.at<Vec3b>(j,i)[0];
+                    unsigned char Cr = imageUndistortYCrCb.at<Vec3b>(j,i)[1];
+                    unsigned char Cb = imageUndistortYCrCb.at<Vec3b>(j,i)[2];
 
-                        /* access the pixel value in YCrCb image */
-                        unsigned char Y = imageUndistortYCrCb.at<Vec3b>(j,i)[0];
-                        unsigned char Cr = imageUndistortYCrCb.at<Vec3b>(j,i)[1];
-                        unsigned char Cb = imageUndistortYCrCb.at<Vec3b>(j,i)[2];
+                    /* correct Y (intensity) value */
+                    Y = saturate_cast<unsigned char>(intensityCorrection * Y);
 
-                        /* correct Y (intensity) value */
-                        Y = saturate_cast<unsigned char>(control->corr_intensity_gain * Y * intensityCorrection);
-
-                        /* convert back to gbr */
-                        b = saturate_cast<unsigned char>(Y + 1.773 * (Cb - 128));
-                        g = saturate_cast<unsigned char>(Y - 0.714 * (Cr - 128) - 0.344 * (Cb - 128));
-                        r = saturate_cast<unsigned char>(Y + 1.403 * (Cr - 128));
+                    /* convert back to gbr */
+                    b = saturate_cast<unsigned char>(Y + 1.773 * (Cb - 128));
+                    g = saturate_cast<unsigned char>(Y - 0.714 * (Cr - 128) - 0.344 * (Cb - 128));
+                    r = saturate_cast<unsigned char>(Y + 1.403 * (Cr - 128));
 //fprintf(stderr, "%d %d  BGR: %d %d %d   Y:%d Cr:%d Cb:%d  %.3f    Y:%d Cr:%d Cb:%d  BGR: %d %d %d\n",
 //i, j, imageUndistort.at<Vec3b>(j,i)[0], imageUndistort.at<Vec3b>(j,i)[1], imageUndistort.at<Vec3b>(j,i)[2],
 //imageUndistortYCrCb.at<Vec3b>(j,i)[0], imageUndistortYCrCb.at<Vec3b>(j,i)[1], imageUndistortYCrCb.at<Vec3b>(j,i)[2],
 //intensityCorrection, Y, Cr, Cb, b, g, r);
-                    }
 
                     /* find the location and footprint of the input pixel
                         in the output image */
@@ -707,7 +741,6 @@ void process_image_sectioned(int verbose, struct mbpm_process_struct *process,
 
         double fov_x, fov_y;
         double center_x, center_y;
-        double intensityCorrection;
         bool image_use = false;
 
         /* undistort the image */
@@ -749,14 +782,8 @@ void process_image_sectioned(int verbose, struct mbpm_process_struct *process,
         double yy = MAX(center_y, imageUndistort.rows - center_y);
         double rrxymax = sqrt(xx * xx + yy * yy);
 
-        /* Do some calculations relevant to image correction:
-         * - calculate the average intensity of the image
-         * - if specified calculate the correction required to bring the
-         *    average intensity to a value of 70.0
-         */
+        /* Calculate the average intensity of the image */
         Scalar avgPixelIntensity = mean(imageUndistortYCrCb);
-        double avgImageIntensityCorrection = 1.0;
-        double brightnessCorrection = 70.0 / avgPixelIntensity.val[0];
 
         /* get unit vector (cx, cy, cz) for direction camera is pointing */
         /* (1) rotate center pixel location using attitude and zzref */
@@ -792,6 +819,36 @@ void process_image_sectioned(int verbose, struct mbpm_process_struct *process,
         double cx = vxx * cos(DTR * process->camera_heading) + vyy * sin(DTR * process->camera_heading);
         double cy = -vxx * sin(DTR * process->camera_heading) + vyy * cos(DTR * process->camera_heading);
         double cz = vzz;
+
+        /* Calculate intensity correction for this image - this will be modified
+            if range, standoff, or lookup table correction is specified */
+        double imageIntensityCorrection = 1.0;
+
+        /* Apply no image correction */
+        if (control->corr_mode == MBPM_CORRECTION_NONE) {
+            imageIntensityCorrection = 1.0;
+        }
+
+        /* Apply brightness correction to each image separately
+           - correct each image so the average intensity is a value of 70.0 */
+        else if (control->corr_mode == MBPM_CORRECTION_BRIGHTNESS) {
+            imageIntensityCorrection = 70.0 / avgPixelIntensity.val[0];
+        }
+
+        /* Image correction starts by correcting for camera gain and
+            exposure followed by correction for range or standoff or
+            using a 3D correction table from mbgetphotocorrection */
+        else {
+            imageIntensityCorrection = 1.0;
+
+            /* get correction for embedded camera gain */
+            if (control->reference_gain > 0.0)
+                imageIntensityCorrection *= pow(10.0, (process->image_gain - control->reference_gain) / 20.0);
+
+            /* get correction for embedded camera exposure time */
+            if (process->image_exposure > 0.0 && control->reference_exposure > 0.0)
+                imageIntensityCorrection *= control->reference_exposure / process->image_exposure;
+        }
 
         /* Loop over sections of the undistorted image, and map those onto the
            destination image as continuous quads. The priority determining if the
@@ -945,11 +1002,11 @@ void process_image_sectioned(int verbose, struct mbpm_process_struct *process,
                         image_use = true;
                         int time_i[7];
                         mb_get_date(verbose, process->time_d, time_i);
-                        fprintf(stderr,"%4d Camera:%d %s %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d LLZ: %.10f %.10f %8.3f HRP: %6.2f %6.2f %6.2f Amp:%.3f\n",
+                        fprintf(stderr,"%4d Camera:%d %s %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d LLZ: %.8f %.8f %8.3f HRP: %6.2f %5.2f %5.2f A:%.3f Q:%.2f\n",
                                 process->image_count, process->image_camera, process->imageFile,
                                 time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6],
                                 process->camera_navlon, process->camera_navlat, process->camera_sensordepth,
-                                process->camera_heading, process->camera_roll, process->camera_pitch, avgPixelIntensity.val[0]);
+                                process->camera_heading, process->camera_roll, process->camera_pitch, avgPixelIntensity.val[0], process->image_quality);
                     }
 
                     for (int i=i0; i<=i1; i++) {
@@ -1079,23 +1136,18 @@ void process_image_sectioned(int verbose, struct mbpm_process_struct *process,
                                     r = imageUndistort.at<Vec3b>(j,i)[2];
                                 }
 
-                                /* Get intensity correction according to corr_mode */
+                                /* Apply specified image correction */
                                 else {
-
-                                    /* Get intensity correction according to corr_mode */
-                                    /* Apply brightness correction to each image separately */
-                                    if (control->corr_mode == MBPM_CORRECTION_BRIGHTNESS) {
-                                        intensityCorrection = brightnessCorrection;
-                                    }
+                                    double intensityCorrection = imageIntensityCorrection;
 
                                     /* Apply range based correction to pixels */
-                                    else if (control->corr_mode == MBPM_CORRECTION_RANGE) {
-                                        intensityCorrection = exp(control->corr_range_coeff * (rr - control->corr_range_target));
+                                    if (control->corr_mode == MBPM_CORRECTION_RANGE) {
+                                        intensityCorrection *= exp(control->corr_range_coeff * (rr - control->corr_range_target));
                                     }
 
                                     /* Apply standoff based correction to pixels */
                                     else if (control->corr_mode == MBPM_CORRECTION_STANDOFF) {
-                                        intensityCorrection = exp(control->corr_standoff_coeff * (standoff - control->corr_standoff_target));
+                                        intensityCorrection *= exp(control->corr_standoff_coeff * (standoff - control->corr_standoff_target));
                                     }
 
                                     /* Apply correction by interpolation of 3D table generated by mbgetphotocorrection */
@@ -1156,18 +1208,13 @@ void process_image_sectioned(int verbose, struct mbpm_process_struct *process,
                                                 + v011 * (1.0 - factor_x) * factor_y * factor_z
                                                 + v110 * factor_x * factor_y * (1.0 - factor_z)
                                                 + v111 * factor_x * factor_y * factor_z;
-                                        if (table_intensity > 0.0 && control->referenceIntensity[process->image_camera] > 0.0)
-                                            intensityCorrection = control->referenceIntensity[process->image_camera]
+                                        if (table_intensity > 0.0 && control->referenceIntensity[process->image_camera] > 0.0) {
+                                            intensityCorrection *= control->referenceIntensity[process->image_camera]
                                                                     / table_intensity;
-                                        else {
-                                            intensityCorrection = 1.0;
                                         }
-
-                                    }
-
-                                    /* else do no correction */
-                                    else {
-                                        intensityCorrection = 1.0;
+                                        // else {
+                                        //    intensityCorrection *= 1.0;
+                                        // }
                                     }
 
                                     /* access the pixel value in YCrCb image */
@@ -1176,7 +1223,7 @@ void process_image_sectioned(int verbose, struct mbpm_process_struct *process,
                                     unsigned char Cb = imageUndistortYCrCb.at<Vec3b>(j,i)[2];
 
                                     /* correct Y (intensity) value */
-                                    Y = saturate_cast<unsigned char>(control->corr_intensity_gain * Y * intensityCorrection);
+                                    Y = saturate_cast<unsigned char>(intensityCorrection * Y);
 
                                     /* convert back to gbr */
                                     b = saturate_cast<unsigned char>(Y + 1.773 * (Cb - 128));
@@ -1311,14 +1358,8 @@ void process_image_sectioned2(int verbose, struct mbpm_process_struct *process,
         double yy = MAX(center_y, imageUndistort.rows - center_y);
         double rrxymax = sqrt(xx * xx + yy * yy);
 
-        /* Do some calculations relevant to image correction:
-         * - calculate the average intensity of the image
-         * - if specified calculate the correction required to bring the
-         *    average intensity to a value of 70.0
-         */
+        /* Calculate the average intensity of the image */
         Scalar avgPixelIntensity = mean(imageUndistortYCrCb);
-        double avgImageIntensityCorrection = 1.0;
-        double brightnessCorrection = 70.0 / avgPixelIntensity.val[0];
 
         /* get unit vector (cx, cy, cz) for direction camera is pointing */
         /* (1) rotate center pixel location using attitude and zzref */
@@ -1354,6 +1395,40 @@ void process_image_sectioned2(int verbose, struct mbpm_process_struct *process,
         double cx = vxx * cos(DTR * process->camera_heading) + vyy * sin(DTR * process->camera_heading);
         double cy = -vxx * sin(DTR * process->camera_heading) + vyy * cos(DTR * process->camera_heading);
         double cz = vzz;
+
+        /* Calculate intensity correction for this image - this will be modified
+            if range, standoff, or lookup table correction is specified */
+        double imageIntensityCorrection = 1.0;
+
+        /* Apply no image correction */
+        if (control->corr_mode == MBPM_CORRECTION_NONE) {
+            imageIntensityCorrection = 1.0;
+        }
+
+        /* Apply brightness correction to each image separately
+           - correct each image so the average intensity is a value of 70.0 */
+        else if (control->corr_mode == MBPM_CORRECTION_BRIGHTNESS) {
+            imageIntensityCorrection = 70.0 / avgPixelIntensity.val[0];
+        }
+
+        /* Image correction starts by correcting for camera gain and
+            exposure followed by correction for range or standoff or
+            using a 3D correction table from mbgetphotocorrection */
+        else {
+            imageIntensityCorrection = 1.0;
+
+            /* get correction for embedded camera gain */
+            if (control->reference_gain > 0.0)
+                imageIntensityCorrection *= pow(10.0, (process->image_gain - control->reference_gain) / 20.0);
+
+            /* get correction for embedded camera exposure time */
+            if (process->image_exposure > 0.0 && control->reference_exposure > 0.0)
+                imageIntensityCorrection *= control->reference_exposure / process->image_exposure;
+fprintf(stderr, "Gains: %f %f Exposures: %f %f  imageIntensityCorrection: %f\n",
+process->image_gain, control->reference_gain,
+process->image_exposure, control->reference_exposure,
+imageIntensityCorrection);
+        }
 
         /* Loop over sections of the undistorted image, and map those onto the
            destination image as continuous quads. The priority determining if the
@@ -1514,11 +1589,11 @@ void process_image_sectioned2(int verbose, struct mbpm_process_struct *process,
                         image_use = true;
                         int time_i[7];
                         mb_get_date(verbose, process->time_d, time_i);
-                        fprintf(stderr,"%4d Camera:%d %s %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d LLZ: %.10f %.10f %8.3f HRP: %6.2f %6.2f %6.2f Amp:%.3f\n",
+                        fprintf(stderr,"%4d Camera:%d %s %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d LLZ: %.8f %.8f %8.3f HRP: %6.2f %5.2f %5.2f A:%.3f Q:%.2f\n",
                                 process->image_count, process->image_camera, process->imageFile,
                                 time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6],
                                 process->camera_navlon, process->camera_navlat, process->camera_sensordepth,
-                                process->camera_heading, process->camera_roll, process->camera_pitch, avgPixelIntensity.val[0]);
+                                process->camera_heading, process->camera_roll, process->camera_pitch, avgPixelIntensity.val[0], process->image_quality);
                     }
 
                     /* widen the quad in the destination image to avoid missing some pixels */
@@ -1634,23 +1709,18 @@ void process_image_sectioned2(int verbose, struct mbpm_process_struct *process,
                                     r = imageUndistort.at<Vec3b>(sj,si)[2];
                                 }
 
-                                /* Get intensity correction according to corr_mode */
+                                /* Apply specified image correction */
                                 else {
-
-                                    /* Get intensity correction according to corr_mode */
-                                    /* Apply brightness correction to each image separately */
-                                    if (control->corr_mode == MBPM_CORRECTION_BRIGHTNESS) {
-                                        intensityCorrection = brightnessCorrection;
-                                    }
+                                    double intensityCorrection = imageIntensityCorrection;
 
                                     /* Apply range based correction to pixels */
-                                    else if (control->corr_mode == MBPM_CORRECTION_RANGE) {
-                                        intensityCorrection = exp(control->corr_range_coeff * (range[4] - control->corr_range_target));
+                                    if (control->corr_mode == MBPM_CORRECTION_RANGE) {
+                                        intensityCorrection *= exp(control->corr_range_coeff * (range[4] - control->corr_range_target));
                                     }
 
                                     /* Apply standoff based correction to pixels */
                                     else if (control->corr_mode == MBPM_CORRECTION_STANDOFF) {
-                                        intensityCorrection = exp(control->corr_standoff_coeff * (standoff[4] - control->corr_standoff_target));
+                                        intensityCorrection *= exp(control->corr_standoff_coeff * (standoff[4] - control->corr_standoff_target));
                                     }
 
                                     /* Apply correction by interpolation of 3D table generated by mbgetphotocorrection */
@@ -1712,17 +1782,11 @@ void process_image_sectioned2(int verbose, struct mbpm_process_struct *process,
                                                 + v110 * factor_x * factor_y * (1.0 - factor_z)
                                                 + v111 * factor_x * factor_y * factor_z;
                                         if (table_intensity > 0.0 && control->referenceIntensity[process->image_camera] > 0.0)
-                                            intensityCorrection = control->referenceIntensity[process->image_camera]
+                                            intensityCorrection *= control->referenceIntensity[process->image_camera]
                                                                     / table_intensity;
-                                        else {
-                                            intensityCorrection = 1.0;
-                                        }
-
-                                    }
-
-                                    /* else do no correction */
-                                    else {
-                                        intensityCorrection = 1.0;
+                                        // else {
+                                        //    intensityCorrection *= 1.0;
+                                        // }
                                     }
 
                                     /* access the pixel value in YCrCb image */
@@ -1731,7 +1795,7 @@ void process_image_sectioned2(int verbose, struct mbpm_process_struct *process,
                                     unsigned char Cb = imageUndistortYCrCb.at<Vec3b>(sj,si)[2];
 
                                     /* correct Y (intensity) value */
-                                    Y = saturate_cast<unsigned char>(control->corr_intensity_gain * Y * intensityCorrection);
+                                    Y = saturate_cast<unsigned char>(intensityCorrection * Y);
 
                                     /* convert back to gbr */
                                     b = saturate_cast<unsigned char>(Y + 1.773 * (Cb - 128));
@@ -1780,10 +1844,12 @@ int main(int argc, char** argv)
                             "\t--bounds=lonmin/lonmax/latmin/latmax | west/east/south/north\n"
                             "\t--bounds-buffer=bounds_buffer\n"
                             "\t--correction-brightness\n"
+                            "\t--correction-camera-settings\n"
                             "\t--correction-range=target/coeff\n"
                             "\t--correction-standoff=target/coeff\n"
                             "\t--correction-file=imagecorrection.yaml\n"
-                            "\t--correction-gain=gain\n"
+                            "\t--reference-gain=gain\n"
+                            "\t--reference-exposure=exposure\n"
                             "\t--platform-file=platform.plf\n"
                             "\t--camera-sensor=camera_sensor_id\n"
                             "\t--nav-sensor=nav_sensor_id\n"
@@ -1830,6 +1896,8 @@ int main(int argc, char** argv)
     control.range_max = 200.0;
     control.trimPixels = 0;
     control.sectionPixels = 0;
+    control.reference_gain = 15.0;
+    control.reference_exposure = 4000.0;
 
     /* Input image variables */
     mb_path    ImageListFile;
@@ -1837,7 +1905,11 @@ int main(int argc, char** argv)
     mb_path    imageRightFile;
     mb_path    imageFile;
     double    left_time_d;
-    double    time_diff;
+    double    right_time_d;
+    double    left_gain;
+    double    right_gain;
+    double    left_exposure;
+    double    right_exposure;
     double    time_d;
     int       time_i[7];
     double    navlon;
@@ -1892,7 +1964,8 @@ int main(int argc, char** argv)
     control.corr_range_coeff = 1.0;
     control.corr_standoff_target = 3.0;
     control.corr_standoff_coeff = 1.0;
-    control.corr_intensity_gain = 1.0;
+    control.reference_gain = 15.0;
+    control.reference_exposure = 4000.0;
     mb_path ImageCorrectionFile;
     control.ncorr_x = 21;
     control.ncorr_y = 21;
@@ -2000,10 +2073,12 @@ int main(int argc, char** argv)
      *    --bounds=lonmin/lonmax/latmin/latmax | west/east/south/north
      *    --bounds-buffer=bounds_buffer
      *    --correction-brightness
+     *    --correction-camera-settings
      *    --correction-range=target/coeff
      *    --correction-standoff=target/coeff
      *    --correction-file=imagecorrection.yaml
-     *    --correction-gain=gain
+     *    --reference-gain=gain
+     *    --reference-exposure=exposure
      *    --platform-file=platform.plf
      *    --camera-sensor=camera_sensor_id
      *    --nav-sensor=nav_sensor_id
@@ -2045,10 +2120,12 @@ int main(int argc, char** argv)
         {"bounds",                      required_argument,      NULL,         0},
         {"bounds-buffer",               required_argument,      NULL,         0},
         {"correction-brightness",       no_argument,            NULL,         0},
+        {"correction-camera-settings",  no_argument,            NULL,         0},
         {"correction-range",            required_argument,      NULL,         0},
         {"correction-standoff",         required_argument,      NULL,         0},
         {"correction-file",             required_argument,      NULL,         0},
-        {"correction-gain",             required_argument,      NULL,         0},
+        {"reference-gain",              required_argument,      NULL,         0},
+        {"reference-exposure",          required_argument,      NULL,         0},
         {"platform-file",               required_argument,      NULL,         0},
         {"camera-sensor",               required_argument,      NULL,         0},
         {"nav-sensor",                  required_argument,      NULL,         0},
@@ -2256,6 +2333,12 @@ int main(int argc, char** argv)
                 control.corr_mode = MBPM_CORRECTION_BRIGHTNESS;
                 }
 
+            /* correction-camera-settings */
+            else if (strcmp("correction-camera-settings", options[option_index].name) == 0)
+                {
+                control.corr_mode = MBPM_CORRECTION_CAMERA_SETTINGS;
+                }
+
             /* correction-range */
             else if (strcmp("correction-range", options[option_index].name) == 0)
                 {
@@ -2287,10 +2370,16 @@ int main(int argc, char** argv)
                     }
                 }
 
-            /* correction-offset */
-            else if (strcmp("correction-gain", options[option_index].name) == 0)
+            /* reference-gain */
+            else if (strcmp("reference-gain", options[option_index].name) == 0)
                 {
-                int n = sscanf (optarg,"%lf", &control.corr_intensity_gain);
+                int n = sscanf (optarg,"%lf", &control.reference_gain);
+                }
+
+            /* reference-exposure */
+            else if (strcmp("reference-exposure", options[option_index].name) == 0)
+                {
+                int n = sscanf (optarg,"%lf", &control.reference_exposure);
                 }
 
             /* platform-file */
@@ -2389,14 +2478,12 @@ int main(int argc, char** argv)
             else if (strcmp("image-quality-threshold", options[option_index].name) == 0)
                 {
                 sscanf (optarg,"%lf", &imageQualityThreshold);
-                use_imagequality = true;
                 }
 
             /* image-quality-filter-length */
             else if (strcmp("image-quality-filter-length", options[option_index].name) == 0)
                 {
                 sscanf (optarg,"%lf", &imageQualityFilterLength);
-                use_imagequality = true;
                 }
 
             /* topography-grid */
@@ -2503,6 +2590,9 @@ int main(int argc, char** argv)
         if (control.corr_mode == MBPM_CORRECTION_BRIGHTNESS) {
             fprintf(stream,"dbg2       control.corr_mode:             %d MBPM_CORRECTION_BRIGHTNESS\n",control.corr_mode);
         }
+        else if (control.corr_mode == MBPM_CORRECTION_CAMERA_SETTINGS) {
+            fprintf(stream,"dbg2       control.corr_mode:             %d MBPM_CORRECTION_CAMERA_SETTINGS\n",control.corr_mode);
+        }
         else if (control.corr_mode == MBPM_CORRECTION_RANGE) {
             fprintf(stream,"dbg2       control.corr_mode:             %d MBPM_CORRECTION_RANGE\n",control.corr_mode);
             fprintf(stream,"dbg2       control.corr_range_target:     %f\n",control.corr_range_target);
@@ -2520,7 +2610,8 @@ int main(int argc, char** argv)
         else {
             fprintf(stream,"dbg2       control.corr_mode:             %d MBPM_CORRECTION_NONE\n",control.corr_mode);
         }
-        fprintf(stream,"dbg2       control.corr_intensity_gain:   %f\n",control.corr_intensity_gain);
+        fprintf(stream,"dbg2       control.reference_gain:        %f\n",control.reference_gain);
+        fprintf(stream,"dbg2       control.reference_exposure:    %f\n",control.reference_exposure);
         fprintf(stream,"dbg2       PlatformFile:                  %s\n",PlatformFile);
         fprintf(stream,"dbg2       platform_specified:            %d\n",platform_specified);
         fprintf(stream,"dbg2       camera_sensor:                 %d\n",camera_sensor);
@@ -2584,6 +2675,9 @@ int main(int argc, char** argv)
         if (control.corr_mode == MBPM_CORRECTION_BRIGHTNESS) {
             fprintf(stream,"  control.corr_mode:             %d MBPM_CORRECTION_BRIGHTNESS\n",control.corr_mode);
         }
+        else if (control.corr_mode == MBPM_CORRECTION_CAMERA_SETTINGS) {
+            fprintf(stream,"  control.corr_mode:             %d MBPM_CORRECTION_CAMERA_SETTINGS\n",control.corr_mode);
+        }
         else if (control.corr_mode == MBPM_CORRECTION_RANGE) {
             fprintf(stream,"  control.corr_mode:             %d MBPM_CORRECTION_RANGE\n",control.corr_mode);
             fprintf(stream,"  control.corr_range_target:     %f\n",control.corr_range_target);
@@ -2601,7 +2695,8 @@ int main(int argc, char** argv)
         else {
             fprintf(stream,"  control.corr_mode:             %d MBPM_CORRECTION_NONE\n",control.corr_mode);
         }
-        fprintf(stream,"  control.corr_intensity_gain:   %f\n",control.corr_intensity_gain);
+        fprintf(stream,"  control.reference_gain:        %f\n",control.reference_gain);
+        fprintf(stream,"  control.reference_exposure:    %f\n",control.reference_exposure);
         fprintf(stream,"  PlatformFile:                  %s\n",PlatformFile);
         fprintf(stream,"  platform_specified:            %d\n",platform_specified);
         fprintf(stream,"  camera_sensor:                 %d\n",camera_sensor);
@@ -3550,14 +3645,16 @@ control.OutputBounds[0], control.OutputBounds[1], control.OutputBounds[2], contr
     npairs = 0;
     nimages = 0;
     int imageStatus = MB_IMAGESTATUS_NONE;
-    double imageQuality = 0.0;
+    double image_quality = 0.0;
     mb_path dpath;
     unsigned int numThreadsSet = 0;
     fprintf(stderr,"About to read ImageListFile: %s\n", ImageListFile);
 
     while ((status = mb_imagelist_read(verbose, imagelist_ptr, &imageStatus,
                                 imageLeftFile, imageRightFile, dpath,
-                                &left_time_d, &time_diff, &imageQuality, &error)) == MB_SUCCESS) {
+                                &left_time_d, &right_time_d,
+                                &left_gain, &right_gain,
+                                &left_exposure, &right_exposure, &error)) == MB_SUCCESS) {
         if (imageStatus == MB_IMAGESTATUS_STEREO) {
           if (use_camera_mode == MBPM_USE_STEREO) {
             npairs++;
@@ -3612,6 +3709,8 @@ control.OutputBounds[0], control.OutputBounds[1], control.OutputBounds[2], contr
             double camera_heading;
             double camera_roll;
             double camera_pitch;
+            double image_gain;
+            double image_exposure;
 
             /* set camera for stereo image */
             if (currentimages == 2) {
@@ -3627,13 +3726,17 @@ control.OutputBounds[0], control.OutputBounds[1], control.OutputBounds[2], contr
             use_this_image = false;
             if (image_camera == MBPM_CAMERA_LEFT
                 && (use_camera_mode == MBPM_USE_LEFT || use_camera_mode == MBPM_USE_STEREO)) {
-                     time_d = left_time_d;
+                    time_d = left_time_d;
+                    image_gain = left_gain;
+                    image_exposure = left_exposure;
                     strcpy(imageFile, imageLeftFile);
                     use_this_image = true;
             }
             else if (image_camera == MBPM_CAMERA_RIGHT
                 && (use_camera_mode == MBPM_USE_RIGHT || use_camera_mode == MBPM_USE_STEREO)) {
-                     time_d = left_time_d + time_diff;
+                     time_d = right_time_d;
+                     image_gain = right_gain;
+                     image_exposure = right_exposure;
                     strcpy(imageFile, imageRightFile);
                     use_this_image = true;
             }
@@ -3642,13 +3745,11 @@ control.OutputBounds[0], control.OutputBounds[1], control.OutputBounds[2], contr
             if (use_this_image && use_imagequality) {
                 if (nquality > 1) {
                     intstat = mb_linear_interp(verbose, qtime-1, qquality-1, nquality,
-                                                time_d, &imageQuality, &iqtime, &error);
+                                                time_d, &image_quality, &iqtime, &error);
                 }
-                if (imageQuality < imageQualityThreshold) {
+                if (image_quality < imageQualityThreshold) {
                     use_this_image = false;
                 }
-fprintf(stderr, "Image quality: %f Threshold:%f   Use: %d\n",
-imageQuality, imageQualityThreshold, use_this_image);
             }
 
             /* check navigation for location close to or inside destination image bounds */
@@ -3743,6 +3844,9 @@ imageQuality, imageQualityThreshold, use_this_image);
                 strcpy(processPars[numThreadsSet].imageFile, imageFile);
                 processPars[numThreadsSet].image_count = nimages - currentimages + iimage;
                 processPars[numThreadsSet].image_camera = image_camera;
+                processPars[numThreadsSet].image_quality = image_quality;
+                processPars[numThreadsSet].image_gain = image_gain;
+                processPars[numThreadsSet].image_exposure = image_exposure;
                 processPars[numThreadsSet].time_d = time_d;
                 processPars[numThreadsSet].camera_navlon = camera_navlon;
                 processPars[numThreadsSet].camera_navlat = camera_navlat;

@@ -3517,7 +3517,9 @@ int mb_imagelist_open(int verbose, void **imagelist_ptr, char *path, int *error)
 /*--------------------------------------------------------------------*/
 int mb_imagelist_read(int verbose, void *imagelist_ptr, int *imagestatus,
                       char *path0, char *path1, char *dpath,
-                      double *time_d, double *dtime_d, double *quality, int *error) {
+                      double *time_d0, double *time_d1,
+                      double *gain0, double *gain1,
+                      double *exposure0, double *exposure1, int *error) {
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -3554,9 +3556,12 @@ int mb_imagelist_read(int verbose, void *imagelist_ptr, int *imagestatus,
         bool rdone = false;
         while (!rdone) {
           *imagestatus = MB_IMAGESTATUS_NONE;
-          *time_d = 0.0;
-          *dtime_d = 0.0;
-          *quality = 0.0;
+          *time_d0 = 0.0;
+          *time_d1 = 0.0;
+          *gain0 = 0.0;
+          *gain1 = 0.0;
+          *exposure0 = 0.0;
+          *exposure1 = 0.0;
           char *buffer_ptr = fgets(buffer, MB_PATH_MAXLINE, imagelist->fp);
 
           /* deal with end of imagelist file */
@@ -3594,11 +3599,17 @@ int mb_imagelist_read(int verbose, void *imagelist_ptr, int *imagestatus,
           /* check for valid image entry */
           else {
               /* try to read a stereo pair entry */
-              int nscan = sscanf(buffer, "%s %s %lf %lf %lf", path0, path1, time_d, dtime_d, quality);
+              int nscan = sscanf(buffer, "%s %s %lf %lf %lf %lf %lf %lf", path0, path1, time_d0, time_d1, gain0, gain1, exposure0, exposure1);
+
+              /* if 8 values parsed then this is in the newer format, if four values then in original format */
               if (nscan >= 4) {
-                  /* if no quality value assume 1.00 */
-                  if (nscan == 4) {
-                      *quality = 1.00;
+                  /* if no gain/exposure values then timestamps are time and dtime, so time_d1 is actually dt */
+                  if (nscan < 8) {
+                      *time_d1 += *time_d0;
+                      *gain0 = 15.0;
+                      *gain1 = 15.0;
+                      *exposure0 = 4000.0;
+                      *exposure1 = 4000.0;
                   }
 
                   /* if relative path make it global */
@@ -3656,13 +3667,13 @@ int mb_imagelist_read(int verbose, void *imagelist_ptr, int *imagestatus,
 
               /* else try to read a single image entry */
               /* line should have one path and one time stamp */
-              else if ((nscan = sscanf(buffer, "%s %lf %lf", path0, time_d, quality)) >= 2) {
+              else if ((nscan = sscanf(buffer, "%s %lf", path0, time_d0)) >= 2) {
                   if (strcmp(path0, "NULL") != 0) {
 
-                      /* if no quality value assume 1.00 */
-                      if (nscan == 2) {
-                          *quality = 1.00;
-                      }
+                      *gain0 = 15.0;
+                      *gain1 = 15.0;
+                      *exposure0 = 4000.0;
+                      *exposure1 = 4000.0;
 
                       /* if relative path make it global */
                       int len;
@@ -3756,7 +3767,7 @@ int mb_imagelist_read(int verbose, void *imagelist_ptr, int *imagestatus,
         if (imagelist2->open) {
           /* recursively call mb_read_imagelist */
           status = mb_imagelist_read(verbose, (void *)imagelist->imagelist, imagestatus,
-                                    path0, path1, dpath, time_d, dtime_d, quality, error);
+                                    path0, path1, dpath, time_d0, time_d1, gain0, gain1, exposure0, exposure1, error);
 
           /* if imagelist read fails close it */
           if (status == MB_FAILURE) {
@@ -3784,9 +3795,12 @@ int mb_imagelist_read(int verbose, void *imagelist_ptr, int *imagestatus,
     fprintf(stderr, "dbg2       path0:       %s\n", path0);
     fprintf(stderr, "dbg2       path1:       %s\n", path1);
     fprintf(stderr, "dbg2       dpath:       %s\n", dpath);
-    fprintf(stderr, "dbg2       time_d:      %f\n", *time_d);
-    fprintf(stderr, "dbg2       dtime_d:     %f\n", *dtime_d);
-    fprintf(stderr, "dbg2       quality:     %f\n", *quality);
+    fprintf(stderr, "dbg2       time_d0:     %f\n", *time_d0);
+    fprintf(stderr, "dbg2       time_d1:     %f\n", *time_d1);
+    fprintf(stderr, "dbg2       gain0:       %f\n", *gain0);
+    fprintf(stderr, "dbg2       gain1:       %f\n", *gain1);
+    fprintf(stderr, "dbg2       exposure0:   %f\n", *exposure0);
+    fprintf(stderr, "dbg2       exposure1:   %f\n", *exposure1);
     fprintf(stderr, "dbg2       error:       %d\n", *error);
     fprintf(stderr, "dbg2  Return status:\n");
     fprintf(stderr, "dbg2       status:      %d\n", status);

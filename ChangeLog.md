@@ -23,7 +23,9 @@ Distributions that do not include "beta" in the tag name correspond to the major
 announced releases. The source distributions associated with all releases, major
 or beta, are equally accessible as tarballs through the Github interface.
 
-- Version 5.7.9beta19    December 1, 2021
+- Version 5.7.9beta21    December 4, 2021
+- Version 5.7.9beta20    December 1, 2021
+- Version 5.7.9beta19    November 6, 2021
 - Version 5.7.9beta18    October 31, 2021
 - Version 5.7.9beta17    October 16, 2021
 - Version 5.7.9beta16    August 27, 2021
@@ -397,6 +399,17 @@ or beta, are equally accessible as tarballs through the Github interface.
 --
 ### MB-System Version 5.7 Release Notes:
 --
+
+#### 5.7.9beta21 (December 4, 2021)
+
+Mbphotomosaic, mbgetphotocorrection, mbphotogrammetry, mbm_makeimagelist: Altered
+imagelist file format and functions reading recursive imagelist structures. Now
+each stereo rig dataset has a single imagelist that can include both stereo pairs
+and  single images (when one photo from a stereo pair is missing). Also, the
+imagelists created by mbm_makeimagelist now include the camera gain and exposure
+settings.
+
+Mbphotomosaic, mbgetphotocorrection: Now can correct for image gain and exposure settings.
 
 #### 5.7.9beta20 (December 1, 2021)
 

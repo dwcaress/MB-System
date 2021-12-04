@@ -53,10 +53,11 @@ extern "C"
 using namespace std;
 using namespace cv;
 
-#define MB_IMAGE_CORR_MODE_NONE     0
-#define MB_IMAGE_CORR_MODE_HISTEQ   1
-#define MB_IMAGE_CORR_MODE_GAMMA    2
-#define MB_IMAGE_CORR_MODE_CLAHE    3
+#define MB_IMAGE_CORR_MODE_NONE       0
+#define MB_IMAGE_CORR_MODE_HISTEQ     1
+#define MB_IMAGE_CORR_MODE_GAMMA      2
+#define MB_IMAGE_CORR_MODE_CLAHE      3
+#define MB_IMAGE_CORR_MODE_LIGHTNESS  4
 
 int main(int argc, char** argv)
 {
@@ -68,8 +69,9 @@ int main(int argc, char** argv)
                             "\t--input=imagelist || --input=imagefile\n"
                             "\t--output=imagefile\n"
                             "\t--histogram-equalization\n"
-                            "\t--gamma-correction\n"
-                            "\t--clahe-correction\n";
+                            "\t--gamma-correction=gamma\n"
+                            "\t--clahe-correction\n"
+                            "\t--lightness-correction\n";
 
     /* MBIO status variables */
     int status = MB_SUCCESS;
@@ -90,7 +92,8 @@ int main(int argc, char** argv)
       {"output",                      required_argument,      NULL, 0},
       {"histogram-equalization",      no_argument,            NULL, 0},
       {"gamma-correction",            required_argument,      NULL, 0},
-      {"clahe-correction",            no_argument,            NULL, 0}
+      {"clahe-correction",            no_argument,            NULL, 0},
+      {"lightness-correction",         required_argument,      NULL, 0}
     };
 
     /* declare input and output */
@@ -101,6 +104,7 @@ int main(int argc, char** argv)
     /* correction parameters */
     int correction_mode = MB_IMAGE_CORR_MODE_NONE;
     double gamma = 0.5;
+    double lightness_correction = 1.0;
 
     /* process argument list */
     extern char *optarg;
@@ -147,6 +151,12 @@ int main(int argc, char** argv)
                 correction_mode = MB_IMAGE_CORR_MODE_CLAHE;
             }
 
+            /* simple lightness correction */
+            else if (strcmp("lightness-correction", options[option_index].name) == 0) {
+                sscanf (optarg,"%lf", &lightness_correction);
+                correction_mode = MB_IMAGE_CORR_MODE_LIGHTNESS;
+            }
+
             break;
         case '?':
             errflg++;
@@ -188,6 +198,8 @@ int main(int argc, char** argv)
       fprintf(stream,"dbg2       InputImageFile:              %s\n",InputImageFile);
       fprintf(stream,"dbg2       OutputImageFile:             %s\n",OutputImageFile);
       fprintf(stream,"dbg2       correction_mode:             %d\n",correction_mode);
+      fprintf(stream,"dbg2       gamma:                       %f\n",gamma);
+      fprintf(stream,"dbg2       lightness_correction:        %f\n",lightness_correction);
     }
 
     // Read input RGB image
@@ -262,14 +274,40 @@ int main(int argc, char** argv)
 
         break;
         }
+
+      case MB_IMAGE_CORR_MODE_LIGHTNESS:
+        {
+        Mat ycrcb_img;
+
+        // convert RGB color image to YCrCb
+        cvtColor(src_img, ycrcb_img, COLOR_BGR2YCrCb);
+
+        for (int i=0; i<src_img.cols; i++) {
+            for (int j=0; j<src_img.rows; j++) {
+
+                /* access the pixel value in YCrCb image */
+                unsigned char Y = ycrcb_img.at<Vec3b>(j,i)[0];
+                // unsigned char Cr = ycrcb_img.at<Vec3b>(j,i)[1];
+                // unsigned char Cb = ycrcb_img.at<Vec3b>(j,i)[2];
+
+                /* correct Y (intensity) value */
+                ycrcb_img.at<Vec3b>(j,i)[0] = saturate_cast<unsigned char>(lightness_correction * Y);
+            }
+        }
+
+        // convert YCrCb color image to RGB
+        cvtColor(ycrcb_img, dst_img, COLOR_YCrCb2BGR);
+
+        break;
+        }
     }
 
-   imwrite(OutputImageFile, dst_img);
+    imwrite(OutputImageFile, dst_img);
 
-   // display the results  (you might also want to see lab_planes[0] before and after).
-   imshow("Original Image", src_img);
-   imshow("Corrected Image", dst_img);
-   waitKey();
+    // display the results
+    imshow("Original Image", src_img);
+    imshow("Corrected Image", dst_img);
+    waitKey();
 
     /* end it all */
     exit(0);

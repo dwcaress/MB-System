@@ -4,11 +4,11 @@
 #
 # 09/22/18  GT   Created
 
-import sys, getopt, os
+import sys, getopt, os, re
 import glob, csv
 from datetime import datetime
 from collections import namedtuple
-
+from PIL import Image
 
 shortOpts = "hd:f:o:g:x"
 longOpts = ["help", "imdir=", "imformat=", "outfile=", "gpsfile=", "nogpsfile"]
@@ -29,31 +29,31 @@ def usage():
 def utime_text(ts):
   return datetime.utcfromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S')
 
-def StereoMatching(tleft, tright):
+def StereoMatching(tleft, tright, gleft, gright, eleft, eright):
   j,k = 0,0
   matchStereo  = []
   nomatch_left = []
   nomatch_right = []
   allImages = []
-  stereoItem = namedtuple('stereoItem', ['tleft','tright','tgps'])
+  stereoItem = namedtuple('stereoItem', ['tleft','tright','tgps','gleft','gright','eleft','eright'])
   MAX_DIFFERENCE_IMG_TIME = 5e5
 
   while j < len(tleft) and k < len(tright):
     # Left image without right
     if tleft[j] <  tright[k] - MAX_DIFFERENCE_IMG_TIME:
       nomatch_left.append(tleft[j])
-      stereo = stereoItem(tleft = tleft[j], tright = 0, tgps = tleft[j])
+      stereo = stereoItem(tleft = tleft[j], tright = 0, tgps = tleft[j], gleft = gleft[j], gright = 0, eleft = eleft[j], eright = 0)
       allImages.append(stereo)
       j += 1
     # Right image without left
     elif tright[k] <  tleft[j] - MAX_DIFFERENCE_IMG_TIME:
       nomatch_right.append(tright[k])
-      stereo = stereoItem(tleft = 0, tright = tright[k], tgps = tright[k])
+      stereo = stereoItem(tleft = 0, tright = tright[k], tgps = tright[k], gleft = 0, gright = gright[k], eleft = 0, eright = eright[k])
       allImages.append(stereo)
       k += 1
     # STEREO MATCH
     else:
-      stereo = stereoItem(tleft = tleft[j], tright = tright[k], tgps = tleft[j])
+      stereo = stereoItem(tleft = tleft[j], tright = tright[k], tgps = tleft[j], gleft = gleft[j], gright = gright[k], eleft = eleft[j], eright = eright[k])
       matchStereo.append(stereo)
       allImages.append(stereo)
       j+= 1;k+= 1
@@ -67,13 +67,13 @@ def StereoMatching(tleft, tright):
   return matchStereo, allImages, nomatch_left, nomatch_right
 
 
-def StereoMatchingGPS(tgps, tleft, tright):
+def StereoMatchingGPS(tgps, tleft, tright, gleft, gright, eleft, eright):
   i,j,k = 0,0,0
   matchStereo  = []
   nomatch_left = []
   nomatch_right = []
   allImages = []
-  stereoItem = namedtuple('stereoItem', ['tleft','tright','tgps'])
+  stereoItem = namedtuple('stereoItem', ['tleft','tright','tgps','gleft','gright','eleft','eright'])
   MAX_DIFFERENCE_IMG_TIME = 5e5
 
   while i < len(tgps) and j < len(tleft) and k < len(tright):
@@ -90,20 +90,20 @@ def StereoMatchingGPS(tgps, tleft, tright):
       k += 1
     # STEREO MATCH
     elif (abs(tleft[j] - tgps[i])<MAX_DIFFERENCE_IMG_TIME) and (abs(tright[k] - tgps[i])<MAX_DIFFERENCE_IMG_TIME):
-      stereo = stereoItem(tleft = tleft[j], tright = tright[k], tgps = tgps[i])
+      stereo = stereoItem(tleft = tleft[j], tright = tright[k], tgps = tgps[i], gleft = gleft[j], gright = gright[k], eleft = eleft[j], eright = eright[k])
       matchStereo.append(stereo)
       allImages.append(stereo)
       i+= 1;j+= 1;k+= 1
     # Only left image match with trigger
     elif abs(tleft[j] - tgps[i])<MAX_DIFFERENCE_IMG_TIME:
       nomatch_left.append(tleft[j])
-      stereo = stereoItem(tleft = tleft[j], tright = 0, tgps = tgps[i])
+      stereo = stereoItem(tleft = tleft[j], tright = 0, tgps = tgps[i], gleft = gleft[j], gright = 0, eleft = eleft[j], eright = 0)
       allImages.append(stereo)
       i += 1; j += 1
     # Only right image match with trigger
     elif abs(tright[k] - tgps[i])<MAX_DIFFERENCE_IMG_TIME:
       nomatch_right.append(tright[k])
-      stereo = stereoItem(tleft = 0, tright = tright[k], tgps = tgps[i])
+      stereo = stereoItem(tleft = 0, tright = tright[k], tgps = tgps[i], gleft = 0, gright = gright[k], eleft = 0, eright = eright[k])
       allImages.append(stereo)
       i += 1; k += 1
     else:
@@ -202,37 +202,76 @@ def main (args, opts={}):
     outFname = os.path.basename(outFname)
 
   # Getting image list
-  imlist_left  = [os.path.basename(f) for f in sorted(glob.glob(imdir+"/PROSILICA_L/*."+imformat))]
-  imlist_right = [os.path.basename(f) for f in sorted(glob.glob(imdir+"/PROSILICA_R/*."+imformat))]
+  image_list_left  = sorted(glob.glob(imdir+"/PROSILICA_L/*."+imformat))
+  image_list_right = sorted(glob.glob(imdir+"/PROSILICA_R/*."+imformat))
 
-  tlist_left   = [int(os.path.splitext(f)[0]) for f in imlist_left]
-  tlist_right  = [int(os.path.splitext(f)[0]) for f in imlist_right]
+  # Get time lists from image filenames
+  time_list_left   = [int(os.path.splitext(os.path.basename(f))[0]) for f in image_list_left]
+  time_list_right  = [int(os.path.splitext(os.path.basename(f))[0]) for f in image_list_right]
+
+  # Get camera gain and exposure values from image files
+  gain_list_left  = []
+  exposure_list_left  = []
+  gain_list_right  = []
+  exposure_list_right  = []
+  for f in image_list_left :
+    img = Image.open(f)
+    tagdata = img.tag.tagdata
+    img.close()
+    gain_exposure_str = tagdata[270].decode('UTF-8','ignore')
+    (gain_str, exposure_str) = re.findall(r"[-+]?\d*\.?\d+|[-+]?\d+", gain_exposure_str);
+    gain_list_left.append(float(gain_str))
+    exposure_list_left.append(float(exposure_str))
+  for f in image_list_right :
+    img = Image.open(f)
+    tagdata = img.tag.tagdata
+    img.close()
+    gain_exposure_str = tagdata[270].decode('UTF-8','ignore')
+    (gain_str, exposure_str) = re.findall(r"[-+]?\d*\.?\d+|[-+]?\d+", gain_exposure_str);
+    gain_list_right.append(float(gain_str))
+    exposure_list_right.append(float(exposure_str))
 
   #  Use GPS Triggers?
   if fGPStimes:
     # Getting GPS times
     with open(imdir+gpsFname, "r") as f:
       reader = csv.reader(f)
-      tlist_gps_raw = list(reader)
-    tlist_gps = [int(row[0]) for row in tlist_gps_raw]
+      time_list_gps_raw = list(reader)
+    time_list_gps = [int(row[0]) for row in time_list_gps_raw]
 
     # Matching Stereo Images with GPS tiggers
-    matchStereo, allImages, nomatch_left, nomatch_right  = StereoMatchingGPS(tlist_gps,tlist_left,tlist_right)
-    print(str(len(matchStereo))+"\t stereo images matched with GPS triggers")
+    matchStereo, allImages, nomatch_left, nomatch_right  = StereoMatchingGPS(time_list_gps, time_list_left, time_list_right, gain_list_left, gain_list_right, exposure_list_left, exposure_list_right)
+    print(str(len(matchStereo))+"\t matched stereo pairs with GPS trigger times")
     print(str(len(allImages))+"\t complete and partial stereo image pairs")
-    print(str(len(nomatch_left))+"\t left images not matched with GPS triggers")
-    print(str(len(nomatch_right))+"\t right images not matched with GPS triggers")
+    print(str(len(nomatch_left))+"\t unmatched left images")
+    print(str(len(nomatch_right))+"\t unmatched right images")
 
   else:
     # Matching Stereo Images between them (no GPS)
-    matchStereo, allImages, nomatch_left, nomatch_right  = StereoMatching(tlist_left,tlist_right)
-    print(str(len(matchStereo))+"\t stereo images matched")
+    matchStereo, allImages, nomatch_left, nomatch_right  = StereoMatching(time_list_left, time_list_right, gain_list_left, gain_list_right, exposure_list_left, exposure_list_right)
+    print(str(len(matchStereo))+"\t matched stereo pairs")
     print(str(len(allImages))+"\t complete and partial stereo image pairs")
-    print(str(len(nomatch_left))+"\t left images not matched")
-    print(str(len(nomatch_right))+"\t right images not matched")
+    print(str(len(nomatch_left))+"\t unmatched left images")
+    print(str(len(nomatch_right))+"\t unmatched right images")
 
   # Save Outputs
-  saveFiles(outdir, outFname, imformat, matchStereo, allImages, nomatch_left, nomatch_right, tlist_left, tlist_right)
+  #saveFiles(outdir, outFname, imformat, matchStereo, allImages, nomatch_left, nomatch_right, time_list_left, time_list_right)
+  imfile = open(outdir+'/'+outFname+".mb-2", "w")
+  imfile.write("#STEREOCAMERA\n#\n# Date range of files:\n")
+  imfile.write("# "+utime_text(allImages[0].tgps/1e6)+"  to  "+utime_text(allImages[-1].tgps/1e6)+"\n#\n")
+  for st in allImages:
+    if st.tleft > 0:
+      imfile.write('PROSILICA_L/'+str(st.tleft)+'.'+imformat+'\t\t')
+    else:
+      imfile.write('NULL'+'\t\t')
+    if st.tright > 0:
+      imfile.write('PROSILICA_R/'+str(st.tright)+'.'+imformat+'\t\t')
+    else:
+      imfile.write('NULL'+'\t\t')
+    imfile.write("%.6f"%(st.tgps/1e6)+'\t'+"%.6f"%(st.tgps/1e6)+'\t'+"%.1f"%(st.gleft)+'\t'+"%.1f"%(st.gright)+'\t'+"%.1f"%(st.eleft)+'\t'+"%.1f"%(st.eright)+'\n')
+    if st.tleft > 0 and st.tright > 0 and (st.gleft != st.gright or st.eleft != st.eright):
+      print("Image settings differ: PROSILICA_L/"+str(st.tleft)+"."+imformat+"\tPROSILICA_R/"+str(st.tright)+"."+imformat+"\t"+str(st.gleft)+"\t"+str(st.gright)+"\t"+str(st.eleft)+"\t"+str(st.eright))
+  imfile.close()
 
 
 if __name__ == "__main__":
