@@ -205,8 +205,12 @@ int main(int argc, char** argv)
     mb_path ImageListFile;
     mb_path imageLeftFile;
     mb_path imageRightFile;
-    double left_time_d;
-    double time_diff;
+    double    left_time_d;
+    double    right_time_d;
+    double    left_gain;
+    double    right_gain;
+    double    left_exposure;
+    double    right_exposure;
     double time_d;
     int time_i[7];
     double navlon;
@@ -1406,7 +1410,7 @@ int main(int argc, char** argv)
     waypoint = 0;
     int imagestatus = MB_IMAGESTATUS_NONE;
     mb_path dpath;
-    double imageQuality = 0.0;
+    double image_quality = 0.0;
     fprintf(stderr,"About to read ImageListFile: %s\n", ImageListFile);
 
     /* set up to display images if specified */
@@ -1418,28 +1422,22 @@ int main(int argc, char** argv)
 
     while ((status = mb_imagelist_read(verbose, imagelist_ptr, &imagestatus,
                                 imageLeftFile, imageRightFile, dpath,
-                                &left_time_d, &time_diff, &imageQuality, &error)) == MB_SUCCESS) {
+                                &left_time_d, &right_time_d,
+                                &left_gain, &right_gain,
+                                &left_exposure, &right_exposure, &error)) == MB_SUCCESS) {
         use_this_pair = false;
         if (imagestatus == MB_IMAGESTATUS_STEREO) {
             use_this_pair = true;
-
-            /* get quality for this image */
-            if (nquality > 1) {
-                intstat = mb_linear_interp(verbose, qtime-1, qquality-1, nquality,
-                                            time_d, &imageQuality, &iqtime, &error);
-            }
 
             /* check imageQuality value against threshold to see if this image should be used */
             if (use_this_pair && use_imagequality) {
                 if (nquality > 1) {
                     intstat = mb_linear_interp(verbose, qtime-1, qquality-1, nquality,
-                                                time_d, &imageQuality, &iqtime, &error);
+                                                time_d, &image_quality, &iqtime, &error);
                 }
-                if (imageQuality < imageQualityThreshold) {
+                if (image_quality < imageQualityThreshold) {
                     use_this_pair = false;
                 }
-fprintf(stderr, "Image quality: %f Threshold:%f   Use: %d\n",
-imageQuality, imageQualityThreshold, use_this_pair);
             }
 
             /* check that navigation is available for this stereo pair */
@@ -1701,11 +1699,11 @@ fprintf(stderr, "%s:%d:%s: no algorithm\n", __FILE__, __LINE__, __func__);
             Scalar avgPixelIntensityLeft = mean(img1);
             Scalar avgPixelIntensityRight = mean(img2);
             mb_get_date(verbose, time_d, time_i);
-            fprintf(stderr,"%5d Left:%s Right:%s %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d LLZ: %.10f %.10f %8.3f Tide:%7.3f H:%6.2f R:%6.2f P:%6.2f Avg Intensities:%.3f %3f\n",
+            fprintf(stderr,"%5d Left:%s Right:%s %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d LLZ: %.8f %.8f %8.3f HRP:%6.2f %5.2f %5.2f A:%.3f %3f Q:%.2f\n",
                     npairs, imageLeftFile, imageRightFile,
                     time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6],
-                    camera_navlon, camera_navlat, camera_sensordepth, tide, camera_heading, camera_roll, camera_pitch,
-                    avgPixelIntensityLeft.val[0], avgPixelIntensityRight.val[0]);
+                    camera_navlon, camera_navlat, camera_sensordepth, camera_heading, camera_roll, camera_pitch,
+                    avgPixelIntensityLeft.val[0], avgPixelIntensityRight.val[0], image_quality);
 
             /* If specified apply stereo calibration to rectify the images */
             if (use_calibration == MB_YES) {
@@ -1990,7 +1988,7 @@ fprintf(stderr, "%s:%d:%s: no algorithm\n", __FILE__, __LINE__, __func__);
             double good_fraction = ((double)ngood / ((double)(ngood + nbad)));
             fprintf(stream, "      --> Disparity calculations: good:%d  bad:%d  fraction:%.3f\n",
                     ngood, nbad, good_fraction);
-            fprintf(oilfp, "%s %s %.6f %.6f  %.2f\n", imageLeftFile, imageRightFile, left_time_d, time_diff, good_fraction);
+            fprintf(oilfp, "%s %s %.6f %.6f  %.2f\n", imageLeftFile, imageRightFile, left_time_d, right_time_d, good_fraction);
 
             mb_write_ping(verbose, mbio_ptr, (void *)store, &error);
             output_count++;
@@ -2010,7 +2008,7 @@ fprintf(stderr, "%s:%d:%s: no algorithm\n", __FILE__, __LINE__, __func__);
 
         // else not used add to imagelist with zero good fraction
         else {
-            fprintf(oilfp, "%s %s %.6f %.6f  %.2f\n", imageLeftFile, imageRightFile, left_time_d, time_diff, 0.0);
+            fprintf(oilfp, "%s %s %.6f %.6f  %.2f\n", imageLeftFile, imageRightFile, left_time_d, right_time_d, 0.0);
         }
     }
 

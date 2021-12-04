@@ -71,6 +71,9 @@ struct mbpm_process_struct {
     mb_path imageFile;
     int image_count;
     int image_camera;
+    double image_quality;
+    double image_gain;
+    double image_exposure;
     double time_d;
     double camera_navlon;
     double camera_navlat;
@@ -121,6 +124,10 @@ struct mbpm_control_struct {
 
     // Pixel trim
     unsigned int trimPixels;
+
+    // Image correction
+    double reference_gain;
+    double reference_exposure;
 
     // Image correction table
     int ncorr_x;
@@ -208,11 +215,11 @@ void process_image(int verbose, struct mbpm_process_struct *process,
         /* Print information for image to be processed */
         int time_i[7];
         mb_get_date(verbose, process->time_d, time_i);
-        fprintf(stderr,"%4d Camera:%d %s %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d LLZ: %.10f %.10f %8.3f HRP: %6.2f %6.2f %6.2f Amp:%.3f\n",
+        fprintf(stderr,"%4d Camera:%d %s %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d LLZ: %.8f %.8f %8.3f HRP: %6.2f %5.2f %5.2f A:%.3f Q:%.2f\n",
                 process->image_count, process->image_camera, process->imageFile,
                 time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6],
                 process->camera_navlon, process->camera_navlat, process->camera_sensordepth,
-                process->camera_heading, process->camera_roll, process->camera_pitch, avgPixelIntensity.val[0]);
+                process->camera_heading, process->camera_roll, process->camera_pitch, avgPixelIntensity.val[0], process->image_quality);
 
         /* get unit vector for direction camera is pointing */
 
@@ -250,6 +257,16 @@ void process_image(int verbose, struct mbpm_process_struct *process,
         double cy = -vxx * sin(DTR * process->camera_heading) + vyy * cos(DTR * process->camera_heading);
         double cz = vzz;
 
+        double imageIntensityCorrection = 1.0;
+
+        /* get correction for embedded camera gain */
+        if (control->reference_gain > 0.0)
+            imageIntensityCorrection *= pow(10.0, (process->image_gain - control->reference_gain) / 20.0);
+
+        /* get correction for embedded camera exposure time */
+        if (process->image_exposure > 0.0 && control->reference_exposure > 0.0)
+            imageIntensityCorrection *= control->reference_exposure / process->image_exposure;
+
         /* Loop over the pixels in the undistorted image. If trim is nonzero then
             that number of pixels are ignored around the margins. This solves the
             problem of black pixels being incorporated into the correction tables. If
@@ -269,7 +286,7 @@ void process_image(int verbose, struct mbpm_process_struct *process,
                 double dtheta;
                 double standoff = 0.0;
                 double lon, lat, topo;
-                float bgr_intensity;
+                //float bgr_intensity;
                 float ycrcb_intensity;
 
                 /* Deal with problem of black pixels at the margins of the
@@ -299,11 +316,12 @@ void process_image(int verbose, struct mbpm_process_struct *process,
                 /* calculate intensity for this pixel
                     - access the pixel value with Vec3b */
                 if (use_pixel) {
-                    bgr_intensity = ((float)imageUndistort.at<Vec3b>(j,i)[0]
-                             + (float)imageUndistort.at<Vec3b>(j,i)[1]
-                             + (float)imageUndistort.at<Vec3b>(j,i)[2]) / 3.0;
-                    ycrcb_intensity = (float)imageUndistortYCrCb.at<Vec3b>(j,i)[0];
-//fprintf(stderr,"i:%d j:%d intensity: bgr:%f hsv:%f\n",i,j,bgr_intensity,ycrcb_intensity);
+                    //bgr_intensity = ((float)imageUndistort.at<Vec3b>(j,i)[0]
+                    //         + (float)imageUndistort.at<Vec3b>(j,i)[1]
+                    //         + (float)imageUndistort.at<Vec3b>(j,i)[2]) / 3.0;
+                    ycrcb_intensity = (float)(imageIntensityCorrection * imageUndistortYCrCb.at<Vec3b>(j,i)[0]);
+//fprintf(stderr,"i:%d j:%d corr:%f  YCrCb intensity:%f\n",
+// i, j, imageIntensityCorrection, ycrcb_intensity);
 
                     /* only use nonzero intensities */
                     if (ycrcb_intensity <= 0.0) {
@@ -469,6 +487,8 @@ int main(int argc, char** argv)
                             "\t--fov-fudgefactor=factor\n"
                             "\t--projection=projection_pars\n"
                             "\t--trim=trim_pixels\n"
+                            "\t--reference-gain=gain\n"
+                            "\t--reference-exposure=exposure\n"
                             "\t--platform-file=platform.plf\n"
                             "\t--camera-sensor=camera_sensor_id\n"
                             "\t--nav-sensor=nav_sensor_id\n"
@@ -506,7 +526,11 @@ int main(int argc, char** argv)
     mb_path    imageRightFile;
     mb_path    imageFile;
     double    left_time_d;
-    double    time_diff;
+    double    right_time_d;
+    double    left_gain;
+    double    right_gain;
+    double    left_exposure;
+    double    right_exposure;
     double    time_d;
     int       time_i[7];
     double    navlon;
@@ -556,6 +580,8 @@ int main(int argc, char** argv)
     bool undistort_initialized = false;
 
     /* Input image correction */
+    control.reference_gain = 15.0;
+    control.reference_exposure = 4000.0;
     control.ncorr_x = 21;
     control.ncorr_y = 21;
     control.ncorr_z = 81;
@@ -647,6 +673,8 @@ int main(int argc, char** argv)
      *    --correction-z-minmax=value/value
      *    --fov-fudgefactor=factor
      *    --trim=trim_pixels
+     *    --reference-gain=gain
+     *    --reference-exposure=exposure
      *    --platform-file=platform.plf
      *    --camera-sensor=camera_sensor_id
      *    --nav-sensor=nav_sensor_id
@@ -680,6 +708,8 @@ int main(int argc, char** argv)
         {"correction-z-minmax",       required_argument,  NULL, 0},
         {"fov-fudgefactor",             required_argument,      NULL,         0},
         {"trim",                        required_argument,      NULL,         0},
+        {"reference-gain",              required_argument,      NULL,         0},
+        {"reference-exposure",          required_argument,      NULL,         0},
         {"platform-file",               required_argument,      NULL,         0},
         {"camera-sensor",               required_argument,      NULL,         0},
         {"nav-sensor",                  required_argument,      NULL,         0},
@@ -799,6 +829,18 @@ int main(int argc, char** argv)
             else if (strcmp("trim", options[option_index].name) == 0)
                 {
                 const int n = sscanf (optarg,"%d", &control.trimPixels);
+                }
+
+            /* reference-gain */
+            else if (strcmp("reference-gain", options[option_index].name) == 0)
+                {
+                int n = sscanf (optarg,"%lf", &control.reference_gain);
+                }
+
+            /* reference-exposure */
+            else if (strcmp("reference-exposure", options[option_index].name) == 0)
+                {
+                int n = sscanf (optarg,"%lf", &control.reference_exposure);
                 }
 
             /* platform-file */
@@ -961,6 +1003,8 @@ int main(int argc, char** argv)
         fprintf(stream,"dbg2       corr_zmax:                     %f\n",control.corr_zmax);
         fprintf(stream,"dbg2       control.fov_fudgefactor:       %f\n",control.fov_fudgefactor);
         fprintf(stream,"dbg2       control.trimPixels:            %u\n",control.trimPixels);
+        fprintf(stream,"dbg2       control.reference_gain:        %f\n",control.reference_gain);
+        fprintf(stream,"dbg2       control.reference_exposure:    %f\n",control.reference_exposure);
         fprintf(stream,"dbg2       PlatformFile:                  %s\n",PlatformFile);
         fprintf(stream,"dbg2       platform_specified:            %d\n",platform_specified);
         fprintf(stream,"dbg2       camera_sensor:                 %d\n",camera_sensor);
@@ -1000,6 +1044,8 @@ int main(int argc, char** argv)
         fprintf(stream,"  corr_zmax:                     %f\n",control.corr_zmax);
         fprintf(stream,"  control.fov_fudgefactor:       %f\n",control.fov_fudgefactor);
         fprintf(stream,"  control.trimPixels:            %u\n",control.trimPixels);
+        fprintf(stream,"  control.reference_gain:        %f\n",control.reference_gain);
+        fprintf(stream,"  control.reference_exposure:    %f\n",control.reference_exposure);
         fprintf(stream,"  PlatformFile:                  %s\n",PlatformFile);
         fprintf(stream,"  platform_specified:            %d\n",platform_specified);
         fprintf(stream,"  camera_sensor:                 %d\n",camera_sensor);
@@ -1559,14 +1605,16 @@ int main(int argc, char** argv)
     npairs = 0;
     nimages = 0;
     int imageStatus = MB_IMAGESTATUS_NONE;
-    double imageQuality = 0.0;
+    double image_quality = 0.0;
     mb_path dpath;
     unsigned int numThreadsSet = 0;
     fprintf(stderr,"About to read ImageListFile: %s\n", ImageListFile);
 
     while ((status = mb_imagelist_read(verbose, imagelist_ptr, &imageStatus,
                                 imageLeftFile, imageRightFile, dpath,
-                                &left_time_d, &time_diff, &imageQuality, &error)) == MB_SUCCESS) {
+                                &left_time_d, &right_time_d,
+                                &left_gain, &right_gain,
+                                &left_exposure, &right_exposure, &error)) == MB_SUCCESS) {
         if (imageStatus == MB_IMAGESTATUS_STEREO) {
           if (use_camera_mode == MBPM_USE_STEREO) {
             npairs++;
@@ -1621,6 +1669,8 @@ int main(int argc, char** argv)
             double camera_heading;
             double camera_roll;
             double camera_pitch;
+            double image_gain;
+            double image_exposure;
 
             /* set camera for stereo image */
             if (currentimages == 2) {
@@ -1636,36 +1686,30 @@ int main(int argc, char** argv)
             use_this_image = false;
             if (image_camera == MBPM_CAMERA_LEFT
                 && (use_camera_mode == MBPM_USE_LEFT || use_camera_mode == MBPM_USE_STEREO)) {
-                     time_d = left_time_d;
-                    strcpy(imageFile, imageLeftFile);
-                    use_this_image = true;
+                time_d = left_time_d;
+                image_gain = left_gain;
+                image_exposure = left_exposure;
+                strcpy(imageFile, imageLeftFile);
+                use_this_image = true;
             }
             else if (image_camera == MBPM_CAMERA_RIGHT
                 && (use_camera_mode == MBPM_USE_RIGHT || use_camera_mode == MBPM_USE_STEREO)) {
-                     time_d = left_time_d + time_diff;
-                    strcpy(imageFile, imageRightFile);
-                    use_this_image = true;
+                time_d = right_time_d;
+                image_gain = right_gain;
+                image_exposure = right_exposure;
+                strcpy(imageFile, imageRightFile);
+                use_this_image = true;
             }
 
-            /* get quality for this image */
-            if (nquality > 1) {
-                intstat = mb_linear_interp(verbose,
-                        qtime-1, qquality-1,
-                        nquality, time_d, &imageQuality, &iqtime,
-                        &error);
-            }
-
-            /* check imageQuality value against threshold to see if this image should be used */
+            /* check image_quality value against threshold to see if this image should be used */
             if (use_this_image && use_imagequality) {
                 if (nquality > 1) {
                     intstat = mb_linear_interp(verbose, qtime-1, qquality-1, nquality,
-                                                time_d, &imageQuality, &iqtime, &error);
+                                                time_d, &image_quality, &iqtime, &error);
                 }
-                if (imageQuality < imageQualityThreshold) {
+                if (image_quality < imageQualityThreshold) {
                     use_this_image = false;
                 }
-fprintf(stderr, "Image quality: %f Threshold:%f   Use: %d\n",
-imageQuality, imageQualityThreshold, use_this_image);
             }
 
             /* check navigation for location close to or inside destination image bounds */
@@ -1753,6 +1797,9 @@ imageQuality, imageQualityThreshold, use_this_image);
                 strcpy(processPars[numThreadsSet].imageFile, imageFile);
                 processPars[numThreadsSet].image_count = nimages - currentimages + iimage;
                 processPars[numThreadsSet].image_camera = image_camera;
+                processPars[numThreadsSet].image_quality = image_quality;
+                processPars[numThreadsSet].image_gain = image_gain;
+                processPars[numThreadsSet].image_exposure = image_exposure;
                 processPars[numThreadsSet].time_d = time_d;
                 processPars[numThreadsSet].camera_navlon = camera_navlon;
                 processPars[numThreadsSet].camera_navlat = camera_navlat;

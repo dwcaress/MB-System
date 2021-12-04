@@ -292,8 +292,11 @@ int mb_datalist_readorg(int verbose, void *datalist_ptr, char *path, int *format
 int mb_datalist_recursion(int verbose, void *datalist_ptr, bool print, int *recursion, int *error);
 int mb_datalist_close(int verbose, void **datalist_ptr, int *error);
 int mb_imagelist_open(int verbose, void **imagelist_ptr, char *path, int *error);
-int mb_imagelist_read(int verbose, void *imagelist_ptr, int *imagestatus, char *path0, char *path1, char *dpath,
-                      double *time_d, double *dtime_d, double *quality, int *error);
+int mb_imagelist_read(int verbose, void *imagelist_ptr, int *imagestatus,
+                      char *path0, char *path1, char *dpath,
+                      double *time_d0, double *time_d1,
+                      double *gain0, double *gain1,
+                      double *exposure0, double *exposure1, int *error);
 int mb_imagelist_recursion(int verbose, void *imagelist_ptr, bool print, int *recursion, int *error);
 int mb_imagelist_close(int verbose, void **imagelist_ptr, int *error);
 int mb_get_relative_path(int verbose, char *path, char *pwd, int *error);
