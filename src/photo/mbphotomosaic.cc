@@ -1639,7 +1639,7 @@ void process_image_sectioned2(int verbose, struct mbpm_process_struct *process,
                         fprintf(stderr,"%4d Camera:%d %s %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d ",
                                 process->image_count, process->image_camera, process->imageFile,
                                 time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6]);
-                        fprintf(stderr,"LLZ: %.8f %.8f %8.3f HRP: %6.2f %5.2f %5.2f A:%.3f Q:%.2f \n",
+                        fprintf(stderr,"LLZ: %.8f %.8f %8.3f HRP: %6.2f %5.2f %5.2f A:%.3f Q:%.2f ",
                                 process->camera_navlon, process->camera_navlat, process->camera_sensordepth,
                                 process->camera_heading, process->camera_roll, process->camera_pitch,
                                 avgPixelIntensity.val[0], process->image_quality);
