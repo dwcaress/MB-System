@@ -209,8 +209,33 @@ void process_image(int verbose, struct mbpm_process_struct *process,
          */
         cvtColor(imageUndistort, imageUndistortYCrCb, COLOR_BGR2YCrCb);
         Scalar avgPixelIntensity = mean(imageUndistortYCrCb);
-        double avgImageIntensityCorrection = 1.0;
-        double brightnessCorrection = 70.0 / avgPixelIntensity.val[0];
+
+        /* get correction for embedded camera gain */
+        double imageIntensityCorrection = 1.0;
+        if (control->reference_gain > 0.0)
+            imageIntensityCorrection *= pow(10.0, (process->image_gain - control->reference_gain) / 20.0);
+
+        /* get correction for embedded camera exposure time */
+        if (process->image_exposure > 0.0 && control->reference_exposure > 0.0) {
+            //imageIntensityCorrection *= control->reference_exposure / process->image_exposure;
+
+            if (process->image_exposure >= 7999.0)
+                imageIntensityCorrection *= 1.0;
+            else if (process->image_exposure >= 3999.00)
+                imageIntensityCorrection *= 1.14;
+            else if (process->image_exposure >= 1999.00)
+                imageIntensityCorrection *= 1.4;
+            else if (process->image_exposure >= 999.00)
+                imageIntensityCorrection *= 2.0;
+            if (control->reference_exposure >= 7999.0)
+                imageIntensityCorrection /= 1.0;
+            else if (control->reference_exposure >= 3999.00)
+                imageIntensityCorrection /= 1.14;
+            else if (control->reference_exposure >= 1999.00)
+                imageIntensityCorrection /= 1.4;
+            else if (control->reference_exposure >= 999.00)
+                imageIntensityCorrection /= 2.0;
+        }
 
         /* Print information for image to be processed */
         int time_i[7];
@@ -256,16 +281,6 @@ void process_image(int verbose, struct mbpm_process_struct *process,
         double cx = vxx * cos(DTR * process->camera_heading) + vyy * sin(DTR * process->camera_heading);
         double cy = -vxx * sin(DTR * process->camera_heading) + vyy * cos(DTR * process->camera_heading);
         double cz = vzz;
-
-        double imageIntensityCorrection = 1.0;
-
-        /* get correction for embedded camera gain */
-        if (control->reference_gain > 0.0)
-            imageIntensityCorrection *= pow(10.0, (process->image_gain - control->reference_gain) / 20.0);
-
-        /* get correction for embedded camera exposure time */
-        if (process->image_exposure > 0.0 && control->reference_exposure > 0.0)
-            imageIntensityCorrection *= control->reference_exposure / process->image_exposure;
 
         /* Loop over the pixels in the undistorted image. If trim is nonzero then
             that number of pixels are ignored around the margins. This solves the
