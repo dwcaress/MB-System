@@ -331,8 +331,26 @@ void process_image(int verbose, struct mbpm_process_struct *process,
                 imageIntensityCorrection *= pow(10.0, (process->image_gain - control->reference_gain) / 20.0);
 
             /* get correction for embedded camera exposure time */
-            if (process->image_exposure > 0.0 && control->reference_exposure > 0.0)
-                imageIntensityCorrection *= control->reference_exposure / process->image_exposure;
+            if (process->image_exposure > 0.0 && control->reference_exposure > 0.0) {
+                //imageIntensityCorrection *= control->reference_exposure / process->image_exposure;
+
+                if (process->image_exposure >= 7999.0)
+                    imageIntensityCorrection *= 1.0;
+                else if (process->image_exposure >= 3999.00)
+                    imageIntensityCorrection *= 1.14;
+                else if (process->image_exposure >= 1999.00)
+                    imageIntensityCorrection *= 1.4;
+                else if (process->image_exposure >= 999.00)
+                    imageIntensityCorrection *= 2.0;
+                if (control->reference_exposure >= 7999.0)
+                    imageIntensityCorrection /= 1.0;
+                else if (control->reference_exposure >= 3999.00)
+                    imageIntensityCorrection /= 1.14;
+                else if (control->reference_exposure >= 1999.00)
+                    imageIntensityCorrection /= 1.4;
+                else if (control->reference_exposure >= 999.00)
+                    imageIntensityCorrection /= 2.0;
+            }
         }
 
         /* Loop over the pixels in the undistorted image. If trim is nonzero then
@@ -846,8 +864,27 @@ void process_image_sectioned(int verbose, struct mbpm_process_struct *process,
                 imageIntensityCorrection *= pow(10.0, (process->image_gain - control->reference_gain) / 20.0);
 
             /* get correction for embedded camera exposure time */
-            if (process->image_exposure > 0.0 && control->reference_exposure > 0.0)
-                imageIntensityCorrection *= control->reference_exposure / process->image_exposure;
+            /* get correction for embedded camera exposure time */
+            if (process->image_exposure > 0.0 && control->reference_exposure > 0.0) {
+                //imageIntensityCorrection *= control->reference_exposure / process->image_exposure;
+
+                if (process->image_exposure >= 7999.0)
+                    imageIntensityCorrection *= 1.0;
+                else if (process->image_exposure >= 3999.00)
+                    imageIntensityCorrection *= 1.14;
+                else if (process->image_exposure >= 1999.00)
+                    imageIntensityCorrection *= 1.4;
+                else if (process->image_exposure >= 999.00)
+                    imageIntensityCorrection *= 2.0;
+                if (control->reference_exposure >= 7999.0)
+                    imageIntensityCorrection /= 1.0;
+                else if (control->reference_exposure >= 3999.00)
+                    imageIntensityCorrection /= 1.14;
+                else if (control->reference_exposure >= 1999.00)
+                    imageIntensityCorrection /= 1.4;
+                else if (control->reference_exposure >= 999.00)
+                    imageIntensityCorrection /= 2.0;
+            }
         }
 
         /* Loop over sections of the undistorted image, and map those onto the
@@ -1444,8 +1481,26 @@ void process_image_sectioned2(int verbose, struct mbpm_process_struct *process,
                 imageIntensityCorrection *= pow(10.0, (process->image_gain - control->reference_gain) / 20.0);
 
             /* get correction for embedded camera exposure time */
-            if (process->image_exposure > 0.0 && control->reference_exposure > 0.0)
-                imageIntensityCorrection *= control->reference_exposure / process->image_exposure;
+            if (process->image_exposure > 0.0 && control->reference_exposure > 0.0) {
+                //imageIntensityCorrection *= control->reference_exposure / process->image_exposure;
+
+                if (process->image_exposure >= 7999.0)
+                    imageIntensityCorrection *= 1.0;
+                else if (process->image_exposure >= 3999.00)
+                    imageIntensityCorrection *= 1.14;
+                else if (process->image_exposure >= 1999.00)
+                    imageIntensityCorrection *= 1.4;
+                else if (process->image_exposure >= 999.00)
+                    imageIntensityCorrection *= 2.0;
+                if (control->reference_exposure >= 7999.0)
+                    imageIntensityCorrection /= 1.0;
+                else if (control->reference_exposure >= 3999.00)
+                    imageIntensityCorrection /= 1.14;
+                else if (control->reference_exposure >= 1999.00)
+                    imageIntensityCorrection /= 1.4;
+                else if (control->reference_exposure >= 999.00)
+                    imageIntensityCorrection /= 2.0;
+            }
 
             /* Apply range based correction */
             if (control->corr_mode == MBPM_CORRECTION_RANGE) {
@@ -1643,10 +1698,10 @@ void process_image_sectioned2(int verbose, struct mbpm_process_struct *process,
                                 process->camera_navlon, process->camera_navlat, process->camera_sensordepth,
                                 process->camera_heading, process->camera_roll, process->camera_pitch,
                                 avgPixelIntensity.val[0], process->image_quality);
-                        fprintf(stderr,"G:%.0f/%.0f E:%.0f/%.0f S:%.3f C:%.3f ",
+                        fprintf(stderr,"G:%.0f/%.0f E:%.0f/%.0f S:%.3f C:%.3f %.3f",
                                 process->image_gain, control->reference_gain,
                                 process->image_exposure, control->reference_exposure,
-                                image_center_standoff, imageIntensityCorrection);
+                                image_center_standoff, imageIntensityCorrection, centerIntensityCorrection);
                         fprintf(stderr, "\n");
                     }
 

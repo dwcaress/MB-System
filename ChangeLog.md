@@ -403,8 +403,8 @@ or beta, are equally accessible as tarballs through the Github interface.
 
 #### 5.7.9beta22 (December 5, 2021)
 
-Mbphotomosaic: Another iteration trying to bet image gain and exposure correction
-to work correctly.
+Mbphotomosaic and mbgetphotocorrection: Another iteration trying to bet image
+gain and exposure correction to work correctly.
 
 #### 5.7.9beta21 (December 4, 2021)
 
