@@ -1455,7 +1455,7 @@ void process_image_sectioned2(int verbose, struct mbpm_process_struct *process,
             - Also calculate the final image correction for the center of the
               image by the method used for each section of pixels */
         double imageIntensityCorrection = 1.0;
-        double centerIntensityCorrection;
+        double centerIntensityCorrection = 1.0;;
 
         /* Apply no image correction */
         if (control->corr_mode == MBPM_CORRECTION_NONE) {
@@ -1502,8 +1502,14 @@ void process_image_sectioned2(int verbose, struct mbpm_process_struct *process,
                     imageIntensityCorrection /= 2.0;
             }
 
+            /* Apply camera setting correction */
+            if (control->corr_mode == MBPM_CORRECTION_CAMERA_SETTINGS) {
+                centerIntensityCorrection = imageIntensityCorrection;
+                centerIntensityCorrection *= exp(control->corr_range_coeff * (rr - control->corr_range_target));
+            }
+
             /* Apply range based correction */
-            if (control->corr_mode == MBPM_CORRECTION_RANGE) {
+            else if (control->corr_mode == MBPM_CORRECTION_RANGE) {
                 centerIntensityCorrection = imageIntensityCorrection;
                 centerIntensityCorrection *= exp(control->corr_range_coeff * (rr - control->corr_range_target));
             }
