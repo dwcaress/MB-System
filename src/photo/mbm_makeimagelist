@@ -10,14 +10,15 @@ from datetime import datetime
 from collections import namedtuple
 from PIL import Image
 
-shortOpts = "hd:f:o:g:x"
-longOpts = ["help", "imdir=", "imformat=", "outfile=", "gpsfile=", "nogpsfile"]
+shortOpts = "hbd:f:o:g:x"
+longOpts = ["help", "check-bayer", "imdir=", "imformat=", "outfile=", "gpsfile=", "nogpsfile"]
 
 def usage():
   pname, sname = os.path.split(sys.argv[0])
   sys.stderr.write("usage: % s %s < path > \n" % (sname, str(longOpts)))
   print( """
   -h --help                  print this message
+  -b --check-bayer           Read camera settings from original bayer images rather than RGB images
   -d --imdir=path2images     Path to image files (default './')
   -f --imformat=image_format Image format [image_format] [default 'tif']
   -o --outfile=outfname      Output data to [ofname] [default 'imagelist']
@@ -178,21 +179,24 @@ def main (args, opts={}):
   outFname = "imagelist"
   gpsFname = "/../logfile_gpstime_cam_sync.csv"
   fGPStimes = True
+  checkBayer = True
   for o, a in opts:
-      if o in ("-h", "--help"):
-        usage()
-      elif o in ("-d", "--imdir"):
-        imdir = a
-      elif o in ("-f", "--imformat"):
-        imdir = a
-      elif o in ("-o", "--outfile"):
-        outFname = a
-      elif o in ("-g", "--gpsfile"):
-        gpsFname = a
-      elif o in ("-x", "--nogpsfile"):
-        fGPStimes = False
-      else:
-        assert False, "unhandled option: "+o+" "+a
+    if o in ("-h", "--help"):
+      usage()
+    elif o in ("-b", "--check-bayer"):
+      checkBayer = True
+    elif o in ("-d", "--imdir"):
+      imdir = a
+    elif o in ("-f", "--imformat"):
+      imdir = a
+    elif o in ("-o", "--outfile"):
+      outFname = a
+    elif o in ("-g", "--gpsfile"):
+      gpsFname = a
+    elif o in ("-x", "--nogpsfile"):
+      fGPStimes = False
+    else:
+      assert False, "unhandled option: "+o+" "+a
 
   if os.path.dirname(outFname) == '':
     outdir   = imdir
@@ -215,6 +219,8 @@ def main (args, opts={}):
   gain_list_right  = []
   exposure_list_right  = []
   for f in image_list_left :
+    if checkBayer:
+      f = f.replace("color", "bayer", 1)
     img = Image.open(f)
     tagdata = img.tag.tagdata
     img.close()
@@ -223,6 +229,8 @@ def main (args, opts={}):
     gain_list_left.append(float(gain_str))
     exposure_list_left.append(float(exposure_str))
   for f in image_list_right :
+    if checkBayer:
+      f = f.replace("color", "bayer", 1)
     img = Image.open(f)
     tagdata = img.tag.tagdata
     img.close()
