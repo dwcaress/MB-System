@@ -213,7 +213,7 @@ void process_image(int verbose, struct mbpm_process_struct *process,
         /* get correction for embedded camera gain */
         double imageIntensityCorrection = 1.0;
         if (control->reference_gain > 0.0)
-            imageIntensityCorrection *= pow(10.0, (process->image_gain - control->reference_gain) / 20.0);
+            imageIntensityCorrection *= pow(10.0, (control->reference_gain - process->image_gain) / 20.0);
 
         /* get correction for embedded camera exposure time */
         if (process->image_exposure > 0.0 && control->reference_exposure > 0.0) {
