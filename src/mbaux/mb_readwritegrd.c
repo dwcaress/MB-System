@@ -271,19 +271,19 @@ int mb_read_gmt_grd(int verbose, char *grdfile, int *grid_projection_mode, char 
 
   if (status == MB_SUCCESS && verbose > 0) {
     fprintf(stderr, "\nGrid read:\n");
-    fprintf(stderr, "  Dimensions:     %d %d\n", header->n_columns, header->n_rows);
+    fprintf(stderr, "  Dimensions:     %u %u\n", header->n_columns, header->n_rows);
     fprintf(stderr, "  Registration:   %d\n", header->registration);
     if (modeltype == ModelTypeProjected) {
       fprintf(stderr, "  Projected Coordinate System Name: %s\n", projectionname);
       fprintf(stderr, "  Projected Coordinate System ID:   %d\n", epsgid);
-      fprintf(stderr, "  Easting:    %f %f  %f\n", header->wesn[0], header->wesn[1], header->inc[0]);
-      fprintf(stderr, "  Northing:   %f %f  %f\n", header->wesn[2], header->wesn[3], header->inc[1]);
+      fprintf(stderr, "  Easting:    %f %f  %g\n", header->wesn[0], header->wesn[1], header->inc[0]);
+      fprintf(stderr, "  Northing:   %f %f  %g\n", header->wesn[2], header->wesn[3], header->inc[1]);
     }
     else {
       fprintf(stderr, "  Geographic Coordinate System Name: %s\n", projectionname);
       fprintf(stderr, "  Geographic Coordinate System ID:   %d\n", epsgid);
-      fprintf(stderr, "  Longitude:  %f %f  %f\n", header->wesn[0], header->wesn[1], header->inc[0]);
-      fprintf(stderr, "  Latitude:   %f %f  %f\n", header->wesn[2], header->wesn[3], header->inc[1]);
+      fprintf(stderr, "  Longitude:  %.9f %.9f  %.9f\n", header->wesn[0], header->wesn[1], header->inc[0]);
+      fprintf(stderr, "  Latitude:   %.9f %.9f  %.9f\n", header->wesn[2], header->wesn[3], header->inc[1]);
     }
     fprintf(stderr, "  Grid Projection Mode:     %d\n", *grid_projection_mode);
     fprintf(stderr, "  Grid Projection ID:       %s\n", grid_projection_id);

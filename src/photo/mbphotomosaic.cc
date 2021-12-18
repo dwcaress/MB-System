@@ -86,6 +86,51 @@ using namespace cv;
 
 // #define DEBUG 1
 
+char program_name[] = "mbphotomosaic";
+char help_message[] =  "mbphotomosaic makes a mosaic of navigated downlooking photographs.";
+char usage_message[] = "mbphotomosaic \n"
+                        "\t--verbose\n"
+                        "\t--help\n"
+                        "\t--threads=nthreads\n"
+                        "\t--input=imagelist\n"
+                        "\t--output=file\n"
+                        "\t--output-tiff\n"
+                        "\t--output-png\n"
+                        "\t--image-dimensions=width/height\n"
+                        "\t--image-spacing=dx/dy[/units]\n"
+                        "\t--fov-fudgefactor=factor\n"
+                        "\t--projection=projection_pars\n"
+                        "\t--altitude=standoff_target/standoff_range\n"
+                        "\t--standoff=standoff_target/standoff_range\n"
+                        "\t--rangemax=range_max\n"
+                        "\t--trim=trim_pixels\n"
+                        "\t--bounds=lonmin/lonmax/latmin/latmax | west/east/south/north\n"
+                        "\t--bounds-buffer=bounds_buffer\n"
+                        "\t--correction-brightness\n"
+                        "\t--correction-camera-settings\n"
+                        "\t--correction-range=target/coeff\n"
+                        "\t--correction-standoff=target/coeff\n"
+                        "\t--correction-file=imagecorrection.yaml\n"
+                        "\t--reference-gain=gain\n"
+                        "\t--reference-exposure=exposure\n"
+                        "\t--platform-file=platform.plf\n"
+                        "\t--camera-sensor=camera_sensor_id\n"
+                        "\t--nav-sensor=nav_sensor_id\n"
+                        "\t--sensordepth-sensor=sensordepth_sensor_id\n"
+                        "\t--heading-sensor=heading_sensor_id\n"
+                        "\t--altitude-sensor=altitude_sensor_id\n"
+                        "\t--attitude-sensor=attitude_sensor_id\n"
+                        "\t--use-left-camera\n"
+                        "\t--use-right-camera\n"
+                        "\t--use-both-cameras\n"
+                        "\t--calibration-file=stereocalibration.yaml\n"
+                        "\t--navigation-file=file\n"
+                        "\t--tide-file=file\n"
+                        "\t--image-quality-file=file\n"
+                        "\t--image-quality-threshold=value\n"
+                        "\t--image-quality-filter-length=value\n"
+                        "\t--topography-grid=file";
+
 /*--------------------------------------------------------------------*/
 
 struct mbpm_process_struct {
@@ -200,6 +245,485 @@ struct mbpm_control_struct {
     // Input image section size (pixels)
     int sectionPixels;
 };
+
+/*--------------------------------------------------------------------*/
+void load_navigation(int verbose, mb_path NavigationFile, int lonflip,
+                      int *nnav, double **nptime, double **nplon, double **nplat,
+                      double **npheading, double **npspeed, double **npdraft,
+                      double **nproll, double **nppitch, double **npheave, int *error)
+{
+    int status = MB_SUCCESS;
+    *error = MB_ERROR_NO_ERROR;
+    char *message = NULL;
+    FILE *tfp = NULL;
+    if ((tfp = fopen(NavigationFile, "r")) == NULL)
+        {
+        *error = MB_ERROR_OPEN_FAIL;
+        fprintf(stderr,"\nUnable to Open Navigation File <%s> for reading\n",NavigationFile);
+        fprintf(stderr,"\nProgram <%s> Terminated\n", program_name);
+        exit(*error);
+        }
+    *nnav = 0;
+    char *result;
+    mb_path buffer;
+    while ((result = fgets(buffer,MB_PATH_MAXLINE,tfp)) == buffer)
+        (*nnav)++;
+    fclose(tfp);
+
+    /* allocate arrays for nav */
+    if (*nnav > 0)
+        {
+        status = mb_reallocd(verbose, __FILE__, __LINE__, *nnav * sizeof(double), (void **)nptime, error);
+        status = mb_reallocd(verbose, __FILE__, __LINE__, *nnav * sizeof(double), (void **)nplon, error);
+        status = mb_reallocd(verbose, __FILE__, __LINE__, *nnav * sizeof(double), (void **)nplat, error);
+        status = mb_reallocd(verbose, __FILE__, __LINE__, *nnav * sizeof(double), (void **)npheading, error);
+        status = mb_reallocd(verbose, __FILE__, __LINE__, *nnav * sizeof(double), (void **)npspeed, error);
+        status = mb_reallocd(verbose, __FILE__, __LINE__, *nnav * sizeof(double), (void **)npdraft, error);
+        status = mb_reallocd(verbose, __FILE__, __LINE__, *nnav * sizeof(double), (void **)nproll, error);
+        status = mb_reallocd(verbose, __FILE__, __LINE__, *nnav * sizeof(double), (void **)nppitch, error);
+        status = mb_reallocd(verbose, __FILE__, __LINE__, *nnav * sizeof(double), (void **)npheave, error);
+        }
+
+    /* if no nav data then set error */
+    else
+        {
+        *error = MB_ERROR_BAD_DATA;
+        }
+
+    /* if error initializing memory or reading data then quit */
+    if (*error != MB_ERROR_NO_ERROR)
+        {
+        mb_error(verbose,*error,&message);
+        fprintf(stderr,"\nMBIO Error allocating data arrays:\n%s\n",message);
+        fprintf(stderr,"\nProgram <%s> Terminated\n", program_name);
+        exit(*error);
+        }
+
+    /* read the data points in the nav file */
+    *nnav = 0;
+    double *ntime = *nptime;
+    double *nlon = *nplon;
+    double *nlat = *nplat;
+    double *nheading = *npheading;
+    double *nspeed = *npspeed;
+    double *ndraft = *npdraft;
+    double *nroll = *nproll;
+    double *npitch = *nppitch;
+    double *nheave = *npheave;
+
+    if ((tfp = fopen(NavigationFile, "r")) == NULL)
+        {
+        *error = MB_ERROR_OPEN_FAIL;
+        fprintf(stderr,"\nUnable to open navigation file <%s> for reading\n",NavigationFile);
+        fprintf(stderr,"\nProgram <%s> Terminated\n", program_name);
+        exit(*error);
+        }
+    while ((result = fgets(buffer,MB_PATH_MAXLINE,tfp)) == buffer)
+        {
+        bool value_ok = false;
+        int time_i[7];
+        double sec;
+
+        /* read the navigation from an fnv file */
+        int nget = sscanf(buffer,"%d %d %d %d %d %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf",
+            &time_i[0], &time_i[1], &time_i[2],
+            &time_i[3], &time_i[4], &sec, &ntime[*nnav], &nlon[*nnav], &nlat[*nnav],
+            &nheading[*nnav], &nspeed[*nnav], &ndraft[*nnav],
+            &nroll[*nnav], &npitch[*nnav], &nheave[*nnav]);
+        if (nget >= 15)
+            value_ok = true;
+
+        /* make sure longitude is defined according to lonflip */
+        if (value_ok)
+            {
+            if (lonflip == -1 && nlon[*nnav] > 0.0)
+                nlon[*nnav] = nlon[*nnav] - 360.0;
+            else if (lonflip == 0 && nlon[*nnav] < -180.0)
+                nlon[*nnav] = nlon[*nnav] + 360.0;
+            else if (lonflip == 0 && nlon[*nnav] > 180.0)
+                nlon[*nnav] = nlon[*nnav] - 360.0;
+            else if (lonflip == 1 && nlon[*nnav] < 0.0)
+                nlon[*nnav] = nlon[*nnav] + 360.0;
+            }
+
+        /* output some debug values */
+        if (verbose >= 5 && value_ok)
+            {
+            fprintf(stderr,"\ndbg5  New navigation point read in program <%s>\n",program_name);
+            fprintf(stderr,"dbg5       nav[%d]: %f %f %f\n",
+                *nnav,ntime[*nnav], nlon[*nnav], nlat[*nnav]);
+            }
+        else if (verbose >= 5)
+            {
+            fprintf(stderr,"\ndbg5  Error parsing line in navigation file in program <%s>\n",program_name);
+            fprintf(stderr,"dbg5       line: %s\n",buffer);
+            }
+
+        /* check for reverses or repeats in time */
+        if (value_ok)
+            {
+            if (*nnav == 0)
+                (*nnav)++;
+            else if (ntime[*nnav] > ntime[*nnav-1])
+                (*nnav)++;
+            else if (*nnav > 0 && ntime[*nnav] <= ntime[*nnav-1]
+                && verbose >= 5)
+                {
+                fprintf(stderr,"\ndbg5  Navigation time error in program <%s>\n",program_name);
+                fprintf(stderr,"dbg5       nav[%d]: %f %f %f\n",
+                    *nnav-1,ntime[*nnav-1], nlon[*nnav-1], nlat[*nnav-1]);
+                fprintf(stderr,"dbg5       nav[%d]: %f %f %f\n",
+                    *nnav,ntime[*nnav], nlon[*nnav], nlat[*nnav]);
+                }
+            }
+        strncpy(buffer,"\0",sizeof(buffer));
+        }
+    fclose(tfp);
+
+    /* output information */
+    fprintf(stderr,"    %d navigation records read from %s\n", *nnav, NavigationFile);
+
+}
+
+/*--------------------------------------------------------------------*/
+void load_tide(int verbose, mb_path TideFile, int *ntide, double **tptime, double **tptide, int *error)
+{
+    int status = MB_SUCCESS;
+    *error = MB_ERROR_NO_ERROR;
+    char *message = NULL;
+    FILE *tfp = NULL;
+    if ((tfp = fopen(TideFile, "r")) == NULL)
+        {
+        *error = MB_ERROR_OPEN_FAIL;
+        fprintf(stderr,"\nUnable to open tide file <%s> for reading\n",TideFile);
+        fprintf(stderr,"\nProgram <%s> Terminated\n", program_name);
+        exit(*error);
+        }
+    *ntide = 0;
+    char *result;
+    mb_path buffer;
+    while ((result = fgets(buffer,MB_PATH_MAXLINE,tfp)) == buffer)
+        (*ntide)++;
+    fclose(tfp);
+
+    /* allocate arrays for nav */
+    if (*ntide > 0)
+        {
+        status = mb_reallocd(verbose, __FILE__, __LINE__, *ntide * sizeof(double), (void **)tptime, error);
+        status = mb_reallocd(verbose, __FILE__, __LINE__, *ntide * sizeof(double), (void **)tptide, error);
+        }
+
+    /* if no nav data then set error */
+    else
+        {
+        *error = MB_ERROR_BAD_DATA;
+        }
+
+    /* if error initializing memory or reading data then quit */
+    if (*error != MB_ERROR_NO_ERROR)
+        {
+        mb_error(verbose,*error,&message);
+        fprintf(stderr,"\nMBIO Error allocating data arrays:\n%s\n",message);
+        fprintf(stderr,"\nProgram <%s> Terminated\n", program_name);
+        exit(*error);
+        }
+
+    /* read the data points in the nav file */
+    *ntide = 0;
+    double *ttime = *tptime;
+    double *ttide = *tptide;
+    if ((tfp = fopen(TideFile, "r")) == NULL)
+        {
+        *error = MB_ERROR_OPEN_FAIL;
+        fprintf(stderr,"\nUnable to open tide file <%s> for reading\n",TideFile);
+        fprintf(stderr,"\nProgram <%s> Terminated\n", program_name);
+        exit(*error);
+        }
+    while ((result = fgets(buffer,MB_PATH_MAXLINE,tfp)) == buffer)
+        {
+        bool value_ok = false;
+        int time_i[7];
+        double sec;
+
+        /* read the navigation from an fnv file */
+        int nget = sscanf(buffer,"%lf %lf", &ttime[*ntide], &ttide[*ntide]);
+        if (nget == 2)
+            value_ok = true;
+
+        /* output some debug values */
+        if (verbose >= 5 && value_ok)
+            {
+            fprintf(stderr,"\ndbg5  New tide point read in program <%s>\n",program_name);
+            fprintf(stderr,"dbg5       tide[%d]: %f %f\n",
+                *ntide, ttime[*ntide], ttide[*ntide]);
+            }
+        else if (verbose >= 5)
+            {
+            fprintf(stderr,"\ndbg5  Error parsing line in tide file in program <%s>\n",program_name);
+            fprintf(stderr,"dbg5       line: %s\n", buffer);
+            }
+
+        /* check for reverses or repeats in time */
+        if (value_ok)
+            {
+            if (*ntide == 0)
+                (*ntide)++;
+            else if (ttime[*ntide] > ttime[*ntide-1])
+                (*ntide)++;
+            else if (*ntide > 0 && ttime[*ntide] <= ttime[*ntide-1] && verbose >= 5)
+                {
+                fprintf(stderr,"\ndbg5  Tide time error in program <%s>\n",program_name);
+                fprintf(stderr,"dbg5       tide[%d]: %f %f\n", *ntide-1, ttime[*ntide-1], ttide[*ntide-1]);
+                fprintf(stderr,"dbg5       nav[%d]: %f %f\n", *ntide, ttime[*ntide], ttide[*ntide]);
+                }
+            }
+        strncpy(buffer,"\0",sizeof(buffer));
+        }
+    fclose(tfp);
+
+    /* output information */
+    fprintf(stderr,"    %d tide records read from %s\n", *ntide, TideFile);
+
+}
+
+/*--------------------------------------------------------------------*/
+void load_image_quality(int verbose, mb_path ImageQualityFile, int *nquality, double **qptime, double **qpquality, int *error)
+{
+    int status = MB_SUCCESS;
+    *error = MB_ERROR_NO_ERROR;
+    char *message = NULL;
+    FILE *tfp = NULL;
+    if ((tfp = fopen(ImageQualityFile, "r")) == NULL)
+        {
+        *error = MB_ERROR_OPEN_FAIL;
+        fprintf(stderr,"\nUnable to open image quality file <%s> for reading\n",ImageQualityFile);
+        fprintf(stderr,"\nProgram <%s> Terminated\n", program_name);
+        exit(*error);
+        }
+    *nquality = 0;
+    char *result;
+    mb_path buffer;
+    while ((result = fgets(buffer,MB_PATH_MAXLINE,tfp)) == buffer)
+        (*nquality)++;
+    fclose(tfp);
+
+    /* allocate arrays for nav */
+    if (*nquality > 0)
+        {
+        status = mb_reallocd(verbose, __FILE__, __LINE__, *nquality * sizeof(double), (void **)qptime, error);
+        status = mb_reallocd(verbose, __FILE__, __LINE__, *nquality * sizeof(double), (void **)qpquality, error);
+        }
+
+    /* if no nav data then set error */
+    else
+        {
+        *error = MB_ERROR_BAD_DATA;
+        }
+
+    /* if error initializing memory or reading data then quit */
+    if (*error != MB_ERROR_NO_ERROR)
+        {
+        mb_error(verbose,*error,&message);
+        fprintf(stderr,"\nMBIO Error allocating data arrays:\n%s\n",message);
+        fprintf(stderr,"\nProgram <%s> Terminated\n", program_name);
+        exit(*error);
+        }
+
+    /* read the data points in the nav file */
+    *nquality = 0;
+    double *qtime = *qptime;
+    double *qquality = *qpquality;
+    if ((tfp = fopen(ImageQualityFile, "r")) == NULL)
+        {
+        *error = MB_ERROR_OPEN_FAIL;
+        fprintf(stderr,"\nUnable to open image quality file <%s> for reading\n",ImageQualityFile);
+        fprintf(stderr,"\nProgram <%s> Terminated\n", program_name);
+        exit(*error);
+        }
+    while ((result = fgets(buffer,MB_PATH_MAXLINE,tfp)) == buffer)
+        {
+        bool value_ok = false;
+
+        /* read the navigation from an fnv file */
+        int nget = sscanf(buffer,"%lf %lf", &qtime[*nquality], &qquality[*nquality]);
+        if (nget == 2)
+            value_ok = true;
+
+        /* output some debug values */
+        if (verbose >= 5 && value_ok)
+            {
+            fprintf(stderr,"\ndbg5  New image quality point read in program <%s>\n",program_name);
+            fprintf(stderr,"dbg5       quality[%d]: %f %f\n", *nquality, qtime[*nquality], qquality[*nquality]);
+            }
+        else if (verbose >= 5)
+            {
+            fprintf(stderr,"\ndbg5  Error parsing line in image quality file in program <%s>\n",program_name);
+            fprintf(stderr,"dbg5       line: %s\n",buffer);
+            }
+
+        /* check for reverses or repeats in time */
+        if (value_ok)
+            {
+            if (*nquality == 0)
+                (*nquality)++;
+            else if (qtime[*nquality] > qtime[*nquality-1])
+                (*nquality)++;
+            else if (*nquality > 0 && qtime[*nquality] <= qtime[*nquality-1] && verbose >= 5)
+                {
+                fprintf(stderr,"\ndbg5  Image quality time error in program <%s>\n",program_name);
+                fprintf(stderr,"dbg5       quality[%d]: %f %f\n", *nquality-1, qtime[*nquality-1], qquality[*nquality-1]);
+                fprintf(stderr,"dbg5       quality[%d]: %f %f\n", *nquality, qtime[*nquality], qquality[*nquality]);
+                }
+            }
+        strncpy(buffer,"\0",sizeof(buffer));
+        }
+    fclose(tfp);
+
+    /* output information */
+    fprintf(stderr,"    %d image quality records read from %s\n", *nquality, ImageQualityFile);
+
+}
+/*--------------------------------------------------------------------*/
+
+
+void load_calibration(int verbose, mb_path StereoCameraCalibrationFile, struct mbpm_control_struct *control, int *error)
+{
+    FileStorage fstorage;
+
+    /* read intrinsic and extrinsic stereo camera calibration parameters */
+    fstorage.open(StereoCameraCalibrationFile, FileStorage::READ);
+    if(fstorage.isOpened() ) {
+        fstorage["M1"] >> control->cameraMatrix[0];
+        fstorage["D1"] >> control->distCoeffs[0];
+        fstorage["M2"] >> control->cameraMatrix[1];
+        fstorage["D2"] >> control->distCoeffs[1];
+        fstorage["R"] >> control->R;
+        fstorage["T"] >> control->T;
+        fstorage["R1"] >> control->R1;
+        fstorage["R2"] >> control->R2;
+        fstorage["P1"] >> control->P1;
+        fstorage["P2"] >> control->P2;
+        fstorage["Q"] >> control->Q;
+        fstorage.release();
+        control->isVerticalStereo = fabs(control->P2.at<double>(1, 3)) > fabs(control->P2.at<double>(0, 3));
+        control->calibration_set = true;
+    }
+    else {
+        fprintf(stderr,"\nUnable to read camera calibration file %s\n",
+            StereoCameraCalibrationFile);
+        fprintf(stderr,"\nProgram <%s> Terminated\n", program_name);
+        mb_memory_clear(verbose, error);
+        exit(MB_ERROR_BAD_PARAMETER);
+    }
+
+    /* print out calibration information */
+    fprintf(stderr, "    Stereo camera calibration model read from: %s\n", StereoCameraCalibrationFile);
+    if (verbose > 1) {
+        cerr << endl;
+        cerr << "M1:" << endl << control->cameraMatrix[0] << endl << endl;
+        cerr << "D1:" << endl << control->distCoeffs[0] << endl << endl;
+        cerr << "M2:" << endl << control->cameraMatrix[1] << endl << endl;
+        cerr << "D2:" << endl << control->distCoeffs[1] << endl << endl;
+        cerr << "R:" << endl << control->R << endl << endl;
+        cerr << "T:" << endl << control->T << endl << endl;
+        cerr << "R1:" << endl << control->R1 << endl << endl;
+        cerr << "R2:" << endl << control->R2 << endl << endl;
+        cerr << "P1:" << endl << control->P1 << endl << endl;
+        cerr << "P2:" << endl << control->P2 << endl << endl;
+        cerr << "Q:" << endl << control->Q << endl << endl;
+    }
+}
+/*--------------------------------------------------------------------*/
+void load_correction(int verbose, mb_path ImageCorrectionFile, struct mbpm_control_struct *control, int *error)
+{
+    FileStorage fstorage;
+
+    /* read in the image correction table - this is expected to be a stereo correction table */
+    fstorage.open(ImageCorrectionFile, FileStorage::READ);
+    if(fstorage.isOpened() ) {
+        fstorage["ImageCorrectionBounds"] >> control->corr_bounds;
+        control->corr_xmin = control->corr_bounds.at<float>(0, 0);
+        control->corr_xmax = control->corr_bounds.at<float>(0, 1);
+        control->bin_dx = control->corr_bounds.at<float>(0, 2);
+        control->corr_ymin = control->corr_bounds.at<float>(1, 0);
+        control->corr_ymax = control->corr_bounds.at<float>(1, 1);
+        control->bin_dy = control->corr_bounds.at<float>(1, 2);
+        control->corr_zmin = control->corr_bounds.at<float>(2, 0);
+        control->corr_zmax = control->corr_bounds.at<float>(2, 1);
+        control->bin_dz = control->corr_bounds.at<float>(2, 2);
+        fstorage["ImageCorrectionTable1"] >> control->corr_table[0];
+        fstorage["ImageCorrectionTable2"] >> control->corr_table[1];
+        fstorage.release();
+    }
+    else {
+        fprintf(stderr,"\nUnable to read image correction file %s\n",
+            ImageCorrectionFile);
+        fprintf(stderr,"\nProgram <%s> Terminated\n", program_name);
+        mb_memory_clear(verbose, error);
+        exit(MB_ERROR_BAD_PARAMETER);
+    }
+    control->ncorr_x = control->corr_table[0].size[0];
+    control->ncorr_y = control->corr_table[0].size[1];
+    control->ncorr_z = control->corr_table[0].size[2];
+
+    /* Get reference intensity value for each camera.
+     * If the target standoff value is specified use the correction table value
+     * at the center x and y and the target standoff z. If no target standoff
+     * value is specified use the correction table value at the x y center
+     * which is located halfway between the first and last nonzero values */
+    control->ibin_xcen = control->ncorr_x / 2;
+    control->jbin_ycen = control->ncorr_y / 2;
+    control->kbin_zcen = control->ncorr_z / 2;
+    for (int icamera = 0; icamera < 2; icamera++) {
+        if (control->priority_mode == MBPM_PRIORITY_CENTRALITY_PLUS_STANDOFF
+            && control->standoff_target > control->corr_zmin && control->standoff_target < control->corr_zmax) {
+            control->kbin_zcen = (control->standoff_target - control->corr_zmin) / control->bin_dz;
+        } else {
+            control->kbin_zcen = control->ncorr_z / 2;
+            int k0 = control->ncorr_z;
+            int k1 = -1;
+            for (int k=0;k<control->ncorr_z;k++) {
+                if (control->corr_table[icamera].at<float>(control->ibin_xcen, control->jbin_ycen, k) > 0.0) {
+                    if (k0 > k)
+                        k0 = k;
+                    k1 = k;
+                }
+
+                /* reset k0 because there is an isolated nonzero value at k == 0 */
+                else if (k == 1 && k0 == 0) {
+                  k0 = control->ncorr_z;
+                  k1 = -1;
+                }
+            }
+            if (k1 >= k0) {
+              control->kbin_zcen = (k0 + k1) / 2;
+            }
+        }
+        control->referenceIntensity[icamera] =  control->corr_table[icamera].at<float>(control->ibin_xcen, control->jbin_ycen, control->kbin_zcen);
+    }
+
+    /* print out calibration information */
+    fprintf(stderr, "    Image correction tables read from: %s\n", ImageCorrectionFile);
+    fprintf(stderr, "    Image correction table bounds:\n");
+    fprintf(stderr, "      minmax x: %f %f  nx:%d dx:%f\n", control->corr_xmin, control->corr_xmax, control->ncorr_x, control->bin_dx);
+    fprintf(stderr, "      minmax y: %f %f  ny:%d dy:%f\n", control->corr_ymin, control->corr_ymax, control->ncorr_y, control->bin_dy);
+    fprintf(stderr, "      minmax z: %f %f  nz:%d dz:%f\n", control->corr_zmin, control->corr_zmax, control->ncorr_z, control->bin_dz);
+    fprintf(stderr, "    Reference intensity:\n");
+    fprintf(stderr, "      camera 0: %f\n", control->referenceIntensity[0]);
+    fprintf(stderr, "      camera 1: %f\n", control->referenceIntensity[1]);
+    if (verbose > 1) {
+        for (int icamera=0; icamera < 2; icamera++) {
+            fprintf(stderr, "\nCorrection Table[camera %d]:\n", icamera);
+            for (int i=0;i<control->ncorr_x;i++) {
+                for (int j=0;j<control->ncorr_y;j++) {
+                    for (int k=0;k<control->ncorr_z;k++) {
+                    fprintf(stderr,"    %d %d %d   %f\n", i, j, k, control->corr_table[icamera].at<float>(i, j, k));
+                    }
+                }
+            }
+        }
+    }
+}
 
 /*--------------------------------------------------------------------*/
 void process_image(int verbose, struct mbpm_process_struct *process,
@@ -797,7 +1321,7 @@ void process_image(int verbose, struct mbpm_process_struct *process,
     }
 }
 /*--------------------------------------------------------------------*/
-void process_image_sectioned2(int verbose, struct mbpm_process_struct *process,
+void process_image_sectioned(int verbose, struct mbpm_process_struct *process,
                   struct mbpm_control_struct *control, int *status, int *error)
 {
     // Working images
@@ -1401,50 +1925,7 @@ void process_image_sectioned2(int verbose, struct mbpm_process_struct *process,
 
 int main(int argc, char** argv)
 {
-    char program_name[] = "mbphotomosaic";
-    char help_message[] =  "mbphotomosaic makes a mosaic of navigated downlooking photographs.";
-    char usage_message[] = "mbphotomosaic \n"
-                            "\t--verbose\n"
-                            "\t--help\n"
-                            "\t--threads=nthreads\n"
-                            "\t--input=imagelist\n"
-                            "\t--output=file\n"
-                            "\t--output-tiff\n"
-                            "\t--output-png\n"
-                            "\t--image-dimensions=width/height\n"
-                            "\t--image-spacing=dx/dy[/units]\n"
-                            "\t--fov-fudgefactor=factor\n"
-                            "\t--projection=projection_pars\n"
-                            "\t--altitude=standoff_target/standoff_range\n"
-                            "\t--standoff=standoff_target/standoff_range\n"
-                            "\t--rangemax=range_max\n"
-                            "\t--trim=trim_pixels\n"
-                            "\t--bounds=lonmin/lonmax/latmin/latmax | west/east/south/north\n"
-                            "\t--bounds-buffer=bounds_buffer\n"
-                            "\t--correction-brightness\n"
-                            "\t--correction-camera-settings\n"
-                            "\t--correction-range=target/coeff\n"
-                            "\t--correction-standoff=target/coeff\n"
-                            "\t--correction-file=imagecorrection.yaml\n"
-                            "\t--reference-gain=gain\n"
-                            "\t--reference-exposure=exposure\n"
-                            "\t--platform-file=platform.plf\n"
-                            "\t--camera-sensor=camera_sensor_id\n"
-                            "\t--nav-sensor=nav_sensor_id\n"
-                            "\t--sensordepth-sensor=sensordepth_sensor_id\n"
-                            "\t--heading-sensor=heading_sensor_id\n"
-                            "\t--altitude-sensor=altitude_sensor_id\n"
-                            "\t--attitude-sensor=attitude_sensor_id\n"
-                            "\t--use-left-camera\n"
-                            "\t--use-right-camera\n"
-                            "\t--use-both-cameras\n"
-                            "\t--calibration-file=stereocalibration.yaml\n"
-                            "\t--navigation-file=file\n"
-                            "\t--tide-file=file\n"
-                            "\t--image-quality-file=file\n"
-                            "\t--image-quality-threshold=value\n"
-                            "\t--image-quality-filter-length=value\n"
-                            "\t--topography-grid=file";
+
     extern char *optarg;
     int    option_index;
     int    errflg = 0;
@@ -1622,11 +2103,10 @@ int main(int argc, char** argv)
     bool use_this_image = false;
     mb_path buffer;
     char *result;
-    int lonflip;
+    int lonflip = 0;
     double sec;
     double pbounds[4];
     double factor, scale;
-    FileStorage fstorage;
 
     int npairs, nimages, currentimages;
 
@@ -2335,207 +2815,71 @@ int main(int argc, char** argv)
         exit(error);
         }
 
-    /* if stereo calibration not specified then quit */
-    if (!control.calibration_set)
-        {
-        fprintf(stream,"\nNo camera calibration file specified\n");
-        fprintf(stream,"\nProgram <%s> Terminated\n",
-            program_name);
-        error = MB_ERROR_BAD_PARAMETER;
-        mb_memory_clear(verbose, &error);
-        exit(error);
-        }
-
     /* read in platform offsets */
-    status = mb_platform_read(verbose, PlatformFile, (void **)&platform, &error);
-    if (status == MB_FAILURE)
-        {
-        error = MB_ERROR_OPEN_FAIL;
-        fprintf(stderr,"\nUnable to open and parse platform file: %s\n", PlatformFile);
-        fprintf(stderr,"\nProgram <%s> Terminated\n", program_name);
-        exit(error);
-        }
-
-    /* reset data sources according to commands */
-    if (nav_sensor >= 0)
-        platform->source_position = nav_sensor;
-    if (sensordepth_sensor >= 0)
-        platform->source_depth = sensordepth_sensor;
-    if (heading_sensor >= 0)
-        platform->source_heading = heading_sensor;
-    if (attitude_sensor >= 0)
-        {
-        platform->source_rollpitch = attitude_sensor;
-        platform->source_heave = attitude_sensor;
-        }
-
-    /* get sensor structures */
-    if (platform->source_bathymetry >= 0)
-        sensor_bathymetry = &(platform->sensors[platform->source_bathymetry]);
-    if (platform->source_backscatter >= 0)
-        sensor_backscatter = &(platform->sensors[platform->source_backscatter]);
-    if (platform->source_position >= 0)
-        sensor_position = &(platform->sensors[platform->source_position]);
-    if (platform->source_depth >= 0)
-        sensor_depth = &(platform->sensors[platform->source_depth]);
-    if (platform->source_heading >= 0)
-        sensor_heading = &(platform->sensors[platform->source_heading]);
-    if (platform->source_rollpitch >= 0)
-        sensor_rollpitch = &(platform->sensors[platform->source_rollpitch]);
-    if (platform->source_heave >= 0)
-        sensor_heave = &(platform->sensors[platform->source_heave]);
-    if (camera_sensor < 0)
-        {
-        for (int isensor=0;isensor<platform->num_sensors;isensor++)
+    if (platform_specified) {
+        status = mb_platform_read(verbose, PlatformFile, (void **)&platform, &error);
+        if (status == MB_FAILURE)
             {
-            if (platform->sensors[isensor].type == MB_SENSOR_TYPE_CAMERA_STEREO)
-                {
-                camera_sensor = isensor;
-                }
-            }
-        }
-    if (camera_sensor >= 0)
-        sensor_camera = &(platform->sensors[camera_sensor]);
-
-    /* read intrinsic and extrinsic stereo camera calibration parameters */
-    if (control.calibration_set)
-        {
-        fstorage.open(StereoCameraCalibrationFile, FileStorage::READ);
-        if(fstorage.isOpened() )
-            {
-            fstorage["M1"] >> control.cameraMatrix[0];
-            fstorage["D1"] >> control.distCoeffs[0];
-            fstorage["M2"] >> control.cameraMatrix[1];
-            fstorage["D2"] >> control.distCoeffs[1];
-            fstorage["R"] >> control.R;
-            fstorage["T"] >> control.T;
-            fstorage["R1"] >> control.R1;
-            fstorage["R2"] >> control.R2;
-            fstorage["P1"] >> control.P1;
-            fstorage["P2"] >> control.P2;
-            fstorage["Q"] >> control.Q;
-            fstorage.release();
-            control.isVerticalStereo = fabs(control.P2.at<double>(1, 3)) > fabs(control.P2.at<double>(0, 3));
-            }
-        else
-            {
-            fprintf(stream,"\nUnable to read calibration file %s\n",
-                StereoCameraCalibrationFile);
-            fprintf(stream,"\nProgram <%s> Terminated\n",
-                program_name);
-            error = MB_ERROR_BAD_PARAMETER;
-            mb_memory_clear(verbose, &error);
+            error = MB_ERROR_OPEN_FAIL;
+            fprintf(stderr,"\nUnable to open and parse platform file: %s\n", PlatformFile);
+            fprintf(stderr,"\nProgram <%s> Terminated\n", program_name);
             exit(error);
             }
+        fprintf(stream, "Read platform model from: %s\n", PlatformFile);
 
-        /* print out calibration values */
-        if (verbose > 0)
+        /* reset data sources according to commands */
+        if (nav_sensor >= 0)
+            platform->source_position = nav_sensor;
+        if (sensordepth_sensor >= 0)
+            platform->source_depth = sensordepth_sensor;
+        if (heading_sensor >= 0)
+            platform->source_heading = heading_sensor;
+        if (attitude_sensor >= 0)
             {
-            fprintf(stderr,"\nStereo Camera Calibration Parameters:\n");
-            cerr << "M1:" << endl << control.cameraMatrix[0] << endl << endl;
-            cerr << "D1:" << endl << control.distCoeffs[0] << endl << endl;
-            cerr << "M2:" << endl << control.cameraMatrix[1] << endl << endl;
-            cerr << "D2:" << endl << control.distCoeffs[1] << endl << endl;
-            cerr << "R:" << endl << control.R << endl << endl;
-            cerr << "T:" << endl << control.T << endl << endl;
-            cerr << "R1:" << endl << control.R1 << endl << endl;
-            cerr << "R2:" << endl << control.R2 << endl << endl;
-            cerr << "P1:" << endl << control.P1 << endl << endl;
-            cerr << "P2:" << endl << control.P2 << endl << endl;
-            cerr << "Q:" << endl << control.Q << endl << endl;
+            platform->source_rollpitch = attitude_sensor;
+            platform->source_heave = attitude_sensor;
             }
-        }
+
+        /* get sensor structures */
+        if (platform->source_bathymetry >= 0)
+            sensor_bathymetry = &(platform->sensors[platform->source_bathymetry]);
+        if (platform->source_backscatter >= 0)
+            sensor_backscatter = &(platform->sensors[platform->source_backscatter]);
+        if (platform->source_position >= 0)
+            sensor_position = &(platform->sensors[platform->source_position]);
+        if (platform->source_depth >= 0)
+            sensor_depth = &(platform->sensors[platform->source_depth]);
+        if (platform->source_heading >= 0)
+            sensor_heading = &(platform->sensors[platform->source_heading]);
+        if (platform->source_rollpitch >= 0)
+            sensor_rollpitch = &(platform->sensors[platform->source_rollpitch]);
+        if (platform->source_heave >= 0)
+            sensor_heave = &(platform->sensors[platform->source_heave]);
+        if (camera_sensor < 0)
+            {
+            for (int isensor=0;isensor<platform->num_sensors;isensor++)
+                {
+                if (platform->sensors[isensor].type == MB_SENSOR_TYPE_CAMERA_STEREO)
+                    {
+                    camera_sensor = isensor;
+                    }
+                }
+            }
+        if (camera_sensor >= 0)
+            sensor_camera = &(platform->sensors[camera_sensor]);
+    }
+
+    /* image correction table */
+    if (control.calibration_set) {
+        load_calibration(verbose, StereoCameraCalibrationFile, &control, &error);
+    }
 
     /* image correction table */
     if (control.corr_mode == MBPM_CORRECTION_FILE) {
-        /* read in the image correction table - this is expected to be a stereo correction table */
-        fstorage.open(ImageCorrectionFile, FileStorage::READ);
-        if(fstorage.isOpened() )
-            {
-            fstorage["ImageCorrectionBounds"] >> control.corr_bounds;
-            fstorage["ImageCorrectionTable1"] >> control.corr_table[0];
-            fstorage["ImageCorrectionTable2"] >> control.corr_table[1];
-            fstorage.release();
-            }
-        else
-            {
-            fprintf(stream,"\nUnable to read image correction file %s\n",
-                ImageCorrectionFile);
-            fprintf(stream,"\nProgram <%s> Terminated\n",
-                program_name);
-            error = MB_ERROR_BAD_PARAMETER;
-            mb_memory_clear(verbose, &error);
-            exit(error);
-            }
-        control.ncorr_x = control.corr_table[0].size[0];
-        control.ncorr_y = control.corr_table[0].size[1];
-        control.ncorr_z = control.corr_table[0].size[2];
-        control.corr_xmin = control.corr_bounds.at<float>(0, 0);
-        control.corr_xmax = control.corr_bounds.at<float>(0, 1);
-        control.bin_dx = control.corr_bounds.at<float>(0, 2);
-        control.corr_ymin = control.corr_bounds.at<float>(1, 0);
-        control.corr_ymax = control.corr_bounds.at<float>(1, 1);
-        control.bin_dy = control.corr_bounds.at<float>(1, 2);
-        control.corr_zmin = control.corr_bounds.at<float>(2, 0);
-        control.corr_zmax = control.corr_bounds.at<float>(2, 1);
-        control.bin_dz = control.corr_bounds.at<float>(2, 2);
-//fprintf(stderr, "\nImage correction:\n");
-//fprintf(stderr, "x: %d %f %f %f\n", control.ncorr_x, control.corr_xmin, control.corr_xmax, control.bin_dx);
-//fprintf(stderr, "y: %d %f %f %f\n", control.ncorr_y, control.corr_ymin, control.corr_ymax, control.bin_dy);
-//fprintf(stderr, "z: %d %f %f %f\n", control.ncorr_z, control.corr_zmin, control.corr_zmax, control.bin_dz);
-
-        /* Get reference intensity value for each camera.
-         * If the target standoff value is specified use the correction table value
-         * at the center x and y and the target standoff z. If no target standoff
-         * value is specified use the correction table value at the x y center
-         * which is located halfway between the first and last nonzero values */
-        control.ibin_xcen = control.ncorr_x / 2;
-        control.jbin_ycen = control.ncorr_y / 2;
-        control.kbin_zcen = control.ncorr_z / 2;
-        for (int icamera = 0; icamera < 2; icamera++) {
-            if (control.priority_mode == MBPM_PRIORITY_CENTRALITY_PLUS_STANDOFF
-                && control.standoff_target > control.corr_zmin && control.standoff_target < control.corr_zmax) {
-                control.kbin_zcen = (control.standoff_target - control.corr_zmin) / control.bin_dz;
-            } else {
-                control.kbin_zcen = control.ncorr_z / 2;
-                int k0 = control.ncorr_z;
-                int k1 = -1;
-                for (int k=0;k<control.ncorr_z;k++) {
-                    if (control.corr_table[icamera].at<float>(control.ibin_xcen, control.jbin_ycen, k) > 0.0) {
-                        if (k0 > k)
-                            k0 = k;
-                        k1 = k;
-                    }
-
-                    /* reset k0 because there is an isolated nonzero value at k == 0 */
-                    else if (k == 1 && k0 == 0) {
-                      k0 = control.ncorr_z;
-                      k1 = -1;
-                    }
-                }
-                if (k1 >= k0) {
-                  control.kbin_zcen = (k0 + k1) / 2;
-                }
-            }
-            control.referenceIntensity[icamera] =  control.corr_table[icamera].at<float>(control.ibin_xcen, control.jbin_ycen, control.kbin_zcen);
-
-//fprintf(stderr, "\nImage correction camera: %d\n", icamera);
-//fprintf(stderr, "center: %d %d %d\n", control.ibin_xcen, control.jbin_ycen, control.kbin_zcen);
-//fprintf(stderr, "control.referenceIntensity[%d]: %f\n", icamera, control.referenceIntensity[icamera]);
-//fprintf(stderr, "\nCorrection Table[%d]:\n", icamera);
-//for (int i=0;i<control.ncorr_x;i++) {
-//for (int j=0;j<control.ncorr_y;j++) {
-//for (int k=0;k<control.ncorr_z;k++) {
-//fprintf(stderr,"    %d %d %d   %f\n", i, j, k, control.corr_table[icamera].at<float>(i, j, k));
-//}
-//}
-//}
-
-        }
+        load_correction(verbose, ImageCorrectionFile, &control, &error);
     }
-
-    /* else the reference intensity is 70.0 */
     else {
+        /* else the reference intensity is 70.0 */
         control.referenceIntensity[0] = 1.0;
         control.referenceIntensity[1] = 1.0;
     }
@@ -2834,373 +3178,21 @@ control.OutputBounds[0], control.OutputBounds[1], control.OutputBounds[2], contr
     }
 
     /* read in navigation if desired */
-    if (navigation_specified)
-        {
-        if ((tfp = fopen(NavigationFile, "r")) == NULL)
-            {
-            error = MB_ERROR_OPEN_FAIL;
-            fprintf(stderr,"\nUnable to Open Navigation File <%s> for reading\n",NavigationFile);
-            fprintf(stderr,"\nProgram <%s> Terminated\n",
-                program_name);
-            exit(error);
-            }
-        nnav = 0;
-        while ((result = fgets(buffer,MB_PATH_MAXLINE,tfp)) == buffer)
-            nnav++;
-        fclose(tfp);
-
-        /* allocate arrays for nav */
-        if (nnav > 1)
-            {
-            status = mb_mallocd(verbose,__FILE__,__LINE__,nnav*sizeof(double),(void **)&ntime,&error);
-            status = mb_mallocd(verbose,__FILE__,__LINE__,nnav*sizeof(double),(void **)&nlon,&error);
-            status = mb_mallocd(verbose,__FILE__,__LINE__,nnav*sizeof(double),(void **)&nlat,&error);
-            status = mb_mallocd(verbose,__FILE__,__LINE__,nnav*sizeof(double),(void **)&nheading,&error);
-            status = mb_mallocd(verbose,__FILE__,__LINE__,nnav*sizeof(double),(void **)&nspeed,&error);
-            status = mb_mallocd(verbose,__FILE__,__LINE__,nnav*sizeof(double),(void **)&ndraft,&error);
-            status = mb_mallocd(verbose,__FILE__,__LINE__,nnav*sizeof(double),(void **)&nroll,&error);
-            status = mb_mallocd(verbose,__FILE__,__LINE__,nnav*sizeof(double),(void **)&npitch,&error);
-            status = mb_mallocd(verbose,__FILE__,__LINE__,nnav*sizeof(double),(void **)&nheave,&error);
-
-            /* if error initializing memory then quit */
-            if (error != MB_ERROR_NO_ERROR)
-                {
-                fclose(tfp);
-                mb_error(verbose,error,&message);
-                fprintf(stderr,"\nMBIO Error allocating data arrays:\n%s\n",message);
-                fprintf(stderr,"\nProgram <%s> Terminated\n",
-                    program_name);
-                exit(error);
-                }
-            }
-
-        /* if no nav data then quit */
-        else
-            {
-            fclose(tfp);
-            error = MB_ERROR_BAD_DATA;
-            fprintf(stderr,"\nUnable to read data from navigation file <%s>\n",NavigationFile);
-            fprintf(stderr,"\nProgram <%s> Terminated\n",
-                program_name);
-            exit(error);
-            }
-
-        /* read the data points in the nav file */
-        nnav = 0;
-        if ((tfp = fopen(NavigationFile, "r")) == NULL)
-            {
-            error = MB_ERROR_OPEN_FAIL;
-            fprintf(stderr,"\nUnable to Open Navigation File <%s> for reading\n",NavigationFile);
-            fprintf(stderr,"\nProgram <%s> Terminated\n",
-                program_name);
-            exit(error);
-            }
-        while ((result = fgets(buffer,MB_PATH_MAXLINE,tfp)) == buffer)
-            {
-            bool value_ok = false;
-
-            /* read the navigation from an fnv file */
-            int nget = sscanf(buffer,"%d %d %d %d %d %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf",
-                &time_i[0],&time_i[1],&time_i[2],
-                &time_i[3],&time_i[4],&sec,
-                &ntime[nnav],
-                &nlon[nnav],&nlat[nnav],
-                &nheading[nnav],&nspeed[nnav],&ndraft[nnav],
-                &nroll[nnav],&npitch[nnav],&nheave[nnav]);
-            if (nget >= 15)
-                value_ok = true;
-
-            /* make sure longitude is defined according to lonflip */
-            if (value_ok)
-                {
-                if (lonflip == -1 && nlon[nnav] > 0.0)
-                    nlon[nnav] = nlon[nnav] - 360.0;
-                else if (lonflip == 0 && nlon[nnav] < -180.0)
-                    nlon[nnav] = nlon[nnav] + 360.0;
-                else if (lonflip == 0 && nlon[nnav] > 180.0)
-                    nlon[nnav] = nlon[nnav] - 360.0;
-                else if (lonflip == 1 && nlon[nnav] < 0.0)
-                    nlon[nnav] = nlon[nnav] + 360.0;
-                }
-
-            /* output some debug values */
-            if (verbose >= 5 && value_ok)
-                {
-                fprintf(stderr,"\ndbg5  New navigation point read in program <%s>\n",program_name);
-                fprintf(stderr,"dbg5       nav[%d]: %f %f %f\n",
-                    nnav,ntime[nnav],nlon[nnav],nlat[nnav]);
-                }
-            else if (verbose >= 5)
-                {
-                fprintf(stderr,"\ndbg5  Error parsing line in navigation file in program <%s>\n",program_name);
-                fprintf(stderr,"dbg5       line: %s\n",buffer);
-                }
-
-            /* check for reverses or repeats in time */
-            if (value_ok)
-                {
-                if (nnav == 0)
-                    nnav++;
-                else if (ntime[nnav] > ntime[nnav-1])
-                    nnav++;
-                else if (nnav > 0 && ntime[nnav] <= ntime[nnav-1]
-                    && verbose >= 5)
-                    {
-                    fprintf(stderr,"\ndbg5  Navigation time error in program <%s>\n",program_name);
-                    fprintf(stderr,"dbg5       nav[%d]: %f %f %f\n",
-                        nnav-1,ntime[nnav-1],nlon[nnav-1],
-                        nlat[nnav-1]);
-                    fprintf(stderr,"dbg5       nav[%d]: %f %f %f\n",
-                        nnav,ntime[nnav],nlon[nnav],
-                        nlat[nnav]);
-                    }
-                }
-            strncpy(buffer,"\0",sizeof(buffer));
-            }
-        fclose(tfp);
-
-        /* output information */
-        if (verbose >= 1)
-            {
-            fprintf(stdout,"\nNavigation Parameters:\n");
-            fprintf(stream,"  NavigationFile:     %s\n",NavigationFile);
-            fprintf(stream,"  nnav:               %d\n",nnav);
-            }
-        }
+    if (navigation_specified) {
+        load_navigation(verbose, NavigationFile, lonflip,
+                        &nnav, &ntime, &nlon, &nlat, &nheading, &nspeed, &ndraft,
+                        &nroll, &npitch, &nheave, &error);
+    }
 
     /* read in tide if desired */
-    if (use_tide)
-        {
-        if ((tfp = fopen(TideFile, "r")) == NULL)
-            {
-            error = MB_ERROR_OPEN_FAIL;
-            fprintf(stderr,"\nUnable to open tide file <%s> for reading\n",TideFile);
-            fprintf(stderr,"\nProgram <%s> Terminated\n",
-                program_name);
-            exit(error);
-            }
-        ntide = 0;
-        while ((result = fgets(buffer,MB_PATH_MAXLINE,tfp)) == buffer)
-            ntide++;
-        fclose(tfp);
-
-        /* allocate arrays for tide */
-        if (ntide > 1)
-            {
-            status = mb_mallocd(verbose,__FILE__,__LINE__,ntide*sizeof(double),(void **)&ttime,&error);
-            status = mb_mallocd(verbose,__FILE__,__LINE__,ntide*sizeof(double),(void **)&ttide,&error);
-
-            /* if error initializing memory then quit */
-            if (error != MB_ERROR_NO_ERROR)
-                {
-                fclose(tfp);
-                mb_error(verbose,error,&message);
-                fprintf(stderr,"\nMBIO Error allocating data arrays:\n%s\n",message);
-                fprintf(stderr,"\nProgram <%s> Terminated\n",
-                    program_name);
-                exit(error);
-                }
-            }
-
-        /* if no tide data then quit */
-        else
-            {
-            fclose(tfp);
-            error = MB_ERROR_BAD_DATA;
-            fprintf(stderr,"\nUnable to read data from tide file <%s>\n",TideFile);
-            fprintf(stderr,"\nProgram <%s> Terminated\n",
-                program_name);
-            exit(error);
-            }
-
-        /* read the data points in the tide file */
-        ntide = 0;
-        if ((tfp = fopen(TideFile, "r")) == NULL)
-            {
-            error = MB_ERROR_OPEN_FAIL;
-            fprintf(stderr,"\nUnable to open tide file <%s> for reading\n",TideFile);
-            fprintf(stderr,"\nProgram <%s> Terminated\n",
-                program_name);
-            exit(error);
-            }
-        while ((result = fgets(buffer,MB_PATH_MAXLINE,tfp)) == buffer)
-            {
-            bool value_ok = false;
-
-            /* read the tide values */
-            int nget = sscanf(buffer,"%lf %lf", &ttime[ntide], &ttide[ntide]);
-            if (nget >= 2)
-                value_ok = true;
-
-            /* output some debug values */
-            if (verbose >= 5 && value_ok)
-                {
-                fprintf(stderr,"\ndbg5  New tide point read in program <%s>\n",program_name);
-                fprintf(stderr,"dbg5       tide[%d]: %f %f\n",
-                    ntide,ttime[ntide],ttide[ntide]);
-                }
-            else if (verbose >= 5)
-                {
-                fprintf(stderr,"\ndbg5  Error parsing line in tide file in program <%s>\n",program_name);
-                fprintf(stderr,"dbg5       line: %s\n",buffer);
-                }
-
-            /* check for reverses or repeats in time */
-            if (value_ok)
-                {
-                if (ntide == 0)
-                    ntide++;
-                else if (ttime[ntide] > ttime[ntide-1])
-                    ntide++;
-                else if (ntide > 0 && ttime[ntide] <= ttime[ntide-1]
-                    && verbose >= 5)
-                    {
-                    fprintf(stderr,"\ndbg5  Tide time error in program <%s>\n",program_name);
-                    fprintf(stderr,"dbg5       tide[%d]: %f %f\n",
-                        ntide-1,ttime[ntide-1],ttide[ntide-1]);
-                    fprintf(stderr,"dbg5       tide[%d]: %f %f\n",
-                        ntide,ttime[ntide],ttide[ntide]);
-                    }
-                }
-            strncpy(buffer,"\0",sizeof(buffer));
-            }
-        fclose(tfp);
-
-        /* output information */
-        if (verbose >= 1)
-            {
-            fprintf(stdout,"\nTide Parameters:\n");
-            fprintf(stream,"  TideFile:     %s\n",TideFile);
-            fprintf(stream,"  ntide:        %d\n",ntide);
-            }
-        }
+    if (use_tide) {
+        load_tide(verbose, TideFile, &ntide, &ttime, &ttide, &error);
+    }
 
     /* read in image quality if desired */
-    if (ImageQualityFile_specified)
-        {
-        if ((tfp = fopen(ImageQualityFile, "r")) == NULL)
-            {
-            error = MB_ERROR_OPEN_FAIL;
-            fprintf(stderr,"\nUnable to open image quality file <%s> for reading\n",ImageQualityFile);
-            fprintf(stderr,"\nProgram <%s> Terminated\n",
-                program_name);
-            exit(error);
-            }
-        nquality = 0;
-        while ((result = fgets(buffer,MB_PATH_MAXLINE,tfp)) == buffer)
-            nquality++;
-        fclose(tfp);
-
-        /* allocate arrays for quality */
-        if (nquality > 1)
-            {
-            status = mb_mallocd(verbose,__FILE__,__LINE__,nquality*sizeof(double),(void **)&qtime,&error);
-            status = mb_mallocd(verbose,__FILE__,__LINE__,nquality*sizeof(double),(void **)&qquality,&error);
-
-            /* if error initializing memory then quit */
-            if (error != MB_ERROR_NO_ERROR)
-                {
-                fclose(tfp);
-                mb_error(verbose,error,&message);
-                fprintf(stderr,"\nMBIO Error allocating data arrays:\n%s\n",message);
-                fprintf(stderr,"\nProgram <%s> Terminated\n",
-                    program_name);
-                exit(error);
-                }
-            }
-
-        /* if no image quality data then quit */
-        else
-            {
-            fclose(tfp);
-            error = MB_ERROR_BAD_DATA;
-            fprintf(stderr,"\nUnable to read data from image quality file <%s>\n",ImageQualityFile);
-            fprintf(stderr,"\nProgram <%s> Terminated\n",
-                program_name);
-            exit(error);
-            }
-
-        /* read the data points in the image quality file */
-        nquality = 0;
-        if ((tfp = fopen(ImageQualityFile, "r")) == NULL)
-            {
-            error = MB_ERROR_OPEN_FAIL;
-            fprintf(stderr,"\nUnable to open image quality file <%s> for reading\n",ImageQualityFile);
-            fprintf(stderr,"\nProgram <%s> Terminated\n",
-                program_name);
-            exit(error);
-            }
-        while ((result = fgets(buffer,MB_PATH_MAXLINE,tfp)) == buffer)
-            {
-            bool value_ok = false;
-
-            /* read the image quality values */
-            int nget = sscanf(buffer,"%lf %lf",
-                &qtime[nquality], &qquality[nquality]);
-            if (nget >= 2)
-                value_ok = true;
-
-            /* output some debug values */
-            if (verbose >= 5 && value_ok)
-                {
-                fprintf(stderr,"\ndbg5  New image quality point read in program <%s>\n",program_name);
-                fprintf(stderr,"dbg5       quality[%d]: %f %f\n",
-                    nquality,qtime[nquality],qquality[nquality]);
-                }
-            else if (verbose >= 5)
-                {
-                fprintf(stderr,"\ndbg5  Error parsing line in image quality file in program <%s>\n",program_name);
-                fprintf(stderr,"dbg5       line: %s\n",buffer);
-                }
-
-            /* check for reverses or repeats in time */
-            if (value_ok)
-                {
-                if (nquality == 0)
-                    nquality++;
-                else if (qtime[nquality] > qtime[nquality-1])
-                    nquality++;
-                else if (nquality > 0 && qtime[nquality] <= qtime[nquality-1]
-                    && verbose >= 5)
-                    {
-                    fprintf(stderr,"\ndbg5  Tide time error in program <%s>\n",program_name);
-                    fprintf(stderr,"dbg5       quality[%d]: %f %f\n",
-                        nquality-1,qtime[nquality-1],qquality[nquality-1]);
-                    fprintf(stderr,"dbg5       quality[%d]: %f %f\n",
-                        nquality,qtime[nquality],qquality[nquality]);
-                    }
-                }
-            strncpy(buffer,"\0",sizeof(buffer));
-            }
-        fclose(tfp);
-        if (nquality > 0) {
-            use_imagequality = true;
-            if (imageQualityFilterLength > 0.0)
-                mb_apply_time_filter(verbose, nquality, qtime, qquality, imageQualityFilterLength, &error);
-        }
-
-        /* output information */
-        if (verbose >= 1)
-            {
-            fprintf(stdout,"\nImage Quality Parameters:\n");
-            fprintf(stream,"  ImageQualityFile:  %s\n",ImageQualityFile);
-            fprintf(stream,"  nquality:          %d\n",nquality);
-            }
-        }
-
-    /* Load topography grid if desired */
-    if (control.use_topography)
-        {
-        status = mb_topogrid_init(verbose, TopographyGridFile, &lonflip, &control.topogrid_ptr, &error);
-        if (error != MB_ERROR_NO_ERROR)
-            {
-            mb_error(verbose,error,&message);
-            fprintf(stderr,"\nMBIO Error loading topography grid: %s\n%s\n",TopographyGridFile,message);
-            fprintf(stderr,"\nProgram <%s> Terminated\n",program_name);
-            mb_memory_clear(verbose, &error);
-            exit(error);
-            }
-        }
+    if (ImageQualityFile_specified) {
+        load_image_quality(verbose, ImageQualityFile, &nquality, &qtime, &qquality, &error);
+    }
 
     /* loop over the list of input images
        - this can be a list of single images or stereo images
@@ -3226,14 +3218,326 @@ control.OutputBounds[0], control.OutputBounds[1], control.OutputBounds[2], contr
     double image_quality = 0.0;
     mb_path dpath;
     unsigned int numThreadsSet = 0;
-    fprintf(stderr,"About to read ImageListFile: %s\n", ImageListFile);
+    fprintf(stderr,"\nAbout to read ImageListFile: %s\n\n", ImageListFile);
 
     while ((status = mb_imagelist_read(verbose, imagelist_ptr, &imageStatus,
                                 imageLeftFile, imageRightFile, dpath,
                                 &left_time_d, &right_time_d,
                                 &left_gain, &right_gain,
                                 &left_exposure, &right_exposure, &error)) == MB_SUCCESS) {
-        if (imageStatus == MB_IMAGESTATUS_STEREO) {
+
+        /* handle parameter statements embedded in the recursive imagelist structure */
+        if (imageStatus == MB_IMAGESTATUS_PARAMETER) {
+            currentimages = 0;
+            mb_path tmp;
+            fprintf(stderr, "  ->Processing parameter: %s\n",imageLeftFile);
+
+            /* fov-fudgefactor */
+            if (strncmp(imageLeftFile, "--fov-fudgefactor=", 18) == 0) {
+                if (sscanf(imageLeftFile, "--fov-fudgefactor=%lf", &control.fov_fudgefactor) == 1) {
+                    if (verbose > 1)
+                        fprintf(stderr, "\nParameter reset: fov-fudgefactor: %f\n", control.fov_fudgefactor);
+                } else {
+                    if (verbose > 0)
+                        fprintf(stderr, "\nFailure to reset parameter: fov_fudgefactor:%f\n", control.fov_fudgefactor);
+                }
+            }
+
+            /* standoff */
+            else if (strncmp(imageLeftFile, "--standoff=", 10) == 0) {
+                if (sscanf(imageLeftFile, "--standoff=%lf/%lf", &control.standoff_target, &control.standoff_range) == 2) {
+                    if (verbose > 1)
+                        fprintf(stderr, "\nParameters reset: standoff_target:%f standoff_range:%f\n",
+                            control.standoff_target, control.standoff_range);
+                } else {
+                    if (verbose > 0)
+                        fprintf(stderr, "\nFailure to reset parameters: standoff_target:%f standoff_range:%f\n",
+                            control.standoff_target, control.standoff_range);
+                }
+            }
+
+            /* trim */
+            else if (strncmp(imageLeftFile, "--trim=", 7) == 0) {
+                if (sscanf(imageLeftFile, "--trim=%d", &control.trimPixels) == 1) {
+                    if (verbose > 1)
+                        fprintf(stderr, "\nParameter reset: trimPixels:%d\n",
+                            control.trimPixels);
+                } else {
+                    if (verbose > 0)
+                        fprintf(stderr, "\nFailure to reset parameter: trimPixels:%d\n",
+                            control.trimPixels);
+                }
+            }
+
+            /* section */
+            else if (strncmp(imageLeftFile, "--section=", 10) == 0) {
+                if (sscanf(imageLeftFile, "--section=%d", &control.sectionPixels) == 1) {
+                    if (verbose > 1)
+                        fprintf(stderr, "\nParameter reset: sectionPixels:%d\n",
+                            control.sectionPixels);
+                } else {
+                    if (verbose > 0)
+                        fprintf(stderr, "\nFailure to reset parameter: sectionPixels:%d\n",
+                            control.sectionPixels);
+                }
+            }
+
+            /* rangemax */
+            else if (strncmp(imageLeftFile, "--rangemax=", 11) == 0) {
+                if (sscanf(imageLeftFile,"--rangemax=%lf", &control.range_max) == 1 ) {
+                    if (verbose > 1)
+                        fprintf(stderr, "\nParameters reset: range_max:%f\n",
+                            control.range_max);
+                } else {
+                    if (verbose > 0)
+                        fprintf(stderr, "\nFailure to reset parameters: range_max:%f\n",
+                            control.range_max);
+                }
+            }
+
+            /* correction-brightness */
+            else if (strncmp(imageLeftFile, "--correction-brightness", 23) == 0) {
+                control.corr_mode = MBPM_CORRECTION_BRIGHTNESS;
+                if (verbose > 1)
+                    fprintf(stderr, "\nParameters reset: corr_mode:%d\n",
+                            control.corr_mode);
+            }
+
+            /* correction-camera-settings */
+            else if (strncmp(imageLeftFile, "--correction-camera-settings=", 29) == 0) {
+                control.corr_mode = MBPM_CORRECTION_CAMERA_SETTINGS;
+                if (verbose > 1)
+                    fprintf(stderr, "\nParameters reset: corr_mode:%d\n",
+                            control.corr_mode);
+            }
+
+            /* correction-range */
+            else if (strncmp(imageLeftFile, "--correction-range=", 19) == 0) {
+                if (sscanf(imageLeftFile,"--correction-range=%lf/%lf", &control.corr_range_target, &control.corr_range_coeff) == 2) {
+                    control.corr_mode = MBPM_CORRECTION_RANGE;
+                    if (verbose > 1)
+                        fprintf(stderr, "\nParameters reset: corr_mode:%d corr_range_target:%f corr_range_coeff:%f\n",
+                            control.corr_mode, control.corr_range_target, control.corr_range_coeff);
+                } else {
+                    if (verbose > 0)
+                        fprintf(stderr, "\nFailure to reset parameters: corr_mode:%d corr_range_target:%f corr_range_coeff:%f\n",
+                            control.corr_mode, control.corr_range_target, control.corr_range_coeff);
+                }
+            }
+
+            /* correction-standoff */
+            else if (strncmp(imageLeftFile, "--correction-standoff=", 19) == 0) {
+                if (sscanf(imageLeftFile,"--correction-standoff=%lf/%lf", &control.corr_standoff_target, &control.corr_standoff_coeff) == 2) {
+                    control.corr_mode = MBPM_CORRECTION_RANGE;
+                    if (verbose > 1)
+                        fprintf(stderr, "\nParameters reset: corr_mode:%d corr_standoff_target:%f corr_standoff_coeff:%f\n",
+                            control.corr_mode, control.corr_standoff_target, control.corr_standoff_coeff);
+                } else {
+                    if (verbose > 0)
+                        fprintf(stderr, "\nFailure to reset parameters: corr_mode:%d corr_standoff_target:%f corr_standoff_coeff:%f\n",
+                            control.corr_mode, control.corr_standoff_target, control.corr_standoff_coeff);
+                }
+            }
+
+            /* correction-file */
+            else if (strncmp(imageLeftFile, "--correction-file=", 18) == 0) {
+                if (sscanf(imageLeftFile, "--correction-file=%s", tmp) == 1) {
+                    strcpy(ImageCorrectionFile, tmp);
+                    load_correction(verbose, ImageCorrectionFile, &control, &error);
+                }
+            }
+
+            /* reference-gain */
+            else if (strncmp(imageLeftFile, "--reference-gain=", 17) == 0) {
+                if (sscanf(imageLeftFile,"--reference-gain=%lf", &control.reference_gain) == 1 ) {
+                    if (verbose > 1)
+                        fprintf(stderr, "\nParameters reset: reference_gain:%f\n",
+                            control.reference_gain);
+                } else {
+                    if (verbose > 0)
+                        fprintf(stderr, "\nFailure to reset parameters: reference_gain:%f\n",
+                            control.reference_gain);
+                }
+            }
+
+            /* reference-exposure */
+            else if (strncmp(imageLeftFile, "--reference-exposure=", 21) == 0) {
+                if (sscanf(imageLeftFile,"--reference-exposure=%lf", &control.reference_exposure) == 1 ) {
+                    if (verbose > 1)
+                        fprintf(stderr, "\nParameters reset: reference_exposure:%f\n",
+                            control.reference_exposure);
+                } else {
+                    if (verbose > 0)
+                        fprintf(stderr, "\nFailure to reset parameters: reference_exposure:%f\n",
+                            control.reference_exposure);
+                }
+            }
+
+            /* platform-file */
+            else if (strncmp(imageLeftFile, "--platform-file=", 16) == 0) {
+                if (sscanf(imageLeftFile, "--platform-file=%s", tmp) == 1) {
+                  strcpy(PlatformFile, tmp);
+                  if (platform != NULL) {
+                      status = mb_platform_deall(verbose, (void **)&platform, &error);
+                  }
+                  status = mb_platform_read(verbose, PlatformFile, (void **)&platform, &error);
+                  if (verbose > 0 && status == MB_SUCCESS) {
+                      fprintf(stream, "    Survey platform model read from: %s\n", PlatformFile);
+                  } else if (status == MB_FAILURE) {
+                      fprintf(stderr,"\nUnable to read platform file %s\n", PlatformFile);
+                      fprintf(stderr,"Program <%s> Terminated\n", program_name);
+                      mb_memory_clear(verbose, &error);
+                      exit(MB_ERROR_BAD_PARAMETER);
+                  }
+                }
+            }
+
+            /* camera-sensor */
+            else if (strncmp(imageLeftFile, "--camera-sensor=", 16) == 0) {
+                if (sscanf(imageLeftFile,"--camera-sensor=%d", &camera_sensor) == 1 ) {
+                    if (verbose > 1)
+                        fprintf(stderr, "\nParameters reset: camera_sensor:%d\n", camera_sensor);
+                } else {
+                    if (verbose > 0)
+                        fprintf(stderr, "\nFailure to reset parameters: camera_sensor:%d\n", camera_sensor);
+                }
+            }
+
+            /* nav-sensor */
+            else if (strncmp(imageLeftFile, "--nav-sensor=", 13) == 0) {
+                if (sscanf(imageLeftFile,"--nav-sensor=%d", &nav_sensor) == 1 ) {
+                    if (verbose > 1)
+                        fprintf(stderr, "\nParameters reset: nav_sensor:%d\n", nav_sensor);
+                } else {
+                    if (verbose > 0)
+                        fprintf(stderr, "\nFailure to reset parameters: nav_sensor:%d\n", nav_sensor);
+                }
+            }
+
+            /* sensordepth-sensor */
+            else if (strncmp(imageLeftFile, "--sensordepth-sensor=", 16) == 0) {
+                if (sscanf(imageLeftFile,"--sensordepth-sensor=%d", &sensordepth_sensor) == 1 ) {
+                    if (verbose > 1)
+                        fprintf(stderr, "\nParameters reset: sensordepth_sensor:%d\n", sensordepth_sensor);
+                } else {
+                    if (verbose > 0)
+                        fprintf(stderr, "\nFailure to reset parameters: sensordepth_sensor:%d\n", sensordepth_sensor);
+                }
+            }
+
+            /* heading-sensor */
+            else if (strncmp(imageLeftFile, "--heading-sensor=", 16) == 0) {
+                if (sscanf(imageLeftFile,"--heading-sensor=%d", &heading_sensor) == 1 ) {
+                    if (verbose > 1)
+                        fprintf(stderr, "\nParameters reset: heading_sensor:%d\n", heading_sensor);
+                } else {
+                    if (verbose > 0)
+                        fprintf(stderr, "\nFailure to reset parameters: heading_sensor:%d\n", heading_sensor);
+                }
+            }
+
+            /* altitude-sensor */
+            else if (strncmp(imageLeftFile, "--altitude-sensor=", 16) == 0) {
+                if (sscanf(imageLeftFile,"--altitude-sensor=%d", &altitude_sensor) == 1 ) {
+                    if (verbose > 1)
+                        fprintf(stderr, "\nParameters reset: altitude_sensor:%d\n", altitude_sensor);
+                } else {
+                    if (verbose > 0)
+                        fprintf(stderr, "\nFailure to reset parameters: altitude_sensor:%d\n", altitude_sensor);
+                }
+            }
+
+            /* attitude-sensor */
+            else if (strncmp(imageLeftFile, "--attitude-sensor=", 16) == 0) {
+                if (sscanf(imageLeftFile,"--attitude-sensor=%d", &attitude_sensor) == 1 ) {
+                    if (verbose > 1)
+                        fprintf(stderr, "\nParameters reset: attitude_sensor:%d\n", attitude_sensor);
+                } else {
+                    if (verbose > 0)
+                        fprintf(stderr, "\nFailure to reset parameters: attitude_sensor:%d\n", attitude_sensor);
+                }
+            }
+
+            /* use-left-camera */
+            else if (strncmp(imageLeftFile, "--use-left-camera", 17) == 0) {
+                use_camera_mode = MBPM_USE_LEFT;
+            }
+
+            /* use-right-camera */
+            else if (strncmp(imageLeftFile, "--use-right-camera", 18) == 0) {
+                use_camera_mode = MBPM_USE_RIGHT;
+            }
+
+            /* use-both-cameras */
+            else if (strncmp(imageLeftFile, "--use-both-cameras", 18) == 0) {
+                use_camera_mode = MBPM_USE_STEREO;
+            }
+
+            /* calibration-file */
+            else if (strncmp(imageLeftFile, "--calibration-file=", 19) == 0) {
+                if (sscanf(imageLeftFile, "--calibration-file=%s", tmp) == 1) {
+                    strcpy(StereoCameraCalibrationFile, tmp);
+                    load_calibration(verbose, StereoCameraCalibrationFile, &control, &error);
+                }
+            }
+
+            /* navigation-file */
+            else if (strncmp(imageLeftFile, "--navigation-file=", 18) == 0) {
+                if (sscanf(imageLeftFile, "--navigation-file=%s", tmp) == 1) {
+                    strcpy(NavigationFile, tmp);
+                    load_navigation(verbose, NavigationFile, lonflip,
+                                    &nnav, &ntime, &nlon, &nlat, &nheading, &nspeed, &ndraft,
+                                    &nroll, &npitch, &nheave, &error);
+                    navigation_specified = true;
+                }
+            }
+
+            /* tide-file */
+            else if (strncmp(imageLeftFile, "--tide-file=", 12) == 0) {
+                if (sscanf(imageLeftFile, "--tide-file=%s", tmp) == 1) {
+                    strcpy(TideFile, tmp);
+                    load_tide(verbose, TideFile, &ntide, &ttime, &ttide, &error);
+                    use_tide = true;
+                }
+            }
+
+            /* image-quality-file */
+            else if (strncmp(imageLeftFile, "--image-quality-file=", 21) == 0) {
+                if (sscanf(imageLeftFile, "--image-quality-file=%s", tmp) == 1) {
+                    strcpy(ImageQualityFile, tmp);
+                    load_image_quality(verbose, ImageQualityFile, &nquality, &qtime, &qquality, &error);
+                    ImageQualityFile_specified = true;
+                }
+            }
+
+            /* image-quality-threshold */
+            else if (strncmp(imageLeftFile, "--image-quality-threshold=", 26) == 0) {
+                if (sscanf(imageLeftFile,"--image-quality-threshold=%lf", &imageQualityThreshold) == 1 ) {
+                    if (verbose > 1)
+                        fprintf(stderr, "\nParameters reset: imageQualityThreshold:%f\n",
+                            imageQualityThreshold);
+                } else {
+                    if (verbose > 0)
+                        fprintf(stderr, "\nFailure to reset parameters: imageQualityThreshold:%f\n",
+                            imageQualityThreshold);
+                }
+            }
+
+            /* image-quality-filter-length */
+            else if (strncmp(imageLeftFile, "--image-quality-filter-length=", 30) == 0) {
+                if (sscanf(imageLeftFile,"--image-quality-filter-length=%lf", &imageQualityFilterLength) == 1 ) {
+                    if (verbose > 1)
+                        fprintf(stderr, "\nParameters reset: imageQualityFilterLength:%f\n",
+                            imageQualityFilterLength);
+                } else {
+                    if (verbose > 0)
+                        fprintf(stderr, "\nFailure to reset parameters: imageQualityFilterLength:%f\n",
+                            imageQualityFilterLength);
+                }
+            }
+
+        }
+        else if (imageStatus == MB_IMAGESTATUS_STEREO) {
           if (use_camera_mode == MBPM_USE_STEREO) {
             npairs++;
             nimages += 2;
@@ -3289,6 +3593,17 @@ control.OutputBounds[0], control.OutputBounds[1], control.OutputBounds[2], contr
             double camera_pitch;
             double image_gain;
             double image_exposure;
+
+            /* if stereo calibration not already set then quit */
+            if (!control.calibration_set)
+                {
+                fprintf(stream,"\nNo camera calibration file specified, either on command line or in imagelist structure...\n");
+                fprintf(stream,"\nProgram <%s> Terminated\n",
+                    program_name);
+                error = MB_ERROR_BAD_PARAMETER;
+                mb_memory_clear(verbose, &error);
+                exit(error);
+                }
 
             /* set camera for stereo image */
             if (currentimages == 2) {
@@ -3487,7 +3802,7 @@ control.OutputBounds[0], control.OutputBounds[1], control.OutputBounds[2], contr
 
                 if (control.sectionPixels > 0)
                     mbphotomosaicThreads[numThreadsSet]
-                        = std::thread(process_image_sectioned2, verbose, &processPars[numThreadsSet], &control,
+                        = std::thread(process_image_sectioned, verbose, &processPars[numThreadsSet], &control,
                                         &thread_status[numThreadsSet], &thread_error[numThreadsSet]);
                 else
                     mbphotomosaicThreads[numThreadsSet]
@@ -3714,6 +4029,11 @@ control.OutputBounds[0], control.OutputBounds[1], control.OutputBounds[2], contr
         processPars[0].OutputIntensityCorrection.release();
         processPars[0].OutputStandoff.release();
 #endif
+    }
+
+    /* deallocate platform */
+    if (platform != NULL) {
+        status = mb_platform_deall(verbose, (void **)&platform, &error);
     }
 
     /* deallocate topography grid array if necessary */

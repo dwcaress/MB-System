@@ -23,6 +23,7 @@ Distributions that do not include "beta" in the tag name correspond to the major
 announced releases. The source distributions associated with all releases, major
 or beta, are equally accessible as tarballs through the Github interface.
 
+- Version 5.7.9beta23    December 18, 2021
 - Version 5.7.9beta22    December 5, 2021
 - Version 5.7.9beta21    December 4, 2021
 - Version 5.7.9beta20    December 1, 2021
@@ -400,6 +401,21 @@ or beta, are equally accessible as tarballs through the Github interface.
 --
 ### MB-System Version 5.7 Release Notes:
 --
+
+#### 5.7.9beta23 (December 18, 2021)
+
+Mbphotomosaic and mbgetphotocorrection: Another iteration trying to get image
+gain and exposure correction to work correctly. Altered the imagelist file format
+to include camera gain and exposure settings. These can be extracted from the
+metadata embedded into images written by the MBARI Prosilica driver code
+(adapted from URI/WHOI/UM).
+
+Mbm_makeimagelist: Altered the imagelist file format
+to include camera gain and exposure settings. These can be extracted from the
+metadata embedded into images written by the MBARI Prosilica driver code
+(adapted from URI/WHOI/UM). Added --check-bayer option to allow checking the bayer images
+for the original camera gain and exposure settings when those are not carried over
+to the derived color images.
 
 #### 5.7.9beta22 (December 5, 2021)
 

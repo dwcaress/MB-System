@@ -2027,65 +2027,49 @@ int main(int argc, char** argv)
         if (num_changes == 0)
             done = true;
     }
-    int first = -1;
-    int last = -1;
-    bool found = false;
-    {
-        int i = control.ncorr_x / 2;
-        int j = control.ncorr_y / 2;
-        for (int k=0;k<control.ncorr_z;k++) {
-            if (processPars[0].corr_table[0].at<float>(i, j, k) > 0.0 && first < 0) {
-                first = k;
-                last = k;
-            }
-            if (processPars[0].corr_table[0].at<float>(i, j, k) > 0.0 && last < k) {
-                last = k;
-            }
-        }
-    }
-    for (int k=0;k<first;k++) {
+    done = false;
+    while (!done) {
+        int num_changes = 0;
         for (int j=0;j<control.ncorr_y;j++) {
             for (int i=0;i<control.ncorr_x;i++) {
-                processPars[0].corr_table[0].at<float>(i, j, k) = processPars[0].corr_table[0].at<float>(i, j, first);
+                for (int k=0;k<control.ncorr_z;k++) {
+                    if (processPars[0].corr_table[0].at<float>(i, j, k) == 0.0) {
+                        processPars[0].corr_table_count[0].at<int>(i, j, k) = 0;
+                        for (int kk=MAX(0,k-1);kk<=MIN(control.ncorr_z-1,k+1);kk++) {
+                            if (!(kk == k) && processPars[0].corr_table[0].at<float>(i, j, kk) > 0.0) {
+                                processPars[0].corr_table[0].at<float>(i, j, k)
+                                    += processPars[0].corr_table[0].at<float>(i, j, kk);
+                                processPars[0].corr_table_count[0].at<int>(i, j, k)++;
+                                num_changes++;
+                            }
+                        }
+                        if (processPars[0].corr_table_count[0].at<int>(i, j, k) > 0) {
+                            processPars[0].corr_table[0].at<float>(i, j, k)
+                                /= processPars[0].corr_table_count[0].at<int>(i, j, k);
+                            processPars[0].corr_table_count[0].at<int>(i, j, k) = 0;
+                        }
+                    }
+                    if (processPars[0].corr_table[1].at<float>(i, j, k) == 0.0) {
+                        processPars[0].corr_table_count[1].at<int>(i, j, k) = 0;
+                        for (int kk=MAX(0,k-1);kk<=MIN(control.ncorr_z-1,k+1);kk++) {
+                            if (!(kk == k) && processPars[0].corr_table[1].at<float>(i, j, kk) > 0.0) {
+                                processPars[0].corr_table[1].at<float>(i, j, k)
+                                    += processPars[0].corr_table[1].at<float>(i, j, kk);
+                                processPars[0].corr_table_count[1].at<int>(i, j, k)++;
+                                num_changes++;
+                            }
+                        }
+                        if (processPars[0].corr_table_count[1].at<int>(i, j, k) > 0) {
+                            processPars[0].corr_table[1].at<float>(i, j, k)
+                                /= processPars[0].corr_table_count[1].at<int>(i, j, k);
+                            processPars[0].corr_table_count[1].at<int>(i, j, k) = 0;
+                        }
+                    }
+                }
             }
         }
-    }
-    for (int k=last+1;k<control.ncorr_z;k++) {
-        for (int j=0;j<control.ncorr_y;j++) {
-            for (int i=0;i<control.ncorr_x;i++) {
-                processPars[0].corr_table[0].at<float>(i, j, k) = processPars[0].corr_table[0].at<float>(i, j, last);
-            }
-        }
-    }
-    first = -1;
-    last = -1;
-    found = false;
-    {
-        int i = control.ncorr_x / 2;
-        int j = control.ncorr_y / 2;
-        for (int k=0;k<control.ncorr_z;k++) {
-            if (processPars[0].corr_table[1].at<float>(i, j, k) > 0.0 && first < 0) {
-                first = k;
-                last = k;
-            }
-            if (processPars[0].corr_table[1].at<float>(i, j, k) > 0.0 && last < k) {
-                last = k;
-            }
-        }
-    }
-    for (int k=0;k<first;k++) {
-        for (int j=0;j<control.ncorr_y;j++) {
-            for (int i=0;i<control.ncorr_x;i++) {
-                processPars[0].corr_table[1].at<float>(i, j, k) = processPars[0].corr_table[1].at<float>(i, j, first);
-            }
-        }
-    }
-    for (int k=last+1;k<control.ncorr_z;k++) {
-        for (int j=0;j<control.ncorr_y;j++) {
-            for (int i=0;i<control.ncorr_x;i++) {
-                processPars[0].corr_table[1].at<float>(i, j, k) = processPars[0].corr_table[1].at<float>(i, j, last);
-            }
-        }
+        if (num_changes == 0)
+            done = true;
     }
 
     /* print out each correction table layer from lowest standoff to largest */

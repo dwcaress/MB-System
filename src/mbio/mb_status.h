@@ -200,12 +200,13 @@
 #define MB_PROCESSED_USE 2
 
 /* image status values returned by mb_imagelist_read() */
-#define MB_IMAGESTATUS_NONE         0x00
-#define MB_IMAGESTATUS_SINGLE       0x01
-#define MB_IMAGESTATUS_LEFT         0x01
-#define MB_IMAGESTATUS_RIGHT        0x02
-#define MB_IMAGESTATUS_STEREO       0x03
-#define MB_IMAGESTATUS_IMAGELIST    0x04
+#define MB_IMAGESTATUS_NONE             0x00
+#define MB_IMAGESTATUS_SINGLE           0x01
+#define MB_IMAGESTATUS_LEFT             0x01
+#define MB_IMAGESTATUS_RIGHT            0x02
+#define MB_IMAGESTATUS_STEREO           0x03
+#define MB_IMAGESTATUS_IMAGELIST        0x04
+#define MB_IMAGESTATUS_PARAMETER        0x09
 #define mb_image_check_none(S) ((int)(S == MB_IMAGESTATUS_NONE))
 #define mb_image_check_single(S) ((int)(S == MB_IMAGESTATUS_SINGLE))
 #define mb_image_check_left(S) ((int)(S & MB_IMAGESTATUS_LEFT))

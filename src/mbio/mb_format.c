@@ -3572,12 +3572,13 @@ int mb_imagelist_read(int verbose, void *imagelist_ptr, int *imagestatus,
             *error = MB_ERROR_EOF;
           }
 
-          /* Check for special tags $SINGLE, $LEFT, $RIGHT, $STEREO, with variants
-              #SINGLE, #LEFT, #RIGHT, #STEREO allowed.
-              Note that tags $SINGLECAMERA, $LEFTCAMERA, $RIGHTCAMERA, $STEREOCAMERA
-              and  #SINGLECAMERA, #LEFTCAMERA, #RIGHTCAMERA, #STEREOCAMERA
-              all work as well. */
+          /* Check for special tags starting with '$' or '#' */
           else if (buffer[0] == '#' || buffer[0] == '$') {
+              /* Check for special tags $SINGLE, $LEFT, $RIGHT, $STEREO, with variants
+                  #SINGLE, #LEFT, #RIGHT, #STEREO allowed.
+                  Note that tags $SINGLECAMERA, $LEFTCAMERA, $RIGHTCAMERA, $STEREOCAMERA
+                  and  #SINGLECAMERA, #LEFTCAMERA, #RIGHTCAMERA, #STEREOCAMERA
+                  all work as well. */
               if (strncmp(buffer, "$SINGLE", 7) == 0
                   || strncmp(buffer, "#SINGLE", 7) == 0) {
                   imagelist->leftrightstereo = MB_IMAGESTATUS_LEFT;
@@ -3593,6 +3594,18 @@ int mb_imagelist_read(int verbose, void *imagelist_ptr, int *imagestatus,
               else if (strncmp(buffer, "$STEREO", 7) == 0
                   || strncmp(buffer, "#STEREO", 7) == 0) {
                   imagelist->leftrightstereo = MB_IMAGESTATUS_STEREO;
+              }
+
+              /* Check for special tags $PARAMETER or #PARAMETER */
+              else if (strncmp(buffer, "$PARAMETER", 8) == 0
+                  || strncmp(buffer, "#PARAMETER", 8) == 0) {
+                  mb_path tmp;
+                  int n = sscanf(buffer, "%s %s", tmp, path0);
+                  if (n == 2) {
+                      *imagestatus = MB_IMAGESTATUS_PARAMETER;
+                      done = true;
+                      rdone = true;
+                  }
               }
           }
 
@@ -3765,7 +3778,7 @@ int mb_imagelist_read(int verbose, void *imagelist_ptr, int *imagestatus,
       if (!done && imagelist->open && imagelist->imagelist != NULL) {
         imagelist2 = (struct mb_imagelist_struct *)imagelist->imagelist;
         if (imagelist2->open) {
-          /* recursively call mb_read_imagelist */
+          /* recursively call mb_imagelist_read */
           status = mb_imagelist_read(verbose, (void *)imagelist->imagelist, imagestatus,
                                     path0, path1, dpath, time_d0, time_d1, gain0, gain1, exposure0, exposure1, error);
 
