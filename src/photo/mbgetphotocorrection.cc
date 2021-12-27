@@ -595,8 +595,8 @@ int main(int argc, char** argv)
     bool undistort_initialized = false;
 
     /* Input image correction */
-    control.reference_gain = 15.0;
-    control.reference_exposure = 4000.0;
+    control.reference_gain = 14.0;
+    control.reference_exposure = 8000.0;
     control.ncorr_x = 21;
     control.ncorr_y = 21;
     control.ncorr_z = 81;
@@ -2105,6 +2105,7 @@ fprintf(stderr, "Camera 1 Correction: Standoff %.3f meters +/- %.3f\n", k * cont
     }
 
     /* Write out the ouput correction table */
+    int corr_version = 2;
     Mat corr_bounds = Mat(3, 3, CV_32FC(1), Scalar(0.0));
     corr_bounds.at<float>(0, 0) = control.corr_xmin;
     corr_bounds.at<float>(0, 1) = control.corr_xmax;
@@ -2117,7 +2118,10 @@ fprintf(stderr, "Camera 1 Correction: Standoff %.3f meters +/- %.3f\n", k * cont
     corr_bounds.at<float>(2, 2) = control.bin_dz;
     fstorage = FileStorage(ImageCorrectionFile, FileStorage::WRITE);
     if( fstorage.isOpened() ) {
-        fstorage << "ImageCorrectionBounds" << corr_bounds
+        fstorage << "ImageCorrectionVersion" << corr_version
+            << "ImageCorrectionBounds" << corr_bounds
+            << "ImageCorrectionReferenceGain" << control.reference_gain
+            << "ImageCorrectionReferenceExposure" << control.reference_exposure
             << "ImageCorrectionTable1" << processPars[0].corr_table[0]
             << "ImageCorrectionTable2" << processPars[0].corr_table[1];
         fstorage.release();

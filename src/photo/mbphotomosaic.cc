@@ -113,6 +113,7 @@ char usage_message[] = "mbphotomosaic \n"
                         "\t--correction-file=imagecorrection.yaml\n"
                         "\t--reference-gain=gain\n"
                         "\t--reference-exposure=exposure\n"
+                        "\t--reference-intensity=intensity\n"
                         "\t--platform-file=platform.plf\n"
                         "\t--camera-sensor=camera_sensor_id\n"
                         "\t--nav-sensor=nav_sensor_id\n"
@@ -208,6 +209,8 @@ struct mbpm_control_struct {
     double corr_range_coeff;
     double corr_standoff_target;
     double corr_standoff_coeff;
+    bool reference_intensity_set;
+    double reference_intensity;
 
     // Image correction table
     int ncorr_x;
@@ -225,7 +228,7 @@ struct mbpm_control_struct {
     int ibin_xcen;
     int jbin_ycen;
     int kbin_zcen;
-    double referenceIntensity[2];
+    double centerIntensity[2];
     Mat corr_bounds;
     Mat corr_table[2];
 
@@ -637,10 +640,18 @@ void load_calibration(int verbose, mb_path StereoCameraCalibrationFile, struct m
 void load_correction(int verbose, mb_path ImageCorrectionFile, struct mbpm_control_struct *control, int *error)
 {
     FileStorage fstorage;
+    int corr_version = 1;
+    double reference_gain;
+    double reference_exposure;
+
+    /* print out image correction information */
+    fprintf(stderr, "\nImage correction using 3D lookup table\n");
+    fprintf(stderr, "    Image correction tables read from: %s\n", ImageCorrectionFile);
 
     /* read in the image correction table - this is expected to be a stereo correction table */
     fstorage.open(ImageCorrectionFile, FileStorage::READ);
     if(fstorage.isOpened() ) {
+        fstorage["ImageCorrectionVersion"] >> corr_version;
         fstorage["ImageCorrectionBounds"] >> control->corr_bounds;
         control->corr_xmin = control->corr_bounds.at<float>(0, 0);
         control->corr_xmax = control->corr_bounds.at<float>(0, 1);
@@ -651,6 +662,32 @@ void load_correction(int verbose, mb_path ImageCorrectionFile, struct mbpm_contr
         control->corr_zmin = control->corr_bounds.at<float>(2, 0);
         control->corr_zmax = control->corr_bounds.at<float>(2, 1);
         control->bin_dz = control->corr_bounds.at<float>(2, 2);
+        if (corr_version >= 2) {
+            fstorage["ImageCorrectionReferenceGain"] >> reference_gain;
+            fstorage["ImageCorrectionReferenceExposure"] >> reference_exposure;
+            if (control->reference_gain > 0.0) {
+                fprintf(stderr, "    Reference gain %f dB overridden on command line with gain %f dB\n",
+                                  reference_gain, control->reference_gain);
+            } else {
+                control->reference_gain = reference_gain;
+            }
+            if (control->reference_exposure > 0.0) {
+                fprintf(stderr, "    Reference exposure %f usec overridden on command line with exposure %f usec\n",
+                                  reference_exposure, control->reference_exposure);
+            } else {
+                control->reference_exposure = reference_exposure;
+            }
+
+        }
+        else {
+            fprintf(stderr, "    Image correction file %s is version %d without reference gain or exposure\n", ImageCorrectionFile, corr_version);
+            if (control->reference_gain <= 0.0)
+                control->reference_gain = 14.0;
+            if (control->reference_exposure <= 0.0)
+                control->reference_exposure = 8000.0;
+            fprintf(stderr, "      Reference gain used:       %f dB\n", control->reference_gain);
+            fprintf(stderr, "      Reference exposure used:   %f usec\n", control->reference_exposure);
+        }
         fstorage["ImageCorrectionTable1"] >> control->corr_table[0];
         fstorage["ImageCorrectionTable2"] >> control->corr_table[1];
         fstorage.release();
@@ -666,7 +703,7 @@ void load_correction(int verbose, mb_path ImageCorrectionFile, struct mbpm_contr
     control->ncorr_y = control->corr_table[0].size[1];
     control->ncorr_z = control->corr_table[0].size[2];
 
-    /* Get reference intensity value for each camera.
+    /* Get center intensity value for each camera.
      * If the target standoff value is specified use the correction table value
      * at the center x and y and the target standoff z. If no target standoff
      * value is specified use the correction table value at the x y center
@@ -699,18 +736,33 @@ void load_correction(int verbose, mb_path ImageCorrectionFile, struct mbpm_contr
               control->kbin_zcen = (k0 + k1) / 2;
             }
         }
-        control->referenceIntensity[icamera] =  control->corr_table[icamera].at<float>(control->ibin_xcen, control->jbin_ycen, control->kbin_zcen);
+        control->centerIntensity[icamera] =  control->corr_table[icamera].at<float>(control->ibin_xcen, control->jbin_ycen, control->kbin_zcen);
     }
 
-    /* print out calibration information */
-    fprintf(stderr, "    Image correction tables read from: %s\n", ImageCorrectionFile);
+    /* Set reference intensity if needed - the actual correction applied from the table
+       will be that needed to take the table value to the specified reference value.
+       If no reference value has been specified, use the average of the center
+       intensity values from the table. */
+    bool reference_intensity_reset = false;
+    if (control->reference_intensity <= 0.0) {
+        control->reference_intensity = 0.5 * (control->centerIntensity[0] + control->centerIntensity[0]);
+        reference_intensity_reset = true;
+    }
+
+    /* print out image correction information */
+    fprintf(stderr, "    Image correction file version: %d\n", corr_version);
     fprintf(stderr, "    Image correction table bounds:\n");
     fprintf(stderr, "      minmax x: %f %f  nx:%d dx:%f\n", control->corr_xmin, control->corr_xmax, control->ncorr_x, control->bin_dx);
     fprintf(stderr, "      minmax y: %f %f  ny:%d dy:%f\n", control->corr_ymin, control->corr_ymax, control->ncorr_y, control->bin_dy);
     fprintf(stderr, "      minmax z: %f %f  nz:%d dz:%f\n", control->corr_zmin, control->corr_zmax, control->ncorr_z, control->bin_dz);
-    fprintf(stderr, "    Reference intensity:\n");
-    fprintf(stderr, "      camera 0: %f\n", control->referenceIntensity[0]);
-    fprintf(stderr, "      camera 1: %f\n", control->referenceIntensity[1]);
+    fprintf(stderr, "    Reference gain:        %f dB\n", control->reference_gain);
+    fprintf(stderr, "    Reference exposure:    %f usec\n", control->reference_exposure);
+    fprintf(stderr, "    Center intensity:\n");
+    fprintf(stderr, "      camera 0: %f\n", control->centerIntensity[0]);
+    fprintf(stderr, "      camera 1: %f\n", control->centerIntensity[1]);
+    if (reference_intensity_reset)
+        fprintf(stderr, "    Reference intensity not specified so set as average of center intensities\n");
+    fprintf(stderr, "    Reference intensity:   %f usec\n", control->reference_intensity);
     if (verbose > 1) {
         for (int icamera=0; icamera < 2; icamera++) {
             fprintf(stderr, "\nCorrection Table[camera %d]:\n", icamera);
@@ -918,8 +970,8 @@ void process_image(int verbose, struct mbpm_process_struct *process,
                             + factor_z * control->corr_table[process->image_camera].at<float>(control->ibin_xcen, control->jbin_ycen, kbin_z2);
 
                 centerIntensityCorrection = imageIntensityCorrection;
-                if (table_intensity_ref > 0.0 && control->referenceIntensity[process->image_camera] > 0.0)
-                    centerIntensityCorrection *= control->referenceIntensity[process->image_camera]
+                if (table_intensity_ref > 0.0 && control->reference_intensity > 0.0)
+                    centerIntensityCorrection *= control->reference_intensity
                                             / table_intensity_ref;
             }
         }
@@ -1209,8 +1261,8 @@ void process_image(int verbose, struct mbpm_process_struct *process,
                                     + v011 * (1.0 - factor_x) * factor_y * factor_z
                                     + v110 * factor_x * factor_y * (1.0 - factor_z)
                                     + v111 * factor_x * factor_y * factor_z;
-                            if (table_intensity > 0.0 && control->referenceIntensity[process->image_camera] > 0.0) {
-                                intensityCorrection *= control->referenceIntensity[process->image_camera]
+                            if (table_intensity > 0.0 && control->reference_intensity > 0.0) {
+                                intensityCorrection *= control->reference_intensity
                                                         / table_intensity;
                             }
                             //else {
@@ -1514,8 +1566,8 @@ void process_image_sectioned(int verbose, struct mbpm_process_struct *process,
                             + factor_z * control->corr_table[process->image_camera].at<float>(control->ibin_xcen, control->jbin_ycen, kbin_z2);
 
                 centerIntensityCorrection = imageIntensityCorrection;
-                if (table_intensity_ref > 0.0 && control->referenceIntensity[process->image_camera] > 0.0)
-                    centerIntensityCorrection *= control->referenceIntensity[process->image_camera]
+                if (table_intensity_ref > 0.0 && control->reference_intensity > 0.0)
+                    centerIntensityCorrection *= control->reference_intensity
                                             / table_intensity_ref;
             }
         }
@@ -1883,8 +1935,8 @@ void process_image_sectioned(int verbose, struct mbpm_process_struct *process,
                                                 + v011 * (1.0 - factor_x) * factor_y * factor_z
                                                 + v110 * factor_x * factor_y * (1.0 - factor_z)
                                                 + v111 * factor_x * factor_y * factor_z;
-                                        if (table_intensity > 0.0 && control->referenceIntensity[process->image_camera] > 0.0)
-                                            intensityCorrection *= control->referenceIntensity[process->image_camera]
+                                        if (table_intensity > 0.0 && control->reference_intensity > 0.0)
+                                            intensityCorrection *= control->reference_intensity
                                                                     / table_intensity;
                                         // else {
                                         //    intensityCorrection *= 1.0;
@@ -1930,7 +1982,7 @@ int main(int argc, char** argv)
     int    option_index;
     int    errflg = 0;
     int    c;
-    int    help = 0;
+    bool   help = false;
     int    flag = 0;
 
     /* parameter controls */
@@ -1955,8 +2007,6 @@ int main(int argc, char** argv)
     control.range_max = 200.0;
     control.trimPixels = 0;
     control.sectionPixels = 0;
-    control.reference_gain = 15.0;
-    control.reference_exposure = 4000.0;
 
     /* Input image variables */
     mb_path    ImageListFile;
@@ -2023,8 +2073,10 @@ int main(int argc, char** argv)
     control.corr_range_coeff = 1.0;
     control.corr_standoff_target = 3.0;
     control.corr_standoff_coeff = 1.0;
-    control.reference_gain = 15.0;
-    control.reference_exposure = 4000.0;
+    control.reference_gain = 0.0;
+    control.reference_exposure = 0.0;
+    control.reference_intensity_set = false;
+    control.reference_intensity = 0.0;
     mb_path ImageCorrectionFile;
     control.ncorr_x = 21;
     control.ncorr_y = 21;
@@ -2137,6 +2189,7 @@ int main(int argc, char** argv)
      *    --correction-file=imagecorrection.yaml
      *    --reference-gain=gain
      *    --reference-exposure=exposure
+     *    --reference-intensity=intensity
      *    --platform-file=platform.plf
      *    --camera-sensor=camera_sensor_id
      *    --nav-sensor=nav_sensor_id
@@ -2184,6 +2237,7 @@ int main(int argc, char** argv)
         {"correction-file",             required_argument,      NULL,         0},
         {"reference-gain",              required_argument,      NULL,         0},
         {"reference-exposure",          required_argument,      NULL,         0},
+        {"reference-intensity",         required_argument,      NULL,         0},
         {"platform-file",               required_argument,      NULL,         0},
         {"camera-sensor",               required_argument,      NULL,         0},
         {"nav-sensor",                  required_argument,      NULL,         0},
@@ -2240,7 +2294,7 @@ int main(int argc, char** argv)
             /* help */
             else if (strcmp("help", options[option_index].name) == 0)
                 {
-                help = MB_YES;
+                help = true;
                 }
 
             /*-------------------------------------------------------
@@ -2440,6 +2494,14 @@ int main(int argc, char** argv)
                 int n = sscanf (optarg,"%lf", &control.reference_exposure);
                 }
 
+            /* reference-intensity */
+            else if (strcmp("reference-intensity", options[option_index].name) == 0)
+                {
+                int n = sscanf (optarg,"%lf", &control.reference_intensity);
+                if (n == 1 && control.reference_intensity > 0.0)
+                    control.reference_intensity_set = true;
+                }
+
             /* platform-file */
             else if (strcmp("platform-file", options[option_index].name) == 0)
                 {
@@ -2607,173 +2669,177 @@ int main(int argc, char** argv)
         fprintf(stream,"\ndbg2  Program <%s>\n",program_name);
         fprintf(stream,"dbg2  MB-system Version %s\n",MB_VERSION);
         fprintf(stream,"dbg2  Control Parameters:\n");
-        fprintf(stream,"dbg2       verbose:                       %d\n",verbose);
-        fprintf(stream,"dbg2       help:                          %d\n",help);
-        fprintf(stream,"dbg2       numThreads:                    %d\n",numThreads);
-        fprintf(stream,"dbg2       ImageListFile:                 %s\n",ImageListFile);
-        fprintf(stream,"dbg2       use_camera_mode:               %d\n",use_camera_mode);
-        fprintf(stream,"dbg2       outputimage_specified:         %d\n",outputimage_specified);
-        fprintf(stream,"dbg2       OutputImageFile:               %s\n",OutputImageFile);
-        fprintf(stream,"dbg2       output_format:                 %d\n",output_format);
-        fprintf(stream,"dbg2       bounds_specified:              %d\n",bounds_specified);
-        fprintf(stream,"dbg2       Bounds: west:                  %f\n",control.OutputBounds[0]);
-        fprintf(stream,"dbg2       Bounds: east:                  %f\n",control.OutputBounds[1]);
-        fprintf(stream,"dbg2       Bounds: south:                 %f\n",control.OutputBounds[2]);
-        fprintf(stream,"dbg2       Bounds: north:                 %f\n",control.OutputBounds[3]);
-        fprintf(stream,"dbg2       Bounds buffer:                 %f\n",bounds_buffer);
-        fprintf(stream,"dbg2       set_spacing:                   %d\n",set_spacing);
-        fprintf(stream,"dbg2       spacing_priority:              %d\n",spacing_priority);
-        fprintf(stream,"dbg2       dx_set:                        %f\n",dx_set);
-        fprintf(stream,"dbg2       dy_set:                        %f\n",dy_set);
-        fprintf(stream,"dbg2       set_dimensions:                %d\n",set_dimensions);
-        fprintf(stream,"dbg2       control.OutputDim[0]:          %d\n",control.OutputDim[0]);
-        fprintf(stream,"dbg2       control.OutputDim[1]:          %d\n",control.OutputDim[1]);
-        fprintf(stream,"dbg2       control.use_projection:        %d\n",control.use_projection);
+        fprintf(stream,"dbg2       verbose:                          %d\n",verbose);
+        fprintf(stream,"dbg2       help:                             %d\n",help);
+        fprintf(stream,"dbg2       numThreads:                       %d\n",numThreads);
+        fprintf(stream,"dbg2       ImageListFile:                    %s\n",ImageListFile);
+        fprintf(stream,"dbg2       use_camera_mode:                  %d\n",use_camera_mode);
+        fprintf(stream,"dbg2       outputimage_specified:            %d\n",outputimage_specified);
+        fprintf(stream,"dbg2       OutputImageFile:                  %s\n",OutputImageFile);
+        fprintf(stream,"dbg2       output_format:                    %d\n",output_format);
+        fprintf(stream,"dbg2       bounds_specified:                 %d\n",bounds_specified);
+        fprintf(stream,"dbg2       Bounds: west:                     %f\n",control.OutputBounds[0]);
+        fprintf(stream,"dbg2       Bounds: east:                     %f\n",control.OutputBounds[1]);
+        fprintf(stream,"dbg2       Bounds: south:                    %f\n",control.OutputBounds[2]);
+        fprintf(stream,"dbg2       Bounds: north:                    %f\n",control.OutputBounds[3]);
+        fprintf(stream,"dbg2       Bounds buffer:                    %f\n",bounds_buffer);
+        fprintf(stream,"dbg2       set_spacing:                      %d\n",set_spacing);
+        fprintf(stream,"dbg2       spacing_priority:                 %d\n",spacing_priority);
+        fprintf(stream,"dbg2       dx_set:                           %f\n",dx_set);
+        fprintf(stream,"dbg2       dy_set:                           %f\n",dy_set);
+        fprintf(stream,"dbg2       set_dimensions:                   %d\n",set_dimensions);
+        fprintf(stream,"dbg2       control.OutputDim[0]:             %d\n",control.OutputDim[0]);
+        fprintf(stream,"dbg2       control.OutputDim[1]:             %d\n",control.OutputDim[1]);
+        fprintf(stream,"dbg2       control.use_projection:           %d\n",control.use_projection);
         if (control.use_projection)
-            fprintf(stream,"dbg2       projection_pars:               %s\n",projection_pars);
-        fprintf(stream,"dbg2       navigation_specified:          %d\n",navigation_specified);
-        fprintf(stream,"dbg2       NavigationFile:                %s\n",NavigationFile);
-        fprintf(stream,"dbg2       use_tide:                      %d\n",use_tide);
-        fprintf(stream,"dbg2       TideFile:                      %s\n",TideFile);
-        fprintf(stream,"dbg2       ImageQualityFile_specified:    %d\n",ImageQualityFile_specified);
-        fprintf(stream,"dbg2       ImageQualityFile:              %s\n",ImageQualityFile);
-        fprintf(stream,"dbg2       use_imagequality:              %d\n",use_imagequality);
-        fprintf(stream,"dbg2       imageQualityThreshold:         %f\n",imageQualityThreshold);
-        fprintf(stream,"dbg2       imageQualityFilterLength:      %f\n",imageQualityFilterLength);
-        fprintf(stream,"dbg2       control.use_topography:        %d\n",control.use_topography);
-        fprintf(stream,"dbg2       TopographyGridFile:            %s\n",TopographyGridFile);
-        fprintf(stream,"dbg2       control.calibration_set:       %d\n",control.calibration_set);
-        fprintf(stream,"dbg2       StereoCameraCalibrationFile:   %s\n",StereoCameraCalibrationFile);
-        fprintf(stream,"dbg2       control.fov_fudgefactor:       %f\n",control.fov_fudgefactor);
+            fprintf(stream,"dbg2       projection_pars:                  %s\n",projection_pars);
+        fprintf(stream,"dbg2       navigation_specified:             %d\n",navigation_specified);
+        fprintf(stream,"dbg2       NavigationFile:                   %s\n",NavigationFile);
+        fprintf(stream,"dbg2       use_tide:                         %d\n",use_tide);
+        fprintf(stream,"dbg2       TideFile:                         %s\n",TideFile);
+        fprintf(stream,"dbg2       ImageQualityFile_specified:       %d\n",ImageQualityFile_specified);
+        fprintf(stream,"dbg2       ImageQualityFile:                 %s\n",ImageQualityFile);
+        fprintf(stream,"dbg2       use_imagequality:                 %d\n",use_imagequality);
+        fprintf(stream,"dbg2       imageQualityThreshold:            %f\n",imageQualityThreshold);
+        fprintf(stream,"dbg2       imageQualityFilterLength:         %f\n",imageQualityFilterLength);
+        fprintf(stream,"dbg2       control.use_topography:           %d\n",control.use_topography);
+        fprintf(stream,"dbg2       TopographyGridFile:               %s\n",TopographyGridFile);
+        fprintf(stream,"dbg2       control.calibration_set:          %d\n",control.calibration_set);
+        fprintf(stream,"dbg2       StereoCameraCalibrationFile:      %s\n",StereoCameraCalibrationFile);
+        fprintf(stream,"dbg2       control.fov_fudgefactor:          %f\n",control.fov_fudgefactor);
         if (control.corr_mode == MBPM_CORRECTION_BRIGHTNESS) {
-            fprintf(stream,"dbg2       control.corr_mode:             %d MBPM_CORRECTION_BRIGHTNESS\n",control.corr_mode);
+            fprintf(stream,"dbg2       control.corr_mode:                %d MBPM_CORRECTION_BRIGHTNESS\n",control.corr_mode);
         }
         else if (control.corr_mode == MBPM_CORRECTION_CAMERA_SETTINGS) {
-            fprintf(stream,"dbg2       control.corr_mode:             %d MBPM_CORRECTION_CAMERA_SETTINGS\n",control.corr_mode);
+            fprintf(stream,"dbg2       control.corr_mode:                %d MBPM_CORRECTION_CAMERA_SETTINGS\n",control.corr_mode);
         }
         else if (control.corr_mode == MBPM_CORRECTION_RANGE) {
-            fprintf(stream,"dbg2       control.corr_mode:             %d MBPM_CORRECTION_RANGE\n",control.corr_mode);
-            fprintf(stream,"dbg2       control.corr_range_target:     %f\n",control.corr_range_target);
-            fprintf(stream,"dbg2       control.corr_range_coeff:      %f\n",control.corr_range_coeff);
+            fprintf(stream,"dbg2       control.corr_mode:                %d MBPM_CORRECTION_RANGE\n",control.corr_mode);
+            fprintf(stream,"dbg2       control.corr_range_target:        %f\n",control.corr_range_target);
+            fprintf(stream,"dbg2       control.corr_range_coeff:         %f\n",control.corr_range_coeff);
         }
         else if (control.corr_mode == MBPM_CORRECTION_STANDOFF) {
-            fprintf(stream,"dbg2       control.corr_mode:             %d MBPM_CORRECTION_STANDOFF\n",control.corr_mode);
-            fprintf(stream,"dbg2       control.corr_standoff_target:  %f\n",control.corr_standoff_target);
-            fprintf(stream,"dbg2       control.corr_standoff_coeff:   %f\n",control.corr_standoff_coeff);
+            fprintf(stream,"dbg2       control.corr_mode:                %d MBPM_CORRECTION_STANDOFF\n",control.corr_mode);
+            fprintf(stream,"dbg2       control.corr_standoff_target:     %f\n",control.corr_standoff_target);
+            fprintf(stream,"dbg2       control.corr_standoff_coeff:      %f\n",control.corr_standoff_coeff);
         }
         else if (control.corr_mode == MBPM_CORRECTION_FILE) {
-            fprintf(stream,"dbg2       control.corr_mode:             %d MBPM_CORRECTION_FILE\n",control.corr_mode);
-            fprintf(stream,"dbg2       ImageCorrectionFile:           %s\n",ImageCorrectionFile);
+            fprintf(stream,"dbg2       control.corr_mode:                %d MBPM_CORRECTION_FILE\n",control.corr_mode);
+            fprintf(stream,"dbg2       ImageCorrectionFile:              %s\n",ImageCorrectionFile);
         }
         else {
-            fprintf(stream,"dbg2       control.corr_mode:             %d MBPM_CORRECTION_NONE\n",control.corr_mode);
+            fprintf(stream,"dbg2       control.corr_mode:                %d MBPM_CORRECTION_NONE\n",control.corr_mode);
         }
-        fprintf(stream,"dbg2       control.reference_gain:        %f\n",control.reference_gain);
-        fprintf(stream,"dbg2       control.reference_exposure:    %f\n",control.reference_exposure);
-        fprintf(stream,"dbg2       PlatformFile:                  %s\n",PlatformFile);
-        fprintf(stream,"dbg2       platform_specified:            %d\n",platform_specified);
-        fprintf(stream,"dbg2       camera_sensor:                 %d\n",camera_sensor);
-        fprintf(stream,"dbg2       nav_sensor:                    %d\n",nav_sensor);
-        fprintf(stream,"dbg2       sensordepth_sensor:            %d\n",sensordepth_sensor);
-        fprintf(stream,"dbg2       heading_sensor:                %d\n",heading_sensor);
-        fprintf(stream,"dbg2       altitude_sensor:               %d\n",altitude_sensor);
-        fprintf(stream,"dbg2       attitude_sensor:               %d\n",attitude_sensor);
+        fprintf(stream,"dbg2       control.reference_gain:           %f\n",control.reference_gain);
+        fprintf(stream,"dbg2       control.reference_exposure:       %f\n",control.reference_exposure);
+        fprintf(stream,"dbg2       control.reference_intensity_set:  %d\n",control.reference_intensity_set);
+        fprintf(stream,"dbg2       control.reference_intensity:      %f\n",control.reference_intensity);
+        fprintf(stream,"dbg2       PlatformFile:                     %s\n",PlatformFile);
+        fprintf(stream,"dbg2       platform_specified:               %d\n",platform_specified);
+        fprintf(stream,"dbg2       camera_sensor:                    %d\n",camera_sensor);
+        fprintf(stream,"dbg2       nav_sensor:                       %d\n",nav_sensor);
+        fprintf(stream,"dbg2       sensordepth_sensor:               %d\n",sensordepth_sensor);
+        fprintf(stream,"dbg2       heading_sensor:                   %d\n",heading_sensor);
+        fprintf(stream,"dbg2       altitude_sensor:                  %d\n",altitude_sensor);
+        fprintf(stream,"dbg2       attitude_sensor:                  %d\n",attitude_sensor);
         if (control.priority_mode == MBPM_PRIORITY_CENTRALITY_ONLY)
-            fprintf(stream,"dbg2       control.priority_mode:         %d (priority by centrality in source image only)\n",control.priority_mode);
+            fprintf(stream,"dbg2       control.priority_mode:            %d (priority by centrality in source image only)\n",control.priority_mode);
         else
             {
-            fprintf(stream,"dbg2       control.priority_mode:         %d (priority by centrality in source image and difference from target standoff)\n",control.priority_mode);
-            fprintf(stream,"dbg2       control.standoff_target:       %f\n",control.standoff_target);
-            fprintf(stream,"dbg2       control.standoff_range:        %f\n",control.standoff_range);
+            fprintf(stream,"dbg2       control.priority_mode:            %d (priority by centrality in source image and difference from target standoff)\n",control.priority_mode);
+            fprintf(stream,"dbg2       control.standoff_target:          %f\n",control.standoff_target);
+            fprintf(stream,"dbg2       control.standoff_range:           %f\n",control.standoff_range);
             }
-        fprintf(stream,"dbg2       control.range_max:             %f\n",control.range_max);
-        fprintf(stream,"dbg2       control.trimPixels:            %u\n",control.trimPixels);
-        fprintf(stream,"dbg2       control.sectionPixels:         %u\n",control.sectionPixels);
+        fprintf(stream,"dbg2       control.range_max:                %f\n",control.range_max);
+        fprintf(stream,"dbg2       control.trimPixels:               %u\n",control.trimPixels);
+        fprintf(stream,"dbg2       control.sectionPixels:            %u\n",control.sectionPixels);
         }
     else if (verbose == 1)
         {
         fprintf(stream,"\nProgram <%s>\n",program_name);
         fprintf(stream,"Control Parameters:\n");
-        fprintf(stream,"  numThreads:                    %d\n",numThreads);
-        fprintf(stream,"  ImageListFile:                 %s\n",ImageListFile);
-        fprintf(stream,"  use_camera_mode:               %d\n",use_camera_mode);
-        fprintf(stream,"  outputimage_specified:         %d\n",outputimage_specified);
-        fprintf(stream,"  OutputImageFile:               %s\n",OutputImageFile);
-        fprintf(stream,"  output_format:                 %d\n",output_format);
-        fprintf(stream,"  bounds_specified:              %d\n",bounds_specified);
-        fprintf(stream,"  Bounds: west:                  %f\n",control.OutputBounds[0]);
-        fprintf(stream,"  Bounds: east:                  %f\n",control.OutputBounds[1]);
-        fprintf(stream,"  Bounds: south:                 %f\n",control.OutputBounds[2]);
-        fprintf(stream,"  Bounds: north:                 %f\n",control.OutputBounds[3]);
-        fprintf(stream,"  Bounds buffer:                 %f\n",bounds_buffer);
-        fprintf(stream,"  set_spacing:                   %d\n",set_spacing);
-        fprintf(stream,"  spacing_priority:              %d\n",spacing_priority);
-        fprintf(stream,"  dx_set:                        %f\n",dx_set);
-        fprintf(stream,"  dy_set:                        %f\n",dy_set);
-        fprintf(stream,"  set_dimensions:                %d\n",set_dimensions);
-        fprintf(stream,"  control.OutputDim[0]:          %d\n",control.OutputDim[0]);
-        fprintf(stream,"  control.OutputDim[1]:          %d\n",control.OutputDim[1]);
-        fprintf(stream,"  control.use_projection:        %d\n",control.use_projection);
+        fprintf(stream,"  numThreads:                       %d\n",numThreads);
+        fprintf(stream,"  ImageListFile:                    %s\n",ImageListFile);
+        fprintf(stream,"  use_camera_mode:                  %d\n",use_camera_mode);
+        fprintf(stream,"  outputimage_specified:            %d\n",outputimage_specified);
+        fprintf(stream,"  OutputImageFile:                  %s\n",OutputImageFile);
+        fprintf(stream,"  output_format:                    %d\n",output_format);
+        fprintf(stream,"  bounds_specified:                 %d\n",bounds_specified);
+        fprintf(stream,"  Bounds: west:                     %f\n",control.OutputBounds[0]);
+        fprintf(stream,"  Bounds: east:                     %f\n",control.OutputBounds[1]);
+        fprintf(stream,"  Bounds: south:                    %f\n",control.OutputBounds[2]);
+        fprintf(stream,"  Bounds: north:                    %f\n",control.OutputBounds[3]);
+        fprintf(stream,"  Bounds buffer:                    %f\n",bounds_buffer);
+        fprintf(stream,"  set_spacing:                      %d\n",set_spacing);
+        fprintf(stream,"  spacing_priority:                 %d\n",spacing_priority);
+        fprintf(stream,"  dx_set:                           %f\n",dx_set);
+        fprintf(stream,"  dy_set:                           %f\n",dy_set);
+        fprintf(stream,"  set_dimensions:                   %d\n",set_dimensions);
+        fprintf(stream,"  control.OutputDim[0]:             %d\n",control.OutputDim[0]);
+        fprintf(stream,"  control.OutputDim[1]:             %d\n",control.OutputDim[1]);
+        fprintf(stream,"  control.use_projection:           %d\n",control.use_projection);
         if (control.use_projection)
-            fprintf(stream,"  projection_pars:               %s\n",projection_pars);
-        fprintf(stream,"  navigation_specified:          %d\n",navigation_specified);
-        fprintf(stream,"  NavigationFile:                %s\n",NavigationFile);
-        fprintf(stream,"  use_tide:                      %d\n",use_tide);
-        fprintf(stream,"  TideFile:                      %s\n",TideFile);
-        fprintf(stream,"  ImageQualityFile_specified:    %d\n",ImageQualityFile_specified);
-        fprintf(stream,"  ImageQualityFile:              %s\n",ImageQualityFile);
-        fprintf(stream,"  use_imagequality:              %d\n",use_imagequality);
-        fprintf(stream,"  imageQualityThreshold:         %f\n",imageQualityThreshold);
-        fprintf(stream,"  imageQualityFilterLength:      %f\n",imageQualityFilterLength);
-        fprintf(stream,"  control.use_topography:        %d\n",control.use_topography);
-        fprintf(stream,"  TopographyGridFile:            %s\n",TopographyGridFile);
-        fprintf(stream,"  control.calibration_set:       %d\n",control.calibration_set);
-        fprintf(stream,"  StereoCameraCalibrationFile:   %s\n",StereoCameraCalibrationFile);
-        fprintf(stream,"  control.fov_fudgefactor:       %f\n",control.fov_fudgefactor);
+            fprintf(stream,"  projection_pars:                  %s\n",projection_pars);
+        fprintf(stream,"  navigation_specified:             %d\n",navigation_specified);
+        fprintf(stream,"  NavigationFile:                   %s\n",NavigationFile);
+        fprintf(stream,"  use_tide:                         %d\n",use_tide);
+        fprintf(stream,"  TideFile:                         %s\n",TideFile);
+        fprintf(stream,"  ImageQualityFile_specified:       %d\n",ImageQualityFile_specified);
+        fprintf(stream,"  ImageQualityFile:                 %s\n",ImageQualityFile);
+        fprintf(stream,"  use_imagequality:                 %d\n",use_imagequality);
+        fprintf(stream,"  imageQualityThreshold:            %f\n",imageQualityThreshold);
+        fprintf(stream,"  imageQualityFilterLength:         %f\n",imageQualityFilterLength);
+        fprintf(stream,"  control.use_topography:           %d\n",control.use_topography);
+        fprintf(stream,"  TopographyGridFile:               %s\n",TopographyGridFile);
+        fprintf(stream,"  control.calibration_set:          %d\n",control.calibration_set);
+        fprintf(stream,"  StereoCameraCalibrationFile:      %s\n",StereoCameraCalibrationFile);
+        fprintf(stream,"  control.fov_fudgefactor:          %f\n",control.fov_fudgefactor);
         if (control.corr_mode == MBPM_CORRECTION_BRIGHTNESS) {
-            fprintf(stream,"  control.corr_mode:             %d MBPM_CORRECTION_BRIGHTNESS\n",control.corr_mode);
+            fprintf(stream,"  control.corr_mode:                %d MBPM_CORRECTION_BRIGHTNESS\n",control.corr_mode);
         }
         else if (control.corr_mode == MBPM_CORRECTION_CAMERA_SETTINGS) {
-            fprintf(stream,"  control.corr_mode:             %d MBPM_CORRECTION_CAMERA_SETTINGS\n",control.corr_mode);
+            fprintf(stream,"  control.corr_mode:                %d MBPM_CORRECTION_CAMERA_SETTINGS\n",control.corr_mode);
         }
         else if (control.corr_mode == MBPM_CORRECTION_RANGE) {
-            fprintf(stream,"  control.corr_mode:             %d MBPM_CORRECTION_RANGE\n",control.corr_mode);
-            fprintf(stream,"  control.corr_range_target:     %f\n",control.corr_range_target);
-            fprintf(stream,"  control.corr_range_coeff:      %f\n",control.corr_range_coeff);
+            fprintf(stream,"  control.corr_mode:                %d MBPM_CORRECTION_RANGE\n",control.corr_mode);
+            fprintf(stream,"  control.corr_range_target:        %f\n",control.corr_range_target);
+            fprintf(stream,"  control.corr_range_coeff:         %f\n",control.corr_range_coeff);
         }
         else if (control.corr_mode == MBPM_CORRECTION_STANDOFF) {
-            fprintf(stream,"  control.corr_mode:             %d MBPM_CORRECTION_STANDOFF\n",control.corr_mode);
-            fprintf(stream,"  control.corr_standoff_target:  %f\n",control.corr_standoff_target);
-            fprintf(stream,"  control.corr_standoff_coeff:   %f\n",control.corr_standoff_coeff);
+            fprintf(stream,"  control.corr_mode:                %d MBPM_CORRECTION_STANDOFF\n",control.corr_mode);
+            fprintf(stream,"  control.corr_standoff_target:     %f\n",control.corr_standoff_target);
+            fprintf(stream,"  control.corr_standoff_coeff:      %f\n",control.corr_standoff_coeff);
         }
         else if (control.corr_mode == MBPM_CORRECTION_FILE) {
-            fprintf(stream,"  control.corr_mode:             %d MBPM_CORRECTION_FILE\n",control.corr_mode);
-            fprintf(stream,"  ImageCorrectionFile:           %s\n",ImageCorrectionFile);
+            fprintf(stream,"  control.corr_mode:                %d MBPM_CORRECTION_FILE\n",control.corr_mode);
+            fprintf(stream,"  ImageCorrectionFile:              %s\n",ImageCorrectionFile);
         }
         else {
-            fprintf(stream,"  control.corr_mode:             %d MBPM_CORRECTION_NONE\n",control.corr_mode);
+            fprintf(stream,"  control.corr_mode:                %d MBPM_CORRECTION_NONE\n",control.corr_mode);
         }
-        fprintf(stream,"  control.reference_gain:        %f\n",control.reference_gain);
-        fprintf(stream,"  control.reference_exposure:    %f\n",control.reference_exposure);
-        fprintf(stream,"  PlatformFile:                  %s\n",PlatformFile);
-        fprintf(stream,"  platform_specified:            %d\n",platform_specified);
-        fprintf(stream,"  camera_sensor:                 %d\n",camera_sensor);
-        fprintf(stream,"  nav_sensor:                    %d\n",nav_sensor);
-        fprintf(stream,"  sensordepth_sensor:            %d\n",sensordepth_sensor);
-        fprintf(stream,"  heading_sensor:                %d\n",heading_sensor);
-        fprintf(stream,"  altitude_sensor:               %d\n",altitude_sensor);
-        fprintf(stream,"  attitude_sensor:               %d\n",attitude_sensor);
+        fprintf(stream,"  control.reference_gain:           %f\n",control.reference_gain);
+        fprintf(stream,"  control.reference_exposure:       %f\n",control.reference_exposure);
+        fprintf(stream,"  control.reference_intensity_set:  %d\n",control.reference_intensity_set);
+        fprintf(stream,"  control.reference_intensity:      %f\n",control.reference_intensity);
+        fprintf(stream,"  PlatformFile:                     %s\n",PlatformFile);
+        fprintf(stream,"  platform_specified:               %d\n",platform_specified);
+        fprintf(stream,"  camera_sensor:                    %d\n",camera_sensor);
+        fprintf(stream,"  nav_sensor:                       %d\n",nav_sensor);
+        fprintf(stream,"  sensordepth_sensor:               %d\n",sensordepth_sensor);
+        fprintf(stream,"  heading_sensor:                   %d\n",heading_sensor);
+        fprintf(stream,"  altitude_sensor:                  %d\n",altitude_sensor);
+        fprintf(stream,"  attitude_sensor:                  %d\n",attitude_sensor);
         if (control.priority_mode == MBPM_PRIORITY_CENTRALITY_ONLY)
-            fprintf(stream,"  control.priority_mode:         %d (priority by centrality in source image only)\n",control.priority_mode);
+            fprintf(stream,"  control.priority_mode:            %d (priority by centrality in source image only)\n",control.priority_mode);
         else
             {
-            fprintf(stream,"  control.priority_mode:         %d (priority by centrality in source image and difference from target standoff)\n",control.priority_mode);
-            fprintf(stream,"  control.standoff_target:       %f\n",control.standoff_target);
-            fprintf(stream,"  control.standoff_range:        %f\n",control.standoff_range);
+            fprintf(stream,"  control.priority_mode:            %d (priority by centrality in source image and difference from target standoff)\n",control.priority_mode);
+            fprintf(stream,"  control.standoff_target:          %f\n",control.standoff_target);
+            fprintf(stream,"  control.standoff_range:           %f\n",control.standoff_range);
             }
-        fprintf(stream,"  control.range_max:             %f\n",control.range_max);
-        fprintf(stream,"  control.trimPixels:            %u\n",control.trimPixels);
-        fprintf(stream,"  control.sectionPixels:         %u\n",control.sectionPixels);
+        fprintf(stream,"  control.range_max:                %f\n",control.range_max);
+        fprintf(stream,"  control.trimPixels:               %u\n",control.trimPixels);
+        fprintf(stream,"  control.sectionPixels:            %u\n",control.sectionPixels);
         }
 
     /* if help desired then print it and exit */
@@ -2879,9 +2945,9 @@ int main(int argc, char** argv)
         load_correction(verbose, ImageCorrectionFile, &control, &error);
     }
     else {
-        /* else the reference intensity is 70.0 */
-        control.referenceIntensity[0] = 1.0;
-        control.referenceIntensity[1] = 1.0;
+        /* else the default center intensity is 70.0 */
+        control.centerIntensity[0] = 70.0;
+        control.centerIntensity[1] = 70.0;
     }
 
     /* deal with projected gridding */
@@ -3169,10 +3235,14 @@ control.OutputBounds[0], control.OutputBounds[1], control.OutputBounds[2], contr
     if (outputimage_specified) {
         for (int ithread = 0; ithread < numThreads; ithread++) {
             processPars[ithread].OutputImage.create(control.OutputDim[1], control.OutputDim[0], CV_8UC3);
+            processPars[ithread].OutputImage = Scalar::all(0);
             processPars[ithread].OutputPriority.create(control.OutputDim[1], control.OutputDim[0], CV_32FC1);
+            processPars[ithread].OutputPriority = Scalar::all(0);
 #ifdef DEBUG
             processPars[ithread].OutputIntensityCorrection.create(control.OutputDim[1], control.OutputDim[0], CV_32FC1);
+            processPars[ithread].OutputIntensityCorrection = Scalar::all(0);
             processPars[ithread].OutputStandoff.create(control.OutputDim[1], control.OutputDim[0], CV_32FC1);
+            processPars[ithread].OutputStandoff = Scalar::all(0);
 #endif
         }
     }
