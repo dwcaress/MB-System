@@ -23,6 +23,7 @@ Distributions that do not include "beta" in the tag name correspond to the major
 announced releases. The source distributions associated with all releases, major
 or beta, are equally accessible as tarballs through the Github interface.
 
+- Version 5.7.9beta25    December 28, 2021
 - Version 5.7.9beta24    December 27, 2021
 - Version 5.7.9beta23    December 18, 2021
 - Version 5.7.9beta22    December 5, 2021
@@ -402,6 +403,11 @@ or beta, are equally accessible as tarballs through the Github interface.
 --
 ### MB-System Version 5.7 Release Notes:
 --
+
+#### 5.7.9beta25 (December 28, 2021)
+
+Mbphotomosaic: Fixed problem specifying the image correction table file in
+an imagelist structure.
 
 #### 5.7.9beta24 (December 27, 2021)
 
