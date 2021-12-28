@@ -3412,6 +3412,7 @@ control.OutputBounds[0], control.OutputBounds[1], control.OutputBounds[2], contr
             /* correction-file */
             else if (strncmp(imageLeftFile, "--correction-file=", 18) == 0) {
                 if (sscanf(imageLeftFile, "--correction-file=%s", tmp) == 1) {
+                    control.corr_mode = MBPM_CORRECTION_FILE;
                     strcpy(ImageCorrectionFile, tmp);
                     load_correction(verbose, ImageCorrectionFile, &control, &error);
                 }
@@ -3451,6 +3452,7 @@ control.OutputBounds[0], control.OutputBounds[1], control.OutputBounds[2], contr
                       status = mb_platform_deall(verbose, (void **)&platform, &error);
                   }
                   status = mb_platform_read(verbose, PlatformFile, (void **)&platform, &error);
+                  platform_specified = MB_YES;
                   if (verbose > 0 && status == MB_SUCCESS) {
                       fprintf(stream, "    Survey platform model read from: %s\n", PlatformFile);
                   } else if (status == MB_FAILURE) {
