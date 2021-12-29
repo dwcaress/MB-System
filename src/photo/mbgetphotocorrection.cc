@@ -83,7 +83,9 @@ struct mbpm_process_struct {
     double camera_pitch;
 
     // Image correction table
-    Mat corr_table[2];
+    Mat corr_table_y[2];
+    Mat corr_table_cr[2];
+    Mat corr_table_cb[2];
     Mat corr_table_count[2];
 };
 
@@ -302,7 +304,9 @@ void process_image(int verbose, struct mbpm_process_struct *process,
                 double standoff = 0.0;
                 double lon, lat, topo;
                 //float bgr_intensity;
-                float ycrcb_intensity;
+                float ycrcb_y;
+                float ycrcb_cr;
+                float ycrcb_cb;
 
                 /* Deal with problem of black pixels at the margins of the
                     undistorted images. If the user has not specified a trim
@@ -334,12 +338,14 @@ void process_image(int verbose, struct mbpm_process_struct *process,
                     //bgr_intensity = ((float)imageUndistort.at<Vec3b>(j,i)[0]
                     //         + (float)imageUndistort.at<Vec3b>(j,i)[1]
                     //         + (float)imageUndistort.at<Vec3b>(j,i)[2]) / 3.0;
-                    ycrcb_intensity = (float)(imageIntensityCorrection * imageUndistortYCrCb.at<Vec3b>(j,i)[0]);
+                    ycrcb_y = (float)(imageIntensityCorrection * imageUndistortYCrCb.at<Vec3b>(j,i)[0]);
+                    ycrcb_cr = (float)(imageUndistortYCrCb.at<Vec3b>(j,i)[1]);
+                    ycrcb_cb = (float)(imageUndistortYCrCb.at<Vec3b>(j,i)[2]);
 //fprintf(stderr,"i:%d j:%d corr:%f  YCrCb intensity:%f\n",
-// i, j, imageIntensityCorrection, ycrcb_intensity);
+// i, j, imageIntensityCorrection, ycrcb_y);
 
                     /* only use nonzero intensities */
-                    if (ycrcb_intensity <= 0.0) {
+                    if (ycrcb_y <= 0.0) {
                         use_pixel = false;
                     }
                 }
@@ -472,7 +478,9 @@ void process_image(int verbose, struct mbpm_process_struct *process,
                         jbin_y = MIN(MAX(jbin_y, 0), control->ncorr_y - 1);
                         int kbin_z = (int)((standoff + 0.5 * control->bin_dz - control->corr_zmin) / control->bin_dz);
                         kbin_z = MIN(MAX(kbin_z, 0), control->ncorr_z - 1);
-                        process->corr_table[process->image_camera].at<float>(ibin_x, jbin_y, kbin_z) += ycrcb_intensity;
+                        process->corr_table_y[process->image_camera].at<float>(ibin_x, jbin_y, kbin_z) += ycrcb_y;
+                        process->corr_table_cr[process->image_camera].at<float>(ibin_x, jbin_y, kbin_z) += ycrcb_cr;
+                        process->corr_table_cb[process->image_camera].at<float>(ibin_x, jbin_y, kbin_z) += ycrcb_cb;
                         process->corr_table_count[process->image_camera].at<int>(ibin_x, jbin_y, kbin_z) += 1;
                     }
                 }
@@ -1593,9 +1601,13 @@ int main(int argc, char** argv)
 
     const int corr_table_dims[3] = {control.ncorr_x, control.ncorr_y, control.ncorr_z};
     for (int ithread = 0; ithread < numThreads; ithread++) {
-        processPars[ithread].corr_table[0] = Mat(3, corr_table_dims, CV_32FC(1), Scalar(0.0));
+        processPars[ithread].corr_table_y[0] = Mat(3, corr_table_dims, CV_32FC(1), Scalar(0.0));
+        processPars[ithread].corr_table_cb[0] = Mat(3, corr_table_dims, CV_32FC(1), Scalar(0.0));
+        processPars[ithread].corr_table_cr[0] = Mat(3, corr_table_dims, CV_32FC(1), Scalar(0.0));
         processPars[ithread].corr_table_count[0] = Mat(3, corr_table_dims, CV_32SC(1), Scalar(0));
-        processPars[ithread].corr_table[1] = Mat(3, corr_table_dims, CV_32FC(1), Scalar(0.0));
+        processPars[ithread].corr_table_y[1] = Mat(3, corr_table_dims, CV_32FC(1), Scalar(0.0));
+        processPars[ithread].corr_table_cr[1] = Mat(3, corr_table_dims, CV_32FC(1), Scalar(0.0));
+        processPars[ithread].corr_table_cb[1] = Mat(3, corr_table_dims, CV_32FC(1), Scalar(0.0));
         processPars[ithread].corr_table_count[1] = Mat(3, corr_table_dims, CV_32SC(1), Scalar(0));
     }
 
@@ -1930,19 +1942,27 @@ int main(int argc, char** argv)
                 for (int j=0;j<control.ncorr_y;j++) {
                     for (int k=0;k<control.ncorr_z;k++) {
                         if (processPars[ithread].corr_table_count[0].at<int>(i, j, k) > 0) {
-                            processPars[0].corr_table[0].at<float>(i, j, k) += processPars[ithread].corr_table[0].at<float>(i, j, k);
+                            processPars[0].corr_table_y[0].at<float>(i, j, k) += processPars[ithread].corr_table_y[0].at<float>(i, j, k);
+                            processPars[0].corr_table_cr[0].at<float>(i, j, k) += processPars[ithread].corr_table_cr[0].at<float>(i, j, k);
+                            processPars[0].corr_table_cb[0].at<float>(i, j, k) += processPars[ithread].corr_table_cb[0].at<float>(i, j, k);
                             processPars[0].corr_table_count[0].at<int>(i, j, k) += processPars[ithread].corr_table_count[0].at<int>(i, j, k);
                         }
                         if (processPars[ithread].corr_table_count[1].at<int>(i, j, k) > 0) {
-                            processPars[0].corr_table[1].at<float>(i, j, k) += processPars[ithread].corr_table[1].at<float>(i, j, k);
+                            processPars[0].corr_table_y[1].at<float>(i, j, k) += processPars[ithread].corr_table_y[1].at<float>(i, j, k);
+                            processPars[0].corr_table_cr[1].at<float>(i, j, k) += processPars[ithread].corr_table_cr[1].at<float>(i, j, k);
+                            processPars[0].corr_table_cb[1].at<float>(i, j, k) += processPars[ithread].corr_table_cb[1].at<float>(i, j, k);
                             processPars[0].corr_table_count[1].at<int>(i, j, k) += processPars[ithread].corr_table_count[1].at<int>(i, j, k);
                         }
                     }
                 }
             }
-        processPars[ithread].corr_table[0].release();
+        processPars[ithread].corr_table_y[0].release();
+        processPars[ithread].corr_table_cr[0].release();
+        processPars[ithread].corr_table_cb[0].release();
         processPars[ithread].corr_table_count[0].release();
-        processPars[ithread].corr_table[1].release();
+        processPars[ithread].corr_table_y[1].release();
+        processPars[ithread].corr_table_cr[1].release();
+        processPars[ithread].corr_table_cb[1].release();
         processPars[ithread].corr_table_count[1].release();
         }
     }
@@ -1962,15 +1982,23 @@ int main(int argc, char** argv)
         for (int j=0;j<control.ncorr_y;j++) {
             for (int k=0;k<control.ncorr_z;k++) {
                 if (processPars[0].corr_table_count[0].at<int>(i, j, k) > count_min) {
-                    processPars[0].corr_table[0].at<float>(i, j, k) /= processPars[0].corr_table_count[0].at<int>(i, j, k);
+                    processPars[0].corr_table_y[0].at<float>(i, j, k) /= processPars[0].corr_table_count[0].at<int>(i, j, k);
+                    processPars[0].corr_table_cr[0].at<float>(i, j, k) /= processPars[0].corr_table_count[0].at<int>(i, j, k);
+                    processPars[0].corr_table_cb[0].at<float>(i, j, k) /= processPars[0].corr_table_count[0].at<int>(i, j, k);
                 } else {
-                    processPars[0].corr_table[0].at<float>(i, j, k) = 0.0;
+                    processPars[0].corr_table_y[0].at<float>(i, j, k) = 0.0;
+                    processPars[0].corr_table_cr[0].at<float>(i, j, k) = 0.0;
+                    processPars[0].corr_table_cb[0].at<float>(i, j, k) = 0.0;
                     processPars[0].corr_table_count[0].at<int>(i, j, k) = 0;
                 }
                 if (processPars[0].corr_table_count[1].at<int>(i, j, k) > count_min) {
-                    processPars[0].corr_table[1].at<float>(i, j, k) /= processPars[0].corr_table_count[1].at<int>(i, j, k);
+                    processPars[0].corr_table_y[1].at<float>(i, j, k) /= processPars[0].corr_table_count[1].at<int>(i, j, k);
+                    processPars[0].corr_table_cr[1].at<float>(i, j, k) /= processPars[0].corr_table_count[1].at<int>(i, j, k);
+                    processPars[0].corr_table_cb[1].at<float>(i, j, k) /= processPars[0].corr_table_count[1].at<int>(i, j, k);
                 } else {
-                    processPars[0].corr_table[1].at<float>(i, j, k) = 0.0;
+                    processPars[0].corr_table_y[1].at<float>(i, j, k) = 0.0;
+                    processPars[0].corr_table_cr[1].at<float>(i, j, k) = 0.0;
+                    processPars[0].corr_table_cb[1].at<float>(i, j, k) = 0.0;
                     processPars[0].corr_table_count[1].at<int>(i, j, k) = 0;
                 }
             }
@@ -1985,38 +2013,54 @@ int main(int argc, char** argv)
         for (int k=0;k<control.ncorr_z;k++) {
             for (int j=0;j<control.ncorr_y;j++) {
                 for (int i=0;i<control.ncorr_x;i++) {
-                    if (processPars[0].corr_table[0].at<float>(i, j, k) == 0.0) {
+                    if (processPars[0].corr_table_y[0].at<float>(i, j, k) == 0.0) {
                         processPars[0].corr_table_count[0].at<int>(i, j, k) = 0;
                         for (int jj=MAX(0,j-1);jj<=MIN(control.ncorr_y-1,j+1);jj++) {
                             for (int ii=MAX(0,i-1);ii<=MIN(control.ncorr_x-1,i+1);ii++) {
-                                if (!(ii == i && jj == j) && processPars[0].corr_table[0].at<float>(ii, jj, k) > 0.0) {
-                                    processPars[0].corr_table[0].at<float>(i, j, k)
-                                        += processPars[0].corr_table[0].at<float>(ii, jj, k);
+                                if (!(ii == i && jj == j) && processPars[0].corr_table_y[0].at<float>(ii, jj, k) > 0.0) {
+                                    processPars[0].corr_table_y[0].at<float>(i, j, k)
+                                        += processPars[0].corr_table_y[0].at<float>(ii, jj, k);
+                                    processPars[0].corr_table_cr[0].at<float>(i, j, k)
+                                        += processPars[0].corr_table_cr[0].at<float>(ii, jj, k);
+                                    processPars[0].corr_table_cb[0].at<float>(i, j, k)
+                                        += processPars[0].corr_table_cb[0].at<float>(ii, jj, k);
                                     processPars[0].corr_table_count[0].at<int>(i, j, k)++;
                                     num_changes++;
                                 }
                             }
                         }
                         if (processPars[0].corr_table_count[0].at<int>(i, j, k) > 0) {
-                            processPars[0].corr_table[0].at<float>(i, j, k)
+                            processPars[0].corr_table_y[0].at<float>(i, j, k)
+                                /= processPars[0].corr_table_count[0].at<int>(i, j, k);
+                            processPars[0].corr_table_cr[0].at<float>(i, j, k)
+                                /= processPars[0].corr_table_count[0].at<int>(i, j, k);
+                            processPars[0].corr_table_cb[0].at<float>(i, j, k)
                                 /= processPars[0].corr_table_count[0].at<int>(i, j, k);
                             processPars[0].corr_table_count[0].at<int>(i, j, k) = 0;
                         }
                     }
-                    if (processPars[0].corr_table[1].at<float>(i, j, k) == 0.0) {
+                    if (processPars[0].corr_table_y[1].at<float>(i, j, k) == 0.0) {
                         processPars[0].corr_table_count[1].at<int>(i, j, k) = 0;
                         for (int jj=MAX(0,j-1);jj<=MIN(control.ncorr_y-1,j+1);jj++) {
                             for (int ii=MAX(0,i-1);ii<=MIN(control.ncorr_x-1,i+1);ii++) {
-                                if (!(ii == i && jj == j) && processPars[0].corr_table[1].at<float>(ii, jj, k) > 0.0) {
-                                    processPars[0].corr_table[1].at<float>(i, j, k)
-                                        += processPars[0].corr_table[1].at<float>(ii, jj, k);
+                                if (!(ii == i && jj == j) && processPars[0].corr_table_y[1].at<float>(ii, jj, k) > 0.0) {
+                                    processPars[0].corr_table_y[1].at<float>(i, j, k)
+                                        += processPars[0].corr_table_y[1].at<float>(ii, jj, k);
+                                    processPars[0].corr_table_cr[1].at<float>(i, j, k)
+                                        += processPars[0].corr_table_cr[1].at<float>(ii, jj, k);
+                                    processPars[0].corr_table_cb[1].at<float>(i, j, k)
+                                        += processPars[0].corr_table_cb[1].at<float>(ii, jj, k);
                                     processPars[0].corr_table_count[1].at<int>(i, j, k)++;
                                     num_changes++;
                                 }
                             }
                         }
                         if (processPars[0].corr_table_count[1].at<int>(i, j, k) > 0) {
-                            processPars[0].corr_table[1].at<float>(i, j, k)
+                            processPars[0].corr_table_y[1].at<float>(i, j, k)
+                                /= processPars[0].corr_table_count[1].at<int>(i, j, k);
+                            processPars[0].corr_table_cr[1].at<float>(i, j, k)
+                                /= processPars[0].corr_table_count[1].at<int>(i, j, k);
+                            processPars[0].corr_table_cb[1].at<float>(i, j, k)
                                 /= processPars[0].corr_table_count[1].at<int>(i, j, k);
                             processPars[0].corr_table_count[1].at<int>(i, j, k) = 0;
                         }
@@ -2033,34 +2077,50 @@ int main(int argc, char** argv)
         for (int j=0;j<control.ncorr_y;j++) {
             for (int i=0;i<control.ncorr_x;i++) {
                 for (int k=0;k<control.ncorr_z;k++) {
-                    if (processPars[0].corr_table[0].at<float>(i, j, k) == 0.0) {
+                    if (processPars[0].corr_table_y[0].at<float>(i, j, k) == 0.0) {
                         processPars[0].corr_table_count[0].at<int>(i, j, k) = 0;
                         for (int kk=MAX(0,k-1);kk<=MIN(control.ncorr_z-1,k+1);kk++) {
-                            if (!(kk == k) && processPars[0].corr_table[0].at<float>(i, j, kk) > 0.0) {
-                                processPars[0].corr_table[0].at<float>(i, j, k)
-                                    += processPars[0].corr_table[0].at<float>(i, j, kk);
+                            if (!(kk == k) && processPars[0].corr_table_y[0].at<float>(i, j, kk) > 0.0) {
+                                processPars[0].corr_table_y[0].at<float>(i, j, k)
+                                    += processPars[0].corr_table_y[0].at<float>(i, j, kk);
+                                processPars[0].corr_table_cr[0].at<float>(i, j, k)
+                                    += processPars[0].corr_table_cr[0].at<float>(i, j, kk);
+                                processPars[0].corr_table_cb[0].at<float>(i, j, k)
+                                    += processPars[0].corr_table_cb[0].at<float>(i, j, kk);
                                 processPars[0].corr_table_count[0].at<int>(i, j, k)++;
                                 num_changes++;
                             }
                         }
                         if (processPars[0].corr_table_count[0].at<int>(i, j, k) > 0) {
-                            processPars[0].corr_table[0].at<float>(i, j, k)
+                            processPars[0].corr_table_y[0].at<float>(i, j, k)
+                                /= processPars[0].corr_table_count[0].at<int>(i, j, k);
+                            processPars[0].corr_table_cr[0].at<float>(i, j, k)
+                                /= processPars[0].corr_table_count[0].at<int>(i, j, k);
+                            processPars[0].corr_table_cb[0].at<float>(i, j, k)
                                 /= processPars[0].corr_table_count[0].at<int>(i, j, k);
                             processPars[0].corr_table_count[0].at<int>(i, j, k) = 0;
                         }
                     }
-                    if (processPars[0].corr_table[1].at<float>(i, j, k) == 0.0) {
+                    if (processPars[0].corr_table_y[1].at<float>(i, j, k) == 0.0) {
                         processPars[0].corr_table_count[1].at<int>(i, j, k) = 0;
                         for (int kk=MAX(0,k-1);kk<=MIN(control.ncorr_z-1,k+1);kk++) {
-                            if (!(kk == k) && processPars[0].corr_table[1].at<float>(i, j, kk) > 0.0) {
-                                processPars[0].corr_table[1].at<float>(i, j, k)
-                                    += processPars[0].corr_table[1].at<float>(i, j, kk);
+                            if (!(kk == k) && processPars[0].corr_table_y[1].at<float>(i, j, kk) > 0.0) {
+                                processPars[0].corr_table_y[1].at<float>(i, j, k)
+                                    += processPars[0].corr_table_y[1].at<float>(i, j, kk);
+                                processPars[0].corr_table_cr[1].at<float>(i, j, k)
+                                    += processPars[0].corr_table_cr[1].at<float>(i, j, kk);
+                                processPars[0].corr_table_cb[1].at<float>(i, j, k)
+                                    += processPars[0].corr_table_cb[1].at<float>(i, j, kk);
                                 processPars[0].corr_table_count[1].at<int>(i, j, k)++;
                                 num_changes++;
                             }
                         }
                         if (processPars[0].corr_table_count[1].at<int>(i, j, k) > 0) {
-                            processPars[0].corr_table[1].at<float>(i, j, k)
+                            processPars[0].corr_table_y[1].at<float>(i, j, k)
+                                /= processPars[0].corr_table_count[1].at<int>(i, j, k);
+                            processPars[0].corr_table_cr[1].at<float>(i, j, k)
+                                /= processPars[0].corr_table_count[1].at<int>(i, j, k);
+                            processPars[0].corr_table_cb[1].at<float>(i, j, k)
                                 /= processPars[0].corr_table_count[1].at<int>(i, j, k);
                             processPars[0].corr_table_count[1].at<int>(i, j, k) = 0;
                         }
@@ -2078,7 +2138,15 @@ fprintf(stderr, "\n---------------------\nCamera 0 Image Correction\n-----------
 fprintf(stderr, "Camera 0 Correction: Standoff %.3f meters +/- %.3f\n", k * control.bin_dz + control.corr_zmin, 0.5 * control.bin_dz);
         for (int j=0;j<control.ncorr_y;j++) {
             for (int i=0;i<control.ncorr_x;i++) {
-                fprintf(stderr, "%5.1f ", processPars[0].corr_table[0].at<float>(i, j, k));
+                fprintf(stderr, "%5.1f ", processPars[0].corr_table_y[0].at<float>(i, j, k));
+            }
+            fprintf(stderr, "   ");
+            for (int i=0;i<control.ncorr_x;i++) {
+                fprintf(stderr, "%5.1f ", processPars[0].corr_table_cr[0].at<float>(i, j, k));
+            }
+            fprintf(stderr, "   ");
+            for (int i=0;i<control.ncorr_x;i++) {
+                fprintf(stderr, "%5.1f ", processPars[0].corr_table_cb[0].at<float>(i, j, k));
             }
             fprintf(stderr, "   ");
             for (int i=0;i<control.ncorr_x;i++) {
@@ -2093,7 +2161,15 @@ fprintf(stderr, "\n---------------------\nCamera 1 Image Correction\n-----------
 fprintf(stderr, "Camera 1 Correction: Standoff %.3f meters +/- %.3f\n", k * control.bin_dz + control.corr_zmin, 0.5 * control.bin_dz);
         for (int j=0;j<control.ncorr_y;j++) {
             for (int i=0;i<control.ncorr_x;i++) {
-                fprintf(stderr, "%5.1f ", processPars[0].corr_table[1].at<float>(i, j, k));
+                fprintf(stderr, "%5.1f ", processPars[0].corr_table_y[1].at<float>(i, j, k));
+            }
+            fprintf(stderr, "   ");
+            for (int i=0;i<control.ncorr_x;i++) {
+                fprintf(stderr, "%5.1f ", processPars[0].corr_table_cr[1].at<float>(i, j, k));
+            }
+            fprintf(stderr, "   ");
+            for (int i=0;i<control.ncorr_x;i++) {
+                fprintf(stderr, "%5.1f ", processPars[0].corr_table_cb[1].at<float>(i, j, k));
             }
             fprintf(stderr, "   ");
             for (int i=0;i<control.ncorr_x;i++) {
@@ -2105,7 +2181,7 @@ fprintf(stderr, "Camera 1 Correction: Standoff %.3f meters +/- %.3f\n", k * cont
     }
 
     /* Write out the ouput correction table */
-    int corr_version = 2;
+    int corr_version = 3;
     Mat corr_bounds = Mat(3, 3, CV_32FC(1), Scalar(0.0));
     corr_bounds.at<float>(0, 0) = control.corr_xmin;
     corr_bounds.at<float>(0, 1) = control.corr_xmax;
@@ -2122,17 +2198,25 @@ fprintf(stderr, "Camera 1 Correction: Standoff %.3f meters +/- %.3f\n", k * cont
             << "ImageCorrectionBounds" << corr_bounds
             << "ImageCorrectionReferenceGain" << control.reference_gain
             << "ImageCorrectionReferenceExposure" << control.reference_exposure
-            << "ImageCorrectionTable1" << processPars[0].corr_table[0]
-            << "ImageCorrectionTable2" << processPars[0].corr_table[1];
+            << "ImageCorrectionTableY1" << processPars[0].corr_table_y[0]
+            << "ImageCorrectionTableCr1" << processPars[0].corr_table_cr[0]
+            << "ImageCorrectionTableCb1" << processPars[0].corr_table_cb[0]
+            << "ImageCorrectionTableY2" << processPars[0].corr_table_y[1]
+            << "ImageCorrectionTableCr2" << processPars[0].corr_table_cr[1]
+            << "ImageCorrectionTableCb2" << processPars[0].corr_table_cb[1];
         fstorage.release();
     }
     else
         cout << "Error: Cannot save the image correction tables\n";
 
 
-    processPars[0].corr_table[0].release();
+    processPars[0].corr_table_y[0].release();
+    processPars[0].corr_table_cr[0].release();
+    processPars[0].corr_table_cb[0].release();
     processPars[0].corr_table_count[0].release();
-    processPars[0].corr_table[1].release();
+    processPars[0].corr_table_y[1].release();
+    processPars[0].corr_table_cr[1].release();
+    processPars[0].corr_table_cb[1].release();
     processPars[0].corr_table_count[1].release();
     corr_bounds.release();
 
