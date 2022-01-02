@@ -102,8 +102,11 @@ char usage_message[] = "mbphotomosaic \n"
                         "\t--projection=projection_pars\n"
                         "\t--altitude=standoff_target/standoff_range\n"
                         "\t--standoff=standoff_target/standoff_range\n"
-                        "\t--rangemax=range_max\n"
+                        "\t--priority-weight=weight\n"
                         "\t--trim=trim_pixels\n"
+                        "\t--section=section_pixels\n"
+                        "\t--section-length-max=section_length_max\n"
+                        "\t--rangemax=range_max\n"
                         "\t--bounds=lonmin/lonmax/latmin/latmax | west/east/south/north\n"
                         "\t--bounds-buffer=bounds_buffer\n"
                         "\t--correction-brightness\n"
@@ -249,6 +252,7 @@ struct mbpm_control_struct {
 
     // Input pixel priority
     int priority_mode;
+    double priority_weight;
     double standoff_target;
     double standoff_range;
     double range_max;
@@ -258,6 +262,7 @@ struct mbpm_control_struct {
 
     // Input image section size (pixels)
     int sectionPixels;
+    double sectionLengthMax;
 };
 
 /*--------------------------------------------------------------------*/
@@ -622,7 +627,7 @@ void load_calibration(int verbose, mb_path StereoCameraCalibrationFile, struct m
     }
 
     /* print out calibration information */
-    if (verbose > 1) {
+    if (verbose >= 0) {
         cerr << endl;
         cerr << "Stereo camera calibration model read from: " << StereoCameraCalibrationFile << endl;
         cerr << "M1:" << endl << control->cameraMatrix[0] << endl << endl;
@@ -655,7 +660,6 @@ void load_correction(int verbose, mb_path ImageCorrectionFile, struct mbpm_contr
 
     /* release correction tables */
     if (control->corr_tables_loaded) {
-fprintf(stderr, "%s:%d:%s: About to release correction table Mats\n", __FILE__, __LINE__, __FUNCTION__);
         control->corr_bounds.release();
         control->corr_table_y[0].release();
         control->corr_table_y[1].release();
@@ -669,7 +673,7 @@ fprintf(stderr, "%s:%d:%s: About to release correction table Mats\n", __FILE__, 
     }
 
     /* print out image correction information */
-    fprintf(stream, "\nImage correction using 3D lookup table\n");
+    fprintf(stream, "    Image correction using 3D lookup table\n");
     fprintf(stream, "    Image correction tables read from: %s\n", ImageCorrectionFile);
 
     /* read in the image correction table - this is expected to be a stereo correction table */
@@ -1136,7 +1140,7 @@ void process_image(int verbose, struct mbpm_process_struct *process,
                     rrxysq = xx * xx + yy * yy;
                     rrxy = sqrt(rrxysq);
                     rr = sqrt(rrxysq + zzref * zzref);
-                    pixel_priority = (rrxymax - rrxy) / rrxymax;
+                    pixel_priority = control->priority_weight * (rrxymax - rrxy) / rrxymax;
     //if (debugprint == MB_YES) {
     //fprintf(stream,"\nPRIORITY xx:%f yy:%f zzref:%f rr:%f rrxy:%f rrxymax:%f pixel_priority:%f\n",
     //xx,yy,zzref,rr,rrxy,rrxymax,pixel_priority);
@@ -1892,7 +1896,7 @@ void process_image_sectioned(int verbose, struct mbpm_process_struct *process,
                             if (icorner == 4) {
                                 /* calculate the section priority based on the distance
                                     from the image center and if specified the standoff */
-                                section_priority = (rrxymax - rrxy) / rrxymax;
+                                section_priority = control->priority_weight * (rrxymax - rrxy) / rrxymax;
                                 if (control->priority_mode == MBPM_PRIORITY_CENTRALITY_PLUS_STANDOFF)  {
                                     double dstandoff = (standoff[icorner] - control->standoff_target) / control->standoff_range;
                                     double standoff_priority = (float) (exp(-dstandoff * dstandoff));
@@ -1906,6 +1910,26 @@ void process_image_sectioned(int verbose, struct mbpm_process_struct *process,
                             }
                         }
                     }
+                }
+
+                /* if ok and higher priority, map entire section onto the output image */
+                if (use_section) {
+
+                    /* calculate max length of quad diagonals */
+                    double length = MAX(sqrt((dstCorners[2].x - dstCorners[0].x) * (dstCorners[2].x - dstCorners[0].x)
+                                          + (dstCorners[2].y - dstCorners[0].y) * (dstCorners[2].y - dstCorners[0].y)),
+                                        sqrt((dstCorners[3].x - dstCorners[1].x) * (dstCorners[3].x - dstCorners[1].x)
+                                          + (dstCorners[3].y - dstCorners[1].y) * (dstCorners[3].y - dstCorners[1].y)));
+                    if (!control->use_projection)
+                        length *= 0.5 * (control->OutputDx[0] / control->mtodeglon + control->OutputDx[1] / control->mtodeglat);
+                    if (length > control->sectionLengthMax)
+                        use_section = false;
+//if (!use_section)
+//fprintf(stderr, "%s:%d:%s: %5d %5d length:%f   %f %f  %f %f  %f %f  %f %f\n",
+//__FILE__, __LINE__, __FUNCTION__,
+//isection, jsection, length,
+//dstCorners[0].x, dstCorners[0].y, dstCorners[1].x, dstCorners[1].y,
+//dstCorners[2].x, dstCorners[2].y, dstCorners[3].x, dstCorners[3].y);
                 }
 
                 /* if ok and higher priority, map entire section onto the output image */
@@ -2284,11 +2308,13 @@ int main(int argc, char** argv)
     bool      outputimage_specified = false;
     int       output_format = MBPM_FORMAT_NONE;
     control.priority_mode = MBPM_PRIORITY_CENTRALITY_ONLY;
+    control.priority_weight = 1.0;
     control.standoff_target = 3.0;
     control.standoff_range = 1.0;
     control.range_max = 200.0;
     control.trimPixels = 0;
     control.sectionPixels = 0;
+    control.sectionLengthMax = 0.5;
 
     /* Input image variables */
     mb_path    ImageListFile;
@@ -2459,9 +2485,11 @@ int main(int argc, char** argv)
      *    --projection=projection_pars
      *    --altitude=standoff_target/standoff_range
      *    --standoff=standoff_target/standoff_range
-     *    --rangemax=range_max
+     *    --priority-weight=weight
      *    --trim=trim_pixels
      *    --section=section_pixels
+     *    --section-length-max=length
+     *    --rangemax=range_max
      *    --bounds=lonmin/lonmax/latmin/latmax | west/east/south/north
      *    --bounds-buffer=bounds_buffer
      *    --correction-brightness
@@ -2509,9 +2537,11 @@ int main(int argc, char** argv)
         {"projection",                  required_argument,      NULL,         0},
         {"altitude",                    required_argument,      NULL,         0},
         {"standoff",                    required_argument,      NULL,         0},
-        {"rangemax",                    required_argument,      NULL,         0},
+        {"priority-weight",             required_argument,      NULL,         0},
         {"trim",                        required_argument,      NULL,         0},
         {"section",                     required_argument,      NULL,         0},
+        {"section-length-max",          required_argument,      NULL,         0},
+        {"rangemax",                    required_argument,      NULL,         0},
         {"bounds",                      required_argument,      NULL,         0},
         {"bounds-buffer",               required_argument,      NULL,         0},
         {"correction-brightness",       no_argument,            NULL,         0},
@@ -2695,6 +2725,12 @@ int main(int argc, char** argv)
                     control.priority_mode = MBPM_PRIORITY_CENTRALITY_PLUS_STANDOFF;
                 }
 
+            /* priority-weight */
+            else if (strcmp("priority-weight", options[option_index].name) == 0)
+                {
+                const int n = sscanf (optarg,"%lf", &control.priority_weight);
+                }
+
             /* trim */
             else if (strcmp("trim", options[option_index].name) == 0)
                 {
@@ -2705,6 +2741,12 @@ int main(int argc, char** argv)
             else if (strcmp("section", options[option_index].name) == 0)
                 {
                 const int n = sscanf (optarg,"%d", &control.sectionPixels);
+                }
+
+            /* section-length-max */
+            else if (strcmp("section", options[option_index].name) == 0)
+                {
+                const int n = sscanf (optarg,"%lf", &control.sectionLengthMax);
                 }
 
             /* rangemax */
@@ -3042,9 +3084,9 @@ int main(int argc, char** argv)
         fprintf(stream,"%s     control.reference_exposure:       %f\n", first, control.reference_exposure);
         fprintf(stream,"%s     control.reference_y_set:          %d\n", first, control.reference_y_set);
         fprintf(stream,"%s     control.reference_y:              %f\n", first, control.reference_y);
-        fprintf(stream,"%s     control.reference_crcb_set:       %d\n", first, control.reference_y);
-        fprintf(stream,"%s     control.reference_cr:             %f\n", first, control.reference_y);
-        fprintf(stream,"%s     control.reference_cb:             %f\n", first, control.reference_y);
+        fprintf(stream,"%s     control.reference_crcb_set:       %d\n", first, control.reference_crcb_set);
+        fprintf(stream,"%s     control.reference_cr:             %f\n", first, control.reference_cr);
+        fprintf(stream,"%s     control.reference_cb:             %f\n", first, control.reference_cb);
         fprintf(stream,"%s     PlatformFile:                     %s\n", first, PlatformFile);
         fprintf(stream,"%s     platform_specified:               %d\n", first, platform_specified);
         fprintf(stream,"%s     camera_sensor:                    %d\n", first, camera_sensor);
@@ -3053,14 +3095,16 @@ int main(int argc, char** argv)
         fprintf(stream,"%s     heading_sensor:                   %d\n", first, heading_sensor);
         fprintf(stream,"%s     altitude_sensor:                  %d\n", first, altitude_sensor);
         fprintf(stream,"%s     attitude_sensor:                  %d\n", first, attitude_sensor);
-        if (control.priority_mode == MBPM_PRIORITY_CENTRALITY_ONLY)
+        if (control.priority_mode == MBPM_PRIORITY_CENTRALITY_ONLY) {
             fprintf(stream,"%s     control.priority_mode:            %d (priority by centrality in source image only)\n", first, control.priority_mode);
-        else
-            {
+            fprintf(stream,"%s     control.priority_weight:          %f\n", first, control.priority_weight);
+        }
+        else {
             fprintf(stream,"%s     control.priority_mode:            %d (priority by centrality in source image and difference from target standoff)\n", first, control.priority_mode);
+            fprintf(stream,"%s     control.priority_weight:          %f\n", first, control.priority_weight);
             fprintf(stream,"%s     control.standoff_target:          %f\n", first, control.standoff_target);
             fprintf(stream,"%s     control.standoff_range:           %f\n", first, control.standoff_range);
-            }
+        }
         fprintf(stream,"%s     control.range_max:                %f\n", first, control.range_max);
         fprintf(stream,"%s     control.trimPixels:               %u\n", first, control.trimPixels);
         fprintf(stream,"%s     control.sectionPixels:            %u\n", first, control.sectionPixels);
@@ -3556,7 +3600,7 @@ control.OutputBounds[0], control.OutputBounds[1], control.OutputBounds[2], contr
             if (strncmp(imageLeftFile, "--fov-fudgefactor=", 18) == 0) {
                 if (sscanf(imageLeftFile, "--fov-fudgefactor=%lf", &control.fov_fudgefactor) == 1) {
                     if (verbose > 0)
-                        fprintf(stream, "\nParameter reset: fov-fudgefactor: %f\n", control.fov_fudgefactor);
+                        fprintf(stream, "    Parameter reset: fov-fudgefactor: %f\n", control.fov_fudgefactor);
                 } else {
                     if (verbose > 0)
                         fprintf(stream, "\nFailure to reset parameter: fov_fudgefactor:%f\n", control.fov_fudgefactor);
@@ -3567,7 +3611,7 @@ control.OutputBounds[0], control.OutputBounds[1], control.OutputBounds[2], contr
             else if (strncmp(imageLeftFile, "--standoff=", 10) == 0) {
                 if (sscanf(imageLeftFile, "--standoff=%lf/%lf", &control.standoff_target, &control.standoff_range) == 2) {
                     if (verbose > 0)
-                        fprintf(stream, "\nParameters reset: standoff_target:%f standoff_range:%f\n",
+                        fprintf(stream, "    Parameters reset: standoff_target:%f standoff_range:%f\n",
                             control.standoff_target, control.standoff_range);
                 } else {
                     if (verbose > 0)
@@ -3576,11 +3620,24 @@ control.OutputBounds[0], control.OutputBounds[1], control.OutputBounds[2], contr
                 }
             }
 
+            /* priority-weight */
+            else if (strncmp(imageLeftFile, "--priority-weight", 17) == 0) {
+                if (sscanf(imageLeftFile, "--priority-weight=%lf", &control.priority_weight) == 1) {
+                    if (verbose > 0)
+                        fprintf(stream, "    Parameter reset: priority_weight:%f\n",
+                            control.priority_weight);
+                } else {
+                    if (verbose > 0)
+                        fprintf(stream, "\nFailure to reset parameter: priority_weight:%f\n",
+                            control.priority_weight);
+                }
+            }
+
             /* trim */
             else if (strncmp(imageLeftFile, "--trim=", 7) == 0) {
                 if (sscanf(imageLeftFile, "--trim=%d", &control.trimPixels) == 1) {
                     if (verbose > 0)
-                        fprintf(stream, "\nParameter reset: trimPixels:%d\n",
+                        fprintf(stream, "    Parameter reset: trimPixels:%d\n",
                             control.trimPixels);
                 } else {
                     if (verbose > 0)
@@ -3593,7 +3650,7 @@ control.OutputBounds[0], control.OutputBounds[1], control.OutputBounds[2], contr
             else if (strncmp(imageLeftFile, "--section=", 10) == 0) {
                 if (sscanf(imageLeftFile, "--section=%d", &control.sectionPixels) == 1) {
                     if (verbose > 0)
-                        fprintf(stream, "\nParameter reset: sectionPixels:%d\n",
+                        fprintf(stream, "    Parameter reset: sectionPixels:%d\n",
                             control.sectionPixels);
                 } else {
                     if (verbose > 0)
@@ -3606,7 +3663,7 @@ control.OutputBounds[0], control.OutputBounds[1], control.OutputBounds[2], contr
             else if (strncmp(imageLeftFile, "--rangemax=", 11) == 0) {
                 if (sscanf(imageLeftFile,"--rangemax=%lf", &control.range_max) == 1 ) {
                     if (verbose > 0)
-                        fprintf(stream, "\nParameters reset: range_max:%f\n",
+                        fprintf(stream, "    Parameters reset: range_max:%f\n",
                             control.range_max);
                 } else {
                     if (verbose > 0)
@@ -3619,7 +3676,7 @@ control.OutputBounds[0], control.OutputBounds[1], control.OutputBounds[2], contr
             else if (strncmp(imageLeftFile, "--correction-brightness", 23) == 0) {
                 control.corr_mode = MBPM_CORRECTION_BRIGHTNESS;
                 if (verbose > 0)
-                    fprintf(stream, "\nParameters reset: corr_mode:%d\n",
+                    fprintf(stream, "    Parameters reset: corr_mode:%d\n",
                             control.corr_mode);
             }
 
@@ -3627,7 +3684,7 @@ control.OutputBounds[0], control.OutputBounds[1], control.OutputBounds[2], contr
             else if (strncmp(imageLeftFile, "--correction-camera-settings=", 29) == 0) {
                 control.corr_mode = MBPM_CORRECTION_CAMERA_SETTINGS;
                 if (verbose > 0)
-                    fprintf(stream, "\nParameters reset: corr_mode:%d\n",
+                    fprintf(stream, "    Parameters reset: corr_mode:%d\n",
                             control.corr_mode);
             }
 
@@ -3636,7 +3693,7 @@ control.OutputBounds[0], control.OutputBounds[1], control.OutputBounds[2], contr
                 if (sscanf(imageLeftFile,"--correction-range=%lf/%lf", &control.corr_range_target, &control.corr_range_coeff) == 2) {
                     control.corr_mode = MBPM_CORRECTION_RANGE;
                     if (verbose > 0)
-                        fprintf(stream, "\nParameters reset: corr_mode:%d corr_range_target:%f corr_range_coeff:%f\n",
+                        fprintf(stream, "    Parameters reset: corr_mode:%d corr_range_target:%f corr_range_coeff:%f\n",
                             control.corr_mode, control.corr_range_target, control.corr_range_coeff);
                 } else {
                     if (verbose > 0)
@@ -3650,7 +3707,7 @@ control.OutputBounds[0], control.OutputBounds[1], control.OutputBounds[2], contr
                 if (sscanf(imageLeftFile,"--correction-standoff=%lf/%lf", &control.corr_standoff_target, &control.corr_standoff_coeff) == 2) {
                     control.corr_mode = MBPM_CORRECTION_RANGE;
                     if (verbose > 0)
-                        fprintf(stream, "\nParameters reset: corr_mode:%d corr_standoff_target:%f corr_standoff_coeff:%f\n",
+                        fprintf(stream, "    Parameters reset: corr_mode:%d corr_standoff_target:%f corr_standoff_coeff:%f\n",
                             control.corr_mode, control.corr_standoff_target, control.corr_standoff_coeff);
                 } else {
                     if (verbose > 0)
@@ -3668,11 +3725,16 @@ control.OutputBounds[0], control.OutputBounds[1], control.OutputBounds[2], contr
                 }
             }
 
+            /* correction-file-color */
+            else if (strncmp(imageLeftFile, "--correction-file-color", 23) == 0) {
+                control.corr_color_enabled = true;
+            }
+
             /* reference-gain */
             else if (strncmp(imageLeftFile, "--reference-gain=", 17) == 0) {
                 if (sscanf(imageLeftFile,"--reference-gain=%lf", &control.reference_gain) == 1 ) {
                     if (verbose > 0)
-                        fprintf(stream, "\nParameters reset: reference_gain:%f\n",
+                        fprintf(stream, "    Parameters reset: reference_gain:%f\n",
                             control.reference_gain);
                 } else {
                     if (verbose > 0)
@@ -3685,7 +3747,7 @@ control.OutputBounds[0], control.OutputBounds[1], control.OutputBounds[2], contr
             else if (strncmp(imageLeftFile, "--reference-exposure=", 21) == 0) {
                 if (sscanf(imageLeftFile,"--reference-exposure=%lf", &control.reference_exposure) == 1 ) {
                     if (verbose > 0)
-                        fprintf(stream, "\nParameters reset: reference_exposure:%f\n",
+                        fprintf(stream, "    Parameters reset: reference_exposure:%f\n",
                             control.reference_exposure);
                 } else {
                     if (verbose > 0)
@@ -3694,23 +3756,96 @@ control.OutputBounds[0], control.OutputBounds[1], control.OutputBounds[2], contr
                 }
             }
 
+            /* reference-intensity */
+            else if (strncmp(imageLeftFile, "--reference-intensity=", 22) == 0) {
+                if (sscanf(imageLeftFile,"--reference-intensity=%lf", &control.reference_y) == 1 ) {
+                    control.reference_y_set = true;
+                    if (verbose > 0)
+                        fprintf(stream, "    Parameters reset: reference_y:%f\n",
+                            control.reference_y);
+                } else {
+                    control.reference_y_set = false;
+                    if (verbose > 0)
+                        fprintf(stream, "\nFailure to reset parameters: reference_y:%f\n",
+                            control.reference_y);
+                }
+            }
+
+            /* reference-crcb */
+            else if (strncmp(imageLeftFile, "--reference-crcb=", 17) == 0) {
+                if (sscanf(imageLeftFile,"--reference-intensity=%lf/%lf", &control.reference_cr, &control.reference_cb) == 2 ) {
+                    control.reference_crcb_set = true;
+                    if (verbose > 0)
+                        fprintf(stream, "    Parameters reset: reference_cr:%f reference_cb:%f\n",
+                            control.reference_cr, control.reference_cb);
+                } else {
+                    control.reference_crcb_set = false;
+                    if (verbose > 0)
+                        fprintf(stream, "\nFailure to reset parameters: reference_cr:%f reference_cb:%f\n",
+                            control.reference_cr, control.reference_cb);
+                }
+            }
+
             /* platform-file */
             else if (strncmp(imageLeftFile, "--platform-file=", 16) == 0) {
                 if (sscanf(imageLeftFile, "--platform-file=%s", tmp) == 1) {
-                  strcpy(PlatformFile, tmp);
-                  if (platform != NULL) {
-                      status = mb_platform_deall(verbose, (void **)&platform, &error);
-                  }
-                  status = mb_platform_read(verbose, PlatformFile, (void **)&platform, &error);
-                  platform_specified = MB_YES;
-                  if (verbose > 0 && status == MB_SUCCESS) {
-                      fprintf(stream, "    Survey platform model read from: %s\n", PlatformFile);
-                  } else if (status == MB_FAILURE) {
-                      fprintf(stderr,"\nUnable to read platform file %s\n", PlatformFile);
-                      fprintf(stderr,"Program <%s> Terminated\n", program_name);
-                      mb_memory_clear(verbose, &error);
-                      exit(MB_ERROR_BAD_PARAMETER);
-                  }
+                    strcpy(PlatformFile, tmp);
+                    if (platform != NULL) {
+                        status = mb_platform_deall(verbose, (void **)&platform, &error);
+                    }
+                    status = mb_platform_read(verbose, PlatformFile, (void **)&platform, &error);
+                    if (status == MB_SUCCESS) {
+                        platform_specified = MB_YES;
+
+                        /* reset data sources according to commands */
+                        if (nav_sensor >= 0)
+                            platform->source_position = nav_sensor;
+                        if (sensordepth_sensor >= 0)
+                            platform->source_depth = sensordepth_sensor;
+                        if (heading_sensor >= 0)
+                            platform->source_heading = heading_sensor;
+                        if (attitude_sensor >= 0)
+                            {
+                            platform->source_rollpitch = attitude_sensor;
+                            platform->source_heave = attitude_sensor;
+                            }
+
+                        /* get sensor structures */
+                        if (platform->source_bathymetry >= 0)
+                            sensor_bathymetry = &(platform->sensors[platform->source_bathymetry]);
+                        if (platform->source_backscatter >= 0)
+                            sensor_backscatter = &(platform->sensors[platform->source_backscatter]);
+                        if (platform->source_position >= 0)
+                            sensor_position = &(platform->sensors[platform->source_position]);
+                        if (platform->source_depth >= 0)
+                            sensor_depth = &(platform->sensors[platform->source_depth]);
+                        if (platform->source_heading >= 0)
+                            sensor_heading = &(platform->sensors[platform->source_heading]);
+                        if (platform->source_rollpitch >= 0)
+                            sensor_rollpitch = &(platform->sensors[platform->source_rollpitch]);
+                        if (platform->source_heave >= 0)
+                            sensor_heave = &(platform->sensors[platform->source_heave]);
+                        if (camera_sensor < 0)
+                            {
+                            for (int isensor=0;isensor<platform->num_sensors;isensor++)
+                                {
+                                if (platform->sensors[isensor].type == MB_SENSOR_TYPE_CAMERA_STEREO)
+                                    {
+                                    camera_sensor = isensor;
+                                    }
+                                }
+                            }
+                        if (camera_sensor >= 0)
+                            sensor_camera = &(platform->sensors[camera_sensor]);
+
+                        if (verbose > 0)
+                            fprintf(stream, "    Survey platform model read from: %s\n", PlatformFile);
+                    } else if (status == MB_FAILURE) {
+                        fprintf(stderr,"\nUnable to read platform file %s\n", PlatformFile);
+                        fprintf(stderr,"Program <%s> Terminated\n", program_name);
+                        mb_memory_clear(verbose, &error);
+                        exit(MB_ERROR_BAD_PARAMETER);
+                    }
                 }
             }
 
@@ -3718,7 +3853,7 @@ control.OutputBounds[0], control.OutputBounds[1], control.OutputBounds[2], contr
             else if (strncmp(imageLeftFile, "--camera-sensor=", 16) == 0) {
                 if (sscanf(imageLeftFile,"--camera-sensor=%d", &camera_sensor) == 1 ) {
                     if (verbose > 0)
-                        fprintf(stream, "\nParameters reset: camera_sensor:%d\n", camera_sensor);
+                        fprintf(stream, "    Parameters reset: camera_sensor:%d\n", camera_sensor);
                 } else {
                     if (verbose > 0)
                         fprintf(stream, "\nFailure to reset parameters: camera_sensor:%d\n", camera_sensor);
@@ -3729,7 +3864,7 @@ control.OutputBounds[0], control.OutputBounds[1], control.OutputBounds[2], contr
             else if (strncmp(imageLeftFile, "--nav-sensor=", 13) == 0) {
                 if (sscanf(imageLeftFile,"--nav-sensor=%d", &nav_sensor) == 1 ) {
                     if (verbose > 0)
-                        fprintf(stream, "\nParameters reset: nav_sensor:%d\n", nav_sensor);
+                        fprintf(stream, "    Parameters reset: nav_sensor:%d\n", nav_sensor);
                 } else {
                     if (verbose > 0)
                         fprintf(stream, "\nFailure to reset parameters: nav_sensor:%d\n", nav_sensor);
@@ -3740,7 +3875,7 @@ control.OutputBounds[0], control.OutputBounds[1], control.OutputBounds[2], contr
             else if (strncmp(imageLeftFile, "--sensordepth-sensor=", 16) == 0) {
                 if (sscanf(imageLeftFile,"--sensordepth-sensor=%d", &sensordepth_sensor) == 1 ) {
                     if (verbose > 0)
-                        fprintf(stream, "\nParameters reset: sensordepth_sensor:%d\n", sensordepth_sensor);
+                        fprintf(stream, "    Parameters reset: sensordepth_sensor:%d\n", sensordepth_sensor);
                 } else {
                     if (verbose > 0)
                         fprintf(stream, "\nFailure to reset parameters: sensordepth_sensor:%d\n", sensordepth_sensor);
@@ -3751,7 +3886,7 @@ control.OutputBounds[0], control.OutputBounds[1], control.OutputBounds[2], contr
             else if (strncmp(imageLeftFile, "--heading-sensor=", 16) == 0) {
                 if (sscanf(imageLeftFile,"--heading-sensor=%d", &heading_sensor) == 1 ) {
                     if (verbose > 0)
-                        fprintf(stream, "\nParameters reset: heading_sensor:%d\n", heading_sensor);
+                        fprintf(stream, "    Parameters reset: heading_sensor:%d\n", heading_sensor);
                 } else {
                     if (verbose > 0)
                         fprintf(stream, "\nFailure to reset parameters: heading_sensor:%d\n", heading_sensor);
@@ -3762,7 +3897,7 @@ control.OutputBounds[0], control.OutputBounds[1], control.OutputBounds[2], contr
             else if (strncmp(imageLeftFile, "--altitude-sensor=", 16) == 0) {
                 if (sscanf(imageLeftFile,"--altitude-sensor=%d", &altitude_sensor) == 1 ) {
                     if (verbose > 0)
-                        fprintf(stream, "\nParameters reset: altitude_sensor:%d\n", altitude_sensor);
+                        fprintf(stream, "    Parameters reset: altitude_sensor:%d\n", altitude_sensor);
                 } else {
                     if (verbose > 0)
                         fprintf(stream, "\nFailure to reset parameters: altitude_sensor:%d\n", altitude_sensor);
@@ -3773,7 +3908,7 @@ control.OutputBounds[0], control.OutputBounds[1], control.OutputBounds[2], contr
             else if (strncmp(imageLeftFile, "--attitude-sensor=", 16) == 0) {
                 if (sscanf(imageLeftFile,"--attitude-sensor=%d", &attitude_sensor) == 1 ) {
                     if (verbose > 0)
-                        fprintf(stream, "\nParameters reset: attitude_sensor:%d\n", attitude_sensor);
+                        fprintf(stream, "    Parameters reset: attitude_sensor:%d\n", attitude_sensor);
                 } else {
                     if (verbose > 0)
                         fprintf(stream, "\nFailure to reset parameters: attitude_sensor:%d\n", attitude_sensor);
@@ -3800,7 +3935,7 @@ control.OutputBounds[0], control.OutputBounds[1], control.OutputBounds[2], contr
                 if (sscanf(imageLeftFile, "--calibration-file=%s", tmp) == 1) {
                     strcpy(StereoCameraCalibrationFile, tmp);
                     load_calibration(verbose, StereoCameraCalibrationFile, &control, &error);
-                    fprintf(stream, "\nStereo camera calibration model read from: %s\n", StereoCameraCalibrationFile);
+                    fprintf(stream, "    Stereo camera calibration model read from: %s\n", StereoCameraCalibrationFile);
                 }
             }
 
@@ -3849,7 +3984,7 @@ control.OutputBounds[0], control.OutputBounds[1], control.OutputBounds[2], contr
             else if (strncmp(imageLeftFile, "--image-quality-threshold=", 26) == 0) {
                 if (sscanf(imageLeftFile,"--image-quality-threshold=%lf", &imageQualityThreshold) == 1 ) {
                     if (verbose > 0)
-                        fprintf(stream, "\nParameters reset: imageQualityThreshold:%f\n",
+                        fprintf(stream, "    Parameters reset: imageQualityThreshold:%f\n",
                             imageQualityThreshold);
                 } else {
                     if (verbose > 0)
@@ -3862,7 +3997,7 @@ control.OutputBounds[0], control.OutputBounds[1], control.OutputBounds[2], contr
             else if (strncmp(imageLeftFile, "--image-quality-filter-length=", 30) == 0) {
                 if (sscanf(imageLeftFile,"--image-quality-filter-length=%lf", &imageQualityFilterLength) == 1 ) {
                     if (verbose > 0)
-                        fprintf(stream, "\nParameters reset: imageQualityFilterLength:%f\n",
+                        fprintf(stream, "    Parameters reset: imageQualityFilterLength:%f\n",
                             imageQualityFilterLength);
                 } else {
                     if (verbose > 0)

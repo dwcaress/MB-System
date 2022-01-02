@@ -605,9 +605,9 @@ int main(int argc, char** argv)
     /* Input image correction */
     control.reference_gain = 14.0;
     control.reference_exposure = 8000.0;
-    control.ncorr_x = 21;
-    control.ncorr_y = 21;
-    control.ncorr_z = 81;
+    control.ncorr_x = 11;
+    control.ncorr_y = 11;
+    control.ncorr_z = 41;
     control.corr_xmin = 0.0;
     control.corr_xmax = 0.0;
     control.corr_ymin = 0.0;

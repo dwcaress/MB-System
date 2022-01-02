@@ -57,7 +57,7 @@ def StereoMatching(tleft, tright, gleft, gright, eleft, eright):
       stereo = stereoItem(tleft = tleft[j], tright = tright[k], tgps = tleft[j], gleft = gleft[j], gright = gright[k], eleft = eleft[j], eright = eright[k])
       matchStereo.append(stereo)
       allImages.append(stereo)
-      j+= 1;k+= 1
+      j += 1; k += 1
 
   if j < len(tleft):
     nomatch_left.extend(tleft[j:])
@@ -94,7 +94,7 @@ def StereoMatchingGPS(tgps, tleft, tright, gleft, gright, eleft, eright):
       stereo = stereoItem(tleft = tleft[j], tright = tright[k], tgps = tgps[i], gleft = gleft[j], gright = gright[k], eleft = eleft[j], eright = eright[k])
       matchStereo.append(stereo)
       allImages.append(stereo)
-      i+= 1;j+= 1;k+= 1
+      i += 1; j += 1; k += 1
     # Only left image match with trigger
     elif abs(tleft[j] - tgps[i])<MAX_DIFFERENCE_IMG_TIME:
       nomatch_left.append(tleft[j])
@@ -179,7 +179,7 @@ def main (args, opts={}):
   outFname = "imagelist"
   gpsFname = "/../logfile_gpstime_cam_sync.csv"
   fGPStimes = True
-  checkBayer = True
+  checkBayer = False
   for o, a in opts:
     if o in ("-h", "--help"):
       usage()
@@ -267,7 +267,10 @@ def main (args, opts={}):
   imfile = open(outdir+'/'+outFname+".mb-2", "w")
   imfile.write("#STEREOCAMERA\n#\n# Date range of files:\n")
   imfile.write("# "+utime_text(allImages[0].tgps/1e6)+"  to  "+utime_text(allImages[-1].tgps/1e6)+"\n#\n")
+  i=0
   for st in allImages:
+    if i < 5:
+      imfile.write('## ')
     if st.tleft > 0:
       imfile.write('PROSILICA_L/'+str(st.tleft)+'.'+imformat+'\t\t')
     else:
@@ -277,8 +280,9 @@ def main (args, opts={}):
     else:
       imfile.write('NULL'+'\t\t')
     imfile.write("%.6f"%(st.tgps/1e6)+'\t'+"%.6f"%(st.tgps/1e6)+'\t'+"%.1f"%(st.gleft)+'\t'+"%.1f"%(st.gright)+'\t'+"%.1f"%(st.eleft)+'\t'+"%.1f"%(st.eright)+'\n')
-    if st.tleft > 0 and st.tright > 0 and (st.gleft != st.gright or st.eleft != st.eright):
-      print("Image settings differ: PROSILICA_L/"+str(st.tleft)+"."+imformat+"\tPROSILICA_R/"+str(st.tright)+"."+imformat+"\t"+str(st.gleft)+"\t"+str(st.gright)+"\t"+str(st.eleft)+"\t"+str(st.eright))
+    # if st.tleft > 0 and st.tright > 0 and (st.gleft != st.gright or st.eleft != st.eright):
+    #   print("Image settings differ: PROSILICA_L/"+str(st.tleft)+"."+imformat+"\tPROSILICA_R/"+str(st.tright)+"."+imformat+"\t"+str(st.gleft)+"\t"+str(st.gright)+"\t"+str(st.eleft)+"\t"+str(st.eright))
+    i += 1
   imfile.close()
 
 
