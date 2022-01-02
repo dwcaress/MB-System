@@ -23,6 +23,7 @@ Distributions that do not include "beta" in the tag name correspond to the major
 announced releases. The source distributions associated with all releases, major
 or beta, are equally accessible as tarballs through the Github interface.
 
+- Version 5.7.9beta26    January 2, 2022
 - Version 5.7.9beta25    December 29, 2021
 - Version 5.7.9beta24    December 27, 2021
 - Version 5.7.9beta23    December 18, 2021
@@ -403,6 +404,18 @@ or beta, are equally accessible as tarballs through the Github interface.
 --
 ### MB-System Version 5.7 Release Notes:
 --
+
+#### 5.7.9beta26 (January 2, 2022)
+
+Mbphotomosaic: Augmented available commands that can be specified in imagelist
+files with --priority-weight and section-length-max. The --priority-weight allows
+one to up-weight or down-weight sets of images in a photomosaic. The --section-length-max
+command allows one to exclude groups of pixels that are projected into too large
+of an extent when projected onto the seafloor topography model.
+
+Mbm_makeimagelist: Augmented to comment out the first five image pairs in each
+image survey directory, as the first three or four images are usually quite
+dark.
 
 #### 5.7.9beta25 (December 29, 2021)
 
