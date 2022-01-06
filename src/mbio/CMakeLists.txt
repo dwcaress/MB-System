@@ -171,7 +171,10 @@ target_include_directories(mbio
                            PUBLIC
 			   ${NETCDF_INCLUDE_DIR}
                            .
-                           ${CMAKE_SOURCE_DIR}/src/gsf)
+                           ${CMAKE_SOURCE_DIR}/src/gsf
+                           ${CMAKE_SOURCE_DIR}/src/bsio
+                           ${CMAKE_SOURCE_DIR}/src/mbaux
+                           ${CMAKE_SOURCE_DIR}/src/surf)	   
 
 
 # Building dylib on Apple results in undefined symbols from third-party
