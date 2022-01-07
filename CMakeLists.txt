@@ -31,6 +31,19 @@ if (help)
   message(FATAL_ERROR "")
 endif()
 
+if (APPLE)
+  # Prepend XQuartz /opt/X11 to search for includes and libraries
+  # (this works for FindX11(), but not for FindOpenGL())
+  set(CMAKE_INCLUDE_PATH /opt/X11/include ${CMAKE_INCLUDE_PATH})  
+  set(CMAKE_LIBRARY_PATH /opt/X11/lib ${CMAKE_LIBRARY_PATH})
+
+  # Needed for FindOpenGL to find includes in /opt/X11/include
+  set(OPENGL_INCLUDE_DIR /opt/X11/include/)
+
+  # This does not work
+  set(OPENGL_LIBRARIES /opt/X11/lib/)
+endif()
+
 # NOTE: VTK_lib is specified as a space-delimited list of libraries, and so
 # so those spaces must be quoted when specified with cmake -D command line
 # option. E.g. suppose $VTK_LIBS is a bash shell variable. Then specify 
@@ -90,8 +103,8 @@ foreach(module ${modules})
 
   if (NOT ${module}_include OR  NOT ${module}_lib)
     # Try to find module
+    message("include Find${MODULE}")
     include(Find${module})
-    ### find_package(${module})
     string(TOUPPER ${module} MODULE)
     if (${module}_FOUND OR ${MODULE}_FOUND)
       if (${MODULE}_LIBRARY)
