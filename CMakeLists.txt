@@ -1,8 +1,9 @@
-# Find prerequesite packages and build Makefiles
-#
-# 
-# For Qt apps we currently rely on qmake and .pro files to determine Qt header
-# and library location
+#[[
+Find prerequesite packages and build Makefiles
+
+For Qt apps we currently rely on qmake and .pro files to determine Qt header
+and library location
+]]
 
 cmake_minimum_required(VERSION 3.18)
 project(MB-System)
@@ -13,7 +14,7 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
 elseif (CMAKE_SYSTEM_NAME STREQUAL "Darwin")
   message("Building on Darwin")
 else()
-  message(FATAL_ERROR "Building on unsupported OS")
+  message(FATAL_ERROR "Building on unsupported OS ${CMAKE_SYSTEM_NAME}")
 endif()
 
 
@@ -32,28 +33,44 @@ if (help)
 endif()
 
 if (APPLE)
-  # Prepend XQuartz /opt/X11 to search for includes and libraries
-  # (this works for FindX11(), but not for FindOpenGL())
-  set(CMAKE_INCLUDE_PATH /opt/X11/include ${CMAKE_INCLUDE_PATH})  
-  set(CMAKE_LIBRARY_PATH /opt/X11/lib ${CMAKE_LIBRARY_PATH})
 
-  # Needed for FindOpenGL to find includes in /opt/X11/include
-  set(OPENGL_INCLUDE_DIR /opt/X11/include/)
+  # On OSX we assume X11 and OpenGL are provided by XQuartz in /opt/X11,
+  # unless user specifies location on command line
+  message("MACOS: assume X11 and OpenGL are in /opt/X11")
 
-  # This does not work
-  set(OPENGL_LIBRARIES /opt/X11/lib/)
+  if (NOT X11_include)
+    message("assume X11_include in /opt/X11/include")
+    set(X11_include /opt/X11/include)
+  endif()
+
+  if (NOT X11_lib)
+    message("assume X11_lib in /opt/X11/lib")
+    set(X11_lib /opt/X11/lib/libXt.dylib;/opt/X11/lib/libX11.dylib)
+  endif()
+
+  if (NOT OpenGL_include)
+    message("assume OpenGL_include in /opt/X11/include")  
+    set(OpenGL_include /opt/X11/include)  
+  endif()
+  
+  if (NOT OpenGL_lib)
+    message("assume OpenGL_lib in /opt/X11/lib")
+    set(OpenGL_lib /opt/X11/lib/libGL.dylib)
+  endif()
+
 endif()
 
-# NOTE: VTK_lib is specified as a space-delimited list of libraries, and so
-# so those spaces must be quoted when specified with cmake -D command line
-# option. E.g. suppose $VTK_LIBS is a bash shell variable. Then specify 
-# VTK_lib to cmake like this:
-#   % cmake -DVTK_lib="$VTK_LIBS" ..
-#
-# Note the double-quotes around VTK_LIBS, and note that -D options must
-# precede the final argument that specifies location of the CMakeLists.txt
-# file, which is .. in this case.
+#[[
+NOTE: VTK_lib is specified as a space-delimited list of libraries, and 
+so those spaces must be quoted when specified with cmake -D command line
+option. E.g. suppose $VTK_LIBS is a bash shell variable. Then specify 
+VTK_lib to cmake like this:
+   % cmake -DVTK_lib="$VTK_LIBS" ..
 
+Note the double-quotes around VTK_LIBS, and note that -D options must
+precede the final argument that specifies location of the CMakeLists.txt
+file, which is .. in this case.
+]]
 
 # Add globally-needed compiler flags
 add_compile_options(-DUSE_DEFAULT_FILE_FUNCTIONS)
@@ -97,7 +114,7 @@ foreach(module ${modules})
   # No need to search, if module's include and lib are specified as
   # command line '-D' arguments
   if (${module}_include AND ${module}_lib)
-    message("${module} include and lib are specified on command line")
+    message("${module} include and lib are pre-specified")
     continue()
   endif()
 
@@ -108,7 +125,7 @@ foreach(module ${modules})
     string(TOUPPER ${module} MODULE)
     if (${module}_FOUND OR ${MODULE}_FOUND)
       if (${MODULE}_LIBRARY)
-        message("rename ${MODULE}_LIBRARY (val=${${MODULE}_LIBRARY})")
+        message("rename ${MODULE}_LIBRARY")
         set(${MODULE}_LIBRARIES ${${MODULE}_LIBRARY})
       endif()
     else()
