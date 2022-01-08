@@ -55,7 +55,7 @@ if (APPLE)
   
   if (NOT OpenGL_lib)
     message("assume OpenGL_lib in /opt/X11/lib")
-    set(OpenGL_lib /opt/X11/lib/libGL.dylib)
+    set(OpenGL_lib /opt/X11/lib/libGL.dylib;/opt/X11/lib/libGLU.dylib)
   endif()
 
 endif()
@@ -265,6 +265,7 @@ add_subdirectory(src/mbio)
 add_subdirectory(src/mbview)
 add_subdirectory(src/bsio)
 add_subdirectory(src/surf)
+add_subdirectory(src/mbtrn)
 
 # Executables
 add_subdirectory(src/mbgrdviz)
