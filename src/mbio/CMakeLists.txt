@@ -174,7 +174,10 @@ target_include_directories(mbio
                            ${CMAKE_SOURCE_DIR}/src/gsf
                            ${CMAKE_SOURCE_DIR}/src/bsio
                            ${CMAKE_SOURCE_DIR}/src/mbaux
-                           ${CMAKE_SOURCE_DIR}/src/surf)	   
+                           ${CMAKE_SOURCE_DIR}/src/surf
+			   ${CMAKE_SOURCE_DIR}/src/mbtrn/r7kr
+			   ${CMAKE_SOURCE_DIR}/src/mbtrn/mframe/src
+			   )	   
 
 
 # Building dylib on Apple results in undefined symbols from third-party
