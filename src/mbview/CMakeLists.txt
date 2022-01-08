@@ -20,6 +20,8 @@ target_include_directories(mbview
                            PUBLIC
                            .
 			   ${MOTIF_INCLUDE_DIR}
+			   ${X11_INCLUDE_DIR}			   
+                           ${OPENGL_INCLUDE_DIR}			   
 			   ${X11_INCLUDE_DIR}
                            ${GMT_INCLUDE_DIR}
                            ${CMAKE_SOURCE_DIR}/src/mbio
@@ -46,7 +48,9 @@ target_include_directories(mbviewShared
                            PUBLIC
                            .
 			   ${CMAKE_INSTALL_PREFIX}/include
-			   ${X11_INCLUDE_DIR}			   
+			   ${MOTIF_INCLUDE_DIR}			   
+			   ${X11_INCLUDE_DIR}
+                           ${OPENGL_INCLUDE_DIR}  			   
                            ${GMT_INCLUDE_DIR}
                            ${CMAKE_SOURCE_DIR}/src/mbio
                            ${CMAKE_SOURCE_DIR}/src/mbaux)
