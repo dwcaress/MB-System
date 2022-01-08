@@ -34,6 +34,8 @@ if (APPLE)
                         mbaux
                         mbsapi
                         mbgsf
+			r7kr
+			mframe
 	                ${GMT_LIBRARIES}
                         ${NETCDF_LIBRARIES}
                         ${GDAL_LIBRARIES}
@@ -49,6 +51,8 @@ else()
                         mbauxShared
                         mbsapiShared
                         mbgsfShared
+			r7kr
+			mframe
 	                ${GMT_LIBRARIES}
                         ${NETCDF_LIBRARIES}
                         ${GDAL_LIBRARIES}
