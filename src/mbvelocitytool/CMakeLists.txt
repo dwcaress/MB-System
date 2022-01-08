@@ -31,6 +31,8 @@ target_link_libraries(mbvelocitytool
                       mbbsio
                       mbsapi
                       mbgsf
+		      r7kr
+		      mframe
 		      ${GMT_LIBRARIES}
 		      ${NETCDF_LIBRARIES}
 		      ${MOTIF_LIBRARIES}
