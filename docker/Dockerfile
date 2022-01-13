@@ -75,6 +75,9 @@ ENV LD_LIBRARY_PATH ${LD_LIBRARY_PATH:+$LD_LIBRARY_PATH:}/usr/local/lib64
 
 # Permit executing MB-System commands via ssh from another container
 RUN echo "export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}" >> /root/.bashrc
+# For execution of MB-System gmt modules, e.g.: gmt mbgrd2obj
+RUN echo "GMT_CUSTOM_LIBS = /usr/local/lib/mbsystem.so" >> /root/gmt.conf
+# Generate host keys
 RUN /usr/bin/ssh-keygen -A
 
 # No explicit cmd or entry_point. Launcher script will typically run `bash`
