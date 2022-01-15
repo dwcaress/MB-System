@@ -241,7 +241,7 @@ message("QT5_LIBRARIES: ${QT5_LIBRARIES}")
 # Build a few needed header files
 message("call buildHeaders()")
 include(buildHeaders)
-buildHeaders("xyz")
+buildHeaders("otpsDir" "levitusInstallDir")
 
 # MacOS requires all referred library symbols be specified when
 # building shared dylib
