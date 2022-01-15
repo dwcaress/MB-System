@@ -28,6 +28,7 @@ if (help)
   message("${modules} ${packages}")
   message("enable debugging with -DCMAKE_BUILD_TYPE=Debug")
   message("built Qt-based GUIs with -DbuildQt=1")
+  message("built TRN software with -DbuildTrn=1")  
   message("you MUST specify -DVTK_include=<dir> -DVTK_lib=<libs>")
   message(FATAL_ERROR "")
 endif()
@@ -237,6 +238,11 @@ message("X11_XT_LIBRARIES: ${X11_XT_LIBRARIES}")
 message("VTK_LIBRARIES: ${VTK_LIBRARIES}")
 message("QT5_LIBRARIES: ${QT5_LIBRARIES}")
 
+# Build a few needed header files
+message("call buildHeaders()")
+include(buildHeaders)
+buildHeaders("xyz")
+
 # MacOS requires all referred library symbols be specified when
 # building shared dylib
 if (APPLE)
@@ -265,7 +271,9 @@ add_subdirectory(src/mbio)
 add_subdirectory(src/mbview)
 add_subdirectory(src/bsio)
 add_subdirectory(src/surf)
-add_subdirectory(src/mbtrn)
+if (buildTrn)
+   add_subdirectory(src/mbtrn)
+endif(buildTrn)
 
 # Executables
 add_subdirectory(src/mbgrdviz)
