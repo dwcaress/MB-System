@@ -17,11 +17,12 @@ else()
   message(FATAL_ERROR "Building on unsupported OS ${CMAKE_SYSTEM_NAME}")
 endif()
 
-
 # Set list of required modules (i.e. packages with find modules)
 set(modules GMT Proj OpenGL X11 Motif GDAL NetCDF FFTW)
 
 if (help)
+  message("specify OPTS install location with -DoptsDir=directory")
+  message("set install prefix with -Dprefix=directory")  
   message("force package include directory with -Dpackage_include=path")
   message("force package libraries with -Dpackage_lib=file")  
   message("where package is one of the following:")
@@ -32,6 +33,7 @@ if (help)
   message("you MUST specify -DVTK_include=<dir> -DVTK_lib=<libs>")
   message(FATAL_ERROR "")
 endif()
+
 
 if (APPLE)
 
@@ -59,6 +61,10 @@ if (APPLE)
     set(OpenGL_lib /opt/X11/lib/libGL.dylib;/opt/X11/lib/libGLU.dylib)
   endif()
 
+  set(otpsDir /usr/local/opt/otps)
+
+else()
+  set(otpsDir /local/opt/otps)
 endif()
 
 #[[
@@ -96,6 +102,10 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 
 message("CMAKE_CXX_FLAGS: ${CMAKE_CXX_FLAGS}")
 
+
+if (prefix)
+  set(CMAKE_INSTALL_PREFIX ${prefix})
+endif()
 
 # Get directory of this CMakeLists.txt file
 set(MB_HOME ${CMAKE_CURRENT_SOURCE_DIR})
@@ -143,6 +153,8 @@ endforeach()
 if (buildQt)
   # Look for packages that don't have modules
   if (NOT Qt5_include OR NOT Qt5_lib)
+    # This will need to change; see
+    # https://cmake.org/cmake/help/latest/manual/cmake-qt.7.html#manual:cmake-qt(7)
     find_package(Qt5 COMPONENTS Gui Quick REQUIRED)
     if (Qt5_FOUND)
       message("Found Qt5 package")
@@ -238,10 +250,12 @@ message("X11_XT_LIBRARIES: ${X11_XT_LIBRARIES}")
 message("VTK_LIBRARIES: ${VTK_LIBRARIES}")
 message("QT5_LIBRARIES: ${QT5_LIBRARIES}")
 
+message("Assume OPTS is installed in ${otpsDir}; override with -DotpsDir=dir")
+
 # Build a few needed header files
-message("call buildHeaders()")
+message("call buildHeaders(${otpsDir} ${CMAKE_INSTALL_PREFIX}/share/mbsystem)")
 include(buildHeaders)
-buildHeaders("otpsDir" "levitusInstallDir")
+buildHeaders(${otpsDir} ${CMAKE_INSTALL_PREFIX}/share/mbsystem)
 
 # MacOS requires all referred library symbols be specified when
 # building shared dylib
@@ -263,6 +277,8 @@ else()
   set(EXTRA_LIBRARIES "")
 endif()
 
+# Use standard cache variables for installation
+include(GNUInstallDirs)
 
 # Utilities and libraries
 add_subdirectory(src/gsf)
