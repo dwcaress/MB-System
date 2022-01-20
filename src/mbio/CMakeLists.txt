@@ -162,6 +162,7 @@ mbsys_gsf.c
 
 
 # Static library
+message("build static libmbio")
 add_library(mbio
 	    STATIC
             ${SRC})
@@ -171,7 +172,7 @@ target_include_directories(mbio
                            PUBLIC
 			   ${NETCDF_INCLUDE_DIR}
                            .
-                           ${CMAKE_SOURCE_DIR}/src/gsf
+			   ${CMAKE_SOURCE_DIR}/src/gsf
                            ${CMAKE_SOURCE_DIR}/src/bsio
                            ${CMAKE_SOURCE_DIR}/src/mbaux
                            ${CMAKE_SOURCE_DIR}/src/surf
@@ -180,9 +181,7 @@ target_include_directories(mbio
 			   )	   
 
 
-# Building dylib on Apple results in undefined symbols from third-party
-# libraries, not sure how to deal with those yet...
-if (NOT APPLE)
+message("build shared libmbio")
 
 # Shared library
 add_library(mbioShared
@@ -190,12 +189,29 @@ add_library(mbioShared
             ${SRC})
 
 
+target_compile_definitions(mbioShared PRIVATE 
+         $<$<COMPILE_LANG_AND_ID:C,GNU>:HAVE_CONFIG_H>
+         $<$<COMPILE_LANG_AND_ID:C,CC>:HAVE_CONFIG_H>)
+
 set_target_properties(mbioShared PROPERTIES OUTPUT_NAME mbio)
+
+IF (APPLE)
+  # Resolve missing symbols at runtime
+  set_target_properties(mbioShared PROPERTIES LINK_FLAGS
+                  "-undefined dynamic_lookup -flat_namespace")
+ENDIF (APPLE)
 
 target_include_directories(mbioShared
                            PUBLIC
 			   ${NETCDF_INCLUDE_DIR}
                            .
-                           ${CMAKE_SOURCE_DIR}/src/gsf)
+			   ${NETCDF_INCLUDE_DIR}
+                           .
+			   ${CMAKE_SOURCE_DIR}/src/gsf
+                           ${CMAKE_SOURCE_DIR}/src/bsio
+                           ${CMAKE_SOURCE_DIR}/src/mbaux
+                           ${CMAKE_SOURCE_DIR}/src/surf
+			   ${CMAKE_SOURCE_DIR}/src/mbtrn/r7kr
+			   ${CMAKE_SOURCE_DIR}/src/mbtrn/mframe/src
+			   )
 
-endif(NOT APPLE)
