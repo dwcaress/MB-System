@@ -3,6 +3,8 @@
 #
 
 message("in mbaux")
+message("CMAKE_INSTALL_LIBDIR: ${CMAKE_INSTALL_LIBDIR}")
+message("CMAKE_INSTALL_DATADIR: ${CMAKE_INSTALL_DATADIR}")
 
 # Static library
 add_library(mbaux
@@ -33,6 +35,16 @@ target_include_directories(mbxgr
                            ${GDAL_INCLUDE_DIR}
                            ${CMAKE_SOURCE_DIR}/src/mbio)
                            
+
+# Install
+message("set up mbaux install targets")
+message("CMAKE_INSTALL_PREFIX: ${CMAKE_INSTALL_PREFIX}")
+
+install(TARGETS mbaux mbxgr
+	DESTINATION ${CMAKE_INSTALL_LIBDIR})
+
+## install(TARGETS mbaux DESTINATION ${CMAKE_INSTALL_LIBDIR})
+## install(TARGETS mbxgr DESTINATION ${CMAKE_INSTALL_LIBDIR})
 
 if (NOT APPLE)
 
@@ -72,4 +84,9 @@ target_include_directories(mbxgrShared
                            ${CMAKE_SOURCE_DIR}/src/mbio)
 
 
+install(TARGETS mbauxShared DESTINATION ${CMAKE_INSTALL_LIBDIR})
+install(TARGETS mbxgrShared DESTINATION ${CMAKE_INSTALL_LIBDIR})
+
 endif(NOT APPLE)
+
+
