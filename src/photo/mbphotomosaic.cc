@@ -520,14 +520,14 @@ void load_image_quality(int verbose, mb_path ImageQualityFile, int *nquality, do
         (*nquality)++;
     fclose(tfp);
 
-    /* allocate arrays for nav */
+    /* allocate arrays for quality */
     if (*nquality > 0)
         {
         status = mb_reallocd(verbose, __FILE__, __LINE__, *nquality * sizeof(double), (void **)qptime, error);
         status = mb_reallocd(verbose, __FILE__, __LINE__, *nquality * sizeof(double), (void **)qpquality, error);
         }
 
-    /* if no nav data then set error */
+    /* if no quality data then set error */
     else
         {
         *error = MB_ERROR_BAD_DATA;
@@ -542,7 +542,7 @@ void load_image_quality(int verbose, mb_path ImageQualityFile, int *nquality, do
         exit(*error);
         }
 
-    /* read the data points in the nav file */
+    /* read the data points in the quality file */
     *nquality = 0;
     double *qtime = *qptime;
     double *qquality = *qpquality;
@@ -616,7 +616,7 @@ void load_calibration(int verbose, mb_path StereoCameraCalibrationFile, struct m
         fstorage["Q"] >> control->Q;
         fstorage.release();
         control->isVerticalStereo = fabs(control->P2.at<double>(1, 3)) > fabs(control->P2.at<double>(0, 3));
-        control->calibration_set = true;
+        control->calibration_set = false;
     }
     else {
         fprintf(stderr,"\nUnable to read camera calibration file %s\n",
@@ -2343,8 +2343,9 @@ int main(int argc, char** argv)
     double    tide;
 
     /* platform offsets */
+    bool platform_specified = false;
+    bool platform_initialized = false;
     mb_path PlatformFile;
-    int platform_specified = MB_NO;
     int camera_sensor = -1;
     int nav_sensor = -1;
     int sensordepth_sensor = -1;
@@ -2363,20 +2364,41 @@ int main(int argc, char** argv)
     struct mb_sensor_struct *sensor_camera = NULL;
 
     /* Input camera parameters */
-    int imagelist_camera;
+    bool calibration_specified = false;
+    bool calibration_initialized = false;
+    mb_path StereoCameraCalibrationFile;
     int image_camera = MBPM_CAMERA_LEFT;
     int use_camera_mode = MBPM_USE_STEREO;
-    mb_path StereoCameraCalibrationFile;
     control.calibration_set = false;
     control.SensorWidthMm = 8.789;
     control.SensorHeightMm = 6.610;
-    control.SensorCellMm =0.00454;
+    control.SensorCellMm = 0.00454;
     control.fov_fudgefactor = 1.0;
 
-    bool undistort_initialized = false;
+    /* Input navigation variables */
+    bool navigation_specified = false;
+    bool navigation_initialized = false;
+    mb_path NavigationFile;
+    int intstat;
+    int intime = 0;
+    int nnav = 0;
+    double *ntime = NULL;
+    double *nlon = NULL;
+    double *nlat = NULL;
+    double *nheading = NULL;
+    double *nspeed = NULL;
+    double *ndraft = NULL;
+    double *nroll = NULL;
+    double *npitch = NULL;
+    double *nheave = NULL;
 
     /* Input image correction */
+    bool correction_specified = false;
+    bool correction_initialized = false;
+    mb_path ImageCorrectionFile;
     control.corr_mode = MBPM_CORRECTION_NONE;
+    control.corr_tables_loaded = false;
+    control.corr_color_enabled = false;
     control.corr_range_target = 3.0;
     control.corr_range_coeff = 1.0;
     control.corr_standoff_target = 3.0;
@@ -2388,9 +2410,6 @@ int main(int argc, char** argv)
     control.reference_crcb_set = false;
     control.reference_cr = 0.0;
     control.reference_cb = 0.0;
-    mb_path ImageCorrectionFile;
-    control.corr_tables_loaded = false;
-    control.corr_color_enabled = false;
     control.ncorr_x = 21;
     control.ncorr_y = 21;
     control.ncorr_z = 100;
@@ -2406,25 +2425,12 @@ int main(int argc, char** argv)
     control.ibin_xcen = 0;
     control.jbin_ycen = 0;
     control.kbin_zcen = 0;
-
-    /* Input navigation variables */
-    bool navigation_specified = false;
-    mb_path NavigationFile;
-    int intstat;
-    int intime = 0;
-    int nnav = 0;
-    double *ntime = NULL;
-    double *nlon = NULL;
-    double *nlat = NULL;
-    double *nheading = NULL;
-    double *nspeed = NULL;
-    double *ndraft = NULL;
-    double *nroll = NULL;
-    double *npitch = NULL;
-    double *nheave = NULL;
+    control.center_y[0] = 70.0;
+    control.center_y[1] = 70.0;
 
     /* Input tide variables */
-    bool use_tide = false;
+    bool tide_specified = false;
+    bool tide_initialized = false;
     mb_path TideFile;
     int ittime = 0;
     int ntide = 0;
@@ -2432,10 +2438,10 @@ int main(int argc, char** argv)
     double *ttide = NULL;
 
     /* Input quality variables */
-    bool use_imagequality = false;
+    bool imagequality_initialized = false;
+    bool imagequality_specified = false;
     double imageQualityThreshold = 0.0;
     double imageQualityFilterLength = 0.0;
-    bool ImageQualityFile_specified = false;
     mb_path ImageQualityFile;
     int iqtime = 0;
     int nquality = 0;
@@ -2848,7 +2854,7 @@ int main(int argc, char** argv)
             else if (strcmp("platform-file", options[option_index].name) == 0)
                 {
                 strcpy(PlatformFile, optarg);
-                platform_specified = MB_YES;
+                platform_specified = true;
                 }
 
             /* camera-sensor */
@@ -2909,7 +2915,7 @@ int main(int argc, char** argv)
             else if (strcmp("calibration-file", options[option_index].name) == 0)
                 {
                 strcpy(StereoCameraCalibrationFile, optarg);
-                control.calibration_set = true;
+                calibration_specified = true;
                 }
 
             /* navigation-file */
@@ -2925,7 +2931,7 @@ int main(int argc, char** argv)
                 {
                 const int n = sscanf (optarg,"%s", TideFile);
                 if (n == 1)
-                    use_tide = true;
+                    tide_specified = true;
                 }
 
             /* image-quality-file */
@@ -2933,7 +2939,7 @@ int main(int argc, char** argv)
                 {
                 const int n = sscanf (optarg,"%s", ImageQualityFile);
                 if (n == 1)
-                    ImageQualityFile_specified = true;
+                    imagequality_specified = true;
                 }
 
             /* image-quality-threshold  (0 <= imageQualityThreshold <= 1) */
@@ -3044,11 +3050,11 @@ int main(int argc, char** argv)
             fprintf(stream,"%s     projection_pars:                  %s\n", first, projection_pars);
         fprintf(stream,"%s     navigation_specified:             %d\n", first, navigation_specified);
         fprintf(stream,"%s     NavigationFile:                   %s\n", first, NavigationFile);
-        fprintf(stream,"%s     use_tide:                         %d\n", first, use_tide);
+        fprintf(stream,"%s     tide_specified:                   %d\n", first, tide_specified);
         fprintf(stream,"%s     TideFile:                         %s\n", first, TideFile);
-        fprintf(stream,"%s     ImageQualityFile_specified:       %d\n", first, ImageQualityFile_specified);
+        fprintf(stream,"%s     imagequality_specified:           %d\n", first, imagequality_specified);
         fprintf(stream,"%s     ImageQualityFile:                 %s\n", first, ImageQualityFile);
-        fprintf(stream,"%s     use_imagequality:                 %d\n", first, use_imagequality);
+        fprintf(stream,"%s     imagequality_initialized:                 %d\n", first, imagequality_initialized);
         fprintf(stream,"%s     imageQualityThreshold:            %f\n", first, imageQualityThreshold);
         fprintf(stream,"%s     imageQualityFilterLength:         %f\n", first, imageQualityFilterLength);
         fprintf(stream,"%s     control.use_topography:           %d\n", first, control.use_topography);
@@ -3148,76 +3154,6 @@ int main(int argc, char** argv)
         error = MB_ERROR_BAD_PARAMETER;
         exit(error);
         }
-
-    /* read in platform offsets */
-    if (platform_specified) {
-        status = mb_platform_read(verbose, PlatformFile, (void **)&platform, &error);
-        if (status == MB_FAILURE)
-            {
-            error = MB_ERROR_OPEN_FAIL;
-            fprintf(stderr,"\nUnable to open and parse platform file: %s\n", PlatformFile);
-            fprintf(stderr,"\nProgram <%s> Terminated\n", program_name);
-            exit(error);
-            }
-        fprintf(stream, "\nRead platform model from: %s\n", PlatformFile);
-
-        /* reset data sources according to commands */
-        if (nav_sensor >= 0)
-            platform->source_position = nav_sensor;
-        if (sensordepth_sensor >= 0)
-            platform->source_depth = sensordepth_sensor;
-        if (heading_sensor >= 0)
-            platform->source_heading = heading_sensor;
-        if (attitude_sensor >= 0)
-            {
-            platform->source_rollpitch = attitude_sensor;
-            platform->source_heave = attitude_sensor;
-            }
-
-        /* get sensor structures */
-        if (platform->source_bathymetry >= 0)
-            sensor_bathymetry = &(platform->sensors[platform->source_bathymetry]);
-        if (platform->source_backscatter >= 0)
-            sensor_backscatter = &(platform->sensors[platform->source_backscatter]);
-        if (platform->source_position >= 0)
-            sensor_position = &(platform->sensors[platform->source_position]);
-        if (platform->source_depth >= 0)
-            sensor_depth = &(platform->sensors[platform->source_depth]);
-        if (platform->source_heading >= 0)
-            sensor_heading = &(platform->sensors[platform->source_heading]);
-        if (platform->source_rollpitch >= 0)
-            sensor_rollpitch = &(platform->sensors[platform->source_rollpitch]);
-        if (platform->source_heave >= 0)
-            sensor_heave = &(platform->sensors[platform->source_heave]);
-        if (camera_sensor < 0)
-            {
-            for (int isensor=0;isensor<platform->num_sensors;isensor++)
-                {
-                if (platform->sensors[isensor].type == MB_SENSOR_TYPE_CAMERA_STEREO)
-                    {
-                    camera_sensor = isensor;
-                    }
-                }
-            }
-        if (camera_sensor >= 0)
-            sensor_camera = &(platform->sensors[camera_sensor]);
-    }
-
-    /* image correction table */
-    if (control.calibration_set) {
-        load_calibration(verbose, StereoCameraCalibrationFile, &control, &error);
-        fprintf(stream, "    Stereo camera calibration model read from: %s\n", StereoCameraCalibrationFile);
-    }
-
-    /* image correction table */
-    if (control.corr_mode == MBPM_CORRECTION_FILE) {
-        load_correction(verbose, ImageCorrectionFile, &control, &error);
-    }
-    else {
-        /* else the default center intensity is 70.0 */
-        control.center_y[0] = 70.0;
-        control.center_y[1] = 70.0;
-    }
 
     /* deal with projected gridding */
     double deglontokm, deglattokm;
@@ -3516,34 +3452,6 @@ control.OutputBounds[0], control.OutputBounds[1], control.OutputBounds[2], contr
         }
     }
 
-    /* read in navigation if desired */
-    if (navigation_specified) {
-        load_navigation(verbose, NavigationFile, lonflip,
-                        &nnav, &ntime, &nlon, &nlat, &nheading, &nspeed, &ndraft,
-                        &nroll, &npitch, &nheave, &error);
-        if (nnav > 0) {
-            fprintf(stream,"\nRead %d navigation records read %s\n", nnav, NavigationFile);
-        }
-    }
-
-    /* read in tide if desired */
-    if (use_tide) {
-        load_tide(verbose, TideFile, &ntide, &ttime, &ttide, &error);
-        if (ntide > 0)
-            fprintf(stream,"\nRead %d tide records from %s\n", ntide, TideFile);
-    }
-
-    /* read in image quality if desired */
-    if (ImageQualityFile_specified) {
-        load_image_quality(verbose, ImageQualityFile, &nquality, &qtime, &qquality, &error);
-        if (nquality > 1) {
-            use_imagequality = true;
-            fprintf(stream,"\nRead %d image quality records from %s\n", nquality, ImageQualityFile);
-        }
-        else
-            use_imagequality = false;
-    }
-
     /* loop over the list of input images
        - this can be a list of single images or stereo images
        - the images must have navigation and attitude
@@ -3720,7 +3628,7 @@ control.OutputBounds[0], control.OutputBounds[1], control.OutputBounds[2], contr
             else if (strncmp(imageLeftFile, "--correction-file=", 18) == 0) {
                 if (sscanf(imageLeftFile, "--correction-file=%s", tmp) == 1) {
                     strcpy(ImageCorrectionFile, tmp);
-                    load_correction(verbose, ImageCorrectionFile, &control, &error);
+                    correction_specified = true;
                     control.corr_mode = MBPM_CORRECTION_FILE;
                 }
             }
@@ -3790,62 +3698,7 @@ control.OutputBounds[0], control.OutputBounds[1], control.OutputBounds[2], contr
             else if (strncmp(imageLeftFile, "--platform-file=", 16) == 0) {
                 if (sscanf(imageLeftFile, "--platform-file=%s", tmp) == 1) {
                     strcpy(PlatformFile, tmp);
-                    if (platform != NULL) {
-                        status = mb_platform_deall(verbose, (void **)&platform, &error);
-                    }
-                    status = mb_platform_read(verbose, PlatformFile, (void **)&platform, &error);
-                    if (status == MB_SUCCESS) {
-                        platform_specified = MB_YES;
-
-                        /* reset data sources according to commands */
-                        if (nav_sensor >= 0)
-                            platform->source_position = nav_sensor;
-                        if (sensordepth_sensor >= 0)
-                            platform->source_depth = sensordepth_sensor;
-                        if (heading_sensor >= 0)
-                            platform->source_heading = heading_sensor;
-                        if (attitude_sensor >= 0)
-                            {
-                            platform->source_rollpitch = attitude_sensor;
-                            platform->source_heave = attitude_sensor;
-                            }
-
-                        /* get sensor structures */
-                        if (platform->source_bathymetry >= 0)
-                            sensor_bathymetry = &(platform->sensors[platform->source_bathymetry]);
-                        if (platform->source_backscatter >= 0)
-                            sensor_backscatter = &(platform->sensors[platform->source_backscatter]);
-                        if (platform->source_position >= 0)
-                            sensor_position = &(platform->sensors[platform->source_position]);
-                        if (platform->source_depth >= 0)
-                            sensor_depth = &(platform->sensors[platform->source_depth]);
-                        if (platform->source_heading >= 0)
-                            sensor_heading = &(platform->sensors[platform->source_heading]);
-                        if (platform->source_rollpitch >= 0)
-                            sensor_rollpitch = &(platform->sensors[platform->source_rollpitch]);
-                        if (platform->source_heave >= 0)
-                            sensor_heave = &(platform->sensors[platform->source_heave]);
-                        if (camera_sensor < 0)
-                            {
-                            for (int isensor=0;isensor<platform->num_sensors;isensor++)
-                                {
-                                if (platform->sensors[isensor].type == MB_SENSOR_TYPE_CAMERA_STEREO)
-                                    {
-                                    camera_sensor = isensor;
-                                    }
-                                }
-                            }
-                        if (camera_sensor >= 0)
-                            sensor_camera = &(platform->sensors[camera_sensor]);
-
-                        if (verbose > 0)
-                            fprintf(stream, "    Survey platform model read from: %s\n", PlatformFile);
-                    } else if (status == MB_FAILURE) {
-                        fprintf(stderr,"\nUnable to read platform file %s\n", PlatformFile);
-                        fprintf(stderr,"Program <%s> Terminated\n", program_name);
-                        mb_memory_clear(verbose, &error);
-                        exit(MB_ERROR_BAD_PARAMETER);
-                    }
+                    platform_specified = true;
                 }
             }
 
@@ -3934,8 +3787,7 @@ control.OutputBounds[0], control.OutputBounds[1], control.OutputBounds[2], contr
             else if (strncmp(imageLeftFile, "--calibration-file=", 19) == 0) {
                 if (sscanf(imageLeftFile, "--calibration-file=%s", tmp) == 1) {
                     strcpy(StereoCameraCalibrationFile, tmp);
-                    load_calibration(verbose, StereoCameraCalibrationFile, &control, &error);
-                    fprintf(stream, "    Stereo camera calibration model read from: %s\n", StereoCameraCalibrationFile);
+                    calibration_specified = true;
                 }
             }
 
@@ -3943,13 +3795,7 @@ control.OutputBounds[0], control.OutputBounds[1], control.OutputBounds[2], contr
             else if (strncmp(imageLeftFile, "--navigation-file=", 18) == 0) {
                 if (sscanf(imageLeftFile, "--navigation-file=%s", tmp) == 1) {
                     strcpy(NavigationFile, tmp);
-                    load_navigation(verbose, NavigationFile, lonflip,
-                                    &nnav, &ntime, &nlon, &nlat, &nheading, &nspeed, &ndraft,
-                                    &nroll, &npitch, &nheave, &error);
-                    if (nnav > 0) {
-                        navigation_specified = true;
-                        fprintf(stream,"    Read %d navigation records from %s\n", nnav, NavigationFile);
-                    }
+                    navigation_specified = true;
                 }
             }
 
@@ -3957,11 +3803,7 @@ control.OutputBounds[0], control.OutputBounds[1], control.OutputBounds[2], contr
             else if (strncmp(imageLeftFile, "--tide-file=", 12) == 0) {
                 if (sscanf(imageLeftFile, "--tide-file=%s", tmp) == 1) {
                     strcpy(TideFile, tmp);
-                    load_tide(verbose, TideFile, &ntide, &ttime, &ttide, &error);
-                    if (ntide > 0) {
-                        use_tide = true;
-                        fprintf(stream,"    Read %d tide records from %s\n", ntide, TideFile);
-                    }
+                    tide_specified = true;
                 }
             }
 
@@ -3969,14 +3811,7 @@ control.OutputBounds[0], control.OutputBounds[1], control.OutputBounds[2], contr
             else if (strncmp(imageLeftFile, "--image-quality-file=", 21) == 0) {
                 if (sscanf(imageLeftFile, "--image-quality-file=%s", tmp) == 1) {
                     strcpy(ImageQualityFile, tmp);
-                    load_image_quality(verbose, ImageQualityFile, &nquality, &qtime, &qquality, &error);
-                    ImageQualityFile_specified = true;
-                    if (nquality > 1) {
-                        use_imagequality = true;
-                        fprintf(stream,"    Read %d image quality records from %s\n", nquality, ImageQualityFile);
-                    }
-                    else
-                        use_imagequality = false;
+                    imagequality_specified = true;
                 }
             }
 
@@ -4064,16 +3899,147 @@ control.OutputBounds[0], control.OutputBounds[1], control.OutputBounds[2], contr
             double image_gain;
             double image_exposure;
 
-            /* if stereo calibration not already set then quit */
-            if (!control.calibration_set)
-                {
+            /* If this is the first image processed since a platform model has
+                been specified, then load and initialize the platform model,
+                along with any specifications of ancilliary data source sensors. We assume that all
+                subsequent images derive from the same camera rig and have the same
+                dimensions. */
+            if (platform_specified) {
+                if (platform_initialized && platform != NULL) {
+                    status = mb_platform_deall(verbose, (void **)&platform, &error);
+                    platform_initialized = false;
+                }
+                if (mb_platform_read(verbose, PlatformFile, (void **)&platform, &error) == MB_SUCCESS) {
+                    fprintf(stream, "\nRead platform model from: %s\n", PlatformFile);
+                    platform_specified = false;
+                    platform_initialized = true;
+                }
+                else {
+                    error = MB_ERROR_OPEN_FAIL;
+                    fprintf(stderr,"\nUnable to open and parse platform file: %s\n", PlatformFile);
+                    fprintf(stderr,"\nProgram <%s> Terminated\n", program_name);
+                    mb_memory_clear(verbose, &error);
+                    exit(error);
+                }
+
+                /* reset data sources according to commands */
+                if (nav_sensor >= 0)
+                    platform->source_position = nav_sensor;
+                if (sensordepth_sensor >= 0)
+                    platform->source_depth = sensordepth_sensor;
+                if (heading_sensor >= 0)
+                    platform->source_heading = heading_sensor;
+                if (attitude_sensor >= 0)
+                    {
+                    platform->source_rollpitch = attitude_sensor;
+                    platform->source_heave = attitude_sensor;
+                    }
+
+                /* get sensor structures */
+                if (platform->source_bathymetry >= 0)
+                    sensor_bathymetry = &(platform->sensors[platform->source_bathymetry]);
+                if (platform->source_backscatter >= 0)
+                    sensor_backscatter = &(platform->sensors[platform->source_backscatter]);
+                if (platform->source_position >= 0)
+                    sensor_position = &(platform->sensors[platform->source_position]);
+                if (platform->source_depth >= 0)
+                    sensor_depth = &(platform->sensors[platform->source_depth]);
+                if (platform->source_heading >= 0)
+                    sensor_heading = &(platform->sensors[platform->source_heading]);
+                if (platform->source_rollpitch >= 0)
+                    sensor_rollpitch = &(platform->sensors[platform->source_rollpitch]);
+                if (platform->source_heave >= 0)
+                    sensor_heave = &(platform->sensors[platform->source_heave]);
+                if (camera_sensor < 0) {
+                    for (int isensor=0;isensor<platform->num_sensors;isensor++) {
+                        if (platform->sensors[isensor].type == MB_SENSOR_TYPE_CAMERA_STEREO) {
+                            camera_sensor = isensor;
+                        }
+                    }
+                }
+                if (camera_sensor >= 0)
+                    sensor_camera = &(platform->sensors[camera_sensor]);
+
+                if (verbose > 0)
+                    fprintf(stream, "    Survey platform model read from: %s\n", PlatformFile);
+            }
+            if (!platform_initialized) {
+                fprintf(stderr,"\nNo platform model file specified, either on command line or in imagelist structure...\n");
+                fprintf(stderr,"\nProgram <%s> Terminated\n",
+                    program_name);
+                error = MB_ERROR_BAD_PARAMETER;
+                mb_memory_clear(verbose, &error);
+                exit(error);
+            }
+
+            /* if newly specified load image correction table */
+            if (calibration_specified) {
+                load_calibration(verbose, StereoCameraCalibrationFile, &control, &error);
+                calibration_initialized = true;
+                calibration_specified = false;
+                fprintf(stream, "    Stereo camera calibration model read from: %s\n", StereoCameraCalibrationFile);
+            }
+            if (!calibration_initialized) {
                 fprintf(stderr,"\nNo camera calibration file specified, either on command line or in imagelist structure...\n");
                 fprintf(stderr,"\nProgram <%s> Terminated\n",
                     program_name);
                 error = MB_ERROR_BAD_PARAMETER;
                 mb_memory_clear(verbose, &error);
                 exit(error);
+            }
+
+            /* read in navigation if desired */
+            if (navigation_specified) {
+                load_navigation(verbose, NavigationFile, lonflip,
+                                &nnav, &ntime, &nlon, &nlat, &nheading, &nspeed, &ndraft,
+                                &nroll, &npitch, &nheave, &error);
+                if (nnav > 0) {
+                    fprintf(stream,"\nRead %d navigation records read %s\n", nnav, NavigationFile);
+                    navigation_initialized = true;
+                    navigation_specified = false;
                 }
+            }
+            if (!navigation_initialized) {
+                fprintf(stderr,"\nNo navigation file specified, either on command line or in imagelist structure...\n");
+                fprintf(stderr,"\nProgram <%s> Terminated\n",
+                    program_name);
+                error = MB_ERROR_BAD_PARAMETER;
+                mb_memory_clear(verbose, &error);
+                exit(error);
+            }
+
+            /* image correction table */
+            if (correction_specified) {
+                control.corr_mode = MBPM_CORRECTION_FILE;
+                load_correction(verbose, ImageCorrectionFile, &control, &error);
+                correction_initialized = true;
+                correction_specified = false;
+            }
+
+            /* read in tide if desired */
+            if (tide_specified) {
+                load_tide(verbose, TideFile, &ntide, &ttime, &ttide, &error);
+                if (ntide > 0) {
+                    tide_initialized = true;
+                    fprintf(stream,"\nRead %d tide records from %s\n", ntide, TideFile);
+                } else {
+                    tide_initialized = false;
+                }
+                tide_specified = false;
+            }
+
+            /* read in image quality if desired */
+            if (imagequality_specified) {
+                load_image_quality(verbose, ImageQualityFile, &nquality, &qtime, &qquality, &error);
+                if (nquality > 1) {
+                    imagequality_initialized = true;
+                    fprintf(stream,"    Read %d image quality records from %s\n", nquality, ImageQualityFile);
+                }
+                else {
+                    imagequality_initialized = false;
+                }
+                imagequality_specified = false;
+            }
 
             /* set camera for stereo image */
             if (currentimages == 2) {
@@ -4105,7 +4071,7 @@ control.OutputBounds[0], control.OutputBounds[1], control.OutputBounds[2], contr
             }
 
             /* check imageQuality value against threshold to see if this image should be used */
-            if (use_this_image && use_imagequality) {
+            if (use_this_image && imagequality_initialized) {
                 if (nquality > 1) {
                     intstat = mb_linear_interp(verbose, qtime-1, qquality-1, nquality,
                                                 time_d, &image_quality, &iqtime, &error);
@@ -4202,29 +4168,14 @@ control.OutputBounds[0], control.OutputBounds[1], control.OutputBounds[2], contr
 
             // Start processing thread
             else if (use_this_image) {
-                /* copy parameters to current processing parameter structure */
-                processPars[numThreadsSet].thread = numThreadsSet;
-                strcpy(processPars[numThreadsSet].imageFile, imageFile);
-                processPars[numThreadsSet].image_count = nimages - currentimages + iimage;
-                processPars[numThreadsSet].image_camera = image_camera;
-                processPars[numThreadsSet].image_quality = image_quality;
-                processPars[numThreadsSet].image_gain = image_gain;
-                processPars[numThreadsSet].image_exposure = image_exposure;
-                processPars[numThreadsSet].time_d = time_d;
-                processPars[numThreadsSet].camera_navlon = camera_navlon;
-                processPars[numThreadsSet].camera_navlat = camera_navlat;
-                processPars[numThreadsSet].camera_sensordepth = camera_sensordepth;
-                processPars[numThreadsSet].camera_heading = camera_heading;
-                processPars[numThreadsSet].camera_roll = camera_roll;
-                processPars[numThreadsSet].camera_pitch = camera_pitch;
 
-                /* If this is the first image processed, and a camera model has
+                /* If this is the first image processed since a camera model has
                     been specified, then read the image here and
                     initialize the use of the camera model. We assume that all
-                    images derive from the same camera rig and have the same
+                    subsequent images derive from the same camera rig and have the same
                     dimensions. */
-                if (!undistort_initialized) {
-                    undistort_initialized = true;
+                if (calibration_initialized && !control.calibration_set) {
+                    control.calibration_set = true;
                     Mat imageFirst = imread(imageFile);
                     if (!imageFirst.empty()) {
                         control.imageSize = imageFirst.size();
@@ -4269,6 +4220,22 @@ control.OutputBounds[0], control.OutputBounds[1], control.OutputBounds[2], contr
                         imageFirst.release();
                     }
                 }
+
+                /* copy parameters to current processing parameter structure */
+                processPars[numThreadsSet].thread = numThreadsSet;
+                strcpy(processPars[numThreadsSet].imageFile, imageFile);
+                processPars[numThreadsSet].image_count = nimages - currentimages + iimage;
+                processPars[numThreadsSet].image_camera = image_camera;
+                processPars[numThreadsSet].image_quality = image_quality;
+                processPars[numThreadsSet].image_gain = image_gain;
+                processPars[numThreadsSet].image_exposure = image_exposure;
+                processPars[numThreadsSet].time_d = time_d;
+                processPars[numThreadsSet].camera_navlon = camera_navlon;
+                processPars[numThreadsSet].camera_navlat = camera_navlat;
+                processPars[numThreadsSet].camera_sensordepth = camera_sensordepth;
+                processPars[numThreadsSet].camera_heading = camera_heading;
+                processPars[numThreadsSet].camera_roll = camera_roll;
+                processPars[numThreadsSet].camera_pitch = camera_pitch;
 
                 if (control.sectionPixels > 0)
                     mbphotomosaicThreads[numThreadsSet]
