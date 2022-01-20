@@ -29,7 +29,7 @@
 #include <time.h>
 #include <unistd.h>
 
-#define MB_NEED_SENSOR_TYPE
+#define MB_NEED_SENSOR_TYPE 1
 #include "mb_define.h"
 #include "mb_format.h"
 #include "mb_io.h"

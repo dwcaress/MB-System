@@ -191,3 +191,6 @@ src/mbtrn/mframe/build/medebug-test.d
 src/mbtrn/mframe/build/mconfig.d
 src/mbtrn/mframe/build/mcbuf.d
 src/mbtrn/mframe/build/mbbuf.d
+src/mbtrnav/trn-replay
+src/photo/mbtiff2png
+src/mbtrnav/trn-replay
