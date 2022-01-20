@@ -27,7 +27,8 @@ RUN yum -y groupinstall "Development Tools" && \
 # So, trying master just as an interim
 ARG GMT_SOURCE_TAG=master
 
-ARG PROJ_SOURCE_TAG
+# Tried 8.2.1, but got compile error, use this stable build
+ARG PROJ_SOURCE_TAG=7.2.1
 
 # TODO in general, confirm appropriate install mechanisms for PROJ and GMT on centos
 # (per .travis.yml, seems like the above tags are only defined for ubuntu.
@@ -36,7 +37,7 @@ COPY docker/centos/scripts/install-gmt.sh .
 RUN GMT_SOURCE_TAG=${GMT_SOURCE_TAG} ./install-gmt.sh
 
 COPY docker/centos/scripts/install-proj.sh .
-RUN GMT_SOURCE_TAG=${PROJ_SOURCE_TAG} ./install-proj.sh
+RUN PROJ_SOURCE_TAG=${PROJ_SOURCE_TAG} ./install-proj.sh
 
 # Cleanup
 RUN rm -rf install-gmt.sh install-proj.sh && yum -y clean all
@@ -63,10 +64,14 @@ RUN mkdir -p /opt/MB-System \
 # no "GDAL found" (even though was there) ...  no luck.
 COPY . /opt/MB-System/
 RUN cd /opt/MB-System/                              \
- && ./configure --with-gdal-config=/usr/bin         \
+ && ./configure --with-gdal-config=/usr/local/bin      \
+                --with-proj-lib=/usr/local/lib         \
+                --with-proj-include=/usr/local/include \
  && make                                            \
  && make check                                      \
  && make install
+
+RUN  ls /usr/local/include 
 
 WORKDIR  /opt/MBSWorkDir
 
