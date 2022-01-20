@@ -46,8 +46,6 @@ install(TARGETS mbaux mbxgr
 ## install(TARGETS mbaux DESTINATION ${CMAKE_INSTALL_LIBDIR})
 ## install(TARGETS mbxgr DESTINATION ${CMAKE_INSTALL_LIBDIR})
 
-if (NOT APPLE)
-
 # Shared library
 add_library(mbauxShared
 	    SHARED
@@ -55,6 +53,12 @@ add_library(mbauxShared
             mb_surface.c mb_track.c mb_truecont.c mb_zgrid.c)
 
 set_target_properties(mbauxShared PROPERTIES OUTPUT_NAME mbaux)
+
+IF (APPLE)
+  # Resolve missing symbols at runtime
+  set_target_properties(mbauxShared PROPERTIES LINK_FLAGS
+                  "-undefined dynamic_lookup -flat_namespace")
+ENDIF (APPLE)
 
 target_include_directories(mbauxShared
                            PUBLIC
@@ -65,8 +69,6 @@ target_include_directories(mbauxShared
                            ${CMAKE_SOURCE_DIR}/src/mbio)
 
 
-target_link_libraries(mbauxShared ${EXTRA_LIBRARIES})
-
 
 # Shared library
 add_library(mbxgrShared
@@ -74,6 +76,12 @@ add_library(mbxgrShared
             mb_xgraphics.c)
 
 set_target_properties(mbxgrShared PROPERTIES OUTPUT_NAME mbxgr)
+
+IF (APPLE)
+  # Resolve missing symbols at runtime
+  set_target_properties(mbxgrShared PROPERTIES LINK_FLAGS
+                  "-undefined dynamic_lookup -flat_namespace")
+ENDIF (APPLE)
 
 target_include_directories(mbxgrShared
                            PUBLIC
@@ -86,7 +94,5 @@ target_include_directories(mbxgrShared
 
 install(TARGETS mbauxShared DESTINATION ${CMAKE_INSTALL_LIBDIR})
 install(TARGETS mbxgrShared DESTINATION ${CMAKE_INSTALL_LIBDIR})
-
-endif(NOT APPLE)
 
 
