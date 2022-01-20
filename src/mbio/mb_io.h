@@ -122,6 +122,7 @@ const char *mb_platform_type(mb_platform_enum platform);
 #define MB_SENSOR_TYPE_PRESSURE 111
 #define MB_SENSOR_TYPE_SOUNDSPEED 120
 
+/* These arrays are defined in mb_platform.c and extern elsewhere */
 #ifdef MB_NEED_SENSOR_TYPE
 const int mb_sensor_type_id[] = {
     MB_SENSOR_TYPE_NONE,                    // 0
@@ -169,6 +170,11 @@ const char *mb_sensor_type_string[] = {"Unknown sensor type",
                                         "CTD",
                                         "Pressure",
                                         "Soundspeed"};
+
+#else
+
+extern const int mb_sensor_type_id[];
+extern const char *mb_sensor_type_string[];
 #endif  // MB_NEED_SENSOR_TYPE
 
 /* survey platform sensor capability bitmask defines */
