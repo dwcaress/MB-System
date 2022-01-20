@@ -175,6 +175,7 @@ const char *mb_sensor_type_string[] = {"Unknown sensor type",
 
 extern const int mb_sensor_type_id[];
 extern const char *mb_sensor_type_string[];
+
 #endif  // MB_NEED_SENSOR_TYPE
 
 /* survey platform sensor capability bitmask defines */
