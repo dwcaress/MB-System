@@ -40,4 +40,5 @@ target_include_directories(mbsapiShared
 
 
                            
-
+install(TARGETS mbsapi mbsapiShared
+	DESTINATION ${CMAKE_INSTALL_LIBDIR})
