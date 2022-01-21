@@ -59,3 +59,5 @@ target_include_directories(mbviewShared
                            ${CMAKE_SOURCE_DIR}/src/mbio
                            ${CMAKE_SOURCE_DIR}/src/mbaux)
                            
+install(TARGETS mbview mbviewShared
+	DESTINATION ${CMAKE_INSTALL_LIBDIR})
