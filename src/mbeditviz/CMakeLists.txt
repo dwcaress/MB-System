@@ -44,3 +44,5 @@ target_link_libraries(mbeditviz
                            
                            
 
+install(TARGETS mbeditviz
+	DESTINATION ${CMAKE_INSTALL_BINDIR})
