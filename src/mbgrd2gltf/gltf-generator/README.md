@@ -19,11 +19,13 @@ This is a program made to replace the current 3d geometry generation pipeline us
 
 This project uses CMake as the build-system generator, and running cmake with the CMakeLists.txt file in the gltf-generator folder should be enough to generate the build files.
 
-More specifically, on linux, one can enter the following commands in terminal:
+More specifically, in a MB-System Docker container shell one can:
 ```
-	$ cd $STOQS_HOME/stoqs/contrib/gltf-generator/build	
-	$ cmake ..	
-	$ make
+	cd /opt/MB-System/src/mbgrd2gltf/gltf-generator/build
+    export netCDFCxx_DIR=/usr/local/lib64/cmake/netCDF/
+	cmake3 ..	
+	make
+    ./grd-to-gltf -h
 ```
 
 As long as all the required packages/dependencies are installed, this should work.
