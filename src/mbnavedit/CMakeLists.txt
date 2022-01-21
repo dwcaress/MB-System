@@ -43,4 +43,6 @@ target_link_libraries(mbnavedit
                       pthread)
                            
                            
-
+install(TARGETS mbnavedit
+	DESTINATION ${CMAKE_INSTALL_BINDIR})
+	
