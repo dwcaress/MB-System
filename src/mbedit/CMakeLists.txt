@@ -43,4 +43,5 @@ target_link_libraries(mbedit
                       pthread)
                            
                            
-
+install(TARGETS mbedit
+	DESTINATION ${CMAKE_INSTALL_BINDIR})
