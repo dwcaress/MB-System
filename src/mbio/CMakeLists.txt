@@ -215,3 +215,5 @@ target_include_directories(mbioShared
 			   ${CMAKE_SOURCE_DIR}/src/mbtrn/mframe/src
 			   )
 
+install(TARGETS mbio mbioShared
+	DESTINATION ${CMAKE_INSTALL_LIBDIR})
