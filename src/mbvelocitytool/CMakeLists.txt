@@ -46,3 +46,6 @@ target_link_libraries(mbvelocitytool
                            
                            
 
+install(TARGETS mbvelocitytool
+        DESTINATION ${CMAKE_INSTALL_BINDIR})
+	
