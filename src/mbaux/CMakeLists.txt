@@ -40,12 +40,6 @@ target_include_directories(mbxgr
 message("set up mbaux install targets")
 message("CMAKE_INSTALL_PREFIX: ${CMAKE_INSTALL_PREFIX}")
 
-install(TARGETS mbaux mbxgr
-	DESTINATION ${CMAKE_INSTALL_LIBDIR})
-
-## install(TARGETS mbaux DESTINATION ${CMAKE_INSTALL_LIBDIR})
-## install(TARGETS mbxgr DESTINATION ${CMAKE_INSTALL_LIBDIR})
-
 # Shared library
 add_library(mbauxShared
 	    SHARED
@@ -92,7 +86,6 @@ target_include_directories(mbxgrShared
                            ${CMAKE_SOURCE_DIR}/src/mbio)
 
 
-install(TARGETS mbauxShared DESTINATION ${CMAKE_INSTALL_LIBDIR})
-install(TARGETS mbxgrShared DESTINATION ${CMAKE_INSTALL_LIBDIR})
-
+install(TARGETS mbaux mbxgr mbauxShared mbxgrShared
+	DESTINATION ${CMAKE_INSTALL_LIBDIR})
 
