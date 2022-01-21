@@ -41,3 +41,6 @@ target_include_directories(mbgsfShared
                            .
                            ${CMAKE_SOURCE_DIR}/src/mbio)
 
+
+install(TARGETS mbgsf mbgsfShared
+	DESTINATION ${CMAKE_INSTALL_LIBDIR})
