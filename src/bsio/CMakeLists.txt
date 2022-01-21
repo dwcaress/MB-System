@@ -56,5 +56,5 @@ target_include_directories(mbbsioShared
                            ${CMAKE_SOURCE_DIR}/src/mbaux)
 
 
-                           
-
+install(TARGETS mbbsio mbbsioShared
+	DESTINATION ${CMAKE_INSTALL_LIBDIR})
