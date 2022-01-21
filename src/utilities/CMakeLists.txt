@@ -65,4 +65,6 @@ endif()
 endforeach()
                            
                            
-
+install(TARGETS ${executables}
+        DESTINATION ${CMAKE_INSTALL_BINDIR})
+	
