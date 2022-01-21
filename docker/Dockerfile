@@ -3,10 +3,11 @@ FROM centos:7
 RUN yum -y groupinstall "Development Tools" && \
     yum install -y epel-release && \
     yum install -y \
+            curl-devel \
+            hdf5 \
+            hdf5-devel \
             fftw \
             fftw-devel \
-            netcdf \
-            netcdf-devel \
             openmotif \
             openmotif-devel \
             openssh-server \
@@ -21,6 +22,10 @@ RUN yum -y groupinstall "Development Tools" && \
             mesa-dri-drivers \
             gedit \
             evince
+
+# Build netcdf4 and netcdf-cxx4 from source - needed for building mbgrd2gltf
+COPY docker/centos/scripts/install-netcdfcxx.sh .
+RUN ./install-netcdfcxx.sh
 
 # note, problems with latest 6.0.0 release at this point,
 # see https://github.com/dwcaress/MB-System/issues/807#issuecomment-632938328
@@ -75,8 +80,8 @@ RUN  ls /usr/local/include
 
 WORKDIR  /opt/MBSWorkDir
 
-# due to programs failing to load libgmt
-ENV LD_LIBRARY_PATH ${LD_LIBRARY_PATH:+$LD_LIBRARY_PATH:}/usr/local/lib64
+# Runtime support to access shared libraries for gmt, netcdf4, etc.
+ENV LD_LIBRARY_PATH=/usr/local/lib64:/usr/local/lib
 
 # Permit executing MB-System commands via ssh from another container
 RUN echo "export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}" >> /root/.bashrc
