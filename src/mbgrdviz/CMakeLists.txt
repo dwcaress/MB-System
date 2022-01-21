@@ -43,4 +43,6 @@ target_link_libraries(mbgrdviz
                       pthread)
                            
                            
+install(TARGETS mbgrdviz
+	DESTINATION ${CMAKE_INSTALL_BINDIR})
 
