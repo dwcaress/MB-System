@@ -44,5 +44,6 @@ target_link_libraries(mbnavadjust
                       m
                       pthread)
                            
-                           
 
+install(TARGETS mbnavadjust
+        DESTINATION ${CMAKE_INSTALL_BINDIR})
