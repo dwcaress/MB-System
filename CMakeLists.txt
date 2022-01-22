@@ -28,12 +28,14 @@ if (help)
   message("where package is one of the following:")
   message("${modules} ${packages}")
   message("enable debugging with -DCMAKE_BUILD_TYPE=Debug")
-  message("built Qt-based GUIs with -DbuildQt=1")
-  message("built TRN software with -DbuildTrn=1")  
+  message("build Qt-based GUIs with -DbuildQt=1")
+  message("build TRN software with -DbuildTrn=1")
+  message("build shared/static libraries with -DBUILD_SHARED_LIBS=ON/OFF")
   message("you MUST specify -DVTK_include=<dir> -DVTK_lib=<libs>")
   message(FATAL_ERROR "")
 endif()
 
+option(BUILD_SHARED_LIBS "Build and link with shared libraries" ON)
 
 if (APPLE)
 
