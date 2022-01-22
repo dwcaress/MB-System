@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.13)
-project("grd-to-gltf")
+project("mbgrd2gltf")
 
-list(APPEND CMAKE_PREFIX_PATH "/home/vagrant/Downloads/netcdf-cxx4/build")
+list(APPEND CMAKE_PREFIX_PATH "/usr/local/lib64/cmake/netCDF/")
 
 # getting libraries
 find_package(netCDFCxx CONFIG REQUIRED)
@@ -21,19 +21,23 @@ else()
 endif()
 
 # getting sources & include dirs
-file(GLOB_RECURSE SOURCES "src/stoqs/*.cpp")
-set(INCLUDE_DIRS "include" "lib/tinygltf" ${netCDF_INCLUDE_DIR})
+# https://stackoverflow.com/a/22177285/1281657
+#file(GLOB_RECURSE SOURCES "*.cpp")
+set(SOURCE_FILES bathymetry.cpp  compression.cpp  geometry.cpp  main.cpp  model.cpp  options.cpp)
+set(INCLUDE_DIRS "include" "tinygltf" ${netCDF_INCLUDE_DIR})
 
 # universal objects
-add_library(common_objects OBJECT ${SOURCES})
+add_library(common_objects OBJECT ${SOURCE_FILES})
 target_include_directories(common_objects PRIVATE ${INCLUDE_DIRS})
 
 # main executable
-add_executable(${PROJECT_NAME} "src/main.cpp" $<TARGET_OBJECTS:common_objects>)
+# https://stackoverflow.com/a/22177285/1281657
+add_executable(${PROJECT_NAME} "main.cpp" ${SOURCE_FILES})
+#add_executable(${PROJECT_NAME} "main.cpp" $<TARGET_OBJECTS:common_objects>)
 list(APPEND TARGETS ${PROJECT_NAME})
 
 # getting tests
-file(GLOB TEST_SRCS "src/test/*.cpp")
+file(GLOB TEST_SRCS "test/*.cpp")
 
 # creating executables for tests
 foreach(TEST ${TEST_SRCS})

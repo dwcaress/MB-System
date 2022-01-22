@@ -1,16 +1,14 @@
 // local includes
-#include <stoqs/bathymetry.h>
-#include <stoqs/geometry.h>
-#include <stoqs/model.h>
-#include <stoqs/options.h>
+#include "bathymetry.h"
+#include "geometry.h"
+#include "model.h"
+#include "options.h"
 
 // standard library
 #include <iostream>
 
 // external libraries
 #include <netcdf.h>
-
-using namespace stoqs;
 
 int main(int argc, char *argv[])
 {

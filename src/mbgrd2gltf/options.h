@@ -5,8 +5,7 @@
 #include <string>
 #include <unordered_map>
 
-namespace stoqs
-{	
+
 	class Options
 	{
 	public: // types
@@ -53,6 +52,6 @@ namespace stoqs
 		bool is_exaggeration_set() const { return _is_exaggeration_set; }
 		bool is_output_folder_set() const { return _is_output_folder_set; }
 	};
-}
+
 
 #endif

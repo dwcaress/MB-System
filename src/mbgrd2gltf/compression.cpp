@@ -1,11 +1,9 @@
-#include <stoqs/compression.h>
+#include "compression.h"
 
 // standard library
 #include <cmath>
 #include <cstdint>
 
-namespace stoqs
-{
 	namespace compression
 	{
 		struct Size
@@ -113,4 +111,3 @@ namespace stoqs
 			return out;
 		}
 	}
-}

@@ -6,8 +6,6 @@
 #include <stdexcept>
 #include <string>
 
-namespace stoqs
-{
 	template <typename T>
 	class Matrix
 	{
@@ -150,6 +148,5 @@ namespace stoqs
 			return *this;
 		}
 	};
-}
 
 #endif

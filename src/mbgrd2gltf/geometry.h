@@ -2,16 +2,14 @@
 #define STOQS_GEOMETRY_H
 
 // local includes
-#include <stoqs/vertex.h>
-#include <stoqs/triangle.h>
-#include <stoqs/matrix.h>
-#include <stoqs/bathymetry.h>
+#include "vertex.h"
+#include "triangle.h"
+#include "matrix.h"
+#include "bathymetry.h"
 
 // standard library
 #include <vector>
 
-namespace stoqs
-{
 	class Geometry
 	{
 	private: // members
@@ -35,6 +33,5 @@ namespace stoqs
 		const Matrix<Vertex>& vertices() const { return _vertices; }
 		const std::vector<Triangle>& triangles() const { return _triangles; }
 	};
-}
 
 #endif

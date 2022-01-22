@@ -4,8 +4,6 @@
 // standard library
 #include <cstdint>
 
-namespace stoqs
-{
 	class Vertex
 	{
 	private: // members
@@ -43,6 +41,5 @@ namespace stoqs
 		Vertex& operator=(Vertex&&) = default;
 		Vertex& operator=(const Vertex&) = default;
 	};
-}
 
 #endif

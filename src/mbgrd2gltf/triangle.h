@@ -4,8 +4,6 @@
 // standard library
 #include <cstdint>
 
-namespace stoqs
-{
 	class Triangle
 	{
 	private: // members
@@ -32,6 +30,5 @@ namespace stoqs
 		inline uint32_t b() const { return _b; }
 		inline uint32_t c() const { return _c; }
 	};
-}
 
 #endif

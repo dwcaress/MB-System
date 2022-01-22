@@ -1,4 +1,4 @@
-#include <stoqs/model.h>
+#include "model.h"
 
 // external libraries
 #define TINYGLTF_IMPLEMENTATION
@@ -6,8 +6,6 @@
 #define TINYGLTF_NO_STB_IMAGE_WRITE
 #include <tiny_gltf.h>
 
-namespace stoqs
-{
 	namespace model
 	{
 		std::vector<float> get_vertex_buffer(const Matrix<Vertex>& vertices)
@@ -234,4 +232,3 @@ namespace stoqs
 			gltf.WriteGltfSceneToFile(&model, output_filepath, false, true, true, options.is_binary_output());
 		}
 	}
-}

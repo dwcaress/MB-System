@@ -1,13 +1,11 @@
-#include <stoqs/bathymetry.h>
+#include "bathymetry.h"
 
 // local includes
-#include <stoqs/compression.h>
+#include "compression.h"
 
 // external libraries
 #include <netcdf.h>
 
-namespace stoqs
-{
 	Bathymetry::Bathymetry(const Options& options)
 	{
 		int netcdf_id = get_netcdf_id(options.input_filepath().c_str());
@@ -186,4 +184,3 @@ namespace stoqs
 
 		return out;
 	}
-}

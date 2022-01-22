@@ -2,15 +2,13 @@
 #define STOQS_BATHYMETRY_H
 
 // local includes
-#include <stoqs/matrix.h>
-#include <stoqs/options.h>
+#include "matrix.h"
+#include "options.h"
 
 // standard library
 #include <string>
 #include <unordered_map>
 
-namespace stoqs
-{
 	class Bathymetry
 	{
 	public: // types
@@ -83,6 +81,5 @@ namespace stoqs
 
 		std::string to_string() const;
 	};
-}
 
 #endif

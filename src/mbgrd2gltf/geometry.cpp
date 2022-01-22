@@ -1,4 +1,4 @@
-#include <stoqs/geometry.h>
+#include "geometry.h"
 
 // standard library
 #include <cmath>
@@ -8,8 +8,6 @@
 #define WGS_84_SEMI_MAJOR_AXIS 6378137.0
 #define WGS_84_INVERSE_FLATTENING 298.257223563
 
-namespace stoqs
-{
 	Geometry::Geometry(const Bathymetry& bathymetry, const Options& options) :
 	_vertices(get_vertices(bathymetry, options.exaggeration())),
 	_triangles(get_triangles(_vertices))
@@ -173,4 +171,3 @@ namespace stoqs
 
 		return out;
 	}
-}
