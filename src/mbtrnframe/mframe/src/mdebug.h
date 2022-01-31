@@ -448,6 +448,10 @@ MQPRINT(fmt, ##__VA_ARGS__)
 // Exports
 /////////////////////////
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /// @fn int mdb_test()
 /// @brief test debug macros
 /// @return 0 on success, -1 otherwise
@@ -490,6 +494,10 @@ const char *mdb_get_name(md_module_id_t id);
 /// @param[in] level debug level
 /// @return level name or NULL
 const char *mdb_level2str(md_level_t level);
+
+#ifdef __cplusplus
+}
+#endif
 
 // include guard
 #endif

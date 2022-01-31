@@ -180,6 +180,8 @@ int mthread_thread_start(mthread_thread_t *thread, mthread_thread_fn func, void 
         fprintf(stderr,"error creating thread.");
         retval=-1;
     }
+    // release attributes, no longer needed
+    pthread_attr_destroy(&thread->attr);
     return retval;
 }
 // End function mthread_thread_start
@@ -190,7 +192,7 @@ int mthread_thread_start(mthread_thread_t *thread, mthread_thread_fn func, void 
 /// @return 0 on success, -1 otherwise
 int mthread_thread_join(mthread_thread_t *thread){
     int retval=0;
-    if ( pthread_join ( thread->t, (void **)thread->status ) ) {
+    if ( thread && thread->t && pthread_join ( thread->t, (void **)&thread->status ) ) {
         fprintf(stderr,"error joining thread.");
         retval=-1;
     }

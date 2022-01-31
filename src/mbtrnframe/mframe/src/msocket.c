@@ -167,7 +167,6 @@ void msock_addr_destroy(msock_addr_t **pself)
     if (NULL!=pself) {
         msock_addr_t *self = *pself;
         if (NULL!=self) {
-            
             if (NULL!=self->alist) {
                 // alist used to hold UDP reslist
                 // [i.e. getaddrinfo],
@@ -462,7 +461,7 @@ int msock_configure(msock_socket_t *s, const char *host, int port, msock_socket_
             }
             close(s->fd);
             s->fd=-1;
-       }
+        }
     }else{
         fprintf(stderr, "getaddrinfo error: %d/%s\n",status, gai_strerror(status));
     }

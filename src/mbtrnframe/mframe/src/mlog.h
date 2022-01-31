@@ -71,12 +71,13 @@
 // Includes 
 /////////////////////////
 #include "mfile.h"
+#include "mlist.h"
 
 /////////////////////////
 // Type Definitions
 /////////////////////////
 
-/// @typedef enum mlog_flags_t mlog_flags_t
+/// @typedef enum mlog_flag_bits_t mlog_flag_bits_t
 /// @brief mlog attribute flags
 /// ML_NOLIMIT no-limit value
 /// ML_MONO    monolithic log (single segment)
@@ -86,15 +87,46 @@
 /// ML_LIMLEN  limit segments by length
 /// ML_LIMTIME limit segments by time
 //typedef enum{ML_NOLIMIT=-1,ML_MONO=0,ML_DIS=0x1,ML_OVWR=0x2,ML_OSEG=0x4,ML_LIMLEN=0x8,ML_LIMTIME=0x10} mlog_flags_t;
-typedef enum{ML_NOLIMIT=0x40,ML_MONO=0x20,ML_DIS=0x1,ML_OVWR=0x2,ML_OSEG=0x4,ML_LIMLEN=0x8,ML_LIMTIME=0x10} mlog_flags_t;
+typedef enum{
+    ML_NOLIMIT=0x40,
+    ML_MONO=0x20,
+    ML_DIS=0x1,
+    ML_OVWR=0x2,
+    ML_OSEG=0x4,
+    ML_LIMLEN=0x8,
+    ML_LIMTIME=0x10
+} mlog_flag_bits_t;
+typedef uint32_t mlog_flags_t;
 
-/// @typedef enum mlog_dest_t mlog_dest_t
+/// @typedef enum mlog_dest_bits_s mlog_dest_bits_t
 /// @brief log destination flags. May be logically OR'd to use multiple
 /// ML_NODEST none
 /// ML_SERR   stderr
 /// ML_SOUT   stdout
 /// ML_FILE   file
-typedef enum{ML_NODEST=0,ML_SERR=0x8,ML_SOUT=0x4,ML_FILE=0x2} mlog_dest_t;
+typedef enum{
+    ML_NODEST=0,
+    ML_SERR=0x8,
+    ML_SOUT=0x4,
+    ML_FILE=0x2
+} mlog_dest_bits_t;
+
+typedef uint32_t mlog_oset_t;
+
+typedef enum{
+    ML_NONE=0,
+    ML_ERR,
+    ML_WARN,
+    ML_INFO,
+    ML_DEBUG
+}mlog_level_t;
+
+typedef struct map_entry_s{
+    const char *channel;
+    int level;
+    mlog_oset_t dfl_set;
+    mlog_oset_t dest_set;
+}map_entry_t;
 
 /// @typedef struct mlog_config_s mlog_config_t
 /// @brief mlog configuration structure
@@ -114,7 +146,7 @@ typedef struct mlog_config_s
     mlog_flags_t flags;
     /// @var mlog_config_s::dest
     /// @brief log output destination flags
-    mlog_dest_t dest;
+    mlog_oset_t dest;
     /// @var mlog_config_s::tfmt
     /// @brief log timestamp format
     char *tfmt;
@@ -154,11 +186,14 @@ typedef struct mlog_s
     /// @var mlog_s::cur_seg
     /// @brief current active segment number
     uint16_t cur_seg;
+    /// @var mlog_s::map_impl
+    /// @brief map channel, level to output destination(s)
+    mlist_t *omap_channel_map;
 }mlog_t;
 
 /// @typedef struct log_info_s mlog_info_t
 /// @brief mlog information
-typedef struct log_info_s
+typedef struct mlog_info_s
 {
     /// @var log_info_s::seg_count
     /// @brief number of segments
@@ -191,6 +226,9 @@ typedef int32_t mlog_id_t;
 // Macros
 /////////////////////////
 
+#define ML_LOG_DFL_CHANNEL "MLOG"
+#define ML_LOG_DFL_EXT ".dfl"
+
 #if defined(__unix__) || defined(__APPLE__)
 /// @def ML_SYS_PATH_DEL
 /// @brief path delimiter
@@ -216,12 +254,16 @@ typedef int32_t mlog_id_t;
 /// @brief max segment number
 #define ML_MAX_SEG       9999
 
-/// @def ML_TFMT_ISO1806
-/// @brief ISO1806 time format specifier
-#define ML_TFMT_ISO1806 "%FT%H:%M:%SZ"
+/// @def ML_TFMT_ISO8601
+/// @brief ISO8601 time format specifier
+#define ML_TFMT_ISO8601 "%FT%H:%M:%SZ"
+#define ML_TFMT_ISO1806 ML_TFMT_ISO8601
+/// @def ML_TFMT_POSIX_SEC
+/// @brief Posix epoch sec
+#define ML_TFMT_POSIX_SEC "%s"
 /// @def ML_DFL_TFMT
 /// @brief default timestamp format specifier
-#define ML_DFL_TFMT     ML_TFMT_ISO1806
+#define ML_DFL_TFMT     ML_TFMT_ISO8601
 /// @def ML_DFL_DEL
 /// @brief default record delimiter (between timestamp, data)
 #define ML_DFL_DEL      ","
@@ -236,21 +278,21 @@ typedef int32_t mlog_id_t;
 /// @brief 1 GByte
 #define ML_1G 1073741824
 
-/// @def IS_BYSIZE(f)
+/// @def MLOG_IS_BYSIZE(f)
 /// @brief return true if segment size limit flag set
-#define IS_BYSIZE(f)    ((f&ML_LIMLEN    != 0) ? true : false)
-/// @def IS_BYTIME(f)
+#define MLOG_IS_BYSIZE(f)    ((f&ML_LIMLEN    != 0) ? true : false)
+/// @def MLOG_IS_BYTIME(f)
 /// @brief return true if segment time limit flag set
-#define IS_BYTIME(f)    ((f&ML_LIMTIME    != 0) ? true : false)
-/// @def IS_SEGMENTED(f)
+#define MLOG_IS_BYTIME(f)    ((f&ML_LIMTIME    != 0) ? true : false)
+/// @def MLOG_IS_SEGMENTED(f)
 /// @brief return true if segmentation flag set
-#define IS_SEGMENTED(f) ((f&ML_OSEG   != 0) ? true : false)
-/// @def IS_ROTATE(f)
+#define MLOG_IS_SEGMENTED(f) ((f&ML_OSEG   != 0) ? true : false)
+/// @def MLOG_IS_ROTATE(f)
 /// @brief return true if segment overwrite flag set
-#define IS_ROTATE(f)    ((f&ML_OVWR    != 0) ? true : false)
-/// @def IS_ENABLED(f)
+#define MLOG_IS_ROTATE(f)    ((f&ML_OVWR    != 0) ? true : false)
+/// @def MLOG_IS_ENABLED(f)
 /// @brief return true if log disable flag clear
-#define IS_ENABLED(f)   ((f&ML_DIS   == 0) ? true : false)
+#define MLOG_IS_ENABLED(f)   ((f&ML_DIS   == 0) ? true : false)
 
 /////////////////////////
 // Exports
@@ -260,7 +302,7 @@ extern "C" {
 #endif
     
     mlog_config_t *mlog_config_new(const char *tfmt,const char *del,
-                                   mlog_flags_t flags, mlog_dest_t dest,
+                                   mlog_flags_t flags, mlog_oset_t dest,
                                    int32_t lim_b, int32_t lim_s, int32_t lim_t);
     
     void mlog_config_destroy(mlog_config_t **pself);
@@ -275,15 +317,29 @@ extern "C" {
     mlog_t *mlog_get(mlog_id_t id);
     void mlog_show(mlog_id_t, bool verbose, uint16_t indent);
     
-    void mlog_set_dest(mlog_id_t log, mlog_dest_t dest);
-    mlog_dest_t mlog_get_dest(mlog_id_t log);
+    void mlog_set_dest(mlog_id_t log, mlog_oset_t dest);
+    mlog_oset_t mlog_get_dest(mlog_id_t log);
     
-    int mlog_flush(mlog_id_t log);
-    int mlog_write(mlog_id_t log, byte *data, uint32_t len);
-    int mlog_printf(mlog_id_t log, char *fmt, ...);
-    int mlog_tprintf(mlog_id_t log, char *fmt, ...);
-    int mlog_puts(mlog_id_t log, char *data);
-    int mlog_putc(mlog_id_t log, char data);
+    int mlog_flush(mlog_id_t id);
+    int mlog_write(mlog_id_t id, byte *data, uint32_t len);
+    int mlog_printf(mlog_id_t id, char *fmt, ...);
+    int mlog_tprintf(mlog_id_t id, const char *fmt, ...);
+    int mlog_puts(mlog_id_t id, char *data);
+    int mlog_putc(mlog_id_t id, char data);
+
+    const char *mlog_deststr(mlog_oset_t dest_set);
+    const char *mlog_levelstr(int level);
+    void mlog_map_show(mlog_id_t id, bool verbose, int indent);
+    int mlog_map_dfl(mlog_id_t id, int level, mlog_oset_t dest_set);
+    int mlog_unmap_dfl(mlog_id_t id, int level);
+    int mlog_map_channel(mlog_id_t id, const char *channel, int level, mlog_oset_t dest_set);
+    int mlog_unmap_channel(mlog_id_t id, const char *channel, int level);
+    int mlog_map_channel_dfl(mlog_id_t id, const char *channel, mlog_oset_t dest_set);
+    int mlog_unmap_channel_dfl(mlog_id_t id, const char *channel);
+    mlog_oset_t mlog_lookup_dest(mlog_id_t id, const char *channel, int level);
+
+    int mlog_xtprintf(mlog_id_t id, const char *channel, int level, const char *fmt, ...);
+
 #ifdef WITH_MLOG_TEST
    int mlog_test(int verbose);
 #endif
