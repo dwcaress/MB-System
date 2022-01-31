@@ -96,11 +96,19 @@ double InitVars::z(){
 /*----------------------------------------------------------------------------
 /mapT member functions
 /----------------------------------------------------------------------------*/
-mapT::mapT() {
-	xpts = NULL;
-	ypts = NULL;
-	numX = 0;
-	numY = 0;
+mapT::mapT()
+:
+depths(),
+depthVariance(),
+xpts(NULL),
+ypts(NULL),
+dx(0.),
+dy(0.),
+xcen(0.),
+ycen(0.),
+numX(0),
+numY(0)
+{
 }
 
 mapT::~mapT() {
@@ -121,15 +129,14 @@ void mapT::clean() {
 	depths.CleanUp();
 	depthVariance.CleanUp();
 }
-
+#ifdef WITH_RESAMPLE_MAP
+// TODO remove mapT::reSampleMap (unused)
 void mapT::reSampleMap(const double newRes) {
 	int newNumX, newNumY;
 	double* xptsNew;
 	double* yptsNew;
 	Matrix depthsNew;
 	Matrix depthVarNew;
-	int i, j, subRes;
-	Matrix subDepthMap;
 
 	//Fill in new xpts/ypts vectors
 	newNumX = int(round(fabs(xpts[numX - 1] - xpts[0]) / newRes)) + 1;
@@ -140,21 +147,23 @@ void mapT::reSampleMap(const double newRes) {
 	xptsNew = new double[newNumX];
 	yptsNew = new double[newNumY];
 
-	for(i = 0; i < newNumX; i++) {
+	for(int i = 0; i < newNumX; i++) {
 		xptsNew[i] = xpts[0] + newRes * i;
 	}
 
-	for(j = 0; j < newNumY; j++) {
+	for(int j = 0; j < newNumY; j++) {
 		yptsNew[j] = ypts[0] + newRes * j;
 	}
 
 	//Fill in new depth values
 	if((newRes > dx) | (newRes > dy)) {
+        Matrix subDepthMap;
+
 		//TO DO: Fix this so it actually computes correct average for newRes!!
-		subRes = int(ceil(newRes / dx));
+		int subRes = int(ceil(newRes / dx));
 		subDepthMap.ReSize(subRes, subRes);
-		for(i = 1; i <= newNumX; i++) {
-			for(j = 1; j <= newNumY; j++) {
+		for(int i = 1; i <= newNumX; i++) {
+			for(int j = 1; j <= newNumY; j++) {
 				//fill in new depth values by averaging subMatrix
 				subDepthMap = depths.SubMatrix((i - 1) * subRes + 1, i * subRes,
 											   (j - 1) * subRes + 1, j * subRes);
@@ -183,6 +192,7 @@ void mapT::reSampleMap(const double newRes) {
 	xcen = (xpts[numX - 1] + xpts[0]) / 2.0;
 	ycen = (ypts[numY - 1] + ypts[0]) / 2.0;
 }
+#endif
 
 //subSample the stored map to a lower resolution.
 void mapT::subSampleMap(const int subRes) {
@@ -334,7 +344,7 @@ poseT::poseT() {
 
 
 //copy assignment operator
-poseT& poseT::operator=(poseT& rhs) {
+poseT& poseT::operator=(const poseT& rhs) {
 	if(this != &rhs) {
 		//copy non-array values
 		x    = rhs.x;     y     = rhs.y;      z    = rhs.z;
@@ -362,7 +372,7 @@ poseT& poseT::operator=(poseT& rhs) {
 }
 
 //difference assignment operator
-poseT& poseT::operator-=(poseT& rhs) {
+poseT& poseT::operator-=(const poseT& rhs) {
 
 	x    -= rhs.x;     y     -= rhs.y;      z    -= rhs.z;
 	vx   -= rhs.vx;    vy    -= rhs.vy;     vz   -= rhs.vz;    ve -= rhs.ve;
@@ -383,7 +393,7 @@ poseT& poseT::operator-=(poseT& rhs) {
 }
 
 //addition assignment operator
-poseT& poseT::operator+=(poseT& rhs) {
+poseT& poseT::operator+=(const poseT& rhs) {
 
 	x    += rhs.x;     y     += rhs.y;      z    += rhs.z;
 	vx   += rhs.vx;    vy    += rhs.vy;     vz   += rhs.vz;    ve += rhs.ve;
@@ -627,8 +637,7 @@ void measT::clean() {
 }
 
 //copy assignment operator
-measT& measT::operator=(measT& rhs) {
-	int i;
+measT& measT::operator=(const measT& rhs) {
 	if(this != &rhs) {
 		//if the two measT structs have different datatype or number of
 		//measurements, we need to delete and recreate memory for the
@@ -640,24 +649,76 @@ measT& measT::operator=(measT& rhs) {
 			this->clean();
 			if(rhs.dataType == TRN_SENSOR_MB ||
 			   rhs.dataType == TRN_SENSOR_HOMER) {
-                crossTrack = (double *)realloc(crossTrack, dasz);
-                alongTrack = (double *)realloc(alongTrack, dasz);
-                altitudes = (double *)realloc(altitudes, dasz);
-                ranges = (double *)realloc(ranges, dasz);
-			} else {
-                ranges = (double *)realloc(ranges, dasz);
+
+                double *new_cross = (double *)realloc(crossTrack, dasz);
+                double *new_along = (double *)realloc(alongTrack, dasz);
+                double *new_alts = (double *)realloc(altitudes, dasz);
+                double *new_ranges = (double *)realloc(ranges, dasz);
+
+                if(NULL != new_cross){
+                    crossTrack = new_cross;
+                }else{
+                    fprintf(stderr,"%s:%d WARN realloc failed for crossTrack\n",__func__,__LINE__);
+                }
+                if(NULL != new_along){
+                    alongTrack = new_along;
+                }else{
+                    fprintf(stderr,"%s:%d WARN realloc failed for alongTrack\n",__func__,__LINE__);
+                }
+                if(NULL != new_alts){
+                    altitudes = new_alts;
+                }else{
+                    fprintf(stderr,"%s:%d WARN realloc failed for altitudes\n",__func__,__LINE__);
+                }
+                if(NULL != new_ranges){
+                    ranges = new_ranges;
+                }else{
+                    fprintf(stderr,"%s:%d WARN realloc failed for ranges\n",__func__,__LINE__);
+                }
+
+            } else {
+                double *new_ranges = (double *)realloc(ranges, dasz);
+                if(NULL != new_ranges){
+                    ranges = new_ranges;
+                }else{
+                    fprintf(stderr,"%s:%d WARN realloc failed for ranges\n",__func__,__LINE__);
+                }
 			}
 
 			// MB-sys beam numbers
-            if(rhs.dataType == TRN_SENSOR_MB)
-                beamNums = (int *)realloc(beamNums, iasz);
+            if(rhs.dataType == TRN_SENSOR_MB){
+                int *new_beamn = (int *)realloc(beamNums, iasz);
+                if(NULL != new_beamn){
+                    beamNums = new_beamn;
+                }else{
+                    fprintf(stderr,"%s:%d WARN realloc failed for beamNums\n",__func__,__LINE__);
+                }
 
-            alphas = (double *)realloc(alphas, dasz);
-            measStatus = (bool *)realloc(measStatus, basz);
+            }
+            double *new_alph = (double *)realloc(alphas, dasz);
+            if( NULL != new_alph){
+                alphas = new_alph;
+            }else{
+                fprintf(stderr,"%s:%d WARN realloc failed for alphas\n",__func__,__LINE__);
+            }
+
+            bool *new_mstat = (bool *)realloc(measStatus, basz);
+            if(NULL != new_mstat){
+                measStatus = new_mstat;
+            }else{
+                fprintf(stderr,"%s:%d WARN realloc failed for measStatus\n",__func__,__LINE__);
+            }
+
 		}
 
 		if(rhs.covariance != NULL) {
-            covariance = (double *)realloc(covariance, dasz);
+            double *new_cov = (double *)realloc(covariance, dasz);
+            if(NULL!=new_cov){
+                covariance = new_cov;
+            }else{
+                fprintf(stderr,"%s:%d WARN realloc failed for covariance\n",__func__,__LINE__);
+            }
+
 		}
 
 		//copy non-array values
@@ -673,7 +734,7 @@ measT& measT::operator=(measT& rhs) {
 		z = rhs.z;
 
 		//copy array values
-		for(i = 0; i < rhs.numMeas; i++) {
+		for(int i = 0; i < rhs.numMeas; i++) {
 			if(rhs.dataType == TRN_SENSOR_MB ||
 			   rhs.dataType == TRN_SENSOR_HOMER) {
 				crossTrack[i] = rhs.crossTrack[i];
@@ -906,7 +967,13 @@ int measT::unserialize(char* buf, int buflen) { //TODO buflen is unused?
 	  printf("\n");
 #endif
 
-        measStatus = (bool *)realloc(measStatus, nm*sizeof(bool));
+        bool *new_mstat = (bool *)realloc(measStatus, nm*sizeof(bool));
+        if(NULL != new_mstat){
+            measStatus = new_mstat;
+        }else{
+            fprintf(stderr,"%s:%d WARN realloc failed for measStatus\n",__func__,__LINE__);
+        }
+
 		for(int i = 0; i < nm; i++) {
 			measStatus[i] = (buf[len++] != 0 ? true : false);
 #if BEAM_DEBUG
@@ -920,34 +987,61 @@ int measT::unserialize(char* buf, int buflen) { //TODO buflen is unused?
 		//
 		if(abs(dataType) == TRN_SENSOR_MB ||
 		   abs(dataType) == TRN_SENSOR_HOMER) {
-
-            crossTrack = (double *)realloc(crossTrack, dasz);
-            alongTrack = (double *)realloc(alongTrack, dasz);
-            altitudes = (double *)realloc(altitudes, dasz);
-            ranges = (double *)realloc(ranges, dasz);
+            double *new_cross = (double *)realloc(crossTrack, dasz);
+            double *new_along = (double *)realloc(alongTrack, dasz);
+            double *new_alts = (double *)realloc(altitudes, dasz);
+            double *new_ranges = (double *)realloc(ranges, dasz);
 
 			// Again, order is significant
-			//
-			memcpy(crossTrack, &buf[len], nm * sizeof(double));
-			len += nm * sizeof(double);
-			memcpy(alongTrack, &buf[len], nm * sizeof(double));
-			len += nm * sizeof(double);
-			memcpy(altitudes,  &buf[len], nm * sizeof(double));
-			len += nm * sizeof(double);
-			memcpy(ranges,     &buf[len], nm * sizeof(double));
-			len += nm * sizeof(double);
-
+            if(NULL != new_cross){
+                crossTrack = new_cross;
+                memcpy(crossTrack, &buf[len], nm * sizeof(double));
+                len += nm * sizeof(double);
+            }else{
+                fprintf(stderr,"%s:%d WARN realloc failed for crossTrack\n",__func__,__LINE__);
+            }
+            if(NULL != new_along){
+                alongTrack = new_along;
+                memcpy(alongTrack, &buf[len], nm * sizeof(double));
+                len += nm * sizeof(double);
+            }else{
+                fprintf(stderr,"%s:%d WARN realloc failed for alongTrack\n",__func__,__LINE__);
+            }
+            if(NULL != new_alts){
+                altitudes = new_alts;
+                memcpy(altitudes,  &buf[len], nm * sizeof(double));
+                len += nm * sizeof(double);
+            }else{
+                fprintf(stderr,"%s:%d WARN realloc failed for altitudes\n",__func__,__LINE__);
+            }
+            if(NULL != new_ranges){
+                ranges = new_ranges;
+                memcpy(ranges,     &buf[len], nm * sizeof(double));
+                len += nm * sizeof(double);
+            }else{
+                fprintf(stderr,"%s:%d WARN realloc failed for ranges\n",__func__,__LINE__);
+            }
 		} else {
-            ranges = (double *)realloc(ranges, dasz);
-			memcpy(ranges,     &buf[len], nm * sizeof(double));
-			len += nm * sizeof(double);
+            double *new_ranges = (double *)realloc(ranges, dasz);
+            if(NULL != new_ranges){
+                ranges = new_ranges;
+                memcpy(ranges,     &buf[len], nm * sizeof(double));
+                len += nm * sizeof(double);
+            }else{
+                fprintf(stderr,"%s:%d WARN realloc failed for ranges\n",__func__,__LINE__);
+            }
 		}
 
 		// MB-sys beam numbers
 		if(abs(dataType) == TRN_SENSOR_MB) {
-            beamNums = (int *)realloc(beamNums, iasz);
-			memcpy(beamNums,  &buf[len], nm * sizeof(int));
-			len += nm * sizeof(int);
+            int *new_beamn = (int *)realloc(beamNums, iasz);
+            if(NULL != new_beamn){
+                beamNums = new_beamn;
+                memcpy(beamNums,  &buf[len], nm * sizeof(int));
+                len += nm * sizeof(int);
+            }else{
+                fprintf(stderr,"%s:%d WARN realloc failed for beamNums\n",__func__,__LINE__);
+            }
 		}
 
 
@@ -955,9 +1049,14 @@ int measT::unserialize(char* buf, int buflen) { //TODO buflen is unused?
 		// are no covariances in this measT
 		//
 		if(dataType >= 0) {
-            covariance = (double *)realloc(covariance, dasz);
-			memcpy(covariance, &buf[len], nm * sizeof(double));
-			len += nm * sizeof(double);
+            double *new_cov = (double *)realloc(covariance, dasz);
+            if(NULL!=new_cov){
+                covariance = new_cov;
+                memcpy(covariance, &buf[len], nm * sizeof(double));
+                len += nm * sizeof(double);
+            }else{
+                fprintf(stderr,"%s:%d WARN realloc failed for covariance\n",__func__,__LINE__);
+            }
 			//printf("measT has covariance values\n");
 
 #if BEAM_DEBUG
@@ -976,11 +1075,14 @@ int measT::unserialize(char* buf, int buflen) { //TODO buflen is unused?
 		    fprintf(stderr,"measT::unserialize dataType[%d]\n", dataType);
 		  }
 		// Alphas
-		//
-        alphas = (double *)realloc(alphas, dasz);
-		memcpy(alphas, &buf[len], nm * sizeof(double));
-		len += nm * sizeof(double);
-
+        double *new_alph = (double *)realloc(alphas, dasz);
+        if( NULL != new_alph){
+            alphas = new_alph;
+            memcpy(alphas, &buf[len], nm * sizeof(double));
+            len += nm * sizeof(double);
+        }else{
+            fprintf(stderr,"%s:%d WARN realloc failed for alphas\n",__func__,__LINE__);
+        }
 		// printf("\t\t\tunserialize - alphas[0] = %f, len = %d\n", alphas[0], len);
 
 	}
@@ -1001,12 +1103,31 @@ void transformT::displayTransformInfo() {
 /*----------------------------------------------------------------------------
 /sensorT member functions
 /----------------------------------------------------------------------------*/
-sensorT::sensorT() {
-	T_bs = NULL;
+sensorT::sensorT()
+:
+numBeams(0),
+percentRangeError(0.),
+beamWidth(0.),
+type(0),
+T_bs(NULL)
+{
+    memset(name,0,256);
+    memset(filename,0,300);
 }
 
-sensorT::sensorT(char* fileName) { //TODO filename unused?
-	T_bs = NULL;
+sensorT::sensorT(char* fileName)
+:
+numBeams(0),
+percentRangeError(0.),
+beamWidth(0.),
+type(0),
+T_bs(NULL)
+{
+    memset(name,0,256);
+    memset(filename,0,300);
+    // TODO: orig ctor indicated fileName arg unused
+    // call parseSensorSpecs?
+    //parseSensorSpecs(fileName);
 }
 
 sensorT::~sensorT() {
@@ -1021,7 +1142,6 @@ sensorT::~sensorT() {
 void sensorT::parseSensorSpecs(char* fileName) {
 	fstream sensorFile;
 	char temp[512];
-	int i;
 
 	strcpy(filename, fileName);
 	sensorFile.open(fileName);
@@ -1072,7 +1192,7 @@ void sensorT::parseSensorSpecs(char* fileName) {
 			sensorFile.getline(temp, 256);
 			double dpsi = atof(temp) * PI / 180.0;
 
-			for(i = 0; i < numBeams; i++) {
+			for(int i = 0; i < numBeams; i++) {
 				T_bs[i].rotation[1] = T_bs[0].rotation[1] + i * dphi;
 				T_bs[i].rotation[2] = T_bs[0].rotation[2] + i * dpsi;
 				T_bs[i].rotation[0] = 0.0;
@@ -1093,7 +1213,7 @@ void sensorT::parseSensorSpecs(char* fileName) {
 			double dphi = atof(temp)*PI/180.0;
 
 			// Centered on middle beam pointing down with beam 1 at the back
-			for(i = 0; i < numBeams; i++)
+			for(int i = 0; i < numBeams; i++)
 			{
 				T_bs[i].rotation[1] = init_phi - dphi*numBeams/2 + i*dphi;
 				T_bs[i].rotation[2] = 0.0;
@@ -1107,7 +1227,7 @@ void sensorT::parseSensorSpecs(char* fileName) {
 			else {
 			//beam pitch angle
 			sensorFile.ignore(256, ':');
-			for(i = 0; i < numBeams; i++) {
+			for(int i = 0; i < numBeams; i++) {
 				if(i < numBeams - 1) {
 					sensorFile.getline(temp, 10, ',');
 				} else {
@@ -1122,7 +1242,7 @@ void sensorT::parseSensorSpecs(char* fileName) {
 
 			//beam yaw angle
 			sensorFile.ignore(256, ':');
-			for(i = 0; i < numBeams; i++) {
+			for(int i = 0; i < numBeams; i++) {
 				if(i < numBeams - 1) {
 					sensorFile.getline(temp, 10, ',');
 				} else {
@@ -1154,14 +1274,24 @@ void sensorT::displaySensorInfo() {
 /*----------------------------------------------------------------------------
 /vehicleT member functions
 /----------------------------------------------------------------------------*/
-vehicleT::vehicleT() {
-	T_sv = NULL;
-	sensors = NULL;
+vehicleT::vehicleT()
+:
+numSensors(0),
+driftRate(0.),
+T_sv(NULL),
+sensors(NULL)
+{
+    memset(name,0,256);
 }
 
-vehicleT::vehicleT(char* fileName) {
-	T_sv = NULL;
-	sensors = NULL;
+vehicleT::vehicleT(char* fileName)
+:
+numSensors(0),
+driftRate(0.),
+T_sv(NULL),
+sensors(NULL)
+{
+    memset(name,0,256);
 	parseVehicleSpecs(fileName);
 }
 
@@ -1179,91 +1309,86 @@ vehicleT::~vehicleT() {
 
 // throws an exception if the specs file could not be opened
 //
-void vehicleT::parseVehicleSpecs(char* fileName) {
-	fstream vehicleFile;
-	char temp[512];
-	char temp2[512];
-	char sensorFile[1024];
-	char* sensorPath;
+void vehicleT::parseVehicleSpecs(char* fileName){
+    fstream vehicleFile;
 
-   try
-   {
-      vehicleFile.open(fileName);
-      if(vehicleFile.is_open()) {
-         //read in vehicleName
-         vehicleFile.ignore(256, ':');
-         vehicleFile.getline(name, 256);
+    try {
+        char temp[512]={0};
+        vehicleFile.open(fileName);
+        if(vehicleFile.is_open()) {
+            char temp2[512]={0};
+            char sensorFile[1024]={0};
+            //read in vehicleName
+            vehicleFile.ignore(256, ':');
+            vehicleFile.getline(name, 256);
 
-         //read in number of sensors
-         vehicleFile.ignore(256, ':');
-         vehicleFile.getline(temp, 256);
-         numSensors = atoi(temp);
+            //read in number of sensors
+            vehicleFile.ignore(256, ':');
+            vehicleFile.getline(temp, 256);
+            numSensors = atoi(temp);
 
-         //read in INS drift rate
-         vehicleFile.ignore(256, ':');
-         vehicleFile.getline(temp, 256);
-         driftRate = atof(temp);
+            //read in INS drift rate
+            vehicleFile.ignore(256, ':');
+            vehicleFile.getline(temp, 256);
+            driftRate = atof(temp);
 
-         //read in sensor information
-         sensors = new sensorT[numSensors];
-         T_sv = new transformT[numSensors];
+            //read in sensor information
+            sensors = new sensorT[numSensors];
+            T_sv = new transformT[numSensors];
 
-         for(int i = 0; i < numSensors; i++) {
-           //sensor name
-           vehicleFile.ignore(256, ':');
-           vehicleFile.getline(sensors[i].name, 256);
+            for(int i = 0; i < numSensors; i++) {
+                //sensor name
+                vehicleFile.ignore(256, ':');
+                vehicleFile.getline(sensors[i].name, 256);
 
-           //sensor orientation offset
-           vehicleFile.ignore(256, ':');
-           vehicleFile.getline(temp, 10, ',');
-           T_sv[i].rotation[0] = atof(temp) * PI / 180.0;
-           vehicleFile.getline(temp, 10, ',');
-           T_sv[i].rotation[1] = atof(temp) * PI / 180.0;
-           vehicleFile.getline(temp, 10);
-           T_sv[i].rotation[2] = atof(temp) * PI / 180.0;
+                //sensor orientation offset
+                vehicleFile.ignore(256, ':');
+                vehicleFile.getline(temp, 10, ',');
+                T_sv[i].rotation[0] = atof(temp) * PI / 180.0;
+                vehicleFile.getline(temp, 10, ',');
+                T_sv[i].rotation[1] = atof(temp) * PI / 180.0;
+                vehicleFile.getline(temp, 10);
+                T_sv[i].rotation[2] = atof(temp) * PI / 180.0;
 
-           //sensor translational offset
-           vehicleFile.ignore(256, ':');
-           vehicleFile.getline(temp, 10, ',');
-           T_sv[i].translation[0] = atof(temp);
-           vehicleFile.getline(temp, 10, ',');
-           T_sv[i].translation[1] = atof(temp);
-           vehicleFile.getline(temp, 10);
-           T_sv[i].translation[2] = atof(temp);
+                //sensor translational offset
+                vehicleFile.ignore(256, ':');
+                vehicleFile.getline(temp, 10, ',');
+                T_sv[i].translation[0] = atof(temp);
+                vehicleFile.getline(temp, 10, ',');
+                T_sv[i].translation[1] = atof(temp);
+                vehicleFile.getline(temp, 10);
+                T_sv[i].translation[2] = atof(temp);
 
-           //extract file directory
-           strcpy(sensorFile, fileName);
-           sensorPath = strstr(sensorFile, name);
+                //extract file directory
+                strcpy(sensorFile, fileName);
+                char *sensorPath = strstr(sensorFile, name);
 
-           //determine sensor file name
-           sprintf(temp2, "%s%s", sensors[i].name, "_specs.cfg\0");
-           strcpy(sensorPath, temp2);
+                //determine sensor file name
+                sprintf(temp2, "%s%s", sensors[i].name, "_specs.cfg\0");
+                strcpy(sensorPath, temp2);
 
-           //parse sensor file
-           sensors[i].parseSensorSpecs(sensorFile);
-           LOGM("Sensor %d is of type %d.\n",
-                 i, sensors[i].type);
+                //parse sensor file
+                sensors[i].parseSensorSpecs(sensorFile);
+                LOGM("Sensor %d is of type %d.\n",
+                     i, sensors[i].type);
+            }
+
+            vehicleFile.close();
+        } else {
+            sprintf(temp,"Error opening file %s...\n", fileName);
+            fprintf(stderr, "%s: %s", __func__, temp);
+            throw Exception(temp);
         }
 
-        vehicleFile.close();
-     } else {
-        sprintf(temp,"Error opening file %s...\n", fileName);
-	     fprintf(stderr, "%s: %s", __func__, temp);
-        throw Exception(temp);
-     }
+    } catch (Exception& e){
+        // Report, close specs file, re-throw
+        //
+        fprintf(stderr, "structDefs::parseVehicleSpecs() - %s\n", EXP_MSG);
+        if (vehicleFile.is_open()) vehicleFile.close();
+        throw(e);
+    }
 
-   }  // try block
-
-   catch (Exception e)
-   {
-      // Report, close specs file, re-throw
-      //
-      fprintf(stderr, "structDefs::parseVehicleSpecs() - %s\n", EXP_MSG);
-      if (vehicleFile.is_open()) vehicleFile.close();
-      throw(e);
-   }
-
-   return;
+    return;
 }
 
 void vehicleT::displayVehicleInfo() {
@@ -1296,40 +1421,84 @@ void vehicleT::displayVehicleInfo() {
 /----------------------------------------------------------------------------*/
 
 commsT::commsT()
-	: msg_type(0), parameter(0), vdr(0.0),
-	  mapname(NULL), cfgname(NULL), particlename(NULL), logname(NULL) {
-          memset(&xyz_sdev,0, sizeof(d_triplet_t));
-          memset(&est_nav_ofs,0, sizeof(est_nav_ofs));
+:
+msg_type(0),
+parameter(0),
+vdr(0.0),
+pt(),
+mt(),
+xyz_sdev(),
+est_nav_ofs(),
+mapname(NULL),
+cfgname(NULL),
+particlename(NULL),
+logname(NULL)
+{
 }
 
 commsT::commsT(char type)
-	: msg_type(type), parameter(0), vdr(0.0),
-	  mapname(NULL), cfgname(NULL), particlename(NULL), logname(NULL) {
-          memset(&xyz_sdev,0, sizeof(d_triplet_t));
-          memset(&est_nav_ofs,0, sizeof(est_nav_ofs));
+:
+msg_type(type),
+parameter(0),
+vdr(0.0),
+pt(),
+mt(),
+xyz_sdev(),
+est_nav_ofs(),
+mapname(NULL),
+cfgname(NULL),
+particlename(NULL),
+logname(NULL)
+{
 }
 
 commsT::commsT(char type, int param)
-	: msg_type(type), parameter(param), vdr(0.0),
-	  mapname(NULL), cfgname(NULL), particlename(NULL), logname(NULL) {
-          memset(&xyz_sdev,0, sizeof(d_triplet_t));
-          memset(&est_nav_ofs,0, sizeof(est_nav_ofs));
+:
+msg_type(type),
+parameter(param),
+vdr(0.0),
+pt(),
+mt(),
+xyz_sdev(),
+est_nav_ofs(),
+mapname(NULL),
+cfgname(NULL),
+particlename(NULL),
+logname(NULL)
+{
 }
 
 commsT::commsT(char type, int param, float dr)// TODO char param unused
-	: msg_type(type), parameter(0), vdr(dr),
-	  mapname(NULL), cfgname(NULL), particlename(NULL), logname(NULL) {
-          memset(&xyz_sdev,0, sizeof(d_triplet_t));
-          memset(&est_nav_ofs,0, sizeof(est_nav_ofs));
+:
+msg_type(type),
+parameter(0),
+vdr(dr),
+pt(),
+mt(),
+xyz_sdev(),
+est_nav_ofs(),
+mapname(NULL),
+cfgname(NULL),
+particlename(NULL),
+logname(NULL)
+{
 }
 
 commsT::commsT(char type, int param, char* map, char* cfg,
 	            char* partfile, char* logdir)
-	: msg_type(type), parameter(param), vdr(0.0),
-	  mapname(NULL), cfgname(NULL), particlename(NULL), logname(NULL)
+:
+msg_type(type),
+parameter(param),
+vdr(0.0),
+pt(),
+mt(),
+xyz_sdev(),
+est_nav_ofs(),
+mapname(NULL),
+cfgname(NULL),
+particlename(NULL),
+logname(NULL)
 {
-    memset(&xyz_sdev,0, sizeof(d_triplet_t));
-    memset(&est_nav_ofs,0, sizeof(est_nav_ofs));
     mapname = STRDUPNULL(map);
     cfgname = STRDUPNULL(cfg);
     logname = STRDUPNULL(logdir);
@@ -1341,12 +1510,20 @@ commsT::commsT(char type, int param, char* map, char* cfg,
     }
 }
 
-commsT::commsT(char type, int param, measT& m)
-: msg_type(type), parameter(param), vdr(0.0),
-mapname(NULL), cfgname(NULL), particlename(NULL), logname(NULL) {
-
-    memset(&xyz_sdev,0, sizeof(d_triplet_t));
-    memset(&est_nav_ofs,0, sizeof(est_nav_ofs));
+commsT::commsT(char type, int param, const measT& m)
+:
+msg_type(type),
+parameter(param),
+vdr(0.0),
+pt(),
+mt(),
+xyz_sdev(),
+est_nav_ofs(),
+mapname(NULL),
+cfgname(NULL),
+particlename(NULL),
+logname(NULL)
+{
     // Measure update message?
     //
     if(msg_type == TRN_MEAS) {
@@ -1357,9 +1534,20 @@ mapname(NULL), cfgname(NULL), particlename(NULL), logname(NULL) {
     //printf("MU msg created\n");
 }
 
-commsT::commsT(char type, poseT& p)
-	: msg_type(type), parameter(0), vdr(0.0),
-	  mapname(NULL), cfgname(NULL), particlename(NULL), logname(NULL) {
+commsT::commsT(char type, const poseT& p)
+:
+msg_type(type),
+parameter(0),
+vdr(0.0),
+pt(),
+mt(),
+xyz_sdev(),
+est_nav_ofs(),
+mapname(NULL),
+cfgname(NULL),
+particlename(NULL),
+logname(NULL)
+{
 	// Measure update message?
 	//
 	if((msg_type == TRN_MOTN || msg_type == TRN_MLE || msg_type == TRN_MMSE ||
@@ -1371,8 +1559,19 @@ commsT::commsT(char type, poseT& p)
 }
 
 commsT::commsT(char type, double x, double y, double z)
-: msg_type(type), parameter(0), vdr(0.0),
-mapname(NULL), cfgname(NULL), particlename(NULL), logname(NULL) {
+:
+msg_type(type),
+parameter(0),
+vdr(0.0),
+pt(),
+mt(),
+xyz_sdev(),
+est_nav_ofs(),
+mapname(NULL),
+cfgname(NULL),
+particlename(NULL),
+logname(NULL)
+{
     if( (msg_type == TRN_SET_INITSTDDEVXYZ) ||
        (msg_type == TRN_GET_INITSTDDEVXYZ)) {
         xyz_sdev.x = x;
@@ -1389,8 +1588,19 @@ mapname(NULL), cfgname(NULL), particlename(NULL), logname(NULL) {
 }
 
 commsT::commsT(char type, int param, double ofs_x, double ofs_y, double ofs_z)
-: msg_type(type), parameter(param), vdr(0.0),
-mapname(NULL), cfgname(NULL), particlename(NULL), logname(NULL) {
+:
+msg_type(type),
+parameter(param),
+vdr(0.0),
+pt(),
+mt(),
+xyz_sdev(),
+est_nav_ofs(),
+mapname(NULL),
+cfgname(NULL),
+particlename(NULL),
+logname(NULL)
+{
     if(msg_type == TRN_FILT_REINIT_OFFSET) {
         est_nav_ofs.x = ofs_x;
         est_nav_ofs.y = ofs_y;
@@ -1402,8 +1612,18 @@ mapname(NULL), cfgname(NULL), particlename(NULL), logname(NULL) {
 
 commsT::commsT(char type, int param, double ofs_x, double ofs_y, double ofs_z,
                double sdev_x, double sdev_y, double sdev_z)
-: msg_type(type), parameter(param), vdr(0.0),
-mapname(NULL), cfgname(NULL), particlename(NULL), logname(NULL) {
+:
+msg_type(type),
+parameter(param),
+vdr(0.0),
+pt(),
+mt(),
+xyz_sdev(),
+est_nav_ofs(),
+mapname(NULL),
+cfgname(NULL),
+particlename(NULL),
+logname(NULL) {
     if(msg_type == TRN_FILT_REINIT_BOX) {
         xyz_sdev.x = sdev_x;
         xyz_sdev.y = sdev_y;

@@ -297,7 +297,7 @@ bool TNavExtendKalmanFilter::generateMeasCorrData(measT* currMeas)
 
 int TNavExtendKalmanFilter::extractMap(const poseT &currPose)
 {
-   double max_dx, max_dy, dx, dy;
+   double max_dx, max_dy;
    double xCen, yCen;
    double mapSearch[2];
    double numXdesired, numYdesired;
@@ -309,11 +309,11 @@ int TNavExtendKalmanFilter::extractMap(const poseT &currPose)
 
    for(int i = 0; i < numCorr; i++)
    {
-      dx = fabs(corrData[i].dx);
+      double dx = fabs(corrData[i].dx);
       if(dx > max_dx)
          max_dx = dx;
            
-      dy = fabs(corrData[i].dy);
+      double dy = fabs(corrData[i].dy);
       if(dy > max_dy)
          max_dy = dy;
    }

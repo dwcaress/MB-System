@@ -69,20 +69,7 @@
 #include <cstdlib>
 #include <cstdio>
 #include <cinttypes>
-//#include <stdlib.h>
-//#include <stdio.h>
 #include "trn_msg.h"
-//#include <sys/stat.h>
-//#include <dirent.h>
-//#include <sys/types.h>
-//#include <sys/socket.h>
-//#include <unistd.h>
-//#include <arpa/inet.h>
-//#include <netinet/in.h>
-//#include <sys/time.h>
-//#include <pthread.h>
-//#include <semaphore.h>
-//#include <fcntl.h>
 // OS X before Sierra does not have clock_gettime, use clock_get_time
 #if defined(__APPLE__) && !defined(__CLOCK_AVAILABILITY) && defined(__MACH__)
 // host_get_clock_service
@@ -90,7 +77,6 @@
 // host_get_clock_service
 #include <mach/clock.h>
 #endif
-
 
 #include "TrnClient.h"
 #include "matrixArrayCalcs.h"
@@ -131,13 +117,24 @@
 #endif
 
 #define TRNCLI_UNIT_NAME "trncli-unit"
-#ifndef TRNCLI_UNIT_BUILD
-/// @def TRNUNIT_TEST_BUILD
+#ifndef TRNCLI_UNIT_VER
+/// @def TRNCLI_UNIT_VER
 /// @brief module build date.
 /// Sourced from CFLAGS in Makefile
-/// w/ -DMBTRN_BUILD=`date`
-#define TRNCLI_UNIT_BUILD ""VERSION_STRING(APP_BUILD)
+/// w/ -DTRNCLI_UNIT_VER=<version>
+#define TRNCLI_UNIT_VER (dev)
 #endif
+
+#ifndef TRNCLI_UNIT_BUILD
+/// @def TRNCLI_UNIT_BUILD
+/// @brief MB1RS library build date.
+/// Sourced from CFLAGS in Makefile
+/// w/ -DTRNCLI_UNIT_BUILD=`date`
+#define TRNCLI_UNIT_BUILD "0000/00/00T00:00:00-0000"
+#endif
+
+#define TRNCLI_UNIT_VERSION_STR VERSION_STRING(TRNCLI_UNIT_VER)
+#define TRNCLI_UNIT_BUILD_STR VERSION_STRING(TRNCLI_UNIT_BUILD)
 
 #define PARSE_BOOL(s) (strcasecmp(s,"Y")==0 || strcasecmp(s,"1")==0 || strcasecmp(s,"TRUE")==0 ? true : false)
 #define BOOLC_YN(b) (b ? 'Y' : 'N')
@@ -540,7 +537,7 @@ static void s_parse_args(int argc, char **argv, app_cfg_t *cfg)
 
         if (version) {
             //            mbtrn_show_app_version(TCPC_NAME,TCPC_BUILD);
-            fprintf(stderr,"%s build %s\n",TRNCLI_UNIT_NAME,TRNCLI_UNIT_BUILD);
+            fprintf(stderr,"%s ver[%s] build[%s]\n",TRNCLI_UNIT_NAME,TRNCLI_UNIT_VERSION_STR,TRNCLI_UNIT_BUILD_STR);
             exit(0);
         }
         if (help) {

@@ -57,7 +57,7 @@ static FILE* tlog=NULL;
 
 void tl_mconfig(TLModuleID id, TLStreams s_en, TLStreams s_di){
     
-    if (id>0 || id<TL_N_MODULES) {
+    if (id>=0 && id<TL_N_MODULES) {
         switch (s_en) {
             case TL_NONE:
             case TL_SOUT:
@@ -190,10 +190,10 @@ void trn_log(const char* log_msg) {
 //
 void tl_new_logfile(const char* directory)
 {
-    char buf[200];
-    
+
     if(directory != NULL){
-        const char *fname=(directory[strlen(directory)-1]=='/' ? "trn.log" : "/trn.log" );
+        char buf[200]={0};
+       const char *fname=(directory[strlen(directory)-1]=='/' ? "trn.log" : "/trn.log" );
         
         for (int i = 0; true; i++)
         {
@@ -243,6 +243,9 @@ void logs(int strmask, const char* format, ...) {
         va_copy(cargs,args);
         vsnprintf(temp, TL_RING_BYTES, format, cargs);
         trn_log(temp);
+        // klh : fix cppcheck va_copy/va_start error
+        // may have previously been omitted for QNX
+        va_end(cargs);
     }
     
     // check tlog!=NULL and send to stderr
@@ -253,6 +256,9 @@ void logs(int strmask, const char* format, ...) {
         if (term!=0x00) {
             fprintf(stderr,"\n");
         }
+        // klh : fix cppcheck va_copy/va_start error
+        // may have previously been omitted for QNX
+        va_end(cargs);
     }
     if( (strmask&TL_SOUT) !=0 ){
         va_copy(cargs,args);
@@ -260,7 +266,10 @@ void logs(int strmask, const char* format, ...) {
         if (term!=0x00) {
             fprintf(stdout,"\n");
         }
+        // klh : fix cppcheck va_copy/va_start error
+        // may have previously been omitted for QNX
+        va_end(cargs);
     }
     
-    va_end(args);
+   va_end(args);
 }

@@ -371,26 +371,27 @@ double randn(double mean, double stddev);
  */
 inline double randn_zeroMean(const double& stddev)
 {
-   double rand1, rand2, gauss1, w;
-   static int use_last = 0;
-   static double gauss2;
+   double gauss1=0.;
+   static bool use_last = false;
+   static double gauss2 = 0.;
 
    //If we already have a random variable waiting to be used, use it
    if (use_last)		
    {
       gauss1 = gauss2;
-      use_last = 0;
+      use_last = false;
    }
    //Otherwise, generate two new random numbers
    else
    {
+       double rand1, rand2, w;
       //Use the Polar Form of the Box-Muller transformation:
       //1.Generate two uniform random variables within the unit circle
       do {
          //Generate two uniform random variables between -1 and 1
-         rand1 = unif_zeroOne();
-         rand2 = unif_zeroOne();
-         w = rand1*rand1 + rand2*rand2;
+          rand1 = unif_zeroOne();
+          rand2 = unif_zeroOne();
+          w = rand1*rand1 + rand2*rand2;
       } while ( w >= 1.0 );
       
       //2.Convert random variables to gaussian variables, N(0,1).
@@ -399,7 +400,7 @@ inline double randn_zeroMean(const double& stddev)
       gauss2 = rand2 * w;
 
       //Set flag that we have an extra variable that can be used
-      use_last = 1;
+      use_last = true;
    }
    
    return (stddev*gauss1);

@@ -41,6 +41,13 @@
 #include "TerrainNavLcmClient.h"
 #endif
 
+// Seconds within which a DVL record matches TRN record
+const double Replay::DVL4TRN = 0.4;
+// Seconds within which a nav record matches TRN record
+const double Replay::NAV4TRN = 0.2;
+// array depth for VNORM
+const uint16_t Replay::REPLAY_VNORM_DIM = 3;
+
 // Common to QNX and NIX versions
 Replay::Replay(const char* loghome, const char *map, const char *host, int port)
   : logdir(0),
@@ -136,7 +143,7 @@ static double Vnorm( double v[] )
 {
    double Vnorm2 = 0.;
    int i;
-   for(i=0; i<REPLAY_VNORM_DIM; i++) Vnorm2 += pow(v[i],2.);
+   for(i=0; i < Replay::REPLAY_VNORM_DIM; i++) Vnorm2 += pow(v[i],2.);
    return( sqrt( Vnorm2 ) );
 }
 
@@ -295,7 +302,7 @@ int Replay::getNextRecordSet(poseT *pt, measT *mt)
         nav_log->read();
         nav_time = nav_log->timeTag()->value();
       }
-      while( (fabs(nav_time - pt->time) > NAV4TRN) && (nav_time < pt->time) );
+      while( (fabs(nav_time - pt->time) > Replay::NAV4TRN) && (nav_time < pt->time) );
 
       //fprintf(stderr, "Found matching nav record at time %f\n", nav_time);
       nav_log->fields.get(7,&f); mt->phi   = atof(f->ascii());
@@ -487,7 +494,7 @@ int Replay::openLogFiles()
 // If the user enters "native" as the argument in the -h option,
 // return false.
 // On QNX, always use the trn_server for TRN
-Boolean Replay::useTRNServer()
+bool Replay::useTRNServer()
 {
 #ifdef _QNX
   return True;
@@ -496,7 +503,7 @@ Boolean Replay::useTRNServer()
 #endif
 }
 
-Boolean Replay::useLcmTrn()
+bool Replay::useLcmTrn()
 {
 #ifndef _LCMTRN
   fprintf(stderr, "Replay - trn_replay was not build for LCMTRN!\n");

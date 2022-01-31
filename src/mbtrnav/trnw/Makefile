@@ -7,9 +7,12 @@
 # to override value defined in source, e.g.
 #   trn_ver=1.0.1 make
 trn_ver ?=0.0.1
-trn_build=`date +%Y/%m/%dT%H:%M:%S%z`
+build_date=`date +%Y/%m/%dT%H:%M:%S%z`
 OPT_TRN_VER=-DLIBTRN_VERSION=$(trn_ver)
-OPT_TRN_BUILD=-DLIBTRN_BUILD=$(trn_build)
+OPT_TRN_BUILD=-DLIBTRN_BUILD=$(build_date)
+mb1rs_ver ?=0.0.0b1
+OPT_MB1RS_VER=-DMB1RS_VER=$(mb1rs_ver)
+OPT_MB1RS_BUILD=-DMB1RS_BUILD=$(build_date)
 
 # C standard e.g. -std=c99 -std=gnu99
 # may be needed for Cygwin (e.g. for loop declare/init)
@@ -48,7 +51,7 @@ $(info INFO >>>>>> using NETIF_MMDEBUG)
 endif
 
 # Build options
-BUILD_RELEASE_OPTIONS = $(STD) -D_GNU_SOURCE  $(OPT_TRN_VER) $(OPT_TRN_BUILD) $(OPT_NETIF_MMDEBUG)
+BUILD_RELEASE_OPTIONS = $(STD) -D_GNU_SOURCE  $(OPT_TRN_VER) $(OPT_TRN_BUILD) $(OPT_NETIF_MMDEBUG) $(OPT_MB1RS_VER) $(OPT_MB1RS_BUILD)
 BUILD_DEBUG_OPTIONS = $(BUILD_RELEASE_OPTIONS) -DWITH_PDEBUG
 
 BUILD_OPTIONS = $(BUILD_RELEASE_OPTIONS)
@@ -191,17 +194,36 @@ TRNIF_TEST_SRC=trnif_test.c trnif_proto.c trnif_msg.c
 TRNIF_TEST_OBJ = $(TRNIF_TEST_SRC:%.c=$(BUILD_DIR)/%.o)
 TRNIF_TEST_LIBS = -lnetif -lmframe -ltrnw -lpthread -lm -lqnx -lnewmat -ltrn -lnetcdf -lgeolib -lstdc++
 
-# TRN clients
-TRNC_SRC+= $(LIBTRNCLI_SRC) $(TRNCLI_TEST_SRC) \
-$(LIBTRNUCLI_SRC) $(TRNUCLI_TEST_SRC) $(TRNUSVR_TEST_SRC) \
-$(MMCPUB_SRC) $(MMCPUB_SRC) $(MCPUB_SRC) $(MCPUB_SRC) \
-$(TRNCLI_TEST_SRC) $(TRNIF_TEST_SRC)
+MB1RS=mb1rs
+MB1RS_SRC=mb1_msg.c mb1rs.c mb1rs-app.c
+MB1RS_OBJ=$(MB1RS_SRC:%.c=$(BUILD_DIR)/%.o)
+MB1RS_LIBS = $(MFRAME_LIB) -lm -lpthread
 
-TRNC_TARGETS+=  $(OUTPUT_DIR)/$(LIBTRNCLI) $(OUTPUT_DIR)/$(TRNCLI_TEST) \
-			$(OUTPUT_DIR)/$(LIBTRNUCLI) $(OUTPUT_DIR)/$(TRNUCLI_TEST)\
-			$(OUTPUT_DIR)/$(TRNUSVR_TEST) \
-			$(OUTPUT_DIR)/$(MMCPUB) $(OUTPUT_DIR)/$(MMCSUB) \
-			$(OUTPUT_DIR)/$(MCPUB) $(OUTPUT_DIR)/$(MCSUB) $(OUTPUT_DIR)/$(TRNIF_TEST)
+# TRN clients
+TRNC_SRC+= $(LIBTRNCLI_SRC) \
+$(TRNCLI_TEST_SRC) \
+$(LIBTRNUCLI_SRC) \
+$(TRNUCLI_TEST_SRC) \
+$(TRNUSVR_TEST_SRC) \
+$(MMCPUB_SRC) \
+$(MMCPUB_SRC) \
+$(MCPUB_SRC) \
+$(MCPUB_SRC) \
+$(TRNCLI_TEST_SRC) \
+$(TRNIF_TEST_SRC) \
+$(MB1RS_SRC)
+
+TRNC_TARGETS+=  $(OUTPUT_DIR)/$(LIBTRNCLI) \
+$(OUTPUT_DIR)/$(TRNCLI_TEST) \
+$(OUTPUT_DIR)/$(LIBTRNUCLI) \
+$(OUTPUT_DIR)/$(TRNUCLI_TEST)\
+$(OUTPUT_DIR)/$(TRNUSVR_TEST) \
+$(OUTPUT_DIR)/$(MMCPUB) \
+$(OUTPUT_DIR)/$(MMCSUB) \
+$(OUTPUT_DIR)/$(MCPUB) \
+$(OUTPUT_DIR)/$(MCSUB) \
+$(OUTPUT_DIR)/$(TRNIF_TEST) \
+$(OUTPUT_DIR)/$(MB1RS)
 
 ########################################
 # Build Files (mostly for cleanup)
@@ -294,6 +316,11 @@ $(OUTPUT_DIR)/$(MMCSUB): $(MMCSUB_OBJ)
 $(OUTPUT_DIR)/$(TRNIF_TEST): $(TRNIF_TEST_OBJ)
 	@echo building $@...
 	$(CXX) $(INC_PATHS) $(LIB_PATHS) $^ -o $@ $(LD_FLAGS) $(TRNIF_TEST_LIBS)
+
+# build mb1rs MB1 server
+$(OUTPUT_DIR)/$(MB1RS): $(MB1RS_OBJ)
+	@echo building $@...
+	$(CXX) $(INC_PATHS) $(LIB_PATHS) $^ -o $@ $(LD_FLAGS) $(MB1RS_LIBS)
 
 # include the dependencies
 ifeq ($(MAKECMDGOALS),trnc)

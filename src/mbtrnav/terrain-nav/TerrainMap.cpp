@@ -148,7 +148,6 @@ double TerrainMap::getNearestLowResMapPoint(const double north,
 
 void TerrainMap::setRefMap(char *mapName)
 {
-   int check_error_code;
    mapbounds* tempBounds;
    char mapPrefix[1024];
    char mapVarName[1040];
@@ -185,7 +184,9 @@ void TerrainMap::setRefMap(char *mapName)
    //set map bounds structure for new reference map
    this->refMap->bounds = mapbounds_init();
    tempBounds = mapbounds_init();
-   check_error_code = mapbounds_fill1(this->refMap->src, tempBounds);
+    if( (int check_error_code = mapbounds_fill1(this->refMap->src, tempBounds))!=MAPIO_OK){
+        logs(TL_OMASK(TL_TERRAIN_MAP, TL_LOG),"WARN - mapbounds_fill1 ret[%d]\n",check_error_code);
+    }
 
    //change labels to keep with a right-handed coordinate system
    this->refMap->bounds->xmin = tempBounds->ymin;

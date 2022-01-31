@@ -73,8 +73,18 @@ I've tested with either 1 or 2. It doesn't have to be an int.
 struct WeightArray{
 	int size;
 	double weights[MAX_NUM_PARTICLES];
-	WeightArray(int size){this->size = size;}
-	WeightArray(){this->size = MAX_NUM_PARTICLES;}
+    explicit WeightArray(int isize)
+    :size(isize)
+    {
+        int i=0;
+        for(i=0;i<MAX_NUM_PARTICLES;i++)
+        weights[i]=0.;
+    }
+	WeightArray():size(MAX_NUM_PARTICLES){
+        int i=0;
+        for(i=0;i<MAX_NUM_PARTICLES;i++)
+        weights[i]=0.;
+    }
 	double operator[](int index);
 };
 
@@ -383,7 +393,7 @@ class TNavBankFilter : public TNavFilter
    * -------------------------------------------------------------------------*/
   /*! Initializes the particle distribution based on an initial guess
    */
-  void initParticleDist(particleT& initialGuess);
+  void initParticleDist(const particleT& initialGuess);
 
 
   /* Function: attitudeMeasUpdate
@@ -394,7 +404,7 @@ class TNavBankFilter : public TNavFilter
    * Resamples the particle distribution if appropriate.
    * Note that this function is only called when INTEG_PHI_THETA is set to 1.
    */
-  void attitudeMeasUpdate(poseT& currPose);
+  void attitudeMeasUpdate(const poseT& currPose);
 
 
   /* Function: homerMeasUpdate
@@ -417,7 +427,7 @@ class TNavBankFilter : public TNavFilter
    * displacements dx, dy, dz, dphi, dtheta, dpsi, over the last dt seconds.
    * Uses terrain motion information stored by the particle.
    */
-  void motionUpdateParticle(particleT& particle, poseT& diffPose);   
+  void motionUpdateParticle(particleT& particle, const poseT& diffPose);
 
   /* Function: resampParticleDist
    * Usage: resampParticleDist();
@@ -632,6 +642,7 @@ class TNavBankFilter : public TNavFilter
   unsigned int windowIndex[MAX_NUM_FILTERS][MAX_NUM_PARTICLES];
 
   TNavPFLog* *bfLogs; //[MAX_NUM_FILTERS];
+
 };
 
 #endif
