@@ -1,0 +1,23 @@
+#version 330
+/*
+Adapted from phong shader demo at http://www.cs.toronto.edu/~jacobson/phong-demo/
+*/
+attribute vec3 vertexPosition;
+attribute vec3 vertexNormal;    // Already normalized to length 1
+attribute vec4 vertexColor;
+
+uniform mat4 u_projectionMatrix, u_modelMatrix;
+varying vec3 normalInterp;
+varying vec3 vertPos;
+vec4 normalMat;   // T.O'R.
+out vec4 ambientColor;
+
+void main(){
+  normalMat.x = normalMat.y = normalMat.z = normalMat.w = 1.;  // T.O'R.
+  vec4 vertPos4 = u_modelMatrix * vec4(vertexPosition, 1.0);
+  vertPos = vec3(vertPos4) / vertPos4.w;
+  normalInterp = vec3(normalMat * vec4(vertexNormal, 0.0));
+  normalInterp = vec4(vertexNormal);
+  gl_Position = u_projectionMatrix * vertPos4;
+  ambientColor = vertexColor;
+}

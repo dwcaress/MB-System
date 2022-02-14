@@ -29,7 +29,7 @@
 #include <time.h>
 #include <unistd.h>
 
-#define MB_NEED_SENSOR_TYPE
+#define MB_NEED_SENSOR_TYPE 1
 #include "mb_define.h"
 #include "mb_format.h"
 #include "mb_io.h"
@@ -87,6 +87,10 @@ int mb_platform_init(int verbose, void **platform_ptr, int *error) {
     platform->source_subbottom1 = -1;
     platform->source_subbottom2 = -1;
     platform->source_subbottom3 = -1;
+    platform->source_camera = -1;
+    platform->source_camera1 = -1;
+    platform->source_camera2 = -1;
+    platform->source_camera3 = -1;
     platform->source_position = -1;
     platform->source_position1 = -1;
     platform->source_position2 = -1;
@@ -534,6 +538,14 @@ int mb_platform_set_source_sensor(int verbose, void *platform_ptr, int source_ty
       platform->source_subbottom2 = sensor;
     else if (source_type == MB_PLATFORM_SOURCE_SUBBOTTOM3)
       platform->source_subbottom3 = sensor;
+    else if (source_type == MB_PLATFORM_SOURCE_CAMERA)
+      platform->source_camera = sensor;
+    else if (source_type == MB_PLATFORM_SOURCE_CAMERA1)
+      platform->source_camera1 = sensor;
+    else if (source_type == MB_PLATFORM_SOURCE_CAMERA2)
+      platform->source_camera2 = sensor;
+    else if (source_type == MB_PLATFORM_SOURCE_CAMERA3)
+      platform->source_camera3 = sensor;
     else if (source_type == MB_PLATFORM_SOURCE_POSITION)
       platform->source_position = sensor;
     else if (source_type == MB_PLATFORM_SOURCE_POSITION1)
@@ -617,6 +629,14 @@ int mb_platform_set_source_sensor(int verbose, void *platform_ptr, int source_ty
         fprintf(stderr, "dbg2       value set: platform->source_subbottom2:    %d\n", platform->source_subbottom2);
       else if (source_type == MB_PLATFORM_SOURCE_SUBBOTTOM3)
         fprintf(stderr, "dbg2       value set: platform->source_subbottom3:    %d\n", platform->source_subbottom3);
+      else if (source_type == MB_PLATFORM_SOURCE_CAMERA)
+        fprintf(stderr, "dbg2       value set: platform->source_camera:        %d\n", platform->source_camera);
+      else if (source_type == MB_PLATFORM_SOURCE_CAMERA1)
+        fprintf(stderr, "dbg2       value set: platform->source_camera1:       %d\n", platform->source_camera1);
+      else if (source_type == MB_PLATFORM_SOURCE_CAMERA2)
+        fprintf(stderr, "dbg2       value set: platform->source_camera2:       %d\n", platform->source_camera2);
+      else if (source_type == MB_PLATFORM_SOURCE_CAMERA3)
+        fprintf(stderr, "dbg2       value set: platform->source_camera3:       %d\n", platform->source_camera3);
       else if (source_type == MB_PLATFORM_SOURCE_POSITION)
         fprintf(stderr, "dbg2       value set: platform->source_position:      %d\n", platform->source_position);
       else if (source_type == MB_PLATFORM_SOURCE_POSITION1)
@@ -840,6 +860,18 @@ int mb_platform_read(int verbose, char *platform_file, void **platform_ptr, int 
           }
           else if (strncmp(buffer, "SOURCE_SUBBOTTOM", 18) == 0) {
             sscanf(buffer, "%s %d", dummy, &platform->source_subbottom);
+          }
+          else if (strncmp(buffer, "SOURCE_SUBCAMERA1", 19) == 0) {
+            sscanf(buffer, "%s %d", dummy, &platform->source_camera1);
+          }
+          else if (strncmp(buffer, "SOURCE_SUBCAMERA2", 19) == 0) {
+            sscanf(buffer, "%s %d", dummy, &platform->source_camera2);
+          }
+          else if (strncmp(buffer, "SOURCE_SUBCAMERA3", 19) == 0) {
+            sscanf(buffer, "%s %d", dummy, &platform->source_camera3);
+          }
+          else if (strncmp(buffer, "SOURCE_SUBCAMERA", 18) == 0) {
+            sscanf(buffer, "%s %d", dummy, &platform->source_camera);
           }
           else if (strncmp(buffer, "SOURCE_POSITION1", 16) == 0) {
             sscanf(buffer, "%s %d", dummy, &platform->source_position1);
@@ -1174,6 +1206,14 @@ int mb_platform_write(int verbose, char *platform_file, void *platform_ptr, int 
         fprintf(fp, "SOURCE_SUBBOTTOM2        %d\n", platform->source_subbottom2);
       if (platform->source_subbottom3 >= 0)
         fprintf(fp, "SOURCE_SUBBOTTOM3        %d\n", platform->source_subbottom3);
+      if (platform->source_camera >= 0)
+        fprintf(fp, "SOURCE_CAMERA            %d\n", platform->source_camera);
+      if (platform->source_camera1 >= 0)
+        fprintf(fp, "SOURCE_CAMERA1           %d\n", platform->source_camera1);
+      if (platform->source_camera2 >= 0)
+        fprintf(fp, "SOURCE_CAMERA2           %d\n", platform->source_camera2);
+      if (platform->source_camera3 >= 0)
+        fprintf(fp, "SOURCE_CAMERA3           %d\n", platform->source_camera3);
       if (platform->source_position >= 0)
         fprintf(fp, "SOURCE_POSITION          %d\n", platform->source_position);
       if (platform->source_position1 >= 0)
@@ -1240,6 +1280,14 @@ int mb_platform_write(int verbose, char *platform_file, void *platform_ptr, int 
         fprintf(fp, "  ## SOURCE_SUBBOTTOM2\n");
       if (platform->source_subbottom3 < 0)
         fprintf(fp, "  ## SOURCE_SUBBOTTOM3\n");
+      if (platform->source_camera < 0)
+        fprintf(fp, "  ## SOURCE_CAMERA\n");
+      if (platform->source_camera1 < 0)
+        fprintf(fp, "  ## SOURCE_CAMERA1\n");
+      if (platform->source_camera2 < 0)
+        fprintf(fp, "  ## SOURCE_CAMERA2\n");
+      if (platform->source_camera3 < 0)
+        fprintf(fp, "  ## SOURCE_CAMERA3\n");
       if (platform->source_position < 0)
         fprintf(fp, "  ## SOURCE_POSITION\n");
       if (platform->source_position1 < 0)
@@ -1928,45 +1976,49 @@ int mb_platform_print(int verbose, void *platform_ptr, int *error) {
     struct mb_platform_struct *platform = (struct mb_platform_struct *)platform_ptr;
 
     if (verbose >= 2 && platform_ptr != NULL) {
-      fprintf(stderr, "dbg2       platform->type:             %d\n", platform->type);
-      fprintf(stderr, "dbg2       platform->name:             %s\n", platform->name);
+      fprintf(stderr, "dbg2       platform->type:                 %d\n", platform->type);
+      fprintf(stderr, "dbg2       platform->name:                 %s\n", platform->name);
       fprintf(stderr, "dbg2       platform->organization:         %s\n", platform->organization);
-      fprintf(stderr, "dbg2       platform->documentation_url:      %s\n", platform->documentation_url);
-      fprintf(stderr, "dbg2       platform->start_time_d:          %f\n", platform->start_time_d);
-      fprintf(stderr, "dbg2       platform->end_time_d:          %f\n", platform->end_time_d);
+      fprintf(stderr, "dbg2       platform->documentation_url:    %s\n", platform->documentation_url);
+      fprintf(stderr, "dbg2       platform->start_time_d:         %f\n", platform->start_time_d);
+      fprintf(stderr, "dbg2       platform->end_time_d:           %f\n", platform->end_time_d);
       fprintf(stderr, "dbg2       platform->source_bathymetry:    %d\n", platform->source_bathymetry);
-      fprintf(stderr, "dbg2       platform->source_bathymetry1:    %d\n", platform->source_bathymetry1);
-      fprintf(stderr, "dbg2       platform->source_bathymetry2:    %d\n", platform->source_bathymetry2);
-      fprintf(stderr, "dbg2       platform->source_bathymetry3:    %d\n", platform->source_bathymetry3);
-      fprintf(stderr, "dbg2       platform->source_backscatter:    %d\n", platform->source_backscatter);
-      fprintf(stderr, "dbg2       platform->source_backscatter1:    %d\n", platform->source_backscatter1);
-      fprintf(stderr, "dbg2       platform->source_backscatter2:    %d\n", platform->source_backscatter2);
-      fprintf(stderr, "dbg2       platform->source_backscatter3:    %d\n", platform->source_backscatter3);
-      fprintf(stderr, "dbg2       platform->source_subbottom:    %d\n", platform->source_subbottom);
+      fprintf(stderr, "dbg2       platform->source_bathymetry1:   %d\n", platform->source_bathymetry1);
+      fprintf(stderr, "dbg2       platform->source_bathymetry2:   %d\n", platform->source_bathymetry2);
+      fprintf(stderr, "dbg2       platform->source_bathymetry3:   %d\n", platform->source_bathymetry3);
+      fprintf(stderr, "dbg2       platform->source_backscatter:   %d\n", platform->source_backscatter);
+      fprintf(stderr, "dbg2       platform->source_backscatter1:  %d\n", platform->source_backscatter1);
+      fprintf(stderr, "dbg2       platform->source_backscatter2:  %d\n", platform->source_backscatter2);
+      fprintf(stderr, "dbg2       platform->source_backscatter3:  %d\n", platform->source_backscatter3);
+      fprintf(stderr, "dbg2       platform->source_subbottom:     %d\n", platform->source_subbottom);
       fprintf(stderr, "dbg2       platform->source_subbottom1:    %d\n", platform->source_subbottom1);
       fprintf(stderr, "dbg2       platform->source_subbottom2:    %d\n", platform->source_subbottom2);
       fprintf(stderr, "dbg2       platform->source_subbottom3:    %d\n", platform->source_subbottom3);
-      fprintf(stderr, "dbg2       platform->source_position:     %d\n", platform->source_position);
-      fprintf(stderr, "dbg2       platform->source_position1:    %d\n", platform->source_position1);
-      fprintf(stderr, "dbg2       platform->source_position2:    %d\n", platform->source_position2);
-      fprintf(stderr, "dbg2       platform->source_position3:    %d\n", platform->source_position3);
-      fprintf(stderr, "dbg2       platform->source_depth:      %d\n", platform->source_depth);
-      fprintf(stderr, "dbg2       platform->source_depth1:      %d\n", platform->source_depth1);
-      fprintf(stderr, "dbg2       platform->source_depth2:      %d\n", platform->source_depth2);
-      fprintf(stderr, "dbg2       platform->source_depth3:      %d\n", platform->source_depth3);
-      fprintf(stderr, "dbg2       platform->source_heading:      %d\n", platform->source_heading);
+      fprintf(stderr, "dbg2       platform->source_camera:        %d\n", platform->source_camera);
+      fprintf(stderr, "dbg2       platform->source_camera1:       %d\n", platform->source_camera1);
+      fprintf(stderr, "dbg2       platform->source_camera2:       %d\n", platform->source_camera2);
+      fprintf(stderr, "dbg2       platform->source_camera3:       %d\n", platform->source_camera3);
+      fprintf(stderr, "dbg2       platform->source_position:      %d\n", platform->source_position);
+      fprintf(stderr, "dbg2       platform->source_position1:     %d\n", platform->source_position1);
+      fprintf(stderr, "dbg2       platform->source_position2:     %d\n", platform->source_position2);
+      fprintf(stderr, "dbg2       platform->source_position3:     %d\n", platform->source_position3);
+      fprintf(stderr, "dbg2       platform->source_depth:         %d\n", platform->source_depth);
+      fprintf(stderr, "dbg2       platform->source_depth1:        %d\n", platform->source_depth1);
+      fprintf(stderr, "dbg2       platform->source_depth2:        %d\n", platform->source_depth2);
+      fprintf(stderr, "dbg2       platform->source_depth3:        %d\n", platform->source_depth3);
+      fprintf(stderr, "dbg2       platform->source_heading:       %d\n", platform->source_heading);
       fprintf(stderr, "dbg2       platform->source_heading1:      %d\n", platform->source_heading1);
       fprintf(stderr, "dbg2       platform->source_heading2:      %d\n", platform->source_heading2);
       fprintf(stderr, "dbg2       platform->source_heading3:      %d\n", platform->source_heading3);
-      fprintf(stderr, "dbg2       platform->source_rollpitch:    %d\n", platform->source_rollpitch);
+      fprintf(stderr, "dbg2       platform->source_rollpitch:     %d\n", platform->source_rollpitch);
       fprintf(stderr, "dbg2       platform->source_rollpitch1:    %d\n", platform->source_rollpitch1);
       fprintf(stderr, "dbg2       platform->source_rollpitch2:    %d\n", platform->source_rollpitch2);
       fprintf(stderr, "dbg2       platform->source_rollpitch3:    %d\n", platform->source_rollpitch3);
-      fprintf(stderr, "dbg2       platform->source_heave:      %d\n", platform->source_heave);
-      fprintf(stderr, "dbg2       platform->source_heave1:      %d\n", platform->source_heave1);
-      fprintf(stderr, "dbg2       platform->source_heave2:      %d\n", platform->source_heave2);
-      fprintf(stderr, "dbg2       platform->source_heave3:      %d\n", platform->source_heave3);
-      fprintf(stderr, "dbg2       platform->num_sensors:         %d\n", platform->num_sensors);
+      fprintf(stderr, "dbg2       platform->source_heave:         %d\n", platform->source_heave);
+      fprintf(stderr, "dbg2       platform->source_heave1:        %d\n", platform->source_heave1);
+      fprintf(stderr, "dbg2       platform->source_heave2:        %d\n", platform->source_heave2);
+      fprintf(stderr, "dbg2       platform->source_heave3:        %d\n", platform->source_heave3);
+      fprintf(stderr, "dbg2       platform->num_sensors:          %d\n", platform->num_sensors);
       for (int i = 0; i < platform->num_sensors; i++) {
         fprintf(stderr, "dbg2       platform->sensors[%2d].type:                 %d\n", i, platform->sensors[i].type);
         fprintf(stderr, "dbg2       platform->sensors[%2d].model:                %s\n", i, platform->sensors[i].model);

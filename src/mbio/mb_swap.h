@@ -11,7 +11,8 @@
  *
  *    See README file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
-/*
+/**
+   @file
  * mb_swap.h is an include file with macro definitions
  * used to swap bytes for 2 and 4 byte integer values to deal with the
  * differences between "big endian" and "little endian" machines.

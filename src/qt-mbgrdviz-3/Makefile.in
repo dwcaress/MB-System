@@ -489,6 +489,9 @@ uninstall-am:
 
 .PRECIOUS: Makefile
 
+
+# Recipes invoke make on Makefile.qmake, which is generated from the .pro file by the
+# Qt qmake utility and includes all sources, dependencies, etc
 all:
 	echo Using Makefile from qmake: make -f Makefile.qmake all
 	make -f Makefile.qmake all

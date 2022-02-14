@@ -5758,6 +5758,7 @@ int mbnavadjust_invertnav() {
 
   int n_iteration;
   double convergence;
+  double convergence_prior;
   double convergence_threshold;
   double offset_x, offset_y, offset_z, projected_offset;
   double weight, zweight;
@@ -6547,12 +6548,18 @@ int mbnavadjust_invertnav() {
         /* loop over all ties applying the offsets to the chunks partitioned according to survey quality */
         n_iteration = 100000;
         convergence = 1000.0;
+        convergence_prior = 1000.0;
         convergence_threshold = 0.000005;
         damping = 0.02;
-        for (int iteration=0; iteration < n_iteration && convergence > convergence_threshold; iteration ++) {
+        for (int iteration=0;
+            iteration < n_iteration
+                && convergence > convergence_threshold
+                && convergence <= convergence_prior;
+            iteration ++) {
             fprintf(stderr,"\nStage 2 relaxation iteration %d\n", iteration);
 
             /* zero the working average offset array */
+            convergence_prior = convergence;
             memset(x, 0, ncols_alloc * sizeof(double));
             memset(nx, 0, ncols_alloc * sizeof(int));
             rms_misfit_previous = 0.0;
