@@ -196,3 +196,4 @@ src/photo/mbtiff2png
 src/mbtrnav/trn-replay
 src/mbio/mb_config.h
 libtool
+libtool
