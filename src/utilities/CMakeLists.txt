@@ -25,8 +25,7 @@ foreach(executable ${executables})
                              ${CMAKE_SOURCE_DIR}/src/mbaux
                              ${CMAKE_SOURCE_DIR}/src/gsf)
 
-if (APPLE)
-  # Don't know how to build dylib on Apple yet, so link with static libs
+
   target_link_libraries(${executable}
                         PRIVATE
                         mbio
@@ -34,6 +33,8 @@ if (APPLE)
                         mbaux
                         mbsapi
                         mbgsf
+			r7kr
+			mframe
 	                ${GMT_LIBRARIES}
                         ${NETCDF_LIBRARIES}
                         ${GDAL_LIBRARIES}
@@ -41,24 +42,10 @@ if (APPLE)
                         ${FFTW_LIBRARIES}
                         m
                         pthread)
-else()
-  target_link_libraries(${executable}
-                        PRIVATE
-                        mbioShared
-                        mbbsioShared
-                        mbauxShared
-                        mbsapiShared
-                        mbgsfShared
-	                ${GMT_LIBRARIES}
-                        ${NETCDF_LIBRARIES}
-                        ${GDAL_LIBRARIES}
-                        ${PROJ_LIBRARIES}
-                        ${FFTW_LIBRARIES}
-                        m
-                        pthread)
-endif()
 
 endforeach()
                            
                            
-
+install(TARGETS ${executables}
+        DESTINATION ${CMAKE_INSTALL_BINDIR})
+	

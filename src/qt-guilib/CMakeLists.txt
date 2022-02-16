@@ -49,6 +49,7 @@ message("*** OPENGL_INCLUDE_DIR: ${OPENGL_INCLUDE_DIR}")
 
 set_target_properties(MBGui PROPERTIES POSITION_INDEPENDENT_CODE ON)
 
+
 # Shared library
 add_library(MBGuiShared
             SHARED
@@ -66,3 +67,6 @@ target_include_directories(MBGuiShared
 
 target_link_libraries(MBGuiShared ${EXTRA_LIBRARIES})
 
+# Install
+install(TARGETS MBGui DESTINATION cmake-example/lib)
+install(TARGETS MBGuiShared DESTINATION cmake-example/lib)

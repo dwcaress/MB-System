@@ -31,6 +31,8 @@ target_link_libraries(mbvelocitytool
                       mbbsio
                       mbsapi
                       mbgsf
+		      r7kr
+		      mframe
 		      ${GMT_LIBRARIES}
 		      ${NETCDF_LIBRARIES}
 		      ${MOTIF_LIBRARIES}
@@ -44,3 +46,6 @@ target_link_libraries(mbvelocitytool
                            
                            
 
+install(TARGETS mbvelocitytool
+        DESTINATION ${CMAKE_INSTALL_BINDIR})
+	

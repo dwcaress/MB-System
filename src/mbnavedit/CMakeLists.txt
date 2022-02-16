@@ -29,6 +29,8 @@ target_link_libraries(mbnavedit
                       mbbsio
                       mbsapi
                       mbgsf
+		      r7kr
+		      mframe
 		      ${GMT_LIBRARIES}
 		      ${NETCDF_LIBRARIES}
 		      ${MOTIF_LIBRARIES}
@@ -41,4 +43,6 @@ target_link_libraries(mbnavedit
                       pthread)
                            
                            
-
+install(TARGETS mbnavedit
+	DESTINATION ${CMAKE_INSTALL_BINDIR})
+	
