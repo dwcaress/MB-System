@@ -42,6 +42,7 @@ void do_mb3dsdg_snell(Widget, XtPointer, XtPointer);
 void do_mb3dsdg_input(Widget, XtPointer, XtPointer);
 void do_mb3dsdg_view_boundingbox(Widget, XtPointer, XtPointer);
 void do_mb3dsdg_view_flagged(Widget, XtPointer, XtPointer);
+void do_mb3dsdg_view_secondary(Widget, XtPointer, XtPointer);
 void do_mb3dsdg_view_noprofile(Widget, XtPointer, XtPointer);
 void do_mb3dsdg_view_goodprofile(Widget, XtPointer, XtPointer);
 void do_mb3dsdg_view_allprofile(Widget, XtPointer, XtPointer);
@@ -628,6 +629,29 @@ Mb3dsdgDataPtr Mb3dsdgCreate(Mb3dsdgDataPtr class_in, Widget parent, String name
 	}
 
 	XtAddCallback(class_in->toggleButton_view_flagged, XmNvalueChangedCallback, do_mb3dsdg_view_flagged, (XtPointer)0);
+
+	ac = 0;
+	{
+		XmString tmp0 = (XmString)BX_CONVERT(class_in->pulldownMenu_view, (char *)"View Secondary Pick Soundings", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNfontList,
+		         BX_CONVERT(class_in->pulldownMenu_view, (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1", XmRFontList,
+		                    0, &argok));
+		if (argok)
+			ac++;
+		class_in->toggleButton_view_secondary =
+		    XmCreateToggleButton(class_in->pulldownMenu_view, (char *)"toggleButton_view_secondary", args, ac);
+		XtManageChild(class_in->toggleButton_view_secondary);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(class_in->toggleButton_view_secondary, XmNvalueChangedCallback, do_mb3dsdg_view_secondary, (XtPointer)0);
 
 	ac = 0;
 	class_in->separator = XmCreateSeparator(class_in->pulldownMenu_view, (char *)"separator", args, ac);

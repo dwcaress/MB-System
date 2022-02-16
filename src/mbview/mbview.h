@@ -187,20 +187,39 @@
 #define MBV_STATMASK7 0x80
 
 /* pick sensitivity masks */
-#define MBV_PICKMASK_NONE 0
-#define MBV_PICKMASK_ONEPOINT 1
-#define MBV_PICKMASK_TWOPOINT 2
-#define MBV_PICKMASK_AREA 4
-#define MBV_PICKMASK_REGION 8
-#define MBV_PICKMASK_SITE 16
-#define MBV_PICKMASK_ROUTE 32
-#define MBV_PICKMASK_NAVONEPOINT 64
-#define MBV_PICKMASK_NAVTWOPOINT 128
-#define MBV_PICKMASK_NAVANY 256
-#define MBV_PICKMASK_NEWINSTANCE 512
-#define MBV_EXISTMASK_SITE 1024
-#define MBV_EXISTMASK_ROUTE 2048
-#define MBV_EXISTMASK_NAV 4096
+#define MBV_PICKMASK_NONE 0x0
+#define MBV_PICKMASK_ONEPOINT 0x1
+#define MBV_PICKMASK_TWOPOINT 0x2
+#define MBV_PICKMASK_AREA 0x4
+#define MBV_PICKMASK_REGION 0x8
+#define MBV_PICKMASK_SITE 0x10
+#define MBV_PICKMASK_ROUTE 0x20
+#define MBV_PICKMASK_NAVONEPOINT 0x40
+#define MBV_PICKMASK_NAVTWOPOINT 0x80
+#define MBV_PICKMASK_NAVANY 0x100
+#define MBV_PICKMASK_NEWINSTANCE 0x200
+#define MBV_EXISTMASK_SITE 0x400
+#define MBV_EXISTMASK_ROUTE 0x800
+#define MBV_EXISTMASK_NAV 0x1000
+#define MBV_STATEMASK_13 0x2000
+#define MBV_STATEMASK_14 0x4000
+#define MBV_STATEMASK_15 0x8000
+#define MBV_STATEMASK_16 0x10000
+#define MBV_STATEMASK_17 0x20000
+#define MBV_STATEMASK_18 0x40000
+#define MBV_STATEMASK_19 0x80000
+#define MBV_STATEMASK_20 0x100000
+#define MBV_STATEMASK_21 0x200000
+#define MBV_STATEMASK_22 0x400000
+#define MBV_STATEMASK_23 0x800000
+#define MBV_STATEMASK_24 0x1000000
+#define MBV_STATEMASK_25 0x2000000
+#define MBV_STATEMASK_26 0x4000000
+#define MBV_STATEMASK_27 0x8000000
+#define MBV_STATEMASK_28 0x10000000
+#define MBV_STATEMASK_29 0x20000000
+#define MBV_STATEMASK_30 0x40000000
+#define MBV_STATEMASK_31 0x80000000
 
 /* profile defines */
 #define MBV_PROFILE_NONE 0
@@ -632,6 +651,27 @@ struct mbview_struct {
 	int navdrape_view_mode;
 	int vector_view_mode;
 	int profile_view_mode;
+
+  /* general use state variables to turn action button sensitivity on and off */
+  int state13;
+  int state14;
+  int state15;
+  int state16;
+  int state17;
+  int state18;
+  int state19;
+  int state20;
+  int state21;
+  int state22;
+  int state23;
+  int state24;
+  int state25;
+  int state26;
+  int state27;
+  int state28;
+  int state29;
+  int state30;
+  int state31;
 };
 
 /*--------------------------------------------------------------------*/
@@ -711,6 +751,7 @@ int mbview_update(int verbose, size_t instance, int *error);
 int mbview_set_widgets(int verbose, size_t instance, int *error);
 int mbview_addaction(int verbose, size_t instance, void(mbview_action_notify)(Widget, XtPointer, XtPointer), char *label,
                      int sensitive, int *error);
+int mbview_setstate(int verbose, size_t instance, int mask, int value, int *error);
 int mbview_addpicknotify(int verbose, size_t instance, int picktype, void(mbview_pick_notify)(size_t), int *error);
 int mbview_setsensitivitynotify(int verbose, size_t instance, void(mbview_sensitivity_notify)(), int *error);
 int mbview_setcolorchangenotify(int verbose, size_t instance, void(mbview_colorchange_notify)(size_t), int *error);

@@ -94,6 +94,7 @@ int mbeditviz_init(int argc, char **argv) {
   mbev_num_pings_loaded = 0;
   mbev_num_esf_open = 0;
   mbev_num_soundings_loaded = 0;
+  mbev_num_soundings_secondary = 0;
   for (int i = 0; i < 4; i++) {
     mbev_bounds[i] = 0.0;
   }
@@ -3347,7 +3348,8 @@ int mbeditviz_selectregion(size_t instance) {
           double mtodeglat;
           mb_coor_scale(mbev_verbose, ping->navlat, &mtodeglon, &mtodeglat);
           for (int ibeam = 0; ibeam < ping->beams_bath; ibeam++) {
-            if (!mb_beam_check_flag_unusable(ping->beamflag[ibeam])) {
+            if (mb_beam_check_flag_usable2(ping->beamflag[ibeam])
+              || (mbviewdata->state21 && mb_beam_check_flag_multipick(ping->beamflag[ibeam]))) {
               if (ping->bathx[ibeam] >= xmin && ping->bathx[ibeam] <= xmax && ping->bathy[ibeam] >= ymin &&
                   ping->bathy[ibeam] <= ymax) {
                 /* allocate memory if needed */
@@ -3514,7 +3516,8 @@ int mbeditviz_selectarea(size_t instance) {
           double mtodeglat;
           mb_coor_scale(mbev_verbose, ping->navlat, &mtodeglon, &mtodeglat);
           for (int ibeam = 0; ibeam < ping->beams_bath; ibeam++) {
-            if (!mb_beam_check_flag_unusable(ping->beamflag[ibeam])) {
+            if (mb_beam_check_flag_usable2(ping->beamflag[ibeam])
+              || (mbviewdata->state21 && mb_beam_check_flag_multipick(ping->beamflag[ibeam]))) {
               double x = ping->bathx[ibeam] - mbev_selected.xorigin;
               double y = ping->bathy[ibeam] - mbev_selected.yorigin;
               double yy = -x * mbev_selected.cosbearing + y * mbev_selected.sinbearing;
@@ -3632,6 +3635,8 @@ int mbeditviz_selectnav(size_t instance) {
   /* check shared data source for selected nav */
   struct mbview_shareddata_struct *mbviewshared;
   mbev_status = mbview_getsharedptr(mbev_verbose, &mbviewshared, &mbev_error);
+  struct mbview_struct *mbviewdata;
+  mbev_status = mbview_getdataptr(mbev_verbose, instance, &mbviewdata, &mbev_error);
 
   /* check if any nav is currently selected */
   if (mbev_status == MB_SUCCESS) {
@@ -3677,82 +3682,83 @@ int mbeditviz_selectnav(size_t instance) {
             double mtodeglat;
             mb_coor_scale(mbev_verbose, ping->navlat, &mtodeglon, &mtodeglat);
             for (int ibeam = 0; ibeam < ping->beams_bath; ibeam++) {
-              if (!mb_beam_check_flag_unusable(ping->beamflag[ibeam])) {
-                /* allocate memory if needed */
-                if (mbev_selected.num_soundings >= mbev_selected.num_soundings_alloc) {
-                  mbev_selected.num_soundings_alloc += MBEV_ALLOCK_NUM;
-                  mbev_selected.soundings =
-                      realloc(mbev_selected.soundings,
-                              mbev_selected.num_soundings_alloc * sizeof(struct mb3dsoundings_sounding_struct));
-                }
+            if (mb_beam_check_flag_usable2(ping->beamflag[ibeam])
+              || (mbviewdata->state21 && mb_beam_check_flag_multipick(ping->beamflag[ibeam]))) {
+              /* allocate memory if needed */
+              if (mbev_selected.num_soundings >= mbev_selected.num_soundings_alloc) {
+                mbev_selected.num_soundings_alloc += MBEV_ALLOCK_NUM;
+                mbev_selected.soundings =
+                    realloc(mbev_selected.soundings,
+                            mbev_selected.num_soundings_alloc * sizeof(struct mb3dsoundings_sounding_struct));
+              }
 
-                /* same beam ids */
-                mbev_selected.soundings[mbev_selected.num_soundings].ifile = ifile;
-                mbev_selected.soundings[mbev_selected.num_soundings].iping = iping;
-                mbev_selected.soundings[mbev_selected.num_soundings].ibeam = ibeam;
-                mbev_selected.soundings[mbev_selected.num_soundings].beamflag = ping->beamflag[ibeam];
-                mbev_selected.soundings[mbev_selected.num_soundings].beamflagorg = ping->beamflagorg[ibeam];
-                mbev_selected.soundings[mbev_selected.num_soundings].beamcolor = ping->beamcolor[ibeam];
+              /* same beam ids */
+              mbev_selected.soundings[mbev_selected.num_soundings].ifile = ifile;
+              mbev_selected.soundings[mbev_selected.num_soundings].iping = iping;
+              mbev_selected.soundings[mbev_selected.num_soundings].ibeam = ibeam;
+              mbev_selected.soundings[mbev_selected.num_soundings].beamflag = ping->beamflag[ibeam];
+              mbev_selected.soundings[mbev_selected.num_soundings].beamflagorg = ping->beamflagorg[ibeam];
+              mbev_selected.soundings[mbev_selected.num_soundings].beamcolor = ping->beamcolor[ibeam];
 
-                /* get sounding relative to sonar */
-                double beam_xtrack = ping->bathacrosstrack[ibeam];
-                double beam_ltrack = ping->bathalongtrack[ibeam];
-                double beam_z = ping->bath[ibeam] - ping->sonardepth;
+              /* get sounding relative to sonar */
+              double beam_xtrack = ping->bathacrosstrack[ibeam];
+              double beam_ltrack = ping->bathalongtrack[ibeam];
+              double beam_z = ping->bath[ibeam] - ping->sonardepth;
 
-                /* if beamforming sound speed correction to be applied */
-                if (mbev_snell != 1.0) {
-                  mbeditviz_snell_correction(mbev_snell, (ping->roll + rolldelta),
-                                 &beam_xtrack, &beam_ltrack, &beam_z);
-                }
+              /* if beamforming sound speed correction to be applied */
+              if (mbev_snell != 1.0) {
+                mbeditviz_snell_correction(mbev_snell, (ping->roll + rolldelta),
+                               &beam_xtrack, &beam_ltrack, &beam_z);
+              }
 
-                /* apply rotations and recalculate position */
-                mbeditviz_beam_position(
-                    ping->navlon, ping->navlat, mtodeglon, mtodeglat, beam_z,
-                    beam_xtrack, beam_ltrack, sonardepth, rolldelta, pitchdelta,
-                    heading, &(ping->bathcorr[ibeam]), &(ping->bathlon[ibeam]), &(ping->bathlat[ibeam]));
-                mb_proj_forward(mbev_verbose, mbev_grid.pjptr, ping->bathlon[ibeam], ping->bathlat[ibeam],
-                                &ping->bathx[ibeam], &ping->bathy[ibeam], &mbev_error);
+              /* apply rotations and recalculate position */
+              mbeditviz_beam_position(
+                  ping->navlon, ping->navlat, mtodeglon, mtodeglat, beam_z,
+                  beam_xtrack, beam_ltrack, sonardepth, rolldelta, pitchdelta,
+                  heading, &(ping->bathcorr[ibeam]), &(ping->bathlon[ibeam]), &(ping->bathlat[ibeam]));
+              mb_proj_forward(mbev_verbose, mbev_grid.pjptr, ping->bathlon[ibeam], ping->bathlat[ibeam],
+                              &ping->bathx[ibeam], &ping->bathy[ibeam], &mbev_error);
 
-                /* get local position in selected region */
-                mbev_selected.soundings[mbev_selected.num_soundings].x = ping->bathx[ibeam];
-                mbev_selected.soundings[mbev_selected.num_soundings].y = ping->bathy[ibeam];
-                mbev_selected.soundings[mbev_selected.num_soundings].z = -ping->bathcorr[ibeam];
-                if (mbev_selected.num_soundings == 0) {
-                  xmin = ping->bathx[ibeam];
-                  xmax = ping->bathx[ibeam];
-                  ymin = ping->bathy[ibeam];
-                  ymax = ping->bathy[ibeam];
-                  zmin = -ping->bathcorr[ibeam];
-                  zmax = -ping->bathcorr[ibeam];
-                }
-                else {
-                  xmin = MIN(xmin, ping->bathx[ibeam]);
-                  xmax = MAX(xmax, ping->bathx[ibeam]);
-                  ymin = MIN(ymin, ping->bathy[ibeam]);
-                  ymax = MAX(ymax, ping->bathy[ibeam]);
-                  zmin = MIN(zmin, -ping->bathcorr[ibeam]);
-                  zmax = MAX(zmax, -ping->bathcorr[ibeam]);
-                }
-                mbev_selected.soundings[mbev_selected.num_soundings].a = ping->amp[ibeam];
+              /* get local position in selected region */
+              mbev_selected.soundings[mbev_selected.num_soundings].x = ping->bathx[ibeam];
+              mbev_selected.soundings[mbev_selected.num_soundings].y = ping->bathy[ibeam];
+              mbev_selected.soundings[mbev_selected.num_soundings].z = -ping->bathcorr[ibeam];
+              if (mbev_selected.num_soundings == 0) {
+                xmin = ping->bathx[ibeam];
+                xmax = ping->bathx[ibeam];
+                ymin = ping->bathy[ibeam];
+                ymax = ping->bathy[ibeam];
+                zmin = -ping->bathcorr[ibeam];
+                zmax = -ping->bathcorr[ibeam];
+              }
+              else {
+                xmin = MIN(xmin, ping->bathx[ibeam]);
+                xmax = MAX(xmax, ping->bathx[ibeam]);
+                ymin = MIN(ymin, ping->bathy[ibeam]);
+                ymax = MAX(ymax, ping->bathy[ibeam]);
+                zmin = MIN(zmin, -ping->bathcorr[ibeam]);
+                zmax = MAX(zmax, -ping->bathcorr[ibeam]);
+              }
+              mbev_selected.soundings[mbev_selected.num_soundings].a = ping->amp[ibeam];
 
-                /* get sounding color to be used if displayed colored by topography */
-                mbview_colorvalue_instance(instance,
-                      mbev_selected.soundings[mbev_selected.num_soundings].z,
-                      &(mbev_selected.soundings[mbev_selected.num_soundings].r),
-                      &(mbev_selected.soundings[mbev_selected.num_soundings].g),
-                      &(mbev_selected.soundings[mbev_selected.num_soundings].b));
+              /* get sounding color to be used if displayed colored by topography */
+              mbview_colorvalue_instance(instance,
+                    mbev_selected.soundings[mbev_selected.num_soundings].z,
+                    &(mbev_selected.soundings[mbev_selected.num_soundings].r),
+                    &(mbev_selected.soundings[mbev_selected.num_soundings].g),
+                    &(mbev_selected.soundings[mbev_selected.num_soundings].b));
 
-                /*fprintf(stderr,"SELECTED SOUNDING: %d %d %d  %f %f  |  %d %f %f %f\n",
-                ifile,iping,ibeam,ping->bathx[ibeam],ping->bathy[ibeam],
-                mbev_selected.num_soundings,
-                mbev_selected.soundings[mbev_selected.num_soundings].x,
-                mbev_selected.soundings[mbev_selected.num_soundings].y,
-                mbev_selected.soundings[mbev_selected.num_soundings].z);*/
-                mbev_selected.num_soundings++;
-                if (mb_beam_ok(ping->beamflag[ibeam]))
-                  mbev_selected.num_soundings_unflagged++;
-                else
-                  mbev_selected.num_soundings_flagged++;
+              /*fprintf(stderr,"SELECTED SOUNDING: %d %d %d  %f %f  |  %d %f %f %f\n",
+              ifile,iping,ibeam,ping->bathx[ibeam],ping->bathy[ibeam],
+              mbev_selected.num_soundings,
+              mbev_selected.soundings[mbev_selected.num_soundings].x,
+              mbev_selected.soundings[mbev_selected.num_soundings].y,
+              mbev_selected.soundings[mbev_selected.num_soundings].z);*/
+              mbev_selected.num_soundings++;
+              if (mb_beam_ok(ping->beamflag[ibeam]))
+                mbev_selected.num_soundings_unflagged++;
+              else
+                mbev_selected.num_soundings_flagged++;
               }
             }
           }
@@ -3782,7 +3788,7 @@ int mbeditviz_selectnav(size_t instance) {
       mbev_selected.soundings[i].y = mbev_selected.soundings[i].y - yorigin;
     }
     if (mbev_verbose > 0)
-      fprintf(stderr, "mbeditviz_selectarea: num_soundings:%d\n", mbev_selected.num_soundings);
+      fprintf(stderr, "mbeditviz_selectnav: num_soundings:%d\n", mbev_selected.num_soundings);
   }
 
   if (mbev_verbose >= 2) {
@@ -4228,20 +4234,6 @@ void mbeditviz_mb3dsoundings_flagsparsevoxels(int sizemultiplier, int nsoundingt
   const int nvoxels_alloc_chunk = n_columns * n_rows * 2 / 10; /* figure occupied voxels likely to number about twice a horizontal slice */
   // fprintf(stderr,"Array pointers after: %p %p %p\n",ncoarsevoxels,ncoarsevoxels_alloc,coarsevoxels);
 
-  // TODO(schwehr): Localize variables.
-  // int nvoxels_alloc;
-  int *voxels = NULL;
-  int *voxel;
-  int nvoxels;
-  bool occupied_voxel;
-  int ncoarsevoxelstot;
-  int nvoxelstot;
-  // bool found;
-  int ivoxel;
-  int ivoxeluse;
-  int nsoundingsinvoxel;
-  int nflagged;
-
   /* loop over all soundings setting occupied voxels as needed */
   if (mbev_status == MB_SUCCESS) {
     for (int isounding = 0; isounding < mbev_selected.num_soundings; isounding++) {
@@ -4264,7 +4256,7 @@ void mbeditviz_mb3dsoundings_flagsparsevoxels(int sizemultiplier, int nsoundingt
           for (int jjj = j0; jjj <= j1; jjj++) {
             for (int kkk = k0; kkk <= k1; kkk++) {
               /* is this the occupied voxel or a neighbor */
-              occupied_voxel = i == iii && j == jjj && k == kkk;
+              bool occupied_voxel = i == iii && j == jjj && k == kkk;
 
               /* get coarse voxel */
               const int ii = i / 10;
@@ -4273,13 +4265,16 @@ void mbeditviz_mb3dsoundings_flagsparsevoxels(int sizemultiplier, int nsoundingt
               const int ll = ii + jj * cn_columns + kk * cn_columns * cn_rows;
 
               /* look for voxel already set in the appropriate coarse voxel */
-              nvoxels = ncoarsevoxels[ll];
+              int *voxels = NULL;
+              int *voxel;
+              int nvoxels = ncoarsevoxels[ll];
               int nvoxels_alloc = ncoarsevoxels_alloc[ll];
               voxels = coarsevoxels[ll];
 
               bool found = false;
+              int ivoxeluse = 0;
               if (nvoxels > 0 && voxels != NULL) {
-                for (ivoxel = 0; ivoxel < nvoxels && !found; ivoxel++) {
+                for (int ivoxel = 0; ivoxel < nvoxels && !found; ivoxel++) {
                   voxel = &voxels[ivoxel * voxel_size];
                   if (iii == voxel[0] && jjj == voxel[1] && kkk == voxel[2]) {
                     found = true;
@@ -4320,7 +4315,7 @@ void mbeditviz_mb3dsoundings_flagsparsevoxels(int sizemultiplier, int nsoundingt
               if (mbev_status == MB_SUCCESS) {
                 voxel = &voxels[ivoxeluse * voxel_size];
                 if (occupied_voxel) {
-                  nsoundingsinvoxel = voxel[3];
+                  int nsoundingsinvoxel = voxel[3];
                   if (nsoundingsinvoxel < mbev_nsoundingthreshold) {
                     voxel[5 + nsoundingsinvoxel] = isounding;
                   }
@@ -4359,14 +4354,14 @@ void mbeditviz_mb3dsoundings_flagsparsevoxels(int sizemultiplier, int nsoundingt
    * than the minimum number of soundings */
   if (mbev_status == MB_SUCCESS) {
     /* count occupied voxels */
-    ncoarsevoxelstot = 0;
-    nvoxelstot = 0;
+    int ncoarsevoxelstot = 0;
+    int nvoxelstot = 0;
     for (int ll = 0; ll < cn_columns * cn_rows * cnz; ll++) {
       if (ncoarsevoxels[ll] > 0) {
         ncoarsevoxelstot++;
-        voxels = coarsevoxels[ll];
-        for (ivoxel = 0; ivoxel < ncoarsevoxels[ll]; ivoxel++) {
-          voxel = &voxels[ivoxel * voxel_size];
+        int *voxels = coarsevoxels[ll];
+        for (int ivoxel = 0; ivoxel < ncoarsevoxels[ll]; ivoxel++) {
+          int *voxel = &voxels[ivoxel * voxel_size];
           if (voxel[3] > 0)
             nvoxelstot++;
         }
@@ -4376,12 +4371,12 @@ void mbeditviz_mb3dsoundings_flagsparsevoxels(int sizemultiplier, int nsoundingt
     fprintf(stderr, "Number of occupied voxels:        %10d of %10d\n", nvoxelstot, n_columns * n_rows * nz);
 
     /* loop over all occupied voxels */
-    nflagged = 0;
-    nvoxels = 0;
+    int nflagged = 0;
+    int nvoxels = 0;
     for (int ll = 0; ll < cn_columns * cn_rows * cnz; ll++) {
-      voxels = coarsevoxels[ll];
-      for (ivoxel = 0; ivoxel < ncoarsevoxels[ll]; ivoxel++) {
-        voxel = &voxels[ivoxel * voxel_size];
+      int *voxels = coarsevoxels[ll];
+      for (int ivoxel = 0; ivoxel < ncoarsevoxels[ll]; ivoxel++) {
+        int *voxel = &voxels[ivoxel * voxel_size];
         if (voxel[3] > 0 && (voxel[3] + voxel[4]) < mbev_nsoundingthreshold) {
           for (int i = 0; i < voxel[3]; i++) {
             int isounding = voxel[5 + i];

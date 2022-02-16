@@ -1354,7 +1354,7 @@ int mbedit_action_mouse_toggle(int x_loc, int y_loc, int plwd, int exgr, int xnt
 		int range_min = 100000;
 		for (int i = current_id; i < current_id + nplot; i++) {
 			for (int j = 0; j < ping[i].beams_bath; j++) {
-				if (!mb_beam_check_flag_unusable(ping[i].beamflag[j])) {
+				if (!mb_beam_check_flag_unusable2(ping[i].beamflag[j])) {
 					const int ix = x_loc - ping[i].bath_x[j];
 					const int iy = y_loc - ping[i].bath_y[j];
 					const int range = (int)sqrt((double)(ix * ix + iy * iy));
@@ -1388,7 +1388,7 @@ int mbedit_action_mouse_toggle(int x_loc, int y_loc, int plwd, int exgr, int xnt
 				if (mb_beam_ok(ping[iping].beamflag[jbeam]))
 					mb_ess_save(verbose, &esf, ping[iping].time_d, jbeam + ping[iping].multiplicity * MB_ESF_MULTIPLICITY_FACTOR,
 					            MBP_EDIT_FLAG, &error);
-				else if (!mb_beam_check_flag_unusable(ping[iping].beamflag[jbeam]))
+				else if (!mb_beam_check_flag_unusable2(ping[iping].beamflag[jbeam]))
 					mb_ess_save(verbose, &esf, ping[iping].time_d, jbeam + ping[iping].multiplicity * MB_ESF_MULTIPLICITY_FACTOR,
 					            MBP_EDIT_UNFLAG, &error);
 			}
@@ -1406,7 +1406,7 @@ int mbedit_action_mouse_toggle(int x_loc, int y_loc, int plwd, int exgr, int xnt
 					fprintf(stderr, " flagged\n");
 				}
 			}
-			else if (!mb_beam_check_flag_unusable(ping[iping].beamflag[jbeam])) {
+			else if (!mb_beam_check_flag_unusable2(ping[iping].beamflag[jbeam])) {
 				ping[iping].beamflag[jbeam] = mb_beam_set_flag_none(ping[iping].beamflag[jbeam]);
 				if (verbose >= 1) {
 					fprintf(stderr, "\nping: %d beam:%d depth:%10.3f ", iping, jbeam, ping[iping].bath[jbeam]);
@@ -1799,7 +1799,7 @@ int mbedit_action_mouse_restore(int x_loc, int y_loc, int plwd, int exgr, int xn
 			bool found = false;
 			bool replot_label = false;
 			for (int j = 0; j < ping[i].beams_bath; j++) {
-				if (!mb_beam_ok(ping[i].beamflag[j]) && !mb_beam_check_flag_unusable(ping[i].beamflag[j])) {
+				if (!mb_beam_ok(ping[i].beamflag[j]) && !mb_beam_check_flag_unusable2(ping[i].beamflag[j])) {
 					const int ix = x_loc - ping[i].bath_x[j];
 					const int iy = y_loc - ping[i].bath_y[j];
 					const int range = (int)sqrt((double)(ix * ix + iy * iy));
@@ -1816,7 +1816,7 @@ int mbedit_action_mouse_restore(int x_loc, int y_loc, int plwd, int exgr, int xn
 						status = mbedit_unplot_beam(i, j);
 
 						/* reset the beam value */
-						if (!mb_beam_ok(ping[i].beamflag[j]) && !mb_beam_check_flag_unusable(ping[i].beamflag[j]))
+						if (!mb_beam_ok(ping[i].beamflag[j]) && !mb_beam_check_flag_unusable2(ping[i].beamflag[j]))
 							ping[i].beamflag[j] = mb_beam_set_flag_none(ping[i].beamflag[j]);
 						if (verbose >= 1) {
 							fprintf(stderr, "\nping: %d beam:%d depth:%10.3f ", i, j, ping[i].bath[j]);
@@ -1996,7 +1996,7 @@ int mbedit_action_mouse_grab(int grabmode, int x_loc, int y_loc, int plwd, int e
 				bool found = false;
 				bool replot_label = false;
 				for (int j = 0; j < ping[i].beams_bath; j++) {
-					if (!mb_beam_check_flag_unusable(ping[i].beamflag[j])) {
+					if (!mb_beam_check_flag_unusable2(ping[i].beamflag[j])) {
 						if (abs(ping[i].bath_x[j] - xgmin) <= 10 || abs(ping[i].bath_x[j] - xgmax) <= 10 ||
 						    abs(ping[i].bath_y[j] - ygmin) <= 10 || abs(ping[i].bath_y[j] - ygmax) <= 10) {
 							/* replot the affected beams */
@@ -2172,7 +2172,7 @@ int mbedit_action_mouse_info(int x_loc, int y_loc, int plwd, int exgr, int xntrv
 		int range_min = 100000;
 		for (int i = current_id; i < current_id + nplot; i++) {
 			for (int j = 0; j < ping[i].beams_bath; j++) {
-				if (!mb_beam_check_flag_unusable(ping[i].beamflag[j])) {
+				if (!mb_beam_check_flag_unusable2(ping[i].beamflag[j])) {
 					const int ix = x_loc - ping[i].bath_x[j];
 					const int iy = y_loc - ping[i].bath_y[j];
 					const int range = (int)sqrt((double)(ix * ix + iy * iy));
@@ -2488,7 +2488,7 @@ int mbedit_action_good_ping(int plwd, int exgr, int xntrvl, int yntrvl, int plt_
 		/* write edits to save file */
 		if (esffile_open) {
 			for (int j = 0; j < ping[iping_save].beams_bath; j++)
-				if (!mb_beam_ok(ping[iping_save].beamflag[j]) && !mb_beam_check_flag_unusable(ping[iping_save].beamflag[j]))
+				if (!mb_beam_ok(ping[iping_save].beamflag[j]) && !mb_beam_check_flag_unusable2(ping[iping_save].beamflag[j]))
 					mb_ess_save(verbose, &esf, ping[iping_save].time_d,
 					            j + ping[iping_save].multiplicity * MB_ESF_MULTIPLICITY_FACTOR, MBP_EDIT_UNFLAG, &error);
 		}
@@ -2500,7 +2500,7 @@ int mbedit_action_good_ping(int plwd, int exgr, int xntrvl, int yntrvl, int plt_
 
 		/* flag beams in good ping */
 		for (int j = 0; j < ping[iping_save].beams_bath; j++)
-			if (!mb_beam_ok(ping[iping_save].beamflag[j]) && !mb_beam_check_flag_unusable(ping[iping_save].beamflag[j]))
+			if (!mb_beam_ok(ping[iping_save].beamflag[j]) && !mb_beam_check_flag_unusable2(ping[iping_save].beamflag[j]))
 				ping[iping_save].beamflag[j] = mb_beam_set_flag_none(ping[iping_save].beamflag[j]);
 		if (verbose >= 1)
 			fprintf(stderr, "\nbeams in ping: %d unflagged\n", iping_save);
@@ -2771,7 +2771,7 @@ int mbedit_action_zero_ping(int plwd, int exgr, int xntrvl, int yntrvl, int plt_
 		/* write edits to save file */
 		if (esffile_open) {
 			for (int j = 0; j < ping[iping_save].beams_bath; j++) {
-				if (!mb_beam_check_flag_unusable(ping[iping_save].beamflag[j]))
+				if (!mb_beam_check_flag_unusable2(ping[iping_save].beamflag[j]))
 					mb_ess_save(verbose, &esf, ping[iping_save].time_d,
 					            j + ping[iping_save].multiplicity * MB_ESF_MULTIPLICITY_FACTOR, MBP_EDIT_ZERO, &error);
 			}
@@ -2951,7 +2951,7 @@ int mbedit_action_unflag_view(int plwd, int exgr, int xntrvl, int yntrvl, int pl
 		/* unflag all flagged beams */
 		for (int i = current_id; i < current_id + nplot; i++) {
 			for (int j = 0; j < ping[i].beams_bath; j++) {
-				if (!mb_beam_ok(ping[i].beamflag[j]) && !mb_beam_check_flag_unusable(ping[i].beamflag[j])) {
+				if (!mb_beam_ok(ping[i].beamflag[j]) && !mb_beam_check_flag_unusable2(ping[i].beamflag[j])) {
 					/* write edit to save file */
 					if (esffile_open)
 						mb_ess_save(verbose, &esf, ping[i].time_d, j + ping[i].multiplicity * MB_ESF_MULTIPLICITY_FACTOR,
@@ -3040,7 +3040,7 @@ int mbedit_action_unflag_all(int plwd, int exgr, int xntrvl, int yntrvl, int plt
 		/* unflag all flagged beams from current point in buffer */
 		for (int i = current_id; i < nbuff; i++) {
 			for (int j = 0; j < ping[i].beams_bath; j++) {
-				if (!mb_beam_ok(ping[i].beamflag[j]) && !mb_beam_check_flag_unusable(ping[i].beamflag[j])) {
+				if (!mb_beam_ok(ping[i].beamflag[j]) && !mb_beam_check_flag_unusable2(ping[i].beamflag[j])) {
 					/* write edit to save file */
 					if (esffile_open)
 						mb_ess_save(verbose, &esf, ping[i].time_d, j + ping[i].multiplicity * MB_ESF_MULTIPLICITY_FACTOR,
@@ -3843,7 +3843,7 @@ int mbedit_dump_data(int hold_size, int *ndumped, int *nbuffer) {
 						action = MBP_EDIT_FILTER;
 					else if (mb_beam_check_flag_filter(ping[iping].beamflag[jbeam]))
 						action = MBP_EDIT_FILTER;
-					else if (!mb_beam_check_flag_unusable(ping[iping].beamflag[jbeam]))
+					else if (!mb_beam_check_flag_unusable2(ping[iping].beamflag[jbeam]))
 						action = MBP_EDIT_FLAG;
 					else
 						action = MBP_EDIT_ZERO;
@@ -4238,7 +4238,7 @@ int mbedit_plot_all(int plwd, int exgr, int xntrvl, int yntrvl, int plt_size,
 	if (nbathlist <= 0 || xtrack_max <= 0.0) {
 		for (int i = current_id; i < current_id + nplot; i++) {
 			for (int j = 0; j < ping[i].beams_bath; j++) {
-				if (!mb_beam_ok(ping[i].beamflag[j]) && !mb_beam_check_flag_unusable(ping[i].beamflag[j])) {
+				if (!mb_beam_ok(ping[i].beamflag[j]) && !mb_beam_check_flag_unusable2(ping[i].beamflag[j])) {
 					// bathsum += ping[i].bath[j];
 					nbathsum++;
 					bathlist[nbathlist] = ping[i].bath[j];
@@ -4574,7 +4574,7 @@ int mbedit_plot_all(int plwd, int exgr, int xntrvl, int yntrvl, int plt_size,
 		ping[i].label_x = xmin - 5;
 		ping[i].label_y = y;
 		for (int j = 0; j < ping[i].beams_bath; j++) {
-			if (!mb_beam_check_flag_unusable(ping[i].beamflag[j])) {
+			if (!mb_beam_check_flag_unusable2(ping[i].beamflag[j])) {
 				if (view_mode == MBEDIT_VIEW_WATERFALL) {
 					ping[i].bath_x[j] = (int)(xcen + dxscale * ping[i].bathacrosstrack[j]);
 					ping[i].bath_y[j] = (int)(y + dyscale * ((double)ping[i].bath[j] - bathmedian));
@@ -4638,11 +4638,11 @@ int mbedit_plot_beam(int iping, int jbeam) {
 
 	/* plot the beam */
 	if (info_set && iping == info_ping && jbeam == info_beam) {
-		if (!mb_beam_check_flag_unusable(ping[iping].beamflag[jbeam]))
+		if (!mb_beam_check_flag_unusable2(ping[iping].beamflag[jbeam]))
 			xg_fillrectangle(mbedit_xgid, ping[iping].bath_x[jbeam] - 4, ping[iping].bath_y[jbeam] - 4, 8, 8, pixel_values[BLUE],
 			                 XG_SOLIDLINE);
 	}
-	else if (jbeam >= 0 && jbeam < ping[iping].beams_bath && !mb_beam_check_flag_unusable(ping[iping].beamflag[jbeam])) {
+	else if (jbeam >= 0 && jbeam < ping[iping].beams_bath && !mb_beam_check_flag_unusable2(ping[iping].beamflag[jbeam])) {
 		beam_color = BLACK;
 		if (show_mode == MBEDIT_SHOW_FLAG) {
 			if (mb_beam_ok(ping[iping].beamflag[jbeam]))
@@ -4711,7 +4711,7 @@ int mbedit_plot_ping(int iping) {
 	bool last_flagged = false;
 	for (int j = 0; j < ping[iping].beams_bath; j++) {
 		if (show_flaggedprofiles && !mb_beam_ok(ping[iping].beamflag[j]) &&
-		    !mb_beam_check_flag_unusable(ping[iping].beamflag[j]) && first) {
+		    !mb_beam_check_flag_unusable2(ping[iping].beamflag[j]) && first) {
 			first = false;
 			last_flagged = true;
 			xold = ping[iping].bath_x[j];
@@ -4736,7 +4736,7 @@ int mbedit_plot_ping(int iping) {
 			yold = ping[iping].bath_y[j];
 		}
 		else if (show_flaggedprofiles && !mb_beam_ok(ping[iping].beamflag[j]) &&
-		         !mb_beam_check_flag_unusable(ping[iping].beamflag[j])) {
+		         !mb_beam_check_flag_unusable2(ping[iping].beamflag[j])) {
 			if (j > 0)
 				xg_drawline(mbedit_xgid, xold, yold, ping[iping].bath_x[j], ping[iping].bath_y[j], pixel_values[RED],
 				            XG_SOLIDLINE);
@@ -4772,12 +4772,12 @@ int mbedit_plot_ping_label(int iping, bool save) {
 	/* get the ping outbounds value */
 	ping[iping].outbounds = MBEDIT_OUTBOUNDS_NONE;
 	for (int j = 0; j < ping[iping].beams_bath; j++) {
-		if (!mb_beam_check_flag_unusable(ping[iping].beamflag[j]) &&
+		if (!mb_beam_check_flag_unusable2(ping[iping].beamflag[j]) &&
 		    (ping[iping].bath_x[j] < xmin || ping[iping].bath_x[j] > xmax || ping[iping].bath_y[j] < ymin ||
 		     ping[iping].bath_y[j] > ymax)) {
 			if (mb_beam_ok(ping[iping].beamflag[j]))
 				ping[iping].outbounds = MBEDIT_OUTBOUNDS_UNFLAGGED;
-			else if (!mb_beam_check_flag_unusable(ping[iping].beamflag[j]) && ping[iping].outbounds != MBEDIT_OUTBOUNDS_UNFLAGGED)
+			else if (!mb_beam_check_flag_unusable2(ping[iping].beamflag[j]) && ping[iping].outbounds != MBEDIT_OUTBOUNDS_UNFLAGGED)
 				ping[iping].outbounds = MBEDIT_OUTBOUNDS_FLAGGED;
 		}
 	}
@@ -4903,7 +4903,7 @@ int mbedit_unplot_beam(int iping, int jbeam) {
 
 	/* unplot the beam */
 	if (info_set && iping == info_ping && jbeam == info_beam) {
-		if (!mb_beam_check_flag_unusable(ping[iping].beamflag[jbeam]))
+		if (!mb_beam_check_flag_unusable2(ping[iping].beamflag[jbeam]))
 			xg_fillrectangle(mbedit_xgid, ping[iping].bath_x[jbeam] - 4, ping[iping].bath_y[jbeam] - 4, 8, 8, pixel_values[WHITE],
 			                 XG_SOLIDLINE);
 	}
@@ -4911,7 +4911,7 @@ int mbedit_unplot_beam(int iping, int jbeam) {
 		if (mb_beam_ok(ping[iping].beamflag[jbeam]))
 			xg_fillrectangle(mbedit_xgid, ping[iping].bath_x[jbeam] - 2, ping[iping].bath_y[jbeam] - 2, 4, 4, pixel_values[WHITE],
 			                 XG_SOLIDLINE);
-		else if (!mb_beam_check_flag_unusable(ping[iping].beamflag[jbeam]))
+		else if (!mb_beam_check_flag_unusable2(ping[iping].beamflag[jbeam]))
 			xg_drawrectangle(mbedit_xgid, ping[iping].bath_x[jbeam] - 2, ping[iping].bath_y[jbeam] - 2, 4, 4, pixel_values[WHITE],
 			                 XG_SOLIDLINE);
 	}

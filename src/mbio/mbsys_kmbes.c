@@ -455,15 +455,21 @@ int mbsys_kmbes_preprocess(int verbose, void *mbio_ptr, void *store_ptr,
     /*--------------------------------------------------------------*/
     if (pars->timestamp_changed) {
       /* set time */
+double time_d_old = store->time_d;
+int time_i_old[7];
+mb_get_date(verbose, time_d_old, time_i_old);
       mb_get_date(verbose, pars->time_d, time_i);
       for (int i = 0; i < 7; i++)
         store->time_i[i] = time_i[i];
       store->time_d = pars->time_d;
       fprintf(stderr,
               "Timestamp changed in function %s: "
-              "%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d "
+              "from %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d "
+              "to %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d "
               "| ping_number:%d\n",
-              __func__, time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6],
+              __func__,
+              time_i_old[0], time_i_old[1], time_i_old[2], time_i_old[3], time_i_old[4], time_i_old[5], time_i_old[6],
+              time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6],
               store->mrz[0].cmnPart.pingCnt);
     }
 
@@ -487,6 +493,10 @@ int mbsys_kmbes_preprocess(int verbose, void *mbio_ptr, void *store_ptr,
       struct mbsys_kmbes_xmt *xmt = (struct mbsys_kmbes_xmt *)&store->xmt[imrz];
 
       // get time
+      if (pars->timestamp_changed) {
+        mrz->header.time_sec = (unsigned int)floor(pars->time_d);
+        mrz->header.time_nanosec = (unsigned int)((pars->time_d - (double)mrz->header.time_sec) * 1.0e9);
+      }
       time_d = ((double)mrz->header.time_sec) + MBSYS_KMBES_NANO * mrz->header.time_nanosec;
 
       // construct xmt basics
@@ -1322,16 +1332,30 @@ int mbsys_kmbes_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, i
 
   /* insert data in structure */
   if (store->kind == MB_DATA_DATA) {
-    /* get time */
-    for (int i = 0; i < 7; i++)
-      store->time_i[i] = time_i[i];
-    store->time_d = time_d;
+    bool change_timestamp = false;
+    unsigned int time_sec = (unsigned int)floor(time_d);
+    unsigned int time_nanosec = (unsigned int)((time_d - (double)time_sec) * 1.0e9);
+    if (store->time_d != time_d) {
+      for (int i = 0; i < 7; i++)
+        store->time_i[i] = time_i[i];
+      store->time_d = time_d;
+      change_timestamp = true;
+      xmt->header.time_sec = time_sec;
+      xmt->header.time_nanosec = time_nanosec;
+      xms->header.time_sec = time_sec;
+      xms->header.time_nanosec = time_nanosec;
+    }
 
     /* loop over all sub-pings */
     /* read distance and depth values into storage arrays */
     int numSoundings = 0;
     for(int imrz = 0; imrz < store->n_mrz_read; imrz++) {
       struct mbsys_kmbes_mrz *mrz = (struct mbsys_kmbes_mrz *)&store->mrz[imrz];
+
+      if (change_timestamp) {
+        mrz->header.time_sec = time_sec;
+        mrz->header.time_nanosec = time_nanosec;
+      }
 
       xmt->xmtPingInfo.longitude = navlon;
       xmt->xmtPingInfo.latitude = navlat;
@@ -1373,7 +1397,10 @@ int mbsys_kmbes_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, i
 
   /* insert data in nav structure */
   else if (store->kind == MB_DATA_NAV) {
-    /* get time */
+    if (store->time_d != time_d) {
+      spo->header.time_sec = (unsigned int)floor(time_d);
+      spo->header.time_nanosec = (unsigned int)((time_d - (double)spo->header.time_sec) * 1.0e9);
+    }
     for (int i = 0; i < 7; i++)
       store->time_i[i] = time_i[i];
     store->time_d = time_d;
@@ -1391,7 +1418,10 @@ int mbsys_kmbes_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, i
 
   /* insert data in nav structure */
   else if (store->kind == MB_DATA_NAV1) {
-    /* get time */
+    if (store->time_d != time_d) {
+      skm->header.time_sec = (unsigned int)floor(time_d);
+      skm->header.time_nanosec = (unsigned int)((time_d - (double)skm->header.time_sec) * 1.0e9);
+    }
     for (int i = 0; i < 7; i++)
       store->time_i[i] = time_i[i];
     store->time_d = time_d;
@@ -1408,7 +1438,10 @@ int mbsys_kmbes_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, i
 
   /* insert data in nav structure */
   else if (store->kind == MB_DATA_NAV2) {
-    /* get time */
+    if (store->time_d != time_d) {
+      cpo->header.time_sec = (unsigned int)floor(time_d);
+      cpo->header.time_nanosec = (unsigned int)((time_d - (double)cpo->header.time_sec) * 1.0e9);
+    }
     for (int i = 0; i < 7; i++)
       store->time_i[i] = time_i[i];
     store->time_d = time_d;
@@ -1431,7 +1464,10 @@ int mbsys_kmbes_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, i
 
   /* insert data in nav structure */
   else if (store->kind == MB_DATA_HEADING) {
-    /* get time */
+    if (store->time_d != time_d) {
+      sha->header.time_sec = (unsigned int)floor(time_d);
+      sha->header.time_nanosec = (unsigned int)((time_d - (double)sha->header.time_sec) * 1.0e9);
+    }
     for (int i = 0; i < 7; i++)
       store->time_i[i] = time_i[i];
     store->time_d = time_d;
@@ -2227,7 +2263,7 @@ int mbsys_kmbes_extract_nnav(int verbose, void *mbio_ptr, void *store_ptr, int n
     navlat[0] = mrz->pingInfo.latitude_deg;
 
     /* get speed */
-    speed[0] = 3.6 * xmt->xmtPingInfo.speed;;
+    speed[0] = 3.6 * xmt->xmtPingInfo.speed;
 
     /* get heading */
     heading[0] = mrz->pingInfo.headingVessel_deg;
@@ -2485,20 +2521,35 @@ int mbsys_kmbes_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int tim
   struct mbsys_kmbes_skm *skm = (struct mbsys_kmbes_skm *)&store->skm;
   struct mbsys_kmbes_cpo *cpo = (struct mbsys_kmbes_cpo *)&store->cpo;
   // struct mbsys_kmbes_xmt *xmt = (struct mbsys_kmbes_xmt *)&store->xmt[0];
+  struct mbsys_kmbes_xms *xms = (struct mbsys_kmbes_xms *)&store->xms;
 
   int status = MB_SUCCESS;
 
   /* insert data in structure */
   if (store->kind == MB_DATA_DATA) {
-    /* get time */
-    for (int i = 0; i < 7; i++)
-      store->time_i[i] = time_i[i];
-    store->time_d = time_d;
+    bool change_timestamp = false;
+    unsigned int time_sec = (unsigned int)floor(time_d);
+    unsigned int time_nanosec = (unsigned int)((time_d - (double)time_sec) * 1.0e9);
+    if (store->time_d != time_d) {
+      for (int i = 0; i < 7; i++)
+        store->time_i[i] = time_i[i];
+      store->time_d = time_d;
+      change_timestamp = true;
+      xms->header.time_sec = time_sec;
+      xms->header.time_nanosec = time_nanosec;
+    }
 
     /* loop over all sub-pings */
     for(int imrz = 0; imrz < store->n_mrz_read; imrz++) {
       struct mbsys_kmbes_mrz *mrz = (struct mbsys_kmbes_mrz *)&store->mrz[imrz];
       struct mbsys_kmbes_xmt *xmt = (struct mbsys_kmbes_xmt *)&store->xmt[imrz];
+
+      if (change_timestamp) {
+        mrz->header.time_sec = time_sec;
+        mrz->header.time_nanosec = time_nanosec;
+        xmt->header.time_sec = time_sec;
+        xmt->header.time_nanosec = time_nanosec;
+      }
       mrz->pingInfo.longitude_deg = navlon;
       mrz->pingInfo.latitude_deg = navlat;
       mrz->pingInfo.headingVessel_deg = heading;
@@ -2513,7 +2564,10 @@ int mbsys_kmbes_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int tim
 
   /* insert data in nav structure */
   else if (store->kind == MB_DATA_NAV) {
-    /* get time */
+    if (store->time_d != time_d) {
+      spo->header.time_sec = (unsigned int)floor(time_d);
+      spo->header.time_nanosec = (unsigned int)((time_d - (double)spo->header.time_sec) * 1.0e9);
+    }
     for (int i = 0; i < 7; i++)
       store->time_i[i] = time_i[i];
     store->time_d = time_d;
@@ -2531,7 +2585,10 @@ int mbsys_kmbes_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int tim
 
   /* insert data in nav structure */
   else if (store->kind == MB_DATA_NAV1) {
-    /* get time */
+    if (store->time_d != time_d) {
+      skm->header.time_sec = (unsigned int)floor(time_d);
+      skm->header.time_nanosec = (unsigned int)((time_d - (double)skm->header.time_sec) * 1.0e9);
+    }
     for (int i = 0; i < 7; i++)
       store->time_i[i] = time_i[i];
     store->time_d = time_d;
@@ -2548,7 +2605,10 @@ int mbsys_kmbes_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int tim
 
   /* insert data in nav structure */
   else if (store->kind == MB_DATA_NAV2) {
-    /* get time */
+    if (store->time_d != time_d) {
+      cpo->header.time_sec = (unsigned int)floor(time_d);
+      cpo->header.time_nanosec = (unsigned int)((time_d - (double)cpo->header.time_sec) * 1.0e9);
+    }
     for (int i = 0; i < 7; i++)
       store->time_i[i] = time_i[i];
     store->time_d = time_d;
