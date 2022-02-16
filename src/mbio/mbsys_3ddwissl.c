@@ -1584,7 +1584,7 @@ int mbsys_3ddwissl_detects
 
         // Bits 8-11 are used for multi-detect sounding priority, with highest == 0
         // A sounding flagged as secondary has a priority of 1, else the priority is 0
-        if (mb_beam_check_flag_secondary(sounding->beamflag))
+        if (mb_beam_check_flag_multipick(sounding->beamflag))
           detects[ibath] = MB_DETECT_LIDAR | 0x100;
         else
           detects[ibath] = MB_DETECT_LIDAR;
@@ -3745,7 +3745,7 @@ int mbsys_3ddwissl_calculatebathymetry
           else if (isounding_largest == isounding)
             sounding->beamflag = MB_FLAG_FLAG + MB_FLAG_SONAR;
           else
-            sounding->beamflag = MB_FLAG_NULL;
+            sounding->beamflag = MB_FLAG_MULTIPICK;
 
           /* translate to takeoff coordinates */
           mb_rollpitch_to_takeoff(verbose, alpha, beta, &theta, &phi, error);

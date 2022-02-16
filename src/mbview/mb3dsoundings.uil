@@ -4,7 +4,7 @@
  *
  * BuilderXcessory Version 6.1.3.
  *
- * Identification: 
+ * Identification:
  */
 module main_uil
 version = 'V2.1'
@@ -432,6 +432,22 @@ object mb3dsdg_toggleButton_view_flagged : XmToggleButton widget {
     callbacks {
         callbacks Style_useReasons;
         XmNvalueChangedCallback = procedure do_mb3dsdg_view_flagged();
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object mb3dsdg_toggleButton_view_secondary : XmToggleButton widget {
+    arguments {
+        arguments Style_use;
+        XmNlabelString = compound_string("View Secondary Pick Soundings");
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+        XmNvalueChangedCallback = procedure do_mb3dsdg_view_secondary();
     };
 !(BX)    handlers {
 !(BX)        handlers Style_useHandlers;

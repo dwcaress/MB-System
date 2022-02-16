@@ -408,8 +408,6 @@ or beta, are equally accessible as tarballs through the Github interface.
 
 #### 5.7.9beta27 (January 20, 2022)
 
-Mbphotomosaic: Fixed further issues with specifying options within the imagelist.
-
 Mbnavadjust: Changed inversion - the relaxation stage now terminates if it starts
 to diverge, a mod that reduces the tendency of the inversion to blow up.
 

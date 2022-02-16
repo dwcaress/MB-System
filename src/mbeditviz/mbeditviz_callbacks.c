@@ -1210,6 +1210,20 @@ void do_mbeditviz_viewgrid() {
     mbview_addaction(mbev_verbose, mbev_instance, do_mbeditviz_regrid_notify, "Update Bathymetry Grid", MBV_PICKMASK_NONE,
                      &mbev_error);
 
+    /* if some soundings flagged as secondary have been loaded, add actions to enable/disable using them */
+    if (mbev_num_soundings_secondary > 0) {
+
+      /* add action button */
+      mbview_addaction(mbev_verbose, mbev_instance, do_mbeditviz_enablesecondarypicks_notify, "Enable Secondary Picks", MBV_STATEMASK_20,
+                       &mbev_error);
+      mbview_setstate(mbev_verbose, mbev_instance, MBV_STATEMASK_20, 1, &mbev_error);
+
+      /* add action button */
+      mbview_addaction(mbev_verbose, mbev_instance, do_mbeditviz_disablesecondarypicks_notify, "Disable Secondary Picks", MBV_STATEMASK_21,
+                       &mbev_error);
+      mbview_setstate(mbev_verbose, mbev_instance, MBV_STATEMASK_21, 0, &mbev_error);
+    }
+
     /* add colorchange notify function */
     mbview_setcolorchangenotify(mbev_verbose, mbev_instance, do_mbeditviz_colorchange_notify, &mbev_error);
   }
@@ -1386,6 +1400,7 @@ void do_mbeditviz_update_gui() {
   mbev_num_files_loaded = 0;
   mbev_num_pings_loaded = 0;
   mbev_num_soundings_loaded = 0;
+  mbev_num_soundings_secondary = 0;
   for (int i = 0; i < mbev_num_files; i++) {
     struct mbev_file_struct *file = &(mbev_files[i]);
     if (file->load_status) {
@@ -1396,6 +1411,8 @@ void do_mbeditviz_update_gui() {
         for (int k = 0; k < ping->beams_bath; k++) {
           if (!mb_beam_check_flag_unusable(ping->beamflag[k]))
             mbev_num_soundings_loaded++;
+          if (mb_beam_check_flag_multipick(ping->beamflag[k]))
+            mbev_num_soundings_secondary++;
         }
       }
     }
@@ -1788,6 +1805,48 @@ void do_mbeditviz_regrid_notify(Widget w, XtPointer client_data, XtPointer call_
 
 #ifdef MBEDITVIZ_GUI_DEBUG
   fprintf(stderr, "return do_mbeditviz_regrid_notify status:%d\n", mbev_status);
+#endif
+}
+/*------------------------------------------------------------------------------*/
+void do_mbeditviz_enablesecondarypicks_notify(Widget w, XtPointer client_data, XtPointer call_data) {
+  if (mbev_verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+    fprintf(stderr, "dbg2  Input arguments:\n");
+    fprintf(stderr, "dbg2       w:           %p\n", w);
+    fprintf(stderr, "dbg2       client_data: %p\n", client_data);
+    fprintf(stderr, "dbg2       call_data:   %p\n", call_data);
+  }
+
+#ifdef MBEDITVIZ_GUI_DEBUG
+  fprintf(stderr, "do_mbeditviz_enablesecondarypicks_notify\n");
+#endif
+
+  mbview_setstate(mbev_verbose, mbev_instance, MBV_STATEMASK_20, 0, &mbev_error);
+  mbview_setstate(mbev_verbose, mbev_instance, MBV_STATEMASK_21, 1, &mbev_error);
+
+#ifdef MBEDITVIZ_GUI_DEBUG
+  fprintf(stderr, "return do_mbeditviz_enablesecondarypicks_notify status:%d\n", mbev_status);
+#endif
+}
+/*------------------------------------------------------------------------------*/
+void do_mbeditviz_disablesecondarypicks_notify(Widget w, XtPointer client_data, XtPointer call_data) {
+  if (mbev_verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+    fprintf(stderr, "dbg2  Input arguments:\n");
+    fprintf(stderr, "dbg2       w:           %p\n", w);
+    fprintf(stderr, "dbg2       client_data: %p\n", client_data);
+    fprintf(stderr, "dbg2       call_data:   %p\n", call_data);
+  }
+
+#ifdef MBEDITVIZ_GUI_DEBUG
+  fprintf(stderr, "do_mbeditviz_disablesecondarypicks_notify\n");
+#endif
+
+  mbview_setstate(mbev_verbose, mbev_instance, MBV_STATEMASK_20, 1, &mbev_error);
+  mbview_setstate(mbev_verbose, mbev_instance, MBV_STATEMASK_21, 0, &mbev_error);
+
+#ifdef MBEDITVIZ_GUI_DEBUG
+  fprintf(stderr, "return do_mbeditviz_disablesecondarypicks_notify status:%d\n", mbev_status);
 #endif
 }
 /*------------------------------------------------------------------------------*/

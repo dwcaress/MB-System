@@ -1237,6 +1237,7 @@ int main(int argc, char **argv) {
   for (int i = 0; i<npings_alloc; i++) {
     status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&pings[i].beamflag, &error);
     status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&pings[i].beamflagorg, &error);
+    status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&pings[i].bathacrosstrack, &error);
     status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&pings[i].bathz, &error);
     status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&pings[i].bathx, &error);
     status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&pings[i].bathy, &error);
