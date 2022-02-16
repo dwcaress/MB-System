@@ -418,7 +418,7 @@ const char *unknown_notice_msg[] = {"Unknown notice identifier"};
 #define MB_FLAG_MANUAL      0x04  // =   4
 #define MB_FLAG_FILTER      0x08  // =   8
 #define MB_FLAG_FILTER2     0x10  // =  16
-#define MB_FLAG_SECONDARY   0x20  // =  32
+#define MB_FLAG_MULTIPICK   0x20  // =  32
 #define MB_FLAG_INTERPOLATE 0x40  // =  64
 #define MB_FLAG_SONAR       0x80  // = 128
 //#define MB_FLAG_GT_1X_IHO 0x10 // original meaning, deprecated
@@ -441,19 +441,21 @@ const char *unknown_notice_msg[] = {"Unknown notice identifier"};
 #define mb_beam_check_flag_manual(F) ((int)((F & MB_FLAG_MANUAL) && (F & MB_FLAG_FLAG)))
 #define mb_beam_check_flag_filter(F) ((int)((F & MB_FLAG_FILTER) && (F & MB_FLAG_FLAG)))
 #define mb_beam_check_flag_filter2(F) ((int)((F & MB_FLAG_FILTER2) && (F & MB_FLAG_FLAG)))
-#define mb_beam_check_flag_secondary(F) ((int)((F & MB_FLAG_SECONDARY) && (F & MB_FLAG_FLAG)))
+#define mb_beam_check_flag_multipick(F) ((int)((F & MB_FLAG_MULTIPICK) && (F & MB_FLAG_FLAG)))
 #define mb_beam_check_flag_interpolate(F) ((int)((F & MB_FLAG_INTERPOLATE) && (F & MB_FLAG_FLAG)))
 #define mb_beam_check_flag_sonar(F) ((int)((F & MB_FLAG_SONAR) && (F & MB_FLAG_FLAG)))
 //#define mb_beam_check_flag_gt_1x_iho(F) ((int)((F & MB_FLAG_GT_1X_IHO) && (F & MB_FLAG_FLAG)))
 //#define mb_beam_check_flag_gt_2x_iho(F) ((int)((F & MB_FLAG_GT_2X_IHO) && (F & MB_FLAG_FLAG)))
-//#define mb_beam_check_flag_unusable(F) ((int)((F == MB_FLAG_NULL) || ((F & MB_FLAG_FLAG) && ((F & MB_FLAG_INTERPOLATE) || (F & MB_FLAG_SECONDARY)))))
+#define mb_beam_check_flag_usable(F) ((int)((F != MB_FLAG_NULL) && !((F & MB_FLAG_FLAG) && ((F & MB_FLAG_INTERPOLATE)))))
 #define mb_beam_check_flag_unusable(F) ((int)((F == MB_FLAG_NULL) || ((F & MB_FLAG_FLAG) && ((F & MB_FLAG_INTERPOLATE)))))
+#define mb_beam_check_flag_usable2(F) ((int)((F != MB_FLAG_NULL) && !((F & MB_FLAG_FLAG) && ((F & MB_FLAG_INTERPOLATE) || (F & MB_FLAG_MULTIPICK)))))
+#define mb_beam_check_flag_unusable2(F) ((int)((F == MB_FLAG_NULL) || ((F & MB_FLAG_FLAG) && ((F & MB_FLAG_INTERPOLATE) || (F & MB_FLAG_MULTIPICK)))))
 #define mb_beam_set_flag_null(F) (0x01)
 #define mb_beam_set_flag_none(F) (0x00)
 #define mb_beam_set_flag_manual(F) (F | 0x05)
 #define mb_beam_set_flag_filter(F) (F | 0x09)
 #define mb_beam_set_flag_filter2(F) (F | 0x11)
-#define mb_beam_set_flag_secondary(F) (F | 0x21)
+#define mb_beam_set_flag_multipick(F) (F | 0x21)
 #define mb_beam_set_flag_interpolate(F) (F | 0x41)
 #define mb_beam_set_flag_sonar(F) (F | 0x81)
 //#define mb_beam_set_flag_filter2(F) (F | 0x11)

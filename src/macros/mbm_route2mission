@@ -1386,8 +1386,12 @@ print "Behavior: ascend\r\n";
 print "Behavior: acousticUpdate\r\n";
 	if ($mappingsonar)
 		{
-		print MFILE "# Turn off power to sonars and stop logging on the PLC \r\n";
-		print MFILE "# by setting the value of the mode attribute to 0 (used to be False). \r\n";
+		print MFILE "# Stop data logging on sonars and then turn off power to sonars\r\n";
+		print MFILE "behavior battery \r\n";
+		print MFILE "{ \r\n";
+		print MFILE "	duration = 10; \r\n";
+		print MFILE "	disableAuxLoads = 1; \r\n";
+		print MFILE "} \r\n";
 		print MFILE "behavior edgetech \r\n";
 		print MFILE "{ \r\n";
 		print MFILE "duration  = RESON_DURATION; \r\n";
@@ -1664,9 +1668,12 @@ print "Behavior: acousticUpdate\n";
 			print MFILE "# \r\n";
 			if ($mappingsonar)
 				{
-				print MFILE "#######################################################\r\n";
-				print MFILE "# Turn off power to sonars and stop logging on the PLC \r\n";
-				print MFILE "# by setting the value of the mode attribute to 0 (used to be False). \r\n";
+    		print MFILE "# Stop data logging on sonars and then turn off power to sonars\r\n";
+    		print MFILE "behavior battery \r\n";
+    		print MFILE "{ \r\n";
+    		print MFILE "	duration = 10; \r\n";
+    		print MFILE "	disableAuxLoads = 1; \r\n";
+    		print MFILE "} \r\n";
         if ($subbottom || $sidescanlo || $sidescanhi)
           {
   				print MFILE "behavior edgetech \r\n";

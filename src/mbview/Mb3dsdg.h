@@ -19,6 +19,7 @@ typedef struct _Mb3dsdgData {
 	Widget toggleButton_view_boundingbox;
 	Widget separator1;
 	Widget toggleButton_view_flagged;
+	Widget toggleButton_view_secondary;
 	Widget separator;
 	Widget toggleButton_view_noconnect;
 	Widget toggleButton_view_connectgood;
