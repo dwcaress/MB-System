@@ -29,9 +29,12 @@
 #include <time.h>
 #include <unistd.h>
 
-#define MB_NEED_SENSOR_TYPE 1
 #include "mb_define.h"
 #include "mb_format.h"
+/* Set define so that mb_sensor_type_id[] amd mb_sensor_type_string[] arrays are
+   defined in mb_platform.c (this source file) when included from mb_io.h
+   - these will be declared extern elsewhere */
+#define MB_NEED_SENSOR_TYPE 1
 #include "mb_io.h"
 #include "mb_segy.h"
 #include "mb_status.h"
