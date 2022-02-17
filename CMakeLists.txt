@@ -16,20 +16,24 @@ else()
   message(FATAL_ERROR "Building on unsupported OS")
 endif()
 
+option(buildQt "buildQt" OFF)
 
 # Set list of required modules (i.e. packages with find modules)
 set(modules GMT Proj OpenGL X11 Motif GDAL NetCDF FFTW)
 
+
 if (help)
-  message("force package include directory with -Dpackage_include=path")
+  message("force package include path with -Dpackage_include=path")
   message("force package libraries with -Dpackage_lib=file")  
   message("where package is one of the following:")
   message("${modules} ${packages}")
   message("enable debugging with -DCMAKE_BUILD_TYPE=Debug")
-  message("built Qt-based GUIs with -DbuildQt=1")
+  message("build Qt-based GUIs with -DbuildQt=1")
   message("you MUST specify -DVTK_include=<dir> -DVTK_lib=<libs>")
   message(FATAL_ERROR "")
 endif()
+
+
 
 # NOTE: VTK_lib is specified as a space-delimited list of libraries, and so
 # so those spaces must be quoted when specified with cmake -D command line
@@ -64,7 +68,6 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
 message("CMAKE_CXX_FLAGS: ${CMAKE_CXX_FLAGS}")
-
 
 # Get directory of this CMakeLists.txt file
 set(MB_HOME ${CMAKE_CURRENT_SOURCE_DIR})
