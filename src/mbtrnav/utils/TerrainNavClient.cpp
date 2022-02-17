@@ -205,7 +205,7 @@ bool TerrainNavClient::is_connected()
 // throws a TRNConnection exception if TRN has hung up
 char TerrainNavClient::get_msg()
 {
-  bool OK = true;
+  bool stat_OK = true;
   _server_msg.msg_type = 0;
   if (is_connected())
   {
@@ -238,7 +238,7 @@ char TerrainNavClient::get_msg()
             }
 
             // disconnected or unrecoverable error, quit loop
-            OK=false;
+            stat_OK=false;
             break;
         }
         else
@@ -257,12 +257,12 @@ char TerrainNavClient::get_msg()
   else
   {
     // No connection
-    OK = false;
+      stat_OK = false;
   }
 
 
   // Server hung-up
-  if (!OK)
+  if (!stat_OK)
   {
     _connected = false;
     printf("TerrainNavClient::get_msg() - server connection failed/terminated\n");

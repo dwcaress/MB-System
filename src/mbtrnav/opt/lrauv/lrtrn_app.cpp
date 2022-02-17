@@ -45,7 +45,7 @@ int main(int argc, char** argv)
   if (argc == 1)
     configfile = getDefaultConfig();
   else if (argc == 2)
-    configfile = argv[1];
+    configfile = strdup(argv[1]);
   else
     usage();
 
@@ -60,8 +60,11 @@ int main(int argc, char** argv)
   // Run if the LcmTrn object setup was a success.
   // run() only stops when the LcmTrn object is not good.
   //
-  if (_trn.good())
+  if (!_trn.good())
   {
+    fprintf(stderr, "Initialization failed!\n");
+  }
+  else {
     fprintf(stderr, "%s listening for messages...\n", argv[0]);
     _trn.run();
   }

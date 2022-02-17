@@ -28,6 +28,7 @@
 #include "trn_log.h"
 #include "TerrainMap.h"
 #include "MathP.h"
+#include "TNavPFLog.h"
 
 #include <newmatap.h>
 #include <newmatio.h>
@@ -36,6 +37,8 @@
 #include <iomanip>
 #include <time.h>
 #include <vector>
+
+//class TNavPFLog;
 
 
 
@@ -93,7 +96,7 @@ struct particleT {
     }
 
    //copy assignment operator
-   particleT& operator=(particleT& rhs)
+   particleT& operator=(const particleT& rhs)
    {
       int i;
       if(this != &rhs)
@@ -124,8 +127,6 @@ struct particleT {
    }
 
 };
-
-class TNavPFLog;
 
 /*!
  * Class: TNavParticleFilter
@@ -304,7 +305,7 @@ class TNavParticleFilter : public TNavFilter
    * -------------------------------------------------------------------------*/
   /*! Initializes the particle distribution based on an initial guess
    */
-  void initParticleDist(particleT& initialGuess);
+  void initParticleDist(const particleT& initialGuess);
 
 
   /* Function: attitudeMeasUpdate
@@ -315,7 +316,7 @@ class TNavParticleFilter : public TNavFilter
    * Resamples the particle distribution if appropriate.
    * Note that this function is only called when INTEG_PHI_THETA is set to 1.
    */
-  void attitudeMeasUpdate(poseT& currPose);
+  void attitudeMeasUpdate(const poseT& currPose);
 
 
   /* Function: homerMeasUpdate
@@ -338,7 +339,7 @@ class TNavParticleFilter : public TNavFilter
    * displacements dx, dy, dz, dphi, dtheta, dpsi, over the last dt seconds.
    * Uses terrain motion information stored by the particle.
    */
-  void motionUpdateParticle(particleT& particle, poseT& diffPose,
+  void motionUpdateParticle(particleT& particle, const poseT& diffPose,
 			    double* velocity_sf_sigma, const double& gyroStddev);   
 
   /* Function: resampParticleDist

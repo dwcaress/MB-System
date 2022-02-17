@@ -60,7 +60,14 @@
 #include "netif.h"
 #include "trnif_proto.h"
 #include "trn_msg.h"
+#include "mb1_msg.h"
+#include "mb1-reader.h"
 #endif // WITH_MBTNAV
+
+// Features
+#ifndef WITHOUT_MB1_READER
+#define WITH_MB1_READER
+#endif
 
 /* ping structure definition */
 struct mbtrnpp_ping_struct {
@@ -101,8 +108,8 @@ typedef enum{
     OUTPUT_TRN_SVR_EN  =0x0004, OUTPUT_TRNU_SVR_EN =0x0008, OUTPUT_MB1_BIN     =0x0010,
     OUTPUT_RESON_BIN   =0x0020, OUTPUT_TRNU_ASC    =0x0040, OUTPUT_TRNU_SOUT   =0x0080,
     OUTPUT_TRNU_SERR   =0x0100, OUTPUT_TRNU_DEBUG  =0x0200, OUTPUT_TRNU_BIN    =0x0400,
-    OUTPUT_MBTRNPP_MSG =0x0800, OUTPUT_MBSYS_STDOUT=0x1000, OUTPUT_TRNUM_SVR_EN=0x2000,
-    OUTPUT_ALL         =0x1FFF
+    OUTPUT_MBTRNPP_MSG =0x0800, OUTPUT_MBSYS_STDOUT=0x1000, OUTPUT_TRNUM_SVR_EN=0x2000, OUTPUT_MB1R_BIN=0x4000,
+    OUTPUT_ALL         =0x7FFF
 }output_mode_t;
 
 
@@ -599,6 +606,8 @@ s=NULL;\
 #define TRNUM_ALOG_DESC   "trnum log"
 #define TRNUM_BLOG_NAME   "trnumb"
 #define TRNUM_BLOG_DESC   "trnum log (binary)"
+#define MB1R_BLOG_NAME    "mb1rbin"
+#define MB1R_BLOG_DESC    "mb1r log (binary)"
 #define MBTRNPP_LOG_EXT   ".log"
 #ifdef WITH_MBTNAV
 #define UTM_MONTEREY_BAY 10L
@@ -620,6 +629,9 @@ s=NULL;\
 #define TRNSVR_PORT_DFL  28000
 #define TRN_XMIT_GAIN_RESON7K_DFL 200.0
 #define TRN_XMIT_GAIN_KMALL_DFL -20.0
+#ifdef WITH_MB1_READER
+#define TRN_XMIT_GAIN_MB1_DFL 0.0
+#endif // WITH_MB1_READER
 
 #endif //WITH_MBTNAV
 #define SZ_1M (1024 * 1024)
@@ -657,18 +669,21 @@ mlog_id_t mbtrnpp_mlog_id = MLOG_ID_INVALID;
 mlog_id_t reson_blog_id = MLOG_ID_INVALID;
 mlog_id_t trnu_alog_id = MLOG_ID_INVALID;
 mlog_id_t trnu_blog_id = MLOG_ID_INVALID;
+mlog_id_t mb1r_blog_id = MLOG_ID_INVALID;
 
 mlog_config_t mb1_blog_conf = {100 * SZ_1M, ML_NOLIMIT, ML_NOLIMIT, ML_OSEG | ML_LIMLEN, ML_FILE, ML_TFMT_ISO1806};
 mlog_config_t mbtrnpp_mlog_conf = {ML_NOLIMIT, ML_NOLIMIT, ML_NOLIMIT, ML_MONO, ML_FILE, ML_TFMT_ISO1806};
 mlog_config_t reson_blog_conf = {ML_NOLIMIT, ML_NOLIMIT, ML_NOLIMIT, ML_MONO, ML_FILE, ML_TFMT_ISO1806};
 mlog_config_t trnu_alog_conf = {ML_NOLIMIT, ML_NOLIMIT, ML_NOLIMIT, ML_MONO, ML_FILE, ML_TFMT_ISO1806};
 mlog_config_t trnu_blog_conf = {100 * SZ_1M, ML_NOLIMIT, ML_NOLIMIT, ML_OSEG | ML_LIMLEN, ML_FILE, ML_TFMT_ISO1806};
+mlog_config_t mb1r_blog_conf = {ML_NOLIMIT, ML_NOLIMIT, ML_NOLIMIT, ML_MONO, ML_FILE, ML_TFMT_ISO1806};
 
 char *mb1_blog_path = NULL;
 char *mbtrnpp_mlog_path = NULL;
 char *reson_blog_path = NULL;
 char *trnu_alog_path = NULL;
 char *trnu_blog_path = NULL;
+char *mb1r_blog_path = NULL;
 
 mfile_flags_t flags = MFILE_RDWR | MFILE_APPEND | MFILE_CREATE;
 mfile_mode_t mode = MFILE_RU | MFILE_WU | MFILE_RG | MFILE_WG;
@@ -821,6 +836,11 @@ int mbtrnpp_reson7kr_input_close(int verbose, void *mbio_ptr, int *error);
 int mbtrnpp_kemkmall_input_open(int verbose, void *mbio_ptr, char *definition, int *error);
 int mbtrnpp_kemkmall_input_read(int verbose, void *mbio_ptr, size_t *size, char *buffer, int *error);
 int mbtrnpp_kemkmall_input_close(int verbose, void *mbio_ptr, int *error);
+#ifdef WITH_MB1_READER
+int mbtrnpp_mb1r_input_open(int verbose, void *mbio_ptr, char *definition, int *error);
+int mbtrnpp_mb1r_input_read(int verbose, void *mbio_ptr, size_t *size, char *buffer, int *error);
+int mbtrnpp_mb1r_input_close(int verbose, void *mbio_ptr, int *error);
+#endif // WITH_MB1_READER
 
 // Configuration helper functions
 
@@ -1741,6 +1761,16 @@ static int s_parse_opt_mbout(mbtrnpp_cfg_t *cfg, char *opt_str)
                 // enable reson frame data log
                 cfg->output_flags |= OUTPUT_RESON_BIN;
             }
+#ifdef WITH_MB1_READER
+            if(strcmp(tok[i],"mb1r")==0){
+                // enable mb1 frame data log
+                cfg->output_flags |= OUTPUT_MB1R_BIN;
+            }
+            if(strcmp(tok[i],"nomb1r")==0){
+                // disable mb1 frame data log
+                cfg->output_flags &= ~OUTPUT_MB1R_BIN;
+            }
+#endif
             if(strcmp(tok[i],"nomb1")==0){
                 // disable mb1 data log
                 cfg->output_flags &= ~OUTPUT_MB1_BIN;
@@ -2655,7 +2685,10 @@ static void s_mbtrnpp_release_resources()
     mlog_delete_instance(reson_blog_id);
     mlog_delete_instance(trnu_alog_id);
     mlog_delete_instance(trnu_blog_id);
-
+#ifdef WITH_MB1_READER
+    mlog_delete_instance(mb1r_blog_id);
+    MEM_CHKFREE(mb1r_blog_path);
+#endif
     fprintf(stderr,"release log paths...\n");
     // release log paths
     MEM_CHKFREE(mb1_blog_path);
@@ -3281,6 +3314,11 @@ int main(int argc, char **argv) {
     else if (mbtrn_cfg->format == MBF_KEMKMALL) {
         transmit_gain_threshold = TRN_XMIT_GAIN_KMALL_DFL;
     }
+#ifdef WITH_MB1_READER
+    else if (mbtrn_cfg->format == MBF_MBARIMB1) {
+        transmit_gain_threshold = TRN_XMIT_GAIN_MB1_DFL;
+    }
+#endif // WITH_MB1_READER
     mlog_tprintf(mbtrnpp_mlog_id, "i,transmit gain threshold[%.2lf]\n", transmit_gain_threshold);
   }
 
@@ -3362,12 +3400,19 @@ int main(int argc, char **argv) {
         mbtrnpp_input_open = &mbtrnpp_reson7kr_input_open;
         mbtrnpp_input_read = &mbtrnpp_reson7kr_input_read;
         mbtrnpp_input_close = &mbtrnpp_reson7kr_input_close;
-      }
-      else if (mbtrn_cfg->format == MBF_KEMKMALL) {
+      } else if (mbtrn_cfg->format == MBF_KEMKMALL) {
         mbtrnpp_input_open = &mbtrnpp_kemkmall_input_open;
         mbtrnpp_input_read = &mbtrnpp_kemkmall_input_read;
         mbtrnpp_input_close = &mbtrnpp_kemkmall_input_close;
-      }else{
+      }
+#ifdef WITH_MB1_READER
+      else if (mbtrn_cfg->format == MBF_MBARIMB1) {
+          mbtrnpp_input_open = &mbtrnpp_mb1r_input_open;
+          mbtrnpp_input_read = &mbtrnpp_mb1r_input_read;
+          mbtrnpp_input_close = &mbtrnpp_mb1r_input_close;
+      }
+#endif // WITH_MB1_READER
+      else{
           fprintf(stderr,"ERR - Invalid output format [%d]\n",mbtrn_cfg->format);
       }
       if ((status = mb_input_init(mbtrn_cfg->verbose, mbtrn_cfg->socket_definition, mbtrn_cfg->format, pings, lonflip, bounds,
@@ -5508,7 +5553,7 @@ int mbtrnpp_trn_process_mb1(wtnav_t *tnav, mb1_t *mb1, trn_config_t *cfg)
             if(NULL!=tnav && NULL!=mb1 && NULL!=cfg){
                 static int process_count=0;
 
-                mlog_tprintf(trnu_alog_id,"trn_update_start,%lf,%lf,%d\n",mtime_etime(),mb1->sounding.ts,++process_count);
+                mlog_tprintf(trnu_alog_id,"trn_update_start,%lf,%lf,%d\n",mtime_etime(),mb1->ts,++process_count);
                 MST_METRIC_START(app_stats->stats->metrics[MBTPP_CH_TRN_PROC_XT], mtime_dtime());
 
                 wmeast_t *mt = NULL;
@@ -5543,15 +5588,15 @@ int mbtrnpp_trn_process_mb1(wtnav_t *tnav, mb1_t *mb1, trn_config_t *cfg)
                             pstate->filter_state = wtnav_get_filter_state(tnav);
                             pstate->is_converged = (wtnav_is_converged(tnav) ? 1 : 0);
                             pstate->is_valid = use_trn_offset;
-                            // pstate->is_valid = ( (mb1->sounding.ts > 0. &&
+                            // pstate->is_valid = ( (mb1->ts > 0. &&
                             //                       pstate->mse_dat->covariance[0] <= cfg->max_northing_cov &&
                             //                       pstate->mse_dat->covariance[2] <= cfg->max_easting_cov &&
                             //                       fabs(pstate->mse_dat->x-pstate->pt_dat->x) <= cfg->max_northing_err &&
                             //                       fabs(pstate->mse_dat->y-pstate->pt_dat->y) <= cfg->max_easting_err
                             //                     )? 1 : 0);
                             pstate->mb1_cycle=mb1_count;
-                            pstate->ping_number=mb1->sounding.ping_number;
-                            pstate->mb1_time=mb1->sounding.ts;
+                            pstate->ping_number=mb1->ping_number;
+                            pstate->mb1_time=mb1->ts;
                             pstate->update_time=mtime_etime();
 
                             MST_METRIC_LAP(app_stats->stats->metrics[MBTPP_CH_TRN_NREINITS_XT], mtime_dtime());
@@ -5565,8 +5610,8 @@ int mbtrnpp_trn_process_mb1(wtnav_t *tnav, mb1_t *mb1, trn_config_t *cfg)
                             PMPRINT(MOD_MBTRNPP,MM_DEBUG,(stderr,"ERR: pt[%p] pt_dat[%p] mle_dat[%p] mse_dat[%p]\n",pt,pstate->pt_dat,pstate->mle_dat,pstate->mse_dat));
                             mlog_tprintf(trnu_alog_id,"ERR: NULL data pt[%p] pt_dat[%p] mle_dat[%p] mse_dat[%p] ts[%.3lf] beams[%u] ping[%d] lat[%.5lf] lon[%.5lf] hdg[%.2lf] sd[%.1lf]\n",
                                          pt,pstate->pt_dat,pstate->mle_dat,pstate->mse_dat,
-                                         mb1->sounding.ts, mb1->sounding.nbeams, mb1->sounding.ping_number,
-                                         mb1->sounding.lat, mb1->sounding.lon, mb1->sounding.hdg, mb1->sounding.depth);
+                                         mb1->ts, mb1->nbeams, mb1->ping_number,
+                                         mb1->lat, mb1->lon, mb1->hdg, mb1->depth);
                         }
                     }else{
                         mlog_tprintf(trnu_alog_id,"ERR: trncli_get_bias_estimates failed [%d] [%d/%s]\n",test,errno,strerror(errno));
@@ -5574,26 +5619,26 @@ int mbtrnpp_trn_process_mb1(wtnav_t *tnav, mb1_t *mb1, trn_config_t *cfg)
                         PMPRINT(MOD_MBTRNPP,MM_DEBUG|MBTRNPP_V3,(stderr,"ERR: trn_get_bias_estimates failed [%d] [%d/%s]\n",test,errno,strerror(errno)));
 
                         int time_i[7];
-                        mb_get_date(0, mb1->sounding.ts, time_i);
+                        mb_get_date(0, mb1->ts, time_i);
                         fprintf(stderr, "%4.4d/%2.2d/%2.2d-%2.2d:%2.2d:%2.2d.%6.6d %.6f "
                                         "| %11.6f %11.6f %8.3f | %d filtered beams - Ping not used - failed bias estimate\n",
-                        time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6], mb1->sounding.ts,
-                        mb1->sounding.lon, mb1->sounding.lat, mb1->sounding.depth, mb1->sounding.nbeams);
-                        mbtrnpp_trnu_pubempty_osocket(mb1->sounding.ts, mb1->sounding.lat, mb1->sounding.lon, mb1->sounding.depth, trnusvr);
-                        mbtrnpp_trnu_pubempty_osocket(mb1->sounding.ts, mb1->sounding.lat, mb1->sounding.lon, mb1->sounding.depth, trnumsvr);
+                        time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6], mb1->ts,
+                        mb1->lon, mb1->lat, mb1->depth, mb1->nbeams);
+                        mbtrnpp_trnu_pubempty_osocket(mb1->ts, mb1->lat, mb1->lon, mb1->depth, trnusvr);
+                        mbtrnpp_trnu_pubempty_osocket(mb1->ts, mb1->lat, mb1->lon, mb1->depth, trnumsvr);
                     }
                 }else{
                     mlog_tprintf(trnu_alog_id,"ERR: trncli_send_update failed [%d] [%d/%s]\n",test,errno,strerror(errno));
                     PMPRINT(MOD_MBTRNPP,MM_DEBUG|MBTRNPP_V3,(stderr,"ERR: trn_update failed [%d] [%d/%s]\n",test,errno,strerror(errno)));
 
                     int time_i[7];
-                    mb_get_date(0, mb1->sounding.ts, time_i);
+                    mb_get_date(0, mb1->ts, time_i);
                     fprintf(stderr, "%4.4d/%2.2d/%2.2d-%2.2d:%2.2d:%2.2d.%6.6d %.6f "
                                     "| %11.6f %11.6f %8.3f | %d filtered beams - Ping not used - failed trn processing\n",
-                    time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6], mb1->sounding.ts,
-                    mb1->sounding.lon, mb1->sounding.lat, mb1->sounding.depth, mb1->sounding.nbeams);
-                    mbtrnpp_trnu_pubempty_osocket(mb1->sounding.ts, mb1->sounding.lat, mb1->sounding.lon, mb1->sounding.depth, trnusvr);
-                    mbtrnpp_trnu_pubempty_osocket(mb1->sounding.ts, mb1->sounding.lat, mb1->sounding.lon, mb1->sounding.depth, trnumsvr);
+                    time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6], mb1->ts,
+                    mb1->lon, mb1->lat, mb1->depth, mb1->nbeams);
+                    mbtrnpp_trnu_pubempty_osocket(mb1->ts, mb1->lat, mb1->lon, mb1->depth, trnusvr);
+                    mbtrnpp_trnu_pubempty_osocket(mb1->ts, mb1->lat, mb1->lon, mb1->depth, trnumsvr);
                 }
                 wmeast_destroy(mt);
                 wposet_destroy(pt);
@@ -5610,11 +5655,11 @@ int mbtrnpp_trn_process_mb1(wtnav_t *tnav, mb1_t *mb1, trn_config_t *cfg)
         }// if do_process
         //else {
         //    int time_i[7];
-        //    mb_get_date(0, mb1->sounding.ts, time_i);
+        //    mb_get_date(0, mb1->ts, time_i);
         //    fprintf(stderr, "%4.4d/%2.2d/%2.2d-%2.2d:%2.2d:%2.2d.%6.6d %.6f "
         //                    "| %11.6f %11.6f %8.3f | Ping not processed - decimated\n",
-        //    time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6], mb1->sounding.ts,
-        //    mb1->sounding.lon, mb1->sounding.lat, mb1->sounding.depth);
+        //    time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6], mb1->ts,
+        //    mb1->lon, mb1->lat, mb1->depth);
         //}
     }// if trn_en
 
@@ -5744,7 +5789,7 @@ int mbtrnpp_reson7kr_input_open(int verbose, void *mbio_ptr, char *definition, i
     mstats_set_period(reader_stats, app_stats->stats->stat_period_start, app_stats->stats->stat_period_sec);
 
     // configure reader data log
-      if ( OUTPUT_FLAG_SET(OUTPUT_RESON_BIN) ) {
+    if ( OUTPUT_FLAG_SET(OUTPUT_RESON_BIN) ) {
       // open mbr data log
       reson_blog_path = (char *)malloc(512);
       sprintf(reson_blog_path, "%s//%s-%s%s", mbtrn_cfg->trn_log_dir, RESON_BLOG_NAME, s_mbtrnpp_session_str(NULL,0,RF_NONE), MBTRNPP_LOG_EXT);
@@ -6369,4 +6414,266 @@ int mbtrnpp_kemkmall_input_close(int verbose, void *mbio_ptr, int *error) {
   /* return */
   return (status);
 }
+#ifdef WITH_MB1_READER
 /*--------------------------------------------------------------------*/
+int mbtrnpp_mb1r_input_open(int verbose, void *mbio_ptr, char *definition, int *error) {
+
+    /* local variables */
+    int status = MB_SUCCESS;
+    struct mb_io_struct *mb_io_ptr;
+
+    /* print input debug statements */
+    if (verbose >= 2) {
+        fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+        fprintf(stderr, "dbg2  Input arguments:\n");
+        fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+        fprintf(stderr, "dbg2       mbio_ptr:   %p,%p\n", mbio_ptr, &mbio_ptr);
+        fprintf(stderr, "dbg2       hostname:   %s\n", definition);
+    }
+
+    /* get pointer to mbio descriptor */
+    mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+
+    /* set initial status */
+    status = MB_SUCCESS;
+
+    /* Open and initialize the socket based input for reading using function
+     * mbtrnpp_mb1r_input_read(). Allocate an internal, hidden buffer to hold data from
+     * full mb1 records while waiting to return bytes from those records as
+     * requested by the MBIO read functions.
+     * Store the relevant pointers and parameters within the
+     * mb_io_struct structure *mb_io_ptr. */
+
+    mb_path hostname;
+    int port = 0;
+    size_t size = 0;
+
+    // copy def (strtok is destructive)
+    char *defcpy = strdup(definition);
+    char *addr[2]={NULL,NULL};
+    char *saveptr;
+    // separate hostname, numeric tokens
+    addr[0]=strtok_r(defcpy,":",&saveptr);
+    addr[1]=strtok_r(NULL,"",&saveptr);
+
+    // parse hostname, port, size
+    if(NULL!=addr[0])
+        strcpy(hostname, addr[0]);
+    if(NULL!=addr[1])
+        sscanf(addr[1], "%d:%zu", &port, &size);
+    // release definition copy
+    free(defcpy);
+
+    if (strlen(hostname) == 0)
+        strcpy(hostname, "localhost");
+    if (port == 0)
+        port = MB1_IP_PORT_DFL;
+    if (size == 0)
+        size = MB1_MAX_SOUNDING_BYTES;
+
+    PMPRINT(MOD_MBTRNPP, MM_DEBUG, (stderr, "configuring mb1r_reader using %s:%d\n", hostname, port));
+    mb1r_reader_t *reader = mb1r_reader_new(hostname, port, size);
+
+    if (NULL != mb_io_ptr && NULL != reader) {
+
+        // set mb1_reader
+        mb_io_ptr->mbsp = (void *) reader;
+
+        if (reader->state == MB1R_CONNECTED || reader->state == MB1R_SUBSCRIBED) {
+            // update application performance profile
+            MST_COUNTER_INC(app_stats->stats->events[MBTPP_EV_MB_CONN]);
+        }
+
+        // get global reader performance profile
+        reader_stats = mb1r_reader_get_stats(reader);
+        mstats_set_period(reader_stats, app_stats->stats->stat_period_start, app_stats->stats->stat_period_sec);
+
+        // configure reader data log
+        if ( OUTPUT_FLAG_SET(OUTPUT_MB1R_BIN) ) {
+            // open mbr data log
+            mb1r_blog_path = (char *)malloc(512);
+            sprintf(mb1r_blog_path, "%s//%s-%s%s", mbtrn_cfg->trn_log_dir, MB1R_BLOG_NAME, s_mbtrnpp_session_str(NULL,0,RF_NONE), MBTRNPP_LOG_EXT);
+
+            mb1r_blog_id = mlog_get_instance(mb1r_blog_path, &mb1r_blog_conf, MB1R_BLOG_NAME);
+
+            mlog_show(mb1r_blog_id, true, 5);
+            mlog_open(mb1r_blog_id, flags, mode);
+
+            mb1r_reader_set_log(reader, mb1r_blog_id);
+        }
+
+        if (verbose >= 1) {
+            mb1r_reader_show(reader, true, 5);
+        }
+    }
+    else {
+        fprintf(stderr, "ERR - mb1r_reader_new failed (NULL) [%d:%s]\n", errno, strerror(errno));
+        status = MB_FAILURE;
+        *error = MB_ERROR_INIT_FAIL;
+    }
+
+    /* print output debug statements */
+    if (verbose >= 2) {
+        fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
+        fprintf(stderr, "dbg2  Return values:\n");
+        fprintf(stderr, "dbg2       error:              %d\n", *error);
+        fprintf(stderr, "dbg2  Return status:\n");
+        fprintf(stderr, "dbg2       status:             %d\n", status);
+    }
+
+    /* return */
+    return (status);
+}
+
+int mbtrnpp_mb1r_input_read(int verbose, void *mbio_ptr, size_t *size, char *buffer, int *error)
+{
+
+    /* local variables */
+    int status = MB_SUCCESS;
+    struct mb_io_struct *mb_io_ptr;
+
+    /* print input debug statements */
+    if (verbose >= 2) {
+        fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+        fprintf(stderr, "dbg2  Input arguments:\n");
+        fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+        fprintf(stderr, "dbg2       mbio_ptr:   %p\n", mbio_ptr);
+        fprintf(stderr, "dbg2       size:       %zu\n", *size);
+        fprintf(stderr, "dbg2       buffer:     %p\n", buffer);
+    }
+
+    /* get pointer to mbio descriptor */
+    mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+
+    /* set initial status */
+    status = MB_SUCCESS;
+
+    /* Read the requested number of bytes (= size) off the input and  place
+     * those bytes into the buffer.
+     * This requires reading full s7k records off the socket, storing the data
+     * in an internal, hidden buffer, and parceling those bytes out as requested.
+     * The internal buffer should be allocated in mbtrnpp_reson7kr_input_init() and stored
+     * in the mb_io_struct structure *mb_io_ptr. */
+
+    // use the socket reader
+    // read and return single frame
+    uint32_t sync_bytes=0;
+    int64_t rbytes=-1;
+    mb1r_reader_t *reader = (mb1r_reader_t *)mb_io_ptr->mbsp;
+    if ( (rbytes = mb1r_read_frame(reader, (byte *) buffer,
+                                            MB1_MAX_SOUNDING_BYTES, MB1R_NET_STREAM,
+                                            0.0, MB1R_READ_TMOUT_MSEC,
+                                            &sync_bytes)) < 0) {
+        status   = MB_FAILURE;
+        *error   = MB_ERROR_EOF;
+        *size    = (size_t)rbytes;
+
+        MST_METRIC_START(app_stats->stats->metrics[MBTPP_CH_MB_GETFAIL_XT], mtime_dtime());
+        PMPRINT(MOD_MBTRNPP,MBTRNPP_V4,(stderr,"mb1r_read_frame failed: sync_bytes[%d] status[%d] err[%d]\n",sync_bytes,status, *error));
+        fprintf(stderr,"mb1r_read_frame failed: sync_bytes[%u] status[%d] err[%d]\n",sync_bytes,status, *error);
+
+        MST_COUNTER_INC(app_stats->stats->events[MBTPP_EV_EMBFRAMERD]);
+        MST_COUNTER_ADD(app_stats->stats->events[MBTPP_STA_MB_SYNC_BYTES],sync_bytes);
+
+        fprintf(stderr,"EOF (input socket) - clear status/error\n");
+        status = MB_SUCCESS;
+        error = MB_ERROR_NO_ERROR;
+
+        // check connection status
+        // only reconnect if disconnected
+        if ((NULL!=reader && reader->state==MB1R_INITIALIZED) || (me_errno==ME_ESOCK) || (me_errno==ME_EOF)  ) {
+            MST_COUNTER_INC(app_stats->stats->events[MBTPP_EV_EMBSOCKET]);
+
+            // empty the reader's record frame container
+            mb1r_reader_purge(reader);
+            fprintf(stderr,"mbtrnpp: input socket disconnected status[%s]\n",mb1r_strstate(reader->state));
+            mlog_tprintf(mbtrnpp_mlog_id,"mbtrnpp: input socket disconnected status[%s]\n",mb1r_strstate(reader->state));
+            MST_COUNTER_INC(app_stats->stats->events[MBTPP_EV_MB_DISN]);
+            if (mb1r_reader_connect(reader,true)==0) {
+                fprintf(stderr,"mbtrnpp: input socket connected status[%s]\n",mb1r_strstate(reader->state));
+                mlog_tprintf(mbtrnpp_mlog_id,"mbtrnpp: input socket connected status[%s]\n",mb1r_strstate(reader->state));
+                MST_COUNTER_INC(app_stats->stats->events[MBTPP_EV_MB_CONN]);
+            }else{
+                fprintf(stderr,"mbtrnpp: input socket reconnect failed status[%s]\n",mb1r_strstate(reader->state));
+                mlog_tprintf(mbtrnpp_mlog_id,"mbtrnpp: input socket reconnect failed status[%s]\n",mb1r_strstate(reader->state));
+                MST_COUNTER_INC(app_stats->stats->events[MBTPP_EV_EMBCON]);
+
+                struct timespec twait={0},trem={0};
+                twait.tv_sec=5;
+                nanosleep(&twait,&trem);
+            }
+        }
+
+        MST_METRIC_LAP(app_stats->stats->metrics[MBTPP_CH_MB_GETFAIL_XT], mtime_dtime());
+
+        //    if (me_errno==ME_ESOCK) {
+        //        fprintf(stderr,"r7kr_reader server connection closed.\n");
+        //    } else if (me_errno==ME_EOF) {
+        //        fprintf(stderr,"r7kr_reader end of file (server connection closed).\n");
+        //    } else{
+        //        fprintf(stderr,"r7kr_read_stripped_frame me_errno %d/%s\n",me_errno,me_strerror(me_errno));
+        //    }
+
+    } else {
+        *error = MB_ERROR_NO_ERROR;
+        *size    = (size_t)rbytes;
+        if(verbose>=2 || verbose<=-2){
+            fprintf(stderr,"read frame len[%zu]:",(size_t)rbytes);
+            mb1_show((mb1_t *)buffer,(verbose<-2?true:false),5);
+        }
+    }
+
+    /* print output debug statements */
+    if (verbose >= 2) {
+        fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
+        fprintf(stderr, "dbg2  Return values:\n");
+        fprintf(stderr, "dbg2       error:              %d\n", *error);
+        fprintf(stderr, "dbg2  Return status:\n");
+        fprintf(stderr, "dbg2       status:             %d\n", status);
+    }
+
+    /* return */
+    return (status);
+}
+
+int mbtrnpp_mb1r_input_close(int verbose, void *mbio_ptr, int *error)
+{
+    /* local variables */
+    int status = MB_SUCCESS;
+    struct mb_io_struct *mb_io_ptr;
+
+    /* print input debug statements */
+    if (verbose >= 2) {
+        fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+        fprintf(stderr, "dbg2  Input arguments:\n");
+        fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+        fprintf(stderr, "dbg2       mbio_ptr:   %p\n", mbio_ptr);
+    }
+
+    /* get pointer to mbio descriptor */
+    mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+
+    /* set initial status */
+    status = MB_SUCCESS;
+
+    /* Close the socket based input for reading using function
+     * mbtrnpp_mb1r_input_read(). Deallocate the internal, hidden buffer and any
+     * other resources that were allocated by mbtrnpp_reson7kr_input_init(). */
+    mb1r_reader_t *reader = (mb1r_reader_t *)mb_io_ptr->mbsp;
+    mb1r_reader_destroy(&reader);
+    mb_io_ptr->mbsp = NULL;
+
+    /* print output debug statements */
+    if (verbose >= 2) {
+        fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
+        fprintf(stderr, "dbg2  Return values:\n");
+        fprintf(stderr, "dbg2       error:              %d\n", *error);
+        fprintf(stderr, "dbg2  Return status:\n");
+        fprintf(stderr, "dbg2       status:             %d\n", status);
+    }
+
+    /* return */
+    return (status);
+}
+#endif // WITH_MB1_READER
+

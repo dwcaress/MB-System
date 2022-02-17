@@ -168,7 +168,7 @@ class TerrainNav
   /*! Initializes a new TerrainNav with terrain map "mapName.txt". The mapping
    * AUV specs and the Point Mass Filter algorithm are used as defaults.
    */
-  TerrainNav(char *mapName);
+  explicit TerrainNav(char *mapName);
 
 
   /* Constructor: TerrainNav(mapName, vehicleName)

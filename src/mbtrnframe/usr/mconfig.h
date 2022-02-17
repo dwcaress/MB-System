@@ -86,6 +86,8 @@
 typedef enum{
     MOD_R7KR=MM_MODULE_COUNT,
     MOD_R7K,
+    MOD_MB1R,
+    MOD_MB1,
     MOD_S7K,
     MOD_F7K,
     MOD_TRNC,
@@ -132,6 +134,43 @@ typedef enum{
     R7K_PARSER= (1<<ID_R7K_PARSER),
     R7K_DRFCON= (1<<ID_R7K_DRFCON)
 }r7k_channel_mask;
+
+/// @enum mb1r_channel_id
+/// @brief test module channel IDs
+/// [note : starting above reserved mframe channel IDs]
+typedef enum{
+    ID_MB1R_V1=MM_CHANNEL_COUNT,
+    ID_MB1R_V2,
+    MB1R_CH_COUNT
+}mb1r_channel_id;
+
+/// @enum mb1r_channel_mask
+/// @brief test module channel masks
+typedef enum{
+    MB1R_V1= (1<<ID_MB1R_V1),
+    MB1R_V2= (1<<ID_MB1R_V2)
+}mb1r_channel_mask;
+
+/// @enum mb1_channel_id
+/// @brief test module channel IDs
+/// [note : starting above reserved mframe channel IDs]
+typedef enum{
+    ID_MB1_V1=MM_CHANNEL_COUNT,
+    ID_MB1_V2,
+    ID_MB1_PARSER,
+    ID_MB1_DRFCON,
+    MB1_CH_COUNT
+}mb1_channel_id;
+
+/// @enum mb1_channel_mask
+/// @brief test module channel masks
+typedef enum{
+    MB1_V1= (1<<ID_MB1_V1),
+    MB1_V2= (1<<ID_MB1_V2),
+    MB1_PARSER= (1<<ID_MB1_PARSER),
+    MB1_DRFCON= (1<<ID_MB1_DRFCON)
+}mb1_channel_mask;
+
 
 /// @enum s7k_channel_id
 /// @brief test module channel IDs

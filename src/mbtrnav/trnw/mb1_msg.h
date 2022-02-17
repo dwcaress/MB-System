@@ -13,7 +13,7 @@
 /////////////////////////
 /*
  Copyright Information
-  
+
  Copyright 2002-YYYY MBARI
  Monterey Bay Aquarium Research Institute, all rights reserved.
  
@@ -66,105 +66,191 @@
 /////////////////////////
 // Includes 
 /////////////////////////
+#include <stdlib.h>
+#include <stdio.h>
 #include <stdbool.h>
 #include <inttypes.h>
 
 /////////////////////////
 // Macros
 /////////////////////////
+
+/// @def IP_PORT_MB1
+/// @brief reson 7k center IP port
+#define MB1_IP_PORT_DFL 7007
+
+/// @def MB1_MAX_BEAMS
+/// @brief maximum number of beams
 #define MB1_MAX_BEAMS 512
-#define MB1_HEADER_FIELDS   2
-#define MB1_BEAM_FIELDS     4
-#define MB1_SOUNDING_FIELDS 7
-#define MB1_SOUNDING_BEAM_FIELDS (MB1_MAX_BEAMS*MB1_BEAM_FIELDS)
-#define MB1_FIXED_FIELDS (MB1_SOUNDING_FIELDS+MB1_HEADER_FIELDS)
-#define MB1_FIELDS (MB1_SOUNDING_FIELDS+MB1_SOUNDING_BEAM_FIELDS+MB1_HEADER_FIELDS)
-#define MB1_BIN_HEADER_BYTES   56
-#define MB1_BIN_SOUNDING_BYTES 28
-#define MB1_BIN_CHECKSUM_BYTES 4
-#define MB1_BIN_MAX_BYTES (MB1_BIN_HEADER_BYTES+MB1_MAX_BEAMS*MB1_BIN_SOUNDING_BYTES+MB1_BIN_CHECKSUM_BYTES)
+
+/// @def MB1_TYPE_ID
+/// @brief MB1 record type ID (0x4D423100='M''B''1''\0')
+//#define MB1_TYPE_ID 0x4D423100
+#define MB1_TYPE_ID 0x0031424D
+/// @def MB1_HEADER_BYTES
+/// @brief MB1 header (static field) size (bytes)
+#define MB1_HEADER_BYTES   sizeof(mb1_header_t) //56
+/// @def MB1_TYPE_BYTES
+/// @brief MB1 type size (bytes)
+#define MB1_TYPE_BYTES   4
+/// @def MB1_SIZE_BYTES
+/// @brief MB1 size size (bytes)
+#define MB1_SIZE_BYTES   4
+/// @def MB1_BEAM_BYTES
+/// @brief MB1 beam data size
+#define MB1_BEAM_BYTES     28
+/// @def MB1_CHECKSUM_BYTES
+/// @brief MB1 checksum size
+#define MB1_CHECKSUM_BYTES  sizeof(mb1_checksum_t) //4
+/// @def MB1_BEAM_ARRAY_BYTES
+/// @brief size of beam array
+/// @param[in] beams number of beams
+#define MB1_BEAM_ARRAY_BYTES(beams) (beams*MB1_BEAM_BYTES)
+
+/// @def MB1_PSNDCHKSUM_U32(psounding)
+/// @brief checksum pointer (unsigned int *)
+#define MB1_PCHECKSUM(psounding)  ((uint32_t *) (((unsigned char *)psounding)+psounding->size-MB1_CHECKSUM_BYTES))
+
+/// @def MB1_PBEAMS(psounding)
+/// @brief pointer to start of beam data
+#define MB1_PBEAMS(psounding) ((mb1_beam_t *) (((unsigned char *)psounding)+MB1_HEADER_BYTES))
+
+/// @def MB1_CHECKSUM_LEN_BYTES(psounding)
+/// @brief number of bytes over which checksum is calculated (header+beams)
+#define MB1_CHECKSUM_LEN_BYTES(psounding) (psounding->size-MB1_CHECKSUM_BYTES)
+
+/// @def MB1_PSNDCHKSUM_U32(psounding)
+/// @brief checksum pointer (unsigned int *)
+#define MB1_GET_CHECKSUM(psounding) (mb1_checksum_t)(*MB1_PCHECKSUM(psounding))
+
+/// @def MB1_SOUNDING_BYTES(beams)
+/// @brief sounding size (bytes)
+#define MB1_SOUNDING_BYTES(beams) (MB1_HEADER_BYTES+beams*MB1_BEAM_BYTES+MB1_CHECKSUM_BYTES)
+
+/// @def MB1_MAX_SOUNDING_BYTES
+/// @brief sounding size (bytes) for MB1_MAX_BEAMS
+#define MB1_MAX_SOUNDING_BYTES MB1_SOUNDING_BYTES(MB1_MAX_BEAMS)
+
+/// @def MB1_EMPTY_SOUNDING_BYTES
+/// @brief empty sounding size (bytes) for 0 beams
+#define MB1_EMPTY_SOUNDING_BYTES MB1_SOUNDING_BYTES(0)
+
+// TODO: update legacy fields
+// CSV does not include size or type
+#define MB1_CSV_HEADER_FIELDS 7
+#define MB1_BEAM_FIELDS 4
+#define MB1_CSV_BEAM_FIELDS(nbeams) (nbeams*MB1_BEAM_FIELDS)
+#define MB1_CSV_CHECKSUM_FIELDS 1
+#define MB1_CSV_SOUNDING_FIELDS(nbeams) (MB1_CSV_HEADER_FIELDS+(nbeams*MB1_BEAM_FIELDS)+MB1_CSV_CHECKSUM_FIELDS)
+#define MB1_CSV_MAX_FIELDS MB1_CSV_SOUNDING_FIELDS(MB1_MAX_BEAMS)
 
 /////////////////////////
 // Type Definitions
 /////////////////////////
 
+typedef unsigned char byte;
+
+typedef uint32_t mb1_checksum_t;
+
+/// @typedef enum mb1_resize_flags_t
+/// @brief resize flags (indicate which fields to clear)
+typedef enum{
+    MB1_RS_NONE=0x0,
+    MB1_RS_BEAMS=0x1,
+    MB1_RS_HEADER=0x2,
+    MB1_RS_CHECKSUM=0x4,
+    MB1_RS_ALL=0x7
+} mb1_resize_flags_t;
+
 #pragma pack(push,1)
+/// @typedef struct mb1_beam_s mb1_beam_t
+/// @brief MB1 beam data structure
 typedef struct mb1_beam_s
 {
-     // beam number (0 is port-most beam)
-    unsigned int beam_num;
-    // along track position wrt sonar meters
+    /// @var mb1_beam_s::beam_num
+    /// @brief beam number
+    // beam number (0 is port-most beam)
+    uint32_t beam_num;
+    /// @var mb1_beam_s::rhox
+    /// @brief along track position wrt sonar (m)
     double rhox;
-    // cross track position wrt soanr meters
+    /// @var mb1_beam_s::rhoy
+    /// @brief cross track position wrt sonar (m)
     double rhoy;
-    // vertical position wrt to sonar meters (positive down)
+    /// @var mb1_beam_s::rhoz
+    /// @brief vertical position wrt to sonar (m, positive down)
     double rhoz;
 }mb1_beam_t;
 
-// MB-TRN sounding data (all beams) with vehicle context
-typedef struct mb1_sounding_s
-{
-    // epoch time of ping
-    double ts;
-    // epoch time of ping
-    double lat;
-    // epoch time of ping
-    double lon;
-    // vehicle position depth meters
-    double depth;
-    // epoch time of ping
-    double hdg;
-    // epoch time of ping
-    int ping_number;
-    // epoch time of ping
-    unsigned int nbeams;
-    mb1_beam_t beams[MB1_MAX_BEAMS];
-}mb1_sounding_t;
-
-// Header for MB-TRN communication packets
+/// @typedef struct mb1_header_s mb1_header_t
+/// @brief static header struct (for convenience)
 typedef struct mb1_header_s
 {
-    unsigned int type;
-    unsigned int size;
+    /// @var mb1_s::type
+    /// @brief record type ID ('M''B''1''\0')
+    uint32_t type;
+    /// @var mb1_s::size
+    /// @brief total bytes, including header and checksum
+    uint32_t size;
+    /// @var mb1_s::ts
+    /// @brief epoch time of ping
+    double ts;
+    /// @var mb1_s::lat
+    /// @brief latitude
+    double lat;
+    /// @var mb1_s::lon
+    /// @brief longitude
+    double lon;
+    /// @var mb1_s::depth
+    /// @brief vehicle position depth meters
+    double depth;
+    /// @var mb1_s::hdg
+    /// @brief heading
+    double hdg;
+    /// @var mb1_s::ping_number
+    /// @brief ping number
+    int32_t ping_number;
+    /// @var mb1_s::nbeams
+    /// @brief number of beams
+    uint32_t nbeams;
 }mb1_header_t;
 
-
-// MB-TRN MB1 communications packet consists of header and sounding data
+/// @typedef struct mb1_s mb1_t
+/// @brief
 typedef struct mb1_s
 {
-    mb1_header_t    header;
-    mb1_sounding_t  sounding;
+    /// @var mb1_s::type
+    /// @brief record type ID ('M''B''1''\0')
+    uint32_t type;
+    /// @var mb1_s::size
+    /// @brief total bytes, including header and checksum
+    uint32_t size;
+    /// @var mb1_s::ts
+    /// @brief epoch time of ping
+    double ts;
+    /// @var mb1_s::lat
+    /// @brief latitude
+    double lat;
+    /// @var mb1_s::lon
+    /// @brief longitude
+    double lon;
+    /// @var mb1_s::depth
+    /// @brief vehicle position depth meters
+    double depth;
+    /// @var mb1_s::hdg
+    /// @brief heading
+    double hdg;
+    /// @var mb1_s::ping_number
+    /// @brief ping number
+    int32_t ping_number;
+    /// @var mb1_s::nbeams
+    /// @brief number of beams
+    uint32_t nbeams;
+    /// @var mb1_s::beams
+    /// @brief beam data array
+    mb1_beam_t beams[];
+    /// 32-bit checksum follows beam array
 }mb1_t;
-
-//// Header for MB-TRN communication packets
-//typedef struct mb1_bin_header_s
-//{
-//    // 'M''B''1''\0'
-//    unsigned int type;
-//    // total bytes, including header and checksum
-//    unsigned int size;
-//    // epoch time of ping
-//    double ts;
-//    // epoch time of ping
-//    double lat;
-//    // epoch time of ping
-//    double lon;
-//    // vehicle position depth meters
-//    double depth;
-//    // epoch time of ping
-//    double hdg;
-//    // epoch time of ping
-//    int ping_number;
-//    // epoch time of ping
-//    unsigned int nbeams;
-//}mb1_bin_header_t;
-//
-//typedef struct mb1_bin_s
-//{
-//    mb1_bin_header_t header;
-//    mb1_beam_t beams[MB1_MAX_BEAMS];
-//    uint32_t checksum;
-//}mb1_bin_t;
 
 #pragma pack(pop)
 
@@ -175,9 +261,98 @@ typedef struct mb1_s
 #ifdef __cplusplus
 extern "C" {
 #endif
-    mb1_t *mb1_new(unsigned int type, int beams);
-    void mb1_destroy(mb1_t **pself);
-    void mb1_show(mb1_t *self, bool verbose, uint16_t indent);
+
+// mb1_sounding API (used by mbtrn_server)
+
+/// @fn mb1_t * mb1_new(uint32_t data_len)
+/// @brief create new mb1 protocol message structure.
+/// mb1 messages  must be explicitly serialized before sending.
+/// @param[in] beams number of bathymetry beams
+/// @return new message reference on success, NULL otherwise.
+mb1_t *mb1_new(uint32_t beams);
+
+/// @fn void mb1_destroy(mb1_t ** pself)
+/// @brief release message structure resources.
+/// @param[in] pself pointer to message reference
+/// @return none
+void mb1_destroy(mb1_t **pself);
+
+/// @fn mb1_t *mb1_resize(mb1_t **pself, uint32_t beams,  int flags)
+/// @brief resize an exsiting sounding
+/// @param[in] pself pointer to sounding reference
+/// @param[in] beams number of bathymetry beams
+/// @param[in] flags flags indicating what fields to zero
+/// @return new sounding reference on success, NULL otherwise.
+mb1_t *mb1_resize(mb1_t **pself, uint32_t beams,  int flags);
+
+/// @fn int mb1_zero(mb1_t *self, int flags)
+/// @brief clear (set to zero) all/part of a sounding
+/// @param[in] self sounding reference
+/// @param[in] flags flags indicating what fields to zero
+/// @return 0 on success, -1 otherwise.
+int mb1_zero(mb1_t *self, int flags);
+int mb1_zero_len(mb1_t *self, size_t len);
+
+/// @fn void mb1_show(mb1_t * self, _Bool verbose, uint16_t indent)
+/// @brief output mb1 message parameter summary to stderr.
+/// @param[in] self mb1 message reference
+/// @param[in] verbose use verbose output
+/// @param[in] indent output indent spaces
+/// @return none
+void mb1_show(mb1_t *self, bool verbose, uint16_t indent);
+
+/// @fn uint32_t mb1_calc_checksum(mb1_t *self)
+/// @brief return mb1 checksum for data.
+/// @param[in] self mb1 message reference
+/// @return mb1 checksum value (sum of bytes).
+uint32_t mb1_calc_checksum(mb1_t *self);
+
+/// @fn uint32_t mb1_set_checksum(mb1_t * self)
+/// @brief set the checksum for an mb1 message structure.
+/// @param[in] self mb1 message reference
+/// @return previous checksum value.
+uint32_t mb1_set_checksum(mb1_t *self);
+
+/// @fn int mb1_validate_checksum(mb1_t * self)
+/// @brief validate the checksum for an mb1 message structure.
+/// @param[in] self mb1 message reference
+/// @return 0 if valid, -1 otherwise
+int mb1_validate_checksum(mb1_t *self);
+
+/// @fn byte * mb1_serialize(mb1_t * self)
+/// @brief serialize mb1 message into new buffer.
+/// Really just validating and copying, since memory is contiguous.
+/// caller must release buffer resources using free.
+/// @param[in] self mb1 message reference
+/// @return new network frame buffer on success, NULL otherwise
+byte* mb1_serialize(mb1_t *self, size_t *r_size);
+
+// MB1 utility API
+
+/// @fn uint32_t mb1_checksum_u32(byte * pdata, uint32_t len)
+/// @brief return 32-bit checksum for data of arbitrary length
+/// @param[in] pdata data pointer
+/// @param[in] len length of data.
+/// @return 32-bit checksum value (sum of bytes).
+uint32_t mb1_checksum_u32(byte *pdata, uint32_t len);
+
+/// @fn void mb1_hex_show(byte * data, uint32_t len, uint16_t cols, _Bool show_offsets, uint16_t indent)
+/// @brief output data buffer bytes in hex to stderr.
+/// @param[in] data buffer pointer
+/// @param[in] len number of bytes to display
+/// @param[in] cols number of columns to display
+/// @param[in] show_offsets show starting offset for each row
+/// @param[in] indent output indent spaces
+/// @return none
+void mb1_hex_show(byte *data, uint32_t len, uint16_t cols, bool show_offsets, uint16_t indent);
+
+// Tests
+
+/// @fn int mb1_test()
+/// @brief mb1 unit test(s).
+/// currently subscribes to test server (exercising most of the mb1 API).
+/// @return 0 on success, -1 otherwise
+int mb1_test();
 
 #ifdef __cplusplus
 }

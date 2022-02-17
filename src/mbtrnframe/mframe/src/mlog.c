@@ -64,8 +64,8 @@ GNU General Public License for more details
 #include "mframe.h"
 #include "mlog.h"
 #include "mfile.h"
+#include "mlist.h"
 #include "mthread.h"
-#include "medebug.h"
 
 /////////////////////////
 // Macros
@@ -134,6 +134,11 @@ static int s_log_set_seg(mlog_t *self, int16_t segno);
 static void s_init_log(mlog_t *self);
 static char *s_seg_path(const char *file_path, mlog_t *self, uint16_t segno);
 static int s_mlog_add(mlog_t *self, int32_t id, char *name);
+
+map_entry_t *map_entry_new(const char *channel,int level, mlog_oset_t dest_set);
+void map_entry_destroy(map_entry_t **pself);
+void map_entry_free(void *self);
+bool map_entry_cmp_fn(void *a, void *b);
 
 /////////////////////////
 // Imports
@@ -381,7 +386,7 @@ static int s_get_log_info(mlog_info_t *dest, char *path, char *name, char *fmt, 
         if (dp != NULL){
             struct dirent *ep;
             while ( (ep = readdir(dp))!=NULL ){
-                int16_t nseg=s_path_segno(ep->d_name,name,(fmt!=NULL?fmt:ML_SEG_FMT));
+                int16_t nseg=s_path_segno(ep->d_name,name,(char *)(fmt!=NULL?fmt:ML_SEG_FMT));
                 // if it's a segment
                 if ( nseg >= 0) {
                     retval=0;
@@ -413,7 +418,7 @@ static int s_get_log_info(mlog_info_t *dest, char *path, char *name, char *fmt, 
             fprintf(stderr,"Couldn't open the directory\n");
         }
     }else{
-        fprintf(stderr,"invalid argument\n");
+        fprintf(stderr,"%s: invalid argument\n",__func__);
     }
     return retval;
 }
@@ -472,7 +477,7 @@ static int s_log_rotate(mlog_t *self)
         }
         
     }else{
-        fprintf(stderr,"invalid argument\n");
+        fprintf(stderr,"%s: invalid argument\n",__func__);
     }
     
     return retval;
@@ -492,7 +497,7 @@ static int s_log_chklimits(mlog_t *self)
     
     if (NULL!=self && NULL!=self->file) {
         mlog_flags_t flags=self->cfg->flags;
-        mlog_dest_t dest = self->cfg->dest;
+        mlog_oset_t dest = self->cfg->dest;
         // check limit flags
 //        fprintf(stderr,"flags[%0x] dest[%0x]\n",flags,dest);
         if ( flags==ML_MONO || flags&ML_DIS || (dest&ML_FILE)==0 ) {
@@ -518,7 +523,7 @@ static int s_log_chklimits(mlog_t *self)
             }
         }
     }else{
-        fprintf(stderr,"invalid argument\n");
+        fprintf(stderr,"%s: invalid argument\n",__func__);
     }
     
     return retval;
@@ -685,7 +690,7 @@ static void s_init_log(mlog_t *self)
 //			}
         }
     }else{
-        fprintf(stderr,"invalid argument\n");
+        fprintf(stderr,"%s: invalid argument\n",__func__);
     }
 }
 // End function s_init_log
@@ -721,7 +726,7 @@ size_t len =0;
 // End function s_seg_path
 
 
-/// @fn mlog_config_t * mlog_config_new(const char * tfmt, const char * del, mlog_flags_t flags, mlog_dest_t dest, int32_t lim_b, int32_t lim_s, int32_t lim_t)
+/// @fn mlog_config_t * mlog_config_new(const char * tfmt, const char * del, mlog_flags_t flags, mlog_oset_t dest, int32_t lim_b, int32_t lim_s, int32_t lim_t)
 /// @brief create new mlog configuration structure.
 /// @param[in] tfmt time format string (i.e. strftime)
 /// @param[in] del path delimiter string
@@ -732,7 +737,7 @@ size_t len =0;
 /// @param[in] lim_t segment limit (time, msec)
 /// @return new mlog configuration reference on success, -1 otherwise
 mlog_config_t *mlog_config_new(const char *tfmt,const char *del,
-                               mlog_flags_t flags, mlog_dest_t dest,
+                               mlog_flags_t flags, mlog_oset_t dest,
                                int32_t lim_b, int32_t lim_s, int32_t lim_t)
 {
     mlog_config_t *self = (mlog_config_t *)malloc(sizeof(mlog_config_t));
@@ -825,42 +830,44 @@ void mlog_config_show(mlog_config_t *self, bool verbose, uint16_t indent)
 /// @return new mlog_t reference on success, NULL otherwise
 static mlog_t *s_mlog_new(const char *file_path, mlog_config_t *config)
 {
-    mlog_t *self = (mlog_t *)malloc(sizeof(mlog_t));
-    if (NULL!=self) {
-        memset(self,0,sizeof(mlog_t));
+    mlog_t *instance = (mlog_t *)malloc(sizeof(mlog_t));
+    if (NULL!=instance) {
+        memset(instance,0,sizeof(mlog_t));
         if (NULL!=config) {
         char *tpath = NULL;
-            self->path = NULL;
-            self->name = NULL;
-            self->ext  = NULL;
-            s_parse_path(file_path,self);
+            instance->path = NULL;
+            instance->name = NULL;
+            instance->ext  = NULL;
+            s_parse_path(file_path,instance);
 
-            self->stime = 0;
+            instance->stime = 0;
             
-//            self->file  = mfile_file_new(NULL);
-            tpath = s_seg_path(file_path,self,0);
-            self->file  = mfile_file_new(tpath);
+//            instance->file  = mfile_file_new(NULL);
+            tpath = s_seg_path(file_path,instance,0);
+            instance->file  = mfile_file_new(tpath);
             free(tpath);
-            self->cfg = mlog_config_new(NULL,NULL,ML_MONO,ML_SERR,ML_NOLIMIT,ML_NOLIMIT,ML_NOLIMIT);
+            instance->cfg = mlog_config_new(NULL,NULL,ML_MONO,ML_SERR,ML_NOLIMIT,ML_NOLIMIT,ML_NOLIMIT);
             // copy config if provided
-            if (NULL != self->cfg) {
+            if (NULL != instance->cfg) {
                 // free allocated strings
-                if (self->cfg->tfmt) {
-                    free(self->cfg->tfmt);
+                if (instance->cfg->tfmt) {
+                    free(instance->cfg->tfmt);
                 }
-                if (self->cfg->del) {
-                	free(self->cfg->del);
+                if (instance->cfg->del) {
+                	free(instance->cfg->del);
                 }
-                memcpy(self->cfg,config,sizeof(mlog_config_t));
-                self->cfg->tfmt = (config->tfmt==NULL ? strdup(ML_DFL_TFMT)  : strdup(config->tfmt));
-                self->cfg->del  = strdup(ML_DFL_DEL);
+                memcpy(instance->cfg,config,sizeof(mlog_config_t));
+                instance->cfg->tfmt = (config->tfmt==NULL ? strdup(ML_DFL_TFMT)  : strdup(config->tfmt));
+                instance->cfg->del  = strdup(ML_DFL_DEL);
+                instance->omap_channel_map =  mlist_new();
+                mlist_autofree(instance->omap_channel_map, map_entry_free);
             }
-            s_init_log(self);
+            s_init_log(instance);
        }
      }else{
         fprintf(stderr,"malloc failed\n");
     }
-    return self;
+    return instance;
 }
 // End function s_mlog_new
 
@@ -900,18 +907,21 @@ static void s_mlog_destroy(mlog_t **pself)
                 mlog_config_destroy(&self->cfg);
             }
             if(NULL!=self->file)
-            mfile_file_destroy(&self->file);
+                mfile_file_destroy(&self->file);
             
             if(NULL!=self->path)
-            free(self->path);
+                free(self->path);
             self->path=NULL;
             if(NULL!=self->ext)
-            free(self->ext);
+                free(self->ext);
             self->ext=NULL;
             if(NULL!=self->name)
-            free(self->name);
+                free(self->name);
             self->name=NULL;
-            
+
+            if(NULL!=self->omap_channel_map)
+                mlist_destroy(&self->omap_channel_map);
+
             free(self);
             *pself=NULL;
         }
@@ -1148,12 +1158,12 @@ int mlog_delete(mlog_id_t id)
 // End function mlog_delete
 
 
-/// @fn void mlog_set_dest(mlog_id_t id, mlog_dest_t dest)
+/// @fn void mlog_set_dest(mlog_id_t id, mlog_oset_t dest)
 /// @brief set (listed) log destination flags.
 /// @param[in] id log ID
 /// @param[in] dest desintation flags
 /// @return none
-void mlog_set_dest(mlog_id_t id, mlog_dest_t dest)
+void mlog_set_dest(mlog_id_t id, mlog_oset_t dest)
 {
     mlog_t *log = NULL;
     if ( ( log = s_lookup_log(id) ) != NULL) {
@@ -1163,13 +1173,13 @@ void mlog_set_dest(mlog_id_t id, mlog_dest_t dest)
 // End function mlog_set_dest
 
 
-/// @fn mlog_dest_t mlog_get_dest(mlog_id_t id)
+/// @fn mlog_oset_t mlog_get_dest(mlog_id_t id)
 /// @brief get (listed) log destination flags.
 /// @param[in] id log ID
 /// @return log destination flags on success, or ML_NODEST otherwise
-mlog_dest_t mlog_get_dest(mlog_id_t id)
+mlog_oset_t mlog_get_dest(mlog_id_t id)
 {
-    mlog_dest_t retval=ML_NODEST;
+    mlog_oset_t retval=ML_NODEST;
     mlog_t *log = s_lookup_log(id);
     if ( log != NULL) {
         retval = log->cfg->dest;
@@ -1217,7 +1227,7 @@ int mlog_printf(mlog_id_t id, char *fmt, ...)
 
     int retval = -1;
     mlog_t *log = NULL;
-    mlog_dest_t dest;
+    mlog_oset_t dest;
     mlog_flags_t flags;
     
     log = s_lookup_log(id);
@@ -1281,7 +1291,7 @@ int mlog_printf(mlog_id_t id, char *fmt, ...)
 	return retval;
 }
 
-int mlog_tprintf(mlog_id_t id, char *fmt, ...)
+int mlog_tprintf(mlog_id_t id, const char *fmt, ...)
 {
 //    va_list va1;
 //    va_list va2;
@@ -1299,7 +1309,7 @@ int mlog_tprintf(mlog_id_t id, char *fmt, ...)
         char timestamp[ML_MAX_TS_BYTES]={0};
         char *del=NULL;
         char term=0;
-        mlog_dest_t dest = log->cfg->dest;
+        mlog_oset_t dest = log->cfg->dest;
         mlog_flags_t flags = log->cfg->flags;
          gmtime_r(&tt,&now);
 
@@ -1380,7 +1390,7 @@ int mlog_printf(mlog_id_t id, char *fmt, ...)
 {
    int retval = -1;
     mlog_t *log = NULL;
-    mlog_dest_t dest;
+    mlog_oset_t dest;
     mlog_flags_t flags;
 
     
@@ -1451,13 +1461,13 @@ int mlog_printf(mlog_id_t id, char *fmt, ...)
 }
 // End function mlog_printf
 
-/// @fn int mlog_tprintf(mlog_id_t id, char * fmt)
+/// @fn int mlog_tprintf(mlog_id_t id, const char * fmt)
 /// @brief formatted print with timestamp to log destination(s).
 /// uses mlog time format defined in mlog.h
 /// @param[in] id log ID
 /// @param[in] fmt print format (e.g. stdio printf)
 /// @return number of bytes written (to file only) on success, -1 otherwise
-int mlog_tprintf(mlog_id_t id, char *fmt, ...)
+int mlog_tprintf(mlog_id_t id, const char *fmt, ...)
 {
     int retval = -1;
     
@@ -1471,7 +1481,7 @@ int mlog_tprintf(mlog_id_t id, char *fmt, ...)
         char timestamp[ML_MAX_TS_BYTES]={0};
 		char *del=NULL;
 	    char term=0;
-        mlog_dest_t dest = log->cfg->dest;
+        mlog_oset_t dest = log->cfg->dest;
         mlog_flags_t flags = log->cfg->flags;
          gmtime_r(&tt,&now);
         va_list args;
@@ -1488,7 +1498,7 @@ int mlog_tprintf(mlog_id_t id, char *fmt, ...)
        	memset(timestamp,0,ML_MAX_TS_BYTES);
         strftime(timestamp,ML_MAX_TS_BYTES,tfmt,&now);
         
-        del = ( (NULL!=log->cfg->del)? log->cfg->del : ML_DFL_DEL);
+        del = (char *)( (NULL!=log->cfg->del)? log->cfg->del : ML_DFL_DEL);
         
         
         term=( (fmt!=NULL && fmt[strlen(fmt)-1]=='\n') ? 0x00 : '\n');
@@ -1553,6 +1563,430 @@ int mlog_tprintf(mlog_id_t id, char *fmt, ...)
     return retval;
 }
 // End function mlog_tprintf
+
+/// @fn int mlog_xtprintf(mlog_id_t log, const char *channel, int level, const char *fmt, ...)
+/// @brief formatted print with timestamp to log destination(s).
+/// uses mlog time format defined in mlog.h
+/// @param[in] id log ID
+/// @param[in] fmt print format (e.g. stdio printf)
+/// @return number of bytes written (to file only) on success, -1 otherwise
+int mlog_xtprintf(mlog_id_t id, const char *channel, int level, const char *fmt, ...)
+{
+    int retval = -1;
+
+    mlog_t *log = s_lookup_log(id);
+
+    if(log!=NULL && NULL!=log->cfg){
+
+        struct tm now = {0};
+        time_t tt = time(NULL);
+        char *tfmt = NULL;
+        char timestamp[ML_MAX_TS_BYTES]={0};
+        char *del=NULL;
+        char term=0;
+        mlog_oset_t dest = mlog_lookup_dest(id, channel, level);
+        mlog_flags_t flags = log->cfg->flags;
+        gmtime_r(&tt,&now);
+        va_list args;
+        va_list cargs;
+        //get the arguments
+        va_start(args, fmt);
+
+        if (NULL!=log->cfg->tfmt) {
+            tfmt = log->cfg->tfmt;
+        }else{
+            tfmt = ML_DFL_TFMT;
+        }
+
+        memset(timestamp,0,ML_MAX_TS_BYTES);
+        strftime(timestamp,ML_MAX_TS_BYTES,tfmt,&now);
+
+        del = (char *)( (NULL!=log->cfg->del)? log->cfg->del : ML_DFL_DEL);
+
+
+        term=( (fmt!=NULL && fmt[strlen(fmt)-1]=='\n') ? 0x00 : '\n');
+        //        fprintf(stderr,"mask[%x]&TL_LOG[%x]\n",strmask,(strmask&TL_LOG));
+        //        fprintf(stderr,"mask[%x]&TL_SERR[%x]\n",strmask,(strmask&TL_SERR));
+        //        fprintf(stderr,"mask[%x]&TL_SOUT[%x]\n",strmask,(strmask&TL_SOUT));
+
+        if (dest&ML_FILE  && (flags&ML_DIS)==0 ) {
+            int wbytes=0;
+            // print message to buffer
+            va_copy(cargs,args);
+
+            wbytes=snprintf(NULL,0,"%s%s%s%s%s%s",timestamp,del,channel,del,mlog_levelstr(level),del);
+            wbytes += vsnprintf(NULL,0,fmt,cargs);
+            retval=wbytes;
+            // check write size and rotate if it will overflow
+            // [will allow writes > segment/log size]
+            if ( (log->cfg->lim_b > 0) && ((log->seg_len+wbytes) > log->cfg->lim_b) ) {
+                s_log_rotate(log);
+            }
+            // va_end added per cppcheck - delete if issues
+            va_end(cargs);
+
+            va_copy(cargs,args);
+            if((wbytes=mfile_fprintf(log->file,"%s%s%s%s%s%s",timestamp,del,channel,del,mlog_levelstr(level),del))>0){
+                log->seg_len+=wbytes;
+            }
+            if( (wbytes=mfile_vfprintf(log->file,fmt,cargs))>0){
+                log->seg_len+=wbytes;
+            }
+            // va_end added per cppcheck - delete if issues
+            va_end(cargs);
+        }
+
+        // send to stderr, stdout
+        if( (dest&ML_SERR) !=0 ){
+            va_copy(cargs,args);
+            fprintf(stderr,"%s%s%s%s%s%s",timestamp,del,channel,del,mlog_levelstr(level),del);
+            vfprintf(stderr,fmt, cargs);
+            if (term!=0x00) {
+                fprintf(stderr,"\n");
+            }
+            // va_end added per cppcheck - delete if issues
+            va_end(cargs);
+        }
+        if( (dest&ML_SOUT) !=0 ){
+            va_copy(cargs,args);
+            fprintf(stdout,"%s%s%s%s%s%s",timestamp,del,channel,del,mlog_levelstr(level),del);
+            vprintf(fmt, cargs);
+            if (term!=0x00) {
+                fprintf(stdout,"\n");
+            }
+            // va_end added per cppcheck - delete if issues
+            va_end(cargs);
+        }
+
+        va_end(args);
+    }
+    return retval;
+}
+// End function mlog_xtprintf
+
+
+map_entry_t *map_entry_new(const char *channel,int level, mlog_oset_t dest_set)
+{
+    map_entry_t *instance = (map_entry_t *)malloc(sizeof(map_entry_t));
+    if(NULL!=instance){
+        memset(instance,0,sizeof(map_entry_t));
+        instance->channel = (channel!=NULL ? strdup(channel) : NULL);
+        instance->level = level;
+        instance->dest_set = dest_set;
+    }
+    return instance;
+}
+
+void map_entry_destroy(map_entry_t **pself)
+{
+    if(NULL!=pself){
+        map_entry_t *self =  *pself;
+        if(self){
+            free((void *)self->channel);
+            free(self);
+        }
+        *pself =  NULL;
+    }
+}
+
+void map_entry_free(void *self)
+{
+        if(NULL!=self){
+            map_entry_t *ps=(map_entry_t *)self;
+            free((void *)ps->channel);
+            free(self);
+        }
+}
+
+bool map_entry_cmp_fn(void *a, void *b)
+{
+    bool retval=false;
+    if(NULL!=a && NULL!=b){
+        map_entry_t *A = (map_entry_t *) a;
+        map_entry_t *B = (map_entry_t *) b;
+        if( (A->channel==NULL && B->channel==NULL) ||
+           (strcmp(A->channel,B->channel)==0)){
+            if(A->level == B->level){
+                retval=true;
+            }
+        }
+    }
+    return retval;
+}
+
+static map_entry_t *s_mlog_map_lookup(mlist_t *map, const char *channel, int level, int *r_chan, int *r_map)
+{
+    map_entry_t *retval=NULL;
+    if(NULL!=map){
+        // iterate over map entries
+        map_entry_t *next = (map_entry_t *)mlist_first(map);
+        if(NULL!=r_map)*r_map=-1;
+        if(NULL!=r_chan)*r_chan=-1;
+        while(next!=NULL){
+            if(strcmp(next->channel,channel)==0){
+                if(NULL!=r_chan)*r_chan=0;
+                if(next->level == level){
+                    if(NULL!=r_map)*r_map=0;
+                    retval = next;
+                    break;
+                }
+            }
+            next = (map_entry_t *)mlist_next(map);
+        }
+    }
+    return retval;
+}
+
+static map_entry_t *s_mlog_map_clookup(mlist_t *map, const char *channel)
+{
+    map_entry_t *retval=NULL;
+    if(NULL!=map){
+        // iterate over map entries
+        map_entry_t *next = (map_entry_t *)mlist_first(map);
+        while(next!=NULL){
+            if(strcmp(next->channel,channel)==0){
+                retval = next;
+                break;
+            }
+            next = (map_entry_t *)mlist_next(map);
+        }
+    }
+    return retval;
+}
+
+static char *s_mlog_dfl_name(const char *channel)
+{
+    char *retval=NULL;
+    if(NULL!=channel){
+        char *str = (char *)malloc(strlen(channel)+strlen(ML_LOG_DFL_EXT)+1);
+        if(str){
+            sprintf(str,"%s%s",channel,ML_LOG_DFL_EXT);
+            retval=str;
+        }
+    }
+    return retval;
+}
+
+const char *mlog_deststr(mlog_oset_t dest_set)
+{
+    static char buf[128]={0};
+    char *cur=buf;
+    size_t inc=0;
+    memset(buf,0,128);
+
+    if(dest_set==ML_NODEST){
+       inc=sprintf(cur,"NODEST");
+    }else{
+        if( (dest_set&ML_SOUT) > 0){
+          if(cur>buf)
+                inc=sprintf(cur,"|SOUT");
+            else
+                inc=sprintf(cur,"SOUT");
+        }
+        cur+=(inc>0 ? inc : 0);
+        if( (dest_set&ML_SERR) > 0){
+            if(cur>buf)
+                inc=sprintf(cur,"|SERR");
+            else
+                inc=sprintf(cur,"SERR");
+        }
+        cur+=(inc>0 ? inc : 0);
+        if( (dest_set&ML_FILE) > 0){
+            if(cur>buf)
+                inc=sprintf(cur,"|FILE");
+            else
+                inc=sprintf(cur,"FILE");
+        }
+    }
+    return (const char *)buf;
+}
+
+const char *mlog_levelstr(int level)
+{
+    static char buf[32]={0};
+    memset(buf,0,32);
+    switch (level) {
+        case ML_NONE:
+            sprintf(buf,"NONE");
+            break;
+        case ML_ERR:
+            sprintf(buf,"ERR");
+            break;
+        case ML_WARN:
+            sprintf(buf,"WARN");
+            break;
+        case ML_INFO:
+            sprintf(buf,"INFO");
+            break;
+        case ML_DEBUG:
+            sprintf(buf,"DEBUG");
+            break;
+        default:
+            sprintf(buf,"USR.%d",level);
+            break;
+    }
+    return (const char *)buf;
+}
+
+void mlog_map_show(mlog_id_t id, bool verbose, int indent)
+{
+    int wkey=15;
+    int wval=15;
+    mlog_t *log = s_lookup_log(id);
+    if(NULL!=log){
+        mlist_t *map = log->omap_channel_map;
+        if(NULL!=map){
+            fprintf(stderr,"%*s%*s %*d\n",indent,(indent>0?" ":""),wkey,"id",wval,id);
+            fprintf(stderr,"%*s%*s %*p\n",indent,(indent>0?" ":""),wkey,"addr",wval,map);
+            if(NULL!=log && NULL!=log->omap_channel_map){
+                map_entry_t *next = (map_entry_t *)mlist_first(map);
+                while(next!=NULL){
+                    fprintf(stderr,"%*s%*s %*p\n",indent,(indent>0?" ":""),wkey,"--entry--",wval,next);
+                    fprintf(stderr,"%*s%*s %*s\n",indent,(indent>0?" ":""),wkey,"channel",wval,next->channel);
+                    fprintf(stderr,"%*s%*s %*d/%s\n",indent,(indent>0?" ":""),wkey,"level",wval,next->level,mlog_levelstr(next->level));
+                    fprintf(stderr,"%*s%*s %*s%08X/%s\n",indent,(indent>0?" ":""),wkey,"dfl_set",wval-8,"",next->dfl_set,mlog_deststr(next->dfl_set));
+                    fprintf(stderr,"%*s%*s %*s%08X/%s\n",indent,(indent>0?" ":""),wkey,"dest_set",wval-8,"",next->dest_set,mlog_deststr(next->dest_set));
+                    next = (map_entry_t *)mlist_next(map);
+                }
+            }
+        }
+    }
+}
+
+int mlog_map_dfl(mlog_id_t id, int level, mlog_oset_t dest_set)
+{
+    return mlog_map_channel(id,ML_LOG_DFL_CHANNEL,level, dest_set);
+}
+
+int mlog_unmap_dfl(mlog_id_t id, int level)
+{
+    return mlog_unmap_channel(id,ML_LOG_DFL_CHANNEL,level);
+}
+
+mlog_oset_t mlog_lookup_dfl(mlog_id_t id, int level)
+{
+    mlog_oset_t retval=ML_SERR;
+    mlog_t *log = s_lookup_log(id);
+
+    if(NULL!=log && NULL!=log->omap_channel_map){
+
+        map_entry_t *dfl = s_mlog_map_lookup(log->omap_channel_map, ML_LOG_DFL_CHANNEL, level, NULL, NULL);
+        if(NULL!=dfl){
+            retval = dfl->dest_set;
+        }
+    }
+    return retval;
+}
+
+int mlog_map_channel(mlog_id_t id, const char *channel, int level, mlog_oset_t dest_set)
+{
+    int retval=-1;
+    mlog_t *log = s_lookup_log(id);
+    const char *chn = (NULL==channel ? ML_LOG_DFL_CHANNEL : channel);
+    if(NULL!=log && NULL!=log->omap_channel_map){
+        
+        map_entry_t *key = map_entry_new(chn, level, dest_set);
+        map_entry_t *val = (map_entry_t *)mlist_vlookup(log->omap_channel_map, (void *)key, map_entry_cmp_fn);
+        if(val!=NULL){
+            // entry exists, replace
+            mlist_remove(log->omap_channel_map, val);
+            mlist_add( log->omap_channel_map, key);
+            retval = 0;
+        }else{
+            // add new entry
+            mlist_add(log->omap_channel_map,key);
+            retval = 0;
+        }
+    }
+    return retval;
+}
+
+int mlog_unmap_channel(mlog_id_t id, const char *channel, int level)
+{
+    int retval=-1;
+    mlog_t *log = s_lookup_log(id);
+    const char *chn = (NULL==channel ? ML_LOG_DFL_CHANNEL : channel);
+    if(NULL!=log && NULL!=log->omap_channel_map ){
+        map_entry_t *entry = s_mlog_map_lookup(log->omap_channel_map, chn, level, NULL, NULL);
+        if(NULL!=entry){
+            mlist_remove(log->omap_channel_map, (void *)entry);
+            retval = 0;
+        }
+    }
+    return retval;
+}
+
+int mlog_map_channel_dfl(mlog_id_t id, const char *channel, mlog_oset_t dest_set)
+{
+    int retval=-1;
+    mlog_t *log = s_lookup_log(id);
+    const char *chn = (NULL==channel ? ML_LOG_DFL_CHANNEL : channel);
+    if(NULL!=log && NULL!=log->omap_channel_map){
+        char *dfl_name=s_mlog_dfl_name(chn);
+        map_entry_t *entry = s_mlog_map_clookup(log->omap_channel_map, dfl_name);
+        if(NULL!=entry){
+            // entry exists, set
+            entry->dfl_set = dest_set;
+            retval = 0;
+        }
+        free(dfl_name);
+    }
+    return retval;
+}
+
+int mlog_unmap_channel_dfl(mlog_id_t id, const char *channel)
+{
+    int retval=-1;
+    mlog_t *log = s_lookup_log(id);
+    const char *chn = (NULL==channel ? ML_LOG_DFL_CHANNEL : channel);
+    if(NULL!=log && NULL!=log->omap_channel_map){
+        char *dfl_name=s_mlog_dfl_name(chn);
+        map_entry_t *entry = s_mlog_map_clookup(log->omap_channel_map, dfl_name);
+        if(NULL!=entry){
+            // entry exists, remove
+            mlist_remove(log->omap_channel_map, entry);
+            retval = 0;
+        }
+        free(dfl_name);
+    }
+    return retval;
+}
+
+mlog_oset_t mlog_lookup_dest(mlog_id_t id, const char *channel, int level)
+{
+    // if all else fails, send to stderr
+    mlog_oset_t retval=ML_SERR;
+
+    mlog_t *log = s_lookup_log(id);
+    const char *chn = (NULL==channel ? ML_LOG_DFL_CHANNEL : channel);
+    if(NULL!=log && NULL!=log->omap_channel_map){
+        int r_chan=0;
+        int r_map=0;
+        map_entry_t *entry = s_mlog_map_lookup(log->omap_channel_map, chn, level, &r_chan, &r_map);
+        if(NULL!=entry){
+            retval = entry->dest_set;
+        }else{
+            if(r_chan==-1){
+                // channel not found, use log default dest
+                retval=mlog_lookup_dfl(id, level);
+            }else if(r_chan==0 && r_map==-1){
+                // channel found, but level not mapped
+                char *dfl_name=s_mlog_dfl_name(chn);
+                entry = s_mlog_map_clookup(log->omap_channel_map, chn);
+                if(NULL!=entry){
+                    // use channel default
+                    retval = entry->dest_set;
+                }else{
+                    // use map default
+                    retval = mlog_lookup_dfl(id,level);
+                }
+                free(dfl_name);
+            }
+        }
+    }
+    return retval;
+}
+
 #endif
 
 
@@ -1569,7 +2003,7 @@ int mlog_write(mlog_id_t id, byte *data, uint32_t len)
     mlog_t *log = s_lookup_log(id);
     
     if(log!=NULL){
-        mlog_dest_t dest = log->cfg->dest;
+        mlog_oset_t dest = log->cfg->dest;
         mlog_flags_t flags = log->cfg->flags;
         if (dest&ML_FILE  && (flags&ML_DIS)==0 ) {
             
@@ -1604,7 +2038,7 @@ int mlog_write(mlog_id_t id, byte *data, uint32_t len)
                     }
                 }
             }else{
-//                fprintf(stderr,"just writing");
+//                fprintf(stderr,"just writing len[%"PRIu32"]\n",len);
                 if( (retval = mfile_write(log->file,data,len)) > 0 ){
                     log->seg_len+=retval;
                 }else{
@@ -1632,7 +2066,7 @@ int mlog_puts(mlog_id_t id, char *data)
     mlog_t *log = s_lookup_log(id);
     
     if(NULL!=log && NULL!=data){
-        mlog_dest_t dest = log->cfg->dest;
+        mlog_oset_t dest = log->cfg->dest;
         mlog_flags_t flags = log->cfg->flags;
         if (dest&ML_FILE  && (flags&ML_DIS)==0 ) {
             retval = mlog_write(id, (byte *)data, strlen(data)+1);
@@ -1658,7 +2092,7 @@ int mlog_putc(mlog_id_t id, char data)
     
     if(NULL!=log){
         
-        mlog_dest_t dest = log->cfg->dest;
+        mlog_oset_t dest = log->cfg->dest;
         mlog_flags_t flags = log->cfg->flags;
         if (dest&ML_FILE  && (flags&ML_DIS)==0 ) {
             retval=mlog_write(id, (byte *) &data, 1);

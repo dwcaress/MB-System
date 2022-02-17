@@ -32,7 +32,7 @@ set(TRNW_SRC_DIR ${PROJECT_SOURCE_DIR}/trnw)
 # [1] - required by some netcdf versions
 
 
-set(DFL_PKG_PATH "${PARENT_DIR}/mframe/build/install")
+set(DFL_PKG_PATH "${PARENT_DIR}/mbtrnframe/mframe/build/pkg")
 message(" >>> CMakeLists.txt -  MFRAME_PKG_PATH  ${MFRAME_PKG_PATH}")
 message(" >>> CMakeLists.txt -       PARENT_DIR  ${PARENT_DIR}")
 message(" >>> CMakeLists.txt -     DFL_PKG_PATH  ${DFL_PKG_PATH}")

@@ -65,11 +65,11 @@ INC_PATHS =  -I.  -I$(NEWMAT_DIR) -I$(QNX_DIR) -I$(TRN_DIR) $(OS_INC_PATH)
 
 # Set to 1 to build lrtrn-server
 # Requires LCM and lrauv-lcmtypes
-BUILD_LRTRN=0
+BUILD_LRTRN=1
 
 # Add includes for lrtrn-server if required
 ifeq ($(BUILD_LRTRN),1)
-LRAUVLCM_DIR=../../lrauv-lcmtypes/include
+LRAUVLCM_DIR=../../../lrauv-lcmtypes/include
 INC_PATHS += -I$(LRAUVLCM_DIR)
 endif
 
@@ -80,18 +80,18 @@ LIB_PATHS = -L/usr/local/lib -L$(OUTPUT_DIR) $(OS_LIB_PATH)
 ########################################
 # Target Definitions
 
-LRTRN_SERVER=lrtrn-server
-LRTRN_SERVER_SRC=lrtrn_app.cpp LcmTrn.cpp
-LRTRN_SERVER_OBJ = $(LRTRN_SERVER_SRC:%.cpp=$(BUILD_DIR)/%.o)
-LRTRN_SERVER_LIBS = -llcm -lconfig++ -ltrn  -lnewmat -lqnx -lgeolib -lnetcdf -lm $(OS_LIBS)
+LRTRN_BOT=lrtrn-bot
+LRTRN_BOT_SRC=lrtrn_app.cpp LcmTrn.cpp
+LRTRN_BOT_OBJ = $(LRTRN_BOT_SRC:%.cpp=$(BUILD_DIR)/%.o)
+LRTRN_BOT_LIBS = -llcm -lconfig++ -ltrn  -lnewmat -lqnx -lgeolib -lnetcdf -lm $(OS_LIBS)
 
 ########################################
 # Build Files (mostly for cleanup)
-SOURCES = $(LRTRN_SERVER)
+SOURCES = $(LRTRN_BOT)
 
 OBJECTS = $(SOURCES:%.cpp=$(BUILD_DIR)/%.o)
 DEPENDS = $(SOURCES:%.cpp=$(BUILD_DIR)/%.d)
-BINARIES = $(OUTPUT_DIR)/$(LRTRN_SERVER)
+BINARIES = $(OUTPUT_DIR)/$(LRTRN_BOT)
 
 
 CLEANUP = gmon.out
@@ -105,9 +105,9 @@ CLEANUP = gmon.out
 all: $(BINARIES)
 
 # build LRAUV TRN server utility
-$(OUTPUT_DIR)/$(LRTRN_SERVER): $(LRTRN_SERVER_OBJ)
+$(OUTPUT_DIR)/$(LRTRN_BOT): $(LRTRN_BOT_OBJ)
 	@echo building $@...
-	$(CXX) $(CFLAGS) $(INC_PATHS) $(LIB_PATHS) $^ -o $@ $(LD_FLAGS) $(LRTRN_SERVER_LIBS)
+	$(CXX) $(CFLAGS) $(INC_PATHS) $(LIB_PATHS) $^ -o $@ $(LD_FLAGS) $(LRTRN_BOT_LIBS)
 	@echo
 
 # generate dependency files

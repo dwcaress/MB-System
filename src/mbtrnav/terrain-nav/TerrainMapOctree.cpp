@@ -41,10 +41,17 @@
 
 
 TerrainMapOctree::TerrainMapOctree(const char* mapName)
+:
+OctreeMap(NULL),
+numTiles_(0),
+minDistTile_(0),
+lastMinDistTile_(0),
+tiles_(NULL)
 {
    //OctreeMap = Octree<PlanarFitNode>();
    //OctreeMap1 = Octree<bool>();
    //OctreeMap = &OctreeMap1;
+    interpMapMethod=0;
 
    if (NULL == mapName)
    {
@@ -75,7 +82,7 @@ TerrainMapOctree::TerrainMapOctree(const char* mapName)
       throw Exception("TerrainMapOctree - Error loading map file");
    }
 
-   logs(TL_LOG|TL_LOG,"TerrainMapOctree::Octree tile load %s took %f seconds.",
+   logs(TL_LOG,"TerrainMapOctree::Octree tile load %s took %f seconds.",
       tiles_[0].mapName, duration);
 
    OctreeMap = tiles_[0].octreeMap;
@@ -131,7 +138,6 @@ double TerrainMapOctree::GetRangeError(double& mapVariance,
 #ifdef WITH_QUERYMAP
 double TerrainMapOctree::QueryMap(const double* const queryPoint)
 {
-   Vector queryPoint =
    //return static_cast<double>(OctreeMap->Query(queryPoint));
    return OctreeMap->InterpolatingQuery(queryPoint);
 }
@@ -154,7 +160,7 @@ bool TerrainMapOctree::tileLoadTest()
    bool value = true;
    for (int i = 0; i < numTiles_; i++)
    {
-      logs(TL_LOG|TL_LOG,"TerrainMapOctree::pre-load of tile %s ...",
+      logs(TL_LOG,"TerrainMapOctree::pre-load of tile %s ...",
             tiles_[i].mapName);
       if (tiles_[i].load())
       {
@@ -211,7 +217,7 @@ bool TerrainMapOctree::initializeTiles(const char* mapName)
       tiles_[0].mapName = STRDUPNULL(mapName);
       tiles_[0].octreeMap = NULL;
       tilesLoaded = 1;
-      logs(TL_LOG|TL_LOG,"TerrainMapOctree::Using a single (non-tiled) map.");
+      logs(TL_LOG,"TerrainMapOctree::Using a single (non-tiled) map.");
    }
    else if (S_ISDIR(map_stat.st_mode))
    {
@@ -222,7 +228,7 @@ bool TerrainMapOctree::initializeTiles(const char* mapName)
       char header[TILEHEADERLEN];
       header[0] = record[0] = tileName[0] = tileDataName[0] = '\0';
       snprintf(tileDataName, TILEPATHNAMELEN, "%s/%s", mapName, TILESFILENAME);
-      logs(TL_LOG|TL_LOG,"TerrainMapOctree::tileDataName = %s", tileDataName);
+      logs(TL_LOG,"TerrainMapOctree::tileDataName = %s", tileDataName);
 
       // Open and process tiles.csv containing the tile info
       fstream tf(tileDataName);
@@ -234,17 +240,16 @@ bool TerrainMapOctree::initializeTiles(const char* mapName)
          tf >> header >> comma  >> header >> comma >> header >> comma >> numTiles_;
          if (tf.good())
          {
-            logs(TL_LOG|TL_LOG,"TerrainMapOctree::numTiles_ = %d.", numTiles_);
+            logs(TL_LOG,"TerrainMapOctree::numTiles_ = %d.", numTiles_);
 
             // Each line in the file has the following format:
             // relativeTileFilename , center-easting , center-northing
             // Eg, "MapTile4.bo , 594250 , 4061750"
             tiles_ = new struct MapTile[numTiles_];
-            memset(tiles_, 0, numTiles_*sizeof(MapTile));
          }
          else
          {
-            logs(TL_LOG|TL_LOG,"TerrainMapOctree::numTiles_ = %d.", numTiles_);
+            logs(TL_LOG,"TerrainMapOctree::numTiles_ = %d.", numTiles_);
             numTiles_ = 0;
          }
 
@@ -291,13 +296,13 @@ bool TerrainMapOctree::initializeTiles(const char* mapName)
             tiles_[tn].easting  = east;
             tiles_[tn].northing = north;
             tiles_[tn].octreeMap= NULL;
-            logs(TL_LOG|TL_LOG,"TerrainMapOctree::read tile line: %s %.1f %.1f .",
+            logs(TL_LOG,"TerrainMapOctree::read tile line: %s %.1f %.1f .",
                   tiles_[tn].mapName, tiles_[tn].northing, tiles_[tn].easting);
             tn++;
          }
 
          tilesLoaded = tn;
-         logs(TL_LOG|TL_LOG,"TerrainMapOctree::loaded %d useable tiles from %s.",
+         logs(TL_LOG,"TerrainMapOctree::loaded %d useable tiles from %s.",
                tilesLoaded, tileDataName);
 
          tf.close();
@@ -365,8 +370,8 @@ int TerrainMapOctree::loadSubMap(const double xcen, const double ycen,
          minDist = distance;
       }
    }
-   logs(TL_LOG|TL_LOG,"TerrainMapOctree:  Min Distance = %.2f.", minDist);
-   logs(TL_LOG|TL_LOG,"TerrainMapOctree:  Using tile %d.", minDistTile_ + 1);
+   logs(TL_LOG,"TerrainMapOctree:  Min Distance = %.2f.", minDist);
+   logs(TL_LOG,"TerrainMapOctree:  Using tile %d.", minDistTile_ + 1);
 
    // When the closest center location is in another tile, make the switch
    if (lastMinDistTile_ != minDistTile_)
@@ -374,7 +379,7 @@ int TerrainMapOctree::loadSubMap(const double xcen, const double ycen,
       // First unload the last tile:
       tiles_[lastMinDistTile_].unload();
 
-      logs(TL_LOG|TL_LOG,"TerrainMapOctree:  Switching to tile %d.",
+      logs(TL_LOG,"TerrainMapOctree:  Switching to tile %d.",
          minDistTile_ + 1);
 
       // Now load the new tile:
@@ -393,7 +398,7 @@ int TerrainMapOctree::loadSubMap(const double xcen, const double ycen,
          throw Exception("TerrainMapOctree - Error loading map file.");
       }
 
-      logs(TL_LOG|TL_LOG,"TerrainMapOctree::Octree tile load %s took %f seconds.",
+      logs(TL_LOG,"TerrainMapOctree::Octree tile load %s took %f seconds.",
          tiles_[minDistTile_].mapName, duration);
 
       // Switch the pointer and we're ready to use

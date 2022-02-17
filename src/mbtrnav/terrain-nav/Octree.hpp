@@ -135,7 +135,7 @@ class Octree {
 		double RayTrace(const Vector& startPoint, const Vector& directionVector) const;
 		
 		//for Stevesie to plot
-		bool ItterateThroughLeaves(Vector& nodeLowerBounds, Vector& nodeUpperBounds, ValueType value);
+		bool IterateThroughLeaves(Vector& nodeLowerBounds, Vector& nodeUpperBounds, ValueType value);
 		
 		//for making map measurements
 		ValueType Query(const Vector& queryPoint) const;
@@ -152,7 +152,7 @@ class Octree {
 		//adding points to the Octree
 		bool AddPoint(const Vector& point);
 		int AddPoints(const Vector points[], const unsigned int numPoints);
-		bool AddData(const Vector point, const ValueType data);
+		bool AddData(const Vector& point, const ValueType data);
 		int AddData(const Vector points[], const ValueType data[], const unsigned int numDatas);
 		
 		
@@ -218,12 +218,12 @@ class Octree {
 		
 		OctreeNode* OctreeRoot;
 		
-		Path currentItterationPath;
+		Path currentIterationPath;
 		bool treeComplete;
 	private:
 		friend class OctreeNode;
 		class OctreeNode {
-			bool ItterateThroughLeaves(Octree<ValueType>& OT, int& depth, ValueType Value);
+			bool IterateThroughLeaves(Octree<ValueType>& OT, int& depth, ValueType Value);
 			bool FindNextChildWithValueAndSetPath(Octree<ValueType>& OT, int depth, ValueType Value, int startChildNumber, int& maxDepthHit);
 			//add points
 			void AddPointPointCount(const Octree<ValueType>& OT, const Vector& point, const int depth);
@@ -247,7 +247,7 @@ class Octree {
 			void Print(int num) const;
 			
 			//constructors and such
-			OctreeNode(ValueType Value): value(Value), children(NULL) {}
+			explicit OctreeNode(ValueType Value): value(Value), children(NULL) {}
 			OctreeNode(): value(static_cast<ValueType>(0)), children(NULL) {}
 			OctreeNode(const OctreeNode& nodeToCopy);
 			OctreeNode& operator=(OctreeNode rightHandSide);
