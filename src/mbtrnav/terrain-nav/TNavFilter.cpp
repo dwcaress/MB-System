@@ -18,7 +18,11 @@
 
 TNavFilter::
 //TNavFilter(char* mapName, char* vehicleSpecs, char* directory, const double* windowVar, const int& mapType) {Reload Map Issue
-TNavFilter(TerrainMap* terrainMap, char* vehicleSpecs, char* directory, const double* windowVar, const int& mapType) {
+TNavFilter(TerrainMap* terrainMap, char* vehicleSpecs, char* directory, const double* windowVar, const int& mapType)
+:SubcloudNIS(0.0),
+forceHighGradeFilter(false),
+forceLowGradeFilter(false)
+{
 	int i;
 	this->mapType = mapType;
 	/* Reload Map Issue
@@ -144,17 +148,14 @@ findMeasSensorIndex(int measType, int& sensorIndex) {
 	sensorIndex = 0;
 
 	//associate measurement with correct sensor type
-	while((measType != vehicle->sensors[sensorIndex].type) &&
-			(sensorIndex < vehicle->numSensors)) {
+	while((sensorIndex < vehicle->numSensors) &&
+          (measType != vehicle->sensors[sensorIndex].type)) {
 
 	   //logs(TL_OMASK(TL_TNAV_FILTER, TL_LOG),"findMeasSensorIndex:: checking measType =%d, against "
 	   //	"sensorType = %d.\n",measType,
 	   //	vehicle->sensors[sensorIndex].type);
 
 	    sensorIndex++;
-
-
-
 	}
 
 	//if there was no corresponding sensor for this vehicle,
@@ -270,8 +271,8 @@ initVariables() {
 	int sensorIndex = 0;
 
 	//associate measurement with correct sensor type
-	while((1 != vehicle->sensors[sensorIndex].type) &&
-			(sensorIndex < vehicle->numSensors)) {
+	while((sensorIndex < vehicle->numSensors) &&
+          (1 != vehicle->sensors[sensorIndex].type)) {
 		sensorIndex++;
 	}
 
@@ -288,7 +289,6 @@ projectMeasVF(Matrix& beamsVF, const measT& currMeas, int* beamIndices) {
 	Matrix Rsv;
 	Matrix beamsSF(3, currMeas.numMeas);
 	int measSensor = 0;
-	int i;
 
 	//check that a valid sensor index can be found for current measurement
 	if(!findMeasSensorIndex(currMeas.dataType, measSensor)) {
@@ -305,6 +305,7 @@ projectMeasVF(Matrix& beamsVF, const measT& currMeas, int* beamIndices) {
 		trans_sv << vehicle->T_sv[measSensor].translation;
 
 		beamsVF.ReSize(3, beamsSF.Ncols());
+        int i=0;
 		for(i = 1; i <= beamsSF.Ncols(); i++) {
 			beamsVF.SubMatrix(1, 3, i, i) = Rsv.t() * beamsSF.SubMatrix(1, 3, i, i) + trans_sv;
 		}
@@ -725,7 +726,7 @@ calculateNIS(SymmetricMatrix& measCov, ColumnVector& meanDiff, double& nisVal,
 
 void
 TNavFilter::
-updateNISwindow(double& nisVal) {
+updateNISwindow(const double& nisVal) {
 	int i;
 	windowedNIS = 0;
 

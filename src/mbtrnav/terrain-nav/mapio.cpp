@@ -12,16 +12,13 @@
 
 //TODO this function fails to print which file or directory doesn't exist, making its error message near useless.
 int check_error(int status, struct mapsrc* src) {
-	const char* fname = "check_error";
 	int err;
 	
 	if(status != NC_NOERR) {
 		const char* status_tostring = nc_strerror(status);
 		//char *status_tostring = nc_strerror(status);
-		
-		
-		fprintf(stderr, "MAPIO::%s %s\n", fname, status_tostring);
-		
+
+		fprintf(stderr, "%s:%d %s\n", __func__,__LINE__, status_tostring);
 		
 		//free(status_tostring);
 		// TODO how do we want to handle this error gracefully?
@@ -36,131 +33,132 @@ int check_error(int status, struct mapsrc* src) {
 
 void mapsrc_fill(const char* file, struct mapsrc* src) {
 
-	const char* fname = "mapsrc_fill";
-	int err, i;
-	double range[2];
-	double delta;
-	
-	// We don't refill existign strctures unless they've been free'd first
-	if(src->x != NULL || src->y != NULL) {
-		fprintf(stderr,
-				"MAPIO::%s: An attempt was made to reallocate data to a mapsrc structure that already contains data. This may be a memory leak. You should call 'mapsrc_free' first",
-				fname);
-	}
-	
-	err = nc_open(file, NC_NOWRITE, &(src->ncid));
-	if(MAPIO_OK != check_error(err, src)) {
-		return;
-	}
-	
-	/* get x variable */
-	err = nc_inq_dimid(src->ncid, "x", &(src->xdimid));
-	if(MAPIO_OK != check_error(err, src)) {
-		return;
-	}
-	
-	err = nc_inq_dimlen(src->ncid, src->xdimid, &(src->xdimlen));
-	if(MAPIO_OK != check_error(err, src)) {
-		return;
-	}
-	
-	src->x = (double*) malloc(sizeof(double) * src->xdimlen);
-	err = nc_inq_varid(src->ncid, "x", &(src->xid));
-	if(MAPIO_OK != check_error(err, src)) {
-		return;
-	}
-	
-	err = nc_get_att_double(src->ncid, src->xid, "actual_range", range);
-	if(MAPIO_OK != check_error(err, src)) {
-		return;
-	}
-	
-	//fill in xvec based on range boundaries.
-	delta = (range[1] - range[0]) / (src->xdimlen - 1);
-	for(i = 0; i < int(src->xdimlen); i++) {
-		src->x[i] = range[0] + delta * i;
-	}
-	
-	//OLD WAY TO GET X-VAR: USES X VALUES FROM GRD FILE
-	/*err = nc_get_var_double(src->ncid, src->xid, src->x);
-	  if (MAPIO_OK != check_error(err, src)) { return; }
-	*/
-	
-	/* get y variable */
-	err = nc_inq_dimid(src->ncid, "y", &(src->ydimid));
-	if(MAPIO_OK != check_error(err, src)) {
-		return;
-	}
-	
-	err = nc_inq_dimlen(src->ncid, src->ydimid, &(src->ydimlen));
-	if(MAPIO_OK != check_error(err, src)) {
-		return;
-	}
-	
-	src->y = (double*) malloc(sizeof(double) * src->ydimlen);
-	if(MAPIO_OK != check_error(err, src)) {
-		return;
-	}
-	
-	err = nc_inq_varid(src->ncid, "y", &(src->yid));
-	if(MAPIO_OK != check_error(err, src)) {
-		return;
-	}
-	
-	err = nc_get_att_double(src->ncid, src->yid, "actual_range", range);
-	if(MAPIO_OK != check_error(err, src)) {
-		return;
-	}
-	
-	//fill in xvec based on range boundaries.
-	delta = (range[1] - range[0]) / (src->ydimlen - 1);
-	for(i = 0; i < int(src->ydimlen); i++) {
-		src->y[i] = range[0] + delta * i;
-	}
-	
-	//OLD WAY TO GET Y-VAR: USES Y VALUES FROM GRD FILE
-	/*err = nc_get_var_double(src->ncid, src->yid, src->y);
-	  if (MAPIO_OK != check_error(err, src)) { return; }
-	*/
-	
-	/* get z variable */
-	err = nc_inq_varid(src->ncid, "z", &(src->zid));
-	if(MAPIO_OK != check_error(err, src)) {
-		return;
-	}
-	
-	src->status = src->status | MAPSRC_IS_FILLED;
-	
+    if(NULL!=src){
+        int err, i;
+        double range[2];
+        double delta;
+
+        // We don't refill existign strctures unless they've been free'd first
+        if(src->x != NULL || src->y != NULL) {
+            fprintf(stderr,
+                    "%s:%d WARN - Reallocate mapsrc structure that already contains data, which may leak memory. Use 'mapsrc_free' to release struct resources before calling %s",
+                    __func__,__LINE__,__func__);
+        }
+
+        err = nc_open(file, NC_NOWRITE, &(src->ncid));
+        if(MAPIO_OK != check_error(err, src)) {
+            return;
+        }
+
+        /* get x variable */
+        err = nc_inq_dimid(src->ncid, "x", &(src->xdimid));
+        if(MAPIO_OK != check_error(err, src)) {
+            return;
+        }
+
+        err = nc_inq_dimlen(src->ncid, src->xdimid, &(src->xdimlen));
+        if(MAPIO_OK != check_error(err, src)) {
+            return;
+        }
+
+        src->x = (double*) malloc(sizeof(double) * src->xdimlen);
+        err = nc_inq_varid(src->ncid, "x", &(src->xid));
+        if(MAPIO_OK != check_error(err, src)) {
+            return;
+        }
+
+        err = nc_get_att_double(src->ncid, src->xid, "actual_range", range);
+        if(MAPIO_OK != check_error(err, src)) {
+            return;
+        }
+
+        //fill in xvec based on range boundaries.
+        delta = (range[1] - range[0]) / (src->xdimlen - 1);
+        for(i = 0; i < int(src->xdimlen); i++) {
+            src->x[i] = range[0] + delta * i;
+        }
+
+        //OLD WAY TO GET X-VAR: USES X VALUES FROM GRD FILE
+        /*err = nc_get_var_double(src->ncid, src->xid, src->x);
+         if (MAPIO_OK != check_error(err, src)) { return; }
+         */
+
+        /* get y variable */
+        err = nc_inq_dimid(src->ncid, "y", &(src->ydimid));
+        if(MAPIO_OK != check_error(err, src)) {
+            return;
+        }
+
+        err = nc_inq_dimlen(src->ncid, src->ydimid, &(src->ydimlen));
+        if(MAPIO_OK != check_error(err, src)) {
+            return;
+        }
+
+        src->y = (double*) malloc(sizeof(double) * src->ydimlen);
+        if(MAPIO_OK != check_error(err, src)) {
+            return;
+        }
+
+        err = nc_inq_varid(src->ncid, "y", &(src->yid));
+        if(MAPIO_OK != check_error(err, src)) {
+            return;
+        }
+
+        err = nc_get_att_double(src->ncid, src->yid, "actual_range", range);
+        if(MAPIO_OK != check_error(err, src)) {
+            return;
+        }
+
+        //fill in xvec based on range boundaries.
+        delta = (range[1] - range[0]) / (src->ydimlen - 1);
+        for(i = 0; i < int(src->ydimlen); i++) {
+            src->y[i] = range[0] + delta * i;
+        }
+
+        //OLD WAY TO GET Y-VAR: USES Y VALUES FROM GRD FILE
+        /*err = nc_get_var_double(src->ncid, src->yid, src->y);
+         if (MAPIO_OK != check_error(err, src)) { return; }
+         */
+
+        /* get z variable */
+        err = nc_inq_varid(src->ncid, "z", &(src->zid));
+        if(MAPIO_OK != check_error(err, src)) {
+            return;
+        }
+
+        src->status = src->status | MAPSRC_IS_FILLED;
+    }else{
+        fprintf(stderr,"%s:%d ERR src is NULL\n",__func__,__LINE__);
+    }
+
 }
 
 float mapsrc_find(struct mapsrc* src, double x, double y) {
-	float* z;
-	float z_out;
-	int mapdata_code, XI = 1, YI = 0;
-	
-	size_t start[2];        // For NetCDF access -> {x0, y0}
-	size_t count[2];        // For NetCDF access -> {xdimlen, ydimlen}
-	
-	// Make sure the data is within the map bounds
-	struct mapbounds* bounds = mapbounds_init();
-	mapbounds_fill1(src, bounds);
-	mapdata_code = mapbounds_contains(bounds, x, y);
-	free(bounds);
-	
-	if(mapdata_code != MAPBOUNDS_OUT_OF_BOUNDS) {
-		// Get the nearest point in our map
-		start[XI] = nearest(x, src->x, src->xdimlen);
-		start[YI] = nearest(y, src->y, src->ydimlen);
-		count[XI] = 1;
-		count[YI] = 1;
-		z = (float*) malloc(count[YI] * count[XI] * sizeof(float));
-		check_error(nc_get_vara_float(src->ncid, src->zid, start, count, z), src);
-		z_out = *z;
-		free(z);
-	} else {
-		z_out = NAN;
-	}
-	
+	float z_out=NAN;
+    if(NULL!=src){
+        int mapdata_code=0;
+
+        // Make sure the data is within the map bounds
+        struct mapbounds* bounds = mapbounds_init();
+        mapbounds_fill1(src, bounds);
+        mapdata_code = mapbounds_contains(bounds, x, y);
+        free(bounds);
+
+        if(mapdata_code != MAPBOUNDS_OUT_OF_BOUNDS) {
+            int XI = 1, YI = 0;
+            size_t start[2]={0};        // For NetCDF access -> {x0, y0}
+            size_t count[2]={0};        // For NetCDF access -> {xdimlen, ydimlen}
+            // Get the nearest point in our map
+            start[XI] = nearest(x, src->x, src->xdimlen);
+            start[YI] = nearest(y, src->y, src->ydimlen);
+            count[XI] = 1;
+            count[YI] = 1;
+            float *z = (float*) malloc(count[YI] * count[XI] * sizeof(float));
+            check_error(nc_get_vara_float(src->ncid, src->zid, start, count, z), src);
+            z_out = *z;
+            free(z);
+        }
+    }
 	return z_out;
 }
 
@@ -182,19 +180,20 @@ struct mapsrc* mapsrc_init(void) {
 }
 
 
-void mapsrc_free(struct mapsrc* src) {
-	if(src->x != NULL) {
-		free(src->x);
-		src->x = NULL;
-	}
-	if(src->y != NULL) {
-		free(src->y);
-		src->y = NULL;
-	}
-	if(src != NULL) {
-		free(src);
-		src = NULL;
-	}
+void mapsrc_free(struct mapsrc** psrc) {
+    if(NULL != psrc){
+        struct mapsrc* src = *psrc;
+        if(NULL!=src){
+            if(src->x != NULL) {
+                free(src->x);
+            }
+            if(src->y != NULL) {
+                free(src->y);
+            }
+            free(src);
+            *psrc = NULL;
+        }
+    }
 }
 
 char* mapsrc_tostring(struct mapsrc* src) {
@@ -381,29 +380,36 @@ void mapdata_free(struct mapdata* data, int free_all) {
 
 
 char* mapdata_tostring(struct mapdata* data) {
-	char* str = (char*) malloc(180 * sizeof(char));
-	char buf[100];
-	strcpy(str, "mapdata {\n");
-	sprintf(buf, "\txcenter = %f\n", data->xcenter);
-	strcat(str, buf);
-	sprintf(buf, "\tycenter = %f\n", data->ycenter);
-	strcat(str, buf);
-	if(data->xpts == NULL) {
-		sprintf(buf, "\tWARNING: x = NULL");
-		strcat(str, buf);
-	}
-	if(data->ypts == NULL) {
-		sprintf(buf, "\tWARNING: y = NULL");
-		strcat(str, buf);
-	}
-	sprintf(buf, "\txdimlen = %u\n", int(data->xdimlen));
-	strcat(str, buf);
-	sprintf(buf, "\tydimlen = %u\n", int(data->ydimlen));
-	strcat(str, buf);
-	sprintf(buf, "\tstatus = %i\n", data->status);
-	strcat(str, buf);
-	strcat(str, "}");
-	return str;
+    char *retval = NULL;
+    if(NULL!=data){
+        char* str = (char*) malloc(180 * sizeof(char));
+        if(NULL!=str){
+            memset(str,0,180 * sizeof(char));
+            char buf[100];
+            strcpy(str, "mapdata {\n");
+            sprintf(buf, "\txcenter = %f\n", data->xcenter);
+            strcat(str, buf);
+            sprintf(buf, "\tycenter = %f\n", data->ycenter);
+            strcat(str, buf);
+            if(data->xpts == NULL) {
+                sprintf(buf, "\tWARNING: x = NULL");
+                strcat(str, buf);
+            }
+            if(data->ypts == NULL) {
+                sprintf(buf, "\tWARNING: y = NULL");
+                strcat(str, buf);
+            }
+            sprintf(buf, "\txdimlen = %zu\n", data->xdimlen);
+            strcat(str, buf);
+            sprintf(buf, "\tydimlen = %zu\n", data->ydimlen);
+            strcat(str, buf);
+            sprintf(buf, "\tstatus = %i\n", data->status);
+            strcat(str, buf);
+            strcat(str, "}");
+            retval = str;
+        }// else malloc failed
+    }// else invalid arg
+	return retval;
 }
 
 int nearest(double key, const double* base, size_t nmemb) {
@@ -522,7 +528,7 @@ int mapbounds_fill2(const char* file, struct mapbounds* bounds) {
 	struct mapsrc* src = mapsrc_init();
 	mapsrc_fill(file, src);
 	return_code = mapbounds_fill1(src, bounds);
-	mapsrc_free(src);
+	mapsrc_free(&src);
 	return return_code;
 }
 

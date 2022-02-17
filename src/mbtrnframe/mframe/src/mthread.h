@@ -109,7 +109,7 @@ struct mthread_thread_s
     pthread_attr_t attr;
     /// @var mthread_thread_s::status
     /// @brief thread exit status
-    void **status;
+    void *status;
 };
 
 /// @typedef struct mthread_mutex_s mthread_mutex_t

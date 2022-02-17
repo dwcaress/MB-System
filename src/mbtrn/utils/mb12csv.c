@@ -65,7 +65,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <getopt.h>
-//#include <math.h>
 
 #include "mb12csv.h"
 #include "mb1_msg.h"
@@ -365,19 +364,19 @@ static void app_cfg_destroy(app_cfg_t **pself)
     }
 }
 
-static int32_t s_read_mb1_rec( mb1_frame_t **pdest, mfile_file_t *src, app_cfg_t *cfg)
+static int32_t s_read_mb1_rec( mb1_t **pdest, mfile_file_t *src, app_cfg_t *cfg)
 {
     int32_t retval=-1;
-    
+
     if(NULL!=src && NULL!=pdest){
         byte *bp = NULL;
         uint32_t readlen = 1;
         uint32_t record_bytes=0;
         int64_t read_bytes=0;
-        mb1_frame_t *dest = *pdest;
-        
+        mb1_t *dest = *pdest;
+
         // sync to start of record
-        bp = (byte *)dest->sounding;
+        bp = (byte *)dest;
 
         while( (read_bytes=mfile_read(src,(byte *)bp,readlen))==readlen){
             if(*bp=='M'){
@@ -395,46 +394,44 @@ static int32_t s_read_mb1_rec( mb1_frame_t **pdest, mfile_file_t *src, app_cfg_t
 
         if(NULL!=cfg && cfg->verbose>2){
             fprintf(stderr,"%d: read sync err[%d/%s]\n",__LINE__,errno,strerror(errno));
-            fprintf(stderr,"%d: frame[%p]\n",__LINE__,dest);
-            fprintf(stderr,"%d: sounding[%p]\n",__LINE__,dest->sounding);
-            fprintf(stderr,"%d: chksum[%p]\n",__LINE__,dest->checksum);
+            fprintf(stderr,"%d: sounding[%p]\n",__LINE__,dest);
+            fprintf(stderr,"%d: chksum[%p]\n",__LINE__,MB1_PCHECKSUM(dest));
             fprintf(stderr,"%d: readlen[%u]\n",__LINE__,readlen);
             fprintf(stderr,"%d: sizeof double[%zu]\n",__LINE__,sizeof(double));
             fprintf(stderr,"%d: sizeof int[%zu]\n",__LINE__,sizeof(int));
-            fprintf(stderr,"%d: sizeof mb1_sounding_t[%zu]\n",__LINE__,sizeof(mb1_sounding_t));
+            fprintf(stderr,"%d: sizeof mb1_t[%zu]\n",__LINE__,sizeof(mb1_t));
             fprintf(stderr,"%d: sizeof mb1_beam_t[%zu]\n",__LINE__,sizeof(mb1_beam_t));
-            fprintf(stderr,"%d: sizeof mb1_frame_t[%zu]\n",__LINE__,sizeof(mb1_frame_t));
+            fprintf(stderr,"%d: sizeof checksum[%zu]\n",__LINE__,sizeof(mb1_checksum_t));
         }
 
         // if start of sync found, read header (fixed-length sounding bytes)
         if(record_bytes>0 && (read_bytes=mfile_read(src,(byte *)bp,readlen))==readlen){
 
             if(NULL!=cfg && cfg->verbose>2){
-                fprintf(stderr,"%d: type[x%08X]\n",__LINE__,dest->sounding->type);
-                fprintf(stderr,"%d: nbeams[%u]\n",__LINE__,dest->sounding->nbeams);
+                fprintf(stderr,"%d: type[x%08X]\n",__LINE__,dest->type);
+                fprintf(stderr,"%d: nbeams[%u]\n",__LINE__,dest->nbeams);
             }
-
             record_bytes+=read_bytes;
 
             bp=NULL;
             readlen=0;
             retval=record_bytes;
 
-            if(NULL!=dest && NULL!=dest->sounding ){
-                if(dest->sounding->type==0x0031424D){
-                    if(dest->sounding->nbeams>0 && dest->sounding->nbeams<=MB1_MAX_BEAMS){
-                        if(mb1_frame_resize(&dest, dest->sounding->nbeams, MB1_RS_BEAMS)!=NULL){
-                            bp=(byte *)&dest->sounding->beams[0];
-                            readlen = dest->sounding->size-(MB1_HEADER_BYTES+MB1_CHECKSUM_BYTES);
+            if(NULL!=dest ){
+                if(dest->type==MB1_TYPE_ID){
+                    if(dest->nbeams>0 && dest->nbeams<=MB1_MAX_BEAMS){
+                        if(mb1_resize(&dest, dest->nbeams, MB1_RS_BEAMS)!=NULL){
+                            bp=(byte *)&dest->beams[0];
+                            readlen = dest->size-(MB1_HEADER_BYTES+MB1_CHECKSUM_BYTES);
                             *pdest=dest;
                         }else{fprintf(stderr,"%s:%d - ERR frame_resize\n",__func__,__LINE__);}
                     }else{
                         // don't resize, but update checksum pointer
-                        dest->checksum=MB1_PCHECKSUM_U32(dest);
+                        //                        dest->checksum=MB1_PCHECKSUM_U32(dest);
                     }
                 }else{
                     if(NULL!=cfg && cfg->verbose>=2)
-                    fprintf(stderr,"%s:%d - ERR invalid type[%u]\n",__func__,__LINE__,dest->sounding->type);
+                        fprintf(stderr,"%s:%d - ERR invalid type[%08X/%08X]\n",__func__,__LINE__,dest->type,MB1_TYPE_ID);
                     retval=-1;
                 }
             }else{
@@ -442,20 +439,19 @@ static int32_t s_read_mb1_rec( mb1_frame_t **pdest, mfile_file_t *src, app_cfg_t
             }
 
             if(NULL!=cfg && cfg->verbose>2){
-                fprintf(stderr,"%d: sounding->sz[%"PRIu32"] read[%"PRId64"/%"PRIu32"] err[%d/%s]\n",__LINE__,dest->sounding->size,read_bytes,readlen,errno,strerror(errno));
-                fprintf(stderr,"%d: sounding->type[%08X]\n",__LINE__,dest->sounding->type);
-                fprintf(stderr,"%d: sounding->checksum[%p]\n",__LINE__,dest->checksum);
-                 if(readlen>0)
-                fprintf(stderr,"%d: sounding->checksum[%"PRIu32"]\n",__LINE__,*dest->checksum);
-           }
+                fprintf(stderr,"%d: sounding->sz[%"PRIu32"] read[%"PRId64"/%"PRIu32"] err[%d/%s]\n",__LINE__,dest->size,read_bytes,readlen,errno,strerror(errno));
+                fprintf(stderr,"%d: sounding->type[%08X]\n",__LINE__,dest->type);
+                fprintf(stderr,"%d: sounding->checksum[%p]\n",__LINE__,MB1_PCHECKSUM(dest));
+                if(readlen>0)
+                    fprintf(stderr,"%d: sounding->checksum[%"PRIu32"]\n",__LINE__,MB1_GET_CHECKSUM(dest));
+            }
 
-
-             // if header OK, read sounding data (variable length)
+            // if header OK, read sounding data (variable length)
             read_bytes=0;
             if(readlen>0 && (read_bytes=mfile_read(src,(byte *)bp,readlen))==readlen){
                 record_bytes+=read_bytes;
 
-                bp=(byte *)dest->checksum;
+                bp=(byte *)MB1_PCHECKSUM(dest);
                 readlen=MB1_CHECKSUM_BYTES;
 
                 // read checksum
@@ -463,21 +459,20 @@ static int32_t s_read_mb1_rec( mb1_frame_t **pdest, mfile_file_t *src, app_cfg_t
                     record_bytes+=read_bytes;
                     retval=record_bytes;
 
-                    unsigned int checksum = mb1_frame_calc_checksum(dest);
-                    if(checksum!=*(dest->checksum)){
-                        fprintf(stderr,"checksum err (calc/read)[%08X/%08X] failed fp/fsz[%"PRId64"/%"PRId64"]\n",checksum,*(dest->checksum),mfile_seek(src,0,MFILE_CUR),mfile_fsize(src));
+                    if(mb1_validate_checksum(dest)!=0){
+                        fprintf(stderr,"checksum err (calc/read)[%08X/%08X] failed fp/fsz[%"PRId64"/%"PRId64"]\n",mb1_calc_checksum(dest),MB1_GET_CHECKSUM(dest),mfile_seek(src,0,MFILE_CUR),mfile_fsize(src));
                     }
                 }else{
                     fprintf(stderr,"%d: read failed err[%d/%s] fp/fsz[%"PRId64"/%"PRId64"]\n",__LINE__,errno,strerror(errno),mfile_seek(src,0,MFILE_CUR),mfile_fsize(src));
                 }
             }else{
                 if(readlen>0)
-                fprintf(stderr,"%d: read failed err[%d/%s] readlen[%"PRId32"] read_bytes[%"PRId64"] fp/fsz[%"PRId64"/%"PRId64"]\n",__LINE__,errno,strerror(errno),readlen,read_bytes,mfile_seek(src,0,MFILE_CUR),mfile_fsize(src));
+                    fprintf(stderr,"%d: read failed err[%d/%s] readlen[%"PRId32"] read_bytes[%"PRId64"] fp/fsz[%"PRId64"/%"PRId64"]\n",__LINE__,errno,strerror(errno),readlen,read_bytes,mfile_seek(src,0,MFILE_CUR),mfile_fsize(src));
             }
         }else{
             if(mfile_seek(src,0,MFILE_CUR)==mfile_fsize(src)){
                 if(NULL!=cfg && cfg->verbose>0)
-                fprintf(stderr,"%d: read failed end of file reached fp/fsz[%"PRId64"/%"PRId64"] err[%d/%s]\n",__LINE__,mfile_seek(src,0,MFILE_CUR),mfile_fsize(src),errno,strerror(errno));
+                    fprintf(stderr,"%d: read failed end of file reached fp/fsz[%"PRId64"/%"PRId64"] err[%d/%s]\n",__LINE__,mfile_seek(src,0,MFILE_CUR),mfile_fsize(src),errno,strerror(errno));
             }else{
                 fprintf(stderr,"%d: read failed err[%d/%s]\n",__LINE__,errno,strerror(errno));
             }
@@ -504,13 +499,13 @@ static void s_out_header(app_cfg_t *cfg)
     }
 }
 
-static int32_t s_mb1_to_csv(byte **dest, int32_t size, mb1_frame_t *src, app_cfg_t *cfg)
+static int32_t s_mb1_to_csv(byte **dest, int32_t size, mb1_t *src, app_cfg_t *cfg)
 {
     int32_t retval=-1;
     
     if(NULL!=dest && NULL!=src){
         
-        int32_t csv_size = 4*1024;//(98+7*src->sounding->nbeams);
+        int32_t csv_size = 4*1024;//(98+7*src->nbeams);
         byte *bp = *dest;
         int32_t msize = size;
 
@@ -526,9 +521,9 @@ static int32_t s_mb1_to_csv(byte **dest, int32_t size, mb1_frame_t *src, app_cfg
             *dest = bp;
 
            // apply unit conversions, if any
-           double lat=src->sounding->lat;
-           double lon=src->sounding->lon;
-           double hdg=src->sounding->hdg;
+           double lat=src->lat;
+           double lon=src->lon;
+           double hdg=src->hdg;
            if(CFG_RAD_EN(cfg->flags)){
                lat *= 180./M_PI;
                lon *= 180./M_PI;
@@ -537,28 +532,28 @@ static int32_t s_mb1_to_csv(byte **dest, int32_t size, mb1_frame_t *src, app_cfg
 
             sprintf(op,"MB1,");
             op=ostr+strlen(ostr);
-            sprintf(op,"%.3lf,",src->sounding->ts);
+            sprintf(op,"%.3lf,",src->ts);
             op=ostr+strlen(ostr);
             sprintf(op,"%e,",lon);
             op=ostr+strlen(ostr);
             sprintf(op,"%e,",lat);
             op=ostr+strlen(ostr);
-            sprintf(op,"%e,",src->sounding->depth);
+            sprintf(op,"%e,",src->depth);
             op=ostr+strlen(ostr);
             sprintf(op,"%e,",hdg);
             op=ostr+strlen(ostr);
-            sprintf(op,"%u,",src->sounding->nbeams);
+            sprintf(op,"%u,",src->nbeams);
             op=ostr+strlen(ostr);
 
             int i=0;
-            int nbeams = src->sounding->nbeams;
+            int nbeams = src->nbeams;
 
             for(i=0;i<nbeams;i++){
-                sprintf(op,"%e,",src->sounding->beams[i].rhox);
+                sprintf(op,"%e,",src->beams[i].rhox);
                 op=ostr+strlen(ostr);
-                sprintf(op,"%e,",src->sounding->beams[i].rhoy);
+                sprintf(op,"%e,",src->beams[i].rhoy);
                 op=ostr+strlen(ostr);
-                sprintf(op,"%e,",src->sounding->beams[i].rhoz);
+                sprintf(op,"%e,",src->beams[i].rhoz);
                 op=ostr+strlen(ostr);
             }
         }
@@ -587,7 +582,7 @@ static int s_app_main(app_cfg_t *cfg)
         mfile_file_t *ifile = mfile_file_new(cfg->ifile);
         mfile_file_t *ofile = (NULL==cfg->ofile?NULL:mfile_file_new(cfg->ofile));
         byte *csv_bytes=NULL;
-        mb1_frame_t *mb1=NULL;
+        mb1_t *mb1=NULL;
 
         // open input file
         if( (test[0]=mfile_open(ifile, MFILE_RONLY))>0){
@@ -612,7 +607,7 @@ static int s_app_main(app_cfg_t *cfg)
             while( !g_interrupt && !quit && input_bytes<file_size){
                 
                 // reset frame (or create if NULL)
-                mb1_frame_resize(&mb1,0,MB1_RS_ALL);
+                mb1_resize(&mb1,0,MB1_RS_ALL);
 
                 // read an mb1 record
                 if((test[0]=s_read_mb1_rec(&mb1, ifile, cfg))>0){
@@ -625,7 +620,7 @@ static int s_app_main(app_cfg_t *cfg)
                         output_bytes+=csv_size;
 
                         if( cfg->verbose>2){
-                            mb1_frame_show(mb1,5,true);
+                            mb1_show(mb1,5,true);
                         }
 
                         if(CFG_CSV_EN(cfg->flags)){
@@ -670,7 +665,7 @@ static int s_app_main(app_cfg_t *cfg)
         if(NULL!=csv_bytes){
             free(csv_bytes);
         }
-        mb1_frame_destroy(&mb1);
+        mb1_destroy(&mb1);
         retval=0;
         
         if(cfg->verbose>0){

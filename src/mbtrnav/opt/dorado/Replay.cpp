@@ -41,10 +41,18 @@
 #include "TerrainNavLcmClient.h"
 #endif
 
+// Seconds within which a DVL record matches TRN record
+const double Replay::DVL4TRN = 0.4;
+// Seconds within which a nav record matches TRN record
+const double Replay::NAV4TRN = 0.2;
+// array depth for VNORM
+const uint16_t Replay::REPLAY_VNORM_DIM = 3;
+
 // Common to QNX and NIX versions
 Replay::Replay(const char* loghome, const char *map, const char *host, int port)
   : logdir(0),
-     lastTime(0.0),  nupdates(0L), nreinits(0),  trn_log(0),  dvl_log(0), nav_log(0), mbtrn_log(0), dvl_csv(0)
+     lastTime(0.0),  nupdates(0L), nreinits(0),  trn_log(0),  dvl_log(0),
+     nav_log(0), mbtrn_log(0), tnav_log(0), dvl_csv(0)
 {
   logdir = strdup(loghome);
 
@@ -135,7 +143,7 @@ static double Vnorm( double v[] )
 {
    double Vnorm2 = 0.;
    int i;
-   for(i=0; i<REPLAY_VNORM_DIM; i++) Vnorm2 += pow(v[i],2.);
+   for(i=0; i < Replay::REPLAY_VNORM_DIM; i++) Vnorm2 += pow(v[i],2.);
    return( sqrt( Vnorm2 ) );
 }
 
@@ -147,12 +155,79 @@ static double degToRad(double deg)
 }
 #endif
 
+int Replay::getNextTRNRecordSet(poseT *pt, measT *mt)
+{
+  // Get the data from the other log files
+  DataField *f=NULL;
+
+  try
+  {
+    // Read a TRN log record.
+    tnav_log->read();
+    tnav_log->fields.get( 1,&f); pt->time = atof(f->ascii());
+
+    // Get [x,y,z], [phi,theta,psi], [wx,wy,wz], [vx,vy,vz],
+    // and flags from the TRN record
+    // navN, navN, depth
+    tnav_log->fields.get( 2,&f); pt->x = atof(f->ascii());
+    tnav_log->fields.get( 3,&f); pt->y = atof(f->ascii());
+    tnav_log->fields.get( 4,&f); pt->z = atof(f->ascii());
+
+    tnav_log->fields.get( 5,&f); pt->vx = atof(f->ascii());
+    tnav_log->fields.get( 6,&f); pt->vy = atof(f->ascii());
+    tnav_log->fields.get( 7,&f); pt->vz = atof(f->ascii());
+
+    // phi, theta, psi (roll, pitch, yaw)
+    tnav_log->fields.get( 8,&f); pt->phi   = atof(f->ascii());
+    tnav_log->fields.get( 9,&f); pt->theta = atof(f->ascii());
+    tnav_log->fields.get(10,&f); pt->psi   = atof(f->ascii());
+
+    // wx, wy, wz, (omega1, 2, 3)
+    pt->wx = pt->wy = pt->wz = 0.;
+
+    // dvlValid, gpsValid, bottomlock flags
+    pt->dvlValid   = 1;
+
+    if (pt->z > 0.3)
+      pt->gpsValid = false;
+    else
+      pt->gpsValid = true;
+
+    pt->bottomLock = !pt->gpsValid;
+
+    tnav_log->fields.get(11,&f); mt->time = atof(f->ascii());
+    tnav_log->fields.get(12,&f); mt->dataType = atoi(f->ascii());
+    tnav_log->fields.get(14,&f); int nb = atoi(f->ascii());
+
+    for (int i = 0; i < nb; i++)
+    {
+      tnav_log->fields.get( 16+i,&f); mt->ranges[i] = atof(f->ascii());
+      tnav_log->fields.get(380+i,&f); mt->measStatus[i] = atoi(f->ascii());
+    }
+
+    mt->x     = pt->x;
+    mt->y     = pt->y;
+    mt->z     = pt->z;
+    mt->phi   = pt->phi;
+    mt->theta = pt->theta;
+    mt->psi   = pt->psi;
+  }
+  catch (...) {
+    fprintf(stderr, "\nEnd of log!\n");
+    return 0;
+  }
+
+  return 1;
+}
+
 // Call the appropriate function based on which instruments were used
 // for TRN, determined by flags set in the terrainAid.cfg file and
 // loaded here in loadCfgAttributes().
 int Replay::getNextRecordSet(poseT *pt, measT *mt)
 {
   nupdates++;
+
+  if (tnav_log) return getNextTRNRecordSet(pt, mt);
 
   if (trn_attr->_lrauvDvlFilename)
   {
@@ -227,7 +302,7 @@ int Replay::getNextRecordSet(poseT *pt, measT *mt)
         nav_log->read();
         nav_time = nav_log->timeTag()->value();
       }
-      while( (fabs(nav_time - pt->time) > NAV4TRN) && (nav_time < pt->time) );
+      while( (fabs(nav_time - pt->time) > Replay::NAV4TRN) && (nav_time < pt->time) );
 
       //fprintf(stderr, "Found matching nav record at time %f\n", nav_time);
       nav_log->fields.get(7,&f); mt->phi   = atof(f->ascii());
@@ -389,17 +464,27 @@ int Replay::openLogFiles()
     return 0;
   }
 
-  // Default log files
-  sprintf(logfile, "%s/TerrainAid.log", logdir);
-  fprintf(stdout, "Replay - Opening %s...\n", logfile);
-  trn_log = new DataLogReader(logfile);
-
-  if (trn_attr->_useDvlSide)
-    sprintf(logfile, "%s/dvlSide.log", logdir);
+  sprintf(logfile, "%s/TerrainNav.log", logdir);
+  if (access(logfile, R_OK) == 0)
+  {
+    // TerrainNav log files
+    fprintf(stdout, "Replay - Opening %s...\n", logfile);
+    tnav_log = new DataLogReader(logfile);
+  }
   else
-    sprintf(logfile, "%s/navigation.log", logdir);
-  fprintf(stdout, "Replay - Opening %s...\n", logfile);
-  nav_log = new DataLogReader(logfile);
+  {
+    // Default log files
+    sprintf(logfile, "%s/TerrainAid.log", logdir);
+    fprintf(stdout, "Replay - Opening %s...\n", logfile);
+    trn_log = new DataLogReader(logfile);
+
+    if (trn_attr->_useDvlSide)
+      sprintf(logfile, "%s/dvlSide.log", logdir);
+    else
+      sprintf(logfile, "%s/navigation.log", logdir);
+    fprintf(stdout, "Replay - Opening %s...\n", logfile);
+    nav_log = new DataLogReader(logfile);
+  }
 
   return 0;
 }
@@ -409,7 +494,7 @@ int Replay::openLogFiles()
 // If the user enters "native" as the argument in the -h option,
 // return false.
 // On QNX, always use the trn_server for TRN
-Boolean Replay::useTRNServer()
+bool Replay::useTRNServer()
 {
 #ifdef _QNX
   return True;
@@ -418,7 +503,7 @@ Boolean Replay::useTRNServer()
 #endif
 }
 
-Boolean Replay::useLcmTrn()
+bool Replay::useLcmTrn()
 {
 #ifndef _LCMTRN
   fprintf(stderr, "Replay - trn_replay was not build for LCMTRN!\n");

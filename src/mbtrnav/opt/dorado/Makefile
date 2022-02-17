@@ -76,7 +76,7 @@ LIB_TNAVC_OBJ=$(BUILD_DIR)/TerrainNavClient.o $(BUILD_DIR)/TRNUtils.o
 MBARI_MAIN=mbari-main
 MBARI_MAIN_SRC=mainMbari.cpp
 MBARI_MAIN_OBJ = $(MBARI_MAIN_SRC:%.cpp=$(BUILD_DIR)/%.o)
-MBARI_MAIN_LIBS = -ltrn  -lnewmat -lqnx -lnetcdf -lm -lpthread -ltnavc $(OS_LIBS)
+MBARI_MAIN_LIBS = -ltnavc -ltrn  -lnewmat -lqnx -lnetcdf -lm -lpthread $(OS_LIBS)
 
 REPLAY=trn-replay
 REPLAY_SRC=Replay.cpp trn_replay.cpp

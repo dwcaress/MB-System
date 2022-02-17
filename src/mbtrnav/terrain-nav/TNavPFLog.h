@@ -25,7 +25,8 @@
 #include "DoubleData.h"
 #include "TimeTag.h"
 
-class TNavPFLog: public DataLogWriter {
+class TNavPFLog : public DataLogWriter
+{
 
 public:
 
@@ -42,7 +43,7 @@ public:
   //    plog = new TNavLog(DataLog::BinaryFormat, "TNF")  // Creates TNF.log
   //    mlog = new TNavLog(DataLog::BinaryFormat, "TNF", "tnav")  // data mnem is "tnav"
   // 
-  TNavPFLog(DataLog::FileFormat fileFormat, const char* logname=TNavPFLogName,
+  explicit TNavPFLog(DataLog::FileFormat fileFormat, const char* logname=TNavPFLogName,
               const char *mnem=TNavPFMnemName);
 
   ~TNavPFLog();

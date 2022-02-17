@@ -71,7 +71,7 @@ int main( int argc, char **argv )
 	totalFaces = 0;
 	
 	//Iterate through all the filled octree boxes
-	while(oct->ItterateThroughLeaves(nodeLowerBounds, nodeUpperBounds, true)){
+	while(oct->IterateThroughLeaves(nodeLowerBounds, nodeUpperBounds, true)){
 		//First 6 columns of the output file are: x_lower, x_upper, y_lower, y_upper, z_lower, z_upper
 		outFile << setprecision(10) << nodeLowerBounds.x << "," << nodeUpperBounds.x << ",";
 		outFile << nodeLowerBounds.y << "," << nodeUpperBounds.y << ",";

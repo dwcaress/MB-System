@@ -65,10 +65,12 @@ int round(const double& num) {
  */
 unsigned int seed_randn(unsigned int *p_seed)
 {
-   unsigned int seed = (NULL != p_seed)? *p_seed : time(NULL);
+
 #ifdef TRN_NORAND
    // Building to use the same set of random numbers
-   seed = 0;
+    unsigned int seed = 0;
+#else
+    unsigned int seed = (NULL != p_seed)? *p_seed : time(NULL);
 #endif
 
 	//Initialize random number generator
@@ -150,12 +152,19 @@ Matrix conv2(const Matrix& A, const Matrix& H) {
 	return newMAT;
 }
 
+#ifdef WITH_RESAMPLE_MAP
+#if 0
+// TODO remove interp2 (unused, called by mapT::reSampleMap in structDefs.cpp)
 void interp2(double* xpts, double* ypts, const Matrix Z, double* xi,
 			 double* yi, double* zi, int numPts) {
 	int yIndices[4];
 	int xIndices[4];
 	ColumnVector Weights(4);
-	
+	// klh: xi,yi,zi are being indexed as arrays here with no boundary checks.
+    // xi, yi may or may not be arrays, and are being passed in (by interp2mat)
+    // from potentially non-zero indices.
+    // zi is defined and passed (by interp2mat) as a double (array dimension 1).
+    // IOW, there is potential for array boundary violations.
 	for(int i = 0; i < numPts; i++)
 		bilinearInterp(xpts, ypts, Z, xi[i], yi[i], zi[i], xIndices,
 					   yIndices, Weights);
@@ -163,6 +172,7 @@ void interp2(double* xpts, double* ypts, const Matrix Z, double* xi,
 	return;
 }
 
+// TODO remove interp2mat (unused, called by mapT::reSampleMap in structDefs.cpp)
 void interp2mat(double* xpts, double* ypts, const Matrix Z, double* xi,
 				double* yi, Matrix& zi) {
 	double znum;
@@ -176,7 +186,8 @@ void interp2mat(double* xpts, double* ypts, const Matrix Z, double* xi,
 	
 	return;
 }
-
+#endif
+#endif
 
 void nearestInterp(double* xpts, double* ypts, const Matrix& zvals,
 				   double xi, double yi, double& zi, int* xIndices,
@@ -206,29 +217,28 @@ void nearestInterp(double* xpts, double* ypts, const Matrix& zvals,
 }
 
 bool findNearestValid(const Matrix& zvals, int& xIndex, int& yIndex) {
-	int i, j, r, rPower, rBase, maxRadius;
-	i = 1;
-	j = 1;
-	r = 1; //radius of search away from nominal point
-	rPower = 0; //radius power
-	rBase = 2; //radius base
-	maxRadius = 32;
+    //radius power
+	int rPower = 0;
+    //radius base
+    int rBase = 2;
+	int maxRadius = 32;
 	
 	if(!ISNIN(zvals(xIndex, yIndex))) {
 		return true;
 	}
-	
-	r = (int)(pow(rBase, rPower));
+
+    //radius of search away from nominal point
+	int r = (int)(pow(rBase, rPower));
 	//   while ((r < zvals.Nrows()) || (r < zvals.Ncols()))
 	while(r < maxRadius) {
 		//search side columns
-		for(i = -r; i <= r; i++) {
+		for(int i = -r; i <= r; i++) {
 			//check that we are indexing within the grid
 			if((xIndex + i < 1) || (xIndex + i > zvals.Nrows())) {
 				continue;
 			}
 			
-			for(j = -r; j <= r; j = j + 2 * r) {
+			for(int j = -r; j <= r; j = j + 2 * r) {
 				//check that we are indexing within the grid
 				if((yIndex + j < 1) || (yIndex + j > zvals.Ncols())) {
 					continue;
@@ -243,13 +253,13 @@ bool findNearestValid(const Matrix& zvals, int& xIndex, int& yIndex) {
 		}
 		
 		//search top and bottom rows
-		for(j = -r + 1; j <= r - 1; j++) {
+		for(int j = -r + 1; j <= r - 1; j++) {
 			//check that we are indexing within the grid
 			if((yIndex + j < 1) || (yIndex + j > zvals.Ncols())) {
 				continue;
 			}
 			
-			for(i = -r; i <= r; i = i + 2 * r) {
+			for(int i = -r; i <= r; i = i + 2 * r) {
 				//check that we are indexing within the grid
 				if((xIndex + i < 1) || (xIndex + i > zvals.Nrows())) {
 					continue;
@@ -679,24 +689,25 @@ int lowerBound(double val, const double* vec, int numVals) {
 }
 
 double randn(double mean, double stddev) {
-	double rand1, rand2, gauss1, w;
-	static int use_last = 0;
+    double gauss1=0.;
+	static bool use_last = false;
 	static double gauss2;
 	
 	//If we already have a random variable waiting to be used, use it
 	if(use_last) {
 		gauss1 = gauss2;
-		use_last = 0;
+		use_last = false;
 	}
 	//Otherwise, generate two new random numbers
 	else {
+        double rand1, rand2, w;
 		//Use the Polar Form of the Box-Muller transformation:
 		//1.Generate two uniform random variables within the unit circle
 		do {
 			//Generate two uniform random variables between -1 and 1
-			rand1 = unif(0, 1);
-			rand2 = unif(0, 1);
-			w = rand1 * rand1 + rand2 * rand2;
+            rand1 = unif(0, 1);
+            rand2 = unif(0, 1);
+            w = rand1 * rand1 + rand2 * rand2;
 		} while(w >= 1.0);
 		
 		//2.Convert random variables to gaussian variables, N(0,1).
@@ -705,7 +716,7 @@ double randn(double mean, double stddev) {
 		gauss2 = rand2 * w;
 		
 		//Set flag that we have an extra variable that can be used
-		use_last = 1;
+		use_last = true;
 	}
 	
 	return (mean + stddev * gauss1);

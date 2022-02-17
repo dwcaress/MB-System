@@ -112,6 +112,30 @@ char *r7k_ch_names[R7K_CH_COUNT]={
     "r7k.drfcon"
 };
 
+/// @var char *mb1r_ch_names[MB1R_CH_COUNT]
+/// @brief module channel names
+char *mb1r_ch_names[MB1R_CH_COUNT]={
+    "trace.mbtrnpp",
+    "debug.mbtrnpp",
+    "warn.mbtrnpp",
+    "err.mbtrnpp",
+    "mb1r.v1",
+    "mb1r.v2"
+};
+
+/// @var char *mb1_ch_names[MB1_CH_COUNT]
+/// @brief module channel names
+char *mb1_ch_names[MB1_CH_COUNT]={
+    "trace.mb1",
+    "debug.mb1",
+    "warn.mb1",
+    "err.mb1",
+    "mb1.v1",
+    "mb1.v2",
+    "mb1.parser",
+    "mb1.drfcon"
+};
+
 /// @var char *s7k_ch_names[S7K_CH_COUNT]
 /// @brief module channel names
 char *s7k_ch_names[S7K_CH_COUNT]={
@@ -212,6 +236,8 @@ char *netif_ch_names[NETIF_CHAN_COUNT]={
 static mmd_module_config_t mmd_config_defaults[]={
     {MOD_R7KR,"MOD_R7KR",R7KR_CH_COUNT,((MM_ERR|MM_WARN)|R7KR_V1),r7kr_ch_names},
     {MOD_R7K,"MOD_R7K",R7K_CH_COUNT,((MM_ERR|MM_WARN)|R7K_V1),r7k_ch_names},
+    {MOD_MB1R,"MOD_MB1R",MB1R_CH_COUNT,((MM_ERR|MM_WARN)|MB1R_V1),mb1r_ch_names},
+    {MOD_MB1,"MOD_MB1",MB1_CH_COUNT,((MM_ERR|MM_WARN)|MB1_V1),mb1_ch_names},
     {MOD_S7K,"MOD_S7K",S7K_CH_COUNT,((MM_ERR|MM_WARN)),s7k_ch_names},
     {MOD_F7K,"MOD_F7K",F7K_CH_COUNT,((MM_ERR|MM_WARN)),f7k_ch_names},
     {MOD_TRNC,"MOD_TRNC",TRNC_CH_COUNT,((MM_ERR|MM_WARN)),trnc_ch_names},

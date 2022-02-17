@@ -1307,10 +1307,12 @@ if test "$build_mbtrn" = "yes" ; then
     AS_ECHO(["Build libmbtrn and mbtrnpp"])
     AC_DEFINE(MBTRN_ENABLED, 1, [Build libmbtrn and mbtrnpp])
     build_mbrnutils="yes"
+    build_mbtrnframe="yes"
 else
     dnl Not building mbtrn tools
     AS_ECHO(["Not building mbtrn tools"])
     build_mbrnutils="no"
+    build_mbtrnframe="no"
 fi
 
 dnl--------------------------------------------------------------------
@@ -1330,10 +1332,12 @@ if test "$build_mbtnav" = "yes" ; then
     AS_ECHO(["Build libmbtnav and embed TRN instance in mbtrnpp"])
     AC_DEFINE(MBTNAV_ENABLED, 1, [Build libmbtnav and embed TRN instance in mbtrnpp])
     build_mbrnutils="yes"
+    build_mbtrnframe="yes"
 else
     dnl Not building mbtnav tools
     AS_ECHO(["Not building mbtnav tools"])
     build_mbrnutils="no"
+    build_mbtrnframe="no"
 fi
 
 dnl--------------------------------------------------------------------
@@ -1475,6 +1479,11 @@ if test "$build_mbtools" = "yes" ; then
         fi
     fi
 fi
+if test "$build_mbtrnframe" = "yes" ; then
+    AC_CONFIG_FILES([\
+        src/mbtrnframe/Makefile \
+        ])
+fi
 if test "$build_mbtrn" = "yes" ; then
     AC_CONFIG_FILES([\
         src/mbtrn/Makefile \
@@ -1608,6 +1617,11 @@ if test "$build_mbtnav" = "yes" ; then
 	AS_ECHO(["Build mbtnav tools: Enabled"])
 else
 	AS_ECHO(["Build mbtnav tools: Disabled"])
+fi
+if test "$build_mbtrnframe" = "yes" ; then
+	AS_ECHO(["Build mbtrnframe: Enabled"])
+else
+	AS_ECHO(["Build mbtrnframe: Disabled"])
 fi
 if test "$GOT_OPENCV4" = "yes" ; then
 	AS_ECHO(["Build OpenCV4 tools: Enabled"])

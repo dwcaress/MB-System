@@ -13,7 +13,7 @@ GetRangeError(double& mapVariance, const double* const startPoint, const double*
 	/* called with:
 	tempExpectedMeasDiff[i] = terrainMap->GetRangeError(mapVar, particle.position, beamVector, beamRanges[i]);
 	*/
-	double rangeError;
+	double rangeError = 0.;
 	if(USE_RANGE_CORR){
 		double predictedRange;
 		double beamU[3];
@@ -23,6 +23,7 @@ GetRangeError(double& mapVariance, const double* const startPoint, const double*
 
 		if(!computeMapRayIntersection(startPoint, beamU, predictedRange, mapVariance)){
 			rangeError = measuredDistance - fabs(predictedRange);
+
 		} else {
 			if(!USE_MAP_NAN){
 				return predictedRange;//NAN
@@ -60,9 +61,8 @@ GetRangeError(double& mapVariance, const double* const startPoint, const double*
 			}
 			//ADD IN CODE TO HANDLE NAN VALUES
 		}
-
-		return rangeError;
 	}
+    return rangeError;
 }
 /*
 double
@@ -235,8 +235,7 @@ setRefMap(const char* mapName){
 	//std::cout << "\nand here\n\n";
 
 	if(this->refMap->varSrc->status != MAPSRC_IS_FILLED) {
-		mapsrc_free(this->refMap->varSrc);
-		this->refMap->varSrc = NULL;
+		mapsrc_free(&this->refMap->varSrc);
 	}
 
 	//set map bounds structure for new reference map
@@ -445,23 +444,21 @@ computeInterpDepthVariance(int* xIndices, int* yIndices, ColumnVector Weights) {
 	int N = Weights.Nrows();
 	SymmetricMatrix VarMat(N);
 	ColumnVector VarVec(N);
-	double dx, dy, hsq, z1, z2;
-	int i, j;
 
 	VarMat = 0.0;
 
-	for(i = 0; i < N; i++) {
+	for(int i = 0; i < N; i++) {
 		VarVec(i + 1) = this->map.depthVariance(xIndices[i] + 1, yIndices[i] + 1);
-		z1 = this->map.depths(xIndices[i] + 1, yIndices[i] + 1);
+		double z1 = this->map.depths(xIndices[i] + 1, yIndices[i] + 1);
 
 		//Compute cross-variance terms using variogram
-		for(j = i; j < N; j++) {
-			dx = this->map.xpts[xIndices[i]] -
+		for(int j = i; j < N; j++) {
+			double dx = this->map.xpts[xIndices[i]] -
 				 this->map.xpts[xIndices[j]];
-			dy = this->map.ypts[yIndices[i]] -
+            double dy = this->map.ypts[yIndices[i]] -
 				 this->map.ypts[yIndices[j]];
-			z2 = this->map.depths(xIndices[j] + 1, yIndices[j] + 1);
-			hsq = dx * dx + dy * dy;
+            double z2 = this->map.depths(xIndices[j] + 1, yIndices[j] + 1);
+            double hsq = dx * dx + dy * dy;
 			VarMat(i + 1, j + 1) = 0.5 * pow(z1 - z2, 2) - evalVariogram(sqrt(hsq));
 
 			// if(isnan(VarMat(i + 1, j + 1))) {
@@ -502,7 +499,7 @@ extractSubMap(const double north, const double east, double* mapParams) {
 	}
 
 	//load data from reference map
-	mapdata* data = (mapdata*) malloc(sizeof(struct mapdata));
+	struct mapdata* data = (struct mapdata*) malloc(sizeof(struct mapdata));
 	statusCode = mapdata_fill(this->refMap->src, data, east, north, mapParams[1]
 							  , mapParams[0]);
 
@@ -583,7 +580,7 @@ extractVarMap(const double north, const double east, double* mapParams) {
 
 		statusCode = MAPBOUNDS_OK;
 	} else {
-		mapdata* data = (mapdata*) malloc(sizeof(struct mapdata));
+		struct mapdata* data = (struct mapdata*) malloc(sizeof(struct mapdata));
 		statusCode = mapdata_fill(this->refMap->varSrc, data, east, north,
 								  mapParams[1], mapParams[0]);
 
@@ -864,13 +861,10 @@ interpolateDepthAndGradient(double xi, double yi, double& zi, double& var, Matri
 //used by interpolate gradient
 void
 TerrainMapDEM::
-computeInterpTerrainGradient(int* xIndices, int* yIndices, double xi, double yi, Matrix& gradient) {
-	double dx, dy;
-	double b2, b3, b4;
-	double z11, z12, z21, z22;
+computeInterpTerrainGradient(int* xIndices, int* yIndices, double xi, double yi,  Matrix& gradient) {
 
-	dx = this->map.dx;
-	dy = this->map.dy;
+    double dx = this->map.dx;
+	double dy = this->map.dy;
 
 	//If using bilinear interpolation, compute terrain gradient based on the
 	//bilinear interpolation function
@@ -879,21 +873,21 @@ computeInterpTerrainGradient(int* xIndices, int* yIndices, double xi, double yi,
 		//          z11   z12
 		//          z21   z22
 		// ----------------------------------------------------
-		z11 = this->map.depths(xIndices[0] + 1, yIndices[0] + 1);
-		z21 = this->map.depths(xIndices[1] + 1, yIndices[1] + 1);
-		z12 = this->map.depths(xIndices[2] + 1, yIndices[2] + 1);
-		z22 = this->map.depths(xIndices[3] + 1, yIndices[3] + 1);
+        double z11 = this->map.depths(xIndices[0] + 1, yIndices[0] + 1);
+        double z21 = this->map.depths(xIndices[1] + 1, yIndices[1] + 1);
+        double z12 = this->map.depths(xIndices[2] + 1, yIndices[2] + 1);
+        double z22 = this->map.depths(xIndices[3] + 1, yIndices[3] + 1);
 
 		// The resulting bilinear interpolation function is given
 		// by:
 		//        z(x,y)_interp = b1 + b2x + b3y + b4xy
 		// where b2:b4 are defined as (don't need b1 for gradient):
 		// ----------------------------------------------------
-		b2 = (1 / (dx * dy)) * (yIndices[0] * (z12 - z22) +
+        double b2 = (1 / (dx * dy)) * (yIndices[0] * (z12 - z22) +
 								yIndices[1] * (z21 - z11));
-		b3 = (1 / (dx * dy)) * (xIndices[0] * (z21 - z22) +
+        double b3 = (1 / (dx * dy)) * (xIndices[0] * (z21 - z22) +
 								xIndices[2] * (z12 - z11));
-		b4 = (1 / (dx * dy)) * (z11 - z12 - z21 + z22);
+        double b4 = (1 / (dx * dy)) * (z11 - z12 - z21 + z22);
 
 		// The associated derivatives are:
 		//        dz/dx = b2 + b4y
@@ -901,10 +895,8 @@ computeInterpTerrainGradient(int* xIndices, int* yIndices, double xi, double yi,
 		// ----------------------------------------------------
 		gradient(1, 1) = b2 + b4 * yi;
 		gradient(1, 2) = b3 + b4 * xi;
-	}
-
-	//Use simple forward/backward differencing for gradient calculation
-	else {
+	} else {
+        //Use simple forward/backward differencing for gradient calculation
 		//Compute X gradient
 		//If we are at the lower bound, use a forward difference
 		if(xIndices[0] == 0) {
