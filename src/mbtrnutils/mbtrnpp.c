@@ -4880,6 +4880,9 @@ int mbtrnpp_trn_pub_blog(trn_update_t *update,
         retval=0;
 
         int iobytes=0;
+        double offset_n = update->mse_dat->x - update->pt_dat->x;
+        double offset_e = update->mse_dat->y - update->pt_dat->y;
+        double offset_z = update->mse_dat->z - update->pt_dat->z;
         // serialize data
         trnu_pub_t pub_data={
             TRNU_PUB_SYNC,
@@ -4892,7 +4895,13 @@ int mbtrnpp_trn_pub_blog(trn_update_t *update,
                 },
                 {update->mse_dat->time,update->mse_dat->x,update->mse_dat->y,update->mse_dat->z,
                     {update->mse_dat->covariance[0],update->mse_dat->covariance[2],update->mse_dat->covariance[5],update->mse_dat->covariance[1]}
-                }
+                },
+                {update->mse_dat->time,offset_n,offset_e,offset_z,
+                    {update->mse_dat->covariance[0],update->mse_dat->covariance[2],update->mse_dat->covariance[5],update->mse_dat->covariance[1]}
+                },
+                {use_offset_time,use_offset_n,use_offset_e,use_offset_z,
+                    {use_covariance[0],use_covariance[1],use_covariance[2],use_covariance[3]}
+                },
             },
             update->reinit_count,
             update->reinit_tlast,
@@ -4902,7 +4911,12 @@ int mbtrnpp_trn_pub_blog(trn_update_t *update,
             update->is_valid,
             update->mb1_cycle,
             update->ping_number,
+            n_converged_streak,
+            n_converged_tot,
+            n_unconverged_streak,
+            n_unconverged_tot,
             update->mb1_time,
+            reinit_time,
             update->update_time
         };
 
