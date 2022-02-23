@@ -279,8 +279,11 @@ typedef struct mbtrnpp_cfg_s{
     // socket input specifier
     mb_path socket_definition;
 
-    // output file name
-    mb_path output_file;
+    // output mb1 file name
+    mb_path output_mb1_file;
+
+    // output trn results file name
+    mb_path output_trn_file;
 
     // input specifier
     mb_path input;
@@ -701,6 +704,7 @@ netif_t *trnusvr=NULL;
 netif_t *trnumsvr=NULL;
 int s_mbtrnpp_trnu_reset_callback();
 trnuif_res_t rr_resources={0},*g_trnu_res=&rr_resources;
+FILE *output_trn_fp = NULL;
 
 #endif // WITH_MBTNAV
 
@@ -930,6 +934,8 @@ int n_converged_tot = 0;
 int n_unconverged_tot = 0;
 int n_reinit = 0;
 double reinit_time = 0.0;
+bool converged = false;
+bool reinitialized = true;
 bool use_trn_offset = false;
 double use_offset_time = 0.0;
 double use_offset_e = 0.0;
@@ -1320,8 +1326,10 @@ static int s_mbtrnpp_init_cfg(mbtrnpp_cfg_t *cfg)
         cfg->input_mode=INPUT_MODE_FILE;
         memset(cfg->socket_definition,0,MB_PATH_SIZE);
         sprintf(cfg->socket_definition,"%s",CFG_SOCKET_DEFINITION_DFL);
-        memset(cfg->output_file,0,MB_PATH_SIZE);
-        sprintf(cfg->output_file,"%s",CFG_OUTPUT_FILE_DFL);
+        memset(cfg->output_mb1_file,0,MB_PATH_SIZE);
+        sprintf(cfg->output_mb1_file,"%s",CFG_OUTPUT_FILE_DFL);
+        memset(cfg->output_trn_file,0,MB_PATH_SIZE);
+        sprintf(cfg->output_trn_file,"%s",CFG_OUTPUT_FILE_DFL);
         memset(cfg->input,0,MB_PATH_SIZE);
         sprintf(cfg->input,"%s",CFG_INPUT_DFL);
         cfg->format=0;
@@ -1497,7 +1505,8 @@ static int s_mbtrnpp_show_cfg(mbtrnpp_cfg_t *self, bool verbose, int indent)
         retval+=fprintf(stderr,"%*s %*s  %*d\n",indent,(indent>0?" ":""), wkey,"input_mode",wval,self->input_mode);
         retval+=fprintf(stderr,"%*s %*s  %*s\n",indent,(indent>0?" ":""), wkey,"input",wval,self->input);
         retval+=fprintf(stderr,"%*s %*s  %*s\n",indent,(indent>0?" ":""), wkey,"socket_definition",wval,self->socket_definition);
-        retval+=fprintf(stderr,"%*s %*s  %*s\n",indent,(indent>0?" ":""), wkey,"output_file",wval,self->output_file);
+        retval+=fprintf(stderr,"%*s %*s  %*s\n",indent,(indent>0?" ":""), wkey,"output_mb1_file",wval,self->output_mb1_file);
+        retval+=fprintf(stderr,"%*s %*s  %*s\n",indent,(indent>0?" ":""), wkey,"output_trn_file",wval,self->output_trn_file);
         retval+=fprintf(stderr,"%*s %*s  %*d\n",indent,(indent>0?" ":""), wkey,"format",wval,self->format);
         retval+=fprintf(stderr,"%*s %*s  %*s\n",indent,(indent>0?" ":""), wkey,"platform-file",wval,self->platform_file);
         retval+=fprintf(stderr,"%*s %*s  %*c\n",indent,(indent>0?" ":""), wkey,"use_platform_file",wval,BOOL2YNC(self->use_platform_file));
@@ -1677,9 +1686,9 @@ static int s_parse_opt_output(mbtrnpp_cfg_t *cfg, char *opt_str)
             if(NULL!=strstr(tok[i],"file:")){
                 char *acpy = strdup((tok[i]+strlen("file:")));
                 char *atok = strtok_r(acpy,":",&saveptr);
-                //                fprintf(stderr,"output_file[%s]\n",atok);
+                //                fprintf(stderr,"output_mb1_file[%s]\n",atok);
                 if(strlen(atok)>0){
-                    strcpy(cfg->output_file,atok);
+                    strcpy(cfg->output_mb1_file,atok);
                     // enable mb1 data log (use specified name)
                     cfg->output_flags |= OUTPUT_MB1_FILE_EN;
                     retval++;
@@ -1692,6 +1701,13 @@ static int s_parse_opt_output(mbtrnpp_cfg_t *cfg, char *opt_str)
             }
         }
         free(ocopy);
+
+        if (strlen(cfg->output_mb1_file) > 4
+            && strncmp(&(cfg->output_mb1_file[strlen(cfg->output_mb1_file)-4]), ".mb1", 4) == 0) {
+          strncpy(cfg->output_trn_file, cfg->output_mb1_file, strlen(cfg->output_mb1_file)-4);
+          strcat(cfg->output_trn_file, "_trn.txt");
+
+        }
     }// err - invalid arg
     return retval;
 }
@@ -1745,9 +1761,9 @@ static int s_parse_opt_mbout(mbtrnpp_cfg_t *cfg, char *opt_str)
             if(NULL != strstr(tok[i], "file:")) {
                 char *acpy = strdup((tok[i] + strlen("file:")));
                 char *atok = strtok_r(acpy,":",&saveptr);
-                //                fprintf(stderr,"output_file[%s]\n",atok);
+                //                fprintf(stderr,"output_mb1_file[%s]\n",atok);
                 if(strlen(atok)>0){
-                    strcpy(cfg->output_file,atok);
+                    strcpy(cfg->output_mb1_file,atok);
                     // enable mb1 data log (use specified name)
                     cfg->output_flags |= OUTPUT_MB1_FILE_EN;
                 }
@@ -1934,7 +1950,6 @@ static int s_parse_opt_logdir(mbtrnpp_cfg_t *cfg, char *opt_str)
         logd_status = stat(cfg->log_directory, &logd_stat);
 
         if (logd_status != 0) {
-            fprintf(stderr, "\nSpecified log file directory %s does not exist...\n", cfg->log_directory);
             cfg->make_logs = false;
             char *ps = CHK_STRDUP(cfg->log_directory);
             if(NULL!=ps){
@@ -1943,7 +1958,6 @@ static int s_parse_opt_logdir(mbtrnpp_cfg_t *cfg, char *opt_str)
                     cfg->make_logs = true;
                     MEM_CHKINVALIDATE(cfg->trn_log_dir);
                    cfg->trn_log_dir=CHK_STRDUP(ps);
-                   fprintf(stderr, "\ncreated/using log directory %s...\n", cfg->trn_log_dir);
                 }else{
                     fprintf(stderr, "\nCreate log directory %s failed [%d/%s]\n", ps,errno,strerror(errno));
                 }
@@ -1956,7 +1970,6 @@ static int s_parse_opt_logdir(mbtrnpp_cfg_t *cfg, char *opt_str)
             cfg->make_logs = true;
             MEM_CHKINVALIDATE(cfg->trn_log_dir);
             cfg->trn_log_dir = CHK_STRDUP(cfg->log_directory);
-            fprintf(stderr, "\nusing log directory %s...\n", cfg->trn_log_dir);
         }
         if(NULL==cfg->trn_log_dir){
             MEM_CHKINVALIDATE(cfg->trn_log_dir);
@@ -2329,6 +2342,8 @@ static int s_mbtrnpp_kvparse_fn(char *key, char *val, void *cfg)
         MEM_CHKINVALIDATE(mval);
         s_sub_mnem(&opts->output,0,opts->output,CFG_MNEM_SESSION,s_mnem_value(&mval,0,CFG_MNEM_SESSION));
         MEM_CHKINVALIDATE(mval);
+        s_sub_mnem(&opts->log_directory,0,opts->log_directory,CFG_MNEM_SESSION,s_mnem_value(&mval,0,CFG_MNEM_SESSION));
+        MEM_CHKINVALIDATE(mval);
         s_sub_mnem(&opts->mb_out,0,opts->mb_out,CFG_MNEM_TRN_HOST,s_mnem_value(&mval,0,CFG_MNEM_TRN_HOST));
         MEM_CHKINVALIDATE(mval);
         s_sub_mnem(&opts->trn_out,0,opts->trn_out,CFG_MNEM_TRN_HOST,s_mnem_value(&mval,0,CFG_MNEM_TRN_HOST));
@@ -2575,9 +2590,9 @@ static int s_mbtrnpp_validate_config(mbtrnpp_cfg_t *cfg)
         }
 
         if( (cfg->output_flags&OUTPUT_MB1_FILE_EN)!=0){
-            if(strlen(cfg->output_file)==0){
+            if(strlen(cfg->output_mb1_file)==0){
                 err_count++;
-                fprintf(stderr,"ERR - output_file not set\n");
+                fprintf(stderr,"ERR - output_mb1_file not set\n");
             }
         }
 
@@ -2866,8 +2881,8 @@ int main(int argc, char **argv) {
   double median;
   int n_output;
 
-  /* output write control parameters */
-  FILE *output_fp = NULL;
+  /* mb1 output write control parameters */
+  FILE *output_mb1_fp = NULL;
   char *output_buffer = NULL;
   int n_output_buffer_alloc = 0;
   size_t mb1_size, index;
@@ -2972,6 +2987,9 @@ int main(int argc, char **argv) {
 
     fprintf(stderr,"\nconfiguration - final:\n");
     s_mbtrnpp_show_cfg(mbtrn_cfg,true,5);
+    fprintf(stderr, "\n--------------------------------------------------------------------------------\n");
+    fprintf(stderr, "MBtrnpp logging directory: %s\n", mbtrn_cfg->trn_log_dir);
+    fprintf(stderr, "--------------------------------------------------------------------------------\n\n");
 
   /* if error flagged then print it and exit */
   if (errflg) {
@@ -3018,7 +3036,8 @@ int main(int argc, char **argv) {
     fprintf(stderr, "dbg2       timegap:                  %f\n", timegap);
     fprintf(stderr, "dbg2       input:                    %s\n", mbtrn_cfg->input);
     fprintf(stderr, "dbg2       format:                   %d\n", mbtrn_cfg->format);
-    fprintf(stderr, "dbg2       output:                   %s\n", mbtrn_cfg->output_file);
+    fprintf(stderr, "dbg2       output_mb1_file:          %s\n", mbtrn_cfg->output_mb1_file);
+    fprintf(stderr, "dbg2       output_trn_file:          %s\n", mbtrn_cfg->output_trn_file);
     fprintf(stderr, "dbg2       swath_width:              %f\n", mbtrn_cfg->swath_width);
     fprintf(stderr, "dbg2       n_output_soundings:       %d\n", mbtrn_cfg->n_output_soundings);
     fprintf(stderr, "dbg2       median_filter_en:         %d\n", mbtrn_cfg->median_filter_en);
@@ -3052,7 +3071,6 @@ int main(int argc, char **argv) {
   mbtrnpp_init_debug(mbtrn_cfg->verbose);
 
 #ifdef WITH_MBTNAV
-
     trn_cfg = trncfg_new(NULL, -1, mbtrn_cfg->trn_utm_zone, mbtrn_cfg->trn_mtype,
                         mbtrn_cfg->trn_ftype,mbtrn_cfg->trn_fgrade,
                         mbtrn_cfg->trn_freinit,mbtrn_cfg->trn_mweight,
@@ -3062,6 +3080,19 @@ int main(int argc, char **argv) {
                         mbtrn_cfg->trn_max_ecov, mbtrn_cfg->trn_max_eerr);
 
     if (mbtrn_cfg->trn_enable &&  NULL!=trn_cfg ) {
+
+        // If the environment variable TRN_LOGFILES is not already set then
+        // set it so that the TRN logfiles are created within the mbtrnpp
+        // log directory
+        if (getenv("TRN_LOGFILES") == NULL) {
+          setenv("TRN_LOGFILES", mbtrn_cfg->trn_log_dir, 0);
+          fprintf(stderr, "Setting the Terrain-nav log directory to %s by creating the environment variable TRN_LOGFILES\n",
+                  mbtrn_cfg->trn_log_dir);
+        } else {
+          fprintf(stderr, "Unable to set the Terrain-nav log directory to %s because the environment variable TRN_LOGFILES=%s exists\n",
+                  mbtrn_cfg->trn_log_dir, getenv("TRN_LOGFILES"));
+        }
+
         mbtrnpp_init_trn(&trn_instance,mbtrn_cfg->verbose, trn_cfg);
 
         // temporarily enable module debug
@@ -3222,7 +3253,7 @@ int main(int argc, char **argv) {
   /* initialize output */
     if ( OUTPUT_FLAG_SET(OUTPUT_MBSYS_STDOUT)) {
     }
-  /* insert option to recognize and initialize ipc with TRN */
+  /* if enabled initialize ipc with TRN */
   /* else open ipc to TRN */
 
  if ( OUTPUT_FLAG_SET(OUTPUT_MB1_SVR_EN) ) {
@@ -3245,20 +3276,33 @@ int main(int argc, char **argv) {
     }
   }
 
-    /* else open output file in which the binary data otherwise communicated
-   * to TRN will be saved */
+    /* if enabled open output file for mb1 data in MB-System supported format */
    if ( OUTPUT_FLAG_SET(OUTPUT_MB1_FILE_EN)) {
      if(NULL!=mbtrn_cfg->trn_log_dir){
-         if(mbtrn_cfg->output_file[0]!='/' && mbtrn_cfg->output_file[0]!='.'){
-             char *ocopy = strdup(mbtrn_cfg->output_file);
+         if(mbtrn_cfg->output_mb1_file[0]!='/' && mbtrn_cfg->output_mb1_file[0]!='.'){
+             char *ocopy = strdup(mbtrn_cfg->output_mb1_file);
              if(NULL!=ocopy){
-             sprintf(mbtrn_cfg->output_file,"%s/%s",mbtrn_cfg->trn_log_dir,ocopy);
+             sprintf(mbtrn_cfg->output_mb1_file,"%s/%s",mbtrn_cfg->trn_log_dir,ocopy);
              free(ocopy);
              }
          }
      }
-    output_fp = fopen(mbtrn_cfg->output_file, "w");
+    output_mb1_fp = fopen(mbtrn_cfg->output_mb1_file, "w");
   }
+
+#ifdef WITH_MBTNAV
+  /* if TRN is enabled then open file for ascii table of TRN results */
+   if(NULL!=mbtrn_cfg->trn_log_dir){
+       if(mbtrn_cfg->output_trn_file[0]!='/' && mbtrn_cfg->output_trn_file[0]!='.'){
+           char *ocopy = strdup(mbtrn_cfg->output_trn_file);
+           if(NULL!=ocopy){
+           sprintf(mbtrn_cfg->output_trn_file,"%s/%s",mbtrn_cfg->trn_log_dir,ocopy);
+           free(ocopy);
+           }
+       }
+   }
+  output_trn_fp = fopen(mbtrn_cfg->output_trn_file, "w");
+#endif
 
   /* get number of ping records to hold */
   if (mbtrn_cfg->median_filter_en == true) {
@@ -3376,7 +3420,7 @@ int main(int argc, char **argv) {
         if (status == MB_SUCCESS) {
           gettimeofday(&timeofday, &timezone);
           log_file_open_time_d = timeofday.tv_sec + 0.000001 * timeofday.tv_usec;
-          status = mbtrnpp_logparameters(mbtrn_cfg->verbose, logfp, mbtrn_cfg->input, mbtrn_cfg->format, mbtrn_cfg->output_file, mbtrn_cfg->swath_width, mbtrn_cfg->n_output_soundings,
+          status = mbtrnpp_logparameters(mbtrn_cfg->verbose, logfp, mbtrn_cfg->input, mbtrn_cfg->format, mbtrn_cfg->output_mb1_file, mbtrn_cfg->swath_width, mbtrn_cfg->n_output_soundings,
                                          mbtrn_cfg->median_filter_en, mbtrn_cfg->median_filter_n_across, mbtrn_cfg->median_filter_n_along,
                                          mbtrn_cfg->median_filter_threshold, mbtrn_cfg->n_buffer_max, &error);
         }
@@ -3594,7 +3638,7 @@ int main(int argc, char **argv) {
           if (status == MB_SUCCESS) {
             gettimeofday(&timeofday, &timezone);
             log_file_open_time_d = timeofday.tv_sec + 0.000001 * timeofday.tv_usec;
-            status = mbtrnpp_logparameters(mbtrn_cfg->verbose, logfp, mbtrn_cfg->input, mbtrn_cfg->format, mbtrn_cfg->output_file, mbtrn_cfg->swath_width, mbtrn_cfg->n_output_soundings,
+            status = mbtrnpp_logparameters(mbtrn_cfg->verbose, logfp, mbtrn_cfg->input, mbtrn_cfg->format, mbtrn_cfg->output_mb1_file, mbtrn_cfg->swath_width, mbtrn_cfg->n_output_soundings,
                                            mbtrn_cfg->median_filter_en, mbtrn_cfg->median_filter_n_across, mbtrn_cfg->median_filter_n_along,
                                            mbtrn_cfg->median_filter_threshold, mbtrn_cfg->n_buffer_max, &error);
           }
@@ -3917,6 +3961,7 @@ int main(int argc, char **argv) {
 
                   // if reinit_flag set then reinit the TRN filter
                   if (reinit_flag) {
+                    reinitialized = true;
                     //wtnav_reinit_filter(trn_instance, true);
                     fprintf(stderr, "--reinit time_d:%.6f centered on offset: %f %f %f\n",
                                   ping[i_ping_process].time_d, use_offset_e, use_offset_n, use_offset_z);
@@ -3966,11 +4011,11 @@ int main(int argc, char **argv) {
             /* write the packet to a file */
             if ( OUTPUT_FLAG_SET(OUTPUT_MB1_FILE_EN) ) {
 
-                if(NULL!=output_fp && NULL!=output_buffer){
+                if(NULL!=output_mb1_fp && NULL!=output_buffer){
                     MST_METRIC_START(app_stats->stats->metrics[MBTPP_CH_MB_FWRITE_XT], mtime_dtime());
 
                     size_t obytes=0;
-                    if( (obytes=fwrite(output_buffer, mb1_size, 1, output_fp))>0){
+                    if( (obytes=fwrite(output_buffer, mb1_size, 1, output_mb1_fp))>0){
                         MST_COUNTER_ADD(app_stats->stats->status[MBTPP_STA_MB_FWRITE_BYTES],mb1_size);
                     }else{
                         MST_COUNTER_INC(app_stats->stats->events[MBTPP_EV_EMBLOGWR]);
@@ -3979,7 +4024,7 @@ int main(int argc, char **argv) {
                     MST_METRIC_LAP(app_stats->stats->metrics[MBTPP_CH_MB_FWRITE_XT], mtime_dtime());
 
                 }else{
-                    fprintf(stderr,"%s:%d - ERR fwrite failed obuf[%p] fp[%p]\n",__FUNCTION__,__LINE__,output_buffer,output_fp);
+                    fprintf(stderr,"%s:%d - ERR fwrite failed obuf[%p] fp[%p]\n",__FUNCTION__,__LINE__,output_buffer,output_mb1_fp);
                 }
               // fprintf(stderr, "WRITE SIZE: %zu %zu %zu\n", mb1_size, index, index - mb1_size);
             }
@@ -4150,8 +4195,14 @@ int main(int argc, char **argv) {
 
   /* close output */
   if ( OUTPUT_FLAG_SET(OUTPUT_MB1_FILE_EN) ) {
-    fclose(output_fp);
+    fclose(output_mb1_fp);
   }
+
+  /* close output */
+#ifdef WITH_MBTNAV
+  if (output_trn_fp != NULL)
+    fclose(output_trn_fp);
+#endif
 
   /* deallocate arrays allocated with mb_mallocd() */
   if (median_filter_soundings != NULL) {
@@ -5303,10 +5354,12 @@ int mbtrnpp_check_reinit(trn_update_t *pstate, trn_config_t *cfg)
                     + pstate->mse_dat->covariance[1] * pstate->mse_dat->covariance[1]
                     + pstate->mse_dat->covariance[2] * pstate->mse_dat->covariance[2]);
           if (covariance_mag <= mbtrn_cfg->covariance_magnitude_max) {
+            converged = true;
             n_converged_streak++;
             n_unconverged_streak = 0;
             n_converged_tot++;
           } else {
+            converged = false;
             n_converged_streak = 0;
             n_unconverged_streak++;
             n_unconverged_tot++;
@@ -5418,7 +5471,9 @@ int mbtrnpp_trn_publish(trn_update_t *pstate, trn_config_t *cfg)
         }
 
         if (pstate->mse_dat->time > 0.0) {
-          char *useornot[2] = {"   ", "USE"};
+          char *useornot[2] = {"---", "USE"};
+          char *convergedornot[3] = {"---", "CNV", "RNT"};
+          int convergestate = reinitialized ? 2 : (converged ? 1 : 0);
           int time_i[7];
           mb_get_date(0, (double)pstate->mse_dat->time, time_i);
           double offset_n = pstate->mse_dat->x - pstate->pt_dat->x;
@@ -5438,7 +5493,7 @@ int mbtrnpp_trn_publish(trn_update_t *pstate, trn_config_t *cfg)
           fprintf(stderr, "%4.4d/%2.2d/%2.2d-%2.2d:%2.2d:%2.2d.%6.6d %.6f "
                           "| %11.3f %11.3f %8.3f | %11.3f %11.3f %8.3f "
                           "| %8.3f %8.3f %7.3f | %9.3f %9.3f %9.3f : %9.3f "
-                          "| %12.6f %7.3f %7.3f %6.3f | %5d %5d %5d %5d %3d | %s\n",
+                          "| %12.6f %7.3f %7.3f %6.3f | %5d %5d %5d %5d %3d | %s %s\n",
           time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6], pstate->pt_dat->time,
           pstate->pt_dat->y, pstate->pt_dat->x, pstate->pt_dat->z,
           pstate->mse_dat->y, pstate->mse_dat->x, pstate->mse_dat->z,
@@ -5446,7 +5501,29 @@ int mbtrnpp_trn_publish(trn_update_t *pstate, trn_config_t *cfg)
           pstate->mse_dat->covariance[1], pstate->mse_dat->covariance[0], pstate->mse_dat->covariance[2], covariance_mag,
           pstate->pt_dat->time - use_offset_time, use_offset_e, use_offset_n, use_offset_z,
           n_converged_streak, n_converged_tot, n_unconverged_streak, n_unconverged_tot, n_reinit,
-          useornot[use_trn_offset]);
+          convergedornot[convergestate], useornot[use_trn_offset]);
+
+          if (output_trn_fp != NULL)
+            if ((n_converged_tot + n_unconverged_tot - 1) == 0) {
+              fprintf(output_trn_fp, "##---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------\n");
+              fprintf(output_trn_fp, "## YYYY/MM/DD-HH:MM:SS.SSSSSS TTTTTTTTTT.TTTTTT | Nav: Easting  Northing Z   | TRN: Easting  Northing     Z     | Off: East   North  Z   | Cov: East  North       Z   :    Mag   | Best Off: T    E      N      Z    | Ncs   Nct   Nus   Nut  Nr | CNV USE \n");
+              fprintf(output_trn_fp, "##---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------\n");
+            }
+            fprintf(output_trn_fp, "%4.4d/%2.2d/%2.2d-%2.2d:%2.2d:%2.2d.%6.6d %.6f "
+                          "%11.3f %11.3f %8.3f %11.3f %11.3f %8.3f "
+                          "%8.3f %8.3f %7.3f %9.3f %9.3f %9.3f %9.3f "
+                          "%12.6f %7.3f %7.3f %6.3f %5d %5d %5d %5d %3d %s %s\n",
+          time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6], pstate->pt_dat->time,
+          pstate->pt_dat->y, pstate->pt_dat->x, pstate->pt_dat->z,
+          pstate->mse_dat->y, pstate->mse_dat->x, pstate->mse_dat->z,
+          offset_e, offset_n, offset_z,
+          pstate->mse_dat->covariance[1], pstate->mse_dat->covariance[0], pstate->mse_dat->covariance[2], covariance_mag,
+          pstate->pt_dat->time - use_offset_time, use_offset_e, use_offset_n, use_offset_z,
+          n_converged_streak, n_converged_tot, n_unconverged_streak, n_unconverged_tot, n_reinit,
+          convergedornot[convergestate], useornot[use_trn_offset]);
+
+        // save the reinit state for the next iteration output
+        reinitialized = reinit_flag;
         }
 
         retval=0;
@@ -6676,4 +6753,3 @@ int mbtrnpp_mb1r_input_close(int verbose, void *mbio_ptr, int *error)
     return (status);
 }
 #endif // WITH_MB1_READER
-
