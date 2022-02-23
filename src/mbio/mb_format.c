@@ -19,6 +19,7 @@
  * Date:  Februrary 18, 1994
  */
 
+#include <assert.h>
 #include <math.h>
 #include <stdbool.h>
 #include <stdio.h>
@@ -3966,6 +3967,7 @@ int mb_get_relative_path(int verbose, char *path, char *ipwd, int *error) {
   if (pathlen > 0 && path[0] != '/') {
     strncpy(relativepath, path, MB_PATH_MAXLINE);
     bufptr = getcwd(path, MB_PATH_MAXLINE);
+    assert(strlen(path) > 0);
 #ifdef WIN32
     cvt_to_nix_path(path);
     cvt_to_nix_path(bufptr);
@@ -3990,6 +3992,7 @@ int mb_get_relative_path(int verbose, char *path, char *ipwd, int *error) {
     strncpy(pwd, ipwd, MB_PATH_MAXLINE);
   else {
     bufptr = getcwd(pwd, MB_PATH_MAXLINE);
+    assert(strlen(pwd) > 0);
 #ifdef WIN32
     cvt_to_nix_path(pwd);
     cvt_to_nix_path(bufptr);

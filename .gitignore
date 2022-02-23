@@ -197,3 +197,5 @@ src/mbtrnav/trn-replay
 src/mbio/mb_config.h
 libtool
 libtool
+src/mbtrnav/mb1rs
+src/mbtrn/mb1r_test

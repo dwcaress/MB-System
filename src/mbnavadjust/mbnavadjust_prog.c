@@ -24,6 +24,7 @@
 
 /*--------------------------------------------------------------------*/
 
+#include <assert.h>
 #include <math.h>
 #include <stdbool.h>
 #include <stdio.h>
@@ -669,7 +670,8 @@ int mbnavadjust_file_open(char *projectname) {
         strncpy(project.path, projectname, strlen(projectname) - strlen(nameptr));
       }
       else {
-        /* char *bufptr = */ getcwd(project.path, MB_PATH_MAXLINE);
+        char *getcwd_result = getcwd(project.path, MB_PATH_MAXLINE);
+        assert(strlen(project.path) > 0);
         strcat(project.path, "/");
       }
       strcpy(project.home, project.path);
