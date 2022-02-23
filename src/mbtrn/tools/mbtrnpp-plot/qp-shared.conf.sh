@@ -26,7 +26,7 @@ QU_IMG_TYPE="png"
 
 # plot styles
 export QU_POINT_COLOR=9 #7(orng,blk,gray)
-export QU_POINT_SIZE=0.1
+export QU_POINT_SIZE=0.3
 export QU_POINT_TYPE=5
 export QU_OTERM="pngcairo"
 
