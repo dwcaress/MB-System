@@ -1,7 +1,6 @@
 #!/bin/bash
 
 # summary: show mbtrnpp config contents w/o comments
-# use: cfgstrip.sh <config>
 
 quiet='N'
 
@@ -35,5 +34,14 @@ echo " summary: show mbtrnpp config contents w/o comments"
 echo " use: $(basename $0) [-q] <config>"
 echo "  options:"
 echo "    -q : quiet - no filename or trailing newline"
+echo 
+echo " Examples:"
+echo "  # show file (no separators)"
+echo "    $(basename $0) -q foo.cfg"
+echo 
+echo "  # show multiple files with separators"
+echo "    $(basename $0) foo/bar/*.cfg"
+echo 
+
 echo 
 fi

@@ -79,10 +79,12 @@ mb1r_test_LDADD = libmb1r.la
 
 dist_bin_SCRIPTS = tools/bin/mbtrnpp.sh 
 dist_bin_SCRIPTS += emu7k.sh 
-dist_bin_SCRIPTS += tools/bin/cfgstrip.sh 
-dist_bin_SCRIPTS += tools/bin/cfg2opt.sh 
+dist_bin_SCRIPTS += tools/bin/mbcfgstrip.sh 
+dist_bin_SCRIPTS += tools/bin/mbcfg2opt.sh 
 
 bin_SCRIPTS = tools/bin/mbtrnpp.sh
+bin_SCRIPTS += tools/bin/mbcfgstrip.sh 
+bin_SCRIPTS += tools/bin/mbcfg2opt.sh 
 
 DIST_SUBDIRS = tools
 
