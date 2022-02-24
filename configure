@@ -24643,9 +24643,11 @@ if test "$build_mbtrn" = "yes" ; then
 printf "%s\n" "#define MBTRN_ENABLED 1" >>confdefs.h
 
     build_mbrnutils="yes"
+    build_mbtrnframe="yes"
 else
         printf "%s\n" "Not building mbtrn tools"
     build_mbrnutils="no"
+    build_mbtrnframe="no"
 fi
 
 
@@ -24682,9 +24684,11 @@ if test "$build_mbtnav" = "yes" ; then
 printf "%s\n" "#define MBTNAV_ENABLED 1" >>confdefs.h
 
     build_mbrnutils="yes"
+    build_mbtrnframe="yes"
 else
         printf "%s\n" "Not building mbtnav tools"
     build_mbrnutils="no"
+    build_mbtrnframe="no"
 fi
 
 
@@ -25281,6 +25285,10 @@ if test "$build_mbtools" = "yes" ; then
 
         fi
     fi
+fi
+if test "$build_mbtrnframe" = "yes" ; then
+    ac_config_files="$ac_config_files src/mbtrnframe/Makefile"
+
 fi
 if test "$build_mbtrn" = "yes" ; then
     ac_config_files="$ac_config_files src/mbtrn/Makefile"
@@ -26433,6 +26441,7 @@ do
     "src/mbgrdviz/Makefile") CONFIG_FILES="$CONFIG_FILES src/mbgrdviz/Makefile" ;;
     "src/mbeditviz/Makefile") CONFIG_FILES="$CONFIG_FILES src/mbeditviz/Makefile" ;;
     "src/mbnavadjust/Makefile") CONFIG_FILES="$CONFIG_FILES src/mbnavadjust/Makefile" ;;
+    "src/mbtrnframe/Makefile") CONFIG_FILES="$CONFIG_FILES src/mbtrnframe/Makefile" ;;
     "src/mbtrn/Makefile") CONFIG_FILES="$CONFIG_FILES src/mbtrn/Makefile" ;;
     "src/mbtrnav/Makefile") CONFIG_FILES="$CONFIG_FILES src/mbtrnav/Makefile" ;;
     "src/mbtrnutils/Makefile") CONFIG_FILES="$CONFIG_FILES src/mbtrnutils/Makefile" ;;
@@ -27975,6 +27984,11 @@ if test "$build_mbtnav" = "yes" ; then
 	printf "%s\n" "Build mbtnav tools: Enabled"
 else
 	printf "%s\n" "Build mbtnav tools: Disabled"
+fi
+if test "$build_mbtrnframe" = "yes" ; then
+	printf "%s\n" "Build mbtrnframe: Enabled"
+else
+	printf "%s\n" "Build mbtrnframe: Disabled"
 fi
 if test "$GOT_OPENCV4" = "yes" ; then
 	printf "%s\n" "Build OpenCV4 tools: Enabled"
