@@ -872,7 +872,8 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles, struct mb_process_s
 	/* Now make input file global if local */
 	process->mbp_ifile_specified = true;
 	if (file[0] != '/' && file[1] != ':') {
-    assert(getcwd(process->mbp_ifile, MB_PATH_MAXLINE) != NULL);
+    char *getcwd_result = getcwd(process->mbp_ifile, MB_PATH_MAXLINE);
+    assert(strlen(process->mbp_ifile) > 0);
 		strcat(process->mbp_ifile, "/");
 		strcat(process->mbp_ifile, file);
 	} else {
@@ -1438,7 +1439,8 @@ int mb_pr_writepar(int verbose, char *file, struct mb_process_struct *process, i
 		pwd[strlen(file) - strlen(lastslash)] = '\0';
 	}
 	else {
-    assert(getcwd(pwd, MB_PATH_MAXLINE) != NULL);
+    char *getcwd_result = getcwd(pwd, MB_PATH_MAXLINE);
+    assert(strlen(pwd) > 0);
 		if (lastslash != NULL) {
 			strcat(pwd, "/");
 			strcat(pwd, file);

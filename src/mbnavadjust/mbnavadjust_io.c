@@ -24,6 +24,7 @@
 
 /*--------------------------------------------------------------------*/
 
+#include <assert.h>
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -103,7 +104,8 @@ int mbnavadjust_new_project(int verbose, char *projectpath, double section_lengt
   if (status == MB_SUCCESS) {
     strcpy(project->name, nameptr);
     if (strlen(projectpath) == strlen(nameptr)) {
-      /* char *result = */ getcwd(project->path, MB_PATH_MAXLINE);
+      char *getcwd_result = getcwd(project->path, MB_PATH_MAXLINE);
+      assert(strlen(project->path) > 0);
       strcat(project->path, "/");
     }
     else {
@@ -243,6 +245,7 @@ int mbnavadjust_read_project(int verbose, char *projectpath, struct mbna_project
     char *result;
     if (strlen(projectpath) == strlen(nameptr)) {
       result = getcwd(project->path, MB_PATH_MAXLINE);
+      assert(strlen(project->path) > 0);
       strcat(project->path, "/");
     }
     else {

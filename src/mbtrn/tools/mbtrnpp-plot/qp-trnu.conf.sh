@@ -61,7 +61,7 @@ export QU_TRNSTATE2_OIMG_NAME="trn-state-2"
 QU_TRNSTATE2_PTITLE=${QU_PTITLE:-"TRN state-2"}
 export QU_TRNSTATERI_OIMG_NAME="trn-state-reinit"
 QU_TRNSTATERI_PTITLE=${QU_PTITLE:-"TRN state-reinit"}
-export QU_TRN_REINIT_OVL_OIMG_NAME="trn-reinit-ovl"
+export QU_TRN_REINIT_OVL_OIMG_NAME="trn-freinit-ovl"
 QU_TRN_REINIT_OVL_PTITLE=${QU_PTITLE:-"TRN reinit+state"}
 
 export QU_TRN_MMSE_OVL_OIMG_NAME="trn-mmse-ovl"
@@ -69,7 +69,7 @@ QU_TRN_MMSE_OVL_PTITLE=${QU_PTITLE:-"TRN mmse+state"}
 
 
 # Define job names to use in the configuration
-declare -a QU_KEYS=( "est-mle" "est-mse" "mse-var" "mle" "mlex" "mley" "mlez" "mmse" "mmsex" "mmsey" "mmsez"  "pt" "ptx" "pty" "ptz" "trn-state1" "trn-state2" "trn-state-reinit" "trn-reinit-ovl" "trn-mmse-ovl" "comb-all" )
+declare -a QU_KEYS=( "est-mle" "est-mse" "mse-var" "mle" "mlex" "mley" "mlez" "mmse" "mmsex" "mmsey" "mmsez"  "pt" "ptx" "pty" "ptz" "trn-state1" "trn-state2" "trn-state-reinit" "trn-freinit-ovl" "trn-mmse-ovl" "comb-all" )
 
 # Set time formats for data and plots
 # time format strings conform to gnuplot syntax
