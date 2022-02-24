@@ -167,11 +167,11 @@ trn-ftype=2
 // 1: use high grade filter
 trn-fgrade=0
 
-// opt "trn-reinit" [int]
+// opt "trn-freinit" [int]
 // enable filter reinit
 // 0: don't allow filter reinit
 // 1: allow reinit
-trn-reinit=1
+trn-freinit=1
 
 // opt "trn-mweight" [int]
 // use modified weighting

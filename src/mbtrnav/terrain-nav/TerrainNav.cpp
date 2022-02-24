@@ -1438,8 +1438,8 @@ void TerrainNav::copyToLogDir()
 		char* trnLogDir = getenv("TRN_LOGFILES");
         char dot[]=".";
 		if (!trnLogDir) trnLogDir = dot;
-		char dir_spec[512];  // Reusable buffer to write log directory paths
-		char dir_spec2[512];  // Reusable buffer to write log directory paths
+    char dir_spec[512]={0};  // Reusable buffer to write log directory paths
+    char dir_spec2[512]={0};  // Reusable buffer to write log directory paths
 
 		// Create the log directory
 		// remove last component of directory prefix, if any (shouldn't exist)
@@ -1462,21 +1462,34 @@ void TerrainNav::copyToLogDir()
 		remove(dir_spec);
     strncpy(dir_spec2, this->saveDirectory, 511);
     if (dir_spec2[strlen(dir_spec2)-1] == '/')
+    {
       dir_spec2[strlen(dir_spec2)-1] = '\0';
+    }
     char *sessionLogDir = strrchr(dir_spec2, '/');
     if (sessionLogDir == NULL)
+    {
       sessionLogDir = dir_spec2;
+    }
     else
+    {
       sessionLogDir += 1;
-		if (0 != symlink(sessionLogDir, dir_spec))
-			logs(TL_OMASK(TL_TERRAIN_NAV, TL_LOG), "symlink %s to %s failed:%s\n",
-				dir_spec, sessionLogDir, strerror(errno));
-		else
-			logs(TL_OMASK(TL_TERRAIN_NAV, TL_LOG), "symlink %s to %s OK\n",
-				dir_spec, sessionLogDir);
+    }
+
+    if (0 != symlink(sessionLogDir, dir_spec))
+    {
+  logs(TL_OMASK(TL_TERRAIN_NAV, TL_LOG), "symlink %s to %s failed:%s\n",
+    dir_spec, sessionLogDir, strerror(errno));
+    }
+    else
+    {
+  logs(TL_OMASK(TL_TERRAIN_NAV, TL_LOG), "symlink %s to %s OK\n",
+    dir_spec, sessionLogDir);
+    }
 	}
-	else
+    else
+    {
 		return;
+    }
 
 	char copybuf[320];
 	if (NULL != this->vehicleSpecFile)

@@ -219,7 +219,7 @@ help_topics["trn-ftype"]="TRN filter type\n\
 help_topics["trn-fgrade"]="TRN filter grade\n\
  0: low grade\n\
  1: high grade";
-help_topics["trn-reinit"]="Enable TRN filter reinits"
+help_topics["trn-freinit"]="Enable TRN filter reinits"
 help_topics["trn-mweight"]="TRN modified weighting scheme\n\
  0 - No weighting modifications\n\
  1 - Shandor's original alpha modificatio\n\
@@ -348,7 +348,7 @@ function load_ctx(){
     // (may reference placeholder values)
     x.elements["verbose"].value="-2";
     x.elements["input"].value="socket:TRN_RESON_HOST:7000:0";
-    x.elements["log-directory"].value="TRN_LOGFILES";
+    x.elements["log-directory"].value="mbtrnpp-SESSION";
     x.elements["swath-width"].value="90";
     x.elements["soundings"].value="11";
     x.elements["format"].value="88";
@@ -370,7 +370,7 @@ function load_ctx(){
     x.elements["trn-mtype"].value="1";
     x.elements["trn-ftype"].value="2";
     x.elements["trn-fgrade"].value="1";
-    x.elements["trn-reinit"].value="1";
+    x.elements["trn-freinit"].value="1";
     x.elements["trn-mweight"].value="4";
     x.elements["trn-ncov"].value="49";
     x.elements["trn-nerr"].value="200";
@@ -413,7 +413,7 @@ function init_preset(key){
     // (may reference placeholder values)
     x.elements["verbose"].value="-2";
     x.elements["input"].value="socket:TRN_RESON_HOST:7000:0";
-    x.elements["log-directory"].value="TRN_LOGFILES";
+    x.elements["log-directory"].value="mbtrnpp-SESSION";
     x.elements["swath-width"].value="90";
     x.elements["soundings"].value="11";
     x.elements["format"].value="88";
@@ -435,7 +435,7 @@ function init_preset(key){
     x.elements["trn-mtype"].value="1";
     x.elements["trn-ftype"].value="2";
     x.elements["trn-fgrade"].value="1";
-    x.elements["trn-reinit"].value="1";
+    x.elements["trn-freinit"].value="1";
     x.elements["trn-mweight"].value="4";
     x.elements["trn-ncov"].value="49";
     x.elements["trn-nerr"].value="200";
@@ -466,7 +466,8 @@ function sub_placeholder(form,optkey,n,pstr,pval){
     var optstr='--'+optkey+'=';
     if(form.elements[optkey].value.length>0){
         var i=0
-            var tmp=form.elements[optkey].value;
+        var tmp=form.elements[optkey].value;
+        if(tmp.indexOf(pstr[i])>=0){
         for(i=0;i<n;i++){
             // iterate until no placeholder instances
             while(tmp.indexOf(pstr[i])>=0){
@@ -478,6 +479,7 @@ function sub_placeholder(form,optkey,n,pstr,pval){
             }
         } // for
         retval = optstr+tmp;
+        }
     }
     return retval;
 }
@@ -534,8 +536,8 @@ function update(){
         text += '--trn-ftype='+x.elements["trn-ftype"].value+" ";
     if(x.elements["trn-fgrade"].value.length>0)
         text += '--trn-fgrade='+x.elements["trn-fgrade"].value+" ";
-    if(x.elements["trn-reinit"].value.length>0)
-        text += '--trn-reinit='+x.elements["trn-reinit"].value+" ";
+    if(x.elements["trn-freinit"].value.length>0)
+        text += '--trn-freinit='+x.elements["trn-freinit"].value+" ";
     if(x.elements["trn-mweight"].value.length>0)
         text += '--trn-mweight='+x.elements["trn-mweight"].value+" ";
     if(x.elements["trn-ncov"].value.length>0)
@@ -584,11 +586,15 @@ function update(){
 
     subk = ["TRN_DATAFILES"];
     subv = [TRN_DATAFILES["current"]];
-    text += sub_placeholder(x,"trn-cfg",subk,subv);
+    text += sub_placeholder(x,"trn-cfg",1,subk,subv);
 
     subk = ["SESSION"];
     subv = [session_str()];
     text += sub_placeholder(x,"output",1,subk,subv);
+
+    subk = ["SESSION"];
+    subv = [session_str()];
+    text += sub_placeholder(x,"log-directory",1,subk,subv);
 
     subk = ["TRN_HOST"];
     subv = [TRN_HOST["current"]];
@@ -884,12 +890,12 @@ function cfg2str(){
 
     retval+="\n";
     if(verbose){
-        retval+="// opt trn-reinit [int]\n";
+        retval+="// opt trn-freinit [int]\n";
         retval+="// enable filter reinit\n";
         retval+="// 0: don't allow filter reinit\n";
         retval+="// 1: allow reinit\n";
     }
-    retval+="trn-reinit="+x.elements["trn-reinit"].value+"\n";
+    retval+="trn-freinit="+x.elements["trn-freinit"].value+"\n";
 
     retval+="\n";
     if(verbose){
