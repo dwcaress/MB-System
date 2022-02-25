@@ -77,9 +77,14 @@ mb12csv_LDADD = libmb1r.la
 mb1r_test_SOURCES = mb1r/mb1r-test.c
 mb1r_test_LDADD = libmb1r.la
 
-dist_bin_SCRIPTS = tools/bin/mbtrnpp.sh emu7k.sh
+dist_bin_SCRIPTS = tools/bin/mbtrnpp.sh 
+dist_bin_SCRIPTS += emu7k.sh 
+dist_bin_SCRIPTS += tools/bin/mbcfgstrip.sh 
+dist_bin_SCRIPTS += tools/bin/mbcfg2opt.sh 
 
 bin_SCRIPTS = tools/bin/mbtrnpp.sh
+bin_SCRIPTS += tools/bin/mbcfgstrip.sh 
+bin_SCRIPTS += tools/bin/mbcfg2opt.sh 
 
 DIST_SUBDIRS = tools
 

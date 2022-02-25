@@ -36,6 +36,7 @@
 #include <ctime>
 #include <getopt.h>
 #include <unistd.h>
+#include <limits>
 
 #include <algorithm>
 
