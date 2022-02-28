@@ -258,6 +258,9 @@ typedef struct mbtrnpp_opts_s{
     double reinit_zoffset_min;
     double reinit_zoffset_max;
 
+    // opt "random-offset"
+    bool random_offset_enable;
+
     // opt "trn-dev"
     int trn_dev;
 
@@ -472,6 +475,9 @@ typedef struct mbtrnpp_cfg_s{
     // TRN reinit offset_z max
     double reinit_zoffset_max;
 
+    // TRN "random-offset"
+    bool random_offset_enable;
+
     // TRN device enum
     int trn_dev;
 
@@ -571,6 +577,7 @@ s=NULL;\
 #define OPT_REINIT_ZOFFSET_ENABLE_DFL     false
 #define OPT_REINIT_ZOFFSET_MIN_DFL        0.0
 #define OPT_REINIT_ZOFFSET_MAX_DFL        0.0
+#define OPT_RANDOM_OFFSET_ENABLE_DFL      false
 #define OPT_HELP_DFL                      false
 #define OPT_TRN_DEV_DFL                   R7KC_DEV_T50
 
@@ -855,9 +862,9 @@ static char *s_mbtrnpp_session_str(char **pdest, size_t len, mb_resource_flag_t 
 // get mbtrnpp command line string (used in logs, debugging)
 static char *s_mbtrnpp_cmdline_str(char **pdest, size_t len, int argc, char **argv, mb_resource_flag_t flags);
 // show mbtrnpp config struct contents
-static int s_mbtrnpp_show_cfg(mbtrnpp_cfg_t *self, bool verbose, int indent);
+static int s_mbtrnpp_show_cfg(FILE * fpout, mbtrnpp_cfg_t *self, bool hashstart, int indent);
 // show mbtrnpp option struct contents
-static int s_mbtrnpp_show_opts(mbtrnpp_opts_t *opts, bool verbose, int indent);
+static int s_mbtrnpp_show_opts(FILE *, mbtrnpp_opts_t *opts, bool hashstart, int indent);
 // get config mnemonic value
 char *s_mnem_value(char **pdest, size_t len, const char *key);
 // substitute mnemonic value into string
@@ -1393,6 +1400,7 @@ static int s_mbtrnpp_init_cfg(mbtrnpp_cfg_t *cfg)
         cfg->reinit_zoffset_enable = false;
         cfg->reinit_zoffset_min = 0.0;
         cfg->reinit_zoffset_max = 0.0;
+        cfg->random_offset_enable = false;
         cfg->trn_dev = CFG_TRN_DEV_DFL;
         retval=0;
     }
@@ -1451,6 +1459,7 @@ static int s_mbtrnpp_init_opts(mbtrnpp_opts_t *opts)
         opts->reinit_zoffset_enable = OPT_REINIT_ZOFFSET_ENABLE_DFL;
         opts->reinit_zoffset_min = OPT_REINIT_ZOFFSET_MIN_DFL;
         opts->reinit_zoffset_max = OPT_REINIT_ZOFFSET_MAX_DFL;
+        opts->random_offset_enable = OPT_RANDOM_OFFSET_ENABLE_DFL;
         opts->trn_dev = OPT_TRN_DEV_DFL;
         opts->help=OPT_HELP_DFL;
         retval=0;
@@ -1493,143 +1502,151 @@ static void s_mbtrnpp_free_cfg(mbtrnpp_cfg_t **pself)
     }
 }
 
-static int s_mbtrnpp_show_cfg(mbtrnpp_cfg_t *self, bool verbose, int indent)
+static int s_mbtrnpp_show_cfg(FILE *fpout, mbtrnpp_cfg_t *self, bool hashstart, int indent)
 {
     int retval=0;
+    char hash[8] = "";;
+    if (hashstart)
+        strcpy(hash, "##  ");
 
     if(NULL!=self){
         int wkey=25;
         int wval=30;
-        retval+=fprintf(stderr,"%*s %*s  %*p\n",indent,(indent>0?" ":""), wkey,"self",wval,self);
-        retval+=fprintf(stderr,"%*s %*s  %*d\n",indent,(indent>0?" ":""), wkey,"verbose",wval,self->verbose);
-        retval+=fprintf(stderr,"%*s %*s  %*d\n",indent,(indent>0?" ":""), wkey,"input_mode",wval,self->input_mode);
-        retval+=fprintf(stderr,"%*s %*s  %*s\n",indent,(indent>0?" ":""), wkey,"input",wval,self->input);
-        retval+=fprintf(stderr,"%*s %*s  %*s\n",indent,(indent>0?" ":""), wkey,"socket_definition",wval,self->socket_definition);
-        retval+=fprintf(stderr,"%*s %*s  %*s\n",indent,(indent>0?" ":""), wkey,"output_mb1_file",wval,self->output_mb1_file);
-        retval+=fprintf(stderr,"%*s %*s  %*s\n",indent,(indent>0?" ":""), wkey,"output_trn_file",wval,self->output_trn_file);
-        retval+=fprintf(stderr,"%*s %*s  %*d\n",indent,(indent>0?" ":""), wkey,"format",wval,self->format);
-        retval+=fprintf(stderr,"%*s %*s  %*s\n",indent,(indent>0?" ":""), wkey,"platform-file",wval,self->platform_file);
-        retval+=fprintf(stderr,"%*s %*s  %*c\n",indent,(indent>0?" ":""), wkey,"use_platform_file",wval,BOOL2YNC(self->use_platform_file));
-        retval+=fprintf(stderr,"%*s %*s  %*d\n",indent,(indent>0?" ":""), wkey,"platform-target-sensor",wval,self->target_sensor);
-        retval+=fprintf(stderr,"%*s %*s  %*s\n",indent,(indent>0?" ":""), wkey,"tide-model",wval,self->tide_model);
-        retval+=fprintf(stderr,"%*s %*s  %*c\n",indent,(indent>0?" ":""), wkey,"use_tide_model",wval,BOOL2YNC(self->use_tide_model));
-        retval+=fprintf(stderr,"%*s %*s  %*s\n",indent,(indent>0?" ":""), wkey,"log-directory",wval,self->log_directory);
-        retval+=fprintf(stderr,"%*s %*s  %*s\n",indent,(indent>0?" ":""), wkey,"trn_log_dir",wval,self->trn_log_dir);
-        retval+=fprintf(stderr,"%*s %*s  %*c\n",indent,(indent>0?" ":""), wkey,"make_logs",wval,BOOL2YNC(self->make_logs));
-        retval+=fprintf(stderr,"%*s %*s  %*c\n",indent,(indent>0?" ":""), wkey,"platform-file",wval,BOOL2YNC(self->make_logs));
-        retval+=fprintf(stderr,"%*s %*s  %*.2lf\n",indent,(indent>0?" ":""), wkey,"swath-width",wval,self->swath_width);
-        retval+=fprintf(stderr,"%*s %*s  %*d\n",indent,(indent>0?" ":""), wkey,"n_output_soundings",wval,self->n_output_soundings);
-        retval+=fprintf(stderr,"%*s %*s  %*.2lf\n",indent,(indent>0?" ":""), wkey,"median_filter_threshold",wval,self->median_filter_threshold);
-        retval+=fprintf(stderr,"%*s %*s  %*d\n",indent,(indent>0?" ":""), wkey,"median_filter_n_across",wval,self->median_filter_n_across);
-        retval+=fprintf(stderr,"%*s %*s  %*d\n",indent,(indent>0?" ":""), wkey,"median_filter_n_along",wval,self->median_filter_n_along);
-        retval+=fprintf(stderr,"%*s %*s  %*c\n",indent,(indent>0?" ":""), wkey,"median_filter_en",wval,BOOL2YNC(self->median_filter_en));
-        retval+=fprintf(stderr,"%*s %*s  %*d\n",indent,(indent>0?" ":""), wkey,"n_buffer_max",wval,self->n_buffer_max);
-        retval+=fprintf(stderr,"%*s %*s  %*s\n",indent,(indent>0?" ":""), wkey,"mb1svr_host",wval,self->mb1svr_host);
-        retval+=fprintf(stderr,"%*s %*s  %*d\n",indent,(indent>0?" ":""), wkey,"mb1svr_port",wval,self->mb1svr_port);
-        retval+=fprintf(stderr,"%*s %*s  %*s\n",indent,(indent>0?" ":""), wkey,"trnsvr_host",wval,self->trnsvr_host);
-        retval+=fprintf(stderr,"%*s %*s  %*d\n",indent,(indent>0?" ":""), wkey,"trnsvr_port",wval,self->trnsvr_port);
-        retval+=fprintf(stderr,"%*s %*s  %*s\n",indent,(indent>0?" ":""), wkey,"trnusvr_host",wval,self->trnusvr_host);
-        retval+=fprintf(stderr,"%*s %*s  %*d\n",indent,(indent>0?" ":""), wkey,"trnusvr_port",wval,self->trnusvr_port);
-        retval+=fprintf(stderr,"%*s %*s  %*s\n",indent,(indent>0?" ":""), wkey,"trnumsvr_group",wval,self->trnumsvr_group);
-        retval+=fprintf(stderr,"%*s %*s  %*d\n",indent,(indent>0?" ":""), wkey,"trnumsvr_port",wval,self->trnumsvr_port);
-        retval+=fprintf(stderr,"%*s %*s  %*d\n",indent,(indent>0?" ":""), wkey,"trnumsvr_ttl",wval,self->trnumsvr_ttl);
-        retval+=fprintf(stderr,"%*s %*s  %*X\n",indent,(indent>0?" ":""), wkey,"output_flags",wval,self->output_flags);
-        retval+=fprintf(stderr,"%*s %*s  %*d\n",indent,(indent>0?" ":""), wkey,"mbsvr_hbtok",wval,self->mbsvr_hbtok);
-        retval+=fprintf(stderr,"%*s %*s  %*.2lf\n",indent,(indent>0?" ":""), wkey,"mbsvr_hbto",wval,self->mbsvr_hbto);
-        retval+=fprintf(stderr,"%*s %*s  %*.2lf\n",indent,(indent>0?" ":""), wkey,"trnsvr_hbto",wval,self->trnsvr_hbto);
-        retval+=fprintf(stderr,"%*s %*s  %*.2lf\n",indent,(indent>0?" ":""), wkey,"trnusvr_hbto",wval,self->trnusvr_hbto);
-        retval+=fprintf(stderr,"%*s %*s  %*"PRId64"\n",indent,(indent>0?" ":""), wkey,"mbtrnpp_loop_delay_msec",wval,self->mbtrnpp_loop_delay_msec);
-        retval+=fprintf(stderr,"%*s %*s  %*.2lf\n",indent,(indent>0?" ":""), wkey,"trn_status_interval_sec",wval,self->trn_status_interval_sec);
-        retval+=fprintf(stderr,"%*s %*s  %*X\n",indent,(indent>0?" ":""), wkey,"mbtrnpp_stat_flags",wval,self->mbtrnpp_stat_flags);
-        retval+=fprintf(stderr,"%*s %*s  %*s/%d\n",indent,(indent>0?" ":""), wkey,"trn_dev",wval,r7k_devidstr(self->trn_dev),self->trn_dev);
-        retval+=fprintf(stderr,"%*s %*s  %*c\n",indent,(indent>0?" ":""), wkey,"trn_enable",wval,BOOL2YNC(self->trn_enable));
-        retval+=fprintf(stderr,"%*s %*s  %*ld\n",indent,(indent>0?" ":""), wkey,"trn_utm_zone",wval,self->trn_utm_zone);
-        retval+=fprintf(stderr,"%*s %*s  %*d\n",indent,(indent>0?" ":""), wkey,"trn_mtype",wval,self->trn_mtype);
-        retval+=fprintf(stderr,"%*s %*s  %*d\n",indent,(indent>0?" ":""), wkey,"trn_ftype",wval,self->trn_ftype);
-        retval+=fprintf(stderr,"%*s %*s  %*d\n",indent,(indent>0?" ":""), wkey,"trn_fgrade",wval,self->trn_fgrade);
-        retval+=fprintf(stderr,"%*s %*s  %*d\n",indent,(indent>0?" ":""), wkey,"trn_freinit",wval,self->trn_freinit);
-        retval+=fprintf(stderr,"%*s %*s  %*d\n",indent,(indent>0?" ":""), wkey,"trn_mweight",wval,self->trn_mweight);
-        retval+=fprintf(stderr,"%*s %*s  %*.2lf\n",indent,(indent>0?" ":""), wkey,"trn_max_ncov",wval,self->trn_max_ncov);
-        retval+=fprintf(stderr,"%*s %*s  %*.2lf\n",indent,(indent>0?" ":""), wkey,"trn_max_nerr",wval,self->trn_max_nerr);
-        retval+=fprintf(stderr,"%*s %*s  %*.2lf\n",indent,(indent>0?" ":""), wkey,"trn_max_ecov",wval,self->trn_max_ecov);
-        retval+=fprintf(stderr,"%*s %*s  %*.2lf\n",indent,(indent>0?" ":""), wkey,"trn_max_eerr",wval,self->trn_max_eerr);
-        retval+=fprintf(stderr,"%*s %*s  %*s\n",indent,(indent>0?" ":""), wkey,"trn_map_file",wval,self->trn_map_file);
-        retval+=fprintf(stderr,"%*s %*s  %*s\n",indent,(indent>0?" ":""), wkey,"trn_cfg_file",wval,self->trn_cfg_file);
-        retval+=fprintf(stderr,"%*s %*s  %*s\n",indent,(indent>0?" ":""), wkey,"trn_particles_file",wval,self->trn_particles_file);
-        retval+=fprintf(stderr,"%*s %*s  %*s\n",indent,(indent>0?" ":""), wkey,"trn_mission_dir",wval,self->trn_mission_id);
-        retval+=fprintf(stderr,"%*s %*s  %*u\n",indent,(indent>0?" ":""), wkey,"trn_decn",wval,self->trn_decn);
-        retval+=fprintf(stderr,"%*s %*s  %*.2lf\n",indent,(indent>0?" ":""), wkey,"trn_decs",wval,self->trn_decs);
-        retval+=fprintf(stderr,"%*s %*s  %*.2lf\n",indent,(indent>0?" ":""), wkey,"covariance_magnitude_max",wval,self->covariance_magnitude_max);
-        retval+=fprintf(stderr,"%*s %*s  %*d\n",indent,(indent>0?" ":""), wkey,"convergence_repeat_min",wval,self->convergence_repeat_min);
-        retval+=fprintf(stderr,"%*s %*s  %*c\n",indent,(indent>0?" ":""), wkey,"reinit_gain_enable",wval,BOOL2YNC(self->reinit_gain_enable));
-        retval+=fprintf(stderr,"%*s %*s  %*c\n",indent,(indent>0?" ":""), wkey,"reinit_file_enable",wval,BOOL2YNC(self->reinit_file_enable));
-        retval+=fprintf(stderr,"%*s %*s  %*c\n",indent,(indent>0?" ":""), wkey,"reinit_xyoffset_enable",wval,BOOL2YNC(self->reinit_xyoffset_enable));
-        retval+=fprintf(stderr,"%*s %*s  %*.2lf\n",indent,(indent>0?" ":""), wkey,"reinit_xyoffset_max",wval,self->reinit_xyoffset_max);
-        retval+=fprintf(stderr,"%*s %*s  %*c\n",indent,(indent>0?" ":""), wkey,"reinit_zoffset_enable",wval,BOOL2YNC(self->reinit_zoffset_enable));
-        retval+=fprintf(stderr,"%*s %*s  %*.2lf\n",indent,(indent>0?" ":""), wkey,"reinit_zoffset_min",wval,self->reinit_zoffset_min);
-        retval+=fprintf(stderr,"%*s %*s  %*.2lf\n",indent,(indent>0?" ":""), wkey,"reinit_zoffset_max",wval,self->reinit_zoffset_max);
+        retval+=fprintf(fpout,"%s %*s %*s  %*p\n",hash,indent,(indent>0?" ":""), wkey,"self",wval,self);
+        retval+=fprintf(fpout,"%s %*s %*s  %*d\n",hash,indent,(indent>0?" ":""), wkey,"verbose",wval,self->verbose);
+        retval+=fprintf(fpout,"%s %*s %*s  %*d\n",hash,indent,(indent>0?" ":""), wkey,"input_mode",wval,self->input_mode);
+        retval+=fprintf(fpout,"%s %*s %*s  %*s\n",hash,indent,(indent>0?" ":""), wkey,"input",wval,self->input);
+        retval+=fprintf(fpout,"%s %*s %*s  %*s\n",hash,indent,(indent>0?" ":""), wkey,"socket_definition",wval,self->socket_definition);
+        retval+=fprintf(fpout,"%s %*s %*s  %*s\n",hash,indent,(indent>0?" ":""), wkey,"output_mb1_file",wval,self->output_mb1_file);
+        retval+=fprintf(fpout,"%s %*s %*s  %*s\n",hash,indent,(indent>0?" ":""), wkey,"output_trn_file",wval,self->output_trn_file);
+        retval+=fprintf(fpout,"%s %*s %*s  %*d\n",hash,indent,(indent>0?" ":""), wkey,"format",wval,self->format);
+        retval+=fprintf(fpout,"%s %*s %*s  %*s\n",hash,indent,(indent>0?" ":""), wkey,"platform-file",wval,self->platform_file);
+        retval+=fprintf(fpout,"%s %*s %*s  %*c\n",hash,indent,(indent>0?" ":""), wkey,"use_platform_file",wval,BOOL2YNC(self->use_platform_file));
+        retval+=fprintf(fpout,"%s %*s %*s  %*d\n",hash,indent,(indent>0?" ":""), wkey,"platform-target-sensor",wval,self->target_sensor);
+        retval+=fprintf(fpout,"%s %*s %*s  %*s\n",hash,indent,(indent>0?" ":""), wkey,"tide-model",wval,self->tide_model);
+        retval+=fprintf(fpout,"%s %*s %*s  %*c\n",hash,indent,(indent>0?" ":""), wkey,"use_tide_model",wval,BOOL2YNC(self->use_tide_model));
+        retval+=fprintf(fpout,"%s %*s %*s  %*s\n",hash,indent,(indent>0?" ":""), wkey,"log-directory",wval,self->log_directory);
+        retval+=fprintf(fpout,"%s %*s %*s  %*s\n",hash,indent,(indent>0?" ":""), wkey,"trn_log_dir",wval,self->trn_log_dir);
+        retval+=fprintf(fpout,"%s %*s %*s  %*c\n",hash,indent,(indent>0?" ":""), wkey,"make_logs",wval,BOOL2YNC(self->make_logs));
+        retval+=fprintf(fpout,"%s %*s %*s  %*c\n",hash,indent,(indent>0?" ":""), wkey,"platform-file",wval,BOOL2YNC(self->make_logs));
+        retval+=fprintf(fpout,"%s %*s %*s  %*.2lf\n",hash,indent,(indent>0?" ":""), wkey,"swath-width",wval,self->swath_width);
+        retval+=fprintf(fpout,"%s %*s %*s  %*d\n",hash,indent,(indent>0?" ":""), wkey,"n_output_soundings",wval,self->n_output_soundings);
+        retval+=fprintf(fpout,"%s %*s %*s  %*.2lf\n",hash,indent,(indent>0?" ":""), wkey,"median_filter_threshold",wval,self->median_filter_threshold);
+        retval+=fprintf(fpout,"%s %*s %*s  %*d\n",hash,indent,(indent>0?" ":""), wkey,"median_filter_n_across",wval,self->median_filter_n_across);
+        retval+=fprintf(fpout,"%s %*s %*s  %*d\n",hash,indent,(indent>0?" ":""), wkey,"median_filter_n_along",wval,self->median_filter_n_along);
+        retval+=fprintf(fpout,"%s %*s %*s  %*c\n",hash,indent,(indent>0?" ":""), wkey,"median_filter_en",wval,BOOL2YNC(self->median_filter_en));
+        retval+=fprintf(fpout,"%s %*s %*s  %*d\n",hash,indent,(indent>0?" ":""), wkey,"n_buffer_max",wval,self->n_buffer_max);
+        retval+=fprintf(fpout,"%s %*s %*s  %*s\n",hash,indent,(indent>0?" ":""), wkey,"mb1svr_host",wval,self->mb1svr_host);
+        retval+=fprintf(fpout,"%s %*s %*s  %*d\n",hash,indent,(indent>0?" ":""), wkey,"mb1svr_port",wval,self->mb1svr_port);
+        retval+=fprintf(fpout,"%s %*s %*s  %*s\n",hash,indent,(indent>0?" ":""), wkey,"trnsvr_host",wval,self->trnsvr_host);
+        retval+=fprintf(fpout,"%s %*s %*s  %*d\n",hash,indent,(indent>0?" ":""), wkey,"trnsvr_port",wval,self->trnsvr_port);
+        retval+=fprintf(fpout,"%s %*s %*s  %*s\n",hash,indent,(indent>0?" ":""), wkey,"trnusvr_host",wval,self->trnusvr_host);
+        retval+=fprintf(fpout,"%s %*s %*s  %*d\n",hash,indent,(indent>0?" ":""), wkey,"trnusvr_port",wval,self->trnusvr_port);
+        retval+=fprintf(fpout,"%s %*s %*s  %*s\n",hash,indent,(indent>0?" ":""), wkey,"trnumsvr_group",wval,self->trnumsvr_group);
+        retval+=fprintf(fpout,"%s %*s %*s  %*d\n",hash,indent,(indent>0?" ":""), wkey,"trnumsvr_port",wval,self->trnumsvr_port);
+        retval+=fprintf(fpout,"%s %*s %*s  %*d\n",hash,indent,(indent>0?" ":""), wkey,"trnumsvr_ttl",wval,self->trnumsvr_ttl);
+        retval+=fprintf(fpout,"%s %*s %*s  %*X\n",hash,indent,(indent>0?" ":""), wkey,"output_flags",wval,self->output_flags);
+        retval+=fprintf(fpout,"%s %*s %*s  %*d\n",hash,indent,(indent>0?" ":""), wkey,"mbsvr_hbtok",wval,self->mbsvr_hbtok);
+        retval+=fprintf(fpout,"%s %*s %*s  %*.2lf\n",hash,indent,(indent>0?" ":""), wkey,"mbsvr_hbto",wval,self->mbsvr_hbto);
+        retval+=fprintf(fpout,"%s %*s %*s  %*.2lf\n",hash,indent,(indent>0?" ":""), wkey,"trnsvr_hbto",wval,self->trnsvr_hbto);
+        retval+=fprintf(fpout,"%s %*s %*s  %*.2lf\n",hash,indent,(indent>0?" ":""), wkey,"trnusvr_hbto",wval,self->trnusvr_hbto);
+        retval+=fprintf(fpout,"%s %*s %*s  %*"PRId64"\n",hash,indent,(indent>0?" ":""), wkey,"mbtrnpp_loop_delay_msec",wval,self->mbtrnpp_loop_delay_msec);
+        retval+=fprintf(fpout,"%s %*s %*s  %*.2lf\n",hash,indent,(indent>0?" ":""), wkey,"trn_status_interval_sec",wval,self->trn_status_interval_sec);
+        retval+=fprintf(fpout,"%s %*s %*s  %*X\n",hash,indent,(indent>0?" ":""), wkey,"mbtrnpp_stat_flags",wval,self->mbtrnpp_stat_flags);
+        retval+=fprintf(fpout,"%s %*s %*s  %*s/%d\n",hash,indent,(indent>0?" ":""), wkey,"trn_dev",wval,r7k_devidstr(self->trn_dev),self->trn_dev);
+        retval+=fprintf(fpout,"%s %*s %*s  %*c\n",hash,indent,(indent>0?" ":""), wkey,"trn_enable",wval,BOOL2YNC(self->trn_enable));
+        retval+=fprintf(fpout,"%s %*s %*s  %*ld\n",hash,indent,(indent>0?" ":""), wkey,"trn_utm_zone",wval,self->trn_utm_zone);
+        retval+=fprintf(fpout,"%s %*s %*s  %*d\n",hash,indent,(indent>0?" ":""), wkey,"trn_mtype",wval,self->trn_mtype);
+        retval+=fprintf(fpout,"%s %*s %*s  %*d\n",hash,indent,(indent>0?" ":""), wkey,"trn_ftype",wval,self->trn_ftype);
+        retval+=fprintf(fpout,"%s %*s %*s  %*d\n",hash,indent,(indent>0?" ":""), wkey,"trn_fgrade",wval,self->trn_fgrade);
+        retval+=fprintf(fpout,"%s %*s %*s  %*d\n",hash,indent,(indent>0?" ":""), wkey,"trn_freinit",wval,self->trn_freinit);
+        retval+=fprintf(fpout,"%s %*s %*s  %*d\n",hash,indent,(indent>0?" ":""), wkey,"trn_mweight",wval,self->trn_mweight);
+        retval+=fprintf(fpout,"%s %*s %*s  %*.2lf\n",hash,indent,(indent>0?" ":""), wkey,"trn_max_ncov",wval,self->trn_max_ncov);
+        retval+=fprintf(fpout,"%s %*s %*s  %*.2lf\n",hash,indent,(indent>0?" ":""), wkey,"trn_max_nerr",wval,self->trn_max_nerr);
+        retval+=fprintf(fpout,"%s %*s %*s  %*.2lf\n",hash,indent,(indent>0?" ":""), wkey,"trn_max_ecov",wval,self->trn_max_ecov);
+        retval+=fprintf(fpout,"%s %*s %*s  %*.2lf\n",hash,indent,(indent>0?" ":""), wkey,"trn_max_eerr",wval,self->trn_max_eerr);
+        retval+=fprintf(fpout,"%s %*s %*s  %*s\n",hash,indent,(indent>0?" ":""), wkey,"trn_map_file",wval,self->trn_map_file);
+        retval+=fprintf(fpout,"%s %*s %*s  %*s\n",hash,indent,(indent>0?" ":""), wkey,"trn_cfg_file",wval,self->trn_cfg_file);
+        retval+=fprintf(fpout,"%s %*s %*s  %*s\n",hash,indent,(indent>0?" ":""), wkey,"trn_particles_file",wval,self->trn_particles_file);
+        retval+=fprintf(fpout,"%s %*s %*s  %*s\n",hash,indent,(indent>0?" ":""), wkey,"trn_mission_dir",wval,self->trn_mission_id);
+        retval+=fprintf(fpout,"%s %*s %*s  %*u\n",hash,indent,(indent>0?" ":""), wkey,"trn_decn",wval,self->trn_decn);
+        retval+=fprintf(fpout,"%s %*s %*s  %*.2lf\n",hash,indent,(indent>0?" ":""), wkey,"trn_decs",wval,self->trn_decs);
+        retval+=fprintf(fpout,"%s %*s %*s  %*.2lf\n",hash,indent,(indent>0?" ":""), wkey,"covariance_magnitude_max",wval,self->covariance_magnitude_max);
+        retval+=fprintf(fpout,"%s %*s %*s  %*d\n",hash,indent,(indent>0?" ":""), wkey,"convergence_repeat_min",wval,self->convergence_repeat_min);
+        retval+=fprintf(fpout,"%s %*s %*s  %*c\n",hash,indent,(indent>0?" ":""), wkey,"reinit_gain_enable",wval,BOOL2YNC(self->reinit_gain_enable));
+        retval+=fprintf(fpout,"%s %*s %*s  %*c\n",hash,indent,(indent>0?" ":""), wkey,"reinit_file_enable",wval,BOOL2YNC(self->reinit_file_enable));
+        retval+=fprintf(fpout,"%s %*s %*s  %*c\n",hash,indent,(indent>0?" ":""), wkey,"reinit_xyoffset_enable",wval,BOOL2YNC(self->reinit_xyoffset_enable));
+        retval+=fprintf(fpout,"%s %*s %*s  %*.2lf\n",hash,indent,(indent>0?" ":""), wkey,"reinit_xyoffset_max",wval,self->reinit_xyoffset_max);
+        retval+=fprintf(fpout,"%s %*s %*s  %*c\n",hash,indent,(indent>0?" ":""), wkey,"reinit_zoffset_enable",wval,BOOL2YNC(self->reinit_zoffset_enable));
+        retval+=fprintf(fpout,"%s %*s %*s  %*.2lf\n",hash,indent,(indent>0?" ":""), wkey,"reinit_zoffset_min",wval,self->reinit_zoffset_min);
+        retval+=fprintf(fpout,"%s %*s %*s  %*.2lf\n",hash,indent,(indent>0?" ":""), wkey,"reinit_zoffset_max",wval,self->reinit_zoffset_max);
+        retval+=fprintf(fpout,"%s %*s %*s  %*c\n",hash,indent,(indent>0?" ":""), wkey,"random_offset_enable",wval,BOOL2YNC(self->random_offset_enable));
     }
 
     return retval;
 }
 
-static int s_mbtrnpp_show_opts(mbtrnpp_opts_t *self, bool verbose, int indent){
+static int s_mbtrnpp_show_opts(FILE *fpout, mbtrnpp_opts_t *self, bool hashstart, int indent){
     int retval=0;
+    char hash[8] = "";;
+    if (hashstart)
+        strcpy(hash, "##  ");
 
     if(NULL!=self){
         int wkey=25;
         int wval=30;
-        retval+=fprintf(stderr,"%*s %*s  %*p\n",indent,(indent>0?" ":""), wkey,"self",wval,self);
-        retval+=fprintf(stderr,"%*s %*s  %*d\n",indent,(indent>0?" ":""), wkey,"verbose",wval,self->verbose);
-        retval+=fprintf(stderr,"%*s %*s  %*s\n",indent,(indent>0?" ":""), wkey,"input",wval,self->input);
-        retval+=fprintf(stderr,"%*s %*s  %*d\n",indent,(indent>0?" ":""), wkey,"format",wval,self->format);
-        retval+=fprintf(stderr,"%*s %*s  %*s\n",indent,(indent>0?" ":""), wkey,"platform-file",wval,self->platform_file);
-        retval+=fprintf(stderr,"%*s %*s  %*d\n",indent,(indent>0?" ":""), wkey,"platform-target-sensor",wval,self->platform_target_sensor);
-        retval+=fprintf(stderr,"%*s %*s  %*s\n",indent,(indent>0?" ":""), wkey,"log-directory",wval,self->log_directory);
-        retval+=fprintf(stderr,"%*s %*s  %*s\n",indent,(indent>0?" ":""), wkey,"tide-model",wval,self->tide_model);
-        retval+=fprintf(stderr,"%*s %*s  %*s\n",indent,(indent>0?" ":""), wkey,"output",wval,self->output);
-        retval+=fprintf(stderr,"%*s %*s  %*d\n",indent,(indent>0?" ":""), wkey,"projection",wval,self->projection);
-        retval+=fprintf(stderr,"%*s %*s  %*.2lf\n",indent,(indent>0?" ":""), wkey,"swath-width",wval,self->swath_width);
-        retval+=fprintf(stderr,"%*s %*s  %*d\n",indent,(indent>0?" ":""), wkey,"soundings",wval,self->soundings);
-        retval+=fprintf(stderr,"%*s %*s  %*s\n",indent,(indent>0?" ":""), wkey,"median-filter",wval,self->median_filter);
-        retval+=fprintf(stderr,"%*s %*s  %*d\n",indent,(indent>0?" ":""), wkey,"mbhbn",wval,self->mbhbn);
-        retval+=fprintf(stderr,"%*s %*s  %*.2lf\n",indent,(indent>0?" ":""), wkey,"mbhbt",wval,self->mbhbt);
-        retval+=fprintf(stderr,"%*s %*s  %*.2lf\n",indent,(indent>0?" ":""), wkey,"trnhbt",wval,self->trnhbt);
-        retval+=fprintf(stderr,"%*s %*s  %*.2lf\n",indent,(indent>0?" ":""), wkey,"trnuhbt",wval,self->trnuhbt);
-        retval+=fprintf(stderr,"%*s %*s  %*d\n",indent,(indent>0?" ":""), wkey,"trnumttl",wval,self->trnumttl);
-        retval+=fprintf(stderr,"%*s %*s  %*"PRId64"\n",indent,(indent>0?" ":""), wkey,"delay",wval,self->delay);
-        retval+=fprintf(stderr,"%*s %*s  %*.2lf\n",indent,(indent>0?" ":""), wkey,"statsec",wval,self->statsec);
-        retval+=fprintf(stderr,"%*s %*s  %*X/%s\n",indent,(indent>0?" ":""), wkey,"statflags",wval,self->statflags,self->statflags_str);
-        retval+=fprintf(stderr,"%*s %*s  %*c\n",indent,(indent>0?" ":""), wkey,"trn-en",wval,BOOL2YNC(self->trn_en));
-        retval+=fprintf(stderr,"%*s %*s  %*s/%d\n",indent,(indent>0?" ":""), wkey,"trn-dev",wval,r7k_devidstr(self->trn_dev),self->trn_dev);
-       retval+=fprintf(stderr,"%*s %*s  %*ld\n",indent,(indent>0?" ":""), wkey,"trn-utm",wval,self->trn_utm);
-        retval+=fprintf(stderr,"%*s %*s  %*s\n",indent,(indent>0?" ":""), wkey,"trn-map",wval,self->trn_map);
-        retval+=fprintf(stderr,"%*s %*s  %*s\n",indent,(indent>0?" ":""), wkey,"trn-cfg",wval,self->trn_cfg);
-        retval+=fprintf(stderr,"%*s %*s  %*s\n",indent,(indent>0?" ":""), wkey,"trn-par",wval,self->trn_par);
-        retval+=fprintf(stderr,"%*s %*s  %*s\n",indent,(indent>0?" ":""), wkey,"trn-mid",wval,self->trn_mid);
-        retval+=fprintf(stderr,"%*s %*s  %*d\n",indent,(indent>0?" ":""), wkey,"trn-mtype",wval,self->trn_mtype);
-        retval+=fprintf(stderr,"%*s %*s  %*d\n",indent,(indent>0?" ":""), wkey,"trn-ftype",wval,self->trn_ftype);
-        retval+=fprintf(stderr,"%*s %*s  %*d\n",indent,(indent>0?" ":""), wkey,"trn-fgrade",wval,self->trn_fgrade);
-        retval+=fprintf(stderr,"%*s %*s  %*d\n",indent,(indent>0?" ":""), wkey,"trn-freinit",wval,self->trn_freinit);
-        retval+=fprintf(stderr,"%*s %*s  %*d\n",indent,(indent>0?" ":""), wkey,"trn-mweight",wval,self->trn_mweight);
-        retval+=fprintf(stderr,"%*s %*s  %*.2lf\n",indent,(indent>0?" ":""), wkey,"trn-ncov",wval,self->trn_ncov);
-        retval+=fprintf(stderr,"%*s %*s  %*.2lf\n",indent,(indent>0?" ":""), wkey,"trn-nerr",wval,self->trn_nerr);
-        retval+=fprintf(stderr,"%*s %*s  %*.2lf\n",indent,(indent>0?" ":""), wkey,"trn-ecov",wval,self->trn_ecov);
-        retval+=fprintf(stderr,"%*s %*s  %*.2lf\n",indent,(indent>0?" ":""), wkey,"trn-eerr",wval,self->trn_eerr);
-        retval+=fprintf(stderr,"%*s %*s  %*s\n",indent,(indent>0?" ":""), wkey,"mb-out",wval,self->mb_out);
-        retval+=fprintf(stderr,"%*s %*s  %*s\n",indent,(indent>0?" ":""), wkey,"trn-out",wval,self->trn_out);
-        retval+=fprintf(stderr,"%*s %*s  %*u\n",indent,(indent>0?" ":""), wkey,"trn-decn",wval,self->trn_decn);
-        retval+=fprintf(stderr,"%*s %*s  %*.2lf\n",indent,(indent>0?" ":""), wkey,"trn-decs",wval,self->trn_decs);
-        retval+=fprintf(stderr,"%*s %*s  %*.2lf\n",indent,(indent>0?" ":""), wkey,"covariance-magnitude-max",wval,self->covariance_magnitude_max);
-        retval+=fprintf(stderr,"%*s %*s  %*d\n",indent,(indent>0?" ":""), wkey,"convergence-repeat-min",wval,self->convergence_repeat_min);
-        retval+=fprintf(stderr,"%*s %*s  %*c\n",indent,(indent>0?" ":""), wkey,"reinit_gain_enable",wval,BOOL2YNC(self->reinit_gain_enable));
-        retval+=fprintf(stderr,"%*s %*s  %*c\n",indent,(indent>0?" ":""), wkey,"reinit_file_enable",wval,BOOL2YNC(self->reinit_file_enable));
-        retval+=fprintf(stderr,"%*s %*s  %*c\n",indent,(indent>0?" ":""), wkey,"reinit_xyoffset_enable",wval,BOOL2YNC(self->reinit_xyoffset_enable));
-        retval+=fprintf(stderr,"%*s %*s  %*.2lf\n",indent,(indent>0?" ":""), wkey,"reinit_xyoffset_max",wval,self->reinit_xyoffset_max);
-        retval+=fprintf(stderr,"%*s %*s  %*c\n",indent,(indent>0?" ":""), wkey,"reinit_zoffset_enable",wval,BOOL2YNC(self->reinit_zoffset_enable));
-        retval+=fprintf(stderr,"%*s %*s  %*.2lf\n",indent,(indent>0?" ":""), wkey,"reinit_zoffset_min",wval,self->reinit_zoffset_min);
-        retval+=fprintf(stderr,"%*s %*s  %*.2lf\n",indent,(indent>0?" ":""), wkey,"reinit_zoffset_max",wval,self->reinit_zoffset_max);
-        retval+=fprintf(stderr,"%*s %*s  %*c\n",indent,(indent>0?" ":""), wkey,"help",wval,BOOL2YNC(self->help));
+        retval+=fprintf(fpout,"%s %*s %*s  %*p\n",hash,indent,(indent>0?" ":""), wkey,"self",wval,self);
+        retval+=fprintf(fpout,"%s %*s %*s  %*d\n",hash,indent,(indent>0?" ":""), wkey,"verbose",wval,self->verbose);
+        retval+=fprintf(fpout,"%s %*s %*s  %*s\n",hash,indent,(indent>0?" ":""), wkey,"input",wval,self->input);
+        retval+=fprintf(fpout,"%s %*s %*s  %*d\n",hash,indent,(indent>0?" ":""), wkey,"format",wval,self->format);
+        retval+=fprintf(fpout,"%s %*s %*s  %*s\n",hash,indent,(indent>0?" ":""), wkey,"platform-file",wval,self->platform_file);
+        retval+=fprintf(fpout,"%s %*s %*s  %*d\n",hash,indent,(indent>0?" ":""), wkey,"platform-target-sensor",wval,self->platform_target_sensor);
+        retval+=fprintf(fpout,"%s %*s %*s  %*s\n",hash,indent,(indent>0?" ":""), wkey,"log-directory",wval,self->log_directory);
+        retval+=fprintf(fpout,"%s %*s %*s  %*s\n",hash,indent,(indent>0?" ":""), wkey,"tide-model",wval,self->tide_model);
+        retval+=fprintf(fpout,"%s %*s %*s  %*s\n",hash,indent,(indent>0?" ":""), wkey,"output",wval,self->output);
+        retval+=fprintf(fpout,"%s %*s %*s  %*d\n",hash,indent,(indent>0?" ":""), wkey,"projection",wval,self->projection);
+        retval+=fprintf(fpout,"%s %*s %*s  %*.2lf\n",hash,indent,(indent>0?" ":""), wkey,"swath-width",wval,self->swath_width);
+        retval+=fprintf(fpout,"%s %*s %*s  %*d\n",hash,indent,(indent>0?" ":""), wkey,"soundings",wval,self->soundings);
+        retval+=fprintf(fpout,"%s %*s %*s  %*s\n",hash,indent,(indent>0?" ":""), wkey,"median-filter",wval,self->median_filter);
+        retval+=fprintf(fpout,"%s %*s %*s  %*d\n",hash,indent,(indent>0?" ":""), wkey,"mbhbn",wval,self->mbhbn);
+        retval+=fprintf(fpout,"%s %*s %*s  %*.2lf\n",hash,indent,(indent>0?" ":""), wkey,"mbhbt",wval,self->mbhbt);
+        retval+=fprintf(fpout,"%s %*s %*s  %*.2lf\n",hash,indent,(indent>0?" ":""), wkey,"trnhbt",wval,self->trnhbt);
+        retval+=fprintf(fpout,"%s %*s %*s  %*.2lf\n",hash,indent,(indent>0?" ":""), wkey,"trnuhbt",wval,self->trnuhbt);
+        retval+=fprintf(fpout,"%s %*s %*s  %*d\n",hash,indent,(indent>0?" ":""), wkey,"trnumttl",wval,self->trnumttl);
+        retval+=fprintf(fpout,"%s %*s %*s  %*"PRId64"\n",hash,indent,(indent>0?" ":""), wkey,"delay",wval,self->delay);
+        retval+=fprintf(fpout,"%s %*s %*s  %*.2lf\n",hash,indent,(indent>0?" ":""), wkey,"statsec",wval,self->statsec);
+        retval+=fprintf(fpout,"%s %*s %*s  %*X/%s\n",hash,indent,(indent>0?" ":""), wkey,"statflags",wval,self->statflags,self->statflags_str);
+        retval+=fprintf(fpout,"%s %*s %*s  %*c\n",hash,indent,(indent>0?" ":""), wkey,"trn-en",wval,BOOL2YNC(self->trn_en));
+        retval+=fprintf(fpout,"%s %*s %*s  %*s/%d\n",hash,indent,(indent>0?" ":""), wkey,"trn-dev",wval,r7k_devidstr(self->trn_dev),self->trn_dev);
+        retval+=fprintf(fpout,"%s %*s %*s  %*ld\n",hash,indent,(indent>0?" ":""), wkey,"trn-utm",wval,self->trn_utm);
+        retval+=fprintf(fpout,"%s %*s %*s  %*s\n",hash,indent,(indent>0?" ":""), wkey,"trn-map",wval,self->trn_map);
+        retval+=fprintf(fpout,"%s %*s %*s  %*s\n",hash,indent,(indent>0?" ":""), wkey,"trn-cfg",wval,self->trn_cfg);
+        retval+=fprintf(fpout,"%s %*s %*s  %*s\n",hash,indent,(indent>0?" ":""), wkey,"trn-par",wval,self->trn_par);
+        retval+=fprintf(fpout,"%s %*s %*s  %*s\n",hash,indent,(indent>0?" ":""), wkey,"trn-mid",wval,self->trn_mid);
+        retval+=fprintf(fpout,"%s %*s %*s  %*d\n",hash,indent,(indent>0?" ":""), wkey,"trn-mtype",wval,self->trn_mtype);
+        retval+=fprintf(fpout,"%s %*s %*s  %*d\n",hash,indent,(indent>0?" ":""), wkey,"trn-ftype",wval,self->trn_ftype);
+        retval+=fprintf(fpout,"%s %*s %*s  %*d\n",hash,indent,(indent>0?" ":""), wkey,"trn-fgrade",wval,self->trn_fgrade);
+        retval+=fprintf(fpout,"%s %*s %*s  %*d\n",hash,indent,(indent>0?" ":""), wkey,"trn-freinit",wval,self->trn_freinit);
+        retval+=fprintf(fpout,"%s %*s %*s  %*d\n",hash,indent,(indent>0?" ":""), wkey,"trn-mweight",wval,self->trn_mweight);
+        retval+=fprintf(fpout,"%s %*s %*s  %*.2lf\n",hash,indent,(indent>0?" ":""), wkey,"trn-ncov",wval,self->trn_ncov);
+        retval+=fprintf(fpout,"%s %*s %*s  %*.2lf\n",hash,indent,(indent>0?" ":""), wkey,"trn-nerr",wval,self->trn_nerr);
+        retval+=fprintf(fpout,"%s %*s %*s  %*.2lf\n",hash,indent,(indent>0?" ":""), wkey,"trn-ecov",wval,self->trn_ecov);
+        retval+=fprintf(fpout,"%s %*s %*s  %*.2lf\n",hash,indent,(indent>0?" ":""), wkey,"trn-eerr",wval,self->trn_eerr);
+        retval+=fprintf(fpout,"%s %*s %*s  %*s\n",hash,indent,(indent>0?" ":""), wkey,"mb-out",wval,self->mb_out);
+        retval+=fprintf(fpout,"%s %*s %*s  %*s\n",hash,indent,(indent>0?" ":""), wkey,"trn-out",wval,self->trn_out);
+        retval+=fprintf(fpout,"%s %*s %*s  %*u\n",hash,indent,(indent>0?" ":""), wkey,"trn-decn",wval,self->trn_decn);
+        retval+=fprintf(fpout,"%s %*s %*s  %*.2lf\n",hash,indent,(indent>0?" ":""), wkey,"trn-decs",wval,self->trn_decs);
+        retval+=fprintf(fpout,"%s %*s %*s  %*.2lf\n",hash,indent,(indent>0?" ":""), wkey,"covariance-magnitude-max",wval,self->covariance_magnitude_max);
+        retval+=fprintf(fpout,"%s %*s %*s  %*d\n",hash,indent,(indent>0?" ":""), wkey,"convergence-repeat-min",wval,self->convergence_repeat_min);
+        retval+=fprintf(fpout,"%s %*s %*s  %*c\n",hash,indent,(indent>0?" ":""), wkey,"reinit_gain_enable",wval,BOOL2YNC(self->reinit_gain_enable));
+        retval+=fprintf(fpout,"%s %*s %*s  %*c\n",hash,indent,(indent>0?" ":""), wkey,"reinit_file_enable",wval,BOOL2YNC(self->reinit_file_enable));
+        retval+=fprintf(fpout,"%s %*s %*s  %*c\n",hash,indent,(indent>0?" ":""), wkey,"reinit_xyoffset_enable",wval,BOOL2YNC(self->reinit_xyoffset_enable));
+        retval+=fprintf(fpout,"%s %*s %*s  %*.2lf\n",hash,indent,(indent>0?" ":""), wkey,"reinit_xyoffset_max",wval,self->reinit_xyoffset_max);
+        retval+=fprintf(fpout,"%s %*s %*s  %*c\n",hash,indent,(indent>0?" ":""), wkey,"reinit_zoffset_enable",wval,BOOL2YNC(self->reinit_zoffset_enable));
+        retval+=fprintf(fpout,"%s %*s %*s  %*.2lf\n",hash,indent,(indent>0?" ":""), wkey,"reinit_zoffset_min",wval,self->reinit_zoffset_min);
+        retval+=fprintf(fpout,"%s %*s %*s  %*.2lf\n",hash,indent,(indent>0?" ":""), wkey,"reinit_zoffset_max",wval,self->reinit_zoffset_max);
+        retval+=fprintf(fpout,"%s %*s %*s  %*c\n",hash,indent,(indent>0?" ":""), wkey,"random_offset_enable",wval,BOOL2YNC(self->random_offset_enable));
+        retval+=fprintf(fpout,"%s %*s %*s  %*c\n",hash,indent,(indent>0?" ":""), wkey,"help",wval,BOOL2YNC(self->help));
     }
 
     return retval;
@@ -1971,6 +1988,13 @@ static int s_parse_opt_logdir(mbtrnpp_cfg_t *cfg, char *opt_str)
             MEM_CHKINVALIDATE(cfg->trn_log_dir);
             cfg->trn_log_dir = CHK_STRDUP(cfg->log_directory);
         }
+        int filestatus = 0;
+        if ((filestatus = lstat("mbtrnpp-latest", &logd_stat)) == 0) {
+            remove("mbtrnpp-latest");
+            fprintf(stderr, "Delete old symlink mbtrnpp-latest\n");
+        }
+        symlink(cfg->log_directory, "mbtrnpp-latest");
+        fprintf(stderr, "Create symlink mbtrnpp-latest->%s\n", cfg->log_directory);
         if(NULL==cfg->trn_log_dir){
             MEM_CHKINVALIDATE(cfg->trn_log_dir);
             cfg->trn_log_dir=strdup(CFG_TRN_LOG_DIR_DFL);
@@ -2284,6 +2308,9 @@ static int s_mbtrnpp_kvparse_fn(char *key, char *val, void *cfg)
                     opts->reinit_zoffset_enable = true;
                     retval=0;
                 }
+            }else if(strcmp(key,"random-offset")==0 ){
+                opts->random_offset_enable = true;
+                retval=0;
             }else if(strcmp(key,"trn-en")==0 ){
                 if( mkvc_parse_bool(val,&opts->trn_en)==0){
                     retval=0;
@@ -2306,26 +2333,17 @@ static int s_mbtrnpp_kvparse_fn(char *key, char *val, void *cfg)
             // val is NULL
             // process args w/o required arguments
              if(strcmp(key,"trn-en")==0 ){
-//                if( mkvc_parse_bool(val,&opts->trn_en)==0){
-//                    retval=0;
-//                }else{
-                    opts->trn_en=true;
-                    retval=0;
-//                }
+                opts->trn_en=true;
+                retval=0;
             }else if(strcmp(key,"reinit-gain")==0 ){
-//                if( mkvc_parse_bool(val,&opts->reinit_gain_enable)==0){
-//                    retval=0;
-//                }else{
-                    opts->reinit_gain_enable=true;
-                    retval=0;
-//                }
+                opts->reinit_gain_enable=true;
+                retval=0;
             }else if(strcmp(key,"reinit-file")==0 ){
-//                if( mkvc_parse_bool(val,&opts->reinit_file_enable)==0){
-//                    retval=0;
-//                }else{
-                    opts->reinit_file_enable=true;
-                    retval=0;
-//                }
+                opts->reinit_file_enable=true;
+                retval=0;
+            }else if(strcmp(key,"random-offset")==0 ){
+                opts->random_offset_enable = true;
+                retval=0;
             }else if(strcmp(key,"config")==0 ){
                 retval=0;
             }else if(strcmp(key,"help")==0 ){
@@ -2497,6 +2515,7 @@ static int s_mbtrnpp_configure(mbtrnpp_cfg_t *cfg, mbtrnpp_opts_t *opts)
         cfg->reinit_zoffset_enable = opts->reinit_zoffset_enable;
         cfg->reinit_zoffset_min = opts->reinit_zoffset_min;
         cfg->reinit_zoffset_max = opts->reinit_zoffset_max;
+        cfg->random_offset_enable = opts->random_offset_enable;
 
         // format
         cfg->format = opts->format;
@@ -2782,7 +2801,8 @@ int main(int argc, char **argv) {
                          "\t--reinit-gain\n"
                          "\t--reinit-file\n"
                          "\t--reinit-xyoffset=xyoffset_max\n"
-                         "\t--reinit-zoffset=offset_z_min/offset_z_max\n";
+                         "\t--reinit-zoffset=offset_z_min/offset_z_max\n"
+                         "\t--random-offset\n";
   extern char WIN_DECLSPEC *optarg;
 //  int option_index;
   int errflg = 0;
@@ -2949,21 +2969,21 @@ int main(int argc, char **argv) {
     s_mbtrnpp_init_opts(mbtrn_opts);
 
     fprintf(stderr,"\nconfiguration - default:\n");
-    s_mbtrnpp_show_cfg(mbtrn_cfg,true,5);
+    s_mbtrnpp_show_cfg(stderr, mbtrn_cfg,false,5);
 
     // load option overrrides from config file, if specified
     char *cfg_path=NULL;
     if(s_mbtrnpp_peek_opt_cfg(argc,argv,&cfg_path,0)!=NULL){
         fprintf(stderr,"loading config file [%s]\n",cfg_path);
-       if(s_mbtrnpp_load_config(cfg_path,mbtrn_opts)!=0){
-           PTRACE();
+        if(s_mbtrnpp_load_config(cfg_path,mbtrn_opts)!=0){
+            PTRACE();
             fprintf(stderr,"ERR - error(s) in config file [%s]\n",cfg_path);
             errflg++;
         }
     }
     MEM_CHKINVALIDATE(cfg_path);
     fprintf(stderr,"options - post-config:\n");
-    s_mbtrnpp_show_opts(mbtrn_opts,true,5);
+    s_mbtrnpp_show_opts(stderr, mbtrn_opts,false,5);
 
     // load option overrrides from command line, if specified
     if(s_mbtrnpp_process_cmdline(argc,argv,mbtrn_opts)!=0){
@@ -2972,7 +2992,7 @@ int main(int argc, char **argv) {
     };
 
     fprintf(stderr,"options - post-cmdline:\n");
-    s_mbtrnpp_show_opts(mbtrn_opts,true,5);
+    s_mbtrnpp_show_opts(stderr, mbtrn_opts,false,5);
 
     // configure using selected options
     if(s_mbtrnpp_configure(mbtrn_cfg, mbtrn_opts)!=0){
@@ -2986,7 +3006,7 @@ int main(int argc, char **argv) {
     };
 
     fprintf(stderr,"\nconfiguration - final:\n");
-    s_mbtrnpp_show_cfg(mbtrn_cfg,true,5);
+    s_mbtrnpp_show_cfg(stderr, mbtrn_cfg,false,5);
     fprintf(stderr, "\n--------------------------------------------------------------------------------\n");
     fprintf(stderr, "MBtrnpp logging directory: %s\n", mbtrn_cfg->trn_log_dir);
     fprintf(stderr, "--------------------------------------------------------------------------------\n\n");
@@ -3134,12 +3154,6 @@ int main(int argc, char **argv) {
     }else{
         fprintf(stderr,"WARN: skipping TRN init trn_enable[%c] trn_cfg[%p]\n",(mbtrn_cfg->trn_enable?'Y':'N'),trn_cfg);
     }
-
-    // release the config strings
-    MEM_CHKINVALIDATE(mbtrn_cfg->trn_map_file);
-    MEM_CHKINVALIDATE(mbtrn_cfg->trn_cfg_file);
-    MEM_CHKINVALIDATE(mbtrn_cfg->trn_particles_file);
-    MEM_CHKINVALIDATE(mbtrn_cfg->trn_mission_id);
 
     trncfg_show(trn_cfg, true, 5);
 
@@ -3364,6 +3378,29 @@ int main(int argc, char **argv) {
     }
 #endif // WITH_MB1_READER
     mlog_tprintf(mbtrnpp_mlog_id, "i,transmit gain threshold[%.2lf]\n", transmit_gain_threshold);
+  }
+
+  // calculate static position offset applied to all input navigation using
+  // a random number generator - the range of the random offset is the circle
+  // radius of the reinit_xyoffset_max parameter
+  // the offset is calculated here in eastings northings but is converted to
+  // decimal degrees lon and lat when the first data are read
+  double nav_offset_east = 0.0;
+  double nav_offset_north = 0.0;
+  double nav_offset_lon = 0.0;
+  double nav_offset_lat = 0.0;
+  bool nav_offset_init = false;
+  if (mbtrn_cfg->random_offset_enable) {
+      srand(time(0) / getpid());
+      for (int i=0; i < 100; i++) {
+          int j = rand();
+      }
+      double nav_offset_mag = mbtrn_cfg->reinit_xyoffset_max * ((double)rand()) / ((double)RAND_MAX);
+      double nav_offset_bearing = 2.0 * M_PI * ((double)rand()) / ((double)RAND_MAX);
+      nav_offset_east = nav_offset_mag * sin(nav_offset_bearing);
+      nav_offset_north = nav_offset_mag * cos(nav_offset_bearing);
+      fprintf(stderr, "Applying random static offset to input navigation: Magnitude: %f bearing: %f easting: %f m  northing: %f m\n",
+                      nav_offset_mag, nav_offset_bearing * 180.0 / M_PI, nav_offset_east, nav_offset_north);
   }
 
   // kick off the first cycle here
@@ -3710,6 +3747,19 @@ int main(int argc, char **argv) {
                                 &ping[idataread].pitch, &ping[idataread].heave, &error);
         status = mb_extract_altitude(mbtrn_cfg->verbose, imbio_ptr, store_ptr, &kind, &ping[idataread].sonardepth,
                                      &ping[idataread].altitude, &error);
+
+        // apply static nav offset if specified
+        if (mbtrn_cfg->random_offset_enable) {
+          if (!nav_offset_init) {
+            double mtodeglon, mtodeglat;
+            mb_coor_scale(mbtrn_cfg->verbose, ping[idataread].navlat, &mtodeglon, &mtodeglat);
+            nav_offset_lon = nav_offset_east * mtodeglon;
+            nav_offset_lat = nav_offset_north * mtodeglat;
+            nav_offset_init = true;
+          }
+          ping[idataread].navlon += nav_offset_lon;
+          ping[idataread].navlat += nav_offset_lat;
+        }
 
         // apply tide model if specified
         if (n_tide > 0 && ping[idataread].time_d >= tide_time_d[0]
@@ -4214,6 +4264,12 @@ int main(int argc, char **argv) {
   if (tide_tide != NULL) {
     mb_freed(mbtrn_cfg->verbose, __FILE__, __LINE__, (void **)&tide_tide, &error);
   }
+
+  // release the config strings
+  MEM_CHKINVALIDATE(mbtrn_cfg->trn_map_file);
+  MEM_CHKINVALIDATE(mbtrn_cfg->trn_cfg_file);
+  MEM_CHKINVALIDATE(mbtrn_cfg->trn_particles_file);
+  MEM_CHKINVALIDATE(mbtrn_cfg->trn_mission_id);
 
   /* check memory */
   //if (mbtrn_cfg->verbose >= 4)
@@ -5519,6 +5575,19 @@ int mbtrnpp_trn_publish(trn_update_t *pstate, trn_config_t *cfg)
 
           if (output_trn_fp != NULL)
             if ((n_converged_tot + n_unconverged_tot - 1) == 0) {
+              char user[256], host[256], date[32];
+              int error = MB_ERROR_NO_ERROR;
+              mb_user_host_date(0, user, host, date, &error);
+              fprintf(output_trn_fp, "##---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------\n");
+              fprintf(output_trn_fp, "## Terrain Relative Navigation Log\n");
+              fprintf(output_trn_fp, "## Generated by program %s\n", program_name);
+              fprintf(output_trn_fp, "## Executed on cpu <%s> by user <%s> at <%s>\n", host, user, date);
+              fprintf(output_trn_fp, "## MB-System version <%s>\n", MB_VERSION);
+              fprintf(output_trn_fp, "## Reference topography model: %s\n", cfg->map_file);
+              fprintf(output_trn_fp, "##---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------\n");
+              fprintf(output_trn_fp, "## Parameters:\n");
+              s_mbtrnpp_show_cfg(output_trn_fp, mbtrn_cfg,true,5);
+              fprintf(output_trn_fp, "## \n");
               fprintf(output_trn_fp, "##---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------\n");
               fprintf(output_trn_fp, "## YYYY/MM/DD-HH:MM:SS.SSSSSS TTTTTTTTTT.TTTTTT | Nav: Easting  Northing Z   | TRN: Easting  Northing     Z     | Off: East   North  Z   | Cov: East  North       Z   :    Mag   | Best Off: T    E      N      Z    | Ncs   Nct   Nus   Nut  Nr | CNV USE \n");
               fprintf(output_trn_fp, "##---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------\n");

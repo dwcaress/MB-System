@@ -23,8 +23,7 @@ Distributions that do not include "beta" in the tag name correspond to the major
 announced releases. The source distributions associated with all releases, major
 or beta, are equally accessible as tarballs through the Github interface.
 
-- Version 5.7.9beta28    February 18, 2022
-- Version 5.7.9beta27    January 20, 2022
+- Version 5.7.9beta27    February 28, 2022
 - Version 5.7.9beta26    January 2, 2022
 - Version 5.7.9beta25    December 29, 2021
 - Version 5.7.9beta24    December 27, 2021
@@ -407,7 +406,15 @@ or beta, are equally accessible as tarballs through the Github interface.
 ### MB-System Version 5.7 Release Notes:
 --
 
-#### 5.7.9beta28 (February 18, 2022)
+#### 5.7.9beta27 (February 28, 2022)
+
+Mbtrnpp: Improved TRN result logging, including having all log files from a
+session placed in the same directory named according to the start time. Also
+added automated plotting of the TRN results using a new plot macro
+mbm_trnplot.
+
+Mbm_trnplot: New plotting macro that generates two map views of the results from
+an mbtrnpp session.
 
 Mbeditviz: Supports selective editing or ignoring of multipick soundings.
 
@@ -423,8 +430,6 @@ distributions.
 
 Terrain Relative Navigation: Many changes to mbrnpp and TRN related code by
 Kent Headley
-
-#### 5.7.9beta27 (January 20, 2022)
 
 Mbphotomosaic: Fixed further issues with specifying options within the imagelist.
 
