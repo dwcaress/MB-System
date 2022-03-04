@@ -164,7 +164,7 @@ mbbuf_t *mbb_new(off_t capacity, byte *data, off_t size)
 		return NULL;
 	}
 	{
-	mbbuf_t *new_obj=(mbbuf_t *)mm_alloc(sizeof(mbbuf_t));
+	mbbuf_t *new_obj=(mbbuf_t *)malloc(sizeof(mbbuf_t));
 	new_obj->capacity=capacity;
 	
 	new_obj->head=(byte *)malloc((capacity+1)*sizeof(byte));
@@ -197,7 +197,7 @@ void mbb_destroy(mbbuf_t **p_self)
 				free(self->head);
 			}
 			//printf("%s:%d - got here\n",__FUNCTION__,__LINE__);
-			mm_release(self);
+			free(self);
 		}
 	}
 }

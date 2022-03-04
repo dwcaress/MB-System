@@ -3,6 +3,7 @@ lib_LTLIBRARIES = libmframe.la
 include_HEADERS = \
         usr/mconfig.h \
         mframe/src/mframe.h \
+        mframe/src/mbbuf.h \
         mframe/src/mcbuf.h \
         mframe/src/msocket.h \
         mframe/src/mthread.h \
@@ -30,6 +31,7 @@ AM_CPPFLAGS = -g -O0 -I./usr -I./mframe/src -DHAVE_CONFIG_H  -D_GNU_SOURCE $(MFR
 libmframe_la_LDFLAGS =  -no-undefined -version-info 0:0:0
 
 libmframe_la_SOURCES = mframe/src/mframe.c \
+        mframe/src/mbbuf.c \
         mframe/src/mcbuf.c \
         mframe/src/msocket.c \
         mframe/src/mthread.c \
