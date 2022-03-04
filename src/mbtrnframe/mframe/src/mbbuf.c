@@ -62,7 +62,7 @@ GNU General Public License for more details
 /////////////////////////
 
 #include "mbbuf.h"
-#include "mmem.h"
+//#include "mmem.h"
 
 /////////////////////////
 // Macros
@@ -920,11 +920,12 @@ void mbb_buf_show(mbbuf_t *self, bool verbose, int indent)
 #ifdef WITH_MBBUF_TEST
 /// @fn int mbbuf_test(int verbose)
 /// @brief mbbuf unit test.
-/// @param[in] verbose enable verbose output
+/// @param[in] argc number or args
+/// @param[in] argv array of args
 /// @return return 0 on success, -1 otherwise
-int mbbuf_test(int verbose)
+int mbbuf_test(int argc, char **argv)
 {
-	// create an empty buffer
+    // create an empty buffer
 	off_t init_sz=64;
 	mbbuf_t *buf=mbb_new(init_sz,NULL,0);
 	off_t track_len=0;

@@ -123,6 +123,6 @@ void mbb_buf_show(mbbuf_t *self, bool verbose, int indent);
 void mbb_dump(mbbuf_t *self);
 
 #ifdef WITH_MBBUF_TEST
-int mbbuf_test(int verbose);
+int mbbuf_test(int argc, char **argv);
 #endif //WITH_MBBUF_TEST
 #endif  // THIS_FILE
