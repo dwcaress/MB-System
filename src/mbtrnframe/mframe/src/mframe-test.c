@@ -336,7 +336,8 @@ static int s_app_main(app_cfg_t *cfg)
         PMPRINT(MOD_MFTEST,MFTEST_1,(stderr,"mser_test [%d]\n",retval));
 #endif
 #ifdef WITH_MBBUF_TEST
-        retval=mbbuf_test((cfg->verbose!=0));
+        char *av[]={"false"};
+        retval=mbbuf_test(1,&av[0]);
         PMPRINT(MOD_MFTEST,MFTEST_1,(stderr,"mbbuf_test [%d]\n",retval));
 #endif
 #ifdef WITH_MLOG_TEST

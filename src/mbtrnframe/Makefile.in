@@ -146,12 +146,12 @@ am__uninstall_files_from_dir = { \
 LTLIBRARIES = $(lib_LTLIBRARIES)
 libmframe_la_DEPENDENCIES =
 am__dirstamp = $(am__leading_dot)dirstamp
-am_libmframe_la_OBJECTS = mframe/src/mframe.lo mframe/src/mcbuf.lo \
-	mframe/src/msocket.lo mframe/src/mthread.lo \
-	mframe/src/mfile.lo mframe/src/mtime.lo mframe/src/mmdebug.lo \
-	mframe/src/merror.lo mframe/src/mlog.lo mframe/src/mlist.lo \
-	mframe/src/mstats.lo mframe/src/mswap.lo mframe/src/mutils.lo \
-	mframe/src/mkvconf.lo usr/mconfig.lo
+am_libmframe_la_OBJECTS = mframe/src/mframe.lo mframe/src/mbbuf.lo \
+	mframe/src/mcbuf.lo mframe/src/msocket.lo \
+	mframe/src/mthread.lo mframe/src/mfile.lo mframe/src/mtime.lo \
+	mframe/src/mmdebug.lo mframe/src/merror.lo mframe/src/mlog.lo \
+	mframe/src/mlist.lo mframe/src/mstats.lo mframe/src/mswap.lo \
+	mframe/src/mutils.lo mframe/src/mkvconf.lo usr/mconfig.lo
 libmframe_la_OBJECTS = $(am_libmframe_la_OBJECTS)
 AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
@@ -176,9 +176,9 @@ am__v_at_1 =
 DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)/src/mbio
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__maybe_remake_depfiles = depfiles
-am__depfiles_remade = mframe/src/$(DEPDIR)/mcbuf.Plo \
-	mframe/src/$(DEPDIR)/merror.Plo mframe/src/$(DEPDIR)/mfile.Plo \
-	mframe/src/$(DEPDIR)/mframe.Plo \
+am__depfiles_remade = mframe/src/$(DEPDIR)/mbbuf.Plo \
+	mframe/src/$(DEPDIR)/mcbuf.Plo mframe/src/$(DEPDIR)/merror.Plo \
+	mframe/src/$(DEPDIR)/mfile.Plo mframe/src/$(DEPDIR)/mframe.Plo \
 	mframe/src/$(DEPDIR)/mkvconf.Plo \
 	mframe/src/$(DEPDIR)/mlist.Plo mframe/src/$(DEPDIR)/mlog.Plo \
 	mframe/src/$(DEPDIR)/mmdebug.Plo \
@@ -458,6 +458,7 @@ lib_LTLIBRARIES = libmframe.la
 include_HEADERS = \
         usr/mconfig.h \
         mframe/src/mframe.h \
+        mframe/src/mbbuf.h \
         mframe/src/mcbuf.h \
         mframe/src/msocket.h \
         mframe/src/mthread.h \
@@ -482,6 +483,7 @@ MFRAME_OPTS = $(MFRAME_VERSIONS) $(MFRAME_FEATURES) $(MFRAME_TESTS)
 AM_CPPFLAGS = -g -O0 -I./usr -I./mframe/src -DHAVE_CONFIG_H  -D_GNU_SOURCE $(MFRAME_OPTS)
 libmframe_la_LDFLAGS = -no-undefined -version-info 0:0:0
 libmframe_la_SOURCES = mframe/src/mframe.c \
+        mframe/src/mbbuf.c \
         mframe/src/mcbuf.c \
         mframe/src/msocket.c \
         mframe/src/mthread.c \
@@ -628,6 +630,8 @@ mframe/src/$(DEPDIR)/$(am__dirstamp):
 	@: > mframe/src/$(DEPDIR)/$(am__dirstamp)
 mframe/src/mframe.lo: mframe/src/$(am__dirstamp) \
 	mframe/src/$(DEPDIR)/$(am__dirstamp)
+mframe/src/mbbuf.lo: mframe/src/$(am__dirstamp) \
+	mframe/src/$(DEPDIR)/$(am__dirstamp)
 mframe/src/mcbuf.lo: mframe/src/$(am__dirstamp) \
 	mframe/src/$(DEPDIR)/$(am__dirstamp)
 mframe/src/msocket.lo: mframe/src/$(am__dirstamp) \
@@ -745,6 +749,7 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
+@AMDEP_TRUE@@am__include@ @am__quote@mframe/src/$(DEPDIR)/mbbuf.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@mframe/src/$(DEPDIR)/mcbuf.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@mframe/src/$(DEPDIR)/merror.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@mframe/src/$(DEPDIR)/mfile.Plo@am__quote@ # am--include-marker
@@ -970,7 +975,8 @@ clean-am: clean-binPROGRAMS clean-generic clean-libLTLIBRARIES \
 	clean-libtool mostlyclean-am
 
 distclean: distclean-recursive
-		-rm -f mframe/src/$(DEPDIR)/mcbuf.Plo
+		-rm -f mframe/src/$(DEPDIR)/mbbuf.Plo
+	-rm -f mframe/src/$(DEPDIR)/mcbuf.Plo
 	-rm -f mframe/src/$(DEPDIR)/merror.Plo
 	-rm -f mframe/src/$(DEPDIR)/mfile.Plo
 	-rm -f mframe/src/$(DEPDIR)/mframe.Plo
@@ -1031,7 +1037,8 @@ install-ps-am:
 installcheck-am:
 
 maintainer-clean: maintainer-clean-recursive
-		-rm -f mframe/src/$(DEPDIR)/mcbuf.Plo
+		-rm -f mframe/src/$(DEPDIR)/mbbuf.Plo
+	-rm -f mframe/src/$(DEPDIR)/mcbuf.Plo
 	-rm -f mframe/src/$(DEPDIR)/merror.Plo
 	-rm -f mframe/src/$(DEPDIR)/mfile.Plo
 	-rm -f mframe/src/$(DEPDIR)/mframe.Plo
