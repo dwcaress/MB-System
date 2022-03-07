@@ -142,15 +142,17 @@ void trncli_destroy(trncli_t **pself)
 {
     if(NULL!=pself){
         trncli_t *self=(trncli_t *)(*pself);
-        if(NULL!=self->trn){
-            msock_connection_destroy(&self->trn);
-        }
-        if(NULL!=self->measurement){
-            wmeast_destroy(self->measurement);
-        }
-        free(self);
-       *pself=NULL;
-    }
+        if(NULL!=self){
+            if(NULL!=self->trn){
+                msock_connection_destroy(&self->trn);
+            }
+            if(NULL!=self->measurement){
+                wmeast_destroy(self->measurement);
+            }
+            free(self);
+         }
+        *pself=NULL;
+   }
 }// end function trncli_destroy
 
 int trncli_connect(trncli_t *self, char *host, int port)
@@ -177,10 +179,15 @@ int trncli_disconnect(trncli_t *self)
     byte *msg=NULL;
     int32_t mlen=0;
 
-    if( (mlen=trnw_type_msg((char **)&msg,TRN_MSG_BYE))>0){
-        retval=(s_trncli_send_recv(self, msg, mlen, false)>0?0:-1);
-        free(msg);
-        retval=0;
+    if(NULL != self){
+        if( (mlen=trnw_type_msg((char **)&msg,TRN_MSG_BYE))>0){
+            retval=(s_trncli_send_recv(self, msg, mlen, false)>0?0:-1);
+            if(NULL != msg)
+                free(msg);
+            retval=0;
+        }
+    } else {
+        retval = 0;
     }
     return retval;
 }// end function trncli_disconnect
@@ -227,22 +234,25 @@ int trncli_get_bias_estimates(trncli_t *self, wposet_t *pt, pt_cdata_t **pt_out,
     wposet_t *mse = NULL;
 
     if(NULL!=self && NULL!=pt && NULL!=mle_out && NULL!=mse_out){
-        uint32_t uret;
-        if((  uret=trncli_estimate_pose(self, &mle, TRN_MSG_MLE))>0){
-            if((uret=trncli_estimate_pose(self, &mse, TRN_MSG_MMSE))>0){
+        fprintf(stderr, "%s:%d +++++++++++\n", __func__, __LINE__);
+        int32_t uret = trncli_estimate_pose(self, &mle, TRN_MSG_MLE);
+        if(uret > 0){
+            fprintf(stderr, "%s:%d +++++++++++\n", __func__, __LINE__);
+            uret = trncli_estimate_pose(self, &mse, TRN_MSG_MMSE);
+            if(uret > 0){
                 retval=0;
-
             }else{
-                fprintf(stderr,"trncli_estimate_pose failed [%u]\n",uret);
+                fprintf(stderr,"trncli_estimate_pose MMSE failed [%"PRId32"] [%d/%s]\n", uret, errno, strerror(errno));
                 retval=errno;
             }
 
         }else{
-            fprintf(stderr,"trncli_estimate_pose failed [%u]\n",uret);
+            fprintf(stderr,"trncli_estimate_pose MLE failed [%"PRId32"] [%d/%s]\n", uret, errno, strerror(errno));
             retval=errno;
         }
 
-        if( trncli_last_meas_succesful(self)==true){
+        fprintf(stderr, "%s:%d +++++++++++\n", __func__, __LINE__);
+        if(trncli_last_meas_succesful(self) == true){
 
             wposet_pose_to_cdata(pt_out, pt);
             wposet_pose_to_cdata(mle_out, mle);
@@ -257,7 +267,7 @@ int trncli_get_bias_estimates(trncli_t *self, wposet_t *pt, pt_cdata_t **pt_out,
 
 
         }else{
-            fprintf(stderr,"Last Meas Invalid\n");
+            fprintf(stderr,"%s:%d Last Meas Invalid\n", __func__, __LINE__);
         }
         wposet_destroy(mle);
         wposet_destroy(mse);
@@ -504,7 +514,7 @@ int32_t trncli_estimate_pose(trncli_t *self, wposet_t **pose, char msg_type)
             fprintf(stderr,"TX EST_POSE MSG [%c]:\n",msg_type);
             trnw_msg_show((char *)msg, true, 5);
 #endif
-            retval=s_trncli_send_recv(self, msg, mlen, true);
+            retval = s_trncli_send_recv(self, msg, mlen, true);
             wposet_msg_to_pose(pose, (char *)msg);
 
 #if defined(WITH_PDEBUG)
