@@ -158,6 +158,11 @@ void trncli_destroy(trncli_t **pself)
 int trncli_connect(trncli_t *self, char *host, int port)
 {
     int retval=-1;
+
+    if(NULL!=self->trn->sock){
+        // destroy the old socket to enable fd to be reused.
+        msock_socket_destroy(&self->trn->sock);
+    }
     if( (self->trn->sock=msock_socket_new(host,port,ST_TCP))!=NULL ){
         const int optionval = 1;
 #if !defined(__CYGWIN__)
@@ -234,10 +239,10 @@ int trncli_get_bias_estimates(trncli_t *self, wposet_t *pt, pt_cdata_t **pt_out,
     wposet_t *mse = NULL;
 
     if(NULL!=self && NULL!=pt && NULL!=mle_out && NULL!=mse_out){
-        fprintf(stderr, "%s:%d +++++++++++\n", __func__, __LINE__);
+
         int32_t uret = trncli_estimate_pose(self, &mle, TRN_MSG_MLE);
         if(uret > 0){
-            fprintf(stderr, "%s:%d +++++++++++\n", __func__, __LINE__);
+
             uret = trncli_estimate_pose(self, &mse, TRN_MSG_MMSE);
             if(uret > 0){
                 retval=0;
@@ -251,7 +256,6 @@ int trncli_get_bias_estimates(trncli_t *self, wposet_t *pt, pt_cdata_t **pt_out,
             retval=errno;
         }
 
-        fprintf(stderr, "%s:%d +++++++++++\n", __func__, __LINE__);
         if(trncli_last_meas_succesful(self) == true){
 
             wposet_pose_to_cdata(pt_out, pt);
