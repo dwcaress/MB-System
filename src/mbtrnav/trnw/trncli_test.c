@@ -280,19 +280,21 @@ static void s_show_help()
     "  # update mode\n"
 
     "  # define TRN environment\n"
-    "  $ cat 20180713m0.env\n"
-    "  #!/bin/bash\n"
-    "  export TRN_LOGFILES=$PWD/logs\n"
-    "  export TRN_DATAFILES=/Volumes/linux-share/config\n"
-    "  export TRN_MAPFILES=/Volumes/linux-share/maps\n"
+    "  cat 20180713m0.env\n"
+    "   #!/bin/bash\n"
+    "   export TRN_LOGFILES=$PWD/logs\n"
+    "   export TRN_DATAFILES=/Volumes/linux-share/config\n"
+    "   export TRN_MAPFILES=/Volumes/linux-share/maps\n"
     "\n"
     "  # source environment before running TRN server\n"
-    "  $ . 20180713m0.env\n"
+    "  . 20180713m0.env\n"
     "  # start TRN server"
     "  $ trn-server  -p 27001\n"
     "\n"
     "  # run trn-cli"
-    "  trn-cli ./src/mbtrnav/trn-cli  ./src/mbtrnav/trn-cli --mb1-src=m:/Volumes/linux-share/git/mbsys-trn/MB-System/test/feature.initvars/mbtrnpp-20220307-232342/mbtrnpp_20220307-232342.mb1  --host=134.89.13.138:27001 --debug  --est-n=3 --state-n=3 --hbeat=10  --map=PortTiles --cfg=mappingAUV_specs.cfg --particles=particles.cfg --logdir=foo --mode=update\n"
+    "  trn-cli ./src/mbtrnav/trn-cli  ./src/mbtrnav/trn-cli --mb1-src=m:/path/to/data.mb1 \\\n"
+    "  --host=$TRN_HOST:27001 --debug  --est-n=3 --state-n=3 --hbeat=10  --map=PortTiles \\\n"
+    "  --cfg=mappingAUV_specs.cfg --particles=particles.cfg --logdir=foo --mode=u\n"
     "\n";
     printf("%s", help_message);
     printf("%s", usage_message);
@@ -767,7 +769,6 @@ static int32_t s_read_mb1_rec( mb1_t **pdest, mfile_file_t *src, app_cfg_t *cfg)
         // find header type sequence start byte
         while(mfile_read(src,(byte *)bp,readlen)==(int64_t)readlen){
             if(*bp=='M'){
-//                s_dbg_printf(stderr, cfg->debug, "%s:%d found record start\n", __func__, __LINE__);
                 record_bytes+=readlen;
                 bp++;
                 readlen = (uint32_t)MB1_HEADER_BYTES-1;
@@ -777,22 +778,20 @@ static int32_t s_read_mb1_rec( mb1_t **pdest, mfile_file_t *src, app_cfg_t *cfg)
 
         // read header remainder
         int64_t br = mfile_read(src,(byte *)bp,readlen);
-//        s_dbg_printf(stderr, cfg->debug, "%s:%d reading header [%"PRIu32"]\n", __func__, __LINE__,readlen);
         if((record_bytes > 0) && (br == (int64_t)readlen)){
              record_bytes+=readlen;
             bp=(byte *)MB1_PBEAMS(dest);
             readlen = MB1_BEAM_ARRAY_BYTES(dest->nbeams) + MB1_CHECKSUM_BYTES;
-//            s_dbg_printf(stderr, cfg->debug, "%s:%d reading data/chksum [%"PRIu32"]\n", __func__, __LINE__,readlen);
 
             // read data and checksum
             if((br=mfile_read(src,(byte *)bp,readlen)) == (int64_t)readlen){
                 record_bytes += readlen;
                 retval = record_bytes;
-//                s_dbg_printf(stderr, cfg->debug, "%s:%d record read len[%"PRId32"]\n", __func__, __LINE__,retval);
             }else{
-                int64_t cur_save=mfile_seek(src,0,MFILE_CUR);
-                if(cur_save==mfile_seek(src,0,MFILE_END)){
-                    s_dbg_printf(stderr, cfg->debug, "end of file\n");
+                int64_t cur_save = mfile_seek(src,0,MFILE_CUR);
+                int64_t cur_end = mfile_seek(src,0,MFILE_END);
+                if(cur_save == cur_end){
+                    s_dbg_printf(stderr, cfg->debug, "end of file [%"PRId64"]\n",cur_end);
                     retval = 0;
                 }else{
                     fprintf(stderr, "%s:%d ERR - data read [%zu/%"PRIu32"]:\n", __func__, __LINE__, test, readlen);
@@ -801,7 +800,14 @@ static int32_t s_read_mb1_rec( mb1_t **pdest, mfile_file_t *src, app_cfg_t *cfg)
                 mfile_seek(src,cur_save,MFILE_SET);
             }
         }else{
-            fprintf(stderr, "%s:%d ERR - header read readlen[%"PRIu32"] br[%"PRId64"] [%zu]\n", __func__, __LINE__, readlen, br, test);
+            int64_t cur_save = mfile_seek(src,0,MFILE_CUR);
+            int64_t cur_end = mfile_seek(src,0,MFILE_END);
+            if(cur_save == cur_end){
+                s_dbg_printf(stderr, cfg->debug, "end of file [%"PRId64"]\n",cur_end);
+                retval = 0;
+            }else{
+                fprintf(stderr, "%s:%d ERR - header read readlen[%"PRIu32"] br[%"PRId64"] [%zu]\n", __func__, __LINE__, readlen, br, test);
+            }
         }
     }
     return retval;
@@ -900,13 +906,6 @@ static int s_trncli_process_mb1(trncli_t *tcli, mb1_t *mb1, app_cfg_t *cfg)
                 mlog_tprintf(cfg->log_id, "ERR - pt[%p] pt_dat[%p] mle_dat[%p] mse_dat[%p]\n", pt, pt_dat, mle_dat, mse_dat);
                 mlog_tprintf(cfg->log_id, "ERR - ts[%.3lf] beams[%u] ping[%d] \n", mb1->ts, mb1->nbeams, mb1->ping_number);
                 mlog_tprintf(cfg->log_id, "ERR - lat[%.5lf] lon[%.5lf] hdg[%.2lf] sd[%.1lf]\n", mb1->lat, mb1->lon, mb1->hdg, mb1->depth);
-
-//                bool bval=false;
-//                int err=0;
-//                bval=trncli_is_intialized(tcli);
-//                err = errno;
-//                mlog_tprintf(cfg->log_id, "is initialized [%c] err[%d/%s]\n", (bval?'Y':'N'), err, strerror(err));
-
             }
         }else{
             s_dbg_printf(stderr, cfg->debug, "ERR - trncli_get_bias_estimates failed [%d]\n", test);
@@ -951,7 +950,7 @@ static int s_trncli_test_csv(trncli_t *tcli, app_cfg_t *cfg)
     return retval;
 }
 
-static msock_socket_t *s_connect_mb1(app_cfg_t *cfg)
+static msock_socket_t **s_get_mb1_instance(app_cfg_t *cfg)
 {
     static msock_socket_t *mb1_sock = NULL;
 
@@ -1000,12 +999,13 @@ static msock_socket_t *s_connect_mb1(app_cfg_t *cfg)
         fprintf(stderr,"%s:%d ERR - mb1 socket create [%s:%d] failed [%d/%s]\n", __func__, __LINE__, cfg->mb1_host, cfg->mb1_port, errno, strerror(errno));
     }
 
-    return mb1_sock;
+    return &mb1_sock;
 }
 
 static int s_trncli_test_trnc(trncli_t *tcli, app_cfg_t *cfg)
 {
     int retval=0;
+    msock_socket_t **pmb1 = NULL;
     msock_socket_t *mb1_sock = NULL;
     int tcli_connect_retries = TRNCLI_CONNECT_RETRIES;
     int mb1_read_retries = MB1_READ_RETRIES;
@@ -1018,7 +1018,8 @@ static int s_trncli_test_trnc(trncli_t *tcli, app_cfg_t *cfg)
 
         if(!mb1_connected){
             // connect MB1 input as needed
-            mb1_sock = s_connect_mb1(cfg);
+            pmb1 = s_get_mb1_instance(cfg);
+            mb1_sock = *pmb1;
             hbeat=cfg->trnc_hbn;
             mb1_read_retries = MB1_READ_RETRIES;
         }
@@ -1231,9 +1232,8 @@ static int s_trncli_test_trnc(trncli_t *tcli, app_cfg_t *cfg)
         s_dbg_printf(stderr, cfg->debug, "INTERRUPTED sig[%d] - exiting\n", g_signal);
         mlog_tprintf(cfg->log_id, "INTERRUPTED sig[%d] - exiting\n", g_signal);
     }
-//    if(NULL!=mb1_sock){
-//        msock_socket_destroy(&mb1_sock);
-//    }
+
+    msock_socket_destroy(pmb1);
     return retval;
 }
 
@@ -1247,11 +1247,40 @@ static int s_trncli_test_mbin(trncli_t *tcli, app_cfg_t *cfg)
     if( (test=mfile_open(mb1_file, MFILE_RONLY))>0){
         bool quit=false;
         mb1_t *mb1=mb1_new(MB1_MAX_BEAMS);
-        while( !g_interrupt && !quit && (test=s_read_mb1_rec(&mb1, mb1_file,cfg))>0){
-            if( (test=s_trncli_process_mb1(tcli,mb1,cfg))!=0){
-                if(test==EPIPE){
-                    quit=true;
+        int mb1_count = 0;
+        while( !g_interrupt && !quit){
+
+            test = s_read_mb1_rec(&mb1, mb1_file,cfg);
+
+            if(test > 0){
+                mb1_count++;
+                mlog_oset_t log_dest = mlog_get_dest(cfg->log_id);
+                mlog_set_dest(cfg->log_id, (log_dest | ML_SERR));
+
+                mlog_tprintf(cfg->log_id, "ts[%.3lf] beams[%u] ping[%d]\n", mb1->ts, mb1->nbeams, mb1->ping_number);
+                mlog_tprintf(cfg->log_id, "lat[%.5lf] lon[%.5lf] hdg[%.2lf] sd[%.1lf]\n", mb1->lat, mb1->lon, mb1->hdg, mb1->depth);
+
+                if(cfg->verbose && mb1->nbeams>0){
+                    // add beam data for verbose output
+                    fprintf(stderr, "%5s %8s %8s %8s\n","beam", "rhox", "rhoy", "rhoz");
+                    for(int i=0; i<mb1->nbeams; i++){
+                        fprintf(stderr, "[%03"PRIu32"] %8.2lf %8.2lf %8.2lf\n", mb1->beams[i].beam_num, mb1->beams[i].rhox, mb1->beams[i].rhoy, mb1->beams[i].rhoz );
+                    }
                 }
+
+                mlog_set_dest(cfg->log_id, log_dest);
+            } else {
+                // error or end of file
+                break;
+            }
+
+            if((cfg->est_n > 0) &&  ((mb1_count % cfg->est_n) == 0)){
+                if((test=s_trncli_process_mb1(tcli,mb1,cfg))!=0){
+                    if(test==EPIPE){
+                        quit=true;
+                    }
+                }
+                fprintf(stderr,"\n");
             }
             mb1_zero_len(mb1, MB1_MAX_SOUNDING_BYTES);
         }// while
