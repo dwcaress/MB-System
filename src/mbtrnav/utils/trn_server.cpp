@@ -623,7 +623,6 @@ int is_conv() {
 
 }
 
-
 static poseT _currEst;
 // Forwarded measure update message
 //
@@ -823,6 +822,28 @@ int get_est_nav_ofs() {
     return retval;
 
 }
+
+int is_init() {
+
+    logs(TL_OMASK(TL_TRN_SERVER, TL_LOG),"Returning is_init");
+    if(_tercom) {
+        if(_tercom->initialized()) {
+            _ack.parameter = 1;
+        } else {
+            _ack.parameter = 0;
+        }
+
+        logs(TL_OMASK(TL_TRN_SERVER, TL_LOG),"parameter = %d", _ack.parameter);
+        send_msg(_ack);
+    } else {
+        logs(TL_OMASK(TL_TRN_SERVER, (TL_LOG|TL_SERR)),"No TRN object! Have you initialized yet?");
+        send_msg(_nack);
+    }
+
+    return 1;
+
+}
+
 
 // Main function for server process.
 //
@@ -1107,6 +1128,9 @@ int main(int argc, char** argv) {
 
                     case TRN_GET_ESTNAVOFS:
                         get_est_nav_ofs();
+                        break;
+                    case TRN_IS_INIT:
+                        is_init();
                         break;
 
                     case TRN_ACK:

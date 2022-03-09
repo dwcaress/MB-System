@@ -638,7 +638,7 @@ int  wcommst_serialize(char **pdest, wcommst_t *src, int len)
 {
     int retval=-1;
     if(NULL!=src && NULL!=pdest){
-        fprintf(stderr,"%s:%d pdest[%p/%p] len[%d]\n",__FUNCTION__,__LINE__,pdest,*pdest,len);
+//        fprintf(stderr,"%s:%d pdest[%p/%p] len[%d]\n",__FUNCTION__,__LINE__,pdest,*pdest,len);
         char *dest = *pdest;
         if(NULL==dest){
             dest = (char *)malloc(len);
