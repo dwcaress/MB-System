@@ -313,6 +313,7 @@ extern "C" {
     
     int mlog_open(mlog_id_t id,mfile_flags_t flags, mfile_mode_t mode);
     int mlog_close(mlog_id_t id);
+    const char *mlog_path(mlog_id_t id);
     int mlog_delete(mlog_id_t id);
     mlog_t *mlog_get(mlog_id_t id);
     void mlog_show(mlog_id_t, bool verbose, uint16_t indent);
@@ -324,6 +325,10 @@ extern "C" {
     int mlog_write(mlog_id_t id, byte *data, uint32_t len);
     int mlog_printf(mlog_id_t id, char *fmt, ...);
     int mlog_tprintf(mlog_id_t id, const char *fmt, ...);
+    int mlog_xtprintf(mlog_id_t id, const char *channel, int level, const char *fmt, ...);
+    int mlog_vprintf(mlog_id_t id, char *fmt, va_list args);
+    int mlog_vtprintf(mlog_id_t id, const char *fmt, va_list args);
+    int mlog_vxtprintf(mlog_id_t id, const char *channel, int level, const char *fmt, va_list args);
     int mlog_puts(mlog_id_t id, char *data);
     int mlog_putc(mlog_id_t id, char data);
 
@@ -338,7 +343,6 @@ extern "C" {
     int mlog_unmap_channel_dfl(mlog_id_t id, const char *channel);
     mlog_oset_t mlog_lookup_dest(mlog_id_t id, const char *channel, int level);
 
-    int mlog_xtprintf(mlog_id_t id, const char *channel, int level, const char *fmt, ...);
 
 #ifdef WITH_MLOG_TEST
    int mlog_test(int verbose);

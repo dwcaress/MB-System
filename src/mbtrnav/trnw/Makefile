@@ -102,7 +102,7 @@ INC_PATHS = -I. -I$(MFRAME_INC_DIR) -I$(TNAV_DIR) -I$(NEWMAT_DIR) -I$(QNX_DIR) $
 
 # Linker flags
 LD_FLAGS = -g $(GPROF)
-LIB_PATHS = -L/usr/local/lib -L$(OUTPUT_DIR) -L$(MFRAME_LIB_DIR) $(OS_LIB_PATH)
+LIB_PATHS = -L$(OUTPUT_DIR) -L$(MFRAME_LIB_DIR) $(OS_LIB_PATH) -L/usr/local/lib
 
 ########################################
 # Target Definitions

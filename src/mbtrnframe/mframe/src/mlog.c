@@ -1384,8 +1384,23 @@ int mlog_tprintf(mlog_id_t id, const char *fmt, ...)
     return retval;
 }
 
+int mlog_xtprintf(mlog_id_t id, const char *channel, int level, const char *fmt, ...)
+{return -1;} //not implemented}
+int mlog_vprintf(mlog_id_t id, char *fmt, va_list args)
+{return -1;} //not implemented}
+int mlog_vtprintf(mlog_id_t id, const char *fmt, va_list args)
+{return -1;} //not implemented}
+int mlog_vxtprintf(mlog_id_t id, const char *channel, int level, const char *fmt, va_list args)
+{return -1;} //not implemented}
 
 #else
+
+/// @fn int mlog_printf(mlog_id_t id, const char * fmt)
+/// @brief formatted print with timestamp to log destination(s).
+/// uses mlog time format defined in mlog.h
+/// @param[in] id log ID
+/// @param[in] fmt print format (e.g. stdio printf)
+/// @return number of bytes written (to file only) on success, -1 otherwise
 int mlog_printf(mlog_id_t id, char *fmt, ...)
 {
    int retval = -1;
@@ -1460,6 +1475,82 @@ int mlog_printf(mlog_id_t id, char *fmt, ...)
     return retval;
 }
 // End function mlog_printf
+
+/// @fn int mlog_printf(mlog_id_t id, const char * fmt, va_list args)
+/// @brief formatted print with timestamp to log destination(s).
+/// uses mlog time format defined in mlog.h
+/// @param[in] id log ID
+/// @param[in] fmt print format (e.g. stdio printf)
+/// @return number of bytes written (to file only) on success, -1 otherwise
+int mlog_vprintf(mlog_id_t id, char *fmt, va_list args)
+{
+    int retval = -1;
+    mlog_t *log = NULL;
+    mlog_oset_t dest;
+    mlog_flags_t flags;
+
+    log = s_lookup_log(id);
+    if(log!=NULL){
+        char term=0;
+        dest = log->cfg->dest;
+        flags = log->cfg->flags;
+        //get the arguments
+        va_list cargs;
+
+        term=( (fmt!=NULL && fmt[strlen(fmt)-1]=='\n') ? 0x00 : '\n');
+
+        //        fprintf(stderr,"dest[%x]&ML_FILE[%x]\n",dest,(dest&ML_FILE));
+        //        fprintf(stderr,"dest[%x]&ML_SERR[%x]\n",dest,(dest&ML_SERR));
+        //        fprintf(stderr,"dest[%x]&ML_SOUT[%x]\n",dest,(dest&ML_SOUT));
+
+        if (dest&ML_FILE  && (flags&ML_DIS)==0 ) {
+            int wbytes=0;
+            // print message to buffer
+            va_copy(cargs,args);
+            wbytes=vsnprintf(NULL,0,fmt,cargs);
+            retval=wbytes;
+            // check write size and rotate if it will overflow
+            // [will allow writes > segment/log size]
+            if ( (log->cfg->lim_b > 0) && ((log->seg_len+wbytes) > log->cfg->lim_b) ) {
+                s_log_rotate(log);
+            }
+            // va_end added per cppcheck - delete if issues
+            va_end(cargs);
+            va_copy(cargs,args);
+            if( (wbytes=mfile_vfprintf(log->file,fmt,cargs))>0){
+                // add one for the null char
+                log->seg_len+=wbytes+1;
+            }
+            // va_end added per cppcheck - delete if issues
+            va_end(cargs);
+        }
+        //        else{
+        //            fprintf(stderr,"file output disabled d[%0X] f[%0X]\n",dest,flags);
+        //        }
+
+        // send to stderr, stdout
+        if( (dest&ML_SERR) !=0 ){
+            va_copy(cargs,args);
+            vfprintf(stderr,fmt, cargs);
+            if (term!=0x00) {
+                fprintf(stderr,"\n");
+            }
+            // va_end added per cppcheck - delete if issues
+            va_end(cargs);
+        }
+        if( (dest&ML_SOUT) !=0 ){
+            va_copy(cargs,args);
+            vprintf(fmt, cargs);
+            if (term!=0x00) {
+                fprintf(stdout,"\n");
+            }
+            // va_end added per cppcheck - delete if issues
+            va_end(cargs);
+        }
+    }
+    return retval;
+}
+// End function mlog_vprintf
 
 /// @fn int mlog_tprintf(mlog_id_t id, const char * fmt)
 /// @brief formatted print with timestamp to log destination(s).
@@ -1564,6 +1655,105 @@ int mlog_tprintf(mlog_id_t id, const char *fmt, ...)
 }
 // End function mlog_tprintf
 
+/// @fn int mlog_vtprintf(mlog_id_t id, const char * fmt, va_list args)
+/// @brief formatted print with timestamp to log destination(s).
+/// uses mlog time format defined in mlog.h
+/// @param[in] id log ID
+/// @param[in] fmt print format (e.g. stdio printf)
+/// @param[in] args va_list arguments
+/// @return number of bytes written (to file only) on success, -1 otherwise
+int mlog_vtprintf(mlog_id_t id, const char *fmt, va_list args)
+{
+    int retval = -1;
+
+    mlog_t *log = s_lookup_log(id);
+
+    if(log!=NULL && NULL!=log->cfg){
+
+        struct tm now = {0};
+        time_t tt = time(NULL);
+        char *tfmt = NULL;
+        char timestamp[ML_MAX_TS_BYTES]={0};
+        char *del=NULL;
+        char term=0;
+        mlog_oset_t dest = log->cfg->dest;
+        mlog_flags_t flags = log->cfg->flags;
+        gmtime_r(&tt,&now);
+        va_list cargs;
+        //get the arguments
+
+        if (NULL!=log->cfg->tfmt) {
+            tfmt = log->cfg->tfmt;
+        }else{
+            tfmt = ML_DFL_TFMT;
+        }
+
+        memset(timestamp,0,ML_MAX_TS_BYTES);
+        strftime(timestamp,ML_MAX_TS_BYTES,tfmt,&now);
+
+        del = (char *)( (NULL!=log->cfg->del)? log->cfg->del : ML_DFL_DEL);
+
+
+        term=( (fmt!=NULL && fmt[strlen(fmt)-1]=='\n') ? 0x00 : '\n');
+        //        fprintf(stderr,"mask[%x]&TL_LOG[%x]\n",strmask,(strmask&TL_LOG));
+        //        fprintf(stderr,"mask[%x]&TL_SERR[%x]\n",strmask,(strmask&TL_SERR));
+        //        fprintf(stderr,"mask[%x]&TL_SOUT[%x]\n",strmask,(strmask&TL_SOUT));
+
+        if (dest&ML_FILE  && (flags&ML_DIS)==0 ) {
+            int wbytes=0;
+            // print message to buffer
+            va_copy(cargs,args);
+
+            wbytes=snprintf(NULL,0,"%s%s",timestamp,del);
+            wbytes += vsnprintf(NULL,0,fmt,cargs);
+            retval=wbytes;
+            // check write size and rotate if it will overflow
+            // [will allow writes > segment/log size]
+            if ( (log->cfg->lim_b > 0) && ((log->seg_len+wbytes) > log->cfg->lim_b) ) {
+                s_log_rotate(log);
+            }
+            // va_end added per cppcheck - delete if issues
+            va_end(cargs);
+
+            va_copy(cargs,args);
+            if((wbytes=mfile_fprintf(log->file,"%s%s",timestamp,del))>0){
+                log->seg_len+=wbytes;
+            }
+            if( (wbytes=mfile_vfprintf(log->file,fmt,cargs))>0){
+                log->seg_len+=wbytes;
+            }
+            // va_end added per cppcheck - delete if issues
+            va_end(cargs);
+        }
+        //        else{
+        //            fprintf(stderr,"file output disabled d[%0X] f[%0X]\n",dest,flags);
+        //        }
+
+        // send to stderr, stdout
+        if( (dest&ML_SERR) !=0 ){
+            va_copy(cargs,args);
+            fprintf(stderr,"%s%s",timestamp,del);
+            vfprintf(stderr,fmt, cargs);
+            if (term!=0x00) {
+                fprintf(stderr,"\n");
+            }
+            // va_end added per cppcheck - delete if issues
+            va_end(cargs);
+        }
+        if( (dest&ML_SOUT) !=0 ){
+            va_copy(cargs,args);
+            fprintf(stdout,"%s%s",timestamp,del);
+            vprintf(fmt, cargs);
+            if (term!=0x00) {
+                fprintf(stdout,"\n");
+            }
+            // va_end added per cppcheck - delete if issues
+            va_end(cargs);
+        }
+    }
+    return retval;
+}// End function mlog_vtprintf
+
 /// @fn int mlog_xtprintf(mlog_id_t log, const char *channel, int level, const char *fmt, ...)
 /// @brief formatted print with timestamp to log destination(s).
 /// uses mlog time format defined in mlog.h
@@ -1663,6 +1853,103 @@ int mlog_xtprintf(mlog_id_t id, const char *channel, int level, const char *fmt,
     return retval;
 }
 // End function mlog_xtprintf
+
+/// @fn int mlog_vxtprintf(mlog_id_t log, const char *channel, int level, const char *fmt, va_list args)
+/// @brief formatted print with timestamp to log destination(s).
+/// uses mlog time format defined in mlog.h
+/// @param[in] id log ID
+/// @param[in] fmt print format (e.g. stdio printf)
+/// @param[in] args va_list arguments
+/// @return number of bytes written (to file only) on success, -1 otherwise
+int mlog_vxtprintf(mlog_id_t id, const char *channel, int level, const char *fmt, va_list args)
+{
+    int retval = -1;
+
+    mlog_t *log = s_lookup_log(id);
+
+    if(log!=NULL && NULL!=log->cfg){
+
+        struct tm now = {0};
+        time_t tt = time(NULL);
+        char *tfmt = NULL;
+        char timestamp[ML_MAX_TS_BYTES]={0};
+        char *del=NULL;
+        char term=0;
+        mlog_oset_t dest = mlog_lookup_dest(id, channel, level);
+        mlog_flags_t flags = log->cfg->flags;
+        gmtime_r(&tt,&now);
+
+        va_list cargs;
+
+        if (NULL!=log->cfg->tfmt) {
+            tfmt = log->cfg->tfmt;
+        }else{
+            tfmt = ML_DFL_TFMT;
+        }
+
+        memset(timestamp,0,ML_MAX_TS_BYTES);
+        strftime(timestamp,ML_MAX_TS_BYTES,tfmt,&now);
+
+        del = (char *)( (NULL!=log->cfg->del)? log->cfg->del : ML_DFL_DEL);
+
+
+        term=( (fmt!=NULL && fmt[strlen(fmt)-1]=='\n') ? 0x00 : '\n');
+        //        fprintf(stderr,"mask[%x]&TL_LOG[%x]\n",strmask,(strmask&TL_LOG));
+        //        fprintf(stderr,"mask[%x]&TL_SERR[%x]\n",strmask,(strmask&TL_SERR));
+        //        fprintf(stderr,"mask[%x]&TL_SOUT[%x]\n",strmask,(strmask&TL_SOUT));
+
+        if (dest&ML_FILE  && (flags&ML_DIS)==0 ) {
+            int wbytes=0;
+            // print message to buffer
+            va_copy(cargs,args);
+
+            wbytes=snprintf(NULL,0,"%s%s%s%s%s%s",timestamp,del,channel,del,mlog_levelstr(level),del);
+            wbytes += vsnprintf(NULL,0,fmt,cargs);
+            retval=wbytes;
+            // check write size and rotate if it will overflow
+            // [will allow writes > segment/log size]
+            if ( (log->cfg->lim_b > 0) && ((log->seg_len+wbytes) > log->cfg->lim_b) ) {
+                s_log_rotate(log);
+            }
+            // va_end added per cppcheck - delete if issues
+            va_end(cargs);
+
+            va_copy(cargs,args);
+            if((wbytes=mfile_fprintf(log->file,"%s%s%s%s%s%s",timestamp,del,channel,del,mlog_levelstr(level),del))>0){
+                log->seg_len+=wbytes;
+            }
+            if( (wbytes=mfile_vfprintf(log->file,fmt,cargs))>0){
+                log->seg_len+=wbytes;
+            }
+            // va_end added per cppcheck - delete if issues
+            va_end(cargs);
+        }
+
+        // send to stderr, stdout
+        if( (dest&ML_SERR) !=0 ){
+            va_copy(cargs,args);
+            fprintf(stderr,"%s%s%s%s%s%s",timestamp,del,channel,del,mlog_levelstr(level),del);
+            vfprintf(stderr,fmt, cargs);
+            if (term!=0x00) {
+                fprintf(stderr,"\n");
+            }
+            // va_end added per cppcheck - delete if issues
+            va_end(cargs);
+        }
+        if( (dest&ML_SOUT) !=0 ){
+            va_copy(cargs,args);
+            fprintf(stdout,"%s%s%s%s%s%s",timestamp,del,channel,del,mlog_levelstr(level),del);
+            vprintf(fmt, cargs);
+            if (term!=0x00) {
+                fprintf(stdout,"\n");
+            }
+            // va_end added per cppcheck - delete if issues
+            va_end(cargs);
+        }
+    }
+    return retval;
+}
+// End function mlog_vxtprintf
 
 
 map_entry_t *map_entry_new(const char *channel,int level, mlog_oset_t dest_set)
@@ -2078,6 +2365,17 @@ int mlog_puts(mlog_id_t id, char *data)
 }
 // End function mlog_puts
 
+const char *mlog_path(mlog_id_t id)
+{
+    const char *retval = NULL;
+
+    mlog_t *log = s_lookup_log(id);
+    if(NULL!=log && NULL!=log->file){
+        retval = log->file->path;
+    }
+    return retval;
+
+}
 
 /// @fn int mlog_putc(mlog_id_t id, char data)
 /// @brief write a character to log destination(s).
