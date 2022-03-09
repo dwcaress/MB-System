@@ -1426,100 +1426,101 @@ char *TerrainNav::getSessionDir(char *dir_prefix, char *dest, size_t len, bool c
 */
 void TerrainNav::copyToLogDir()
 {
-	// Used the following line for testing
-	// this->saveDirectory = "./logdir";
-
-	// Copy only if there is a place for the files to land
-	//
-	if (NULL != this->saveDirectory)
-	{
-
+    // Used the following line for testing
+    // this->saveDirectory = "./logdir";
+    
+    // Copy only if there is a place for the files to land
+    //
+    if (NULL != this->saveDirectory)
+    {
+        
         char *slash = NULL;
-		char* trnLogDir = getenv("TRN_LOGFILES");
+        char* trnLogDir = getenv("TRN_LOGFILES");
         char dot[]=".";
-		if (!trnLogDir) trnLogDir = dot;
-    char dir_spec[512]={0};  // Reusable buffer to write log directory paths
-    char dir_spec2[512]={0};  // Reusable buffer to write log directory paths
-
-		// Create the log directory
-		// remove last component of directory prefix, if any (shouldn't exist)
+        if (!trnLogDir) trnLogDir = dot;
+        char dir_spec[512]={0};  // Reusable buffer to write log directory paths
+        char dir_spec2[512]={0};  // Reusable buffer to write log directory paths
+        
+        // Create the log directory
+        // remove last component of directory prefix, if any (shouldn't exist)
         // klh - intentional? or is it meant to remove trailing slash?
-		if( ( slash = strrchr( this->saveDirectory, '/' ) ) )
-		{
-		   *slash = '\0';
-		}
-
+        if( ( slash = strrchr( this->saveDirectory, '/' ) ) )
+        {
+            *slash = '\0';
+        }
+        
         getSessionDir(this->saveDirectory,dir_spec,512,true);
-
+        
         // update saveDirectory (used to store filter files)
-		free(this->saveDirectory);
-		this->saveDirectory = STRDUPNULL(dir_spec);
-		logs(TL_OMASK(TL_TERRAIN_NAV, TL_LOG), "TRN log directory is %s\n", this->saveDirectory);
-
-		// Create a latest link that points to the log directory
-		//
-		sprintf(dir_spec, "%s/%s", trnLogDir, LatestLogDirName);
-		remove(dir_spec);
-    strncpy(dir_spec2, this->saveDirectory, 511);
-    if (dir_spec2[strlen(dir_spec2)-1] == '/')
-    {
-      dir_spec2[strlen(dir_spec2)-1] = '\0';
-    }
-    char *sessionLogDir = strrchr(dir_spec2, '/');
-    if (sessionLogDir == NULL)
-    {
-      sessionLogDir = dir_spec2;
+        free(this->saveDirectory);
+        this->saveDirectory = STRDUPNULL(dir_spec);
+        logs(TL_OMASK(TL_TERRAIN_NAV, TL_LOG), "TRN log directory is %s\n", this->saveDirectory);
+        
+        // Create a latest link that points to the log directory
+        //
+        sprintf(dir_spec, "%s/%s", trnLogDir, LatestLogDirName);
+        remove(dir_spec);
+        
+        strncpy(dir_spec2, this->saveDirectory, 511);
+        if (dir_spec2[strlen(dir_spec2)-1] == '/')
+        {
+            dir_spec2[strlen(dir_spec2)-1] = '\0';
+        }
+        char *sessionLogDir = strrchr(dir_spec2, '/');
+        if (sessionLogDir == NULL)
+        {
+            sessionLogDir = dir_spec2;
+        }
+        else
+        {
+            sessionLogDir += 1;
+        }
+        
+        if (0 != symlink(sessionLogDir, dir_spec))
+        {
+            logs(TL_OMASK(TL_TERRAIN_NAV, TL_LOG), "symlink %s to %s failed:%s\n",
+                 dir_spec, sessionLogDir, strerror(errno));
+        }
+        else
+        {
+            logs(TL_OMASK(TL_TERRAIN_NAV, TL_LOG), "symlink %s to %s OK\n",
+                 dir_spec, sessionLogDir);
+        }
     }
     else
     {
-      sessionLogDir += 1;
+        return;
     }
-
-    if (0 != symlink(sessionLogDir, dir_spec))
+    
+    char copybuf[320];
+    if (NULL != this->vehicleSpecFile)
     {
-  logs(TL_OMASK(TL_TERRAIN_NAV, TL_LOG), "symlink %s to %s failed:%s\n",
-    dir_spec, sessionLogDir, strerror(errno));
+        sprintf(copybuf, "cp %s %s/.", this->vehicleSpecFile,
+                this->saveDirectory);
+        if (0 != system(copybuf))
+            logs(TL_OMASK(TL_TERRAIN_NAV, TL_LOG), "command \'%s\' failed:%s\n",
+                 copybuf, strerror(errno));
     }
-    else
+    
+    if (NULL != this->particlesFile)
     {
-  logs(TL_OMASK(TL_TERRAIN_NAV, TL_LOG), "symlink %s to %s OK\n",
-    dir_spec, sessionLogDir);
+        sprintf(copybuf, "cp %s %s/.", this->particlesFile,
+                this->saveDirectory);
+        if (0 != system(copybuf))
+            logs(TL_OMASK(TL_TERRAIN_NAV, TL_LOG), "command \'%s\' failed:%s\n",
+                 copybuf, strerror(errno));
     }
-	}
-    else
+    
+    // Create a vehicleT object just to get the sensor spec files to copy
+    //
+    vehicleT *v = new vehicleT(vehicleSpecFile);
+    for (int i = 0; i < v->numSensors; i++)
     {
-		return;
+        sprintf(copybuf, "cp %s %s/.", v->sensors[i].filename,
+                this->saveDirectory);
+        if (0 != system(copybuf))
+            logs(TL_OMASK(TL_TERRAIN_NAV, TL_LOG), "command \'%s\' failed:%s\n",
+                 copybuf, strerror(errno));
     }
-
-	char copybuf[320];
-	if (NULL != this->vehicleSpecFile)
-	{
-		sprintf(copybuf, "cp %s %s/.", this->vehicleSpecFile,
-						    this->saveDirectory);
-		if (0 != system(copybuf))
-			logs(TL_OMASK(TL_TERRAIN_NAV, TL_LOG), "command \'%s\' failed:%s\n",
-				copybuf, strerror(errno));
-	}
-
-	if (NULL != this->particlesFile)
-	{
-		sprintf(copybuf, "cp %s %s/.", this->particlesFile,
-						    this->saveDirectory);
-		if (0 != system(copybuf))
-			logs(TL_OMASK(TL_TERRAIN_NAV, TL_LOG), "command \'%s\' failed:%s\n",
-				copybuf, strerror(errno));
-	}
-
-	// Create a vehicleT object just to get the sensor spec files to copy
-	//
-	vehicleT *v = new vehicleT(vehicleSpecFile);
-	for (int i = 0; i < v->numSensors; i++)
-	{
-		sprintf(copybuf, "cp %s %s/.", v->sensors[i].filename,
-						       this->saveDirectory);
-		if (0 != system(copybuf))
-			logs(TL_OMASK(TL_TERRAIN_NAV, TL_LOG), "command \'%s\' failed:%s\n",
-				copybuf, strerror(errno));
-	}
-	delete v;
+    delete v;
 }

@@ -476,6 +476,7 @@ enum
 // (particle window variance)
 //
 
+#define TRN_IS_INIT 'i'
 #define TRN_SET_ESTNAVOFS 'j'
 #define TRN_GET_ESTNAVOFS 'J'
 
