@@ -4927,26 +4927,26 @@ int mbtrnpp_init_debug(int verbose) {
             mmd_channel_set(MOD_MBTRNPP, MM_NONE);
             mmd_channel_set(MOD_R7K, MM_NONE);
             mmd_channel_set(MOD_R7KR, MM_NONE);
-            mmd_channel_set(MOD_M1BR, MM_NONE);
+            mmd_channel_set(MOD_MB1R, MM_NONE);
             mmd_channel_set(MOD_MSOCK, MM_NONE);
             mmd_channel_set(MOD_NETIF, MM_NONE);
             break;
         case 1:
             mmd_channel_en(MOD_MBTRNPP, MBTRNPP_V1);
             mmd_channel_en(MOD_R7KR, R7KR_V1);
-            mmd_channel_set(MOD_M1BR, M1BR_V1);
+            mmd_channel_set(MOD_MB1R, MB1R_V1);
             break;
         case 2:
             mmd_channel_en(MOD_MBTRNPP, MM_DEBUG);
             mmd_channel_en(MOD_R7KR, MM_DEBUG);
             mmd_channel_en(MOD_R7K, R7K_PARSER);
-            mmd_channel_en(MOD_M1BR, MM_DEBUG);
+            mmd_channel_en(MOD_MB1R, MM_DEBUG);
             break;
         case -1:
             mmd_channel_en(MOD_MBTRNPP, MBTRNPP_V1);
             mmd_channel_en(MOD_R7KR, MM_DEBUG);
             mmd_channel_set(MOD_NETIF, NETIF_V1 | NETIF_V2);
-            mmd_channel_en(MOD_M1BR, MM_DEBUG);
+            mmd_channel_en(MOD_MB1R, MM_DEBUG);
             break;
         case -2:
             mmd_channel_en(MOD_MBTRNPP, MBTRNPP_V1 | MBTRNPP_V2);
