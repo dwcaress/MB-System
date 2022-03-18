@@ -42,9 +42,11 @@ Libmframe
 CONFIG
 PATHS
 "${MFRAME_PKG_PATH}"
+"${PARENT_DIR}"
 "${DFL_PKG_PATH}"
 PATH_SUFFIXES
 lib/cmake/mframe
+mframe/build/pkg/lib/cmake/mframe
 REQUIRED
 )
 
