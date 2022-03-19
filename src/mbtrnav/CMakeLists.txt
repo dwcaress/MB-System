@@ -567,6 +567,7 @@ INCLUDES DESTINATION include
 # specify package files
 install(
 FILES
+${TNAV_SRC_DIR}/trn_common.h
 ${TRNW_SRC_DIR}/trnw.h
 ${TRNW_SRC_DIR}/netif.h
 ${TRNW_SRC_DIR}/trnu_cli.h
