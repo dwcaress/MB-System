@@ -65,7 +65,7 @@ INC_PATHS =  -I.  -I$(NEWMAT_DIR) -I$(QNX_DIR) -I$(TRN_DIR) -I$(UTILS_DIR) $(OS_
 
 # Linker flags
 LD_FLAGS = -g $(GPROF)
-LIB_PATHS = -L/usr/local/lib -L$(OUTPUT_DIR) $(OS_LIB_PATH)
+LIB_PATHS = -L$(OUTPUT_DIR) $(OS_LIB_PATH) -L/usr/local/lib
 
 ########################################
 # Target Definitions
