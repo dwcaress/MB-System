@@ -119,7 +119,7 @@ typedef struct {
 #define MB_BUFFER_MAX 5000
 
 /* maximum path length in characters */
-#define MB_PATH_MAXLINE 4096
+#define MB_PATH_MAXLINE 1024
 
 /* maximum comment length in characters */
 #define MB_COMMENT_MAXLINE 1944

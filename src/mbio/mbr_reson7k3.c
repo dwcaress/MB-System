@@ -435,7 +435,7 @@ int mbr_dem_reson7k3(int verbose, void *mbio_ptr, int *error) {
   struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
   /* get pointers to buffers */
-  struct mbsys_reson7k3_struct *store = (struct mbsys_reson7k3_struct *) &mb_io_ptr->store_data;
+  struct mbsys_reson7k3_struct *store = (struct mbsys_reson7k3_struct *) mb_io_ptr->store_data;
   bufferptr = (char **)&mb_io_ptr->saveptr1;
   buffer = (char *)*bufferptr;
   bufferalloc = (int *)&mb_io_ptr->save6;
@@ -5192,8 +5192,8 @@ int mbr_reson7k3_rd_Beamformed(int verbose, char *buffer, void *store_ptr, int *
   mb_get_binary_int(true, &buffer[index], &(Beamformed->number_samples));
   index += 4;
   for (int i = 0; i < 8; i++) {
-    Beamformed->reserved[i] = buffer[index];
-    index++;
+    mb_get_binary_int(true, &buffer[index], &(Beamformed->reserved[i]));
+    index += 4;
   }
 
   /* loop over all beams */
@@ -11132,7 +11132,7 @@ int mbr_reson7k3_FileCatalog_update(int verbose, void *mbio_ptr, void *store_ptr
 
   /* get pointers to data structures */
   s7k3_header *header = (s7k3_header *)header_ptr;
-  s7k3_FileCatalog *FileCatalog = (s7k3_FileCatalog *)&store->FileCatalog_write;
+  s7k3_FileCatalog *FileCatalog = &store->FileCatalog_write;
 
   int status = MB_SUCCESS;
 
@@ -15685,8 +15685,8 @@ int mbr_reson7k3_wr_Beamformed(int verbose, int *bufferalloc, char **bufferptr, 
     mb_put_binary_int(true, Beamformed->number_samples, &buffer[index]);
     index += 4;
     for (int i = 0; i < 8; i++) {
-      buffer[index] = (char) Beamformed->reserved[i];
-      index++;
+      mb_put_binary_int(true, Beamformed->reserved[i], &buffer[index]);
+      index += 4;
     }
     for (int i = 0; i < Beamformed->number_beams; i++) {
       amplitudephase = &(Beamformed->amplitudephase[i]);

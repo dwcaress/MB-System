@@ -112,8 +112,10 @@ EXTERNAL Widget pushButton_showmediocrecrossings;
 EXTERNAL Widget pushButton_showgoodcrossings;
 EXTERNAL Widget pushButton_showbettercrossings;
 EXTERNAL Widget pushButton_showtruecrossings;
-EXTERNAL Widget pushButton_showties;
-EXTERNAL Widget pushButton_showtiessorted;
+EXTERNAL Widget pushButton_showcrossingties;
+EXTERNAL Widget pushButton_showcrossingtiessorted;
+EXTERNAL Widget pushButton_showglobalties;
+EXTERNAL Widget pushButton_showglobaltiessorted;
 EXTERNAL Widget toggleButton_showallsurveys;
 EXTERNAL Widget toggleButton_showselectedsurvey;
 EXTERNAL Widget toggleButton_showselectedblock; /* NEW */
