@@ -203,6 +203,9 @@ int mb1r_reader_connect(mb1r_reader_t *self, bool replace_socket)
             self->sockif = msock_socket_new(host,port,ST_TCP);
         }
 
+        const int optionval = 1;
+        msock_set_opt(self->sockif, SO_REUSEPORT, &optionval, sizeof(optionval));
+
         PMPRINT(MOD_MB1R,MM_DEBUG,(stderr,"connecting to stream [%s:%d]\n",self->sockif->addr->host,self->sockif->addr->port));
         if(msock_connect(self->sockif)==0){
             self->state=MB1R_CONNECTED;
@@ -859,8 +862,12 @@ static int s_sm_act_read_header(mb1r_reader_t *self, mb1r_sm_ctx_t *pctx)
             if(pctx->action == MB1R_ACTION_READ){
                 pctx->read_bytes=0;
                 while (pctx->read_bytes<pctx->read_len) {
+
+                    PMPRINT(MOD_MB1R,MM_DEBUG,(stderr,"reading [%"PRId64"/%"PRIu32"] rto_ms[%"PRIu32"]\n",pctx->read_bytes,pctx->read_len, pctx->timeout_msec));
+
                     if ( (pctx->read_bytes=msock_read_tmout(mb1r_reader_sockif(self), pctx->pbuf, pctx->read_len, pctx->timeout_msec)) == pctx->read_len) {
-                        //                        PMPRINT(MOD_R7KR,MM_DEBUG,(stderr,"read OK [%"PRId64"]\n",read_bytes));
+
+//                        PMPRINT(MOD_MB1R,MM_DEBUG,(stderr,"read OK [%"PRId64"]\n",pctx->read_bytes));
 
 //                        pnf = (r7k_nf_t *)dest;
                         pctx->pbuf += pctx->read_bytes;
