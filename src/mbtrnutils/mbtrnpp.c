@@ -4832,101 +4832,108 @@ int mbtrnpp_update_stats(mstats_profile_t *stats, mlog_id_t log_id, mstats_flags
 
 int mbtrnpp_init_debug(int verbose) {
 
-  /* Open and initialize the socket based input for reading using function
-   * mbtrnpp_input_read(). Allocate an internal, hidden buffer to hold data from
-   * full s7k records while waiting to return bytes from those records as
-   * requested by the MBIO read functions.
-   * Store the relevant pointers and parameters within the
-   * mb_io_struct structure *mb_io_ptr. */
+    /* Open and initialize the socket based input for reading using function
+     * mbtrnpp_input_read(). Allocate an internal, hidden buffer to hold data from
+     * full s7k records while waiting to return bytes from those records as
+     * requested by the MBIO read functions.
+     * Store the relevant pointers and parameters within the
+     * mb_io_struct structure *mb_io_ptr. */
 
-  mmd_initialize();
-  mconf_init(NULL, NULL);
+    mmd_initialize();
+    mconf_init(NULL, NULL);
 
-  fprintf(stderr, "%s:%d >>> MOD_MBTRNPP[id=%d]  en[%08X] verbose[%d]\n", __FUNCTION__, __LINE__, MOD_MBTRNPP,
-          mmd_get_enmask(MOD_MBTRNPP, NULL),verbose);
+    fprintf(stderr, "%s:%d >>> MOD_MBTRNPP[id=%d]  en[%08X] verbose[%d]\n", __FUNCTION__, __LINE__, MOD_MBTRNPP,
+            mmd_get_enmask(MOD_MBTRNPP, NULL),verbose);
 
-  switch (verbose) {
-  case 0:
-    mmd_channel_set(MOD_MBTRNPP, MM_NONE);
-    mmd_channel_set(MOD_R7K, MM_NONE);
-    mmd_channel_set(MOD_R7KR, MM_NONE);
-    mmd_channel_set(MOD_MSOCK, MM_NONE);
-    mmd_channel_set(MOD_NETIF, MM_NONE);
-    break;
-  case 1:
-    mmd_channel_en(MOD_MBTRNPP, MBTRNPP_V1);
-    mmd_channel_en(MOD_R7KR, R7KR_V1);
-    break;
-  case 2:
-    mmd_channel_en(MOD_MBTRNPP, MM_DEBUG);
-    mmd_channel_en(MOD_R7KR, MM_DEBUG);
-    mmd_channel_en(MOD_R7K, R7K_PARSER);
-    break;
-  case -1:
-    mmd_channel_en(MOD_MBTRNPP, MBTRNPP_V1);
-    mmd_channel_en(MOD_R7KR, MM_DEBUG);
-    mmd_channel_set(MOD_NETIF, NETIF_V1 | NETIF_V2);
-    break;
-  case -2:
-    mmd_channel_en(MOD_MBTRNPP, MBTRNPP_V1 | MBTRNPP_V2);
-    mmd_channel_set(MOD_NETIF, NETIF_V1 | NETIF_V2 | NETIF_V3 );
-    break;
-  case -3:
-    mmd_channel_en(MOD_MBTRNPP, MM_DEBUG | MBTRNPP_V1 | MBTRNPP_V2 | MBTRNPP_V3 );
-    mmd_channel_en(MOD_R7KR, MM_DEBUG);
-    mmd_channel_en(MOD_R7K, MM_WARN | R7K_PARSER);
-    mmd_channel_set(MOD_NETIF, NETIF_V1 | NETIF_V2 | NETIF_V3 | NETIF_V4);
-    // this enables messages from msock_recv (e.g. resource temporarily unavailable)
-    msock_set_debug(1);
-    break;
-  case -4:
-    mmd_channel_en(MOD_MBTRNPP, MM_DEBUG | MBTRNPP_V1 | MBTRNPP_V2 | MBTRNPP_V3 | MBTRNPP_V4);
-    mmd_channel_en(MOD_R7KR, MM_DEBUG);
-    mmd_channel_en(MOD_R7K, MM_WARN | R7K_PARSER | R7K_DRFCON);
-    mmd_channel_en(MOD_MSOCK, MM_DEBUG);
-    mmd_channel_set(MOD_NETIF, MM_DEBUG | NETIF_V1 | NETIF_V2 | NETIF_V3 | NETIF_V4);
-    msock_set_debug(1);
-    break;
-  case -5:
-    mmd_channel_en(MOD_MBTRNPP, MM_ALL);
-    mmd_channel_en(MOD_R7KR, MM_ALL);
-    mmd_channel_en(MOD_R7K, MM_ALL);
-    mmd_channel_en(MOD_MSOCK, MM_ALL);
-    mmd_channel_en(MOD_NETIF, MM_ALL);
-    msock_set_debug(1);
-    break;
-  default:
-    break;
-  }
-  fprintf(stderr, "%s:%d >>> MOD_MBTRNPP  en[%08X]\n", __FUNCTION__, __LINE__, mmd_get_enmask(MOD_MBTRNPP, NULL));
+    switch (verbose) {
+        case 0:
+            mmd_channel_set(MOD_MBTRNPP, MM_NONE);
+            mmd_channel_set(MOD_R7K, MM_NONE);
+            mmd_channel_set(MOD_R7KR, MM_NONE);
+            mmd_channel_set(MOD_MB1R, MM_NONE);
+            mmd_channel_set(MOD_MSOCK, MM_NONE);
+            mmd_channel_set(MOD_NETIF, MM_NONE);
+            break;
+        case 1:
+            mmd_channel_en(MOD_MBTRNPP, MBTRNPP_V1);
+            mmd_channel_en(MOD_R7KR, R7KR_V1);
+            mmd_channel_set(MOD_MB1R, MB1R_V1);
+            break;
+        case 2:
+            mmd_channel_en(MOD_MBTRNPP, MM_DEBUG);
+            mmd_channel_en(MOD_R7KR, MM_DEBUG);
+            mmd_channel_en(MOD_R7K, R7K_PARSER);
+            mmd_channel_en(MOD_MB1R, MM_DEBUG);
+            break;
+        case -1:
+            mmd_channel_en(MOD_MBTRNPP, MBTRNPP_V1);
+            mmd_channel_en(MOD_R7KR, MM_DEBUG);
+            mmd_channel_set(MOD_NETIF, NETIF_V1 | NETIF_V2);
+            mmd_channel_en(MOD_MB1R, MM_DEBUG);
+            break;
+        case -2:
+            mmd_channel_en(MOD_MBTRNPP, MBTRNPP_V1 | MBTRNPP_V2);
+            mmd_channel_set(MOD_NETIF, NETIF_V1 | NETIF_V2 | NETIF_V3 );
+            break;
+        case -3:
+            mmd_channel_en(MOD_MBTRNPP, MM_DEBUG | MBTRNPP_V1 | MBTRNPP_V2 | MBTRNPP_V3 );
+            mmd_channel_en(MOD_R7KR, MM_DEBUG);
+            mmd_channel_en(MOD_R7K, MM_WARN | R7K_PARSER);
+            mmd_channel_en(MOD_MB1R, MM_ALL);
+            mmd_channel_set(MOD_NETIF, NETIF_V1 | NETIF_V2 | NETIF_V3 | NETIF_V4);
+            // this enables messages from msock_recv (e.g. resource temporarily unavailable)
+            msock_set_debug(1);
+            break;
+        case -4:
+            mmd_channel_en(MOD_MBTRNPP, MM_DEBUG | MBTRNPP_V1 | MBTRNPP_V2 | MBTRNPP_V3 | MBTRNPP_V4);
+            mmd_channel_en(MOD_R7KR, MM_DEBUG);
+            mmd_channel_en(MOD_R7K, MM_WARN | R7K_PARSER | R7K_DRFCON);
+            mmd_channel_en(MOD_MB1R, MM_DEBUG);
+            mmd_channel_en(MOD_MSOCK, MM_DEBUG);
+            mmd_channel_set(MOD_NETIF, MM_DEBUG | NETIF_V1 | NETIF_V2 | NETIF_V3 | NETIF_V4);
+            msock_set_debug(1);
+            break;
+        case -5:
+            mmd_channel_en(MOD_MBTRNPP, MM_ALL);
+            mmd_channel_en(MOD_R7KR, MM_ALL);
+            mmd_channel_en(MOD_R7K, MM_ALL);
+            mmd_channel_en(MOD_MB1R, MM_ALL);
+            mmd_channel_en(MOD_MSOCK, MM_ALL);
+            mmd_channel_en(MOD_NETIF, MM_ALL);
+            msock_set_debug(1);
+            break;
+        default:
+            break;
+    }
+    fprintf(stderr, "%s:%d >>> MOD_MBTRNPP  en[%08X]\n", __FUNCTION__, __LINE__, mmd_get_enmask(MOD_MBTRNPP, NULL));
 
-  // open mb1 data log
-  if ( OUTPUT_FLAG_SET(OUTPUT_MB1_BIN) ) {
-    mb1_blog_path = (char *)malloc(512);
-    sprintf(mb1_blog_path, "%s//%s-%s%s", mbtrn_cfg->trn_log_dir, MB1_BLOG_NAME,
-            s_mbtrnpp_session_str(NULL,0,RF_NONE), MBTRNPP_LOG_EXT);
-    mb1_blog_id = mlog_get_instance(mb1_blog_path, &mb1_blog_conf, MB1_BLOG_NAME);
-    fprintf(stderr,"MB1 binary log [%s]\n",mb1_blog_path);
-    mlog_show(mb1_blog_id, true, 5);
-    mlog_open(mb1_blog_id, flags, mode);
-  }
+    // open mb1 data log
+    if ( OUTPUT_FLAG_SET(OUTPUT_MB1_BIN) ) {
+        mb1_blog_path = (char *)malloc(512);
+        sprintf(mb1_blog_path, "%s//%s-%s%s", mbtrn_cfg->trn_log_dir, MB1_BLOG_NAME,
+                s_mbtrnpp_session_str(NULL,0,RF_NONE), MBTRNPP_LOG_EXT);
+        mb1_blog_id = mlog_get_instance(mb1_blog_path, &mb1_blog_conf, MB1_BLOG_NAME);
+        fprintf(stderr,"MB1 binary log [%s]\n",mb1_blog_path);
+        mlog_show(mb1_blog_id, true, 5);
+        mlog_open(mb1_blog_id, flags, mode);
+    }
 
-  // open trn message log
-  if (OUTPUT_FLAG_SET(OUTPUT_MBTRNPP_MSG) ) {
-    mbtrnpp_mlog_path = (char *)malloc(512);
-    sprintf(mbtrnpp_mlog_path, "%s//%s-%s%s", mbtrn_cfg->trn_log_dir, MBTRNPP_MLOG_NAME, s_mbtrnpp_session_str(NULL,0,RF_NONE), MBTRNPP_LOG_EXT);
-    mbtrnpp_mlog_id = mlog_get_instance(mbtrnpp_mlog_path, &mbtrnpp_mlog_conf, MBTRNPP_MLOG_NAME);
-    fprintf(stderr,"mbtrnpp message log [%s]\n",mbtrnpp_mlog_path);
-    mlog_show(mbtrnpp_mlog_id, true, 5);
-    mlog_open(mbtrnpp_mlog_id, flags, mode);
-    mlog_tprintf(mbtrnpp_mlog_id, "*** mbtrn session start ***\n");
-    mlog_tprintf(mbtrnpp_mlog_id, "cmdline [%s]\n", s_mbtrnpp_cmdline_str(NULL, 0, 0, NULL, RF_NONE));
-    mlog_tprintf(mbtrnpp_mlog_id, "r7kr v[%s] build[%s]\n", R7KR_VERSION_STR, LIBMFRAME_BUILD);
-  } else {
-      // put to stderr if log disabled
-    fprintf(stderr, "*** mbtrn session start ***\n");
-    fprintf(stderr, "cmdline [%s]\n", s_mbtrnpp_cmdline_str(NULL, 0, 0, NULL, RF_NONE));
-  }
+    // open trn message log
+    if (OUTPUT_FLAG_SET(OUTPUT_MBTRNPP_MSG) ) {
+        mbtrnpp_mlog_path = (char *)malloc(512);
+        sprintf(mbtrnpp_mlog_path, "%s//%s-%s%s", mbtrn_cfg->trn_log_dir, MBTRNPP_MLOG_NAME, s_mbtrnpp_session_str(NULL,0,RF_NONE), MBTRNPP_LOG_EXT);
+        mbtrnpp_mlog_id = mlog_get_instance(mbtrnpp_mlog_path, &mbtrnpp_mlog_conf, MBTRNPP_MLOG_NAME);
+        fprintf(stderr,"mbtrnpp message log [%s]\n",mbtrnpp_mlog_path);
+        mlog_show(mbtrnpp_mlog_id, true, 5);
+        mlog_open(mbtrnpp_mlog_id, flags, mode);
+        mlog_tprintf(mbtrnpp_mlog_id, "*** mbtrn session start ***\n");
+        mlog_tprintf(mbtrnpp_mlog_id, "cmdline [%s]\n", s_mbtrnpp_cmdline_str(NULL, 0, 0, NULL, RF_NONE));
+        mlog_tprintf(mbtrnpp_mlog_id, "r7kr v[%s] build[%s]\n", R7KR_VERSION_STR, LIBMFRAME_BUILD);
+    } else {
+        // put to stderr if log disabled
+        fprintf(stderr, "*** mbtrn session start ***\n");
+        fprintf(stderr, "cmdline [%s]\n", s_mbtrnpp_cmdline_str(NULL, 0, 0, NULL, RF_NONE));
+    }
 
     // open trn message log
     if (OUTPUT_FLAG_SET(OUTPUT_TRNU_ASC) ) {
@@ -4951,10 +4958,10 @@ int mbtrnpp_init_debug(int verbose) {
         mlog_open(trnu_blog_id, flags, mode);
     }
 
-  app_stats = mstats_profile_new(MBTPP_EV_COUNT, MBTPP_STA_COUNT, MBTPP_CH_COUNT, mbtrnpp_stats_labels, mtime_dtime(),
-                                 mbtrn_cfg->trn_status_interval_sec);
+    app_stats = mstats_profile_new(MBTPP_EV_COUNT, MBTPP_STA_COUNT, MBTPP_CH_COUNT, mbtrnpp_stats_labels, mtime_dtime(),
+                                   mbtrn_cfg->trn_status_interval_sec);
 
-  return 0;
+    return 0;
 }
 /*--------------------------------------------------------------------*/
 
@@ -6735,6 +6742,7 @@ int mbtrnpp_mb1r_input_open(int verbose, void *mbio_ptr, char *definition, int *
         size = MB1_MAX_SOUNDING_BYTES;
 
     PMPRINT(MOD_MBTRNPP, MM_DEBUG, (stderr, "configuring mb1r_reader using %s:%d\n", hostname, port));
+
     mb1r_reader_t *reader = mb1r_reader_new(hostname, port, size);
 
     if (NULL != mb_io_ptr && NULL != reader) {
@@ -6823,6 +6831,7 @@ int mbtrnpp_mb1r_input_read(int verbose, void *mbio_ptr, size_t *size, char *buf
     uint32_t sync_bytes=0;
     int64_t rbytes=-1;
     mb1r_reader_t *reader = (mb1r_reader_t *)mb_io_ptr->mbsp;
+
     if ( (rbytes = mb1r_read_frame(reader, (byte *) buffer,
                                             MB1_MAX_SOUNDING_BYTES, MB1R_NET_STREAM,
                                             0.0, MB1R_READ_TMOUT_MSEC,

@@ -42,9 +42,11 @@ Libmframe
 CONFIG
 PATHS
 "${MFRAME_PKG_PATH}"
+"${PARENT_DIR}"
 "${DFL_PKG_PATH}"
 PATH_SUFFIXES
 lib/cmake/mframe
+mframe/build/pkg/lib/cmake/mframe
 REQUIRED
 )
 
@@ -565,6 +567,7 @@ INCLUDES DESTINATION include
 # specify package files
 install(
 FILES
+${TNAV_SRC_DIR}/trn_common.h
 ${TRNW_SRC_DIR}/trnw.h
 ${TRNW_SRC_DIR}/netif.h
 ${TRNW_SRC_DIR}/trnu_cli.h

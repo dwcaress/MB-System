@@ -19,7 +19,7 @@ ifeq ($(shell uname),Linux)
  OS_CFLAGS=
  OS_INC_PATH=
  OS_LIB_PATH=
- OS_LIBS=-lrt
+ OS_LIBS=-lrt -larmadillo
 endif
 
 ifeq ($(shell uname),Darwin)
@@ -48,7 +48,8 @@ TRN_DIR=../../terrain-nav
 UTILS_DIR=../../utils
 
 # Compilation Options
-CXX = g++ #gcc
+CC = gcc
+CXX = g++
 AR = ar
 # compile and link with -pg for profiling support
 # then do gprof <application> gmon.out for profile output to console
@@ -63,6 +64,9 @@ SANI_FLAG =
 CFLAGS = -g -O2 $(SANI_FLAG) $(WARN_FLAGS) $(GPROF) $(BUILD_OPTIONS) $(OS_CFLAGS)
 INC_PATHS =  -I.  -I$(NEWMAT_DIR) -I$(QNX_DIR) -I$(TRN_DIR) $(OS_INC_PATH)
 
+# C++ lint tool
+CPPLINT=cppcheck --enable=all
+
 # Set to 1 to build lrtrn-server
 # Requires LCM and lrauv-lcmtypes
 BUILD_LRTRN=1
@@ -75,23 +79,39 @@ endif
 
 # Linker flags
 LD_FLAGS = -g $(GPROF)
-LIB_PATHS = -L/usr/local/lib -L$(OUTPUT_DIR) $(OS_LIB_PATH)
+LIB_PATHS = -L$(OUTPUT_DIR) $(OS_LIB_PATH) -L/usr/local/lib
+
 
 ########################################
 # Target Definitions
+LRTRN_APP=lrtrn-app
+LRTRN_APP_HDR=LcmTrn.h
+LRTRN_APP_SRC=lrtrn_app.cpp LcmTrn.cpp $(LRTRN_APP_HDR)
+LRTRN_APP_OBJ = $(LRTRN_APP_SRC:%.cpp=$(BUILD_DIR)/%.o)
+LRTRN_APP_PP = $(LRTRN_APP_SRC:%.cpp=./%.cpp-pp) $(LRTRN_APP_SRC:%.h=./%.h-pp)
+LRTRN_APP_LIBS = -llcm -lconfig++ -lzf_log -ltrn  -lnewmat -lqnx -lgeolib -lnetcdf -lm $(OS_LIBS)
 
-LRTRN_BOT=lrtrn-bot
-LRTRN_BOT_SRC=lrtrn_app.cpp LcmTrn.cpp
-LRTRN_BOT_OBJ = $(LRTRN_BOT_SRC:%.cpp=$(BUILD_DIR)/%.o)
-LRTRN_BOT_LIBS = -llcm -lconfig++ -ltrn  -lnewmat -lqnx -lgeolib -lnetcdf -lm $(OS_LIBS)
+LRCONAV_APP=lrconav-app
+LRCONAV_APP_HDR=lrconav_app.h CoNav.h MRFilter.h
+LRCONAV_APP_SRC=lrconav_app.cpp CoNav.cpp MRFilter.cpp $(LRCONAV_APP_HDR)
+LRCONAV_APP_OBJ = $(LRCONAV_APP_SRC:%.cpp=$(BUILD_DIR)/%.o)
+LRCONAV_APP_PP = $(LRCONAV_APP_SRC:%.cpp=./%.cpp-pp) $(LRCONAV_APP_SRC:%.h=./%.h-pp)
+LRCONAV_APP_LIBS = -llcm -lzf_log -ltrn  -lnewmat -lqnx -lgeolib -lnetcdf -lm $(OS_LIBS)
+
+#CONAV_MSG_PP = $(CONAV_MSG_SRC:%.cpp=./%.cpp-pp) $(CONAV_MSG_SRC:%.h=./%.h-pp)
+
+CONAV_MSG_APP=mr_msg-app
+CONAV_MSG_SRC=mr_msg_app.cpp
+CONAV_MSG_OBJ = $(CONAV_MSG_SRC:%.cpp=$(BUILD_DIR)/%.o)
+CONAV_MSG_LIBS = -llcm -lzf_log -ltrn  -lnewmat -lqnx -lgeolib -lnetcdf -lm $(OS_LIBS)
 
 ########################################
 # Build Files (mostly for cleanup)
-SOURCES = $(LRTRN_BOT)
+SOURCES = $(LRTRN_APP) $(LRCONAV_APP) $(CONAV_MSG_APP)
 
 OBJECTS = $(SOURCES:%.cpp=$(BUILD_DIR)/%.o)
 DEPENDS = $(SOURCES:%.cpp=$(BUILD_DIR)/%.d)
-BINARIES = $(OUTPUT_DIR)/$(LRTRN_BOT)
+BINARIES = $(OUTPUT_DIR)/$(LRTRN_APP) $(OUTPUT_DIR)/$(LRCONAV_APP) $(OUTPUT_DIR)/$(CONAV_MSG_APP)
 
 
 CLEANUP = gmon.out
@@ -104,11 +124,31 @@ CLEANUP = gmon.out
 
 all: $(BINARIES)
 
-# build LRAUV TRN server utility
-$(OUTPUT_DIR)/$(LRTRN_BOT): $(LRTRN_BOT_OBJ)
+# build LRAUV TRN utility
+$(OUTPUT_DIR)/$(LRTRN_APP): $(LRTRN_APP_HDR) $(LRTRN_APP_OBJ)
 	@echo building $@...
-	$(CXX) $(CFLAGS) $(INC_PATHS) $(LIB_PATHS) $^ -o $@ $(LD_FLAGS) $(LRTRN_BOT_LIBS)
+	$(CXX) $(CFLAGS) $(INC_PATHS) $(LIB_PATHS) $^ -o $@ $(LD_FLAGS) $(LRTRN_APP_LIBS)
 	@echo
+
+# build LR Terrain-Relative CoNav utility
+$(OUTPUT_DIR)/$(LRCONAV_APP): $(LRCONAV_APP_OBJ) $(LRCONAV_APP_HDR)
+	@echo building $@...
+	$(CXX) $(CFLAGS) $(INC_PATHS) $(LIB_PATHS) $^ -o $@ $(LD_FLAGS) $(LRCONAV_APP_LIBS)
+	@echo
+
+# build LR Terrain-Relative CoNav message test program
+$(OUTPUT_DIR)/$(CONAV_MSG_APP): $(CONAV_MSG_OBJ)
+	@echo building $@...
+	$(CXX) $(CFLAGS) $(INC_PATHS) $(LIB_PATHS) $^ -o $@ $(LD_FLAGS) $(CONAV_MSG_LIBS)
+	@echo
+
+lint: $(LRTRN_APP_SRC) $(LRCONAV_APP_SRC) $(CONAV_MSG_SRC)
+	@echo running cppcheck on source...
+	$(CPPLINT) $^
+	@echo
+
+format: $(CONAV_MSG_PP) $(LRTRN_APP_PP) $(LRCONAV_APP_PP)
+	@echo Formatting source to clang standard...
 
 # generate dependency files
 ifneq ($(MAKECMDGOALS),clean)
@@ -117,9 +157,31 @@ ifneq ($(MAKECMDGOALS),purge)
 endif
 endif
 
+
+# rule: build pretty-print files from source files
+CLANG_FORMAT=clang-format -style="{BasedOnStyle: llvm, IndentWidth: 4, BreakBeforeBraces: Linux, AlignConsecutiveAssignments: true}"
+
+./%.cpp-pp :%.cpp
+	@echo formatting $<...
+	$(CLANG_FORMAT) $< > $@
+	@echo
+
+./%.h-pp :%.h
+	@echo formatting $<...
+	$(CLANG_FORMAT) $< > $@
+	@echo
+
 # rule: build object files from source files
 $(BUILD_DIR)/%.o :%.cpp
 	@echo compiling $<...
+	$(CPPLINT) $<
+	$(CXX) $(CFLAGS) $(INC_PATHS) -c $< -o $@
+	@echo
+
+# rule: build object files from source files
+$(BUILD_DIR)/%.o :%.c
+	@echo compiling $<...
+	$(CPPLINT) $<
 	$(CXX) $(CFLAGS) $(INC_PATHS) -c $< -o $@
 	@echo
 

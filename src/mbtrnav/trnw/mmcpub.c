@@ -151,6 +151,8 @@ int main(int argc, char *argv[])
     int wkey=OFMT_KEY;
     int wval=OFMT_VAL;
 
+    char *lcm = NULL;
+
     // configure signal handling
     // for main thread
     struct sigaction saStruct;
@@ -159,7 +161,7 @@ int main(int argc, char *argv[])
     saStruct.sa_handler = s_termination_handler;
     sigaction(SIGINT, &saStruct, NULL);
 
-    while((opt_c = getopt(argc, argv, "a:bd:hi:m:lp:t:ux")) != -1){
+    while((opt_c = getopt(argc, argv, "a:bd:hi:m:lLp:t:ux")) != -1){
         switch(opt_c) {
             case 'a':
                 mcast_addr_s = optarg;
@@ -192,6 +194,10 @@ int main(int argc, char *argv[])
             case 'x':
                 xout_en = true;
                 break;
+            case 'L':
+                if(NULL!=lcm)free(lcm);
+                lcm = strdup("LC02");
+                break;
             case 'h':
                 fprintf(stderr,"\n");
                 fprintf(stderr,"Usage: %s [options] [-h]\n",basename(argv[0]));
@@ -205,6 +211,7 @@ int main(int argc, char *argv[])
                 fprintf(stderr,"-b       : enable bind\n");
                 fprintf(stderr,"-u       : unidirectional (mcast pub->sub only)\n");
                 fprintf(stderr,"-x       : enable hex out\n");
+                fprintf(stderr,"-L       : LCM compatible message (not fully compliant)\n");
                 fprintf(stderr,"-h : print this help message\n");
                 fprintf(stderr,"\n");
                 exit(0);
@@ -226,6 +233,7 @@ int main(int argc, char *argv[])
     fprintf(stderr,"%*s %*c\n",wkey,"xout",wval,xout_en?'Y':'N');
     fprintf(stderr,"%*s %*s\n",wkey,"message",wval,message);
     fprintf(stderr,"%*s %*d\n",wkey,"PID",wval,getpid());
+    fprintf(stderr,"%*s %*s\n",wkey,"LCM",wval,lcm);
     fprintf(stderr,"\n");
 
     if(NULL!=host_addr_s){
@@ -339,9 +347,41 @@ int main(int argc, char *argv[])
         char txbuf[MSGBUFSIZE];
         // prepare mcast message and address
         memset(txbuf,0,MAX_DATA_BYTES);
-        sprintf(txbuf,"MSG mid[%d]",msg_n++);
-        size_t tx_len=strlen(txbuf)+1;
+        size_t tx_len=0;
+        if(NULL == lcm){
+            sprintf(txbuf, "MSG mid[%3d]", msg_n++);
+            tx_len=strlen(txbuf)+1;
+        }else{
+            typedef struct lcm_hdr_s{
+                byte magic[4];
+                uint32_t seq;
+                // char channel[]
+            }lcm_hdr_t;
 
+            lcm_hdr_t *hdr = (lcm_hdr_t *)txbuf;
+            hdr->magic[0] = 'L';
+            hdr->magic[1] = 'C';
+            hdr->magic[2] = '0';
+            hdr->magic[3] = '2';
+            hdr->seq = msg_n;
+            char *pchannel = txbuf + sizeof(lcm_hdr_t);
+            const char *channel="MSG";
+            uint32_t *plen = (uint32_t *)((byte *)pchannel + strlen(channel)+1);
+            char *pdata = pchannel + strlen(channel)+1+sizeof(uint32_t);
+            sprintf(pchannel,"%s",channel);
+            *plen = sprintf(pdata,"mid[%3d]",msg_n++)+1;
+            tx_len=sizeof(lcm_hdr_t) + strlen(channel) + strlen(pdata)+2+sizeof(uint32_t);
+
+            fprintf(stderr, "msg bytes\n");
+            for(int i=0, col=0;i<tx_len;i++){
+                fprintf(stderr, "%02x ",txbuf[i]);
+                if(col>0 && (col%7)==0) {
+                    fprintf(stderr, "\n");
+                    col=0;
+                }else{col++;}
+            }
+            fprintf(stderr, "\n");
+        }
         // Send mcast message to SUB clients
         if( (tx_bytes=msock_sendto(pub, pub->addr, (byte *)txbuf, tx_len, 0))>0){
             fprintf(stderr,"PUB - mtx msg[%-*s] len[%7zu] dest[%s : %hu]\n",
