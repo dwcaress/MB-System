@@ -190,7 +190,7 @@ procedure do_biases_roll();
 procedure do_biases_toggle();
 procedure do_controls_apply();
 procedure do_controls_scale_colorinterval();
-procedure do_dismiss_naverr();
+procedure do_naverr_dismiss();
 procedure do_file_close();
 procedure do_fileselection_mode(integer);
 procedure do_fileselection_ok();
@@ -1973,7 +1973,7 @@ object pushButton_naverr_dismiss : XmPushButton widget {
         callbacks Style_use2Reasons;
         MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_pushButton_naverr_dismiss);
        XmNactivateCallback = procedures {
-                 do_dismiss_naverr();
+                 do_naverr_dismiss();
                  BxUnmanageCB("bulletinBoard_biases");
                  BxUnmanageCB("bulletinBoard_naverr");
         };

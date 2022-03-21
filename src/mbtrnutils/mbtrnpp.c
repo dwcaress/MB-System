@@ -803,7 +803,7 @@ const char *mbtrnpp_ststatus_labels[] = {
 
 // profiling - measurement channel labels
 const char *mbtrnpp_stchan_labels[] = {
-    "mb_getall_xt", "mb_ping_xt", "mb_log_xt", "mb_dtime_xt",
+    "mb_getall_xt",  "mb_ping_xt", "mb_log_xt", "mb_dtime_xt",
     "mb_getfail_xt", "mb_post_xt", "mb_stats_xt", "mb_cycle_xt", "mb_fwrite_xt",
     "mb_proc_mb1_xt"
 #ifdef WITH_MBTNAV
@@ -867,9 +867,13 @@ static int s_mbtrnpp_show_cfg(FILE * fpout, mbtrnpp_cfg_t *self, bool hashstart,
 // show mbtrnpp option struct contents
 static int s_mbtrnpp_show_opts(FILE *, mbtrnpp_opts_t *opts, bool hashstart, int indent);
 // write configuration to string (w/ various formatting parameters)
-static int s_mbtrnpp_cfgstr(char **pdest, size_t olen, mbtrnpp_cfg_t *self, const char *prefix, const char *kvsep, const char *delim, int indent, int wkey, int wval);
+static int s_mbtrnpp_cfgstr(char **pdest, size_t olen, mbtrnpp_cfg_t *self,
+                            const char *prefix, const char *kvsep,
+                            const char *delim, int indent, int wkey, int wval);
 // write options to string (w/ various formatting parameters)
-static int s_mbtrnpp_optstr(char **pdest, size_t olen, mbtrnpp_opts_t *self, const char *prefix, const char *kvsep, const char *delim, int indent, int wkey, int wval);
+static int s_mbtrnpp_optstr(char **pdest, size_t olen, mbtrnpp_opts_t *self,
+                            const char *prefix, const char *kvsep,
+                            const char *delim, int indent, int wkey, int wval);
 // get config mnemonic value
 char *s_mnem_value(char **pdest, size_t len, const char *key);
 // substitute mnemonic value into string
@@ -984,7 +988,7 @@ static char *s_mbtrnpp_trnsession_str(char **pdest, size_t len, mb_resource_flag
         if(NULL==*pdest){
             *pdest=strdup(session_date);
             retval=*pdest;
-        }else {
+        } else {
             if(len>=TRNSESSION_BUF_LEN){
                 sprintf(*pdest,"%s",session_date);
                 retval=*pdest;
@@ -1022,7 +1026,7 @@ static char *s_mbtrnpp_session_str(char **pdest, size_t len, mb_resource_flag_t 
         if(NULL==*pdest){
             *pdest=strdup(session_date);
             retval=*pdest;
-        }else {
+        } else {
             if(len>=SESSION_BUF_LEN){
                 sprintf(*pdest,"%s",session_date);
                 retval=*pdest;
@@ -1074,7 +1078,7 @@ static char *s_mbtrnpp_cmdline_str(char **pdest, size_t len, int argc, char **ar
             if(NULL==*pdest){
                 *pdest=CHK_STRDUP(cmd_line);
                 retval=*pdest;
-            }else {
+            } else {
                 if(len>=slen){
                     sprintf(*pdest,"%s",cmd_line);
                     retval=*pdest;
@@ -1506,158 +1510,87 @@ static void s_mbtrnpp_free_cfg(mbtrnpp_cfg_t **pself)
         MEM_CHKFREE(self->trn_mission_id);
     }
 }
-
 static int s_mbtrnpp_cfgstr(char **pdest, size_t olen, mbtrnpp_cfg_t *self, const char *prefix, const char *kvsep, const char *delim, int indent, int wkey, int wval)
 {
     int retval=-1;
     const char *pre = (prefix ? prefix : "");
     const char *sep = (kvsep ? kvsep : "");
     const char *del = (delim ? delim : "\n");
-
     // mbbuf : mframe dynamically sized byte buffer (mbbuf.h)
     // auto-resizes on printf/write
     // mbbuf_t must be released using mbb_destroy()
     // buffers created by mbb_read() must be released using free()
     mbbuf_t *optr = mbb_new(1024*5, NULL, 0);
-
     mbb_printf(optr, "%s%*s%*s%s%*p%s", pre, indent, (indent>0?" ":""), wkey, "self", sep, wval, self, del);
-
     mbb_printf(optr, "%s%*s%*s%s%*d%s", pre, indent, (indent>0?" ":""), wkey, "verbose", sep, wval, self->verbose, del);
-
     mbb_printf(optr, "%s%*s%*s%s%*d%s", pre, indent, (indent>0?" ":""), wkey, "input_mode", sep, wval, self->input_mode, del);
-
     mbb_printf(optr, "%s%*s%*s%s%*s%s", pre, indent, (indent>0?" ":""), wkey, "input", sep, wval, self->input, del);
-
     mbb_printf(optr, "%s%*s%*s%s%*s%s", pre, indent, (indent>0?" ":""), wkey, "socket_definition", sep, wval, self->socket_definition, del);
-
     mbb_printf(optr, "%s%*s%*s%s%*s%s", pre, indent, (indent>0?" ":""), wkey, "output_mb1_file", sep, wval, self->output_mb1_file, del);
-
     mbb_printf(optr, "%s%*s%*s%s%*s%s", pre, indent, (indent>0?" ":""), wkey, "output_trn_file", sep, wval, self->output_trn_file, del);
-
     mbb_printf(optr, "%s%*s%*s%s%*d%s", pre, indent, (indent>0?" ":""), wkey, "format", sep, wval, self->format, del);
-
     mbb_printf(optr, "%s%*s%*s%s%*s%s", pre, indent, (indent>0?" ":""), wkey, "platform-file", sep, wval, self->platform_file, del);
-
     mbb_printf(optr, "%s%*s%*s%s%*c%s", pre, indent, (indent>0?" ":""), wkey, "use_platform_file", sep, wval, BOOL2YNC(self->use_platform_file), del);
-
     mbb_printf(optr, "%s%*s%*s%s%*d%s", pre, indent, (indent>0?" ":""), wkey, "platform-target-sensor", sep, wval, self->target_sensor, del);
-
     mbb_printf(optr, "%s%*s%*s%s%*s%s", pre, indent, (indent>0?" ":""), wkey, "tide-model", sep, wval, self->tide_model, del);
-
     mbb_printf(optr, "%s%*s%*s%s%*c%s", pre, indent, (indent>0?" ":""), wkey, "use_tide_model", sep, wval, BOOL2YNC(self->use_tide_model), del);
-
     mbb_printf(optr, "%s%*s%*s%s%*s%s", pre, indent, (indent>0?" ":""), wkey, "log-directory", sep, wval, self->log_directory, del);
-
     mbb_printf(optr, "%s%*s%*s%s%*s%s", pre, indent, (indent>0?" ":""), wkey, "trn_log_dir", sep, wval, self->trn_log_dir, del);
-
     mbb_printf(optr, "%s%*s%*s%s%*c%s", pre, indent, (indent>0?" ":""), wkey, "make_logs", sep, wval, BOOL2YNC(self->make_logs), del);
-
     mbb_printf(optr, "%s%*s%*s%s%*c%s", pre, indent, (indent>0?" ":""), wkey, "platform-file", sep, wval, BOOL2YNC(self->make_logs), del);
-
     mbb_printf(optr, "%s%*s%*s%s%*.2lf%s", pre, indent, (indent>0?" ":""), wkey, "swath-width", sep, wval, self->swath_width, del);
-
     mbb_printf(optr, "%s%*s%*s%s%*d%s", pre, indent, (indent>0?" ":""), wkey, "n_output_soundings", sep, wval, self->n_output_soundings, del);
-
     mbb_printf(optr, "%s%*s%*s%s%*.2lf%s", pre, indent, (indent>0?" ":""), wkey, "median_filter_threshold", sep, wval, self->median_filter_threshold, del);
-
     mbb_printf(optr, "%s%*s%*s%s%*d%s", pre, indent, (indent>0?" ":""), wkey, "median_filter_n_across", sep, wval, self->median_filter_n_across, del);
-
     mbb_printf(optr, "%s%*s%*s%s%*d%s", pre, indent, (indent>0?" ":""), wkey, "median_filter_n_along", sep, wval, self->median_filter_n_along, del);
-
     mbb_printf(optr, "%s%*s%*s%s%*c%s", pre, indent, (indent>0?" ":""), wkey, "median_filter_en", sep, wval, BOOL2YNC(self->median_filter_en), del);
-
     mbb_printf(optr, "%s%*s%*s%s%*d%s", pre, indent, (indent>0?" ":""), wkey, "n_buffer_max", sep, wval, self->n_buffer_max, del);
-
     mbb_printf(optr, "%s%*s%*s%s%*s%s", pre, indent, (indent>0?" ":""), wkey, "mb1svr_host", sep, wval, self->mb1svr_host, del);
-
     mbb_printf(optr, "%s%*s%*s%s%*d%s", pre, indent, (indent>0?" ":""), wkey, "mb1svr_port", sep, wval, self->mb1svr_port, del);
 
     mbb_printf(optr, "%s%*s%*s%s%*s%s", pre, indent, (indent>0?" ":""), wkey, "trnsvr_host", sep, wval, self->trnsvr_host, del);
-
     mbb_printf(optr, "%s%*s%*s%s%*d%s", pre, indent, (indent>0?" ":""), wkey, "trnsvr_port", sep, wval, self->trnsvr_port, del);
-
     mbb_printf(optr, "%s%*s%*s%s%*s%s", pre, indent, (indent>0?" ":""), wkey, "trnusvr_host", sep, wval, self->trnusvr_host, del);
-
     mbb_printf(optr, "%s%*s%*s%s%*d%s", pre, indent, (indent>0?" ":""), wkey, "trnusvr_port", sep, wval, self->trnusvr_port, del);
-
     mbb_printf(optr, "%s%*s%*s%s%*s%s", pre, indent, (indent>0?" ":""), wkey, "trnumsvr_group", sep, wval, self->trnumsvr_group, del);
-
     mbb_printf(optr, "%s%*s%*s%s%*d%s", pre, indent, (indent>0?" ":""), wkey, "trnumsvr_port", sep, wval, self->trnumsvr_port, del);
-
     mbb_printf(optr, "%s%*s%*s%s%*d%s", pre, indent, (indent>0?" ":""), wkey, "trnumsvr_ttl", sep, wval, self->trnumsvr_ttl, del);
-
     mbb_printf(optr, "%s%*s%*s%s%*X%s", pre, indent, (indent>0?" ":""), wkey, "output_flags", sep, wval, self->output_flags, del);
-
     mbb_printf(optr, "%s%*s%*s%s%*d%s", pre, indent, (indent>0?" ":""), wkey, "mbsvr_hbtok", sep, wval, self->mbsvr_hbtok, del);
-
     mbb_printf(optr, "%s%*s%*s%s%*.2lf%s", pre, indent, (indent>0?" ":""), wkey, "mbsvr_hbto", sep, wval, self->mbsvr_hbto, del);
-
     mbb_printf(optr, "%s%*s%*s%s%*.2lf%s", pre, indent, (indent>0?" ":""), wkey, "trnsvr_hbto", sep, wval, self->trnsvr_hbto, del);
-
     mbb_printf(optr, "%s%*s%*s%s%*.2lf%s", pre, indent, (indent>0?" ":""), wkey, "trnusvr_hbto", sep, wval, self->trnusvr_hbto, del);
-
     mbb_printf(optr, "%s%*s%*s%s%*"PRId64"%s", pre, indent, (indent>0?" ":""), wkey, "mbtrnpp_loop_delay_msec", sep, wval, self->mbtrnpp_loop_delay_msec, del);
-
     mbb_printf(optr, "%s%*s%*s%s%*.2lf%s", pre, indent, (indent>0?" ":""), wkey, "trn_status_interval_sec", sep, wval, self->trn_status_interval_sec, del);
-
     mbb_printf(optr, "%s%*s%*s%s%*X%s", pre, indent, (indent>0?" ":""), wkey, "mbtrnpp_stat_flags", sep, wval, self->mbtrnpp_stat_flags, del);
-
     mbb_printf(optr, "%s%*s%*s%s%*s/%d%s", pre, indent, (indent>0?" ":""), wkey, "trn_dev", sep, wval, r7k_devidstr(self->trn_dev), self->trn_dev, del);
-
     mbb_printf(optr, "%s%*s%*s%s%*c%s", pre, indent, (indent>0?" ":""), wkey, "trn_enable", sep, wval, BOOL2YNC(self->trn_enable), del);
-
     mbb_printf(optr, "%s%*s%*s%s%*ld%s", pre, indent, (indent>0?" ":""), wkey, "trn_utm_zone", sep, wval, self->trn_utm_zone, del);
-
     mbb_printf(optr, "%s%*s%*s%s%*d%s", pre, indent, (indent>0?" ":""), wkey, "trn_mtype", sep, wval, self->trn_mtype, del);
-
     mbb_printf(optr, "%s%*s%*s%s%*d%s", pre, indent, (indent>0?" ":""), wkey, "trn_ftype", sep, wval, self->trn_ftype, del);
-
     mbb_printf(optr, "%s%*s%*s%s%*d%s", pre, indent, (indent>0?" ":""), wkey, "trn_fgrade", sep, wval, self->trn_fgrade, del);
-
     mbb_printf(optr, "%s%*s%*s%s%*d%s", pre, indent, (indent>0?" ":""), wkey, "trn_freinit", sep, wval, self->trn_freinit, del);
-
     mbb_printf(optr, "%s%*s%*s%s%*d%s", pre, indent, (indent>0?" ":""), wkey, "trn_mweight", sep, wval, self->trn_mweight, del);
-
     mbb_printf(optr, "%s%*s%*s%s%*.2lf%s", pre, indent, (indent>0?" ":""), wkey, "trn_max_ncov", sep, wval, self->trn_max_ncov, del);
-
     mbb_printf(optr, "%s%*s%*s%s%*.2lf%s", pre, indent, (indent>0?" ":""), wkey, "trn_max_nerr", sep, wval, self->trn_max_nerr, del);
-
     mbb_printf(optr, "%s%*s%*s%s%*.2lf%s", pre, indent, (indent>0?" ":""), wkey, "trn_max_ecov", sep, wval, self->trn_max_ecov, del);
-
     mbb_printf(optr, "%s%*s%*s%s%*.2lf%s", pre, indent, (indent>0?" ":""), wkey, "trn_max_eerr", sep, wval, self->trn_max_eerr, del);
-
     mbb_printf(optr, "%s%*s%*s%s%*s%s", pre, indent, (indent>0?" ":""), wkey, "trn_map_file", sep, wval, self->trn_map_file, del);
-
     mbb_printf(optr, "%s%*s%*s%s%*s%s", pre, indent, (indent>0?" ":""), wkey, "trn_cfg_file", sep, wval, self->trn_cfg_file, del);
-
     mbb_printf(optr, "%s%*s%*s%s%*s%s", pre, indent, (indent>0?" ":""), wkey, "trn_particles_file", sep, wval, self->trn_particles_file, del);
-
     mbb_printf(optr, "%s%*s%*s%s%*s%s", pre, indent, (indent>0?" ":""), wkey, "trn_mission_dir", sep, wval, self->trn_mission_id, del);
-
     mbb_printf(optr, "%s%*s%*s%s%*u%s", pre, indent, (indent>0?" ":""), wkey, "trn_decn", sep, wval, self->trn_decn, del);
-
     mbb_printf(optr, "%s%*s%*s%s%*.2lf%s", pre, indent, (indent>0?" ":""), wkey, "trn_decs", sep, wval, self->trn_decs, del);
-
     mbb_printf(optr, "%s%*s%*s%s%*.2lf%s", pre, indent, (indent>0?" ":""), wkey, "covariance_magnitude_max", sep, wval, self->covariance_magnitude_max, del);
-
     mbb_printf(optr, "%s%*s%*s%s%*d%s", pre, indent, (indent>0?" ":""), wkey, "convergence_repeat_min", sep, wval, self->convergence_repeat_min, del);
-
     mbb_printf(optr, "%s%*s%*s%s%*c%s", pre, indent, (indent>0?" ":""), wkey, "reinit_gain_enable", sep, wval, BOOL2YNC(self->reinit_gain_enable), del);
-
     mbb_printf(optr, "%s%*s%*s%s%*c%s", pre, indent, (indent>0?" ":""), wkey, "reinit_file_enable", sep, wval, BOOL2YNC(self->reinit_file_enable), del);
-
     mbb_printf(optr, "%s%*s%*s%s%*c%s", pre, indent, (indent>0?" ":""), wkey, "reinit_xyoffset_enable", sep, wval, BOOL2YNC(self->reinit_xyoffset_enable), del);
-
     mbb_printf(optr, "%s%*s%*s%s%*.2lf%s", pre, indent, (indent>0?" ":""), wkey, "reinit_xyoffset_max", sep, wval, self->reinit_xyoffset_max, del);
-
     mbb_printf(optr, "%s%*s%*s%s%*c%s", pre, indent, (indent>0?" ":""), wkey, "reinit_zoffset_enable", sep, wval, BOOL2YNC(self->reinit_zoffset_enable), del);
-
     mbb_printf(optr, "%s%*s%*s%s%*.2lf%s", pre, indent, (indent>0?" ":""), wkey, "reinit_zoffset_min", sep, wval, self->reinit_zoffset_min, del);
-
     mbb_printf(optr, "%s%*s%*s%s%*.2lf%s", pre, indent, (indent>0?" ":""), wkey, "reinit_zoffset_max", sep, wval, self->reinit_zoffset_max, del);
-
     mbb_printf(optr, "%s%*s%*s%s%*c%s", pre, indent, (indent>0?" ":""), wkey, "random_offset_enable", sep, wval, BOOL2YNC(self->random_offset_enable), del);
-
     size_t slen = mbb_length(optr);
     if(NULL == *pdest){
         // set dest buffer (malloc'd, caller must free)
@@ -1674,26 +1607,21 @@ static int s_mbtrnpp_cfgstr(char **pdest, size_t olen, mbtrnpp_cfg_t *self, cons
             fprintf(stderr, "%s:%d - ERR destination buffer too small (%zu/%zu)\n", __func__, __LINE__, olen, slen);
         }
     }
-
     // release byte buffer
     mbb_destroy(&optr);
-
     return retval;
 }
-
 static int s_mbtrnpp_optstr(char **pdest, size_t olen, mbtrnpp_opts_t *self, const char *prefix, const char *kvsep, const char *delim, int indent, int wkey, int wval)
 {
     int retval=-1;
     const char *pre = (prefix ? prefix : "");
     const char *sep = (kvsep ? kvsep : "");
     const char *del = (delim ? delim : "\n");
-
     // mbbuf : mframe dynamically sized byte buffer (mbbuf.h)
     // auto-resizes on printf/write
     // mbbuf_t must be released using mbb_destroy()
     // buffers created by mbb_read() must be released using free()
     mbbuf_t *optr = mbb_new(1024*5,NULL,0);
-
     mbb_printf(optr, "%s%*s%*s%s%*p%s", pre, indent, (indent>0?" ":""), wkey, "self", sep, wval, self, del);
     mbb_printf(optr, "%s%*s%*s%s%*d%s", pre, indent, (indent>0?" ":""), wkey, "verbose", sep, wval, self->verbose, del);
     mbb_printf(optr, "%s%*s%*s%s%*s%s", pre, indent, (indent>0?" ":""), wkey, "input", sep, wval, self->input, del);
@@ -1746,7 +1674,6 @@ static int s_mbtrnpp_optstr(char **pdest, size_t olen, mbtrnpp_opts_t *self, con
     mbb_printf(optr, "%s%*s%*s%s%*.2lf%s", pre, indent, (indent>0?" ":""), wkey, "reinit_zoffset_max", sep, wval, self->reinit_zoffset_max, del);
     mbb_printf(optr, "%s%*s%*s%s%*c%s", pre, indent, (indent>0?" ":""), wkey, "random_offset_enable", sep, wval, BOOL2YNC(self->random_offset_enable), del);
     mbb_printf(optr, "%s%*s%*s%s%*c%s", pre, indent, (indent>0?" ":""), wkey, "help", sep, wval, BOOL2YNC(self->help), del);
-
     size_t slen = mbb_length(optr);
     if(NULL == *pdest){
         // set dest buffer (malloc'd, caller must free)
@@ -1763,21 +1690,17 @@ static int s_mbtrnpp_optstr(char **pdest, size_t olen, mbtrnpp_opts_t *self, con
             fprintf(stderr,"%s:%d - ERR destination buffer too small (%zu/%zu)\n", __func__, __LINE__, olen, slen);
         }
     }
-
     // release byte buffer
     mbb_destroy(&optr);
-
     return retval;
 }
-
 static int s_mbtrnpp_show_cfg(FILE *fpout, mbtrnpp_cfg_t *self, bool hashstart, int indent)
 {
-    int retval = 0;
+ int retval = 0;
     char *buf = NULL;
     const char *pre = (hashstart ? "##  " : " ");
     const char *kvsep = " ";
     const char *del = "\n";
-
     // passing NULL buf ptr returns as malloc'd string
     int slen = s_mbtrnpp_cfgstr(&buf, 0, self, pre, kvsep, del, indent, 25, 30);
     if ( (slen > 0)  && (NULL != buf)) {
@@ -1798,7 +1721,6 @@ static int s_mbtrnpp_show_opts(FILE *fpout, mbtrnpp_opts_t *self, bool hashstart
     const char *pre = (hashstart ? "##  " : " ");
     const char *kvsep = " ";
     const char *del = "\n";
-
     // passing NULL buf ptr returns as malloc'd string
     int slen = s_mbtrnpp_optstr(&buf, 0, self, pre, kvsep, del, indent, 25, 30);
     if ( (slen > 0) && (NULL != buf)) {
@@ -1808,6 +1730,7 @@ static int s_mbtrnpp_show_opts(FILE *fpout, mbtrnpp_opts_t *self, bool hashstart
     } else {
         fprintf(stderr,"%s:%d - ERR s_mbtrnpp_optstr failed: len[%d] buf[%p]\n", __func__, __LINE__, slen, buf);
     }
+
     return retval;
 }
 
@@ -2187,7 +2110,7 @@ static int s_parse_opt_input(mbtrnpp_cfg_t *cfg, char *opt_str)
                 }
 //            fprintf(stderr, "socket_definition|%s\n", cfg->socket_definition);
 
-            }else {
+            } else {
                 // cfg->input is input file name
                 cfg->input_mode = INPUT_MODE_FILE;
             }
@@ -2485,7 +2408,7 @@ static int s_mbtrnpp_kvparse_fn(char *key, char *val, void *cfg)
                 retval=0;
             } else if(strcmp(key,"config")==0 ){
                 retval=0;
-            }else {
+            } else {
                 fprintf(stderr, "WARN - unsupported key/val [%s/%s]\n", key,val);
             }
         } else {
@@ -2508,7 +2431,7 @@ static int s_mbtrnpp_kvparse_fn(char *key, char *val, void *cfg)
             } else if(strcmp(key,"help")==0 ){
                 opts->help=true;
                 retval=0;
-            }else {
+            } else {
                 fprintf(stderr, "WARN - unsupported key/val [%s/NULL]\n", key);
             }
         }
@@ -2916,6 +2839,7 @@ int main(int argc, char **argv) {
   char usage_message[] = "mbtrnpp \n"
                          "\t--verbose\n"
                          "\t--help\n"
+                         "\t--config=path\n"
                          "\t--log-directory=path\n"
                          "\t--input=datalist|file|socket_definition\n"
                          "\t--output=file|'socket'\n"
@@ -3325,7 +3249,6 @@ int main(int argc, char **argv) {
         fprintf(stderr,"s_mbtrnpp_optstr failed: len[%d] buf[%p]\n",slen,buf);
     }
     free(buf);
-
     // log config settings in mbtrnpp message log
     buf = NULL;
     slen = s_mbtrnpp_cfgstr(&buf, 0, mbtrn_cfg, NULL, "=", "\n", 0, 0, 0);
@@ -3335,7 +3258,6 @@ int main(int argc, char **argv) {
         fprintf(stderr,"s_mbtrnpp_cfgstr failed: len[%d] buf[%p]\n",slen,buf);
     }
     free(buf);
-
 
 #endif // WITH_MBTNAV
 
@@ -4426,6 +4348,7 @@ int main(int argc, char **argv) {
   /* close output */
   if ( OUTPUT_FLAG_SET(OUTPUT_MB1_FILE_EN) ) {
     fclose(output_mb1_fp);
+    mb_freed(mbtrn_cfg->verbose, __FILE__, __LINE__, (void **)&output_buffer, &error);
   }
 
   /* close output */
@@ -5855,7 +5778,7 @@ int mbtrnpp_trn_process_mb1(wtnav_t *tnav, mb1_t *mb1, trn_config_t *cfg)
                 do_process=true;
                 trn_dec_time=now;
             }
-        }else {
+        } else {
             // always process if decimation disabled
             // (trn_decs<=0 && mbtrn_cfg->trn_decn<=0 )
             do_process=true;

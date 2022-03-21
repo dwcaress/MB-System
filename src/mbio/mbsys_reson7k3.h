@@ -238,7 +238,7 @@
 #define R7KHDRSIZE_VerticalDepth 42
 #define R7KHDRSIZE_TVG 50
 #define R7KHDRSIZE_Image 56
-#define R7KHDRSIZE_PingMotion 44
+#define R7KHDRSIZE_PingMotion 28
 #define R7KHDRSIZE_AdaptiveGate 22
 #define R7KHDRSIZE_DetectionDataSetup 116
 #define R7KRDTSIZE_DetectionDataSetup 34
@@ -380,7 +380,7 @@
 // Structure size definitions
 #define MBSYS_RESON7K_BUFFER_STARTSIZE 32768
 #define MBSYS_RESON7K_MAX_DEVICE 73
-#define MBSYS_RESON7K_MAX_BEAMS 1024
+#define MBSYS_RESON7K_MAX_BEAMS 2048
 #define MBSYS_RESON7K_MAX_SOUNDINGS 2560
 #define MBSYS_RESON7K_MAX_SEGMENTS 320
 #define MBSYS_RESON7K_MAX_PIXELS 2048

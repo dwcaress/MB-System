@@ -9,8 +9,8 @@
 import sys, getopt, os
 import glob, subprocess
 
-shortOpts = "hbi:g:"
-longOpts = ["help", "input=", "grid="]
+shortOpts = "hbi:dg:"
+longOpts = ["help", "display", "input=", "grid="]
 
 def usage():
   pname, sname = os.path.split(sys.argv[0])
@@ -66,6 +66,8 @@ def main (args, opts={}):
 
   # If gridfile not yet specified then try to figure it out from the log header
   for sessionlog in sessionloglist :
+    tmp = os.path.basename(sessionlog)
+    sessionname = tmp[0:-8]
     fp = open(sessionlog)
     for line in fp:
       if line[0] == '#' :
@@ -76,18 +78,18 @@ def main (args, opts={}):
 
   print("TRN Results\n---------")
   print("Session Directory: "+inputdir)
-  print("Session Log List:  "+sessionloglist[0])
+  print("Session Name:      "+sessionname)
+  print("Session Log List:  "+sessionlog)
   print("Reference Grid:    "+gridfile+"\n")
 
   for sessionlog in sessionloglist :
     # Open the desired output files
     root = sessionlog[0:-4]
-    print(root)
-    fp_Nxy = open(root + "_Nxy.txt", "w")
-    fp_Txy = open(root + "_Txy.txt", "w")
-    fp_TxyC = open(root + "_TxyC.txt", "w")
-    fp_TxyU = open(root + "_TxyU.txt", "w")
-    fp_TxyR = open(root + "_TxyR.txt", "w")
+    fp_Nxy = open(sessionname + "_trn_Nxy.txt", "w")
+    fp_Txy = open(sessionname + "_trn_Txy.txt", "w")
+    fp_TxyC = open(sessionname + "_trn_TxyC.txt", "w")
+    fp_TxyU = open(sessionname + "_trn_TxyU.txt", "w")
+    fp_TxyR = open(sessionname + "_trn_TxyR.txt", "w")
 
     # Open and parse the session log, outputting as desired
     xmin = 0.0
@@ -99,29 +101,30 @@ def main (args, opts={}):
     for line in fp:
       if line[0] != '#' :
         columns = line.split()
-        fp_Nxy.write(columns[2] + " " + columns[3] + "\n")
-        fp_Txy.write(columns[5] + " " + columns[6] + "\n")
-        if columns[24] == 'CNV' :
-          fp_TxyC.write(columns[5] + " " + columns[6] + "\n")
-        if columns[25] == 'USE' :
-          fp_TxyU.write(columns[5] + " " + columns[6] + "\n")
-        if columns[24] == 'RNT' :
-          fp_TxyR.write(columns[5] + " " + columns[6] + "\n")
-        x1 = float(columns[2])
-        y1 = float(columns[3])
-        x2 = float(columns[5])
-        y2 = float(columns[6])
-        if first :
-          xmin = min(x1, x2)
-          xmax = max(x1, x2)
-          ymin = min(y1, y2)
-          ymax = max(y1, y2)
-          first = False
-        else :
-          xmin = min(xmin, x1, x2)
-          xmax = max(xmax, x1, x2)
-          ymin = min(ymin, y1, y2)
-          ymax = max(ymax, y1, y2)
+        if (len(columns) == 26) :
+          fp_Nxy.write(columns[2] + " " + columns[3] + "\n")
+          fp_Txy.write(columns[5] + " " + columns[6] + "\n")
+          if columns[24] == 'CNV' :
+            fp_TxyC.write(columns[5] + " " + columns[6] + "\n")
+          if columns[25] == 'USE' :
+            fp_TxyU.write(columns[5] + " " + columns[6] + "\n")
+          if columns[24] == 'RNT' :
+            fp_TxyR.write(columns[5] + " " + columns[6] + "\n")
+          x1 = float(columns[2])
+          y1 = float(columns[3])
+          x2 = float(columns[5])
+          y2 = float(columns[6])
+          if first :
+            xmin = min(x1, x2)
+            xmax = max(x1, x2)
+            ymin = min(y1, y2)
+            ymax = max(y1, y2)
+            first = False
+          else :
+            xmin = min(xmin, x1, x2)
+            xmax = max(xmax, x1, x2)
+            ymin = min(ymin, y1, y2)
+            ymax = max(ymax, y1, y2)
 
     fp.close()
     fp_Nxy.close()
@@ -139,24 +142,24 @@ def main (args, opts={}):
 
     # Create and execute an mbm_grdplot command to generate a map of the
     # TRN performance over the reference bathymetry
-    command = "cd "+inputdir+" ; mbm_grdplot -I ../"+gridfile+" -O "+inputdir+"-trn-plot"
+    command = "cd "+inputdir+" ; mbm_grdplot -I ../"+gridfile+" -O "+sessionname+"-trn-plot"
     command = command+" -R"+str(xmin)+"/"+str(xmax)+"/"+str(ymin)+"/"+str(ymax)
     command = command+" -G5 -D0/1 -A1.0 -L\"Terrain Relative Navigation over Reference Bathymetry\":\"Topography (meters)\""
-    command = command+" -MXW1p -MXI"+inputdir+"_trn_Nxy.txt"
-    command = command+" -MXW1p,purple -MXI"+inputdir+"_trn_Txy.txt"
-    command = command+" -MXW2p,purple -MXSc2p -MXI"+inputdir+"_trn_TxyC.txt"
-    command = command+" -MXW2p,red -MXSc2p -MXI"+inputdir+"_trn_TxyU.txt"
-    command = command+" -MXW1,black -MXSC0.2 -MXI"+inputdir+"_trn_TxyR.txt"
+    command = command+" -MXW1p -MXI"+sessionname+"_trn_Nxy.txt"
+    command = command+" -MXW1p,purple -MXI"+sessionname+"_trn_Txy.txt"
+    command = command+" -MXW2p,purple -MXSc2p -MXI"+sessionname+"_trn_TxyC.txt"
+    command = command+" -MXW2p,red -MXSc2p -MXI"+sessionname+"_trn_TxyU.txt"
+    command = command+" -MXW1,black -MXSC0.2 -MXI"+sessionname+"_trn_TxyR.txt"
     command = command+" -Pc -V ; cd .."
     print("Command: "+command+"\n")
     subprocess.run(command, shell=True)
     if display :
-      command = "cd "+inputdir+" ; "+inputdir+"-trn-plot.cmd ; cd .."
+      command = "cd "+inputdir+" ; "+sessionname+"-trn-plot.cmd ; cd .."
     else :
-      command = "cd "+inputdir+" ; "+inputdir+"-trn-plot.cmd -N ; cd .."
+      command = "cd "+inputdir+" ; "+sessionname+"-trn-plot.cmd -N ; cd .."
     print("Command: "+command+"\n")
     subprocess.run(command, shell=True)
-    command = "cd "+inputdir+" ; gmt psconvert "+inputdir+"-trn-plot.ps -Tj -E300 -A -P ; cd .."
+    command = "cd "+inputdir+" ; gmt psconvert "+sessionname+"-trn-plot.ps -Tj -E300 -A -P ; cd .."
     print("Command: "+command+"\n")
     subprocess.run(command, shell=True)
 
@@ -166,24 +169,24 @@ def main (args, opts={}):
     command = "cd "+inputdir+" ; mbgrid -Idatalist_mb1.mb-1 -A2 -N -F5 -JU -C5 -V -O TopoMB1 ; cd .."
     print("Command: "+command+"\n")
     subprocess.run(command, shell=True)
-    command = "cd "+inputdir+" ; mbm_grdplot -I TopoMB1.grd -O "+inputdir+"-mb1-plot"
+    command = "cd "+inputdir+" ; mbm_grdplot -I TopoMB1.grd -O "+sessionname+"-mb1-plot"
     command = command+" -R"+str(xmin)+"/"+str(xmax)+"/"+str(ymin)+"/"+str(ymax)
     command = command+" -G5 -D0/1 -A1.0 -L\"Terrain Relative Navigation over MB1 Bathymetry\":\"Topography (meters)\""
-    command = command+" -MXW1p -MXI"+inputdir+"_trn_Nxy.txt"
-    command = command+" -MXW1p,purple -MXI"+inputdir+"_trn_Txy.txt"
-    command = command+" -MXW2p,purple -MXSc2p -MXI"+inputdir+"_trn_TxyC.txt"
-    command = command+" -MXW2p,red -MXSc2p -MXI"+inputdir+"_trn_TxyU.txt"
-    command = command+" -MXW1,black -MXSC0.2 -MXI"+inputdir+"_trn_TxyR.txt"
+    command = command+" -MXW1p -MXI"+sessionname+"_trn_Nxy.txt"
+    command = command+" -MXW1p,purple -MXI"+sessionname+"_trn_Txy.txt"
+    command = command+" -MXW2p,purple -MXSc2p -MXI"+sessionname+"_trn_TxyC.txt"
+    command = command+" -MXW2p,red -MXSc2p -MXI"+sessionname+"_trn_TxyU.txt"
+    command = command+" -MXW1,black -MXSC0.2 -MXI"+sessionname+"_trn_TxyR.txt"
     command = command+" -Pc -V ; cd .."
     print("Command: "+command+"\n")
     subprocess.run(command, shell=True)
     if display :
-      command = "cd "+inputdir+" ; "+inputdir+"-mb1-plot.cmd ; cd .."
+      command = "cd "+inputdir+" ; "+sessionname+"-mb1-plot.cmd ; cd .."
     else :
-      command = "cd "+inputdir+" ; "+inputdir+"-mb1-plot.cmd -N ; cd .."
+      command = "cd "+inputdir+" ; "+sessionname+"-mb1-plot.cmd -N ; cd .."
     print("Command: "+command+"\n")
     subprocess.run(command, shell=True)
-    command = "cd "+inputdir+" ; gmt psconvert "+inputdir+"-mb1-plot.ps -Tj -E300 -A -P ; cd .."
+    command = "cd "+inputdir+" ; gmt psconvert "+sessionname+"-mb1-plot.ps -Tj -E300 -A -P ; cd .."
     print("Command: "+command+"\n")
     subprocess.run(command, shell=True)
 
