@@ -20,14 +20,13 @@
  *
  */
 
+#include <algorithm>
 #include <cmath>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
 #include <getopt.h>
 #include <unistd.h>
-
-#include <algorithm>
 
 #include "mb_define.h"
 #include "mb_format.h"

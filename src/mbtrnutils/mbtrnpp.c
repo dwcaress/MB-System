@@ -6148,7 +6148,7 @@ int mbtrnpp_reson7kr_input_read(int verbose, void *mbio_ptr, size_t *size, char 
 
       fprintf(stderr,"EOF (input socket) - clear status/error\n");
       status = MB_SUCCESS;
-      error = MB_ERROR_NO_ERROR;
+      *error = MB_ERROR_NO_ERROR;
 
       // check connection status
       // only reconnect if disconnected
@@ -6804,7 +6804,7 @@ int mbtrnpp_mb1r_input_read(int verbose, void *mbio_ptr, size_t *size, char *buf
     struct mb_io_struct *mb_io_ptr;
 
     /* print input debug statements */
-    if (verbose >= 2) {
+    if (verbose >= 0) {
         fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
         fprintf(stderr, "dbg2  Input arguments:\n");
         fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
@@ -6899,6 +6899,8 @@ int mbtrnpp_mb1r_input_read(int verbose, void *mbio_ptr, size_t *size, char *buf
     if (verbose >= 2) {
         fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
         fprintf(stderr, "dbg2  Return values:\n");
+        fprintf(stderr, "dbg2       size:       %zu\n", *size);
+        fprintf(stderr, "dbg2       buffer:     %p\n", buffer);
         fprintf(stderr, "dbg2       error:              %d\n", *error);
         fprintf(stderr, "dbg2  Return status:\n");
         fprintf(stderr, "dbg2       status:             %d\n", status);
