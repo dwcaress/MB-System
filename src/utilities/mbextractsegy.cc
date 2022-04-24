@@ -20,6 +20,7 @@
  * Date:  April 18, 2004
  */
 
+#include <algorithm>
 #include <assert.h>
 #include <cmath>
 #include <cstdio>
@@ -27,8 +28,6 @@
 #include <cstring>
 #include <getopt.h>
 #include <unistd.h>
-
-#include <algorithm>
 
 #include "mb_define.h"
 #include "mb_format.h"

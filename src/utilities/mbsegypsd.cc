@@ -20,18 +20,17 @@
  * Date:	November 2, 2009
  */
 
+#include <algorithm>
 #include <cmath>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
 #include <ctime>
 #include <getopt.h>
+#include <limits>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <unistd.h>
-
-#include <algorithm>
-#include <limits>
 
 #include "fftw3.h"
 #include "mb_aux.h"

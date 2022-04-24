@@ -35,6 +35,7 @@
  * Date:  January 4, 2000
  */
 
+#include <algorithm>
 #include <cmath>
 #include <cstdio>
 #include <cstdlib>
@@ -43,10 +44,8 @@
 #include <getopt.h>
 #include <sys/stat.h>
 #include <sys/types.h>
-#include <unistd.h>
-
-#include <algorithm>
 #include <thread>
+#include <unistd.h>
 
 #include "mb_aux.h"
 #include "mb_define.h"

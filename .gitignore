@@ -199,3 +199,4 @@ libtool
 libtool
 src/mbtrnav/mb1rs
 src/mbtrn/mb1r_test
+build/README.md

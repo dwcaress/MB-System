@@ -5449,7 +5449,7 @@ int mbsys_reson7k3_preprocess(int verbose,     /* in: verbosity level set on com
 
     /* do lever arm correction */
     if (platform != NULL) {
-      /* calculate sonar Position Position */
+      /* calculate sonar Position */
       status = mb_platform_position(verbose, (void *)platform, pars->target_sensor, 0, navlon, navlat, sensordepth,
                                     heading, roll, pitch, &navlon, &navlat, &sensordepth, error);
 
