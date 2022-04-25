@@ -118,12 +118,12 @@ mapT::~mapT() {
 void mapT::clean() {
 	if(xpts != NULL) {
 		delete [] xpts;
-		xpts = NULL;
+//		xpts = NULL;
 	}
 
   if(ypts != NULL) {
 		delete [] ypts;
-		ypts = NULL;
+//		ypts = NULL;
 	}
 
 	depths.CleanUp();
@@ -1134,7 +1134,7 @@ sensorT::~sensorT() {
 	if(T_bs != NULL) {
 		delete [] T_bs;
 	}
-	T_bs = NULL;
+	//T_bs = NULL;
 }
 
 // throws an exception if the specs file could not be opened
@@ -1299,12 +1299,12 @@ vehicleT::~vehicleT() {
 	if(T_sv != NULL) {
 		delete [] T_sv;
 	}
-	T_sv = NULL;
+//	T_sv = NULL;
 
 	if(sensors != NULL) {
 		delete [] sensors;
 	}
-	sensors = NULL;
+//	sensors = NULL;
 }
 
 // throws an exception if the specs file could not be opened
