@@ -870,7 +870,7 @@ void TerrainNav::attemptInitFilter(poseT& initEstimate) {
 			return;
 		}
 		logs(TL_OMASK(TL_TERRAIN_NAV, TL_LOG),"TerrainNav::Filter not initialized - vehicle currently "
-			   "does not have bottom lock or good velocity data\n");
+             "does not have bottom lock or good velocity data dvlVal[%c]\n",initEstimate.dvlValid?'Y':'N');
 	}
 }
 

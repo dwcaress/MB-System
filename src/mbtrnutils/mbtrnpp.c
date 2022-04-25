@@ -7184,25 +7184,27 @@ int mbtrnpp_mb1r_input_read(int verbose, void *mbio_ptr, size_t *size, char *buf
                     // update frame read pointers
                     fb_pread = frame_buf;
                     read_frame = false;
-                    PMPRINT(MOD_MBTRNPP,MBTRNPP_V4,(stderr,"read frame len[%zu]:\n",(size_t)rbytes));
+                    read_err = false;
+                    PMPRINT(MOD_MBTRNPP,MBTRNPP_V3,(stderr,"read frame len[%zu]:\n",(size_t)rbytes));
 //                   if(verbose>=2 || verbose<=-2){
 //                        mb1_show((mb1_t *)frame_buf,(verbose<-2 || verbose>=2 ? true : false),5);
 //                    }
                 } else {
                     // frame invalid
                     read_err = true;
-                    PMPRINT(MOD_MBTRNPP,MBTRNPP_V4,(stderr,"invalid frame rbytes[%zu] size[%zu]\n",(size_t)rbytes, (size_t)fb_pmb1->size));
+                    PMPRINT(MOD_MBTRNPP,MBTRNPP_V3,(stderr,"invalid frame rbytes[%zu] size[%zu]\n",(size_t)rbytes, (size_t)fb_pmb1->size));
                 }
             } else {
                 // read error
                 read_err = true;
-                PMPRINT(MOD_MBTRNPP,MBTRNPP_V4,(stderr,"mb1r_read_frame failed rbytes[%zu]\n",(size_t)rbytes));
+                PMPRINT(MOD_MBTRNPP,MBTRNPP_V3,(stderr,"mb1r_read_frame failed rbytes[%zu]\n",(size_t)rbytes));
             }
 
         } else {
             // there's a frame in the buffer
             size_t bytes_rem = frame_buf + fb_pmb1->size - fb_pread;
-            PMPRINT(MOD_MBTRNPP,MBTRNPP_V4,(stderr,"reading from frame size[%zu] rem[%zu]\n", (size_t)*size, bytes_rem));
+            size_t readlen = (*size <= bytes_rem ? *size : bytes_rem);
+            PMPRINT(MOD_MBTRNPP,MBTRNPP_V3,(stderr,"reading framebuf size[%zu] rlen[%zu] rem[%zu] err[%c]\n", (size_t)*size, readlen, bytes_rem, (read_err?'Y':'N')));
         }
 
         if(!read_err){
@@ -7210,7 +7212,6 @@ int mbtrnpp_mb1r_input_read(int verbose, void *mbio_ptr, size_t *size, char *buf
             size_t readlen = (*size <= bytes_rem ? *size : bytes_rem);
             if(readlen > 0){
                 memcpy(buffer, fb_pread, readlen);
-                fb_pread += readlen;
                 *size = (size_t)readlen;
                 *error = MB_ERROR_NO_ERROR;
                 // update frame cursor
@@ -7218,17 +7219,17 @@ int mbtrnpp_mb1r_input_read(int verbose, void *mbio_ptr, size_t *size, char *buf
                 bytes_rem -= readlen;
                 if(bytes_rem <= 0)
                 {
+                    PMPRINT(MOD_MBTRNPP,MBTRNPP_V4,(stderr,"* buffer empty rem[%"PRId64"]\n", bytes_rem));
                     // if nothing left, read a frame next time
                     read_frame = true;
                 }
-                PMPRINT(MOD_MBTRNPP,MBTRNPP_V4,(stderr,"read from frame size[%zu] rem[%"PRId64"] readlen[%zu]\n",(size_t)*size, bytes_rem, (size_t)readlen));
             } else {
                 // buffer empty
                 status   = MB_FAILURE;
                 *error   = MB_ERROR_EOF;
-                *size    = (size_t)-1;
+                *size    = (size_t)0;
                 read_frame = true;
-                PMPRINT(MOD_MBTRNPP,MBTRNPP_V4,(stderr,"end of buffer, nothing to read rem[%"PRId64"]\n", bytes_rem));
+                PMPRINT(MOD_MBTRNPP,MBTRNPP_V4,(stderr,"buffer empty readlen[%zu] rem[%"PRId64"]\n", readlen, bytes_rem));
             }
         }
     } else {
@@ -7261,13 +7262,14 @@ int mbtrnpp_mb1r_input_read(int verbose, void *mbio_ptr, size_t *size, char *buf
             // empty the reader's record frame container
             mb1r_reader_purge(reader);
 
-            fprintf(stderr,"mbtrnpp: input socket disconnected status[%s]\n",mb1r_strstate(reader->state));
-            mlog_tprintf(mbtrnpp_mlog_id,"mbtrnpp: input socket disconnected status[%s]\n",mb1r_strstate(reader->state));
+            mlog_tprintf(mbtrnpp_mlog_id,"mbtrnpp: input socket status[%s]\n",mb1r_strstate(reader->state));
             MST_COUNTER_INC(app_stats->stats->events[MBTPP_EV_MB_DISN]);
 
             // re-connect reader
             if (mb1r_reader_connect(reader,true)==0) {
-                fprintf(stderr,"mbtrnpp: input socket connected status[%s]\n",mb1r_strstate(reader->state));
+                read_frame = true;
+                read_err = false;
+                fprintf(stderr,"mbtrnpp: input socket re-connected status[%s]\n",mb1r_strstate(reader->state));
                 mlog_tprintf(mbtrnpp_mlog_id,"mbtrnpp: input socket connected status[%s]\n",mb1r_strstate(reader->state));
                 MST_COUNTER_INC(app_stats->stats->events[MBTPP_EV_MB_CONN]);
             } else {
