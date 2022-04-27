@@ -38,7 +38,7 @@ libmb1r_la_SOURCES =  \
 
 libmb1r_la_LIBADD = ${top_srcdir}/src/mbtrnav/libmb1.la ${LIBMFRAME} -lpthread
 
-bin_PROGRAMS =  udps udpc mbtnav-cli stream7k frames7k emu7k r7kr_test trnc tbinx mb1conv mb12csv mb1r_test
+bin_PROGRAMS =  udps udpc mbtnav-cli stream7k frames7k emu7k r7kr_test trnc tbinx mb1conv mb12csv mb1r_test mb1-cli
 
 
 udps_SOURCES = utils/udps.c
@@ -76,6 +76,9 @@ mb12csv_LDADD = libmb1r.la
 
 mb1r_test_SOURCES = mb1r/mb1r-test.c
 mb1r_test_LDADD = libmb1r.la
+
+mb1_cli_SOURCES = mb1r/mb1cli-app.c
+mb1_cli_LDADD = libmb1r.la
 
 dist_bin_SCRIPTS = tools/bin/mbtrnpp.sh 
 dist_bin_SCRIPTS += emu7k.sh 

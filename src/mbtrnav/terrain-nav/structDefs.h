@@ -33,6 +33,8 @@
 #define  TRN_SENSOR_HOMER   4
 #define  TRN_SENSOR_DELTAT  5
 
+#define TRN_EST_MLE 1
+#define TRN_EST_MMSE 2
 
 // InitVars is a structure that enables TRN reinits
 // with search radius that may be configured at run time.
