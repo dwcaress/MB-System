@@ -1295,7 +1295,6 @@ initParticleDist(const particleT& initialGuess) {
 	SymmetricMatrix tempCov(9);
 	SymmetricMatrix tempCovSqrt(9);
 	tempCovSqrt = 0.0;
-	fstream particleFile; //Used for loading particles from a specified file
 
 	tempCov.Row(1) << initWindowVar[0];
 	tempCov.Row(2) << initWindowVar[1] << initWindowVar[2];
@@ -1334,6 +1333,7 @@ initParticleDist(const particleT& initialGuess) {
 	}
 
 	if(USE_PARTICLE_FILE){ //Specify starting particle locations in particles.cfg
+        fstream particleFile; //Used for loading particles from a specified file
         char temp[TRN_MAX_BEAMS]={0};
         // caller own name string, so must free it
 		char *pfname=TNavConfig::instance()->getParticlesFile();

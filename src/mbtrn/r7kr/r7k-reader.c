@@ -208,10 +208,10 @@ int r7kr_reader_connect(r7kr_reader_t *self, bool replace_socket)
             self->state=R7KR_CONNECTED;
             self->sockif->status=SS_CONNECTED;
 
-            if(mmd_channel_isset(MOD_R7KR,MM_DEBUG)){
-            PMPRINT(MOD_R7KR,MM_DEBUG,(stderr,"requesting 7k device config data"));
-            r7k_req_config(r7kr_reader_sockif(self));
-            }
+//            if(mmd_channel_isset(MOD_R7KR,MM_DEBUG)){
+//            PMPRINT(MOD_R7KR,MM_DEBUG,(stderr,"requesting 7k device config data"));
+//            r7k_req_config(r7kr_reader_sockif(self));
+//            }
 
             PMPRINT(MOD_R7KR,MM_DEBUG,(stderr,"subscribing to 7k center [%s]\n",self->sockif->addr->host));
             if (r7k_subscribe(r7kr_reader_sockif(self), self->device, self->sub_list, self->sub_count)==0) {
@@ -694,7 +694,9 @@ int64_t r7kr_read_nf(r7kr_reader_t *self, byte *dest, uint32_t len,
                         // pbuf points to end of input...
                         // psync points 1 byte into invalid frame
                         PMPRINT(MOD_R7KR,MM_DEBUG,(stderr,">>>>> RESYNC: NRF buffer:\n"));
-                        r7k_hex_show(dest,R7K_NF_BYTES,16,true,5);
+                        if(mmd_channel_isset(MOD_R7KR,(MM_DEBUG))){
+                            r7k_hex_show(dest,R7K_NF_BYTES,16,true,5);
+                        }
                         PMPRINT(MOD_R7KR,MM_DEBUG,(stderr,"dest[%p] pbuf[%p] ofs[%"PRId32"]\n",dest,pbuf,(int32_t)(pbuf-dest)));
                         PMPRINT(MOD_R7KR,MM_DEBUG,(stderr,"read_len[%"PRIu32"]\n",read_len));
                         PMPRINT(MOD_R7KR,MM_DEBUG,(stderr,"frame_bytes[%"PRId64"]\n",frame_bytes));

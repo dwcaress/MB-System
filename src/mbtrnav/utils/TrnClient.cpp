@@ -190,7 +190,7 @@ int TrnClient::loadCfgAttributes(const char *cfg_file)
     // Get   key = value   pairs from non-comment lines in the cfg.
     // If the key matches a known config item, extract and save the value.
     //
-    char key[100], value[200];
+    char key[100], value[512];
     while (getNextKeyValue(cfg, key, value))
     {
         if      (!strcmp("mapFileName",          key)){
