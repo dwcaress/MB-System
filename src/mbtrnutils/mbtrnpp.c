@@ -6931,7 +6931,6 @@ int mbtrnpp_mb1r_input_open(int verbose, void *mbio_ptr, char *definition, int *
 
     return (status);
 }
-
 int mbtrnpp_mb1r_input_read(int verbose, void *mbio_ptr, size_t *size, char *buffer, int *error)
 {
 
