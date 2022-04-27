@@ -3494,8 +3494,10 @@ int main(int argc, char **argv) {
   bool nav_offset_init = false;
   if (mbtrn_cfg->random_offset_enable) {
       srand(time(0) / getpid());
+      // TODO: what is the intent of this loop? (klh)
       for (int i=0; i < 100; i++) {
           int j = rand();
+          j+=1; // silence unused variable warning
       }
       double nav_offset_mag = mbtrn_cfg->reinit_xyoffset_max * ((double)rand()) / ((double)RAND_MAX);
       double nav_offset_bearing = 2.0 * M_PI * ((double)rand()) / ((double)RAND_MAX);
@@ -5985,16 +5987,17 @@ int mbtrnpp_process_mb1(char *src, size_t len, trn_config_t *cfg)
 
 /*--------------------------------------------------------------------*/
 
-int mbtrnpp_reson7kr_input_open(int verbose, void *mbio_ptr, char *definition, int *error) {
+int mbtrnpp_reson7kr_input_open(int verbose, void *mbio_ptr, char *definition, int *error)
+{
 
-  /* local variables */
+  // local variables
   int status = MB_SUCCESS;
   struct mb_io_struct *mb_io_ptr;
 
   uint32_t reson_nsubs = 11;
   uint32_t reson_subs[] = {1003, 1006, 1008, 1010, 1012, 1013, 1015, 1016, 7000, 7004, 7027};
 
-  /* print input debug statements */
+  // print input debug statements
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -6003,18 +6006,18 @@ int mbtrnpp_reson7kr_input_open(int verbose, void *mbio_ptr, char *definition, i
     fprintf(stderr, "dbg2       hostname:   %s\n", definition);
   }
 
-  /* get pointer to mbio descriptor */
+  // get pointer to mbio descriptor
   mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
-  /* set initial status */
+  // set initial status
   status = MB_SUCCESS;
 
-  /* Open and initialize the socket based input for reading using function
-   * mbtrnpp_reson7kr_input_read(). Allocate an internal, hidden buffer to hold data from
-   * full s7k records while waiting to return bytes from those records as
-   * requested by the MBIO read functions.
-   * Store the relevant pointers and parameters within the
-   * mb_io_struct structure *mb_io_ptr. */
+    // Open and initialize the socket based input for reading using function
+    // mbtrnpp_mb1r_input_read(). mbtrnpp_mb1r_input_read allocates a buffer
+    // to hold a complete and validated mb1 record, and returns bytes from
+    // that record as requested by the MBIO read functions.
+    // Store the relevant pointers and parameters within the
+    // mb_io_struct structure *mb_io_ptr.
 
   mb_path hostname;
   int port = 0;
@@ -6084,7 +6087,7 @@ int mbtrnpp_reson7kr_input_open(int verbose, void *mbio_ptr, char *definition, i
     *error = MB_ERROR_INIT_FAIL;
   }
 
-  /* print output debug statements */
+  // print output debug statements
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
@@ -6093,7 +6096,6 @@ int mbtrnpp_reson7kr_input_open(int verbose, void *mbio_ptr, char *definition, i
     fprintf(stderr, "dbg2       status:             %d\n", status);
   }
 
-  /* return */
   return (status);
 }
 
@@ -6133,16 +6135,19 @@ int mbtrnpp_reson7kr_validate_drf(r7k_drf_t *pdrf)
         fprintf(stderr, "%s : ERR proto ver [%"PRIu32"/%"PRIu32"]\n",__func__,pdrf->protocol_version, R7K_DRF_PROTO_VER);
     }
 
+#if MBTRNPP_R7KR_VALIDATE_CHECKSUM
     // validate checksum
-//    byte *pd=(byte *)pdrf;
-//    uint32_t vchk = r7k_checksum( pd, (uint32_t)(pdrf->size-R7K_CHECKSUM_BYTES));
-//    pd = (byte *)pdrf;
-//    pd += ((size_t)pdrf->size-R7K_CHECKSUM_BYTES);
-//    uint32_t *pchk = (uint32_t *)pd;
-//
-//    if (vchk != (uint32_t)(*pchk) ) {
-//        retval = -1;
-//    }
+    byte *pd=(byte *)pdrf;
+    uint32_t vchk = r7k_checksum( pd, (uint32_t)(pdrf->size-R7K_CHECKSUM_BYTES));
+    pd = (byte *)pdrf;
+    pd += ((size_t)pdrf->size-R7K_CHECKSUM_BYTES);
+    uint32_t *pchk = (uint32_t *)pd;
+
+    if (vchk != (uint32_t)(*pchk) ) {
+        retval = -1;
+    }
+#endif
+
     return retval;
 }
 
@@ -6167,7 +6172,7 @@ int mbtrnpp_reson7kr_input_read(int verbose, void *mbio_ptr, size_t *size, char 
     mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
     // set initial status
-    status = MB_SUCCESS;
+    *error = MB_ERROR_NO_ERROR;
 
     // Read the requested number of bytes (= size) off the input and  place
     // those bytes into the buffer.
@@ -6333,113 +6338,6 @@ int mbtrnpp_reson7kr_input_read(int verbose, void *mbio_ptr, size_t *size, char 
     }
 
     return (status);
-}
-
-int mbtrnpp_reson7kr_input_read_orig(int verbose, void *mbio_ptr, size_t *size, char *buffer, int *error) {
-
-  /* local variables */
-  int status = MB_SUCCESS;
-  struct mb_io_struct *mb_io_ptr;
-
-  /* print input debug statements */
-  if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
-    fprintf(stderr, "dbg2  Input arguments:\n");
-    fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
-    fprintf(stderr, "dbg2       mbio_ptr:   %p\n", mbio_ptr);
-    fprintf(stderr, "dbg2       size:       %zu\n", *size);
-    fprintf(stderr, "dbg2       buffer:     %p\n", buffer);
-  }
-
-  /* get pointer to mbio descriptor */
-  mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-
-  /* set initial status */
-  status = MB_SUCCESS;
-
-  /* Read the requested number of bytes (= size) off the input and  place
-   * those bytes into the buffer.
-   * This requires reading full s7k records off the socket, storing the data
-   * in an internal, hidden buffer, and parceling those bytes out as requested.
-   * The internal buffer should be allocated in mbtrnpp_reson7kr_input_init() and stored
-   * in the mb_io_struct structure *mb_io_ptr. */
-
-  // use the socket reader
-  // read and return single frame
-  uint32_t sync_bytes=0;
-  int64_t rbytes=-1;
-  r7kr_reader_t *reader = (r7kr_reader_t *)mb_io_ptr->mbsp;
-  if ( (rbytes = r7kr_read_stripped_frame(reader, (byte *) buffer,
-                                          R7K_MAX_FRAME_BYTES, R7KR_NET_STREAM,
-                                          0.0, R7KR_READ_TMOUT_MSEC,
-                                          &sync_bytes)) < 0) {
-    status   = MB_FAILURE;
-    *error   = MB_ERROR_EOF;
-    *size    = (size_t)rbytes;
-
-      MST_METRIC_START(app_stats->stats->metrics[MBTPP_CH_MB_GETFAIL_XT], mtime_dtime());
-      PMPRINT(MOD_MBTRNPP,MBTRNPP_V4,(stderr,"r7kr_read_stripped_frame failed: sync_bytes[%d] status[%d] err[%d]\n",sync_bytes,status, *error));
-      fprintf(stderr,"r7kr_read_stripped_frame failed: sync_bytes[%u] status[%d] err[%d]\n",sync_bytes,status, *error);
-
-      MST_COUNTER_INC(app_stats->stats->events[MBTPP_EV_EMBFRAMERD]);
-      MST_COUNTER_ADD(app_stats->stats->events[MBTPP_STA_MB_SYNC_BYTES],sync_bytes);
-
-      fprintf(stderr,"EOF (input socket) - clear status/error\n");
-      status = MB_SUCCESS;
-      *error = MB_ERROR_NO_ERROR;
-
-      // check connection status
-      // only reconnect if disconnected
-      if ((NULL!=reader && reader->state==R7KR_INITIALIZED) || (me_errno==ME_ESOCK) || (me_errno==ME_EOF)  ) {
-          MST_COUNTER_INC(app_stats->stats->events[MBTPP_EV_EMBSOCKET]);
-
-          // empty the reader's record frame container
-          r7kr_reader_purge(reader);
-          fprintf(stderr,"mbtrnpp: input socket disconnected status[%s]\n",r7kr_strstate(reader->state));
-          mlog_tprintf(mbtrnpp_mlog_id,"mbtrnpp: input socket disconnected status[%s]\n",r7kr_strstate(reader->state));
-          MST_COUNTER_INC(app_stats->stats->events[MBTPP_EV_MB_DISN]);
-          if (r7kr_reader_connect(reader,true)==0) {
-              fprintf(stderr,"mbtrnpp: input socket connected status[%s]\n",r7kr_strstate(reader->state));
-              mlog_tprintf(mbtrnpp_mlog_id,"mbtrnpp: input socket connected status[%s]\n",r7kr_strstate(reader->state));
-              MST_COUNTER_INC(app_stats->stats->events[MBTPP_EV_MB_CONN]);
-          } else {
-              fprintf(stderr,"mbtrnpp: input socket reconnect failed status[%s]\n",r7kr_strstate(reader->state));
-              mlog_tprintf(mbtrnpp_mlog_id,"mbtrnpp: input socket reconnect failed status[%s]\n",r7kr_strstate(reader->state));
-              MST_COUNTER_INC(app_stats->stats->events[MBTPP_EV_EMBCON]);
-
-
-              struct timespec twait={0},trem={0};
-              twait.tv_sec=5;
-              nanosleep(&twait,&trem);
-          }
-      }
-
-      MST_METRIC_LAP(app_stats->stats->metrics[MBTPP_CH_MB_GETFAIL_XT], mtime_dtime());
-
-//    if (me_errno==ME_ESOCK) {
-//        fprintf(stderr,"r7kr_reader server connection closed.\n");
-//    } else if (me_errno==ME_EOF) {
-//        fprintf(stderr,"r7kr_reader end of file (server connection closed).\n");
-//    } else{
-//        fprintf(stderr,"r7kr_read_stripped_frame me_errno %d/%s\n",me_errno,me_strerror(me_errno));
-//    }
-
-  } else {
-    *error = MB_ERROR_NO_ERROR;
-    *size    = (size_t)rbytes;
-  }
-
-  /* print output debug statements */
-  if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
-    fprintf(stderr, "dbg2  Return values:\n");
-    fprintf(stderr, "dbg2       error:              %d\n", *error);
-    fprintf(stderr, "dbg2  Return status:\n");
-    fprintf(stderr, "dbg2       status:             %d\n", status);
-  }
-
-  /* return */
-  return (status);
 }
 
 /*--------------------------------------------------------------------*/
@@ -6924,13 +6822,14 @@ int mbtrnpp_kemkmall_input_close(int verbose, void *mbio_ptr, int *error) {
 }
 #ifdef WITH_MB1_READER
 /*--------------------------------------------------------------------*/
-int mbtrnpp_mb1r_input_open(int verbose, void *mbio_ptr, char *definition, int *error) {
+int mbtrnpp_mb1r_input_open(int verbose, void *mbio_ptr, char *definition, int *error)
+{
 
-    /* local variables */
+    // local variables
     int status = MB_SUCCESS;
     struct mb_io_struct *mb_io_ptr;
 
-    /* print input debug statements */
+    // print input debug statements
     if (verbose >= 2) {
         fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
         fprintf(stderr, "dbg2  Input arguments:\n");
@@ -6939,18 +6838,18 @@ int mbtrnpp_mb1r_input_open(int verbose, void *mbio_ptr, char *definition, int *
         fprintf(stderr, "dbg2       hostname:   %s\n", definition);
     }
 
-    /* get pointer to mbio descriptor */
+    // get pointer to mbio descriptor
     mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
-    /* set initial status */
+    // set initial status
     status = MB_SUCCESS;
 
-    /* Open and initialize the socket based input for reading using function
-     * mbtrnpp_mb1r_input_read(). Allocate an internal, hidden buffer to hold data from
-     * full mb1 records while waiting to return bytes from those records as
-     * requested by the MBIO read functions.
-     * Store the relevant pointers and parameters within the
-     * mb_io_struct structure *mb_io_ptr. */
+    // Open and initialize the socket based input for reading using function
+    // mbtrnpp_mb1r_input_read(). mbtrnpp_mb1r_input_read allocates a buffer
+    // to hold a complete and validated mb1 record, and returns bytes from
+    // that record as requested by the MBIO read functions.
+    // Store the relevant pointers and parameters within the
+    // mb_io_struct structure *mb_io_ptr.
 
     mb_path hostname;
     int port = 0;
@@ -7021,7 +6920,7 @@ int mbtrnpp_mb1r_input_open(int verbose, void *mbio_ptr, char *definition, int *
         *error = MB_ERROR_INIT_FAIL;
     }
 
-    /* print output debug statements */
+    // print output debug statements
     if (verbose >= 2) {
         fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
         fprintf(stderr, "dbg2  Return values:\n");
@@ -7030,18 +6929,17 @@ int mbtrnpp_mb1r_input_open(int verbose, void *mbio_ptr, char *definition, int *
         fprintf(stderr, "dbg2       status:             %d\n", status);
     }
 
-    /* return */
     return (status);
 }
 int mbtrnpp_mb1r_input_read(int verbose, void *mbio_ptr, size_t *size, char *buffer, int *error)
 {
 
-    /* local variables */
+    // local variables
     int status = MB_SUCCESS;
     struct mb_io_struct *mb_io_ptr;
 
-    /* print input debug statements */
-    if (verbose >= 0) {
+    // print input debug statements
+    if (verbose >= 2) {
         fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
         fprintf(stderr, "dbg2  Input arguments:\n");
         fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
@@ -7050,10 +6948,10 @@ int mbtrnpp_mb1r_input_read(int verbose, void *mbio_ptr, size_t *size, char *buf
         fprintf(stderr, "dbg2       buffer:     %p\n", buffer);
     }
 
-    /* get pointer to mbio descriptor */
+    // get pointer to mbio descriptor
     mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
-    /* set initial status */
+    // set initial status
     status = MB_SUCCESS;
 
     // Read the requested number of bytes (= size) off the input and  place
@@ -7214,116 +7112,6 @@ int mbtrnpp_mb1r_input_read(int verbose, void *mbio_ptr, size_t *size, char *buf
     if (verbose >= 2) {
         fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
         fprintf(stderr, "dbg2  Return values:\n");
-        fprintf(stderr, "dbg2       error:              %d\n", *error);
-        fprintf(stderr, "dbg2  Return status:\n");
-        fprintf(stderr, "dbg2       status:             %d\n", status);
-    }
-
-    return (status);
-}
-int mbtrnpp_mb1r_input_read_orig(int verbose, void *mbio_ptr, size_t *size, char *buffer, int *error)
-{
-
-    /* local variables */
-    int status = MB_SUCCESS;
-    struct mb_io_struct *mb_io_ptr;
-
-    /* print input debug statements */
-    if (verbose >= 2) {
-        fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
-        fprintf(stderr, "dbg2  Input arguments:\n");
-        fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
-        fprintf(stderr, "dbg2       mbio_ptr:   %p\n", mbio_ptr);
-        fprintf(stderr, "dbg2       size:       %zu\n", *size);
-        fprintf(stderr, "dbg2       buffer:     %p\n", buffer);
-    }
-
-    /* get pointer to mbio descriptor */
-    mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-
-    /* set initial status */
-    status = MB_SUCCESS;
-
-    /* Read the requested number of bytes (= size) off the input and  place
-     * those bytes into the buffer.
-     * This requires reading full MB1 records off the socket, storing the data
-     * in an internal, hidden buffer, and parceling those bytes out as requested.
-     * The internal buffer should be allocated in mbtrnpp_mb1r_input_init() and stored
-     * in the mb_io_struct structure *mb_io_ptr. */
-
-    // use the socket reader
-    // read and return single frame
-    uint32_t sync_bytes=0;
-    int64_t rbytes=-1;
-    mb1r_reader_t *reader = (mb1r_reader_t *)mb_io_ptr->mbsp;
-
-    if ( (rbytes = mb1r_read_frame(reader, (byte *) buffer,
-                                            MB1_MAX_SOUNDING_BYTES, MB1R_NET_STREAM,
-                                            0.0, MB1R_READ_TMOUT_MSEC,
-                                            &sync_bytes)) < 0) {
-        status   = MB_FAILURE;
-        *error   = MB_ERROR_EOF;
-        *size    = (size_t)rbytes;
-
-        MST_METRIC_START(app_stats->stats->metrics[MBTPP_CH_MB_GETFAIL_XT], mtime_dtime());
-        PMPRINT(MOD_MBTRNPP,MBTRNPP_V4,(stderr,"mb1r_read_frame failed: sync_bytes[%d] status[%d] err[%d]\n",sync_bytes,status, *error));
-        fprintf(stderr,"mb1r_read_frame failed: sync_bytes[%u] status[%d] err[%d]\n",sync_bytes,status, *error);
-
-        MST_COUNTER_INC(app_stats->stats->events[MBTPP_EV_EMBFRAMERD]);
-        MST_COUNTER_ADD(app_stats->stats->events[MBTPP_STA_MB_SYNC_BYTES],sync_bytes);
-
-        fprintf(stderr,"EOF (input socket) - clear status/error\n");
-        status = MB_SUCCESS;
-        *error = MB_ERROR_NO_ERROR;
-
-        // check connection status
-        // only reconnect if disconnected
-        if ((NULL!=reader && reader->state==MB1R_INITIALIZED) || (me_errno==ME_ESOCK) || (me_errno==ME_EOF)  ) {
-            MST_COUNTER_INC(app_stats->stats->events[MBTPP_EV_EMBSOCKET]);
-
-            // empty the reader's record frame container
-            mb1r_reader_purge(reader);
-            fprintf(stderr,"mbtrnpp: input socket disconnected status[%s]\n",mb1r_strstate(reader->state));
-            mlog_tprintf(mbtrnpp_mlog_id,"mbtrnpp: input socket disconnected status[%s]\n",mb1r_strstate(reader->state));
-            MST_COUNTER_INC(app_stats->stats->events[MBTPP_EV_MB_DISN]);
-            if (mb1r_reader_connect(reader,true)==0) {
-                fprintf(stderr,"mbtrnpp: input socket connected status[%s]\n",mb1r_strstate(reader->state));
-                mlog_tprintf(mbtrnpp_mlog_id,"mbtrnpp: input socket connected status[%s]\n",mb1r_strstate(reader->state));
-                MST_COUNTER_INC(app_stats->stats->events[MBTPP_EV_MB_CONN]);
-            } else {
-                fprintf(stderr,"mbtrnpp: input socket reconnect failed status[%s]\n",mb1r_strstate(reader->state));
-                mlog_tprintf(mbtrnpp_mlog_id,"mbtrnpp: input socket reconnect failed status[%s]\n",mb1r_strstate(reader->state));
-                MST_COUNTER_INC(app_stats->stats->events[MBTPP_EV_EMBCON]);
-
-                struct timespec twait={0},trem={0};
-                twait.tv_sec=5;
-                nanosleep(&twait,&trem);
-            }
-        }
-
-        MST_METRIC_LAP(app_stats->stats->metrics[MBTPP_CH_MB_GETFAIL_XT], mtime_dtime());
-
-        //    if (me_errno==ME_ESOCK) {
-        //        fprintf(stderr,"r7kr_reader server connection closed.\n");
-        //    } else if (me_errno==ME_EOF) {
-        //        fprintf(stderr,"r7kr_reader end of file (server connection closed).\n");
-        //    } else{
-        //        fprintf(stderr,"r7kr_read_stripped_frame me_errno %d/%s\n",me_errno,me_strerror(me_errno));
-        //    }
-
-    } else {
-        *error = MB_ERROR_NO_ERROR;
-        *size    = (size_t)rbytes;
-        if(verbose>=2 || verbose<=-2){
-            fprintf(stderr,"read frame len[%zu]:\n",(size_t)rbytes);
-            mb1_show((mb1_t *)buffer,(verbose<-2 || verbose>=2 ? true : false),5);
-        }
-    }
-
-    /* print output debug statements */
-    if (verbose >= 2) {
-        fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
-        fprintf(stderr, "dbg2  Return values:\n");
         fprintf(stderr, "dbg2       size:       %zu\n", *size);
         fprintf(stderr, "dbg2       buffer:     %p\n", buffer);
         fprintf(stderr, "dbg2       error:              %d\n", *error);
@@ -7331,7 +7119,6 @@ int mbtrnpp_mb1r_input_read_orig(int verbose, void *mbio_ptr, size_t *size, char
         fprintf(stderr, "dbg2       status:             %d\n", status);
     }
 
-    /* return */
     return (status);
 }
 
