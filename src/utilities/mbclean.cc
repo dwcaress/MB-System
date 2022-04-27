@@ -53,6 +53,7 @@
  * program mbclean (v. 1.0) by David Caress.
  */
 
+#include <algorithm>
 #include <cmath>
 #include <cstdio>
 #include <cstdlib>
@@ -60,8 +61,6 @@
 #include <ctime>
 #include <sys/stat.h>
 #include <unistd.h>
-
-#include <algorithm>
 
 #include "mb_define.h"
 #include "mb_format.h"

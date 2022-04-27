@@ -1629,7 +1629,6 @@ int mbr_wt_nvnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	int mbPositionNbr_id;
 	int dims[2];
 	size_t index[2], count[2];
-	char *user_ptr;
 	double time_d;
 	int icomment;
 #ifdef MBNETCDF_DEBUG

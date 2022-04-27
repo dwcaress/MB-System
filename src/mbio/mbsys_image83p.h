@@ -26,7 +26,7 @@
  *
  */
 /*
- * Notes on the MBSYS_HSDS data structure:
+ * Notes on the MBSYS_IMAGE83P data structure:
  *   1. Imagex multibeam systems output raw data in a format
  *      combining ascii and binary values.
  *   2. The system outputs 480 beams of bathymetry

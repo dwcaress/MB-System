@@ -25,12 +25,12 @@
 #include "mbnavadjust_icp.h"
 
 /* standard include files */
-#include <iostream>
-#include <thread>
-#include <chrono>
 #include <algorithm>
+#include <chrono>
 #include <getopt.h>
+#include <iostream>
 #include <string.h>
+#include <thread>
 
 /* C++ namespaces for the lazy typer */
 using std::endl;

@@ -398,7 +398,6 @@ autoreconf --force --install
     --enable-opencv
 #    --enable-qt \
 #    --enable-pcltools
-
 make
 make check
 make install

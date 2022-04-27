@@ -41,6 +41,7 @@
  * Date:  August 3, 2018
  */
 
+#include <algorithm>
 #include <cmath>
 #include <cstdio>
 #include <cstdlib>
@@ -49,8 +50,6 @@
 #include <getopt.h>
 #include <sys/stat.h>
 #include <unistd.h>
-
-#include <algorithm>
 
 #include "mb_define.h"
 #include "mb_format.h"

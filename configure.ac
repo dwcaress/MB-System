@@ -11,8 +11,8 @@ dnl    See README file for copying and redistribution conditions.
 dnl--------------------------------------------------------------------
 
 dnl Initialize and set version and version date
-AC_INIT([mbsystem],[5.7.9beta27],[http://listserver.mbari.org/sympa/arc/mbsystem],[mbsystem],[http://www.mbari.org/data/mbsystem/])
-AC_DEFINE(VERSION_DATE, ["28 February 2022"], [Set VERSION_DATE define in mb_config.h])
+AC_INIT([mbsystem],[5.7.9beta28],[http://listserver.mbari.org/sympa/arc/mbsystem],[mbsystem],[http://www.mbari.org/data/mbsystem/])
+AC_DEFINE(VERSION_DATE, ["21 March 2022"], [Set VERSION_DATE define in mb_config.h])
 
 AS_ECHO([" "])
 AS_ECHO(["------------------------------------------------------------------------------"])
@@ -93,6 +93,7 @@ AS_ECHO(["        --disable-mbtools     - disable building graphical tools (use 
 AS_ECHO(["        --enable-hardening    - Enable compiler and linker options to frustrate memory corruption exploits  (e.g. -fPIE and -pie) (optional)"])
 AS_ECHO(["        --enable-test         - Enable building unit tests in test/ and third-party/"])
 AS_ECHO(["        --enable-qt           - Enable building graphical tools using the Qt5 framework"])
+AS_ECHO(["        --with-debug          - Set compiler flags to allow full debugging"])
 AS_ECHO([" "])
 AS_ECHO(["    After configure you can run the make utility in the usual fashion"])
 AS_ECHO(["        make"])
@@ -122,7 +123,6 @@ AS_ECHO(["Used Installation Prefix:       $prefix"])
 AS_ECHO(["------------------------------------------------------------------------------"])
 AS_ECHO([" "])
 
-
 dnl Require automake 2.71 or later
 AC_PREREQ([2.71])
 
@@ -142,6 +142,9 @@ AX_CXX_COMPILE_STDCXX(11)
 AM_INIT_AUTOMAKE([no-dist subdir-objects foreign])
 AM_MAINTAINER_MODE
 AC_CONFIG_HEADERS([src/mbio/mb_config.h])
+
+dnl Handle option to enable debugging
+AC_ARG_WITH(debug, [  --with-debug  Set compiler flags to allow full debugging], [AC_DEFINE(WITH_DEBUG,1,0) AC_SUBST(WITH_DEBUG,1) CFLAGS="-O0 -g" CXXFLAGS="-O0 -g"])
 
 dnl Check for programs
 AC_PROG_CC

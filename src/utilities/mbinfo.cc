@@ -25,15 +25,14 @@
  * Date:  February 1, 1993
  */
 
+#include <cmath>
+#include <algorithm>
 #include <getopt.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-
-#include <cmath>
-#include <algorithm>
 
 #include "mb_define.h"
 #include "mb_status.h"
