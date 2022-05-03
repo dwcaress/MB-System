@@ -68,8 +68,13 @@
 /////////////////////////
 #include <stdlib.h>
 #include <stdio.h>
+#include <sys/types.h>
+#if defined (__QNX__)
+#include <ourTypes.h>
+#else
 #include <stdbool.h>
 #include <inttypes.h>
+#endif
 
 /////////////////////////
 // Macros
@@ -147,6 +152,10 @@
 /////////////////////////
 // Type Definitions
 /////////////////////////
+
+#if defined(__QNX__)
+typedef int socklen_t;
+#endif
 
 typedef unsigned char byte;
 

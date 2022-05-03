@@ -131,6 +131,7 @@ typedef struct trn_config_s{
     char *cfg_file;
     char *particles_file;
     char *log_dir;
+    int  sensor_type;
     int  filter_type;
     int  map_type;
     long int utm_zone;
@@ -153,7 +154,9 @@ extern "C" {
     // TRN config API
     trn_config_t *trncfg_dnew();
     trn_config_t *trncfg_new(char *host, int port,
-                             long int utm_zone,int map_type,
+                             long int utm_zone,
+                             int map_type,
+                             int sensor_type,
                              int filter_type,
                              int filter_grade,
                              int filter_reinit,
