@@ -1236,6 +1236,8 @@ public:
     {
         return mTBConfig;
     }
+
+    std::string cfg(){return mAppCfg;}
     std::list<std::string>::iterator input_first(){ return mInputList.begin();}
     std::list<std::string>::iterator input_last(){ return mInputList.end();}
     int debug(){return mDebug;}
@@ -1284,6 +1286,11 @@ int main(int argc, char **argv)
     // get configuration from command line, file
     app_cfg cfg;
     cfg.parse_args(argc, argv);
+    if(cfg.cfg().length() > 0){
+        cfg.parse_file(cfg.cfg());
+        // reparse command line (should override config options)
+        cfg.parse_args(argc, argv, true);
+    }
 
     // configure debug output
     trn_debug::get()->set_debug(cfg.debug());
