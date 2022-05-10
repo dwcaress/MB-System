@@ -30,6 +30,7 @@
 #include "TrnLog.h"
 #include "TrnClient.h"
 #include "trn_debug.hpp"
+#include "flag_utils.hpp"
 
 // /////////////////
 // Macros
@@ -85,14 +86,24 @@ class TrnLogConfig
 {
 public:
 
+    typedef enum{
+        MOTN=0x1,
+        MEAS=0x2,
+        EST=0x4,
+        TRNI_CSV=0x8,
+        TRNO_CSV=0x10,
+        TRNI=0x3,
+        ALL_CSV=0x18
+    }OFlags;
+
    TrnLogConfig()
-    : mDebug(0), mVerbose(false), mHost("localhost"), mTrnCfg(), mPort(TRN_SERVER_PORT_DFL), mServer(false), mConsole(true), mCsv(false), mCsvPath(), mTrnSensor(TRN_SENSOR_MB)
+    : mDebug(0), mVerbose(false), mHost("localhost"), mTrnCfg(), mPort(TRN_SERVER_PORT_DFL), mServer(false), mTrnInCsvEn(false), mTrnOutCsvEn(false), mTrnInCsvPath(), mTrnOutCsvPath(), mTrnSensor(TRN_SENSOR_MB), mOFlags() //mConsole(true),
     {
 
     }
 
     TrnLogConfig(const TrnLogConfig &other)
-    : mDebug(other.mDebug), mVerbose(other.mVerbose), mHost(other.mHost), mTrnCfg(other.mTrnCfg), mPort(other.mPort), mServer(other.mServer), mConsole(other.mConsole), mCsv(other.mCsv), mCsvPath(other.mCsvPath), mTrnSensor(other.mTrnSensor)
+    : mDebug(other.mDebug), mVerbose(other.mVerbose), mHost(other.mHost), mTrnCfg(other.mTrnCfg), mPort(other.mPort), mServer(other.mServer),  mTrnInCsvEn(other.mTrnInCsvEn), mTrnOutCsvEn(other.mTrnOutCsvEn), mTrnInCsvPath(other.mTrnInCsvPath), mTrnOutCsvPath(other.mTrnOutCsvPath), mTrnSensor(other.mTrnSensor), mOFlags(other.mOFlags) //mConsole(other.mConsole),
     {
 
     }
@@ -102,24 +113,28 @@ public:
     }
 
     bool server(){return mServer;}
-    bool console(){return mConsole;}
-    bool csv(){return mCsv;}
+    bool trni_csv(){return mTrnInCsvEn;}
+    bool trno_csv(){return mTrnOutCsvEn;}
     int trn_sensor(){return mTrnSensor;}
     std::string host(){return mHost;}
     std::string trn_cfg(){return mTrnCfg;}
-    std::string csv_path(){return mCsvPath;}
+    std::string trni_csv_path(){return mTrnInCsvPath;}
+    std::string trno_csv_path(){return mTrnOutCsvPath;}
     int port(){return mPort;}
+    bool oflag_set(TrnLogConfig::OFlags mask){return mOFlags.all_set(mask);}
 
-    void set_console(bool enable){mConsole = enable;}
     void set_server(bool enable){mServer = enable;}
-    void set_csv(bool enable){mCsv = enable;}
-    void set_csv_path(const std::string &path){mCsvPath = std::string(path);}
+    void set_trni_csv(bool enable){mTrnInCsvEn = enable;}
+    void set_trni_csv_path(const std::string &path){mTrnInCsvPath = std::string(path);}
+    void set_trno_csv(bool enable){mTrnOutCsvEn = enable;}
+    void set_trno_csv_path(const std::string &path){mTrnOutCsvPath = std::string(path);}
     void set_host(const std::string &host){mHost = std::string(host);}
     void set_port(int port){mPort = port;}
     void set_trn_sensor(int id){mTrnSensor = id;}
     void set_trn_cfg(const std::string &cfg){mTrnCfg = std::string(cfg);}
     void set_debug(int debug){mDebug = debug;}
     void set_verbose(bool verbose){mVerbose = verbose;}
+    void set_oflags(uint32_t flags){mOFlags = flags;}
 
 protected:
 private:
@@ -129,10 +144,12 @@ private:
     std::string mTrnCfg;
     int mPort;
     bool mServer;
-    bool mConsole;
-    bool mCsv;
-    std::string mCsvPath;
+    bool mTrnInCsvEn;
+    bool mTrnOutCsvEn;
+    std::string mTrnInCsvPath;
+    std::string mTrnOutCsvPath;
     int mTrnSensor;
+    flag_var<uint32_t> mOFlags;
 
 };
 
@@ -141,12 +158,12 @@ class TrnLogPlayer
 public:
 
     TrnLogPlayer()
-    :mConfig(), mTrn(NULL), mFile(NULL), mCsvFile(NULL), mQuit(false)
+    :mConfig(), mTrn(NULL), mFile(NULL), mCsvFile(NULL), mTrnOutCsvFile(NULL), mQuit(false)
     {
     }
 
     TrnLogPlayer(const TrnLogConfig &cfg)
-    :mConfig(cfg), mTrn(NULL), mFile(NULL), mCsvFile(NULL), mQuit(false)
+    :mConfig(cfg), mTrn(NULL), mFile(NULL), mCsvFile(NULL), mTrnOutCsvFile(NULL), mQuit(false)
     {
     }
 
@@ -158,6 +175,9 @@ public:
 
         if(mCsvFile != NULL){
             fclose(mCsvFile);
+        }
+        if(mTrnOutCsvFile != NULL){
+            fclose(mTrnOutCsvFile);
         }
 
         if(NULL != mTrn)
@@ -203,6 +223,8 @@ public:
 
         while (!mQuit && next_record(ibuf, 2048, rec_type) == 0) {
 
+            if(NULL!=quit && *quit)
+                break;
             memset(ibuf, 0, 2048);
 
             if(rec_type == TrnLog::MOTN_IN) {
@@ -210,7 +232,7 @@ public:
                 poseT *pt = NULL;
                 if(read_pose(&pt, ibuf) == 0 && pt != NULL){
 
-                    if(mConfig.console())
+                    if(mConfig.oflag_set(TrnLogConfig::MOTN))
                     {
                         show_pt(*pt);
                         std::cerr << "\n";
@@ -234,7 +256,7 @@ public:
                 measT *mt = NULL;
                 if(read_meas(&mt, ibuf) == 0 && mt != NULL){
 
-                    if(mConfig.console())
+                    if(mConfig.oflag_set(TrnLogConfig::MEAS))
                     {
                         show_mt(*mt);
                         std::cerr << "\n";
@@ -246,20 +268,30 @@ public:
                             mTrn->measUpdate(mt, mConfig.trn_sensor());
 
                             if(mTrn->lastMeasSuccessful()){
+                                auto ts_now = std::chrono::system_clock::now();
+                                std::chrono::duration<double> epoch_time = ts_now.time_since_epoch();
                                 poseT mle, mmse;
+                                double ts = epoch_time.count();
+
                                 mTrn->estimatePose(&mmse, TRN_EST_MMSE);
                                 mTrn->estimatePose(&mle, TRN_EST_MLE);
-                                if(mConfig.console()){
-                                    auto ts_now = std::chrono::system_clock::now();
-                                    std::chrono::duration<double> epoch_time = ts_now.time_since_epoch();
-                                    double ts = epoch_time.count();
 
+                                if(mConfig.oflag_set(TrnLogConfig::EST)){
                                     show_est(ts, lastPT, mle, mmse);
                                 }
-                                if(mConfig.csv()){
-                                    csv_tofile(mCsvFile, lastPT, *mt);
-                                    if(mConfig.console()){
-                                        show_csv(lastPT, *mt);
+
+                                if(mConfig.trni_csv()){
+                                    trni_csv_tofile(mCsvFile, lastPT, *mt);
+                                    if(mConfig.oflag_set(TrnLogConfig::TRNI_CSV))
+                                    {
+                                        show_trni_csv(lastPT, *mt);
+                                    }
+                                }
+                                if(mConfig.trno_csv()){
+                                    trno_csv_tofile(mTrnOutCsvFile, ts, lastPT, mle, mmse);
+                                    if(mConfig.oflag_set(TrnLogConfig::TRNO_CSV))
+                                    {
+                                        show_trno_csv(ts, lastPT, mle, mmse);
                                     }
                                 }
                             }else{
@@ -281,7 +313,6 @@ public:
         return retval;
     }
 
-    void set_console(bool enable){mConfig.set_console(enable);}
     void set_server(bool enable){mConfig.set_server(enable);}
     void quit(){
         TRN_DPRINT("setting player quit flag\n");
@@ -290,7 +321,7 @@ public:
 
 protected:
 
-    void csv_tostream(std::ostream &os, poseT &pt, measT &mt)
+    void trni_csv_tostream(std::ostream &os, poseT &pt, measT &mt)
     {
         // Note that TRN uses N,E,D frame (i.e. N:x E:y D:z)
         // time POSIX epoch sec
@@ -347,45 +378,122 @@ protected:
         os << "\n";
     }
 
-    std::string csv_tostring(poseT &pt, measT &mt)
+    std::string trni_csv_tostring(poseT &pt, measT &mt)
     {
         ostringstream ss;
-        csv_tostream(ss, pt, mt);
+        trni_csv_tostream(ss, pt, mt);
         return ss.str();
     }
 
-    void csv_tofile(FILE *fp, poseT &pt, measT &mt)
+    void trni_csv_tofile(FILE *fp, poseT &pt, measT &mt)
     {
-        std::string csv = csv_tostring(pt, mt);
+        std::string csv = trni_csv_tostring(pt, mt);
         if(NULL == fp)
         {
-            fp = fopen(mConfig.csv_path().c_str(),"a");
+            fp = fopen(mConfig.trni_csv_path().c_str(),"a");
         }
 
         if(NULL != fp){
             fprintf(fp, "%s",csv.c_str());
         } else {
-            TRN_DPRINT("ERR - could not open file[%s]\n",mConfig.csv_path().c_str());
+            TRN_DPRINT("ERR - could not open file[%s]\n",mConfig.trni_csv_path().c_str());
         }
     }
 
-    void show_csv(poseT &pt, measT &mt)
+    void show_trni_csv(poseT &pt, measT &mt)
     {
-        csv_tostream(std::cerr, pt, mt);
+        trni_csv_tostream(std::cerr, pt, mt);
+//        std::cerr << "\n";
+    }
+
+    void trno_csv_tostream(std::ostream &os, double ts, poseT &pt, poseT &mle, poseT &mmse)
+    {
+        // format
+        // time
+        // mmse.time
+        // mmse.x
+        // mmse.y
+        // mmse.z
+        // ofs.x
+        // ofs.y
+        // ofs.z
+        // cov.0
+        // cov.2
+        // cov.5
+        // pos.time
+        // pos.x
+        // pos.y
+        // pos.z
+        // mle.time
+        // mle.x
+        // mle.y
+        // mle.z
+
+        os << std::fixed << std::setprecision(3);
+        os << ts << ",";
+
+        // mmse
+        os << mmse.time << ",";
+        os << std::setprecision(4);
+        os << mmse.x << "," << mmse.y << "," << mmse.z << ",";
+
+        // ofs
+        os << std::fixed << std::setprecision(3);
+        os << pt.time << ",";
+        os << std::setprecision(4);
+        os << pt.x-mmse.x << "," << pt.y-mmse.y << "," << pt.z-mmse.z << ",";
+
+        // cov
+        os << std::fixed << std::setprecision(3);
+        os << sqrt(mmse.covariance[0]) << ",";
+        os << sqrt(mmse.covariance[2]) << ",";
+        os << sqrt(mmse.covariance[5]) << ",";
+
+        // pos
+        os << std::setprecision(3);
+        os << pt.time << ",";
+        os << std::setprecision(4);
+        os << pt.x << "," << pt.y << "," << pt.z << ",";
+
+        // mle
+        os << std::fixed << std::setprecision(3);
+        os << mle.time << ",";
+        os << std::setprecision(4);
+        os << mle.x << "," << mle.y << "," << mle.z << "\n";
+
+    }
+
+    std::string trno_csv_tostring(double ts, poseT &pt, poseT &mle, poseT &mmse)
+    {
+        ostringstream ss;
+        trno_csv_tostream(ss, ts, pt, mle, mmse);
+        return ss.str();
+    }
+
+    void trno_csv_tofile(FILE *fp, double ts, poseT &pt, poseT &mle, poseT &mmse)
+    {
+        std::string trno_csv = trno_csv_tostring(ts, pt, mle, mmse);
+        if(NULL == fp)
+        {
+            fp = fopen(mConfig.trno_csv_path().c_str(),"a");
+        }
+
+        if(NULL != fp){
+            fprintf(fp, "%s",trno_csv.c_str());
+        } else {
+            TRN_DPRINT("ERR - could not open file[%s]\n",mConfig.trno_csv_path().c_str());
+        }
+    }
+
+    void show_trno_csv(double ts, poseT &pt, poseT &mle, poseT &mmse)
+    {
+        trno_csv_tostream(std::cerr, ts, pt, mle, mmse);
         std::cerr << "\n";
     }
 
     void est_tostream(std::ostream &os, double ts, poseT &pt, poseT &mle, poseT &mmse, int wkey=15, int wval=18)
     {
         os << "--- TRN Estimate OK---" << "\n";
-        os << "MLE[t,tm,x,y,z]  [";
-        os << std::fixed << std::setprecision(3);
-        os << ts << ",";
-        os << std::setprecision(2);
-        os << mle.time << ",";
-        os << std::setprecision(4);
-        os << mle.x << "," << mle.y << "," << mle.z << "]\n";
-
         os << "MMSE[t,tm,x,y,z] [";
         os << std::fixed << std::setprecision(3);
         os << ts << ",";
@@ -394,15 +502,7 @@ protected:
         os << std::setprecision(4);
         os << mmse.x << "," << mmse.y << "," << mmse.z << "]\n";
 
-        os << "POS[t,tm,x,y,z]  [";
-        os << std::fixed << std::setprecision(3);
-        os << ts << ",";
-        os << std::setprecision(2);
-        os << mmse.time << ",";
-        os << std::setprecision(4);
-        os << pt.x << "," << pt.y << "," << pt.z << "]\n";
-
-        os << "OFS[t,tm,x,y,z]  [";
+        os << " OFS[t,tm,x,y,z] [";
         os << std::fixed << std::setprecision(3);
         os << ts << ",";
         os << std::setprecision(2);
@@ -410,22 +510,31 @@ protected:
         os << std::setprecision(4);
         os << pt.x-mmse.x << "," << pt.y-mmse.y << "," << pt.z-mmse.z << "]\n";
 
-        os << "COV[t,x,y,z]     [";
-        os << std::setprecision(3);
-        os << mmse.time << ",";
+        os << " COV[t,tm,x,y,z] [";
+        os << std::fixed << std::setprecision(3);
+        os << ts << ",";
         os << std::setprecision(2);
+        os << mmse.time << ",";
+        os << std::setprecision(4);
         os << sqrt(mmse.covariance[0]) << ",";
         os << sqrt(mmse.covariance[2]) << ",";
         os << sqrt(mmse.covariance[5]) << "]\n";
 
-        //    fprintf(stderr,"MLE[t,tx,y,z] [ %.3lf, %.2f , %.4f , %.4f , %.4f ]\n",time,mle.time,mle.x, mle.y, mle.z);
-        //    fprintf(stderr,"MSE[t,x,y,z] [ %.3lf, %.2f , %.4f , %.4f , %.4f ]\n",time,mmse.time, mmse.x, mmse.y, mmse.z);
-        //    fprintf(stderr,"COV[t,x,y,z] [ %.3lf, %.2f , %.2f , %.2f ]\n",
-        //            mmse.time,
-        //            sqrt(mmse.covariance[0]),
-        //            sqrt(mmse.covariance[2]),
-        //            sqrt(mmse.covariance[5]));
+        os << " POS[t,tm,x,y,z] [";
+        os << std::fixed << std::setprecision(3);
+        os << ts << ",";
+        os << std::setprecision(2);
+        os << pt.time << ",";
+        os << std::setprecision(4);
+        os << pt.x << "," << pt.y << "," << pt.z << "]\n";
 
+        os << " MLE[t,tm,x,y,z] [";
+        os << std::fixed << std::setprecision(3);
+        os << ts << ",";
+        os << std::setprecision(2);
+        os << mle.time << ",";
+        os << std::setprecision(4);
+        os << mle.x << "," << mle.y << "," << mle.z << "]\n";
     }
 
 
@@ -750,6 +859,7 @@ private:
     TrnClient *mTrn;
     FILE *mFile;
     FILE *mCsvFile;
+    FILE *mTrnOutCsvFile;
     bool mQuit;
 };
 
@@ -781,9 +891,9 @@ public:
             {"trn-host", required_argument, NULL, 0},
             {"trn-cfg", required_argument, NULL, 0},
             {"trn-sensor", required_argument, NULL, 0},
-            {"csv", required_argument, NULL, 0},
-            {"console", no_argument, NULL, 0},
-            {"noconsole", no_argument, NULL, 0},
+            {"trni-csv", required_argument, NULL, 0},
+            {"trno-csv", required_argument, NULL, 0},
+            {"show", required_argument, NULL, 0},
             {"server", no_argument, NULL, 0},
             {"noserver", no_argument, NULL, 0},
             {"logdir", required_argument, NULL, 0},
@@ -835,10 +945,6 @@ public:
 
                         mTBConfig.set_server(true);
                     }
-                    // logdir
-//                    else if (strcmp("logdir", options[option_index].name) == 0) {
-//                        mLogDirStr=optarg;
-//                    }
                     // trn-cfg
                     else if (strcmp("trn-cfg", options[option_index].name) == 0) {
                         mTBConfig.set_trn_cfg(std::string(optarg));
@@ -857,13 +963,36 @@ public:
                     else if (!ignore_cfg && strcmp("cfg", options[option_index].name) == 0) {
                         mAppCfg = std::string(optarg);
                     }
-                    // console
-                    else if (!ignore_cfg && strcmp("console", options[option_index].name) == 0) {
-                        mTBConfig.set_console(true);
-                    }
-                    // noconsole
-                    else if (!ignore_cfg && strcmp("noconsole", options[option_index].name) == 0) {
-                        mTBConfig.set_console(false);
+                    // show
+                    else if (!ignore_cfg && strcmp("show", options[option_index].name) == 0) {
+                        uint32_t oflags=0;
+                        if(strstr(optarg,"trni") != NULL){
+                            oflags |= TrnLogConfig::TRNI;
+                        }
+                        if(strstr(optarg,"trno") != NULL){
+                            oflags |= TrnLogConfig::EST;
+                        }
+                        if(strstr(optarg,"est") != NULL){
+                            oflags |= TrnLogConfig::EST;
+                        }
+                        if(strstr(optarg,"motn") != NULL){
+                            oflags |= TrnLogConfig::MOTN;
+                        }
+                        if(strstr(optarg,"meas") != NULL){
+                            oflags |= TrnLogConfig::MEAS;
+                        }
+                        if(strstr(optarg,"icsv") != NULL){
+                            oflags |= TrnLogConfig::TRNI_CSV;
+                        }
+                        if(strstr(optarg,"ocsv") != NULL){
+                            oflags |= TrnLogConfig::TRNO_CSV;
+                        }
+                        if(strstr(optarg,"*csv") != NULL){
+                            oflags |= TrnLogConfig::ALL_CSV;
+                        }
+                        if(oflags>0){
+                            mTBConfig.set_oflags(oflags);
+                        }
                     }
                     // server
                     else if (!ignore_cfg && strcmp("server", options[option_index].name) == 0) {
@@ -873,10 +1002,15 @@ public:
                     else if (!ignore_cfg && strcmp("noserver", options[option_index].name) == 0) {
                         mTBConfig.set_server(false);
                     }
-                    // csv
-                    else if (!ignore_cfg && strcmp("csv", options[option_index].name) == 0) {
-                        mTBConfig.set_csv(true);
-                        mTBConfig.set_csv_path(std::string(optarg));
+                    // trni-csv
+                    else if (!ignore_cfg && strcmp("trni-csv", options[option_index].name) == 0) {
+                        mTBConfig.set_trni_csv(true);
+                        mTBConfig.set_trni_csv_path(std::string(optarg));
+                    }
+                    // trno-csv
+                    else if (!ignore_cfg && strcmp("trno-csv", options[option_index].name) == 0) {
+                        mTBConfig.set_trno_csv(true);
+                        mTBConfig.set_trno_csv_path(std::string(optarg));
                     }
                     break;
                 default:
@@ -899,8 +1033,8 @@ public:
     static void show_help()
     {
         // monitor mode:
-        char help_message[] = "\n TRN Bin Log Player\n";
-        char usage_message[] = "\n use: trnbin-replay [options]\n"
+        char help_message[] = "\n TRN Log Player\n";
+        char usage_message[] = "\n use: trnlog_player [options]\n"
         "\n"
         " Options\n"
         " --verbose              : verbose output\n"
@@ -911,11 +1045,17 @@ public:
         " --trn-host=addr[:port] : send output to TRN server\n"
         " --trn-cfg=s            : TRN config file\n"
         " --trn-sensor=n         : TRN sensor type\n"
-//        " --logdir=s            : log directory\n"
         " --input=s              : specify input file path (may be used multiple times)\n"
-        " --csv                  : write to CSV file\n"
-        " --console              : enable output to console\n"
-        " --noconsole            : disable output to console\n"
+        " --show=s               : specify console outputs\n"
+        "                           trni     : TRN inputs (motion/poseT, meas/measT)\n"
+        "                           trno|est : TRN outputs             (pose, mmse, ofs, cov, mle)\n"
+        "                           motn     : TRN motion updates      (poseT)\n"
+        "                           meas     : TRN measurement updates (measT)\n"
+        "                           icsv     : TRN input csv           (motion/poseT, meas/measT)\n"
+        "                           ocsv     : TRN output csv          (pose, mmse, ofs, cov, mle)\n"
+        "                           *csv     : TRN input and output csv\n"
+        " --trni-csv=s           : write TRN inputs to CSV file\n"
+        " --trno-csv=s           : write TRN outputs (estimates) to CSV file\n"
         " --server               : enable output to server\n"
         " --noserver             : disable output to server\n"
         " Notes:\n"
