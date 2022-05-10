@@ -14,6 +14,7 @@ AM_CPPFLAGS += -I${top_srcdir}/src/mbtrnav/terrain-nav
 AM_CPPFLAGS += -I${top_srcdir}/src/mbtrnav/qnx-utils
 AM_CPPFLAGS += -I${top_srcdir}/src/mbtrnav/newmat
 AM_CPPFLAGS += -I${top_srcdir}/src/mbtrnav/gctp/source
+AM_CPPFLAGS += -I${top_srcdir}/src/mbtrnav/opt/rov
 AM_CPPFLAGS += -I${top_srcdir}/src/mbtrn/utils
 AM_CPPFLAGS += -I${top_srcdir}/src/mbtrn/mb1r
 AM_CPPFLAGS += -I${top_srcdir}/src/mbtrnframe/usr
@@ -24,6 +25,7 @@ AM_CPPFLAGS += -DWITH_MMDEBUG
 AM_CPPFLAGS += -D_GNU_SOURCE
 AM_CPPFLAGS += -DWITH_MST_MSTATS
 AM_CPPFLAGS += -DMST_STATS_EN
+AM_CPPFLAGS += -DWITH_ALT_DELTAT_VALIDATION
 
 libgeolib_la_LDFLAGS =  -no-undefined -version-info 0:0:0
 
@@ -166,6 +168,7 @@ libtnav_la_SOURCES += terrain-nav/TNavPFLog.cpp
 libtnav_la_SOURCES += terrain-nav/TerrainMapOctree.cpp
 libtnav_la_SOURCES += terrain-nav/PositionLog.cpp
 libtnav_la_SOURCES += terrain-nav/TerrainNavLog.cpp
+libtnav_la_SOURCES += terrain-nav/TrnLog.cpp
 libtnav_la_SOURCES += terrain-nav/mapio.cpp
 libtnav_la_SOURCES += terrain-nav/structDefs.cpp
 libtnav_la_SOURCES += terrain-nav/trn_log.cpp
@@ -212,7 +215,7 @@ libmb1_la_SOURCES += trnw/mb1_msg.c
 
 libmb1_la_LIBADD =
 
-bin_PROGRAMS =  trn-server trn-replay trnclient-test mmcpub mmcsub trnu-cli trn-cli trnif-test trnusvr-test netif-test trnifsvr-test mb1rs #  readlog writelog
+bin_PROGRAMS =  trn-server trn-replay trnclient-test mmcpub mmcsub trnu-cli trn-cli trnif-test trnusvr-test netif-test trnifsvr-test mb1rs trnlog-player #  readlog writelog
 
 trn_server_SOURCES = utils/trn_server.cpp
 trn_server_LDADD = libtnav.la libqnx.la libnewmat.la libtnav.la libgeolib.la
@@ -249,6 +252,9 @@ trnifsvr_test_LDADD = libnetif.la  libtrnw.la
 
 mb1rs_SOURCES = trnw/mb1rs.c trnw/mb1rs-app.c
 mb1rs_LDADD = ${LIBMFRAME} libmb1.la
+
+trnlog_player_SOURCES = utils/trnlog_player.cpp utils/TrnClient.cpp utils/TerrainNavClient.cpp
+trnlog_player_LDADD = libtnav.la
 
 dist_bin_SCRIPTS =
 

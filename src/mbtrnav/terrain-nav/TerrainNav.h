@@ -113,6 +113,7 @@ using namespace std;
 
 class PositionLog;
 class TerrainNavLog;
+class TrnLog;
 
 /*!
  * Class: TerrainNav
@@ -742,6 +743,7 @@ class TerrainNav
 
   // log files
   TerrainNavLog *_trnLog;
+  TrnLog *_trnBinLog;
 
   // TRN filter reinit variables (e.g. x_stddev_init, etc)
   // (used in conjunction with estNavOffset by reinitFilterBox)

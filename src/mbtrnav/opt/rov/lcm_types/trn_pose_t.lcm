@@ -1,0 +1,51 @@
+//////////////////////////////////////////////////////////////////////////////
+// Copyright 2021  Monterey Bay Aquarium Research Institute                 //
+// Distributed under MIT license. See license.txt for more information.     //
+//////////////////////////////////////////////////////////////////////////////
+package trn;
+
+struct trn_pose_t
+{
+    //North, East, Down position (m)
+    double x, y, z;
+
+    //Vehicle velocity wrto iceberg, coordinatized in Body Frame(m/s)
+    double vx, vy, vz, ve;
+
+    //Vehicle velocity wrto water, coordinatized in Body (m/s)
+    double vw_x, vw_y, vw_z;
+
+    //Vehicle velocity wrto an inertial frame, coordinatized in Body (m/s)
+    double vn_x, vn_y, vn_z;
+
+	//Vehicle angular velocity wrto an inertial frame, coordinatized in Body (rad/sec)
+    double wx, wy, wz;
+
+    //Vehicle aceleration wrto an inertial frame coordinatized in Body (m/s^2)
+    double ax, ay, az;
+
+    //3-2-1 Euler angles relating the B frame to an inertial NED frame (rad).
+    double phi, theta, psi;
+
+    //TRN states
+    double psi_berg, psi_dot_berg;
+
+    //Time (s)
+    double time;
+
+    //Validity flag for dvl motion measurement
+    byte dvlValid;
+
+    //Validity flag for GPS measurement
+    byte gpsValid;
+
+    //Validity flag for DVL lock onto seafloor
+    byte bottomLock;
+
+    int32_t ncovar;
+
+    //XYZ, phi, theta, psi, wy, wz covariance (passively stable in roll) (see above units)
+    double covariance[ncovar];
+
+}
+

@@ -5779,7 +5779,7 @@ int mbtrnpp_trn_update(wtnav_t *self, mb1_t *src, wposet_t **pt_out, wmeast_t **
         // must do motion update first if pt time <= mt time
         wtnav_motion_update(self, *pt_out);
         wtnav_meas_update(self, *mt_out, cfg->sensor_type);
-        //                fprintf(stderr,"%s:%d DONE [PT, MT]\n",__FUNCTION__,__LINE__);
+        //          fprintf(stderr,"%s:%d DONE [PT, MT]\n",__FUNCTION__,__LINE__);
         //                wposet_show(*pt_out,true,5);
         //                wmeast_show(*mt_out,true,5);
         retval = 0;

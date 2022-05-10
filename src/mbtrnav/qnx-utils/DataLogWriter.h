@@ -84,13 +84,13 @@ protected:
   //virtual void setFields() = 0;
   virtual void setFields() {};
 
+  int pre_write();
 
 private:
 
   ///////////////////////////////////////////////////////////////////
   // Write metadata to file header. Called after all fields have been added.
   void writeHeader();
-
   TimeTag _timeStamp;
   Boolean _autoTimestamp;
   struct  timespec _timeSpec;

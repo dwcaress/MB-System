@@ -30,6 +30,7 @@
 #include "structDefs.h"
 
 
+#define TRNCLI_PORT_DFL 27027
 #define VNORM_DIM 3
 #undef WITH_VNORM_FN
 #undef WITH_DEGTORAD_FN
@@ -65,6 +66,7 @@ struct TRN_attr
     bool _useIDTData;
     bool _useDvlSide;
     bool _useMbTrnData;
+    bool _skipInit;
     TRN_attr();
     ~TRN_attr();
 };
@@ -77,15 +79,21 @@ public:
     TrnClient(const char *host=NULL, int port=0);
     TrnClient(const char *svr_log_dir=NULL, const char *host=NULL, int port=0);
     ~TrnClient();
-    
+    int initSocket();
+    int connectSocket();
     int loadCfgAttributes(const char *cfg_file);
     int getNextKeyValue(FILE *cfg, char key[], char value[]);
     int setVerbose(int val);
+    void show(int indent=0, int wkey=15, int wval=18);
     TerrainNav* connectTRN();
+    void setQuitRef(bool *pvar);
+    bool isQuitSet();
+
 protected:
     char *_cfg_file;
     TRN_attr *_trn_attr;
     int verbose;
+    bool *_quit_ref;
     
 };
 

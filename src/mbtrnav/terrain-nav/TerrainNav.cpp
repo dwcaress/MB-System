@@ -17,8 +17,11 @@
 
 #include "TerrainNav.h"
 #include "TerrainNavLog.h"
+#include "TrnLog.h"
 
 #define MBTRN_DEBUG 0
+#define _STR(x) #x
+#define STR(x) _STR(x)
 
 /*TODO delete Transition Matrix, filterState, and newState
 trn_server.cpp calls getFilterState() which currently only returns 0
@@ -59,7 +62,8 @@ filterType(1),
 mapType(1),
 terrainMap(NULL),
 _initialized(false),
-_trnLog(NULL)
+_trnLog(NULL),
+_trnBinLog(NULL)
 {
     for(int i=0;i<3;i++)lastValidVel[i]=0.;
     for(int i=0;i<4;i++)noValidRange[i]=false;
@@ -89,7 +93,8 @@ filterType(1),
 mapType(1),
 terrainMap(NULL),
 _initialized(false),
-_trnLog(NULL)
+_trnLog(NULL),
+_trnBinLog(NULL)
 {
     for(int i=0;i<3;i++)lastValidVel[i]=0.;
     for(int i=0;i<4;i++)noValidRange[i]=false;
@@ -118,7 +123,8 @@ _trnLog(NULL)
 
 }
 
-TerrainNav::TerrainNav(char* mapName, char* vehicleSpecs) {
+TerrainNav::TerrainNav(char* mapName, char* vehicleSpecs)
+{
 	//initialize pointers
 	this->mapFile = STRDUPNULL(mapName);
 	this->vehicleSpecFile = STRDUPNULL(vehicleSpecs);
@@ -142,7 +148,8 @@ TerrainNav::TerrainNav(char* mapName, char* vehicleSpecs) {
 }
 
 TerrainNav::TerrainNav(char* mapName, char* vehicleSpecs,
-					   const int& filterType) {
+					   const int& filterType)
+{
 	//initialize pointers
 	this->mapFile = STRDUPNULL(mapName);
 	this->vehicleSpecFile = STRDUPNULL(vehicleSpecs);
@@ -166,7 +173,8 @@ TerrainNav::TerrainNav(char* mapName, char* vehicleSpecs,
 }
 
 TerrainNav::TerrainNav(char* mapName, char* vehicleSpecs,
-					   const int& filterType, char* directory) {
+					   const int& filterType, char* directory)
+{
 	//initialize pointers
 	this->mapFile = STRDUPNULL(mapName);
 	this->vehicleSpecFile = STRDUPNULL(vehicleSpecs);
@@ -190,7 +198,8 @@ TerrainNav::TerrainNav(char* mapName, char* vehicleSpecs,
 }
 
 TerrainNav::TerrainNav(char* mapName, char* vehicleSpecs,
-					   const int& filterType, const int& mapType) {
+					   const int& filterType, const int& mapType)
+{
 	//initialize pointers
 	this->mapFile = STRDUPNULL(mapName);
 	this->vehicleSpecFile = STRDUPNULL(vehicleSpecs);
@@ -213,7 +222,8 @@ TerrainNav::TerrainNav(char* mapName, char* vehicleSpecs,
 }
 
 TerrainNav::TerrainNav(char* mapName, char* vehicleSpecs,
-					   const int& filterType, const int& mapType, char* directory) {
+					   const int& filterType, const int& mapType, char* directory)
+{
 	//initialize pointers
 	this->mapFile = STRDUPNULL(mapName);
 	this->vehicleSpecFile = STRDUPNULL(vehicleSpecs);
@@ -237,7 +247,8 @@ TerrainNav::TerrainNav(char* mapName, char* vehicleSpecs,
 }
 
 TerrainNav::TerrainNav(char* mapName, char* vehicleSpecs, char* particles,
-							  const int& filterType, const int& mapType, char* directory) {
+							  const int& filterType, const int& mapType, char* directory)
+{
 
 	//initialize pointers
 	this->mapFile = STRDUPNULL(mapName);
@@ -286,6 +297,7 @@ TerrainNav::~TerrainNav() {
 	this->particlesFile=NULL;
 
     if(_trnLog !=NULL) delete _trnLog;
+    if(_trnBinLog != NULL) delete _trnBinLog;
 //	if (_posLog) delete _posLog;
 
 	logs(TL_OMASK(TL_TERRAIN_NAV, (TL_LOG|TL_SERR)),"%s - Number of reinitializations: %i\n", __func__,numReinits);
@@ -375,7 +387,8 @@ void TerrainNav::measUpdate(measT* incomingMeas, const int& type) {
 	currMeas.dataType = type;
 
   // Record measurement
-  if (_trnLog) _trnLog->logMeas(&currMeas);
+    if (_trnLog) _trnLog->logMeas(&currMeas);
+    if (NULL != _trnBinLog) _trnBinLog->logMeas(&currMeas, TrnLog::MEAS_IN);
 
 	//check validity of range data
 	checkRangeValidity(currMeas);
@@ -478,6 +491,9 @@ void TerrainNav::motionUpdate(poseT* incomingNav) {
 
    // make a copy
 	currEstimate = *incomingNav;
+
+    if (NULL != _trnBinLog) _trnBinLog->logMotn(&currEstimate, TrnLog::MOTN_IN);
+
 #if MBTRN_DEBUG
 	logs(TL_OMASK(TL_TERRAIN_NAV, TL_LOG),"poseT time:%.3f\n", currEstimate.time);
 	logs(TL_OMASK(TL_TERRAIN_NAV, TL_LOG),"poseT  phi:%.3f\n", currEstimate.phi);
@@ -750,7 +766,8 @@ void TerrainNav::initVariables() {
 	copyToLogDir();
 
 	//create log objects
-	_trnLog = new TerrainNavLog(DataLog::BinaryFormat);
+    _trnLog = new TerrainNavLog(DataLog::BinaryFormat);
+    _trnBinLog = new TrnLog(DataLog::BinaryFormat);
     char *log_copy =STRDUPNULL(_trnLog->fileName());
     tl_new_logfile(dirname(log_copy));
     free(log_copy);
@@ -1067,34 +1084,97 @@ void TerrainNav::checkRangeValidity(measT& currMeas) {
 		}
 	}
 	else if(currMeas.dataType == TRN_SENSOR_DELTAT){
-        int msval=0;
-		for(int i = 0; i < currMeas.numMeas; i++) {
+#ifndef WITH_ALT_DELTAT_VALIDATION
+#pragma message( __FILE__":" STR(__LINE__) " - Original DeltaT validation enabled (see FEATURE_OPTIONS in Makefile)" )
+        for(int i = 0; i < currMeas.numMeas; i++) {
 			//check validity of each beam based on NaN or range value
-		        // Use only the middle 60 of 120 beams
+		    // Use only the middle 60 of 120 beams
 			if(std::isnan(currMeas.ranges[i]) || (currMeas.ranges[i] >= MAX_RANGE)
-			   //		|| (currMeas.ranges[i] <= MIN_RANGE) || ((i < 30) || (i >= 90)) )
-			   		|| (currMeas.ranges[i] <= MIN_RANGE) || ((i < 30) || (i >  90)) )
+               //            || (currMeas.ranges[i] <= MIN_RANGE) || ((i < 30) || (i >= 90)) )
+               || (currMeas.ranges[i] <= MIN_RANGE) || ((i < 30) || (i >  90)) )
 			{
 			   currMeas.measStatus[i] = false;
 			}
-			else
-			{
+            else {
 			   //currMeas.measStatus[i] = true;
 			   //Further pare the center 60 down to only 5
 			   //if( i==30 || i==44 || i==59 || i==74 || i==89 )
 
 			   //Try paring down to every 6th for 11 total.
-			   if( i%6 == 0 )
-			      currMeas.measStatus[i] = true;
-			   else
-			      currMeas.measStatus[i] = false;
-			   //
-			   // measStatus is set back to false during trip from MVC?
+                if( i%6 == 0 )
+			        currMeas.measStatus[i] = true;
+                else
+                    currMeas.measStatus[i] = false;
+                //
+                // measStatus is set back to false during trip from MVC?
 			}
-            msval += (currMeas.measStatus[i] ? 1 : 0);
 		}
-		logs(TL_OMASK(TL_TERRAIN_NAV, TL_LOG),"TerrainNav::measUpdate() - IDT[45] = %.2f, IDT[75] = %.2f msval[%d]\n",
-			currMeas.ranges[45], currMeas.ranges[75], msval);
+        logs(TL_OMASK(TL_TERRAIN_NAV, TL_LOG),"TerrainNav::measUpdate - IDT[45] = %.2f, IDT[75] = %.2f\n",
+             currMeas.ranges[45], currMeas.ranges[75]);
+#else
+
+#pragma message( __FILE__":" STR(__LINE__) " - Alternative DeltaT validation enabled (see FEATURE_OPTIONS in Makefile)" )
+
+        // Proposed DeltaT beam validation : decimates symmetrically
+        // accounting for angled sensor and pre-filtered beam set (< max beams),
+        // and provides adequate beam spacing.
+        // The original version over-decimates when the sensor is angled,
+        // as it removes low/high index beams (0-30, 60+) and futher invalidates
+        // every 6th beam, assuming a full set of beams.
+
+        logs(TL_OMASK(TL_TERRAIN_NAV, TL_LOG),"TerrainNav::measUpdate - WARN - using alternative for ROVTRN\n");
+        int n_val=0, n_nan=0, n_lim=0;
+        for(int i = 0; i < currMeas.numMeas; i++)
+        {
+            logs(TL_OMASK(TL_TERRAIN_NAV, TL_LOG),"TerrainNav::measUpdate - i[%d/%d] measStat[%d]\n", i, currMeas.numMeas, currMeas.measStatus[i]);
+            // invalidate NaN or invalid range values
+            if(std::isnan(currMeas.ranges[i]))
+            {
+                currMeas.measStatus[i] = false;
+                n_nan++;
+            } else if((currMeas.ranges[i] >= MAX_RANGE)
+                      || (currMeas.ranges[i] <= MIN_RANGE) ){
+                currMeas.measStatus[i] = false;
+                n_lim++;
+            }
+            n_val += (currMeas.measStatus[i] ? 1 : 0);
+        }
+
+        logs(TL_OMASK(TL_TERRAIN_NAV, TL_LOG),"TerrainNav::measUpdate - n_val[%d] n_lim[%d] nan[%d]\n", n_val, n_lim, n_nan);
+
+        if(n_val>11){
+            // if there are more than 11 valid beams,
+            // decimate symmetrically from the lowest/highest beam numbers
+            int i=0, j=currMeas.numMeas-1, k=n_val;
+            // skip invalid beams on either end
+            while(!currMeas.measStatus[i] && i<currMeas.numMeas)i++;
+            while(!currMeas.measStatus[j] && j>0)j--;
+
+            logs(TL_OMASK(TL_TERRAIN_NAV, TL_LOG),"%s:%d INIT - i,j,k[%d, %d, %d]\n", __func__, __LINE__, i, j, k);
+            while(i<j && k>11){
+                if(currMeas.measStatus[i]){
+                    logs(TL_OMASK(TL_TERRAIN_NAV, TL_LOG),"%s:%d I - i,j,k[%d, %d, %d]\n", __func__, __LINE__, i, j, k);
+                    currMeas.measStatus[i] = false;
+                    k--;
+                }
+                if(k<=11)break;
+                if(currMeas.measStatus[j]){
+                    logs(TL_OMASK(TL_TERRAIN_NAV, TL_LOG),"%s:%d J - i,j,k[%d, %d, %d]\n", __func__, __LINE__, i, j, k);
+                    currMeas.measStatus[j] = false;
+                    k--;
+                }
+                // decimate every other beam,
+                // skip runs of invalid beams
+                for(int z=0; z < 2 ;z++){
+                    while(!currMeas.measStatus[i] && i<j)i++;
+                    while(!currMeas.measStatus[j] && i<j)j--;
+                    i++;
+                    j--;
+                    if(i>=j)break;
+                }
+            }
+        }
+#endif
 	}
 	else {
 		return;

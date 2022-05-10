@@ -95,7 +95,7 @@ bin_PROGRAMS = trn-server$(EXEEXT) trn-replay$(EXEEXT) \
 	trnclient-test$(EXEEXT) mmcpub$(EXEEXT) mmcsub$(EXEEXT) \
 	trnu-cli$(EXEEXT) trn-cli$(EXEEXT) trnif-test$(EXEEXT) \
 	trnusvr-test$(EXEEXT) netif-test$(EXEEXT) \
-	trnifsvr-test$(EXEEXT) mb1rs$(EXEEXT)
+	trnifsvr-test$(EXEEXT) mb1rs$(EXEEXT) trnlog-player$(EXEEXT)
 subdir = src/mbtrnav
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/ax_check_compile_flag.m4 \
@@ -238,12 +238,12 @@ am_libtnav_la_OBJECTS = terrain-nav/TerrainNav.lo \
 	terrain-nav/TNavParticleFilter.lo \
 	terrain-nav/TNavBankFilter.lo terrain-nav/TNavPFLog.lo \
 	terrain-nav/TerrainMapOctree.lo terrain-nav/PositionLog.lo \
-	terrain-nav/TerrainNavLog.lo terrain-nav/mapio.lo \
-	terrain-nav/structDefs.lo terrain-nav/trn_log.lo \
-	terrain-nav/myOutput.lo terrain-nav/matrixArrayCalcs.lo \
-	terrain-nav/TerrainMapDEM.lo terrain-nav/OctreeSupport.lo \
-	terrain-nav/Octree.lo terrain-nav/OctreeNode.lo \
-	terrain-nav/TRNUtils.lo
+	terrain-nav/TerrainNavLog.lo terrain-nav/TrnLog.lo \
+	terrain-nav/mapio.lo terrain-nav/structDefs.lo \
+	terrain-nav/trn_log.lo terrain-nav/myOutput.lo \
+	terrain-nav/matrixArrayCalcs.lo terrain-nav/TerrainMapDEM.lo \
+	terrain-nav/OctreeSupport.lo terrain-nav/Octree.lo \
+	terrain-nav/OctreeNode.lo terrain-nav/TRNUtils.lo
 libtnav_la_OBJECTS = $(am_libtnav_la_OBJECTS)
 libtnav_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CXXLD) $(AM_CXXFLAGS) \
@@ -288,6 +288,10 @@ trnif_test_DEPENDENCIES = libnetif.la libtrnw.la
 am_trnifsvr_test_OBJECTS = utils/trnifsvr-test.$(OBJEXT)
 trnifsvr_test_OBJECTS = $(am_trnifsvr_test_OBJECTS)
 trnifsvr_test_DEPENDENCIES = libnetif.la libtrnw.la
+am_trnlog_player_OBJECTS = utils/trnlog_player.$(OBJEXT) \
+	utils/TrnClient.$(OBJEXT) utils/TerrainNavClient.$(OBJEXT)
+trnlog_player_OBJECTS = $(am_trnlog_player_OBJECTS)
+trnlog_player_DEPENDENCIES = libtnav.la
 am_trnu_cli_OBJECTS = trnw/trnucli_test.$(OBJEXT) \
 	trnw/trnu_cli.$(OBJEXT)
 trnu_cli_OBJECTS = $(am_trnu_cli_OBJECTS)
@@ -426,6 +430,7 @@ am__depfiles_remade = gctp/source/$(DEPDIR)/alberfor.Plo \
 	terrain-nav/$(DEPDIR)/TerrainMapOctree.Plo \
 	terrain-nav/$(DEPDIR)/TerrainNav.Plo \
 	terrain-nav/$(DEPDIR)/TerrainNavLog.Plo \
+	terrain-nav/$(DEPDIR)/TrnLog.Plo \
 	terrain-nav/$(DEPDIR)/mapio.Plo \
 	terrain-nav/$(DEPDIR)/matrixArrayCalcs.Plo \
 	terrain-nav/$(DEPDIR)/myOutput.Plo \
@@ -442,7 +447,8 @@ am__depfiles_remade = gctp/source/$(DEPDIR)/alberfor.Plo \
 	utils/$(DEPDIR)/TrnClient.Po utils/$(DEPDIR)/netif-test.Po \
 	utils/$(DEPDIR)/trn_server.Po \
 	utils/$(DEPDIR)/trnclient_test.Po \
-	utils/$(DEPDIR)/trnifsvr-test.Po
+	utils/$(DEPDIR)/trnifsvr-test.Po \
+	utils/$(DEPDIR)/trnlog_player.Po
 am__mv = mv -f
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
@@ -487,8 +493,8 @@ SOURCES = $(libgeolib_la_SOURCES) $(libmb1_la_SOURCES) \
 	$(mmcsub_SOURCES) $(netif_test_SOURCES) $(trn_cli_SOURCES) \
 	$(trn_replay_SOURCES) $(trn_server_SOURCES) \
 	$(trnclient_test_SOURCES) $(trnif_test_SOURCES) \
-	$(trnifsvr_test_SOURCES) $(trnu_cli_SOURCES) \
-	$(trnusvr_test_SOURCES)
+	$(trnifsvr_test_SOURCES) $(trnlog_player_SOURCES) \
+	$(trnu_cli_SOURCES) $(trnusvr_test_SOURCES)
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
     n|no|NO) false;; \
@@ -733,11 +739,12 @@ AM_CPPFLAGS = -g -O0 -I${top_srcdir}/src/mbtrnav/trnw \
 	-I${top_srcdir}/src/mbtrnav/qnx-utils \
 	-I${top_srcdir}/src/mbtrnav/newmat \
 	-I${top_srcdir}/src/mbtrnav/gctp/source \
+	-I${top_srcdir}/src/mbtrnav/opt/rov \
 	-I${top_srcdir}/src/mbtrn/utils -I${top_srcdir}/src/mbtrn/mb1r \
 	-I${top_srcdir}/src/mbtrnframe/usr \
 	-I${top_srcdir}/src/mbtrnframe/mframe/src -DHAVE_CONFIG_H \
 	-DWITH_TESTS -DWITH_MMDEBUG -D_GNU_SOURCE -DWITH_MST_MSTATS \
-	-DMST_STATS_EN
+	-DMST_STATS_EN -DWITH_ALT_DELTAT_VALIDATION
 libgeolib_la_LDFLAGS = -no-undefined -version-info 0:0:0
 libgeolib_la_SOURCES = gctp/source/gctp.c gctp/source/alberfor.c \
 	gctp/source/alberinv.c gctp/source/alconfor.c \
@@ -800,12 +807,12 @@ libtnav_la_SOURCES = terrain-nav/TerrainNav.cpp \
 	terrain-nav/TNavParticleFilter.cpp \
 	terrain-nav/TNavBankFilter.cpp terrain-nav/TNavPFLog.cpp \
 	terrain-nav/TerrainMapOctree.cpp terrain-nav/PositionLog.cpp \
-	terrain-nav/TerrainNavLog.cpp terrain-nav/mapio.cpp \
-	terrain-nav/structDefs.cpp terrain-nav/trn_log.cpp \
-	terrain-nav/myOutput.cpp terrain-nav/matrixArrayCalcs.cpp \
-	terrain-nav/TerrainMapDEM.cpp terrain-nav/OctreeSupport.cpp \
-	terrain-nav/Octree.cpp terrain-nav/OctreeNode.cpp \
-	terrain-nav/TRNUtils.cpp
+	terrain-nav/TerrainNavLog.cpp terrain-nav/TrnLog.cpp \
+	terrain-nav/mapio.cpp terrain-nav/structDefs.cpp \
+	terrain-nav/trn_log.cpp terrain-nav/myOutput.cpp \
+	terrain-nav/matrixArrayCalcs.cpp terrain-nav/TerrainMapDEM.cpp \
+	terrain-nav/OctreeSupport.cpp terrain-nav/Octree.cpp \
+	terrain-nav/OctreeNode.cpp terrain-nav/TRNUtils.cpp
 libtnav_la_LIBADD = libgeolib.la libnewmat.la libqnx.la -lm -lnetcdf \
 	-lpthread
 libtrnw_la_LDFLAGS = -no-undefined -version-info 0:0:0
@@ -841,6 +848,8 @@ trnifsvr_test_SOURCES = utils/trnifsvr-test.c
 trnifsvr_test_LDADD = libnetif.la  libtrnw.la
 mb1rs_SOURCES = trnw/mb1rs.c trnw/mb1rs-app.c
 mb1rs_LDADD = ${LIBMFRAME} libmb1.la
+trnlog_player_SOURCES = utils/trnlog_player.cpp utils/TrnClient.cpp utils/TerrainNavClient.cpp
+trnlog_player_LDADD = libtnav.la
 dist_bin_SCRIPTS = 
 CLEANFILES = 
 DISTCLEANFILES = 
@@ -1252,6 +1261,8 @@ terrain-nav/PositionLog.lo: terrain-nav/$(am__dirstamp) \
 	terrain-nav/$(DEPDIR)/$(am__dirstamp)
 terrain-nav/TerrainNavLog.lo: terrain-nav/$(am__dirstamp) \
 	terrain-nav/$(DEPDIR)/$(am__dirstamp)
+terrain-nav/TrnLog.lo: terrain-nav/$(am__dirstamp) \
+	terrain-nav/$(DEPDIR)/$(am__dirstamp)
 terrain-nav/mapio.lo: terrain-nav/$(am__dirstamp) \
 	terrain-nav/$(DEPDIR)/$(am__dirstamp)
 terrain-nav/structDefs.lo: terrain-nav/$(am__dirstamp) \
@@ -1362,6 +1373,12 @@ utils/trnifsvr-test.$(OBJEXT): utils/$(am__dirstamp) \
 trnifsvr-test$(EXEEXT): $(trnifsvr_test_OBJECTS) $(trnifsvr_test_DEPENDENCIES) $(EXTRA_trnifsvr_test_DEPENDENCIES) 
 	@rm -f trnifsvr-test$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(trnifsvr_test_OBJECTS) $(trnifsvr_test_LDADD) $(LIBS)
+utils/trnlog_player.$(OBJEXT): utils/$(am__dirstamp) \
+	utils/$(DEPDIR)/$(am__dirstamp)
+
+trnlog-player$(EXEEXT): $(trnlog_player_OBJECTS) $(trnlog_player_DEPENDENCIES) $(EXTRA_trnlog_player_DEPENDENCIES) 
+	@rm -f trnlog-player$(EXEEXT)
+	$(AM_V_CXXLD)$(CXXLINK) $(trnlog_player_OBJECTS) $(trnlog_player_LDADD) $(LIBS)
 trnw/trnucli_test.$(OBJEXT): trnw/$(am__dirstamp) \
 	trnw/$(DEPDIR)/$(am__dirstamp)
 trnw/trnu_cli.$(OBJEXT): trnw/$(am__dirstamp) \
@@ -1559,6 +1576,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@terrain-nav/$(DEPDIR)/TerrainMapOctree.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@terrain-nav/$(DEPDIR)/TerrainNav.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@terrain-nav/$(DEPDIR)/TerrainNavLog.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@terrain-nav/$(DEPDIR)/TrnLog.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@terrain-nav/$(DEPDIR)/mapio.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@terrain-nav/$(DEPDIR)/matrixArrayCalcs.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@terrain-nav/$(DEPDIR)/myOutput.Plo@am__quote@ # am--include-marker
@@ -1585,6 +1603,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@utils/$(DEPDIR)/trn_server.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@utils/$(DEPDIR)/trnclient_test.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@utils/$(DEPDIR)/trnifsvr-test.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@utils/$(DEPDIR)/trnlog_player.Po@am__quote@ # am--include-marker
 
 $(am__depfiles_remade):
 	@$(MKDIR_P) $(@D)
@@ -1937,6 +1956,7 @@ distclean: distclean-am
 	-rm -f terrain-nav/$(DEPDIR)/TerrainMapOctree.Plo
 	-rm -f terrain-nav/$(DEPDIR)/TerrainNav.Plo
 	-rm -f terrain-nav/$(DEPDIR)/TerrainNavLog.Plo
+	-rm -f terrain-nav/$(DEPDIR)/TrnLog.Plo
 	-rm -f terrain-nav/$(DEPDIR)/mapio.Plo
 	-rm -f terrain-nav/$(DEPDIR)/matrixArrayCalcs.Plo
 	-rm -f terrain-nav/$(DEPDIR)/myOutput.Plo
@@ -1963,6 +1983,7 @@ distclean: distclean-am
 	-rm -f utils/$(DEPDIR)/trn_server.Po
 	-rm -f utils/$(DEPDIR)/trnclient_test.Po
 	-rm -f utils/$(DEPDIR)/trnifsvr-test.Po
+	-rm -f utils/$(DEPDIR)/trnlog_player.Po
 	-rm -f Makefile
 distclean-am: clean-am distclean-compile distclean-generic \
 	distclean-tags
@@ -2138,6 +2159,7 @@ maintainer-clean: maintainer-clean-am
 	-rm -f terrain-nav/$(DEPDIR)/TerrainMapOctree.Plo
 	-rm -f terrain-nav/$(DEPDIR)/TerrainNav.Plo
 	-rm -f terrain-nav/$(DEPDIR)/TerrainNavLog.Plo
+	-rm -f terrain-nav/$(DEPDIR)/TrnLog.Plo
 	-rm -f terrain-nav/$(DEPDIR)/mapio.Plo
 	-rm -f terrain-nav/$(DEPDIR)/matrixArrayCalcs.Plo
 	-rm -f terrain-nav/$(DEPDIR)/myOutput.Plo
@@ -2164,6 +2186,7 @@ maintainer-clean: maintainer-clean-am
 	-rm -f utils/$(DEPDIR)/trn_server.Po
 	-rm -f utils/$(DEPDIR)/trnclient_test.Po
 	-rm -f utils/$(DEPDIR)/trnifsvr-test.Po
+	-rm -f utils/$(DEPDIR)/trnlog_player.Po
 	-rm -f Makefile
 maintainer-clean-am: distclean-am maintainer-clean-generic
 

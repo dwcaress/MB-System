@@ -1,0 +1,96 @@
+/***************************************************************************
+ *   CONFIDENTIAL - PROPERTY OF GREENSEA SYSTEMS, INC.                     *
+ *                                                                         *
+ *   Copyright 2012 Greensea Systems, Inc.                                 *
+ *   All Rights Reserved by Greensea Systems, Inc.                         *
+ *                                                                         *
+ *   NOTICE:  This is proprietary and confidential software.  The source   *
+ *   code and intellectual property contained within this file is          *
+ *   protected by one or more licenses and is NOT "free" or "open source". *
+ *   This software may not be duplicated, copied either literally or in    *
+ *   spirit,  modified, or used in any way not explicitly granted in       *
+ *   writing by Greensea Systems, Inc.                                     *
+ *                                                                         *
+ *   A copy of the governing software license for the program              *
+ *   including this file should have accompanied its distribution.  Please *
+ *   contact Greensea Systems, Inc. to receive a copy of the license.      *
+ *                                                                         *
+ *          Greensea Systems, Inc.                                         *
+ *          10 East Main Street                                            *
+ *          PO Box 959                                                     *
+ *          Richmond, Vermont  05477  USA                                  *
+ *          www.greenseainc.com :: info@greenseainc.com                    *
+ *                                                                         *
+ *                                                                         *
+ ***************************************************************************/
+ 
+package gss;
+
+struct nav_solution_t
+{
+  /* Unix timestamp in microseconds */
+  double unix_time;
+  
+  /* The number of times data has been published */
+  int64_t count_publish;  
+
+  /* name of the sender */
+  string vehicle;
+
+  /* Bolton attitude : phi, theta, psi in degrees in 0,1,2 respectively */  
+  double attitude[3];
+  
+  /* Bolton attitude rate of change */
+  double attitude_dot[3];
+  
+  /* Bolton attitude angular accelerations */
+  double attitude_acceleration[3];
+
+  /* Relative Position in Meters: North, East, Down in 0,1,2 respectively */
+  double relative_position[3];
+  
+  /* Relative Position rate of change */
+  double relative_position_dot[3];
+  
+  /* Relative Acceleration */
+  double relative_acceleration[3];
+  
+  /* Absolute Position in decimal degrees Longitude, Latitude 
+     and GPS elevation (WGS84 datum) in 0,1,2 respectively */  
+  double absolute_position[3];
+  
+  /* estimated speed over ground */
+  double speed_over_ground;
+
+  /* estimated course over ground */
+  double course_over_ground;
+
+  /* estimated height above the bottom in meters */
+  double altitude_above_bottom;
+
+  /* estimated depth below water in positive meters */
+  double depth;
+
+  /* Initial fix in decimal degrees Longitude, Latitude (WGS84 datum)
+     in 0 and 1 */  
+  double initial_lonlat_fix[2];
+
+  /* Last fix in decimal degrees Longitude, Latitude (WGS84 datum)
+     in 0 and 1 */  
+  double last_lonlat_fix[2];
+  
+  /* estimated IMU error */
+  double imu_error;
+  
+  /* estimated DVL error */
+  double dvl_error;
+  
+  /* booleans to indicate nav system status */
+  boolean attitude_ok;
+  boolean depth_ok;
+  boolean altitude_ok;
+  boolean speed_ok;
+  boolean relative_position_ok;
+  boolean absolute_position_ok;
+  boolean have_bottom_lock;
+} 
