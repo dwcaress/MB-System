@@ -11,8 +11,8 @@
 #ifndef TRNLOG_H
 #define TRNLOG_H
 
-#define TrnLogName  "TrnBin"
-#define TrnMnemName "trn"
+#define TRNLOG_NAME_DFL  "TrnIO"
+#define TRNLOG_MNEM_NAME_DFL "trn"
 
 #include "DataLogWriter.h"
 #include "IntegerData.h"
@@ -128,7 +128,7 @@ public:
     // [input] fileFormat: Specifies either DataLog::AsciiFormat or
     //                     DataLog::BinaryFormat.
     //         logname   : Optional user-supplied filename. Uses the
-    //                     TrnLogName above by default.
+    //                     TRNLOG_NAME_DFL above by default.
     //         mnem      : Optional user-supplied mnemonic. Uses the
     //                     TerrainNavMnemName above by default. Cannot be NULL.
     // Examples:
@@ -136,8 +136,8 @@ public:
     //    plog = new TrnLog(DataLog::BinaryFormat, "poseT")  // Creates poseT.log
     //    mlog = new TrnLog(DataLog::BinaryFormat, "poseT", "pose")  // data mnem is "pose"
     //
-    explicit TrnLog(DataLog::FileFormat fileFormat, const char* logname=TrnLogName,
-                    const char *mnem=TrnMnemName, uint32_t max_beams=TRN_MAX_BEAMS_DFL);
+    explicit TrnLog(DataLog::FileFormat fileFormat, const char* logname=TRNLOG_NAME_DFL,
+                    const char *mnem=TRNLOG_MNEM_NAME_DFL, uint32_t max_beams=TRN_MAX_BEAMS_DFL);
 
     ~TrnLog();
 

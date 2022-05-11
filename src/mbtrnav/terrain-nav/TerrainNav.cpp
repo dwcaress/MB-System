@@ -62,8 +62,10 @@ filterType(1),
 mapType(1),
 terrainMap(NULL),
 _initialized(false),
-_trnLog(NULL),
-_trnBinLog(NULL)
+_trnLog(NULL)
+#ifdef WITH_TRNLOG
+,_trnBinLog(NULL)
+#endif
 {
     for(int i=0;i<3;i++)lastValidVel[i]=0.;
     for(int i=0;i<4;i++)noValidRange[i]=false;
@@ -93,8 +95,10 @@ filterType(1),
 mapType(1),
 terrainMap(NULL),
 _initialized(false),
-_trnLog(NULL),
-_trnBinLog(NULL)
+_trnLog(NULL)
+#ifdef WITH_TRNLOG
+,_trnBinLog(NULL)
+#endif
 {
     for(int i=0;i<3;i++)lastValidVel[i]=0.;
     for(int i=0;i<4;i++)noValidRange[i]=false;
@@ -297,7 +301,9 @@ TerrainNav::~TerrainNav() {
 	this->particlesFile=NULL;
 
     if(_trnLog !=NULL) delete _trnLog;
+#ifdef WITH_TRNLOG
     if(_trnBinLog != NULL) delete _trnBinLog;
+#endif
 //	if (_posLog) delete _posLog;
 
 	logs(TL_OMASK(TL_TERRAIN_NAV, (TL_LOG|TL_SERR)),"%s - Number of reinitializations: %i\n", __func__,numReinits);
@@ -344,8 +350,10 @@ void TerrainNav::estimatePose(poseT* estimate, const int& type) {
 			_trnLog->logNav(&_incomingNav);
 			_trnLog->logReinits( numReinits );
 			_trnLog->write();
+#ifdef WITH_TRNLOG
 #ifdef WITH_TRNLOG_EST_OUT
             _trnBinLog->logEst(estimate, TrnLog::MSE_OUT);
+#endif
 #endif
 			break;
 
@@ -390,8 +398,9 @@ void TerrainNav::measUpdate(measT* incomingMeas, const int& type) {
 
   // Record measurement
     if (_trnLog) _trnLog->logMeas(&currMeas);
+#ifdef WITH_TRNLOG
     if (NULL != _trnBinLog) _trnBinLog->logMeas(&currMeas, TrnLog::MEAS_IN);
-
+#endif
 	//check validity of range data
 	checkRangeValidity(currMeas);
 
@@ -494,7 +503,9 @@ void TerrainNav::motionUpdate(poseT* incomingNav) {
    // make a copy
 	currEstimate = *incomingNav;
 
+#ifdef WITH_TRNLOG
     if (NULL != _trnBinLog) _trnBinLog->logMotn(&currEstimate, TrnLog::MOTN_IN);
+#endif
 
 #if MBTRN_DEBUG
 	logs(TL_OMASK(TL_TERRAIN_NAV, TL_LOG),"poseT time:%.3f\n", currEstimate.time);
@@ -769,7 +780,9 @@ void TerrainNav::initVariables() {
 
 	//create log objects
     _trnLog = new TerrainNavLog(DataLog::BinaryFormat);
+#ifdef WITH_TRNLOG
     _trnBinLog = new TrnLog(DataLog::BinaryFormat);
+#endif
     char *log_copy =STRDUPNULL(_trnLog->fileName());
     tl_new_logfile(dirname(log_copy));
     free(log_copy);
