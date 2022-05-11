@@ -84,7 +84,8 @@ protected:
   //virtual void setFields() = 0;
   virtual void setFields() {};
 
-  int pre_write();
+  int checkLog();
+  void updateAutoTimestamp();
 
 private:
 

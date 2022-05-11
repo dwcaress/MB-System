@@ -22,9 +22,21 @@
 #include "structDefs.h"
 
 #define TRN_MAX_BEAMS_DFL TRN_MAX_BEAMS
+// size of record ID
+#define TL_RID_SIZE sizeof(uint32_t)
+// size of motn_in w/o record id
+#define TL_MTNI_SIZE (sizeof(motn_in_t)-TL_RID_SIZE)
+// size of meas_in w/o record id
+#define TL_MEAI_HDR_SIZE (sizeof(meas_in_t)-TL_RID_SIZE)
+// size of beam data for n beams
+#define TL_MEAI_BEAM_SIZE(n) (sizeof(meas_beam_t) * n)
+// size of mse_out w/o record id
+#define TL_MSEO_SIZE (sizeof(est_out_t)-TL_RID_SIZE)
+
 #pragma pack(push,1)
 typedef struct motn_in_s
 {
+    uint32_t rec_id;
     double time;
     double x;
     double y;
@@ -48,6 +60,7 @@ typedef struct meas_beam_s{
 
 typedef struct meas_in_s
 {
+    uint32_t rec_id;
     double time;
     int data_type;
     double x;
@@ -55,9 +68,44 @@ typedef struct meas_in_s
     double z;
     int ping_number;
     int num_meas;
-    // beam data follows - use measin_beam_data()
+    // beam data follows; measin_beam_data() returns pointer
     //meas_beam_t beams[num_meas];
 }meas_in_t;
+
+typedef struct est_out_s
+{
+    uint32_t rec_id;
+    double time;
+    double x;
+    double y;
+    double z;
+    double vx;
+    double vy;
+    double vz;
+    double ve;
+    double vw_x;
+    double vw_y;
+    double vw_z;
+    double vn_x;
+    double vn_y;
+    double vn_z;
+    double wx;
+    double wy;
+    double wz;
+    double ax;
+    double ay;
+    double az;
+    double phi;
+    double theta;
+    double psi;
+    double psi_berg;
+    double psi_dot_berg;
+    short int dvl_valid;
+    short int gps_valid;
+    short int bottom_lock;
+    double covariance[N_COVAR];
+}est_out_t;
+
 #pragma pack(pop)
 
 class TrnLog: public DataLogWriter {
@@ -67,13 +115,13 @@ public:
     typedef enum {
         RT_INVALID = 0x0U,
         // MTNI
-        MOTN_IN = 0x494e544dU,
+        MOTN_IN = 0x494E544DU,
         // MEAI
-        MEAS_IN = 0x4941454dU,
-        // MTNO
-        MOTN_OUT = 0x4f4e544dU,
-        // MEAO
-        MEAS_OUT = 0x4f41454dU
+        MEAS_IN = 0x4941454DU,
+        // MSEO
+        MSE_OUT = 0x4F45534DU,
+        // MLEO
+        MLE_OUT = 0x4F454C4DU
     }TrnRecID;
     //////////////////////////////////////////////////////////////////////////////////
     // Constructor
@@ -106,9 +154,16 @@ public:
     //
     void logMeas(measT* meas, TrnRecID recID);
     void logMotn(poseT* pose, TrnRecID recID);
+#ifdef WITH_TRNLOG_EST_OUT
+    void logEst(poseT* pose, TrnRecID recID);
+#endif
+    static meas_beam_t *meaiBeamData(meas_in_t *self);
 
 protected:
- 
+    void writeField(FILE *file, DataField *field);
+    void writeHeader();
+    int pre_write();
+
     IntegerData *_recordID;
     // Vehicle position and orientation data input from IMUs
     // (e.g. DVL, Kearfott)
@@ -126,7 +181,7 @@ protected:
     ShortData *_ptDvlValid;
     ShortData *_ptGpsValid;
     ShortData *_ptBottomLock;
-#ifdef WITH_POSE_OUTPUTS
+#ifdef WITH_TRNLOG_EST_OUT
     DoubleData *_ptVe;
     DoubleData *_ptVwx;
     DoubleData *_ptVwy;

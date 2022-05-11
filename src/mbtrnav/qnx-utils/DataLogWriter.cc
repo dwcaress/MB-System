@@ -156,9 +156,28 @@ void DataLogWriter::writeHeader()
   fflush(fileStream());
 }
 
-int DataLogWriter::pre_write()
+int DataLogWriter::checkLog()
 {
     if (_logFile == NULL || _logOK == False) {
+        return -1;
+    }
+    return 0;
+}
+
+void DataLogWriter::updateAutoTimestamp()
+{
+    if (_autoTimestamp) {
+        //struct timespec timeSpec;
+        //clock_gettime(CLOCK_REALTIME, &_timeSpec);
+        TimeP::gettime(&_timeSpec);
+        _timeStamp.setValue((double )(_timeSpec.tv_sec + _timeSpec.tv_nsec/1.e9));
+    }
+}
+
+int DataLogWriter::write()
+{
+    if (_logFile == NULL || _logOK == False) {
+        if (DLDEBUG) printf("DataLogWriter::write() - no log file!\n");
         return -1;
     }
 
@@ -175,15 +194,6 @@ int DataLogWriter::pre_write()
         TimeP::gettime(&_timeSpec);
         _timeStamp.setValue((double )(_timeSpec.tv_sec + _timeSpec.tv_nsec/1.e9));
     }
-    return 0;
-}
-
-int DataLogWriter::write()
-{
-  if(pre_write()!=0){
-      if (DLDEBUG) printf("DataLogWriter::write() - no log file!\n");
-      return 0;
-  }
 
   if (DLDEBUG) printf("DataLogWriter::write() - call setFields()\n");
 

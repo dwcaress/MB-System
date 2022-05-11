@@ -344,7 +344,9 @@ void TerrainNav::estimatePose(poseT* estimate, const int& type) {
 			_trnLog->logNav(&_incomingNav);
 			_trnLog->logReinits( numReinits );
 			_trnLog->write();
-
+#ifdef WITH_TRNLOG_EST_OUT
+            _trnBinLog->logEst(estimate, TrnLog::MSE_OUT);
+#endif
 			break;
 
 	   case 1:      //Compute MLE
@@ -1085,7 +1087,6 @@ void TerrainNav::checkRangeValidity(measT& currMeas) {
 	}
 	else if(currMeas.dataType == TRN_SENSOR_DELTAT){
 #ifndef WITH_ALT_DELTAT_VALIDATION
-#pragma message( __FILE__":" STR(__LINE__) " - Original DeltaT validation enabled (see FEATURE_OPTIONS in Makefile)" )
         for(int i = 0; i < currMeas.numMeas; i++) {
 			//check validity of each beam based on NaN or range value
 		    // Use only the middle 60 of 120 beams
@@ -1113,7 +1114,7 @@ void TerrainNav::checkRangeValidity(measT& currMeas) {
              currMeas.ranges[45], currMeas.ranges[75]);
 #else
 
-#pragma message( __FILE__":" STR(__LINE__) " - Alternative DeltaT validation enabled (see FEATURE_OPTIONS in Makefile)" )
+#pragma message( __FILE__":" STR(__LINE__) " - feature WITH_ALT_DELTAT_VALIDATION enabled (see FEATURE_OPTIONS in Makefile)" )
 
         // Proposed DeltaT beam validation : decimates symmetrically
         // accounting for angled sensor and pre-filtered beam set (< max beams),

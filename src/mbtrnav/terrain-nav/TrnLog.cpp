@@ -10,6 +10,9 @@
 #include "structDefs.h"
 #include "TrnLog.h"
 
+#define _STR(x) #x
+#define STR(x) _STR(x)
+
 TrnLog::TrnLog(DataLog::FileFormat fileFormat, const char* logname,
                const char *mnem, uint32_t max_beams)
 : DataLogWriter(logname, fileFormat, AutoTimeStamp), _mtRanges(NULL), _mtStatus(NULL), _mtBeamNums(NULL), _max_beams(max_beams)
@@ -42,7 +45,8 @@ TrnLog::TrnLog(DataLog::FileFormat fileFormat, const char* logname,
     addField((_ptGpsValid = new ShortData("trn.ptGpsValid")));
     addField((_ptBottomLock = new ShortData("trn.ptBottomLock")));
 
-#ifdef WITH_POSE_OUTPUTS
+#ifdef WITH_TRNLOG_EST_OUT
+#pragma message( __FILE__":" STR(__LINE__) " - feature WITH_TRNLOG_EST_OUT enabled (see FEATURE_OPTIONS in Makefile)" )
     addField((_ptVe = new DoubleData("trn.ptVe")));
     addField((_ptVwx = new DoubleData("trn.ptVwx")));
     addField((_ptVwy = new DoubleData("trn.ptvwy")));
@@ -134,7 +138,7 @@ TrnLog::~TrnLog()
     if(_ptDvlValid) delete _ptDvlValid;
     if(_ptGpsValid) delete _ptGpsValid;
     if(_ptBottomLock) delete _ptBottomLock;
-#ifdef WITH_POSE_OUTPUTS
+#ifdef WITH_TRNLOG_EST_OUT
     if(_ptVe) delete _ptVe;
     if(_ptVwx) delete _ptVwx;
     if(_ptVwy) delete _ptVwy;
@@ -193,6 +197,86 @@ TrnLog::~TrnLog()
 
 }
 
+void TrnLog::writeField(FILE *file, DataField *field)
+{
+    fprintf(file, "%s %s %s %s ,%s ,%s \n",
+            CommentChar, field->typeMnemonic(), field->name(),
+            field->asciiFormat(),
+            field->longName(), field->units());
+}
+
+void TrnLog::writeHeader()
+{
+
+    fprintf(fileStream(), "%s %s %s\n",
+            CommentChar, BinaryFormatMnem, mnemonic());
+
+    fprintf(fileStream(), "%s Contains TRN input records\n", CommentChar);
+    fprintf(fileStream(), "%s structured as follows:\n", CommentChar);
+    fprintf(fileStream(), "%s\n", CommentChar);
+    fprintf(fileStream(), "%s TRN motion update input\n", CommentChar);
+    writeField(fileStream(), _recordID);
+    writeField(fileStream(), _ptTime);
+    writeField(fileStream(), _ptX);
+    writeField(fileStream(), _ptY);
+    writeField(fileStream(), _ptZ);
+    writeField(fileStream(), _ptVx);
+    writeField(fileStream(), _ptVy);
+    writeField(fileStream(), _ptVz);
+    writeField(fileStream(), _ptPhi);
+    writeField(fileStream(), _ptTheta);
+    writeField(fileStream(), _ptPsi);
+    writeField(fileStream(), _ptDvlValid);
+    writeField(fileStream(), _ptGpsValid);
+    writeField(fileStream(), _ptBottomLock);
+    fprintf(fileStream(), "%s\n", CommentChar);
+
+    fprintf(fileStream(), "%s TRN measurement update input\n", CommentChar);
+    writeField(fileStream(), _recordID);
+    writeField(fileStream(), _mtTime);
+    writeField(fileStream(), _mtDataType);
+    writeField(fileStream(), _mtX);
+    writeField(fileStream(), _mtY);
+    writeField(fileStream(), _mtZ);
+    writeField(fileStream(), _mtPingNumber);
+    writeField(fileStream(), _mtNumMeas);
+    fprintf(fileStream(), "%s followed by an array of beam entries, e.g.:\n", CommentChar);
+    writeField(fileStream(), _mtBeamNums[0]);
+    writeField(fileStream(), _mtStatus[0]);
+    writeField(fileStream(), _mtRanges[0]);
+    fprintf(fileStream(), "%s\n", CommentChar);
+
+    fprintf(fileStream(), "%s Record IDs are 32-bit (4 byte) printable ASCII sequences:\n", CommentChar);
+    fprintf(fileStream(), "%s  'MTNI' : motion update input\n", CommentChar);
+    fprintf(fileStream(), "%s  'MEAI' : measurement update input\n", CommentChar);
+    fprintf(fileStream(), "%s  'MTNO' : motion update output (not implemented)\n", CommentChar);
+    fprintf(fileStream(), "%s  'MEAO' : measurement update (not implemented)\n", CommentChar);
+    fprintf(fileStream(), "%s Record order is not guaranteed.\n", CommentChar);
+    fprintf(fileStream(), "%s %s\n", CommentChar, BeginDataMnem);
+
+    _handledHeader = True;
+
+    fflush(fileStream());
+
+}
+
+int TrnLog::pre_write()
+{
+    if (checkLog() != 0) {
+        return -1;
+    }
+
+    if (!_handledHeader) {
+        // Need to write header. Note that write() is not called until
+        // after all Data fields have been added.
+        writeHeader();
+    }
+
+    updateAutoTimestamp();
+
+    return 0;
+}
+
 // These log functions takes the place of the setFields()
 // function. To log a the data in a poseT, pass a
 // pointer to the poseT object. Avoids declaring this class
@@ -206,7 +290,7 @@ TrnLog::~TrnLog()
 // log measurement update
 void TrnLog::logMotn(poseT* pt, TrnLog::TrnRecID recID)
 {
-    if (pt && (recID==MOTN_IN || recID==MOTN_OUT))
+    if (pt && recID==MOTN_IN)
     {
         if(pre_write() != 0)
             return;
@@ -253,9 +337,6 @@ void TrnLog::logMotn(poseT* pt, TrnLog::TrnRecID recID)
         _ptBottomLock->setValue(pt->bottomLock ? 1 : 0);
         _ptBottomLock->write(_logFile);
 
-#ifdef WITH_POSE_OUTPUTS
-
-#endif
         // Terminate this record
         _logFile->endRecord();
    }
@@ -274,7 +355,7 @@ void TrnLog::logMotn(poseT* pt, TrnLog::TrnRecID recID)
 
 void TrnLog::logMeas(measT* mt, TrnLog::TrnRecID recID)
 {
-    if (mt && (recID==MEAS_IN || recID==MEAS_OUT))
+    if (mt && recID==MEAS_IN)
     {
         if(pre_write() != 0)
             return;
@@ -346,19 +427,121 @@ void TrnLog::logMeas(measT* mt, TrnLog::TrnRecID recID)
     }
 }
 
-meas_beam_t *measin_beam_data(meas_in_t *self)
+#ifdef WITH_TRNLOG_EST_OUT
+
+void TrnLog::logEst(poseT* pt, TrnLog::TrnRecID recID)
+{
+    if (pt && (recID==MSE_OUT || recID==MLE_OUT))
+    {
+        if(pre_write() != 0)
+            return;
+
+        _recordID->setValue(recID);
+        _recordID->write(_logFile);
+
+        _ptTime->setValue(pt->time);
+        _ptTime->write(_logFile);
+
+        _ptX->setValue(pt->x);
+        _ptX->write(_logFile);
+
+        _ptY->setValue(pt->y);
+        _ptY->write(_logFile);
+
+        _ptZ->setValue(pt->z);
+        _ptZ->write(_logFile);
+
+        _ptVx->setValue(pt->vx);
+        _ptVx->write(_logFile);
+
+        _ptVy->setValue(pt->vy);
+        _ptVy->write(_logFile);
+
+        _ptVz->setValue(pt->vz);
+        _ptVz->write(_logFile);
+
+        _ptVe->setValue(pt->ve);
+        _ptVe->write(_logFile);
+
+        _ptVwx->setValue(pt->vw_x);
+        _ptVwx->write(_logFile);
+
+        _ptVwy->setValue(pt->vw_y);
+        _ptVwy->write(_logFile);
+
+        _ptVwz->setValue(pt->vw_z);
+        _ptVwz->write(_logFile);
+
+        _ptVnx->setValue(pt->vn_x);
+        _ptVnx->write(_logFile);
+
+        _ptVny->setValue(pt->vn_y);
+        _ptVny->write(_logFile);
+
+        _ptVnz->setValue(pt->vn_z);
+        _ptVnz->write(_logFile);
+
+        _ptWx->setValue(pt->wx);
+        _ptWx->write(_logFile);
+
+        _ptWy->setValue(pt->wy);
+        _ptWy->write(_logFile);
+
+        _ptWz->setValue(pt->wz);
+        _ptWz->write(_logFile);
+
+        _ptAx->setValue(pt->ax);
+        _ptAx->write(_logFile);
+
+        _ptAy->setValue(pt->ay);
+        _ptAy->write(_logFile);
+
+        _ptAz->setValue(pt->az);
+        _ptAz->write(_logFile);
+
+        _ptPhi->setValue(pt->phi);
+        _ptPhi->write(_logFile);
+
+        _ptTheta->setValue(pt->theta);
+        _ptTheta->write(_logFile);
+
+        _ptPsi->setValue(pt->psi);
+        _ptPsi->write(_logFile);
+
+        _ptPsiBerg->setValue(pt->psi_berg);
+        _ptPsiBerg->write(_logFile);
+
+        _ptPsiDotBerg->setValue(pt->psi_dot_berg);
+        _ptPsiDotBerg->write(_logFile);
+
+        _ptDvlValid->setValue(pt->dvlValid ? 1 : 0);
+        _ptDvlValid->write(_logFile);
+
+        _ptGpsValid->setValue(pt->gpsValid ? 1 : 0);
+        _ptGpsValid->write(_logFile);
+
+        _ptBottomLock->setValue(pt->bottomLock ? 1 : 0);
+        _ptBottomLock->write(_logFile);
+
+        for(int i=0; i< N_COVAR; i++)
+        {
+            _ptCovariance[i]->setValue(pt->covariance[i]);
+            _ptCovariance[i]->write(_logFile);
+
+        }
+
+        // Terminate this record
+        _logFile->endRecord();
+    }
+}
+#endif
+
+meas_beam_t *TrnLog::meaiBeamData(meas_in_t *self)
 {
     if(NULL != self){
         uint8_t *bp = (uint8_t *)self;
         bp += sizeof(meas_in_t);
-        return (meas_beam_t *)bp;//(self+1);
+        return (meas_beam_t *)bp;
     }
     return NULL;
-}
-
-size_t measin_size(meas_in_t *self)
-{
-    if(NULL != self)
-        return (sizeof(meas_in_t) + self->num_meas*sizeof(meas_beam_t));
-    return 0;
 }

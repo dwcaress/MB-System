@@ -92,6 +92,8 @@ public:
         EST=0x4,
         TRNI_CSV=0x8,
         TRNO_CSV=0x10,
+        MMSE=0x20,
+        MLE=0x40,
         TRNI=0x3,
         ALL_CSV=0x18
     }OFlags;
@@ -225,7 +227,6 @@ public:
 
             if(NULL!=quit && *quit)
                 break;
-            memset(ibuf, 0, 2048);
 
             if(rec_type == TrnLog::MOTN_IN) {
 
@@ -306,9 +307,31 @@ public:
                 } else {
                     TRN_NDPRINT(2,"read_meas failed\n");
                 }
-            } else {
+            } else if(rec_type == TrnLog::MSE_OUT) {
+
+                poseT *pt = NULL;
+                if(read_est(&pt, ibuf) == 0 && pt != NULL){
+                    if(mConfig.oflag_set(TrnLogConfig::MMSE))
+                        show_esto(*pt);
+                }else {
+                    TRN_NDPRINT(2,"read_est failed\n");
+                }
+                delete pt;
+            } else if(rec_type == TrnLog::MLE_OUT) {
+                
+                poseT *pt = NULL;
+                if(read_est(&pt, ibuf) == 0 && pt != NULL){
+                    if(mConfig.oflag_set(TrnLogConfig::MLE))
+                        show_esto(*pt);
+                }else {
+                    TRN_NDPRINT(2,"read_est failed\n");
+                }
+                delete pt;
+            }else {
                 TRN_NDPRINT(2,"invalid record type[%d]\n",rec_type);
             }
+
+            memset(ibuf, 0, 2048);
         }
         return retval;
     }
@@ -614,6 +637,53 @@ protected:
         mt_tostream(mt, std::cerr, wkey, wval);
     }
 
+    void esto_tostream(poseT &pt, std::ostream &os, int wkey=15, int wval=18)
+    {
+        os << "-- poseT [est] --\n";
+        os << std::fixed << std::setprecision(3);
+        os << std::setw(wkey) <<  "time" << std::setw(wval) << pt.time << "\n";
+        os << std::setw(wkey) <<  "x" << std::setw(wval) << pt.x << "\n";
+        os << std::setw(wkey) <<  "y" << std::setw(wval) << pt.y << "\n";
+        os << std::setw(wkey) <<  "z" << std::setw(wval) << pt.z << "\n";
+        os << std::setw(wkey) <<  "vx" << std::setw(wval) << pt.vx << "\n";
+        os << std::setw(wkey) <<  "vy" << std::setw(wval) << pt.vy << "\n";
+        os << std::setw(wkey) <<  "vz" << std::setw(wval) << pt.vz << "\n";
+        os << std::setw(wkey) <<  "vw_x" << std::setw(wval) << pt.vw_x << "\n";
+        os << std::setw(wkey) <<  "vw_y" << std::setw(wval) << pt.vw_y << "\n";
+        os << std::setw(wkey) <<  "vw_z" << std::setw(wval) << pt.vw_z << "\n";
+        os << std::setw(wkey) <<  "vn_x" << std::setw(wval) << pt.vn_x << "\n";
+        os << std::setw(wkey) <<  "vn_y" << std::setw(wval) << pt.vn_y << "\n";
+        os << std::setw(wkey) <<  "vn_z" << std::setw(wval) << pt.vn_z << "\n";
+        os << std::setw(wkey) <<  "wx" << std::setw(wval) << pt.wx << "\n";
+        os << std::setw(wkey) <<  "wy" << std::setw(wval) << pt.wy << "\n";
+        os << std::setw(wkey) <<  "wz" << std::setw(wval) << pt.wz << "\n";
+        os << std::setw(wkey) <<  "ax" << std::setw(wval) << pt.ax << "\n";
+        os << std::setw(wkey) <<  "ay" << std::setw(wval) << pt.ay << "\n";
+        os << std::setw(wkey) <<  "az" << std::setw(wval) << pt.az << "\n";
+        os << std::setw(wkey) <<  "phi" << std::setw(wval) << pt.phi << "\n";
+        os << std::setw(wkey) <<  "theta" << std::setw(wval) << pt.theta << "\n";
+        os << std::setw(wkey) <<  "psi" << std::setw(wval) << pt.psi << "\n";
+        os << std::setw(wkey) <<  "psi_berg" << std::setw(wval) << pt.psi_berg << "\n";
+        os << std::setw(wkey) <<  "psi_dot_berg" << std::setw(wval) << pt.psi_dot_berg << "\n";
+        os << std::setw(wkey) <<  "dvlValid" << std::setw(wval) << (pt.dvlValid?'Y':'N') << "\n";
+        os << std::setw(wkey) <<  "gpsValid" << std::setw(wval) << (pt.gpsValid?'Y':'N') << "\n";
+        os << std::setw(wkey) <<  "bottomLock" << std::setw(wval) << (pt.bottomLock?'Y':'N') << "\n";
+        for(int i=0;i<N_COVAR;i++)
+            os << std::setw(wkey-4) <<  "cov[" << std::setw(2) << i << "]" << std::setw(wval) << pt.covariance[i] << "\n";
+    }
+
+    std::string esto_tostring(poseT &pt, int wkey=15, int wval=18)
+    {
+        std::ostringstream ss;
+        esto_tostream(pt, ss, wkey, wval);
+        return ss.str();
+    }
+
+    void show_esto(poseT &pt, int wkey=15, int wval=18)
+    {
+        esto_tostream(pt, std::cerr, wkey, wval);
+    }
+
     int trn_connect(int retries, uint32_t delay_sec)
     {
         int retval = -1;
@@ -652,13 +722,14 @@ protected:
         return retval;
     }
 
+    // finds and reads next record ID
     int next_record(byte *dest, size_t len, TrnLog::TrnRecID &r_type)
     {
         int retval = -1;
         byte buf[5]={0}, *cur = buf;
         typedef enum{
             START,
-            MTN, MEA,
+            MTN, MEA, MSE, MLE,
             OK, EEOF, ERR
         }state_t;
         state_t stat = START;
@@ -667,7 +738,6 @@ protected:
         {
             if(fread(cur,1,1,mFile) == 1)
             {
-//                fprintf(stderr,"%c ", (*cur>0x20?*cur:'.'));
                 switch (*cur) {
                     case 'M':
                         if(stat==START){
@@ -698,6 +768,8 @@ protected:
                         if(stat==START){
                             cur++;
                             stat = MEA;
+                        } else if(stat == MSE || stat == MLE){
+                            cur++;
                         } else {
                             cur = buf;
                             stat = START;
@@ -726,20 +798,38 @@ protected:
                         }
                         break;
                     case 'O':
-                        if(stat==MTN){
+                        if(stat==MSE){
                             cur++;
                             stat = OK;
-                            r_type = TrnLog::MOTN_OUT;
-                        } else if(stat==MEA){
+                            r_type = TrnLog::MSE_OUT;
+                        }  else if(stat==MLE){
                             cur++;
                             stat = OK;
-                            r_type = TrnLog::MEAS_OUT;
+                            r_type = TrnLog::MLE_OUT;
                         } else {
                             cur = buf;
                             stat = START;
                         }
                         break;
 
+                    case 'S':
+                        if(stat==START){
+                            cur++;
+                            stat = MSE;
+                        } else {
+                            cur = buf;
+                            stat = START;
+                        }
+                        break;
+                    case 'L':
+                        if(stat==START){
+                            cur++;
+                            stat = MLE;
+                        } else {
+                            cur = buf;
+                            stat = START;
+                        }
+                        break;
                     default:
                         cur = buf;
                         stat = START;
@@ -759,34 +849,25 @@ protected:
         if(stat == OK)
         {
             TRN_NDPRINT(2,"%s:%d - stat OK %s/%X\n", __func__, __LINE__, buf, r_type);
+            memcpy(dest,buf,TL_RID_SIZE);
             retval = 0;
         }
         return retval;
     }
 
+    // src points to rec_id (already read by next_record)
     int read_meas(measT **pdest, byte *src)
     {
         int retval = -1;
         // read data from file to buffer
-        byte *bp = (byte *)src;
-        size_t readlen = sizeof(meas_in_t);
-
-
-//        fprintf(stderr,"%s:%d readlen[%zu]\n", __func__, __LINE__, readlen);
+        byte *bp = (byte *)src+TL_RID_SIZE;
+        size_t readlen = TL_MEAI_HDR_SIZE;
 
         if(fread(bp, readlen, 1, mFile) == 1)
         {
             bp += readlen;
             meas_in_t *measin =  (meas_in_t *)src;
-            readlen = measin->num_meas * sizeof(meas_beam_t);
-
-//            fprintf(stderr,"%s:%d      time [%.3lf]\n", __func__, __LINE__,measin->time);
-//            fprintf(stderr,"%s:%d data_type [%d]\n", __func__, __LINE__,measin->data_type);
-//            fprintf(stderr,"%s:%d         x [%.3lf]\n", __func__, __LINE__,measin->x);
-//            fprintf(stderr,"%s:%d         y [%.3lf]\n", __func__, __LINE__,measin->y);
-//            fprintf(stderr,"%s:%d         z [%.3lf]\n", __func__, __LINE__,measin->z);
-//            fprintf(stderr,"%s:%d  ping_num [%d]\n", __func__, __LINE__,measin->ping_number);
-//            fprintf(stderr,"%s:%d  num_meas [%d]\n", __func__, __LINE__,measin->num_meas);
+            readlen = TL_MEAI_BEAM_SIZE(measin->num_meas);
 
             if(fread(bp, readlen, 1, mFile) == 1)
             {
@@ -800,7 +881,7 @@ protected:
                     dest->ping_number = measin->ping_number;
                     dest->numMeas = measin->num_meas;
 
-                    meas_beam_t *beams = measin_beam_data(measin);
+                    meas_beam_t *beams = TrnLog::meaiBeamData(measin);
                     for(int i=0; i<dest->numMeas; i++)
                     {
                         dest->beamNums[i] = beams[i].beam_num;
@@ -820,12 +901,13 @@ protected:
         return retval;
     }
 
+    // src points to rec_id (already read by next_record)
     int read_pose(poseT **pdest, byte *src)
     {
         int retval = -1;
         // read data from file to buffer
-        byte *bp = (byte *)src;
-        size_t readlen = sizeof(motn_in_t);
+        byte *bp = (byte *)src+TL_RID_SIZE;
+        size_t readlen = TL_MTNI_SIZE;
         if(fread(bp, readlen, 1, mFile) == 1)
         {
             poseT *dest = new poseT();
@@ -847,6 +929,59 @@ protected:
                 dest->dvlValid = (motnin->dvl_valid != 0);
                 dest->gpsValid = (motnin->gps_valid != 0);
                 dest->bottomLock = (motnin->bottom_lock != 0);
+                *pdest = dest;
+                retval = 0;
+            }
+        }
+        return retval;
+    }
+
+    // src points to rec_id (already read by next_record)
+    int read_est(poseT **pdest, byte *src)
+    {
+        int retval = -1;
+        // read data from file to buffer
+        byte *bp = (byte *)src+TL_RID_SIZE;
+        size_t readlen = TL_MSEO_SIZE;
+        if(fread(bp, readlen, 1, mFile) == 1)
+        {
+            poseT *dest = new poseT();
+            if(NULL != dest)
+            {
+                bp += readlen;
+                est_out_t *est =  (est_out_t *)src;
+
+                dest->time = est->time;
+                dest->x = est->x;
+                dest->y = est->y;
+                dest->z = est->z;
+                dest->vx = est->vx;
+                dest->vy = est->vy;
+                dest->vz = est->vz;
+                dest->ve = est->ve;
+                dest->vw_x = est->vw_x;
+                dest->vw_y = est->vw_y;
+                dest->vw_z = est->vw_z;
+                dest->vn_x = est->vn_x;
+                dest->vn_y = est->vn_y;
+                dest->vn_z = est->vn_z;
+                dest->wx = est->wx;
+                dest->wy = est->wy;
+                dest->wz = est->wz;
+                dest->ax = est->ax;
+                dest->ay = est->ay;
+                dest->az = est->az;
+                dest->phi = est->phi;
+                dest->theta = est->theta;
+                dest->psi = est->psi;
+                dest->psi_berg = est->psi_berg;
+                dest->psi_dot_berg = est->psi_dot_berg;
+
+                dest->dvlValid = (est->dvl_valid != 0);
+                dest->gpsValid = (est->gps_valid != 0);
+                dest->bottomLock = (est->bottom_lock != 0);
+                memcpy(dest->covariance,est->covariance, N_COVAR*sizeof(double));
+
                 *pdest = dest;
                 retval = 0;
             }
@@ -974,6 +1109,12 @@ public:
                         }
                         if(strstr(optarg,"est") != NULL){
                             oflags |= TrnLogConfig::EST;
+                        }
+                        if(strstr(optarg,"mmse") != NULL){
+                            oflags |= TrnLogConfig::MMSE;
+                        }
+                        if(strstr(optarg,"mle") != NULL){
+                            oflags |= TrnLogConfig::MLE;
                         }
                         if(strstr(optarg,"motn") != NULL){
                             oflags |= TrnLogConfig::MOTN;
