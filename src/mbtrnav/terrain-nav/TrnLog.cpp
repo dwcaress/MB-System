@@ -13,6 +13,18 @@
 #define _STR(x) #x
 #define STR(x) _STR(x)
 
+#ifdef WITH_TRNLOG
+#pragma message( __FILE__":" STR(__LINE__) " - feature WITH_TRNLOG_OUT enabled (see FEATURE_OPTIONS in Makefile)" )
+#endif
+
+#ifdef WITH_TRNLOG_EST_OUT
+#pragma message( __FILE__":" STR(__LINE__) " - feature WITH_TRNLOG_EST_OUT enabled (see FEATURE_OPTIONS in Makefile)" )
+#ifndef WITH_TRNLOG
+#pragma message( __FILE__":" STR(__LINE__) " - feature WITH_TRNLOG_EST_OUT requires WITH_TRNLOG (see FEATURE_OPTIONS in Makefile)" )
+#endif
+#endif
+
+
 TrnLog::TrnLog(DataLog::FileFormat fileFormat, const char* logname,
                const char *mnem, uint32_t max_beams)
 : DataLogWriter(logname, fileFormat, AutoTimeStamp), _mtRanges(NULL), _mtStatus(NULL), _mtBeamNums(NULL), _max_beams(max_beams)
@@ -46,7 +58,6 @@ TrnLog::TrnLog(DataLog::FileFormat fileFormat, const char* logname,
     addField((_ptBottomLock = new ShortData("trn.ptBottomLock")));
 
 #ifdef WITH_TRNLOG_EST_OUT
-#pragma message( __FILE__":" STR(__LINE__) " - feature WITH_TRNLOG_EST_OUT enabled (see FEATURE_OPTIONS in Makefile)" )
     addField((_ptVe = new DoubleData("trn.ptVe")));
     addField((_ptVwx = new DoubleData("trn.ptVwx")));
     addField((_ptVwy = new DoubleData("trn.ptvwy")));

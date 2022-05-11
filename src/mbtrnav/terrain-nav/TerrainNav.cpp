@@ -23,6 +23,10 @@
 #define _STR(x) #x
 #define STR(x) _STR(x)
 
+#ifdef WITH_ALT_DELTAT_VALIDATION
+#pragma message( __FILE__":" STR(__LINE__) " - feature WITH_ALT_DELTAT_VALIDATION enabled (see FEATURE_OPTIONS in Makefile)" )
+#endif
+
 /*TODO delete Transition Matrix, filterState, and newState
 trn_server.cpp calls getFilterState() which currently only returns 0
 */
@@ -1126,8 +1130,6 @@ void TerrainNav::checkRangeValidity(measT& currMeas) {
         logs(TL_OMASK(TL_TERRAIN_NAV, TL_LOG),"TerrainNav::measUpdate - IDT[45] = %.2f, IDT[75] = %.2f\n",
              currMeas.ranges[45], currMeas.ranges[75]);
 #else
-
-#pragma message( __FILE__":" STR(__LINE__) " - feature WITH_ALT_DELTAT_VALIDATION enabled (see FEATURE_OPTIONS in Makefile)" )
 
         // Proposed DeltaT beam validation : decimates symmetrically
         // accounting for angled sensor and pre-filtered beam set (< max beams),
