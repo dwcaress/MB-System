@@ -155,17 +155,69 @@ private:
 
 };
 
+class TLPStats
+{
+public:
+    TLPStats()
+    :mFilesPlayed(0), mRecordsFound(0), mMtniRead(0), mMeaiRead(0), mMseoRead(0), mMleoRead(0), mMotnUpdate(0), mMeasUpdate(0), mEstMMSE(0), mEstMLE(0), mLastMeasSuccess(0), mTrniCsvWrite(0), mTrnoCsvWrite(0)
+    {}
+
+    void stat_tostream(ostream &os, int wkey=18, int wval=15)
+    {
+        os << std::setw(wkey) << "-- stats --\n";
+        os << std::setw(wkey) << "mFilesPlayed" << std::setw(wkey) << mFilesPlayed << "\n";
+        os << std::setw(wkey) << "mRecordsFound" << std::setw(wkey) << mRecordsFound << "\n";
+        os << std::setw(wkey) << "mMtniRead" << std::setw(wkey) << mMtniRead << "\n";
+        os << std::setw(wkey) << "mMeaiRead" << std::setw(wkey) << mMeaiRead << "\n";
+        os << std::setw(wkey) << "mMseoRead" << std::setw(wkey) << mMseoRead << "\n";
+        os << std::setw(wkey) << "mMleoRead" << std::setw(wkey) << mMleoRead << "\n";
+        os << std::setw(wkey) << "mMotnUpdate" << std::setw(wkey) << mMotnUpdate << "\n";
+        os << std::setw(wkey) << "mMeasUpdate" << std::setw(wkey) << mMeasUpdate << "\n";
+        os << std::setw(wkey) << "mEstMMSE" << std::setw(wkey) << mEstMMSE << "\n";
+        os << std::setw(wkey) << "mEstMLE" << std::setw(wkey) << mEstMLE << "\n";
+        os << std::setw(wkey) << "mLastMeasSuccess" << std::setw(wkey) << mLastMeasSuccess << "\n";
+        os << std::setw(wkey) << "mTrniCsvWrite" << std::setw(wkey) << mTrniCsvWrite << "\n";
+    }
+
+    std::string stat_tostring(int wkey=18, int wval=15)
+    {
+        ostringstream ss;
+        stat_tostream(ss, wkey, wval);
+        return ss.str();
+    }
+
+    void show_stats(int wkey=18, int wval=15)
+    {
+        stat_tostream(std::cerr, wkey, wval);
+    }
+
+    uint32_t mFilesPlayed;
+    uint32_t mRecordsFound;
+    uint32_t mMtniRead;
+    uint32_t mMeaiRead;
+    uint32_t mMseoRead;
+    uint32_t mMleoRead;
+    uint32_t mMotnUpdate;
+    uint32_t mMeasUpdate;
+    uint32_t mEstMMSE;
+    uint32_t mEstMLE;
+    uint32_t mLastMeasSuccess;
+    uint32_t mTrniCsvWrite;
+    uint32_t mTrnoCsvWrite;
+
+};
+
 class TrnLogPlayer
 {
 public:
 
     TrnLogPlayer()
-    :mConfig(), mTrn(NULL), mFile(NULL), mCsvFile(NULL), mTrnOutCsvFile(NULL), mQuit(false)
+    :mConfig(), mTrn(NULL), mFile(NULL), mTrnInCsvFile(NULL), mTrnOutCsvFile(NULL), mQuit(false)
     {
     }
 
     TrnLogPlayer(const TrnLogConfig &cfg)
-    :mConfig(cfg), mTrn(NULL), mFile(NULL), mCsvFile(NULL), mTrnOutCsvFile(NULL), mQuit(false)
+    :mConfig(cfg), mTrn(NULL), mFile(NULL), mTrnInCsvFile(NULL), mTrnOutCsvFile(NULL), mQuit(false)
     {
     }
 
@@ -175,8 +227,8 @@ public:
             fclose(mFile);
         }
 
-        if(mCsvFile != NULL){
-            fclose(mCsvFile);
+        if(mTrnInCsvFile != NULL){
+            fclose(mTrnInCsvFile);
         }
         if(mTrnOutCsvFile != NULL){
             fclose(mTrnOutCsvFile);
@@ -224,6 +276,7 @@ public:
         byte ibuf[2048]={0};
 
         while (!mQuit && next_record(ibuf, 2048, rec_type) == 0) {
+            this->stats().mRecordsFound++;
 
             if(NULL!=quit && *quit)
                 break;
@@ -232,6 +285,7 @@ public:
 
                 poseT *pt = NULL;
                 if(read_pose(&pt, ibuf) == 0 && pt != NULL){
+                    this->stats().mMtniRead++;
 
                     if(mConfig.oflag_set(TrnLogConfig::MOTN))
                     {
@@ -243,6 +297,7 @@ public:
                     {
                         try{
                             mTrn->motionUpdate(pt);
+                            this->stats().mMotnUpdate++;
                         }catch(Exception e) {
                             fprintf(stderr,"%s - caught exception [%s]\n",__func__, e.what());
                         }
@@ -256,6 +311,7 @@ public:
 
                 measT *mt = NULL;
                 if(read_meas(&mt, ibuf) == 0 && mt != NULL){
+                    this->stats().mMeaiRead++;
 
                     if(mConfig.oflag_set(TrnLogConfig::MEAS))
                     {
@@ -266,30 +322,39 @@ public:
                     if(mConfig.server())
                     {
                         try{
+
+                            if(mConfig.trni_csv()){
+                                trni_csv_tofile(&mTrnInCsvFile, lastPT, *mt);
+                                this->stats().mTrniCsvWrite++;
+                                if(mConfig.oflag_set(TrnLogConfig::TRNI_CSV))
+                                {
+                                    show_trni_csv(lastPT, *mt);
+                                }
+                            }
+
                             mTrn->measUpdate(mt, mConfig.trn_sensor());
+                            this->stats().mMeasUpdate++;
 
                             if(mTrn->lastMeasSuccessful()){
+                                this->stats().mLastMeasSuccess++;
+
                                 auto ts_now = std::chrono::system_clock::now();
                                 std::chrono::duration<double> epoch_time = ts_now.time_since_epoch();
                                 poseT mle, mmse;
                                 double ts = epoch_time.count();
 
                                 mTrn->estimatePose(&mmse, TRN_EST_MMSE);
+                                this->stats().mEstMMSE++;
                                 mTrn->estimatePose(&mle, TRN_EST_MLE);
+                                this->stats().mEstMLE++;
 
                                 if(mConfig.oflag_set(TrnLogConfig::EST)){
                                     show_est(ts, lastPT, mle, mmse);
                                 }
 
-                                if(mConfig.trni_csv()){
-                                    trni_csv_tofile(mCsvFile, lastPT, *mt);
-                                    if(mConfig.oflag_set(TrnLogConfig::TRNI_CSV))
-                                    {
-                                        show_trni_csv(lastPT, *mt);
-                                    }
-                                }
                                 if(mConfig.trno_csv()){
-                                    trno_csv_tofile(mTrnOutCsvFile, ts, lastPT, mle, mmse);
+                                    trno_csv_tofile(&mTrnOutCsvFile, ts, lastPT, mle, mmse);
+                                    this->stats().mTrnoCsvWrite++;
                                     if(mConfig.oflag_set(TrnLogConfig::TRNO_CSV))
                                     {
                                         show_trno_csv(ts, lastPT, mle, mmse);
@@ -311,6 +376,9 @@ public:
 
                 poseT *pt = NULL;
                 if(read_est(&pt, ibuf) == 0 && pt != NULL){
+
+                    this->stats().mMseoRead++;
+
                     if(mConfig.oflag_set(TrnLogConfig::MMSE))
                         show_esto(*pt);
                 }else {
@@ -321,6 +389,7 @@ public:
                 
                 poseT *pt = NULL;
                 if(read_est(&pt, ibuf) == 0 && pt != NULL){
+                    this->stats().mMleoRead++;
                     if(mConfig.oflag_set(TrnLogConfig::MLE))
                         show_esto(*pt);
                 }else {
@@ -341,6 +410,7 @@ public:
         TRN_DPRINT("setting player quit flag\n");
         mQuit = true;
     }
+    TLPStats &stats(){return mStats;}
 
 protected:
 
@@ -408,16 +478,17 @@ protected:
         return ss.str();
     }
 
-    void trni_csv_tofile(FILE *fp, poseT &pt, measT &mt)
+    void trni_csv_tofile(FILE **fp, poseT &pt, measT &mt)
     {
-        std::string csv = trni_csv_tostring(pt, mt);
-        if(NULL == fp)
+        if(NULL == *fp)
         {
-            fp = fopen(mConfig.trni_csv_path().c_str(),"a");
+            TRN_DPRINT("INFO - opening file[%s]\n",mConfig.trni_csv_path().c_str());
+             *fp = fopen(mConfig.trni_csv_path().c_str(),"a");
         }
 
-        if(NULL != fp){
-            fprintf(fp, "%s",csv.c_str());
+        if(NULL != *fp){
+            std::string csv = trni_csv_tostring(pt, mt);
+            fwrite(csv.c_str(),csv.length(),1,*fp);
         } else {
             TRN_DPRINT("ERR - could not open file[%s]\n",mConfig.trni_csv_path().c_str());
         }
@@ -437,6 +508,7 @@ protected:
         // mmse.x
         // mmse.y
         // mmse.z
+        // pos.time
         // ofs.x
         // ofs.y
         // ofs.z
@@ -493,16 +565,16 @@ protected:
         return ss.str();
     }
 
-    void trno_csv_tofile(FILE *fp, double ts, poseT &pt, poseT &mle, poseT &mmse)
+    void trno_csv_tofile(FILE **fp, double ts, poseT &pt, poseT &mle, poseT &mmse)
     {
-        std::string trno_csv = trno_csv_tostring(ts, pt, mle, mmse);
-        if(NULL == fp)
+        if(NULL == *fp)
         {
-            fp = fopen(mConfig.trno_csv_path().c_str(),"a");
+            *fp = fopen(mConfig.trno_csv_path().c_str(),"a");
         }
 
-        if(NULL != fp){
-            fprintf(fp, "%s",trno_csv.c_str());
+        if(NULL != *fp){
+            std::string csv = trno_csv_tostring(ts, pt, mle, mmse);
+            fwrite(csv.c_str(),csv.length(),1,*fp);
         } else {
             TRN_DPRINT("ERR - could not open file[%s]\n",mConfig.trno_csv_path().c_str());
         }
@@ -993,9 +1065,11 @@ private:
     TrnLogConfig mConfig;
     TrnClient *mTrn;
     FILE *mFile;
-    FILE *mCsvFile;
+    FILE *mTrnInCsvFile;
     FILE *mTrnOutCsvFile;
     bool mQuit;
+    TLPStats mStats;
+
 };
 
 
@@ -1447,6 +1521,7 @@ int main(int argc, char **argv)
 
         TRN_NDPRINT(1,"playing[%s]\n",input.c_str());
         tbplayer.play(input, &g_interrupt);
+        tbplayer.stats().mFilesPlayed++;
 
         if(g_interrupt){
             // stop for SIGINT (CTRL-C)
@@ -1454,6 +1529,7 @@ int main(int argc, char **argv)
             break;
         }
     }
+    tbplayer.stats().show_stats();
 
     // release trn_debug resources;
     trn_debug::get(true);
