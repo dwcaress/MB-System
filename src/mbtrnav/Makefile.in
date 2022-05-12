@@ -733,6 +733,7 @@ LIBMFRAME = $(top_builddir)/src/mbtrnframe/libmframe.la
 MFRAME_INC = -I${top_srcdir}/src/mbtrnframe/usr -I${top_srcdir}/src/mbtrnframe/mframe/src 
 include_HEADERS = 
 AM_CFLAGS = ${libgmt_CFLAGS} ${libnetcdf_CFLAGS}
+#AM_CPPFLAGS += -DWITH_ALT_DELTAT_VALIDATION
 AM_CPPFLAGS = -g -O0 -I${top_srcdir}/src/mbtrnav/trnw \
 	-I${top_srcdir}/src/mbtrnav/utils \
 	-I${top_srcdir}/src/mbtrnav/terrain-nav \
@@ -744,8 +745,7 @@ AM_CPPFLAGS = -g -O0 -I${top_srcdir}/src/mbtrnav/trnw \
 	-I${top_srcdir}/src/mbtrnframe/usr \
 	-I${top_srcdir}/src/mbtrnframe/mframe/src -DHAVE_CONFIG_H \
 	-DWITH_TESTS -DWITH_MMDEBUG -D_GNU_SOURCE -DWITH_MST_MSTATS \
-	-DMST_STATS_EN -DWITH_ALT_DELTAT_VALIDATION -DWITH_TRNLOG \
-	-DWITH_TRNLOG_EST_OUT
+	-DMST_STATS_EN -DWITH_TRNLOG -DWITH_TRNLOG_EST_OUT
 libgeolib_la_LDFLAGS = -no-undefined -version-info 0:0:0
 libgeolib_la_SOURCES = gctp/source/gctp.c gctp/source/alberfor.c \
 	gctp/source/alberinv.c gctp/source/alconfor.c \

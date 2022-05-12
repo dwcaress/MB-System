@@ -503,32 +503,11 @@ protected:
     void show_trni_csv(poseT &pt, measT &mt)
     {
         trni_csv_tostream(std::cerr, pt, mt);
-//        std::cerr << "\n";
     }
 
     void trno_csv_tostream(std::ostream &os, double ts, poseT &pt, poseT &mle, poseT &mmse)
     {
-        // format
-        // time
-        // mmse.time
-        // mmse.x
-        // mmse.y
-        // mmse.z
-        // pos.time
-        // ofs.x
-        // ofs.y
-        // ofs.z
-        // cov.0
-        // cov.2
-        // cov.5
-        // pos.time
-        // pos.x
-        // pos.y
-        // pos.z
-        // mle.time
-        // mle.x
-        // mle.y
-        // mle.z
+        // Format time,mmse.time,mmse.x,mmse.y,mmse.z,pos.time,ofs.x,ofs.y,ofs.z,cov.0,cov.2,cov.5,pos.time,pos.x,pos.y,pos.z,mle.time,mle.x,mle.y,mle.z
 
         os << std::fixed << std::setprecision(3);
         os << ts << ",";
