@@ -56,6 +56,9 @@ typedef struct meas_beam_s{
     short int beam_num;
     short int status;
     double range;
+    double cross_track;
+    double along_track;
+    double altitude;
 }meas_beam_t;
 
 typedef struct meas_in_s
@@ -213,11 +216,11 @@ protected:
     DoubleData  **_mtRanges;
     ShortData **_mtStatus;
     ShortData **_mtBeamNums;
-#ifdef WITH_MEAS_OUTPUTS
-    DoubleData **_mtCovariance;
     DoubleData **_mtCrosstrack;
     DoubleData **_mtAlongtrack;
     DoubleData **_mtAltitudes;
+#ifdef WITH_MEAS_OUTPUTS
+    DoubleData **_mtCovariance;
     DoubleData **_mtAlphas;
 #endif
 

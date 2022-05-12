@@ -110,14 +110,10 @@ TrnLog::TrnLog(DataLog::FileFormat fileFormat, const char* logname,
         snprintf(mnembuf, sizeof(mnembuf), "trn.mtBeamNum_%02d", i);
         addField((_mtBeamNums[i]  = new ShortData(mnembuf)));
     }
-#ifdef WITH_MEAS_OUTPUTS
+
     _mtCrosstrack = new DoubleData *[max_beams];
     _mtAlongtrack = new DoubleData *[max_beams];
     _mtAltitudes = new DoubleData *[max_beams];
-    _mtAlphas = new DoubleData *[max_beams];
-
-    addField((_mtCovariance = new DoubleData("trn.mtCovariance")));
-
     for (int i = 0; i < _max_beams; i++)
     {
         snprintf(mnembuf, sizeof(mnembuf), "trn.mtCrosstrack_%02d", i);
@@ -126,6 +122,16 @@ TrnLog::TrnLog(DataLog::FileFormat fileFormat, const char* logname,
         addField((_mtAlongtrack[i]  = new DoubleData(mnembuf)));
         snprintf(mnembuf, sizeof(mnembuf), "trn.mtAltitudes_%02d", i);
         addField((_mtAltitudes[i]  = new DoubleData(mnembuf)));
+    }
+
+#ifdef WITH_MEAS_OUTPUTS
+    _mtAlphas = new DoubleData *[max_beams];
+
+    addField((_mtCovariance = new DoubleData("trn.mtCovariance")));
+
+    _mtAlphas = new DoubleData *[max_beams];
+    for (int i = 0; i < _max_beams; i++)
+    {
         snprintf(mnembuf, sizeof(mnembuf), "trn.mtAlphas_%02d", i);
         addField((_mtAlphas[i]  = new DoubleData(mnembuf)));
     }
@@ -184,25 +190,25 @@ TrnLog::~TrnLog()
         if (_mtRanges[i]) delete _mtRanges[i];
         if (_mtStatus[i]) delete _mtStatus[i];
         if (_mtBeamNums[i]) delete _mtBeamNums[i];
+        if (_mtCrosstrack[i]) delete _mtCrosstrack[i];
+        if (_mtAlongtrack[i]) delete _mtAlongtrack[i];
+        if (_mtAltitudes[i]) delete _mtAltitudes[i];
     }
 
     delete [] _mtRanges;
     delete [] _mtStatus;
     delete [] _mtBeamNums;
+    delete [] _mtCrosstrack;
+    delete [] _mtAlongtrack;
+    delete [] _mtAltitudes;
 
 #ifdef WITH_MEAS_OUTPUTS
     for (int i = 0; i < _max_beams; i++)
     {
         if (_mtCovariance[i]) delete _mtCovariance[i];
-        if (_mtCrosstrack[i]) delete _mtCrosstrack[i];
-        if (_mtAlongtrack[i]) delete _mtAlongtrack[i];
-        if (_mtAltitudes[i]) delete _mtAltitudes[i];
         if (_mtAlphas[i]) delete _mtAlphas[i];
     }
     delete [] _mtCovariance;
-    delete [] _mtCrosstrack;
-    delete [] _mtAlongtrack;
-    delete [] _mtAltitudes;
     delete [] _mtAlphas;
 #endif
 
@@ -255,6 +261,9 @@ void TrnLog::writeHeader()
     writeField(fileStream(), _mtBeamNums[0]);
     writeField(fileStream(), _mtStatus[0]);
     writeField(fileStream(), _mtRanges[0]);
+    writeField(fileStream(), _mtCrosstrack[0]);
+    writeField(fileStream(), _mtAlongtrack[0]);
+    writeField(fileStream(), _mtAltitudes[0]);
     fprintf(fileStream(), "%s\n", CommentChar);
 
     fprintf(fileStream(), "%s Record IDs are 32-bit (4 byte) printable ASCII sequences:\n", CommentChar);
@@ -426,12 +435,42 @@ void TrnLog::logMeas(measT* mt, TrnLog::TrnRecID recID)
                 _mtBeamNums[i]->setValue(i);
                 _mtBeamNums[i]->write(_logFile);
             }
-            _mtStatus[i]->setValue((mt->measStatus[i]? 1 : 0));
-            _mtStatus[i]->write(_logFile);
 
-            _mtRanges[i]->setValue(mt->ranges[i]);
-            _mtRanges[i]->write(_logFile);
-
+            if(NULL != mt->measStatus){
+                _mtStatus[i]->setValue((mt->measStatus[i]? 1 : 0));
+                _mtStatus[i]->write(_logFile);
+            }else{
+                _mtStatus[i]->setValue(0);
+                _mtStatus[i]->write(_logFile);
+           }
+            if(NULL != mt->ranges){
+                _mtRanges[i]->setValue(mt->ranges[i]);
+                _mtRanges[i]->write(_logFile);
+            }else{
+                _mtRanges[i]->setValue(0);
+                _mtRanges[i]->write(_logFile);
+            }
+            if(NULL != mt->crossTrack){
+                _mtCrosstrack[i]->setValue(mt->crossTrack[i]);
+                _mtCrosstrack[i]->write(_logFile);
+            }else{
+                _mtCrosstrack[i]->setValue(0);
+                _mtCrosstrack[i]->write(_logFile);
+            }
+            if(NULL != mt->alongTrack){
+                _mtAlongtrack[i]->setValue(mt->alongTrack[i]);
+                _mtAlongtrack[i]->write(_logFile);
+            }else{
+                _mtAlongtrack[i]->setValue(0);
+                _mtAlongtrack[i]->write(_logFile);
+            }
+            if(NULL != mt->altitudes){
+                _mtAltitudes[i]->setValue(mt->altitudes[i]);
+                _mtAltitudes[i]->write(_logFile);
+            }else{
+               _mtAltitudes[i]->setValue(0);
+               _mtAltitudes[i]->write(_logFile);
+            }
         }
         // Terminate this record
         _logFile->endRecord();

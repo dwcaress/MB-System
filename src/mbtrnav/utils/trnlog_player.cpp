@@ -272,6 +272,12 @@ public:
             return retval;
         }
 
+        if(skip_header() != 0)
+        {
+            fprintf(stderr, "%s:%d - data start not found in file[%s] [%d:%s]\n", __func__, __LINE__, src.c_str(), errno, strerror(errno));
+            return retval;
+        }
+
         TrnLog::TrnRecID rec_type = TrnLog::RT_INVALID;
         byte ibuf[2048]={0};
 
@@ -692,8 +698,11 @@ protected:
         os << std::setprecision(2) ;
         for(int i=0; i<mt.numMeas; i++){
             os << std::setw(wkey-4) <<  "[" << std::setw(3) << mt.beamNums[i] << "]";
-            os << std::setw(wval-9) << "[" << (mt.measStatus[i] ? 1 : 0) << ",";
-            os << std::fixed << std::setprecision(2) << setw(6) << mt.ranges[i] << "]\n";
+            os << std::setw(wval-9) << "[" << (mt.measStatus[i] ? 1 : 0) << ", ";
+            os << std::fixed << std::setprecision(2) << setw(6) << mt.ranges[i] << ", ";
+            os << mt.crossTrack[i] << ", ";
+            os << mt.alongTrack[i] << ", ";
+            os << mt.altitudes[i] << "]\n";
         }
     }
 
@@ -791,6 +800,85 @@ protected:
 
         }
 
+        return retval;
+    }
+
+    // finds and reads next record ID
+    int skip_header()
+    {
+        int retval = -1;
+        byte buf[8]={0}, *cur = buf;
+        typedef enum{
+            START,
+            B,E,G,I,N,
+            OK, EEOF, ERR
+        }state_t;
+        state_t stat = START;
+
+        while(stat != OK && stat != EEOF && stat != ERR)
+        {
+            if(fread(cur,1,1,mFile) == 1)
+            {
+                if(*cur == 'b'){
+                    if(stat==START){
+                        stat=B;
+                        cur++;
+                    } else {
+                        stat=START;
+                        cur=buf;
+                    }
+                } else if(*cur == 'e'){
+                    if(stat==B){
+                        stat=E;
+                        cur++;
+                    } else {
+                        stat=START;
+                        cur=buf;
+                    }
+                } else if(*cur == 'g'){
+                    if(stat==E){
+                        stat=G;
+                        cur++;
+                    } else {
+                        stat=START;
+                        cur=buf;
+                    }
+                } else if(*cur == 'i'){
+                    if(stat==G){
+                        stat=I;
+                        cur++;
+                    } else {
+                        stat=START;
+                        cur=buf;
+                    }
+                } else if(*cur == 'n'){
+                    if(stat==I){
+                        stat=OK;
+                        cur++;
+                    } else {
+                        stat=START;
+                        cur=buf;
+                    }
+                } else {
+                    stat=START;
+                    cur=buf;
+                }
+            } else {
+                if(feof(mFile)){
+                    stat = EEOF;
+                    TRN_NDPRINT(2, "end of data file\n");
+                } else {
+                    stat = ERR;
+                    fprintf(stderr,"%s:%d - ERR data file read failed [%d:%s]\n",__func__, __LINE__, errno, strerror(errno));
+                }
+            }
+        }
+
+        if(stat == OK)
+        {
+            TRN_NDPRINT(2,"%s:%d - stat OK %s\n", __func__, __LINE__, buf);
+            retval = 0;
+        }
         return retval;
     }
 
@@ -959,6 +1047,9 @@ protected:
                         dest->beamNums[i] = beams[i].beam_num;
                         dest->measStatus[i] = beams[i].status;
                         dest->ranges[i] = beams[i].range;
+                        dest->crossTrack[i] = beams[i].cross_track;
+                        dest->alongTrack[i] = beams[i].along_track;
+                        dest->altitudes[i] = beams[i].altitude;
                     }
                     *pdest = dest;
                     retval = 0;

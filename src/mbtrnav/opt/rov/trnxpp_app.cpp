@@ -2009,6 +2009,7 @@ int cb_update_mb1(void *pargs)
             {
                 transform_deltat(bi, ai, cfg->mb_geo(), snd);
             } else {
+                fprintf(stderr,"%s:%d ERR - unsupported input_type[%d] beam transformation invalid\n", __func__, __LINE__, bp->bath_input_type());
                 // !!! this placeholder will not produce valid output
                 int k=0;
                 for(it=beams.begin(); it!=beams.end(); it++,k++)
