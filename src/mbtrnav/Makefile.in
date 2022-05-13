@@ -231,7 +231,9 @@ libqnx_la_OBJECTS = $(am_libqnx_la_OBJECTS)
 libqnx_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CXXLD) $(AM_CXXFLAGS) \
 	$(CXXFLAGS) $(libqnx_la_LDFLAGS) $(LDFLAGS) -o $@
-libtnav_la_DEPENDENCIES = libgeolib.la libnewmat.la libqnx.la
+am__DEPENDENCIES_1 =
+libtnav_la_DEPENDENCIES = libgeolib.la libnewmat.la libqnx.la \
+	$(am__DEPENDENCIES_1)
 am_libtnav_la_OBJECTS = terrain-nav/TerrainNav.lo \
 	terrain-nav/TNavConfig.lo terrain-nav/TNavFilter.lo \
 	terrain-nav/TNavPointMassFilter.lo \
@@ -547,6 +549,7 @@ EGREP = @EGREP@
 ETAGS = @ETAGS@
 EXEEXT = @EXEEXT@
 FGREP = @FGREP@
+FILECMD = @FILECMD@
 GDAL_CONF = @GDAL_CONF@
 GMT_CONF = @GMT_CONF@
 GMT_PLUGINDIR = @GMT_PLUGINDIR@
@@ -724,9 +727,9 @@ top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 lib_LTLIBRARIES = libgeolib.la libnewmat.la libqnx.la libtnav.la libtrnw.la libnetif.la libmb1.la
 LIBMFRAME = $(top_builddir)/src/mbtrnframe/libmframe.la
-MFRAME_INC = -I${top_srcdir}/src/mbtrnframe/usr -I${top_srcdir}/src/mbtrnframe/mframe/src 
+MFRAME_INC = -I${top_srcdir}/src/mbtrnframe/usr -I${top_srcdir}/src/mbtrnframe/mframe/src
 include_HEADERS = 
-AM_CFLAGS = ${libgmt_CFLAGS} ${libnetcdf_CFLAGS}
+AM_CFLAGS = ${libnetcdf_CFLAGS}
 AM_CPPFLAGS = -g -O0 -I${top_srcdir}/src/mbtrnav/trnw \
 	-I${top_srcdir}/src/mbtrnav/utils \
 	-I${top_srcdir}/src/mbtrnav/terrain-nav \
@@ -737,7 +740,7 @@ AM_CPPFLAGS = -g -O0 -I${top_srcdir}/src/mbtrnav/trnw \
 	-I${top_srcdir}/src/mbtrnframe/usr \
 	-I${top_srcdir}/src/mbtrnframe/mframe/src -DHAVE_CONFIG_H \
 	-DWITH_TESTS -DWITH_MMDEBUG -D_GNU_SOURCE -DWITH_MST_MSTATS \
-	-DMST_STATS_EN
+	-DMST_STATS_EN ${libnetcdf_CPPFLAGS}
 libgeolib_la_LDFLAGS = -no-undefined -version-info 0:0:0
 libgeolib_la_SOURCES = gctp/source/gctp.c gctp/source/alberfor.c \
 	gctp/source/alberinv.c gctp/source/alconfor.c \
@@ -806,8 +809,8 @@ libtnav_la_SOURCES = terrain-nav/TerrainNav.cpp \
 	terrain-nav/TerrainMapDEM.cpp terrain-nav/OctreeSupport.cpp \
 	terrain-nav/Octree.cpp terrain-nav/OctreeNode.cpp \
 	terrain-nav/TRNUtils.cpp
-libtnav_la_LIBADD = libgeolib.la libnewmat.la libqnx.la -lm -lnetcdf \
-	-lpthread
+libtnav_la_LIBADD = libgeolib.la libnewmat.la libqnx.la \
+	${libnetcdf_LIBS} -lm -lpthread
 libtrnw_la_LDFLAGS = -no-undefined -version-info 0:0:0
 libtrnw_la_SOURCES = trnw/trnw.cpp trnw/mb1_msg.c trnw/trnif_msg.c
 libtrnw_la_LIBADD = libtnav.la libqnx.la libnewmat.la -lm -lpthread
@@ -820,7 +823,7 @@ libmb1_la_LIBADD =
 trn_server_SOURCES = utils/trn_server.cpp
 trn_server_LDADD = libtnav.la libqnx.la libnewmat.la libtnav.la libgeolib.la
 trn_replay_SOURCES = opt/dorado/Replay.cpp opt/dorado/trn_replay.cpp utils/TerrainNavClient.cpp
-trn_replay_LDADD = -ltnav  -lnewmat -lqnx -lnetcdf -lm -lpthread -lgeolib 
+trn_replay_LDADD = -ltnav  -lnewmat -lqnx -lnetcdf -lm -lpthread -lgeolib
 trnclient_test_SOURCES = utils/trnclient_test.cpp utils/TrnClient.cpp utils/TerrainNavClient.cpp
 trnclient_test_LDADD = libtnav.la
 mmcpub_SOURCES = trnw/mmcpub.c
