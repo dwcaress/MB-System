@@ -434,7 +434,7 @@ protected:
         // flag (0)
         // flag (0)
         // vx (0)
-        // xy (0)
+        // vy (0)
         // vz (0)
         // sounding valid flag
         // bottom lock valid flag
