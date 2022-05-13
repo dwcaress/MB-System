@@ -29,7 +29,8 @@
 #include <sys/types.h>
 #include <unistd.h>
 
-#define MB_NEED_SENSOR_TYPE
+// #define MB_NEED_SENSOR_TYPE
+
 #include "mb_define.h"
 #include "mb_format.h"
 #include "mb_io.h"
@@ -146,6 +147,10 @@ constexpr char usage_message[] =
     "\t--sensor-source-subbottom1\n"
     "\t--sensor-source-subbottom2\n"
     "\t--sensor-source-subbottom3\n"
+    "\t--sensor-source-camera\n"
+    "\t--sensor-source-camera1\n"
+    "\t--sensor-source-camera2\n"
+    "\t--sensor-source-camera3\n"
     "\t--sensor-source-position\n"
     "\t--sensor-source-position1\n"
     "\t--sensor-source-position2\n"
@@ -179,6 +184,10 @@ constexpr char usage_message[] =
     "\t--modify-sensor-subbottom1\n"
     "\t--modify-sensor-subbottom2\n"
     "\t--modify-sensor-subbottom3\n"
+    "\t--modify-sensor-camera\n"
+    "\t--modify-sensor-camera1\n"
+    "\t--modify-sensor-camera2\n"
+    "\t--modify-sensor-camera3\n"
     "\t--modify-sensor-position\n"
     "\t--modify-sensor-position1\n"
     "\t--modify-sensor-position2\n"
@@ -204,6 +213,42 @@ constexpr char usage_message[] =
     "\t--modify-offset-angles=ioff/azimuth/roll/pitch\n"
     "\t--modify-time-latency=value\n"
     "\t--modify-time-latency-model=file\n"
+    "\t--set-source-bathymetry\n"
+    "\t--set-source-bathymetry1\n"
+    "\t--set-source-bathymetry2\n"
+    "\t--set-source-bathymetry3\n"
+    "\t--set-source-backscatter\n"
+    "\t--set-source-backscatter1\n"
+    "\t--set-source-backscatter2\n"
+    "\t--set-source-backscatter3\n"
+    "\t--set-source-subbottom\n"
+    "\t--set-source-subbottom1\n"
+    "\t--set-source-subbottom2\n"
+    "\t--set-source-subbottom3\n"
+    "\t--set-source-camera\n"
+    "\t--set-source-camera1\n"
+    "\t--set-source-camera2\n"
+    "\t--set-source-camera3\n"
+    "\t--set-source-position\n"
+    "\t--set-source-position1\n"
+    "\t--set-source-position2\n"
+    "\t--set-source-position3\n"
+    "\t--set-source-depth\n"
+    "\t--set-source-depth1\n"
+    "\t--set-source-depth2\n"
+    "\t--set-source-depth3\n"
+    "\t--set-source-heading\n"
+    "\t--set-source-heading1\n"
+    "\t--set-source-heading2\n"
+    "\t--set-source-heading3\n"
+    "\t--set-source-rollpitch\n"
+    "\t--set-source-rollpitch1\n"
+    "\t--set-source-rollpitch2\n"
+    "\t--set-source-rollpitch3\n"
+    "\t--set-source-heave\n"
+    "\t--set-source-heave1\n"
+    "\t--set-source-heave2\n"
+    "\t--set-source-heave3\n"
     "\t]\n";
 
 
@@ -286,6 +331,10 @@ int main(int argc, char **argv) {
     option_modify_sensor_subbottom1,
     option_modify_sensor_subbottom2,
     option_modify_sensor_subbottom3,
+    option_modify_sensor_camera,
+    option_modify_sensor_camera1,
+    option_modify_sensor_camera2,
+    option_modify_sensor_camera3,
     option_modify_sensor_position,
     option_modify_sensor_position1,
     option_modify_sensor_position2,
@@ -363,6 +412,10 @@ int main(int argc, char **argv) {
     option_sensor_source_subbottom1,
     option_sensor_source_subbottom2,
     option_sensor_source_subbottom3,
+    option_sensor_source_camera,
+    option_sensor_source_camera1,
+    option_sensor_source_camera2,
+    option_sensor_source_camera3,
     option_sensor_source_position,
     option_sensor_source_position1,
     option_sensor_source_position2,
@@ -389,6 +442,42 @@ int main(int argc, char **argv) {
     option_modify_time_latency,
     option_modify_time_latency_model,
     option_end_sensor,
+    option_set_source_bathymetry,
+    option_set_source_bathymetry1,
+    option_set_source_bathymetry2,
+    option_set_source_bathymetry3,
+    option_set_source_backscatter,
+    option_set_source_backscatter1,
+    option_set_source_backscatter2,
+    option_set_source_backscatter3,
+    option_set_source_subbottom,
+    option_set_source_subbottom1,
+    option_set_source_subbottom2,
+    option_set_source_subbottom3,
+    option_set_source_camera,
+    option_set_source_camera1,
+    option_set_source_camera2,
+    option_set_source_camera3,
+    option_set_source_position,
+    option_set_source_position1,
+    option_set_source_position2,
+    option_set_source_position3,
+    option_set_source_depth,
+    option_set_source_depth1,
+    option_set_source_depth2,
+    option_set_source_depth3,
+    option_set_source_heading,
+    option_set_source_heading1,
+    option_set_source_heading2,
+    option_set_source_heading3,
+    option_set_source_rollpitch,
+    option_set_source_rollpitch1,
+    option_set_source_rollpitch2,
+    option_set_source_rollpitch3,
+    option_set_source_heave,
+    option_set_source_heave1,
+    option_set_source_heave2,
+    option_set_source_heave3,
   } option_id;
 
   static struct option options[] = {
@@ -443,6 +532,10 @@ int main(int argc, char **argv) {
     {"modify-sensor-subbottom1", no_argument, nullptr, 0},
     {"modify-sensor-subbottom2", no_argument, nullptr, 0},
     {"modify-sensor-subbottom3", no_argument, nullptr, 0},
+    {"modify-sensor-camera", no_argument, nullptr, 0},
+    {"modify-sensor-camera1", no_argument, nullptr, 0},
+    {"modify-sensor-camera2", no_argument, nullptr, 0},
+    {"modify-sensor-camera3", no_argument, nullptr, 0},
     {"modify-sensor-position", no_argument, nullptr, 0},
     {"modify-sensor-position1", no_argument, nullptr, 0},
     {"modify-sensor-position2", no_argument, nullptr, 0},
@@ -520,6 +613,10 @@ int main(int argc, char **argv) {
     {"sensor-source-subbottom1", no_argument, nullptr, 0},
     {"sensor-source-subbottom2", no_argument, nullptr, 0},
     {"sensor-source-subbottom3", no_argument, nullptr, 0},
+    {"sensor-source-camera", no_argument, nullptr, 0},
+    {"sensor-source-camera", no_argument, nullptr, 0},
+    {"sensor-source-camera", no_argument, nullptr, 0},
+    {"sensor-source-camera", no_argument, nullptr, 0},
     {"sensor-source-position", no_argument, nullptr, 0},
     {"sensor-source-position1", no_argument, nullptr, 0},
     {"sensor-source-position2", no_argument, nullptr, 0},
@@ -546,6 +643,42 @@ int main(int argc, char **argv) {
     {"modify-time-latency", required_argument, nullptr, 0},
     {"modify-time-latency-model", required_argument, nullptr, 0},
     {"end-sensor", no_argument, nullptr, 0},
+    {"set-source-bathymetry", required_argument, nullptr, 0},
+    {"set-source-bathymetry1", required_argument, nullptr, 0},
+    {"set-source-bathymetry2", required_argument, nullptr, 0},
+    {"set-source-bathymetry3", required_argument, nullptr, 0},
+    {"set-source-backscatter", required_argument, nullptr, 0},
+    {"set-source-backscatter1", required_argument, nullptr, 0},
+    {"set-source-backscatter2", required_argument, nullptr, 0},
+    {"set-source-backscatter3", required_argument, nullptr, 0},
+    {"set-source-subbottom", required_argument, nullptr, 0},
+    {"set-source-subbottom1", required_argument, nullptr, 0},
+    {"set-source-subbottom2", required_argument, nullptr, 0},
+    {"set-source-subbottom3", required_argument, nullptr, 0},
+    {"set-source-camera", required_argument, nullptr, 0},
+    {"set-source-camera", required_argument, nullptr, 0},
+    {"set-source-camera", required_argument, nullptr, 0},
+    {"set-source-camera", required_argument, nullptr, 0},
+    {"set-source-position", required_argument, nullptr, 0},
+    {"set-source-position1", required_argument, nullptr, 0},
+    {"set-source-position2", required_argument, nullptr, 0},
+    {"set-source-position3", required_argument, nullptr, 0},
+    {"set-source-depth", required_argument, nullptr, 0},
+    {"set-source-depth1", required_argument, nullptr, 0},
+    {"set-source-depth2", required_argument, nullptr, 0},
+    {"set-source-depth3", required_argument, nullptr, 0},
+    {"set-source-heading", required_argument, nullptr, 0},
+    {"set-source-heading1", required_argument, nullptr, 0},
+    {"set-source-heading2", required_argument, nullptr, 0},
+    {"set-source-heading3", required_argument, nullptr, 0},
+    {"set-source-rollpitch", required_argument, nullptr, 0},
+    {"set-source-rollpitch1", required_argument, nullptr, 0},
+    {"set-source-rollpitch2", required_argument, nullptr, 0},
+    {"set-source-rollpitch3", required_argument, nullptr, 0},
+    {"set-source-heave", required_argument, nullptr, 0},
+    {"set-source-heave1", required_argument, nullptr, 0},
+    {"set-source-heave2", required_argument, nullptr, 0},
+    {"set-source-heave3", required_argument, nullptr, 0},
     {nullptr, 0, nullptr, 0}};
 
   /* MBIO read control parameters */
@@ -659,6 +792,10 @@ int main(int argc, char **argv) {
             fprintf(stderr, "    platform->source_subbottom1:           %d\n", platform->source_subbottom1);
             fprintf(stderr, "    platform->source_subbottom2:           %d\n", platform->source_subbottom2);
             fprintf(stderr, "    platform->source_subbottom3:           %d\n", platform->source_subbottom3);
+            fprintf(stderr, "    platform->source_camera:               %d\n", platform->source_camera);
+            fprintf(stderr, "    platform->source_camera1:              %d\n", platform->source_camera1);
+            fprintf(stderr, "    platform->source_camera2:              %d\n", platform->source_camera2);
+            fprintf(stderr, "    platform->source_camera3:              %d\n", platform->source_camera3);
             fprintf(stderr, "    platform->source_position:             %d\n", platform->source_position);
             fprintf(stderr, "    platform->source_position1:            %d\n", platform->source_position1);
             fprintf(stderr, "    platform->source_position2:            %d\n", platform->source_position2);
@@ -833,6 +970,10 @@ int main(int argc, char **argv) {
             fprintf(stderr, "    platform->source_subbottom1:           %d\n", platform->source_subbottom1);
             fprintf(stderr, "    platform->source_subbottom2:           %d\n", platform->source_subbottom2);
             fprintf(stderr, "    platform->source_subbottom3:           %d\n", platform->source_subbottom3);
+            fprintf(stderr, "    platform->source_camera:               %d\n", platform->source_camera);
+            fprintf(stderr, "    platform->source_camera1:              %d\n", platform->source_camera1);
+            fprintf(stderr, "    platform->source_camera2:              %d\n", platform->source_camera2);
+            fprintf(stderr, "    platform->source_camera3:              %d\n", platform->source_camera3);
             fprintf(stderr, "    platform->source_position:             %d\n", platform->source_position);
             fprintf(stderr, "    platform->source_position1:            %d\n", platform->source_position1);
             fprintf(stderr, "    platform->source_position2:            %d\n", platform->source_position2);
@@ -1512,6 +1653,22 @@ int main(int argc, char **argv) {
           platform->source_subbottom3 = sensor_id;
           break;
 
+        case option_sensor_source_camera:
+        platform->source_camera = sensor_id;
+          break;
+
+        case option_sensor_source_camera1:
+        platform->source_camera1 = sensor_id;
+          break;
+
+        case option_sensor_source_camera2:
+          platform->source_camera2 = sensor_id;
+          break;
+
+        case option_sensor_source_camera3:
+          platform->source_camera3 = sensor_id;
+          break;
+
         case option_sensor_source_position:
           platform->source_position = sensor_id;
           break;
@@ -1688,6 +1845,30 @@ int main(int argc, char **argv) {
 
         case option_modify_sensor_subbottom3:
           sensor_id = platform->source_subbottom3;
+          sensor_mode = SENSOR_MODIFY;
+          active_sensor = &platform->sensors[sensor_id];
+          break;
+
+        case option_modify_sensor_camera:
+          sensor_id = platform->source_camera;
+          sensor_mode = SENSOR_MODIFY;
+          active_sensor = &platform->sensors[sensor_id];
+          break;
+
+        case option_modify_sensor_camera1:
+          sensor_id = platform->source_camera1;
+          sensor_mode = SENSOR_MODIFY;
+          active_sensor = &platform->sensors[sensor_id];
+          break;
+
+        case option_modify_sensor_camera2:
+          sensor_id = platform->source_camera2;
+          sensor_mode = SENSOR_MODIFY;
+          active_sensor = &platform->sensors[sensor_id];
+          break;
+
+        case option_modify_sensor_camera3:
+          sensor_id = platform->source_camera3;
           sensor_mode = SENSOR_MODIFY;
           active_sensor = &platform->sensors[sensor_id];
           break;
@@ -1910,6 +2091,223 @@ int main(int argc, char **argv) {
             fclose(tfp);
           }
           break;
+
+        case option_set_source_bathymetry:
+          nscan = sscanf(optarg, "%d", &sensor_id);
+          if (sensor_id >= -1 && sensor_id < platform->num_sensors)
+            platform->source_bathymetry = sensor_id;
+          break;
+
+        case option_set_source_bathymetry1:
+          nscan = sscanf(optarg, "%d", &sensor_id);
+          if (sensor_id >= -1 && sensor_id < platform->num_sensors)
+            platform->source_bathymetry1 = sensor_id;
+          break;
+
+        case option_set_source_bathymetry2:
+          nscan = sscanf(optarg, "%d", &sensor_id);
+          if (sensor_id >= -1 && sensor_id < platform->num_sensors)
+            platform->source_bathymetry2 = sensor_id;
+          break;
+
+        case option_set_source_bathymetry3:
+          nscan = sscanf(optarg, "%d", &sensor_id);
+          if (sensor_id >= -1 && sensor_id < platform->num_sensors)
+            platform->source_bathymetry3 = sensor_id;
+          break;
+
+        case option_set_source_backscatter:
+          nscan = sscanf(optarg, "%d", &sensor_id);
+          if (sensor_id >= -1 && sensor_id < platform->num_sensors)
+            platform->source_backscatter = sensor_id;
+          break;
+
+        case option_set_source_backscatter1:
+          nscan = sscanf(optarg, "%d", &sensor_id);
+          if (sensor_id >= -1 && sensor_id < platform->num_sensors)
+            platform->source_backscatter1 = sensor_id;
+          break;
+
+        case option_set_source_backscatter2:
+          nscan = sscanf(optarg, "%d", &sensor_id);
+          if (sensor_id >= -1 && sensor_id < platform->num_sensors)
+            platform->source_backscatter2 = sensor_id;
+          break;
+
+        case option_set_source_backscatter3:
+          nscan = sscanf(optarg, "%d", &sensor_id);
+          if (sensor_id >= -1 && sensor_id < platform->num_sensors)
+            platform->source_backscatter3 = sensor_id;
+          break;
+
+        case option_set_source_subbottom:
+        nscan = sscanf(optarg, "%d", &sensor_id);
+        if (sensor_id >= -1 && sensor_id < platform->num_sensors)
+          platform->source_subbottom = sensor_id;
+          break;
+
+        case option_set_source_subbottom1:
+        nscan = sscanf(optarg, "%d", &sensor_id);
+        if (sensor_id >= -1 && sensor_id < platform->num_sensors)
+          platform->source_subbottom1 = sensor_id;
+          break;
+
+        case option_set_source_subbottom2:
+          nscan = sscanf(optarg, "%d", &sensor_id);
+          if (sensor_id >= -1 && sensor_id < platform->num_sensors)
+            platform->source_subbottom2 = sensor_id;
+          break;
+
+        case option_set_source_subbottom3:
+          nscan = sscanf(optarg, "%d", &sensor_id);
+          if (sensor_id >= -1 && sensor_id < platform->num_sensors)
+            platform->source_subbottom3 = sensor_id;
+          break;
+
+        case option_set_source_camera:
+        nscan = sscanf(optarg, "%d", &sensor_id);
+        if (sensor_id >= -1 && sensor_id < platform->num_sensors)
+          platform->source_camera = sensor_id;
+          break;
+
+        case option_set_source_camera1:
+        nscan = sscanf(optarg, "%d", &sensor_id);
+        if (sensor_id >= -1 && sensor_id < platform->num_sensors)
+          platform->source_camera1 = sensor_id;
+          break;
+
+        case option_set_source_camera2:
+          nscan = sscanf(optarg, "%d", &sensor_id);
+          if (sensor_id >= -1 && sensor_id < platform->num_sensors)
+            platform->source_camera2 = sensor_id;
+          break;
+
+        case option_set_source_camera3:
+          nscan = sscanf(optarg, "%d", &sensor_id);
+          if (sensor_id >= -1 && sensor_id < platform->num_sensors)
+            platform->source_camera3 = sensor_id;
+          break;
+
+        case option_set_source_position:
+          nscan = sscanf(optarg, "%d", &sensor_id);
+          if (sensor_id >= -1 && sensor_id < platform->num_sensors)
+            platform->source_position = sensor_id;
+          break;
+
+        case option_set_source_position1:
+          nscan = sscanf(optarg, "%d", &sensor_id);
+          if (sensor_id >= -1 && sensor_id < platform->num_sensors)
+            platform->source_position1 = sensor_id;
+          break;
+
+        case option_set_source_position2:
+          nscan = sscanf(optarg, "%d", &sensor_id);
+          if (sensor_id >= -1 && sensor_id < platform->num_sensors)
+            platform->source_position2 = sensor_id;
+          break;
+
+        case option_set_source_position3:
+          nscan = sscanf(optarg, "%d", &sensor_id);
+          if (sensor_id >= -1 && sensor_id < platform->num_sensors)
+            platform->source_position3 = sensor_id;
+          break;
+
+        case option_set_source_depth:
+          nscan = sscanf(optarg, "%d", &sensor_id);
+          if (sensor_id >= -1 && sensor_id < platform->num_sensors)
+            platform->source_depth = sensor_id;
+          break;
+
+        case option_set_source_depth1:
+          nscan = sscanf(optarg, "%d", &sensor_id);
+          if (sensor_id >= -1 && sensor_id < platform->num_sensors)
+            platform->source_depth1 = sensor_id;
+          break;
+
+        case option_set_source_depth2:
+          nscan = sscanf(optarg, "%d", &sensor_id);
+          if (sensor_id >= -1 && sensor_id < platform->num_sensors)
+            platform->source_depth2 = sensor_id;
+          break;
+
+        case option_set_source_depth3:
+          nscan = sscanf(optarg, "%d", &sensor_id);
+          if (sensor_id >= -1 && sensor_id < platform->num_sensors)
+            platform->source_depth3 = sensor_id;
+          break;
+
+        case option_set_source_heading:
+          nscan = sscanf(optarg, "%d", &sensor_id);
+          if (sensor_id >= -1 && sensor_id < platform->num_sensors)
+            platform->source_heading = sensor_id;
+          break;
+
+        case option_set_source_heading1:
+          nscan = sscanf(optarg, "%d", &sensor_id);
+          if (sensor_id >= -1 && sensor_id < platform->num_sensors)
+            platform->source_heading1 = sensor_id;
+          break;
+
+        case option_set_source_heading2:
+          nscan = sscanf(optarg, "%d", &sensor_id);
+          if (sensor_id >= -1 && sensor_id < platform->num_sensors)
+            platform->source_heading2 = sensor_id;
+          break;
+
+        case option_set_source_heading3:
+          nscan = sscanf(optarg, "%d", &sensor_id);
+          if (sensor_id >= -1 && sensor_id < platform->num_sensors)
+            platform->source_heading3 = sensor_id;
+          break;
+
+        case option_set_source_rollpitch:
+          nscan = sscanf(optarg, "%d", &sensor_id);
+          if (sensor_id >= -1 && sensor_id < platform->num_sensors)
+            platform->source_rollpitch = sensor_id;
+          break;
+
+        case option_set_source_rollpitch1:
+          nscan = sscanf(optarg, "%d", &sensor_id);
+          if (sensor_id >= -1 && sensor_id < platform->num_sensors)
+            platform->source_rollpitch1 = sensor_id;
+          break;
+
+        case option_set_source_rollpitch2:
+          nscan = sscanf(optarg, "%d", &sensor_id);
+          if (sensor_id >= -1 && sensor_id < platform->num_sensors)
+            platform->source_rollpitch2 = sensor_id;
+          break;
+
+        case option_set_source_rollpitch3:
+          nscan = sscanf(optarg, "%d", &sensor_id);
+          if (sensor_id >= -1 && sensor_id < platform->num_sensors)
+            platform->source_rollpitch3 = sensor_id;
+          break;
+
+        case option_set_source_heave:
+          nscan = sscanf(optarg, "%d", &sensor_id);
+          if (sensor_id >= -1 && sensor_id < platform->num_sensors)
+            platform->source_heave = sensor_id;
+          break;
+
+        case option_set_source_heave1:
+          nscan = sscanf(optarg, "%d", &sensor_id);
+          if (sensor_id >= -1 && sensor_id < platform->num_sensors)
+            platform->source_heave1 = sensor_id;
+          break;
+
+        case option_set_source_heave2:
+          nscan = sscanf(optarg, "%d", &sensor_id);
+          if (sensor_id >= -1 && sensor_id < platform->num_sensors)
+            platform->source_heave2 = sensor_id;
+          break;
+
+        case option_set_source_heave3:
+          nscan = sscanf(optarg, "%d", &sensor_id);
+          if (sensor_id >= -1 && sensor_id < platform->num_sensors)
+            platform->source_heave3 = sensor_id;
+          break;
+
       }
     }
 
@@ -1972,6 +2370,10 @@ int main(int argc, char **argv) {
     fprintf(stderr, "    platform->source_subbottom1:           %d\n", platform->source_subbottom1);
     fprintf(stderr, "    platform->source_subbottom2:           %d\n", platform->source_subbottom2);
     fprintf(stderr, "    platform->source_subbottom3:           %d\n", platform->source_subbottom3);
+    fprintf(stderr, "    platform->source_camera:               %d\n", platform->source_camera);
+    fprintf(stderr, "    platform->source_camera1:              %d\n", platform->source_camera1);
+    fprintf(stderr, "    platform->source_camera2:              %d\n", platform->source_camera2);
+    fprintf(stderr, "    platform->source_camera3:              %d\n", platform->source_camera3);
     fprintf(stderr, "    platform->source_position:             %d\n", platform->source_position);
     fprintf(stderr, "    platform->source_position1:            %d\n", platform->source_position1);
     fprintf(stderr, "    platform->source_position2:            %d\n", platform->source_position2);

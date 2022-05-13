@@ -67,26 +67,30 @@ const char *mb_platform_type(mb_platform_enum platform);
 #define MB_PLATFORM_SOURCE_SUBBOTTOM1 10
 #define MB_PLATFORM_SOURCE_SUBBOTTOM2 11
 #define MB_PLATFORM_SOURCE_SUBBOTTOM3 12
-#define MB_PLATFORM_SOURCE_POSITION 13
-#define MB_PLATFORM_SOURCE_POSITION1 14
-#define MB_PLATFORM_SOURCE_POSITION2 15
-#define MB_PLATFORM_SOURCE_POSITION3 16
-#define MB_PLATFORM_SOURCE_DEPTH 17
-#define MB_PLATFORM_SOURCE_DEPTH1 18
-#define MB_PLATFORM_SOURCE_DEPTH2 19
-#define MB_PLATFORM_SOURCE_DEPTH3 20
-#define MB_PLATFORM_SOURCE_HEADING 21
-#define MB_PLATFORM_SOURCE_HEADING1 22
-#define MB_PLATFORM_SOURCE_HEADING2 23
-#define MB_PLATFORM_SOURCE_HEADING3 24
-#define MB_PLATFORM_SOURCE_ROLLPITCH 25
-#define MB_PLATFORM_SOURCE_ROLLPITCH1 26
-#define MB_PLATFORM_SOURCE_ROLLPITCH2 27
-#define MB_PLATFORM_SOURCE_ROLLPITCH3 28
-#define MB_PLATFORM_SOURCE_HEAVE 29
-#define MB_PLATFORM_SOURCE_HEAVE1 30
-#define MB_PLATFORM_SOURCE_HEAVE2 31
-#define MB_PLATFORM_SOURCE_HEAVE3 32
+#define MB_PLATFORM_SOURCE_CAMERA 13
+#define MB_PLATFORM_SOURCE_CAMERA1 14
+#define MB_PLATFORM_SOURCE_CAMERA2 15
+#define MB_PLATFORM_SOURCE_CAMERA3 16
+#define MB_PLATFORM_SOURCE_POSITION 17
+#define MB_PLATFORM_SOURCE_POSITION1 18
+#define MB_PLATFORM_SOURCE_POSITION2 19
+#define MB_PLATFORM_SOURCE_POSITION3 20
+#define MB_PLATFORM_SOURCE_DEPTH 21
+#define MB_PLATFORM_SOURCE_DEPTH1 22
+#define MB_PLATFORM_SOURCE_DEPTH2 23
+#define MB_PLATFORM_SOURCE_DEPTH3 25
+#define MB_PLATFORM_SOURCE_HEADING 26
+#define MB_PLATFORM_SOURCE_HEADING1 27
+#define MB_PLATFORM_SOURCE_HEADING2 28
+#define MB_PLATFORM_SOURCE_HEADING3 29
+#define MB_PLATFORM_SOURCE_ROLLPITCH 30
+#define MB_PLATFORM_SOURCE_ROLLPITCH1 31
+#define MB_PLATFORM_SOURCE_ROLLPITCH2 32
+#define MB_PLATFORM_SOURCE_ROLLPITCH3 33
+#define MB_PLATFORM_SOURCE_HEAVE 34
+#define MB_PLATFORM_SOURCE_HEAVE1 35
+#define MB_PLATFORM_SOURCE_HEAVE2 36
+#define MB_PLATFORM_SOURCE_HEAVE3 37
 
 /* survey sensor time latency defines */
 #define MB_SENSOR_TIME_LATENCY_NONE 0
@@ -122,6 +126,7 @@ const char *mb_platform_type(mb_platform_enum platform);
 #define MB_SENSOR_TYPE_PRESSURE 111
 #define MB_SENSOR_TYPE_SOUNDSPEED 120
 
+/* These arrays are defined in mb_platform.c and extern elsewhere */
 #ifdef MB_NEED_SENSOR_TYPE
 const int mb_sensor_type_id[] = {
     MB_SENSOR_TYPE_NONE,                    // 0
@@ -169,6 +174,12 @@ const char *mb_sensor_type_string[] = {"Unknown sensor type",
                                         "CTD",
                                         "Pressure",
                                         "Soundspeed"};
+
+#else
+
+extern const int mb_sensor_type_id[];
+extern const char *mb_sensor_type_string[];
+
 #endif  // MB_NEED_SENSOR_TYPE
 
 /* survey platform sensor capability bitmask defines */
@@ -362,6 +373,10 @@ struct mb_platform_struct {
   int source_subbottom1;
   int source_subbottom2;
   int source_subbottom3;
+  int source_camera;
+  int source_camera1;
+  int source_camera2;
+  int source_camera3;
   int source_position;
   int source_position1;
   int source_position2;

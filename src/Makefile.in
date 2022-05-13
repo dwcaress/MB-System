@@ -159,7 +159,7 @@ am__define_uniq_tagged_files = \
 DIST_SUBDIRS = gsf surf bsio mbtrn mbtrnav mbio mbaux utilities \
 	deprecated mbtrnutils gmt otps macros share man html ps mbedit \
 	mbnavedit mbvelocitytool mbview mbgrdviz mbeditviz mbnavadjust \
-	photo qt-mbgrdviz-1 qt-mbgrdviz-2 qt-mbgui qt-mbgrdviz-3
+	photo qt-mbgrdviz qt-mbgrdviz-2 qt-guilib qt-mbgrdviz-3
 ACLOCAL = @ACLOCAL@
 AMTAR = @AMTAR@
 AM_DEFAULT_VERBOSITY = @AM_DEFAULT_VERBOSITY@
@@ -375,7 +375,7 @@ top_srcdir = @top_srcdir@
 @BUILD_MBTNAV_TRUE@XBUILD_SUB_MBTNAV = mbtrnav
 @BUILD_MBTRNUTILS_TRUE@XBUILD_SUB_MBTRNBIN = mbtrnutils
 @BUILD_OPENCVTOOLS_TRUE@XBUILD_SUB_OPENCVTOOLS = photo
-@BUILD_QTTOOLS_TRUE@XBUILD_SUB_QTTOOLS = qt-mbgrdviz-1 qt-mbgrdviz-2 qt-mbgui qt-mbgrdviz-3
+@BUILD_QTTOOLS_TRUE@XBUILD_SUB_QTTOOLS = qt-mbgrdviz qt-mbgrdviz-2 qt-guilib qt-mbgrdviz-3
 SUBDIRS = $(am__append_1) surf bsio $(XBUILD_SUB_MBTRN) \
 	$(XBUILD_SUB_MBTNAV) mbio mbaux utilities deprecated \
 	$(XBUILD_SUB_MBTRNBIN) gmt otps macros share man html ps \

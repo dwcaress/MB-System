@@ -30,6 +30,8 @@ target_link_libraries(mbedit
                       mbbsio
                       mbsapi
                       mbgsf
+		      r7kr
+		      mframe
 		      ${GMT_LIBRARIES}
 		      ${NETCDF_LIBRARIES}
 		      ${MOTIF_LIBRARIES}
@@ -41,4 +43,5 @@ target_link_libraries(mbedit
                       pthread)
                            
                            
-
+install(TARGETS mbedit
+	DESTINATION ${CMAKE_INSTALL_BINDIR})

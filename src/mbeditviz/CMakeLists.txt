@@ -29,6 +29,8 @@ target_link_libraries(mbeditviz
                       mbbsio
                       mbsapi
                       mbgsf
+		      r7kr
+		      mframe
 		      ${GMT_LIBRARIES}
 		      ${NETCDF_LIBRARIES}
 		      ${MOTIF_LIBRARIES}
@@ -42,3 +44,5 @@ target_link_libraries(mbeditviz
                            
                            
 
+install(TARGETS mbeditviz
+	DESTINATION ${CMAKE_INSTALL_BINDIR})

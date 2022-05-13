@@ -71,6 +71,9 @@ struct mbpm_process_struct {
     mb_path imageFile;
     int image_count;
     int image_camera;
+    double image_quality;
+    double image_gain;
+    double image_exposure;
     double time_d;
     double camera_navlon;
     double camera_navlat;
@@ -80,7 +83,9 @@ struct mbpm_process_struct {
     double camera_pitch;
 
     // Image correction table
-    Mat corr_table[2];
+    Mat corr_table_y[2];
+    Mat corr_table_cr[2];
+    Mat corr_table_cb[2];
     Mat corr_table_count[2];
 };
 
@@ -121,6 +126,10 @@ struct mbpm_control_struct {
 
     // Pixel trim
     unsigned int trimPixels;
+
+    // Image correction
+    double reference_gain;
+    double reference_exposure;
 
     // Image correction table
     int ncorr_x;
@@ -202,17 +211,42 @@ void process_image(int verbose, struct mbpm_process_struct *process,
          */
         cvtColor(imageUndistort, imageUndistortYCrCb, COLOR_BGR2YCrCb);
         Scalar avgPixelIntensity = mean(imageUndistortYCrCb);
-        double avgImageIntensityCorrection = 1.0;
-        double brightnessCorrection = 70.0 / avgPixelIntensity.val[0];
+
+        /* get correction for embedded camera gain */
+        double imageIntensityCorrection = 1.0;
+        if (control->reference_gain > 0.0)
+            imageIntensityCorrection *= pow(10.0, (control->reference_gain - process->image_gain) / 20.0);
+
+        /* get correction for embedded camera exposure time */
+        if (process->image_exposure > 0.0 && control->reference_exposure > 0.0) {
+            //imageIntensityCorrection *= control->reference_exposure / process->image_exposure;
+
+            if (process->image_exposure >= 7999.0)
+                imageIntensityCorrection *= 1.0;
+            else if (process->image_exposure >= 3999.00)
+                imageIntensityCorrection *= 1.14;
+            else if (process->image_exposure >= 1999.00)
+                imageIntensityCorrection *= 1.4;
+            else if (process->image_exposure >= 999.00)
+                imageIntensityCorrection *= 2.0;
+            if (control->reference_exposure >= 7999.0)
+                imageIntensityCorrection /= 1.0;
+            else if (control->reference_exposure >= 3999.00)
+                imageIntensityCorrection /= 1.14;
+            else if (control->reference_exposure >= 1999.00)
+                imageIntensityCorrection /= 1.4;
+            else if (control->reference_exposure >= 999.00)
+                imageIntensityCorrection /= 2.0;
+        }
 
         /* Print information for image to be processed */
         int time_i[7];
         mb_get_date(verbose, process->time_d, time_i);
-        fprintf(stderr,"%4d Camera:%d %s %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d LLZ: %.10f %.10f %8.3f HRP: %6.2f %6.2f %6.2f Amp:%.3f\n",
+        fprintf(stderr,"%4d Camera:%d %s %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d LLZ: %.8f %.8f %8.3f HRP: %6.2f %5.2f %5.2f A:%.3f Q:%.2f\n",
                 process->image_count, process->image_camera, process->imageFile,
                 time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6],
                 process->camera_navlon, process->camera_navlat, process->camera_sensordepth,
-                process->camera_heading, process->camera_roll, process->camera_pitch, avgPixelIntensity.val[0]);
+                process->camera_heading, process->camera_roll, process->camera_pitch, avgPixelIntensity.val[0], process->image_quality);
 
         /* get unit vector for direction camera is pointing */
 
@@ -269,8 +303,10 @@ void process_image(int verbose, struct mbpm_process_struct *process,
                 double dtheta;
                 double standoff = 0.0;
                 double lon, lat, topo;
-                float bgr_intensity;
-                float ycrcb_intensity;
+                //float bgr_intensity;
+                float ycrcb_y;
+                float ycrcb_cr;
+                float ycrcb_cb;
 
                 /* Deal with problem of black pixels at the margins of the
                     undistorted images. If the user has not specified a trim
@@ -299,14 +335,17 @@ void process_image(int verbose, struct mbpm_process_struct *process,
                 /* calculate intensity for this pixel
                     - access the pixel value with Vec3b */
                 if (use_pixel) {
-                    bgr_intensity = ((float)imageUndistort.at<Vec3b>(j,i)[0]
-                             + (float)imageUndistort.at<Vec3b>(j,i)[1]
-                             + (float)imageUndistort.at<Vec3b>(j,i)[2]) / 3.0;
-                    ycrcb_intensity = (float)imageUndistortYCrCb.at<Vec3b>(j,i)[0];
-//fprintf(stderr,"i:%d j:%d intensity: bgr:%f hsv:%f\n",i,j,bgr_intensity,ycrcb_intensity);
+                    //bgr_intensity = ((float)imageUndistort.at<Vec3b>(j,i)[0]
+                    //         + (float)imageUndistort.at<Vec3b>(j,i)[1]
+                    //         + (float)imageUndistort.at<Vec3b>(j,i)[2]) / 3.0;
+                    ycrcb_y = (float)(imageIntensityCorrection * imageUndistortYCrCb.at<Vec3b>(j,i)[0]);
+                    ycrcb_cr = (float)(imageUndistortYCrCb.at<Vec3b>(j,i)[1]);
+                    ycrcb_cb = (float)(imageUndistortYCrCb.at<Vec3b>(j,i)[2]);
+//fprintf(stderr,"i:%d j:%d corr:%f  YCrCb intensity:%f\n",
+// i, j, imageIntensityCorrection, ycrcb_y);
 
                     /* only use nonzero intensities */
-                    if (ycrcb_intensity <= 0.0) {
+                    if (ycrcb_y <= 0.0) {
                         use_pixel = false;
                     }
                 }
@@ -439,7 +478,9 @@ void process_image(int verbose, struct mbpm_process_struct *process,
                         jbin_y = MIN(MAX(jbin_y, 0), control->ncorr_y - 1);
                         int kbin_z = (int)((standoff + 0.5 * control->bin_dz - control->corr_zmin) / control->bin_dz);
                         kbin_z = MIN(MAX(kbin_z, 0), control->ncorr_z - 1);
-                        process->corr_table[process->image_camera].at<float>(ibin_x, jbin_y, kbin_z) += ycrcb_intensity;
+                        process->corr_table_y[process->image_camera].at<float>(ibin_x, jbin_y, kbin_z) += ycrcb_y;
+                        process->corr_table_cr[process->image_camera].at<float>(ibin_x, jbin_y, kbin_z) += ycrcb_cr;
+                        process->corr_table_cb[process->image_camera].at<float>(ibin_x, jbin_y, kbin_z) += ycrcb_cb;
                         process->corr_table_count[process->image_camera].at<int>(ibin_x, jbin_y, kbin_z) += 1;
                     }
                 }
@@ -469,6 +510,8 @@ int main(int argc, char** argv)
                             "\t--fov-fudgefactor=factor\n"
                             "\t--projection=projection_pars\n"
                             "\t--trim=trim_pixels\n"
+                            "\t--reference-gain=gain\n"
+                            "\t--reference-exposure=exposure\n"
                             "\t--platform-file=platform.plf\n"
                             "\t--camera-sensor=camera_sensor_id\n"
                             "\t--nav-sensor=nav_sensor_id\n"
@@ -479,10 +522,12 @@ int main(int argc, char** argv)
                             "\t--use-left-camera\n"
                             "\t--use-right-camera\n"
                             "\t--use-both-cameras\n"
-                            "\t--image-quality-threshold=value\n"
                             "\t--calibration-file=stereocalibration.yaml\n"
                             "\t--navigation-file=file\n"
                             "\t--tide-file=file\n"
+                            "\t--image-quality-file=file\n"
+                            "\t--image-quality-threshold=value\n"
+                            "\t--image-quality-filter-length=value\n"
                             "\t--topography-grid=file";
     extern char *optarg;
     int    option_index;
@@ -504,7 +549,11 @@ int main(int argc, char** argv)
     mb_path    imageRightFile;
     mb_path    imageFile;
     double    left_time_d;
-    double    time_diff;
+    double    right_time_d;
+    double    left_gain;
+    double    right_gain;
+    double    left_exposure;
+    double    right_exposure;
     double    time_d;
     int       time_i[7];
     double    navlon;
@@ -544,7 +593,6 @@ int main(int argc, char** argv)
     int imagelist_camera;
     int image_camera = MBPM_CAMERA_LEFT;
     int use_camera_mode = MBPM_USE_STEREO;
-    double imageQualityThreshold = 0.0;
     mb_path StereoCameraCalibrationFile;
     control.calibration_set = false;
     control.SensorWidthMm = 8.789;
@@ -555,9 +603,11 @@ int main(int argc, char** argv)
     bool undistort_initialized = false;
 
     /* Input image correction */
-    control.ncorr_x = 21;
-    control.ncorr_y = 21;
-    control.ncorr_z = 81;
+    control.reference_gain = 14.0;
+    control.reference_exposure = 8000.0;
+    control.ncorr_x = 11;
+    control.ncorr_y = 11;
+    control.ncorr_z = 41;
     control.corr_xmin = 0.0;
     control.corr_xmax = 0.0;
     control.corr_ymin = 0.0;
@@ -594,6 +644,17 @@ int main(int argc, char** argv)
     int ntide = 0;
     double *ttime = NULL;
     double *ttide = NULL;
+
+    /* Input quality variables */
+    bool use_imagequality = false;
+    double imageQualityThreshold = 0.0;
+    double imageQualityFilterLength = 0.0;
+    bool ImageQualityFile_specified = false;
+    mb_path ImageQualityFile;
+    int iqtime = 0;
+    int nquality = 0;
+    double *qtime = NULL;
+    double *qquality = NULL;
 
     /* topography parameters */
     control.use_topography = false;
@@ -635,6 +696,8 @@ int main(int argc, char** argv)
      *    --correction-z-minmax=value/value
      *    --fov-fudgefactor=factor
      *    --trim=trim_pixels
+     *    --reference-gain=gain
+     *    --reference-exposure=exposure
      *    --platform-file=platform.plf
      *    --camera-sensor=camera_sensor_id
      *    --nav-sensor=nav_sensor_id
@@ -645,10 +708,12 @@ int main(int argc, char** argv)
      *    --use-left-camera
      *    --use-right-camera
      *    --use-both-cameras
-     *    --image-quality-threshold=value
      *    --calibration-file=stereocalibration.yaml
      *    --navigation-file=file
      *    --tide-file=file
+     *    --image-quality-file=file
+     *    --image-quality-threshold=value
+     *    --image-quality-filter-length=value
      *    --topography-grid=file
      *
      */
@@ -666,6 +731,8 @@ int main(int argc, char** argv)
         {"correction-z-minmax",       required_argument,  NULL, 0},
         {"fov-fudgefactor",             required_argument,      NULL,         0},
         {"trim",                        required_argument,      NULL,         0},
+        {"reference-gain",              required_argument,      NULL,         0},
+        {"reference-exposure",          required_argument,      NULL,         0},
         {"platform-file",               required_argument,      NULL,         0},
         {"camera-sensor",               required_argument,      NULL,         0},
         {"nav-sensor",                  required_argument,      NULL,         0},
@@ -676,10 +743,12 @@ int main(int argc, char** argv)
         {"use-left-camera",             no_argument,            NULL,         0},
         {"use-right-camera",            no_argument,            NULL,         0},
         {"use-both-cameras",            no_argument,            NULL,         0},
-        {"image-quality-threshold",     required_argument,      NULL,         0},
         {"calibration-file",            required_argument,      NULL,         0},
         {"navigation-file",             required_argument,      NULL,         0},
         {"tide-file",                   required_argument,      NULL,         0},
+        {"image-quality-file",          required_argument,      NULL,         0},
+        {"image-quality-threshold",     required_argument,      NULL,         0},
+        {"image-quality-filter-length", required_argument,      NULL,         0},
         {"topography-grid",             required_argument,      NULL,         0},
         {NULL,                          0,                      NULL,         0}
         };
@@ -693,6 +762,7 @@ int main(int argc, char** argv)
     memset(PlatformFile, 0, sizeof(mb_path));
     memset(NavigationFile, 0, sizeof(mb_path));
     memset(TideFile, 0, sizeof(mb_path));
+    memset(ImageQualityFile, 0, sizeof(mb_path));
     memset(TopographyGridFile, 0, sizeof(mb_path));
 
     /* Thread handling */
@@ -784,6 +854,18 @@ int main(int argc, char** argv)
                 const int n = sscanf (optarg,"%d", &control.trimPixels);
                 }
 
+            /* reference-gain */
+            else if (strcmp("reference-gain", options[option_index].name) == 0)
+                {
+                int n = sscanf (optarg,"%lf", &control.reference_gain);
+                }
+
+            /* reference-exposure */
+            else if (strcmp("reference-exposure", options[option_index].name) == 0)
+                {
+                int n = sscanf (optarg,"%lf", &control.reference_exposure);
+                }
+
             /* platform-file */
             else if (strcmp("platform-file", options[option_index].name) == 0)
                 {
@@ -845,12 +927,6 @@ int main(int argc, char** argv)
                 use_camera_mode = MBPM_USE_STEREO;
                 }
 
-            /* image-quality-threshold  (0 <= imageQualityThreshold <= 1) */
-            else if (strcmp("image-quality-threshold", options[option_index].name) == 0)
-                {
-                sscanf (optarg,"%lf", &imageQualityThreshold);
-                }
-
             /* calibration-file */
             else if (strcmp("calibration-file", options[option_index].name) == 0)
                 {
@@ -872,6 +948,28 @@ int main(int argc, char** argv)
                 const int n = sscanf (optarg,"%s", TideFile);
                 if (n == 1)
                     use_tide = true;
+                }
+
+            /* image-quality-file */
+            else if (strcmp("image-quality-file", options[option_index].name) == 0)
+                {
+                const int n = sscanf (optarg,"%s", ImageQualityFile);
+                if (n == 1)
+                    ImageQualityFile_specified = true;
+                }
+
+            /* image-quality-threshold  (0 <= imageQualityThreshold <= 1) */
+            else if (strcmp("image-quality-threshold", options[option_index].name) == 0)
+                {
+                sscanf (optarg,"%lf", &imageQualityThreshold);
+                use_imagequality = true;
+                }
+
+            /* image-quality-filter-length */
+            else if (strcmp("image-quality-filter-length", options[option_index].name) == 0)
+                {
+                sscanf (optarg,"%lf", &imageQualityFilterLength);
+                use_imagequality = true;
                 }
 
             /* topography-grid */
@@ -928,6 +1026,8 @@ int main(int argc, char** argv)
         fprintf(stream,"dbg2       corr_zmax:                     %f\n",control.corr_zmax);
         fprintf(stream,"dbg2       control.fov_fudgefactor:       %f\n",control.fov_fudgefactor);
         fprintf(stream,"dbg2       control.trimPixels:            %u\n",control.trimPixels);
+        fprintf(stream,"dbg2       control.reference_gain:        %f\n",control.reference_gain);
+        fprintf(stream,"dbg2       control.reference_exposure:    %f\n",control.reference_exposure);
         fprintf(stream,"dbg2       PlatformFile:                  %s\n",PlatformFile);
         fprintf(stream,"dbg2       platform_specified:            %d\n",platform_specified);
         fprintf(stream,"dbg2       camera_sensor:                 %d\n",camera_sensor);
@@ -937,13 +1037,17 @@ int main(int argc, char** argv)
         fprintf(stream,"dbg2       altitude_sensor:               %d\n",altitude_sensor);
         fprintf(stream,"dbg2       attitude_sensor:               %d\n",attitude_sensor);
         fprintf(stream,"dbg2       use_camera_mode:               %d\n",use_camera_mode);
-        fprintf(stream,"dbg2       imageQualityThreshold:         %f\n",imageQualityThreshold);
         fprintf(stream,"dbg2       control.calibration_set:       %d\n",control.calibration_set);
         fprintf(stream,"dbg2       StereoCameraCalibrationFile:   %s\n",StereoCameraCalibrationFile);
         fprintf(stream,"dbg2       navigation_specified:          %d\n",navigation_specified);
         fprintf(stream,"dbg2       NavigationFile:                %s\n",NavigationFile);
         fprintf(stream,"dbg2       use_tide:                      %d\n",use_tide);
         fprintf(stream,"dbg2       TideFile:                      %s\n",TideFile);
+        fprintf(stream,"dbg2       ImageQualityFile_specified:    %d\n",ImageQualityFile_specified);
+        fprintf(stream,"dbg2       ImageQualityFile:              %s\n",ImageQualityFile);
+        fprintf(stream,"dbg2       use_imagequality:              %d\n",use_imagequality);
+        fprintf(stream,"dbg2       imageQualityThreshold:         %f\n",imageQualityThreshold);
+        fprintf(stream,"dbg2       imageQualityFilterLength:      %f\n",imageQualityFilterLength);
         fprintf(stream,"dbg2       control.use_topography:        %d\n",control.use_topography);
         fprintf(stream,"dbg2       TopographyGridFile:            %s\n",TopographyGridFile);
         }
@@ -963,6 +1067,8 @@ int main(int argc, char** argv)
         fprintf(stream,"  corr_zmax:                     %f\n",control.corr_zmax);
         fprintf(stream,"  control.fov_fudgefactor:       %f\n",control.fov_fudgefactor);
         fprintf(stream,"  control.trimPixels:            %u\n",control.trimPixels);
+        fprintf(stream,"  control.reference_gain:        %f\n",control.reference_gain);
+        fprintf(stream,"  control.reference_exposure:    %f\n",control.reference_exposure);
         fprintf(stream,"  PlatformFile:                  %s\n",PlatformFile);
         fprintf(stream,"  platform_specified:            %d\n",platform_specified);
         fprintf(stream,"  camera_sensor:                 %d\n",camera_sensor);
@@ -972,13 +1078,17 @@ int main(int argc, char** argv)
         fprintf(stream,"  altitude_sensor:               %d\n",altitude_sensor);
         fprintf(stream,"  attitude_sensor:               %d\n",attitude_sensor);
         fprintf(stream,"  use_camera_mode:               %d\n",use_camera_mode);
-        fprintf(stream,"  imageQualityThreshold:         %f\n",imageQualityThreshold);
         fprintf(stream,"  control.calibration_set:       %d\n",control.calibration_set);
         fprintf(stream,"  StereoCameraCalibrationFile:   %s\n",StereoCameraCalibrationFile);
         fprintf(stream,"  navigation_specified:          %d\n",navigation_specified);
         fprintf(stream,"  NavigationFile:                %s\n",NavigationFile);
         fprintf(stream,"  use_tide:                      %d\n",use_tide);
         fprintf(stream,"  TideFile:                      %s\n",TideFile);
+        fprintf(stream,"  ImageQualityFile_specified:    %d\n",ImageQualityFile_specified);
+        fprintf(stream,"  ImageQualityFile:              %s\n",ImageQualityFile);
+        fprintf(stream,"  use_imagequality:              %d\n",use_imagequality);
+        fprintf(stream,"  imageQualityThreshold:         %f\n",imageQualityThreshold);
+        fprintf(stream,"  imageQualityFilterLength:      %f\n",imageQualityFilterLength);
         fprintf(stream,"  control.use_topography:        %d\n",control.use_topography);
         fprintf(stream,"  TopographyGridFile:            %s\n",TopographyGridFile);
         }
@@ -1011,20 +1121,6 @@ int main(int argc, char** argv)
         error = MB_ERROR_BAD_PARAMETER;
         mb_memory_clear(verbose, &error);
         exit(error);
-        }
-
-    /* Load topography grid if desired */
-    if (control.use_topography)
-        {
-        status = mb_topogrid_init(verbose, TopographyGridFile, &lonflip, &control.topogrid_ptr, &error);
-        if (error != MB_ERROR_NO_ERROR)
-            {
-            mb_error(verbose,error,&message);
-            fprintf(stderr,"\nMBIO Error loading topography grid: %s\n%s\n",TopographyGridFile,message);
-            fprintf(stderr,"\nProgram <%s> Terminated\n",program_name);
-            mb_memory_clear(verbose, &error);
-            exit(error);
-            }
         }
 
     /* read in platform offsets */
@@ -1272,7 +1368,7 @@ int main(int argc, char** argv)
         if ((tfp = fopen(TideFile, "r")) == NULL)
             {
             error = MB_ERROR_OPEN_FAIL;
-            fprintf(stderr,"\nUnable to Open Tide File <%s> for reading\n",TideFile);
+            fprintf(stderr,"\nUnable to open tide file <%s> for reading\n",TideFile);
             fprintf(stderr,"\nProgram <%s> Terminated\n",
                 program_name);
             exit(error);
@@ -1316,7 +1412,7 @@ int main(int argc, char** argv)
         if ((tfp = fopen(TideFile, "r")) == NULL)
             {
             error = MB_ERROR_OPEN_FAIL;
-            fprintf(stderr,"\nUnable to Open Navigation File <%s> for reading\n",NavigationFile);
+            fprintf(stderr,"\nUnable to open tide file <%s> for reading\n",NavigationFile);
             fprintf(stderr,"\nProgram <%s> Terminated\n",
                 program_name);
             exit(error);
@@ -1374,6 +1470,130 @@ int main(int argc, char** argv)
             }
         }
 
+    /* read in image quality if desired */
+    if (ImageQualityFile_specified)
+        {
+        if ((tfp = fopen(ImageQualityFile, "r")) == NULL)
+            {
+            error = MB_ERROR_OPEN_FAIL;
+            fprintf(stderr,"\nUnable to open image quality file <%s> for reading\n",ImageQualityFile);
+            fprintf(stderr,"\nProgram <%s> Terminated\n",
+                program_name);
+            exit(error);
+            }
+        nquality = 0;
+        while ((result = fgets(buffer,MB_PATH_MAXLINE,tfp)) == buffer)
+            nquality++;
+        fclose(tfp);
+
+        /* allocate arrays for quality */
+        if (nquality > 1)
+            {
+            status = mb_mallocd(verbose,__FILE__,__LINE__,nquality*sizeof(double),(void **)&qtime,&error);
+            status = mb_mallocd(verbose,__FILE__,__LINE__,nquality*sizeof(double),(void **)&qquality,&error);
+
+            /* if error initializing memory then quit */
+            if (error != MB_ERROR_NO_ERROR)
+                {
+                fclose(tfp);
+                mb_error(verbose,error,&message);
+                fprintf(stderr,"\nMBIO Error allocating data arrays:\n%s\n",message);
+                fprintf(stderr,"\nProgram <%s> Terminated\n",
+                    program_name);
+                exit(error);
+                }
+            }
+
+        /* if no image quality data then quit */
+        else
+            {
+            fclose(tfp);
+            error = MB_ERROR_BAD_DATA;
+            fprintf(stderr,"\nUnable to read data from image quality file <%s>\n",ImageQualityFile);
+            fprintf(stderr,"\nProgram <%s> Terminated\n",
+                program_name);
+            exit(error);
+            }
+
+        /* read the data points in the image quality file */
+        nquality = 0;
+        if ((tfp = fopen(ImageQualityFile, "r")) == NULL)
+            {
+            error = MB_ERROR_OPEN_FAIL;
+            fprintf(stderr,"\nUnable to open image quality file <%s> for reading\n",ImageQualityFile);
+            fprintf(stderr,"\nProgram <%s> Terminated\n",
+                program_name);
+            exit(error);
+            }
+        while ((result = fgets(buffer,MB_PATH_MAXLINE,tfp)) == buffer)
+            {
+            bool value_ok = false;
+
+            /* read the image quality values */
+            int nget = sscanf(buffer,"%lf %lf",
+                &qtime[nquality], &qquality[nquality]);
+            if (nget >= 2)
+                value_ok = true;
+
+            /* output some debug values */
+            if (verbose >= 5 && value_ok)
+                {
+                fprintf(stderr,"\ndbg5  New image quality point read in program <%s>\n",program_name);
+                fprintf(stderr,"dbg5       quality[%d]: %f %f\n",
+                    nquality,qtime[nquality],qquality[nquality]);
+                }
+            else if (verbose >= 5)
+                {
+                fprintf(stderr,"\ndbg5  Error parsing line in image quality file in program <%s>\n",program_name);
+                fprintf(stderr,"dbg5       line: %s\n",buffer);
+                }
+
+            /* check for reverses or repeats in time */
+            if (value_ok)
+                {
+                if (nquality == 0)
+                    nquality++;
+                else if (qtime[nquality] > qtime[nquality-1])
+                    nquality++;
+                else if (nquality > 0 && qtime[nquality] <= qtime[nquality-1]
+                    && verbose >= 5)
+                    {
+                    fprintf(stderr,"\ndbg5  Tide time error in program <%s>\n",program_name);
+                    fprintf(stderr,"dbg5       quality[%d]: %f %f\n",
+                        nquality-1,qtime[nquality-1],qquality[nquality-1]);
+                    fprintf(stderr,"dbg5       quality[%d]: %f %f\n",
+                        nquality,qtime[nquality],qquality[nquality]);
+                    }
+                }
+            strncpy(buffer,"\0",sizeof(buffer));
+            }
+        fclose(tfp);
+        if (nquality > 0)
+            use_imagequality = true;
+
+        /* output information */
+        if (verbose >= 1)
+            {
+            fprintf(stdout,"\nImage Quality Parameters:\n");
+            fprintf(stream,"  ImageQualityFile:  %s\n",ImageQualityFile);
+            fprintf(stream,"  nquality:          %d\n",nquality);
+            }
+        }
+
+    /* Load topography grid if desired */
+    if (control.use_topography)
+        {
+        status = mb_topogrid_init(verbose, TopographyGridFile, &lonflip, &control.topogrid_ptr, &error);
+        if (error != MB_ERROR_NO_ERROR)
+            {
+            mb_error(verbose,error,&message);
+            fprintf(stderr,"\nMBIO Error loading topography grid: %s\n%s\n",TopographyGridFile,message);
+            fprintf(stderr,"\nProgram <%s> Terminated\n",program_name);
+            mb_memory_clear(verbose, &error);
+            exit(error);
+            }
+        }
+
     /* Initialize image correction tables for each thread */
 
     /* Create an an output image correction table in the processing structure for each
@@ -1381,9 +1601,13 @@ int main(int argc, char** argv)
 
     const int corr_table_dims[3] = {control.ncorr_x, control.ncorr_y, control.ncorr_z};
     for (int ithread = 0; ithread < numThreads; ithread++) {
-        processPars[ithread].corr_table[0] = Mat(3, corr_table_dims, CV_32FC(1), Scalar(0.0));
+        processPars[ithread].corr_table_y[0] = Mat(3, corr_table_dims, CV_32FC(1), Scalar(0.0));
+        processPars[ithread].corr_table_cb[0] = Mat(3, corr_table_dims, CV_32FC(1), Scalar(0.0));
+        processPars[ithread].corr_table_cr[0] = Mat(3, corr_table_dims, CV_32FC(1), Scalar(0.0));
         processPars[ithread].corr_table_count[0] = Mat(3, corr_table_dims, CV_32SC(1), Scalar(0));
-        processPars[ithread].corr_table[1] = Mat(3, corr_table_dims, CV_32FC(1), Scalar(0.0));
+        processPars[ithread].corr_table_y[1] = Mat(3, corr_table_dims, CV_32FC(1), Scalar(0.0));
+        processPars[ithread].corr_table_cr[1] = Mat(3, corr_table_dims, CV_32FC(1), Scalar(0.0));
+        processPars[ithread].corr_table_cb[1] = Mat(3, corr_table_dims, CV_32FC(1), Scalar(0.0));
         processPars[ithread].corr_table_count[1] = Mat(3, corr_table_dims, CV_32SC(1), Scalar(0));
     }
 
@@ -1408,14 +1632,16 @@ int main(int argc, char** argv)
     npairs = 0;
     nimages = 0;
     int imageStatus = MB_IMAGESTATUS_NONE;
-    double imageQuality = 0.0;
+    double image_quality = 0.0;
     mb_path dpath;
     unsigned int numThreadsSet = 0;
     fprintf(stderr,"About to read ImageListFile: %s\n", ImageListFile);
 
     while ((status = mb_imagelist_read(verbose, imagelist_ptr, &imageStatus,
                                 imageLeftFile, imageRightFile, dpath,
-                                &left_time_d, &time_diff, &imageQuality, &error)) == MB_SUCCESS) {
+                                &left_time_d, &right_time_d,
+                                &left_gain, &right_gain,
+                                &left_exposure, &right_exposure, &error)) == MB_SUCCESS) {
         if (imageStatus == MB_IMAGESTATUS_STEREO) {
           if (use_camera_mode == MBPM_USE_STEREO) {
             npairs++;
@@ -1470,6 +1696,8 @@ int main(int argc, char** argv)
             double camera_heading;
             double camera_roll;
             double camera_pitch;
+            double image_gain;
+            double image_exposure;
 
             /* set camera for stereo image */
             if (currentimages == 2) {
@@ -1485,20 +1713,30 @@ int main(int argc, char** argv)
             use_this_image = false;
             if (image_camera == MBPM_CAMERA_LEFT
                 && (use_camera_mode == MBPM_USE_LEFT || use_camera_mode == MBPM_USE_STEREO)) {
-                     time_d = left_time_d;
-                    strcpy(imageFile, imageLeftFile);
-                    use_this_image = true;
+                time_d = left_time_d;
+                image_gain = left_gain;
+                image_exposure = left_exposure;
+                strcpy(imageFile, imageLeftFile);
+                use_this_image = true;
             }
             else if (image_camera == MBPM_CAMERA_RIGHT
                 && (use_camera_mode == MBPM_USE_RIGHT || use_camera_mode == MBPM_USE_STEREO)) {
-                     time_d = left_time_d + time_diff;
-                    strcpy(imageFile, imageRightFile);
-                    use_this_image = true;
+                time_d = right_time_d;
+                image_gain = right_gain;
+                image_exposure = right_exposure;
+                strcpy(imageFile, imageRightFile);
+                use_this_image = true;
             }
 
-            /* check imageQuality value against threshold to see if this image should be used */
-            if (use_this_image && imageQuality < imageQualityThreshold) {
-              use_this_image = false;
+            /* check image_quality value against threshold to see if this image should be used */
+            if (use_this_image && use_imagequality) {
+                if (nquality > 1) {
+                    intstat = mb_linear_interp(verbose, qtime-1, qquality-1, nquality,
+                                                time_d, &image_quality, &iqtime, &error);
+                }
+                if (image_quality < imageQualityThreshold) {
+                    use_this_image = false;
+                }
             }
 
             /* check navigation for location close to or inside destination image bounds */
@@ -1586,6 +1824,9 @@ int main(int argc, char** argv)
                 strcpy(processPars[numThreadsSet].imageFile, imageFile);
                 processPars[numThreadsSet].image_count = nimages - currentimages + iimage;
                 processPars[numThreadsSet].image_camera = image_camera;
+                processPars[numThreadsSet].image_quality = image_quality;
+                processPars[numThreadsSet].image_gain = image_gain;
+                processPars[numThreadsSet].image_exposure = image_exposure;
                 processPars[numThreadsSet].time_d = time_d;
                 processPars[numThreadsSet].camera_navlon = camera_navlon;
                 processPars[numThreadsSet].camera_navlat = camera_navlat;
@@ -1701,19 +1942,27 @@ int main(int argc, char** argv)
                 for (int j=0;j<control.ncorr_y;j++) {
                     for (int k=0;k<control.ncorr_z;k++) {
                         if (processPars[ithread].corr_table_count[0].at<int>(i, j, k) > 0) {
-                            processPars[0].corr_table[0].at<float>(i, j, k) += processPars[ithread].corr_table[0].at<float>(i, j, k);
+                            processPars[0].corr_table_y[0].at<float>(i, j, k) += processPars[ithread].corr_table_y[0].at<float>(i, j, k);
+                            processPars[0].corr_table_cr[0].at<float>(i, j, k) += processPars[ithread].corr_table_cr[0].at<float>(i, j, k);
+                            processPars[0].corr_table_cb[0].at<float>(i, j, k) += processPars[ithread].corr_table_cb[0].at<float>(i, j, k);
                             processPars[0].corr_table_count[0].at<int>(i, j, k) += processPars[ithread].corr_table_count[0].at<int>(i, j, k);
                         }
                         if (processPars[ithread].corr_table_count[1].at<int>(i, j, k) > 0) {
-                            processPars[0].corr_table[1].at<float>(i, j, k) += processPars[ithread].corr_table[1].at<float>(i, j, k);
+                            processPars[0].corr_table_y[1].at<float>(i, j, k) += processPars[ithread].corr_table_y[1].at<float>(i, j, k);
+                            processPars[0].corr_table_cr[1].at<float>(i, j, k) += processPars[ithread].corr_table_cr[1].at<float>(i, j, k);
+                            processPars[0].corr_table_cb[1].at<float>(i, j, k) += processPars[ithread].corr_table_cb[1].at<float>(i, j, k);
                             processPars[0].corr_table_count[1].at<int>(i, j, k) += processPars[ithread].corr_table_count[1].at<int>(i, j, k);
                         }
                     }
                 }
             }
-        processPars[ithread].corr_table[0].release();
+        processPars[ithread].corr_table_y[0].release();
+        processPars[ithread].corr_table_cr[0].release();
+        processPars[ithread].corr_table_cb[0].release();
         processPars[ithread].corr_table_count[0].release();
-        processPars[ithread].corr_table[1].release();
+        processPars[ithread].corr_table_y[1].release();
+        processPars[ithread].corr_table_cr[1].release();
+        processPars[ithread].corr_table_cb[1].release();
         processPars[ithread].corr_table_count[1].release();
         }
     }
@@ -1733,15 +1982,23 @@ int main(int argc, char** argv)
         for (int j=0;j<control.ncorr_y;j++) {
             for (int k=0;k<control.ncorr_z;k++) {
                 if (processPars[0].corr_table_count[0].at<int>(i, j, k) > count_min) {
-                    processPars[0].corr_table[0].at<float>(i, j, k) /= processPars[0].corr_table_count[0].at<int>(i, j, k);
+                    processPars[0].corr_table_y[0].at<float>(i, j, k) /= processPars[0].corr_table_count[0].at<int>(i, j, k);
+                    processPars[0].corr_table_cr[0].at<float>(i, j, k) /= processPars[0].corr_table_count[0].at<int>(i, j, k);
+                    processPars[0].corr_table_cb[0].at<float>(i, j, k) /= processPars[0].corr_table_count[0].at<int>(i, j, k);
                 } else {
-                    processPars[0].corr_table[0].at<float>(i, j, k) = 0.0;
+                    processPars[0].corr_table_y[0].at<float>(i, j, k) = 0.0;
+                    processPars[0].corr_table_cr[0].at<float>(i, j, k) = 0.0;
+                    processPars[0].corr_table_cb[0].at<float>(i, j, k) = 0.0;
                     processPars[0].corr_table_count[0].at<int>(i, j, k) = 0;
                 }
                 if (processPars[0].corr_table_count[1].at<int>(i, j, k) > count_min) {
-                    processPars[0].corr_table[1].at<float>(i, j, k) /= processPars[0].corr_table_count[1].at<int>(i, j, k);
+                    processPars[0].corr_table_y[1].at<float>(i, j, k) /= processPars[0].corr_table_count[1].at<int>(i, j, k);
+                    processPars[0].corr_table_cr[1].at<float>(i, j, k) /= processPars[0].corr_table_count[1].at<int>(i, j, k);
+                    processPars[0].corr_table_cb[1].at<float>(i, j, k) /= processPars[0].corr_table_count[1].at<int>(i, j, k);
                 } else {
-                    processPars[0].corr_table[1].at<float>(i, j, k) = 0.0;
+                    processPars[0].corr_table_y[1].at<float>(i, j, k) = 0.0;
+                    processPars[0].corr_table_cr[1].at<float>(i, j, k) = 0.0;
+                    processPars[0].corr_table_cb[1].at<float>(i, j, k) = 0.0;
                     processPars[0].corr_table_count[1].at<int>(i, j, k) = 0;
                 }
             }
@@ -1756,38 +2013,54 @@ int main(int argc, char** argv)
         for (int k=0;k<control.ncorr_z;k++) {
             for (int j=0;j<control.ncorr_y;j++) {
                 for (int i=0;i<control.ncorr_x;i++) {
-                    if (processPars[0].corr_table[0].at<float>(i, j, k) == 0.0) {
+                    if (processPars[0].corr_table_y[0].at<float>(i, j, k) == 0.0) {
                         processPars[0].corr_table_count[0].at<int>(i, j, k) = 0;
                         for (int jj=MAX(0,j-1);jj<=MIN(control.ncorr_y-1,j+1);jj++) {
                             for (int ii=MAX(0,i-1);ii<=MIN(control.ncorr_x-1,i+1);ii++) {
-                                if (!(ii == i && jj == j) && processPars[0].corr_table[0].at<float>(ii, jj, k) > 0.0) {
-                                    processPars[0].corr_table[0].at<float>(i, j, k)
-                                        += processPars[0].corr_table[0].at<float>(ii, jj, k);
+                                if (!(ii == i && jj == j) && processPars[0].corr_table_y[0].at<float>(ii, jj, k) > 0.0) {
+                                    processPars[0].corr_table_y[0].at<float>(i, j, k)
+                                        += processPars[0].corr_table_y[0].at<float>(ii, jj, k);
+                                    processPars[0].corr_table_cr[0].at<float>(i, j, k)
+                                        += processPars[0].corr_table_cr[0].at<float>(ii, jj, k);
+                                    processPars[0].corr_table_cb[0].at<float>(i, j, k)
+                                        += processPars[0].corr_table_cb[0].at<float>(ii, jj, k);
                                     processPars[0].corr_table_count[0].at<int>(i, j, k)++;
                                     num_changes++;
                                 }
                             }
                         }
                         if (processPars[0].corr_table_count[0].at<int>(i, j, k) > 0) {
-                            processPars[0].corr_table[0].at<float>(i, j, k)
+                            processPars[0].corr_table_y[0].at<float>(i, j, k)
+                                /= processPars[0].corr_table_count[0].at<int>(i, j, k);
+                            processPars[0].corr_table_cr[0].at<float>(i, j, k)
+                                /= processPars[0].corr_table_count[0].at<int>(i, j, k);
+                            processPars[0].corr_table_cb[0].at<float>(i, j, k)
                                 /= processPars[0].corr_table_count[0].at<int>(i, j, k);
                             processPars[0].corr_table_count[0].at<int>(i, j, k) = 0;
                         }
                     }
-                    if (processPars[0].corr_table[1].at<float>(i, j, k) == 0.0) {
+                    if (processPars[0].corr_table_y[1].at<float>(i, j, k) == 0.0) {
                         processPars[0].corr_table_count[1].at<int>(i, j, k) = 0;
                         for (int jj=MAX(0,j-1);jj<=MIN(control.ncorr_y-1,j+1);jj++) {
                             for (int ii=MAX(0,i-1);ii<=MIN(control.ncorr_x-1,i+1);ii++) {
-                                if (!(ii == i && jj == j) && processPars[0].corr_table[1].at<float>(ii, jj, k) > 0.0) {
-                                    processPars[0].corr_table[1].at<float>(i, j, k)
-                                        += processPars[0].corr_table[1].at<float>(ii, jj, k);
+                                if (!(ii == i && jj == j) && processPars[0].corr_table_y[1].at<float>(ii, jj, k) > 0.0) {
+                                    processPars[0].corr_table_y[1].at<float>(i, j, k)
+                                        += processPars[0].corr_table_y[1].at<float>(ii, jj, k);
+                                    processPars[0].corr_table_cr[1].at<float>(i, j, k)
+                                        += processPars[0].corr_table_cr[1].at<float>(ii, jj, k);
+                                    processPars[0].corr_table_cb[1].at<float>(i, j, k)
+                                        += processPars[0].corr_table_cb[1].at<float>(ii, jj, k);
                                     processPars[0].corr_table_count[1].at<int>(i, j, k)++;
                                     num_changes++;
                                 }
                             }
                         }
                         if (processPars[0].corr_table_count[1].at<int>(i, j, k) > 0) {
-                            processPars[0].corr_table[1].at<float>(i, j, k)
+                            processPars[0].corr_table_y[1].at<float>(i, j, k)
+                                /= processPars[0].corr_table_count[1].at<int>(i, j, k);
+                            processPars[0].corr_table_cr[1].at<float>(i, j, k)
+                                /= processPars[0].corr_table_count[1].at<int>(i, j, k);
+                            processPars[0].corr_table_cb[1].at<float>(i, j, k)
                                 /= processPars[0].corr_table_count[1].at<int>(i, j, k);
                             processPars[0].corr_table_count[1].at<int>(i, j, k) = 0;
                         }
@@ -1798,65 +2071,65 @@ int main(int argc, char** argv)
         if (num_changes == 0)
             done = true;
     }
-    int first = -1;
-    int last = -1;
-    bool found = false;
-    {
-        int i = control.ncorr_x / 2;
-        int j = control.ncorr_y / 2;
-        for (int k=0;k<control.ncorr_z;k++) {
-            if (processPars[0].corr_table[0].at<float>(i, j, k) > 0.0 && first < 0) {
-                first = k;
-                last = k;
-            }
-            if (processPars[0].corr_table[0].at<float>(i, j, k) > 0.0 && last < k) {
-                last = k;
-            }
-        }
-    }
-    for (int k=0;k<first;k++) {
+    done = false;
+    while (!done) {
+        int num_changes = 0;
         for (int j=0;j<control.ncorr_y;j++) {
             for (int i=0;i<control.ncorr_x;i++) {
-                processPars[0].corr_table[0].at<float>(i, j, k) = processPars[0].corr_table[0].at<float>(i, j, first);
+                for (int k=0;k<control.ncorr_z;k++) {
+                    if (processPars[0].corr_table_y[0].at<float>(i, j, k) == 0.0) {
+                        processPars[0].corr_table_count[0].at<int>(i, j, k) = 0;
+                        for (int kk=MAX(0,k-1);kk<=MIN(control.ncorr_z-1,k+1);kk++) {
+                            if (!(kk == k) && processPars[0].corr_table_y[0].at<float>(i, j, kk) > 0.0) {
+                                processPars[0].corr_table_y[0].at<float>(i, j, k)
+                                    += processPars[0].corr_table_y[0].at<float>(i, j, kk);
+                                processPars[0].corr_table_cr[0].at<float>(i, j, k)
+                                    += processPars[0].corr_table_cr[0].at<float>(i, j, kk);
+                                processPars[0].corr_table_cb[0].at<float>(i, j, k)
+                                    += processPars[0].corr_table_cb[0].at<float>(i, j, kk);
+                                processPars[0].corr_table_count[0].at<int>(i, j, k)++;
+                                num_changes++;
+                            }
+                        }
+                        if (processPars[0].corr_table_count[0].at<int>(i, j, k) > 0) {
+                            processPars[0].corr_table_y[0].at<float>(i, j, k)
+                                /= processPars[0].corr_table_count[0].at<int>(i, j, k);
+                            processPars[0].corr_table_cr[0].at<float>(i, j, k)
+                                /= processPars[0].corr_table_count[0].at<int>(i, j, k);
+                            processPars[0].corr_table_cb[0].at<float>(i, j, k)
+                                /= processPars[0].corr_table_count[0].at<int>(i, j, k);
+                            processPars[0].corr_table_count[0].at<int>(i, j, k) = 0;
+                        }
+                    }
+                    if (processPars[0].corr_table_y[1].at<float>(i, j, k) == 0.0) {
+                        processPars[0].corr_table_count[1].at<int>(i, j, k) = 0;
+                        for (int kk=MAX(0,k-1);kk<=MIN(control.ncorr_z-1,k+1);kk++) {
+                            if (!(kk == k) && processPars[0].corr_table_y[1].at<float>(i, j, kk) > 0.0) {
+                                processPars[0].corr_table_y[1].at<float>(i, j, k)
+                                    += processPars[0].corr_table_y[1].at<float>(i, j, kk);
+                                processPars[0].corr_table_cr[1].at<float>(i, j, k)
+                                    += processPars[0].corr_table_cr[1].at<float>(i, j, kk);
+                                processPars[0].corr_table_cb[1].at<float>(i, j, k)
+                                    += processPars[0].corr_table_cb[1].at<float>(i, j, kk);
+                                processPars[0].corr_table_count[1].at<int>(i, j, k)++;
+                                num_changes++;
+                            }
+                        }
+                        if (processPars[0].corr_table_count[1].at<int>(i, j, k) > 0) {
+                            processPars[0].corr_table_y[1].at<float>(i, j, k)
+                                /= processPars[0].corr_table_count[1].at<int>(i, j, k);
+                            processPars[0].corr_table_cr[1].at<float>(i, j, k)
+                                /= processPars[0].corr_table_count[1].at<int>(i, j, k);
+                            processPars[0].corr_table_cb[1].at<float>(i, j, k)
+                                /= processPars[0].corr_table_count[1].at<int>(i, j, k);
+                            processPars[0].corr_table_count[1].at<int>(i, j, k) = 0;
+                        }
+                    }
+                }
             }
         }
-    }
-    for (int k=last+1;k<control.ncorr_z;k++) {
-        for (int j=0;j<control.ncorr_y;j++) {
-            for (int i=0;i<control.ncorr_x;i++) {
-                processPars[0].corr_table[0].at<float>(i, j, k) = processPars[0].corr_table[0].at<float>(i, j, last);
-            }
-        }
-    }
-    first = -1;
-    last = -1;
-    found = false;
-    {
-        int i = control.ncorr_x / 2;
-        int j = control.ncorr_y / 2;
-        for (int k=0;k<control.ncorr_z;k++) {
-            if (processPars[0].corr_table[1].at<float>(i, j, k) > 0.0 && first < 0) {
-                first = k;
-                last = k;
-            }
-            if (processPars[0].corr_table[1].at<float>(i, j, k) > 0.0 && last < k) {
-                last = k;
-            }
-        }
-    }
-    for (int k=0;k<first;k++) {
-        for (int j=0;j<control.ncorr_y;j++) {
-            for (int i=0;i<control.ncorr_x;i++) {
-                processPars[0].corr_table[1].at<float>(i, j, k) = processPars[0].corr_table[1].at<float>(i, j, first);
-            }
-        }
-    }
-    for (int k=last+1;k<control.ncorr_z;k++) {
-        for (int j=0;j<control.ncorr_y;j++) {
-            for (int i=0;i<control.ncorr_x;i++) {
-                processPars[0].corr_table[1].at<float>(i, j, k) = processPars[0].corr_table[1].at<float>(i, j, last);
-            }
-        }
+        if (num_changes == 0)
+            done = true;
     }
 
     /* print out each correction table layer from lowest standoff to largest */
@@ -1865,7 +2138,15 @@ fprintf(stderr, "\n---------------------\nCamera 0 Image Correction\n-----------
 fprintf(stderr, "Camera 0 Correction: Standoff %.3f meters +/- %.3f\n", k * control.bin_dz + control.corr_zmin, 0.5 * control.bin_dz);
         for (int j=0;j<control.ncorr_y;j++) {
             for (int i=0;i<control.ncorr_x;i++) {
-                fprintf(stderr, "%5.1f ", processPars[0].corr_table[0].at<float>(i, j, k));
+                fprintf(stderr, "%5.1f ", processPars[0].corr_table_y[0].at<float>(i, j, k));
+            }
+            fprintf(stderr, "   ");
+            for (int i=0;i<control.ncorr_x;i++) {
+                fprintf(stderr, "%5.1f ", processPars[0].corr_table_cr[0].at<float>(i, j, k));
+            }
+            fprintf(stderr, "   ");
+            for (int i=0;i<control.ncorr_x;i++) {
+                fprintf(stderr, "%5.1f ", processPars[0].corr_table_cb[0].at<float>(i, j, k));
             }
             fprintf(stderr, "   ");
             for (int i=0;i<control.ncorr_x;i++) {
@@ -1880,7 +2161,15 @@ fprintf(stderr, "\n---------------------\nCamera 1 Image Correction\n-----------
 fprintf(stderr, "Camera 1 Correction: Standoff %.3f meters +/- %.3f\n", k * control.bin_dz + control.corr_zmin, 0.5 * control.bin_dz);
         for (int j=0;j<control.ncorr_y;j++) {
             for (int i=0;i<control.ncorr_x;i++) {
-                fprintf(stderr, "%5.1f ", processPars[0].corr_table[1].at<float>(i, j, k));
+                fprintf(stderr, "%5.1f ", processPars[0].corr_table_y[1].at<float>(i, j, k));
+            }
+            fprintf(stderr, "   ");
+            for (int i=0;i<control.ncorr_x;i++) {
+                fprintf(stderr, "%5.1f ", processPars[0].corr_table_cr[1].at<float>(i, j, k));
+            }
+            fprintf(stderr, "   ");
+            for (int i=0;i<control.ncorr_x;i++) {
+                fprintf(stderr, "%5.1f ", processPars[0].corr_table_cb[1].at<float>(i, j, k));
             }
             fprintf(stderr, "   ");
             for (int i=0;i<control.ncorr_x;i++) {
@@ -1892,6 +2181,7 @@ fprintf(stderr, "Camera 1 Correction: Standoff %.3f meters +/- %.3f\n", k * cont
     }
 
     /* Write out the ouput correction table */
+    int corr_version = 3;
     Mat corr_bounds = Mat(3, 3, CV_32FC(1), Scalar(0.0));
     corr_bounds.at<float>(0, 0) = control.corr_xmin;
     corr_bounds.at<float>(0, 1) = control.corr_xmax;
@@ -1904,18 +2194,29 @@ fprintf(stderr, "Camera 1 Correction: Standoff %.3f meters +/- %.3f\n", k * cont
     corr_bounds.at<float>(2, 2) = control.bin_dz;
     fstorage = FileStorage(ImageCorrectionFile, FileStorage::WRITE);
     if( fstorage.isOpened() ) {
-        fstorage << "ImageCorrectionBounds" << corr_bounds
-            << "ImageCorrectionTable1" << processPars[0].corr_table[0]
-            << "ImageCorrectionTable2" << processPars[0].corr_table[1];
+        fstorage << "ImageCorrectionVersion" << corr_version
+            << "ImageCorrectionBounds" << corr_bounds
+            << "ImageCorrectionReferenceGain" << control.reference_gain
+            << "ImageCorrectionReferenceExposure" << control.reference_exposure
+            << "ImageCorrectionTableY1" << processPars[0].corr_table_y[0]
+            << "ImageCorrectionTableCr1" << processPars[0].corr_table_cr[0]
+            << "ImageCorrectionTableCb1" << processPars[0].corr_table_cb[0]
+            << "ImageCorrectionTableY2" << processPars[0].corr_table_y[1]
+            << "ImageCorrectionTableCr2" << processPars[0].corr_table_cr[1]
+            << "ImageCorrectionTableCb2" << processPars[0].corr_table_cb[1];
         fstorage.release();
     }
     else
         cout << "Error: Cannot save the image correction tables\n";
 
 
-    processPars[0].corr_table[0].release();
+    processPars[0].corr_table_y[0].release();
+    processPars[0].corr_table_cr[0].release();
+    processPars[0].corr_table_cb[0].release();
     processPars[0].corr_table_count[0].release();
-    processPars[0].corr_table[1].release();
+    processPars[0].corr_table_y[1].release();
+    processPars[0].corr_table_cr[1].release();
+    processPars[0].corr_table_cb[1].release();
     processPars[0].corr_table_count[1].release();
     corr_bounds.release();
 
@@ -1935,6 +2236,22 @@ fprintf(stderr, "Camera 1 Correction: Standoff %.3f meters +/- %.3f\n", k * cont
         status = mb_freed(verbose,__FILE__,__LINE__,(void **)&nroll,&error);
         status = mb_freed(verbose,__FILE__,__LINE__,(void **)&npitch,&error);
         status = mb_freed(verbose,__FILE__,__LINE__,(void **)&nheave,&error);
+        }
+
+    /* deallocate tide arrays if necessary */
+    if (ntide > 0)
+        {
+        status = mb_freed(verbose,__FILE__,__LINE__,(void **)&ttime,&error);
+        status = mb_freed(verbose,__FILE__,__LINE__,(void **)&ttide,&error);
+        ntide = 0;
+        }
+
+    /* deallocate image quality arrays if necessary */
+    if (nquality > 0)
+        {
+        status = mb_freed(verbose,__FILE__,__LINE__,(void **)&qtime,&error);
+        status = mb_freed(verbose,__FILE__,__LINE__,(void **)&qquality,&error);
+        nquality = 0;
         }
 
     /* end it all */
