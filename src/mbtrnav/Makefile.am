@@ -1,11 +1,11 @@
 lib_LTLIBRARIES = libgeolib.la libnewmat.la libqnx.la libtnav.la libtrnw.la libnetif.la libmb1.la
 
 LIBMFRAME = $(top_builddir)/src/mbtrnframe/libmframe.la
-MFRAME_INC = -I${top_srcdir}/src/mbtrnframe/usr -I${top_srcdir}/src/mbtrnframe/mframe/src 
+MFRAME_INC = -I${top_srcdir}/src/mbtrnframe/usr -I${top_srcdir}/src/mbtrnframe/mframe/src
 
 include_HEADERS =
 
-AM_CFLAGS = ${libgmt_CFLAGS} ${libnetcdf_CFLAGS}
+AM_CFLAGS = ${libnetcdf_CFLAGS}
 
 AM_CPPFLAGS = -g -O0
 AM_CPPFLAGS += -I${top_srcdir}/src/mbtrnav/trnw
@@ -24,6 +24,7 @@ AM_CPPFLAGS += -DWITH_MMDEBUG
 AM_CPPFLAGS += -D_GNU_SOURCE
 AM_CPPFLAGS += -DWITH_MST_MSTATS
 AM_CPPFLAGS += -DMST_STATS_EN
+AM_CPPFLAGS += ${libnetcdf_CPPFLAGS}
 
 libgeolib_la_LDFLAGS =  -no-undefined -version-info 0:0:0
 
@@ -180,7 +181,8 @@ libtnav_la_SOURCES += terrain-nav/TRNUtils.cpp
 libtnav_la_LIBADD = libgeolib.la
 libtnav_la_LIBADD += libnewmat.la
 libtnav_la_LIBADD += libqnx.la
-libtnav_la_LIBADD += -lm -lnetcdf -lpthread
+libtnav_la_LIBADD += ${libnetcdf_LIBS}
+libtnav_la_LIBADD += -lm -lpthread
 
 libtrnw_la_LDFLAGS =  -no-undefined -version-info 0:0:0
 
@@ -218,7 +220,7 @@ trn_server_SOURCES = utils/trn_server.cpp
 trn_server_LDADD = libtnav.la libqnx.la libnewmat.la libtnav.la libgeolib.la
 
 trn_replay_SOURCES = opt/dorado/Replay.cpp opt/dorado/trn_replay.cpp utils/TerrainNavClient.cpp
-trn_replay_LDADD = -ltnav  -lnewmat -lqnx -lnetcdf -lm -lpthread -lgeolib 
+trn_replay_LDADD = -ltnav  -lnewmat -lqnx -lnetcdf -lm -lpthread -lgeolib
 
 trnclient_test_SOURCES =  utils/trnclient_test.cpp utils/TrnClient.cpp utils/TerrainNavClient.cpp
 trnclient_test_LDADD = libtnav.la
