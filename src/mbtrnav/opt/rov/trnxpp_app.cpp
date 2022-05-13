@@ -832,7 +832,8 @@ public:
 
     void parse_file(const std::string &file_path)
     {
-        std::ifstream file(file_path);
+        std::ifstream file(file_path.c_str(), std::ifstream::in);
+
         if (file.is_open()) {
             std::string line;
             while (std::getline(file, line)) {
@@ -2367,6 +2368,10 @@ int main(int argc, char **argv)
     setenv("XPP_SESSION",cfg.session_string().c_str(), false);
 
     cfg.parse_args(argc, argv);
+    // configure debug output
+    trn_debug::get()->set_debug(cfg.debug());
+    trn_debug::get()->set_verbose(cfg.verbose());
+
     if(cfg.cfg().length() > 0){
         cfg.parse_file(cfg.cfg());
         // reparse command line (should override config options)

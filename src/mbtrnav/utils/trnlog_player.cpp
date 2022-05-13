@@ -1147,8 +1147,27 @@ class app_cfg
 {
 public:
     app_cfg()
-    : mDebug(0), mVerbose(false), mAppCfg(), mInputList(), mTBConfig()
+    : mDebug(0), mVerbose(false), mAppCfg(), mSessionStr(), mInputList(), mTBConfig()
     {
+        char session_string[64]={0};
+
+        auto now = std::chrono::system_clock::now();
+
+        // convert the time to a time_t type
+        std::time_t now_t = std::chrono::system_clock::to_time_t(now);
+
+        // create a buffer with YYYYMMDD-HHMMSS format
+        // note: not using std::put_time as it was broken until GCC 5.0,
+        // best to use strftime for portability
+        std::strftime(session_string, sizeof(session_string), "%Y%m%d-%H%M%S",
+                      std::localtime(&now_t));
+
+        // create a formatted time stamp string
+        std::stringstream ss;
+
+        ss << std::string(session_string);
+
+        mSessionStr = ss.str();
     }
     ~app_cfg(){}
 
@@ -1468,11 +1487,13 @@ public:
 
     void parse_file(const std::string &file_path)
     {
-        std::ifstream file(file_path);
+        std::ifstream file(file_path.c_str(), std::ifstream::in);
+
         if (file.is_open()) {
             std::string line;
+
             while (std::getline(file, line)) {
-                // using printf() in all tests for consistency
+               // using printf() in all tests for consistency
                 TRN_NDPRINT(4,">>> line : [%s]\n", line.c_str());
                 if(line.length()>0){
                     char *lcp = strdup(line.c_str());
@@ -1514,6 +1535,8 @@ public:
                 }
             }
             file.close();
+        } else {
+            fprintf(stderr, "ERR - file open failed [%s] [%d/%s]", file_path.c_str(), errno, strerror(errno));
         }
     }
 
@@ -1523,6 +1546,7 @@ public:
     }
 
     std::string cfg(){return mAppCfg;}
+    std::string session_string(){return mSessionStr;}
     std::list<std::string>::iterator input_first(){ return mInputList.begin();}
     std::list<std::string>::iterator input_last(){ return mInputList.end();}
     int debug(){return mDebug;}
@@ -1532,6 +1556,7 @@ private:
     int mDebug;
     bool mVerbose;
     std::string mAppCfg;
+    std::string mSessionStr;
     std::list<std::string> mInputList;
     TrnLogConfig mTBConfig;
 };
@@ -1570,7 +1595,14 @@ int main(int argc, char **argv)
 
     // get configuration from command line, file
     app_cfg cfg;
+
+    setenv("TLP_SESSION",cfg.session_string().c_str(), false);
+
     cfg.parse_args(argc, argv);
+    // configure debug output
+    trn_debug::get()->set_debug(cfg.debug());
+    trn_debug::get()->set_verbose(cfg.verbose());
+
     if(cfg.cfg().length() > 0){
         cfg.parse_file(cfg.cfg());
         // reparse command line (should override config options)
@@ -1579,6 +1611,10 @@ int main(int argc, char **argv)
 
     // configure debug output
     trn_debug::get()->set_debug(cfg.debug());
+    trn_debug::get()->set_verbose(cfg.verbose());
+
+    TRN_NDPRINT(1,"session [%s]\n",cfg.session_string().c_str());
+    TRN_NDPRINT(1,"session env[%s]\n",getenv("TLP_SESSION"));
 
     // get log player
     TrnLogPlayer tbplayer(cfg.tb_config());
