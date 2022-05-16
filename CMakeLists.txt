@@ -294,9 +294,12 @@ add_subdirectory(src/mbio)
 add_subdirectory(src/mbview)
 add_subdirectory(src/bsio)
 add_subdirectory(src/surf)
-if (buildTrn)
+# Note that libmbio (at least, maybe others?) depends on
+# on mbtrn libraries r7kr and lmframe, so must always build these 
+## if (buildTrn)
    add_subdirectory(src/mbtrn)
-endif(buildTrn)
+## endif(buildTrn)
+
 
 # Executables
 add_subdirectory(src/mbgrdviz)
