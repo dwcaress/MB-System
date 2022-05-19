@@ -18,7 +18,14 @@ else()
 endif()
 
 
-option(buildQt "buildQt" OFF)
+option(buildQt "build Qt tools" OFF)
+option(buildTrn "build MBTRN tools" OFF)
+option(buildTnav "build MBTNAV tools" OFF)
+option(buildOpencv "build OpenCV tools" OFF)
+option(buildGraphical "build graphical tools" ON)
+option(buildGsf "build GSF library" ON)
+option(buildTest "build test tools" ON)
+option(buildPCL "build PCL tools" OFF)
 
 # Set list of required modules (i.e. packages with find modules)
 set(modules GMT Proj OpenGL X11 Motif GDAL NetCDF FFTW)
@@ -296,9 +303,9 @@ add_subdirectory(src/bsio)
 add_subdirectory(src/surf)
 # Note that libmbio (at least, maybe others?) depends on
 # on mbtrn libraries r7kr and lmframe, so must always build these 
-## if (buildTrn)
+if (buildTrn)
    add_subdirectory(src/mbtrn)
-## endif(buildTrn)
+endif(buildTrn)
 
 
 # Executables
@@ -316,3 +323,8 @@ if (buildQt)
   add_subdirectory(src/qvtkTest)  
 endif(buildQt)
 
+# TESTING
+include(buildConfigHeader)
+
+buildConfigHeader(${buildGsf} ${otpsDir} ${buildTrn} ${buildTnav}
+                              ${buildGraphical} ${buildTest})
