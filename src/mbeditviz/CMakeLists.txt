@@ -18,7 +18,7 @@ target_include_directories(mbeditviz
                            ${CMAKE_SOURCE_DIR}/src/gsf
 			   ${NETCDF_INCLUDE_DIR}
 			   ${X11_INCLUDE_DIR})
-			   
+
 # link_directories($GMT_LIBRARIES)
 target_link_libraries(mbeditviz
                       PRIVATE
@@ -29,8 +29,8 @@ target_link_libraries(mbeditviz
                       mbbsio
                       mbsapi
                       mbgsf
-		      r7kr
-		      mframe
+		      ${R7KRLIB}
+		      ${MFRAMELIB}
 		      ${GMT_LIBRARIES}
 		      ${NETCDF_LIBRARIES}
 		      ${MOTIF_LIBRARIES}
