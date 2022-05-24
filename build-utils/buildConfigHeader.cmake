@@ -1,8 +1,8 @@
 # Generate src/mbio/mb_config.h 
 message("Now in buildConfigHeader")
 
-function(buildConfigHeader buildGsf otpsDir buildTrn buildMbTnav
-                           buildGraphical buildTest)
+function(buildConfigHeader buildGSF buildTRN buildMbTNav
+                           buildGUIs buildTest)
 
    set(outfile ${CMAKE_SOURCE_DIR}/src/mbio/mb_config.h)
    
@@ -17,16 +17,16 @@ function(buildConfigHeader buildGsf otpsDir buildTrn buildMbTnav
    test_big_endian(bigEndian)
    file(APPEND ${outfile} "// Bytes are swapped (little-endian)?\n")
    if (bigEndian)
-     file(APPEND ${outfile} "#define BYTESWAPPED 0\n\n")
+     file(APPEND ${outfile} "#undef BYTESWAPPED\n\n")
    else()
-     file(APPEND ${outfile} "#define BYTESWAPPED 1\n\n")
+     file(APPEND ${outfile} "#define BYTESWAPPED\n\n")
    endif()
    
    file(APPEND ${outfile} "// Build with GSF?\n")
-   if (${buildGsf})
-      file(APPEND ${outfile} "#define ENABLE_GSF 1\n\n")
+   if (${buildGSF})
+      file(APPEND ${outfile} "#define ENABLE_GSF\n\n")
    else()
-      file(APPEND ${outfile} "#define ENABLE_GSF 0\n\n")
+      file(APPEND ${outfile} "#undef ENABLE_GSF\n\n")
    endif()
    
    file(APPEND ${outfile} "// Machine is bigendian, (Byteswapping off)?\n")
@@ -34,17 +34,17 @@ function(buildConfigHeader buildGsf otpsDir buildTrn buildMbTnav
 
    file(APPEND ${outfile} "// Compiler supports basic C++11 syntax?\n")
    if (${CMAKE_CXX_STANDARD} EQUAL 11)
-     file(APPEND ${outfile} "#define HAVE_CXX11 1\n\n")
+     file(APPEND ${outfile} "#define HAVE_CXX11\n\n")
    else()
-     file(APPEND ${outfile} "#define HAVE_CXX11 0\n\n")
+     file(APPEND ${outfile} "#undef HAVE_CXX11\n\n")
    endif()
    
    file(APPEND ${outfile} "// Have <dlfcn.h>?\n")
    find_file(fn1 "dlfcn.h" NO_CACHE PATHS ${CMAKE_SYSTEM_PREFIX_PATH})
    if (${fn1} MATCHES "-NOTFOUND")
-     file(APPEND ${outfile} "#define HAVE_DLFCN_H 0\n\n")
+     file(APPEND ${outfile} "#define HAVE_DLFCN_H\n\n")
    else()
-     file(APPEND ${outfile} "#define HAVE_DLFCN_H 1\n\n")   
+     file(APPEND ${outfile} "#undef HAVE_DLFCN_H\n\n")   
    endif()
 
 #[[     
@@ -59,9 +59,9 @@ function(buildConfigHeader buildGsf otpsDir buildTrn buildMbTnav
              NO_CACHE PATHS ${CMAKE_SYSTEM_PREFIX_PATH})
    message("AFTER - fn2: ${fn2}")
    if (${fn2} MATCHES "-NOTFOUND")
-     file(APPEND ${outfile} "#define HAVE_INTTYPES_H 0\n\n")
+     file(APPEND ${outfile} "#undef HAVE_INTTYPES_H\n\n")
    else()
-     file(APPEND ${outfile} "#define HAVE_INTTYPES_H 1\n\n")   
+     file(APPEND ${outfile} "#define HAVE_INTTYPES_H\n\n")   
    endif()
    
    file(APPEND ${outfile} "// Have `m' (math) library\n")
@@ -69,36 +69,36 @@ function(buildConfigHeader buildGsf otpsDir buildTrn buildMbTnav
    find_library(lib1 "m" NO_CACHE)
    message("lib1: ${lib1}")
    if (${lib1} MATCHES "-NOTFOUND")
-     file(APPEND ${outfile} "#define HAVE_LIBM 0\n\n")
+     file(APPEND ${outfile} "#undef HAVE_LIBM\n\n")
    else()
-     file(APPEND ${outfile} "#define HAVE_LIBM 1\n\n")   
+     file(APPEND ${outfile} "#define HAVE_LIBM\n\n")   
    endif()
    
    file(APPEND ${outfile} "// Have `pthread' library?\n")
    find_library(lib2 "pthread" NO_CACHE)
    message("lib2: ${lib2}")
    if (${lib2} MATCHES "-NOTFOUND")
-     file(APPEND ${outfile} "#define HAVE_LIBPTHREAD 0\n\n")
+     file(APPEND ${outfile} "#undef HAVE_LIBPTHREAD\n\n")
    else()
-     file(APPEND ${outfile} "#define HAVE_LIBPTHREAD 1\n\n")   
+     file(APPEND ${outfile} "#define HAVE_LIBPTHREAD\n\n")   
    endif()
 
    file(APPEND ${outfile} "// Have <malloc.h>?\n")
    find_file(fn3 "malloc.h" 
              NO_CACHE PATHS ${CMAKE_SYSTEM_PREFIX_PATH})
    if (${fn3} MATCHES "-NOTFOUND")
-     file(APPEND ${outfile} "#define HAVE_MALLOC_H 0\n\n")
+     file(APPEND ${outfile} "#undef HAVE_MALLOC_H\n\n")
    else()
-     file(APPEND ${outfile} "#define HAVE_MALLOC_H 1\n\n") 
+     file(APPEND ${outfile} "#define HAVE_MALLOC_H\n\n") 
    endif()
 
    file(APPEND ${outfile} "// Have <rpc/rpc.h>?\n")
    find_file(fn4 "rpc/rpc.h" 
              NO_CACHE PATHS ${CMAKE_SYSTEM_PREFIX_PATH})
    if (${fn4} MATCHES "-NOTFOUND")
-     file(APPEND ${outfile} "#define HAVE_RPC_RPC_H 0\n\n")
+     file(APPEND ${outfile} "#undef HAVE_RPC_RPC_H\n\n")
    else()
-     file(APPEND ${outfile} "#define HAVE_RPC_RPC_H 1\n\n")
+     file(APPEND ${outfile} "#define HAVE_RPC_RPC_H\n\n")
    endif()
    
 #[[
@@ -112,75 +112,75 @@ function(buildConfigHeader buildGsf otpsDir buildTrn buildMbTnav
    find_file(fn5 "stdint.h" 
              NO_CACHE PATHS ${CMAKE_SYSTEM_PREFIX_PATH})
    if (${fn5} MATCHES "-NOTFOUND")
-     file(APPEND ${outfile} "#define HAVE_STDINT_H 0\n\n")
+     file(APPEND ${outfile} "#undef HAVE_STDINT_H\n\n")
    else()
-     file(APPEND ${outfile} "#define HAVE_STDINT_H 1\n\n")
+     file(APPEND ${outfile} "#define HAVE_STDINT_H\n\n")
    endif()
 
    file(APPEND ${outfile} "// Have <stdio.h>?\n")
    find_file(fn6 "stdio.h" 
              NO_CACHE PATHS ${CMAKE_SYSTEM_PREFIX_PATH})
    if (${fn6} MATCHES "-NOTFOUND")
-     file(APPEND ${outfile} "#define HAVE_STDIO_H 0\n\n")
+     file(APPEND ${outfile} "#undef HAVE_STDIO_H\n\n")
    else()
-     file(APPEND ${outfile} "#define HAVE_STDIO_H 1\n\n")
+     file(APPEND ${outfile} "#define HAVE_STDIO_H\n\n")
    endif()
 
    file(APPEND ${outfile} "// Have <stdlib.h>?\n")
    find_file(fn7 "stdlib.h" 
              NO_CACHE PATHS ${CMAKE_SYSTEM_PREFIX_PATH})
    if (${fn7} MATCHES "-NOTFOUND")
-     file(APPEND ${outfile} "#define HAVE_STDLIB_H 0\n\n")
+     file(APPEND ${outfile} "#undef HAVE_STDLIB_H\n\n")
    else()
-     file(APPEND ${outfile} "#define HAVE_STDLIB_H 1\n\n")
+     file(APPEND ${outfile} "#define HAVE_STDLIB_H\n\n")
    endif()
 
    file(APPEND ${outfile} "// Have <strings.h>?\n")
    find_file(fn8 "strings.h" 
              NO_CACHE PATHS ${CMAKE_SYSTEM_PREFIX_PATH})
    if (${fn8} MATCHES "-NOTFOUND")
-     file(APPEND ${outfile} "#define HAVE_STRINGS_H 0\n\n")
+     file(APPEND ${outfile} "#undef HAVE_STRINGS_H\n\n")
    else()
-     file(APPEND ${outfile} "#define HAVE_STRINGS_H 1\n\n")
+     file(APPEND ${outfile} "#define HAVE_STRINGS_H\n\n")
    endif()
 
    file(APPEND ${outfile} "// Have <string.h>?\n")
    find_file(fn9 "string.h" 
              NO_CACHE PATHS ${CMAKE_SYSTEM_PREFIX_PATH})
    if (${fn9} MATCHES "-NOTFOUND")
-     file(APPEND ${outfile} "#define HAVE_STRING_H 0\n\n")
+     file(APPEND ${outfile} "#undef HAVE_STRING_H\n\n")
    else()
-     file(APPEND ${outfile} "#define HAVE_STRING_H 1\n\n")
+     file(APPEND ${outfile} "#define HAVE_STRING_H\n\n")
    endif()
 
    file(APPEND ${outfile} "// Have <stat.h>?\n")
    find_file(fn10 "sys/stat.h" 
              NO_CACHE PATHS ${CMAKE_SYSTEM_PREFIX_PATH} ${CMAKE_C_IMPLICIT_INCLUDE_DIRECTORIES})
    if (${fn10} MATCHES "-NOTFOUND")
-     file(APPEND ${outfile} "#define HAVE_SYS_STAT_H 0\n\n")
+     file(APPEND ${outfile} "#undef HAVE_SYS_STAT_H\n\n")
    else()
-     file(APPEND ${outfile} "#define HAVE_SYS_STAT_H 1\n\n")
+     file(APPEND ${outfile} "#define HAVE_SYS_STAT_H\n\n")
    endif()
 
    file(APPEND ${outfile} "// Have <sys/types.h>?\n")
    find_file(fn11 "sys/types.h" 
              NO_CACHE PATHS ${CMAKE_SYSTEM_PREFIX_PATH})
    if (${fn11} MATCHES "-NOTFOUND")
-     file(APPEND ${outfile} "#define HAVE_SYS_TYPES_H 0\n\n")
+     file(APPEND ${outfile} "#undef HAVE_SYS_TYPES_H\n\n")
    else()
-     file(APPEND ${outfile} "#define HAVE_SYS_TYPES_H 1\n\n")
+     file(APPEND ${outfile} "#define HAVE_SYS_TYPES_H\n\n")
    endif()
 
    file(APPEND ${outfile} "// Have <unistd.h>?\n")
    find_file(fn12 "unistd.h" 
              NO_CACHE PATHS ${CMAKE_SYSTEM_PREFIX_PATH})
    if (${fn12} MATCHES "-NOTFOUND")
-     file(APPEND ${outfile} "#define HAVE_UNISTD_H 0\n\n")
+     file(APPEND ${outfile} "#undef HAVE_UNISTD_H\n\n")
    else()
-     file(APPEND ${outfile} "#define HAVE_UNISTD_H 1\n\n")
+     file(APPEND ${outfile} "#define HAVE_UNISTD_H\n\n")
    endif()
 
-   file(APPEND ${outfile} "#define MBSYSTEM_CONFIG_DEFINED 1\n\n")
+   file(APPEND ${outfile} "#define MBSYSTEM_CONFIG_DEFINED\n\n")
 
    file(APPEND ${outfile} "// Installation prefix\n")
    file(APPEND ${outfile} "#define MBSYSTEM_INSTALL_PREFIX \"${CMAKE_INSTALL_PREFIX}\"\n\n")   
@@ -218,10 +218,6 @@ function(buildConfigHeader buildGsf otpsDir buildTrn buildMbTnav
    file(APPEND ${outfile} "#define PACKAGE_TARNAME \"mbsystem\"\n\n")
 
 
-   file(APPEND ${outfile} "// MBSYSTEM_OTPS_LOCATION\n")
-   file(APPEND ${outfile}
-               "#define MBSYSTEM_OTPS_LOCATION \"${otpsDir}\"\n\n")
-
    file(APPEND ${outfile} "// Build tools using OpenCV?\n")
    file(APPEND ${outfile} "#define OPENCVTOOLS_ENABLED ${openCVEnabled}\n\n")
 
@@ -233,31 +229,31 @@ function(buildConfigHeader buildGsf otpsDir buildTrn buildMbTnav
    file(APPEND ${outfile} "#define PACKAGE_URL \"http://www.mbari.org/data/mbsystem/\"\n\n")
 
    file(APPEND ${outfile} "// Build libmbtnav and embed TRN instance in mbtrnpp?\n")
-   if (${buildTnav})
-      file(APPEND ${outfile} "#define MBTNAV_ENABLED 1\n\n")
+   if (${buildTNav})
+      file(APPEND ${outfile} "#define MBTNAV_ENABLED\n\n")
    else()
-      file(APPEND ${outfile} "#define MBTNAV_ENABLED 0\n\n")
+      file(APPEND ${outfile} "#undef MBTNAV_ENABLED 0\n\n")
    endif()
 
    file(APPEND ${outfile} "// Build libmbtrn and mbtrnpp?\n")
-   if (${buildTrn})
+   if (${buildTRN})
       file(APPEND ${outfile} "#define MBTRN_ENABLED\n\n")
    else()
       file(APPEND ${outfile} "#undef MBTRN_ENABLED\n\n")
    endif()
    
    file(APPEND ${outfile} "// Build graphical tools?\n")
-   if (${buildGraphical})
-      file(APPEND ${outfile} "#define MB_GRAPHICAL_ENABLED 1\n\n")
+   if (${buildGUIs})
+      file(APPEND ${outfile} "#define MB_GRAPHICAL_ENABLED\n\n")
    else()
-      file(APPEND ${outfile} "#define MB_GRAPHICAL_ENABLED 0\n\n")   
+      file(APPEND ${outfile} "#undef MB_GRAPHICAL_ENABLED\n\n")   
    endif()
 
    file(APPEND ${outfile} "//Build unit tests?\n")
    if (${buildTest})
-      file(APPEND ${outfile} "#define TEST_ENABLED 1\n\n")
+      file(APPEND ${outfile} "#define TEST_ENABLED\n\n")
    else()
-      file(APPEND ${outfile} "#define TEST_ENABLED 0\n\n")   
+      file(APPEND ${outfile} "#undefine TEST_ENABLED\n\n")   
    endif()
    
 #[[
