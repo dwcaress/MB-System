@@ -19,8 +19,9 @@ help() {
         echo $opt
     done
 
-    echo "assert module include path with module_include=<DIR>"
-    echo "assert module library with module_lib=<LIB>"    
+    echo "specify module include path with module_include=<DIR>"
+    echo "specify module library with module_lib=<LIB>"
+    echo "specify module libraries with module_lib=<LIB;LIB2;LIB3...>"        
     echo "where 'module' is one of:"
     for package in ${validModules[@]}; do
         echo $package
