@@ -4,7 +4,7 @@
 # N.B.: Most command-line options to this script *MUST* match spelling of
 # of variables that can be provided on command-line to MB-System/CMakeLists.txt
 
-# Boolean options are specified as single word, which assumes true
+# Boolean options are specified as option=0 or option=1
 validBoolOptions=(buildGUIs buildOpenCV buildPCL
                   buildTRN buildTNav buildQt buildGSF buildTest)
 
