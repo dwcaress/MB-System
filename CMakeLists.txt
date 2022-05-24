@@ -17,15 +17,17 @@ else()
   message(FATAL_ERROR "Building on unsupported OS ${CMAKE_SYSTEM_NAME}")
 endif()
 
+# Basics
+option(buildGraphical "build graphical tools" ON)
+option(buildOpencv "build OpenCV tools" ON)
+option(buildOpencv "build PCL tools" ON)
 
 option(buildQt "build Qt tools" OFF)
 option(buildTrn "build MBTRN tools" OFF)
 option(buildTnav "build MBTNAV tools" OFF)
-option(buildOpencv "build OpenCV tools" OFF)
-option(buildGraphical "build graphical tools" ON)
-option(buildGsf "build GSF library" ON)
-option(buildTest "build test tools" ON)
-option(buildPCL "build PCL tools" OFF)
+option(buildGsf "build GSF library" OFF)
+option(buildTest "build test tools" OFF)
+
 
 # Set list of required modules (i.e. packages with find modules)
 set(modules GMT Proj OpenGL X11 Motif GDAL NetCDF FFTW)
@@ -33,9 +35,8 @@ set(modules GMT Proj OpenGL X11 Motif GDAL NetCDF FFTW)
 
 if (help)
 
-  message("force package include path with -Dpackage_include=path")
-  message("specify OPTS install location with -DoptsDir=directory")
-  message("set install prefix with -Dprefix=directory")  
+  message("specify OTPS install location with -DotpsDir=directory")
+  message("set install directory with -DinstallDir=directory")  
   message("force package include directory with -Dpackage_include=path")
   message("force package libraries with -Dpackage_lib=file")  
   message("where package is one of the following:")
@@ -117,7 +118,7 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 
 message("CMAKE_CXX_FLAGS: ${CMAKE_CXX_FLAGS}")
 
-if (prefix)
+if (installDir)
   set(CMAKE_INSTALL_PREFIX ${prefix})
 endif()
 
@@ -301,10 +302,16 @@ add_subdirectory(src/mbio)
 add_subdirectory(src/mbview)
 add_subdirectory(src/bsio)
 add_subdirectory(src/surf)
-# Note that libmbio (at least, maybe others?) depends on
-# on mbtrn libraries r7kr and lmframe, so must always build these 
+# Note that libmbio 
 if (buildTrn)
    add_subdirectory(src/mbtrn)
+   
+   # Some executables get linked with TRN libraries
+   set(R7KR_LIB r7kr)
+   set(MFRAME_LIB mframe)
+else()
+   set(R7KR_LIB "")
+   set(MFRAME_LIB "")   
 endif(buildTrn)
 
 
