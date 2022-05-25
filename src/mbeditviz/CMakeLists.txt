@@ -28,9 +28,9 @@ target_link_libraries(mbeditviz
                       mbview
                       mbbsio
                       mbsapi
-                      mbgsf
-		      ${R7KRLIB}
-		      ${MFRAMELIB}
+                      ${GSF_LIB}
+		      ${R7KR_LIB}
+		      ${MFRAME_LIB}
 		      ${GMT_LIBRARIES}
 		      ${NETCDF_LIBRARIES}
 		      ${MOTIF_LIBRARIES}
