@@ -31,8 +31,8 @@ target_link_libraries(mbnavadjust
                       mbbsio
                       mbsapi
                       mbgsf
-		      r7kr
-		      mframe
+		      ${R7KR_LIB}
+		      ${MFRAME_LIB}
 		      ${GMT_LIBRARIES}
 		      ${NETCDF_LIBRARIES}
 		      ${MOTIF_LIBRARIES}
