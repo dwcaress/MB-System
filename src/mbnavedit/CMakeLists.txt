@@ -5,6 +5,7 @@
 message("in mbnavedit")
 
 add_executable(mbnavedit
+               mbnavedit.c
 	       mbnavedit_callbacks.c
                mbnavedit_creation.c
 	       mbnavedit_prog.c
