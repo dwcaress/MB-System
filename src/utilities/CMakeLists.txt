@@ -32,9 +32,9 @@ foreach(executable ${executables})
                         mbbsio
                         mbaux
                         mbsapi
-                        mbgsf
-			r7kr
-			mframe
+                        ${GSF_LIB}
+			${R7KR_LIB}
+			${MFRAME_LIB}
 	                ${GMT_LIBRARIES}
                         ${NETCDF_LIBRARIES}
                         ${GDAL_LIBRARIES}
