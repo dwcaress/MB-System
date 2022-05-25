@@ -155,8 +155,7 @@ mbsys_surf.c
 mbsys_swathplus.c
 mbsys_wassp.c
 mbsys_xse.c
-mbr_gsfgenmb.c
-mbsys_gsf.c
+${MBIO_GSF_SRC}
 )
 
 # add static or shared library, depending on BUILD_SHARED_LIBS
