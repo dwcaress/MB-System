@@ -31,14 +31,16 @@ function(buildConfigHeader buildGSF buildTRN buildMbTNav
    
    file(APPEND ${outfile} "// Machine is bigendian, (Byteswapping off)?\n")
    file(APPEND ${outfile} "#define ENDIAN_BIG ${bigEndian}\n\n")
-
+#[[ Not referenced
    file(APPEND ${outfile} "// Compiler supports basic C++11 syntax?\n")
    if (${CMAKE_CXX_STANDARD} EQUAL 11)
      file(APPEND ${outfile} "#define HAVE_CXX11\n\n")
    else()
      file(APPEND ${outfile} "#undef HAVE_CXX11\n\n")
    endif()
-   
+ ]]
+
+#[[ Not referenced
    file(APPEND ${outfile} "// Have <dlfcn.h>?\n")
    find_file(fn1 "dlfcn.h" NO_CACHE PATHS ${CMAKE_SYSTEM_PREFIX_PATH})
    if (${fn1} MATCHES "-NOTFOUND")
@@ -46,6 +48,7 @@ function(buildConfigHeader buildGSF buildTRN buildMbTNav
    else()
      file(APPEND ${outfile} "#undef HAVE_DLFCN_H\n\n")   
    endif()
+]]
 
 #[[     
 /*
@@ -53,6 +56,7 @@ function(buildConfigHeader buildGSF buildTRN buildMbTNav
 /* #undef HAVE_GSINCOS */
 ]]
 
+#[[ Not referenced
   file(APPEND ${outfile} "// Have <inttypes.h>?\n")
    message("CMAKE_SYSTEM_PREFIX_PATH: ${CMAKE_SYSTEM_PREFIX_PATH}")
    find_file(fn2 "inttypes.h" 
@@ -63,7 +67,9 @@ function(buildConfigHeader buildGSF buildTRN buildMbTNav
    else()
      file(APPEND ${outfile} "#define HAVE_INTTYPES_H\n\n")   
    endif()
-   
+]]
+
+#[[ Not referenced
    file(APPEND ${outfile} "// Have `m' (math) library\n")
    message("CMAKE_SYSTEM_LIBRARY_PATH: ${CMAKE_SYSTEM_LIBRARY_PATH}")
    find_library(lib1 "m" NO_CACHE)
@@ -73,7 +79,9 @@ function(buildConfigHeader buildGSF buildTRN buildMbTNav
    else()
      file(APPEND ${outfile} "#define HAVE_LIBM\n\n")   
    endif()
-   
+]]
+
+#[[ Not referenced
    file(APPEND ${outfile} "// Have `pthread' library?\n")
    find_library(lib2 "pthread" NO_CACHE)
    message("lib2: ${lib2}")
@@ -82,6 +90,7 @@ function(buildConfigHeader buildGSF buildTRN buildMbTNav
    else()
      file(APPEND ${outfile} "#define HAVE_LIBPTHREAD\n\n")   
    endif()
+]]
 
    file(APPEND ${outfile} "// Have <malloc.h>?\n")
    find_file(fn3 "malloc.h" 
@@ -117,6 +126,7 @@ function(buildConfigHeader buildGSF buildTRN buildMbTNav
      file(APPEND ${outfile} "#define HAVE_STDINT_H\n\n")
    endif()
 
+#[[ Not referenced
    file(APPEND ${outfile} "// Have <stdio.h>?\n")
    find_file(fn6 "stdio.h" 
              NO_CACHE PATHS ${CMAKE_SYSTEM_PREFIX_PATH})
@@ -125,7 +135,9 @@ function(buildConfigHeader buildGSF buildTRN buildMbTNav
    else()
      file(APPEND ${outfile} "#define HAVE_STDIO_H\n\n")
    endif()
+]]
 
+#[[ Not referenced
    file(APPEND ${outfile} "// Have <stdlib.h>?\n")
    find_file(fn7 "stdlib.h" 
              NO_CACHE PATHS ${CMAKE_SYSTEM_PREFIX_PATH})
@@ -134,7 +146,9 @@ function(buildConfigHeader buildGSF buildTRN buildMbTNav
    else()
      file(APPEND ${outfile} "#define HAVE_STDLIB_H\n\n")
    endif()
+]]
 
+#[[ Not referenced
    file(APPEND ${outfile} "// Have <strings.h>?\n")
    find_file(fn8 "strings.h" 
              NO_CACHE PATHS ${CMAKE_SYSTEM_PREFIX_PATH})
@@ -179,6 +193,7 @@ function(buildConfigHeader buildGSF buildTRN buildMbTNav
    else()
      file(APPEND ${outfile} "#define HAVE_UNISTD_H\n\n")
    endif()
+]]
 
    file(APPEND ${outfile} "#define MBSYSTEM_CONFIG_DEFINED\n\n")
 
@@ -214,12 +229,13 @@ function(buildConfigHeader buildGSF buildTRN buildMbTNav
    file(APPEND ${outfile} "#define PACKAGE_STRING ${packageName} \"${gitVersion}\"\n\n")
    
 
-   file(APPEND ${outfile} "// Define package short name")
+   file(APPEND ${outfile} "// Define package short name\n")
    file(APPEND ${outfile} "#define PACKAGE_TARNAME \"mbsystem\"\n\n")
 
-
+#[[ Not referenced
    file(APPEND ${outfile} "// Build tools using OpenCV?\n")
    file(APPEND ${outfile} "#define OPENCVTOOLS_ENABLED ${openCVEnabled}\n\n")
+]]
 
    file(APPEND ${outfile} "// Address where bug reports for this package should be sent.\n")
    file(APPEND ${outfile}
@@ -228,6 +244,8 @@ function(buildConfigHeader buildGSF buildTRN buildMbTNav
    file(APPEND ${outfile} "// Package homepage\n")
    file(APPEND ${outfile} "#define PACKAGE_URL \"http://www.mbari.org/data/mbsystem/\"\n\n")
 
+
+#[[ Not referenced
    file(APPEND ${outfile} "// Build libmbtnav and embed TRN instance in mbtrnpp?\n")
    if (${buildTNav})
       file(APPEND ${outfile} "#define MBTNAV_ENABLED\n\n")
@@ -235,13 +253,16 @@ function(buildConfigHeader buildGSF buildTRN buildMbTNav
       file(APPEND ${outfile} "#undef MBTNAV_ENABLED 0\n\n")
    endif()
 
+]]
+
    file(APPEND ${outfile} "// Build libmbtrn and mbtrnpp?\n")
    if (${buildTRN})
       file(APPEND ${outfile} "#define MBTRN_ENABLED\n\n")
    else()
       file(APPEND ${outfile} "#undef MBTRN_ENABLED\n\n")
    endif()
-   
+
+#[[ Not referenced
    file(APPEND ${outfile} "// Build graphical tools?\n")
    if (${buildGUIs})
       file(APPEND ${outfile} "#define MB_GRAPHICAL_ENABLED\n\n")
@@ -255,17 +276,10 @@ function(buildConfigHeader buildGSF buildTRN buildMbTNav
    else()
       file(APPEND ${outfile} "#undefine TEST_ENABLED\n\n")   
    endif()
-   
+]]
+
+
 #[[
-/*
-/* Define to the sub-directory where libtool stores uninstalled libraries. */
-/*
-#define LT_OBJDIR ".libs/"
-
-
-
-
-
 
 /* Build tools using PCL */
 /* #undef PCLTOOLS_ENABLED */
@@ -274,8 +288,6 @@ function(buildConfigHeader buildGSF buildTRN buildMbTNav
 /* Define to 1 if all of the C90 standard headers exist (not just the ones
    required in a freestanding environment). This macro is provided for
    backward compatibility; new code need not use it. */
-
-#define STDC_HEADERS 1
 
 
 /* Version number of package */
