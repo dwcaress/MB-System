@@ -18,14 +18,14 @@ else()
 endif()
 
 # Basics
-option(buildGraphical "build graphical tools" ON)
-option(buildOpencv "build OpenCV tools" ON)
-option(buildOpencv "build PCL tools" ON)
+option(buildGUIs "build graphical tools" ON)
+option(buildOpenCV "build OpenCV tools" ON)
+option(buildPCL "build point-cloud-library" ON)
 
+option(buildTRN "build MBTRN tools" OFF)
+option(buildTNav "build MBTNav tools" OFF)
 option(buildQt "build Qt tools" OFF)
-option(buildTrn "build MBTRN tools" OFF)
-option(buildTnav "build MBTNAV tools" OFF)
-option(buildGsf "build GSF library" OFF)
+option(buildGSF "build GSF library" OFF)
 option(buildTest "build test tools" OFF)
 
 
@@ -43,7 +43,7 @@ if (help)
   message("${modules} ${packages}")
   message("enable debugging with -DCMAKE_BUILD_TYPE=Debug")
   message("build Qt-based GUIs with -DbuildQt=1")
-  message("build TRN software with -DbuildTrn=1")
+  message("build TRN software with -DbuildTRN=1")
   message("build shared/static libraries with -DBUILD_SHARED_LIBS=ON/OFF")
   message("you MUST specify -DVTK_include=<dir> -DVTK_lib=<libs>")
   message(FATAL_ERROR "")
@@ -295,33 +295,43 @@ endif()
 # Use standard cache variables for installation
 include(GNUInstallDirs)
 
-# Utilities and libraries
-add_subdirectory(src/gsf)
 add_subdirectory(src/mbaux)
 add_subdirectory(src/mbio)
 add_subdirectory(src/mbview)
 add_subdirectory(src/bsio)
 add_subdirectory(src/surf)
-# Note that libmbio 
-if (buildTrn)
+
+# Utilities and libraries
+if (buildGSF)
+   add_subdirectory(src/gsf)
+   set(GSF_LIB mbgsf)
+else()
+   set(GSF_LIB "")
+endif(buildGSF)
+
+if (buildTRN)
    add_subdirectory(src/mbtrn)
    
-   # Some executables get linked with TRN libraries
+   # Some executables get linked with TRN libraries in this case
    set(R7KR_LIB r7kr)
    set(MFRAME_LIB mframe)
 else()
+   # Not building TRN libraries
    set(R7KR_LIB "")
    set(MFRAME_LIB "")   
-endif(buildTrn)
+endif(buildTRN)
 
 
 # Executables
-add_subdirectory(src/mbgrdviz)
-add_subdirectory(src/mbedit)
-add_subdirectory(src/mbeditviz)
-add_subdirectory(src/mbnavadjust)
-add_subdirectory(src/mbnavedit)
-add_subdirectory(src/mbvelocitytool)
+if (buildGUIs)
+   add_subdirectory(src/mbedit)
+   add_subdirectory(src/mbgrdviz)
+   add_subdirectory(src/mbeditviz)
+   add_subdirectory(src/mbnavadjust)
+   add_subdirectory(src/mbnavedit)
+   add_subdirectory(src/mbvelocitytool)
+endif(buildGUIs)
+
 add_subdirectory(src/utilities)
 
 if (buildQt)
@@ -333,5 +343,5 @@ endif(buildQt)
 # TESTING
 include(buildConfigHeader)
 
-buildConfigHeader(${buildGsf} ${otpsDir} ${buildTrn} ${buildTnav}
-                              ${buildGraphical} ${buildTest})
+buildConfigHeader(${buildGSF} ${buildTRN} ${buildTNav}
+                              ${buildGUIs} ${buildTest})
