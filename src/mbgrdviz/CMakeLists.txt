@@ -20,7 +20,6 @@ target_include_directories(mbgrdviz
                            ${CMAKE_SOURCE_DIR}/src/gsf)                        
 
 # link_directories($GMT_LIBRARIES)
-message("mbgrdviz: GMT_LIBRARIES: ${GMT_LIBRARIES}")   
 target_link_libraries(mbgrdviz
                       PRIVATE
                       mbio
