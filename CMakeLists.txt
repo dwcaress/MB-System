@@ -30,6 +30,8 @@ option(buildTest "build test tools" OFF)
 
 
 # Set list of required modules (i.e. packages with find modules)
+# NOTE: VTK is not included in list of required modules, as its
+# support for cmake is not complete/consistent
 set(modules GMT Proj OpenGL X11 Motif GDAL NetCDF FFTW)
 
 
@@ -82,6 +84,24 @@ if (APPLE)
 else()
   set(otpsDir /local/opt/otps)
 endif()
+
+### TEST TEST TEST Can cmake find VTK header directory and libraries?
+message("TEST: look for vtk stuff")
+message("CMAKE_MODULE_PATH: ${CMAKE_MODULE_PATH}")
+find_package(VTK)
+message("VTK_FOUND: ${VTK_FOUND}")
+message("VTK_INCLUDE_DIRS: ${VTK_INCLUDE_DIRS}")
+message("VTK_LIBRARIES: ${VTK_LIBRARIES}")
+message("VTK_VERSION: ${VTK_VERSION}")
+
+message("file GLOB")
+## file(GLOB result LIST_DIRECTORIES true RELATIVE /usr/local /usr/local/*/*vtk-8*)
+### file(GLOB result LIST_DIRECTORIES true RELATIVE /usr/local /usr/local/*/*vtk-8*)
+file(GLOB result LIST_DIRECTORIES true /usr/local/*/*vtk-8*)
+message("result: ${result}")
+message("file GLOB RECURSE")
+file(GLOB_RECURSE LIST_DIRECTORIES true result2 /usr/local/*vtk-8*)
+message("result: ${result2}")
 
 #[[
 NOTE: VTK_lib is specified as a space-delimited list of libraries, and 
@@ -145,7 +165,7 @@ foreach(module ${modules})
   endif()
 
   if (NOT ${module}_include OR  NOT ${module}_lib)
-    # Try to find module
+    # Try to find module with Find${module}
     message("include Find${MODULE}")
     include(Find${module})
     string(TOUPPER ${module} MODULE)
@@ -155,8 +175,10 @@ foreach(module ${modules})
         set(${MODULE}_LIBRARIES ${${MODULE}_LIBRARY})
       endif()
     else()
+      # Search for header
+      # Search for libraries
       message(FATAL_ERROR
-              "Module ${module} not found\n"
+              "Find${module} didn't find ${module}\n"
               "Specify -D${module}_include=dir and -D${module}_lib=file "
               "on cmake command line")
 
@@ -183,13 +205,18 @@ if (buildQt)
   endif()
 
   if (VTK_include)
-    set(VTK_INCLUDE_DIR ${VTK_include})
+    # Specified on command line
+    message("set VTK_INCLUDE_DIR to ${VTK_include}")
+    set(VTK_INCLUDE_DIR ${VTK_include} CACHE PATH "path to VTK headers")
   endif()
 
   if (VTK_lib)
-    set(VTK_LIBRARIES ${VTK_lib})
+    # Specified on command line
+    message("set VTK_LIBRARIES to ${VTK_lib}")  
+    set(VTK_LIBRARIES ${VTK_lib} CACHE FILEPATH "path to VTK libraries")
   endif()
 
+  # Try to find VTK package
   if (NOT VTK_include OR NOT VTK_lib)
     find_package(VTK REQUIRED)
     if (VTK_FOUND)
@@ -197,6 +224,12 @@ if (buildQt)
     else()
       message("VTK package not found")
     endif()
+
+ 
+    # VTK does not seem to play well with cmake package structure, so
+    # we use a more brute-force method to find it
+    
+
   endif()
 
 endif(buildQt)  
@@ -230,12 +263,12 @@ foreach(module ${modules})
   if (${module}_include)
     message("override ${module} include directory with ${${module}_include}")
     string(TOUPPER ${module} MODULE)
-    set(${MODULE}_INCLUDE_DIR ${${module}_include})
+    set(${MODULE}_INCLUDE_DIR ${${module}_include} CACHE FILE "${module} header directory")
   endif()
   if (${module}_lib)
     message("override ${module} library with ${${module}_lib}")
     string(TOUPPER ${module} MODULE)
-    set(${MODULE}_LIBRARIES ${${module}_lib})
+    set(${MODULE}_LIBRARIES ${${module}_lib} CACHE FILE "${module} library(ies)")
 endif()
 endforeach()
 
@@ -305,8 +338,10 @@ add_subdirectory(src/surf)
 if (buildGSF)
    add_subdirectory(src/gsf)
    set(GSF_LIB mbgsf)
+   set(MBIO_GSF_SRC "mbsys_gsf.c mbr_gsfgenmb.c")
 else()
    set(GSF_LIB "")
+   set(MBIO_GSF_SRC "")
 endif(buildGSF)
 
 if (buildTRN)
@@ -345,3 +380,5 @@ include(buildConfigHeader)
 
 buildConfigHeader(${buildGSF} ${buildTRN} ${buildTNav}
                               ${buildGUIs} ${buildTest})
+
+message("DONE")
