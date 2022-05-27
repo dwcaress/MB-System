@@ -15,6 +15,7 @@ using att_tup = std::tuple<double, double, double>;
 
 typedef enum{
     AF_VALID=0x1,
+    AF_INVERT_PITCH=0x2,
 }att_flag_bits_t;
 
 typedef uint32_t att_flags_t;
@@ -63,7 +64,7 @@ public:
 
     double pitch(att_angle_units_t=PA_RADIANS)
     {
-        return std::get<0>(mAttitude);
+        return (mFlags.is_set(AF_INVERT_PITCH) ? (std::get<0>(mAttitude) * -1.) : std::get<0>(mAttitude));
     }
 
     double roll(att_angle_units_t=PA_RADIANS)

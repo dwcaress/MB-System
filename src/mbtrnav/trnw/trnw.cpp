@@ -1167,11 +1167,17 @@ int wposet_mb1_to_pose(wposet_t **dest, mb1_t *src, long int utmZone)
             obj->gpsValid=(obj->z<2?true:false);
             obj->bottomLock=true;
             obj->dvlValid=true;
-            // why these consts?
-            obj->wx = -3.332e-002;
-            obj->wy = -9.155e-003;
-            obj->wz = -3.076e-002;
-            obj->vx = obj->vy = obj->vz = 0.01;
+            // TRN can't intialize if vx == 0
+            obj->vx = 0.01;
+            obj->vy = 0.;
+            obj->vz = 0.;
+            // wx not required; can use these (how determined?)
+            // obj->wx = -3.332e-002;
+            // obj->wy = -9.155e-003;
+            // obj->wz = -3.076e-002;
+            obj->wx = 0.;
+            obj->wy = 0.;
+            obj->wz = 0.;
 
             retval=0;
         }

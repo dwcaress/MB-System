@@ -1147,7 +1147,7 @@ class app_cfg
 {
 public:
     app_cfg()
-    : mDebug(0), mVerbose(false), mAppCfg(), mSessionStr(), mInputList(), mTBConfig()
+    : mDebug(0), mVerbose(false), mAppCfg(), mSessionStr(), mInputList(), mTBConfig(), mConfigSet(false)
     {
         char session_string[64]={0};
 
@@ -1171,7 +1171,7 @@ public:
     }
     ~app_cfg(){}
 
-    void parse_args(int argc, char **argv, bool ignore_cfg=false)
+    void parse_args(int argc, char **argv)
     {
         extern char WIN_DECLSPEC *optarg;
         int option_index=0;
@@ -1199,11 +1199,13 @@ public:
         };
         // reset optind
         optind=1;
+
         // process argument list
         while ((c = getopt_long(argc, argv, "", options, &option_index)) != -1){
             char *acpy = nullptr;
             char *host_str = nullptr;
             char *port_str = nullptr;
+            TRN_NDPRINT(1,"++++ PARSING OPTION [%s / %s]\n",options[option_index].name, optarg);
 
             switch (c) {
                     // long options all return c=0
@@ -1226,95 +1228,109 @@ public:
                     else if (strcmp("version", options[option_index].name) == 0) {
                         version = true;
                     }
-                    // host
-                    else if (strcmp("trn-host", options[option_index].name) == 0) {
-                        acpy = strdup(optarg);
-                        host_str = strtok(acpy,":");
-                        port_str = strtok(NULL,":");
-                        if(NULL!=host_str){
-                            mTBConfig.set_host(std::string(host_str));
+                    if(!mConfigSet){
+                        // cfg
+                        if (strcmp("cfg", options[option_index].name) == 0) {
+                            mAppCfg = std::string(optarg);
+                            mConfigSet=true;
+                            break;
                         }
-                        if(NULL != port_str){
-                            int port;
-                            if(sscanf(port_str,"%d",&port) == 1)
-                                mTBConfig.set_port(port);
-                        }
-                        free(acpy);
+                    } else {
+                        // host
+                        if (strcmp("trn-host", options[option_index].name) == 0) {
+                            acpy = strdup(optarg);
+                            host_str = strtok(acpy,":");
+                            port_str = strtok(NULL,":");
+                            if(NULL!=host_str){
+                                mTBConfig.set_host(std::string(host_str));
+                            }
+                            if(NULL != port_str){
+                                int port;
+                                if(sscanf(port_str,"%d",&port) == 1)
+                                    mTBConfig.set_port(port);
+                            }
+                            free(acpy);
 
-                        mTBConfig.set_server(true);
-                    }
-                    // trn-cfg
-                    else if (strcmp("trn-cfg", options[option_index].name) == 0) {
-                        mTBConfig.set_trn_cfg(std::string(optarg));
-                    }
-                    // trn-sensor
-                    else if (strcmp("trn-sensor", options[option_index].name) == 0) {
-                        int sensor=0;
-                        if(sscanf(optarg,"%d", &sensor) == 1)
-                            mTBConfig.set_trn_sensor(sensor);
-                    }
-                    // input
-                    else if (strcmp("input", options[option_index].name) == 0) {
-                        mInputList.push_back(std::string(optarg));
-                    }
-                    // cfg
-                    else if (!ignore_cfg && strcmp("cfg", options[option_index].name) == 0) {
-                        mAppCfg = std::string(optarg);
-                    }
-                    // show
-                    else if (!ignore_cfg && strcmp("show", options[option_index].name) == 0) {
-                        uint32_t oflags=0;
-                        if(strstr(optarg,"trni") != NULL){
-                            oflags |= TrnLogConfig::TRNI;
+                            mTBConfig.set_server(true);
                         }
-                        if(strstr(optarg,"trno") != NULL){
-                            oflags |= TrnLogConfig::EST;
+                        // trn-sensor
+                        else if (strcmp("trn-sensor", options[option_index].name) == 0) {
+                            int sensor=0;
+                            if(sscanf(optarg,"%d", &sensor) == 1)
+                                mTBConfig.set_trn_sensor(sensor);
+                        } else if (strcmp("trn-cfg", options[option_index].name) == 0) {
+                            mTBConfig.set_trn_cfg(std::string(optarg));
                         }
-                        if(strstr(optarg,"est") != NULL){
-                            oflags |= TrnLogConfig::EST;
+                        // input
+                        else if (strcmp("input", options[option_index].name) == 0) {
+                            std::list<std::string>::iterator it;
+                            bool on_list=false;
+                            for(it = mInputList.begin(); it != mInputList.end(); it++)
+                            {
+                                if(it->compare(optarg)==0){
+                                    on_list=true;
+                                    break;
+                                }
+                            }
+                            if(!on_list){
+                                mInputList.push_back(std::string(optarg));
+                            }
                         }
-                        if(strstr(optarg,"mmse") != NULL){
-                            oflags |= TrnLogConfig::MMSE;
+                        // show
+                        else if (strcmp("show", options[option_index].name) == 0) {
+                            uint32_t oflags=0;
+                            if(strstr(optarg,"trni") != NULL){
+                                oflags |= TrnLogConfig::TRNI;
+                            }
+                            if(strstr(optarg,"trno") != NULL){
+                                oflags |= TrnLogConfig::EST;
+                            }
+                            if(strstr(optarg,"est") != NULL){
+                                oflags |= TrnLogConfig::EST;
+                            }
+                            if(strstr(optarg,"mmse") != NULL){
+                                oflags |= TrnLogConfig::MMSE;
+                            }
+                            if(strstr(optarg,"mle") != NULL){
+                                oflags |= TrnLogConfig::MLE;
+                            }
+                            if(strstr(optarg,"motn") != NULL){
+                                oflags |= TrnLogConfig::MOTN;
+                            }
+                            if(strstr(optarg,"meas") != NULL){
+                                oflags |= TrnLogConfig::MEAS;
+                            }
+                            if(strstr(optarg,"icsv") != NULL){
+                                oflags |= TrnLogConfig::TRNI_CSV;
+                            }
+                            if(strstr(optarg,"ocsv") != NULL){
+                                oflags |= TrnLogConfig::TRNO_CSV;
+                            }
+                            if(strstr(optarg,"*csv") != NULL){
+                                oflags |= TrnLogConfig::ALL_CSV;
+                            }
+                            if(oflags>0){
+                                mTBConfig.set_oflags(oflags);
+                            }
                         }
-                        if(strstr(optarg,"mle") != NULL){
-                            oflags |= TrnLogConfig::MLE;
+                        // server
+                        else if (strcmp("server", options[option_index].name) == 0) {
+                            mTBConfig.set_server(true);
                         }
-                        if(strstr(optarg,"motn") != NULL){
-                            oflags |= TrnLogConfig::MOTN;
+                        // noserver
+                        else if (strcmp("noserver", options[option_index].name) == 0) {
+                            mTBConfig.set_server(false);
                         }
-                        if(strstr(optarg,"meas") != NULL){
-                            oflags |= TrnLogConfig::MEAS;
+                        // trni-csv
+                        else if (strcmp("trni-csv", options[option_index].name) == 0) {
+                            mTBConfig.set_trni_csv(true);
+                            mTBConfig.set_trni_csv_path(std::string(optarg));
                         }
-                        if(strstr(optarg,"icsv") != NULL){
-                            oflags |= TrnLogConfig::TRNI_CSV;
+                        // trno-csv
+                        else if (strcmp("trno-csv", options[option_index].name) == 0) {
+                            mTBConfig.set_trno_csv(true);
+                            mTBConfig.set_trno_csv_path(std::string(optarg));
                         }
-                        if(strstr(optarg,"ocsv") != NULL){
-                            oflags |= TrnLogConfig::TRNO_CSV;
-                        }
-                        if(strstr(optarg,"*csv") != NULL){
-                            oflags |= TrnLogConfig::ALL_CSV;
-                        }
-                        if(oflags>0){
-                            mTBConfig.set_oflags(oflags);
-                        }
-                    }
-                    // server
-                    else if (!ignore_cfg && strcmp("server", options[option_index].name) == 0) {
-                        mTBConfig.set_server(true);
-                    }
-                    // noserver
-                    else if (!ignore_cfg && strcmp("noserver", options[option_index].name) == 0) {
-                        mTBConfig.set_server(false);
-                    }
-                    // trni-csv
-                    else if (!ignore_cfg && strcmp("trni-csv", options[option_index].name) == 0) {
-                        mTBConfig.set_trni_csv(true);
-                        mTBConfig.set_trni_csv_path(std::string(optarg));
-                    }
-                    // trno-csv
-                    else if (!ignore_cfg && strcmp("trno-csv", options[option_index].name) == 0) {
-                        mTBConfig.set_trno_csv(true);
-                        mTBConfig.set_trno_csv_path(std::string(optarg));
                     }
                     break;
                 default:
@@ -1500,38 +1516,44 @@ public:
                     char *wp = trim(lcp);
                     TRN_NDPRINT(4,">>> wp[%s]\n", wp);
                     if(wp==NULL || strlen(wp)<=0){
-                        continue;
-                    }
-                    char *cp = comment(wp);
-                    TRN_NDPRINT(4,">>> cp[%s]\n", cp);
-                    if(strlen(cp) > 0){
-                        char *key=NULL;
-                        char *val=NULL;
-                        parse_key_val(cp, "=", &key, &val);
-                        char *tkey = trim(key);
-                        char *tval = trim(val);
-                        TRN_NDPRINT(4,">>> key[%s] val[%s]\n",tkey,tval);
-                        char *etval = expand_env(tval);
-                        if(etval==NULL)
-                            etval=tval==NULL?strdup(""):strdup(tval);
+                        // empty/comment
+                    } else {
+                        char *cp = comment(wp);
+                        TRN_NDPRINT(4,">>> cp[%s]\n", cp);
+                        if(strlen(cp) > 0){
+                            char *key=NULL;
+                            char *val=NULL;
+                            parse_key_val(cp, "=", &key, &val);
+                            char *tkey = trim(key);
+                            char *tval = trim(val);
+                            TRN_NDPRINT(4,">>> key[%s] val[%s]\n",tkey,tval);
+                            char *etval = expand_env(tval);
+                            if(etval==NULL)
+                                etval=tval==NULL?strdup(""):strdup(tval);
 
-                        TRN_NDPRINT(4,">>> key[%s] etval[%s]\n",tkey,etval);
-                        size_t cmd_len = strlen(key) + strlen(etval) + 4;
-                        char *cmd_buf = (char *)malloc(cmd_len);
-                        memset(cmd_buf,0,cmd_len);
-                        sprintf(cmd_buf, "--%s%s%s", key,(strlen(etval)>0?"=":""),etval);
-                        char dummy[]={'f','o','o','\0'};
-                        char *cmdv[2]={dummy,cmd_buf};
-                        TRN_NDPRINT(4,">>> cmd_buf[%s] cmdv[%p]\n",cmd_buf,&cmdv[0]);
-                        parse_args(2,&cmdv[0]);
-                        free(key);
-                        free(val);
-                        free(etval);
-                        free(cmd_buf);
-                    }else{
-                        TRN_NDPRINT(4, ">>> [comment line]\n");
+                            TRN_NDPRINT(4,">>> key[%s] etval[%s]\n",tkey,etval);
+                            size_t cmd_len = strlen(key) + strlen(etval) + 4;
+                            char *cmd_buf = (char *)malloc(cmd_len);
+                            memset(cmd_buf,0,cmd_len);
+                            sprintf(cmd_buf, "--%s%s%s", key,(strlen(etval)>0?"=":""),etval);
+                            char dummy[]={'f','o','o','\0'};
+                            char *cmdv[2]={dummy,cmd_buf};
+                            TRN_NDPRINT(4,">>> cmd_buf[%s] cmdv[%p]\n",cmd_buf,&cmdv[0]);
+                            parse_args(2,&cmdv[0]);
+                            free(key);
+                            free(val);
+                            free(etval);
+                            free(cmd_buf);
+                            cmd_buf = NULL;
+                            key=NULL;
+                            val=NULL;
+                            etval=NULL;
+                        }else{
+                            TRN_NDPRINT(4, ">>> [comment line]\n");
+                        }
                     }
                     free(lcp);
+                    lcp = NULL;
                 }
             }
             file.close();
@@ -1551,6 +1573,7 @@ public:
     std::list<std::string>::iterator input_last(){ return mInputList.end();}
     int debug(){return mDebug;}
     bool verbose(){return mVerbose;}
+    bool config_set(){return mConfigSet;}
 protected:
 private:
     int mDebug;
@@ -1559,6 +1582,7 @@ private:
     std::string mSessionStr;
     std::list<std::string> mInputList;
     TrnLogConfig mTBConfig;
+    bool mConfigSet;
 };
 
 // /////////////////
@@ -1598,16 +1622,19 @@ int main(int argc, char **argv)
 
     setenv("TLP_SESSION",cfg.session_string().c_str(), false);
 
+    // parse command line (first pass for config file)
     cfg.parse_args(argc, argv);
-    // configure debug output
+
+    // configure debug output (for parsing debug)
     trn_debug::get()->set_debug(cfg.debug());
     trn_debug::get()->set_verbose(cfg.verbose());
 
-    if(cfg.cfg().length() > 0){
+    if(cfg.config_set() > 0){
+        // parse config file
         cfg.parse_file(cfg.cfg());
-        // reparse command line (should override config options)
-        cfg.parse_args(argc, argv, true);
     }
+    // reparse command line (should override config options)
+    cfg.parse_args(argc, argv);
 
     // configure debug output
     trn_debug::get()->set_debug(cfg.debug());

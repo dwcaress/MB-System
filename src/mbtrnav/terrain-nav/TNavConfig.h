@@ -58,11 +58,13 @@ public:
    char *getVehicleSpecsFile();
    char *getParticlesFile();
    char *getMapFile();
+   char *getConfigPath();
    char *getLogDir();
 
    void setMapFile(char *filename);
    void setParticlesFile(char *filename);
    void setVehicleSpecsFile(char *filename);
+   void setConfigPath(char *filename);
    void setLogDir(char *filename);
     
    void setIgnoreGps(char flag);
@@ -72,6 +74,7 @@ protected:
    char *_vehicleSpecsFile;
    char *_particlesFile;
    char *_mapFile;
+   char *_configPath;
    char *_logDir;
 
    char _ignoreGps;   // flag indicates whether to ignore gpsValid
