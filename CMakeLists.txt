@@ -30,10 +30,9 @@ option(buildTest "build test tools" OFF)
 
 
 # Set list of required modules (i.e. packages with find modules)
-# NOTE: VTK is not included in list of required modules, as its
-# support for cmake is not complete/consistent
+# NOTE: VTK is not included in list of required modules, as FindVTK() has
+# been removed from cmake versions after 3.0.
 set(modules GMT Proj OpenGL X11 Motif GDAL NetCDF FFTW)
-
 
 if (help)
 
@@ -47,7 +46,7 @@ if (help)
   message("build Qt-based GUIs with -DbuildQt=1")
   message("build TRN software with -DbuildTRN=1")
   message("build shared/static libraries with -DBUILD_SHARED_LIBS=ON/OFF")
-  message("you MUST specify -DVTK_include=<dir> -DVTK_lib=<libs>")
+  ###  message("you MUST specify -DVTK_include=<dir> -DVTK_lib=<libs>")
   message(FATAL_ERROR "")
 endif()
 
@@ -85,23 +84,17 @@ else()
   set(otpsDir /local/opt/otps)
 endif()
 
+#[[
 ### TEST TEST TEST Can cmake find VTK header directory and libraries?
 message("TEST: look for vtk stuff")
 message("CMAKE_MODULE_PATH: ${CMAKE_MODULE_PATH}")
-find_package(VTK)
+## find_package(VTK "8.2.0" REQUIRED EXACT)
+find_package(VTK "8...<9" REQUIRED)
 message("VTK_FOUND: ${VTK_FOUND}")
 message("VTK_INCLUDE_DIRS: ${VTK_INCLUDE_DIRS}")
 message("VTK_LIBRARIES: ${VTK_LIBRARIES}")
 message("VTK_VERSION: ${VTK_VERSION}")
-
-message("file GLOB")
-## file(GLOB result LIST_DIRECTORIES true RELATIVE /usr/local /usr/local/*/*vtk-8*)
-### file(GLOB result LIST_DIRECTORIES true RELATIVE /usr/local /usr/local/*/*vtk-8*)
-file(GLOB result LIST_DIRECTORIES true /usr/local/*/*vtk-8*)
-message("result: ${result}")
-message("file GLOB RECURSE")
-file(GLOB_RECURSE LIST_DIRECTORIES true result2 /usr/local/*vtk-8*)
-message("result: ${result2}")
+]]
 
 #[[
 NOTE: VTK_lib is specified as a space-delimited list of libraries, and 
@@ -214,23 +207,21 @@ if (buildQt)
     # Specified on command line
     message("set VTK_LIBRARIES to ${VTK_lib}")  
     set(VTK_LIBRARIES ${VTK_lib} CACHE FILEPATH "path to VTK libraries")
-  endif()
-
-  # Try to find VTK package
-  if (NOT VTK_include OR NOT VTK_lib)
-    find_package(VTK REQUIRED)
+  else()
+##    find_package(VTK "8.0.0...<9.0.0" REQUIRED) # Doesn't work
+##    find_package(VTK "8.2.0" REQUIRED EXACT)  # Works
+##     find_package(VTK "8" REQUIRED)
+    find_package(VTK 8...<9 REQUIRED) 
+    if (${VTK_VERSION} VERSION_GREATER_EQUAL 9)
+       message(FATAL_ERROR "This application requires VTK 8.x, but VTK ${VTK_VERSION} was found. Please set VTK_DIR to a folder containing the VTKConfig.cmake file from a VTK 8 installation.")
+endif ()    
     if (VTK_FOUND)
-      message("Found VTK package")
+      message("Found VTK package version ${VTK_VERSION}, VTK_LIBRARIES: ${VTK_LIBRARIES}")
     else()
-      message("VTK package not found")
+      message(FATAL_ERROR, "VTK package not found, needed by buildQt")
     endif()
+  endif(VTK_lib)
 
- 
-    # VTK does not seem to play well with cmake package structure, so
-    # we use a more brute-force method to find it
-    
-
-  endif()
 
 endif(buildQt)  
 
@@ -322,7 +313,7 @@ if (APPLE)
   
   message("EXTRA_LIBRARIES: ${EXTRA_LIBRARIES}")
 else()
-  set(EXTRA_LIBRARIES "")
+
 endif()
 
 # Use standard cache variables for installation
