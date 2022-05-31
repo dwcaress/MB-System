@@ -95,7 +95,8 @@ bin_PROGRAMS = trn-server$(EXEEXT) trn-replay$(EXEEXT) \
 	trnclient-test$(EXEEXT) mmcpub$(EXEEXT) mmcsub$(EXEEXT) \
 	trnu-cli$(EXEEXT) trn-cli$(EXEEXT) trnif-test$(EXEEXT) \
 	trnusvr-test$(EXEEXT) netif-test$(EXEEXT) \
-	trnifsvr-test$(EXEEXT) mb1rs$(EXEEXT) trnlog-player$(EXEEXT)
+	trnifsvr-test$(EXEEXT) mb1rs$(EXEEXT) trnlog-player$(EXEEXT) \
+	$(am__EXEEXT_1)
 subdir = src/mbtrnav
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/ax_check_compile_flag.m4 \
@@ -115,6 +116,7 @@ mkinstalldirs = $(install_sh) -d
 CONFIG_HEADER = $(top_builddir)/src/mbio/mb_config.h
 CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
+@BUILD_ROVTRN_TRUE@am__EXEEXT_1 = trnxpp$(EXEEXT)
 am__installdirs = "$(DESTDIR)$(bindir)" "$(DESTDIR)$(libdir)" \
 	"$(DESTDIR)$(bindir)" "$(DESTDIR)$(includedir)"
 PROGRAMS = $(bin_PROGRAMS)
@@ -299,6 +301,12 @@ trnu_cli_DEPENDENCIES = $(LIBMFRAME) libtrnw.la
 am_trnusvr_test_OBJECTS = trnw/trnusvr_test.$(OBJEXT)
 trnusvr_test_OBJECTS = $(am_trnusvr_test_OBJECTS)
 trnusvr_test_DEPENDENCIES = libnetif.la libtrnw.la
+@BUILD_ROVTRN_TRUE@am_trnxpp_OBJECTS = opt/rov/udpm_sub.$(OBJEXT) \
+@BUILD_ROVTRN_TRUE@	opt/rov/trnxpp_app.$(OBJEXT) \
+@BUILD_ROVTRN_TRUE@	utils/TrnClient.$(OBJEXT) \
+@BUILD_ROVTRN_TRUE@	utils/TerrainNavClient.$(OBJEXT)
+trnxpp_OBJECTS = $(am_trnxpp_OBJECTS)
+@BUILD_ROVTRN_TRUE@trnxpp_DEPENDENCIES = libmb1.la libtnav.la
 SCRIPTS = $(dist_bin_SCRIPTS)
 AM_V_P = $(am__v_P_@AM_V@)
 am__v_P_ = $(am__v_P_@AM_DEFAULT_V@)
@@ -396,6 +404,7 @@ am__depfiles_remade = gctp/source/$(DEPDIR)/alberfor.Plo \
 	newmat/$(DEPDIR)/sort.Plo newmat/$(DEPDIR)/submat.Plo \
 	newmat/$(DEPDIR)/svd.Plo opt/dorado/$(DEPDIR)/Replay.Po \
 	opt/dorado/$(DEPDIR)/trn_replay.Po \
+	opt/rov/$(DEPDIR)/trnxpp_app.Po opt/rov/$(DEPDIR)/udpm_sub.Po \
 	qnx-utils/$(DEPDIR)/AngleData.Plo \
 	qnx-utils/$(DEPDIR)/AsciiFile.Plo \
 	qnx-utils/$(DEPDIR)/BinaryFile.Plo \
@@ -494,7 +503,7 @@ SOURCES = $(libgeolib_la_SOURCES) $(libmb1_la_SOURCES) \
 	$(trn_replay_SOURCES) $(trn_server_SOURCES) \
 	$(trnclient_test_SOURCES) $(trnif_test_SOURCES) \
 	$(trnifsvr_test_SOURCES) $(trnlog_player_SOURCES) \
-	$(trnu_cli_SOURCES) $(trnusvr_test_SOURCES)
+	$(trnu_cli_SOURCES) $(trnusvr_test_SOURCES) $(trnxpp_SOURCES)
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
     n|no|NO) false;; \
@@ -731,7 +740,25 @@ top_srcdir = @top_srcdir@
 lib_LTLIBRARIES = libgeolib.la libnewmat.la libqnx.la libtnav.la libtrnw.la libnetif.la libmb1.la
 LIBMFRAME = $(top_builddir)/src/mbtrnframe/libmframe.la
 MFRAME_INC = -I${top_srcdir}/src/mbtrnframe/usr -I${top_srcdir}/src/mbtrnframe/mframe/src 
-include_HEADERS = 
+include_HEADERS = \
+opt/rov/lcm_pcf/signal_t.hpp \
+opt/rov/lcm_pcf/string_t.hpp \
+opt/rov/gss/nav_solution_t.hpp \
+opt/rov/gss/message_t.hpp \
+opt/rov/gss/analog_t.hpp \
+opt/rov/gss/digital_t.hpp \
+opt/rov/gss/dvl_stat_t.hpp \
+opt/rov/gss/pcomms_t.hpp \
+opt/rov/oi/idt_t.hpp \
+opt/rov/oi/lcm_header_t.hpp \
+opt/rov/trn/mb1_beam_t.hpp \
+opt/rov/trn/trnu_estimate_t.hpp \
+opt/rov/trn/trn_stat_t.hpp \
+opt/rov/trn/trn_meas_t.hpp \
+opt/rov/trn/trn_pose_t.hpp \
+opt/rov/trn/trnupub_t.hpp \
+opt/rov/trn/trn_mb1_t.hpp
+
 AM_CFLAGS = ${libgmt_CFLAGS} ${libnetcdf_CFLAGS}
 #AM_CPPFLAGS += -DWITH_ALT_DELTAT_VALIDATION
 AM_CPPFLAGS = -g -O0 -I${top_srcdir}/src/mbtrnav/trnw \
@@ -825,6 +852,34 @@ libnetif_la_LIBADD = ${LIBMFRAME} libtrnw.la -lm -lpthread
 libmb1_la_LDFLAGS = -no-undefined -version-info 0:0:0
 libmb1_la_SOURCES = trnw/mb1_msg.c
 libmb1_la_LIBADD = 
+@BUILD_ROVTRN_TRUE@ROVTRN_APPS = trnxpp
+@BUILD_ROVTRN_TRUE@ROVTRN_CLEANFILES = trnxpp opt/rov/lcm_pcf/*.hpp opt/rov/gss/*.hpp opt/rov/oi/*.hpp opt/rov/trn/*.hpp
+@BUILD_ROVTRN_TRUE@trnxpp_SOURCES = \
+@BUILD_ROVTRN_TRUE@opt/rov/udpm_sub.c \
+@BUILD_ROVTRN_TRUE@opt/rov/trnxpp_app.cpp \
+@BUILD_ROVTRN_TRUE@utils/TrnClient.cpp \
+@BUILD_ROVTRN_TRUE@utils/TerrainNavClient.cpp
+
+@BUILD_ROVTRN_TRUE@trnxpp_LDADD = -llcm libmb1.la libtnav.la
+@BUILD_ROVTRN_TRUE@BUILT_SOURCES = \
+@BUILD_ROVTRN_TRUE@opt/rov/lcm_pcf/signal_t.hpp \
+@BUILD_ROVTRN_TRUE@opt/rov/lcm_pcf/string_t.hpp \
+@BUILD_ROVTRN_TRUE@opt/rov/gss/nav_solution_t.hpp \
+@BUILD_ROVTRN_TRUE@opt/rov/gss/message_t.hpp \
+@BUILD_ROVTRN_TRUE@opt/rov/gss/analog_t.hpp \
+@BUILD_ROVTRN_TRUE@opt/rov/gss/digital_t.hpp \
+@BUILD_ROVTRN_TRUE@opt/rov/gss/dvl_stat_t.hpp \
+@BUILD_ROVTRN_TRUE@opt/rov/gss/pcomms_t.hpp \
+@BUILD_ROVTRN_TRUE@opt/rov/oi/idt_t.hpp \
+@BUILD_ROVTRN_TRUE@opt/rov/oi/lcm_header_t.hpp \
+@BUILD_ROVTRN_TRUE@opt/rov/trn/mb1_beam_t.hpp \
+@BUILD_ROVTRN_TRUE@opt/rov/trn/trnu_estimate_t.hpp \
+@BUILD_ROVTRN_TRUE@opt/rov/trn/trn_stat_t.hpp \
+@BUILD_ROVTRN_TRUE@opt/rov/trn/trn_meas_t.hpp \
+@BUILD_ROVTRN_TRUE@opt/rov/trn/trn_pose_t.hpp \
+@BUILD_ROVTRN_TRUE@opt/rov/trn/trnupub_t.hpp \
+@BUILD_ROVTRN_TRUE@opt/rov/trn/trn_mb1_t.hpp
+
 trn_server_SOURCES = utils/trn_server.cpp
 trn_server_LDADD = libtnav.la libqnx.la libnewmat.la libtnav.la libgeolib.la
 trn_replay_SOURCES = opt/dorado/Replay.cpp opt/dorado/trn_replay.cpp utils/TerrainNavClient.cpp
@@ -852,9 +907,10 @@ mb1rs_LDADD = ${LIBMFRAME} libmb1.la
 trnlog_player_SOURCES = utils/trnlog_player.cpp utils/TrnClient.cpp utils/TerrainNavClient.cpp
 trnlog_player_LDADD = libtnav.la
 dist_bin_SCRIPTS = 
-CLEANFILES = 
+CLEANFILES = ${ROVTRN_CLEANFILES}
 DISTCLEANFILES = 
-all: all-am
+all: $(BUILT_SOURCES)
+	$(MAKE) $(AM_MAKEFLAGS) all-am
 
 .SUFFIXES:
 .SUFFIXES: .c .cc .cpp .lo .o .obj
@@ -1394,6 +1450,20 @@ trnw/trnusvr_test.$(OBJEXT): trnw/$(am__dirstamp) \
 trnusvr-test$(EXEEXT): $(trnusvr_test_OBJECTS) $(trnusvr_test_DEPENDENCIES) $(EXTRA_trnusvr_test_DEPENDENCIES) 
 	@rm -f trnusvr-test$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(trnusvr_test_OBJECTS) $(trnusvr_test_LDADD) $(LIBS)
+opt/rov/$(am__dirstamp):
+	@$(MKDIR_P) opt/rov
+	@: > opt/rov/$(am__dirstamp)
+opt/rov/$(DEPDIR)/$(am__dirstamp):
+	@$(MKDIR_P) opt/rov/$(DEPDIR)
+	@: > opt/rov/$(DEPDIR)/$(am__dirstamp)
+opt/rov/udpm_sub.$(OBJEXT): opt/rov/$(am__dirstamp) \
+	opt/rov/$(DEPDIR)/$(am__dirstamp)
+opt/rov/trnxpp_app.$(OBJEXT): opt/rov/$(am__dirstamp) \
+	opt/rov/$(DEPDIR)/$(am__dirstamp)
+
+trnxpp$(EXEEXT): $(trnxpp_OBJECTS) $(trnxpp_DEPENDENCIES) $(EXTRA_trnxpp_DEPENDENCIES) 
+	@rm -f trnxpp$(EXEEXT)
+	$(AM_V_CXXLD)$(CXXLINK) $(trnxpp_OBJECTS) $(trnxpp_LDADD) $(LIBS)
 install-dist_binSCRIPTS: $(dist_bin_SCRIPTS)
 	@$(NORMAL_INSTALL)
 	@list='$(dist_bin_SCRIPTS)'; test -n "$(bindir)" || list=; \
@@ -1437,6 +1507,7 @@ mostlyclean-compile:
 	-rm -f newmat/*.$(OBJEXT)
 	-rm -f newmat/*.lo
 	-rm -f opt/dorado/*.$(OBJEXT)
+	-rm -f opt/rov/*.$(OBJEXT)
 	-rm -f qnx-utils/*.$(OBJEXT)
 	-rm -f qnx-utils/*.lo
 	-rm -f terrain-nav/*.$(OBJEXT)
@@ -1541,6 +1612,8 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@newmat/$(DEPDIR)/svd.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@opt/dorado/$(DEPDIR)/Replay.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@opt/dorado/$(DEPDIR)/trn_replay.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@opt/rov/$(DEPDIR)/trnxpp_app.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@opt/rov/$(DEPDIR)/udpm_sub.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@qnx-utils/$(DEPDIR)/AngleData.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@qnx-utils/$(DEPDIR)/AsciiFile.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@qnx-utils/$(DEPDIR)/BinaryFile.Plo@am__quote@ # am--include-marker
@@ -1768,7 +1841,8 @@ cscopelist-am: $(am__tagged_files)
 distclean-tags:
 	-rm -f TAGS ID GTAGS GRTAGS GSYMS GPATH tags
 check-am: all-am
-check: check-am
+check: $(BUILT_SOURCES)
+	$(MAKE) $(AM_MAKEFLAGS) check-am
 all-am: Makefile $(PROGRAMS) $(LTLIBRARIES) $(SCRIPTS) $(HEADERS)
 install-binPROGRAMS: install-libLTLIBRARIES
 
@@ -1776,8 +1850,10 @@ installdirs:
 	for dir in "$(DESTDIR)$(bindir)" "$(DESTDIR)$(libdir)" "$(DESTDIR)$(bindir)" "$(DESTDIR)$(includedir)"; do \
 	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
 	done
-install: install-am
-install-exec: install-exec-am
+install: $(BUILT_SOURCES)
+	$(MAKE) $(AM_MAKEFLAGS) install-am
+install-exec: $(BUILT_SOURCES)
+	$(MAKE) $(AM_MAKEFLAGS) install-exec-am
 install-data: install-data-am
 uninstall: uninstall-am
 
@@ -1809,6 +1885,8 @@ distclean-generic:
 	-rm -f newmat/$(am__dirstamp)
 	-rm -f opt/dorado/$(DEPDIR)/$(am__dirstamp)
 	-rm -f opt/dorado/$(am__dirstamp)
+	-rm -f opt/rov/$(DEPDIR)/$(am__dirstamp)
+	-rm -f opt/rov/$(am__dirstamp)
 	-rm -f qnx-utils/$(DEPDIR)/$(am__dirstamp)
 	-rm -f qnx-utils/$(am__dirstamp)
 	-rm -f terrain-nav/$(DEPDIR)/$(am__dirstamp)
@@ -1822,6 +1900,7 @@ distclean-generic:
 maintainer-clean-generic:
 	@echo "This command is intended for maintainers to use"
 	@echo "it deletes files that may require special tools to rebuild."
+	-test -z "$(BUILT_SOURCES)" || rm -f $(BUILT_SOURCES)
 clean: clean-am
 
 clean-am: clean-binPROGRAMS clean-generic clean-libLTLIBRARIES \
@@ -1921,6 +2000,8 @@ distclean: distclean-am
 	-rm -f newmat/$(DEPDIR)/svd.Plo
 	-rm -f opt/dorado/$(DEPDIR)/Replay.Po
 	-rm -f opt/dorado/$(DEPDIR)/trn_replay.Po
+	-rm -f opt/rov/$(DEPDIR)/trnxpp_app.Po
+	-rm -f opt/rov/$(DEPDIR)/udpm_sub.Po
 	-rm -f qnx-utils/$(DEPDIR)/AngleData.Plo
 	-rm -f qnx-utils/$(DEPDIR)/AsciiFile.Plo
 	-rm -f qnx-utils/$(DEPDIR)/BinaryFile.Plo
@@ -2124,6 +2205,8 @@ maintainer-clean: maintainer-clean-am
 	-rm -f newmat/$(DEPDIR)/svd.Plo
 	-rm -f opt/dorado/$(DEPDIR)/Replay.Po
 	-rm -f opt/dorado/$(DEPDIR)/trn_replay.Po
+	-rm -f opt/rov/$(DEPDIR)/trnxpp_app.Po
+	-rm -f opt/rov/$(DEPDIR)/udpm_sub.Po
 	-rm -f qnx-utils/$(DEPDIR)/AngleData.Plo
 	-rm -f qnx-utils/$(DEPDIR)/AsciiFile.Plo
 	-rm -f qnx-utils/$(DEPDIR)/BinaryFile.Plo
@@ -2207,7 +2290,7 @@ ps-am:
 uninstall-am: uninstall-binPROGRAMS uninstall-dist_binSCRIPTS \
 	uninstall-includeHEADERS uninstall-libLTLIBRARIES
 
-.MAKE: install-am install-strip
+.MAKE: all check install install-am install-exec install-strip
 
 .PHONY: CTAGS GTAGS TAGS all all-am am--depfiles check check-am clean \
 	clean-binPROGRAMS clean-generic clean-libLTLIBRARIES \
@@ -2229,6 +2312,91 @@ uninstall-am: uninstall-binPROGRAMS uninstall-dist_binSCRIPTS \
 
 .PRECIOUS: Makefile
 
+
+@BUILD_ROVTRN_TRUE@opt/rov/lcm_pcf/signal_t.hpp : opt/rov/lcm_types/signal_t.lcm
+@BUILD_ROVTRN_TRUE@	@ echo compiling $@...
+@BUILD_ROVTRN_TRUE@	lcm-gen -x --cpp-hpath=opt/rov  $<
+@BUILD_ROVTRN_TRUE@	@echo
+
+@BUILD_ROVTRN_TRUE@opt/rov/lcm_pcf/string_t.hpp : opt/rov/lcm_types/string_t.lcm
+@BUILD_ROVTRN_TRUE@	@ echo compiling $@...
+@BUILD_ROVTRN_TRUE@	lcm-gen -x --cpp-hpath=opt/rov  $<
+@BUILD_ROVTRN_TRUE@	@echo
+
+@BUILD_ROVTRN_TRUE@opt/rov/gss/nav_solution_t.hpp : opt/rov/lcm_types/nav_solution_t.lcm
+@BUILD_ROVTRN_TRUE@	@ echo compiling $@...
+@BUILD_ROVTRN_TRUE@	lcm-gen -x --cpp-hpath=opt/rov  $<
+@BUILD_ROVTRN_TRUE@	@echo
+
+@BUILD_ROVTRN_TRUE@opt/rov/gss/message_t.hpp : opt/rov/lcm_types/message_t.lcm
+@BUILD_ROVTRN_TRUE@	@ echo compiling $@...
+@BUILD_ROVTRN_TRUE@	lcm-gen -x --cpp-hpath=opt/rov  $<
+@BUILD_ROVTRN_TRUE@	@echo
+
+@BUILD_ROVTRN_TRUE@opt/rov/gss/analog_t.hpp : opt/rov/lcm_types/analog_t.lcm
+@BUILD_ROVTRN_TRUE@	@ echo compiling $@...
+@BUILD_ROVTRN_TRUE@	lcm-gen -x --cpp-hpath=opt/rov  $<
+@BUILD_ROVTRN_TRUE@	@echo
+
+@BUILD_ROVTRN_TRUE@opt/rov/gss/digital_t.hpp : opt/rov/lcm_types/digital_t.lcm
+@BUILD_ROVTRN_TRUE@	@ echo compiling $@...
+@BUILD_ROVTRN_TRUE@	lcm-gen -x --cpp-hpath=opt/rov  $<
+@BUILD_ROVTRN_TRUE@	@echo
+
+@BUILD_ROVTRN_TRUE@opt/rov/gss/dvl_stat_t.hpp : opt/rov/lcm_types/dvl_stat_t.lcm
+@BUILD_ROVTRN_TRUE@	@ echo compiling $@...
+@BUILD_ROVTRN_TRUE@	lcm-gen -x --cpp-hpath=opt/rov  $<
+@BUILD_ROVTRN_TRUE@	@echo
+
+@BUILD_ROVTRN_TRUE@opt/rov/gss/pcomms_t.hpp : opt/rov/lcm_types/pcomms_t.lcm
+@BUILD_ROVTRN_TRUE@	@ echo compiling $@...
+@BUILD_ROVTRN_TRUE@	lcm-gen -x --cpp-hpath=opt/rov  $<
+@BUILD_ROVTRN_TRUE@	@echo
+
+@BUILD_ROVTRN_TRUE@opt/rov/oi/idt_t.hpp : opt/rov/lcm_types/idt_t.lcm
+@BUILD_ROVTRN_TRUE@	@ echo compiling $@...
+@BUILD_ROVTRN_TRUE@	lcm-gen -x --cpp-hpath=opt/rov  $<
+@BUILD_ROVTRN_TRUE@	@echo
+
+@BUILD_ROVTRN_TRUE@opt/rov/oi/lcm_header_t.hpp : opt/rov/lcm_types/lcm_header_t.lcm
+@BUILD_ROVTRN_TRUE@	@ echo compiling $@...
+@BUILD_ROVTRN_TRUE@	lcm-gen -x --cpp-hpath=opt/rov  $<
+@BUILD_ROVTRN_TRUE@	@echo
+
+@BUILD_ROVTRN_TRUE@opt/rov/trn/mb1_beam_t.hpp : opt/rov/lcm_types/mb1_beam_t.lcm
+@BUILD_ROVTRN_TRUE@	@ echo compiling $@...
+@BUILD_ROVTRN_TRUE@	lcm-gen -x --cpp-hpath=opt/rov  $<
+@BUILD_ROVTRN_TRUE@	@echo
+
+@BUILD_ROVTRN_TRUE@opt/rov/trn/trnu_estimate_t.hpp : opt/rov/lcm_types/trnu_estimate_t.lcm
+@BUILD_ROVTRN_TRUE@	@ echo compiling $@...
+@BUILD_ROVTRN_TRUE@	lcm-gen -x --cpp-hpath=opt/rov  $<
+@BUILD_ROVTRN_TRUE@	@echo
+
+@BUILD_ROVTRN_TRUE@opt/rov/trn/trn_stat_t.hpp : opt/rov/lcm_types/trn_stat_t.lcm
+@BUILD_ROVTRN_TRUE@	@ echo compiling $@...
+@BUILD_ROVTRN_TRUE@	lcm-gen -x --cpp-hpath=opt/rov  $<
+@BUILD_ROVTRN_TRUE@	@echo
+
+@BUILD_ROVTRN_TRUE@opt/rov/trn/trn_meas_t.hpp : opt/rov/lcm_types/trn_meas_t.lcm
+@BUILD_ROVTRN_TRUE@	@ echo compiling $@...
+@BUILD_ROVTRN_TRUE@	lcm-gen -x --cpp-hpath=opt/rov  $<
+@BUILD_ROVTRN_TRUE@	@echo
+
+@BUILD_ROVTRN_TRUE@opt/rov/trn/trn_pose_t.hpp : opt/rov/lcm_types/trn_pose_t.lcm
+@BUILD_ROVTRN_TRUE@	@ echo compiling $@...
+@BUILD_ROVTRN_TRUE@	lcm-gen -x --cpp-hpath=opt/rov  $<
+@BUILD_ROVTRN_TRUE@	@echo
+
+@BUILD_ROVTRN_TRUE@opt/rov/trn/trnupub_t.hpp : opt/rov/lcm_types/trnupub_t.lcm
+@BUILD_ROVTRN_TRUE@	@ echo compiling $@...
+@BUILD_ROVTRN_TRUE@	lcm-gen -x --cpp-hpath=opt/rov  $<
+@BUILD_ROVTRN_TRUE@	@echo
+
+@BUILD_ROVTRN_TRUE@opt/rov/trn/trn_mb1_t.hpp : opt/rov/lcm_types/trn_mb1_t.lcm
+@BUILD_ROVTRN_TRUE@	@ echo compiling $@...
+@BUILD_ROVTRN_TRUE@	lcm-gen -x --cpp-hpath=opt/rov  $<
+@BUILD_ROVTRN_TRUE@	@echo
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

@@ -3,7 +3,24 @@ lib_LTLIBRARIES = libgeolib.la libnewmat.la libqnx.la libtnav.la libtrnw.la libn
 LIBMFRAME = $(top_builddir)/src/mbtrnframe/libmframe.la
 MFRAME_INC = -I${top_srcdir}/src/mbtrnframe/usr -I${top_srcdir}/src/mbtrnframe/mframe/src 
 
-include_HEADERS =
+include_HEADERS = \
+opt/rov/lcm_pcf/signal_t.hpp \
+opt/rov/lcm_pcf/string_t.hpp \
+opt/rov/gss/nav_solution_t.hpp \
+opt/rov/gss/message_t.hpp \
+opt/rov/gss/analog_t.hpp \
+opt/rov/gss/digital_t.hpp \
+opt/rov/gss/dvl_stat_t.hpp \
+opt/rov/gss/pcomms_t.hpp \
+opt/rov/oi/idt_t.hpp \
+opt/rov/oi/lcm_header_t.hpp \
+opt/rov/trn/mb1_beam_t.hpp \
+opt/rov/trn/trnu_estimate_t.hpp \
+opt/rov/trn/trn_stat_t.hpp \
+opt/rov/trn/trn_meas_t.hpp \
+opt/rov/trn/trn_pose_t.hpp \
+opt/rov/trn/trnupub_t.hpp \
+opt/rov/trn/trn_mb1_t.hpp
 
 AM_CFLAGS = ${libgmt_CFLAGS} ${libnetcdf_CFLAGS}
 
@@ -217,7 +234,126 @@ libmb1_la_SOURCES += trnw/mb1_msg.c
 
 libmb1_la_LIBADD =
 
-bin_PROGRAMS =  trn-server trn-replay trnclient-test mmcpub mmcsub trnu-cli trn-cli trnif-test trnusvr-test netif-test trnifsvr-test mb1rs trnlog-player #  readlog writelog
+if BUILD_ROVTRN
+
+ROVTRN_APPS = trnxpp
+
+ROVTRN_CLEANFILES = trnxpp opt/rov/lcm_pcf/*.hpp opt/rov/gss/*.hpp opt/rov/oi/*.hpp opt/rov/trn/*.hpp
+
+trnxpp_SOURCES = \
+opt/rov/udpm_sub.c \
+opt/rov/trnxpp_app.cpp \
+utils/TrnClient.cpp \
+utils/TerrainNavClient.cpp
+trnxpp_LDADD = -llcm libmb1.la libtnav.la
+
+BUILT_SOURCES = \
+opt/rov/lcm_pcf/signal_t.hpp \
+opt/rov/lcm_pcf/string_t.hpp \
+opt/rov/gss/nav_solution_t.hpp \
+opt/rov/gss/message_t.hpp \
+opt/rov/gss/analog_t.hpp \
+opt/rov/gss/digital_t.hpp \
+opt/rov/gss/dvl_stat_t.hpp \
+opt/rov/gss/pcomms_t.hpp \
+opt/rov/oi/idt_t.hpp \
+opt/rov/oi/lcm_header_t.hpp \
+opt/rov/trn/mb1_beam_t.hpp \
+opt/rov/trn/trnu_estimate_t.hpp \
+opt/rov/trn/trn_stat_t.hpp \
+opt/rov/trn/trn_meas_t.hpp \
+opt/rov/trn/trn_pose_t.hpp \
+opt/rov/trn/trnupub_t.hpp \
+opt/rov/trn/trn_mb1_t.hpp
+
+opt/rov/lcm_pcf/signal_t.hpp : opt/rov/lcm_types/signal_t.lcm
+	@ echo compiling $@...
+	lcm-gen -x --cpp-hpath=opt/rov  $<
+	@echo
+
+opt/rov/lcm_pcf/string_t.hpp : opt/rov/lcm_types/string_t.lcm
+	@ echo compiling $@...
+	lcm-gen -x --cpp-hpath=opt/rov  $<
+	@echo
+
+opt/rov/gss/nav_solution_t.hpp : opt/rov/lcm_types/nav_solution_t.lcm
+	@ echo compiling $@...
+	lcm-gen -x --cpp-hpath=opt/rov  $<
+	@echo
+
+opt/rov/gss/message_t.hpp : opt/rov/lcm_types/message_t.lcm
+	@ echo compiling $@...
+	lcm-gen -x --cpp-hpath=opt/rov  $<
+	@echo
+
+opt/rov/gss/analog_t.hpp : opt/rov/lcm_types/analog_t.lcm
+	@ echo compiling $@...
+	lcm-gen -x --cpp-hpath=opt/rov  $<
+	@echo
+
+opt/rov/gss/digital_t.hpp : opt/rov/lcm_types/digital_t.lcm
+	@ echo compiling $@...
+	lcm-gen -x --cpp-hpath=opt/rov  $<
+	@echo
+
+opt/rov/gss/dvl_stat_t.hpp : opt/rov/lcm_types/dvl_stat_t.lcm
+	@ echo compiling $@...
+	lcm-gen -x --cpp-hpath=opt/rov  $<
+	@echo
+
+opt/rov/gss/pcomms_t.hpp : opt/rov/lcm_types/pcomms_t.lcm
+	@ echo compiling $@...
+	lcm-gen -x --cpp-hpath=opt/rov  $<
+	@echo
+
+opt/rov/oi/idt_t.hpp : opt/rov/lcm_types/idt_t.lcm
+	@ echo compiling $@...
+	lcm-gen -x --cpp-hpath=opt/rov  $<
+	@echo
+
+opt/rov/oi/lcm_header_t.hpp : opt/rov/lcm_types/lcm_header_t.lcm
+	@ echo compiling $@...
+	lcm-gen -x --cpp-hpath=opt/rov  $<
+	@echo
+
+opt/rov/trn/mb1_beam_t.hpp : opt/rov/lcm_types/mb1_beam_t.lcm
+	@ echo compiling $@...
+	lcm-gen -x --cpp-hpath=opt/rov  $<
+	@echo
+
+opt/rov/trn/trnu_estimate_t.hpp : opt/rov/lcm_types/trnu_estimate_t.lcm
+	@ echo compiling $@...
+	lcm-gen -x --cpp-hpath=opt/rov  $<
+	@echo
+
+opt/rov/trn/trn_stat_t.hpp : opt/rov/lcm_types/trn_stat_t.lcm
+	@ echo compiling $@...
+	lcm-gen -x --cpp-hpath=opt/rov  $<
+	@echo
+
+opt/rov/trn/trn_meas_t.hpp : opt/rov/lcm_types/trn_meas_t.lcm
+	@ echo compiling $@...
+	lcm-gen -x --cpp-hpath=opt/rov  $<
+	@echo
+
+opt/rov/trn/trn_pose_t.hpp : opt/rov/lcm_types/trn_pose_t.lcm
+	@ echo compiling $@...
+	lcm-gen -x --cpp-hpath=opt/rov  $<
+	@echo
+
+opt/rov/trn/trnupub_t.hpp : opt/rov/lcm_types/trnupub_t.lcm
+	@ echo compiling $@...
+	lcm-gen -x --cpp-hpath=opt/rov  $<
+	@echo
+
+opt/rov/trn/trn_mb1_t.hpp : opt/rov/lcm_types/trn_mb1_t.lcm
+	@ echo compiling $@...
+	lcm-gen -x --cpp-hpath=opt/rov  $<
+	@echo
+
+endif
+
+bin_PROGRAMS =  trn-server trn-replay trnclient-test mmcpub mmcsub trnu-cli trn-cli trnif-test trnusvr-test netif-test trnifsvr-test mb1rs trnlog-player ${ROVTRN_APPS} #  readlog writelog
 
 trn_server_SOURCES = utils/trn_server.cpp
 trn_server_LDADD = libtnav.la libqnx.la libnewmat.la libtnav.la libgeolib.la
@@ -260,5 +396,5 @@ trnlog_player_LDADD = libtnav.la
 
 dist_bin_SCRIPTS =
 
-CLEANFILES =
+CLEANFILES = ${ROVTRN_CLEANFILES}
 DISTCLEANFILES =
