@@ -852,8 +852,8 @@ libnetif_la_LIBADD = ${LIBMFRAME} libtrnw.la -lm -lpthread
 libmb1_la_LDFLAGS = -no-undefined -version-info 0:0:0
 libmb1_la_SOURCES = trnw/mb1_msg.c
 libmb1_la_LIBADD = 
+@BUILD_ROVTRN_TRUE@LCM_JAR = /usr/local/share/java/lcm.jar
 @BUILD_ROVTRN_TRUE@ROVTRN_APPS = trnxpp
-@BUILD_ROVTRN_TRUE@ROVTRN_CLEANFILES = trnxpp opt/rov/lcm_pcf/*.hpp opt/rov/gss/*.hpp opt/rov/oi/*.hpp opt/rov/trn/*.hpp
 @BUILD_ROVTRN_TRUE@trnxpp_SOURCES = \
 @BUILD_ROVTRN_TRUE@opt/rov/udpm_sub.c \
 @BUILD_ROVTRN_TRUE@opt/rov/trnxpp_app.cpp \
@@ -861,8 +861,8 @@ libmb1_la_LIBADD =
 @BUILD_ROVTRN_TRUE@utils/TerrainNavClient.cpp
 
 @BUILD_ROVTRN_TRUE@trnxpp_LDADD = -llcm libmb1.la libtnav.la
-@BUILD_ROVTRN_TRUE@BUILT_SOURCES = \
-@BUILD_ROVTRN_TRUE@opt/rov/lcm_pcf/signal_t.hpp \
+@BUILD_ROVTRN_TRUE@TRN_HPP = \
+@BUILD_ROVTRN_TRUE@opt/rov/lcm_pcf/signal_t.hpp\
 @BUILD_ROVTRN_TRUE@opt/rov/lcm_pcf/string_t.hpp \
 @BUILD_ROVTRN_TRUE@opt/rov/gss/nav_solution_t.hpp \
 @BUILD_ROVTRN_TRUE@opt/rov/gss/message_t.hpp \
@@ -879,6 +879,15 @@ libmb1_la_LIBADD =
 @BUILD_ROVTRN_TRUE@opt/rov/trn/trn_pose_t.hpp \
 @BUILD_ROVTRN_TRUE@opt/rov/trn/trnupub_t.hpp \
 @BUILD_ROVTRN_TRUE@opt/rov/trn/trn_mb1_t.hpp
+
+@BUILD_ROVTRN_TRUE@TRN_LCM = ${TRN_HPP:%.hpp=%.lcm}
+@BUILD_ROVTRN_TRUE@TRN_JSRC = ${TRN_HPP:%.hpp=%.java}
+@BUILD_ROVTRN_TRUE@TRN_JCLS = ${TRN_HPP:%.hpp=%.class}
+@BUILD_ROVTRN_TRUE@BUILT_SOURCES = \
+@BUILD_ROVTRN_TRUE@${TRN_HPP} \
+@BUILD_ROVTRN_TRUE@${TRN_JSRC} \
+@BUILD_ROVTRN_TRUE@${TRN_JCLS} \
+@BUILD_ROVTRN_TRUE@lcm_rovtrn.jar
 
 trn_server_SOURCES = utils/trn_server.cpp
 trn_server_LDADD = libtnav.la libqnx.la libnewmat.la libtnav.la libgeolib.la
@@ -907,7 +916,7 @@ mb1rs_LDADD = ${LIBMFRAME} libmb1.la
 trnlog_player_SOURCES = utils/trnlog_player.cpp utils/TrnClient.cpp utils/TerrainNavClient.cpp
 trnlog_player_LDADD = libtnav.la
 dist_bin_SCRIPTS = 
-CLEANFILES = ${ROVTRN_CLEANFILES}
+CLEANFILES = ${BUILT_SOURCES} #${ROVTRN_CLEANFILES}
 DISTCLEANFILES = 
 all: $(BUILT_SOURCES)
 	$(MAKE) $(AM_MAKEFLAGS) all-am
@@ -2313,6 +2322,7 @@ uninstall-am: uninstall-binPROGRAMS uninstall-dist_binSCRIPTS \
 .PRECIOUS: Makefile
 
 
+# LCM headers
 @BUILD_ROVTRN_TRUE@opt/rov/lcm_pcf/signal_t.hpp : opt/rov/lcm_types/signal_t.lcm
 @BUILD_ROVTRN_TRUE@	@ echo compiling $@...
 @BUILD_ROVTRN_TRUE@	lcm-gen -x --cpp-hpath=opt/rov  $<
@@ -2396,6 +2406,184 @@ uninstall-am: uninstall-binPROGRAMS uninstall-dist_binSCRIPTS \
 @BUILD_ROVTRN_TRUE@opt/rov/trn/trn_mb1_t.hpp : opt/rov/lcm_types/trn_mb1_t.lcm
 @BUILD_ROVTRN_TRUE@	@ echo compiling $@...
 @BUILD_ROVTRN_TRUE@	lcm-gen -x --cpp-hpath=opt/rov  $<
+@BUILD_ROVTRN_TRUE@	@echo
+
+# Java source
+@BUILD_ROVTRN_TRUE@opt/rov/lcm_pcf/signal_t.java : opt/rov/lcm_types/signal_t.lcm
+@BUILD_ROVTRN_TRUE@	@ echo compiling $@...
+@BUILD_ROVTRN_TRUE@	lcm-gen -j --jpath=opt/rov $<
+@BUILD_ROVTRN_TRUE@	@echo
+
+@BUILD_ROVTRN_TRUE@opt/rov/lcm_pcf/string_t.java : opt/rov/lcm_types/string_t.lcm
+@BUILD_ROVTRN_TRUE@	@ echo compiling $@...
+@BUILD_ROVTRN_TRUE@	lcm-gen -j --jpath=opt/rov $<
+@BUILD_ROVTRN_TRUE@	@echo
+
+@BUILD_ROVTRN_TRUE@opt/rov/gss/nav_solution_t.java : opt/rov/lcm_types/nav_solution_t.lcm
+@BUILD_ROVTRN_TRUE@	@ echo compiling $@...
+@BUILD_ROVTRN_TRUE@	lcm-gen -j --jpath=opt/rov $<
+@BUILD_ROVTRN_TRUE@	@echo
+
+@BUILD_ROVTRN_TRUE@opt/rov/gss/message_t.java : opt/rov/lcm_types/message_t.lcm
+@BUILD_ROVTRN_TRUE@	@ echo compiling $@...
+@BUILD_ROVTRN_TRUE@	lcm-gen -j --jpath=opt/rov $<
+@BUILD_ROVTRN_TRUE@	@echo
+
+@BUILD_ROVTRN_TRUE@opt/rov/gss/analog_t.java : opt/rov/lcm_types/analog_t.lcm
+@BUILD_ROVTRN_TRUE@	@ echo compiling $@...
+@BUILD_ROVTRN_TRUE@	lcm-gen -j --jpath=opt/rov $<
+@BUILD_ROVTRN_TRUE@	@echo
+
+@BUILD_ROVTRN_TRUE@opt/rov/gss/digital_t.java : opt/rov/lcm_types/digital_t.lcm
+@BUILD_ROVTRN_TRUE@	@ echo compiling $@...
+@BUILD_ROVTRN_TRUE@	lcm-gen -j --jpath=opt/rov $<
+@BUILD_ROVTRN_TRUE@	@echo
+
+@BUILD_ROVTRN_TRUE@opt/rov/gss/dvl_stat_t.java : opt/rov/lcm_types/dvl_stat_t.lcm
+@BUILD_ROVTRN_TRUE@	@ echo compiling $@...
+@BUILD_ROVTRN_TRUE@	lcm-gen -j --jpath=opt/rov $<
+@BUILD_ROVTRN_TRUE@	@echo
+
+@BUILD_ROVTRN_TRUE@opt/rov/gss/pcomms_t.java : opt/rov/lcm_types/pcomms_t.lcm
+@BUILD_ROVTRN_TRUE@	@ echo compiling $@...
+@BUILD_ROVTRN_TRUE@	lcm-gen -j --jpath=opt/rov $<
+@BUILD_ROVTRN_TRUE@	@echo
+
+@BUILD_ROVTRN_TRUE@opt/rov/oi/idt_t.java : opt/rov/lcm_types/idt_t.lcm
+@BUILD_ROVTRN_TRUE@	@ echo compiling $@...
+@BUILD_ROVTRN_TRUE@	lcm-gen -j --jpath=opt/rov $<
+@BUILD_ROVTRN_TRUE@	@echo
+
+@BUILD_ROVTRN_TRUE@opt/rov/oi/lcm_header_t.java : opt/rov/lcm_types/lcm_header_t.lcm
+@BUILD_ROVTRN_TRUE@	@ echo compiling $@...
+@BUILD_ROVTRN_TRUE@	lcm-gen -j --jpath=opt/rov $<
+@BUILD_ROVTRN_TRUE@	@echo
+
+@BUILD_ROVTRN_TRUE@opt/rov/trn/mb1_beam_t.java : opt/rov/lcm_types/mb1_beam_t.lcm
+@BUILD_ROVTRN_TRUE@	@ echo compiling $@...
+@BUILD_ROVTRN_TRUE@	lcm-gen -j --jpath=opt/rov $<
+@BUILD_ROVTRN_TRUE@	@echo
+
+@BUILD_ROVTRN_TRUE@opt/rov/trn/trnu_estimate_t.java : opt/rov/lcm_types/trnu_estimate_t.lcm
+@BUILD_ROVTRN_TRUE@	@ echo compiling $@...
+@BUILD_ROVTRN_TRUE@	lcm-gen -j --jpath=opt/rov $<
+@BUILD_ROVTRN_TRUE@	@echo
+
+@BUILD_ROVTRN_TRUE@opt/rov/trn/trn_stat_t.java : opt/rov/lcm_types/trn_stat_t.lcm
+@BUILD_ROVTRN_TRUE@	@ echo compiling $@...
+@BUILD_ROVTRN_TRUE@	lcm-gen -j --jpath=opt/rov $<
+@BUILD_ROVTRN_TRUE@	@echo
+
+@BUILD_ROVTRN_TRUE@opt/rov/trn/trn_meas_t.java : opt/rov/lcm_types/trn_meas_t.lcm
+@BUILD_ROVTRN_TRUE@	@ echo compiling $@...
+@BUILD_ROVTRN_TRUE@	lcm-gen -j --jpath=opt/rov $<
+@BUILD_ROVTRN_TRUE@	@echo
+
+@BUILD_ROVTRN_TRUE@opt/rov/trn/trn_pose_t.java : opt/rov/lcm_types/trn_pose_t.lcm
+@BUILD_ROVTRN_TRUE@	@ echo compiling $@...
+@BUILD_ROVTRN_TRUE@	lcm-gen -j --jpath=opt/rov $<
+@BUILD_ROVTRN_TRUE@	@echo
+
+@BUILD_ROVTRN_TRUE@opt/rov/trn/trnupub_t.java : opt/rov/lcm_types/trnupub_t.lcm
+@BUILD_ROVTRN_TRUE@	@ echo compiling $@...
+@BUILD_ROVTRN_TRUE@	lcm-gen -j --jpath=opt/rov $<
+@BUILD_ROVTRN_TRUE@	@echo
+
+@BUILD_ROVTRN_TRUE@opt/rov/trn/trn_mb1_t.java : opt/rov/lcm_types/trn_mb1_t.lcm
+@BUILD_ROVTRN_TRUE@	@ echo compiling $@...
+@BUILD_ROVTRN_TRUE@	lcm-gen -j --jpath=opt/rov $<
+@BUILD_ROVTRN_TRUE@	@echo
+
+# Java class
+@BUILD_ROVTRN_TRUE@opt/rov/lcm_pcf/signal_t.class : opt/rov/lcm_pcf/signal_t.java
+@BUILD_ROVTRN_TRUE@	@ echo compiling $@...
+@BUILD_ROVTRN_TRUE@	javac -cp $(LCM_JAR) $^
+@BUILD_ROVTRN_TRUE@	@echo
+
+@BUILD_ROVTRN_TRUE@opt/rov/lcm_pcf/string_t.class : opt/rov/lcm_pcf/string_t.java
+@BUILD_ROVTRN_TRUE@	@ echo compiling $@...
+@BUILD_ROVTRN_TRUE@	javac -cp $(LCM_JAR) $^
+@BUILD_ROVTRN_TRUE@	@echo
+
+@BUILD_ROVTRN_TRUE@opt/rov/gss/nav_solution_t.class : opt/rov/gss/nav_solution_t.java
+@BUILD_ROVTRN_TRUE@	@ echo compiling $@...
+@BUILD_ROVTRN_TRUE@	javac -cp $(LCM_JAR) $^
+@BUILD_ROVTRN_TRUE@	@echo
+
+@BUILD_ROVTRN_TRUE@opt/rov/gss/message_t.class : opt/rov/gss/message_t.java
+@BUILD_ROVTRN_TRUE@	@ echo compiling $@...
+@BUILD_ROVTRN_TRUE@	javac -cp $(LCM_JAR) $^
+@BUILD_ROVTRN_TRUE@	@echo
+
+@BUILD_ROVTRN_TRUE@opt/rov/gss/analog_t.class : opt/rov/gss/analog_t.java
+@BUILD_ROVTRN_TRUE@	@ echo compiling $@...
+@BUILD_ROVTRN_TRUE@	javac -cp $(LCM_JAR) $^
+@BUILD_ROVTRN_TRUE@	@echo
+
+@BUILD_ROVTRN_TRUE@opt/rov/gss/digital_t.class : opt/rov/gss/digital_t.java
+@BUILD_ROVTRN_TRUE@	@ echo compiling $@...
+@BUILD_ROVTRN_TRUE@	javac -cp $(LCM_JAR) $^
+@BUILD_ROVTRN_TRUE@	@echo
+
+@BUILD_ROVTRN_TRUE@opt/rov/gss/dvl_stat_t.class : opt/rov/gss/dvl_stat_t.java opt/rov/gss/analog_t.java opt/rov/gss/digital_t.java
+@BUILD_ROVTRN_TRUE@	@ echo compiling $@...
+@BUILD_ROVTRN_TRUE@	javac -cp $(LCM_JAR) $^
+@BUILD_ROVTRN_TRUE@	@echo
+
+@BUILD_ROVTRN_TRUE@opt/rov/gss/pcomms_t.class : opt/rov/gss/pcomms_t.java  opt/rov/gss/message_t.java opt/rov/gss/analog_t.java opt/rov/gss/digital_t.java
+@BUILD_ROVTRN_TRUE@	@ echo compiling $@...
+@BUILD_ROVTRN_TRUE@	javac -cp $(LCM_JAR) $^
+@BUILD_ROVTRN_TRUE@	@echo
+
+@BUILD_ROVTRN_TRUE@opt/rov/oi/idt_t.class : opt/rov/oi/idt_t.java opt/rov/oi/lcm_header_t.java
+@BUILD_ROVTRN_TRUE@	@ echo compiling $@...
+@BUILD_ROVTRN_TRUE@	javac -cp $(LCM_JAR) $^
+@BUILD_ROVTRN_TRUE@	@echo
+
+@BUILD_ROVTRN_TRUE@opt/rov/oi/lcm_header_t.class : opt/rov/oi/lcm_header_t.java
+@BUILD_ROVTRN_TRUE@	@ echo compiling $@...
+@BUILD_ROVTRN_TRUE@	javac -cp $(LCM_JAR) $^
+@BUILD_ROVTRN_TRUE@	@echo
+
+@BUILD_ROVTRN_TRUE@opt/rov/trn/mb1_beam_t.class : opt/rov/trn/mb1_beam_t.java
+@BUILD_ROVTRN_TRUE@	@ echo compiling $@...
+@BUILD_ROVTRN_TRUE@	javac -cp $(LCM_JAR) $^
+@BUILD_ROVTRN_TRUE@	@echo
+
+@BUILD_ROVTRN_TRUE@opt/rov/trn/trnu_estimate_t.class : opt/rov/trn/trnu_estimate_t.java
+@BUILD_ROVTRN_TRUE@	@ echo compiling $@...
+@BUILD_ROVTRN_TRUE@	javac -cp $(LCM_JAR) $^
+@BUILD_ROVTRN_TRUE@	@echo
+
+@BUILD_ROVTRN_TRUE@opt/rov/trn/trn_stat_t.class : opt/rov/trn/trn_stat_t.java opt/rov/trn/trnu_estimate_t.java
+@BUILD_ROVTRN_TRUE@	@ echo compiling $@...
+@BUILD_ROVTRN_TRUE@	javac -cp $(LCM_JAR) $^
+@BUILD_ROVTRN_TRUE@	@echo
+
+@BUILD_ROVTRN_TRUE@opt/rov/trn/trn_meas_t.class : opt/rov/trn/trn_meas_t.java
+@BUILD_ROVTRN_TRUE@	@ echo compiling $@...
+@BUILD_ROVTRN_TRUE@	javac -cp $(LCM_JAR) $^
+@BUILD_ROVTRN_TRUE@	@echo
+
+@BUILD_ROVTRN_TRUE@opt/rov/trn/trn_pose_t.class : opt/rov/trn/trn_pose_t.java
+@BUILD_ROVTRN_TRUE@	@ echo compiling $@...
+@BUILD_ROVTRN_TRUE@	javac -cp $(LCM_JAR) $^
+@BUILD_ROVTRN_TRUE@	@echo
+
+@BUILD_ROVTRN_TRUE@opt/rov/trn/trnupub_t.class : opt/rov/trn/trnupub_t.java opt/rov/trn/trnu_estimate_t.java
+@BUILD_ROVTRN_TRUE@	@ echo compiling $@...
+@BUILD_ROVTRN_TRUE@	javac -cp $(LCM_JAR) $^
+@BUILD_ROVTRN_TRUE@	@echo
+
+@BUILD_ROVTRN_TRUE@opt/rov/trn/trn_mb1_t.class : opt/rov/trn/trn_mb1_t.java opt/rov/trn/mb1_beam_t.java
+@BUILD_ROVTRN_TRUE@	@ echo compiling $@...
+@BUILD_ROVTRN_TRUE@	javac -cp $(LCM_JAR) $^
+@BUILD_ROVTRN_TRUE@	@echo
+
+# TRN LCM types JAR
+@BUILD_ROVTRN_TRUE@lcm_rovtrn.jar: ${TRN_JCLS}
+@BUILD_ROVTRN_TRUE@	@ echo compiling $@...
+@BUILD_ROVTRN_TRUE@	cd opt/rov; jar cvf ../../$@ $(shell echo $^ | sed -e "s/opt\/rov\///g")
 @BUILD_ROVTRN_TRUE@	@echo
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.

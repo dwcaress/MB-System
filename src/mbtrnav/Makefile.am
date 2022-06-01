@@ -236,19 +236,20 @@ libmb1_la_LIBADD =
 
 if BUILD_ROVTRN
 
-ROVTRN_APPS = trnxpp
+LCM_JAR=/usr/local/share/java/lcm.jar
 
-ROVTRN_CLEANFILES = trnxpp opt/rov/lcm_pcf/*.hpp opt/rov/gss/*.hpp opt/rov/oi/*.hpp opt/rov/trn/*.hpp
+ROVTRN_APPS = trnxpp
 
 trnxpp_SOURCES = \
 opt/rov/udpm_sub.c \
 opt/rov/trnxpp_app.cpp \
 utils/TrnClient.cpp \
 utils/TerrainNavClient.cpp
+
 trnxpp_LDADD = -llcm libmb1.la libtnav.la
 
-BUILT_SOURCES = \
-opt/rov/lcm_pcf/signal_t.hpp \
+TRN_HPP = \
+opt/rov/lcm_pcf/signal_t.hpp\
 opt/rov/lcm_pcf/string_t.hpp \
 opt/rov/gss/nav_solution_t.hpp \
 opt/rov/gss/message_t.hpp \
@@ -266,6 +267,19 @@ opt/rov/trn/trn_pose_t.hpp \
 opt/rov/trn/trnupub_t.hpp \
 opt/rov/trn/trn_mb1_t.hpp
 
+TRN_LCM = ${TRN_HPP:%.hpp=%.lcm}
+TRN_JSRC = ${TRN_HPP:%.hpp=%.java}
+TRN_JCLS = ${TRN_HPP:%.hpp=%.class}
+
+BUILT_SOURCES = \
+${TRN_HPP} \
+${TRN_JSRC} \
+${TRN_JCLS} \
+lcm_rovtrn.jar
+
+
+
+# LCM headers
 opt/rov/lcm_pcf/signal_t.hpp : opt/rov/lcm_types/signal_t.lcm
 	@ echo compiling $@...
 	lcm-gen -x --cpp-hpath=opt/rov  $<
@@ -351,6 +365,184 @@ opt/rov/trn/trn_mb1_t.hpp : opt/rov/lcm_types/trn_mb1_t.lcm
 	lcm-gen -x --cpp-hpath=opt/rov  $<
 	@echo
 
+# Java source
+opt/rov/lcm_pcf/signal_t.java : opt/rov/lcm_types/signal_t.lcm
+	@ echo compiling $@...
+	lcm-gen -j --jpath=opt/rov $<
+	@echo
+
+opt/rov/lcm_pcf/string_t.java : opt/rov/lcm_types/string_t.lcm
+	@ echo compiling $@...
+	lcm-gen -j --jpath=opt/rov $<
+	@echo
+
+opt/rov/gss/nav_solution_t.java : opt/rov/lcm_types/nav_solution_t.lcm
+	@ echo compiling $@...
+	lcm-gen -j --jpath=opt/rov $<
+	@echo
+
+opt/rov/gss/message_t.java : opt/rov/lcm_types/message_t.lcm
+	@ echo compiling $@...
+	lcm-gen -j --jpath=opt/rov $<
+	@echo
+
+opt/rov/gss/analog_t.java : opt/rov/lcm_types/analog_t.lcm
+	@ echo compiling $@...
+	lcm-gen -j --jpath=opt/rov $<
+	@echo
+
+opt/rov/gss/digital_t.java : opt/rov/lcm_types/digital_t.lcm
+	@ echo compiling $@...
+	lcm-gen -j --jpath=opt/rov $<
+	@echo
+
+opt/rov/gss/dvl_stat_t.java : opt/rov/lcm_types/dvl_stat_t.lcm
+	@ echo compiling $@...
+	lcm-gen -j --jpath=opt/rov $<
+	@echo
+
+opt/rov/gss/pcomms_t.java : opt/rov/lcm_types/pcomms_t.lcm
+	@ echo compiling $@...
+	lcm-gen -j --jpath=opt/rov $<
+	@echo
+
+opt/rov/oi/idt_t.java : opt/rov/lcm_types/idt_t.lcm
+	@ echo compiling $@...
+	lcm-gen -j --jpath=opt/rov $<
+	@echo
+
+opt/rov/oi/lcm_header_t.java : opt/rov/lcm_types/lcm_header_t.lcm
+	@ echo compiling $@...
+	lcm-gen -j --jpath=opt/rov $<
+	@echo
+
+opt/rov/trn/mb1_beam_t.java : opt/rov/lcm_types/mb1_beam_t.lcm
+	@ echo compiling $@...
+	lcm-gen -j --jpath=opt/rov $<
+	@echo
+
+opt/rov/trn/trnu_estimate_t.java : opt/rov/lcm_types/trnu_estimate_t.lcm
+	@ echo compiling $@...
+	lcm-gen -j --jpath=opt/rov $<
+	@echo
+
+opt/rov/trn/trn_stat_t.java : opt/rov/lcm_types/trn_stat_t.lcm
+	@ echo compiling $@...
+	lcm-gen -j --jpath=opt/rov $<
+	@echo
+
+opt/rov/trn/trn_meas_t.java : opt/rov/lcm_types/trn_meas_t.lcm
+	@ echo compiling $@...
+	lcm-gen -j --jpath=opt/rov $<
+	@echo
+
+opt/rov/trn/trn_pose_t.java : opt/rov/lcm_types/trn_pose_t.lcm
+	@ echo compiling $@...
+	lcm-gen -j --jpath=opt/rov $<
+	@echo
+
+opt/rov/trn/trnupub_t.java : opt/rov/lcm_types/trnupub_t.lcm
+	@ echo compiling $@...
+	lcm-gen -j --jpath=opt/rov $<
+	@echo
+
+opt/rov/trn/trn_mb1_t.java : opt/rov/lcm_types/trn_mb1_t.lcm
+	@ echo compiling $@...
+	lcm-gen -j --jpath=opt/rov $<
+	@echo
+
+# Java class
+opt/rov/lcm_pcf/signal_t.class : opt/rov/lcm_pcf/signal_t.java
+	@ echo compiling $@...
+	javac -cp $(LCM_JAR) $^
+	@echo
+
+opt/rov/lcm_pcf/string_t.class : opt/rov/lcm_pcf/string_t.java
+	@ echo compiling $@...
+	javac -cp $(LCM_JAR) $^
+	@echo
+
+opt/rov/gss/nav_solution_t.class : opt/rov/gss/nav_solution_t.java
+	@ echo compiling $@...
+	javac -cp $(LCM_JAR) $^
+	@echo
+
+opt/rov/gss/message_t.class : opt/rov/gss/message_t.java
+	@ echo compiling $@...
+	javac -cp $(LCM_JAR) $^
+	@echo
+
+opt/rov/gss/analog_t.class : opt/rov/gss/analog_t.java
+	@ echo compiling $@...
+	javac -cp $(LCM_JAR) $^
+	@echo
+
+opt/rov/gss/digital_t.class : opt/rov/gss/digital_t.java
+	@ echo compiling $@...
+	javac -cp $(LCM_JAR) $^
+	@echo
+
+opt/rov/gss/dvl_stat_t.class : opt/rov/gss/dvl_stat_t.java opt/rov/gss/analog_t.java opt/rov/gss/digital_t.java
+	@ echo compiling $@...
+	javac -cp $(LCM_JAR) $^
+	@echo
+
+opt/rov/gss/pcomms_t.class : opt/rov/gss/pcomms_t.java  opt/rov/gss/message_t.java opt/rov/gss/analog_t.java opt/rov/gss/digital_t.java
+	@ echo compiling $@...
+	javac -cp $(LCM_JAR) $^
+	@echo
+
+opt/rov/oi/idt_t.class : opt/rov/oi/idt_t.java opt/rov/oi/lcm_header_t.java
+	@ echo compiling $@...
+	javac -cp $(LCM_JAR) $^
+	@echo
+
+opt/rov/oi/lcm_header_t.class : opt/rov/oi/lcm_header_t.java
+	@ echo compiling $@...
+	javac -cp $(LCM_JAR) $^
+	@echo
+
+opt/rov/trn/mb1_beam_t.class : opt/rov/trn/mb1_beam_t.java
+	@ echo compiling $@...
+	javac -cp $(LCM_JAR) $^
+	@echo
+
+opt/rov/trn/trnu_estimate_t.class : opt/rov/trn/trnu_estimate_t.java
+	@ echo compiling $@...
+	javac -cp $(LCM_JAR) $^
+	@echo
+
+opt/rov/trn/trn_stat_t.class : opt/rov/trn/trn_stat_t.java opt/rov/trn/trnu_estimate_t.java
+	@ echo compiling $@...
+	javac -cp $(LCM_JAR) $^
+	@echo
+
+opt/rov/trn/trn_meas_t.class : opt/rov/trn/trn_meas_t.java
+	@ echo compiling $@...
+	javac -cp $(LCM_JAR) $^
+	@echo
+
+opt/rov/trn/trn_pose_t.class : opt/rov/trn/trn_pose_t.java
+	@ echo compiling $@...
+	javac -cp $(LCM_JAR) $^
+	@echo
+
+opt/rov/trn/trnupub_t.class : opt/rov/trn/trnupub_t.java opt/rov/trn/trnu_estimate_t.java
+	@ echo compiling $@...
+	javac -cp $(LCM_JAR) $^
+	@echo
+
+opt/rov/trn/trn_mb1_t.class : opt/rov/trn/trn_mb1_t.java opt/rov/trn/mb1_beam_t.java
+	@ echo compiling $@...
+	javac -cp $(LCM_JAR) $^
+	@echo
+
+# TRN LCM types JAR
+lcm_rovtrn.jar: ${TRN_JCLS}
+	@ echo compiling $@...
+	cd opt/rov; jar cvf ../../$@ $(shell echo $^ | sed -e "s/opt\/rov\///g")
+	@echo
+
 endif
 
 bin_PROGRAMS =  trn-server trn-replay trnclient-test mmcpub mmcsub trnu-cli trn-cli trnif-test trnusvr-test netif-test trnifsvr-test mb1rs trnlog-player ${ROVTRN_APPS} #  readlog writelog
@@ -396,5 +588,5 @@ trnlog_player_LDADD = libtnav.la
 
 dist_bin_SCRIPTS =
 
-CLEANFILES = ${ROVTRN_CLEANFILES}
+CLEANFILES = ${BUILT_SOURCES} #${ROVTRN_CLEANFILES}
 DISTCLEANFILES =

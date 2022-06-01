@@ -113,7 +113,7 @@
 /* #undef QTTOOLS_ENABLED */
 
 /* Build rovtrn tools in mbtrnav */
-/* #undef ROVTRN_ENABLED */
+#define ROVTRN_ENABLED 1
 
 /* Define to 1 if all of the C90 standard headers exist (not just the ones
    required in a freestanding environment). This macro is provided for
