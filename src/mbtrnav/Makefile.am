@@ -248,36 +248,32 @@ utils/TerrainNavClient.cpp
 
 trnxpp_LDADD = -llcm libmb1.la libtnav.la
 
-TRN_HPP = \
-opt/rov/lcm_pcf/signal_t.hpp\
-opt/rov/lcm_pcf/string_t.hpp \
-opt/rov/gss/nav_solution_t.hpp \
-opt/rov/gss/message_t.hpp \
-opt/rov/gss/analog_t.hpp \
-opt/rov/gss/digital_t.hpp \
-opt/rov/gss/dvl_stat_t.hpp \
-opt/rov/gss/pcomms_t.hpp \
-opt/rov/oi/idt_t.hpp \
-opt/rov/oi/lcm_header_t.hpp \
-opt/rov/trn/mb1_beam_t.hpp \
-opt/rov/trn/trnu_estimate_t.hpp \
-opt/rov/trn/trn_stat_t.hpp \
-opt/rov/trn/trn_meas_t.hpp \
-opt/rov/trn/trn_pose_t.hpp \
-opt/rov/trn/trnupub_t.hpp \
-opt/rov/trn/trn_mb1_t.hpp
+TRN_HPP = opt/rov/lcm_pcf/signal_t.hpp
+TRN_HPP += opt/rov/lcm_pcf/string_t.hpp
+TRN_HPP += opt/rov/gss/nav_solution_t.hpp
+TRN_HPP += opt/rov/gss/message_t.hpp
+TRN_HPP += opt/rov/gss/analog_t.hpp
+TRN_HPP += opt/rov/gss/digital_t.hpp
+TRN_HPP += opt/rov/gss/dvl_stat_t.hpp
+TRN_HPP += opt/rov/gss/pcomms_t.hpp
+TRN_HPP += opt/rov/oi/idt_t.hpp
+TRN_HPP += opt/rov/oi/lcm_header_t.hpp
+TRN_HPP += opt/rov/trn/mb1_beam_t.hpp
+TRN_HPP += opt/rov/trn/trnu_estimate_t.hpp
+TRN_HPP += opt/rov/trn/trn_stat_t.hpp
+TRN_HPP += opt/rov/trn/trn_meas_t.hpp
+TRN_HPP += opt/rov/trn/trn_pose_t.hpp
+TRN_HPP += opt/rov/trn/trnupub_t.hpp
+TRN_HPP += opt/rov/trn/trn_mb1_t.hpp
 
 TRN_LCM = ${TRN_HPP:%.hpp=%.lcm}
 TRN_JSRC = ${TRN_HPP:%.hpp=%.java}
 TRN_JCLS = ${TRN_HPP:%.hpp=%.class}
 
-BUILT_SOURCES = \
-${TRN_HPP} \
-${TRN_JSRC} \
-${TRN_JCLS} \
-lcm_rovtrn.jar
-
-
+BUILT_SOURCES = ${TRN_HPP}
+BUILT_SOURCES += ${TRN_JSRC}
+BUILT_SOURCES += ${TRN_JCLS}
+BUILT_SOURCES += lcm_rovtrn.jar
 
 # LCM headers
 opt/rov/lcm_pcf/signal_t.hpp : opt/rov/lcm_types/signal_t.lcm

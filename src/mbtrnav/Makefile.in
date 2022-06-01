@@ -861,34 +861,28 @@ libmb1_la_LIBADD =
 @BUILD_ROVTRN_TRUE@utils/TerrainNavClient.cpp
 
 @BUILD_ROVTRN_TRUE@trnxpp_LDADD = -llcm libmb1.la libtnav.la
-@BUILD_ROVTRN_TRUE@TRN_HPP = \
-@BUILD_ROVTRN_TRUE@opt/rov/lcm_pcf/signal_t.hpp\
-@BUILD_ROVTRN_TRUE@opt/rov/lcm_pcf/string_t.hpp \
-@BUILD_ROVTRN_TRUE@opt/rov/gss/nav_solution_t.hpp \
-@BUILD_ROVTRN_TRUE@opt/rov/gss/message_t.hpp \
-@BUILD_ROVTRN_TRUE@opt/rov/gss/analog_t.hpp \
-@BUILD_ROVTRN_TRUE@opt/rov/gss/digital_t.hpp \
-@BUILD_ROVTRN_TRUE@opt/rov/gss/dvl_stat_t.hpp \
-@BUILD_ROVTRN_TRUE@opt/rov/gss/pcomms_t.hpp \
-@BUILD_ROVTRN_TRUE@opt/rov/oi/idt_t.hpp \
-@BUILD_ROVTRN_TRUE@opt/rov/oi/lcm_header_t.hpp \
-@BUILD_ROVTRN_TRUE@opt/rov/trn/mb1_beam_t.hpp \
-@BUILD_ROVTRN_TRUE@opt/rov/trn/trnu_estimate_t.hpp \
-@BUILD_ROVTRN_TRUE@opt/rov/trn/trn_stat_t.hpp \
-@BUILD_ROVTRN_TRUE@opt/rov/trn/trn_meas_t.hpp \
-@BUILD_ROVTRN_TRUE@opt/rov/trn/trn_pose_t.hpp \
-@BUILD_ROVTRN_TRUE@opt/rov/trn/trnupub_t.hpp \
-@BUILD_ROVTRN_TRUE@opt/rov/trn/trn_mb1_t.hpp
-
+@BUILD_ROVTRN_TRUE@TRN_HPP = opt/rov/lcm_pcf/signal_t.hpp \
+@BUILD_ROVTRN_TRUE@	opt/rov/lcm_pcf/string_t.hpp \
+@BUILD_ROVTRN_TRUE@	opt/rov/gss/nav_solution_t.hpp \
+@BUILD_ROVTRN_TRUE@	opt/rov/gss/message_t.hpp \
+@BUILD_ROVTRN_TRUE@	opt/rov/gss/analog_t.hpp \
+@BUILD_ROVTRN_TRUE@	opt/rov/gss/digital_t.hpp \
+@BUILD_ROVTRN_TRUE@	opt/rov/gss/dvl_stat_t.hpp \
+@BUILD_ROVTRN_TRUE@	opt/rov/gss/pcomms_t.hpp \
+@BUILD_ROVTRN_TRUE@	opt/rov/oi/idt_t.hpp \
+@BUILD_ROVTRN_TRUE@	opt/rov/oi/lcm_header_t.hpp \
+@BUILD_ROVTRN_TRUE@	opt/rov/trn/mb1_beam_t.hpp \
+@BUILD_ROVTRN_TRUE@	opt/rov/trn/trnu_estimate_t.hpp \
+@BUILD_ROVTRN_TRUE@	opt/rov/trn/trn_stat_t.hpp \
+@BUILD_ROVTRN_TRUE@	opt/rov/trn/trn_meas_t.hpp \
+@BUILD_ROVTRN_TRUE@	opt/rov/trn/trn_pose_t.hpp \
+@BUILD_ROVTRN_TRUE@	opt/rov/trn/trnupub_t.hpp \
+@BUILD_ROVTRN_TRUE@	opt/rov/trn/trn_mb1_t.hpp
 @BUILD_ROVTRN_TRUE@TRN_LCM = ${TRN_HPP:%.hpp=%.lcm}
 @BUILD_ROVTRN_TRUE@TRN_JSRC = ${TRN_HPP:%.hpp=%.java}
 @BUILD_ROVTRN_TRUE@TRN_JCLS = ${TRN_HPP:%.hpp=%.class}
-@BUILD_ROVTRN_TRUE@BUILT_SOURCES = \
-@BUILD_ROVTRN_TRUE@${TRN_HPP} \
-@BUILD_ROVTRN_TRUE@${TRN_JSRC} \
-@BUILD_ROVTRN_TRUE@${TRN_JCLS} \
-@BUILD_ROVTRN_TRUE@lcm_rovtrn.jar
-
+@BUILD_ROVTRN_TRUE@BUILT_SOURCES = ${TRN_HPP} ${TRN_JSRC} ${TRN_JCLS} \
+@BUILD_ROVTRN_TRUE@	lcm_rovtrn.jar
 trn_server_SOURCES = utils/trn_server.cpp
 trn_server_LDADD = libtnav.la libqnx.la libnewmat.la libtnav.la libgeolib.la
 trn_replay_SOURCES = opt/dorado/Replay.cpp opt/dorado/trn_replay.cpp utils/TerrainNavClient.cpp
