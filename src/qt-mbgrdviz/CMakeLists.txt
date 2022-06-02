@@ -24,6 +24,7 @@ target_include_directories(qt-mbgrdviz
                            .
                            ${GMT_INCLUDE_DIR}
                            ${GDAL_INCLUDE_DIR}
+                           ${VTK_INCLUDE_DIR}
                            ${CMAKE_SOURCE_DIR}/src/qt-guilib)
 
 target_link_libraries(qt-mbgrdviz

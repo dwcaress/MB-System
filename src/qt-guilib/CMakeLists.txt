@@ -36,7 +36,8 @@ add_library(MBGui
             STATIC
             ${src})
 
-target_link_libraries(MBGui ${VTK_LIBRARIES})
+# VTK 8.x does not fully support find_package()
+### target_link_libraries(MBGui ${VTK_LIBRARIES}) 
 
 target_include_directories(MBGui
                            PUBLIC
@@ -44,7 +45,8 @@ target_include_directories(MBGui
                            ${MB_HOME}/src/mbio
 			   ${OPENGL_INCLUDE_DIR}
                            ${GMT_INCLUDE_DIR}
-                           ${QT5_INCLUDE_DIR})
+                           ${QT5_INCLUDE_DIR}
+                           ${VTK_INCLUDE_DIR})
 
 message("*** OPENGL_INCLUDE_DIR: ${OPENGL_INCLUDE_DIR}")
 
@@ -63,7 +65,8 @@ target_include_directories(MBGuiShared
                            .
 			   ${OPENGL_INCLUDE_DIR}			   
                            ${GMT_INCLUDE_DIR}
-                           ${QT5_INCLUDE_DIR})
+                           ${QT5_INCLUDE_DIR}
+                           ${VTK_INCLUDE_DIR})
 
 message("qt-guilib - EXTRA_LIBRARIES: ${EXTRA_LIBRARIES}")
 target_link_libraries(MBGuiShared ${VTK_LIBRARIES} ${EXTRA_LIBRARIES})
