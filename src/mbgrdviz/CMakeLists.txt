@@ -10,8 +10,8 @@ add_executable(mbgrdviz
 target_include_directories(mbgrdviz
                            PUBLIC
                            .
-                           ${GMT_INCLUDE_DIR}
-                           ${GDAL_INCLUDE_DIR}
+                           ${GMT_INCLUDE_DIRS}
+                           ${GDAL_INCLUDE_DIRS}
                            ${CMAKE_SOURCE_DIR}/src/mbio
                            ${CMAKE_SOURCE_DIR}/src/mbaux
                            ${CMAKE_SOURCE_DIR}/src/mbview

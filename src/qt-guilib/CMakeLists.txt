@@ -43,12 +43,12 @@ target_include_directories(MBGui
                            PUBLIC
                            .
                            ${MB_HOME}/src/mbio
-			   ${OPENGL_INCLUDE_DIR}
-                           ${GMT_INCLUDE_DIR}
-                           ${QT5_INCLUDE_DIR}
-                           ${VTK_INCLUDE_DIR})
+			   ${OPENGL_INCLUDE_DIRS}
+                           ${GMT_INCLUDE_DIRS}
+                           ${QT5_INCLUDE_DIRS}
+                           ${VTK_INCLUDE_DIRS})
 
-message("*** OPENGL_INCLUDE_DIR: ${OPENGL_INCLUDE_DIR}")
+message("*** OPENGL_INCLUDE_DIRS: ${OPENGL_INCLUDE_DIRS}")
 
 set_target_properties(MBGui PROPERTIES POSITION_INDEPENDENT_CODE ON)
 
@@ -63,10 +63,10 @@ set_target_properties(MBGuiShared PROPERTIES OUTPUT_NAME MBGui)
 target_include_directories(MBGuiShared
                            PUBLIC
                            .
-			   ${OPENGL_INCLUDE_DIR}			   
-                           ${GMT_INCLUDE_DIR}
-                           ${QT5_INCLUDE_DIR}
-                           ${VTK_INCLUDE_DIR})
+			   ${OPENGL_INCLUDE_DIRS}			   
+                           ${GMT_INCLUDE_DIRS}
+                           ${QT5_INCLUDE_DIRS}
+                           ${VTK_INCLUDE_DIRS})
 
 message("qt-guilib - EXTRA_LIBRARIES: ${EXTRA_LIBRARIES}")
 target_link_libraries(MBGuiShared ${VTK_LIBRARIES} ${EXTRA_LIBRARIES})
