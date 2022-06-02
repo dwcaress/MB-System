@@ -208,9 +208,6 @@ if (buildQt)
     message("set VTK_LIBRARIES to ${VTK_lib}")  
     set(VTK_LIBRARIES ${VTK_lib} CACHE FILEPATH "path to VTK libraries")
   else()
-##    find_package(VTK "8.0.0...<9.0.0" REQUIRED) # Doesn't work
-##    find_package(VTK "8.2.0" REQUIRED EXACT)  # Works
-##     find_package(VTK "8" REQUIRED)
     find_package(VTK 8...<9 REQUIRED) 
     if (${VTK_VERSION} VERSION_GREATER_EQUAL 9)
        message(FATAL_ERROR "This application requires VTK 8.x, but VTK ${VTK_VERSION} was found. Please set VTK_DIR to a folder containing the VTKConfig.cmake file from a VTK 8 installation.")
