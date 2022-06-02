@@ -188,8 +188,8 @@ if (buildQt)
     find_package(Qt5 COMPONENTS Gui Quick REQUIRED)
     if (Qt5_FOUND)
       message("Found Qt5 package")
-      set(QT5_INCLUDE_DIR ${Qt5Gui_INCLUDE_DIRS})
-      list(APPEND QT5_INCLUDE_DIR ${Qt5Quick_INCLUDE_DIRS})
+      set(QT5_INCLUDE_DIRS ${Qt5Gui_INCLUDE_DIRS})
+      list(APPEND QT5_INCLUDE_DIRS ${Qt5Quick_INCLUDE_DIRS})
       set(QT5_LIBRARIES ${Qt5Gui_LIBRARIES})
       list(APPEND QT5_LIBRARIES ${Qt5Quick_LIBRARIES})
     else()
@@ -199,8 +199,8 @@ if (buildQt)
 
   if (VTK_include)
     # Specified on command line
-    message("set VTK_INCLUDE_DIR to ${VTK_include}")
-    set(VTK_INCLUDE_DIR ${VTK_include} CACHE PATH "path to VTK headers")
+    message("set VTK_INCLUDE_DIRS to ${VTK_include}")
+    set(VTK_INCLUDE_DIRS ${VTK_include} CACHE PATH "path to VTK headers")
   endif()
 
   if (VTK_lib)
@@ -234,24 +234,24 @@ message("Done finding packages")
 # described at
 # https://cmake.org/cmake/help/latest/manual/cmake-developer.7.html
 # Make names consistent...
-set(X11_XT_INCLUDE_DIR ${X11_Xt_INCLUDE_PATH})
+set(X11_XT_INCLUDE_DIRS ${X11_Xt_INCLUDE_PATH})
 set(X11_XT_LIBRARIES ${X11_Xt_LIB})
 
 # Make NetCDF variable names consistent
-set(NETCDF_INCLUDE_DIR ${NetCDF_INCLUDE_DIRS})
+set(NETCDF_INCLUDE_DIRS ${NetCDF_INCLUDE_DIRS})
 set(NETCDF_LIBRARIES ${NetCDF_LIBRARIES})
 
 # Override header and library locations if specified on command line
 # with -D<package>_include or -D<package>_lib.
 message("override header and library locations if specified on command line")
 message("APPENDED modules to packages, now: ${packages}")
-# Set variables ${MODULE}_INCLUDE_DIR an ${MODULE}_LIBRARIES for each required
+# Set variables ${MODULE}_INCLUDE_DIRS and ${MODULE}_LIBRARIES for each required
 # MODULE
 foreach(module ${modules})
   if (${module}_include)
     message("override ${module} include directory with ${${module}_include}")
     string(TOUPPER ${module} MODULE)
-    set(${MODULE}_INCLUDE_DIR ${${module}_include} CACHE FILE "${module} header directory")
+    set(${MODULE}_INCLUDE_DIRS ${${module}_include} CACHE FILE "${module} header directory")
   endif()
   if (${module}_lib)
     message("override ${module} library with ${${module}_lib}")
@@ -262,17 +262,17 @@ endforeach()
 
 
 
-message("GMT_INCLUDE_DIR: ${GMT_INCLUDE_DIR}")
-message("FFTW_INCLUDE_DIR: ${FFTW_INCLUDE_DIR}")
-message("PROJ_INCLUDE_DIR: ${PROJ_INCLUDE_DIR}")
-message("GDAL_INCLUDE_DIR: ${GDAL_INCLUDE_DIR}")
-message("OPENGL_INCLUDE_DIR: ${OPENGL_INCLUDE_DIR}")
-message("X11_INCLUDE_DIR: ${X11_INCLUDE_DIR}")
-message("MOTIF_INCLUDE_DIR: ${MOTIF_INCLUDE_DIR}")
-message("NETCDF_INCLUDE_DIR: ${NETCDF_INCLUDE_DIR}")
-message("X11_XT_INCLUDE_DIR: ${X11_XT_INCLUDE_DIR}")
-message("VTK_INCLUDE_DIR: ${VTK_INCLUDE_DIR}")
-message("QT5_INCLUDE_DIR: ${QT5_INCLUDE_DIR}")
+message("GMT_INCLUDE_DIRS: ${GMT_INCLUDE_DIRS}")
+message("FFTW_INCLUDE_DIRS: ${FFTW_INCLUDE_DIRS}")
+message("PROJ_INCLUDE_DIRS: ${PROJ_INCLUDE_DIRS}")
+message("GDAL_INCLUDE_DIRS: ${GDAL_INCLUDE_DIRS}")
+message("OPENGL_INCLUDE_DIRS: ${OPENGL_INCLUDE_DIRS}")
+message("X11_INCLUDE_DIRS: ${X11_INCLUDE_DIRS}")
+message("MOTIF_INCLUDE_DIRS: ${MOTIF_INCLUDE_DIRS}")
+message("NETCDF_INCLUDE_DIRS: ${NETCDF_INCLUDE_DIRS}")
+message("X11_XT_INCLUDE_DIRS: ${X11_XT_INCLUDE_DIRS}")
+message("VTK_INCLUDE_DIRS: ${VTK_INCLUDE_DIRS}")
+message("QT5_INCLUDE_DIRS: ${QT5_INCLUDE_DIRS}")
 
 message("GMT_LIBRARIES: ${GMT_LIBRARIES}")
 message("FFTW_LIBRARIES: ${FFTW_LIBRARIES}")
