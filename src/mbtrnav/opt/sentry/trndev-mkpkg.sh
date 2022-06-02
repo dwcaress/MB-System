@@ -78,20 +78,22 @@ processCmdLine(){
 }
 
 showVars(){
-    vout " GIT            $GIT"
-    vout " MAKE           $MAKE"
-    vout " TAR            $TAR"
-    vout " DIST_DATE      $DIST_DATE"
-    vout " TRNDEV_WD      $TRNDEV_WD"
-    vout " TRNDEV_TGZ     $TRNDEV_TGZ"
-    vout " TRNDEV_SDNAME  $TRNDEV_SDNAME"
-    vout " TRNDEV_SD      $TRNDEV_SD"
-    vout " MFRAME_REPO    $MFRAME_REPO"
-    vout " MFRAME_TOP     $MFRAME_TOP"
-    vout " MFRAME_TGZ     $MFRAME_TGZ"
-    vout " LIBTRNAV_REPO  $LIBTRNAV_REPO"
-    vout " LIBTRNAV_TOP   $LIBTRNAV_TOP"
-    vout " LIBTRNAV_TGZ   $LIBTRNAV_TGZ"
+    vout " GIT             $GIT"
+    vout " MAKE            $MAKE"
+    vout " TAR             $TAR"
+    vout " DIST_DATE       $DIST_DATE"
+    vout " TRNDEV_WD       $TRNDEV_WD"
+    vout " TRNDEV_TGZ      $TRNDEV_TGZ"
+    vout " TRNDEV_SDNAME   $TRNDEV_SDNAME"
+    vout " TRNDEV_SD       $TRNDEV_SD"
+    vout " MFRAME_REPO     $MFRAME_REPO"
+    vout " MFRAME_TOP      $MFRAME_TOP"
+    vout " MFRAME_TGZ      $MFRAME_TGZ"
+    vout " MFRAME_BRANCH   $MFRAME_BRANCH"
+    vout " LIBTRNAV_REPO   $LIBTRNAV_REPO"
+    vout " LIBTRNAV_TOP    $LIBTRNAV_TOP"
+    vout " LIBTRNAV_TGZ    $LIBTRNAV_TGZ"
+    vout " LIBTRNAV_BRANCH $LIBTRNAV_BRANCH"
 }
 
 #################d
@@ -107,9 +109,11 @@ TRNDEV_SD=${TRNDEV_WD}/${TRNDEV_SDNAME}
 MFRAME_REPO=mframe
 MFRAME_TGZ=mframe.tar.gz
 MFRAME_TOP=${TRNDEV_WD}/${MFRAME_REPO}
+MFRAME_BRANCH=${MFRAME_BRANCH:-"master"}
 LIBTRNAV_REPO=libtrnav
 LIBTRNAV_TGZ=libtrnav.tar.gz
 LIBTRNAV_TOP=${TRNDEV_WD}/${LIBTRNAV_REPO}
+LIBTRNAV_BRANCH=${LIBTRNAV_BRANCH:-"master"}
 
 showVars
 
@@ -128,11 +132,13 @@ ${GIT} clone git@bitbucket.org:mbari/libtrnav.git
 # build mframe distribution tar.gz
 vout "building mframe dist"
 cd ${MFRAME_TOP}
+git checkout ${MFRAME_BRANCH}
 ${MAKE} dist
 
 # build libtrnav distribution tar.gz
 vout "building libtrnav dist"
 cd ${LIBTRNAV_TOP}
+git checkout ${LIBTRNAV_BRANCH}
 ${MAKE} dist
 
 # create staging directory
