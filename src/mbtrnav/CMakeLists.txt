@@ -152,15 +152,19 @@ add_compile_definitions(WITH_PDEBUG)
 endif()
 
 # built-in netif module debug
-if( WITH_NETIF_MMD_EXT )
-# TODO: get external netif mmdebug channel defs
-else()
+if( NETIF_MMDEBUG )
 # add NETIF_MMDEBUG to use netif default MMDEBUG macros
 # instead of values defined in a custom mconfig.h
 # [may need for Cygwin build]
 # compile using cmake .. -DNETIF_MMDEBUG=1
 message("compiling with NETIF_MMDEBUG")
 add_compile_definitions(NETIF_MMDEBUG)
+elseif( WITH_NETIF_MMD_EXT )
+message("compiling with WITH_NETIF_MMD_EXT")
+add_compile_definitions(WITH_NETIF_MMD_EXT)
+else()
+message("compiling with mframe NETIF_MMDEBUG")
+# TODO: get external netif mmdebug channel defs
 endif()
 
 # configuration/feature header
