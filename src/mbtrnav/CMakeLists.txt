@@ -414,7 +414,13 @@ ${PROJECT_SOURCE_DIR}/trnw/trnucli_test.c
 
 # specify dependency libs
 target_link_libraries(trnucli-test
-trnucli
+"netif"
+"trnw"
+"tnav"
+"qnx"
+"newmat"
+"geolib"
+"trnucli"
 Libmframe::mframe
 "${EXTRA_LIBS}"
 )
