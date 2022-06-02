@@ -412,24 +412,24 @@ int trnucli_reset_trn(trnucli_t *self)
     return retval;
 }
 
-int trnucli_reset_ofs_trn(trnucli_t *self, double ofs_n, double ofs_e, double ofs_z)
+int trnucli_reset_ofs_trn(trnucli_t *self, double ofs_x, double ofs_y, double ofs_z)
 {
     int retval=-1;
 
     if(NULL!=self && !UCF_ISSET(self->flags,TRNUC_MCAST)){
-        trnuif_msg_t *msg = TRNU_MSG_RST_OFS(ofs_n, ofs_e, ofs_z);
+        trnuif_msg_t *msg = TRNU_MSG_RST_OFS(ofs_x, ofs_y, ofs_z);
         retval=s_send_recv(self,(byte *)msg,TRNX_MSG_SIZE);
         free(msg);
     }
     return retval;
 }
 
-int trnucli_reset_box_trn(trnucli_t *self, double ofs_n, double ofs_e, double ofs_z, double sx, double sy, double sz)
+int trnucli_reset_box_trn(trnucli_t *self, double ofs_x, double ofs_y, double ofs_z, double sx, double sy, double sz)
 {
     int retval=-1;
 
     if(NULL!=self && !UCF_ISSET(self->flags,TRNUC_MCAST)){
-        trnuif_msg_t *msg = TRNU_MSG_RST_BOX(ofs_n, ofs_e, ofs_z, sx, sy, sz);
+        trnuif_msg_t *msg = TRNU_MSG_RST_BOX(ofs_x, ofs_y, ofs_z, sx, sy, sz);
         retval=s_send_recv(self,(byte *)msg,TRNX_MSG_SIZE);
         free(msg);
     }
@@ -1275,23 +1275,23 @@ int trnucli_ctx_reset_trn(trnucli_ctx_t *self)
     return retval;
 }
 
-int trnucli_ctx_reset_ofs_trn(trnucli_ctx_t *self, double ofs_n, double ofs_e, double ofs_z)
+int trnucli_ctx_reset_ofs_trn(trnucli_ctx_t *self, double ofs_x, double ofs_y, double ofs_z)
 {
     int retval=-1;
     if(NULL!=self){
         mthread_mutex_lock(self->mtx);
-        retval=trnucli_reset_ofs_trn(self->cli, ofs_n, ofs_e, ofs_z);
+        retval=trnucli_reset_ofs_trn(self->cli, ofs_x, ofs_y, ofs_z);
         mthread_mutex_unlock(self->mtx);
     }
     return retval;
 }
 
-int trnucli_ctx_reset_box_trn(trnucli_ctx_t *self, double ofs_n, double ofs_e, double ofs_z, double sx, double sy, double sz)
+int trnucli_ctx_reset_box_trn(trnucli_ctx_t *self, double ofs_x, double ofs_y, double ofs_z, double sx, double sy, double sz)
 {
     int retval=-1;
     if(NULL!=self){
         mthread_mutex_lock(self->mtx);
-        retval=trnucli_reset_box_trn(self->cli, ofs_n, ofs_e, ofs_z, sx, sy, sz);
+        retval=trnucli_reset_box_trn(self->cli, ofs_x, ofs_y, ofs_z, sx, sy, sz);
         mthread_mutex_unlock(self->mtx);
     }
     return retval;

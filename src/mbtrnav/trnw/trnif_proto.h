@@ -95,6 +95,8 @@
 #define PROTO_TRNU_RST_OFS  "RST_OFS"
 #define PROTO_TRNU_RST_BOX  "RST_BOX"
 
+// These macros create new messages using malloc
+// caller must relese using free
 #define TRNU_MSG_CON()  trnu_msg_str(PROTO_TRNU_CON)
 #define TRNU_MSG_REQ()  trnu_msg_str(PROTO_TRNU_REQ)
 #define TRNU_MSG_RST()  trnu_msg_str(PROTO_TRNU_RST)
@@ -102,10 +104,10 @@
 #define TRNU_MSG_PING() trnu_msg_str(PROTO_TRNU_PING)
 #define TRNU_MSG_DIS()  trnu_msg_str(PROTO_TRNU_DIS)
 #define TRNU_MSG_ACK()  trnu_msg_str(PROTO_TRNU_ACK)
-#define TRNU_MSG_NACK()  trnu_msg_str(PROTO_TRNU_NACK)
-#define TRNU_MSG_RST_OFS(x,y,z)  trnu_msg_d3(PROTO_TRNU_RST_OFS,x,y,z)
-#define TRNU_MSG_RST_BOX(x,y,z,sx,sy,sz)  trnu_msg_d6(PROTO_TRNU_RST_BOX,x,y,z,sx,sy,sz)
-#define TRNU_MSG_PD(id, n, pd)  trnu_msg_pd(id,n,pd)
+#define TRNU_MSG_NACK() trnu_msg_str(PROTO_TRNU_NACK)
+#define TRNU_MSG_RST_OFS(x,y,z) trnu_msg_d3(PROTO_TRNU_RST_OFS,x,y,z)
+#define TRNU_MSG_RST_BOX(x,y,z,sx,sy,sz) trnu_msg_d6(PROTO_TRNU_RST_BOX,x,y,z,sx,sy,sz)
+#define TRNU_MSG_PD(id, n, pd) trnu_msg_pd(id,n,pd)
 
 #define PROTO_MSG_LEN(s) (strlen(s)+1)
 

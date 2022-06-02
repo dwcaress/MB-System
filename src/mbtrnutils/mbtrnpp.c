@@ -5446,7 +5446,7 @@ int s_mbtrnpp_trnu_reset_callback()
     return retval;
 }
 
-int s_mbtrnpp_trnu_reset_ofs_callback(double ofs_n, double ofs_e, double ofs_z)
+int s_mbtrnpp_trnu_reset_ofs_callback(double ofs_x, double ofs_y, double ofs_z)
 {
     int retval=0;
     int reinits_pre=wtnav_get_num_reinits(trn_instance);
@@ -5454,12 +5454,12 @@ int s_mbtrnpp_trnu_reset_ofs_callback(double ofs_n, double ofs_e, double ofs_z)
     double reset_time = mtime_etime();
 
     fprintf(stderr, "--reinit_ofs (cli_req) systime:%.6f centered on offset: %lf %lf %lf\n",
-            reset_time, ofs_n, ofs_e, ofs_z);
+            reset_time, ofs_x, ofs_y, ofs_z);
 
-    wtnav_reinit_filter_offset(trn_instance, true, ofs_n, ofs_e, ofs_z);
+    wtnav_reinit_filter_offset(trn_instance, true, ofs_x, ofs_y, ofs_z);
 
     mlog_tprintf(mbtrnpp_mlog_id, "i,trn filter reinit_ofs.cli systime:%.6f centered on offset: %lf %lf %lf\n",
-                 reset_time, ofs_n, ofs_e, ofs_z);
+                 reset_time, ofs_x, ofs_y, ofs_z);
 
     MST_COUNTER_INC(app_stats->stats->events[MBTPP_EV_MB_REINIT]);
     MST_COUNTER_INC(app_stats->stats->events[MBTPP_EV_MB_TRNUCLI_RESET]);
@@ -5476,7 +5476,7 @@ int s_mbtrnpp_trnu_reset_ofs_callback(double ofs_n, double ofs_e, double ofs_z)
     return retval;
 }
 
-int s_mbtrnpp_trnu_reset_box_callback(double ofs_n, double ofs_e, double ofs_z, double sx, double sy, double sz)
+int s_mbtrnpp_trnu_reset_box_callback(double ofs_x, double ofs_y, double ofs_z, double sx, double sy, double sz)
 {
     int retval=0;
     int reinits_pre=wtnav_get_num_reinits(trn_instance);
@@ -5484,12 +5484,12 @@ int s_mbtrnpp_trnu_reset_box_callback(double ofs_n, double ofs_e, double ofs_z, 
     double reset_time = mtime_etime();
 
     fprintf(stderr, "--reinit_box (cli_req) systime:%.6f centered on offset: %lf %lf %lf %lf %lf %lf\n",
-            reset_time, ofs_n, ofs_e, ofs_z, sx, sy, sz);
+            reset_time, ofs_x, ofs_y, ofs_z, sx, sy, sz);
 
-    wtnav_reinit_filter_box(trn_instance, true, ofs_n, ofs_e, ofs_z, sx, sy, sz);
+    wtnav_reinit_filter_box(trn_instance, true, ofs_x, ofs_y, ofs_z, sx, sy, sz);
 
     mlog_tprintf(mbtrnpp_mlog_id, "i,trn filter reinit_box.cli systime:%.6f centered on offset: %lf %lf %lf %lf %lf %lf\n",
-                 reset_time, ofs_n, ofs_e, ofs_z, sx, sy, sz);
+                 reset_time, ofs_x, ofs_y, ofs_z, sx, sy, sz);
 
     MST_COUNTER_INC(app_stats->stats->events[MBTPP_EV_MB_REINIT]);
     MST_COUNTER_INC(app_stats->stats->events[MBTPP_EV_MB_TRNUCLI_RESET]);
