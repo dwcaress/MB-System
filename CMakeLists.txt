@@ -54,6 +54,17 @@ option(BUILD_SHARED_LIBS "Build and link with shared libraries" ON)
 
 if (APPLE)
 
+  # Assume MacPorts default install location in /opt/local
+  set(CMAKE_INCLUDE_PATH ${CMAKE_INCLUDE_PATH} /opt/local/include)
+  set(CMAKE_LIBRARY_PATH ${CMAKE_LIBRARY_PATH} /opt/local/lib)
+
+  set(GMT_ROOT /opt/local/lib/gmt6) # Required for FindGMT()
+  set(PROJ_ROOT /opt/local/lib/proj6)
+  set(PROJ6_ROOT /opt/local/lib/proj6)
+  set(PROJ8_ROOT /opt/local/lib/proj8)
+  set(PROJ_ROOT /opt/local/lib/proj9)
+  set(PROJ9_ROOT /opt/local/lib/proj9)    
+
   # On OSX we assume X11 and OpenGL are provided by XQuartz in /opt/X11,
   # unless user specifies location on command line
   message("MACOS: assume X11 and OpenGL are in /opt/X11")
@@ -84,17 +95,7 @@ else()
   set(otpsDir /local/opt/otps)
 endif()
 
-#[[
-### TEST TEST TEST Can cmake find VTK header directory and libraries?
-message("TEST: look for vtk stuff")
-message("CMAKE_MODULE_PATH: ${CMAKE_MODULE_PATH}")
-## find_package(VTK "8.2.0" REQUIRED EXACT)
-find_package(VTK "8...<9" REQUIRED)
-message("VTK_FOUND: ${VTK_FOUND}")
-message("VTK_INCLUDE_DIRS: ${VTK_INCLUDE_DIRS}")
-message("VTK_LIBRARIES: ${VTK_LIBRARIES}")
-message("VTK_VERSION: ${VTK_VERSION}")
-]]
+
 
 #[[
 NOTE: VTK_lib is specified as a space-delimited list of libraries, and 
@@ -147,6 +148,33 @@ message("Add build-utils/ subdirectory to module CMAKE_MODULE_PATH")
 list(APPEND CMAKE_MODULE_PATH ${MB_HOME}/build-utils/)
 message("CMAKE_MODULE_PATH now: ${CMAKE_MODULE_PATH}")
 
+
+### TEST TEST TEST  Can cmake find GMT, proj packages? Not on MacOS when proj8 or less
+### installed with MacPorts!
+message("*** TEST FindGMT()")
+include("FindGMT")
+message("*** FindGMT() result: GMT_FOUND: ${GMT_FOUND}")
+
+### find_package(GMT CONFIG REQUIRED)
+
+include("FindProj")
+message("FindProj() result: Proj_FOUND: ${Proj_FOUND}")
+message("find_package(PROJ9)")
+find_package(PROJ CONFIG REQUIRED)
+
+#[[
+### TEST TEST TEST Can cmake find VTK header directory and libraries?
+message("TEST: look for vtk stuff")
+message("CMAKE_MODULE_PATH: ${CMAKE_MODULE_PATH}")
+## find_package(VTK "8.2.0" REQUIRED EXACT)
+find_package(VTK "8...<9" REQUIRED)
+message("VTK_FOUND: ${VTK_FOUND}")
+message("VTK_INCLUDE_DIRS: ${VTK_INCLUDE_DIRS}")
+message("VTK_LIBRARIES: ${VTK_LIBRARIES}")
+message("VTK_VERSION: ${VTK_VERSION}")
+]]
+
+
 # Find required modules
 message("find modules: ${modules}")
 foreach(module ${modules})
@@ -159,10 +187,11 @@ foreach(module ${modules})
 
   if (NOT ${module}_include OR  NOT ${module}_lib)
     # Try to find module with Find${module}
-    message("include Find${MODULE}")
+    message("---include Find${module}")
     include(Find${module})
     string(TOUPPER ${module} MODULE)
     if (${module}_FOUND OR ${MODULE}_FOUND)
+      message("${module}_FOUND: ${${module}_FOUND}")
       if (${MODULE}_LIBRARY)
         message("rename ${MODULE}_LIBRARY")
         set(${MODULE}_LIBRARIES ${${MODULE}_LIBRARY})
