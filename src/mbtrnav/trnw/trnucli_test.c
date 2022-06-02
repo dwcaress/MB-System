@@ -298,7 +298,6 @@ static void s_show_help()
     " --block=[lc]  : block on connect/listen (L:listen C:connect)\n"
     " --update=n    : TRN update N\n"
     " --demo=n      : use trn_cli handler mechanism, w/ periodic TRN resets (mod n)\n"
-    " --test-reset=n : enable periodic TRN resets (mod n)\n"
     "\ntrncli_ctx API options:\n"
     " --rctos=n     : reconnect timeout sec (reconnect if no message received for n sec)\n"
     " --nddelms=n   : delay n ms on listen error\n"
@@ -307,6 +306,7 @@ static void s_show_help()
     " --no-log      : disable client logging\n"
     " --logstats=f  : async client stats log period (sec, <=0.0 to disable)\n"
     " --async=n     : use asynchronous implementation, show status every n msec\n"
+    " --test-reset=n : enable periodic TRN resets (mod n)\n"
     "\n"
     " Example:\n"
     " # async client\n"
@@ -1074,8 +1074,21 @@ static int s_trnucli_test_trnu_async(app_cfg_t *cfg)
                 // reinit per config
                 if(cfg->test_reset_mod>0 && x>0 && (x%cfg->test_reset_mod)==0 ){
                     fprintf(stderr,"\nTest Reset mod/update[%d/%d]\n",cfg->test_reset_mod,x);
-                    int res=trnucli_ctx_reset_trn(ctx);
-                    fprintf(stderr,"\nReset returned[%d]\n",res);
+
+                    static int xc = 0;
+                    int res=-1;
+                    char *rtype = "norm";
+                    if ((xc%3) == 2){
+                        res=trnucli_ctx_reset_ofs_trn(ctx, 1., 1., 0.);
+                        rtype = "ofs";
+                    }else if ((xc%3) == 1){
+                        res=trnucli_ctx_reset_box_trn(ctx, 1., 1., 0., 60., 60., 5.);
+                        rtype = "box";
+                    }else{
+                        res=trnucli_ctx_reset_trn(ctx);
+                    }
+                    xc++;
+                    fprintf(stderr,"\nReset returned[%d/%s]\n",res, rtype);
                 }else{
                     fprintf(stderr,"\nSkipping Test Reset mod/update[%d/%d]\n",cfg->test_reset_mod,x);
                 }
@@ -1205,13 +1218,25 @@ static int s_trnucli_test_trnu(app_cfg_t *cfg)
                     fprintf(stderr,"processed update (demo mode)\n");
                     // in demo mode, reset TRN periodically and send heartbeat
                     if( (call_count>0) && (call_count%cfg->demo)==0){
-                        int rst=trnucli_reset_trn(dcli);
+                        static int xc = 0;
+                        int res=-1;
+                        char *rtype = "norm";
+                        if ((xc%2) == 0){
+                            res=trnucli_reset_ofs_trn(dcli,1., 1., 0.);
+                            rtype = "ofs";
+                        }else if ((xc%3) == 0){
+                            res=trnucli_reset_box_trn(dcli, 1., 1., 0., 60., 60., 5.);
+                            rtype = "box";
+                        }else{
+                            res=trnucli_reset_trn(dcli);
+                        }
+                        xc++;
                         int hbt=trnucli_hbeat(dcli);
-                        reset_count++;
-                        fprintf(stderr,"reset TRN [%d]\n",rst);
+                        fprintf(stderr,"reset TRN [%d/%s]\n",res,rtype);
                         fprintf(stderr,"hbeat TRN [%d]\n",hbt);
-                        mlog_tprintf(cfg->log_id,"reset TRN [%d]\n",rst);
+                        mlog_tprintf(cfg->log_id,"reset TRN [%d/%s]\n",res, rtype);
                         mlog_tprintf(cfg->log_id,"hbeat TRN [%d]\n",hbt);
+                        reset_count++;
                     }
                     call_count++;
                 }

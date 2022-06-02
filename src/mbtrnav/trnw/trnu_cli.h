@@ -403,6 +403,8 @@ extern "C" {
     // must check subsequent update reinit count to confirm
     // returns 0 on request ACK, -1 otherwise
     int trnucli_reset_trn(trnucli_t *self);
+    int trnucli_reset_ofs_trn(trnucli_t *self, double ofs_n, double ofs_e, double ofs_z);
+    int trnucli_reset_box_trn(trnucli_t *self, double ofs_n, double ofs_e, double ofs_z, double sx, double sy, double sz);
 
     // issue heartbeat request
     // caller must manage timing
@@ -510,6 +512,8 @@ extern "C" {
     // issue TRN update
     // return: 0 on success, -1 otherwise
     int trnucli_ctx_reset_trn(trnucli_ctx_t *self);
+    int trnucli_ctx_reset_ofs_trn(trnucli_ctx_t *self, double ofs_n, double ofs_e, double ofs_z);
+    int trnucli_ctx_reset_box_trn(trnucli_ctx_t *self, double ofs_n, double ofs_e, double ofs_z, double sx, double sy, double sz);
 
     // disconnect and reconnect to server host
     // return: 0 on success, -1 otherwise

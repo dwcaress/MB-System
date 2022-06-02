@@ -230,7 +230,7 @@ mmcsub_SOURCES = trnw/mmcsub.c
 mmcsub_LDADD = ${LIBMFRAME}
 
 trnu_cli_SOURCES = trnw/trnucli_test.c trnw/trnu_cli.c
-trnu_cli_LDADD = ${LIBMFRAME} libtrnw.la
+trnu_cli_LDADD = ${LIBMFRAME} libtrnw.la libnetif.la
 
 trn_cli_SOURCES = trnw/trncli_test.c trnw/trn_cli.c
 trn_cli_LDADD = ${LIBMFRAME} libtrnw.la

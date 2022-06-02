@@ -5446,6 +5446,65 @@ int s_mbtrnpp_trnu_reset_callback()
     return retval;
 }
 
+int s_mbtrnpp_trnu_reset_ofs_callback(double ofs_n, double ofs_e, double ofs_z)
+{
+    int retval=0;
+    int reinits_pre=wtnav_get_num_reinits(trn_instance);
+
+    double reset_time = mtime_etime();
+
+    fprintf(stderr, "--reinit_ofs (cli_req) systime:%.6f centered on offset: %lf %lf %lf\n",
+            reset_time, ofs_n, ofs_e, ofs_z);
+
+    wtnav_reinit_filter_offset(trn_instance, true, ofs_n, ofs_e, ofs_z);
+
+    mlog_tprintf(mbtrnpp_mlog_id, "i,trn filter reinit_ofs.cli systime:%.6f centered on offset: %lf %lf %lf\n",
+                 reset_time, ofs_n, ofs_e, ofs_z);
+
+    MST_COUNTER_INC(app_stats->stats->events[MBTPP_EV_MB_REINIT]);
+    MST_COUNTER_INC(app_stats->stats->events[MBTPP_EV_MB_TRNUCLI_RESET]);
+
+    //    reinit_flag = false;
+    n_reinit++;
+
+    int reinit_post=wtnav_get_num_reinits(trn_instance);
+
+    if(reinit_post<=reinits_pre){
+        retval=-1;
+    }
+
+    return retval;
+}
+
+int s_mbtrnpp_trnu_reset_box_callback(double ofs_n, double ofs_e, double ofs_z, double sx, double sy, double sz)
+{
+    int retval=0;
+    int reinits_pre=wtnav_get_num_reinits(trn_instance);
+
+    double reset_time = mtime_etime();
+
+    fprintf(stderr, "--reinit_box (cli_req) systime:%.6f centered on offset: %lf %lf %lf %lf %lf %lf\n",
+            reset_time, ofs_n, ofs_e, ofs_z, sx, sy, sz);
+
+    wtnav_reinit_filter_box(trn_instance, true, ofs_n, ofs_e, ofs_z, sx, sy, sz);
+
+    mlog_tprintf(mbtrnpp_mlog_id, "i,trn filter reinit_box.cli systime:%.6f centered on offset: %lf %lf %lf %lf %lf %lf\n",
+                 reset_time, ofs_n, ofs_e, ofs_z, sx, sy, sz);
+
+    MST_COUNTER_INC(app_stats->stats->events[MBTPP_EV_MB_REINIT]);
+    MST_COUNTER_INC(app_stats->stats->events[MBTPP_EV_MB_TRNUCLI_RESET]);
+
+    //    reinit_flag = false;
+    n_reinit++;
+
+    int reinit_post=wtnav_get_num_reinits(trn_instance);
+
+    if(reinit_post<=reinits_pre){
+        retval=-1;
+    }
+
+    return retval;
+}
 
 int mbtrnpp_init_trnusvr(netif_t **psvr, char *host, int port, wtnav_t *trn, bool verbose)
 {
@@ -5465,7 +5524,9 @@ int mbtrnpp_init_trnusvr(netif_t **psvr, char *host, int port, wtnav_t *trn, boo
         if(NULL!=svr){
             *psvr = svr;
             g_trnu_res->trn=trn_instance;
-            g_trnu_res->reset_callback=s_mbtrnpp_trnu_reset_callback;
+            g_trnu_res->reset_callback = s_mbtrnpp_trnu_reset_callback;
+            g_trnu_res->reset_ofs_callback = s_mbtrnpp_trnu_reset_ofs_callback;
+            g_trnu_res->reset_box_callback = s_mbtrnpp_trnu_reset_box_callback;
 
             netif_set_reqres_res(svr,g_trnu_res);
             //            trnif_res_t rr_resources={trn};

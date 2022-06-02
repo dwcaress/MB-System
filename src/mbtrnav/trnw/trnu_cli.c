@@ -119,7 +119,7 @@ static int s_get_acknak(trnucli_t *self, uint32_t retries, uint32_t delay)
 
     if(NULL!=self && retries){
         PDPRINT((stderr,"%s - retries[%"PRIu32"] del[%"PRIu32"]\n",__func__,retries,delay));
-        byte ack[TRNUCLI_ACK_BYTES]={0};
+        byte ack[TRNX_MSG_SIZE]={0};
         uint32_t rx_retries=retries;
         msock_set_blocking(self->trnu->sock,false);
 
@@ -127,7 +127,7 @@ static int s_get_acknak(trnucli_t *self, uint32_t retries, uint32_t delay)
             int64_t test=-1;
             bool is_acknak=false;
             bool is_update=false;
-            memset(ack,0,TRNUCLI_ACK_BYTES);
+            memset(ack,0,TRNX_MSG_SIZE);
             PDPRINT((stderr,"%s - rx_retries[%"PRIu32"]\n",__func__,rx_retries));
 
             // check message type
@@ -143,16 +143,16 @@ static int s_get_acknak(trnucli_t *self, uint32_t retries, uint32_t delay)
 
             if(is_acknak){
                 // this is the ACK/NAK we're looking for
-                if((test=msock_recvfrom(self->trnu->sock,self->trnu->sock->addr,ack,TRNUCLI_ACK_BYTES,0))>0){
-                    PDPRINT((stderr,"%s - ret/ret/ack[%"PRIu32"/%"PRId64"/%s]\n",__func__,rx_retries,test,ack));
+                if((test=msock_recvfrom(self->trnu->sock,self->trnu->sock->addr,ack,TRNX_MSG_SIZE,0))>0){
+                    PDPRINT((stderr,"%s - ret/ret/ack[%"PRIu32"/%"PRId64"/%s]\n",__func__,rx_retries,test,ack->mid));
 #ifdef WITH_PDEBUG
                     int64_t i=0;
                     for(i=0;i<test && i<TRNUCLI_ACK_BYTES;i++)
                         fprintf(stderr,"%02X ",ack[i]);
                     fprintf(stderr,"\n");
 #endif
-                    const char *cp=(char *)ack;
-                    if(strcmp(cp,PROTO_TRNU_ACK)==0 || strcmp(cp,PROTO_TRNU_NACK)==0){
+                    trnuif_msg_t *mp=(trnuif_msg_t *)ack;
+                    if(strcmp(mp->mid,PROTO_TRNU_ACK)==0 || strcmp(mp->mid,PROTO_TRNU_NACK)==0){
                         retval=0;
                         break;
                     }
@@ -242,8 +242,10 @@ int trnucli_connect(trnucli_t *self, char *host, int port)
         int test=-1;
 
         if ( (test=msock_connect(self->trnu->sock))==0) {
-            int32_t slen=(strlen(PROTO_TRNU_CON)+1);
-            retval = s_send_recv(self,(byte *)PROTO_TRNU_CON,slen);
+            trnuif_msg_t *msg = TRNU_MSG_CON();
+            int32_t slen=TRNX_MSG_SIZE;
+            retval = s_send_recv(self,(byte *)msg,slen);
+            free(msg);
         }else{
             PTRACE();
             PDPRINT((stderr,"CON failed [%d]\n",test));
@@ -276,9 +278,9 @@ int trnucli_disconnect(trnucli_t *self)
         }else{
             // udp clients: send disconnect messaage
             msock_set_blocking(self->trnu->sock,false);
-            char msg[8]={0};
-            sprintf(msg,PROTO_TRNU_DIS);
-            int32_t sret=msock_sendto(self->trnu->sock,NULL,(byte *)msg,4,0);
+            trnuif_msg_t *msg = TRNU_MSG_DIS();
+            int32_t sret=msock_sendto(self->trnu->sock,NULL,(byte *)msg,TRNX_MSG_SIZE,0);
+            free(msg);
             if(sret>0){
                 retval=0;
             }
@@ -403,8 +405,33 @@ int trnucli_reset_trn(trnucli_t *self)
     int retval=-1;
 
     if(NULL!=self && !UCF_ISSET(self->flags,TRNUC_MCAST)){
-        int32_t len=(strlen(PROTO_TRNU_RST)+1);
-        retval=s_send_recv(self,(byte *)PROTO_TRNU_RST,len);
+        trnuif_msg_t *msg = TRNU_MSG_RST();
+        retval=s_send_recv(self,(byte *)msg,TRNX_MSG_SIZE);
+        free(msg);
+    }
+    return retval;
+}
+
+int trnucli_reset_ofs_trn(trnucli_t *self, double ofs_n, double ofs_e, double ofs_z)
+{
+    int retval=-1;
+
+    if(NULL!=self && !UCF_ISSET(self->flags,TRNUC_MCAST)){
+        trnuif_msg_t *msg = TRNU_MSG_RST_OFS(ofs_n, ofs_e, ofs_z);
+        retval=s_send_recv(self,(byte *)msg,TRNX_MSG_SIZE);
+        free(msg);
+    }
+    return retval;
+}
+
+int trnucli_reset_box_trn(trnucli_t *self, double ofs_n, double ofs_e, double ofs_z, double sx, double sy, double sz)
+{
+    int retval=-1;
+
+    if(NULL!=self && !UCF_ISSET(self->flags,TRNUC_MCAST)){
+        trnuif_msg_t *msg = TRNU_MSG_RST_BOX(ofs_n, ofs_e, ofs_z, sx, sy, sz);
+        retval=s_send_recv(self,(byte *)msg,TRNX_MSG_SIZE);
+        free(msg);
     }
     return retval;
 }
@@ -414,8 +441,9 @@ int trnucli_hbeat(trnucli_t *self)
     int retval=-1;
 
     if(NULL!=self && !UCF_ISSET(self->flags,TRNUC_MCAST)){
-        int32_t len=(strlen(PROTO_TRNU_HBT)+1);
-        retval=s_send_recv(self,(byte *)PROTO_TRNU_HBT,len);
+        trnuif_msg_t *msg = TRNU_MSG_HBT();
+        retval=s_send_recv(self,(byte *)msg,TRNX_MSG_SIZE);
+        free(msg);
     }
 
     return retval;
@@ -1242,6 +1270,28 @@ int trnucli_ctx_reset_trn(trnucli_ctx_t *self)
     if(NULL!=self){
         mthread_mutex_lock(self->mtx);
         retval=trnucli_reset_trn(self->cli);
+        mthread_mutex_unlock(self->mtx);
+    }
+    return retval;
+}
+
+int trnucli_ctx_reset_ofs_trn(trnucli_ctx_t *self, double ofs_n, double ofs_e, double ofs_z)
+{
+    int retval=-1;
+    if(NULL!=self){
+        mthread_mutex_lock(self->mtx);
+        retval=trnucli_reset_ofs_trn(self->cli, ofs_n, ofs_e, ofs_z);
+        mthread_mutex_unlock(self->mtx);
+    }
+    return retval;
+}
+
+int trnucli_ctx_reset_box_trn(trnucli_ctx_t *self, double ofs_n, double ofs_e, double ofs_z, double sx, double sy, double sz)
+{
+    int retval=-1;
+    if(NULL!=self){
+        mthread_mutex_lock(self->mtx);
+        retval=trnucli_reset_box_trn(self->cli, ofs_n, ofs_e, ofs_z, sx, sy, sz);
         mthread_mutex_unlock(self->mtx);
     }
     return retval;
