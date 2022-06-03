@@ -112,7 +112,9 @@ PROGRAMS = $(bin_PROGRAMS)
 am_mbgrd2octree_OBJECTS = mbgrd2octree.$(OBJEXT)
 mbgrd2octree_OBJECTS = $(am_mbgrd2octree_OBJECTS)
 am__DEPENDENCIES_1 =
-mbgrd2octree_DEPENDENCIES = $(TRNWLIBS) $(am__DEPENDENCIES_1)
+mbgrd2octree_DEPENDENCIES = $(am__DEPENDENCIES_1) \
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) $(TRNWLIBS) \
+	$(am__DEPENDENCIES_1)
 AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
 am__v_lt_0 = --silent
@@ -236,6 +238,7 @@ EGREP = @EGREP@
 ETAGS = @ETAGS@
 EXEEXT = @EXEEXT@
 FGREP = @FGREP@
+FILECMD = @FILECMD@
 GDAL_CONF = @GDAL_CONF@
 GMT_CONF = @GMT_CONF@
 GMT_PLUGINDIR = @GMT_PLUGINDIR@
@@ -419,11 +422,20 @@ top_srcdir = @top_srcdir@
 @BUILD_MBTNAV_TRUE@$(top_builddir)/src/mbtrn/libr7kr.la \
 @BUILD_MBTNAV_TRUE@$(top_builddir)/src/mbtrn/libmb1r.la
 
-@BUILD_MBTNAV_TRUE@MBTNAV_INC = -I${top_builddir}/src/mbtrnav/terrain-nav -I${top_builddir}/src/mbtrnav/gctp -I${top_builddir}/src/mbtrnav/newmat -I${top_builddir}/src/mbtrnav/qnx-utils -I${top_builddir}/src/mbtrnav/trnw -I${top_builddir}/src/mbtrnav/utils -I${top_builddir}/src/mbtrn/mb1r
-@BUILD_MBTNAV_TRUE@MBTRN_INC = -I${top_srcdir}/src/mbtrn/r7kr -I${top_srcdir}/src/mbtrn/utils  -I${top_srcdir}/src/mbtrnframe/usr -I${top_srcdir}/src/mbtrnframe/mframe/src
+@BUILD_MBTNAV_TRUE@MBTNAV_INC =  \
+@BUILD_MBTNAV_TRUE@	-I${top_builddir}/src/mbtrnav/terrain-nav \
+@BUILD_MBTNAV_TRUE@	-I${top_builddir}/src/mbtrnav/gctp \
+@BUILD_MBTNAV_TRUE@	-I${top_builddir}/src/mbtrnav/newmat \
+@BUILD_MBTNAV_TRUE@	-I${top_builddir}/src/mbtrnav/qnx-utils \
+@BUILD_MBTNAV_TRUE@	-I${top_builddir}/src/mbtrnav/trnw \
+@BUILD_MBTNAV_TRUE@	-I${top_builddir}/src/mbtrnav/utils \
+@BUILD_MBTNAV_TRUE@	-I${top_builddir}/src/mbtrn/mb1r
+@BUILD_MBTNAV_TRUE@MBTRN_INC = -I${top_srcdir}/src/mbtrn/r7kr \
+@BUILD_MBTNAV_TRUE@	-I${top_srcdir}/src/mbtrn/utils \
+@BUILD_MBTNAV_TRUE@	-I${top_srcdir}/src/mbtrnframe/usr \
+@BUILD_MBTNAV_TRUE@	-I${top_srcdir}/src/mbtrnframe/mframe/src
 @BUILD_MBTNAV_TRUE@MBTNAV_OPT = -DWITH_MBTNAV
 @BUILD_MOTIF_TRUE@LIBMBXGR = $(top_builddir)/src/mbaux/libmbxgr.la
-AM_CFLAGS = ${libgmt_CFLAGS} ${libnetcdf_CFLAGS}
 
 # add -DMBTRN_VER="<version>" to override version defined in mbtrn.h
 BUILD_DATE = `date +%Y/%m/%dT%H:%M:%S%z`
@@ -433,17 +445,24 @@ STREAM7K_VER = '-DSTREAM7K_VER=1.0'
 TBIN_VER = '-DTBIN_VER=1.0'
 EMU7K_VER = '-DEMU_VER=1.0'
 TEST_OPTS = -DWITH_TESTS -DWITH_R7KR_TEST
-AM_CPPFLAGS = -g -O0 $(MBTRN_INC) $(MBTNAV_INC)  -DHAVE_CONFIG_H  ${TEST_OPTS} -DWITH_MST_MSTATS -DMST_STATS_EN -DWITH_PDEBUG -DWITH_MMDEBUG -D_GNU_SOURCE -DMFRAME_BUILD="${BUILD_DATE}" ${FRAMES7K_VER} ${TRNC_VER} ${STREAM7K_VER} ${TBIN_VER} ${EMU7K_VER} ${MBTNAV_OPT}
+AM_CFLAGS = ${libgmt_CFLAGS} ${libnetcdf_CFLAGS}
+AM_CPPFLAGS = -g -O0 $(MBTRN_INC) $(MBTNAV_INC) \
+		-DHAVE_CONFIG_H  ${TEST_OPTS} -DWITH_MST_MSTATS -DMST_STATS_EN -DWITH_PDEBUG \
+		-DWITH_MMDEBUG -D_GNU_SOURCE -DMFRAME_BUILD="${BUILD_DATE}" \
+		${libgmt_CPPFLAGS} ${libnetcdf_CPPFLAGS} \
+		${FRAMES7K_VER} ${TRNC_VER} ${STREAM7K_VER} ${TBIN_VER} ${EMU7K_VER} ${MBTNAV_OPT}
+
 mbtrnpp_SOURCES = mbtrnpp.c
 mbtrnpp_LDADD = $(top_builddir)/src/mbio/libmbio.la \
-	$(top_builddir)/src/mbaux/libmbaux.la \
-	$(LIBMBXGR) \
-	${libgmt_LIBS} ${libnetcdf_LIBS} ${libproj_LIBS} \
-    $(MBTRNLIBS) \
-    $(TRNWLIBS) $(LIBM)
+		$(top_builddir)/src/mbaux/libmbaux.la \
+		$(LIBMBXGR) \
+		${libgmt_LIBS} ${libnetcdf_LIBS} ${libproj_LIBS} \
+		$(MBTRNLIBS) \
+		$(TRNWLIBS) $(LIBM)
 
 mbgrd2octree_SOURCES = mbgrd2octree.cc
 mbgrd2octree_LDADD = \
+	${libgmt_LIBS} ${libnetcdf_LIBS} ${libproj_LIBS} \
   $(TRNWLIBS) $(LIBM)
 
 CLEANFILES = 
