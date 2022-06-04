@@ -1462,6 +1462,7 @@ int mbnavadjust_naverr_specific_crossing(int new_crossing, int new_tie) {
       sprintf(message, "Loading crossing %d...", mbna_current_crossing);
       do_message_on(message);
 
+fprintf(stderr, "%s:%d:%s: Calling mbnavadjust_crossing_load\n", __FILE__, __LINE__, __FUNCTION__);
       mbnavadjust_crossing_load();
 
       /* turn off message */
@@ -1578,6 +1579,7 @@ int mbnavadjust_naverr_specific_section(int new_file, int new_section) {
       sprintf(message, "Loading crossing %d...", mbna_current_crossing);
       do_message_on(message);
 
+fprintf(stderr, "%s:%d:%s: Calling mbnavadjust_crossing_load\n", __FILE__, __LINE__, __FUNCTION__);
       mbnavadjust_crossing_load();
 
       /* turn off message */
@@ -1672,6 +1674,7 @@ int mbnavadjust_naverr_next() {
     sprintf(message, "Loading crossing %d...", mbna_current_crossing);
     do_message_on(message);
 
+fprintf(stderr, "%s:%d:%s: Calling mbnavadjust_crossing_load\n", __FILE__, __LINE__, __FUNCTION__);
     mbnavadjust_crossing_load();
 
     /* turn off message */
@@ -1762,6 +1765,7 @@ int mbnavadjust_naverr_previous() {
     sprintf(message, "Loading crossing %d...", mbna_current_crossing);
     do_message_on(message);
 
+fprintf(stderr, "%s:%d:%s: Calling mbnavadjust_crossing_load\n", __FILE__, __LINE__, __FUNCTION__);
     mbnavadjust_crossing_load();
 
     /* turn off message */
@@ -1857,6 +1861,7 @@ int mbnavadjust_naverr_nextunset() {
     sprintf(message, "Loading crossing %d...", mbna_current_crossing);
     do_message_on(message);
 
+fprintf(stderr, "%s:%d:%s: Calling mbnavadjust_crossing_load\n", __FILE__, __LINE__, __FUNCTION__);
     mbnavadjust_crossing_load();
 
     /* turn off message */
@@ -2530,7 +2535,7 @@ int mbnavadjust_naverr_unset() {
 }
 /*--------------------------------------------------------------------*/
 int mbnavadjust_crossing_load() {
-  if (mbna_verbose >= 2) {
+  if (mbna_verbose >= 0) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
   }
 
@@ -2541,6 +2546,8 @@ int mbnavadjust_crossing_load() {
   struct mbna_section *section1, *section2;
 
   /* unload loaded crossing or section */
+fprintf(stderr, "%s:%d:%s: mbna_naverr_mode:%d\n", __FILE__, __LINE__, __FUNCTION__, mbna_naverr_mode);
+
   if (mbna_naverr_mode == MBNA_NAVERR_MODE_CROSSING) {
     status = mbnavadjust_crossing_unload();
   }
@@ -2695,14 +2702,14 @@ int mbnavadjust_crossing_load() {
 }
 /*--------------------------------------------------------------------*/
 int mbnavadjust_crossing_unload() {
-  if (mbna_verbose >= 2) {
+  if (mbna_verbose >= 0) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
   }
 
   int status = MB_SUCCESS;
 
   /* unload loaded crossing */
-  if (mbna_naverr_mode != MBNA_NAVERR_MODE_UNLOADED) {
+  if (mbna_naverr_mode == MBNA_NAVERR_MODE_CROSSING) {
     status = mbnavadjust_section_unload(mbna_verbose, (void **)&swathraw1, (void **)&swath1, &error);
     status = mbnavadjust_section_unload(mbna_verbose, (void **)&swathraw2, (void **)&swath2, &error);
     if (mbna_contour1.vector != NULL && mbna_contour1.nvector_alloc > 0) {
@@ -2757,9 +2764,13 @@ int mbnavadjust_crossing_unload() {
         /* set flag to update model plot */
         project.modelplot_uptodate = false;
   }
+  else if (mbna_naverr_mode == MBNA_NAVERR_MODE_SECTION) {
+    status = mbnavadjust_referencesection_unload();
+  }
+  mbna_naverr_mode = MBNA_NAVERR_MODE_UNLOADED;
 
-  // fprintf(stderr,"\nend %s: mbna_current_crossing:%d mbna_current_tie:%d\n",
-  // __func__,mbna_current_crossing,mbna_current_tie);
+  fprintf(stderr,"\nend %s: mbna_current_crossing:%d mbna_current_tie:%d\n",
+  __func__,mbna_current_crossing,mbna_current_tie);
 
   if (mbna_verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBnavadjust function <%s> completed\n", __func__);
@@ -2804,7 +2815,7 @@ int mbnavadjust_crossing_replot() {
 }
 /*--------------------------------------------------------------------*/
 int mbnavadjust_referencesection_load() {
-  if (mbna_verbose >= 2) {
+  if (mbna_verbose >= 0) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
   }
 
@@ -2822,7 +2833,7 @@ int mbnavadjust_referencesection_load() {
 }
 /*--------------------------------------------------------------------*/
 int mbnavadjust_referencesection_unload() {
-  if (mbna_verbose >= 2) {
+  if (mbna_verbose >= 0) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
   }
 
@@ -4377,6 +4388,7 @@ int mbnavadjust_autopick(bool do_vertical) {
         do_message_update(message);
 
         /* load crossing */
+fprintf(stderr, "%s:%d:%s: Calling mbnavadjust_crossing_load\n", __FILE__, __LINE__, __FUNCTION__);
         mbnavadjust_crossing_load();
         /* fprintf(stderr,"mbnavadjust_autopick AA crossing:%d overlap:%d overlap_scale:%f current offsets:%f %f %f
         minmisfit3D:%f %f %f  minmisfit2D:%f %f %f\n", mbna_current_crossing,crossing->overlap,overlap_scale,
@@ -5292,6 +5304,7 @@ int mbnavadjust_autosetsvsvertical() {
         do_message_update(message);
 
         /* load crossing */
+fprintf(stderr, "%s:%d:%s: Calling mbnavadjust_crossing_load\n", __FILE__, __LINE__, __FUNCTION__);
         mbnavadjust_crossing_load();
         nprocess++;
 
@@ -16654,6 +16667,7 @@ int mbnavadjust_visualization_selectcrossingfromroute(int icrossing, int itie) {
     sprintf(message, "Loading crossing %d...", mbna_current_crossing);
     do_message_on(message);
 
+fprintf(stderr, "%s:%d:%s: Calling mbnavadjust_crossing_load\n", __FILE__, __LINE__, __FUNCTION__);
     mbnavadjust_crossing_load();
 
     /* turn off message */
@@ -16751,6 +16765,7 @@ int mbnavadjust_visualization_selectcrossingfromnav(int ifile1, int isection1, i
       sprintf(message, "Loading crossing %d...", mbna_current_crossing);
       do_message_on(message);
 
+fprintf(stderr, "%s:%d:%s: Calling mbnavadjust_crossing_load\n", __FILE__, __LINE__, __FUNCTION__);
       mbnavadjust_crossing_load();
 
       /* turn off message */

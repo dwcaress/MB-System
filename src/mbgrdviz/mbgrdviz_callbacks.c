@@ -2204,7 +2204,7 @@ int do_mbgrdviz_savesitewpt(size_t instance, char *output_file_ptr) {
 
   /* time, user, host variables */
   time_t right_now;
-  char date[32], host[MB_PATH_MAXLINE];
+  char date[32], *user_ptr, host[MB_PATH_MAXLINE];
   char *unknown = "Unknown";
 
   if (verbose >= 2) {
@@ -2262,7 +2262,7 @@ int do_mbgrdviz_savesitewpt(size_t instance, char *output_file_ptr) {
         fprintf(sfp, "## MB-System Version %s\n", MB_VERSION);
         char user[256], host[256], date[32];
         status = mb_user_host_date(verbose, user, host, date, &error);
-        fprintf(sfp, "## Run by user <%s> on cpu <%s> at <%s>\n", user, host, date);
+        fprintf(sfp, "## Run by user <%s> on cpu <%s> at <%s>\n", user_ptr, host, date);
         fprintf(sfp, "## Number of sites: %d\n", nsite);
 
         /* loop over the sites */
@@ -2461,7 +2461,7 @@ int do_mbgrdviz_saveroute(size_t instance, char *output_file_ptr) {
 
   /* time, user, host variables */
   time_t right_now;
-  char date[32], host[MB_PATH_MAXLINE];
+  char date[32], *user_ptr, host[MB_PATH_MAXLINE];
   char *unknown = "Unknown";
 
   if (verbose >= 2) {
@@ -2499,7 +2499,7 @@ int do_mbgrdviz_saveroute(size_t instance, char *output_file_ptr) {
         fprintf(sfp, "## MB-System Version %s\n", MB_VERSION);
         char user[256], host[256], date[32];
         status = mb_user_host_date(verbose, user, host, date, &error);
-        fprintf(sfp, "## Run by user <%s> on cpu <%s> at <%s>\n", user, host, date);
+        fprintf(sfp, "## Run by user <%s> on cpu <%s> at <%s>\n", user_ptr, host, date);
         fprintf(sfp, "## Number of routes: %d\n", nroutewrite);
         fprintf(sfp, "## Route point format:\n");
         fprintf(sfp, "##   <longitude (deg)> <latitude (deg)> <topography (m)> <waypoint (boolean)> <bearing (deg)> "
@@ -2640,7 +2640,7 @@ int do_mbgrdviz_saveroutereversed(size_t instance, char *output_file_ptr) {
 
   /* time, user, host variables */
   time_t right_now;
-  char date[32], host[MB_PATH_MAXLINE];
+  char date[32], *user_ptr, host[MB_PATH_MAXLINE];
   char *unknown = "Unknown";
 
   if (verbose >= 2) {
@@ -2678,7 +2678,7 @@ int do_mbgrdviz_saveroutereversed(size_t instance, char *output_file_ptr) {
         fprintf(sfp, "## MB-System Version %s\n", MB_VERSION);
         char user[256], host[256], date[32];
         status = mb_user_host_date(verbose, user, host, date, &error);
-        fprintf(sfp, "## Run by user <%s> on cpu <%s> at <%s>\n", user, host, date);
+        fprintf(sfp, "## Run by user <%s> on cpu <%s> at <%s>\n", user_ptr, host, date);
         fprintf(sfp, "## Number of routes: %d\n", nroutewrite);
         fprintf(sfp, "## Route point format:\n");
         fprintf(sfp, "##   <longitude (deg)> <latitude (deg)> <topography (m)> <waypoint (boolean)> <bearing (deg)> "
@@ -2832,7 +2832,7 @@ int do_mbgrdviz_saverisiscript(size_t instance, char *output_file_ptr) {
 
   /* time, user, host variables */
   time_t right_now;
-  char date[32], host[MB_PATH_MAXLINE];
+  char date[32], *user_ptr, host[MB_PATH_MAXLINE];
   char *unknown = "Unknown";
 
   if (verbose >= 2) {
@@ -2870,7 +2870,7 @@ int do_mbgrdviz_saverisiscript(size_t instance, char *output_file_ptr) {
         fprintf(sfp, "## MB-System Version %s\r\n", MB_VERSION);
         char user[256], host[256], date[32];
         status = mb_user_host_date(verbose, user, host, date, &error);
-        fprintf(sfp, "## Run by user <%s> on cpu <%s> at <%s>\r\n", user, host, date);
+        fprintf(sfp, "## Run by user <%s> on cpu <%s> at <%s>\r\n", user_ptr, host, date);
         fprintf(sfp, "## Number of routes: %d\r\n", nroutewrite);
         fprintf(sfp, "## Risi script format:\r\n");
         fprintf(sfp, "##   ALT, <altitude (m)>, <speed (m/s)>, <settling time (sec)>\r\n");
@@ -3954,7 +3954,7 @@ int do_mbgrdviz_saveprofile(size_t instance, char *output_file_ptr) {
 
   /* time, user, host variables */
   time_t right_now;
-  char date[32], host[MB_PATH_MAXLINE];
+  char date[32], *user_ptr, host[MB_PATH_MAXLINE];
   char *unknown = "Unknown";
 
   /* read data for valid instance */
@@ -3979,7 +3979,7 @@ int do_mbgrdviz_saveprofile(size_t instance, char *output_file_ptr) {
         fprintf(sfp, "## MB-System Version %s\n", MB_VERSION);
         char user[256], host[256], date[32];
         status = mb_user_host_date(verbose, user, host, date, &error);
-        fprintf(sfp, "## Run by user <%s> on cpu <%s> at <%s>\n", user, host, date);
+        fprintf(sfp, "## Run by user <%s> on cpu <%s> at <%s>\n", user_ptr, host, date);
         fprintf(sfp, "## Number of profile points: %d\n", npoints);
         fprintf(sfp, "## Profile point format:\n");
         fprintf(sfp, "##   <lateral distance (m)> <topography (m)> <boundary (boolean)> <longitude (deg)> <latitude "

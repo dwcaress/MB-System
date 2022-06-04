@@ -729,7 +729,7 @@ lib_LTLIBRARIES = libgeolib.la libnewmat.la libqnx.la libtnav.la libtrnw.la libn
 LIBMFRAME = $(top_builddir)/src/mbtrnframe/libmframe.la
 MFRAME_INC = -I${top_srcdir}/src/mbtrnframe/usr -I${top_srcdir}/src/mbtrnframe/mframe/src
 include_HEADERS = 
-AM_CFLAGS = ${libnetcdf_CFLAGS}
+AM_CFLAGS = ${libgmt_CFLAGS} ${libnetcdf_CFLAGS}
 AM_CPPFLAGS = -g -O0 -I${top_srcdir}/src/mbtrnav/trnw \
 	-I${top_srcdir}/src/mbtrnav/utils \
 	-I${top_srcdir}/src/mbtrnav/terrain-nav \

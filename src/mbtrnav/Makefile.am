@@ -5,7 +5,7 @@ MFRAME_INC = -I${top_srcdir}/src/mbtrnframe/usr -I${top_srcdir}/src/mbtrnframe/m
 
 include_HEADERS =
 
-AM_CFLAGS = ${libnetcdf_CFLAGS}
+AM_CFLAGS = ${libgmt_CFLAGS} ${libnetcdf_CFLAGS}
 
 AM_CPPFLAGS = -g -O0
 AM_CPPFLAGS += -I${top_srcdir}/src/mbtrnav/trnw
