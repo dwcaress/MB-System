@@ -29,10 +29,15 @@ option(buildGSF "build GSF library" OFF)
 option(buildTest "build test tools" OFF)
 
 
-# Set list of required modules (i.e. packages with find modules)
-# NOTE: VTK is not included in list of required modules, as FindVTK() has
-# been removed from cmake versions after 3.0.
-set(modules GMT Proj OpenGL X11 Motif GDAL NetCDF FFTW)
+# Set list of required packages
+set(packages GMT PROJ GDAL FFTW OpenGL X11 Motif NetCDF)
+
+if (buildQt)
+  # Add Qt, VTK to packages
+  message("buildQt specified; add VTK and Qt to required packages")
+  list(APPEND packages "Qt" "VTK")
+endif()
+
 
 if (help)
 
@@ -41,7 +46,7 @@ if (help)
   message("force package include directory with -Dpackage_include=path")
   message("force package libraries with -Dpackage_lib=file")  
   message("where package is one of the following:")
-  message("${modules} ${packages}")
+  message("${packages} ${packages}")
   message("enable debugging with -DCMAKE_BUILD_TYPE=Debug")
   message("build Qt-based GUIs with -DbuildQt=1")
   message("build TRN software with -DbuildTRN=1")
@@ -53,6 +58,16 @@ endif()
 option(BUILD_SHARED_LIBS "Build and link with shared libraries" ON)
 
 if (APPLE)
+
+  # Assume MacPorts default install location in /opt/local
+  set(CMAKE_INCLUDE_PATH ${CMAKE_INCLUDE_PATH} /opt/local/include)
+  set(CMAKE_LIBRARY_PATH ${CMAKE_LIBRARY_PATH} /opt/local/lib)
+
+  # Must set PROJ_ROOT to point at directory containing proj-versionX
+  # so that find_package() works
+  # MacPorts puts projX files in /opt/local/lib/projX
+  set(PROJ_ROOT /opt/local/lib/proj9)
+  set(GMT_ROOT /opt/local/lib/gmt6) # Required for FindGMT()
 
   # On OSX we assume X11 and OpenGL are provided by XQuartz in /opt/X11,
   # unless user specifies location on command line
@@ -83,18 +98,6 @@ if (APPLE)
 else()
   set(otpsDir /local/opt/otps)
 endif()
-
-#[[
-### TEST TEST TEST Can cmake find VTK header directory and libraries?
-message("TEST: look for vtk stuff")
-message("CMAKE_MODULE_PATH: ${CMAKE_MODULE_PATH}")
-## find_package(VTK "8.2.0" REQUIRED EXACT)
-find_package(VTK "8...<9" REQUIRED)
-message("VTK_FOUND: ${VTK_FOUND}")
-message("VTK_INCLUDE_DIRS: ${VTK_INCLUDE_DIRS}")
-message("VTK_LIBRARIES: ${VTK_LIBRARIES}")
-message("VTK_VERSION: ${VTK_VERSION}")
-]]
 
 #[[
 NOTE: VTK_lib is specified as a space-delimited list of libraries, and 
@@ -147,45 +150,45 @@ message("Add build-utils/ subdirectory to module CMAKE_MODULE_PATH")
 list(APPEND CMAKE_MODULE_PATH ${MB_HOME}/build-utils/)
 message("CMAKE_MODULE_PATH now: ${CMAKE_MODULE_PATH}")
 
-# Find required modules
-message("find modules: ${modules}")
-foreach(module ${modules})
-  # No need to search, if module's include and lib are specified as
+
+##### TEST TEST TEST ########
+set(package PROJ)
+
+# Most packages handled by the following
+message("TESTING: look for ${package}")
+find_package(${package})
+
+if (${package}_FOUND)
+  message("Found ${package}: ${package}_INCLUDE_DIRS: ${${package}_INCLUDE_DIRS}}")
+  message("${package}_LIBRARIES: ${${package}_LIBRARIES}}")  
+  set(packageFound TRUE)
+else()
+  message("Coulndn't find ${package}")
+endif()
+############
+
+# Find required packages
+message("find packages: ${packages}")
+foreach(package ${packages})
+  message("look for ${package}")
+  # No need to search, if package's include and lib are specified as
   # command line '-D' arguments
-  if (${module}_include AND ${module}_lib)
-    message("${module} include and lib are pre-specified")
+
+  if (${package}_include AND ${package}_lib)
+    message("${package} include and lib are pre-specified")
     continue()
   endif()
 
-  if (NOT ${module}_include OR  NOT ${module}_lib)
-    # Try to find module with Find${module}
-    message("include Find${MODULE}")
-    include(Find${module})
-    string(TOUPPER ${module} MODULE)
-    if (${module}_FOUND OR ${MODULE}_FOUND)
-      if (${MODULE}_LIBRARY)
-        message("rename ${MODULE}_LIBRARY")
-        set(${MODULE}_LIBRARIES ${${MODULE}_LIBRARY})
-      endif()
-    else()
-      # Search for header
-      # Search for libraries
-      message(FATAL_ERROR
-              "Find${module} didn't find ${module}\n"
-              "Specify -D${module}_include=dir and -D${module}_lib=file "
-              "on cmake command line")
 
-    endif()
-  endif()
-  
-endforeach()
+  # Try to find package
+  set(packageFound FALSE)
 
-if (buildQt)
-  # Look for packages that don't have modules
-  if (NOT Qt5_include OR NOT Qt5_lib)
+  if (${package} STREQUAL "Qt")
+    # Qt handled a bit differently
     # This will need to change; see
     # https://cmake.org/cmake/help/latest/manual/cmake-qt.7.html#manual:cmake-qt(7)
     find_package(Qt5 COMPONENTS Gui Quick REQUIRED)
+
     if (Qt5_FOUND)
       message("Found Qt5 package")
       set(QT5_INCLUDE_DIRS ${Qt5Gui_INCLUDE_DIRS})
@@ -193,34 +196,55 @@ if (buildQt)
       set(QT5_LIBRARIES ${Qt5Gui_LIBRARIES})
       list(APPEND QT5_LIBRARIES ${Qt5Quick_LIBRARIES})
     else()
-      message(FATAL_ERROR "Qt5 package not found")
+       message(FATAL_ERROR "Qt5 package not found")
     endif()
+    
+    continue()
+
   endif()
 
-  if (VTK_include)
-    # Specified on command line
-    message("set VTK_INCLUDE_DIRS to ${VTK_include}")
-    set(VTK_INCLUDE_DIRS ${VTK_include} CACHE PATH "path to VTK headers")
+  # Most packages handled by the following
+  message("TRY find_package(${package})")
+  find_package(${package})
+  message("BACK FROM find_package(${package})")
+  message("${package}_FOUND: ${${package}_FOUND}")
+  
+  if (${package}_FOUND)
+    message("Found ${package}!!!")
+    set(packageFound TRUE)
+    message("${package}_INCLUDE_DIRS: ${${package}_INCLUDE_DIRS}, ${package}_LIBRARIES: ${${package}_LIBRARIES})")
+    if (NOT ${package}_LIBRARIES)
+      # Some packages and versions (e.g. proj6) have a bug
+      # wherein PACKAGE_FOUND is true, but PACKAGE_LIBRARIES is undefined.
+      # Try explicit CONFIG package search.
+      message("${package}_LIBRARIES not found; try find_package(${package} CONFIG)")
+      find_package(${package} CONFIG)
+
+      if (NOT ${package}_LIBRARIES)
+        # Package not found; fatal error
+        set(packageFound FALSE)
+      endif()
+    endif()
+
+    if (${package} STREQUAL "VTK")
+      # Check for maximum VTK version
+      if (${VTK_VERSION} VERSION_GREATER_EQUAL 9)
+        message(FATAL_ERROR
+        "This application requires VTK 8.x, but VTK ${VTK_VERSION} was found.")
+      endif()
+      
+    endif()
+  endif() 
+  if (NOT ${packageFound})
+    message(FATAL_ERROR
+            "Couldn't find ${package}\n"
+            "Specify -D${package}_include=dir and -D${package}_lib=file "
+            "on cmake command line")
   endif()
 
-  if (VTK_lib)
-    # Specified on command line
-    message("set VTK_LIBRARIES to ${VTK_lib}")  
-    set(VTK_LIBRARIES ${VTK_lib} CACHE FILEPATH "path to VTK libraries")
-  else()
-    find_package(VTK 8...<9 REQUIRED) 
-    if (${VTK_VERSION} VERSION_GREATER_EQUAL 9)
-       message(FATAL_ERROR "This application requires VTK 8.x, but VTK ${VTK_VERSION} was found. Please set VTK_DIR to a folder containing the VTKConfig.cmake file from a VTK 8 installation.")
-endif ()    
-    if (VTK_FOUND)
-      message("Found VTK package version ${VTK_VERSION}, VTK_LIBRARIES: ${VTK_LIBRARIES}")
-    else()
-      message(FATAL_ERROR, "VTK package not found, needed by buildQt")
-    endif()
-  endif(VTK_lib)
 
+endforeach()
 
-endif(buildQt)  
 
 ### Print all accessible variables
 ### get_cmake_property(_variableNames VARIABLES)
@@ -244,19 +268,19 @@ set(NETCDF_LIBRARIES ${NetCDF_LIBRARIES})
 # Override header and library locations if specified on command line
 # with -D<package>_include or -D<package>_lib.
 message("override header and library locations if specified on command line")
-message("APPENDED modules to packages, now: ${packages}")
-# Set variables ${MODULE}_INCLUDE_DIRS and ${MODULE}_LIBRARIES for each required
-# MODULE
-foreach(module ${modules})
-  if (${module}_include)
-    message("override ${module} include directory with ${${module}_include}")
-    string(TOUPPER ${module} MODULE)
-    set(${MODULE}_INCLUDE_DIRS ${${module}_include} CACHE FILE "${module} header directory")
+message("APPENDED packages to packages, now: ${packages}")
+# Set variables ${PACKAGE}_INCLUDE_DIRS and ${PACKAGE}_LIBRARIES for each required
+# PACKAGE
+foreach(package ${packages})
+  if (${package}_include)
+    message("override ${package} include directory with ${${package}_include}")
+    string(TOUPPER ${package} PACKAGE)
+    set(${PACKAGE}_INCLUDE_DIRS ${${package}_include} CACHE FILE "${package} header directory")
   endif()
-  if (${module}_lib)
-    message("override ${module} library with ${${module}_lib}")
-    string(TOUPPER ${module} MODULE)
-    set(${MODULE}_LIBRARIES ${${module}_lib} CACHE FILE "${module} library(ies)")
+  if (${package}_lib)
+    message("override ${package} library with ${${package}_lib}")
+    string(TOUPPER ${package} PACKAGE)
+    set(${PACKAGE}_LIBRARIES ${${package}_lib} CACHE FILE "${package} library(ies)")
 endif()
 endforeach()
 
