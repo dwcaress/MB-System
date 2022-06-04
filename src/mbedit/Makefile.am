@@ -1,7 +1,6 @@
 bin_PROGRAMS = mbedit
 
 if BUILD_MBTRN
-  MBTRNINCDIR = -I${top_srcdir}/src/mbtrn/r7kr -I${top_srcdir}/src/mbtrn/utils -I${top_srcdir}/src/mbtrnframe/usr -I${top_srcdir}/src/mbtrnframe/mframe/src
   MBTRNLIB = ${top_builddir}/src/mbtrn/libr7kr.la
 endif
 
@@ -13,7 +12,6 @@ AM_CPPFLAGS =
 AM_CPPFLAGS += -I${top_srcdir}/src/mbio
 AM_CPPFLAGS += -I${top_srcdir}/src/mbaux
 AM_CPPFLAGS += -I${top_srcdir}/src/gsf
-AM_CPPFLAGS += $(MBTRNINCDIR)
 AM_CPPFLAGS += ${libnetcdf_CPPFLAGS}
 AM_CPPFLAGS += ${libmotif_CPPFLAGS}
 AM_CPPFLAGS += ${libx11_CPPFLAGS}
