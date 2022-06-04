@@ -9,13 +9,7 @@ MBTRNLIBS = \
 $(top_builddir)/src/mbtrn/libr7kr.la \
 $(top_builddir)/src/mbtrn/libmb1r.la
 
-MBTNAV_INC = -I${top_builddir}/src/mbtrnav/terrain-nav
-MBTNAV_INC += -I${top_builddir}/src/mbtrnav/gctp
-MBTNAV_INC += -I${top_builddir}/src/mbtrnav/newmat
-MBTNAV_INC += -I${top_builddir}/src/mbtrnav/qnx-utils
-MBTNAV_INC += -I${top_builddir}/src/mbtrnav/trnw
-MBTNAV_INC += -I${top_builddir}/src/mbtrnav/utils
-MBTNAV_INC += -I${top_builddir}/src/mbtrn/mb1r
+MBTNAV_INC=-I${top_builddir}/src/mbtrnav/terrain-nav -I${top_builddir}/src/mbtrnav/gctp -I${top_builddir}/src/mbtrnav/newmat -I${top_builddir}/src/mbtrnav/qnx-utils -I${top_builddir}/src/mbtrnav/trnw -I${top_builddir}/src/mbtrnav/utils -I${top_builddir}/src/mbtrn/mb1r
 
 MBTRN_INC = -I${top_srcdir}/src/mbtrn/r7kr -I${top_srcdir}/src/mbtrn/utils  -I${top_srcdir}/src/mbtrnframe/usr -I${top_srcdir}/src/mbtrnframe/mframe/src
 
