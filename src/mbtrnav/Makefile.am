@@ -217,7 +217,7 @@ libmb1_la_LIBADD =
 bin_PROGRAMS =  trn-server trn-replay trnclient-test mmcpub mmcsub trnu-cli trn-cli trnif-test trnusvr-test netif-test trnifsvr-test mb1rs #  readlog writelog
 
 trn_server_SOURCES = utils/trn_server.cpp
-trn_server_LDADD = libtnav.la libqnx.la libnewmat.la libtnav.la libgeolib.la
+trn_server_LDADD = libtnav.la libqnx.la libnewmat.la libgeolib.la
 
 trn_replay_SOURCES = opt/dorado/Replay.cpp opt/dorado/trn_replay.cpp utils/TerrainNavClient.cpp
 trn_replay_LDADD = -ltnav  -lnewmat -lqnx -lnetcdf -lm -lpthread -lgeolib
@@ -250,7 +250,7 @@ trnifsvr_test_SOURCES = utils/trnifsvr-test.c
 trnifsvr_test_LDADD = libnetif.la  libtrnw.la
 
 mb1rs_SOURCES = trnw/mb1rs.c trnw/mb1rs-app.c
-mb1rs_LDADD = ${LIBMFRAME} libmb1.la
+mb1rs_LDADD = ${LIBMFRAME} libmb1.la libtnav.la
 
 dist_bin_SCRIPTS =
 
