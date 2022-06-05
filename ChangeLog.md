@@ -23,6 +23,8 @@ Distributions that do not include "beta" in the tag name correspond to the major
 announced releases. The source distributions associated with all releases, major
 or beta, are equally accessible as tarballs through the Github interface.
 
+- Version 5.7.9beta32    June 4, 2022
+- Version 5.7.9beta30    June 4, 2022
 - Version 5.7.9beta29    May 13, 2022
 - Version 5.7.9beta28    March 21, 2022
 - Version 5.7.9beta27    February 28, 2022
@@ -407,6 +409,21 @@ or beta, are equally accessible as tarballs through the Github interface.
 --
 ### MB-System Version 5.7 Release Notes:
 --
+
+#### 5.7.9beta32 (June 4, 2022)
+
+Fixes to src/mbtrnav/Makefile.am to allow successful build of TRN tools on
+Mac Homebrew.
+
+#### 5.7.9beta30 (June 4, 2022)
+
+Fixes to the Autotools build system allowing MB-System to be built in full on
+Arm architecture Mac computers running the Monterey OS and fixing the build of
+the TRN tools on Linux.
+
+MBnavadjust: Incremental changes towards handling global ties relative to a
+reference grid - defined a single section naverr mode but don't have it
+working yet.
 
 #### 5.7.9beta29 (May 13, 2022)
 

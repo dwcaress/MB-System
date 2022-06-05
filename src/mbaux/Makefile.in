@@ -436,14 +436,12 @@ top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 @BUILD_MOTIF_TRUE@XGRLIB = libmbxgr.la
 @BUILD_MOTIF_TRUE@XGRINC = mb_xgraphics.h
-@BUILD_MBTRN_TRUE@MBTRNINCDIR = -I${top_srcdir}/src/mbtrn/r7kr -I${top_srcdir}/src/mbtrn/utils -I${top_srcdir}/src/mbtrnframe/usr -I${top_srcdir}/src/mbtrnframe/mframe/src
 @BUILD_MBTRN_TRUE@MBTRNLIB = $(top_builddir)/src/mbtrn/libr7kr.la
 lib_LTLIBRARIES = libmbaux.la ${XGRLIB}
 include_HEADERS = mb_aux.h ${XGRINC}
 AM_CFLAGS = ${libgmt_CFLAGS} ${libgdal_CFLAGS} ${libnetcdf_CFLAGS}
-AM_CPPFLAGS = -I${top_srcdir}/src/mbio $(MBTRNINCDIR) \
-	${libgmt_CPPFLAGS} ${libgdal_CPPFLAGS} ${libnetcdf_CPPFLAGS} \
-	${libx11_CPPFLAGS}
+AM_CPPFLAGS = -I${top_srcdir}/src/mbio ${libgmt_CPPFLAGS} \
+	${libgdal_CPPFLAGS} ${libnetcdf_CPPFLAGS} ${libx11_CPPFLAGS}
 libmbaux_la_LDFLAGS = -no-undefined -version-info 0:0:0
 libmbaux_la_SOURCES = mb_cheb.c mb_delaun.c mb_intersectgrid.c \
 	mb_readwritegrd.c mb_surface.c mb_track.c mb_truecont.c \

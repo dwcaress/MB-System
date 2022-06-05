@@ -258,7 +258,7 @@ libtrnw_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) \
 	$(CXXFLAGS) $(libtrnw_la_LDFLAGS) $(LDFLAGS) -o $@
 am_mb1rs_OBJECTS = trnw/mb1rs.$(OBJEXT) trnw/mb1rs-app.$(OBJEXT)
 mb1rs_OBJECTS = $(am_mb1rs_OBJECTS)
-mb1rs_DEPENDENCIES = $(LIBMFRAME) libmb1.la
+mb1rs_DEPENDENCIES = $(LIBMFRAME) libmb1.la libtnav.la
 am_mmcpub_OBJECTS = trnw/mmcpub.$(OBJEXT)
 mmcpub_OBJECTS = $(am_mmcpub_OBJECTS)
 mmcpub_DEPENDENCIES = $(LIBMFRAME)
@@ -275,10 +275,11 @@ am_trn_replay_OBJECTS = opt/dorado/Replay.$(OBJEXT) \
 	opt/dorado/trn_replay.$(OBJEXT) \
 	utils/TerrainNavClient.$(OBJEXT)
 trn_replay_OBJECTS = $(am_trn_replay_OBJECTS)
-trn_replay_DEPENDENCIES =
+trn_replay_DEPENDENCIES = libtnav.la libnewmat.la libqnx.la \
+	libgeolib.la
 am_trn_server_OBJECTS = utils/trn_server.$(OBJEXT)
 trn_server_OBJECTS = $(am_trn_server_OBJECTS)
-trn_server_DEPENDENCIES = libtnav.la libqnx.la libnewmat.la libtnav.la \
+trn_server_DEPENDENCIES = libtnav.la libqnx.la libnewmat.la \
 	libgeolib.la
 am_trnclient_test_OBJECTS = utils/trnclient_test.$(OBJEXT) \
 	utils/TrnClient.$(OBJEXT) utils/TerrainNavClient.$(OBJEXT)
@@ -728,7 +729,7 @@ lib_LTLIBRARIES = libgeolib.la libnewmat.la libqnx.la libtnav.la libtrnw.la libn
 LIBMFRAME = $(top_builddir)/src/mbtrnframe/libmframe.la
 MFRAME_INC = -I${top_srcdir}/src/mbtrnframe/usr -I${top_srcdir}/src/mbtrnframe/mframe/src
 include_HEADERS = 
-AM_CFLAGS = ${libnetcdf_CFLAGS}
+AM_CFLAGS = ${libgmt_CFLAGS} ${libnetcdf_CFLAGS}
 AM_CPPFLAGS = -g -O0 -I${top_srcdir}/src/mbtrnav/trnw \
 	-I${top_srcdir}/src/mbtrnav/utils \
 	-I${top_srcdir}/src/mbtrnav/terrain-nav \
@@ -820,9 +821,9 @@ libmb1_la_LDFLAGS = -no-undefined -version-info 0:0:0
 libmb1_la_SOURCES = trnw/mb1_msg.c
 libmb1_la_LIBADD = 
 trn_server_SOURCES = utils/trn_server.cpp
-trn_server_LDADD = libtnav.la libqnx.la libnewmat.la libtnav.la libgeolib.la
+trn_server_LDADD = libtnav.la libqnx.la libnewmat.la libgeolib.la
 trn_replay_SOURCES = opt/dorado/Replay.cpp opt/dorado/trn_replay.cpp utils/TerrainNavClient.cpp
-trn_replay_LDADD = -ltnav  -lnewmat -lqnx -lnetcdf -lm -lpthread -lgeolib
+trn_replay_LDADD = libtnav.la  libnewmat.la libqnx.la libgeolib.la -lnetcdf -lm -lpthread
 trnclient_test_SOURCES = utils/trnclient_test.cpp utils/TrnClient.cpp utils/TerrainNavClient.cpp
 trnclient_test_LDADD = libtnav.la
 mmcpub_SOURCES = trnw/mmcpub.c
@@ -842,7 +843,7 @@ netif_test_LDADD = libnetif.la  libtrnw.la
 trnifsvr_test_SOURCES = utils/trnifsvr-test.c
 trnifsvr_test_LDADD = libnetif.la  libtrnw.la
 mb1rs_SOURCES = trnw/mb1rs.c trnw/mb1rs-app.c
-mb1rs_LDADD = ${LIBMFRAME} libmb1.la
+mb1rs_LDADD = ${LIBMFRAME} libmb1.la libtnav.la
 dist_bin_SCRIPTS = 
 CLEANFILES = 
 DISTCLEANFILES = 
