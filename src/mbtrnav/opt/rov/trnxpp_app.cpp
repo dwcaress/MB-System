@@ -1551,7 +1551,8 @@ int cb_update_trncli(void *pargs)
         double lon = ni->lon();
         long int utm = NavUtils::geoToUtmZone(Math::degToRad(lat),
                                               Math::degToRad(lon));
-//        ai->flags().set(trn::AF_INVERT_PITCH);
+        ai->flags().set(trn::AF_INVERT_PITCH);
+        // ai->flags().set(trn::AF_INVERT_ROLL);
         double x = 0.;
         double y = 0.;
         double z = ni->depth();
@@ -1897,6 +1898,11 @@ void transform_deltat(trn::bath_info *bi, trn::att_info *ai, mbgeo *geo, mb1_t *
 
     std::list<trn::beam_tup> beams = bi->beams_raw();
     std::list<trn::beam_tup>::iterator it;
+    TRN_NDPRINT(5, "roll[%.2lf] pitch[%.2lf] hdg[%.2lf (%.2lf)] SVR[%.2lf, %.2lf, %.2lf] S[%.2lf] K[%.2lf] e[%.2lf]\n",
+                Math::radToDeg(VW[0]), Math::radToDeg(VW[1]), Math::radToDeg(VW[2]), Math::radToDeg(ai->heading()),
+                Math::radToDeg(RSV[0]), Math::radToDeg(RSV[1]), Math::radToDeg(RSV[2]),
+                S,K,e
+                );
 
     for(it=beams.begin(); it!=beams.end(); it++)
     {
@@ -1915,11 +1921,10 @@ void transform_deltat(trn::bath_info *bi, trn::att_info *ai, mbgeo *geo, mb1_t *
         comp_RSF(2,c) = cos(DTR(ad));
         comp_RSF(3,c) = sin(DTR(ad));
 
-        TRN_NDPRINT(5, "n[%3d] R[%7.2lf] X[%7.2lf] Y[%7.2lf] Z[%7.2lf] ad[%7.2lf] ar[%7.2lf] S[%7.2lf] K[%7.2lf] e[%7.2lf]\n",
+        TRN_NDPRINT(5, "n[%3d] R[%7.2lf] X[%7.2lf] Y[%7.2lf] Z[%7.2lf] ad[%7.2lf] ar[%7.2lf]\n",
                 b,range,
                     comp_RSF(1,c), comp_RSF(2,c), comp_RSF(3,c),
-                    ad,DTR(ad),
-                    S,K,e
+                    ad,DTR(ad)
                 );
     }
     // apply coordinate transforms; order is significant:
@@ -1946,11 +1951,14 @@ void transform_deltat(trn::bath_info *bi, trn::att_info *ai, mbgeo *geo, mb1_t *
         r_snd->beams[k].rhoy = range * beams_WF(2,c);
         r_snd->beams[k].rhoz = range * beams_WF(3,c);
 
-        TRN_NDPRINT(5, "b[%3d] R[%7.2lf] rhox[%7.2lf] rhoy[%7.2lf] rhoz[%7.2lf] \n",
+        TRN_NDPRINT(5, "b[%3d] R[%7.2lf] rhox[%7.2lf] rhoy[%7.2lf] rhoz[%7.2lf] ax[%6.2lf] ay[%6.2lf] az[%6.2lf]\n",
                     b,sqrt(r_snd->beams[k].rhox*r_snd->beams[k].rhox + r_snd->beams[k].rhoy*r_snd->beams[k].rhoy + r_snd->beams[k].rhoz*r_snd->beams[k].rhoz),
                     r_snd->beams[k].rhox,
                     r_snd->beams[k].rhoy,
-                    r_snd->beams[k].rhoz
+                    r_snd->beams[k].rhoz,
+                    (range==0. ? 0. : Math::radToDeg(acos(r_snd->beams[k].rhox/range))),
+                    (range==0. ? 0. : Math::radToDeg(acos(r_snd->beams[k].rhoy/range))),
+                    (range==0. ? 0. : Math::radToDeg(acos(r_snd->beams[k].rhoz/range)))
                     );
     }
 }
@@ -2103,7 +2111,8 @@ int cb_update_mb1(void *pargs)
 
         size_t n_beams = bi->beam_count();
         if(n_beams>0){
-//            ai->flags().set(trn::AF_INVERT_PITCH);
+            ai->flags().set(trn::AF_INVERT_PITCH);
+//            ai->flags().set(trn::AF_INVERT_ROLL);
             mb1_t *snd = mb1_new(n_beams);
             snd->hdg = ai->heading();
             snd->depth = ni->depth();

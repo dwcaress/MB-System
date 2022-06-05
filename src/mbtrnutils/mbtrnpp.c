@@ -4077,7 +4077,7 @@ int main(int argc, char **argv) {
             PMPRINT(MOD_MBTRNPP, MBTRNPP_V1,
                     (stderr,
                      "\nts[%.3lf] beams[%03d] ping[%06u]\nlat[%.4lf] lon[%.4lf] hdg[%6.2lf] sd[%7.2lf]\nv[%+6.2lf] "
-                     "p/r/y[%.3lf / %.3lf / %.3lf]\n",
+                     "p/r/v[%.3lf / %.3lf / %.3lf]\n",
                      ping[i_ping_process].time_d, n_output, ping_number, ping[i_ping_process].navlat,
                      ping[i_ping_process].navlon, (double)(DTR * ping[i_ping_process].heading),
                      ping[i_ping_process].sonardepth, ping[i_ping_process].speed, ping[i_ping_process].pitch,

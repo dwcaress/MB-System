@@ -63,10 +63,10 @@
 #define TRN_SERVER_PORT_DFL 27027
 
 #ifndef DTR
-#define DTR(x) (x * M_PI/180.)
+#define DTR(x) ((x) * M_PI/180.)
 #endif
 #ifndef RTD
-#define RTD(x) (x * 180./M_PI)
+#define RTD(x) ((x) * 180./M_PI)
 #endif
 
 // /////////////////
