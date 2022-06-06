@@ -113,6 +113,11 @@ LIBTRNW_SRC=trnw.cpp
 LIBTRNW_OBJ=$(LIBTRNW_SRC:%.cpp=$(BUILD_DIR)/%.o)
 LIBTRNW_LIBS = -ltrn -lqnx -lnewmat -lpthread
 
+LIBMB1=libmb1.a
+LIBMB1_SRC=mb1_msg.c
+LIBMB1_OBJ=$(LIBMB1_SRC:%.c=$(BUILD_DIR)/%.o)
+LIBMB1_LIBS =
+
 TNAV_OBJ=$(BUILD_DIR)/TerrainNav.o \
 $(BUILD_DIR)/PositionLog.o \
 $(BUILD_DIR)/TerrainNavLog.o \
@@ -233,9 +238,11 @@ TRNC_OBJECTS = $(TRNC_SOURCES:%.c=$(BUILD_DIR)/%.o)
 TRNW_OBJECTS = $(TRNW_SOURCES:%.cpp=$(BUILD_DIR)/%.o)
 TRNC_DEPENDS = $(TRNC_SOURCES:%.c=$(BUILD_DIR)/%.d)
 TRNW_DEPENDS = $(TRNW_SOURCES:%.cpp=$(BUILD_DIR)/%.d)
-CLEAN_OBJECTS = $(TRNC_OBJECTS) $(TRNW_OBJECTS) $(MCSUB_OBJ) $(MMCSUB_OBJ) $(LIBNETIF_OBJ)
+CLEAN_OBJECTS = $(TRNC_OBJECTS) $(TRNW_OBJECTS) $(MCSUB_OBJ) $(MMCSUB_OBJ) $(LIBNETIF_OBJ) \
+$(LIBMB1_OBJ)
 CLEAN_DEPENDS = $(TRNC_DEPENDS) $(TRNW_DEPENDS) 
-BINARIES =  $(OUTPUT_DIR)/$(LIBTRNW) $(OUTPUT_DIR)/$(TRNC_TARGETS) $(OUTPUT_DIR)/$(LIBNETIF)
+BINARIES =  $(OUTPUT_DIR)/$(LIBTRNW) $(OUTPUT_DIR)/$(TRNC_TARGETS) $(OUTPUT_DIR)/$(LIBNETIF) \
+$(OUTPUT_DIR)/$(LIBMB1)
 
 CLEANUP = gmon.out
 # dSYMs : XCode debug symbol file folders
@@ -244,12 +251,17 @@ CLEANUP = gmon.out
 
 ########################################
 # Rules: build targets
-all: $(OUTPUT_DIR)/$(LIBTRNW)
+all: $(OUTPUT_DIR)/$(LIBTRNW) $(OUTPUT_DIR)/$(LIBMB1)
 	
 
 trnc: $(OUTPUT_DIR)/$(LIBTRNW) $(OUTPUT_DIR)/$(LIBNETIF) $(TRNC_TARGETS)
 	@echo building $@...
-	
+
+# build Mb1 library
+$(OUTPUT_DIR)/$(LIBMB1): $(LIBMB1_OBJ)
+	@echo building $@...
+	ar -r $@ $(LIBMB1_OBJ)
+
 # build netif library
 $(OUTPUT_DIR)/$(LIBNETIF): $(LIBNETIF_OBJ) 
 	@echo building $@...
@@ -357,6 +369,7 @@ $(BUILD_DIR)/%.d :%.c
 	| awk '/o:/ {printf "%s", "$@ $(BUILD_DIR)/"} {print}' > $@; \
 	[ -s $@ ] || rm -f $@
 	@echo
+
 $(BUILD_DIR)/%.d :%.cpp
 	@[ -d $(BUILD_DIR) ] || mkdir -p $(BUILD_DIR)
 	@[ -d $(OUTPUT_DIR) ] || mkdir -p $(OUTPUT_DIR)

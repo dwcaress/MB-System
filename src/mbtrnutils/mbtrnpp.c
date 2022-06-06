@@ -202,6 +202,9 @@ typedef struct mbtrnpp_opts_s{
     // opt "trn-mtype"
     int trn_mtype;
 
+    // opt "trn-sensor-type"
+    int trn_sensor_type;
+
     // opt "trn-ftype"
     int trn_ftype;
 
@@ -401,6 +404,9 @@ typedef struct mbtrnpp_cfg_s{
     // TRN map type
     int trn_mtype;
 
+    // TRN sensor type
+    int trn_sensor_type;
+
     // TRN filter type
     int trn_ftype;
 
@@ -557,6 +563,7 @@ s=NULL;\
 #define OPT_PAR_DFL                       NULL
 #define OPT_TRN_MDIR_DFL                  "mb"
 #define OPT_TRN_MTYPE_DFL                 TRN_MTYPE_DFL
+#define OPT_TRN_SENSOR_TYPE_DFL           TRN_SENSOR_TYPE_DFL
 #define OPT_TRN_FTYPE_DFL                 TRN_FTYPE_DFL
 #define OPT_TRN_FGRADE_DFL                TRN_FGRADE_DFL
 #define OPT_TRN_FREINIT_DFL               TRN_FREINIT_DFL
@@ -625,6 +632,7 @@ s=NULL;\
 #define UTM_AXIAL        12L
 #define TRN_UTM_DFL      UTM_MONTEREY_BAY
 #define TRN_MTYPE_DFL    TRN_MAP_BO
+#define TRN_SENSOR_TYPE_DFL TRN_SENSOR_MB
 #define TRN_FTYPE_DFL    TRN_FILT_PARTICLE
 #define TRN_FGRADE_DFL   TRN_FILT_HIGH
 #define TRN_FREINIT_DFL  TRN_FILT_REINIT_EN
@@ -1386,6 +1394,7 @@ static int s_mbtrnpp_init_cfg(mbtrnpp_cfg_t *cfg)
         cfg->trn_enable=false;
         cfg->trn_utm_zone=TRN_UTM_DFL;
         cfg->trn_mtype=TRN_MTYPE_DFL;
+        cfg->trn_sensor_type=TRN_SENSOR_TYPE_DFL;
         cfg->trn_ftype=TRN_FTYPE_DFL;
         cfg->trn_fgrade=TRN_FGRADE_DFL;
         cfg->trn_freinit=TRN_FREINIT_DFL;
@@ -1447,6 +1456,7 @@ static int s_mbtrnpp_init_opts(mbtrnpp_opts_t *opts)
         opts->trn_par=CHK_STRDUP(OPT_PAR_DFL);
         opts->trn_mid=strdup(OPT_TRN_MDIR_DFL);
         opts->trn_mtype=OPT_TRN_MTYPE_DFL;
+        opts->trn_sensor_type=OPT_TRN_SENSOR_TYPE_DFL;
         opts->trn_ftype=OPT_TRN_FTYPE_DFL;
         opts->trn_fgrade=OPT_TRN_FGRADE_DFL;
         opts->trn_freinit=OPT_TRN_FREINIT_DFL;
@@ -1567,6 +1577,7 @@ static int s_mbtrnpp_cfgstr(char **pdest, size_t olen, mbtrnpp_cfg_t *self, cons
     mbb_printf(optr, "%s%*s%*s%s%*c%s", pre, indent, (indent>0?" ":""), wkey, "trn_enable", sep, wval, BOOL2YNC(self->trn_enable), del);
     mbb_printf(optr, "%s%*s%*s%s%*ld%s", pre, indent, (indent>0?" ":""), wkey, "trn_utm_zone", sep, wval, self->trn_utm_zone, del);
     mbb_printf(optr, "%s%*s%*s%s%*d%s", pre, indent, (indent>0?" ":""), wkey, "trn_mtype", sep, wval, self->trn_mtype, del);
+    mbb_printf(optr, "%s%*s%*s%s%*d%s", pre, indent, (indent>0?" ":""), wkey, "trn_sensor_type", sep, wval, self->trn_sensor_type, del);
     mbb_printf(optr, "%s%*s%*s%s%*d%s", pre, indent, (indent>0?" ":""), wkey, "trn_ftype", sep, wval, self->trn_ftype, del);
     mbb_printf(optr, "%s%*s%*s%s%*d%s", pre, indent, (indent>0?" ":""), wkey, "trn_fgrade", sep, wval, self->trn_fgrade, del);
     mbb_printf(optr, "%s%*s%*s%s%*d%s", pre, indent, (indent>0?" ":""), wkey, "trn_freinit", sep, wval, self->trn_freinit, del);
@@ -1651,6 +1662,7 @@ static int s_mbtrnpp_optstr(char **pdest, size_t olen, mbtrnpp_opts_t *self, con
     mbb_printf(optr, "%s%*s%*s%s%*s%s", pre, indent, (indent>0?" ":""), wkey, "trn-par", sep, wval, self->trn_par, del);
     mbb_printf(optr, "%s%*s%*s%s%*s%s", pre, indent, (indent>0?" ":""), wkey, "trn-mid", sep, wval, self->trn_mid, del);
     mbb_printf(optr, "%s%*s%*s%s%*d%s", pre, indent, (indent>0?" ":""), wkey, "trn-mtype", sep, wval, self->trn_mtype, del);
+    mbb_printf(optr, "%s%*s%*s%s%*d%s", pre, indent, (indent>0?" ":""), wkey, "trn-sensor-type", sep, wval, self->trn_sensor_type, del);
     mbb_printf(optr, "%s%*s%*s%s%*d%s", pre, indent, (indent>0?" ":""), wkey, "trn-ftype", sep, wval, self->trn_ftype, del);
     mbb_printf(optr, "%s%*s%*s%s%*d%s", pre, indent, (indent>0?" ":""), wkey, "trn-fgrade", sep, wval, self->trn_fgrade, del);
     mbb_printf(optr, "%s%*s%*s%s%*d%s", pre, indent, (indent>0?" ":""), wkey, "trn-freinit", sep, wval, self->trn_freinit, del);
@@ -2309,6 +2321,10 @@ static int s_mbtrnpp_kvparse_fn(char *key, char *val, void *cfg)
                 if(sscanf(val,"%d",&opts->trn_ftype)==1){
                     retval=0;
                 }
+            }  else if(strcmp(key,"trn-sensor-type")==0 ){
+                if(sscanf(val,"%d",&opts->trn_sensor_type)==1){
+                    retval=0;
+                }
             } else if(strcmp(key,"trn-fgrade")==0 ){
                 if(sscanf(val,"%d",&opts->trn_fgrade)==1){
                     retval=0;
@@ -2551,6 +2567,8 @@ static int s_mbtrnpp_configure(mbtrnpp_cfg_t *cfg, mbtrnpp_opts_t *opts)
         // trn-mtype
         cfg->trn_mtype = opts->trn_mtype;
         // trn-ftype
+        cfg->trn_sensor_type = opts->trn_sensor_type;
+        // trn-ftype
         cfg->trn_ftype = opts->trn_ftype;
         // trn-fgrade
         cfg->trn_fgrade = opts->trn_fgrade;
@@ -2722,6 +2740,21 @@ static int s_mbtrnpp_validate_config(mbtrnpp_cfg_t *cfg)
                 err_count++;
                 fprintf(stderr,"ERR - invalid trn_mtype [%d] valid range 1-2\n",cfg->trn_mtype);
             }
+
+            switch (cfg->trn_sensor_type) {
+                case TRN_SENSOR_DVL:
+                case TRN_SENSOR_MB:
+                case TRN_SENSOR_PENCIL:
+                case TRN_SENSOR_HOMER:
+                case TRN_SENSOR_DELTAT:
+                    break;
+
+                default:
+                    err_count++;
+                    fprintf(stderr,"ERR - invalid trn sensor type [%d]\n",cfg->trn_sensor_type);
+                    break;
+            }
+
             if(cfg->trn_ftype<0 || cfg->trn_ftype>4){
                 err_count++;
                 fprintf(stderr,"ERR - invalid trn_mtype [%d] valid range 0-4\n",cfg->trn_ftype);
@@ -2867,6 +2900,7 @@ int main(int argc, char **argv) {
                          "\t--trn-mid\n"
                          "\t--trn-cfg\n"
                          "\t--trn-mtype\n"
+                         "\t--trn-sensor-type\n"
                          "\t--trn-ftype\n"
                          "\t--trn-fgrade\n"
                          "\t--trn-freinit\n"
@@ -3174,8 +3208,10 @@ int main(int argc, char **argv) {
   mbtrnpp_init_debug(mbtrn_cfg->verbose);
 
 #ifdef WITH_MBTNAV
-    trn_cfg = trncfg_new(NULL, -1, mbtrn_cfg->trn_utm_zone, mbtrn_cfg->trn_mtype,
-                        mbtrn_cfg->trn_ftype,mbtrn_cfg->trn_fgrade,
+    trn_cfg = trncfg_new(NULL, -1,
+                         mbtrn_cfg->trn_utm_zone,
+                         mbtrn_cfg->trn_mtype,
+                         mbtrn_cfg->trn_sensor_type, mbtrn_cfg->trn_ftype, mbtrn_cfg->trn_fgrade,
                         mbtrn_cfg->trn_freinit,mbtrn_cfg->trn_mweight,
                         mbtrn_cfg->trn_map_file, mbtrn_cfg->trn_cfg_file,
                         mbtrn_cfg->trn_particles_file, mbtrn_cfg->trn_mission_id,
@@ -5742,7 +5778,7 @@ int mbtrnpp_trn_update(wtnav_t *self, mb1_t *src, wposet_t **pt_out, wmeast_t **
       if ((test = wposet_mb1_to_pose(pt_out, src, cfg->utm_zone)) == 0) {
         // must do motion update first if pt time <= mt time
         wtnav_motion_update(self, *pt_out);
-        wtnav_meas_update(self, *mt_out, TRN_SENSOR_MB);
+        wtnav_meas_update(self, *mt_out, cfg->sensor_type);
         //                fprintf(stderr,"%s:%d DONE [PT, MT]\n",__FUNCTION__,__LINE__);
         //                wposet_show(*pt_out,true,5);
         //                wmeast_show(*mt_out,true,5);

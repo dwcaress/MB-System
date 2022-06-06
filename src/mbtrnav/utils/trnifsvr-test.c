@@ -327,6 +327,7 @@ static int s_app_main(app_cfg_t *cfg)
                                            -1,
                                            10L,
                                            TRN_MAP_BO,
+                                           TRN_SENSOR_MB,
                                            TRN_FILT_PARTICLE,
                                            TRN_FILT_HIGH,
                                            TRN_FILT_REINIT_EN,

@@ -1447,10 +1447,10 @@ int wmeast_mb1_to_meas(wmeast_t **dest, mb1_t *src, long int utmZone)
                 double rho[3] = {obj->alongTrack[i], obj->crossTrack[i], obj->altitudes[i]};
                 double rhoNorm = vnorm( rho );
                 obj->ranges[i] = rhoNorm;
+                // [rhoNorm = sqrt(ax^2 + ay^2 + az^2)] (i.e. range magnitude)
                 obj->measStatus[i] = rhoNorm>1?true:false;
 //                obj->covariance[i] = 0.0;
 //                obj->alphas[i]     = 0.0;
-
             }
 
             retval=0;
@@ -1733,12 +1733,14 @@ trn_config_t *trncfg_dnew()
         instance->log_dir=strdup(TRNW_TRN_LOGDIR_DFL);
         instance->filter_type=TRNW_TRN_FILTER_TYPE_DFL;
         instance->map_type=TRNW_TRN_MAP_TYPE_DFL;
+        instance->sensor_type=TRN_SENSOR_MB;
     }
     return instance;
 }
 
 trn_config_t *trncfg_new(char *host,int port,
                          long int utm_zone, int map_type,
+                         int sensor_type,
                          int filter_type,
                          int filter_grade,
                          int filter_reinit,
@@ -1763,6 +1765,7 @@ trn_config_t *trncfg_new(char *host,int port,
         instance->cfg_file=(NULL!=cfg_file?strdup(cfg_file):strdup("cfg.dfl"));
         instance->particles_file=(NULL!=particles_file?strdup(particles_file):strdup("particles.dfl"));
         instance->log_dir=(NULL!=log_dir?strdup(log_dir):strdup("."));
+        instance->sensor_type=sensor_type;
         instance->filter_type=filter_type;
         instance->map_type=map_type;
         instance->utm_zone=utm_zone;
