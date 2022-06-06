@@ -776,13 +776,20 @@ int Replay::parseDvlCsvLine(const char *line, poseT *pt, measT *mt)
   char *lcopy = strdup(line);
     char *buf = lcopy;
 
-  mt->dataType = TRN_SENSOR_DVL;
+  // folks use the csv file for a variety of different sensors
+  if (trn_attr->_useIDTData) {
+    mt->dataType = TRN_SENSOR_DELTAT;
+  } else {
+    mt->dataType = TRN_SENSOR_DVL;
+  }
+
   mt->numMeas  = 0;
 
   // Get position data
+  char *token = NULL;
   for (int c = 0; c < DVL_RANGES; c++)
   {
-    char *token = strtok((char*)buf, ",");
+    token = strtok((char*)buf, ",");
     buf = NULL;
 
     if (NULL == token)
@@ -842,9 +849,10 @@ int Replay::parseDvlCsvLine(const char *line, poseT *pt, measT *mt)
     memset(mt->measStatus,0,mt->numMeas*sizeof(bool));
 
   // There are 3 data items per beam, 3 * numMeas
+  int bn = -1, i = -1, bi = -1;
   for (int b = 0; b < mt->numMeas * 3; b++)
   {
-    char *token = strtok((char*)buf, ",");
+    token = strtok((char*)buf, ",");
     buf = NULL;
 
     if (NULL == token)
@@ -853,16 +861,19 @@ int Replay::parseDvlCsvLine(const char *line, poseT *pt, measT *mt)
         free(lcopy);
       return 0;
     }
-    //printf("  %d = %s\n", b/3, token);
 
+    i = b/3;
+    bi = b%3;
     // these three go with beam number (b/3)
-    if (0 == b%3)      // skip beam number
-      ;
-    else if (1 == b%3) // measStatus
-      mt->measStatus[b/3] = atoi(token);
-    else if (2 == b%3) // range
-      mt->ranges[b/3] = atof(token);
-
+    if (0 == bi)      // skip beam number
+      bn = atoi(token);
+    else if (1 == bi) // measStatus
+      mt->measStatus[i] = atoi(token);
+    else if (2 == bi) { // range
+      mt->ranges[i] = atof(token);
+      fprintf(stderr, "meas %d: beam# %d\t%.2f\t%d\n",
+        i, bn, mt->ranges[i], mt->measStatus[i]);
+    }
   }
 
   // There shouldn't be any more tokens. Let's check...
