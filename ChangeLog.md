@@ -23,6 +23,7 @@ Distributions that do not include "beta" in the tag name correspond to the major
 announced releases. The source distributions associated with all releases, major
 or beta, are equally accessible as tarballs through the Github interface.
 
+- Version 5.7.9beta34    June 5, 2022
 - Version 5.7.9beta33    June 5, 2022
 - Version 5.7.9beta32    June 4, 2022
 - Version 5.7.9beta30    June 4, 2022
@@ -410,6 +411,12 @@ or beta, are equally accessible as tarballs through the Github interface.
 --
 ### MB-System Version 5.7 Release Notes:
 --
+
+#### 5.7.9beta34 (June 5, 2022)
+
+Mbtrnpp and other elements of the Terrain Relative Navigation infrastructure:
+Augment mbtrnpp command set to include new commands for forced TRN resets
+with specified starting navigation offsets and particle filter spread size.
 
 #### 5.7.9beta33 (June 5, 2022)
 
@@ -3861,15 +3868,15 @@ supported data types there will be no change to the MBF_MBLDEOIH format or to
 fbt files.
 
 General: MB-System now defines several types of bathymetry data:
-      MB_TOPOGRAPHY_TYPE_UNKNOWN		0
-      MB_TOPOGRAPHY_TYPE_ECHOSOUNDER	        1
-      MB_TOPOGRAPHY_TYPE_MULTIBEAM		2
-      MB_TOPOGRAPHY_TYPE_SIDESCAN		3
-      MB_TOPOGRAPHY_TYPE_INTERFEROMETRIC	4
-      MB_TOPOGRAPHY_TYPE_LIDAR      	        5
-      MB_TOPOGRAPHY_TYPE_CAMERA     	        6
-      MB_TOPOGRAPHY_TYPE_GRID     	        7
-      MB_TOPOGRAPHY_TYPE_POINT       	        8
+      MB_TOPOGRAPHY_TYPE_UNKNOWN        0
+      MB_TOPOGRAPHY_TYPE_ECHOSOUNDER            1
+      MB_TOPOGRAPHY_TYPE_MULTIBEAM        2
+      MB_TOPOGRAPHY_TYPE_SIDESCAN        3
+      MB_TOPOGRAPHY_TYPE_INTERFEROMETRIC    4
+      MB_TOPOGRAPHY_TYPE_LIDAR                  5
+      MB_TOPOGRAPHY_TYPE_CAMERA                 6
+      MB_TOPOGRAPHY_TYPE_GRID                 7
+      MB_TOPOGRAPHY_TYPE_POINT                   8
 The immediate utility of differentiating between data types is to
 allow gridding algorithms to handle data appropriately. As discussed
 above, the footprint gridding algorithms are now only applied by
@@ -4656,13 +4663,13 @@ Mbsvplist: Added -T option to output CSV delimited table
 
 Formats 221 and 222: Added empty i/o module files to ultimately support two
 new formats, both handling data from SEA SWATHplus interferometric sonars:
-	MBF_SWPLSSXI - 221
-	MBF_SWPLSSXP - 222
+    MBF_SWPLSSXI - 221
+    MBF_SWPLSSXP - 222
 The new files include:
-	mbio/mbsys_swathplus.c
-	mbio/mbsys_swathplus.h
-	mbio/mbr_swplssxi.c
-	mbio/mbr_swplssxp.c
+    mbio/mbsys_swathplus.c
+    mbio/mbsys_swathplus.h
+    mbio/mbr_swplssxi.c
+    mbio/mbr_swplssxp.c
 
 #### 5.3.2055 (May 7, 2013)
 
@@ -4998,11 +5005,11 @@ are binned and averaged into 1-degree wide "pseudo-beams" to allow reasonable
 
 Added MBIO function mb_sonartype() that returns the type of sonar associated
 with some data, using the definitions:
-  #define	MB_SONARTYPE_UNKNOWN		0
-  #define	MB_SONARTYPE_ECHOSOUNDER	1
-  #define	MB_SONARTYPE_MULTIBEAM		2
-  #define	MB_SONARTYPE_SIDESCAN		3
-  #define	MB_SONARTYPE_INTERFEROMETRIC	4
+  #define    MB_SONARTYPE_UNKNOWN        0
+  #define    MB_SONARTYPE_ECHOSOUNDER    1
+  #define    MB_SONARTYPE_MULTIBEAM        2
+  #define    MB_SONARTYPE_SIDESCAN        3
+  #define    MB_SONARTYPE_INTERFEROMETRIC    4
 
 Added function to mbnavadjust that will estimate vertical offset between surveys
 and then set relevant ties accordingly.
@@ -5360,7 +5367,7 @@ swath format MBF_LDEOIH (format 71) for fbt files.
 Users can now use mbdefaults to set the format 71 version that
 will be generated when fbt files are created by mbdatalist and
 mbprocess. If
- 	mbdefaults -Fold
+     mbdefaults -Fold
 is executed, the .mbio_defaults file in the user's home directory
 will be altered so that all new fbt files are in the old format.
 The purpose of this backwards compatibility is to allow users to
@@ -5524,9 +5531,9 @@ Increased verbosity of mbnavedit for -X option.
 #### 5.2.1880 (December 30, 2010)
 
 Augmented mbotps to output tide in both
- 	time_d tide
+     time_d tide
 and
- 	year month day hour minute seconds tide
+     year month day hour minute seconds tide
 using a -Atideformat command line option.
 
 Added new kluge processing option to mb7kpreprocess (-K2)
@@ -6241,10 +6248,10 @@ than the sonar ping rate, and synchronous means the sensor data sampled
 at ping times).
 Each time series file uses epoch times in seconds as the first column.
 These files are:
-	*.ath - asynchronous heading - time heading
-	*.ats - asynchronous sonardepth - time sonardepth
-	*.ata - asynchronous attitude - time roll pitch
-	*.sta - synchronous attitude - time roll pitch
+    *.ath - asynchronous heading - time heading
+    *.ats - asynchronous sonardepth - time sonardepth
+    *.ata - asynchronous attitude - time roll pitch
+    *.sta - synchronous attitude - time roll pitch
 Asynchronous data are not available in all formats. When available, the
 asynchronous data can be extracted using mbnavlist. The synchronous
 attitude can be extracted using mblist.
@@ -6254,23 +6261,23 @@ Contributed by Gordon Keith.
 
 Removed a number of obsolete programs and macros from the distribution.
 The following are no longer distributed with MB-System:
- 	mbanglecorrect
- 	mbbackangleold
- 	mbbath
- 	mbcleanold
- 	mbeditold
- 	mbfilter
- 	mbgetmask
- 	mbmask
- 	mbmerge
- 	mbm_dslnavfix.perl
- 	mbm_fmtvel.perl
- 	mbm_vrefcheck.perl
- 	mbm_rollerror.perl
- 	mbnaveditold
- 	mbsmooth
- 	mbtide
- 	mbunclean
+     mbanglecorrect
+     mbbackangleold
+     mbbath
+     mbcleanold
+     mbeditold
+     mbfilter
+     mbgetmask
+     mbmask
+     mbmerge
+     mbm_dslnavfix.perl
+     mbm_fmtvel.perl
+     mbm_vrefcheck.perl
+     mbm_rollerror.perl
+     mbnaveditold
+     mbsmooth
+     mbtide
+     mbunclean
 
 --
 ### MB-System Version 5.1.0 Release Notes:
@@ -6815,9 +6822,9 @@ The MB-System distribution is now compatible with GMT 4.0b. There have
 been minor changes to the pslib and gmtlib APIs, so it is necessary
 to specify the linked version of GMT in the mbsystem/install_makefiles
 script. Set:
-	$GMTVERSION = "4.0";
+    $GMTVERSION = "4.0";
 if you are using GMT 4.0b, or set:
-	$GMTVERSION = "3.4";
+    $GMTVERSION = "3.4";
 if you are still using GMT 3.4
 
 MBnavadjust has a significant new feature in which the contours
@@ -7058,3 +7065,4 @@ New Data Formats
     been supported by including the code for the HMRG library
     libmr1pr in the MB-System library. Thanks to Roger Davis and
     HMRG for making the code available under the GPL.
+
