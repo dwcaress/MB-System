@@ -111,7 +111,7 @@ am__aclocal_m4_deps = $(top_srcdir)/m4/ax_check_compile_flag.m4 \
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 DIST_COMMON = $(srcdir)/Makefile.am $(dist_bin_SCRIPTS) \
-	$(include_HEADERS)
+	$(am__include_HEADERS_DIST)
 mkinstalldirs = $(install_sh) -d
 CONFIG_HEADER = $(top_builddir)/src/mbio/mb_config.h
 CONFIG_CLEAN_FILES =
@@ -509,6 +509,15 @@ am__can_run_installinfo = \
     n|no|NO) false;; \
     *) (install-info --version) >/dev/null 2>&1;; \
   esac
+am__include_HEADERS_DIST = opt/rov/lcm_pcf/signal_t.hpp \
+	opt/rov/lcm_pcf/string_t.hpp opt/rov/gss/nav_solution_t.hpp \
+	opt/rov/gss/message_t.hpp opt/rov/gss/analog_t.hpp \
+	opt/rov/gss/digital_t.hpp opt/rov/gss/dvl_stat_t.hpp \
+	opt/rov/gss/pcomms_t.hpp opt/rov/oi/idt_t.hpp \
+	opt/rov/oi/lcm_header_t.hpp opt/rov/trn/mb1_beam_t.hpp \
+	opt/rov/trn/trnu_estimate_t.hpp opt/rov/trn/trn_stat_t.hpp \
+	opt/rov/trn/trn_meas_t.hpp opt/rov/trn/trn_pose_t.hpp \
+	opt/rov/trn/trnupub_t.hpp opt/rov/trn/trn_mb1_t.hpp
 HEADERS = $(include_HEADERS)
 am__tagged_files = $(HEADERS) $(SOURCES) $(TAGS_FILES) $(LISP)
 # Read a list of newline-separated strings from the standard input,
@@ -740,25 +749,6 @@ top_srcdir = @top_srcdir@
 lib_LTLIBRARIES = libgeolib.la libnewmat.la libqnx.la libtnav.la libtrnw.la libnetif.la libmb1.la
 LIBMFRAME = $(top_builddir)/src/mbtrnframe/libmframe.la
 MFRAME_INC = -I${top_srcdir}/src/mbtrnframe/usr -I${top_srcdir}/src/mbtrnframe/mframe/src 
-include_HEADERS = \
-opt/rov/lcm_pcf/signal_t.hpp \
-opt/rov/lcm_pcf/string_t.hpp \
-opt/rov/gss/nav_solution_t.hpp \
-opt/rov/gss/message_t.hpp \
-opt/rov/gss/analog_t.hpp \
-opt/rov/gss/digital_t.hpp \
-opt/rov/gss/dvl_stat_t.hpp \
-opt/rov/gss/pcomms_t.hpp \
-opt/rov/oi/idt_t.hpp \
-opt/rov/oi/lcm_header_t.hpp \
-opt/rov/trn/mb1_beam_t.hpp \
-opt/rov/trn/trnu_estimate_t.hpp \
-opt/rov/trn/trn_stat_t.hpp \
-opt/rov/trn/trn_meas_t.hpp \
-opt/rov/trn/trn_pose_t.hpp \
-opt/rov/trn/trnupub_t.hpp \
-opt/rov/trn/trn_mb1_t.hpp
-
 AM_CFLAGS = ${libgmt_CFLAGS} ${libnetcdf_CFLAGS}
 #AM_CPPFLAGS += -DWITH_ALT_DELTAT_VALIDATION
 AM_CPPFLAGS = -g -O0 -I${top_srcdir}/src/mbtrnav/trnw \
@@ -853,6 +843,25 @@ libnetif_la_LIBADD = ${LIBMFRAME} libtrnw.la -lm -lpthread
 libmb1_la_LDFLAGS = -no-undefined -version-info 0:0:0
 libmb1_la_SOURCES = trnw/mb1_msg.c
 libmb1_la_LIBADD = 
+@BUILD_ROVTRN_TRUE@include_HEADERS = \
+@BUILD_ROVTRN_TRUE@opt/rov/lcm_pcf/signal_t.hpp \
+@BUILD_ROVTRN_TRUE@opt/rov/lcm_pcf/string_t.hpp \
+@BUILD_ROVTRN_TRUE@opt/rov/gss/nav_solution_t.hpp \
+@BUILD_ROVTRN_TRUE@opt/rov/gss/message_t.hpp \
+@BUILD_ROVTRN_TRUE@opt/rov/gss/analog_t.hpp \
+@BUILD_ROVTRN_TRUE@opt/rov/gss/digital_t.hpp \
+@BUILD_ROVTRN_TRUE@opt/rov/gss/dvl_stat_t.hpp \
+@BUILD_ROVTRN_TRUE@opt/rov/gss/pcomms_t.hpp \
+@BUILD_ROVTRN_TRUE@opt/rov/oi/idt_t.hpp \
+@BUILD_ROVTRN_TRUE@opt/rov/oi/lcm_header_t.hpp \
+@BUILD_ROVTRN_TRUE@opt/rov/trn/mb1_beam_t.hpp \
+@BUILD_ROVTRN_TRUE@opt/rov/trn/trnu_estimate_t.hpp \
+@BUILD_ROVTRN_TRUE@opt/rov/trn/trn_stat_t.hpp \
+@BUILD_ROVTRN_TRUE@opt/rov/trn/trn_meas_t.hpp \
+@BUILD_ROVTRN_TRUE@opt/rov/trn/trn_pose_t.hpp \
+@BUILD_ROVTRN_TRUE@opt/rov/trn/trnupub_t.hpp \
+@BUILD_ROVTRN_TRUE@opt/rov/trn/trn_mb1_t.hpp
+
 @BUILD_ROVTRN_TRUE@LCM_JAR = /usr/local/share/java/lcm.jar
 @BUILD_ROVTRN_TRUE@ROVTRN_APPS = trnxpp
 @BUILD_ROVTRN_TRUE@trnxpp_SOURCES = \
