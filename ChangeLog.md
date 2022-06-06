@@ -23,6 +23,7 @@ Distributions that do not include "beta" in the tag name correspond to the major
 announced releases. The source distributions associated with all releases, major
 or beta, are equally accessible as tarballs through the Github interface.
 
+- Version 5.7.9beta33    June 5, 2022
 - Version 5.7.9beta32    June 4, 2022
 - Version 5.7.9beta30    June 4, 2022
 - Version 5.7.9beta29    May 13, 2022
@@ -409,6 +410,13 @@ or beta, are equally accessible as tarballs through the Github interface.
 --
 ### MB-System Version 5.7 Release Notes:
 --
+
+#### 5.7.9beta33 (June 5, 2022)
+
+Mbtrnpp and other elements of the Terrain Relative Navigation infrastructure:
+Test tools and mbtrnpp command set augmented to enable using TRN in an ROV
+context with realtime bathymetry available via LCM - this development is not
+complete.
 
 #### 5.7.9beta32 (June 4, 2022)
 
