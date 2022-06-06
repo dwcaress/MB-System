@@ -1007,6 +1007,10 @@ void TerrainNav::checkRangeValidity(measT& currMeas) {
 	  logs(TL_OMASK(TL_TERRAIN_NAV, TL_LOG),"TRNBeam,%d,%.3f,%d,%.3f,%.3f,%.3f\n",
             i, currMeas.time, currMeas.beamNums[i], currMeas.alongTrack[i],
             currMeas.crossTrack[i], currMeas.altitudes[i]);
+          else if (currMeas.dataType == TRN_SENSOR_DELTAT)
+                logs(TL_OMASK(TL_TERRAIN_NAV, TL_LOG),"IDTBeam,%d,%.3f,%d,%.3f,%.3f,%.3f\n",
+                     i, currMeas.time, currMeas.beamNums[i], currMeas.alongTrack[i],
+                     currMeas.crossTrack[i], currMeas.altitudes[i]);
           else if (currMeas.dataType == TRN_SENSOR_DVL)
 	  logs(TL_OMASK(TL_TERRAIN_NAV, TL_LOG),"DVLBeam,%.3f,%.3f\n",
             i, currMeas.time, currMeas.ranges[i]);
@@ -1063,6 +1067,7 @@ void TerrainNav::checkRangeValidity(measT& currMeas) {
 		}
 	}
 	else if(currMeas.dataType == TRN_SENSOR_DELTAT){
+        int msval=0;
 		for(int i = 0; i < currMeas.numMeas; i++) {
 			//check validity of each beam based on NaN or range value
 		        // Use only the middle 60 of 120 beams
@@ -1086,9 +1091,10 @@ void TerrainNav::checkRangeValidity(measT& currMeas) {
 			   //
 			   // measStatus is set back to false during trip from MVC?
 			}
+            msval += (currMeas.measStatus[i] ? 1 : 0);
 		}
-		logs(TL_OMASK(TL_TERRAIN_NAV, TL_LOG),"TerrainNav::measUpdate() - IDT[45] = %.2f, IDT[75] = %.2f\n",
-			currMeas.ranges[45], currMeas.ranges[75]);
+		logs(TL_OMASK(TL_TERRAIN_NAV, TL_LOG),"TerrainNav::measUpdate() - IDT[45] = %.2f, IDT[75] = %.2f msval[%d]\n",
+			currMeas.ranges[45], currMeas.ranges[75], msval);
 	}
 	else {
 		return;
