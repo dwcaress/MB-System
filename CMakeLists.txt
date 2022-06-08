@@ -29,8 +29,8 @@ option(buildGSF "build GSF library" OFF)
 option(buildTest "build test tools" OFF)
 
 
-# Set list of required packages
-set(packages GMT PROJ GDAL FFTW OpenGL X11 Motif NetCDF)
+# Set list of required packages - DO NOT CHANGE NAMES!
+set(packages GMT PROJ NetCDF GDAL FFTW OpenGL X11 Motif)
 
 if (buildQt)
   # Add Qt, VTK to packages
@@ -151,22 +151,6 @@ list(APPEND CMAKE_MODULE_PATH ${MB_HOME}/build-utils/)
 message("CMAKE_MODULE_PATH now: ${CMAKE_MODULE_PATH}")
 
 
-##### TEST TEST TEST ########
-set(package PROJ)
-
-# Most packages handled by the following
-message("TESTING: look for ${package}")
-find_package(${package})
-
-if (${package}_FOUND)
-  message("Found ${package}: ${package}_INCLUDE_DIRS: ${${package}_INCLUDE_DIRS}}")
-  message("${package}_LIBRARIES: ${${package}_LIBRARIES}}")  
-  set(packageFound TRUE)
-else()
-  message("Coulndn't find ${package}")
-endif()
-############
-
 # Find required packages
 message("find packages: ${packages}")
 foreach(package ${packages})
@@ -203,38 +187,46 @@ foreach(package ${packages})
 
   endif()
 
+  if (${package} STREQUAL "VTK")
+    message("TRY find_package(VTK 8.2.0)")
+    find_package(VTK "8.2.0" EXACT REQUIRED)
+    continue()    
+  endif()
+
   # Most packages handled by the following
   message("TRY find_package(${package})")
   find_package(${package})
   message("BACK FROM find_package(${package})")
-  message("${package}_FOUND: ${${package}_FOUND}")
   
   if (${package}_FOUND)
-    message("Found ${package}!!!")
+    message("Found ${package}")
     set(packageFound TRUE)
-    message("${package}_INCLUDE_DIRS: ${${package}_INCLUDE_DIRS}, ${package}_LIBRARIES: ${${package}_LIBRARIES})")
-    if (NOT ${package}_LIBRARIES)
-      # Some packages and versions (e.g. proj6) have a bug
-      # wherein PACKAGE_FOUND is true, but PACKAGE_LIBRARIES is undefined.
-      # Try explicit CONFIG package search.
-      message("${package}_LIBRARIES not found; try find_package(${package} CONFIG)")
-      find_package(${package} CONFIG)
+    message("${package}_INCLUDE_DIRS: ${${package}_INCLUDE_DIRS}")
+    message("${package}_LIBRARIES: ${${package}_LIBRARIES})")
 
-      if (NOT ${package}_LIBRARIES)
-        # Package not found; fatal error
-        set(packageFound FALSE)
-      endif()
-    endif()
+    if (${package} STREQUAL "NetCDF")
+       # Make NetCDF variable names all upper case
+       set(NETCDF_INCLUDE_DIRS ${NetCDF_INCLUDE_DIRS})
+       set(NETCDF_LIBRARIES ${NetCDF_LIBRARIES})
 
-    if (${package} STREQUAL "VTK")
-      # Check for maximum VTK version
-      if (${VTK_VERSION} VERSION_GREATER_EQUAL 9)
-        message(FATAL_ERROR
-        "This application requires VTK 8.x, but VTK ${VTK_VERSION} was found.")
-      endif()
+    elseif (${package} STREQUAL "OpenGL")
+      # find_package(OpenGL) returns variables in all upper case
+      set(OPENGL_INCLUDE_DIRS ${OPENGL_INCLUDE_DIR})
+      
+    elseif (${package} STREQUAL "X11")
+      # find_package(X11) returns X11_INCLUDE_DIR
+      set(X11_INCLUDE_DIRS ${X11_INCLUDE_DIR})
+
+    elseif (${package} STREQUAL "Motif")
+      # find_package(Motif) returns all upper case, MOTIF_INCLUDE_DIR
+      set(MOTIF_INCLUDE_DIRS ${MOTIF_INCLUDE_DIR})
       
     endif()
-  endif() 
+
+
+  endif()
+
+
   if (NOT ${packageFound})
     message(FATAL_ERROR
             "Couldn't find ${package}\n"
@@ -261,9 +253,7 @@ message("Done finding packages")
 set(X11_XT_INCLUDE_DIRS ${X11_Xt_INCLUDE_PATH})
 set(X11_XT_LIBRARIES ${X11_Xt_LIB})
 
-# Make NetCDF variable names consistent
-set(NETCDF_INCLUDE_DIRS ${NetCDF_INCLUDE_DIRS})
-set(NETCDF_LIBRARIES ${NetCDF_LIBRARIES})
+
 
 # Override header and library locations if specified on command line
 # with -D<package>_include or -D<package>_lib.
