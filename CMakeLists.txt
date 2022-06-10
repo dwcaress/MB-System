@@ -170,7 +170,6 @@ foreach(package ${packages})
     continue()
   endif()
 
-
   # Try to find package
   set(packageFound FALSE)
 
