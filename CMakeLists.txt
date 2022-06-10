@@ -155,7 +155,10 @@ list(APPEND CMAKE_MODULE_PATH ${MB_HOME}/build-utils/)
 message("CMAKE_MODULE_PATH now: ${CMAKE_MODULE_PATH}")
 
 
-# Find required packages
+# Find required packages; start with CONFIG package search, fall-back
+# to MODULE search
+set(CMAKE_FIND_PACKAGE_PREFER_CONFIG TRUE)
+
 message("find packages: ${packages}")
 foreach(package ${packages})
   message("look for ${package}")
