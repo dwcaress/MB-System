@@ -1363,7 +1363,7 @@ int write_csv(FILE *fp, trn::bath_info *bi, trn::att_info *ai, trn::nav_info *ni
 void trnest_tostream(std::ostream &os, double &ts, poseT &pt, poseT &mle, poseT &mmse, int wkey=15, int wval=1)
 {
     os << "--- TRN Estimate OK---" << "\n";
-    os << "MLE[t,tm,x,y,z] [";
+    os << "MLE[t,tm,x,y,z] ";
     os << std::fixed << std::setprecision(3);
     os << ts << ",";
     os << std::setprecision(2);
@@ -1371,7 +1371,7 @@ void trnest_tostream(std::ostream &os, double &ts, poseT &pt, poseT &mle, poseT 
     os << std::setprecision(4);
     os << mle.x << "," << mle.y << "," << mle.z << "\n";
 
-    os << "MMSE[t,tm,x,y,z] [";
+    os << "MMSE[t,tm,x,y,z] ";
     os << std::fixed << std::setprecision(3);
     os << ts << ",";
     os << std::setprecision(2);
@@ -1379,7 +1379,7 @@ void trnest_tostream(std::ostream &os, double &ts, poseT &pt, poseT &mle, poseT 
     os << std::setprecision(4);
     os << mmse.x << "," << mmse.y << "," << mmse.z << "\n";
 
-    os << "POS[t,tm,x,y,z] [";
+    os << "POS[t,tm,x,y,z]  ";
     os << std::fixed << std::setprecision(3);
     os << ts << ",";
     os << std::setprecision(2);
@@ -1387,7 +1387,7 @@ void trnest_tostream(std::ostream &os, double &ts, poseT &pt, poseT &mle, poseT 
     os << std::setprecision(4);
     os << pt.x << "," << pt.y << "," << pt.z << "\n";
 
-    os << "OFS[t,tm,x,y,z] [";
+    os << "OFS[t,tm,x,y,z]  ";
     os << std::fixed << std::setprecision(3);
     os << ts << ",";
     os << std::setprecision(2);
@@ -1395,7 +1395,7 @@ void trnest_tostream(std::ostream &os, double &ts, poseT &pt, poseT &mle, poseT 
     os << std::setprecision(4);
     os << pt.x-mmse.x << "," << pt.y-mmse.y << "," << pt.z-mmse.z << "\n";
 
-    os << "COV[t,x,y,z] [";
+    os << "COV[t,x,y,z]     ";
     os << std::setprecision(3);
     os << mmse.time << ",";
     os << std::setprecision(2);
@@ -1898,8 +1898,8 @@ void transform_deltat(trn::bath_info *bi, trn::att_info *ai, mbgeo *geo, mb1_t *
 
     std::list<trn::beam_tup> beams = bi->beams_raw();
     std::list<trn::beam_tup>::iterator it;
-    TRN_NDPRINT(5, "roll[%.2lf] pitch[%.2lf] hdg[%.2lf (%.2lf)] SVR[%.2lf, %.2lf, %.2lf] S[%.2lf] K[%.2lf] e[%.2lf]\n",
-                Math::radToDeg(VW[0]), Math::radToDeg(VW[1]), Math::radToDeg(VW[2]), Math::radToDeg(ai->heading()),
+    TRN_NDPRINT(5, "roll[%.2lf] pitch[%.2lf%s] hdg[%.2lf (%.2lf)] SVR[%.2lf, %.2lf, %.2lf] S[%.2lf] K[%.2lf] e[%.2lf]\n",
+                Math::radToDeg(VW[0]), Math::radToDeg(VW[1]), (ai->flags().is_set(AF_INVERT_PITCH) ? " i" : " "), Math::radToDeg(VW[2]), Math::radToDeg(ai->heading()),
                 Math::radToDeg(RSV[0]), Math::radToDeg(RSV[1]), Math::radToDeg(RSV[2]),
                 S,K,e
                 );
