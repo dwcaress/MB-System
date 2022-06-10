@@ -30,7 +30,7 @@ target_link_libraries(mbnavadjust
                       mbview
                       mbbsio
                       mbsapi
-                      mbgsf
+                      ${GSF_LIB}
 		      ${R7KR_LIB}
 		      ${MFRAME_LIB}
 		      ${GMT_LIBRARIES}
