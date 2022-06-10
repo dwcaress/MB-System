@@ -185,5 +185,11 @@ target_include_directories(mbio
 			   ${CMAKE_SOURCE_DIR}/src/mbtrn/mframe/src
 			   )
 
+target_link_libraries(mbio
+                      PRIVATE
+		      ${NETCDF_LIBRARIES}
+		      ${PROJ_LIBRARIES})
+
+
 install(TARGETS mbio mbio
 	DESTINATION ${CMAKE_INSTALL_LIBDIR})
