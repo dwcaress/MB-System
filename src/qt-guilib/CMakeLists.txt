@@ -44,6 +44,7 @@ target_include_directories(MBGui
                            .
                            ${MB_HOME}/src/mbio
 			   ${OPENGL_INCLUDE_DIRS}
+                           ${PROJ_INCLUDE_DIRS}
                            ${GMT_INCLUDE_DIRS}
                            ${QT5_INCLUDE_DIRS}
                            ${VTK_INCLUDE_DIRS})
@@ -65,11 +66,13 @@ target_include_directories(MBGuiShared
                            .
 			   ${OPENGL_INCLUDE_DIRS}			   
                            ${GMT_INCLUDE_DIRS}
+                           ${PROJ_INCLUDE_DIRS}                           
                            ${QT5_INCLUDE_DIRS}
                            ${VTK_INCLUDE_DIRS})
 
 message("qt-guilib - EXTRA_LIBRARIES: ${EXTRA_LIBRARIES}")
-target_link_libraries(MBGuiShared ${VTK_LIBRARIES} ${EXTRA_LIBRARIES})
+target_link_libraries(MBGuiShared ${VTK_LIBRARIES} ${PROJ_LIBRARIES}
+                      ${EXTRA_LIBRARIES})
 
 # Install
 install(TARGETS MBGui DESTINATION cmake-example/lib)
