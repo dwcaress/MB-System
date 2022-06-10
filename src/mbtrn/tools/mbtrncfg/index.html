@@ -139,6 +139,11 @@
                         <td class="entry"><input type="text" size="8" name="trn-dev" value="">
                             </td>
                     </tr>
+                    <tr>
+                        <td class="param" onmouseover="showhelp('trn-sensor')"><a>trn-sensor</a></td>
+                        <td class="entry"><input type="text" size="8" name="trn-sensor" value="">
+                            </td>
+                    </tr>
                   <tr>
                       <td class="param" onmouseover="showhelp('trn-utm')"><a>trn-utm</a></td>
                       <td class="entry"><input type="text" size="8" name="trn-utm" value="">
@@ -238,6 +243,16 @@
                           </td>
                   </tr>
                   <tr>
+                      <td class="param" onmouseover="showhelp('reinit-coarse')"><a>reinit-coarse</a></td>
+                      <td class="entry"><input type="text" size="8" name="reinit-coarse" value="">
+                          </td>
+                  </tr>
+                  <tr>
+                      <td class="param" onmouseover="showhelp('reinit-fine')"><a>reinit-fine</a></td>
+                      <td class="entry"><input type="text" size="8" name="reinit-fine" value="">
+                          </td>
+                  </tr>
+                  <tr>
                       <td class="param" onmouseover="showhelp('covariance-magnitude-max')"><a>covariance-magnitude-max</a></td>
                       <td class="entry"><input type="text" size="8" name="covariance-magnitude-max" value="">
                           </td>
@@ -310,6 +325,7 @@
                         <td class="entry">
                             <select name="ctx-rhost" id="ctx-rhost">
                                 <option value="win.reson">mapper1</option>
+                                <option value="sentry">sentry</option>
                                 <option value="linux.mbari">linux.mbari</option>
                                 <option value="linux.carson">linux.carson</option>
                                 <option value="linux.home">linux.home</option>
@@ -325,6 +341,7 @@
                         <td class="entry">
                             <select name="ctx-mhost" id="ctx-mhost">
                                 <option value="win.reson">mapper1</option>
+                                <option value="sentry">sentry</option>
                                 <option value="linux.mbari">linux.mbari</option>
                                 <option value="linux.carson">linux.carson</option>
                                 <option value="linux.home">linux.home</option>
