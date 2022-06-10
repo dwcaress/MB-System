@@ -30,7 +30,7 @@ option(buildTest "build test tools" OFF)
 
 
 # Set list of required packages - DO NOT CHANGE NAMES!
-set(packages GMT PROJ NetCDF GDAL FFTW OpenGL X11 Motif)
+set(packages GMT PROJ netCDF GDAL FFTW OpenGL X11 Motif)
 
 if (buildQt)
   # Add Qt, VTK to packages
@@ -210,23 +210,24 @@ foreach(package ${packages})
     message("${package}_INCLUDE_DIRS: ${${package}_INCLUDE_DIRS}")
     message("${package}_LIBRARIES: ${${package}_LIBRARIES})")
 
-    if (${package} STREQUAL "NetCDF")
+    if (${package} STREQUAL "netCDF")
        # Make NetCDF variable names all upper case
-       set(NETCDF_INCLUDE_DIRS ${NetCDF_INCLUDE_DIRS})
-       set(NETCDF_LIBRARIES ${NetCDF_LIBRARIES})
+       set(NETCDF_INCLUDE_DIRS ${${package}_INCLUDE_DIRS})
+       set(NETCDF_LIBRARIES ${${package}_LIBRARIES})
 
     elseif (${package} STREQUAL "OpenGL")
       # find_package(OpenGL) returns variables in all upper case
-      set(OPENGL_INCLUDE_DIRS ${OPENGL_INCLUDE_DIR})
+      set(OPENGL_INCLUDE_DIRS ${${package}_INCLUDE_DIR})
       
     elseif (${package} STREQUAL "X11")
       # find_package(X11) returns X11_INCLUDE_DIR
-      set(X11_INCLUDE_DIRS ${X11_INCLUDE_DIR})
+      set(X11_INCLUDE_DIRS ${${package}_INCLUDE_DIR})
 
     elseif (${package} STREQUAL "Motif")
       # find_package(Motif) returns all upper case, MOTIF_INCLUDE_DIR
+      message("package Motif: ${package}_INCLUDE_DIR: ${${package}_INCLUDE_DIR}")
       set(MOTIF_INCLUDE_DIRS ${MOTIF_INCLUDE_DIR})
-      
+            
     endif()
 
 
