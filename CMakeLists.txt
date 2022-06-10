@@ -370,7 +370,6 @@ add_subdirectory(src/utilities)
 if (buildQt)
   add_subdirectory(src/qt-guilib)
   add_subdirectory(src/qt-mbgrdviz)
-  add_subdirectory(src/qvtkTest)  
 endif(buildQt)
 
 # TESTING
