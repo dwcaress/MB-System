@@ -19,8 +19,8 @@ foreach(executable ${executables})
   target_include_directories(${executable}
                              PUBLIC
                              .
-                             ${GMT_INCLUDE_DIR}
-                             ${NETCDF_INCLUDE_DIR}                           
+                             ${GMT_INCLUDE_DIRS}
+                             ${NETCDF_INCLUDE_DIRS}                           
                              ${CMAKE_SOURCE_DIR}/src/mbio
                              ${CMAKE_SOURCE_DIR}/src/mbaux
                              ${CMAKE_SOURCE_DIR}/src/gsf)

@@ -1,5 +1,5 @@
 #
-# Gets GMT_INCLUDE_DIR from root CMakeLists
+# Gets GMT_INCLUDE_DIRS from root CMakeLists
 #
 
 message("in mbio")
@@ -175,9 +175,7 @@ ENDIF (APPLE)
 
 target_include_directories(mbio
                            PUBLIC
-			   ${NETCDF_INCLUDE_DIR}
-                           .
-			   ${NETCDF_INCLUDE_DIR}
+			   ${NETCDF_INCLUDE_DIRS}
                            .
 			   ${CMAKE_SOURCE_DIR}/src/gsf
                            ${CMAKE_SOURCE_DIR}/src/bsio

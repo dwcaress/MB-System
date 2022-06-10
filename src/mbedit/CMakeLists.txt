@@ -17,8 +17,8 @@ target_include_directories(mbedit
                            ${CMAKE_SOURCE_DIR}/src/mbio
                            ${CMAKE_SOURCE_DIR}/src/mbaux
                            ${CMAKE_SOURCE_DIR}/src/gsf
-			   ${NETCDF_INCLUDE_DIR}
-			   ${X11_INCLUDE_DIR})
+			   ${NETCDF_INCLUDE_DIRS}
+			   ${X11_INCLUDE_DIRS})
 
 # link_directories($GMT_LIBRARIES)
 target_link_libraries(mbedit
