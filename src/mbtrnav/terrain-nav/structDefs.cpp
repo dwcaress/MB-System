@@ -7,6 +7,8 @@
  *****************************************************************************/
 
 #include "structDefs.h"
+#include "genFilterDefs.h"
+#include "trn_common.h"
 #include "trn_log.h"
 #include "MathP.h"
 
@@ -25,44 +27,49 @@
 /*----------------------------------------------------------------------------
  /InitVars member functions
  /----------------------------------------------------------------------------*/
-InitVars::InitVars(){
+InitVars::InitVars()
+{
     // initialize using compile-time defaults
-    vars.xyz_sdev.x = X_STDDEV_INIT;
-    vars.xyz_sdev.y = Y_STDDEV_INIT;
-    vars.xyz_sdev.z = Z_STDDEV_INIT;
+    _ivars.xyz_sdev.x = X_STDDEV_INIT;
+    _ivars.xyz_sdev.y = Y_STDDEV_INIT;
+    _ivars.xyz_sdev.z = Z_STDDEV_INIT;
 }
 
 // initializing CTOR
-InitVars::InitVars(double x, double y, double z){
-    vars.xyz_sdev.x = x;
-    vars.xyz_sdev.y = y;
-    vars.xyz_sdev.z = z;
+InitVars::InitVars(double x, double y, double z)
+{
+    _ivars.xyz_sdev.x = x;
+    _ivars.xyz_sdev.y = y;
+    _ivars.xyz_sdev.z = z;
 }
 
-InitVars::InitVars(d_triplet_t *xyz){
+InitVars::InitVars(d_triplet_t *xyz)
+{
     if(NULL!=xyz){
-        vars.xyz_sdev.x = xyz->x;
-        vars.xyz_sdev.y = xyz->y;
-        vars.xyz_sdev.z = xyz->z;
+        _ivars.xyz_sdev.x = xyz->x;
+        _ivars.xyz_sdev.y = xyz->y;
+        _ivars.xyz_sdev.z = xyz->z;
     }
 }
 
 // copy CTOR
-InitVars::InitVars(InitVars *xyz){
+InitVars::InitVars(InitVars *xyz)
+{
     if(NULL!=xyz){
-        vars.xyz_sdev.x = xyz->x();
-        vars.xyz_sdev.y = xyz->y();
-        vars.xyz_sdev.z = xyz->z();
+        _ivars.xyz_sdev.x = xyz->x();
+        _ivars.xyz_sdev.y = xyz->y();
+        _ivars.xyz_sdev.z = xyz->z();
     }
 }
 
 // DTOR
-InitVars::~InitVars(){};
+InitVars::~InitVars(){
+};
 
 d_triplet_t *InitVars::getXYZ(d_triplet_t *dest){
     d_triplet_t *retval=NULL;
     if(NULL!=dest){
-        memcpy(dest, &vars.xyz_sdev, sizeof(d_triplet_t));
+        memcpy(dest, &_ivars.xyz_sdev, sizeof(d_triplet_t));
         retval=dest;
     }
     return retval;
@@ -77,20 +84,20 @@ int InitVars::setXYZ(d_triplet_t *src){
 }
 
 int InitVars::setXYZ(double x, double y, double z){
-    vars.xyz_sdev.x = x;
-    vars.xyz_sdev.y = y;
-    vars.xyz_sdev.z = z;
+    _ivars.xyz_sdev.x = x;
+    _ivars.xyz_sdev.y = y;
+    _ivars.xyz_sdev.z = z;
     return 0;
 }
 
 double InitVars::x(){
-    return vars.xyz_sdev.x;
+    return _ivars.xyz_sdev.x;
 }
 double InitVars::y(){
-    return vars.xyz_sdev.y;
+    return _ivars.xyz_sdev.y;
 }
 double InitVars::z(){
-    return vars.xyz_sdev.z;
+    return _ivars.xyz_sdev.z;
 }
 
 /*----------------------------------------------------------------------------
