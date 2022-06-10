@@ -20,8 +20,8 @@ endif()
 # Basics
 option(buildGUIs "build graphical tools" ON)
 option(buildOpenCV "build OpenCV tools" ON)
-option(buildPCL "build point-cloud-library" ON)
 
+option(buildPCL "build point-cloud-library" OFF)
 option(buildTRN "build MBTRN tools" OFF)
 option(buildTNav "build MBTNav tools" OFF)
 option(buildQt "build Qt tools" OFF)
@@ -34,9 +34,13 @@ set(packages GMT PROJ NetCDF GDAL FFTW OpenGL X11 Motif)
 
 if (buildQt)
   # Add Qt, VTK to packages
-  message("buildQt specified; add VTK and Qt to required packages")
   list(APPEND packages "Qt" "VTK")
 endif()
+
+if (buildPCL)
+  list(APPEND packages "PCL")
+endif()
+
 
 
 if (help)
@@ -274,31 +278,17 @@ foreach(package ${packages})
 endif()
 endforeach()
 
+# Print package variables
+message("package variables:")
+foreach(package ${packages})
+  set(varName ${package}_INCLUDE_DIRS)
+  string(TOUPPER ${varName} VARNAME)
+  message("${VARNAME}: ${${VARNAME}}")
 
-
-message("GMT_INCLUDE_DIRS: ${GMT_INCLUDE_DIRS}")
-message("FFTW_INCLUDE_DIRS: ${FFTW_INCLUDE_DIRS}")
-message("PROJ_INCLUDE_DIRS: ${PROJ_INCLUDE_DIRS}")
-message("GDAL_INCLUDE_DIRS: ${GDAL_INCLUDE_DIRS}")
-message("OPENGL_INCLUDE_DIRS: ${OPENGL_INCLUDE_DIRS}")
-message("X11_INCLUDE_DIRS: ${X11_INCLUDE_DIRS}")
-message("MOTIF_INCLUDE_DIRS: ${MOTIF_INCLUDE_DIRS}")
-message("NETCDF_INCLUDE_DIRS: ${NETCDF_INCLUDE_DIRS}")
-message("X11_XT_INCLUDE_DIRS: ${X11_XT_INCLUDE_DIRS}")
-message("VTK_INCLUDE_DIRS: ${VTK_INCLUDE_DIRS}")
-message("QT5_INCLUDE_DIRS: ${QT5_INCLUDE_DIRS}")
-
-message("GMT_LIBRARIES: ${GMT_LIBRARIES}")
-message("FFTW_LIBRARIES: ${FFTW_LIBRARIES}")
-message("PROJ_LIBRARIES: ${PROJ_LIBRARIES}")
-message("GDAL_LIBRARIES: ${GDAL_LIBRARIES}")
-message("OPENGL_LIBRARIES: ${OPENGL_LIBRARIES}")
-message("X11_LIBRARIES: ${X11_LIBRARIES}")
-message("MOTIF_LIBRARIES: ${MOTIF_LIBRARIES}")
-message("NETCDF_LIBRARIES: ${NETCDF_LIBRARIES}")
-message("X11_XT_LIBRARIES: ${X11_XT_LIBRARIES}")
-message("VTK_LIBRARIES: ${VTK_LIBRARIES}")
-message("QT5_LIBRARIES: ${QT5_LIBRARIES}")
+  set(varName ${package}_LIBRARIES)
+  string(TOUPPER ${varName} VARNAME)
+  message("${VARNAME}: ${${VARNAME}}")  
+endforeach()
 
 message("Assume OPTS is installed in ${otpsDir}; override with -DotpsDir=dir")
 
@@ -330,21 +320,24 @@ endif()
 # Use standard cache variables for installation
 include(GNUInstallDirs)
 
+# Utilities and libraries
+if (buildGSF)
+   message("building GSF")
+   add_subdirectory(src/gsf)
+   set(GSF_LIB mbgsf)
+   set(MBIO_GSF_SRC "mbsys_gsf.c mbr_gsfgenmb.c")
+else()
+   message("NOT building GSF")
+   set(GSF_LIB "")
+   set(MBIO_GSF_SRC "")
+endif(buildGSF)
+
 add_subdirectory(src/mbaux)
 add_subdirectory(src/mbio)
 add_subdirectory(src/mbview)
 add_subdirectory(src/bsio)
 add_subdirectory(src/surf)
 
-# Utilities and libraries
-if (buildGSF)
-   add_subdirectory(src/gsf)
-   set(GSF_LIB mbgsf)
-   set(MBIO_GSF_SRC "mbsys_gsf.c mbr_gsfgenmb.c")
-else()
-   set(GSF_LIB "")
-   set(MBIO_GSF_SRC "")
-endif(buildGSF)
 
 if (buildTRN)
    add_subdirectory(src/mbtrn)
