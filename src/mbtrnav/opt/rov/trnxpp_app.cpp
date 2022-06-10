@@ -1899,7 +1899,7 @@ void transform_deltat(trn::bath_info *bi, trn::att_info *ai, mbgeo *geo, mb1_t *
     std::list<trn::beam_tup> beams = bi->beams_raw();
     std::list<trn::beam_tup>::iterator it;
     TRN_NDPRINT(5, "roll[%.2lf] pitch[%.2lf%s] hdg[%.2lf (%.2lf)] SVR[%.2lf, %.2lf, %.2lf] S[%.2lf] K[%.2lf] e[%.2lf]\n",
-                Math::radToDeg(VW[0]), Math::radToDeg(VW[1]), (ai->flags().is_set(AF_INVERT_PITCH) ? " i" : " "), Math::radToDeg(VW[2]), Math::radToDeg(ai->heading()),
+                Math::radToDeg(VW[0]), Math::radToDeg(VW[1]), (ai->flags().is_set(trn::AF_INVERT_PITCH) ? " i" : " "), Math::radToDeg(VW[2]), Math::radToDeg(ai->heading()),
                 Math::radToDeg(RSV[0]), Math::radToDeg(RSV[1]), Math::radToDeg(RSV[2]),
                 S,K,e
                 );
