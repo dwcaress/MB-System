@@ -1,7 +1,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
-#include <proj.h>
+#include "proj.h"
 #include "vtkDataSet.h"
 #include "vtkErrorCode.h"
 #include "vtkSetGet.h"
