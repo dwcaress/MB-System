@@ -141,15 +141,15 @@ should be turned on.  */
 //   10.0 ?
 
 #ifndef X_STDDEV_INIT       //! x standard deviation (m) for initialization
-#define X_STDDEV_INIT 60.0 
+#define X_STDDEV_INIT 60.0
 #endif
 
 #ifndef Y_STDDEV_INIT       //!  y standard deviation (m) for initialization
-#define Y_STDDEV_INIT 60.0 
+#define Y_STDDEV_INIT 60.0
 #endif
 
 #ifndef Z_STDDEV_INIT       //! z standard deviation (m) for initialization
-#define Z_STDDEV_INIT 5.0 
+#define Z_STDDEV_INIT 5.0
 #endif
 
 #ifndef PHI_STDDEV_INIT   //! roll standard deviation (rad) for initialization
