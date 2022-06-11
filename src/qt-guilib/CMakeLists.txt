@@ -36,14 +36,17 @@ add_library(MBGui
             STATIC
             ${src})
 
-# VTK 8.x does not fully support find_package()
-### target_link_libraries(MBGui ${VTK_LIBRARIES}) 
-
+target_link_libraries(MBGui
+                      PRIVATE
+		      mbio
+                      ${GMT_LIBRARIES})
+		      
 target_include_directories(MBGui
                            PUBLIC
                            .
                            ${MB_HOME}/src/mbio
 			   ${OPENGL_INCLUDE_DIRS}
+			   ${PROJ_INCLUDE_DIRS}
                            ${GMT_INCLUDE_DIRS}
                            ${QT5_INCLUDE_DIRS}
                            ${VTK_INCLUDE_DIRS})
@@ -60,16 +63,21 @@ add_library(MBGuiShared
 
 set_target_properties(MBGuiShared PROPERTIES OUTPUT_NAME MBGui)
 
+
 target_include_directories(MBGuiShared
                            PUBLIC
                            .
-			   ${OPENGL_INCLUDE_DIRS}			   
+                           ${MB_HOME}/src/mbio			   
+			   ${OPENGL_INCLUDE_DIRS}
+			   ${PROJ_INCLUDE_DIRS}
                            ${GMT_INCLUDE_DIRS}
                            ${QT5_INCLUDE_DIRS}
                            ${VTK_INCLUDE_DIRS})
 
 message("qt-guilib - EXTRA_LIBRARIES: ${EXTRA_LIBRARIES}")
-target_link_libraries(MBGuiShared ${VTK_LIBRARIES} ${EXTRA_LIBRARIES})
+target_link_libraries(MBGuiShared mbio
+                      ${VTK_LIBRARIES}
+	              ${GMT_LIBRARIES} ${EXTRA_LIBRARIES})
 
 # Install
 install(TARGETS MBGui DESTINATION cmake-example/lib)
