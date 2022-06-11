@@ -56,7 +56,7 @@ def main (args, opts={}):
 
   # If the background grid is not specified, look for a soft link named "mbtrnpp-grid"
   # and use the grid file pointed to by this link
-  if gridset == False or inputdir == 'mbtrnpp-grid' :
+  if gridset == False or gridfile == 'mbtrnpp-grid' :
     if os.path.islink('mbtrnpp-grid') :
       gridfile = os.readlink('mbtrnpp-grid')
       gridset = True
@@ -64,17 +64,25 @@ def main (args, opts={}):
   # Read the input mbtrnpp session file
   sessionloglist = glob.glob(inputdir+"/*_trn.txt")
 
+  # If no sessions identified then quit
+  if len(sessionloglist) == 0 :
+    print ("No mbtrnpp sessions found in "+inputdir+"\nMacro mbm_trnplot exiting...")
+    sys.exit()
+
   # If gridfile not yet specified then try to figure it out from the log header
   for sessionlog in sessionloglist :
     tmp = os.path.basename(sessionlog)
     sessionname = tmp[0:-8]
-    fp = open(sessionlog)
-    for line in fp:
-      if line[0] == '#' :
-        if line != None and "## Reference topography model: " in line :
-          gridfile = line[31:].strip()
-          gridfile = gridfile.replace('.bo', '.grd')
-    fp.close()
+    if gridset == False :
+      fp = open(sessionlog)
+      for line in fp:
+        if line[0] == '#' :
+          if line != None and "## Reference topography model: " in line :
+            gridfile = line[31:].strip()
+            gridfile = gridfile.replace('.bo', '.grd')
+      fp.close()
+  if gridfile[0] != '/' :
+    gridfile = "../"+gridfile
 
   print("TRN Results\n---------")
   print("Session Directory: "+inputdir)
@@ -85,11 +93,11 @@ def main (args, opts={}):
   for sessionlog in sessionloglist :
     # Open the desired output files
     root = sessionlog[0:-4]
-    fp_Nxy = open(sessionname + "_trn_Nxy.txt", "w")
-    fp_Txy = open(sessionname + "_trn_Txy.txt", "w")
-    fp_TxyC = open(sessionname + "_trn_TxyC.txt", "w")
-    fp_TxyU = open(sessionname + "_trn_TxyU.txt", "w")
-    fp_TxyR = open(sessionname + "_trn_TxyR.txt", "w")
+    fp_Nxy = open(inputdir + "/" + sessionname + "_trn_Nxy.txt", "w")
+    fp_Txy = open(inputdir + "/" + sessionname + "_trn_Txy.txt", "w")
+    fp_TxyC = open(inputdir + "/" + sessionname + "_trn_TxyC.txt", "w")
+    fp_TxyU = open(inputdir + "/" + sessionname + "_trn_TxyU.txt", "w")
+    fp_TxyR = open(inputdir + "/" + sessionname + "_trn_TxyR.txt", "w")
 
     # Open and parse the session log, outputting as desired
     xmin = 0.0
@@ -142,7 +150,7 @@ def main (args, opts={}):
 
     # Create and execute an mbm_grdplot command to generate a map of the
     # TRN performance over the reference bathymetry
-    command = "cd "+inputdir+" ; mbm_grdplot -I ../"+gridfile+" -O "+sessionname+"-trn-plot"
+    command = "cd "+inputdir+" ; mbm_grdplot -I "+gridfile+" -O "+sessionname+"-trn-plot"
     command = command+" -R"+str(xmin)+"/"+str(xmax)+"/"+str(ymin)+"/"+str(ymax)
     command = command+" -G5 -D0/1 -A1.0 -L\"Terrain Relative Navigation over Reference Bathymetry\":\"Topography (meters)\""
     command = command+" -MXW1p -MXI"+sessionname+"_trn_Nxy.txt"
