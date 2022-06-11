@@ -80,14 +80,10 @@ target_include_directories(MBGuiShared
                            ${VTK_INCLUDE_DIRS})
 
 message("qt-guilib - EXTRA_LIBRARIES: ${EXTRA_LIBRARIES}")
-<<<<<<< HEAD
+
 target_link_libraries(MBGuiShared mbio
                       ${VTK_LIBRARIES}
 	              ${GMT_LIBRARIES} ${EXTRA_LIBRARIES})
-=======
-target_link_libraries(MBGuiShared ${VTK_LIBRARIES} ${PROJ_LIBRARIES}
-                      ${EXTRA_LIBRARIES})
->>>>>>> c577b37b749cbfb614fd0d313a81c760e99f6161
 
 # Install
 install(TARGETS MBGui DESTINATION cmake-example/lib)
