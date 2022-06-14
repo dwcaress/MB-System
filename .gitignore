@@ -204,3 +204,4 @@ src/mbtrnav/mb1rs
 src/mbtrn/mb1r_test
 build/README.md
 src/mbtrn/mb1-cli
+src/mbtrnutils/mbgrdtilemaker

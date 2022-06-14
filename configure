@@ -3293,7 +3293,7 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
 
 
-printf "%s\n" "#define VERSION_DATE \"10 June 2022\"" >>confdefs.h
+printf "%s\n" "#define VERSION_DATE \"13 June 2022\"" >>confdefs.h
 
 
 printf "%s\n" " "

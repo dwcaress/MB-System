@@ -124,7 +124,7 @@
 #define VERSION "5.7.9beta35"
 
 /* Set VERSION_DATE define in mb_config.h */
-#define VERSION_DATE "10 June 2022"
+#define VERSION_DATE "13 June 2022"
 
 /* 0 */
 /* #undef WITH_DEBUG */
