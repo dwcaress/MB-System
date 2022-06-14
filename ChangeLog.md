@@ -23,7 +23,7 @@ Distributions that do not include "beta" in the tag name correspond to the major
 announced releases. The source distributions associated with all releases, major
 or beta, are equally accessible as tarballs through the Github interface.
 
-- Version 5.7.9beta35    June 10, 2022
+- Version 5.7.9beta35    June 13, 2022
 - Version 5.7.9beta34    June 5, 2022
 - Version 5.7.9beta33    June 5, 2022
 - Version 5.7.9beta32    June 4, 2022
@@ -413,13 +413,21 @@ or beta, are equally accessible as tarballs through the Github interface.
 ### MB-System Version 5.7 Release Notes:
 --
 
-#### 5.7.9beta35 (June 10, 2022)
+#### 5.7.9beta35 (June 13, 2022)
 
 Mbtrnpp: Added options to set the TRN search area on the command line and in
 cfg files. Fixed wrapper script mbtrnpp.sh so that the number of cycles
 to be used is set correction.
 
 Mbm_trnplot: Fixed plotting macro to work with the current mbtrnpp output.
+
+Mbgrd2octree: Recast program that translates a topography grid in a projected
+coordinate system (like UTM) into a TRN octree model. This program now used
+MB-System-like arguments, e.g. mbgrd2octree --input=grid --output=octree
+
+Mbgrdtilemaker: Added new program to generate a tileset of octrees for TRN from a
+reference grid in a projected coordinate system (like UTM). This tileset can be
+used by mbtrnpp.
 
 #### 5.7.9beta34 (June 5, 2022)
 

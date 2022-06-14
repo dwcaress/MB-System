@@ -589,8 +589,8 @@ s=NULL;\
 #define OPT_TRN_DECS_DFL                  0.0
 #define OPT_COVARIANCE_MAGNITUDE_MAX_DFL  5.0
 #define OPT_CONVERGENCE_REPEAT_MIN        200
-#define OPT_REINIT_SEARCH_XY              60
-#define OPT_REINIT_SEARCH_Z               5
+#define OPT_REINIT_SEARCH_XY              60.0
+#define OPT_REINIT_SEARCH_Z               5.0
 #define OPT_REINIT_GAIN_ENABLE_DFL        false
 #define OPT_REINIT_FILE_ENABLE_DFL        false
 #define OPT_REINIT_XYOFFSET_ENABLE_DFL    false

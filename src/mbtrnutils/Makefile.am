@@ -39,7 +39,7 @@ AM_CPPFLAGS = -g -O0 $(MBTRN_INC) $(MBTNAV_INC) \
 	${FRAMES7K_VER} ${TRNC_VER} ${STREAM7K_VER} \
 	${TBIN_VER} ${EMU7K_VER} ${MBTNAV_OPT}
 
-bin_PROGRAMS =  mbtrnpp mbgrd2octree
+bin_PROGRAMS =  mbtrnpp mbgrd2octree mbgrdtilemaker
 
 mbtrnpp_SOURCES = mbtrnpp.c
 
@@ -54,6 +54,12 @@ mbgrd2octree_SOURCES = mbgrd2octree.cc
 mbgrd2octree_LDADD =  \
 	${libgmt_LIBS} ${libnetcdf_LIBS} ${libproj_LIBS} \
   $(TRNWLIBS) $(LIBM)
+
+mbgrdtilemaker_SOURCES = mbgrdtilemaker.cc
+mbgrdtilemaker_LDADD =  $(top_builddir)/src/mbio/libmbio.la \
+	$(top_builddir)/src/mbaux/libmbaux.la \
+	$(LIBMBXGR) \
+	${libgmt_LIBS} ${libnetcdf_LIBS} ${libproj_LIBS} $(LIBM)
 
 CLEANFILES =
 DISTCLEANFILES =

@@ -88,7 +88,8 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-bin_PROGRAMS = mbtrnpp$(EXEEXT) mbgrd2octree$(EXEEXT)
+bin_PROGRAMS = mbtrnpp$(EXEEXT) mbgrd2octree$(EXEEXT) \
+	mbgrdtilemaker$(EXEEXT)
 subdir = src/mbtrnutils
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/ax_check_compile_flag.m4 \
@@ -119,6 +120,12 @@ AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
 am__v_lt_0 = --silent
 am__v_lt_1 = 
+am_mbgrdtilemaker_OBJECTS = mbgrdtilemaker.$(OBJEXT)
+mbgrdtilemaker_OBJECTS = $(am_mbgrdtilemaker_OBJECTS)
+mbgrdtilemaker_DEPENDENCIES = $(top_builddir)/src/mbio/libmbio.la \
+	$(top_builddir)/src/mbaux/libmbaux.la $(LIBMBXGR) \
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
 am_mbtrnpp_OBJECTS = mbtrnpp.$(OBJEXT)
 mbtrnpp_OBJECTS = $(am_mbtrnpp_OBJECTS)
 mbtrnpp_DEPENDENCIES = $(top_builddir)/src/mbio/libmbio.la \
@@ -142,7 +149,7 @@ DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)/src/mbio
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__maybe_remake_depfiles = depfiles
 am__depfiles_remade = ./$(DEPDIR)/mbgrd2octree.Po \
-	./$(DEPDIR)/mbtrnpp.Po
+	./$(DEPDIR)/mbgrdtilemaker.Po ./$(DEPDIR)/mbtrnpp.Po
 am__mv = mv -f
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
@@ -180,7 +187,8 @@ AM_V_CXXLD = $(am__v_CXXLD_@AM_V@)
 am__v_CXXLD_ = $(am__v_CXXLD_@AM_DEFAULT_V@)
 am__v_CXXLD_0 = @echo "  CXXLD   " $@;
 am__v_CXXLD_1 = 
-SOURCES = $(mbgrd2octree_SOURCES) $(mbtrnpp_SOURCES)
+SOURCES = $(mbgrd2octree_SOURCES) $(mbgrdtilemaker_SOURCES) \
+	$(mbtrnpp_SOURCES)
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
     n|no|NO) false;; \
@@ -457,6 +465,12 @@ mbgrd2octree_LDADD = \
 	${libgmt_LIBS} ${libnetcdf_LIBS} ${libproj_LIBS} \
   $(TRNWLIBS) $(LIBM)
 
+mbgrdtilemaker_SOURCES = mbgrdtilemaker.cc
+mbgrdtilemaker_LDADD = $(top_builddir)/src/mbio/libmbio.la \
+	$(top_builddir)/src/mbaux/libmbaux.la \
+	$(LIBMBXGR) \
+	${libgmt_LIBS} ${libnetcdf_LIBS} ${libproj_LIBS} $(LIBM)
+
 CLEANFILES = 
 DISTCLEANFILES = 
 all: all-am
@@ -546,6 +560,10 @@ mbgrd2octree$(EXEEXT): $(mbgrd2octree_OBJECTS) $(mbgrd2octree_DEPENDENCIES) $(EX
 	@rm -f mbgrd2octree$(EXEEXT)
 	$(AM_V_CXXLD)$(CXXLINK) $(mbgrd2octree_OBJECTS) $(mbgrd2octree_LDADD) $(LIBS)
 
+mbgrdtilemaker$(EXEEXT): $(mbgrdtilemaker_OBJECTS) $(mbgrdtilemaker_DEPENDENCIES) $(EXTRA_mbgrdtilemaker_DEPENDENCIES) 
+	@rm -f mbgrdtilemaker$(EXEEXT)
+	$(AM_V_CXXLD)$(CXXLINK) $(mbgrdtilemaker_OBJECTS) $(mbgrdtilemaker_LDADD) $(LIBS)
+
 mbtrnpp$(EXEEXT): $(mbtrnpp_OBJECTS) $(mbtrnpp_DEPENDENCIES) $(EXTRA_mbtrnpp_DEPENDENCIES) 
 	@rm -f mbtrnpp$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(mbtrnpp_OBJECTS) $(mbtrnpp_LDADD) $(LIBS)
@@ -557,6 +575,7 @@ distclean-compile:
 	-rm -f *.tab.c
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbgrd2octree.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbgrdtilemaker.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbtrnpp.Po@am__quote@ # am--include-marker
 
 $(am__depfiles_remade):
@@ -715,6 +734,7 @@ clean-am: clean-binPROGRAMS clean-generic clean-libtool mostlyclean-am
 
 distclean: distclean-am
 		-rm -f ./$(DEPDIR)/mbgrd2octree.Po
+	-rm -f ./$(DEPDIR)/mbgrdtilemaker.Po
 	-rm -f ./$(DEPDIR)/mbtrnpp.Po
 	-rm -f Makefile
 distclean-am: clean-am distclean-compile distclean-generic \
@@ -762,6 +782,7 @@ installcheck-am:
 
 maintainer-clean: maintainer-clean-am
 		-rm -f ./$(DEPDIR)/mbgrd2octree.Po
+	-rm -f ./$(DEPDIR)/mbgrdtilemaker.Po
 	-rm -f ./$(DEPDIR)/mbtrnpp.Po
 	-rm -f Makefile
 maintainer-clean-am: distclean-am maintainer-clean-generic
