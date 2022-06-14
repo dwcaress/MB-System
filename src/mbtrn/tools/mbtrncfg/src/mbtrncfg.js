@@ -1,5 +1,6 @@
 // variable declarations, initialization
 var help_topics=[];
+// preset parameters (i.e. keyed w/ preset name)
 var TRN_RESON_HOST=[];
 var TRN_HOST=[];
 var TRN_GROUP=[];
@@ -11,6 +12,7 @@ var trn_dev=[];
 var mbhbt=[];
 var trnhbt=[];
 var trnuhbt=[];
+var reinit_search=[];
 
 // context-specific constants
 var MBARI_LINUXVM_IP="134.89.13.19";
@@ -21,7 +23,7 @@ var CARSON_WINVM_IP="134.89.33.X";
 var HOME_WINVM_IP="192.168.1.86";
 var MAPPER1_RESON_IP="134.89.32.107";
 var GLOBAL_TRN_GROUP="239.255.0.16"
-var SENTRY_LINUX_IP="192.168.1.X";
+var SENTRY_LINUX_IP="192.168.100.X";
 var LINUXVM_IP_CURRENT=MBARI_LINUXVM_IP;
 var WINVM_IP_CURRENT=MBARI_WINVM_IP;
 
@@ -37,6 +39,9 @@ var TRNUHBT_SENTRY=0;
 
 var TRNDEV_SENTRY="T50"
 var TRNDEV_MAPPER1="7125_400"
+
+var AXIAL_REINIT_SEARCH="600.0/5.0"
+var PORTLEDGE_REINIT_SEARCH="60.0/5.0"
 
 var RESON_LOGFILES="/cygdrive/d/cygwin64/logs/mbtrn";
 var RESON_DATAFILES="/cygdrive/d/cygwin64/G2TerrainNav/config";
@@ -73,6 +78,7 @@ trn_dev["win.reson"]=TRNDEV_MAPPER1;
 mbhbt["win.reson"]=MBHBT_MAPPER1;
 trnhbt["win.reson"]=TRNHBT_MAPPER1;
 trnuhbt["win.reson"]=TRNUHBT_MAPPER1;
+reinit_search["win.reson"]=PORTLEDGE_REINIT_SEARCH;
 
 TRN_RESON_HOST["linux.mbari"]=MBARI_LINUXVM_IP;
 TRN_HOST["linux.mbari"]=MBARI_LINUXVM_IP;
@@ -85,6 +91,7 @@ trn_dev["linux.mbari"]=TRNDEV_MAPPER1;
 mbhbt["linux.mbari"]=MBHBT_TEST;
 trnhbt["linux.mbari"]=TRNHBT_TEST;
 trnuhbt["linux.mbari"]=TRNUHBT_TEST;
+reinit_search["linux.mbari"]=PORTLEDGE_REINIT_SEARCH;
 
 TRN_RESON_HOST["linux.carson"]=CARSON_LINUXVM_IP;
 TRN_HOST["linux.carson"]=CARSON_LINUXVM_IP;
@@ -97,6 +104,7 @@ trn_dev["linux.carson"]=TRNDEV_MAPPER1;
 mbhbt["linux.carson"]=MBHBT_TEST;
 trnhbt["linux.carson"]=TRNHBT_TEST;
 trnuhbt["linux.carson"]=TRNUHBT_TEST;
+reinit_search["linux.carson"]=PORTLEDGE_REINIT_SEARCH;
 
 TRN_RESON_HOST["sentry"]=SENTRY_LINUX_IP;
 TRN_HOST["sentry"]=SENTRY_LINUX_IP;
@@ -109,6 +117,7 @@ trn_dev["sentry"]=TRNDEV_SENTRY;
 mbhbt["sentry"]=MBHBT_SENTRY;
 trnhbt["sentry"]=TRNHBT_SENTRY;
 trnuhbt["sentry"]=TRNUHBT_SENTRY;
+reinit_search["sentry"]=AXIAL_REINIT_SEARCH;
 
 TRN_RESON_HOST["linux.home"]=HOME_LINUXVM_IP;
 TRN_HOST["linux.home"]=HOME_LINUXVM_IP;
@@ -121,6 +130,7 @@ trn_dev["linux.home"]=TRNDEV_MAPPER1;
 mbhbt["linux.home"]=MBHBT_TEST;
 trnhbt["linux.home"]=TRNHBT_TEST;
 trnuhbt["linux.home"]=TRNUHBT_TEST;
+reinit_search["linux.home"]=PORTLEDGE_REINIT_SEARCH;
 
 TRN_RESON_HOST["winvm.mbari"]=MBARI_WINVM_IP;
 TRN_HOST["winvm.mbari"]=MBARI_WINVM_IP;
@@ -133,6 +143,7 @@ trn_dev["winvm.mbari"]=TRNDEV_MAPPER1;
 mbhbt["winvm.mbari"]=MBHBT_TEST;
 trnhbt["winvm.mbari"]=TRNHBT_TEST;
 trnuhbt["winvm.mbari"]=TRNUHBT_TEST;
+reinit_search["winvm.mbari"]=PORTLEDGE_REINIT_SEARCH;
 
 TRN_RESON_HOST["winvm.carson"]=CARSON_WINVM_IP;
 TRN_HOST["winvm.carson"]=CARSON_WINVM_IP;
@@ -145,6 +156,7 @@ trn_dev["winvm.carson"]=TRNDEV_MAPPER1;
 mbhbt["winvm.carson"]=MBHBT_TEST;
 trnhbt["winvm.carson"]=TRNHBT_TEST;
 trnuhbt["winvm.carson"]=TRNUHBT_TEST;
+reinit_search["winvm.carson"]=PORTLEDGE_REINIT_SEARCH;
 
 TRN_RESON_HOST["winvm.home"]=HOME_WINVM_IP;
 TRN_HOST["winvm.home"]=HOME_WINVM_IP;
@@ -157,6 +169,7 @@ trn_dev["winvm.home"]=TRNDEV_MAPPER1;
 mbhbt["winvm.home"]=MBHBT_TEST;
 trnhbt["winvm.home"]=TRNHBT_TEST;
 trnuhbt["winvm.home"]=TRNUHBT_TEST;
+reinit_search["winvm.home"]=PORTLEDGE_REINIT_SEARCH;
 
 TRN_RESON_HOST["custom"]="";
 TRN_HOST["custom"]="";
@@ -169,6 +182,7 @@ trn_dev["custom"]="";
 mbhbt["custom"]="";
 trnhbt["custom"]="";
 trnuhbt["custom"]="";
+reinit_search["custom"]="";
 
 // help strings
 help_topics["TRN_MBTRNDIR"]="mbtrnpp binary directory";
@@ -307,8 +321,7 @@ help_topics["reset"]="";
 help_topics["reinit-gain"]="Enable/disable gating TRN resets using sonar transmit gain";
 help_topics["reinit-file"]="Reinitialize TRN every time a new file is read when parsing a datalist";
 help_topics["reinit-xyoffset"]="Reinitialize TRN whenever the magnitude of the lateral converged offset exceeds specified limit";
-help_topics["reinit-coarse"]="TRN filter reinit stdevs a/b where a: X,Y limit b:Z limit";
-help_topics["reinit-fine"]="TRN filter reinit stdevs a/b where a: X,Y limit b:Z limit";
+help_topics["reinit-search"]="TRN filter reinit stdevs a/b where a: X,Y limit b:Z limit";
 help_topics["reinit-zoffset"]="Reinitialize TRN whenever the converged z-offset is outside specified range";
 help_topics["covariance-magnitude-max"]="Convergence criteria: max covariance magnitude";
 help_topics["convergence-repeat-min"]="Convergence criteria: min convergence repeat";
@@ -387,6 +400,7 @@ function load_ctx(){
     x.elements["trnuhbt"].value=trnuhbt[key];
     // use reson host context key for trn-dev
     x.elements["trn-dev"].value=trn_dev[rkey];
+    x.elements["reinit-search"].value=reinit_search[key];
 
     // initialize common defaults
     // (may reference placeholder values)
@@ -424,8 +438,6 @@ function load_ctx(){
     x.elements["reinit-file"].value="1";
     x.elements["reinit-xyoffset"].value="150.0";
     x.elements["reinit-zoffset"].value="2.0/2.0";
-    x.elements["reinit-coarse"].value="60.0/5.0";
-    x.elements["reinit-fine"].value="60.0/5.0";
     x.elements["set-trnlogfiles"].value="en";
     x.elements["covariance-magnitude-max"].value="5.0";
     x.elements["convergence-repeat-min"].value="200";
@@ -455,6 +467,7 @@ function init_preset(key){
     x.elements["mbhbt"].value=mbhbt[key];
     x.elements["trnhbt"].value=trnhbt[key];
     x.elements["trnuhbt"].value=trnuhbt[key];
+    x.elements["reinit-search"].value=reinit_search[key];
 
     // initialize common defaults
     // (may reference placeholder values)
@@ -492,8 +505,6 @@ function init_preset(key){
     x.elements["reinit-file"].value="1";
     x.elements["reinit-xyoffset"].value="150.0";
     x.elements["reinit-zoffset"].value="2.0/2.0";
-    x.elements["reinit-coarse"].value="60.0/5.0";
-    x.elements["reinit-fine"].value="60.0/5.0";
     x.elements["set-trnlogfiles"].value="en";
     x.elements["covariance-magnitude-max"].value="5.0";
     x.elements["convergence-repeat-min"].value="200";
@@ -607,10 +618,8 @@ function update(){
         text += '--reinit-xyoffset='+x.elements["reinit-xyoffset"].value+" ";
     if(x.elements["reinit-zoffset"].value.length>0)
         text += '--reinit-zoffset='+x.elements["reinit-zoffset"].value+" ";
-    if(x.elements["reinit-coarse"].value.length>0)
-        text += '--reinit-coarse='+x.elements["reinit-coarse"].value+" ";
-    if(x.elements["reinit-fine"].value.length>0)
-        text += '--reinit-fine='+x.elements["reinit-fine"].value+" ";
+    if(x.elements["reinit-search"].value.length>0)
+        text += '--reinit-search='+x.elements["reinit-search"].value+" ";
     if(x.elements["set-trnlogfiles"].value=='en')
         text = "TRN_LOGFILES=\""+TRN_LOGFILES["current"]+"\" "+text;
     if(x.elements["covariance-magnitude-max"].value.length>0)
@@ -1094,17 +1103,10 @@ function cfg2str(){
 
     retval+="\n";
     if(verbose){
-        retval+="// opt reinit-coarse [double/double]\n";
+        retval+="// opt reinit-search [double/double]\n";
         retval+="// TRN reinit stdev limits\n";
     }
-    retval+="reinit-coarse="+x.elements["reinit-coarse"].value+"\n";
-
-    retval+="\n";
-    if(verbose){
-        retval+="// opt reinit-fine [double/double]\n";
-        retval+="// TRN reinit stdev limits\n";
-    }
-    retval+="reinit-fine="+x.elements["reinit-fine"].value+"\n";
+    retval+="reinit-search="+x.elements["reinit-search"].value+"\n";
 
     retval+="\n";
     if(verbose){
