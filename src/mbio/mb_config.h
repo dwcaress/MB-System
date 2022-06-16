@@ -95,7 +95,7 @@
 #define PACKAGE_NAME "mbsystem"
 
 /* Define to the full name and version of this package. */
-#define PACKAGE_STRING "mbsystem 5.7.9beta35"
+#define PACKAGE_STRING "mbsystem 5.7.9beta36"
 
 /* Define to the one symbol short name of this package. */
 #define PACKAGE_TARNAME "mbsystem"
@@ -104,7 +104,7 @@
 #define PACKAGE_URL "http://www.mbari.org/data/mbsystem/"
 
 /* Define to the version of this package. */
-#define PACKAGE_VERSION "5.7.9beta35"
+#define PACKAGE_VERSION "5.7.9beta36"
 
 /* Build tools using PCL */
 /* #undef PCLTOOLS_ENABLED */
@@ -121,10 +121,10 @@
 #define TEST_ENABLED 1
 
 /* Version number of package */
-#define VERSION "5.7.9beta35"
+#define VERSION "5.7.9beta36"
 
 /* Set VERSION_DATE define in mb_config.h */
-#define VERSION_DATE "13 June 2022"
+#define VERSION_DATE "15 June 2022"
 
 /* 0 */
 /* #undef WITH_DEBUG */

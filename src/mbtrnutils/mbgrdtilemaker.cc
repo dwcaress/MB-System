@@ -406,6 +406,8 @@ int main( int argc, char **argv )
   // Copy source grid to tiles directory
   char command[MB_COMMAND_LENGTH];
   sprintf(command, "cp %s %s/source_grid.grd", input_grid, output_root);
+  fprintf(outfp, "\n-----------------------------------------------------------\nExecuting: %s\n", command);
+  system(command);
 
   // Generate octree files from the grids
   for (int itile=0; itile<num_tiles; itile++) {
