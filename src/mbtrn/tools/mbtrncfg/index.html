@@ -23,7 +23,7 @@
 
     <div style="margin: 25px 25px 25px 40px;"><!--margin:0px 200px 0px 0px;-->
 
-        <div style="top:0;margin-left:620px;position:fixed;">
+        <div style="top:0;margin-left:720px;position:fixed;">
             <textarea name="helptext" id="helptext" spellcheck="false" class="help"></textarea>
         </div>
 
@@ -139,6 +139,11 @@
                         <td class="entry"><input type="text" size="8" name="trn-dev" value="">
                             </td>
                     </tr>
+                    <tr>
+                        <td class="param" onmouseover="showhelp('trn-sensor')"><a>trn-sensor</a></td>
+                        <td class="entry"><input type="text" size="8" name="trn-sensor" value="">
+                            </td>
+                    </tr>
                   <tr>
                       <td class="param" onmouseover="showhelp('trn-utm')"><a>trn-utm</a></td>
                       <td class="entry"><input type="text" size="8" name="trn-utm" value="">
@@ -238,6 +243,11 @@
                           </td>
                   </tr>
                   <tr>
+                      <td class="param" onmouseover="showhelp('reinit-search')"><a>reinit-search</a></td>
+                      <td class="entry"><input type="text" size="8" name="reinit-search" value="">
+                          </td>
+                  </tr>
+                  <tr>
                       <td class="param" onmouseover="showhelp('covariance-magnitude-max')"><a>covariance-magnitude-max</a></td>
                       <td class="entry"><input type="text" size="8" name="covariance-magnitude-max" value="">
                           </td>
@@ -310,6 +320,7 @@
                         <td class="entry">
                             <select name="ctx-rhost" id="ctx-rhost">
                                 <option value="win.reson">mapper1</option>
+                                <option value="sentry">sentry</option>
                                 <option value="linux.mbari">linux.mbari</option>
                                 <option value="linux.carson">linux.carson</option>
                                 <option value="linux.home">linux.home</option>
@@ -325,6 +336,7 @@
                         <td class="entry">
                             <select name="ctx-mhost" id="ctx-mhost">
                                 <option value="win.reson">mapper1</option>
+                                <option value="sentry">sentry</option>
                                 <option value="linux.mbari">linux.mbari</option>
                                 <option value="linux.carson">linux.carson</option>
                                 <option value="linux.home">linux.home</option>

@@ -43,8 +43,8 @@
 // instance. Calling reinitFilter is currently the only
 // way to change the values, ensuring that the values are not changed
 // while the filter is running.
-struct InitVars{
-    trn_initvars_t vars;
+class InitVars{
+public:
     // TODO: incorporate other parameters?
     // default CTOR
     InitVars();
@@ -69,6 +69,8 @@ struct InitVars{
     double x();
     double y();
     double z();
+private:
+    trn_initvars_t _ivars;
 };
 
 //!The mapT struct stores data in a gridded Matrix.

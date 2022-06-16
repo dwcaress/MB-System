@@ -1,5 +1,6 @@
 // variable declarations, initialization
 var help_topics=[];
+// preset parameters (i.e. keyed w/ preset name)
 var TRN_RESON_HOST=[];
 var TRN_HOST=[];
 var TRN_GROUP=[];
@@ -7,9 +8,11 @@ var TRN_LOGFILES=[];
 var TRN_DATAFILES=[];
 var TRN_MAPFILES=[];
 var TRN_MBTRNDIR=[];
+var trn_dev=[];
 var mbhbt=[];
 var trnhbt=[];
 var trnuhbt=[];
+var reinit_search=[];
 
 // context-specific constants
 var MBARI_LINUXVM_IP="134.89.13.19";
@@ -20,14 +23,25 @@ var CARSON_WINVM_IP="134.89.33.X";
 var HOME_WINVM_IP="192.168.1.86";
 var MAPPER1_RESON_IP="134.89.32.107";
 var GLOBAL_TRN_GROUP="239.255.0.16"
+var SENTRY_LINUX_IP="192.168.100.X";
 var LINUXVM_IP_CURRENT=MBARI_LINUXVM_IP;
 var WINVM_IP_CURRENT=MBARI_WINVM_IP;
+
 var MBHBT_MAPPER1=0;
-var MBHBT_TEST=15;
 var TRNHBT_MAPPER1=0;
-var TRNHBT_TEST=15;
 var TRNUHBT_MAPPER1=0;
+var MBHBT_TEST=15;
+var TRNHBT_TEST=15;
 var TRNUHBT_TEST=15;
+var MBHBT_SENTRY=0;
+var TRNHBT_SENTRY=0;
+var TRNUHBT_SENTRY=0;
+
+var TRNDEV_SENTRY="T50"
+var TRNDEV_MAPPER1="7125_400"
+
+var AXIAL_REINIT_SEARCH="600.0/5.0"
+var PORTLEDGE_REINIT_SEARCH="60.0/5.0"
 
 var RESON_LOGFILES="/cygdrive/d/cygwin64/logs/mbtrn";
 var RESON_DATAFILES="/cygdrive/d/cygwin64/G2TerrainNav/config";
@@ -44,6 +58,11 @@ var WINVM_DATAFILES="/cygdrive/z/win_share/test/config";
 var WINVM_MAPFILES="/cygdrive/z/win_share/test/maps";
 var WINVM_TRN_MBTRNDIR="/home/headley/git/MB-System/src/mbtrnutils"
 
+var SENTRY_LOGFILES="/path/to/logs";
+var SENTRY_DATAFILES="/path/to/config";
+var SENTRY_MAPFILES="/path/to/maps";
+var SENTRY_TRN_MBTRNDIR="/usr/local/bin";
+
 //initialize session
 var SESSION=session_str();
 
@@ -55,9 +74,11 @@ TRN_LOGFILES["win.reson"]=RESON_LOGFILES;
 TRN_DATAFILES["win.reson"]=RESON_DATAFILES;
 TRN_MAPFILES["win.reson"]=RESON_MAPFILES;
 TRN_MBTRNDIR["win.reson"]=RESON_TRN_MBTRNDIR;
+trn_dev["win.reson"]=TRNDEV_MAPPER1;
 mbhbt["win.reson"]=MBHBT_MAPPER1;
 trnhbt["win.reson"]=TRNHBT_MAPPER1;
 trnuhbt["win.reson"]=TRNUHBT_MAPPER1;
+reinit_search["win.reson"]=PORTLEDGE_REINIT_SEARCH;
 
 TRN_RESON_HOST["linux.mbari"]=MBARI_LINUXVM_IP;
 TRN_HOST["linux.mbari"]=MBARI_LINUXVM_IP;
@@ -66,9 +87,11 @@ TRN_LOGFILES["linux.mbari"]=LINUXVM_LOGFILES;
 TRN_DATAFILES["linux.mbari"]=LINUXVM_DATAFILES;
 TRN_MAPFILES["linux.mbari"]=LINUXVM_MAPFILES;
 TRN_MBTRNDIR["linux.mbari"]=LINUXVM_TRN_MBTRNDIR;
+trn_dev["linux.mbari"]=TRNDEV_MAPPER1;
 mbhbt["linux.mbari"]=MBHBT_TEST;
 trnhbt["linux.mbari"]=TRNHBT_TEST;
 trnuhbt["linux.mbari"]=TRNUHBT_TEST;
+reinit_search["linux.mbari"]=PORTLEDGE_REINIT_SEARCH;
 
 TRN_RESON_HOST["linux.carson"]=CARSON_LINUXVM_IP;
 TRN_HOST["linux.carson"]=CARSON_LINUXVM_IP;
@@ -77,9 +100,24 @@ TRN_LOGFILES["linux.carson"]=LINUXVM_LOGFILES;
 TRN_DATAFILES["linux.carson"]=LINUXVM_DATAFILES;
 TRN_MAPFILES["linux.carson"]=LINUXVM_MAPFILES;
 TRN_MBTRNDIR["linux.carson"]=LINUXVM_TRN_MBTRNDIR;
+trn_dev["linux.carson"]=TRNDEV_MAPPER1;
 mbhbt["linux.carson"]=MBHBT_TEST;
 trnhbt["linux.carson"]=TRNHBT_TEST;
 trnuhbt["linux.carson"]=TRNUHBT_TEST;
+reinit_search["linux.carson"]=PORTLEDGE_REINIT_SEARCH;
+
+TRN_RESON_HOST["sentry"]=SENTRY_LINUX_IP;
+TRN_HOST["sentry"]=SENTRY_LINUX_IP;
+TRN_GROUP["sentry"]=GLOBAL_TRN_GROUP;
+TRN_LOGFILES["sentry"]=SENTRY_LOGFILES;
+TRN_DATAFILES["sentry"]=SENTRY_DATAFILES;
+TRN_MAPFILES["sentry"]=SENTRY_MAPFILES;
+TRN_MBTRNDIR["sentry"]=SENTRY_TRN_MBTRNDIR;
+trn_dev["sentry"]=TRNDEV_SENTRY;
+mbhbt["sentry"]=MBHBT_SENTRY;
+trnhbt["sentry"]=TRNHBT_SENTRY;
+trnuhbt["sentry"]=TRNUHBT_SENTRY;
+reinit_search["sentry"]=AXIAL_REINIT_SEARCH;
 
 TRN_RESON_HOST["linux.home"]=HOME_LINUXVM_IP;
 TRN_HOST["linux.home"]=HOME_LINUXVM_IP;
@@ -88,9 +126,11 @@ TRN_LOGFILES["linux.home"]=LINUXVM_LOGFILES;
 TRN_DATAFILES["linux.home"]=LINUXVM_DATAFILES;
 TRN_MAPFILES["linux.home"]=LINUXVM_MAPFILES;
 TRN_MBTRNDIR["linux.home"]=LINUXVM_TRN_MBTRNDIR;
+trn_dev["linux.home"]=TRNDEV_MAPPER1;
 mbhbt["linux.home"]=MBHBT_TEST;
 trnhbt["linux.home"]=TRNHBT_TEST;
 trnuhbt["linux.home"]=TRNUHBT_TEST;
+reinit_search["linux.home"]=PORTLEDGE_REINIT_SEARCH;
 
 TRN_RESON_HOST["winvm.mbari"]=MBARI_WINVM_IP;
 TRN_HOST["winvm.mbari"]=MBARI_WINVM_IP;
@@ -99,9 +139,11 @@ TRN_LOGFILES["winvm.mbari"]=WINVM_LOGFILES;
 TRN_DATAFILES["winvm.mbari"]=WINVM_DATAFILES;
 TRN_MAPFILES["winvm.mbari"]=WINVM_MAPFILES;
 TRN_MBTRNDIR["winvm.mbari"]=WINVM_TRN_MBTRNDIR;
+trn_dev["winvm.mbari"]=TRNDEV_MAPPER1;
 mbhbt["winvm.mbari"]=MBHBT_TEST;
 trnhbt["winvm.mbari"]=TRNHBT_TEST;
 trnuhbt["winvm.mbari"]=TRNUHBT_TEST;
+reinit_search["winvm.mbari"]=PORTLEDGE_REINIT_SEARCH;
 
 TRN_RESON_HOST["winvm.carson"]=CARSON_WINVM_IP;
 TRN_HOST["winvm.carson"]=CARSON_WINVM_IP;
@@ -110,9 +152,11 @@ TRN_LOGFILES["winvm.carson"]=WINVM_LOGFILES;
 TRN_DATAFILES["winvm.carson"]=WINVM_DATAFILES;
 TRN_MAPFILES["winvm.carson"]=WINVM_MAPFILES;
 TRN_MBTRNDIR["winvm.carson"]=WINVM_TRN_MBTRNDIR;
+trn_dev["winvm.carson"]=TRNDEV_MAPPER1;
 mbhbt["winvm.carson"]=MBHBT_TEST;
 trnhbt["winvm.carson"]=TRNHBT_TEST;
 trnuhbt["winvm.carson"]=TRNUHBT_TEST;
+reinit_search["winvm.carson"]=PORTLEDGE_REINIT_SEARCH;
 
 TRN_RESON_HOST["winvm.home"]=HOME_WINVM_IP;
 TRN_HOST["winvm.home"]=HOME_WINVM_IP;
@@ -121,9 +165,11 @@ TRN_LOGFILES["winvm.home"]=WINVM_LOGFILES;
 TRN_DATAFILES["winvm.home"]=WINVM_DATAFILES;
 TRN_MAPFILES["winvm.home"]=WINVM_MAPFILES;
 TRN_MBTRNDIR["winvm.home"]=WINVM_TRN_MBTRNDIR;
+trn_dev["winvm.home"]=TRNDEV_MAPPER1;
 mbhbt["winvm.home"]=MBHBT_TEST;
 trnhbt["winvm.home"]=TRNHBT_TEST;
 trnuhbt["winvm.home"]=TRNUHBT_TEST;
+reinit_search["winvm.home"]=PORTLEDGE_REINIT_SEARCH;
 
 TRN_RESON_HOST["custom"]="";
 TRN_HOST["custom"]="";
@@ -132,9 +178,11 @@ TRN_LOGFILES["custom"]="";
 TRN_DATAFILES["custom"]="";
 TRN_MAPFILES["custom"]="";
 TRN_MBTRNDIR["custom"]="";
+trn_dev["custom"]="";
 mbhbt["custom"]="";
 trnhbt["custom"]="";
 trnuhbt["custom"]="";
+reinit_search["custom"]="";
 
 // help strings
 help_topics["TRN_MBTRNDIR"]="mbtrnpp binary directory";
@@ -179,7 +227,13 @@ Value <=0 disables heartbeat; abandoned sockets persist";
 help_topics["trnuhbt"]="trnu (TRN update pub/sub) server heartbeat timeout (s)\n\n\
 Drop client connections after timeout\n\
 Value <=0 disables heartbeat; abandoned sockets persist";
-help_topics["trn-dev"]="TRN Device (7125_400, 7125_200, T50)";
+help_topics["trn-dev"]="TRN Device: [7125_400, 7125_200, T50]";
+help_topics["trn-sensor"]="TRN sensor type\n\
+1: TRN_SENSOR_DVL\n\
+2: TRN_SENSOR_MB\n\
+3: TRN_SENSOR_PENCIL\n\
+4: TRN_SENSOR_HOMER\n\
+5: TRN_SENSOR_DELTAT";
 help_topics["trn-utm"]="TRN UTM zone (10:Monterey Bay)";
 help_topics["mb-out"]="TRN MB1 output configuration\n\n\
 Options for MB1 record output are selected using one or more comma separated values:\n\n\
@@ -267,6 +321,7 @@ help_topics["reset"]="";
 help_topics["reinit-gain"]="Enable/disable gating TRN resets using sonar transmit gain";
 help_topics["reinit-file"]="Reinitialize TRN every time a new file is read when parsing a datalist";
 help_topics["reinit-xyoffset"]="Reinitialize TRN whenever the magnitude of the lateral converged offset exceeds specified limit";
+help_topics["reinit-search"]="TRN filter reinit stdevs a/b where a: X,Y limit b:Z limit";
 help_topics["reinit-zoffset"]="Reinitialize TRN whenever the converged z-offset is outside specified range";
 help_topics["covariance-magnitude-max"]="Convergence criteria: max covariance magnitude";
 help_topics["convergence-repeat-min"]="Convergence criteria: min convergence repeat";
@@ -343,6 +398,9 @@ function load_ctx(){
     x.elements["mbhbt"].value=mbhbt[key];
     x.elements["trnhbt"].value=trnhbt[key];
     x.elements["trnuhbt"].value=trnuhbt[key];
+    // use reson host context key for trn-dev
+    x.elements["trn-dev"].value=trn_dev[rkey];
+    x.elements["reinit-search"].value=reinit_search[key];
 
     // initialize common defaults
     // (may reference placeholder values)
@@ -357,7 +415,7 @@ function load_ctx(){
     x.elements["statsec"].value="30";
     x.elements["statflags"].value="MSF_STATUS|MSF_EVENT|MSF_ASTAT|MSF_PSTAT";
     x.elements["delay"].value="0";
-    x.elements["trn-dev"].value="T50";
+    x.elements["trn-sensor"].value="2";
     x.elements["trn-utm"].value="10";
     x.elements["mb-out"].value="mb1svr:TRN_HOST:27000";
     x.elements["trn-map"].value="TRN_MAPFILES/PortTiles";
@@ -405,9 +463,11 @@ function init_preset(key){
     x.elements["trn_datafiles"].value=TRN_DATAFILES[key];
     x.elements["trn_mapfiles"].value=TRN_MAPFILES[key];
     x.elements["trn_logfiles"].value=TRN_LOGFILES[key];
+    x.elements["trn-dev"].value=trn_dev[key];
     x.elements["mbhbt"].value=mbhbt[key];
     x.elements["trnhbt"].value=trnhbt[key];
     x.elements["trnuhbt"].value=trnuhbt[key];
+    x.elements["reinit-search"].value=reinit_search[key];
 
     // initialize common defaults
     // (may reference placeholder values)
@@ -422,7 +482,7 @@ function init_preset(key){
     x.elements["statsec"].value="30";
     x.elements["statflags"].value="MSF_STATUS|MSF_EVENT|MSF_ASTAT|MSF_PSTAT";
     x.elements["delay"].value="0";
-    x.elements["trn-dev"].value="T50";
+    x.elements["trn-sensor"].value="2";
     x.elements["trn-utm"].value="10";
     x.elements["mb-out"].value="mb1svr:TRN_HOST:27000";
     x.elements["trn-map"].value="TRN_MAPFILES/PortTiles";
@@ -524,6 +584,8 @@ function update(){
     	text += '--trnuhbt='+x.elements["trnuhbt"].value+" ";
     if(x.elements["trn-dev"].value.length>0)
         text += '--trn-dev='+x.elements["trn-dev"].value+" ";
+    if(x.elements["trn-sensor"].value.length>0)
+        text += '--trn-sensor='+x.elements["trn-sensor"].value+" ";
     if(x.elements["trn-utm"].value.length>0)
         text += '--trn-utm='+x.elements["trn-utm"].value+" ";
     if(x.elements["trn-decn"].value.length>0)
@@ -556,10 +618,10 @@ function update(){
         text += '--reinit-xyoffset='+x.elements["reinit-xyoffset"].value+" ";
     if(x.elements["reinit-zoffset"].value.length>0)
         text += '--reinit-zoffset='+x.elements["reinit-zoffset"].value+" ";
+    if(x.elements["reinit-search"].value.length>0)
+        text += '--reinit-search='+x.elements["reinit-search"].value+" ";
     if(x.elements["set-trnlogfiles"].value=='en')
         text = "TRN_LOGFILES=\""+TRN_LOGFILES["current"]+"\" "+text;
-    if(x.elements["reinit-zoffset"].value.length>0)
-        text += '--reinit-zoffset='+x.elements["reinit-zoffset"].value+" ";
     if(x.elements["covariance-magnitude-max"].value.length>0)
         text += '--covariance-magnitude-max='+x.elements["covariance-magnitude-max"].value+" ";
     if(x.elements["convergence-repeat-min"].value.length>0)
@@ -822,6 +884,18 @@ function cfg2str(){
 
     retval+="\n";
     if(verbose){
+        retval+="// opt trn-sensor [int]\n";
+        retval+="// TRN sensor data type\n";
+        retval+="// TRN_SENSOR_DVL     1\n";
+        retval+="// TRN_SENSOR_MB      2\n";
+        retval+="// TRN_SENSOR_PENCIL  3\n";
+        retval+="// TRN_SENSOR_HOMER   4\n";
+        retval+="// TRN_SENSOR_DELTAT  5\n";
+    }
+    retval+="trn-sensor="+x.elements["trn-sensor"].value+"\n";
+
+    retval+="\n";
+    if(verbose){
         retval+="// opt trn-utm [long]\n";
         retval+="// UTM zone for TRN processing (1-60)\n";
         retval+="// Monterey Bay : 10\n";
@@ -1026,6 +1100,13 @@ function cfg2str(){
         retval+="// is is outside specified range.\n";
     }
     retval+="reinit-zoffset="+x.elements["reinit-zoffset"].value+"\n";
+
+    retval+="\n";
+    if(verbose){
+        retval+="// opt reinit-search [double/double]\n";
+        retval+="// TRN reinit stdev limits\n";
+    }
+    retval+="reinit-search="+x.elements["reinit-search"].value+"\n";
 
     retval+="\n";
     if(verbose){
