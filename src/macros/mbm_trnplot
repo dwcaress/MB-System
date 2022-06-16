@@ -79,7 +79,10 @@ def main (args, opts={}):
         if line[0] == '#' :
           if line != None and "## Reference topography model: " in line :
             gridfile = line[31:].strip()
-            gridfile = gridfile.replace('.bo', '.grd')
+            if ".grd" in gridfile :
+              gridfile = gridfile.replace('.bo', '.grd')
+            else :
+              gridfile = gridfile + "/source_grid.grd"
       fp.close()
   if gridfile[0] != '/' :
     gridfile = "../"+gridfile
@@ -162,9 +165,9 @@ def main (args, opts={}):
     print("Command: "+command+"\n")
     subprocess.run(command, shell=True)
     if display :
-      command = "cd "+inputdir+" ; "+sessionname+"-trn-plot.cmd ; cd .."
+      command = "cd "+inputdir+" ; ./"+sessionname+"-trn-plot.cmd ; cd .."
     else :
-      command = "cd "+inputdir+" ; "+sessionname+"-trn-plot.cmd -N ; cd .."
+      command = "cd "+inputdir+" ; ./"+sessionname+"-trn-plot.cmd -N ; cd .."
     print("Command: "+command+"\n")
     subprocess.run(command, shell=True)
     command = "cd "+inputdir+" ; gmt psconvert "+sessionname+"-trn-plot.ps -Tj -E300 -A -P ; cd .."
@@ -189,9 +192,9 @@ def main (args, opts={}):
     print("Command: "+command+"\n")
     subprocess.run(command, shell=True)
     if display :
-      command = "cd "+inputdir+" ; "+sessionname+"-mb1-plot.cmd ; cd .."
+      command = "cd "+inputdir+" ; ./"+sessionname+"-mb1-plot.cmd ; cd .."
     else :
-      command = "cd "+inputdir+" ; "+sessionname+"-mb1-plot.cmd -N ; cd .."
+      command = "cd "+inputdir+" ; ./"+sessionname+"-mb1-plot.cmd -N ; cd .."
     print("Command: "+command+"\n")
     subprocess.run(command, shell=True)
     command = "cd "+inputdir+" ; gmt psconvert "+sessionname+"-mb1-plot.ps -Tj -E300 -A -P ; cd .."

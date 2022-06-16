@@ -23,6 +23,7 @@ Distributions that do not include "beta" in the tag name correspond to the major
 announced releases. The source distributions associated with all releases, major
 or beta, are equally accessible as tarballs through the Github interface.
 
+- Version 5.7.9beta36    June 15, 2022
 - Version 5.7.9beta35    June 13, 2022
 - Version 5.7.9beta34    June 5, 2022
 - Version 5.7.9beta33    June 5, 2022
@@ -412,6 +413,16 @@ or beta, are equally accessible as tarballs through the Github interface.
 --
 ### MB-System Version 5.7 Release Notes:
 --
+
+#### 5.7.9beta36 (June 15, 2022)
+
+Mbgrdviz: Fixed export of Risi survey scripts from routes.
+
+Mbm_trnplot: Fixed plotting macro to work when the users path does not include
+the current directory.
+
+Mbgrdtilemaker: Now copies the source background grid into the directory
+containing the octree tiles with the name source_grid.grd.
 
 #### 5.7.9beta35 (June 13, 2022)
 
