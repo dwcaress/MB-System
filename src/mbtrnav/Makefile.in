@@ -881,6 +881,10 @@ libmb1_la_LIBADD =
 @BUILD_ROVTRN_TRUE@	opt/rov/gss/pcomms_t.hpp \
 @BUILD_ROVTRN_TRUE@	opt/rov/oi/idt_t.hpp \
 @BUILD_ROVTRN_TRUE@	opt/rov/oi/lcm_header_t.hpp \
+@BUILD_ROVTRN_TRUE@	opt/rov/oi/rdi_pd4_t.hpp \
+@BUILD_ROVTRN_TRUE@	opt/rov/oi/kearfott_t.hpp \
+@BUILD_ROVTRN_TRUE@	opt/rov/oi/octans_t.hpp \
+@BUILD_ROVTRN_TRUE@	opt/rov/oi/double_t.hpp \
 @BUILD_ROVTRN_TRUE@	opt/rov/trn/mb1_beam_t.hpp \
 @BUILD_ROVTRN_TRUE@	opt/rov/trn/trnu_estimate_t.hpp \
 @BUILD_ROVTRN_TRUE@	opt/rov/trn/trn_stat_t.hpp \
@@ -2377,6 +2381,26 @@ uninstall-am: uninstall-binPROGRAMS uninstall-dist_binSCRIPTS \
 @BUILD_ROVTRN_TRUE@	lcm-gen -x --cpp-hpath=opt/rov  $<
 @BUILD_ROVTRN_TRUE@	@echo
 
+@BUILD_ROVTRN_TRUE@opt/rov/oi/rdi_pd4_t.hpp : opt/rov/lcm_types/rdi_pd4_t.lcm
+@BUILD_ROVTRN_TRUE@	@ echo compiling $@...
+@BUILD_ROVTRN_TRUE@	lcm-gen -x --cpp-hpath=opt/rov  $<
+@BUILD_ROVTRN_TRUE@	@echo
+
+@BUILD_ROVTRN_TRUE@opt/rov/oi/kearfott_t.hpp : opt/rov/lcm_types/kearfott_t.lcm
+@BUILD_ROVTRN_TRUE@	@ echo compiling $@...
+@BUILD_ROVTRN_TRUE@	lcm-gen -x --cpp-hpath=opt/rov  $<
+@BUILD_ROVTRN_TRUE@	@echo
+
+@BUILD_ROVTRN_TRUE@opt/rov/oi/octans_t.hpp : opt/rov/lcm_types/octans_t.lcm
+@BUILD_ROVTRN_TRUE@	@ echo compiling $@...
+@BUILD_ROVTRN_TRUE@	lcm-gen -x --cpp-hpath=opt/rov  $<
+@BUILD_ROVTRN_TRUE@	@echo
+
+@BUILD_ROVTRN_TRUE@opt/rov/oi/double_t.hpp : opt/rov/lcm_types/double_t.lcm
+@BUILD_ROVTRN_TRUE@	@ echo compiling $@...
+@BUILD_ROVTRN_TRUE@	lcm-gen -x --cpp-hpath=opt/rov  $<
+@BUILD_ROVTRN_TRUE@	@echo
+
 @BUILD_ROVTRN_TRUE@opt/rov/trn/mb1_beam_t.hpp : opt/rov/lcm_types/mb1_beam_t.lcm
 @BUILD_ROVTRN_TRUE@	@ echo compiling $@...
 @BUILD_ROVTRN_TRUE@	lcm-gen -x --cpp-hpath=opt/rov  $<
@@ -2463,6 +2487,26 @@ uninstall-am: uninstall-binPROGRAMS uninstall-dist_binSCRIPTS \
 @BUILD_ROVTRN_TRUE@	lcm-gen -j --jpath=opt/rov $<
 @BUILD_ROVTRN_TRUE@	@echo
 
+@BUILD_ROVTRN_TRUE@opt/rov/oi/rdi_pd4_t.java : opt/rov/lcm_types/rdi_pd4_t.lcm
+@BUILD_ROVTRN_TRUE@	@ echo compiling $@...
+@BUILD_ROVTRN_TRUE@	lcm-gen -j --jpath=opt/rov $<
+@BUILD_ROVTRN_TRUE@	@echo
+
+@BUILD_ROVTRN_TRUE@opt/rov/oi/kearfott_t.java : opt/rov/lcm_types/kearfott_t.lcm
+@BUILD_ROVTRN_TRUE@	@ echo compiling $@...
+@BUILD_ROVTRN_TRUE@	lcm-gen -j --jpath=opt/rov $<
+@BUILD_ROVTRN_TRUE@	@echo
+
+@BUILD_ROVTRN_TRUE@opt/rov/oi/octans_t.java : opt/rov/lcm_types/octans_t.lcm
+@BUILD_ROVTRN_TRUE@	@ echo compiling $@...
+@BUILD_ROVTRN_TRUE@	lcm-gen -j --jpath=opt/rov $<
+@BUILD_ROVTRN_TRUE@	@echo
+
+@BUILD_ROVTRN_TRUE@opt/rov/oi/double_t.java : opt/rov/lcm_types/double_t.lcm
+@BUILD_ROVTRN_TRUE@	@ echo compiling $@...
+@BUILD_ROVTRN_TRUE@	lcm-gen -j --jpath=opt/rov $<
+@BUILD_ROVTRN_TRUE@	@echo
+
 @BUILD_ROVTRN_TRUE@opt/rov/trn/mb1_beam_t.java : opt/rov/lcm_types/mb1_beam_t.lcm
 @BUILD_ROVTRN_TRUE@	@ echo compiling $@...
 @BUILD_ROVTRN_TRUE@	lcm-gen -j --jpath=opt/rov $<
@@ -2545,6 +2589,21 @@ uninstall-am: uninstall-binPROGRAMS uninstall-dist_binSCRIPTS \
 @BUILD_ROVTRN_TRUE@	@echo
 
 @BUILD_ROVTRN_TRUE@opt/rov/oi/lcm_header_t.class : opt/rov/oi/lcm_header_t.java
+@BUILD_ROVTRN_TRUE@	@ echo compiling $@...
+@BUILD_ROVTRN_TRUE@	javac -cp $(LCM_JAR) $^
+@BUILD_ROVTRN_TRUE@	@echo
+
+@BUILD_ROVTRN_TRUE@opt/rov/oi/rdi_pd4_t.class : opt/rov/oi/rdi_pd4_t.java opt/rov/oi/lcm_header_t.java opt/rov/oi/double_t.java
+@BUILD_ROVTRN_TRUE@	@ echo compiling $@...
+@BUILD_ROVTRN_TRUE@	javac -cp $(LCM_JAR) $^
+@BUILD_ROVTRN_TRUE@	@echo
+
+@BUILD_ROVTRN_TRUE@opt/rov/oi/kearfott_t.class : opt/rov/oi/kearfott_t.java opt/rov/oi/lcm_header_t.java opt/rov/oi/double_t.java
+@BUILD_ROVTRN_TRUE@	@ echo compiling $@...
+@BUILD_ROVTRN_TRUE@	javac -cp $(LCM_JAR) $^
+@BUILD_ROVTRN_TRUE@	@echo
+
+@BUILD_ROVTRN_TRUE@opt/rov/oi/octans_t.class : opt/rov/oi/octans_t.java opt/rov/oi/lcm_header_t.java
 @BUILD_ROVTRN_TRUE@	@ echo compiling $@...
 @BUILD_ROVTRN_TRUE@	javac -cp $(LCM_JAR) $^
 @BUILD_ROVTRN_TRUE@	@echo

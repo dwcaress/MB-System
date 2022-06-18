@@ -260,6 +260,10 @@ TRN_HPP += opt/rov/gss/dvl_stat_t.hpp
 TRN_HPP += opt/rov/gss/pcomms_t.hpp
 TRN_HPP += opt/rov/oi/idt_t.hpp
 TRN_HPP += opt/rov/oi/lcm_header_t.hpp
+TRN_HPP += opt/rov/oi/rdi_pd4_t.hpp
+TRN_HPP += opt/rov/oi/kearfott_t.hpp
+TRN_HPP += opt/rov/oi/octans_t.hpp
+TRN_HPP += opt/rov/oi/double_t.hpp
 TRN_HPP += opt/rov/trn/mb1_beam_t.hpp
 TRN_HPP += opt/rov/trn/trnu_estimate_t.hpp
 TRN_HPP += opt/rov/trn/trn_stat_t.hpp
@@ -324,6 +328,26 @@ opt/rov/oi/idt_t.hpp : opt/rov/lcm_types/idt_t.lcm
 	@echo
 
 opt/rov/oi/lcm_header_t.hpp : opt/rov/lcm_types/lcm_header_t.lcm
+	@ echo compiling $@...
+	lcm-gen -x --cpp-hpath=opt/rov  $<
+	@echo
+
+opt/rov/oi/rdi_pd4_t.hpp : opt/rov/lcm_types/rdi_pd4_t.lcm
+	@ echo compiling $@...
+	lcm-gen -x --cpp-hpath=opt/rov  $<
+	@echo
+
+opt/rov/oi/kearfott_t.hpp : opt/rov/lcm_types/kearfott_t.lcm
+	@ echo compiling $@...
+	lcm-gen -x --cpp-hpath=opt/rov  $<
+	@echo
+
+opt/rov/oi/octans_t.hpp : opt/rov/lcm_types/octans_t.lcm
+	@ echo compiling $@...
+	lcm-gen -x --cpp-hpath=opt/rov  $<
+	@echo
+
+opt/rov/oi/double_t.hpp : opt/rov/lcm_types/double_t.lcm
 	@ echo compiling $@...
 	lcm-gen -x --cpp-hpath=opt/rov  $<
 	@echo
@@ -414,6 +438,27 @@ opt/rov/oi/lcm_header_t.java : opt/rov/lcm_types/lcm_header_t.lcm
 	lcm-gen -j --jpath=opt/rov $<
 	@echo
 
+opt/rov/oi/rdi_pd4_t.java : opt/rov/lcm_types/rdi_pd4_t.lcm
+	@ echo compiling $@...
+	lcm-gen -j --jpath=opt/rov $<
+	@echo
+
+opt/rov/oi/kearfott_t.java : opt/rov/lcm_types/kearfott_t.lcm
+	@ echo compiling $@...
+	lcm-gen -j --jpath=opt/rov $<
+	@echo
+
+opt/rov/oi/octans_t.java : opt/rov/lcm_types/octans_t.lcm
+	@ echo compiling $@...
+	lcm-gen -j --jpath=opt/rov $<
+	@echo
+
+opt/rov/oi/double_t.java : opt/rov/lcm_types/double_t.lcm
+	@ echo compiling $@...
+	lcm-gen -j --jpath=opt/rov $<
+	@echo
+
+
 opt/rov/trn/mb1_beam_t.java : opt/rov/lcm_types/mb1_beam_t.lcm
 	@ echo compiling $@...
 	lcm-gen -j --jpath=opt/rov $<
@@ -496,6 +541,21 @@ opt/rov/oi/idt_t.class : opt/rov/oi/idt_t.java opt/rov/oi/lcm_header_t.java
 	@echo
 
 opt/rov/oi/lcm_header_t.class : opt/rov/oi/lcm_header_t.java
+	@ echo compiling $@...
+	javac -cp $(LCM_JAR) $^
+	@echo
+
+opt/rov/oi/rdi_pd4_t.class : opt/rov/oi/rdi_pd4_t.java opt/rov/oi/lcm_header_t.java opt/rov/oi/double_t.java
+	@ echo compiling $@...
+	javac -cp $(LCM_JAR) $^
+	@echo
+
+opt/rov/oi/kearfott_t.class : opt/rov/oi/kearfott_t.java opt/rov/oi/lcm_header_t.java opt/rov/oi/double_t.java
+	@ echo compiling $@...
+	javac -cp $(LCM_JAR) $^
+	@echo
+
+opt/rov/oi/octans_t.class : opt/rov/oi/octans_t.java opt/rov/oi/lcm_header_t.java
 	@ echo compiling $@...
 	javac -cp $(LCM_JAR) $^
 	@echo

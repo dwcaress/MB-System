@@ -404,6 +404,12 @@ public:
             dynamic_cast<trn::bath_input *>(obj)->set_bath_input_type(BT_DVL);
             return obj;
         }
+        else if(channel.compare("RDI_PD4")==0)
+        {
+            trn_lcm_input *obj = new trn::rdi_pd4_input("RDI_PD4", buf_depth);
+            dynamic_cast<trn::bath_input *>(obj)->set_bath_input_type(BT_DVL);
+            return obj;
+        }
         else if(channel.compare("IDT_PUB")==0)
         {
             trn_lcm_input *obj = new trn::idt_input("IDT_PUB", 10);
@@ -421,6 +427,14 @@ public:
         else if(channel.compare("SONARDYNE_SPRINT_STAT")==0)
         {
             return new trn::pcomms_input("SONARDYNE_SPRINT_STAT", buf_depth);
+        }
+        else if(channel.compare("KEARFOTT_STAT")==0)
+        {
+            return new trn::kearfott_input("KEARFOTT_STAT", buf_depth);
+        }
+        else if(channel.compare("OCTANS_STAT")==0)
+        {
+            return new trn::octans_input("OCTANS_STAT", buf_depth);
         }
         std::cerr << __func__ << ": ERR - Unsupported type [" << channel << "]\n";
         return nullptr;
