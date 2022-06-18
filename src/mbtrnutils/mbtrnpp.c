@@ -241,6 +241,9 @@ typedef struct mbtrnpp_opts_s{
     // opt "trn-decs"
     double trn_decs;
 
+    // opt "trn-dev"
+    int trn_dev;
+
     // opt "covariance-magnitude-max"
     double covariance_magnitude_max;
 
@@ -269,8 +272,8 @@ typedef struct mbtrnpp_opts_s{
     // opt "random-offset"
     bool random_offset_enable;
 
-    // opt "trn-dev"
-    int trn_dev;
+    // opt "auv-sentry-em2040"
+    bool auv_sentry_em2040;
 
     // opt "help"
     bool help;
@@ -453,6 +456,9 @@ typedef struct mbtrnpp_cfg_s{
     // TRN process gating timeout
     double trn_decs;
 
+    // TRN device enum
+    int trn_dev;
+
     // --------------------------
     // mbtrnpp convergence use criteria
 
@@ -496,8 +502,11 @@ typedef struct mbtrnpp_cfg_s{
     // TRN "random-offset"
     bool random_offset_enable;
 
-    // TRN device enum
-    int trn_dev;
+    // --------------------------
+    // mbtrnpp Kluge (special case) parameters
+
+    // mbtrnpp AUV Sentry EM2040 flag (special handling of pressure depth)
+    bool auv_sentry_em2040;
 
 }mbtrnpp_cfg_t;
 
@@ -587,6 +596,7 @@ s=NULL;\
 #define OPT_TRN_OUT_DFL                   NULL
 #define OPT_TRN_DECN_DFL                  0
 #define OPT_TRN_DECS_DFL                  0.0
+#define OPT_TRN_DEV_DFL                   R7KC_DEV_T50
 #define OPT_COVARIANCE_MAGNITUDE_MAX_DFL  5.0
 #define OPT_CONVERGENCE_REPEAT_MIN        200
 #define OPT_REINIT_SEARCH_XY              60.0
@@ -599,8 +609,8 @@ s=NULL;\
 #define OPT_REINIT_ZOFFSET_MIN_DFL        0.0
 #define OPT_REINIT_ZOFFSET_MAX_DFL        0.0
 #define OPT_RANDOM_OFFSET_ENABLE_DFL      false
+#define OPT_AUV_SENTRY_EM2040_DFL         false
 #define OPT_HELP_DFL                      false
-#define OPT_TRN_DEV_DFL                   R7KC_DEV_T50
 
 #define MNEM_MAX_LEN 64
 #define HOSTNAME_BUF_LEN 256
@@ -1423,6 +1433,7 @@ static int s_mbtrnpp_init_cfg(mbtrnpp_cfg_t *cfg)
         cfg->trn_mission_id=NULL;
         cfg->trn_decn=0;
         cfg->trn_decs=0.0;
+        cfg->trn_dev = CFG_TRN_DEV_DFL;
         cfg->covariance_magnitude_max = OPT_COVARIANCE_MAGNITUDE_MAX_DFL;
         cfg->convergence_repeat_min = OPT_CONVERGENCE_REPEAT_MIN;
         cfg->reinit_search_xy = OPT_REINIT_SEARCH_XY;
@@ -1435,7 +1446,7 @@ static int s_mbtrnpp_init_cfg(mbtrnpp_cfg_t *cfg)
         cfg->reinit_zoffset_min = 0.0;
         cfg->reinit_zoffset_max = 0.0;
         cfg->random_offset_enable = false;
-        cfg->trn_dev = CFG_TRN_DEV_DFL;
+        cfg->auv_sentry_em2040 = false;
         retval=0;
     }
     return retval;
@@ -1485,6 +1496,7 @@ static int s_mbtrnpp_init_opts(mbtrnpp_opts_t *opts)
         opts->trn_out=CHK_STRDUP(OPT_TRN_OUT_DFL);
         opts->trn_decn=OPT_TRN_DECN_DFL;
         opts->trn_decs=OPT_TRN_DECS_DFL;
+        opts->trn_dev = OPT_TRN_DEV_DFL;
         opts->covariance_magnitude_max = OPT_COVARIANCE_MAGNITUDE_MAX_DFL;
         opts->convergence_repeat_min = OPT_CONVERGENCE_REPEAT_MIN;
         opts->reinit_search_xy = OPT_REINIT_SEARCH_XY;
@@ -1497,7 +1509,7 @@ static int s_mbtrnpp_init_opts(mbtrnpp_opts_t *opts)
         opts->reinit_zoffset_min = OPT_REINIT_ZOFFSET_MIN_DFL;
         opts->reinit_zoffset_max = OPT_REINIT_ZOFFSET_MAX_DFL;
         opts->random_offset_enable = OPT_RANDOM_OFFSET_ENABLE_DFL;
-        opts->trn_dev = OPT_TRN_DEV_DFL;
+        opts->auv_sentry_em2040 = OPT_AUV_SENTRY_EM2040_DFL;
         opts->help=OPT_HELP_DFL;
         retval=0;
     }
@@ -1591,7 +1603,6 @@ static int s_mbtrnpp_cfgstr(char **pdest, size_t olen, mbtrnpp_cfg_t *self, cons
     mbb_printf(optr, "%s%*s%*s%s%*"PRId64"%s", pre, indent, (indent>0?" ":""), wkey, "mbtrnpp_loop_delay_msec", sep, wval, self->mbtrnpp_loop_delay_msec, del);
     mbb_printf(optr, "%s%*s%*s%s%*.2lf%s", pre, indent, (indent>0?" ":""), wkey, "trn_status_interval_sec", sep, wval, self->trn_status_interval_sec, del);
     mbb_printf(optr, "%s%*s%*s%s%*X%s", pre, indent, (indent>0?" ":""), wkey, "mbtrnpp_stat_flags", sep, wval, self->mbtrnpp_stat_flags, del);
-    mbb_printf(optr, "%s%*s%*s%s%*s/%d%s", pre, indent, (indent>0?" ":""), wkey, "trn_dev", sep, wval, r7k_devidstr(self->trn_dev), self->trn_dev, del);
     mbb_printf(optr, "%s%*s%*s%s%*c%s", pre, indent, (indent>0?" ":""), wkey, "trn_enable", sep, wval, BOOL2YNC(self->trn_enable), del);
     mbb_printf(optr, "%s%*s%*s%s%*ld%s", pre, indent, (indent>0?" ":""), wkey, "trn_utm_zone", sep, wval, self->trn_utm_zone, del);
     mbb_printf(optr, "%s%*s%*s%s%*d%s", pre, indent, (indent>0?" ":""), wkey, "trn_mtype", sep, wval, self->trn_mtype, del);
@@ -1610,6 +1621,7 @@ static int s_mbtrnpp_cfgstr(char **pdest, size_t olen, mbtrnpp_cfg_t *self, cons
     mbb_printf(optr, "%s%*s%*s%s%*s%s", pre, indent, (indent>0?" ":""), wkey, "trn_mission_dir", sep, wval, self->trn_mission_id, del);
     mbb_printf(optr, "%s%*s%*s%s%*u%s", pre, indent, (indent>0?" ":""), wkey, "trn_decn", sep, wval, self->trn_decn, del);
     mbb_printf(optr, "%s%*s%*s%s%*.2lf%s", pre, indent, (indent>0?" ":""), wkey, "trn_decs", sep, wval, self->trn_decs, del);
+    mbb_printf(optr, "%s%*s%*s%s%*s/%d%s", pre, indent, (indent>0?" ":""), wkey, "trn_dev", sep, wval, r7k_devidstr(self->trn_dev), self->trn_dev, del);
     mbb_printf(optr, "%s%*s%*s%s%*.2lf%s", pre, indent, (indent>0?" ":""), wkey, "covariance_magnitude_max", sep, wval, self->covariance_magnitude_max, del);
     mbb_printf(optr, "%s%*s%*s%s%*d%s", pre, indent, (indent>0?" ":""), wkey, "convergence_repeat_min", sep, wval, self->convergence_repeat_min, del);
     mbb_printf(optr, "%s%*s%*s%s%*d%s", pre, indent, (indent>0?" ":""), wkey, "reinit_search_xy", sep, wval, self->reinit_search_xy, del);
@@ -1622,6 +1634,7 @@ static int s_mbtrnpp_cfgstr(char **pdest, size_t olen, mbtrnpp_cfg_t *self, cons
     mbb_printf(optr, "%s%*s%*s%s%*.2lf%s", pre, indent, (indent>0?" ":""), wkey, "reinit_zoffset_min", sep, wval, self->reinit_zoffset_min, del);
     mbb_printf(optr, "%s%*s%*s%s%*.2lf%s", pre, indent, (indent>0?" ":""), wkey, "reinit_zoffset_max", sep, wval, self->reinit_zoffset_max, del);
     mbb_printf(optr, "%s%*s%*s%s%*c%s", pre, indent, (indent>0?" ":""), wkey, "random_offset_enable", sep, wval, BOOL2YNC(self->random_offset_enable), del);
+    mbb_printf(optr, "%s%*s%*s%s%*c%s", pre, indent, (indent>0?" ":""), wkey, "auv_sentry_em2040", sep, wval, BOOL2YNC(self->auv_sentry_em2040), del);
     size_t slen = mbb_length(optr);
     if(NULL == *pdest){
         // set dest buffer (malloc'd, caller must free)
@@ -1675,7 +1688,6 @@ static int s_mbtrnpp_optstr(char **pdest, size_t olen, mbtrnpp_opts_t *self, con
     mbb_printf(optr, "%s%*s%*s%s%*.2lf%s", pre, indent, (indent>0?" ":""), wkey, "statsec", sep, wval, self->statsec, del);
     mbb_printf(optr, "%s%*s%*s%s%*X/%s%s", pre, indent, (indent>0?" ":""), wkey, "statflags", sep, wval, self->statflags, self->statflags_str, del);
     mbb_printf(optr, "%s%*s%*s%s%*c%s", pre, indent, (indent>0?" ":""), wkey, "trn-en", sep, wval, BOOL2YNC(self->trn_en), del);
-    mbb_printf(optr, "%s%*s%*s%s%*s/%d%s", pre, indent, (indent>0?" ":""), wkey, "trn-dev", sep, wval, r7k_devidstr(self->trn_dev), self->trn_dev, del);
     mbb_printf(optr, "%s%*s%*s%s%*ld%s", pre, indent, (indent>0?" ":""), wkey, "trn-utm", sep, wval, self->trn_utm, del);
     mbb_printf(optr, "%s%*s%*s%s%*s%s", pre, indent, (indent>0?" ":""), wkey, "trn-map", sep, wval, self->trn_map, del);
     mbb_printf(optr, "%s%*s%*s%s%*s%s", pre, indent, (indent>0?" ":""), wkey, "trn-cfg", sep, wval, self->trn_cfg, del);
@@ -1695,6 +1707,7 @@ static int s_mbtrnpp_optstr(char **pdest, size_t olen, mbtrnpp_opts_t *self, con
     mbb_printf(optr, "%s%*s%*s%s%*s%s", pre, indent, (indent>0?" ":""), wkey, "trn-out", sep, wval, self->trn_out, del);
     mbb_printf(optr, "%s%*s%*s%s%*u%s", pre, indent, (indent>0?" ":""), wkey, "trn-decn", sep, wval, self->trn_decn, del);
     mbb_printf(optr, "%s%*s%*s%s%*.2lf%s", pre, indent, (indent>0?" ":""), wkey, "trn-decs", sep, wval, self->trn_decs, del);
+    mbb_printf(optr, "%s%*s%*s%s%*s/%d%s", pre, indent, (indent>0?" ":""), wkey, "trn-dev", sep, wval, r7k_devidstr(self->trn_dev), self->trn_dev, del);
     mbb_printf(optr, "%s%*s%*s%s%*.2lf%s", pre, indent, (indent>0?" ":""), wkey, "covariance-magnitude-max", sep, wval, self->covariance_magnitude_max, del);
     mbb_printf(optr, "%s%*s%*s%s%*d%s", pre, indent, (indent>0?" ":""), wkey, "convergence-repeat-min", sep, wval, self->convergence_repeat_min, del);
     mbb_printf(optr, "%s%*s%*s%s%*d%s", pre, indent, (indent>0?" ":""), wkey, "reinit_search_xy", sep, wval, self->reinit_search_xy, del);
@@ -1707,6 +1720,7 @@ static int s_mbtrnpp_optstr(char **pdest, size_t olen, mbtrnpp_opts_t *self, con
     mbb_printf(optr, "%s%*s%*s%s%*.2lf%s", pre, indent, (indent>0?" ":""), wkey, "reinit_zoffset_min", sep, wval, self->reinit_zoffset_min, del);
     mbb_printf(optr, "%s%*s%*s%s%*.2lf%s", pre, indent, (indent>0?" ":""), wkey, "reinit_zoffset_max", sep, wval, self->reinit_zoffset_max, del);
     mbb_printf(optr, "%s%*s%*s%s%*c%s", pre, indent, (indent>0?" ":""), wkey, "random_offset_enable", sep, wval, BOOL2YNC(self->random_offset_enable), del);
+    mbb_printf(optr, "%s%*s%*s%s%*c%s", pre, indent, (indent>0?" ":""), wkey, "auv_sentry_em2040", sep, wval, BOOL2YNC(self->auv_sentry_em2040), del);
     mbb_printf(optr, "%s%*s%*s%s%*c%s", pre, indent, (indent>0?" ":""), wkey, "help", sep, wval, BOOL2YNC(self->help), del);
     size_t slen = mbb_length(optr);
     if(NULL == *pdest){
@@ -2311,6 +2325,13 @@ static int s_mbtrnpp_kvparse_fn(char *key, char *val, void *cfg)
                     opts->statflags |= MSF_READER;
                     retval=0;
                 }
+            } else if(strcmp(key,"trn-en")==0 ){
+                if( mkvc_parse_bool(val,&opts->trn_en)==0){
+                    retval=0;
+                } else {
+                    opts->trn_en=true;
+                    retval=0;
+                }
             } else if(strcmp(key,"trn-utm")==0 ){
                 if(sscanf(val,"%ld",&opts->trn_utm)==1){
                     retval=0;
@@ -2393,6 +2414,12 @@ static int s_mbtrnpp_kvparse_fn(char *key, char *val, void *cfg)
                 if(sscanf(val,"%lf",&opts->trn_decs)==1){
                     retval=0;
                 }
+            } else if(strcmp(key,"trn-dev")==0 ){
+                r7k_device_t test = R7KC_DEV_INVALID;
+                if( (test=r7k_parse_devid(val)) != R7KC_DEV_INVALID){
+                    opts->trn_dev = test;
+                }
+                retval=0;
             } else if(strcmp(key,"covariance-magnitude-max")==0 ){
                 if(sscanf(val,"%lf",&opts->covariance_magnitude_max)==1){
                     retval=0;
@@ -2435,18 +2462,8 @@ static int s_mbtrnpp_kvparse_fn(char *key, char *val, void *cfg)
             } else if(strcmp(key,"random-offset")==0 ){
                 opts->random_offset_enable = true;
                 retval=0;
-            } else if(strcmp(key,"trn-en")==0 ){
-                if( mkvc_parse_bool(val,&opts->trn_en)==0){
-                    retval=0;
-                } else {
-                    opts->trn_en=true;
-                    retval=0;
-                }
-            } else if(strcmp(key,"trn-dev")==0 ){
-                r7k_device_t test = R7KC_DEV_INVALID;
-                if( (test=r7k_parse_devid(val)) != R7KC_DEV_INVALID){
-                    opts->trn_dev = test;
-                }
+            } else if(strcmp(key,"auv-sentry-em2040")==0 ){
+                opts->auv_sentry_em2040 = true;
                 retval=0;
             } else if(strcmp(key,"config")==0 ){
                 retval=0;
@@ -2467,6 +2484,9 @@ static int s_mbtrnpp_kvparse_fn(char *key, char *val, void *cfg)
                 retval=0;
             } else if(strcmp(key,"random-offset")==0 ){
                 opts->random_offset_enable = true;
+                retval=0;
+            } else if(strcmp(key,"auv-sentry-em2040")==0 ){
+                opts->auv_sentry_em2040 = true;
                 retval=0;
             } else if(strcmp(key,"config")==0 ){
                 retval=0;
@@ -2645,6 +2665,7 @@ static int s_mbtrnpp_configure(mbtrnpp_cfg_t *cfg, mbtrnpp_opts_t *opts)
         cfg->reinit_zoffset_min = opts->reinit_zoffset_min;
         cfg->reinit_zoffset_max = opts->reinit_zoffset_max;
         cfg->random_offset_enable = opts->random_offset_enable;
+        cfg->auv_sentry_em2040 = opts->auv_sentry_em2040;
 
         // format
         cfg->format = opts->format;
@@ -2949,7 +2970,8 @@ int main(int argc, char **argv) {
                          "\t--reinit-file\n"
                          "\t--reinit-xyoffset=xyoffset_max\n"
                          "\t--reinit-zoffset=offset_z_min/offset_z_max\n"
-                         "\t--random-offset\n";
+                         "\t--random-offset\n"
+                         "\t--auv-sentry-em2040\n";
   extern char WIN_DECLSPEC *optarg;
 //  int option_index;
   int errflg = 0;
@@ -3722,7 +3744,7 @@ int main(int argc, char **argv) {
 
       if ((status = mb_read_init(mbtrn_cfg->verbose, ifile, mbtrn_cfg->format, pings, lonflip, bounds, btime_i, etime_i, speedmin, timegap,
                                  &imbio_ptr, &btime_d, &etime_d, &beams_bath, &beams_amp, &pixels_ss, &error)) !=
-          MB_SUCCESS) {
+        MB_SUCCESS) {
 
         sprintf(log_message, "MBIO Error returned from function <mb_read_init>");
         if (logfp != NULL)
@@ -3790,11 +3812,10 @@ int main(int argc, char **argv) {
                                    (void **)&ping[i].ssalongtrack, &error);
     }
 
-    /* if option for AUV Sentry is set, then set flag in mb_io_ptr structure that
+    /* if option for AUV Sentry EM2040 is set, then set flag in mb_io_ptr structure that
         will apply the Sentry sensordepth kluge to the multibem data - the sensordepth
         value has to be accessed in a nonstandard location in the data stream */
-    bool auv_sentry = true;
-    if (auv_sentry) {
+    if (mbtrn_cfg->format == MBF_KEMKMALL && mbtrn_cfg->auv_sentry_em2040) {
       struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)imbio_ptr;
       mb_io_ptr->save10 = 1;
     }
@@ -6582,10 +6603,6 @@ int mbtrnpp_kemkmall_input_open(int verbose, void *mbio_ptr, char *definition, i
 
   /* set initial status */
   status = MB_SUCCESS;
-
-  /* set flag to enable Sentry sensordepth kluge */
-  int *kluge_set = (int *)&mb_io_ptr->save10;
-  *kluge_set = 1;
 
   // Open and initialize the socket based input for reading using function
   // mbtrnpp_kemkmall_input_read().
