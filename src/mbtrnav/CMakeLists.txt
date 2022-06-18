@@ -164,6 +164,7 @@ message("compiling with WITH_NETIF_MMD_EXT")
 add_compile_definitions(WITH_NETIF_MMD_EXT)
 else()
 message("compiling with mframe NETIF_MMDEBUG")
+add_compile_definitions(NETIF_MMDEBUG)
 # TODO: get external netif mmdebug channel defs
 endif()
 
@@ -410,6 +411,7 @@ LINK_LIBRARIES
 # specify build target
 add_executable(trnucli-test
 ${PROJECT_SOURCE_DIR}/trnw/trnucli_test.c
+${PROJECT_SOURCE_DIR}/trnw/trnu_cli.c
 )
 
 # specify dependency libs
@@ -427,6 +429,7 @@ Libmframe::mframe
 
 # specify include paths
 target_include_directories(trnucli-test PUBLIC
+BEFORE
 "${PROJECT_BINARY_DIR}"
 "${PROJECT_SOURCE_DIR}/trnw"
 "${EXTRA_INCLUDES}"
@@ -453,6 +456,7 @@ target_link_libraries(trnusvr-test
 
 # specify include paths
 target_include_directories(trnusvr-test PUBLIC
+BEFORE
 "${PROJECT_BINARY_DIR}"
 "${PROJECT_SOURCE_DIR}/trnw"
 "${EXTRA_INCLUDES}"
