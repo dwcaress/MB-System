@@ -47,6 +47,7 @@ ${PTHREAD_LIB}
 )
 
 include_directories(
+BEFORE 
 "${UTILS_SRC_DIR}"
 "${MFRAME_SRC_DIR}"
 )
@@ -64,6 +65,7 @@ PATHS
 
 find_file( MCONFIG_H
 NAME mconfig.h
+NO_DEFAULT_PATH
 PATHS
 "${UTILS_SRC_DIR}"
 "${MFRAME_SRC_DIR}"
