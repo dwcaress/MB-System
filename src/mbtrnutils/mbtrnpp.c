@@ -3984,10 +3984,11 @@ int main(int argc, char **argv) {
           beam_end = MAX(beam_end, 0);
 
           /* apply decimation - only consider outputting decimated soundings */
-          beam_decimation = ((beam_end - beam_start + 1) / mbtrn_cfg->n_output_soundings) + 1;
+          beam_decimation = ((beam_end - beam_start + 1) / mbtrn_cfg->n_output_soundings);
           int dj = mbtrn_cfg->median_filter_n_across / 2;
           n_output = 0;
           for (int j = beam_start; j <= beam_end; j++) {
+
             if ((j - beam_start) % beam_decimation == 0) {
               if (mb_beam_ok(ping[i_ping_process].beamflag_filter[j])) {
                 /* apply median filtering to this sounding */
@@ -4024,7 +4025,15 @@ int main(int argc, char **argv) {
                   // fprintf(stderr, "\n");
                 }
                 if (mb_beam_ok(ping[i_ping_process].beamflag_filter[j])) {
-                  n_output++;
+                  if (n_output < mbtrn_cfg->n_output_soundings) {
+                    n_output++;
+                  } else {
+                    ping[i_ping_process].beamflag_filter[j] = MB_FLAG_FLAG + MB_FLAG_FILTER;
+                    n_soundings_decimated++;
+                  }
+                }
+                else {
+                  n_soundings_decimated++;
                 }
               }
             }
