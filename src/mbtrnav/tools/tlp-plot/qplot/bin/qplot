@@ -1,0 +1,877 @@
+#!/usr/local/bin/bash
+
+#########################################
+# Name: qplot
+#
+# Summary: Batch process gnuplot jobs
+#
+# Description:
+# Use gnuplot to generate formatted plots
+# from delimited data files. Creates and
+# executes gnuplot command files to:
+#
+#  - create plots from multiple data files
+#  - combine parameters in a single plot
+#  - combine multiple plots in PDF document
+#  - generate gnuplot files for reuse
+#
+# May be invoked manually or from scripts,
+# using command line or configuration files.
+#
+# Author: k. headley
+#
+# Copyright MBARI 2009
+#
+#########################################
+
+# NOTE:
+# Requires bash >=4.x, which implements associative arrays
+# Typically, bash is located in /usr/bin.
+# On OSX, default (/usr/bin) bash is 3.x,
+# which does not implement associative arrays.
+# Macports or Brew may be used to install
+# bash v4.x, which has associative arrays.
+# use /opt/local/bin/bash for OSX/macports
+
+# Naming Convention:
+# QU_ prefix for user environment prevents
+# naming conflicts
+# QP_ prefix denotes qplot environment/variables
+
+
+#########################################
+# Script configuration defaults
+# casual users should not need to change
+# anything below this section
+#########################################
+QP_PLOT_HOME=${QP_PLOT_HOME:-.}
+QP_PLOT_DATA_DIR_DFL="${QP_PLOT_DATA_DIR_DFL:-.}"
+QP_OUTPUT_DIR_DFL="${QP_PLOT_HOME}/plot-output"
+
+declare -A QP_GS_DEV=( [png]="png16m" [pdf]="pdfwrite" )
+
+unset QP_CONF
+
+QP_GHOSTSCRIPT_CMD=`which gs`
+QP_GNUPLOT_CMD=`which gnuplot`
+QP_CONVERT_CMD=`which convert`
+QP_MAKEPDF_CMD="$QP_GHOSTSCRIPT_CMD -q -dNOPAUSE -dNOPROMPT -dBATCH"
+QP_COMBINE_CMD="$QP_GHOSTSCRIPT_CMD -q -dNOPAUSE -dNOPROMPT -dBATCH"
+
+QP_OFILE_NAME_DFL="qplot-${QP_SESSION_ID}"
+QP_DSEP_DFL=","
+QP_SPECDEL_DFL="+"
+QP_EXPR_DFL="N"
+QP_TFMT_DFL="%s"
+QP_XTFMT_DFL="%Y-%m-%d %H:%M:%S"
+QP_POINTTYPE_DFL=7
+QP_POINTSIZE_DFL=0.3
+QP_TERMINAL_DFL="postscript color \"arial\" 10"
+QP_AXES_DFL="x1y1"
+QP_YRANGE_MIN_DFL="*"
+QP_YRANGE_MAX_DFL="*"
+QP_XRANGE_MIN_DFL="*"
+QP_XRANGE_MAX_DFL="*"
+QP_Y2RANGE_MIN_DFL="*"
+QP_Y2RANGE_MAX_DFL="*"
+QP_X2RANGE_MIN_DFL="*"
+QP_X2RANGE_MAX_DFL="*"
+QP_POINTTYPE_DFL=7
+QP_POINTSIZE_DFL=1.0
+QP_POINTCOLOR_DFL=4
+QP_LINETYPE_DFL=1
+QP_INC_POINTTYPE_DFL="N"
+QP_INC_POINTCOLOR_DFL="N"
+QP_INC_LINETYPE_DFL="N"
+QP_USE_LINETYPES_DFL="N"
+QP_KEY_SIZE_DFL=9
+QP_KEY_FONT_DFL="arial"
+QP_KEY_MAX_COL_DFL="2"
+QP_TERM_SIZE_DFL=10
+QP_TERM_FONT_DFL="arial"
+QP_TERM_OSIZE_DFL="800,600"
+QP_XROTATION_DFL="-90"
+QP_XOFFSET_DFL="0,0"
+QP_X2ROTATION_DFL="-90"
+QP_X2OFFSET_DFL="0,0"
+QP_PLOT_STYLE_DFL="points"
+QP_XSCALE_DFL=1.0
+QP_YSCALE_DFL=1.0
+QP_XOFS_DFL=0.0
+QP_YOFS_DFL=0.0
+
+declare -a QP_JOB_LIST
+declare -a QP_JOB_ORDER
+declare -A QP_JOB_DEFS
+
+declare -A COMBINE_SET
+declare -A QP_OUTPUT_DIR
+declare -A QP_TERMINAL
+declare -A QP_PLOT_DATA_DIR
+
+declare -A QP_OFILE_NAME
+declare -A QP_PTITLE
+declare -A QP_XTITLE
+declare -A QP_XROTATION
+declare -A QP_XOFFSET
+declare -A QP_X2TITLE
+declare -A QP_X2ROTATION
+declare -A QP_X2OFFSET
+declare -A QP_YTITLE
+declare -A QP_Y2TITLE
+declare -A QP_TFMT
+declare -A QP_XTFMT
+declare -A QP_DSEP
+declare -A QP_PLOT_SPECS
+declare -A QP_YRANGE_MIN
+declare -A QP_YRANGE_MAX
+declare -A QP_XRANGE_MIN
+declare -A QP_XRANGE_MAX
+declare -A QP_Y2RANGE_MIN
+declare -A QP_Y2RANGE_MAX
+declare -A QP_X2RANGE_MIN
+declare -A QP_X2RANGE_MAX
+declare -A QP_KEY_FONT
+declare -A QP_KEY_SIZE
+declare -A QP_KEY_MAX_COL
+declare -A QP_POINTTYPE
+declare -A QP_POINTSIZE
+declare -A QP_POINTCOLOT
+declare -A QP_INC_POINTTYPE
+declare -A QP_INC_POINTCOLOR
+declare -A QP_LINETYPE
+declare -A QP_LINE_TYPES
+declare -A QP_USE_LINETYPES
+declare -A QP_INC_LINETYPE
+declare -A QP_PLOT_STYLE
+declare -A QP_TERM_FONT
+declare -A QP_TERM_SIZE
+declare -A QP_TERM_OSIZE
+declare -A QP_PLOT_STRINGS
+declare -A QP_ISTIME
+declare -A QP_YFMT
+declare -A QP_XSCALE
+declare -A QP_YSCALE
+declare -A QP_XOFS
+declare -A QP_YOFS
+declare -A QP_EXPR
+declare -A QP_SPECDEL
+
+#################################
+# Script variable initialization
+#################################
+# use PID as session ID
+QP_SESSION_ID=$$
+QP_VERBOSE="N"
+QP_DEBUG="N"
+
+#################################
+# Function Definitions
+#################################
+#################################
+# name: printUsage
+# description: print use message
+# args: none
+#################################
+printUsage(){
+    echo
+    echo "`basename $0`: Generate plots from one or more delimited text files"
+    echo
+    echo "usage: `basename $0` [options] file... "
+    echo ""
+	echo "Options:"
+    echo "-f <path>   : config file path             [$QP_CONF]"
+    echo "-j <job>    : job name (select/order jobs)"
+
+    echo "-a <dir>    : plot data directory          [$QP_PLOT_DATA_DIR_DFL]"
+    echo "-o <ofile>  : output file                  [$QP_OFILE_NAME_DFL]"
+    echo "-O <dir>    : output directory             [$QP_OUTPUT_DIR_DFL]"
+
+    echo "-r <min Y>  : y-range min                  [$QP_YRANGE_MIN_DFL]"
+    echo "-R <max Y>  : y-range max                  [$QP_YRANGE_MAX_DFL]"
+    echo "-i <min X>  : x-range min                  [$QP_XRANGE_MIN_DFL]"
+    echo "-I <max X>  : x-range max                  [$QP_XRANGE_MAX_DFL]"
+    echo "-p <ptype>  : point type                   [$QP_POINTTYPE_DFL]"
+    echo "-P <psize>  : point size                   [$QP_POINTSIZE_DFL]"
+	echo "-t <fmt>    : time input format            [$QP_TFMT_DFL]"
+	echo "-x <fmt>    : x axis (time) format         [$QP_XTFMT_DFL]"
+	echo "-s <sep>    : data separator               [$QP_DSEP_DFL]"
+
+	echo "-m <rot>    : x-axis tic rotation (deg)    [$QP_XROTATION_DFL]"
+	echo "-M <x,y>    : x-axis tic offset (chars)    [$QP_XOFFSET_DFL]"
+	echo "-n <rot>    : x-axis2 tic rotation (deg)   [$QP_X2ROTATION_DFL]"
+	echo "-N <x,y>    : x-axis2 tic offset (chars)   [$QP_X2OFFSET_DFL]"
+	echo "-X <axes>   : defauld axes                 [$QP_AXES_DFL]"
+
+    echo "-D          : debug (keep temporary files) [$QP_DEBUG]"
+    echo "-V          : verbose output               [$QP_VERBOSE]"
+    echo "-h          : print this help message"
+    echo ""
+    echo "Examples:"
+	echo ""
+    echo "    `basename $0` -DVf /path/to/my_plot_cfg"
+    echo ""
+    echo
+}
+
+########################################
+# name: vout
+# description: print verbose message to stderr
+# args:
+#     msg: message
+########################################
+vout(){
+    if [ "$QP_VERBOSE" == "TRUE" ] || [ "$QP_VERBOSE" == "Y" ] || [ "$QP_VERBOSE" == "y" ]
+    then
+        echo "$1" >&2
+    fi
+}
+
+########################################
+# name: exitError
+# description: print use message to stderr
+# args:
+#     msg:        error message
+#     returnCode: exit status to return
+########################################
+exitError(){
+    echo >&2
+    echo "$1" >&2
+    exit $2
+}
+
+#################################
+# name: qp_make_plotstring
+# description: generate plot string
+# args: key
+#################################
+qp_make_plotstring(){
+    key="${1}"
+    plot_data_dir=${QP_PLOT_DATA_DIR[$key]:-$QP_PLOT_DATA_DIR_DFL}
+	point_type=${QP_POINTTYPE[$key]:-$QP_POINTTYPE_DFL}
+    line_type=${QP_LINETYPE[$key]:-$QP_LINETYPE_DFL}
+    use_linetypes=${QP_USE_LINETYPES[$key]:-$QP_USE_LINETYPES_DFL}
+	plot_style=${QP_PLOT_STYLE[$key]:-$QP_PLOT_STYLE_DFL}
+	point_color=${QP_POINTCOLOR[$key]:-$QP_POINTCOLOR_DFL}
+
+	declare -a plotspecs
+    OFS=$IFS
+	specdel=${QP_SPECDEL[$key]:-$QP_SPECDEL_DFL}
+
+	IFS="${specdel}" read -a plotspecs <<< "${QP_PLOT_SPECS[$key]}"
+    let "last_spec=${#plotspecs[@]}-1"
+    let "nspec=0"
+
+
+    # dont use "for plotspec in ${plotspecs[@]}"
+    # because it uses default IFS, which will
+    # delimit on spaces in expressions
+    let "pscount=0"
+    while [ $pscount -lt ${#plotspecs[*]} ]
+    do
+		plotspec=${plotspecs[$pscount]}
+		declare -a spec
+        IFS="," read -a spec <<< "${plotspec}"
+        # plot specifier format (comma delimited):
+        # 0: file
+        # 1: point color
+        # 2: xcol
+        # 3: x2col
+        # 4: number of y fields
+        # 5: y-col
+        # 6: axes
+        # 7: title...
+        # n-1: y-col
+        # n: title
+        let "ptr=0"
+        let "spec_fields=${spec[4]}"
+        let "last_field=${spec_fields}-1"
+
+        while [ "${ptr}" -lt $spec_fields ]
+        do
+            #let "idx=2*${ptr}+3"
+            #let "idx=3*${ptr}+4"
+            let "idx=3*${ptr}+5"
+
+            fpath="${QP_PLOT_STRINGS[$key]}\"${plot_data_dir}/${spec[0]}\""
+            pcolor=${spec[1]:-""}
+            xcol=${spec[2]}
+            x2col=${spec[3]:-""}
+            ycol=${spec[$idx+0]}
+            axes=${spec[$idx+1]:-${QP_AXES_DFL}}
+            title=${spec[$idx+2]}
+
+            if [ "${pcolor}" ]
+            then
+            test_color="rgb ${pcolor}"
+            else
+            test_color=${point_color}
+            fi
+            point_color=${test_color:-$point_color}
+
+
+			# set up scale, offset
+            xscale="${QP_XSCALE[$key]:-$QP_XSCALE_DFL}"
+            xofs="${QP_XOFS[$key]:-$QP_XOFS_DFL}"
+            yscale="${QP_YSCALE[$key]:-$QP_YSCALE_DFL}"
+            yofs="${QP_YOFS[$key]:-$QP_YOFS_DFL}"
+			# set expression flag
+			is_expr="${QP_EXPR[$key]:-$QP_YOFS_DFL}"
+
+            # apply scaling if x axis is not time
+#            if [ "${QP_ISTIME[$key]}" != "Y" ]
+#            then
+#            xcol="(\$${xcol}*${xscale} + ${xofs})"
+#            fi
+#            ycol="(\$${ycol}*${yscale} + ${yofs})"
+
+            # if axes are not time or expression
+			# interpret as column number, apply scaling
+            if [ "${QP_ISTIME[$key]}" != "Y" ] &&[ "${is_expr}" != "Y" ]
+            then
+            	xcol="(\$${xcol}*${xscale} + ${xofs})"
+            fi
+
+            if [ "${is_expr}" != "Y" ]
+            then
+				# interpret as column number, apply scaling
+    	        ycol="(\$${ycol}*${yscale} + ${yofs})"
+            fi
+
+            # generate plot string
+            if [ "${use_linetypes}" == "Y" ]
+            then
+	            QP_PLOT_STRINGS[$key]="${fpath} using ${xcol}:${ycol} t \"${title}\" lt ${line_type} with ${plot_style} axes ${axes} "
+            else
+	            QP_PLOT_STRINGS[$key]="${fpath} using ${xcol}:${ycol} t \"${title}\" pt ${point_type} lc ${point_color} with ${plot_style} axes ${axes} "
+            fi
+
+			QP_PLOT_STRINGS[$key]+=$', \\\n'
+            let "ptr+=1"
+
+			# auto-increment point/line styles if enabled
+
+            if [ "${QP_INC_LINETYPE[$key]}" == "Y" ]
+            then
+                let "line_type=$line_type+1"
+            fi
+            if [ "${QP_INC_POINTTYPE[$key]}" == "Y" ]
+            then
+                let "point_type=$point_type+1"
+            fi
+            if [ "${QP_INC_POINTCOLOR[$key]}" == "Y" ]
+            then
+                let "point_color=$point_color+1"
+            fi
+       done
+		let "nspec+=1"
+		let "pscount=$pscount+1"
+
+     done
+    # prepend with plot command
+    QP_PLOT_STRINGS[$key]="plot ${QP_PLOT_STRINGS[$key]}"
+    # replace last continuation with newline
+    let "x=${#QP_PLOT_STRINGS[$key]}-4"
+    QP_PLOT_STRINGS[$key]="${QP_PLOT_STRINGS[$key]:0:$x}"
+    QP_PLOT_STRINGS[$key]+=$'\n'
+
+}
+
+#################################
+# name: qp_make_gpfile
+# description: Write gnuplot command file
+# args: key, odevice, gpfile, plot_file
+#################################
+qp_make_gpfile(){
+
+    key="${1}"
+    odevice="${2}"
+    gpfile="${3}"
+    plot_output="\"${4}\""
+
+    vout "qp_make_gpfile - key    :[$key]"
+    vout "qp_make_gpfile - odevice:[$odevice]"
+    vout "qp_make_gpfile - gpfile :[$gpfile]"
+    key_font=${QP_KEY_FONT[$key]:-"$QP_KEY_FONT_DFL"}
+	key_size=${QP_KEY_SIZE[$key]:-"$QP_KEY_SIZE_DFL"}
+	key_max_col=${QP_KEY_MAX_COL[$key]:-"$QP_KEY_MAX_COL_DFL"}
+    dsep=${QP_DSEP[$key]:-$QP_DSEP_DFL}
+    if [ "${dsep}" == "whitespace" ]
+    then
+        dsep_cmd="set datafile separator whitespace"
+    else
+        dsep_cmd="set datafile separator \"${dsep}\""
+    fi
+    case $odevice in
+        aqua)
+        qp_term="aqua title \"${QU_OFILE_NAME}\" font \"${QP_TERM_FONT[$key]:-$QP_TERM_FONT_DFL}, ${QP_TERM_SIZE[$key]:-$QP_TERM_SIZE_DFL}\" size ${QP_TERM_OSIZE[$key]:-$QP_TERM_OSIZE_DFL}"
+        ;;
+       png)
+        qp_term="png font \"${QP_TERM_FONT[$key]:-$QP_TERM_FONT_DFL}\" ${QP_TERM_SIZE[$key]:-$QP_TERM_SIZE_DFL} size ${QP_TERM_OSIZE[$key]:-$QP_TERM_OSIZE_DFL}"
+        ;;
+        ps)
+        qp_term="postscript color font \"${QP_TERM_FONT[$key]:-$QP_TERM_FONT_DFL}\" ${QP_TERM_SIZE[$key]:-$QP_TERM_SIZE_DFL}"
+        ;;
+        pdf)
+        qp_term="postscript color font \"${QP_TERM_FONT[$key]:-$QP_TERM_FONT_DFL}\" ${QP_TERM_SIZE[$key]:-$QP_TERM_SIZE_DFL}"
+		;;
+        pdfcairo)
+        qp_term="pdfcairo color font \"${QP_TERM_FONT[$key]:-$QP_TERM_FONT_DFL}, ${QP_TERM_SIZE[$key]:-$QP_TERM_SIZE_DFL}\"  size ${QP_TERM_OSIZE[$key]:-$QP_TERM_OSIZE_DFL}"
+        ;;
+        pngcairo)
+        qp_term="pngcairo color font \"${QP_TERM_FONT[$key]:-$QP_TERM_FONT_DFL}, ${QP_TERM_SIZE[$key]:-$QP_TERM_SIZE_DFL}\" size ${QP_TERM_OSIZE[$key]:-$QP_TERM_OSIZE_DFL}"
+        ;;
+        x11)
+        qp_term="x11 title \"${QU_OFILE_NAME}\" font \"${QP_TERM_FONT[$key]:-$QP_TERM_FONT_DFL}, ${QP_TERM_SIZE[$key]:-$QP_TERM_SIZE_DFL}\" persist size ${QP_TERM_OSIZE[$key]:-$QP_TERM_OSIZE_DFL}"
+        ;;
+        *) qp_term="${QP_TERMINAL_DFL}"
+        ;;
+    esac
+    yrange_min=${QP_YRANGE_MIN[$key]:-$QP_YRANGE_MIN_DFL}
+    yrange_max=${QP_YRANGE_MAX[$key]:-$QP_YRANGE_MAX_DFL}
+    xrange_min=${QP_XRANGE_MIN[$key]:-$QP_XRANGE_MIN_DFL}
+    xrange_max=${QP_XRANGE_MAX[$key]:-$QP_XRANGE_MAX_DFL}
+    point_type=${QP_POINTTYPE[$key]:-$QP_POINTTYPE_DFL}
+    point_size=${QP_POINTSIZE[$key]:-$QP_POINTSIZE_DFL}
+    ptitle="\"${QP_PTITLE[$key]}\""
+    xlabel="\"${QP_XTITLE[$key]}\""
+    ylabel="\"${QP_YTITLE[$key]}\""
+	tfmt="\"${QP_TFMT[$key]:-$QP_TFMT_DFL}\""
+    xtfmt="\"${QP_XTFMT[$key]:-$QP_XTFMT_DFL}\""
+	xrotation=${QP_XROTATION[$key]:-$QP_XROTATION_DFL}
+	xoffset=${QP_XOFFSET[$key]:-$QP_XOFFSET_DFL}
+
+	x2label="\"${QP_X2TITLE[$key]}\""
+	x2range_min=${QP_X2RANGE_MIN[$key]:-$QP_X2RANGE_MIN_DFL}
+	x2range_max=${QP_X2RANGE_MAX[$key]:-$QP_X2RANGE_MAX_DFL}
+	x2rotation=${QP_X2ROTATION[$key]:-$QP_X2ROTATION_DFL}
+	x2offset=${QP_X2OFFSET[$key]:-$QP_X2OFFSET_DFL}
+
+	y2label="\"${QP_Y2TITLE[$key]}\""
+	y2range_min=${QP_Y2RANGE_MIN[$key]:-$QP_Y2RANGE_MIN_DFL}
+	y2range_max=${QP_Y2RANGE_MAX[$key]:-$QP_Y2RANGE_MAX_DFL}
+
+
+	if [ "${#y2label}" -gt 2 ]
+	then
+		y2cmds=`printf "%s\n%s\n%s\n%s\n" "set ytics nomirror" "set y2tics" "set y2range[$y2range_min:$y2range_max]" "set y2label ${y2label}"`
+	else
+		y2cmds=`printf "%s\n%s\n" "set ytics nomirror" "unset y2tics"`
+	fi
+
+	if [ "${#x2label}" -gt 2 ]
+	then
+# "set format x2 ${xtfmt}"
+#"set x2tics rotate"
+		x2cmds=`printf "%s\n%s\n%s\n%s\n" "set x2range[$x2range_min:$x2range_max]" "set x2label ${x2label}" "set x2tics" "set x2tics rotate by ${x2rotation} offset ${x2offset}"`
+	else
+		x2cmds=`printf "%s\n" "unset x2tics"`
+	fi
+
+#echo "Y2: $y2label[${#y2label}] $y2cmds"
+#echo "X2: $x2label[${#x2label}] $x2cmds"
+if [ "${QP_ISTIME[$key]}" == "Y" ]
+then
+SET_XDATA_EXPR="set xdata time"
+else
+SET_XDATA_EXPR="#set xdata time"
+fi
+
+if [ "${QP_YFMT[$key]}" ]
+then
+SET_YFMT_EXPR="set format y \"${QP_YFMT[$key]}\""
+else
+SET_YFMT_EXPR=""
+fi
+
+##########################
+# Do Not Indent (here-doc)
+##########################
+
+cat > $gpfile << EOF
+# GNU Plot definition file
+# [automatically generated]
+
+# output terminal
+set terminal ${qp_term}
+# plot title
+set title ${ptitle}
+# plot file
+set output ${plot_output}
+# plot style (enable multiple plots)
+set multiplot
+# line point size
+set pointsize $point_size
+# key options
+set key right tmargin horizontal
+set key spacing 1 width 0 height 0 maxcols ${key_max_col}
+set key noautotitle
+set key box
+set key samplen 2
+# key font and textcolor in gnuplot ver > 4.4
+set key font "$key_font,$key_size" textcolor variable
+
+${QP_LINE_TYPES[$key]:-""}
+
+# input options
+# data separator
+${dsep_cmd}
+
+# x-axis
+set xlabel ${xlabel}
+${SET_XDATA_EXPR}
+set timefmt ${tfmt}
+set xrange [ $xrange_min : $xrange_max ]
+set format x ${xtfmt}
+set xtics rotate by ${xrotation} offset ${xoffset}
+
+# y-axis
+set ylabel ${ylabel}
+set yrange [$yrange_min:$yrange_max]
+${SET_YFMT_EXPR}
+
+# x2-axis
+${x2cmds}
+
+# y2-axis
+${y2cmds}
+
+# for debug
+#show xrange
+#show yrange
+
+
+# plot command string
+${QP_PLOT_STRINGS[$key]}
+EOF
+#echo "$gpfile:"
+#cat $gpfile
+}
+
+#################################
+# name: qp_make_gpfile
+# description: Write gnuplot command file
+# args: none
+#################################
+qp_run_tasks(){
+
+    vout "running tasks"
+
+    if [ "${#QP_JOB_LIST[@]}" -gt 0 ]
+    then
+        # use job list, if specified on command line,
+        job_keys=${QP_JOB_LIST[@]}
+    else
+        # other wise, use config file or default
+        # NOTE: default order is not necessarily the same
+        # as order specified in config file
+        job_keys=${QP_JOB_ORDER[@]:-${!QP_JOB_DEFS[@]}}
+    fi
+
+    # iterate over job keys
+    for key in ${job_keys[*]}
+    do
+
+    # lookup next job
+    job=${QP_JOB_DEFS[$key]}
+
+    # get job type
+    type=`qp_parse_tok $job "," 0`
+
+    if [ "$type" == "plot" ]
+    then
+        odev=`qp_parse_tok ${job} "," 1`
+        plots=`qp_parse_tok $job "," 2`
+        declare -a keys
+        IFS="+" read -a keys <<< "${plots}"
+        for key in "${keys[@]}"
+        do
+            odir="${QP_OUTPUT_DIR[$key]:-$QP_OUTPUT_DIR_DFL}"
+
+			if [ ! -d odir ]
+            then
+                mkdir -p ${odir}
+            fi
+
+            gpfile="${odir}/${QP_OFILE_NAME[$key]}-$QP_SESSION_ID.gp"
+            vout "running plot task: [$key/$odev -> $gpfile]"
+            # do plot task...
+            qp_make_plotstring $key
+            plot_file="${odir}/${QP_OFILE_NAME[$key]}.$odev"
+            if [ "${odev}" == "pdfcairo" ]
+            then
+                plot_file="${odir}/${QP_OFILE_NAME[$key]}.pdf"
+            fi
+if [ "${odev}" == "pngcairo" ]
+then
+plot_file="${odir}/${QP_OFILE_NAME[$key]}.png"
+fi
+
+            qp_make_gpfile $key $odev $gpfile $plot_file
+
+            # Plot data with gnuplot
+vout "Generating plot using"
+vout "$QP_GNUPLOT_CMD $gpfile"
+            $QP_GNUPLOT_CMD $gpfile
+
+            if [ "${odev}" == "pdf" ]
+            then
+                plot_pdf="${odir}/${QP_OFILE_NAME[$key]}.pdf}"
+                # Convert PS to PDF with GhostScript
+                vout "Creating PDF..."
+                vout "${QP_MAKEPDF_CMD} -sDEVICE=${QP_GS_DEV[$odev]}  -sOutputFile=${plot_pdf} -dAutoRotatePages=/None -c \"<</Orientation 3>> setpagedevice\" -f $plot_file"
+                $QP_MAKEPDF_CMD  -sDEVICE=${QP_GS_DEV[$odev]}  -sOutputFile=$plot_pdf -dAutoRotatePages=/None -c "<</Orientation 3>> setpagedevice" -f $plot_file
+            fi
+
+            # remove temp gnuplot file
+            if [ "${QP_DEBUG}" == "Y" ]
+            then
+                vout "keeping gpfile [${gpfile}]"
+            else
+                vout "removing gpfile [${gpfile}]"
+                rm $gpfile
+            fi
+
+        done
+    elif [ "${type}" == "combine" ]
+    then
+        odev=`qp_parse_tok ${job} "," 1`
+		odir="${QP_OUTPUT_DIR[$key]:-$QP_OUTPUT_DIR_DFL}"
+
+        ofile="${odir}/`qp_parse_tok ${job} "," 2`"
+        list=`qp_parse_tok ${job} "," 3`
+
+        # for file set, use wildcard or file list separated by '|'
+        # e.g. 'plot-output/*png' or 'foo.png|bar.png'
+        # no whitespace allowed in list
+		declare -a combine_set
+#IFS was ';'
+        IFS="|" read -a combine_set <<< "${list}"
+        cset=`echo ${combine_set[@]}`
+        if [ "${odev}" == "pdf" ]
+        then
+            vout "cmd[$QP_COMBINE_CMD -sDEVICE=${QP_GS_DEV[$odev]} -sOutputFile=${ofile} -dAutoRotatePages=/None -c \"<</Orientation 0>> setpagedevice\"  -f ${cset}]"
+           $QP_COMBINE_CMD -sDEVICE=${QP_GS_DEV[$odev]} -sOutputFile=${ofile} -dAutoRotatePages=/None -c "<</Orientation 0>> setpagedevice"  -f ${cset}
+        elif [ "${odev}" == "png" ]
+        then
+            vout "cmd[${QP_CONVERT_CMD} ${cset} ${ofile}]"
+            ${QP_CONVERT_CMD} ${cset} ${ofile}
+        fi
+    fi
+    done
+}
+
+qp_parse_tok(){
+    # $1: string to parse
+    # $2: delimiter
+    # $3: index
+     declare -a tokens
+    IFS="$2" read -a tokens <<< "${1}"
+    echo "${tokens[$3]}"
+}
+
+qp_dump_config(){
+    key=${1:-" "}
+    vout ""
+    vout "QP_YRANGE_MIN  = [${QP_YRANGE_MIN[$key]:-$QP_YRANGE_MIN_DFL}]"
+    vout "QP_YRANGE_MAX  = [${QP_YRANGE_MAX[$key]:-$QP_YRANGE_MAX_DFL}]"
+    vout "QP_XRANGE_MIN  = [${QP_XRANGE_MIN[$key]:-$QP_XRANGE_MIN_DFL}]"
+    vout "QP_XRANGE_MAX  = [${QP_XRANGE_MAX[$key]:-$QP_XRANGE_MAX_DFL}]"
+	vout "QP_Y2RANGE_MIN = [${QP_Y2RANGE_MIN[$key]:-$QP_Y2RANGE_MIN_DFL}]"
+	vout "QP_Y2RANGE_MAX = [${QP_Y2RANGE_MAX[$key]:-$QP_Y2RANGE_MAX_DFL}]"
+	vout "QP_X2RANGE_MIN = [${QP_X2RANGE_MIN[$key]:-$QP_X2RANGE_MIN_DFL}]"
+	vout "QP_X2RANGE_MAX = [${QP_X2RANGE_MAX[$key]:-$QP_X2RANGE_MAX_DFL}]"
+    vout "QP_TFMT        = [${QP_TFMT[$key]:-$QP_TFMT_DFL}]"
+    vout "QP_XTFMT       = [${QP_XTFMT[$key]:-$QP_XTFMT_DFL}]"
+    vout "QP_POINTTYPE   = [${QP_POINTTYPE[$key]:-$QP_POINTTYPE_DFL}]"
+    vout "QP_POINTSIZE   = [${QP_POINTSIZE[$key]:-$QP_POINTSIZE_DFL}]"
+    vout "QP_USE_LINETYPES = [${QP_USE_LINETYPES[$key]:-$QP_USE_LINETYPES_DFL}]"
+    vout "QP_LINETYPE    = [${QP_LINETYPE[$key]:-$QP_LINETYPE_DFL}]"
+    vout "QP_LINETYPES   = [${QP_LINETYPES[$key]:-$QP_LINETYPES_DFL}]"
+    vout "QP_PTITLE      = [${QP_PTITLE[$key]:-'-'}]"
+    vout "QP_XTITLE      = [${QP_XTITLE[$key]:-'-'}]"
+    vout "QP_YTITLE      = [${QP_YTITLE[$key]:-'-'}]"
+    vout "QP_PLOT_SPECS  = [${QP_PLOT_SPECS[$key]}]"
+    vout "QP_OFILE_NAME  = [${QP_OFILE_NAME[$key]:-$QP_OFILE_NAME_DFL}]"
+	vout "QP_XROTATION   = [${QP_XROTATION[$key]:-$QP_XROTATION_DFL}]"
+	vout "QP_XOFFSET     = [${QP_XOFFSET[$key]:-$QP_XOFFSET_DFL}]"
+	vout "QP_X2ROTATION  = [${QP_X2ROTATION[$key]:-$QP_X2ROTATION_DFL}]"
+	vout "QP_X2OFFSET    = [${QP_X2OFFSET[$key]:-$QP_X2OFFSET_DFL}]"
+	vout "QP_AXES        = [${QP_AXES_DFL}]"
+
+    vout "QP_PLOT_DATA_DIR   = [${QP_PLOT_DATA_DIR[$key]:-$QP_PLOT_DATA_DIR_DFL}]"
+    vout "QP_OUTPUT_DIR = [${QP_OUTPUT_DIR[$key]:-$QP_OUTPUT_DIR_DFL}]"
+	vout "QP_DEBUG      = [$QP_DEBUG]"
+    vout "QP_VERBOSE    = [$QP_VERBOSE]"
+
+
+    for job in "${QP_JOB_DEFS[@]}"
+    do
+        vout "job:[${job}]"
+    done
+
+#    vout "ARGS          = [$*]"
+#    vout "OPTIND        = [$OPTIND]"
+    vout ""
+
+}
+
+qp_validate_opts()
+{
+    # check for invalid directory
+    if [ "${QP_PLOT_DATA_DIR}" ] && [ -e "${QP_PLOT_DATA_DIR}" ] && [ ! -d "${QP_PLOT_DATA_DIR}" ]
+    then
+    exitError "Invalid directory [${QP_PLOT_DATA_DIR}]" -1
+    fi
+}
+
+qp_check_missing(){
+    # check for missing dependencies
+    declare -a MISSING_X
+
+    if [ ! "$QP_GHOSTSCRIPT_CMD" ]
+    then
+    MISSING_X[${#MISSING_X[@]}]="gs"
+    fi
+
+    if  [ ! "$QP_GNUPLOT_CMD" ]
+    then
+    MISSING_X[${#MISSING_X[@]}]="gnuplot"
+    fi
+
+    if  [ ! "$QP_CONVERT_CMD" ]
+    then
+    MISSING_X[${#MISSING_X[@]}]="convert"
+    fi
+
+    # if required package missing
+    # output error and exit
+    if [ "${#MISSING_X[@]}" -gt 0 ]
+    then
+        exitError "program(s) not found [${MISSING_X[@]}]" 1
+    fi
+}
+
+processCmdLine(){
+	OPTIND=1
+    vout "`basename $0` all args[$*]"
+while getopts a:f:hi:I:j:m:M:n:N:o:O:p:P:r:R:s:t:x:X:DV Option
+	do
+		vout "`basename $0` Processing option - $Option[$OPTARG]"
+		case $Option in
+            f ) QP_CONF=$OPTARG
+            ;;
+            j )
+                if [ "${PROCESS_PASS}" -eq 0 ]
+                then
+                    declare -a jlist
+                    IFS="," read -a jlist <<< "${OPTARG}"
+                    for jspec in ${jlist[@]}
+                    do
+                        QP_JOB_LIST[${#QP_JOB_LIST[@]}]=${jspec}
+                    done
+                fi
+            ;;
+			a ) QP_PLOT_DATA_DIR_DFL="`dirname $OPTARG`/`basename $OPTARG`"
+			;;
+			O ) QP_OUTPUT_DIR_DFL=$OPTARG
+			;;
+			m ) QP_XROTATION_DFL=$OPTARG
+			;;
+			M ) QP_XOFFSET_DFL=$OPTARG
+			;;
+			n ) QP_X2ROTATION_DFL=$OPTARG
+			;;
+			N ) QP_X2OFFSET_DFL=$OPTARG
+			;;
+			o ) QP_OFILE_NAME_DFL=$OPTARG
+			;;
+			p ) QP_POINTTYPE_DFL=$OPTARG
+			;;
+			P ) QP_POINTSIZE_DFL=$OPTARG
+			;;
+			r ) QP_YRANGE_MIN_DFL=$OPTARG
+			;;
+			R ) QP_YRANGE_MAX_DFL=$OPTARG
+			;;
+			s ) QP_DSEP_DFL=${OPTARG}
+			;;
+			i ) QP_XRANGE_MIN_DFL=$OPTARG
+			;;
+			I ) QP_XRANGE_MAX_DFL=$OPTARG
+			;;
+			t ) QP_TFMT_DFL=$OPTARG
+			;;
+			x ) QP_XTFMT_DFL=$OPTARG
+			;;
+			X ) QP_AXES_DFL=$OPTARG
+			;;
+            D ) QP_DEBUG="Y"
+            ;;
+			V ) QP_VERBOSE="Y"
+			;;
+			h) printUsage
+			  exit 0
+			;;
+			*) let "argopt=$OPTIND-1"
+			   exitError "unrecognized option [${@:$argopt:1} ${@:$OPTIND:1}]"
+			;;
+		esac
+	done
+
+    let "PROCESS_PASS+=1"
+}
+
+##########################
+# Script main entry point
+##########################
+
+if [ "$#" -eq 0 ]
+then
+printUsage
+exit -1
+fi
+
+# check for missing programs
+qp_check_missing
+
+# process args (read cmd line)
+let "PROCESS_PASS=0"
+processCmdLine $*
+
+# if config file, source
+if [ "${QP_CONF}" ] && [ -f "${QP_CONF}" ]
+then
+source ${QP_CONF}
+fi
+
+# apply cmd line settings (override config file)
+processCmdLine $*
+
+# check options
+qp_validate_opts
+
+if [ "${QP_VERBOSE}" == "Y" ]
+then
+if [ "${#QP_JOB_LIST[@]}" -gt 0 ]
+then
+# use job list, if specified on command line,
+job_keys=${QP_JOB_LIST[@]}
+else
+# other wise, use config file or default
+# NOTE: default order is not necessarily the same
+# as order specified in config file
+job_keys=${QP_JOB_ORDER[@]:-${!QP_JOB_DEFS[@]}}
+fi
+
+# iterate over job keys
+for key in ${job_keys[*]}
+do
+qp_dump_config $key
+done
+fi
+
+# run the jobs
+qp_run_tasks
+
+exit 0
