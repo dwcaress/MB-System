@@ -4012,50 +4012,55 @@ int main(int argc, char **argv) {
           for (int j = beam_start; j <= beam_end; j++) {
 
             if ((j - beam_start) % beam_decimation == 0) {
-              if (mb_beam_ok(ping[i_ping_process].beamflag_filter[j])
-                && n_output < mbtrn_cfg->n_output_soundings) {
-                /* apply median filtering to this sounding */
-                if (median_filter_n_total > 1) {
-                  /* accumulate soundings for median filter */
-                  n_median_filter_soundings = 0;
-                  int jj0 = MAX(beam_start, j - dj);
-                  int jj1 = MIN(beam_end, j + dj);
-                  for (int ii = 0; ii < mbtrn_cfg->n_buffer_max; ii++) {
-                    for (int jj = jj0; jj <= jj1; jj++) {
-                      if (mb_beam_ok(ping[ii].beamflag[jj])) {
-                        median_filter_soundings[n_median_filter_soundings] = ping[ii].bath[jj];
-                        n_median_filter_soundings++;
+              if (mb_beam_ok(ping[i_ping_process].beamflag_filter[j])) {
+                if (n_output < mbtrn_cfg->n_output_soundings) {
+                  /* apply median filtering to this sounding */
+                  if (median_filter_n_total > 1) {
+                    /* accumulate soundings for median filter */
+                    n_median_filter_soundings = 0;
+                    int jj0 = MAX(beam_start, j - dj);
+                    int jj1 = MIN(beam_end, j + dj);
+                    for (int ii = 0; ii < mbtrn_cfg->n_buffer_max; ii++) {
+                      for (int jj = jj0; jj <= jj1; jj++) {
+                        if (mb_beam_ok(ping[ii].beamflag[jj])) {
+                          median_filter_soundings[n_median_filter_soundings] = ping[ii].bath[jj];
+                          n_median_filter_soundings++;
+                        }
                       }
                     }
+
+                    /* run qsort */
+                    qsort((char *)median_filter_soundings, n_median_filter_soundings, sizeof(double),
+                          (void *)mb_double_compare);
+                    median = median_filter_soundings[n_median_filter_soundings / 2];
+                    // fprintf(stderr, "Beam %3d of %d:%d bath:%.3f n:%3d:%3d median:%.3f ", j, beam_start,
+                    // beam_end, ping[i_ping_process].bath[j], n_median_filter_soundings, median_filter_n_min,
+                    // median);
+
+                    /* apply median filter - also flag soundings that don't have enough neighbors to filter */
+                    if (n_median_filter_soundings < median_filter_n_min ||
+                        fabs(ping[i_ping_process].bath[j] - median) > mbtrn_cfg->median_filter_threshold * median) {
+                      ping[i_ping_process].beamflag_filter[j] = MB_FLAG_FLAG + MB_FLAG_FILTER;
+                      n_soundings_flagged++;
+
+                      // fprintf(stderr, "**filtered**");
+                    }
+                    // fprintf(stderr, "\n");
                   }
-
-                  /* run qsort */
-                  qsort((char *)median_filter_soundings, n_median_filter_soundings, sizeof(double),
-                        (void *)mb_double_compare);
-                  median = median_filter_soundings[n_median_filter_soundings / 2];
-                  // fprintf(stderr, "Beam %3d of %d:%d bath:%.3f n:%3d:%3d median:%.3f ", j, beam_start,
-                  // beam_end, ping[i_ping_process].bath[j], n_median_filter_soundings, median_filter_n_min,
-                  // median);
-
-                  /* apply median filter - also flag soundings that don't have enough neighbors to filter */
-                  if (n_median_filter_soundings < median_filter_n_min ||
-                      fabs(ping[i_ping_process].bath[j] - median) > mbtrn_cfg->median_filter_threshold * median) {
-                    ping[i_ping_process].beamflag_filter[j] = MB_FLAG_FLAG + MB_FLAG_FILTER;
-                    n_soundings_flagged++;
-
-                    // fprintf(stderr, "**filtered**");
+                  if (mb_beam_ok(ping[i_ping_process].beamflag_filter[j])) {
+                    if (n_output < mbtrn_cfg->n_output_soundings) {
+                      n_output++;
+                    } else {
+                      ping[i_ping_process].beamflag_filter[j] = MB_FLAG_FLAG + MB_FLAG_FILTER;
+                      n_soundings_decimated++;
+                    }
                   }
-                  // fprintf(stderr, "\n");
-                }
-                if (mb_beam_ok(ping[i_ping_process].beamflag_filter[j])) {
-                  if (n_output < mbtrn_cfg->n_output_soundings) {
-                    n_output++;
-                  } else {
-                    ping[i_ping_process].beamflag_filter[j] = MB_FLAG_FLAG + MB_FLAG_FILTER;
+                  else {
                     n_soundings_decimated++;
                   }
                 }
                 else {
+                  ping[i_ping_process].beamflag_filter[j] = MB_FLAG_FLAG + MB_FLAG_FILTER;
                   n_soundings_decimated++;
                 }
               }
@@ -4145,8 +4150,10 @@ int main(int argc, char **argv) {
                      ping[i_ping_process].sonardepth, ping[i_ping_process].speed, ping[i_ping_process].pitch,
                      ping[i_ping_process].roll, ping[i_ping_process].heave));
 
+            int n_output_count = 0;
             for (int j = 0; j < ping[i_ping_process].beams_bath; j++) {
-              if (mb_beam_ok(ping[i_ping_process].beamflag_filter[j])) {
+              if (mb_beam_ok(ping[i_ping_process].beamflag_filter[j])
+                && n_output_count < n_output) {
 
                 mb_put_binary_int(true, j, &output_buffer[index]);
                 index += 4;
@@ -4160,6 +4167,7 @@ int main(int argc, char **argv) {
                 mb_put_binary_double(true, (ping[i_ping_process].bath[j] - ping[i_ping_process].sonardepth),
                                      &output_buffer[index]);
                 index += 8;
+                n_output_count++;
 
                 PMPRINT(MOD_MBTRNPP, MBTRNPP_V2,
                         (stderr, "n[%03d] atrk/X[%+10.3lf] ctrk/Y[%+10.3lf] dpth/Z[%+10.3lf]\n", j,
