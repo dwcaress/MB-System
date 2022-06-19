@@ -4006,12 +4006,14 @@ int main(int argc, char **argv) {
 
           /* apply decimation - only consider outputting decimated soundings */
           beam_decimation = ((beam_end - beam_start + 1) / mbtrn_cfg->n_output_soundings);
+          beam_decimation = MAX(beam_decimation, 1);
           int dj = mbtrn_cfg->median_filter_n_across / 2;
           n_output = 0;
           for (int j = beam_start; j <= beam_end; j++) {
 
             if ((j - beam_start) % beam_decimation == 0) {
-              if (mb_beam_ok(ping[i_ping_process].beamflag_filter[j])) {
+              if (mb_beam_ok(ping[i_ping_process].beamflag_filter[j])
+                && n_output < mbtrn_cfg->n_output_soundings) {
                 /* apply median filtering to this sounding */
                 if (median_filter_n_total > 1) {
                   /* accumulate soundings for median filter */
