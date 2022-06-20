@@ -772,7 +772,7 @@ LoadFromFile(const char* filename) {
 	int numLeafNodes = 0;
 
 	bool returnValue = OctreeRoot->LoadFromFile(loadFile, numBranchNodes, numLeafNodes);
-  std::cout << "\nOctree file <" << filename << "> loaded\n";
+    std::cout << "\nOctree file <" << filename << "> loaded\n";
 	std::cout << "Num Branch Nodes: " << numBranchNodes << "\tNum Leaf Nodes: " << numLeafNodes << "\n";
 	std::cout << "Total Node Size: " << ((numBranchNodes + numLeafNodes) * sizeof(OctreeNode) +
 					     numBranchNodes * 8 * sizeof(OctreeNode*) )/ 1048576 << " MB \n";
@@ -789,22 +789,59 @@ LoadFromFile(const char* filename) {
 template <class ValueType>
 void
 Octree<ValueType>::
-Print(void) const {
-	std::cout << "LowerBounds:\t";
-	LowerBounds.Print();
-	std::cout << "UpperBounds:\t";
-	UpperBounds.Print();
-	std::cout << "MaxDepth:\t" << MaxDepth << std::endl;
-	std::cout << "Size:\t\t";
-	Size.Print();
-	std::cout << "TrueResolution:\t";
-	TrueResolution.Print();
-	std::cout << "OctreeType:\t" << OctreeNodeType << std::endl;
+Print(OTreeStats *ts) const {
+    std::cout << "LowerBounds:\t";
+    LowerBounds.Print();
+    std::cout << "UpperBounds:\t";
+    UpperBounds.Print();
+    std::cout << "MaxDepth:\t" << MaxDepth << std::endl;
+    std::cout << "Size:\t\t";
+    Size.Print();
+    std::cout << "TrueResolution:\t";
+    TrueResolution.Print();
+    std::cout << "OctreeType:\t" << OctreeNodeType << std::endl;
+    std::cout << "valueType sz:\t" << sizeof(ValueType) << std::endl;
 
-	//big octrees have LOTS to print
-	//OctreeRoot->Print(0);
+    //big octrees have LOTS to print
+    OctreeRoot->Print(0,ts);
+    std::cout << std::endl;
+    int wkey=12;
+    int wval=30;
+    std::cout << std::setfill(' ');
+    std::cout << std::setw(wkey) << "depth :" << std::setw(wval) << ts->depth <<  std::endl;
+    std::cout << std::setw(wkey) << "branches :" << std::setw(wval) << ts->branches << std::endl;
+    std::cout << std::setw(wkey) << "leaves :" << std::setw(wval) << ts->leaves << std::endl;
+    std::cout << std::setw(wkey) << "nodes :" << std::setw(wval) << ts->nodes << std::endl;
+    std::cout << std::setw(wkey) << "disk size :" << std::setw(wval) << DiskSize(ts) << std::endl;
+    std::cout << std::setw(wkey) << "RAM size :" << std::setw(wval) << MemSize(ts) << std::endl;
 
-	std::cout << std::endl;
+    std::cout << std::endl;
+}
+
+template <class ValueType>
+int
+Octree<ValueType>::
+DiskSize(OTreeStats *ts) {
+    int disk_size = 0;
+    if(NULL != ts){
+        disk_size = ((ts->nodes+1)*sizeof(Octree<ValueType>::OTNode)+sizeof(Octree<ValueType>::MapHeader));
+    }
+    return disk_size;
+}
+
+template <class ValueType>
+int
+Octree<ValueType>::
+MemSize(OTreeStats *ts) {
+    int mem_size = 0;
+    if(NULL != ts){
+    int leaf_size = sizeof(Octree<ValueType>::OctreeNode)+sizeof(Octree<ValueType>::OctreeNode *);
+    int branch_size = sizeof(Octree<ValueType>::OctreeNode)+8*sizeof(Octree<ValueType>::OctreeNode *);
+    int mem_branches = ts->branches*branch_size;
+    int mem_leaves = ts->leaves*leaf_size;
+    mem_size = mem_branches+mem_leaves;
+    }
+    return mem_size;
 }
 
 // Now for some private functions: first paths and bounds stuff

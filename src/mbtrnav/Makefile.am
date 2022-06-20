@@ -214,7 +214,7 @@ libmb1_la_SOURCES += trnw/mb1_msg.c
 
 libmb1_la_LIBADD =
 
-bin_PROGRAMS =  trn-server trn-replay trnclient-test mmcpub mmcsub trnu-cli trn-cli trnif-test trnusvr-test netif-test trnifsvr-test mb1rs #  readlog writelog
+bin_PROGRAMS =  trn-server trn-replay trnclient-test mmcpub mmcsub trnu-cli trn-cli trnif-test trnusvr-test netif-test trnifsvr-test mb1rs otree #  readlog writelog
 
 trn_server_SOURCES = utils/trn_server.cpp
 trn_server_LDADD = libtnav.la libqnx.la libnewmat.la libgeolib.la
@@ -251,6 +251,9 @@ trnifsvr_test_LDADD = libnetif.la  libtrnw.la
 
 mb1rs_SOURCES = trnw/mb1rs.c trnw/mb1rs-app.c
 mb1rs_LDADD = ${LIBMFRAME} libmb1.la libtnav.la
+
+otree_SOURCES = utils/OctreeTest.cpp
+otree_LDADD = libtnav.la  libnewmat.la libqnx.la libgeolib.la -lnetcdf -lm -lpthread 
 
 dist_bin_SCRIPTS =
 
