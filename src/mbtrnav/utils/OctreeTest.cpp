@@ -76,7 +76,7 @@ void header_show(Octree<bool>::MapHeader *map_header)
     int wkey=18;
     int wval=12;
     int wxyz=10;
-    int orig_settings = std::cout.flags();
+    std::ios_base::fmtflags orig_settings = std::cout.flags();
     int orig_precision = std::cout.precision();
 
     std::cout << "Map Header" << std::endl;
@@ -217,7 +217,7 @@ uint64_t stat_clk_res()
 void stat_show_summary(TreeStats *ts, bool do_hist)
 {
     if (ts!=NULL) {
-        int orig_settings = std::cout.flags();
+        std::ios_base::fmtflags orig_settings = std::cout.flags();
         int orig_precision = std::cout.precision();
         std::cout << std::endl;
         int wkey=18;
@@ -357,7 +357,7 @@ int test_octree_funcs(Octree<bool>::OTNode *ot_root, Octree<bool>::MapHeader *ma
         long f_ofs=((byte *)leaf-(byte *)map_header);
         
         if (r_ofs>0 && f_ofs>0) {
-            int orig_settings = std::cout.flags();
+            std::ios_base::fmtflags orig_settings = std::cout.flags();
             int orig_precision = std::cout.precision();
 
             std::cout << std::endl;
