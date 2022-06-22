@@ -114,7 +114,7 @@ LIBTRNW_OBJ=$(LIBTRNW_SRC:%.cpp=$(BUILD_DIR)/%.o)
 LIBTRNW_LIBS = -ltrn -lqnx -lnewmat -lpthread
 
 LIBMB1=libmb1.a
-LIBMB1_SRC=mb1_msg.c
+LIBMB1_SRC = mb1_msg.c
 LIBMB1_OBJ=$(LIBMB1_SRC:%.c=$(BUILD_DIR)/%.o)
 LIBMB1_LIBS =
 
@@ -126,13 +126,19 @@ $(BUILD_DIR)/TNavFilter.o \
 $(BUILD_DIR)/TNavPointMassFilter.o \
 $(BUILD_DIR)/TNavParticleFilter.o \
 $(BUILD_DIR)/TNavBankFilter.o \
+$(BUILD_DIR)/TNavPFLog.o \
 $(BUILD_DIR)/TerrainMapOctree.o \
-$(BUILD_DIR)/OctreeSupport.o \
-$(BUILD_DIR)/TerrainMapDEM.o \
+$(BUILD_DIR)/PositionLog.o \
+$(BUILD_DIR)/TerrainNavLog.o \
 $(BUILD_DIR)/mapio.o \
 $(BUILD_DIR)/structDefs.o \
 $(BUILD_DIR)/trn_log.o \
 $(BUILD_DIR)/myOutput.o \
+$(BUILD_DIR)/OctreeSupport.o \
+$(BUILD_DIR)/Octree.o \
+$(BUILD_DIR)/OctreeNode.o \
+$(BUILD_DIR)/TerrainMapDEM.o \
+$(BUILD_DIR)/TRNUtils.o \
 $(BUILD_DIR)/matrixArrayCalcs.o
 
 # libtrncli: TRN client lib
@@ -153,11 +159,17 @@ LIBTRNUCLI_SRC=trnu_cli.c
 LIBTRNUCLI_OBJ=$(LIBTRNUCLI_SRC:%.c=$(BUILD_DIR)/%.o)
 LIBTRNUCLI_LIBS = -lmframe -lpthread -lm
 
+# libnetif: TRN network interface lib
+LIBNETIF=libnetif.a
+LIBNETIF_SRC=netif.c trnif_proto.c trnif_msg.c
+LIBNETIF_OBJ=$(LIBNETIF_SRC:%.c=$(BUILD_DIR)/%.o)
+LIBNETIF_LIBS =
+
 # trnucli-test: trnu_cli unit test
 TRNUCLI_TEST=trnucli-test
 TRNUCLI_TEST_SRC=trnucli_test.c 
 TRNUCLI_TEST_OBJ=$(TRNUCLI_TEST_SRC:%.c=$(BUILD_DIR)/%.o)
-TRNUCLI_TEST_LIBS = $(MFRAME_LIB) -ltrnucli -lpthread -lm -lqnx -lnewmat -ltrn -ltrncli -lnetcdf -lgeolib 
+TRNUCLI_TEST_LIBS = -lnetif -ltrnucli -lmframe -lpthread -lm -lqnx -lnewmat -ltrn -ltrncli -lnetcdf -lgeolib -lstdc++
 
 # trnusvr-test: trnu_cli test server
 TRNUSVR_TEST=trnusvr-test
@@ -189,11 +201,6 @@ MMCSUB_SRC=mmcsub.c
 MMCSUB_OBJ=$(MMCSUB_SRC:%.c=$(BUILD_DIR)/%.o)
 MMCSUB_LIBS = $(MFRAME_LIB) -lm
 
-LIBNETIF=libnetif.a
-LIBNETIF_SRC=netif.c #trnif_proto.c trnif_msg.c
-LIBNETIF_OBJ=$(LIBNETIF_SRC:%.c=$(BUILD_DIR)/%.o)
-LIBNETIF_LIBS = -lmframe -ltrnw
-
 TRNIF_TEST=trnif-test
 TRNIF_TEST_SRC=trnif_test.c trnif_proto.c trnif_msg.c
 TRNIF_TEST_OBJ = $(TRNIF_TEST_SRC:%.c=$(BUILD_DIR)/%.o)
@@ -219,8 +226,8 @@ $(TRNIF_TEST_SRC) \
 $(MB1RS_SRC)
 
 TRNC_TARGETS+=  $(OUTPUT_DIR)/$(LIBTRNCLI) \
-$(OUTPUT_DIR)/$(TRNCLI_TEST) \
 $(OUTPUT_DIR)/$(LIBTRNUCLI) \
+$(OUTPUT_DIR)/$(TRNCLI_TEST) \
 $(OUTPUT_DIR)/$(TRNUCLI_TEST)\
 $(OUTPUT_DIR)/$(TRNUSVR_TEST) \
 $(OUTPUT_DIR)/$(MMCPUB) \
@@ -265,7 +272,7 @@ $(OUTPUT_DIR)/$(LIBMB1): $(LIBMB1_OBJ)
 # build netif library
 $(OUTPUT_DIR)/$(LIBNETIF): $(LIBNETIF_OBJ) 
 	@echo building $@...
-	ar -r $@ $(LIBNETIF_OBJ)  
+	ar rcs $@ $(LIBNETIF_OBJ)
 
 # build trn wrapper library
 $(OUTPUT_DIR)/$(LIBTRNW): $(LIBTRNW_OBJ)

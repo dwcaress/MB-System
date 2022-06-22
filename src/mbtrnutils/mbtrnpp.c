@@ -756,22 +756,26 @@ typedef enum {
     MBTPP_EV_MB_DISN,
     MBTPP_EV_MB_PUBN,
     MBTPP_EV_MB_REINIT,
+
     MBTPP_EV_MB_GAIN_LO,
     MBTPP_EV_MB_FILE,
     MBTPP_EV_MB_xyoffset,
     MBTPP_EV_MB_offset_z,
     MBTPP_EV_MB_TRNUCLI_RESET,
+
     MBTPP_EV_MB_EOF,
     MBTPP_EV_MB_NONSURVEY,
     MBTPP_EV_EMBGETALL,
     MBTPP_EV_EMBFAILURE,
     MBTPP_EV_EMBFRAMERD,
+
     MBTPP_EV_EMBLOGWR,
     MBTPP_EV_EMBSOCKET,
     MBTPP_EV_EMBCON,
     MBTPP_EV_EMBPUB,
 #ifdef WITH_MBTNAV
     MBTPP_EV_TRN_PROCN,
+
     MBTPP_EV_TRNU_PUBN,
     MBTPP_EV_TRNU_PUBEMPTYN,
     MBTPP_EV_ETRNUPUB,
@@ -820,7 +824,7 @@ typedef enum {
 const char *mbtrnpp_stevent_labels[] = {
     "mb_cycles", "mb_con", "mb_dis", "mb_pub_n", "mb_reinit", "mb_gain_lo", "mb_file",
     "mb_xyoffset", "mb_offset_z", "mb_trnucli_reset", "mb_eof", "mb_nonsurvey", "e_mbgetall", "e_mbfailure",
-    "e_mb_frame_rd", "e_mb_log_wr", "e_mbsocket", "e_mbcon" "e_mbpub"
+    "e_mb_frame_rd", "e_mb_log_wr", "e_mbsocket", "e_mbcon", "e_mbpub"
 #ifdef WITH_MBTNAV
     ,"trn_proc_n","trnu_pub_n","trnu_pubempty_n","e_trnu_pub","e_trnu_pubempty"
 #endif
@@ -6498,7 +6502,7 @@ int mbtrnpp_reson7kr_input_read(int verbose, void *mbio_ptr, size_t *size, char 
         PMPRINT(MOD_MBTRNPP,MBTRNPP_V4,(stderr,"r7kr_read_stripped_frame failed: sync_bytes[%d] status[%d] err[%d]\n",sync_bytes,status, *error));
 
         MST_COUNTER_INC(app_stats->stats->events[MBTPP_EV_EMBFRAMERD]);
-        MST_COUNTER_ADD(app_stats->stats->events[MBTPP_STA_MB_SYNC_BYTES],sync_bytes);
+        MST_COUNTER_ADD(app_stats->stats->status[MBTPP_STA_MB_SYNC_BYTES],sync_bytes);
 
         // check connection status (socket errors)
         // only reconnect if disconnected
@@ -7274,7 +7278,7 @@ int mbtrnpp_mb1r_input_read(int verbose, void *mbio_ptr, size_t *size, char *buf
         PMPRINT(MOD_MBTRNPP,MBTRNPP_V4,(stderr,"mb1r_read_frame failed: sync_bytes[%d] status[%d] err[%d]\n",sync_bytes,status, *error));
 
         MST_COUNTER_INC(app_stats->stats->events[MBTPP_EV_EMBFRAMERD]);
-        MST_COUNTER_ADD(app_stats->stats->events[MBTPP_STA_MB_SYNC_BYTES],sync_bytes);
+        MST_COUNTER_ADD(app_stats->stats->status[MBTPP_STA_MB_SYNC_BYTES],sync_bytes);
 
         // check connection status
         // only reconnect if disconnected

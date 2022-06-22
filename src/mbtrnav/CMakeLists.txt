@@ -181,21 +181,6 @@ message("EXTRA_INCLUDES=${EXTRA_INCLUDES}")
 message("EXTRA_LIBS`=${EXTRA_LIBS}")
 
 #################################
-# build trnu_cli component library
-
-# specify library
-add_library(trnucli STATIC
-${TRNW_SRC_DIR}/trnu_cli.c
-)
-
-# specify include directories
-set_target_properties( trnucli
-PROPERTIES
-INCLUDE_DIRECTORIES
-"${EXTRA_INCLUDES}"
-)
-
-#################################
 # build libgeolib (gctp)
 
 # specify library
@@ -400,9 +385,30 @@ PROPERTIES
 INCLUDE_DIRECTORIES
 "${EXTRA_INCLUDES}"
 LINK_LIBRARIES
+"libtnav.a"
+"libqnx.a"
+"libnewmat.a"
+"libgeolib.a"
 "libtrnw.a"
 "m"
 "pthread"
+)
+
+#################################
+# build trnu_cli component library
+
+# specify library
+add_library(trnucli STATIC
+${TRNW_SRC_DIR}/trnu_cli.c
+)
+
+# specify include directories
+set_target_properties( trnucli
+PROPERTIES
+INCLUDE_DIRECTORIES
+"${EXTRA_INCLUDES}"
+LINK_LIBRARIES
+"libnetif.a"
 )
 
 ##################################
@@ -411,18 +417,17 @@ LINK_LIBRARIES
 # specify build target
 add_executable(trnucli-test
 ${PROJECT_SOURCE_DIR}/trnw/trnucli_test.c
-${PROJECT_SOURCE_DIR}/trnw/trnu_cli.c
 )
 
 # specify dependency libs
 target_link_libraries(trnucli-test
+"trnucli"
 "netif"
 "trnw"
 "tnav"
 "qnx"
 "newmat"
 "geolib"
-"trnucli"
 Libmframe::mframe
 "${EXTRA_LIBS}"
 )
