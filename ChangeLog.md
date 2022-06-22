@@ -23,6 +23,7 @@ Distributions that do not include "beta" in the tag name correspond to the major
 announced releases. The source distributions associated with all releases, major
 or beta, are equally accessible as tarballs through the Github interface.
 
+- Version 5.7.9beta41    June 22, 2022
 - Version 5.7.9beta40    June 18, 2022
 - Version 5.7.9beta38    June 18, 2022
 - Version 5.7.9beta37    June 17, 2022
@@ -416,6 +417,13 @@ or beta, are equally accessible as tarballs through the Github interface.
 --
 ### MB-System Version 5.7 Release Notes:
 --
+
+#### 5.7.9beta41 (June 22, 2022)
+
+Mbm_makedatalist: Fixed to work with *.kmall files, and added -Bsize option
+to impose a size threshold for files included in the output datalist.
+
+TRN: Several fixes to the TRN (terrain relative navigation) capability.
 
 #### 5.7.9beta40 (June 18, 2022)
 
