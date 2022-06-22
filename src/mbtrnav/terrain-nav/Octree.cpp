@@ -808,6 +808,7 @@ Print(OTreeStats *ts) const {
     std::cout << std::endl;
     int wkey=12;
     int wval=30;
+    if(NULL!=ts){
     std::cout << std::setfill(' ');
     std::cout << std::setw(wkey) << "depth :" << std::setw(wval) << ts->depth <<  std::endl;
     std::cout << std::setw(wkey) << "branches :" << std::setw(wval) << ts->branches << std::endl;
@@ -815,7 +816,7 @@ Print(OTreeStats *ts) const {
     std::cout << std::setw(wkey) << "nodes :" << std::setw(wval) << ts->nodes << std::endl;
     std::cout << std::setw(wkey) << "disk size :" << std::setw(wval) << DiskSize(ts) << std::endl;
     std::cout << std::setw(wkey) << "RAM size :" << std::setw(wval) << MemSize(ts) << std::endl;
-
+    }
     std::cout << std::endl;
 }
 
