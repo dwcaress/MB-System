@@ -21,12 +21,13 @@ Requires:
 
 ### from trndev-<version>.tar.gz
 
-Build the mframe and libtrnav libraries and applications using:
+Build the mframe and libtrnav libraries and applications using cmake:
 
 ```
 tar xzvf trndev-<version>.tar.gz
 cd trndev-<version>
-./trndev-build.sh
+./trndev-build-cmake.sh
+./trndev-build-cmake.sh -I
 ```
 
 Applications, libraries and headers are installed in trndev-<version>/install.
@@ -35,7 +36,7 @@ Optionally, set TRNDEV_INSTALL to install in another directory:
 ```
 tar xzvf trndev-<version>.tar.gz
 cd trndev-<version>
-TRNDEV_INSTALL=/tmp/foo ./trndev-build.sh
+./trndev-build.sh -i <path>
 ```
 
 A copy of the build output may also be found in
@@ -47,27 +48,23 @@ trndev-<version>/libtrnav/build/pkg
 
 ## Get the code 
 
+### from developmenent snapshot (tar.gz)
+
+```
+ftp://ftp.mbari.org/pub/trn
+tar xzvf trndev-<version>.tar.gz 
+```
+
 ### from git
+
+These repos are in an MBARI workspace
+and require permission to access
 
 ```
  mkdir trn-dev
  cd trn-dev
  git clone git@bitbucket.org:mbari/mframe.git
  git clone git@bitbucket.org:mbari/libtrnav.git
-```
-
-At this time, the code described here is in branch feature/async-trnucli
-
-```
- cd libtrnav
- git checkout feature/async-trnucli
-```
-
-### from developmenent snapshot (tar.gz)
-
-```
- ftp://ftp.mbari.org/pub/trn
- tar xzvf trndev-<version>.tar.gz 
 ```
 
 ---
@@ -77,9 +74,11 @@ At this time, the code described here is in branch feature/async-trnucli
 Instructions in this doc reference TRNDEV
 as the path to the directory containing libtrnav and mframe
 
-    export TRNDEV=/path/to/trn-dev
+```
+ export TRNDEV=/path/to/trn-dev
+```
 
-## using cmake [1]
+## Manual build using cmake [1]
 
 ### build mframe
 
@@ -129,7 +128,7 @@ The binaries are in ${TRNDEV}/build
 
 ---
 
-## using gnu make
+## Manual build using gnu make
 
 ### build mframe
 
@@ -144,7 +143,7 @@ The binaries are in ${TRNDEV}/build
 ```
  cd ${TRNDEV}/libtrnav
  mkdir build
- make 
+ make all trnc
 ```
 
 ### run apps [1]

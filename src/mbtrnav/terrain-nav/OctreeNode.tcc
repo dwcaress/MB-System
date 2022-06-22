@@ -204,22 +204,34 @@ Bad idea for large Octrees.  Used mostly when debugging on small testcase Octree
 template <class ValueType>
 void
 Octree<ValueType>::OctreeNode::
-Print(int num) const {
-	//Depth first order
-	//PrintTabs indents so that the tree is actually readable by a human.
-	OctreeNode_PrintTabs(num);
-	std::cout << "value:    " << value << std::endl;
-	OctreeNode_PrintTabs(num);
-	std::cout << "children: " << (children != NULL) << std::endl;
-	OctreeNode_PrintTabs(num);
-	std::cout << "---------------\n";
-	
-	if(children != NULL) {
-		for(int index = 0; index < 8; index ++) {
-			children[index]->Print(num + 1);
-		}
-	}
-	
+Print(int num, OTreeStats *ts) const {
+    //Depth first order
+    //PrintTabs indents so that the tree is actualy readable by a human.
+    OctreeNode_PrintTabs(num);
+    std::cout << "value:    " << value << std::endl;
+    OctreeNode_PrintTabs(num);
+    std::cout << "children: " << (children != NULL) << std::endl;
+    OctreeNode_PrintTabs(num);
+    std::cout << "---------------\n";
+
+    if (ts !=NULL) {
+        ts->nodes++;
+    }
+
+    if(children != NULL) {
+        if (ts !=NULL) {
+            ts->branches++;
+        }
+
+        for(int index = 0; index < 8; index ++) {
+            children[index]->Print(num + 1);
+        }
+    }else{
+        if (ts !=NULL) {
+            ts->leaves++;
+        }
+
+    }
 }
 
 /* Constructors and such:

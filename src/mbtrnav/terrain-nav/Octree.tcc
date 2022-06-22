@@ -703,22 +703,23 @@ LoadFromFile(const char* filename) {
 template <class ValueType>
 void
 Octree<ValueType>::
-Print(void) const {
-	std::cout << "LowerBounds:\t";
-	LowerBounds.Print();
-	std::cout << "UpperBounds:\t";
-	UpperBounds.Print();
-	std::cout << "MaxDepth:\t" << MaxDepth << std::endl;
-	std::cout << "Size:\t\t";
-	Size.Print();
-	std::cout << "TrueResolution:\t";
-	TrueResolution.Print();
-	std::cout << "OctreeType:\t" << OctreeNodeType << std::endl;
-	
-	//big octrees have LOTS to print
-	//OctreeRoot->Print(0);
-	
-	std::cout << std::endl;
+Print(OTreeStats *ts) const {
+        std::cout << "LowerBounds:\t";
+        LowerBounds.Print();
+        std::cout << "UpperBounds:\t";
+        UpperBounds.Print();
+        std::cout << "MaxDepth:\t" << MaxDepth << std::endl;
+        std::cout << "Size:\t\t";
+        Size.Print();
+        std::cout << "TrueResolution:\t";
+        TrueResolution.Print();
+        std::cout << "OctreeType:\t" << OctreeNodeType << std::endl;
+        std::cout << "valueType sz:\t" << sizeof(ValueType) << std::endl;
+
+        //big octrees have LOTS to print
+        OctreeRoot->Print(0,ts);
+
+        std::cout << std::endl;
 }
 
 // Now for some private functions: first paths and bounds stuff

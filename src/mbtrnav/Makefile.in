@@ -95,7 +95,7 @@ bin_PROGRAMS = trn-server$(EXEEXT) trn-replay$(EXEEXT) \
 	trnclient-test$(EXEEXT) mmcpub$(EXEEXT) mmcsub$(EXEEXT) \
 	trnu-cli$(EXEEXT) trn-cli$(EXEEXT) trnif-test$(EXEEXT) \
 	trnusvr-test$(EXEEXT) netif-test$(EXEEXT) \
-	trnifsvr-test$(EXEEXT) mb1rs$(EXEEXT)
+	trnifsvr-test$(EXEEXT) mb1rs$(EXEEXT) otree$(EXEEXT)
 subdir = src/mbtrnav
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/ax_check_compile_flag.m4 \
@@ -268,6 +268,9 @@ mmcsub_DEPENDENCIES = $(LIBMFRAME)
 am_netif_test_OBJECTS = utils/netif-test.$(OBJEXT)
 netif_test_OBJECTS = $(am_netif_test_OBJECTS)
 netif_test_DEPENDENCIES = libnetif.la libtrnw.la
+am_otree_OBJECTS = utils/OctreeTest.$(OBJEXT)
+otree_OBJECTS = $(am_otree_OBJECTS)
+otree_DEPENDENCIES = libtnav.la libnewmat.la libqnx.la libgeolib.la
 am_trn_cli_OBJECTS = trnw/trncli_test.$(OBJEXT) trnw/trn_cli.$(OBJEXT)
 trn_cli_OBJECTS = $(am_trn_cli_OBJECTS)
 trn_cli_DEPENDENCIES = $(LIBMFRAME) libtrnw.la
@@ -441,6 +444,7 @@ am__depfiles_remade = gctp/source/$(DEPDIR)/alberfor.Plo \
 	trnw/$(DEPDIR)/trnif_proto.Plo trnw/$(DEPDIR)/trnif_test.Po \
 	trnw/$(DEPDIR)/trnu_cli.Po trnw/$(DEPDIR)/trnucli_test.Po \
 	trnw/$(DEPDIR)/trnusvr_test.Po trnw/$(DEPDIR)/trnw.Plo \
+	utils/$(DEPDIR)/OctreeTest.Po \
 	utils/$(DEPDIR)/TerrainNavClient.Po \
 	utils/$(DEPDIR)/TrnClient.Po utils/$(DEPDIR)/netif-test.Po \
 	utils/$(DEPDIR)/trn_server.Po \
@@ -487,8 +491,8 @@ SOURCES = $(libgeolib_la_SOURCES) $(libmb1_la_SOURCES) \
 	$(libnetif_la_SOURCES) $(libnewmat_la_SOURCES) \
 	$(libqnx_la_SOURCES) $(libtnav_la_SOURCES) \
 	$(libtrnw_la_SOURCES) $(mb1rs_SOURCES) $(mmcpub_SOURCES) \
-	$(mmcsub_SOURCES) $(netif_test_SOURCES) $(trn_cli_SOURCES) \
-	$(trn_replay_SOURCES) $(trn_server_SOURCES) \
+	$(mmcsub_SOURCES) $(netif_test_SOURCES) $(otree_SOURCES) \
+	$(trn_cli_SOURCES) $(trn_replay_SOURCES) $(trn_server_SOURCES) \
 	$(trnclient_test_SOURCES) $(trnif_test_SOURCES) \
 	$(trnifsvr_test_SOURCES) $(trnu_cli_SOURCES) \
 	$(trnusvr_test_SOURCES)
@@ -845,6 +849,8 @@ trnifsvr_test_SOURCES = utils/trnifsvr-test.c
 trnifsvr_test_LDADD = libnetif.la  libtrnw.la
 mb1rs_SOURCES = trnw/mb1rs.c trnw/mb1rs-app.c
 mb1rs_LDADD = ${LIBMFRAME} libmb1.la libtnav.la
+otree_SOURCES = utils/OctreeTest.cpp
+otree_LDADD = libtnav.la  libnewmat.la libqnx.la libgeolib.la -lnetcdf -lm -lpthread 
 dist_bin_SCRIPTS = 
 CLEANFILES = 
 DISTCLEANFILES = 
@@ -1316,6 +1322,12 @@ utils/netif-test.$(OBJEXT): utils/$(am__dirstamp) \
 netif-test$(EXEEXT): $(netif_test_OBJECTS) $(netif_test_DEPENDENCIES) $(EXTRA_netif_test_DEPENDENCIES) 
 	@rm -f netif-test$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(netif_test_OBJECTS) $(netif_test_LDADD) $(LIBS)
+utils/OctreeTest.$(OBJEXT): utils/$(am__dirstamp) \
+	utils/$(DEPDIR)/$(am__dirstamp)
+
+otree$(EXEEXT): $(otree_OBJECTS) $(otree_DEPENDENCIES) $(EXTRA_otree_DEPENDENCIES) 
+	@rm -f otree$(EXEEXT)
+	$(AM_V_CXXLD)$(CXXLINK) $(otree_OBJECTS) $(otree_LDADD) $(LIBS)
 trnw/trncli_test.$(OBJEXT): trnw/$(am__dirstamp) \
 	trnw/$(DEPDIR)/$(am__dirstamp)
 trnw/trn_cli.$(OBJEXT): trnw/$(am__dirstamp) \
@@ -1583,6 +1595,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@trnw/$(DEPDIR)/trnucli_test.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@trnw/$(DEPDIR)/trnusvr_test.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@trnw/$(DEPDIR)/trnw.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@utils/$(DEPDIR)/OctreeTest.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@utils/$(DEPDIR)/TerrainNavClient.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@utils/$(DEPDIR)/TrnClient.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@utils/$(DEPDIR)/netif-test.Po@am__quote@ # am--include-marker
@@ -1961,6 +1974,7 @@ distclean: distclean-am
 	-rm -f trnw/$(DEPDIR)/trnucli_test.Po
 	-rm -f trnw/$(DEPDIR)/trnusvr_test.Po
 	-rm -f trnw/$(DEPDIR)/trnw.Plo
+	-rm -f utils/$(DEPDIR)/OctreeTest.Po
 	-rm -f utils/$(DEPDIR)/TerrainNavClient.Po
 	-rm -f utils/$(DEPDIR)/TrnClient.Po
 	-rm -f utils/$(DEPDIR)/netif-test.Po
@@ -2162,6 +2176,7 @@ maintainer-clean: maintainer-clean-am
 	-rm -f trnw/$(DEPDIR)/trnucli_test.Po
 	-rm -f trnw/$(DEPDIR)/trnusvr_test.Po
 	-rm -f trnw/$(DEPDIR)/trnw.Plo
+	-rm -f utils/$(DEPDIR)/OctreeTest.Po
 	-rm -f utils/$(DEPDIR)/TerrainNavClient.Po
 	-rm -f utils/$(DEPDIR)/TrnClient.Po
 	-rm -f utils/$(DEPDIR)/netif-test.Po
