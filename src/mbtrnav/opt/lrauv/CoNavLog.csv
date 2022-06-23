@@ -1,0 +1,25 @@
+Field name, variable name, C type, units, printf format
+Vehicle Id, vehId, int, scalar, "%d"
+Northing, northing, double, UTM meters, "%.2f"
+Easting, easting, double, UTM meters, "%.2f"
+Depth, depth, double, meters, "%.2f"
+
+Results in a CSV file like:
+
+Timestamp, Vehicle Id, Northing (UTM meters), Easting (UTM meters), Depth (meters)
+1234567890.123, 1, 4064567.12, 563456.12, 0.02
+
+Results in a C struct like:
+
+struct CoNavLogData {
+    int  vehId;  // scalar
+    double northing;  // UTM meters
+    double easting;  // UTM meters
+    double depth;  // meters
+}
+
+Results in a C API like
+
+int create_CoNavLog(const char* folder);  // returns fd
+int log_CoNavData(int fd, struct CoNavLogData* data);  // returns #bytes written
+int destroy_CoNavLog(int fd);
