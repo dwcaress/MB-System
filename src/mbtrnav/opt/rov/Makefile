@@ -112,6 +112,10 @@ OI=oi
 OI_LCM=$(LCM_TYPES)/idt_t.lcm \
 $(LCM_TYPES)/lcm_header_t.lcm
 OI_HPP=$(OI)/idt_t.hpp \
+$(OI)/double_t.hpp \
+$(OI)/rdi_pd4_t.hpp \
+$(OI)/octans_t.hpp \
+$(OI)/kearfott_t.hpp \
 $(OI)/lcm_header_t.hpp
 OI_JAVA=$(OI_HPP:%.hpp=%.java)
 OI_CLASS=$(OI_HPP:%.hpp=%.class)
@@ -119,6 +123,7 @@ OI_CLASS=$(OI_HPP:%.hpp=%.class)
 TRN=trn
 TRN_LCM=$(LCM_TYPES)/mb1_beam_t.lcm \
 $(LCM_TYPES)/trnu_estimate_t.lcm \
+$(LCM_TYPES)/trn_stat_t.lcm \
 $(LCM_TYPES)/trn_meas_t.lcm \
 $(LCM_TYPES)/trn_pose_t.lcm \
 $(LCM_TYPES)/trnupub_t.lcm \
@@ -126,6 +131,7 @@ $(LCM_TYPES)/trn_mb1_t.lcm \
 $(LCM_TYPES)/trn_stat_t.lcm
 TRN_HPP=$(TRN)/mb1_beam_t.hpp \
 $(TRN)/trnu_estimate_t.hpp \
+$(TRN)/trn_stat_t.hpp \
 $(TRN)/trn_meas_t.hpp \
 $(TRN)/trn_pose_t.hpp \
 $(TRN)/trnupub_t.hpp \
@@ -144,7 +150,7 @@ TRNXPP_LIBS =  -llcm -lstdc++ -lmb1 -ltrncli -ltrn  -lnewmat -lqnx -lnetcdf -lm 
 
 FVTEST=fv-test
 FVTEST_SRC = flag_var_test.cpp
-FVTEST_HPP= flag_utils.hpp
+FVTEST_HPP = $(UTILS_DIR)/flag_utils.hpp
 FVTEST_OBJ = $(FVTEST_SRC:%.cpp=$(BUILD_DIR)/%.o)
 FVTEST_LIBS = -lstdc++ $(OS_LIBS)
 
@@ -190,7 +196,7 @@ $(OUTPUT_DIR)/$(LIBUDPMS): $(LIBUDPMS_OBJ)
 	@echo building $@...
 	ar -rcs $@ $(LIBUDPMS_OBJ)
 
-# build mbari_main utility
+# build trnlcm test
 $(OUTPUT_DIR)/$(TRNLCM): $(LCM_HPP) $(TRNLCM_OBJ)
 	@echo building $@...
 	$(CXX) $(CXXFLAGS) $(INC_PATHS) $(LIB_PATHS) -o  $@ $(LD_FLAGS) $(TRNLCM_OBJ) $(TRNLCM_LIBS)
@@ -268,6 +274,8 @@ $(OI)/%.java : $(LCM_TYPES)/%.lcm
 	lcm-gen -j $<
 	@echo
 
+# this rule is different b/c multiple dependent
+# files must be compiled together
 $(OI)/%.class : $(OI_JAVA)
 	@ echo compiling $@...
 	javac -cp $(LCM_JAR) $^
