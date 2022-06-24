@@ -4,9 +4,6 @@ endif
 if BUILD_MBSVPSELECT
   MBSVPSELECT_PROG = mbsvpselect
 endif
-if BUILD_MBTRN
-  MBTRNINCDIR = -I${top_srcdir}/src/mbtrn/r7kr -I${top_srcdir}/src/mbtrn/utils -I${top_srcdir}/src/mbtrnframe/usr -I${top_srcdir}/src/mbtrnframe/mframe/src
-endif
 
 bin_PROGRAMS =
 bin_PROGRAMS += mbconfig
@@ -61,7 +58,6 @@ AM_CPPFLAGS += -I${top_srcdir}/src/mbaux
 if BUILD_GSF
 AM_CPPFLAGS += -I${top_srcdir}/src/gsf
 endif
-AM_CPPFLAGS += $(MBTRNINCDIR)
 AM_CPPFLAGS += ${libproj_CPPFLAGS}
 AM_CPPFLAGS += ${libgmt_CPPFLAGS}
 AM_CPPFLAGS += ${libnetcdf_CPPFLAGS}

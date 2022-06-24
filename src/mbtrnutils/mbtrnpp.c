@@ -247,6 +247,10 @@ typedef struct mbtrnpp_opts_s{
     // opt "convergence-repeat-min"
     int convergence_repeat_min;
 
+    // opt "reinit-search"
+    double reinit_search_xy;
+    double reinit_search_z;
+
     // opt "reinit-gain"
     bool reinit_gain_enable;
 
@@ -459,6 +463,13 @@ typedef struct mbtrnpp_cfg_s{
     int convergence_repeat_min;
 
     // --------------------------
+    // mbtrnpp reinit search sizes
+
+    // opt "reinit-search"
+    double reinit_search_xy;
+    double reinit_search_z;
+
+    // --------------------------
     // TRN reinit triggers
 
     // TRN reinit gain enable
@@ -578,6 +589,8 @@ s=NULL;\
 #define OPT_TRN_DECS_DFL                  0.0
 #define OPT_COVARIANCE_MAGNITUDE_MAX_DFL  5.0
 #define OPT_CONVERGENCE_REPEAT_MIN        200
+#define OPT_REINIT_SEARCH_XY              60.0
+#define OPT_REINIT_SEARCH_Z               5.0
 #define OPT_REINIT_GAIN_ENABLE_DFL        false
 #define OPT_REINIT_FILE_ENABLE_DFL        false
 #define OPT_REINIT_XYOFFSET_ENABLE_DFL    false
@@ -733,22 +746,26 @@ typedef enum {
     MBTPP_EV_MB_DISN,
     MBTPP_EV_MB_PUBN,
     MBTPP_EV_MB_REINIT,
+
     MBTPP_EV_MB_GAIN_LO,
     MBTPP_EV_MB_FILE,
     MBTPP_EV_MB_xyoffset,
     MBTPP_EV_MB_offset_z,
     MBTPP_EV_MB_TRNUCLI_RESET,
+
     MBTPP_EV_MB_EOF,
     MBTPP_EV_MB_NONSURVEY,
     MBTPP_EV_EMBGETALL,
     MBTPP_EV_EMBFAILURE,
     MBTPP_EV_EMBFRAMERD,
+
     MBTPP_EV_EMBLOGWR,
     MBTPP_EV_EMBSOCKET,
     MBTPP_EV_EMBCON,
     MBTPP_EV_EMBPUB,
 #ifdef WITH_MBTNAV
     MBTPP_EV_TRN_PROCN,
+
     MBTPP_EV_TRNU_PUBN,
     MBTPP_EV_TRNU_PUBEMPTYN,
     MBTPP_EV_ETRNUPUB,
@@ -797,7 +814,7 @@ typedef enum {
 const char *mbtrnpp_stevent_labels[] = {
     "mb_cycles", "mb_con", "mb_dis", "mb_pub_n", "mb_reinit", "mb_gain_lo", "mb_file",
     "mb_xyoffset", "mb_offset_z", "mb_trnucli_reset", "mb_eof", "mb_nonsurvey", "e_mbgetall", "e_mbfailure",
-    "e_mb_frame_rd", "e_mb_log_wr", "e_mbsocket", "e_mbcon" "e_mbpub"
+    "e_mb_frame_rd", "e_mb_log_wr", "e_mbsocket", "e_mbcon", "e_mbpub"
 #ifdef WITH_MBTNAV
     ,"trn_proc_n","trnu_pub_n","trnu_pubempty_n","e_trnu_pub","e_trnu_pubempty"
 #endif
@@ -957,6 +974,7 @@ int n_unconverged_streak = 0;
 int n_converged_tot = 0;
 int n_unconverged_tot = 0;
 int n_reinit = 0;
+int n_reinit_since_use = 10;
 double reinit_time = 0.0;
 bool converged = false;
 bool reinitialized = true;
@@ -1411,6 +1429,8 @@ static int s_mbtrnpp_init_cfg(mbtrnpp_cfg_t *cfg)
         cfg->trn_decs=0.0;
         cfg->covariance_magnitude_max = OPT_COVARIANCE_MAGNITUDE_MAX_DFL;
         cfg->convergence_repeat_min = OPT_CONVERGENCE_REPEAT_MIN;
+        cfg->reinit_search_xy = OPT_REINIT_SEARCH_XY;
+        cfg->reinit_search_z = OPT_REINIT_SEARCH_Z;
         cfg->reinit_gain_enable = false;
         cfg->reinit_file_enable = false;
         cfg->reinit_xyoffset_enable = false;
@@ -1471,6 +1491,8 @@ static int s_mbtrnpp_init_opts(mbtrnpp_opts_t *opts)
         opts->trn_decs=OPT_TRN_DECS_DFL;
         opts->covariance_magnitude_max = OPT_COVARIANCE_MAGNITUDE_MAX_DFL;
         opts->convergence_repeat_min = OPT_CONVERGENCE_REPEAT_MIN;
+        opts->reinit_search_xy = OPT_REINIT_SEARCH_XY;
+        opts->reinit_search_z = OPT_REINIT_SEARCH_Z;
         opts->reinit_gain_enable = OPT_REINIT_GAIN_ENABLE_DFL;
         opts->reinit_file_enable = OPT_REINIT_FILE_ENABLE_DFL;
         opts->reinit_xyoffset_enable = OPT_REINIT_XYOFFSET_ENABLE_DFL;
@@ -1594,6 +1616,8 @@ static int s_mbtrnpp_cfgstr(char **pdest, size_t olen, mbtrnpp_cfg_t *self, cons
     mbb_printf(optr, "%s%*s%*s%s%*.2lf%s", pre, indent, (indent>0?" ":""), wkey, "trn_decs", sep, wval, self->trn_decs, del);
     mbb_printf(optr, "%s%*s%*s%s%*.2lf%s", pre, indent, (indent>0?" ":""), wkey, "covariance_magnitude_max", sep, wval, self->covariance_magnitude_max, del);
     mbb_printf(optr, "%s%*s%*s%s%*d%s", pre, indent, (indent>0?" ":""), wkey, "convergence_repeat_min", sep, wval, self->convergence_repeat_min, del);
+    mbb_printf(optr, "%s%*s%*s%s%*d%s", pre, indent, (indent>0?" ":""), wkey, "reinit_search_xy", sep, wval, self->reinit_search_xy, del);
+    mbb_printf(optr, "%s%*s%*s%s%*d%s", pre, indent, (indent>0?" ":""), wkey, "reinit_search_z", sep, wval, self->reinit_search_z, del);
     mbb_printf(optr, "%s%*s%*s%s%*c%s", pre, indent, (indent>0?" ":""), wkey, "reinit_gain_enable", sep, wval, BOOL2YNC(self->reinit_gain_enable), del);
     mbb_printf(optr, "%s%*s%*s%s%*c%s", pre, indent, (indent>0?" ":""), wkey, "reinit_file_enable", sep, wval, BOOL2YNC(self->reinit_file_enable), del);
     mbb_printf(optr, "%s%*s%*s%s%*c%s", pre, indent, (indent>0?" ":""), wkey, "reinit_xyoffset_enable", sep, wval, BOOL2YNC(self->reinit_xyoffset_enable), del);
@@ -1677,6 +1701,8 @@ static int s_mbtrnpp_optstr(char **pdest, size_t olen, mbtrnpp_opts_t *self, con
     mbb_printf(optr, "%s%*s%*s%s%*.2lf%s", pre, indent, (indent>0?" ":""), wkey, "trn-decs", sep, wval, self->trn_decs, del);
     mbb_printf(optr, "%s%*s%*s%s%*.2lf%s", pre, indent, (indent>0?" ":""), wkey, "covariance-magnitude-max", sep, wval, self->covariance_magnitude_max, del);
     mbb_printf(optr, "%s%*s%*s%s%*d%s", pre, indent, (indent>0?" ":""), wkey, "convergence-repeat-min", sep, wval, self->convergence_repeat_min, del);
+    mbb_printf(optr, "%s%*s%*s%s%*d%s", pre, indent, (indent>0?" ":""), wkey, "reinit_search_xy", sep, wval, self->reinit_search_xy, del);
+    mbb_printf(optr, "%s%*s%*s%s%*d%s", pre, indent, (indent>0?" ":""), wkey, "reinit_search_z", sep, wval, self->reinit_search_z, del);
     mbb_printf(optr, "%s%*s%*s%s%*c%s", pre, indent, (indent>0?" ":""), wkey, "reinit_gain_enable", sep, wval, BOOL2YNC(self->reinit_gain_enable), del);
     mbb_printf(optr, "%s%*s%*s%s%*c%s", pre, indent, (indent>0?" ":""), wkey, "reinit_file_enable", sep, wval, BOOL2YNC(self->reinit_file_enable), del);
     mbb_printf(optr, "%s%*s%*s%s%*c%s", pre, indent, (indent>0?" ":""), wkey, "reinit_xyoffset_enable", sep, wval, BOOL2YNC(self->reinit_xyoffset_enable), del);
@@ -2379,6 +2405,10 @@ static int s_mbtrnpp_kvparse_fn(char *key, char *val, void *cfg)
                 if(sscanf(val,"%d",&opts->convergence_repeat_min)==1){
                     retval=0;
                 }
+            } else if(strcmp(key,"reinit-search")==0 ){
+                if(sscanf(val,"%lf/%lf",&opts->reinit_search_xy,&opts->reinit_search_z)==1){
+                    retval=0;
+                }
             } else if(strcmp(key,"reinit-gain")==0 ){
                 if( mkvc_parse_bool(val,&opts->reinit_gain_enable)==0){
                     retval=0;
@@ -2604,6 +2634,9 @@ static int s_mbtrnpp_configure(mbtrnpp_cfg_t *cfg, mbtrnpp_opts_t *opts)
         cfg->covariance_magnitude_max = opts->covariance_magnitude_max;
         // convergence-repeat-min
         cfg->convergence_repeat_min = opts->convergence_repeat_min;
+        // reinit-search
+        cfg->reinit_search_xy = opts->reinit_search_xy;
+        cfg->reinit_search_z = opts->reinit_search_z;
         // reinit-gain
         cfg->reinit_gain_enable = opts->reinit_gain_enable;
         // reinit-file
@@ -2915,6 +2948,7 @@ int main(int argc, char **argv) {
                          "\t--trn-decs\n"
                          "\t--covariance-magnitude-max=covariance_magnitude_max\n"
                          "\t--convergence-repeat-min=convergence_repeat_min\n"
+                         "\t--reinit-search=reinit_search_xy/reinit_search_z\n"
                          "\t--reinit-gain\n"
                          "\t--reinit-file\n"
                          "\t--reinit-xyoffset=xyoffset_max\n"
@@ -3504,7 +3538,7 @@ int main(int argc, char **argv) {
   /* set transmit_gain threshold according to format */
   double transmit_gain_threshold = 0.0;
   if (mbtrn_cfg->reinit_gain_enable) {
-    if (mbtrn_cfg->format == MBF_RESON7KR) {
+    if (mbtrn_cfg->format == MBF_RESON7KR || mbtrn_cfg->format == MBF_RESON7K3) {
         transmit_gain_threshold = TRN_XMIT_GAIN_RESON7K_DFL;
     }
     else if (mbtrn_cfg->format == MBF_KEMKMALL) {
@@ -3954,10 +3988,11 @@ int main(int argc, char **argv) {
           beam_end = MAX(beam_end, 0);
 
           /* apply decimation - only consider outputting decimated soundings */
-          beam_decimation = ((beam_end - beam_start + 1) / mbtrn_cfg->n_output_soundings) + 1;
+          beam_decimation = ((beam_end - beam_start + 1) / mbtrn_cfg->n_output_soundings);
           int dj = mbtrn_cfg->median_filter_n_across / 2;
           n_output = 0;
           for (int j = beam_start; j <= beam_end; j++) {
+
             if ((j - beam_start) % beam_decimation == 0) {
               if (mb_beam_ok(ping[i_ping_process].beamflag_filter[j])) {
                 /* apply median filtering to this sounding */
@@ -3994,7 +4029,15 @@ int main(int argc, char **argv) {
                   // fprintf(stderr, "\n");
                 }
                 if (mb_beam_ok(ping[i_ping_process].beamflag_filter[j])) {
-                  n_output++;
+                  if (n_output < mbtrn_cfg->n_output_soundings) {
+                    n_output++;
+                  } else {
+                    ping[i_ping_process].beamflag_filter[j] = MB_FLAG_FLAG + MB_FLAG_FILTER;
+                    n_soundings_decimated++;
+                  }
+                }
+                else {
+                  n_soundings_decimated++;
                 }
               }
             }
@@ -4152,24 +4195,40 @@ int main(int argc, char **argv) {
                   // if reinit_flag set then reinit the TRN filter
                   if (reinit_flag) {
                     reinitialized = true;
-                    //wtnav_reinit_filter(trn_instance, true);
-                    fprintf(stderr, "--reinit time_d:%.6f centered on offset: %f %f %f\n",
-                                  ping[i_ping_process].time_d, use_offset_e, use_offset_n, use_offset_z);
-                    wtnav_reinit_filter_offset(trn_instance, true, use_offset_n, use_offset_e, use_offset_z);
-                      // TODO: replace wtnav_reinit_filter_offset with the following,
-                      // which correspond 1:1 with TerrainNav method calls
-                      // use existing xyz sdev init values
-//                      d_triplet_t xyz_sdev={0., 0., 0.};
-//                      wtnav_get_init_stddev_xyz(trn_instance, &xyz_sdev);
-//
-//                      wtnav_reinit_filter_box(trn_instance, true, use_offset_n, use_offset_e, use_offset_z,
-//                                              xyz_sdev.x, xyz_sdev.y, xyz_sdev.z);
+                    // TRN reinit function options are:
+                    //
+                    //   (1) reinit w/ zero offset and default standard deviations
+                    //       which correspond to the particle filter distribution widths
+                    //   wtnav_reinit_filter(trn_instance, true);
+                    //
+                    //   (2) Reinit w/ offset set to last good offset estimate and
+                    //       default standard deviations
+                    //   wtnav_reinit_filter_offset(trn_instance, true, use_offset_n, use_offset_e, use_offset_z);
+                    //
+                    //   (3) Reinit w/ offset set to last good offset estimate and
+                    //       specified standard deviations (here set to default values)
+                    //   d_triplet_t xyz_sdev={0., 0., 0.};
+                    //   wtnav_get_init_stddev_xyz(trn_instance, &xyz_sdev);
+                    //   wtnav_reinit_filter_box(trn_instance, true, use_offset_n, use_offset_e, use_offset_z,
+                    //                                              xyz_sdev.x, xyz_sdev.y, xyz_sdev.z);
+                    //
+                    d_triplet_t xyz_sdev={0., 0., 0.};
+                    xyz_sdev.x = MIN((n_reinit_since_use + 1), 10) * mbtrn_cfg->reinit_search_xy;
+                    xyz_sdev.y = xyz_sdev.x;
+                    xyz_sdev.z = mbtrn_cfg->reinit_search_z;
+                    //wtnav_get_init_stddev_xyz(trn_instance, &xyz_sdev);
+                    fprintf(stderr, "--reinit time_d:%.6f centered on offset: %f %f %f  sd: %f %f %f\n",
+                                  ping[i_ping_process].time_d, use_offset_e, use_offset_n, use_offset_z,
+                                  xyz_sdev.x, xyz_sdev.y, xyz_sdev.z);
+                    wtnav_reinit_filter_box(trn_instance, true, use_offset_n, use_offset_e, use_offset_z,
+                                              xyz_sdev.x, xyz_sdev.y, xyz_sdev.z);
 
                     mlog_tprintf(mbtrnpp_mlog_id, "i,trn filter reinit time_d:%.6f centered on offset: %f %f %f\n",
                                   ping[i_ping_process].time_d, use_offset_e, use_offset_n, use_offset_z);
                     MST_COUNTER_INC(app_stats->stats->events[MBTPP_EV_MB_REINIT]);
                     reinit_flag = false;
                     n_reinit++;
+                    n_reinit_since_use++;
                   }
 
                   MST_METRIC_START(app_stats->stats->metrics[MBTPP_CH_TRN_PROC_TRN_XT], mtime_dtime());
@@ -5413,27 +5472,44 @@ int s_mbtrnpp_trnu_reset_callback()
 
     double reset_time = mtime_etime();
 
-    fprintf(stderr, "--reinit (cli_req) systime:%.6f centered on offset: %f %f %f\n",
-            reset_time, use_offset_e, use_offset_n, use_offset_z);
+    // TRN reinit function options are:
+    //
+    //   (1) reinit w/ zero offset and default standard deviations
+    //       which correspond to the particle filter distribution widths
+    //   wtnav_reinit_filter(trn_instance, true);
+    //
+    //   (2) Reinit w/ offset set to last good offset estimate and
+    //       default standard deviations
+    //   wtnav_reinit_filter_offset(trn_instance, true, use_offset_n, use_offset_e, use_offset_z);
+    //
+    //   (3) Reinit w/ offset set to last good offset estimate and
+    //       specified standard deviations (here set to default values)
+    //   d_triplet_t xyz_sdev={0., 0., 0.};
+    //   wtnav_get_init_stddev_xyz(trn_instance, &xyz_sdev);
+    //   wtnav_reinit_filter_box(trn_instance, true, use_offset_n, use_offset_e, use_offset_z,
+    //                                              xyz_sdev.x, xyz_sdev.y, xyz_sdev.z);
+    //
+    d_triplet_t xyz_sdev={0., 0., 0.};
+    xyz_sdev.x = MIN((n_reinit_since_use + 1), 10) * mbtrn_cfg->reinit_search_xy;
+    xyz_sdev.y = xyz_sdev.x;
+    xyz_sdev.z = mbtrn_cfg->reinit_search_z;
+    // wtnav_get_init_stddev_xyz(trn_instance, &xyz_sdev);
+    fprintf(stderr, "--reinit (cli_req) systime:%.6f centered on offset: %f %f %f  sd: %f %f %f\n",
+                  reset_time, use_offset_e, use_offset_n, use_offset_z,
+                  xyz_sdev.x, xyz_sdev.y, xyz_sdev.z);
+    wtnav_reinit_filter_box(trn_instance, true, use_offset_n, use_offset_e, use_offset_z,
+                              xyz_sdev.x, xyz_sdev.y, xyz_sdev.z);
 
-    // TODO: replace wtnav_reinit_filter_offset with wtnav_reinit_filter_box
-    wtnav_reinit_filter_offset(trn_instance, true, use_offset_n, use_offset_e, use_offset_z);
-
-    // TODO: use current values, or generate in mbtrnpp?
-//    d_triplet_t xyz_sdev={0., 0., 0.};
-//    wtnav_get_init_stddev_xyz(trn_instance, &xyz_sdev);
-//
-//    wtnav_reinit_filter_box(trn_instance, true, use_offset_n, use_offset_e, use_offset_z,
-//                            xyz_sdev.x, xyz_sdev.y, xyz_sdev.z);
-
-    mlog_tprintf(mbtrnpp_mlog_id, "i,trn filter reinit.cli systime:%.6f centered on offset: %f %f %f\n",
-                 reset_time, use_offset_e, use_offset_n, use_offset_z);
+    mlog_tprintf(mbtrnpp_mlog_id, "i,trn filter reinit.cli systime:%.6f centered on offset: %f %f %f  sd: %f %f %f\n",
+                 reset_time, use_offset_e, use_offset_n, use_offset_z,
+                 xyz_sdev.x, xyz_sdev.y, xyz_sdev.z);
 
     MST_COUNTER_INC(app_stats->stats->events[MBTPP_EV_MB_REINIT]);
     MST_COUNTER_INC(app_stats->stats->events[MBTPP_EV_MB_TRNUCLI_RESET]);
 
 //    reinit_flag = false;
     n_reinit++;
+    n_reinit_since_use++;
 
     int reinit_post=wtnav_get_num_reinits(trn_instance);
 
@@ -5446,6 +5522,73 @@ int s_mbtrnpp_trnu_reset_callback()
     return retval;
 }
 
+int s_mbtrnpp_trnu_reset_ofs_callback(double ofs_x, double ofs_y, double ofs_z)
+{
+    int retval=0;
+    int reinits_pre=wtnav_get_num_reinits(trn_instance);
+
+    double reset_time = mtime_etime();
+
+    d_triplet_t xyz_sdev={0., 0., 0.};
+    xyz_sdev.x = mbtrn_cfg->reinit_search_xy;
+    xyz_sdev.y = xyz_sdev.x;
+    xyz_sdev.z = mbtrn_cfg->reinit_search_z;
+    fprintf(stderr, "--reinit_ofs (cli_req) systime:%.6f centered on offset: %f %f %f  sd: %f %f %f\n",
+                  reset_time, use_offset_e, use_offset_n, use_offset_z,
+                  xyz_sdev.x, xyz_sdev.y, xyz_sdev.z);
+    wtnav_reinit_filter_box(trn_instance, true, ofs_x, ofs_y, ofs_z,
+                              xyz_sdev.x, xyz_sdev.y, xyz_sdev.z);
+
+    mlog_tprintf(mbtrnpp_mlog_id, "i,trn filter reinit_ofs.cli systime:%.6f centered on offset: %f %f %f  sd: %f %f %f\n",
+                 reset_time, ofs_x, ofs_y, ofs_z,
+                 xyz_sdev.x, xyz_sdev.y, xyz_sdev.z);
+
+    MST_COUNTER_INC(app_stats->stats->events[MBTPP_EV_MB_REINIT]);
+    MST_COUNTER_INC(app_stats->stats->events[MBTPP_EV_MB_TRNUCLI_RESET]);
+
+    //    reinit_flag = false;
+    n_reinit++;
+    n_reinit_since_use++;
+
+    int reinit_post=wtnav_get_num_reinits(trn_instance);
+
+    if(reinit_post<=reinits_pre){
+        retval=-1;
+    }
+
+    return retval;
+}
+
+int s_mbtrnpp_trnu_reset_box_callback(double ofs_x, double ofs_y, double ofs_z, double sx, double sy, double sz)
+{
+    int retval=0;
+    int reinits_pre=wtnav_get_num_reinits(trn_instance);
+
+    double reset_time = mtime_etime();
+
+    fprintf(stderr, "--reinit_box (cli_req) systime:%.6f centered on offset: %lf %lf %lf %lf %lf %lf\n",
+            reset_time, ofs_x, ofs_y, ofs_z, sx, sy, sz);
+
+    wtnav_reinit_filter_box(trn_instance, true, ofs_x, ofs_y, ofs_z, sx, sy, sz);
+
+    mlog_tprintf(mbtrnpp_mlog_id, "i,trn filter reinit_box.cli systime:%.6f centered on offset: %lf %lf %lf %lf %lf %lf\n",
+                 reset_time, ofs_x, ofs_y, ofs_z, sx, sy, sz);
+
+    MST_COUNTER_INC(app_stats->stats->events[MBTPP_EV_MB_REINIT]);
+    MST_COUNTER_INC(app_stats->stats->events[MBTPP_EV_MB_TRNUCLI_RESET]);
+
+    //    reinit_flag = false;
+    n_reinit++;
+    n_reinit_since_use++;
+
+    int reinit_post=wtnav_get_num_reinits(trn_instance);
+
+    if(reinit_post<=reinits_pre){
+        retval=-1;
+    }
+
+    return retval;
+}
 
 int mbtrnpp_init_trnusvr(netif_t **psvr, char *host, int port, wtnav_t *trn, bool verbose)
 {
@@ -5465,7 +5608,9 @@ int mbtrnpp_init_trnusvr(netif_t **psvr, char *host, int port, wtnav_t *trn, boo
         if(NULL!=svr){
             *psvr = svr;
             g_trnu_res->trn=trn_instance;
-            g_trnu_res->reset_callback=s_mbtrnpp_trnu_reset_callback;
+            g_trnu_res->reset_callback = s_mbtrnpp_trnu_reset_callback;
+            g_trnu_res->reset_ofs_callback = s_mbtrnpp_trnu_reset_ofs_callback;
+            g_trnu_res->reset_box_callback = s_mbtrnpp_trnu_reset_box_callback;
 
             netif_set_reqres_res(svr,g_trnu_res);
             //            trnif_res_t rr_resources={trn};
@@ -5594,6 +5739,7 @@ int mbtrnpp_check_reinit(trn_update_t *pstate, trn_config_t *cfg)
             use_covariance[1] = pstate->mse_dat->covariance[2];
             use_covariance[2] = pstate->mse_dat->covariance[5];
             use_covariance[3] = pstate->mse_dat->covariance[1];
+            n_reinit_since_use = 0;
           } else {
             use_trn_offset = false;
           }
@@ -6325,7 +6471,7 @@ int mbtrnpp_reson7kr_input_read(int verbose, void *mbio_ptr, size_t *size, char 
         PMPRINT(MOD_MBTRNPP,MBTRNPP_V4,(stderr,"r7kr_read_stripped_frame failed: sync_bytes[%d] status[%d] err[%d]\n",sync_bytes,status, *error));
 
         MST_COUNTER_INC(app_stats->stats->events[MBTPP_EV_EMBFRAMERD]);
-        MST_COUNTER_ADD(app_stats->stats->events[MBTPP_STA_MB_SYNC_BYTES],sync_bytes);
+        MST_COUNTER_ADD(app_stats->stats->status[MBTPP_STA_MB_SYNC_BYTES],sync_bytes);
 
         // check connection status (socket errors)
         // only reconnect if disconnected
@@ -6967,7 +7113,6 @@ int mbtrnpp_mb1r_input_open(int verbose, void *mbio_ptr, char *definition, int *
 
     return (status);
 }
-
 int mbtrnpp_mb1r_input_read(int verbose, void *mbio_ptr, size_t *size, char *buffer, int *error)
 {
 
@@ -7106,7 +7251,7 @@ int mbtrnpp_mb1r_input_read(int verbose, void *mbio_ptr, size_t *size, char *buf
         PMPRINT(MOD_MBTRNPP,MBTRNPP_V4,(stderr,"mb1r_read_frame failed: sync_bytes[%d] status[%d] err[%d]\n",sync_bytes,status, *error));
 
         MST_COUNTER_INC(app_stats->stats->events[MBTPP_EV_EMBFRAMERD]);
-        MST_COUNTER_ADD(app_stats->stats->events[MBTPP_STA_MB_SYNC_BYTES],sync_bytes);
+        MST_COUNTER_ADD(app_stats->stats->status[MBTPP_STA_MB_SYNC_BYTES],sync_bytes);
 
         // check connection status
         // only reconnect if disconnected

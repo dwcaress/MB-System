@@ -32,10 +32,13 @@ src/mbtrn/tbinx
 src/mbtrn/udpc
 src/mbtrn/udps
 src/mbtrn/mb1conv
+src/mbtrn/mb1-cli
 src/mbtrnutils/mbtrnpp
 src/mbtrn/r7kr_test
 src/mbtrnav/trn-cli
 src/mbtrnav/trn-server
+src/mbtrnav/trnlog-player
+src/mbtrnav/trnxpp
 src/mbtrnav/mmcpub
 src/mbtrnav/mmcsub
 src/mbtrnsave/
@@ -200,3 +203,5 @@ libtool
 src/mbtrnav/mb1rs
 src/mbtrn/mb1r_test
 build/README.md
+src/mbtrn/mb1-cli
+src/mbtrnutils/mbgrdtilemaker

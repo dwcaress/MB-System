@@ -1,7 +1,7 @@
 dnl--------------------------------------------------------------------
 dnl    The MB-system:    configure.ac    12/7/2011
 dnl
-dnl    Copyright (c) 2011-2021 by
+dnl    Copyright (c) 2011-2022 by
 dnl    D. W. Caress (caress@lamont.ldgo.columbia.edu)
 dnl    and D. N. Chayes (dale@lamont.ldgo.columbia.edu)
 dnl    Lamont-Doherty Earth Observatory
@@ -11,14 +11,14 @@ dnl    See README file for copying and redistribution conditions.
 dnl--------------------------------------------------------------------
 
 dnl Initialize and set version and version date
-AC_INIT([mbsystem],[5.7.9beta28],[http://listserver.mbari.org/sympa/arc/mbsystem],[mbsystem],[http://www.mbari.org/data/mbsystem/])
-AC_DEFINE(VERSION_DATE, ["21 March 2022"], [Set VERSION_DATE define in mb_config.h])
+AC_INIT([mbsystem],[5.7.9beta37],[http://listserver.mbari.org/sympa/arc/mbsystem],[mbsystem],[http://www.mbari.org/data/mbsystem/])
+AC_DEFINE(VERSION_DATE, ["17 June 2022"], [Set VERSION_DATE define in mb_config.h])
 
 AS_ECHO([" "])
 AS_ECHO(["------------------------------------------------------------------------------"])
 AS_ECHO(["    The MB-system:    configure    12/7/2011"])
 AS_ECHO([" "])
-AS_ECHO(["    Copyright (c) 2011-2021 by"])
+AS_ECHO(["    Copyright (c) 2011-2022 by"])
 AS_ECHO(["    D. W. Caress (caress@lamont.ldgo.columbia.edu)"])
 AS_ECHO(["    and D. N. Chayes (dale@lamont.ldgo.columbia.edu)"])
 AS_ECHO(["    Lamont-Doherty Earth Observatory"])
@@ -1084,7 +1084,7 @@ if test "$build_opencvtools" = "yes" ; then
         if test "$OPENCV4_SETTING" = "no"; then
             AC_MSG_ERROR([Did not find libopencv_core according to --with-opencv-lib - check the installation!])
         fi
-        opencv4_LIBS="-L$opencv4_libdir -R $opencv4_libdir -lopencv_core -lopencv_highgui -lopencv_ccalib -lopencv_calib3d -lopencv_imgcodecs -lopencv_imgproc"
+        opencv4_LIBS="-L$opencv4_libdir -R $opencv4_libdir -lopencv_core -lopencv_highgui -lopencv_calib3d -lopencv_imgcodecs -lopencv_imgproc"
         opencv4_LDFLAGS="-L$opencv4_libdir"
     else
         dnl Look for pkg-config OpenCV4 package...

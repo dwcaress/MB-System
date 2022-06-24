@@ -2452,6 +2452,10 @@ void do_update_visualization_status() {
 /*--------------------------------------------------------------------*/
 
 void do_naverr_init(int mode) {
+  if (mbna_verbose >= 0) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called   mode:%d\n", __func__, mode);
+  }
+
   /* manage naverr */
   XtManageChild(bulletinBoard_naverr);
 
@@ -2510,7 +2514,7 @@ void do_naverr_init(int mode) {
     else
       mbnavadjust_naverr_specific_section(mbna_file_select, mbna_section_select);
   }
-
+  mbna_naverr_mode = mode;
 
   /* update naverr labels */
   mbnavadjust_naverr_plot(MBNA_PLOT_MODE_FIRST);
@@ -2805,7 +2809,7 @@ void do_list_data_select(Widget w, XtPointer client_data, XtPointer call_data) {
         do_naverr_init(MBNA_NAVERR_MODE_SECTION);
       }
 
-      /* else if naverr window is up, load selected crossing */
+      /* else if naverr window is up, load selected section */
       else {
         mbnavadjust_naverr_specific_section(mbna_file_select, mbna_section_select);
         mbnavadjust_naverr_plot(MBNA_PLOT_MODE_FIRST);
@@ -2932,12 +2936,12 @@ void do_list_data_select(Widget w, XtPointer client_data, XtPointer call_data) {
       if (found) {
         /* bring up naverr window if required */
         if (mbna_naverr_mode == MBNA_NAVERR_MODE_UNLOADED) {
-          do_naverr_init(MBNA_NAVERR_MODE_CROSSING);
+          do_naverr_init(MBNA_NAVERR_MODE_SECTION);
         }
 
         /* else if naverr window is up, load selected crossing */
         else {
-          mbnavadjust_naverr_specific_crossing(mbna_crossing_select, mbna_tie_select);
+          mbnavadjust_naverr_specific_section(mbna_file_select, mbna_section_select);
           mbnavadjust_naverr_plot(MBNA_PLOT_MODE_FIRST);
           do_naverr_update();
         }
@@ -5525,7 +5529,7 @@ void do_modelplot_input(Widget w, XtPointer client_data, XtPointer call_data) {
 
         /* replot model if zoom set */
         mbnavadjust_modelplot_setzoom();
-                project.modelplot_uptodate = false;
+        project.modelplot_uptodate = false;
         mbnavadjust_modelplot_plot(__FILE__, __LINE__);
         mbna_modelplot_zoom_x1 = 0;
         mbna_modelplot_zoom_x2 = 0;
@@ -5772,15 +5776,15 @@ void do_picknav_notify(size_t instance) {
   /* get shared data */
   int status = mbview_getsharedptr(mbna_verbose, &shareddata, &error);
 
-  // fprintf(stderr,"\n*************\ndo_picknav_notify:%zu  selected: %d %d  navadjust: %d %d\n",
-  // instance,shareddata->nav_selected[0],shareddata->nav_selected[1],
-  // shareddata->nav_selected_mbnavadjust[0],shareddata->nav_selected_mbnavadjust[1]);
+  fprintf(stderr,"\n*************\ndo_picknav_notify:%zu  selected: %d %d  navadjust: %d %d\n",
+  instance,shareddata->nav_selected[0],shareddata->nav_selected[1],
+  shareddata->nav_selected_mbnavadjust[0],shareddata->nav_selected_mbnavadjust[1]);
 
   /* if any navigation selected then unselect and unload any selected crossing */
   if (shareddata->nav_selected_mbnavadjust[0] != MBV_SELECT_NONE) {
     /* unload currently loaded crossing */
-    // fprintf(stderr,"Need to unload current crossing: mbna_naverr_mode:%d mbna_current_crossing:%d mbna_current_tie:%d\n",
-    // mbna_naverr_mode, mbna_current_crossing, mbna_current_tie);
+    fprintf(stderr,"Need to unload current crossing: mbna_naverr_mode:%d mbna_current_crossing:%d mbna_current_tie:%d\n",
+    mbna_naverr_mode, mbna_current_crossing, mbna_current_tie);
 
     if (mbna_naverr_mode != MBNA_NAVERR_MODE_UNLOADED) {
       /* unload crossing, remove naverr window */
@@ -5794,15 +5798,46 @@ void do_picknav_notify(size_t instance) {
       mbna_current_crossing = MBV_SELECT_NONE;
       mbna_current_tie = MBV_SELECT_NONE;
     }
-    // fprintf(stderr,"Crossing should be unloaded: mbna_naverr_mode:%d mbna_current_crossing:%d mbna_current_tie:%d\n",
-    // mbna_naverr_mode, mbna_current_crossing, mbna_current_tie);
+    fprintf(stderr,"Crossing should be unloaded: mbna_naverr_mode:%d mbna_current_crossing:%d mbna_current_tie:%d\n",
+    mbna_naverr_mode, mbna_current_crossing, mbna_current_tie);
   }
-  // fprintf(stderr,"A do_picknav_notify: selected: %d %d  navadjust: %d %d\n",
-  // shareddata->nav_selected[0],shareddata->nav_selected[1],
-  // shareddata->nav_selected_mbnavadjust[0],shareddata->nav_selected_mbnavadjust[1]);
+  fprintf(stderr,"A do_picknav_notify: selected: %d %d  navadjust: %d %d\n",
+  shareddata->nav_selected[0],shareddata->nav_selected[1],
+  shareddata->nav_selected_mbnavadjust[0],shareddata->nav_selected_mbnavadjust[1]);
 
-  /* get selected navigation and translate to selected crossing */
-  if (shareddata->nav_selected_mbnavadjust[0] != MBV_SELECT_NONE &&
+  /* if set to look at global ties then translate selected navigation to
+     single section and open that in naverr with reference grid */
+  if (mbna_view_list == MBNA_VIEW_LIST_GLOBALTIES || mbna_view_list == MBNA_VIEW_LIST_GLOBALTIESSORTED) {
+    if (shareddata->nav_selected_mbnavadjust[0] != MBV_SELECT_NONE) {
+      struct mbview_nav_struct *nav1 =
+        (struct mbview_nav_struct *)&shareddata->navs[shareddata->nav_selected_mbnavadjust[0]];
+      int ifile1;
+      int isection1;
+      sscanf(nav1->name, "%d:%d", &ifile1, &isection1);
+      fprintf(stderr,"do_picknav_notify: nav1->name:%s\n",nav1->name);
+
+      /* bring up naverr window if required */
+      if (mbna_current_section != MBV_SELECT_NONE && mbna_naverr_mode == MBNA_NAVERR_MODE_UNLOADED) {
+        do_naverr_init(MBNA_NAVERR_MODE_SECTION);
+      }
+
+      /* or replot the existing window */
+      else if (mbna_current_section != MBV_SELECT_NONE) {
+        mbnavadjust_naverr_plot(MBNA_PLOT_MODE_FIRST);
+        do_naverr_update();
+        do_update_status();
+      }
+      if (project.modelplot) {
+        do_update_modelplot_status();
+        mbnavadjust_modelplot_plot(__FILE__, __LINE__);
+      }
+      if (project.visualization_status)
+        do_update_visualization_status();
+    }
+  }
+
+  /* else get selected navigation and translate to selected crossing */
+  else if (shareddata->nav_selected_mbnavadjust[0] != MBV_SELECT_NONE &&
       shareddata->nav_selected_mbnavadjust[1] != MBV_SELECT_NONE) {
     struct mbview_nav_struct *nav1 =
       (struct mbview_nav_struct *)&shareddata->navs[shareddata->nav_selected_mbnavadjust[0]];
@@ -5814,8 +5849,7 @@ void do_picknav_notify(size_t instance) {
     int isection2;
     sscanf(nav1->name, "%d:%d", &ifile1, &isection1);
     sscanf(nav2->name, "%d:%d", &ifile2, &isection2);
-    // fprintf(stderr,"do_picknav_notify: nav1->name:%s   nav2->name:%s\n",nav1->name,nav2->name);
-
+    fprintf(stderr,"do_picknav_notify: nav1->name:%s   nav2->name:%s\n",nav1->name,nav2->name);
     status = mbnavadjust_visualization_selectcrossingfromnav(ifile1, isection1, ifile2, isection2);
 
     /* bring up naverr window if required */
