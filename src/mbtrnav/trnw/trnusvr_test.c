@@ -339,9 +339,9 @@ static int s_trnu_pub(trnu_pub_t *update, netif_t *trnusvr)
 
     if(NULL!=update && NULL!=trnusvr){
         retval=0;
-        int iobytes=0;
+        size_t iobytes=0;
 
-        if( (iobytes=netif_pub(trnusvr,(char *)update, sizeof(trnu_pub_t)))>0){
+        if( netif_pub(trnusvr,(char *)update, sizeof(trnu_pub_t), &iobytes) == 0){
             retval=iobytes;
         }
     }

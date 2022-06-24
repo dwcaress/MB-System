@@ -5253,7 +5253,6 @@ int mbtrnpp_trnu_pub_osocket(trn_update_t *update,
 
     if(NULL!=update && NULL!=netif){
         retval=0;
-        int iobytes=0;
 
         double offset_n = update->mse_dat->x - update->pt_dat->x;
         double offset_e = update->mse_dat->y - update->pt_dat->y;
@@ -5299,8 +5298,9 @@ int mbtrnpp_trnu_pub_osocket(trn_update_t *update,
             update->update_time
         };
 
-        if( (iobytes=netif_pub(netif,(char *)&pub_data, sizeof(pub_data)))>0){
-            retval=iobytes;
+        size_t iobytes = 0;
+        if( netif_pub(netif,(char *)&pub_data, sizeof(pub_data), &iobytes) == 0){
+            retval = iobytes;
             MST_COUNTER_INC(app_stats->stats->events[MBTPP_EV_TRNU_PUBN]);
         } else {
             MST_COUNTER_INC(app_stats->stats->events[MBTPP_EV_ETRNUPUB]);
@@ -5316,8 +5316,6 @@ int mbtrnpp_trnu_pubempty_osocket(double time, double lat, double lon, double de
 
     if(NULL!=netif){
         retval=0;
-
-            int iobytes=0;
 
             int izero = 0;
             short int szero = 0;
@@ -5360,7 +5358,8 @@ int mbtrnpp_trnu_pubempty_osocket(double time, double lat, double lon, double de
                 dzero,
             };
 
-            if( (iobytes=netif_pub(netif,(char *)&pub_data, sizeof(pub_data)))>0){
+            size_t iobytes = 0;
+            if( netif_pub(netif,(char *)&pub_data, sizeof(pub_data), &iobytes) == 0){
                 retval=iobytes;
                 MST_COUNTER_INC(app_stats->stats->events[MBTPP_EV_TRNU_PUBEMPTYN]);
             } else {
@@ -6141,7 +6140,7 @@ int mbtrnpp_process_mb1(char *src, size_t len, trn_config_t *cfg)
             // server: service (mb1 server) client requests
             netif_reqres(mb1svr);
            // publish mb1 sounding to all clients
-            if(netif_pub(mb1svr,(char *)src, len)==0){
+            if(netif_pub(mb1svr,(char *)src, len, NULL) == 0){
 	            MST_COUNTER_INC(app_stats->stats->events[MBTPP_EV_MB_PUBN]);
             } else {
                 MST_COUNTER_INC(app_stats->stats->events[MBTPP_EV_EMBPUB]);

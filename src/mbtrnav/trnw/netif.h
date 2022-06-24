@@ -336,7 +336,7 @@ extern "C" {
     int netif_connections(netif_t *self);
 
     int netif_reqres(netif_t *self);
-    int netif_pub(netif_t *self, char *output_buffer, size_t len);
+    int netif_pub(netif_t *self, char *output_buffer, size_t len, size_t *r_iobytes);
     /// @fn const char *netif_get_version()
     /// @brief get build string.
     /// @return version string
