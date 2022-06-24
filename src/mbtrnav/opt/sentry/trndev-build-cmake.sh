@@ -5,12 +5,15 @@
 description="build/install trndev using cmake"
 VERBOSE="N"
 DO_INSTALL="N"
+DO_UNINSTALL="N"
+DO_BUILD="Y"
 
-MAKE_CMD=$(which cmake)
+MAKE_CMD=${MAKE_CMD:-$(which cmake)}
 
 TRNDEV_TOP=$PWD
 
-TRNDEV_INSTALL=${TRNDEV_INSTALL:-${TRNDEV_TOP}/install}
+DESTDIR=${DESTDIR:-""}
+PREFIX=${PREFIX:-"/usr/local"}
 
 ########################################
 # name: vout
@@ -36,11 +39,29 @@ printUsage(){
     echo
     echo " usage: `basename $0` [options]"
     echo " Options:"
-    echo "  -I     : install to default directory [${TRNDEV_INSTALL}]"
-    echo "  -i <s> : install to specifiec directory"
+    echo "  -d <s> : set DESTDIR for install/uninstall [${DESTDIR}]"
+    echo "  -p <s> : set PREFIX for install/uninstall [${PREFIX}]"
+    echo "  -i     : install"
+    echo "  -u     : uninstall"
     echo "  -h     : help message"
     echo "  -v     : verbose output"
     echo
+    echo "Examples:"
+    echo
+    echo " # build"
+    echo "   `basename $0`"
+    echo
+    echo " # install to default directory ${DESTDIR}${PREFIX}"
+    echo "   sudo `basename $0` -i"
+    echo
+    echo " # uninstall from default directory ${DESTDIR}${PREFIX}"
+    echo "   sudo `basename $0` -u"
+    echo
+    echo " # install to staging directory w/ default PREFIX (as non-root)"
+    echo "   `basename $0` -id \$PWD/stage"
+    echo
+    echo " # uninstall from staging directory w/ custom PREFIX (as non-root)"
+    echo "   `basename $0` -ud \$PWD/stage -p /foo/bar"
     echo
 }
 
@@ -55,13 +76,18 @@ processCmdLine(){
     OPTIND=1
     vout "`basename $0` all args[$*]"
 
-    while getopts Ii:hv Option
+    while getopts d:hip:uv Option
     do
         case $Option in
-            I ) DO_INSTALL="Y"
+            d ) DESTDIR=${OPTARG}
             ;;
-            i ) TRNDEV_INSTALL=${OPTARG}
-                DO_INSTALL="Y"
+            i ) DO_INSTALL="Y"
+                DO_BUILD="N"
+            ;;
+            d ) PREFIX=${OPTARG}
+            ;;
+            u ) DO_UNINSTALL="Y"
+                DO_BUILD="N"
             ;;
             v ) VERBOSE="Y"
             ;;
@@ -101,14 +127,38 @@ build_pkg(){
 # description: install package files to dest
 # args:
 #   src: build location
-#   dest: destination path
+#   dest: DESTDIR
+#   prefix: PREFIX
 # returnCode: none
 ########################################
 install_x(){
     src=$1
-    dest=$2
+    destdir=$2
+    prefix=$3
     cd $src
-    ${MAKE_CMD} --install . --prefix ${dest}
+    ${MAKE_CMD} --install . --prefix ${destdir}/${prefix}
+}
+
+########################################
+# name: uninstall_x
+# description: install package files to dest
+# args:
+#   src: space-delimited list (quoted)
+#   dest: DESTDIR
+#   prefix: PREFIX
+# returnCode: none
+########################################
+uninstall_x(){
+    src=$1
+    destdir=$2
+    prefix=$3
+    cd $src
+    if [ -f "./install_manifest.txt" ]
+    then
+        xargs rm < ./install_manifest.txt
+    else
+        echo "install_manifest not found in ${PWD}"
+    fi
 }
 
 # Script main entry point
@@ -128,17 +178,30 @@ echo " missing libtrnav directory"
 exit -1
 fi
 
-build_pkg ${TRNDEV_TOP}/mframe/build
-build_pkg ${TRNDEV_TOP}/libtrnav/build
+if [ ${DO_BUILD} == "Y" ]
+then
+    vout "building mframe"
+    build_pkg ${TRNDEV_TOP}/mframe/build
+    vout "building libtrnav"
+    build_pkg ${TRNDEV_TOP}/libtrnav/build
+fi
 
 if [ ${DO_INSTALL} == "Y" ]
 then
-    if [ ! -d ${TRNDEV_INSTALL} ]
+    if [ ! -d ${DESTDIR} ]
     then
-        mkdir -p ${TRNDEV_INSTALL}
+        mkdir -p ${DESTDIR}
     fi
-    echo "installing to ${TRNDEV_INSTALL}"
+    echo "installing to ${DESTDIR}/${PREFIX}"
 
-    install_x ${TRNDEV_TOP}/mframe/build ${TRNDEV_INSTALL}
-    install_x ${TRNDEV_TOP}/libtrnav/build ${TRNDEV_INSTALL}
+    install_x ${TRNDEV_TOP}/mframe/build ${DESTDIR} ${PREFIX}
+    install_x ${TRNDEV_TOP}/libtrnav/build ${DESTDIR} ${PREFIX}
+fi
+
+if [ ${DO_UNINSTALL} == "Y" ]
+then
+    vout "uninstalling from ${DESTDIR}/${PREFIX}"
+
+    uninstall_x ${TRNDEV_TOP}/mframe/build ${DESTDIR} ${PREFIX}
+    uninstall_x ${TRNDEV_TOP}/libtrnav/build ${DESTDIR} ${PREFIX}
 fi

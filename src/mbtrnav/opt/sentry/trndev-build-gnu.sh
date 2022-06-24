@@ -5,155 +5,15 @@
 description="build/install trndev using gnu make"
 VERBOSE="N"
 DO_INSTALL="N"
+DO_UNINSTALL="N"
+DO_BUILD="Y"
 
-MAKE_CMD=$(which make)
+MAKE_CMD=${MAKE_CMD:-$(which make)}
 
 TRNDEV_TOP=${TRNDEV_TOP:-"${PWD}"}
 
-TRNDEV_INSTALL=${TRNDEV_INSTALL:-${TRNDEV_TOP}/install}
-
-MF_VERSION=${MF_VERSION:-"0.1.0"}
-LT_VERSION=${LT_VERSION:-"0.1.0"}
-
-MF_SRC_LIB=${TRNDEV_TOP}/mframe/bin
-MF_DES_LIB=${TRNDEV_INSTALL}/lib
-MF_SRC_BIN=${TRNDEV_TOP}/mframe/bin
-MF_DES_BIN=${TRNDEV_INSTALL}/bin/mframe-${MF_VERSION}
-MF_SRC_INC=${TRNDEV_TOP}/mframe/src
-MF_DES_INC=${TRNDEV_INSTALL}/include/mframe-${MF_VERSION}
-
-LT_SRC_LIB=${TRNDEV_TOP}/libtrnav/bin
-LT_DES_LIB=${TRNDEV_INSTALL}/lib
-LT_SRC_BIN=${TRNDEV_TOP}/libtrnav/bin
-LT_DES_BIN=${TRNDEV_INSTALL}/bin/libtrnav-${LT_VERSION}
-LT_SRC_INC=${TRNDEV_TOP}/libtrnav
-LT_DES_INC=${TRNDEV_INSTALL}/include/libtrnav-${LT_VERSION}
-
-MF_BINARIES="\
-${MF_SRC_BIN}/medebug-test \
-${MF_SRC_BIN}/mkvconf-test \
-${MF_SRC_BIN}/mmdebug-test \
-${MF_SRC_BIN}/msocket-test \
-${MF_SRC_BIN}/mstats-test \
-${MF_SRC_BIN}/mtime-test
-"
-
-MF_LIBS="\
-${MF_SRC_LIB}/libmframe.a
-"
-
-MF_HEADERS="\
-${MF_SRC_INC}/mbbuf.h \
-${MF_SRC_INC}/mcbuf.h \
-${MF_SRC_INC}/mconfig.h \
-${MF_SRC_INC}/mdebug.h \
-${MF_SRC_INC}/medebug.h \
-${MF_SRC_INC}/merror.h \
-${MF_SRC_INC}/mfile.h \
-${MF_SRC_INC}/mframe.h \
-${MF_SRC_INC}/mkvconf.h \
-${MF_SRC_INC}/mlist.h \
-${MF_SRC_INC}/mlog.h \
-${MF_SRC_INC}/mmdebug.h \
-${MF_SRC_INC}/mmem.h \
-${MF_SRC_INC}/mqueue.h \
-${MF_SRC_INC}/mserial.h \
-${MF_SRC_INC}/msocket.h \
-${MF_SRC_INC}/mstats.h \
-${MF_SRC_INC}/mswap.h \
-${MF_SRC_INC}/mthread.h \
-${MF_SRC_INC}/mtime.h \
-${MF_SRC_INC}/mutils.h \
-${MF_SRC_INC}/sysq.h
-"
-
-LT_BINARIES="\
-${LT_SRC_BIN}/trnucli-test \
-${LT_SRC_BIN}/trnusvr-test \
-${LT_SRC_BIN}/mcpub \
-${LT_SRC_BIN}/mcsub \
-${LT_SRC_BIN}/mmcpub \
-${LT_SRC_BIN}/mmcsub \
-${LT_SRC_BIN}/trn-server \
-${LT_SRC_BIN}/otree
-"
-
-LT_LIBS="\
-${LT_SRC_LIB}/libgeolib.a \
-${LT_SRC_LIB}/libmb1.a \
-${LT_SRC_LIB}/libnetif.a \
-${LT_SRC_LIB}/libnewmat.a \
-${LT_SRC_LIB}/libqnx.a \
-${LT_SRC_LIB}/libtrn.a \
-${LT_SRC_LIB}/libtrnw.a \
-${LT_SRC_LIB}/libtrncli.a \
-${LT_SRC_LIB}/libtrnucli.a
-"
-
-LT_HEADERS="\
-${LT_SRC_INC}/qnx-utils/AngleData.h \
-${LT_SRC_INC}/qnx-utils/AsciiFile.h \
-${LT_SRC_INC}/qnx-utils/BinaryFile.h \
-${LT_SRC_INC}/qnx-utils/CharData.h \
-${LT_SRC_INC}/qnx-utils/DataField.h \
-${LT_SRC_INC}/qnx-utils/DataFieldFactory.h \
-${LT_SRC_INC}/qnx-utils/DataLog.h \
-${LT_SRC_INC}/qnx-utils/DataLogReader.h \
-${LT_SRC_INC}/qnx-utils/DataLogWriter.h \
-${LT_SRC_INC}/qnx-utils/DoubleData.h \
-${LT_SRC_INC}/qnx-utils/DynamicArray.h \
-${LT_SRC_INC}/qnx-utils/Exception.h \
-${LT_SRC_INC}/qnx-utils/ExternalData.h \
-${LT_SRC_INC}/qnx-utils/FileData.h \
-${LT_SRC_INC}/qnx-utils/FloatData.h \
-${LT_SRC_INC}/qnx-utils/IntegerData.h \
-${LT_SRC_INC}/qnx-utils/LogFile.h \
-${LT_SRC_INC}/qnx-utils/MathP.h \
-${LT_SRC_INC}/qnx-utils/NavUtils.h \
-${LT_SRC_INC}/qnx-utils/ShortData.h \
-${LT_SRC_INC}/qnx-utils/StringConverter.h \
-${LT_SRC_INC}/qnx-utils/StringData.h \
-${LT_SRC_INC}/qnx-utils/TimeIF.h \
-${LT_SRC_INC}/qnx-utils/TimeP.h \
-${LT_SRC_INC}/qnx-utils/TimeTag.h \
-${LT_SRC_INC}/qnx-utils/ourTypes.h \
-${LT_SRC_INC}/terrain-nav/Octree.hpp \
-${LT_SRC_INC}/terrain-nav/OctreeSupport.hpp \
-${LT_SRC_INC}/terrain-nav/OctreeTestCode.h \
-${LT_SRC_INC}/terrain-nav/PositionLog.h \
-${LT_SRC_INC}/terrain-nav/TNavBankFilter.h \
-${LT_SRC_INC}/terrain-nav/TNavConfig.h \
-${LT_SRC_INC}/terrain-nav/TNavExtendKalmanFilter.h \
-${LT_SRC_INC}/terrain-nav/TNavFilter.h \
-${LT_SRC_INC}/terrain-nav/TNavPFLog.h \
-${LT_SRC_INC}/terrain-nav/TNavParticleFilter.h \
-${LT_SRC_INC}/terrain-nav/TNavPointMassFilter.h \
-${LT_SRC_INC}/terrain-nav/TNavSigmaPointFilter.h \
-${LT_SRC_INC}/terrain-nav/TRNUtils.h \
-${LT_SRC_INC}/terrain-nav/TerrainMap.h \
-${LT_SRC_INC}/terrain-nav/TerrainMapDEM.h \
-${LT_SRC_INC}/terrain-nav/TerrainMapOctree.h \
-${LT_SRC_INC}/terrain-nav/TerrainNav.h \
-${LT_SRC_INC}/terrain-nav/TerrainNavLog.h \
-${LT_SRC_INC}/terrain-nav/genFilterDefs.h \
-${LT_SRC_INC}/terrain-nav/mapio.h \
-${LT_SRC_INC}/terrain-nav/matrixArrayCalcs.h \
-${LT_SRC_INC}/terrain-nav/myOutput.h \
-${LT_SRC_INC}/terrain-nav/particleFilterDefs.h \
-${LT_SRC_INC}/terrain-nav/structDefs.h \
-${LT_SRC_INC}/terrain-nav/trn_common.h \
-${LT_SRC_INC}/terrain-nav/trn_log.h \
-${LT_SRC_INC}/trnw/mb1_dmsg.h \
-${LT_SRC_INC}/trnw/mb1_msg.h \
-${LT_SRC_INC}/trnw/mb1rs.h \
-${LT_SRC_INC}/trnw/netif.h \
-${LT_SRC_INC}/trnw/trn_cli.h \
-${LT_SRC_INC}/trnw/trn_msg.h \
-${LT_SRC_INC}/trnw/trnif_msg.h \
-${LT_SRC_INC}/trnw/trnif_proto.h \
-${LT_SRC_INC}/trnw/trnu_cli.h \
-${LT_SRC_INC}/trnw/trnw.h
-"
+DESTDIR=${DESTDIR:-""}
+PREFIX=${PREFIX:-"/usr/local"}
 
 ########################################
 # name: vout
@@ -179,11 +39,29 @@ printUsage(){
     echo
     echo " usage: `basename $0` [options]"
     echo " Options:"
-    echo "  -I     : install to default directory [${TRNDEV_INSTALL}]"
-    echo "  -i <s> : install to specifiec directory"
+    echo "  -d <s> : set DESTDIR for install/uninstall [${DESTDIR}]"
+    echo "  -p <s> : set PREFIX for install/uninstall [${PREFIX}]"
+    echo "  -i     : install"
+    echo "  -u     : uninstall"
     echo "  -h     : help message"
     echo "  -v     : verbose output"
     echo
+    echo "Examples:"
+    echo
+    echo " # build"
+    echo "   `basename $0`"
+    echo
+    echo " # install to default directory ${DESTDIR}${PREFIX}"
+    echo "   sudo `basename $0` -i"
+    echo
+    echo " # uninstall from default directory ${DESTDIR}${PREFIX}"
+    echo "   sudo `basename $0` -u"
+    echo
+    echo " # install to staging directory w/ default PREFIX (as non-root)"
+    echo "   `basename $0` -id \$PWD/stage"
+    echo
+    echo " # uninstall from staging directory w/ custom PREFIX (as non-root)"
+    echo "   `basename $0` -ud \$PWD/stage -p /foo/bar"
     echo
 }
 
@@ -198,13 +76,18 @@ processCmdLine(){
     OPTIND=1
     vout "`basename $0` all args[$*]"
 
-    while getopts Ii:hv Option
+    while getopts d:hip:uv Option
     do
         case $Option in
-            I ) DO_INSTALL="Y"
+            d ) DESTDIR=${OPTARG}
             ;;
-            i ) TRNDEV_INSTALL=${OPTARG}
-                DO_INSTALL="Y"
+            i ) DO_INSTALL="Y"
+                DO_BUILD="N"
+            ;;
+            d ) PREFIX=${OPTARG}
+            ;;
+            u ) DO_UNINSTALL="Y"
+                DO_BUILD="N"
             ;;
             v ) VERBOSE="Y"
             ;;
@@ -234,59 +117,63 @@ build_pkg(){
 }
 
 ########################################
-# name: install_mkdir
-# description: make installation directories
-# args:none
-# returnCode: none
-########################################
-install_mkdir(){
-
-    if [ ! -d ${MF_DES_LIB} ]
-    then
-        mkdir -p ${MF_DES_LIB}
-    fi
-    if [ ! -d ${MF_DES_BIN} ]
-    then
-        mkdir -p ${MF_DES_BIN}
-    fi
-    if [ ! -d ${MF_DES_INC} ]
-    then
-        mkdir -p ${MF_DES_INC}
-    fi
-
-    if [ ! -d ${LT_DES_LIB} ]
-    then
-        mkdir -p ${MF_DES_LIB}
-    fi
-    if [ ! -d ${LT_DES_BIN} ]
-    then
-        mkdir -p ${LT_DES_BIN}
-    fi
-    if [ ! -d ${LT_DES_INC} ]
-    then
-        mkdir -p ${LT_DES_INC}
-    fi
-}
-
-########################################
 # name: install_x
 # description: install package files to dest
 # args:
 #   src: space-delimited list (quoted)
-#   dest: directory path
+#   dest: DESTDIR
+#   prefix: PREFIX
 # returnCode: none
 ########################################
 install_x(){
     src=$1
-    dest=$2
+    destdir=$2
+    prefix=$3
 
-    IFS=' ' read -ra arr <<< ${src}
-    for x in ${arr[*]}
-    do
-    vout "copying ${x} to ${dest}"
-    cp $x ${dest}/.
-    done
+    OPT_DEST=
+    if [ ! -z destdir ]
+    then
+        OPT_DEST="DESTDIR=${destdir}"
+    fi
 
+    OPT_PREFIX=
+    if [ ! -z prefix ]
+    then
+        OPT_PREFIX="PREFIX=${prefix}"
+    fi
+
+    cd $src
+    ${MAKE_CMD} ${OPT_DEST} ${OPT_PREFIX} install
+}
+
+########################################
+# name: uninstall_x
+# description: install package files to dest
+# args:
+#   src: space-delimited list (quoted)
+#   dest: DESTDIR
+#   prefix: PREFIX
+# returnCode: none
+########################################
+uninstall_x(){
+    src=$1
+    destdir=$2
+    prefix=$3
+
+    OPT_DEST=
+    if [ ! -z destdir ]
+    then
+        OPT_DEST="DESTDIR=${destdir}"
+    fi
+
+    OPT_PREFIX=
+    if [ ! -z prefix ]
+    then
+        OPT_PREFIX="PREFIX=${prefix}"
+    fi
+
+    cd $src
+    ${MAKE_CMD} ${OPT_DEST} ${OPT_PREFIX} uninstall
 }
 
 # Script main entry point
@@ -306,26 +193,31 @@ echo " missing libtrnav directory"
 exit -1
 fi
 
-vout "building mframe"
-build_pkg ${TRNDEV_TOP}/mframe all
+if [ ${DO_BUILD} == "Y" ]
+then
+    vout "building mframe"
+    build_pkg ${TRNDEV_TOP}/mframe all
 
-vout "building libtrnav"
-build_pkg ${TRNDEV_TOP}/libtrnav all trnc
-
+    vout "building libtrnav"
+    build_pkg ${TRNDEV_TOP}/libtrnav all trnc
+fi
 
 if [ ${DO_INSTALL} == "Y" ]
 then
-    if [ ! -d ${TRNDEV_INSTALL} ]
+    if [ ! -d ${DESTDIR} ]
     then
-        mkdir -p ${TRNDEV_INSTALL}
+        mkdir -p ${DESTDIR}
     fi
-    vout "installing to ${TRNDEV_INSTALL}"
+    vout "installing to ${DESTDIR}/${PREFIX}"
 
-    install_mkdir
-    install_x "${MF_LIBS}" ${MF_DES_LIB}
-    install_x "${MF_BINARIES}" ${MF_DES_BIN}
-    install_x "${MF_HEADERS}" ${MF_DES_INC}
-    install_x "${LT_LIBS}" ${LT_DES_LIB}
-    install_x "${LT_BINARIES}" ${LT_DES_BIN}
-    install_x "${LT_HEADERS}" ${LT_DES_INC}
+    install_x ${TRNDEV_TOP}/mframe ${DESTDIR} ${PREFIX}
+    install_x ${TRNDEV_TOP}/libtrnav ${DESTDIR} ${PREFIX}
+fi
+
+if [ ${DO_UNINSTALL} == "Y" ]
+then
+    vout "uninstalling from ${DESTDIR}/${PREFIX}"
+
+    uninstall_x ${TRNDEV_TOP}/mframe ${DESTDIR} ${PREFIX}
+    uninstall_x ${TRNDEV_TOP}/libtrnav ${DESTDIR} ${PREFIX}
 fi

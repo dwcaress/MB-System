@@ -819,7 +819,8 @@ void *s_trnucli_thread_fn(void *arg)
     mlog_tprintf(ctx->log_id,"host             %s\n",ctx->host);
     mlog_tprintf(ctx->log_id,"port             %d\n",ctx->port);
     mlog_tprintf(ctx->log_id,"ttl              %d\n",ctx->ttl);
-    mlog_tprintf(ctx->log_id,"flags            %08X\n",ctx->cli->flags);
+    mlog_tprintf(ctx->log_id,"cflags           %08X\n",ctx->cli->flags);
+    mlog_tprintf(ctx->log_id,"xflags           %08X\n",ctx->flags);
     mlog_tprintf(ctx->log_id,"update_fn        %p\n",ctx->cli->update_fn);
     mlog_tprintf(ctx->log_id,"hbeat_to_sec     %.3lf\n",ctx->hbeat_to_sec);
     mlog_tprintf(ctx->log_id,"listen_to_ms     %.3lf\n",ctx->listen_to_ms);
