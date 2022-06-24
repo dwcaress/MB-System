@@ -297,7 +297,7 @@ trnlog_player_DEPENDENCIES = libtnav.la
 am_trnu_cli_OBJECTS = trnw/trnucli_test.$(OBJEXT) \
 	trnw/trnu_cli.$(OBJEXT)
 trnu_cli_OBJECTS = $(am_trnu_cli_OBJECTS)
-trnu_cli_DEPENDENCIES = $(LIBMFRAME) libtrnw.la
+trnu_cli_DEPENDENCIES = $(LIBMFRAME) libtrnw.la libnetif.la
 am_trnusvr_test_OBJECTS = trnw/trnusvr_test.$(OBJEXT)
 trnusvr_test_OBJECTS = $(am_trnusvr_test_OBJECTS)
 trnusvr_test_DEPENDENCIES = libnetif.la libtrnw.la
@@ -908,7 +908,7 @@ mmcpub_LDADD = ${LIBMFRAME}
 mmcsub_SOURCES = trnw/mmcsub.c
 mmcsub_LDADD = ${LIBMFRAME}
 trnu_cli_SOURCES = trnw/trnucli_test.c trnw/trnu_cli.c
-trnu_cli_LDADD = ${LIBMFRAME} libtrnw.la
+trnu_cli_LDADD = ${LIBMFRAME} libtrnw.la libnetif.la
 trn_cli_SOURCES = trnw/trncli_test.c trnw/trn_cli.c
 trn_cli_LDADD = ${LIBMFRAME} libtrnw.la
 trnif_test_SOURCES = trnw/trnif_test.c
