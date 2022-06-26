@@ -5880,6 +5880,10 @@ int mbnavadjust_invertnav() {
   double *x_time_d = NULL;
   int *chunk_center = NULL;
   bool *chunk_continuity = NULL;
+  int *global_ties_xy_files = NULL;
+  int *global_ties_xy_sections = NULL;
+  int *global_ties_z_files = NULL;
+  int *global_ties_z_sections = NULL;
   double *u = NULL;
   double *v = NULL;
   double *w = NULL;
@@ -5906,6 +5910,8 @@ int mbnavadjust_invertnav() {
   int nnav = 0;
   int nblock = 0;
   int ndiscontinuity = 0;
+  int nglobaltiexy = 0;
+  int nglobaltiez = 0;
   int nsmooth = 0;
   int nnsmooth = 0;
   int ntie = 0;
@@ -6001,7 +6007,7 @@ int mbnavadjust_invertnav() {
     /* Initialize arrays, solution, perturbation                      */
     /*----------------------------------------------------------------*/
 
-        /* zero solution across all navigation */
+    /* zero solution across all navigation */
     for (int ifile = 0; ifile < project.num_files; ifile++) {
       file = &project.files[ifile];
       for (int isection = 0; isection < file->num_sections; isection++) {
@@ -6014,10 +6020,12 @@ int mbnavadjust_invertnav() {
       }
     }
 
-    /* count number of nav points, discontinuities, and blocks */
+    /* count number of nav points, discontinuities, blocks, and global ties */
     nnav = 0;
     nblock = 0;
     ndiscontinuity = 0;
+    nglobaltiexy = 0;
+    nglobaltiez = 0;
     for (int ifile = 0; ifile < project.num_files; ifile++) {
       file = &project.files[ifile];
       if (!file->sections[0].continuity)
@@ -6027,6 +6035,12 @@ int mbnavadjust_invertnav() {
         nnav += section->num_snav - section->continuity;
         if (!section->continuity)
           ndiscontinuity++;
+        if (section->global_tie_status == MBNA_TIE_XY || section->global_tie_status == MBNA_TIE_XYZ) {
+          nglobaltiexy++;
+        }
+        if (section->global_tie_status == MBNA_TIE_Z || section->global_tie_status == MBNA_TIE_XYZ) {
+          nglobaltiez++;
+        }
       }
       file->block = nblock - 1;
       file->block_offset_x = 0.0;
@@ -6042,6 +6056,10 @@ int mbnavadjust_invertnav() {
     status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, nnav * sizeof(double), (void **)&x_time_d, &error);
     status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, nnav * sizeof(int), (void **)&chunk_center, &error);
     status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, nnav * sizeof(bool), (void **)&chunk_continuity, &error);
+    status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, nglobaltiexy * sizeof(int), (void **)&global_ties_xy_files, &error);
+    status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, nglobaltiexy * sizeof(int), (void **)&global_ties_xy_sections, &error);
+    status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, nglobaltiez * sizeof(int), (void **)&global_ties_z_files, &error);
+    status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, nglobaltiez * sizeof(int), (void **)&global_ties_z_sections, &error);
     memset(x_continuity, 0, nnav * sizeof(bool));
     memset(x_quality, 0, nnav * sizeof(int));
     memset(x_num_ties, 0, nnav * sizeof(int));
@@ -6049,18 +6067,34 @@ int mbnavadjust_invertnav() {
     memset(x_time_d, 0, nnav * sizeof(double));
     memset(chunk_center, 0, nnav * sizeof(int));
     memset(chunk_continuity, 0, nnav * sizeof(bool));
+    memset(global_ties_xy_files, 0, nglobaltiexy * sizeof(int));
+    memset(global_ties_xy_sections, 0, nglobaltiexy * sizeof(int));
+    memset(global_ties_z_files, 0, nglobaltiez * sizeof(int));
+    memset(global_ties_z_sections, 0, nglobaltiez * sizeof(int));
 
-    /* loop over all files getting tables of time and continuity */
+    /* loop over all files getting tables of time, continuity and global ties */
     int inav = 0;
     nchunk = 0;
     nchunk_start = 0;
     chunk_distance = 25 * project.section_length;
     distance_sum = 0.0;
+    nglobaltiexy = 0;
+    nglobaltiez = 0;
     for (int ifile = 0; ifile < project.num_files; ifile++) {
       file = &project.files[ifile];
       chunk_distance = 10 * file->sections[0].distance;
       for (int isection = 0; isection < file->num_sections; isection++) {
         section = &file->sections[isection];
+        if (section->global_tie_status == MBNA_TIE_XY || section->global_tie_status == MBNA_TIE_XYZ) {
+          global_ties_xy_files[nglobaltiexy] = ifile;
+          global_ties_xy_sections[nglobaltiexy] = isection;
+          nglobaltiexy++;
+        }
+        if (section->global_tie_status == MBNA_TIE_Z || section->global_tie_status == MBNA_TIE_XYZ) {
+          global_ties_z_files[nglobaltiez] = ifile;
+          global_ties_z_sections[nglobaltiez] = isection;
+          nglobaltiez++;
+        }
         for (int isnav = 0; isnav < section->num_snav; isnav++) {
           if (isnav == 0 && section->continuity) {
             section->snav_invert_id[isnav] = inav - 1;
@@ -6111,6 +6145,308 @@ int mbnavadjust_invertnav() {
             nsmooth += 3;
         }
     }
+
+    /*----------------------------------------------------------------*/
+    /* Generate starting adjustment model by applying global ties. If a block
+       has a single global tie then that will be applied uniformly to all nav
+       points in that block. If a block has more than one global tie then the
+       offsets are applied by linear interpolation in time over the block. */
+    /*----------------------------------------------------------------*/
+
+    /* deal with xy global ties */
+    for (int igtie = 0; igtie < nglobaltiexy; igtie++) {
+
+      /* Note a conflict if the file for this global tie has xy navigation fixed */
+      if (project.files[global_ties_xy_files[igtie]].status == MBNA_FILE_FIXEDNAV
+          || project.files[global_ties_xy_files[igtie]].status == MBNA_FILE_FIXEDXYNAV) {
+        fprintf(stdout, "MBnavadjust warning: An xy global tie has been defined for a file with xy navigation fixed.\n");
+        fprintf(stdout, "  File: %2.2d:%5.5d %s   Section: %d  Offset: %f m east  %f m north  %f m vertical\n",
+                project.files[global_ties_xy_sections[igtie]].block,
+                global_ties_xy_files[igtie],
+                project.files[global_ties_xy_sections[igtie]].file,
+                global_ties_xy_sections[igtie],
+                project.files[global_ties_xy_sections[igtie]].sections[global_ties_xy_sections[igtie]].offset_x_m,
+                project.files[global_ties_xy_sections[igtie]].sections[global_ties_xy_sections[igtie]].offset_y_m,
+                project.files[global_ties_xy_sections[igtie]].sections[global_ties_xy_sections[igtie]].offset_z_m);
+        fprintf(stdout, "  This global tie will be ignored because the solution offset is constrained to be zero.\n\n");
+      }
+
+      /* survey/block of this global tie and the tie offset */
+      int iblock_gtie = project.files[global_ties_xy_files[igtie]].block;
+      int ifile_gtie = global_ties_xy_files[igtie];
+      int isection_gtie = global_ties_xy_sections[igtie];
+      double global_offset_time_d = project.files[ifile_gtie].sections[isection_gtie].snav_time_d[0];
+      double global_offset_x_m = project.files[ifile_gtie].sections[isection_gtie].offset_x_m;
+      double global_offset_y_m = project.files[ifile_gtie].sections[isection_gtie].offset_y_m;
+
+      /* Is this tie the first or last in a survey/block? */
+      bool first_gtie = true;
+      if (igtie > 0 && project.files[global_ties_xy_files[igtie-1]].block == iblock_gtie) {
+        first_gtie = false;
+      }
+      bool last_gtie = true;
+      if (igtie < nglobaltiexy - 1
+          && iblock_gtie == project.files[global_ties_xy_files[igtie+1]].block) {
+        last_gtie = false;
+      }
+
+      /* if first tie in survey/block then apply this global tie offset to all
+        nav points in this survey/block from the start up to this tie */
+      if (first_gtie) {
+
+        /* apply to all previous files in the survey/block */
+        for (int ifile = 0; ifile < ifile_gtie; ifile++) {
+          file = &project.files[ifile];
+          if (file->block == iblock_gtie) {
+            for (int isection = 0; isection < file->num_sections; isection++) {
+              section = &file->sections[isection];
+              for (int isnav = 0; isnav < section->num_snav; isnav++) {
+                section->snav_lon_offset[isnav] = global_offset_x_m * project.mtodeglon;
+                section->snav_lat_offset[isnav] = global_offset_y_m * project.mtodeglat;
+              }
+            }
+          }
+        }
+
+        /* apply to previous sections in this file */
+        file = &project.files[ifile_gtie];
+        for (int isection = 0; isection <= isection_gtie; isection++) {
+          section = &file->sections[isection];
+          for (int isnav = 0; isnav < section->num_snav; isnav++) {
+            section->snav_lon_offset[isnav] = global_offset_x_m * project.mtodeglon;
+            section->snav_lat_offset[isnav] = global_offset_y_m * project.mtodeglat;
+          }
+        }
+
+      } // end first_gtie
+
+      /* if this global tie and the next global tie are in the same survey/block
+         (i.e. !last_gtie) then linearly interpolate the offset in time between
+         the two ties */
+      if (!last_gtie) {
+
+        /* get end time and offset for interpolation */
+        double global_offset2_time_d = project.files[ifile_gtie+1].sections[isection_gtie+1].snav_time_d[0];
+        double global_offset2_x_m = project.files[ifile_gtie+1].sections[isection_gtie+1].offset_x_m;
+        double global_offset2_y_m = project.files[ifile_gtie+1].sections[isection_gtie+1].offset_y_m;
+
+        /* Apply to all files from the one containing the current global tie to
+          the one containing the next global tie. In the first file start at the
+          section of the global tie and in the last file end at the section of
+          the next global tie. */
+        for (int ifile = ifile_gtie + 1; ifile < global_ties_xy_files[igtie+1]; ifile++) {
+          file = &project.files[ifile];
+          if (file->block == iblock_gtie) {
+            int isection_start = 0;
+            if (ifile == ifile_gtie) {
+              isection_start = isection_gtie;
+            }
+            int isection_end = file->num_sections - 1;
+            if (ifile == global_ties_xy_files[igtie+1]) {
+              isection_end = global_ties_xy_sections[igtie+1];
+            }
+            for (int isection = 0; isection <= isection_end; isection++) {
+              section = &file->sections[isection];
+              for (int isnav = 0; isnav < section->num_snav; isnav++) {
+              double snav_time_d = section->snav_time_d[isnav];
+              double fraction = 0.0;
+              if (global_offset2_time_d > global_offset_time_d)
+                fraction = (snav_time_d - global_offset_time_d)
+                                  / (global_offset2_time_d - global_offset_time_d);
+              section->snav_lon_offset[isnav]
+                  = (global_offset_x_m
+                      + fraction * (global_offset2_x_m - global_offset_x_m)) * project.mtodeglon;
+              section->snav_lat_offset[isnav]
+                  = (global_offset_y_m
+                      + fraction * (global_offset2_y_m - global_offset_y_m)) * project.mtodeglat;
+              }
+            }
+          }
+        }
+      }
+
+      /* if last tie in survey/block then apply this global tie offset to all
+        nav points in this survey/block from this tie up to the end */
+      if (last_gtie) {
+
+        /* apply to later sections in this file */
+        file = &project.files[ifile_gtie];
+        for (int isection = isection_gtie; isection < file->num_sections; isection++) {
+          section = &file->sections[isection];
+          for (int isnav = 0; isnav < section->num_snav; isnav++) {
+            section->snav_lon_offset[isnav] = global_offset_x_m * project.mtodeglon;
+            section->snav_lat_offset[isnav] = global_offset_y_m * project.mtodeglat;
+          }
+        }
+
+        /* apply to all later files in the survey/block */
+        for (int ifile = ifile_gtie + 1; ifile < project.num_files; ifile++) {
+          file = &project.files[ifile];
+          if (file->block == iblock_gtie) {
+            for (int isection = 0; isection < file->num_sections; isection++) {
+              section = &file->sections[isection];
+              for (int isnav = 0; isnav < section->num_snav; isnav++) {
+                section->snav_lon_offset[isnav] = global_offset_x_m * project.mtodeglon;
+                section->snav_lat_offset[isnav] = global_offset_y_m * project.mtodeglat;
+              }
+            }
+          }
+        }
+      } // end last_gtie
+
+    } // end nglobaltiexy
+
+    /* deal with z global ties */
+    for (int igtie = 0; igtie < nglobaltiez; igtie++) {
+
+      /* survey/block of this global tie and the tie offset */
+      int iblock_gtie = project.files[global_ties_z_files[igtie]].block;
+      int ifile_gtie = global_ties_z_files[igtie];
+      int isection_gtie = global_ties_z_sections[igtie];
+      double global_offset_time_d = project.files[ifile_gtie].sections[isection_gtie].snav_time_d[0];
+      double global_offset_z_m = project.files[ifile_gtie].sections[isection_gtie].offset_z_m;
+
+      /* Is this tie the first or last in a survey/block? */
+      bool first_gtie = true;
+      if (igtie > 0 && project.files[global_ties_z_files[igtie-1]].block == iblock_gtie) {
+        first_gtie = false;
+      }
+      bool last_gtie = true;
+      if (igtie < nglobaltiez - 1
+          && iblock_gtie == project.files[global_ties_z_files[igtie+1]].block) {
+        last_gtie = false;
+      }
+
+      /* if first tie in survey/block then apply this global tie offset to all
+        nav points in this survey/block from the start up to this tie */
+      if (first_gtie) {
+
+        /* apply to all previous files in the survey/block */
+        for (int ifile = 0; ifile < ifile_gtie; ifile++) {
+          file = &project.files[ifile];
+          if (file->block == iblock_gtie) {
+            for (int isection = 0; isection < file->num_sections; isection++) {
+              section = &file->sections[isection];
+              for (int isnav = 0; isnav < section->num_snav; isnav++) {
+                section->snav_z_offset[isnav] = global_offset_z_m;
+              }
+            }
+          }
+        }
+
+        /* apply to previous sections in this file */
+        file = &project.files[ifile_gtie];
+        for (int isection = 0; isection <= isection_gtie; isection++) {
+          section = &file->sections[isection];
+          for (int isnav = 0; isnav < section->num_snav; isnav++) {
+            section->snav_z_offset[isnav] = global_offset_z_m;
+          }
+        }
+
+      } // end first_gtie
+
+      /* if this global tie and the next global tie are in the same survey/block
+         (i.e. !last_gtie) then linearly interpolate the offset in time between
+         the two ties */
+      if (!last_gtie) {
+
+        /* get end time and offset for interpolation */
+        double global_offset2_time_d = project.files[ifile_gtie+1].sections[isection_gtie+1].snav_time_d[0];
+        double global_offset2_z_m = project.files[ifile_gtie+1].sections[isection_gtie+1].offset_z_m;
+
+        /* Apply to all files from the one containing the current global tie to
+          the one containing the next global tie. In the first file start at the
+          section of the global tie and in the last file end at the section of
+          the next global tie. */
+        for (int ifile = ifile_gtie + 1; ifile < global_ties_z_files[igtie+1]; ifile++) {
+          file = &project.files[ifile];
+          if (file->block == iblock_gtie) {
+            int isection_start = 0;
+            if (ifile == ifile_gtie) {
+              isection_start = isection_gtie;
+            }
+            int isection_end = file->num_sections - 1;
+            if (ifile == global_ties_z_files[igtie+1]) {
+              isection_end = global_ties_z_sections[igtie+1];
+            }
+            for (int isection = 0; isection <= isection_end; isection++) {
+              section = &file->sections[isection];
+              for (int isnav = 0; isnav < section->num_snav; isnav++) {
+              double snav_time_d = section->snav_time_d[isnav];
+              double fraction = 0.0;
+              if (global_offset2_time_d > global_offset_time_d)
+                fraction = (snav_time_d - global_offset_time_d)
+                                  / (global_offset2_time_d - global_offset_time_d);
+              section->snav_z_offset[isnav]
+                  = global_offset_z_m
+                      + fraction * (global_offset2_z_m - global_offset_z_m);
+              }
+            }
+          }
+        }
+      }
+
+      /* if last tie in survey/block then apply this global tie offset to all
+        nav points in this survey/block from this tie up to the end */
+      if (last_gtie) {
+
+        /* apply to later sections in this file */
+        file = &project.files[ifile_gtie];
+        for (int isection = isection_gtie; isection < file->num_sections; isection++) {
+          section = &file->sections[isection];
+          for (int isnav = 0; isnav < section->num_snav; isnav++) {
+            section->snav_z_offset[isnav] = global_offset_z_m;
+          }
+        }
+
+        /* apply to all later files in the survey/block */
+        for (int ifile = ifile_gtie + 1; ifile < project.num_files; ifile++) {
+          file = &project.files[ifile];
+          if (file->block == iblock_gtie) {
+            for (int isection = 0; isection < file->num_sections; isection++) {
+              section = &file->sections[isection];
+              for (int isnav = 0; isnav < section->num_snav; isnav++) {
+                section->snav_z_offset[isnav] = global_offset_z_m;
+              }
+            }
+          }
+        }
+      } // end last_gtie
+
+    } // end nglobaltiez
+
+    /*----------------------------------------------------------------*/
+    /* Modify starting adjustment model by applying any fixed         */
+    /* navigation. Note that global ties and fixed files can be in    */
+    /* conflict. This stage could overwrite global tie constraints    */
+    /* applied above.                                                 */
+    /*----------------------------------------------------------------*/
+
+    for (int ifile = 0; ifile < project.num_files; ifile++) {
+      file = &project.files[ifile];
+      if (file->status == MBNA_FILE_FIXEDNAV || file->status == MBNA_FILE_FIXEDXYNAV) {
+        for (int isection = 0; isection < file->num_sections; isection++) {
+          section = &file->sections[isection];
+          for (int isnav = 0; isnav < section->num_snav; isnav++) {
+            section->snav_lon_offset[isnav] = 0.0;
+            section->snav_lat_offset[isnav] = 0.0;
+          }
+        }
+      }
+      if (file->status == MBNA_FILE_FIXEDNAV || file->status == MBNA_FILE_FIXEDZNAV) {
+        for (int isection = 0; isection < file->num_sections; isection++) {
+          section = &file->sections[isection];
+          for (int isnav = 0; isnav < section->num_snav; isnav++) {
+            section->snav_z_offset[isnav] = 0.0;
+          }
+        }
+      }
+    }
+
+    /*----------------------------------------------------------------*/
+    /* Modify starting adjustment model by solving for average adjustments
+       between the survey/blocks */
+    /*----------------------------------------------------------------*/
 
     /* get dimensions of inversion problem and initial misfit */
     ntie = 0;
@@ -6236,13 +6572,24 @@ int mbnavadjust_invertnav() {
               }
               jbvb = (jbvb2) * (jbvb2 + 1) / 2 + jbvb1;
 
+              file1 = &project.files[crossing->file_id_1];
+              section1 = &file1->sections[crossing->section_1];
+              file2 = &project.files[crossing->file_id_2];
+              section2 = &file2->sections[crossing->section_2];
+
               if (tie->status != MBNA_TIE_Z) {
-                bxavg[jbvb] += tie->offset_x_m;
-                byavg[jbvb] += tie->offset_y_m;
+                bxavg[jbvb] += tie->offset_x_m
+                            - (section2->snav_lon_offset[tie->snav_2]
+                                - section1->snav_lon_offset[tie->snav_1]) / project.mtodeglon;
+                byavg[jbvb] += tie->offset_y_m
+                            - (section2->snav_lat_offset[tie->snav_2]
+                                - section1->snav_lat_offset[tie->snav_1]) / project.mtodeglat;
                 nbxy[jbvb]++;
               }
               if (tie->status != MBNA_TIE_XY) {
-                bzavg[jbvb] += tie->offset_z_m;
+                bzavg[jbvb] += tie->offset_z_m
+                            - (section2->snav_z_offset[tie->snav_2]
+                                - section1->snav_z_offset[tie->snav_1]);
                 nbz[jbvb]++;
               }
             }
@@ -6285,13 +6632,13 @@ int mbnavadjust_invertnav() {
           if (section->global_tie_status != MBNA_TIE_NONE) {
             if (section->global_tie_status == MBNA_TIE_XYZ || section->global_tie_status == MBNA_TIE_XY) {
               bxfixstatus[file->block]++;
-              bxfix[file->block] += section->offset_x_m;
+              bxfix[file->block] += section->offset_x_m - section->snav_lon_offset[section->global_tie_snav] / project.mtodeglon;
               byfixstatus[file->block]++;
-              byfix[file->block] += section->offset_y_m;
+              byfix[file->block] += section->offset_y_m - section->snav_lat_offset[section->global_tie_snav] / project.mtodeglat;
             }
             if (section->global_tie_status == MBNA_TIE_XYZ || section->global_tie_status == MBNA_TIE_Z) {
               bzfixstatus[file->block]++;
-              bzfix[file->block] += section->offset_z_m;
+              bzfix[file->block] += section->offset_z_m - section->snav_z_offset[section->global_tie_snav];
             }
           }
         }
@@ -6336,7 +6683,7 @@ int mbnavadjust_invertnav() {
       }
     }
 
-    /* We do a three stage inversion first for block averages, then a slow relaxation
+    /* We do a three stage inversion: first for block averages, then a slow relaxation
      * towards a coarse solution, and finally an overdetermined least squares
      * solution for an additional perturbation to satisfy the remaining signal.
      * Make sure arrays are allocated large enough for both stages. */
@@ -6621,68 +6968,68 @@ int mbnavadjust_invertnav() {
                 x[3 * i + 2]);
       }
 
-            /* calculate final misfit */
-            nrms = 0;
-            rms_misfit_current = 0.0;
-            for (int icrossing = 0; icrossing < project.num_crossings; icrossing++) {
-                crossing = &project.crossings[icrossing];
-                if (crossing->status == MBNA_CROSSING_STATUS_SET)
-                    for (int itie = 0; itie < crossing->num_ties; itie++) {
-                        /* get tie */
-                        tie = (struct mbna_tie *)&crossing->ties[itie];
+      /* calculate final misfit */
+      nrms = 0;
+      rms_misfit_current = 0.0;
+      for (int icrossing = 0; icrossing < project.num_crossings; icrossing++) {
+          crossing = &project.crossings[icrossing];
+          if (crossing->status == MBNA_CROSSING_STATUS_SET)
+              for (int itie = 0; itie < crossing->num_ties; itie++) {
+                  /* get tie */
+                  tie = (struct mbna_tie *)&crossing->ties[itie];
 
-                        /* get absolute id for first snav point */
-                        file1 = &project.files[crossing->file_id_1];
-                        section1 = &file1->sections[crossing->section_1];
-                        // int nc1 = section1->snav_invert_id[tie->snav_1];
+                  /* get absolute id for first snav point */
+                  file1 = &project.files[crossing->file_id_1];
+                  section1 = &file1->sections[crossing->section_1];
+                  // int nc1 = section1->snav_invert_id[tie->snav_1];
 
-                        /* get absolute id for second snav point */
-                        file2 = &project.files[crossing->file_id_2];
-                        section2 = &file2->sections[crossing->section_2];
-                        // int nc2 = section2->snav_invert_id[tie->snav_2];
+                  /* get absolute id for second snav point */
+                  file2 = &project.files[crossing->file_id_2];
+                  section2 = &file2->sections[crossing->section_2];
+                  // int nc2 = section2->snav_invert_id[tie->snav_2];
 
-                        /* get offset vector for this tie */
-                        if (tie->status != MBNA_TIE_Z) {
-                            offset_x = tie->offset_x_m - (section2->snav_lon_offset[tie->snav_2] - section1->snav_lon_offset[tie->snav_1]) / project.mtodeglon;
-                            offset_y = tie->offset_y_m - (section2->snav_lat_offset[tie->snav_2] - section1->snav_lat_offset[tie->snav_1]) / project.mtodeglat;
-                            rms_misfit_current += offset_x * offset_x + offset_y * offset_y;
-                            nrms += 2;
-                        }
-                        if (tie->status != MBNA_TIE_XY) {
-                            offset_z = tie->offset_z_m - (section2->snav_z_offset[tie->snav_2] - section1->snav_z_offset[tie->snav_1]);
-                            rms_misfit_current += offset_z * offset_z;
-                            nrms += 1;
-                        }
-                    }
-            }
-            for (int ifile = 0; ifile < project.num_files; ifile++) {
-                file = &project.files[ifile];
-                for (int isection = 0; isection < file->num_sections; isection++) {
-                    section = &file->sections[isection];
-                    if (section->global_tie_status == MBNA_TIE_XYZ || section->global_tie_status == MBNA_TIE_XY) {
-                        offset_x =
-                            section->offset_x_m - section->snav_lon_offset[section->global_tie_snav] / project.mtodeglon;
-                        offset_y =
-                            section->offset_y_m - section->snav_lat_offset[section->global_tie_snav] / project.mtodeglat;
-                        rms_misfit_current += offset_x * offset_x + offset_y * offset_y;
-                        nrms += 2;
-                    }
-                    if (section->global_tie_status == MBNA_TIE_XYZ || section->global_tie_status == MBNA_TIE_Z) {
-                        offset_z = section->offset_z_m - section->snav_z_offset[section->global_tie_snav];
-                        rms_misfit_current += offset_z * offset_z;
-                        nrms += 1;
-                    }
-                }
-            }
-            if (nrms > 0) {
-                rms_misfit_current = sqrt(rms_misfit_current) / nrms;
-            }
+                  /* get offset vector for this tie */
+                  if (tie->status != MBNA_TIE_Z) {
+                      offset_x = tie->offset_x_m - (section2->snav_lon_offset[tie->snav_2] - section1->snav_lon_offset[tie->snav_1]) / project.mtodeglon;
+                      offset_y = tie->offset_y_m - (section2->snav_lat_offset[tie->snav_2] - section1->snav_lat_offset[tie->snav_1]) / project.mtodeglat;
+                      rms_misfit_current += offset_x * offset_x + offset_y * offset_y;
+                      nrms += 2;
+                  }
+                  if (tie->status != MBNA_TIE_XY) {
+                      offset_z = tie->offset_z_m - (section2->snav_z_offset[tie->snav_2] - section1->snav_z_offset[tie->snav_1]);
+                      rms_misfit_current += offset_z * offset_z;
+                      nrms += 1;
+                  }
+              }
+      }
+      for (int ifile = 0; ifile < project.num_files; ifile++) {
+          file = &project.files[ifile];
+          for (int isection = 0; isection < file->num_sections; isection++) {
+              section = &file->sections[isection];
+              if (section->global_tie_status == MBNA_TIE_XYZ || section->global_tie_status == MBNA_TIE_XY) {
+                  offset_x =
+                      section->offset_x_m - section->snav_lon_offset[section->global_tie_snav] / project.mtodeglon;
+                  offset_y =
+                      section->offset_y_m - section->snav_lat_offset[section->global_tie_snav] / project.mtodeglat;
+                  rms_misfit_current += offset_x * offset_x + offset_y * offset_y;
+                  nrms += 2;
+              }
+              if (section->global_tie_status == MBNA_TIE_XYZ || section->global_tie_status == MBNA_TIE_Z) {
+                  offset_z = section->offset_z_m - section->snav_z_offset[section->global_tie_snav];
+                  rms_misfit_current += offset_z * offset_z;
+                  nrms += 1;
+              }
+          }
+      }
+      if (nrms > 0) {
+          rms_misfit_current = sqrt(rms_misfit_current) / nrms;
+      }
 
-            fprintf(stderr, "\nBlock inversion:\n > Solution size:        %12g\n"
-                    " > Total solution size:  %12g\n > Initial misfit:       %12g\n"
-                    " > Previous misfit:      %12g\n > Final misfit:         %12g\n",
-                    rms_solution, rms_solution_total, rms_misfit_initial,
-                    rms_misfit_previous, rms_misfit_current);
+      fprintf(stderr, "\nBlock inversion:\n > Solution size:        %12g\n"
+              " > Total solution size:  %12g\n > Initial misfit:       %12g\n"
+              " > Previous misfit:      %12g\n > Final misfit:         %12g\n",
+              rms_solution, rms_solution_total, rms_misfit_initial,
+              rms_misfit_previous, rms_misfit_current);
 
       /* deallocate arrays used only for block inversion */
       status = mb_freed(mbna_verbose, __FILE__, __LINE__, (void **)&nbxy, &error);
@@ -6699,17 +7046,19 @@ int mbnavadjust_invertnav() {
       status = mb_freed(mbna_verbose, __FILE__, __LINE__, (void **)&bzfix, &error);
     }
 
-        /* stage 2 - iteratively relax towards a coarse offset model in which
+        /* Stage 2 - Iteratively relax towards a coarse offset model in which
          * nav specified as poor is downweighted relative to good nav. The
-         * nav offsets of this coarse model will be added to the block offsets
-         * and the total removed from the tie offsets used in the final inversion.
-         * The approach is to use the least squares inversion to solve for zero
-         * mean, Gaussian distributed offsets rather than the large scale offsets
-         * and drift.
-         * The coarseness is to solve for a navigation offset that is large scale
+         * coarseness is to solve for a navigation offset that is large scale
          * using a coarseness defined as 10 times the section length (which is
          * taken from the first section of the current file, as it can vary amongst
-         * surveys in a project).
+         * surveys in a project). The nav offsets of this coarse model will be
+         * added to the global tie offsets and the block offsets to provide the
+         * starting model for the the final inversion. Only the portions of the
+         * crossing tie offsets not fit by this stage 2 model will be incorporated
+         * into the inversion. The point of this multi-stage approach is to use
+         * the least squares inversion to solve for zero mean, Gaussian distributed
+         * offsets rather than the large scale offsets and drift characterizing
+         * many multi-survey navigation adjustment problems.
          */
 
         /* loop over all ties applying the offsets to the chunks partitioned according to survey quality */
@@ -8050,7 +8399,6 @@ fprintf(stderr,"APPLYING WEIGHT: %f  ifile:%d isection:%d\n",weight,ifile,isecti
           int snav_1_time_i[7], snav_2_time_i[7];
           double snav_1_time_d = project.files[crossing->file_id_1].sections[crossing->section_1].snav_time_d[tie->snav_1];
           double snav_2_time_d = project.files[crossing->file_id_2].sections[crossing->section_2].snav_time_d[tie->snav_2];
-          //ZZZZZZZZZZZZ
           mb_get_date(mbna_verbose, snav_1_time_d, snav_1_time_i);
           mb_get_date(mbna_verbose, snav_2_time_d, snav_2_time_i);
           double avg_tie_lon = 0.5 * (project.files[crossing->file_id_1].sections[crossing->section_1].snav_lon[tie->snav_1]
@@ -15221,7 +15569,7 @@ int mbnavadjust_modelplot_pick_tieoffsets(int x, int y) {
 
         ix = mbna_modelplot_xo + (int)(mbna_modelplot_xscale * (tie->isurveyplotindex - mbna_modelplot_tiestart));
 
-        iy = mbna_modelplot_yo_lon - (int)(mbna_modelplot_yscale * tie->offset_x_m);
+        iy = mbna_modelplot_yo_lon - (int)(mbna_modelplot_yscale * (tie->offset_x_m - mbna_modelplot_yxmid));
         range = (ix - x) * (ix - x) + (iy - y) * (iy - y);
         if (range < rangemin) {
           rangemin = range;
@@ -15232,7 +15580,7 @@ int mbnavadjust_modelplot_pick_tieoffsets(int x, int y) {
           // pick_snav = tie->snav_1;
         }
 
-        iy = mbna_modelplot_yo_lat - (int)(mbna_modelplot_yscale * tie->offset_y_m);
+        iy = mbna_modelplot_yo_lat - (int)(mbna_modelplot_yscale * (tie->offset_y_m - mbna_modelplot_yymid));
         range = (ix - x) * (ix - x) + (iy - y) * (iy - y);
         if (range < rangemin) {
           rangemin = range;
@@ -15243,7 +15591,7 @@ int mbnavadjust_modelplot_pick_tieoffsets(int x, int y) {
           // pick_snav = tie->snav_1;
         }
 
-        iy = mbna_modelplot_yo_z - (int)(mbna_modelplot_yzscale * tie->offset_z_m);
+        iy = mbna_modelplot_yo_z - (int)(mbna_modelplot_yzscale * (tie->offset_z_m - mbna_modelplot_yzmid));
         range = (ix - x) * (ix - x) + (iy - y) * (iy - y);
         if (range < rangemin) {
           rangemin = range;
@@ -15880,7 +16228,7 @@ int mbnavadjust_modelplot_middlepick(int x, int y) {
 
           ix = mbna_modelplot_xo + (int)(mbna_modelplot_xscale * (tie->isurveyplotindex - mbna_modelplot_tiestart));
 
-          iy = mbna_modelplot_yo_lon - (int)(mbna_modelplot_yscale * tie->offset_x_m);
+          iy = mbna_modelplot_yo_lon - (int)(mbna_modelplot_yscale * (tie->offset_x_m - mbna_modelplot_yxmid));
           range = (ix - x) * (ix - x) + (iy - y) * (iy - y);
           if (range < rangemin) {
             rangemin = range;
@@ -15891,7 +16239,7 @@ int mbnavadjust_modelplot_middlepick(int x, int y) {
             // pick_snav = tie->snav_1;
           }
 
-          iy = mbna_modelplot_yo_lat - (int)(mbna_modelplot_yscale * tie->offset_y_m);
+          iy = mbna_modelplot_yo_lat - (int)(mbna_modelplot_yscale * (tie->offset_y_m - mbna_modelplot_yymid));
           range = (ix - x) * (ix - x) + (iy - y) * (iy - y);
           if (range < rangemin) {
             rangemin = range;
@@ -15902,7 +16250,7 @@ int mbnavadjust_modelplot_middlepick(int x, int y) {
             // pick_snav = tie->snav_1;
           }
 
-          iy = mbna_modelplot_yo_z - (int)(mbna_modelplot_yzscale * tie->offset_z_m);
+          iy = mbna_modelplot_yo_z - (int)(mbna_modelplot_yzscale * (tie->offset_z_m - mbna_modelplot_yzmid));
           range = (ix - x) * (ix - x) + (iy - y) * (iy - y);
           if (range < rangemin) {
             rangemin = range;
