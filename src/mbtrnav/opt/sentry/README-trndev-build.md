@@ -27,24 +27,80 @@ Build the mframe and libtrnav libraries and applications using cmake:
 tar xzvf trndev-<version>.tar.gz
 cd trndev-<version>
 ./trndev-build-cmake.sh
-./trndev-build-cmake.sh -I
 ```
 
-Applications, libraries and headers are installed in trndev-<version>/install.
-Optionally, set TRNDEV_INSTALL to install in another directory:
+Applications, libraries and headers are installed in /usr/local by default.
+Optionally, set DESTDIR and/or PREFIX to install in $DESTDIR/$PREFIX:
 
 ```
-tar xzvf trndev-<version>.tar.gz
-cd trndev-<version>
-./trndev-build.sh -i <path>
+sudo ./trndev-build-cmake.sh -i [-d <path> -p <path>]
 ```
 
-A copy of the build output may also be found in
+A copy of the cmake build output is automatically staged in
 
 ```
 trndev-<version>/mframe/build/pkg
 trndev-<version>/libtrnav/build/pkg 
 ```
+
+---
+
+## Build script options
+
+### trndev-build-cmake.sh
+
+```
+Description: build/install trndev using cmake
+
+usage: trndev-build-cmake.sh [options]
+Options:
+-d <s> : set DESTDIR for install/uninstall []
+-p <s> : set PREFIX for install/uninstall [/usr/local]
+-i     : install
+-u     : uninstall
+-h     : help message
+-v     : verbose output
+```
+
+### trndev-build-gnu.sh
+
+```
+Description: build/install trndev using gnu make
+
+usage: trndev-build-gnu.sh [options]
+Options:
+-d <s> : set DESTDIR for install/uninstall []
+-p <s> : set PREFIX for install/uninstall [/usr/local]
+-i     : install
+-u     : uninstall
+-h     : help message
+-v     : verbose output
+
+```
+
+### Examples
+
+```
+
+# build using cmake
+trndev-build-cmake.sh
+
+# build using gnu
+trndev-build-gnu.sh
+
+# install to default directory /usr/local
+sudo trndev-build-cmake.sh -i
+
+# uninstall from default directory /usr/local
+sudo trndev-build-cmake.sh -u
+
+# install to staging directory w/ default PREFIX (as non-root)
+trndev-build-cmake.sh -id $PWD/stage
+
+# uninstall from staging directory w/ custom PREFIX (as non-root)
+trndev-build-cmake.sh -ud $PWD/stage -p /foo/bar
+```
+---
 
 ## Get the code 
 
