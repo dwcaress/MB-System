@@ -13,6 +13,7 @@ src/**/.deps
 src/**/.libs
 src/**/Makefile
 src/**/*.exe
+src/**/*.jar
 src/gsf/dump_gsf
 src/mbedit/mbedit
 src/mbeditviz/mbeditviz

@@ -551,7 +551,7 @@ int netif_reqres(netif_t *self)
 }
 // End function
 
-int netif_pub(netif_t *self, char *output_buffer, size_t len)
+int netif_pub(netif_t *self, char *output_buffer, size_t len, size_t *r_iobytes)
 {
     int retval=-1;
 
@@ -563,6 +563,9 @@ int netif_pub(netif_t *self, char *output_buffer, size_t len)
 
             if (  iobytes > 0) {
 //                fprintf(stderr,"%s:%d iobytes[%d]\n",__func__,__LINE__,iobytes);
+                if(NULL != r_iobytes) {
+                    *r_iobytes = iobytes;
+                }
             }
         }else{
             // iterate over subscribers...
@@ -579,7 +582,9 @@ int netif_pub(netif_t *self, char *output_buffer, size_t len)
                     MST_COUNTER_ADD(self->profile->stats->status[NETIF_STA_CLI_PUB_BYTES],iobytes);
 
                     PMPRINT(MOD_NETIF,NETIF_V2,(stderr,"[SVCPUB.%s]:TX - ret[%5d] bytes id[%d/%s:%s] hbtime[%.2lf]\n", self->port_name,iobytes, idx, psub->chost, psub->service, psub->hbtime));
-
+                    if(NULL != r_iobytes) {
+                        *r_iobytes = iobytes;
+                    }
                 }else{
                     PMPRINT(MOD_NETIF,NETIF_V4,(stderr,"\n[SVCPUB.%s]:ERR - sendto ret[%d] id[%d/%s:%s] [%d/%s]\n",self->port_name,iobytes,idx,psub->chost, psub->service,errno,strerror(errno)));
                     //                mlog_tprintf(self->mlog_id,"[PUB.%s]:ERR - sendto ret[%d] id[%d/%s:%s] [%d/%s]\n",self->port_name,iobytes,idx,psub->chost, psub->service,errno,strerror(errno));
@@ -1279,7 +1284,7 @@ int netif_test()
 
     // server: publish data
     char obuf[]="MB1";
-    int sp = netif_pub(netif, obuf, 4);
+    int sp = netif_pub(netif, obuf, 4, NULL);
     if(sp!=0){
         fprintf(stderr,"ERR - netif_pub returned[%d]\n",sp);
     }
