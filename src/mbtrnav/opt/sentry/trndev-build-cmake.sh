@@ -2,15 +2,15 @@
 
 # Build the trndev packages as described in README-trndev-build.md
 
-description="build/install trndev using gnu make"
+description="build/install trndev using cmake"
 VERBOSE="N"
 DO_INSTALL="N"
 DO_UNINSTALL="N"
 DO_BUILD="Y"
 
-MAKE_CMD=${MAKE_CMD:-$(which make)}
+MAKE_CMD=${MAKE_CMD:-$(which cmake)}
 
-TRNDEV_TOP=${TRNDEV_TOP:-"${PWD}"}
+TRNDEV_TOP=$PWD
 
 DESTDIR=${DESTDIR:-""}
 PREFIX=${PREFIX:-"/usr/local"}
@@ -110,17 +110,23 @@ processCmdLine(){
 ########################################
 build_pkg(){
     loc=$1
-    shift
-    targets=$*
+
+    if [ ! -d ${loc} ]
+    then
+        mkdir -p ${loc}
+    fi
     cd $loc
-    ${MAKE_CMD} ${targets}
+    ${MAKE_CMD} ..
+    ${MAKE_CMD} --build .
+    # install a copy in the build directory
+    ${MAKE_CMD} --install . --prefix `pwd`/pkg
 }
 
 ########################################
 # name: install_x
 # description: install package files to dest
 # args:
-#   src: space-delimited list (quoted)
+#   src: build location
 #   dest: DESTDIR
 #   prefix: PREFIX
 # returnCode: none
@@ -129,21 +135,8 @@ install_x(){
     src=$1
     destdir=$2
     prefix=$3
-
-    OPT_DEST=
-    if [ ! -z destdir ]
-    then
-        OPT_DEST="DESTDIR=${destdir}"
-    fi
-
-    OPT_PREFIX=
-    if [ ! -z prefix ]
-    then
-        OPT_PREFIX="PREFIX=${prefix}"
-    fi
-
     cd $src
-    ${MAKE_CMD} ${OPT_DEST} ${OPT_PREFIX} install
+    ${MAKE_CMD} --install . --prefix ${destdir}/${prefix}
 }
 
 ########################################
@@ -159,21 +152,13 @@ uninstall_x(){
     src=$1
     destdir=$2
     prefix=$3
-
-    OPT_DEST=
-    if [ ! -z destdir ]
-    then
-        OPT_DEST="DESTDIR=${destdir}"
-    fi
-
-    OPT_PREFIX=
-    if [ ! -z prefix ]
-    then
-        OPT_PREFIX="PREFIX=${prefix}"
-    fi
-
     cd $src
-    ${MAKE_CMD} ${OPT_DEST} ${OPT_PREFIX} uninstall
+    if [ -f "./install_manifest.txt" ]
+    then
+        xargs rm < ./install_manifest.txt
+    else
+        echo "install_manifest not found in ${PWD}"
+    fi
 }
 
 # Script main entry point
@@ -196,10 +181,9 @@ fi
 if [ ${DO_BUILD} == "Y" ]
 then
     vout "building mframe"
-    build_pkg ${TRNDEV_TOP}/mframe all
-
+    build_pkg ${TRNDEV_TOP}/mframe/build
     vout "building libtrnav"
-    build_pkg ${TRNDEV_TOP}/libtrnav all trnc
+    build_pkg ${TRNDEV_TOP}/libtrnav/build
 fi
 
 if [ ${DO_INSTALL} == "Y" ]
@@ -208,16 +192,16 @@ then
     then
         mkdir -p ${DESTDIR}
     fi
-    vout "installing to ${DESTDIR}/${PREFIX}"
+    echo "installing to ${DESTDIR}/${PREFIX}"
 
-    install_x ${TRNDEV_TOP}/mframe ${DESTDIR} ${PREFIX}
-    install_x ${TRNDEV_TOP}/libtrnav ${DESTDIR} ${PREFIX}
+    install_x ${TRNDEV_TOP}/mframe/build ${DESTDIR} ${PREFIX}
+    install_x ${TRNDEV_TOP}/libtrnav/build ${DESTDIR} ${PREFIX}
 fi
 
 if [ ${DO_UNINSTALL} == "Y" ]
 then
     vout "uninstalling from ${DESTDIR}/${PREFIX}"
 
-    uninstall_x ${TRNDEV_TOP}/mframe ${DESTDIR} ${PREFIX}
-    uninstall_x ${TRNDEV_TOP}/libtrnav ${DESTDIR} ${PREFIX}
+    uninstall_x ${TRNDEV_TOP}/mframe/build ${DESTDIR} ${PREFIX}
+    uninstall_x ${TRNDEV_TOP}/libtrnav/build ${DESTDIR} ${PREFIX}
 fi
