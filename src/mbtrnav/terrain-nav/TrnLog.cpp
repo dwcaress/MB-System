@@ -93,19 +93,19 @@ TrnLog::TrnLog(DataLog::FileFormat fileFormat, const char* logname,
     addField((_mtPingNumber = new IntegerData("trn.mtPingNumber")));
     addField((_mtNumMeas = new IntegerData("trn.mtNumMeas")));
 
-    for (int i = 0; i < _max_beams; i++)
+    for (uint32_t i = 0; i < _max_beams; i++)
     {
         snprintf(mnembuf, sizeof(mnembuf), "trn.mtRange_%02d", i);
         addField((_mtRanges[i]  = new DoubleData(mnembuf)));
     }
 
-    for (int i = 0; i < _max_beams; i++)
+    for (uint32_t i = 0; i < _max_beams; i++)
     {
         snprintf(mnembuf, sizeof(mnembuf), "trn.mtStatus_%02d", i);
         addField((_mtStatus[i]  = new ShortData(mnembuf)));
     }
 
-    for (int i = 0; i < _max_beams; i++)
+    for (uint32_t i = 0; i < _max_beams; i++)
     {
         snprintf(mnembuf, sizeof(mnembuf), "trn.mtBeamNum_%02d", i);
         addField((_mtBeamNums[i]  = new ShortData(mnembuf)));
@@ -114,7 +114,7 @@ TrnLog::TrnLog(DataLog::FileFormat fileFormat, const char* logname,
     _mtCrosstrack = new DoubleData *[max_beams];
     _mtAlongtrack = new DoubleData *[max_beams];
     _mtAltitudes = new DoubleData *[max_beams];
-    for (int i = 0; i < _max_beams; i++)
+    for (uint32_t i = 0; i < _max_beams; i++)
     {
         snprintf(mnembuf, sizeof(mnembuf), "trn.mtCrosstrack_%02d", i);
         addField((_mtCrosstrack[i]  = new DoubleData(mnembuf)));
@@ -185,7 +185,7 @@ TrnLog::~TrnLog()
     if(_mtZ) delete _mtZ;
     if (_mtPingNumber) delete _mtPingNumber;
     if (_mtNumMeas) delete _mtNumMeas;
-    for (int i = 0; i < _max_beams; i++)
+    for (uint32_t i = 0; i < _max_beams; i++)
     {
         if (_mtRanges[i]) delete _mtRanges[i];
         if (_mtStatus[i]) delete _mtStatus[i];

@@ -25,6 +25,7 @@
 #include <fstream>
 #include <iostream>
 #include <list>
+#include <chrono>
 
 #include "structDefs.h"
 #include "TrnLog.h"
@@ -1476,7 +1477,7 @@ public:
                     size_t var_len = pe-pb;
                     char var_buf[var_len+1];
                     memset(var_buf,0,var_len+1);
-                    for(int i=1;i<var_len;i++){
+                    for(unsigned int i=1;i<var_len;i++){
                         var_buf[i-1] = pb[i];
                     }
                     TRN_NDPRINT(4,">>> var_buf[%s]\n",var_buf);

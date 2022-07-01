@@ -4120,7 +4120,7 @@ int main(int argc, char **argv) {
             PMPRINT(MOD_MBTRNPP, MBTRNPP_V1,
                     (stderr,
                      "\nts[%.3lf] beams[%03d] ping[%06u]\nlat[%.4lf] lon[%.4lf] hdg[%6.2lf] sd[%7.2lf]\nv[%+6.2lf] "
-                     "p/r/v[%.3lf / %.3lf / %.3lf]\n",
+                     "p/r/y[%.3lf / %.3lf / %.3lf]\n",
                      ping[i_ping_process].time_d, n_output, ping_number, ping[i_ping_process].navlat,
                      ping[i_ping_process].navlon, (double)(DTR * ping[i_ping_process].heading),
                      ping[i_ping_process].sonardepth, ping[i_ping_process].speed, ping[i_ping_process].pitch,
@@ -5253,7 +5253,6 @@ int mbtrnpp_trnu_pub_osocket(trn_update_t *update,
 
     if(NULL!=update && NULL!=netif){
         retval=0;
-        int iobytes=0;
 
         double offset_n = update->mse_dat->x - update->pt_dat->x;
         double offset_e = update->mse_dat->y - update->pt_dat->y;
@@ -5299,8 +5298,9 @@ int mbtrnpp_trnu_pub_osocket(trn_update_t *update,
             update->update_time
         };
 
-        if( (iobytes=netif_pub(netif,(char *)&pub_data, sizeof(pub_data)))>0){
-            retval=iobytes;
+        size_t iobytes = 0;
+        if( netif_pub(netif,(char *)&pub_data, sizeof(pub_data), &iobytes) == 0){
+            retval = iobytes;
             MST_COUNTER_INC(app_stats->stats->events[MBTPP_EV_TRNU_PUBN]);
         } else {
             MST_COUNTER_INC(app_stats->stats->events[MBTPP_EV_ETRNUPUB]);
@@ -5316,8 +5316,6 @@ int mbtrnpp_trnu_pubempty_osocket(double time, double lat, double lon, double de
 
     if(NULL!=netif){
         retval=0;
-
-            int iobytes=0;
 
             int izero = 0;
             short int szero = 0;
@@ -5360,7 +5358,8 @@ int mbtrnpp_trnu_pubempty_osocket(double time, double lat, double lon, double de
                 dzero,
             };
 
-            if( (iobytes=netif_pub(netif,(char *)&pub_data, sizeof(pub_data)))>0){
+            size_t iobytes = 0;
+            if( netif_pub(netif,(char *)&pub_data, sizeof(pub_data), &iobytes) == 0){
                 retval=iobytes;
                 MST_COUNTER_INC(app_stats->stats->events[MBTPP_EV_TRNU_PUBEMPTYN]);
             } else {
@@ -5925,7 +5924,7 @@ int mbtrnpp_trn_update(wtnav_t *self, mb1_t *src, wposet_t **pt_out, wmeast_t **
         // must do motion update first if pt time <= mt time
         wtnav_motion_update(self, *pt_out);
         wtnav_meas_update(self, *mt_out, cfg->sensor_type);
-        //          fprintf(stderr,"%s:%d DONE [PT, MT]\n",__FUNCTION__,__LINE__);
+        //                fprintf(stderr,"%s:%d DONE [PT, MT]\n",__FUNCTION__,__LINE__);
         //                wposet_show(*pt_out,true,5);
         //                wmeast_show(*mt_out,true,5);
         retval = 0;
@@ -6141,7 +6140,7 @@ int mbtrnpp_process_mb1(char *src, size_t len, trn_config_t *cfg)
             // server: service (mb1 server) client requests
             netif_reqres(mb1svr);
            // publish mb1 sounding to all clients
-            if(netif_pub(mb1svr,(char *)src, len)==0){
+            if(netif_pub(mb1svr,(char *)src, len, NULL) == 0){
 	            MST_COUNTER_INC(app_stats->stats->events[MBTPP_EV_MB_PUBN]);
             } else {
                 MST_COUNTER_INC(app_stats->stats->events[MBTPP_EV_EMBPUB]);
