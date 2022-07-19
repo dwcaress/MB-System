@@ -2,7 +2,8 @@
 
 Notes for the end user about using the dockerized MB-System.
 
-**Status**: Functional and tested on CentOS 7 and MacOS. Feedback welcome.
+**Status**: Functional and tested, mainly on CentOS 7 and macOS,
+and, more recently, though minimally, also on Windows 11.
 
 ## Requirements
 
@@ -13,15 +14,13 @@ The core requirements on your host system are:
 
 Additionally:
 
-- on MacOS:
+- on macOS:
 
     - [socat](http://www.dest-unreach.org/socat/)
 
-- on Windows 10:
-    - (TODO)
+- on Windows 11:
+    - More details [here](README-win11.md). 
 
-
-The dockerized MB-system has been tested on CentOS 7 and MacOS.
 
 
 ## The MB-System docker image
