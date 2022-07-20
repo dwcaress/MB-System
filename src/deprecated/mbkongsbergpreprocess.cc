@@ -22,6 +22,7 @@
  * Date:	June 1, 2012
  */
 
+#include <algorithm>
 #include <cmath>
 #include <cstdio>
 #include <cstdlib>
@@ -30,8 +31,6 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <unistd.h>
-
-#include <algorithm>
 
 #include "mb_aux.h"
 #include "mb_define.h"

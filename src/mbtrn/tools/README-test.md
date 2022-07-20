@@ -308,8 +308,7 @@ configuration - default:
              reinit_zoffset_min                            0.00
              reinit_zoffset_max                            0.00
 loading config file [/Volumes/wdcs/20210609m1/mbtrn-210609m1.cfg]
-WARN - unsupported key/val [trn-reinit/1]
-ERR - invalid key/value [trn-reinit/1]
+
 options - post-config:
                            self                     0x10b6c51e0
                         verbose                              -2

@@ -40,51 +40,48 @@
 
 //TODO: Delete this?  Will we ever use compassBiasT again???
 struct compassBiasT{
-  double* cosineCoeff;
-  double* sineCoeff;
-  double constCoeff;
-  int seriesOrder;
-  compassBiasT()
-  {
-    seriesOrder = 3;
-    cosineCoeff = new double[seriesOrder];
-    sineCoeff = new double[seriesOrder];
-    if(seriesOrder == 2)
-      {
-	constCoeff = -0.00280307588;
-	cosineCoeff[0] = 0.020827917;
-	sineCoeff[0] = 0.30351486302;
-	cosineCoeff[1] = 0.03350770889;
-	sineCoeff[1] = -0.00226968614376;   
-      }
-    else
-      {
-	constCoeff = -0.002800887506;
-	cosineCoeff[0] = 0.0192245946634;
-	sineCoeff[0] = 0.3049004455222;
-	cosineCoeff[1] = 0.033519791431345;
-	sineCoeff[1] = -0.0022754105288;
-	cosineCoeff[2] = -0.0035822997664;
-	sineCoeff[2] = -0.0054575460693;
-      }
-  }
+    double* cosineCoeff;
+    double* sineCoeff;
+    double constCoeff;
+    int seriesOrder;
+    compassBiasT(int so=3)
+    {
+        seriesOrder = so;
+        cosineCoeff = new double[seriesOrder];
+        sineCoeff = new double[seriesOrder];
+        if(seriesOrder == 2){
+            constCoeff = -0.00280307588;
+            cosineCoeff[0] = 0.020827917;
+            sineCoeff[0] = 0.30351486302;
+            cosineCoeff[1] = 0.03350770889;
+            sineCoeff[1] = -0.00226968614376;
+        } else {
+            constCoeff = -0.002800887506;
+            cosineCoeff[0] = 0.0192245946634;
+            sineCoeff[0] = 0.3049004455222;
+            cosineCoeff[1] = 0.033519791431345;
+            sineCoeff[1] = -0.0022754105288;
+            cosineCoeff[2] = -0.0035822997664;
+            sineCoeff[2] = -0.0054575460693;
+        }
+    }
 
-  ~compassBiasT()
-  {
-    delete [] cosineCoeff;
-    delete [] sineCoeff;
-  }
-  
-  double evalCompassBias(double psi)
-  {
-    double psi_bias = constCoeff;
-    int i;
-    
-    for(i = 0; i < seriesOrder; i++)
-      psi_bias += cosineCoeff[i]*cos((i+1)*psi) + sineCoeff[i]*sin((i+1)*psi);
-    
-    return psi_bias;
-  };
+    ~compassBiasT()
+    {
+        delete [] cosineCoeff;
+        delete [] sineCoeff;
+    }
+
+    double evalCompassBias(double psi)
+    {
+        double psi_bias = constCoeff;
+        int i;
+
+        for(i = 0; i < seriesOrder; i++)
+        psi_bias += cosineCoeff[i]*cos((i+1)*psi) + sineCoeff[i]*sin((i+1)*psi);
+
+        return psi_bias;
+    };
 
 };
 
@@ -530,7 +527,7 @@ class TNavFilter
   /*! This function updates windowedNISlog and windowedNIS with the most 
    * recent NIS value
    */
-  void updateNISwindow(double& nisVal);
+  void updateNISwindow(const double& nisVal);
 
   //Protected structures and components of a TNavFilter object:
   /************************************************************/

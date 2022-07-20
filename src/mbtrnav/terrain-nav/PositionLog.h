@@ -36,7 +36,7 @@ public:
   //    plog = new PositionLog(DataLog::BinaryFormat, "poseT")  // Creates poseT.log
   //    mlog = new PositionLog(DataLog::BinaryFormat, "poseT", "pose")  // data mnem is "pose"
   // 
-  PositionLog(DataLog::FileFormat fileFormat, const char* logname=PositionLogName,
+  explicit PositionLog(DataLog::FileFormat fileFormat, const char* logname=PositionLogName,
               const char *mnem=PositionMnemName);
 
   virtual ~PositionLog();

@@ -161,24 +161,24 @@ RayTrace(const Vector& startPoint, const Vector& directionVector) const {
 
 
 /* sets nodeLowerBounds and nodeUpperBounds for the next leaf node in the tree with value == desiredValue. If there are no mode leaf nodes with value == desiredValue, it returns false.
-Usage: while(octreeMap.ItterateThroughLeaves(nodeLowerBounds, nodeUpperBounds, true)){ PLOT_OCTREE_NODE(nodeLowerBounds, nodeUpperBounds);}*/
+Usage: while(octreeMap.IterateThroughLeaves(nodeLowerBounds, nodeUpperBounds, true)){ PLOT_OCTREE_NODE(nodeLowerBounds, nodeUpperBounds);}*/
 template <class ValueType>
 bool
 Octree<ValueType>::
-ItterateThroughLeaves(Vector& nodeLowerBounds, Vector& nodeUpperBounds, ValueType Value){
+IterateThroughLeaves(Vector& nodeLowerBounds, Vector& nodeUpperBounds, ValueType Value){
 	if(treeComplete){
 		return false;
 	}
 
 	int depth = 0;
-	if(OctreeRoot->ItterateThroughLeaves(*this, depth, Value)){
-		CalculateBoundsFromPath(nodeLowerBounds, nodeUpperBounds, currentItterationPath, depth);
+	if(OctreeRoot->IterateThroughLeaves(*this, depth, Value)){
+		CalculateBoundsFromPath(nodeLowerBounds, nodeUpperBounds, currentIterationPath, depth);
 		return true;
 	}
 
-	currentItterationPath = Path();
+	currentIterationPath = Path();
 	if(OctreeRoot->FindNextChildWithValueAndSetPath(*this, 0, Value, 0, depth)){
-		CalculateBoundsFromPath(nodeLowerBounds, nodeUpperBounds, currentItterationPath, depth);
+		CalculateBoundsFromPath(nodeLowerBounds, nodeUpperBounds, currentIterationPath, depth);
 		treeComplete = true;
 		return true;
 	}
@@ -417,40 +417,39 @@ InterpolatingQuery(const Vector& queryPoint) const {
 //enpty constructor
 template <class ValueType>
 Octree<ValueType>::
-Octree() {
-	OffMapValue = static_cast<ValueType>(0);
-	EmptyValue = static_cast<ValueType>(0);
-	Size = Vector();
-	UpperBounds = Vector();
-	LowerBounds = Vector();
-	TrueResolution = Vector();
-	MaxDepth = 0;
-	OctreeNodeType = OctreeType::BinaryOccupancy;
-
-	OctreeRoot = new OctreeNode;
-
-	currentItterationPath = Path();
-	treeComplete = false;
+Octree()
+:
+LowerBounds(Vector()),
+UpperBounds(Vector()),
+Size(Vector()),
+TrueResolution(Vector()),
+MaxDepth(0),
+OffMapValue(static_cast<ValueType>(0)),
+EmptyValue(static_cast<ValueType>(0)),
+OctreeNodeType(OctreeType::BinaryOccupancy),
+OctreeRoot(new OctreeNode),
+currentIterationPath(Path()),
+treeComplete(false)
+{
 }
 
 //copy constructor
 template <class ValueType>
 Octree<ValueType>::
-Octree(const Octree<ValueType>& octreeToCopy) {
-	LowerBounds = Vector(octreeToCopy.LowerBounds);
-	UpperBounds = Vector(octreeToCopy.UpperBounds);
-	Size = Vector(octreeToCopy.Size);
-	TrueResolution = Vector(octreeToCopy.TrueResolution);
-
-	MaxDepth = int(octreeToCopy.MaxDepth);
-	OffMapValue = ValueType(octreeToCopy.OffMapValue);
-	EmptyValue = ValueType(octreeToCopy.EmptyValue);
-	OctreeNodeType = OctreeType::EnumOctreeType(octreeToCopy.OctreeNodeType);
-
-	OctreeRoot = new OctreeNode(*(octreeToCopy.OctreeRoot));
-
-	currentItterationPath = octreeToCopy.currentItterationPath;
-	treeComplete = false;
+Octree(const Octree<ValueType>& octreeToCopy)
+:
+LowerBounds(Vector(octreeToCopy.LowerBounds)),
+UpperBounds(Vector(octreeToCopy.UpperBounds)),
+Size(Vector(octreeToCopy.Size)),
+TrueResolution(Vector(octreeToCopy.TrueResolution)),
+MaxDepth(int(octreeToCopy.MaxDepth)),
+OffMapValue(ValueType(octreeToCopy.OffMapValue)),
+EmptyValue(ValueType(octreeToCopy.EmptyValue)),
+OctreeNodeType(OctreeType::EnumOctreeType(octreeToCopy.OctreeNodeType)),
+OctreeRoot(new OctreeNode(*(octreeToCopy.OctreeRoot))),
+currentIterationPath(octreeToCopy.currentIterationPath),
+treeComplete(false)
+{
 }
 
 /* Constructor you want to use:
@@ -462,30 +461,23 @@ template <class ValueType>
 Octree<ValueType>::
 Octree(const Vector& desiredResolution, const Vector& lowerBounds, const Vector& upperBounds,
 	   const OctreeType::EnumOctreeType octreeType)
+:
+LowerBounds(Vector(lowerBounds)),
+UpperBounds(Vector(upperBounds)),
+Size(UpperBounds - LowerBounds),
+TrueResolution(Vector(Size)),
+MaxDepth(0),
+OffMapValue(static_cast<ValueType>(0)),
+EmptyValue(static_cast<ValueType>(0)),
+OctreeNodeType(octreeType),
+OctreeRoot(new OctreeNode(EmptyValue)),
+currentIterationPath(Path()),
+treeComplete(false)
 {
-
-	//all we are doing here is setting parameters for the tree as a whole, then calling the correct OctreeNode<type> constructor
-	OffMapValue = static_cast<ValueType>(0);
-	EmptyValue = static_cast<ValueType>(0);
-
-	UpperBounds = Vector(upperBounds);
-	LowerBounds = Vector(lowerBounds);
-
-	Size = UpperBounds - LowerBounds;
-	TrueResolution = Vector(Size);
-
-	//set the true resolution and max depth
-	MaxDepth = 0;
 	while(! TrueResolution.StrictlyLessOrEqualTo(desiredResolution)) {
 		TrueResolution /= 2.0;
 		MaxDepth++;
 	}
-	OctreeNodeType = octreeType;
-
-	OctreeRoot = new OctreeNode(EmptyValue);
-
-	currentItterationPath = Path();
-	treeComplete = false;
 }
 
 /* copy assignment operator
@@ -566,7 +558,7 @@ AddPoints(const Vector points[], const unsigned int numPoints) {
 template <class ValueType>
 bool
 Octree<ValueType>::
-AddData(const Vector point, const ValueType data) {
+AddData(const Vector& point, const ValueType data) {
 	if(OctreeNodeType == OctreeType::Data) {
 		if(!ContainsPoint(point)) {
 			ExpandOctreeToIncludePoint(point);
@@ -827,14 +819,8 @@ FindPathToPoint(const Vector& desiredPoint) const {
 	//'1' represents going to the upper half along that axis
 
 	Path path;
-	//fast return if possible
-	if(ContainsPoint(desiredPoint)){
-		path.x = static_cast<unsigned int>((desiredPoint.x - LowerBounds.x) / TrueResolution.x);
-		path.y = static_cast<unsigned int>((desiredPoint.y - LowerBounds.y) / TrueResolution.y);
-		path.z = static_cast<unsigned int>((desiredPoint.z - LowerBounds.z) / TrueResolution.z);
-	}
 
-	//X
+    //X
 	if(desiredPoint.x <= LowerBounds.x) {
 		path.x = 0;
 	} else if(desiredPoint.x >= UpperBounds.x) {
@@ -875,20 +861,20 @@ FindPathToPointFromNode(const Vector& desiredPoint, const Path& path, const int 
 	Path tempPath = FindPathToPoint(desiredPoint);
 	unsigned int lowerPathBitsHI = ((unsigned int)(1 << (MaxDepth - depth)) - 1);
 	//X
-	if(tempPath.x < (path.x & !lowerPathBitsHI)) {
-		tempPath.x = path.x & !lowerPathBitsHI;
+	if(tempPath.x < (path.x & ~lowerPathBitsHI)) {
+		tempPath.x = path.x & ~lowerPathBitsHI;
 	} else if(tempPath.x > (path.x | lowerPathBitsHI)) {
 		tempPath.x = path.x | lowerPathBitsHI;
 	}
 	//Y
-	if(tempPath.y < (path.y & !lowerPathBitsHI)) {
-		tempPath.y = path.y & !lowerPathBitsHI;
+	if(tempPath.y < (path.y & ~lowerPathBitsHI)) {
+		tempPath.y = path.y & ~lowerPathBitsHI;
 	} else if(tempPath.y > (path.y | lowerPathBitsHI)) {
 		tempPath.y = path.y | lowerPathBitsHI;
 	}
 	//Z
-	if(tempPath.z < (path.z & !lowerPathBitsHI)) {
-		tempPath.z = path.z & !lowerPathBitsHI;
+	if(tempPath.z < (path.z & ~lowerPathBitsHI)) {
+		tempPath.z = path.z & ~lowerPathBitsHI;
 	} else if(tempPath.z > (path.z | lowerPathBitsHI)) {
 		tempPath.z = path.z | lowerPathBitsHI;
 	}
@@ -950,8 +936,7 @@ GetPointerToLeafOnPath(const Path& path) const {
 	int depthIterator;
 	OctreeNode* nodePointer = OctreeRoot;
 	unsigned int bitmask = 1 << (MaxDepth - 1);
-	int childNumber;
-	/* Each loop will test to see if there are children.  If there are no children,
+    /* Each loop will test to see if there are children.  If there are no children,
 	the current node is the one we want.  If there are, children, the path is
 	followed to the next layer.
 	*/
@@ -959,7 +944,7 @@ GetPointerToLeafOnPath(const Path& path) const {
 		if(NULL == nodePointer->children) {
 			return nodePointer;
 		}
-		childNumber =
+		int childNumber =
 			((0 != (path.x & bitmask)) << 2)
 			| ((0 != (path.y & bitmask)) << 1)
 			| (0 != (path.z & bitmask));
@@ -977,7 +962,6 @@ GetPointerToLeafOnPath(const unsigned int Xpath, const unsigned int Ypath, const
 	int depthIterator;
 	OctreeNode* nodePointer = OctreeRoot;
 	unsigned int bitmask = 1 << (MaxDepth - 1);
-	int childNumber;
 	/* Each loop will test to see if there are children.  If there are no children,
 	the current node is the one we want.  If there are, children, the path is
 	followed to the next layer.
@@ -986,7 +970,7 @@ GetPointerToLeafOnPath(const unsigned int Xpath, const unsigned int Ypath, const
 		if(NULL == nodePointer->children) {
 			return nodePointer;
 		}
-		childNumber =
+		int childNumber =
 			((0 != (Xpath & bitmask)) << 2)
 			| ((0 != (Ypath & bitmask)) << 1)
 			| (0 != (Zpath & bitmask));
@@ -1005,7 +989,6 @@ Octree<ValueType>::
 GetPointerToLeafOnPath(int& depth, const Path& path) const {
 	OctreeNode* nodePointer = OctreeRoot;
 	unsigned int bitmask = 1 << (MaxDepth - 1);
-	int childNumber;
 	/* Each loop will test to see if there are children.  If there are no children,
 	the current node is the one we want.  If there are, children, the path is
 	followed to the next layer.
@@ -1014,7 +997,7 @@ GetPointerToLeafOnPath(int& depth, const Path& path) const {
 		if(NULL == nodePointer->children) {
 			return nodePointer;
 		}
-		childNumber =
+		int childNumber =
 			((0 != (path.x & bitmask)) << 2)
 			| ((0 != (path.y & bitmask)) << 1)
 			| (0 != (path.z & bitmask));
@@ -1031,8 +1014,8 @@ Octree<ValueType>::
 GetPointerToLeafOnPath(int& depth, const unsigned int Xpath, const unsigned int Ypath, const unsigned int Zpath) const {
 	OctreeNode* nodePointer = OctreeRoot;
 	unsigned int bitmask = 1 << (MaxDepth - 1);
-	int childNumber;
-	/* Each loop will test to see if there are children.  If there are no children,
+
+    /* Each loop will test to see if there are children.  If there are no children,
 	the current node is the one we want.  If there are, children, the path is
 	followed to the next layer.
 	*/
@@ -1040,7 +1023,7 @@ GetPointerToLeafOnPath(int& depth, const unsigned int Xpath, const unsigned int 
 		if(NULL == nodePointer->children) {
 			return nodePointer;
 		}
-		childNumber =
+		int childNumber =
 			((0 != (Xpath & bitmask)) << 2)
 			| ((0 != (Ypath & bitmask)) << 1)
 			| (0 != (Zpath & bitmask));
@@ -1269,7 +1252,7 @@ Swap(Octree<ValueType>& octreeToSwap) {
 	OctreeRoot = octreeToSwap.OctreeRoot;
 	octreeToSwap.OctreeRoot = tempPointer;
 
-	std::swap(currentItterationPath, octreeToSwap.currentItterationPath);
+	std::swap(currentIterationPath, octreeToSwap.currentIterationPath);
 	std::swap(treeComplete, octreeToSwap.treeComplete);
 }
 

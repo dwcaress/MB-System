@@ -24,6 +24,7 @@
 
 /*--------------------------------------------------------------------*/
 
+#include <assert.h>
 #include <math.h>
 #include <stdbool.h>
 #include <stdio.h>
@@ -205,7 +206,7 @@ int mbnavadjust_init_globals() {
   project.crossings = NULL;
   project.num_ties = 0;
   project.inversion_status = MBNA_INVERSION_NONE;
-  project.ref_grid_status = MBNA_GRID_NONE;
+  project.refgrid_status = MBNA_REFGRID_NONE;
   project.grid_status = MBNA_GRID_NONE;
   project.modelplot = false;
   project.modelplot_style = MBNA_MODELPLOT_TIMESERIES;
@@ -222,7 +223,7 @@ int mbnavadjust_init_globals() {
   project.decimation = 1;
   project.precision = SIGMA_MINIMUM;
   project.smoothing = MBNA_SMOOTHING_DEFAULT;
-  project.zoffsetwidth = 5.0;
+  project.zoffsetwidth = 1.0;
   project.triangle_scale = 0.0;
   mbna_file_id_1 = MBNA_SELECT_NONE;
   mbna_section_1 = MBNA_SELECT_NONE;
@@ -230,7 +231,7 @@ int mbnavadjust_init_globals() {
   mbna_section_2 = MBNA_SELECT_NONE;
   mbna_current_crossing = MBNA_SELECT_NONE;
   mbna_current_tie = MBNA_SELECT_NONE;
-  mbna_naverr_load = false;
+  mbna_naverr_mode = MBNA_NAVERR_MODE_UNLOADED;
   mbna_file_select = MBNA_SELECT_NONE;
   mbna_survey_select = MBNA_SELECT_NONE;
   mbna_section_select = MBNA_SELECT_NONE;
@@ -565,7 +566,7 @@ int mbnavadjust_file_new(char *projectname) {
         project.grid_status = MBNA_GRID_NONE;
         project.precision = SIGMA_MINIMUM;
         project.smoothing = MBNA_SMOOTHING_DEFAULT;
-        project.zoffsetwidth = 5.0;
+        project.zoffsetwidth = 1.0;
         project.bin_beams_bath = mbna_bin_beams_bath;
         project.bin_swathwidth = mbna_bin_swathwidth;
         project.bin_pseudobeamwidth = mbna_bin_pseudobeamwidth;
@@ -669,7 +670,8 @@ int mbnavadjust_file_open(char *projectname) {
         strncpy(project.path, projectname, strlen(projectname) - strlen(nameptr));
       }
       else {
-        /* char *bufptr = */ getcwd(project.path, MB_PATH_MAXLINE);
+        char *getcwd_result = getcwd(project.path, MB_PATH_MAXLINE);
+        assert(strlen(project.path) > 0);
         strcat(project.path, "/");
       }
       strcpy(project.home, project.path);
@@ -1242,7 +1244,7 @@ int mbnavadjust_naverr_save() {
   }
 
   /* save offsets if crossing loaded and ties set */
-  if (project.open && project.num_crossings > 0 && mbna_naverr_load && mbna_current_crossing >= 0 &&
+  if (project.open && project.num_crossings > 0 && mbna_naverr_mode != MBNA_NAVERR_MODE_UNLOADED && mbna_current_crossing >= 0 &&
       mbna_current_tie >= 0) {
     /* save offsets if ties set */
     struct mbna_crossing *crossing = &project.crossings[mbna_current_crossing];
@@ -1363,7 +1365,7 @@ int mbnavadjust_naverr_save() {
 }
 
 /*--------------------------------------------------------------------*/
-int mbnavadjust_naverr_specific(int new_crossing, int new_tie) {
+int mbnavadjust_naverr_specific_crossing(int new_crossing, int new_tie) {
   if (mbna_verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2               new_crossing: %d\n", new_crossing);
@@ -1372,6 +1374,7 @@ int mbnavadjust_naverr_specific(int new_crossing, int new_tie) {
 
   /* get current crossing */
   if (project.open && project.num_crossings > 0) {
+
     /* get next crossing */
     if (new_crossing >= 0 && new_crossing < project.num_crossings) {
       mbna_current_crossing = new_crossing;
@@ -1383,6 +1386,121 @@ int mbnavadjust_naverr_specific(int new_crossing, int new_tie) {
     else {
       mbna_current_crossing = 0;
       mbna_current_tie = -1;
+    }
+
+    /* retrieve crossing parameters */
+    if (mbna_current_crossing >= 0) {
+      struct mbna_crossing *crossing = &project.crossings[mbna_current_crossing];
+      mbna_file_id_1 = crossing->file_id_1;
+      mbna_section_1 = crossing->section_1;
+      mbna_file_id_2 = crossing->file_id_2;
+      mbna_section_2 = crossing->section_2;
+      if (crossing->num_ties > 0) {
+        if (mbna_current_tie < 0)
+          mbna_current_tie = 0;
+        struct mbna_tie *tie = &crossing->ties[mbna_current_tie];
+        mbna_snav_1 = tie->snav_1;
+        mbna_snav_1_time_d = tie->snav_1_time_d;
+        mbna_snav_2 = tie->snav_2;
+        mbna_snav_2_time_d = tie->snav_2_time_d;
+        mbna_offset_x = tie->offset_x;
+        mbna_offset_y = tie->offset_y;
+        mbna_offset_z = tie->offset_z_m;
+      }
+      else {
+        mbna_current_tie = -1;
+      }
+
+      /* reset survey file and section selections */
+      if (mbna_view_mode == MBNA_VIEW_MODE_SURVEY || mbna_view_mode == MBNA_VIEW_MODE_WITHSURVEY) {
+        if (mbna_survey_select == project.files[crossing->file_id_1].block) {
+          mbna_file_select = crossing->file_id_1;
+          mbna_section_select = crossing->section_1;
+        }
+        else if (mbna_survey_select == project.files[crossing->file_id_2].block) {
+          mbna_file_select = crossing->file_id_2;
+          mbna_section_select = crossing->section_2;
+        }
+        else {
+          mbna_file_select = crossing->file_id_1;
+          mbna_section_select = crossing->section_1;
+        }
+      }
+      else if (mbna_view_mode == MBNA_VIEW_MODE_FILE || mbna_view_mode == MBNA_VIEW_MODE_WITHFILE) {
+        if (mbna_file_select == crossing->file_id_1) {
+          mbna_survey_select = project.files[crossing->file_id_1].block;
+          mbna_section_select = crossing->section_1;
+        }
+        else if (mbna_file_select == crossing->file_id_2) {
+          mbna_survey_select = project.files[crossing->file_id_2].block;
+          mbna_section_select = crossing->section_2;
+        }
+        else {
+          mbna_survey_select = project.files[crossing->file_id_1].block;
+          mbna_section_select = crossing->section_1;
+        }
+      }
+      else if (mbna_view_mode == MBNA_VIEW_MODE_WITHSECTION) {
+        if (mbna_file_select == crossing->file_id_1 && mbna_section_select == crossing->section_1) {
+          mbna_survey_select = project.files[crossing->file_id_1].block;
+          mbna_file_select = crossing->file_id_1;
+        }
+        else if (mbna_file_select == crossing->file_id_2 && mbna_section_select == crossing->section_2) {
+          mbna_survey_select = project.files[crossing->file_id_2].block;
+          mbna_file_select = crossing->file_id_2;
+        }
+        else {
+          mbna_survey_select = project.files[crossing->file_id_1].block;
+          mbna_file_select = crossing->file_id_1;
+        }
+      }
+    }
+
+    /* load the crossing */
+    if (mbna_current_crossing >= 0) {
+      /* put up message */
+      sprintf(message, "Loading crossing %d...", mbna_current_crossing);
+      do_message_on(message);
+
+      mbnavadjust_crossing_load();
+
+      /* turn off message */
+      do_message_off();
+    }
+  }
+
+  const int status = MB_SUCCESS;
+
+  if (mbna_verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBnavadjust function <%s> completed\n", __func__);
+    fprintf(stderr, "dbg2  Return values:\n");
+    fprintf(stderr, "dbg2       error:       %d\n", error);
+    fprintf(stderr, "dbg2  Return status:\n");
+    fprintf(stderr, "dbg2       status:      %d\n", status);
+  }
+
+  return (status);
+}
+
+/*--------------------------------------------------------------------*/
+int mbnavadjust_naverr_specific_section(int new_file, int new_section) {
+  if (mbna_verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+    fprintf(stderr, "dbg2               new_file:     %d\n", new_file);
+    fprintf(stderr, "dbg2               new_section:  %d\n", new_section);
+  }
+
+  /* get current crossing */
+  if (project.open && project.num_files > 0) {
+    /* get next section */
+    if (new_file >= 0 && new_file < project.num_files
+        && new_section >= 0 && new_section < project.files[new_file].num_sections) {
+      mbna_current_file = new_file;
+      mbna_current_section = new_section;
+    }
+    else {
+      mbna_current_file = 0;
+      mbna_current_section = 0;
     }
 
     /* retrieve crossing parameters */
@@ -1746,7 +1864,7 @@ int mbnavadjust_naverr_nextunset() {
   }
 
   /* else unload previously loaded crossing */
-  else if (mbna_naverr_load) {
+  else if (mbna_naverr_mode != MBNA_NAVERR_MODE_UNLOADED) {
     status = mbnavadjust_crossing_unload();
   }
 
@@ -2422,9 +2540,12 @@ int mbnavadjust_crossing_load() {
   struct mbna_file *file1, *file2;
   struct mbna_section *section1, *section2;
 
-  /* unload loaded crossing */
-  if (mbna_naverr_load) {
+  /* unload loaded crossing or section */
+  if (mbna_naverr_mode == MBNA_NAVERR_MODE_CROSSING) {
     status = mbnavadjust_crossing_unload();
+  }
+  else if (mbna_naverr_mode == MBNA_NAVERR_MODE_SECTION) {
+    status = mbnavadjust_referencesection_unload();
   }
 
   /* load current crossing */
@@ -2535,7 +2656,7 @@ int mbnavadjust_crossing_load() {
     }
 
     /* set loaded flag */
-    mbna_naverr_load = true;
+    mbna_naverr_mode = MBNA_NAVERR_MODE_CROSSING;
 
     /* generate misfit grids */
     sprintf(message, "Getting misfit for crossing %d...", mbna_current_crossing);
@@ -2545,8 +2666,8 @@ int mbnavadjust_crossing_load() {
     /* get overlap region */
     mbnavadjust_crossing_overlap(mbna_verbose, &project, mbna_current_crossing, &error);
 
-        /* set flag to update model plot */
-        project.modelplot_uptodate = false;
+    /* set flag to update model plot */
+    project.modelplot_uptodate = false;
   }
 
   /* set mbna_crossing_select */
@@ -2581,7 +2702,7 @@ int mbnavadjust_crossing_unload() {
   int status = MB_SUCCESS;
 
   /* unload loaded crossing */
-  if (mbna_naverr_load) {
+  if (mbna_naverr_mode != MBNA_NAVERR_MODE_UNLOADED) {
     status = mbnavadjust_section_unload(mbna_verbose, (void **)&swathraw1, (void **)&swath1, &error);
     status = mbnavadjust_section_unload(mbna_verbose, (void **)&swathraw2, (void **)&swath2, &error);
     if (mbna_contour1.vector != NULL && mbna_contour1.nvector_alloc > 0) {
@@ -2596,7 +2717,7 @@ int mbnavadjust_crossing_unload() {
     mbna_contour2.vector = NULL;
     mbna_contour2.nvector = 0;
     mbna_contour2.nvector_alloc = 0;
-    mbna_naverr_load = false;
+    mbna_naverr_mode = MBNA_NAVERR_MODE_UNLOADED;
     grid_nx = 0;
     grid_ny = 0;
     grid_nxy = 0;
@@ -2659,7 +2780,7 @@ int mbnavadjust_crossing_replot() {
   int status = MB_SUCCESS;
 
   /* replot loaded crossing */
-  if ((mbna_status == MBNA_STATUS_NAVERR || mbna_status == MBNA_STATUS_AUTOPICK) && mbna_naverr_load) {
+  if ((mbna_status == MBNA_STATUS_NAVERR || mbna_status == MBNA_STATUS_AUTOPICK) && mbna_naverr_mode != MBNA_NAVERR_MODE_UNLOADED) {
     /* get lon lat positions for soundings */
     status = mbnavadjust_section_translate(mbna_verbose, &project, mbna_file_id_1, swathraw1, swath1, 0.0, &error);
     status = mbnavadjust_section_translate(mbna_verbose, &project, mbna_file_id_2, swathraw2, swath2, mbna_offset_z, &error);
@@ -2670,6 +2791,42 @@ int mbnavadjust_crossing_replot() {
     mbna_contour = &mbna_contour2;
     status = mbnavadjust_section_contour(mbna_verbose, &project, mbna_file_id_2, mbna_section_2, swath2, &mbna_contour2, &error);
   }
+
+  if (mbna_verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBnavadjust function <%s> completed\n", __func__);
+    fprintf(stderr, "dbg2  Return values:\n");
+    fprintf(stderr, "dbg2       error:       %d\n", error);
+    fprintf(stderr, "dbg2  Return status:\n");
+    fprintf(stderr, "dbg2       status:      %d\n", status);
+  }
+
+  return (status);
+}
+/*--------------------------------------------------------------------*/
+int mbnavadjust_referencesection_load() {
+  if (mbna_verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+  }
+
+  int status = MB_SUCCESS;
+
+  if (mbna_verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBnavadjust function <%s> completed\n", __func__);
+    fprintf(stderr, "dbg2  Return values:\n");
+    fprintf(stderr, "dbg2       error:       %d\n", error);
+    fprintf(stderr, "dbg2  Return status:\n");
+    fprintf(stderr, "dbg2       status:      %d\n", status);
+  }
+
+  return (status);
+}
+/*--------------------------------------------------------------------*/
+int mbnavadjust_referencesection_unload() {
+  if (mbna_verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+  }
+
+  int status = MB_SUCCESS;
 
   if (mbna_verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBnavadjust function <%s> completed\n", __func__);
@@ -2696,7 +2853,7 @@ int mbnavadjust_naverr_snavpoints(int ix, int iy) {
   struct mbna_section *section;
   double distance;
 
-  if (mbna_naverr_load) {
+  if (mbna_naverr_mode != MBNA_NAVERR_MODE_UNLOADED) {
     /* get position in lon and lat */
     x = ix / mbna_plotx_scale + mbna_plot_lon_min;
     y = (cont_borders[3] - iy) / mbna_ploty_scale + mbna_plot_lat_min;
@@ -2737,9 +2894,9 @@ int mbnavadjust_naverr_snavpoints(int ix, int iy) {
 
   if (mbna_verbose >= 2) {
     fprintf(stderr, "\ndbg2  snav point selection in MBnavadjust function <%s>\n", __func__);
-    fprintf(stderr, "dbg2  mbna_naverr_load:        %d\n", mbna_naverr_load);
+    fprintf(stderr, "dbg2  mbna_naverr_mode:        %d\n", mbna_naverr_mode);
     fprintf(stderr, "dbg2  mbna_current_crossing:   %d\n", mbna_current_crossing);
-    if (mbna_naverr_load) {
+    if (mbna_naverr_mode != MBNA_NAVERR_MODE_UNLOADED) {
       fprintf(stderr, "dbg2  snav values:\n");
       section = &project.files[crossing->file_id_1].sections[crossing->section_1];
       fprintf(stderr, "dbg2       mbna_snav_1:        %d\n", mbna_snav_1);
@@ -2799,7 +2956,7 @@ int mbnavadjust_get_misfit() {
   int k, ll;
   void *tptr;
 
-  if (project.open && project.num_crossings > 0 && mbna_current_crossing >= 0 && mbna_naverr_load) {
+  if (project.open && project.num_crossings > 0 && mbna_current_crossing >= 0 && mbna_naverr_mode != MBNA_NAVERR_MODE_UNLOADED) {
     /* fprintf(stderr,"\nDEBUG %s %d: mbnavadjust_get_misfit: mbna_plot minmax: %f %f %f %f\n",
     __FILE__,__LINE__,
     mbna_plot_lon_min,mbna_plot_lon_max,mbna_plot_lat_min,mbna_plot_lat_max); */
@@ -3355,7 +3512,7 @@ int mbnavadjust_get_misfitxy() {
   int status = MB_SUCCESS;
   int kc, lc;
 
-  if (project.open && project.num_crossings > 0 && mbna_current_crossing >= 0 && mbna_naverr_load) {
+  if (project.open && project.num_crossings > 0 && mbna_current_crossing >= 0 && mbna_naverr_mode != MBNA_NAVERR_MODE_UNLOADED) {
     /* get minimum misfit in plane at current z offset */
     if (grid_nxyzeq > 0) {
       /* get closest to current zoffset in existing 3d grid */
@@ -3493,7 +3650,7 @@ void mbnavadjust_naverr_scale() {
   int status = MB_SUCCESS;
   double xscale, yscale;
 
-  if (mbna_naverr_load) {
+  if (mbna_naverr_mode != MBNA_NAVERR_MODE_UNLOADED) {
     /* set scaling for contour window */
     xscale = (cont_borders[1] - cont_borders[0]) / ((mbna_plot_lon_max - mbna_plot_lon_min) / mbna_mtodeglon);
     yscale = (cont_borders[3] - cont_borders[2]) / ((mbna_plot_lat_max - mbna_plot_lat_min) / mbna_mtodeglat);
@@ -3548,13 +3705,17 @@ void mbnavadjust_naverr_plot(int plotmode) {
   bool found;
   int i, j, k, l;
 
-  if (mbna_naverr_load) {
+fprintf(stderr, "plotmode:%d mbna_naverr_mode:%d mbna_current_crossing:%d mbna_current_file:%d mbna_current_section:%d\n",
+plotmode, mbna_naverr_mode, mbna_current_crossing, mbna_current_file, mbna_current_section);
+  if (mbna_naverr_mode != MBNA_NAVERR_MODE_UNLOADED) {
     /* get structures */
     crossing = (struct mbna_crossing *)&project.crossings[mbna_current_crossing];
     file1 = (struct mbna_file *)&project.files[crossing->file_id_1];
     file2 = (struct mbna_file *)&project.files[crossing->file_id_2];
     section1 = (struct mbna_section *)&file1->sections[crossing->section_1];
     section2 = (struct mbna_section *)&file2->sections[crossing->section_2];
+fprintf(stderr, "crossing:%p file1:%p file2:%p section1:%p section:%p\n",
+crossing, file1, file2, section1, section2);
 
     /* get naverr plot scaling */
     mbnavadjust_naverr_scale();
@@ -3806,7 +3967,6 @@ void mbnavadjust_naverr_plot(int plotmode) {
           }
           /*fprintf(stderr, "%d %d %f %f %f   %f %d\n",
               i, j, misfit_min, misfit_max, dmisfit, gridm[l], ipixel);*/
-
           xg_fillrectangle(pcorr_xgid, ix, iy, idx, idy, pixel_values[ipixel], XG_SOLIDLINE);
         }
       }
@@ -4281,33 +4441,33 @@ int mbnavadjust_autopick(bool do_vertical) {
         /* get misfit */
         mbnavadjust_get_misfit();
 
-                /* The overlap focus point is currently the center of the line
-                 * connecting the two closest approach nav points. It could also
-                 * be the centroid of the overlap regions. */
-                mbnavadjust_crossing_focuspoint(mbna_verbose, &project, mbna_current_crossing, mbna_offset_x, mbna_offset_y,
-                                                   &isnav1_focus, &isnav2_focus, &lon_focus, &lat_focus,
-                                                   &error);
+        /* The overlap focus point is currently the center of the line
+         * connecting the two closest approach nav points. It could also
+         * be the centroid of the overlap regions. */
+        mbnavadjust_crossing_focuspoint(mbna_verbose, &project, mbna_current_crossing, mbna_offset_x, mbna_offset_y,
+                                           &isnav1_focus, &isnav2_focus, &lon_focus, &lat_focus,
+                                           &error);
 
         /* If nonzero overlap region and focus point inside the overlap region,
-                 * set plot bounds to cover one-quarter
-                 * of overlap region centered on the focus point and
-                 * recalculate misfit. */
-                if (mbna_overlap_lon_max > mbna_overlap_lon_min && mbna_overlap_lat_max > mbna_overlap_lat_min
-                    && lon_focus >= mbna_overlap_lon_min && lon_focus <= mbna_overlap_lon_max
-                    && lat_focus >= mbna_overlap_lat_min && lat_focus <= mbna_overlap_lat_max) {
-                    dlon =  0.25 * (mbna_overlap_lon_max - mbna_overlap_lon_min);
-                    dlat =  0.25 * (mbna_overlap_lat_max - mbna_overlap_lat_min);
-                    mbna_plot_lon_min = MAX((lon_focus - dlon), mbna_overlap_lon_min);
-                    mbna_plot_lon_max = MIN((lon_focus + dlon), mbna_overlap_lon_max);
-                    mbna_plot_lat_min = MAX((lat_focus - dlat), mbna_overlap_lat_min);
-                    mbna_plot_lat_max = MIN((lat_focus + dlat), mbna_overlap_lat_max);
+         * set plot bounds to cover one-quarter
+         * of overlap region centered on the focus point and
+         * recalculate misfit. */
+        if (mbna_overlap_lon_max > mbna_overlap_lon_min && mbna_overlap_lat_max > mbna_overlap_lat_min
+          && lon_focus >= mbna_overlap_lon_min && lon_focus <= mbna_overlap_lon_max
+          && lat_focus >= mbna_overlap_lat_min && lat_focus <= mbna_overlap_lat_max) {
+          dlon =  0.25 * (mbna_overlap_lon_max - mbna_overlap_lon_min);
+          dlat =  0.25 * (mbna_overlap_lat_max - mbna_overlap_lat_min);
+          mbna_plot_lon_min = MAX((lon_focus - dlon), mbna_overlap_lon_min);
+          mbna_plot_lon_max = MIN((lon_focus + dlon), mbna_overlap_lon_max);
+          mbna_plot_lat_min = MAX((lat_focus - dlat), mbna_overlap_lat_min);
+          mbna_plot_lat_max = MIN((lat_focus + dlat), mbna_overlap_lat_max);
 
-                    /* get naverr plot scaling */
-                    mbnavadjust_naverr_scale();
+          /* get naverr plot scaling */
+          mbnavadjust_naverr_scale();
 
-                    /* get misfit */
-                    mbnavadjust_get_misfit();
-                }
+          /* get misfit */
+          mbnavadjust_get_misfit();
+        }
 
         /* check uncertainty estimate for a good pick */
         /* fprintf(stderr,"mbnavadjust_autopick C crossing:%d overlap:%d overlap_scale:%f current offsets:%f %f %f
@@ -4353,7 +4513,7 @@ int mbnavadjust_autopick(bool do_vertical) {
 
           /* update model plot */
           if (project.modelplot) {
-                        project.modelplot_uptodate = false;
+            project.modelplot_uptodate = false;
 
             /* update model status */
             do_update_modelplot_status();
@@ -4387,7 +4547,7 @@ int mbnavadjust_autopick(bool do_vertical) {
 
     /* update model plot */
     if (project.modelplot) {
-            project.modelplot_uptodate = false;
+      project.modelplot_uptodate = false;
 
       /* update model status */
       do_update_modelplot_status();
@@ -5201,7 +5361,6 @@ int mbnavadjust_autosetsvsvertical() {
 
           /* add tie */
           mbnavadjust_naverr_addtie();
-fprintf(stderr,"Done adding tie\n");
         }
         else {
           sprintf(message, "Failed to reset Tie Point %d of Crossing %d\n", 0, mbna_current_crossing);
@@ -5209,7 +5368,6 @@ fprintf(stderr,"Done adding tie\n");
             fprintf(stderr, "%s", message);
           do_info_add(message, true);
         }
-fprintf(stderr,"nprocess:%d\n",nprocess);
 
         /* update status periodically */
         if (nprocess % 10 == 0) {
@@ -5232,12 +5390,8 @@ fprintf(stderr,"nprocess:%d\n",nprocess);
         }
 
         /* unload crossing */
-fprintf(stderr,"calling mbnavadjust_crossing_unload\n");
         mbnavadjust_crossing_unload();
-fprintf(stderr,"done with mbnavadjust_crossing_unload\n");
 
-fprintf(stderr,"mbna_file_select:%d mbna_survey_select:%d mbna_section_select:%d\n",
-mbna_file_select,mbna_survey_select,mbna_section_select);
       }
     }
 
@@ -5758,6 +5912,7 @@ int mbnavadjust_invertnav() {
 
   int n_iteration;
   double convergence;
+  double convergence_prior;
   double convergence_threshold;
   double offset_x, offset_y, offset_z, projected_offset;
   double weight, zweight;
@@ -6547,12 +6702,18 @@ int mbnavadjust_invertnav() {
         /* loop over all ties applying the offsets to the chunks partitioned according to survey quality */
         n_iteration = 100000;
         convergence = 1000.0;
+        convergence_prior = 1000.0;
         convergence_threshold = 0.000005;
         damping = 0.02;
-        for (int iteration=0; iteration < n_iteration && convergence > convergence_threshold; iteration ++) {
+        for (int iteration=0;
+            iteration < n_iteration
+                && convergence > convergence_threshold
+                && convergence <= convergence_prior;
+            iteration ++) {
             fprintf(stderr,"\nStage 2 relaxation iteration %d\n", iteration);
 
             /* zero the working average offset array */
+            convergence_prior = convergence;
             memset(x, 0, ncols_alloc * sizeof(double));
             memset(nx, 0, ncols_alloc * sizeof(int));
             rms_misfit_previous = 0.0;
@@ -12456,15 +12617,15 @@ int mbnavadjust_modelplot_pick_timeseries(int x, int y) {
         mbna_modelplot_picksnav = MBNA_SELECT_NONE;
 
         /* bring up naverr window if required */
-        if (!mbna_naverr_load) {
-          do_naverr_init();
+        if (mbna_naverr_mode == MBNA_NAVERR_MODE_UNLOADED) {
+          do_naverr_init(MBNA_NAVERR_MODE_CROSSING);
         }
 
         /* else if naverr window is up, load selected crossing */
         else {
-          mbnavadjust_naverr_specific(mbna_crossing_select, mbna_tie_select);
+          mbnavadjust_naverr_specific_crossing(mbna_crossing_select, mbna_tie_select);
           mbnavadjust_naverr_plot(MBNA_PLOT_MODE_FIRST);
-          do_update_naverr();
+          do_naverr_update();
           do_update_status();
         }
       }
@@ -12476,8 +12637,8 @@ int mbnavadjust_modelplot_pick_timeseries(int x, int y) {
         mbna_modelplot_picksnav = pick_snav;
       }
 
-            /* set flag to replot modelplot */
-            project.modelplot_uptodate = false;
+      /* set flag to replot modelplot */
+      project.modelplot_uptodate = false;
     }
   }
 
@@ -12657,15 +12818,15 @@ int mbnavadjust_modelplot_pick_perturbation(int x, int y) {
         mbna_modelplot_picksnav = MBNA_SELECT_NONE;
 
         /* bring up naverr window if required */
-        if (!mbna_naverr_load) {
-          do_naverr_init();
+        if (mbna_naverr_mode == MBNA_NAVERR_MODE_UNLOADED) {
+          do_naverr_init(MBNA_NAVERR_MODE_CROSSING);
         }
 
         /* else if naverr window is up, load selected crossing */
         else {
-          mbnavadjust_naverr_specific(mbna_crossing_select, mbna_tie_select);
+          mbnavadjust_naverr_specific_crossing(mbna_crossing_select, mbna_tie_select);
           mbnavadjust_naverr_plot(MBNA_PLOT_MODE_FIRST);
-          do_update_naverr();
+          do_naverr_update();
           do_update_status();
         }
       }
@@ -12775,15 +12936,15 @@ int mbnavadjust_modelplot_pick_tieoffsets(int x, int y) {
       mbna_modelplot_picksnav = MBNA_SELECT_NONE;
 
       /* bring up naverr window if required */
-      if (!mbna_naverr_load) {
-        do_naverr_init();
+      if (mbna_naverr_mode == MBNA_NAVERR_MODE_UNLOADED) {
+        do_naverr_init(MBNA_NAVERR_MODE_CROSSING);
       }
 
       /* else if naverr window is up, load selected crossing */
       else {
-        mbnavadjust_naverr_specific(mbna_crossing_select, mbna_tie_select);
+        mbnavadjust_naverr_specific_crossing(mbna_crossing_select, mbna_tie_select);
         mbnavadjust_naverr_plot(MBNA_PLOT_MODE_FIRST);
-        do_update_naverr();
+        do_naverr_update();
         do_update_status();
       }
 
@@ -12954,15 +13115,15 @@ int mbnavadjust_modelplot_middlepick(int x, int y) {
           mbna_modelplot_picksnav = MBNA_SELECT_NONE;
 
           /* bring up naverr window if required */
-          if (!mbna_naverr_load) {
-            do_naverr_init();
+          if (mbna_naverr_mode == MBNA_NAVERR_MODE_UNLOADED) {
+            do_naverr_init(MBNA_NAVERR_MODE_CROSSING);
           }
 
           /* else if naverr window is up, load selected crossing */
           else {
-            mbnavadjust_naverr_specific(mbna_crossing_select, mbna_tie_select);
+            mbnavadjust_naverr_specific_crossing(mbna_crossing_select, mbna_tie_select);
             mbnavadjust_naverr_plot(MBNA_PLOT_MODE_FIRST);
-            do_update_naverr();
+            do_naverr_update();
             do_update_status();
           }
 
@@ -13075,15 +13236,15 @@ int mbnavadjust_modelplot_middlepick(int x, int y) {
           mbna_modelplot_picksnav = MBNA_SELECT_NONE;
 
           /* bring up naverr window if required */
-          if (!mbna_naverr_load) {
-            do_naverr_init();
+          if (mbna_naverr_mode == MBNA_NAVERR_MODE_UNLOADED) {
+            do_naverr_init(MBNA_NAVERR_MODE_CROSSING);
           }
 
           /* else if naverr window is up, load selected crossing */
           else {
-            mbnavadjust_naverr_specific(mbna_crossing_select, mbna_tie_select);
+            mbnavadjust_naverr_specific_crossing(mbna_crossing_select, mbna_tie_select);
             mbnavadjust_naverr_plot(MBNA_PLOT_MODE_FIRST);
-            do_update_naverr();
+            do_naverr_update();
             do_update_status();
           }
 
@@ -13226,15 +13387,15 @@ int mbnavadjust_modelplot_middlepick(int x, int y) {
           mbna_modelplot_picksnav = MBNA_SELECT_NONE;
 
           /* bring up naverr window if required */
-          if (!mbna_naverr_load) {
-            do_naverr_init();
+          if (mbna_naverr_mode == MBNA_NAVERR_MODE_UNLOADED) {
+            do_naverr_init(MBNA_NAVERR_MODE_CROSSING);
           }
 
           /* else if naverr window is up, load selected crossing */
           else {
-            mbnavadjust_naverr_specific(mbna_crossing_select, mbna_tie_select);
+            mbnavadjust_naverr_specific_crossing(mbna_crossing_select, mbna_tie_select);
             mbnavadjust_naverr_plot(MBNA_PLOT_MODE_FIRST);
-            do_update_naverr();
+            do_naverr_update();
             do_update_status();
           }
 
@@ -13353,15 +13514,15 @@ int mbnavadjust_modelplot_middlepick(int x, int y) {
           mbna_modelplot_picksnav = MBNA_SELECT_NONE;
 
           /* bring up naverr window if required */
-          if (!mbna_naverr_load) {
-            do_naverr_init();
+          if (mbna_naverr_mode == MBNA_NAVERR_MODE_UNLOADED) {
+            do_naverr_init(MBNA_NAVERR_MODE_CROSSING);
           }
 
           /* else if naverr window is up, load selected crossing */
           else {
-            mbnavadjust_naverr_specific(mbna_crossing_select, mbna_tie_select);
+            mbnavadjust_naverr_specific_crossing(mbna_crossing_select, mbna_tie_select);
             mbnavadjust_naverr_plot(MBNA_PLOT_MODE_FIRST);
-            do_update_naverr();
+            do_naverr_update();
             do_update_status();
           }
 
@@ -13439,15 +13600,15 @@ int mbnavadjust_modelplot_middlepick(int x, int y) {
         mbna_modelplot_tiezoom = false;
 
         /* bring up naverr window if required */
-        if (!mbna_naverr_load) {
-          do_naverr_init();
+        if (mbna_naverr_mode == MBNA_NAVERR_MODE_UNLOADED) {
+          do_naverr_init(MBNA_NAVERR_MODE_CROSSING);
         }
 
         /* else if naverr window is up, load selected crossing */
         else {
-          mbnavadjust_naverr_specific(mbna_crossing_select, mbna_tie_select);
+          mbnavadjust_naverr_specific_crossing(mbna_crossing_select, mbna_tie_select);
           mbnavadjust_naverr_plot(MBNA_PLOT_MODE_FIRST);
-          do_update_naverr();
+          do_naverr_update();
           do_update_status();
         }
 
@@ -13496,8 +13657,8 @@ int mbnavadjust_modelplot_clearblock() {
         for (int j = crossing->num_ties - 1; j >= 0; j--) {
           mbnavadjust_deletetie(i, j, MBNA_CROSSING_STATUS_NONE);
 
-                    /* set flag to replot modelplot */
-                    project.modelplot_uptodate = false;
+          /* set flag to replot modelplot */
+          project.modelplot_uptodate = false;
         }
       }
     }
@@ -16597,7 +16758,7 @@ int mbnavadjust_visualization_selectcrossingfromnav(int ifile1, int isection1, i
     }
 
     /* else unload previously loaded crossing */
-    else if (mbna_naverr_load) {
+    else if (mbna_naverr_mode != MBNA_NAVERR_MODE_UNLOADED) {
       /* put up message */
       sprintf(message, "Unloading crossing...");
       do_message_on(message);

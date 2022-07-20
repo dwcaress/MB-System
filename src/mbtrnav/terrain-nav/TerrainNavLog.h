@@ -37,7 +37,7 @@ public:
   //    plog = new TerrainNavLog(DataLog::BinaryFormat, "poseT")  // Creates poseT.log
   //    mlog = new TerrainNavLog(DataLog::BinaryFormat, "poseT", "pose")  // data mnem is "pose"
   // 
-  TerrainNavLog(DataLog::FileFormat fileFormat, const char* logname=TerrainNavLogName,
+  explicit TerrainNavLog(DataLog::FileFormat fileFormat, const char* logname=TerrainNavLogName,
               const char *mnem=TerrainNavMnemName);
 
   ~TerrainNavLog();

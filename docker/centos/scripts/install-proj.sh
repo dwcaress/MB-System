@@ -11,8 +11,17 @@ then
     exit 0
 fi
 
-# Dependencies
-yum install -y sqlite-devel sqlite curl
+# Dependencies - need sqlite3 >= 3.11, so build from source
+curl -L https://www.sqlite.org/2022/sqlite-autoconf-3370200.tar.gz | tar -xzv
+cd sqlite-autoconf-3370200
+./configure
+make
+make install
+cd ..
+
+yum install -y \
+    libtiff-devel \
+    libtiff
 
 # Build PROJ from sources
 git clone --depth=1 --branch ${PROJ_SOURCE_TAG} https://github.com/OSGeo/PROJ

@@ -49,6 +49,9 @@
 #define MBNA_GRID_NONE 0
 #define MBNA_GRID_OLD 1
 #define MBNA_GRID_CURRENT 2
+#define MBNA_REFGRID_NONE 0
+#define MBNA_REFGRID_IMPORTED 1
+#define MBNA_REFGRID_LOADED 2
 #define MBNA_INVERT_ZFULL 0
 #define MBNA_INVERT_ZISOLATED 1
 #define MBNA_FILE_POORNAV 1
@@ -76,6 +79,8 @@
 #define MBNA_VIEW_LIST_TRUECROSSINGS 8
 #define MBNA_VIEW_LIST_TIES 9
 #define MBNA_VIEW_LIST_TIESSORTED 10
+#define MBNA_VIEW_LIST_GLOBALTIES 11
+#define MBNA_VIEW_LIST_GLOBALTIESSORTED 12
 #define MBNA_VIEW_MODE_ALL 0
 #define MBNA_VIEW_MODE_SURVEY 1
 #define MBNA_VIEW_MODE_WITHSURVEY 2
@@ -83,6 +88,9 @@
 #define MBNA_VIEW_MODE_FILE 4
 #define MBNA_VIEW_MODE_WITHFILE 5
 #define MBNA_VIEW_MODE_WITHSECTION 6
+#define MBNA_NAVERR_MODE_UNLOADED 0
+#define MBNA_NAVERR_MODE_CROSSING 1
+#define MBNA_NAVERR_MODE_SECTION 2
 #define MBNA_SELECT_NONE -1
 #define MBNA_VECTOR_ALLOC_INC 1000
 #define MBNA_PEN_UP 3
@@ -161,6 +169,8 @@ struct mbna_block {
   double global_tie_offset_z_m;
 };
 struct mbna_section {
+  int file_id;
+  int section_id;
   int num_pings;
   int num_beams;
   int global_start_ping;
@@ -314,6 +324,7 @@ struct mbna_project {
   char path[STRING_MAX];
   char home[STRING_MAX];
   char datadir[STRING_MAX];
+  char refgrid_name[STRING_MAX];
   char logfile[STRING_MAX];
   FILE *logfp;
 
@@ -332,6 +343,7 @@ struct mbna_project {
   int num_truecrossings_analyzed;
   struct mbna_crossing *crossings;
   int num_ties;
+  int num_globalties;
   double section_length;
   int section_soundings;
   int bin_beams_bath;
@@ -357,8 +369,8 @@ struct mbna_project {
   double triangle_scale;
   int inversion_status;
 
-  int ref_grid_status;
-  struct mbna_grid ref_grid;
+  int refgrid_status;
+  struct mbna_grid refgrid;
 
   int grid_status;
   struct mbna_grid grid;
@@ -444,6 +456,8 @@ int mbnavadjust_section_translate(int verbose, struct mbna_project *project,
 int mbnavadjust_section_contour(int verbose, struct mbna_project *project,
                                 int fileid, int sectionid, struct swath *swath,
                                 struct mbna_contour_vector *contour, int *error);
+int mbnavadjust_referencesection_load();
+int mbnavadjust_referencesection_unload();
 int mbnavadjust_import_data(int verbose, struct mbna_project *project, char *path, int format, int *error);
 int mbnavadjust_import_file(int verbose, struct mbna_project *project, char *path, int format, bool firstfile, int *error);
 int mbnavadjust_import_reference(int verbose, struct mbna_project *project, char *path, int *error);
@@ -458,6 +472,7 @@ int mbnavadjust_bin_bathymetry(int verbose, struct mbna_project *project,
                                double *bin_bathalongtrack, int *error);
 int mbnavadjust_crossing_compare(const void *a, const void *b);
 int mbnavadjust_tie_compare(const void *a, const void *b);
+int mbnavadjust_globaltie_compare(const void *a, const void *b);
 int mbnavadjust_info_add(int verbose, struct mbna_project *project, char *info, bool timetag, int *error);
 
 /*--------------------------------------------------------------------*/

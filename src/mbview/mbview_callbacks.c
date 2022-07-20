@@ -565,6 +565,27 @@ int mbview_reset(size_t instance) {
 		/* profile data */
 		data->profile_view_mode = MBV_VIEW_OFF;
 
+    /* general use state variables to turn action button sensitivity on and off */
+    data->state13 = MBV_VIEW_OFF;
+    data->state14 = MBV_VIEW_OFF;
+    data->state15 = MBV_VIEW_OFF;
+    data->state16 = MBV_VIEW_OFF;
+    data->state17 = MBV_VIEW_OFF;
+    data->state18 = MBV_VIEW_OFF;
+    data->state19 = MBV_VIEW_OFF;
+    data->state20 = MBV_VIEW_OFF;
+    data->state21 = MBV_VIEW_OFF;
+    data->state22 = MBV_VIEW_OFF;
+    data->state23 = MBV_VIEW_OFF;
+    data->state24 = MBV_VIEW_OFF;
+    data->state25 = MBV_VIEW_OFF;
+    data->state26 = MBV_VIEW_OFF;
+    data->state27 = MBV_VIEW_OFF;
+    data->state28 = MBV_VIEW_OFF;
+    data->state29 = MBV_VIEW_OFF;
+    data->state30 = MBV_VIEW_OFF;
+    data->state31 = MBV_VIEW_OFF;
+
 		/* set mbview default values */
 		status = mb_mbview_defaults(mbv_verbose, &data->primary_colortable, &data->primary_colortable_mode,
 		                            &data->primary_shade_mode, &data->slope_colortable, &data->slope_colortable_mode,
@@ -2420,8 +2441,66 @@ int mbview_action_sensitivity(size_t instance) {
 				XtSetArg(args[ac], XmNsensitive, True);
 			}
 			if (view->actionsensitive[i] & MBV_PICKMASK_NEWINSTANCE && mbview_allactive) {
-				XtSetArg(args[ac], XmNsensitive, False);
+				XtSetArg(args[ac], XmNsensitive, True);
 			}
+			if (view->actionsensitive[i] & MBV_STATEMASK_13 && data->state13) {
+				XtSetArg(args[ac], XmNsensitive, True);
+			}
+			if (view->actionsensitive[i] & MBV_STATEMASK_14 && data->state14) {
+				XtSetArg(args[ac], XmNsensitive, True);
+			}
+			if (view->actionsensitive[i] & MBV_STATEMASK_15 && data->state15) {
+				XtSetArg(args[ac], XmNsensitive, True);
+			}
+			if (view->actionsensitive[i] & MBV_STATEMASK_16 && data->state16) {
+				XtSetArg(args[ac], XmNsensitive, True);
+			}
+			if (view->actionsensitive[i] & MBV_STATEMASK_17 && data->state17) {
+				XtSetArg(args[ac], XmNsensitive, True);
+			}
+			if (view->actionsensitive[i] & MBV_STATEMASK_18 && data->state18) {
+				XtSetArg(args[ac], XmNsensitive, True);
+			}
+			if (view->actionsensitive[i] & MBV_STATEMASK_19 && data->state19) {
+				XtSetArg(args[ac], XmNsensitive, True);
+			}
+			if (view->actionsensitive[i] & MBV_STATEMASK_20 && data->state20) {
+				XtSetArg(args[ac], XmNsensitive, True);
+			}
+			if (view->actionsensitive[i] & MBV_STATEMASK_21 && data->state21) {
+				XtSetArg(args[ac], XmNsensitive, True);
+			}
+			if (view->actionsensitive[i] & MBV_STATEMASK_22 && data->state22) {
+				XtSetArg(args[ac], XmNsensitive, True);
+			}
+			if (view->actionsensitive[i] & MBV_STATEMASK_23 && data->state23) {
+				XtSetArg(args[ac], XmNsensitive, True);
+			}
+			if (view->actionsensitive[i] & MBV_STATEMASK_24 && data->state24) {
+				XtSetArg(args[ac], XmNsensitive, True);
+			}
+			if (view->actionsensitive[i] & MBV_STATEMASK_25 && data->state25) {
+				XtSetArg(args[ac], XmNsensitive, True);
+			}
+			if (view->actionsensitive[i] & MBV_STATEMASK_26 && data->state26) {
+				XtSetArg(args[ac], XmNsensitive, True);
+			}
+			if (view->actionsensitive[i] & MBV_STATEMASK_27 && data->state27) {
+				XtSetArg(args[ac], XmNsensitive, True);
+			}
+			if (view->actionsensitive[i] & MBV_STATEMASK_28 && data->state28) {
+				XtSetArg(args[ac], XmNsensitive, True);
+			}
+			if (view->actionsensitive[i] & MBV_STATEMASK_29 && data->state29) {
+				XtSetArg(args[ac], XmNsensitive, True);
+			}
+			if (view->actionsensitive[i] & MBV_STATEMASK_30 && data->state30) {
+				XtSetArg(args[ac], XmNsensitive, True);
+			}
+			if (view->actionsensitive[i] & MBV_STATEMASK_31 && data->state31) {
+				XtSetArg(args[ac], XmNsensitive, True);
+			}
+
 			ac++;
 			XtSetValues(view->pushButton_action[i], args, ac);
 		}
@@ -2561,6 +2640,77 @@ int mbview_addaction(int verbose, size_t instance, void(mbview_action_notify)(Wi
 	XtManageChild(view->pushButton_action[view->naction]);
 	XtAddCallback(view->pushButton_action[view->naction], XmNactivateCallback, mbview_action_notify, (XtPointer)instance);
 	view->naction++;
+
+	/* now set action buttons according to current pick states */
+	mbview_action_sensitivity(instance);
+
+	const int status = MB_SUCCESS;
+
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       error:        %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:  %d\n", status);
+	}
+
+	return (status);
+}
+
+/*------------------------------------------------------------------------------*/
+int mbview_setstate(int verbose, size_t instance, int mask, int value, int *error) {
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:              %d\n", verbose);
+		fprintf(stderr, "dbg2       instance:             %zu\n", instance);
+		fprintf(stderr, "dbg2       mask:                 %d\n", mask);
+		fprintf(stderr, "dbg2       value:                %d\n", value);
+	}
+
+	struct mbview_world_struct *view = &(mbviews[instance]);
+	struct mbview_struct *data = &(view->data);
+
+  /* set state value */
+  if (mask & MBV_STATEMASK_13)
+    data->state13 = value;
+  if (mask & MBV_STATEMASK_14)
+    data->state14 = value;
+  if (mask & MBV_STATEMASK_15)
+    data->state15 = value;
+  if (mask & MBV_STATEMASK_16)
+    data->state16 = value;
+  if (mask & MBV_STATEMASK_17)
+    data->state17 = value;
+  if (mask & MBV_STATEMASK_18)
+    data->state18 = value;
+  if (mask & MBV_STATEMASK_19)
+    data->state19 = value;
+  if (mask & MBV_STATEMASK_20)
+    data->state20 = value;
+  if (mask & MBV_STATEMASK_21)
+    data->state21 = value;
+  if (mask & MBV_STATEMASK_22)
+    data->state22 = value;
+  if (mask & MBV_STATEMASK_23)
+    data->state23 = value;
+  if (mask & MBV_STATEMASK_24)
+    data->state24 = value;
+  if (mask & MBV_STATEMASK_25)
+    data->state25 = value;
+  if (mask & MBV_STATEMASK_26)
+    data->state26 = value;
+  if (mask & MBV_STATEMASK_27)
+    data->state27 = value;
+  if (mask & MBV_STATEMASK_28)
+    data->state28 = value;
+  if (mask & MBV_STATEMASK_29)
+    data->state29 = value;
+  if (mask & MBV_STATEMASK_30)
+    data->state30 = value;
+  if (mask & MBV_STATEMASK_31)
+    data->state31 = value;
 
 	/* now set action buttons according to current pick states */
 	mbview_action_sensitivity(instance);

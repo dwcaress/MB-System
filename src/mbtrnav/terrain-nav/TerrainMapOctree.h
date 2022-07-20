@@ -21,7 +21,7 @@ class TerrainMapOctree : public TerrainMap{
 		double QueryMap(const double[3] queryPoint);
 #endif
 
-		TerrainMapOctree(const char* mapName);
+		explicit TerrainMapOctree(const char* mapName);
 		~TerrainMapOctree();
 
 		int loadSubMap(const double xcen, const double ycen, double* mapWidth,
@@ -59,6 +59,14 @@ class TerrainMapOctree : public TerrainMap{
 		   double northing;
 		   double easting;
 
+            MapTile()
+            :
+            octreeMap(NULL),
+            mapName(NULL),
+            northing(0.),
+            easting(0.)
+            {
+            }
 		   bool load()
 		   {
 		   	// unload unless the map is NULL

@@ -40,17 +40,61 @@ trn_server.cpp calls getFilterState() which currently only returns 0
 ******************************************************************************/
 //static int transitionMatrix[5][3] = {{0, 0, 1}, {1, 1, 1}, {1, 2, 2}, {2, 2, 2}, {2, 2, 2}};
 TerrainNav::TerrainNav()
-: tNavFilter(NULL),allowFilterReinits(true),numReinits(0),
-saveDirectory(NULL), vehicleSpecFile(NULL),
-particlesFile(NULL), mapFile(NULL),
-filterType(1),mapType(1),
-terrainMap(NULL),_trnLog(NULL)
+: tNavFilter(NULL),
+numWaitingMeas(0),
+lastMeasSuccess(false),
+lastVelBotLock(false),
+lastMeasValid(false),
+lastMeasSuccessTime(0.),
+lastInitAttemptTime(0.),
+lastBottomLockTime(0.),
+allowFilterReinits(true),
+useModifiedWeighting(0),
+numReinits(0),
+saveDirectory(NULL),
+vehicleSpecFile(NULL),
+particlesFile(NULL),
+mapFile(NULL),
+filterType(1),
+mapType(1),
+terrainMap(NULL),
+_initialized(false),
+_trnLog(NULL)
 {
-    _initVars.setXYZ(X_STDDEV_INIT,Y_STDDEV_INIT,Z_STDDEV_INIT);
+    for(int i=0;i<3;i++)lastValidVel[i]=0.;
+    for(int i=0;i<4;i++)noValidRange[i]=false;
+    for(int i=0;i<4;i++)lastValidRange[i]=0.;
+    for(int i=0;i<4;i++)lastValidRangeTime[i]=0.;
+   _initVars.setXYZ(X_STDDEV_INIT,Y_STDDEV_INIT,Z_STDDEV_INIT);
     // NOTE: should NOT call initVariables
 }
 
-TerrainNav::TerrainNav(char* mapName) {
+TerrainNav::TerrainNav(char* mapName)
+: tNavFilter(NULL),
+numWaitingMeas(0),
+lastMeasSuccess(false),
+lastVelBotLock(false),
+lastMeasValid(false),
+lastMeasSuccessTime(0.),
+lastInitAttemptTime(0.),
+lastBottomLockTime(0.),
+allowFilterReinits(true),
+useModifiedWeighting(0),
+numReinits(0),
+saveDirectory(NULL),
+vehicleSpecFile(NULL),
+particlesFile(NULL),
+mapFile(NULL),
+filterType(1),
+mapType(1),
+terrainMap(NULL),
+_initialized(false),
+_trnLog(NULL)
+{
+    for(int i=0;i<3;i++)lastValidVel[i]=0.;
+    for(int i=0;i<4;i++)noValidRange[i]=false;
+    for(int i=0;i<4;i++)lastValidRange[i]=0.;
+    for(int i=0;i<4;i++)lastValidRangeTime[i]=0.;
 	//initialize pointers
 	this->mapFile = STRDUPNULL(mapName);
 	this->vehicleSpecFile = (char*)"mappingAUV_specs.cfg";
@@ -323,7 +367,6 @@ void TerrainNav::estimatePose(poseT* estimate, const int& type) {
 void TerrainNav::measUpdate(measT* incomingMeas, const int& type) {
 	//copy incoming measurement to current meas structure;
 	measT currMeas;
-	int i;
     // measT '=' operator performs copy operation,
     // allocating dynamic memory for variables...
     // this has to be released (note call to clean() below)
@@ -342,7 +385,7 @@ void TerrainNav::measUpdate(measT* incomingMeas, const int& type) {
 	if(tNavFilter->lastNavPose == NULL) {
 		//check if our current measurements are valid
 		this->lastMeasValid = false;
-		for(i = 0; i < currMeas.numMeas; i++) {
+		for(int i = 0; i < currMeas.numMeas; i++) {
 			if(currMeas.measStatus[i]) {
 				this->lastMeasValid = true;
 				break;
@@ -475,24 +518,22 @@ void TerrainNav::motionUpdate(poseT* incomingNav) {
 	if( INTG_POS )
 	{
 	   //Convert currEstimate->pose (.x, .y .z) from body to iceberg.  psi_berg.
-	   Matrix currVelBody(3,1);
 	   Matrix prevVelBody(3,1);
-	   Matrix currVelMap(3,1);
 	   Matrix prevVelMap(3,1);
 
 	   double prevAttitude[3] = {tNavFilter->lastNavPose->phi, tNavFilter->lastNavPose->theta,
 				     tNavFilter->lastNavPose->psi};
 
-	   double currAttitude[3] = {currEstimate.phi, currEstimate.theta,
-				     currEstimate.psi};
 
 	   prevVelBody(1,1) = tNavFilter->lastNavPose->vx;
 	   prevVelBody(2,1) = tNavFilter->lastNavPose->vy;
 	   prevVelBody(3,1) = tNavFilter->lastNavPose->vz;
 
-	   currVelBody(1,1) = currEstimate.vx;
-	   currVelBody(2,1) = currEstimate.vy;
-	   currVelBody(3,1) = currEstimate.vz;
+//     // TODO use or remove
+//     Matrix currVelBody(3,1);
+//	   currVelBody(1,1) = currEstimate.vx;
+//	   currVelBody(2,1) = currEstimate.vy;
+//	   currVelBody(3,1) = currEstimate.vz;
 
 	   logs(TL_OMASK(TL_TERRAIN_NAV, TL_LOG),"TerrainNav::motionUpdate() - currEstimate = "
 		"(%.f, %.2f, %.2f)\n", currEstimate.x, currEstimate.y, currEstimate.z);
@@ -500,15 +541,20 @@ void TerrainNav::motionUpdate(poseT* incomingNav) {
 
 	   prevVelMap = tNavFilter->applyRotation( prevAttitude, prevVelBody );
 
-	   currVelMap = tNavFilter->applyRotation( currAttitude, currVelBody );
+//     // TODO use or remove
+//     Matrix currVelMap(3,1);
+//     double currAttitude[3] = {currEstimate.phi, currEstimate.theta,
+//            currEstimate.psi};
+//	   currVelMap = tNavFilter->applyRotation( currAttitude, currVelBody );
 
 	   double deltat = currEstimate.time - tNavFilter->lastNavPose->time;
 
-//         Trapezoidal:
+//     // TODO - remove or use
+//     // Trapezoidal:
 //	   currEstimate.x = tNavFilter->lastNavPose->x + (prevVelMap(1,1) + currVelMap(1,1))*deltat/2.;
 //	   currEstimate.y = tNavFilter->lastNavPose->y + (prevVelMap(2,1) + currVelMap(2,1))*deltat/2.;
 //	   currEstimate.z = tNavFilter->lastNavPose->z + (prevVelMap(3,1) + currVelMap(3,1))*deltat/2.;
-//
+
 //         Forward Euler:
 	   currEstimate.x = tNavFilter->lastNavPose->x + (prevVelMap(1,1) )*deltat;
 	   currEstimate.y = tNavFilter->lastNavPose->y + (prevVelMap(2,1) )*deltat;
@@ -754,7 +800,6 @@ void TerrainNav::initVariables() {
 
 void TerrainNav::attemptInitFilter(poseT& initEstimate) {
 	bool withinMap;
-	int i;
 	static double windowVarInc[N_COVAR] = {
 					  0.0,
 					  0.0, 0.0,
@@ -785,13 +830,13 @@ void TerrainNav::attemptInitFilter(poseT& initEstimate) {
             (!initEstimate.gpsValid || TNavConfig::instance()->getIgnoreGps())) {
 		//Incorporate increased search window to account for large initialization
 		//waiting times
-		for(i = 0; i < N_COVAR; i++) {
+		for(int i = 0; i < N_COVAR; i++) {
 			windowVarInc[i] *= windowVarInc[i];
 		}
 		tNavFilter->increaseInitSearchWin(windowVarInc);
 
 		logs(TL_OMASK(TL_TERRAIN_NAV, TL_LOG),"TerrainNav::attemptInitFilter is increasing Init Search Window by %f m\n", windowVarInc[0]);
-		for(i = 0; i < N_COVAR; i++) {
+		for(int i = 0; i < N_COVAR; i++) {
 			windowVarInc[i] = 0.0;
 		}
 		//lastInitAttemptTime = -1;
@@ -825,7 +870,7 @@ void TerrainNav::attemptInitFilter(poseT& initEstimate) {
 			return;
 		}
 		logs(TL_OMASK(TL_TERRAIN_NAV, TL_LOG),"TerrainNav::Filter not initialized - vehicle currently "
-			   "does not have bottom lock or good velocity data\n");
+             "does not have bottom lock or good velocity data dvlVal[%c]\n",initEstimate.dvlValid?'Y':'N');
 	}
 }
 
@@ -892,16 +937,13 @@ bool TerrainNav::interpolatePoses(const poseT& pose1, const poseT& pose2,
 
 void TerrainNav::computeMeasVariance(measT& currMeas) {
 	int sensorIdx = 0;
-	double perError;
-	double rangeSq;
-	int i;
 
 	//find index of current measurement sensor.  If none match,
 	//return.
 	if(!tNavFilter->findMeasSensorIndex(currMeas.dataType, sensorIdx)) {
 		return;
 	}
-	perError = tNavFilter->vehicle->sensors[sensorIdx].percentRangeError;
+	double perError = tNavFilter->vehicle->sensors[sensorIdx].percentRangeError;
 
 	//if covariance vector not already initialized, initialize it
 	if(currMeas.covariance == NULL) {
@@ -910,13 +952,13 @@ void TerrainNav::computeMeasVariance(measT& currMeas) {
 
 	//compute variance based on sensor's percent range error
 	if(currMeas.dataType == TRN_SENSOR_MB) { // mb measurement
-		for(i = 0; i < currMeas.numMeas; i++) {
-			rangeSq = pow(currMeas.crossTrack[i], 2) + pow(currMeas.alongTrack[i], 2)
+		for(int i = 0; i < currMeas.numMeas; i++) {
+			double rangeSq = pow(currMeas.crossTrack[i], 2) + pow(currMeas.alongTrack[i], 2)
 					  + pow(currMeas.altitudes[i], 2);
 			currMeas.covariance[i] = rangeSq * pow(perError / 100.0, 2);
 		}
 	} else { //dvl or altimeter measurement
-		for(i = 0; i < currMeas.numMeas; i++) {
+		for(int i = 0; i < currMeas.numMeas; i++) {
 			currMeas.covariance[i] = pow(currMeas.ranges[i] * perError / 100.0, 2);
 		}
 	}
@@ -949,8 +991,6 @@ void TerrainNav::checkVelocityValidity(poseT& currPose) {
 
 
 void TerrainNav::checkRangeValidity(measT& currMeas) {
-	int i, j;
-	int numEqual = 0;
 	double alpha, dr, dt;
 #if MBTRN_DEBUG
 
@@ -961,7 +1001,7 @@ void TerrainNav::checkRangeValidity(measT& currMeas) {
 	logs(TL_OMASK(TL_TERRAIN_NAV, TL_LOG),"measT    y:%.3f\n", currMeas.y);
 	logs(TL_OMASK(TL_TERRAIN_NAV, TL_LOG),"measT    z:%.3f\n", currMeas.z);
 	logs(TL_OMASK(TL_TERRAIN_NAV, TL_LOG),"measT  hdg:%.3f\n", currMeas.psi);
-	for(i = 0; i < currMeas.numMeas; i++)
+	for(int i = 0; i < currMeas.numMeas; i++)
         {
           if (currMeas.dataType == TRN_SENSOR_MB)
 	  logs(TL_OMASK(TL_TERRAIN_NAV, TL_LOG),"TRNBeam,%d,%.3f,%d,%.3f,%.3f,%.3f\n",
@@ -975,19 +1015,19 @@ void TerrainNav::checkRangeValidity(measT& currMeas) {
 #endif
 	//this range check is only valid for DVL and IDT measurements
 	if(currMeas.dataType == TRN_SENSOR_DVL) {
-		for(i = 0; i < currMeas.numMeas; i++) {
-			numEqual = 0;
+		for(int i = 0; i < currMeas.numMeas; i++) {
 			alpha = currMeas.ranges[i];
 			//check if more than two beams are equal
 			if(i < 2) {
-				for(j = i + 1; j < currMeas.numMeas; j++) {
+                int numEqual = 0;
+				for(int j = i + 1; j < currMeas.numMeas; j++) {
 					if(fabs(alpha - currMeas.ranges[j]) < 0.1) {
 						numEqual++;
 					}
 				}
 				if(numEqual >= 2) {
 					//if more than two beams are equal, throw out all beams
-					for(j = 0; j < currMeas.numMeas; j++) {
+					for(int j = 0; j < currMeas.numMeas; j++) {
 						currMeas.measStatus[j] = false;
 					}
 					logs(TL_OMASK(TL_TERRAIN_NAV, TL_LOG),"TerrainNav:: Throwing out all beams because more "
@@ -1023,7 +1063,7 @@ void TerrainNav::checkRangeValidity(measT& currMeas) {
 		}
 	}
 	else if(currMeas.dataType == TRN_SENSOR_DELTAT){
-		for(i = 0; i < currMeas.numMeas; i++) {
+		for(int i = 0; i < currMeas.numMeas; i++) {
 			//check validity of each beam based on NaN or range value
 		        // Use only the middle 60 of 120 beams
 			if(std::isnan(currMeas.ranges[i]) || (currMeas.ranges[i] >= MAX_RANGE)
@@ -1078,8 +1118,7 @@ void TerrainNav::reinitFilter(bool lowInfoTransition) {
         0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, GYRO_BIAS_STDDEV_INIT * GYRO_BIAS_STDDEV_INIT,
         0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, PSI_BERG_STDDEV_INIT * PSI_BERG_STDDEV_INIT
     };
-	int i;
-	poseT* temp = new poseT;
+    poseT* temp = new poseT;
 
 	//ensure that tNavFilter is non-empty before accessing and deleting
 	if(tNavFilter != NULL) {
@@ -1097,7 +1136,7 @@ void TerrainNav::reinitFilter(bool lowInfoTransition) {
 		//If keeping mean and covariance
 		if(tNavFilter->lastNavPose != NULL && !lowInfoTransition) {
 			tNavFilter->computeMMSE(temp);	//puts covariance and MMSE in temp
-			for(i = 0; i < N_COVAR; i++) {
+			for(int i = 0; i < N_COVAR; i++) {
 				windowVar[i] = 1.0 * temp->covariance[i];
 			}
 		}
@@ -1387,78 +1426,101 @@ char *TerrainNav::getSessionDir(char *dir_prefix, char *dest, size_t len, bool c
 */
 void TerrainNav::copyToLogDir()
 {
-	// Used the following line for testing
-	// this->saveDirectory = "./logdir";
-
-	// Copy only if there is a place for the files to land
-	//
-	if (NULL != this->saveDirectory)
-	{
-
+    // Used the following line for testing
+    // this->saveDirectory = "./logdir";
+    
+    // Copy only if there is a place for the files to land
+    //
+    if (NULL != this->saveDirectory)
+    {
+        
         char *slash = NULL;
-		char* trnLogDir = getenv("TRN_LOGFILES");
+        char* trnLogDir = getenv("TRN_LOGFILES");
         char dot[]=".";
-		if (!trnLogDir) trnLogDir = dot;
-		char dir_spec[512];  // Reusable buffer to write log directory paths
-
-		// Create the log directory
-		// remove last component of directory prefix, if any (shouldn't exist)
+        if (!trnLogDir) trnLogDir = dot;
+        char dir_spec[512]={0};  // Reusable buffer to write log directory paths
+        char dir_spec2[512]={0};  // Reusable buffer to write log directory paths
+        
+        // Create the log directory
+        // remove last component of directory prefix, if any (shouldn't exist)
         // klh - intentional? or is it meant to remove trailing slash?
-		if( ( slash = strrchr( this->saveDirectory, '/' ) ) )
-		{
-		   *slash = '\0';
-		}
-
+        if( ( slash = strrchr( this->saveDirectory, '/' ) ) )
+        {
+            *slash = '\0';
+        }
+        
         getSessionDir(this->saveDirectory,dir_spec,512,true);
-
+        
         // update saveDirectory (used to store filter files)
-		free(this->saveDirectory);
-		this->saveDirectory = STRDUPNULL(dir_spec);
-		logs(TL_OMASK(TL_TERRAIN_NAV, TL_LOG), "TRN log directory is %s\n", this->saveDirectory);
-
-		// Create a latest link that points to the log directory
-		//
-		sprintf(dir_spec, "%s/%s", trnLogDir, LatestLogDirName);
-		remove(dir_spec);
-		if (0 != symlink(this->saveDirectory, dir_spec))
-			logs(TL_OMASK(TL_TERRAIN_NAV, TL_LOG), "symlink %s to %s failed:%s\n",
-				dir_spec, this->saveDirectory, strerror(errno));
-		else
-			logs(TL_OMASK(TL_TERRAIN_NAV, TL_LOG), "symlink %s to %s OK\n",
-				dir_spec, this->saveDirectory);
-	}
-	else
-		return;
-
-	char copybuf[320];
-	if (NULL != this->vehicleSpecFile)
-	{
-		sprintf(copybuf, "cp %s %s/.", this->vehicleSpecFile,
-						    this->saveDirectory);
-		if (0 != system(copybuf))
-			logs(TL_OMASK(TL_TERRAIN_NAV, TL_LOG), "command \'%s\' failed:%s\n",
-				copybuf, strerror(errno));
-	}
-
-	if (NULL != this->particlesFile)
-	{
-		sprintf(copybuf, "cp %s %s/.", this->particlesFile,
-						    this->saveDirectory);
-		if (0 != system(copybuf))
-			logs(TL_OMASK(TL_TERRAIN_NAV, TL_LOG), "command \'%s\' failed:%s\n",
-				copybuf, strerror(errno));
-	}
-
-	// Create a vehicleT object just to get the sensor spec files to copy
-	//
-	vehicleT *v = new vehicleT(vehicleSpecFile);
-	for (int i = 0; i < v->numSensors; i++)
-	{
-		sprintf(copybuf, "cp %s %s/.", v->sensors[i].filename,
-						       this->saveDirectory);
-		if (0 != system(copybuf))
-			logs(TL_OMASK(TL_TERRAIN_NAV, TL_LOG), "command \'%s\' failed:%s\n",
-				copybuf, strerror(errno));
-	}
-	delete v;
+        free(this->saveDirectory);
+        this->saveDirectory = STRDUPNULL(dir_spec);
+        logs(TL_OMASK(TL_TERRAIN_NAV, TL_LOG), "TRN log directory is %s\n", this->saveDirectory);
+        
+        // Create a latest link that points to the log directory
+        //
+        sprintf(dir_spec, "%s/%s", trnLogDir, LatestLogDirName);
+        remove(dir_spec);
+        
+        strncpy(dir_spec2, this->saveDirectory, 511);
+        if (dir_spec2[strlen(dir_spec2)-1] == '/')
+        {
+            dir_spec2[strlen(dir_spec2)-1] = '\0';
+        }
+        char *sessionLogDir = strrchr(dir_spec2, '/');
+        if (sessionLogDir == NULL)
+        {
+            sessionLogDir = dir_spec2;
+        }
+        else
+        {
+            sessionLogDir += 1;
+        }
+        
+        if (0 != symlink(sessionLogDir, dir_spec))
+        {
+            logs(TL_OMASK(TL_TERRAIN_NAV, TL_LOG), "symlink %s to %s failed:%s\n",
+                 dir_spec, sessionLogDir, strerror(errno));
+        }
+        else
+        {
+            logs(TL_OMASK(TL_TERRAIN_NAV, TL_LOG), "symlink %s to %s OK\n",
+                 dir_spec, sessionLogDir);
+        }
+    }
+    else
+    {
+        return;
+    }
+    
+    char copybuf[320];
+    if (NULL != this->vehicleSpecFile)
+    {
+        sprintf(copybuf, "cp %s %s/.", this->vehicleSpecFile,
+                this->saveDirectory);
+        if (0 != system(copybuf))
+            logs(TL_OMASK(TL_TERRAIN_NAV, TL_LOG), "command \'%s\' failed:%s\n",
+                 copybuf, strerror(errno));
+    }
+    
+    if (NULL != this->particlesFile)
+    {
+        sprintf(copybuf, "cp %s %s/.", this->particlesFile,
+                this->saveDirectory);
+        if (0 != system(copybuf))
+            logs(TL_OMASK(TL_TERRAIN_NAV, TL_LOG), "command \'%s\' failed:%s\n",
+                 copybuf, strerror(errno));
+    }
+    
+    // Create a vehicleT object just to get the sensor spec files to copy
+    //
+    vehicleT *v = new vehicleT(vehicleSpecFile);
+    for (int i = 0; i < v->numSensors; i++)
+    {
+        sprintf(copybuf, "cp %s %s/.", v->sensors[i].filename,
+                this->saveDirectory);
+        if (0 != system(copybuf))
+            logs(TL_OMASK(TL_TERRAIN_NAV, TL_LOG), "command \'%s\' failed:%s\n",
+                 copybuf, strerror(errno));
+    }
+    delete v;
 }

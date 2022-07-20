@@ -56,6 +56,7 @@
  * Date:  April 5,  2018
  */
 
+#include <assert.h>
 #include <math.h>
 #include <stdbool.h>
 #include <stdio.h>
@@ -770,6 +771,7 @@ int main(int argc, char **argv) {
     int pid = getpid();
     mb_path wd = "";
     getcwd(wd, sizeof(wd));
+    assert(strlen(wd) > 0);
     mb_path lltfile = "";
     mb_path otpsfile = "";
     sprintf(lltfile, "%s/t%d.txt", wd, pid);

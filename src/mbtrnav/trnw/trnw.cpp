@@ -62,15 +62,19 @@
 /////////////////////////
 // Headers
 /////////////////////////
+#include <stdint.h>
+#include <stdbool.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <unistd.h>
-#include "trnw.h"
 
+#include "trnw.h"
 #include "TerrainNav.h"
 #include "NavUtils.h"
 #include "MathP.h"
 #include "structDefs.h"
+#include "mb1_msg.h"
+#include "trn_msg.h"
 
 /////////////////////////
 // Macros
@@ -634,7 +638,7 @@ int  wcommst_serialize(char **pdest, wcommst_t *src, int len)
 {
     int retval=-1;
     if(NULL!=src && NULL!=pdest){
-        fprintf(stderr,"%s:%d pdest[%p/%p] len[%d]\n",__FUNCTION__,__LINE__,pdest,*pdest,len);
+//        fprintf(stderr,"%s:%d pdest[%p/%p] len[%d]\n",__FUNCTION__,__LINE__,pdest,*pdest,len);
         char *dest = *pdest;
         if(NULL==dest){
             dest = (char *)malloc(len);
@@ -1152,14 +1156,14 @@ int wposet_mb1_to_pose(wposet_t **dest, mb1_t *src, long int utmZone)
         }
         if(NULL!=pose){
             poseT *obj = static_cast<poseT *>(pose->obj);
-            obj->time = src->sounding.ts;
-            NavUtils::geoToUtm( Math::degToRad(src->sounding.lat),
-                               Math::degToRad(src->sounding.lon),
+            obj->time = src->ts;
+            NavUtils::geoToUtm( Math::degToRad(src->lat),
+                               Math::degToRad(src->lon),
                                utmZone, &(obj->x), &(obj->y));
-            obj->z = src->sounding.depth;
+            obj->z = src->depth;
             obj->phi=0.0;
             obj->theta=0.0;
-            obj->psi=src->sounding.hdg;
+            obj->psi=src->hdg;
             obj->gpsValid=(obj->z<2?true:false);
             obj->bottomLock=true;
             obj->dvlValid=true;
@@ -1420,26 +1424,26 @@ int wmeast_mb1_to_meas(wmeast_t **dest, mb1_t *src, long int utmZone)
     if(NULL!=dest && NULL!=src){
         wmeast_t *meas = (wmeast_t *)(*dest);
         if(NULL==meas){
-            meas=wmeast_new(src->sounding.nbeams);
+            meas=wmeast_new(src->nbeams);
             *dest=meas;
         }
         if(NULL!=meas){
             int i=0;
             measT *obj = static_cast<measT *>(meas->obj);
-            obj->time = src->sounding.ts;
-            obj->ping_number = src->sounding.ping_number;
+            obj->time = src->ts;
+            obj->ping_number = src->ping_number;
             obj->dataType=2;
-            obj->z=src->sounding.depth;
-            NavUtils::geoToUtm( Math::degToRad(src->sounding.lat),
-                               Math::degToRad(src->sounding.lon),
+            obj->z=src->depth;
+            NavUtils::geoToUtm( Math::degToRad(src->lat),
+                               Math::degToRad(src->lon),
                                utmZone, &(obj->x), &(obj->y));
 
             for(i=0;i<obj->numMeas;i++){
                 // TODO: fill in measT from ping...
-                obj->beamNums[i] = src->sounding.beams[i].beam_num;
-                obj->alongTrack[i] = src->sounding.beams[i].rhox;
-                obj->crossTrack[i] = src->sounding.beams[i].rhoy;
-                obj->altitudes[i]  = src->sounding.beams[i].rhoz;
+                obj->beamNums[i] = src->beams[i].beam_num;
+                obj->alongTrack[i] = src->beams[i].rhox;
+                obj->crossTrack[i] = src->beams[i].rhoy;
+                obj->altitudes[i]  = src->beams[i].rhoz;
                 double rho[3] = {obj->alongTrack[i], obj->crossTrack[i], obj->altitudes[i]};
                 double rhoNorm = vnorm( rho );
                 obj->ranges[i] = rhoNorm;

@@ -243,7 +243,7 @@ int mfile_open(mfile_file_t *self,mfile_flags_t flags)
             self->fd=-1;
         }
     }else{
-        fprintf(stderr,"invalid argument\n");
+        fprintf(stderr,"%s: invalid argument\n",__func__);
     }
     return retval;
 }
@@ -272,7 +272,7 @@ int mfile_mopen(mfile_file_t *self,mfile_flags_t flags,mfile_mode_t mode )
             self->fd=-1;
         }
     }else{
-        fprintf(stderr,"invalid argument\n");
+        fprintf(stderr,"%s: invalid argument\n",__func__);
     }
     return retval;
 }
@@ -365,7 +365,7 @@ int64_t mfile_seek(mfile_file_t *self, uint32_t ofs, mfile_whence_t whence)
             fprintf(stderr,"seek failed [%d/%s]\n",errno,strerror(errno));
         }
     }else{
-        fprintf(stderr,"invalid argument\n");
+        fprintf(stderr,"%s: invalid argument\n",__func__);
     }
     return retval;
 
@@ -389,7 +389,7 @@ int64_t mfile_read(mfile_file_t *self, byte *dest, uint32_t len)
             fprintf(stderr,"read failed [%d/%s]\n",errno,strerror(errno));
         }
     }else{
-        fprintf(stderr,"invalid argument\n");
+        fprintf(stderr,"%s: invalid argument\n",__func__);
     }
     return retval;
 }
@@ -412,7 +412,7 @@ int64_t mfile_write(mfile_file_t *self, byte *src, uint32_t len)
             fprintf(stderr,"write failed [%d/%s]\n",errno,strerror(errno));
         }
     }else{
-        fprintf(stderr,"invalid argument\n");
+        fprintf(stderr,"%s: invalid argument\n",__func__);
     }
     return retval;
 }
@@ -468,7 +468,7 @@ int mfile_vfprintf(mfile_file_t *self, const char *fmt, va_list args)
 //    if(NULL != self && self->fd>0){
 //        retval=vdprintf(self->fd,fmt,args);
 //    }else{
-//        fprintf(stderr,"invalid argument\n");
+//        fprintf(stderr,"%s: invalid argument\n",__func__);
 //    }
     return retval;
 }
@@ -492,7 +492,7 @@ int mfile_vfprintf(mfile_file_t *self, const char *fmt, va_list args)
         va_end(cargs);
 
     }else{
-        fprintf(stderr,"invalid argument\n");
+        fprintf(stderr,"%s: invalid argument\n",__func__);
     }
     return retval;
 }
@@ -510,7 +510,7 @@ int mfile_flush(mfile_file_t *self)
     if (NULL!=self && self->fd>0) {
         retval=fsync(self->fd);
     }else{
-        fprintf(stderr,"invalid argument\n");
+        fprintf(stderr,"%s: invalid argument\n",__func__);
     }
     return retval;
     
@@ -532,7 +532,7 @@ int64_t mfile_fsize(mfile_file_t *self)
             fprintf(stderr,"stat failed[%d/%s]\n",errno,strerror(errno));
         }
     }else{
-        fprintf(stderr,"invalid argument\n");
+        fprintf(stderr,"%s: invalid argument\n",__func__);
     }
     return retval;
 }
@@ -553,7 +553,7 @@ time_t mfile_mtime(const char *path)
             fprintf(stderr,"stat failed[%d/%s]\n",errno,strerror(errno));
         }
     }else{
-        fprintf(stderr,"invalid argument\n");
+        fprintf(stderr,"%s: invalid argument\n",__func__);
     }
     return retval;
 }

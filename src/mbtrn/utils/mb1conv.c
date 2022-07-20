@@ -312,7 +312,7 @@ static void app_cfg_destroy(app_cfg_t **pself)
     }
 }
 
-static int32_t s_read_mb1_rec( mb1_frame_t **pdest, mfile_file_t *src, app_cfg_t *cfg)
+static int32_t s_read_mb1_rec( mb1_t **pdest, mfile_file_t *src, app_cfg_t *cfg)
 {
     int32_t retval=-1;
 
@@ -321,10 +321,10 @@ static int32_t s_read_mb1_rec( mb1_frame_t **pdest, mfile_file_t *src, app_cfg_t
         uint32_t readlen = 1;
         uint32_t record_bytes=0;
         int64_t read_bytes=0;
-        mb1_frame_t *dest = *pdest;
+        mb1_t *dest = *pdest;
 
         // sync to start of record
-        bp = (byte *)dest->sounding;
+        bp = (byte *)dest;
 
         while( (read_bytes=mfile_read(src,(byte *)bp,readlen))==readlen){
             if(*bp=='M'){
@@ -342,23 +342,22 @@ static int32_t s_read_mb1_rec( mb1_frame_t **pdest, mfile_file_t *src, app_cfg_t
 
         if(NULL!=cfg && cfg->verbose>2){
             fprintf(stderr,"%d: read sync err[%d/%s]\n",__LINE__,errno,strerror(errno));
-            fprintf(stderr,"%d: frame[%p]\n",__LINE__,dest);
-            fprintf(stderr,"%d: sounding[%p]\n",__LINE__,dest->sounding);
-            fprintf(stderr,"%d: chksum[%p]\n",__LINE__,dest->checksum);
+            fprintf(stderr,"%d: sounding[%p]\n",__LINE__,dest);
+            fprintf(stderr,"%d: chksum[%p]\n",__LINE__,MB1_PCHECKSUM(dest));
             fprintf(stderr,"%d: readlen[%u]\n",__LINE__,readlen);
             fprintf(stderr,"%d: sizeof double[%zu]\n",__LINE__,sizeof(double));
             fprintf(stderr,"%d: sizeof int[%zu]\n",__LINE__,sizeof(int));
-            fprintf(stderr,"%d: sizeof mb1_sounding_t[%zu]\n",__LINE__,sizeof(mb1_sounding_t));
+            fprintf(stderr,"%d: sizeof mb1_t[%zu]\n",__LINE__,sizeof(mb1_t));
             fprintf(stderr,"%d: sizeof mb1_beam_t[%zu]\n",__LINE__,sizeof(mb1_beam_t));
-            fprintf(stderr,"%d: sizeof mb1_frame_t[%zu]\n",__LINE__,sizeof(mb1_frame_t));
+            fprintf(stderr,"%d: sizeof checksum[%zu]\n",__LINE__,sizeof(mb1_checksum_t));
         }
 
         // if start of sync found, read header (fixed-length sounding bytes)
         if(record_bytes>0 && (read_bytes=mfile_read(src,(byte *)bp,readlen))==readlen){
 
             if(NULL!=cfg && cfg->verbose>2){
-            fprintf(stderr,"%d: type[x%08X]\n",__LINE__,dest->sounding->type);
-            fprintf(stderr,"%d: nbeams[%u]\n",__LINE__,dest->sounding->nbeams);
+            fprintf(stderr,"%d: type[x%08X]\n",__LINE__,dest->type);
+            fprintf(stderr,"%d: nbeams[%u]\n",__LINE__,dest->nbeams);
             }
             record_bytes+=read_bytes;
 
@@ -366,21 +365,21 @@ static int32_t s_read_mb1_rec( mb1_frame_t **pdest, mfile_file_t *src, app_cfg_t
             readlen=0;
             retval=record_bytes;
 
-            if(NULL!=dest && NULL!=dest->sounding ){
-                if(dest->sounding->type==0x0031424D){
-                    if(dest->sounding->nbeams>0 && dest->sounding->nbeams<=MB1_MAX_BEAMS){
-                        if(mb1_frame_resize(&dest, dest->sounding->nbeams, MB1_RS_BEAMS)!=NULL){
-                            bp=(byte *)&dest->sounding->beams[0];
-                            readlen = dest->sounding->size-(MB1_HEADER_BYTES+MB1_CHECKSUM_BYTES);
+            if(NULL!=dest && NULL!=dest ){
+                if(dest->type==MB1_TYPE_ID){
+                    if(dest->nbeams>0 && dest->nbeams<=MB1_MAX_BEAMS){
+                        if(mb1_resize(&dest, dest->nbeams, MB1_RS_BEAMS)!=NULL){
+                            bp=(byte *)&dest->beams[0];
+                            readlen = dest->size-(MB1_HEADER_BYTES+MB1_CHECKSUM_BYTES);
                             *pdest=dest;
                         }else{fprintf(stderr,"%s:%d - ERR frame_resize\n",__func__,__LINE__);}
                     }else{
                         // don't resize, but update checksum pointer
-                        dest->checksum=MB1_PCHECKSUM_U32(dest);
+                        //                        dest->checksum=MB1_PCHECKSUM_U32(dest);
                     }
                 }else{
                     if(NULL!=cfg && cfg->verbose>=2)
-                    fprintf(stderr,"%s:%d - ERR invalid type[%u]\n",__func__,__LINE__,dest->sounding->type);
+                        fprintf(stderr,"%s:%d - ERR invalid type[%08X/%08X]\n",__func__,__LINE__,dest->type,MB1_TYPE_ID);
                     retval=-1;
                 }
             }else{
@@ -388,11 +387,11 @@ static int32_t s_read_mb1_rec( mb1_frame_t **pdest, mfile_file_t *src, app_cfg_t
             }
 
             if(NULL!=cfg && cfg->verbose>2){
-                fprintf(stderr,"%d: sounding->sz[%"PRIu32"] read[%"PRId64"/%"PRIu32"] err[%d/%s]\n",__LINE__,dest->sounding->size,read_bytes,readlen,errno,strerror(errno));
-                fprintf(stderr,"%d: sounding->type[%08X]\n",__LINE__,dest->sounding->type);
-                fprintf(stderr,"%d: sounding->checksum[%p]\n",__LINE__,dest->checksum);
+                fprintf(stderr,"%d: sounding->sz[%"PRIu32"] read[%"PRId64"/%"PRIu32"] err[%d/%s]\n",__LINE__,dest->size,read_bytes,readlen,errno,strerror(errno));
+                fprintf(stderr,"%d: sounding->type[%08X]\n",__LINE__,dest->type);
+                fprintf(stderr,"%d: sounding->checksum[%p]\n",__LINE__,MB1_PCHECKSUM(dest));
                 if(readlen>0)
-                fprintf(stderr,"%d: sounding->checksum[%"PRIu32"]\n",__LINE__,*dest->checksum);
+                fprintf(stderr,"%d: sounding->checksum[%"PRIu32"]\n",__LINE__,MB1_GET_CHECKSUM(dest));
             }
 
             // if header OK, read sounding data (variable length)
@@ -400,7 +399,7 @@ static int32_t s_read_mb1_rec( mb1_frame_t **pdest, mfile_file_t *src, app_cfg_t
             if(readlen>0 && (read_bytes=mfile_read(src,(byte *)bp,readlen))==readlen){
                 record_bytes+=read_bytes;
 
-                bp=(byte *)dest->checksum;
+                bp=(byte *)MB1_PCHECKSUM(dest);
                 readlen=MB1_CHECKSUM_BYTES;
 
                 // read checksum
@@ -408,9 +407,8 @@ static int32_t s_read_mb1_rec( mb1_frame_t **pdest, mfile_file_t *src, app_cfg_t
                     record_bytes+=read_bytes;
                     retval=record_bytes;
 
-                    unsigned int checksum = mb1_frame_calc_checksum(dest);
-                    if(checksum!=*(dest->checksum)){
-                        fprintf(stderr,"checksum err (calc/read)[%08X/%08X] failed fp/fsz[%"PRId64"/%"PRId64"]\n",checksum,*(dest->checksum),mfile_seek(src,0,MFILE_CUR),mfile_fsize(src));
+                    if(mb1_validate_checksum(dest)!=0){
+                        fprintf(stderr,"checksum err (calc/read)[%08X/%08X] failed fp/fsz[%"PRId64"/%"PRId64"]\n",mb1_calc_checksum(dest),MB1_GET_CHECKSUM(dest),mfile_seek(src,0,MFILE_CUR),mfile_fsize(src));
                     }
                 }else{
                     fprintf(stderr,"%d: read failed err[%d/%s] fp/fsz[%"PRId64"/%"PRId64"]\n",__LINE__,errno,strerror(errno),mfile_seek(src,0,MFILE_CUR),mfile_fsize(src));
@@ -434,13 +432,13 @@ static int32_t s_read_mb1_rec( mb1_frame_t **pdest, mfile_file_t *src, app_cfg_t
     return retval;
 }
 
-static int32_t s_mb1_to_mb71v5(byte **dest, int32_t size, mb1_frame_t *src, app_cfg_t *cfg)
+static int32_t s_mb1_to_mb71v5(byte **dest, int32_t size, mb1_t *src, app_cfg_t *cfg)
 {
     int32_t retval=-1;
     
     if(NULL!=dest && NULL!=src){
         
-        int32_t mb71_size = (98+7*src->sounding->nbeams);
+        int32_t mb71_size = (98+7*src->nbeams);
         byte *bp = *dest;
         int32_t msize = size;
 
@@ -457,19 +455,19 @@ static int32_t s_mb1_to_mb71v5(byte **dest, int32_t size, mb1_frame_t *src, app_
 
             // 22069=0x5635:'V''5'
             pmb71->recordtype  = 0x5635;
-            pmb71->time_d      = src->sounding->ts;
-            pmb71->longitude   = src->sounding->lon;
-            pmb71->latitude    = src->sounding->lat;
-            pmb71->sonardepth  = src->sounding->depth;
+            pmb71->time_d      = src->ts;
+            pmb71->longitude   = src->lon;
+            pmb71->latitude    = src->lat;
+            pmb71->sonardepth  = src->depth;
             pmb71->altitude    = 0;
-            pmb71->heading     = src->sounding->hdg;
+            pmb71->heading     = src->hdg;
             pmb71->speed       = 0.0;
             pmb71->roll        = 0.0;
             pmb71->pitch       = 0.0;
             pmb71->heave       = 0.0;
             pmb71->beam_xwidth = 1.0;
             pmb71->beam_lwidth = 1.0;
-            pmb71->beams_bath  = src->sounding->nbeams;
+            pmb71->beams_bath  = src->nbeams;
             pmb71->beams_amp   = 0;
             pmb71->pixels_ss   = 0;
             pmb71->spare1      = 0;
@@ -481,15 +479,15 @@ static int32_t s_mb1_to_mb71v5(byte **dest, int32_t size, mb1_frame_t *src, app_
             pmb71->topo_type     = 0x02;
             
             int i=0;
-            int nbeams = src->sounding->nbeams;
+            int nbeams = src->nbeams;
             // get scaling
             double depthmax = -1e6;
             double distmax = -1e6;
 
             for ( i = 0; i < nbeams; i++) {
-                depthmax = MAX(depthmax, fabs(src->sounding->beams[i].rhoz));
-                distmax  = MAX(distmax, fabs(src->sounding->beams[i].rhoy));
-                distmax  = MAX(distmax, fabs(src->sounding->beams[i].rhox));
+                depthmax = MAX(depthmax, fabs(src->beams[i].rhoz));
+                distmax  = MAX(distmax, fabs(src->beams[i].rhoy));
+                distmax  = MAX(distmax, fabs(src->beams[i].rhox));
             }
             
             if (depthmax > 0.0)
@@ -500,7 +498,7 @@ static int32_t s_mb1_to_mb71v5(byte **dest, int32_t size, mb1_frame_t *src, app_
             if(NULL!=cfg && cfg->verbose>0){
                 //            fprintf(stderr,"size double[%d] float[%d] int[%d] uchar[%d] ushort[%d] short[%d] mbf71v5_hdr_t[%d]\r\n",sizeof(double),sizeof(float),sizeof(int),sizeof(unsigned char),sizeof(unsigned short),sizeof(short),sizeof(mbf71v5_hdr_t));
                 fprintf(stderr,"nb[%2d] mb71_sz[%d] beams[%p/%ld]\r\n", nbeams,mb71_size,&pmb71->beam_bytes[0],((long)&pmb71->beam_bytes[0]-(long)pmb71));
-                fprintf(stderr,"ts[%.3lf] lat[%.3lf] lon[%.3lf] sonar_depth[%.3lf]\r\n",src->sounding->ts,src->sounding->lat,src->sounding->lon,src->sounding->depth);
+                fprintf(stderr,"ts[%.3lf] lat[%.3lf] lon[%.3lf] sonar_depth[%.3lf]\r\n",src->ts,src->lat,src->lon,src->depth);
                 fprintf(stderr,"max_depth[%.4lf] max_distance[%.4lf]\r\n",depthmax,distmax);
                 fprintf(stderr,"depth_scale[%.4lf] distance_scale[%.4lf]\r\n\r\n",pmb71->depth_scale,pmb71->distance_scale);
             }
@@ -515,11 +513,11 @@ static int32_t s_mb1_to_mb71v5(byte **dest, int32_t size, mb1_frame_t *src, app_
                 // beam flag
                 bf[i]= 0x00;
                 // depth (mb1 rohz = bath-sonardepth)
-                bz[i]= (src->sounding->beams[i].rhoz)/pmb71->depth_scale;
+                bz[i]= (src->beams[i].rhoz)/pmb71->depth_scale;
                 // across-track
-                by[i]= src->sounding->beams[i].rhoy/pmb71->distance_scale;
+                by[i]= src->beams[i].rhoy/pmb71->distance_scale;
                 // along-track
-                bx[i]=src->sounding->beams[i].rhox/pmb71->distance_scale;
+                bx[i]=src->beams[i].rhox/pmb71->distance_scale;
             }
             // no amp, sidescan
             //        pmb71->amp;
@@ -546,7 +544,7 @@ static int s_app_main(app_cfg_t *cfg)
         mfile_file_t *ifile = mfile_file_new(cfg->ifile);
         mfile_file_t *ofile = mfile_file_new(cfg->ofile);
         byte *mb71_bytes=NULL;
-        mb1_frame_t *mb1=NULL;
+        mb1_t *mb1=NULL;
         mb71v5_t *pmb71 = NULL;
         
         if( (test[0]=mfile_open(ifile, MFILE_RONLY))>0 &&
@@ -560,7 +558,7 @@ static int s_app_main(app_cfg_t *cfg)
             while( !g_interrupt && !quit && input_bytes<file_size){
                 
                 // reset frame (or create if NULL)
-                mb1_frame_resize(&mb1,0,MB1_RS_ALL);
+                mb1_resize(&mb1,0,MB1_RS_ALL);
                 
                 if((test[0]=s_read_mb1_rec(&mb1, ifile,cfg))>0){
                     rec_count++;
@@ -571,7 +569,7 @@ static int s_app_main(app_cfg_t *cfg)
                         pmb71 = (mb71v5_t *)mb71_bytes;
                         output_bytes+=mb71_size;
                         if( cfg->verbose>2){
-                            mb1_frame_show(mb1,5,true);
+                            mb1_show(mb1,5,true);
                         }
                         if( cfg->verbose>1){
                             mb71v5_show(pmb71,5,true);
@@ -625,7 +623,7 @@ static int s_app_main(app_cfg_t *cfg)
         if(NULL!=mb71_bytes){
             free(mb71_bytes);
         }
-        mb1_frame_destroy(&mb1);
+        mb1_destroy(&mb1);
         retval=0;
         
         if(cfg->verbose>0){

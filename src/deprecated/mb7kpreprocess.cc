@@ -22,6 +22,7 @@
  * Author:	D. W. Caress Date:	October 12, 2005
  */
 
+#include <algorithm>
 #include <cmath>
 #include <cstdio>
 #include <cstdlib>
@@ -30,8 +31,6 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
-
-#include <algorithm>
 
 #include "mb_aux.h"
 #include "mb_define.h"

@@ -24,6 +24,7 @@
  * Date:	February 10, 1997
  */
 
+#include <algorithm>
 #include <getopt.h>
 #include <math.h>
 #include <stdbool.h>
@@ -32,8 +33,7 @@
 #include <string.h>
 #include <time.h>
 #include <unistd.h>
-
-#include <algorithm>
+#include <limits>
 
 #include "mb_aux.h"
 #include "mb_define.h"

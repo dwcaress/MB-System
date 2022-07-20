@@ -139,7 +139,7 @@ extern void do_naverr_nextunset(Widget, XtPointer, XtPointer);
 extern void do_naverr_cont_input(Widget, XtPointer, XtPointer);
 extern void do_naverr_cont_expose(Widget, XtPointer, XtPointer);
 extern void do_naverr_corr_input(Widget, XtPointer, XtPointer);
-extern void do_dismiss_naverr(Widget, XtPointer, XtPointer);
+extern void do_naverr_dismiss(Widget, XtPointer, XtPointer);
 extern void do_naverr_selecttie(Widget, XtPointer, XtPointer);
 extern void do_naverr_minmisfit(Widget, XtPointer, XtPointer);
 extern void do_naverr_next(Widget, XtPointer, XtPointer);
@@ -162,8 +162,10 @@ extern void do_view_showmediocrecrossings(Widget, XtPointer, XtPointer);
 extern void do_view_showgoodcrossings(Widget, XtPointer, XtPointer);
 extern void do_view_showbettercrossings(Widget, XtPointer, XtPointer);
 extern void do_view_showtruecrossings(Widget, XtPointer, XtPointer);
-extern void do_view_showties(Widget, XtPointer, XtPointer);
-extern void do_view_showtiessorted(Widget, XtPointer, XtPointer);
+extern void do_view_showcrossingties(Widget, XtPointer, XtPointer);
+extern void do_view_showcrossingtiessorted(Widget, XtPointer, XtPointer);
+extern void do_view_showglobalties(Widget, XtPointer, XtPointer);
+extern void do_view_showglobaltiessorted(Widget, XtPointer, XtPointer);
 extern void do_view_showallsurveys(Widget, XtPointer, XtPointer);
 extern void do_view_showselectedsurveys(Widget, XtPointer, XtPointer);
 extern void do_view_showselectedblock(Widget, XtPointer, XtPointer);
@@ -877,7 +879,7 @@ Widget CreatemainWindow(Widget parent) {
 	{
 		XmString tmp0;
 
-		tmp0 = (XmString)BX_CONVERT(pulldownMenu_view, (char *)"Show Ties", XmRXmString, 0, &argok);
+		tmp0 = (XmString)BX_CONVERT(pulldownMenu_view, (char *)"Show Crossing Ties", XmRXmString, 0, &argok);
 		XtSetArg(args[ac], XmNlabelString, tmp0);
 		if (argok)
 			ac++;
@@ -886,8 +888,8 @@ Widget CreatemainWindow(Widget parent) {
 		    BX_CONVERT(pulldownMenu_view, (char *)"-*-" SANS "-bold-r-*-*-*-120-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
 		if (argok)
 			ac++;
-		pushButton_showties = XmCreatePushButton(pulldownMenu_view, (char *)"pushButton_showties", args, ac);
-		XtManageChild(pushButton_showties);
+		pushButton_showcrossingties = XmCreatePushButton(pulldownMenu_view, (char *)"pushButton_showcrossingties", args, ac);
+		XtManageChild(pushButton_showcrossingties);
 
 		/**
 		 * Free any memory allocated for resources.
@@ -895,13 +897,13 @@ Widget CreatemainWindow(Widget parent) {
 		XmStringFree((XmString)tmp0);
 	}
 
-	XtAddCallback(pushButton_showties, XmNactivateCallback, do_view_showties, (XtPointer)0);
+	XtAddCallback(pushButton_showcrossingties, XmNactivateCallback, do_view_showcrossingties, (XtPointer)0);
 
 	ac = 0;
 	{
 		XmString tmp0;
 
-		tmp0 = (XmString)BX_CONVERT(pulldownMenu_view, (char *)"Show Ties Sorted", XmRXmString, 0, &argok);
+		tmp0 = (XmString)BX_CONVERT(pulldownMenu_view, (char *)"Show Crossing Ties Sorted", XmRXmString, 0, &argok);
 		XtSetArg(args[ac], XmNlabelString, tmp0);
 		if (argok)
 			ac++;
@@ -910,8 +912,8 @@ Widget CreatemainWindow(Widget parent) {
 		    BX_CONVERT(pulldownMenu_view, (char *)"-*-" SANS "-bold-r-*-*-*-120-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
 		if (argok)
 			ac++;
-		pushButton_showtiessorted = XmCreatePushButton(pulldownMenu_view, (char *)"pushButton_showtiessorted", args, ac);
-		XtManageChild(pushButton_showtiessorted);
+		pushButton_showcrossingtiessorted = XmCreatePushButton(pulldownMenu_view, (char *)"pushButton_showcrossingtiessorted", args, ac);
+		XtManageChild(pushButton_showcrossingtiessorted);
 
 		/**
 		 * Free any memory allocated for resources.
@@ -919,7 +921,55 @@ Widget CreatemainWindow(Widget parent) {
 		XmStringFree((XmString)tmp0);
 	}
 
-	XtAddCallback(pushButton_showtiessorted, XmNactivateCallback, do_view_showtiessorted, (XtPointer)0);
+	XtAddCallback(pushButton_showcrossingtiessorted, XmNactivateCallback, do_view_showcrossingtiessorted, (XtPointer)0);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(pulldownMenu_view, (char *)"Show Global Ties", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(
+		    args[ac], XmNfontList,
+		    BX_CONVERT(pulldownMenu_view, (char *)"-*-" SANS "-bold-r-*-*-*-120-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		pushButton_showglobalties = XmCreatePushButton(pulldownMenu_view, (char *)"pushButton_showglobalties", args, ac);
+		XtManageChild(pushButton_showglobalties);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(pushButton_showglobalties, XmNactivateCallback, do_view_showglobalties, (XtPointer)0);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(pulldownMenu_view, (char *)"Show Global Ties Sorted", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(
+		    args[ac], XmNfontList,
+		    BX_CONVERT(pulldownMenu_view, (char *)"-*-" SANS "-bold-r-*-*-*-120-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		pushButton_showglobaltiessorted = XmCreatePushButton(pulldownMenu_view, (char *)"pushButton_showglobaltiessorted", args, ac);
+		XtManageChild(pushButton_showglobaltiessorted);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(pushButton_showglobaltiessorted, XmNactivateCallback, do_view_showglobaltiessorted, (XtPointer)0);
 
 	ac = 0;
 	separator13 = XmCreateSeparator(pulldownMenu_view, (char *)"separator13", args, ac);
@@ -2992,7 +3042,7 @@ Widget CreatemainWindow(Widget parent) {
 		XmStringFree((XmString)tmp0);
 	}
 
-	XtAddCallback(pushButton_naverr_dismiss, XmNactivateCallback, do_dismiss_naverr, (XtPointer)0);
+	XtAddCallback(pushButton_naverr_dismiss, XmNactivateCallback, do_naverr_dismiss, (XtPointer)0);
 	XtAddCallback(pushButton_naverr_dismiss, XmNactivateCallback, BxUnmanageCB, (XtPointer) "bulletinBoard_biases");
 	XtAddCallback(pushButton_naverr_dismiss, XmNactivateCallback, BxUnmanageCB, (XtPointer) "bulletinBoard_naverr");
 
@@ -4064,11 +4114,11 @@ Widget CreatemainWindow(Widget parent) {
 	ac = 0;
 	XtSetArg(args[ac], XmNminimum, 1);
 	ac++;
-	XtSetArg(args[ac], XmNdecimalPoints, 0);
+	XtSetArg(args[ac], XmNdecimalPoints, 1);
 	ac++;
 	XtSetArg(args[ac], XmNvalue, 10);
 	ac++;
-	XtSetArg(args[ac], XmNmaximum, 20);
+	XtSetArg(args[ac], XmNmaximum, 50);
 	ac++;
 	XtSetArg(args[ac], XmNshowArrows, TRUE);
 	ac++;

@@ -41,6 +41,7 @@
  * Date:  August 3, 2018
  */
 
+#include <algorithm>
 #include <cmath>
 #include <cstdio>
 #include <cstdlib>
@@ -49,8 +50,6 @@
 #include <getopt.h>
 #include <sys/stat.h>
 #include <unistd.h>
-
-#include <algorithm>
 
 #include "mb_define.h"
 #include "mb_format.h"
@@ -1237,6 +1236,7 @@ int main(int argc, char **argv) {
   for (int i = 0; i<npings_alloc; i++) {
     status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&pings[i].beamflag, &error);
     status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&pings[i].beamflagorg, &error);
+    status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&pings[i].bathacrosstrack, &error);
     status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&pings[i].bathz, &error);
     status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&pings[i].bathx, &error);
     status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&pings[i].bathy, &error);

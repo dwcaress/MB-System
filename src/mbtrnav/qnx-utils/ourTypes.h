@@ -13,31 +13,22 @@
 /****************************************************************************/
 /* Modification History:                                                    */
 /****************************************************************************/
-#ifndef _ALTEXTYPES_H
-#define _ALTEXTYPES_H
+#ifndef _OUR_TYPES_H
+#define _OUR_TYPES_H
 
 #include <sys/types.h>
-//#include </usr/include/syslog.h>  // QNX/Watcom bug; include full path
 
+#if defined(__QNX__)
+typedef unsigned char Boolean;
 #define True 1
 #define False 0
-#define On True
-#define Off False
-
-#define OK 0
-#define ERROR -1
-
-#define MaxSharedObjNameLen 256
-
-typedef unsigned char Boolean;
-
-#define MaxLong 2147483648
-
-#define callMemberFunction(objPtr, memberPtr) ((objPtr)->*(memberPtr))
-
-#if defined(__APPLE__) 
-#define max(a,b)  (((a) > (b)) ? (a) : (b))
-#define min(a,b)  (((a) < (b)) ? (a) : (b))
+#else
+typedef bool Boolean;
+#define True true
+#define False false
 #endif
 
-#endif
+#define OT_MAX(a,b)  (((a) > (b)) ? (a) : (b))
+#define OT_MIN(a,b)  (((a) < (b)) ? (a) : (b))
+
+#endif // this file

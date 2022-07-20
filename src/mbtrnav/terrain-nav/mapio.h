@@ -211,7 +211,7 @@ void mapsrc_fill(const char *file, struct mapsrc *src);
  *  free those arrays as well as the parent structure.
  * @param src Is the mapsrc structure to be freed
  */
-void mapsrc_free(struct mapsrc *src);
+void mapsrc_free(struct mapsrc **psrc);
 
 /*!
  * function: mapsrc_find

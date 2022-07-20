@@ -24,6 +24,7 @@
  * Date:	January 6, 1995
  */
 
+#include <algorithm>
 #include <cmath>
 #include <cstdio>
 #include <cstdlib>
@@ -32,8 +33,6 @@
 #include <getopt.h>
 #include <sys/stat.h>
 #include <unistd.h>
-
-#include <algorithm>
 
 #include "mb_aux.h"
 #include "mb_define.h"

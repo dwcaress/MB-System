@@ -5449,7 +5449,7 @@ int mbsys_reson7k3_preprocess(int verbose,     /* in: verbosity level set on com
 
     /* do lever arm correction */
     if (platform != NULL) {
-      /* calculate sonar Position Position */
+      /* calculate sonar Position */
       status = mb_platform_position(verbose, (void *)platform, pars->target_sensor, 0, navlon, navlat, sensordepth,
                                     heading, roll, pitch, &navlon, &navlat, &sensordepth, error);
 
@@ -5754,7 +5754,7 @@ int mbsys_reson7k3_preprocess(int verbose,     /* in: verbosity level set on com
 
           // multi-detect enabled, not primary pick, usually ignored
           else if ((RawDetection->flags & 0x10) && (rawdetectiondata->flags & 0x1E00)) {
-            beamflag = MB_FLAG_FLAG + MB_FLAG_SECONDARY;
+            beamflag = MB_FLAG_FLAG + MB_FLAG_MULTIPICK;
           }
 
           // else primary pick but failed quality so treated as flagged by sonar
@@ -6283,7 +6283,7 @@ int mbsys_reson7k3_extract(int verbose, void *mbio_ptr, void *store_ptr, int *ki
         for (int i = 0; i < RawDetection->number_beams; i++) {
           rawdetectiondata = &(RawDetection->rawdetectiondata[i]);
           if (mb_beam_check_flag_flagged(beamflag[i]) && rawdetectiondata->flags & 0x1E00) {
-            beamflag[i] = MB_FLAG_FLAG + MB_FLAG_SECONDARY;
+            beamflag[i] = MB_FLAG_FLAG + MB_FLAG_MULTIPICK;
           }
         }
       }
@@ -6699,7 +6699,7 @@ int mbsys_reson7k3_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind
         for (int i = 0; i < RawDetection->number_beams; i++) {
           rawdetectiondata = &(RawDetection->rawdetectiondata[i]);
           if (mb_beam_check_flag_flagged(beamflag[i]) && rawdetectiondata->flags & 0x1E00) {
-            beamflag[i] = MB_FLAG_FLAG + MB_FLAG_SECONDARY;
+            beamflag[i] = MB_FLAG_FLAG + MB_FLAG_MULTIPICK;
           }
         }
       }

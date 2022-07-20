@@ -10,20 +10,20 @@
 template <class ValueType>
 bool
 Octree<ValueType>::OctreeNode::
-ItterateThroughLeaves(Octree<ValueType>& OT, int& depth, ValueType Value){
+IterateThroughLeaves(Octree<ValueType>& OT, int& depth, ValueType Value){
 	//std::cout << "\nPath\t";
-	//OT.currentItterationPath.Print();
+	//OT.currentIterationPath.Print();
 	//std::cout << "Depth\t" << depth << "\n";
 	
 	if(children != NULL){
-		int childNumber = OT.GetPathChildNumber(OT.currentItterationPath, depth);
+		int childNumber = OT.GetPathChildNumber(OT.currentIterationPath, depth);
 		//std::cout << "childNumber\t" << childNumber << "\n";
-		if(children[childNumber]->ItterateThroughLeaves(OT, ++depth, Value)){
+		if(children[childNumber]->IterateThroughLeaves(OT, ++depth, Value)){
 			//std::cout << "returning True\n";
 			return true;
 		}
 		else{
-			//std::cout << "children[childNumber]->ItterateThroughLeaves(OT, ++depth, Value returned FALSE\n";
+			//std::cout << "children[childNumber]->IterateThroughLeaves(OT, ++depth, Value returned FALSE\n";
 			if(childNumber < 7){
 				//increment childNumber, adjust path accordingly, dive down the tree to get depth to leaf node
 				int maxDepthHit = 0;
@@ -32,7 +32,7 @@ ItterateThroughLeaves(Octree<ValueType>& OT, int& depth, ValueType Value){
 					
 					depth = maxDepthHit;
 					//std::cout << "returning True having gotten next child number\nPATH:\t";
-					//OT.currentItterationPath.Print();
+					//OT.currentIterationPath.Print();
 					//std::cout << "DEPTH\t" << depth << "\n";
 					return true;
 				}
@@ -71,12 +71,12 @@ FindNextChildWithValueAndSetPath(Octree<ValueType>& OT, int depth, ValueType Val
 			if(children[childNumber]->FindNextChildWithValueAndSetPath(OT, depth+1, Value, 0, maxDepthHit)){
 				unsigned int bitmask = 1 << (OT.MaxDepth - depth - 1);
 				//std::cout << "Depth: " << depth << "\tBitmask: " << bitmask << "\n";
-				//std::cout << "components: " << (OT.currentItterationPath.x & ~bitmask) << "\t" << (OT.currentItterationPath.y & ~bitmask) << "\t" << (OT.currentItterationPath.z & ~bitmask) << "\n";
+				//std::cout << "components: " << (OT.currentIterationPath.x & ~bitmask) << "\t" << (OT.currentIterationPath.y & ~bitmask) << "\t" << (OT.currentIterationPath.z & ~bitmask) << "\n";
 				//std::cout << "components: " << (childNumber & (1U << 2)) << "\t" << (childNumber & (1U << 1)) << "\t" << (childNumber & (1U)) << "\n";
-				OT.currentItterationPath.x = (OT.currentItterationPath.x & ~bitmask) | (((childNumber & (1U << 2)) !=0) * bitmask);
-				OT.currentItterationPath.y = (OT.currentItterationPath.y & ~bitmask) | (((childNumber & (1U << 1)) !=0) * bitmask);
-				OT.currentItterationPath.z = (OT.currentItterationPath.z & ~bitmask) | (((childNumber & (1U)) !=0) * bitmask);
-				//OT.currentItterationPath.Print();
+				OT.currentIterationPath.x = (OT.currentIterationPath.x & ~bitmask) | (((childNumber & (1U << 2)) !=0) * bitmask);
+				OT.currentIterationPath.y = (OT.currentIterationPath.y & ~bitmask) | (((childNumber & (1U << 1)) !=0) * bitmask);
+				OT.currentIterationPath.z = (OT.currentIterationPath.z & ~bitmask) | (((childNumber & (1U)) !=0) * bitmask);
+				//OT.currentIterationPath.Print();
 				return true;
 			}
 		}

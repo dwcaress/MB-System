@@ -24,6 +24,7 @@
 
 /*--------------------------------------------------------------------*/
 
+#include <assert.h>
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -103,7 +104,8 @@ int mbnavadjust_new_project(int verbose, char *projectpath, double section_lengt
   if (status == MB_SUCCESS) {
     strcpy(project->name, nameptr);
     if (strlen(projectpath) == strlen(nameptr)) {
-      /* char *result = */ getcwd(project->path, MB_PATH_MAXLINE);
+      char *getcwd_result = getcwd(project->path, MB_PATH_MAXLINE);
+      assert(strlen(project->path) > 0);
       strcat(project->path, "/");
     }
     else {
@@ -243,6 +245,7 @@ int mbnavadjust_read_project(int verbose, char *projectpath, struct mbna_project
     char *result;
     if (strlen(projectpath) == strlen(nameptr)) {
       result = getcwd(project->path, MB_PATH_MAXLINE);
+      assert(strlen(project->path) > 0);
       strcat(project->path, "/");
     }
     else {
@@ -371,6 +374,28 @@ int mbnavadjust_read_project(int verbose, char *projectpath, struct mbna_project
         if (status == MB_FAILURE) {
           fprintf(stderr, "Die at line:%d file:%s buffer:%s\n", __LINE__, __FILE__, buffer);
           exit(0);
+        }
+
+        if (version_id >= 310) {
+          if (status == MB_SUCCESS &&
+              ((result = fgets(buffer, BUFFER_MAX, hfp)) != buffer ||
+               (nscan = sscanf(buffer, "%s %s", label, obuffer)) < 1 || strcmp(label, "REFERENCEGRID") != 0))
+            status = MB_FAILURE;
+          if (status == MB_FAILURE) {
+            fprintf(stderr, "Die at line:%d file:%s buffer:%s\n", __LINE__, __FILE__, buffer);
+            exit(0);
+          }
+          if (nscan > 1)
+            strcpy(project->refgrid_name, obuffer);
+          else
+            strcpy(project->refgrid_name, "NONE");
+          if (strlen(project->refgrid_name) > 0 && strcmp(project->refgrid_name, "NONE") != 0)
+            project->refgrid_status = MBNA_REFGRID_IMPORTED;
+          else
+            project->refgrid_status = MBNA_REFGRID_NONE;
+        } else {
+          project->refgrid_status = MBNA_REFGRID_NONE;
+          strcpy(project->refgrid_name, "NONE");
         }
 
         if (status == MB_SUCCESS &&
@@ -510,7 +535,7 @@ int mbnavadjust_read_project(int verbose, char *projectpath, struct mbna_project
               status = MB_FAILURE;
           }
           else
-            project->zoffsetwidth = 5.0;
+            project->zoffsetwidth = 1.0;
         }
 
         /* allocate memory for files array */
@@ -560,6 +585,7 @@ int mbnavadjust_read_project(int verbose, char *projectpath, struct mbna_project
         int idummy;
         int k, l;
 
+        project->num_globalties = 0;
         for (int ifile = 0; ifile < project->num_files; ifile++) {
           struct mbna_file *file = &project->files[ifile];
           file->num_sections_alloc = 0;
@@ -620,6 +646,8 @@ int mbnavadjust_read_project(int verbose, char *projectpath, struct mbna_project
           }
           for (int isection = 0; isection < file->num_sections; isection++) {
             section = &file->sections[isection];
+            section->file_id = ifile;
+            section->section_id = isection;
             if (status == MB_SUCCESS)
               result = fgets(buffer, BUFFER_MAX, hfp);
             if (status == MB_SUCCESS && result == buffer)
@@ -738,7 +766,9 @@ int mbnavadjust_read_project(int verbose, char *projectpath, struct mbna_project
                                                 &section->global_tie_inversion_status,
                                                 &section->offset_x, &section->offset_y, &section->offset_z_m,
                                                 &section->xsigma, &section->ysigma, &section->zsigma);
-            }
+              if (section->global_tie_status != MBNA_TIE_NONE)
+                project->num_globalties++;
+              }
             else if (version_id >= 305) {
               if (status == MB_SUCCESS)
                 result = fgets(buffer, BUFFER_MAX, hfp);
@@ -748,7 +778,8 @@ int mbnavadjust_read_project(int verbose, char *projectpath, struct mbna_project
                                                 &section->offset_x, &section->offset_y, &section->offset_z_m,
                                                 &section->xsigma, &section->ysigma, &section->zsigma);
               if (section->global_tie_status != MBNA_TIE_NONE) {
-                                section->global_tie_inversion_status = project->inversion_status;
+                section->global_tie_inversion_status = project->inversion_status;
+                project->num_globalties++;
               }
             }
             else if (version_id == 304) {
@@ -761,8 +792,9 @@ int mbnavadjust_read_project(int verbose, char *projectpath, struct mbna_project
                                                 &section->xsigma, &section->ysigma, &section->zsigma);
               if (section->global_tie_snav != MBNA_SELECT_NONE) {
                 section->global_tie_status = MBNA_TIE_XYZ;
-                                section->global_tie_inversion_status = project->inversion_status;
-               }
+                section->global_tie_inversion_status = project->inversion_status;
+                project->num_globalties++;
+              }
             }
 
             if (section->global_tie_status == 0 && section->global_tie_snav == -1) {
@@ -1158,6 +1190,7 @@ fprintf(stderr,"Project version %d previous to 3.08: Adding sensordepth values t
           memset(project->name, 0, STRING_MAX);
           strcpy(project->name, "None");
           memset(project->path, 0, STRING_MAX);
+          memset(project->refgrid_name, 0, STRING_MAX);
           memset(project->datadir, 0, STRING_MAX);
           project->num_files = 0;
           project->num_files_alloc = 0;
@@ -1171,6 +1204,7 @@ fprintf(stderr,"Project version %d previous to 3.08: Adding sensordepth values t
           project->num_truecrossings = 0;
           project->num_truecrossings_analyzed = 0;
           project->num_ties = 0;
+          project->num_globalties = 0;
         }
 
         /* recalculate crossing overlap values if not already set */
@@ -1272,6 +1306,7 @@ int mbnavadjust_close_project(int verbose, struct mbna_project *project, int *er
   project->num_ties = 0;
   project->inversion_status = MBNA_INVERSION_NONE;
   project->grid_status = MBNA_GRID_NONE;
+  project->refgrid_status = MBNA_REFGRID_NONE;
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBnavadjust function <%s> completed\n", __func__);
@@ -1319,24 +1354,25 @@ int mbnavadjust_write_project(int verbose, struct mbna_project *project, int *er
 
   /* time, user, host variables */
   time_t right_now;
-  char date[32], user[MB_PATH_MAXLINE], *user_ptr, host[MB_PATH_MAXLINE];
+  char date[32], user[MB_PATH_MAXLINE], host[MB_PATH_MAXLINE];
 
   int i, j, k, l;
 
   /* open and write home file */
   if ((hfp = fopen(project->home, "w")) != NULL) {
-    fprintf(stderr, "Writing project %s (file version 3.09)\n", project->name);
+    fprintf(stderr, "Writing project %s (file version 3.10)\n", project->name);
     char user[256], host[256], date[32];
     status = mb_user_host_date(verbose, user, host, date, error);
     fprintf(hfp, "##MBNAVADJUST PROJECT\n");
     fprintf(hfp, "MB-SYSTEM_VERSION\t%s\n", MB_VERSION);
-    fprintf(hfp, "PROGRAM_VERSION\t3.09\n");
-    fprintf(hfp, "FILE_VERSION\t3.09\n");
+    fprintf(hfp, "PROGRAM_VERSION\t3.10\n");
+    fprintf(hfp, "FILE_VERSION\t3.10\n");
     fprintf(hfp, "ORIGIN\tGenerated by user <%s> on cpu <%s> at <%s>\n", user, host, date);
     fprintf(hfp, "NAME\t%s\n", project->name);
     fprintf(hfp, "PATH\t%s\n", project->path);
     fprintf(hfp, "HOME\t%s\n", project->home);
     fprintf(hfp, "DATADIR\t%s\n", project->datadir);
+    fprintf(hfp, "REFERENCEGRID\t%s\n", project->refgrid_name);
     fprintf(hfp, "NUMFILES\t%d\n", project->num_files);
     fprintf(hfp, "NUMBLOCKS\t%d\n", project->num_surveys);
     fprintf(hfp, "NUMCROSSINGS\t%d\n", project->num_crossings);
@@ -1505,7 +1541,7 @@ int mbnavadjust_write_project(int verbose, struct mbna_project *project, int *er
     fprintf(hfp, "## MB-System Version %s\n", MB_VERSION);
     char user[256], host[256], date[32];
     status = mb_user_host_date(verbose, user, host, date, error);
-    fprintf(hfp, "## Run by user <%s> on cpu <%s> at <%s>\n", user_ptr, host, date);
+    fprintf(hfp, "## Run by user <%s> on cpu <%s> at <%s>\n", user, host, date);
     fprintf(hfp, "## Number of routes: %d\n", ncrossings_true);
     fprintf(hfp, "## Route point format:\n");
     fprintf(hfp, "##   <longitude (deg)> <latitude (deg)> <topography (m)> <waypoint (boolean)>\n");
@@ -1576,7 +1612,7 @@ int mbnavadjust_write_project(int verbose, struct mbna_project *project, int *er
     fprintf(hfp, "## MB-System Version %s\n", MB_VERSION);
     char user[256], host[256], date[32];
     status = mb_user_host_date(verbose, user, host, date, error);
-    fprintf(hfp, "## Run by user <%s> on cpu <%s> at <%s>\n", user_ptr, host, date);
+    fprintf(hfp, "## Run by user <%s> on cpu <%s> at <%s>\n", user, host, date);
     fprintf(hfp, "## Number of routes: %d\n", ncrossings_gt50);
     fprintf(hfp, "## Route point format:\n");
     fprintf(hfp, "##   <longitude (deg)> <latitude (deg)> <topography (m)> <waypoint (boolean)>\n");
@@ -1648,7 +1684,7 @@ int mbnavadjust_write_project(int verbose, struct mbna_project *project, int *er
     fprintf(hfp, "## MB-System Version %s\n", MB_VERSION);
     char user[256], host[256], date[32];
     status = mb_user_host_date(verbose, user, host, date, error);
-    fprintf(hfp, "## Run by user <%s> on cpu <%s> at <%s>\n", user_ptr, host, date);
+    fprintf(hfp, "## Run by user <%s> on cpu <%s> at <%s>\n", user, host, date);
     fprintf(hfp, "## Number of routes: %d\n", ncrossings_gt25);
     fprintf(hfp, "## Route point format:\n");
     fprintf(hfp, "##   <longitude (deg)> <latitude (deg)> <topography (m)> <waypoint (boolean)>\n");
@@ -1720,7 +1756,7 @@ int mbnavadjust_write_project(int verbose, struct mbna_project *project, int *er
     fprintf(hfp, "## MB-System Version %s\n", MB_VERSION);
     char user[256], host[256], date[32];
     status = mb_user_host_date(verbose, user, host, date, error);
-    fprintf(hfp, "## Run by user <%s> on cpu <%s> at <%s>\n", user_ptr, host, date);
+    fprintf(hfp, "## Run by user <%s> on cpu <%s> at <%s>\n", user, host, date);
     fprintf(hfp, "## Number of routes: %d\n", ncrossings_lt25);
     fprintf(hfp, "## Route point format:\n");
     fprintf(hfp, "##   <longitude (deg)> <latitude (deg)> <topography (m)> <waypoint (boolean)>\n");
@@ -1791,7 +1827,7 @@ int mbnavadjust_write_project(int verbose, struct mbna_project *project, int *er
     fprintf(hfp, "## MB-System Version %s\n", MB_VERSION);
     char user[256], host[256], date[32];
     status = mb_user_host_date(verbose, user, host, date, error);
-    fprintf(hfp, "## Run by user <%s> on cpu <%s> at <%s>\n", user_ptr, host, date);
+    fprintf(hfp, "## Run by user <%s> on cpu <%s> at <%s>\n", user, host, date);
     fprintf(hfp, "## Number of routes: %d\n", ncrossings_fixed);
     fprintf(hfp, "## Route point format:\n");
     fprintf(hfp, "##   <longitude (deg)> <latitude (deg)> <topography (m)> <waypoint (boolean)>\n");
@@ -1862,7 +1898,7 @@ int mbnavadjust_write_project(int verbose, struct mbna_project *project, int *er
     fprintf(hfp, "## MB-System Version %s\n", MB_VERSION);
     char user[256], host[256], date[32];
     status = mb_user_host_date(verbose, user, host, date, error);
-    fprintf(hfp, "## Run by user <%s> on cpu <%s> at <%s>\n", user_ptr, host, date);
+    fprintf(hfp, "## Run by user <%s> on cpu <%s> at <%s>\n", user, host, date);
     fprintf(hfp, "## Number of routes: %d\n", nties_unfixed);
     fprintf(hfp, "## Route point format:\n");
     fprintf(hfp, "##   <longitude (deg)> <latitude (deg)> <topography (m)> <waypoint (boolean)>\n");
@@ -1932,7 +1968,7 @@ int mbnavadjust_write_project(int verbose, struct mbna_project *project, int *er
     fprintf(hfp, "## MB-System Version %s\n", MB_VERSION);
     char user[256], host[256], date[32];
     status = mb_user_host_date(verbose, user, host, date, error);
-    fprintf(hfp, "## Run by user <%s> on cpu <%s> at <%s>\n", user_ptr, host, date);
+    fprintf(hfp, "## Run by user <%s> on cpu <%s> at <%s>\n", user, host, date);
     fprintf(hfp, "## Number of routes: %d\n", nties_fixed);
     fprintf(hfp, "## Route point format:\n");
     fprintf(hfp, "##   <longitude (deg)> <latitude (deg)> <topography (m)> <waypoint (boolean)>\n");
@@ -3842,6 +3878,8 @@ int mbnavadjust_import_file(int verbose, struct mbna_project *project,
         file->num_sections++;
         new_sections++;
         section = &file->sections[file->num_sections - 1];
+        section->file_id = file->id;
+        section->section_id = file->num_sections - 1;
         section->num_pings = 0;
         section->num_beams = 0;
         section->continuity = false;
@@ -4617,6 +4655,8 @@ int mbnavadjust_reimport_file(int verbose, struct mbna_project *project,
         /* initialize new section */
         isection++;
         section = &file->sections[isection];
+        section->file_id = file->id;
+        section->section_id = isection;
         section->num_beams = 0;
         for (int i = 0; i < MBNA_MASK_DIM * MBNA_MASK_DIM; i++)
           section->coverage[i] = 0;
@@ -4959,9 +4999,33 @@ int mbnavadjust_import_reference(int verbose, struct mbna_project *project, char
     fprintf(stderr, "dbg2       path:             %s\n", path);
   }
 
-  // TODO(schwehr): Was there supposed to be some actual work?
-
-  const int status = MB_SUCCESS;
+  /* check if specified grid can be read, then copy it into the project */
+  int grid_projection_mode;
+  int nxy;
+  int status = mb_read_gmt_grd(verbose, path, &grid_projection_mode,
+                                project->refgrid.projection_id,
+                                &project->refgrid.nodatavalue, &nxy,
+                                &project->refgrid.nx, &project->refgrid.ny,
+                                &project->refgrid.min, &project->refgrid.max,
+                                &project->refgrid.bounds[0], &project->refgrid.bounds[1],
+                                &project->refgrid.bounds[2], &project->refgrid.bounds[2],
+                                &project->refgrid.dx, &project->refgrid.dy,
+                                &project->refgrid.val, NULL, NULL, error);
+  if (status == MB_SUCCESS && project->refgrid.val != NULL) {
+    mb_path command, name;
+    if (strrchr(path, '/') != NULL) {
+      strncpy(name, strrchr(path, '/')+1, STRING_MAX);
+    } else {
+      strncpy(name, path, STRING_MAX);
+    }
+    sprintf(command, "cp %s %s/%s", path, project->datadir, name);
+    system(command);
+    fprintf(stderr, "Imported new reference grid: %s ==> %s/%s\n", path, project->datadir, name);
+    free(project->refgrid.val);
+    project->refgrid.val = NULL;
+    strncpy(project->refgrid_name, name, STRING_MAX);
+    project->refgrid_status = MBNA_REFGRID_IMPORTED;
+  }
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBnavadjust function <%s> completed\n", __func__);
@@ -5420,6 +5484,28 @@ int mbnavadjust_tie_compare(const void *a, const void *b) {
       return(-1);
     }
   } else if (tie_a->inversion_status != MBNA_INVERSION_NONE) {
+    return(1);
+  } else {
+    return(-1);
+  }
+}
+/*--------------------------------------------------------------------*/
+/*   function mbnavadjust_globaltie_compare compares global ties according to the
+    misfit magnitude between the tie offset and the inversion model */
+int mbnavadjust_globaltie_compare(const void *a, const void *b) {
+
+  struct mbna_section *section_a = *((struct mbna_section **)a);
+  struct mbna_section *section_b = *((struct mbna_section **)b);
+
+  /* return according to the misfit magnitude */
+  if (section_a->global_tie_inversion_status != MBNA_INVERSION_NONE
+      && section_b->global_tie_inversion_status != MBNA_INVERSION_NONE) {
+    if (section_a->sigma_m > section_b->sigma_m) {
+      return(1);
+    } else {
+      return(-1);
+    }
+  } else if (section_a->global_tie_inversion_status != MBNA_INVERSION_NONE) {
     return(1);
   } else {
     return(-1);

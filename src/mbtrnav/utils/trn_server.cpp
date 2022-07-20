@@ -623,7 +623,6 @@ int is_conv() {
 
 }
 
-
 static poseT _currEst;
 // Forwarded measure update message
 //
@@ -824,6 +823,28 @@ int get_est_nav_ofs() {
 
 }
 
+int is_init() {
+
+    logs(TL_OMASK(TL_TRN_SERVER, TL_LOG),"Returning is_init");
+    if(_tercom) {
+        if(_tercom->initialized()) {
+            _ack.parameter = 1;
+        } else {
+            _ack.parameter = 0;
+        }
+
+        logs(TL_OMASK(TL_TRN_SERVER, TL_LOG),"parameter = %d", _ack.parameter);
+        send_msg(_ack);
+    } else {
+        logs(TL_OMASK(TL_TRN_SERVER, (TL_LOG|TL_SERR)),"No TRN object! Have you initialized yet?");
+        send_msg(_nack);
+    }
+
+    return 1;
+
+}
+
+
 // Main function for server process.
 //
 // Setup socket and listen for TRN client connection. When connected,
@@ -900,6 +921,12 @@ int main(int argc, char** argv) {
 	_server_addr.sin_family = AF_INET;
 	_server_addr.sin_addr.s_addr = htonl(INADDR_ANY);
 	_server_addr.sin_port = htons(port);
+
+    const int optionval = 1;
+#if !defined(__CYGWIN__)
+    setsockopt(_servfd, SOL_SOCKET, SO_REUSEPORT, &optionval, sizeof(optionval));
+#endif
+    setsockopt(_servfd, SOL_SOCKET, SO_REUSEADDR, &optionval, sizeof(optionval));
 
 	len = ::bind(_servfd, (struct sockaddr*)&_server_addr, sizeof(_server_addr));
     err=errno;
@@ -1101,6 +1128,9 @@ int main(int argc, char** argv) {
 
                     case TRN_GET_ESTNAVOFS:
                         get_est_nav_ofs();
+                        break;
+                    case TRN_IS_INIT:
+                        is_init();
                         break;
 
                     case TRN_ACK:

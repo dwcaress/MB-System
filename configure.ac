@@ -1,7 +1,7 @@
 dnl--------------------------------------------------------------------
 dnl    The MB-system:    configure.ac    12/7/2011
 dnl
-dnl    Copyright (c) 2011-2021 by
+dnl    Copyright (c) 2011-2022 by
 dnl    D. W. Caress (caress@lamont.ldgo.columbia.edu)
 dnl    and D. N. Chayes (dale@lamont.ldgo.columbia.edu)
 dnl    Lamont-Doherty Earth Observatory
@@ -11,14 +11,14 @@ dnl    See README file for copying and redistribution conditions.
 dnl--------------------------------------------------------------------
 
 dnl Initialize and set version and version date
-AC_INIT([mbsystem],[5.7.9beta26],[http://listserver.mbari.org/sympa/arc/mbsystem],[mbsystem],[http://www.mbari.org/data/mbsystem/])
-AC_DEFINE(VERSION_DATE, ["2 January 2022"], [Set VERSION_DATE define in mb_config.h])
+AC_INIT([mbsystem],[5.7.9beta29],[http://listserver.mbari.org/sympa/arc/mbsystem],[mbsystem],[http://www.mbari.org/data/mbsystem/])
+AC_DEFINE(VERSION_DATE, ["13 May 2022"], [Set VERSION_DATE define in mb_config.h])
 
 AS_ECHO([" "])
 AS_ECHO(["------------------------------------------------------------------------------"])
 AS_ECHO(["    The MB-system:    configure    12/7/2011"])
 AS_ECHO([" "])
-AS_ECHO(["    Copyright (c) 2011-2021 by"])
+AS_ECHO(["    Copyright (c) 2011-2022 by"])
 AS_ECHO(["    D. W. Caress (caress@lamont.ldgo.columbia.edu)"])
 AS_ECHO(["    and D. N. Chayes (dale@lamont.ldgo.columbia.edu)"])
 AS_ECHO(["    Lamont-Doherty Earth Observatory"])
@@ -93,6 +93,7 @@ AS_ECHO(["        --disable-mbtools     - disable building graphical tools (use 
 AS_ECHO(["        --enable-hardening    - Enable compiler and linker options to frustrate memory corruption exploits  (e.g. -fPIE and -pie) (optional)"])
 AS_ECHO(["        --enable-test         - Enable building unit tests in test/ and third-party/"])
 AS_ECHO(["        --enable-qt           - Enable building graphical tools using the Qt5 framework"])
+AS_ECHO(["        --with-debug          - Set compiler flags to allow full debugging"])
 AS_ECHO([" "])
 AS_ECHO(["    After configure you can run the make utility in the usual fashion"])
 AS_ECHO(["        make"])
@@ -122,7 +123,6 @@ AS_ECHO(["Used Installation Prefix:       $prefix"])
 AS_ECHO(["------------------------------------------------------------------------------"])
 AS_ECHO([" "])
 
-
 dnl Require automake 2.71 or later
 AC_PREREQ([2.71])
 
@@ -142,6 +142,9 @@ AX_CXX_COMPILE_STDCXX(11)
 AM_INIT_AUTOMAKE([no-dist subdir-objects foreign])
 AM_MAINTAINER_MODE
 AC_CONFIG_HEADERS([src/mbio/mb_config.h])
+
+dnl Handle option to enable debugging
+AC_ARG_WITH(debug, [  --with-debug  Set compiler flags to allow full debugging], [AC_DEFINE(WITH_DEBUG,1,0) AC_SUBST(WITH_DEBUG,1) CFLAGS="-O0 -g" CXXFLAGS="-O0 -g"])
 
 dnl Check for programs
 AC_PROG_CC
@@ -1079,7 +1082,7 @@ if test "$build_opencvtools" = "yes" ; then
         if test "$OPENCV4_SETTING" = "no"; then
             AC_MSG_ERROR([Did not find libopencv_core according to --with-opencv-lib - check the installation!])
         fi
-        opencv4_LIBS="-L$opencv4_libdir -R $opencv4_libdir -lopencv_core -lopencv_highgui -lopencv_ccalib -lopencv_calib3d -lopencv_imgcodecs -lopencv_imgproc"
+        opencv4_LIBS="-L$opencv4_libdir -R $opencv4_libdir -lopencv_core -lopencv_highgui -lopencv_calib3d -lopencv_imgcodecs -lopencv_imgproc"
         opencv4_LDFLAGS="-L$opencv4_libdir"
     else
         dnl Look for pkg-config OpenCV4 package...
@@ -1307,10 +1310,12 @@ if test "$build_mbtrn" = "yes" ; then
     AS_ECHO(["Build libmbtrn and mbtrnpp"])
     AC_DEFINE(MBTRN_ENABLED, 1, [Build libmbtrn and mbtrnpp])
     build_mbrnutils="yes"
+    build_mbtrnframe="yes"
 else
     dnl Not building mbtrn tools
     AS_ECHO(["Not building mbtrn tools"])
     build_mbrnutils="no"
+    build_mbtrnframe="no"
 fi
 
 dnl--------------------------------------------------------------------
@@ -1330,10 +1335,12 @@ if test "$build_mbtnav" = "yes" ; then
     AS_ECHO(["Build libmbtnav and embed TRN instance in mbtrnpp"])
     AC_DEFINE(MBTNAV_ENABLED, 1, [Build libmbtnav and embed TRN instance in mbtrnpp])
     build_mbrnutils="yes"
+    build_mbtrnframe="yes"
 else
     dnl Not building mbtnav tools
     AS_ECHO(["Not building mbtnav tools"])
     build_mbrnutils="no"
+    build_mbtrnframe="no"
 fi
 
 dnl--------------------------------------------------------------------
@@ -1475,6 +1482,11 @@ if test "$build_mbtools" = "yes" ; then
         fi
     fi
 fi
+if test "$build_mbtrnframe" = "yes" ; then
+    AC_CONFIG_FILES([\
+        src/mbtrnframe/Makefile \
+        ])
+fi
 if test "$build_mbtrn" = "yes" ; then
     AC_CONFIG_FILES([\
         src/mbtrn/Makefile \
@@ -1608,6 +1620,11 @@ if test "$build_mbtnav" = "yes" ; then
 	AS_ECHO(["Build mbtnav tools: Enabled"])
 else
 	AS_ECHO(["Build mbtnav tools: Disabled"])
+fi
+if test "$build_mbtrnframe" = "yes" ; then
+	AS_ECHO(["Build mbtrnframe: Enabled"])
+else
+	AS_ECHO(["Build mbtrnframe: Disabled"])
 fi
 if test "$GOT_OPENCV4" = "yes" ; then
 	AS_ECHO(["Build OpenCV4 tools: Enabled"])

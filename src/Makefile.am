@@ -6,12 +6,15 @@ endif
 endif
 
 if BUILD_MBTRN
+XBUILD_SUB_MBTFRAME = mbtrnframe
 XBUILD_SUB_MBTRN = mbtrn
 endif
 if BUILD_MBTNAV
+XBUILD_SUB_MBTFRAME = mbtrnframe
 XBUILD_SUB_MBTNAV = mbtrnav
 endif
 if BUILD_MBTRNUTILS
+XBUILD_SUB_MBTFRAME = mbtrnframe
 XBUILD_SUB_MBTRNBIN = mbtrnutils
 endif
 
@@ -29,8 +32,9 @@ if BUILD_GSF
 endif
 SUBDIRS += surf
 SUBDIRS += bsio
-SUBDIRS += $(XBUILD_SUB_MBTRN)
+SUBDIRS += $(XBUILD_SUB_MBTFRAME)
 SUBDIRS += $(XBUILD_SUB_MBTNAV)
+SUBDIRS += $(XBUILD_SUB_MBTRN)
 SUBDIRS += mbio
 SUBDIRS += mbaux
 SUBDIRS += utilities

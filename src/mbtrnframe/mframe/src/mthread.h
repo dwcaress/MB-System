@@ -1,22 +1,20 @@
 ///
-/// @file mbbuf.h
+/// @file mthread.h
 /// @authors k. headley
 /// @date 06 nov 2012
-/// 
-/// mframe byte buffer API.
-/// Dynamic, reference counted buffers. 
-/// Automatically resize when writing.
-/// 
+ 
+/// mframe cross-platform thread wrappers
+ 
 /// @sa doxygen-examples.c for more examples of Doxygen markup
+ 
 
 /////////////////////////
 // Terms of use 
 /////////////////////////
-
 /*
  Copyright Information
  
- Copyright 2002-2013 MBARI
+ Copyright 2000-2018 MBARI
  Monterey Bay Aquarium Research Institute, all rights reserved.
  
  Terms of Use
@@ -61,68 +59,92 @@
  required.
  */
 
-// Always do this.
-#ifndef MBBUF_H
-#define MBBUF_H
+// include guard
+#ifndef MTHREAD_H
+/// @def MTHREAD_H
+/// @brief include guard
+#define MTHREAD_H
 
 /////////////////////////
 // Includes 
 /////////////////////////
-
-// for byte
 #include "mframe.h"
-
-/////////////////////////
-// Type Definitions
-/////////////////////////
-typedef struct mbbuf_s mbbuf_t;
 
 /////////////////////////
 // Macros
 /////////////////////////
-/// @def MB_SEEK_HEAD
-/// @brief seek start of buffer
-#define MB_SEEK_HEAD -1
-/// @def MB_SEEK_TAIL
-/// @brief seek end of buffer
-#define MB_SEEK_TAIL -2
+
+/////////////////////////
+// Type Definitions
+/////////////////////////
+
+/// @struct mthread_thread_s
+/// @brief wrapped thread representation (posix implementation)
+struct mthread_thread_s;
+/// @typedef struct mthread_thread_s mthread_thread_t
+/// @brief wrapped thread typedef
+typedef struct mthread_thread_s mthread_thread_t;
+
+/// @struct mthread_mutex_s
+/// @brief wrapped mutex representation (posix implementation)
+struct mthread_mutex_s;
+/// @typedef struct mthread_mutex_s mthread_mutex_t
+/// @brief wrapped mutex typedef
+typedef struct mthread_mutex_s mthread_mutex_t;
+
+// @typedef void *(*)(void *) mbtrn_thread_fn
+/// @brief thread function
+/// @param[in] arg data to pass into thread function
+typedef void *(* mthread_thread_fn)(void *arg);
+
+/// @typedef struct mthread_thread_s mthread_thread_t
+/// @brief wrapped thread representation (posix implementation)
+struct mthread_thread_s
+{
+    /// @var mthread_thread_s::t
+    /// @brief posix thread
+    pthread_t t;
+    /// @var mthread_thread_s::attr
+    /// @brief thread attributes
+    pthread_attr_t attr;
+    /// @var mthread_thread_s::status
+    /// @brief thread exit status
+    void *status;
+};
+
+/// @typedef struct mthread_mutex_s mthread_mutex_t
+/// @brief wrapped mutex representation (posix implementation)
+struct mthread_mutex_s
+{
+    /// @var mthread_mutex_s::m
+    /// @brief posix mutex
+    pthread_mutex_t m;
+};
 
 /////////////////////////
 // Exports
 /////////////////////////
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-mbbuf_t *mbb_new(off_t capacity, byte *data, off_t size);
-void mbb_destroy(mbbuf_t **p_self);
-void mbb_free(void *self);
+    // mfile thread API (not implemented for QNX)
+mthread_thread_t *mthread_thread_new();
+void mthread_thread_destroy(mthread_thread_t **pself);
 
-mbbuf_t *mbb_dup(mbbuf_t *self);
-int mbb_set_capacity(mbbuf_t *self, off_t size);
+int mthread_thread_start(mthread_thread_t *thread, mthread_thread_fn func, void *arg);
+int mthread_thread_join(mthread_thread_t *thread);
 
-int mbb_seek(mbbuf_t *self, off_t offset);
-int mbb_iseek(mbbuf_t *self, off_t offset);
-int mbb_oseek(mbbuf_t *self, off_t offset);
+// mfile mutex API
+mthread_mutex_t *mthread_mutex_new();
+void mthread_mutex_destroy(mthread_mutex_t **pself);
+int mthread_mutex_lock(mthread_mutex_t *self);
+int mthread_mutex_unlock(mthread_mutex_t *self);
+    
+#ifdef __cplusplus
+}
+#endif
 
-int mbb_set(mbbuf_t *self, off_t offset, off_t len, byte b);
-int mbb_reset(mbbuf_t *self);
-int mbbuf_trim(mbbuf_t *self);
-int mbb_append(mbbuf_t *self, byte *data, off_t size);
-int mbb_push(mbbuf_t *self,byte *data, off_t size);
-byte *mbb_pop(mbbuf_t *self, off_t len);
-byte *mbb_read(mbbuf_t *self, off_t len);
-int mbb_write(mbbuf_t *self, byte *data, off_t size);
-int mbb_printf(mbbuf_t *self, const char *fmt,...);
-byte *mbb_head(mbbuf_t *self);
 
-off_t mbb_capacity(mbbuf_t *self);
-off_t mbb_length(mbbuf_t *self);
-off_t mbb_available(mbbuf_t *self);
-off_t mbb_iavailable(mbbuf_t *self);
-off_t mbb_icursor(mbbuf_t *self);
-off_t mbb_ocursor(mbbuf_t *self);
-void mbb_buf_show(mbbuf_t *self, bool verbose, int indent);
-void mbb_dump(mbbuf_t *self);
-
-#ifdef WITH_MBBUF_TEST
-int mbbuf_test(int verbose);
-#endif //WITH_MBBUF_TEST
-#endif  // THIS_FILE
+// include guard
+#endif

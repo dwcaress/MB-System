@@ -46,7 +46,7 @@ export QU_PTZ_OIMG_NAME="pt-z"
 export QU_TRNSTATE1_OIMG_NAME="trn-state-1"
 export QU_TRNSTATE2_OIMG_NAME="trn-state-2"
 export QU_TRNSTATERI_OIMG_NAME="trn-state-reinit"
-export QU_TRN_REINIT_OVL_OIMG_NAME="trn-reinit-ovl"
+export QU_TRN_REINIT_OVL_OIMG_NAME="trn-freinit-ovl"
 export QU_TRN_MMSE_OVL_OIMG_NAME="trn-mmse-ovl"
 
 # define image paths (uses environment from qp-shared.conf)

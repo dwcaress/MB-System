@@ -196,7 +196,7 @@ The annotated example configuration file in MB-System ```src/mbtrn/tools/mbtrnpp
 | trn-mtype=\<n\>              | TRN map type (int)                                            |  1 | see Note [1] |
 | trn-ftype=\<n\>              | TRN filter type (int)                                         |  2 | see Note [2] |
 | trn-fgrade=\<n\>             | TRN filter grade (int)                                        |  1 | 0:low grade 1:high grade |
-| trn-reinit=\<n\>             | enable filter reinit (bool)                                   |  1 | 0:disable filter reinit 1:enable filter reinit |
+| trn-freinit=\<n\>             | enable filter reinit (bool)                                   |  1 | 0:disable filter reinit 1:enable filter reinit |
 | trn-mweight=\<n\>            | use modified weighting                                        |  4 | see Note [3] |
 | trn-ncov=\<n\>               | TRN convergence criteria - northing covariance limit (double) | 49 | |
 | trn-ecov=\<n\>               | TRN convergence criteria - easting covariance limit (double)  | 49 | |

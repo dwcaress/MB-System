@@ -22,6 +22,7 @@
  * Date:  January 8, 2014
  */
 
+#include <algorithm>
 #include <cmath>
 #include <cstdio>
 #include <cstdlib>
@@ -30,8 +31,6 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <unistd.h>
-
-#include <algorithm>
 
 #include "mb_aux.h"
 #include "mb_define.h"
@@ -2800,6 +2799,7 @@ int main(int argc, char **argv) {
           }
 
           /* apply time latency correction called for in the platform file */
+
           if (sensor_target != nullptr && sensor_target->time_latency_mode != MB_SENSOR_TIME_LATENCY_NONE) {
             mb_apply_time_latency(verbose, 1, &time_d, sensor_target->time_latency_mode,
                         sensor_target->time_latency_static, sensor_target->num_time_latency,

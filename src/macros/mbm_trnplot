@@ -1,0 +1,203 @@
+#!/usr/bin/env python3
+####
+# Plot map views of a mbtrnpp session
+#
+# David W. Caress
+# 22 February 2022
+#
+
+import sys, getopt, os
+import glob, subprocess
+
+shortOpts = "hbi:dg:"
+longOpts = ["help", "display", "input=", "grid="]
+
+def usage():
+  pname, sname = os.path.split(sys.argv[0])
+  sys.stderr.write("usage: % s %s < path > \n" % (sname, str(longOpts)))
+  print( """
+  -h --help                    Print this message
+  -d --display                 Enable immediate display of the plots
+  -g --grid=filepath           Path to background topography grid
+  -i --input=directory         Path to mbtrnpp session logs and results
+  """ )
+  sys.exit()
+
+def main (args, opts={}):
+
+  # Handle command line options
+  display = False
+  inputdir    = ""
+  inputset = False
+  gridfile = ""
+  gridset = False
+  for o, a in opts:
+    if o in ("-h", "--help"):
+      usage()
+    elif o in ("-d", "--display"):
+      display = True
+    elif o in ("-g", "--grid"):
+      gridfile = a
+      gridset = True
+    elif o in ("-i", "--input"):
+      inputdir = a
+      inputset = True
+    else:
+      assert False, "unhandled option: "+o+" "+a
+
+  # If the input is not specified, look for a soft link named "mbtrnpp-latest"
+  # and use the directory pointed to by this link
+  if inputset == False or inputdir == 'mbtrnpp-latest' :
+    if os.path.islink('mbtrnpp-latest') :
+      inputdir = os.readlink('mbtrnpp-latest')
+      inputset = True
+    else :
+      inputdir = "."
+
+  # If the background grid is not specified, look for a soft link named "mbtrnpp-grid"
+  # and use the grid file pointed to by this link
+  if gridset == False or inputdir == 'mbtrnpp-grid' :
+    if os.path.islink('mbtrnpp-grid') :
+      gridfile = os.readlink('mbtrnpp-grid')
+      gridset = True
+
+  # Read the input mbtrnpp session file
+  sessionloglist = glob.glob(inputdir+"/*_trn.txt")
+
+  # If gridfile not yet specified then try to figure it out from the log header
+  for sessionlog in sessionloglist :
+    tmp = os.path.basename(sessionlog)
+    sessionname = tmp[0:-8]
+    fp = open(sessionlog)
+    for line in fp:
+      if line[0] == '#' :
+        if line != None and "## Reference topography model: " in line :
+          gridfile = line[31:].strip()
+          gridfile = gridfile.replace('.bo', '.grd')
+    fp.close()
+
+  print("TRN Results\n---------")
+  print("Session Directory: "+inputdir)
+  print("Session Name:      "+sessionname)
+  print("Session Log List:  "+sessionlog)
+  print("Reference Grid:    "+gridfile+"\n")
+
+  for sessionlog in sessionloglist :
+    # Open the desired output files
+    root = sessionlog[0:-4]
+    fp_Nxy = open(sessionname + "_trn_Nxy.txt", "w")
+    fp_Txy = open(sessionname + "_trn_Txy.txt", "w")
+    fp_TxyC = open(sessionname + "_trn_TxyC.txt", "w")
+    fp_TxyU = open(sessionname + "_trn_TxyU.txt", "w")
+    fp_TxyR = open(sessionname + "_trn_TxyR.txt", "w")
+
+    # Open and parse the session log, outputting as desired
+    xmin = 0.0
+    xmax = 0.0
+    ymin = 0.0
+    ymax = 0.0
+    first = True
+    fp = open(sessionlog)
+    for line in fp:
+      if line[0] != '#' :
+        columns = line.split()
+        if (len(columns) == 26) :
+          fp_Nxy.write(columns[2] + " " + columns[3] + "\n")
+          fp_Txy.write(columns[5] + " " + columns[6] + "\n")
+          if columns[24] == 'CNV' :
+            fp_TxyC.write(columns[5] + " " + columns[6] + "\n")
+          if columns[25] == 'USE' :
+            fp_TxyU.write(columns[5] + " " + columns[6] + "\n")
+          if columns[24] == 'RNT' :
+            fp_TxyR.write(columns[5] + " " + columns[6] + "\n")
+          x1 = float(columns[2])
+          y1 = float(columns[3])
+          x2 = float(columns[5])
+          y2 = float(columns[6])
+          if first :
+            xmin = min(x1, x2)
+            xmax = max(x1, x2)
+            ymin = min(y1, y2)
+            ymax = max(y1, y2)
+            first = False
+          else :
+            xmin = min(xmin, x1, x2)
+            xmax = max(xmax, x1, x2)
+            ymin = min(ymin, y1, y2)
+            ymax = max(ymax, y1, y2)
+
+    fp.close()
+    fp_Nxy.close()
+    fp_Txy.close()
+    fp_TxyC.close()
+    fp_TxyU.close()
+    fp_TxyR.close()
+
+    print("x: "+str(xmin)+" "+str(xmax)+"  y: "+str(ymin)+" "+str(ymax))
+    xmin = xmin - 0.1 * (xmax - xmin)
+    xmax = xmax + 0.1 * (xmax - xmin)
+    ymin = ymin - 0.1 * (ymax - ymin)
+    ymax = ymax + 0.1 * (ymax - ymin)
+    print("x: "+str(xmin)+" "+str(xmax)+"  y: "+str(ymin)+" "+str(ymax))
+
+    # Create and execute an mbm_grdplot command to generate a map of the
+    # TRN performance over the reference bathymetry
+    command = "cd "+inputdir+" ; mbm_grdplot -I ../"+gridfile+" -O "+sessionname+"-trn-plot"
+    command = command+" -R"+str(xmin)+"/"+str(xmax)+"/"+str(ymin)+"/"+str(ymax)
+    command = command+" -G5 -D0/1 -A1.0 -L\"Terrain Relative Navigation over Reference Bathymetry\":\"Topography (meters)\""
+    command = command+" -MXW1p -MXI"+sessionname+"_trn_Nxy.txt"
+    command = command+" -MXW1p,purple -MXI"+sessionname+"_trn_Txy.txt"
+    command = command+" -MXW2p,purple -MXSc2p -MXI"+sessionname+"_trn_TxyC.txt"
+    command = command+" -MXW2p,red -MXSc2p -MXI"+sessionname+"_trn_TxyU.txt"
+    command = command+" -MXW1,black -MXSC0.2 -MXI"+sessionname+"_trn_TxyR.txt"
+    command = command+" -Pc -V ; cd .."
+    print("Command: "+command+"\n")
+    subprocess.run(command, shell=True)
+    if display :
+      command = "cd "+inputdir+" ; "+sessionname+"-trn-plot.cmd ; cd .."
+    else :
+      command = "cd "+inputdir+" ; "+sessionname+"-trn-plot.cmd -N ; cd .."
+    print("Command: "+command+"\n")
+    subprocess.run(command, shell=True)
+    command = "cd "+inputdir+" ; gmt psconvert "+sessionname+"-trn-plot.ps -Tj -E300 -A -P ; cd .."
+    print("Command: "+command+"\n")
+    subprocess.run(command, shell=True)
+
+    # Create and execute an mbgrid and mbm_grdplot command to generate a map of the TRN performance over MB1 bathymetry
+    command = "cd "+inputdir+" ; mbm_makedatalist -S.mb1 -F72 -Odatalist_mb1.mb-1 ; mbdatalist -Idatalist_mb1.mb-1 -O ; cd .."
+    subprocess.run(command, shell=True)
+    command = "cd "+inputdir+" ; mbgrid -Idatalist_mb1.mb-1 -A2 -N -F5 -JU -C5 -V -O TopoMB1 ; cd .."
+    print("Command: "+command+"\n")
+    subprocess.run(command, shell=True)
+    command = "cd "+inputdir+" ; mbm_grdplot -I TopoMB1.grd -O "+sessionname+"-mb1-plot"
+    command = command+" -R"+str(xmin)+"/"+str(xmax)+"/"+str(ymin)+"/"+str(ymax)
+    command = command+" -G5 -D0/1 -A1.0 -L\"Terrain Relative Navigation over MB1 Bathymetry\":\"Topography (meters)\""
+    command = command+" -MXW1p -MXI"+sessionname+"_trn_Nxy.txt"
+    command = command+" -MXW1p,purple -MXI"+sessionname+"_trn_Txy.txt"
+    command = command+" -MXW2p,purple -MXSc2p -MXI"+sessionname+"_trn_TxyC.txt"
+    command = command+" -MXW2p,red -MXSc2p -MXI"+sessionname+"_trn_TxyU.txt"
+    command = command+" -MXW1,black -MXSC0.2 -MXI"+sessionname+"_trn_TxyR.txt"
+    command = command+" -Pc -V ; cd .."
+    print("Command: "+command+"\n")
+    subprocess.run(command, shell=True)
+    if display :
+      command = "cd "+inputdir+" ; "+sessionname+"-mb1-plot.cmd ; cd .."
+    else :
+      command = "cd "+inputdir+" ; "+sessionname+"-mb1-plot.cmd -N ; cd .."
+    print("Command: "+command+"\n")
+    subprocess.run(command, shell=True)
+    command = "cd "+inputdir+" ; gmt psconvert "+sessionname+"-mb1-plot.ps -Tj -E300 -A -P ; cd .."
+    print("Command: "+command+"\n")
+    subprocess.run(command, shell=True)
+
+if __name__ == "__main__":
+  # Parse command line arguments
+  try:
+      opts, args = getopt.gnu_getopt(sys.argv[1:], shortOpts, longOpts)
+  except getopt.GetoptError as err:
+      # print help information and exit:
+      print (str(err)) # will print something like "option -a not recognized"
+      usage()
+
+  # Run main script
+  main (args,opts)

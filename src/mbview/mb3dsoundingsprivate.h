@@ -168,8 +168,8 @@ struct mb3dsoundings_world_struct {
 	int button_up_y;
 
 	/* edit grab parameters */
-	int grab_start_defined;
-	int grab_end_defined;
+	bool grab_start_defined;
+	bool grab_end_defined;
 	int grab_start_x;
 	int grab_start_y;
 	int grab_end_x;
@@ -183,15 +183,16 @@ struct mb3dsoundings_world_struct {
 	int isnell;
 
 	/* view parameters */
-	int view_boundingbox;
-	int view_flagged;
+	bool view_boundingbox;
+	bool view_flagged;
+  bool view_secondary;
 	int view_profiles;
-	int view_scalewithflagged;
+	bool view_scalewithflagged;
 	int view_color;
 
 	/* last sounding edited */
-	int last_sounding_defined;
-	int last_sounding_edited;
+	bool last_sounding_defined;
+	bool last_sounding_edited;
 };
 
 /* library variables */
@@ -267,6 +268,7 @@ void do_mb3dsdg_headingbias(Widget w, XtPointer client_data, XtPointer call_data
 void do_mb3dsdg_timelag(Widget w, XtPointer client_data, XtPointer call_data);
 void do_mb3dsdg_snell(Widget w, XtPointer client_data, XtPointer call_data);
 void do_mb3dsdg_view_flagged(Widget w, XtPointer client_data, XtPointer call_data);
+void do_mb3dsdg_view_secondary(Widget w, XtPointer client_data, XtPointer call_data);
 void do_mb3dsdg_view_noprofile(Widget w, XtPointer client_data, XtPointer call_data);
 void do_mb3dsdg_view_goodprofile(Widget w, XtPointer client_data, XtPointer call_data);
 void do_mb3dsdg_view_allprofile(Widget w, XtPointer client_data, XtPointer call_data);

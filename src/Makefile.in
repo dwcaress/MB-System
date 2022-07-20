@@ -156,10 +156,11 @@ am__define_uniq_tagged_files = \
   unique=`for i in $$list; do \
     if test -f "$$i"; then echo $$i; else echo $(srcdir)/$$i; fi; \
   done | $(am__uniquify_input)`
-DIST_SUBDIRS = gsf surf bsio mbtrn mbtrnav mbio mbaux utilities \
-	deprecated mbtrnutils gmt otps macros share man html ps mbedit \
-	mbnavedit mbvelocitytool mbview mbgrdviz mbeditviz mbnavadjust \
-	photo qt-mbgrdviz qt-mbgrdviz-2 qt-guilib qt-mbgrdviz-3
+DIST_SUBDIRS = gsf surf bsio mbtrnframe mbtrnav mbtrn mbio mbaux \
+	utilities deprecated mbtrnutils gmt otps macros share man html \
+	ps mbedit mbnavedit mbvelocitytool mbview mbgrdviz mbeditviz \
+	mbnavadjust photo qt-mbgrdviz qt-mbgrdviz-2 qt-guilib \
+	qt-mbgrdviz-3
 ACLOCAL = @ACLOCAL@
 AMTAR = @AMTAR@
 AM_DEFAULT_VERBOSITY = @AM_DEFAULT_VERBOSITY@
@@ -195,6 +196,7 @@ EGREP = @EGREP@
 ETAGS = @ETAGS@
 EXEEXT = @EXEEXT@
 FGREP = @FGREP@
+FILECMD = @FILECMD@
 GDAL_CONF = @GDAL_CONF@
 GMT_CONF = @GMT_CONF@
 GMT_PLUGINDIR = @GMT_PLUGINDIR@
@@ -267,6 +269,7 @@ SET_MAKE = @SET_MAKE@
 SHELL = @SHELL@
 STRIP = @STRIP@
 VERSION = @VERSION@
+WITH_DEBUG = @WITH_DEBUG@
 XDR_LIB = @XDR_LIB@
 XMKMF = @XMKMF@
 X_CFLAGS = @X_CFLAGS@
@@ -371,16 +374,19 @@ top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 @BUILD_MOTIF_TRUE@XBUILD_SUB_MOTIF = mbedit mbnavedit mbvelocitytool
 @BUILD_GL_TRUE@@BUILD_MOTIF_TRUE@XBUILD_SUB_GL = mbview mbgrdviz mbeditviz mbnavadjust
+@BUILD_MBTNAV_TRUE@XBUILD_SUB_MBTFRAME = mbtrnframe
+@BUILD_MBTRNUTILS_TRUE@XBUILD_SUB_MBTFRAME = mbtrnframe
+@BUILD_MBTRN_TRUE@XBUILD_SUB_MBTFRAME = mbtrnframe
 @BUILD_MBTRN_TRUE@XBUILD_SUB_MBTRN = mbtrn
 @BUILD_MBTNAV_TRUE@XBUILD_SUB_MBTNAV = mbtrnav
 @BUILD_MBTRNUTILS_TRUE@XBUILD_SUB_MBTRNBIN = mbtrnutils
 @BUILD_OPENCVTOOLS_TRUE@XBUILD_SUB_OPENCVTOOLS = photo
 @BUILD_QTTOOLS_TRUE@XBUILD_SUB_QTTOOLS = qt-mbgrdviz qt-mbgrdviz-2 qt-guilib qt-mbgrdviz-3
-SUBDIRS = $(am__append_1) surf bsio $(XBUILD_SUB_MBTRN) \
-	$(XBUILD_SUB_MBTNAV) mbio mbaux utilities deprecated \
-	$(XBUILD_SUB_MBTRNBIN) gmt otps macros share man html ps \
-	$(XBUILD_SUB_MOTIF) $(XBUILD_SUB_GL) $(XBUILD_SUB_OPENCVTOOLS) \
-	$(XBUILD_SUB_QTTOOLS)
+SUBDIRS = $(am__append_1) surf bsio $(XBUILD_SUB_MBTFRAME) \
+	$(XBUILD_SUB_MBTNAV) $(XBUILD_SUB_MBTRN) mbio mbaux utilities \
+	deprecated $(XBUILD_SUB_MBTRNBIN) gmt otps macros share man \
+	html ps $(XBUILD_SUB_MOTIF) $(XBUILD_SUB_GL) \
+	$(XBUILD_SUB_OPENCVTOOLS) $(XBUILD_SUB_QTTOOLS)
 CLEANFILES = 
 DISTCLEANFILES = 
 all: all-recursive

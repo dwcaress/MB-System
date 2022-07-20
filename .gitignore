@@ -191,3 +191,13 @@ src/mbtrn/mframe/build/medebug-test.d
 src/mbtrn/mframe/build/mconfig.d
 src/mbtrn/mframe/build/mcbuf.d
 src/mbtrn/mframe/build/mbbuf.d
+src/mbtrnav/trn-replay
+src/photo/mbtiff2png
+src/mbtrnav/trn-replay
+src/mbio/mb_config.h
+libtool
+libtool
+src/mbtrnav/mb1rs
+src/mbtrn/mb1r_test
+build/README.md
+src/mbtrn/mb1-cli

@@ -23,6 +23,9 @@ Distributions that do not include "beta" in the tag name correspond to the major
 announced releases. The source distributions associated with all releases, major
 or beta, are equally accessible as tarballs through the Github interface.
 
+- Version 5.7.9beta29    May 13, 2022
+- Version 5.7.9beta28    March 21, 2022
+- Version 5.7.9beta27    February 28, 2022
 - Version 5.7.9beta26    January 2, 2022
 - Version 5.7.9beta25    December 29, 2021
 - Version 5.7.9beta24    December 27, 2021
@@ -404,6 +407,59 @@ or beta, are equally accessible as tarballs through the Github interface.
 --
 ### MB-System Version 5.7 Release Notes:
 --
+
+#### 5.7.9beta29 (May 13, 2022)
+
+Fixes to the Autotools build system allowing MB-System to be built in full on
+Arm architecture Mac computers running the Monterey OS and fixing the build of
+the TRN tools on Linux.
+
+#### 5.7.9beta28 (March 21, 2022)
+
+Mbm_trnplot: Added --display option that immediately displays the plots.
+
+General: Reduced the internal maximum file path name length from 4096 to 1024
+characters.
+
+Format MBF_RESON7K3 (89): Fixed reading/writing of the PingMotion (7012),
+Beamformed (7018), and FileCatalog (7300) records.
+
+Mbnavadjust: Changed default range for z-offsets in calculating the 3D misfit
+from +/- 5 m to +/- 1 m. Made progress towards allowing interactive picking of
+global ties relative to a reference topography grid.
+
+#### 5.7.9beta27 (February 28, 2022)
+
+Mbtrnpp: Improved TRN result logging, including having all log files from a
+session placed in the same directory named according to the start time. Also
+added automated plotting of the TRN results using a new plot macro
+mbm_trnplot.
+
+Mbm_trnplot: New plotting macro that generates two map views of the results from
+an mbtrnpp session.
+
+Mbeditviz: Supports selective editing or ignoring of multipick soundings.
+
+Mbm_route2mission: Added new battery behavior that turns off the mapping sonars
+after data logging has been turned off at the end of the survey, before ascent
+to the surface.
+
+Mbvoxelclean: fixed memory management fault.
+
+General: Increased the size of MB_PATH_MAX to 4096 bytes to allow for longer
+file paths - this now conforms to the common file path maximum for Linux
+distributions.
+
+Terrain Relative Navigation: Many changes to mbrnpp and TRN related code by
+Kent Headley
+
+Mbphotomosaic: Fixed further issues with specifying options within the imagelist.
+
+Mbnavadjust: Changed inversion - the relaxation stage now terminates if it starts
+to diverge, a mod that reduces the tendency of the inversion to blow up.
+
+Mbmakeplatform: Fixed header file array definition issue that caused compile
+failures when testing cmake based builds.
 
 #### 5.7.9beta26 (January 2, 2022)
 

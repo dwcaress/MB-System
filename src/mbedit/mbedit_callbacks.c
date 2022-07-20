@@ -315,6 +315,13 @@ void do_mbedit_init(int argc, char **argv) {
 	/* make sure expose plots are off */
 	expose_plot_ok = false;
 
+#ifdef PRINTING_SUPPORTED
+fprintf(stderr, "PRINTING_SUPPORTED defined %d\n", PRINTING_SUPPORTED);
+#else
+fprintf(stderr, "PRINTING_SUPPORTED not defined\n");
+#endif
+
+
 	/* get additional widgets */
 	fileSelectionList = (Widget)XmFileSelectionBoxGetChild(fileSelectionBox, XmDIALOG_LIST);
 	fileSelectionText = (Widget)XmFileSelectionBoxGetChild(fileSelectionBox, XmDIALOG_TEXT);

@@ -13,10 +13,6 @@
 /****************************************************************************/
 /* Modification History:                                                    */
 /****************************************************************************/
-#ifndef DYNAMICARRAY_H
-#define DYNAMICARRAY_H
-#define MAXINT 99999
-
 /*
 $Log$
 Revision 1.1.2.2  2019/07/10 17:15:46  rob
@@ -54,18 +50,15 @@ Revision 1.4  1997/03/20 12:27:01  oreilly
  * 
 */
 
+#ifndef DYNAMICARRAY_H
+#define DYNAMICARRAY_H
+
 #include <stdio.h>
 #include <stdlib.h>
-
 #if !defined(__APPLE__)
 #include <malloc.h>
 #endif
-
-#define MAX(a,b)  (((a) > (b)) ? (a) : (b))
-
-typedef unsigned char Boolean;
-#define True 1
-#define False 0
+#include "ourTypes.h"
 
 /*
 CLASS 
@@ -143,7 +136,7 @@ class DynamicArray {
     }
     array[i] = *val;
     mem_error = False;
-    n_elems = MAX((i+1), n_elems);
+    n_elems = OT_MAX((i+1), n_elems);
     return 0;
   }
 
@@ -255,5 +248,4 @@ class DynamicArray {
 
 };
 
-
-#endif
+#endif // this file

@@ -21,7 +21,9 @@ TNavPointMassFilter::TNavPointMassFilter(TerrainMap* terrainMap, char* vehicleSp
 		const int& mapType) : TNavFilter(terrainMap, vehicleSpecs, directory, windowVar, mapType) {
 	priorPDF = new mapT;
 	likeSurf = new mapT;
-	
+    for(int i=0;i<4;i++){
+        hypBounds[i]=0;
+    }
 	initVariables();
 }
 
@@ -189,17 +191,12 @@ bool TNavPointMassFilter::measUpdate(measT& currMeas) {
 void TNavPointMassFilter::motionUpdate(poseT& currNavPose) {
 	int j;
 	double dx, dy, elapsedTime;
-	double cep, sigmaSq;
-	double velocity_sf_sigma[3];
 	Matrix velocity_sf(3, 1), R_sv;
 	Matrix velocity_vf(3, 1), R_vi;
 	Matrix velocity_if(3, 1), A;
 	DiagonalMatrix Cv(3);
 	SymmetricMatrix Cx(3);
 	Cx = 0.0;
-	double lastAttitude[3] = {lastNavPose->phi, lastNavPose->theta,
-							  lastNavPose->psi
-							 };
 	elapsedTime = currNavPose.time - this->lastNavPose->time;
 	
 	//If there is valid GPS data AND/OR there is no valid DVL data for dead
@@ -213,17 +210,21 @@ void TNavPointMassFilter::motionUpdate(poseT& currNavPose) {
 		//logs(TL_OMASK(TL_TNAV_POINT_MASS_FILTER, TL_LOG),"using recorded navigation values...\n");
 		
 		//Compute motion sigma
-		cep = (this->vehicle->driftRate / 100.0) * (sqrt(dx * dx + dy * dy));
-		sigmaSq = cep / sqrt(-2 * (log(1 - 0.5)));
+		double cep = (this->vehicle->driftRate / 100.0) * (sqrt(dx * dx + dy * dy));
+		double sigmaSq = cep / sqrt(-2 * (log(1 - 0.5)));
 		Cx(1, 1) = sigmaSq;
 		Cx(2, 2) = sigmaSq;
 		Cx = Cx.SymSubMatrix(1, 2);
 	} else {
 		//use recorded DVL velocities to dead reckon
+        double velocity_sf_sigma[3];
 		velocity_sf(1, 1) = this->lastNavPose->vx;
 		velocity_sf(2, 1) = this->lastNavPose->vy;
 		velocity_sf(3, 1) = this->lastNavPose->vz;
 		
+        double lastAttitude[3] = {lastNavPose->phi, lastNavPose->theta,
+            lastNavPose->psi
+        };
 		velocity_vf = applyRotation(dvlAttitude, velocity_sf);
 		velocity_if = applyRotation(lastAttitude, velocity_vf);
 		R_sv = getRotMatrix(dvlAttitude);
@@ -301,14 +302,12 @@ void TNavPointMassFilter::computeMLE(poseT* mlePose) {
 
 void TNavPointMassFilter::computeMMSE(poseT* mmsePose) {
 	//initialize variables
-	double xbar, ybar;
-	int i, j, row, col;
+	double xbar=0, ybar=0;
+	int row=0, col=0;
 	
 	//Compute x and y means
-	xbar = 0;
-	ybar = 0;
-	for(i = 1; i <= this->priorPDF->numX; i++) {
-		for(j = 1; j <= this->priorPDF->numY; j++) {
+	for(int i = 1; i <= this->priorPDF->numX; i++) {
+		for(int j = 1; j <= this->priorPDF->numY; j++) {
 			xbar += this->priorPDF->xpts[i - 1] * this->priorPDF->depths(i, j);
 			ybar += this->priorPDF->ypts[j - 1] * this->priorPDF->depths(i, j);
 		}
@@ -327,8 +326,8 @@ void TNavPointMassFilter::computeMMSE(poseT* mmsePose) {
 	mmsePose->covariance[1] = 0;
 	mmsePose->covariance[2] = 0;
 	mmsePose->covariance[5] = 0;
-	for(i = 1; i <= this->priorPDF->numX; i++) {
-		for(j = 1; j <= this->priorPDF->numY; j++) {
+	for(int i = 1; i <= this->priorPDF->numX; i++) {
+		for(int j = 1; j <= this->priorPDF->numY; j++) {
 			mmsePose->covariance[0] += pow((this->priorPDF->xpts[i - 1] - xbar), 2) *
 									   this->priorPDF->depths(i, j);
 			mmsePose->covariance[2] += pow((this->priorPDF->ypts[j - 1] - ybar), 2) *
@@ -435,7 +434,7 @@ void TNavPointMassFilter::initVariables() {
 	
 	if(saveDirectory != NULL) {
 		//load data files for storing results
-		char fileName[2048];
+        char fileName[2048]={0};
 		gradientFile.open(charCat(fileName, saveDirectory, "J.txt"));
 		measFile.open(charCat(fileName, saveDirectory, "measProj.txt"));
 		numMeasFile.open(charCat(fileName, saveDirectory, "numMeas.txt"));
@@ -460,8 +459,7 @@ void TNavPointMassFilter::initPriorPDF(const poseT& initNavPose) {
 	Matrix error;
 	//double covDet;
 	Cov = 0.0;
-	int i, j;
-	
+
 	if(HYP_RES != 0) {
 		this->priorPDF->dx = HYP_RES;
 		this->priorPDF->dy = HYP_RES;
@@ -495,8 +493,8 @@ void TNavPointMassFilter::initPriorPDF(const poseT& initNavPose) {
 		//covDet = Cov.Determinant();
 		
 		invCov = Cov.i();
-		for(i = 1; i <= this->priorPDF->numX; i++) {
-			for(j = 1; j <= this->priorPDF->numY; j++) {
+		for(int i = 1; i <= this->priorPDF->numX; i++) {
+			for(int j = 1; j <= this->priorPDF->numY; j++) {
 				currX(1) = this->priorPDF->dx * (i - 1);
 				currX(2) = this->priorPDF->dy * (j - 1);
 				error = (currX - mu).t() * invCov * (currX - mu);
@@ -510,11 +508,11 @@ void TNavPointMassFilter::initPriorPDF(const poseT& initNavPose) {
 	this->priorPDF->xpts = new double[this->priorPDF->numX];
 	this->priorPDF->ypts = new double[this->priorPDF->numY];
 	
-	for(i = 0; i < this->priorPDF->numX; i++)
+	for(int i = 0; i < this->priorPDF->numX; i++)
 		this->priorPDF->xpts[i] = initNavPose.x +
 								  this->priorPDF->dx * (i - (this->priorPDF->numX - 1) / 2);
 								  
-	for(i = 0; i < this->priorPDF->numY; i++)
+	for(int i = 0; i < this->priorPDF->numY; i++)
 		this->priorPDF->ypts[i] = initNavPose.y +
 								  this->priorPDF->dy * (i - (this->priorPDF->numY - 1) / 2);
 								  
@@ -531,7 +529,7 @@ void TNavPointMassFilter::initPriorPDF(const poseT& initNavPose) {
 		this->tempDepthBias = 0.0 * tempPDF;
 		
 		if(DEPTH_FILTER_LENGTH != 0) {
-			for(i = 0; i < DEPTH_FILTER_LENGTH; i++) {
+			for(int i = 0; i < DEPTH_FILTER_LENGTH; i++) {
 				measSumError[i] = 0.0 * tempPDF;
 				measSumInvVar[i] = 0.0 * tempPDF;
 			}
@@ -626,15 +624,12 @@ Matrix TNavPointMassFilter::generateCorrelationSurf(bool& containsNaN) {
 	//normalization constants used to sum the likelihood scores
 	double alpha = 0;
 	double beta = 0;
-	double eta = 0;
 	int numAlpha = 0;
 	int numBeta = 0;
-	int i = 0;
-	int m, row, col, j;
-	
+
 	if(saveDirectory != NULL) {
 		//save corrData values to file for debugging
-		for(i = 0; i < numCorr; i++) {
+		for(int i = 0; i < numCorr; i++) {
 			this->measFile << setprecision(15) << i << '\t';
 			this->measFile << corrData[numCorr - i - 1].dx << '\t';
 			this->measFile << corrData[numCorr - i - 1].dy << '\t';
@@ -666,7 +661,7 @@ Matrix TNavPointMassFilter::generateCorrelationSurf(bool& containsNaN) {
 	containsNaN = false;
 	
 	//Cycle through all beams to generate squared error matrix
-	for(m = 1; m <= numCorr; m++) {
+	for(int m = 1; m <= numCorr; m++) {
 		depthMeas = lastNavPose->z + corrData[numCorr - m].dz;
 		extractDepthCompareValues(MapValues, ZVar, m);
 		
@@ -678,19 +673,19 @@ Matrix TNavPointMassFilter::generateCorrelationSurf(bool& containsNaN) {
 		ZVar += corrData[numCorr - m].var;
 		
 		//Invert variance matrix for proper weighting
-		for(i = 0; i < ZVar.Nrows(); i++) {
-			for(j = 0; j < ZVar.Ncols(); j++) {
+		for(int i = 0; i < ZVar.Nrows(); i++) {
+			for(int j = 0; j < ZVar.Ncols(); j++) {
 				ZinvVar(i + 1, j + 1) = 1.0 / ZVar(i + 1, j + 1);
 			}
 		}
 		
 		//Check if beams intersect NaN values in the map, and remove those
 		//beams from the correlation
-		i = 0;
-		for(row = hypBounds[0]; row <= hypBounds[1]; row++) {
+		int i = 0;
+		for(int row = hypBounds[0]; row <= hypBounds[1]; row++) {
 			i++;
-			j = 0;
-			for(col = hypBounds[2]; col <= hypBounds[3]; col++) {
+			int j = 0;
+			for(int col = hypBounds[2]; col <= hypBounds[3]; col++) {
 				j++;
 				
 				Error(i, j) = depthMeas - fabs(MapValues(i, j));
@@ -720,13 +715,12 @@ Matrix TNavPointMassFilter::generateCorrelationSurf(bool& containsNaN) {
 	
 	logs(TL_OMASK(TL_TNAV_POINT_MASS_FILTER, TL_LOG),"TerrainNav::Minimum Correlation Error: %.4f \n", Esq.Minimum());
 	//Generate the Likelihood matrix from the squared error matrix
-	i = 0;
-	
+	int i = 0;
 	GaussianProb = 0.0;
-	for(row = hypBounds[0]; row <= hypBounds[1]; row++) {
+	for(int row = hypBounds[0]; row <= hypBounds[1]; row++) {
 		i++;
-		j = 0;
-		for(col = hypBounds[2]; col <= hypBounds[3]; col++) {
+		int j = 0;
+		for(int col = hypBounds[2]; col <= hypBounds[3]; col++) {
 			j++;
 			if(numBeamsCorrelated(i, j) == 0) {
 				//If any hypothesis points have no correlated beams, set the
@@ -737,7 +731,7 @@ Matrix TNavPointMassFilter::generateCorrelationSurf(bool& containsNaN) {
 			} else {
 				//normalization constant for gaussian distribution with
 				//dimension N = numBeamsCorrelated
-				eta = pow(2 * PI, -0.5 * numBeamsCorrelated(i, j)) *
+				double eta = pow(2 * PI, -0.5 * numBeamsCorrelated(i, j)) *
 					  sqrt(currProdInvVar(i, j));
 					  
 				//compute likelihood estimate based on correlation error
@@ -766,10 +760,10 @@ Matrix TNavPointMassFilter::generateCorrelationSurf(bool& containsNaN) {
 	
 	//Normalize the likelihood surface for a proper probability function
 	i = 0;
-	for(row = hypBounds[0]; row <= hypBounds[1]; row++) {
+	for(int row = hypBounds[0]; row <= hypBounds[1]; row++) {
 		i++;
-		j = 0;
-		for(col = hypBounds[2]; col <= hypBounds[3]; col++) {
+		int j = 0;
+		for(int col = hypBounds[2]; col <= hypBounds[3]; col++) {
 			j++;
 			//Normalize distribution
 			if(GaussianProb(i, j) && alpha != 0) {
@@ -787,10 +781,10 @@ Matrix TNavPointMassFilter::generateCorrelationSurf(bool& containsNaN) {
 		//Compute terrain gradient at current location
 		Matrix G(1, 2);
 		G = 0.0;
-		double north, east;
-		for(i = 1; i <= numCorr; i++) {
-			north = this->lastNavPose->x + corrData[numCorr - i].dx;
-			east = this->lastNavPose->y + corrData[numCorr - i].dy;
+
+        for( i = 1; i <= numCorr; i++) {
+			double north = this->lastNavPose->x + corrData[numCorr - i].dx;
+			double east = this->lastNavPose->y + corrData[numCorr - i].dy;
 			
 			if(this->mapType == 1){ //TODO make this use RayTrace or Query?
 				(dynamic_cast<TerrainMapDEM *>(terrainMap))->interpolateGradient(north, east, G);
@@ -814,9 +808,7 @@ void TNavPointMassFilter::extractDepthCompareValues(Matrix& depthMat,
 	double locX, locY;
 	double* hypX = NULL;
 	double* hypY = NULL;
-	int bounds[4];
-	int i, j, row, col;
-	
+
 	//If the hypothesis resolution matches the map resolution, we can do
 	//a slightly faster depth extraction and interpolation method
 	if(HYP_RES == 0 && this->terrainMap->GetInterpMethod() == 0) {
@@ -828,6 +820,7 @@ void TNavPointMassFilter::extractDepthCompareValues(Matrix& depthMat,
 		terrainMap->GetMapT(mapForComparison);
 		
 		//define map bounds for particular relative beam location:
+        int bounds[4]={0};
 		bounds[0] = closestPtUniformArray(locX + priorPDF->xpts[hypBounds[0] - 1],
 										  mapForComparison.xpts[0],
 										  mapForComparison.xpts[mapForComparison.numX - 1],
@@ -863,14 +856,14 @@ void TNavPointMassFilter::extractDepthCompareValues(Matrix& depthMat,
 		hypX = new double[depthMat.Nrows()];
 		hypY = new double[depthMat.Ncols()];
 		
-		i = 0;
-		for(row = hypBounds[0]; row <= hypBounds[1]; row++) {
+		int i = 0;
+		for(int row = hypBounds[0]; row <= hypBounds[1]; row++) {
 			//determine hypothesized projected beam X location
 			locX = corrData[numCorr - measNum].dx + priorPDF->xpts[row - 1];
 			hypX[i] = locX;
 			i++;
-			j = 0;
-			for(col = hypBounds[2]; col <= hypBounds[3]; col++) {
+			int j = 0;
+			for(int col = hypBounds[2]; col <= hypBounds[3]; col++) {
 				//determine hypothesized projected beam Y location
 				locY = corrData[numCorr - measNum].dy + priorPDF->ypts[col - 1];
 				hypY[j] = locY;
@@ -965,23 +958,23 @@ int TNavPointMassFilter::defineHypBoundsAndMap(const double* loc) {
 	 in x and y of the projected measurement beams from the vehicle center. All
 	 values in the above figure are in units of distance (meters).
 	************************************************************************/
-	double max_dx, max_dy, dx, dy;
+	double max_dx, max_dy;
 	double xCen, yCen;
 	double mapSearch[2];
 	double numXdesired, numYdesired;
-	int mapStatus, i;
+	int mapStatus;
 	
 	//Define maximum beam projection distances
 	max_dx = 0;
 	max_dy = 0;
 	
-	for(i = 0; i < numCorr; i++) {
-		dx = fabs(corrData[i].dx);
+	for(int i = 0; i < numCorr; i++) {
+		double dx = fabs(corrData[i].dx);
 		if(dx > max_dx) {
 			max_dx = dx;
 		}
 		
-		dy = fabs(corrData[i].dy);
+        double dy = fabs(corrData[i].dy);
 		if(dy > max_dy) {
 			max_dy = dy;
 		}
@@ -1104,7 +1097,6 @@ bool TNavPointMassFilter::motionBlur_convolve(const SymmetricMatrix Cov) {
 	Matrix convPDF(numPtsX + 1, numPtsY + 1);
 	Matrix invCov = Cov.i();
 	Matrix newPDF(this->priorPDF->numX, this->priorPDF->numY);
-	Matrix tempMAT = convPDF;
 	Matrix error;
 	
 	//generate gaussian blurring matrix;

@@ -215,6 +215,13 @@ int mb3dsoundings_updategui() {
     XmToggleButtonSetState(mb3dsoundings.mb3dsdg.toggleButton_view_flagged, False, False);
   }
 
+  if (mb3dsoundings.view_secondary) {
+    XmToggleButtonSetState(mb3dsoundings.mb3dsdg.toggleButton_view_secondary, True, False);
+  }
+  else {
+    XmToggleButtonSetState(mb3dsoundings.mb3dsdg.toggleButton_view_secondary, False, False);
+  }
+
   if (mb3dsoundings.view_scalewithflagged) {
     XmToggleButtonSetState(mb3dsoundings.mb3dsdg.toggleButton_view_scalewithflagged, True, False);
   }
@@ -770,6 +777,7 @@ int mb3dsoundings_reset() {
   /* view parameters */
   mb3dsoundings.view_boundingbox = true;
   mb3dsoundings.view_flagged = true;
+  mb3dsoundings.view_secondary = false;
   mb3dsoundings.view_profiles = MBS_VIEW_PROFILES_NONE;
   mb3dsoundings.view_scalewithflagged = true;
   mb3dsoundings.view_color = MBS_VIEW_COLOR_FLAG;
@@ -798,6 +806,47 @@ int mb3dsoundings_open(int verbose, struct mb3dsoundings_struct *soundingdata, i
     fprintf(stderr, "dbg2       verbose:       %d\n", verbose);
     fprintf(stderr, "dbg2       soundingdata:  %p\n", soundingdata);
   }
+
+  /* print out some statistics of the selected soundings */
+  struct mb3dsoundings_sounding_struct *soundings = soundingdata->soundings;
+  double bounds[4];
+  int num_soundings = 0;
+  int num_soundings_null = 0;
+  int num_soundings_unflagged = 0;
+  int num_soundings_flagged = 0;
+  int num_soundings_flagged_manual = 0;
+  int num_soundings_flagged_flagged = 0;
+  int num_soundings_flagged_sonar = 0;
+  int num_soundings_flagged_filter = 0;
+  int num_soundings_flagged_filter2 = 0;
+  int num_soundings_flagged_secondary = 0;
+  int num_soundings_flagged_interpolated = 0;
+  for (int i = 0; i < soundingdata->num_soundings; i++) {
+    num_soundings++;
+    num_soundings_null += mb_beam_check_flag_null(soundings[i].beamflag);
+    num_soundings_unflagged += mb_beam_ok(soundings[i].beamflag);
+    num_soundings_flagged += mb_beam_check_flag_flagged(soundings[i].beamflag);
+    num_soundings_flagged_manual += mb_beam_check_flag_manual(soundings[i].beamflag);
+    num_soundings_flagged_sonar += mb_beam_check_flag_sonar(soundings[i].beamflag);
+    num_soundings_flagged_filter += mb_beam_check_flag_filter(soundings[i].beamflag);
+    num_soundings_flagged_filter2 += mb_beam_check_flag_filter2(soundings[i].beamflag);
+    num_soundings_flagged_secondary += mb_beam_check_flag_multipick(soundings[i].beamflag);
+    num_soundings_flagged_interpolated += mb_beam_check_flag_interpolate(soundings[i].beamflag);
+  }
+  //if (verbose) {
+    fprintf(stdout, "\nMBeditviz 3D Sounding View:\n");
+    fprintf(stdout, "  Soundings:                        %d\n", num_soundings);
+    fprintf(stdout, "  Null Soundings:                   %d\n", num_soundings_null);
+    fprintf(stdout, "  Unflagged Soundings:              %d\n", num_soundings_unflagged);
+    fprintf(stdout, "  Flagged Soundings:                %d\n", num_soundings_flagged);
+    fprintf(stdout, "  Manual Flagged Soundings:         %d\n", num_soundings_flagged_manual);
+    fprintf(stdout, "  Sonar Flagged Soundings:          %d\n", num_soundings_flagged_sonar);
+    fprintf(stdout, "  Filter Flagged Soundings:         %d\n", num_soundings_flagged_filter);
+    fprintf(stdout, "  Filter2 Flagged Soundings:        %d\n", num_soundings_flagged_filter2);
+    fprintf(stdout, "  Secondary Flagged Soundings:      %d\n", num_soundings_flagged_secondary);
+    fprintf(stdout, "  Interpolated Flagged Soundings:   %d\n", num_soundings_flagged_interpolated);
+  //}
+
 
   /* set the data pointer */
   mb3dsoundings.soundingdata = (struct mb3dsoundings_struct *)soundingdata;
@@ -1739,7 +1788,10 @@ int mb3dsoundings_pick(int x, int y) {
     sounding = (struct mb3dsoundings_sounding_struct *)&(soundingdata->soundings[irmin]);
     if (mb3dsoundings.edit_mode == MBS_EDIT_TOGGLE) {
       if (mb_beam_ok(sounding->beamflag)) {
-        sounding->beamflag = MB_FLAG_FLAG + MB_FLAG_MANUAL;
+        if (sounding->beamflag != sounding->beamflagorg)
+          sounding->beamflag = sounding->beamflagorg;
+        else
+          sounding->beamflag = MB_FLAG_FLAG + MB_FLAG_MANUAL;
         soundingdata->num_soundings_unflagged--;
         soundingdata->num_soundings_flagged++;
         editevent = true;
@@ -1748,7 +1800,7 @@ int mb3dsoundings_pick(int x, int y) {
         mb3dsoundings.last_sounding_defined = true;
         mb3dsoundings.last_sounding_edited = irmin;
       }
-      else {
+      else if (mb3dsoundings.view_secondary || !mb_beam_check_flag_multipick(sounding->beamflag)) {
         sounding->beamflag = MB_FLAG_NONE;
         soundingdata->num_soundings_unflagged++;
         soundingdata->num_soundings_flagged--;
@@ -1761,7 +1813,10 @@ int mb3dsoundings_pick(int x, int y) {
     }
     else if (mb3dsoundings.edit_mode == MBS_EDIT_PICK) {
       if (mb_beam_ok(sounding->beamflag)) {
-        sounding->beamflag = MB_FLAG_FLAG + MB_FLAG_MANUAL;
+        if (sounding->beamflag != sounding->beamflagorg)
+          sounding->beamflag = sounding->beamflagorg;
+        else
+          sounding->beamflag = MB_FLAG_FLAG + MB_FLAG_MANUAL;
         soundingdata->num_soundings_unflagged--;
         soundingdata->num_soundings_flagged++;
         editevent = true;
@@ -1808,7 +1863,10 @@ int mb3dsoundings_eraserestore(int x, int y) {
     if (r < MBS_ERASE_THRESHOLD) {
       bool editevent = false;
       if (mb3dsoundings.edit_mode == MBS_EDIT_ERASE && mb_beam_ok(sounding->beamflag)) {
-        sounding->beamflag = MB_FLAG_FLAG + MB_FLAG_MANUAL;
+        if (sounding->beamflag != sounding->beamflagorg)
+          sounding->beamflag = sounding->beamflagorg;
+        else
+          sounding->beamflag = MB_FLAG_FLAG + MB_FLAG_MANUAL;
         soundingdata->num_soundings_unflagged--;
         soundingdata->num_soundings_flagged++;
         editevent = true;
@@ -1817,7 +1875,11 @@ int mb3dsoundings_eraserestore(int x, int y) {
         mb3dsoundings.last_sounding_defined = true;
         mb3dsoundings.last_sounding_edited = i;
       }
-      else if (mb3dsoundings.edit_mode == MBS_EDIT_RESTORE && !mb_beam_ok(sounding->beamflag)) {
+      else if (mb3dsoundings.edit_mode == MBS_EDIT_RESTORE
+                && !mb_beam_ok(sounding->beamflag)
+                && (mb3dsoundings.view_secondary
+                    || !mb_beam_check_flag_multipick(sounding->beamflag))) {
+
         sounding->beamflag = MB_FLAG_NONE;
         soundingdata->num_soundings_unflagged++;
         soundingdata->num_soundings_flagged--;
@@ -1901,7 +1963,10 @@ int mb3dsoundings_grab(int x, int y, int grabmode) {
       // bool editevent = false;
       if (sounding->winx >= xmin && sounding->winx <= xmax && sounding->winy >= ymin && sounding->winy <= ymax) {
         if (mb_beam_ok(sounding->beamflag)) {
-          sounding->beamflag = MB_FLAG_FLAG + MB_FLAG_MANUAL;
+          if (sounding->beamflag != sounding->beamflagorg)
+            sounding->beamflag = sounding->beamflagorg;
+          else
+            sounding->beamflag = MB_FLAG_FLAG + MB_FLAG_MANUAL;
           soundingdata->num_soundings_unflagged--;
           soundingdata->num_soundings_flagged++;
           // editevent = true;
@@ -1990,7 +2055,10 @@ int mb3dsoundings_flag_view() {
     struct mb3dsoundings_sounding_struct *sounding =
       (struct mb3dsoundings_sounding_struct *)&(soundingdata->soundings[i]);
     if (mb_beam_ok(sounding->beamflag)) {
-      sounding->beamflag = MB_FLAG_FLAG + MB_FLAG_MANUAL;
+        if (sounding->beamflag != sounding->beamflagorg)
+          sounding->beamflag = sounding->beamflagorg;
+        else
+          sounding->beamflag = MB_FLAG_FLAG + MB_FLAG_MANUAL;
       soundingdata->num_soundings_unflagged--;
       soundingdata->num_soundings_flagged++;
       neditevent++;
@@ -2072,7 +2140,10 @@ int mb3dsoundings_bad_ping() {
         (struct mb3dsoundings_sounding_struct *)&(soundingdata->soundings[i]);
       if (sounding->ifile == lastsounding->ifile && sounding->iping == lastsounding->iping &&
           mb_beam_ok(sounding->beamflag)) {
-        sounding->beamflag = MB_FLAG_FLAG + MB_FLAG_MANUAL;
+        if (sounding->beamflag != sounding->beamflagorg)
+          sounding->beamflag = sounding->beamflagorg;
+        else
+          sounding->beamflag = MB_FLAG_FLAG + MB_FLAG_MANUAL;
         soundingdata->num_soundings_unflagged--;
         soundingdata->num_soundings_flagged++;
         neditevent++;
@@ -2167,7 +2238,10 @@ int mb3dsoundings_left_ping() {
         (struct mb3dsoundings_sounding_struct *)&(soundingdata->soundings[i]);
       if (sounding->ifile == lastsounding->ifile && sounding->iping == lastsounding->iping &&
           sounding->ibeam <= lastsounding->ibeam && mb_beam_ok(sounding->beamflag)) {
-        sounding->beamflag = MB_FLAG_FLAG + MB_FLAG_MANUAL;
+        if (sounding->beamflag != sounding->beamflagorg)
+          sounding->beamflag = sounding->beamflagorg;
+        else
+          sounding->beamflag = MB_FLAG_FLAG + MB_FLAG_MANUAL;
         soundingdata->num_soundings_unflagged--;
         soundingdata->num_soundings_flagged++;
         neditevent++;
@@ -2213,7 +2287,10 @@ int mb3dsoundings_right_ping() {
         (struct mb3dsoundings_sounding_struct *)&(soundingdata->soundings[i]);
       if (sounding->ifile == lastsounding->ifile && sounding->iping == lastsounding->iping &&
           sounding->ibeam >= lastsounding->ibeam && mb_beam_ok(sounding->beamflag)) {
-        sounding->beamflag = MB_FLAG_FLAG + MB_FLAG_MANUAL;
+        if (sounding->beamflag != sounding->beamflagorg)
+          sounding->beamflag = sounding->beamflagorg;
+        else
+          sounding->beamflag = MB_FLAG_FLAG + MB_FLAG_MANUAL;
         soundingdata->num_soundings_unflagged--;
         soundingdata->num_soundings_flagged++;
         neditevent++;
@@ -2577,6 +2654,9 @@ soundingdata->num_soundings); */
         } else if (mb_beam_check_flag_sonar(sounding->beamflag)) {
           glColor3f(0.0, 1.0, 0.0);
           glVertex3f(sounding->glx, sounding->gly, sounding->glz);
+        } else if (mb3dsoundings.view_secondary && mb_beam_check_flag_multipick(sounding->beamflag)) {
+          glColor3f(0.0, 1.0, 1.0);
+          glVertex3f(sounding->glx, sounding->gly, sounding->glz);
         }
       }
     }
@@ -2593,7 +2673,10 @@ soundingdata->num_soundings); */
 
       /* plot sounding */
       if (mb_beam_ok(sounding->beamflag)
-          || (mb3dsoundings.view_flagged && !mb_beam_check_flag_null(sounding->beamflag))) {
+          || (mb3dsoundings.view_flagged
+              && !mb_beam_check_flag_null(sounding->beamflag)
+              && (!mb_beam_check_flag_multipick(sounding->beamflag
+                  || mb3dsoundings.view_secondary)))) {
         glColor3f(sounding->r, sounding->g, sounding->b);
         glVertex3f(sounding->glx, sounding->gly, sounding->glz);
       }
@@ -2611,7 +2694,10 @@ soundingdata->num_soundings); */
       struct mb3dsoundings_sounding_struct *sounding =
         (struct mb3dsoundings_sounding_struct *)&(soundingdata->soundings[i]);
       if (mb_beam_ok(sounding->beamflag)
-          || (mb3dsoundings.view_flagged && !mb_beam_check_flag_null(sounding->beamflag))) {
+          || (mb3dsoundings.view_flagged
+              && !mb_beam_check_flag_null(sounding->beamflag)
+              && (!mb_beam_check_flag_multipick(sounding->beamflag
+                  || mb3dsoundings.view_secondary)))) {
         if (first) {
           first = false;
           ampmin = sounding->a;
@@ -2631,7 +2717,10 @@ soundingdata->num_soundings); */
 
       /* plot sounding */
       if (mb_beam_ok(sounding->beamflag)
-          || (mb3dsoundings.view_flagged && !mb_beam_check_flag_null(sounding->beamflag))) {
+          || (mb3dsoundings.view_flagged
+              && !mb_beam_check_flag_null(sounding->beamflag)
+              && (!mb_beam_check_flag_multipick(sounding->beamflag
+                  || mb3dsoundings.view_secondary)))) {
         float r, g, b;
         mbview_getcolor(sounding->a, ampmin, ampmax, MBV_COLORTABLE_NORMAL,
                         (float)0.0, (float)0.0, (float)1.0, (float)1.0, (float)0.0, (float)0.0,
@@ -3005,6 +3094,22 @@ void do_mb3dsdg_view_flagged(Widget w, XtPointer client_data, XtPointer call_dat
   /* fprintf(stderr,"Called do_mb3dsdg_view_flagged\n"); */
 
   mb3dsoundings.view_flagged = XmToggleButtonGetState(mb3dsoundings.mb3dsdg.toggleButton_view_flagged);
+
+  /* replot the data */
+  mb3dsoundings_plot(mbs_verbose, &mbs_error);
+}
+
+/*---------------------------------------------------------------------------------------*/
+
+void do_mb3dsdg_view_secondary(Widget w, XtPointer client_data, XtPointer call_data) {
+  (void)w;  // Unused parameter
+  (void)client_data;  // Unused parameter
+  (void)call_data;  // Unused parameter
+  // XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
+
+  /* fprintf(stderr,"Called do_mb3dsdg_view_secondary\n"); */
+
+  mb3dsoundings.view_secondary = XmToggleButtonGetState(mb3dsoundings.mb3dsdg.toggleButton_view_secondary);
 
   /* replot the data */
   mb3dsoundings_plot(mbs_verbose, &mbs_error);

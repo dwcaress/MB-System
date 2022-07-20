@@ -22,18 +22,15 @@ struct refMapT{
 	
 	void clean(){
 		if(src!=NULL){
-			mapsrc_free(src);
-			src = NULL;
+			mapsrc_free(&src);
 		}
 
 		if(varSrc!=NULL){
-			mapsrc_free(varSrc);
-			varSrc = NULL;
+			mapsrc_free(&varSrc);
 		}
 
 		if(lowResSrc!=NULL){
-			mapsrc_free(lowResSrc);
-			lowResSrc = NULL;
+			mapsrc_free(&lowResSrc);
 		}
 
 		if(bounds != NULL){
@@ -59,7 +56,7 @@ class TerrainMapDEM : public TerrainMap{
 		int loadSubMap(const double xcen, const double ycen, double* mapWidth,
 			       double vehN, double vehE);
 		
-		TerrainMapDEM(const char* mapName);
+		explicit TerrainMapDEM(const char* mapName);
 		~TerrainMapDEM();
 		
 		//functionality moved from TNavFilter or TNavParticleFilter
@@ -94,7 +91,7 @@ class TerrainMapDEM : public TerrainMap{
 		
 	public:
 		void interpolateGradient(double xi, double yi, Matrix& gradient);
-		void computeInterpTerrainGradient(int* xIndices, int* yIndices, double xi, double yi, Matrix& gradient);
+		void computeInterpTerrainGradient(int* xIndices, int* yIndices, double xi, double yi,  Matrix& gradient);
 		void interpolateDepthMat(double* xi, double* yi, Matrix& zi, Matrix& var);
 		
 		

@@ -33,6 +33,8 @@
 #define  TRN_SENSOR_HOMER   4
 #define  TRN_SENSOR_DELTAT  5
 
+#define TRN_EST_MLE 1
+#define TRN_EST_MMSE 2
 
 // InitVars is a structure that enables TRN reinits
 // with search radius that may be configured at run time.
@@ -50,10 +52,10 @@ struct InitVars{
     // initializing CTOR
     InitVars(double x, double y, double z);
 
-    InitVars(d_triplet_t *xyz);
+    explicit InitVars(d_triplet_t *xyz);
 
     // copy CTOR
-    InitVars(InitVars *xyz);
+    explicit InitVars(InitVars *xyz);
 
     // DTOR
     ~InitVars();
@@ -71,21 +73,23 @@ struct InitVars{
 
 //!The mapT struct stores data in a gridded Matrix.
 struct mapT {
-  Matrix depths; //Positive down
-  Matrix depthVariance;
-  double* xpts; //North
-  double* ypts; //East
-  double dx, dy;
-  double xcen, ycen;
-  int numX, numY;
+    Matrix depths; //Positive down
+    Matrix depthVariance;
+    double* xpts; //North
+    double* ypts; //East
+    double dx, dy;
+    double xcen, ycen;
+    int numX, numY;
 
-  mapT();
-  ~mapT();
-  void clean();
-  void reSampleMap(const double newRes);
-  void subSampleMap(const int subRes);
-  void displayMap();
-  mapT& operator=(mapT& rhs);
+    mapT();
+    ~mapT();
+    void clean();
+#ifdef WITH_RESAMPLE_MAP
+    void reSampleMap(const double newRes);
+#endif
+    void subSampleMap(const int subRes);
+    void displayMap();
+    mapT& operator=(mapT& rhs);
 };
 
 //!The poseT struct stores vehicle pose information.
@@ -93,106 +97,106 @@ struct mapT {
 #define N_COVAR 45               //XYZ, phi, theta, psi, wy, wz covariance
 struct poseT {
 
-  double x, y, z;                //North, East, Down position (m)
-  double vx, vy, vz, ve;         //Vehicle velocity wrto iceberg, coordinatized in Body Frame(m/s)
-  double vw_x, vw_y, vw_z;       //Vehicle velocity wrto water, coordinatized in Body (m/s)
-  double vn_x, vn_y, vn_z;       // was Vehicle velocity wrto an inertial frame, coordinatized in Body (m/s)
-                                 // 18 June 2019; reassigned vn_* to pass lastNavPose.x, y and z.
-  double wx, wy, wz;             //Vehicle angular velocity wrto an inertial frame, coordinatized in Body (rad/sec)
-  double ax, ay, az;             //Vehicle aceleration wrto an inertial frame coordinatized in Body (m/s^2)
-  double phi, theta, psi;        //3-2-1 Euler angles relating the B frame to an inertial NED frame (rad).
-  double psi_berg, psi_dot_berg; //TRN states
+    double x, y, z;                //North, East, Down position (m)
+    double vx, vy, vz, ve;         //Vehicle velocity wrto iceberg, coordinatized in Body Frame(m/s)
+    double vw_x, vw_y, vw_z;       //Vehicle velocity wrto water, coordinatized in Body (m/s)
+    double vn_x, vn_y, vn_z;       // was Vehicle velocity wrto an inertial frame, coordinatized in Body (m/s)
+    // 18 June 2019; reassigned vn_* to pass lastNavPose.x, y and z.
+    double wx, wy, wz;             //Vehicle angular velocity wrto an inertial frame, coordinatized in Body (rad/sec)
+    double ax, ay, az;             //Vehicle aceleration wrto an inertial frame coordinatized in Body (m/s^2)
+    double phi, theta, psi;        //3-2-1 Euler angles relating the B frame to an inertial NED frame (rad).
+    double psi_berg, psi_dot_berg; //TRN states
 
-  double time;		  		 				 //Time (s)
+    double time;		  		 				 //Time (s)
 
-  bool dvlValid;							  //Validity flag for dvl motion measurement
-  bool gpsValid;							  //Validity flag for GPS measurement
-  bool bottomLock;						  //Validity flag for DVL lock onto seafloor
+    bool dvlValid;							  //Validity flag for dvl motion measurement
+    bool gpsValid;							  //Validity flag for GPS measurement
+    bool bottomLock;						  //Validity flag for DVL lock onto seafloor
 
-  double covariance[N_COVAR];   //XYZ, phi, theta, psi, wy, wz covariance (passively stable in roll) (see above units)
+    double covariance[N_COVAR];   //XYZ, phi, theta, psi, wy, wz covariance (passively stable in roll) (see above units)
 
 
-  poseT();
-  poseT& operator=(poseT& rhs);
-  poseT& operator-=(poseT& rhs);
-  poseT& operator+=(poseT& rhs);
+    poseT();
+    poseT& operator=(const poseT& rhs);
+    poseT& operator-=(const poseT& rhs);
+    poseT& operator+=(const poseT& rhs);
 
-  int   serialize(char *buf, int buflen);
-  int unserialize(char *buf, int buflen);
+    int   serialize(char *buf, int buflen);
+    int unserialize(char *buf, int buflen);
 };
 
 //!The measT struct stores sonar measurement information.
 struct measT {
-  double time;	//Measurement time (s)
-  int dataType; //1: DVL, 2: Multibeam, 3: Single Beam,
-		//4: Homer Relative Measurement, 5: Imagenex multibeam, 6: Side-looking DVL
-  double phi, theta, psi;
-  double x, y, z;
-  double* covariance;
-  double* ranges;
-  double* crossTrack;
-  double* alongTrack;
-  double* altitudes;
-  double* alphas;
-  bool* measStatus;
-  unsigned int ping_number;
-  int numMeas;            // aka, number of beams
+    double time;	//Measurement time (s)
+    int dataType; //1: DVL, 2: Multibeam, 3: Single Beam,
+    //4: Homer Relative Measurement, 5: Imagenex multibeam, 6: Side-looking DVL
+    double phi, theta, psi;
+    double x, y, z;
+    double* covariance;
+    double* ranges;
+    double* crossTrack;
+    double* alongTrack;
+    double* altitudes;
+    double* alphas;
+    bool* measStatus;
+    unsigned int ping_number;
+    int numMeas;            // aka, number of beams
 
-  // For use in sensors that vary the number of beams (e.g., MB-system)
-  int* beamNums;
+    // For use in sensors that vary the number of beams (e.g., MB-system)
+    int* beamNums;
 
-  measT();
-  measT(unsigned int nummeas, int datatype);
-  ~measT();
-  void clean();
-  measT& operator=(measT& rhs);
+    measT();
+    measT(unsigned int nummeas, int datatype);
+    ~measT();
+    void clean();
+    measT& operator=(const measT& rhs);
 
-  int   serialize(char *buf, int buflen);
-  int unserialize(char *buf, int buflen);
+    int   serialize(char *buf, int buflen);
+    int unserialize(char *buf, int buflen);
 };
 
 //!The transformT struct stores a rotation and translation vector.
 struct transformT
 {
-	//TODO: perhaps also add a precomputed transformation matrix?
-  double rotation[3];
-  double translation[3];
-  int dr;
-  void displayTransformInfo();
+    //TODO: perhaps also add a precomputed transformation matrix?
+    double rotation[3];
+    double translation[3];
+    int dr;
+    void displayTransformInfo();
 };
 
 //!The sensorT struct stores sonar sensor-specific information.
 struct sensorT
 {
-  char name[256];
-  char filename[300];
-  int numBeams;
-  double percentRangeError;
-  double beamWidth;
-  int type;  //should match type of associated measT measurements
-  transformT* T_bs;			//TODO:Beam to Sensor transform (TODO:rename)
+    char name[256];
+    char filename[300];
+    int numBeams;
+    double percentRangeError;
+    double beamWidth;
+    int type;  //should match type of associated measT measurements
+    transformT* T_bs;			//TODO:Beam to Sensor transform (TODO:rename)
 
-  sensorT();
-  sensorT(char* fileName);
-  ~sensorT();
-  void parseSensorSpecs(char* fileName);
-  void displaySensorInfo();
+    sensorT();
+    explicit sensorT(char* fileName);
+    ~sensorT();
+    void parseSensorSpecs(char* fileName);
+    void displaySensorInfo();
 };
 
 //!The vehicleT struct stores vehicle-specific information.
 struct vehicleT
 {
-  char name[256];
-  int numSensors;
-  double driftRate;
-  transformT* T_sv;			//TODO:Sensor to Vehicle transform (TODO:rename)
-  sensorT* sensors;
+    char name[256];
+    int numSensors;
+    double driftRate;
+    transformT* T_sv;			//TODO:Sensor to Vehicle transform (TODO:rename)
+    sensorT* sensors;
 
-  vehicleT();
-  vehicleT(char* fileName);
-  ~vehicleT();
-  void parseVehicleSpecs(char* fileName);
-  void displayVehicleInfo();
+    vehicleT();
+    explicit vehicleT(char* fileName);
+    ~vehicleT();
+    void parseVehicleSpecs(char* fileName);
+    void displayVehicleInfo();
 };
 
 ///////////////////////////////////////////////////////////////
@@ -236,16 +240,16 @@ struct commsT
     char *logname;
 
     commsT();
-    commsT(char msg_type);
+    explicit commsT(char msg_type);
     commsT(char msg_type, int parameter);
     commsT(char msg_type, int parameter, float vdr);
-    commsT(char msg_type, poseT& pt);
-    commsT(char msg_type, int parameter, measT& mt);
+    commsT(char msg_type, const poseT& pt);
+    commsT(char msg_type, int parameter, const measT& mt);
     commsT(char msg_type, int parameter, char *map, char *cfg, char *particles, char *logdir);
     commsT(char msg_type, double x, double y, double z);
     commsT(char msg_type, int parameter, double x, double y, double z);
     commsT(char msg_type, int parameter, double ofs_x, double ofs_y, double ofs_z,
-                 double sdev_x, double sdev_y, double sdev_z);
+           double sdev_x, double sdev_y, double sdev_z);
     ~commsT();
 
     char* to_s(char *buf, int buflen); // Write a string representation of the object
@@ -335,12 +339,12 @@ struct commsT
 // Possible weighting algorithm to use in Particle filter
 enum
 {
-  TRN_WT_NONE  = 0,       // No weighting modifications at all.
-  TRN_WT_NORM  = 1,       // Shandor's original alpha modification.
-  TRN_WT_XBEAM = 2,       // Crossbeam with original
-  TRN_WT_SUBCL = 3,       // Subcloud  with original
-  TRN_FORCE_SUBCL = 4,    // Forced to do Subcloud on every measurement
-  TRN_WT_INVAL = 5        // Any value here and above is invalid
+    TRN_WT_NONE  = 0,       // No weighting modifications at all.
+    TRN_WT_NORM  = 1,       // Shandor's original alpha modification.
+    TRN_WT_XBEAM = 2,       // Crossbeam with original
+    TRN_WT_SUBCL = 3,       // Subcloud  with original
+    TRN_FORCE_SUBCL = 4,    // Forced to do Subcloud on every measurement
+    TRN_WT_INVAL = 5        // Any value here and above is invalid
 };
 
 #define TRN_SET_FR 'F'
@@ -433,10 +437,10 @@ enum
 // Filter Types
 enum
 {
-  TRN_FT_NONE  = 0,       // Undefined.
-  TRN_FT_POINTMASS  = 1,  // Point Mass Filter
-  TRN_FT_PARTICLE   = 2,  // Particle Filter
-  TRN_FT_BANK       = 3,  // Bank of Particle Filters.
+    TRN_FT_NONE  = 0,       // Undefined.
+    TRN_FT_POINTMASS  = 1,  // Point Mass Filter
+    TRN_FT_PARTICLE   = 2,  // Particle Filter
+    TRN_FT_BANK       = 3,  // Bank of Particle Filters.
 };
 
 #define TRN_FILT_STATE 'H'
@@ -474,6 +478,7 @@ enum
 // (particle window variance)
 //
 
+#define TRN_IS_INIT 'i'
 #define TRN_SET_ESTNAVOFS 'j'
 #define TRN_GET_ESTNAVOFS 'J'
 

@@ -883,11 +883,11 @@ int mbview_pick_text(size_t instance) {
 		        shared.shareddata.navs[shared.shareddata.nav_selected[0]].name, date0, lonmstr0, latmstr0, shot0,
 		        shared.shareddata.navs[shared.shareddata.nav_selected[1]].name, date1, lonmstr1, latmstr1, shot1);
 	}
-	/*	else
+	else
 	        {
 	        sprintf(value_text, ":::t\"Pick Info:\":t\"No Pick\"");
 	        sprintf(value_list, "Pick Info: No Pick\n");
-	        }*/
+	        }
 	set_mbview_label_multiline_string(view->mb3dview.mbview_label_pickinfo, value_text);
 	fprintf(stderr, "%s", value_list);
 

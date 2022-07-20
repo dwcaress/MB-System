@@ -25,12 +25,17 @@
 //TNavParticleFilter(char* mapName, char* vehicleSpecs, char* directory, const double* windowVar,
 //				   const int& mapType) : TNavFilter(mapName, vehicleSpecs, directory, windowVar, mapType) {
 TNavParticleFilter::
-TNavParticleFilter(TerrainMap* terrainMap, char* vehicleSpecs, char* directory, const double* windowVar,
-				   const int& mapType) : TNavFilter(terrainMap, vehicleSpecs, directory, windowVar, mapType) {
+TNavParticleFilter(TerrainMap* terrainMap, char* vehicleSpecs, char* directory, const double* windowVar, const int& mapType) :
+TNavFilter(terrainMap, vehicleSpecs, directory, windowVar, mapType),
+navData_x_(0.), navData_y_(0.)
+{
+    int i=0;
+    for(i=0;i<MAX_PARTICLES;i++){
+        currMeasWeights[i]=0.0;
+    }
 	initVariables();
 	this->tempUseBeam = new bool[TRN_MAX_BEAMS];
 	this->useBeam     = new bool[TRN_MAX_BEAMS];
-
 	this->pfLog = new TNavPFLog(DataLog::BinaryFormat);
 }
 
@@ -111,7 +116,6 @@ measUpdate(measT& currMeas) {
 	double effSampSize = 0.0;
 	int i=0, nBeamsUsed = 0;
 	double attitude[3] = {lastNavPose->phi, lastNavPose->theta, lastNavPose->psi};
-	int mapStatus=0;
 	double avgWeights=0.0;
 	bool successfulMeas = false;
 
@@ -122,7 +126,7 @@ measUpdate(measT& currMeas) {
 
 	// initialize beamIndices
 	// some C versions may not permit array[n]={0} initialization
-	for(int i=0;i<currMeas.numMeas;i++)beamIndices[i]=0;
+	for(i=0;i<currMeas.numMeas;i++)beamIndices[i]=0;
 
 	logs(TL_OMASK(TL_TNAV_PARTICLE_FILTER, TL_LOG),"TNavPF::Projecting Measurements \n");
 
@@ -141,7 +145,7 @@ measUpdate(measT& currMeas) {
 
 	logs(TL_OMASK(TL_TNAV_PARTICLE_FILTER, TL_LOG),
 		"TNavPF::Measurements Projected, beam correspondences:");
-	for (int i=0; i<currMeas.numMeas; i++) {
+	for (i=0; i<currMeas.numMeas; i++) {
 		logs(TL_OMASK(TL_TNAV_PARTICLE_FILTER, TL_LOG),
 			"TNavPF:: beamIndex[%i] = %i", i, beamIndices[i]);
 	}
@@ -157,7 +161,7 @@ measUpdate(measT& currMeas) {
 		//Load a sub-map for use in measurement correlation
 		//Find the bounds of the North/East rectangle which circumscribes the
 		//particle distribution
-		mapStatus = defineAndLoadSubMap(beamsVF);
+		int mapStatus = defineAndLoadSubMap(beamsVF);
 
 		// check that the map extraction worked correctly
 		if(mapStatus == MAPBOUNDS_OUT_OF_BOUNDS) {
@@ -195,7 +199,7 @@ measUpdate(measT& currMeas) {
 			double tempAttitude[3];
 
 			//Get the expected measurement differences
-			for( i=0; i < currMeas.numMeas && i < TRN_MAX_BEAMS; i++ )
+			for(i=0; i < currMeas.numMeas && i < TRN_MAX_BEAMS; i++ )
 			{
 				this->useBeam[i]=true;
 			}
@@ -439,16 +443,16 @@ measUpdate(measT& currMeas) {
 
 				//check for nan values before allowing the update into the filter weights
 				bool nanWeights = false;
-				double sumWeights = 0;
+				double subWeights = 0;
 				for(int indexP = 0; indexP < nParticles; indexP++) {
 					nanWeights = nanWeights || ISNIN(tempWeights[indexP]);
-					sumWeights += tempWeights[indexP];
+                    subWeights += tempWeights[indexP];
 				}
 				if(nanWeights){
 					logs(TL_OMASK(TL_TNAV_PARTICLE_FILTER, TL_LOG),
 						"Subcloud weighting FAILED due to NAN weights.\n");
 					return false;
-				} else if(sumWeights == 0){
+				} else if(subWeights == 0){
 					logs(TL_OMASK(TL_TNAV_PARTICLE_FILTER, TL_LOG),
 						"Subcloud Weighting FAILED due to sumWeights == 0. \n");
 					return false;
@@ -701,19 +705,18 @@ measUpdate(measT& currMeas) {
 			}
 
 			//Loop through & compute measurement update weights for all particles
-			double sumSquaredError = 0;
-			double sumWeightedError;
-			double sumInvVar = 0.0;
-			double currDepthBias;
+			double sumSquaredError = 0.;
+			double sumWeightedError = 0.;
+			double sumInvVar = 0.;
+			double currDepthBias = 0.;
 
 //		TODO: Beam Variance can be computed ahead of time (implement later)
 //		for (int beamInd = 0; beamInd < beamsVF.Ncols(); beamInd++) sumInvVar += (1.0/(totalVar[beamInd]));
 
 			for(i = 0; i < nParticles; i++) {
-				sumSquaredError = 0;
-				sumWeightedError = 0;
-				sumInvVar = 0;
-				currDepthBias = 0;
+				sumSquaredError = 0.;
+				sumWeightedError = 0.;
+				sumInvVar = 0.;
 
 				currMeasWeights[i] = 1;
 
@@ -1011,12 +1014,11 @@ void
 TNavParticleFilter::
 computeMMSE(poseT* mmsePose) {
 	int i;
-	double weight, alpha, temp1, temp2;
 	double sumWeights = 0;
 	poseT tempPose;
 
 	for(i = 0; i < nParticles; i++) {
-		weight = allParticles[i].weight;
+        double weight = allParticles[i].weight;
 		sumWeights += weight;
 
 		tempPose.x += weight * allParticles[i].position[0];
@@ -1064,11 +1066,11 @@ computeMMSE(poseT* mmsePose) {
 	}
 
 	for(i = 0; i < nParticles; i++) {
-		weight = allParticles[i].weight;
-		alpha = weight / sumWeights;
-		temp1 = allParticles[i].position[0] - tempPose.x;
+        double weight = allParticles[i].weight;
+		double alpha = weight / sumWeights;
+        double temp1 = allParticles[i].position[0] - tempPose.x;
 		tempPose.covariance[0] += temp1 * temp1 * alpha;
-		temp2 = allParticles[i].position[1] - tempPose.y;
+        double temp2 = allParticles[i].position[1] - tempPose.y;
 		tempPose.covariance[2] += temp2 * temp2 * alpha;
 		tempPose.covariance[1] += temp1 * temp2 * alpha;
 		temp1 = allParticles[i].position[2] - tempPose.z;
@@ -1127,7 +1129,7 @@ defineAndLoadSubMap(const Matrix& beamsVF) {
 	poseT mmseEst;
 	double maxAttitude[3];
 	Matrix beamsMF;
-	double max_dx, max_dy, dx, dy;
+    double max_dx, max_dy;
 	double widthPhi, widthTheta;
 	int i;
 	double Nmin, Nmax, Emin, Emax;
@@ -1166,12 +1168,12 @@ defineAndLoadSubMap(const Matrix& beamsVF) {
 	max_dy = 0;
 
 	for(i = 0; i < beamsMF.Ncols(); i++) {
-		dx = fabs(beamsMF(1, i + 1));
+		double dx = fabs(beamsMF(1, i + 1));
 		if(dx > max_dx) {
 			max_dx = dx;
 		}
 
-		dy = fabs(beamsMF(2, i + 1));
+        double dy = fabs(beamsMF(2, i + 1));
 		if(dy > max_dy) {
 			max_dy = dy;
 		}
@@ -1288,16 +1290,11 @@ initVariables() {
 
 void
 TNavParticleFilter::
-initParticleDist(particleT& initialGuess) {
-	int i, j;
+initParticleDist(const particleT& initialGuess) {
+    int i=0;
 	SymmetricMatrix tempCov(9);
 	SymmetricMatrix tempCovSqrt(9);
 	tempCovSqrt = 0.0;
-	double tempX, tempY;
-	fstream particleFile; //Used for loading particles from a specified file
-
-	char temp[TRN_MAX_BEAMS];
-	int nStates;
 
 	tempCov.Row(1) << initWindowVar[0];
 	tempCov.Row(2) << initWindowVar[1] << initWindowVar[2];
@@ -1336,6 +1333,8 @@ initParticleDist(particleT& initialGuess) {
 	}
 
 	if(USE_PARTICLE_FILE){ //Specify starting particle locations in particles.cfg
+        fstream particleFile; //Used for loading particles from a specified file
+        char temp[TRN_MAX_BEAMS]={0};
         // caller own name string, so must free it
 		char *pfname=TNavConfig::instance()->getParticlesFile();
 		logs(TL_OMASK(TL_TNAV_PARTICLE_FILTER, TL_LOG),"TNAVPF: Opening particles in %s\n",pfname);
@@ -1350,7 +1349,7 @@ initParticleDist(particleT& initialGuess) {
 
 			//Read the number of states the file is giving
 			particleFile.getline(temp,10);
-			nStates = atoi(temp);
+			int nStates = atoi(temp);
 
 			for(i = 0; i < nParticles; i++) {
 				//The file is structured such that the states are specified in the file as North, East, Down (optional), psiBerg (optional)
@@ -1382,7 +1381,7 @@ initParticleDist(particleT& initialGuess) {
 			}
 		}else{
 			sprintf(temp, "TNavParticleFilter::initParticleDist() - Error opening file: %s\n",
-				pfname);
+				(pfname?pfname:"NULL"));
      		if(pfname!=NULL)free(pfname);
         fprintf(stderr, "%s", temp);
         throw Exception(temp);
@@ -1391,7 +1390,7 @@ initParticleDist(particleT& initialGuess) {
 		if(pfname!=NULL)free(pfname);
 
 	}else{
-	        // If not using the particle file:
+        // If not using the particle file:
 		//Initialize the particle distribution to a gaussian around the initial guess
 		//Variances defined in particleFilterDefs.h
 		for(i = 0; i < nParticles; i++) {
@@ -1399,8 +1398,8 @@ initParticleDist(particleT& initialGuess) {
 			allParticles[i].weight = 1.0 / nParticles;
 
 			//initialize positions with uniform distribution (or reinitialize with gaussian)
-			tempX = (*pt2randFunction)(1.0);
-			tempY = (*pt2randFunction)(1.0);
+            double tempX = (*pt2randFunction)(1.0);
+            double tempY = (*pt2randFunction)(1.0);
 
 			this->allParticles[i].position[0] += tempX * tempCovSqrt(1, 1) +
 												 tempY * tempCovSqrt(1, 2);
@@ -1457,6 +1456,7 @@ initParticleDist(particleT& initialGuess) {
 			//initialize DVL scale factor and bias if used
 			if(SEARCH_DVL_ERRORS) {
 				this->allParticles[i].dvlScaleFactor += unif_zeroMean(DVL_SF_STDDEV_INIT);
+                int j=0;
 				for(j = 0; j < 3; j++) {
 					this->allParticles[i].dvlBias[j] += unif_zeroMean(DVL_BIAS_STDDEV_INIT);
 				}
@@ -1479,14 +1479,14 @@ initParticleDist(particleT& initialGuess) {
 
 void
 TNavParticleFilter::
-attitudeMeasUpdate(poseT& currPose) {
+attitudeMeasUpdate(const poseT& currPose) {
 	double sumWeights = 0;
 	double sumSquaresWeights = 0;
 	double effSampSize;
 	double avgWeights;
 	double phiVar = DPHI_STDDEV * DPHI_STDDEV;
 	double thetaVar = DTHETA_STDDEV * DTHETA_STDDEV;
-	double sumSquaredError = 0;
+	double sumSquaredError;
 	double measProb;
 	int i;
 
@@ -1557,8 +1557,6 @@ homerMeasUpdate(const measT& currMeas) {
 	homerInertPose = 0.0;
 	int i;
 	double sumWeights = 0;
-	double weight = 0;
-	double temp1, temp2, alpha;
 	double range_stddev[3] = {fabs(homerRelPose[0])* HOMER_RANGE_PER_ERROR / 100.0, fabs(homerRelPose[1])* HOMER_RANGE_PER_ERROR / 100.0,
 							  fabs(homerRelPose[2])* HOMER_RANGE_PER_ERROR / 100.0
 							 };
@@ -1581,7 +1579,7 @@ homerMeasUpdate(const measT& currMeas) {
 
 	//Compute mean and variance of current homer pose estimate
 	for(i = 0; i < nParticles; i++) {
-		weight = allParticles[i].weight;
+        double weight = allParticles[i].weight;
 		sumWeights += weight;
 
 		homerPoseMu[0] += weight * homerPoseN[i];
@@ -1593,11 +1591,11 @@ homerMeasUpdate(const measT& currMeas) {
 		homerPoseMu[1] /= sumWeights;
 	}
 	for(i = 0; i < nParticles; i++) {
-		weight = allParticles[i].weight;
-		alpha = weight / sumWeights;
-		temp1 = homerPoseN[i] - homerPoseMu[0];
+        double weight = allParticles[i].weight;
+        double alpha = weight / sumWeights;
+        double temp1 = homerPoseN[i] - homerPoseMu[0];
 		homerPoseCov[0] += temp1 * temp1 * alpha;
-		temp2 = homerPoseE[i] - homerPoseMu[1];
+        double temp2 = homerPoseE[i] - homerPoseMu[1];
 		homerPoseCov[1] += temp2 * temp2 * alpha;
 		homerPoseCov[2] += temp1 * temp2 * alpha;
 	}
@@ -1655,12 +1653,6 @@ getExpectedMeasDiffParticle(particleT& particle, const Matrix& beamsSF, double* 
 //  double mapVar = 1;
 	Matrix beamsMF;
 	Matrix beamsVF;
-	double currDvlAttitude[3] = {dvlAttitude[0], dvlAttitude[1],
-								 dvlAttitude[2]
-								};
-	double currAttitude[3] = {particle.attitude[0], particle.attitude[1],
-							  particle.attitude[2]
-							 };
 
 	//!double beamU[3];		//Used for octree, range
 	double beamVector[3];
@@ -1671,6 +1663,9 @@ getExpectedMeasDiffParticle(particleT& particle, const Matrix& beamsSF, double* 
 
 	//If searching over alignment state, first bring beams into vehicle frame
 	if(SEARCH_ALIGN_STATE) {
+        double currDvlAttitude[3] = {dvlAttitude[0], dvlAttitude[1],
+            dvlAttitude[2]
+        };
 		currDvlAttitude[0] += particle.alignState[0];
 		currDvlAttitude[1] += particle.alignState[1];
 		currDvlAttitude[2] += particle.alignState[2];
@@ -1681,6 +1676,9 @@ getExpectedMeasDiffParticle(particleT& particle, const Matrix& beamsSF, double* 
 
 	//Rotate the beams from the vehicle frame to the map frame
 	if(ALLOW_ATTITUDE_SEARCH) {
+        double currAttitude[3] = {particle.attitude[0], particle.attitude[1],
+            particle.attitude[2]
+        };
 		if(SEARCH_COMPASS_BIAS) {
 			currAttitude[2] += particle.compassBias;
 		}
@@ -1730,27 +1728,18 @@ getExpectedMeasDiffParticle(particleT& particle, const Matrix& beamsSF, double* 
 
 void
 TNavParticleFilter::
-motionUpdateParticle(particleT& particle, poseT& diffPose, double* velocity_sf_sigma, const double& gyroStddev) {
-	double currDvlAttitude[3] = {dvlAttitude[0], dvlAttitude[1],
-								 dvlAttitude[2]
-								};
-	double currAttitude[3] = {particle.attitude[0], particle.attitude[1],
-							  particle.attitude[2]
-							 };
+motionUpdateParticle(particleT& particle, const poseT& diffPose, double* velocity_sf_sigma, const double& gyroStddev) {
 	double vehicleDisp[3];
-	double psiDot, phiDot, thetaDot;
 	Matrix velocity_sf(3, 1);
 	Matrix velocity_vf(3, 1);
 	Matrix velocity_if(3, 1);
 	Matrix accel_sf(3, 1);
 	Matrix accel_vf(3, 1);
 	Matrix accel_if(3, 1);
-	double driftStddev, cep;
 	double cosTheta = cos(particle.attitude[1]);
 	double sinPhi = sin(particle.attitude[0]);
 	double cosPhi = cos(particle.attitude[0]);
 	double tanTheta = tan(particle.attitude[1]);
-	int i;
 
 	//Depth update is given by INS delta z
 	vehicleDisp[2] = diffPose.z;
@@ -1765,15 +1754,23 @@ motionUpdateParticle(particleT& particle, poseT& diffPose, double* velocity_sf_s
 	if(diffPose.gpsValid || !DEAD_RECKON || !lastNavPose->dvlValid) {
 		//Add Gaussian noise to account for uncertainty in the inertial disp.
 		//measurement
-		cep = (this->vehicle->driftRate / 100.0) * (sqrt(diffPose.x * diffPose.x + diffPose.y * diffPose.y));
+        double cep = (this->vehicle->driftRate / 100.0) * (sqrt(diffPose.x * diffPose.x + diffPose.y * diffPose.y));
 
 		//TODO:  check conversion from CEP to Stddev, I don't feel like there should be a sqrt outside the CEP
-		driftStddev = MOTION_NOISE_MULTIPLIER * sqrt(cep / sqrt(-2 * (log(1 - 0.5))));
+        double driftStddev = MOTION_NOISE_MULTIPLIER * sqrt(cep / sqrt(-2 * (log(1 - 0.5))));
 		//logs(TL_OMASK(TL_TNAV_PARTICLE_FILTER, TL_LOG),"MOTION UPDATE: CEP = %f\n",this->vehicle->driftRate/100.0); //TODO: Remove this (when no longer needed)
 		vehicleDisp[0] = diffPose.x + randn_zeroMean(driftStddev);
 		vehicleDisp[1] = diffPose.y + randn_zeroMean(driftStddev);
 		//logs(TL_OMASK(TL_TNAV_PARTICLE_FILTER, TL_LOG),"standard navigation update...\n");
 	} else {
+
+        double currDvlAttitude[3] = {dvlAttitude[0], dvlAttitude[1],
+            dvlAttitude[2]
+        };
+        double currAttitude[3] = {particle.attitude[0], particle.attitude[1],
+            particle.attitude[2]
+        };
+
 		//Apply bias and scale factor corrections IFF DVL is returning ground
 		//velocity and we are searching over dvl bias/scale factor
 		if(SEARCH_DVL_ERRORS && lastNavPose->bottomLock) {
@@ -1908,19 +1905,20 @@ motionUpdateParticle(particleT& particle, poseT& diffPose, double* velocity_sf_s
 
 	//Compute new heading of the particle
 	if(SEARCH_GYRO_BIAS) {
+        double psiDot;
 		if(INTEG_PHI_THETA) {
 			//Compute psi by integrating the gyro readings
-			psiDot = (sinPhi / cosTheta) * (lastNavPose->wy - particle.gyroBias[1]) +
+            psiDot = (sinPhi / cosTheta) * (lastNavPose->wy - particle.gyroBias[1]) +
 					 (cosPhi / cosTheta) * (lastNavPose->wz - particle.gyroBias[2]);
 			particle.attitude[2] += psiDot * diffPose.time;
 
 			//Compute theta by integrating gyro readings
-			thetaDot = cosPhi * (lastNavPose->wy - particle.gyroBias[1])
+            double thetaDot = cosPhi * (lastNavPose->wy - particle.gyroBias[1])
 					   - sinPhi * (lastNavPose->wz - particle.gyroBias[2]);
 			particle.attitude[1] += thetaDot * diffPose.time;
 
 			//Compute phi by integrating gyro readings
-			phiDot = (lastNavPose->wx - particle.gyroBias[0]) +
+            double phiDot = (lastNavPose->wx - particle.gyroBias[0]) +
 					 sinPhi * tanTheta * (lastNavPose->wy - particle.gyroBias[1])
 					 + cosPhi * tanTheta * (lastNavPose->wz - particle.gyroBias[2]);
 			particle.attitude[0] += phiDot * diffPose.time;
@@ -1979,6 +1977,7 @@ motionUpdateParticle(particleT& particle, poseT& diffPose, double* velocity_sf_s
 	//Add randomness to DVL error states
 	if(SEARCH_DVL_ERRORS) {
 		particle.dvlScaleFactor += randn_zeroMean(DDVLSF_STDDEV);
+        int i=0;
 		for(i = 0; i < 3; i++) {
 			particle.dvlBias[i] += randn_zeroMean(DDVLBIAS_STDDEV);
 		}
@@ -1995,7 +1994,6 @@ resampParticleDist() {
 	double step;
 	double r;
 	double c;
-	double U;
 	int m, N, M = 0;
 	int i = 0;
 	poseT mmseEst;
@@ -2027,7 +2025,7 @@ resampParticleDist() {
 	r = (rand() + 1) * (1.0 / (RAND_MAX + 1.0)) * 1.0 / nParticles;
 	c = allParticles[0].weight;
 	for(m = 0; m < N; m++) {
-		U = r + m * step;
+		double U = r + m * step;
 
 		while(c < U) {
 			i++;
@@ -2120,7 +2118,6 @@ computeKLdiv_gaussian_particles() {
 	ColumnVector dx(2);
 	SymmetricMatrix Cov(2);
 	Matrix A;
-	double q;
 	int i;
 	double eta;
 	double kl = 0;
@@ -2150,7 +2147,7 @@ computeKLdiv_gaussian_particles() {
 
 		//compute current gaussian probability
 		Value = dx.t() * A * dx;
-		q = eta * exp(Value.AsScalar() * -0.5);
+		double q = eta * exp(Value.AsScalar() * -0.5);
 
 		//add current kl entry
 		if(allParticles[i].weight / q > 1e-50 && allParticles[i].weight / q < 1e50) {
@@ -2374,7 +2371,7 @@ writeParticlesToFile(particleT* particles, ofstream& particlesFile) {
 void
 TNavParticleFilter::
 writeHistDistribToFile(particleT* particles, ofstream& particlesFile) {
-	int i, idx;
+	int i;
 	double Nmin, Nmax, Emin, Emax, Zmin, Zmax, Phmin, Phmax, Tmin, Tmax, Pmin, Pmax;
 	double dN, dE, dZ, dPh, dT, dP;
 	RowVector likeN, likeE, likeZ, likePh, likeT, likeP;
@@ -2452,7 +2449,7 @@ writeHistDistribToFile(particleT* particles, ofstream& particlesFile) {
 	//fill in histogram vectors
 	for(i = 0; i < nParticles; i++) {
 		//fill in likeN
-		idx = closestPtUniformArray(particles[i].position[0], Nmin, Nmax,
+		int idx = closestPtUniformArray(particles[i].position[0], Nmin, Nmax,
 									numN);
 		likeN(idx + 1) += particles[i].weight;
 
