@@ -41,7 +41,6 @@ target_link_libraries(qt-mbgrdviz
                       ${QT5_LIBRARIES}
                       ${VTK_LIBRARIES}
                       m
-                      GL
                       pthread)
                            
                            
