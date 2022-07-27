@@ -34,7 +34,10 @@ set(packages GMT PROJ netCDF GDAL FFTW OpenGL X11 Motif)
 
 if (buildQt)
   # Add Qt, VTK to packages
+  message("Build Qt/VTK apps")  
   list(APPEND packages "Qt" "VTK")
+else()
+  message("Do not build Qt/VTK apps")
 endif()
 
 if (buildPCL)
@@ -55,7 +58,6 @@ if (help)
   message("build Qt-based GUIs with -DbuildQt=1")
   message("build TRN software with -DbuildTRN=1")
   message("build shared/static libraries with -DBUILD_SHARED_LIBS=ON/OFF")
-  ###  message("you MUST specify -DVTK_include=<dir> -DVTK_lib=<libs>")
   message(FATAL_ERROR "")
 endif()
 
@@ -73,6 +75,7 @@ if (APPLE)
   set(PROJ_ROOT /opt/local/lib/proj9)
   set(GMT_ROOT /opt/local/lib/gmt6) # Required for FindGMT()
 
+  #[[
   # On OSX we assume X11 and OpenGL are provided by XQuartz in /opt/X11,
   # unless user specifies location on command line
   message("MACOS: assume X11 and OpenGL are in /opt/X11")
@@ -96,7 +99,7 @@ if (APPLE)
     message("assume OpenGL_lib in /opt/X11/lib")
     set(OpenGL_lib /opt/X11/lib/libGL.dylib;/opt/X11/lib/libGLU.dylib)
   endif()
-
+  ]] 
   set(otpsDir /usr/local/opt/otps)
 
 else()
@@ -180,7 +183,7 @@ foreach(package ${packages})
     find_package(Qt5 COMPONENTS Gui Quick REQUIRED)
 
     if (Qt5_FOUND)
-      message("Found Qt5 package")
+      message("Found Qt5 package in ${Qt5_DIR}")
       set(QT5_INCLUDE_DIRS ${Qt5Gui_INCLUDE_DIRS})
       list(APPEND QT5_INCLUDE_DIRS ${Qt5Quick_INCLUDE_DIRS})
       set(QT5_LIBRARIES ${Qt5Gui_LIBRARIES})
@@ -196,6 +199,7 @@ foreach(package ${packages})
   if (${package} STREQUAL "VTK")
     message("TRY find_package(VTK 8.2.0)")
     find_package(VTK "8.2.0" EXACT REQUIRED)
+    find_package(VTK REQUIRED)
     continue()    
   endif()
 
@@ -207,13 +211,15 @@ foreach(package ${packages})
   if (${package}_FOUND)
     message("Found ${package}")
     set(packageFound TRUE)
-    message("${package}_INCLUDE_DIRS: ${${package}_INCLUDE_DIRS}")
-    message("${package}_LIBRARIES: ${${package}_LIBRARIES})")
+    message("${package}_VERSION: ${${package}_VERSION}")    
+    ### message("${package}_INCLUDE_DIRS: ${${package}_INCLUDE_DIRS}")
+    ### message("${package}_LIBRARIES: ${${package}_LIBRARIES})")
 
     if (${package} STREQUAL "netCDF")
        # Make NetCDF variable names all upper case
        set(NETCDF_INCLUDE_DIRS ${${package}_INCLUDE_DIRS})
        set(NETCDF_LIBRARIES ${${package}_LIBRARIES})
+       set(NETCDF_VERSION ${${package}_VERSION})       
 
     elseif (${package} STREQUAL "OpenGL")
       # find_package(OpenGL) returns variables in all upper case
@@ -284,13 +290,24 @@ endforeach()
 # Print package variables
 message("package variables:")
 foreach(package ${packages})
+
+  set(varName ${package}_VERSION)
+  string(TOUPPER ${varName} VARNAME)
+  message("${VARNAME}: ${${VARNAME}}")
+  
   set(varName ${package}_INCLUDE_DIRS)
   string(TOUPPER ${varName} VARNAME)
   message("${VARNAME}: ${${VARNAME}}")
 
   set(varName ${package}_LIBRARIES)
   string(TOUPPER ${varName} VARNAME)
-  message("${VARNAME}: ${${VARNAME}}")  
+  message("${VARNAME}: ${${VARNAME}}")
+
+  set(varName ${package}_DIR)
+  string(TOUPPER ${varName} VARNAME)
+  message("${VARNAME}: ${${VARNAME}}")
+  message("${varName}: ${${varName}}")
+  
 endforeach()
 
 message("Assume OPTS is installed in ${otpsDir}; override with -DotpsDir=dir")
