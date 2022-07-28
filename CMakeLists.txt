@@ -75,10 +75,8 @@ if (APPLE)
   set(PROJ_ROOT /opt/local/lib/proj9)
   set(GMT_ROOT /opt/local/lib/gmt6) # Required for FindGMT()
 
-  #[[
-  # On OSX we assume X11 and OpenGL are provided by XQuartz in /opt/X11,
-  # unless user specifies location on command line
-  message("MACOS: assume X11 and OpenGL are in /opt/X11")
+
+  #[[ find_package(X11) appears reliable on MacOS
 
   if (NOT X11_include)
     message("assume X11_include in /opt/X11/include")
@@ -89,20 +87,26 @@ if (APPLE)
     message("assume X11_lib in /opt/X11/lib")
     set(X11_lib /opt/X11/lib/libXt.dylib;/opt/X11/lib/libX11.dylib)
   endif()
+  ]]
+
+  # OSX OpenGL support is not very reliable or consistent.
+  # By default specific /opt/local for OpenGL includes and libs,
+  # unless user specifies location on command line
 
   if (NOT OpenGL_include)
-    message("assume OpenGL_include in /opt/X11/include")  
-    set(OpenGL_include /opt/X11/include)  
+    message("assume OpenGL_include in /opt/local/include")  
+    set(OpenGL_include /opt/local/include)  
   endif()
   
   if (NOT OpenGL_lib)
-    message("assume OpenGL_lib in /opt/X11/lib")
-    set(OpenGL_lib /opt/X11/lib/libGL.dylib;/opt/X11/lib/libGLU.dylib)
+    message("assume OpenGL_lib in /opt/local/lib")
+    set(OpenGL_lib /opt/local/lib/libGL.dylib;/opt/local/lib/libGLU.dylib)
   endif()
-  ]] 
+
   set(otpsDir /usr/local/opt/otps)
 
 else()
+  # Not MacOS
   set(otpsDir /local/opt/otps)
 endif()
 
