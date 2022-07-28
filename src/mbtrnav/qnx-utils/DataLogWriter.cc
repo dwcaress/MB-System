@@ -42,14 +42,14 @@ DataLogWriter::DataLogWriter(const char *objectName,
 
   //////////////////////////////////////////////////////////////////
   // Build file name and open the file
-  char *trnLogDir = getenv(TRNLogDirName);
+  const char *trnLogDir = getenv(TRNLogDirName);
   if (trnLogDir == 0) {
     // No ENV for logs. Use current directory
     //
     //printf("\n\n\tDataLog::DataLog() - environment variable %s not set\n",
     //  TRNLogDirName);
     //printf("\tDataLog::DataLog() - Log directory is in local directory!\n\n");
-    trnLogDir = strdup(".");
+    trnLogDir = ".";
   }
 
   sprintf(_fileName, "%s/%s/%s.log", trnLogDir, LatestLogDirName, name());
@@ -69,6 +69,7 @@ DataLogWriter::DataLogWriter(const char *objectName,
     break;
 
   default:
+    _logFile = NULL;
     _logOK = False;
     if (DLDEBUG) printf("DataLogWriter::DataLogWriter() - unknown file format\n");
   }
@@ -108,7 +109,10 @@ void DataLogWriter::addField(DataField *field)
 
 void DataLogWriter::writeHeader()
 {
-  if (_logFile == NULL)
+  if (_logFile == NULL || _logOK == False) {
+    if (DLDEBUG) printf("DataLogWriter::writeHeader() - no log file!\n");
+    return;
+  }
 
   if (DLDEBUG) printf("DataLogWriter::writeHeader()\n");
 
@@ -155,6 +159,11 @@ void DataLogWriter::writeHeader()
 
 int DataLogWriter::write()
 {
+  if (_logFile == NULL || _logOK == False) {
+    if (DLDEBUG) printf("DataLogWriter::write() - no log file!\n");
+    return 0;
+  }
+
   char errorBuf[MAX_EXC_STRING_LEN];
 
   if (!_handledHeader) {

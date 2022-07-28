@@ -575,6 +575,9 @@ class TNavBankFilter : public TNavFilter
 
   bool treatBeamAsNan(int filterIndex, Matrix beamIF, const particleT &particle);
 
+    int deleteLogs();
+    int allocateLogs();
+
   //Private structures and components of a TNavBankFilter object:
   /*********************************************************/
  
@@ -642,7 +645,7 @@ class TNavBankFilter : public TNavFilter
   unsigned int windowIndex[MAX_NUM_FILTERS][MAX_NUM_PARTICLES];
 
   TNavPFLog* *bfLogs; //[MAX_NUM_FILTERS];
-
+    uint32_t logCount;
 };
 
 #endif

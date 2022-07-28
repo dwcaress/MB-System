@@ -28,7 +28,7 @@ There are two configuration files for mbtrnpp, both are optional but strongly re
   * sets MB-System and TRN processing parameters
   * supports special variables that use the environment or are dynamically determined at runtime
 
-Running mbtrnpp is typically done by 
+Running mbtrnpp is typically done by
 * sourcing the environment file
 * running mbtrnpp with the --config option, along with config file override options
 
@@ -42,7 +42,7 @@ See [Appendix: Formatting Markdown](#formatting-markdown) for info on reformatti
 The environment and mbtrnpp configuration are managed by an environment file and configuration file, detailed below.
 
 
-### Environment File 
+### Environment File
 
 The environment file (e.g. mbtrnpp-sentry.env) may be used to set environment variables
 used by the TRN server and mbtrnpp.
@@ -94,7 +94,7 @@ TRN_GROUP
 
     Source:
      * environment variable if set
-     * defaults to TRNUM_GROUP_DFL in mbtrnpp.c (239.255.0.16) 
+     * defaults to TRNUM_GROUP_DFL in mbtrnpp.c (239.255.0.16)
 
 
 TRN_LOGFILES
@@ -155,9 +155,9 @@ TRN_SESSION
 
 ### mbtrnpp Config File
 
-The mbtrnpp configuration file (e.g. mbtrnpp.cfg) contains configuration parameters for mbtrnpp utility in MB-System; it may be provided using the command line option 
-``` 
---config=<path> 
+The mbtrnpp configuration file (e.g. mbtrnpp.cfg) contains configuration parameters for mbtrnpp utility in MB-System; it may be provided using the command line option
+```
+--config=<path>
 
 ```  
 
@@ -179,7 +179,8 @@ The annotated example configuration file in MB-System ```src/mbtrn/tools/mbtrnpp
 | swath-width=\<sonar swath\>  | Sonar swath width (decimal deg)                               | 90.0 | |
 | soundings=\<n\>              | number of sonar soundings to output (uint)                    | 11 | |
 | median-filter=\<filter spec\>| median filter parameters \<threshold\>/\<n_across\>/\<n_along\>| 0.10/9/3 | |
-| format=\<n\>                 | MB-System input format number                                 | 88 | |
+| format=\<n\>                 | MB-System input format id                                     | 88 | |
+| auv-sentry-em2040=\<n\>      | Enable special pressure depth encoding for Sentry EM2040      | default unused |use Y/1: enable N/0: disable|
 | *TRN Options* ||||
 | mbhbt=\<s\>                  | MB1 server heartbeat timeout (s)                              | 15 | |
 | trnhbt=\<s\>                 | TRN server heartbeat timeout (s)                              | 15 | |
@@ -196,7 +197,7 @@ The annotated example configuration file in MB-System ```src/mbtrn/tools/mbtrnpp
 | trn-mtype=\<n\>              | TRN map type (int)                                            |  1 | see Note [1] |
 | trn-ftype=\<n\>              | TRN filter type (int)                                         |  2 | see Note [2] |
 | trn-fgrade=\<n\>             | TRN filter grade (int)                                        |  1 | 0:low grade 1:high grade |
-| trn-freinit=\<n\>             | enable filter reinit (bool)                                   |  1 | 0:disable filter reinit 1:enable filter reinit |
+| trn-freinit=\<n\>            | enable filter reinit (bool)                                   |  1 | 0:disable filter reinit 1:enable filter reinit |
 | trn-mweight=\<n\>            | use modified weighting                                        |  4 | see Note [3] |
 | trn-ncov=\<n\>               | TRN convergence criteria - northing covariance limit (double) | 49 | |
 | trn-ecov=\<n\>               | TRN convergence criteria - easting covariance limit (double)  | 49 | |
@@ -205,33 +206,34 @@ The annotated example configuration file in MB-System ```src/mbtrn/tools/mbtrnpp
 | mb-out=\<spec\>              | MB1 output specifier (comma delimited list)                   | mb1svr:TRN_HOST:27000,mb1 | see Note [4] |
 | trn-out=\<spec\>             | TRN output specifier (comma delimited list)                   | trnsvr:TRN_HOST:28000,trnu,trnusvr:TRN_HOST:8000 | see Note [5] |
 | trn-decn=\<n\>               | TRN updpate decimation modulus (uint)                         |  9 | update TRN every nth MB1 sample |
-| trn-decs=\<s\>               | TRN updpate decimation interval (decimal seconds)             | typically unused  | update TRN every s decimal seconds |
-| trn-nombgain=\<bool\>        | enable/disable gating TRN resets using sonar transmit gain    | typically unused |use Y/1: enable N/0: disable|
-| reinit-file                  | reinitialize TRN every time a new datalist file is read       | - | |
-| reinit-gain                  | enable/disable gating TRN resets using sonar transmit gain    | - | |
+| covariance-magnitude-max=\<max\> | TRN covariance magnitude convergence threshold            | typically 10.0 for 1-meter-scale mapping |
+| covariance-repeat-min=\<min\> | TRN cycle stable convergence threshold                       | typically 400 for 1-meter-scale mapping |
+| reinit-search=\<xy\>/\<z\>|  | set size of TRN reinit search area in meters                  | default 60 m / 5 m |
+| reinit-gain=\<bool\>         | enable/disable gating TRN resets using sonar transmit gain    | default unused |use Y/1: enable N/0: disable|
+| reinit-file=\<bool\>         | enable/disable reiniting TRN at file breaks when reading files| default unused |use Y/1: enable N/0: disable|
 | reinit-xyoffset=\<max\>      | reinitialize TRN whenever the magnitude of the xy converged offset > max (double) | 150.0 | |
 | reinit-zoffset=\<min\>/\<max\>| reinitialize TRN whenever the magnitude of the xy converged z offset z<min, z>max (double) | 2.0/2.0 | |
 | ping-decimate=\<n\>          | ping decimation modulus (int)                                 | 1 | |
 
 [1] map type options
-``` 
-1: TRN_MAP_DEM 
+```
+1: TRN_MAP_DEM
 2: TRN_MAP_BO
 ```
 [2] filter type options
 ```
- 0: TRN_FILT_NONE 
+ 0: TRN_FILT_NONE
  1: TRN_FILT_POINTMASS
- 2: TRN_FILT_PARTICLE 
- 3: TRN_FILT_BANK 
+ 2: TRN_FILT_PARTICLE
+ 3: TRN_FILT_BANK
 ```
 
 [3] modified weighting options
 ```
-0: No weighting modifications 
-1: Shandor's original alpha modification 
-2: Crossbeam with Shandor's weighting 
-3: Subcloud with Shandor's original 
+0: No weighting modifications
+1: Shandor's original alpha modification
+2: Crossbeam with Shandor's weighting
+3: Subcloud with Shandor's original
 4: Subcloud with modified NIS always on
 ```
 
@@ -274,7 +276,7 @@ e.g.
 7125_400 - Seabat 7125 400 kHz
 T50      - T50-S, T50-R
 
-The mnemonic is translated to a numeric ID that is passed into the reson reader, where it is 
+The mnemonic is translated to a numeric ID that is passed into the reson reader, where it is
 mapped to the correct device ID and system enumerator required for the subscription message.
 
 The mnemonic values and associated IDs are defined in r7kc.h
@@ -331,12 +333,12 @@ Locations are determined by the log-directory option and/or TRN_LOGDIRECTORY env
 | trnusvr-YYYYMMDD_HHMMSSnnnn.log     | TRN UDP server session log | log-directory | |
 | trnu-YYYYMMDD_HHMMSSnnnn.log        | TRN UDP update record log  | log-directory | |
 | \<mid\>-YYYY.JJJ-TRN.NN             | TRN instance log directory | TRN_LOGDIRECTORY | mid (mission ID) determined by trn-mid option|
- 
+
 <div style="page-break-after: always">  </div>
 
 ----
 
-## Troubleshooting 
+## Troubleshooting
 
 ----
 
@@ -369,15 +371,15 @@ env|grep TRN
 
 ### Segfaults
 
-segfaults are uncommon in the production code. In the event that one occurs, 
+segfaults are uncommon in the production code. In the event that one occurs,
 gdb (or ggdb on OSX) are useful for debugging; OSX and linux are slightly different, and may be need to run under libtool.
 
 ```
 # on linux
-gdb --args your_cmdline 
+gdb --args your_cmdline
 
 # on OSX
-ggdb -- your_cmdline 
+ggdb -- your_cmdline
 ```
 
 If debugging in a build directory (i.e. uninstalled libtool binaries), use libtool (or glibtool on OSX) to run gdb
@@ -460,8 +462,8 @@ The basic steps include:
 
 	download and uncompress the source tar.gz
 	cd gmt-<version>
-	optionally copy and modify 
-	   cmake/ConfigUserTemplate.cmake -> cmake/ConfigUser.cmake 
+	optionally copy and modify
+	   cmake/ConfigUserTemplate.cmake -> cmake/ConfigUser.cmake
 	   cmake/ConfigUserAdvancedTemplate.cmake -. cmake/ConfigUserAdvanced.cmake
 	mkdir build
 	cd build
@@ -487,7 +489,7 @@ make LDFLAGS=-no-undefined
 succeeds but
 
 ```
-./configure --enable-mbtrn --enable-mbtnav --disable-mbtools —-disable-dependency-tracking 
+./configure --enable-mbtrn --enable-mbtnav --disable-mbtools —-disable-dependency-tracking
 ```
 
 fails. The issue may only appear initially and clear up on subsequent builds.
@@ -496,9 +498,9 @@ fails. The issue may only appear initially and clear up on subsequent builds.
 This appears to happen because gmt dependencies are generated configure using
 
 ```
-gmt-config --libs 
+gmt-config --libs
 ```
-which returns 
+which returns
 
 ```
 -L/usr/local/lib -lgmt
@@ -569,7 +571,7 @@ Copy the text below and save it in an "entitlements.xml" file in your current di
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-   
+
 <key>com.apple.security.cs.debugger</key>
 
 <true/>
@@ -581,13 +583,13 @@ Copy the text below and save it in an "entitlements.xml" file in your current di
 Run the following commands in terminal:
 ```
 # codesign with entitlements
-codesign --entitlements entitlements.xml -fs gdb-cert $(which gdb) 
+codesign --entitlements entitlements.xml -fs gdb-cert $(which gdb)
 
 # verify codesigning
-codesign -vv $(which gdb) 
+codesign -vv $(which gdb)
 
 # display details of code signature
-codesign -d --entitlements - $(which gdb) 
+codesign -d --entitlements - $(which gdb)
 ```
 ### Refresh System Certificates
 
@@ -600,7 +602,7 @@ Reboot the machine
 ## Formatting Markdown
 
 This file is best viewed as a PDF, HTML, in a text editor or markdown viewer, e.g. this [extension for Google Chrome](https://chrome.google.com/webstore/detail/markdown-viewer/ckkdlimhmcjmikdlpkmbgfkaikojcbjk?hl=en)
-The Chrome extension offers a number of CSS formatting styles, and it's possible to export it as PDF or HTML. 
+The Chrome extension offers a number of CSS formatting styles, and it's possible to export it as PDF or HTML.
 
 
 Use pandoc to generate HTML (and other formats)
@@ -613,7 +615,7 @@ where
 |    option   |          description       |
 | ----------: | :------------------------- |
 |          -s | standalone output          |
-|          -c | specify a CSS style        | 
+|          -c | specify a CSS style        |
 |  input_path | markdown source            |
 |  --metadata | specify the HTML page title|
 | output_path | path to output HTML file   |
@@ -632,4 +634,3 @@ pandoc -s /doc/markdown/mbtrnpp-op-Sentry.md --metadata title="mntrnpp Config Cu
 ----
 
 ----
-

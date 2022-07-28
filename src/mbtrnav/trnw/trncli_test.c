@@ -616,7 +616,7 @@ static void parse_args(int argc, char **argv, app_cfg_t *cfg)
                 // mw
                 else if (strcmp("trn-mw", options[option_index].name) == 0) {
                     uint16_t mw = 0xFFFF;
-                    if((sscanf(optarg,"%"PRIu16"",&mw)==1) &&
+                    if((sscanf(optarg,"%hu",&mw)==1) &&
                        (mw>=0 && mw<=4)){
                         cfg->trn_cfg->mod_weight = mw;
                     } else {

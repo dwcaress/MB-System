@@ -1,10 +1,5 @@
 bin_PROGRAMS = mbgrdviz
 
-if BUILD_MBTRN
-  MBTRNINCDIR = -I${top_srcdir}/src/mbtrn/r7kr -I${top_srcdir}/src/mbtrn/utils -I${top_srcdir}/src/mbtrnframe/usr -I${top_srcdir}/src/mbtrnframe/mframe/src
-  MBTRNLIB = ${top_builddir}/src/mbtrn/libr7kr.la
-endif
-
 AM_CFLAGS =
 AM_CFLAGS += ${libnetcdf_CFLAGS}
 AM_CFLAGS += ${libgmt_CFLAGS}
@@ -13,7 +8,6 @@ AM_CPPFLAGS =
 AM_CPPFLAGS += -I${top_srcdir}/src/mbio
 AM_CPPFLAGS += -I${top_srcdir}/src/mbaux
 AM_CPPFLAGS += -I${top_srcdir}/src/mbview
-AM_CPPFLAGS += $(MBTRNINCDIR)
 AM_CPPFLAGS += ${libnetcdf_CPPFLAGS}
 AM_CPPFLAGS += ${libgmt_CPPFLAGS}
 AM_CPPFLAGS += ${libopengl_CPPFLAGS}

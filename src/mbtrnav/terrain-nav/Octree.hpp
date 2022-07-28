@@ -121,12 +121,41 @@ namespace OctreeType {
 	};
 }
 
+struct OTreeStats_s{
+    unsigned long depth;
+    unsigned long nodes;
+    unsigned long leaves;
+    unsigned long branches;
+};
+typedef OTreeStats_s OTreeStats;
+
 template <class ValueType>
 class Octree {
 		class OctreeNode;//defined at the bottom of the classdef
 		
 	public:
-		void moveOctree(const Vector& newOrigin){
+    // byte-align these structs
+#pragma pack(push, 1)
+    struct MapHeader_s{
+        Vector LowerBounds ;
+        Vector UpperBounds;
+        Vector Size;
+        Vector TrueResolution;
+        int MaxDepth;
+        ValueType OffMapValue;
+        ValueType EmptyValue;
+        OctreeType::EnumOctreeType OctreeNodeType;
+    };
+    typedef struct  MapHeader_s MapHeader;
+
+    struct OctreeNode_s{
+        ValueType value;
+        bool hasChildren;
+    };
+    typedef struct OctreeNode_s OTNode;
+#pragma pack(pop)
+
+        void moveOctree(const Vector& newOrigin){
 			this->LowerBounds -= newOrigin;
 			this->UpperBounds -= newOrigin;
 		}
@@ -167,13 +196,15 @@ class Octree {
 		bool LoadFromFile(const char* filename);
 		
 		//print
-		void Print(void) const;
-		
+        void Print(OTreeStats *ts=NULL) const;
+        static int DiskSize(OTreeStats *ts=NULL);
+        static int MemSize(OTreeStats *ts=NULL);
+
 		//Get functions
 		Vector GetTrueResolution(void) const {	return this->TrueResolution; }
 		Vector GetLowerBounds(void) const { return this->LowerBounds; }
 		Vector GetUpperBounds(void) const { return this->UpperBounds; }
-		
+        static size_t NodeSize(){return sizeof(Octree<ValueType>::OctreeNode);}
 	private: // helper functions
 		// Path functions
 		Path FindPathToPoint(const Vector& desiredPoint) const;
@@ -244,8 +275,7 @@ class Octree {
 			bool LoadFromFile(std::FILE* loadFile, int& numBranchNodes , int& numLeafNodes);
 			
 			//print
-			void Print(int num) const;
-			
+            void Print(int num, OTreeStats *ts=NULL) const;
 			//constructors and such
 			explicit OctreeNode(ValueType Value): value(Value), children(NULL) {}
 			OctreeNode(): value(static_cast<ValueType>(0)), children(NULL) {}

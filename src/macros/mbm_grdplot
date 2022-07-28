@@ -1005,7 +1005,7 @@ if (!$bounds || !$zbounds || $zmode == 1)
     @grdinfo = `gmt grdinfo $file_grd 2>&1`;
     if ($verbose > 0)
       {
-      print "\tgmt grdinfo -I$file_grd\n";
+      print "\tgmt grdinfo -$file_grd\n";
       }
     }
   while (@grdinfo)

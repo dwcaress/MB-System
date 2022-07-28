@@ -161,7 +161,7 @@ void TerrainNavClient::init_comms()
   }
   else
   {
-    struct timeval tv;
+      struct timeval tv={0,0};
     tv.tv_sec = 150;
     tv.tv_usec = 0;
     setsockopt(_sockfd, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv));
@@ -173,33 +173,66 @@ void TerrainNavClient::init_comms()
 
 bool TerrainNavClient::is_connected()
 {
-  // Don't bother checking unless we have initialized comms successfully
-  if (_connected) {
-    struct timeval tv;
-    tv.tv_sec = 0;
-    tv.tv_usec = 100L;
+    // Don't bother checking unless we have initialized comms successfully
+    if (_connected) {
+        struct timeval tv;
+        tv.tv_sec = 0;
+        tv.tv_usec = 100L;
 
-    fd_set servfd;
-    FD_ZERO(&servfd);
-    FD_SET(_sockfd, &servfd);
-    char temp[5];
-    int nready = select(_sockfd+1, &servfd, 0, 0, &tv);
-    if (nready > 0) {
-      if (0 == recv(_sockfd, temp, 1, MSG_PEEK)) {
-	       printf("TerrainNavClient::is_connected() - Server closed connection!\n");
-	       ::close(_sockfd);    // Client disconnected
-         _connected = false;
-      }
-      else {
-         _connected = true;   // Connected and there is data to read
-      }
-    }
-    else {
-      _connected = true;     // Connected but no data to read
-    }
-  }
+        fd_set svr_r_fd;
+        fd_set svr_e_fd;
+        FD_ZERO(&svr_r_fd);
+        FD_ZERO(&svr_e_fd);
+        FD_SET(_sockfd, &svr_r_fd);
+        FD_SET(_sockfd, &svr_e_fd);
+        int fdmax = _sockfd+1;
 
-  return _connected;
+        int stat =   select(fdmax, &svr_r_fd, 0, &svr_e_fd, &tv);
+        if (stat != -1) {
+            for (int i=_sockfd; i<=fdmax; i++)
+            {
+                if (FD_ISSET(i, &svr_r_fd))
+                {
+                    if (i==_sockfd)
+                    {
+                        // client ready to read
+                        char temp[5]={0};
+                        int test=0;
+                        if( (test=recv(_sockfd, temp, 1, MSG_PEEK)) == 0) {
+                            if(test==0){
+                                fprintf(stderr,"%s - client socket closed by svr fd[%d] test[%d] [%d:%s]\n", __FUNCTION__, i, test, errno, strerror(errno));
+                            }
+                            ::close(_sockfd);    // Client disconnected
+                            _connected = false;
+                        } else {
+                            if(test<0){
+                                if(errno == EAGAIN){
+                                    fprintf(stderr,"%s - client nothing to read fd[%d] test[%d] [%d:%s]\n", __FUNCTION__, i, test, errno, strerror(errno));
+                                }else{
+                                    fprintf(stderr,"%s - client socket error fd[%d] test[%d] [%d:%s]\n", __FUNCTION__, i, test, errno, strerror(errno));
+                                    ::close(_sockfd);    // Client disconnected
+                                    _connected = false;
+                                }
+                            } else {
+                                // data ready
+                                fprintf(stderr,"%s : client ready to read fd[%d] test[%d] [%d/%s]\n", __FUNCTION__, i, test, errno, strerror(errno));
+                            }
+                        }
+                    }
+                }
+                if (FD_ISSET(i, &svr_e_fd))
+                {
+                    if (i==_sockfd)
+                    {
+                        // client ready to read
+                        fprintf(stderr,"%s : client socket err fd[%d] [%d/%s]\n", __FUNCTION__, i, errno, strerror(errno));
+                        _connected = false;
+                    }
+                }
+            }
+        }// else select failed
+    }
+    return _connected;
 }
 
 // throws a TRNConnection exception if TRN has hung up
@@ -390,6 +423,8 @@ void TerrainNavClient::estimatePose(poseT* estimate, const int &type)
 {
   // Send request to server for estimate
   // Type = 1 is MLE, 2 is MMSE
+  //poseT est;
+  //est = *estimate;
   commsT *pose;
   if (type == 1)
     pose = new commsT(TRN_MLE, *estimate);

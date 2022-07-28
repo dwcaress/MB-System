@@ -36,6 +36,7 @@ class DoubleData : public DataField {
 public:
 
   DoubleData(const char *name);
+  DoubleData(const char *name, const char *longname, const char *units);
 
   virtual ~DoubleData();
 

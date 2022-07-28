@@ -805,7 +805,8 @@ int mbsys_kmbes_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
                                  double *navlon, double *navlat, double *speed, double *heading, int *nbath, int *namp, int *nss,
                                  char *beamflag, double *bath, double *amp, double *bathacrosstrack, double *bathalongtrack,
                                  double *ss, double *ssacrosstrack, double *ssalongtrack, char *comment, int *error) {
-  if (verbose >= 2) {
+
+if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
@@ -865,19 +866,26 @@ int mbsys_kmbes_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
       for (int i = 0;
             i < (mrz->rxInfo.numSoundingsMaxMain + mrz->rxInfo.numExtraDetections);
             i++) {
-        bath[numSoundings] = mrz->sounding[i].z_reRefPoint_m
-                              - mrz->pingInfo.z_waterLevelReRefPoint_m;
-//fprintf(stderr,"%s:%d:%s: %4.4d/%2.2d/%2.2d-%2.2d:%2.2d:%2.2d.%6.6d txd:%f wlr:%f ehr:%f zreref:%f bath:%f\n",
+        beamflag[numSoundings] = mrz->sounding[i].beamflag;
+        if (!mb_beam_check_flag_null(mrz->sounding[i].beamflag) && mrz->sounding[i].twoWayTravelTime_sec > 0.0) {
+          bath[numSoundings] = mrz->sounding[i].z_reRefPoint_m
+                                - mrz->pingInfo.z_waterLevelReRefPoint_m;
+          bathacrosstrack[numSoundings] = mrz->sounding[i].y_reRefPoint_m;
+          bathalongtrack[numSoundings] = mrz->sounding[i].x_reRefPoint_m;
+          amp[numSoundings] = mrz->sounding[i].reflectivity1_dB;
+        } else {
+          bath[numSoundings] = 0.0;
+          bathacrosstrack[numSoundings] = 0.0;
+          bathalongtrack[numSoundings] = 0.0;
+          amp[numSoundings] = 0.0;
+        }
+//fprintf(stderr,"\n%s:%d:%s: %4.4d/%2.2d/%2.2d-%2.2d:%2.2d:%2.2d.%6.6d txd:%f wlr:%f ehr:%f zreref:%f bath:%f flag:%d %d amp:%f\n",
 //__FILE__, __LINE__, __func__,
 //time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6],
 //mrz->pingInfo.txTransducerDepth_m, mrz->pingInfo.z_waterLevelReRefPoint_m,
 //mrz->pingInfo.ellipsoidHeightReRefPoint_m,
-//mrz->sounding[i].z_reRefPoint_m, bath[numSoundings]);
-        beamflag[numSoundings] = mrz->sounding[i].beamflag;
-        bathacrosstrack[numSoundings] = mrz->sounding[i].y_reRefPoint_m;
-        bathalongtrack[numSoundings] = mrz->sounding[i].x_reRefPoint_m;
-        amp[numSoundings] = mrz->sounding[i].reflectivity1_dB;
-
+//mrz->sounding[i].z_reRefPoint_m, bath[numSoundings],
+//mrz->sounding[i].beamflag_enabled, mrz->sounding[i].beamflag, mrz->sounding[i].reflectivity1_dB);
         numSoundings++;
       }
     }

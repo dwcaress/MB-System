@@ -25,6 +25,14 @@ DoubleData::DoubleData(const char *name)
 }
 
 
+DoubleData::DoubleData(const char *name, const char *longnm, const char *units)
+  : DataField(name, longnm, units)
+{
+  _value = 0.;
+  setAsciiFormat("%8.8e");
+}
+
+
 DoubleData::~DoubleData()
 {
 } 
