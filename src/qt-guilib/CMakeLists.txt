@@ -35,17 +35,27 @@ set(src
 add_library(MBGui
             STATIC
             ${src})
-            
+
+target_link_libraries(MBGui
+                      PRIVATE
+		      mbio
+                      ${GMT_LIBRARIES})
+		      
 target_include_directories(MBGui
                            PUBLIC
                            .
                            ${MB_HOME}/src/mbio
-			   ${OPENGL_INCLUDE_DIR}
-                           ${GMT_INCLUDE_DIR}
-                           ${VTK_INCLUDE_DIR}
-                           ${QT5_INCLUDE_DIR})
+			   ${OPENGL_INCLUDE_DIRS}
+<<<<<<< HEAD
+			   ${PROJ_INCLUDE_DIRS}
+=======
+                           ${PROJ_INCLUDE_DIRS}
+>>>>>>> c577b37b749cbfb614fd0d313a81c760e99f6161
+                           ${GMT_INCLUDE_DIRS}
+                           ${QT5_INCLUDE_DIRS}
+                           ${VTK_INCLUDE_DIRS})
 
-message("*** OPENGL_INCLUDE_DIR: ${OPENGL_INCLUDE_DIR}")
+message("*** OPENGL_INCLUDE_DIRS: ${OPENGL_INCLUDE_DIRS}")
 
 set_target_properties(MBGui PROPERTIES POSITION_INDEPENDENT_CODE ON)
 
@@ -57,16 +67,25 @@ add_library(MBGuiShared
 
 set_target_properties(MBGuiShared PROPERTIES OUTPUT_NAME MBGui)
 
+
 target_include_directories(MBGuiShared
                            PUBLIC
                            .
-			   ${OPENGL_INCLUDE_DIR}			   
-                           ${GMT_INCLUDE_DIR}
-                           ${VTK_INCLUDE_DIR}                           
-                           ${QT5_INCLUDE_DIR})
+                           ${MB_HOME}/src/mbio			   
+			   ${OPENGL_INCLUDE_DIRS}
+			   ${PROJ_INCLUDE_DIRS}
+                           ${GMT_INCLUDE_DIRS}
+                           ${PROJ_INCLUDE_DIRS}                           
+                           ${QT5_INCLUDE_DIRS}
+                           ${VTK_INCLUDE_DIRS})
 
-target_link_libraries(MBGuiShared ${EXTRA_LIBRARIES})
+message("qt-guilib - EXTRA_LIBRARIES: ${EXTRA_LIBRARIES}")
+
+target_link_libraries(MBGuiShared mbio
+                      ${VTK_LIBRARIES}
+	              ${GMT_LIBRARIES} ${EXTRA_LIBRARIES})
 
 # Install
 install(TARGETS MBGui DESTINATION cmake-example/lib)
 install(TARGETS MBGuiShared DESTINATION cmake-example/lib)
+

@@ -10,8 +10,8 @@ add_executable(mbgrdviz
 target_include_directories(mbgrdviz
                            PUBLIC
                            .
-                           ${GMT_INCLUDE_DIR}
-                           ${GDAL_INCLUDE_DIR}
+                           ${GMT_INCLUDE_DIRS}
+                           ${GDAL_INCLUDE_DIRS}
                            ${CMAKE_SOURCE_DIR}/src/mbio
                            ${CMAKE_SOURCE_DIR}/src/mbaux
                            ${CMAKE_SOURCE_DIR}/src/mbview
@@ -20,7 +20,6 @@ target_include_directories(mbgrdviz
                            ${CMAKE_SOURCE_DIR}/src/gsf)                        
 
 # link_directories($GMT_LIBRARIES)
-message("mbgrdviz: GMT_LIBRARIES: ${GMT_LIBRARIES}")   
 target_link_libraries(mbgrdviz
                       PRIVATE
                       mbio
@@ -28,9 +27,9 @@ target_link_libraries(mbgrdviz
                       mbview
                       mbbsio
                       mbsapi
-                      mbgsf
-		      r7kr
-		      mframe
+                      ${GSF_LIB}
+		      ${R7KR_LIB}
+		      ${MFRAME_LIB}
 		      ${GMT_LIBRARIES}
 		      ${NETCDF_LIBRARIES}
 		      ${MOTIF_LIBRARIES}
