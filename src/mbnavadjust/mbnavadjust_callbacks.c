@@ -956,43 +956,43 @@ void do_update_status() {
               (mbna_view_mode == MBNA_VIEW_MODE_WITHSECTION && mbna_file_select == i)) {
             mb_get_date(mbna_verbose, section->btime_d, btime_i);
             mb_get_date(mbna_verbose, section->etime_d, etime_i);
-            if (section->global_tie_status == MBNA_TIE_NONE)
+            if (section->globaltie.status == MBNA_TIE_NONE)
               sprintf(string,
                     "%2.2d:%4.4d:%2.2d %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d %4.4d/%2.2d/%2.2d "
                     "%2.2d:%2.2d:%2.2d.%6.6d",
                     file->block, file->id, j, btime_i[0], btime_i[1], btime_i[2], btime_i[3], btime_i[4], btime_i[5],
                     btime_i[6], etime_i[0], etime_i[1], etime_i[2], etime_i[3], etime_i[4], etime_i[5], etime_i[6]);
             else {
-              if (section->global_tie_status == MBNA_TIE_XYZ)
+              if (section->globaltie.status == MBNA_TIE_XYZ)
                 tiestatus = tiestatus_xyz;
-              else if (section->global_tie_status == MBNA_TIE_XY)
+              else if (section->globaltie.status == MBNA_TIE_XY)
                 tiestatus = tiestatus_xy;
-              else if (section->global_tie_status == MBNA_TIE_Z)
+              else if (section->globaltie.status == MBNA_TIE_Z)
                 tiestatus = tiestatus_z;
-              if (section->global_tie_inversion_status == MBNA_INVERSION_CURRENT)
+              if (section->globaltie.inversion_status == MBNA_INVERSION_CURRENT)
                 sprintf(string,
                     "%2.2d:%4.4d:%2.2d %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d"
                     " | %2.2d %s %8.2f %8.2f %8.2f | %8.2f %8.2f %8.2f | %8.2f %8.2f %8.2f | %8.2f %6.3f",
                     file->block, file->id, j,
                     btime_i[0], btime_i[1], btime_i[2], btime_i[3], btime_i[4], btime_i[5], btime_i[6],
                     etime_i[0], etime_i[1], etime_i[2], etime_i[3], etime_i[4], etime_i[5], etime_i[6],
-                    section->global_tie_snav, tiestatus,
-                    section->offset_x_m, section->offset_y_m, section->offset_z_m,
-                    section->xsigma, section->ysigma, section->zsigma,
-                    section->dx_m, section->dy_m, section->dz_m,
-                    section->sigma_m, section->rsigma_m);
-              else if (section->global_tie_inversion_status == MBNA_INVERSION_OLD)
+                    section->globaltie.snav, tiestatus,
+                    section->globaltie.offset_x_m, section->globaltie.offset_y_m, section->globaltie.offset_z_m,
+                    section->globaltie.sigmar1, section->globaltie.sigmar2, section->globaltie.sigmar3,
+                    section->globaltie.dx_m, section->globaltie.dy_m, section->globaltie.dz_m,
+                    section->globaltie.sigma_m, section->globaltie.rsigma_m);
+            else if (section->globaltie.inversion_status == MBNA_INVERSION_OLD)
                 sprintf(string,
                     "%2.2d:%4.4d:%2.2d %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d"
                     " | %2.2d %s %8.2f %8.2f %8.2f | %8.2f %8.2f %8.2f | %8.2f %8.2f %8.2f | %8.2f %6.3f ***",
                     file->block, file->id, j,
                     btime_i[0], btime_i[1], btime_i[2], btime_i[3], btime_i[4], btime_i[5], btime_i[6],
                     etime_i[0], etime_i[1], etime_i[2], etime_i[3], etime_i[4], etime_i[5], etime_i[6],
-                    section->global_tie_snav, tiestatus,
-                    section->offset_x_m, section->offset_y_m, section->offset_z_m,
-                    section->xsigma, section->ysigma, section->zsigma,
-                    section->dx_m, section->dy_m, section->dz_m,
-                    section->sigma_m, section->rsigma_m);
+                    section->globaltie.snav, tiestatus,
+                    section->globaltie.offset_x_m, section->globaltie.offset_y_m, section->globaltie.offset_z_m,
+                    section->globaltie.sigmar1, section->globaltie.sigmar2, section->globaltie.sigmar3,
+                    section->globaltie.dx_m, section->globaltie.dy_m, section->globaltie.dz_m,
+                    section->globaltie.sigma_m, section->globaltie.rsigma_m);
               else
                 sprintf(string,
                     "%2.2d:%4.4d:%2.2d %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d"
@@ -1000,9 +1000,9 @@ void do_update_status() {
                     file->block, file->id, j,
                     btime_i[0], btime_i[1], btime_i[2], btime_i[3], btime_i[4], btime_i[5], btime_i[6],
                     etime_i[0], etime_i[1], etime_i[2], etime_i[3], etime_i[4], etime_i[5], etime_i[6],
-                    section->global_tie_snav, tiestatus,
-                    section->offset_x_m, section->offset_y_m, section->offset_z_m,
-                    section->xsigma, section->ysigma, section->zsigma);
+                    section->globaltie.snav, tiestatus,
+                    section->globaltie.offset_x_m, section->globaltie.offset_y_m, section->globaltie.offset_z_m,
+                    section->globaltie.sigmar1, section->globaltie.sigmar2, section->globaltie.sigmar3);
             }
             xstr[num_sections] = XmStringCreateLocalized(string);
             if (mbna_verbose > 0)
@@ -1621,7 +1621,7 @@ void do_update_status() {
         file = &(project.files[i]);
         for (j = 0; j < file->num_sections; j++) {
           section = &(file->sections[j]);
-          if (section->global_tie_status != MBNA_TIE_NONE &&
+          if (section->globaltie.status != MBNA_TIE_NONE &&
               ((mbna_view_mode == MBNA_VIEW_MODE_ALL) ||
                (mbna_view_mode == MBNA_VIEW_MODE_SURVEY && mbna_survey_select == file->block) ||
                (mbna_view_mode == MBNA_VIEW_MODE_FILE && mbna_file_select == i) ||
@@ -1645,39 +1645,41 @@ void do_update_status() {
         file = &(project.files[i]);
         for (j = 0; j < file->num_sections; j++) {
           section = &(file->sections[j]);
-          if (section->global_tie_status != MBNA_TIE_NONE &&
+          if (section->globaltie.status != MBNA_TIE_NONE &&
               ((mbna_view_mode == MBNA_VIEW_MODE_ALL) ||
                (mbna_view_mode == MBNA_VIEW_MODE_SURVEY && mbna_survey_select == file->block) ||
                (mbna_view_mode == MBNA_VIEW_MODE_FILE && mbna_file_select == i) ||
                (mbna_view_mode == MBNA_VIEW_MODE_WITHSURVEY && mbna_survey_select == file->block) ||
                (mbna_view_mode == MBNA_VIEW_MODE_WITHFILE && mbna_file_select == i) ||
                (mbna_view_mode == MBNA_VIEW_MODE_WITHSECTION && mbna_file_select == i && mbna_section_select == j))) {
-            if (section->global_tie_status == MBNA_TIE_XYZ)
+            if (section->globaltie.status == MBNA_TIE_XYZ)
               tiestatus = tiestatus_xyz;
-            else if (section->global_tie_status == MBNA_TIE_XY)
+            else if (section->globaltie.status == MBNA_TIE_XY)
               tiestatus = tiestatus_xy;
-            else if (section->global_tie_status == MBNA_TIE_Z)
+            else if (section->globaltie.status == MBNA_TIE_Z)
               tiestatus = tiestatus_z;
-            if (section->global_tie_inversion_status == MBNA_INVERSION_CURRENT)
+            if (section->globaltie.inversion_status == MBNA_INVERSION_CURRENT)
                             sprintf(string,
                                     "%2.2d:%4.4d:%3.3d:%2.2d %s %8.2f %8.2f %8.2f | %8.2f %8.2f %8.2f | %8.2f %8.2f %8.2f | %8.2f %6.3f",
-                                    project.files[i].block, i, j, section->global_tie_snav, tiestatus,
-                                    section->offset_x_m, section->offset_y_m, section->offset_z_m,
-                                    section->xsigma, section->ysigma, section->zsigma,
-                                    section->dx_m, section->dy_m, section->dz_m, section->sigma_m, section->rsigma_m);
-            else if (section->global_tie_inversion_status == MBNA_INVERSION_OLD)
+                                    project.files[i].block, i, j, section->globaltie.snav, tiestatus,
+                                    section->globaltie.offset_x_m, section->globaltie.offset_y_m, section->globaltie.offset_z_m,
+                                    section->globaltie.sigmar1, section->globaltie.sigmar2, section->globaltie.sigmar3,
+                                    section->globaltie.dx_m, section->globaltie.dy_m, section->globaltie.dz_m,
+                                    section->globaltie.sigma_m, section->globaltie.rsigma_m);
+            else if (section->globaltie.inversion_status == MBNA_INVERSION_OLD)
                             sprintf(string,
                                     "%2.2d:%4.4d:%3.3d:%2.2d %s %8.2f %8.2f %8.2f | %8.2f %8.2f %8.2f | %8.2f %8.2f %8.2f | %8.2f %6.3f ***",
-                                    project.files[i].block, i, j, section->global_tie_snav, tiestatus,
-                                    section->offset_x_m, section->offset_y_m, section->offset_z_m,
-                                    section->xsigma, section->ysigma, section->zsigma,
-                                    section->dx_m, section->dy_m, section->dz_m, section->sigma_m, section->rsigma_m);
+                                    project.files[i].block, i, j, section->globaltie.snav, tiestatus,
+                                    section->globaltie.offset_x_m, section->globaltie.offset_y_m, section->globaltie.offset_z_m,
+                                    section->globaltie.sigmar1, section->globaltie.sigmar2, section->globaltie.sigmar3,
+                                    section->globaltie.dx_m, section->globaltie.dy_m, section->globaltie.dz_m,
+                                    section->globaltie.sigma_m, section->globaltie.rsigma_m);
             else
                             sprintf(string,
                                     "%2.2d:%4.4d:%3.3d:%2.2d %s %8.2f %8.2f %8.2f | %8.2f %8.2f %8.2f",
-                                    project.files[i].block, i, j, section->global_tie_snav, tiestatus,
-                                    section->offset_x_m, section->offset_y_m, section->offset_z_m,
-                                    section->xsigma, section->ysigma, section->zsigma);
+                                    project.files[i].block, i, j, section->globaltie.snav, tiestatus,
+                                    section->globaltie.offset_x_m, section->globaltie.offset_y_m, section->globaltie.offset_z_m,
+                                    section->globaltie.sigmar1, section->globaltie.sigmar2, section->globaltie.sigmar3);
             xstr[num_globalties] = XmStringCreateLocalized(string);
             if (mbna_verbose > 0)
               fprintf(stderr, "%s\n", string);
@@ -1725,7 +1727,7 @@ void do_update_status() {
         file = &(project.files[i]);
         for (j = 0; j < file->num_sections; j++) {
           section = &(file->sections[j]);
-          if (section->global_tie_status != MBNA_TIE_NONE &&
+          if (section->globaltie.status != MBNA_TIE_NONE &&
               ((mbna_view_mode == MBNA_VIEW_MODE_ALL) ||
                (mbna_view_mode == MBNA_VIEW_MODE_SURVEY && mbna_survey_select == file->block) ||
                (mbna_view_mode == MBNA_VIEW_MODE_FILE && mbna_file_select == i) ||
@@ -1750,7 +1752,7 @@ void do_update_status() {
         file = &(project.files[i]);
         for (j = 0; j < file->num_sections; j++) {
           section = &(file->sections[j]);
-          if (section->global_tie_status != MBNA_TIE_NONE &&
+          if (section->globaltie.status != MBNA_TIE_NONE &&
               ((mbna_view_mode == MBNA_VIEW_MODE_ALL) ||
                (mbna_view_mode == MBNA_VIEW_MODE_SURVEY && mbna_survey_select == file->block) ||
                (mbna_view_mode == MBNA_VIEW_MODE_FILE && mbna_file_select == i) ||
@@ -1771,40 +1773,40 @@ void do_update_status() {
       kk = 0;
       for (int kglobaltie  = num_globalties - 1; kglobaltie >= 0; kglobaltie--) {
         section = section_ptr_list[kglobaltie];
-        if (section->global_tie_status == MBNA_TIE_XYZ)
+        if (section->globaltie.status == MBNA_TIE_XYZ)
           tiestatus = tiestatus_xyz;
-        else if (section->global_tie_status == MBNA_TIE_XY)
+        else if (section->globaltie.status == MBNA_TIE_XY)
           tiestatus = tiestatus_xy;
-        else if (section->global_tie_status == MBNA_TIE_Z)
+        else if (section->globaltie.status == MBNA_TIE_Z)
           tiestatus = tiestatus_z;
-        if (section->global_tie_inversion_status == MBNA_INVERSION_CURRENT)
+        if (section->globaltie.inversion_status == MBNA_INVERSION_CURRENT)
                         sprintf(string,
                                 "%2.2d:%4.4d:%3.3d:%2.2d %s %8.2f %8.2f %8.2f | %8.2f %8.2f %8.2f | %8.2f %8.2f %8.2f | %8.2f %6.3f",
                                 project.files[section->file_id].block,
                                 section->file_id, section->section_id,
-                                section->global_tie_snav, tiestatus,
-                                section->offset_x_m, section->offset_y_m, section->offset_z_m,
-                                section->xsigma, section->ysigma, section->zsigma,
-                                section->dx_m, section->dy_m, section->dz_m,
-                                section->sigma_m, section->rsigma_m);
-        else if (section->global_tie_inversion_status == MBNA_INVERSION_OLD)
+                                section->globaltie.snav, tiestatus,
+                                section->globaltie.offset_x_m, section->globaltie.offset_y_m, section->globaltie.offset_z_m,
+                                section->globaltie.sigmar1, section->globaltie.sigmar2, section->globaltie.sigmar3,
+                                section->globaltie.dx_m, section->globaltie.dy_m, section->globaltie.dz_m,
+                                section->globaltie.sigma_m, section->globaltie.rsigma_m);
+        else if (section->globaltie.inversion_status == MBNA_INVERSION_OLD)
                         sprintf(string,
                                 "%2.2d:%4.4d:%3.3d:%2.2d %s %8.2f %8.2f %8.2f | %8.2f %8.2f %8.2f | %8.2f %8.2f %8.2f | %8.2f %6.3f ***",
                                 project.files[section->file_id].block,
                                 section->file_id, section->section_id,
-                                section->global_tie_snav, tiestatus,
-                                section->offset_x_m, section->offset_y_m, section->offset_z_m,
-                                section->xsigma, section->ysigma, section->zsigma,
-                                section->dx_m, section->dy_m, section->dz_m,
-                                section->sigma_m, section->rsigma_m);
+                                section->globaltie.snav, tiestatus,
+                                section->globaltie.offset_x_m, section->globaltie.offset_y_m, section->globaltie.offset_z_m,
+                                section->globaltie.sigmar1, section->globaltie.sigmar2, section->globaltie.sigmar3,
+                                section->globaltie.dx_m, section->globaltie.dy_m, section->globaltie.dz_m,
+                                section->globaltie.sigma_m, section->globaltie.rsigma_m);
         else
                         sprintf(string,
                                 "%2.2d:%4.4d:%3.3d:%2.2d %s %8.2f %8.2f %8.2f | %8.2f %8.2f %8.2f",
                                 project.files[section->file_id].block,
                                 section->file_id, section->section_id,
-                                section->global_tie_snav, tiestatus,
-                                section->offset_x_m, section->offset_y_m, section->offset_z_m,
-                                section->xsigma, section->ysigma, section->zsigma);
+                                section->globaltie.snav, tiestatus,
+                                section->globaltie.offset_x_m, section->globaltie.offset_y_m, section->globaltie.offset_z_m,
+                                section->globaltie.sigmar1, section->globaltie.sigmar2, section->globaltie.sigmar3);
         xstr[kk] = XmStringCreateLocalized(string);
         if (mbna_verbose > 0)
           fprintf(stderr, "%s\n", string);
@@ -3104,7 +3106,7 @@ int do_check_globaltie_listok(int ifile, int isection) {
 
   /* if there is a global time check for view mode */
   bool use_status = false;
-  if (section->global_tie_status != MBNA_TIE_NONE) {
+  if (section->globaltie.status != MBNA_TIE_NONE) {
     if ((mbna_view_mode == MBNA_VIEW_MODE_ALL) ||
         (mbna_view_mode == MBNA_VIEW_MODE_SURVEY && mbna_survey_select == file->block) ||
         (mbna_view_mode == MBNA_VIEW_MODE_BLOCK &&

@@ -1,10 +1,10 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # summary: show mbtrnpp config contents w/o comments
 
 quiet='N'
 
-if [ ${#} -ge 1 ] 
+if [ ${#} -ge 1 ]
 then
  while  [ ${#} -ge 1 ]
  do
@@ -29,19 +29,19 @@ then
   shift
 done
 else
-echo 
+echo
 echo " summary: show mbtrnpp config contents w/o comments"
 echo " use: $(basename $0) [-q] <config>"
 echo "  options:"
 echo "    -q : quiet - no filename or trailing newline"
-echo 
+echo
 echo " Examples:"
 echo "  # show file (no separators)"
 echo "    $(basename $0) -q foo.cfg"
-echo 
+echo
 echo "  # show multiple files with separators"
 echo "    $(basename $0) foo/bar/*.cfg"
-echo 
+echo
 
-echo 
+echo
 fi

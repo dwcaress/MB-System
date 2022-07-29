@@ -4884,6 +4884,11 @@ int main(int argc, char **argv) {
     fclose(outfile);
   }
 
+  /* free projection */
+  if (use_projection && pjptr != NULL) {
+    mb_proj_free(verbose, &(pjptr), &error);
+  }
+
   if (verbose >= 4)
     status &= mb_memory_list(verbose, &error);
 

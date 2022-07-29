@@ -640,8 +640,8 @@ int mb_make_info(int verbose, bool force, char *file, int format, int *error) {
 		sprintf(command, "mbinfo -F %d -I %s -G -N -O -M10/10", format, file);
 		if (verbose >= 2)
 			fprintf(stderr, "\t%s\n", command);
-		  if ((shellstatus = system(command)) != 0)
-        status = MB_FAILURE;
+		if ((shellstatus = system(command)) != 0)
+      status = MB_FAILURE;
 	}
 
 	/* make new fbt file if not there or out of date */

@@ -3040,6 +3040,10 @@ int main(int argc, char **argv) {
   double *tide_tide = NULL;
   int tide_start_time_i[7], tide_end_time_i[7];
 
+  /* UTM projection variables */
+  mb_path projection_id;
+	void *pjptr = NULL;
+
   /* buffer handling parameters */
   struct mbtrnpp_ping_struct ping[MBTRNPREPROCESS_BUFFER_DEFAULT];
 
@@ -3383,6 +3387,17 @@ int main(int argc, char **argv) {
     if (mbtrn_cfg->target_sensor >= 0)
       sensor_target = &(platform->sensors[mbtrn_cfg->target_sensor]);
   }
+
+  /* Initialize UTM projection for mbtrnpp main - the TRN codebase has its own
+    GTCP based UTM projection so this does not impact the projection of navigation
+    within the TRN object. However, having a projection defined in mbtrnpp main
+    allows UTM projection of navigation when no valid soundings are available to
+    pass to TRN. */
+  if (mbtrn_cfg->trn_utm_zone >= 0)
+    sprintf(projection_id, "UTM%2.2ldN", mbtrn_cfg->trn_utm_zone);
+  else
+    sprintf(projection_id, "UTM%2.2ldS", mbtrn_cfg->trn_utm_zone);
+  int proj_status = mb_proj_init(mbtrn_cfg->verbose, projection_id, &(pjptr), &error);
 
   /* load tide model if specified */
   if (mbtrn_cfg->use_tide_model) {
@@ -4496,6 +4511,11 @@ int main(int argc, char **argv) {
     mb_freed(mbtrn_cfg->verbose, __FILE__, __LINE__, (void **)&tide_tide, &error);
   }
 
+  /* free projection */
+  if (pjptr != NULL) {
+    mb_proj_free(mbtrn_cfg->verbose, &(pjptr), &error);
+  }
+
   // release the config strings
   MEM_CHKINVALIDATE(mbtrn_cfg->trn_map_file);
   MEM_CHKINVALIDATE(mbtrn_cfg->trn_cfg_file);
@@ -5564,7 +5584,7 @@ int s_mbtrnpp_trnu_reset_ofs_callback(double ofs_x, double ofs_y, double ofs_z)
     xyz_sdev.y = xyz_sdev.x;
     xyz_sdev.z = mbtrn_cfg->reinit_search_z;
     fprintf(stderr, "--reinit_ofs (cli_req) systime:%.6f centered on offset: %f %f %f  sd: %f %f %f\n",
-                  reset_time, use_offset_e, use_offset_n, use_offset_z,
+                  reset_time, ofs_x, ofs_y, ofs_z,
                   xyz_sdev.x, xyz_sdev.y, xyz_sdev.z);
     wtnav_reinit_filter_box(trn_instance, true, ofs_x, ofs_y, ofs_z,
                               xyz_sdev.x, xyz_sdev.y, xyz_sdev.z);
