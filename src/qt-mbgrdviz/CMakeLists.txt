@@ -22,8 +22,9 @@ add_executable(qt-mbgrdviz
 target_include_directories(qt-mbgrdviz
                            PUBLIC
                            .
-                           ${GMT_INCLUDE_DIR}
-                           ${GDAL_INCLUDE_DIR}
+                           ${GMT_INCLUDE_DIRS}
+                           ${GDAL_INCLUDE_DIRS}
+                           ${VTK_INCLUDE_DIR}
                            ${CMAKE_SOURCE_DIR}/src/qt-guilib)
 
 target_link_libraries(qt-mbgrdviz
@@ -40,7 +41,6 @@ target_link_libraries(qt-mbgrdviz
                       ${QT5_LIBRARIES}
                       ${VTK_LIBRARIES}
                       m
-                      GL
                       pthread)
                            
                            
