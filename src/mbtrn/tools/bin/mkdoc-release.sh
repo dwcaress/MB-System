@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 #########################################
 # Name: mkdoc-release.sh
@@ -160,4 +160,3 @@ DISABLE_COPYFILE=1 tar czvf ${MKDOC_OPATH}.tar.gz ${MKDOC_OPATH}
 fi
 
 fi
-

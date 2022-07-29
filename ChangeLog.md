@@ -419,6 +419,33 @@ or beta, are equally accessible as tarballs through the Github interface.
 ### MB-System Version 5.7 Release Notes:
 --
 
+#### 5.7.9beta43 (July 29, 2022)
+
+Mblist and mbnavlist: Fixed failure to deallocate proj object.
+
+Mbtrnpp: Added UTM projection to top level using Proj, but this is not used yet.
+The UTM projection used within the TRN codebase remains defined in the very old
+GCTP package, which is embedded with TRN.
+
+TRN execution and plotting scripts (e.g. src/mbtrn/tools/mbtrnpp-plot/trnucli-plot.sh):
+Changed the shebang call from #!/usr/local/bin/bash to #!/usr/bin/env bash for
+portability.
+
+Mbnavadjust: Recast global ties to utilize a full 3D covariance model just like
+the crossing ties, in preparation for allowing graphical picking of global ties
+relative to a reference bathymetry model.
+
+Mbnavadjustmerge: Added ability to remove disconitinuities in mbnavadjust projects.
+Recast global ties to utilize a full 3D covariance model just like
+the crossing ties, in preparation for allowing graphical picking of global ties
+relative to a reference bathymetry model.
+
+Mbm_trnplot: Added mission names to mbtrnpp result plots.
+
+Cmake Build System: Incorporates an initial attempt at a cmake based build system
+that will provide an alternative to the existing AutoTools based build system.
+Updated documentation for both build systems is not included yet.
+
 #### 5.7.9beta42 (June 26, 2022)
 
 Format 261 (MBF_KEMKMALL): Fixed bug in handling beam amplitude data from null

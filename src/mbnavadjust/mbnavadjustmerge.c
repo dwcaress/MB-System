@@ -86,15 +86,16 @@
 #define MOD_MODE_UNSET_SKIPPED_CROSSINGS_BLOCK 40
 #define MOD_MODE_UNSET_SKIPPED_CROSSINGS_BETWEEN_SURVEYS 41
 #define MOD_MODE_INSERT_DISCONTINUITY 42
-#define MOD_MODE_MERGE_SURVEYS 43
-#define MOD_MODE_REIMPORT_FILE 44
-#define MOD_MODE_REIMPORT_ALL_FILES 45
-#define MOD_MODE_TRIANGULATE 46
-#define MOD_MODE_TRIANGULATE_SECTION 47
-#define MOD_MODE_UNSET_SHORT_SECTION_TIES 48
-#define MOD_MODE_SKIP_SHORT_SECTION_CROSSINGS 49
-#define MOD_MODE_REMAKE_MB166_FILES 50
-#define MOD_MODE_FIX_SENSORDEPTH 51
+#define MOD_MODE_REMOVE_DISCONTINUITY 43
+#define MOD_MODE_MERGE_SURVEYS 44
+#define MOD_MODE_REIMPORT_FILE 45
+#define MOD_MODE_REIMPORT_ALL_FILES 46
+#define MOD_MODE_TRIANGULATE 47
+#define MOD_MODE_TRIANGULATE_SECTION 48
+#define MOD_MODE_UNSET_SHORT_SECTION_TIES 49
+#define MOD_MODE_SKIP_SHORT_SECTION_CROSSINGS 50
+#define MOD_MODE_REMAKE_MB166_FILES 51
+#define MOD_MODE_FIX_SENSORDEPTH 52
 #define IMPORT_NONE 0
 #define IMPORT_TIE 1
 #define IMPORT_GLOBALTIE 2
@@ -169,6 +170,7 @@ static char usage_message[] =
     "\t--unset-skipped-crossings-by-block=survey1/survey2\n"
     "\t--unset-skipped-crossings-between-surveys\n"
     "\t--insert-discontinuity=file:section\n"
+    "\t--remove-discontinuity=file:section\n"
     "\t--merge-surveys=survey1:survey2\n"
     "\t--reimport-file=file\n"
     "\t--reimport-all-files\n"
@@ -256,6 +258,7 @@ int main(int argc, char **argv) {
                                     {"unset-skipped-crossings-by-block", required_argument, NULL, 0},
                                     {"unset-skipped-crossings-between-surveys", no_argument, NULL, 0},
                                     {"insert-discontinuity", required_argument, NULL, 0},
+                                    {"remove-discontinuity", required_argument, NULL, 0},
                                     {"merge-surveys", required_argument, NULL, 0},
                                     {"reimport-file", required_argument, NULL, 0},
                                     {"reimport-all-files", no_argument, NULL, 0},
@@ -1176,6 +1179,22 @@ int main(int argc, char **argv) {
       }
 
       /*-------------------------------------------------------
+       * Remove discontinuity immediately before the file and section specified
+          --remove-discontinuity */
+      else if (strcmp("remove-discontinuity", options[option_index].name) == 0) {
+        if (num_mods < NUMBER_MODS_MAX) {
+          int nscan;
+          if ((nscan = sscanf(optarg, "%d:%d", &mods[num_mods].file1, &mods[num_mods].section1)) == 2) {
+            mods[num_mods].mode = MOD_MODE_REMOVE_DISCONTINUITY;
+            num_mods++;
+          }
+        }
+        else {
+          fprintf(stderr, "Maximum number of mod commands reached:\n\tskip-unset-crossings command ignored\n\n");
+        }
+      }
+
+      /*-------------------------------------------------------
        * Merge two adjacent surveys into a single survey with a discontinuity
           --merge-surveys */
       else if (strcmp("merge-surveys", options[option_index].name) == 0) {
@@ -1869,44 +1888,62 @@ int main(int argc, char **argv) {
           section1 = (struct mbna_section *)&file1->sections[mods[imod].section1];
           mb_coor_scale(verbose, 0.5 * (section1->latmin + section1->latmax), &mtodeglon, &mtodeglat);
           if (mods[imod].snav1 >= 0 && mods[imod].snav1 < section1->num_snav) {
-            section1->global_tie_status = MBNA_TIE_XYZ;
-            section1->global_tie_snav = mods[imod].snav1;
-                        section1->global_tie_inversion_status = MBNA_INVERSION_NONE;
-            section1->offset_x = mods[imod].xoffset * mtodeglon;
-            section1->offset_y = mods[imod].yoffset * mtodeglat;
-            section1->offset_x_m = mods[imod].xoffset;
-            section1->offset_y_m = mods[imod].yoffset;
-            section1->offset_z_m = mods[imod].zoffset;
-            section1->xsigma = mods[imod].xsigma;
-            section1->ysigma = mods[imod].ysigma;
-            section1->zsigma = mods[imod].zsigma;
+            section1->globaltie.status = MBNA_TIE_XYZ;
+            section1->globaltie.snav = mods[imod].snav1;
+            section1->globaltie.inversion_status = MBNA_INVERSION_NONE;
+            section1->globaltie.offset_x = mods[imod].xoffset * mtodeglon;
+            section1->globaltie.offset_y = mods[imod].yoffset * mtodeglat;
+            section1->globaltie.offset_x_m = mods[imod].xoffset;
+            section1->globaltie.offset_y_m = mods[imod].yoffset;
+            section1->globaltie.offset_z_m = mods[imod].zoffset;
+            section1->globaltie.sigmar1 = mods[imod].xsigma;
+            section1->globaltie.sigmar2 = mods[imod].ysigma;
+            section1->globaltie.sigmar3 = mods[imod].zsigma;
+            section1->globaltie.sigmax1[0] = 1.0;
+            section1->globaltie.sigmax1[1] = 0.0;
+            section1->globaltie.sigmax1[2] = 0.0;
+            section1->globaltie.sigmax2[0] = 0.0;
+            section1->globaltie.sigmax2[1] = 1.0;
+            section1->globaltie.sigmax2[2] = 0.0;
+            section1->globaltie.sigmax3[0] = 0.0;
+            section1->globaltie.sigmax3[1] = 0.0;
+            section1->globaltie.sigmax3[2] = 1.0;
           }
           else {
-            section1->global_tie_status = MBNA_TIE_NONE;
-            section1->global_tie_snav = MBNA_SELECT_NONE;
-                        section1->global_tie_inversion_status = MBNA_INVERSION_NONE;
-            section1->offset_x = 0.0;
-            section1->offset_y = 0.0;
-            section1->offset_x_m = 0.0;
-            section1->offset_y_m = 0.0;
-            section1->offset_z_m = 0.0;
-            section1->xsigma = 0.0;
-            section1->ysigma = 0.0;
-            section1->zsigma = 0.0;
+            section1->globaltie.status = MBNA_TIE_NONE;
+            section1->globaltie.snav = MBNA_SELECT_NONE;
+                        section1->globaltie.inversion_status = MBNA_INVERSION_NONE;
+            section1->globaltie.offset_x = 0.0;
+            section1->globaltie.offset_y = 0.0;
+            section1->globaltie.offset_x_m = 0.0;
+            section1->globaltie.offset_y_m = 0.0;
+            section1->globaltie.offset_z_m = 0.0;
+            section1->globaltie.sigmar1 = 0.0;
+            section1->globaltie.sigmar2 = 0.0;
+            section1->globaltie.sigmar3 = 0.0;
+            section1->globaltie.sigmax1[0] = 0.0;
+            section1->globaltie.sigmax1[1] = 0.0;
+            section1->globaltie.sigmax1[2] = 0.0;
+            section1->globaltie.sigmax2[0] = 0.0;
+            section1->globaltie.sigmax2[1] = 0.0;
+            section1->globaltie.sigmax2[2] = 0.0;
+            section1->globaltie.sigmax3[0] = 0.0;
+            section1->globaltie.sigmax3[1] = 0.0;
+            section1->globaltie.sigmax3[2] = 0.0;
           }
-          section1->inversion_offset_x = 0.0;
-          section1->inversion_offset_y = 0.0;
-          section1->inversion_offset_x_m = 0.0;
-          section1->inversion_offset_y_m = 0.0;
-          section1->inversion_offset_z_m = 0.0;
-          section1->dx_m = 0.0;
-          section1->dy_m = 0.0;
-          section1->dz_m = 0.0;
-          section1->sigma_m = 0.0;
-          section1->dr1_m = 0.0;
-          section1->dr2_m = 0.0;
-          section1->dr3_m = 0.0;
-          section1->rsigma_m = 0.0;
+          section1->globaltie.inversion_offset_x = 0.0;
+          section1->globaltie.inversion_offset_y = 0.0;
+          section1->globaltie.inversion_offset_x_m = 0.0;
+          section1->globaltie.inversion_offset_y_m = 0.0;
+          section1->globaltie.inversion_offset_z_m = 0.0;
+          section1->globaltie.dx_m = 0.0;
+          section1->globaltie.dy_m = 0.0;
+          section1->globaltie.dz_m = 0.0;
+          section1->globaltie.sigma_m = 0.0;
+          section1->globaltie.dr1_m = 0.0;
+          section1->globaltie.dr2_m = 0.0;
+          section1->globaltie.dr3_m = 0.0;
+          section1->globaltie.rsigma_m = 0.0;
         }
       }
       break;
@@ -1926,44 +1963,62 @@ int main(int argc, char **argv) {
           section1 = (struct mbna_section *)&file1->sections[mods[imod].section1];
           mb_coor_scale(verbose, 0.5 * (section1->latmin + section1->latmax), &mtodeglon, &mtodeglat);
           if (mods[imod].snav1 >= 0 && mods[imod].snav1 < section1->num_snav) {
-            section1->global_tie_status = MBNA_TIE_XYZ;
-            section1->global_tie_snav = mods[imod].snav1;
-            section1->global_tie_inversion_status = MBNA_INVERSION_NONE;
-            section1->offset_x = section1->snav_lon_offset[section1->global_tie_snav] + mods[imod].xoffset * mtodeglon;
-            section1->offset_y = section1->snav_lat_offset[section1->global_tie_snav] + mods[imod].yoffset * mtodeglat;
-            section1->offset_x_m = section1->offset_x / mtodeglon;
-            section1->offset_y_m = section1->offset_y / mtodeglat;
-            section1->offset_z_m = section1->snav_z_offset[section1->global_tie_snav] + mods[imod].zoffset;
-            section1->xsigma = mods[imod].xsigma;
-            section1->ysigma = mods[imod].ysigma;
-            section1->zsigma = mods[imod].zsigma;
+            section1->globaltie.status = MBNA_TIE_XYZ;
+            section1->globaltie.snav = mods[imod].snav1;
+            section1->globaltie.inversion_status = MBNA_INVERSION_NONE;
+            section1->globaltie.offset_x = section1->snav_lon_offset[section1->globaltie.snav] + mods[imod].xoffset * mtodeglon;
+            section1->globaltie.offset_y = section1->snav_lat_offset[section1->globaltie.snav] + mods[imod].yoffset * mtodeglat;
+            section1->globaltie.offset_x_m = section1->globaltie.offset_x / mtodeglon;
+            section1->globaltie.offset_y_m = section1->globaltie.offset_y / mtodeglat;
+            section1->globaltie.offset_z_m = section1->snav_z_offset[section1->globaltie.snav] + mods[imod].zoffset;
+            section1->globaltie.sigmar1 = mods[imod].xsigma;
+            section1->globaltie.sigmar2 = mods[imod].ysigma;
+            section1->globaltie.sigmar3 = mods[imod].zsigma;
+            section1->globaltie.sigmax1[0] = 1.0;
+            section1->globaltie.sigmax1[1] = 0.0;
+            section1->globaltie.sigmax1[2] = 0.0;
+            section1->globaltie.sigmax2[0] = 0.0;
+            section1->globaltie.sigmax2[1] = 1.0;
+            section1->globaltie.sigmax2[2] = 0.0;
+            section1->globaltie.sigmax3[0] = 0.0;
+            section1->globaltie.sigmax3[1] = 0.0;
+            section1->globaltie.sigmax3[2] = 1.0;
           }
           else {
-            section1->global_tie_status = MBNA_TIE_NONE;
-            section1->global_tie_snav = MBNA_SELECT_NONE;
-            section1->global_tie_inversion_status = MBNA_INVERSION_NONE;
-            section1->offset_x = 0.0;
-            section1->offset_y = 0.0;
-            section1->offset_x_m = 0.0;
-            section1->offset_y_m = 0.0;
-            section1->offset_z_m = 0.0;
-            section1->xsigma = 0.0;
-            section1->ysigma = 0.0;
-            section1->zsigma = 0.0;
+            section1->globaltie.status = MBNA_TIE_NONE;
+            section1->globaltie.snav = MBNA_SELECT_NONE;
+            section1->globaltie.inversion_status = MBNA_INVERSION_NONE;
+            section1->globaltie.offset_x = 0.0;
+            section1->globaltie.offset_y = 0.0;
+            section1->globaltie.offset_x_m = 0.0;
+            section1->globaltie.offset_y_m = 0.0;
+            section1->globaltie.offset_z_m = 0.0;
+            section1->globaltie.sigmar1 = 0.0;
+            section1->globaltie.sigmar2 = 0.0;
+            section1->globaltie.sigmar3 = 0.0;
+            section1->globaltie.sigmax1[0] = 0.0;
+            section1->globaltie.sigmax1[1] = 0.0;
+            section1->globaltie.sigmax1[2] = 0.0;
+            section1->globaltie.sigmax2[0] = 0.0;
+            section1->globaltie.sigmax2[1] = 0.0;
+            section1->globaltie.sigmax2[2] = 0.0;
+            section1->globaltie.sigmax3[0] = 0.0;
+            section1->globaltie.sigmax3[1] = 0.0;
+            section1->globaltie.sigmax3[2] = 0.0;
           }
-          section1->inversion_offset_x = 0.0;
-          section1->inversion_offset_y = 0.0;
-          section1->inversion_offset_x_m = 0.0;
-          section1->inversion_offset_y_m = 0.0;
-          section1->inversion_offset_z_m = 0.0;
-          section1->dx_m = 0.0;
-          section1->dy_m = 0.0;
-          section1->dz_m = 0.0;
-          section1->sigma_m = 0.0;
-          section1->dr1_m = 0.0;
-          section1->dr2_m = 0.0;
-          section1->dr3_m = 0.0;
-          section1->rsigma_m = 0.0;
+          section1->globaltie.inversion_offset_x = 0.0;
+          section1->globaltie.inversion_offset_y = 0.0;
+          section1->globaltie.inversion_offset_x_m = 0.0;
+          section1->globaltie.inversion_offset_y_m = 0.0;
+          section1->globaltie.inversion_offset_z_m = 0.0;
+          section1->globaltie.dx_m = 0.0;
+          section1->globaltie.dy_m = 0.0;
+          section1->globaltie.dz_m = 0.0;
+          section1->globaltie.sigma_m = 0.0;
+          section1->globaltie.dr1_m = 0.0;
+          section1->globaltie.dr2_m = 0.0;
+          section1->globaltie.dr3_m = 0.0;
+          section1->globaltie.rsigma_m = 0.0;
         }
       }
       break;
@@ -1980,12 +2035,12 @@ int main(int argc, char **argv) {
         if (mods[imod].section1 >= 0 && mods[imod].section1 < file1->num_sections) {
           section1 = (struct mbna_section *)&file1->sections[mods[imod].section1];
           if (mods[imod].snav1 >= 0 && mods[imod].snav1 < section1->num_snav) {
-            section1->global_tie_status = MBNA_TIE_XYZ;
-            section1->global_tie_snav = mods[imod].snav1;
+            section1->globaltie.status = MBNA_TIE_XYZ;
+            section1->globaltie.snav = mods[imod].snav1;
           }
           else {
-            section1->global_tie_status = MBNA_TIE_NONE;
-            section1->global_tie_snav = MBNA_SELECT_NONE;
+            section1->globaltie.status = MBNA_TIE_NONE;
+            section1->globaltie.snav = MBNA_SELECT_NONE;
           }
         }
       }
@@ -2003,12 +2058,12 @@ int main(int argc, char **argv) {
         if (mods[imod].section1 >= 0 && mods[imod].section1 < file1->num_sections) {
           section1 = (struct mbna_section *)&file1->sections[mods[imod].section1];
           if (mods[imod].snav1 >= 0 && mods[imod].snav1 < section1->num_snav) {
-            section1->global_tie_status = MBNA_TIE_XY;
-            section1->global_tie_snav = mods[imod].snav1;
+            section1->globaltie.status = MBNA_TIE_XY;
+            section1->globaltie.snav = mods[imod].snav1;
           }
           else {
-            section1->global_tie_status = MBNA_TIE_NONE;
-            section1->global_tie_snav = MBNA_SELECT_NONE;
+            section1->globaltie.status = MBNA_TIE_NONE;
+            section1->globaltie.snav = MBNA_SELECT_NONE;
           }
         }
       }
@@ -2026,12 +2081,12 @@ int main(int argc, char **argv) {
         if (mods[imod].section1 >= 0 && mods[imod].section1 < file1->num_sections) {
           section1 = (struct mbna_section *)&file1->sections[mods[imod].section1];
           if (mods[imod].snav1 >= 0 && mods[imod].snav1 < section1->num_snav) {
-            section1->global_tie_status = MBNA_TIE_Z;
-            section1->global_tie_snav = mods[imod].snav1;
+            section1->globaltie.status = MBNA_TIE_Z;
+            section1->globaltie.snav = mods[imod].snav1;
           }
           else {
-            section1->global_tie_status = MBNA_TIE_NONE;
-            section1->global_tie_snav = MBNA_SELECT_NONE;
+            section1->globaltie.status = MBNA_TIE_NONE;
+            section1->globaltie.snav = MBNA_SELECT_NONE;
           }
         }
       }
@@ -2045,30 +2100,39 @@ int main(int argc, char **argv) {
         file1 = (struct mbna_file *)&project_output.files[mods[imod].file1];
         if (mods[imod].section1 >= 0 && mods[imod].section1 < file1->num_sections) {
           section1 = (struct mbna_section *)&file1->sections[mods[imod].section1];
-          section1->global_tie_status = MBNA_TIE_NONE;
-                    section1->global_tie_snav = MBNA_SELECT_NONE;
-                    section1->global_tie_inversion_status = MBNA_INVERSION_NONE;
-                    section1->offset_x = 0.0;
-                    section1->offset_y = 0.0;
-                    section1->offset_x_m = 0.0;
-                    section1->offset_y_m = 0.0;
-                    section1->offset_z_m = 0.0;
-                    section1->xsigma = 0.0;
-                    section1->ysigma = 0.0;
-                    section1->zsigma = 0.0;
-                    section1->inversion_offset_x = 0.0;
-                    section1->inversion_offset_y = 0.0;
-                    section1->inversion_offset_x_m = 0.0;
-                    section1->inversion_offset_y_m = 0.0;
-                    section1->inversion_offset_z_m = 0.0;
-                    section1->dx_m = 0.0;
-                    section1->dy_m = 0.0;
-                    section1->dz_m = 0.0;
-                    section1->sigma_m = 0.0;
-                    section1->dr1_m = 0.0;
-                    section1->dr2_m = 0.0;
-                    section1->dr3_m = 0.0;
-                    section1->rsigma_m = 0.0;
+          section1->globaltie.status = MBNA_TIE_NONE;
+                    section1->globaltie.snav = MBNA_SELECT_NONE;
+                    section1->globaltie.inversion_status = MBNA_INVERSION_NONE;
+                    section1->globaltie.offset_x = 0.0;
+                    section1->globaltie.offset_y = 0.0;
+                    section1->globaltie.offset_x_m = 0.0;
+                    section1->globaltie.offset_y_m = 0.0;
+                    section1->globaltie.offset_z_m = 0.0;
+                    section1->globaltie.sigmar1 = 0.0;
+                    section1->globaltie.sigmar2 = 0.0;
+                    section1->globaltie.sigmar3 = 0.0;
+                    section1->globaltie.sigmax1[0] = 0.0;
+                    section1->globaltie.sigmax1[1] = 0.0;
+                    section1->globaltie.sigmax1[2] = 0.0;
+                    section1->globaltie.sigmax2[0] = 0.0;
+                    section1->globaltie.sigmax2[1] = 0.0;
+                    section1->globaltie.sigmax2[2] = 0.0;
+                    section1->globaltie.sigmax3[0] = 0.0;
+                    section1->globaltie.sigmax3[1] = 0.0;
+                    section1->globaltie.sigmax3[2] = 0.0;
+                    section1->globaltie.inversion_offset_x = 0.0;
+                    section1->globaltie.inversion_offset_y = 0.0;
+                    section1->globaltie.inversion_offset_x_m = 0.0;
+                    section1->globaltie.inversion_offset_y_m = 0.0;
+                    section1->globaltie.inversion_offset_z_m = 0.0;
+                    section1->globaltie.dx_m = 0.0;
+                    section1->globaltie.dy_m = 0.0;
+                    section1->globaltie.dz_m = 0.0;
+                    section1->globaltie.sigma_m = 0.0;
+                    section1->globaltie.dr1_m = 0.0;
+                    section1->globaltie.dr2_m = 0.0;
+                    section1->globaltie.dr3_m = 0.0;
+                    section1->globaltie.rsigma_m = 0.0;
         }
       }
       break;
@@ -2078,33 +2142,42 @@ int main(int argc, char **argv) {
           file = &project_output.files[ifile];
           for (int isection = 0; isection < file->num_sections; isection++) {
               section1 = &file->sections[isection];
-              if (section1->global_tie_status != MBNA_TIE_NONE) {
-                  section1->global_tie_status = MBNA_TIE_NONE;
-                  section1->global_tie_snav = 0;
-                  section1->global_tie_status = MBNA_TIE_NONE;
-                  section1->global_tie_snav = MBNA_SELECT_NONE;
-                  section1->global_tie_inversion_status = MBNA_INVERSION_NONE;
-                  section1->offset_x = 0.0;
-                  section1->offset_y = 0.0;
-                  section1->offset_x_m = 0.0;
-                  section1->offset_y_m = 0.0;
-                  section1->offset_z_m = 0.0;
-                  section1->xsigma = 0.0;
-                  section1->ysigma = 0.0;
-                  section1->zsigma = 0.0;
-                  section1->inversion_offset_x = 0.0;
-                  section1->inversion_offset_y = 0.0;
-                  section1->inversion_offset_x_m = 0.0;
-                  section1->inversion_offset_y_m = 0.0;
-                  section1->inversion_offset_z_m = 0.0;
-                  section1->dx_m = 0.0;
-                  section1->dy_m = 0.0;
-                  section1->dz_m = 0.0;
-                  section1->sigma_m = 0.0;
-                  section1->dr1_m = 0.0;
-                  section1->dr2_m = 0.0;
-                  section1->dr3_m = 0.0;
-                  section1->rsigma_m = 0.0;
+              if (section1->globaltie.status != MBNA_TIE_NONE) {
+                  section1->globaltie.status = MBNA_TIE_NONE;
+                  section1->globaltie.snav = 0;
+                  section1->globaltie.status = MBNA_TIE_NONE;
+                  section1->globaltie.snav = MBNA_SELECT_NONE;
+                  section1->globaltie.inversion_status = MBNA_INVERSION_NONE;
+                  section1->globaltie.offset_x = 0.0;
+                  section1->globaltie.offset_y = 0.0;
+                  section1->globaltie.offset_x_m = 0.0;
+                  section1->globaltie.offset_y_m = 0.0;
+                  section1->globaltie.offset_z_m = 0.0;
+                  section1->globaltie.sigmar1 = 0.0;
+                  section1->globaltie.sigmar2 = 0.0;
+                  section1->globaltie.sigmar3 = 0.0;
+                  section1->globaltie.sigmax1[0] = 0.0;
+                  section1->globaltie.sigmax1[1] = 0.0;
+                  section1->globaltie.sigmax1[2] = 0.0;
+                  section1->globaltie.sigmax2[0] = 0.0;
+                  section1->globaltie.sigmax2[1] = 0.0;
+                  section1->globaltie.sigmax2[2] = 0.0;
+                  section1->globaltie.sigmax3[0] = 0.0;
+                  section1->globaltie.sigmax3[1] = 0.0;
+                  section1->globaltie.sigmax3[2] = 0.0;
+                  section1->globaltie.inversion_offset_x = 0.0;
+                  section1->globaltie.inversion_offset_y = 0.0;
+                  section1->globaltie.inversion_offset_x_m = 0.0;
+                  section1->globaltie.inversion_offset_y_m = 0.0;
+                  section1->globaltie.inversion_offset_z_m = 0.0;
+                  section1->globaltie.dx_m = 0.0;
+                  section1->globaltie.dy_m = 0.0;
+                  section1->globaltie.dz_m = 0.0;
+                  section1->globaltie.sigma_m = 0.0;
+                  section1->globaltie.dr1_m = 0.0;
+                  section1->globaltie.dr2_m = 0.0;
+                  section1->globaltie.dr3_m = 0.0;
+                  section1->globaltie.rsigma_m = 0.0;
               }
           }
       }
@@ -3062,10 +3135,34 @@ int main(int argc, char **argv) {
       if (mods[imod].file1 >= 0 && mods[imod].file1 < project_output.num_files) {
         file1 = &(project_output.files[mods[imod].file1]);
         section1 = &(file1->sections[mods[imod].section1]);
-        if (mods[imod].section1 >= 0 && mods[imod].section1 < file1->num_sections && section1->continuity) {
-          section1->continuity = false;
-          fprintf(stderr, "Set discontinuity before survey:file:section :   %2.2d:%4.4d:%4.4d\n", file1->block,
-                  mods[imod].file1, mods[imod].section1);
+        if (mods[imod].section1 >= 0 && mods[imod].section1 < file1->num_sections) {
+          if (section1->continuity) {
+            section1->continuity = false;
+            fprintf(stderr, "Set discontinuity before survey:file:section :   %2.2d:%4.4d:%4.4d\n", file1->block,
+                    mods[imod].file1, mods[imod].section1);
+          } else {
+            fprintf(stderr, "Discontinuity already exists before survey:file:section :   %2.2d:%4.4d:%4.4d\n", file1->block,
+                    mods[imod].file1, mods[imod].section1);
+          }
+        }
+      }
+      break;
+
+    case MOD_MODE_REMOVE_DISCONTINUITY:
+      fprintf(stderr, "\nCommand remove-discontinuity=%2.2d:%2.2d\n", mods[imod].file1, mods[imod].section1);
+
+      if (mods[imod].file1 >= 0 && mods[imod].file1 < project_output.num_files) {
+        file1 = &(project_output.files[mods[imod].file1]);
+        section1 = &(file1->sections[mods[imod].section1]);
+        if (mods[imod].section1 >= 0 && mods[imod].section1 < file1->num_sections) {
+          if (!section1->continuity) {
+            section1->continuity = true;
+            fprintf(stderr, "Removed discontinuity before survey:file:section :   %2.2d:%4.4d:%4.4d\n", file1->block,
+                    mods[imod].file1, mods[imod].section1);
+          } else {
+            fprintf(stderr, "Discontinuity already exists before survey:file:section :   %2.2d:%4.4d:%4.4d\n", file1->block,
+                    mods[imod].file1, mods[imod].section1);
+          }
         }
       }
       break;
@@ -3469,31 +3566,31 @@ int main(int argc, char **argv) {
           /* apply the global tie */
           file = &(project_output.files[import_globaltie_file]);
           section = &(file->sections[import_globaltie_section_id]);
-          section->global_tie_status = import_globaltie_status;
-          section->global_tie_snav = import_globaltie_snav;
-                    section->global_tie_inversion_status = MBNA_INVERSION_NONE;
-          section->offset_x_m = import_globaltie_offset_x_m;
-          section->offset_y_m = import_globaltie_offset_y_m;
-          section->offset_z_m = import_globaltie_offset_z_m;
-          section->xsigma = import_globaltie_offset_xsigma;
-          section->ysigma = import_globaltie_offset_ysigma;
-          section->zsigma = import_globaltie_offset_zsigma;
+          section->globaltie.status = import_globaltie_status;
+          section->globaltie.snav = import_globaltie_snav;
+                    section->globaltie.inversion_status = MBNA_INVERSION_NONE;
+          section->globaltie.offset_x_m = import_globaltie_offset_x_m;
+          section->globaltie.offset_y_m = import_globaltie_offset_y_m;
+          section->globaltie.offset_z_m = import_globaltie_offset_z_m;
+          section->globaltie.sigmar1 = import_globaltie_offset_xsigma;
+          section->globaltie.sigmar2 = import_globaltie_offset_ysigma;
+          section->globaltie.sigmar3 = import_globaltie_offset_zsigma;
           mb_coor_scale(verbose, 0.5 * (section->latmin + section->latmax), &mtodeglon, &mtodeglat);
-          section->offset_x = section->offset_x_m * mtodeglon;
-          section->offset_y = section->offset_y_m * mtodeglat;
-                    section->inversion_offset_x = 0.0;
-                    section->inversion_offset_y = 0.0;
-                    section->inversion_offset_x_m = 0.0;
-                    section->inversion_offset_y_m = 0.0;
-                    section->inversion_offset_z_m = 0.0;
-                    section->dx_m = 0.0;
-                    section->dy_m = 0.0;
-                    section->dz_m = 0.0;
-                    section->sigma_m = 0.0;
-                    section->dr1_m = 0.0;
-                    section->dr2_m = 0.0;
-                    section->dr3_m = 0.0;
-                    section->rsigma_m = 0.0;
+          section->globaltie.offset_x = section->globaltie.offset_x_m * mtodeglon;
+          section->globaltie.offset_y = section->globaltie.offset_y_m * mtodeglat;
+          section->globaltie.inversion_offset_x = 0.0;
+          section->globaltie.inversion_offset_y = 0.0;
+          section->globaltie.inversion_offset_x_m = 0.0;
+          section->globaltie.inversion_offset_y_m = 0.0;
+          section->globaltie.inversion_offset_z_m = 0.0;
+          section->globaltie.dx_m = 0.0;
+          section->globaltie.dy_m = 0.0;
+          section->globaltie.dz_m = 0.0;
+          section->globaltie.sigma_m = 0.0;
+          section->globaltie.dr1_m = 0.0;
+          section->globaltie.dr2_m = 0.0;
+          section->globaltie.dr3_m = 0.0;
+          section->globaltie.rsigma_m = 0.0;
         }
       }
 
@@ -3870,11 +3967,11 @@ int main(int argc, char **argv) {
       file = &project_output.files[ifile];
       for (int isection = 0; isection < file->num_sections; isection++) {
         section = &file->sections[isection];
-        if (section->global_tie_status != MBNA_TIE_NONE) {
+        if (section->globaltie.status != MBNA_TIE_NONE) {
           fprintf(tfp, "GLOBALTIE %s %1d %16.6f %13.8f %13.8f %13.8f %13.8f %13.8f %13.8f\n", file->path,
-                  section->global_tie_status, section->snav_time_d[section->global_tie_snav],
-                  section->offset_x_m, section->offset_y_m, section->offset_z_m,
-                  section->xsigma, section->ysigma, section->zsigma);
+                  section->globaltie.status, section->snav_time_d[section->globaltie.snav],
+                  section->globaltie.offset_x_m, section->globaltie.offset_y_m, section->globaltie.offset_z_m,
+                  section->globaltie.sigmar1, section->globaltie.sigmar2, section->globaltie.sigmar3);
         }
       }
     }

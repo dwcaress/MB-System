@@ -684,7 +684,7 @@ int mbnavadjust_read_project(int verbose, char *projectpath, struct mbna_project
             fprintf(stderr, "\n");
             }*/
             for (k = 0; k < section->num_snav; k++) {
-              if (status == MB_SUCCESS)
+              if (status == MB_SUCCESS) {
                 result = fgets(buffer, BUFFER_MAX, hfp);
                 if (version_id >= 308) {
                     if (status == MB_SUCCESS && result == buffer)
@@ -729,83 +729,188 @@ int mbnavadjust_read_project(int verbose, char *projectpath, struct mbna_project
                         section->snav_z_offset[k] *= -1.0;
                     }
                 }
+              }
             }
 
             /* global fixed frame tie, whether defined or not */
-            section->global_tie_status = MBNA_TIE_NONE;
-            section->global_tie_snav = MBNA_SELECT_NONE;
-            section->global_tie_inversion_status = MBNA_INVERSION_NONE;
-            section->offset_x = 0.0;
-            section->offset_y = 0.0;
-            section->offset_x_m = 0.0;
-            section->offset_y_m = 0.0;
-            section->offset_z_m = 0.0;
-            section->xsigma = 0.0;
-            section->ysigma = 0.0;
-            section->zsigma = 0.0;
-            section->inversion_offset_x = 0.0;
-            section->inversion_offset_y = 0.0;
-            section->inversion_offset_x_m = 0.0;
-            section->inversion_offset_y_m = 0.0;
-            section->inversion_offset_z_m = 0.0;
-            section->dx_m = 0.0;
-            section->dy_m = 0.0;
-            section->dz_m = 0.0;
-            section->sigma_m = 0.0;
-            section->dr1_m = 0.0;
-            section->dr2_m = 0.0;
-            section->dr3_m = 0.0;
-            section->rsigma_m = 0.0;
+            section->globaltie.status = MBNA_TIE_NONE;
+            section->globaltie.snav = MBNA_SELECT_NONE;
+            section->globaltie.snav_time_d = 0.0;
+            section->globaltie.offset_x = 0.0;
+            section->globaltie.offset_y = 0.0;
+            section->globaltie.offset_x_m = 0.0;
+            section->globaltie.offset_y_m = 0.0;
+            section->globaltie.offset_z_m = 0.0;
+            section->globaltie.sigmar1 = 0.0;
+            section->globaltie.sigmax1[0] = 0.0;
+            section->globaltie.sigmax1[1] = 0.0;
+            section->globaltie.sigmax1[2] = 0.0;
+            section->globaltie.sigmar2 = 0.0;
+            section->globaltie.sigmax2[0] = 0.0;
+            section->globaltie.sigmax2[1] = 0.0;
+            section->globaltie.sigmax2[2] = 0.0;
+            section->globaltie.sigmar3 = 0.0;
+            section->globaltie.sigmax3[0] = 0.0;
+            section->globaltie.sigmax3[1] = 0.0;
+            section->globaltie.sigmax3[2] = 0.0;
+            section->globaltie.inversion_status = MBNA_INVERSION_NONE;
+            section->globaltie.inversion_offset_x = 0.0;
+            section->globaltie.inversion_offset_y = 0.0;
+            section->globaltie.inversion_offset_x_m = 0.0;
+            section->globaltie.inversion_offset_y_m = 0.0;
+            section->globaltie.inversion_offset_z_m = 0.0;
+            section->globaltie.dx_m = 0.0;
+            section->globaltie.dy_m = 0.0;
+            section->globaltie.dz_m = 0.0;
+            section->globaltie.sigma_m = 0.0;
+            section->globaltie.dr1_m = 0.0;
+            section->globaltie.dr2_m = 0.0;
+            section->globaltie.dr3_m = 0.0;
+            section->globaltie.rsigma_m = 0.0;
 
-            if (version_id >= 309) {
-              if (status == MB_SUCCESS)
-                result = fgets(buffer, BUFFER_MAX, hfp);
-              if (status == MB_SUCCESS && result == buffer)
-                nscan = sscanf(buffer, "GLOBALTIE %d %d %d %lf %lf %lf %lf %lf %lf",
-                                                &section->global_tie_status, &section->global_tie_snav,
-                                                &section->global_tie_inversion_status,
-                                                &section->offset_x, &section->offset_y, &section->offset_z_m,
-                                                &section->xsigma, &section->ysigma, &section->zsigma);
-              if (section->global_tie_status != MBNA_TIE_NONE)
-                project->num_globalties++;
+            if (version_id >= 311) {
+	      if (status == MB_SUCCESS) {
+	        if ((result = fgets(buffer, BUFFER_MAX, hfp)) != buffer
+                    || sscanf(buffer, "GLOBALTIE %d %d %lf %lf %lf %d %lf %lf %lf",
+                                &section->globaltie.status, &section->globaltie.snav,
+                                &section->globaltie.offset_x, 
+				&section->globaltie.offset_y,
+				&section->globaltie.offset_z_m, 
+                                &section->globaltie.inversion_status,
+ 				&section->globaltie.inversion_offset_x, 
+		                &section->globaltie.inversion_offset_y, 
+				&section->globaltie.inversion_offset_z_m) != 6) {
+                  status = MB_FAILURE;
+                  fprintf(stderr, "read failed on global tie covariance: %s\n", buffer);
+	        }
+	      }
+	      if (status == MB_SUCCESS) {
+                if ((result = fgets(buffer, BUFFER_MAX, hfp)) != buffer ||
+                    (sscanf(buffer, "COV %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf",
+		                    &section->globaltie.sigmar1, &section->globaltie.sigmax1[0],
+				    &section->globaltie.sigmax1[1], &section->globaltie.sigmax1[2],
+				    &section->globaltie.sigmar2, &section->globaltie.sigmax2[0],
+				    &section->globaltie.sigmax2[1], &section->globaltie.sigmax2[2],
+				    &section->globaltie.sigmar3, &section->globaltie.sigmax3[0],
+				    &section->globaltie.sigmax3[1], &section->globaltie.sigmax3[2])) != 12) {
+                  status = MB_FAILURE;
+                  fprintf(stderr, "read failed on global tie covariance: %s\n", buffer);
+                }
               }
+
+              /* update number of global ties */
+              if (status == MB_SUCCESS && section->globaltie.status != MBNA_TIE_NONE) {
+                project->num_globalties++;
+	      }
+	    }
+
+
+            else if (version_id >= 309) {
+              if (status == MB_SUCCESS) {
+                if ((result = fgets(buffer, BUFFER_MAX, hfp)) != buffer
+                    || sscanf(buffer, "GLOBALTIE %d %d %d %lf %lf %lf %lf %lf %lf",
+                                &section->globaltie.status, &section->globaltie.snav,
+                                &section->globaltie.inversion_status,
+                                &section->globaltie.offset_x, &section->globaltie.offset_y, &section->globaltie.offset_z_m,
+                                &section->globaltie.sigmar1, &section->globaltie.sigmar2, &section->globaltie.sigmar3) != 9) {
+		  status = MB_FAILURE;
+		  fprintf(stderr, "read failed on global tie: %s\n", buffer);
+		}
+              }
+
+              /* update number of global ties */
+              if (status == MB_SUCCESS && section->globaltie.status != MBNA_TIE_NONE) {
+                project->num_globalties++;
+                section->globaltie.sigmax1[0] = 1.0;
+                section->globaltie.sigmax1[1] = 0.0;
+                section->globaltie.sigmax1[2] = 0.0;
+                section->globaltie.sigmax2[0] = 0.0;
+                section->globaltie.sigmax2[1] = 1.0;
+                section->globaltie.sigmax2[2] = 0.0;
+                section->globaltie.sigmax3[0] = 0.0;
+                section->globaltie.sigmax3[1] = 0.0;
+                section->globaltie.sigmax3[2] = 1.0;
+	      }
+	    }
+
             else if (version_id >= 305) {
-              if (status == MB_SUCCESS)
-                result = fgets(buffer, BUFFER_MAX, hfp);
-              if (status == MB_SUCCESS && result == buffer)
-                nscan = sscanf(buffer, "GLOBALTIE %d %d %lf %lf %lf %lf %lf %lf",
-                                                &section->global_tie_status, &section->global_tie_snav,
-                                                &section->offset_x, &section->offset_y, &section->offset_z_m,
-                                                &section->xsigma, &section->ysigma, &section->zsigma);
-              if (section->global_tie_status != MBNA_TIE_NONE) {
-                section->global_tie_inversion_status = project->inversion_status;
+              if (status == MB_SUCCESS) {
+                if ((result = fgets(buffer, BUFFER_MAX, hfp)) != buffer
+                    || sscanf(buffer, "GLOBALTIE %d %d %lf %lf %lf %lf %lf %lf",
+                                                &section->globaltie.status, &section->globaltie.snav,
+                                                &section->globaltie.offset_x, &section->globaltie.offset_y, &section->globaltie.offset_z_m,
+                                                &section->globaltie.sigmar1, &section->globaltie.sigmar2, &section->globaltie.sigmar3)
+						!= 8) {
+		  status = MB_FAILURE;
+		  fprintf(stderr, "read failed on global tie: %s\n", buffer);
+		}
+	      }
+
+              /* update number of global ties */
+              if (status == MB_SUCCESS && section->globaltie.status != MBNA_TIE_NONE) {
+                section->globaltie.inversion_status = project->inversion_status;
                 project->num_globalties++;
-              }
-            }
-            else if (version_id == 304) {
-              if (status == MB_SUCCESS)
-                result = fgets(buffer, BUFFER_MAX, hfp);
-              if (status == MB_SUCCESS && result == buffer)
-                nscan = sscanf(buffer, "GLOBALTIE %d %lf %lf %lf %lf %lf %lf",
-                                                &section->global_tie_snav,
-                                                &section->offset_x, &section->offset_y, &section->offset_z_m,
-                                                &section->xsigma, &section->ysigma, &section->zsigma);
-              if (section->global_tie_snav != MBNA_SELECT_NONE) {
-                section->global_tie_status = MBNA_TIE_XYZ;
-                section->global_tie_inversion_status = project->inversion_status;
-                project->num_globalties++;
-              }
+                section->globaltie.sigmax1[0] = 1.0;
+                section->globaltie.sigmax1[1] = 0.0;
+                section->globaltie.sigmax1[2] = 0.0;
+                section->globaltie.sigmax2[0] = 0.0;
+                section->globaltie.sigmax2[1] = 1.0;
+                section->globaltie.sigmax2[2] = 0.0;
+                section->globaltie.sigmax3[0] = 0.0;
+                section->globaltie.sigmax3[1] = 0.0;
+                section->globaltie.sigmax3[2] = 1.0;
+	      }
             }
 
-            if (section->global_tie_status == 0 && section->global_tie_snav == -1) {
-              section->global_tie_inversion_status = 0;
-              section->offset_x = 0.0;
-              section->offset_y = 0.0;
-              section->offset_z_m = 0.0;
-              section->xsigma = 0.0;
-              section->ysigma = 0.0;
-              section->zsigma = 0.0;
+            else if (version_id == 304) {
+              if (status == MB_SUCCESS) {
+                if ((result = fgets(buffer, BUFFER_MAX, hfp)) != buffer
+                    || sscanf(buffer, "GLOBALTIE %d %lf %lf %lf %lf %lf %lf",
+                                &section->globaltie.snav,
+                                &section->globaltie.offset_x, &section->globaltie.offset_y, &section->globaltie.offset_z_m,
+                                &section->globaltie.sigmar1, &section->globaltie.sigmar2, &section->globaltie.sigmar3) != 7) {
+		  status = MB_FAILURE;
+		  fprintf(stderr, "read failed on global tie: %s\n", buffer);
+		}
+	      }
+
+              /* update number of global ties */
+              if (status == MB_SUCCESS && section->globaltie.status != MBNA_TIE_NONE) {
+                section->globaltie.status = MBNA_TIE_XYZ;
+                section->globaltie.inversion_status = project->inversion_status;
+                project->num_globalties++;
+                section->globaltie.sigmax1[0] = 1.0;
+                section->globaltie.sigmax1[1] = 0.0;
+                section->globaltie.sigmax1[2] = 0.0;
+                section->globaltie.sigmax2[0] = 0.0;
+                section->globaltie.sigmax2[1] = 1.0;
+                section->globaltie.sigmax2[2] = 0.0;
+                section->globaltie.sigmax3[0] = 0.0;
+                section->globaltie.sigmax3[1] = 0.0;
+                section->globaltie.sigmax3[2] = 1.0;
+	      }
             }
+
+            if (section->globaltie.status == 0 && section->globaltie.snav == -1) {
+              section->globaltie.inversion_status = 0;
+              section->globaltie.offset_x = 0.0;
+              section->globaltie.offset_y = 0.0;
+              section->globaltie.offset_z_m = 0.0;
+              section->globaltie.sigmar1 = 0.0;
+              section->globaltie.sigmar2 = 0.0;
+              section->globaltie.sigmar3 = 0.0;
+            }
+	    else {
+              if (section->globaltie.sigmar1 <= MBNA_SMALL) {
+                section->globaltie.sigmar3 = MBNA_SMALL;
+              }
+              if (section->globaltie.sigmar2 <= MBNA_SMALL) {
+                section->globaltie.sigmar3 = MBNA_SMALL;
+              }
+              if (section->globaltie.sigmar3 <= MBNA_ZSMALL) {
+                section->globaltie.sigmar3 = MBNA_ZSMALL;
+              }
+	    }
           }
         }
 
@@ -840,10 +945,10 @@ int mbnavadjust_read_project(int verbose, char *projectpath, struct mbna_project
         mb_coor_scale(verbose, 0.5 * (project->lat_min + project->lat_max), &project->mtodeglon, &project->mtodeglat);
 
         /* add sensordepth values to snav lists if needed */
-                if (version_id < 308) {
-fprintf(stderr,"Project version %d previous to 3.08: Adding sensordepth values to section snav arrays...\n", version_id);
-                    status = mbnavadjust_fix_section_sensordepth(verbose, project, error);
-                }
+        if (version_id < 308) {
+          fprintf(stderr,"Project version %d previous to 3.08: Adding sensordepth values to section snav arrays...\n", version_id);
+          status = mbnavadjust_fix_section_sensordepth(verbose, project, error);
+        }
 
         /* recount the number of blocks */
         project->num_surveys = 0;
@@ -863,27 +968,27 @@ fprintf(stderr,"Project version %d previous to 3.08: Adding sensordepth values t
           struct mbna_file *file = &project->files[ifile];
           for (int isection = 0; isection < file->num_sections; isection++) {
             section = &file->sections[isection];
-                        if (section->global_tie_status != MBNA_TIE_NONE) {
-                            section->offset_x_m = section->offset_x / project->mtodeglon;
-                            section->offset_y_m = section->offset_y / project->mtodeglat;
-                            if (section->global_tie_inversion_status != MBNA_INVERSION_NONE) {
-                                section->inversion_offset_x = section->snav_lon_offset[section->global_tie_snav];
-                                section->inversion_offset_y = section->snav_lat_offset[section->global_tie_snav];
-                                section->inversion_offset_x_m = section->snav_lon_offset[section->global_tie_snav] / project->mtodeglon;
-                                section->inversion_offset_y_m = section->snav_lat_offset[section->global_tie_snav] / project->mtodeglat;
-                                section->inversion_offset_z_m = section->snav_z_offset[section->global_tie_snav];
-                                section->dx_m = section->offset_x_m - section->inversion_offset_x_m;
-                                section->dy_m = section->offset_y_m - section->inversion_offset_y_m;
-                                section->dz_m = section->offset_z_m - section->inversion_offset_z_m;
-                                section->sigma_m = sqrt(section->dx_m * section->dx_m + section->dy_m * section->dy_m + section->dz_m * section->dz_m);
-                                section->dr1_m = section->inversion_offset_x_m / section->xsigma;
-                                section->dr2_m = section->inversion_offset_y_m / section->ysigma;
-                                section->dr3_m = section->inversion_offset_z_m / section->zsigma;
-                                section->rsigma_m = sqrt(section->dr1_m * section->dr1_m + section->dr2_m * section->dr2_m + section->dr3_m * section->dr3_m);
-                            }
-                        }
-                    }
+            if (section->globaltie.status != MBNA_TIE_NONE) {
+                section->globaltie.offset_x_m = section->globaltie.offset_x / project->mtodeglon;
+                section->globaltie.offset_y_m = section->globaltie.offset_y / project->mtodeglat;
+                if (section->globaltie.inversion_status != MBNA_INVERSION_NONE) {
+                    section->globaltie.inversion_offset_x = section->snav_lon_offset[section->globaltie.snav];
+                    section->globaltie.inversion_offset_y = section->snav_lat_offset[section->globaltie.snav];
+                    section->globaltie.inversion_offset_x_m = section->snav_lon_offset[section->globaltie.snav] / project->mtodeglon;
+                    section->globaltie.inversion_offset_y_m = section->snav_lat_offset[section->globaltie.snav] / project->mtodeglat;
+                    section->globaltie.inversion_offset_z_m = section->snav_z_offset[section->globaltie.snav];
+                    section->globaltie.dx_m = section->globaltie.offset_x_m - section->globaltie.inversion_offset_x_m;
+                    section->globaltie.dy_m = section->globaltie.offset_y_m - section->globaltie.inversion_offset_y_m;
+                    section->globaltie.dz_m = section->globaltie.offset_z_m - section->globaltie.inversion_offset_z_m;
+                    section->globaltie.sigma_m = sqrt(section->globaltie.dx_m * section->globaltie.dx_m + section->globaltie.dy_m * section->globaltie.dy_m + section->globaltie.dz_m * section->globaltie.dz_m);
+                    section->globaltie.dr1_m = section->globaltie.inversion_offset_x_m / section->globaltie.sigmar1;
+                    section->globaltie.dr2_m = section->globaltie.inversion_offset_y_m / section->globaltie.sigmar2;
+                    section->globaltie.dr3_m = section->globaltie.inversion_offset_z_m / section->globaltie.sigmar3;
+                    section->globaltie.rsigma_m = sqrt(section->globaltie.dr1_m * section->globaltie.dr1_m + section->globaltie.dr2_m * section->globaltie.dr2_m + section->globaltie.dr3_m * section->globaltie.dr3_m);
                 }
+            }
+          }
+      }
 
         /* read crossings */
         project->num_crossings_analyzed = 0;
@@ -1152,7 +1257,7 @@ fprintf(stderr,"Project version %d previous to 3.08: Adding sensordepth values t
                             tie->dx_m *= -1.0;
                             tie->dy_m *= -1.0;
                             tie->dz_m *= -1.0;
-                            //tie->sigma_m;
+                            //tie->globaltie.sigma_m;
                             tie->dr1_m *= -1.0;
                             tie->dr2_m *= -1.0;
                             tie->dr3_m *= -1.0;
@@ -1360,13 +1465,13 @@ int mbnavadjust_write_project(int verbose, struct mbna_project *project, int *er
 
   /* open and write home file */
   if ((hfp = fopen(project->home, "w")) != NULL) {
-    fprintf(stderr, "Writing project %s (file version 3.10)\n", project->name);
+    fprintf(stderr, "Writing project %s (file version 3.11)\n", project->name);
     char user[256], host[256], date[32];
     status = mb_user_host_date(verbose, user, host, date, error);
     fprintf(hfp, "##MBNAVADJUST PROJECT\n");
     fprintf(hfp, "MB-SYSTEM_VERSION\t%s\n", MB_VERSION);
     fprintf(hfp, "PROGRAM_VERSION\t3.10\n");
-    fprintf(hfp, "FILE_VERSION\t3.10\n");
+    fprintf(hfp, "FILE_VERSION\t3.11\n");
     fprintf(hfp, "ORIGIN\tGenerated by user <%s> on cpu <%s> at <%s>\n", user, host, date);
     fprintf(hfp, "NAME\t%s\n", project->name);
     fprintf(hfp, "PATH\t%s\n", project->path);
@@ -1413,19 +1518,25 @@ int mbnavadjust_write_project(int verbose, struct mbna_project *project, int *er
                             section->snav_lon[k], section->snav_lat[k], section->snav_sensordepth[k],
                   section->snav_lon_offset[k], section->snav_lat_offset[k], section->snav_z_offset[k]);
         }
-        if (section->global_tie_status == 0 && section->global_tie_snav == -1) {
-          section->global_tie_inversion_status = 0;
-          section->offset_x = 0.0;
-          section->offset_y = 0.0;
-          section->offset_z_m = 0.0;
-          section->xsigma = 0.0;
-          section->ysigma = 0.0;
-          section->zsigma = 0.0;
+        if (section->globaltie.status == 0 && section->globaltie.snav == -1) {
+          section->globaltie.inversion_status = 0;
+          section->globaltie.offset_x = 0.0;
+          section->globaltie.offset_y = 0.0;
+          section->globaltie.offset_z_m = 0.0;
+          section->globaltie.sigmar1 = 0.0;
+          section->globaltie.sigmar2 = 0.0;
+          section->globaltie.sigmar3 = 0.0;
         }
-        fprintf(hfp, "GLOBALTIE %2d %4d %2d %13.8f %13.8f %13.8f %13.8f %13.8f %13.8f\n",
-                        section->global_tie_status, section->global_tie_snav, section->global_tie_inversion_status,
-                        section->offset_x, section->offset_y, section->offset_z_m,
-                        section->xsigma, section->ysigma, section->zsigma);
+        fprintf(hfp, "GLOBALTIE %2d %4d %13.8f %13.8f %13.8f %13.8f %13.8f %13.8f %1.1d %13.8f %13.8f %13.8f\n",
+		section->globaltie.status, section->globaltie.snav, 
+		section->globaltie.offset_x, section->globaltie.offset_y, section->globaltie.offset_z_m,
+		section->globaltie.sigmar1, section->globaltie.sigmar2, section->globaltie.sigmar3, 
+		section->globaltie.inversion_status, section->globaltie.inversion_offset_x, 
+		section->globaltie.inversion_offset_y, section->globaltie.inversion_offset_z_m);
+        fprintf(hfp, "COV %13.8f %13.8f %13.8f %13.8f %13.8f %13.8f %13.8f %13.8f %13.8f %13.8f %13.8f %13.8f\n",
+                section->globaltie.sigmar1, section->globaltie.sigmax1[0], section->globaltie.sigmax1[1], section->globaltie.sigmax1[2], 
+		section->globaltie.sigmar2, section->globaltie.sigmax2[0], section->globaltie.sigmax2[1], section->globaltie.sigmax2[2], 
+		section->globaltie.sigmar3, section->globaltie.sigmax3[0], section->globaltie.sigmax3[1], section->globaltie.sigmax3[2]);
       }
     }
 
@@ -3917,29 +4028,29 @@ int mbnavadjust_import_file(int verbose, struct mbna_project *project,
         section->depthmin = 0.0;
         section->depthmax = 0.0;
         section->contoursuptodate = false;
-        section->global_tie_status = MBNA_TIE_NONE;
-        section->global_tie_snav = MBNA_SELECT_NONE;
-        section->offset_x = 0.0;
-        section->offset_y = 0.0;
-        section->offset_x_m = 0.0;
-        section->offset_y_m = 0.0;
-        section->offset_z_m = 0.0;
-        section->xsigma = 0.0;
-        section->ysigma = 0.0;
-        section->zsigma = 0.0;
-        section->inversion_offset_x = 0.0;
-        section->inversion_offset_y = 0.0;
-        section->inversion_offset_x_m = 0.0;
-        section->inversion_offset_y_m = 0.0;
-        section->inversion_offset_z_m = 0.0;
-        section->dx_m = 0.0;
-        section->dy_m = 0.0;
-        section->dz_m = 0.0;
-        section->sigma_m = 0.0;
-        section->dr1_m = 0.0;
-        section->dr2_m = 0.0;
-        section->dr3_m = 0.0;
-        section->rsigma_m = 0.0;
+        section->globaltie.status = MBNA_TIE_NONE;
+        section->globaltie.snav = MBNA_SELECT_NONE;
+        section->globaltie.offset_x = 0.0;
+        section->globaltie.offset_y = 0.0;
+        section->globaltie.offset_x_m = 0.0;
+        section->globaltie.offset_y_m = 0.0;
+        section->globaltie.offset_z_m = 0.0;
+        section->globaltie.sigmar1 = 0.0;
+        section->globaltie.sigmar2 = 0.0;
+        section->globaltie.sigmar3 = 0.0;
+        section->globaltie.inversion_offset_x = 0.0;
+        section->globaltie.inversion_offset_y = 0.0;
+        section->globaltie.inversion_offset_x_m = 0.0;
+        section->globaltie.inversion_offset_y_m = 0.0;
+        section->globaltie.inversion_offset_z_m = 0.0;
+        section->globaltie.dx_m = 0.0;
+        section->globaltie.dy_m = 0.0;
+        section->globaltie.dz_m = 0.0;
+        section->globaltie.sigma_m = 0.0;
+        section->globaltie.dr1_m = 0.0;
+        section->globaltie.dr2_m = 0.0;
+        section->globaltie.dr3_m = 0.0;
+        section->globaltie.rsigma_m = 0.0;
         new_section = false;
 
         /* open output section file */
@@ -4668,11 +4779,11 @@ int mbnavadjust_reimport_file(int verbose, struct mbna_project *project,
         section->depthmin = 0.0;
         section->depthmax = 0.0;
         section->contoursuptodate = false;
-        section->inversion_offset_x = 0.0;
-        section->inversion_offset_y = 0.0;
-        section->inversion_offset_x_m = 0.0;
-        section->inversion_offset_y_m = 0.0;
-        section->inversion_offset_z_m = 0.0;
+        section->globaltie.inversion_offset_x = 0.0;
+        section->globaltie.inversion_offset_y = 0.0;
+        section->globaltie.inversion_offset_x_m = 0.0;
+        section->globaltie.inversion_offset_y_m = 0.0;
+        section->globaltie.inversion_offset_z_m = 0.0;
 
         /* open output section file */
         sprintf(opath, "%s/nvs_%4.4d_%4.4d.mb71", project->datadir, file->id, isection);
@@ -5498,14 +5609,14 @@ int mbnavadjust_globaltie_compare(const void *a, const void *b) {
   struct mbna_section *section_b = *((struct mbna_section **)b);
 
   /* return according to the misfit magnitude */
-  if (section_a->global_tie_inversion_status != MBNA_INVERSION_NONE
-      && section_b->global_tie_inversion_status != MBNA_INVERSION_NONE) {
-    if (section_a->sigma_m > section_b->sigma_m) {
+  if (section_a->globaltie.inversion_status != MBNA_INVERSION_NONE
+      && section_b->globaltie.inversion_status != MBNA_INVERSION_NONE) {
+    if (section_a->globaltie.sigma_m > section_b->globaltie.sigma_m) {
       return(1);
     } else {
       return(-1);
     }
-  } else if (section_a->global_tie_inversion_status != MBNA_INVERSION_NONE) {
+  } else if (section_a->globaltie.inversion_status != MBNA_INVERSION_NONE) {
     return(1);
   } else {
     return(-1);
