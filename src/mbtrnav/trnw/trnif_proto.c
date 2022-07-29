@@ -949,13 +949,48 @@ int trnif_msg_pub_mb(netif_t *self, msock_connection_t *peer, char *data, size_t
     return trnif_msg_pub(self,peer,data,len);
 }
 
+
+trnuif_msg_t *trnu_msg_pd(const char *mid, int n, double *darr)
+{
+    trnuif_msg_t *instance = (trnuif_msg_t *)malloc(TRNX_MSG_SIZE);
+    if(NULL != instance){
+        memset(instance,0,TRNX_MSG_SIZE);
+        // initialize msg ID
+        snprintf(instance->mid,TRNX_MSG_SBUF_BYTES-1,"%s",mid);
+        // initialize double args (if specified)
+        if(NULL!= darr && n > 0){
+            for(int i=0; i < (n<TRNX_MSG_DA_LEN ? n : TRNX_MSG_DA_LEN); i++){
+                instance->dvals[i] = darr[i];
+            }
+        }
+    }
+    return instance;
+}
+
+trnuif_msg_t *trnu_msg_str(const char *mid)
+{
+    return trnu_msg_pd(mid, 0, NULL);
+}
+
+trnuif_msg_t *trnu_msg_d3(const char *mid, double d0, double d1, double d2)
+{
+    double da[3] = {d0,d1,d2};
+    return trnu_msg_pd(mid, 3, &da[0]);
+}
+
+trnuif_msg_t *trnu_msg_d6(const char *mid, double d0, double d1, double d2, double d3, double d4, double d5)
+{
+    double da[6] = {d0,d1,d2,d3,d4,d5};
+    return trnu_msg_pd(mid, 6, &da[0]);
+}
+
 int trnif_msg_read_trnu(byte **pdest, uint32_t *len, netif_t *self, msock_connection_t *peer, int *errout)
 {
     int retval = 0;
 
     if(NULL!=pdest && NULL!=self && NULL!=peer){
-        uint32_t readlen=TRNX_MSG_SIZE;
-        byte *buf=*pdest;
+        uint32_t readlen = TRNX_MSG_SIZE;
+        byte *buf = *pdest;
         if(NULL==buf){
             buf=(byte *)malloc(TRNX_MSG_SIZE);
             memset(buf,0,TRNX_MSG_SIZE);
@@ -969,11 +1004,13 @@ int trnif_msg_read_trnu(byte **pdest, uint32_t *len, netif_t *self, msock_connec
     return retval;
 }
 
-int trnif_msg_handle_trnu(void *msg, netif_t *self, msock_connection_t *peer, int *errout)
+int trnif_msg_handle_trnu(void *pmsg, netif_t *self, msock_connection_t *peer, int *errout)
 {
     int retval=-1;
 
-    if(NULL!=msg && NULL!=self && NULL!=peer){
+    if(NULL!=pmsg && NULL!=self && NULL!=peer){
+
+        trnuif_msg_t *msg = (trnuif_msg_t *)pmsg;
 
         // get resource bundle
         trnuif_res_t *resources=self->rr_res;
@@ -983,37 +1020,66 @@ int trnif_msg_handle_trnu(void *msg, netif_t *self, msock_connection_t *peer, in
 
         double msg_time = mtime_etime();
 
-        if(strcmp(msg,PROTO_TRNU_REQ)==0 ||
-           strcmp(msg,PROTO_TRNU_CON)==0 ||
-           strcmp(msg,PROTO_TRNU_HBT)==0 ||
-           strcmp(msg,PROTO_TRNU_DIS)==0 ||
-            strcmp(msg,PROTO_TRNU_PING)==0){
-            msg_out=strdup(PROTO_TRNU_ACK);
-            send_len=strlen(PROTO_TRNU_ACK)+1;
-        }else{
-            msg_out=strdup(PROTO_TRNU_NACK);
-            send_len=strlen(PROTO_TRNU_NACK)+1;
+        if(strcmp(msg->mid,PROTO_TRNU_REQ) == 0 ||
+           strcmp(msg->mid,PROTO_TRNU_CON) == 0 ||
+           strcmp(msg->mid,PROTO_TRNU_HBT) == 0 ||
+           strcmp(msg->mid,PROTO_TRNU_DIS) == 0 ||
+            strcmp(msg->mid,PROTO_TRNU_PING) == 0)
+        {
+            msg_out = (char *)TRNU_MSG_ACK();
+            send_len = TRNX_MSG_SIZE;
         }
-
-        if(strcmp(msg,PROTO_TRNU_RST)==0){
+        else if(strcmp(msg->mid,PROTO_TRNU_RST) == 0)
+        {
             // reinit, return ACK/NACK
             if(NULL!=resources && NULL!=resources->reset_callback){
-                int test=resources->reset_callback();
-                const char *ret_msg=(test==0 ? PROTO_TRNU_ACK : PROTO_TRNU_NACK);
-                msg_out=strdup(ret_msg);
-                send_len=strlen(ret_msg)+1;
+                int test = resources->reset_callback();
+                msg_out = (char *)(test==0 ? TRNU_MSG_ACK() : TRNU_MSG_NACK());
+                send_len = TRNX_MSG_SIZE;
                 mlog_tprintf(self->mlog_id,"trn_filt_reinit,%lf,[%s:%s],%d\n", msg_time,peer->chost, peer->service,test);
-            }else{
-                mlog_tprintf(self->mlog_id,"trn_filt_reinit[NULL resuorce],%lf,[%s,%s],-1\n", msg_time,peer->chost, peer->service);
-                msg_out=strdup(PROTO_TRNU_NACK);
-                send_len=strlen(PROTO_TRNU_NACK)+1;
+            } else {
+                mlog_tprintf(self->mlog_id,"trn_filt_reinit[NULL resource],%lf,[%s,%s],-1\n", msg_time,peer->chost, peer->service);
+                msg_out = (char *)TRNU_MSG_NACK();
+                send_len = TRNX_MSG_SIZE;
             }
         }
+        else if(strcmp(msg->mid,PROTO_TRNU_RST_OFS) == 0)
+        {
+            // reinit, return ACK/NACK
+            if(NULL!=resources && NULL!=resources->reset_ofs_callback){
+                int test = resources->reset_ofs_callback(msg->dvals[0], msg->dvals[1], msg->dvals[2]);
+                msg_out = (char *)(test==0 ? TRNU_MSG_ACK() : TRNU_MSG_NACK());
+                send_len = TRNX_MSG_SIZE;
+                mlog_tprintf(self->mlog_id,"trn_filt_reinit_ofs,%lf,[%s:%s],%d\n", msg_time,peer->chost, peer->service,test);
+            } else {
+                mlog_tprintf(self->mlog_id,"trn_filt_reinit_ofs[NULL resource],%lf,[%s,%s],-1\n", msg_time,peer->chost, peer->service);
+                msg_out = (char *)TRNU_MSG_NACK();
+                send_len = TRNX_MSG_SIZE;
+            }
+        }
+        else if(strcmp(msg->mid,PROTO_TRNU_RST_BOX) == 0)
+        {
+            // reinit, return ACK/NACK
+            if(NULL!=resources && NULL!=resources->reset_box_callback){
+                int test = resources->reset_box_callback(msg->dvals[0], msg->dvals[1], msg->dvals[2], msg->dvals[3], msg->dvals[4], msg->dvals[5]);
+                msg_out = (char *)(test==0 ? TRNU_MSG_ACK() : TRNU_MSG_NACK());
+                send_len = TRNX_MSG_SIZE;
+                mlog_tprintf(self->mlog_id,"trn_filt_reinit_box,%lf,[%s:%s],%d\n", msg_time,peer->chost, peer->service,test);
+            } else {
+                mlog_tprintf(self->mlog_id,"trn_filt_reinit_box[NULL resource],%lf,[%s,%s],-1\n", msg_time,peer->chost, peer->service);
+                msg_out = (char *)TRNU_MSG_NACK();
+                send_len = TRNX_MSG_SIZE;
+            }
+        } else {
+            msg_out = (char *)TRNU_MSG_NACK();
+            send_len = TRNX_MSG_SIZE;
+        }
+
 
         if(send_len>0){
             // send response
             retval=s_trnif_dfl_send_udp(self,peer, msg_out, send_len, errout);
-        }else{
+        } else {
             MST_COUNTER_INC(self->profile->stats->events[NETIF_EV_EPROTO_HND]);
         }
 

@@ -58,6 +58,10 @@ median-filter=0.10/9/3
 // input data format
 format=88
 
+// opt "auv-sentry-em2040" [none]
+// flag to enable special handling of AUV Sentry pressure depth
+#auv-sentry-em2040
+
 // opt "platform-file" [mb_path]
 // description TBD
 #platform-file=

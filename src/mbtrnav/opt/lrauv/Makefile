@@ -92,8 +92,8 @@ LRTRN_APP_PP = $(LRTRN_APP_SRC:%.cpp=./%.cpp-pp) $(LRTRN_APP_SRC:%.h=./%.h-pp)
 LRTRN_APP_LIBS = -llcm -lconfig++ -lzf_log -ltrn  -lnewmat -lqnx -lgeolib -lnetcdf -lm $(OS_LIBS)
 
 LRCONAV_APP=lrconav-app
-LRCONAV_APP_HDR=lrconav_app.h CoNav.h MRFilter.h
-LRCONAV_APP_SRC=lrconav_app.cpp CoNav.cpp MRFilter.cpp $(LRCONAV_APP_HDR)
+LRCONAV_APP_HDR=lrconav_app.h CoNav.h MRFilter.h MRFilterLog.h CoNavLog.h
+LRCONAV_APP_SRC=lrconav_app.cpp CoNav.cpp MRFilter.cpp MRFilterLog.cpp CoNavLog.cpp $(LRCONAV_APP_HDR)
 LRCONAV_APP_OBJ = $(LRCONAV_APP_SRC:%.cpp=$(BUILD_DIR)/%.o)
 LRCONAV_APP_PP = $(LRCONAV_APP_SRC:%.cpp=./%.cpp-pp) $(LRCONAV_APP_SRC:%.h=./%.h-pp)
 LRCONAV_APP_LIBS = -llcm -lzf_log -ltrn  -lnewmat -lqnx -lgeolib -lnetcdf -lm $(OS_LIBS)
@@ -131,7 +131,7 @@ $(OUTPUT_DIR)/$(LRTRN_APP): $(LRTRN_APP_HDR) $(LRTRN_APP_OBJ)
 	@echo
 
 # build LR Terrain-Relative CoNav utility
-$(OUTPUT_DIR)/$(LRCONAV_APP): $(LRCONAV_APP_OBJ) $(LRCONAV_APP_HDR)
+$(OUTPUT_DIR)/$(LRCONAV_APP): $(LRCONAV_APP_OBJ)
 	@echo building $@...
 	$(CXX) $(CFLAGS) $(INC_PATHS) $(LIB_PATHS) $^ -o $@ $(LD_FLAGS) $(LRCONAV_APP_LIBS)
 	@echo

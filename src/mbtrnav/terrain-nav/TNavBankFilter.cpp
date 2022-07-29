@@ -32,7 +32,9 @@ operator[](int index){
 //				   const int& mapType) : TNavFilter(mapName, vehicleSpecs, directory, windowVar, mapType) {
 TNavBankFilter::
 TNavBankFilter(TerrainMap* terrainMap, char* vehicleSpecs, char* directory, const double* windowVar,
-               const int& mapType) : TNavFilter(terrainMap, vehicleSpecs, directory, windowVar, mapType) {
+               const int& mapType)
+: TNavFilter(terrainMap, vehicleSpecs, directory, windowVar, mapType), numFilters(0), bfLogs(NULL), logCount(0)
+{
     initVariables();
     this->tempUseBeam = new bool[TRN_MAX_BEAMS];
     this->useBeam     = new bool[TRN_MAX_BEAMS];
@@ -51,8 +53,57 @@ TNavBankFilter::
         homerMmseFile.close();
         measWeightsFile.close();
     }
+    deleteLogs();
     delete [] tempUseBeam;
     delete [] useBeam;
+}
+
+int
+TNavBankFilter::
+deleteLogs()
+{
+    int retval=0;
+    // check both array pointer and number of logs.
+    if (NULL != bfLogs && logCount > 0)
+    {
+        logs(TL_OMASK(TL_TNAV_BANK_FILTER, TL_LOG),"TNavBF::deleting logs bfLogs[%p] logCount[%u]\n", bfLogs, logCount);
+
+        // iterate over the actual size of the array
+        for (int i=0; i < logCount;  i++)
+        {
+            if (bfLogs[i]) delete bfLogs[i];
+            bfLogs[i] = NULL;
+            retval++;
+        }
+        logCount = 0;
+        free(bfLogs);
+        bfLogs = NULL;
+    } else {
+        logs(TL_OMASK(TL_TNAV_BANK_FILTER, TL_LOG),"TNavBF::no logs to delete bfLogs[%p] logCount[%u]\n", bfLogs, logCount);
+    }
+    return retval;
+}
+
+int
+TNavBankFilter::
+allocateLogs()
+{
+    // remove existing logs, if any
+    deleteLogs();
+
+    bfLogs = (TNavPFLog **)malloc(numFilters * sizeof(TNavPFLog*));
+    memset(bfLogs,0,numFilters * sizeof(TNavPFLog*));
+    for (int i=0; i < numFilters; i++)
+    {
+        char lname[TNAVPF_LOGFILE_NAMELEN];
+        char mname[TNAVPF_MNEM_NAMELEN];
+        snprintf(lname, sizeof(lname), "%s_%d", TNavBFLogName, i+1);
+        snprintf(mname, sizeof(mname), "%s_%d", TNavBFMnemName, i+1);
+        bfLogs[i] = new TNavPFLog(DataLog::BinaryFormat, lname, mname);
+        logCount++;
+    }
+    logs(TL_OMASK(TL_TNAV_BANK_FILTER, TL_LOG),"TNavBF::allocated %u logs\n", logCount);
+    return logCount;
 }
 
 /* Override setModifiedWeighting() to decode the embedded parameter values
@@ -132,39 +183,8 @@ setModifiedWeighting(const int use)
             break;
     }
 
-    // RGH BUGFIX: numFilters is set to 2 by default, but no filters are
-    // instantiated until right here. currentNF will often == 2 when there
-    // is actually only one filter in the array.
-    // Temp solution: rather than iterate over currentNF filters (2),
-    // iterate over the actual size of the array (1).
-
-    // calculate number of elements in bfLogs
-    // note: using sizeof(x)/sizeof(x[0]) is not valid,
-    // since the array is not in scope
-    int realNF = (int) (*(&bfLogs + 1) - bfLogs);
-    if (bfLogs)
-    {
-        logs(TL_OMASK(TL_TNAV_BANK_FILTER, TL_LOG),"TNavBF::deleting %d logs\n",
-             currentNF);
-        // iterate over the actual size of the array
-        for (int i=0; i < realNF;  i++)
-        {
-            if (bfLogs[i]) delete bfLogs[i];
-            bfLogs[i] = NULL;
-        }
-        delete [] bfLogs;
-        bfLogs = NULL;
-    }
-
-    bfLogs = new TNavPFLog*[numFilters];
-    for (int i=0; i < numFilters; i++)
-    {
-        char lname[TNAVPF_LOGFILE_NAMELEN];
-        char mname[TNAVPF_MNEM_NAMELEN];
-        snprintf(lname, sizeof(lname), "%s_%d", TNavBFLogName, i+1);
-        snprintf(mname, sizeof(mname), "%s_%d", TNavBFMnemName, i+1);
-        bfLogs[i] = new TNavPFLog(DataLog::BinaryFormat, lname, mname);
-    }
+    // allocate logs for filters (will delete any existing logs)
+    allocateLogs();
 }
 
 //********************************************************************************
@@ -1783,6 +1803,8 @@ initVariables() {
     // Initialize parameters to defaults
     //
     this->numFilters = NUM_FILTERS;
+    // allocate filter logs (to be consistent with numFilters)
+    allocateLogs();
     this->PmfGridResolution = PMF_GRID_RESOLUTION;
     this->PmfGridSize = PMF_GRID_SIZE;
     this->nParticles = PMF_GRID_SIZE * PMF_GRID_SIZE;

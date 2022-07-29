@@ -152,15 +152,20 @@ add_compile_definitions(WITH_PDEBUG)
 endif()
 
 # built-in netif module debug
-if( WITH_NETIF_MMD_EXT )
-# TODO: get external netif mmdebug channel defs
-else()
+if( NETIF_MMDEBUG )
 # add NETIF_MMDEBUG to use netif default MMDEBUG macros
 # instead of values defined in a custom mconfig.h
 # [may need for Cygwin build]
 # compile using cmake .. -DNETIF_MMDEBUG=1
 message("compiling with NETIF_MMDEBUG")
 add_compile_definitions(NETIF_MMDEBUG)
+elseif( WITH_NETIF_MMD_EXT )
+message("compiling with WITH_NETIF_MMD_EXT")
+add_compile_definitions(WITH_NETIF_MMD_EXT)
+else()
+message("compiling with mframe NETIF_MMDEBUG")
+add_compile_definitions(NETIF_MMDEBUG)
+# TODO: get external netif mmdebug channel defs
 endif()
 
 # configuration/feature header
@@ -174,21 +179,6 @@ message("PARENT_DIR=${PARENT_DIR}")
 message("MFRAME_PKG_PATH=${MFRAME_PKG_PATH}")
 message("EXTRA_INCLUDES=${EXTRA_INCLUDES}")
 message("EXTRA_LIBS`=${EXTRA_LIBS}")
-
-#################################
-# build trnu_cli component library
-
-# specify library
-add_library(trnucli STATIC
-${TRNW_SRC_DIR}/trnu_cli.c
-)
-
-# specify include directories
-set_target_properties( trnucli
-PROPERTIES
-INCLUDE_DIRECTORIES
-"${EXTRA_INCLUDES}"
-)
 
 #################################
 # build libgeolib (gctp)
@@ -395,9 +385,30 @@ PROPERTIES
 INCLUDE_DIRECTORIES
 "${EXTRA_INCLUDES}"
 LINK_LIBRARIES
+"libtnav.a"
+"libqnx.a"
+"libnewmat.a"
+"libgeolib.a"
 "libtrnw.a"
 "m"
 "pthread"
+)
+
+#################################
+# build trnu_cli component library
+
+# specify library
+add_library(trnucli STATIC
+${TRNW_SRC_DIR}/trnu_cli.c
+)
+
+# specify include directories
+set_target_properties( trnucli
+PROPERTIES
+INCLUDE_DIRECTORIES
+"${EXTRA_INCLUDES}"
+LINK_LIBRARIES
+"libnetif.a"
 )
 
 ##################################
@@ -410,13 +421,20 @@ ${PROJECT_SOURCE_DIR}/trnw/trnucli_test.c
 
 # specify dependency libs
 target_link_libraries(trnucli-test
-trnucli
+"trnucli"
+"netif"
+"trnw"
+"tnav"
+"qnx"
+"newmat"
+"geolib"
 Libmframe::mframe
 "${EXTRA_LIBS}"
 )
 
 # specify include paths
 target_include_directories(trnucli-test PUBLIC
+BEFORE
 "${PROJECT_BINARY_DIR}"
 "${PROJECT_SOURCE_DIR}/trnw"
 "${EXTRA_INCLUDES}"
@@ -443,6 +461,7 @@ target_link_libraries(trnusvr-test
 
 # specify include paths
 target_include_directories(trnusvr-test PUBLIC
+BEFORE
 "${PROJECT_BINARY_DIR}"
 "${PROJECT_SOURCE_DIR}/trnw"
 "${EXTRA_INCLUDES}"

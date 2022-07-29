@@ -50,9 +50,8 @@ TRN_GROUP=${TRN_GROUP:-"239.255.0.16"}
 #################################
 
 # init_vars()
-# initialize variables/set default options
-# called *after* command line processing
-# to support value overrides
+# initialize variables/set default options before command line processing
+# (DWC 6/8/22 - was previously called after command line processing)
 init_vars(){
     # verbose wrapper script output
     VERBOSE="N"
@@ -276,10 +275,10 @@ printUsage(){
     echo " # log console output [-d <dir> creates <dir>/mbtrnpp-console-<session>.log]"
     echo "  `basename $0` -e /path/to/environment/file -d /path/to/console/output/dir -- --config=/path/to/config/file"
     echo ""
-	echo " # test: show environment and mbtrnpp command line exit"
+    echo " # test: show environment and mbtrnpp command line exit"
     echo "  `basename $0` -e /path/to/environment/file -t -- --config=/path/to/config/file [options...]"
-	echo ""
-	echo " # test: show all mbtrnpp parsed command line options and exit"
+    echo ""
+    echo " # test: show all mbtrnpp parsed command line options and exit"
     echo "  `basename $0` -e /path/to/environment/file -- --config=/path/to/config/file [options...] --help"
     echo ""
     echo " Environment variables:"
@@ -333,7 +332,6 @@ processCmdLine(){
 
 while getopts a:c:d:D:e:G:hL:M:m:o:r:tvw: Option
     do
-        #    vout "processing $Option[$OPTARG]"
         case $Option in
         a ) APP_CMD=$OPTARG
         ;;
@@ -377,12 +375,13 @@ while getopts a:c:d:D:e:G:hL:M:m:o:r:tvw: Option
 ##########################
 
 # Argument processing
-# Accepts arguments from command line
-# or pipe/file redirect
-# Command line settings override config
-# file settings
+# Accepts arguments from command line or pipe/file redirect
+# Command line settings override config file settings
 
-# pre-process cmdline to get env file
+# call init vars
+init_vars
+
+# process cmdline to get env file
 processCmdLine "$@"
 
 # apply TRN environment file
@@ -391,11 +390,11 @@ then
 source ${MBTRNPP_ENV}
 fi
 
-# process command line args (may override env)
+# process command line args again (may override env)
 if [ "$#" -eq 0 ];then
     printUsage
     #  exit -1
-    else
+else
     # this ensures that quoted whitespace is preserved by getopts
     # note use of $@, in quotes
 
@@ -411,11 +410,6 @@ fi
 
 echo ""
 
-# call init vars
-# delaying variable init until after command line processing
-# enables command line overrides (e.g. see TRN_RESON_HOST)
-init_vars
-
 if [ ! -z ${DO_HELP} ] && [ ${DO_HELP} == "Y" ]
 then
     printUsage
@@ -426,7 +420,6 @@ then
     fi
     exit 0
 fi
-
 
 declare -a v=("$@")
 for a in "${v[@]}"
@@ -489,6 +482,12 @@ do
     then
     OPT_FORMAT=$a
     vout "ovr OPT_FORMAT: $OPT_FORMAT"
+    fi
+
+    if [ ${a:2:17} == "auv-sentry-em2040" ]
+    then
+    OPT_AUV_SENTRY_EM2040=$a
+    vout "ovr OPT_AUV_SENTRY_EM2040: $OPT_AUV_SENTRY_EM2040"
     fi
 
     if [ ${a:2:13} == "median-filter" ]
@@ -727,11 +726,14 @@ done
 #$OPT_TRN_MID $OPT_MBHBN $OPT_TRN_NOMBGAIN
 
 # set cmdline options
-APP_OPTS="$OPT_CONFIG $OPT_LOGDIR  $OPT_VERBOSE $OPT_INPUT $OPT_OUTPUT $OPT_TIDE $OPT_SWATH $OPT_SOUNDINGS $OPT_FORMAT $OPT_MFILTER \
-$OPT_TRN_SEL $OPT_TRN_DEV $OPT_TRN_UTM $OPT_TRN_MAP $OPT_TRN_PAR $OPT_TRN_CFG $OPT_TRN_MID $OPT_TRN_DECN $OPT_TRN_DECS \
-$OPT_TRN_MTYPE $OPT_TRN_FTYPE $OPT_TRN_FGRADE $OPT_TRN_MWEIGHT $OPT_TRN_NCOV $OPT_TRN_NERR $OPT_TRN_ECOV $OPT_TRN_EERR \
-$OPT_TRN_FREINIT $OPT_REINIT_GAIN $OPT_REINIT_FILE $OPT_REINIT_XYOFFSET $OPT_REINIT_ZOFFSET \
-$OPT_COVARIANCE_MAGNITUDE_MAX $OPT_CONVERGENCE_REPEAT_MIN $OPT_TRNOUT $OPT_TRNHBT $OPT_TRNUHBT $OPT_MBOUT \
+APP_OPTS="$OPT_CONFIG $OPT_LOGDIR  $OPT_VERBOSE $OPT_INPUT $OPT_OUTPUT $OPT_TIDE \
+$OPT_SWATH $OPT_SOUNDINGS $OPT_FORMAT $OPT_AUV_SENTRY_EM2040 $OPT_MFILTER \
+$OPT_TRN_SEL $OPT_TRN_DEV $OPT_TRN_UTM $OPT_TRN_MAP $OPT_TRN_PAR $OPT_TRN_CFG \
+$OPT_TRN_MID $OPT_TRN_DECN $OPT_TRN_DECS $OPT_TRN_MTYPE $OPT_TRN_FTYPE \
+$OPT_TRN_FGRADE $OPT_TRN_MWEIGHT $OPT_TRN_NCOV $OPT_TRN_NERR $OPT_TRN_ECOV \
+$OPT_TRN_EERR $OPT_TRN_FREINIT $OPT_REINIT_GAIN $OPT_REINIT_FILE \
+$OPT_REINIT_XYOFFSET $OPT_REINIT_ZOFFSET $OPT_COVARIANCE_MAGNITUDE_MAX \
+$OPT_CONVERGENCE_REPEAT_MIN $OPT_TRNOUT $OPT_TRNHBT $OPT_TRNUHBT $OPT_MBOUT \
 $OPT_MBHBT $OPT_STATSEC $OPT_STATFLAGS  $OPT_DELAY $OPT_HELP"
 
 # check required TRN options
@@ -756,10 +758,10 @@ fi
 if [ ${DO_TEST} ]
 then
     echo
-	echo  "env:"
-	env|grep TRN
-	echo
-	echo "cmdline:"
+    echo  "env:"
+    env|grep TRN
+    echo
+    echo "cmdline:"
     echo  $APP_CMD $APP_OPTS
     echo
     exit 0
@@ -770,6 +772,7 @@ vout "config file  [$CFG_FILE]"
 vout "env name     [$MBTRNPP_ENV]"
 vout "cycles       [$CYCLES]"
 vout "loop delay   [$LOOP_DELAY_SEC]"
+vout "verbose      [$VERBOSE]"
 
 if [ "${DO_CONLOG}" == "Y" ]
 then
@@ -810,6 +813,11 @@ fi
 
 # initialize cycle count
 # [loop indefinitely if <0]
+# interpret $CYCLES -eq 0 to mean execute once, so ==> $LOOP_COUNT = $CYCLES = 1
+if [ ${CYCLES} -eq 0 ]
+then
+    let "CYCLES=1"
+fi
 let "LOOP_COUNT=${CYCLES}"
 
 while [ ${LOOP_COUNT} -ne 0 ]

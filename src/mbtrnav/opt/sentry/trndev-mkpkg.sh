@@ -33,6 +33,11 @@ printUsage(){
     echo "-h             : print use message"
     echo "-k             : keep build files  [$KEEP_FILES]"
     echo ""
+    echo "Environment:"
+    echo "MF_REPO     : use specified mframe repo"
+    echo "LT_REPO     : use specified libtrnav repo"
+    echo "MF_BRANCH   : use specified mframe branch"
+    echo "LT_BRANCH   : use specified libtrnav branch"
     echo
 }
 
@@ -67,31 +72,35 @@ processCmdLine(){
             v ) VERBOSE="TRUE"
             ;;
             h ) printUsage
-                    exit 0
+                exit 0
             ;;
             k ) KEEP_FILES="Y"
             ;;
-           *) exit 0 # getopts outputs error message
+            * ) exit 0 # getopts outputs error message
             ;;
         esac
     done
 }
 
 showVars(){
-    vout " GIT            $GIT"
-    vout " MAKE           $MAKE"
-    vout " TAR            $TAR"
-    vout " DIST_DATE      $DIST_DATE"
-    vout " TRNDEV_WD      $TRNDEV_WD"
-    vout " TRNDEV_TGZ     $TRNDEV_TGZ"
-    vout " TRNDEV_SDNAME  $TRNDEV_SDNAME"
-    vout " TRNDEV_SD      $TRNDEV_SD"
-    vout " MFRAME_REPO    $MFRAME_REPO"
-    vout " MFRAME_TOP     $MFRAME_TOP"
-    vout " MFRAME_TGZ     $MFRAME_TGZ"
-    vout " LIBTRNAV_REPO  $LIBTRNAV_REPO"
-    vout " LIBTRNAV_TOP   $LIBTRNAV_TOP"
-    vout " LIBTRNAV_TGZ   $LIBTRNAV_TGZ"
+    vout " GIT             $GIT"
+    vout " MAKE            $MAKE"
+    vout " TAR             $TAR"
+    vout " DIST_DATE       $DIST_DATE"
+    vout " TRNDEV_WD       $TRNDEV_WD"
+    vout " TRNDEV_TGZ      $TRNDEV_TGZ"
+    vout " TRNDEV_SDNAME   $TRNDEV_SDNAME"
+    vout " TRNDEV_SD       $TRNDEV_SD"
+    vout " MFRAME_REPO     $MFRAME_REPO"
+    vout " MFRAME_TOP      $MFRAME_TOP"
+    vout " MFRAME_TGZ      $MFRAME_TGZ"
+    vout " MF_REPO         $MF_REPO"
+    vout " MF_BRANCH       $MF_BRANCH"
+    vout " LIBTRNAV_REPO   $LIBTRNAV_REPO"
+    vout " LIBTRNAV_TOP    $LIBTRNAV_TOP"
+    vout " LIBTRNAV_TGZ    $LIBTRNAV_TGZ"
+    vout " LT_REPO         $LT_REPO"
+    vout " LT_BRANCH       $LT_BRANCH"
 }
 
 #################d
@@ -107,9 +116,13 @@ TRNDEV_SD=${TRNDEV_WD}/${TRNDEV_SDNAME}
 MFRAME_REPO=mframe
 MFRAME_TGZ=mframe.tar.gz
 MFRAME_TOP=${TRNDEV_WD}/${MFRAME_REPO}
+MF_REPO=${MF_REPO:-"git@bitbucket.org:mbari/mframe.git"}
+MF_BRANCH=${MF_BRANCH:-"master"}
 LIBTRNAV_REPO=libtrnav
 LIBTRNAV_TGZ=libtrnav.tar.gz
 LIBTRNAV_TOP=${TRNDEV_WD}/${LIBTRNAV_REPO}
+LT_REPO=${LT_REPO:-"git@bitbucket.org:mbari/libtrnav.git"}
+LT_BRANCH=${LT_BRANCH:-"master"}
 
 showVars
 
@@ -121,18 +134,20 @@ cd ${TRNDEV_WD}
 
 # clone repositories
 vout "cloning mframe"
-${GIT} clone git@bitbucket.org:mbari/mframe.git
+${GIT} clone ${MF_REPO}
 vout "cloning libtrnav"
-${GIT} clone git@bitbucket.org:mbari/libtrnav.git
+${GIT} clone ${LT_REPO}
 
 # build mframe distribution tar.gz
 vout "building mframe dist"
 cd ${MFRAME_TOP}
+git checkout ${MF_BRANCH}
 ${MAKE} dist
 
 # build libtrnav distribution tar.gz
 vout "building libtrnav dist"
 cd ${LIBTRNAV_TOP}
+git checkout ${LT_BRANCH}
 ${MAKE} dist
 
 # create staging directory
@@ -144,13 +159,14 @@ cd ${TRNDEV_SD}
 # stage the distribution tar.gz
 vout "staging mframe"
 ${TAR} xzvf ${MFRAME_TOP}/bin/${MFRAME_TGZ}
+
 vout "staging libtrnav"
 ${TAR} xzvf ${LIBTRNAV_TOP}/bin/${LIBTRNAV_TGZ}
 
 # copy the README to the top level staging directory
 vout "staging doc, scripts"
 cp ${LIBTRNAV_REPO}/opt/sentry/README*md ${TRNDEV_SD}
-cp ${LIBTRNAV_REPO}/opt/sentry/trndev-build.sh ${TRNDEV_SD}
+cp ${LIBTRNAV_REPO}/opt/sentry/trndev-build-*.sh ${TRNDEV_SD}
 
 # generate trndev package tar.gz
 vout "generating trndev package archive ${TRNDEV_WD}/${TRNDEV_TGZ}"

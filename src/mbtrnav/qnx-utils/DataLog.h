@@ -16,8 +16,10 @@
 #ifndef _DATALOG_H
 #define _DATALOG_H
 
+#include <string>
 #include <stdio.h>
 #include <time.h>
+#include <math.h>
 #include "DynamicArray.h"
 #include "FileData.h"
 #include "DataField.h"
@@ -59,6 +61,32 @@ public:
   enum FileFormat {
     UnknownFormat, BinaryFormat, AsciiFormat
   };
+
+  // Function attempts to make a unique name for a directory to be created
+  // inside the directory specified in homeDir. The new name uses the format:
+  //     YYYY.JJJ.NNN  (e.g. 2021.001.000 <- first name for Jan 1, 2021)
+  // where YYYY is the 4-digit year, JJJ is the Julian day of the year plus one,
+  // and NNN is an integer appended to ensure the name is unique.
+  // The directory is NOT created by this function.
+  //
+  // The new directory name is returned in dirname.
+  // Returns true if the directory can be created, otherwise false.
+  static bool newJulianDayLogDirName(std::string& dirname,
+                                     const std::string& homeDir);
+
+
+  // Function attempts to create a new directory for log files inside the
+  // existing directory specified in homeDir. The new directory name is created
+  // using newJulianDayLogDirName() function above. If homeDir does not exist,
+  // the current directory will be used (i.e., ".").
+  // Assuming the new directory is created in homeDir, this function will also
+  // create a "latest" symbolic link to the new directory if one is provided
+  // in the latest argument. To avoid creating the link, use and empty string.
+  // The new directory name is returned in dirname.
+  // Returns true if successful, otherwise false.
+  static bool createJulianDayLogDir(std::string& dirname,
+                                    const std::string& homeDir,
+                                    const std::string& latest);
 
   ///////////////////////////////////////////////////////////////////
   // Constructor

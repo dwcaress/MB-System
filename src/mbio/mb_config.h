@@ -38,14 +38,47 @@
 // Define full package name 
 #define PACKAGE "mbsystem"
 
-// Define full package name and version
-#define PACKAGE_STRING mbsystem "5.7.9beta26-123-gf5db30465"
+/* Define to the address where bug reports for this package should be sent. */
+#define PACKAGE_BUGREPORT "http://listserver.mbari.org/sympa/arc/mbsystem"
+
+/* Define to the full name of this package. */
+#define PACKAGE_NAME "mbsystem"
+
+/* Define to the full name and version of this package. */
+#define PACKAGE_STRING "mbsystem 5.7.9beta42"
 
 // Define package short name
 #define PACKAGE_TARNAME "mbsystem"
 
-// Address where bug reports for this package should be sent.
-#define PACKAGE_BUGREPORT "http://listserver.mbari.org/sympa/arc/mbsystem"
+
+/* Define to the home page for this package. */
+#define PACKAGE_URL "http://www.mbari.org/data/mbsystem/"
+
+/* Define to the version of this package. */
+#define PACKAGE_VERSION "5.7.9beta42"
+
+/* Build tools using PCL */
+/* #undef PCLTOOLS_ENABLED */
+
+/* Build tools using Qt5 */
+/* #undef QTTOOLS_ENABLED */
+
+/* Define to 1 if all of the C90 standard headers exist (not just the ones
+   required in a freestanding environment). This macro is provided for
+   backward compatibility; new code need not use it. */
+#define STDC_HEADERS 1
+
+/* Building unit tests */
+#define TEST_ENABLED 1
+
+/* Version number of package */
+#define VERSION "5.7.9beta42"
+
+/* Set VERSION_DATE define in mb_config.h */
+#define VERSION_DATE "26 June 2022"
+
+/* 0 */
+/* #undef WITH_DEBUG */
 
 // Package homepage
 #define PACKAGE_URL "http://www.mbari.org/data/mbsystem/"
