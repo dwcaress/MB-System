@@ -831,36 +831,51 @@ void load_correction(int verbose, mb_path ImageCorrectionFile, struct mbpm_contr
         fprintf(stream, "    Reference Red Chroma Difference:    %f (range 0-255)\n", control->reference_cr);
         fprintf(stream, "    Reference Blue Chroma Difference:   %f (range 0-255)\n", control->reference_cb);
     }
-    if (verbose > 1) {
-        for (int icamera=0; icamera < 2; icamera++) {
-            fprintf(stream, "\nIntensity Correction Table[camera %d]:\n", icamera);
-            for (int i=0;i<control->ncorr_x;i++) {
-                for (int j=0;j<control->ncorr_y;j++) {
-                    for (int k=0;k<control->ncorr_z;k++) {
-                    fprintf(stream,"    %d %d %d   %f\n", i, j, k, control->corr_table_y[icamera].at<float>(i, j, k));
-                    }
-                }
-            }
-            if (control->corr_color_enabled) {
-                fprintf(stream, "\nRed Chroma Correction Table[camera %d]:\n", icamera);
-                for (int i=0;i<control->ncorr_x;i++) {
-                    for (int j=0;j<control->ncorr_y;j++) {
-                        for (int k=0;k<control->ncorr_z;k++) {
-                        fprintf(stream,"    %d %d %d   %f\n", i, j, k, control->corr_table_cr[icamera].at<float>(i, j, k));
-                        }
-                    }
-                }
-                fprintf(stream, "\nBlue Chroma Correction Table[camera %d]:\n", icamera);
-                for (int i=0;i<control->ncorr_x;i++) {
-                    for (int j=0;j<control->ncorr_y;j++) {
-                        for (int k=0;k<control->ncorr_z;k++) {
-                        fprintf(stream,"    %d %d %d   %f\n", i, j, k, control->corr_table_cb[icamera].at<float>(i, j, k));
-                        }
-                    }
-                }
-            }
-        }
+
+    if (verbose > 0) {
+
+      /* print out each correction table layer from lowest standoff to largest */
+      fprintf(stderr, "\n---------------------\nCamera 0 Image Correction\n--------------------\n");
+      for (int k=0;k<control->ncorr_z;k++) {
+        fprintf(stderr, "Camera 0 Correction: Standoff %.3f meters +/- %.3f\n", k * control->bin_dz + control->corr_zmin, 0.5 * control->bin_dz);
+          for (int j=0;j<control->ncorr_y;j++) {
+              for (int i=0;i<control->ncorr_x;i++) {
+                  fprintf(stderr, "%5.1f ", control->corr_table_y[0].at<float>(i, j, k));
+              }
+              fprintf(stderr, "   ");
+              for (int i=0;i<control->ncorr_x;i++) {
+                  fprintf(stderr, "%5.1f ", control->corr_table_cr[0].at<float>(i, j, k));
+              }
+              fprintf(stderr, "   ");
+              for (int i=0;i<control->ncorr_x;i++) {
+                  fprintf(stderr, "%5.1f ", control->corr_table_cb[0].at<float>(i, j, k));
+              }
+              fprintf(stderr, "\n");
+          }
+          fprintf(stderr, "\n");
+      }
+      fprintf(stderr, "\n---------------------\nCamera 1 Image Correction\n--------------------\n");
+      for (int k=0;k<control->ncorr_z;k++) {
+        fprintf(stderr, "Camera 1 Correction: Standoff %.3f meters +/- %.3f\n", k * control->bin_dz + control->corr_zmin, 0.5 * control->bin_dz);
+          for (int j=0;j<control->ncorr_y;j++) {
+              for (int i=0;i<control->ncorr_x;i++) {
+                  fprintf(stderr, "%5.1f ", control->corr_table_y[1].at<float>(i, j, k));
+              }
+              fprintf(stderr, "   ");
+              for (int i=0;i<control->ncorr_x;i++) {
+                  fprintf(stderr, "%5.1f ", control->corr_table_cr[1].at<float>(i, j, k));
+              }
+              fprintf(stderr, "   ");
+              for (int i=0;i<control->ncorr_x;i++) {
+                  fprintf(stderr, "%5.1f ", control->corr_table_cb[1].at<float>(i, j, k));
+              }
+              fprintf(stderr, "\n");
+          }
+          fprintf(stderr, "\n");
+      }
+
     }
+
 }
 
 /*--------------------------------------------------------------------*/
@@ -2808,6 +2823,7 @@ int main(int argc, char** argv)
                 if (n == 1)
                     {
                     control.corr_mode = MBPM_CORRECTION_FILE;
+                    correction_specified = true;
                     if (strlen(ImageCorrectionFile) < 5
                         || strncmp(".yml", &ImageCorrectionFile[strlen(ImageCorrectionFile)-4], 4) != 0)
                         {
