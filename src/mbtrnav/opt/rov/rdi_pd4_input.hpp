@@ -64,18 +64,39 @@ public:
             //            std::cerr << std::dec;
             //            std::cerr << "  dvl.lock_btm : " << (dvl.lock_btm?1:0) << "\n";
             //            std::cerr << "  dvl.lock_ref : " << (dvl.lock_ref?1:0) << "\n";
+//            std::cerr << "  dvl.beam1_cm_uint: " << dvl.beam1_cm_uint << "\n";
+//            std::cerr << "  dvl.beam2_cm_uint: " << dvl.beam2_cm_uint << "\n";
+//            std::cerr << "  dvl.beam3_cm_uint: " << dvl.beam3_cm_uint << "\n";
+//            std::cerr << "  dvl.beam4_cm_uint: " << dvl.beam4_cm_uint << "\n";
 
             std::list<beam_tup> beams;
-            beams.emplace_back(1,dvl.beam1_cm_uint/100.);
-            beams.emplace_back(2,dvl.beam2_cm_uint/100.);
-            beams.emplace_back(3,dvl.beam3_cm_uint/100.);
-            beams.emplace_back(4,dvl.beam4_cm_uint/100.);
+            beams.emplace_back(1,(double)dvl.beam1_cm_uint/100.);
+            beams.emplace_back(2,(double)dvl.beam2_cm_uint/100.);
+            beams.emplace_back(3,(double)dvl.beam3_cm_uint/100.);
+            beams.emplace_back(4,(double)dvl.beam4_cm_uint/100.);
             mBathInst = bath_info(time, mPingNumber++, beams, bflags);
+
 
             // velocities are x:E, y:N, z:U
             double vx = dvl.xvelbtm_mms / 1000.;
             double vy = dvl.yvelbtm_mms / 1000.;
             double vz = dvl.zvelbtm_mms / 1000.;
+
+            // TODO: check velocity reference frame
+            // reported via sysconfig
+            // BIT 76543210
+            // 00xxxxxx BEAM-COORDINATE VELOCITIES
+            // 01xxxxxx INSTRUMENT-COORDINATE VELOCITIES
+            // 10xxxxxx SHIP-COORDINATE VELOCITIES
+            // 11xxxxxx EARTH-COORDINATE VELOCITIES
+            // xx0xxxxx TILT INFORMATION NOT USED IN CALCULATIONS
+            // xx1xxxxx TILT INFORMATION USED IN CALCULATIONS
+            // xxx0xxxx 3-BEAM SOLUTIONS NOT COMPUTED
+            // xxx1xxxx 3-BEAM SOLUTIONS COMPUTED
+            // xxxxx010 300-kHz DVL
+            // xxxxx011 600-kHz DVL
+            // xxxxx100 1200-kHz DVL
+
             vel_flags_t vflags = 0;
 
             vflags |= ( ((bflags|BF_BLOCK) != 0) ? VF_BLOCK : 0);

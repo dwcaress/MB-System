@@ -15,12 +15,11 @@
 #include "lcm_pcf/string_t.hpp"
 #include "data_container.hpp"
 #include "oi/octans_t.hpp"
-#include "nav_input.hpp"
 #include "att_input.hpp"
 
 namespace trn
 {
-class octans_input : public att_input, public vel_input
+class octans_input : public att_input
 {
 public:
 
@@ -65,17 +64,6 @@ public:
             aflags |= (att_valid ? AF_VALID : 0);
             mAttInst = att_info(time, pitch, roll, heading, aflags);
             att_input::mDataInstMutex.unlock();
-
-            // TODO: is this velocity or acceleration?
-            double vx = msg.x_meters_sec2;
-            double vy = msg.y_meters_sec2;
-            double vz = msg.z_meters_sec2;
-            vel_flags_t vflags = 0;
-
-            vflags |= (VF_BLOCK);
-            vflags |= (VF_RLOCK);
-            vflags |= (VF_VALID);
-            mVelInst = vel_info(time, vx, vy, vz, vflags);
 
 #ifdef WITH_SHOW_DCON
             std::cerr << __func__ << ":" << std::dec << __LINE__ << " Updated DATA_TIME\n";

@@ -733,6 +733,7 @@ public:
         //    " --log-en      : enable app logging\n"
         " --help                : output help message\n"
         " --version             : output version info\n"
+        " --cfg=s               : configuration file path\n"
         " --host=addr[:port]    : MB1 server\n"
         " --trnum=addr[:port:ttl] : TRN UDP mcast config (from mbtrnpp)\n"
         " --delay=u             : main loop delay\n"
@@ -1042,9 +1043,10 @@ public:
         os << std::dec << std::setfill(' ');
         os << std::setw(wkey) << "verbose " << std::setw(wval) << (mVerbose?"Y":"N") << "\n";
         os << std::setw(wkey) << "debug " << std::setw(wval) << mDebug  << "\n";
-        os << std::setw(wkey) << "cycles " << std::setw(wval) << mCycles  << "\n";
+        os << std::setw(wkey) << "cfg " << std::setw(wval) << mAppCfg  << "\n";
         os << std::setw(wkey) << "host " << std::setw(wval) << mHost << ":" << mPort << "\n";
         os << std::setw(wkey) << "trnu " << std::setw(wval) << mTrnuGroup << ":" <<  mTrnuPort << ":" << mTrnuTTL<< "\n";
+        os << std::setw(wkey) << "cycles " << std::setw(wval) << mCycles  << "\n";
         os << std::setw(wkey) << "delay " << std::setw(wval) << mDelay << "\n";
         os << std::fixed << std::setprecision(3);
         os << std::setw(wkey) << "stat_period " << std::setw(wval) << mStatPeriod << "\n";
@@ -1061,7 +1063,6 @@ public:
         os << std::setw(wkey) << "trn-csv " << std::setw(wval) << mTrnCsv  << "\n";
         os << std::setw(wkey) << "mb1-csv " << std::setw(wval) << mMB1Csv  << "\n";
         os << std::setw(wkey) << "trn-decn " << std::setw(wval) << mTrnDecN  << "\n";
-        os << std::setw(wkey) << "cfg " << std::setw(wval) << mAppCfg  << "\n";
         os << std::setw(wkey) << "fakemb1 " << std::setw(wval) << (mFakeMB1?"Y":"N")  << "\n";
         os << std::setw(wkey) << "inputs"<< "\n";
 
@@ -1589,7 +1590,7 @@ int cb_update_trncli(void *pargs)
 
 
         TRN_NDPRINT(2, "%s:%d lat[%.6lf] lon[%.6lf] utm[%ld]\n", __func__, __LINE__, lat, lon, utm);
-        TRN_NDPRINT(2, "%s:%d x[%.4lf] y[%.4lf] p/r/y[%.2lf%s %.2lf, %.2lf]\n\n", __func__, __LINE__, x, y, theta, (ai->flags().is_set(trn::AF_INVERT_PITCH)? "*," :","), phi, psi);
+        TRN_NDPRINT(2, "%s:%d x[%.4lf] y[%.4lf] depth[%.1lf] p/r/y[%.2lf%s %.2lf, %.2lf] vx[%.2lf]\n", __func__, __LINE__, x, y, z, theta, (ai->flags().is_set(trn::AF_INVERT_PITCH)? "*," :","), phi, psi, vx);
 
         poseT pt;
         pt.x = x;
@@ -1634,6 +1635,15 @@ int cb_update_trncli(void *pargs)
             mt.beamNums[k] = std::get<0>(bt);
             mt.measStatus[k] = (mt.ranges[k] > 1 ? true : false);
         }
+        TRN_NDPRINT(2, "%s:%d nbeams[%u] ranges[%.2lf, %.2lf, %.2lf, %.2lf] status[%c, %c, %c, %c]\n", __func__, __LINE__,n_beams,
+                    n_beams>0?mt.ranges[0]:-1.,
+                    n_beams>1?mt.ranges[1]:-1.,
+                    n_beams>2?mt.ranges[2]:-1.,
+                    n_beams>3?mt.ranges[3]:-1.,
+                    n_beams>0?mt.measStatus[0] ? 'Y' : 'N':'?',
+                    n_beams>1?mt.measStatus[1] ? 'Y' : 'N':'?',
+                    n_beams>2?mt.measStatus[2] ? 'Y' : 'N':'?',
+                    n_beams>3?mt.measStatus[3] ? 'Y' : 'N':'?');
 
         try{
             trn->motionUpdate(&pt);
@@ -2250,6 +2260,10 @@ static void s_parse_ctx( char *i_ctx, const char *chan, callback_res_t *cb_res)
         // create input (chan, depth) if it doesn't exist
         listener = xpp->create_input(chan, 10);
         TRN_NDPRINT(2, "%s:%d - add input chan[%s] @[%p]\n",__func__, __LINE__, chan, listener);
+        if(listener == nullptr){
+            fprintf(stderr,"%s:%d ERR - NULL create_input returned NULL listener - check configuration for chan [%s]\n", __func__, __LINE__, chan);
+
+        }
         // add input
         xpp->add_input(chan, listener);
     }
