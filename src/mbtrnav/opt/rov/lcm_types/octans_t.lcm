@@ -1,0 +1,33 @@
+//////////////////////////////////////////////////////////////////////////////
+// Copyright 2019 MBARI.                                                    //
+// MBARI Proprietary Information. All rights reserved.                      //
+//////////////////////////////////////////////////////////////////////////////
+
+package oi;
+
+struct octans_t
+{
+    // message header
+    lcm_header_t header;
+
+    // comm stats
+    double uptime_sec;
+    int64_t sync_cnt;
+    int64_t parse_err_cnt;
+    boolean rx_connected;
+
+    // payload
+    double roll_deg;
+    double pitch_deg;
+    double heading_deg;
+
+    double roll_deg_sec;
+    double pitch_deg_sec;
+    double heading_deg_sec;
+
+    double x_meters_sec2;
+    double y_meters_sec2;
+    double z_meters_sec2;
+
+    byte status;
+}

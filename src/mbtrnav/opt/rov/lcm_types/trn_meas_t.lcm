@@ -1,0 +1,32 @@
+//////////////////////////////////////////////////////////////////////////////
+// Copyright 2021  Monterey Bay Aquarium Research Institute                 //
+// Distributed under MIT license. See license.txt for more information.     //
+//////////////////////////////////////////////////////////////////////////////
+package trn;
+
+struct trn_meas_t
+{
+    //Measurement time (s)
+    double time;
+
+	//1: DVL, 2: Multibeam, 3: Single Beam,
+    //4: Homer Relative Measurement, 5: Imagenex multibeam, 6: Side-looking DVL
+    int32_t dataType;
+    double phi;
+    double theta;
+    double psi;
+    double x;
+    double y;
+    double z;
+    int32_t ping_number;
+    int32_t numMeas;
+    double covariance[numMeas];
+    double ranges[numMeas];
+    double crossTrack[numMeas];
+    double alongTrack[numMeas];
+    double altitudes[numMeas];
+    double alphas[numMeas];
+    int8_t measStatus[numMeas];
+    int32_t beamNums[numMeas];
+}
+

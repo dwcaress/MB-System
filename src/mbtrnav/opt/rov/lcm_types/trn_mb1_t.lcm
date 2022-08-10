@@ -1,0 +1,42 @@
+//////////////////////////////////////////////////////////////////////////////
+// Copyright 2021  Monterey Bay Aquarium Research Institute                 //
+// Distributed under MIT license. See license.txt for more information.     //
+//////////////////////////////////////////////////////////////////////////////
+package trn;
+
+struct trn_mb1_t
+{
+    /// record type ID ('M''B''1''\0')
+    int32_t type;
+
+    /// total bytes, including header and checksum
+    int32_t size;
+
+    /// epoch time of ping
+    double ts;
+
+    /// latitude
+    double lat;
+
+    /// longitude
+    double lon;
+
+    /// vehicle position depth meters
+    double depth;
+
+    /// heading
+    double hdg;
+
+    /// ping number
+    int32_t ping_number;
+
+    /// number of beams
+    int32_t nbeams;
+
+    /// beam data array
+    mb1_beam_t beams[nbeams];
+    
+    /// 32-bit checksum follows beam array
+    int32_t checksum;
+}
+

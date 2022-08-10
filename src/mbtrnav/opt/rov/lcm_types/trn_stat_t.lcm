@@ -1,0 +1,18 @@
+//////////////////////////////////////////////////////////////////////////////
+// Copyright 2021  Monterey Bay Aquarium Research Institute                 //
+// Distributed under MIT license. See license.txt for more information.     //
+//////////////////////////////////////////////////////////////////////////////
+package trn;
+
+struct trn_stat_t
+{
+    // TRN update time
+    double update_time;
+
+    string source;
+
+    // TRN estimates
+    // 0:pose 1:mle 2:mmse 3: offset 4: most recent useful offset
+    trnu_estimate_t est[5];
+}
+

@@ -95,7 +95,8 @@ bin_PROGRAMS = trn-server$(EXEEXT) trn-replay$(EXEEXT) \
 	trnclient-test$(EXEEXT) mmcpub$(EXEEXT) mmcsub$(EXEEXT) \
 	trnu-cli$(EXEEXT) trn-cli$(EXEEXT) trnif-test$(EXEEXT) \
 	trnusvr-test$(EXEEXT) netif-test$(EXEEXT) \
-	trnifsvr-test$(EXEEXT) mb1rs$(EXEEXT) otree$(EXEEXT)
+	trnifsvr-test$(EXEEXT) mb1rs$(EXEEXT) trnlog-player$(EXEEXT) \
+	$(am__EXEEXT_1)
 subdir = src/mbtrnav
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/ax_check_compile_flag.m4 \
@@ -110,11 +111,12 @@ am__aclocal_m4_deps = $(top_srcdir)/m4/ax_check_compile_flag.m4 \
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 DIST_COMMON = $(srcdir)/Makefile.am $(dist_bin_SCRIPTS) \
-	$(include_HEADERS)
+	$(am__include_HEADERS_DIST)
 mkinstalldirs = $(install_sh) -d
 CONFIG_HEADER = $(top_builddir)/src/mbio/mb_config.h
 CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
+@BUILD_ROVTRN_TRUE@am__EXEEXT_1 = trnxpp$(EXEEXT)
 am__installdirs = "$(DESTDIR)$(bindir)" "$(DESTDIR)$(libdir)" \
 	"$(DESTDIR)$(bindir)" "$(DESTDIR)$(includedir)"
 PROGRAMS = $(bin_PROGRAMS)
@@ -231,21 +233,19 @@ libqnx_la_OBJECTS = $(am_libqnx_la_OBJECTS)
 libqnx_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CXXLD) $(AM_CXXFLAGS) \
 	$(CXXFLAGS) $(libqnx_la_LDFLAGS) $(LDFLAGS) -o $@
-am__DEPENDENCIES_1 =
-libtnav_la_DEPENDENCIES = libgeolib.la libnewmat.la libqnx.la \
-	$(am__DEPENDENCIES_1)
+libtnav_la_DEPENDENCIES = libgeolib.la libnewmat.la libqnx.la
 am_libtnav_la_OBJECTS = terrain-nav/TerrainNav.lo \
 	terrain-nav/TNavConfig.lo terrain-nav/TNavFilter.lo \
 	terrain-nav/TNavPointMassFilter.lo \
 	terrain-nav/TNavParticleFilter.lo \
 	terrain-nav/TNavBankFilter.lo terrain-nav/TNavPFLog.lo \
 	terrain-nav/TerrainMapOctree.lo terrain-nav/PositionLog.lo \
-	terrain-nav/TerrainNavLog.lo terrain-nav/mapio.lo \
-	terrain-nav/structDefs.lo terrain-nav/trn_log.lo \
-	terrain-nav/myOutput.lo terrain-nav/matrixArrayCalcs.lo \
-	terrain-nav/TerrainMapDEM.lo terrain-nav/OctreeSupport.lo \
-	terrain-nav/Octree.lo terrain-nav/OctreeNode.lo \
-	terrain-nav/TRNUtils.lo
+	terrain-nav/TerrainNavLog.lo terrain-nav/TrnLog.lo \
+	terrain-nav/mapio.lo terrain-nav/structDefs.lo \
+	terrain-nav/trn_log.lo terrain-nav/myOutput.lo \
+	terrain-nav/matrixArrayCalcs.lo terrain-nav/TerrainMapDEM.lo \
+	terrain-nav/OctreeSupport.lo terrain-nav/Octree.lo \
+	terrain-nav/OctreeNode.lo terrain-nav/TRNUtils.lo
 libtnav_la_OBJECTS = $(am_libtnav_la_OBJECTS)
 libtnav_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CXXLD) $(AM_CXXFLAGS) \
@@ -258,7 +258,7 @@ libtrnw_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) \
 	$(CXXFLAGS) $(libtrnw_la_LDFLAGS) $(LDFLAGS) -o $@
 am_mb1rs_OBJECTS = trnw/mb1rs.$(OBJEXT) trnw/mb1rs-app.$(OBJEXT)
 mb1rs_OBJECTS = $(am_mb1rs_OBJECTS)
-mb1rs_DEPENDENCIES = $(LIBMFRAME) libmb1.la libtnav.la
+mb1rs_DEPENDENCIES = $(LIBMFRAME) libmb1.la
 am_mmcpub_OBJECTS = trnw/mmcpub.$(OBJEXT)
 mmcpub_OBJECTS = $(am_mmcpub_OBJECTS)
 mmcpub_DEPENDENCIES = $(LIBMFRAME)
@@ -268,9 +268,6 @@ mmcsub_DEPENDENCIES = $(LIBMFRAME)
 am_netif_test_OBJECTS = utils/netif-test.$(OBJEXT)
 netif_test_OBJECTS = $(am_netif_test_OBJECTS)
 netif_test_DEPENDENCIES = libnetif.la libtrnw.la
-am_otree_OBJECTS = utils/OctreeTest.$(OBJEXT)
-otree_OBJECTS = $(am_otree_OBJECTS)
-otree_DEPENDENCIES = libtnav.la libnewmat.la libqnx.la libgeolib.la
 am_trn_cli_OBJECTS = trnw/trncli_test.$(OBJEXT) trnw/trn_cli.$(OBJEXT)
 trn_cli_OBJECTS = $(am_trn_cli_OBJECTS)
 trn_cli_DEPENDENCIES = $(LIBMFRAME) libtrnw.la
@@ -278,11 +275,10 @@ am_trn_replay_OBJECTS = opt/dorado/Replay.$(OBJEXT) \
 	opt/dorado/trn_replay.$(OBJEXT) \
 	utils/TerrainNavClient.$(OBJEXT)
 trn_replay_OBJECTS = $(am_trn_replay_OBJECTS)
-trn_replay_DEPENDENCIES = libtnav.la libnewmat.la libqnx.la \
-	libgeolib.la
+trn_replay_DEPENDENCIES =
 am_trn_server_OBJECTS = utils/trn_server.$(OBJEXT)
 trn_server_OBJECTS = $(am_trn_server_OBJECTS)
-trn_server_DEPENDENCIES = libtnav.la libqnx.la libnewmat.la \
+trn_server_DEPENDENCIES = libtnav.la libqnx.la libnewmat.la libtnav.la \
 	libgeolib.la
 am_trnclient_test_OBJECTS = utils/trnclient_test.$(OBJEXT) \
 	utils/TrnClient.$(OBJEXT) utils/TerrainNavClient.$(OBJEXT)
@@ -294,6 +290,10 @@ trnif_test_DEPENDENCIES = libnetif.la libtrnw.la
 am_trnifsvr_test_OBJECTS = utils/trnifsvr-test.$(OBJEXT)
 trnifsvr_test_OBJECTS = $(am_trnifsvr_test_OBJECTS)
 trnifsvr_test_DEPENDENCIES = libnetif.la libtrnw.la
+am_trnlog_player_OBJECTS = utils/trnlog_player.$(OBJEXT) \
+	utils/TrnClient.$(OBJEXT) utils/TerrainNavClient.$(OBJEXT)
+trnlog_player_OBJECTS = $(am_trnlog_player_OBJECTS)
+trnlog_player_DEPENDENCIES = libtnav.la
 am_trnu_cli_OBJECTS = trnw/trnucli_test.$(OBJEXT) \
 	trnw/trnu_cli.$(OBJEXT)
 trnu_cli_OBJECTS = $(am_trnu_cli_OBJECTS)
@@ -301,6 +301,12 @@ trnu_cli_DEPENDENCIES = $(LIBMFRAME) libtrnw.la libnetif.la
 am_trnusvr_test_OBJECTS = trnw/trnusvr_test.$(OBJEXT)
 trnusvr_test_OBJECTS = $(am_trnusvr_test_OBJECTS)
 trnusvr_test_DEPENDENCIES = libnetif.la libtrnw.la
+@BUILD_ROVTRN_TRUE@am_trnxpp_OBJECTS = opt/rov/udpm_sub.$(OBJEXT) \
+@BUILD_ROVTRN_TRUE@	opt/rov/trnxpp_app.$(OBJEXT) \
+@BUILD_ROVTRN_TRUE@	utils/TrnClient.$(OBJEXT) \
+@BUILD_ROVTRN_TRUE@	utils/TerrainNavClient.$(OBJEXT)
+trnxpp_OBJECTS = $(am_trnxpp_OBJECTS)
+@BUILD_ROVTRN_TRUE@trnxpp_DEPENDENCIES = libmb1.la libtnav.la
 SCRIPTS = $(dist_bin_SCRIPTS)
 AM_V_P = $(am__v_P_@AM_V@)
 am__v_P_ = $(am__v_P_@AM_DEFAULT_V@)
@@ -398,6 +404,7 @@ am__depfiles_remade = gctp/source/$(DEPDIR)/alberfor.Plo \
 	newmat/$(DEPDIR)/sort.Plo newmat/$(DEPDIR)/submat.Plo \
 	newmat/$(DEPDIR)/svd.Plo opt/dorado/$(DEPDIR)/Replay.Po \
 	opt/dorado/$(DEPDIR)/trn_replay.Po \
+	opt/rov/$(DEPDIR)/trnxpp_app.Po opt/rov/$(DEPDIR)/udpm_sub.Po \
 	qnx-utils/$(DEPDIR)/AngleData.Plo \
 	qnx-utils/$(DEPDIR)/AsciiFile.Plo \
 	qnx-utils/$(DEPDIR)/BinaryFile.Plo \
@@ -432,6 +439,7 @@ am__depfiles_remade = gctp/source/$(DEPDIR)/alberfor.Plo \
 	terrain-nav/$(DEPDIR)/TerrainMapOctree.Plo \
 	terrain-nav/$(DEPDIR)/TerrainNav.Plo \
 	terrain-nav/$(DEPDIR)/TerrainNavLog.Plo \
+	terrain-nav/$(DEPDIR)/TrnLog.Plo \
 	terrain-nav/$(DEPDIR)/mapio.Plo \
 	terrain-nav/$(DEPDIR)/matrixArrayCalcs.Plo \
 	terrain-nav/$(DEPDIR)/myOutput.Plo \
@@ -444,12 +452,12 @@ am__depfiles_remade = gctp/source/$(DEPDIR)/alberfor.Plo \
 	trnw/$(DEPDIR)/trnif_proto.Plo trnw/$(DEPDIR)/trnif_test.Po \
 	trnw/$(DEPDIR)/trnu_cli.Po trnw/$(DEPDIR)/trnucli_test.Po \
 	trnw/$(DEPDIR)/trnusvr_test.Po trnw/$(DEPDIR)/trnw.Plo \
-	utils/$(DEPDIR)/OctreeTest.Po \
 	utils/$(DEPDIR)/TerrainNavClient.Po \
 	utils/$(DEPDIR)/TrnClient.Po utils/$(DEPDIR)/netif-test.Po \
 	utils/$(DEPDIR)/trn_server.Po \
 	utils/$(DEPDIR)/trnclient_test.Po \
-	utils/$(DEPDIR)/trnifsvr-test.Po
+	utils/$(DEPDIR)/trnifsvr-test.Po \
+	utils/$(DEPDIR)/trnlog_player.Po
 am__mv = mv -f
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
@@ -491,16 +499,25 @@ SOURCES = $(libgeolib_la_SOURCES) $(libmb1_la_SOURCES) \
 	$(libnetif_la_SOURCES) $(libnewmat_la_SOURCES) \
 	$(libqnx_la_SOURCES) $(libtnav_la_SOURCES) \
 	$(libtrnw_la_SOURCES) $(mb1rs_SOURCES) $(mmcpub_SOURCES) \
-	$(mmcsub_SOURCES) $(netif_test_SOURCES) $(otree_SOURCES) \
-	$(trn_cli_SOURCES) $(trn_replay_SOURCES) $(trn_server_SOURCES) \
+	$(mmcsub_SOURCES) $(netif_test_SOURCES) $(trn_cli_SOURCES) \
+	$(trn_replay_SOURCES) $(trn_server_SOURCES) \
 	$(trnclient_test_SOURCES) $(trnif_test_SOURCES) \
-	$(trnifsvr_test_SOURCES) $(trnu_cli_SOURCES) \
-	$(trnusvr_test_SOURCES)
+	$(trnifsvr_test_SOURCES) $(trnlog_player_SOURCES) \
+	$(trnu_cli_SOURCES) $(trnusvr_test_SOURCES) $(trnxpp_SOURCES)
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
     n|no|NO) false;; \
     *) (install-info --version) >/dev/null 2>&1;; \
   esac
+am__include_HEADERS_DIST = opt/rov/lcm_pcf/signal_t.hpp \
+	opt/rov/lcm_pcf/string_t.hpp opt/rov/gss/nav_solution_t.hpp \
+	opt/rov/gss/message_t.hpp opt/rov/gss/analog_t.hpp \
+	opt/rov/gss/digital_t.hpp opt/rov/gss/dvl_stat_t.hpp \
+	opt/rov/gss/pcomms_t.hpp opt/rov/oi/idt_t.hpp \
+	opt/rov/oi/lcm_header_t.hpp opt/rov/trn/mb1_beam_t.hpp \
+	opt/rov/trn/trnu_estimate_t.hpp opt/rov/trn/trn_stat_t.hpp \
+	opt/rov/trn/trn_meas_t.hpp opt/rov/trn/trn_pose_t.hpp \
+	opt/rov/trn/trnupub_t.hpp opt/rov/trn/trn_mb1_t.hpp
 HEADERS = $(include_HEADERS)
 am__tagged_files = $(HEADERS) $(SOURCES) $(TAGS_FILES) $(LISP)
 # Read a list of newline-separated strings from the standard input,
@@ -554,7 +571,6 @@ EGREP = @EGREP@
 ETAGS = @ETAGS@
 EXEEXT = @EXEEXT@
 FGREP = @FGREP@
-FILECMD = @FILECMD@
 GDAL_CONF = @GDAL_CONF@
 GMT_CONF = @GMT_CONF@
 GMT_PLUGINDIR = @GMT_PLUGINDIR@
@@ -732,20 +748,22 @@ top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 lib_LTLIBRARIES = libgeolib.la libnewmat.la libqnx.la libtnav.la libtrnw.la libnetif.la libmb1.la
 LIBMFRAME = $(top_builddir)/src/mbtrnframe/libmframe.la
-MFRAME_INC = -I${top_srcdir}/src/mbtrnframe/usr -I${top_srcdir}/src/mbtrnframe/mframe/src
-include_HEADERS = 
+MFRAME_INC = -I${top_srcdir}/src/mbtrnframe/usr -I${top_srcdir}/src/mbtrnframe/mframe/src 
 AM_CFLAGS = ${libgmt_CFLAGS} ${libnetcdf_CFLAGS}
+#AM_CPPFLAGS += -DWITH_ALT_DELTAT_VALIDATION
 AM_CPPFLAGS = -g -O0 -I${top_srcdir}/src/mbtrnav/trnw \
 	-I${top_srcdir}/src/mbtrnav/utils \
 	-I${top_srcdir}/src/mbtrnav/terrain-nav \
 	-I${top_srcdir}/src/mbtrnav/qnx-utils \
 	-I${top_srcdir}/src/mbtrnav/newmat \
 	-I${top_srcdir}/src/mbtrnav/gctp/source \
+	-I${top_srcdir}/src/mbtrnav/opt/rov \
 	-I${top_srcdir}/src/mbtrn/utils -I${top_srcdir}/src/mbtrn/mb1r \
 	-I${top_srcdir}/src/mbtrnframe/usr \
 	-I${top_srcdir}/src/mbtrnframe/mframe/src -DHAVE_CONFIG_H \
 	-DWITH_TESTS -DWITH_MMDEBUG -D_GNU_SOURCE -DWITH_MST_MSTATS \
-	-DMST_STATS_EN ${libnetcdf_CPPFLAGS}
+	-DMST_STATS_EN -DWITH_TRNLOG -DWITH_TRNLOG_EST_OUT
+#AM_CPPFLAGS += -DTRN_NORAND
 libgeolib_la_LDFLAGS = -no-undefined -version-info 0:0:0
 libgeolib_la_SOURCES = gctp/source/gctp.c gctp/source/alberfor.c \
 	gctp/source/alberinv.c gctp/source/alconfor.c \
@@ -808,14 +826,14 @@ libtnav_la_SOURCES = terrain-nav/TerrainNav.cpp \
 	terrain-nav/TNavParticleFilter.cpp \
 	terrain-nav/TNavBankFilter.cpp terrain-nav/TNavPFLog.cpp \
 	terrain-nav/TerrainMapOctree.cpp terrain-nav/PositionLog.cpp \
-	terrain-nav/TerrainNavLog.cpp terrain-nav/mapio.cpp \
-	terrain-nav/structDefs.cpp terrain-nav/trn_log.cpp \
-	terrain-nav/myOutput.cpp terrain-nav/matrixArrayCalcs.cpp \
-	terrain-nav/TerrainMapDEM.cpp terrain-nav/OctreeSupport.cpp \
-	terrain-nav/Octree.cpp terrain-nav/OctreeNode.cpp \
-	terrain-nav/TRNUtils.cpp
-libtnav_la_LIBADD = libgeolib.la libnewmat.la libqnx.la \
-	${libnetcdf_LIBS} -lm -lpthread
+	terrain-nav/TerrainNavLog.cpp terrain-nav/TrnLog.cpp \
+	terrain-nav/mapio.cpp terrain-nav/structDefs.cpp \
+	terrain-nav/trn_log.cpp terrain-nav/myOutput.cpp \
+	terrain-nav/matrixArrayCalcs.cpp terrain-nav/TerrainMapDEM.cpp \
+	terrain-nav/OctreeSupport.cpp terrain-nav/Octree.cpp \
+	terrain-nav/OctreeNode.cpp terrain-nav/TRNUtils.cpp
+libtnav_la_LIBADD = libgeolib.la libnewmat.la libqnx.la -lm -lnetcdf \
+	-lpthread
 libtrnw_la_LDFLAGS = -no-undefined -version-info 0:0:0
 libtrnw_la_SOURCES = trnw/trnw.cpp trnw/mb1_msg.c trnw/trnif_msg.c
 libtrnw_la_LIBADD = libtnav.la libqnx.la libnewmat.la -lm -lpthread
@@ -825,10 +843,64 @@ libnetif_la_LIBADD = ${LIBMFRAME} libtrnw.la -lm -lpthread
 libmb1_la_LDFLAGS = -no-undefined -version-info 0:0:0
 libmb1_la_SOURCES = trnw/mb1_msg.c
 libmb1_la_LIBADD = 
+@BUILD_ROVTRN_TRUE@include_HEADERS = \
+@BUILD_ROVTRN_TRUE@opt/rov/lcm_pcf/signal_t.hpp \
+@BUILD_ROVTRN_TRUE@opt/rov/lcm_pcf/string_t.hpp \
+@BUILD_ROVTRN_TRUE@opt/rov/gss/nav_solution_t.hpp \
+@BUILD_ROVTRN_TRUE@opt/rov/gss/message_t.hpp \
+@BUILD_ROVTRN_TRUE@opt/rov/gss/analog_t.hpp \
+@BUILD_ROVTRN_TRUE@opt/rov/gss/digital_t.hpp \
+@BUILD_ROVTRN_TRUE@opt/rov/gss/dvl_stat_t.hpp \
+@BUILD_ROVTRN_TRUE@opt/rov/gss/pcomms_t.hpp \
+@BUILD_ROVTRN_TRUE@opt/rov/oi/idt_t.hpp \
+@BUILD_ROVTRN_TRUE@opt/rov/oi/lcm_header_t.hpp \
+@BUILD_ROVTRN_TRUE@opt/rov/trn/mb1_beam_t.hpp \
+@BUILD_ROVTRN_TRUE@opt/rov/trn/trnu_estimate_t.hpp \
+@BUILD_ROVTRN_TRUE@opt/rov/trn/trn_stat_t.hpp \
+@BUILD_ROVTRN_TRUE@opt/rov/trn/trn_meas_t.hpp \
+@BUILD_ROVTRN_TRUE@opt/rov/trn/trn_pose_t.hpp \
+@BUILD_ROVTRN_TRUE@opt/rov/trn/trnupub_t.hpp \
+@BUILD_ROVTRN_TRUE@opt/rov/trn/trn_mb1_t.hpp
+
+@BUILD_ROVTRN_TRUE@LCM_JAR = /usr/local/share/java/lcm.jar
+@BUILD_ROVTRN_TRUE@ROVTRN_APPS = trnxpp
+@BUILD_ROVTRN_TRUE@trnxpp_SOURCES = \
+@BUILD_ROVTRN_TRUE@opt/rov/udpm_sub.c \
+@BUILD_ROVTRN_TRUE@opt/rov/trnxpp_app.cpp \
+@BUILD_ROVTRN_TRUE@utils/TrnClient.cpp \
+@BUILD_ROVTRN_TRUE@utils/TerrainNavClient.cpp
+
+@BUILD_ROVTRN_TRUE@trnxpp_LDADD = -llcm libmb1.la libtnav.la
+@BUILD_ROVTRN_TRUE@TRN_HPP = opt/rov/lcm_pcf/signal_t.hpp \
+@BUILD_ROVTRN_TRUE@	opt/rov/lcm_pcf/string_t.hpp \
+@BUILD_ROVTRN_TRUE@	opt/rov/gss/nav_solution_t.hpp \
+@BUILD_ROVTRN_TRUE@	opt/rov/gss/message_t.hpp \
+@BUILD_ROVTRN_TRUE@	opt/rov/gss/analog_t.hpp \
+@BUILD_ROVTRN_TRUE@	opt/rov/gss/digital_t.hpp \
+@BUILD_ROVTRN_TRUE@	opt/rov/gss/dvl_stat_t.hpp \
+@BUILD_ROVTRN_TRUE@	opt/rov/gss/pcomms_t.hpp \
+@BUILD_ROVTRN_TRUE@	opt/rov/oi/idt_t.hpp \
+@BUILD_ROVTRN_TRUE@	opt/rov/oi/lcm_header_t.hpp \
+@BUILD_ROVTRN_TRUE@	opt/rov/oi/rdi_pd4_t.hpp \
+@BUILD_ROVTRN_TRUE@	opt/rov/oi/kearfott_t.hpp \
+@BUILD_ROVTRN_TRUE@	opt/rov/oi/octans_t.hpp \
+@BUILD_ROVTRN_TRUE@	opt/rov/oi/double_t.hpp \
+@BUILD_ROVTRN_TRUE@	opt/rov/trn/mb1_beam_t.hpp \
+@BUILD_ROVTRN_TRUE@	opt/rov/trn/trnu_estimate_t.hpp \
+@BUILD_ROVTRN_TRUE@	opt/rov/trn/trn_stat_t.hpp \
+@BUILD_ROVTRN_TRUE@	opt/rov/trn/trn_meas_t.hpp \
+@BUILD_ROVTRN_TRUE@	opt/rov/trn/trn_pose_t.hpp \
+@BUILD_ROVTRN_TRUE@	opt/rov/trn/trnupub_t.hpp \
+@BUILD_ROVTRN_TRUE@	opt/rov/trn/trn_mb1_t.hpp
+@BUILD_ROVTRN_TRUE@TRN_LCM = ${TRN_HPP:%.hpp=%.lcm}
+@BUILD_ROVTRN_TRUE@TRN_JSRC = ${TRN_HPP:%.hpp=%.java}
+@BUILD_ROVTRN_TRUE@TRN_JCLS = ${TRN_HPP:%.hpp=%.class}
+@BUILD_ROVTRN_TRUE@BUILT_SOURCES = ${TRN_HPP} ${TRN_JSRC} ${TRN_JCLS} \
+@BUILD_ROVTRN_TRUE@	lcm_rovtrn.jar
 trn_server_SOURCES = utils/trn_server.cpp
-trn_server_LDADD = libtnav.la libqnx.la libnewmat.la libgeolib.la
+trn_server_LDADD = libtnav.la libqnx.la libnewmat.la libtnav.la libgeolib.la
 trn_replay_SOURCES = opt/dorado/Replay.cpp opt/dorado/trn_replay.cpp utils/TerrainNavClient.cpp
-trn_replay_LDADD = libtnav.la  libnewmat.la libqnx.la libgeolib.la -lnetcdf -lm -lpthread
+trn_replay_LDADD = -ltnav  -lnewmat -lqnx -lnetcdf -lm -lpthread -lgeolib 
 trnclient_test_SOURCES = utils/trnclient_test.cpp utils/TrnClient.cpp utils/TerrainNavClient.cpp
 trnclient_test_LDADD = libtnav.la
 mmcpub_SOURCES = trnw/mmcpub.c
@@ -848,13 +920,14 @@ netif_test_LDADD = libnetif.la  libtrnw.la
 trnifsvr_test_SOURCES = utils/trnifsvr-test.c
 trnifsvr_test_LDADD = libnetif.la  libtrnw.la
 mb1rs_SOURCES = trnw/mb1rs.c trnw/mb1rs-app.c
-mb1rs_LDADD = ${LIBMFRAME} libmb1.la libtnav.la
-otree_SOURCES = utils/OctreeTest.cpp
-otree_LDADD = libtnav.la  libnewmat.la libqnx.la libgeolib.la -lnetcdf -lm -lpthread 
+mb1rs_LDADD = ${LIBMFRAME} libmb1.la
+trnlog_player_SOURCES = utils/trnlog_player.cpp utils/TrnClient.cpp utils/TerrainNavClient.cpp
+trnlog_player_LDADD = libtnav.la
 dist_bin_SCRIPTS = 
-CLEANFILES = 
+CLEANFILES = ${BUILT_SOURCES} #${ROVTRN_CLEANFILES}
 DISTCLEANFILES = 
-all: all-am
+all: $(BUILT_SOURCES)
+	$(MAKE) $(AM_MAKEFLAGS) all-am
 
 .SUFFIXES:
 .SUFFIXES: .c .cc .cpp .lo .o .obj
@@ -1262,6 +1335,8 @@ terrain-nav/PositionLog.lo: terrain-nav/$(am__dirstamp) \
 	terrain-nav/$(DEPDIR)/$(am__dirstamp)
 terrain-nav/TerrainNavLog.lo: terrain-nav/$(am__dirstamp) \
 	terrain-nav/$(DEPDIR)/$(am__dirstamp)
+terrain-nav/TrnLog.lo: terrain-nav/$(am__dirstamp) \
+	terrain-nav/$(DEPDIR)/$(am__dirstamp)
 terrain-nav/mapio.lo: terrain-nav/$(am__dirstamp) \
 	terrain-nav/$(DEPDIR)/$(am__dirstamp)
 terrain-nav/structDefs.lo: terrain-nav/$(am__dirstamp) \
@@ -1322,12 +1397,6 @@ utils/netif-test.$(OBJEXT): utils/$(am__dirstamp) \
 netif-test$(EXEEXT): $(netif_test_OBJECTS) $(netif_test_DEPENDENCIES) $(EXTRA_netif_test_DEPENDENCIES) 
 	@rm -f netif-test$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(netif_test_OBJECTS) $(netif_test_LDADD) $(LIBS)
-utils/OctreeTest.$(OBJEXT): utils/$(am__dirstamp) \
-	utils/$(DEPDIR)/$(am__dirstamp)
-
-otree$(EXEEXT): $(otree_OBJECTS) $(otree_DEPENDENCIES) $(EXTRA_otree_DEPENDENCIES) 
-	@rm -f otree$(EXEEXT)
-	$(AM_V_CXXLD)$(CXXLINK) $(otree_OBJECTS) $(otree_LDADD) $(LIBS)
 trnw/trncli_test.$(OBJEXT): trnw/$(am__dirstamp) \
 	trnw/$(DEPDIR)/$(am__dirstamp)
 trnw/trn_cli.$(OBJEXT): trnw/$(am__dirstamp) \
@@ -1378,6 +1447,12 @@ utils/trnifsvr-test.$(OBJEXT): utils/$(am__dirstamp) \
 trnifsvr-test$(EXEEXT): $(trnifsvr_test_OBJECTS) $(trnifsvr_test_DEPENDENCIES) $(EXTRA_trnifsvr_test_DEPENDENCIES) 
 	@rm -f trnifsvr-test$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(trnifsvr_test_OBJECTS) $(trnifsvr_test_LDADD) $(LIBS)
+utils/trnlog_player.$(OBJEXT): utils/$(am__dirstamp) \
+	utils/$(DEPDIR)/$(am__dirstamp)
+
+trnlog-player$(EXEEXT): $(trnlog_player_OBJECTS) $(trnlog_player_DEPENDENCIES) $(EXTRA_trnlog_player_DEPENDENCIES) 
+	@rm -f trnlog-player$(EXEEXT)
+	$(AM_V_CXXLD)$(CXXLINK) $(trnlog_player_OBJECTS) $(trnlog_player_LDADD) $(LIBS)
 trnw/trnucli_test.$(OBJEXT): trnw/$(am__dirstamp) \
 	trnw/$(DEPDIR)/$(am__dirstamp)
 trnw/trnu_cli.$(OBJEXT): trnw/$(am__dirstamp) \
@@ -1392,6 +1467,20 @@ trnw/trnusvr_test.$(OBJEXT): trnw/$(am__dirstamp) \
 trnusvr-test$(EXEEXT): $(trnusvr_test_OBJECTS) $(trnusvr_test_DEPENDENCIES) $(EXTRA_trnusvr_test_DEPENDENCIES) 
 	@rm -f trnusvr-test$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(trnusvr_test_OBJECTS) $(trnusvr_test_LDADD) $(LIBS)
+opt/rov/$(am__dirstamp):
+	@$(MKDIR_P) opt/rov
+	@: > opt/rov/$(am__dirstamp)
+opt/rov/$(DEPDIR)/$(am__dirstamp):
+	@$(MKDIR_P) opt/rov/$(DEPDIR)
+	@: > opt/rov/$(DEPDIR)/$(am__dirstamp)
+opt/rov/udpm_sub.$(OBJEXT): opt/rov/$(am__dirstamp) \
+	opt/rov/$(DEPDIR)/$(am__dirstamp)
+opt/rov/trnxpp_app.$(OBJEXT): opt/rov/$(am__dirstamp) \
+	opt/rov/$(DEPDIR)/$(am__dirstamp)
+
+trnxpp$(EXEEXT): $(trnxpp_OBJECTS) $(trnxpp_DEPENDENCIES) $(EXTRA_trnxpp_DEPENDENCIES) 
+	@rm -f trnxpp$(EXEEXT)
+	$(AM_V_CXXLD)$(CXXLINK) $(trnxpp_OBJECTS) $(trnxpp_LDADD) $(LIBS)
 install-dist_binSCRIPTS: $(dist_bin_SCRIPTS)
 	@$(NORMAL_INSTALL)
 	@list='$(dist_bin_SCRIPTS)'; test -n "$(bindir)" || list=; \
@@ -1435,6 +1524,7 @@ mostlyclean-compile:
 	-rm -f newmat/*.$(OBJEXT)
 	-rm -f newmat/*.lo
 	-rm -f opt/dorado/*.$(OBJEXT)
+	-rm -f opt/rov/*.$(OBJEXT)
 	-rm -f qnx-utils/*.$(OBJEXT)
 	-rm -f qnx-utils/*.lo
 	-rm -f terrain-nav/*.$(OBJEXT)
@@ -1539,6 +1629,8 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@newmat/$(DEPDIR)/svd.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@opt/dorado/$(DEPDIR)/Replay.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@opt/dorado/$(DEPDIR)/trn_replay.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@opt/rov/$(DEPDIR)/trnxpp_app.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@opt/rov/$(DEPDIR)/udpm_sub.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@qnx-utils/$(DEPDIR)/AngleData.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@qnx-utils/$(DEPDIR)/AsciiFile.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@qnx-utils/$(DEPDIR)/BinaryFile.Plo@am__quote@ # am--include-marker
@@ -1575,6 +1667,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@terrain-nav/$(DEPDIR)/TerrainMapOctree.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@terrain-nav/$(DEPDIR)/TerrainNav.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@terrain-nav/$(DEPDIR)/TerrainNavLog.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@terrain-nav/$(DEPDIR)/TrnLog.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@terrain-nav/$(DEPDIR)/mapio.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@terrain-nav/$(DEPDIR)/matrixArrayCalcs.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@terrain-nav/$(DEPDIR)/myOutput.Plo@am__quote@ # am--include-marker
@@ -1595,13 +1688,13 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@trnw/$(DEPDIR)/trnucli_test.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@trnw/$(DEPDIR)/trnusvr_test.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@trnw/$(DEPDIR)/trnw.Plo@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@utils/$(DEPDIR)/OctreeTest.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@utils/$(DEPDIR)/TerrainNavClient.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@utils/$(DEPDIR)/TrnClient.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@utils/$(DEPDIR)/netif-test.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@utils/$(DEPDIR)/trn_server.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@utils/$(DEPDIR)/trnclient_test.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@utils/$(DEPDIR)/trnifsvr-test.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@utils/$(DEPDIR)/trnlog_player.Po@am__quote@ # am--include-marker
 
 $(am__depfiles_remade):
 	@$(MKDIR_P) $(@D)
@@ -1765,7 +1858,8 @@ cscopelist-am: $(am__tagged_files)
 distclean-tags:
 	-rm -f TAGS ID GTAGS GRTAGS GSYMS GPATH tags
 check-am: all-am
-check: check-am
+check: $(BUILT_SOURCES)
+	$(MAKE) $(AM_MAKEFLAGS) check-am
 all-am: Makefile $(PROGRAMS) $(LTLIBRARIES) $(SCRIPTS) $(HEADERS)
 install-binPROGRAMS: install-libLTLIBRARIES
 
@@ -1773,8 +1867,10 @@ installdirs:
 	for dir in "$(DESTDIR)$(bindir)" "$(DESTDIR)$(libdir)" "$(DESTDIR)$(bindir)" "$(DESTDIR)$(includedir)"; do \
 	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
 	done
-install: install-am
-install-exec: install-exec-am
+install: $(BUILT_SOURCES)
+	$(MAKE) $(AM_MAKEFLAGS) install-am
+install-exec: $(BUILT_SOURCES)
+	$(MAKE) $(AM_MAKEFLAGS) install-exec-am
 install-data: install-data-am
 uninstall: uninstall-am
 
@@ -1806,6 +1902,8 @@ distclean-generic:
 	-rm -f newmat/$(am__dirstamp)
 	-rm -f opt/dorado/$(DEPDIR)/$(am__dirstamp)
 	-rm -f opt/dorado/$(am__dirstamp)
+	-rm -f opt/rov/$(DEPDIR)/$(am__dirstamp)
+	-rm -f opt/rov/$(am__dirstamp)
 	-rm -f qnx-utils/$(DEPDIR)/$(am__dirstamp)
 	-rm -f qnx-utils/$(am__dirstamp)
 	-rm -f terrain-nav/$(DEPDIR)/$(am__dirstamp)
@@ -1819,6 +1917,7 @@ distclean-generic:
 maintainer-clean-generic:
 	@echo "This command is intended for maintainers to use"
 	@echo "it deletes files that may require special tools to rebuild."
+	-test -z "$(BUILT_SOURCES)" || rm -f $(BUILT_SOURCES)
 clean: clean-am
 
 clean-am: clean-binPROGRAMS clean-generic clean-libLTLIBRARIES \
@@ -1918,6 +2017,8 @@ distclean: distclean-am
 	-rm -f newmat/$(DEPDIR)/svd.Plo
 	-rm -f opt/dorado/$(DEPDIR)/Replay.Po
 	-rm -f opt/dorado/$(DEPDIR)/trn_replay.Po
+	-rm -f opt/rov/$(DEPDIR)/trnxpp_app.Po
+	-rm -f opt/rov/$(DEPDIR)/udpm_sub.Po
 	-rm -f qnx-utils/$(DEPDIR)/AngleData.Plo
 	-rm -f qnx-utils/$(DEPDIR)/AsciiFile.Plo
 	-rm -f qnx-utils/$(DEPDIR)/BinaryFile.Plo
@@ -1954,6 +2055,7 @@ distclean: distclean-am
 	-rm -f terrain-nav/$(DEPDIR)/TerrainMapOctree.Plo
 	-rm -f terrain-nav/$(DEPDIR)/TerrainNav.Plo
 	-rm -f terrain-nav/$(DEPDIR)/TerrainNavLog.Plo
+	-rm -f terrain-nav/$(DEPDIR)/TrnLog.Plo
 	-rm -f terrain-nav/$(DEPDIR)/mapio.Plo
 	-rm -f terrain-nav/$(DEPDIR)/matrixArrayCalcs.Plo
 	-rm -f terrain-nav/$(DEPDIR)/myOutput.Plo
@@ -1974,13 +2076,13 @@ distclean: distclean-am
 	-rm -f trnw/$(DEPDIR)/trnucli_test.Po
 	-rm -f trnw/$(DEPDIR)/trnusvr_test.Po
 	-rm -f trnw/$(DEPDIR)/trnw.Plo
-	-rm -f utils/$(DEPDIR)/OctreeTest.Po
 	-rm -f utils/$(DEPDIR)/TerrainNavClient.Po
 	-rm -f utils/$(DEPDIR)/TrnClient.Po
 	-rm -f utils/$(DEPDIR)/netif-test.Po
 	-rm -f utils/$(DEPDIR)/trn_server.Po
 	-rm -f utils/$(DEPDIR)/trnclient_test.Po
 	-rm -f utils/$(DEPDIR)/trnifsvr-test.Po
+	-rm -f utils/$(DEPDIR)/trnlog_player.Po
 	-rm -f Makefile
 distclean-am: clean-am distclean-compile distclean-generic \
 	distclean-tags
@@ -2120,6 +2222,8 @@ maintainer-clean: maintainer-clean-am
 	-rm -f newmat/$(DEPDIR)/svd.Plo
 	-rm -f opt/dorado/$(DEPDIR)/Replay.Po
 	-rm -f opt/dorado/$(DEPDIR)/trn_replay.Po
+	-rm -f opt/rov/$(DEPDIR)/trnxpp_app.Po
+	-rm -f opt/rov/$(DEPDIR)/udpm_sub.Po
 	-rm -f qnx-utils/$(DEPDIR)/AngleData.Plo
 	-rm -f qnx-utils/$(DEPDIR)/AsciiFile.Plo
 	-rm -f qnx-utils/$(DEPDIR)/BinaryFile.Plo
@@ -2156,6 +2260,7 @@ maintainer-clean: maintainer-clean-am
 	-rm -f terrain-nav/$(DEPDIR)/TerrainMapOctree.Plo
 	-rm -f terrain-nav/$(DEPDIR)/TerrainNav.Plo
 	-rm -f terrain-nav/$(DEPDIR)/TerrainNavLog.Plo
+	-rm -f terrain-nav/$(DEPDIR)/TrnLog.Plo
 	-rm -f terrain-nav/$(DEPDIR)/mapio.Plo
 	-rm -f terrain-nav/$(DEPDIR)/matrixArrayCalcs.Plo
 	-rm -f terrain-nav/$(DEPDIR)/myOutput.Plo
@@ -2176,13 +2281,13 @@ maintainer-clean: maintainer-clean-am
 	-rm -f trnw/$(DEPDIR)/trnucli_test.Po
 	-rm -f trnw/$(DEPDIR)/trnusvr_test.Po
 	-rm -f trnw/$(DEPDIR)/trnw.Plo
-	-rm -f utils/$(DEPDIR)/OctreeTest.Po
 	-rm -f utils/$(DEPDIR)/TerrainNavClient.Po
 	-rm -f utils/$(DEPDIR)/TrnClient.Po
 	-rm -f utils/$(DEPDIR)/netif-test.Po
 	-rm -f utils/$(DEPDIR)/trn_server.Po
 	-rm -f utils/$(DEPDIR)/trnclient_test.Po
 	-rm -f utils/$(DEPDIR)/trnifsvr-test.Po
+	-rm -f utils/$(DEPDIR)/trnlog_player.Po
 	-rm -f Makefile
 maintainer-clean-am: distclean-am maintainer-clean-generic
 
@@ -2202,7 +2307,7 @@ ps-am:
 uninstall-am: uninstall-binPROGRAMS uninstall-dist_binSCRIPTS \
 	uninstall-includeHEADERS uninstall-libLTLIBRARIES
 
-.MAKE: install-am install-strip
+.MAKE: all check install install-am install-exec install-strip
 
 .PHONY: CTAGS GTAGS TAGS all all-am am--depfiles check check-am clean \
 	clean-binPROGRAMS clean-generic clean-libLTLIBRARIES \
@@ -2224,6 +2329,325 @@ uninstall-am: uninstall-binPROGRAMS uninstall-dist_binSCRIPTS \
 
 .PRECIOUS: Makefile
 
+
+# LCM headers
+@BUILD_ROVTRN_TRUE@opt/rov/lcm_pcf/signal_t.hpp : opt/rov/lcm_types/signal_t.lcm
+@BUILD_ROVTRN_TRUE@	@ echo compiling $@...
+@BUILD_ROVTRN_TRUE@	lcm-gen -x --cpp-hpath=opt/rov  $<
+@BUILD_ROVTRN_TRUE@	@echo
+
+@BUILD_ROVTRN_TRUE@opt/rov/lcm_pcf/string_t.hpp : opt/rov/lcm_types/string_t.lcm
+@BUILD_ROVTRN_TRUE@	@ echo compiling $@...
+@BUILD_ROVTRN_TRUE@	lcm-gen -x --cpp-hpath=opt/rov  $<
+@BUILD_ROVTRN_TRUE@	@echo
+
+@BUILD_ROVTRN_TRUE@opt/rov/gss/nav_solution_t.hpp : opt/rov/lcm_types/nav_solution_t.lcm
+@BUILD_ROVTRN_TRUE@	@ echo compiling $@...
+@BUILD_ROVTRN_TRUE@	lcm-gen -x --cpp-hpath=opt/rov  $<
+@BUILD_ROVTRN_TRUE@	@echo
+
+@BUILD_ROVTRN_TRUE@opt/rov/gss/message_t.hpp : opt/rov/lcm_types/message_t.lcm
+@BUILD_ROVTRN_TRUE@	@ echo compiling $@...
+@BUILD_ROVTRN_TRUE@	lcm-gen -x --cpp-hpath=opt/rov  $<
+@BUILD_ROVTRN_TRUE@	@echo
+
+@BUILD_ROVTRN_TRUE@opt/rov/gss/analog_t.hpp : opt/rov/lcm_types/analog_t.lcm
+@BUILD_ROVTRN_TRUE@	@ echo compiling $@...
+@BUILD_ROVTRN_TRUE@	lcm-gen -x --cpp-hpath=opt/rov  $<
+@BUILD_ROVTRN_TRUE@	@echo
+
+@BUILD_ROVTRN_TRUE@opt/rov/gss/digital_t.hpp : opt/rov/lcm_types/digital_t.lcm
+@BUILD_ROVTRN_TRUE@	@ echo compiling $@...
+@BUILD_ROVTRN_TRUE@	lcm-gen -x --cpp-hpath=opt/rov  $<
+@BUILD_ROVTRN_TRUE@	@echo
+
+@BUILD_ROVTRN_TRUE@opt/rov/gss/dvl_stat_t.hpp : opt/rov/lcm_types/dvl_stat_t.lcm
+@BUILD_ROVTRN_TRUE@	@ echo compiling $@...
+@BUILD_ROVTRN_TRUE@	lcm-gen -x --cpp-hpath=opt/rov  $<
+@BUILD_ROVTRN_TRUE@	@echo
+
+@BUILD_ROVTRN_TRUE@opt/rov/gss/pcomms_t.hpp : opt/rov/lcm_types/pcomms_t.lcm
+@BUILD_ROVTRN_TRUE@	@ echo compiling $@...
+@BUILD_ROVTRN_TRUE@	lcm-gen -x --cpp-hpath=opt/rov  $<
+@BUILD_ROVTRN_TRUE@	@echo
+
+@BUILD_ROVTRN_TRUE@opt/rov/oi/idt_t.hpp : opt/rov/lcm_types/idt_t.lcm
+@BUILD_ROVTRN_TRUE@	@ echo compiling $@...
+@BUILD_ROVTRN_TRUE@	lcm-gen -x --cpp-hpath=opt/rov  $<
+@BUILD_ROVTRN_TRUE@	@echo
+
+@BUILD_ROVTRN_TRUE@opt/rov/oi/lcm_header_t.hpp : opt/rov/lcm_types/lcm_header_t.lcm
+@BUILD_ROVTRN_TRUE@	@ echo compiling $@...
+@BUILD_ROVTRN_TRUE@	lcm-gen -x --cpp-hpath=opt/rov  $<
+@BUILD_ROVTRN_TRUE@	@echo
+
+@BUILD_ROVTRN_TRUE@opt/rov/oi/rdi_pd4_t.hpp : opt/rov/lcm_types/rdi_pd4_t.lcm
+@BUILD_ROVTRN_TRUE@	@ echo compiling $@...
+@BUILD_ROVTRN_TRUE@	lcm-gen -x --cpp-hpath=opt/rov  $<
+@BUILD_ROVTRN_TRUE@	@echo
+
+@BUILD_ROVTRN_TRUE@opt/rov/oi/kearfott_t.hpp : opt/rov/lcm_types/kearfott_t.lcm
+@BUILD_ROVTRN_TRUE@	@ echo compiling $@...
+@BUILD_ROVTRN_TRUE@	lcm-gen -x --cpp-hpath=opt/rov  $<
+@BUILD_ROVTRN_TRUE@	@echo
+
+@BUILD_ROVTRN_TRUE@opt/rov/oi/octans_t.hpp : opt/rov/lcm_types/octans_t.lcm
+@BUILD_ROVTRN_TRUE@	@ echo compiling $@...
+@BUILD_ROVTRN_TRUE@	lcm-gen -x --cpp-hpath=opt/rov  $<
+@BUILD_ROVTRN_TRUE@	@echo
+
+@BUILD_ROVTRN_TRUE@opt/rov/oi/double_t.hpp : opt/rov/lcm_types/double_t.lcm
+@BUILD_ROVTRN_TRUE@	@ echo compiling $@...
+@BUILD_ROVTRN_TRUE@	lcm-gen -x --cpp-hpath=opt/rov  $<
+@BUILD_ROVTRN_TRUE@	@echo
+
+@BUILD_ROVTRN_TRUE@opt/rov/trn/mb1_beam_t.hpp : opt/rov/lcm_types/mb1_beam_t.lcm
+@BUILD_ROVTRN_TRUE@	@ echo compiling $@...
+@BUILD_ROVTRN_TRUE@	lcm-gen -x --cpp-hpath=opt/rov  $<
+@BUILD_ROVTRN_TRUE@	@echo
+
+@BUILD_ROVTRN_TRUE@opt/rov/trn/trnu_estimate_t.hpp : opt/rov/lcm_types/trnu_estimate_t.lcm
+@BUILD_ROVTRN_TRUE@	@ echo compiling $@...
+@BUILD_ROVTRN_TRUE@	lcm-gen -x --cpp-hpath=opt/rov  $<
+@BUILD_ROVTRN_TRUE@	@echo
+
+@BUILD_ROVTRN_TRUE@opt/rov/trn/trn_stat_t.hpp : opt/rov/lcm_types/trn_stat_t.lcm
+@BUILD_ROVTRN_TRUE@	@ echo compiling $@...
+@BUILD_ROVTRN_TRUE@	lcm-gen -x --cpp-hpath=opt/rov  $<
+@BUILD_ROVTRN_TRUE@	@echo
+
+@BUILD_ROVTRN_TRUE@opt/rov/trn/trn_meas_t.hpp : opt/rov/lcm_types/trn_meas_t.lcm
+@BUILD_ROVTRN_TRUE@	@ echo compiling $@...
+@BUILD_ROVTRN_TRUE@	lcm-gen -x --cpp-hpath=opt/rov  $<
+@BUILD_ROVTRN_TRUE@	@echo
+
+@BUILD_ROVTRN_TRUE@opt/rov/trn/trn_pose_t.hpp : opt/rov/lcm_types/trn_pose_t.lcm
+@BUILD_ROVTRN_TRUE@	@ echo compiling $@...
+@BUILD_ROVTRN_TRUE@	lcm-gen -x --cpp-hpath=opt/rov  $<
+@BUILD_ROVTRN_TRUE@	@echo
+
+@BUILD_ROVTRN_TRUE@opt/rov/trn/trnupub_t.hpp : opt/rov/lcm_types/trnupub_t.lcm
+@BUILD_ROVTRN_TRUE@	@ echo compiling $@...
+@BUILD_ROVTRN_TRUE@	lcm-gen -x --cpp-hpath=opt/rov  $<
+@BUILD_ROVTRN_TRUE@	@echo
+
+@BUILD_ROVTRN_TRUE@opt/rov/trn/trn_mb1_t.hpp : opt/rov/lcm_types/trn_mb1_t.lcm
+@BUILD_ROVTRN_TRUE@	@ echo compiling $@...
+@BUILD_ROVTRN_TRUE@	lcm-gen -x --cpp-hpath=opt/rov  $<
+@BUILD_ROVTRN_TRUE@	@echo
+
+# Java source
+@BUILD_ROVTRN_TRUE@opt/rov/lcm_pcf/signal_t.java : opt/rov/lcm_types/signal_t.lcm
+@BUILD_ROVTRN_TRUE@	@ echo compiling $@...
+@BUILD_ROVTRN_TRUE@	lcm-gen -j --jpath=opt/rov $<
+@BUILD_ROVTRN_TRUE@	@echo
+
+@BUILD_ROVTRN_TRUE@opt/rov/lcm_pcf/string_t.java : opt/rov/lcm_types/string_t.lcm
+@BUILD_ROVTRN_TRUE@	@ echo compiling $@...
+@BUILD_ROVTRN_TRUE@	lcm-gen -j --jpath=opt/rov $<
+@BUILD_ROVTRN_TRUE@	@echo
+
+@BUILD_ROVTRN_TRUE@opt/rov/gss/nav_solution_t.java : opt/rov/lcm_types/nav_solution_t.lcm
+@BUILD_ROVTRN_TRUE@	@ echo compiling $@...
+@BUILD_ROVTRN_TRUE@	lcm-gen -j --jpath=opt/rov $<
+@BUILD_ROVTRN_TRUE@	@echo
+
+@BUILD_ROVTRN_TRUE@opt/rov/gss/message_t.java : opt/rov/lcm_types/message_t.lcm
+@BUILD_ROVTRN_TRUE@	@ echo compiling $@...
+@BUILD_ROVTRN_TRUE@	lcm-gen -j --jpath=opt/rov $<
+@BUILD_ROVTRN_TRUE@	@echo
+
+@BUILD_ROVTRN_TRUE@opt/rov/gss/analog_t.java : opt/rov/lcm_types/analog_t.lcm
+@BUILD_ROVTRN_TRUE@	@ echo compiling $@...
+@BUILD_ROVTRN_TRUE@	lcm-gen -j --jpath=opt/rov $<
+@BUILD_ROVTRN_TRUE@	@echo
+
+@BUILD_ROVTRN_TRUE@opt/rov/gss/digital_t.java : opt/rov/lcm_types/digital_t.lcm
+@BUILD_ROVTRN_TRUE@	@ echo compiling $@...
+@BUILD_ROVTRN_TRUE@	lcm-gen -j --jpath=opt/rov $<
+@BUILD_ROVTRN_TRUE@	@echo
+
+@BUILD_ROVTRN_TRUE@opt/rov/gss/dvl_stat_t.java : opt/rov/lcm_types/dvl_stat_t.lcm
+@BUILD_ROVTRN_TRUE@	@ echo compiling $@...
+@BUILD_ROVTRN_TRUE@	lcm-gen -j --jpath=opt/rov $<
+@BUILD_ROVTRN_TRUE@	@echo
+
+@BUILD_ROVTRN_TRUE@opt/rov/gss/pcomms_t.java : opt/rov/lcm_types/pcomms_t.lcm
+@BUILD_ROVTRN_TRUE@	@ echo compiling $@...
+@BUILD_ROVTRN_TRUE@	lcm-gen -j --jpath=opt/rov $<
+@BUILD_ROVTRN_TRUE@	@echo
+
+@BUILD_ROVTRN_TRUE@opt/rov/oi/idt_t.java : opt/rov/lcm_types/idt_t.lcm
+@BUILD_ROVTRN_TRUE@	@ echo compiling $@...
+@BUILD_ROVTRN_TRUE@	lcm-gen -j --jpath=opt/rov $<
+@BUILD_ROVTRN_TRUE@	@echo
+
+@BUILD_ROVTRN_TRUE@opt/rov/oi/lcm_header_t.java : opt/rov/lcm_types/lcm_header_t.lcm
+@BUILD_ROVTRN_TRUE@	@ echo compiling $@...
+@BUILD_ROVTRN_TRUE@	lcm-gen -j --jpath=opt/rov $<
+@BUILD_ROVTRN_TRUE@	@echo
+
+@BUILD_ROVTRN_TRUE@opt/rov/oi/rdi_pd4_t.java : opt/rov/lcm_types/rdi_pd4_t.lcm
+@BUILD_ROVTRN_TRUE@	@ echo compiling $@...
+@BUILD_ROVTRN_TRUE@	lcm-gen -j --jpath=opt/rov $<
+@BUILD_ROVTRN_TRUE@	@echo
+
+@BUILD_ROVTRN_TRUE@opt/rov/oi/kearfott_t.java : opt/rov/lcm_types/kearfott_t.lcm
+@BUILD_ROVTRN_TRUE@	@ echo compiling $@...
+@BUILD_ROVTRN_TRUE@	lcm-gen -j --jpath=opt/rov $<
+@BUILD_ROVTRN_TRUE@	@echo
+
+@BUILD_ROVTRN_TRUE@opt/rov/oi/octans_t.java : opt/rov/lcm_types/octans_t.lcm
+@BUILD_ROVTRN_TRUE@	@ echo compiling $@...
+@BUILD_ROVTRN_TRUE@	lcm-gen -j --jpath=opt/rov $<
+@BUILD_ROVTRN_TRUE@	@echo
+
+@BUILD_ROVTRN_TRUE@opt/rov/oi/double_t.java : opt/rov/lcm_types/double_t.lcm
+@BUILD_ROVTRN_TRUE@	@ echo compiling $@...
+@BUILD_ROVTRN_TRUE@	lcm-gen -j --jpath=opt/rov $<
+@BUILD_ROVTRN_TRUE@	@echo
+
+@BUILD_ROVTRN_TRUE@opt/rov/trn/mb1_beam_t.java : opt/rov/lcm_types/mb1_beam_t.lcm
+@BUILD_ROVTRN_TRUE@	@ echo compiling $@...
+@BUILD_ROVTRN_TRUE@	lcm-gen -j --jpath=opt/rov $<
+@BUILD_ROVTRN_TRUE@	@echo
+
+@BUILD_ROVTRN_TRUE@opt/rov/trn/trnu_estimate_t.java : opt/rov/lcm_types/trnu_estimate_t.lcm
+@BUILD_ROVTRN_TRUE@	@ echo compiling $@...
+@BUILD_ROVTRN_TRUE@	lcm-gen -j --jpath=opt/rov $<
+@BUILD_ROVTRN_TRUE@	@echo
+
+@BUILD_ROVTRN_TRUE@opt/rov/trn/trn_stat_t.java : opt/rov/lcm_types/trn_stat_t.lcm
+@BUILD_ROVTRN_TRUE@	@ echo compiling $@...
+@BUILD_ROVTRN_TRUE@	lcm-gen -j --jpath=opt/rov $<
+@BUILD_ROVTRN_TRUE@	@echo
+
+@BUILD_ROVTRN_TRUE@opt/rov/trn/trn_meas_t.java : opt/rov/lcm_types/trn_meas_t.lcm
+@BUILD_ROVTRN_TRUE@	@ echo compiling $@...
+@BUILD_ROVTRN_TRUE@	lcm-gen -j --jpath=opt/rov $<
+@BUILD_ROVTRN_TRUE@	@echo
+
+@BUILD_ROVTRN_TRUE@opt/rov/trn/trn_pose_t.java : opt/rov/lcm_types/trn_pose_t.lcm
+@BUILD_ROVTRN_TRUE@	@ echo compiling $@...
+@BUILD_ROVTRN_TRUE@	lcm-gen -j --jpath=opt/rov $<
+@BUILD_ROVTRN_TRUE@	@echo
+
+@BUILD_ROVTRN_TRUE@opt/rov/trn/trnupub_t.java : opt/rov/lcm_types/trnupub_t.lcm
+@BUILD_ROVTRN_TRUE@	@ echo compiling $@...
+@BUILD_ROVTRN_TRUE@	lcm-gen -j --jpath=opt/rov $<
+@BUILD_ROVTRN_TRUE@	@echo
+
+@BUILD_ROVTRN_TRUE@opt/rov/trn/trn_mb1_t.java : opt/rov/lcm_types/trn_mb1_t.lcm
+@BUILD_ROVTRN_TRUE@	@ echo compiling $@...
+@BUILD_ROVTRN_TRUE@	lcm-gen -j --jpath=opt/rov $<
+@BUILD_ROVTRN_TRUE@	@echo
+
+# Java class
+@BUILD_ROVTRN_TRUE@opt/rov/lcm_pcf/signal_t.class : opt/rov/lcm_pcf/signal_t.java
+@BUILD_ROVTRN_TRUE@	@ echo compiling $@...
+@BUILD_ROVTRN_TRUE@	javac -cp $(LCM_JAR) $^
+@BUILD_ROVTRN_TRUE@	@echo
+
+@BUILD_ROVTRN_TRUE@opt/rov/lcm_pcf/string_t.class : opt/rov/lcm_pcf/string_t.java
+@BUILD_ROVTRN_TRUE@	@ echo compiling $@...
+@BUILD_ROVTRN_TRUE@	javac -cp $(LCM_JAR) $^
+@BUILD_ROVTRN_TRUE@	@echo
+
+@BUILD_ROVTRN_TRUE@opt/rov/gss/nav_solution_t.class : opt/rov/gss/nav_solution_t.java
+@BUILD_ROVTRN_TRUE@	@ echo compiling $@...
+@BUILD_ROVTRN_TRUE@	javac -cp $(LCM_JAR) $^
+@BUILD_ROVTRN_TRUE@	@echo
+
+@BUILD_ROVTRN_TRUE@opt/rov/gss/message_t.class : opt/rov/gss/message_t.java
+@BUILD_ROVTRN_TRUE@	@ echo compiling $@...
+@BUILD_ROVTRN_TRUE@	javac -cp $(LCM_JAR) $^
+@BUILD_ROVTRN_TRUE@	@echo
+
+@BUILD_ROVTRN_TRUE@opt/rov/gss/analog_t.class : opt/rov/gss/analog_t.java
+@BUILD_ROVTRN_TRUE@	@ echo compiling $@...
+@BUILD_ROVTRN_TRUE@	javac -cp $(LCM_JAR) $^
+@BUILD_ROVTRN_TRUE@	@echo
+
+@BUILD_ROVTRN_TRUE@opt/rov/gss/digital_t.class : opt/rov/gss/digital_t.java
+@BUILD_ROVTRN_TRUE@	@ echo compiling $@...
+@BUILD_ROVTRN_TRUE@	javac -cp $(LCM_JAR) $^
+@BUILD_ROVTRN_TRUE@	@echo
+
+@BUILD_ROVTRN_TRUE@opt/rov/gss/dvl_stat_t.class : opt/rov/gss/dvl_stat_t.java opt/rov/gss/analog_t.java opt/rov/gss/digital_t.java
+@BUILD_ROVTRN_TRUE@	@ echo compiling $@...
+@BUILD_ROVTRN_TRUE@	javac -cp $(LCM_JAR) $^
+@BUILD_ROVTRN_TRUE@	@echo
+
+@BUILD_ROVTRN_TRUE@opt/rov/gss/pcomms_t.class : opt/rov/gss/pcomms_t.java  opt/rov/gss/message_t.java opt/rov/gss/analog_t.java opt/rov/gss/digital_t.java
+@BUILD_ROVTRN_TRUE@	@ echo compiling $@...
+@BUILD_ROVTRN_TRUE@	javac -cp $(LCM_JAR) $^
+@BUILD_ROVTRN_TRUE@	@echo
+
+@BUILD_ROVTRN_TRUE@opt/rov/oi/idt_t.class : opt/rov/oi/idt_t.java opt/rov/oi/lcm_header_t.java
+@BUILD_ROVTRN_TRUE@	@ echo compiling $@...
+@BUILD_ROVTRN_TRUE@	javac -cp $(LCM_JAR) $^
+@BUILD_ROVTRN_TRUE@	@echo
+
+@BUILD_ROVTRN_TRUE@opt/rov/oi/lcm_header_t.class : opt/rov/oi/lcm_header_t.java
+@BUILD_ROVTRN_TRUE@	@ echo compiling $@...
+@BUILD_ROVTRN_TRUE@	javac -cp $(LCM_JAR) $^
+@BUILD_ROVTRN_TRUE@	@echo
+
+@BUILD_ROVTRN_TRUE@opt/rov/oi/rdi_pd4_t.class : opt/rov/oi/rdi_pd4_t.java opt/rov/oi/lcm_header_t.java opt/rov/oi/double_t.java
+@BUILD_ROVTRN_TRUE@	@ echo compiling $@...
+@BUILD_ROVTRN_TRUE@	javac -cp $(LCM_JAR) $^
+@BUILD_ROVTRN_TRUE@	@echo
+
+@BUILD_ROVTRN_TRUE@opt/rov/oi/kearfott_t.class : opt/rov/oi/kearfott_t.java opt/rov/oi/lcm_header_t.java opt/rov/oi/double_t.java
+@BUILD_ROVTRN_TRUE@	@ echo compiling $@...
+@BUILD_ROVTRN_TRUE@	javac -cp $(LCM_JAR) $^
+@BUILD_ROVTRN_TRUE@	@echo
+
+@BUILD_ROVTRN_TRUE@opt/rov/oi/octans_t.class : opt/rov/oi/octans_t.java opt/rov/oi/lcm_header_t.java
+@BUILD_ROVTRN_TRUE@	@ echo compiling $@...
+@BUILD_ROVTRN_TRUE@	javac -cp $(LCM_JAR) $^
+@BUILD_ROVTRN_TRUE@	@echo
+
+@BUILD_ROVTRN_TRUE@opt/rov/trn/mb1_beam_t.class : opt/rov/trn/mb1_beam_t.java
+@BUILD_ROVTRN_TRUE@	@ echo compiling $@...
+@BUILD_ROVTRN_TRUE@	javac -cp $(LCM_JAR) $^
+@BUILD_ROVTRN_TRUE@	@echo
+
+@BUILD_ROVTRN_TRUE@opt/rov/trn/trnu_estimate_t.class : opt/rov/trn/trnu_estimate_t.java
+@BUILD_ROVTRN_TRUE@	@ echo compiling $@...
+@BUILD_ROVTRN_TRUE@	javac -cp $(LCM_JAR) $^
+@BUILD_ROVTRN_TRUE@	@echo
+
+@BUILD_ROVTRN_TRUE@opt/rov/trn/trn_stat_t.class : opt/rov/trn/trn_stat_t.java opt/rov/trn/trnu_estimate_t.java
+@BUILD_ROVTRN_TRUE@	@ echo compiling $@...
+@BUILD_ROVTRN_TRUE@	javac -cp $(LCM_JAR) $^
+@BUILD_ROVTRN_TRUE@	@echo
+
+@BUILD_ROVTRN_TRUE@opt/rov/trn/trn_meas_t.class : opt/rov/trn/trn_meas_t.java
+@BUILD_ROVTRN_TRUE@	@ echo compiling $@...
+@BUILD_ROVTRN_TRUE@	javac -cp $(LCM_JAR) $^
+@BUILD_ROVTRN_TRUE@	@echo
+
+@BUILD_ROVTRN_TRUE@opt/rov/trn/trn_pose_t.class : opt/rov/trn/trn_pose_t.java
+@BUILD_ROVTRN_TRUE@	@ echo compiling $@...
+@BUILD_ROVTRN_TRUE@	javac -cp $(LCM_JAR) $^
+@BUILD_ROVTRN_TRUE@	@echo
+
+@BUILD_ROVTRN_TRUE@opt/rov/trn/trnupub_t.class : opt/rov/trn/trnupub_t.java opt/rov/trn/trnu_estimate_t.java
+@BUILD_ROVTRN_TRUE@	@ echo compiling $@...
+@BUILD_ROVTRN_TRUE@	javac -cp $(LCM_JAR) $^
+@BUILD_ROVTRN_TRUE@	@echo
+
+@BUILD_ROVTRN_TRUE@opt/rov/trn/trn_mb1_t.class : opt/rov/trn/trn_mb1_t.java opt/rov/trn/mb1_beam_t.java
+@BUILD_ROVTRN_TRUE@	@ echo compiling $@...
+@BUILD_ROVTRN_TRUE@	javac -cp $(LCM_JAR) $^
+@BUILD_ROVTRN_TRUE@	@echo
+
+# TRN LCM types JAR
+@BUILD_ROVTRN_TRUE@lcm_rovtrn.jar: ${TRN_JCLS}
+@BUILD_ROVTRN_TRUE@	@ echo compiling $@...
+@BUILD_ROVTRN_TRUE@	cd opt/rov; jar cvf ../../$@ $(shell echo $^ | sed -e "s/opt\/rov\///g")
+@BUILD_ROVTRN_TRUE@	@echo
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

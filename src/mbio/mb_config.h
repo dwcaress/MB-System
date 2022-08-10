@@ -112,6 +112,9 @@
 /* Build tools using Qt5 */
 /* #undef QTTOOLS_ENABLED */
 
+/* Build rovtrn tools in mbtrnav */
+#define ROVTRN_ENABLED 1
+
 /* Define to 1 if all of the C90 standard headers exist (not just the ones
    required in a freestanding environment). This macro is provided for
    backward compatibility; new code need not use it. */

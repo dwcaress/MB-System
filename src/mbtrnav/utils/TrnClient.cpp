@@ -339,12 +339,14 @@ int TrnClient::loadCfgAttributes(const char *cfg_file)
         TNavConfig::instance()->setVehicleSpecsFile(this->vehicleSpecFile);
         TNavConfig::instance()->setParticlesFile(this->particlesFile);
         TNavConfig::instance()->setLogDir(_logdir);
+        TNavConfig::instance()->setConfigPath(cfg_path);
 
         fprintf(stderr, "%s: map    : %s\n", __func__, mapname);
         fprintf(stderr, "%s: logPath: %s\n", __func__, logPath);
         fprintf(stderr, "%s: logdir : %s\n", __func__, _logdir);
         fprintf(stderr, "%s: veh    : %s\n", __func__, vehiclename);
         fprintf(stderr, "%s: par    : %s\n", __func__, particlename);
+        fprintf(stderr, "%s: cfg    : %s\n", __func__, cfg_path);
         fprintf(stderr, "%s: save   : %s\n", __func__, saveDirectory);
         fprintf(stderr, "%s: trnsvr : %s\n", __func__, _trn_attr->_terrainNavServer);
 
@@ -543,6 +545,24 @@ TerrainNav* TrnClient::connectTRN()
         else
             useHighGradeFilter();
 
+        // server initialization creates log directory
+        // copy config file to directory (if TRN on same host)
+        char copybuf[512] = {0};
+        char *cfg_path = TNavConfig::instance()->getConfigPath();
+
+        if (this->saveDirectory && NULL != cfg_path)
+        {
+            sprintf(copybuf, "cp %s %s/.", cfg_path,
+                    this->saveDirectory);
+            if (0 != system(copybuf))
+                fprintf(stderr, "%s: ERR - config copy [%s] failed [%d/%s]\n",
+                        __func__, copybuf, errno, strerror(errno));
+            else
+                fprintf(stderr, "%s: copied config [%s] to [%s]\n",
+                        __func__, cfg_path, saveDirectory);
+        }
+        free(cfg_path);
+
         // If we reach here then we've connected
         //
         fprintf(stdout, "TrnClient - connected to server if no error messages...\n");
@@ -566,3 +586,14 @@ void TrnClient::show(int indent, int wkey, int wval)
 
 }
 
+void TrnClient::setQuitRef(bool *pvar)
+{
+    _quit_ref=pvar;
+}
+
+bool TrnClient::isQuitSet()
+{
+    if(NULL != _quit_ref)
+        return *_quit_ref;
+    return false;
+}

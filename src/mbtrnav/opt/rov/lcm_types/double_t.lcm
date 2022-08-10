@@ -1,0 +1,16 @@
+/**
+ * double_t.lcm
+ * 
+ * type for vector implementation of calculated data that may get added
+ * to a channel. 
+ * 
+ *  Copyright 2019 MBARI
+ *
+*/
+
+package oi;
+
+struct double_t {
+    string name;
+    double value;
+}

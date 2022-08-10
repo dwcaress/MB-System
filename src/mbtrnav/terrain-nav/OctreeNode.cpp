@@ -283,9 +283,9 @@ Print(int num, OTreeStats *ts) const {
 //    std::cout << "ts:[" << ts << "] nodes:[" << ts->nodes << "]" << std::endl;
 
     if (ts !=NULL) {
-        if(num>0)
+        if(num > 0)
             ts->nodes++;
-        if (num>ts->depth) {
+        if ((long unsigned)num > ts->depth) {
             ts->depth=num;
         }
     }
