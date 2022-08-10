@@ -137,6 +137,8 @@ make uninstall (to fully uninstall the installed libraries, headers, and program
   port select --list python
   sudo port install python310
   sudo port select --set python3 python310
+# Also install the most recent Python imaging library Pillow
+  sudo port install py310-Pillow
 #
 # Download the MB-System source package from the repository at GitHub:
 #   https://github.com/dwcaress/MB-System

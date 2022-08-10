@@ -1739,7 +1739,7 @@ int main(int argc, char** argv)
                 }
             }
 
-            /* check navigation for location close to or inside destination image bounds */
+            /* check for valid navigation */
             if (use_this_image) {
                 if (nnav > 0 && time_d >= ntime[0] && time_d <= ntime[nnav-1]) {
                     /* get navigation for this image */
@@ -1751,10 +1751,6 @@ int main(int argc, char** argv)
                             ntime-1, nlat-1,
                             nnav, time_d, &navlat, &itime,
                             &error);
-                    if (navlon < pbounds[0] || navlon > pbounds[1]
-                        || navlat < pbounds[2] || navlat > pbounds[3]) {
-                        use_this_image = false;
-                    }
                 }
                 else {
                     use_this_image = false;
@@ -2133,9 +2129,9 @@ int main(int argc, char** argv)
     }
 
     /* print out each correction table layer from lowest standoff to largest */
-fprintf(stderr, "\n---------------------\nCamera 0 Image Correction\n--------------------\n");
+    fprintf(stderr, "\n---------------------\nCamera 0 Image Correction\n--------------------\n");
     for (int k=0;k<control.ncorr_z;k++) {
-fprintf(stderr, "Camera 0 Correction: Standoff %.3f meters +/- %.3f\n", k * control.bin_dz + control.corr_zmin, 0.5 * control.bin_dz);
+      fprintf(stderr, "Camera 0 Correction: Standoff %.3f meters +/- %.3f\n", k * control.bin_dz + control.corr_zmin, 0.5 * control.bin_dz);
         for (int j=0;j<control.ncorr_y;j++) {
             for (int i=0;i<control.ncorr_x;i++) {
                 fprintf(stderr, "%5.1f ", processPars[0].corr_table_y[0].at<float>(i, j, k));
@@ -2156,9 +2152,9 @@ fprintf(stderr, "Camera 0 Correction: Standoff %.3f meters +/- %.3f\n", k * cont
         }
         fprintf(stderr, "\n");
     }
-fprintf(stderr, "\n---------------------\nCamera 1 Image Correction\n--------------------\n");
+    fprintf(stderr, "\n---------------------\nCamera 1 Image Correction\n--------------------\n");
     for (int k=0;k<control.ncorr_z;k++) {
-fprintf(stderr, "Camera 1 Correction: Standoff %.3f meters +/- %.3f\n", k * control.bin_dz + control.corr_zmin, 0.5 * control.bin_dz);
+      fprintf(stderr, "Camera 1 Correction: Standoff %.3f meters +/- %.3f\n", k * control.bin_dz + control.corr_zmin, 0.5 * control.bin_dz);
         for (int j=0;j<control.ncorr_y;j++) {
             for (int i=0;i<control.ncorr_x;i++) {
                 fprintf(stderr, "%5.1f ", processPars[0].corr_table_y[1].at<float>(i, j, k));

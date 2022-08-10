@@ -192,7 +192,7 @@ struct mb3dsoundings_world_struct {
 
 	/* last sounding edited */
 	bool last_sounding_defined;
-	bool last_sounding_edited;
+	int last_sounding_edited;
 };
 
 /* library variables */
