@@ -72,7 +72,7 @@
 #define LU_BLOG(p,...) p.blog(__VA_ARGS__)
 
 #define LUP_PDEBUG(p,...) p->pdebug(__VA_ARGS__)
-#define LUP_PNDEBUG(p,n...) p->pndebug(n,__VA_ARGS__)
+#define LUP_PNDEBUG(p,n,...) p->pndebug(n,__VA_ARGS__)
 #define LUP_PVERBOSE(p,...) p->pverbose(__VA_ARGS__)
 #define LUP_PEVENT(p,...) p->pevent(__VA_ARGS__)
 #define LUP_PINFO(p,...) p->pinfo(__VA_ARGS__)
