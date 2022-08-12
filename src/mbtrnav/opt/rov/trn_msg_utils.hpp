@@ -152,7 +152,7 @@ public:
         dest.ping_number = src->ping_number;
         dest.nbeams = src->nbeams;
         dest.checksum = MB1_GET_CHECKSUM(src);
-        for(int i=0; i < src->nbeams; i++)
+        for(uint32_t i=0; i < src->nbeams; i++)
         {
             dest.beams.push_back(mb1_beam_t());
             dest.beams[i].beam_num = src->beams[i].beam_num;

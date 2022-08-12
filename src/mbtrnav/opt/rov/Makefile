@@ -83,7 +83,7 @@ LIB_PATHS = -L$(OUTPUT_DIR) $(OS_LIB_PATH) -L/usr/local/lib
 TRNLCM=trnlcm-test
 TRNLCM_SRC= trnlcm_test.cpp
 TRNLCM_OBJ = $(TRNLCM_SRC:%.cpp=$(BUILD_DIR)/%.o)
-TRNLCM_LIBS = -llcm -lstdc++ $(OS_LIBS)
+TRNLCM_LIBS = -llcm -lstdc++ -lpthread $(OS_LIBS)
 
 PCF=lcm_pcf
 PCF_LCM=$(LCM_TYPES)/signal_t.lcm $(LCM_TYPES)/string_t.lcm

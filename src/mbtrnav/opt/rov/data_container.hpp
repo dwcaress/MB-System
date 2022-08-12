@@ -90,7 +90,7 @@ public:
 
         bool phdr=true;
         if(show_hex){
-            for(int i=0;i<mDataLen;i++){
+            for(uint32_t i=0;i<mDataLen;i++){
                 if(phdr){
                     std::cerr << std::setw(wkey-8) << std::setfill(' ') << " ";
                     std::cerr << std::hex << std::setw(8) << std::setfill('0') << i << ' ';

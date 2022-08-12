@@ -13,6 +13,7 @@
 // Includes
 #include <stdlib.h>
 #include <stdio.h>
+#include <stdarg.h>
 #include <unistd.h>
 #include <signal.h>
 #include <getopt.h>
@@ -920,7 +921,7 @@ public:
                     size_t var_len = pe-pb;
                     char var_buf[var_len+1];
                     memset(var_buf,0,var_len+1);
-                    for(int i=1;i<var_len;i++){
+                    for(uint32_t i=1;i<var_len;i++){
                         var_buf[i-1] = pb[i];
                     }
                     TRN_NDPRINT(4,">>> var_buf[%s]\n",var_buf);
@@ -1720,7 +1721,7 @@ int cb_update_trncli(void *pargs)
 
     cx++;
 
-    return 0;
+    return retval;
 }
 
 Matrix applyRotation(const double* attitude,  const Matrix& beamsVF)
