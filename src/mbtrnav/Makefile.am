@@ -248,7 +248,7 @@ opt/rov/trnxpp_app.cpp \
 utils/TrnClient.cpp \
 utils/TerrainNavClient.cpp
 
-trnxpp_LDADD = -llcm libmb1.la libtnav.la
+trnxpp_LDADD = -llcm libmb1.la libtnav.la libnewmat.la libqnx.la
 
 TRN_HPP = opt/rov/lcm_pcf/signal_t.hpp
 TRN_HPP += opt/rov/lcm_pcf/string_t.hpp
@@ -612,7 +612,7 @@ trn_replay_SOURCES = opt/dorado/Replay.cpp opt/dorado/trn_replay.cpp utils/Terra
 trn_replay_LDADD = -ltnav  -lnewmat -lqnx -lnetcdf -lm -lpthread -lgeolib 
 
 trnclient_test_SOURCES =  utils/trnclient_test.cpp utils/TrnClient.cpp utils/TerrainNavClient.cpp
-trnclient_test_LDADD = libtnav.la
+trnclient_test_LDADD = libtnav.la libnewmat.la
 
 mmcpub_SOURCES = trnw/mmcpub.c
 mmcpub_LDADD = ${LIBMFRAME}
@@ -627,22 +627,22 @@ trn_cli_SOURCES = trnw/trncli_test.c trnw/trn_cli.c
 trn_cli_LDADD = ${LIBMFRAME} libtrnw.la
 
 trnif_test_SOURCES =  trnw/trnif_test.c
-trnif_test_LDADD = libnetif.la  libtrnw.la
+trnif_test_LDADD = ${LIBMFRAME} libnetif.la  libtrnw.la
 
 trnusvr_test_SOURCES = trnw/trnusvr_test.c
-trnusvr_test_LDADD = libnetif.la libtrnw.la
+trnusvr_test_LDADD = ${LIBMFRAME} libnetif.la libtrnw.la
 
 netif_test_SOURCES = utils/netif-test.c
 netif_test_LDADD = libnetif.la  libtrnw.la
 
 trnifsvr_test_SOURCES = utils/trnifsvr-test.c
-trnifsvr_test_LDADD = libnetif.la  libtrnw.la
+trnifsvr_test_LDADD = ${LIBMFRAME} libnetif.la  libtrnw.la
 
 mb1rs_SOURCES = trnw/mb1rs.c trnw/mb1rs-app.c
 mb1rs_LDADD = ${LIBMFRAME} libmb1.la
 
 trnlog_player_SOURCES = utils/trnlog_player.cpp utils/TrnClient.cpp utils/TerrainNavClient.cpp
-trnlog_player_LDADD = libtnav.la
+trnlog_player_LDADD = libtnav.la libnewmat.la
 
 dist_bin_SCRIPTS =
 

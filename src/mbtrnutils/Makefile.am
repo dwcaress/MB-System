@@ -53,6 +53,7 @@ bin_PROGRAMS =  mbtrnpp mbgrd2octree mbgrdtilemaker
 mbtrnpp_SOURCES = mbtrnpp.c
 
 mbtrnpp_LDADD =  $(top_builddir)/src/mbio/libmbio.la \
+  $(top_builddir)/src/mbtrnframe/libmframe.la \
   $(top_builddir)/src/mbaux/libmbaux.la \
   $(LIBMBXGR) \
   ${libgmt_LIBS} ${libnetcdf_LIBS} ${libproj_LIBS} \
