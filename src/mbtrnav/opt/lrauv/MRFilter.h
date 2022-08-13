@@ -73,6 +73,7 @@
  * Macros
  ***********************************************************************/
 
+#define PIJ_INIT 10000000.0
 #define RANGE_THRESHOLD 50.0
 #define SIGMA_THRESHOLD 7.0
 #define FILTER_FUN_KF 1
@@ -100,16 +101,16 @@ public:
    int getId() { return _id; }
 
     // Process position, range, and bearing data from a cooperating vehicle
-    void conav_update(MRFilterLog::CoopVehicleNavData& conavdata);
+    void measure_update(CoNav::MRDATInput& mrdata);
     // Process position and attitude data from the Ego vehicle (this vehicle)
-    void motion_update(MRFilterLog::VehicleNavData& navdata, const arma::mat& pBest);
+    void process_update(CoNav::ERNavInput& navdata, const arma::mat& pBest);
     // accessors
     double northing() { return _northing; }
     double easting() { return _easting; }
 
     // computational matrices
-    // result of filter_fun()
-    arma::mat _P;        // state covariance
+    // result of meas_update_MRFilter()
+    arma::mat _Pij;        // state covariance
 
 //protected:
     int _id;
@@ -123,21 +124,21 @@ public:
     double _timelast;    // time from last conav_update() data
 
     MRFilterLog *_log;
-    MRFilterLog::MRFilterState _state;
+    CoNav::MRFilterState _state;
 
     // copy of most recently used datasets
-    MRFilterLog::VehicleNavData _lastNav;
-    MRFilterLog::CoopVehicleNavData _lastCoopData;
+    CoNav::ERNavInput _lastNav;
+    CoNav::MRDATInput _lastMRData;
 
     // Computes and updates all matrix parameters
     void range_bearing(arma::mat& deltaz, arma::mat& rij,
                        arma::mat& hi, arma::mat& hj, arma::mat& pj);
 
     // Computes and updates P (process noise)
-    void filter_fun(int kf, arma::mat& P, const arma::mat deltaz,
-                    const arma::mat pij, const arma::mat rij,
-                    const arma::mat hi, const arma::mat hj,
-                    const arma::mat pj);
+    void meas_update_MRFilter(int kf, arma::mat& P, const arma::mat deltaz,
+                              const arma::mat pij, const arma::mat rij,
+                              const arma::mat hi, const arma::mat hj,
+                              const arma::mat pj);
 
     // Computes and updates P (process noise)
     void kf_filter_fun(arma::mat& P, const arma::mat deltaz,

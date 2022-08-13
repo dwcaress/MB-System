@@ -57,9 +57,14 @@
  * software required.
  *****************************************************************************/
 
+#ifndef LRCONAV_APP_H
+#define LRCONAV_APP_H
+
 #include <stdint.h>
 #include <stdio.h>
 #include <unistd.h>
+
+#include "conav.h"
 
 /***********************************************************************
  * Macros
@@ -74,34 +79,20 @@
 #define DVL_CHANNEL            "RDI_Pathfinder"
 #define DEPTH_CHANNEL          "Depth_Keller"
 #define DEPTH_DEPTH            "depth"
-#define COOP_CHANNEL           "CoNav_Cooperative_Vehicle_Data"
-#define EGO_CHANNEL            "CoNav_Ego"
-#define CONAV_VEHID_NAME       "VehId"
-#define CONAV_TIME_NAME        "Timestamp"     // epoch seconds
-#define CONAV_TRN_N_NAME       "TrnNorth"      // meters
-#define CONAV_TRN_E_NAME       "TrnEast"       // meters
-#define CONAV_TRN_Z_NAME       "TrnDepth"      // meters
-#define CONAV_TRN_VAR_N_NAME   "TrnVarNorth"
-#define CONAV_TRN_VAR_E_NAME   "TrnVarEast"
-#define CONAV_TRN_VAR_Z_NAME   "TrnVarDepth"
-#define CONAV_RANGE_NAME       "Range"         // meters
-#define CONAV_BEARING_NAME     "Bearing"       // radians
-#define CONAV_RANGE_VAR_NAME   "RangeVar"
-#define CONAV_BEARING_VAR_NAME "BearingVar"
+#define CONAV_CHANNEL          "CoNav_Est"
+#define MR_DAT_CHANNEL         "Multi_Robot_DAT"
+#define MR_VEHID_NAME          "VehId"
+#define MR_TIME_NAME           "Timestamp"     // epoch seconds
+#define MR_TRN_N_NAME          "TrnNorth"      // meters
+#define MR_TRN_E_NAME          "TrnEast"       // meters
+#define MR_TRN_Z_NAME          "TrnDepth"      // meters
+#define MR_TRN_VAR_N_NAME      "TrnVarNorth"
+#define MR_TRN_VAR_E_NAME      "TrnVarEast"
+#define MR_TRN_VAR_Z_NAME      "TrnVarDepth"
+#define MR_RANGE_NAME          "Range"         // meters
+#define MR_BEARING_NAME        "Bearing"       // radians
+#define MR_RANGE_VAR_NAME      "RangeVar"
+#define MR_BEARING_VAR_NAME    "BearingVar"
 // clang-format on
 
-// Define a useful way to delete and reset a pointer to an object.
-// If the ptr is non-NULL, delete the object referenced by the ptr
-// and reset the ptr to NULL.
-// E.g.:
-// SomeObj *obj = new SomeObject();
-// DELOBJ(obj);
-//
-#define DELOBJ(ptr)                                                            \
-    {                                                                          \
-        if (NULL != ptr) {                                                     \
-            delete ptr;                                                        \
-            ptr = NULL;                                                        \
-        }                                                                      \
-    }
-
+#endif

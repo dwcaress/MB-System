@@ -21,7 +21,6 @@
 #define ZF_LOG_TAG "MRFilterLog:"
 #include <zf_log.h>
 
-#include "lrconav_app.h"
 #include "MRFilterLog.h"
 
 ///////////////////////////////////////////////////////////////////
@@ -279,11 +278,11 @@ void MRFilterLog::init(void)
 }
 
 // set the field values for the filter state
-int MRFilterLog::setMRFilterState(const struct MRFilterState& state)
+int MRFilterLog::setMRFilterState(const struct CoNav::MRFilterState& state)
 {
   if (_northing && _easting && _deltaN && _deltaE && _distance) {
-    _northing->setValue(state.northing);
-    _easting ->setValue(state.easting);
+    _northing->setValue(state.nij);
+    _easting ->setValue(state.eij);
     _deltaN  ->setValue(state.deltaN);
     _deltaE  ->setValue(state.deltaE);
     _distance->setValue(state.distance);
@@ -295,13 +294,13 @@ int MRFilterLog::setMRFilterState(const struct MRFilterState& state)
 }
 
 // set the field values for the motion data
-int MRFilterLog::setMRFilterMotion(const struct VehicleNavData& nd)
+int MRFilterLog::setMRFilterMotion(const struct CoNav::ERNavInput& nd)
 {
   if (_motionE && _motionN && _motionZ && _motionTime) {
-    _motionTime->setValue(nd.egoClock);
-    _motionN   ->setValue(nd.northing);
-    _motionE   ->setValue(nd.easting);
-    _motionZ   ->setValue(nd.depth);
+    _motionTime->setValue(nd.egoTime);
+    _motionN   ->setValue(nd.navN);
+    _motionE   ->setValue(nd.navE);
+    _motionZ   ->setValue(nd.navZ);
     return 0;
   } else {
     ZF_LOGE("One or more motion fields are NULL");
@@ -310,22 +309,22 @@ int MRFilterLog::setMRFilterMotion(const struct VehicleNavData& nd)
 }
 
 // set the field values for the measure data
-int MRFilterLog::setMRFilterMeas(const struct CoopVehicleNavData& cnd)
+int MRFilterLog::setMRFilterMeas(const struct CoNav::MRDATInput& cnd)
 {
   if (_measTime    && _measTrnN    && _measTrnE     && _measTrnZ &&
       _measTrnNVar && _measTrnEVar && _measTrnZVar  &&
       _measRange   && _measBear    && _measRangeVar && _measBearVar) {
-    _measTime->setValue(cnd.coopClock);
-    _measTrnN->setValue(cnd.trnN);
-    _measTrnE->setValue(cnd.trnE);
-    _measTrnZ->setValue(cnd.trnZ);
-    _measTrnNVar->setValue(cnd.trnNVar);
-    _measTrnEVar->setValue(cnd.trnEVar);
-    _measTrnZVar->setValue(cnd.trnZVar);
+    _measTime->setValue(cnd.datTime);
+    _measTrnN->setValue(cnd.nj);
+    _measTrnE->setValue(cnd.ej);
+    _measTrnZ->setValue(cnd.dj);
+    _measTrnNVar->setValue(cnd.njCovar);
+    _measTrnEVar->setValue(cnd.ejCovar);
+    _measTrnZVar->setValue(cnd.djCovar);
     _measRange->setValue(cnd.range);
-    _measRangeVar->setValue(cnd.rangeVar * cnd.range);
+    _measRangeVar->setValue(cnd.rangeSigma * cnd.range);
     _measBear->setValue(cnd.bearing);
-    _measBearVar->setValue(cnd.bearingVar);
+    _measBearVar->setValue(cnd.bearingSigma);
     return 0;
   } else {
     ZF_LOGE("One or more measure fields are NULL");

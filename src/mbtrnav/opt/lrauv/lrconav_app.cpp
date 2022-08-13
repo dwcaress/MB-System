@@ -78,7 +78,8 @@
 #include "DataLogWriter.h"
 #include "NavUtils.h"
 
-#include "CoNav.h"
+#include "lrconav_app.h"
+#include "EgoRobot.h"
 
 /***********************************************************************
  * Macros
@@ -110,16 +111,16 @@ int64_t getTimeMillisec() {
 // Function prototypes/declarations
 // Initialize the LCM context: subscribe to channels, set up channel handlers
 bool init_lcm();
-// Initialize the CoNavEgo channel writer
-bool init_ego_writer();
+// Initialize the CoNav channel writer
+bool init_conav_writer();
 // Handle incoming LCM messages
 int handle_lcm();
 // Determine if the motion update period has elapsed
 bool motion_period_elapsed();
 // Update vehicle position
-int motion_update(MRFilterLog::VehicleNavData& navData);
+int process_update(CoNav::ERNavInput& navData);
 // Update Cooperative Nav
-int conav_update(MRFilterLog::CoopVehicleNavData& coNavData);
+int measure_update(CoNav::MRDATInput& coNavData);
 // Publish the current Co-navigated position and variances
 void publish_state();
 
@@ -142,8 +143,8 @@ struct CoNavTiming
 };
 static struct CoNavTiming _timing = {0.,0.,0.,0.};
 
-static MRFilterLog::VehicleNavData _navData = {};
-static CoNav* _coNav = NULL;
+static CoNav::ERNavInput _navData = {};
+static EgoRobot* _ego = NULL;
 static bool _logToStdErr = true;
 
 FILE *g_log_file;
@@ -163,7 +164,7 @@ static void file_output_callback(const zf_log_message *msg, void *arg)
 static void finalize(void)
 {
     ZF_LOGI("Finalize");
-    DELOBJ(_coNav);
+    DELOBJ(_ego);
 //    DELOBJ(_lcmHandler);
     DELOBJ(_lcm);
     fclose(g_log_file);
@@ -208,7 +209,7 @@ int main(int argc, char **argv)
     }
 
     // Create the CoNav object
-    _coNav = new CoNav();
+    _ego = new EgoRobot();
 
     // main loop
     ZF_LOGI("Entering main loop");
@@ -260,11 +261,11 @@ public:
         // Convert to UTM for use in CoNav
         NavUtils::geoToUtm(Math::degToRad(lat), Math::degToRad(lon),
             NavUtils::geoToUtmZone(Math::degToRad(lat), Math::degToRad(lon)),
-            &_navData.northing, &_navData.easting);
+            &_navData.navN, &_navData.navE);
 
         // Update CoNav with the latest motion dataset
-        _navData.egoClock = _timing.egoClock;
-        motion_update(_navData);
+        _navData.egoTime = _timing.egoClock;
+        process_update(_navData);
     }
 
     // When a Dvl message is received copy data into vehicle state object
@@ -298,18 +299,18 @@ public:
                 ZF_LOGD("failed to read float %s", DEPTH_DEPTH);
                 return;
             } else {
-                _navData.depth = (float)fa->data[0];
+                _navData.navZ = (float)fa->data[0];
             }
         } else {
-            _navData.depth = da->data[0];
+            _navData.navZ = da->data[0];
         }
 
         // Update CoNav with the latest motion dataset
-        _navData.egoClock = _timing.lastMotionMsg;
-        motion_update(_navData);
+        _navData.egoTime = _timing.lastMotionMsg;
+        process_update(_navData);
     }
 
-    // When a CoNav message is received extract info and call CoNav object
+    // When a CoNav message is received extract info and call EgoRobot object
     void handleCoNav(const lcm::ReceiveBuffer *rbuf,
                      const std::string &chan,
                      const LrauvLcmMessage *msg) {
@@ -319,95 +320,95 @@ public:
         _timing.lastMotionMsg = _timing.egoClock;
         ZF_LOGD("msg time = %.3f", _timing.egoClock);
 
-        MRFilterLog::CoopVehicleNavData coNavData = {};
+        CoNav::MRDATInput mrInput = {};
         // Update CoNav with this CoNav message data
-        const DoubleArray *fa = _msgReader.getDoubleArray(CONAV_TIME_NAME);
+        const DoubleArray *fa = _msgReader.getDoubleArray(MR_TIME_NAME);
         if (NULL == fa) {
-            ZF_LOGE("failed to read %s", CONAV_TIME_NAME);
+            ZF_LOGE("failed to read %s", MR_TIME_NAME);
             return;
         }
-        coNavData.coopClock = double(fa->data[0]);
-        ZF_LOGD("read %s as %.2f", CONAV_TIME_NAME, fa->data[0]);
+        mrInput.datTime = double(fa->data[0]);
+        ZF_LOGD("read %s as %.2f", MR_TIME_NAME, fa->data[0]);
 
-        const IntArray *ia = _msgReader.getIntArray(CONAV_VEHID_NAME);
+        const IntArray *ia = _msgReader.getIntArray(MR_VEHID_NAME);
         if (NULL == ia) {
-            ZF_LOGE("failed to read %s", CONAV_VEHID_NAME);
+            ZF_LOGE("failed to read %s", MR_VEHID_NAME);
             return;
         }
-        coNavData.vehId = ia->data[0];
+        mrInput.vehId = ia->data[0];
 
-        fa = _msgReader.getDoubleArray(CONAV_TRN_N_NAME);
+        fa = _msgReader.getDoubleArray(MR_TRN_N_NAME);
         if (NULL == fa) {
-            ZF_LOGE("failed to read %s", CONAV_TRN_N_NAME);
+            ZF_LOGE("failed to read %s", MR_TRN_N_NAME);
             return;
         }
-        coNavData.trnN = fa->data[0];
+        mrInput.nj = fa->data[0];
 
-        fa = _msgReader.getDoubleArray(CONAV_TRN_E_NAME);
+        fa = _msgReader.getDoubleArray(MR_TRN_E_NAME);
         if (NULL == fa) {
-            ZF_LOGE("failed to read %s", CONAV_TRN_E_NAME);
+            ZF_LOGE("failed to read %s", MR_TRN_E_NAME);
             return;
         }
-        coNavData.trnE = fa->data[0];
+        mrInput.ej = fa->data[0];
 
-        fa = _msgReader.getDoubleArray(CONAV_TRN_Z_NAME);
+        fa = _msgReader.getDoubleArray(MR_TRN_Z_NAME);
         if (NULL == fa) {
-            ZF_LOGE("failed to read %s", CONAV_TRN_Z_NAME);
+            ZF_LOGE("failed to read %s", MR_TRN_Z_NAME);
             return;
         }
-        coNavData.trnZ = fa->data[0];
+        mrInput.dj = fa->data[0];
 
-        fa = _msgReader.getDoubleArray(CONAV_TRN_VAR_N_NAME);
+        fa = _msgReader.getDoubleArray(MR_TRN_VAR_N_NAME);
         if (NULL == fa) {
-            ZF_LOGE("failed to read %s", CONAV_TRN_VAR_N_NAME);
+            ZF_LOGE("failed to read %s", MR_TRN_VAR_N_NAME);
             return;
         }
-        coNavData.trnNVar = fa->data[0];
+        mrInput.njCovar = fa->data[0];
 
-        fa = _msgReader.getDoubleArray(CONAV_TRN_VAR_E_NAME);
+        fa = _msgReader.getDoubleArray(MR_TRN_VAR_E_NAME);
         if (NULL == fa) {
-            ZF_LOGE("failed to read %s", CONAV_TRN_VAR_E_NAME);
+            ZF_LOGE("failed to read %s", MR_TRN_VAR_E_NAME);
             return;
         }
-        coNavData.trnEVar = fa->data[0];
+        mrInput.ejCovar = fa->data[0];
 
-        fa = _msgReader.getDoubleArray(CONAV_TRN_VAR_Z_NAME);
+        fa = _msgReader.getDoubleArray(MR_TRN_VAR_Z_NAME);
         if (NULL == fa) {
-            ZF_LOGE("failed to read %s", CONAV_TRN_VAR_Z_NAME);
+            ZF_LOGE("failed to read %s", MR_TRN_VAR_Z_NAME);
             return;
         }
-        coNavData.trnZVar = fa->data[0];
+        mrInput.djCovar = fa->data[0];
 
-        fa = _msgReader.getDoubleArray(CONAV_RANGE_NAME);
+        fa = _msgReader.getDoubleArray(MR_RANGE_NAME);
         if (NULL == fa) {
-            ZF_LOGE("failed to read %s", CONAV_RANGE_NAME);
+            ZF_LOGE("failed to read %s", MR_RANGE_NAME);
             return;
         }
-        coNavData.range = fa->data[0];
+        mrInput.range = fa->data[0];
 
-        fa = _msgReader.getDoubleArray(CONAV_BEARING_NAME);
+        fa = _msgReader.getDoubleArray(MR_BEARING_NAME);
         if (NULL == fa) {
-            ZF_LOGE("failed to read %s", CONAV_BEARING_NAME);
+            ZF_LOGE("failed to read %s", MR_BEARING_NAME);
             return;
         }
-        coNavData.bearing = fa->data[0];
+        mrInput.bearing = fa->data[0];
 
-        fa = _msgReader.getDoubleArray(CONAV_RANGE_VAR_NAME);
+        fa = _msgReader.getDoubleArray(MR_RANGE_VAR_NAME);
         if (NULL == fa) {
-            ZF_LOGE("failed to read %s", CONAV_RANGE_VAR_NAME);
+            ZF_LOGE("failed to read %s", MR_RANGE_VAR_NAME);
             return;
         }
-        coNavData.rangeVar = fa->data[0];
+        mrInput.rangeSigma = fa->data[0];
 
-        fa = _msgReader.getDoubleArray(CONAV_BEARING_VAR_NAME);
+        fa = _msgReader.getDoubleArray(MR_BEARING_VAR_NAME);
         if (NULL == fa) {
-            ZF_LOGE("failed to read %s", CONAV_BEARING_VAR_NAME);
+            ZF_LOGE("failed to read %s", MR_BEARING_VAR_NAME);
             return;
         }
-        coNavData.bearingVar = fa->data[0];
+        mrInput.bearingSigma = fa->data[0];
 
-        coNavData.egoClock = _timing.egoClock;
-        conav_update(coNavData);
+        mrInput.egoTime = _timing.egoClock;
+        measure_update(mrInput);
     }
 
 };
@@ -427,10 +428,10 @@ bool init_lcm()
     _lcm->subscribe(NAV_CHANNEL,   &CoNavLcmHandler::handleNav,   _lcmHandler);
     _lcm->subscribe(DVL_CHANNEL,   &CoNavLcmHandler::handleDvl,   _lcmHandler);
     _lcm->subscribe(DEPTH_CHANNEL, &CoNavLcmHandler::handleDepth, _lcmHandler);
-    _lcm->subscribe(COOP_CHANNEL, &CoNavLcmHandler::handleCoNav, _lcmHandler);
+    _lcm->subscribe(MR_DAT_CHANNEL, &CoNavLcmHandler::handleCoNav, _lcmHandler);
 
-    // Set up the ego channel writer
-    if (!init_ego_writer()) {
+    // Set up the conav channel writer
+    if (!init_conav_writer()) {
         return false;
     }
 
@@ -438,7 +439,7 @@ bool init_lcm()
 }
 
 // Initialize the CoNavEgo channel writer
-bool init_ego_writer()
+bool init_conav_writer()
 {
     Dim sdim(0, 0);
     if (!_msgWriter.addArray(Int, "EgoVehId", "EgoVehId", "", sdim)) {
@@ -481,15 +482,15 @@ int handle_lcm()
 }
 
 // Update vehicle position
-int motion_update(MRFilterLog::VehicleNavData& nav)
+int process_update(CoNav::ERNavInput& nav)
 {
-    // Call _coNav->motion_update() when it is "time" for another position update
+    // Call _ego->process_update() when it is "time" for another position update
     if (!motion_period_elapsed()) {
         return -1;
     }
 
-    // Update CoNav with latest motion dataset and publish updated state
-    _coNav->motion_update(nav);
+    // Update EgoRobot with latest motion dataset and publish updated state
+    _ego->process_update(nav);
     _timing.lastMotionUpdate = _timing.egoClock;
     ZF_LOGD("motion update time = %.3f", _timing.lastMotionUpdate);
     publish_state();
@@ -498,10 +499,10 @@ int motion_update(MRFilterLog::VehicleNavData& nav)
 }
 
 // Update Cooperative Nav
-int conav_update(MRFilterLog::CoopVehicleNavData& coNavData)
+int measure_update(CoNav::MRDATInput& coNavData)
 {
-    // Call _coNav->conav_update() and publish updated state
-    _coNav->conav_update(coNavData);
+    // Call _ego->measure_update() and publish updated state
+    _ego->measure_update(coNavData);
     _timing.lastCoNavUpdate = _timing.egoClock;
     ZF_LOGD("measure update time = %.3f", _timing.lastCoNavUpdate);
     publish_state();
@@ -513,9 +514,9 @@ int conav_update(MRFilterLog::CoopVehicleNavData& coNavData)
 void publish_state()
 {
     // Get the updated Co-Navigated vehicle position and publish
-    // _coNav->get_state();
+    // _ego->get_state();
     // _msgWriter.set("VehId", id);
-    _msgWriter.publish(*_lcm, EGO_CHANNEL, getTimeMillisec());
+    _msgWriter.publish(*_lcm, CONAV_CHANNEL, getTimeMillisec());
 }
 
 // Check if the update period has elapsed

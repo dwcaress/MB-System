@@ -23,7 +23,7 @@
 // If original is NULL, copy is null
 #define  STRDUPNULL(char_star) (char_star != NULL ? strdup(char_star) : NULL)
 
-#define TRN_MAX_BEAMS  91
+#define TRN_MAX_BEAMS  120
 
 // Sensor types
 //1: DVL, 2: Multibeam, 3: Single Beam, 5: Imagenex delta t multibeam

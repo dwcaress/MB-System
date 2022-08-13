@@ -25,6 +25,7 @@
 #include "DoubleData.h"
 #include "IntegerData.h"
 #include "ShortData.h"
+#include "conav.h"
 
 #define MRFilterLogName "MRFilter"
 #define ORIGIN_THRESHOLD_FAIL 2
@@ -36,47 +37,6 @@ class MRFilterLog : public DataLogWriter
 
 public:
 
-    struct MRFilterState
-    {
-        double egoClock;   // ego vehicle control system time epoch seconds
-        double northing;
-        double easting;
-        double deltaN;
-        double deltaE;
-        double measN;
-        double measE;
-        double distance;
-    };
-
-    // Ego vehicle nav (nav data from this vehicle)
-    struct VehicleNavData
-    {
-        double egoClock;   // ego vehicle control system time epoch seconds
-        double northing;
-        double easting;
-        double depth;
-    };
-
-    // Data from a cooperating vehicle data messages (trn-nav, range/bearing)
-    struct CoopVehicleNavData
-    {
-        double  egoClock;  // ego vehicle control system time epoch seconds
-        int     vehId;
-        double  coopClock; // co-op vehicle control system time epoch seconds
-        // trn
-        double  trnN;
-        double  trnE;
-        double  trnZ;
-        double  trnNVar;
-        double  trnEVar;
-        double  trnZVar;
-        // range and bearing
-        double  range;
-        double  bearing;
-        double  rangeVar;
-        double  bearingVar;
-    };
-
     ///////////////////////////////////////////////////////////////////
     // Constructor
     MRFilterLog(int id, const std::string& logname,
@@ -84,7 +44,7 @@ public:
 
     ~MRFilterLog();
 
-    int setMRFilterState(const struct MRFilterState& state);
+    int setMRFilterState(const struct CoNav::MRFilterState& state);
     int setMRFilterP(int origin, const arma::mat& p);
     int setMRFilterPbest(const arma::mat& pb);
     int setMRFilterQbar(const arma::mat& qb);
@@ -95,8 +55,8 @@ public:
     int setMRFilterPj(const arma::mat& pj);
     int setMRFilterMeasPosition(double measN, double measE);
     int setMRFilterWopt(double wopt);
-    int setMRFilterMotion(const struct VehicleNavData& nd);
-    int setMRFilterMeas(const struct CoopVehicleNavData& cnd);
+    int setMRFilterMotion(const struct CoNav::ERNavInput& nd);
+    int setMRFilterMeas(const struct CoNav::MRDATInput& cnd);
 
     virtual void setFields();
 

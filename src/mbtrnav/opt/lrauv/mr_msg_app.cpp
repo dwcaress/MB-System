@@ -71,7 +71,8 @@
 #include <sys/time.h>
 #include <stdio.h>
 #include <unistd.h>
-#include "CoNav.h"
+#include "lrconav_app.h"
+#include "MRFilterLog.h"
 
 // Status logging
 #define ZF_LOG_LEVEL ZF_LOG_INFO
@@ -89,7 +90,7 @@
 // ND = 719529 days from Jan 01, 0000 to Jan 01, 1970
 // NS = 719529 * 86400 = 62167305600
 #define MATLAB_TO_EPOCH 62167305600L // seconds from 01-01-0000 to 01-01-1970
-#define COOP_VEH_MSG_LATENCY 3       // seconds msg takes from there to here
+#define MR_VEH_MSG_LATENCY 3       // seconds msg takes from there to here
 
 /***********************************************************************
  * Code
@@ -101,7 +102,7 @@ using namespace lrauv_lcm_tools;
 
 // File-scoped objects
 static int _quit = 0;
-static struct MRFilterLog::CoopVehicleNavData _coopNav = {0, 0, 0, 0, 0, 0, 0, 0};
+static struct CoNav::MRDATInput _mrInput = {0, 0, 0, 0, 0, 0, 0, 0};
 
 // LCM and handler objects
 class CoNavLcmHandler;
@@ -113,7 +114,7 @@ static LcmMessageWriter<std::string> _msgWriter;
 // CSV FILE items
 static FILE* _csv = NULL;
 static int64_t _lastMsgTime = 0;  // use INT64_MAX to publish immediately
-static int64_t _mrLatency = COOP_VEH_MSG_LATENCY;
+static int64_t _mrLatency = MR_VEH_MSG_LATENCY;
 
 // Function forward declarations
 void usage(const char* app_name);
@@ -121,14 +122,14 @@ int64_t getTimeMillisec();
 
 // Initialize the LCM context: subscribe to channels, set up channel handlers
 bool init_lcm();
-// Initialize the CoNavEgo channel writer
+// Initialize the channel writer
 bool init_writer();
 // Handle incoming LCM messages
 int handle_lcm();
 // Read and parse next record into the _msgWriter fields
 int get_next_record();
-// Publish the current Co-navigated position and variances
-int publish_coop_nav();
+// Publish the multi-robot data
+int publish_multi_robot_data();
 
 int main(int argc, char **argv)
 {
@@ -143,14 +144,14 @@ int main(int argc, char **argv)
     // Initialization phase
     //**************************************************************************
 
-    // Open the CSV file containing the CoNav data
+    // Open the CSV file containing the MultiRobot data
     _csv = fopen(argv[1], "r");
     if (!_csv) {
         ZF_LOGE("No message CSV file specified!");
         usage(argv[0]);
         return -1;
     }
-    ZF_LOGI("CoNav message file %s found...", argv[1]);
+    ZF_LOGI("MultiRobot message file %s found...", argv[1]);
 
     // Get the first record
     if (get_next_record() != 0) {
@@ -168,7 +169,7 @@ int main(int argc, char **argv)
     ZF_LOGI("Main loop: listen and respond to LRAUV LCM messages");
     do {
         handle_lcm();
-        publish_coop_nav();
+        publish_multi_robot_data();
     } while (!_quit);
     ZF_LOGI("Done!");
 
@@ -251,64 +252,64 @@ bool init_lcm()
 bool init_writer()
 {
     Dim sdim(0, 0);
-    if (!_msgWriter.addArray(Int, CONAV_VEHID_NAME, CONAV_VEHID_NAME,
+    if (!_msgWriter.addArray(Int, MR_VEHID_NAME, MR_VEHID_NAME,
                              "", sdim)) {
-        ZF_LOGE("Creating %s failed", CONAV_VEHID_NAME);
+        ZF_LOGE("Creating %s failed", MR_VEHID_NAME);
         return false;
     }
-    if (!_msgWriter.addArray(Double, CONAV_TIME_NAME, CONAV_TIME_NAME,
+    if (!_msgWriter.addArray(Double, MR_TIME_NAME, MR_TIME_NAME,
                              "seconds", sdim)) {
-        ZF_LOGE("Creating %s failed", CONAV_TIME_NAME);
+        ZF_LOGE("Creating %s failed", MR_TIME_NAME);
         return false;
     }
-    if (!_msgWriter.addArray(Double, CONAV_TRN_N_NAME, CONAV_TRN_N_NAME,
+    if (!_msgWriter.addArray(Double, MR_TRN_N_NAME, MR_TRN_N_NAME,
                              "meters", sdim)) {
-        ZF_LOGE("Creating %s failed", CONAV_TRN_N_NAME);
+        ZF_LOGE("Creating %s failed", MR_TRN_N_NAME);
         return false;
     }
-    if (!_msgWriter.addArray(Double, CONAV_TRN_E_NAME, CONAV_TRN_E_NAME,
+    if (!_msgWriter.addArray(Double, MR_TRN_E_NAME, MR_TRN_E_NAME,
                              "meters", sdim)) {
-        ZF_LOGE("Creating %s failed", CONAV_TRN_E_NAME);
+        ZF_LOGE("Creating %s failed", MR_TRN_E_NAME);
         return false;
     }
-    if (!_msgWriter.addArray(Double, CONAV_TRN_Z_NAME, CONAV_TRN_Z_NAME,
+    if (!_msgWriter.addArray(Double, MR_TRN_Z_NAME, MR_TRN_Z_NAME,
                              "meters", sdim)) {
-        ZF_LOGE("Creating %s failed", CONAV_TRN_Z_NAME);
+        ZF_LOGE("Creating %s failed", MR_TRN_Z_NAME);
         return false;
     }
-    if (!_msgWriter.addArray(Double, CONAV_TRN_VAR_N_NAME, CONAV_TRN_VAR_N_NAME,
+    if (!_msgWriter.addArray(Double, MR_TRN_VAR_N_NAME, MR_TRN_VAR_N_NAME,
                              "", sdim)) {
-        ZF_LOGE("Creating %s failed", CONAV_TRN_VAR_N_NAME);
+        ZF_LOGE("Creating %s failed", MR_TRN_VAR_N_NAME);
         return false;
     }
-    if (!_msgWriter.addArray(Double, CONAV_TRN_VAR_E_NAME, CONAV_TRN_VAR_E_NAME,
+    if (!_msgWriter.addArray(Double, MR_TRN_VAR_E_NAME, MR_TRN_VAR_E_NAME,
                              "", sdim)) {
-        ZF_LOGE("Creating %s failed", CONAV_TRN_VAR_E_NAME);
+        ZF_LOGE("Creating %s failed", MR_TRN_VAR_E_NAME);
         return false;
     }
-    if (!_msgWriter.addArray(Double, CONAV_TRN_VAR_Z_NAME, CONAV_TRN_VAR_Z_NAME,
+    if (!_msgWriter.addArray(Double, MR_TRN_VAR_Z_NAME, MR_TRN_VAR_Z_NAME,
                              "", sdim)) {
-        ZF_LOGE("Creating %s failed", CONAV_TRN_VAR_Z_NAME);
+        ZF_LOGE("Creating %s failed", MR_TRN_VAR_Z_NAME);
         return false;
     }
-    if (!_msgWriter.addArray(Double, CONAV_RANGE_NAME, CONAV_RANGE_NAME,
+    if (!_msgWriter.addArray(Double, MR_RANGE_NAME, MR_RANGE_NAME,
                              "meters", sdim)) {
-        ZF_LOGE("Creating %s failed", CONAV_RANGE_NAME);
+        ZF_LOGE("Creating %s failed", MR_RANGE_NAME);
         return false;
     }
-    if (!_msgWriter.addArray(Double, CONAV_BEARING_NAME, CONAV_BEARING_NAME,
+    if (!_msgWriter.addArray(Double, MR_BEARING_NAME, MR_BEARING_NAME,
                              "radians", sdim)) {
-        ZF_LOGE("Creating %s failed", CONAV_BEARING_NAME);
+        ZF_LOGE("Creating %s failed", MR_BEARING_NAME);
         return false;
     }
-    if (!_msgWriter.addArray(Double, CONAV_RANGE_VAR_NAME, CONAV_RANGE_VAR_NAME,
+    if (!_msgWriter.addArray(Double, MR_RANGE_VAR_NAME, MR_RANGE_VAR_NAME,
                              "", sdim)) {
-        ZF_LOGE("Creating %s failed", CONAV_RANGE_VAR_NAME);
+        ZF_LOGE("Creating %s failed", MR_RANGE_VAR_NAME);
         return false;
     }
-    if (!_msgWriter.addArray(Double, CONAV_BEARING_VAR_NAME,
-                             CONAV_BEARING_VAR_NAME, "", sdim)) {
-        ZF_LOGE("Creating %s failed", CONAV_BEARING_VAR_NAME);
+    if (!_msgWriter.addArray(Double, MR_BEARING_VAR_NAME,
+                             MR_BEARING_VAR_NAME, "", sdim)) {
+        ZF_LOGE("Creating %s failed", MR_BEARING_VAR_NAME);
         return false;
     }
     ZF_LOGD("LCM msgWriter initialized");
@@ -347,87 +348,87 @@ int get_next_record()
                &i,  &j
                );
 
-    _coopNav.coopClock = (double)time;
-    _coopNav.vehId = (double)id;
-    _coopNav.trnN = (double)a;
-    _coopNav.trnE = (double)b;
-    _coopNav.trnZ = (double)c;
-    _coopNav.trnNVar = (double)d;
-    _coopNav.trnEVar = (double)e;
-    _coopNav.trnZVar = (double)f;
-    _coopNav.range = (double)g;
-    _coopNav.bearing = (double)h;
-    _coopNav.rangeVar = (double)i;
-    _coopNav.bearingVar = (double)j;
+    _mrInput.datTime = (double)time;
+    _mrInput.vehId = (double)id;
+    _mrInput.nj = (double)a;
+    _mrInput.ej = (double)b;
+    _mrInput.dj = (double)c;
+    _mrInput.njCovar = (double)d;
+    _mrInput.ejCovar = (double)e;
+    _mrInput.djCovar = (double)f;
+    _mrInput.range = (double)g;
+    _mrInput.bearing = (double)h;
+    _mrInput.rangeSigma = (double)i;
+    _mrInput.bearingSigma = (double)j;
 
     if (rc != 12) {
         return 1;
     } else {
-        _coopNav.coopClock -= MATLAB_TO_EPOCH;
+        _mrInput.datTime -= MATLAB_TO_EPOCH;
         ZF_LOGI("Read record scheduled for %.3f with range %.2f",
-            _coopNav.coopClock, _coopNav.range);
+            _mrInput.datTime, _mrInput.range);
         return 0;
     }
 }
 
 // Publish the current Cooperative Vehicle nav data
-int publish_coop_nav()
+int publish_multi_robot_data()
 {
     // When the most recent LCM timestamp >= the coop timestamp then
     // publish the coop data
     if (_lastMsgTime <
-        (_mrLatency + _coopNav.coopClock)*1000) {
+        (_mrLatency + _mrInput.datTime)*1000) {
         return -1;
     }
 
-    if (!_msgWriter.set(CONAV_VEHID_NAME, _coopNav.vehId)) {
-        ZF_LOGE("Setting %s failed", CONAV_VEHID_NAME);
+    if (!_msgWriter.set(MR_VEHID_NAME, _mrInput.vehId)) {
+        ZF_LOGE("Setting %s failed", MR_VEHID_NAME);
     }
-    //double ft = 1.0 * _coopNav.timestamp;
+
+    //double ft = 1.0 * _mrInput.timestamp;
     // LCM timestamp is epoch milliseconds
     // coopClock timestamp is epoch seconds
     // Convert to epoch seconds if necessary
     //double ft = 1.0 * (_lastMsgTime - _mrLatency*1000);
     // ft *= 1.0/1000.;
-    double ft = 1.0 * _coopNav.coopClock;
-    if (!_msgWriter.set(CONAV_TIME_NAME, ft)) {
-        ZF_LOGE("Setting %s failed", CONAV_TIME_NAME);
+    double ft = 1.0 * _mrInput.datTime;
+    if (!_msgWriter.set(MR_TIME_NAME, ft)) {
+        ZF_LOGE("Setting %s failed", MR_TIME_NAME);
     }
-    if (!_msgWriter.set(CONAV_TRN_N_NAME, (double)_coopNav.trnN)) {
-        ZF_LOGE("Setting %s failed", CONAV_TRN_N_NAME);
+    if (!_msgWriter.set(MR_TRN_N_NAME, (double)_mrInput.nj)) {
+        ZF_LOGE("Setting %s failed", MR_TRN_N_NAME);
     }
-    if (!_msgWriter.set(CONAV_TRN_E_NAME, (double)_coopNav.trnE)) {
-        ZF_LOGE("Setting %s failed", CONAV_TRN_E_NAME);
+    if (!_msgWriter.set(MR_TRN_E_NAME, (double)_mrInput.ej)) {
+        ZF_LOGE("Setting %s failed", MR_TRN_E_NAME);
     }
-    if (!_msgWriter.set(CONAV_TRN_Z_NAME, (double)_coopNav.trnZ)) {
-        ZF_LOGE("Setting %s failed", CONAV_TRN_Z_NAME);
+    if (!_msgWriter.set(MR_TRN_Z_NAME, (double)_mrInput.dj)) {
+        ZF_LOGE("Setting %s failed", MR_TRN_Z_NAME);
     }
-    if (!_msgWriter.set(CONAV_TRN_VAR_N_NAME, (double)_coopNav.trnNVar)) {
-        ZF_LOGE("Setting %s failed", CONAV_TRN_VAR_N_NAME);
+    if (!_msgWriter.set(MR_TRN_VAR_N_NAME, (double)_mrInput.njCovar)) {
+        ZF_LOGE("Setting %s failed", MR_TRN_VAR_N_NAME);
     }
-    if (!_msgWriter.set(CONAV_TRN_VAR_E_NAME, (double)_coopNav.trnEVar)) {
-        ZF_LOGE("Setting %s failed", CONAV_TRN_VAR_E_NAME);
+    if (!_msgWriter.set(MR_TRN_VAR_E_NAME, (double)_mrInput.ejCovar)) {
+        ZF_LOGE("Setting %s failed", MR_TRN_VAR_E_NAME);
     }
-    if (!_msgWriter.set(CONAV_TRN_VAR_Z_NAME, (double)_coopNav.trnZVar)) {
-        ZF_LOGE("Setting %s failed", CONAV_TRN_VAR_Z_NAME);
+    if (!_msgWriter.set(MR_TRN_VAR_Z_NAME, (double)_mrInput.djCovar)) {
+        ZF_LOGE("Setting %s failed", MR_TRN_VAR_Z_NAME);
     }
-    if (!_msgWriter.set(CONAV_RANGE_NAME, (double)_coopNav.range)) {
-        ZF_LOGE("Setting %s failed", CONAV_RANGE_NAME);
+    if (!_msgWriter.set(MR_RANGE_NAME, (double)_mrInput.range)) {
+        ZF_LOGE("Setting %s failed", MR_RANGE_NAME);
     }
-    if (!_msgWriter.set(CONAV_BEARING_NAME, (double)_coopNav.bearing)) {
-        ZF_LOGE("Setting %s failed", CONAV_BEARING_NAME);
+    if (!_msgWriter.set(MR_BEARING_NAME, (double)_mrInput.bearing)) {
+        ZF_LOGE("Setting %s failed", MR_BEARING_NAME);
     }
-    if (!_msgWriter.set(CONAV_RANGE_VAR_NAME, (double)_coopNav.rangeVar)) {
-        ZF_LOGE("Setting %s failed", CONAV_RANGE_VAR_NAME);
+    if (!_msgWriter.set(MR_RANGE_VAR_NAME, (double)_mrInput.rangeSigma)) {
+        ZF_LOGE("Setting %s failed", MR_RANGE_VAR_NAME);
     }
-    if (!_msgWriter.set(CONAV_BEARING_VAR_NAME, (double)_coopNav.bearingVar)) {
-        ZF_LOGE("Setting %s failed", CONAV_BEARING_VAR_NAME);
+    if (!_msgWriter.set(MR_BEARING_VAR_NAME, (double)_mrInput.bearingSigma)) {
+        ZF_LOGE("Setting %s failed", MR_BEARING_VAR_NAME);
     }
-    ZF_LOGI("Publishing %s msg vehId %d from %.3f at %ld", COOP_CHANNEL,
-        _coopNav.vehId, ft/1000., _lastMsgTime);
-        //_coopNav.vehId, _coopNav.timestamp, _lastMsgTime);
-    int64_t t = ((int64_t)_coopNav.coopClock) * 1000;
-    _msgWriter.publish(*_lcm, COOP_CHANNEL, _lastMsgTime);
+    ZF_LOGI("Publishing %s msg vehId %d from %.3f at %ld", MR_DAT_CHANNEL,
+        _mrInput.vehId, ft/1000., _lastMsgTime);
+
+    _msgWriter.publish(*_lcm, MR_DAT_CHANNEL, _lastMsgTime);
 
     // Get the next coop data set if any
     if (get_next_record() != 0) {

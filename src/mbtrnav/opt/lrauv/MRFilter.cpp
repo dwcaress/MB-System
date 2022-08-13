@@ -144,15 +144,15 @@ MRFilter::MRFilter(int filterId, double initN, double initE, double initTime)
     : _id(filterId), _origin(0), _northing(initN), _easting(initE),
       _deltaN(0.0), _deltaE(0.0), _time(initTime), _timelast(initTime)
 {
-    _lastNav.egoClock = initTime;
-    _lastNav.northing = initN;
-    _lastNav.easting = initE;
+    _lastNav.egoTime = initTime;
+    _lastNav.navN    = initN;
+    _lastNav.navE    = initE;
 
-    memset(&_lastCoopData, 0, sizeof(_lastCoopData));
+    memset(&_lastMRData, 0, sizeof(_lastMRData));
 
     arma::mat pn(2, 2, arma::fill::eye);
-    _P = pn;
-    _P *= 10000.;
+    _Pij = pn;
+    _Pij *= PIJ_INIT;
 
     std::string logname = MRFilterLogName + std::to_string(_id);
     _log = new MRFilterLog(_id, logname);
@@ -167,25 +167,25 @@ MRFilter::~MRFilter()
 }
 
 // Process position, range, and bearing data from a cooperating vehicle
-void MRFilter::conav_update(MRFilterLog::CoopVehicleNavData& conavdata)
+void MRFilter::measure_update(CoNav::MRDATInput& mrdata)
 {
     // Computation modeled after Steve Rock's Matlab script
-    _time   = conavdata.egoClock;
+    _time   = mrdata.egoTime;
     _state.egoClock = _time;
-    _lastCoopData = conavdata;
-    _log->setMRFilterMeas(conavdata);
+    _lastMRData = mrdata;
+    _log->setMRFilterMeas(mrdata);
     _log->setMRFilterState(_state);
 
-    double convergence = sqrt(conavdata.trnNVar + conavdata.trnEVar);
+    double convergence = sqrt(mrdata.njCovar + mrdata.ejCovar);
     // The sending vehicle's TRN filter must be converged and the
     // range value must be less than the threshold
     if (convergence     >  SIGMA_THRESHOLD ||
-        conavdata.range <= RANGE_THRESHOLD) {
+        mrdata.range <= RANGE_THRESHOLD) {
         ZF_LOGD("MRFilter %d threshold fail: sigma is %.2f, range is %.2f",
-                _id, convergence, conavdata.range);
+                _id, convergence, mrdata.range);
         // log measurement data regardless
         _origin = ORIGIN_THRESHOLD_FAIL;
-        _log->setMRFilterP(_origin, _P);
+        _log->setMRFilterP(_origin, _Pij);
         _log->write();
         return;
     }
@@ -194,7 +194,7 @@ void MRFilter::conav_update(MRFilterLog::CoopVehicleNavData& conavdata)
     if (ORIGIN_MEASUREMENT == _origin) {
         ZF_LOGD("MRFilter %d: last event was a good measurement, skipping...",
                 _id);
-        //return;
+        return;
     }
 
     // Process valid hit from cooperating vehicle
@@ -214,11 +214,11 @@ void MRFilter::conav_update(MRFilterLog::CoopVehicleNavData& conavdata)
     _log->setMRFilterPj(pj);
 
     // Update and record filter
-    arma::mat pij = _P;
-    filter_fun(FILTER_FUN_CI, _P, deltaz, pij, rij, hi, hj, pj);
+    arma::mat pij = _Pij;
+    meas_update_MRFilter(FILTER_FUN_CI, _Pij, deltaz, pij, rij, hi, hj, pj);
     _origin = ORIGIN_MEASUREMENT;
-    _log->setMRFilterP(_origin, _P);
-    _timelast = conavdata.coopClock;
+    _log->setMRFilterP(_origin, _Pij);
+    _timelast = mrdata.datTime;
 
     // Log data
     _log->write();
@@ -231,7 +231,7 @@ void MRFilter::range_bearing(arma::mat& deltaz, arma::mat& rij,
 {
     /*
     function [deltaz,Rij,Hi,Hj,Pj] = Range_Bearing(Range,Bearing,RangeSigma,BearingSigma,
-                                                   Nmeas,Emeas,Nj,Ej,Njvar,Ejvar)
+                                                   nijTDAT,eijTDAT,Nj,Ej,Njvar,Ejvar)
       1 R1z=[RangeSigma^2 0 ; 0 BearingSigma^2];
       2 R1x=[Njvar 0 ; 0 Ejvar];
         %Bearing=zeroto2pi(Bearing);
@@ -239,39 +239,40 @@ void MRFilter::range_bearing(arma::mat& deltaz, arma::mat& rij,
         Hi=zeros(2,2);
         Hi(1,1)= cos(Bearing);   %range/N  also (Nhat-N1)/range
         Hi(1,2)= sin(Bearing);   %range/E  also (Ehat-E1)/range
-        Hi(2,1)= -(Emeas-Ej)/Range^2;   %bearing/N
-        Hi(2,2)=  (Nmeas-Nj)/Range^2;   %bearing/E
+        Hi(2,1)= -(eijTDAT-Ej)/Range^2;   %bearing/N
+        Hi(2,2)=  (nijTDAT-Nj)/Range^2;   %bearing/E
       4 Hj=-Hi;
       5 Pj=R1x;
       6 Rij=R1z;
       7 z=[Range;Bearing];
-        %zhat=[sqrt((Nmeas-Nj)^2+(Emeas-Ej)^2); zeroto2pi(atan2(Emeas-Ej,Nmeas-Nj))];
-      8 zhat=[sqrt((Nmeas-Nj)^2+(Emeas-Ej)^2); wrapTo2Pi(atan2(Emeas-Ej,Nmeas-Nj))];
+        %zhat=[sqrt((nijTDAT-Nj)^2+(eijTDAT-Ej)^2); zeroto2pi(atan2(eijTDAT-Ej,nijTDAT-Nj))];
+      8 zhat=[sqrt((nijTDAT-Nj)^2+(eijTDAT-Ej)^2); wrapTo2Pi(atan2(eijTDAT-Ej,nijTDAT-Nj))];
       9 deltaz=[z(1)-zhat(1);-angdiff(z(2),zhat(2))];
     */
     // Data timestamp from sending vehicle is less than now, so
     // interpolate to achieve my vehicle's position at time of measurement
-    //double f = (_time - _lastCoopData.timestamp) / (_time - _timelast);
-    double f = (_time - _lastCoopData.egoClock) / (_deltaT);
-    double measN = _northing - (f * _deltaN);  // add to log
-    double measE = _easting - (f * _deltaE);
-    ZF_LOGD("MRFilter %d interpolated: %.2f  %.2f", _id, measN, measE);
-    _log->setMRFilterMeasPosition(measN, measE);
+    //double f = (_time - _lastMRData.timestamp) / (_time - _timelast);
+    double f = (_time - _lastMRData.egoTime) / (_deltaT);
+    _state.nijTDAT = _northing - (f * _deltaN);  // add to log
+    _state.eijTDAT = _easting -  (f * _deltaE);
+    ZF_LOGD("MRFilter %d interpolated: %.2f  %.2f",
+        _id, _state.nijTDAT, _state.eijTDAT);
+    _log->setMRFilterMeasPosition(_state.nijTDAT, _state.eijTDAT);
 
     // step 1
-    double rangeSigma = _lastCoopData.range * _lastCoopData.rangeVar;
+    double rangeSigma = _lastMRData.range * _lastMRData.rangeSigma;
     arma::mat r1z = { { pow(rangeSigma, 2), 0 },
-                      { 0, pow(_lastCoopData.bearingVar, 2) }
+                      { 0, pow(_lastMRData.bearingSigma, 2) }
                     };
     // step 2
-    arma::mat r1x = { { _lastCoopData.trnNVar, 0 },
-                      { 0 , _lastCoopData.trnEVar}
+    arma::mat r1x = { { _lastMRData.njCovar, 0 },
+                      { 0 , _lastMRData.ejCovar}
                     };
     // step 3
-    double bearing = WrapTwoPI(_lastCoopData.bearing);
+    double bearing = WrapTwoPI(_lastMRData.bearing);
     hi = { { cos(bearing), sin(bearing) },
-           { (0.0 - ((measE-_lastCoopData.trnE)/pow(_lastCoopData.range, 2))),
-             (      ((measN-_lastCoopData.trnN)/pow(_lastCoopData.range, 2))),
+           { (0.0 - ((_state.eijTDAT-_lastMRData.ej)/pow(_lastMRData.range,2))),
+             (      ((_state.nijTDAT-_lastMRData.nj)/pow(_lastMRData.range,2))),
            }
          };
     // step 4
@@ -281,12 +282,13 @@ void MRFilter::range_bearing(arma::mat& deltaz, arma::mat& rij,
     // step 6
     rij = r1z;
     // step 7
-    arma::mat z = { _lastCoopData.range, bearing};
+    arma::mat z = { _lastMRData.range, bearing};
     // step 8
     arma::mat zhat = {
-        sqrt( pow(measN-_lastCoopData.trnN,2) +
-              pow(measE-_lastCoopData.trnE,2) ),
-        WrapTwoPI( atan2(measE-_lastCoopData.trnE, measN-_lastCoopData.trnN) )
+        sqrt( pow(_state.nijTDAT-_lastMRData.nj,2) +
+              pow(_state.eijTDAT-_lastMRData.ej,2) ),
+        WrapTwoPI( atan2(_state.eijTDAT-_lastMRData.ej,
+                         _state.nijTDAT-_lastMRData.nj) )
     };
     // step 9
     deltaz(0,0) = (z(0) - zhat(0));
@@ -298,8 +300,8 @@ void MRFilter::range_bearing(arma::mat& deltaz, arma::mat& rij,
 }
 
 // Computation modeled after the Filterfun function in Rock's scripts
-//void MRFilter::filter_fun(int kf)
-void MRFilter::filter_fun(int kf, arma::mat& P, const arma::mat deltaz,
+//void MRFilter::meas_update_MRFilter(int kf)
+void MRFilter::meas_update_MRFilter(int kf, arma::mat& P, const arma::mat deltaz,
                           const arma::mat pij, const arma::mat rij,
                           const arma::mat hi, const arma::mat hj,
                           const arma::mat pj)
@@ -313,7 +315,7 @@ void MRFilter::filter_fun(int kf, arma::mat& P, const arma::mat deltaz,
     }
     ZF_LOGD("MRFilter %d N: %.2f  E: %.2f  diff: %.2f %.2f",
             _id, _northing, _easting,
-            _lastNav.northing-_northing, _lastNav.easting-_easting);
+            _lastNav.navN - _northing, _lastNav.navE - _easting);
 }
 
 double MRFilter::wopt(const arma::mat& pij, const arma::mat& hi,
@@ -337,8 +339,8 @@ double MRFilter::wopt(const arma::mat& pij, const arma::mat& hi,
         end
     end
 
-    _P === Pij  P31 is passed into wopt as Pij via Filterfun
-    Also noted the line computing p2 was wrong (_P was used instead of _pj)
+    _Pij === Pij  P31 is passed into wopt as Pij via Filterfun
+    Also noted the line computing p2 was wrong (_Pij was used instead of _pj)
     */
     double wout = 0.01;
     double val = 1000000.;
@@ -467,30 +469,29 @@ step 3 deltax=K*deltaz;
 
     ZF_LOGD("MRFilter %d N: %.2f  E: %.2f  diff: %.2f %.2f",
             _id, _northing, _easting,
-            _lastNav.northing-_northing, _lastNav.easting-_easting);
+            _lastNav.navN - _northing, _lastNav.navE - _easting);
 }
 
-#define PROCESS_NOISE  0.03   // nominal process noise (from CoNavDemo.m)
+#define DRIFT_RATE  0.03   // nominal process noise (from CoNavDemo.m)
 
 // Process position and attitude data from the Ego vehicle (this vehicle)
-void MRFilter::motion_update(MRFilterLog::VehicleNavData& navdata, const arma::mat& pBest)
+void MRFilter::process_update(CoNav::ERNavInput& navdata, const arma::mat& pBest)
 {
     ZF_LOGD("MRFilter %d processing data @ %.2f -> %.2f | %.2f | %.2f",
-            _id, navdata.egoClock, navdata.northing,
-            navdata.easting, navdata.depth);
+            _id, navdata.egoTime, navdata.navN, navdata.navE, navdata.navZ);
 
     _log->setMRFilterMotion(navdata);
 
     // Process the motion update
-    _time   = navdata.egoClock;
-    _deltaN = navdata.northing - _lastNav.northing;
-    _deltaE = navdata.easting - _lastNav.easting;
-    _deltaT = navdata.egoClock - _lastNav.egoClock;
+    _time   = navdata.egoTime;
+    _deltaN = navdata.navN - _lastNav.navN;
+    _deltaE = navdata.navE - _lastNav.navE;
+    _deltaT = navdata.egoTime - _lastNav.egoTime;
     _northing += _deltaN;
     _easting += _deltaE;
 
-    _state.northing = _northing;
-    _state.easting = _easting;
+    _state.nij    = _northing;
+    _state.eij    = _easting;
     _state.deltaN = _deltaN;
     _state.deltaE = _deltaE;
     _state.distance = sqrt(pow(_deltaN, 2) + pow(_deltaE, 2));
@@ -502,17 +503,17 @@ void MRFilter::motion_update(MRFilterLog::VehicleNavData& navdata, const arma::m
     // Modify the process noise to deal with correlation
     arma::mat qbar(2, 2, arma::fill::eye);
     arma::mat q(2, 2, arma::fill::eye);
-    q *= pow(_state.distance*PROCESS_NOISE, 2);
-    calculate_qbar(qbar, q, _P, pBest);
+    q *= pow(_state.distance*DRIFT_RATE, 2);
+    calculate_qbar(qbar, q, _Pij, pBest);
     // process update of state covariance
     // P31=P31+Q1bar;   %Process update of the state covariance
-    _P += qbar;
+    _Pij += qbar;
 
     // Log data
     _lastNav = navdata;
     _origin = ORIGIN_MOTION;
     _log->setMRFilterState(_state);
-    _log->setMRFilterP(_origin, _P);
+    _log->setMRFilterP(_origin, _Pij);
     _log->setMRFilterPbest(pBest);
     _log->setMRFilterQbar(qbar);
     _log->write();
