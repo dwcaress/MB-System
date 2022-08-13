@@ -99,10 +99,10 @@ public:
 
             vel_flags_t vflags = 0;
 
-            vflags |= ( ((bflags|BF_BLOCK) != 0) ? VF_BLOCK : 0);
-            vflags |= ( ((bflags|BF_RLOCK) != 0) ? VF_RLOCK : 0);
+            vflags |= ( ((bflags&BF_BLOCK) != 0) ? VF_BLOCK : 0);
+            vflags |= ( ((bflags&BF_RLOCK) != 0) ? VF_RLOCK : 0);
             //            vflags |= (dvl.lock_btm && dvl.lock_ref ? VF_VALID : 0);
-            vflags |= ( ((bflags|BF_VALID) != 0) ? VF_VALID : 0);
+            vflags |= ( ((bflags&BF_VALID) != 0) ? VF_VALID : 0);
             mVelInst = vel_info(time, vx, vy, vz, vflags);
 
             bath_input::mDataInstMutex.unlock();
