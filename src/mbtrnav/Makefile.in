@@ -283,30 +283,31 @@ trn_server_DEPENDENCIES = libtnav.la libqnx.la libnewmat.la libtnav.la \
 am_trnclient_test_OBJECTS = utils/trnclient_test.$(OBJEXT) \
 	utils/TrnClient.$(OBJEXT) utils/TerrainNavClient.$(OBJEXT)
 trnclient_test_OBJECTS = $(am_trnclient_test_OBJECTS)
-trnclient_test_DEPENDENCIES = libtnav.la
+trnclient_test_DEPENDENCIES = libtnav.la libnewmat.la
 am_trnif_test_OBJECTS = trnw/trnif_test.$(OBJEXT)
 trnif_test_OBJECTS = $(am_trnif_test_OBJECTS)
-trnif_test_DEPENDENCIES = libnetif.la libtrnw.la
+trnif_test_DEPENDENCIES = $(LIBMFRAME) libnetif.la libtrnw.la
 am_trnifsvr_test_OBJECTS = utils/trnifsvr-test.$(OBJEXT)
 trnifsvr_test_OBJECTS = $(am_trnifsvr_test_OBJECTS)
-trnifsvr_test_DEPENDENCIES = libnetif.la libtrnw.la
+trnifsvr_test_DEPENDENCIES = $(LIBMFRAME) libnetif.la libtrnw.la
 am_trnlog_player_OBJECTS = utils/trnlog_player.$(OBJEXT) \
 	utils/TrnClient.$(OBJEXT) utils/TerrainNavClient.$(OBJEXT)
 trnlog_player_OBJECTS = $(am_trnlog_player_OBJECTS)
-trnlog_player_DEPENDENCIES = libtnav.la
+trnlog_player_DEPENDENCIES = libtnav.la libnewmat.la
 am_trnu_cli_OBJECTS = trnw/trnucli_test.$(OBJEXT) \
 	trnw/trnu_cli.$(OBJEXT)
 trnu_cli_OBJECTS = $(am_trnu_cli_OBJECTS)
 trnu_cli_DEPENDENCIES = $(LIBMFRAME) libtrnw.la libnetif.la
 am_trnusvr_test_OBJECTS = trnw/trnusvr_test.$(OBJEXT)
 trnusvr_test_OBJECTS = $(am_trnusvr_test_OBJECTS)
-trnusvr_test_DEPENDENCIES = libnetif.la libtrnw.la
+trnusvr_test_DEPENDENCIES = $(LIBMFRAME) libnetif.la libtrnw.la
 @BUILD_ROVTRN_TRUE@am_trnxpp_OBJECTS = opt/rov/udpm_sub.$(OBJEXT) \
 @BUILD_ROVTRN_TRUE@	opt/rov/trnxpp_app.$(OBJEXT) \
 @BUILD_ROVTRN_TRUE@	utils/TrnClient.$(OBJEXT) \
 @BUILD_ROVTRN_TRUE@	utils/TerrainNavClient.$(OBJEXT)
 trnxpp_OBJECTS = $(am_trnxpp_OBJECTS)
-@BUILD_ROVTRN_TRUE@trnxpp_DEPENDENCIES = libmb1.la libtnav.la
+@BUILD_ROVTRN_TRUE@trnxpp_DEPENDENCIES = libmb1.la libtnav.la \
+@BUILD_ROVTRN_TRUE@	libnewmat.la libqnx.la
 SCRIPTS = $(dist_bin_SCRIPTS)
 AM_V_P = $(am__v_P_@AM_V@)
 am__v_P_ = $(am__v_P_@AM_DEFAULT_V@)
@@ -870,7 +871,7 @@ libmb1_la_LIBADD =
 @BUILD_ROVTRN_TRUE@utils/TrnClient.cpp \
 @BUILD_ROVTRN_TRUE@utils/TerrainNavClient.cpp
 
-@BUILD_ROVTRN_TRUE@trnxpp_LDADD = -llcm libmb1.la libtnav.la
+@BUILD_ROVTRN_TRUE@trnxpp_LDADD = -llcm libmb1.la libtnav.la libnewmat.la libqnx.la
 @BUILD_ROVTRN_TRUE@TRN_HPP = opt/rov/lcm_pcf/signal_t.hpp \
 @BUILD_ROVTRN_TRUE@	opt/rov/lcm_pcf/string_t.hpp \
 @BUILD_ROVTRN_TRUE@	opt/rov/gss/nav_solution_t.hpp \
@@ -902,7 +903,7 @@ trn_server_LDADD = libtnav.la libqnx.la libnewmat.la libtnav.la libgeolib.la
 trn_replay_SOURCES = opt/dorado/Replay.cpp opt/dorado/trn_replay.cpp utils/TerrainNavClient.cpp
 trn_replay_LDADD = -ltnav  -lnewmat -lqnx -lnetcdf -lm -lpthread -lgeolib 
 trnclient_test_SOURCES = utils/trnclient_test.cpp utils/TrnClient.cpp utils/TerrainNavClient.cpp
-trnclient_test_LDADD = libtnav.la
+trnclient_test_LDADD = libtnav.la libnewmat.la
 mmcpub_SOURCES = trnw/mmcpub.c
 mmcpub_LDADD = ${LIBMFRAME}
 mmcsub_SOURCES = trnw/mmcsub.c
@@ -912,17 +913,17 @@ trnu_cli_LDADD = ${LIBMFRAME} libtrnw.la libnetif.la
 trn_cli_SOURCES = trnw/trncli_test.c trnw/trn_cli.c
 trn_cli_LDADD = ${LIBMFRAME} libtrnw.la
 trnif_test_SOURCES = trnw/trnif_test.c
-trnif_test_LDADD = libnetif.la  libtrnw.la
+trnif_test_LDADD = ${LIBMFRAME} libnetif.la  libtrnw.la
 trnusvr_test_SOURCES = trnw/trnusvr_test.c
-trnusvr_test_LDADD = libnetif.la libtrnw.la
+trnusvr_test_LDADD = ${LIBMFRAME} libnetif.la libtrnw.la
 netif_test_SOURCES = utils/netif-test.c
 netif_test_LDADD = libnetif.la  libtrnw.la
 trnifsvr_test_SOURCES = utils/trnifsvr-test.c
-trnifsvr_test_LDADD = libnetif.la  libtrnw.la
+trnifsvr_test_LDADD = ${LIBMFRAME} libnetif.la  libtrnw.la
 mb1rs_SOURCES = trnw/mb1rs.c trnw/mb1rs-app.c
 mb1rs_LDADD = ${LIBMFRAME} libmb1.la
 trnlog_player_SOURCES = utils/trnlog_player.cpp utils/TrnClient.cpp utils/TerrainNavClient.cpp
-trnlog_player_LDADD = libtnav.la
+trnlog_player_LDADD = libtnav.la libnewmat.la
 dist_bin_SCRIPTS = 
 CLEANFILES = ${BUILT_SOURCES} #${ROVTRN_CLEANFILES}
 DISTCLEANFILES = 
