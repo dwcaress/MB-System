@@ -188,11 +188,12 @@ int mbsys_image83p_extract(int verbose, void *mbio_ptr, void *store_ptr, int *ki
 
 		/* read distance and depth values into storage arrays */
 		*nbath = store->num_proc_beams;
-		*namp = 0;
+		*namp = store->num_proc_beams;
 		*nss = 0;
 		for (int i = 0; i < *nbath; i++) {
 			beamflag[i] = store->beamflag[i];
 			bath[i] = store->bath[i];
+			amp[i] = store->amp[i];
 			bathacrosstrack[i] = store->bathacrosstrack[i];
 			bathalongtrack[i] = store->bathalongtrack[i];
 		}

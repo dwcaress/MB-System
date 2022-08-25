@@ -64,7 +64,7 @@ int mbr_info_image83p(int verbose, int *system, int *beams_bath_max, int *beams_
 	*error = MB_ERROR_NO_ERROR;
 	*system = MB_SYS_IMAGE83P;
 	*beams_bath_max = 480;
-	*beams_amp_max = 0;
+	*beams_amp_max = 480;
 	*pixels_ss_max = 0;
 	strncpy(format_name, "IMAGE83P", MB_NAME_LENGTH);
 	strncpy(system_name, "IMAGE83P", MB_NAME_LENGTH);
@@ -453,6 +453,13 @@ int mbr_rt_image83p(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			mb_get_binary_short(swap, &buffer[index], &short_val);
 			index += 2;
 			store->range[i] = (int)((unsigned short)short_val);
+		}
+
+		/* get amplitudes */
+		for (int i = 0; i < store->num_beams; i++) {
+			mb_get_binary_short(swap, &buffer[index], &short_val);
+			index += 2;
+			store->amp[i] = (int)((unsigned short)short_val);
 		}
 	}
 	mb_io_ptr->new_kind = store->kind;

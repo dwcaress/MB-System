@@ -73,6 +73,7 @@ struct mbsys_image83p_struct {
 	int rep_rate;           /* msec */
 	int ping_number;
 	int range[MBSYS_IMAGE83P_BEAMS];
+	int amp[MBSYS_IMAGE83P_BEAMS];
 
 	/* important values not in vendor format */
 	float sonar_depth;
