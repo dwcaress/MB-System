@@ -72,6 +72,7 @@ struct mbsys_image83p_struct {
 	int profile_tilt_angle; /* degrees + 180.0 */
 	int rep_rate;           /* msec */
 	int ping_number;
+	int has_intensity;
 	int range[MBSYS_IMAGE83P_BEAMS];
 	int amp[MBSYS_IMAGE83P_BEAMS];
 

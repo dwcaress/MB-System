@@ -440,6 +440,14 @@ int mbr_rt_image83p(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		store->ping_number = int_val;
 		index += 159;
 
+		if (store->version >= 10) {
+			/* backscatter added in v1.1 */
+			store->has_intensity = buffer[117];
+		}
+		else {
+			store->has_intensity = 0;
+		}
+
 		/* fix unexpected zero values */
 		if (store->pitch == 0)
 			store->pitch = 900;
@@ -456,10 +464,15 @@ int mbr_rt_image83p(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		}
 
 		/* get amplitudes */
-		for (int i = 0; i < store->num_beams; i++) {
-			mb_get_binary_short(swap, &buffer[index], &short_val);
-			index += 2;
-			store->amp[i] = (int)((unsigned short)short_val);
+		if (store->has_intensity) {
+			for (int i = 0; i < store->num_beams; i++) {
+				mb_get_binary_short(swap, &buffer[index], &short_val);
+				index += 2;
+				store->amp[i] = (int)((unsigned short)short_val);
+			}
+		}
+		else {
+			memset(store->amp, 0, store->num_beams * sizeof(short));
 		}
 	}
 	mb_io_ptr->new_kind = store->kind;
