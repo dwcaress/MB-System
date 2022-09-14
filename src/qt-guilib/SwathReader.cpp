@@ -11,7 +11,9 @@
 #include "vtk_netcdf.h"
 #include "SwathReader.h"
 
+extern "C" {
 #include "mb_format.h"
+}
 
 #define VTK_CREATE(type, name) vtkSmartPointer<type> name = vtkSmartPointer<type>::New()
 
