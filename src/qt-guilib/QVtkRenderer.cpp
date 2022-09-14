@@ -300,8 +300,8 @@ bool QVtkRenderer::initializePipeline(const char *gridFilename) {
   axesActor_ = vtkSmartPointer<vtkCubeAxesActor>::New();
 
   // Invoke callback when renderWindow_ is made current
-  // renderWindow_->AddObserver(vtkCommand::WindowMakeCurrentEvent,
-  //                        this, &QVtkRenderer::makeCurrentCallback);
+  renderWindow_->AddObserver(vtkCommand::WindowMakeCurrentEvent,
+                             this, &QVtkRenderer::makeCurrentCallback);
     
   return assemblePipeline();
 }
@@ -522,5 +522,6 @@ void QVtkRenderer::makeCurrentCallback(vtkObject *, unsigned long eid,
 
   std::cout << "makeCurrentCallback()!" << std::endl;
 
-  // renderWindow_->SetIsCurrent(true); comment out
+  // Assert render window as current
+  renderWindow_->SetIsCurrent(true);
 }
