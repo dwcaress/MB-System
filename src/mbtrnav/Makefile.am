@@ -220,6 +220,11 @@ libmb1_la_LIBADD =
 if BUILD_ROVTRN
 
 include_HEADERS = \
+trnw/netif.h \
+trnw/trnw.h \
+trnw/trnif_proto.h \
+trnw/trnif_msg.h \
+trnw/mb1_msg.h \
 opt/rov/lcm_pcf/signal_t.hpp \
 opt/rov/lcm_pcf/string_t.hpp \
 opt/rov/gss/nav_solution_t.hpp \
