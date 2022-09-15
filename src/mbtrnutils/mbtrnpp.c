@@ -4166,12 +4166,12 @@ int main(int argc, char **argv) {
             /* output MB1, TRN data */
             if ( !OUTPUT_FLAGS_ZERO() ) {
 
-                MST_METRIC_START(app_stats->stats->metrics[MBTPP_CH_MB_PROC_MB1_XT], mtime_dtime());
-
-                // do MB1 processing/output
-                mbtrnpp_process_mb1(output_buffer, mb1_size, trn_cfg);
-
-                MST_METRIC_LAP(app_stats->stats->metrics[MBTPP_CH_MB_PROC_MB1_XT], mtime_dtime());
+//                MST_METRIC_START(app_stats->stats->metrics[MBTPP_CH_MB_PROC_MB1_XT], mtime_dtime());
+//
+//                // do MB1 processing/output
+//                mbtrnpp_process_mb1(output_buffer, mb1_size, trn_cfg);
+//
+//                MST_METRIC_LAP(app_stats->stats->metrics[MBTPP_CH_MB_PROC_MB1_XT], mtime_dtime());
 
 #ifdef WITH_MBTNAV
 
@@ -4252,6 +4252,15 @@ int main(int argc, char **argv) {
                 }
 
 #endif // WITH_MBTNAV
+
+                MST_METRIC_START(app_stats->stats->metrics[MBTPP_CH_MB_PROC_MB1_XT], mtime_dtime());
+
+                // do MB1 processing/output
+                // after TRN processing/update to enable synchronization, e.g. with sim
+                // i.e. when MB1 record is published, TRN processing has completed
+                mbtrnpp_process_mb1(output_buffer, mb1_size, trn_cfg);
+
+                MST_METRIC_LAP(app_stats->stats->metrics[MBTPP_CH_MB_PROC_MB1_XT], mtime_dtime());
 
                 MBTRNPP_UPDATE_STATS(app_stats, mbtrnpp_mlog_id, mbtrn_cfg->mbtrnpp_stat_flags);
 
