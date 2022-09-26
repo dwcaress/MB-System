@@ -44,4 +44,5 @@ target_link_libraries(qt-mbgrdviz
                       pthread)
                            
                            
-
+install(TARGETS qt-mbgrdviz
+	DESTINATION ${CMAKE_INSTALL_BINDIR})
