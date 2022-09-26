@@ -38,7 +38,7 @@ add_library(MBGui
 
 target_link_libraries(MBGui
                       PRIVATE
-		      mbio
+                      ${VTK_LIBRARIES}
                       ${GMT_LIBRARIES})
 		      
 target_include_directories(MBGui
@@ -46,11 +46,7 @@ target_include_directories(MBGui
                            .
                            ${MB_HOME}/src/mbio
 			   ${OPENGL_INCLUDE_DIRS}
-<<<<<<< HEAD
 			   ${PROJ_INCLUDE_DIRS}
-=======
-                           ${PROJ_INCLUDE_DIRS}
->>>>>>> c577b37b749cbfb614fd0d313a81c760e99f6161
                            ${GMT_INCLUDE_DIRS}
                            ${QT5_INCLUDE_DIRS}
                            ${VTK_INCLUDE_DIRS})
@@ -81,7 +77,7 @@ target_include_directories(MBGuiShared
 
 message("qt-guilib - EXTRA_LIBRARIES: ${EXTRA_LIBRARIES}")
 
-target_link_libraries(MBGuiShared mbio
+target_link_libraries(MBGuiShared 
                       ${VTK_LIBRARIES}
 	              ${GMT_LIBRARIES} ${EXTRA_LIBRARIES})
 
