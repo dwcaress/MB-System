@@ -4166,12 +4166,14 @@ int main(int argc, char **argv) {
             /* output MB1, TRN data */
             if ( !OUTPUT_FLAGS_ZERO() ) {
 
+                // begin: move after TRN update for sim sync
 //                MST_METRIC_START(app_stats->stats->metrics[MBTPP_CH_MB_PROC_MB1_XT], mtime_dtime());
 //
 //                // do MB1 processing/output
 //                mbtrnpp_process_mb1(output_buffer, mb1_size, trn_cfg);
 //
 //                MST_METRIC_LAP(app_stats->stats->metrics[MBTPP_CH_MB_PROC_MB1_XT], mtime_dtime());
+                // end: move after TRN update for sim sync
 
 #ifdef WITH_MBTNAV
 
@@ -4253,6 +4255,7 @@ int main(int argc, char **argv) {
 
 #endif // WITH_MBTNAV
 
+                // begin: move after TRN update for sim sync
                 MST_METRIC_START(app_stats->stats->metrics[MBTPP_CH_MB_PROC_MB1_XT], mtime_dtime());
 
                 // do MB1 processing/output
@@ -4261,6 +4264,8 @@ int main(int argc, char **argv) {
                 mbtrnpp_process_mb1(output_buffer, mb1_size, trn_cfg);
 
                 MST_METRIC_LAP(app_stats->stats->metrics[MBTPP_CH_MB_PROC_MB1_XT], mtime_dtime());
+                // end: move after TRN update for sim sync
+
 
                 MBTRNPP_UPDATE_STATS(app_stats, mbtrnpp_mlog_id, mbtrn_cfg->mbtrnpp_stat_flags);
 
