@@ -141,7 +141,7 @@ struct mbev_file_struct {
 	struct mb_info_struct processed_info;
 	struct mb_process_struct process;
 	bool esf_open;
-  bool esf_changed;
+        bool esf_changed;
 	char esffile[MB_PATH_MAXLINE];
 	struct mb_esf_struct esf;
 	int num_pings;
@@ -174,19 +174,34 @@ struct mbev_grid_struct {
 	int status;
 	char projection_id[MB_PATH_MAXLINE];
 	void *pjptr;
+
+  // minimum lat, maximum lat, minimum lon, maximum lon
 	double bounds[4];
+  
 	double boundsutm[4];
+  
 	double dx;
 	double dy;
 	int n_columns;
 	int n_rows;
+  
+  // minimum depth
 	double min;
+  
+  // maximum depth
 	double max;
+  
 	double smin;
+  
 	double smax;
+
+  // Value denoting 'no data'
 	float nodatavalue;
+  
 	float *sum;
 	float *wgt;
+  
+  // Depth values  
 	float *val;
 	float *sgm;
 };
@@ -285,7 +300,16 @@ int do_wait_until_viewed(void);
 int do_mbeditviz_settimer(void);
 int do_mbeditviz_workfunction(XtPointer client_data);
 
-int mbeditviz_init(int argc, char **argv);
+/// int mbeditviz_init(int argc, char **argv);
+int mbeditviz_init(int argc, char **argv,
+                   char *programName,
+                   char *helpMsg,
+                   char *usageMsg,
+                   int (*showMessage)(char *),
+                   void (*hideMessage)(void),
+                   void (*updateGui)(void),
+                   int (*showErrorDialog)(char *, char *, char *));
+
 int mbeditviz_get_format(char *file, int *form);
 int mbeditviz_open_data(char *path, int format);
 int mbeditviz_import_file(char *path, int format);
@@ -307,7 +331,9 @@ int mbeditviz_get_grid_bounds(void);
 int mbeditviz_setup_grid(void);
 int mbeditviz_project_soundings(void);
 int mbeditviz_make_grid(void);
-int mbeditviz_grid_beam(struct mbev_file_struct *file, struct mbev_ping_struct *ping, int ibeam, int beam_ok, int apply_now);
+int mbeditviz_grid_beam(struct mbev_file_struct *file, struct mbev_ping_struct *ping, int ibeam,
+                        bool beam_ok, bool apply_now);
+
 int mbeditviz_make_grid_simple(void);
 int mbeditviz_destroy_grid(void);
 int mbeditviz_selectregion(size_t instance);
@@ -335,6 +361,8 @@ void BxPopupCB(Widget w, XtPointer client, XtPointer call);
 XtPointer BX_CONVERT(Widget w, char *from_string, char *to_type, int to_size, Boolean *success);
 void BxExitCB(Widget w, XtPointer client, XtPointer call);
 void BxSetValuesCB(Widget w, XtPointer client, XtPointer call);
+
+
 
 /* end this include */
 #endif
