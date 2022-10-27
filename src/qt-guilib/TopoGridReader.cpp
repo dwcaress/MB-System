@@ -97,7 +97,7 @@ TopoGridReader::TopoGridReader() :
 {
   
   gridPoints_ = vtkSmartPointer<vtkPoints>::New();
-  gridPoints_->SetDataTypeToFloat();
+  gridPoints_->SetDataTypeToDouble();
   gridPolygons_ = vtkSmartPointer<vtkCellArray>::New();  
 
   this->SetNumberOfInputPorts(0);
@@ -217,9 +217,6 @@ int TopoGridReader::RequestData(vtkInformation* request,
   }
 
   
-  // Reset/clear points
-  gridPoints_->Reset();
-
   unsigned nRows = grid_->nRows();
   unsigned nColumns = grid_->nColumns();
   std::cerr << "nRows=" << nRows << ", nColumns=" << nColumns << std::endl;
@@ -230,6 +227,9 @@ int TopoGridReader::RequestData(vtkInformation* request,
 	      <<  nRows * nColumns << " points"
 	      << std::endl;
   }
+
+  // Reset/clear points
+  gridPoints_->Reset();
 
   unsigned row;
   unsigned col;
@@ -247,15 +247,12 @@ int TopoGridReader::RequestData(vtkInformation* request,
 
       if (!convertToUTM) {
         grid_->data(row, col, &y, &x, &z);
-        if (!std::isnan(z)) {
-          vtkIdType id = gridPoints_->InsertNextPoint(x, y, z);
-        }
+        vtkIdType id = gridPoints_->InsertNextPoint(x, y, z);
       }
       else {
         grid_->data(row, col, &y, &x, &z);
-        if (!std::isnan(z)) {
-          vtkIdType id = gridPoints_->InsertNextPoint(x, y, z);
-        }        
+        vtkIdType id = gridPoints_->InsertNextPoint(x, y, z);
+
         /* ***
         grid_->data(row, col, &lat, &lon, &z);
         if (!std::isnan(z)) {
