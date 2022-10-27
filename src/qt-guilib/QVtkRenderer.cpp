@@ -520,7 +520,7 @@ void QVtkRenderer::LoadFileWorker::run() {
 void QVtkRenderer::makeCurrentCallback(vtkObject *, unsigned long eid,
                                        void *callData) {
 
-  std::cout << "makeCurrentCallback()!" << std::endl;
+  //  std::cout << "makeCurrentCallback()!" << std::endl;
 
   // Assert render window as current
   renderWindow_->SetIsCurrent(true);
