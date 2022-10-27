@@ -3988,12 +3988,22 @@ int main(int argc, char **argv) {
           beam_end = MAX(beam_end, 0);
 
           /* apply decimation - only consider outputting decimated soundings */
+            if(mbtrn_cfg->n_output_soundings == 0) {
+                mlog_tprintf(mbtrnpp_mlog_id,"e,n_outputsoundings == 0 - invalid\n", beam_start, beam_end, n_pings_read);
+            }
           beam_decimation = ((beam_end - beam_start + 1) / mbtrn_cfg->n_output_soundings);
+            if(beam_decimation <= 0) {
+                beam_decimation = 1;
+                static bool warned = false;
+                if(!warned)
+                mlog_tprintf(mbtrnpp_mlog_id,"e,beam_decimation <= 0 - invalid end[%d] start[%d] using decimation[%d]\n", beam_end, beam_start, beam_decimation);
+                warned = true;
+            }
           int dj = mbtrn_cfg->median_filter_n_across / 2;
           n_output = 0;
           for (int j = beam_start; j <= beam_end; j++) {
 
-            if ((j - beam_start) % beam_decimation == 0) {
+            if (beam_decimation > 0 && (j - beam_start) % beam_decimation == 0) {
               if (mb_beam_ok(ping[i_ping_process].beamflag_filter[j])) {
                 /* apply median filtering to this sounding */
                 if (median_filter_n_total > 1) {
