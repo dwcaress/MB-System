@@ -97,13 +97,12 @@ GMT_GRID *GmtGridData::readGmtFile(const char *gridFile, void **api) {
 
 
 bool GmtGridData::data(int row, int col,
-                       double *x, double *y, double *z) {
+                       double *northing, double *easting, double *z) {
 
-  dataIndex_ = GMT_Get_Index(gmtAPI_, gmtGrid_->header, row, col);
-
-  *x = gmtGrid_->x[col];
-  *y = gmtGrid_->y[row];
-  *z = gmtGrid_->data[dataIndex_];
+  *easting = gmtGrid_->x[col];
+  *northing = gmtGrid_->y[row];
+  unsigned index = GMT_Get_Index(gmtAPI_, gmtGrid_->header, row, col);
+  *z = gmtGrid_->data[index];
 
   return true;
 }

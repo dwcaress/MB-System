@@ -11,9 +11,10 @@ namespace mb_system {
 
   public:
 
-    /// Get x, y, z data at specified row and column.
+    /// Get northing, easting, z data at specified row and column.
     /// Returns false in case of error
-    bool data(int row, int col, double *x, double *y, double *z) override;
+    bool data(int row, int col, double *northing, double *easting,
+              double *z) override;
   
     /// Read data from GMT file
     bool readDatafile(char *filename) override;
@@ -29,13 +30,10 @@ namespace mb_system {
                        double *yMin, double *yMax,
                        double *zMin, double *zMax,
                        char **xUnits, char **yUnits, char **zUnits) override;
-  
+
+    /// GMT data grid
     GMT_GRID *gmtGrid_;
 
-    /// Use this member variable in frequently-called data-fetch functions
-    /// for efficiency.
-    unsigned dataIndex_;
-  
     /// gmtAPI_ is returned when reading a GMT file, and is passed to
     /// various GMT grid access functions.
     void *gmtAPI_;
