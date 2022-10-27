@@ -29,19 +29,19 @@
 #define HAVE_LIBPTHREAD 1
 
 /* Have malloc.h */
-/* #undef HAVE_MALLOC_H */
+#define HAVE_MALLOC_H 1
+
+/* Define to 1 if you have the <memory.h> header file. */
+#define HAVE_MEMORY_H 1
 
 /* Have rpc/rpc.h */
 #define HAVE_RPC_RPC_H 1
 
 /* Define to 1 if you have the `sincos' function. */
-/* #undef HAVE_SINCOS */
+#define HAVE_SINCOS 1
 
 /* Define to 1 if you have the <stdint.h> header file. */
 #define HAVE_STDINT_H 1
-
-/* Define to 1 if you have the <stdio.h> header file. */
-#define HAVE_STDIO_H 1
 
 /* Define to 1 if you have the <stdlib.h> header file. */
 #define HAVE_STDLIB_H 1
@@ -113,11 +113,9 @@
 /* #undef QTTOOLS_ENABLED */
 
 /* Build rovtrn tools in mbtrnav */
-#define ROVTRN_ENABLED 1
+/* #undef ROVTRN_ENABLED */
 
-/* Define to 1 if all of the C90 standard headers exist (not just the ones
-   required in a freestanding environment). This macro is provided for
-   backward compatibility; new code need not use it. */
+/* Define to 1 if you have the ANSI C header files. */
 #define STDC_HEADERS 1
 
 /* Building unit tests */
