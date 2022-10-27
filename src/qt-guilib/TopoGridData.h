@@ -23,9 +23,10 @@ namespace mb_system {
       return nColumns_;
     }
   
-    /// Get x, y, z data at specified row and column.
+    /// Get northing, easting, z data at specified row and column.
     /// Returns false in case of error
-    virtual bool data(int row, int col, double *x, double *y, double *z) = 0;
+    virtual bool data(int row, int col, double *northing, double *easting,
+                      double *z) = 0;
   
     /// Get min/max bounds on each axis
     void bounds(double *xMin, double *xMax,
