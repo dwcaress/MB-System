@@ -1,0 +1,190 @@
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>
+#include <iostream>
+#include <string.h>
+#include <limits>
+#include <cmath>
+
+#include "SwathGridData.h"
+// Need to make phony typdefs for X11 types here as we need to include
+// header that includes them in prototype declarations for
+// functions we do not use
+typedef void *  Widget;
+typedef void *  XtAppContext;
+typedef void *  XtPointer;
+typedef void *  String;
+
+typedef bool Boolean;
+
+extern "C" {
+#include "mbeditviz.h"
+}
+
+
+// Other types used in mbeditviz
+typedef bool Boolean;
+
+extern "C" {
+#include "mb_define.h"
+#include "mb_io.h"
+
+// Defines mbeditviz functions and  extern variables
+#include "mbeditviz.h"   
+
+}
+
+using namespace mb_system;
+
+
+SwathGridData::SwathGridData() {
+
+  // Initialize member variables lifted from mbeditviz, assuming no
+  // command-line options specified
+  appName_ = strdup("SwathDataGridApp");
+  mbeditviz_init(0, nullptr,
+                 appName_,
+                 (char *)"this is a help message",
+                 (char *)"swathReaderTest filename",
+                 &SwathGridData::showMessage,
+                 &SwathGridData::hideMessage,
+                 &SwathGridData::updateGui,
+                 &SwathGridData::showErrorDialog);
+  
+}
+
+SwathGridData::~SwathGridData() {
+}
+
+
+bool SwathGridData::readDatafile(char *swathFile) {
+  
+  int verbose = 1;
+  int error = 0;
+  
+  // Call mbeditviz functions to read data from file
+  int sonarFormat = 0;
+  if (mb_get_format(verbose, (char *)swathFile, NULL, &sonarFormat, &error) !=
+      MB_SUCCESS) {
+    std::cerr << "Couldn't determine sonar format of " << swathFile << std::endl;
+    return false;
+  }
+  
+  // Get list of relevant files
+  if (mbeditviz_import_file((char *)swathFile, sonarFormat) != MB_SUCCESS) {
+    std::cerr << "Couldn't import data from " << swathFile << std::endl;
+    return false;
+  }
+
+  // Read swath data from first file into global structures  
+  if (mbeditviz_load_file(0) != MB_SUCCESS) {
+    std::cerr << "Couldn't load data from " << swathFile << std::endl;
+    return false;
+  }
+
+  // Need to unlock file when done reading
+  std::cout << "Unlock swath file" << std::endl;
+  unlockSwath((char *)swathFile);
+
+  // Point to swath data just loaded
+  mbev_file_struct* swathData = &mbev_files[0];
+
+  mbeditviz_get_grid_bounds();
+  mbeditviz_mb3dsoundings_dismiss();
+  mbeditviz_setup_grid();
+  mbeditviz_project_soundings();
+  mbeditviz_make_grid();
+
+  // Save pointer to grid struct
+  gridData_ = &mbev_grid;
+
+  // Set grid zmin and zmax, since the above mbeditviz functions do not
+  int nPts = gridData_->n_rows * gridData_->n_columns;
+  gridData_->min = std::numeric_limits<float>::max();
+  gridData_->max = -std::numeric_limits<float>::max();
+  
+  for (int i = 0; i < nPts; i++) {
+    if (gridData_->val[i] == gridData_->nodatavalue) {
+      // No z data at this point
+      gridData_->val[i] = nanf("");
+      /// TEST TEST TEST
+      gridData_->val[i] = 0.;  /// TEST TEST TEST
+      continue;
+    }
+
+    if (gridData_->val[i] < gridData_->min) {
+      // Found new minimum z
+      gridData_->min = gridData_->val[i];
+    }
+    if (gridData_->val[i] > gridData_->max) {
+      // Found new maximumm z
+      gridData_->max = gridData_->val[i];
+    }
+  }
+  std::cerr << "done getting grid min/max: min=" << gridData_->min <<
+    "  max=" << gridData_->max << std::endl;
+  
+  std::cout << "Done with SwathGridData::readDatafile()" << std::endl;
+  return true;
+}
+
+
+void SwathGridData::getParameters(int *nRows, int *nColumns,
+                                double *xMin, double *xMax,
+                                double *yMin, double *yMax,
+                                double *zMin, double *zMax,
+                                char **xUnits, char **yUnits, char **zUnits) {
+
+  *nRows = gridData_->n_rows;
+  *nColumns = gridData_->n_columns;
+  *xMin = gridData_->boundsutm[0];
+  *xMax = gridData_->boundsutm[1];
+  *yMin = gridData_->boundsutm[2];
+  *yMax = gridData_->boundsutm[3];
+  *zMin = gridData_->min;;
+  *zMax = gridData_->max;
+
+  // TBD: NOT SURE WHERE TO FIND THESE
+  *xUnits = strdup("lon");
+  *yUnits = strdup("lat");
+  *zUnits = strdup("meters");
+  
+}
+
+/* ***
+bool SwathGridData::data(int row, int col,
+                         double *y, double *x, double *z) {
+
+  *x = gridData_->bounds[0] + col * gridData_->dx; 
+  *y = gridData_->bounds[2] + row * gridData_->dy;
+  int index = row * gridData_->n_columns + col;
+  *z = gridData_->val[index];
+
+  return true;
+}
+*** */
+
+
+bool SwathGridData::data(int row, int col,
+                         double *northing, double *easting, double *z) {
+
+  *easting = gridData_->boundsutm[2] + col * gridData_->dx; 
+  *northing = gridData_->boundsutm[0] + row * gridData_->dy;
+  //  int index = row * gridData_->n_columns + col;
+  int index = col * gridData_->n_rows + row;  
+  *z = gridData_->val[index];
+
+  return true;
+}
+
+
+void mb_system::SwathGridData::unlockSwath(char *swathfile) {
+  bool usingLocks = true;
+  std::cout << "unlockSwath(" << swathfile << ")" << std::endl;
+  if (usingLocks) {
+    int lockError = 0;
+
+    mb_pr_unlockswathfile(mbev_verbose, swathfile,
+                          MBP_LOCK_EDITBATHY, appName_, &lockError);
+    }
+}
