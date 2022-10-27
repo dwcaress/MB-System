@@ -3,7 +3,9 @@
 
 #include <vtkLookupTable.h>
 
-
+/** 
+Various definitions and functions of general use
+*/
 namespace mb_system {
 
   const int NMapColors = 11;
@@ -27,6 +29,14 @@ namespace mb_system {
   /// Make lookup table
   void makeLookupTable(ColorMapScheme colorMap, vtkLookupTable *lut);
 
+  /// Lock MB-System file
+  bool mbLockFile(char *filename);
+  
+  /// Unlock MB-System file
+  bool mbUnlockFile(char *filename);  
+
+
+  bool projTestUtil(char *msg);
 }
 
 
