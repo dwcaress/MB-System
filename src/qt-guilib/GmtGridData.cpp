@@ -5,6 +5,7 @@
 #include <string.h>
 #include "GmtGridData.h"
 
+using namespace mb_system;
 
 bool GmtGridData::readDatafile(char *filename) {
   
