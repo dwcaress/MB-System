@@ -165,17 +165,22 @@ int TopoGridReader::RequestData(vtkInformation* request,
   PJ *toUTM = nullptr;
   PJ_CONTEXT *projContext = nullptr;
   bool convertToUTM = !fileInUTM();
-  // If x and y are not in UTM, must convert them to UTM
-  // Set up PROJ software first...
-
+  
+  if (gridType_ == TopoGridType::SwathGrid) {
+    // Data already in UTM
+    convertToUTM = false;
+  }
+  
   double xMin, xMax, yMin, yMax, zMin, zMax;
   grid_->bounds(&xMin, &xMax, &yMin, &yMax, &zMin, &zMax);
   std::cerr << "xmin=" << xMin << ", xMax=" << xMax
             << ", yMin=" << yMin << ", yMax=" << yMax << std::endl;
 
-  /* ***
+  // If x and y are not in UTM, must convert them to UTM
   if (convertToUTM) {
     std::cout << "file projection is not UTM" << std::endl;
+    // Set up PROJ software first...
+
 
     // Get UTM zone of grid's W edge
     int utmZone = ((xMin + 180)/6 + 0.5);
@@ -210,7 +215,7 @@ int TopoGridReader::RequestData(vtkInformation* request,
   else {
     std::cout << "Already in UTM" << std::endl;
   }
-  *** */
+
   
   // Reset/clear points
   gridPoints_->Reset();
@@ -229,6 +234,10 @@ int TopoGridReader::RequestData(vtkInformation* request,
   unsigned row;
   unsigned col;
 
+  if (convertToUTM) {
+    std::cerr << "WARNING: conversion to UTM not yet implemented!" << std::endl;
+  }
+  
   // Load points read from grid file
   double x, y, z;
   double lat, lon;
@@ -236,7 +245,6 @@ int TopoGridReader::RequestData(vtkInformation* request,
   for (row = 0; row < nRows; row++) {
     for (col = 0; col < nColumns; col++) {
 
-      
       if (!convertToUTM) {
         grid_->data(row, col, &y, &x, &z);
         if (!std::isnan(z)) {
