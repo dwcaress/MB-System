@@ -13,9 +13,10 @@
 
 namespace mb_system {
 
+  /// Supported grid types
   enum TopoGridType {Unknown,
-                      GMTGrid,
-                      SwathGrid};
+                     GMTGrid,
+                     SwathGrid};
 
   
   /**
