@@ -21,7 +21,6 @@ set(src
     QVtkItem.cpp
     GmtGridReader.cpp
     GmtGridData.cpp    
-    SwathReader.cpp    
     MBQuickItem.cpp
     QVtkRenderer.cpp
     GmtGridSurface.cpp
