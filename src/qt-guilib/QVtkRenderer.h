@@ -17,7 +17,7 @@
 #include <vtkTransformFilter.h>
 #include <vtkPolyDataMapper.h>
 #include <vtkNamedColors.h>
-#include "GmtGridReader.h"
+#include "TopoGridReader.h"
 #include "DisplayProperties.h"
 #include "PickerInteractorStyle.h"
 
@@ -120,8 +120,8 @@ namespace mb_system {
     /// Item being rendered
     QVtkItem *item_;
     
-    /// GMT grid reader
-    vtkSmartPointer<GmtGridReader> gridReader_;
+    /// Topo grid reader
+    vtkSmartPointer<TopoGridReader> gridReader_;
 
     /// Elevation color filter
     vtkSmartPointer<vtkElevationFilter> elevColorizer_;
