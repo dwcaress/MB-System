@@ -19,6 +19,9 @@
 #define UTM_X_NAME "Easting (meters)"
 #define UTM_Y_NAME "Northing (meters)"
 
+#define GMT_EXTENSION ".grd"
+#define SWATH_EXTENSION_PREFIX ".mb"
+
 
 using namespace mb_system;
 
@@ -276,13 +279,11 @@ int TopoGridReader::RequestData(vtkInformation* request,
     }
   }
 
-  /* ***
   // Clean up proj UTM conversion stuff
   if (convertToUTM) {
     proj_destroy(toUTM);
     proj_context_destroy(projContext);
   }
-  *** */
   
   //// DEBUG OUTPUT
   row = nRows - 1;
@@ -350,6 +351,7 @@ void TopoGridReader::SetFileName(const char *fileName) {
   }
   fprintf(stderr, "TopoGridReader::SetFileName: call strdup()\n");
   fileName_ = strdup((char *)fileName);
+  
 }
 
 
@@ -430,4 +432,25 @@ TopoGridData *TopoGridReader::readGridfile(char *filename) {
   grid->setParameters();
   
   return grid;
+}
+
+
+TopoGridType TopoGridReader::getGridType(const char *filename) {
+
+  // Get file extension
+  char *extension = strrchr((char *)filename, '.');
+  if (!extension) {
+    return TopoGridType::Unknown;
+  }
+  
+  if (!strcmp(extension, GMT_EXTENSION)) {
+    return TopoGridType::GMTGrid;
+  }
+  else if (!strncmp(extension, SWATH_EXTENSION_PREFIX,
+                    strlen(SWATH_EXTENSION_PREFIX))) {
+    return TopoGridType::SwathGrid;
+  }
+
+  return TopoGridType::Unknown;
+
 }

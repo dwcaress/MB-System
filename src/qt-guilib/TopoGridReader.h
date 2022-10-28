@@ -80,6 +80,8 @@ namespace mb_system {
       gridType_ = gridType;
     }
 
+    /// Return file grid type
+    static TopoGridType getGridType(const char *filename);
     
   protected:
   
