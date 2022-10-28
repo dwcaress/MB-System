@@ -226,7 +226,7 @@ ApplicationWindow {
     FileDialog {
         id: fileDialog
         title: "Open file"
-        nameFilters: ["Grid files (*.grd)"]
+        nameFilters: ["Grid files (*.grd *.mb?*)"]
         onAccepted: {
             console.log("accepted " + fileUrl);
             BackEnd.setGridFile(fileUrl)
