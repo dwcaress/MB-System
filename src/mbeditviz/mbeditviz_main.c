@@ -139,7 +139,14 @@ int main(int argc, char **argv) {
 	mb3dsoundings_set_dismiss_notify(mbev_verbose, mbeditviz_mb3dsoundings_dismiss, &mbev_error);
 	mb3dsoundings_set_edit_notify(mbev_verbose, mbeditviz_mb3dsoundings_edit, &mbev_error);
 
-	mbeditviz_init(argcsave, argv);
+	mbeditviz_init(argcsave, argv,
+                       "MBeditviz",
+                       "MBeditviz is a bathymetry editor and ptch test tool",
+                       "mbeditviz [-H -T -V]",
+                       &do_mbeditviz_message_on,
+                       &do_mbeditviz_message_off,
+                       &do_mbeditviz_update_gui,
+                       &do_error_dialog);
 
 	XtAppMainLoop(app);
 
