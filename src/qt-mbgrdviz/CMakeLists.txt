@@ -14,10 +14,10 @@ set(CMAKE_AUTORCC ON)
 # Run uic automatically when needed.
 set(CMAKE_AUTOUIC ON)
 
+
 # NOTE: add_executable() should not include auto-generated files
 add_executable(qt-mbgrdviz
                BackEnd.cpp main.cpp qml.qrc)
-
 
 target_include_directories(qt-mbgrdviz
                            PUBLIC
@@ -30,6 +30,13 @@ target_include_directories(qt-mbgrdviz
 target_link_libraries(qt-mbgrdviz
                       PRIVATE
                       MBGui
+                      mbev
+                      mbio
+                      mbaux
+		      mbxgr
+                      mbview
+                      mbbsio
+                      mbsapi                      
 		      ${GMT_LIBRARIES}
 		      ${NETCDF_LIBRARIES}
 		      ${MOTIF_LIBRARIES}
