@@ -175,9 +175,10 @@ struct mbev_grid_struct {
 	char projection_id[MB_PATH_MAXLINE];
 	void *pjptr;
 
-  // minimum lat, maximum lat, minimum lon, maximum lon
+  /// minimum lat, maximum lat, minimum lon, maximum lon
 	double bounds[4];
-  
+
+  /// minimum northing, maximum northing, minimum easting, maximum easting
 	double boundsutm[4];
   
 	double dx;
@@ -185,23 +186,23 @@ struct mbev_grid_struct {
 	int n_columns;
 	int n_rows;
   
-  // minimum depth
+  /// minimum depth
 	double min;
   
-  // maximum depth
+  /// maximum depth
 	double max;
   
 	double smin;
   
 	double smax;
 
-  // Value denoting 'no data'
+  /// Value denoting 'no data'
 	float nodatavalue;
   
 	float *sum;
 	float *wgt;
   
-  // Depth values  
+  /// Depth values  
 	float *val;
 	float *sgm;
 };
