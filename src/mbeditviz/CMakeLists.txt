@@ -10,12 +10,28 @@ add_executable(mbeditviz
 	       mbeditviz_prog.c
 	       mbeditviz_callbacks.c)
 
+
+# Build library just containing non-GUI functions
+add_library(mbev
+            mbeditviz_prog.c)
+
+
 target_include_directories(mbeditviz
                            PUBLIC
                            .
                            ${CMAKE_SOURCE_DIR}/src/mbio
                            ${CMAKE_SOURCE_DIR}/src/mbaux
                            ${CMAKE_SOURCE_DIR}/src/gsf
+			   ${NETCDF_INCLUDE_DIRS}
+			   ${X11_INCLUDE_DIRS})
+
+target_include_directories(mbev
+                           PUBLIC
+                           .
+                           ${CMAKE_SOURCE_DIR}/src/mbio
+                           ${CMAKE_SOURCE_DIR}/src/mbaux
+                           ${CMAKE_SOURCE_DIR}/src/gsf
+                           ${CMAKE_SOURCE_DIR}/src/mbview
 			   ${NETCDF_INCLUDE_DIRS}
 			   ${X11_INCLUDE_DIRS})
 
@@ -43,6 +59,7 @@ target_link_libraries(mbeditviz
                       pthread)
                            
                            
+
 
 install(TARGETS mbeditviz
 	DESTINATION ${CMAKE_INSTALL_BINDIR})
