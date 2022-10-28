@@ -107,8 +107,6 @@ bool SwathGridData::readDatafile(char *swathFile) {
     if (gridData_->val[i] == gridData_->nodatavalue) {
       // No z data at this point
       gridData_->val[i] = nanf("");
-      /// TEST TEST TEST
-      gridData_->val[i] = 0.;  /// TEST TEST TEST
       continue;
     }
 
