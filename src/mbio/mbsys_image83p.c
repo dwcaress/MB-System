@@ -177,7 +177,7 @@ int mbsys_image83p_extract(int verbose, void *mbio_ptr, void *store_ptr, int *ki
 		*navlat = store->nav_lat;
 
 		/* get heading */
-		*heading = 0.1 * store->heading;
+		*heading = store->heading_external;
 
 		/* get speed (convert knots to km/hr) */
 		*speed = 1.852 * store->nav_speed * 0.1;
@@ -188,11 +188,12 @@ int mbsys_image83p_extract(int verbose, void *mbio_ptr, void *store_ptr, int *ki
 
 		/* read distance and depth values into storage arrays */
 		*nbath = store->num_proc_beams;
-		*namp = 0;
+		*namp = store->num_proc_beams;
 		*nss = 0;
 		for (int i = 0; i < *nbath; i++) {
 			beamflag[i] = store->beamflag[i];
 			bath[i] = store->bath[i];
+			amp[i] = store->amp[i];
 			bathacrosstrack[i] = store->bathacrosstrack[i];
 			bathalongtrack[i] = store->bathalongtrack[i];
 		}
@@ -216,8 +217,8 @@ int mbsys_image83p_extract(int verbose, void *mbio_ptr, void *store_ptr, int *ki
 			fprintf(stderr, "dbg4       heading:    %f\n", *heading);
 			fprintf(stderr, "dbg4       nbath:      %d\n", *nbath);
 			for (int i = 0; i < *nbath; i++)
-				fprintf(stderr, "dbg4       beam:%d  flag:%3d  bath:%f  acrosstrack:%f  alongtrack:%f\n", i, beamflag[i], bath[i],
-				        bathacrosstrack[i], bathalongtrack[i]);
+				fprintf(stderr, "dbg4       beam:%d  flag:%3d  bath:%f  amp:%f  acrosstrack:%f  alongtrack:%f\n",
+                i, beamflag[i], bath[i], amp[i], bathacrosstrack[i], bathalongtrack[i]);
 		}
 
 		/* done translating values */
@@ -347,8 +348,8 @@ int mbsys_image83p_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind
 		store->nav_long = navlon;
 		store->nav_lat = navlat;
 
-		/* get heading (360 degrees = 65536) */
-		store->heading = (int)(10 * heading);
+		/* get heading */
+		store->heading_external = heading;
 
 		/* get speed (convert km/hr to knots) */
 		store->nav_speed = (int)(0.539996 * speed * 10);
@@ -431,7 +432,7 @@ int mbsys_image83p_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kin
 			angles_forward[i] = store->angles_forward[i];
 			angles_null[i] = 0.0;
 			alongtrack_offset[i] = 0.0;
-			heave[i] = store->heave;
+			heave[i] = store->heave_external;
 		}
 
 		/* set status */
@@ -573,7 +574,7 @@ int mbsys_image83p_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr
 	/* extract data from structure */
 	if (*kind == MB_DATA_DATA) {
 		/* get transducer depth */
-		*transducer_depth = store->sonar_depth - store->heave;
+		*transducer_depth = store->sonar_depth - store->heave_external;
 
 		/* get altitude from depth closest to nadir */
 		double xtrackmin = 999999.9;
@@ -653,7 +654,7 @@ int mbsys_image83p_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int
 		*navlat = store->nav_lat;
 
 		/* get heading */
-		*heading = 0.1 * store->heading;
+		*heading = store->heading_external;
 
 		/* get draft */
 		*draft = store->sonar_depth;
@@ -662,9 +663,9 @@ int mbsys_image83p_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int
 		*speed = 1.852 * store->nav_speed * 0.1;
 
 		/* get roll pitch  */
-		*roll = 0.1 * (store->roll - 900.0);
-		*pitch = 0.1 * (store->pitch - 900.0) + ((double)store->profile_tilt_angle - 180.0);
-		*heave = store->heave;
+		*roll = store->roll_external;
+		*pitch = store->pitch_external + ((double)store->profile_tilt_angle - 180.0);
+		*heave = store->heave_external;
 
 		if (verbose >= 5) {
 			fprintf(stderr, "\ndbg4  Data extracted by MBIO function <%s>\n", __func__);
@@ -784,8 +785,8 @@ int mbsys_image83p_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int 
 		store->nav_long = navlon;
 		store->nav_lat = navlat;
 
-		/* get heading (360 degrees = 65536) */
-		store->heading = (int)(10 * heading);
+		/* get heading */
+		store->heading_external = heading;
 
 		/* get draft */
 		store->sonar_depth = draft;
@@ -794,9 +795,9 @@ int mbsys_image83p_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int 
 		store->nav_speed = (int)(0.539996 * speed * 10);
 
 		/* get roll pitch and heave */
-		store->roll = roll * 10 + 900;
-		store->pitch = pitch * 10 + 900 - ((double)store->profile_tilt_angle - 180.0);
-		store->heave = heave;
+		store->roll_external = roll;
+		store->pitch_external = pitch - ((double)store->profile_tilt_angle - 180.0);
+		store->heave_external = heave;
 	}
 
 	const int status = MB_SUCCESS;

@@ -3235,7 +3235,7 @@ int main(int argc, char **argv) {
             if (verbose)
               fprintf(stderr,"Triangulating section %2.2d:%4.4d ", ifile, isection);
             status = mbnavadjust_section_load(verbose, &project_output, ifile, isection,
-                                              (void **)&swathraw, (void **)&swath, section->num_pings, &error);
+                                              (void **)&swathraw, (void **)&swath, &error);
             status = mbnavadjust_section_unload(verbose, (void **)&swathraw, (void **)&swath, &error);
           }
           else {
@@ -3257,7 +3257,7 @@ int main(int argc, char **argv) {
          fprintf(stderr,"Triangulating section %2.2d:%4.4d ", mods[imod].file1, mods[imod].section1);
       }
       status = mbnavadjust_section_load(verbose, &project_output, mods[imod].file1, mods[imod].section1,
-                                          (void **)&swathraw, (void **)&swath, section1->num_pings, &error);
+                                          (void **)&swathraw, (void **)&swath, &error);
       status = mbnavadjust_section_unload(verbose, (void **)&swathraw, (void **)&swath, &error);
       break;
 

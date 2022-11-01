@@ -164,8 +164,8 @@ the prerequisite packages.
       --enable-shared \
       --enable-hardening \
       --enable-test \
-      --with-proj-lib=/opt/local/lib/proj6/lib \
-      --with-proj-include=/opt/local/lib/proj6/include \
+      --with-proj-lib=/opt/local/lib/proj8/lib \
+      --with-proj-include=/opt/local/lib/proj8/include \
       --with-gmt-config=/opt/local/lib/gmt6/bin \
       --with-fftw-lib=/opt/local/lib \
       --with-fftw-include=/opt/local/include \
@@ -471,8 +471,8 @@ autoreconf --force --install
   --enable-shared \
   --enable-hardening \
   --enable-test \
-  --with-proj-lib=/opt/local/lib/proj6/lib \
-  --with-proj-include=/opt/local/lib/proj6/include \
+  --with-proj-lib=/opt/local/lib/proj9/lib \
+  --with-proj-include=/opt/local/lib/proj9/include \
   --with-gmt-config=/opt/local/lib/gmt6/bin \
   --with-fftw-lib=/opt/local/lib \
   --with-fftw-include=/opt/local/include \

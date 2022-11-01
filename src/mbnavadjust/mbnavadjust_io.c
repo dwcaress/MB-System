@@ -61,23 +61,23 @@ static const char program_name[] = "mbnavadjust i/o functions";
 
 /*--------------------------------------------------------------------*/
 int mbnavadjust_new_project(int verbose, char *projectpath, double section_length, int section_soundings, double cont_int,
-                            double col_int, double tick_int, double label_int, int decimation, double smoothing,
-                            double zoffsetwidth, struct mbna_project *project, int *error) {
+          double col_int, double tick_int, double label_int, int decimation, double smoothing,
+          double zoffsetwidth, struct mbna_project *project, int *error) {
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
-    fprintf(stderr, "dbg2       verbose:            %d\n", verbose);
-    fprintf(stderr, "dbg2       projectpath:        %s\n", projectpath);
+    fprintf(stderr, "dbg2       verbose:      %d\n", verbose);
+    fprintf(stderr, "dbg2       projectpath:  %s\n", projectpath);
     fprintf(stderr, "dbg2       section_length:     %f\n", section_length);
     fprintf(stderr, "dbg2       section_soundings:  %d\n", section_soundings);
-    fprintf(stderr, "dbg2       cont_int:           %f\n", cont_int);
-    fprintf(stderr, "dbg2       col_int:            %f\n", col_int);
-    fprintf(stderr, "dbg2       tick_int:           %f\n", tick_int);
-    fprintf(stderr, "dbg2       label_int:          %f\n", label_int);
-    fprintf(stderr, "dbg2       decimation:         %d\n", decimation);
-    fprintf(stderr, "dbg2       smoothing:          %f\n", smoothing);
+    fprintf(stderr, "dbg2       cont_int:     %f\n", cont_int);
+    fprintf(stderr, "dbg2       col_int:      %f\n", col_int);
+    fprintf(stderr, "dbg2       tick_int:     %f\n", tick_int);
+    fprintf(stderr, "dbg2       label_int:    %f\n", label_int);
+    fprintf(stderr, "dbg2       decimation:   %d\n", decimation);
+    fprintf(stderr, "dbg2       smoothing:    %f\n", smoothing);
     fprintf(stderr, "dbg2       zoffsetwidth:       %f\n", zoffsetwidth);
-    fprintf(stderr, "dbg2       project:            %p\n", project);
+    fprintf(stderr, "dbg2       project:      %p\n", project);
   }
 
   /* if project structure holds an open project close it first */
@@ -217,9 +217,9 @@ int mbnavadjust_read_project(int verbose, char *projectpath, struct mbna_project
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
-    fprintf(stderr, "dbg2       verbose:            %d\n", verbose);
-    fprintf(stderr, "dbg2       projectname:        %s\n", projectpath);
-    fprintf(stderr, "dbg2       project:            %p\n", project);
+    fprintf(stderr, "dbg2       verbose:      %d\n", verbose);
+    fprintf(stderr, "dbg2       projectname:  %s\n", projectpath);
+    fprintf(stderr, "dbg2       project:      %p\n", project);
   }
 
   int status = MB_SUCCESS;
@@ -320,8 +320,8 @@ int mbnavadjust_read_project(int verbose, char *projectpath, struct mbna_project
         int versionmajor;
         int versionminor;
         if (status == MB_SUCCESS && ((result = fgets(buffer, BUFFER_MAX, hfp)) != buffer ||
-                                     (nscan = sscanf(buffer, "%s %d.%d", label, &versionmajor, &versionminor)) != 3 ||
-                                     strcmp(label, "FILE_VERSION") != 0))
+                   (nscan = sscanf(buffer, "%s %d.%d", label, &versionmajor, &versionminor)) != 3 ||
+                   strcmp(label, "FILE_VERSION") != 0))
           status = MB_FAILURE;
         if (status == MB_FAILURE) {
           fprintf(stderr, "Die at line:%d file:%s buffer:%s\n", __LINE__, __FILE__, buffer);
@@ -422,8 +422,8 @@ int mbnavadjust_read_project(int verbose, char *projectpath, struct mbna_project
         }
 
         if (status == MB_SUCCESS && ((result = fgets(buffer, BUFFER_MAX, hfp)) != buffer ||
-                                     (nscan = sscanf(buffer, "%s %d", label, &project->num_crossings)) != 2 ||
-                                     strcmp(label, "NUMCROSSINGS") != 0))
+                   (nscan = sscanf(buffer, "%s %d", label, &project->num_crossings)) != 2 ||
+                   strcmp(label, "NUMCROSSINGS") != 0))
           status = MB_FAILURE;
         if (status == MB_FAILURE) {
           fprintf(stderr, "Die at line:%d file:%s buffer:%s\n", __LINE__, __FILE__, buffer);
@@ -431,8 +431,8 @@ int mbnavadjust_read_project(int verbose, char *projectpath, struct mbna_project
         }
 
         if (status == MB_SUCCESS && ((result = fgets(buffer, BUFFER_MAX, hfp)) != buffer ||
-                                     (nscan = sscanf(buffer, "%s %lf", label, &project->section_length)) != 2 ||
-                                     strcmp(label, "SECTIONLENGTH") != 0))
+                   (nscan = sscanf(buffer, "%s %lf", label, &project->section_length)) != 2 ||
+                   strcmp(label, "SECTIONLENGTH") != 0))
           status = MB_FAILURE;
         if (status == MB_FAILURE) {
           fprintf(stderr, "Die at line:%d file:%s buffer:%s\n", __LINE__, __FILE__, buffer);
@@ -486,8 +486,8 @@ int mbnavadjust_read_project(int verbose, char *projectpath, struct mbna_project
         }
 
         if (status == MB_SUCCESS && ((result = fgets(buffer, BUFFER_MAX, hfp)) != buffer ||
-                                     (nscan = sscanf(buffer, "%s %d", label, &project->inversion_status)) != 2 ||
-                                     strcmp(label, "INVERSION") != 0))
+                   (nscan = sscanf(buffer, "%s %d", label, &project->inversion_status)) != 2 ||
+                   strcmp(label, "INVERSION") != 0))
           status = MB_FAILURE;
         if (status == MB_FAILURE) {
           fprintf(stderr, "Die at line:%d file:%s buffer:%s\n", __LINE__, __FILE__, buffer);
@@ -597,19 +597,19 @@ int mbnavadjust_read_project(int verbose, char *projectpath, struct mbna_project
             if (status == MB_SUCCESS &&
                 ((result = fgets(buffer, BUFFER_MAX, hfp)) != buffer ||
                  (nscan = sscanf(buffer, "FILE %d %d %d %d %d %lf %lf %lf %lf %lf %lf %lf %d %d %s", &idummy,
-                                 &(file->status), &(file->id), &(file->format), &(file->block),
-                                 &(file->block_offset_x), &(file->block_offset_y), &(file->block_offset_z),
-                                 &(file->heading_bias_import), &(file->roll_bias_import), &(file->heading_bias),
-                                 &(file->roll_bias), &(file->num_sections), &(file->output_id), file->file)) != 15))
+                     &(file->status), &(file->id), &(file->format), &(file->block),
+                     &(file->block_offset_x), &(file->block_offset_y), &(file->block_offset_z),
+                     &(file->heading_bias_import), &(file->roll_bias_import), &(file->heading_bias),
+                     &(file->roll_bias), &(file->num_sections), &(file->output_id), file->file)) != 15))
               status = MB_FAILURE;
           }
           else {
             if (status == MB_SUCCESS &&
                 ((result = fgets(buffer, BUFFER_MAX, hfp)) != buffer ||
                  (nscan = sscanf(buffer, "FILE %d %d %d %d %lf %lf %lf %lf %d %d %s", &idummy, &(file->status),
-                                 &(file->id), &(file->format), &(file->heading_bias_import),
-                                 &(file->roll_bias_import), &(file->heading_bias), &(file->roll_bias),
-                                 &(file->num_sections), &(file->output_id), file->file)) != 11))
+                     &(file->id), &(file->format), &(file->heading_bias_import),
+                     &(file->roll_bias_import), &(file->heading_bias), &(file->roll_bias),
+                     &(file->num_sections), &(file->output_id), file->file)) != 11))
               status = MB_FAILURE;
             file->block = 0;
             file->block_offset_x = 0.0;
@@ -652,13 +652,15 @@ int mbnavadjust_read_project(int verbose, char *projectpath, struct mbna_project
               result = fgets(buffer, BUFFER_MAX, hfp);
             if (status == MB_SUCCESS && result == buffer)
               nscan = sscanf(buffer, "SECTION %d %d %d %d %d %lf %lf %lf %lf %lf %lf %lf %lf %lf %d", &idummy,
-                             &section->num_pings, &section->num_beams, &section->num_snav, &section->continuity,
-                             &section->distance, &section->btime_d, &section->etime_d, &section->lonmin,
-                             &section->lonmax, &section->latmin, &section->latmax, &section->depthmin,
-                             &section->depthmax, &section->contoursuptodate);
+                       &section->num_pings, &section->num_beams, &section->num_snav, &section->continuity,
+                       &section->distance, &section->btime_d, &section->etime_d, &section->lonmin,
+                       &section->lonmax, &section->latmin, &section->latmax, &section->depthmin,
+                       &section->depthmax, &section->contoursuptodate);
             if (result != buffer || nscan < 14) {
               status = MB_FAILURE;
               fprintf(stderr, "read failed on section: %s\n", buffer);
+fprintf(stderr, "%s:%d:%s: Read failed on section ifile:%d isection:%d:  buffer:%p result:%p nscan:%d\n",
+__FILE__, __LINE__, __FUNCTION__, ifile, isection, buffer, result, nscan);
             }
             if (nscan < 15)
               section->contoursuptodate = false;
@@ -674,60 +676,60 @@ int mbnavadjust_read_project(int verbose, char *projectpath, struct mbna_project
               exit(0);
             }
             /*fprintf(stderr,"%s/nvs_%4.4d_%4.4d.mb71\n",
-            project->datadir,file->id,isection);
-            for (k=MBNA_MASK_DIM-1;k>=0;k--)
-            {
-            for (l=0;l<MBNA_MASK_DIM;l++)
-            {
-            fprintf(stderr, "%1d", section->coverage[l + k * MBNA_MASK_DIM]);
-            }
-            fprintf(stderr, "\n");
-            }*/
+               project->datadir,file->id,isection);
+               for (k=MBNA_MASK_DIM-1;k>=0;k--)
+               {
+               for (l=0;l<MBNA_MASK_DIM;l++)
+               {
+               fprintf(stderr, "%1d", section->coverage[l + k * MBNA_MASK_DIM]);
+               }
+               fprintf(stderr, "\n");
+               }*/
             for (k = 0; k < section->num_snav; k++) {
               if (status == MB_SUCCESS) {
                 result = fgets(buffer, BUFFER_MAX, hfp);
                 if (version_id >= 308) {
-                    if (status == MB_SUCCESS && result == buffer)
-                        nscan = sscanf(buffer, "SNAV %d %d %lf %lf %lf %lf %lf %lf %lf %lf",
-                                       &idummy, &section->snav_id[k], &section->snav_distance[k], &section->snav_time_d[k],
-                                       &section->snav_lon[k], &section->snav_lat[k], &section->snav_sensordepth[k],
-                                       &section->snav_lon_offset[k], &section->snav_lat_offset[k],
-                                       &section->snav_z_offset[k]);
-                    section->snav_num_ties[k] = 0;
-                    if (section->snav_sensordepth[k] < 0.0 || section->snav_sensordepth[k] > 11000.0)
-                      section->snav_sensordepth[k] = 0.0;
-                    if (result != buffer || nscan != 10) {
-                        status = MB_FAILURE;
-                        fprintf(stderr, "read failed on snav: %s\n", buffer);
-                    }
+                  if (status == MB_SUCCESS && result == buffer)
+                    nscan = sscanf(buffer, "SNAV %d %d %lf %lf %lf %lf %lf %lf %lf %lf",
+                             &idummy, &section->snav_id[k], &section->snav_distance[k], &section->snav_time_d[k],
+                             &section->snav_lon[k], &section->snav_lat[k], &section->snav_sensordepth[k],
+                             &section->snav_lon_offset[k], &section->snav_lat_offset[k],
+                             &section->snav_z_offset[k]);
+                  section->snav_num_ties[k] = 0;
+                  if (section->snav_sensordepth[k] < 0.0 || section->snav_sensordepth[k] > 11000.0)
+                    section->snav_sensordepth[k] = 0.0;
+                  if (result != buffer || nscan != 10) {
+                    status = MB_FAILURE;
+                    fprintf(stderr, "read failed on snav: %s\n", buffer);
+                  }
                 }
                 else {
-                    if (status == MB_SUCCESS && result == buffer)
-                        nscan = sscanf(buffer, "SNAV %d %d %lf %lf %lf %lf %lf %lf %lf", &idummy, &section->snav_id[k],
-                                       &section->snav_distance[k], &section->snav_time_d[k], &section->snav_lon[k],
-                                       &section->snav_lat[k], &section->snav_lon_offset[k], &section->snav_lat_offset[k],
-                                       &section->snav_z_offset[k]);
-                    section->snav_num_ties[k] = 0;
-                    section->snav_sensordepth[k] = 0.0;
-                    if (result == buffer && nscan == 6) {
-                        section->snav_lon_offset[k] = 0.0;
-                        section->snav_lat_offset[k] = 0.0;
-                        section->snav_z_offset[k] = 0.0;
-                    }
-                    else if (result == buffer && nscan == 8) {
-                        section->snav_z_offset[k] = 0.0;
-                    }
-                    else if (result != buffer || nscan != 9) {
-                        status = MB_FAILURE;
-                        fprintf(stderr, "read failed on snav: %s\n", buffer);
-                    }
+                  if (status == MB_SUCCESS && result == buffer)
+                    nscan = sscanf(buffer, "SNAV %d %d %lf %lf %lf %lf %lf %lf %lf", &idummy, &section->snav_id[k],
+                             &section->snav_distance[k], &section->snav_time_d[k], &section->snav_lon[k],
+                             &section->snav_lat[k], &section->snav_lon_offset[k], &section->snav_lat_offset[k],
+                             &section->snav_z_offset[k]);
+                  section->snav_num_ties[k] = 0;
+                  section->snav_sensordepth[k] = 0.0;
+                  if (result == buffer && nscan == 6) {
+                    section->snav_lon_offset[k] = 0.0;
+                    section->snav_lat_offset[k] = 0.0;
+                    section->snav_z_offset[k] = 0.0;
+                  }
+                  else if (result == buffer && nscan == 8) {
+                    section->snav_z_offset[k] = 0.0;
+                  }
+                  else if (result != buffer || nscan != 9) {
+                    status = MB_FAILURE;
+                    fprintf(stderr, "read failed on snav: %s\n", buffer);
+                  }
 
-                    /* reverse offset values if older values */
-                    if (version_id < 300) {
-                        section->snav_lon_offset[k] *= -1.0;
-                        section->snav_lat_offset[k] *= -1.0;
-                        section->snav_z_offset[k] *= -1.0;
-                    }
+                  /* reverse offset values if older values */
+                  if (version_id < 300) {
+                    section->snav_lon_offset[k] *= -1.0;
+                    section->snav_lat_offset[k] *= -1.0;
+                    section->snav_z_offset[k] *= -1.0;
+                  }
                 }
               }
             }
@@ -769,53 +771,86 @@ int mbnavadjust_read_project(int verbose, char *projectpath, struct mbna_project
             section->globaltie.rsigma_m = 0.0;
 
             if (version_id >= 311) {
-	      if (status == MB_SUCCESS) {
-	        if ((result = fgets(buffer, BUFFER_MAX, hfp)) != buffer
-                    || sscanf(buffer, "GLOBALTIE %d %d %lf %lf %lf %d %lf %lf %lf",
-                                &section->globaltie.status, &section->globaltie.snav,
-                                &section->globaltie.offset_x, 
-				&section->globaltie.offset_y,
-				&section->globaltie.offset_z_m, 
-                                &section->globaltie.inversion_status,
- 				&section->globaltie.inversion_offset_x, 
-		                &section->globaltie.inversion_offset_y, 
-				&section->globaltie.inversion_offset_z_m) != 6) {
+              if (status == MB_SUCCESS) {
+                if ((result = fgets(buffer, BUFFER_MAX, hfp)) != buffer
+                    || sscanf(buffer, "GLOBALTIE %d %d %lf %lf %lf %lf %lf %lf %d %lf %lf %lf",
+                        &section->globaltie.status, &section->globaltie.snav,
+                        &section->globaltie.offset_x,
+                        &section->globaltie.offset_y,
+                        &section->globaltie.offset_z_m,
+                        &section->globaltie.sigmar1,
+                        &section->globaltie.sigmar2,
+                        &section->globaltie.sigmar3,
+                        &section->globaltie.inversion_status,
+                        &section->globaltie.inversion_offset_x,
+                        &section->globaltie.inversion_offset_y,
+                        &section->globaltie.inversion_offset_z_m) != 12) {
                   status = MB_FAILURE;
-                  fprintf(stderr, "read failed on global tie covariance: %s\n", buffer);
-	        }
-	      }
-	      if (status == MB_SUCCESS) {
+                  fprintf(stderr, "read failed on global tie offset ifile:%d isection:%d: %s\n", ifile, isection, buffer);
+                }
+              }
+              int nscan = 0;
+              if (status == MB_SUCCESS) {
                 if ((result = fgets(buffer, BUFFER_MAX, hfp)) != buffer ||
-                    (sscanf(buffer, "COV %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf",
-		                    &section->globaltie.sigmar1, &section->globaltie.sigmax1[0],
-				    &section->globaltie.sigmax1[1], &section->globaltie.sigmax1[2],
-				    &section->globaltie.sigmar2, &section->globaltie.sigmax2[0],
-				    &section->globaltie.sigmax2[1], &section->globaltie.sigmax2[2],
-				    &section->globaltie.sigmar3, &section->globaltie.sigmax3[0],
-				    &section->globaltie.sigmax3[1], &section->globaltie.sigmax3[2])) != 12) {
-                  status = MB_FAILURE;
-                  fprintf(stderr, "read failed on global tie covariance: %s\n", buffer);
+                    (nscan = sscanf(buffer, "COV %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf",
+                      &section->globaltie.sigmar1, &section->globaltie.sigmax1[0],
+                      &section->globaltie.sigmax1[1], &section->globaltie.sigmax1[2],
+                      &section->globaltie.sigmar2, &section->globaltie.sigmax2[0],
+                      &section->globaltie.sigmax2[1], &section->globaltie.sigmax2[2],
+                      &section->globaltie.sigmar3, &section->globaltie.sigmax3[0],
+                      &section->globaltie.sigmax3[1], &section->globaltie.sigmax3[2])) != 12) {
+                  if (strncmp(buffer, "COV ", 4) == 0) {
+                      section->globaltie.sigmar1 = 0.0;
+                      section->globaltie.sigmax1[0] = 0.0;
+                      section->globaltie.sigmax1[1] = 0.0;
+                      section->globaltie.sigmax1[2] = 0.0;
+                      section->globaltie.sigmar2 = 0.0;
+                      section->globaltie.sigmax2[0] = 0.0;
+                      section->globaltie.sigmax2[1] = 0.0;
+                      section->globaltie.sigmax2[2] = 0.0;
+                      section->globaltie.sigmar3 = 0.0;
+                      section->globaltie.sigmax3[0] = 0.0;
+                      section->globaltie.sigmax3[1] = 0.0;
+                      section->globaltie.sigmax3[2] = 0.0;
+                  } else {
+                    status = MB_FAILURE;
+                    fprintf(stderr, "Read failed on global tie covariance: %s\n", buffer);
+                  }
+                }
+                if (section->globaltie.status == 0) {
+                  section->globaltie.sigmar1 = 0.0;
+                  section->globaltie.sigmax1[0] = 0.0;
+                  section->globaltie.sigmax1[1] = 0.0;
+                  section->globaltie.sigmax1[2] = 0.0;
+                  section->globaltie.sigmar2 = 0.0;
+                  section->globaltie.sigmax2[0] = 0.0;
+                  section->globaltie.sigmax2[1] = 0.0;
+                  section->globaltie.sigmax2[2] = 0.0;
+                  section->globaltie.sigmar3 = 0.0;
+                  section->globaltie.sigmax3[0] = 0.0;
+                  section->globaltie.sigmax3[1] = 0.0;
+                  section->globaltie.sigmax3[2] = 0.0;
                 }
               }
 
               /* update number of global ties */
               if (status == MB_SUCCESS && section->globaltie.status != MBNA_TIE_NONE) {
                 project->num_globalties++;
-	      }
-	    }
+              }
+            }
 
 
             else if (version_id >= 309) {
               if (status == MB_SUCCESS) {
                 if ((result = fgets(buffer, BUFFER_MAX, hfp)) != buffer
                     || sscanf(buffer, "GLOBALTIE %d %d %d %lf %lf %lf %lf %lf %lf",
-                                &section->globaltie.status, &section->globaltie.snav,
-                                &section->globaltie.inversion_status,
-                                &section->globaltie.offset_x, &section->globaltie.offset_y, &section->globaltie.offset_z_m,
-                                &section->globaltie.sigmar1, &section->globaltie.sigmar2, &section->globaltie.sigmar3) != 9) {
-		  status = MB_FAILURE;
-		  fprintf(stderr, "read failed on global tie: %s\n", buffer);
-		}
+                        &section->globaltie.status, &section->globaltie.snav,
+                        &section->globaltie.inversion_status,
+                        &section->globaltie.offset_x, &section->globaltie.offset_y, &section->globaltie.offset_z_m,
+                        &section->globaltie.sigmar1, &section->globaltie.sigmar2, &section->globaltie.sigmar3) != 9) {
+                  status = MB_FAILURE;
+                  fprintf(stderr, "read failed on global tie: %s\n", buffer);
+                }
               }
 
               /* update number of global ties */
@@ -830,21 +865,21 @@ int mbnavadjust_read_project(int verbose, char *projectpath, struct mbna_project
                 section->globaltie.sigmax3[0] = 0.0;
                 section->globaltie.sigmax3[1] = 0.0;
                 section->globaltie.sigmax3[2] = 1.0;
-	      }
-	    }
+              }
+            }
 
             else if (version_id >= 305) {
               if (status == MB_SUCCESS) {
                 if ((result = fgets(buffer, BUFFER_MAX, hfp)) != buffer
                     || sscanf(buffer, "GLOBALTIE %d %d %lf %lf %lf %lf %lf %lf",
-                                                &section->globaltie.status, &section->globaltie.snav,
-                                                &section->globaltie.offset_x, &section->globaltie.offset_y, &section->globaltie.offset_z_m,
-                                                &section->globaltie.sigmar1, &section->globaltie.sigmar2, &section->globaltie.sigmar3)
-						!= 8) {
-		  status = MB_FAILURE;
-		  fprintf(stderr, "read failed on global tie: %s\n", buffer);
-		}
-	      }
+                        &section->globaltie.status, &section->globaltie.snav,
+                        &section->globaltie.offset_x, &section->globaltie.offset_y, &section->globaltie.offset_z_m,
+                        &section->globaltie.sigmar1, &section->globaltie.sigmar2, &section->globaltie.sigmar3)
+                    != 8) {
+                  status = MB_FAILURE;
+                  fprintf(stderr, "read failed on global tie: %s\n", buffer);
+                }
+              }
 
               /* update number of global ties */
               if (status == MB_SUCCESS && section->globaltie.status != MBNA_TIE_NONE) {
@@ -859,20 +894,20 @@ int mbnavadjust_read_project(int verbose, char *projectpath, struct mbna_project
                 section->globaltie.sigmax3[0] = 0.0;
                 section->globaltie.sigmax3[1] = 0.0;
                 section->globaltie.sigmax3[2] = 1.0;
-	      }
+              }
             }
 
             else if (version_id == 304) {
               if (status == MB_SUCCESS) {
                 if ((result = fgets(buffer, BUFFER_MAX, hfp)) != buffer
                     || sscanf(buffer, "GLOBALTIE %d %lf %lf %lf %lf %lf %lf",
-                                &section->globaltie.snav,
-                                &section->globaltie.offset_x, &section->globaltie.offset_y, &section->globaltie.offset_z_m,
-                                &section->globaltie.sigmar1, &section->globaltie.sigmar2, &section->globaltie.sigmar3) != 7) {
-		  status = MB_FAILURE;
-		  fprintf(stderr, "read failed on global tie: %s\n", buffer);
-		}
-	      }
+                        &section->globaltie.snav,
+                        &section->globaltie.offset_x, &section->globaltie.offset_y, &section->globaltie.offset_z_m,
+                        &section->globaltie.sigmar1, &section->globaltie.sigmar2, &section->globaltie.sigmar3) != 7) {
+                  status = MB_FAILURE;
+                  fprintf(stderr, "read failed on global tie: %s\n", buffer);
+                }
+              }
 
               /* update number of global ties */
               if (status == MB_SUCCESS && section->globaltie.status != MBNA_TIE_NONE) {
@@ -888,7 +923,7 @@ int mbnavadjust_read_project(int verbose, char *projectpath, struct mbna_project
                 section->globaltie.sigmax3[0] = 0.0;
                 section->globaltie.sigmax3[1] = 0.0;
                 section->globaltie.sigmax3[2] = 1.0;
-	      }
+              }
             }
 
             if (section->globaltie.status == 0 && section->globaltie.snav == -1) {
@@ -900,7 +935,7 @@ int mbnavadjust_read_project(int verbose, char *projectpath, struct mbna_project
               section->globaltie.sigmar2 = 0.0;
               section->globaltie.sigmar3 = 0.0;
             }
-	    else {
+            else {
               if (section->globaltie.sigmar1 <= MBNA_SMALL) {
                 section->globaltie.sigmar3 = MBNA_SMALL;
               }
@@ -910,7 +945,12 @@ int mbnavadjust_read_project(int verbose, char *projectpath, struct mbna_project
               if (section->globaltie.sigmar3 <= MBNA_ZSMALL) {
                 section->globaltie.sigmar3 = MBNA_ZSMALL;
               }
-	    }
+            }
+            if (section->globaltie.status != MBNA_TIE_NONE) {
+              section->status = MBNA_CROSSING_STATUS_SET;
+            }
+            if (section->globaltie.status > 0)
+              section->globaltie.snav_time_d = section->snav_time_d[section->globaltie.snav];
           }
         }
 
@@ -968,27 +1008,27 @@ int mbnavadjust_read_project(int verbose, char *projectpath, struct mbna_project
           struct mbna_file *file = &project->files[ifile];
           for (int isection = 0; isection < file->num_sections; isection++) {
             section = &file->sections[isection];
-            if (section->globaltie.status != MBNA_TIE_NONE) {
-                section->globaltie.offset_x_m = section->globaltie.offset_x / project->mtodeglon;
-                section->globaltie.offset_y_m = section->globaltie.offset_y / project->mtodeglat;
-                if (section->globaltie.inversion_status != MBNA_INVERSION_NONE) {
-                    section->globaltie.inversion_offset_x = section->snav_lon_offset[section->globaltie.snav];
-                    section->globaltie.inversion_offset_y = section->snav_lat_offset[section->globaltie.snav];
-                    section->globaltie.inversion_offset_x_m = section->snav_lon_offset[section->globaltie.snav] / project->mtodeglon;
-                    section->globaltie.inversion_offset_y_m = section->snav_lat_offset[section->globaltie.snav] / project->mtodeglat;
-                    section->globaltie.inversion_offset_z_m = section->snav_z_offset[section->globaltie.snav];
-                    section->globaltie.dx_m = section->globaltie.offset_x_m - section->globaltie.inversion_offset_x_m;
-                    section->globaltie.dy_m = section->globaltie.offset_y_m - section->globaltie.inversion_offset_y_m;
-                    section->globaltie.dz_m = section->globaltie.offset_z_m - section->globaltie.inversion_offset_z_m;
-                    section->globaltie.sigma_m = sqrt(section->globaltie.dx_m * section->globaltie.dx_m + section->globaltie.dy_m * section->globaltie.dy_m + section->globaltie.dz_m * section->globaltie.dz_m);
-                    section->globaltie.dr1_m = section->globaltie.inversion_offset_x_m / section->globaltie.sigmar1;
-                    section->globaltie.dr2_m = section->globaltie.inversion_offset_y_m / section->globaltie.sigmar2;
-                    section->globaltie.dr3_m = section->globaltie.inversion_offset_z_m / section->globaltie.sigmar3;
-                    section->globaltie.rsigma_m = sqrt(section->globaltie.dr1_m * section->globaltie.dr1_m + section->globaltie.dr2_m * section->globaltie.dr2_m + section->globaltie.dr3_m * section->globaltie.dr3_m);
-                }
+            if (section->status == MBNA_CROSSING_STATUS_SET) {
+              section->globaltie.offset_x_m = section->globaltie.offset_x / project->mtodeglon;
+              section->globaltie.offset_y_m = section->globaltie.offset_y / project->mtodeglat;
+              if (section->globaltie.inversion_status != MBNA_INVERSION_NONE) {
+                section->globaltie.inversion_offset_x = section->snav_lon_offset[section->globaltie.snav];
+                section->globaltie.inversion_offset_y = section->snav_lat_offset[section->globaltie.snav];
+                section->globaltie.inversion_offset_x_m = section->snav_lon_offset[section->globaltie.snav] / project->mtodeglon;
+                section->globaltie.inversion_offset_y_m = section->snav_lat_offset[section->globaltie.snav] / project->mtodeglat;
+                section->globaltie.inversion_offset_z_m = section->snav_z_offset[section->globaltie.snav];
+                section->globaltie.dx_m = section->globaltie.offset_x_m - section->globaltie.inversion_offset_x_m;
+                section->globaltie.dy_m = section->globaltie.offset_y_m - section->globaltie.inversion_offset_y_m;
+                section->globaltie.dz_m = section->globaltie.offset_z_m - section->globaltie.inversion_offset_z_m;
+                section->globaltie.sigma_m = sqrt(section->globaltie.dx_m * section->globaltie.dx_m + section->globaltie.dy_m * section->globaltie.dy_m + section->globaltie.dz_m * section->globaltie.dz_m);
+                section->globaltie.dr1_m = section->globaltie.inversion_offset_x_m / section->globaltie.sigmar1;
+                section->globaltie.dr2_m = section->globaltie.inversion_offset_y_m / section->globaltie.sigmar2;
+                section->globaltie.dr3_m = section->globaltie.inversion_offset_z_m / section->globaltie.sigmar3;
+                section->globaltie.rsigma_m = sqrt(section->globaltie.dr1_m * section->globaltie.dr1_m + section->globaltie.dr2_m * section->globaltie.dr2_m + section->globaltie.dr3_m * section->globaltie.dr3_m);
+              }
             }
           }
-      }
+        }
 
         /* read crossings */
         project->num_crossings_analyzed = 0;
@@ -1003,9 +1043,9 @@ int mbnavadjust_read_project(int verbose, char *projectpath, struct mbna_project
             if (status == MB_SUCCESS &&
                 ((result = fgets(buffer, BUFFER_MAX, hfp)) != buffer ||
                  (nscan =
-                      sscanf(buffer, "CROSSING %d %d %d %d %d %d %d %d %d", &idummy, &crossing->status,
-                             &crossing->truecrossing, &crossing->overlap, &crossing->file_id_1, &crossing->section_1,
-                             &crossing->file_id_2, &crossing->section_2, &crossing->num_ties)) != 9)) {
+                    sscanf(buffer, "CROSSING %d %d %d %d %d %d %d %d %d", &idummy, &crossing->status,
+                     &crossing->truecrossing, &crossing->overlap, &crossing->file_id_1, &crossing->section_1,
+                     &crossing->file_id_2, &crossing->section_2, &crossing->num_ties)) != 9)) {
               status = MB_FAILURE;
               fprintf(stderr, "read failed on crossing: %s\n", buffer);
             }
@@ -1015,8 +1055,8 @@ int mbnavadjust_read_project(int verbose, char *projectpath, struct mbna_project
             if (status == MB_SUCCESS &&
                 ((result = fgets(buffer, BUFFER_MAX, hfp)) != buffer ||
                  (nscan = sscanf(buffer, "CROSSING %d %d %d %d %d %d %d %d", &idummy, &crossing->status,
-                                 &crossing->truecrossing, &crossing->file_id_1, &crossing->section_1,
-                                 &crossing->file_id_2, &crossing->section_2, &crossing->num_ties)) != 8)) {
+                     &crossing->truecrossing, &crossing->file_id_1, &crossing->section_1,
+                     &crossing->file_id_2, &crossing->section_2, &crossing->num_ties)) != 8)) {
               status = MB_FAILURE;
               fprintf(stderr, "read failed on crossing: %s\n", buffer);
             }
@@ -1027,8 +1067,8 @@ int mbnavadjust_read_project(int verbose, char *projectpath, struct mbna_project
             if (status == MB_SUCCESS &&
                 ((result = fgets(buffer, BUFFER_MAX, hfp)) != buffer ||
                  (nscan = sscanf(buffer, "CROSSING %d %d %d %d %d %d %d", &idummy, &crossing->status,
-                                 &crossing->file_id_1, &crossing->section_1, &crossing->file_id_2,
-                                 &crossing->section_2, &crossing->num_ties)) != 7)) {
+                     &crossing->file_id_1, &crossing->section_1, &crossing->file_id_2,
+                     &crossing->section_2, &crossing->num_ties)) != 7)) {
               status = MB_FAILURE;
               fprintf(stderr, "read failed on old format crossing: %s\n", buffer);
             }
@@ -1042,7 +1082,7 @@ int mbnavadjust_read_project(int verbose, char *projectpath, struct mbna_project
           }
 
           /* reorder crossing to be early file first older file second if
-                  file version prior to 3.00 */
+            file version prior to 3.00 */
           if (version_id < 300) {
             idummy = crossing->file_id_1;
             int jdummy = crossing->section_1;
@@ -1062,10 +1102,10 @@ int mbnavadjust_read_project(int verbose, char *projectpath, struct mbna_project
               if (status == MB_SUCCESS && version_id >= 302) {
                 if ((result = fgets(buffer, BUFFER_MAX, hfp)) != buffer ||
                     (nscan = sscanf(buffer, "TIE %d %d %d %lf %d %lf %lf %lf %lf %d %lf %lf %lf", &idummy,
-                                    &tie->status, &tie->snav_1, &tie->snav_1_time_d, &tie->snav_2,
-                                    &tie->snav_2_time_d, &tie->offset_x, &tie->offset_y, &tie->offset_z_m,
-                                    &tie->inversion_status, &tie->inversion_offset_x, &tie->inversion_offset_y,
-                                    &tie->inversion_offset_z_m)) != 13) {
+                        &tie->status, &tie->snav_1, &tie->snav_1_time_d, &tie->snav_2,
+                        &tie->snav_2_time_d, &tie->offset_x, &tie->offset_y, &tie->offset_z_m,
+                        &tie->inversion_status, &tie->inversion_offset_x, &tie->inversion_offset_y,
+                        &tie->inversion_offset_z_m)) != 13) {
                   status = MB_FAILURE;
                   fprintf(stderr, "read failed on tie: %s\n", buffer);
                 }
@@ -1073,10 +1113,10 @@ int mbnavadjust_read_project(int verbose, char *projectpath, struct mbna_project
               else if (status == MB_SUCCESS && version_id >= 104) {
                 if ((result = fgets(buffer, BUFFER_MAX, hfp)) != buffer ||
                     (nscan = sscanf(buffer, "TIE %d %d %lf %d %lf %lf %lf %lf %d %lf %lf %lf", &idummy,
-                                    &tie->snav_1, &tie->snav_1_time_d, &tie->snav_2, &tie->snav_2_time_d,
-                                    &tie->offset_x, &tie->offset_y, &tie->offset_z_m, &tie->inversion_status,
-                                    &tie->inversion_offset_x, &tie->inversion_offset_y,
-                                    &tie->inversion_offset_z_m)) != 12) {
+                        &tie->snav_1, &tie->snav_1_time_d, &tie->snav_2, &tie->snav_2_time_d,
+                        &tie->offset_x, &tie->offset_y, &tie->offset_z_m, &tie->inversion_status,
+                        &tie->inversion_offset_x, &tie->inversion_offset_y,
+                        &tie->inversion_offset_z_m)) != 12) {
                   status = MB_FAILURE;
                   fprintf(stderr, "read failed on tie: %s\n", buffer);
                 }
@@ -1085,9 +1125,9 @@ int mbnavadjust_read_project(int verbose, char *projectpath, struct mbna_project
               else if (status == MB_SUCCESS) {
                 if ((result = fgets(buffer, BUFFER_MAX, hfp)) != buffer ||
                     (nscan = sscanf(buffer, "TIE %d %d %lf %d %lf %lf %lf %d %lf %lf", &idummy, &tie->snav_1,
-                                    &tie->snav_1_time_d, &tie->snav_2, &tie->snav_2_time_d, &tie->offset_x,
-                                    &tie->offset_y, &tie->inversion_status, &tie->inversion_offset_x,
-                                    &tie->inversion_offset_y)) != 10) {
+                        &tie->snav_1_time_d, &tie->snav_2, &tie->snav_2_time_d, &tie->offset_x,
+                        &tie->offset_y, &tie->inversion_status, &tie->inversion_offset_x,
+                        &tie->inversion_offset_y)) != 10) {
                   status = MB_FAILURE;
                   fprintf(stderr, "read failed on tie: %s\n", buffer);
                 }
@@ -1109,7 +1149,7 @@ int mbnavadjust_read_project(int verbose, char *projectpath, struct mbna_project
               }
 
               /* reorder crossing to be early file first older file second if
-                      file version prior to 3.00 */
+                file version prior to 3.00 */
               if (version_id < 300) {
                 idummy = tie->snav_1;
                 double dummy = tie->snav_1_time_d;
@@ -1117,21 +1157,21 @@ int mbnavadjust_read_project(int verbose, char *projectpath, struct mbna_project
                 tie->snav_1_time_d = tie->snav_2_time_d;
                 tie->snav_2 = idummy;
                 tie->snav_2_time_d = dummy;
-                /*                          tie->offset_x *= -1.0;
-                                    tie->offset_y *= -1.0;
-                                    tie->offset_z_m *= -1.0;
-                                    tie->inversion_offset_x *= -1.0;
-                                    tie->inversion_offset_y *= -1.0;
-                                    tie->inversion_offset_z_m *= -1.0;*/
+                /*        tie->offset_x *= -1.0;
+                        tie->offset_y *= -1.0;
+                        tie->offset_z_m *= -1.0;
+                        tie->inversion_offset_x *= -1.0;
+                        tie->inversion_offset_y *= -1.0;
+                        tie->inversion_offset_z_m *= -1.0;*/
               }
 
               /* for version 2.0 or later read covariance */
               if (status == MB_SUCCESS && version_id >= 200) {
                 if ((result = fgets(buffer, BUFFER_MAX, hfp)) != buffer ||
                     (nscan = sscanf(buffer, "COV %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf", &tie->sigmar1,
-                                    &(tie->sigmax1[0]), &(tie->sigmax1[1]), &(tie->sigmax1[2]), &tie->sigmar2,
-                                    &(tie->sigmax2[0]), &(tie->sigmax2[1]), &(tie->sigmax2[2]), &tie->sigmar3,
-                                    &(tie->sigmax3[0]), &(tie->sigmax3[1]), &(tie->sigmax3[2]))) != 12) {
+                        &(tie->sigmax1[0]), &(tie->sigmax1[1]), &(tie->sigmax1[2]), &tie->sigmar2,
+                        &(tie->sigmax2[0]), &(tie->sigmax2[1]), &(tie->sigmax2[2]), &tie->sigmar3,
+                        &(tie->sigmax3[0]), &(tie->sigmax3[1]), &(tie->sigmax3[2]))) != 12) {
                   status = MB_FAILURE;
                   fprintf(stderr, "read failed on tie covariance: %s\n", buffer);
                 }
@@ -1171,8 +1211,8 @@ int mbnavadjust_read_project(int verbose, char *projectpath, struct mbna_project
                 section = &file->sections[crossing->section_1];
                 if (tie->snav_1 >= section->num_snav) {
                   fprintf(stderr, "Crossing %4d:%4d %4d:%4d Reset tie snav_1 on read from %d to ",
-                          crossing->file_id_1, crossing->section_1, crossing->file_id_2, crossing->section_2,
-                          tie->snav_1);
+                    crossing->file_id_1, crossing->section_1, crossing->file_id_2, crossing->section_2,
+                    tie->snav_1);
                   tie->snav_1 = ((double)tie->snav_1 / (double)section->num_pings) * (MBNA_SNAV_NUM - 1);
                   tie->snav_1_time_d = section->snav_time_d[tie->snav_1];
                   fprintf(stderr, "%d because numsnav=%d\n", tie->snav_1, section->num_snav);
@@ -1181,8 +1221,8 @@ int mbnavadjust_read_project(int verbose, char *projectpath, struct mbna_project
                 section = &file->sections[crossing->section_2];
                 if (tie->snav_2 >= section->num_snav) {
                   fprintf(stderr, "Crossing  %4d:%4d %4d:%4d  Reset tie snav_2 on read from %d to ",
-                          crossing->file_id_1, crossing->section_1, crossing->file_id_2, crossing->section_2,
-                          tie->snav_2);
+                    crossing->file_id_1, crossing->section_1, crossing->file_id_2, crossing->section_2,
+                    tie->snav_2);
                   tie->snav_2 = ((double)tie->snav_2 / (double)section->num_pings) * (MBNA_SNAV_NUM - 1);
                   tie->snav_2_time_d = section->snav_time_d[tie->snav_2];
                   fprintf(stderr, "%d because numsnav=%d\n", tie->snav_2, section->num_snav);
@@ -1203,25 +1243,25 @@ int mbnavadjust_read_project(int verbose, char *projectpath, struct mbna_project
               if (status == MB_SUCCESS) {
                 tie->offset_x_m = tie->offset_x / project->mtodeglon;
                 tie->offset_y_m = tie->offset_y / project->mtodeglat;
-                                tie->inversion_offset_x_m = tie->inversion_offset_x / project->mtodeglon;
-                                tie->inversion_offset_y_m = tie->inversion_offset_y / project->mtodeglat;
-                                tie->dx_m = tie->offset_x_m - tie->inversion_offset_x_m;
-                                tie->dy_m = tie->offset_y_m - tie->inversion_offset_y_m;
-                                tie->dz_m = tie->offset_z_m - tie->inversion_offset_z_m;
-                                tie->sigma_m = sqrt(tie->dx_m * tie->dx_m + tie->dy_m * tie->dy_m + tie->dz_m * tie->dz_m);
-                                tie->dr1_m = fabs((tie->inversion_offset_x_m - tie->offset_x_m) * tie->sigmax1[0] +
-                                               (tie->inversion_offset_y_m - tie->offset_y_m) * tie->sigmax1[1] +
-                                               (tie->inversion_offset_z_m - tie->offset_z_m) * tie->sigmax1[2]) /
-                                          tie->sigmar1;
-                                tie->dr2_m = fabs((tie->inversion_offset_x_m - tie->offset_x_m) * tie->sigmax2[0] +
-                                               (tie->inversion_offset_y_m - tie->offset_y_m) * tie->sigmax2[1] +
-                                               (tie->inversion_offset_z_m - tie->offset_z_m) * tie->sigmax2[2]) /
-                                          tie->sigmar2;
-                                tie->dr3_m = fabs((tie->inversion_offset_x_m - tie->offset_x_m) * tie->sigmax3[0] +
-                                               (tie->inversion_offset_y_m - tie->offset_y_m) * tie->sigmax3[1] +
-                                               (tie->inversion_offset_z_m - tie->offset_z_m) * tie->sigmax3[2]) /
-                                          tie->sigmar3;
-                                tie->rsigma_m = sqrt(tie->dr1_m * tie->dr1_m + tie->dr2_m * tie->dr2_m + tie->dr3_m * tie->dr3_m);
+                tie->inversion_offset_x_m = tie->inversion_offset_x / project->mtodeglon;
+                tie->inversion_offset_y_m = tie->inversion_offset_y / project->mtodeglat;
+                tie->dx_m = tie->offset_x_m - tie->inversion_offset_x_m;
+                tie->dy_m = tie->offset_y_m - tie->inversion_offset_y_m;
+                tie->dz_m = tie->offset_z_m - tie->inversion_offset_z_m;
+                tie->sigma_m = sqrt(tie->dx_m * tie->dx_m + tie->dy_m * tie->dy_m + tie->dz_m * tie->dz_m);
+                tie->dr1_m = fabs((tie->inversion_offset_x_m - tie->offset_x_m) * tie->sigmax1[0] +
+                      (tie->inversion_offset_y_m - tie->offset_y_m) * tie->sigmax1[1] +
+                      (tie->inversion_offset_z_m - tie->offset_z_m) * tie->sigmax1[2]) /
+                       tie->sigmar1;
+                tie->dr2_m = fabs((tie->inversion_offset_x_m - tie->offset_x_m) * tie->sigmax2[0] +
+                      (tie->inversion_offset_y_m - tie->offset_y_m) * tie->sigmax2[1] +
+                      (tie->inversion_offset_z_m - tie->offset_z_m) * tie->sigmax2[2]) /
+                       tie->sigmar2;
+                tie->dr3_m = fabs((tie->inversion_offset_x_m - tie->offset_x_m) * tie->sigmax3[0] +
+                      (tie->inversion_offset_y_m - tie->offset_y_m) * tie->sigmax3[1] +
+                      (tie->inversion_offset_z_m - tie->offset_z_m) * tie->sigmax3[2]) /
+                       tie->sigmar3;
+                tie->rsigma_m = sqrt(tie->dr1_m * tie->dr1_m + tie->dr2_m * tie->dr2_m + tie->dr3_m * tie->dr3_m);
               }
             }
           }
@@ -1254,14 +1294,14 @@ int mbnavadjust_read_project(int verbose, char *projectpath, struct mbna_project
               tie->inversion_offset_x_m *= -1.0;
               tie->inversion_offset_y_m *= -1.0;
               tie->inversion_offset_z_m *= -1.0;
-                            tie->dx_m *= -1.0;
-                            tie->dy_m *= -1.0;
-                            tie->dz_m *= -1.0;
-                            //tie->globaltie.sigma_m;
-                            tie->dr1_m *= -1.0;
-                            tie->dr2_m *= -1.0;
-                            tie->dr3_m *= -1.0;
-                            //tie->rsigma_m;
+              tie->dx_m *= -1.0;
+              tie->dy_m *= -1.0;
+              tie->dz_m *= -1.0;
+              //tie->globaltie.sigma_m;
+              tie->dr1_m *= -1.0;
+              tie->dr2_m *= -1.0;
+              tie->dr3_m *= -1.0;
+              //tie->rsigma_m;
             }
           }
 
@@ -1334,10 +1374,10 @@ int mbnavadjust_read_project(int verbose, char *projectpath, struct mbna_project
     /* open log file */
     if ((project->logfp = fopen(project->logfile, "a")) != NULL) {
       fprintf(project->logfp,
-              "Project opened: %s\n > Project home: %s\n > Number of Files: %d\n > Number of Crossings Found: %d\n > "
-              "Number of Crossings Analyzed: %d\n > Number of Navigation Ties: %d\n",
-              project->name, project->home, project->num_files, project->num_crossings, project->num_crossings_analyzed,
-              project->num_ties);
+        "Project opened: %s\n > Project home: %s\n > Number of Files: %d\n > Number of Crossings Found: %d\n > "
+        "Number of Crossings Analyzed: %d\n > Number of Navigation Ties: %d\n",
+        project->name, project->home, project->num_files, project->num_crossings, project->num_crossings_analyzed,
+        project->num_ties);
     }
     else {
       fprintf(stderr, "Failure to open log file %s\n", project->logfile);
@@ -1360,8 +1400,8 @@ int mbnavadjust_read_project(int verbose, char *projectpath, struct mbna_project
 int mbnavadjust_close_project(int verbose, struct mbna_project *project, int *error) {
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
-    fprintf(stderr, "dbg2       verbose:            %d\n", verbose);
-    fprintf(stderr, "dbg2       project:            %p\n", project);
+    fprintf(stderr, "dbg2       verbose:      %d\n", verbose);
+    fprintf(stderr, "dbg2       project:      %p\n", project);
   }
 
   /* add info text */
@@ -1427,8 +1467,8 @@ int mbnavadjust_close_project(int verbose, struct mbna_project *project, int *er
 int mbnavadjust_write_project(int verbose, struct mbna_project *project, int *error) {
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
-    fprintf(stderr, "dbg2       verbose:            %d\n", verbose);
-    fprintf(stderr, "dbg2       project:            %p\n", project);
+    fprintf(stderr, "dbg2       verbose:      %d\n", verbose);
+    fprintf(stderr, "dbg2       project:      %p\n", project);
   }
 
   int status = MB_SUCCESS;
@@ -1442,7 +1482,7 @@ int mbnavadjust_write_project(int verbose, struct mbna_project *project, int *er
   char routename[STRING_MAX];
   char offsetfile[STRING_MAX];
   double navlon1, navlon2, navlat1, navlat2;
-    int time_i[7];
+  int time_i[7];
   int nroute;
   int snav_1, snav_2;
   int ncrossings_true = 0;
@@ -1495,17 +1535,17 @@ int mbnavadjust_write_project(int verbose, struct mbna_project *project, int *er
       /* write out basic file info */
       file = &project->files[i];
       fprintf(hfp, "FILE %4d %4d %4d %4d %4d %13.8f %13.8f %13.8f %4.1f %4.1f %4.1f %4.1f %4d %4d %s\n", i, file->status,
-              file->id, file->format, file->block, file->block_offset_x, file->block_offset_y, file->block_offset_z,
-              file->heading_bias_import, file->roll_bias_import, file->heading_bias, file->roll_bias, file->num_sections,
-              file->output_id, file->file);
+        file->id, file->format, file->block, file->block_offset_x, file->block_offset_y, file->block_offset_z,
+        file->heading_bias_import, file->roll_bias_import, file->heading_bias, file->roll_bias, file->num_sections,
+        file->output_id, file->file);
 
       /* write out section info */
       for (int j = 0; j < file->num_sections; j++) {
         section = &file->sections[j];
         fprintf(hfp, "SECTION %4d %5d %5d %d %d %10.6f %16.6f %16.6f %13.8f %13.8f %13.8f %13.8f %9.3f %9.3f %d\n", j,
-                section->num_pings, section->num_beams, section->num_snav, section->continuity, section->distance,
-                section->btime_d, section->etime_d, section->lonmin, section->lonmax, section->latmin, section->latmax,
-                section->depthmin, section->depthmax, section->contoursuptodate);
+          section->num_pings, section->num_beams, section->num_snav, section->continuity, section->distance,
+          section->btime_d, section->etime_d, section->lonmin, section->lonmax, section->latmin, section->latmax,
+          section->depthmin, section->depthmax, section->contoursuptodate);
         for (k = MBNA_MASK_DIM - 1; k >= 0; k--) {
           for (l = 0; l < MBNA_MASK_DIM; l++) {
             fprintf(hfp, "%1d", section->coverage[l + k * MBNA_MASK_DIM]);
@@ -1514,11 +1554,11 @@ int mbnavadjust_write_project(int verbose, struct mbna_project *project, int *er
         }
         for (k = 0; k < section->num_snav; k++) {
           fprintf(hfp, "SNAV %4d %5d %10.6f %16.6f %13.8f %13.8f %13.8f %13.8f %13.8f %13.8f\n",
-                            k, section->snav_id[k], section->snav_distance[k], section->snav_time_d[k],
-                            section->snav_lon[k], section->snav_lat[k], section->snav_sensordepth[k],
-                  section->snav_lon_offset[k], section->snav_lat_offset[k], section->snav_z_offset[k]);
+            k, section->snav_id[k], section->snav_distance[k], section->snav_time_d[k],
+            section->snav_lon[k], section->snav_lat[k], section->snav_sensordepth[k],
+            section->snav_lon_offset[k], section->snav_lat_offset[k], section->snav_z_offset[k]);
         }
-        if (section->globaltie.status == 0 && section->globaltie.snav == -1) {
+        if (section->status == MBNA_CROSSING_STATUS_NONE && section->globaltie.snav == -1) {
           section->globaltie.inversion_status = 0;
           section->globaltie.offset_x = 0.0;
           section->globaltie.offset_y = 0.0;
@@ -1528,15 +1568,15 @@ int mbnavadjust_write_project(int verbose, struct mbna_project *project, int *er
           section->globaltie.sigmar3 = 0.0;
         }
         fprintf(hfp, "GLOBALTIE %2d %4d %13.8f %13.8f %13.8f %13.8f %13.8f %13.8f %1.1d %13.8f %13.8f %13.8f\n",
-		section->globaltie.status, section->globaltie.snav, 
-		section->globaltie.offset_x, section->globaltie.offset_y, section->globaltie.offset_z_m,
-		section->globaltie.sigmar1, section->globaltie.sigmar2, section->globaltie.sigmar3, 
-		section->globaltie.inversion_status, section->globaltie.inversion_offset_x, 
-		section->globaltie.inversion_offset_y, section->globaltie.inversion_offset_z_m);
+          section->globaltie.status, section->globaltie.snav,
+          section->globaltie.offset_x, section->globaltie.offset_y, section->globaltie.offset_z_m,
+          section->globaltie.sigmar1, section->globaltie.sigmar2, section->globaltie.sigmar3,
+          section->globaltie.inversion_status, section->globaltie.inversion_offset_x,
+          section->globaltie.inversion_offset_y, section->globaltie.inversion_offset_z_m);
         fprintf(hfp, "COV %13.8f %13.8f %13.8f %13.8f %13.8f %13.8f %13.8f %13.8f %13.8f %13.8f %13.8f %13.8f\n",
-                section->globaltie.sigmar1, section->globaltie.sigmax1[0], section->globaltie.sigmax1[1], section->globaltie.sigmax1[2], 
-		section->globaltie.sigmar2, section->globaltie.sigmax2[0], section->globaltie.sigmax2[1], section->globaltie.sigmax2[2], 
-		section->globaltie.sigmar3, section->globaltie.sigmax3[0], section->globaltie.sigmax3[1], section->globaltie.sigmax3[2]);
+          section->globaltie.sigmar1, section->globaltie.sigmax1[0], section->globaltie.sigmax1[1], section->globaltie.sigmax1[2],
+          section->globaltie.sigmar2, section->globaltie.sigmax2[0], section->globaltie.sigmax2[1], section->globaltie.sigmax2[2],
+          section->globaltie.sigmar3, section->globaltie.sigmax3[0], section->globaltie.sigmax3[1], section->globaltie.sigmax3[2]);
       }
     }
 
@@ -1545,20 +1585,20 @@ int mbnavadjust_write_project(int verbose, struct mbna_project *project, int *er
       /* write out basic crossing info */
       crossing = &project->crossings[i];
       fprintf(hfp, "CROSSING %5d %d %d %3d %5d %3d %5d %3d %2d\n", i, crossing->status, crossing->truecrossing,
-              crossing->overlap, crossing->file_id_1, crossing->section_1, crossing->file_id_2, crossing->section_2,
-              crossing->num_ties);
+        crossing->overlap, crossing->file_id_1, crossing->section_1, crossing->file_id_2, crossing->section_2,
+        crossing->num_ties);
 
       /* write out tie info */
       for (int j = 0; j < crossing->num_ties; j++) {
         /* write out basic tie info */
         struct mbna_tie *tie = &crossing->ties[j];
         fprintf(hfp, "TIE %5d %1d %5d %16.6f %5d %16.6f %13.8f %13.8f %13.8f %1.1d %13.8f %13.8f %13.8f\n", j,
-                tie->status, tie->snav_1, tie->snav_1_time_d, tie->snav_2, tie->snav_2_time_d, tie->offset_x,
-                tie->offset_y, tie->offset_z_m, tie->inversion_status, tie->inversion_offset_x, tie->inversion_offset_y,
-                tie->inversion_offset_z_m);
+          tie->status, tie->snav_1, tie->snav_1_time_d, tie->snav_2, tie->snav_2_time_d, tie->offset_x,
+          tie->offset_y, tie->offset_z_m, tie->inversion_status, tie->inversion_offset_x, tie->inversion_offset_y,
+          tie->inversion_offset_z_m);
         fprintf(hfp, "COV %13.8f %13.8f %13.8f %13.8f %13.8f %13.8f %13.8f %13.8f %13.8f %13.8f %13.8f %13.8f\n",
-                tie->sigmar1, tie->sigmax1[0], tie->sigmax1[1], tie->sigmax1[2], tie->sigmar2, tie->sigmax2[0],
-                tie->sigmax2[1], tie->sigmax2[2], tie->sigmar3, tie->sigmax3[0], tie->sigmax3[1], tie->sigmax3[2]);
+          tie->sigmar1, tie->sigmax1[0], tie->sigmax1[1], tie->sigmax1[2], tie->sigmar2, tie->sigmax2[0],
+          tie->sigmax2[1], tie->sigmax2[2], tie->sigmar3, tie->sigmax3[0], tie->sigmax3[1], tie->sigmax3[2]);
       }
     }
 
@@ -1596,10 +1636,10 @@ int mbnavadjust_write_project(int verbose, struct mbna_project *project, int *er
       consisting of the connected snav points
       - output several different route files
       - route files of ties (fixed and unfixed separate) represent each tie as a
-          two point route consisting of the connected snav points
+    two point route consisting of the connected snav points
       - route files of crossings (<25%, >= 25% && < 50%, >= 50%, true crossings)
-          represent each crossing as a two point route consisting of the central
-          snav points for each of the two sections.
+    represent each crossing as a two point route consisting of the central
+    snav points for each of the two sections.
       - first count different types of crossings and ties to output as routes
       - then output each time of route file */
   ncrossings_true = 0;
@@ -1664,7 +1704,7 @@ int mbnavadjust_write_project(int verbose, struct mbna_project *project, int *er
 
       /* output only unfixed true crossings */
       if (crossing->truecrossing && !(project->files[crossing->file_id_1].status == MBNA_FILE_FIXEDNAV ||
-                                                project->files[crossing->file_id_2].status == MBNA_FILE_FIXEDNAV)) {
+              project->files[crossing->file_id_2].status == MBNA_FILE_FIXEDNAV)) {
         file_1 = (struct mbna_file *)&project->files[crossing->file_id_1];
         file_2 = (struct mbna_file *)&project->files[crossing->file_id_2];
         section_1 = (struct mbna_section *)&file_1->sections[crossing->section_1];
@@ -1692,8 +1732,8 @@ int mbnavadjust_write_project(int verbose, struct mbna_project *project, int *er
         else
           truecrossing_char = 'X';
         sprintf(routename, "%c%c %4d %2.2d:%3.3d:%3.3d %2.2d:%3.3d:%3.3d %3d %2d", status_char, truecrossing_char, i,
-                file_1->block, crossing->file_id_1, crossing->section_1, file_2->block, crossing->file_id_2,
-                crossing->section_2, crossing->overlap, crossing->num_ties);
+          file_1->block, crossing->file_id_1, crossing->section_1, file_2->block, crossing->file_id_2,
+          crossing->section_2, crossing->overlap, crossing->num_ties);
         fprintf(hfp, "## ROUTENAME %s\n", routename);
         fprintf(hfp, "## ROUTESIZE %d\n", 1);
         fprintf(hfp, "## ROUTECOLOR %d\n", routecolor);
@@ -1735,7 +1775,7 @@ int mbnavadjust_write_project(int verbose, struct mbna_project *project, int *er
 
       /* output only unfixed >=50% crossings */
       if (crossing->overlap >= 50 && !(project->files[crossing->file_id_1].status == MBNA_FILE_FIXEDNAV ||
-                                       project->files[crossing->file_id_2].status == MBNA_FILE_FIXEDNAV)) {
+               project->files[crossing->file_id_2].status == MBNA_FILE_FIXEDNAV)) {
         file_1 = (struct mbna_file *)&project->files[crossing->file_id_1];
         file_2 = (struct mbna_file *)&project->files[crossing->file_id_2];
         section_1 = (struct mbna_section *)&file_1->sections[crossing->section_1];
@@ -1763,8 +1803,8 @@ int mbnavadjust_write_project(int verbose, struct mbna_project *project, int *er
         else
           truecrossing_char = 'X';
         sprintf(routename, "%c%c %4d %2.2d:%3.3d:%3.3d %2.2d:%3.3d:%3.3d %3d %2d", status_char, truecrossing_char, i,
-                file_1->block, crossing->file_id_1, crossing->section_1, file_2->block, crossing->file_id_2,
-                crossing->section_2, crossing->overlap, crossing->num_ties);
+          file_1->block, crossing->file_id_1, crossing->section_1, file_2->block, crossing->file_id_2,
+          crossing->section_2, crossing->overlap, crossing->num_ties);
         fprintf(hfp, "## ROUTENAME %s\n", routename);
         fprintf(hfp, "## ROUTESIZE %d\n", 1);
         fprintf(hfp, "## ROUTECOLOR %d\n", routecolor);
@@ -1807,7 +1847,7 @@ int mbnavadjust_write_project(int verbose, struct mbna_project *project, int *er
 
       /* output only unfixed >=25% but less than 50% crossings crossings */
       if (crossing->overlap >= 25 && !(project->files[crossing->file_id_1].status == MBNA_FILE_FIXEDNAV ||
-                                       project->files[crossing->file_id_2].status == MBNA_FILE_FIXEDNAV)) {
+               project->files[crossing->file_id_2].status == MBNA_FILE_FIXEDNAV)) {
         file_1 = (struct mbna_file *)&project->files[crossing->file_id_1];
         file_2 = (struct mbna_file *)&project->files[crossing->file_id_2];
         section_1 = (struct mbna_section *)&file_1->sections[crossing->section_1];
@@ -1835,8 +1875,8 @@ int mbnavadjust_write_project(int verbose, struct mbna_project *project, int *er
         else
           truecrossing_char = 'X';
         sprintf(routename, "%c%c %4d %2.2d:%3.3d:%3.3d %2.2d:%3.3d:%3.3d %3d %2d", status_char, truecrossing_char, i,
-                file_1->block, crossing->file_id_1, crossing->section_1, file_2->block, crossing->file_id_2,
-                crossing->section_2, crossing->overlap, crossing->num_ties);
+          file_1->block, crossing->file_id_1, crossing->section_1, file_2->block, crossing->file_id_2,
+          crossing->section_2, crossing->overlap, crossing->num_ties);
         fprintf(hfp, "## ROUTENAME %s\n", routename);
         fprintf(hfp, "## ROUTESIZE %d\n", 1);
         fprintf(hfp, "## ROUTECOLOR %d\n", routecolor);
@@ -1879,7 +1919,7 @@ int mbnavadjust_write_project(int verbose, struct mbna_project *project, int *er
 
       /* output only unfixed <25% crossings crossings */
       if (crossing->overlap < 25 && !(project->files[crossing->file_id_1].status == MBNA_FILE_FIXEDNAV ||
-                                      project->files[crossing->file_id_2].status == MBNA_FILE_FIXEDNAV)) {
+              project->files[crossing->file_id_2].status == MBNA_FILE_FIXEDNAV)) {
         file_1 = (struct mbna_file *)&project->files[crossing->file_id_1];
         file_2 = (struct mbna_file *)&project->files[crossing->file_id_2];
         section_1 = (struct mbna_section *)&file_1->sections[crossing->section_1];
@@ -1907,8 +1947,8 @@ int mbnavadjust_write_project(int verbose, struct mbna_project *project, int *er
         else
           truecrossing_char = 'X';
         sprintf(routename, "%c%c %4d %2.2d:%3.3d:%3.3d %2.2d:%3.3d:%3.3d %3d %2d", status_char, truecrossing_char, i,
-                file_1->block, crossing->file_id_1, crossing->section_1, file_2->block, crossing->file_id_2,
-                crossing->section_2, crossing->overlap, crossing->num_ties);
+          file_1->block, crossing->file_id_1, crossing->section_1, file_2->block, crossing->file_id_2,
+          crossing->section_2, crossing->overlap, crossing->num_ties);
         fprintf(hfp, "## ROUTENAME %s\n", routename);
         fprintf(hfp, "## ROUTESIZE %d\n", 1);
         fprintf(hfp, "## ROUTECOLOR %d\n", routecolor);
@@ -1978,8 +2018,8 @@ int mbnavadjust_write_project(int verbose, struct mbna_project *project, int *er
         else
           truecrossing_char = 'X';
         sprintf(routename, "%c%c %4d %2.2d:%3.3d:%3.3d %2.2d:%3.3d:%3.3d %3d %2d", status_char, truecrossing_char, i,
-                file_1->block, crossing->file_id_1, crossing->section_1, file_2->block, crossing->file_id_2,
-                crossing->section_2, crossing->overlap, crossing->num_ties);
+          file_1->block, crossing->file_id_1, crossing->section_1, file_2->block, crossing->file_id_2,
+          crossing->section_2, crossing->overlap, crossing->num_ties);
         fprintf(hfp, "## ROUTENAME %s\n", routename);
         fprintf(hfp, "## ROUTESIZE %d\n", 1);
         fprintf(hfp, "## ROUTECOLOR %d\n", routecolor);
@@ -2047,8 +2087,8 @@ int mbnavadjust_write_project(int verbose, struct mbna_project *project, int *er
           else
             truecrossing_char = 'X';
           sprintf(routename, "Tie: %c%c %4d %2.2d:%3.3d:%3.3d %2.2d:%3.3d:%3.3d %3d %2d of %2d", status_char,
-                  truecrossing_char, i, file_1->block, crossing->file_id_1, crossing->section_1, file_2->block,
-                  crossing->file_id_2, crossing->section_2, crossing->overlap, j, crossing->num_ties);
+            truecrossing_char, i, file_1->block, crossing->file_id_1, crossing->section_1, file_2->block,
+            crossing->file_id_2, crossing->section_2, crossing->overlap, j, crossing->num_ties);
           fprintf(hfp, "## ROUTENAME %s\n", routename);
           fprintf(hfp, "## ROUTESIZE %d\n", 1);
           fprintf(hfp, "## ROUTECOLOR %d\n", routecolor);
@@ -2117,8 +2157,8 @@ int mbnavadjust_write_project(int verbose, struct mbna_project *project, int *er
           else
             truecrossing_char = 'X';
           sprintf(routename, "Tie: %c%c %4d %2.2d:%3.3d:%3.3d %2.2d:%3.3d:%3.3d %3d %2d of %2d", status_char,
-                  truecrossing_char, i, file_1->block, crossing->file_id_1, crossing->section_1, file_2->block,
-                  crossing->file_id_2, crossing->section_2, crossing->overlap, j, crossing->num_ties);
+            truecrossing_char, i, file_1->block, crossing->file_id_1, crossing->section_1, file_2->block,
+            crossing->file_id_2, crossing->section_2, crossing->overlap, j, crossing->num_ties);
           fprintf(hfp, "## ROUTENAME %s\n", routename);
           fprintf(hfp, "## ROUTESIZE %d\n", 1);
           fprintf(hfp, "## ROUTECOLOR %d\n", routecolor);
@@ -2144,13 +2184,13 @@ int mbnavadjust_write_project(int verbose, struct mbna_project *project, int *er
           section = &file->sections[j];
           mb_coor_scale(verbose, 0.5 * (section->latmin + section->latmax), &mtodeglon, &mtodeglat);
           for (k = 0; k < section->num_snav; k++) {
-                        mb_get_date(verbose, section->snav_time_d[k], time_i);
-                        fprintf(hfp, "%4.4d:%4.4d:%2.2d  %4d/%2d/%2d %2d:%2d:%2d.%6.6d  %.6f %8.3f %8.3f %6.3f\n",
-                                        i, j, k, time_i[0],time_i[1],time_i[2],time_i[3],time_i[4],time_i[5],time_i[6],
-                                        section->snav_time_d[k],
-                                        (section->snav_lon_offset[k] / mtodeglon),
-                                        (section->snav_lat_offset[k] / mtodeglat),
-                                        section->snav_z_offset[k]);
+            mb_get_date(verbose, section->snav_time_d[k], time_i);
+            fprintf(hfp, "%4.4d:%4.4d:%2.2d  %4d/%2d/%2d %2d:%2d:%2d.%6.6d  %.6f %8.3f %8.3f %6.3f\n",
+              i, j, k, time_i[0],time_i[1],time_i[2],time_i[3],time_i[4],time_i[5],time_i[6],
+              section->snav_time_d[k],
+              (section->snav_lon_offset[k] / mtodeglon),
+              (section->snav_lat_offset[k] / mtodeglat),
+              section->snav_z_offset[k]);
           }
         }
       }
@@ -2177,13 +2217,13 @@ int mbnavadjust_crossing_overlap(int verbose, struct mbna_project *project, int 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
-    fprintf(stderr, "dbg2       verbose:              %d\n", verbose);
-    fprintf(stderr, "dbg2       project:              %p\n", project);
-    fprintf(stderr, "dbg2       crossing_id:          %d\n", crossing_id);
+    fprintf(stderr, "dbg2       verbose:        %d\n", verbose);
+    fprintf(stderr, "dbg2       project:        %p\n", project);
+    fprintf(stderr, "dbg2       crossing_id:    %d\n", crossing_id);
   }
 
   struct mbna_crossing *crossing =
-      (struct mbna_crossing *)&project->crossings[crossing_id];
+    (struct mbna_crossing *)&project->crossings[crossing_id];
 
   /* get section endpoints */
   struct mbna_file *file = &project->files[crossing->file_id_1];
@@ -2252,7 +2292,7 @@ int mbnavadjust_crossing_overlap(int verbose, struct mbna_project *project, int 
   //    (dx1 * dy1) / (dx1 * dy1 + dx2 * dy2) * ((double)noverlap1) / ((double)ncoverage1) +
   //    (dx2 * dy2) / (dx1 * dy1 + dx2 * dy2) * ((double)noverlap2) / ((double)ncoverage2);
   const double overlapfraction = 0.5 * ((double)noverlap1) / ((double)ncoverage1)
-                                  + 0.5 * ((double)noverlap2) / ((double)ncoverage2);
+               + 0.5 * ((double)noverlap2) / ((double)ncoverage2);
   crossing->overlap = (int)(100.0 * overlapfraction);
   if (crossing->overlap < 1)
     crossing->overlap = 1;
@@ -2273,20 +2313,20 @@ int mbnavadjust_crossing_overlap(int verbose, struct mbna_project *project, int 
 
 /*--------------------------------------------------------------------*/
 int mbnavadjust_crossing_overlapbounds(int verbose, struct mbna_project *project, int crossing_id, double offset_x,
-                                       double offset_y, double *lonmin, double *lonmax, double *latmin, double *latmax,
-                                       int *error) {
+               double offset_y, double *lonmin, double *lonmax, double *latmin, double *latmax,
+               int *error) {
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
-    fprintf(stderr, "dbg2       verbose:              %d\n", verbose);
-    fprintf(stderr, "dbg2       project:              %p\n", project);
-    fprintf(stderr, "dbg2       crossing_id:          %d\n", crossing_id);
-    fprintf(stderr, "dbg2       offset_x:             %f\n", offset_x);
-    fprintf(stderr, "dbg2       offset_y:             %f\n", offset_y);
+    fprintf(stderr, "dbg2       verbose:        %d\n", verbose);
+    fprintf(stderr, "dbg2       project:        %p\n", project);
+    fprintf(stderr, "dbg2       crossing_id:    %d\n", crossing_id);
+    fprintf(stderr, "dbg2       offset_x:       %f\n", offset_x);
+    fprintf(stderr, "dbg2       offset_y:       %f\n", offset_y);
   }
 
   struct mbna_crossing *crossing =
-      (struct mbna_crossing *)&project->crossings[crossing_id];
+    (struct mbna_crossing *)&project->crossings[crossing_id];
 
   /* get section endpoints */
   struct mbna_file *file = &project->files[crossing->file_id_1];
@@ -2313,7 +2353,7 @@ int mbnavadjust_crossing_overlapbounds(int verbose, struct mbna_project *project
   const double dx2 = (section2->lonmax - section2->lonmin) / MBNA_MASK_DIM;
   const double dy2 = (section2->latmax - section2->latmin) / MBNA_MASK_DIM;
 
-  int first = true;  // TODO(schwehr): bool
+  bool first = true;
 
   for (int ii1 = 0; ii1 < MBNA_MASK_DIM; ii1++) {
     for (int jj1 = 0; jj1 < MBNA_MASK_DIM; jj1++) {
@@ -2350,7 +2390,97 @@ int mbnavadjust_crossing_overlapbounds(int verbose, struct mbna_project *project
               }
             }
           }
+        }
+      }
+    }
+  }
+
+  const int status = MB_SUCCESS;
+
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBnavadjust function <%s> completed\n", __func__);
+    fprintf(stderr, "dbg2  Return values:\n");
+    fprintf(stderr, "dbg2       lonmin:      %.10f\n", *lonmin);
+    fprintf(stderr, "dbg2       lonmax:      %.10f\n", *lonmax);
+    fprintf(stderr, "dbg2       latmin:      %.10f\n", *latmin);
+    fprintf(stderr, "dbg2       latmax:      %.10f\n", *latmax);
+    fprintf(stderr, "dbg2       error:       %d\n", *error);
+    fprintf(stderr, "dbg2  Return status:\n");
+    fprintf(stderr, "dbg2       status:      %d\n", status);
+  }
+
+  return (status);
+}
+
+/*--------------------------------------------------------------------*/
+int mbnavadjust_section_overlapbounds(int verbose, struct mbna_project *project,
+              int file_id, int section_id, double offset_x, double offset_y,
+              double *lonmin, double *lonmax, double *latmin, double *latmax,
+              int *error) {
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+    fprintf(stderr, "dbg2  Input arguments:\n");
+    fprintf(stderr, "dbg2       verbose:        %d\n", verbose);
+    fprintf(stderr, "dbg2       project:        %p\n", project);
+    fprintf(stderr, "dbg2       file_id:        %d\n", file_id);
+    fprintf(stderr, "dbg2       section_id:     %d\n", section_id);
+    fprintf(stderr, "dbg2       offset_x:       %f\n", offset_x);
+    fprintf(stderr, "dbg2       offset_y:       %f\n", offset_y);
+  }
+
+  struct mbna_file *file = &project->files[file_id];
+  struct mbna_section *section1 = &project->reference_section;
+  struct mbna_section *section2 = &file->sections[section_id];
+  struct mbna_globaltie *globaltie = &section2->globaltie;
+
+  /* get overlap region bounds and focus point */
+  *lonmin = 0.0;
+  *lonmax = 0.0;
+  *latmin = 0.0;
+  *latmax = 0.0;
+  const double dx1 = (section1->lonmax - section1->lonmin) / MBNA_MASK_DIM;
+  const double dy1 = (section1->latmax - section1->latmin) / MBNA_MASK_DIM;
+  const double dx2 = (section2->lonmax - section2->lonmin) / MBNA_MASK_DIM;
+  const double dy2 = (section2->latmax - section2->latmin) / MBNA_MASK_DIM;
+
+  bool first = true;
+
+  for (int ii1 = 0; ii1 < MBNA_MASK_DIM; ii1++) {
+    for (int jj1 = 0; jj1 < MBNA_MASK_DIM; jj1++) {
+      const int kk1 = ii1 + jj1 * MBNA_MASK_DIM;
+      if (section1->coverage[kk1] == 1) {
+        const double lon1min = section1->lonmin + dx1 * ii1;
+        const double lon1max = section1->lonmin + dx1 * (ii1 + 1);
+        const double lat1min = section1->latmin + dy1 * jj1;
+        const double lat1max = section1->latmin + dy1 * (jj1 + 1);
+        for (int ii2 = 0; ii2 < MBNA_MASK_DIM; ii2++) {
+          for (int jj2 = 0; jj2 < MBNA_MASK_DIM; jj2++) {
+            const int kk2 = ii2 + jj2 * MBNA_MASK_DIM;
+            if (section2->coverage[kk2] == 1) {
+              const double lon2min = section2->lonmin + dx2 * ii2 + offset_x;
+              const double lon2max = section2->lonmin + dx2 * (ii2 + 1) + offset_x;
+              const double lat2min = section2->latmin + dy2 * jj2 + offset_y;
+              const double lat2max = section2->latmin + dy2 * (jj2 + 1) + offset_y;
+              if ((lon1min < lon2max) && (lon1max > lon2min) && (lat1min < lat2max) && (lat1max > lat2min)) {
+                // overlap1[kk1] = 1;
+                // overlap2[kk2] = 1;
+                if (!first) {
+                  *lonmin = MIN(*lonmin, MAX(lon1min, lon2min));
+                  *lonmax = MAX(*lonmax, MIN(lon1max, lon2max));
+                  *latmin = MIN(*latmin, MAX(lat1min, lat2min));
+                  *latmax = MAX(*latmax, MIN(lat1max, lat2max));
                 }
+                else {
+                  first = false;
+                  *lonmin = MAX(lon1min, lon2min);
+                  *lonmax = MIN(lon1max, lon2max);
+                  *latmin = MAX(lat1min, lat2min);
+                  *latmax = MIN(lat1max, lat2max);
+                }
+              }
+            }
+          }
+        }
       }
     }
   }
@@ -2374,24 +2504,24 @@ int mbnavadjust_crossing_overlapbounds(int verbose, struct mbna_project *project
 
 /*--------------------------------------------------------------------*/
 int mbnavadjust_crossing_focuspoint(int verbose, struct mbna_project *project, int crossing_id,
-                                    double offset_x, double offset_y, int *isnav1_focus, int *isnav2_focus,
-                                    double *lon_focus, double *lat_focus, int *error) {
-  (void)isnav1_focus;  // Unused parameter
-  (void)isnav2_focus;  // Unused parameter
+            double offset_x, double offset_y, int *isnav1_focus, int *isnav2_focus,
+            double *lon_focus, double *lat_focus, int *error) {
+  (void)isnav1_focus; // Unused parameter
+  (void)isnav2_focus; // Unused parameter
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
-    fprintf(stderr, "dbg2       verbose:              %d\n", verbose);
-    fprintf(stderr, "dbg2       project:              %p\n", project);
-    fprintf(stderr, "dbg2       crossing_id:          %d\n", crossing_id);
-    fprintf(stderr, "dbg2       offset_x:             %f\n", offset_x);
-    fprintf(stderr, "dbg2       offset_y:             %f\n", offset_y);
+    fprintf(stderr, "dbg2       verbose:        %d\n", verbose);
+    fprintf(stderr, "dbg2       project:        %p\n", project);
+    fprintf(stderr, "dbg2       crossing_id:    %d\n", crossing_id);
+    fprintf(stderr, "dbg2       offset_x:       %f\n", offset_x);
+    fprintf(stderr, "dbg2       offset_y:       %f\n", offset_y);
   }
 
   /* get crossing */
   struct mbna_crossing *crossing =
-      (struct mbna_crossing *)&project->crossings[crossing_id];
+    (struct mbna_crossing *)&project->crossings[crossing_id];
 
   /* get section endpoints */
   struct mbna_file *file = &project->files[crossing->file_id_1];
@@ -2436,16 +2566,16 @@ int mbnavadjust_crossing_focuspoint(int verbose, struct mbna_project *project, i
 
 /*--------------------------------------------------------------------*/
 int mbnavadjust_set_plot_functions(int verbose, struct mbna_project *project,
-                             void *plot, void *newpen, void *setline,
-                             void *justify_string, void *plot_string, int *error) {
+           void *plot, void *newpen, void *setline,
+           void *justify_string, void *plot_string, int *error) {
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
-    fprintf(stderr, "dbg2       verbose:          %d\n", verbose);
-    fprintf(stderr, "dbg2       project:          %p\n", project);
-    fprintf(stderr, "dbg2       plot:             %p\n", plot);
-    fprintf(stderr, "dbg2       newpen:           %p\n", newpen);
-    fprintf(stderr, "dbg2       setline:          %p\n", setline);
+    fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+    fprintf(stderr, "dbg2       project:    %p\n", project);
+    fprintf(stderr, "dbg2       plot:       %p\n", plot);
+    fprintf(stderr, "dbg2       newpen:     %p\n", newpen);
+    fprintf(stderr, "dbg2       setline:    %p\n", setline);
     fprintf(stderr, "dbg2       justify_string:   %p\n", justify_string);
     fprintf(stderr, "dbg2       plot_string:      %p\n", plot_string);
   }
@@ -2472,16 +2602,16 @@ int mbnavadjust_set_plot_functions(int verbose, struct mbna_project *project,
 
 /*--------------------------------------------------------------------*/
 int mbnavadjust_read_triangles(int verbose, struct mbna_project *project,
-                             int file_id, int section_id,
-                             struct swath *swath, int *error) {
+             int file_id, int section_id,
+             struct swath *swath, int *error) {
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
-    fprintf(stderr, "dbg2       verbose:          %d\n", verbose);
-    fprintf(stderr, "dbg2       project:          %p\n", project);
-    fprintf(stderr, "dbg2       file_id:          %d\n", file_id);
+    fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+    fprintf(stderr, "dbg2       project:    %p\n", project);
+    fprintf(stderr, "dbg2       file_id:    %d\n", file_id);
     fprintf(stderr, "dbg2       section_id:       %d\n", section_id);
-    fprintf(stderr, "dbg2       swath:            %p\n", swath);
+    fprintf(stderr, "dbg2       swath:      %p\n", swath);
   }
 
   // if all good then try to read existing triangularization
@@ -2649,16 +2779,16 @@ int mbnavadjust_read_triangles(int verbose, struct mbna_project *project,
 
 /*--------------------------------------------------------------------*/
 int mbnavadjust_write_triangles(int verbose, struct mbna_project *project,
-                             int file_id, int section_id,
-                             struct swath *swath, int *error) {
+        int file_id, int section_id,
+        struct swath *swath, int *error) {
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
-    fprintf(stderr, "dbg2       verbose:          %d\n", verbose);
-    fprintf(stderr, "dbg2       project:          %p\n", project);
-    fprintf(stderr, "dbg2       file_id:          %d\n", file_id);
+    fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+    fprintf(stderr, "dbg2       project:    %p\n", project);
+    fprintf(stderr, "dbg2       file_id:    %d\n", file_id);
     fprintf(stderr, "dbg2       section_id:       %d\n", section_id);
-    fprintf(stderr, "dbg2       swath:            %p\n", swath);
+    fprintf(stderr, "dbg2       swath:      %p\n", swath);
   }
 
   // if all good then try to read existing triangularization
@@ -2723,7 +2853,7 @@ int mbnavadjust_write_triangles(int verbose, struct mbna_project *project,
           status &= MB_FAILURE;
         if ((write_size = fwrite(&(swath->ed[2][i]), 1, sizeof(int), tfp)) != sizeof(int))
           status &= MB_FAILURE;
-        }
+      }
 
       fclose (tfp);
       if (status != MB_SUCCESS)
@@ -2748,18 +2878,17 @@ int mbnavadjust_write_triangles(int verbose, struct mbna_project *project,
 
 /*--------------------------------------------------------------------*/
 int mbnavadjust_section_load(int verbose, struct mbna_project *project,
-                             int file_id, int section_id,
-                             void **swathraw_ptr, void **swath_ptr, int num_pings, int *error) {
+           int file_id, int section_id,
+           void **swathraw_ptr, void **swath_ptr, int *error) {
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
-    fprintf(stderr, "dbg2       verbose:          %d\n", verbose);
-    fprintf(stderr, "dbg2       project:          %p\n", project);
-    fprintf(stderr, "dbg2       file_id:          %d\n", file_id);
+    fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+    fprintf(stderr, "dbg2       project:    %p\n", project);
+    fprintf(stderr, "dbg2       file_id:    %d\n", file_id);
     fprintf(stderr, "dbg2       section_id:       %d\n", section_id);
     fprintf(stderr, "dbg2       swathraw_ptr:     %p  %p\n", swathraw_ptr, *swathraw_ptr);
-    fprintf(stderr, "dbg2       swath_ptr:        %p  %p\n", swath_ptr, *swath_ptr);
-    fprintf(stderr, "dbg2       num_pings:        %d\n", num_pings);
+    fprintf(stderr, "dbg2       swath_ptr:  %p  %p\n", swath_ptr, *swath_ptr);
   }
 
   int status = MB_SUCCESS;
@@ -2790,12 +2919,12 @@ int mbnavadjust_section_load(int verbose, struct mbna_project *project,
     int pixels_ss;
 
     if ((status = mb_read_init(verbose, path, iformat, pings, lonflip, bounds, btime_i, etime_i, speedmin, timegap,
-                               &imbio_ptr, &btime_d, &etime_d, &beams_bath, &beams_amp, &pixels_ss, error)) != MB_SUCCESS) {
+             &imbio_ptr, &btime_d, &etime_d, &beams_bath, &beams_amp, &pixels_ss, error)) != MB_SUCCESS) {
       char *error_message;
       mb_error(verbose, *error, &error_message);
       fprintf(stderr, "\nMBIO Error returned from function <mb_read_init>:\n%s\n", error_message);
       fprintf(stderr, "\nSwath sonar File <%s> not initialized for reading\n", path);
-      exit(0);  // TODO(schwehr): Use EXIT_FAILURE
+      exit(0); // TODO(schwehr): Use EXIT_FAILURE
     }
 
     char *beamflag = NULL;
@@ -2811,26 +2940,26 @@ int mbnavadjust_section_load(int verbose, struct mbna_project *project,
     if (status == MB_SUCCESS) {
       if (*error == MB_ERROR_NO_ERROR)
         status =
-            mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(char), (void **)&beamflag, error);
+          mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(char), (void **)&beamflag, error);
       if (*error == MB_ERROR_NO_ERROR)
         status =
-            mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double), (void **)&bath, error);
+          mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double), (void **)&bath, error);
       if (*error == MB_ERROR_NO_ERROR)
         status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_AMPLITUDE, sizeof(double), (void **)&amp, error);
       if (*error == MB_ERROR_NO_ERROR)
         status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double),
-                                   (void **)&bathacrosstrack, error);
+                 (void **)&bathacrosstrack, error);
       if (*error == MB_ERROR_NO_ERROR)
         status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double),
-                                   (void **)&bathalongtrack, error);
+                 (void **)&bathalongtrack, error);
       if (*error == MB_ERROR_NO_ERROR)
         status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double), (void **)&ss, error);
       if (*error == MB_ERROR_NO_ERROR)
         status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double), (void **)&ssacrosstrack,
-                                   error);
+                 error);
       if (*error == MB_ERROR_NO_ERROR)
         status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double), (void **)&ssalongtrack,
-                                   error);
+                 error);
 
       /* if error initializing memory then don't read the file */
       if (*error != MB_ERROR_NO_ERROR) {
@@ -2847,17 +2976,17 @@ int mbnavadjust_section_load(int verbose, struct mbna_project *project,
 
     /* allocate memory for data arrays */
     if (status == MB_SUCCESS) {
-     /* get mb_io_ptr */
+      /* get mb_io_ptr */
       // struct mb_io_struct *imb_io_ptr = (struct mb_io_struct *)imbio_ptr;
 
       /* initialize data storage */
       status = mb_mallocd(verbose, __FILE__, __LINE__, sizeof(struct mbna_swathraw), (void **)swathraw_ptr, error);
       swathraw = (struct mbna_swathraw *)*swathraw_ptr;
       swathraw->beams_bath = beams_bath;
-      swathraw->npings_max = num_pings;
+      swathraw->npings_max = section->num_pings;
       swathraw->npings = 0;
-      status = mb_mallocd(verbose, __FILE__, __LINE__, num_pings * sizeof(struct mbna_pingraw),
-                          (void **)&swathraw->pingraws, error);
+      status = mb_mallocd(verbose, __FILE__, __LINE__, section->num_pings * sizeof(struct mbna_pingraw),
+              (void **)&swathraw->pingraws, error);
       for (int i = 0; i < swathraw->npings_max; i++) {
         pingraw = &swathraw->pingraws[i];
         pingraw->beams_bath = 0;
@@ -2871,14 +3000,14 @@ int mbnavadjust_section_load(int verbose, struct mbna_project *project,
       const double tick_len_map = MAX(section->lonmax - section->lonmin, section->latmax - section->latmin) / 500;
       const double label_hgt_map = MAX(section->lonmax - section->lonmin, section->latmax - section->latmin) / 100;
       const int contour_ncolor = 10;
-      status = mb_contour_init(verbose, (struct swath **)swath_ptr, num_pings, beams_bath, contour_algorithm,
-                               true, false, false, false, false, project->cont_int, project->col_int, project->tick_int,
-                               project->label_int, tick_len_map, label_hgt_map, 0.0, contour_ncolor, 0, NULL, NULL, NULL, 0.0,
-                               0.0, 0.0, 0.0, 0, 0, 0.0, 0.0,
-                                     project->mbnavadjust_plot, project->mbnavadjust_newpen,
-                                     project->mbnavadjust_setline, project->mbnavadjust_justify_string,
-                                     project->mbnavadjust_plot_string,
-                                     error);
+      status = mb_contour_init(verbose, (struct swath **)swath_ptr, section->num_pings, beams_bath, contour_algorithm,
+             true, false, false, false, false, project->cont_int, project->col_int, project->tick_int,
+             project->label_int, tick_len_map, label_hgt_map, 0.0, contour_ncolor, 0, NULL, NULL, NULL, 0.0,
+             0.0, 0.0, 0.0, 0, 0, 0.0, 0.0,
+             project->mbnavadjust_plot, project->mbnavadjust_newpen,
+             project->mbnavadjust_setline, project->mbnavadjust_justify_string,
+             project->mbnavadjust_plot_string,
+             error);
       swath = (struct swath *)*swath_ptr;
       swath->beams_bath = beams_bath;
       swath->npings = 0;
@@ -2918,38 +3047,38 @@ int mbnavadjust_section_load(int verbose, struct mbna_project *project,
 
         /* read the next ping */
         status = mb_get_all(verbose, imbio_ptr, &istore_ptr, &kind, time_i, &time_d, &navlon, &navlat, &speed,
-                            &heading, &distance, &altitude, &sonardepth, &beams_bath, &beams_amp, &pixels_ss, beamflag,
-                            bath, amp, bathacrosstrack, bathalongtrack, ss, ssacrosstrack, ssalongtrack, comment, error);
+                &heading, &distance, &altitude, &sonardepth, &beams_bath, &beams_amp, &pixels_ss, beamflag,
+                bath, amp, bathacrosstrack, bathalongtrack, ss, ssacrosstrack, ssalongtrack, comment, error);
 
         /* handle successful read */
         if (status == MB_SUCCESS && kind == MB_DATA_DATA) {
           /* allocate memory for the raw arrays */
           pingraw = &swathraw->pingraws[swathraw->npings];
           status = mb_mallocd(verbose, __FILE__, __LINE__, beams_bath * sizeof(char), (void **)&pingraw->beamflag,
-                              error);
+                  error);
           status = mb_mallocd(verbose, __FILE__, __LINE__, beams_bath * sizeof(double), (void **)&pingraw->bath,
-                              error);
+                  error);
           status = mb_mallocd(verbose, __FILE__, __LINE__, beams_bath * sizeof(double),
-                              (void **)&pingraw->bathacrosstrack, error);
+                  (void **)&pingraw->bathacrosstrack, error);
           status = mb_mallocd(verbose, __FILE__, __LINE__, beams_bath * sizeof(double),
-                              (void **)&pingraw->bathalongtrack, error);
+                  (void **)&pingraw->bathalongtrack, error);
 
           /* make sure enough memory is allocated for contouring arrays */
           ping = &swath->pings[swathraw->npings];
           if (ping->beams_bath_alloc < beams_bath) {
             status = mb_reallocd(verbose, __FILE__, __LINE__, beams_bath * sizeof(char),
-                                 (void **)&(ping->beamflag), error);
+                     (void **)&(ping->beamflag), error);
             status = mb_reallocd(verbose, __FILE__, __LINE__, beams_bath * sizeof(double),
-                                 (void **)&(ping->bath), error);
+                     (void **)&(ping->bath), error);
             status = mb_reallocd(verbose, __FILE__, __LINE__, beams_bath * sizeof(double),
-                                 (void **)&(ping->bathlon), error);
+                     (void **)&(ping->bathlon), error);
             status = mb_reallocd(verbose, __FILE__, __LINE__, beams_bath * sizeof(double),
-                                 (void **)&(ping->bathlat), error);
+                     (void **)&(ping->bathlat), error);
             if (contour_algorithm == MB_CONTOUR_OLD) {
               status = mb_reallocd(verbose, __FILE__, __LINE__, beams_bath * sizeof(int),
-                                   (void **)&(ping->bflag[0]), error);
+                       (void **)&(ping->bflag[0]), error);
               status = mb_reallocd(verbose, __FILE__, __LINE__, beams_bath * sizeof(int),
-                                   (void **)&(ping->bflag[1]), error);
+                       (void **)&(ping->bflag[1]), error);
             }
             ping->beams_bath_alloc = beams_bath;
           }
@@ -2969,7 +3098,7 @@ int mbnavadjust_section_load(int verbose, struct mbna_project *project,
             pingraw->draft = sonardepth;
             pingraw->beams_bath = beams_bath;
             /* fprintf(stderr,"\nPING %d : %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d\n",
-            swathraw->npings,time_i[0],time_i[1],time_i[2],time_i[3],time_i[4],time_i[5],time_i[6]); */
+               swathraw->npings,time_i[0],time_i[1],time_i[2],time_i[3],time_i[4],time_i[5],time_i[6]); */
             for (int i = 0; i < beams_bath; i++) {
               pingraw->beamflag[i] = beamflag[i];
               if (mb_beam_ok(beamflag[i])) {
@@ -2985,36 +3114,36 @@ int mbnavadjust_section_load(int verbose, struct mbna_project *project,
                 pingraw->bathalongtrack[i] = 0.0;
               }
               /* fprintf(stderr,"BEAM: %d:%d  Flag:%d    %f %f %f\n",
-              swathraw->npings,i,pingraw->beamflag[i],pingraw->bath[i],pingraw->bathacrosstrack[i],pingraw->bathalongtrack[i]);
-              */
+                 swathraw->npings,i,pingraw->beamflag[i],pingraw->bath[i],pingraw->bathacrosstrack[i],pingraw->bathalongtrack[i]);
+               */
             }
           }
 
           /* extract all nav values */
           status = mb_extract_nav(verbose, imbio_ptr, istore_ptr, &kind, pingraw->time_i, &pingraw->time_d,
-                                  &pingraw->navlon, &pingraw->navlat, &speed, &pingraw->heading, &pingraw->draft, &roll,
-                                  &pitch, &heave, error);
+                &pingraw->navlon, &pingraw->navlat, &speed, &pingraw->heading, &pingraw->draft, &roll,
+                &pitch, &heave, error);
 
           /*fprintf(stderr, "%d  %4d/%2d/%2d %2d:%2d:%2d.%6.6d  %15.10f %15.10f %d:%d\n",
-          status,
-          ping->time_i[0],ping->time_i[1],ping->time_i[2],
-          ping->time_i[3],ping->time_i[4],ping->time_i[5],ping->time_i[6],
-          ping->navlon, ping->navlat, beams_bath, swath->beams_bath);*/
+             status,
+             ping->time_i[0],ping->time_i[1],ping->time_i[2],
+             ping->time_i[3],ping->time_i[4],ping->time_i[5],ping->time_i[6],
+             ping->navlon, ping->navlat, beams_bath, swath->beams_bath);*/
 
           if (verbose >= 2) {
             fprintf(stderr, "\ndbg2  Ping read in program <%s>\n", program_name);
-            fprintf(stderr, "dbg2       kind:           %d\n", kind);
-            fprintf(stderr, "dbg2       npings:         %d\n", swathraw->npings);
-            fprintf(stderr, "dbg2       time:           %4d %2d %2d %2d %2d %2d %6.6d\n", pingraw->time_i[0],
-                    pingraw->time_i[1], pingraw->time_i[2], pingraw->time_i[3], pingraw->time_i[4],
-                    pingraw->time_i[5], pingraw->time_i[6]);
+            fprintf(stderr, "dbg2       kind:     %d\n", kind);
+            fprintf(stderr, "dbg2       npings:   %d\n", swathraw->npings);
+            fprintf(stderr, "dbg2       time:     %4d %2d %2d %2d %2d %2d %6.6d\n", pingraw->time_i[0],
+              pingraw->time_i[1], pingraw->time_i[2], pingraw->time_i[3], pingraw->time_i[4],
+              pingraw->time_i[5], pingraw->time_i[6]);
             fprintf(stderr, "dbg2       navigation:     %f  %f\n", pingraw->navlon, pingraw->navlat);
             fprintf(stderr, "dbg2       beams_bath:     %d\n", beams_bath);
             fprintf(stderr, "dbg2       beams_amp:      %d\n", beams_amp);
             fprintf(stderr, "dbg2       pixels_ss:      %d\n", pixels_ss);
-            fprintf(stderr, "dbg2       done:           %d\n", done);
-            fprintf(stderr, "dbg2       error:          %d\n", *error);
-            fprintf(stderr, "dbg2       status:         %d\n", status);
+            fprintf(stderr, "dbg2       done:     %d\n", done);
+            fprintf(stderr, "dbg2       error:    %d\n", *error);
+            fprintf(stderr, "dbg2       status:   %d\n", status);
           }
         }
         else if (*error > MB_ERROR_NO_ERROR) {
@@ -3041,14 +3170,14 @@ int mbnavadjust_section_load(int verbose, struct mbna_project *project,
         fprintf(stderr, "Creating triangles for %4.4d:%2.2d\n", file_id, section_id);
         status = mb_triangulate(verbose, swath, error);
         fprintf(stderr, " - Write triangles for %4.4d:%2.2d - %d pts %d triangles\n",
-                  file_id, section_id, swath->npts, swath->ntri);
+          file_id, section_id, swath->npts, swath->ntri);
         if (status == MB_SUCCESS) {
           status = mbnavadjust_write_triangles(verbose, project, file_id, section_id, swath, error);
         }
       }
       else {
         fprintf(stderr, "Read triangles for %4.4d:%2.2d - %d pts %d triangles\n",
-                  file_id, section_id, swath->npts, swath->ntri);
+          file_id, section_id, swath->npts, swath->ntri);
       }
     }
   }
@@ -3069,9 +3198,9 @@ int mbnavadjust_section_unload(int verbose, void **swathraw_ptr, void **swath_pt
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
-    fprintf(stderr, "dbg2       verbose:          %d\n", verbose);
+    fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
     fprintf(stderr, "dbg2       swathraw_ptr:     %p  %p\n", swathraw_ptr, *swathraw_ptr);
-    fprintf(stderr, "dbg2       swath_ptr:        %p  %p\n", swath_ptr, *swath_ptr);
+    fprintf(stderr, "dbg2       swath_ptr:  %p  %p\n", swath_ptr, *swath_ptr);
   }
 
   int status = MB_SUCCESS;
@@ -3114,8 +3243,8 @@ int mbnavadjust_fix_section_sensordepth(int verbose, struct mbna_project *projec
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
-    fprintf(stderr, "dbg2       verbose:          %d\n", verbose);
-    fprintf(stderr, "dbg2       project:          %p\n", project);
+    fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+    fprintf(stderr, "dbg2       project:    %p\n", project);
   }
 
   int status = MB_SUCCESS;
@@ -3140,7 +3269,7 @@ int mbnavadjust_fix_section_sensordepth(int verbose, struct mbna_project *projec
     int isnav;
     int num_pings;
 
-    for (int ifile=0;ifile<project->num_files;ifile++) {
+    for (int ifile=0; ifile<project->num_files; ifile++) {
       struct mbna_file *file = &(project->files[ifile]);
       for (int isection = 0; isection<file->num_sections; isection++) {
 
@@ -3164,95 +3293,95 @@ int mbnavadjust_fix_section_sensordepth(int verbose, struct mbna_project *projec
         int beams_amp;
         int pixels_ss;
 
-                /* initialize section for reading */
-                if ((status = mb_read_init(verbose, path, iformat, pings, lonflip, bounds, btime_i, etime_i, speedmin, timegap,
-                                           &imbio_ptr, &btime_d, &etime_d, &beams_bath, &beams_amp, &pixels_ss, error)) != MB_SUCCESS) {
-                  char *error_message;
-                    mb_error(verbose, *error, &error_message);
-                    fprintf(stderr, "\nMBIO Error returned from function <mb_read_init>:\n%s\n", error_message);
-                    fprintf(stderr, "\nSwath sonar File <%s> not initialized for reading\n", path);
-                    exit(0);
-                }
-
-                /* allocate memory for data arrays */
-                if (status == MB_SUCCESS) {
-                    if (*error == MB_ERROR_NO_ERROR)
-                        status =
-                            mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(char), (void **)&beamflag, error);
-                    if (*error == MB_ERROR_NO_ERROR)
-                        status =
-                            mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double), (void **)&bath, error);
-                    if (*error == MB_ERROR_NO_ERROR)
-                        status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_AMPLITUDE, sizeof(double), (void **)&amp, error);
-                    if (*error == MB_ERROR_NO_ERROR)
-                        status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double),
-                                                   (void **)&bathacrosstrack, error);
-                    if (*error == MB_ERROR_NO_ERROR)
-                        status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double),
-                                                   (void **)&bathalongtrack, error);
-                    if (*error == MB_ERROR_NO_ERROR)
-                        status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double), (void **)&ss, error);
-                    if (*error == MB_ERROR_NO_ERROR)
-                        status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double), (void **)&ssacrosstrack,
-                                                   error);
-                    if (*error == MB_ERROR_NO_ERROR)
-                        status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double), (void **)&ssalongtrack,
-                                                   error);
-
-                    /* if error initializing memory then don't read the file */
-                    if (*error != MB_ERROR_NO_ERROR) {
-                        char *error_message;
-                        mb_error(verbose, *error, &error_message);
-                        fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", error_message);
-                    }
-                }
-
-                /* now read the data */
-                if (status == MB_SUCCESS) {
-		    // struct mb_io_struct *imb_io_ptr = (struct mb_io_struct *)imbio_ptr;
-                    bool done = false;
-                    isnav = 0;
-                    num_pings = 0;
-                    while (!done && isnav < section->num_snav) {
-                      int kind;
-                      int time_i[7];
-                      double time_d;
-                      double navlon;
-                      double navlat;
-                      double speed;
-                      double heading;
-                      double distance;
-                      double altitude;
-                      double sonardepth;
-                        /* read the next ping */
-                        status = mb_get_all(verbose, imbio_ptr, &istore_ptr, &kind, time_i, &time_d, &navlon, &navlat, &speed,
-                                            &heading, &distance, &altitude, &sonardepth, &beams_bath, &beams_amp, &pixels_ss, beamflag,
-                                            bath, amp, bathacrosstrack, bathalongtrack, ss, ssacrosstrack, ssalongtrack, comment, error);
-
-                        /* handle successful read */
-                        if (status == MB_SUCCESS && kind == MB_DATA_DATA) {
-                            if (num_pings == section->snav_id[isnav]) {
-                                section->snav_sensordepth[isnav] = sonardepth;
-fprintf(stderr, "Update sensordepth section %4.4d:%4.4d:%2.2d  %4d/%2d/%2d %2d:%2d:%2d.%6.6d  %.6f %.6f %.6f\n",
-ifile, isection, isnav, time_i[0],time_i[1],time_i[2],time_i[3],time_i[4],time_i[5],time_i[6],
-time_d, section->snav_time_d[isnav], (section->snav_time_d[isnav]-time_d));
-                                isnav++;
-                            }
-                            num_pings++;
-                        }
-                        else if (*error > MB_ERROR_NO_ERROR) {
-                            status = MB_SUCCESS;
-                            *error = MB_ERROR_NO_ERROR;
-                            done = true;
-                        }
-                    }
-
-                    /* close the input data file */
-                    status = mb_close(verbose, &imbio_ptr, error);
-                }
-            }
+        /* initialize section for reading */
+        if ((status = mb_read_init(verbose, path, iformat, pings, lonflip, bounds, btime_i, etime_i, speedmin, timegap,
+                 &imbio_ptr, &btime_d, &etime_d, &beams_bath, &beams_amp, &pixels_ss, error)) != MB_SUCCESS) {
+          char *error_message;
+          mb_error(verbose, *error, &error_message);
+          fprintf(stderr, "\nMBIO Error returned from function <mb_read_init>:\n%s\n", error_message);
+          fprintf(stderr, "\nSwath sonar File <%s> not initialized for reading\n", path);
+          exit(0);
         }
+
+        /* allocate memory for data arrays */
+        if (status == MB_SUCCESS) {
+          if (*error == MB_ERROR_NO_ERROR)
+            status =
+              mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(char), (void **)&beamflag, error);
+          if (*error == MB_ERROR_NO_ERROR)
+            status =
+              mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double), (void **)&bath, error);
+          if (*error == MB_ERROR_NO_ERROR)
+            status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_AMPLITUDE, sizeof(double), (void **)&amp, error);
+          if (*error == MB_ERROR_NO_ERROR)
+            status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double),
+                     (void **)&bathacrosstrack, error);
+          if (*error == MB_ERROR_NO_ERROR)
+            status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double),
+                     (void **)&bathalongtrack, error);
+          if (*error == MB_ERROR_NO_ERROR)
+            status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double), (void **)&ss, error);
+          if (*error == MB_ERROR_NO_ERROR)
+            status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double), (void **)&ssacrosstrack,
+                     error);
+          if (*error == MB_ERROR_NO_ERROR)
+            status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double), (void **)&ssalongtrack,
+                     error);
+
+          /* if error initializing memory then don't read the file */
+          if (*error != MB_ERROR_NO_ERROR) {
+            char *error_message;
+            mb_error(verbose, *error, &error_message);
+            fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", error_message);
+          }
+        }
+
+        /* now read the data */
+        if (status == MB_SUCCESS) {
+          // struct mb_io_struct *imb_io_ptr = (struct mb_io_struct *)imbio_ptr;
+          bool done = false;
+          isnav = 0;
+          num_pings = 0;
+          while (!done && isnav < section->num_snav) {
+            int kind;
+            int time_i[7];
+            double time_d;
+            double navlon;
+            double navlat;
+            double speed;
+            double heading;
+            double distance;
+            double altitude;
+            double sonardepth;
+            /* read the next ping */
+            status = mb_get_all(verbose, imbio_ptr, &istore_ptr, &kind, time_i, &time_d, &navlon, &navlat, &speed,
+                    &heading, &distance, &altitude, &sonardepth, &beams_bath, &beams_amp, &pixels_ss, beamflag,
+                    bath, amp, bathacrosstrack, bathalongtrack, ss, ssacrosstrack, ssalongtrack, comment, error);
+
+            /* handle successful read */
+            if (status == MB_SUCCESS && kind == MB_DATA_DATA) {
+              if (num_pings == section->snav_id[isnav]) {
+                section->snav_sensordepth[isnav] = sonardepth;
+                fprintf(stderr, "Update sensordepth section %4.4d:%4.4d:%2.2d  %4d/%2d/%2d %2d:%2d:%2d.%6.6d  %.6f %.6f %.6f\n",
+                  ifile, isection, isnav, time_i[0],time_i[1],time_i[2],time_i[3],time_i[4],time_i[5],time_i[6],
+                  time_d, section->snav_time_d[isnav], (section->snav_time_d[isnav]-time_d));
+                isnav++;
+              }
+              num_pings++;
+            }
+            else if (*error > MB_ERROR_NO_ERROR) {
+              status = MB_SUCCESS;
+              *error = MB_ERROR_NO_ERROR;
+              done = true;
+            }
+          }
+
+          /* close the input data file */
+          status = mb_close(verbose, &imbio_ptr, error);
+        }
+      }
     }
+  }
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBnavadjust function <%s> completed\n", __func__);
@@ -3266,17 +3395,17 @@ time_d, section->snav_time_d[isnav], (section->snav_time_d[isnav]-time_d));
 }
 /*--------------------------------------------------------------------*/
 int mbnavadjust_section_translate(int verbose, struct mbna_project *project,
-                                  int file_id, void *swathraw_ptr, void *swath_ptr,
-                                  double zoffset, int *error) {
+          int file_id, void *swathraw_ptr, void *swath_ptr,
+          double zoffset, int *error) {
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
-    fprintf(stderr, "dbg2       verbose:          %d\n", verbose);
-    fprintf(stderr, "dbg2       project:          %p\n", project);
-    fprintf(stderr, "dbg2       file_id:          %d\n", file_id);
+    fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+    fprintf(stderr, "dbg2       project:    %p\n", project);
+    fprintf(stderr, "dbg2       file_id:    %d\n", file_id);
     fprintf(stderr, "dbg2       swathraw_ptr:     %p\n", swathraw_ptr);
-    fprintf(stderr, "dbg2       swath_ptr:        %p\n", swath_ptr);
-    fprintf(stderr, "dbg2       zoffset:          %f\n", zoffset);
+    fprintf(stderr, "dbg2       swath_ptr:  %p\n", swath_ptr);
+    fprintf(stderr, "dbg2       zoffset:    %f\n", zoffset);
   }
 
   // translate soundings from the raw swath form to the structure used for
@@ -3313,7 +3442,7 @@ int mbnavadjust_section_translate(int verbose, struct mbna_project *project,
 
           // get range and angles in roll-pitch frame
           const double range = sqrt(depth * depth + pingraw->bathacrosstrack[i] * pingraw->bathacrosstrack[i] +
-                       pingraw->bathalongtrack[i] * pingraw->bathalongtrack[i]);
+                  pingraw->bathalongtrack[i] * pingraw->bathalongtrack[i]);
           const double alpha = asin(pingraw->bathalongtrack[i] / range);
           double beta = acos(pingraw->bathacrosstrack[i] / range / cos(alpha));
 
@@ -3335,11 +3464,11 @@ int mbnavadjust_section_translate(int verbose, struct mbna_project *project,
           ping->beamflag[i] = pingraw->beamflag[i];
           ping->bath[i] = depth;
           ping->bathlon[i] = pingraw->navlon
-                              + headingy * mtodeglon * depthacrosstrack
-                              + headingx * mtodeglon * depthalongtrack;
+                 + headingy * mtodeglon * depthacrosstrack
+                 + headingx * mtodeglon * depthalongtrack;
           ping->bathlat[i] = pingraw->navlat
-                              - headingx * mtodeglat * depthacrosstrack
-                              + headingy * mtodeglat * depthalongtrack;
+                 - headingx * mtodeglat * depthacrosstrack
+                 + headingy * mtodeglat * depthalongtrack;
 
           if (first) {
             swath->bath_min = depth;
@@ -3385,18 +3514,18 @@ int mbnavadjust_section_translate(int verbose, struct mbna_project *project,
 }
 /*--------------------------------------------------------------------*/
 int mbnavadjust_section_contour(int verbose, struct mbna_project *project,
-                                int fileid, int sectionid, struct swath *swath,
-                                struct mbna_contour_vector *contour, int *error) {
+        int fileid, int sectionid, struct swath *swath,
+        struct mbna_contour_vector *contour, int *error) {
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
-    fprintf(stderr, "dbg2       verbose:          %d\n", verbose);
-    fprintf(stderr, "dbg2       project:          %p\n", project);
-    fprintf(stderr, "dbg2       fileid:           %d\n", fileid);
-    fprintf(stderr, "dbg2       sectionid:        %d\n", sectionid);
-    fprintf(stderr, "dbg2       swath:            %p\n", swath);
-    fprintf(stderr, "dbg2       contour:          %p\n", contour);
-    fprintf(stderr, "dbg2       nvector:          %d\n", contour->nvector);
+    fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+    fprintf(stderr, "dbg2       project:    %p\n", project);
+    fprintf(stderr, "dbg2       fileid:     %d\n", fileid);
+    fprintf(stderr, "dbg2       sectionid:  %d\n", sectionid);
+    fprintf(stderr, "dbg2       swath:      %p\n", swath);
+    fprintf(stderr, "dbg2       contour:    %p\n", contour);
+    fprintf(stderr, "dbg2       nvector:    %d\n", contour->nvector);
     fprintf(stderr, "dbg2       nvector_alloc:    %d\n", contour->nvector_alloc);
   }
 
@@ -3415,7 +3544,8 @@ int mbnavadjust_section_contour(int verbose, struct mbna_project *project,
     status = mb_contour(verbose, swath, error);
 
     /* set contours up to date flag */
-    project->files[fileid].sections[sectionid].contoursuptodate = true;
+    if (fileid >= 0 && sectionid >= 0)
+      project->files[fileid].sections[sectionid].contoursuptodate = true;
   }
 
   if (verbose >= 2) {
@@ -3430,13 +3560,13 @@ int mbnavadjust_section_contour(int verbose, struct mbna_project *project,
 }
 /*--------------------------------------------------------------------*/
 int mbnavadjust_import_data(int verbose, struct mbna_project *project,
-                                char *path, int iformat, int *error) {
+          char *path, int iformat, int *error) {
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
-    fprintf(stderr, "dbg2       verbose:          %d\n", verbose);
-    fprintf(stderr, "dbg2       project:          %p\n", project);
-    fprintf(stderr, "dbg2       path:             %s\n", path);
-    fprintf(stderr, "dbg2       format:           %d\n", iformat);
+    fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+    fprintf(stderr, "dbg2       project:    %p\n", project);
+    fprintf(stderr, "dbg2       path:       %s\n", path);
+    fprintf(stderr, "dbg2       format:     %d\n", iformat);
   }
 
   int status = MB_SUCCESS;
@@ -3527,14 +3657,14 @@ int mbnavadjust_import_data(int verbose, struct mbna_project *project,
 }
 /*--------------------------------------------------------------------*/
 int mbnavadjust_import_file(int verbose, struct mbna_project *project,
-                                char *path, int iformat, bool firstfile, int *error) {
+          char *path, int iformat, bool firstfile, int *error) {
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
-    fprintf(stderr, "dbg2       verbose:          %d\n", verbose);
-    fprintf(stderr, "dbg2       project:          %p\n", project);
-    fprintf(stderr, "dbg2       path:             %s\n", path);
-    fprintf(stderr, "dbg2       format:           %d\n", iformat);
-    fprintf(stderr, "dbg2       firstfile:        %d\n", firstfile);
+    fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+    fprintf(stderr, "dbg2       project:    %p\n", project);
+    fprintf(stderr, "dbg2       path:       %s\n", path);
+    fprintf(stderr, "dbg2       format:     %d\n", iformat);
+    fprintf(stderr, "dbg2       firstfile:  %d\n", firstfile);
   }
 
   int status = MB_SUCCESS;
@@ -3591,7 +3721,7 @@ int mbnavadjust_import_file(int verbose, struct mbna_project *project,
   char comment[MB_COMMENT_MAXLINE];
 
   int sonartype = MB_TOPOGRAPHY_TYPE_UNKNOWN;
-    int sensorhead = 0;
+  int sensorhead = 0;
   int *bin_nbath = NULL;
   double *bin_bath = NULL;
   double *bin_bathacrosstrack = NULL;
@@ -3668,7 +3798,7 @@ int mbnavadjust_import_file(int verbose, struct mbna_project *project,
   if (status == MB_SUCCESS) {
     /* initialize reading the swath file */
     if ((status = mb_read_init(verbose, ipath, iformat, pings, lonflip, bounds, btime_i, etime_i, speedmin, timegap,
-                               &imbio_ptr, &btime_d, &etime_d, &beams_bath, &beams_amp, &pixels_ss, error)) != MB_SUCCESS) {
+             &imbio_ptr, &btime_d, &etime_d, &beams_bath, &beams_amp, &pixels_ss, error)) != MB_SUCCESS) {
       mb_error(verbose, *error, &error_message);
       fprintf(stderr, "\nMBIO Error returned from function <mb_read_init>:\n%s\n", error_message);
       fprintf(stderr, "\nSwath sonar File <%s> not initialized for reading\n", path);
@@ -3694,25 +3824,25 @@ int mbnavadjust_import_file(int verbose, struct mbna_project *project,
       status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_AMPLITUDE, sizeof(double), (void **)&amp, error);
     if (*error == MB_ERROR_NO_ERROR)
       status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double), (void **)&bathacrosstrack,
-                                 error);
+               error);
     if (*error == MB_ERROR_NO_ERROR)
       status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double), (void **)&bathalongtrack,
-                                 error);
+               error);
     if (*error == MB_ERROR_NO_ERROR)
       status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double), (void **)&ss, error);
     if (*error == MB_ERROR_NO_ERROR)
       status =
-          mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double), (void **)&ssacrosstrack, error);
+        mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double), (void **)&ssacrosstrack, error);
     if (*error == MB_ERROR_NO_ERROR)
       status =
-          mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double), (void **)&ssalongtrack, error);
+        mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double), (void **)&ssalongtrack, error);
     if (*error == MB_ERROR_NO_ERROR)
 
-    /* if error initializing memory then don't read the file */
-    if (*error != MB_ERROR_NO_ERROR) {
-      mb_error(verbose, *error, &error_message);
-      fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", error_message);
-    }
+      /* if error initializing memory then don't read the file */
+      if (*error != MB_ERROR_NO_ERROR) {
+        mb_error(verbose, *error, &error_message);
+        fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", error_message);
+      }
   }
 
   /* open nav file */
@@ -3732,18 +3862,18 @@ int mbnavadjust_import_file(int verbose, struct mbna_project *project,
     while (*error <= MB_ERROR_NO_ERROR) {
       /* read a ping of data */
       status = mb_get_all(verbose, imbio_ptr, &istore_ptr, &kind, time_i, &time_d, &navlon, &navlat, &speed, &heading,
-                          &distance, &altitude, &sonardepth, &beams_bath, &beams_amp, &pixels_ss, beamflag, bath, amp,
-                          bathacrosstrack, bathalongtrack, ss, ssacrosstrack, ssalongtrack, comment, error);
+              &distance, &altitude, &sonardepth, &beams_bath, &beams_amp, &pixels_ss, beamflag, bath, amp,
+              bathacrosstrack, bathalongtrack, ss, ssacrosstrack, ssalongtrack, comment, error);
 
       /* extract all nav values */
       if (*error == MB_ERROR_NO_ERROR && (kind == MB_DATA_NAV || kind == MB_DATA_DATA)) {
         status = mb_extract_nav(verbose, imbio_ptr, istore_ptr, &kind, time_i, &time_d, &navlon, &navlat, &speed,
-                                &heading, &draft, &roll, &pitch, &heave, error);
+              &heading, &draft, &roll, &pitch, &heave, error);
       }
 
       /* ignore minor errors - use these data */
       if (kind == MB_DATA_DATA && (*error == MB_ERROR_TIME_GAP || *error == MB_ERROR_OUT_BOUNDS ||
-                                   *error == MB_ERROR_OUT_TIME || *error == MB_ERROR_SPEED_TOO_SMALL)) {
+                 *error == MB_ERROR_OUT_TIME || *error == MB_ERROR_SPEED_TOO_SMALL)) {
         status = MB_SUCCESS;
         *error = MB_ERROR_NO_ERROR;
       }
@@ -3756,7 +3886,7 @@ int mbnavadjust_import_file(int verbose, struct mbna_project *project,
           *error = MB_ERROR_IGNORE;
       }
 
-            /* deal with survey data */
+      /* deal with survey data */
       if (kind == MB_DATA_DATA) {
         /* int status_sensorhead = */
         mb_sensorhead(verbose, imbio_ptr, istore_ptr, &sensorhead, &error_sensorhead);
@@ -3764,18 +3894,18 @@ int mbnavadjust_import_file(int verbose, struct mbna_project *project,
           status = mb_sonartype(verbose, imbio_ptr, istore_ptr, &sonartype, error);
         }
 
-                /* if sonar is interferometric, bin the bathymetry */
+        /* if sonar is interferometric, bin the bathymetry */
         if (sonartype == MB_TOPOGRAPHY_TYPE_INTERFEROMETRIC) {
           /* allocate bin arrays if needed */
           if (bin_nbath == NULL) {
             status = mb_mallocd(verbose, __FILE__, __LINE__, project->bin_beams_bath * sizeof(int),
-                                (void **)&bin_nbath, error);
+                    (void **)&bin_nbath, error);
             status = mb_mallocd(verbose, __FILE__, __LINE__, project->bin_beams_bath * sizeof(double),
-                                (void **)&bin_bath, error);
+                    (void **)&bin_bath, error);
             status = mb_mallocd(verbose, __FILE__, __LINE__, project->bin_beams_bath * sizeof(double),
-                                (void **)&bin_bathacrosstrack, error);
+                    (void **)&bin_bathacrosstrack, error);
             status = mb_mallocd(verbose, __FILE__, __LINE__, project->bin_beams_bath * sizeof(double),
-                                (void **)&bin_bathalongtrack, error);
+                    (void **)&bin_bathalongtrack, error);
             for (int i = 0; i < project->bin_beams_bath; i++) {
               bin_nbath[i] = 0;
               bin_bath[i] = 0.0;
@@ -3827,9 +3957,9 @@ int mbnavadjust_import_file(int verbose, struct mbna_project *project,
               /* get apparent acrosstrack beam angle and bin accordingly */
               angle = RTD * atan(bathacrosstrack[i] / (bath[i] - sonardepth));
               const int j = (int)floor((angle + 0.5 * project->bin_swathwidth + 0.5 * project->bin_pseudobeamwidth) /
-                             project->bin_pseudobeamwidth);
+                     project->bin_pseudobeamwidth);
               /* fprintf(stderr,"i:%d bath:%f %f %f sonardepth:%f angle:%f j:%d\n",
-              i,bath[i],bathacrosstrack[i],bathalongtrack[i],sonardepth,angle,j); */
+                 i,bath[i],bathacrosstrack[i],bathalongtrack[i],sonardepth,angle,j); */
               if (j >= 0 && j < project->bin_beams_bath) {
                 bin_bath[j] += bath[i];
                 bin_bathacrosstrack[j] += bathacrosstrack[i];
@@ -3850,8 +3980,8 @@ int mbnavadjust_import_file(int verbose, struct mbna_project *project,
             beams_bath = project->bin_beams_bath;
             for (int j = 0; j < project->bin_beams_bath; j++) {
               /* fprintf(stderr,"j:%d angle:%f n:%d bath:%f %f %f\n",
-              j,j*project->bin_pseudobeamwidth - 0.5 *
-              project->bin_swathwidth,bin_nbath[j],bin_bath[j],bin_bathacrosstrack[j],bin_bathalongtrack[j]); */
+                 j,j*project->bin_pseudobeamwidth - 0.5 *
+                 project->bin_swathwidth,bin_nbath[j],bin_bath[j],bin_bathacrosstrack[j],bin_bathalongtrack[j]); */
               if (bin_nbath[j] > 0) {
                 bath[j] = bin_bath[j] / bin_nbath[j];
                 bathacrosstrack[j] = bin_bathacrosstrack[j] / bin_nbath[j];
@@ -3902,7 +4032,7 @@ int mbnavadjust_import_file(int verbose, struct mbna_project *project,
         /* get bias values */
         mb_pr_get_heading(verbose, file->path, &mbp_heading_mode, &mbp_headingbias, error);
         mb_pr_get_rollbias(verbose, file->path, &mbp_rollbias_mode, &mbp_rollbias, &mbp_rollbias_port,
-                           &mbp_rollbias_stbd, error);
+               &mbp_rollbias_stbd, error);
         if (mbp_heading_mode == MBP_HEADING_OFFSET || mbp_heading_mode == MBP_HEADING_CALCOFFSET) {
           file->heading_bias_import = mbp_headingbias;
         }
@@ -3922,11 +4052,11 @@ int mbnavadjust_import_file(int verbose, struct mbna_project *project,
 
       /* check if new section needed */
       else if (kind == MB_DATA_DATA && *error == MB_ERROR_NO_ERROR && file != NULL
-               && (section->distance + distance >= project->section_length ||
-                section->num_beams >= project->section_soundings)) {
+         && (section->distance + distance >= project->section_length ||
+             section->num_beams >= project->section_soundings)) {
         new_section = true;
         /*fprintf(stderr, "NEW SECTION: section->distance:%f distance:%f project->section_length:%f\n",
-        section->distance, distance, project->section_length);*/
+           section->distance, distance, project->section_length);*/
       }
 
       /* if end of section or end of file resolve position
@@ -3976,7 +4106,7 @@ int mbnavadjust_import_file(int verbose, struct mbna_project *project,
         /* allocate mbna_section array if needed */
         if (file->num_sections_alloc <= file->num_sections) {
           file->sections = (struct mbna_section *)realloc(file->sections, sizeof(struct mbna_section) *
-                                                                              (file->num_sections_alloc + ALLOC_NUM));
+                      (file->num_sections_alloc + ALLOC_NUM));
           if (file->sections != NULL)
             file->num_sections_alloc += ALLOC_NUM;
           else {
@@ -4028,16 +4158,27 @@ int mbnavadjust_import_file(int verbose, struct mbna_project *project,
         section->depthmin = 0.0;
         section->depthmax = 0.0;
         section->contoursuptodate = false;
+        section->status = MBNA_CROSSING_STATUS_NONE;
         section->globaltie.status = MBNA_TIE_NONE;
         section->globaltie.snav = MBNA_SELECT_NONE;
+        section->globaltie.snav_time_d = 0.0;
         section->globaltie.offset_x = 0.0;
         section->globaltie.offset_y = 0.0;
         section->globaltie.offset_x_m = 0.0;
         section->globaltie.offset_y_m = 0.0;
         section->globaltie.offset_z_m = 0.0;
         section->globaltie.sigmar1 = 0.0;
+        section->globaltie.sigmax1[0] = 0.0;
+        section->globaltie.sigmax1[1] = 0.0;
+        section->globaltie.sigmax1[2] = 0.0;
         section->globaltie.sigmar2 = 0.0;
+        section->globaltie.sigmax2[0] = 0.0;
+        section->globaltie.sigmax2[1] = 0.0;
+        section->globaltie.sigmax2[2] = 0.0;
         section->globaltie.sigmar3 = 0.0;
+        section->globaltie.sigmax3[0] = 0.0;
+        section->globaltie.sigmax3[1] = 0.0;
+        section->globaltie.sigmax3[2] = 0.0;
         section->globaltie.inversion_offset_x = 0.0;
         section->globaltie.inversion_offset_y = 0.0;
         section->globaltie.inversion_offset_x_m = 0.0;
@@ -4051,12 +4192,13 @@ int mbnavadjust_import_file(int verbose, struct mbna_project *project,
         section->globaltie.dr2_m = 0.0;
         section->globaltie.dr3_m = 0.0;
         section->globaltie.rsigma_m = 0.0;
+        section->globaltie.isurveyplotindex = 0;
         new_section = false;
 
         /* open output section file */
         sprintf(opath, "%s/nvs_%4.4d_%4.4d.mb71", project->datadir, file->id, file->num_sections - 1);
         if ((status = mb_write_init(verbose, opath, 71, &ombio_ptr, &obeams_bath, &obeams_amp, &opixels_ss,
-                                    error)) != MB_SUCCESS) {
+                  error)) != MB_SUCCESS) {
           mb_error(verbose, *error, &error_message);
           fprintf(stderr, "\nMBIO Error returned from function <mb_write_init>:\n%s\n", error_message);
           fprintf(stderr, "\nSwath sonar File <%s> not initialized for writing\n", path);
@@ -4069,17 +4211,17 @@ int mbnavadjust_import_file(int verbose, struct mbna_project *project,
           ostore->beams_bath = obeams_bath;
           ostore->beams_amp = 0;
           ostore->pixels_ss = 0;
-                    ostore->sensorhead = sensorhead;
-                    ostore->topo_type = sonartype;
+          ostore->sensorhead = sensorhead;
+          ostore->topo_type = sonartype;
           output_open = true;
           status = mb_mallocd(verbose, __FILE__, __LINE__, obeams_bath * sizeof(char), (void **)&ostore->beamflag,
-                              error);
+                  error);
           status = mb_mallocd(verbose, __FILE__, __LINE__, obeams_bath * sizeof(double), (void **)&ostore->bath,
-                              error);
+                  error);
           status = mb_mallocd(verbose, __FILE__, __LINE__, obeams_bath * sizeof(double),
-                              (void **)&ostore->bath_acrosstrack, error);
+                  (void **)&ostore->bath_acrosstrack, error);
           status = mb_mallocd(verbose, __FILE__, __LINE__, obeams_bath * sizeof(double),
-                              (void **)&ostore->bath_alongtrack, error);
+                  (void **)&ostore->bath_alongtrack, error);
 
           /* if error initializing memory then don't write the file */
           if (*error != MB_ERROR_NO_ERROR) {
@@ -4183,18 +4325,18 @@ int mbnavadjust_import_file(int verbose, struct mbna_project *project,
 
           /* write out data */
           status = mb_put_all(verbose, ombio_ptr, ostore_ptr,
-                                        true, MB_DATA_DATA, time_i, time_d, navlon, navlat,
-                              speed, heading, beams_bath, 0, 0,
-                                        beamflag, bath, amp,
-                                        bathacrosstrack, bathalongtrack,
-                              ss, ssacrosstrack, ssalongtrack, comment, error);
+                  true, MB_DATA_DATA, time_i, time_d, navlon, navlat,
+                  speed, heading, beams_bath, 0, 0,
+                  beamflag, bath, amp,
+                  bathacrosstrack, bathalongtrack,
+                  ss, ssacrosstrack, ssalongtrack, comment, error);
         }
 
         /* write out nav data associated with bath to format 166 file */
         if (nfp != NULL) {
           fprintf(nfp, "%4.4d %2.2d %2.2d %2.2d %2.2d %2.2d.%6.6d %16.6f %.10f %.10f %.2f %.2f %.2f %.2f %.2f %.2f\r\n",
-                  time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6], time_d, navlon, navlat,
-                  heading, speed, draft, roll, pitch, heave);
+            time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6], time_d, navlon, navlat,
+            heading, speed, draft, roll, pitch, heave);
         }
       }
 
@@ -4205,26 +4347,26 @@ int mbnavadjust_import_file(int verbose, struct mbna_project *project,
       /* print debug statements */
       if (verbose >= 2) {
         fprintf(stderr, "\ndbg2  Ping read in program <%s>\n", program_name);
-        fprintf(stderr, "dbg2       kind:           %d\n", kind);
-        fprintf(stderr, "dbg2       error:          %d\n", *error);
-        fprintf(stderr, "dbg2       status:         %d\n", status);
+        fprintf(stderr, "dbg2       kind:     %d\n", kind);
+        fprintf(stderr, "dbg2       error:    %d\n", *error);
+        fprintf(stderr, "dbg2       status:   %d\n", status);
       }
       if (verbose >= 2 && kind == MB_DATA_COMMENT) {
-        fprintf(stderr, "dbg2       comment:        %s\n", comment);
+        fprintf(stderr, "dbg2       comment:  %s\n", comment);
       }
       if (verbose >= 2 && error <= 0 && kind == MB_DATA_DATA) {
-        fprintf(stderr, "dbg2       time_i:         %4d/%2d/%2d %2.2d:%2.2d:%2.2d.%6.6d\n", time_i[0], time_i[1],
-                time_i[2], time_i[3], time_i[4], time_i[5], time_i[6]);
-        fprintf(stderr, "dbg2       time_d:         %f\n", time_d);
-        fprintf(stderr, "dbg2       navlon:         %.10f\n", navlon);
-        fprintf(stderr, "dbg2       navlat:         %.10f\n", navlat);
-        fprintf(stderr, "dbg2       speed:          %f\n", speed);
-        fprintf(stderr, "dbg2       heading:        %f\n", heading);
+        fprintf(stderr, "dbg2       time_i:   %4d/%2d/%2d %2.2d:%2.2d:%2.2d.%6.6d\n", time_i[0], time_i[1],
+          time_i[2], time_i[3], time_i[4], time_i[5], time_i[6]);
+        fprintf(stderr, "dbg2       time_d:   %f\n", time_d);
+        fprintf(stderr, "dbg2       navlon:   %.10f\n", navlon);
+        fprintf(stderr, "dbg2       navlat:   %.10f\n", navlat);
+        fprintf(stderr, "dbg2       speed:    %f\n", speed);
+        fprintf(stderr, "dbg2       heading:  %f\n", heading);
         fprintf(stderr, "dbg2       distance:       %f\n", distance);
         fprintf(stderr, "dbg2       beams_bath:     %d\n", beams_bath);
         fprintf(stderr, "dbg2       beams_amp:      %d\n", beams_amp);
         fprintf(stderr, "dbg2       pixels_ss:      %d\n", pixels_ss);
-            }
+      }
     }
 
     /* close the swath file */
@@ -4257,7 +4399,7 @@ int mbnavadjust_import_file(int verbose, struct mbna_project *project,
 
         /* initialize reading the swath file */
         if ((status = mb_read_init(verbose, opath, 71, 1, lonflip, bounds, btime_i, etime_i, speedmin, timegap,
-                                   &ombio_ptr, &btime_d, &etime_d, &beams_bath, &beams_amp, &pixels_ss, error)) !=
+                 &ombio_ptr, &btime_d, &etime_d, &beams_bath, &beams_amp, &pixels_ss, error)) !=
             MB_SUCCESS) {
           mb_error(verbose, *error, &error_message);
           fprintf(stderr, "\nMBIO Error returned from function <mb_read_init>:\n%s\n", error_message);
@@ -4276,28 +4418,28 @@ int mbnavadjust_import_file(int verbose, struct mbna_project *project,
           ssalongtrack = NULL;
           if (*error == MB_ERROR_NO_ERROR)
             status = mb_register_array(verbose, ombio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(char),
-                                       (void **)&beamflag, error);
+                     (void **)&beamflag, error);
           if (*error == MB_ERROR_NO_ERROR)
             status = mb_register_array(verbose, ombio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double),
-                                       (void **)&bath, error);
+                     (void **)&bath, error);
           if (*error == MB_ERROR_NO_ERROR)
             status = mb_register_array(verbose, ombio_ptr, MB_MEM_TYPE_AMPLITUDE, sizeof(double), (void **)&amp,
-                                       error);
+                     error);
           if (*error == MB_ERROR_NO_ERROR)
             status = mb_register_array(verbose, ombio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double),
-                                       (void **)&bathacrosstrack, error);
+                     (void **)&bathacrosstrack, error);
           if (*error == MB_ERROR_NO_ERROR)
             status = mb_register_array(verbose, ombio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double),
-                                       (void **)&bathalongtrack, error);
+                     (void **)&bathalongtrack, error);
           if (*error == MB_ERROR_NO_ERROR)
             status = mb_register_array(verbose, ombio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double), (void **)&ss,
-                                       error);
+                     error);
           if (*error == MB_ERROR_NO_ERROR)
             status = mb_register_array(verbose, ombio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double),
-                                       (void **)&ssacrosstrack, error);
+                     (void **)&ssacrosstrack, error);
           if (*error == MB_ERROR_NO_ERROR)
             status = mb_register_array(verbose, ombio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double),
-                                       (void **)&ssalongtrack, error);
+                     (void **)&ssalongtrack, error);
 
           /* if error initializing memory then don't read the file */
           if (*error != MB_ERROR_NO_ERROR) {
@@ -4312,13 +4454,13 @@ int mbnavadjust_import_file(int verbose, struct mbna_project *project,
         while (*error <= MB_ERROR_NO_ERROR) {
           /* read a ping of data */
           status =
-              mb_get_all(verbose, ombio_ptr, &ostore_ptr, &kind, time_i, &time_d, &navlon, &navlat, &speed,
-                         &heading, &distance, &altitude, &sonardepth, &beams_bath, &beams_amp, &pixels_ss, beamflag,
-                         bath, amp, bathacrosstrack, bathalongtrack, ss, ssacrosstrack, ssalongtrack, comment, error);
+            mb_get_all(verbose, ombio_ptr, &ostore_ptr, &kind, time_i, &time_d, &navlon, &navlat, &speed,
+                 &heading, &distance, &altitude, &sonardepth, &beams_bath, &beams_amp, &pixels_ss, beamflag,
+                 bath, amp, bathacrosstrack, bathalongtrack, ss, ssacrosstrack, ssalongtrack, comment, error);
 
           /* ignore minor errors */
           if (kind == MB_DATA_DATA && (*error == MB_ERROR_TIME_GAP || *error == MB_ERROR_OUT_BOUNDS ||
-                                       *error == MB_ERROR_OUT_TIME || *error == MB_ERROR_SPEED_TOO_SMALL)) {
+                     *error == MB_ERROR_OUT_TIME || *error == MB_ERROR_SPEED_TOO_SMALL)) {
             status = MB_SUCCESS;
             *error = MB_ERROR_NO_ERROR;
           }
@@ -4331,9 +4473,9 @@ int mbnavadjust_import_file(int verbose, struct mbna_project *project,
             for (int i = 0; i < beams_bath; i++) {
               if (mb_beam_ok(beamflag[i]) && bath[i] != 0.0) {
                 lon =
-                    navlon + headingy * mtodeglon * bathacrosstrack[i] + headingx * mtodeglon * bathalongtrack[i];
+                  navlon + headingy * mtodeglon * bathacrosstrack[i] + headingx * mtodeglon * bathalongtrack[i];
                 lat =
-                    navlat - headingx * mtodeglat * bathacrosstrack[i] + headingy * mtodeglat * bathalongtrack[i];
+                  navlat - headingx * mtodeglat * bathacrosstrack[i] + headingy * mtodeglat * bathalongtrack[i];
                 ii1 = (lon - section->lonmin) / dx1;
                 jj1 = (lat - section->latmin) / dy1;
                 if (ii1 >= 0 && ii1 < MBNA_MASK_DIM && jj1 >= 0 && jj1 < MBNA_MASK_DIM) {
@@ -4353,7 +4495,7 @@ int mbnavadjust_import_file(int verbose, struct mbna_project *project,
   /* add info text */
   if (status == MB_SUCCESS && new_pings > 0) {
     sprintf(message, "Imported format %d file: %s\n > Read %d pings\n > Added %d sections %d crossings\n", iformat, path,
-            new_pings, new_sections, new_crossings);
+      new_pings, new_sections, new_crossings);
     mbnavadjust_info_add(verbose, project, message, true, error);
   }
   else {
@@ -4373,12 +4515,12 @@ int mbnavadjust_import_file(int verbose, struct mbna_project *project,
 }
 /*--------------------------------------------------------------------*/
 int mbnavadjust_reimport_file(int verbose, struct mbna_project *project,
-                                int ifile, int *error) {
+            int ifile, int *error) {
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
-    fprintf(stderr, "dbg2       verbose:          %d\n", verbose);
-    fprintf(stderr, "dbg2       project:          %p\n", project);
-    fprintf(stderr, "dbg2       ifile:            %d\n", ifile);
+    fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+    fprintf(stderr, "dbg2       project:    %p\n", project);
+    fprintf(stderr, "dbg2       ifile:      %d\n", ifile);
   }
 
   int status = MB_SUCCESS;
@@ -4410,8 +4552,8 @@ int mbnavadjust_reimport_file(int verbose, struct mbna_project *project,
       *error = MB_ERROR_NO_ERROR;
     }
     else {
-    *error = MB_ERROR_BAD_DATA;
-    status = MB_FAILURE;
+      *error = MB_ERROR_BAD_DATA;
+      status = MB_FAILURE;
     }
   }
 
@@ -4508,7 +4650,7 @@ int mbnavadjust_reimport_file(int verbose, struct mbna_project *project,
   if (status == MB_SUCCESS) {
     /* initialize reading the swath file */
     if ((status = mb_read_init(verbose, ipath, iformat, pings, lonflip, bounds, btime_i, etime_i, speedmin, timegap,
-                               &imbio_ptr, &btime_d, &etime_d, &beams_bath, &beams_amp, &pixels_ss, error)) != MB_SUCCESS) {
+             &imbio_ptr, &btime_d, &etime_d, &beams_bath, &beams_amp, &pixels_ss, error)) != MB_SUCCESS) {
       mb_error(verbose, *error, &error_message);
       fprintf(stderr, "\nMBIO Error returned from function <mb_read_init>:\n%s\n", error_message);
       fprintf(stderr, "\nSwath sonar File <%s> not initialized for reading\n", ipath);
@@ -4534,25 +4676,25 @@ int mbnavadjust_reimport_file(int verbose, struct mbna_project *project,
       status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_AMPLITUDE, sizeof(double), (void **)&amp, error);
     if (*error == MB_ERROR_NO_ERROR)
       status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double), (void **)&bathacrosstrack,
-                                 error);
+               error);
     if (*error == MB_ERROR_NO_ERROR)
       status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double), (void **)&bathalongtrack,
-                                 error);
+               error);
     if (*error == MB_ERROR_NO_ERROR)
       status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double), (void **)&ss, error);
     if (*error == MB_ERROR_NO_ERROR)
       status =
-          mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double), (void **)&ssacrosstrack, error);
+        mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double), (void **)&ssacrosstrack, error);
     if (*error == MB_ERROR_NO_ERROR)
       status =
-          mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double), (void **)&ssalongtrack, error);
+        mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double), (void **)&ssalongtrack, error);
     if (*error == MB_ERROR_NO_ERROR)
 
-    /* if error initializing memory then don't read the file */
-    if (*error != MB_ERROR_NO_ERROR) {
-      mb_error(verbose, *error, &error_message);
-      fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", error_message);
-    }
+      /* if error initializing memory then don't read the file */
+      if (*error != MB_ERROR_NO_ERROR) {
+        mb_error(verbose, *error, &error_message);
+        fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", error_message);
+      }
   }
 
   /* open nav file */
@@ -4573,18 +4715,18 @@ int mbnavadjust_reimport_file(int verbose, struct mbna_project *project,
     while (*error <= MB_ERROR_NO_ERROR) {
       /* read a ping of data */
       status = mb_get_all(verbose, imbio_ptr, &istore_ptr, &kind, time_i, &time_d, &navlon, &navlat, &speed, &heading,
-                          &distance, &altitude, &sonardepth, &beams_bath, &beams_amp, &pixels_ss, beamflag, bath, amp,
-                          bathacrosstrack, bathalongtrack, ss, ssacrosstrack, ssalongtrack, comment, error);
+              &distance, &altitude, &sonardepth, &beams_bath, &beams_amp, &pixels_ss, beamflag, bath, amp,
+              bathacrosstrack, bathalongtrack, ss, ssacrosstrack, ssalongtrack, comment, error);
 
       /* extract all nav values */
       if (*error == MB_ERROR_NO_ERROR && (kind == MB_DATA_NAV || kind == MB_DATA_DATA)) {
         status = mb_extract_nav(verbose, imbio_ptr, istore_ptr, &kind, time_i, &time_d, &navlon, &navlat, &speed,
-                                &heading, &draft, &roll, &pitch, &heave, error);
+              &heading, &draft, &roll, &pitch, &heave, error);
       }
 
       /* ignore minor errors - use these data */
       if (kind == MB_DATA_DATA && (*error == MB_ERROR_TIME_GAP || *error == MB_ERROR_OUT_BOUNDS ||
-                                   *error == MB_ERROR_OUT_TIME || *error == MB_ERROR_SPEED_TOO_SMALL)) {
+                 *error == MB_ERROR_OUT_TIME || *error == MB_ERROR_SPEED_TOO_SMALL)) {
         status = MB_SUCCESS;
         *error = MB_ERROR_NO_ERROR;
       }
@@ -4597,7 +4739,7 @@ int mbnavadjust_reimport_file(int verbose, struct mbna_project *project,
           *error = MB_ERROR_IGNORE;
       }
 
-            /* deal with survey data */
+      /* deal with survey data */
       if (kind == MB_DATA_DATA) {
         /* int status_sensorhead = */
         mb_sensorhead(verbose, imbio_ptr, istore_ptr, &sensorhead, &error_sensorhead);
@@ -4610,13 +4752,13 @@ int mbnavadjust_reimport_file(int verbose, struct mbna_project *project,
           /* allocate bin arrays if needed */
           if (bin_nbath == NULL) {
             status = mb_mallocd(verbose, __FILE__, __LINE__, project->bin_beams_bath * sizeof(int),
-                                (void **)&bin_nbath, error);
+                    (void **)&bin_nbath, error);
             status = mb_mallocd(verbose, __FILE__, __LINE__, project->bin_beams_bath * sizeof(double),
-                                (void **)&bin_bath, error);
+                    (void **)&bin_bath, error);
             status = mb_mallocd(verbose, __FILE__, __LINE__, project->bin_beams_bath * sizeof(double),
-                                (void **)&bin_bathacrosstrack, error);
+                    (void **)&bin_bathacrosstrack, error);
             status = mb_mallocd(verbose, __FILE__, __LINE__, project->bin_beams_bath * sizeof(double),
-                                (void **)&bin_bathalongtrack, error);
+                    (void **)&bin_bathalongtrack, error);
             for (int i = 0; i < project->bin_beams_bath; i++) {
               bin_nbath[i] = 0;
               bin_bath[i] = 0.0;
@@ -4668,9 +4810,9 @@ int mbnavadjust_reimport_file(int verbose, struct mbna_project *project,
               /* get apparent acrosstrack beam angle and bin accordingly */
               angle = RTD * atan(bathacrosstrack[i] / (bath[i] - sonardepth));
               const int j = (int)floor((angle + 0.5 * project->bin_swathwidth + 0.5 * project->bin_pseudobeamwidth) /
-                             project->bin_pseudobeamwidth);
+                     project->bin_pseudobeamwidth);
               /* fprintf(stderr,"i:%d bath:%f %f %f sonardepth:%f angle:%f j:%d\n",
-              i,bath[i],bathacrosstrack[i],bathalongtrack[i],sonardepth,angle,j); */
+                 i,bath[i],bathacrosstrack[i],bathalongtrack[i],sonardepth,angle,j); */
               if (j >= 0 && j < project->bin_beams_bath) {
                 bin_bath[j] += bath[i];
                 bin_bathacrosstrack[j] += bathacrosstrack[i];
@@ -4691,8 +4833,8 @@ int mbnavadjust_reimport_file(int verbose, struct mbna_project *project,
             beams_bath = project->bin_beams_bath;
             for (int j = 0; j < project->bin_beams_bath; j++) {
               /* fprintf(stderr,"j:%d angle:%f n:%d bath:%f %f %f\n",
-              j,j*project->bin_pseudobeamwidth - 0.5 *
-              project->bin_swathwidth,bin_nbath[j],bin_bath[j],bin_bathacrosstrack[j],bin_bathalongtrack[j]); */
+                 j,j*project->bin_pseudobeamwidth - 0.5 *
+                 project->bin_swathwidth,bin_nbath[j],bin_bath[j],bin_bathacrosstrack[j],bin_bathalongtrack[j]); */
               if (bin_nbath[j] > 0) {
                 bath[j] = bin_bath[j] / bin_nbath[j];
                 bathacrosstrack[j] = bin_bathacrosstrack[j] / bin_nbath[j];
@@ -4728,7 +4870,7 @@ int mbnavadjust_reimport_file(int verbose, struct mbna_project *project,
         /* get bias values */
         mb_pr_get_heading(verbose, file->path, &mbp_heading_mode, &mbp_headingbias, error);
         mb_pr_get_rollbias(verbose, file->path, &mbp_rollbias_mode, &mbp_rollbias, &mbp_rollbias_port,
-                           &mbp_rollbias_stbd, error);
+               &mbp_rollbias_stbd, error);
         if (mbp_heading_mode == MBP_HEADING_OFFSET || mbp_heading_mode == MBP_HEADING_CALCOFFSET) {
           file->heading_bias_import = mbp_headingbias;
         }
@@ -4748,7 +4890,7 @@ int mbnavadjust_reimport_file(int verbose, struct mbna_project *project,
 
       /* check if new section needed */
       else if (kind == MB_DATA_DATA && *error == MB_ERROR_NO_ERROR && file != NULL
-               && time_d > section->etime_d) {
+         && time_d > section->etime_d) {
         new_section = true;
       }
 
@@ -4788,7 +4930,7 @@ int mbnavadjust_reimport_file(int verbose, struct mbna_project *project,
         /* open output section file */
         sprintf(opath, "%s/nvs_%4.4d_%4.4d.mb71", project->datadir, file->id, isection);
         if ((status = mb_write_init(verbose, opath, 71, &ombio_ptr, &obeams_bath, &obeams_amp, &opixels_ss,
-                                    error)) != MB_SUCCESS) {
+                  error)) != MB_SUCCESS) {
           mb_error(verbose, *error, &error_message);
           fprintf(stderr, "\nMBIO Error returned from function <mb_write_init>:\n%s\n", error_message);
           fprintf(stderr, "\nSwath sonar File <%s> not initialized for writing\n", opath);
@@ -4801,17 +4943,17 @@ int mbnavadjust_reimport_file(int verbose, struct mbna_project *project,
           ostore->beams_bath = obeams_bath;
           ostore->beams_amp = 0;
           ostore->pixels_ss = 0;
-                    ostore->sensorhead = sensorhead;
-                    ostore->topo_type = sonartype;
+          ostore->sensorhead = sensorhead;
+          ostore->topo_type = sonartype;
           output_open = true;
           status = mb_mallocd(verbose, __FILE__, __LINE__, obeams_bath * sizeof(char), (void **)&ostore->beamflag,
-                              error);
+                  error);
           status = mb_mallocd(verbose, __FILE__, __LINE__, obeams_bath * sizeof(double), (void **)&ostore->bath,
-                              error);
+                  error);
           status = mb_mallocd(verbose, __FILE__, __LINE__, obeams_bath * sizeof(double),
-                              (void **)&ostore->bath_acrosstrack, error);
+                  (void **)&ostore->bath_acrosstrack, error);
           status = mb_mallocd(verbose, __FILE__, __LINE__, obeams_bath * sizeof(double),
-                              (void **)&ostore->bath_alongtrack, error);
+                  (void **)&ostore->bath_alongtrack, error);
 
           /* if error initializing memory then don't write the file */
           if (*error != MB_ERROR_NO_ERROR) {
@@ -4913,18 +5055,18 @@ int mbnavadjust_reimport_file(int verbose, struct mbna_project *project,
 
           /* write out data */
           status = mb_put_all(verbose, ombio_ptr, ostore_ptr,
-                                        true, MB_DATA_DATA, time_i, time_d, navlon, navlat,
-                              speed, heading, beams_bath, 0, 0,
-                                        beamflag, bath, amp,
-                                        bathacrosstrack, bathalongtrack,
-                              ss, ssacrosstrack, ssalongtrack, comment, error);
+                  true, MB_DATA_DATA, time_i, time_d, navlon, navlat,
+                  speed, heading, beams_bath, 0, 0,
+                  beamflag, bath, amp,
+                  bathacrosstrack, bathalongtrack,
+                  ss, ssacrosstrack, ssalongtrack, comment, error);
         }
 
         /* write out nav data associated with bath to format 166 file */
         if (nfp != NULL) {
           fprintf(nfp, "%4.4d %2.2d %2.2d %2.2d %2.2d %2.2d.%6.6d %16.6f %.10f %.10f %.2f %.2f %.2f %.2f %.2f %.2f\r\n",
-                  time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6], time_d, navlon, navlat,
-                  heading, speed, draft, roll, pitch, heave);
+            time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6], time_d, navlon, navlat,
+            heading, speed, draft, roll, pitch, heave);
         }
       }
 
@@ -4935,26 +5077,26 @@ int mbnavadjust_reimport_file(int verbose, struct mbna_project *project,
       /* print debug statements */
       if (verbose >= 2) {
         fprintf(stderr, "\ndbg2  Ping read in program <%s>\n", program_name);
-        fprintf(stderr, "dbg2       kind:           %d\n", kind);
-        fprintf(stderr, "dbg2       error:          %d\n", *error);
-        fprintf(stderr, "dbg2       status:         %d\n", status);
+        fprintf(stderr, "dbg2       kind:     %d\n", kind);
+        fprintf(stderr, "dbg2       error:    %d\n", *error);
+        fprintf(stderr, "dbg2       status:   %d\n", status);
       }
       if (verbose >= 2 && kind == MB_DATA_COMMENT) {
-        fprintf(stderr, "dbg2       comment:        %s\n", comment);
+        fprintf(stderr, "dbg2       comment:  %s\n", comment);
       }
       if (verbose >= 2 && error <= 0 && kind == MB_DATA_DATA) {
-        fprintf(stderr, "dbg2       time_i:         %4d/%2d/%2d %2.2d:%2.2d:%2.2d.%6.6d\n", time_i[0], time_i[1],
-                time_i[2], time_i[3], time_i[4], time_i[5], time_i[6]);
-        fprintf(stderr, "dbg2       time_d:         %f\n", time_d);
-        fprintf(stderr, "dbg2       navlon:         %.10f\n", navlon);
-        fprintf(stderr, "dbg2       navlat:         %.10f\n", navlat);
-        fprintf(stderr, "dbg2       speed:          %f\n", speed);
-        fprintf(stderr, "dbg2       heading:        %f\n", heading);
+        fprintf(stderr, "dbg2       time_i:   %4d/%2d/%2d %2.2d:%2.2d:%2.2d.%6.6d\n", time_i[0], time_i[1],
+          time_i[2], time_i[3], time_i[4], time_i[5], time_i[6]);
+        fprintf(stderr, "dbg2       time_d:   %f\n", time_d);
+        fprintf(stderr, "dbg2       navlon:   %.10f\n", navlon);
+        fprintf(stderr, "dbg2       navlat:   %.10f\n", navlat);
+        fprintf(stderr, "dbg2       speed:    %f\n", speed);
+        fprintf(stderr, "dbg2       heading:  %f\n", heading);
         fprintf(stderr, "dbg2       distance:       %f\n", distance);
         fprintf(stderr, "dbg2       beams_bath:     %d\n", beams_bath);
         fprintf(stderr, "dbg2       beams_amp:      %d\n", beams_amp);
         fprintf(stderr, "dbg2       pixels_ss:      %d\n", pixels_ss);
-            }
+      }
     }
 
     /* close the swath file */
@@ -4987,7 +5129,7 @@ int mbnavadjust_reimport_file(int verbose, struct mbna_project *project,
 
         /* initialize reading the swath file */
         if ((status = mb_read_init(verbose, opath, 71, 1, lonflip, bounds, btime_i, etime_i, speedmin, timegap,
-                                   &ombio_ptr, &btime_d, &etime_d, &beams_bath, &beams_amp, &pixels_ss, error)) !=
+                 &ombio_ptr, &btime_d, &etime_d, &beams_bath, &beams_amp, &pixels_ss, error)) !=
             MB_SUCCESS) {
           mb_error(verbose, *error, &error_message);
           fprintf(stderr, "\nMBIO Error returned from function <mb_read_init>:\n%s\n", error_message);
@@ -5006,28 +5148,28 @@ int mbnavadjust_reimport_file(int verbose, struct mbna_project *project,
           ssalongtrack = NULL;
           if (*error == MB_ERROR_NO_ERROR)
             status = mb_register_array(verbose, ombio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(char),
-                                       (void **)&beamflag, error);
+                     (void **)&beamflag, error);
           if (*error == MB_ERROR_NO_ERROR)
             status = mb_register_array(verbose, ombio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double),
-                                       (void **)&bath, error);
+                     (void **)&bath, error);
           if (*error == MB_ERROR_NO_ERROR)
             status = mb_register_array(verbose, ombio_ptr, MB_MEM_TYPE_AMPLITUDE, sizeof(double), (void **)&amp,
-                                       error);
+                     error);
           if (*error == MB_ERROR_NO_ERROR)
             status = mb_register_array(verbose, ombio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double),
-                                       (void **)&bathacrosstrack, error);
+                     (void **)&bathacrosstrack, error);
           if (*error == MB_ERROR_NO_ERROR)
             status = mb_register_array(verbose, ombio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double),
-                                       (void **)&bathalongtrack, error);
+                     (void **)&bathalongtrack, error);
           if (*error == MB_ERROR_NO_ERROR)
             status = mb_register_array(verbose, ombio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double), (void **)&ss,
-                                       error);
+                     error);
           if (*error == MB_ERROR_NO_ERROR)
             status = mb_register_array(verbose, ombio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double),
-                                       (void **)&ssacrosstrack, error);
+                     (void **)&ssacrosstrack, error);
           if (*error == MB_ERROR_NO_ERROR)
             status = mb_register_array(verbose, ombio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double),
-                                       (void **)&ssalongtrack, error);
+                     (void **)&ssalongtrack, error);
 
           /* if error initializing memory then don't read the file */
           if (*error != MB_ERROR_NO_ERROR) {
@@ -5042,13 +5184,13 @@ int mbnavadjust_reimport_file(int verbose, struct mbna_project *project,
         while (*error <= MB_ERROR_NO_ERROR) {
           /* read a ping of data */
           status =
-              mb_get_all(verbose, ombio_ptr, &ostore_ptr, &kind, time_i, &time_d, &navlon, &navlat, &speed,
-                         &heading, &distance, &altitude, &sonardepth, &beams_bath, &beams_amp, &pixels_ss, beamflag,
-                         bath, amp, bathacrosstrack, bathalongtrack, ss, ssacrosstrack, ssalongtrack, comment, error);
+            mb_get_all(verbose, ombio_ptr, &ostore_ptr, &kind, time_i, &time_d, &navlon, &navlat, &speed,
+                 &heading, &distance, &altitude, &sonardepth, &beams_bath, &beams_amp, &pixels_ss, beamflag,
+                 bath, amp, bathacrosstrack, bathalongtrack, ss, ssacrosstrack, ssalongtrack, comment, error);
 
           /* ignore minor errors */
           if (kind == MB_DATA_DATA && (*error == MB_ERROR_TIME_GAP || *error == MB_ERROR_OUT_BOUNDS ||
-                                       *error == MB_ERROR_OUT_TIME || *error == MB_ERROR_SPEED_TOO_SMALL)) {
+                     *error == MB_ERROR_OUT_TIME || *error == MB_ERROR_SPEED_TOO_SMALL)) {
             status = MB_SUCCESS;
             *error = MB_ERROR_NO_ERROR;
           }
@@ -5061,9 +5203,9 @@ int mbnavadjust_reimport_file(int verbose, struct mbna_project *project,
             for (int i = 0; i < beams_bath; i++) {
               if (mb_beam_ok(beamflag[i]) && bath[i] != 0.0) {
                 lon =
-                    navlon + headingy * mtodeglon * bathacrosstrack[i] + headingx * mtodeglon * bathalongtrack[i];
+                  navlon + headingy * mtodeglon * bathacrosstrack[i] + headingx * mtodeglon * bathalongtrack[i];
                 lat =
-                    navlat - headingx * mtodeglat * bathacrosstrack[i] + headingy * mtodeglat * bathalongtrack[i];
+                  navlat - headingx * mtodeglat * bathacrosstrack[i] + headingy * mtodeglat * bathalongtrack[i];
                 ii1 = (lon - section->lonmin) / dx1;
                 jj1 = (lat - section->latmin) / dy1;
                 if (ii1 >= 0 && ii1 < MBNA_MASK_DIM && jj1 >= 0 && jj1 < MBNA_MASK_DIM) {
@@ -5083,7 +5225,7 @@ int mbnavadjust_reimport_file(int verbose, struct mbna_project *project,
   /* add info text */
   if (status == MB_SUCCESS && new_pings > 0) {
     sprintf(message, "Imported format %d file: %s\n > Read %d pings\n > Added %d sections %d crossings\n", iformat, ipath,
-            new_pings, new_sections, new_crossings);
+      new_pings, new_sections, new_crossings);
     mbnavadjust_info_add(verbose, project, message, true, error);
   }
   else {
@@ -5105,25 +5247,25 @@ int mbnavadjust_reimport_file(int verbose, struct mbna_project *project,
 int mbnavadjust_import_reference(int verbose, struct mbna_project *project, char *path, int *error) {
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
-    fprintf(stderr, "dbg2       verbose:          %d\n", verbose);
-    fprintf(stderr, "dbg2       project:          %p\n", project);
-    fprintf(stderr, "dbg2       path:             %s\n", path);
+    fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+    fprintf(stderr, "dbg2       project:    %p\n", project);
+    fprintf(stderr, "dbg2       path:       %s\n", path);
   }
 
   /* check if specified grid can be read, then copy it into the project */
   int grid_projection_mode;
   int nxy;
   int status = mb_read_gmt_grd(verbose, path, &grid_projection_mode,
-                                project->refgrid.projection_id,
-                                &project->refgrid.nodatavalue, &nxy,
-                                &project->refgrid.nx, &project->refgrid.ny,
-                                &project->refgrid.min, &project->refgrid.max,
-                                &project->refgrid.bounds[0], &project->refgrid.bounds[1],
-                                &project->refgrid.bounds[2], &project->refgrid.bounds[2],
-                                &project->refgrid.dx, &project->refgrid.dy,
-                                &project->refgrid.val, NULL, NULL, error);
+             project->refgrid.projection_id,
+             &project->refgrid.nodatavalue, &nxy,
+             &project->refgrid.nx, &project->refgrid.ny,
+             &project->refgrid.min, &project->refgrid.max,
+             &project->refgrid.bounds[0], &project->refgrid.bounds[1],
+             &project->refgrid.bounds[2], &project->refgrid.bounds[2],
+             &project->refgrid.dx, &project->refgrid.dy,
+             &project->refgrid.val, NULL, NULL, error);
   if (status == MB_SUCCESS && project->refgrid.val != NULL) {
-    mb_path command, name;
+    char command[STRING_MAX], name[STRING_MAX];
     if (strrchr(path, '/') != NULL) {
       strncpy(name, strrchr(path, '/')+1, STRING_MAX);
     } else {
@@ -5149,11 +5291,338 @@ int mbnavadjust_import_reference(int verbose, struct mbna_project *project, char
   return (status);
 }
 /*--------------------------------------------------------------------*/
+int mbnavadjust_reference_load(int verbose, struct mbna_project *project,
+                                struct mbna_section *section, void **swath_ptr, int *error) {
+
+  int status = MB_SUCCESS;
+
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+    fprintf(stderr, "dbg2       verbose:                   %d\n", verbose);
+    fprintf(stderr, "dbg2       project:                   %p\n", project);
+    fprintf(stderr, "dbg2       project->datadir:          %s\n", project->datadir);
+    fprintf(stderr, "dbg2       project->refgrid_name:     %s\n", project->refgrid_name);
+    fprintf(stderr, "dbg2       section:                   %p\n", section);
+    fprintf(stderr, "dbg2       swath_ptr:                 %p  %p\n", swath_ptr, *swath_ptr);
+  }
+
+  /* load reference grid if needed */
+  if (project->refgrid_status == MBNA_REFGRID_IMPORTED) {
+    mb_path path;
+    int grid_projection_mode;
+    int nxy;
+    sprintf(path, "%s/%s", project->datadir, project->refgrid_name);
+    status = mb_read_gmt_grd(verbose, path, &grid_projection_mode,
+               project->refgrid.projection_id,
+               &project->refgrid.nodatavalue, &nxy,
+               &project->refgrid.nx, &project->refgrid.ny,
+               &project->refgrid.min, &project->refgrid.max,
+               &project->refgrid.bounds[0], &project->refgrid.bounds[1],
+               &project->refgrid.bounds[2], &project->refgrid.bounds[3],
+               &project->refgrid.dx, &project->refgrid.dy,
+               &project->refgrid.val, NULL, NULL, error);
+    if (status == MB_SUCCESS && project->refgrid.val != NULL) {
+      project->refgrid_status = MBNA_REFGRID_LOADED;
+      double tmp = -project->refgrid.min;
+      project->refgrid.min = -project->refgrid.max;
+      project->refgrid.max = tmp;
+      for (int k = 0; k < nxy; k++) {
+        if (project->refgrid.val[k] != project->refgrid.nodatavalue)
+          project->refgrid.val[k] *= -1.0;
+      }
+    }
+  }
+
+  if (project->refgrid_status == MBNA_REFGRID_LOADED){
+
+    /* If reference has been successfully loaded, get the bounds of a region around
+        the section, and extract that data into a swath section structure as if
+        the grid fragment is a north oriented section of swath data.
+       File and section for reference grid are either -1 if no refgrid imported
+       or 0 if refgrid imported. */
+    double extract_lonmin = MAX(project->refgrid.bounds[0], section->lonmin);
+    double extract_lonmax = MIN(project->refgrid.bounds[1], section->lonmax);
+    double extract_latmin = MAX(project->refgrid.bounds[2], section->latmin);
+    double extract_latmax = MIN(project->refgrid.bounds[3], section->latmax);
+    int imin = (extract_lonmin - project->refgrid.bounds[0]) / project->refgrid.dx;
+    int imax = (extract_lonmax - project->refgrid.bounds[0]) / project->refgrid.dx + 1;
+    int jmin = (extract_latmin - project->refgrid.bounds[2]) / project->refgrid.dy;
+    int jmax = (extract_latmax - project->refgrid.bounds[2]) / project->refgrid.dy + 1;
+    int idim = imax - imin + 1;
+    int jdim = jmax - jmin + 1;
+    section->file_id = 0;
+    section->section_id = 0;
+    section->num_pings = jdim;
+    section->num_beams = idim;
+    section->global_start_ping = 0;
+    section->global_start_snav = 0;
+    section->continuity = 0;
+    section->distance = 0.0;
+    section->lonmin = project->refgrid.bounds[0] + imin * project->refgrid.dx;
+    section->lonmax = project->refgrid.bounds[0] + imax * project->refgrid.dx;
+    section->latmin = project->refgrid.bounds[2] + jmin * project->refgrid.dy;
+    section->latmax = project->refgrid.bounds[2] + jmax * project->refgrid.dy;
+    section->depthmin = project->refgrid.nodatavalue;
+    section->depthmax = project->refgrid.nodatavalue;
+    double dx1 = (section->lonmax - section->lonmin) / MBNA_MASK_DIM;
+    double dy1 = (section->latmax - section->latmin) / MBNA_MASK_DIM;
+    bool first = true;
+    int num_valid = 0;
+    memset(section->coverage, 0, MBNA_MASK_DIM * MBNA_MASK_DIM * sizeof(int));
+    for (int i = imin; i <= imax; i++) {
+      for (int j = jmin; j <= jmax; j++) {
+        int k = i * project->refgrid.ny + j;
+        if (project->refgrid.val[k] != project->refgrid.nodatavalue) {
+          if (first) {
+            section->depthmin = project->refgrid.val[k];
+            section->depthmax = project->refgrid.val[k];
+            first = false;
+          } else {
+            section->depthmin = MIN(project->refgrid.val[k], section->depthmin);
+            section->depthmax = MAX(project->refgrid.val[k], section->depthmax);
+          }
+          double lon = project->refgrid.bounds[0] + i * project->refgrid.dx;
+          double lat = project->refgrid.bounds[2] + j * project->refgrid.dy;
+          int ii1 = (lon - section->lonmin) / dx1;
+          int jj1 = (lat - section->latmin) / dy1;
+          if (ii1 >= 0 && ii1 < MBNA_MASK_DIM && jj1 >= 0 && jj1 < MBNA_MASK_DIM) {
+            section->coverage[ii1 + jj1 * MBNA_MASK_DIM] = 1;
+          }
+          num_valid++;
+        }
+      }
+    }
+    section->num_snav = 1;
+    section->snav_id[0] = 0;
+    section->snav_num_ties[0] = 0;
+    section->snav_invert_id[0] = 0;
+    section->snav_invert_constraint[0] = 0;
+    section->snav_distance[0] = 0.0;
+    section->snav_time_d[0] = 0.0;
+    section->snav_lon[0] = 0.5 * (section->lonmin + section->lonmax);
+    section->snav_lat[0] = 0.5 * (section->latmin + section->latmax);
+    section->snav_sensordepth[0] = 0.0;
+    section->snav_lon_offset[0] = 0.0;
+    section->snav_lat_offset[0] = 0.0;
+    section->snav_z_offset[0] = 0.0;
+    section->show_in_modelplot = false;
+    section->modelplot_start_count = 0;
+    section->contoursuptodate = false;
+    section->status = 0;
+    memset(&section->globaltie, 0, sizeof(struct mbna_globaltie));
+
+    /* initialize contour controls */
+    const double tick_len_map = MAX(section->lonmax - section->lonmin, section->latmax - section->latmin) / 500;
+    const double label_hgt_map = MAX(section->lonmax - section->lonmin, section->latmax - section->latmin) / 100;
+    const int contour_ncolor = 10;
+    int contour_algorithm = MB_CONTOUR_TRIANGLES; /* not MB_CONTOUR_OLD;*/
+
+    status = mb_contour_init(verbose, (struct swath **)swath_ptr,
+                              section->num_pings, section->num_beams, MB_CONTOUR_TRIANGLES,
+                              true, false, false, false, false, project->cont_int,
+                              project->col_int, project->tick_int,
+                              project->label_int, tick_len_map, label_hgt_map,
+                              0.0, contour_ncolor, 0, NULL, NULL, NULL, 0.0,
+                              0.0, 0.0, 0.0, 0, 0, 0.0, 0.0,
+                              project->mbnavadjust_plot, project->mbnavadjust_newpen,
+                              project->mbnavadjust_setline, project->mbnavadjust_justify_string,
+                              project->mbnavadjust_plot_string,
+                              error);
+    if (*error != MB_ERROR_NO_ERROR) {
+      char *error_message;
+      mb_error(verbose, *error, &error_message);
+      fprintf(stderr, "\nMBIO Error allocating contour control structure:\n%s\n", error_message);
+      fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
+      exit(*error);
+    }
+
+    struct swath *swath = *swath_ptr;
+    swath->triangle_scale = project->triangle_scale;
+    swath->bath_min = section->depthmin;
+    swath->bath_max = section->depthmax;
+    swath->npings = section->num_pings;
+    for (int j = jmin; j <= jmax; j++) {
+      int iping = j - jmin;
+      struct ping *ping = &swath->pings[iping];
+      if (ping->beams_bath_alloc < swath->beams_bath) {
+        status = mb_reallocd(verbose, __FILE__, __LINE__, swath->beams_bath * sizeof(char), (void **)&(ping->beamflag), error);
+        status = mb_reallocd(verbose, __FILE__, __LINE__, swath->beams_bath * sizeof(double), (void **)&(ping->bath), error);
+        status = mb_reallocd(verbose, __FILE__, __LINE__, swath->beams_bath * sizeof(double), (void **)&(ping->bathlon), error);
+        status = mb_reallocd(verbose, __FILE__, __LINE__, swath->beams_bath * sizeof(double), (void **)&(ping->bathlat), error);
+        if (contour_algorithm == MB_CONTOUR_OLD) {
+          status = mb_reallocd(verbose, __FILE__, __LINE__, swath->beams_bath * sizeof(int), (void **)&(ping->bflag[0]), error);
+          status = mb_reallocd(verbose, __FILE__, __LINE__, swath->beams_bath * sizeof(int), (void **)&(ping->bflag[1]), error);
+        }
+        ping->beams_bath_alloc = swath->beams_bath;
+      }
+      for (int ii = 0; ii < 7; ii++)
+        ping->time_i[ii] = 0;
+      ping->time_d = 0.0;
+      ping->navlon = 0.5 * (section->lonmin + section->lonmax);
+      ping->navlat = section->latmin + iping * (section->latmax - section->latmin) / (swath->npings - 1);
+      ping->heading = 0.0;
+      ping->beams_bath = swath->beams_bath;
+      for (int i = imin; i <= imax; i++) {
+        int jbeam = i - imin;
+        int k = i * project->refgrid.ny + j;
+        if (project->refgrid.val[k] != project->refgrid.nodatavalue) {
+          ping->beamflag[jbeam] = MB_FLAG_NONE;
+          ping->bath[jbeam] = (double) project->refgrid.val[k];
+          ping->bathlon[jbeam] = section->lonmin + jbeam * (section->lonmax - section->lonmin) / (swath->beams_bath - 1);;
+          ping->bathlat[jbeam] = ping->navlat;
+        }
+        else {
+          ping->beamflag[jbeam] = MB_FLAG_NULL;
+          ping->bath[jbeam] = 0.0;
+          ping->bathlon[jbeam] = section->lonmin + jbeam * (section->lonmax - section->lonmin) / (swath->beams_bath - 1);;
+          ping->bathlat[jbeam] = ping->navlat;
+        }
+      }
+    }
+
+    /* now allocate memory for the triangle network for contouring */
+    const int npts_max = swath->npings * swath->beams_bath + 3;
+    const int ntri_max = 3 * swath->npings * swath->beams_bath + 1;
+    if (swath->npts_alloc < npts_max) {
+      swath->npts_alloc = npts_max;
+      status &= mb_reallocd(verbose, __FILE__, __LINE__, swath->npts_alloc * sizeof(int), (void **)&(swath->edge), error);
+      status &= mb_reallocd(verbose, __FILE__, __LINE__, swath->npts_alloc * sizeof(int), (void **)&(swath->pingid), error);
+      status &= mb_reallocd(verbose, __FILE__, __LINE__, swath->npts_alloc * sizeof(int), (void **)&(swath->beamid), error);
+      status &= mb_reallocd(verbose, __FILE__, __LINE__, swath->npts_alloc * sizeof(double), (void **)&(swath->x), error);
+      status &= mb_reallocd(verbose, __FILE__, __LINE__, swath->npts_alloc * sizeof(double), (void **)&(swath->y), error);
+      status &= mb_reallocd(verbose, __FILE__, __LINE__, swath->npts_alloc * sizeof(double), (void **)&(swath->z), error);
+    }
+    if (swath->ntri_alloc < ntri_max) {
+      swath->ntri_alloc = ntri_max;
+      for (int i = 0; i < 3; i++) {
+        status &= mb_reallocd(verbose, __FILE__, __LINE__, swath->ntri_alloc * sizeof(int), (void **)&(swath->iv[i]), error);
+        status &= mb_reallocd(verbose, __FILE__, __LINE__, swath->ntri_alloc * sizeof(int), (void **)&(swath->ct[i]), error);
+        status &= mb_reallocd(verbose, __FILE__, __LINE__, swath->ntri_alloc * sizeof(int), (void **)&(swath->cs[i]), error);
+        status &= mb_reallocd(verbose, __FILE__, __LINE__, swath->ntri_alloc * sizeof(int), (void **)&(swath->ed[i]), error);
+        status &= mb_reallocd(verbose, __FILE__, __LINE__, swath->ntri_alloc * sizeof(int), (void **)&(swath->flag[i]), error);
+      }
+      status &= mb_reallocd(verbose, __FILE__, __LINE__, (4 * swath->ntri_alloc + 1) * sizeof(double), (void **)&(swath->xsave), error);
+      status &= mb_reallocd(verbose, __FILE__, __LINE__, (4 * swath->ntri_alloc + 1) * sizeof(double), (void **)&(swath->ysave), error);
+    }
+    if (swath->ndelaun_alloc < ntri_max) {
+      swath->ndelaun_alloc = ntri_max;
+      status &= mb_reallocd(verbose, __FILE__, __LINE__, swath->ndelaun_alloc * sizeof(double), (void **)&(swath->v1), error);
+      status &= mb_reallocd(verbose, __FILE__, __LINE__, swath->ndelaun_alloc * sizeof(double), (void **)&(swath->v2), error);
+      status &= mb_reallocd(verbose, __FILE__, __LINE__, swath->ndelaun_alloc * sizeof(double), (void **)&(swath->v3), error);
+      status &= mb_reallocd(verbose, __FILE__, __LINE__, swath->ndelaun_alloc * sizeof(int), (void **)&(swath->istack), error);
+      status &= mb_reallocd(verbose, __FILE__, __LINE__, 3 * swath->ndelaun_alloc * sizeof(int), (void **)&(swath->kv1), error);
+      status &= mb_reallocd(verbose, __FILE__, __LINE__, 3 * swath->ndelaun_alloc * sizeof(int), (void **)&(swath->kv2), error);
+    }
+    if (status == MB_FAILURE) {
+      *error = MB_ERROR_MEMORY_FAIL;
+    }
+
+    /* Now generate the triangles */
+    swath->npts = 0;
+    for (int iping = 0; iping < swath->npings; iping++) {
+      struct ping *ping = &swath->pings[iping];
+      for (int jbeam = 0; jbeam < ping->beams_bath - 1; jbeam++) {
+        if (mb_beam_ok(ping->beamflag[jbeam])) {
+          swath->x[swath->npts] = ping->bathlon[jbeam];
+          swath->y[swath->npts] = ping->bathlat[jbeam];
+          swath->z[swath->npts] = ping->bath[jbeam];
+          swath->pingid[swath->npts] = iping;
+          swath->beamid[swath->npts] = jbeam;
+          if (iping == 0 || iping == swath->npings - 1
+              || jbeam == 0 || jbeam == ping->beams_bath - 1) {
+            swath->edge[swath->npts] = true;
+          } else if (!mb_beam_ok(ping->beamflag[jbeam-1]) || !mb_beam_ok(ping->beamflag[jbeam+1])) {
+            swath->edge[swath->npts] = true;
+          } else if (!mb_beam_ok(swath->pings[iping-1].beamflag[jbeam-1])
+                      || !mb_beam_ok(swath->pings[iping-1].beamflag[jbeam])
+                      || !mb_beam_ok(swath->pings[iping-1].beamflag[jbeam+1])) {
+            swath->edge[swath->npts] = true;
+          } else if (!mb_beam_ok(swath->pings[iping+1].beamflag[jbeam-1])
+                      || !mb_beam_ok(swath->pings[iping+1].beamflag[jbeam])
+                      || !mb_beam_ok(swath->pings[iping+1].beamflag[jbeam+1])) {
+            swath->edge[swath->npts] = true;
+          } else {
+            swath->edge[swath->npts] = false;
+          }
+          swath->npts++;
+        }
+      }
+    }
+//// fprintf(stderr, "%s:%d:%s: About to calculate triangles for reference bathymetry\n",
+//// __FILE__, __LINE__, __FUNCTION__);
+//// fprintf(stderr, "swath->npts:%d   swath->ntri:%d\n", swath->npts, swath->ntri);
+//// for (int i=0;i<swath->npts; i++) {
+//// fprintf(stderr, "     %5d  %.8f %.8f %.3f %d\n",
+//// i, swath->x[i],  swath->y[i],  swath->z[i],  swath->edge[i]);
+//// }
+    mb_delaun(verbose, swath->npts, swath->x, swath->y, swath->edge, &swath->ntri,
+              swath->iv[0], swath->iv[1], swath->iv[2],
+              swath->ct[0], swath->ct[1], swath->ct[2],
+              swath->cs[0], swath->cs[1], swath->cs[2],
+              swath->v1, swath->v2, swath->v3, swath->istack,
+              swath->kv1, swath->kv2, error);
+//// fprintf(stderr, "%s:%d:%s: Just calculated triangles for reference bathymetry\n",
+//// __FILE__, __LINE__, __FUNCTION__);
+//// fprintf(stderr, "swath->npts:%d   swath->ntri:%d\n", swath->npts, swath->ntri);
+//// for (int i=0;i<swath->npts; i++) {
+//// fprintf(stderr, "     %5d  %.8f %.8f %.3f %d\n",
+//// i, swath->x[i],  swath->y[i],  swath->z[i],  swath->edge[i]);
+//// }
+//// fprintf(stderr, "swath->npts:%d   swath->ntri:%d\n", swath->npts, swath->ntri);
+//// for (int i=0;i<swath->ntri; i++) {
+//// fprintf(stderr, "     %5d  %d %d %d   %d %d %d   %d %d %d\n",
+//// i, swath->iv[0][i],  swath->iv[1][i],  swath->iv[2][i],
+//// swath->ct[0][i],  swath->ct[1][i],  swath->ct[2][i],
+//// swath->cs[0][i],  swath->cs[1][i],  swath->cs[2][i]);
+//// }
+  }
+
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBnavadjust function <%s> completed\n", __func__);
+    fprintf(stderr, "dbg2  Return values:\n");
+    fprintf(stderr, "dbg2       *swath_ptr:  %p\n", *swath_ptr);
+    fprintf(stderr, "dbg2       error:       %d\n", *error);
+    fprintf(stderr, "dbg2  Return status:\n");
+    fprintf(stderr, "dbg2       status:      %d\n", status);
+  }
+
+  return (status);
+}
+
+/*--------------------------------------------------------------------*/
+int mbnavadjust_reference_unload(int verbose, void **swath_ptr, int *error) {
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+    fprintf(stderr, "dbg2  Input arguments:\n");
+    fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+    fprintf(stderr, "dbg2       swath_ptr:  %p  %p\n", swath_ptr, *swath_ptr);
+  }
+
+  int status = MB_SUCCESS;
+
+  /* unload specified section */
+  struct swath *swath = (struct swath *)(*swath_ptr);
+
+  /* free contours */
+  status = mb_contour_deall(verbose, swath, error);
+
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBnavadjust function <%s> completed\n", __func__);
+    fprintf(stderr, "dbg2  Return values:\n");
+    fprintf(stderr, "dbg2       error:       %d\n", *error);
+    fprintf(stderr, "dbg2  Return status:\n");
+    fprintf(stderr, "dbg2       status:      %d\n", status);
+  }
+
+  return (status);
+}
+
+/*--------------------------------------------------------------------*/
 int mbnavadjust_findcrossings(int verbose, struct mbna_project *project, int *error) {
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
-    fprintf(stderr, "dbg2       verbose:          %d\n", verbose);
-    fprintf(stderr, "dbg2       project:          %p\n", project);
+    fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+    fprintf(stderr, "dbg2       project:    %p\n", project);
   }
 
   int status = MB_SUCCESS;
@@ -5168,7 +5637,7 @@ int mbnavadjust_findcrossings(int verbose, struct mbna_project *project, int *er
     /* resort crossings */
     if (project->num_crossings > 1)
       mb_mergesort((void *)project->crossings, (size_t)project->num_crossings, sizeof(struct mbna_crossing),
-                   mbnavadjust_crossing_compare);
+             mbnavadjust_crossing_compare);
 
     /* recalculate overlap fractions, true crossings, good crossing statistics */
     project->num_crossings_analyzed = 0;
@@ -5224,9 +5693,9 @@ int mbnavadjust_findcrossings(int verbose, struct mbna_project *project, int *er
 int mbnavadjust_findcrossingsfile(int verbose, struct mbna_project *project, int ifile, int *error) {
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
-    fprintf(stderr, "dbg2       verbose:          %d\n", verbose);
-    fprintf(stderr, "dbg2       project:          %p\n", project);
-    fprintf(stderr, "dbg2       ifile:            %d\n", ifile);
+    fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+    fprintf(stderr, "dbg2       project:    %p\n", project);
+    fprintf(stderr, "dbg2       ifile:      %d\n", ifile);
   }
 
   int status = MB_SUCCESS;
@@ -5274,7 +5743,7 @@ int mbnavadjust_findcrossingsfile(int verbose, struct mbna_project *project, int
           if (jfile == ifile && jsection == isection - 1 && section2->continuity)
             disqualify = true;
           else if (jfile == ifile - 1 && jsection == file1->num_sections - 1 && isection == 0 &&
-                   section2->continuity)
+             section2->continuity)
             disqualify = true;
           else if (!(lonmin2 < lonmax1 && lonmax2 > lonmin1 && latmin2 < latmax1 && latmax2 > latmin1)) {
             disqualify = true;
@@ -5321,7 +5790,7 @@ int mbnavadjust_findcrossingsfile(int verbose, struct mbna_project *project, int
                 found = true;
               }
               else if (crossing->file_id_1 == ifile && crossing->file_id_2 == jfile &&
-                       crossing->section_1 == isection && crossing->section_2 == jsection) {
+                 crossing->section_1 == isection && crossing->section_2 == jsection) {
                 found = true;
               }
             }
@@ -5329,7 +5798,7 @@ int mbnavadjust_findcrossingsfile(int verbose, struct mbna_project *project, int
               /* allocate mbna_crossing array if needed */
               if (project->num_crossings_alloc <= project->num_crossings) {
                 project->crossings = (struct mbna_crossing *)realloc(
-                    project->crossings, sizeof(struct mbna_crossing) * (project->num_crossings_alloc + ALLOC_NUM));
+                  project->crossings, sizeof(struct mbna_crossing) * (project->num_crossings_alloc + ALLOC_NUM));
                 if (project->crossings != NULL)
                   project->num_crossings_alloc += ALLOC_NUM;
                 else {
@@ -5351,17 +5820,17 @@ int mbnavadjust_findcrossingsfile(int verbose, struct mbna_project *project, int
               project->num_crossings++;
 
               fprintf(stderr, "added crossing: %d  %4d %4d   %4d %4d\n", project->num_crossings - 1,
-                      crossing->file_id_1, crossing->section_1, crossing->file_id_2, crossing->section_2);
+                crossing->file_id_1, crossing->section_1, crossing->file_id_2, crossing->section_2);
             }
             /*else
-            fprintf(stderr,"no new crossing:    %4d %4d   %4d %4d   duplicate\n",
-            file2->id,isection,
-            file1->id,jsection);*/
+               fprintf(stderr,"no new crossing:    %4d %4d   %4d %4d   duplicate\n",
+               file2->id,isection,
+               file1->id,jsection);*/
           }
           /*else
-          fprintf(stderr,"disqualified:       %4d %4d   %4d %4d   disqualify:%d overlaptxt list:%d\n",
-          file2->id,isection,
-          file1->id,jsection, disqualify, overlap);*/
+             fprintf(stderr,"disqualified:       %4d %4d   %4d %4d   disqualify:%d overlaptxt list:%d\n",
+             file2->id,isection,
+             file1->id,jsection, disqualify, overlap);*/
         }
       }
     }
@@ -5381,12 +5850,12 @@ int mbnavadjust_findcrossingsfile(int verbose, struct mbna_project *project, int
 int mbnavadjust_addcrossing(int verbose, struct mbna_project *project, int ifile1, int isection1, int ifile2, int isection2, int *error) {
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
-    fprintf(stderr, "dbg2       verbose:          %d\n", verbose);
-    fprintf(stderr, "dbg2       project:          %p\n", project);
-    fprintf(stderr, "dbg2       ifile1:           %d\n", ifile1);
-    fprintf(stderr, "dbg2       isection1:        %d\n", isection1);
-    fprintf(stderr, "dbg2       ifile2:           %d\n", ifile2);
-    fprintf(stderr, "dbg2       isection2:        %d\n", isection2);
+    fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+    fprintf(stderr, "dbg2       project:    %p\n", project);
+    fprintf(stderr, "dbg2       ifile1:     %d\n", ifile1);
+    fprintf(stderr, "dbg2       isection1:  %d\n", isection1);
+    fprintf(stderr, "dbg2       ifile2:     %d\n", ifile2);
+    fprintf(stderr, "dbg2       isection2:  %d\n", isection2);
   }
 
   /* check that file and section id's are reasonable */
@@ -5396,7 +5865,7 @@ int mbnavadjust_addcrossing(int verbose, struct mbna_project *project, int ifile
   if (!disqualify && (ifile1 < 0 || ifile1 >= project->num_files || ifile2 < 0 || ifile2 >= project->num_files))
     disqualify = true;
   if (!disqualify && (isection1 < 0 || isection1 >= project->files[ifile1].num_sections || isection2 < 0 ||
-                                isection2 >= project->files[ifile2].num_sections))
+          isection2 >= project->files[ifile2].num_sections))
     disqualify = true;
 
   /* check that this crossing does not already exist */
@@ -5418,7 +5887,7 @@ int mbnavadjust_addcrossing(int verbose, struct mbna_project *project, int ifile
     /* allocate mbna_crossing array if needed */
     if (project->num_crossings_alloc <= project->num_crossings) {
       project->crossings = (struct mbna_crossing *)realloc(project->crossings, sizeof(struct mbna_crossing) *
-                                                                                 (project->num_crossings_alloc + ALLOC_NUM));
+                       (project->num_crossings_alloc + ALLOC_NUM));
       if (project->crossings != NULL)
         project->num_crossings_alloc += ALLOC_NUM;
       else {
@@ -5449,7 +5918,7 @@ int mbnavadjust_addcrossing(int verbose, struct mbna_project *project, int ifile
       project->num_crossings++;
 
       fprintf(stderr, "added crossing: %d  %4d %4d   %4d %4d\n", project->num_crossings - 1, crossing->file_id_1,
-              crossing->section_1, crossing->file_id_2, crossing->section_2);
+        crossing->section_1, crossing->file_id_2, crossing->section_2);
 
       project->modelplot_uptodate = false;
     }
@@ -5468,22 +5937,22 @@ int mbnavadjust_addcrossing(int verbose, struct mbna_project *project, int ifile
 
 /*--------------------------------------------------------------------*/
 int mbnavadjust_bin_bathymetry(int verbose, struct mbna_project *project,
-                               double altitude, int beams_bath, char *beamflag, double *bath, double *bathacrosstrack,
-                               double *bathalongtrack, int bin_beams_bath, double bin_pseudobeamwidth,
-                               double bin_swathwidth, char *bin_beamflag, double *bin_bath, double *bin_bathacrosstrack,
-                               double *bin_bathalongtrack, int *error) {
+             double altitude, int beams_bath, char *beamflag, double *bath, double *bathacrosstrack,
+             double *bathalongtrack, int bin_beams_bath, double bin_pseudobeamwidth,
+             double bin_swathwidth, char *bin_beamflag, double *bin_bath, double *bin_bathacrosstrack,
+             double *bin_bathalongtrack, int *error) {
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
-    fprintf(stderr, "dbg2       verbose:               %d\n", verbose);
-    fprintf(stderr, "dbg2       project:               %p\n", project);
-    fprintf(stderr, "dbg2       altitude:              %f\n", altitude);
-    fprintf(stderr, "dbg2       beams_bath:            %d\n", beams_bath);
+    fprintf(stderr, "dbg2       verbose:         %d\n", verbose);
+    fprintf(stderr, "dbg2       project:         %p\n", project);
+    fprintf(stderr, "dbg2       altitude:        %f\n", altitude);
+    fprintf(stderr, "dbg2       beams_bath:      %d\n", beams_bath);
     for (int i = 0; i < beams_bath; i++)
-      fprintf(stderr, "dbg2        beam[%d]: %f %f %f %d\n", i, bath[i], bathacrosstrack[i],
-              bathalongtrack[i], beamflag[i]);
-    fprintf(stderr, "dbg2       bin_beams_bath:        %d\n", bin_beams_bath);
+      fprintf(stderr, "dbg2  beam[%d]: %f %f %f %d\n", i, bath[i], bathacrosstrack[i],
+        bathalongtrack[i], beamflag[i]);
+    fprintf(stderr, "dbg2       bin_beams_bath:  %d\n", bin_beams_bath);
     fprintf(stderr, "dbg2       bin_pseudobeamwidth:   %f\n", bin_pseudobeamwidth);
-    fprintf(stderr, "dbg2       bin_swathwidth:        %f\n", bin_swathwidth);
+    fprintf(stderr, "dbg2       bin_swathwidth:  %f\n", bin_swathwidth);
   }
 
   const int status = MB_SUCCESS;
@@ -5493,7 +5962,7 @@ int mbnavadjust_bin_bathymetry(int verbose, struct mbna_project *project,
     fprintf(stderr, "dbg2  Return values:\n");
     for (int i = 0; i < project->bin_beams_bath; i++)
       fprintf(stderr, "dbg2     beam[%d]: %f %f %f %d\n", i, bin_bath[i], bin_bathacrosstrack[i],
-              bin_bathalongtrack[i], bin_beamflag[i]);
+        bin_bathalongtrack[i], bin_beamflag[i]);
     fprintf(stderr, "dbg2       error:       %d\n", *error);
     fprintf(stderr, "dbg2  Return status:\n");
     fprintf(stderr, "dbg2       status:      %d\n", status);
@@ -5506,8 +5975,8 @@ bool mbnavadjust_sections_intersect(int verbose, struct mbna_project *project, i
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
-    fprintf(stderr, "dbg2       verbose:          %d\n", verbose);
-    fprintf(stderr, "dbg2       project:          %p\n", project);
+    fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+    fprintf(stderr, "dbg2       project:    %p\n", project);
     fprintf(stderr, "dbg2       crossing_id:  %d\n", crossing_id);
   }
 
@@ -5628,30 +6097,30 @@ int mbnavadjust_globaltie_compare(const void *a, const void *b) {
 int mbnavadjust_info_add(int verbose, struct mbna_project *project, char *info, bool timetag, int *error) {
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
-    fprintf(stderr, "dbg2       verbose:          %d\n", verbose);
-    fprintf(stderr, "dbg2       project:          %p\n", project);
-    fprintf(stderr, "dbg2       info:             %s\n", info);
-    fprintf(stderr, "dbg2       timetag:          %d\n", timetag);
+    fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+    fprintf(stderr, "dbg2       project:    %p\n", project);
+    fprintf(stderr, "dbg2       info:       %s\n", info);
+    fprintf(stderr, "dbg2       timetag:    %d\n", timetag);
   }
 
-	/* add text */
-	if (project->logfp != NULL)
-		fputs(info, project->logfp);
-	if (verbose > 0)
-		fputs(info, stderr);
+  /* add text */
+  if (project->logfp != NULL)
+    fputs(info, project->logfp);
+  if (verbose > 0)
+    fputs(info, stderr);
 
-	/* put time tag in if requested */
-	if (timetag) {
+  /* put time tag in if requested */
+  if (timetag) {
     char user[256], host[256], date[32];
-	  int error = MB_ERROR_NO_ERROR;
+    int error = MB_ERROR_NO_ERROR;
     int status = mb_user_host_date(verbose, user, host, date, &error);
-		char tag[STRING_MAX];
-		sprintf(tag, " > User <%s> on cpu <%s> at <%s>\n", user, host, date);
-		if (project->logfp != NULL)
-			fputs(tag, project->logfp);
-		if (verbose > 0)
-			fputs(tag, stderr);
-	}
+    char tag[STRING_MAX];
+    sprintf(tag, " > User <%s> on cpu <%s> at <%s>\n", user, host, date);
+    if (project->logfp != NULL)
+      fputs(tag, project->logfp);
+    if (verbose > 0)
+      fputs(tag, stderr);
+  }
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBnavadjust function <%s> completed\n", __func__);
@@ -5661,7 +6130,7 @@ int mbnavadjust_info_add(int verbose, struct mbna_project *project, char *info, 
     fprintf(stderr, "dbg2       status:      %d\n", MB_SUCCESS);
   }
 
-	return (MB_SUCCESS);
+  return (MB_SUCCESS);
 }
 
 /*--------------------------------------------------------------------*/

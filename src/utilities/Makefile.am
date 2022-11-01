@@ -44,6 +44,7 @@ bin_PROGRAMS += mbsvplist
 bin_PROGRAMS += $(MBSVPSELECT_PROG)
 bin_PROGRAMS += mbswath2las
 bin_PROGRAMS += mbtime
+bin_PROGRAMS += mbtransmitpattern
 bin_PROGRAMS += mbvoxelclean
 bin_PROGRAMS += $(FFTW_PROG)
 bin_PROGRAMS += $(MBTRN_PROG)
@@ -124,6 +125,8 @@ mbsvpselect_SOURCES = mbsvpselect.cc
 endif
 mbswath2las_SOURCES = mbswath2las.cc
 mbtime_SOURCES = mbtime.cc
+mbtransmitpattern_LDADD = ${top_builddir}/src/mbaux/libmbaux.la
+mbtransmitpattern_SOURCES = mbtransmitpattern.cc
 mbvoxelclean_SOURCES = mbvoxelclean.cc
 if BUILD_FFTW
 mbsegypsd_LDADD =

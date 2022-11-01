@@ -33,8 +33,8 @@
 #endif
 
 /* mbnavadjust global defines */
-#define STRING_MAX MB_PATH_MAXLINE
-#define BUFFER_MAX 1024
+#define STRING_MAX 10 * MB_PATH_MAXLINE
+#define BUFFER_MAX STRING_MAX
 #define ALLOC_NUM 10
 #define MBNA_SNAV_NUM 11
 #define MBNA_STATUS_GUI 0
@@ -197,6 +197,7 @@ struct mbna_globaltie {
   double dr2_m;
   double dr3_m;
   double rsigma_m;
+  int isurveyplotindex;
 };
 struct mbna_section {
   int file_id;
@@ -232,6 +233,7 @@ struct mbna_section {
   int show_in_modelplot;
   int modelplot_start_count;
   int contoursuptodate;
+  int status;
   struct mbna_globaltie globaltie;
 };
 struct mbna_file {
@@ -351,6 +353,7 @@ struct mbna_project {
   struct mbna_crossing *crossings;
   int num_ties;
   int num_globalties;
+  int num_globalties_analyzed;
   double section_length;
   int section_soundings;
   int bin_beams_bath;
@@ -378,6 +381,7 @@ struct mbna_project {
 
   int refgrid_status;
   struct mbna_grid refgrid;
+  struct mbna_section reference_section;
 
   int grid_status;
   struct mbna_grid grid;
@@ -446,6 +450,9 @@ int mbnavadjust_crossing_overlap(int verbose, struct mbna_project *project, int 
 int mbnavadjust_crossing_overlapbounds(int verbose, struct mbna_project *project, int crossing_id, double offset_x,
                                        double offset_y, double *lonmin, double *lonmax, double *latmin, double *latmax,
                                        int *error);
+int mbnavadjust_section_overlapbounds(int verbose, struct mbna_project *project, int file_id, int section_id, double offset_x,
+                                       double offset_y, double *lonmin, double *lonmax, double *latmin, double *latmax,
+                                       int *error);
 int mbnavadjust_crossing_focuspoint(int verbose, struct mbna_project *project, int crossing_id,
                                     double offset_x, double offset_y, int *isnav1_focus, int *isnav2_focus,
                                     double *lon_focus, double *lat_focus, int *error);
@@ -454,7 +461,7 @@ int mbnavadjust_set_plot_functions(int verbose, struct mbna_project *project,
                              void *justify_string, void *plot_string, int *error);
 int mbnavadjust_section_load(int verbose, struct mbna_project *project,
                              int file_id, int section_id,
-                             void **swathraw_ptr, void **swath_ptr, int num_pings, int *error);
+                             void **swathraw_ptr, void **swath_ptr, int *error);
 int mbnavadjust_section_unload(int verbose, void **swathraw_ptr, void **swath_ptr, int *error);
 int mbnavadjust_fix_section_sensordepth(int verbose, struct mbna_project *project, int *error);
 int mbnavadjust_section_translate(int verbose, struct mbna_project *project,
@@ -463,8 +470,11 @@ int mbnavadjust_section_translate(int verbose, struct mbna_project *project,
 int mbnavadjust_section_contour(int verbose, struct mbna_project *project,
                                 int fileid, int sectionid, struct swath *swath,
                                 struct mbna_contour_vector *contour, int *error);
-int mbnavadjust_referencesection_load();
-int mbnavadjust_referencesection_unload();
+int mbnavadjust_reference_load(int verbose, struct mbna_project *project,
+                                struct mbna_section *section, void **swath, int *error);
+int mbnavadjust_reference_unload(int verbose, void **swath, int *error);
+int mbnavadjust_referenceplussection_load();
+int mbnavadjust_referenceplussection_unload();
 int mbnavadjust_import_data(int verbose, struct mbna_project *project, char *path, int format, int *error);
 int mbnavadjust_import_file(int verbose, struct mbna_project *project, char *path, int format, bool firstfile, int *error);
 int mbnavadjust_import_reference(int verbose, struct mbna_project *project, char *path, int *error);
