@@ -22,7 +22,6 @@ using namespace mb_system;
 QVtkRenderer::QVtkRenderer() :
   displayProperties_(nullptr),
   item_(nullptr),
-  initialized_(false),
   gridFilename_(nullptr),
   wheelEvent_(nullptr),
   mouseButtonEvent_(nullptr),
@@ -62,21 +61,15 @@ void QVtkRenderer::render() {
 
   qDebug() << "QVtkRenderer::render()";
   
-  renderWindow_->PushState();
+  renderWindow_->PushState(); 
   
-  initializeOpenGLState();
-  renderWindow_->Start();
-
-
-  if (!initialized_) {
-    initialize();
-    initialized_ = true;
-  }
+  renderWindow_->OpenGLInitState();
 
   axesActor_->SetVisibility(displayProperties_->showAxes);
   
   // User changed vertical scale - rebuild pipeline
   if (displayProperties_->verticalExagg != prevZScale_) {
+    qDebug() << "QVtkRenderer::render() vert scale changed, assemblePipeline";
     assemblePipeline();
     prevZScale_ = displayProperties_->verticalExagg;
   }
@@ -94,7 +87,6 @@ void QVtkRenderer::render() {
   
   if (mouseButtonEvent_ && !mouseButtonEvent_->isAccepted()) {
     // qDebug() << "render(): handle mouseButtonEvent";
-
 
 
     if (mouseButtonEvent_->type() == QEvent::MouseButtonPress) {
@@ -187,6 +179,8 @@ void QVtkRenderer::render() {
 
   if (item_->width() != rendererSize[0] || item_->height() != rendererSize[1]) {
     // Resize render window to fit within its QVtkItem 
+    qDebug() << "QVtkRenderer::render() resize renderWindow " << \
+      item_->width() << " x " << item_->height();
     renderWindow_->SetSize(item_->width(), item_->height());
   }
 
@@ -255,25 +249,16 @@ void QVtkRenderer::synchronize(QQuickFramebufferObject *item) {
 }
 
 
-void QVtkRenderer::initialize() {
-  qDebug() << "QVtkRenderer::initialize()";
-  initialized_ = true;
-}
-
-
-
 bool QVtkRenderer::initializePipeline(const char *gridFilename) {
   qDebug() << "QVtkRenderer::initializePipeline() " << gridFilename;
 
   // Colors for axes
   namedColors_ = vtkSmartPointer<vtkNamedColors>::New();
 
-
   // Color data points based on z-value
   elevColorizer_ =
     vtkSmartPointer<vtkElevationFilter>::New();
 
-  
   elevLookupTable_ =
     vtkSmartPointer<vtkLookupTable>::New();
   
@@ -314,21 +299,12 @@ bool QVtkRenderer::initializePipeline(const char *gridFilename) {
   // Axes actor
   axesActor_ = vtkSmartPointer<vtkCubeAxesActor>::New();
 
-  bool status = assemblePipeline();
-
-  return status;
+  // Invoke callback when renderWindow_ is made current
+  renderWindow_->AddObserver(vtkCommand::WindowMakeCurrentEvent,
+                             this, &QVtkRenderer::makeCurrentCallback);
+    
+  return assemblePipeline();
 }
-
-
-void QVtkRenderer::initializeOpenGLState()
-{
-  renderWindow_->OpenGLInitState();
-  renderWindow_->MakeCurrent();
-  QOpenGLFunctions::initializeOpenGLFunctions();
-  QOpenGLFunctions::glUseProgram(0);
-}
-
-
 
 void QVtkRenderer::setupAxes(vtkCubeAxesActor *axesActor,
                              vtkColor3d &axisColor,
@@ -411,46 +387,12 @@ bool QVtkRenderer::assemblePipeline() {
     "yMin: " << dBounds[2] << ", yMax: " << dBounds[3] <<
     "zMin: " << dBounds[4] << ", zMax: " << dBounds[5];
 
-
   elevColorizer_->SetInputConnection(gridReader_->GetOutputPort());  
   elevColorizer_->SetLowPoint(0, 0, gridBounds[4]);
   elevColorizer_->SetHighPoint(0, 0, gridBounds[5]);
-  elevColorizer_->SetScalarRange(gridBounds[4], gridBounds[5]);
-  
-  bool doTransform = true;
-  if (doTransform) {
-    float zScale = displayProperties_->verticalExagg;
-    qDebug() << "zScale: " << zScale;
-    /// Do we have to recreate transform and transform filter each time?
-    transform_ = vtkSmartPointer<vtkTransform>::New();
-    transformFilter_ = vtkSmartPointer<vtkTransformFilter>::New();  
-    transform_->Scale(1., 1., zScale);
-    transformFilter_->SetTransform(transform_);
 
-    // transformFilter_->SetInputConnection(elevColorizer_->GetOutputPort());
-    transformFilter_->SetInputConnection(elevColorizer_->GetOutputPort());
-    surfaceMapper_->SetInputConnection(transformFilter_->GetOutputPort());
-  }
-  else {
-    surfaceMapper_->SetInputConnection(elevColorizer_->GetOutputPort());    
-  }
+  surfaceMapper_->SetInputConnection(elevColorizer_->GetOutputPort());    
 
-  qDebug() << "create LUT";
-  makeLookupTable(Haxby, elevLookupTable_);
-
-  double *mapperBounds = surfaceMapper_->GetBounds();
-  qDebug() << "mapper z bounds: " << mapperBounds[4] <<
-    " " << mapperBounds[5];
-    
-  qDebug() << "SetScalarRange " << dBounds[4] << "  " << dBounds[5];
-  surfaceMapper_->SetScalarRange(dBounds[4], dBounds[5]);
-  surfaceMapper_->ScalarVisibilityOn();
-  surfaceMapper_->SetLookupTable(elevLookupTable_);
-
-  mapperBounds = surfaceMapper_->GetBounds();
-  qDebug() << "NOW - mapper z bounds: " << mapperBounds[4] <<
-    " " << mapperBounds[5];
-    
   // Assign surfaceMapper to actor
   qDebug() << "assign surfaceMapper to actor";
   surfaceActor_->SetMapper(surfaceMapper_);
@@ -470,7 +412,7 @@ bool QVtkRenderer::assemblePipeline() {
   
   // Per QtVTK example
   windowInteractor_->EnableRenderOff();
-
+  qDebug() << "Keep windowActor enabled!!!";
   vtkColor3d axisColor = namedColors_->GetColor3d("black");
 
   // Set up axes
@@ -491,116 +433,6 @@ bool QVtkRenderer::assemblePipeline() {
 
 }
 
-
-
-bool QVtkRenderer::assemblePipelineTest(mb_system::GmtGridReader *gridReader,
-                                        const char *gridFilename,
-                                        vtkElevationFilter *elevColorizer,
-                                        vtkRenderer *renderer,
-                                        vtkPolyDataMapper *surfaceMapper,
-                                        vtkGenericOpenGLRenderWindow *renderWindow,
-                                        vtkGenericRenderWindowInteractor *windowInteractor,
-                                        PickerInteractorStyle *interactorStyle,
-                                        vtkActor *surfaceActor,
-                                        vtkCubeAxesActor *axesActor,
-                                        const DisplayProperties *displayProperties) {
-
-
-  qDebug() << "QVtkRenderer::assemblePipeline() " << gridFilename;
-
-  double gridBounds[6];
-  gridReader->gridBounds(&gridBounds[0], &gridBounds[1],
-                         &gridBounds[2], &gridBounds[3],
-                         &gridBounds[4], &gridBounds[5]);
-  
-  qDebug() << "xMin: " << gridBounds[0] << ", xMax: " << gridBounds[1] <<
-    "yMin: " << gridBounds[2] << ", yMax: " << gridBounds[3] <<
-    "zMin: " << gridBounds[4] << ", zMax: " << gridBounds[5];
-
-
-  double *dBounds = gridReader->GetOutput()->GetBounds();
-  
-  qDebug() << "GetBounds() - xMin: " << dBounds[0] << ", xMax: " <<
-    dBounds[1] <<
-    "yMin: " << dBounds[2] << ", yMax: " << dBounds[3] <<
-    "zMin: " << dBounds[4] << ", zMax: " << dBounds[5];
-
-  elevColorizer->SetInputConnection(gridReader->GetOutputPort());  
-  elevColorizer->SetLowPoint(0, 0, gridBounds[4]);
-  elevColorizer->SetHighPoint(0, 0, gridBounds[5]);
-
-  float zScale = 1.;
-  
-  bool scaleZ = true;
-  if (scaleZ) {
-    /* **
-    // Compute z-scale factor
-    zScale = GmtGridReader::zScaleLatLon(gridBounds[3] - gridBounds[2],
-                                         gridBounds[1] - gridBounds[0],
-                                         gridBounds[5] - gridBounds[4]);
-                                         *** */
-    zScale = 1.;
-    zScale = displayProperties->verticalExagg;
-    
-    std::cout << "zScale " << zScale << std::endl;
-
-    vtkNew<vtkTransform> transform;
-    qDebug() << "zScale: " << zScale;
-    transform->Scale(1., 1., zScale);
-    vtkNew<vtkTransformFilter> zScaleFilter;
-    zScaleFilter->SetTransform(transform);
-    zScaleFilter->SetInputConnection(elevColorizer->GetOutputPort());
-  
-    surfaceMapper->SetInputConnection(zScaleFilter->GetOutputPort());
-  }
-  else {
-    surfaceMapper->SetInputConnection(elevColorizer->GetOutputPort());
-  }
-  
-  // Assign surfaceMapper to actor
-  qDebug() << "assign surfaceMapper to actor";
-  surfaceActor->SetMapper(surfaceMapper);
-
-  // Add actor to renderer
-  renderer->AddActor(surfaceActor);
-
-  // Add renderer to the renderWindow
-  qDebug() << "add renderer to renderWindow";
-  renderWindow->AddRenderer(renderer);
-
-  interactorStyle->SetDefaultRenderer(renderer);
-  interactorStyle->polyData_ = gridReader->GetOutput();
-
-  windowInteractor->SetInteractorStyle(interactorStyle);
-  windowInteractor->SetRenderWindow(renderWindow);
-  
-  // Per QtVTK example
-  windowInteractor->EnableRenderOff();
-
-  // Colors for axes
-  vtkSmartPointer<vtkNamedColors> colors = 
-    vtkSmartPointer<vtkNamedColors>::New();
-
-  vtkColor3d axisColor = colors->GetColor3d("black");
-
-  // Set up axes
-  setupAxes(axesActor, axisColor,
-            surfaceMapper->GetBounds(),
-            gridBounds,
-            gridReader->xUnits(), gridReader->yUnits(), gridReader->zUnits());
-
-  axesActor->SetCamera(renderer->GetActiveCamera());
-
-  renderer->AddActor(axesActor);    
-
-  renderer->ResetCamera();
-
-  // Initialize the OpenGL context for the renderer
-  ///  renderWindow->OpenGLInitContext();
-
-  qDebug() << "pipeline assembled";  
-  return true;
-}
 
 
 bool QVtkRenderer::gridFilenameChanged(char *filename) {
@@ -683,3 +515,13 @@ void QVtkRenderer::LoadFileWorker::run() {
   qDebug() << "QVtkRenderer::LoadFileLoader::run() finished";
 }
 
+
+/// Assert renderWindow_ as current in response to WindowMakeCurrent event
+void QVtkRenderer::makeCurrentCallback(vtkObject *, unsigned long eid,
+                                       void *callData) {
+
+  std::cout << "makeCurrentCallback()!" << std::endl;
+
+  // Assert render window as current
+  renderWindow_->SetIsCurrent(true);
+}

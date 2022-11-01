@@ -9,8 +9,10 @@
 #include "vtkPoints.h"
 #include "vtkCellArray.h"
 
+extern "C" {
 #include "mb_define.h"
 #include "mb_io.h"
+}
 
 namespace mb_system {
 
