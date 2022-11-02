@@ -193,9 +193,9 @@ int TopoGridReader::RequestData(vtkInformation* request,
     char targCRS[64];
     sprintf(targCRS, "+proj=utm +zone=%d +datum=WGS84", utmZone); 
     toUTM = proj_create_crs_to_crs (projContext,
-                                         srcCRS,
-                                         targCRS,
-                                         nullptr);
+                                    srcCRS,
+                                    targCRS,
+                                    nullptr);
     if (!toUTM) {
       vtkErrorMacro(<< "failed to create toUTM");
       SetErrorCode(vtkErrorCode::UserError);
@@ -253,23 +253,21 @@ int TopoGridReader::RequestData(vtkInformation* request,
         vtkIdType id = gridPoints_->InsertNextPoint(x, y, z);
       }
       else {
+        /* ***
         grid_->data(row, col, &y, &x, &z);
         vtkIdType id = gridPoints_->InsertNextPoint(x, y, z);
-
-        /* ***
-        grid_->data(row, col, &lat, &lon, &z);
-        if (!std::isnan(z)) {
-          // Convert lat/lon to UTM
-          PJ_COORD lonLat = proj_coord(lon, lat,
-                                       0, 0);
-
-          PJ_COORD utm = proj_trans(toUTM, PJ_FWD, lonLat);
-          std::cerr << "utm: " << utm.enu.e << ", " << utm.enu.n << std::endl;
-          vtkIdType id = gridPoints_->InsertNextPoint(utm.enu.e,
-                                                      utm.enu.n,
-                                                      z);
-        }
         *** */
+
+        grid_->data(row, col, &lat, &lon, &z);
+        // Convert lat/lon to UTM
+        PJ_COORD lonLat = proj_coord(lon, lat,
+                                     0, 0);
+
+        PJ_COORD utm = proj_trans(toUTM, PJ_FWD, lonLat);
+        std::cerr << "utm: " << utm.enu.e << ", " << utm.enu.n << std::endl;
+        vtkIdType id = gridPoints_->InsertNextPoint(utm.enu.e,
+                                                    utm.enu.n,
+                                                    z);
       }
 
       /* **
@@ -286,6 +284,12 @@ int TopoGridReader::RequestData(vtkInformation* request,
   }
   
   //// DEBUG OUTPUT
+
+  double *bounds = gridPoints_->GetBounds();
+  std::cerr << "gridPoints_ bounds: " << bounds[0] << ", " << bounds[1] << ", "
+            << bounds[2] << ", " << bounds[3] << ", "
+            << bounds[4] << ", " << bounds[5] << std::endl;
+  
   row = nRows - 1;
   col = 0;
   grid_->data(row, col, &y, &x, &z);
@@ -366,7 +370,15 @@ void TopoGridReader::gridBounds(double *xMin, double *xMax,
                                  double *yMin, double *yMax,
                                  double *zMin, double *zMax) {
 
-  grid_->bounds(xMin, xMax, yMin, yMax, zMin, zMax);
+  // grid_->bounds(xMin, xMax, yMin, yMax, zMin, zMax);
+  double bounds[6];
+  gridPoints_->GetBounds(bounds);
+  *xMin = bounds[0];
+  *xMax = bounds[1];
+  *yMin = bounds[2];
+  *yMax = bounds[3];
+  *zMin = bounds[4];
+  *zMax = bounds[5];  
 }
 
 
