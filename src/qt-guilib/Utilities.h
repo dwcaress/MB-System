@@ -22,9 +22,11 @@ namespace mb_system {
    {0.950, 0.522, 0.267, 0.341, 0.475, 0.635, 0.682, 1.000, 1.000,
     0.984, 0.686};
   
-  enum ColorMapScheme { BrewerDivergingSpectral, WhiteToBlue,
+  enum ColorMapScheme { BrewerDivergingSpectral=0, WhiteToBlue,
                         Hawaii, RedToBlue, Haxby };
 
+  /// Return name of ColorMapScheme
+  const char *colorMapSchemeName(ColorMapScheme scheme);
   
   /// Make lookup table
   void makeLookupTable(ColorMapScheme colorMap, vtkLookupTable *lut);

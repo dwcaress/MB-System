@@ -4,13 +4,41 @@
 
 #include <vtkColorSeries.h>
 #include <vtkNamedColors.h>
+#include <vtkColorTransferFunction.h>
 #include "Utilities.h"
+
+const char *mb_system::colorMapSchemeName(mb_system::ColorMapScheme scheme) {
+  switch (scheme) {
+
+  case BrewerDivergingSpectral:
+    return "BrewerDivergingSpectral";
+
+  case WhiteToBlue:
+    return "WhiteToBlue";
+
+  case Hawaii:
+    return "Hawaii";
+
+  case RedToBlue:
+    return "RedToBlue";
+
+  case Haxby:
+    return "Haxby";
+    
+  default:
+    return "unknown";
+  }
+  
+}
 
 void mb_system::makeLookupTable(mb_system::ColorMapScheme colorScheme,
                                 vtkLookupTable* lut)
 {
   vtkSmartPointer<vtkNamedColors> colors =
     vtkSmartPointer<vtkNamedColors>::New();
+
+  std::cout << "makeLookupTable() w/ colorscheme " <<
+    colorMapSchemeName(colorScheme) << std::endl;
   
   // Select a color scheme.
   switch (colorScheme)  {
@@ -24,6 +52,7 @@ void mb_system::makeLookupTable(mb_system::ColorMapScheme colorScheme,
     colorSeries->SetColorScheme(colorSeriesEnum);
     colorSeries->BuildLookupTable(lut, colorSeries->ORDINAL);
     lut->SetNanColor(1, 0, 0, 1);
+    lut->SetRampToSCurve();
     break;
   }
   case WhiteToBlue: {
@@ -71,25 +100,46 @@ void mb_system::makeLookupTable(mb_system::ColorMapScheme colorScheme,
   default:  {
 
     std::cout << "Haxby LUT" << std::endl;
-    
-    vtkSmartPointer<vtkColorSeries> colorSeries =
-      vtkSmartPointer<vtkColorSeries>::New();
 
+    vtkNew<vtkColorTransferFunction> ctf;
+    // ctf->SetColorSpaceToDiverging();
     int nColors = 11;
-    char nameBuf[16];
-    colorSeries->SetNumberOfColors(nColors);
     for (int i = 0; i < nColors; i++) {
-      sprintf(nameBuf, "color-%d", i);
-      vtkStdString name(nameBuf);
-      colors->SetColor(name, haxbyRed[nColors-i], haxbyGreen[nColors-i],
-                       haxbyBlue[nColors-i]);
-      colorSeries->SetColor(i, colors->GetColor3ub(name));
+      // x ranges from 0. (i=0) to 1. (i=nColors-1)
+      double x = (double )i / (double )(nColors - 1);
+      int ind = nColors-1 - i; 
+      ctf->AddRGBPoint(x, haxbyRed[ind], haxbyGreen[ind], haxbyBlue[ind]);
     }
 
-    colorSeries->BuildLookupTable(lut, colorSeries->ORDINAL);
+    auto tableSize = 256;
+    lut->SetNumberOfTableValues(tableSize);
+    lut->Build();
+    for (int i = 0; i < lut->GetNumberOfColors(); i++) {
+      std::array<double, 3> rgb;
+      ctf->GetColor(static_cast<double>(i) / lut->GetNumberOfColors(),
+                    rgb.data());
+      std::array<double, 4> rgbAlpha{0., 0., 0., 1.0};
+      std::copy(std::begin(rgb), std::end(rgb), std::begin(rgbAlpha));
+      lut->SetTableValue(static_cast<vtkIdType>(i), rgbAlpha.data());
+    }
+
+    /* ***
+    int nColors = 11;
+    char nameBuf[16];
     lut->SetRampToSCurve();
+    lut->SetNumberOfTableValues(nColors);
+    lut->SetIndexedLookup(false);
     
+    for (vtkIdType i = 0; i < nColors; i++) {
+      lut->SetTableValue(i, haxbyRed[i], haxbyGreen[i], haxbyBlue[i],
+                         0.8);
+    }
+    std::cout << "TEST TESTING first table value is red" << std::endl;
+    lut->SetTableValue(0, 1., 0., 0., 1.);   /// TEST TEST TEST
+    lut->Build();
+
     break;
+    *** */
   }
   }    
 };
