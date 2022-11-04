@@ -27,10 +27,6 @@ public:
   /// Specify site file to display
   Q_INVOKABLE bool setSiteFile(QUrl file);
   
-  /// Toggle axes display
-  Q_INVOKABLE void showAxes(bool show);
-
-
 public slots:
   // Slot for qml-generated signals
   void qmlSlot(const QString &msg);

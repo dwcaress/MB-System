@@ -6,6 +6,7 @@
 
 #define VERTICAL_EXAGG "verticalExagg"
 #define SHOW_AXES "showAxes"
+#define COLORMAP "colormap"
 
 /// Initialize singleton to null
 BackEnd *BackEnd::singleInstance_ = nullptr;
@@ -130,10 +131,28 @@ void BackEnd::qmlSlot(const QString &qmsg) {
     }
     else if (!strncmp(msg, SHOW_AXES, strlen(SHOW_AXES))) {
       if (strstr(msg, "true")) {
-        showAxes(true);
+        // showAxes(true);
+        qVtkItem_->showAxes(true);
       }
       else {
-        showAxes(false);
+        qVtkItem_->showAxes(false);
       }
+      qVtkItem_->update();        
+    }
+    else if (!strncmp(msg, COLORMAP, strlen(COLORMAP))) {
+      // Scheme name is second token
+      char *schemeName = strchr(msg, ' ') + 1;
+      if (!schemeName) {
+        qCritical() << "Couldn't find colormap scheme name in " << msg;
+        return;
+      }
+      qDebug() << "colormap schemeName: " << schemeName;
+      if (!qVtkItem_->setColorMapScheme(schemeName)) {
+        qCritical() << "Unknown colormap scheme: " << schemeName;
+      }
+      else {
+        qDebug() << "Set colormap scheme to " << schemeName;
+      }
+      qVtkItem_->update();      
     }
   }
