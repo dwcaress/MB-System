@@ -13,6 +13,7 @@
 #include <vtkVectorText.h>
 #include <vtkAxes.h>
 #include <vtkFollower.h>
+#include <vtkParticleReader.h>
 #include "QVtkRenderer.h"
 #include "QVtkItem.h"
 #include "Utilities.h"
@@ -262,7 +263,6 @@ bool QVtkRenderer::initializePipeline(const char *gridFilename) {
   elevLookupTable_ =
     vtkSmartPointer<vtkLookupTable>::New();
   
-  
   // Create VTK renderer (not the same as QT renderer)
   qDebug() << "create vtk renderer";
   renderer_ =
@@ -393,6 +393,15 @@ bool QVtkRenderer::assemblePipeline() {
 
   surfaceMapper_->SetInputConnection(elevColorizer_->GetOutputPort());    
 
+  bool useLUT = true;
+  if (useLUT) {
+    elevColorizer_->SetScalarRange(dBounds[4], dBounds[5]);
+    makeLookupTable(ColorMapScheme::Haxby, elevLookupTable_);
+    surfaceMapper_->SetScalarRange(dBounds[4], dBounds[5]);
+    surfaceMapper_->ScalarVisibilityOn();
+    surfaceMapper_->SetLookupTable(elevLookupTable_);
+  }
+  
   // Assign surfaceMapper to actor
   qDebug() << "assign surfaceMapper to actor";
   surfaceActor_->SetMapper(surfaceMapper_);
@@ -400,6 +409,22 @@ bool QVtkRenderer::assemblePipeline() {
   // Add actor to renderer
   renderer_->AddActor(surfaceActor_);
 
+  /* ***
+  /// TEST TEST TEST SITE READER
+  vtkNew<vtkParticleReader> siteReader;
+  siteReader->SetFileName("test-site.ste");
+  siteReader->Update();
+
+  vtkNew<vtkPolyDataMapper> siteMapper;
+  siteMapper->SetInputConnection(siteReader->GetOutputPort());
+  vtkNew<vtkActor> siteActor;
+  siteActor->SetMapper(siteMapper);
+  siteActor->GetProperty()->SetPointSize(25);
+  renderer_->AddActor(siteActor);
+  
+  ///
+  *** */
+  
   // Add renderer to the renderWindow
   qDebug() << "add renderer to renderWindow";
   renderWindow_->AddRenderer(renderer_);
