@@ -82,7 +82,10 @@ namespace mb_system {
       qDebug() << "setVerticalExagg() " << verticalExagg;
       displayProperties_.verticalExagg = verticalExagg;
     }
-    
+
+    /// Set topo colormap scheme; return true if colorMapName corresponds
+    /// to a supported colorMap, else return false.
+    bool setColorMapScheme(const char *colorMapname);
 
   signals:
 
