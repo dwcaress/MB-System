@@ -74,6 +74,7 @@ ApplicationWindow {
     ActionGroup {
         id: colorActions
         exclusive: true
+        onTriggered: {console.log("selected a colormap")}
     }
 
     ActionGroup {
@@ -153,13 +154,17 @@ ApplicationWindow {
             MenuSeparator {}
             Menu {
                 title: "Color table"
-                Action {checkable: true; checked: true; text: qsTr("Haxby"); ActionGroup.group: colorActions }
-                Action {checkable: true; text: qsTr("Bright rainbow"); ActionGroup.group: colorActions}
-                Action {checkable: true; text: qsTr("Muted rainbow"); ActionGroup.group: colorActions }
-                Action {checkable: true; text: qsTr("Grayscale"); ActionGroup.group: colorActions }
-                Action {checkable: true; text: qsTr("Flat gray"); ActionGroup.group: colorActions }
-                Action {checkable: true; text: qsTr("Sealevel1"); ActionGroup.group: colorActions }
-                Action {checkable: true; text: qsTr("Sealevel2"); ActionGroup.group: colorActions }
+                Action {checkable: true; checked: true; text: qsTr("Haxby"); ActionGroup.group: colorActions
+                onTriggered: {mainWindow.qmlSignal("colormap " + "Haxby")}}
+                
+                Action {checkable: true; text: qsTr("BrightRainbow"); ActionGroup.group: colorActions
+                onTriggered: {mainWindow.qmlSignal("colormap BrightRainbow")}}
+                
+                Action {checkable: true; text: qsTr("MutedRainbow"); ActionGroup.group: colorActions
+                onTriggered: {mainWindow.qmlSignal("colormap MutedRainbow")}}
+                
+                Action {checkable: true; text: qsTr("Grayscale"); ActionGroup.group: colorActions
+                onTriggered: {mainWindow.qmlSignal("colormap Grayscale")}}
             }
         }
 
