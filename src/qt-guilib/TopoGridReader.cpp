@@ -253,11 +253,6 @@ int TopoGridReader::RequestData(vtkInformation* request,
         vtkIdType id = gridPoints_->InsertNextPoint(x, y, z);
       }
       else {
-        /* ***
-        grid_->data(row, col, &y, &x, &z);
-        vtkIdType id = gridPoints_->InsertNextPoint(x, y, z);
-        *** */
-
         grid_->data(row, col, &lat, &lon, &z);
         // Convert lat/lon to UTM
         PJ_COORD lonLat = proj_coord(lon, lat,
