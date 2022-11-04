@@ -20,9 +20,13 @@ public:
   /// Create and register singleton
   static bool registerSingleton(int argc, char **argv,
                                 QQmlApplicationEngine *engine);
+  
   /// Specify grid file to display
   Q_INVOKABLE bool setGridFile(QUrl file);
 
+  /// Specify site file to display
+  Q_INVOKABLE bool setSiteFile(QUrl file);
+  
   /// Toggle axes display
   Q_INVOKABLE void showAxes(bool show);
 

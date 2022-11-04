@@ -101,6 +101,13 @@ bool BackEnd::setGridFile(QUrl fileURL) {
 }
 
 
+bool BackEnd::setSiteFile(QUrl fileURL) {
+    qDebug() << "*** setSiteFile() - " << fileURL;
+    return true;
+}
+
+
+
 void BackEnd::showAxes(bool show) {
   qDebug() << "BackEnd::showAxes(" << show << ")";
   qVtkItem_->showAxes(show);
