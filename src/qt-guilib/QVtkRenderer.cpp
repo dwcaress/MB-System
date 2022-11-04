@@ -16,7 +16,7 @@
 #include <vtkParticleReader.h>
 #include "QVtkRenderer.h"
 #include "QVtkItem.h"
-#include "Utilities.h"
+#include "TopoColorMap.h"
 
 using namespace mb_system;
 
@@ -393,14 +393,13 @@ bool QVtkRenderer::assemblePipeline() {
 
   surfaceMapper_->SetInputConnection(elevColorizer_->GetOutputPort());    
 
-  bool useLUT = true;
-  if (useLUT) {
-    elevColorizer_->SetScalarRange(dBounds[4], dBounds[5]);
-    makeLookupTable(ColorMapScheme::Haxby, elevLookupTable_);
-    surfaceMapper_->SetScalarRange(dBounds[4], dBounds[5]);
-    surfaceMapper_->ScalarVisibilityOn();
-    surfaceMapper_->SetLookupTable(elevLookupTable_);
-  }
+  elevColorizer_->SetScalarRange(dBounds[4], dBounds[5]);
+  TopoColorMap::makeLUT(displayProperties_->topoColorMapScheme,
+                        elevLookupTable_);
+    
+  surfaceMapper_->SetScalarRange(dBounds[4], dBounds[5]);
+  surfaceMapper_->ScalarVisibilityOn();
+  surfaceMapper_->SetLookupTable(elevLookupTable_);
   
   // Assign surfaceMapper to actor
   qDebug() << "assign surfaceMapper to actor";
