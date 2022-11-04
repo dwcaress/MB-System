@@ -201,9 +201,9 @@ foreach(package ${packages})
   endif()
 
   if (${package} STREQUAL "VTK")
-    message("TRY find_package(VTK 8.2.0)")
-    find_package(VTK "8.2.0" EXACT REQUIRED)
-###    find_package(VTK REQUIRED)  # Find latest version
+##    message("TRY find_package(VTK 8.2.0)")
+##    find_package(VTK "8.2.0" EXACT REQUIRED)
+    find_package(VTK REQUIRED)  # Find latest version
     continue()    
   endif()
 
@@ -389,6 +389,8 @@ if (buildGUIs)
 endif(buildGUIs)
 
 add_subdirectory(src/utilities)
+add_subdirectory(src/deprecated)
+add_subdirectory(src/macros)
 
 if (buildQt)
   add_subdirectory(src/qt-guilib)
