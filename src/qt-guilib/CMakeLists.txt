@@ -13,6 +13,7 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
 
 set(src
+    TopoColorMap.cpp
     TopoGridReader.cpp
     Camera.cpp
     MBQuickItem.cpp
