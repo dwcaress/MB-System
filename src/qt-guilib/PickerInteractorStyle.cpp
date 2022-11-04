@@ -47,6 +47,11 @@ void PickerInteractorStyle::OnLeftButtonDown() {
   std::cout << "WorldCoord value: " << worldCoord[0] << " " <<
     worldCoord[1] << " " << worldCoord[2] << std::endl;
 
+  double gridBounds[6];
+  qVtkRenderer_->getGridReader()->gridBounds(&gridBounds[0], &gridBounds[1],
+                                             &gridBounds[2], &gridBounds[3],
+                                             &gridBounds[4], &gridBounds[5]);
+
   // Correct elevation for vertical exaggeration
   worldCoord[2] /= qVtkRenderer_->getDisplayProperties()->verticalExagg;
   
@@ -58,7 +63,11 @@ void PickerInteractorStyle::OnLeftButtonDown() {
 
   }
   else {
-    sprintf(buf, "unknown position");
+    //    sprintf(buf, "unknown position");
+    sprintf(buf, "%.1f, %.1f, %.1f ???",
+              worldCoord[0], worldCoord[1], worldCoord[2]);
+
+    
   }
   QString coordMsg(buf);
   qVtkRenderer_->getItem()->setPickedPoint(coordMsg);
