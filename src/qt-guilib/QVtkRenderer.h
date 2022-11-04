@@ -83,7 +83,11 @@ namespace mb_system {
       return item_;
     }
     
-                                                                 
+    /// Get grid reader
+    TopoGridReader *getGridReader() {
+      return gridReader_;
+    }
+
   public slots:
 
     /// Called when worker thread finishes
