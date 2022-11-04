@@ -86,11 +86,11 @@ ApplicationWindow {
             title: qsTr("File")
             Action { text: qsTr("Open grid") ;
                 onTriggered: { console.log("show file dialog")
-                    fileDialog.open()}
+                    gridfileDialog.open()}
             }
             Action { text: qsTr("Open site") ;
                 onTriggered: { console.log("open site")
-                }
+                sitefileDialog.open()}
             }
             Action { text: qsTr("Open route") ;
                 onTriggered: { console.log("open route")
@@ -224,12 +224,22 @@ ApplicationWindow {
     }
 
     FileDialog {
-        id: fileDialog
+        id: gridfileDialog
         title: "Open file"
         nameFilters: ["Grid files (*.grd *.mb?*)"]
         onAccepted: {
             console.log("accepted " + fileUrl);
             BackEnd.setGridFile(fileUrl)
+        }
+    }
+
+    FileDialog {
+        id: sitefileDialog
+        title: "Open site file"
+        nameFilters: ["Site files (*.ste)"]
+        onAccepted: {
+            console.log("accepted " + fileUrl);
+            BackEnd.setSiteFile(fileUrl)
         }
     }
 
