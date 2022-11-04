@@ -1,5 +1,6 @@
 #ifndef DISPLAYPROPERTIES_H
 #define DISPLAYPROPERTIES_H
+#include "TopoColorMap.h"
 
 namespace mb_system {
   /**
@@ -12,6 +13,11 @@ namespace mb_system {
 
     /// Vertical exaggeration
     float verticalExagg;
+
+    /// Topo colormap
+    TopoColorMap::Scheme topoColorMapScheme;
+    
+    
   };
 
 }
