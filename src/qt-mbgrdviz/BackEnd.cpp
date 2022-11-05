@@ -109,12 +109,6 @@ bool BackEnd::setSiteFile(QUrl fileURL) {
 
 
 
-void BackEnd::showAxes(bool show) {
-  qDebug() << "BackEnd::showAxes(" << show << ")";
-  qVtkItem_->showAxes(show);
-  qVtkItem_->update();
-}
-
 void BackEnd::qmlSlot(const QString &qmsg) {
     qDebug() << "qmlSlot() qmsg: " << qmsg;
 
