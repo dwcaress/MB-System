@@ -177,6 +177,9 @@ namespace mb_system {
 
     /// Most recent displayed z-scale
     float prevZScale_;
+
+    /// Most recent topo color map scheme
+    TopoColorMap::Scheme prevColorMapScheme_;
     
     /// Worker thread to load grid file
     class LoadFileWorker : public QThread {
