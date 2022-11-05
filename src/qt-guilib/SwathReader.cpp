@@ -11,7 +11,9 @@
 #include "vtk_netcdf.h"
 #include "SwathReader.h"
 
+extern "C" {
 #include "mb_format.h"
+}
 
 #define VTK_CREATE(type, name) vtkSmartPointer<type> name = vtkSmartPointer<type>::New()
 
@@ -71,7 +73,12 @@ int SwathReader::RequestData(vtkInformation* request,
   }
 
   std::cout << "call readSwathData() with fileName " << fileName_ << std::endl;
-  readSwathFile(fileName_);
+  if (!readSwathFile(fileName_)) {
+    // Error reading swath file
+    vtkErrorMacro(<< "Error reading swath data");
+    SetErrorCode(vtkErrorCode::UserError);    
+    return 0;
+  }
 
   polyOutput->SetPoints(points_);
 
@@ -99,14 +106,18 @@ bool SwathReader::readSwathFile(const char *swathFile) {
 
   fprintf(stderr, "swathFile now: %s\n", swathFile);
   int error;
-  int verbose = 1;
-    
+
+  // Verbose flag passed to mb_ functions
+  int mbVerbose = 1;
+
+  // Swath file format ID
   int swathFormat;
     
   // Determine sonar data format from filename
-  std::cout << "call mg_get_format()" << std::endl;
-  if (mb_get_format(verbose, (char *)swathFile, nullptr, &swathFormat,
-                    &error) != MB_SUCCESS) {
+  std::cout << "call mb_get_format()" << std::endl;
+  if (mb_get_format(mbVerbose, (char *)swathFile, nullptr,
+                              &swathFormat,
+                              &error) != MB_SUCCESS) {
     std::cerr << "Can't determine data format of \"" << swathFile << "\""
               << std::endl;      
     return false;
@@ -130,7 +141,7 @@ bool SwathReader::readSwathFile(const char *swathFile) {
   if (mbioPtr_) {
     // Deallocate previous array memory
     std::cout << "call mg_get_close()" << std::endl;      
-    if (mb_close(verbose, &mbioPtr_, &error) != MB_SUCCESS) {
+    if (mb_close(mbVerbose, &mbioPtr_, &error) != MB_SUCCESS) {
       std::cerr << "mb_close() failed with error " << error 
                 << std::endl;
 
@@ -139,9 +150,9 @@ bool SwathReader::readSwathFile(const char *swathFile) {
     mbioPtr_ = nullptr;
   }
 
-  // Initialize read based on metadata/data in file
+  // Initialize read based on file format and metadata/data in file
   std::cout << "call mg_read_init()" << std::endl;    
-  if (mb_read_init(verbose, (char *)swathFile, swathFormat, pings, lonRange,
+  if (mb_read_init(mbVerbose, (char *)swathFile, swathFormat, pings, lonRange,
                    areaBounds, beginTime, endTime, minSpeed, timeGap,
                    &mbioPtr_, &beginEpochSec, &endEpochSec, &maxBathBeams,
                    &maxAmpBeams, &maxSSPixels, &error) != MB_SUCCESS) {
@@ -156,7 +167,7 @@ bool SwathReader::readSwathFile(const char *swathFile) {
   
   // Register/allocate arrays
   std::cout << "call registerArray()s" << std::endl;    
-  if (!registerArrays(verbose, &error)) {
+  if (!registerArrays(mbVerbose, &error)) {
 
     std::cerr << "registerArrays() failed with error " << error 
               << std::endl;
@@ -188,7 +199,7 @@ bool SwathReader::readSwathFile(const char *swathFile) {
   // Initialize proj structure; needed to convert lat/lon to utm
   char projection[1024] = "Geographic";
   void *projPtr = nullptr;
-  if (mb_proj_init(verbose, projection, &projPtr, &error) != MB_SUCCESS) {
+  if (mb_proj_init(mbVerbose, projection, &projPtr, &error) != MB_SUCCESS) {
     std::cerr << "mb_proj_init() failed" << std::endl;
     return false;
   }
@@ -198,7 +209,7 @@ bool SwathReader::readSwathFile(const char *swathFile) {
   
   error = MB_ERROR_NO_ERROR;  
   while (error <= MB_ERROR_NO_ERROR) {
-    int status = mb_read(verbose, mbioPtr_, &recordType, &pings,
+    int status = mb_read(mbVerbose, mbioPtr_, &recordType, &pings,
                          beginTime, &beginEpochSec, &lon, &lat,
                          &speed, &heading, &distance, &altitude, &sonarDepth,
                          &nBath, &nAmp, &nSS, beamFlags_, bathymetry_,
@@ -284,9 +295,10 @@ bool SwathReader::readSwathFile(const char *swathFile) {
       
       // Convert lat/lon to utm
       double northing, easting;
-      mb_proj_forward(verbose, projPtr, bathymetryLon_[i], bathymetryLat_[i],
+      mb_proj_forward(mbVerbose, projPtr, bathymetryLon_[i], bathymetryLat_[i],
                       &easting, &northing, &error);
 
+      bool verbose = false;
       if (verbose) {
         std::cout << "lat: " << bathymetryLat_[i] << " lon: " <<
           bathymetryLon_[i] << " easting: " << easting << " northing: " <<
@@ -299,7 +311,7 @@ bool SwathReader::readSwathFile(const char *swathFile) {
     nRec++;
   }
 
-  mb_proj_free(verbose, &projPtr, &error);
+  mb_proj_free(mbVerbose, &projPtr, &error);
   
   double xMin, xMax, yMin, yMax, zMin, zMax;
   bounds(&xMin, &xMax, &yMin, &yMax, &zMin, &zMax);
@@ -312,7 +324,7 @@ bool SwathReader::readSwathFile(const char *swathFile) {
 
   // Deallocate registered arrays, release resources
   std::cout << "call mb_close()" << std::endl;
-  mb_close(verbose, &mbioPtr_, &error);
+  mb_close(mbVerbose, &mbioPtr_, &error);
 
 
   // Success
@@ -367,41 +379,41 @@ void SwathReader::bounds(double *xMin, double *xMax,
 
    *** */
 
-bool SwathReader::registerArrays(int verbose, int *error) {
+bool SwathReader::registerArrays(int mbVerbose, int *error) {
   int status = MB_SUCCESS;
 
   std::cerr << "register beamFlags" << std::endl;
-  mb_register_array(verbose, mbioPtr_, MB_MEM_TYPE_BATHYMETRY,
+  mb_register_array(mbVerbose, mbioPtr_, MB_MEM_TYPE_BATHYMETRY,
                     sizeof(char), (void **)&beamFlags_, error);
 
   std::cerr << "register bathymetry" << std::endl;  
-  mb_register_array(verbose, mbioPtr_, MB_MEM_TYPE_BATHYMETRY,
+  mb_register_array(mbVerbose, mbioPtr_, MB_MEM_TYPE_BATHYMETRY,
                     sizeof(double), (void **)&bathymetry_, error);
 
   std::cerr << "register bathymetryLat" << std::endl;  
-  mb_register_array(verbose, mbioPtr_, MB_MEM_TYPE_BATHYMETRY,
+  mb_register_array(mbVerbose, mbioPtr_, MB_MEM_TYPE_BATHYMETRY,
                     sizeof(double), (void **)&bathymetryLat_, error);
 
   std::cerr << "register bathymetryLon" << std::endl;    
-  mb_register_array(verbose, mbioPtr_, MB_MEM_TYPE_BATHYMETRY,
+  mb_register_array(mbVerbose, mbioPtr_, MB_MEM_TYPE_BATHYMETRY,
                     sizeof(double), (void **)&bathymetryLon_, error);    
 
   std::cerr << "register amplitude" << std::endl;      
-  mb_register_array(verbose, mbioPtr_, MB_MEM_TYPE_AMPLITUDE,
+  mb_register_array(mbVerbose, mbioPtr_, MB_MEM_TYPE_AMPLITUDE,
                     sizeof(double), (void **)&amplitude_, error);  
 
   std::cerr << "register sidescan" << std::endl;    
-  mb_register_array(verbose, mbioPtr_, MB_MEM_TYPE_SIDESCAN,
+  mb_register_array(mbVerbose, mbioPtr_, MB_MEM_TYPE_SIDESCAN,
                     sizeof(double), (void **)&sideScan_, error);
 
   std::cerr << "register sidescanLat" << std::endl;
   // fprintf(stderr, "register sideScanLat_ = %p\n", sideScanLat_);
   sideScanLat_ = nullptr;
-  mb_register_array(verbose, mbioPtr_, MB_MEM_TYPE_SIDESCAN,
+  mb_register_array(mbVerbose, mbioPtr_, MB_MEM_TYPE_SIDESCAN,
                     sizeof(double), (void **)&sideScanLat_, error);
 
     std::cerr << "register sidescanLon" << std::endl;      
-  mb_register_array(verbose, mbioPtr_, MB_MEM_TYPE_SIDESCAN,
+  mb_register_array(mbVerbose, mbioPtr_, MB_MEM_TYPE_SIDESCAN,
                     sizeof(double), (void **)&sideScanLon_, error);
 
   if (*error != MB_ERROR_NO_ERROR) {

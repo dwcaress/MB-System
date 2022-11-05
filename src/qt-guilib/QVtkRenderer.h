@@ -29,15 +29,15 @@ namespace mb_system {
      QVtkRenderer and QVtkItem coordinate with one another to render VTK scenes 
      within a QQuickItem specified in QML. The QML QVtkItem  instantiates a
      C++ QVtkItem, and QVtkItem::createRenderer() creates a QVtkRenderer object.
-     QVtkRenderer code runs in the app's renderer thread, and is responsible for setting 
-     up the scene in the VTK pipeline, rendering the scene, and modifying the scene
-     based on user inputs such as mouse zoom, rotate, pan, etc.  Those user inputs
-     are made available through the QVtkItem interface and are accessed by 
-     QVtkRenderer::synchronize(), which is only called when the main thread is blocked.
+     QVtkRenderer code runs in the app's renderer thread, and is responsible 
+     for setting up the scene in the VTK pipeline, rendering the scene, and 
+     modifying the scene based on user inputs such as mouse zoom, rotate, pan, 
+     etc.  Those user inputs are made available through the QVtkItem interface 
+     and are accessed by QVtkRenderer::synchronize(), which is only called 
+     when the main thread is blocked.
 
      See https://www.qt.io/blog/2015/05/11/integrating-custom-opengl-rendering-with-qt-quick-via-qquickframebufferobject
   */
-
   class QVtkRenderer : public QObject,
                        public QQuickFramebufferObject::Renderer,
                        protected QOpenGLFunctions
@@ -78,20 +78,6 @@ namespace mb_system {
       return (const DisplayProperties *)displayProperties_;
     }
 
-    
-    /// Connect pipeline components (static method for standalone testing)
-    static bool assemblePipelineTest(mb_system::GmtGridReader *reader,
-                                     const char *gridFilename,
-                                     vtkElevationFilter *elevColorizer,
-                                     vtkRenderer *renderer,
-                                     vtkPolyDataMapper *surfaceMapper,
-                                     vtkGenericOpenGLRenderWindow *renderWindow,
-                                     vtkGenericRenderWindowInteractor *intactor,
-                                     PickerInteractorStyle *interactorStyle,
-                                     vtkActor *surfaceActor,
-                                     vtkCubeAxesActor *axesActor,
-                                     const DisplayProperties *properties);
-
     /// Get item member
     QVtkItem *getItem() {
       return item_;
@@ -116,12 +102,6 @@ namespace mb_system {
     /// Connect pipeline components
     bool assemblePipeline();
 
-    /// Initialize renderer; build VTK pipeline
-    void initialize();
-
-    /// Initialize OpenGL state
-    virtual void initializeOpenGLState();
-
     /// Setup axes
     static void setupAxes(vtkCubeAxesActor *axesActor,
                           vtkColor3d &axisColor,
@@ -133,13 +113,13 @@ namespace mb_system {
     /// If item_ grid filename differs from gridFilename_, copy it and
     /// return true, else return false
     bool gridFilenameChanged(char *filename);
+
+    /// Assert renderWindow_ as current in response to WindowMakeCurrent event
+    void makeCurrentCallback(vtkObject *, unsigned long eid, void *callData);
     
     /// Item being rendered
     QVtkItem *item_;
     
-    /// Flag indicates if rendered scene has been initialized
-    bool initialized_;
-
     /// GMT grid reader
     vtkSmartPointer<GmtGridReader> gridReader_;
 
