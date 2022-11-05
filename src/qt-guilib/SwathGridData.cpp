@@ -95,6 +95,13 @@ bool SwathGridData::readDatafile(char *swathFile) {
   mbeditviz_project_soundings();
   mbeditviz_make_grid();
 
+  // Print swath navigation UTM coords
+  std::cout << "# navEast, navWest" << std::endl;
+  for (int i = 0; i < swathData->num_pings; i++) {
+    struct mbev_ping_struct *ping = &swathData->pings[i];
+    std::cout << ping->navlonx << ", " << ping->navlaty << std::endl;
+  }
+  
   // Save pointer to grid struct
   gridData_ = &mbev_grid;
 
@@ -169,7 +176,7 @@ bool SwathGridData::data(int row, int col,
   *easting = gridData_->boundsutm[2] + col * gridData_->dx; 
   *northing = gridData_->boundsutm[0] + row * gridData_->dy;
   //  int index = row * gridData_->n_columns + col;
-  int index = col * gridData_->n_rows + row;  
+  int index = col * gridData_->n_rows + row;
   *z = gridData_->val[index];
 
   return true;
