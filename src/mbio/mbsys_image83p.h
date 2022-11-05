@@ -19,9 +19,9 @@
  *      MBF_IMAGE83P : MBIO ID 191
  *      MBF_IMAGEMBA : MBIO ID 192
  *
- * Author:	Vivek Reddy, Santa Clara University
- *       	D.W. Caress
- * Date:	February 16, 1993
+ * Author: Vivek Reddy, Santa Clara University (initial version)
+ *         D.W. Caress (many revisions since)
+ * Date:  May 5, 2008
  *
  *
  */
@@ -34,14 +34,36 @@
  *      which are passed in the 83P Imagenex data format records plus many
  *      values calculated from the raw data.
  *   4. The initial 83P format version was labeled 1.xx but is coded as 1.00. The
- *      second format version is 1.10.
+ *      second format version is 1.10. As of November 2022, versions through 1.10
+ *      are supported as format MBF_IMAGE83 (191).
  *   5. Support for comment records is specific to MB-System.
  *   6. The MBF_IMAGE83P format does not support beam flags. Support for beam
  *      flags is specific to the extended MB-System format MBF_IMAGEMBA (id=192).
  *      Format MBF_IMAGEMBA records also include the bathymetry soundings
  *      calculated as arrays of bathymetry values and the acrosstrack and
  *      alongtrack positions of the soundings.
- *   7. Comment records are supported for both formats - this is specific to MB-System.
+ *   7. Both formats have two spaces for recording heading, roll, and pitch. If the
+ *      multibeam has its own attitude sensor then these values are recorded with
+ *      0.1 degree precision. There are other spaces in the header for heading,
+ *      roll and pitch stored as floats so that there are several digits of
+ *      precision available. In some installations the logged files include
+ *      attitude data in those secondary fields from an external sensor (and in
+ *      that case can also include heave). MB-System uses the float attitude values
+ *      in processing. When reading a file, if the internal integer values are
+ *      nonzero and the external float values are flagged as undefined, then the
+ *      former values (converted to degrees) are copied to the latter.
+ *      Subsequently the external float fields are used as the source for heading
+ *      and attitude data.
+ *   8. The vendor MBF_IMAGE83P format does not include a field for sonar depth, but does
+ *      include a field for heave. The extended MBF_IMAGEMBA format includes separate
+ *      float fields for both heave and sonar depth - the sonar depth is typically used
+ *      either as a static draft on a surface vessel or a pressure depth on a
+ *      submerged AUV or ROV platform. Heave is positive up and sonar depth is
+ *      positive down. In some cases on submerged platforms the pressure depth is
+ *      recorded into the heave field. In that case the --kluge-sonardepth-from-heave
+ *      argument to mbpreprocess will cause the heave value to be moved to the
+ *      sonar_depth field in the output MBF_IMAGEMBA format files.
+ *   9. Comment records are supported for both formats - this is specific to MB-System.
  */
 
 /* The following .83P format specification information is taken from a
@@ -353,10 +375,10 @@ struct mbsys_image83p_struct {
 	double nav_lat;
 	double nav_long;
 	int nav_speed;   /* 0.1 knots */
-	int nav_heading; /* 0.1 degrees */
+	int course;      /* 0.1 degrees */
 	int pitch;       /* degrees / 10 - 900 */
 	int roll;        /* degrees / 10 - 900 */
-	int heading /* degrees / 10 */;
+	int heading      /* degrees / 10 */;
 	int num_beams;
 	int samples_per_beam;
 	int sector_size;        /* degrees */
@@ -420,7 +442,7 @@ struct mbsys_image83p_struct {
   int intensity[MBSYS_IMAGE83P_BEAMS];
 
 	/* important values not in vendor format */
-	float sonar_depth;
+	float sonar_depth; /* meters */
 	int num_proc_beams;
 	double beamrange[MBSYS_IMAGE83P_BEAMS];
 	double angles[MBSYS_IMAGE83P_BEAMS];
@@ -440,23 +462,31 @@ int mbsys_image83p_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *err
 int mbsys_image83p_deall(int verbose, void *mbio_ptr, void **store_ptr, int *error);
 int mbsys_image83p_dimensions(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbath, int *namp, int *nss,
                               int *error);
+int mbsys_image83p_pingnumber(int verbose, void *mbio_ptr, unsigned int *pingnumber, int *error);
+int mbsys_image83p_sonartype(int verbose, void *mbio_ptr, void *store_ptr, int *sonartype, int *error);
+int mbsys_image83p_preprocess(int verbose,
+                              void *mbio_ptr,
+                              void *store_ptr,
+                              void *platform_ptr, void *preprocess_pars_ptr, int *error);
+int mbsys_image83p_extract_platform(int verbose, void *mbio_ptr, void *store_ptr,
+                              int *kind, void **platform_ptr, int *error);
 int mbsys_image83p_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int time_i[7], double *time_d, double *navlon,
-                           double *navlat, double *speed, double *heading, int *nbath, int *namp, int *nss, char *beamflag,
-                           double *bath, double *amp, double *bathacrosstrack, double *bathalongtrack, double *ss,
-                           double *ssacrosstrack, double *ssalongtrack, char *comment, int *error);
+                              double *navlat, double *speed, double *heading, int *nbath, int *namp, int *nss, char *beamflag,
+                              double *bath, double *amp, double *bathacrosstrack, double *bathalongtrack, double *ss,
+                              double *ssacrosstrack, double *ssalongtrack, char *comment, int *error);
 int mbsys_image83p_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, int time_i[7], double time_d, double navlon,
-                          double navlat, double speed, double heading, int nbath, int namp, int nss, char *beamflag, double *bath,
-                          double *amp, double *bathacrosstrack, double *bathalongtrack, double *ss, double *ssacrosstrack,
-                          double *ssalongtrack, char *comment, int *error);
+                              double navlat, double speed, double heading, int nbath, int namp, int nss, char *beamflag, double *bath,
+                              double *amp, double *bathacrosstrack, double *bathalongtrack, double *ss, double *ssacrosstrack,
+                              double *ssalongtrack, char *comment, int *error);
 int mbsys_image83p_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbeams, double *ttimes, double *angles,
-                          double *angles_forward, double *angles_null, double *heave, double *alongtrack_offset, double *draft,
-                          double *ssv, int *error);
+                              double *angles_forward, double *angles_null, double *heave, double *alongtrack_offset, double *draft,
+                              double *ssv, int *error);
 int mbsys_image83p_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbeams, int *detects, int *error);
 int mbsys_image83p_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr, int *kind, double *transducer_depth,
-                                    double *altitudev, int *error);
+                              double *altitudev, int *error);
 int mbsys_image83p_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int time_i[7], double *time_d,
-                               double *navlon, double *navlat, double *speed, double *heading, double *draft, double *roll,
-                               double *pitch, double *heave, int *error);
+                              double *navlon, double *navlat, double *speed, double *heading, double *draft, double *roll,
+                              double *pitch, double *heave, int *error);
 int mbsys_image83p_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int time_i[7], double time_d, double navlon,
                               double navlat, double speed, double heading, double draft, double roll, double pitch, double heave,
                               int *error);

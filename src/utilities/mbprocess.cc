@@ -2751,6 +2751,10 @@ void process_file(int verbose, int thread_id, struct mb_process_struct *process,
         exit(MB_ERROR_OPEN_FAIL);
     }
     make_fnv = true;
+    fprintf(nfp,  "## <yyyy mm dd hh mm ss.ssssss> <epoch seconds> "
+                  "<longitude (deg)> <latitude (deg)> <heading (deg)> <speed (km/hr)> "
+                  "<draft (m)> <roll (deg)> <pitch (deg)> <heave (m)> <portlon (deg)> "
+                  "<portlat (deg)> <stbdlon (deg)> <stbdlat (deg)>\n");
   }
 
   /* initialize bounds that will be used in call to mbinfo to generate the *.inf file */

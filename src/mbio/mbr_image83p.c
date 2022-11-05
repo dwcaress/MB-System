@@ -20,13 +20,13 @@
  *   mbr_rt_image83p  - read and translate data
  *   mbr_wt_image83p  - translate and write data
  *
- * Author:  Vivek Reddy, Santa Clara University
- *         D.W. Caress
+ * Author: Vivek Reddy, Santa Clara University (initial version)
+ *         D.W. Caress (many revisions since)
  * Date:  May 5, 2008
  *
  */
 /*
- * Notes on the MBF_IMAGE83P data format:
+ * Notes on the MBSYS_IMAGE83P data structure:
  *   1. Imagenex DeltaT multibeam systems output raw data in a format
  *      combining ascii and binary values.
  *   2. These systems output up to 480 beams of bathymetry
@@ -34,14 +34,36 @@
  *      which are passed in the 83P Imagenex data format records plus many
  *      values calculated from the raw data.
  *   4. The initial 83P format version was labeled 1.xx but is coded as 1.00. The
- *      second format version is 1.10.
+ *      second format version is 1.10. As of November 2022, versions through 1.10
+ *      are supported as format MBF_IMAGE83 (191).
  *   5. Support for comment records is specific to MB-System.
  *   6. The MBF_IMAGE83P format does not support beam flags. Support for beam
  *      flags is specific to the extended MB-System format MBF_IMAGEMBA (id=192).
  *      Format MBF_IMAGEMBA records also include the bathymetry soundings
  *      calculated as arrays of bathymetry values and the acrosstrack and
  *      alongtrack positions of the soundings.
- *   7. Comment records are supported for both formats - this is specific to MB-System.
+ *   7. Both formats have two spaces for recording heading, roll, and pitch. If the
+ *      multibeam has its own attitude sensor then these values are recorded with
+ *      0.1 degree precision. There are other spaces in the header for heading,
+ *      roll and pitch stored as floats so that there are several digits of
+ *      precision available. In some installations the logged files include
+ *      attitude data in those secondary fields from an external sensor (and in
+ *      that case can also include heave). MB-System uses the float attitude values
+ *      in processing. When reading a file, if the internal integer values are
+ *      nonzero and the external float values are flagged as undefined, then the
+ *      former values (converted to degrees) are copied to the latter.
+ *      Subsequently the external float fields are used as the source for heading
+ *      and attitude data.
+ *   8. The vendor MBF_IMAGE83P format does not include a field for sonar depth, but does
+ *      include a field for heave. The extended MBF_IMAGEMBA format includes separate
+ *      float fields for both heave and sonar depth - the sonar depth is typically used
+ *      either as a static draft on a surface vessel or a pressure depth on a
+ *      submerged AUV or ROV platform. Heave is positive up and sonar depth is
+ *      positive down. In some cases on submerged platforms the pressure depth is
+ *      recorded into the heave field. In that case the --kluge-sonardepth-from-heave
+ *      argument to mbpreprocess will cause the heave value to be moved to the
+ *      sonar_depth field in the output MBF_IMAGEMBA format files.
+ *   9. Comment records are supported for both formats - this is specific to MB-System.
  */
 
 /* The following .83P format specification information is taken from a
@@ -652,7 +674,7 @@ int mbr_rt_image83p(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
     index += 1;
 
     mb_get_binary_short(swap, &buffer[index], &short_val);
-    store->nav_heading = (int)((unsigned short)short_val);
+    store->course = (int)((unsigned short)short_val);
     index += 2;
 
     /* parse dvl attitude and heading */
@@ -916,23 +938,63 @@ int mbr_rt_image83p(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
     else
       soundspeed = 1500.0;
     store->sonar_depth = 0.0;
+    double heading = (double) store->heading_external;
+    double roll = (double) store->roll_external;
+    double pitch = (double) store->pitch_external;
+    mb_3D_orientation tx_align;
+    mb_3D_orientation tx_orientation;
+    double tx_steer;
+    mb_3D_orientation rx_align;
+    mb_3D_orientation rx_orientation;
+    double rx_steer;
+    int tx_sign = 1;
+    int rx_sign = 1;
     store->num_proc_beams = store->num_beams;
     for (int i = 0; i < store->num_proc_beams; i++) {
       if (store->range[i] > 0) {
-        double alpha = store->pitch_external + ((double)store->profile_tilt_angle - 180.0);
-        double beta = 270.0 - 0.01 * (store->start_angle + i * store->angle_increment) + store->roll_external;
-        double theta, phi;
-        mb_rollpitch_to_takeoff(verbose, alpha, beta, &theta, &phi, error);
+        /* calculate beam angles for raytracing using Jon Beaudoin's code based on:
+            Beaudoin, J., Hughes Clarke, J., and Bartlett, J. Application of
+            Surface Sound Speed Measurements in Post-Processing for Multi-Sector
+            Multibeam Echosounders : International Hydrographic Review, v.5, no.3,
+            p.26-31.
+            (http://www.omg.unb.ca/omg/papers/beaudoin_IHR_nov2004.pdf).
+           note complexity if transducer arrays are reverse mounted, as determined
+           by a mount heading angle of about 180 degrees rather than about 0 degrees.
+           If a receive array or a transmit array are reverse mounted then:
+            1) subtract 180 from the heading mount angle of the array
+            2) flip the sign of the pitch and roll mount offsets of the array
+            3) flip the sign of the beam steering angle from that array
+                (reverse TX means flip sign of TX steer, reverse RX
+                means flip sign of RX steer) */
+        tx_steer = 0.0;
+        tx_orientation.roll = roll;
+        tx_orientation.pitch = pitch + ((double)store->profile_tilt_angle - 180.0);;
+        tx_orientation.heading = heading;
+        rx_steer = rx_sign * (180.0 - 0.01 * (store->start_angle + i * store->angle_increment));
+        rx_orientation.roll = roll;
+        rx_orientation.pitch = pitch + ((double)store->profile_tilt_angle - 180.0);;
+        rx_orientation.heading = heading;
+        double reference_heading = heading;
+        double beamAzimuth;
+        double beamDepression;
+        status = mb_beaudoin(verbose, tx_align, tx_orientation, tx_steer, rx_align, rx_orientation, rx_steer,
+                             reference_heading, &beamAzimuth, &beamDepression, error);
+        const double theta = 90.0 - beamDepression;
+        double phi = 90.0 - beamAzimuth;
+        if (phi < 0.0)
+          phi += 360.0;
+
+        /* calculate Bathymetry */
         double rr = (soundspeed / 1500.0) * 0.001 * store->range_resolution * store->range[i];
-        double xx = rr * sin(DTR * theta);
-        double zz = rr * cos(DTR * theta);
+        const double xx = rr * sin(DTR * theta);
+        const double zz = rr * cos(DTR * theta);
         store->beamrange[i] = rr;
         store->angles[i] = theta;
         store->angles_forward[i] = phi;
+        store->beamflag[i] = MB_FLAG_NONE;
+        store->bath[i] = zz + store->sonar_depth - store->heave_external;
         store->bathacrosstrack[i] = xx * cos(DTR * phi);
         store->bathalongtrack[i] = xx * sin(DTR * phi);
-        store->bath[i] = zz + store->sonar_depth - store->heave_external;
-        store->beamflag[i] = MB_FLAG_NONE;
         store->amp[i] = (float) store->intensity[i];
       }
       else {
@@ -961,13 +1023,13 @@ int mbr_rt_image83p(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
     fprintf(stderr, "dbg4       time_i[5]:               %d\n", store->time_i[5]);
     fprintf(stderr, "dbg4       time_i[6]:               %d\n", store->time_i[6]);
     fprintf(stderr, "dbg4       time_d:                  %f\n", store->time_d);
-    fprintf(stderr, "dbg4       nav_lat:                 %f\n", store->nav_lat);
-    fprintf(stderr, "dbg4       nav_long:                %f\n", store->nav_long);
-    fprintf(stderr, "dbg4       nav_speed:               %d\n", store->nav_speed);   /* 0.1 knots */
-    fprintf(stderr, "dbg4       nav_heading:             %d\n", store->nav_heading); /*0.1 degrees */
-    fprintf(stderr, "dbg4       pitch:                   %d\n", store->pitch);
-    fprintf(stderr, "dbg4       roll:                    %d\n", store->roll);
-    fprintf(stderr, "dbg4       heading:                 %d\n", store->heading);
+    fprintf(stderr, "dbg4       nav_lat:                 %f\n", store->nav_lat);    /* degrees */
+    fprintf(stderr, "dbg4       nav_long:                %f\n", store->nav_long);   /* degrees */
+    fprintf(stderr, "dbg4       nav_speed:               %d\n", store->nav_speed);  /* 0.1 knots */
+    fprintf(stderr, "dbg4       course:                  %d\n", store->course);     /* 0.1 degrees */
+    fprintf(stderr, "dbg4       pitch:                   %d\n", store->pitch);      /* 0.1 degrees */
+    fprintf(stderr, "dbg4       roll:                    %d\n", store->roll);       /* 0.1 degrees */
+    fprintf(stderr, "dbg4       heading:                 %d\n", store->heading);    /* 0.1 degrees */
     fprintf(stderr, "dbg4       num_beams:               %d\n", store->num_beams);
     fprintf(stderr, "dbg4       samples_per_beam:        %d\n", store->samples_per_beam);
     fprintf(stderr, "dbg4       sector_size:             %d\n", store->sector_size);        /* degrees */
@@ -1068,11 +1130,11 @@ int mbr_wt_image83p(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
     fprintf(stderr, "dbg4       time_d:                  %f\n", store->time_d);
     fprintf(stderr, "dbg4       nav_lat:                 %f\n", store->nav_lat);
     fprintf(stderr, "dbg4       nav_long:                %f\n", store->nav_long);
-    fprintf(stderr, "dbg4       nav_speed:               %d\n", store->nav_speed);   /* 0.1 knots */
-    fprintf(stderr, "dbg4       nav_heading:             %d\n", store->nav_heading); /*0.1 degrees */
-    fprintf(stderr, "dbg4       pitch:                   %d\n", store->pitch);
-    fprintf(stderr, "dbg4       roll:                    %d\n", store->roll);
-    fprintf(stderr, "dbg4       heading:                 %d\n", store->heading);
+    fprintf(stderr, "dbg4       nav_speed:               %d\n", store->nav_speed);          /* 0.1 knots */
+    fprintf(stderr, "dbg4       course:                  %d\n", store->course);             /* 0.1 degrees */
+    fprintf(stderr, "dbg4       pitch:                   %d\n", store->pitch);              /* 0.1 degrees */
+    fprintf(stderr, "dbg4       roll:                    %d\n", store->roll);               /* 0.1 degrees */
+    fprintf(stderr, "dbg4       heading:                 %d\n", store->heading);            /* 0.1 degrees */
     fprintf(stderr, "dbg4       num_beams:               %d\n", store->num_beams);
     fprintf(stderr, "dbg4       samples_per_beam:        %d\n", store->samples_per_beam);
     fprintf(stderr, "dbg4       sector_size:             %d\n", store->sector_size);        /* degrees */
@@ -1225,7 +1287,7 @@ int mbr_wt_image83p(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
       index += 1; /* index = 62 */
 
       /* heading*/
-      mb_put_binary_short(swap, (unsigned short)store->nav_heading, (void *)&buffer[index]);
+      mb_put_binary_short(swap, (unsigned short)store->course, (void *)&buffer[index]);
       index += 2; /* index = 64 */
 
       /* pitch */
@@ -1276,7 +1338,7 @@ int mbr_wt_image83p(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
       mb_put_binary_int(swap, store->ping_number, (void *)&buffer[index]);
       index += 4; /* index = 97 */
 
-      /* if version 1.10 read the rest of the header parameters */
+      /* if version 1.10 write the rest of the header parameters */
       if (store->version >= 10) {
         index = 100;
 
@@ -1455,9 +1517,15 @@ int mbr_register_image83p(int verbose, void *mbio_ptr, int *error) {
   mb_io_ptr->mb_io_read_ping = &mbr_rt_image83p;
   mb_io_ptr->mb_io_write_ping = &mbr_wt_image83p;
   mb_io_ptr->mb_io_dimensions = &mbsys_image83p_dimensions;
+  mb_io_ptr->mb_io_pingnumber = &mbsys_image83p_pingnumber;
+  mb_io_ptr->mb_io_sonartype = &mbsys_image83p_sonartype;
+  mb_io_ptr->mb_io_sidescantype = NULL;
+  mb_io_ptr->mb_io_preprocess = &mbsys_image83p_preprocess;
+  mb_io_ptr->mb_io_extract_platform = &mbsys_image83p_extract_platform;
   mb_io_ptr->mb_io_extract = &mbsys_image83p_extract;
   mb_io_ptr->mb_io_insert = &mbsys_image83p_insert;
   mb_io_ptr->mb_io_extract_nav = &mbsys_image83p_extract_nav;
+  mb_io_ptr->mb_io_extract_nnav = NULL;
   mb_io_ptr->mb_io_insert_nav = &mbsys_image83p_insert_nav;
   mb_io_ptr->mb_io_extract_altitude = &mbsys_image83p_extract_altitude;
   mb_io_ptr->mb_io_insert_altitude = NULL;
@@ -1465,9 +1533,16 @@ int mbr_register_image83p(int verbose, void *mbio_ptr, int *error) {
   mb_io_ptr->mb_io_insert_svp = NULL;
   mb_io_ptr->mb_io_ttimes = &mbsys_image83p_ttimes;
   mb_io_ptr->mb_io_detects = &mbsys_image83p_detects;
+  mb_io_ptr->mb_io_gains = NULL;
   mb_io_ptr->mb_io_copyrecord = &mbsys_image83p_copy;
+  mb_io_ptr->mb_io_makess = NULL;
   mb_io_ptr->mb_io_extract_rawss = NULL;
   mb_io_ptr->mb_io_insert_rawss = NULL;
+  mb_io_ptr->mb_io_extract_segytraceheader = NULL;
+  mb_io_ptr->mb_io_extract_segy = NULL;
+  mb_io_ptr->mb_io_insert_segy = NULL;
+  mb_io_ptr->mb_io_ctd = NULL;
+  mb_io_ptr->mb_io_ancilliarysensor = NULL;
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);

@@ -23,16 +23,46 @@
  * Author:  D.W. Caress
  * Date:  July 18, 2008
  *
- *
  */
 /*
- * Notes on the MBF_IMAGEMBA data format:
- *   1. This data format is used to store Imagenex DeltaT multibeam
- *      bathymetry data.
- *   2. This data format is extended from the vendor format mbf_imagemba (191)
- *      in order to allow storage of calculated bathymetry and beam flags
- *      for processing.
- *   3. Comment records are supported.
+ * Notes on the MBSYS_IMAGE83P data structure:
+ *   1. Imagenex DeltaT multibeam systems output raw data in a format
+ *      combining ascii and binary values.
+ *   2. These systems output up to 480 beams of bathymetry
+ *   3. The data structure defined below includes all of the values
+ *      which are passed in the 83P Imagenex data format records plus many
+ *      values calculated from the raw data.
+ *   4. The initial 83P format version was labeled 1.xx but is coded as 1.00. The
+ *      second format version is 1.10. As of November 2022, versions through 1.10
+ *      are supported as format MBF_IMAGE83 (191).
+ *   5. Support for comment records is specific to MB-System.
+ *   6. The MBF_IMAGE83P format does not support beam flags. Support for beam
+ *      flags is specific to the extended MB-System format MBF_IMAGEMBA (id=192).
+ *      Format MBF_IMAGEMBA records also include the bathymetry soundings
+ *      calculated as arrays of bathymetry values and the acrosstrack and
+ *      alongtrack positions of the soundings.
+ *   7. Both formats have two spaces for recording heading, roll, and pitch. If the
+ *      multibeam has its own attitude sensor then these values are recorded with
+ *      0.1 degree precision. There are other spaces in the header for heading,
+ *      roll and pitch stored as floats so that there are several digits of
+ *      precision available. In some installations the logged files include
+ *      attitude data in those secondary fields from an external sensor (and in
+ *      that case can also include heave). MB-System uses the float attitude values
+ *      in processing. When reading a file, if the internal integer values are
+ *      nonzero and the external float values are flagged as undefined, then the
+ *      former values (converted to degrees) are copied to the latter.
+ *      Subsequently the external float fields are used as the source for heading
+ *      and attitude data.
+ *   8. The vendor MBF_IMAGE83P format does not include a field for sonar depth, but does
+ *      include a field for heave. The extended MBF_IMAGEMBA format includes separate
+ *      float fields for both heave and sonar depth - the sonar depth is typically used
+ *      either as a static draft on a surface vessel or a pressure depth on a
+ *      submerged AUV or ROV platform. Heave is positive up and sonar depth is
+ *      positive down. In some cases on submerged platforms the pressure depth is
+ *      recorded into the heave field. In that case the --kluge-sonardepth-from-heave
+ *      argument to mbpreprocess will cause the heave value to be moved to the
+ *      sonar_depth field in the output MBF_IMAGEMBA format files.
+ *   9. Comment records are supported for both formats - this is specific to MB-System.
  */
 
 #include <math.h>
@@ -372,7 +402,7 @@ int mbr_rt_imagemba(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
     index += 1;
     mb_get_binary_short(swap, &buffer[index], &short_val);
     index += 2;
-    store->nav_heading = (int)((unsigned short)short_val);
+    store->course = (int)((unsigned short)short_val);
 
     /* parse dvl attitude and heading */
     store->pitch = ((((mb_u_char)buffer[index]) & 0x7F) << 8) + ((mb_u_char)buffer[index + 1]);
@@ -456,15 +486,53 @@ int mbr_rt_imagemba(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
       soundspeed = 0.1 * store->sound_velocity;
     else
       soundspeed = 1500.0;
+    double heading = (double) store->heading_external;
+    double roll = (double) store->roll_external;
+    double pitch = (double) store->pitch_external;
+    mb_3D_orientation tx_align;
+    mb_3D_orientation tx_orientation;
+    double tx_steer;
+    mb_3D_orientation rx_align;
+    mb_3D_orientation rx_orientation;
+    double rx_steer;
+    int tx_sign = 1;
+    int rx_sign = 1;
     for (int i = 0; i < store->num_proc_beams; i++) {
       if (store->range[i] > 0) {
-        double alpha = store->pitch_external + ((double)store->profile_tilt_angle - 180.0);
-        double beta = 270.0 - 0.01 * (store->start_angle + i * store->angle_increment) + store->roll_external;
-        double theta, phi;
-        mb_rollpitch_to_takeoff(verbose, alpha, beta, &theta, &phi, error);
+        /* calculate beam angles for raytracing using Jon Beaudoin's code based on:
+            Beaudoin, J., Hughes Clarke, J., and Bartlett, J. Application of
+            Surface Sound Speed Measurements in Post-Processing for Multi-Sector
+            Multibeam Echosounders : International Hydrographic Review, v.5, no.3,
+            p.26-31.
+            (http://www.omg.unb.ca/omg/papers/beaudoin_IHR_nov2004.pdf).
+           note complexity if transducer arrays are reverse mounted, as determined
+           by a mount heading angle of about 180 degrees rather than about 0 degrees.
+           If a receive array or a transmit array are reverse mounted then:
+            1) subtract 180 from the heading mount angle of the array
+            2) flip the sign of the pitch and roll mount offsets of the array
+            3) flip the sign of the beam steering angle from that array
+                (reverse TX means flip sign of TX steer, reverse RX
+                means flip sign of RX steer) */
+        tx_steer = 0.0;
+        tx_orientation.roll = roll;
+        tx_orientation.pitch = pitch + ((double)store->profile_tilt_angle - 180.0);;;
+        tx_orientation.heading = heading;
+        rx_steer = rx_sign * (180.0 - 0.01 * (store->start_angle + i * store->angle_increment));
+        rx_orientation.roll = roll;
+        rx_orientation.pitch = pitch + ((double)store->profile_tilt_angle - 180.0);;;
+        rx_orientation.heading = heading;
+        double reference_heading = heading;
+        double beamAzimuth;
+        double beamDepression;
+        status = mb_beaudoin(verbose, tx_align, tx_orientation, tx_steer, rx_align, rx_orientation, rx_steer,
+                             reference_heading, &beamAzimuth, &beamDepression, error);
+        const double theta = 90.0 - beamDepression;
+        double phi = 90.0 - beamAzimuth;
+        if (phi < 0.0)
+          phi += 360.0;
         double rr = (soundspeed / 1500.0) * 0.001 * store->range_resolution * store->range[i];
-        double xx = rr * sin(DTR * theta);
-        double zz = rr * cos(DTR * theta);
+        const double xx = rr * sin(DTR * theta);
+        const double zz = rr * cos(DTR * theta);
         store->beamrange[i] = rr;
         store->angles[i] = theta;
         store->angles_forward[i] = phi;
@@ -580,7 +648,7 @@ int mbr_rt_imagemba(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
     index += 1;
 
     mb_get_binary_short(swap, &buffer[index], &short_val);
-    store->nav_heading = (int)((unsigned short)short_val);
+    store->course = (int)((unsigned short)short_val);
     index += 2;
 
     /* parse dvl attitude and heading */
@@ -731,6 +799,13 @@ int mbr_rt_imagemba(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
     store->transmit_scan_angle = float_val;
     index += 4;
 
+		/* get sonar_depth and heave */
+    index = 248; /* index 248 */
+		mb_get_binary_float(swap, &buffer[index], &(store->sonar_depth));
+		index += 4; /* index 252 */
+
+		index += 4; /* index 256 */
+
     /* get beam values */
     index = 256;
     store->num_proc_beams = store->num_beams;
@@ -741,11 +816,14 @@ int mbr_rt_imagemba(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
       mb_get_binary_short(swap, &buffer[index], &short_val);
       store->intensity[i] = (int)((unsigned short)short_val);
       index += 2;
-      mb_get_binary_float(swap, &buffer[index], &(store->beamrange[i]));
+      mb_get_binary_float(swap, &buffer[index], &float_val);
+      store->beamrange[i] = (double) float_val;
       index += 4;
-      mb_get_binary_float(swap, &buffer[index], &(store->angles[i]));
+      mb_get_binary_float(swap, &buffer[index], &float_val);
+      store->angles[i] = (double) float_val;
       index += 4;
-      mb_get_binary_float(swap, &buffer[index], &(store->angles_forward[i]));
+      mb_get_binary_float(swap, &buffer[index], &float_val);
+      store->angles_forward[i] = (double) float_val;
       index += 4;
       mb_get_binary_float(swap, &buffer[index], &(store->bath[i]));
       index += 4;
@@ -765,40 +843,59 @@ int mbr_rt_imagemba(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
   if (verbose >= 4) {
     fprintf(stderr, "\ndbg2  Record read in MBIO function <%s>\n", __func__);
     fprintf(stderr, "dbg4  Data values:\n");
-    fprintf(stderr, "dbg4       kind:               %d\n", store->kind);
-    fprintf(stderr, "dbg4       version:            %d\n", store->version);
-    fprintf(stderr, "dbg4       time_i[0]:          %d\n", store->time_i[0]);
-    fprintf(stderr, "dbg4       time_i[1]:          %d\n", store->time_i[1]);
-    fprintf(stderr, "dbg4       time_i[2]:          %d\n", store->time_i[2]);
-    fprintf(stderr, "dbg4       time_i[3]:          %d\n", store->time_i[3]);
-    fprintf(stderr, "dbg4       time_i[4]:          %d\n", store->time_i[4]);
-    fprintf(stderr, "dbg4       time_i[5]:          %d\n", store->time_i[5]);
-    fprintf(stderr, "dbg4       time_i[6]:          %d\n", store->time_i[6]);
-    fprintf(stderr, "dbg4       time_d:             %f\n", store->time_d);
-    fprintf(stderr, "dbg4       nav_lat:            %f\n", store->nav_lat);
-    fprintf(stderr, "dbg4       nav_long:           %f\n", store->nav_long);
-    fprintf(stderr, "dbg4       nav_speed:          %d\n", store->nav_speed);   /* 0.1 knots */
-    fprintf(stderr, "dbg4       nav_heading:        %d\n", store->nav_heading); /*0.1 degrees */
-    fprintf(stderr, "dbg4       pitch:              %d\n", store->pitch);
-    fprintf(stderr, "dbg4       roll:               %d\n", store->roll);
-    fprintf(stderr, "dbg4       heading:            %d\n", store->heading);
-    fprintf(stderr, "dbg4       num_beams:          %d\n", store->num_beams);
-    fprintf(stderr, "dbg4       samples_per_beam:   %d\n", store->samples_per_beam);
-    fprintf(stderr, "dbg4       sector_size:        %d\n", store->sector_size);        /* degrees */
-    fprintf(stderr, "dbg4       start_angle:        %d\n", store->start_angle);        /* 0.01 degrees + 180.0 */
-    fprintf(stderr, "dbg4       angle_increment:    %d\n", store->angle_increment);    /* 0.01 degrees */
-    fprintf(stderr, "dbg4       acoustic_range:     %d\n", store->acoustic_range);     /* meters */
-    fprintf(stderr, "dbg4       acoustic_frequency: %d\n", store->acoustic_frequency); /* kHz */
-    fprintf(stderr, "dbg4       sound_velocity:     %d\n", store->sound_velocity);     /* 0.1 m/sec */
-    fprintf(stderr, "dbg4       range_resolution:   %d\n", store->range_resolution);   /* 0.001 meters */
-    fprintf(stderr, "dbg4       pulse_length:       %d\n", store->pulse_length);       /* usec */
-    fprintf(stderr, "dbg4       profile_tilt_angle: %d\n", store->profile_tilt_angle); /* degrees + 180.0 */
-    fprintf(stderr, "dbg4       rep_rate:           %d\n", store->rep_rate);           /* msec */
-    fprintf(stderr, "dbg4       ping_number:        %d\n", store->ping_number);
-    for (int i = 0; i < store->num_beams; i++)
-      fprintf(stderr, "dbg4       range[%d]:            %d\n", i, store->range[i]);
+    fprintf(stderr, "dbg4       kind:                    %d\n", store->kind);
+    fprintf(stderr, "dbg4       version:                 %d\n", store->version);
+    fprintf(stderr, "dbg4       time_i[0]:               %d\n", store->time_i[0]);
+    fprintf(stderr, "dbg4       time_i[1]:               %d\n", store->time_i[1]);
+    fprintf(stderr, "dbg4       time_i[2]:               %d\n", store->time_i[2]);
+    fprintf(stderr, "dbg4       time_i[3]:               %d\n", store->time_i[3]);
+    fprintf(stderr, "dbg4       time_i[4]:               %d\n", store->time_i[4]);
+    fprintf(stderr, "dbg4       time_i[5]:               %d\n", store->time_i[5]);
+    fprintf(stderr, "dbg4       time_i[6]:               %d\n", store->time_i[6]);
+    fprintf(stderr, "dbg4       time_d:                  %f\n", store->time_d);
+    fprintf(stderr, "dbg4       nav_lat:                 %f\n", store->nav_lat);
+    fprintf(stderr, "dbg4       nav_long:                %f\n", store->nav_long);
+    fprintf(stderr, "dbg4       nav_speed:               %d\n", store->nav_speed);          /* 0.1 knots */
+    fprintf(stderr, "dbg4       course:                  %d\n", store->course);             /* 0.1 degrees */
+    fprintf(stderr, "dbg4       pitch:                   %d\n", store->pitch);              /* 0.1 degrees */
+    fprintf(stderr, "dbg4       roll:                    %d\n", store->roll);               /* 0.1 degrees */
+    fprintf(stderr, "dbg4       heading:                 %d\n", store->heading);            /* 0.1 degrees */
+    fprintf(stderr, "dbg4       num_beams:               %d\n", store->num_beams);
+    fprintf(stderr, "dbg4       samples_per_beam:        %d\n", store->samples_per_beam);
+    fprintf(stderr, "dbg4       sector_size:             %d\n", store->sector_size);        /* degrees */
+    fprintf(stderr, "dbg4       start_angle:             %d\n", store->start_angle);        /* 0.01 degrees + 180.0 */
+    fprintf(stderr, "dbg4       angle_increment:         %d\n", store->angle_increment);    /* 0.01 degrees */
+    fprintf(stderr, "dbg4       acoustic_range:          %d\n", store->acoustic_range);     /* meters */
+    fprintf(stderr, "dbg4       acoustic_frequency:      %d\n", store->acoustic_frequency); /* kHz */
+    fprintf(stderr, "dbg4       sound_velocity:          %d\n", store->sound_velocity);     /* 0.1 m/sec */
+    fprintf(stderr, "dbg4       range_resolution:        %d\n", store->range_resolution);   /* 0.001 meters */
+    fprintf(stderr, "dbg4       pulse_length:            %d\n", store->pulse_length);       /* usec */
+    fprintf(stderr, "dbg4       profile_tilt_angle:      %d\n", store->profile_tilt_angle); /* degrees + 180.0 */
+    fprintf(stderr, "dbg4       rep_rate:                %d\n", store->rep_rate);           /* msec */
+    fprintf(stderr, "dbg4       ping_number:             %d\n", store->ping_number);
+    fprintf(stderr, "dbg4       sonar_x_offset:          %f\n", store->sonar_x_offset);
+    fprintf(stderr, "dbg4       sonar_y_offset:          %f\n", store->sonar_y_offset);
+    fprintf(stderr, "dbg4       sonar_z_offset:          %f\n", store->sonar_z_offset);
+    fprintf(stderr, "dbg4       has_intensity:           %d\n", store->has_intensity);
+    fprintf(stderr, "dbg4       ping_latency:            %d\n", store->ping_latency);
+    fprintf(stderr, "dbg4       data_latency:            %d\n", store->data_latency);
+    fprintf(stderr, "dbg4       sample_rate:             %d\n", store->sample_rate);
+    fprintf(stderr, "dbg4       option_flags:            %u\n", store->option_flags);
+    fprintf(stderr, "dbg4       number_averaged:         %d\n", store->number_averaged);
+    fprintf(stderr, "dbg4       center_time_offset:      %u\n", store->center_time_offset);
+    fprintf(stderr, "dbg4       heave_external:          %f\n", store->heave_external);
+    fprintf(stderr, "dbg4       user_defined_byte:       %u\n", store->user_defined_byte);
+    fprintf(stderr, "dbg4       altitude:                %f\n", store->altitude);
+    fprintf(stderr, "dbg4       external_sensor_flags:   %u\n", store->external_sensor_flags);
+    fprintf(stderr, "dbg4       pitch_external:          %f\n", store->pitch_external);
+    fprintf(stderr, "dbg4       roll_external:           %f\n", store->roll_external);
+    fprintf(stderr, "dbg4       heading_external:        %f\n", store->heading_external);
+    fprintf(stderr, "dbg4       transmit_scan_flag:      %u\n", store->transmit_scan_flag);
+    fprintf(stderr, "dbg4       transmit_scan_angle:     %f\n", store->transmit_scan_angle);
     fprintf(stderr, "dbg4       sonar_depth:        %f\n", store->sonar_depth);
-    fprintf(stderr, "dbg4       heave_external:     %f\n", store->heave_external);
+    fprintf(stderr, "dbg4       heave_external:          %f\n", store->heave_external);
+    for (int i = 0; i < store->num_beams; i++)
+      fprintf(stderr, "dbg4       %d range: %d intensity: %d\n", i, store->range[i], store->intensity[i]);
     fprintf(stderr, "dbg4       num_proc_beams:     %d\n", store->num_proc_beams);
     for (int i = 0; i < store->num_proc_beams; i++)
       fprintf(stderr, "dbg4       tt[%d]: %f angles:%f %f   bath: %f %f %f %d\n", i, store->beamrange[i], store->angles[i],
@@ -852,40 +949,58 @@ int mbr_wt_imagemba(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
   if (verbose >= 4) {
     fprintf(stderr, "\ndbg2  Record read in MBIO function <%s>\n", __func__);
     fprintf(stderr, "dbg4  Data values:\n");
-    fprintf(stderr, "dbg4       kind:               %d\n", store->kind);
-    fprintf(stderr, "dbg4       version:            %d\n", store->version);
-    fprintf(stderr, "dbg4       time_i[0]:          %d\n", store->time_i[0]);
-    fprintf(stderr, "dbg4       time_i[1]:          %d\n", store->time_i[1]);
-    fprintf(stderr, "dbg4       time_i[2]:          %d\n", store->time_i[2]);
-    fprintf(stderr, "dbg4       time_i[3]:          %d\n", store->time_i[3]);
-    fprintf(stderr, "dbg4       time_i[4]:          %d\n", store->time_i[4]);
-    fprintf(stderr, "dbg4       time_i[5]:          %d\n", store->time_i[5]);
-    fprintf(stderr, "dbg4       time_i[6]:          %d\n", store->time_i[6]);
-    fprintf(stderr, "dbg4       time_d:             %f\n", store->time_d);
-    fprintf(stderr, "dbg4       nav_lat:            %f\n", store->nav_lat);
-    fprintf(stderr, "dbg4       nav_long:           %f\n", store->nav_long);
-    fprintf(stderr, "dbg4       nav_speed:          %d\n", store->nav_speed);   /* 0.1 knots */
-    fprintf(stderr, "dbg4       nav_heading:        %d\n", store->nav_heading); /*0.1 degrees */
-    fprintf(stderr, "dbg4       pitch:              %d\n", store->pitch);
-    fprintf(stderr, "dbg4       roll:               %d\n", store->roll);
-    fprintf(stderr, "dbg4       heading:            %d\n", store->heading);
-    fprintf(stderr, "dbg4       num_beams:          %d\n", store->num_beams);
-    fprintf(stderr, "dbg4       samples_per_beam:   %d\n", store->samples_per_beam);
-    fprintf(stderr, "dbg4       sector_size:        %d\n", store->sector_size);        /* degrees */
-    fprintf(stderr, "dbg4       start_angle:        %d\n", store->start_angle);        /* 0.01 degrees + 180.0 */
-    fprintf(stderr, "dbg4       angle_increment:    %d\n", store->angle_increment);    /* 0.01 degrees */
-    fprintf(stderr, "dbg4       acoustic_range:     %d\n", store->acoustic_range);     /* meters */
-    fprintf(stderr, "dbg4       acoustic_frequency: %d\n", store->acoustic_frequency); /* kHz */
-    fprintf(stderr, "dbg4       sound_velocity:     %d\n", store->sound_velocity);     /* 0.1 m/sec */
-    fprintf(stderr, "dbg4       range_resolution:   %d\n", store->range_resolution);   /* 0.001 meters */
-    fprintf(stderr, "dbg4       pulse_length:       %d\n", store->pulse_length);       /* usec */
-    fprintf(stderr, "dbg4       profile_tilt_angle: %d\n", store->profile_tilt_angle); /* degrees + 180.0 */
-    fprintf(stderr, "dbg4       rep_rate:           %d\n", store->rep_rate);           /* msec */
-    fprintf(stderr, "dbg4       ping_number:        %d\n", store->ping_number);
+    fprintf(stderr, "dbg4       kind:                    %d\n", store->kind);
+    fprintf(stderr, "dbg4       version:                 %d\n", store->version);
+    fprintf(stderr, "dbg4       time_i[0]:               %d\n", store->time_i[0]);
+    fprintf(stderr, "dbg4       time_i[1]:               %d\n", store->time_i[1]);
+    fprintf(stderr, "dbg4       time_i[2]:               %d\n", store->time_i[2]);
+    fprintf(stderr, "dbg4       time_i[3]:               %d\n", store->time_i[3]);
+    fprintf(stderr, "dbg4       time_i[4]:               %d\n", store->time_i[4]);
+    fprintf(stderr, "dbg4       time_i[5]:               %d\n", store->time_i[5]);
+    fprintf(stderr, "dbg4       time_i[6]:               %d\n", store->time_i[6]);
+    fprintf(stderr, "dbg4       time_d:                  %f\n", store->time_d);
+    fprintf(stderr, "dbg4       nav_lat:                 %f\n", store->nav_lat);
+    fprintf(stderr, "dbg4       nav_long:                %f\n", store->nav_long);
+    fprintf(stderr, "dbg4       nav_speed:               %d\n", store->nav_speed);          /* 0.1 knots */
+    fprintf(stderr, "dbg4       course:                  %d\n", store->course);             /* 0.1 degrees */
+    fprintf(stderr, "dbg4       pitch:                   %d\n", store->pitch);              /* 0.1 degrees */
+    fprintf(stderr, "dbg4       roll:                    %d\n", store->roll);               /* 0.1 degrees */
+    fprintf(stderr, "dbg4       heading:                 %d\n", store->heading);            /* 0.1 degrees */
+    fprintf(stderr, "dbg4       num_beams:               %d\n", store->num_beams);
+    fprintf(stderr, "dbg4       samples_per_beam:        %d\n", store->samples_per_beam);
+    fprintf(stderr, "dbg4       sector_size:             %d\n", store->sector_size);        /* degrees */
+    fprintf(stderr, "dbg4       start_angle:             %d\n", store->start_angle);        /* 0.01 degrees + 180.0 */
+    fprintf(stderr, "dbg4       angle_increment:         %d\n", store->angle_increment);    /* 0.01 degrees */
+    fprintf(stderr, "dbg4       acoustic_range:          %d\n", store->acoustic_range);     /* meters */
+    fprintf(stderr, "dbg4       acoustic_frequency:      %d\n", store->acoustic_frequency); /* kHz */
+    fprintf(stderr, "dbg4       sound_velocity:          %d\n", store->sound_velocity);     /* 0.1 m/sec */
+    fprintf(stderr, "dbg4       range_resolution:        %d\n", store->range_resolution);   /* 0.001 meters */
+    fprintf(stderr, "dbg4       pulse_length:            %d\n", store->pulse_length);       /* usec */
+    fprintf(stderr, "dbg4       profile_tilt_angle:      %d\n", store->profile_tilt_angle); /* degrees + 180.0 */
+    fprintf(stderr, "dbg4       rep_rate:                %d\n", store->rep_rate);           /* msec */
+    fprintf(stderr, "dbg4       ping_number:             %d\n", store->ping_number);
+    fprintf(stderr, "dbg4       sonar_x_offset:          %f\n", store->sonar_x_offset);
+    fprintf(stderr, "dbg4       sonar_y_offset:          %f\n", store->sonar_y_offset);
+    fprintf(stderr, "dbg4       sonar_z_offset:          %f\n", store->sonar_z_offset);
+    fprintf(stderr, "dbg4       has_intensity:           %d\n", store->has_intensity);
+    fprintf(stderr, "dbg4       ping_latency:            %d\n", store->ping_latency);
+    fprintf(stderr, "dbg4       data_latency:            %d\n", store->data_latency);
+    fprintf(stderr, "dbg4       sample_rate:             %d\n", store->sample_rate);
+    fprintf(stderr, "dbg4       option_flags:            %u\n", store->option_flags);
+    fprintf(stderr, "dbg4       number_averaged:         %d\n", store->number_averaged);
+    fprintf(stderr, "dbg4       center_time_offset:      %u\n", store->center_time_offset);
+    fprintf(stderr, "dbg4       heave_external:          %f\n", store->heave_external);
+    fprintf(stderr, "dbg4       user_defined_byte:       %u\n", store->user_defined_byte);
+    fprintf(stderr, "dbg4       altitude:                %f\n", store->altitude);
+    fprintf(stderr, "dbg4       external_sensor_flags:   %u\n", store->external_sensor_flags);
+    fprintf(stderr, "dbg4       pitch_external:          %f\n", store->pitch_external);
+    fprintf(stderr, "dbg4       roll_external:           %f\n", store->roll_external);
+    fprintf(stderr, "dbg4       heading_external:        %f\n", store->heading_external);
+    fprintf(stderr, "dbg4       transmit_scan_flag:      %u\n", store->transmit_scan_flag);
+    fprintf(stderr, "dbg4       transmit_scan_angle:     %f\n", store->transmit_scan_angle);
     for (int i = 0; i < store->num_beams; i++)
-      fprintf(stderr, "dbg4       range[%d]:            %d\n", i, store->range[i]);
+      fprintf(stderr, "dbg4       %d range: %d intensity: %d\n", i, store->range[i], store->intensity[i]);
     fprintf(stderr, "dbg4       sonar_depth:        %f\n", store->sonar_depth);
-    fprintf(stderr, "dbg4       heave_external:     %f\n", store->heave_external);
     fprintf(stderr, "dbg4       num_proc_beams:     %d\n", store->num_proc_beams);
     for (int i = 0; i < store->num_proc_beams; i++)
       fprintf(stderr, "dbg4       tt[%d]: %f angles:%f %f   bath: %f %f %f %d\n", i, store->beamrange[i], store->angles[i],
@@ -906,9 +1021,9 @@ int mbr_wt_imagemba(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
       index++;
       buffer[index] = '3';
       index++;
-      buffer[index] = 'P';
+      buffer[index] = 'M';
       index++;
-      buffer[index] = (char)store->version;
+      buffer[index] = (char)10;
       index++;
       write_len = 256 + store->num_beams * MBF_IMAGEMBA_BEAM_SIZE;
       mb_put_binary_short(swap, (unsigned short)write_len, (void *)&buffer[index]);
@@ -1003,7 +1118,7 @@ int mbr_wt_imagemba(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
       index++; /* index = 62 */
 
       /* heading*/
-      mb_put_binary_short(swap, (unsigned short)store->nav_heading, (void *)&buffer[index]);
+      mb_put_binary_short(swap, (unsigned short)store->course, (void *)&buffer[index]);
       index += 2; /* index = 64 */
 
       /* pitch */
@@ -1054,6 +1169,74 @@ int mbr_wt_imagemba(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
       mb_put_binary_int(swap, store->ping_number, (void *)&buffer[index]);
       index += 4; /* index = 97 */
 
+      index += 3; /* index = 100 */
+
+      mb_put_binary_float(swap, (float)store->sonar_x_offset, (void *)&buffer[index]);
+      index += 4; /* index = 104 */
+
+      mb_put_binary_float(swap, (float)store->sonar_y_offset, (void *)&buffer[index]);
+      index += 4; /* index = 108 */
+
+      mb_put_binary_float(swap, (float)store->sonar_z_offset, (void *)&buffer[index]);
+      index += 4; /* index = 112 */
+
+      /* replace centiseconds of timestamp already parsed with higher resolution milliseconds encoded here */
+      int milliseconds = store->time_i[6] / 1000;
+      sprintf(&buffer[index], ".%3.3d", milliseconds);
+      index += 4;
+      buffer[index] = 0;
+      index += 1; /* index = 117 */
+
+      buffer[index] = (char) store->has_intensity;
+      index += 1; /* index = 118 */
+
+      mb_put_binary_short(swap, (unsigned short)store->ping_latency, (void *)&buffer[index]);
+      index += 2; /* index = 120 */
+
+      mb_put_binary_short(swap, (unsigned short) store->data_latency, (void *)&buffer[index]);
+      index += 2; /* index = 122 */
+
+      buffer[index] = (char)store->sample_rate;
+      index += 1; /* index = 123 */
+
+      buffer[index] = (char)store->option_flags;
+      index += 1; /* index = 124 */
+
+      index += 1; /* index = 125 */
+
+      buffer[index] = (char)store->number_averaged;
+      index += 1; /* index = 126 */
+
+      mb_put_binary_short(swap, (unsigned short)store->center_time_offset, (void *)&buffer[index]);
+      index += 2; /* index = 128 */
+
+      mb_put_binary_float(swap, (float)(store->heave_external), (void *)&buffer[index]);
+      index += 4; /* index = 132 */
+
+      buffer[index] = (char)store->user_defined_byte;
+      index += 1; /* index = 133 */
+
+      mb_put_binary_float(swap, (float)store->altitude, (void *)&buffer[index]);
+      index += 4; /* index = 137 */
+
+      buffer[index] = (char)store->external_sensor_flags;
+      index += 1; /* index = 138 */
+
+      mb_put_binary_float(swap, (float)store->pitch_external, (void *)&buffer[index]);
+      index += 4; /* index = 142 */
+
+      mb_put_binary_float(swap, (float)store->roll_external, (void *)&buffer[index]);
+      index += 4; /* index = 146 */
+
+      mb_put_binary_float(swap, (float)store->heading_external, (void *)&buffer[index]);
+      index += 4; /* index = 150 */
+
+      buffer[index] = store->transmit_scan_flag;
+      index += 1; /* index = 151 */
+
+      mb_put_binary_float(swap, (float)store->transmit_scan_angle, (void *)&buffer[index]);
+      index += 4; /* index = 155 */
+
       /* blank part of header */
       for (int i = index; i < 248; i++)
         buffer[i] = 0;
@@ -1062,18 +1245,28 @@ int mbr_wt_imagemba(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
       /* put sonar_depth and heave */
       mb_put_binary_float(swap, (float)store->sonar_depth, (void *)&buffer[index]);
       index += 4; /* index = 252 */
-      mb_put_binary_float(swap, (float)store->heave_external, (void *)&buffer[index]);
+
       index += 4; /* index = 256 */
 
       /* put beams */
       for (int i = 0; i < store->num_beams; i++) {
         mb_put_binary_short(swap, (unsigned short)store->range[i], &buffer[index]);
         index += 2;
+        mb_put_binary_short(swap, (unsigned short)store->intensity[i], &buffer[index]);
+        index += 2;
+        mb_put_binary_float(swap, (float) store->beamrange[i], (void *)&buffer[index]);
+        index += 4;
+        mb_put_binary_float(swap, (float) store->angles[i], (void *)&buffer[index]);
+        index += 4;
+        mb_put_binary_float(swap, (float) store->angles_forward[i], (void *)&buffer[index]);
+        index += 4;
         mb_put_binary_float(swap, store->bath[i], (void *)&buffer[index]);
         index += 4;
         mb_put_binary_float(swap, store->bathacrosstrack[i], (void *)&buffer[index]);
         index += 4;
         mb_put_binary_float(swap, store->bathalongtrack[i], (void *)&buffer[index]);
+        index += 4;
+        mb_put_binary_float(swap, store->amp[i], (void *)&buffer[index]);
         index += 4;
         buffer[index] = (char)store->beamflag[i];
         index++;
@@ -1089,7 +1282,7 @@ int mbr_wt_imagemba(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
       index++;
       buffer[index] = 'P';
       index++;
-      buffer[index] = (char)store->version;
+      buffer[index] = (char)10;
       index++;
       write_len = 256;
       mb_put_binary_short(swap, (unsigned short)write_len, (void *)&buffer[index]);
@@ -1168,9 +1361,15 @@ int mbr_register_imagemba(int verbose, void *mbio_ptr, int *error) {
   mb_io_ptr->mb_io_read_ping = &mbr_rt_imagemba;
   mb_io_ptr->mb_io_write_ping = &mbr_wt_imagemba;
   mb_io_ptr->mb_io_dimensions = &mbsys_image83p_dimensions;
+  mb_io_ptr->mb_io_pingnumber = &mbsys_image83p_pingnumber;
+  mb_io_ptr->mb_io_sonartype = &mbsys_image83p_sonartype;
+  mb_io_ptr->mb_io_sidescantype = NULL;
+  mb_io_ptr->mb_io_preprocess = &mbsys_image83p_preprocess;
+  mb_io_ptr->mb_io_extract_platform = &mbsys_image83p_extract_platform;
   mb_io_ptr->mb_io_extract = &mbsys_image83p_extract;
   mb_io_ptr->mb_io_insert = &mbsys_image83p_insert;
   mb_io_ptr->mb_io_extract_nav = &mbsys_image83p_extract_nav;
+  mb_io_ptr->mb_io_extract_nnav = NULL;
   mb_io_ptr->mb_io_insert_nav = &mbsys_image83p_insert_nav;
   mb_io_ptr->mb_io_extract_altitude = &mbsys_image83p_extract_altitude;
   mb_io_ptr->mb_io_insert_altitude = NULL;
@@ -1178,9 +1377,16 @@ int mbr_register_imagemba(int verbose, void *mbio_ptr, int *error) {
   mb_io_ptr->mb_io_insert_svp = NULL;
   mb_io_ptr->mb_io_ttimes = &mbsys_image83p_ttimes;
   mb_io_ptr->mb_io_detects = &mbsys_image83p_detects;
+  mb_io_ptr->mb_io_gains = NULL;
   mb_io_ptr->mb_io_copyrecord = &mbsys_image83p_copy;
+  mb_io_ptr->mb_io_makess = NULL;
   mb_io_ptr->mb_io_extract_rawss = NULL;
   mb_io_ptr->mb_io_insert_rawss = NULL;
+  mb_io_ptr->mb_io_extract_segytraceheader = NULL;
+  mb_io_ptr->mb_io_extract_segy = NULL;
+  mb_io_ptr->mb_io_insert_segy = NULL;
+  mb_io_ptr->mb_io_ctd = NULL;
+  mb_io_ptr->mb_io_ancilliarysensor = NULL;
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
