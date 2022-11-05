@@ -887,9 +887,11 @@ int mbview_pick_text(size_t instance) {
 	        {
 	        sprintf(value_text, ":::t\"Pick Info:\":t\"No Pick\"");
 	        sprintf(value_list, "Pick Info: No Pick\n");
+          data->pickinfo_mode = MBV_PICK_NONE;
 	        }
 	set_mbview_label_multiline_string(view->mb3dview.mbview_label_pickinfo, value_text);
-	fprintf(stderr, "%s", value_list);
+  if (data->pickinfo_mode != MBV_PICK_NONE)
+    fprintf(stderr, "%s", value_list);
 
 	const int status = MB_SUCCESS;
 

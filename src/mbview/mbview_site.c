@@ -245,6 +245,7 @@ int mbview_addsites(int verbose, size_t instance, int nsite, double *sitelon, do
 		}
 		else {
 			for (int i = shared.shareddata.nsite; i < shared.shareddata.nsite_alloc; i++) {
+				shared.shareddata.sites[i].active = false;
 				shared.shareddata.sites[i].color = MBV_COLOR_GREEN;
 				shared.shareddata.sites[i].size = 1;
 				shared.shareddata.sites[i].name[0] = '\0';
@@ -272,6 +273,10 @@ int mbview_addsites(int verbose, size_t instance, int nsite, double *sitelon, do
 		if (fabs(xdisplay) < 1000.0 && fabs(ydisplay) < 1000.0 && fabs(zdisplay) < 1000.0) {
 
 			/* add the new site */
+			shared.shareddata.sites[shared.shareddata.nsite].active = true;
+			shared.shareddata.sites[shared.shareddata.nsite].color = sitecolor[i];
+			shared.shareddata.sites[shared.shareddata.nsite].size = sitesize[i];
+			strcpy(shared.shareddata.sites[shared.shareddata.nsite].name, sitename[i]);
 			shared.shareddata.sites[shared.shareddata.nsite].point.xgrid[instance] = xgrid;
 			shared.shareddata.sites[shared.shareddata.nsite].point.ygrid[instance] = ygrid;
 			shared.shareddata.sites[shared.shareddata.nsite].point.xlon = sitelon[i];
@@ -280,9 +285,6 @@ int mbview_addsites(int verbose, size_t instance, int nsite, double *sitelon, do
 			shared.shareddata.sites[shared.shareddata.nsite].point.xdisplay[instance] = xdisplay;
 			shared.shareddata.sites[shared.shareddata.nsite].point.ydisplay[instance] = ydisplay;
 			shared.shareddata.sites[shared.shareddata.nsite].point.zdisplay[instance] = zdisplay;
-			shared.shareddata.sites[shared.shareddata.nsite].color = sitecolor[i];
-			shared.shareddata.sites[shared.shareddata.nsite].size = sitesize[i];
-			strcpy(shared.shareddata.sites[shared.shareddata.nsite].name, sitename[i]);
 
 			/* set grid and display coordinates for all instances */
 			mbview_updatepointw(instance, &(shared.shareddata.sites[shared.shareddata.nsite].point));
@@ -355,14 +357,16 @@ int mbview_getsites(int verbose, size_t instance, int *nsite, double *sitelon, d
 	/* otherwise go get the site data */
 	else {
 		/* loop over the sites */
-		*nsite = shared.shareddata.nsite;
-		for (int i = 0; i < *nsite; i++) {
-			sitelon[i] = shared.shareddata.sites[i].point.xlon;
-			sitelat[i] = shared.shareddata.sites[i].point.ylat;
-			sitetopo[i] = shared.shareddata.sites[i].point.zdata;
-			sitecolor[i] = shared.shareddata.sites[i].color;
-			sitesize[i] = shared.shareddata.sites[i].size;
-			strcpy(sitename[i], shared.shareddata.sites[i].name);
+		for (int i = 0; i < shared.shareddata.nsite; i++) {
+      if (shared.shareddata.sites[i].active) {
+		    *nsite += 1;
+  			sitelon[i] = shared.shareddata.sites[i].point.xlon;
+  			sitelat[i] = shared.shareddata.sites[i].point.ylat;
+  			sitetopo[i] = shared.shareddata.sites[i].point.zdata;
+  			sitecolor[i] = shared.shareddata.sites[i].color;
+  			sitesize[i] = shared.shareddata.sites[i].size;
+  			strcpy(sitename[i], shared.shareddata.sites[i].name);
+      }
 		}
 	}
 
@@ -489,13 +493,15 @@ int mbview_pick_site_select(size_t instance, int which, int xpixel, int ypixel) 
 			/* now figure out which site will be selected next */
 			double rrmin = 1000000000.0;
 			for (int i = 0; i < shared.shareddata.nsite; i++) {
-				const double xx = xgrid - shared.shareddata.sites[i].point.xgrid[instance];
-				const double yy = ygrid - shared.shareddata.sites[i].point.ygrid[instance];
-				const double rr = sqrt(xx * xx + yy * yy);
-				if (rr < rrmin) {
-					rrmin = rr;
-					shared.shareddata.site_selected = i;
-				}
+        if (shared.shareddata.sites[i].active) {
+  				const double xx = xgrid - shared.shareddata.sites[i].point.xgrid[instance];
+  				const double yy = ygrid - shared.shareddata.sites[i].point.ygrid[instance];
+  				const double rr = sqrt(xx * xx + yy * yy);
+  				if (rr < rrmin) {
+  					rrmin = rr;
+  					shared.shareddata.site_selected = i;
+  				}
+        }
 			}
 		}
 		else if (shared.shareddata.site_selected == MBV_SELECT_NONE) {
@@ -572,6 +578,10 @@ int mbview_pick_site_select(size_t instance, int which, int xpixel, int ypixel) 
 		fprintf(stderr, "dbg2       nsite_alloc:         %d\n", shared.shareddata.nsite_alloc);
 		fprintf(stderr, "dbg2       site_selected:       %d\n", shared.shareddata.site_selected);
 		for (int i = 0; i < shared.shareddata.nsite; i++) {
+			fprintf(stderr, "dbg2       site %d active:      %d\n", i, shared.shareddata.sites[i].active);
+			fprintf(stderr, "dbg2       site %d color:       %d\n", i, shared.shareddata.sites[i].color);
+			fprintf(stderr, "dbg2       site %d size:        %d\n", i, shared.shareddata.sites[i].size);
+			fprintf(stderr, "dbg2       site %d name:        %s\n", i, shared.shareddata.sites[i].name);
 			fprintf(stderr, "dbg2       site %d xgrid:       %f\n", i, shared.shareddata.sites[i].point.xgrid[instance]);
 			fprintf(stderr, "dbg2       site %d ygrid:       %f\n", i, shared.shareddata.sites[i].point.ygrid[instance]);
 			fprintf(stderr, "dbg2       site %d xlon:        %f\n", i, shared.shareddata.sites[i].point.xlon);
@@ -580,9 +590,6 @@ int mbview_pick_site_select(size_t instance, int which, int xpixel, int ypixel) 
 			fprintf(stderr, "dbg2       site %d xdisplay:    %f\n", i, shared.shareddata.sites[i].point.xdisplay[instance]);
 			fprintf(stderr, "dbg2       site %d ydisplay:    %f\n", i, shared.shareddata.sites[i].point.ydisplay[instance]);
 			fprintf(stderr, "dbg2       site %d zdisplay:    %f\n", i, shared.shareddata.sites[i].point.zdisplay[instance]);
-			fprintf(stderr, "dbg2       site %d color:       %d\n", i, shared.shareddata.sites[i].color);
-			fprintf(stderr, "dbg2       site %d size:        %d\n", i, shared.shareddata.sites[i].size);
-			fprintf(stderr, "dbg2       site %d name:        %s\n", i, shared.shareddata.sites[i].name);
 		}
 	}
 
@@ -651,6 +658,7 @@ int mbview_pick_site_add(size_t instance, int which, int xpixel, int ypixel) {
 				}
 				else {
 					for (int i = shared.shareddata.nsite; i < shared.shareddata.nsite_alloc; i++) {
+						shared.shareddata.sites[i].active = false;
 						shared.shareddata.sites[i].color = MBV_COLOR_GREEN;
 						shared.shareddata.sites[i].size = 1;
 						shared.shareddata.sites[i].name[0] = '\0';
@@ -664,6 +672,10 @@ int mbview_pick_site_add(size_t instance, int which, int xpixel, int ypixel) {
 			}
 
 			/* add the new site */
+			shared.shareddata.sites[inew].active = true;
+			shared.shareddata.sites[inew].color = MBV_COLOR_GREEN;
+			shared.shareddata.sites[inew].size = 1;
+			sprintf(shared.shareddata.sites[inew].name, "Site %d", shared.shareddata.nsite);
 			shared.shareddata.sites[inew].point.xgrid[instance] = xgrid;
 			shared.shareddata.sites[inew].point.ygrid[instance] = ygrid;
 			shared.shareddata.sites[inew].point.xlon = xlon;
@@ -672,9 +684,6 @@ int mbview_pick_site_add(size_t instance, int which, int xpixel, int ypixel) {
 			shared.shareddata.sites[inew].point.xdisplay[instance] = xdisplay;
 			shared.shareddata.sites[inew].point.ydisplay[instance] = ydisplay;
 			shared.shareddata.sites[inew].point.zdisplay[instance] = zdisplay;
-			shared.shareddata.sites[inew].color = MBV_COLOR_GREEN;
-			shared.shareddata.sites[inew].size = 1;
-			sprintf(shared.shareddata.sites[inew].name, "Site %d", shared.shareddata.nsite);
 
 			/* set grid and display coordinates for all instances */
 			mbview_updatepointw(instance, &(shared.shareddata.sites[inew].point));
@@ -749,6 +758,10 @@ int mbview_pick_site_add(size_t instance, int which, int xpixel, int ypixel) {
 		fprintf(stderr, "dbg2       nsite_alloc:         %d\n", shared.shareddata.nsite_alloc);
 		fprintf(stderr, "dbg2       site_selected:       %d\n", shared.shareddata.site_selected);
 		for (int i = 0; i < shared.shareddata.nsite; i++) {
+			fprintf(stderr, "dbg2       site %d active:      %d\n", i, shared.shareddata.sites[i].active);
+			fprintf(stderr, "dbg2       site %d color:       %d\n", i, shared.shareddata.sites[i].color);
+			fprintf(stderr, "dbg2       site %d size:        %d\n", i, shared.shareddata.sites[i].size);
+			fprintf(stderr, "dbg2       site %d name:        %s\n", i, shared.shareddata.sites[i].name);
 			fprintf(stderr, "dbg2       site %d xgrid:       %f\n", i, shared.shareddata.sites[i].point.xgrid[instance]);
 			fprintf(stderr, "dbg2       site %d ygrid:       %f\n", i, shared.shareddata.sites[i].point.ygrid[instance]);
 			fprintf(stderr, "dbg2       site %d xlon:        %f\n", i, shared.shareddata.sites[i].point.xlon);
@@ -757,9 +770,6 @@ int mbview_pick_site_add(size_t instance, int which, int xpixel, int ypixel) {
 			fprintf(stderr, "dbg2       site %d xdisplay:    %f\n", i, shared.shareddata.sites[i].point.xdisplay[instance]);
 			fprintf(stderr, "dbg2       site %d ydisplay:    %f\n", i, shared.shareddata.sites[i].point.ydisplay[instance]);
 			fprintf(stderr, "dbg2       site %d zdisplay:    %f\n", i, shared.shareddata.sites[i].point.zdisplay[instance]);
-			fprintf(stderr, "dbg2       site %d color:       %d\n", i, shared.shareddata.sites[i].color);
-			fprintf(stderr, "dbg2       site %d size:        %d\n", i, shared.shareddata.sites[i].size);
-			fprintf(stderr, "dbg2       site %d name:        %s\n", i, shared.shareddata.sites[i].name);
 		}
 	}
 
@@ -857,6 +867,10 @@ int mbview_pick_site_delete(size_t instance, int xpixel, int ypixel) {
 		fprintf(stderr, "dbg2       nsite_alloc:         %d\n", shared.shareddata.nsite_alloc);
 		fprintf(stderr, "dbg2       site_selected:       %d\n", shared.shareddata.site_selected);
 		for (int i = 0; i < shared.shareddata.nsite; i++) {
+			fprintf(stderr, "dbg2       site %d active:      %d\n", i, shared.shareddata.sites[i].active);
+			fprintf(stderr, "dbg2       site %d color:       %d\n", i, shared.shareddata.sites[i].color);
+			fprintf(stderr, "dbg2       site %d size:        %d\n", i, shared.shareddata.sites[i].size);
+			fprintf(stderr, "dbg2       site %d name:        %s\n", i, shared.shareddata.sites[i].name);
 			fprintf(stderr, "dbg2       site %d xgrid:       %f\n", i, shared.shareddata.sites[i].point.xgrid[instance]);
 			fprintf(stderr, "dbg2       site %d ygrid:       %f\n", i, shared.shareddata.sites[i].point.ygrid[instance]);
 			fprintf(stderr, "dbg2       site %d xlon:        %f\n", i, shared.shareddata.sites[i].point.xlon);
@@ -865,9 +879,6 @@ int mbview_pick_site_delete(size_t instance, int xpixel, int ypixel) {
 			fprintf(stderr, "dbg2       site %d xdisplay:    %f\n", i, shared.shareddata.sites[i].point.xdisplay[instance]);
 			fprintf(stderr, "dbg2       site %d ydisplay:    %f\n", i, shared.shareddata.sites[i].point.ydisplay[instance]);
 			fprintf(stderr, "dbg2       site %d zdisplay:    %f\n", i, shared.shareddata.sites[i].point.zdisplay[instance]);
-			fprintf(stderr, "dbg2       site %d color:       %d\n", i, shared.shareddata.sites[i].color);
-			fprintf(stderr, "dbg2       site %d size:        %d\n", i, shared.shareddata.sites[i].size);
-			fprintf(stderr, "dbg2       site %d name:        %s\n", i, shared.shareddata.sites[i].name);
 		}
 	}
 
@@ -991,31 +1002,33 @@ int mbview_drawsite(size_t instance, int rez) {
 
 		/* loop over the sites */
 		for (int isite = 0; isite < shared.shareddata.nsite; isite++) {
+      if (shared.shareddata.sites[isite].active) {
 
-			/* set the color for this site */
-			int icolor;
-			if (isite == shared.shareddata.site_selected)
-				icolor = MBV_COLOR_RED;
-			else
-				icolor = shared.shareddata.sites[isite].color;
-			glColor3f(colortable_object_red[icolor], colortable_object_green[icolor], colortable_object_blue[icolor]);
+  			/* set the color for this site */
+  			int icolor;
+  			if (isite == shared.shareddata.site_selected)
+  				icolor = MBV_COLOR_RED;
+  			else
+  				icolor = shared.shareddata.sites[isite].color;
+  			glColor3f(colortable_object_red[icolor], colortable_object_green[icolor], colortable_object_blue[icolor]);
 
-			/* draw the site as a disk or sphere using GLUT */
-			glTranslatef(shared.shareddata.sites[isite].point.xdisplay[instance],
-			             shared.shareddata.sites[isite].point.ydisplay[instance],
-			             shared.shareddata.sites[isite].point.zdisplay[instance]);
-			/*fprintf(stderr,"site:%d position: %f %f %f\n",
-			isite,shared.shareddata.sites[isite].point.xdisplay[instance],
-			shared.shareddata.sites[isite].point.ydisplay[instance],
-			shared.shareddata.sites[isite].point.zdisplay[instance]);*/
-			if (isite == shared.shareddata.site_selected)
-				glCallList((GLuint)MBV_GLLIST_SITELARGE);
-			else
-				glCallList((GLuint)MBV_GLLIST_SITESMALL);
-			glTranslatef(-shared.shareddata.sites[isite].point.xdisplay[instance],
-			             -shared.shareddata.sites[isite].point.ydisplay[instance],
-			             -shared.shareddata.sites[isite].point.zdisplay[instance]);
-		}
+  			/* draw the site as a disk or sphere using GLUT */
+  			glTranslatef(shared.shareddata.sites[isite].point.xdisplay[instance],
+  			             shared.shareddata.sites[isite].point.ydisplay[instance],
+  			             shared.shareddata.sites[isite].point.zdisplay[instance]);
+  			/*fprintf(stderr,"site:%d position: %f %f %f\n",
+  			isite,shared.shareddata.sites[isite].point.xdisplay[instance],
+  			shared.shareddata.sites[isite].point.ydisplay[instance],
+  			shared.shareddata.sites[isite].point.zdisplay[instance]);*/
+  			if (isite == shared.shareddata.site_selected)
+  				glCallList((GLuint)MBV_GLLIST_SITELARGE);
+  			else
+  				glCallList((GLuint)MBV_GLLIST_SITESMALL);
+  			glTranslatef(-shared.shareddata.sites[isite].point.xdisplay[instance],
+  			             -shared.shareddata.sites[isite].point.ydisplay[instance],
+  			             -shared.shareddata.sites[isite].point.zdisplay[instance]);
+  		}
+    }
 	}
 #ifdef MBV_GETERRORS
 	mbview_glerrorcheck(instance, 1, __func__);
@@ -1052,21 +1065,23 @@ int mbview_updatesitelist() {
 
 			/* loop over the sites */
 			for (int isite = 0; isite < shared.shareddata.nsite; isite++) {
-				/* add list item for each site */
-				char londstr0[24], lonmstr0[24];
-				char latdstr0[24], latmstr0[24];
-				mbview_setlonlatstrings(shared.shareddata.sites[isite].point.xlon, shared.shareddata.sites[isite].point.ylat,
-				                        londstr0, latdstr0, lonmstr0, latmstr0);
-				if (shared.lonlatstyle == MBV_LONLAT_DEGREESDECIMAL)
-					sprintf(value_string, "%3d | %s | %s | %.3f | %s | %d | %s", isite, londstr0, latdstr0,
-					        shared.shareddata.sites[isite].point.zdata, mbview_colorname[shared.shareddata.sites[isite].color],
-					        shared.shareddata.sites[isite].size, shared.shareddata.sites[isite].name);
-				else
-					sprintf(value_string, "%3d | %s | %s | %.3f | %s | %d | %s", isite, lonmstr0, latmstr0,
-					        shared.shareddata.sites[isite].point.zdata, mbview_colorname[shared.shareddata.sites[isite].color],
-					        shared.shareddata.sites[isite].size, shared.shareddata.sites[isite].name);
-				xstr[isite] = XmStringCreateLocalized(value_string);
-			}
+        if (shared.shareddata.sites[isite].active) {
+  				/* add list item for each site */
+  				char londstr0[24], lonmstr0[24];
+  				char latdstr0[24], latmstr0[24];
+  				mbview_setlonlatstrings(shared.shareddata.sites[isite].point.xlon, shared.shareddata.sites[isite].point.ylat,
+  				                        londstr0, latdstr0, lonmstr0, latmstr0);
+  				if (shared.lonlatstyle == MBV_LONLAT_DEGREESDECIMAL)
+  					sprintf(value_string, "%3d | %s | %s | %.3f | %s | %d | %s", isite, londstr0, latdstr0,
+  					        shared.shareddata.sites[isite].point.zdata, mbview_colorname[shared.shareddata.sites[isite].color],
+  					        shared.shareddata.sites[isite].size, shared.shareddata.sites[isite].name);
+  				else
+  					sprintf(value_string, "%3d | %s | %s | %.3f | %s | %d | %s", isite, lonmstr0, latmstr0,
+  					        shared.shareddata.sites[isite].point.zdata, mbview_colorname[shared.shareddata.sites[isite].color],
+  					        shared.shareddata.sites[isite].size, shared.shareddata.sites[isite].name);
+  				xstr[isite] = XmStringCreateLocalized(value_string);
+  			}
+      }
 
 			/* add list items */
 			XmListAddItems(shared.mb3d_sitelist.mbview_list_sitelist, xstr, shared.shareddata.nsite, 0);

@@ -133,7 +133,8 @@ constexpr char usage_message[] =
     "\t--kluge-zero-alongtrack-angles\n"
     "\t--kluge-fix-wissl-timestamps\n"
     "\t--kluge-auv-sentry-sensordepth\n"
-    "\t--kluge-ignore-snippets\n";
+    "\t--kluge-ignore-snippets\n"
+    "\t--kluge-sonardepth-from-heave\n";
 
 /*--------------------------------------------------------------------*/
 
@@ -165,6 +166,7 @@ int main(int argc, char **argv) {
   bool kluge_fix_wissl_timestamps = false;
   bool kluge_auv_sentry_sensordepth = false;
   bool kluge_ignore_snippets = false;
+  bool kluge_sonardepth_from_heave = false;
 
   mb_path sensordepth_file;
   memset(sensordepth_file, 0, sizeof(mb_path));
@@ -296,6 +298,7 @@ int main(int argc, char **argv) {
                                       {"kluge-fix-wissl-timestamps", no_argument, nullptr, 0},
                                       {"kluge-auv-sentry-sensordepth", no_argument, nullptr, 0},
                                       {"kluge-ignore-snippets", no_argument, nullptr, 0},
+                                      {"kluge-sonardepth-from-heave", no_argument, nullptr, 0},
                                       {nullptr, 0, nullptr, 0}};
 
     int option_index;
@@ -669,6 +672,12 @@ int main(int argc, char **argv) {
           preprocess_pars.n_kluge++;
           kluge_ignore_snippets = true;
         }
+        else if (strcmp("kluge-sonardepth-from-heave", options[option_index].name) == 0) {
+          preprocess_pars.kluge_id[preprocess_pars.n_kluge] = MB_PR_KLUGE_SONARDEPTHFROMHEAVE;
+          preprocess_pars.n_kluge++;
+          kluge_sonardepth_from_heave = true;
+        }
+
         break;
       case '?':
         errflg = true;
@@ -846,6 +855,7 @@ int main(int argc, char **argv) {
     fprintf(stderr, "dbg2       kluge_fix_wissl_timestamps:   %d\n", kluge_fix_wissl_timestamps);
     fprintf(stderr, "dbg2       kluge_auv_sentry_sensordepth: %d\n", kluge_auv_sentry_sensordepth);
     fprintf(stderr, "dbg2       kluge_ignore_snippets:        %d\n", kluge_ignore_snippets);
+    fprintf(stderr, "dbg2       kluge_sonardepth_from_heave   %d\n", kluge_sonardepth_from_heave);
     fprintf(stderr, "dbg2  Additional output:\n");
     fprintf(stderr, "dbg2       output_sensor_fnv:            %d\n", output_sensor_fnv);
     fprintf(stderr, "dbg2  Skip existing output files:\n");
@@ -955,6 +965,7 @@ int main(int argc, char **argv) {
     fprintf(stderr, "     kluge_fix_wissl_timestamps:   %d\n", kluge_fix_wissl_timestamps);
     fprintf(stderr, "     kluge_auv_sentry_sensordepth: %d\n", kluge_auv_sentry_sensordepth);
     fprintf(stderr, "     kluge_ignore_snippets:        %d\n", kluge_ignore_snippets);
+    fprintf(stderr, "     kluge_sonardepth_from_heave:  %d\n", kluge_sonardepth_from_heave);
     fprintf(stderr, "Additional output:\n");
     fprintf(stderr, "     output_sensor_fnv:            %d\n", output_sensor_fnv);
     fprintf(stderr, "Skip existing output files:\n");
@@ -1555,16 +1566,17 @@ int main(int argc, char **argv) {
       /* look for nav if not externally defined */
       if (status == MB_SUCCESS && nav_mode == MBPREPROCESS_MERGE_ASYNC && kind == nav_async) {
         /* extract nav data */
-        status = mb_extract_nnav(verbose, imbio_ptr, istore_ptr, nanavmax, &kind, &nanav, atime_i, atime_d, alon, alat,
+        int extract_status = mb_extract_nnav(verbose, imbio_ptr, istore_ptr, nanavmax, &kind, &nanav, atime_i, atime_d, alon, alat,
                                  aspeed, aheading, asensordepth, aroll, apitch, aheave, &error);
 
         /* allocate memory if needed */
-        if (status == MB_SUCCESS && nanav > 0 && n_nav + nanav >= n_nav_alloc) {
+        if (extract_status == MB_SUCCESS && nanav > 0 && n_nav + nanav >= n_nav_alloc) {
+          error = MB_ERROR_NO_ERROR;
           n_nav_alloc += std::max(MBPREPROCESS_ALLOC_CHUNK, nanav);
-          /* status &= */ mb_reallocd(verbose, __FILE__, __LINE__, n_nav_alloc * sizeof(double), (void **)&nav_time_d, &error);
-          /* status &= */ mb_reallocd(verbose, __FILE__, __LINE__, n_nav_alloc * sizeof(double), (void **)&nav_navlon, &error);
-          /* status &= */ mb_reallocd(verbose, __FILE__, __LINE__, n_nav_alloc * sizeof(double), (void **)&nav_navlat, &error);
-          /* status &= */ mb_reallocd(verbose, __FILE__, __LINE__, n_nav_alloc * sizeof(double), (void **)&nav_speed, &error);
+          status = mb_reallocd(verbose, __FILE__, __LINE__, n_nav_alloc * sizeof(double), (void **)&nav_time_d, &error);
+          status &= mb_reallocd(verbose, __FILE__, __LINE__, n_nav_alloc * sizeof(double), (void **)&nav_navlon, &error);
+          status &= mb_reallocd(verbose, __FILE__, __LINE__, n_nav_alloc * sizeof(double), (void **)&nav_navlat, &error);
+          status &= mb_reallocd(verbose, __FILE__, __LINE__, n_nav_alloc * sizeof(double), (void **)&nav_speed, &error);
           if (error != MB_ERROR_NO_ERROR) {
             char *message;
             mb_error(verbose, error, &message);
@@ -1576,7 +1588,7 @@ int main(int argc, char **argv) {
         }
 
         /* copy the nav data */
-        if (status == MB_SUCCESS && nanav > 0) {
+        if (extract_status == MB_SUCCESS && nanav > 0) {
           for (int i = 0; i < nanav; i++) {
             if (atime_d[i] > 0.0 && alon[i] != 0.0 && alat[i] != 0.0) {
               nav_time_d[n_nav] = atime_d[i];
@@ -1592,15 +1604,16 @@ int main(int argc, char **argv) {
       /* look for sensordepth if not externally defined */
       if (status == MB_SUCCESS && sensordepth_mode == MBPREPROCESS_MERGE_ASYNC && kind == sensordepth_async) {
         /* extract sensordepth data */
-        status = mb_extract_nnav(verbose, imbio_ptr, istore_ptr, nanavmax, &kind, &nanav, atime_i, atime_d, alon, alat,
+        int extract_status = status = mb_extract_nnav(verbose, imbio_ptr, istore_ptr, nanavmax, &kind, &nanav, atime_i, atime_d, alon, alat,
                                  aspeed, aheading, asensordepth, aroll, apitch, aheave, &error);
 
         /* allocate memory if needed */
-        if (status == MB_SUCCESS && nanav > 0 && n_sensordepth + nanav >= n_sensordepth_alloc) {
+        if (extract_status == MB_SUCCESS && nanav > 0 && n_sensordepth + nanav >= n_sensordepth_alloc) {
+          error = MB_ERROR_NO_ERROR;
           n_sensordepth_alloc += std::max(MBPREPROCESS_ALLOC_CHUNK, nanav);
-          /* status &= */ mb_reallocd(verbose, __FILE__, __LINE__, n_sensordepth_alloc * sizeof(double),
+          status = mb_reallocd(verbose, __FILE__, __LINE__, n_sensordepth_alloc * sizeof(double),
                                (void **)&sensordepth_time_d, &error);
-          /* status &= */ mb_reallocd(verbose, __FILE__, __LINE__, n_sensordepth_alloc * sizeof(double),
+          status &= mb_reallocd(verbose, __FILE__, __LINE__, n_sensordepth_alloc * sizeof(double),
                                (void **)&sensordepth_sensordepth, &error);
           if (error != MB_ERROR_NO_ERROR) {
             char *message;
@@ -1613,7 +1626,7 @@ int main(int argc, char **argv) {
         }
 
         /* copy the sensordepth data */
-        if (status == MB_SUCCESS && nanav > 0) {
+        if (extract_status == MB_SUCCESS && nanav > 0) {
           for (int i = 0; i < nanav; i++) {
             sensordepth_time_d[n_sensordepth] = atime_d[i];
             sensordepth_sensordepth[n_sensordepth] = asensordepth[i];
@@ -1625,15 +1638,16 @@ int main(int argc, char **argv) {
       /* look for heading if not externally defined */
       if (status == MB_SUCCESS && heading_mode == MBPREPROCESS_MERGE_ASYNC && kind == heading_async) {
         /* extract heading data */
-        status = mb_extract_nnav(verbose, imbio_ptr, istore_ptr, nanavmax, &kind, &nanav, atime_i, atime_d, alon, alat,
+        int extract_status = mb_extract_nnav(verbose, imbio_ptr, istore_ptr, nanavmax, &kind, &nanav, atime_i, atime_d, alon, alat,
                                  aspeed, aheading, asensordepth, aroll, apitch, aheave, &error);
 
         /* allocate memory if needed */
-        if (status == MB_SUCCESS && nanav > 0 && n_heading + nanav >= n_heading_alloc) {
+        if (extract_status == MB_SUCCESS && nanav > 0 && n_heading + nanav >= n_heading_alloc) {
+          error = MB_ERROR_NO_ERROR;
           n_heading_alloc += std::max(MBPREPROCESS_ALLOC_CHUNK, nanav);
-          /* status &= */ mb_reallocd(verbose, __FILE__, __LINE__, n_heading_alloc * sizeof(double), (void **)&heading_time_d,
+          status = mb_reallocd(verbose, __FILE__, __LINE__, n_heading_alloc * sizeof(double), (void **)&heading_time_d,
                                &error);
-          /* status &= */ mb_reallocd(verbose, __FILE__, __LINE__, n_heading_alloc * sizeof(double), (void **)&heading_heading,
+          status &= mb_reallocd(verbose, __FILE__, __LINE__, n_heading_alloc * sizeof(double), (void **)&heading_heading,
                                &error);
           if (error != MB_ERROR_NO_ERROR) {
             char *message;
@@ -1646,7 +1660,7 @@ int main(int argc, char **argv) {
         }
 
         /* copy the heading data */
-        if (status == MB_SUCCESS && nanav > 0) {
+        if (extract_status == MB_SUCCESS && nanav > 0) {
           for (int i = 0; i < nanav; i++) {
             heading_time_d[n_heading] = atime_d[i];
             heading_heading[n_heading] = aheading[i];
@@ -1658,14 +1672,15 @@ int main(int argc, char **argv) {
       /* look for altitude if not externally defined */
       if (status == MB_SUCCESS && altitude_mode == MBPREPROCESS_MERGE_ASYNC && kind == altitude_async) {
         /* extract altitude data */
-        status = mb_extract_altitude(verbose, imbio_ptr, istore_ptr, &kind, &sensordepth, &altitude, &error);
+        int extract_status = mb_extract_altitude(verbose, imbio_ptr, istore_ptr, &kind, &sensordepth, &altitude, &error);
 
         /* allocate memory if needed */
-        if (status == MB_SUCCESS && n_altitude + 1 >= n_altitude_alloc) {
+        if (extract_status == MB_SUCCESS && n_altitude + 1 >= n_altitude_alloc) {
+          error = MB_ERROR_NO_ERROR;
           n_altitude_alloc += MBPREPROCESS_ALLOC_CHUNK;
-          /* status &= */ mb_reallocd(verbose, __FILE__, __LINE__, n_altitude_alloc * sizeof(double),
+          status = mb_reallocd(verbose, __FILE__, __LINE__, n_altitude_alloc * sizeof(double),
                                (void **)&altitude_time_d, &error);
-          /* status &= */ mb_reallocd(verbose, __FILE__, __LINE__, n_altitude_alloc * sizeof(double),
+          status &= mb_reallocd(verbose, __FILE__, __LINE__, n_altitude_alloc * sizeof(double),
                                (void **)&altitude_altitude, &error);
           if (error != MB_ERROR_NO_ERROR) {
             char *message;
@@ -1678,7 +1693,7 @@ int main(int argc, char **argv) {
         }
 
         /* copy the altitude data */
-        if (status == MB_SUCCESS) {
+        if (extract_status == MB_SUCCESS) {
           altitude_time_d[n_altitude] = time_d;
           altitude_altitude[n_altitude] = altitude;
           n_altitude++;
@@ -1688,19 +1703,20 @@ int main(int argc, char **argv) {
       /* look for attitude if not externally defined */
       if (status == MB_SUCCESS && attitude_mode == MBPREPROCESS_MERGE_ASYNC && kind == attitude_async) {
         /* extract attitude data */
-        status = mb_extract_nnav(verbose, imbio_ptr, istore_ptr, nanavmax, &kind, &nanav, atime_i, atime_d, alon, alat,
+        int extract_status = mb_extract_nnav(verbose, imbio_ptr, istore_ptr, nanavmax, &kind, &nanav, atime_i, atime_d, alon, alat,
                                  aspeed, aheading, asensordepth, aroll, apitch, aheave, &error);
 
         /* allocate memory if needed */
-        if (status == MB_SUCCESS && nanav > 0 && n_attitude + nanav >= n_attitude_alloc) {
+        if (extract_status == MB_SUCCESS && nanav > 0 && n_attitude + nanav >= n_attitude_alloc) {
+          error = MB_ERROR_NO_ERROR;
           n_attitude_alloc += std::max(MBPREPROCESS_ALLOC_CHUNK, nanav);
-          /* status &= */ mb_reallocd(verbose, __FILE__, __LINE__, n_attitude_alloc * sizeof(double),
+          status = mb_reallocd(verbose, __FILE__, __LINE__, n_attitude_alloc * sizeof(double),
                                (void **)&attitude_time_d, &error);
-          /* status &= */ mb_reallocd(verbose, __FILE__, __LINE__, n_attitude_alloc * sizeof(double), (void **)&attitude_roll,
+          status &= mb_reallocd(verbose, __FILE__, __LINE__, n_attitude_alloc * sizeof(double), (void **)&attitude_roll,
                                &error);
-          /* status &= */ mb_reallocd(verbose, __FILE__, __LINE__, n_attitude_alloc * sizeof(double), (void **)&attitude_pitch,
+          status &= mb_reallocd(verbose, __FILE__, __LINE__, n_attitude_alloc * sizeof(double), (void **)&attitude_pitch,
                                &error);
-          /* status &= */ mb_reallocd(verbose, __FILE__, __LINE__, n_attitude_alloc * sizeof(double), (void **)&attitude_heave,
+          status &= mb_reallocd(verbose, __FILE__, __LINE__, n_attitude_alloc * sizeof(double), (void **)&attitude_heave,
                                &error);
           if (error != MB_ERROR_NO_ERROR) {
             char *message;
@@ -1713,7 +1729,7 @@ int main(int argc, char **argv) {
         }
 
         /* copy the attitude data */
-        if (status == MB_SUCCESS && nanav > 0) {
+        if (extract_status == MB_SUCCESS && nanav > 0) {
           for (int i = 0; i < nanav; i++) {
             attitude_time_d[n_attitude] = atime_d[i];
             attitude_roll[n_attitude] = aroll[i];
@@ -2518,6 +2534,10 @@ int main(int argc, char **argv) {
             exit(MB_ERROR_OPEN_FAIL);
         }
         make_fnv = true;
+        fprintf(nfp,  "## <yyyy mm dd hh mm ss.ssssss> <epoch seconds> "
+                      "<longitude (deg)> <latitude (deg)> <heading (deg)> <speed (km/hr)> "
+                      "<draft (m)> <roll (deg)> <pitch (deg)> <heave (m)> <portlon (deg)> "
+                      "<portlat (deg)> <stbdlon (deg)> <stbdlat (deg)>\n");
       }
 
       /* initialize bounds that will be used in call to mbinfo to generate the *.inf file */

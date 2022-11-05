@@ -23,6 +23,7 @@ Distributions that do not include "beta" in the tag name correspond to the major
 announced releases. The source distributions associated with all releases, major
 or beta, are equally accessible as tarballs through the Github interface.
 
+- Version 5.7.9beta45    November 1, 2022
 - Version 5.7.9beta44    August 9, 2022
 - Version 5.7.9beta43    July 29, 2022
 - Version 5.7.9beta42    June 26, 2022
@@ -420,6 +421,26 @@ or beta, are equally accessible as tarballs through the Github interface.
 --
 ### MB-System Version 5.7 Release Notes:
 --
+
+#### 5.7.9beta45 (November 1, 2022)
+
+Mbnavadjust: Added ability to import a reference bathymetry grid that can be
+used to define global ties. Also modified so that when the main display list mode
+limits what is shown to "with selected survey" or other modifiers, these constraints
+also limit what navigation is shown in the project visualization. So, if one selects
+a survey and then sets the list mode to show only the selected survey, then the
+visualization will also only display the navigation from that survey, the crossing
+ties or global ties from that survey, and only allow picking on that survey's
+navigation.
+
+Mbareaclean: Fixed issue in which mbareaclean does not apply filters for files
+without pre-existing *.esf files.
+
+Mbbackangle: Plots of the backscatter vs grazing angle distribution are no longer
+histogram equalized.
+
+Mbprocess: Modified the threaded processing function process_file() so that each
+instance carries a thread id that can be checked during debugging.
 
 #### 5.7.9beta44 (August 9, 2022)
 

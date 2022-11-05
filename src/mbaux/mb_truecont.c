@@ -297,6 +297,7 @@ int mb_contour_deall(int verbose, struct swath *data, int *error) {
     status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&ping->bflag[1], error);
   }
   status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&data->pings, error);
+  data->npings_max = 0;
 
   /* deallocate memory for contour controls */
   if (data->nlevel > 0) {
@@ -304,6 +305,7 @@ int mb_contour_deall(int verbose, struct swath *data, int *error) {
     status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&data->label_list, error);
     status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&data->tick_list, error);
     status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&data->color_list, error);
+    data->nlevel = 0;
   }
 
   /* deallocate memory for triangle network */
@@ -321,6 +323,7 @@ int mb_contour_deall(int verbose, struct swath *data, int *error) {
       status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&data->ed[i], error);
       status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&data->flag[i], error);
     }
+    data->ntri_alloc = 0;
   }
   if (data->ndelaun_alloc > 0) {
     status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&data->v1, error);
@@ -329,6 +332,7 @@ int mb_contour_deall(int verbose, struct swath *data, int *error) {
     status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&data->istack, error);
     status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&data->kv1, error);
     status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&data->kv2, error);
+    data->ndelaun_alloc = 0;
   }
 
   /* deallocate memory for contour positions */
@@ -680,7 +684,6 @@ int mb_triangulate(int verbose, struct swath *data, int *error) {
       }
     }
   }
-
 
   // get extrema of preliminary soundings and the minimum  distance allowed
   // between points submitted for triangulization
