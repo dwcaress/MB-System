@@ -27,7 +27,8 @@ QVtkRenderer::QVtkRenderer() :
   wheelEvent_(nullptr),
   mouseButtonEvent_(nullptr),
   mouseMoveEvent_(nullptr),
-  prevZScale_(1.)
+  prevZScale_(1.),
+  prevColorMapScheme_(TopoColorMap::Scheme::Unknown)
 {
     worker_ = new LoadFileWorker(*this);
 
@@ -73,6 +74,11 @@ void QVtkRenderer::render() {
     qDebug() << "QVtkRenderer::render() vert scale changed, assemblePipeline";
     assemblePipeline();
     prevZScale_ = displayProperties_->verticalExagg;
+  }
+
+  if (displayProperties_->topoColorMapScheme != prevColorMapScheme_) {
+    assemblePipeline();
+    prevColorMapScheme_ = displayProperties_->topoColorMapScheme;    
   }
   
   if (wheelEvent_ && !wheelEvent_->isAccepted()) {
