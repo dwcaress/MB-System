@@ -23,7 +23,7 @@ Distributions that do not include "beta" in the tag name correspond to the major
 announced releases. The source distributions associated with all releases, major
 or beta, are equally accessible as tarballs through the Github interface.
 
-- Version 5.7.9beta45    November 1, 2022
+- Version 5.7.9beta45    November 6, 2022
 - Version 5.7.9beta44    August 9, 2022
 - Version 5.7.9beta43    July 29, 2022
 - Version 5.7.9beta42    June 26, 2022
@@ -422,7 +422,10 @@ or beta, are equally accessible as tarballs through the Github interface.
 ### MB-System Version 5.7 Release Notes:
 --
 
-#### 5.7.9beta45 (November 1, 2022)
+#### 5.7.9beta45 (November 6, 2022)
+
+Mbgrdviz: augmented and corrected the headers of route and site files output by
+mbgrdviz, better self documenting the formats of these files.
 
 Mbnavadjust: Added ability to import a reference bathymetry grid that can be
 used to define global ties. Also modified so that when the main display list mode

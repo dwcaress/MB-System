@@ -2517,7 +2517,6 @@ int do_mbgrdviz_saveroute(size_t instance, char *output_file_ptr) {
 
   /* time, user, host variables */
   time_t right_now;
-  char date[32], *user_ptr, host[MB_PATH_MAXLINE];
   char *unknown = "Unknown";
 
   if (verbose >= 2) {
@@ -2555,7 +2554,7 @@ int do_mbgrdviz_saveroute(size_t instance, char *output_file_ptr) {
         fprintf(sfp, "## MB-System Version %s\n", MB_VERSION);
         char user[256], host[256], date[32];
         status = mb_user_host_date(verbose, user, host, date, &error);
-        fprintf(sfp, "## Run by user <%s> on cpu <%s> at <%s>\n", user_ptr, host, date);
+        fprintf(sfp, "## Run by user <%s> on cpu <%s> at <%s>\n", user, host, date);
         fprintf(sfp, "## Number of routes: %d\n", nroutewrite);
         fprintf(sfp, "## Route waypoint type definitions:\n");
         fprintf(sfp, "##   WAYPOINT_NONE         0  Defines topography between waypoints\n");
@@ -2710,8 +2709,6 @@ int do_mbgrdviz_saveroutereversed(size_t instance, char *output_file_ptr) {
 
   /* time, user, host variables */
   time_t right_now;
-  char date[32], *user_ptr, host[MB_PATH_MAXLINE];
-  char *unknown = "Unknown";
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -2748,7 +2745,7 @@ int do_mbgrdviz_saveroutereversed(size_t instance, char *output_file_ptr) {
         fprintf(sfp, "## MB-System Version %s\n", MB_VERSION);
         char user[256], host[256], date[32];
         status = mb_user_host_date(verbose, user, host, date, &error);
-        fprintf(sfp, "## Run by user <%s> on cpu <%s> at <%s>\n", user_ptr, host, date);
+        fprintf(sfp, "## Run by user <%s> on cpu <%s> at <%s>\n", user, host, date);
         fprintf(sfp, "## Number of routes: %d\n", nroutewrite);
         fprintf(sfp, "## Route waypoint type definitions:\n");
         fprintf(sfp, "##   WAYPOINT_NONE         0  Defines topography between waypoints\n");

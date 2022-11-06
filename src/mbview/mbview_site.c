@@ -292,8 +292,8 @@ int mbview_addsites(int verbose, size_t instance, int nsite, double *sitelon, do
 			/* set nsite */
 			shared.shareddata.nsite++;
 			nadded++;
-			/* fprintf(stderr,"Added site %d added so far:%d total:%d\n",
-			shared.shareddata.nsite-1, nadded, shared.shareddata.nsite);*/
+			fprintf(stderr,"Added site %d added so far:%d total:%d\n",
+			shared.shareddata.nsite-1, nadded, shared.shareddata.nsite);
 		}
 
 		/* report failure due to unreasonable coordinates */
@@ -313,6 +313,31 @@ int mbview_addsites(int verbose, size_t instance, int nsite, double *sitelon, do
 
 	/* update site list */
 	mbview_updatesitelist();
+
+	/* print site debug statements */
+	if (mbv_verbose >= 2) {
+		fprintf(stderr, "\ndbg2  Site data in function <%s>\n", __func__);
+		fprintf(stderr, "dbg2  Site values:\n");
+		fprintf(stderr, "dbg2       site_view_mode:      %d\n", data->site_view_mode);
+		fprintf(stderr, "dbg2       site_mode:           %d\n", shared.shareddata.site_mode);
+		fprintf(stderr, "dbg2       nsite:               %d\n", shared.shareddata.nsite);
+		fprintf(stderr, "dbg2       nsite_alloc:         %d\n", shared.shareddata.nsite_alloc);
+		fprintf(stderr, "dbg2       site_selected:       %d\n", shared.shareddata.site_selected);
+		for (int i = 0; i < shared.shareddata.nsite; i++) {
+			fprintf(stderr, "dbg2       site %d active:      %d\n", i, shared.shareddata.sites[i].active);
+			fprintf(stderr, "dbg2       site %d color:       %d\n", i, shared.shareddata.sites[i].color);
+			fprintf(stderr, "dbg2       site %d size:        %d\n", i, shared.shareddata.sites[i].size);
+			fprintf(stderr, "dbg2       site %d name:        %s\n", i, shared.shareddata.sites[i].name);
+			fprintf(stderr, "dbg2       site %d xgrid:       %f\n", i, shared.shareddata.sites[i].point.xgrid[instance]);
+			fprintf(stderr, "dbg2       site %d ygrid:       %f\n", i, shared.shareddata.sites[i].point.ygrid[instance]);
+			fprintf(stderr, "dbg2       site %d xlon:        %f\n", i, shared.shareddata.sites[i].point.xlon);
+			fprintf(stderr, "dbg2       site %d ylat:        %f\n", i, shared.shareddata.sites[i].point.ylat);
+			fprintf(stderr, "dbg2       site %d zdata:       %f\n", i, shared.shareddata.sites[i].point.zdata);
+			fprintf(stderr, "dbg2       site %d xdisplay:    %f\n", i, shared.shareddata.sites[i].point.xdisplay[instance]);
+			fprintf(stderr, "dbg2       site %d ydisplay:    %f\n", i, shared.shareddata.sites[i].point.ydisplay[instance]);
+			fprintf(stderr, "dbg2       site %d zdisplay:    %f\n", i, shared.shareddata.sites[i].point.zdisplay[instance]);
+		}
+	}
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
@@ -344,8 +369,33 @@ int mbview_getsites(int verbose, size_t instance, int *nsite, double *sitelon, d
 	}
 
 	/* get view */
-	// struct mbview_world_struct *view = &(mbviews[instance]);
-	// struct mbview_struct *data = &(view->data);
+	struct mbview_world_struct *view = &(mbviews[instance]);
+	struct mbview_struct *data = &(view->data);
+
+	/* print site debug statements */
+	if (mbv_verbose >= 2) {
+		fprintf(stderr, "\ndbg2  Site data in function <%s>\n", __func__);
+		fprintf(stderr, "dbg2  Site values:\n");
+		fprintf(stderr, "dbg2       site_view_mode:      %d\n", data->site_view_mode);
+		fprintf(stderr, "dbg2       site_mode:           %d\n", shared.shareddata.site_mode);
+		fprintf(stderr, "dbg2       nsite:               %d\n", shared.shareddata.nsite);
+		fprintf(stderr, "dbg2       nsite_alloc:         %d\n", shared.shareddata.nsite_alloc);
+		fprintf(stderr, "dbg2       site_selected:       %d\n", shared.shareddata.site_selected);
+		for (int i = 0; i < shared.shareddata.nsite; i++) {
+			fprintf(stderr, "dbg2       site %d active:      %d\n", i, shared.shareddata.sites[i].active);
+			fprintf(stderr, "dbg2       site %d color:       %d\n", i, shared.shareddata.sites[i].color);
+			fprintf(stderr, "dbg2       site %d size:        %d\n", i, shared.shareddata.sites[i].size);
+			fprintf(stderr, "dbg2       site %d name:        %s\n", i, shared.shareddata.sites[i].name);
+			fprintf(stderr, "dbg2       site %d xgrid:       %f\n", i, shared.shareddata.sites[i].point.xgrid[instance]);
+			fprintf(stderr, "dbg2       site %d ygrid:       %f\n", i, shared.shareddata.sites[i].point.ygrid[instance]);
+			fprintf(stderr, "dbg2       site %d xlon:        %f\n", i, shared.shareddata.sites[i].point.xlon);
+			fprintf(stderr, "dbg2       site %d ylat:        %f\n", i, shared.shareddata.sites[i].point.ylat);
+			fprintf(stderr, "dbg2       site %d zdata:       %f\n", i, shared.shareddata.sites[i].point.zdata);
+			fprintf(stderr, "dbg2       site %d xdisplay:    %f\n", i, shared.shareddata.sites[i].point.xdisplay[instance]);
+			fprintf(stderr, "dbg2       site %d ydisplay:    %f\n", i, shared.shareddata.sites[i].point.ydisplay[instance]);
+			fprintf(stderr, "dbg2       site %d zdisplay:    %f\n", i, shared.shareddata.sites[i].point.zdisplay[instance]);
+		}
+	}
 
 	/* check that the array pointers are not NULL */
 	int status = MB_SUCCESS;
@@ -357,16 +407,18 @@ int mbview_getsites(int verbose, size_t instance, int *nsite, double *sitelon, d
 	/* otherwise go get the site data */
 	else {
 		/* loop over the sites */
+    int j = 0;
 		for (int i = 0; i < shared.shareddata.nsite; i++) {
       if (shared.shareddata.sites[i].active) {
-		    *nsite += 1;
-  			sitelon[i] = shared.shareddata.sites[i].point.xlon;
-  			sitelat[i] = shared.shareddata.sites[i].point.ylat;
-  			sitetopo[i] = shared.shareddata.sites[i].point.zdata;
-  			sitecolor[i] = shared.shareddata.sites[i].color;
-  			sitesize[i] = shared.shareddata.sites[i].size;
-  			strcpy(sitename[i], shared.shareddata.sites[i].name);
+  			sitelon[j] = shared.shareddata.sites[i].point.xlon;
+  			sitelat[j] = shared.shareddata.sites[i].point.ylat;
+  			sitetopo[j] = shared.shareddata.sites[i].point.zdata;
+  			sitecolor[j] = shared.shareddata.sites[i].color;
+  			sitesize[j] = shared.shareddata.sites[i].size;
+  			strcpy(sitename[j], shared.shareddata.sites[i].name);
+		    j += 1;
       }
+      *nsite = j;
 		}
 	}
 
@@ -570,7 +622,7 @@ int mbview_pick_site_select(size_t instance, int which, int xpixel, int ypixel) 
 
 	/* print site debug statements */
 	if (mbv_verbose >= 2) {
-		fprintf(stderr, "\ndbg2  Site data altered in function <%s>\n", __func__);
+		fprintf(stderr, "\ndbg2  Site data in function <%s>\n", __func__);
 		fprintf(stderr, "dbg2  Site values:\n");
 		fprintf(stderr, "dbg2       site_view_mode:      %d\n", data->site_view_mode);
 		fprintf(stderr, "dbg2       site_mode:           %d\n", shared.shareddata.site_mode);
@@ -750,7 +802,7 @@ int mbview_pick_site_add(size_t instance, int which, int xpixel, int ypixel) {
 
 	/* print site debug statements */
 	if (mbv_verbose >= 2) {
-		fprintf(stderr, "\ndbg2  Site data altered in function <%s>\n", __func__);
+		fprintf(stderr, "\ndbg2  Site data in function <%s>\n", __func__);
 		fprintf(stderr, "dbg2  Site values:\n");
 		fprintf(stderr, "dbg2       site_view_mode:      %d\n", data->site_view_mode);
 		fprintf(stderr, "dbg2       site_mode:           %d\n", shared.shareddata.site_mode);
@@ -859,7 +911,7 @@ int mbview_pick_site_delete(size_t instance, int xpixel, int ypixel) {
 
 	/* print site debug statements */
 	if (mbv_verbose >= 2) {
-		fprintf(stderr, "\ndbg2  Site data altered in function <%s>\n", __func__);
+		fprintf(stderr, "\ndbg2  Site data in function <%s>\n", __func__);
 		fprintf(stderr, "dbg2  Site values:\n");
 		fprintf(stderr, "dbg2       site_view_mode:      %d\n", data->site_view_mode);
 		fprintf(stderr, "dbg2       site_mode:           %d\n", shared.shareddata.site_mode);
@@ -1058,6 +1110,24 @@ int mbview_updatesitelist() {
 		/* remove all existing items */
 		XmListDeleteAllItems(shared.mb3d_sitelist.mbview_list_sitelist);
 
+  	/* print site debug statements */
+  	if (mbv_verbose >= 2) {
+  		fprintf(stderr, "\ndbg2  Site data in function <%s>\n", __func__);
+  		fprintf(stderr, "dbg2  Site values:\n");
+  		fprintf(stderr, "dbg2       site_mode:           %d\n", shared.shareddata.site_mode);
+  		fprintf(stderr, "dbg2       nsite:               %d\n", shared.shareddata.nsite);
+  		fprintf(stderr, "dbg2       nsite_alloc:         %d\n", shared.shareddata.nsite_alloc);
+  		fprintf(stderr, "dbg2       site_selected:       %d\n", shared.shareddata.site_selected);
+  		for (int i = 0; i < shared.shareddata.nsite; i++) {
+  			fprintf(stderr, "dbg2       site %d active:      %d\n", i, shared.shareddata.sites[i].active);
+  			fprintf(stderr, "dbg2       site %d color:       %d\n", i, shared.shareddata.sites[i].color);
+  			fprintf(stderr, "dbg2       site %d size:        %d\n", i, shared.shareddata.sites[i].size);
+  			fprintf(stderr, "dbg2       site %d name:        %s\n", i, shared.shareddata.sites[i].name);
+  			fprintf(stderr, "dbg2       site %d xlon:        %f\n", i, shared.shareddata.sites[i].point.xlon);
+  			fprintf(stderr, "dbg2       site %d ylat:        %f\n", i, shared.shareddata.sites[i].point.ylat);
+  			fprintf(stderr, "dbg2       site %d zdata:       %f\n", i, shared.shareddata.sites[i].point.zdata);
+  		}
+  	}
 
 		if (shared.shareddata.nsite > 0) {
 			/* allocate array of label XmStrings */
