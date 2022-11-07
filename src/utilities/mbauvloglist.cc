@@ -220,7 +220,7 @@ int main(int argc, char **argv) {
 	int etime_i[7];
 	double speedmin;
 	double timegap;
-  
+
 	int status = mb_defaults(verbose, &format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
 
 	bool printheader = false;
@@ -459,22 +459,32 @@ int main(int argc, char **argv) {
 			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
 			exit(MB_ERROR_OPEN_FAIL);
 		}
-		while ((result = fgets(buffer, nchar, fp)) == buffer) {
-			double sec;
-			const int nget = sscanf(
-				buffer, "%d %d %d %d %d %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf", &time_i[0], &time_i[1], &time_i[2],
-				&time_i[3], &time_i[4], &sec, &nav_time_d[nav_num], &nav_navlon[nav_num], &nav_navlat[nav_num],
-				&nav_heading[nav_num], &nav_speed[nav_num], &nav_sensordepth[nav_num], &nav_roll[nav_num],
-				&nav_pitch[nav_num], &nav_heave[nav_num]);
-			bool nav_ok = nget >= 9;
-			if (nav_num > 0 && nav_time_d[nav_num] <= nav_time_d[nav_num - 1])
-				nav_ok = false;
-			if (nav_ok)
-				nav_num++;
-		}
-		fclose(fp);
+    if (fp != NULL) {
+      bool done = false;
+      while (!done) {
+        memset(buffer, 0, MB_PATH_MAXLINE);
+      	char *line_ptr = fgets(buffer, MB_PATH_MAXLINE, fp);
+      	if (line_ptr == NULL) {
+          done = true;
+        }
+        else if (buffer[0] != '#') {
+    			double sec;
+    			const int nget = sscanf(
+    				buffer, "%d %d %d %d %d %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf", &time_i[0], &time_i[1], &time_i[2],
+    				&time_i[3], &time_i[4], &sec, &nav_time_d[nav_num], &nav_navlon[nav_num], &nav_navlat[nav_num],
+    				&nav_heading[nav_num], &nav_speed[nav_num], &nav_sensordepth[nav_num], &nav_roll[nav_num],
+    				&nav_pitch[nav_num], &nav_heave[nav_num]);
+    			bool nav_ok = nget >= 9;
+    			if (nav_num > 0 && nav_time_d[nav_num] <= nav_time_d[nav_num - 1])
+    				nav_ok = false;
+    			if (nav_ok)
+    				nav_num++;
+        }
+      }
+		  fclose(fp);
+    }
 	}
-	if (nav_merge)
+  if (nav_merge)
 		fprintf(stderr, "%d %d records read from nav file %s\n", nav_alloc, nav_num, nav_file);
 
 	/* open the input file */

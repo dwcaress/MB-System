@@ -1,4 +1,4 @@
-.TH mbpreprocess 1 "3 January 2021" "MB-System 5.0" "MB-System 5.0"
+.TH mbpreprocess 1 "5 November 2022" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbpreprocess\fP \- performs preprocessing of swath sonar data as part of setting
 up an MB-System processing structure for a dataset.
@@ -146,6 +146,8 @@ Version 5.0
 \fB--kluge-auv-sentry-sensordepth\fP
 .br
 \fB--kluge-ignore-snippets\fP
+.br
+\fB--kluge-sonardepth-from-heave\fP
 .br
 ]
 
@@ -842,6 +844,7 @@ to the origin for a dual head lidar system. The only relevant formats are for
 .B --kluge-zero-attitude-correction
 .TP
 .B --kluge-zero-alongtrack-angles
+This option zeroes alongtrack angles used to calculated bathymetry.
 .TP
 .B --kluge-fix-wissl-timestamps
 .TP
@@ -852,6 +855,12 @@ The i/o module for this format views pings without snippet records as incomplete
 When \fB--kluge-ignore-snippets\fP is specified, \fBmbpreprocess\fP creates an empty
 snippet record for each ping, and ignores any snippet records actually in the
 input datastream.
+.TP
+.B --kluge-sonardepth-from-heave
+This option causes heave values to be moved to the sonardepth (sometimes sensordepth)
+field, leaving the heave value as zero, for each survey ping. This is currently
+only relevant to the preprocessing of Imagenex DeltaT multibeam data in the vendor
+83P format (191). The output of preprocessing format 191 data are format 192 files.
 
 .SH EXAMPLES
 To be written.....

@@ -998,34 +998,36 @@ int main(int argc, char** argv)
             exit(error);
             }
 
-        /* read the data points in the nav file */
+        /* read the data points in the fnv file */
         nnav = 0;
-        if ((tfp = fopen(NavigationFile, "r")) == NULL)
-            {
-            error = MB_ERROR_OPEN_FAIL;
-            fprintf(stderr,"\nUnable to Open Navigation File <%s> for reading\n",NavigationFile);
-            fprintf(stderr,"\nProgram <%s> Terminated\n",
-                program_name);
-            exit(error);
+        if ((tfp = fopen(NavigationFile, "r")) == NULL) {
+          error = MB_ERROR_OPEN_FAIL;
+          fprintf(stderr,"\nUnable to Open Navigation File <%s> for reading\n",NavigationFile);
+          fprintf(stderr,"\nProgram <%s> Terminated\n",
+              program_name);
+          exit(error);
+          }
+        if (tfp != NULL) {
+          bool done = false;
+          while (!done) {
+            memset(buffer, 0, MB_PATH_MAXLINE);
+            if ((result = fgets(buffer,MB_PATH_MAXLINE,tfp)) == NULL) {
+              done = true;
             }
-        while ((result = fgets(buffer,MB_PATH_MAXLINE,tfp)) == buffer)
-            {
-            value_ok = MB_NO;
+            else if (buffer[0] != '#') {
+              bool value_ok = false;
+              int nget = sscanf(buffer,"%d %d %d %d %d %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf",
+                  &time_i[0],&time_i[1],&time_i[2],
+                  &time_i[3],&time_i[4],&sec,
+                  &ntime[nnav],
+                  &nlon[nnav],&nlat[nnav],
+                  &nheading[nnav],&nspeed[nnav],&ndraft[nnav],
+                  &nroll[nnav],&npitch[nnav],&nheave[nnav]);
+              if (nget >= 15)
+                  value_ok = true;
 
-            /* read the navigation from an fnv file */
-            nget = sscanf(buffer,"%d %d %d %d %d %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf",
-                &time_i[0],&time_i[1],&time_i[2],
-                &time_i[3],&time_i[4],&sec,
-                &ntime[nnav],
-                &nlon[nnav],&nlat[nnav],
-                &nheading[nnav],&nspeed[nnav],&ndraft[nnav],
-                &nroll[nnav],&npitch[nnav],&nheave[nnav]);
-            if (nget >= 15)
-                value_ok = MB_YES;
-
-            /* make sure longitude is defined according to lonflip */
-            if (value_ok == MB_YES)
-                {
+              /* make sure longitude is defined according to lonflip */
+              if (value_ok) {
                 if (lonflip == -1 && nlon[nnav] > 0.0)
                     nlon[nnav] = nlon[nnav] - 360.0;
                 else if (lonflip == 0 && nlon[nnav] < -180.0)
@@ -1034,43 +1036,40 @@ int main(int argc, char** argv)
                     nlon[nnav] = nlon[nnav] - 360.0;
                 else if (lonflip == 1 && nlon[nnav] < 0.0)
                     nlon[nnav] = nlon[nnav] + 360.0;
-                }
+              }
 
-            /* output some debug values */
-            if (verbose >= 5 && value_ok == MB_YES)
-                {
+              /* output some debug values */
+              if (verbose >= 5 && value_ok) {
                 fprintf(stderr,"\ndbg5  New navigation point read in program <%s>\n",program_name);
                 fprintf(stderr,"dbg5       nav[%d]: %f %f %f\n",
                     nnav,ntime[nnav],nlon[nnav],nlat[nnav]);
-                }
-            else if (verbose >= 5)
-                {
+              }
+              else if (verbose >= 5) {
                 fprintf(stderr,"\ndbg5  Error parsing line in navigation file in program <%s>\n",program_name);
                 fprintf(stderr,"dbg5       line: %s\n",buffer);
-                }
+              }
 
-            /* check for reverses or repeats in time */
-            if (value_ok == MB_YES)
-                {
+              /* check for reverses or repeats in time */
+              if (value_ok) {
                 if (nnav == 0)
-                    nnav++;
+                  nnav++;
                 else if (ntime[nnav] > ntime[nnav-1])
-                    nnav++;
+                  nnav++;
                 else if (nnav > 0 && ntime[nnav] <= ntime[nnav-1]
-                    && verbose >= 5)
-                    {
-                    fprintf(stderr,"\ndbg5  Navigation time error in program <%s>\n",program_name);
-                    fprintf(stderr,"dbg5       nav[%d]: %f %f %f\n",
-                        nnav-1,ntime[nnav-1],nlon[nnav-1],
-                        nlat[nnav-1]);
-                    fprintf(stderr,"dbg5       nav[%d]: %f %f %f\n",
-                        nnav,ntime[nnav],nlon[nnav],
-                        nlat[nnav]);
-                    }
+                    && verbose >= 5) {
+                  fprintf(stderr,"\ndbg5  Navigation time error in program <%s>\n",program_name);
+                  fprintf(stderr,"dbg5       nav[%d]: %f %f %f\n",
+                      nnav-1,ntime[nnav-1],nlon[nnav-1],
+                      nlat[nnav-1]);
+                  fprintf(stderr,"dbg5       nav[%d]: %f %f %f\n",
+                      nnav,ntime[nnav],nlon[nnav],
+                      nlat[nnav]);
                 }
-            strncpy(buffer,"\0",sizeof(buffer));
+              }
             }
-        fclose(tfp);
+          }
+          fclose(tfp);
+        }
 
         /* output information */
         if (verbose >= 1)

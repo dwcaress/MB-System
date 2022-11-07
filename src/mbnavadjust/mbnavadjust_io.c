@@ -5604,7 +5604,8 @@ int mbnavadjust_reference_unload(int verbose, void **swath_ptr, int *error) {
   struct swath *swath = (struct swath *)(*swath_ptr);
 
   /* free contours */
-  status = mb_contour_deall(verbose, swath, error);
+  if (swath != NULL)
+    status = mb_contour_deall(verbose, swath, error);
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBnavadjust function <%s> completed\n", __func__);

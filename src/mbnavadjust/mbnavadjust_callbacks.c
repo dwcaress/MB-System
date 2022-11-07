@@ -2551,8 +2551,6 @@ void do_naverr_init(int mode) {
       mbnavadjust_naverr_specific_crossing(mbna_crossing_select, mbna_tie_select);
   } else if (mode == MBNA_NAVERR_MODE_SECTION) {
     /* get current section - mbna_naverr_mode will be set to MBNA_NAVERR_MODE_SECTION */
-fprintf(stderr, "%s:%d:%s: mbna_section_select:%d mbna_file_select:%d mbna_file_id_2:%d mbna_section_2:%d\n",
-__FILE__, __LINE__, __FUNCTION__, mbna_section_select, mbna_file_select, mbna_file_id_2, mbna_section_2);
     if (mbna_section_select == MBNA_SELECT_NONE)
       mbnavadjust_naverr_nextunset_section();
     else
