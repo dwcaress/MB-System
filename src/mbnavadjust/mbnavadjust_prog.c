@@ -3712,6 +3712,11 @@ int mbnavadjust_referenceplussection_load() {
     do_message_update(message);
     status = mbnavadjust_section_translate(mbna_verbose, &project, mbna_file_id_2, swathraw2, swath2, mbna_offset_z, &error);
 
+    mbna_lon_min = section2->lonmin + mbna_offset_x;
+    mbna_lon_max = section2->lonmax + mbna_offset_x;
+    mbna_lat_min = section2->latmin + mbna_offset_y;
+    mbna_lat_max = section2->latmax + mbna_offset_y;
+
     /* load the reference grid if it is defined */
     if (project.refgrid_status != MBNA_REFGRID_NONE) {
       double length_meters = MAX((section2->lonmax - section2->lonmin) / mbna_mtodeglon,
@@ -3734,12 +3739,13 @@ int mbnavadjust_referenceplussection_load() {
                         project.refgrid.bounds[0], project.refgrid.bounds[1],
                         project.refgrid.bounds[2], project.refgrid.bounds[3]);
       fprintf(stderr, "%s\n", message);
+
+      mbna_lon_min = MIN(project.reference_section.lonmin, section2->lonmin + mbna_offset_x);
+      mbna_lon_max = MAX(project.reference_section.lonmax, section2->lonmax + mbna_offset_x);
+      mbna_lat_min = MIN(project.reference_section.latmin, section2->latmin + mbna_offset_y);
+      mbna_lat_max = MAX(project.reference_section.latmax, section2->latmax + mbna_offset_y);
     }
 
-    mbna_lon_min = MIN(project.reference_section.lonmin, section2->lonmin + mbna_offset_x);
-    mbna_lon_max = MAX(project.reference_section.lonmax, section2->lonmax + mbna_offset_x);
-    mbna_lat_min = MIN(project.reference_section.latmin, section2->latmin + mbna_offset_y);
-    mbna_lat_max = MAX(project.reference_section.latmax, section2->latmax + mbna_offset_y);
     mbna_plot_lon_min = mbna_lon_min;
     mbna_plot_lon_max = mbna_lon_max;
     mbna_plot_lat_min = mbna_lat_min;
@@ -3803,8 +3809,10 @@ int mbnavadjust_referenceplussection_unload() {
 
   /* unload loaded section */
   if (mbna_naverr_mode == MBNA_NAVERR_MODE_SECTION) {
-    status = mbnavadjust_reference_unload(mbna_verbose, (void **)&swath1, &error);
-    status = mbnavadjust_section_unload(mbna_verbose, (void **)&swathraw2, (void **)&swath2, &error);
+    if (swath1 != NULL)
+      status = mbnavadjust_reference_unload(mbna_verbose, (void **)&swath1, &error);
+    if (swathraw2 != NULL && swath2 != NULL)
+      status = mbnavadjust_section_unload(mbna_verbose, (void **)&swathraw2, (void **)&swath2, &error);
 
     if (mbna_contour1.vector != NULL && mbna_contour1.nvector_alloc > 0) {
       free(mbna_contour1.vector);
@@ -20943,6 +20951,7 @@ int mbnavadjust_open_visualization(int which_grid) {
 
     /* add navigation to the visualization */
     if (status == MB_SUCCESS) {
+fprintf(stderr, "%s:%d:%s: \n", __FILE__, __LINE__, __FUNCTION__);
       /* allocate arrays for navigation of longest section */
       mbv_navpings_alloc = 0;
       for (int i = 0; i < project.num_files; i++) {
@@ -21019,20 +21028,31 @@ int mbnavadjust_open_visualization(int which_grid) {
               nfp = fopen(mbv_file_name, "r");
             }
             if (nfp != NULL) {
-              while ((nscan = fscanf(nfp, "%d %d %d %d %d %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf",
-                                     &year, &month, &day, &hour, &minute, &seconds, &navtime_d[mbv_navpings],
-                                     &navlon[mbv_navpings], &navlat[mbv_navpings], &navheading[mbv_navpings],
-                                     &navspeed[mbv_navpings], &sonardepth, &roll, &pitch, &heave,
-                                     &navportlon[mbv_navpings], &navportlat[mbv_navpings],
-                                     &navstbdlon[mbv_navpings], &navstbdlat[mbv_navpings])) > 0) {
-                navz[mbv_navpings] = -sonardepth;
-                navline[mbv_navpings] = i;
-                navshot[mbv_navpings] = j;
-                navcdp[mbv_navpings] = mbv_navpings;
-                mbv_navpings++;
+              bool done = false;
+              char line[MB_PATH_MAXLINE];
+              while (!done) {
+              	char *line_ptr = fgets(line, MB_PATH_MAXLINE, nfp);
+              	if (line_ptr == NULL) {
+                  done = true;
+                }
+                else if (line[0] != '#') {
+                  nscan = sscanf(line, "%d %d %d %d %d %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf",
+                                       &year, &month, &day, &hour, &minute, &seconds, &navtime_d[mbv_navpings],
+                                       &navlon[mbv_navpings], &navlat[mbv_navpings], &navheading[mbv_navpings],
+                                       &navspeed[mbv_navpings], &sonardepth, &roll, &pitch, &heave,
+                                       &navportlon[mbv_navpings], &navportlat[mbv_navpings],
+                                       &navstbdlon[mbv_navpings], &navstbdlat[mbv_navpings]);
+                  if (nscan >= 15) {
+                    navz[mbv_navpings] = -sonardepth;
+                    navline[mbv_navpings] = i;
+                    navshot[mbv_navpings] = j;
+                    navcdp[mbv_navpings] = mbv_navpings;
+                    mbv_navpings++;
+                  }
+                }
               }
-              fclose(nfp);
             }
+            fclose(nfp);
             if (mbv_navpings > 0) {
               status = mbview_addnav(mbna_verbose, instance, mbv_navpings, navtime_d, navlon, navlat, navz,
                                      navheading, navspeed, navportlon, navportlat, navstbdlon, navstbdlat, navline,

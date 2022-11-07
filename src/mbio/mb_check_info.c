@@ -658,16 +658,16 @@ int mb_make_info(int verbose, bool force, char *file, int format, int *error) {
 	if ((force || (datmodtime > 0 && datmodtime > fnvmodtime)) && mb_should_make_fnv(verbose, format)) {
 		if (verbose >= 1)
 			fprintf(stderr, "Generating fnv file for %s\n", file);
-		  char command[MB_PATH_MAXLINE];
-      sprintf(command,  "echo ## \\<yyyy mm dd hh mm ss.ssssss\\> \\<epoch seconds\\> "
-                        "\\<longitude (deg)\\> \\<latitude (deg)\\> \\<heading (deg)\\> \\<speed (km/hr)\\> "
-                        "\\<draft (m)\\> \\<roll (deg)\\> \\<pitch (deg)\\> \\<heave (m)\\> \\<portlon (deg)\\> "
-                        "\\<portlat (deg)\\> \\<stbdlon (deg)\\> \\<stbdlat (deg)\\>  > %s.fnv", file);
-		  if ((shellstatus = system(command)) != 0)
-        status = MB_FAILURE;
-		  sprintf(command, "mblist -F %d -I %s -O tMXYHScRPr=X=Y+X+Y -UN >> %s.fnv", format, file, file);
-		  if ((shellstatus = system(command)) != 0)
-        status = MB_FAILURE;
+	  char command[MB_PATH_MAXLINE];
+    sprintf(command,  "echo \"## <yyyy mm dd hh mm ss.ssssss> <epoch seconds> "
+                      "<longitude (deg)> <latitude (deg)> <heading (deg)> <speed (km/hr)> "
+                      "<draft (m)> <roll (deg)> <pitch (deg)> <heave (m)> <portlon (deg)> "
+                      "<portlat (deg)> <stbdlon (deg)> <stbdlat (deg)>\"  > %s.fnv", file);
+	  if ((shellstatus = system(command)) != 0)
+      status = MB_FAILURE;
+	  sprintf(command, "mblist -F %d -I %s -O tMXYHScRPr=X=Y+X+Y -UN >> %s.fnv", format, file, file);
+	  if ((shellstatus = system(command)) != 0)
+      status = MB_FAILURE;
 	}
 
 	if (verbose >= 2) {
