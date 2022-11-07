@@ -103,8 +103,7 @@ bin_PROGRAMS = mbconfig$(EXEEXT) mbabsorption$(EXEEXT) \
 	mbsegygrid$(EXEEXT) mbsegyinfo$(EXEEXT) mbsegylist$(EXEEXT) \
 	mbset$(EXEEXT) mbsslayout$(EXEEXT) mbsvplist$(EXEEXT) \
 	$(am__EXEEXT_1) mbswath2las$(EXEEXT) mbtime$(EXEEXT) \
-	mbtransmitpattern$(EXEEXT) mbvoxelclean$(EXEEXT) \
-	$(am__EXEEXT_2)
+	mbvoxelclean$(EXEEXT) $(am__EXEEXT_2)
 @BUILD_GSF_TRUE@am__append_1 = -I${top_srcdir}/src/gsf
 subdir = src/utilities
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -258,10 +257,6 @@ mbswath2las_LDADD = $(LDADD)
 am_mbtime_OBJECTS = mbtime.$(OBJEXT)
 mbtime_OBJECTS = $(am_mbtime_OBJECTS)
 mbtime_LDADD = $(LDADD)
-am_mbtransmitpattern_OBJECTS = mbtransmitpattern.$(OBJEXT)
-mbtransmitpattern_OBJECTS = $(am_mbtransmitpattern_OBJECTS)
-mbtransmitpattern_DEPENDENCIES =  \
-	${top_builddir}/src/mbaux/libmbaux.la
 am_mbvoxelclean_OBJECTS = mbvoxelclean.$(OBJEXT)
 mbvoxelclean_OBJECTS = $(am_mbvoxelclean_OBJECTS)
 mbvoxelclean_LDADD = $(LDADD)
@@ -300,7 +295,7 @@ am__depfiles_remade = ./$(DEPDIR)/mbabsorption.Po \
 	./$(DEPDIR)/mbset.Po ./$(DEPDIR)/mbsslayout.Po \
 	./$(DEPDIR)/mbsvplist.Po ./$(DEPDIR)/mbsvpselect.Po \
 	./$(DEPDIR)/mbswath2las.Po ./$(DEPDIR)/mbtime.Po \
-	./$(DEPDIR)/mbtransmitpattern.Po ./$(DEPDIR)/mbvoxelclean.Po
+	./$(DEPDIR)/mbvoxelclean.Po
 am__mv = mv -f
 CXXCOMPILE = $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) \
 	$(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS)
@@ -337,8 +332,7 @@ SOURCES = $(mbabsorption_SOURCES) $(mbareaclean_SOURCES) \
 	$(mbsegylist_SOURCES) $(mbsegypsd_SOURCES) $(mbset_SOURCES) \
 	$(mbsslayout_SOURCES) $(mbsvplist_SOURCES) \
 	$(mbsvpselect_SOURCES) $(mbswath2las_SOURCES) \
-	$(mbtime_SOURCES) $(mbtransmitpattern_SOURCES) \
-	$(mbvoxelclean_SOURCES)
+	$(mbtime_SOURCES) $(mbvoxelclean_SOURCES)
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
     n|no|NO) false;; \
@@ -657,8 +651,8 @@ mbsvplist_SOURCES = mbsvplist.cc
 @BUILD_MBSVPSELECT_TRUE@mbsvpselect_SOURCES = mbsvpselect.cc
 mbswath2las_SOURCES = mbswath2las.cc
 mbtime_SOURCES = mbtime.cc
-mbtransmitpattern_LDADD = ${top_builddir}/src/mbaux/libmbaux.la
-mbtransmitpattern_SOURCES = mbtransmitpattern.cc
+#mbtransmitpattern_LDADD = ${top_builddir}/src/mbaux/libmbaux.la
+#mbtransmitpattern_SOURCES = mbtransmitpattern.cc
 mbvoxelclean_SOURCES = mbvoxelclean.cc
 @BUILD_FFTW_TRUE@mbsegypsd_LDADD =  \
 @BUILD_FFTW_TRUE@	${top_builddir}/src/mbaux/libmbaux.la \
@@ -909,10 +903,6 @@ mbtime$(EXEEXT): $(mbtime_OBJECTS) $(mbtime_DEPENDENCIES) $(EXTRA_mbtime_DEPENDE
 	@rm -f mbtime$(EXEEXT)
 	$(AM_V_CXXLD)$(CXXLINK) $(mbtime_OBJECTS) $(mbtime_LDADD) $(LIBS)
 
-mbtransmitpattern$(EXEEXT): $(mbtransmitpattern_OBJECTS) $(mbtransmitpattern_DEPENDENCIES) $(EXTRA_mbtransmitpattern_DEPENDENCIES) 
-	@rm -f mbtransmitpattern$(EXEEXT)
-	$(AM_V_CXXLD)$(CXXLINK) $(mbtransmitpattern_OBJECTS) $(mbtransmitpattern_LDADD) $(LIBS)
-
 mbvoxelclean$(EXEEXT): $(mbvoxelclean_OBJECTS) $(mbvoxelclean_DEPENDENCIES) $(EXTRA_mbvoxelclean_DEPENDENCIES) 
 	@rm -f mbvoxelclean$(EXEEXT)
 	$(AM_V_CXXLD)$(CXXLINK) $(mbvoxelclean_OBJECTS) $(mbvoxelclean_LDADD) $(LIBS)
@@ -962,7 +952,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbsvpselect.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbswath2las.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbtime.Po@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbtransmitpattern.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbvoxelclean.Po@am__quote@ # am--include-marker
 
 $(am__depfiles_remade):
@@ -1160,7 +1149,6 @@ distclean: distclean-am
 	-rm -f ./$(DEPDIR)/mbsvpselect.Po
 	-rm -f ./$(DEPDIR)/mbswath2las.Po
 	-rm -f ./$(DEPDIR)/mbtime.Po
-	-rm -f ./$(DEPDIR)/mbtransmitpattern.Po
 	-rm -f ./$(DEPDIR)/mbvoxelclean.Po
 	-rm -f Makefile
 distclean-am: clean-am distclean-compile distclean-generic \
@@ -1246,7 +1234,6 @@ maintainer-clean: maintainer-clean-am
 	-rm -f ./$(DEPDIR)/mbsvpselect.Po
 	-rm -f ./$(DEPDIR)/mbswath2las.Po
 	-rm -f ./$(DEPDIR)/mbtime.Po
-	-rm -f ./$(DEPDIR)/mbtransmitpattern.Po
 	-rm -f ./$(DEPDIR)/mbvoxelclean.Po
 	-rm -f Makefile
 maintainer-clean-am: distclean-am maintainer-clean-generic
