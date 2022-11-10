@@ -110,6 +110,7 @@ bool QVtkItem::setColorMapScheme(const char *colorMapName) {
   }
 
   displayProperties_.topoColorMapScheme = scheme;
+  displayProperties_.changed = true;
   
   return true;
 
