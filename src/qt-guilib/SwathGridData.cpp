@@ -150,8 +150,8 @@ void SwathGridData::getParameters(int *nRows, int *nColumns,
   *zMax = gridData_->max;
 
   // TBD: NOT SURE WHERE TO FIND THESE
-  *xUnits = strdup("lon");
-  *yUnits = strdup("lat");
+  *xUnits = strdup("easting");
+  *yUnits = strdup("northing");
   *zUnits = strdup("meters");
   
 }
