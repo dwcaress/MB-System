@@ -21,6 +21,7 @@ set(src
     MBQuickView.cpp
     QVtkItem.cpp
     GmtGridReader.cpp
+    TopoGridData.cpp
     GmtGridData.cpp    
     MBQuickItem.cpp
     QVtkRenderer.cpp
