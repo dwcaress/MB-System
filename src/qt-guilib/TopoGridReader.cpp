@@ -15,8 +15,6 @@
 #include "SwathGridData.h"
 
 
-#define NO_Z_VALUE 0
-
 #define VTK_CREATE(type, name) vtkSmartPointer<type> name = vtkSmartPointer<type>::New()
 
 #define UTM_X_NAME "Easting (meters)"
@@ -257,20 +255,25 @@ int TopoGridReader::RequestData(vtkInformation* request,
         // Already in UTM
         grid_->data(row, col, &y, &x, &z);
         // Don't insert NaN-valued data
-        if (std::isnan(z)) {
-          z = NO_Z_VALUE;
+        if (std::isnan(z) || z == TopoGridData::NoData) {
           gridMissingZValues = true;
+          // Don't insert nan values           
+          if (std::isnan(z)) {
+            z = TopoGridData::NoData;
+          }
         }
         vtkIdType id = gridPoints_->InsertNextPoint(x, y, z);
         nValidPoints++;
       }
       else {
         grid_->data(row, col, &lat, &lon, &z);
-        if (std::isnan(z)) {
-          z = NO_Z_VALUE;
-          gridMissingZValues = true;          
-        }
-        
+        if (std::isnan(z) || z == TopoGridData::NoData) {
+          gridMissingZValues = true;
+          // Don't insert nan values 
+          if (std::isnan(z)) {
+            z = TopoGridData::NoData;
+          }
+        }        
         // Convert lat/lon to UTM
         PJ_COORD lonLat = proj_coord(lon, lat,
                                      0, 0);
@@ -372,15 +375,19 @@ void TopoGridReader::gridBounds(double *xMin, double *xMax,
                                  double *yMin, double *yMax,
                                  double *zMin, double *zMax) {
 
-  // grid_->bounds(xMin, xMax, yMin, yMax, zMin, zMax);
+  grid_->bounds(xMin, xMax, yMin, yMax, zMin, zMax);
+  /* ***
   double bounds[6];
   gridPoints_->GetBounds(bounds);
   *xMin = bounds[0];
   *xMax = bounds[1];
   *yMin = bounds[2];
   *yMax = bounds[3];
+
+  // zMin/zMax do no include NoData
   *zMin = bounds[4];
   *zMax = bounds[5];  
+  *** */
 }
 
 
@@ -475,7 +482,7 @@ bool TopoGridReader::triangleMissingZValues(vtkIdType *vertices) {
   double *point;
   for (int v = 0; v < 3; v++) {
     point = gridPoints_->GetPoint(vertices[v]);
-    if (point[2] == NO_Z_VALUE) {
+    if (point[2] == TopoGridData::NoData) {
       return true;
     }
   }
