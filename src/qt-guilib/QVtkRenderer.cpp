@@ -27,8 +27,8 @@ QVtkRenderer::QVtkRenderer() :
   wheelEvent_(nullptr),
   mouseButtonEvent_(nullptr),
   mouseMoveEvent_(nullptr),
-  prevZScale_(1.),
-  prevColorMapScheme_(TopoColorMap::Scheme::Unknown)
+  pointPicked_(false),
+  newPointPicked_(true)
 {
     worker_ = new LoadFileWorker(*this);
 
@@ -68,19 +68,15 @@ void QVtkRenderer::render() {
   renderWindow_->OpenGLInitState();
 
   axesActor_->SetVisibility(displayProperties_->showAxes);
-  
-  // User changed vertical scale - rebuild pipeline
-  if (displayProperties_->verticalExagg != prevZScale_) {
+
+  if (displayProperties_->changed || newPointPicked_) {
+    // Some property changed - rebuild pipeline
     qDebug() << "QVtkRenderer::render() vert scale changed, assemblePipeline";
     assemblePipeline();
-    prevZScale_ = displayProperties_->verticalExagg;
+    item_->clearPropertyChangedFlag();
+    newPointPicked_ = false;
   }
 
-  if (displayProperties_->topoColorMapScheme != prevColorMapScheme_) {
-    assemblePipeline();
-    prevColorMapScheme_ = displayProperties_->topoColorMapScheme;    
-  }
-  
   if (wheelEvent_ && !wheelEvent_->isAccepted()) {
     // qDebug() << "render(): handle wheelEvent";
     if (wheelEvent_->delta() > 0) {
@@ -266,8 +262,21 @@ bool QVtkRenderer::initializePipeline(const char *gridFilename) {
   elevColorizer_ =
     vtkSmartPointer<vtkElevationFilter>::New();
 
+  // Lookup table colorizing topo surface
   elevLookupTable_ =
     vtkSmartPointer<vtkLookupTable>::New();
+
+  // Last selected point coordinates
+  pickedPoint_ =
+    vtkSmartPointer<vtkPolyData>::New();
+
+  // Allocate a single selected point
+  pickedPoint_->Allocate(1);
+  pickedPoint_->Reset();
+
+  // Point hasn't been picked yet
+  pointPicked_ = false;
+
   
   // Create VTK renderer (not the same as QT renderer)
   qDebug() << "create vtk renderer";
@@ -376,6 +385,11 @@ bool QVtkRenderer::assemblePipeline() {
 
   qDebug() << "QVtkRenderer::assemblePipeline() for " << gridFilename_;
 
+  // Clear actor list
+  renderer_->RemoveAllViewProps();
+  
+  qDebug() << "renderer_ has " << renderer_->GetActors()->GetNumberOfItems() << " actors";
+    
   double gridBounds[6];
   gridReader_->gridBounds(&gridBounds[0], &gridBounds[1],
                           &gridBounds[2], &gridBounds[3],
@@ -414,10 +428,11 @@ bool QVtkRenderer::assemblePipeline() {
   // Add actor to renderer
   renderer_->AddActor(surfaceActor_);
 
-  /* ***
+
   /// TEST TEST TEST SITE READER
   vtkNew<vtkParticleReader> siteReader;
-  siteReader->SetFileName("test-site.ste");
+  // siteReader->SetFileName("test-site.ste");
+  siteReader->SetFileName(SELECTED_POINT_FILE);
   siteReader->Update();
 
   vtkNew<vtkPolyDataMapper> siteMapper;
@@ -426,8 +441,22 @@ bool QVtkRenderer::assemblePipeline() {
   siteActor->SetMapper(siteMapper);
   siteActor->GetProperty()->SetPointSize(25);
   renderer_->AddActor(siteActor);
-  
-  ///
+
+  /* ***
+  if (pointPicked_) {
+    std::cerr << "add picked point to scene" << std::endl;
+    vtkNew<vtkParticleReader> reader;
+    reader->SetFileName(SELECTED_POINT_FILE);
+    reader->Update();
+    
+    vtkNew<vtkPolyDataMapper> pickedPointMapper;
+    // pickedPointMapper->SetInputData(pickedPoint_);
+    pickedPointMapper->SetInputConnection(reader->GetOutputPort());
+    vtkNew<vtkActor> pickedPointActor;
+    pickedPointActor->SetMapper(pickedPointMapper);
+    pickedPointActor->GetProperty()->SetPointSize(25);
+    renderer_->AddActor(pickedPointActor);
+  }
   *** */
   
   // Add renderer to the renderWindow
@@ -442,7 +471,6 @@ bool QVtkRenderer::assemblePipeline() {
   
   // Per QtVTK example
   windowInteractor_->EnableRenderOff();
-  qDebug() << "Keep windowActor enabled!!!";
   vtkColor3d axisColor = namedColors_->GetColor3d("black");
 
   // Set up axes
@@ -560,3 +588,22 @@ void QVtkRenderer::makeCurrentCallback(vtkObject *, unsigned long eid,
   // Assert render window as current
   renderWindow_->SetIsCurrent(true);
 }
+
+
+void QVtkRenderer::setPickedPoint(double *worldCoords) {
+  std::cerr << "setPickedPoint(): x=" << worldCoords[0] << ", y=" << worldCoords[1] <<
+    ", z=" << worldCoords[2] << std::endl;
+
+  newPointPicked_ = true;
+  pointPicked_ = true;
+
+  vtkSmartPointer<vtkPoints> point = vtkSmartPointer<vtkPoints>::New();
+  point->Allocate(1);
+  vtkIdType pointId[1];
+  pointId[0] = point->InsertNextPoint(worldCoords[0], worldCoords[1],
+                                      worldCoords[2]);
+  
+  pickedPoint_->Reset();
+  pickedPoint_->InsertNextCell(VTK_VERTEX, 1, pointId);
+}
+

@@ -21,6 +21,8 @@
 #include "DisplayProperties.h"
 #include "PickerInteractorStyle.h"
 
+#define SELECTED_POINT_FILE "selectedPoint.txt"
+
 namespace mb_system {
 
   class QVtkItem;
@@ -87,6 +89,9 @@ namespace mb_system {
     TopoGridReader *getGridReader() {
       return gridReader_;
     }
+
+    /// Set picked point coordinates
+    void setPickedPoint(double *worldXYZ);
 
   public slots:
 
@@ -175,11 +180,13 @@ namespace mb_system {
     /// Latest mouse move event
     std::shared_ptr<QMouseEvent> mouseMoveEvent_;
 
-    /// Most recent displayed z-scale
-    float prevZScale_;
+    /// Coordinates of latest selected point
+    vtkSmartPointer<vtkPolyData> pickedPoint_;
 
-    /// Most recent topo color map scheme
-    TopoColorMap::Scheme prevColorMapScheme_;
+    /// Indicate whether pickedPoint_ has been selected
+    bool pointPicked_;
+
+    bool newPointPicked_;
     
     /// Worker thread to load grid file
     class LoadFileWorker : public QThread {
