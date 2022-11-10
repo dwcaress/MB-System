@@ -8,6 +8,10 @@ namespace mb_system {
      QVtkItem and QVtkRenderer
   */
   struct DisplayProperties {
+
+    /// Software that changes any elements *MUST* set changed true!
+    bool changed;
+    
     /// Draw axes
     bool showAxes;
 
