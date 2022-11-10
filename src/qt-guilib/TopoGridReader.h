@@ -104,6 +104,9 @@ namespace mb_system {
     /// Read data from file into GridData. Returns nullptr on error
     static TopoGridData *readGridFile(const char *file);
 
+    /// Return true if specified triangle vertex IDs refer to missing z-values
+    bool triangleMissingZValues(vtkIdType *triangleVertices);
+    
     /// Name of grid file
     char *fileName_;
 
@@ -112,8 +115,11 @@ namespace mb_system {
 
     /// Topometry grid data object
     TopoGridData *grid_;
-  
+
+    /// Grid points
     vtkSmartPointer<vtkPoints> gridPoints_;
+
+    /// Delaunay triangle vertices
     vtkSmartPointer<vtkCellArray> gridPolygons_;
 
     char *xUnits_;

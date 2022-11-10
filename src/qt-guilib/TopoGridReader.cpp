@@ -8,11 +8,14 @@
 #include "vtkErrorCode.h"
 #include "vtkSetGet.h"
 #include "vtkCallbackCommand.h"
+#include "vtkDelaunay2D.h"
 #include "vtk_netcdf.h"
 #include "TopoGridReader.h"
 #include "GmtGridData.h"
 #include "SwathGridData.h"
 
+
+#define NO_Z_VALUE 0
 
 #define VTK_CREATE(type, name) vtkSmartPointer<type> name = vtkSmartPointer<type>::New()
 
@@ -244,31 +247,40 @@ int TopoGridReader::RequestData(vtkInformation* request,
   // Load points read from grid file
   double x, y, z;
   double lat, lon;
+  int nValidPoints = 0;
+  bool gridMissingZValues = false;
   std::cerr << "TopoGridReader::RequestData() - load points" << std::endl;    
   for (row = 0; row < nRows; row++) {
     for (col = 0; col < nColumns; col++) {
 
       if (!convertToUTM) {
+        // Already in UTM
         grid_->data(row, col, &y, &x, &z);
+        // Don't insert NaN-valued data
+        if (std::isnan(z)) {
+          z = NO_Z_VALUE;
+          gridMissingZValues = true;
+        }
         vtkIdType id = gridPoints_->InsertNextPoint(x, y, z);
+        nValidPoints++;
       }
       else {
         grid_->data(row, col, &lat, &lon, &z);
+        if (std::isnan(z)) {
+          z = NO_Z_VALUE;
+          gridMissingZValues = true;          
+        }
+        
         // Convert lat/lon to UTM
         PJ_COORD lonLat = proj_coord(lon, lat,
                                      0, 0);
 
         PJ_COORD utm = proj_trans(toUTM, PJ_FWD, lonLat);
-        std::cerr << "utm: " << utm.enu.e << ", " << utm.enu.n << std::endl;
+        //        std::cerr << "utm: " << utm.enu.e << ", " << utm.enu.n << std::endl;
         vtkIdType id = gridPoints_->InsertNextPoint(utm.enu.e,
                                                     utm.enu.n,
                                                     z);
       }
-
-      /* **
-      std::cerr << "row=" << row << ", col=" << col
-                << ", z=" << z << std::endl;
-                ** */
     }
   }
 
@@ -277,41 +289,29 @@ int TopoGridReader::RequestData(vtkInformation* request,
     proj_destroy(toUTM);
     proj_context_destroy(projContext);
   }
-  
-  //// DEBUG OUTPUT
 
-  double *bounds = gridPoints_->GetBounds();
-  std::cerr << "gridPoints_ bounds: " << bounds[0] << ", " << bounds[1] << ", "
-            << bounds[2] << ", " << bounds[3] << ", "
-            << bounds[4] << ", " << bounds[5] << std::endl;
+  double bounds[6];
+  gridPoints_->GetBounds(bounds);
+  std::cerr << "gridPoints_: xMin=" << bounds[0] << ", xMax=" << bounds[1] <<
+    ", yMin=" << bounds[2] << ", yMax=" << bounds[3] <<
+    ", zMin=" << bounds[4] << ", zMax=" << bounds[5] << std::endl;
   
-  row = nRows - 1;
-  col = 0;
-  grid_->data(row, col, &y, &x, &z);
-  fprintf(stderr, "SW - x[%d]: %f, y[%d]: %f, z: %f\n",
-          col, x, row, y, z);
+  // Set Delaunay triangle vertices
+  /* ***
+       // Add grid points to a polydata object
+      vtkNew<vtkPolyData> polyData;
+      polyData->SetPoints(gridPoints_);
+      vtkNew<vtkDelaunay2D> delaunay;
+      delaunay_->SetInputData(polyData);
 
-  row = 0;
-  col = nColumns - 1;
-  grid_->data(row, col, &y, &x, &z);
-  fprintf(stderr, "NE - x[%d]: %f, y[%d]: %f, z: %f\n",
-          col, x, row, y, z);  
-
-  row = nRows - 1;
-  col = nColumns - 1;
-  grid_->data(row, col, &y, &x, &z);
-  fprintf(stderr, "SE - x[%d]: %f, y[%d]: %f, z: %f\n",
-          col, x, row, y, z);  
-  
-  // Set triangle vertices
-  if (!gridPolygons_->Allocate(nRows * nColumns * 2)) {
+      *** */
+     if (!gridPolygons_->Allocate(nRows * nColumns * 2)) {
     std::cerr << "failed to allocat "
 	      <<  nRows * nColumns *2 << " polygons"
 	      << std::endl;
   }
 
   vtkIdType triangleVertexId[3];
-  int nTriangles = 0;
   // Triangles must stay within row and column bounds
   for (unsigned row = 0; row < nRows-1; row++) {
     for (unsigned col = 0; col < nColumns-1; col++) {
@@ -319,23 +319,30 @@ int TopoGridReader::RequestData(vtkInformation* request,
       // First triangle
       triangleVertexId[0] = gridOffset(nRows, nColumns, row, col);
       triangleVertexId[1] = gridOffset(nRows, nColumns, row, col+1);
-      triangleVertexId[2] = gridOffset(nRows, nColumns, row+1, col+1);      
-      gridPolygons_->InsertNextCell(3, triangleVertexId);
+      triangleVertexId[2] = gridOffset(nRows, nColumns, row+1, col+1);
+      // If any vertices refer to point with no z-data, then do not insert into gridPolygons
+      if (!gridMissingZValues || !triangleMissingZValues(triangleVertexId)) {
+        gridPolygons_->InsertNextCell(3, triangleVertexId);
+      }
+
       
       // Second triangle
       triangleVertexId[0] = gridOffset(nRows, nColumns, row, col);
       triangleVertexId[1] = gridOffset(nRows, nColumns, row+1, col+1);
-      triangleVertexId[2] = gridOffset(nRows, nColumns, row+1, col);      
-      gridPolygons_->InsertNextCell(3, triangleVertexId);
-
-      nTriangles++;
+      triangleVertexId[2] = gridOffset(nRows, nColumns, row+1, col);
+      // If any vertices refer to point with no z-data, then do not insert into gridPolygons
+      if (!gridMissingZValues || !triangleMissingZValues(triangleVertexId)) {
+        gridPolygons_->InsertNextCell(3, triangleVertexId);
+      }      
     }
   }
 
-  std::cout << "nTriangles=" << nTriangles << std::endl;
+
   // Save to object's points and polygons
   polyOutput->SetPoints(gridPoints_);
-  polyOutput->SetPolys(gridPolygons_);  
+  polyOutput->SetPolys(gridPolygons_);
+  // polyOutput->SetPolys(delaunay->GetOutput());
+  
   std::cerr << "TopoGridReader::RequestData() - done" << std::endl;
 
   return 1;
@@ -460,4 +467,19 @@ TopoGridType TopoGridReader::getGridType(const char *filename) {
 
   return TopoGridType::Unknown;
 
+}
+
+
+bool TopoGridReader::triangleMissingZValues(vtkIdType *vertices) {
+
+  double *point;
+  for (int v = 0; v < 3; v++) {
+    point = gridPoints_->GetPoint(vertices[v]);
+    if (point[2] == NO_Z_VALUE) {
+      return true;
+    }
+  }
+
+  // Not missing z-values
+  return false;
 }
