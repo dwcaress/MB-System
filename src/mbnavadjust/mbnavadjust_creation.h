@@ -103,8 +103,9 @@ EXTERNAL Widget pushButton_close;
 EXTERNAL Widget pushButton_importdata;
 EXTERNAL Widget pushButton_importreference;
 EXTERNAL Widget pushButton_quit;
+EXTERNAL Widget pushButton_showreferencegrids;
 EXTERNAL Widget pushButton_showsurveys;
-EXTERNAL Widget pushButton_showblocks; /* NEW */
+EXTERNAL Widget pushButton_showblocks;
 EXTERNAL Widget pushButton_showdata;
 EXTERNAL Widget pushButton_showsections;
 EXTERNAL Widget pushButton_showcrossings;

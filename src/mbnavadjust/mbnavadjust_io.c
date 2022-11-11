@@ -182,7 +182,7 @@ int mbnavadjust_new_project(int verbose, char *projectpath, double section_lengt
       }
 
       /* write home file and other files */
-      else if ((status = mbnavadjust_write_project(verbose, project, error)) == MB_FAILURE) {
+      else if ((status = mbnavadjust_write_project(verbose, project, __FILE__, __LINE__, __FUNCTION__, error)) == MB_FAILURE) {
         fprintf(stderr, "Failure to write project file %s\n", project->home);
         *error = MB_ERROR_INIT_FAIL;
         status = MB_FAILURE;
@@ -376,7 +376,30 @@ int mbnavadjust_read_project(int verbose, char *projectpath, struct mbna_project
           exit(0);
         }
 
-        if (version_id >= 310) {
+        if (version_id >= 312) {
+          if (status == MB_SUCCESS &&
+              ((result = fgets(buffer, BUFFER_MAX, hfp)) != buffer ||
+               (nscan = sscanf(buffer, "%s %d", label, &project->num_refgrids)) != 2 || strcmp(label, "NUMREFERENCEGRIDS") != 0))
+            status = MB_FAILURE;
+          if (status == MB_FAILURE) {
+            fprintf(stderr, "Die at line:%d file:%s buffer:%s\n", __LINE__, __FILE__, buffer);
+            exit(0);
+          }
+          for (int irefgrid=0; irefgrid < project->num_refgrids; irefgrid++) {
+            if (status == MB_SUCCESS &&
+                ((result = fgets(buffer, BUFFER_MAX, hfp)) != buffer ||
+                 (nscan = sscanf(buffer, "%s %s", label, obuffer)) < 1 || strcmp(label, "REFERENCEGRID") != 0))
+              status = MB_FAILURE;
+            if (status == MB_FAILURE) {
+              fprintf(stderr, "Die at line:%d file:%s buffer:%s\n", __LINE__, __FILE__, buffer);
+              exit(0);
+            }
+            if (nscan > 1 && irefgrid < MBNA_REFGRID_NUM_MAX)
+              strcpy(project->refgrid_names[irefgrid], obuffer);
+          }
+          project->refgrid_status = MBNA_REFGRID_UNLOADED;
+        }
+        else if (version_id >= 310) {
           if (status == MB_SUCCESS &&
               ((result = fgets(buffer, BUFFER_MAX, hfp)) != buffer ||
                (nscan = sscanf(buffer, "%s %s", label, obuffer)) < 1 || strcmp(label, "REFERENCEGRID") != 0))
@@ -385,17 +408,15 @@ int mbnavadjust_read_project(int verbose, char *projectpath, struct mbna_project
             fprintf(stderr, "Die at line:%d file:%s buffer:%s\n", __LINE__, __FILE__, buffer);
             exit(0);
           }
-          if (nscan > 1)
-            strcpy(project->refgrid_name, obuffer);
-          else
-            strcpy(project->refgrid_name, "NONE");
-          if (strlen(project->refgrid_name) > 0 && strcmp(project->refgrid_name, "NONE") != 0)
-            project->refgrid_status = MBNA_REFGRID_IMPORTED;
-          else
-            project->refgrid_status = MBNA_REFGRID_NONE;
+          if (nscan > 1 && strcmp(obuffer, "NONE")) {
+            strcpy(project->refgrid_names[0], obuffer);
+            project->num_refgrids = 1;
+          }
+          else {
+            project->num_refgrids = 0;
+          }
         } else {
-          project->refgrid_status = MBNA_REFGRID_NONE;
-          strcpy(project->refgrid_name, "NONE");
+          project->num_refgrids = 0;
         }
 
         if (status == MB_SUCCESS &&
@@ -1335,7 +1356,6 @@ __FILE__, __LINE__, __FUNCTION__, ifile, isection, buffer, result, nscan);
           memset(project->name, 0, STRING_MAX);
           strcpy(project->name, "None");
           memset(project->path, 0, STRING_MAX);
-          memset(project->refgrid_name, 0, STRING_MAX);
           memset(project->datadir, 0, STRING_MAX);
           project->num_files = 0;
           project->num_files_alloc = 0;
@@ -1350,6 +1370,8 @@ __FILE__, __LINE__, __FUNCTION__, ifile, isection, buffer, result, nscan);
           project->num_truecrossings_analyzed = 0;
           project->num_ties = 0;
           project->num_globalties = 0;
+          project->num_globalties_analyzed = 0;
+          project->num_refgrids = 0;
         }
 
         /* recalculate crossing overlap values if not already set */
@@ -1449,9 +1471,12 @@ int mbnavadjust_close_project(int verbose, struct mbna_project *project, int *er
   project->num_truecrossings = 0;
   project->num_truecrossings_analyzed = 0;
   project->num_ties = 0;
+  project->num_globalties = 0;
+  project->num_globalties_analyzed = 0;
+  project->num_refgrids = 0;
   project->inversion_status = MBNA_INVERSION_NONE;
   project->grid_status = MBNA_GRID_NONE;
-  project->refgrid_status = MBNA_REFGRID_NONE;
+  project->refgrid_status = MBNA_REFGRID_UNLOADED;
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBnavadjust function <%s> completed\n", __func__);
@@ -1464,12 +1489,22 @@ int mbnavadjust_close_project(int verbose, struct mbna_project *project, int *er
   return (status);
 }
 /*--------------------------------------------------------------------*/
-int mbnavadjust_write_project(int verbose, struct mbna_project *project, int *error) {
+int mbnavadjust_write_project(int verbose, struct mbna_project *project,
+      const char *calling_file, int calling_line, const char *calling_function,
+      int *error) {
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
-    fprintf(stderr, "dbg2       verbose:      %d\n", verbose);
-    fprintf(stderr, "dbg2       project:      %p\n", project);
+    fprintf(stderr, "dbg2       verbose:           %d\n", verbose);
+    fprintf(stderr, "dbg2       project:           %p\n", project);
+    fprintf(stderr, "dbg2       project->name:     %s\n", project->name);
+    fprintf(stderr, "dbg2       calling_file:      %s\n", calling_file);
+    fprintf(stderr, "dbg2       calling_line:      %d\n", calling_line);
+    fprintf(stderr, "dbg2       calling_function:  %s\n", calling_function);
   }
+
+//fprintf(stderr, "%s:%d:%s write project %s called from %s:%d:%s\n",
+// __FILE__, __LINE__, __FUNCTION__, project->name, calling_file, calling_line, calling_function);
+// clock_t start = clock();
 
   int status = MB_SUCCESS;
   FILE *hfp;
@@ -1505,19 +1540,22 @@ int mbnavadjust_write_project(int verbose, struct mbna_project *project, int *er
 
   /* open and write home file */
   if ((hfp = fopen(project->home, "w")) != NULL) {
-    fprintf(stderr, "Writing project %s (file version 3.11)\n", project->name);
+    fprintf(stderr, "Writing project %s (file version 3.12)\n", project->name);
     char user[256], host[256], date[32];
     status = mb_user_host_date(verbose, user, host, date, error);
     fprintf(hfp, "##MBNAVADJUST PROJECT\n");
     fprintf(hfp, "MB-SYSTEM_VERSION\t%s\n", MB_VERSION);
     fprintf(hfp, "PROGRAM_VERSION\t3.10\n");
-    fprintf(hfp, "FILE_VERSION\t3.11\n");
+    fprintf(hfp, "FILE_VERSION\t3.12\n");
     fprintf(hfp, "ORIGIN\tGenerated by user <%s> on cpu <%s> at <%s>\n", user, host, date);
     fprintf(hfp, "NAME\t%s\n", project->name);
     fprintf(hfp, "PATH\t%s\n", project->path);
     fprintf(hfp, "HOME\t%s\n", project->home);
     fprintf(hfp, "DATADIR\t%s\n", project->datadir);
-    fprintf(hfp, "REFERENCEGRID\t%s\n", project->refgrid_name);
+    fprintf(hfp, "NUMREFERENCEGRIDS\t%d\n", project->num_refgrids);
+    for (i = 0; i < project->num_refgrids; i++) {
+      fprintf(hfp, "REFERENCEGRID\t%s\n", project->refgrid_names[i]);
+    }
     fprintf(hfp, "NUMFILES\t%d\n", project->num_files);
     fprintf(hfp, "NUMBLOCKS\t%d\n", project->num_surveys);
     fprintf(hfp, "NUMCROSSINGS\t%d\n", project->num_crossings);
@@ -2201,6 +2239,10 @@ int mbnavadjust_write_project(int verbose, struct mbna_project *project, int *er
       fprintf(stderr, "Unable to update project %s\n > Offset file: %s\n", project->name, offsetfile);
     }
   }
+// clock_t end = clock();
+// double time_used = ((double)(end - start)) / CLOCKS_PER_SEC;
+// fprintf(stderr, "%s:%d:%s done in %.6f seconds...\n\n",
+// __FILE__, __LINE__, __FUNCTION__, time_used);
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBnavadjust function <%s> completed\n", __func__);
@@ -3642,7 +3684,7 @@ int mbnavadjust_import_data(int verbose, struct mbna_project *project,
   mb_coor_scale(verbose, 0.5 * (project->lat_min + project->lat_max), &project->mtodeglon, &project->mtodeglat);
 
   /* write updated project */
-  mbnavadjust_write_project(verbose, project, error);
+  mbnavadjust_write_project(verbose, project, __FILE__, __LINE__, __FUNCTION__, error);
   project->save_count = 0;
 
   if (verbose >= 2) {
@@ -5253,31 +5295,39 @@ int mbnavadjust_import_reference(int verbose, struct mbna_project *project, char
   }
 
   /* check if specified grid can be read, then copy it into the project */
+  struct mbna_grid refgrid;
+  memset(&refgrid, 0, sizeof(refgrid));
   int grid_projection_mode;
   int nxy;
   int status = mb_read_gmt_grd(verbose, path, &grid_projection_mode,
-             project->refgrid.projection_id,
-             &project->refgrid.nodatavalue, &nxy,
-             &project->refgrid.nx, &project->refgrid.ny,
-             &project->refgrid.min, &project->refgrid.max,
-             &project->refgrid.bounds[0], &project->refgrid.bounds[1],
-             &project->refgrid.bounds[2], &project->refgrid.bounds[2],
-             &project->refgrid.dx, &project->refgrid.dy,
-             &project->refgrid.val, NULL, NULL, error);
-  if (status == MB_SUCCESS && project->refgrid.val != NULL) {
-    char command[STRING_MAX], name[STRING_MAX];
-    if (strrchr(path, '/') != NULL) {
-      strncpy(name, strrchr(path, '/')+1, STRING_MAX);
-    } else {
-      strncpy(name, path, STRING_MAX);
+             refgrid.projection_id,
+             &refgrid.nodatavalue, &nxy,
+             &refgrid.nx, &refgrid.ny,
+             &refgrid.min, &refgrid.max,
+             &refgrid.bounds[0], &refgrid.bounds[1],
+             &refgrid.bounds[2], &refgrid.bounds[2],
+             &refgrid.dx, &refgrid.dy,
+             &refgrid.val, NULL, NULL, error);
+  if (status == MB_SUCCESS && refgrid.val != NULL) {
+    free(refgrid.val);
+    refgrid.val = NULL;
+    if (project->num_refgrids < MBNA_REFGRID_NUM_MAX) {
+      char command[STRING_MAX], name[STRING_MAX];
+      if (strrchr(path, '/') != NULL) {
+        strncpy(name, strrchr(path, '/')+1, STRING_MAX);
+      } else {
+        strncpy(name, path, STRING_MAX);
+      }
+      sprintf(command, "cp %s %s/%s", path, project->datadir, name);
+      system(command);
+      fprintf(stderr, "Imported new reference grid: %s ==> %s/%s\n", path, project->datadir, name);
+      strncpy(project->refgrid_names[project->num_refgrids], name, MB_PATH_MAXLINE);
+      project->num_refgrids++;
     }
-    sprintf(command, "cp %s %s/%s", path, project->datadir, name);
-    system(command);
-    fprintf(stderr, "Imported new reference grid: %s ==> %s/%s\n", path, project->datadir, name);
-    free(project->refgrid.val);
-    project->refgrid.val = NULL;
-    strncpy(project->refgrid_name, name, STRING_MAX);
-    project->refgrid_status = MBNA_REFGRID_IMPORTED;
+    else {
+      fprintf(stderr, "Failed to import new reference grid: %s because maximum number %d has already been imported.\n",
+              path, MBNA_REFGRID_NUM_MAX);
+    }
   }
 
   if (verbose >= 2) {
@@ -5291,27 +5341,41 @@ int mbnavadjust_import_reference(int verbose, struct mbna_project *project, char
   return (status);
 }
 /*--------------------------------------------------------------------*/
-int mbnavadjust_reference_load(int verbose, struct mbna_project *project,
+int mbnavadjust_reference_load(int verbose, struct mbna_project *project, int refgrid_select,
                                 struct mbna_section *section, void **swath_ptr, int *error) {
 
   int status = MB_SUCCESS;
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
-    fprintf(stderr, "dbg2       verbose:                   %d\n", verbose);
-    fprintf(stderr, "dbg2       project:                   %p\n", project);
-    fprintf(stderr, "dbg2       project->datadir:          %s\n", project->datadir);
-    fprintf(stderr, "dbg2       project->refgrid_name:     %s\n", project->refgrid_name);
-    fprintf(stderr, "dbg2       section:                   %p\n", section);
-    fprintf(stderr, "dbg2       swath_ptr:                 %p  %p\n", swath_ptr, *swath_ptr);
+    fprintf(stderr, "dbg2       verbose:                                %d\n", verbose);
+    fprintf(stderr, "dbg2       project:                                %p\n", project);
+    fprintf(stderr, "dbg2       project->datadir:                       %s\n", project->datadir);
+    fprintf(stderr, "dbg2       project->refgrid_status:                %d\n", project->refgrid_status);
+    fprintf(stderr, "dbg2       refgrid_select:                         %d\n", refgrid_select);
+    fprintf(stderr, "dbg2       project->refgrid_names[refgrid_select]: %s\n", project->refgrid_names[project->refgrid_select]);
+    fprintf(stderr, "dbg2       section:                                %p\n", section);
+    fprintf(stderr, "dbg2       swath_ptr:                              %p  %p\n", swath_ptr, *swath_ptr);
+  }
+
+  /* unload reference grid if necessary */
+  if (project->refgrid_status == MBNA_REFGRID_LOADED
+      && refgrid_select != project->refgrid_select) {
+    if (project->refgrid.val != NULL) {
+      free(project->refgrid.val);
+      project->refgrid.val = NULL;
+    }
+    project->refgrid_status = MBNA_REFGRID_UNLOADED;
+    project->refgrid_select = 0;
   }
 
   /* load reference grid if needed */
-  if (project->refgrid_status == MBNA_REFGRID_IMPORTED) {
+  if (project->num_refgrids > 0 && refgrid_select < project->num_refgrids) {
     mb_path path;
     int grid_projection_mode;
     int nxy;
-    sprintf(path, "%s/%s", project->datadir, project->refgrid_name);
+    project->refgrid_select = refgrid_select;
+    sprintf(path, "%s/%s", project->datadir, project->refgrid_names[project->refgrid_select]);
     status = mb_read_gmt_grd(verbose, path, &grid_projection_mode,
                project->refgrid.projection_id,
                &project->refgrid.nodatavalue, &nxy,
@@ -5590,6 +5654,41 @@ int mbnavadjust_reference_load(int verbose, struct mbna_project *project,
 }
 
 /*--------------------------------------------------------------------*/
+int mbnavadjust_refgrid_unload(int verbose, struct mbna_project *project, int *error) {
+
+  int status = MB_SUCCESS;
+
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+    fprintf(stderr, "dbg2       verbose:                            %d\n", verbose);
+    fprintf(stderr, "dbg2       project:                            %p\n", project);
+    fprintf(stderr, "dbg2       project->datadir:                   %s\n", project->datadir);
+    fprintf(stderr, "dbg2       project->refgrid_select:            %d\n", project->refgrid_select);
+    fprintf(stderr, "dbg2       project->refgrid_names[selected]:   %s\n", project->refgrid_names[project->refgrid_select]);
+  }
+
+  /* unload reference grid if necessary */
+  if (project->refgrid_status == MBNA_REFGRID_LOADED) {
+    if (project->refgrid.val != NULL) {
+      free(project->refgrid.val);
+      project->refgrid.val = NULL;
+    }
+    project->refgrid_status = MBNA_REFGRID_UNLOADED;
+    project->refgrid_select = 0;
+  }
+
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBnavadjust function <%s> completed\n", __func__);
+    fprintf(stderr, "dbg2  Return values:\n");
+    fprintf(stderr, "dbg2       error:       %d\n", *error);
+    fprintf(stderr, "dbg2  Return status:\n");
+    fprintf(stderr, "dbg2       status:      %d\n", status);
+  }
+
+  return (status);
+}
+
+/*--------------------------------------------------------------------*/
 int mbnavadjust_reference_unload(int verbose, void **swath_ptr, int *error) {
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -5674,7 +5773,7 @@ int mbnavadjust_findcrossings(int verbose, struct mbna_project *project, int *er
     }
 
     /* write updated project */
-    mbnavadjust_write_project(verbose, project, error);
+    mbnavadjust_write_project(verbose, project, __FILE__, __LINE__, __FUNCTION__, error);
     project->save_count = 0;
     project->modelplot_uptodate = false;
   }
