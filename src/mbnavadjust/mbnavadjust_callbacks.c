@@ -572,31 +572,37 @@ void do_set_controls() {
 void do_update_status() {
 
   /* set status label */
+  mb_path refgrid_name;
+  if (project.refgrid_select >= 0 && project.refgrid_select < project.num_refgrids)
+    strcpy(refgrid_name, project.refgrid_names[project.refgrid_select]);
+  else
+    strcpy(refgrid_name, "NONE");
   sprintf(string,
-    ":::t\"Project: %s\":t\"Number of Files:           %4d     Selected Survey:%4d\""
-    ":t\"Number of Crossings Found:     %4d     Selected File:    %4d\""
-    ":t\"Number of Crossings Analyzed:       %4d     Selected Section:%4d\""
-    ":t\"Number of True Crossings:        %4d     Selected Crossing:%4d\""
-    ":t\"Number of True Crossings Analyzed:%4d     Selected Tie:   %4d\""
-    ":t\"Number of Ties Set:        %4d\""
-    ":t\"Reference Grid: %s\""
-    ":t\"Number of Global Ties Set:    %4d\"",
+    ":::t\"Project: %s\""
+    ":t\"Number of Files:                             %4d      Selected Survey:  %4d\""
+    ":t\"Number of Crossings Found:             %4d     Selected File:    %4d\""
+    ":t\"Number of Crossings Analyzed:         %4d     Selected Section: %4d\""
+    ":t\"Number of True Crossings:               %4d     Selected Crossing:%4d\""
+    ":t\"Number of True Crossings Analyzed: %4d     Selected Tie:     %4d\""
+    ":t\"Number of Ties Set:                        %4d\""
+    ":t\"Reference Grid:                               %s\""
+    ":t\"Number of Global Ties Set:              %4d\"",
     project.name, project.num_files, mbna_survey_select, project.num_crossings, mbna_file_select,
     project.num_crossings_analyzed, mbna_section_select, project.num_truecrossings, mbna_crossing_select,
-    project.num_truecrossings_analyzed, mbna_tie_select, project.num_ties, project.refgrid_name, project.num_globalties);
+    project.num_truecrossings_analyzed, mbna_tie_select, project.num_ties, refgrid_name, project.num_globalties);
 
   if (project.inversion_status == MBNA_INVERSION_CURRENT)
-    strcat(string, ":t\"Inversion Performed:       Current\"");
+    strcat(string, ":t\"Inversion Performed:                     Current\"");
   else if (project.inversion_status == MBNA_INVERSION_OLD)
-    strcat(string, ":t\"Inversion Performed:       Out of Date\"");
+    strcat(string, ":t\"Inversion Performed:                     Out of Date\"");
   else
-    strcat(string, ":t\"Inversion Performed:       No\"");
+    strcat(string, ":t\"Inversion Performed:                     No\"");
   if (project.grid_status == MBNA_GRID_CURRENT)
-    strcat(string, ":t\"Topography Grid Status:        Current\"");
+    strcat(string, ":t\"Topography Grid Status:                  Current\"");
   else if (project.grid_status == MBNA_GRID_OLD)
-    strcat(string, ":t\"Topography Grid Status:        Out of Date\"");
+    strcat(string, ":t\"Topography Grid Status:                  Out of Date\"");
   else
-    strcat(string, ":t\"Topography Grid Status:        Not made yet\"");
+    strcat(string, ":t\"Topography Grid Status:                  Not made yet\"");
   set_label_multiline_string(label_status, string);
   if (mbna_verbose > 0) {
     sprintf(string,
@@ -649,7 +655,28 @@ void do_update_status() {
   /* set list_data */
   iselect = MBNA_SELECT_NONE;
   XmListDeleteAllItems(list_data);
-  if (mbna_view_list == MBNA_VIEW_LIST_SURVEYS) {
+  if (mbna_view_list == MBNA_VIEW_LIST_REFERENCEGRIDS) {
+    sprintf(string, "Reference Grids:");
+    set_label_string(label_listdata, string);
+    if (mbna_verbose > 0)
+      fprintf(stderr, "%s\n", string);
+    if (project.num_refgrids > 0) {
+      xstr = (XmString *)malloc(project.num_refgrids * sizeof(XmString));
+      for (int i = 0; i < project.num_refgrids; i++) {
+        xstr[i] = XmStringCreateLocalized(project.refgrid_names[i]);
+        if (mbna_verbose > 0)
+          fprintf(stderr, "%s\n", project.refgrid_names[i]);
+      }
+      XmListAddItems(list_data, xstr, project.num_refgrids, 0);
+      for (int i = 0; i < project.num_refgrids; i++) {
+        XmStringFree(xstr[i]);
+      }
+      free(xstr);
+    }
+    XmListSelectPos(list_data, project.refgrid_select + 1, 0);
+    XmListSetPos(list_data, MAX(project.refgrid_select + 1 - 5, 1));
+  }
+  else if (mbna_view_list == MBNA_VIEW_LIST_SURVEYS) {
     sprintf(string, "Surveys:");
     set_label_string(label_listdata, string);
     if (mbna_verbose > 0)
@@ -1868,7 +1895,14 @@ void do_update_status() {
   else if (mbna_view_mode == MBNA_VIEW_MODE_WITHSECTION)
     XmToggleButtonSetState(toggleButton_showselectedsection, TRUE, FALSE);
 
-  if (mbna_view_list == MBNA_VIEW_LIST_SURVEYS && project.num_files > 0 && mbna_survey_select != MBNA_SELECT_NONE) {
+  if (mbna_view_list == MBNA_VIEW_LIST_REFERENCEGRIDS) {
+    XtVaSetValues(pushButton_poornav, XmNsensitive, False, NULL);
+    XtVaSetValues(pushButton_goodnav, XmNsensitive, False, NULL);
+    XtVaSetValues(pushButton_fixednav, XmNsensitive, False, NULL);
+    XtVaSetValues(pushButton_fixedxynav, XmNsensitive, False, NULL);
+    XtVaSetValues(pushButton_fixedznav, XmNsensitive, False, NULL);
+  }
+  else if (mbna_view_list == MBNA_VIEW_LIST_SURVEYS && project.num_files > 0 && mbna_survey_select != MBNA_SELECT_NONE) {
     XtVaSetValues(pushButton_poornav, XmNsensitive, True, NULL);
     XtVaSetValues(pushButton_goodnav, XmNsensitive, True, NULL);
     XtVaSetValues(pushButton_fixednav, XmNsensitive, True, NULL);
@@ -1986,254 +2020,97 @@ void do_update_status() {
   else {
     XtVaSetValues(pushButton_importdata, XmNsensitive, False, NULL);
   }
+
   if (project.open && project.num_files > 0) {
-    if (mbna_view_list == MBNA_VIEW_LIST_SURVEYS) {
+    XtVaSetValues(pushButton_showsurveys, XmNsensitive, True, NULL);
+    XtVaSetValues(pushButton_showblocks, XmNsensitive, True, NULL);
+    XtVaSetValues(pushButton_showdata, XmNsensitive, True, NULL);
+    XtVaSetValues(pushButton_showsections, XmNsensitive, True, NULL);
+    XtVaSetValues(pushButton_showcrossings, XmNsensitive, True, NULL);
+    XtVaSetValues(pushButton_showmediocrecrossings, XmNsensitive, True, NULL);
+    XtVaSetValues(pushButton_showgoodcrossings, XmNsensitive, True, NULL);
+    XtVaSetValues(pushButton_showbettercrossings, XmNsensitive, True, NULL);
+    XtVaSetValues(pushButton_showtruecrossings, XmNsensitive, True, NULL);
+    XtVaSetValues(pushButton_showcrossingties, XmNsensitive, True, NULL);
+    XtVaSetValues(pushButton_showcrossingtiessorted, XmNsensitive, True, NULL);
+    XtVaSetValues(pushButton_showglobalties, XmNsensitive, True, NULL);
+    XtVaSetValues(pushButton_showglobaltiessorted, XmNsensitive, True, NULL);
+    XtVaSetValues(pushButton_naverr_previous, XmNsensitive, True, NULL);
+    XtVaSetValues(pushButton_naverr_next, XmNsensitive, True, NULL);
+    XtVaSetValues(pushButton_naverr_nextunset, XmNsensitive, True, NULL);
+    XtVaSetValues(toggleButton_showallsurveys, XmNsensitive, True, NULL);
+    XtVaSetValues(toggleButton_showselectedsurvey, XmNsensitive, True, NULL);
+    XtVaSetValues(toggleButton_showselectedblock, XmNsensitive, True, NULL);
+    XtVaSetValues(toggleButton_showselectedfile, XmNsensitive, True, NULL);
+    XtVaSetValues(toggleButton_showwithselectedsurvey, XmNsensitive, True, NULL);
+    XtVaSetValues(toggleButton_showwithselectedfile, XmNsensitive, True, NULL);
+    XtVaSetValues(toggleButton_showselectedsection, XmNsensitive, True, NULL);
+    if (mbna_view_list == MBNA_VIEW_LIST_REFERENCEGRIDS) {
+      XtVaSetValues(pushButton_showreferencegrids, XmNsensitive, False, NULL);
+      XtVaSetValues(pushButton_naverr_previous, XmNsensitive, False, NULL);
+      XtVaSetValues(pushButton_naverr_next, XmNsensitive, False, NULL);
+      XtVaSetValues(pushButton_naverr_nextunset, XmNsensitive, False, NULL);
+    }
+    else if (mbna_view_list == MBNA_VIEW_LIST_SURVEYS) {
       XtVaSetValues(pushButton_showsurveys, XmNsensitive, False, NULL);
-      XtVaSetValues(pushButton_showblocks, XmNsensitive, True, NULL);
-      XtVaSetValues(pushButton_showdata, XmNsensitive, True, NULL);
-      XtVaSetValues(pushButton_showsections, XmNsensitive, True, NULL);
-      XtVaSetValues(pushButton_showcrossings, XmNsensitive, True, NULL);
-      XtVaSetValues(pushButton_showmediocrecrossings, XmNsensitive, True, NULL);
-      XtVaSetValues(pushButton_showgoodcrossings, XmNsensitive, True, NULL);
-      XtVaSetValues(pushButton_showbettercrossings, XmNsensitive, True, NULL);
-      XtVaSetValues(pushButton_showtruecrossings, XmNsensitive, True, NULL);
-      XtVaSetValues(pushButton_showcrossingties, XmNsensitive, True, NULL);
-      XtVaSetValues(pushButton_showcrossingtiessorted, XmNsensitive, True, NULL);
-      XtVaSetValues(pushButton_showglobalties, XmNsensitive, True, NULL);
-      XtVaSetValues(pushButton_showglobaltiessorted, XmNsensitive, True, NULL);
       XtVaSetValues(pushButton_naverr_previous, XmNsensitive, False, NULL);
       XtVaSetValues(pushButton_naverr_next, XmNsensitive, False, NULL);
       XtVaSetValues(pushButton_naverr_nextunset, XmNsensitive, False, NULL);
     }
     else if (mbna_view_list == MBNA_VIEW_LIST_BLOCKS) {
-      XtVaSetValues(pushButton_showsurveys, XmNsensitive, True, NULL);
       XtVaSetValues(pushButton_showblocks, XmNsensitive, False, NULL);
-      XtVaSetValues(pushButton_showdata, XmNsensitive, True, NULL);
-      XtVaSetValues(pushButton_showsections, XmNsensitive, True, NULL);
-      XtVaSetValues(pushButton_showcrossings, XmNsensitive, True, NULL);
-      XtVaSetValues(pushButton_showmediocrecrossings, XmNsensitive, True, NULL);
-      XtVaSetValues(pushButton_showgoodcrossings, XmNsensitive, True, NULL);
-      XtVaSetValues(pushButton_showbettercrossings, XmNsensitive, True, NULL);
-      XtVaSetValues(pushButton_showtruecrossings, XmNsensitive, True, NULL);
-      XtVaSetValues(pushButton_showcrossingties, XmNsensitive, True, NULL);
-      XtVaSetValues(pushButton_showcrossingtiessorted, XmNsensitive, True, NULL);
-      XtVaSetValues(pushButton_showglobalties, XmNsensitive, True, NULL);
-      XtVaSetValues(pushButton_showglobaltiessorted, XmNsensitive, True, NULL);
       XtVaSetValues(pushButton_naverr_previous, XmNsensitive, False, NULL);
       XtVaSetValues(pushButton_naverr_next, XmNsensitive, False, NULL);
       XtVaSetValues(pushButton_naverr_nextunset, XmNsensitive, False, NULL);
     }
     else if (mbna_view_list == MBNA_VIEW_LIST_FILES) {
-      XtVaSetValues(pushButton_showsurveys, XmNsensitive, True, NULL);
-      XtVaSetValues(pushButton_showblocks, XmNsensitive, True, NULL);
       XtVaSetValues(pushButton_showdata, XmNsensitive, False, NULL);
-      XtVaSetValues(pushButton_showsections, XmNsensitive, True, NULL);
-      XtVaSetValues(pushButton_showcrossings, XmNsensitive, True, NULL);
-      XtVaSetValues(pushButton_showmediocrecrossings, XmNsensitive, True, NULL);
-      XtVaSetValues(pushButton_showgoodcrossings, XmNsensitive, True, NULL);
-      XtVaSetValues(pushButton_showbettercrossings, XmNsensitive, True, NULL);
-      XtVaSetValues(pushButton_showtruecrossings, XmNsensitive, True, NULL);
-      XtVaSetValues(pushButton_showcrossingties, XmNsensitive, True, NULL);
-      XtVaSetValues(pushButton_showcrossingtiessorted, XmNsensitive, True, NULL);
-      XtVaSetValues(pushButton_showglobalties, XmNsensitive, True, NULL);
-      XtVaSetValues(pushButton_showglobaltiessorted, XmNsensitive, True, NULL);
       XtVaSetValues(pushButton_naverr_previous, XmNsensitive, False, NULL);
       XtVaSetValues(pushButton_naverr_next, XmNsensitive, False, NULL);
       XtVaSetValues(pushButton_naverr_nextunset, XmNsensitive, False, NULL);
     }
     else if (mbna_view_list == MBNA_VIEW_LIST_FILESECTIONS) {
-      XtVaSetValues(pushButton_showsurveys, XmNsensitive, True, NULL);
-      XtVaSetValues(pushButton_showblocks, XmNsensitive, True, NULL);
-      XtVaSetValues(pushButton_showdata, XmNsensitive, True, NULL);
       XtVaSetValues(pushButton_showsections, XmNsensitive, False, NULL);
-      XtVaSetValues(pushButton_showcrossings, XmNsensitive, True, NULL);
-      XtVaSetValues(pushButton_showmediocrecrossings, XmNsensitive, True, NULL);
-      XtVaSetValues(pushButton_showgoodcrossings, XmNsensitive, True, NULL);
-      XtVaSetValues(pushButton_showbettercrossings, XmNsensitive, True, NULL);
-      XtVaSetValues(pushButton_showtruecrossings, XmNsensitive, True, NULL);
-      XtVaSetValues(pushButton_showcrossingties, XmNsensitive, True, NULL);
-      XtVaSetValues(pushButton_showcrossingtiessorted, XmNsensitive, True, NULL);
-      XtVaSetValues(pushButton_showglobalties, XmNsensitive, True, NULL);
-      XtVaSetValues(pushButton_showglobaltiessorted, XmNsensitive, True, NULL);
-      XtVaSetValues(pushButton_naverr_previous, XmNsensitive, True, NULL);
-      XtVaSetValues(pushButton_naverr_next, XmNsensitive, True, NULL);
-      XtVaSetValues(pushButton_naverr_nextunset, XmNsensitive, True, NULL);
     }
     else if (mbna_view_list == MBNA_VIEW_LIST_CROSSINGS) {
-      XtVaSetValues(pushButton_showsurveys, XmNsensitive, True, NULL);
-      XtVaSetValues(pushButton_showblocks, XmNsensitive, True, NULL);
-      XtVaSetValues(pushButton_showdata, XmNsensitive, True, NULL);
-      XtVaSetValues(pushButton_showsections, XmNsensitive, True, NULL);
       XtVaSetValues(pushButton_showcrossings, XmNsensitive, False, NULL);
-      XtVaSetValues(pushButton_showmediocrecrossings, XmNsensitive, True, NULL);
-      XtVaSetValues(pushButton_showgoodcrossings, XmNsensitive, True, NULL);
-      XtVaSetValues(pushButton_showbettercrossings, XmNsensitive, True, NULL);
-      XtVaSetValues(pushButton_showtruecrossings, XmNsensitive, True, NULL);
-      XtVaSetValues(pushButton_showcrossingties, XmNsensitive, True, NULL);
-      XtVaSetValues(pushButton_showcrossingtiessorted, XmNsensitive, True, NULL);
-      XtVaSetValues(pushButton_showglobalties, XmNsensitive, True, NULL);
-      XtVaSetValues(pushButton_showglobaltiessorted, XmNsensitive, True, NULL);
-      XtVaSetValues(pushButton_naverr_previous, XmNsensitive, True, NULL);
-      XtVaSetValues(pushButton_naverr_next, XmNsensitive, True, NULL);
       if (project.num_crossings == project.num_crossings_analyzed)
         XtVaSetValues(pushButton_naverr_nextunset, XmNsensitive, False, NULL);
-      else
-        XtVaSetValues(pushButton_naverr_nextunset, XmNsensitive, True, NULL);
     }
     else if (mbna_view_list == MBNA_VIEW_LIST_MEDIOCRECROSSINGS) {
-      XtVaSetValues(pushButton_showsurveys, XmNsensitive, True, NULL);
-      XtVaSetValues(pushButton_showblocks, XmNsensitive, True, NULL);
-      XtVaSetValues(pushButton_showdata, XmNsensitive, True, NULL);
-      XtVaSetValues(pushButton_showsections, XmNsensitive, True, NULL);
-      XtVaSetValues(pushButton_showcrossings, XmNsensitive, True, NULL);
       XtVaSetValues(pushButton_showmediocrecrossings, XmNsensitive, False, NULL);
-      XtVaSetValues(pushButton_showgoodcrossings, XmNsensitive, True, NULL);
-      XtVaSetValues(pushButton_showbettercrossings, XmNsensitive, True, NULL);
-      XtVaSetValues(pushButton_showtruecrossings, XmNsensitive, True, NULL);
-      XtVaSetValues(pushButton_showcrossingties, XmNsensitive, True, NULL);
-      XtVaSetValues(pushButton_showcrossingtiessorted, XmNsensitive, True, NULL);
-      XtVaSetValues(pushButton_showglobalties, XmNsensitive, True, NULL);
-      XtVaSetValues(pushButton_showglobaltiessorted, XmNsensitive, True, NULL);
-      XtVaSetValues(pushButton_naverr_previous, XmNsensitive, True, NULL);
-      XtVaSetValues(pushButton_naverr_next, XmNsensitive, True, NULL);
       if (project.num_crossings == project.num_crossings_analyzed)
         XtVaSetValues(pushButton_naverr_nextunset, XmNsensitive, False, NULL);
-      else
-        XtVaSetValues(pushButton_naverr_nextunset, XmNsensitive, True, NULL);
     }
     else if (mbna_view_list == MBNA_VIEW_LIST_GOODCROSSINGS) {
-      XtVaSetValues(pushButton_showsurveys, XmNsensitive, True, NULL);
-      XtVaSetValues(pushButton_showblocks, XmNsensitive, True, NULL);
-      XtVaSetValues(pushButton_showdata, XmNsensitive, True, NULL);
-      XtVaSetValues(pushButton_showsections, XmNsensitive, True, NULL);
-      XtVaSetValues(pushButton_showcrossings, XmNsensitive, True, NULL);
-      XtVaSetValues(pushButton_showmediocrecrossings, XmNsensitive, True, NULL);
       XtVaSetValues(pushButton_showgoodcrossings, XmNsensitive, False, NULL);
-      XtVaSetValues(pushButton_showbettercrossings, XmNsensitive, True, NULL);
-      XtVaSetValues(pushButton_showtruecrossings, XmNsensitive, True, NULL);
-      XtVaSetValues(pushButton_showcrossingties, XmNsensitive, True, NULL);
-      XtVaSetValues(pushButton_showcrossingtiessorted, XmNsensitive, True, NULL);
-      XtVaSetValues(pushButton_showglobalties, XmNsensitive, True, NULL);
-      XtVaSetValues(pushButton_showglobaltiessorted, XmNsensitive, True, NULL);
-      XtVaSetValues(pushButton_naverr_previous, XmNsensitive, True, NULL);
-      XtVaSetValues(pushButton_naverr_next, XmNsensitive, True, NULL);
       if (project.num_crossings == project.num_crossings_analyzed)
         XtVaSetValues(pushButton_naverr_nextunset, XmNsensitive, False, NULL);
-      else
-        XtVaSetValues(pushButton_naverr_nextunset, XmNsensitive, True, NULL);
     }
     else if (mbna_view_list == MBNA_VIEW_LIST_BETTERCROSSINGS) {
-      XtVaSetValues(pushButton_showsurveys, XmNsensitive, True, NULL);
-      XtVaSetValues(pushButton_showblocks, XmNsensitive, True, NULL);
-      XtVaSetValues(pushButton_showdata, XmNsensitive, True, NULL);
-      XtVaSetValues(pushButton_showsections, XmNsensitive, True, NULL);
-      XtVaSetValues(pushButton_showcrossings, XmNsensitive, True, NULL);
-      XtVaSetValues(pushButton_showmediocrecrossings, XmNsensitive, True, NULL);
-      XtVaSetValues(pushButton_showgoodcrossings, XmNsensitive, True, NULL);
       XtVaSetValues(pushButton_showbettercrossings, XmNsensitive, False, NULL);
-      XtVaSetValues(pushButton_showtruecrossings, XmNsensitive, True, NULL);
-      XtVaSetValues(pushButton_showcrossingties, XmNsensitive, True, NULL);
-      XtVaSetValues(pushButton_showcrossingtiessorted, XmNsensitive, True, NULL);
-      XtVaSetValues(pushButton_showglobalties, XmNsensitive, True, NULL);
-      XtVaSetValues(pushButton_showglobaltiessorted, XmNsensitive, True, NULL);
-      XtVaSetValues(pushButton_naverr_previous, XmNsensitive, True, NULL);
-      XtVaSetValues(pushButton_naverr_next, XmNsensitive, True, NULL);
       if (project.num_crossings == project.num_crossings_analyzed)
         XtVaSetValues(pushButton_naverr_nextunset, XmNsensitive, False, NULL);
-      else
-        XtVaSetValues(pushButton_naverr_nextunset, XmNsensitive, True, NULL);
     }
     else if (mbna_view_list == MBNA_VIEW_LIST_TRUECROSSINGS) {
-      XtVaSetValues(pushButton_showsurveys, XmNsensitive, True, NULL);
-      XtVaSetValues(pushButton_showblocks, XmNsensitive, True, NULL);
-      XtVaSetValues(pushButton_showdata, XmNsensitive, True, NULL);
-      XtVaSetValues(pushButton_showsections, XmNsensitive, True, NULL);
-      XtVaSetValues(pushButton_showcrossings, XmNsensitive, True, NULL);
-      XtVaSetValues(pushButton_showmediocrecrossings, XmNsensitive, True, NULL);
-      XtVaSetValues(pushButton_showgoodcrossings, XmNsensitive, True, NULL);
-      XtVaSetValues(pushButton_showbettercrossings, XmNsensitive, True, NULL);
       XtVaSetValues(pushButton_showtruecrossings, XmNsensitive, False, NULL);
-      XtVaSetValues(pushButton_showcrossingties, XmNsensitive, True, NULL);
-      XtVaSetValues(pushButton_showcrossingtiessorted, XmNsensitive, True, NULL);
-      XtVaSetValues(pushButton_showglobalties, XmNsensitive, True, NULL);
-      XtVaSetValues(pushButton_showglobaltiessorted, XmNsensitive, True, NULL);
-      XtVaSetValues(pushButton_naverr_previous, XmNsensitive, True, NULL);
-      XtVaSetValues(pushButton_naverr_next, XmNsensitive, True, NULL);
       if (project.num_truecrossings == project.num_truecrossings_analyzed)
         XtVaSetValues(pushButton_naverr_nextunset, XmNsensitive, False, NULL);
-      else
-        XtVaSetValues(pushButton_naverr_nextunset, XmNsensitive, True, NULL);
     }
     else if (mbna_view_list == MBNA_VIEW_LIST_TIES) {
-      XtVaSetValues(pushButton_showsurveys, XmNsensitive, True, NULL);
-      XtVaSetValues(pushButton_showblocks, XmNsensitive, True, NULL);
-      XtVaSetValues(pushButton_showdata, XmNsensitive, True, NULL);
-      XtVaSetValues(pushButton_showsections, XmNsensitive, True, NULL);
-      XtVaSetValues(pushButton_showcrossings, XmNsensitive, True, NULL);
-      XtVaSetValues(pushButton_showmediocrecrossings, XmNsensitive, True, NULL);
-      XtVaSetValues(pushButton_showgoodcrossings, XmNsensitive, True, NULL);
-      XtVaSetValues(pushButton_showbettercrossings, XmNsensitive, True, NULL);
-      XtVaSetValues(pushButton_showtruecrossings, XmNsensitive, True, NULL);
       XtVaSetValues(pushButton_showcrossingties, XmNsensitive, False, NULL);
-      XtVaSetValues(pushButton_showcrossingtiessorted, XmNsensitive, True, NULL);
-      XtVaSetValues(pushButton_showglobalties, XmNsensitive, True, NULL);
-      XtVaSetValues(pushButton_showglobaltiessorted, XmNsensitive, True, NULL);
-      XtVaSetValues(pushButton_naverr_previous, XmNsensitive, True, NULL);
-      XtVaSetValues(pushButton_naverr_next, XmNsensitive, True, NULL);
       XtVaSetValues(pushButton_naverr_nextunset, XmNsensitive, False, NULL);
     }
     else if (mbna_view_list == MBNA_VIEW_LIST_TIESSORTED) {
-      XtVaSetValues(pushButton_showsurveys, XmNsensitive, True, NULL);
-      XtVaSetValues(pushButton_showblocks, XmNsensitive, True, NULL);
-      XtVaSetValues(pushButton_showdata, XmNsensitive, True, NULL);
-      XtVaSetValues(pushButton_showsections, XmNsensitive, True, NULL);
-      XtVaSetValues(pushButton_showcrossings, XmNsensitive, True, NULL);
-      XtVaSetValues(pushButton_showmediocrecrossings, XmNsensitive, True, NULL);
-      XtVaSetValues(pushButton_showgoodcrossings, XmNsensitive, True, NULL);
-      XtVaSetValues(pushButton_showbettercrossings, XmNsensitive, True, NULL);
-      XtVaSetValues(pushButton_showtruecrossings, XmNsensitive, True, NULL);
-      XtVaSetValues(pushButton_showcrossingties, XmNsensitive, True, NULL);
       XtVaSetValues(pushButton_showcrossingtiessorted, XmNsensitive, False, NULL);
-      XtVaSetValues(pushButton_showglobalties, XmNsensitive, True, NULL);
-      XtVaSetValues(pushButton_showglobaltiessorted, XmNsensitive, True, NULL);
-      XtVaSetValues(pushButton_naverr_previous, XmNsensitive, True, NULL);
-      XtVaSetValues(pushButton_naverr_next, XmNsensitive, True, NULL);
       XtVaSetValues(pushButton_naverr_nextunset, XmNsensitive, False, NULL);
     }
     else if (mbna_view_list == MBNA_VIEW_LIST_GLOBALTIES) {
-      XtVaSetValues(pushButton_showsurveys, XmNsensitive, True, NULL);
-      XtVaSetValues(pushButton_showblocks, XmNsensitive, True, NULL);
-      XtVaSetValues(pushButton_showdata, XmNsensitive, True, NULL);
-      XtVaSetValues(pushButton_showsections, XmNsensitive, True, NULL);
-      XtVaSetValues(pushButton_showcrossings, XmNsensitive, True, NULL);
-      XtVaSetValues(pushButton_showmediocrecrossings, XmNsensitive, True, NULL);
-      XtVaSetValues(pushButton_showgoodcrossings, XmNsensitive, True, NULL);
-      XtVaSetValues(pushButton_showbettercrossings, XmNsensitive, True, NULL);
-      XtVaSetValues(pushButton_showtruecrossings, XmNsensitive, True, NULL);
-      XtVaSetValues(pushButton_showcrossingties, XmNsensitive, True, NULL);
-      XtVaSetValues(pushButton_showcrossingtiessorted, XmNsensitive, True, NULL);
       XtVaSetValues(pushButton_showglobalties, XmNsensitive, False, NULL);
-      XtVaSetValues(pushButton_showglobaltiessorted, XmNsensitive, True, NULL);
-      XtVaSetValues(pushButton_naverr_previous, XmNsensitive, True, NULL);
-      XtVaSetValues(pushButton_naverr_next, XmNsensitive, True, NULL);
       XtVaSetValues(pushButton_naverr_nextunset, XmNsensitive, False, NULL);
     }
     else if (mbna_view_list == MBNA_VIEW_LIST_GLOBALTIESSORTED) {
-      XtVaSetValues(pushButton_showsurveys, XmNsensitive, True, NULL);
-      XtVaSetValues(pushButton_showblocks, XmNsensitive, True, NULL);
-      XtVaSetValues(pushButton_showdata, XmNsensitive, True, NULL);
-      XtVaSetValues(pushButton_showsections, XmNsensitive, True, NULL);
-      XtVaSetValues(pushButton_showcrossings, XmNsensitive, True, NULL);
-      XtVaSetValues(pushButton_showmediocrecrossings, XmNsensitive, True, NULL);
-      XtVaSetValues(pushButton_showgoodcrossings, XmNsensitive, True, NULL);
-      XtVaSetValues(pushButton_showbettercrossings, XmNsensitive, True, NULL);
-      XtVaSetValues(pushButton_showtruecrossings, XmNsensitive, True, NULL);
-      XtVaSetValues(pushButton_showcrossingties, XmNsensitive, True, NULL);
-      XtVaSetValues(pushButton_showcrossingtiessorted, XmNsensitive, True, NULL);
-      XtVaSetValues(pushButton_showglobalties, XmNsensitive, True, NULL);
       XtVaSetValues(pushButton_showglobaltiessorted, XmNsensitive, False, NULL);
-      XtVaSetValues(pushButton_naverr_previous, XmNsensitive, True, NULL);
-      XtVaSetValues(pushButton_naverr_next, XmNsensitive, True, NULL);
       XtVaSetValues(pushButton_naverr_nextunset, XmNsensitive, False, NULL);
     }
   }
@@ -2376,6 +2253,11 @@ void do_update_status() {
 /*--------------------------------------------------------------------*/
 
 void do_update_modelplot_status() {
+
+// fprintf(stderr, "%s:%d:%s start\n",
+// __FILE__, __LINE__, __FUNCTION__);
+// clock_t start = clock();
+
   /* deal with modelplot */
   if (project.modelplot) {
     /* set model view clear block button sensitivity */
@@ -2434,10 +2316,19 @@ void do_update_modelplot_status() {
 
     set_label_multiline_string(label_modelplot_status, string);
   }
+
+// clock_t end = clock();
+// double time_used = ((double)(end - start)) / CLOCKS_PER_SEC;
+// fprintf(stderr, "%s:%d:%s done in %.6f seconds...\n\n",
+// __FILE__, __LINE__, __FUNCTION__, time_used);
 }
 /*--------------------------------------------------------------------*/
 
 void do_update_visualization_status() {
+
+// fprintf(stderr, "%s:%d:%s start\n",
+// __FILE__, __LINE__, __FUNCTION__);
+// clock_t start = clock();
   // fprintf(stderr,"do_update_visualization_status: mbna_crossing_select:%d mbna_tie_select:%d\n",
   // mbna_crossing_select,mbna_tie_select);
   /* deal with modelplot */
@@ -2490,6 +2381,11 @@ void do_update_visualization_status() {
   // fprintf(stderr,"Calling mbview_update from do_update_visualization_status\n");
 
   mbview_update(mbna_verbose, 0, &error);
+
+// clock_t end = clock();
+// double time_used = ((double)(end - start)) / CLOCKS_PER_SEC;
+// fprintf(stderr, "%s:%d:%s done in %.6f seconds...\n\n",
+// __FILE__, __LINE__, __FUNCTION__, time_used);
 }
 /*--------------------------------------------------------------------*/
 
@@ -2497,6 +2393,10 @@ void do_naverr_init(int mode) {
   if (mbna_verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called   mode:%d\n", __func__, mode);
   }
+
+// fprintf(stderr, "%s:%d:%s start\n",
+// __FILE__, __LINE__, __FUNCTION__);
+// clock_t start = clock();
 
   /* manage naverr */
   XtManageChild(bulletinBoard_naverr);
@@ -2561,11 +2461,21 @@ void do_naverr_init(int mode) {
   mbnavadjust_naverr_plot(MBNA_PLOT_MODE_FIRST);
   do_naverr_update();
   do_update_status();
+
+// clock_t end = clock();
+// double time_used = ((double)(end - start)) / CLOCKS_PER_SEC;
+// fprintf(stderr, "%s:%d:%s done in %.6f seconds...\n\n",
+// __FILE__, __LINE__, __FUNCTION__, time_used);
 }
 
 /*--------------------------------------------------------------------*/
 
 void do_naverr_update() {
+
+// fprintf(stderr, "%s:%d:%s start\n",
+// __FILE__, __LINE__, __FUNCTION__);
+// clock_t start = clock();
+
   if (mbna_naverr_mode == MBNA_NAVERR_MODE_CROSSING && mbna_current_crossing >= 0) {
 
     const double zoom_factor =
@@ -2821,6 +2731,11 @@ void do_naverr_update() {
 
     do_naverr_offsetlabel();
   }
+
+// clock_t end = clock();
+// double time_used = ((double)(end - start)) / CLOCKS_PER_SEC;
+// fprintf(stderr, "%s:%d:%s done in %.6f seconds...\n\n",
+// __FILE__, __LINE__, __FUNCTION__, time_used);
 }
 
 /*--------------------------------------------------------------------*/
@@ -2891,6 +2806,10 @@ void do_list_data_select(Widget w, XtPointer client_data, XtPointer call_data) {
   (void)w; // Unused parameter
   (void)client_data; // Unused parameter
 
+// fprintf(stderr, "%s:%d:%s start\n",
+// __FILE__, __LINE__, __FUNCTION__);
+// clock_t start = clock();
+
   int position_count = 0;
   int *position_list = NULL;
 
@@ -2902,7 +2821,11 @@ void do_list_data_select(Widget w, XtPointer client_data, XtPointer call_data) {
     int num_files, num_sections, num_crossings, num_ties;
     int found;
 
-    if (mbna_view_list == MBNA_VIEW_LIST_SURVEYS) {
+    if (mbna_view_list == MBNA_VIEW_LIST_REFERENCEGRIDS) {
+      project.refgrid_select = position_list[0] - 1;
+fprintf(stderr,"mbna_referencegrid_select:%d of %d\n", project.refgrid_select, project.num_refgrids);
+    }
+    else if (mbna_view_list == MBNA_VIEW_LIST_SURVEYS) {
       mbna_section_select = 0;
       mbna_file_select = MBNA_SELECT_NONE;
       mbna_survey_select = position_list[0] - 1;
@@ -3131,7 +3054,9 @@ void do_list_data_select(Widget w, XtPointer client_data, XtPointer call_data) {
       - bring up naverr if needed - and let do_update_status redraw list with
      previous item selected */
   else {
-    if (mbna_view_list == MBNA_VIEW_LIST_SURVEYS) {
+    if (mbna_view_list == MBNA_VIEW_LIST_REFERENCEGRIDS) {
+    }
+    else if (mbna_view_list == MBNA_VIEW_LIST_SURVEYS) {
     }
     else if (mbna_view_list == MBNA_VIEW_LIST_FILES) {
     }
@@ -3200,6 +3125,11 @@ void do_list_data_select(Widget w, XtPointer client_data, XtPointer call_data) {
     mbnavadjust_reset_visualization_navties();
     do_update_visualization_status();
   }
+
+// clock_t end = clock();
+// double time_used = ((double)(end - start)) / CLOCKS_PER_SEC;
+// fprintf(stderr, "%s:%d:%s done in %.6f seconds...\n\n",
+// __FILE__, __LINE__, __FUNCTION__, time_used);
 }
 
 /*--------------------------------------------------------------------*/
@@ -3397,6 +3327,10 @@ void do_naverr_cont_input(Widget w, XtPointer client_data, XtPointer call_data) 
   (void)w; // Unused parameter
   (void)client_data; // Unused parameter
 
+// fprintf(stderr, "%s:%d:%s start\n",
+// __FILE__, __LINE__, __FUNCTION__);
+// clock_t start = clock();
+
   XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
   /* If there is input in the drawing area */
@@ -3503,6 +3437,11 @@ void do_naverr_cont_input(Widget w, XtPointer client_data, XtPointer call_data) 
       }
     }
   } /* end of inputs from window */
+
+// clock_t end = clock();
+// double time_used = ((double)(end - start)) / CLOCKS_PER_SEC;
+// fprintf(stderr, "%s:%d:%s done in %.6f seconds...\n\n",
+// __FILE__, __LINE__, __FUNCTION__, time_used);
 }
 
 /*--------------------------------------------------------------------*/
@@ -3510,6 +3449,10 @@ void do_naverr_cont_input(Widget w, XtPointer client_data, XtPointer call_data) 
 void do_naverr_corr_input(Widget w, XtPointer client_data, XtPointer call_data) {
   (void)w; // Unused parameter
   (void)client_data; // Unused parameter
+
+// fprintf(stderr, "%s:%d:%s start\n",
+// __FILE__, __LINE__, __FUNCTION__);
+// clock_t start = clock();
 
   XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
@@ -3566,6 +3509,11 @@ void do_naverr_corr_input(Widget w, XtPointer client_data, XtPointer call_data) 
       }
     }
   } /* end of inputs from window */
+
+// clock_t end = clock();
+// double time_used = ((double)(end - start)) / CLOCKS_PER_SEC;
+// fprintf(stderr, "%s:%d:%s done in %.6f seconds...\n\n",
+// __FILE__, __LINE__, __FUNCTION__, time_used);
 }
 /*--------------------------------------------------------------------*/
 
@@ -3647,6 +3595,10 @@ void do_naverr_previous(Widget w, XtPointer client_data, XtPointer call_data) {
   (void)client_data; // Unused parameter
   (void)call_data; // Unused parameter
 
+// fprintf(stderr, "%s:%d:%s start\n",
+// __FILE__, __LINE__, __FUNCTION__);
+// clock_t start = clock();
+
   // XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
   if (mbna_naverr_mode == MBNA_NAVERR_MODE_CROSSING) {
@@ -3674,6 +3626,10 @@ void do_naverr_next(Widget w, XtPointer client_data, XtPointer call_data) {
   (void)client_data; // Unused parameter
   (void)call_data; // Unused parameter
 
+// fprintf(stderr, "%s:%d:%s start\n",
+// __FILE__, __LINE__, __FUNCTION__);
+// clock_t start = clock();
+
   // XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
   if (mbna_naverr_mode == MBNA_NAVERR_MODE_CROSSING) {
@@ -3692,6 +3648,11 @@ void do_naverr_next(Widget w, XtPointer client_data, XtPointer call_data) {
     mbnavadjust_reset_visualization_navties();
     do_update_visualization_status();
   }
+
+// clock_t end = clock();
+// double time_used = ((double)(end - start)) / CLOCKS_PER_SEC;
+// fprintf(stderr, "%s:%d:%s done in %.6f seconds...\n\n",
+// __FILE__, __LINE__, __FUNCTION__, time_used);
 }
 
 /*--------------------------------------------------------------------*/
@@ -3700,6 +3661,10 @@ void do_naverr_nextunset(Widget w, XtPointer client_data, XtPointer call_data) {
   (void)w; // Unused parameter
   (void)client_data; // Unused parameter
   (void)call_data; // Unused parameter
+
+// fprintf(stderr, "%s:%d:%s start\n",
+// __FILE__, __LINE__, __FUNCTION__);
+// clock_t start = clock();
 
   // XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
@@ -3728,6 +3693,10 @@ void do_naverr_addtie(Widget w, XtPointer client_data, XtPointer call_data) {
   (void)client_data; // Unused parameter
   (void)call_data; // Unused parameter
 
+// fprintf(stderr, "%s:%d:%s start\n",
+// __FILE__, __LINE__, __FUNCTION__);
+// clock_t start = clock();
+
   // XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
   mbnavadjust_naverr_addtie();
@@ -3751,6 +3720,10 @@ void do_naverr_deletetie(Widget w, XtPointer client_data, XtPointer call_data) {
   (void)w; // Unused parameter
   (void)client_data; // Unused parameter
   (void)call_data; // Unused parameter
+
+// fprintf(stderr, "%s:%d:%s start\n",
+// __FILE__, __LINE__, __FUNCTION__);
+// clock_t start = clock();
 
   // XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
@@ -3776,6 +3749,10 @@ void do_naverr_selecttie(Widget w, XtPointer client_data, XtPointer call_data) {
   (void)client_data; // Unused parameter
   (void)call_data; // Unused parameter
 
+// fprintf(stderr, "%s:%d:%s start\n",
+// __FILE__, __LINE__, __FUNCTION__);
+// clock_t start = clock();
+
   // XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
   mbnavadjust_naverr_selecttie();
@@ -3798,6 +3775,10 @@ void do_naverr_unset(Widget w, XtPointer client_data, XtPointer call_data) {
   (void)w; // Unused parameter
   (void)client_data; // Unused parameter
   (void)call_data; // Unused parameter
+
+// fprintf(stderr, "%s:%d:%s start\n",
+// __FILE__, __LINE__, __FUNCTION__);
+// clock_t start = clock();
 
   // XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
@@ -3828,6 +3809,10 @@ void do_naverr_setnone(Widget w, XtPointer client_data, XtPointer call_data) {
   (void)client_data; // Unused parameter
   (void)call_data; // Unused parameter
 
+// fprintf(stderr, "%s:%d:%s start\n",
+// __FILE__, __LINE__, __FUNCTION__);
+// clock_t start = clock();
+
   // XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
   mbnavadjust_naverr_skip();
@@ -3857,6 +3842,10 @@ void do_naverr_setoffset(Widget w, XtPointer client_data, XtPointer call_data) {
   (void)client_data; // Unused parameter
   (void)call_data; // Unused parameter
 
+// fprintf(stderr, "%s:%d:%s start\n",
+// __FILE__, __LINE__, __FUNCTION__);
+// clock_t start = clock();
+
   // XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
   mbnavadjust_naverr_save();
@@ -3883,6 +3872,10 @@ void do_naverr_resettie(Widget w, XtPointer client_data, XtPointer call_data) {
 
   // XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
+// fprintf(stderr, "%s:%d:%s start\n",
+// __FILE__, __LINE__, __FUNCTION__);
+// clock_t start = clock();
+
   mbnavadjust_naverr_resettie();
   mbnavadjust_naverr_plot(MBNA_PLOT_MODE_FIRST);
   do_naverr_update();
@@ -3904,11 +3897,16 @@ void do_naverr_dismiss(Widget w, XtPointer client_data, XtPointer call_data) {
   (void)client_data; // Unused parameter
   (void)call_data; // Unused parameter
 
+// fprintf(stderr, "%s:%d:%s start\n",
+// __FILE__, __LINE__, __FUNCTION__);
+// clock_t start = clock();
+
   // XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
   /* unload loaded crossing */
   if (mbna_naverr_mode != MBNA_NAVERR_MODE_UNLOADED) {
     status = mbnavadjust_crossing_unload();
+    status = mbnavadjust_referencegrid_unload();
   }
 
   /* deallocate graphics */
@@ -3941,6 +3939,10 @@ void do_naverr_fullsize(Widget w, XtPointer client_data, XtPointer call_data) {
   (void)client_data; // Unused parameter
   (void)call_data; // Unused parameter
 
+// fprintf(stderr, "%s:%d:%s start\n",
+// __FILE__, __LINE__, __FUNCTION__);
+// clock_t start = clock();
+
   // XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
   /* reset the plot bounds */
@@ -3959,6 +3961,10 @@ void do_naverr_zerooffset(Widget w, XtPointer client_data, XtPointer call_data) 
   (void)w; // Unused parameter
   (void)client_data; // Unused parameter
   (void)call_data; // Unused parameter
+
+// fprintf(stderr, "%s:%d:%s start\n",
+// __FILE__, __LINE__, __FUNCTION__);
+// clock_t start = clock();
 
   // XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
@@ -3983,6 +3989,10 @@ void do_naverr_zerozoffset(Widget w, XtPointer client_data, XtPointer call_data)
   (void)client_data; // Unused parameter
   (void)call_data; // Unused parameter
 
+// fprintf(stderr, "%s:%d:%s start\n",
+// __FILE__, __LINE__, __FUNCTION__);
+// clock_t start = clock();
+
   // XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
   /* move offset */
@@ -4005,6 +4015,10 @@ void do_naverr_applyzoffset(Widget w, XtPointer client_data, XtPointer call_data
   (void)client_data; // Unused parameter
   (void)call_data; // Unused parameter
 
+// fprintf(stderr, "%s:%d:%s start\n",
+// __FILE__, __LINE__, __FUNCTION__);
+// clock_t start = clock();
+
   // XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
   /* recalculate minimum misfit at current z offset */
@@ -4013,14 +4027,15 @@ void do_naverr_applyzoffset(Widget w, XtPointer client_data, XtPointer call_data
   /* replot contours */
   mbnavadjust_naverr_plot(MBNA_PLOT_MODE_FIRST);
   do_naverr_offsetlabel();
-  do_update_status();
-  if (project.modelplot) {
-    do_update_modelplot_status();
-    mbnavadjust_modelplot_plot(__FILE__, __LINE__);
-  }
-  if (project.visualization_status)
-    mbnavadjust_reset_visualization_navties();
-    do_update_visualization_status();
+//  do_update_status();
+//  if (project.modelplot) {
+//    do_update_modelplot_status();
+//    mbnavadjust_modelplot_plot(__FILE__, __LINE__);
+//  }
+//  if (project.visualization_status) {
+//    mbnavadjust_reset_visualization_navties();
+//    do_update_visualization_status();
+//  }
 }
 
 /*--------------------------------------------------------------------*/
@@ -4029,6 +4044,10 @@ void do_naverr_minmisfit(Widget w, XtPointer client_data, XtPointer call_data) {
   (void)w; // Unused parameter
   (void)client_data; // Unused parameter
   (void)call_data; // Unused parameter
+
+// fprintf(stderr, "%s:%d:%s start\n",
+// __FILE__, __LINE__, __FUNCTION__);
+// clock_t start = clock();
 
   // XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
@@ -4045,14 +4064,15 @@ void do_naverr_minmisfit(Widget w, XtPointer client_data, XtPointer call_data) {
   mbnavadjust_naverr_replot();
   mbnavadjust_naverr_plot(MBNA_PLOT_MODE_FIRST);
   do_naverr_update();
-  do_update_status();
-  if (project.modelplot) {
-    do_update_modelplot_status();
-    mbnavadjust_modelplot_plot(__FILE__, __LINE__);
-  }
-  if (project.visualization_status)
-    mbnavadjust_reset_visualization_navties();
-    do_update_visualization_status();
+//  do_update_status();
+//  if (project.modelplot) {
+//    do_update_modelplot_status();
+//    mbnavadjust_modelplot_plot(__FILE__, __LINE__);
+//  }
+//  if (project.visualization_status) {
+//    mbnavadjust_reset_visualization_navties();
+//    do_update_visualization_status();
+//  }
 }
 
 /*--------------------------------------------------------------------*/
@@ -4061,6 +4081,10 @@ void do_naverr_minxymisfit(Widget w, XtPointer client_data, XtPointer call_data)
   (void)w; // Unused parameter
   (void)client_data; // Unused parameter
   (void)call_data; // Unused parameter
+
+// fprintf(stderr, "%s:%d:%s start\n",
+// __FILE__, __LINE__, __FUNCTION__);
+// clock_t start = clock();
 
   // XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
@@ -4074,14 +4098,15 @@ void do_naverr_minxymisfit(Widget w, XtPointer client_data, XtPointer call_data)
   mbnavadjust_naverr_replot();
   mbnavadjust_naverr_plot(MBNA_PLOT_MODE_FIRST);
   do_naverr_update();
-  do_update_status();
-  if (project.modelplot) {
-    do_update_modelplot_status();
-    mbnavadjust_modelplot_plot(__FILE__, __LINE__);
-  }
-  if (project.visualization_status)
-    mbnavadjust_reset_visualization_navties();
-    do_update_visualization_status();
+//  do_update_status();
+//  if (project.modelplot) {
+//    do_update_modelplot_status();
+//    mbnavadjust_modelplot_plot(__FILE__, __LINE__);
+//  }
+//  if (project.visualization_status) {
+//    mbnavadjust_reset_visualization_navties();
+//    do_update_visualization_status();
+//  }
 }
 /*--------------------------------------------------------------------*/
 
@@ -4089,6 +4114,10 @@ void do_naverr_misfitcenter(Widget w, XtPointer client_data, XtPointer call_data
   (void)w; // Unused parameter
   (void)client_data; // Unused parameter
   (void)call_data; // Unused parameter
+
+// fprintf(stderr, "%s:%d:%s start\n",
+// __FILE__, __LINE__, __FUNCTION__);
+// clock_t start = clock();
 
   // XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
@@ -4101,14 +4130,15 @@ void do_naverr_misfitcenter(Widget w, XtPointer client_data, XtPointer call_data
   mbnavadjust_get_misfit();
   mbnavadjust_naverr_plot(MBNA_PLOT_MODE_FIRST);
   do_naverr_update();
-  do_update_status();
-  if (project.modelplot) {
-    do_update_modelplot_status();
-    mbnavadjust_modelplot_plot(__FILE__, __LINE__);
-  }
-  if (project.visualization_status)
-    mbnavadjust_reset_visualization_navties();
-    do_update_visualization_status();
+//  do_update_status();
+//  if (project.modelplot) {
+//    do_update_modelplot_status();
+//    mbnavadjust_modelplot_plot(__FILE__, __LINE__);
+//  }
+//  if (project.visualization_status) {
+//    mbnavadjust_reset_visualization_navties();
+//    do_update_visualization_status();
+//  }
 }
 
 /*--------------------------------------------------------------------*/
@@ -4117,6 +4147,10 @@ void do_biases_apply(Widget w, XtPointer client_data, XtPointer call_data) {
   (void)w; // Unused parameter
   (void)client_data; // Unused parameter
   (void)call_data; // Unused parameter
+
+// fprintf(stderr, "%s:%d:%s start\n",
+// __FILE__, __LINE__, __FUNCTION__);
+// clock_t start = clock();
 
   // XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
@@ -4149,13 +4183,14 @@ void do_biases_apply(Widget w, XtPointer client_data, XtPointer call_data) {
   mbnavadjust_get_misfit();
   mbnavadjust_naverr_plot(MBNA_PLOT_MODE_FIRST);
   do_update_status();
-  if (project.modelplot) {
-    do_update_modelplot_status();
-    mbnavadjust_modelplot_plot(__FILE__, __LINE__);
-  }
-  if (project.visualization_status)
-    mbnavadjust_reset_visualization_navties();
-    do_update_visualization_status();
+//  if (project.modelplot) {
+//    do_update_modelplot_status();
+//    mbnavadjust_modelplot_plot(__FILE__, __LINE__);
+//  }
+//  if (project.visualization_status) {
+//    mbnavadjust_reset_visualization_navties();
+//    do_update_visualization_status();
+//  }
 }
 
 /*--------------------------------------------------------------------*/
@@ -4164,6 +4199,10 @@ void do_biases_applyall(Widget w, XtPointer client_data, XtPointer call_data) {
   (void)w; // Unused parameter
   (void)client_data; // Unused parameter
   (void)call_data; // Unused parameter
+
+// fprintf(stderr, "%s:%d:%s start\n",
+// __FILE__, __LINE__, __FUNCTION__);
+// clock_t start = clock();
 
   // XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
   int ivalue;
@@ -4312,6 +4351,10 @@ void do_controls_apply(Widget w, XtPointer client_data, XtPointer call_data) {
   (void)client_data; // Unused parameter
   (void)call_data; // Unused parameter
 
+// fprintf(stderr, "%s:%d:%s start\n",
+// __FILE__, __LINE__, __FUNCTION__);
+// clock_t start = clock();
+
   // XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
   /* get value of decimation slider */
@@ -4353,18 +4396,19 @@ void do_controls_apply(Widget w, XtPointer client_data, XtPointer call_data) {
 
   mbnavadjust_naverr_replot();
   int error = MB_ERROR_NO_ERROR;
-  mbnavadjust_write_project(mbna_verbose, &project, &error);
+  mbnavadjust_write_project(mbna_verbose, &project, __FILE__, __LINE__, __FUNCTION__, &error);
   mbnavadjust_get_misfit();
   mbnavadjust_naverr_plot(MBNA_PLOT_MODE_FIRST);
   do_naverr_update();
-  do_update_status();
-  if (project.modelplot) {
-    do_update_modelplot_status();
-    mbnavadjust_modelplot_plot(__FILE__, __LINE__);
-  }
-  if (project.visualization_status)
-    mbnavadjust_reset_visualization_navties();
-    do_update_visualization_status();
+//  do_update_status();
+//  if (project.modelplot) {
+//    do_update_modelplot_status();
+//    mbnavadjust_modelplot_plot(__FILE__, __LINE__);
+//  }
+//  if (project.visualization_status) {
+//    mbnavadjust_reset_visualization_navties();
+//    do_update_visualization_status();
+//  }
 }
 
 /*--------------------------------------------------------------------*/
@@ -4604,7 +4648,7 @@ void do_quit(Widget w, XtPointer client_data, XtPointer call_data) {
   /* write project file if there are outstanding changes */
   int error = MB_ERROR_NO_ERROR;
   if (project.save_count != 0) {
-    mbnavadjust_write_project(mbna_verbose, &project, &error);
+    mbnavadjust_write_project(mbna_verbose, &project, __FILE__, __LINE__, __FUNCTION__, &error);
     project.save_count = 0;
   }
 
@@ -4699,7 +4743,7 @@ void do_fileselection_ok(Widget w, XtPointer client_data, XtPointer call_data) {
   else if (file_mode == FILE_MODE_REFERENCE) {
     status = mbnavadjust_import_reference(mbna_verbose, &project, ifile, &error);
     if (status == MB_SUCCESS) {
-      mbnavadjust_write_project(mbna_verbose, &project, &error);
+      mbnavadjust_write_project(mbna_verbose, &project, __FILE__, __LINE__, __FUNCTION__, &error);
       project.save_count = 0;
     } else {
       status = MB_SUCCESS;
@@ -4746,7 +4790,7 @@ void do_view_showallsurveys(Widget w, XtPointer client_data, XtPointer call_data
 
 /*--------------------------------------------------------------------*/
 
-void do_view_showselectedsurveys(Widget w, XtPointer client_data, XtPointer call_data) {
+void do_view_showselectedsurvey(Widget w, XtPointer client_data, XtPointer call_data) {
   (void)w; // Unused parameter
   (void)client_data; // Unused parameter
   (void)call_data; // Unused parameter
@@ -4818,7 +4862,7 @@ void do_view_showselectedfile(Widget w, XtPointer client_data, XtPointer call_da
 
 /*--------------------------------------------------------------------*/
 
-void do_view_showwithselectedsurveys(Widget w, XtPointer client_data, XtPointer call_data) {
+void do_view_showwithselectedsurvey(Widget w, XtPointer client_data, XtPointer call_data) {
   (void)w; // Unused parameter
   (void)client_data; // Unused parameter
   (void)call_data; // Unused parameter
@@ -4890,7 +4934,31 @@ void do_view_showselectedsection(Widget w, XtPointer client_data, XtPointer call
 
 /*--------------------------------------------------------------------*/
 
-void do_view_showsurveys(Widget w, XtPointer client_data, XtPointer call_data) {
+void do_list_showreferencegrids(Widget w, XtPointer client_data, XtPointer call_data) {
+  (void)w; // Unused parameter
+  (void)client_data; // Unused parameter
+  (void)call_data; // Unused parameter
+
+  // XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
+
+  if (mbna_view_list != MBNA_VIEW_LIST_REFERENCEGRIDS) {
+    project.modelplot_uptodate = false;
+  }
+  mbna_view_list = MBNA_VIEW_LIST_REFERENCEGRIDS;
+  do_update_status();
+  if (project.modelplot) {
+    do_update_modelplot_status();
+    mbnavadjust_modelplot_plot(__FILE__, __LINE__);
+  }
+  if (project.visualization_status) {
+    mbnavadjust_reset_visualization_navties();
+    do_update_visualization_status();
+  }
+}
+
+/*--------------------------------------------------------------------*/
+
+void do_list_showsurveys(Widget w, XtPointer client_data, XtPointer call_data) {
   (void)w; // Unused parameter
   (void)client_data; // Unused parameter
   (void)call_data; // Unused parameter
@@ -4914,7 +4982,7 @@ void do_view_showsurveys(Widget w, XtPointer client_data, XtPointer call_data) {
 
 /*--------------------------------------------------------------------*/
 
-void do_view_showblocks(Widget w, XtPointer client_data, XtPointer call_data) {
+void do_list_showblocks(Widget w, XtPointer client_data, XtPointer call_data) {
   (void)w; // Unused parameter
   (void)client_data; // Unused parameter
   (void)call_data; // Unused parameter
@@ -4937,7 +5005,7 @@ void do_view_showblocks(Widget w, XtPointer client_data, XtPointer call_data) {
 }
 
 /*--------------------------------------------------------------------*/
-void do_view_showdata(Widget w, XtPointer client_data, XtPointer call_data) {
+void do_list_showdata(Widget w, XtPointer client_data, XtPointer call_data) {
   (void)w; // Unused parameter
   (void)client_data; // Unused parameter
   (void)call_data; // Unused parameter
@@ -4960,7 +5028,7 @@ void do_view_showdata(Widget w, XtPointer client_data, XtPointer call_data) {
 }
 /*--------------------------------------------------------------------*/
 
-void do_view_showsections(Widget w, XtPointer client_data, XtPointer call_data) {
+void do_list_showsections(Widget w, XtPointer client_data, XtPointer call_data) {
   (void)w; // Unused parameter
   (void)client_data; // Unused parameter
   (void)call_data; // Unused parameter
@@ -4983,7 +5051,7 @@ void do_view_showsections(Widget w, XtPointer client_data, XtPointer call_data) 
 }
 
 /*--------------------------------------------------------------------*/
-void do_view_showcrossings(Widget w, XtPointer client_data, XtPointer call_data) {
+void do_list_showcrossings(Widget w, XtPointer client_data, XtPointer call_data) {
   (void)w; // Unused parameter
   (void)client_data; // Unused parameter
   (void)call_data; // Unused parameter
@@ -5006,7 +5074,7 @@ void do_view_showcrossings(Widget w, XtPointer client_data, XtPointer call_data)
 }
 /*--------------------------------------------------------------------*/
 
-void do_view_showmediocrecrossings(Widget w, XtPointer client_data, XtPointer call_data) {
+void do_list_showmediocrecrossings(Widget w, XtPointer client_data, XtPointer call_data) {
   (void)w; // Unused parameter
   (void)client_data; // Unused parameter
   (void)call_data; // Unused parameter
@@ -5029,7 +5097,7 @@ void do_view_showmediocrecrossings(Widget w, XtPointer client_data, XtPointer ca
 }
 /*--------------------------------------------------------------------*/
 
-void do_view_showgoodcrossings(Widget w, XtPointer client_data, XtPointer call_data) {
+void do_list_showgoodcrossings(Widget w, XtPointer client_data, XtPointer call_data) {
   (void)w; // Unused parameter
   (void)client_data; // Unused parameter
   (void)call_data; // Unused parameter
@@ -5052,7 +5120,7 @@ void do_view_showgoodcrossings(Widget w, XtPointer client_data, XtPointer call_d
 }
 /*--------------------------------------------------------------------*/
 
-void do_view_showbettercrossings(Widget w, XtPointer client_data, XtPointer call_data) {
+void do_list_showbettercrossings(Widget w, XtPointer client_data, XtPointer call_data) {
   (void)w; // Unused parameter
   (void)client_data; // Unused parameter
   (void)call_data; // Unused parameter
@@ -5075,7 +5143,7 @@ void do_view_showbettercrossings(Widget w, XtPointer client_data, XtPointer call
 }
 
 /*--------------------------------------------------------------------*/
-void do_view_showtruecrossings(Widget w, XtPointer client_data, XtPointer call_data) {
+void do_list_showtruecrossings(Widget w, XtPointer client_data, XtPointer call_data) {
   (void)w; // Unused parameter
   (void)client_data; // Unused parameter
   (void)call_data; // Unused parameter
@@ -5098,7 +5166,7 @@ void do_view_showtruecrossings(Widget w, XtPointer client_data, XtPointer call_d
 }
 
 /*--------------------------------------------------------------------*/
-void do_view_showcrossingties(Widget w, XtPointer client_data, XtPointer call_data) {
+void do_list_showcrossingties(Widget w, XtPointer client_data, XtPointer call_data) {
   (void)w; // Unused parameter
   (void)client_data; // Unused parameter
   (void)call_data; // Unused parameter
@@ -5122,7 +5190,7 @@ void do_view_showcrossingties(Widget w, XtPointer client_data, XtPointer call_da
 }
 
 /*--------------------------------------------------------------------*/
-void do_view_showcrossingtiessorted(Widget w, XtPointer client_data, XtPointer call_data) {
+void do_list_showcrossingtiessorted(Widget w, XtPointer client_data, XtPointer call_data) {
   (void)w; // Unused parameter
   (void)client_data; // Unused parameter
   (void)call_data; // Unused parameter
@@ -5146,7 +5214,7 @@ void do_view_showcrossingtiessorted(Widget w, XtPointer client_data, XtPointer c
 }
 
 /*--------------------------------------------------------------------*/
-void do_view_showglobalties(Widget w, XtPointer client_data, XtPointer call_data) {
+void do_list_showglobalties(Widget w, XtPointer client_data, XtPointer call_data) {
   (void)w; // Unused parameter
   (void)client_data; // Unused parameter
   (void)call_data; // Unused parameter
@@ -5170,7 +5238,7 @@ void do_view_showglobalties(Widget w, XtPointer client_data, XtPointer call_data
 }
 
 /*--------------------------------------------------------------------*/
-void do_view_showglobaltiessorted(Widget w, XtPointer client_data, XtPointer call_data) {
+void do_list_showglobaltiessorted(Widget w, XtPointer client_data, XtPointer call_data) {
   (void)w; // Unused parameter
   (void)client_data; // Unused parameter
   (void)call_data; // Unused parameter
@@ -5496,10 +5564,10 @@ void do_action_updategrids(Widget w, XtPointer client_data, XtPointer call_data)
   mbnavadjust_updategrid();
   mbna_status = MBNA_STATUS_GUI;
   do_update_status();
-  if (project.modelplot) {
-    do_update_modelplot_status();
-    mbnavadjust_modelplot_plot(__FILE__, __LINE__);
-  }
+//  if (project.modelplot) {
+//    do_update_modelplot_status();
+//    mbnavadjust_modelplot_plot(__FILE__, __LINE__);
+//  }
   if (project.visualization_status) {
     mbnavadjust_reset_visualization_navties();
     do_update_visualization_status();
@@ -5954,7 +6022,10 @@ void do_visualize(Widget w, XtPointer client_data, XtPointer call_data) {
 
   // XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
-  mbnavadjust_open_visualization(MBNA_GRID_ADJUSTED);
+  int grid_id = MBNA_GRID_PROJECT;
+  if (mbna_view_mode == MBNA_VIEW_MODE_SURVEY)
+    grid_id = mbna_survey_select;
+  mbnavadjust_open_visualization(grid_id);
 }
 
 /*--------------------------------------------------------------------*/

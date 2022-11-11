@@ -206,7 +206,7 @@ int mbnavadjust_init_globals() {
   project.crossings = NULL;
   project.num_ties = 0;
   project.inversion_status = MBNA_INVERSION_NONE;
-  project.refgrid_status = MBNA_REFGRID_NONE;
+  project.refgrid_status = MBNA_REFGRID_UNLOADED;
   project.grid_status = MBNA_GRID_NONE;
   project.modelplot = false;
   project.modelplot_style = MBNA_MODELPLOT_TIMESERIES;
@@ -594,7 +594,7 @@ int mbnavadjust_file_new(char *projectname) {
         }
 
         /* write home file and other files */
-        else if ((status = mbnavadjust_write_project(mbna_verbose, &project, &error)) == MB_FAILURE) {
+        else if ((status = mbnavadjust_write_project(mbna_verbose, &project, __FILE__, __LINE__, __FUNCTION__, &error)) == MB_FAILURE) {
           strcpy(error1, "Unable to create new project!");
           strcpy(error2, "Error writing data.");
           strcpy(error3, " ");
@@ -856,7 +856,7 @@ int mbnavadjust_poornav_file() {
       do_message_on(message);
 
       /* write out updated project */
-      mbnavadjust_write_project(mbna_verbose, &project, &error);
+      mbnavadjust_write_project(mbna_verbose, &project, __FILE__, __LINE__, __FUNCTION__, &error);
       project.save_count = 0;
 
       /* turn off message */
@@ -917,7 +917,7 @@ int mbnavadjust_goodnav_file() {
       do_message_on(message);
 
       /* write out updated project */
-      mbnavadjust_write_project(mbna_verbose, &project, &error);
+      mbnavadjust_write_project(mbna_verbose, &project, __FILE__, __LINE__, __FUNCTION__, &error);
       project.save_count = 0;
 
       /* turn off message */
@@ -979,7 +979,7 @@ int mbnavadjust_fixednav_file() {
       do_message_on(message);
 
       /* write out updated project */
-      mbnavadjust_write_project(mbna_verbose, &project, &error);
+      mbnavadjust_write_project(mbna_verbose, &project, __FILE__, __LINE__, __FUNCTION__, &error);
       project.save_count = 0;
 
       /* turn off message */
@@ -1041,7 +1041,7 @@ int mbnavadjust_fixedxynav_file() {
       do_message_on(message);
 
       /* write out updated project */
-      mbnavadjust_write_project(mbna_verbose, &project, &error);
+      mbnavadjust_write_project(mbna_verbose, &project, __FILE__, __LINE__, __FUNCTION__, &error);
       project.save_count = 0;
 
       /* turn off message */
@@ -1103,7 +1103,7 @@ int mbnavadjust_fixedznav_file() {
       do_message_on(message);
 
       /* write out updated project */
-      mbnavadjust_write_project(mbna_verbose, &project, &error);
+      mbnavadjust_write_project(mbna_verbose, &project, __FILE__, __LINE__, __FUNCTION__, &error);
       project.save_count = 0;
 
       /* turn off message */
@@ -1141,7 +1141,7 @@ int mbnavadjust_set_tie_xyz() {
       project.inversion_status = MBNA_INVERSION_OLD;
 
     /* write out updated project */
-    mbnavadjust_write_project(mbna_verbose, &project, &error);
+    mbnavadjust_write_project(mbna_verbose, &project, __FILE__, __LINE__, __FUNCTION__, &error);
     project.save_count = 0;
 
     /* add info text */
@@ -1179,7 +1179,7 @@ int mbnavadjust_set_tie_xy() {
       project.inversion_status = MBNA_INVERSION_OLD;
 
     /* write out updated project */
-    mbnavadjust_write_project(mbna_verbose, &project, &error);
+    mbnavadjust_write_project(mbna_verbose, &project, __FILE__, __LINE__, __FUNCTION__, &error);
     project.save_count = 0;
 
     /* add info text */
@@ -1219,7 +1219,7 @@ int mbnavadjust_set_tie_z() {
       project.inversion_status = MBNA_INVERSION_OLD;
 
     /* write out updated project */
-    mbnavadjust_write_project(mbna_verbose, &project, &error);
+    mbnavadjust_write_project(mbna_verbose, &project, __FILE__, __LINE__, __FUNCTION__, &error);
     project.save_count = 0;
 
     /* add info text */
@@ -1243,6 +1243,10 @@ int mbnavadjust_naverr_save() {
   if (mbna_verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
   }
+
+// fprintf(stderr, "%s:%d:%s start\n",
+// __FILE__, __LINE__, __FUNCTION__);
+// clock_t start = clock();
 
   /* save offsets if crossing loaded and ties set */
   if (project.open && mbna_naverr_mode == MBNA_NAVERR_MODE_CROSSING
@@ -1340,7 +1344,7 @@ int mbnavadjust_naverr_save() {
       /* write updated project */
       project.save_count++;
       if (project.save_count < 0 || project.save_count >= mbna_save_frequency) {
-        mbnavadjust_write_project(mbna_verbose, &project, &error);
+        mbnavadjust_write_project(mbna_verbose, &project, __FILE__, __LINE__, __FUNCTION__, &error);
         project.save_count = 0;
       }
 
@@ -1434,7 +1438,7 @@ int mbnavadjust_naverr_save() {
     /* write updated project */
     project.save_count++;
     if (project.save_count < 0 || project.save_count >= mbna_save_frequency) {
-      mbnavadjust_write_project(mbna_verbose, &project, &error);
+      mbnavadjust_write_project(mbna_verbose, &project, __FILE__, __LINE__, __FUNCTION__, &error);
       project.save_count = 0;
     }
 
@@ -1456,6 +1460,11 @@ int mbnavadjust_naverr_save() {
     fprintf(stderr, "dbg2  Return status:\n");
     fprintf(stderr, "dbg2       status:      %d\n", status);
   }
+
+// clock_t end = clock();
+// double time_used = ((double)(end - start)) / CLOCKS_PER_SEC;
+// fprintf(stderr, "%s:%d:%s done in %.6f seconds...\n\n",
+// __FILE__, __LINE__, __FUNCTION__, time_used);
 
   return (status);
 }
@@ -1606,7 +1615,7 @@ int mbnavadjust_naverr_specific_section(int new_file, int new_section) {
 
       /* file and section for reference grid are either -1 if no refgrid imported
          or 0 if refgrid imported */
-      if (project.refgrid_status != MBNA_REFGRID_NONE) {
+      if (project.refgrid_status != MBNA_REFGRID_UNLOADED) {
         mbna_file_id_1 = 0;
         mbna_section_1 = 0;
       } else {
@@ -1821,7 +1830,7 @@ int mbnavadjust_naverr_next_section() {
 
     /* file and section for reference grid are either -1 if no refgrid imported
        or 0 if refgrid imported */
-    if (project.refgrid_status != MBNA_REFGRID_NONE) {
+    if (project.refgrid_status != MBNA_REFGRID_UNLOADED) {
       mbna_file_id_1 = 0;
       mbna_section_1 = 0;
     } else {
@@ -2040,7 +2049,7 @@ int mbnavadjust_naverr_previous_section() {
 
     /* file and section for reference grid are either -1 if no refgrid imported
        or 0 if refgrid imported */
-    if (project.refgrid_status != MBNA_REFGRID_NONE) {
+    if (project.refgrid_status != MBNA_REFGRID_UNLOADED) {
       mbna_file_id_1 = 0;
       mbna_section_1 = 0;
     } else {
@@ -2262,7 +2271,7 @@ int mbnavadjust_naverr_nextunset_section() {
 
     /* file and section for reference grid are either -1 if no refgrid imported
        or 0 if refgrid imported */
-    if (project.refgrid_status != MBNA_REFGRID_NONE) {
+    if (project.refgrid_status != MBNA_REFGRID_UNLOADED) {
       mbna_file_id_1 = 0;
       mbna_section_1 = 0;
     } else {
@@ -2520,7 +2529,7 @@ int mbnavadjust_naverr_addtie() {
       project.save_count++;
             project.modelplot_uptodate = false;
       if (project.save_count < 0 || project.save_count >= mbna_save_frequency) {
-        mbnavadjust_write_project(mbna_verbose, &project, &error);
+        mbnavadjust_write_project(mbna_verbose, &project, __FILE__, __LINE__, __FUNCTION__, &error);
         project.save_count = 0;
       }
 
@@ -2670,7 +2679,7 @@ int mbnavadjust_naverr_addtie() {
       project.save_count++;
       project.modelplot_uptodate = false;
       if (project.save_count < 0 || project.save_count >= mbna_save_frequency) {
-        mbnavadjust_write_project(mbna_verbose, &project, &error);
+        mbnavadjust_write_project(mbna_verbose, &project, __FILE__, __LINE__, __FUNCTION__, &error);
         project.save_count = 0;
       }
 
@@ -2758,7 +2767,7 @@ int mbnavadjust_naverr_deletetie() {
         /* write updated project */
         project.save_count++;
         if (project.save_count < 0 || project.save_count >= mbna_save_frequency) {
-          mbnavadjust_write_project(mbna_verbose, &project, &error);
+          mbnavadjust_write_project(mbna_verbose, &project, __FILE__, __LINE__, __FUNCTION__, &error);
           project.save_count = 0;
         }
       }
@@ -2800,7 +2809,7 @@ int mbnavadjust_naverr_deletetie() {
         /* write updated project */
         project.save_count++;
         if (project.save_count < 0 || project.save_count >= mbna_save_frequency) {
-          mbnavadjust_write_project(mbna_verbose, &project, &error);
+          mbnavadjust_write_project(mbna_verbose, &project, __FILE__, __LINE__, __FUNCTION__, &error);
           project.save_count = 0;
         }
 
@@ -3097,7 +3106,7 @@ int mbnavadjust_naverr_skip() {
         /* write updated project */
         project.save_count++;
         if (project.save_count < 0 || project.save_count >= mbna_save_frequency) {
-          mbnavadjust_write_project(mbna_verbose, &project, &error);
+          mbnavadjust_write_project(mbna_verbose, &project, __FILE__, __LINE__, __FUNCTION__, &error);
           project.save_count = 0;
         }
 
@@ -3149,7 +3158,7 @@ int mbnavadjust_naverr_skip() {
         /* write updated project */
         project.save_count++;
         if (project.save_count < 0 || project.save_count >= mbna_save_frequency) {
-          mbnavadjust_write_project(mbna_verbose, &project, &error);
+          mbnavadjust_write_project(mbna_verbose, &project, __FILE__, __LINE__, __FUNCTION__, &error);
           project.save_count = 0;
         }
 
@@ -3210,7 +3219,7 @@ int mbnavadjust_naverr_unset() {
         /* write updated project */
         project.save_count++;
         if (project.save_count < 0 || project.save_count >= mbna_save_frequency) {
-          mbnavadjust_write_project(mbna_verbose, &project, &error);
+          mbnavadjust_write_project(mbna_verbose, &project, __FILE__, __LINE__, __FUNCTION__, &error);
           project.save_count = 0;
         }
 
@@ -3261,7 +3270,7 @@ int mbnavadjust_naverr_unset() {
         /* write updated project */
         project.save_count++;
         if (project.save_count < 0 || project.save_count >= mbna_save_frequency) {
-          mbnavadjust_write_project(mbna_verbose, &project, &error);
+          mbnavadjust_write_project(mbna_verbose, &project, __FILE__, __LINE__, __FUNCTION__, &error);
           project.save_count = 0;
         }
 
@@ -3718,28 +3727,30 @@ int mbnavadjust_referenceplussection_load() {
     mbna_lat_max = section2->latmax + mbna_offset_y;
 
     /* load the reference grid if it is defined */
-    if (project.refgrid_status != MBNA_REFGRID_NONE) {
-      double length_meters = MAX((section2->lonmax - section2->lonmin) / mbna_mtodeglon,
-                                  (section2->latmax - section2->latmin) / mbna_mtodeglat);
-      double lon_size_deg = length_meters * mbna_mtodeglon;
-      double lat_size_deg = length_meters * mbna_mtodeglat;
-      project.reference_section.lonmin = section2->lonmin - 2.0 * lon_size_deg;
-      project.reference_section.lonmax = section2->lonmax + 2.0 * lon_size_deg;
-      project.reference_section.latmin = section2->latmin - 2.0 * lat_size_deg;
-      project.reference_section.latmax = section2->latmax + 2.0 * lat_size_deg;
-      sprintf(message, "Reading reference grid: %s/%s\n", project.datadir, project.refgrid_name);
+    double length_meters = MAX((section2->lonmax - section2->lonmin) / mbna_mtodeglon,
+                                (section2->latmax - section2->latmin) / mbna_mtodeglat);
+    double lon_size_deg = length_meters * mbna_mtodeglon;
+    double lat_size_deg = length_meters * mbna_mtodeglat;
+    project.reference_section.lonmin = section2->lonmin - 2.0 * lon_size_deg;
+    project.reference_section.lonmax = section2->lonmax + 2.0 * lon_size_deg;
+    project.reference_section.latmin = section2->latmin - 2.0 * lat_size_deg;
+    project.reference_section.latmax = section2->latmax + 2.0 * lat_size_deg;
+    if (project.refgrid_status == MBNA_REFGRID_UNLOADED) {
+      sprintf(message, "Reading reference grid: %s/%s\n", project.datadir, project.refgrid_names[project.refgrid_select]);
       do_message_update(message);
-      int refgrid_status = mbnavadjust_reference_load(mbna_verbose, &project,
+      int refgrid_status = mbnavadjust_reference_load(mbna_verbose, &project, project.refgrid_select,
                                 &project.reference_section, (void **)&swath1, &error);
       sprintf(message, "Read reference grid: %s/%s",
-                        project.datadir, project.refgrid_name);
+                        project.datadir, project.refgrid_names[project.refgrid_select]);
       do_message_update(message);
       sprintf(message, "Read reference grid: %s/%s \n\t Dimensions: %d %d\n\tBounds: %f %f   %f %f\n",
-                        project.datadir, project.refgrid_name, project.refgrid.nx, project.refgrid.ny,
+                        project.datadir, project.refgrid_names[project.refgrid_select],
+                        project.refgrid.nx, project.refgrid.ny,
                         project.refgrid.bounds[0], project.refgrid.bounds[1],
                         project.refgrid.bounds[2], project.refgrid.bounds[3]);
       fprintf(stderr, "%s\n", message);
-
+    }
+    if (project.refgrid_status == MBNA_REFGRID_LOADED) {
       mbna_lon_min = MIN(project.reference_section.lonmin, section2->lonmin + mbna_offset_x);
       mbna_lon_max = MAX(project.reference_section.lonmax, section2->lonmax + mbna_offset_x);
       mbna_lat_min = MIN(project.reference_section.latmin, section2->latmin + mbna_offset_y);
@@ -3800,6 +3811,27 @@ int mbnavadjust_referenceplussection_load() {
   return (status);
 }
 /*--------------------------------------------------------------------*/
+int mbnavadjust_referencegrid_unload() {
+  if (mbna_verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+  }
+
+  int status = MB_SUCCESS;
+  if (project.refgrid_status == MBNA_REFGRID_LOADED) {
+    status = mbnavadjust_refgrid_unload(mbna_verbose, &project, &error);
+  }
+
+  if (mbna_verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBnavadjust function <%s> completed\n", __func__);
+    fprintf(stderr, "dbg2  Return values:\n");
+    fprintf(stderr, "dbg2       error:       %d\n", error);
+    fprintf(stderr, "dbg2  Return status:\n");
+    fprintf(stderr, "dbg2       status:      %d\n", status);
+  }
+
+  return (status);
+}
+/*--------------------------------------------------------------------*/
 int mbnavadjust_referenceplussection_unload() {
   if (mbna_verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -3826,6 +3858,7 @@ int mbnavadjust_referenceplussection_unload() {
     mbna_contour2.vector = NULL;
     mbna_contour2.nvector = 0;
     mbna_contour2.nvector_alloc = 0;
+    project.refgrid_status = MBNA_REFGRID_UNLOADED;
     mbna_naverr_mode = MBNA_NAVERR_MODE_UNLOADED;
     grid_nx = 0;
     grid_ny = 0;
@@ -4012,7 +4045,7 @@ int mbnavadjust_get_misfit() {
       sprintf(message, "Making misfit grid for file %d section %d vs reference bathymetry",
               mbna_file_select, mbna_section_select);
     do_message_update(message);
-    if (mbna_verbose >= 0)
+    if (mbna_verbose > 0)
       fprintf(stderr, "%s\n", message);
 
     /* reset sounding density threshold for misfit calculation
@@ -5962,7 +5995,7 @@ int mbnavadjust_autopick(bool do_vertical) {
     }
 
     /* write updated project */
-    mbnavadjust_write_project(mbna_verbose, &project, &error);
+    mbnavadjust_write_project(mbna_verbose, &project, __FILE__, __LINE__, __FUNCTION__, &error);
     project.save_count = 0;
 
     /* turn off message dialog */
@@ -6822,7 +6855,7 @@ int mbnavadjust_autosetsvsvertical() {
     }
 
     /* write updated project */
-    mbnavadjust_write_project(mbna_verbose, &project, &error);
+    mbnavadjust_write_project(mbna_verbose, &project, __FILE__, __LINE__, __FUNCTION__, &error);
     project.save_count = 0;
 
     /* turn off message dialog */
@@ -7039,7 +7072,7 @@ int mbnavadjust_zerozoffsets() {
     }
 
     /* write updated project */
-    mbnavadjust_write_project(mbna_verbose, &project, &error);
+    mbnavadjust_write_project(mbna_verbose, &project, __FILE__, __LINE__, __FUNCTION__, &error);
     project.save_count = 0;
 
     /* turn off message dialog */
@@ -7224,7 +7257,7 @@ int mbnavadjust_unsetskipped() {
     }
 
     /* write updated project */
-    mbnavadjust_write_project(mbna_verbose, &project, &error);
+    mbnavadjust_write_project(mbna_verbose, &project, __FILE__, __LINE__, __FUNCTION__, &error);
     project.save_count = 0;
 
     /* turn off message dialog */
@@ -9981,7 +10014,7 @@ fprintf(stderr,"APPLYING WEIGHT: %f  ifile:%d isection:%d\n",weight,ifile,isecti
     project.inversion_status = MBNA_INVERSION_CURRENT;
         project.modelplot_uptodate = false;
     project.grid_status = MBNA_GRID_OLD;
-    mbnavadjust_write_project(mbna_verbose, &project, &error);
+    mbnavadjust_write_project(mbna_verbose, &project, __FILE__, __LINE__, __FUNCTION__, &error);
     project.save_count = 0;
 
     /* deallocate arrays */
@@ -12297,7 +12330,7 @@ fprintf(stderr,"APPLYING WEIGHT: %f  ifile:%d isection:%d\n",weight,ifile,isecti
     project.inversion_status = MBNA_INVERSION_CURRENT;
         project.modelplot_uptodate = false;
     project.grid_status = MBNA_GRID_OLD;
-    mbnavadjust_write_project(mbna_verbose, &project, &error);
+    mbnavadjust_write_project(mbna_verbose, &project, __FILE__, __LINE__, __FUNCTION__, &error);
     project.save_count = 0;
 
     /* deallocate arrays */
@@ -14521,7 +14554,7 @@ fprintf(stderr,"APPLYING WEIGHT: %f  ifile:%d isection:%d\n",weight,ifile,isecti
     project.inversion_status = MBNA_INVERSION_CURRENT;
         project.modelplot_uptodate = false;
     project.grid_status = MBNA_GRID_OLD;
-    mbnavadjust_write_project(mbna_verbose, &project, &error);
+    mbnavadjust_write_project(mbna_verbose, &project, __FILE__, __LINE__, __FUNCTION__, &error);
     project.save_count = 0;
 
     /* deallocate arrays */
@@ -15884,7 +15917,7 @@ int mbnavadjust_invertnav_old() {
     /* write updated project */
     project.inversion_status = MBNA_INVERSION_CURRENT;
     project.grid_status = MBNA_GRID_OLD;
-    mbnavadjust_write_project(mbna_verbose, &project, &error);
+    mbnavadjust_write_project(mbna_verbose, &project, __FILE__, __LINE__, __FUNCTION__, &error);
     project.save_count = 0;
 
     /* deallocate arrays */
@@ -15962,25 +15995,67 @@ int mbnavadjust_updategrid() {
     /* update datalist files and mbgrid commands */
     sprintf(apath, "%s/datalist.mb-1", project.datadir);
     if ((afp = fopen(apath, "w")) != NULL) {
-      for (int i = 0; i < project.num_files; i++) {
-        file = &project.files[i];
-        //if (file->status != MBNA_FILE_FIXEDNAV) {
-          for (int j = 0; j < file->num_sections; j++) {
-            fprintf(afp, "nvs_%4.4d_%4.4d.mb71 71\n", file->id, j);
-          }
-        //}
+      for (int ifile = 0; ifile < project.num_files; ifile++) {
+        file = &project.files[ifile];
+        for (int j = 0; j < file->num_sections; j++) {
+          fprintf(afp, "nvs_%4.4d_%4.4d.mb71 71\n", file->id, j);
+        }
       }
       fclose(afp);
     }
+    for (int isurvey = 0; isurvey < project.num_surveys; isurvey++) {
+      sprintf(apath, "%s/datalist_%4.4d.mb-1", project.datadir, isurvey);
+      if ((afp = fopen(apath, "w")) != NULL) {
+        for (int ifile = 0; ifile < project.num_files; ifile++) {
+          if (project.files[ifile].block == isurvey) {
+            file = &project.files[ifile];
+            for (int j = 0; j < file->num_sections; j++) {
+              fprintf(afp, "nvs_%4.4d_%4.4d.mb71 71\n", file->id, j);
+            }
+          }
+        }
+        fclose(afp);
+      }
+    }
 
-    lon_min = project.lon_min - 0.1 * (project.lon_max - project.lon_min);
-    lon_max = project.lon_max + 0.1 * (project.lon_max - project.lon_min);
-    lat_min = project.lat_min - 0.1 * (project.lat_max - project.lat_min);
-    lat_max = project.lat_max + 0.1 * (project.lat_max - project.lat_min);
+    double dlon = 0.1 * (project.lon_max - project.lon_min);
+    double dlat = 0.1 * (project.lat_max - project.lat_min);
+    lon_min = project.lon_min - dlon;
+    lon_max = project.lon_max + dlon;
+    lat_min = project.lat_min - dlat;
+    lat_max = project.lat_max + dlat;
     sprintf(apath, "%s/mbgrid_adj.cmd", project.datadir);
     if ((afp = fopen(apath, "w")) != NULL) {
       fprintf(afp, "mbgrid -I datalistp.mb-1 \\\n\t-R%.8f/%.8f/%.8f/%.8f \\\n\t-A2 -F5 -N -C2 \\\n\t-O ProjectTopoAdj\n\n",
               lon_min, lon_max, lat_min, lat_max);
+
+      for (int isurvey = 0; isurvey < project.num_surveys; isurvey++) {
+        bool first_file = true;
+        for (int ifile = 0; ifile < project.num_files; ifile++) {
+          if (project.files[ifile].block == isurvey) {
+            for (int isection=0; isection < project.files[ifile].num_sections; isection++) {
+              if (first_file && isection == 0) {
+                first_file = false;
+                lon_min = project.files[ifile].sections[isection].lonmin;
+                lon_max = project.files[ifile].sections[isection].lonmax;
+                lat_min = project.files[ifile].sections[isection].latmin;
+                lat_max = project.files[ifile].sections[isection].latmax;
+              } else {
+                lon_min = MIN(project.files[ifile].sections[isection].lonmin, lon_min);
+                lon_max = MAX(project.files[ifile].sections[isection].lonmax, lon_max);
+                lat_min = MIN(project.files[ifile].sections[isection].latmin, lat_min);
+                lat_max = MAX(project.files[ifile].sections[isection].latmax, lat_max);
+              }
+            }
+          }
+        }
+        lon_min -= dlon;
+        lon_max += dlon;
+        lat_min -= dlat;
+        lat_max += dlat;
+        fprintf(afp, "mbgrid -I datalist_%4.4dp.mb-1 \\\n\t-R%.8f/%.8f/%.8f/%.8f \\\n\t-A2 -F5 -N -C2 \\\n\t-O ProjectTopoAdj_%4.4d\n\n",
+                isurvey, lon_min, lon_max, lat_min, lat_max, isurvey);
+      }
       fclose(afp);
     }
 
@@ -15997,6 +16072,11 @@ int mbnavadjust_updategrid() {
     sprintf(command, "cd %s ; mbdatalist -Idatalist.mb-1 -O -Y -Z -V", project.datadir);
     fprintf(stderr, "Executing:\n%s\n\n", command);
     /* const int shellstatus = */ system(command);
+    for (int isurvey = 0; isurvey < project.num_surveys; isurvey++) {
+      sprintf(command, "cd %s ; mbdatalist -Idatalist_%4.4d.mb-1 -Z -V", project.datadir, isurvey);
+      fprintf(stderr, "Executing:\n%s\n\n", command);
+      /* const int shellstatus = */ system(command);
+    }
 
     if (project.inversion_status != MBNA_INVERSION_NONE) {
       /* set message */
@@ -16011,14 +16091,6 @@ int mbnavadjust_updategrid() {
         file = &project.files[ifile];
         sprintf(npath, "%s/nvs_%4.4d.mb166", project.datadir, ifile);
         sprintf(apath, "%s/nvs_%4.4d.na%d", project.datadir, ifile, file->output_id);
-        /*
-        if (file->status == MBNA_FILE_FIXEDNAV) {
-          sprintf(message, " > Not outputting updated nav to fixed file %s\n", apath);
-          do_info_add(message, false);
-          if (mbna_verbose == 0)
-            fprintf(stderr, "%s", message);
-        }
-        else */
         if ((nfp = fopen(npath, "r")) == NULL) {
           status = MB_FAILURE;
           error = MB_ERROR_OPEN_FAIL;
@@ -16179,7 +16251,7 @@ ifile, isection, isnav+1);
       project.grid_status = MBNA_GRID_CURRENT;
 
       /* write current project */
-      mbnavadjust_write_project(mbna_verbose, &project, &error);
+      mbnavadjust_write_project(mbna_verbose, &project, __FILE__, __LINE__, __FUNCTION__, &error);
       project.save_count = 0;
 
       /* turn off message dialog */
@@ -17936,7 +18008,7 @@ int mbnavadjust_modelplot_clearblock() {
     }
 
     /* write updated project */
-    mbnavadjust_write_project(mbna_verbose, &project, &error);
+    mbnavadjust_write_project(mbna_verbose, &project, __FILE__, __LINE__, __FUNCTION__, &error);
     project.save_count = 0;
   }
 
@@ -20765,13 +20837,19 @@ int mbnavadjust_open_visualization(int which_grid) {
   }
 
   else {
-    if (which_grid == MBNA_GRID_RAW)
-      sprintf(mbv_file_name, "%s/ProjectTopoRaw.grd", project.datadir);
-    else
+    /* visualize grid using data from one survey in project */
+    if (which_grid >= 0) {
+      sprintf(mbv_file_name, "%s/ProjectTopoAdj_%4.4d.grd", project.datadir, which_grid);
+      sprintf(mbv_title, "MBnavadjust: %s - survey %4.4d\n", project.name, which_grid);
+    }
+
+    /* else visualize grid using all data in project */
+    else { // which_grid == MBNA_GRID_PROJECT == -1
       sprintf(mbv_file_name, "%s/ProjectTopoAdj.grd", project.datadir);
+      sprintf(mbv_title, "MBnavadjust: %s\n", project.name);
+    }
 
     /* set parameters */
-    sprintf(mbv_title, "MBnavadjust: %s\n", project.name);
     mbv_xo = 200;
     mbv_yo = 200;
     mbv_width = 560;
@@ -20951,7 +21029,6 @@ int mbnavadjust_open_visualization(int which_grid) {
 
     /* add navigation to the visualization */
     if (status == MB_SUCCESS) {
-fprintf(stderr, "%s:%d:%s: \n", __FILE__, __LINE__, __FUNCTION__);
       /* allocate arrays for navigation of longest section */
       mbv_navpings_alloc = 0;
       for (int i = 0; i < project.num_files; i++) {

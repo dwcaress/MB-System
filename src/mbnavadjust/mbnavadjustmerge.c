@@ -3981,7 +3981,7 @@ int main(int argc, char **argv) {
 
   /* write out the new project file */
   if (project_output_set) {
-    status = mbnavadjust_write_project(verbose, &project_output, &error);
+    status = mbnavadjust_write_project(verbose, &project_output, __FILE__, __LINE__, __FUNCTION__, &error);
     if (status == MB_SUCCESS) {
       fprintf(stderr, "Output project written:\n\t%s\n", project_output_path);
       fprintf(stderr, "\t%d files\n\t%d crossings\n\t%d ties\n", project_output.num_files, project_output.num_crossings,
