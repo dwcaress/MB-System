@@ -49,53 +49,56 @@
 #define MOD_MODE_SET_GLOBAL_TIE_XYZ 3
 #define MOD_MODE_SET_GLOBAL_TIE_XY 4
 #define MOD_MODE_SET_GLOBAL_TIE_Z 5
-#define MOD_MODE_UNSET_GLOBAL_TIE 6
-#define MOD_MODE_UNSET_ALL_GLOBAL_TIES 7
-#define MOD_MODE_ADD_CROSSING 8
-#define MOD_MODE_SET_TIE_VALUES_ALL 9
-#define MOD_MODE_SET_TIE_VALUES_XYZ 10
-#define MOD_MODE_SET_TIE_VALUES_Z 11
-#define MOD_MODE_SET_TIE_XYZ 12
-#define MOD_MODE_SET_TIE_XY 13
-#define MOD_MODE_SET_TIE_Z 14
-#define MOD_MODE_SET_TIES_XYZ_ALL 15
-#define MOD_MODE_SET_TIES_XY_ALL 16
-#define MOD_MODE_SET_TIES_Z_ALL 17
-#define MOD_MODE_SET_TIES_XYZ_FILE 18
-#define MOD_MODE_SET_TIES_XY_FILE 19
-#define MOD_MODE_SET_TIES_Z_FILE 20
-#define MOD_MODE_SET_TIES_XYZ_SURVEY 21
-#define MOD_MODE_SET_TIES_XY_SURVEY 22
-#define MOD_MODE_SET_TIES_Z_SURVEY 23
-#define MOD_MODE_SET_TIES_XYZ_BYSURVEY 24
-#define MOD_MODE_SET_TIES_XY_BYSURVEY 25
-#define MOD_MODE_SET_TIES_Z_BYSURVEY 26
-#define MOD_MODE_SET_TIES_XYZ_BLOCK 27
-#define MOD_MODE_SET_TIES_XY_BLOCK 28
-#define MOD_MODE_SET_TIES_Z_BLOCK 29
-#define MOD_MODE_SET_TIES_ZOFFSET_BLOCK 30
-#define MOD_MODE_SET_TIES_XY_BY_TIME 31
-#define MOD_MODE_UNSET_TIE 32
-#define MOD_MODE_UNSET_TIES_FILE 33
-#define MOD_MODE_UNSET_TIES_SURVEY 34
-#define MOD_MODE_UNSET_TIES_BYSURVEY 35
-#define MOD_MODE_UNSET_TIES_BLOCK 36
-#define MOD_MODE_UNSET_TIES_ALL 37
-#define MOD_MODE_SKIP_UNSET_CROSSINGS 38
-#define MOD_MODE_UNSET_SKIPPED_CROSSINGS 39
-#define MOD_MODE_UNSET_SKIPPED_CROSSINGS_BLOCK 40
-#define MOD_MODE_UNSET_SKIPPED_CROSSINGS_BETWEEN_SURVEYS 41
-#define MOD_MODE_INSERT_DISCONTINUITY 42
-#define MOD_MODE_REMOVE_DISCONTINUITY 43
-#define MOD_MODE_MERGE_SURVEYS 44
-#define MOD_MODE_REIMPORT_FILE 45
-#define MOD_MODE_REIMPORT_ALL_FILES 46
-#define MOD_MODE_TRIANGULATE 47
-#define MOD_MODE_TRIANGULATE_SECTION 48
-#define MOD_MODE_UNSET_SHORT_SECTION_TIES 49
-#define MOD_MODE_SKIP_SHORT_SECTION_CROSSINGS 50
-#define MOD_MODE_REMAKE_MB166_FILES 51
-#define MOD_MODE_FIX_SENSORDEPTH 52
+#define MOD_MODE_SET_ALL_GLOBAL_TIES_XYZ 6
+#define MOD_MODE_SET_ALL_GLOBAL_TIES_XY 7
+#define MOD_MODE_SET_ALL_GLOBAL_TIES_Z 8
+#define MOD_MODE_UNSET_GLOBAL_TIE 9
+#define MOD_MODE_UNSET_ALL_GLOBAL_TIES 10
+#define MOD_MODE_ADD_CROSSING 11
+#define MOD_MODE_SET_TIE_VALUES_ALL 12
+#define MOD_MODE_SET_TIE_VALUES_XYZ 13
+#define MOD_MODE_SET_TIE_VALUES_Z 14
+#define MOD_MODE_SET_TIE_XYZ 15
+#define MOD_MODE_SET_TIE_XY 16
+#define MOD_MODE_SET_TIE_Z 17
+#define MOD_MODE_SET_TIES_XYZ_ALL 18
+#define MOD_MODE_SET_TIES_XY_ALL 19
+#define MOD_MODE_SET_TIES_Z_ALL 20
+#define MOD_MODE_SET_TIES_XYZ_FILE 21
+#define MOD_MODE_SET_TIES_XY_FILE 22
+#define MOD_MODE_SET_TIES_Z_FILE 23
+#define MOD_MODE_SET_TIES_XYZ_SURVEY 24
+#define MOD_MODE_SET_TIES_XY_SURVEY 25
+#define MOD_MODE_SET_TIES_Z_SURVEY 26
+#define MOD_MODE_SET_TIES_XYZ_BYSURVEY 27
+#define MOD_MODE_SET_TIES_XY_BYSURVEY 28
+#define MOD_MODE_SET_TIES_Z_BYSURVEY 29
+#define MOD_MODE_SET_TIES_XYZ_BLOCK 30
+#define MOD_MODE_SET_TIES_XY_BLOCK 31
+#define MOD_MODE_SET_TIES_Z_BLOCK 32
+#define MOD_MODE_SET_TIES_ZOFFSET_BLOCK 33
+#define MOD_MODE_SET_TIES_XY_BY_TIME 34
+#define MOD_MODE_UNSET_TIE 35
+#define MOD_MODE_UNSET_TIES_FILE 36
+#define MOD_MODE_UNSET_TIES_SURVEY 37
+#define MOD_MODE_UNSET_TIES_BYSURVEY 38
+#define MOD_MODE_UNSET_TIES_BLOCK 39
+#define MOD_MODE_UNSET_TIES_ALL 40
+#define MOD_MODE_SKIP_UNSET_CROSSINGS 41
+#define MOD_MODE_UNSET_SKIPPED_CROSSINGS 42
+#define MOD_MODE_UNSET_SKIPPED_CROSSINGS_BLOCK 43
+#define MOD_MODE_UNSET_SKIPPED_CROSSINGS_BETWEEN_SURVEYS 44
+#define MOD_MODE_INSERT_DISCONTINUITY 45
+#define MOD_MODE_REMOVE_DISCONTINUITY 46
+#define MOD_MODE_MERGE_SURVEYS 47
+#define MOD_MODE_REIMPORT_FILE 48
+#define MOD_MODE_REIMPORT_ALL_FILES 49
+#define MOD_MODE_TRIANGULATE 50
+#define MOD_MODE_TRIANGULATE_SECTION 51
+#define MOD_MODE_UNSET_SHORT_SECTION_TIES 52
+#define MOD_MODE_SKIP_SHORT_SECTION_CROSSINGS 53
+#define MOD_MODE_REMAKE_MB166_FILES 54
+#define MOD_MODE_FIX_SENSORDEPTH 55
 #define IMPORT_NONE 0
 #define IMPORT_TIE 1
 #define IMPORT_GLOBALTIE 2
@@ -133,6 +136,9 @@ static char usage_message[] =
     "\t--set-global-tie-xyz=file:section[:snav]\n"
     "\t--set-global-tie-xyonly=file:section[:snav]\n"
     "\t--set-global-tie-zonly=file:section[:snav]\n"
+    "\t--set-all-global-ties-xyz\n"
+    "\t--set-all-global-ties-xyonly\n"
+    "\t--set-all-global-ties-zonly\n"
     "\t--unset-global-tie=file:section\n"
     "\t--unset-all-global-ties\n"
     "\t--add-crossing=file1:section1/file2:section2\n"
@@ -222,6 +228,9 @@ int main(int argc, char **argv) {
                                     {"set-global-tie-xyz", required_argument, NULL, 0},
                                     {"set-global-tie-xyonly", required_argument, NULL, 0},
                                     {"set-global-tie-zonly", required_argument, NULL, 0},
+                                    {"set-all-global-ties-xyz", no_argument, NULL, 0},
+                                    {"set-all-global-ties-xyonly", no_argument, NULL, 0},
+                                    {"set-all-global-ties-zonly", no_argument, NULL, 0},
                                     {"unset-global-tie", required_argument, NULL, 0},
                                     {"unset-all-global-ties", no_argument, NULL, 0},
                                     {"add-crossing", required_argument, NULL, 0},
@@ -450,7 +459,7 @@ int main(int argc, char **argv) {
           }
         }
         else {
-          fprintf(stderr, "Maximum number of mod commands reached:\n\t--add-crossing=%s command ignored\n\n", optarg);
+          fprintf(stderr, "Maximum number of mod commands reached:\n\t--set-global-tie-xyz=%s command ignored\n\n", optarg);
         }
       }
       else if (strcmp("set-global-tie-xyonly", options[option_index].name) == 0) {
@@ -471,7 +480,7 @@ int main(int argc, char **argv) {
           }
         }
         else {
-          fprintf(stderr, "Maximum number of mod commands reached:\n\t--add-crossing=%s command ignored\n\n", optarg);
+          fprintf(stderr, "Maximum number of mod commands reached:\n\t--set-global-tie-xy=%s command ignored\n\n", optarg);
         }
       }
       else if (strcmp("set-global-tie-zonly", options[option_index].name) == 0) {
@@ -497,6 +506,39 @@ int main(int argc, char **argv) {
       }
 
       /*-------------------------------------------------------
+       * set all global ties mode
+          --set-all-global-ties-xyz
+          --set-all-global-ties-xyonly
+          --set-all-global-ties-zonly */
+      else if (strcmp("set-all-global-ties-xyz", options[option_index].name) == 0) {
+        if (num_mods < NUMBER_MODS_MAX) {
+          mods[num_mods].mode = MOD_MODE_SET_ALL_GLOBAL_TIES_XYZ;
+          num_mods++;
+        }
+        else {
+          fprintf(stderr, "Maximum number of mod commands reached:\n\t--set-all-global-ties-xyz command ignored\n\n");
+        }
+      }
+      else if (strcmp("set-all-global-ties-xyonly", options[option_index].name) == 0) {
+        if (num_mods < NUMBER_MODS_MAX) {
+          mods[num_mods].mode = MOD_MODE_SET_ALL_GLOBAL_TIES_XY;
+          num_mods++;
+        }
+        else {
+          fprintf(stderr, "Maximum number of mod commands reached:\n\t--set-all-global-ties-xyonly command ignored\n\n");
+        }
+      }
+      else if (strcmp("set-all-global-ties-zonly", options[option_index].name) == 0) {
+        if (num_mods < NUMBER_MODS_MAX) {
+          mods[num_mods].mode = MOD_MODE_SET_ALL_GLOBAL_TIES_Z;
+          num_mods++;
+        }
+        else {
+          fprintf(stderr, "Maximum number of mod commands reached:\n\t--set-all-global-ties-zonly command ignored\n\n");
+        }
+      }
+
+      /*-------------------------------------------------------
        * unset global ties
           --unset-global-tie=file:section
           --unset-all-global-ties  */
@@ -508,11 +550,11 @@ int main(int argc, char **argv) {
             num_mods++;
           }
           else {
-            fprintf(stderr, "Failure to parse --set-global-tie-z=%s\n\tmod command ignored\n\n", optarg);
+            fprintf(stderr, "Failure to parse --unset-global-tie-z=%s\n\tmod command ignored\n\n", optarg);
           }
         }
         else {
-          fprintf(stderr, "Maximum number of mod commands reached:\n\t--add-crossing=%s command ignored\n\n", optarg);
+          fprintf(stderr, "Maximum number of mod commands reached:\n\t--set-global-tie=%s command ignored\n\n", optarg);
         }
       }
       else if (strcmp("unset-all-global-ties", options[option_index].name) == 0) {
@@ -521,7 +563,7 @@ int main(int argc, char **argv) {
           num_mods++;
         }
         else {
-          fprintf(stderr, "Maximum number of mod commands reached:\n\tunset-global-tie=%s command ignored\n\n", optarg);
+          fprintf(stderr, "Maximum number of mod commands reached:\n\tunset-all-global-ties command ignored\n\n");
         }
       }
 
@@ -2089,6 +2131,51 @@ int main(int argc, char **argv) {
             section1->globaltie.snav = MBNA_SELECT_NONE;
           }
         }
+      }
+      break;
+
+    case MOD_MODE_SET_ALL_GLOBAL_TIES_XYZ:
+      fprintf(stderr, "\nCommand set-all-global-ties-xyz\n");
+
+      /* set all existing global ties to XYZ */
+      for (int ifile = 0; ifile < project_output.num_files; ifile++) {
+          file = &project_output.files[ifile];
+          for (int isection = 0; isection < file->num_sections; isection++) {
+              section1 = &file->sections[isection];
+              if (section1->globaltie.status != MBNA_TIE_NONE) {
+                  section1->globaltie.status = MBNA_TIE_XYZ;
+              }
+          }
+      }
+      break;
+
+    case MOD_MODE_SET_ALL_GLOBAL_TIES_XY:
+      fprintf(stderr, "\nCommand set-all-global-ties-xyonly\n");
+
+      /* set all existing global ties to XY-only */
+      for (int ifile = 0; ifile < project_output.num_files; ifile++) {
+          file = &project_output.files[ifile];
+          for (int isection = 0; isection < file->num_sections; isection++) {
+              section1 = &file->sections[isection];
+              if (section1->globaltie.status != MBNA_TIE_NONE) {
+                  section1->globaltie.status = MBNA_TIE_XY;
+              }
+          }
+      }
+      break;
+
+    case MOD_MODE_SET_ALL_GLOBAL_TIES_Z:
+      fprintf(stderr, "\nCommand set-all-global-ties-zonly\n");
+
+      /* set all existing global ties to Z-only */
+      for (int ifile = 0; ifile < project_output.num_files; ifile++) {
+          file = &project_output.files[ifile];
+          for (int isection = 0; isection < file->num_sections; isection++) {
+              section1 = &file->sections[isection];
+              if (section1->globaltie.status != MBNA_TIE_NONE) {
+                  section1->globaltie.status = MBNA_TIE_Z;
+              }
+          }
       }
       break;
 

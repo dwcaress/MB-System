@@ -2338,7 +2338,6 @@ int mbview_updatenavlist() {
     				        mbview_colorname[shared.shareddata.navs[inav].color], shared.shareddata.navs[inav].size,
     				        shared.shareddata.navs[inav].name);
     				xstr[nitems] = XmStringCreateLocalized(value_string);
-fprintf(stderr, "%s:%d:%s: Added list item %d for nav: %s\n", __FILE__, __LINE__, __FUNCTION__, nitems, value_string);
     				nitems++;
           }
   			}

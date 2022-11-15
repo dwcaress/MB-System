@@ -585,11 +585,11 @@ void do_update_status() {
     ":t\"Number of True Crossings:               %4d     Selected Crossing:%4d\""
     ":t\"Number of True Crossings Analyzed: %4d     Selected Tie:     %4d\""
     ":t\"Number of Ties Set:                        %4d\""
-    ":t\"Reference Grid:                               %s\""
-    ":t\"Number of Global Ties Set:              %4d\"",
+    ":t\"Number of Global Ties Set:              %4d\""
+    ":t\"Reference Grid: %s\"",
     project.name, project.num_files, mbna_survey_select, project.num_crossings, mbna_file_select,
     project.num_crossings_analyzed, mbna_section_select, project.num_truecrossings, mbna_crossing_select,
-    project.num_truecrossings_analyzed, mbna_tie_select, project.num_ties, refgrid_name, project.num_globalties);
+    project.num_truecrossings_analyzed, mbna_tie_select, project.num_ties, project.num_globalties, refgrid_name);
 
   if (project.inversion_status == MBNA_INVERSION_CURRENT)
     strcat(string, ":t\"Inversion Performed:                     Current\"");
@@ -606,40 +606,32 @@ void do_update_status() {
   set_label_multiline_string(label_status, string);
   if (mbna_verbose > 0) {
     sprintf(string,
-      "Project:               %s\nNumber of Files:         %d\nNumber of "
-      "Crossings Found:   %d\nNumber of Crossings Analyzed:     %d\nNumber of True Crossings:  %d\nNumber "
-      "of True Crossings Analyzed:%d\nNumber of Ties Set:         %d\n",
+      "Project:                           %s\n"
+      "Number of Files:                   %d\n"
+      "Number of Crossings Found:         %d\n"
+      "Number of Crossings Analyzed:      %d\n"
+      "Number of True Crossings:          %d\n"
+      "Number of True Crossings Analyzed: %d\n"
+      "Number of Ties Set:                %d\n"
+      "Number of Global Ties Set:         %d\n"
+      "Reference Grid:                    %s\n",
       project.name, project.num_files, project.num_crossings, project.num_crossings_analyzed, project.num_truecrossings,
-      project.num_truecrossings_analyzed, project.num_ties);
+      project.num_truecrossings_analyzed, project.num_ties, project.num_globalties, refgrid_name);
     if (project.inversion_status == MBNA_INVERSION_CURRENT)
-      strcat(string, "Inversion Performed:        Current\n");
+      strcat(string, "Inversion Performed:               Current\n");
     else if (project.inversion_status == MBNA_INVERSION_OLD)
-      strcat(string, "Inversion Performed:        Out of Date\n");
+      strcat(string, "Inversion Performed:               Out of Date\n");
     else
-      strcat(string, "Inversion Performed:        No\n");
+      strcat(string, "Inversion Performed:               No\n");
     if (project.grid_status == MBNA_GRID_CURRENT)
-      strcat(string, "Topography Grid Status:     Current\n");
+      strcat(string, "Topography Grid Status:            Current\n");
     else if (project.grid_status == MBNA_GRID_OLD)
-      strcat(string, "Topography Grid Status:     Out of Date\n");
+      strcat(string, "Topography Grid Status:            Out of Date\n");
     else
-      strcat(string, "Topography Grid Status:     Not made yet\n");
+      strcat(string, "Topography Grid Status:            Not made yet\n");
     fprintf(stderr, "%s", string);
   }
 
-  // TODO(schwehr): Localize vars
-  XmString *xstr;
-  struct mbna_file *file;
-  struct mbna_file *file2;
-  struct mbna_section *section;
-  struct mbna_crossing *crossing;
-  struct mbna_tie *tie;
-  char status_char;
-  char truecrossing;
-  int iselect, ivalue, imax;
-  int num_surveys, num_blocks, num_files, num_crossings, num_ties, num_globalties, num_sections;
-  double btime_d, etime_d;
-  int btime_i[7], etime_i[7];
-  char *tiestatus;
   char *tiestatus_xyz = "XYZ";
   char *tiestatus_xy = "XY ";
   char *tiestatus_z = "  Z";
@@ -650,10 +642,9 @@ void do_update_status() {
   char *filestatus_fixedxy = "fixedxy";
   char *filestatus_fixedz = "fixedz ";
   char *filestatus_unknown = "unknown";
-  int j, k, kk;
 
   /* set list_data */
-  iselect = MBNA_SELECT_NONE;
+  int iselect = MBNA_SELECT_NONE;
   XmListDeleteAllItems(list_data);
   if (mbna_view_list == MBNA_VIEW_LIST_REFERENCEGRIDS) {
     sprintf(string, "Reference Grids:");
@@ -661,7 +652,7 @@ void do_update_status() {
     if (mbna_verbose > 0)
       fprintf(stderr, "%s\n", string);
     if (project.num_refgrids > 0) {
-      xstr = (XmString *)malloc(project.num_refgrids * sizeof(XmString));
+      XmString *xstr = (XmString *)malloc(project.num_refgrids * sizeof(XmString));
       for (int i = 0; i < project.num_refgrids; i++) {
         xstr[i] = XmStringCreateLocalized(project.refgrid_names[i]);
         if (mbna_verbose > 0)
@@ -683,10 +674,10 @@ void do_update_status() {
       fprintf(stderr, "%s\n", string);
     if (project.num_files > 0) {
       /* count the number of surveys */
-      num_surveys = 0;
-      num_files = 0;
+      int num_surveys = 0;
+      int num_files = 0;
       for (int i = 0; i < project.num_files; i++) {
-        file = &(project.files[i]);
+        struct mbna_file *file = &(project.files[i]);
         if (file->block == num_surveys) {
           num_surveys++;
           num_files = 1;
@@ -694,26 +685,36 @@ void do_update_status() {
         else
           num_files++;
       }
-      xstr = (XmString *)malloc(num_surveys * sizeof(XmString));
+      XmString *xstr = (XmString *)malloc(num_surveys * sizeof(XmString));
 
       /* generate list */
       num_surveys = 0;
       num_files = 0;
+      int num_global_ties = 0;
       for (int i = 0; i < project.num_files; i++) {
-        file = &(project.files[i]);
+        struct mbna_file *file = &(project.files[i]);
 
+        double btime_d = 0.0;
+        double etime_d = 0.0;
         if (i == 0) {
           btime_d = file->sections[0].btime_d;
         }
         if (file->block == num_surveys) {
           /* find end time for this block */
           num_files = 0;
+          num_global_ties = 0;
           btime_d = file->sections[0].etime_d;
           for (int ii = i; ii < project.num_files; ii++) {
-            file2 = &(project.files[ii]);
+            struct mbna_file *file2 = &(project.files[ii]);
             if (file2->block == file->block) {
               etime_d = file2->sections[file2->num_sections - 1].etime_d;
               num_files++;
+              for (int isection=0; isection < file2->num_sections; isection++) {
+                struct mbna_section *section = &file2->sections[isection];
+                if (section->globaltie.status != MBNA_TIE_NONE) {
+                  num_global_ties++;
+                }
+              }
             }
           }
 
@@ -730,13 +731,14 @@ void do_update_status() {
             filestatus = filestatus_fixedz;
           else
             filestatus = filestatus_unknown;
+          int btime_i[7], etime_i[7];
           mb_get_date(mbna_verbose, btime_d, btime_i);
           mb_get_date(mbna_verbose, etime_d, etime_i);
           sprintf(string,
-            "%2.2d %2.2d %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d %s",
+            "%3d %3d %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d %s g-ties:%d",
             num_surveys, num_files, btime_i[0], btime_i[1], btime_i[2], btime_i[3], btime_i[4], btime_i[5],
             btime_i[6], etime_i[0], etime_i[1], etime_i[2], etime_i[3], etime_i[4], etime_i[5], etime_i[6],
-            filestatus);
+            filestatus, num_global_ties);
           xstr[num_surveys] = XmStringCreateLocalized(string);
           if (mbna_verbose > 0)
             fprintf(stderr, "%s\n", string);
@@ -763,8 +765,8 @@ void do_update_status() {
       fprintf(stderr, "%s\n", string);
     if (project.num_files > 0) {
       /* calculate the number of blocks */
-      num_blocks = project.num_surveys + (project.num_surveys * (project.num_surveys - 1) / 2);
-      xstr = (XmString *)malloc(num_blocks * sizeof(XmString));
+      int num_blocks = project.num_surveys + (project.num_surveys * (project.num_surveys - 1) / 2);
+      XmString *xstr = (XmString *)malloc(num_blocks * sizeof(XmString));
       int *survey1 = (int *)malloc(num_blocks * sizeof(int));
       int *survey2 = (int *)malloc(num_blocks * sizeof(int));
       int *n_tcrossing = (int *)malloc(num_blocks * sizeof(int));
@@ -788,8 +790,8 @@ void do_update_status() {
         }
       }
       /* generate list */
-      for (k = 0; k < project.num_crossings; k++) {
-        crossing = &project.crossings[k];
+      for (int k = 0; k < project.num_crossings; k++) {
+        struct mbna_crossing *crossing = &project.crossings[k];
         int iblock = project.files[crossing->file_id_1].block
                + (project.files[crossing->file_id_2].block * (project.files[crossing->file_id_2].block + 1) / 2);
         if (crossing->truecrossing)
@@ -875,9 +877,9 @@ void do_update_status() {
       fprintf(stderr, "%s\n", string);
     if (project.num_files > 0) {
       /* count files */
-      num_files = 0;
+      int num_files = 0;
       for (int i = 0; i < project.num_files; i++) {
-        file = &(project.files[i]);
+        struct mbna_file *file = &(project.files[i]);
         if ((mbna_view_mode == MBNA_VIEW_MODE_ALL) ||
             (mbna_view_mode == MBNA_VIEW_MODE_SURVEY && mbna_survey_select == file->block) ||
             (mbna_view_mode == MBNA_VIEW_MODE_FILE) ||
@@ -885,13 +887,13 @@ void do_update_status() {
             (mbna_view_mode == MBNA_VIEW_MODE_WITHFILE) || (mbna_view_mode == MBNA_VIEW_MODE_WITHSECTION))
           num_files++;
       }
-      xstr = (XmString *)malloc(num_files * sizeof(XmString));
+      XmString *xstr = (XmString *)malloc(num_files * sizeof(XmString));
 
       /* generate list */
       num_files = 0;
       iselect = MBNA_SELECT_NONE;
       for (int i = 0; i < project.num_files; i++) {
-        file = &(project.files[i]);
+        struct mbna_file *file = &(project.files[i]);
         if ((mbna_view_mode == MBNA_VIEW_MODE_ALL) ||
             (mbna_view_mode == MBNA_VIEW_MODE_SURVEY && mbna_survey_select == file->block) ||
             (mbna_view_mode == MBNA_VIEW_MODE_FILE) ||
@@ -909,8 +911,15 @@ void do_update_status() {
             filestatus = filestatus_fixedz;
           else
             filestatus = filestatus_unknown;
-          sprintf(string, "%4.4d:%2.2d %s %4d %4.1f %4.1f %s", file->id, file->block, filestatus, file->num_sections,
-            file->heading_bias, file->roll_bias, file->file);
+          int num_global_ties = 0;
+          for (int isection=0; isection < file->num_sections; isection++) {
+            struct mbna_section *section = &file->sections[isection];
+            if (section->globaltie.status != MBNA_TIE_NONE) {
+              num_global_ties++;
+            }
+          }
+          sprintf(string, "%4.4d:%2.2d %s %4d %4.1f %4.1f g-ties:%d  %s", file->id, file->block, filestatus, file->num_sections,
+            file->heading_bias, file->roll_bias, num_global_ties, file->file);
           xstr[num_files] = XmStringCreateLocalized(string);
           if (mbna_verbose > 0)
             fprintf(stderr, "%s\n", string);
@@ -952,11 +961,11 @@ void do_update_status() {
       fprintf(stderr, "%s\n", string);
     if (project.num_files > 0) {
       /* count sections */
-      num_sections = 0;
+      int num_sections = 0;
       for (int i = 0; i < project.num_files; i++) {
-        file = &(project.files[i]);
-        for (j = 0; j < file->num_sections; j++) {
-          section = &(file->sections[j]);
+        struct mbna_file *file = &(project.files[i]);
+        for (int j = 0; j < file->num_sections; j++) {
+          struct mbna_section *section = &(file->sections[j]);
           if ((mbna_view_mode == MBNA_VIEW_MODE_ALL) ||
               (mbna_view_mode == MBNA_VIEW_MODE_SURVEY && mbna_survey_select == file->block) ||
               (mbna_view_mode == MBNA_VIEW_MODE_FILE && mbna_file_select == i) ||
@@ -967,21 +976,22 @@ void do_update_status() {
           }
         }
       }
-      xstr = (XmString *)malloc(num_sections * sizeof(XmString));
+      XmString *xstr = (XmString *)malloc(num_sections * sizeof(XmString));
 
       /* generate list */
       num_sections = 0;
       iselect = MBNA_SELECT_NONE;
       for (int i = 0; i < project.num_files; i++) {
-        file = &(project.files[i]);
-        for (j = 0; j < file->num_sections; j++) {
-          section = &(file->sections[j]);
+        struct mbna_file *file = &(project.files[i]);
+        for (int j = 0; j < file->num_sections; j++) {
+          struct mbna_section *section = &(file->sections[j]);
           if ((mbna_view_mode == MBNA_VIEW_MODE_ALL) ||
               (mbna_view_mode == MBNA_VIEW_MODE_SURVEY && mbna_survey_select == file->block) ||
               (mbna_view_mode == MBNA_VIEW_MODE_FILE && mbna_file_select == i) ||
               (mbna_view_mode == MBNA_VIEW_MODE_WITHSURVEY && mbna_survey_select == file->block) ||
               (mbna_view_mode == MBNA_VIEW_MODE_WITHFILE && mbna_file_select == i) ||
               (mbna_view_mode == MBNA_VIEW_MODE_WITHSECTION && mbna_file_select == i)) {
+            int btime_i[7], etime_i[7];
             mb_get_date(mbna_verbose, section->btime_d, btime_i);
             mb_get_date(mbna_verbose, section->etime_d, etime_i);
             char status_char;
@@ -998,6 +1008,7 @@ void do_update_status() {
                 status_char, file->block, file->id, j, btime_i[0], btime_i[1], btime_i[2], btime_i[3], btime_i[4], btime_i[5],
                 btime_i[6], etime_i[0], etime_i[1], etime_i[2], etime_i[3], etime_i[4], etime_i[5], etime_i[6]);
             else {
+              char *tiestatus = NULL;
               if (section->globaltie.status == MBNA_TIE_XYZ)
                 tiestatus = tiestatus_xyz;
               else if (section->globaltie.status == MBNA_TIE_XY)
@@ -1081,19 +1092,21 @@ void do_update_status() {
       fprintf(stderr, "%s\n", string);
     if (project.num_files > 0) {
       /* count crossings */
-      num_crossings = 0;
+      int num_crossings = 0;
       for (int i = 0; i < project.num_crossings; i++) {
         if (do_check_crossing_listok(i))
           num_crossings++;
       }
-      xstr = (XmString *)malloc(num_crossings * sizeof(XmString));
+      XmString *xstr = (XmString *)malloc(num_crossings * sizeof(XmString));
 
       /* generate list */
       num_crossings = 0;
       iselect = MBNA_SELECT_NONE;
       for (int i = 0; i < project.num_crossings; i++) {
         if (do_check_crossing_listok(i)) {
-          crossing = &(project.crossings[i]);
+          struct mbna_crossing *crossing = &(project.crossings[i]);
+          char status_char = '-';
+          char truecrossing = ' ';
           if (crossing->status == MBNA_CROSSING_STATUS_NONE)
             status_char = 'U';
           else if (crossing->status == MBNA_CROSSING_STATUS_SET)
@@ -1150,19 +1163,21 @@ void do_update_status() {
       fprintf(stderr, "%s\n", string);
     if (project.num_files > 0) {
       /* count crossings */
-      num_crossings = 0;
+      int num_crossings = 0;
       for (int i = 0; i < project.num_crossings; i++) {
         if (do_check_crossing_listok(i))
           num_crossings++;
       }
-      xstr = (XmString *)malloc(num_crossings * sizeof(XmString));
+      XmString *xstr = (XmString *)malloc(num_crossings * sizeof(XmString));
 
       /* generate list */
       num_crossings = 0;
       iselect = MBNA_SELECT_NONE;
       for (int i = 0; i < project.num_crossings; i++) {
         if (do_check_crossing_listok(i)) {
-          crossing = &(project.crossings[i]);
+          struct mbna_crossing *crossing = &(project.crossings[i]);
+          char status_char = '-';
+          char truecrossing = ' ';
           if (crossing->status == MBNA_CROSSING_STATUS_NONE)
             status_char = 'U';
           else if (crossing->status == MBNA_CROSSING_STATUS_SET)
@@ -1219,19 +1234,21 @@ void do_update_status() {
       fprintf(stderr, "%s\n", string);
     if (project.num_files > 0) {
       /* count crossings */
-      num_crossings = 0;
+      int num_crossings = 0;
       for (int i = 0; i < project.num_crossings; i++) {
         if (do_check_crossing_listok(i))
           num_crossings++;
       }
-      xstr = (XmString *)malloc(num_crossings * sizeof(XmString));
+      XmString *xstr = (XmString *)malloc(num_crossings * sizeof(XmString));
 
       /* generate list */
       num_crossings = 0;
       iselect = MBNA_SELECT_NONE;
       for (int i = 0; i < project.num_crossings; i++) {
         if (do_check_crossing_listok(i)) {
-          crossing = &(project.crossings[i]);
+          struct mbna_crossing *crossing = &(project.crossings[i]);
+          char status_char = '-';
+          char truecrossing = ' ';
           if (crossing->status == MBNA_CROSSING_STATUS_NONE)
             status_char = 'U';
           else if (crossing->status == MBNA_CROSSING_STATUS_SET)
@@ -1288,19 +1305,21 @@ void do_update_status() {
       fprintf(stderr, "%s\n", string);
     if (project.num_files > 0) {
       /* count crossings */
-      num_crossings = 0;
+      int num_crossings = 0;
       for (int i = 0; i < project.num_crossings; i++) {
         if (do_check_crossing_listok(i))
           num_crossings++;
       }
-      xstr = (XmString *)malloc(num_crossings * sizeof(XmString));
+      XmString *xstr = (XmString *)malloc(num_crossings * sizeof(XmString));
 
       /* generate list */
       num_crossings = 0;
       iselect = MBNA_SELECT_NONE;
       for (int i = 0; i < project.num_crossings; i++) {
         if (do_check_crossing_listok(i)) {
-          crossing = &(project.crossings[i]);
+          struct mbna_crossing *crossing = &(project.crossings[i]);
+          char status_char = '-';
+          char truecrossing = ' ';
           if (crossing->status == MBNA_CROSSING_STATUS_NONE)
             status_char = 'U';
           else if (crossing->status == MBNA_CROSSING_STATUS_SET)
@@ -1356,19 +1375,21 @@ void do_update_status() {
       fprintf(stderr, "%s\n", string);
     if (project.num_files > 0) {
       /* count crossings */
-      num_crossings = 0;
+      int num_crossings = 0;
       for (int i = 0; i < project.num_crossings; i++) {
         if (do_check_crossing_listok(i))
           num_crossings++;
       }
-      xstr = (XmString *)malloc(num_crossings * sizeof(XmString));
+      XmString *xstr = (XmString *)malloc(num_crossings * sizeof(XmString));
 
       /* generate list */
       num_crossings = 0;
       iselect = MBNA_SELECT_NONE;
       for (int i = 0; i < project.num_crossings; i++) {
         if (do_check_crossing_listok(i)) {
-          crossing = &(project.crossings[i]);
+          struct mbna_crossing *crossing = &(project.crossings[i]);
+          char status_char = '-';
+          char truecrossing = ' ';
           if (crossing->status == MBNA_CROSSING_STATUS_NONE)
             status_char = 'U';
           else if (crossing->status == MBNA_CROSSING_STATUS_SET)
@@ -1424,30 +1445,31 @@ void do_update_status() {
       fprintf(stderr, "%s\n", string);
     if (project.num_files > 0) {
       /* count crossing ties and global ties */
-      num_ties = 0;
+      int num_ties = 0;
 
       /* count crossing ties */
       for (int i = 0; i < project.num_crossings; i++) {
         if (do_check_crossing_listok(i)) {
-          crossing = &(project.crossings[i]);
+          struct mbna_crossing *crossing = &(project.crossings[i]);
           num_ties += crossing->num_ties;
         }
       }
 
       /* allocate strings for list */
-      xstr = (XmString *)malloc(num_ties * sizeof(XmString));
+      XmString *xstr = (XmString *)malloc(num_ties * sizeof(XmString));
 
       /* generate list */
-      num_crossings = 0;
+      int num_crossings = 0;
       num_ties = 0;
       iselect = MBNA_SELECT_NONE;
 
       /* list crossing ties */
       for (int i = 0; i < project.num_crossings; i++) {
         if (do_check_crossing_listok(i)) {
-          crossing = &(project.crossings[i]);
-          for (j = 0; j < crossing->num_ties; j++) {
-            tie = (struct mbna_tie *)&crossing->ties[j];
+          struct mbna_crossing *crossing = &(project.crossings[i]);
+          for (int j = 0; j < crossing->num_ties; j++) {
+            struct mbna_tie *tie = (struct mbna_tie *)&crossing->ties[j];
+            char *tiestatus = NULL;
             if (tie->status == MBNA_TIE_XYZ)
               tiestatus = tiestatus_xyz;
             else if (tie->status == MBNA_TIE_XY)
@@ -1497,7 +1519,7 @@ void do_update_status() {
       }
 
       XmListAddItems(list_data, xstr, num_ties, 0);
-      for (k = 0; k < num_ties; k++) {
+      for (int k = 0; k < num_ties; k++) {
         XmStringFree(xstr[k]);
       }
       free(xstr);
@@ -1529,16 +1551,16 @@ void do_update_status() {
       fprintf(stderr, "%s\n", string);
     if (project.num_files > 0) {
       /* count crossing ties */
-      num_ties = 0;
+      int num_ties = 0;
       for (int icrossing = 0; icrossing < project.num_crossings; icrossing++) {
         if (do_check_crossing_listok(icrossing)) {
-          crossing = &(project.crossings[icrossing]);
+          struct mbna_crossing *crossing = &(project.crossings[icrossing]);
           num_ties += crossing->num_ties;
         }
       }
 
       /* allocate strings for list */
-      xstr = (XmString *)malloc(num_ties * sizeof(XmString));
+      XmString *xstr = (XmString *)malloc(num_ties * sizeof(XmString));
 
       /* allocate array of tie pointers for list to be sorted */
       struct mbna_tie **tie_ptr_list = NULL;
@@ -1548,7 +1570,7 @@ void do_update_status() {
       num_ties = 0;
       for (int icrossing = 0; icrossing < project.num_crossings; icrossing++) {
         if (do_check_crossing_listok(icrossing)) {
-          crossing = &(project.crossings[icrossing]);
+          struct mbna_crossing *crossing = &(project.crossings[icrossing]);
           for (int itie = 0; itie < crossing->num_ties; itie++) {
             struct mbna_tie *tie = &crossing->ties[itie];
             tie->icrossing = icrossing;
@@ -1564,12 +1586,13 @@ void do_update_status() {
 
       /* generate list */
       iselect = MBNA_SELECT_NONE;
-      kk = 0;
+      int kk = 0;
       for (int ktie  = num_ties - 1; ktie >= 0; ktie--) {
         struct mbna_tie *tie = tie_ptr_list[ktie];
         if (do_check_crossing_listok(tie->icrossing)) {
-          crossing = &(project.crossings[tie->icrossing]);
+          struct mbna_crossing *crossing = &(project.crossings[tie->icrossing]);
           tie = (struct mbna_tie *)&crossing->ties[tie->itie];
+          char *tiestatus = NULL;
           if (tie->status == MBNA_TIE_XYZ)
             tiestatus = tiestatus_xyz;
           else if (tie->status == MBNA_TIE_XY)
@@ -1649,13 +1672,13 @@ void do_update_status() {
       fprintf(stderr, "%s\n", string);
     if (project.num_files > 0) {
       /* count global ties */
-      num_globalties = 0;
+      int num_globalties = 0;
 
       /* count global ties */
       for (int i = 0; i < project.num_files; i++) {
-        file = &(project.files[i]);
-        for (j = 0; j < file->num_sections; j++) {
-          section = &(file->sections[j]);
+        struct mbna_file *file = &(project.files[i]);
+        for (int j = 0; j < file->num_sections; j++) {
+          struct mbna_section *section = &(file->sections[j]);
           if (section->status == MBNA_CROSSING_STATUS_SET &&
               ((mbna_view_mode == MBNA_VIEW_MODE_ALL) ||
                (mbna_view_mode == MBNA_VIEW_MODE_SURVEY && mbna_survey_select == file->block) ||
@@ -1669,7 +1692,7 @@ void do_update_status() {
       }
 
       /* allocate strings for list */
-      xstr = (XmString *)malloc(num_globalties * sizeof(XmString));
+      XmString *xstr = (XmString *)malloc(num_globalties * sizeof(XmString));
 
       /* generate list */
       num_globalties = 0;
@@ -1677,9 +1700,9 @@ void do_update_status() {
 
       /* list global ties */
       for (int i = 0; i < project.num_files; i++) {
-        file = &(project.files[i]);
-        for (j = 0; j < file->num_sections; j++) {
-          section = &(file->sections[j]);
+        struct mbna_file *file = &(project.files[i]);
+        for (int j = 0; j < file->num_sections; j++) {
+          struct mbna_section *section = &(file->sections[j]);
           if (section->status == MBNA_CROSSING_STATUS_SET &&
               ((mbna_view_mode == MBNA_VIEW_MODE_ALL) ||
                (mbna_view_mode == MBNA_VIEW_MODE_SURVEY && mbna_survey_select == file->block) ||
@@ -1687,6 +1710,7 @@ void do_update_status() {
                (mbna_view_mode == MBNA_VIEW_MODE_WITHSURVEY && mbna_survey_select == file->block) ||
                (mbna_view_mode == MBNA_VIEW_MODE_WITHFILE && mbna_file_select == i) ||
                (mbna_view_mode == MBNA_VIEW_MODE_WITHSECTION && mbna_file_select == i && mbna_section_select == j))) {
+            char *tiestatus = NULL;
             if (section->globaltie.status == MBNA_TIE_XYZ)
               tiestatus = tiestatus_xyz;
             else if (section->globaltie.status == MBNA_TIE_XY)
@@ -1726,7 +1750,7 @@ void do_update_status() {
       }
 
       XmListAddItems(list_data, xstr, num_globalties, 0);
-      for (k = 0; k < num_globalties; k++) {
+      for (int k = 0; k < num_globalties; k++) {
         XmStringFree(xstr[k]);
       }
       free(xstr);
@@ -1759,11 +1783,11 @@ void do_update_status() {
     if (project.num_files > 0) {
 
       /* count global ties */
-      num_globalties = 0;
+      int num_globalties = 0;
       for (int i = 0; i < project.num_files; i++) {
-        file = &(project.files[i]);
-        for (j = 0; j < file->num_sections; j++) {
-          section = &(file->sections[j]);
+        struct mbna_file *file = &(project.files[i]);
+        for (int j = 0; j < file->num_sections; j++) {
+          struct mbna_section *section = &(file->sections[j]);
           if (section->status == MBNA_CROSSING_STATUS_SET &&
               ((mbna_view_mode == MBNA_VIEW_MODE_ALL) ||
                (mbna_view_mode == MBNA_VIEW_MODE_SURVEY && mbna_survey_select == file->block) ||
@@ -1777,7 +1801,7 @@ void do_update_status() {
       }
 
       /* allocate strings for list */
-      xstr = (XmString *)malloc(num_globalties * sizeof(XmString));
+      XmString *xstr = (XmString *)malloc(num_globalties * sizeof(XmString));
 
       /* allocate array of section pointers for list to be sorted */
       struct mbna_section **section_ptr_list = NULL;
@@ -1786,9 +1810,9 @@ void do_update_status() {
       /* get list of global ties */
       num_globalties = 0;
       for (int i = 0; i < project.num_files; i++) {
-        file = &(project.files[i]);
-        for (j = 0; j < file->num_sections; j++) {
-          section = &(file->sections[j]);
+        struct mbna_file *file = &(project.files[i]);
+        for (int j = 0; j < file->num_sections; j++) {
+          struct mbna_section *section = &(file->sections[j]);
           if (section->status == MBNA_CROSSING_STATUS_SET &&
               ((mbna_view_mode == MBNA_VIEW_MODE_ALL) ||
                (mbna_view_mode == MBNA_VIEW_MODE_SURVEY && mbna_survey_select == file->block) ||
@@ -1807,9 +1831,10 @@ void do_update_status() {
 
       /* generate list */
       iselect = MBNA_SELECT_NONE;
-      kk = 0;
+      int kk = 0;
       for (int kglobaltie  = num_globalties - 1; kglobaltie >= 0; kglobaltie--) {
-        section = section_ptr_list[kglobaltie];
+        struct mbna_section *section = section_ptr_list[kglobaltie];
+        char *tiestatus = NULL;
         if (section->globaltie.status == MBNA_TIE_XYZ)
           tiestatus = tiestatus_xyz;
         else if (section->globaltie.status == MBNA_TIE_XY)
@@ -2192,8 +2217,8 @@ void do_update_status() {
   XtVaSetValues(scale_controls_decimation, XmNvalue, project.decimation, NULL);
 
   /* set values of section length slider */
-  ivalue = (int)(100 * project.section_length);
-  imax = (int)(100 * 50.0);
+  int ivalue = (int)(100 * project.section_length);
+  int imax = (int)(100 * 50.0);
   XtVaSetValues(scale_controls_sectionlength, XmNminimum, 1, XmNmaximum, imax, XmNdecimalPoints, 2, XmNvalue, ivalue, NULL);
 
   /* set values of section soundings slider */
@@ -6131,37 +6156,19 @@ void do_picknav_notify(size_t instance) {
 
   /* get shared data */
   int status = mbview_getsharedptr(mbna_verbose, &shareddata, &error);
-
-  /* if any navigation selected then unselect and unload any selected crossing */
-  if (shareddata->nav_selected_mbnavadjust[0] != MBV_SELECT_NONE) {
-    /* unload currently loaded crossing */
-    fprintf(stderr,"Need to unload current crossing: mbna_naverr_mode:%d mbna_current_crossing:%d mbna_current_tie:%d\n",
-      mbna_naverr_mode, mbna_current_crossing, mbna_current_tie);
-
-    if (mbna_naverr_mode != MBNA_NAVERR_MODE_UNLOADED) {
-      /* unload crossing, remove naverr window */
-      do_naverr_dismiss(NULL, NULL, NULL);
-      BxUnmanageCB(pushButton_naverr_dismiss, (XtPointer) "bulletinBoard_biases", NULL);
-      BxUnmanageCB(pushButton_naverr_dismiss, (XtPointer) "bulletinBoard_naverr", NULL);
-
-      /* remove second nav pick that was associated with previous crossing */
-      shareddata->nav_selected_mbnavadjust[1] = MBV_SELECT_NONE;
-      shareddata->nav_selected[1] = MBV_SELECT_NONE;
-      mbna_current_crossing = MBV_SELECT_NONE;
-      mbna_current_tie = MBV_SELECT_NONE;
-    }
-    fprintf(stderr,"Crossing should be unloaded: mbna_naverr_mode:%d mbna_current_crossing:%d mbna_current_tie:%d\n",
-      mbna_naverr_mode, mbna_current_crossing, mbna_current_tie);
-  }
-
-  shareddata->nav_selected_mbnavadjust[0] = shareddata->nav_selected[0];
-  shareddata->nav_selected_mbnavadjust[1] = shareddata->nav_selected[1];
+//fprintf(stderr, "*********************\n%s:%d:%s: mbna_naverr_mode: %d  Picks Prior: %d %d     New: %d %d\n",
+//__FILE__, __LINE__, __FUNCTION__, mbna_naverr_mode,
+//shareddata->nav_selected_mbnavadjust[0], shareddata->nav_selected_mbnavadjust[1],
+//shareddata->nav_selected[0], shareddata->nav_selected[1]);
 
   /* if set to look at global ties then translate selected navigation to
      single section and open that in naverr with reference grid */
   if (mbna_view_list == MBNA_VIEW_LIST_FILESECTIONS
       || mbna_view_list == MBNA_VIEW_LIST_GLOBALTIES
       || mbna_view_list == MBNA_VIEW_LIST_GLOBALTIESSORTED) {
+
+    shareddata->nav_selected_mbnavadjust[0] = shareddata->nav_selected[0];
+    shareddata->nav_selected_mbnavadjust[1] = shareddata->nav_selected[1];
     if (shareddata->nav_selected_mbnavadjust[0] != MBV_SELECT_NONE) {
       struct mbview_nav_struct *nav1 =
         (struct mbview_nav_struct *)&shareddata->navs[shareddata->nav_selected_mbnavadjust[0]];
@@ -6175,8 +6182,8 @@ void do_picknav_notify(size_t instance) {
       mbna_survey_select = project.files[mbna_file_select].block;
       mbna_file_id_2 = ifile1;
       mbna_section_2 = isection1;
-      fprintf(stderr,"do_picknav_notify: nav1->name:%s mbna_naverr_mode:%d mbna_current_file:%d mbna_current_section:%d\n",
-      nav1->name, mbna_naverr_mode, mbna_current_file, mbna_current_section);
+//fprintf(stderr, "%s:%d:%s: nav1->name:%s mbna_naverr_mode:%d mbna_current_file:%d mbna_current_section:%d\n",
+//__FILE__, __LINE__, __FUNCTION__, nav1->name, mbna_naverr_mode, mbna_current_file, mbna_current_section);
 
       /* bring up naverr window if required */
       if (mbna_current_section != MBV_SELECT_NONE && mbna_naverr_mode == MBNA_NAVERR_MODE_UNLOADED) {
@@ -6185,6 +6192,7 @@ void do_picknav_notify(size_t instance) {
 
       /* or replot the existing window */
       else if (mbna_current_section != MBV_SELECT_NONE) {
+        mbnavadjust_naverr_specific_section(mbna_file_select, mbna_section_select);
         mbnavadjust_naverr_plot(MBNA_PLOT_MODE_FIRST);
         do_naverr_update();
         do_update_status();
@@ -6198,39 +6206,43 @@ void do_picknav_notify(size_t instance) {
     }
   }
 
-  /* else get selected navigation and translate to selected crossing */
-  else if (shareddata->nav_selected_mbnavadjust[0] != MBV_SELECT_NONE &&
-     shareddata->nav_selected_mbnavadjust[1] != MBV_SELECT_NONE) {
-    struct mbview_nav_struct *nav1 =
-      (struct mbview_nav_struct *)&shareddata->navs[shareddata->nav_selected_mbnavadjust[0]];
-    struct mbview_nav_struct *nav2 =
-      (struct mbview_nav_struct *)&shareddata->navs[shareddata->nav_selected_mbnavadjust[1]];
-    int ifile1;
-    int isection1;
-    int ifile2;
-    int isection2;
-    sscanf(nav1->name, "%d:%d", &ifile1, &isection1);
-    sscanf(nav2->name, "%d:%d", &ifile2, &isection2);
-    fprintf(stderr,"do_picknav_notify: nav1->name:%s   nav2->name:%s\n",nav1->name,nav2->name);
-    status = mbnavadjust_visualization_selectcrossingfromnav(ifile1, isection1, ifile2, isection2);
+  /* else if set to look at crossings get selected navigation and translate to selected crossing */
+  else {
 
-    /* bring up naverr window if required */
-    if (mbna_current_crossing != MBV_SELECT_NONE && mbna_naverr_mode == MBNA_NAVERR_MODE_UNLOADED) {
-      do_naverr_init(MBNA_NAVERR_MODE_CROSSING);
-    }
+    shareddata->nav_selected_mbnavadjust[0] = shareddata->nav_selected[0];
+    shareddata->nav_selected_mbnavadjust[1] = shareddata->nav_selected[1];
+    if (shareddata->nav_selected_mbnavadjust[0] != MBV_SELECT_NONE &&
+       shareddata->nav_selected_mbnavadjust[1] != MBV_SELECT_NONE) {
+      struct mbview_nav_struct *nav1 =
+        (struct mbview_nav_struct *)&shareddata->navs[shareddata->nav_selected_mbnavadjust[0]];
+      struct mbview_nav_struct *nav2 =
+        (struct mbview_nav_struct *)&shareddata->navs[shareddata->nav_selected_mbnavadjust[1]];
+      int ifile1;
+      int isection1;
+      int ifile2;
+      int isection2;
+      sscanf(nav1->name, "%d:%d", &ifile1, &isection1);
+      sscanf(nav2->name, "%d:%d", &ifile2, &isection2);
+      status = mbnavadjust_visualization_selectcrossingfromnav(ifile1, isection1, ifile2, isection2);
 
-    /* or replot the existing window */
-    else if (mbna_current_crossing != MBV_SELECT_NONE) {
-      mbnavadjust_naverr_plot(MBNA_PLOT_MODE_FIRST);
-      do_naverr_update();
-      do_update_status();
+      /* bring up naverr window if required */
+      if (mbna_current_crossing != MBV_SELECT_NONE && mbna_naverr_mode == MBNA_NAVERR_MODE_UNLOADED) {
+        do_naverr_init(MBNA_NAVERR_MODE_CROSSING);
+      }
+
+      /* or replot the existing window */
+      else if (mbna_current_crossing != MBV_SELECT_NONE) {
+        mbnavadjust_naverr_plot(MBNA_PLOT_MODE_FIRST);
+        do_naverr_update();
+        do_update_status();
+      }
+      if (project.modelplot) {
+        do_update_modelplot_status();
+        mbnavadjust_modelplot_plot(__FILE__, __LINE__);
+      }
+      if (project.visualization_status)
+        do_update_visualization_status();
     }
-    if (project.modelplot) {
-      do_update_modelplot_status();
-      mbnavadjust_modelplot_plot(__FILE__, __LINE__);
-    }
-    if (project.visualization_status)
-      do_update_visualization_status();
   }
 
   if (mbna_verbose > 0)
