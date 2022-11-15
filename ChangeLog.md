@@ -426,10 +426,13 @@ or beta, are equally accessible as tarballs through the Github interface.
 
 #### 5.7.9beta47 (November 15, 2022)
 
-Mbnavadjust: Added ability to import and use multiple reference grids for picking
-global ties of individual swath data sections.
+Mbnavadjust: Individual survey grids are now sized to the region of those
+surveys rather than the entire project. When the individual surveys are
+visualized, only the navigation for that survey are loaded into the mbview
+2D/3D map instance. Also fixed picking of section navigation in both crossing
+and section (vs reference grid) modes.
 
-Mbnavadjustmerge: Added options set the mode (XYZ vs XY vs Z) of all global ties.ll
+Mbnavadjustmerge: Added options set the mode (XYZ vs XY vs Z) of all global ties.
 
 #### 5.7.9beta46 (November 11, 2022)
 
