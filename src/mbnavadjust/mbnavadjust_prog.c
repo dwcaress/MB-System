@@ -1130,23 +1130,57 @@ int mbnavadjust_set_tie_xyz() {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
   }
 
-  /* set selected file's block to good nav */
-  if (project.open && project.num_files > 0 && mbna_crossing_select >= 0 && mbna_tie_select >= 0) {
-    /* set tie to fix xyz */
-    struct mbna_crossing *crossing = &(project.crossings[mbna_crossing_select]);
-    struct mbna_tie *tie = (struct mbna_tie *)&crossing->ties[mbna_tie_select];
-    tie->status = MBNA_TIE_XYZ;
-    fprintf(stderr, "Set crossing %d tie %d to fix XYZ\n", mbna_crossing_select, mbna_tie_select);
-    if (project.inversion_status == MBNA_INVERSION_CURRENT)
-      project.inversion_status = MBNA_INVERSION_OLD;
+  if (project.open && project.num_files > 0) {
 
-    /* write out updated project */
-    mbnavadjust_write_project(mbna_verbose, &project, __FILE__, __LINE__, __FUNCTION__, &error);
-    project.save_count = 0;
+    bool status_change = false;
 
-    /* add info text */
-    sprintf(message, "Set crossing %d tie %d to fix XYZ\n", mbna_crossing_select, mbna_tie_select);
-    do_info_add(message, true);
+    /* deal with global tie case */
+    if (mbna_view_list == MBNA_VIEW_LIST_FILESECTIONS
+        || mbna_view_list == MBNA_VIEW_LIST_GLOBALTIES
+        || mbna_view_list == MBNA_VIEW_LIST_GLOBALTIESSORTED) {
+      if (mbna_file_select != MBNA_SELECT_NONE
+        && mbna_section_select != MBNA_SELECT_NONE) {
+        struct mbna_file *file = &project.files[mbna_file_select];
+        struct mbna_section *section = &file->sections[mbna_section_select];
+        if (section->globaltie.status != MBNA_TIE_NONE
+            && section->globaltie.status != MBNA_TIE_XYZ) {
+          section->globaltie.status = MBNA_TIE_XYZ;
+          status_change = true;
+
+          /* add info text */
+          sprintf(message, "Set global tie file %d section %d  to fix XYZ\n", mbna_file_select, mbna_section_select);
+          do_info_add(message, true);
+          fprintf(stderr, "Set global tie file %d section %d to fix XYZ\n", mbna_file_select, mbna_section_select);
+        }
+      }
+    }
+
+    /* deal with crossing tie case */
+    else {
+      /* set selected file's block to good nav */
+      if (mbna_crossing_select >= 0 && mbna_tie_select >= 0) {
+        struct mbna_crossing *crossing = &(project.crossings[mbna_crossing_select]);
+        struct mbna_tie *tie = (struct mbna_tie *)&crossing->ties[mbna_tie_select];
+        if (tie->status != MBNA_TIE_NONE && tie->status != MBNA_TIE_XYZ) {
+          tie->status = MBNA_TIE_XYZ;
+          status_change = true;
+
+          /* add info text */
+          sprintf(message, "Set crossing %d tie %d to fix XYZ\n", mbna_crossing_select, mbna_tie_select);
+          do_info_add(message, true);
+          fprintf(stderr, "Set crossing %d tie %d to fix XYZ\n", mbna_crossing_select, mbna_tie_select);
+        }
+      }
+    }
+
+    if (status_change) {
+      if (project.inversion_status == MBNA_INVERSION_CURRENT)
+        project.inversion_status = MBNA_INVERSION_OLD;
+
+      /* write out updated project */
+      mbnavadjust_write_project(mbna_verbose, &project, __FILE__, __LINE__, __FUNCTION__, &error);
+      project.save_count = 0;
+    }
   }
 
   const int status = MB_SUCCESS;
@@ -1168,23 +1202,57 @@ int mbnavadjust_set_tie_xy() {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
   }
 
-  /* set selected file's block to good nav */
-  if (project.open && project.num_files > 0 && mbna_crossing_select >= 0 && mbna_tie_select >= 0) {
-    /* set tie to fix xy */
-    struct mbna_crossing *crossing = &(project.crossings[mbna_crossing_select]);
-    struct mbna_tie *tie = (struct mbna_tie *)&crossing->ties[mbna_tie_select];
-    tie->status = MBNA_TIE_XY;
-    fprintf(stderr, "Set crossing %d tie %d to fix XY\n", mbna_crossing_select, mbna_tie_select);
-    if (project.inversion_status == MBNA_INVERSION_CURRENT)
-      project.inversion_status = MBNA_INVERSION_OLD;
+  if (project.open && project.num_files > 0) {
 
-    /* write out updated project */
-    mbnavadjust_write_project(mbna_verbose, &project, __FILE__, __LINE__, __FUNCTION__, &error);
-    project.save_count = 0;
+    bool status_change = false;
 
-    /* add info text */
-    sprintf(message, "Set crossing %d tie %d to fix XY\n", mbna_crossing_select, mbna_tie_select);
-    do_info_add(message, true);
+    /* deal with global tie case */
+    if (mbna_view_list == MBNA_VIEW_LIST_FILESECTIONS
+        || mbna_view_list == MBNA_VIEW_LIST_GLOBALTIES
+        || mbna_view_list == MBNA_VIEW_LIST_GLOBALTIESSORTED) {
+      if (mbna_file_select != MBNA_SELECT_NONE
+        && mbna_section_select != MBNA_SELECT_NONE) {
+        struct mbna_file *file = &project.files[mbna_file_select];
+        struct mbna_section *section = &file->sections[mbna_section_select];
+        if (section->globaltie.status != MBNA_TIE_NONE
+            && section->globaltie.status != MBNA_TIE_XY) {
+          section->globaltie.status = MBNA_TIE_XY;
+          status_change = true;
+
+          /* add info text */
+          sprintf(message, "Set global tie file %d section %d  to fix XY\n", mbna_file_select, mbna_section_select);
+          do_info_add(message, true);
+          fprintf(stderr, "Set global tie file %d section %d to fix XY\n", mbna_file_select, mbna_section_select);
+        }
+      }
+    }
+
+    /* deal with crossing tie case */
+    else {
+      /* set selected file's block to good nav */
+      if (mbna_crossing_select >= 0 && mbna_tie_select >= 0) {
+        struct mbna_crossing *crossing = &(project.crossings[mbna_crossing_select]);
+        struct mbna_tie *tie = (struct mbna_tie *)&crossing->ties[mbna_tie_select];
+        if (tie->status != MBNA_TIE_NONE && tie->status != MBNA_TIE_XY) {
+          tie->status = MBNA_TIE_XY;
+          status_change = true;
+
+          /* add info text */
+          sprintf(message, "Set crossing %d tie %d to fix XY\n", mbna_crossing_select, mbna_tie_select);
+          do_info_add(message, true);
+          fprintf(stderr, "Set crossing %d tie %d to fix XY\n", mbna_crossing_select, mbna_tie_select);
+        }
+      }
+    }
+
+    if (status_change) {
+      if (project.inversion_status == MBNA_INVERSION_CURRENT)
+        project.inversion_status = MBNA_INVERSION_OLD;
+
+      /* write out updated project */
+      mbnavadjust_write_project(mbna_verbose, &project, __FILE__, __LINE__, __FUNCTION__, &error);
+      project.save_count = 0;
+    }
   }
 
   const int status = MB_SUCCESS;
@@ -1206,26 +1274,60 @@ int mbnavadjust_set_tie_z() {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
   }
 
-  const int status = MB_SUCCESS;
+  if (project.open && project.num_files > 0) {
 
-  /* set selected file's block to good nav */
-  if (project.open && project.num_files > 0 && mbna_crossing_select >= 0 && mbna_tie_select >= 0) {
-    /* set tie to fix z */
-    struct mbna_crossing *crossing = &(project.crossings[mbna_crossing_select]);
-    struct mbna_tie *tie = (struct mbna_tie *)&crossing->ties[mbna_tie_select];
-    tie->status = MBNA_TIE_Z;
-    fprintf(stderr, "Set crossing %d tie %d to fix Z\n", mbna_crossing_select, mbna_tie_select);
-    if (project.inversion_status == MBNA_INVERSION_CURRENT)
-      project.inversion_status = MBNA_INVERSION_OLD;
+    bool status_change = false;
 
-    /* write out updated project */
-    mbnavadjust_write_project(mbna_verbose, &project, __FILE__, __LINE__, __FUNCTION__, &error);
-    project.save_count = 0;
+    /* deal with global tie case */
+    if (mbna_view_list == MBNA_VIEW_LIST_FILESECTIONS
+        || mbna_view_list == MBNA_VIEW_LIST_GLOBALTIES
+        || mbna_view_list == MBNA_VIEW_LIST_GLOBALTIESSORTED) {
+      if (mbna_file_select != MBNA_SELECT_NONE
+        && mbna_section_select != MBNA_SELECT_NONE) {
+        struct mbna_file *file = &project.files[mbna_file_select];
+        struct mbna_section *section = &file->sections[mbna_section_select];
+        if (section->globaltie.status != MBNA_TIE_NONE
+            && section->globaltie.status != MBNA_TIE_Z) {
+          section->globaltie.status = MBNA_TIE_Z;
+          status_change = true;
 
-    /* add info text */
-    sprintf(message, "Set crossing %d tie %d to fix Z\n", mbna_crossing_select, mbna_tie_select);
-    do_info_add(message, true);
+          /* add info text */
+          sprintf(message, "Set global tie file %d section %d  to fix Z\n", mbna_file_select, mbna_section_select);
+          do_info_add(message, true);
+          fprintf(stderr, "Set global tie file %d section %d to fix Z\n", mbna_file_select, mbna_section_select);
+        }
+      }
+    }
+
+    /* deal with crossing tie case */
+    else {
+      /* set selected file's block to good nav */
+      if (mbna_crossing_select >= 0 && mbna_tie_select >= 0) {
+        struct mbna_crossing *crossing = &(project.crossings[mbna_crossing_select]);
+        struct mbna_tie *tie = (struct mbna_tie *)&crossing->ties[mbna_tie_select];
+        if (tie->status != MBNA_TIE_NONE && tie->status != MBNA_TIE_Z) {
+          tie->status = MBNA_TIE_Z;
+          status_change = true;
+
+          /* add info text */
+          sprintf(message, "Set crossing %d tie %d to fix Z\n", mbna_crossing_select, mbna_tie_select);
+          do_info_add(message, true);
+          fprintf(stderr, "Set crossing %d tie %d to fix Z\n", mbna_crossing_select, mbna_tie_select);
+        }
+      }
+    }
+
+    if (status_change) {
+      if (project.inversion_status == MBNA_INVERSION_CURRENT)
+        project.inversion_status = MBNA_INVERSION_OLD;
+
+      /* write out updated project */
+      mbnavadjust_write_project(mbna_verbose, &project, __FILE__, __LINE__, __FUNCTION__, &error);
+      project.save_count = 0;
+    }
   }
+
+  const int status = MB_SUCCESS;
 
   if (mbna_verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBnavadjust function <%s> completed\n", __func__);
@@ -16053,8 +16155,8 @@ int mbnavadjust_updategrid() {
         lon_max += dlon;
         lat_min -= dlat;
         lat_max += dlat;
-        fprintf(afp, "mbgrid -I datalist_%4.4dp.mb-1 \\\n\t-R%.8f/%.8f/%.8f/%.8f \\\n\t-A2 -F5 -N -C2 \\\n\t-O ProjectTopoAdj_%4.4d\n\n",
-                isurvey, lon_min, lon_max, lat_min, lat_max, isurvey);
+        fprintf(afp, "mbgrid -I datalist_%4.4dp.mb-1 \\\n\t-A2 -F5 -N -C2 \\\n\t-O ProjectTopoAdj_%4.4d\n\n",
+                isurvey, isurvey);
       }
       fclose(afp);
     }
@@ -21086,56 +21188,79 @@ int mbnavadjust_open_visualization(int which_grid) {
         mbv_navcdp = true;
         mbv_navdecimation = 1;
         mbv_navpathstatus = MB_PROCESSED_USE;
+        int num_files_active = 0;
+        for (int i = 0; i< project.num_files; i++) {
+          bool found = false;
+          for (int j = 0; j < project.files[i].num_sections && !found; j++) {
+            if (do_check_nav_active(i, j)) {
+              found = true;
+            }
+          }
+          if (found) {
+            num_files_active++;
+          }
+        }
+        int count_files_active = 0;
+        sprintf(message, "Loading nav %d of %d...", count_files_active + 1, num_files_active);
+        do_message_on(message);
         for (int i = 0; i < project.num_files; i++) {
-          /* set message */
-          sprintf(message, "Loading nav %d of %d...", i + 1, project.num_files);
-          do_message_on(message);
-
           file = &project.files[i];
           mbv_navformatorg = file->format;
+          bool found = false;
           for (int j = 0; j < project.files[i].num_sections; j++) {
-            section = &file->sections[j];
-            sprintf(mbv_file_name, "%s/nvs_%4.4d_%4.4dp.mb71.fnv", project.datadir, file->id, j);
-            sprintf(mbv_navname, "%4.4d:%4.4d", file->id, j);
-            sprintf(mbv_navpathraw, "%s/nvs_%4.4d_%4.4d.mb71", project.datadir, file->id, j);
-            sprintf(mbv_navpathprocessed, "%s/nvs_%4.4d_%4.4dp.mb71", project.datadir, file->id, j);
-            mbv_navpings = 0;
-            if ((nfp = fopen(mbv_file_name, "r")) == NULL) {
-              sprintf(mbv_file_name, "%s/nvs_%4.4d_%4.4d.mb71.fnv", project.datadir, file->id, j);
-              nfp = fopen(mbv_file_name, "r");
-            }
-            if (nfp != NULL) {
-              bool done = false;
-              char line[MB_PATH_MAXLINE];
-              while (!done) {
-              	char *line_ptr = fgets(line, MB_PATH_MAXLINE, nfp);
-              	if (line_ptr == NULL) {
-                  done = true;
-                }
-                else if (line[0] != '#') {
-                  nscan = sscanf(line, "%d %d %d %d %d %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf",
-                                       &year, &month, &day, &hour, &minute, &seconds, &navtime_d[mbv_navpings],
-                                       &navlon[mbv_navpings], &navlat[mbv_navpings], &navheading[mbv_navpings],
-                                       &navspeed[mbv_navpings], &sonardepth, &roll, &pitch, &heave,
-                                       &navportlon[mbv_navpings], &navportlat[mbv_navpings],
-                                       &navstbdlon[mbv_navpings], &navstbdlat[mbv_navpings]);
-                  if (nscan >= 15) {
-                    navz[mbv_navpings] = -sonardepth;
-                    navline[mbv_navpings] = i;
-                    navshot[mbv_navpings] = j;
-                    navcdp[mbv_navpings] = mbv_navpings;
-                    mbv_navpings++;
+            if (do_check_nav_active(i, j)) {
+              section = &file->sections[j];
+              sprintf(mbv_file_name, "%s/nvs_%4.4d_%4.4dp.mb71.fnv", project.datadir, file->id, j);
+              sprintf(mbv_navname, "%4.4d:%4.4d", file->id, j);
+              sprintf(mbv_navpathraw, "%s/nvs_%4.4d_%4.4d.mb71", project.datadir, file->id, j);
+              sprintf(mbv_navpathprocessed, "%s/nvs_%4.4d_%4.4dp.mb71", project.datadir, file->id, j);
+
+              /* reset message only for first active section in an active file */
+              if (!found) {
+                count_files_active++;
+                sprintf(message, "Loading nav %d of %d...", count_files_active, num_files_active);
+                do_message_on(message);
+                found = true;
+              }
+
+              mbv_navpings = 0;
+              if ((nfp = fopen(mbv_file_name, "r")) == NULL) {
+                sprintf(mbv_file_name, "%s/nvs_%4.4d_%4.4d.mb71.fnv", project.datadir, file->id, j);
+                nfp = fopen(mbv_file_name, "r");
+              }
+              if (nfp != NULL) {
+                bool done = false;
+                char line[MB_PATH_MAXLINE];
+                while (!done) {
+                	char *line_ptr = fgets(line, MB_PATH_MAXLINE, nfp);
+                	if (line_ptr == NULL) {
+                    done = true;
+                  }
+                  else if (line[0] != '#') {
+                    nscan = sscanf(line, "%d %d %d %d %d %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf",
+                                         &year, &month, &day, &hour, &minute, &seconds, &navtime_d[mbv_navpings],
+                                         &navlon[mbv_navpings], &navlat[mbv_navpings], &navheading[mbv_navpings],
+                                         &navspeed[mbv_navpings], &sonardepth, &roll, &pitch, &heave,
+                                         &navportlon[mbv_navpings], &navportlat[mbv_navpings],
+                                         &navstbdlon[mbv_navpings], &navstbdlat[mbv_navpings]);
+                    if (nscan >= 15) {
+                      navz[mbv_navpings] = -sonardepth;
+                      navline[mbv_navpings] = i;
+                      navshot[mbv_navpings] = j;
+                      navcdp[mbv_navpings] = mbv_navpings;
+                      mbv_navpings++;
+                    }
                   }
                 }
               }
-            }
-            fclose(nfp);
-            if (mbv_navpings > 0) {
-              status = mbview_addnav(mbna_verbose, instance, mbv_navpings, navtime_d, navlon, navlat, navz,
-                                     navheading, navspeed, navportlon, navportlat, navstbdlon, navstbdlat, navline,
-                                     navshot, navcdp, mbv_navcolor, mbv_navsize, mbv_navname, mbv_navpathstatus,
-                                     mbv_navpathraw, mbv_navpathprocessed, mbv_navformatorg, mbv_navswathbounds,
-                                     mbv_navline, mbv_navshot, mbv_navcdp, mbv_navdecimation, &error);
+              fclose(nfp);
+              if (mbv_navpings > 0) {
+                status = mbview_addnav(mbna_verbose, instance, mbv_navpings, navtime_d, navlon, navlat, navz,
+                                       navheading, navspeed, navportlon, navportlat, navstbdlon, navstbdlat, navline,
+                                       navshot, navcdp, mbv_navcolor, mbv_navsize, mbv_navname, mbv_navpathstatus,
+                                       mbv_navpathraw, mbv_navpathprocessed, mbv_navformatorg, mbv_navswathbounds,
+                                       mbv_navline, mbv_navshot, mbv_navcdp, mbv_navdecimation, &error);
+              }
             }
           }
         }
@@ -21304,18 +21429,20 @@ int mbnavadjust_reset_visualization_navties() {
       }
     }
 
-    /* set active/inactive status of section navigation */
-    bool updatelist = false;
-    for (int i = 0; i < project.num_files; i++) {
-      file = &project.files[i];
-      for (int j = 0; j < project.files[i].num_sections; j++) {
-        section = &file->sections[j];
-        sprintf(navtiename, "%4.4d:%4.4d", file->id, j);
-        if (i == project.num_files - 1 && j == project.files[i].num_sections - 1)
-          updatelist = true;
-        mbview_setnavactivebyname(mbna_verbose, instance, navtiename, do_check_nav_active(i, j), updatelist, &error);
-      }
-    }
+//   No longer loading all nav into mbview when loading single survey grid - only
+//   load nav for that survey now - DWC 20221113
+//    /* set active/inactive status of section navigation */
+//    bool updatelist = false;
+//    for (int i = 0; i < project.num_files; i++) {
+//      file = &project.files[i];
+//      for (int j = 0; j < project.files[i].num_sections; j++) {
+//        section = &file->sections[j];
+//        sprintf(navtiename, "%4.4d:%4.4d", file->id, j);
+//        if (i == project.num_files - 1 && j == project.files[i].num_sections - 1)
+//          updatelist = true;
+//        mbview_setnavactivebyname(mbna_verbose, instance, navtiename, do_check_nav_active(i, j), updatelist, &error);
+//      }
+//    }
 
     /* reset the visualization display */
     do_update_visualization_status();
