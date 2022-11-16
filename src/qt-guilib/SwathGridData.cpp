@@ -76,8 +76,9 @@ bool SwathGridData::readDatafile(char *swathFile) {
     return false;
   }
 
-  // Read swath data from first file into global structures  
-  if (mbeditviz_load_file(0) != MB_SUCCESS) {
+  // Read swath data from first file into global structures
+  // Just reading file, so no need to lock
+  if (mbeditviz_load_file(0, false) != MB_SUCCESS) {
     std::cerr << "Couldn't load data from " << swathFile << std::endl;
     return false;
   }
@@ -113,7 +114,8 @@ bool SwathGridData::readDatafile(char *swathFile) {
   for (int i = 0; i < nPts; i++) {
     if (gridData_->val[i] == gridData_->nodatavalue) {
       // No z data at this point
-      gridData_->val[i] = nanf("");
+      gridData_->val[i] = TopoGridData::NoData;
+      /// gridData_->val[i] = std::nanf("");
       continue;
     }
 
