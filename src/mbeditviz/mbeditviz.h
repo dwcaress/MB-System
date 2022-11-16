@@ -319,7 +319,7 @@ int mbeditviz_init(int argc, char **argv,
 int mbeditviz_get_format(char *file, int *form);
 int mbeditviz_open_data(char *path, int format);
 int mbeditviz_import_file(char *path, int format);
-int mbeditviz_load_file(int ifile);
+int mbeditviz_load_file(int ifile, bool assertLock);
 int mbeditviz_apply_biasesandtimelag(struct mbev_file_struct *file, struct mbev_ping_struct *ping, double rollbias, double pitchbias,
                             double headingbias, double timelag, double *headingdelta, double *sonardepth, double *rolldelta,
                             double *pitchdelta);
@@ -328,7 +328,7 @@ int mbeditviz_snell_correction(double snell, double roll, double *beam_xtrack,
 int mbeditviz_beam_position(double navlon, double navlat, double mtodeglon, double mtodeglat, double rawbath, double acrosstrack,
                             double alongtrack, double sonardepth, double rolldelta, double pitchdelta, double heading,
                             double *bathcorr, double *lon, double *lat);
-int mbeditviz_unload_file(int ifile);
+int mbeditviz_unload_file(int ifile, bool assertUnlock);
 int mbeditviz_delete_file(int ifile);
 double mbeditviz_erf(double x);
 int mbeditviz_bin_weight(double foot_a, double foot_b, double scale, double pcx, double pcy, double dx, double dy, double *px,

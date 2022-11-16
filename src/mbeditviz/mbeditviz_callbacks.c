@@ -413,7 +413,8 @@ void do_mbeditviz_quit(Widget w, XtPointer client_data, XtPointer call_data) {
   for (int ifile = 0; ifile < mbev_num_files; ifile++) {
     struct mbev_file_struct *file = &(mbev_files[ifile]);
     if (file->load_status) {
-      mbeditviz_unload_file(ifile);
+      // Unload file, asserting unlock
+      mbeditviz_unload_file(ifile, true);
     }
   }
 
@@ -479,7 +480,8 @@ void do_mbeditviz_viewall(Widget w, XtPointer client_data, XtPointer call_data) 
 #ifdef MBEDITVIZ_GUI_DEBUG
       fprintf(stderr, "do_mbeditviz_viewall loading file %d of %d...\n", ifile + 1, mbev_num_files);
 #endif
-      mbeditviz_load_file(ifile);
+      // Load file, asserting lock
+      mbeditviz_load_file(ifile, true);
     }
     loadcount++;
 #ifdef MBEDITVIZ_GUI_DEBUG
@@ -576,13 +578,15 @@ void do_mbeditviz_viewselected(Widget w, XtPointer client_data, XtPointer call_d
       loadcount++;
       sprintf(value_text, "Loading file %d of %d...", loadcount, position_count);
       do_mbeditviz_message_on(value_text);
-      mbeditviz_load_file(ifile);
+      // Load file, asserting lock
+      mbeditviz_load_file(ifile, true);
     }
     else if (selected && file->load_status) {
       loadcount++;
     }
     else if (!selected && file->load_status) {
-      mbeditviz_unload_file(ifile);
+      // Unload file, asserting unlock
+      mbeditviz_unload_file(ifile, true);
     }
   }
   do_mbeditviz_message_off();

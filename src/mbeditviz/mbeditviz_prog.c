@@ -508,7 +508,7 @@ int mbeditviz_import_file(char *path, int format) {
   return (mbev_status);
 }
 /*--------------------------------------------------------------------*/
-int mbeditviz_load_file(int ifile) {
+int mbeditviz_load_file(int ifile, bool assertLock) {
   if (mbev_verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -525,7 +525,7 @@ int mbeditviz_load_file(int ifile) {
     file = &(mbev_files[ifile]);
 
     /* try to lock file */
-    if (mbdef_uselockfiles) {
+    if (assertLock && mbdef_uselockfiles) {
       mbev_status = mb_pr_lockswathfile(mbev_verbose, file->path, MBP_LOCK_EDITBATHY, program_name, &mbev_error);
     } else {
       bool locked;
@@ -1934,7 +1934,7 @@ int mbeditviz_beam_position(double navlon, double navlat, double mtodeglon, doub
   return (mbev_status);
 }
 /*--------------------------------------------------------------------*/
-int mbeditviz_unload_file(int ifile) {
+int mbeditviz_unload_file(int ifile, bool assertUnlock) {
   if (mbev_verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -2083,7 +2083,7 @@ int mbeditviz_unload_file(int ifile) {
     mbev_num_files_loaded--;
 
     /* unlock the file */
-    if (mbdef_uselockfiles) {
+    if (assertUnlock && mbdef_uselockfiles) {
       // const int lock_status =
       mb_pr_unlockswathfile(mbev_verbose, file->path, MBP_LOCK_EDITBATHY, program_name, &lock_error);
     }
@@ -2109,7 +2109,8 @@ int mbeditviz_delete_file(int ifile) {
 
   /* unload the file if needed */
   if (ifile >= 0 && ifile < mbev_num_files && mbev_files[ifile].load_status) {
-    mbeditviz_unload_file(ifile);
+    bool assertUnlock = true;
+    mbeditviz_unload_file(ifile, assertUnlock);
   }
 
   /* delete the file */
