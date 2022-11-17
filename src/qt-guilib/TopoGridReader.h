@@ -104,7 +104,8 @@ namespace mb_system {
     /// Read data from file into GridData. Returns nullptr on error
     static TopoGridData *readGridFile(const char *file);
 
-    /// Return true if specified triangle vertex IDs refer to missing z-values
+    /// Return true if specified any of the triangle vertex IDs refer to
+    /// missing z-values
     bool triangleMissingZValues(vtkIdType *triangleVertices);
     
     /// Name of grid file
