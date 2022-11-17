@@ -14,6 +14,8 @@
 #include <vtkAxes.h>
 #include <vtkFollower.h>
 #include <vtkParticleReader.h>
+#include <vtkAxisActor2D.h>
+#include <vtkProperty2D.h>
 #include "QVtkRenderer.h"
 #include "QVtkItem.h"
 #include "TopoColorMap.h"
@@ -69,7 +71,7 @@ void QVtkRenderer::render() {
 
   axesActor_->SetVisibility(displayProperties_->showAxes);
 
-  if (displayProperties_->changed || newPointPicked_) {
+  if (displayProperties_->changed) {
     // Some property changed - rebuild pipeline
     qDebug() << "QVtkRenderer::render() vert scale changed, assemblePipeline";
     assemblePipeline();
@@ -312,7 +314,7 @@ bool QVtkRenderer::initializePipeline(const char *gridFilename) {
   interactorStyle_->initialize(this, windowInteractor_);
 
   // Axes actor
-  axesActor_ = vtkSmartPointer<vtkCubeAxesActor>::New();
+  axesActor_ = vtkSmartPointer<vtkCubeAxesActor2D>::New();
 
   // Invoke callback when renderWindow_ is made current
   renderWindow_->AddObserver(vtkCommand::WindowMakeCurrentEvent,
@@ -321,6 +323,60 @@ bool QVtkRenderer::initializePipeline(const char *gridFilename) {
   return assemblePipeline();
 }
 
+
+void QVtkRenderer::setupAxes(vtkCubeAxesActor2D *axesActor,
+                             vtkNamedColors *namedColors,
+                             double *surfaceBounds,
+                             double *gridBounds,
+                             const char *xUnits, const char *yUnits,
+                             const char *zUnits) {
+
+  qDebug() << "setupAxes(): " <<
+    " xMin: " << surfaceBounds[0] << ", xMax: " << surfaceBounds[1] <<
+    ", yMin: " << surfaceBounds[2] << ", yMax: " << surfaceBounds[3] <<
+    ", zMin: " << surfaceBounds[4] << ", zMax: " << surfaceBounds[5];
+
+
+  vtkNew<vtkTextProperty> text;
+  text->SetColor(namedColors->GetColor3d("Black").GetData());
+  axesActor->SetAxisTitleTextProperty(text.GetPointer());
+  axesActor->SetAxisLabelTextProperty(text.GetPointer());
+
+  axesActor->GetProperty()->SetColor(0., 0., 0.);
+  
+  axesActor->SetBounds(surfaceBounds);
+  
+  axesActor->GetXAxisActor2D()->SetRange(gridBounds[0], gridBounds[1]);
+  axesActor->GetYAxisActor2D()->SetRange(gridBounds[2], gridBounds[3]);  
+  axesActor->GetZAxisActor2D()->SetRange(gridBounds[4], gridBounds[5]);
+  /* ***
+  axesActor->GetTitleTextProperty(0)->SetColor(axisColor.GetData());
+  axesActor->GetTitleTextProperty(0)->SetFontSize(48);
+  axesActor->GetLabelTextProperty(0)->SetColor(axisColor.GetData());
+
+  axesActor->GetTitleTextProperty(1)->SetColor(axisColor.GetData());
+  axesActor->GetLabelTextProperty(1)->SetColor(axisColor.GetData());
+
+  axesActor->GetTitleTextProperty(2)->SetColor(axisColor.GetData());
+  axesActor->GetLabelTextProperty(2)->SetColor(axisColor.GetData());
+  
+  axesActor->GetXAxesLinesProperty()->SetColor(axisColor.GetData());
+  axesActor->GetYAxesLinesProperty()->SetColor(axisColor.GetData());
+  axesActor->GetZAxesLinesProperty()->SetColor(axisColor.GetData());    
+  *** */
+
+  /* ***
+  axesActor->DrawXGridlinesOn();
+  axesActor->DrawYGridlinesOn();
+  axesActor->DrawZGridlinesOn();
+  *** */
+  
+  axesActor->GetXAxisActor2D()->SetTitle(xUnits);
+  axesActor->GetYAxisActor2D()->SetTitle(yUnits);
+  axesActor->GetZAxisActor2D()->SetTitle(zUnits);
+}
+
+/* ***
 void QVtkRenderer::setupAxes(vtkCubeAxesActor *axesActor,
                              vtkColor3d &axisColor,
                              double *surfaceBounds,
@@ -333,9 +389,6 @@ void QVtkRenderer::setupAxes(vtkCubeAxesActor *axesActor,
     ", yMin: " << surfaceBounds[2] << ", yMax: " << surfaceBounds[3] <<
     ", zMin: " << surfaceBounds[4] << ", zMax: " << surfaceBounds[5];
   
-  axesActor->SetUseTextActor3D(0);
-
-
   axesActor->SetBounds(surfaceBounds);
   
   axesActor->SetXAxisRange(gridBounds[0], gridBounds[1]);
@@ -358,7 +411,7 @@ void QVtkRenderer::setupAxes(vtkCubeAxesActor *axesActor,
   
   axesActor->DrawXGridlinesOn();
   axesActor->DrawYGridlinesOn();
-  axesActor->DrawZGridlinesOn();
+  ///  axesActor->DrawZGridlinesOn();
   
   axesActor->SetXTitle(xUnits);
   axesActor->SetYTitle(yUnits);
@@ -379,6 +432,8 @@ void QVtkRenderer::setupAxes(vtkCubeAxesActor *axesActor,
   // axesActor->SetFlyModeToStaticEdges();
   
 }
+
+*** */
 
 
 bool QVtkRenderer::assemblePipeline() {
@@ -429,6 +484,7 @@ bool QVtkRenderer::assemblePipeline() {
   renderer_->AddActor(surfaceActor_);
 
 
+  /* ***
   /// TEST TEST TEST SITE READER
   vtkNew<vtkParticleReader> siteReader;
   // siteReader->SetFileName("test-site.ste");
@@ -442,7 +498,6 @@ bool QVtkRenderer::assemblePipeline() {
   siteActor->GetProperty()->SetPointSize(25);
   renderer_->AddActor(siteActor);
 
-  /* ***
   if (pointPicked_) {
     std::cerr << "add picked point to scene" << std::endl;
     vtkNew<vtkParticleReader> reader;
@@ -474,7 +529,8 @@ bool QVtkRenderer::assemblePipeline() {
   vtkColor3d axisColor = namedColors_->GetColor3d("black");
 
   // Set up axes
-  setupAxes(axesActor_, axisColor,
+  setupAxes(axesActor_,
+            namedColors_,
             surfaceMapper_->GetBounds(),
             gridBounds,
             gridReader_->xUnits(), gridReader_->yUnits(),

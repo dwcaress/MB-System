@@ -10,7 +10,8 @@
 #include <vtkInteractorStyleTrackballCamera.h>
 #include <vtkRenderer.h>
 #include <vtkActor.h>
-#include <vtkCubeAxesActor.h>
+// #include <vtkCubeAxesActor.h>
+#include <vtkCubeAxesActor2D.h>
 #include <vtkSmartPointer.h>
 #include <vtkElevationFilter.h>
 #include <vtkTransform.h>
@@ -112,8 +113,8 @@ namespace mb_system {
     bool assemblePipeline();
 
     /// Setup axes
-    static void setupAxes(vtkCubeAxesActor *axesActor,
-                          vtkColor3d &axisColor,
+    static void setupAxes(vtkCubeAxesActor2D *axesActor,
+                          vtkNamedColors *namedColors,
                           double *surfaceBounds,
                           double *gridBounds,
                           const char *xUnits, const char *yUnits,
@@ -151,7 +152,7 @@ namespace mb_system {
     vtkSmartPointer<vtkActor> surfaceActor_;
 
     /// Grid axes actor
-    vtkSmartPointer<vtkCubeAxesActor> axesActor_;    
+    vtkSmartPointer<vtkCubeAxesActor2D> axesActor_;    
 
     /// VTK renderer
     vtkSmartPointer<vtkRenderer> renderer_;
