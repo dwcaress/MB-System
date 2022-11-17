@@ -257,6 +257,10 @@ int TopoGridReader::RequestData(vtkInformation* request,
         // Don't insert NaN-valued data
         if (std::isnan(z) || z == TopoGridData::NoData) {
           gridMissingZValues = true;
+
+          //// TEST TEST TEST
+          /// z = 0.;
+          
           // Don't insert nan values           
           if (std::isnan(z)) {
             z = TopoGridData::NoData;
