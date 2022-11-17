@@ -121,7 +121,21 @@ ApplicationWindow {
                 Action { checkable: true; text: qsTr("&Topography slope"); ActionGroup.group: topoActions }
 
             }
-
+            MenuSeparator {}
+            Menu {
+                title: "Color table"
+                Action {checkable: true; checked: true; text: qsTr("Haxby"); ActionGroup.group: colorActions
+                onTriggered: {mainWindow.qmlSignal("colormap " + "Haxby")}}
+                
+                Action {checkable: true; text: qsTr("BrightRainbow"); ActionGroup.group: colorActions
+                onTriggered: {mainWindow.qmlSignal("colormap BrightRainbow")}}
+                
+                Action {checkable: true; text: qsTr("MutedRainbow"); ActionGroup.group: colorActions
+                onTriggered: {mainWindow.qmlSignal("colormap MutedRainbow")}}
+                
+                Action {checkable: true; text: qsTr("Grayscale"); ActionGroup.group: colorActions
+                onTriggered: {mainWindow.qmlSignal("colormap Grayscale")}}
+            }
             MenuSeparator {}
             Action { checkable: true; text: qsTr("&Histograms") }
             Action { checkable: true; text: qsTr("&Contours") }
@@ -152,20 +166,6 @@ ApplicationWindow {
                 Action {checkable: true; text: qsTr("Non-draped"); ActionGroup.group: navActions }
             }
             MenuSeparator {}
-            Menu {
-                title: "Color table"
-                Action {checkable: true; checked: true; text: qsTr("Haxby"); ActionGroup.group: colorActions
-                onTriggered: {mainWindow.qmlSignal("colormap " + "Haxby")}}
-                
-                Action {checkable: true; text: qsTr("BrightRainbow"); ActionGroup.group: colorActions
-                onTriggered: {mainWindow.qmlSignal("colormap BrightRainbow")}}
-                
-                Action {checkable: true; text: qsTr("MutedRainbow"); ActionGroup.group: colorActions
-                onTriggered: {mainWindow.qmlSignal("colormap MutedRainbow")}}
-                
-                Action {checkable: true; text: qsTr("Grayscale"); ActionGroup.group: colorActions
-                onTriggered: {mainWindow.qmlSignal("colormap Grayscale")}}
-            }
         }
 
         Menu {
@@ -301,8 +301,6 @@ ApplicationWindow {
 
                 // Update picked coordinate text
                 onPickedPointChanged: {
-                  console.log("user picked a point!")
-                  console.log("this one: " + pickedPoint)
                   pickedCoords.text = pickedPoint
                 }
 
