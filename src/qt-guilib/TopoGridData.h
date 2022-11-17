@@ -2,6 +2,8 @@
 #define TopoGridData_h
 
 namespace mb_system {
+
+  
   /* **
      TopoGridData defines interface to 3D gridded data such as GMT grid data or 
      swath data. 
@@ -9,6 +11,9 @@ namespace mb_system {
   class TopoGridData {
 
   public:
+
+    /// "No data" value
+    static const double NoData;
 
     /// Read grid data from file
     virtual bool readDatafile(char *filename) = 0;
