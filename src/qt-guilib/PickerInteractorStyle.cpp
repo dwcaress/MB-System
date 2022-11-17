@@ -53,9 +53,15 @@ void PickerInteractorStyle::OnLeftButtonDown() {
   char buf[256];
   if (pointId != -1) {
 
+    if (worldCoord[2] == TopoGridData::NoData) {
+      sprintf(buf, "%.1f, %.1f, NoData",
+              worldCoord[0], worldCoord[1]);
+      
+    }
+    else {
       sprintf(buf, "%.1f, %.1f, %.1f",
               worldCoord[0], worldCoord[1], worldCoord[2]);
-
+    }
   }
   else {
     //    sprintf(buf, "unknown position");
@@ -66,10 +72,12 @@ void PickerInteractorStyle::OnLeftButtonDown() {
   // Store picked point coordinates in QVtkRenderer
   qVtkRenderer_->setPickedPoint(worldCoord);
 
+  /* ***
   /// TEST TEST TEST
   FILE *fp = fopen(SELECTED_POINT_FILE, "w");
   fprintf(fp, "%d, %d, %d\n", (int )worldCoord[0], (int )worldCoord[1], (int )worldCoord[2]);
   fclose(fp);
+  *** */
   
   // Display picked point coordinates via QVtkIem
   QString coordMsg(buf);
