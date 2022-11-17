@@ -125,7 +125,6 @@ void BackEnd::qmlSlot(const QString &qmsg) {
     }
     else if (!strncmp(msg, SHOW_AXES, strlen(SHOW_AXES))) {
       if (strstr(msg, "true")) {
-        // showAxes(true);
         qVtkItem_->showAxes(true);
       }
       else {
