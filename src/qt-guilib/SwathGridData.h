@@ -51,7 +51,14 @@ namespace mb_system {
 
       return 0;
     }
-  
+
+
+    /// Set a proj-string corresponding to the data's coordinate
+    /// reference system. 
+    /// Returns true on success, false on error
+    bool setProjString() override;
+    
+    
   protected:
 
     /// Base class calls this to get class parameter variables
@@ -66,7 +73,7 @@ namespace mb_system {
 
     /// Unlock specified swath file
     void unlockSwath(char *swathFile);
-  
+
     /// Swath data read from file, old mb-system struct
     struct mbev_grid_struct *gridData_;
 

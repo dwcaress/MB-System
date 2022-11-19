@@ -4,6 +4,7 @@
 namespace mb_system {
 
   
+  
   /* **
      TopoGridData defines interface to 3D gridded data such as GMT grid data or 
      swath data. 
@@ -12,6 +13,16 @@ namespace mb_system {
 
   public:
 
+    /* ***
+    /// Supported projections
+    enum MapProjection {Unknown,
+                        Geographic,
+                        UTM};
+                        *** */
+
+    /// Constructor
+    TopoGridData();
+    
     /// "No data" value
     static const double NoData;
 
@@ -60,7 +71,18 @@ namespace mb_system {
                     &xMin_, &xMax_, &yMin_, &yMax_, &zMin_, &zMax_,
                     &xUnits_, &yUnits_, &zUnits_);
     }
-  
+
+    /// Return proj-string corresponding to data's CRS, suitable for
+    /// use with PROJ C/C++ API
+    const char *projString() {
+      return (const char *)projString_;
+    }
+    
+    /// Set projString_ member to a valid proj-string corresponding
+    /// to data's coordinate reference system.
+    /// Returns true on success, false on error
+    virtual bool setProjString() = 0;
+
   protected:
   
     /// Must be implemented by subclasses
@@ -81,7 +103,15 @@ namespace mb_system {
 
     /// Grid data units
     char *xUnits_, *yUnits_, *zUnits_;
-  
+
+    /// proj-string describing map's CRS
+    char projString_[100];
+
+
+    /// Projection types
+    static const char *GeographicType_;
+    static const char *UtmType_;
+    
   private:
 
 

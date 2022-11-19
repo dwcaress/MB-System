@@ -19,7 +19,12 @@ namespace mb_system {
     /// Read data from GMT file
     bool readDatafile(char *filename) override;
 
-  
+    /// Set projString_ member to a valid proj-string corresponding
+    /// to data's coordinate reference system.
+    /// Returns true on success, false on error
+    bool setProjString() override;
+    
+    
   protected:
 
     /// Base class calls this to get class parameter variables

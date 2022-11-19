@@ -185,7 +185,7 @@ bool SwathGridData::data(int row, int col,
 }
 
 
-void mb_system::SwathGridData::unlockSwath(char *swathfile) {
+void SwathGridData::unlockSwath(char *swathfile) {
   bool usingLocks = true;
   std::cout << "unlockSwath(" << swathfile << ")" << std::endl;
   if (usingLocks) {
@@ -194,4 +194,23 @@ void mb_system::SwathGridData::unlockSwath(char *swathfile) {
     mb_pr_unlockswathfile(mbev_verbose, swathfile,
                           MBP_LOCK_EDITBATHY, appName_, &lockError);
     }
+}
+
+
+bool SwathGridData::setProjString() {
+
+  if (!strncmp(gridData_->projection_id,
+               TopoGridData::UtmType_,
+               strlen(TopoGridData::UtmType_))) {
+    sprintf(projString_, "+proj=utm +zone=%s +datum=WGS84",
+            gridData_->projection_id + strlen(TopoGridData::UtmType_));
+    
+    return true;
+  }
+  else {
+    // Unhandled projection/CRS
+    std::cerr << "unhandled projection type: " << gridData_->projection_id <<
+      std::endl;
+    return false;
+  }
 }

@@ -106,3 +106,50 @@ bool GmtGridData::data(int row, int col,
 
   return true;
 }
+
+
+#define PROJ_KEYWORD "Projection: "
+// #define GEOGRAPHIC_TYPE "Geographic"
+// #define UTM_TYPE "UTM"
+
+bool GmtGridData::setProjString() {
+
+  std::cerr << "GmtGridData::setProjString()" << std::endl;
+  char *remark = gmtGrid_->header->remark;
+  std::cerr << "remark: " << remark << std::endl;
+  char *proj = strstr(remark, PROJ_KEYWORD);
+  if (proj) {
+
+    // Point to start of projection id
+    proj += strlen(PROJ_KEYWORD);
+    char *endl = strchr(proj, '\n');
+    if (endl) {
+      char *projType = strndup(proj, endl-proj);
+
+      if (!strcmp(projType, TopoGridData::GeographicType_)) {
+        sprintf(projString_, "EPSG:4326");
+        return true;
+      }
+      else if (!strncmp(projType,
+                        TopoGridData::UtmType_,
+                        strlen(TopoGridData::UtmType_))) {
+        sprintf(projString_, "+proj=utm +zone=%s +datum=WGS84",
+                projType + strlen(TopoGridData::UtmType_));
+        
+        return true;
+      }
+      else {
+        std::cerr << "Unhandled projection type: " << projType << std::endl;
+      }
+      free((void *)projType);
+      
+    }
+  }
+  else {
+    std::cerr << "Couldn't find PROJ_KEYWORD in remarks (" << remark <<
+      ")" << std::endl;
+  }
+  return false;
+  
+  return false;
+}
