@@ -73,7 +73,8 @@ void QVtkRenderer::render() {
 
   if (displayProperties_->changed) {
     // Some property changed - rebuild pipeline
-    qDebug() << "QVtkRenderer::render() vert scale changed, assemblePipeline";
+    qDebug() <<
+      "QVtkRenderer::render() displayProperties changed, assemblePipeline";
     assemblePipeline();
     item_->clearPropertyChangedFlag();
     newPointPicked_ = false;
@@ -451,8 +452,18 @@ bool QVtkRenderer::assemblePipeline() {
   elevColorizer_->SetLowPoint(0, 0, gridBounds[4]);
   elevColorizer_->SetHighPoint(0, 0, gridBounds[5]);
 
-  surfaceMapper_->SetInputConnection(elevColorizer_->GetOutputPort());    
-
+  bool doTransform = true;
+  if (doTransform) {
+    float zScale = displayProperties_->verticalExagg;
+    transform_ = vtkSmartPointer<vtkTransform>::New();
+    transform_->Scale(1., 1., zScale);
+    transformFilter_->SetTransform(transform_);
+    transformFilter_->SetInputConnection(elevColorizer_->GetOutputPort());
+    surfaceMapper_->SetInputConnection(transformFilter_->GetOutputPort());
+  }
+  else {
+    surfaceMapper_->SetInputConnection(elevColorizer_->GetOutputPort());    
+  }
   elevColorizer_->SetScalarRange(dBounds[4], dBounds[5]);
   TopoColorMap::makeLUT(displayProperties_->topoColorMapScheme,
                         elevLookupTable_);
@@ -464,10 +475,9 @@ bool QVtkRenderer::assemblePipeline() {
   // Assign surfaceMapper to actor
   qDebug() << "assign surfaceMapper to actor";
   surfaceActor_->SetMapper(surfaceMapper_);
-
+  
   // Add actor to renderer
   renderer_->AddActor(surfaceActor_);
-
 
   /* ***
   /// TEST TEST TEST SITE READER
@@ -520,6 +530,8 @@ bool QVtkRenderer::assemblePipeline() {
             gridBounds,
             gridReader_->xUnits(), gridReader_->yUnits(),
             gridReader_->zUnits());
+  
+  axesActor_->SetScaling(true);
 
   axesActor_->SetCamera(renderer_->GetActiveCamera());
 
