@@ -173,10 +173,10 @@ bool SwathGridData::data(int row, int col,
 
 
 bool SwathGridData::data(int row, int col,
-                         double *northing, double *easting, double *z) {
+                         double *x, double *y, double *z) {
 
-  *easting = gridData_->boundsutm[2] + col * gridData_->dx; 
-  *northing = gridData_->boundsutm[0] + row * gridData_->dy;
+  *x = gridData_->boundsutm[2] + col * gridData_->dx; 
+  *y = gridData_->boundsutm[0] + row * gridData_->dy;
   //  int index = row * gridData_->n_columns + col;
   int index = col * gridData_->n_rows + row;
   *z = gridData_->val[index];

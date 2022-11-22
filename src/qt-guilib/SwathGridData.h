@@ -19,9 +19,9 @@ namespace mb_system {
     /// Destructor
     ~SwathGridData();
     
-    /// Get northing, easting, z data at specified grid row and column.
+    /// Get x, y, z data at specified grid row and column.
     /// Returns false in case of error
-    bool data(int row, int col, double *northing, double *easting,
+    bool data(int row, int col, double *x, double *y,
               double *z) override;
   
     /// Read data from GMT file
