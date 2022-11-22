@@ -349,31 +349,16 @@ void QVtkRenderer::setupAxes(vtkCubeAxesActor2D *axesActor,
   axesActor->GetXAxisActor2D()->SetRange(gridBounds[0], gridBounds[1]);
   axesActor->GetYAxisActor2D()->SetRange(gridBounds[2], gridBounds[3]);  
   axesActor->GetZAxisActor2D()->SetRange(gridBounds[4], gridBounds[5]);
-  /* ***
-  axesActor->GetTitleTextProperty(0)->SetColor(axisColor.GetData());
-  axesActor->GetTitleTextProperty(0)->SetFontSize(48);
-  axesActor->GetLabelTextProperty(0)->SetColor(axisColor.GetData());
-
-  axesActor->GetTitleTextProperty(1)->SetColor(axisColor.GetData());
-  axesActor->GetLabelTextProperty(1)->SetColor(axisColor.GetData());
-
-  axesActor->GetTitleTextProperty(2)->SetColor(axisColor.GetData());
-  axesActor->GetLabelTextProperty(2)->SetColor(axisColor.GetData());
   
-  axesActor->GetXAxesLinesProperty()->SetColor(axisColor.GetData());
-  axesActor->GetYAxesLinesProperty()->SetColor(axisColor.GetData());
-  axesActor->GetZAxesLinesProperty()->SetColor(axisColor.GetData());    
-  *** */
-
-  /* ***
-  axesActor->DrawXGridlinesOn();
-  axesActor->DrawYGridlinesOn();
-  axesActor->DrawZGridlinesOn();
-  *** */
-  
+  qDebug() << "set x-axis label to " << xUnits;
   axesActor->GetXAxisActor2D()->SetTitle(xUnits);
+  qDebug() << "set y-axis label to " << yUnits;  
   axesActor->GetYAxisActor2D()->SetTitle(yUnits);
+  qDebug() << "set z-axis label to " << zUnits;    
   axesActor->GetZAxisActor2D()->SetTitle(zUnits);
+
+  qDebug() << "actual x-axis label now is " <<
+    axesActor->GetXAxisActor2D()->GetTitle();  
 }
 
 /* ***
