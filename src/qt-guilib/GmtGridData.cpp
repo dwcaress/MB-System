@@ -33,7 +33,6 @@ void GmtGridData::getParameters(int *nRows, int *nColumns,
   *yMax = gmtGrid_->header->wesn[3];
   *zMin = gmtGrid_->header->z_min;
   *zMax = gmtGrid_->header->z_max;
-
                 
   *xUnits = strdup(gmtGrid_->header->x_units);
   *yUnits = strdup(gmtGrid_->header->y_units);
@@ -97,10 +96,10 @@ GMT_GRID *GmtGridData::readGmtFile(const char *gridFile, void **api) {
 
 
 bool GmtGridData::data(int row, int col,
-                       double *northing, double *easting, double *z) {
+                       double *x, double *y, double *z) {
 
-  *easting = gmtGrid_->x[col];
-  *northing = gmtGrid_->y[row];
+  *x = gmtGrid_->x[col];
+  *y = gmtGrid_->y[row];
   unsigned index = GMT_Get_Index(gmtAPI_, gmtGrid_->header, row, col);
   *z = gmtGrid_->data[index];
 
