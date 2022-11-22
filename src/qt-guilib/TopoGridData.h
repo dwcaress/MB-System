@@ -39,9 +39,9 @@ namespace mb_system {
       return nColumns_;
     }
   
-    /// Get northing, easting, z data at specified row and column.
+    /// Get x, y, z data at specified row and column.
     /// Returns false in case of error
-    virtual bool data(int row, int col, double *northing, double *easting,
+    virtual bool data(int row, int col, double *y, double *x,
                       double *z) = 0;
   
     /// Get min/max bounds on each axis
@@ -108,7 +108,7 @@ namespace mb_system {
     char projString_[100];
 
 
-    /// Projection types
+    /// Projection types specified in mb-system .grd and swath files
     static const char *GeographicType_;
     static const char *UtmType_;
     
