@@ -1,4 +1,5 @@
 #include <vtkPointPicker.h>
+#include <proj.h>
 #include "PickerInteractorStyle.h"
 #include "QVtkRenderer.h"
 #include "QVtkItem.h"
@@ -47,6 +48,21 @@ void PickerInteractorStyle::OnLeftButtonDown() {
   std::cout << "WorldCoord value: " << worldCoord[0] << " " <<
     worldCoord[1] << " " << worldCoord[2] << std::endl;
 
+  // If dataset in geographic CRS, display picked point in geogaphic
+  // CRS
+  std::cout << "file CRS proj-string: " <<
+    qVtkRenderer_->getGridReader()->fileCRS() << std::endl;
+
+  PJ *transform = qVtkRenderer_->getGridReader()->projFileToDisplay();
+
+  if (transform) {
+    PJ_COORD utm = proj_coord(worldCoord[0], worldCoord[1], 0, 0);
+    PJ_COORD lonLat = proj_trans(transform, PJ_INV, utm);
+    std::cout << "transformed" << std::endl;
+    worldCoord[0] = lonLat.xyzt.x;
+    worldCoord[1] = lonLat.xyzt.y;
+  }
+  
   // Correct elevation for vertical exaggeration
   worldCoord[2] /= qVtkRenderer_->getDisplayProperties()->verticalExagg;
   
@@ -59,7 +75,7 @@ void PickerInteractorStyle::OnLeftButtonDown() {
       
     }
     else {
-      sprintf(buf, "%.1f, %.1f, %.1f",
+      sprintf(buf, "%.4f, %.4f, %.1f",
               worldCoord[0], worldCoord[1], worldCoord[2]);
     }
   }
