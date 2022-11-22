@@ -9,6 +9,7 @@
 #include "vtkPoints.h"
 #include "vtkCellArray.h"
 #include "gmt.h"
+#include <proj.h>
 #include "TopoGridData.h"
 
 namespace mb_system {
@@ -18,7 +19,6 @@ namespace mb_system {
                      GMTGrid,
                      SwathGrid};
 
-  
   /**
      TopoGridReader reads data stored in a data file 
      and outputs the data into a vtkPoints (vertices) and vtkCellArray 
@@ -72,9 +72,9 @@ namespace mb_system {
     static float zScaleLatLon(float latRange, float lonRange,
                               float zRange);
 
-    /// Return true if corresponding file stores x-y values as UTM
-    bool fileInUTM();
-
+    /// Return true if speciied TopoGridData is in geographic CRS
+    bool geographicCRS(TopoGridData *grid);
+    
     /// Set grid type
     void setGridType(TopoGridType gridType) {
       gridType_ = gridType;
@@ -82,8 +82,18 @@ namespace mb_system {
 
     /// Return file grid type
     static TopoGridType getGridType(const char *filename);
+
+    /// Return CRS proj-string of stored grid data
+    const char *fileCRS();
+
+
+    /// PROJ transform between stored and displayed grid data
+    PJ *projFileToDisplay() {
+      return projGeogToUTM_;
+    }
+
     
-  protected:
+ protected:
   
     /// Callback registered with the VariableArraySelection.
     static void SelectionModifiedCallback(vtkObject* caller, unsigned long eid,
@@ -127,9 +137,18 @@ namespace mb_system {
     char *yUnits_;
     char *zUnits_;
 
+    /// Display CRS proj-string
+    char displayCRS_[64];
 
+    /// PROJ context
+    PJ_CONTEXT *projContext_;
+    
+    /// PROJ transformation between stored and displayed CRS
+    PJ *projGeogToUTM_;
+    
   private:
-  
+
+    
     /// Constructor - publicly accessed with New()
     TopoGridReader();
   

@@ -97,7 +97,8 @@ void AprojTest(char *msg) {
 TopoGridReader::TopoGridReader() :
   fileName_(nullptr),
   gridType_(TopoGridType::Unknown),
-  xUnits_(nullptr), yUnits_(nullptr), zUnits_(nullptr)
+  xUnits_(nullptr), yUnits_(nullptr), zUnits_(nullptr),
+  projContext_(nullptr), projGeogToUTM_(nullptr)
 {
   
   gridPoints_ = vtkSmartPointer<vtkPoints>::New();
@@ -165,48 +166,54 @@ int TopoGridReader::RequestData(vtkInformation* request,
   }
 
   grid_->units(&xUnits_, &yUnits_, &zUnits_);
-  
-  PJ *toUTM = nullptr;
+
+    
+  //  PJ *toUTM = nullptr;
   PJ_CONTEXT *projContext = nullptr;
-  bool convertToUTM = !fileInUTM();
-  
-  if (gridType_ == TopoGridType::SwathGrid) {
-    // Data already in UTM
-    convertToUTM = false;
-  }
-  
+
+  // If in grid is in geographic CRM, must project it to UTM
+  // to maintain same scale on x, y, and z axes
+  bool convertToUTM = geographicCRS(grid_);
+
   double xMin, xMax, yMin, yMax, zMin, zMax;
   grid_->bounds(&xMin, &xMax, &yMin, &yMax, &zMin, &zMax);
   std::cerr << "xmin=" << xMin << ", xMax=" << xMax
             << ", yMin=" << yMin << ", yMax=" << yMax << std::endl;
 
+  if (projGeogToUTM_) {
+    // Clean up previous transform and context
+    proj_destroy(projGeogToUTM_);
+    proj_context_destroy(projContext_);
+    projGeogToUTM_ = nullptr;
+    projContext_ = nullptr;
+  }
+    
   // If x and y are not in UTM, must convert them to UTM
   if (convertToUTM) {
+
     std::cout << "file projection is not UTM" << std::endl;
     // Set up PROJ software first...
-
 
     // Get UTM zone of grid's W edge
     int utmZone = ((xMin + 180)/6 + 0.5);
 
     PJ_CONTEXT *projContext = proj_context_create();
-    const char *srcCRS = "EPSG:4326";
-    char targCRS[64];
-    sprintf(targCRS, "+proj=utm +zone=%d +datum=WGS84", utmZone); 
-    toUTM = proj_create_crs_to_crs (projContext,
-                                    srcCRS,
-                                    targCRS,
-                                    nullptr);
-    if (!toUTM) {
-      vtkErrorMacro(<< "failed to create toUTM");
+
+    sprintf(displayCRS_, "+proj=utm +zone=%d +datum=WGS84", utmZone); 
+    projGeogToUTM_ = proj_create_crs_to_crs (projContext,
+                                             grid_->projString(),
+                                             displayCRS_,
+                                             nullptr);
+    if (!projGeogToUTM_) {
+      vtkErrorMacro(<< "failed to create PJ transform");
       SetErrorCode(vtkErrorCode::UserError);
       return 0;      
     }
 
     // Ensure proper coordinate order
     PJ* normT = proj_normalize_for_visualization(projContext,
-                                                 toUTM);
-    proj_destroy(toUTM);
+                                                 projGeogToUTM_);
+    proj_destroy(projGeogToUTM_);
     
     if (!normT) {
       vtkErrorMacro(<< "failed to create norm proj");
@@ -214,7 +221,7 @@ int TopoGridReader::RequestData(vtkInformation* request,
       return 0;      
     }
 
-    toUTM = normT;
+    projGeogToUTM_ = normT;
   }
   else {
     std::cout << "Already in UTM" << std::endl;
@@ -238,39 +245,34 @@ int TopoGridReader::RequestData(vtkInformation* request,
   unsigned row;
   unsigned col;
 
-  if (convertToUTM) {
-    std::cerr << "WARNING: conversion to UTM not yet implemented!" << std::endl;
-  }
-  
   // Load points read from grid file
   double x, y, z;
   double lat, lon;
   int nValidPoints = 0;
   bool gridMissingZValues = false;
   std::cerr << "TopoGridReader::RequestData() - load points" << std::endl;    
+
   for (row = 0; row < nRows; row++) {
     for (col = 0; col < nColumns; col++) {
 
       if (!convertToUTM) {
         // Already in UTM
-        grid_->data(row, col, &y, &x, &z);
+        grid_->data(row, col, &x, &y, &z);
         // Don't insert NaN-valued data
         if (std::isnan(z) || z == TopoGridData::NoData) {
           gridMissingZValues = true;
 
-          //// TEST TEST TEST
-          /// z = 0.;
-          
           // Don't insert nan values           
           if (std::isnan(z)) {
             z = TopoGridData::NoData;
           }
         }
+        
         vtkIdType id = gridPoints_->InsertNextPoint(x, y, z);
         nValidPoints++;
       }
       else {
-        grid_->data(row, col, &lat, &lon, &z);
+        grid_->data(row, col, &lon, &lat, &z);
         if (std::isnan(z) || z == TopoGridData::NoData) {
           gridMissingZValues = true;
           // Don't insert nan values 
@@ -282,20 +284,14 @@ int TopoGridReader::RequestData(vtkInformation* request,
         PJ_COORD lonLat = proj_coord(lon, lat,
                                      0, 0);
 
-        PJ_COORD utm = proj_trans(toUTM, PJ_FWD, lonLat);
-        //        std::cerr << "utm: " << utm.enu.e << ", " << utm.enu.n << std::endl;
+        PJ_COORD utm = proj_trans(projGeogToUTM_, PJ_FWD, lonLat);
         vtkIdType id = gridPoints_->InsertNextPoint(utm.enu.e,
                                                     utm.enu.n,
                                                     z);
       }
     }
   }
-
-  // Clean up proj UTM conversion stuff
-  if (convertToUTM) {
-    proj_destroy(toUTM);
-    proj_context_destroy(projContext);
-  }
+  
 
   double bounds[6];
   gridPoints_->GetBounds(bounds);
@@ -304,15 +300,7 @@ int TopoGridReader::RequestData(vtkInformation* request,
     ", zMin=" << bounds[4] << ", zMax=" << bounds[5] << std::endl;
   
   // Set Delaunay triangle vertices
-  /* ***
-       // Add grid points to a polydata object
-      vtkNew<vtkPolyData> polyData;
-      polyData->SetPoints(gridPoints_);
-      vtkNew<vtkDelaunay2D> delaunay;
-      delaunay_->SetInputData(polyData);
-
-      *** */
-     if (!gridPolygons_->Allocate(nRows * nColumns * 2)) {
+  if (!gridPolygons_->Allocate(nRows * nColumns * 2)) {
     std::cerr << "failed to allocat "
 	      <<  nRows * nColumns *2 << " polygons"
 	      << std::endl;
@@ -327,23 +315,23 @@ int TopoGridReader::RequestData(vtkInformation* request,
       triangleVertexId[0] = gridOffset(nRows, nColumns, row, col);
       triangleVertexId[1] = gridOffset(nRows, nColumns, row, col+1);
       triangleVertexId[2] = gridOffset(nRows, nColumns, row+1, col+1);
-      // If any vertices refer to point with no z-data, then do not insert into gridPolygons
+      // If any of this trianagle's vertices refer to point with no z-data,
+      // then do not insert triangle into gridPolygons
       if (!gridMissingZValues || !triangleMissingZValues(triangleVertexId)) {
         gridPolygons_->InsertNextCell(3, triangleVertexId);
       }
 
-      
       // Second triangle
       triangleVertexId[0] = gridOffset(nRows, nColumns, row, col);
       triangleVertexId[1] = gridOffset(nRows, nColumns, row+1, col+1);
       triangleVertexId[2] = gridOffset(nRows, nColumns, row+1, col);
-      // If any vertices refer to point with no z-data, then do not insert into gridPolygons
+      // If any of this triangle's vertices refer to point with no z-data,
+      // then do not insert triangle into gridPolygons
       if (!gridMissingZValues || !triangleMissingZValues(triangleVertexId)) {
         gridPolygons_->InsertNextCell(3, triangleVertexId);
       }      
     }
   }
-
 
   // Save to object's points and polygons
   polyOutput->SetPoints(gridPoints_);
@@ -419,11 +407,15 @@ float TopoGridReader::zScaleLatLon(float latRange, float lonRange,
 
 
 
-bool TopoGridReader::fileInUTM() {
-  if (!strcmp(xUnits_, UTM_X_NAME) &&
-      !strcmp(yUnits_, UTM_Y_NAME)) {
+bool TopoGridReader::geographicCRS(TopoGridData *gridData) {
+
+  const char *projString = grid_->projString();
+  if (strstr(projString, "EPSG:4326")) {
+    // Appears to be in geographic CRS (are there other geographic EPSGs?)
     return true;
   }
+
+  // Assume projected CRS
   return false;
 }
 
@@ -455,6 +447,17 @@ TopoGridData *TopoGridReader::readGridfile(char *filename) {
 
   // Set grid parameters based on data just read from file
   grid->setParameters();
+
+  // Set proj-string for grid's CRS
+  if (grid->setProjString()) {
+    std::cerr << "proj-string: " << grid->projString() << std::endl;
+  }
+  else {
+    // Unhandled projection
+    std::cerr << "unhandled projection type in " << filename << std::endl;    
+    return nullptr;
+  }
+
   
   return grid;
 }
@@ -491,6 +494,17 @@ bool TopoGridReader::triangleMissingZValues(vtkIdType *vertices) {
     }
   }
 
-  // Not missing z-values
+  // Vertices not missing z-values
   return false;
+}
+
+
+
+const char *TopoGridReader::fileCRS() {
+  if (!grid_) {
+    std::cerr << "No grid defined" << std::endl;
+    return nullptr;
+  }
+
+  return grid_->projString();
 }
