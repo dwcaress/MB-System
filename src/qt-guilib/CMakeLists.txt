@@ -18,6 +18,7 @@ set(src
     Camera.cpp
     MBQuickItem.cpp
     ColorMap.cpp
+    DisplayProperties.cpp    
     MBQuickView.cpp
     QVtkItem.cpp
     GmtGridReader.cpp
