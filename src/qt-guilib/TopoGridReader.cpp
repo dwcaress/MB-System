@@ -98,7 +98,7 @@ TopoGridReader::TopoGridReader() :
   fileName_(nullptr),
   gridType_(TopoGridType::Unknown),
   xUnits_(nullptr), yUnits_(nullptr), zUnits_(nullptr),
-  projContext_(nullptr), projGeogToUTM_(nullptr)
+  projContext_(nullptr), projTransform_(nullptr)
 {
   
   gridPoints_ = vtkSmartPointer<vtkPoints>::New();
@@ -172,19 +172,29 @@ int TopoGridReader::RequestData(vtkInformation* request,
   PJ_CONTEXT *projContext = nullptr;
 
   // If in grid is in geographic CRM, must project it to UTM
-  // to maintain same scale on x, y, and z axes
-  bool convertToUTM = geographicCRS(grid_);
+  // to maintain same scale (meters) on x, y, and z axes
+  bool convertToUTM = geographicCRS();
 
   double xMin, xMax, yMin, yMax, zMin, zMax;
   grid_->bounds(&xMin, &xMax, &yMin, &yMax, &zMin, &zMax);
   std::cerr << "xmin=" << xMin << ", xMax=" << xMax
             << ", yMin=" << yMin << ", yMax=" << yMax << std::endl;
 
-  if (projGeogToUTM_) {
+  // If geographic CRS, then compute scale factor such that z data scale
+  // matches that of lat/lon axes
+  if (geographicCRS()) {
+    float zScale = TopoGridReader::zScaleLatLon(yMax - yMin,
+                                                xMax - xMin,
+                                                zMax - zMin);
+    
+    std::cerr << "lat-lon z-scale: " << zScale << std::endl;
+  }
+  
+  if (projTransform_) {
     // Clean up previous transform and context
-    proj_destroy(projGeogToUTM_);
+    proj_destroy(projTransform_);
     proj_context_destroy(projContext_);
-    projGeogToUTM_ = nullptr;
+    projTransform_ = nullptr;
     projContext_ = nullptr;
   }
     
@@ -200,11 +210,11 @@ int TopoGridReader::RequestData(vtkInformation* request,
     PJ_CONTEXT *projContext = proj_context_create();
 
     sprintf(displayCRS_, "+proj=utm +zone=%d +datum=WGS84", utmZone); 
-    projGeogToUTM_ = proj_create_crs_to_crs (projContext,
+    projTransform_ = proj_create_crs_to_crs (projContext,
                                              grid_->projString(),
                                              displayCRS_,
                                              nullptr);
-    if (!projGeogToUTM_) {
+    if (!projTransform_) {
       vtkErrorMacro(<< "failed to create PJ transform");
       SetErrorCode(vtkErrorCode::UserError);
       return 0;      
@@ -212,8 +222,8 @@ int TopoGridReader::RequestData(vtkInformation* request,
 
     // Ensure proper coordinate order
     PJ* normT = proj_normalize_for_visualization(projContext,
-                                                 projGeogToUTM_);
-    proj_destroy(projGeogToUTM_);
+                                                 projTransform_);
+    proj_destroy(projTransform_);
     
     if (!normT) {
       vtkErrorMacro(<< "failed to create norm proj");
@@ -221,7 +231,7 @@ int TopoGridReader::RequestData(vtkInformation* request,
       return 0;      
     }
 
-    projGeogToUTM_ = normT;
+    projTransform_ = normT;
   }
   else {
     std::cout << "Already in UTM" << std::endl;
@@ -284,7 +294,7 @@ int TopoGridReader::RequestData(vtkInformation* request,
         PJ_COORD lonLat = proj_coord(lon, lat,
                                      0, 0);
 
-        PJ_COORD utm = proj_trans(projGeogToUTM_, PJ_FWD, lonLat);
+        PJ_COORD utm = proj_trans(projTransform_, PJ_FWD, lonLat);
         vtkIdType id = gridPoints_->InsertNextPoint(utm.enu.e,
                                                     utm.enu.n,
                                                     z);
@@ -406,8 +416,31 @@ float TopoGridReader::zScaleLatLon(float latRange, float lonRange,
 }
 
 
+float TopoGridReader::zScaleLatLon() {
 
-bool TopoGridReader::geographicCRS(TopoGridData *gridData) {
+  // Not really implemented yet. Do we still need it?
+  return 1.;
+
+  /* ***
+  if (!geographicCRS()) {
+    // Projected, not geographic - no need to scale z
+    return 1.;
+  }
+  
+  double xMin, xMax, yMin, yMax, zMin, zMax;
+  grid_->bounds(&xMin, &xMax, &yMin, &yMax, &zMin, &zMax);
+  
+  return TopoGridReader::zScaleLatLon(yMax - yMin,
+                                      xMax - xMin,
+                                      zMax - zMin);
+                                      *** */
+}
+
+
+
+
+
+bool TopoGridReader::geographicCRS() {
 
   const char *projString = grid_->projString();
   if (strstr(projString, "EPSG:4326")) {
@@ -508,3 +541,5 @@ const char *TopoGridReader::fileCRS() {
 
   return grid_->projString();
 }
+
+

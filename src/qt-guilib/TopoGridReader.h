@@ -72,8 +72,11 @@ namespace mb_system {
     static float zScaleLatLon(float latRange, float lonRange,
                               float zRange);
 
-    /// Return true if speciied TopoGridData is in geographic CRS
-    bool geographicCRS(TopoGridData *grid);
+    /// Compute z-scale factor based on lat and lon ranges
+    float zScaleLatLon();
+
+    /// Return true if encapsulated TopoGridData is in geographic CRS
+    bool geographicCRS();
     
     /// Set grid type
     void setGridType(TopoGridType gridType) {
@@ -89,7 +92,7 @@ namespace mb_system {
 
     /// PROJ transform between stored and displayed grid data
     PJ *projFileToDisplay() {
-      return projGeogToUTM_;
+      return projTransform_;
     }
 
     
@@ -144,7 +147,7 @@ namespace mb_system {
     PJ_CONTEXT *projContext_;
     
     /// PROJ transformation between stored and displayed CRS
-    PJ *projGeogToUTM_;
+    PJ *projTransform_;
     
   private:
 
