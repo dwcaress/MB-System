@@ -10,7 +10,7 @@
 #include <vtkInteractorStyleTrackballCamera.h>
 #include <vtkRenderer.h>
 #include <vtkActor.h>
-// #include <vtkCubeAxesActor.h>
+#include <vtkCubeAxesActor.h>
 #include <vtkCubeAxesActor2D.h>
 #include <vtkSmartPointer.h>
 #include <vtkElevationFilter.h>
@@ -77,8 +77,8 @@ namespace mb_system {
     }
 
     /// Return pointer to DisplayProperties member
-    const DisplayProperties* getDisplayProperties() {
-      return (const DisplayProperties *)displayProperties_;
+    DisplayProperties* getDisplayProperties() {
+      return displayProperties_;
     }
 
     /// Get item member
@@ -103,7 +103,7 @@ namespace mb_system {
   protected:
 
     /// Display properties copied from QVtkItem
-    const DisplayProperties *displayProperties_;
+    mb_system::DisplayProperties *displayProperties_;
     
     /// Initilize VTK pipeline member objects, then assemble (connect) ; return
     /// false on error.
@@ -112,14 +112,23 @@ namespace mb_system {
     /// Connect pipeline components
     bool assemblePipeline();
 
-    /// Setup axes
-    static void setupAxes(vtkCubeAxesActor2D *axesActor,
-                          vtkNamedColors *namedColors,
-                          double *surfaceBounds,
-                          double *gridBounds,
-                          const char *xUnits, const char *yUnits,
-                          const char *zUnits);
+    /// Setup axes, using vtkCubeAxesActor2D
+    void setupAxes(vtkCubeAxesActor2D *axesActor,
+                   vtkNamedColors *namedColors,
+                   double *surfaceBounds,
+                   double *gridBounds,
+                   const char *xUnits, const char *yUnits,
+                   const char *zUnits);
 
+    /// Setup axes, using vtkCubeAxesActor
+    void setupAxes(vtkCubeAxesActor *axesActor,
+                   vtkNamedColors *namedColors,
+                   double *surfaceBounds,
+                   double *gridBounds,
+                   const char *xUnits, const char *yUnits,
+                   const char *zUnits);
+
+    
     /// If item_ grid filename differs from gridFilename_, copy it and
     /// return true, else return false
     bool gridFilenameChanged(char *filename);
@@ -152,7 +161,7 @@ namespace mb_system {
     vtkSmartPointer<vtkActor> surfaceActor_;
 
     /// Grid axes actor
-    vtkSmartPointer<vtkCubeAxesActor2D> axesActor_;    
+    vtkSmartPointer<vtkCubeAxesActor> axesActor_;        
 
     /// VTK renderer
     vtkSmartPointer<vtkRenderer> renderer_;
