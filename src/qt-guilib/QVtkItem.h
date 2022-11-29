@@ -68,21 +68,28 @@ namespace mb_system {
     }
 
     /// Get display properties
-    const DisplayProperties *displayProperties() {
+    DisplayProperties *displayProperties() {
       return &displayProperties_;
     }
 
     /// Toggle axes display
     void showAxes(bool show) {
-      displayProperties_.showAxes = show;
-      displayProperties_.changed = true;
+      displayProperties_.showAxes(show);
+      displayProperties_.changed(true);
     }
 
+    /// Set site file
+    void setSiteFile(char *siteFile) {
+      displayProperties_.siteFile(siteFile);
+      displayProperties_.changed(true);
+    }
+
+    
     /// Vertical exaggeration
     void setVerticalExagg(float verticalExagg) {
       qDebug() << "setVerticalExagg() " << verticalExagg;
-      displayProperties_.verticalExagg = verticalExagg;
-      displayProperties_.changed = true;      
+      displayProperties_.verticalExagg(verticalExagg);
+      displayProperties_.changed(true);
     }
 
     /// Set topo colormap scheme; return true if colorMapName corresponds
@@ -91,7 +98,7 @@ namespace mb_system {
 
     /// Clear DisplayProperites changed flag
     void clearPropertyChangedFlag() {
-      displayProperties_.changed = false;
+      displayProperties_.changed(false);
     }
     
   signals:

@@ -12,8 +12,7 @@ QVtkItem::QVtkItem() :
     qDebug() << "mirrorVertically: " << mirrorVertically();
     // Qt and OpenGL apparently have opposite y-axis direction
     setMirrorVertically(true);
-    displayProperties_.verticalExagg = 1.;
-    displayProperties_.topoColorMapScheme = TopoColorMap::Scheme::Haxby;
+
 }
 
 QQuickFramebufferObject::Renderer *QVtkItem::createRenderer() const {
@@ -109,8 +108,8 @@ bool QVtkItem::setColorMapScheme(const char *colorMapName) {
     return false;
   }
 
-  displayProperties_.topoColorMapScheme = scheme;
-  displayProperties_.changed = true;
+  displayProperties_.colorMapScheme(scheme);
+  displayProperties_.changed(true);
   
   return true;
 
