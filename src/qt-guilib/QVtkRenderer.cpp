@@ -559,6 +559,10 @@ bool QVtkRenderer::assemblePipeline() {
 
   renderer_->ResetCamera();
 
+  // Initialize displayed picked coordinates to blank
+  QString msg("");
+  item_->setPickedPoint(msg);
+  
   qDebug() << "pipeline assembled";  
   return true;
 
