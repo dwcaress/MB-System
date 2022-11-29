@@ -1,3 +1,4 @@
+#include <locale.h>
 #include <vtkPointPicker.h>
 #include <proj.h>
 #include "PickerInteractorStyle.h"
@@ -50,9 +51,26 @@ void PickerInteractorStyle::OnLeftButtonDown() {
 
   // If dataset in geographic CRS, display picked point in geogaphic
   // CRS
-  std::cout << "file CRS proj-string: " <<
-    qVtkRenderer_->getGridReader()->fileCRS() << std::endl;
+  const char *projString = qVtkRenderer_->getGridReader()->fileCRS();
+  bool geographicCRS = qVtkRenderer_->getGridReader()->geographicCRS();
+  std::cout << "file CRS proj-string: " << projString << std::endl;
 
+  int xyUnits;
+  int decp;
+  if (geographicCRS) {
+    // degree ascii code
+    // xyUnits = 0370;
+    xyUnits = 'd';
+    decp = 4;
+  }
+  else {
+    // meters
+    xyUnits = 'm';
+    decp = 0;
+  }
+
+  printf("xyUnits: %c\n", xyUnits);
+  printf("degree symbol: %c\n", 0370);
   PJ *transform = qVtkRenderer_->getGridReader()->projFileToDisplay();
 
   if (transform) {
@@ -62,29 +80,39 @@ void PickerInteractorStyle::OnLeftButtonDown() {
     worldCoord[0] = lonLat.xyzt.x;
     worldCoord[1] = lonLat.xyzt.y;
   }
+  else {
+    std::cout << "No transform" << std::endl;
+  }
   
   // Correct elevation for vertical exaggeration
-  worldCoord[2] /= qVtkRenderer_->getDisplayProperties()->verticalExagg;
+  worldCoord[2] /=
+    (qVtkRenderer_->getDisplayProperties()->verticalExagg() *
+     qVtkRenderer_->getGridReader()->zScaleLatLon());
   
   char buf[256];
   if (pointId != -1) {
 
     if (worldCoord[2] == TopoGridData::NoData) {
-      sprintf(buf, "%.1f, %.1f, NoData",
-              worldCoord[0], worldCoord[1]);
+      sprintf(buf, "%.*f%c, %.*f%c, NoData %s",
+              decp, worldCoord[0], xyUnits, decp, worldCoord[1],
+              xyUnits, projString);
       
     }
     else {
-      sprintf(buf, "%.4f, %.4f, %.1f",
-              worldCoord[0], worldCoord[1], worldCoord[2]);
+      sprintf(buf, "%.*f%c, %.*f%c, %.0fm %s",
+              decp, worldCoord[0], xyUnits, decp, worldCoord[1], xyUnits,
+              worldCoord[2], projString);
     }
   }
   else {
     //    sprintf(buf, "unknown position");
-    sprintf(buf, "%.1f, %.1f, %.1f ???",
-              worldCoord[0], worldCoord[1], worldCoord[2]);
+    sprintf(buf, "%.*f%c, %.*f%c, %.0fm ??? %s",
+            decp, worldCoord[0], xyUnits, decp, worldCoord[1], xyUnits,
+            worldCoord[2], projString);
   }
 
+  std::cerr << "buf: " << buf << std::endl;
+  
   // Store picked point coordinates in QVtkRenderer
   qVtkRenderer_->setPickedPoint(worldCoord);
 
