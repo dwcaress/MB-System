@@ -510,7 +510,8 @@ am__can_run_installinfo = \
     n|no|NO) false;; \
     *) (install-info --version) >/dev/null 2>&1;; \
   esac
-am__include_HEADERS_DIST = opt/rov/lcm_pcf/signal_t.hpp \
+am__include_HEADERS_DIST = trnw/netif.h trnw/trnw.h trnw/trnif_proto.h \
+	trnw/trnif_msg.h trnw/mb1_msg.h opt/rov/lcm_pcf/signal_t.hpp \
 	opt/rov/lcm_pcf/string_t.hpp opt/rov/gss/nav_solution_t.hpp \
 	opt/rov/gss/message_t.hpp opt/rov/gss/analog_t.hpp \
 	opt/rov/gss/digital_t.hpp opt/rov/gss/dvl_stat_t.hpp \
@@ -845,6 +846,11 @@ libmb1_la_LDFLAGS = -no-undefined -version-info 0:0:0
 libmb1_la_SOURCES = trnw/mb1_msg.c
 libmb1_la_LIBADD = 
 @BUILD_ROVTRN_TRUE@include_HEADERS = \
+@BUILD_ROVTRN_TRUE@trnw/netif.h \
+@BUILD_ROVTRN_TRUE@trnw/trnw.h \
+@BUILD_ROVTRN_TRUE@trnw/trnif_proto.h \
+@BUILD_ROVTRN_TRUE@trnw/trnif_msg.h \
+@BUILD_ROVTRN_TRUE@trnw/mb1_msg.h \
 @BUILD_ROVTRN_TRUE@opt/rov/lcm_pcf/signal_t.hpp \
 @BUILD_ROVTRN_TRUE@opt/rov/lcm_pcf/string_t.hpp \
 @BUILD_ROVTRN_TRUE@opt/rov/gss/nav_solution_t.hpp \

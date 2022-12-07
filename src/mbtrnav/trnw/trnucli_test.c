@@ -979,7 +979,7 @@ static int s_trnucli_process_update(trnu_pub_t *update, app_cfg_t *cfg)
     char *str=NULL;
     trnucli_update_str(update,&str,0,cfg->ofmt);
     if(NULL!=str){
-    	fprintf(cfg->ofile,"%s\n",str);
+        fprintf(cfg->ofile,"%s\n",str);
         free(str);
     }
     str=NULL;
