@@ -765,6 +765,7 @@ AM_CPPFLAGS = -g -O0 -I${top_srcdir}/src/mbtrnav/trnw \
 	-I${top_srcdir}/src/mbtrnframe/mframe/src -DHAVE_CONFIG_H \
 	-DWITH_TESTS -DWITH_MMDEBUG -D_GNU_SOURCE -DWITH_MST_MSTATS \
 	-DMST_STATS_EN -DWITH_TRNLOG -DWITH_TRNLOG_EST_OUT
+#AM_CPPFLAGS += -DWITH_TNAVPF_CEP_CORRECTION
 #AM_CPPFLAGS += -DTRN_NORAND
 libgeolib_la_LDFLAGS = -no-undefined -version-info 0:0:0
 libgeolib_la_SOURCES = gctp/source/gctp.c gctp/source/alberfor.c \

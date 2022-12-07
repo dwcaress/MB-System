@@ -293,12 +293,13 @@ plot_trno(){
     # trno metrics
     #####################
 
-    export QX_TRNO_TARGET=${1}
-    export TRNO_LOG="${QU_LOG_PATH}/trno-${QX_TRNO_TARGET}-${QU_SESSION_ID}.csv"
-    export QU_TRNO_CSV="trno-${QX_TRNO_TARGET}-${QU_SESSION_ID}.csv"
+    export TRNO_LOG="${QU_LOG_PATH}/trno-${QU_SESSION_ID}.csv"
+    export QU_TRNO_CSV="trno-${QU_SESSION_ID}.csv"
 
     TRNO_QPCONF="qp-trno.conf.sh"
 
+    vout " TRNO_LOG       - ${TRNO_LOG}"
+    vout " QU_TRNO_CSV    - ${QU_TRNO_CSV}"
 
     if [ -f "${TRNO_LOG}" ] && [ -f "${QP_PLOT_HOME}/${TRNO_QPCONF}" ]
     then
@@ -307,8 +308,14 @@ plot_trno(){
         # use qplot to generate plot set
         ${QPLOT_CMD} -f ${QP_PLOT_HOME}/${TRNO_QPCONF}
     else
-        echo "ERR - TRNO_LOG log not found ${TRNO_LOG}"
-        echo "ERR - TRNO_QPCONF log not found ${QP_PLOT_HOME}/${TRNO_QPCONF}"
+    	if [ ! -f "${TRNO_LOG}" ]
+        then
+	  echo "WARN - TRNO_LOG log not found ${TRNO_LOG}"
+        fi
+    	if [ ! -f "${QP_PLOT_HOME}/${TRNO_QPCONF}" ]
+        then
+	  echo "ERR - TRNO_QPCONF config not found ${QP_PLOT_HOME}/${TRNO_QPCONF}"
+        fi
     fi
 }
 
@@ -327,13 +334,10 @@ plot_logs(){
     vout " QU_SESSION_ID  - ${QU_SESSION_ID}"
     vout " QU_DATA_SET_ID - ${QU_DATA_SET_ID}"
 
-	# generate plot CSV and images...
+    # generate plot CSV and images...
 
-	# plot DVL TRN replay data
-	plot_trno "DVL"
-
-	# plot IDT TRN replay data
-    plot_trno "IDT"
+    # plot TRN replay data
+    plot_trno
 
     # qplot PDF combiner job configuration
     COMB_QPCONF="qp-comb.conf.sh"

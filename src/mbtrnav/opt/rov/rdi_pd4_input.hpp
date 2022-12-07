@@ -97,6 +97,41 @@ public:
             // xxxxx011 600-kHz DVL
             // xxxxx100 1200-kHz DVL
 
+#if WITH_RDI_SYSCONFIG_DEBUG
+            unsigned short coord_sys = (dvl.sysconfig & 0xC0) >> 6;
+            unsigned short tilt = (dvl.sysconfig & 0x20) >> 5;
+            unsigned short bsol = (dvl.sysconfig & 0x10) >> 4;
+            unsigned short freq = (dvl.sysconfig & 0x07) >> 0;
+
+            std::cerr << __func__ << ":" << __LINE__ << " sysconfig[" << std::hex << dvl.sysconfig << "]\n" << std::dec;
+            const char *csys_str;
+            const char *freq_str;
+            if(coord_sys == 0){
+                csys_str = "BEAM-COORDINATE";
+            } else if(coord_sys == 1){
+                csys_str =  "INSTRUMENT-COORDINATE";
+            } else if(coord_sys == 2){
+                csys_str =  "SHIP-COORDINATE";
+            } else if(coord_sys == 3){
+                csys_str =  "EARTH-COORDINATE";
+            } else {
+                csys_str = "?";
+            }
+
+            if(freq == 2){
+                freq_str = "300-kHz";
+            } else if(freq == 3){
+                freq_str = "600-kHz";
+            } else if(freq == 4){
+                freq_str = "1200-kHz";
+            } else {
+                freq_str = "?";
+            }
+            std::cerr << "coord_sys[" << coord_sys << "/" << csys_str << "]\n" ;
+            std::cerr << "tilt[" << tilt << "/" << (tilt ? 'Y' : 'N' ) << "]\n";
+            std::cerr << "bsol[" << bsol << "/" << (bsol ? 'Y' : 'N' ) << "]\n";
+            std::cerr << "freq[" << freq << "/" << freq_str << "]\n";
+#endif
             vel_flags_t vflags = 0;
 
             vflags |= ( ((bflags&BF_BLOCK) != 0) ? VF_BLOCK : 0);

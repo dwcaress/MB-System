@@ -16,6 +16,13 @@
 #include "particleFilterDefs.h"
 #include "trn_log.h"
 
+#define _STR(x) #x
+#define STR(x) _STR(x)
+
+#ifdef TRN_NORAND
+#pragma message( __FILE__":" STR(__LINE__) " - feature TRN_NORAND enabled (see FEATURE_OPTIONS in Makefile)" )
+#endif
+
 TNavFilter::
 //TNavFilter(char* mapName, char* vehicleSpecs, char* directory, const double* windowVar, const int& mapType) {Reload Map Issue
 TNavFilter(TerrainMap* terrainMap, char* vehicleSpecs, char* directory, const double* windowVar, const int& mapType)
@@ -52,7 +59,11 @@ forceLowGradeFilter(false)
 	currVar[1] = windowVar[2];
 
 	//Initialize random number generator
-   unsigned int seed = seed_randn(NULL);
+#ifdef TRN_NORAND
+    unsigned int seed = seed_randn(NULL);
+#else
+    unsigned int seed = 0;
+#endif
    logs(TL_OMASK(TL_TNAV_PARTICLE_FILTER, TL_LOG),
           "Random noise maker initialized with %d", seed);
 
