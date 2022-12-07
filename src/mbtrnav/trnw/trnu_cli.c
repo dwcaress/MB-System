@@ -690,7 +690,7 @@ static int s_update_hex(trnu_pub_t *update, char *dest, int len, bool pretty)
         for(i=0;i<TRNU_PUB_BYTES;i++){
             if(pretty){
                 if(hdr){
-                    unsigned long ofs = ( bp>(byte *)update ? (bp-(byte *)update-1) : 0);
+                    unsigned long ofs = ( bp>(byte *)update ? (bp-(byte *)update) : 0);
                     int wbytes=snprintf(dp,rem,"%08lx: ",ofs);
                     rem-=(wbytes-1);
                     dp+=wbytes;
