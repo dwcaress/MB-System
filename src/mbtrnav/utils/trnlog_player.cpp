@@ -62,6 +62,7 @@
 
 
 #define TRN_SERVER_PORT_DFL 27027
+#define IBUF_LEN_BYTES 4800
 
 #ifndef DTR
 #define DTR(x) ((x) * M_PI/180.)
@@ -128,9 +129,9 @@ public:
 
     void set_server(bool enable){mServer = enable;}
     void set_trni_csv(bool enable){mTrnInCsvEn = enable;}
-    void set_trni_csv_path(const std::string &path){mTrnInCsvPath = std::string(path);}
+    void set_trni_csv_path(const std::string &path){mTrnInCsvPath = std::string(path.c_str());}
     void set_trno_csv(bool enable){mTrnOutCsvEn = enable;}
-    void set_trno_csv_path(const std::string &path){mTrnOutCsvPath = std::string(path);}
+    void set_trno_csv_path(const std::string &path){mTrnOutCsvPath = std::string(path.c_str());}
     void set_host(const std::string &host){mHost = std::string(host);}
     void set_port(int port){mPort = port;}
     void set_trn_sensor(int id){mTrnSensor = id;}
@@ -138,6 +139,41 @@ public:
     void set_debug(int debug){mDebug = debug;}
     void set_verbose(bool verbose){mVerbose = verbose;}
     void set_oflags(uint32_t flags){mOFlags = flags;}
+
+    void tostream(std::ostream &os, int wkey=15, int wval=18)
+    {
+        os << std::setw(wkey) << "debug" << std::setw(wval) << mDebug << std::endl;
+        os << std::setw(wkey) << "verbose" << std::setw(wval) << mVerbose << std::endl;
+        os << std::setw(wkey) << "mHost" << std::setw(wval) << mHost.c_str() << std::endl;
+        int alen = mTrnCfg.length();
+        int wx = (alen >= wval ? alen + 1 : wval);
+        os << std::setw(wkey) << "mTrnCfg" << std::setw(wx) << mTrnCfg.c_str() << std::endl;
+        os << std::setw(wkey) << "mPort" << std::setw(wval) << mPort << std::endl;
+        os << std::setw(wkey) << "mServer" << std::setw(wval) << mServer << std::endl;
+        os << std::setw(wkey) << "mTrnInCsvEn" << std::setw(wval) << mTrnInCsvEn << std::endl;
+        os << std::setw(wkey) << "mTrnOutCsvEn" << std::setw(wval) << mTrnOutCsvEn << std::endl;
+        alen = mTrnInCsvPath.length();
+        wx = (alen >= wval ? alen + 1 : wval);
+        os << std::setw(wkey) << "mTrnInCsvPath" << std::setw(wx) << mTrnInCsvPath.c_str() << std::endl;
+        alen = mTrnOutCsvPath.length();
+        wx = (alen >= wval ? alen + 1 : wval);
+        os << std::setw(wkey) << "mTrnOutCsvPath" << std::setw(wx) << mTrnOutCsvPath.c_str() << std::endl;
+        os << std::setw(wkey) << "mTrnSensor" << std::setw(wval) << mTrnSensor << std::endl;
+        os << std::setw(wkey) << "mOFlags" << std::hex << std::setw(wval) << (uint32_t)mOFlags.get() << std::endl;
+        os << dec;
+    }
+
+    std::string tostring(int wkey=15, int wval=18)
+    {
+        ostringstream ss;
+        tostream(ss, wkey, wval);
+        return ss.str();
+    }
+
+    void show(int wkey=15, int wval=18)
+    {
+        tostream(std::cerr, wkey, wval);
+    }
 
 protected:
 private:
@@ -250,6 +286,7 @@ public:
 
         TRN_DPRINT("%s:%d - playing file [%s]\n", __func__, __LINE__, src.c_str());
 
+
         if(mConfig.server() && !client_initialized){
             if(init_client(quit) != 0){
                 fprintf(stderr, "%s:%d - init_client failed\n", __func__, __LINE__);
@@ -280,9 +317,9 @@ public:
         }
 
         TrnLog::TrnRecID rec_type = TrnLog::RT_INVALID;
-        byte ibuf[2048]={0};
+        byte ibuf[IBUF_LEN_BYTES]={0};
 
-        while (!mQuit && next_record(ibuf, 2048, rec_type) == 0) {
+        while (!mQuit && next_record(ibuf, IBUF_LEN_BYTES, rec_type) == 0) {
             this->stats().mRecordsFound++;
 
             if(NULL!=quit && *quit)
@@ -292,6 +329,7 @@ public:
 
                 poseT *pt = NULL;
                 if(read_pose(&pt, ibuf) == 0 && pt != NULL){
+
                     this->stats().mMtniRead++;
 
                     if(mConfig.oflag_set(TrnLogConfig::MOTN))
@@ -318,6 +356,7 @@ public:
 
                 measT *mt = NULL;
                 if(read_meas(&mt, ibuf) == 0 && mt != NULL){
+
                     this->stats().mMeaiRead++;
 
                     if(mConfig.oflag_set(TrnLogConfig::MEAS))
@@ -326,10 +365,10 @@ public:
                         std::cerr << "\n";
                     }
 
+
                     if(mConfig.server())
                     {
                         try{
-
                             if(mConfig.trni_csv()){
                                 trni_csv_tofile(&mTrnInCsvFile, lastPT, *mt);
                                 this->stats().mTrniCsvWrite++;
@@ -407,7 +446,7 @@ public:
                 TRN_NDPRINT(2,"invalid record type[%d]\n",rec_type);
             }
 
-            memset(ibuf, 0, 2048);
+            memset(ibuf, 0, IBUF_LEN_BYTES);
         }
         return retval;
     }
@@ -417,7 +456,13 @@ public:
         TRN_DPRINT("setting player quit flag\n");
         mQuit = true;
     }
+
     TLPStats &stats(){return mStats;}
+
+    void show_cfg()
+    {
+        mConfig.show();
+    }
 
 protected:
 
@@ -487,17 +532,20 @@ protected:
 
     void trni_csv_tofile(FILE **fp, poseT &pt, measT &mt)
     {
+
         if(NULL == *fp)
         {
-            TRN_DPRINT("INFO - opening file[%s]\n",mConfig.trni_csv_path().c_str());
-             *fp = fopen(mConfig.trni_csv_path().c_str(),"a");
+            TRN_DPRINT("%s:%d INFO - opening trni_csv file[%s]\n", __func__, __LINE__, mConfig.trni_csv_path().c_str());
+
+            *fp = fopen(mConfig.trni_csv_path().c_str(), "a");
         }
 
         if(NULL != *fp){
+            // if file open, generate and write CSV output
             std::string csv = trni_csv_tostring(pt, mt);
             fwrite(csv.c_str(),csv.length(),1,*fp);
         } else {
-            TRN_DPRINT("ERR - could not open file[%s]\n",mConfig.trni_csv_path().c_str());
+            TRN_DPRINT("%s:%d ERR - could not open trni_csv file[%s] [%d:%s]\n", __func__, __LINE__, mConfig.trni_csv_path().c_str(), errno, strerror(errno));
         }
     }
 
@@ -575,47 +623,57 @@ protected:
     void est_tostream(std::ostream &os, double ts, poseT &pt, poseT &mle, poseT &mmse, int wkey=15, int wval=18)
     {
         os << "--- TRN Estimate OK---" << "\n";
-        os << "MMSE[t,tm,x,y,z] [";
+        os << "MMSE[t, tm, x, y, z] ";
         os << std::fixed << std::setprecision(3);
-        os << ts << ",";
+        os << ts << ", ";
         os << std::setprecision(2);
-        os << mmse.time << ",";
+        os << mmse.time << ", ";
         os << std::setprecision(4);
-        os << mmse.x << "," << mmse.y << "," << mmse.z << "]\n";
+        os << mmse.x << ", " << mmse.y << ", " << mmse.z << "\n";
 
-        os << " OFS[t,tm,x,y,z] [";
+        os << "OFS[t, tm, x, y, z]  ";
         os << std::fixed << std::setprecision(3);
-        os << ts << ",";
+        os << ts << ", ";
         os << std::setprecision(2);
-        os << mmse.time << ",";
+        os << mmse.time << ", ";
         os << std::setprecision(4);
-        os << pt.x-mmse.x << "," << pt.y-mmse.y << "," << pt.z-mmse.z << "]\n";
+        os << pt.x-mmse.x << ", " << pt.y-mmse.y << ", " << pt.z-mmse.z << "\n";
 
-        os << " COV[t,tm,x,y,z] [";
-        os << std::fixed << std::setprecision(3);
-        os << ts << ",";
+        os << "COV[t, x, y, z, m]   ";
+        os << std::setprecision(3);
+        os << mmse.time << ", ";
         os << std::setprecision(2);
-        os << mmse.time << ",";
-        os << std::setprecision(4);
-        os << sqrt(mmse.covariance[0]) << ",";
-        os << sqrt(mmse.covariance[2]) << ",";
-        os << sqrt(mmse.covariance[5]) << "]\n";
+        os << mmse.covariance[0] << ", ";
+        os << mmse.covariance[2] << ", ";
+        os << mmse.covariance[5] << ", ";
+        double ss = mmse.covariance[0] * mmse.covariance[0];
+        ss += mmse.covariance[2] * mmse.covariance[2];
+        ss += mmse.covariance[5] * mmse.covariance[5];
+        os << sqrt(ss) << "\n";
 
-        os << " POS[t,tm,x,y,z] [";
-        os << std::fixed << std::setprecision(3);
-        os << ts << ",";
+        os << "s[t, x, y, z]        ";
+        os << std::setprecision(3);
+        os << mmse.time << ", ";
         os << std::setprecision(2);
-        os << pt.time << ",";
-        os << std::setprecision(4);
-        os << pt.x << "," << pt.y << "," << pt.z << "]\n";
+        os << sqrt(mmse.covariance[0]) << ", ";
+        os << sqrt(mmse.covariance[2]) << ", ";
+        os << sqrt(mmse.covariance[5]) << "\n";
 
-        os << " MLE[t,tm,x,y,z] [";
+        os << "POS[t, tm, x, y, z]  ";
         os << std::fixed << std::setprecision(3);
-        os << ts << ",";
+        os << ts << ", ";
         os << std::setprecision(2);
-        os << mle.time << ",";
+        os << pt.time << ", ";
         os << std::setprecision(4);
-        os << mle.x << "," << mle.y << "," << mle.z << "]\n";
+        os << pt.x << ", " << pt.y << ", " << pt.z << "\n";
+
+        os << "MLE[t, tm, x, y, z]  ";
+        os << std::fixed << std::setprecision(3);
+        os << ts << ", ";
+        os << std::setprecision(2);
+        os << mle.time << ", ";
+        os << std::setprecision(4);
+        os << mle.x << ", " << mle.y << ", " << mle.z << "\n";
     }
 
 
@@ -1003,11 +1061,18 @@ protected:
         byte *bp = (byte *)src+TL_RID_SIZE;
         size_t readlen = TL_MEAI_HDR_SIZE;
 
+        TRN_NDPRINT(2, "%s:%d readlen[%lu]\n", __func__, __LINE__, (unsigned long)readlen);
         if(fread(bp, readlen, 1, mFile) == 1)
         {
             bp += readlen;
             meas_in_t *measin =  (meas_in_t *)src;
             readlen = TL_MEAI_BEAM_SIZE(measin->num_meas);
+
+            TRN_NDPRINT(2, "%s:%d readlen[%lu] num_meas[%d]\n", __func__, __LINE__, (unsigned long)readlen, measin->num_meas);
+            if((bp + readlen) > (src + IBUF_LEN_BYTES)){
+                TRN_NDPRINT(2, "%s:%d ERR: readlen exceeds buffer size [%lu/%d]\n", __func__, __LINE__, (bp + readlen - src), IBUF_LEN_BYTES);
+                return retval;
+            }
 
             if(fread(bp, readlen, 1, mFile) == 1)
             {
@@ -1568,6 +1633,11 @@ public:
         return mTBConfig;
     }
 
+    void show_tb_config()
+    {
+        mTBConfig.show();
+    }
+
     std::string cfg(){return mAppCfg;}
     std::string session_string(){return mSessionStr;}
     std::list<std::string>::iterator input_first(){ return mInputList.begin();}
@@ -1646,6 +1716,16 @@ int main(int argc, char **argv)
 
     // get log player
     TrnLogPlayer tbplayer(cfg.tb_config());
+
+    if(cfg.verbose()){
+        std::cerr << "App Player Config:" << std::endl;
+        cfg.show_tb_config();
+        std::cerr << std::endl;
+
+        std::cerr << "Player Config:" << std::endl;
+        tbplayer.show_cfg();
+        std::cerr << std::endl;
+    }
 
     // play back log files
     std::list<string>::iterator it;
