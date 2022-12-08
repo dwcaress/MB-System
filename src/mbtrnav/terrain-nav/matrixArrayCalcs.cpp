@@ -13,6 +13,13 @@
 #include "trn_log.h"
 #include "MathP.h"
 
+#define _STR(x) #x
+#define STR(x) _STR(x)
+
+#ifdef TRN_NORAND
+#pragma message( __FILE__":" STR(__LINE__) " - feature TRN_NORAND enabled (see FEATURE_OPTIONS in Makefile)" )
+#endif
+
 #ifdef USE_MATLAB
 Engine* matlabEng;
 #endif
