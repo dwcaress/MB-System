@@ -8,6 +8,10 @@ and library location
 cmake_minimum_required(VERSION 3.18)
 project(MB-System)
 
+# MANUALLY SPECIFY MB-System VERSION AND DATE HERE
+set(mbVersion VersionGoesHere)
+set(mbVersionDate "1 January 1900")
+
 # Verify that OS is supported
 if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
   message("Building on LINUX")
@@ -124,7 +128,8 @@ file, which is .. in this case.
 
 # Add globally-needed compiler flags
 add_compile_options(-DUSE_DEFAULT_FILE_FUNCTIONS)
-
+add_compile_options(-DPACKAGE_VERSION=${mbVersion})
+add_compile_options(-DVERSION_DATE=${mbVersionDate})
 if (CMAKE_COMPILER_IS_GNUCC)
   message("Using GNUCC")
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=gnu11")
@@ -136,6 +141,8 @@ else()
   set(CMAKE_C_STANDARD_REQUIRED ON)
   set(CMAKE_C_EXTENSIONS OFF)
 endif()
+
+message("CMAKE_C_FLAGS: ${CMAKE_C_FLAGS}")
 
 message("CMAKE_C_COMPILER_ID: ${CMAKE_C_COMPILER_ID}")
 
@@ -395,12 +402,14 @@ add_subdirectory(src/macros)
 if (buildQt)
   add_subdirectory(src/qt-guilib)
   add_subdirectory(src/qt-mbgrdviz)
+  add_subdirectory(src/qt-mbgrdviz-3)  
 endif(buildQt)
 
-# TESTING
+# Build mbio/mb_config.h
 include(buildConfigHeader)
 
 buildConfigHeader(${buildGSF} ${buildTRN} ${buildTNav}
-                              ${buildGUIs} ${buildTest})
+                              ${buildGUIs} ${buildTest}
+                              ${mbVersion} ${mbVersionDate})
 
 message("DONE")
