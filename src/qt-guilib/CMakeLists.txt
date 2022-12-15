@@ -33,7 +33,6 @@ set(src
     SurfaceRenderer.cpp
     PickerInteractorStyle.cpp
     Utilities.cpp
-    testing3.cxx
     resources.qrc)
 
 
