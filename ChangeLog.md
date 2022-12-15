@@ -426,7 +426,7 @@ or beta, are equally accessible as tarballs through the Github interface.
 ### MB-System Version 5.7 Release Notes:
 --
 
-#### 5.7.9beta49 (December 11, 2022)
+#### 5.7.9beta48 (December 11, 2022)
 
 Mbmosaic: Fixed parsing of the -Ypriority_source option when priority_source is
 a filename.
@@ -442,8 +442,6 @@ reference grid used for each global tie.
 Mbview library: Fixed problem where mbview did not render the last row and
 column of a grid (the easternmost and northernmost data). Also attempted to
 make picking more robust.
-
-#### 5.7.9beta48 (November 22, 2022)
 
 Mbnavadjust: Fixed interpolation of global ties to create the starting navigation
 model during inversions. Fixed several actions in section and reference grid mode.
