@@ -7,6 +7,7 @@
 #define VERTICAL_EXAGG "verticalExagg"
 #define SHOW_AXES "showAxes"
 #define COLORMAP "colormap"
+#define SITE_FILE "sitefile"
 
 /// Initialize singleton to null
 BackEnd *BackEnd::singleInstance_ = nullptr;
@@ -146,6 +147,14 @@ void BackEnd::qmlSlot(const QString &qmsg) {
       else {
         qDebug() << "Set colormap scheme to " << schemeName;
       }
-      qVtkItem_->update();      
+      qVtkItem_->update();
+    }
+    else if (!strncmp(msg, SITE_FILE, strlen(SITE_FILE))) {
+      qDebug() << "open site file " << (strchr(msg, ' ') + 1);
+      char *siteFile = strchr(msg, ' ') + 1;
+      // Remove file URL prefix      
+      siteFile += strlen("file://"); 
+      qVtkItem_->setSiteFile(siteFile);
+      qVtkItem_->update();
     }
   }
