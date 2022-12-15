@@ -134,6 +134,8 @@ EXTERNAL Widget pushButton_fixedznav;
 EXTERNAL Widget pushButton_tie_xy;
 EXTERNAL Widget pushButton_tie_z;
 EXTERNAL Widget pushButton_tie_xyz;
+EXTERNAL Widget pushButton_tie_unfixed;
+EXTERNAL Widget pushButton_tie_fixed;
 EXTERNAL Widget pushButton_autopick;
 EXTERNAL Widget pushButton_autopickhorizontal;
 EXTERNAL Widget pushButton_autosetsvsvertical;

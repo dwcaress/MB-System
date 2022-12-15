@@ -181,9 +181,11 @@ extern void do_action_goodnav(Widget, XtPointer, XtPointer);
 extern void do_action_fixednav(Widget, XtPointer, XtPointer);
 extern void do_action_fixedxynav(Widget, XtPointer, XtPointer);
 extern void do_action_fixedznav(Widget, XtPointer, XtPointer);
-extern void do_action_tie_xy(Widget, XtPointer, XtPointer);
-extern void do_action_z(Widget, XtPointer, XtPointer);
-extern void do_action_tie_xyz(Widget, XtPointer, XtPointer);
+extern void do_action_tie_xy(Widget w, XtPointer client_data, XtPointer call_data);
+extern void do_action_tie_z(Widget w, XtPointer client_data, XtPointer call_data);
+extern void do_action_tie_xyz(Widget w, XtPointer client_data, XtPointer call_data);
+extern void do_action_tie_unfixed(Widget w, XtPointer client_data, XtPointer call_data);
+extern void do_action_tie_fixed(Widget w, XtPointer client_data, XtPointer call_data);
 extern void do_action_autopick(Widget, XtPointer, XtPointer);
 extern void do_action_autopickhorizontal(Widget, XtPointer, XtPointer);
 extern void do_action_autosetsvsvertical(Widget, XtPointer, XtPointer);
@@ -1483,7 +1485,7 @@ Widget CreatemainWindow(Widget parent) {
 		XmStringFree((XmString)tmp0);
 	}
 
-	XtAddCallback(pushButton_tie_z, XmNactivateCallback, do_action_z, (XtPointer)0);
+	XtAddCallback(pushButton_tie_z, XmNactivateCallback, do_action_tie_z, (XtPointer)0);
 
 	ac = 0;
 	{
@@ -1508,6 +1510,54 @@ Widget CreatemainWindow(Widget parent) {
 	}
 
 	XtAddCallback(pushButton_tie_xyz, XmNactivateCallback, do_action_tie_xyz, (XtPointer)0);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(pulldownMenu_action, (char *)"Set tie unfixed", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(
+		    args[ac], XmNfontList,
+		    BX_CONVERT(pulldownMenu_action, (char *)"-*-" SANS "-bold-r-*-*-*-120-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		pushButton_tie_unfixed = XmCreatePushButton(pulldownMenu_action, (char *)"pushButton_tie_unfixed", args, ac);
+		XtManageChild(pushButton_tie_unfixed);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(pushButton_tie_unfixed, XmNactivateCallback, do_action_tie_unfixed, (XtPointer)0);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(pulldownMenu_action, (char *)"Set tie fixed", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(
+		    args[ac], XmNfontList,
+		    BX_CONVERT(pulldownMenu_action, (char *)"-*-" SANS "-bold-r-*-*-*-120-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		pushButton_tie_fixed = XmCreatePushButton(pulldownMenu_action, (char *)"pushButton_tie_fixed", args, ac);
+		XtManageChild(pushButton_tie_fixed);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(pushButton_tie_fixed, XmNactivateCallback, do_action_tie_fixed, (XtPointer)0);
 
 	ac = 0;
 	separator7 = XmCreateSeparator(pulldownMenu_action, (char *)"separator7", args, ac);

@@ -4371,7 +4371,7 @@ control.OutputBounds[0], control.OutputBounds[1], control.OutputBounds[2], contr
             }
 
             /* write out world file contents */
-            fprintf(tfp, "%.10g\r\n0.0\r\n0.0\r\n%.10g\r\n%.10g\r\n%.10g\r\n",
+            fprintf(tfp, "%.15g\r\n0.0\r\n0.0\r\n%.15g\r\n%.15g\r\n%.15g\r\n",
                 control.OutputDx[0], -control.OutputDx[1],
                 control.OutputBounds[0] - 0.5 * control.OutputDx[0],
                 control.OutputBounds[3] + 0.5 * control.OutputDx[1]);
