@@ -23,6 +23,8 @@ Distributions that do not include "beta" in the tag name correspond to the major
 announced releases. The source distributions associated with all releases, major
 or beta, are equally accessible as tarballs through the Github interface.
 
+- Version 5.7.9beta49    December 15, 2022
+- Version 5.7.9beta48    November 22, 2022
 - Version 5.7.9beta47    November 15, 2022
 - Version 5.7.9beta46    November 11, 2022
 - Version 5.7.9beta45    November 6, 2022
@@ -423,6 +425,28 @@ or beta, are equally accessible as tarballs through the Github interface.
 --
 ### MB-System Version 5.7 Release Notes:
 --
+
+#### 5.7.9beta49 (December 11, 2022)
+
+Mbmosaic: Fixed parsing of the -Ypriority_source option when priority_source is
+a filename.
+
+Mbm_grdplot: Fixed handling of image file min max when color_mode == 6.
+
+Mbnavadjust: Added controls allowing the mode of global ties to be changed
+interactively.
+
+Mbnavadjust: Changed project file format, adding the the id of the source
+reference grid used for each global tie.
+
+Mbview library: Fixed problem where mbview did not render the last row and
+column of a grid (the easternmost and northernmost data). Also attempted to
+make picking more robust.
+
+#### 5.7.9beta48 (November 22, 2022)
+
+Mbnavadjust: Fixed interpolation of global ties to create the starting navigation
+model during inversions. Fixed several actions in section and reference grid mode.
 
 #### 5.7.9beta47 (November 15, 2022)
 

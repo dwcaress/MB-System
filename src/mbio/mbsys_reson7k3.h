@@ -109,7 +109,7 @@
 #define R7KRECID_Altitude 1006                    // MB_DATA_ALTITUDE
 #define R7KRECID_MotionOverGround 1007
 #define R7KRECID_Depth 1008                       // MB_DATA_SONARDEPTH
-#define R7KRECID_SoundVelocityProfile 1009
+#define R7KRECID_SoundVelocityProfile 1009        // MB_DATA_SSV
 #define R7KRECID_CTD 1010
 #define R7KRECID_Geodesy 1011
 #define R7KRECID_RollPitchHeave 1012              // MB_DATA_ATTITUDE1

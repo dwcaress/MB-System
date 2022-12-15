@@ -465,7 +465,7 @@ autoreconf --force --install
 # Run the configure script - here the prerequisites have been installed with
 # MacPorts, and the experimental OpenCV based photomosaicing and Terrain relative
 # Navigation are all enabled
-./configure \
+CFLAGS="-g" CPPFLAGS="-g" ./configure \
   --prefix=/usr/local \
   --disable-static \
   --enable-shared \

@@ -1273,11 +1273,20 @@ int main(int argc, char **argv) {
 			case 'Y':
 			case 'y':
 			{
-				int tmp;
-				sscanf(optarg, "%d", &tmp);
-				// TODO(schwehr): Range check tmp.
-				priority_source = (priority_table_t)tmp;
-				if (priority_source == MBMOSAIC_PRIORITYTABLE_60DEGREESUP) {
+				int tmp = MBMOSAIC_PRIORITYTABLE_FILE;
+				int n = sscanf(optarg, "%d", &tmp);
+        if (n == 1) {
+          if (tmp > MBMOSAIC_PRIORITYTABLE_FILE && tmp <= MBMOSAIC_PRIORITYTABLE_85DEGREESDN)
+				      priority_source = (priority_table_t)tmp;
+          else {
+            fprintf(outfp, "\nInvalid argument to -Ypriority_source option: %s\n", optarg);
+            errflg = true;
+          }
+        }
+				if (priority_source == MBMOSAIC_PRIORITYTABLE_FILE) {
+					sscanf(optarg, "%1023s", pfile);
+				}
+				else if (priority_source == MBMOSAIC_PRIORITYTABLE_60DEGREESUP) {
 					n_priority_angle = n_priority_angle_60degreesup;
 					priority_angle_angle = priority_angle_60degreesup_angle;
 					priority_angle_priority = priority_angle_60degreesup_priority;
@@ -1316,9 +1325,6 @@ int main(int argc, char **argv) {
 					n_priority_angle = n_priority_angle_85degreesdn;
 					priority_angle_angle = priority_angle_85degreesdn_angle;
 					priority_angle_priority = priority_angle_85degreesdn_priority;
-				}
-				else {
-					sscanf(optarg, "%1023s", pfile);
 				}
 				if ((priority_mode & MBMOSAIC_PRIORITY_ANGLE) == 0) {
 					priority_mode = static_cast<priority_t>(
@@ -1868,8 +1874,9 @@ int main(int argc, char **argv) {
 		n_priority_angle = 0;
 		while ((/* result = */ fgets(buffer, MB_PATH_MAXLINE, fp)) == buffer) {
 			if (buffer[0] != '#') {
-				sscanf(buffer, "%lf %lf", &priority_angle_angle[n_priority_angle], &priority_angle_priority[n_priority_angle]);
-				n_priority_angle++;
+				int n = sscanf(buffer, "%lf %lf", &priority_angle_angle[n_priority_angle], &priority_angle_priority[n_priority_angle]);
+        if (n == 2)
+				  n_priority_angle++;
 			}
 		}
 		fclose(fp);

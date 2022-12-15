@@ -32,6 +32,10 @@
 #include "mb_status.h"
 #endif
 
+/* Current MBnavadjust project file verion is 3.13 */
+#define MBNA_FILE_VERSION_MAJOR 3
+#define MBNA_FILE_VERSION_MINOR 14
+
 /* mbnavadjust global defines */
 #define STRING_MAX 10 * MB_PATH_MAXLINE
 #define BUFFER_MAX STRING_MAX
@@ -58,10 +62,14 @@
 #define MBNA_FILE_FIXEDNAV 3
 #define MBNA_FILE_FIXEDXYNAV 4
 #define MBNA_FILE_FIXEDZNAV 5
-#define MBNA_TIE_NONE 0
-#define MBNA_TIE_XYZ 1
-#define MBNA_TIE_XY 2
-#define MBNA_TIE_Z 3
+#define MBNA_TIE_NONE       0
+#define MBNA_TIE_XYZ        1
+#define MBNA_TIE_XY         2
+#define MBNA_TIE_Z          3
+#define MBNA_TIE_XYZ_FIXED  5
+#define MBNA_TIE_XY_FIXED   6
+#define MBNA_TIE_Z_FIXED    7
+
 #define MBNA_CROSSING_STATUS_NONE 0
 #define MBNA_CROSSING_STATUS_SET 1
 #define MBNA_CROSSING_STATUS_SKIP 2
@@ -171,6 +179,7 @@ struct mbna_block {
 struct mbna_globaltie {
   int status;
   int snav;
+  int refgrid_id;
   double snav_time_d;
   double offset_x;
   double offset_y;

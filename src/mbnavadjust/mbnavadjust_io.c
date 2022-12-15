@@ -328,6 +328,16 @@ int mbnavadjust_read_project(int verbose, char *projectpath, struct mbna_project
           exit(0);
         }
         const int version_id = 100 * versionmajor + versionminor;
+        const int program_version_id = 100 * MBNA_FILE_VERSION_MAJOR + MBNA_FILE_VERSION_MINOR;
+        if (version_id > program_version_id) {
+          fprintf(stderr, "\nError reading MBnavadjust project file %s\n", project->home);
+          fprintf(stderr, "  File version %d.%2.2d is newer than %d.%2.2d, the most recent version \n",
+                          versionmajor, versionminor, MBNA_FILE_VERSION_MAJOR, MBNA_FILE_VERSION_MINOR);
+          fprintf(stderr, "  supported by program %s\n", program_name);
+          fprintf(stderr, "  MB-system Version %s\n", MB_VERSION);
+          fprintf(stderr, "Exit at line:%d file:%s function:%s\n", __LINE__, __FILE__, __FUNCTION__);
+          exit(0);
+        }
 
         if (version_id >= 302) {
           if (status == MB_SUCCESS &&
@@ -758,6 +768,7 @@ __FILE__, __LINE__, __FUNCTION__, ifile, isection, buffer, result, nscan);
             /* global fixed frame tie, whether defined or not */
             section->globaltie.status = MBNA_TIE_NONE;
             section->globaltie.snav = MBNA_SELECT_NONE;
+            section->globaltie.refgrid_id = MBNA_SELECT_NONE;
             section->globaltie.snav_time_d = 0.0;
             section->globaltie.offset_x = 0.0;
             section->globaltie.offset_y = 0.0;
@@ -791,11 +802,13 @@ __FILE__, __LINE__, __FUNCTION__, ifile, isection, buffer, result, nscan);
             section->globaltie.dr3_m = 0.0;
             section->globaltie.rsigma_m = 0.0;
 
-            if (version_id >= 311) {
+            if (version_id >= 313) {
               if (status == MB_SUCCESS) {
                 if ((result = fgets(buffer, BUFFER_MAX, hfp)) != buffer
-                    || sscanf(buffer, "GLOBALTIE %d %d %lf %lf %lf %lf %lf %lf %d %lf %lf %lf",
-                        &section->globaltie.status, &section->globaltie.snav,
+                    || sscanf(buffer, "GLOBALTIE %d %d %d %lf %lf %lf %lf %lf %lf %d %lf %lf %lf",
+                        &section->globaltie.status,
+                        &section->globaltie.snav,
+                        &section->globaltie.refgrid_id,
                         &section->globaltie.offset_x,
                         &section->globaltie.offset_y,
                         &section->globaltie.offset_z_m,
@@ -805,9 +818,10 @@ __FILE__, __LINE__, __FUNCTION__, ifile, isection, buffer, result, nscan);
                         &section->globaltie.inversion_status,
                         &section->globaltie.inversion_offset_x,
                         &section->globaltie.inversion_offset_y,
-                        &section->globaltie.inversion_offset_z_m) != 12) {
+                        &section->globaltie.inversion_offset_z_m) != 13) {
                   status = MB_FAILURE;
-                  fprintf(stderr, "read failed on global tie offset ifile:%d isection:%d: %s\n", ifile, isection, buffer);
+                  fprintf(stderr, "%s:%d:%s: read failed on global tie offset ifile:%d isection:%d:\n\tBuffer:%s\n",
+                                  __FILE__, __LINE__, __FUNCTION__, ifile, isection, buffer);
                 }
               }
               int nscan = 0;
@@ -835,7 +849,81 @@ __FILE__, __LINE__, __FUNCTION__, ifile, isection, buffer, result, nscan);
                       section->globaltie.sigmax3[2] = 0.0;
                   } else {
                     status = MB_FAILURE;
-                    fprintf(stderr, "Read failed on global tie covariance: %s\n", buffer);
+                  fprintf(stderr, "%s:%d:%s: read failed on global tie covariance ifile:%d isection:%d: \n\tBuffer:%s\n",
+                                  __FILE__, __LINE__, __FUNCTION__, ifile, isection, buffer);
+                  }
+                }
+                if (section->globaltie.status == MBNA_TIE_NONE) {
+                  section->globaltie.sigmar1 = 0.0;
+                  section->globaltie.sigmax1[0] = 0.0;
+                  section->globaltie.sigmax1[1] = 0.0;
+                  section->globaltie.sigmax1[2] = 0.0;
+                  section->globaltie.sigmar2 = 0.0;
+                  section->globaltie.sigmax2[0] = 0.0;
+                  section->globaltie.sigmax2[1] = 0.0;
+                  section->globaltie.sigmax2[2] = 0.0;
+                  section->globaltie.sigmar3 = 0.0;
+                  section->globaltie.sigmax3[0] = 0.0;
+                  section->globaltie.sigmax3[1] = 0.0;
+                  section->globaltie.sigmax3[2] = 0.0;
+                }
+              }
+
+              /* update number of global ties */
+              if (status == MB_SUCCESS && section->globaltie.status != MBNA_TIE_NONE) {
+                project->num_globalties++;
+              }
+            }
+
+            else if (version_id >= 311) {
+              if (status == MB_SUCCESS) {
+                if ((result = fgets(buffer, BUFFER_MAX, hfp)) != buffer
+                    || sscanf(buffer, "GLOBALTIE %d %d %lf %lf %lf %lf %lf %lf %d %lf %lf %lf",
+                        &section->globaltie.status,
+                        &section->globaltie.snav,
+                        &section->globaltie.offset_x,
+                        &section->globaltie.offset_y,
+                        &section->globaltie.offset_z_m,
+                        &section->globaltie.sigmar1,
+                        &section->globaltie.sigmar2,
+                        &section->globaltie.sigmar3,
+                        &section->globaltie.inversion_status,
+                        &section->globaltie.inversion_offset_x,
+                        &section->globaltie.inversion_offset_y,
+                        &section->globaltie.inversion_offset_z_m) != 12) {
+                  status = MB_FAILURE;
+                  fprintf(stderr, "%s:%d:%s: read failed on global tie offset ifile:%d isection:%d: \n\tBuffer:%s\n",
+                                  __FILE__, __LINE__, __FUNCTION__, ifile, isection, buffer);
+                }
+                section->globaltie.refgrid_id = MBNA_SELECT_NONE;
+              }
+              int nscan = 0;
+              if (status == MB_SUCCESS) {
+                if ((result = fgets(buffer, BUFFER_MAX, hfp)) != buffer ||
+                    (nscan = sscanf(buffer, "COV %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf",
+                      &section->globaltie.sigmar1, &section->globaltie.sigmax1[0],
+                      &section->globaltie.sigmax1[1], &section->globaltie.sigmax1[2],
+                      &section->globaltie.sigmar2, &section->globaltie.sigmax2[0],
+                      &section->globaltie.sigmax2[1], &section->globaltie.sigmax2[2],
+                      &section->globaltie.sigmar3, &section->globaltie.sigmax3[0],
+                      &section->globaltie.sigmax3[1], &section->globaltie.sigmax3[2])) != 12) {
+                  if (strncmp(buffer, "COV ", 4) == 0) {
+                      section->globaltie.sigmar1 = 0.0;
+                      section->globaltie.sigmax1[0] = 0.0;
+                      section->globaltie.sigmax1[1] = 0.0;
+                      section->globaltie.sigmax1[2] = 0.0;
+                      section->globaltie.sigmar2 = 0.0;
+                      section->globaltie.sigmax2[0] = 0.0;
+                      section->globaltie.sigmax2[1] = 0.0;
+                      section->globaltie.sigmax2[2] = 0.0;
+                      section->globaltie.sigmar3 = 0.0;
+                      section->globaltie.sigmax3[0] = 0.0;
+                      section->globaltie.sigmax3[1] = 0.0;
+                      section->globaltie.sigmax3[2] = 0.0;
+                  } else {
+                    status = MB_FAILURE;
+                    fprintf(stderr, "%s:%d:%s: read failed on global tie covariance ifile:%d isection:%d: \n\tBuffer:%s\n",
+                                  __FILE__, __LINE__, __FUNCTION__, ifile, isection, buffer);
                   }
                 }
                 if (section->globaltie.status == 0) {
@@ -860,7 +948,6 @@ __FILE__, __LINE__, __FUNCTION__, ifile, isection, buffer, result, nscan);
               }
             }
 
-
             else if (version_id >= 309) {
               if (status == MB_SUCCESS) {
                 if ((result = fgets(buffer, BUFFER_MAX, hfp)) != buffer
@@ -870,7 +957,8 @@ __FILE__, __LINE__, __FUNCTION__, ifile, isection, buffer, result, nscan);
                         &section->globaltie.offset_x, &section->globaltie.offset_y, &section->globaltie.offset_z_m,
                         &section->globaltie.sigmar1, &section->globaltie.sigmar2, &section->globaltie.sigmar3) != 9) {
                   status = MB_FAILURE;
-                  fprintf(stderr, "read failed on global tie: %s\n", buffer);
+                  fprintf(stderr, "%s:%d:%s: read failed on global tie offset ifile:%d isection:%d: \n\tBuffer:%s\n",
+                                  __FILE__, __LINE__, __FUNCTION__, ifile, isection, buffer);
                 }
               }
 
@@ -886,6 +974,7 @@ __FILE__, __LINE__, __FUNCTION__, ifile, isection, buffer, result, nscan);
                 section->globaltie.sigmax3[0] = 0.0;
                 section->globaltie.sigmax3[1] = 0.0;
                 section->globaltie.sigmax3[2] = 1.0;
+                section->globaltie.refgrid_id = MBNA_SELECT_NONE;
               }
             }
 
@@ -898,7 +987,8 @@ __FILE__, __LINE__, __FUNCTION__, ifile, isection, buffer, result, nscan);
                         &section->globaltie.sigmar1, &section->globaltie.sigmar2, &section->globaltie.sigmar3)
                     != 8) {
                   status = MB_FAILURE;
-                  fprintf(stderr, "read failed on global tie: %s\n", buffer);
+                  fprintf(stderr, "%s:%d:%s: read failed on global tie ifile:%d isection:%d: \n\tBuffer:%s\n",
+                                  __FILE__, __LINE__, __FUNCTION__, ifile, isection, buffer);
                 }
               }
 
@@ -915,6 +1005,7 @@ __FILE__, __LINE__, __FUNCTION__, ifile, isection, buffer, result, nscan);
                 section->globaltie.sigmax3[0] = 0.0;
                 section->globaltie.sigmax3[1] = 0.0;
                 section->globaltie.sigmax3[2] = 1.0;
+                section->globaltie.refgrid_id = MBNA_SELECT_NONE;
               }
             }
 
@@ -926,14 +1017,16 @@ __FILE__, __LINE__, __FUNCTION__, ifile, isection, buffer, result, nscan);
                         &section->globaltie.offset_x, &section->globaltie.offset_y, &section->globaltie.offset_z_m,
                         &section->globaltie.sigmar1, &section->globaltie.sigmar2, &section->globaltie.sigmar3) != 7) {
                   status = MB_FAILURE;
-                  fprintf(stderr, "read failed on global tie: %s\n", buffer);
+                  fprintf(stderr, "%s:%d:%s: read failed on global tie ifile:%d isection:%d: \n\tBuffer:%s\n",
+                                  __FILE__, __LINE__, __FUNCTION__, ifile, isection, buffer);
                 }
               }
 
               /* update number of global ties */
-              if (status == MB_SUCCESS && section->globaltie.status != MBNA_TIE_NONE) {
+              if (status == MB_SUCCESS) {
                 section->globaltie.status = MBNA_TIE_XYZ;
                 section->globaltie.inversion_status = project->inversion_status;
+                section->globaltie.refgrid_id = MBNA_SELECT_NONE;
                 project->num_globalties++;
                 section->globaltie.sigmax1[0] = 1.0;
                 section->globaltie.sigmax1[1] = 0.0;
@@ -947,7 +1040,7 @@ __FILE__, __LINE__, __FUNCTION__, ifile, isection, buffer, result, nscan);
               }
             }
 
-            if (section->globaltie.status == 0 && section->globaltie.snav == -1) {
+            if (section->globaltie.status == MBNA_TIE_NONE && section->globaltie.snav == -1) {
               section->globaltie.inversion_status = 0;
               section->globaltie.offset_x = 0.0;
               section->globaltie.offset_y = 0.0;
@@ -1540,13 +1633,13 @@ int mbnavadjust_write_project(int verbose, struct mbna_project *project,
 
   /* open and write home file */
   if ((hfp = fopen(project->home, "w")) != NULL) {
-    fprintf(stderr, "Writing project %s (file version 3.12)\n", project->name);
+    fprintf(stderr, "Writing project %s (file version %d.%2.2d)\n", project->name, MBNA_FILE_VERSION_MAJOR, MBNA_FILE_VERSION_MINOR);
     char user[256], host[256], date[32];
     status = mb_user_host_date(verbose, user, host, date, error);
     fprintf(hfp, "##MBNAVADJUST PROJECT\n");
     fprintf(hfp, "MB-SYSTEM_VERSION\t%s\n", MB_VERSION);
-    fprintf(hfp, "PROGRAM_VERSION\t3.10\n");
-    fprintf(hfp, "FILE_VERSION\t3.12\n");
+    fprintf(hfp, "PROGRAM_VERSION\t3.20\n");
+    fprintf(hfp, "FILE_VERSION\t%d.%2.2d\n", MBNA_FILE_VERSION_MAJOR, MBNA_FILE_VERSION_MINOR);
     fprintf(hfp, "ORIGIN\tGenerated by user <%s> on cpu <%s> at <%s>\n", user, host, date);
     fprintf(hfp, "NAME\t%s\n", project->name);
     fprintf(hfp, "PATH\t%s\n", project->path);
@@ -1605,8 +1698,8 @@ int mbnavadjust_write_project(int verbose, struct mbna_project *project,
           section->globaltie.sigmar2 = 0.0;
           section->globaltie.sigmar3 = 0.0;
         }
-        fprintf(hfp, "GLOBALTIE %2d %4d %13.8f %13.8f %13.8f %13.8f %13.8f %13.8f %1.1d %13.8f %13.8f %13.8f\n",
-          section->globaltie.status, section->globaltie.snav,
+        fprintf(hfp, "GLOBALTIE %2d %4d %d %13.8f %13.8f %13.8f %13.8f %13.8f %13.8f %1.1d %13.8f %13.8f %13.8f\n",
+          section->globaltie.status, section->globaltie.snav, section->globaltie.refgrid_id,
           section->globaltie.offset_x, section->globaltie.offset_y, section->globaltie.offset_z_m,
           section->globaltie.sigmar1, section->globaltie.sigmar2, section->globaltie.sigmar3,
           section->globaltie.inversion_status, section->globaltie.inversion_offset_x,
@@ -4203,6 +4296,7 @@ int mbnavadjust_import_file(int verbose, struct mbna_project *project,
         section->status = MBNA_CROSSING_STATUS_NONE;
         section->globaltie.status = MBNA_TIE_NONE;
         section->globaltie.snav = MBNA_SELECT_NONE;
+        section->globaltie.refgrid_id = MBNA_SELECT_NONE;
         section->globaltie.snav_time_d = 0.0;
         section->globaltie.offset_x = 0.0;
         section->globaltie.offset_y = 0.0;
@@ -5412,6 +5506,10 @@ int mbnavadjust_reference_load(int verbose, struct mbna_project *project, int re
     int imax = (extract_lonmax - project->refgrid.bounds[0]) / project->refgrid.dx + 1;
     int jmin = (extract_latmin - project->refgrid.bounds[2]) / project->refgrid.dy;
     int jmax = (extract_latmax - project->refgrid.bounds[2]) / project->refgrid.dy + 1;
+    imin = MAX(imin, 0);
+    imax = MIN(imax, project->refgrid.nx - 1);
+    jmin = MAX(jmin, 0);
+    jmax = MIN(jmax, project->refgrid.ny - 1);
     int idim = imax - imin + 1;
     int jdim = jmax - jmin + 1;
     section->file_id = 0;
