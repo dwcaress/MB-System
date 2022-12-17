@@ -23,7 +23,7 @@ Distributions that do not include "beta" in the tag name correspond to the major
 announced releases. The source distributions associated with all releases, major
 or beta, are equally accessible as tarballs through the Github interface.
 
-- Version 5.7.9beta49    December 15, 2022
+- Version 5.7.9beta49    December 16, 2022
 - Version 5.7.9beta48    November 22, 2022
 - Version 5.7.9beta47    November 15, 2022
 - Version 5.7.9beta46    November 11, 2022
