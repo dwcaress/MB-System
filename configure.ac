@@ -12,7 +12,7 @@ dnl--------------------------------------------------------------------
 
 dnl Initialize and set version and version date
 AC_INIT([mbsystem],[5.7.9beta48],[http://listserver.mbari.org/sympa/arc/mbsystem],[mbsystem],[http://www.mbari.org/data/mbsystem/])
-AC_DEFINE(VERSION_DATE, ["15 December 2022"], [Set VERSION_DATE define in mb_config.h])
+AC_DEFINE(VERSION_DATE, ["16 December 2022"], [Set VERSION_DATE define in mb_config.h])
 
 AS_ECHO([" "])
 AS_ECHO(["------------------------------------------------------------------------------"])
