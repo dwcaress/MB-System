@@ -59,7 +59,7 @@ QX_PLOTSET_DEF=""
 QX_LOG_PATH="."
 QX_SESSION_ID="-"
 QX_DATA_SET_ID="undefined"
-QX_JOB_DIR=${QX_JOB_DIR:-"jobs"}
+QX_JOB_DIR=${QX_JOB_DIR:-"tlp-jobs"}
 QX_PLOTSET_COUNT=0
 declare -a QX_LOG_PATHS
 declare -a QX_SESSION_IDS
@@ -443,13 +443,18 @@ fi
 # create plot output directory if it doesn't exist
 if [ ! -d "${QP_OUTPUT_DIR}" ]
 then
-	vout "creating plot data dir : ${QP_PLOT_DATA_DIR}"
+	vout "creating plot output dir : ${QP_PLOT_DATA_DIR}"
 	mkdir -p ${QP_OUTPUT_DIR}
+    if [ ! -d "${QP_OUTPUT_DIR}" ]
+    then
+    echo "could not create output dir : ${QP_OUTPUT_DIR}"
+    exit -1
+    fi
 fi
 # create plot job output directory if it doesn't exist
 if [ ! -d "${QX_JOB_DIR}" ]
 then
-	vout "creating job dir : ${QP_PLOT_DATA_DIR}"
+	vout "creating job dir : ${QX_JOB_DIR}"
 	mkdir -p ${QX_JOB_DIR}
     if [ ! -d "${QX_JOB_DIR}" ]
     then
@@ -460,6 +465,16 @@ fi
 
 # process jobs
 run_jobs
+
+if [ -d "${QP_OUTPUT_DIR}" ]
+then
+    rm -r ${QP_OUTPUT_DIR}
+fi
+
+if [ -d "${QP_PLOT_DATA_DIR}" ]
+then
+    rm -r ${QP_PLOT_DATA_DIR}
+fi
 
 vout ""
 

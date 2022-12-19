@@ -329,8 +329,8 @@ QP_INC_LINETYPE["$QU_KEY"]="N"
 QP_EXPR["$QU_KEY"]="Y"
 QP_SPECDEL["$QU_KEY"]="|"
 QP_PLOT_SPECS["$QU_KEY"]="${QU_TRNO_CSV},${QU_ORANGE},2,,1,7,,MMSE-Nav"
-QP_PLOT_SPECS["$QU_KEY"]+="|${QU_TRNO_CSV},${QU_LTBLUE},2,,1,(\$7+sqrt(\$10)),,err+"
-QP_PLOT_SPECS["$QU_KEY"]+="|${QU_TRNO_CSV},${QU_BLUE},2,,1,(\$7-sqrt(\$10)),,err-"
+QP_PLOT_SPECS["$QU_KEY"]+="|${QU_TRNO_CSV},${QU_PURPLE},2,,1,(\$7+sqrt(\$10)),,err+"
+QP_PLOT_SPECS["$QU_KEY"]+="|${QU_TRNO_CSV},${QU_PURPLE},2,,1,(\$7-sqrt(\$10)),,err-"
 
 QU_KEY=${QU_KEYS[5]}
 QP_OFILE_NAME["$QU_KEY"]="${QU_TRNO_EERR_OIMG_NAME}"
@@ -375,8 +375,8 @@ QP_INC_LINETYPE["$QU_KEY"]="N"
 QP_EXPR["$QU_KEY"]="Y"
 QP_SPECDEL["$QU_KEY"]="|"
 QP_PLOT_SPECS["$QU_KEY"]="${QU_TRNO_CSV},${QU_ORANGE},2,,1,8,,MMSE-Nav"
-QP_PLOT_SPECS["$QU_KEY"]+="|${QU_TRNO_CSV},${QU_LTBLUE},2,,1,(\$8+sqrt(\$11)),,err+"
-QP_PLOT_SPECS["$QU_KEY"]+="|${QU_TRNO_CSV},${QU_BLUE},2,,1,(\$8-sqrt(\$11)),,err-"
+QP_PLOT_SPECS["$QU_KEY"]+="|${QU_TRNO_CSV},${QU_PURPLE},2,,1,(\$8+sqrt(\$11)),,err+"
+QP_PLOT_SPECS["$QU_KEY"]+="|${QU_TRNO_CSV},${QU_PURPLE},2,,1,(\$8-sqrt(\$11)),,err-"
 
 QU_KEY=${QU_KEYS[6]}
 QP_OFILE_NAME["$QU_KEY"]="${QU_TRNO_ZERR_OIMG_NAME}"
@@ -421,8 +421,8 @@ QP_INC_LINETYPE["$QU_KEY"]="N"
 QP_EXPR["$QU_KEY"]="Y"
 QP_SPECDEL["$QU_KEY"]="|"
 QP_PLOT_SPECS["$QU_KEY"]="${QU_TRNO_CSV},${QU_ORANGE},2,,1,9,,MMSE-Nav.Z"
-QP_PLOT_SPECS["$QU_KEY"]+="|${QU_TRNO_CSV},${QU_LTBLUE},2,,1,(\$9+sqrt(\$12)),,err+"
-QP_PLOT_SPECS["$QU_KEY"]+="|${QU_TRNO_CSV},${QU_BLUE},2,,1,(\$9-sqrt(\$12)),,err-"
+QP_PLOT_SPECS["$QU_KEY"]+="|${QU_TRNO_CSV},${QU_PURPLE},2,,1,(\$9+sqrt(\$12)),,err+"
+QP_PLOT_SPECS["$QU_KEY"]+="|${QU_TRNO_CSV},${QU_PURPLE},2,,1,(\$9-sqrt(\$12)),,err-"
 
 QU_KEY=${QU_KEYS[7]}
 QP_OFILE_NAME["$QU_KEY"]="${QU_TRNO_NAV_OIMG_NAME}"

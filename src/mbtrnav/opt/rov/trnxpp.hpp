@@ -707,7 +707,16 @@ public:
                 if(ctx->start_trn(cfg, user_int) != 0){
                     errors++;
                 }
-                if(ctx->init_csv_file(cfg) != 0){
+                if(ctx->init_mb1_csv_file(cfg) != 0){
+                    errors++;
+                }
+                if(ctx->init_mb1_bin_file(cfg) != 0){
+                    errors++;
+                }
+                if(ctx->init_trnest_csv_file(cfg) != 0){
+                    errors++;
+                }
+                if(ctx->init_mbest_csv_file(cfg) != 0){
                     errors++;
                 }
             }
@@ -985,12 +994,8 @@ public:
                         if(listener->provides_att() && invert_pitch) {
 
                             trn::att_input *ap = dynamic_cast<trn::att_input *>(listener);
-                            trn::att_info *ai = ap->att_inst();
-
-                            if(ai != nullptr){
-                                ai->flags().set(trn::AF_INVERT_PITCH);
-                                delete ai;
-                            }
+                            
+                            ap->flags().set(trn::AF_INVERT_PITCH);
                         }
 
                         TRN_NDPRINT(2, "%s:%d - add input chan[%s] @[%p]\n",__func__, __LINE__, chan, listener);
@@ -1158,7 +1163,10 @@ public:
                 int att_to = 100;
                 int vel_to = 100;
 
-                char *csv_path = nullptr;
+                char *mbcsv_path = nullptr;
+                char *mbbin_path = nullptr;
+                char *tecsv_path = nullptr;
+                char *mecsv_path = nullptr;
                 long int utm = 10;
 
                 TRN_NDPRINT(5,  "%s:%d - parsing opt_s[%s] \n", __func__, __LINE__, opt_s);
@@ -1231,20 +1239,59 @@ public:
                     } else {
                         flags |= ERR;
                     }
-                }  else if(strstr(opt_s, "csv:") != NULL)  {
+                }  else if(strstr(opt_s, "mbcsv:") != NULL)  {
 
-                    // discard option "csv:"
+                    // discard option "mbcsv:"
                     strtok(opt_s,":");
                     char *key_s = strtok(NULL,":");
                     char *val_key = trnxpp_cfg::trim(key_s);
 
-                    csv_path = trnxpp_cfg::trim(val_key);
+                    mbcsv_path = trnxpp_cfg::trim(val_key);
 
-                    TRN_NDPRINT(5,  "%s:%d - csv_path[%s]\n", __func__, __LINE__, csv_path);
+                    TRN_NDPRINT(5,  "%s:%d - mbcsv_path[%s]\n", __func__, __LINE__, mbcsv_path);
 
-                    ctx->set_csv_path(csv_path);
+                    ctx->set_mb1_csv_path(mbcsv_path);
 
-                }   else if(strstr(opt_s, "utm:") != NULL)  {
+                }  else if(strstr(opt_s, "mbbin:") != NULL)  {
+
+                    // discard option "mbbin:"
+                    strtok(opt_s,":");
+                    char *key_s = strtok(NULL,":");
+                    char *val_key = trnxpp_cfg::trim(key_s);
+
+                    mbbin_path = trnxpp_cfg::trim(val_key);
+
+                    TRN_NDPRINT(5,  "%s:%d - mbbin_path[%s]\n", __func__, __LINE__, mbbin_path);
+
+                    ctx->set_mb1_bin_path(mbbin_path);
+
+                } else if(strstr(opt_s, "tecsv:") != NULL)  {
+
+                    // discard option "tecsv:"
+                    strtok(opt_s,":");
+                    char *key_s = strtok(NULL,":");
+                    char *val_key = trnxpp_cfg::trim(key_s);
+
+                    tecsv_path = trnxpp_cfg::trim(val_key);
+
+                    TRN_NDPRINT(5,  "%s:%d - tecsv_path[%s]\n", __func__, __LINE__, tecsv_path);
+
+                    ctx->set_trnest_csv_path(tecsv_path);
+
+                } else if(strstr(opt_s, "mecsv:") != NULL)  {
+
+                    // discard option "mecsv:"
+                    strtok(opt_s,":");
+                    char *key_s = strtok(NULL,":");
+                    char *val_key = trnxpp_cfg::trim(key_s);
+
+                    mecsv_path = trnxpp_cfg::trim(val_key);
+
+                    TRN_NDPRINT(5,  "%s:%d - mecsv_path[%s]\n", __func__, __LINE__, tecsv_path);
+
+                    ctx->set_mbest_csv_path(mecsv_path);
+
+                } else if(strstr(opt_s, "utm:") != NULL)  {
 
                     // discard option "utm:"
                     strtok(opt_s,":");

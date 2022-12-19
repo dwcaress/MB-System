@@ -7,6 +7,7 @@
 #define ATT_PROVIDER_IF_HPP
 
 #include <tuple>
+#include "MathP.h"
 #include "flag_utils.hpp"
 
 namespace trn {
@@ -65,25 +66,35 @@ public:
 
     double pitch(att_angle_units_t u=PA_RADIANS)
     {
-        double angle = (u==PA_DEGREES ? std::get<0>(mAttitude)*180./M_PI : std::get<0>(mAttitude));
-        return (mFlags.is_set(AF_INVERT_PITCH) ? (angle * -1.) : angle);
+        double angle_r = std::get<0>(mAttitude);
+//        fprintf(stderr, "%s: raw pitch[%7.2lf] %s inv:%s\n", __func__, angle_r, (u==PA_RADIANS?"rad":"deg"), (mFlags.is_set(AF_INVERT_PITCH) ? "Y":"N"));
+        double angle = (u==PA_DEGREES ? Math::degToRad(angle_r) : angle_r);
+        return (mFlags.is_set(AF_INVERT_PITCH) ? -angle : angle);
     }
 
     double roll(att_angle_units_t u=PA_RADIANS)
     {
-        double angle = (u==PA_DEGREES ? std::get<1>(mAttitude)*180./M_PI : std::get<1>(mAttitude));
-        return (mFlags.is_set(AF_INVERT_ROLL) ? (angle * -1.) : angle);
+        double angle_r = std::get<1>(mAttitude);
+
+        double angle = (u==PA_DEGREES ? Math::degToRad(angle_r)  : angle_r);
+        return (mFlags.is_set(AF_INVERT_ROLL) ? -angle : angle);
     }
 
     double heading(att_angle_units_t u=PA_RADIANS)
     {
-        double angle = (u==PA_DEGREES ? std::get<2>(mAttitude)*180./M_PI : std::get<2>(mAttitude));
+        double angle_r = std::get<2>(mAttitude);
+        double angle = (u==PA_DEGREES ? Math::degToRad(angle_r)  : angle_r);
         return angle;
     }
 
     flag_var<att_flags_t> &flags()
     {
         return mFlags;
+    }
+
+    void set_flags(const flag_var<att_flags_t> &flags)
+    {
+        mFlags = flags;
     }
 
     const char *attstr()

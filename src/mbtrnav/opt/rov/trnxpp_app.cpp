@@ -342,7 +342,6 @@ static mb1_t *s_get_test_sounding(mb1_t *dest, int beams)
 int cb_proto_oisled(void *pargs)
 {
     int retval=-1;
-    static uint32_t ping_number = 0;
 
     TRN_NDPRINT(3, "%s:%d >>> Callback triggered <<<\n", __func__, __LINE__);
 
@@ -407,14 +406,15 @@ int cb_proto_oisled(void *pargs)
             err_count++;
         }
 
-        TRN_NDPRINT(4, "BATHINST.%s : %s\n",bkey[0]->c_str(), bi[0]->bathstr());
-        TRN_NDPRINT(4, "BATHINST.%s : %s\n",bkey[1]->c_str(), bi[1]->bathstr());
+        TRN_NDPRINT(6, "BATHINST.%s : %s\n",bkey[0]->c_str(), bi[0]->bathstr());
+        TRN_NDPRINT(6, "BATHINST.%s : %s\n",bkey[1]->c_str(), bi[1]->bathstr());
 
         size_t n_beams = bi[0]->beam_count();
 
         if(n_beams>0){
 
-            mb1_t *snd = trnx_utils::lcm_to_mb1(bi[1], ni, ai[1], ping_number);
+            // use sled bathy, vehicle attitude
+            mb1_t *snd = trnx_utils::lcm_to_mb1(bi[1], ni, ai[0]);
 
             std::list<trn::beam_tup> beams = bi[1]->beams_raw();
             std::list<trn::beam_tup>::iterator it;
@@ -423,6 +423,7 @@ int cb_proto_oisled(void *pargs)
             trn::bath_input *bp[2] = {xpp->get_bath_input(*bkey[0]), xpp->get_bath_input(*bkey[1])};
             int trn_type[2] = {bp[0]->bath_input_type(), bp[1]->bath_input_type()};
 
+            // TODO: include multibeam (MB) and/or DVL (pub only MB to mbtrnpp)
             if(nullptr != bp[0] && nullptr != bp[1]) {
 
                 dvlgeo *geo[2] = {nullptr, nullptr};
@@ -431,7 +432,7 @@ int cb_proto_oisled(void *pargs)
                 bgeo[0] = xpp->lookup_geo(*bkey[0], trn_type[0]);
                 geo[0] = static_cast<dvlgeo *>(bgeo[0]);
 
-                bgeo[1] = xpp->lookup_geo(*bkey[1], trn_type[0]);
+                bgeo[1] = xpp->lookup_geo(*bkey[1], trn_type[1]);
                 geo[1] = static_cast<dvlgeo *>(bgeo[1]);
 
                 // tranform oisled DVL beams
@@ -457,8 +458,8 @@ int cb_proto_oisled(void *pargs)
                 if(ctx->trncli_count() > 0){
 
                     // publish poseT/measT to trn-server
-                    poseT *pt = trnx_utils::mb1_to_pose(snd, ai[1], (long)ctx->utm_zone());
-                    measT *mt = trnx_utils::mb1_to_meas(snd, ai[1], trn_type[1], (long)ctx->utm_zone());
+                    poseT *pt = trnx_utils::mb1_to_pose(snd, ai[0], (long)ctx->utm_zone());
+                    measT *mt = trnx_utils::mb1_to_meas(snd, ai[0], trn_type[1], (long)ctx->utm_zone());
 
                     if(pt != nullptr && mt != nullptr){
 
@@ -479,7 +480,8 @@ int cb_proto_oisled(void *pargs)
             ctx->inc_cbcount();
 
             // write CSV
-            if(ctx->write_csv(bi[0], ai[0], ni, vi) > 0){
+            // use sled bathy, vehicle attitude
+            if(ctx->write_mb1_csv(snd, bi[1], ai[0], vi) > 0){
                 cfg->stats().mb_csv_n++;
             }
 
@@ -503,17 +505,20 @@ int cb_proto_oisled(void *pargs)
             delete vi;
     }
 
-    ping_number++;
-
     return retval;
 }
 
 int cb_proto_deltat(void *pargs)
 {
     int retval=-1;
-    static uint32_t ping_number = 0;
 
-    TRN_NDPRINT(3, "%s:%d >>> Callback triggered <<<\n", __func__, __LINE__);
+    int FN_DEBUG_HI = 6;
+    int FN_DEBUG = 5;
+//    int FN_INFO_HI = 4;
+    int FN_INFO = 3;
+//    int FN_INFO_LO = 2;
+
+    TRN_NDPRINT(FN_INFO, "%s:%d >>> Callback triggered <<<\n", __func__, __LINE__);
 
     trn::trnxpp::callback_res_t *cb_res = static_cast<trn::trnxpp::callback_res_t *>(pargs);
     trn::trnxpp *xpp = cb_res->xpp;
@@ -533,7 +538,7 @@ int cb_proto_deltat(void *pargs)
             continue;
         }
 
-        TRN_NDPRINT(5, "%s:%d processing ctx[%s]\n", __func__, __LINE__, ctx->ctx_key().c_str());
+        TRN_NDPRINT(FN_DEBUG, "%s:%d processing ctx[%s]\n", __func__, __LINE__, ctx->ctx_key().c_str());
 
         int err_count = 0;
 
@@ -545,7 +550,7 @@ int cb_proto_deltat(void *pargs)
         // vi is optional
         if(bkey == nullptr || nkey == nullptr || akey == nullptr)
         {
-            TRN_NDPRINT(5, "%s:%d WARN - NULL input key\n", __func__, __LINE__);
+            TRN_NDPRINT(FN_DEBUG, "%s:%d WARN - NULL input key\n", __func__, __LINE__);
             err_count++;
             continue;
         }
@@ -557,44 +562,40 @@ int cb_proto_deltat(void *pargs)
 
         if(bi == nullptr || ni == nullptr || ai == nullptr || vi == nullptr)
         {
-            TRN_NDPRINT(5, "%s:%d WARN - NULL info instance\n", __func__, __LINE__);
-            TRN_NDPRINT(5, "%s:%d   bi[%p] ni[%p] ai[%p] vi[%p]\n", __func__, __LINE__);
+            TRN_NDPRINT(FN_DEBUG, "%s:%d WARN - NULL info instance\n", __func__, __LINE__);
+            TRN_NDPRINT(FN_DEBUG, "%s:%d   bi[%p] ni[%p] ai[%p] vi[%p]\n", __func__, __LINE__);
             err_count++;
         }
 
         std::string *bath_0_key = ctx->bath_input_chan(0);
-        TRN_NDPRINT(4, "BATHINST.%s : %s\n",bath_0_key->c_str(), bi->bathstr());
+        TRN_NDPRINT(FN_DEBUG_HI, "BATHINST.%s : %s\n",bath_0_key->c_str(), bi->bathstr());
 
         size_t n_beams = bi->beam_count();
 
         if(n_beams>0){
-            mb1_t *snd = trnx_utils::lcm_to_mb1(bi, ni, ai, ping_number);
 
-            std::list<trn::beam_tup> beams = bi->beams_raw();
-            std::list<trn::beam_tup>::iterator it;
+            // generate MB1 sounding (raw beams)
+            mb1_t *snd = trnx_utils::lcm_to_mb1(bi, ni, ai);
 
             // if streams_ok, bs/bp pointers have been validated
             trn::bath_input *bp = xpp->get_bath_input(*bkey);
 
             if(nullptr != bp) {
+
                 if(bp->bath_input_type() == trn::BT_DVL)
                 {
                     beam_geometry *bgeo = xpp->lookup_geo(*bath_0_key, trn::BT_DVL);
                     dvlgeo *geo = static_cast<dvlgeo *>(bgeo);
-                    if(cfg->debug() >= 4){
-                        TRN_NDPRINT(2, "%s - DVL geometry:\n", __func__);
-                        geo->show();
-                    }
+
+                    // compute MB1 beam components in vehicle frame
                     trnx_utils::transform_dvl(bi, ai, geo, snd);
 
                 } else if(bp->bath_input_type() == trn::BT_DELTAT)
                 {
                     beam_geometry *bgeo = xpp->lookup_geo(*bath_0_key, trn::BT_DELTAT);
                     mbgeo *geo = static_cast<mbgeo *>(bgeo);
-                    if(cfg->debug() >= 4){
-                        TRN_NDPRINT(2, "%s - DELTAT geometry:\n", __func__);
-                        geo->show();
-                    }
+
+                    // compute MB1 beam components in vehicle frame
                     trnx_utils::transform_deltat(bi, ai, geo, snd);
 
                 } else {
@@ -609,7 +610,8 @@ int cb_proto_deltat(void *pargs)
             // check modulus
             if(ctx->decmod() <= 0 || (ctx->cbcount() % ctx->decmod()) == 0){
 
-                if(cfg->debug() >=4 ){
+                if(cfg->debug() >= FN_DEBUG ){
+                    fprintf(stderr,"%s - >>>>>>> Publishing MB1:\n",__func__);
                     mb1_show(snd, (cfg->debug()>=5 ? true: false), 5);
                 }
 
@@ -623,6 +625,13 @@ int cb_proto_deltat(void *pargs)
 
                     poseT *pt = trnx_utils::mb1_to_pose(snd, ai, (long)ctx->utm_zone());
                     measT *mt = trnx_utils::mb1_to_meas(snd, ai, trn_type, (long)ctx->utm_zone());
+
+                    if(cfg->debug() >= FN_DEBUG ){
+                        fprintf(stderr,"%s - >>>>>>> Publishing POSE:\n",__func__);
+                        trnx_utils::pose_show(*pt);
+                        fprintf(stderr,"%s - >>>>>>> Publishing MEAS:\n",__func__);
+                        trnx_utils::meas_show(*mt);
+                    }
 
 
                     if(pt != nullptr && mt != nullptr){
@@ -640,15 +649,17 @@ int cb_proto_deltat(void *pargs)
                 }
 
             } else {
-                TRN_NDPRINT(5, "%s:%d WARN - not ready count/mod[%d/%d]\n", __func__, __LINE__,ctx->cbcount(), ctx->decmod());
+                TRN_NDPRINT(FN_DEBUG, "%s:%d WARN - not ready count/mod[%d/%d]\n", __func__, __LINE__,ctx->cbcount(), ctx->decmod());
             }
             ctx->inc_cbcount();
 
 
             // write CSV
-            if(ctx->write_csv(bi, ai, ni, vi) > 0){
+            if(ctx->write_mb1_csv(snd, bi, ai, vi) > 0){
                 cfg->stats().mb_csv_n++;
             }
+
+            ctx->write_mb1_bin(snd);
 
             retval=0;
 
@@ -666,8 +677,6 @@ int cb_proto_deltat(void *pargs)
             delete vi;
     }
 
-    ping_number++;
-
     return retval;
 }
 
@@ -675,6 +684,7 @@ int cb_proto_dvl(void *pargs)
 {
     int retval=-1;
     static uint32_t ping_number = 0;
+    int FN_DEBUG = 5;
 
     TRN_NDPRINT(3, "%s:%d >>> Callback triggered <<<\n", __func__, __LINE__);
 
@@ -696,7 +706,7 @@ int cb_proto_dvl(void *pargs)
             continue;
         }
 
-        TRN_NDPRINT(5, "%s:%d processing ctx[%s]\n", __func__, __LINE__, ctx->ctx_key().c_str());
+        TRN_NDPRINT(FN_DEBUG, "%s:%d processing ctx[%s]\n", __func__, __LINE__, ctx->ctx_key().c_str());
 
         int err_count = 0;
 
@@ -707,7 +717,7 @@ int cb_proto_dvl(void *pargs)
 
         if(bkey[0] == nullptr || nkey == nullptr || akey[0] == nullptr || vkey == nullptr)
         {
-            TRN_NDPRINT(5, "%s:%d WARN - NULL input key\n", __func__, __LINE__);
+            TRN_NDPRINT(FN_DEBUG, "%s:%d WARN - NULL input key\n", __func__, __LINE__);
             err_count++;
             continue;
         }
@@ -728,18 +738,20 @@ int cb_proto_dvl(void *pargs)
 
         double nav_time = ni->time_usec()/1e6;
 
+        mb1_t *snd = trnx_utils::lcm_to_mb1(bi, ni, ai);
+
+        beam_geometry *bgeo = xpp->lookup_geo(*bkey[0], trn::BT_DVL);
+
+        dvlgeo *geo = static_cast<dvlgeo *>(bgeo);
+        trn::bath_input *bp[1] = {xpp->get_bath_input(*bkey[0])};
+        int trn_type = bp[0]->bath_input_type();
+
+        // compute beam components in vehicle frame
+        trnx_utils::transform_dvl(bi, ai, geo, snd);
+
         // check modulus
         if(ctx->decmod() <= 0 || (ctx->cbcount() % ctx->decmod()) == 0){
 
-            mb1_t *snd = trnx_utils::lcm_to_mb1(bi, ni, ai, ping_number);
-
-            beam_geometry *bgeo = xpp->lookup_geo(*bkey[0], trn::BT_DVL);
-
-            dvlgeo *geo = static_cast<dvlgeo *>(bgeo);
-            trn::bath_input *bp[1] = {xpp->get_bath_input(*bkey[0])};
-            int trn_type = bp[0]->bath_input_type();
-
-            trnx_utils::transform_dvl(bi, ai, geo, snd);
 
             // construct poseT/measT TRN inputs
 
@@ -753,20 +765,19 @@ int cb_proto_dvl(void *pargs)
                 delete pt;
             if(mt != nullptr)
                 delete mt;
-            if(snd != nullptr)
-                mb1_destroy(&snd);
 
         } else {
-            TRN_NDPRINT(5, "%s:%d WARN - not ready count/mod[%d/%d]\n", __func__, __LINE__,ctx->cbcount(), ctx->decmod());
+            TRN_NDPRINT(FN_DEBUG, "%s:%d WARN - not ready count/mod[%d/%d]\n", __func__, __LINE__,ctx->cbcount(), ctx->decmod());
         }
         ctx->inc_cbcount();
 
 
         // write to CSV
-        if(ctx->write_csv(bi, ai, ni, vi) > 0){
+        if(ctx->write_mb1_csv(snd, bi, ai, vi) > 0){
             cfg->stats().trn_csv_n++;
         }
-
+        if(snd != nullptr)
+            mb1_destroy(&snd);
 
         if(bi != nullptr)
             delete bi;
@@ -776,7 +787,6 @@ int cb_proto_dvl(void *pargs)
             delete ni;
         if(vi != nullptr)
             delete vi;
-
     }
 
     ping_number++;

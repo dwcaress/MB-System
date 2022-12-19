@@ -86,7 +86,7 @@ public:
         // behavior, i.e. defer notification until processing
         // is complete
         if(mDelegateNotify){
-            TRN_NDPRINT(5, "IDT::%s:%d  NOTIFY SEM\n", __func__, __LINE__);
+            TRN_NDPRINT(6, "IDT::%s:%d  NOTIFY SEM\n", __func__, __LINE__);
             notify_sem_list();
         }
     }

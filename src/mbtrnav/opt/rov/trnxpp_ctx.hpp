@@ -85,24 +85,36 @@ public:
 
     trnxpp_ctx()
     :
-    mCsvFile(nullptr)
+    mMB1CsvFile(nullptr)
+    , mMB1BinFile(nullptr)
+    , mTrnEstCsvFile(nullptr)
+    , mMBEstCsvFile(nullptr)
     , mUtmZone(10)
     , mDecMod(0)
     , mCBCount(0)
     , mCtxKey("undefined")
-    , mCsvPath()
+    , mMB1CsvPath()
+    , mMB1BinPath()
+    , mTrnEstCsvPath()
+    , mMBEstCsvPath()
     , mLcmFlags(0)
     {
     }
 
     trnxpp_ctx(const trnxpp_ctx &other)
     :
-    mCsvFile(other.mCsvFile)
+    mMB1CsvFile(other.mMB1CsvFile)
+    , mMB1BinFile(other.mMB1BinFile)
+    , mTrnEstCsvFile(other.mTrnEstCsvFile)
+    , mMBEstCsvFile(other.mMBEstCsvFile)
     , mUtmZone(other.mUtmZone)
     , mDecMod(other.mDecMod)
     , mCBCount(other.mCBCount)
     , mCtxKey(other.mCtxKey)
-    , mCsvPath(other.mCsvPath)
+    , mMB1CsvPath(other.mMB1CsvPath)
+    , mMB1BinPath(other.mMB1BinPath)
+    , mTrnEstCsvPath(other.mTrnEstCsvPath)
+    , mMBEstCsvPath(other.mMBEstCsvPath)
     , mLcmFlags(other.mLcmFlags)
     {
     }
@@ -135,9 +147,24 @@ public:
             }
         }
 
-        if(mCsvFile != nullptr)
+        if(mMB1CsvFile != nullptr)
         {
-            fclose(mCsvFile);
+            fclose(mMB1CsvFile);
+        }
+
+        if(mMB1BinFile != nullptr)
+        {
+            fclose(mMB1BinFile);
+        }
+
+        if(mTrnEstCsvFile != nullptr)
+        {
+            fclose(mTrnEstCsvFile);
+        }
+
+        if(mMBEstCsvFile != nullptr)
+        {
+            fclose(mMBEstCsvFile);
         }
     }
 
@@ -156,14 +183,24 @@ public:
         wx = (alen > wval ? alen+1 : wval);
         os << std::setw(wkey) << "lcm_flags" << std::setw(wx) << lcm_flags_str().c_str() <<"\n";
 
-        os << std::setw(wkey) << "csv_file" << std::setw(wval) << mCsvFile <<"\n";
+        os << std::setw(wkey) << "mb1_csv_file" << std::setw(wval) << mMB1CsvFile <<"\n";
+        os << std::setw(wkey) << "mb1_bin_file" << std::setw(wval) << mMB1BinFile <<"\n";
+        os << std::setw(wkey) << "trnest_csv_file" << std::setw(wval) << mTrnEstCsvFile <<"\n";
         os << std::setw(wkey) << "utm zone" << std::setw(wval) << mUtmZone <<"\n";
         os << std::setw(wkey) << "cb_count" << std::setw(wval) << mCBCount <<"\n";
         os << std::setw(wkey) << "cb_mod" << std::setw(wval) << mDecMod <<"\n";
 
-        alen = strlen(mCsvPath.c_str());
+        alen = strlen(mMB1CsvPath.c_str());
         wx = (alen > wval ? alen+1 : wval);
-        os << std::setw(wkey) << "csv_path" << std::setw(wx) << mCsvPath.c_str() <<"\n";
+        os << std::setw(wkey) << "mb1_csv_path" << std::setw(wx) << mMB1CsvPath.c_str() <<"\n";
+
+        alen = strlen(mMB1BinPath.c_str());
+        wx = (alen > wval ? alen+1 : wval);
+        os << std::setw(wkey) << "mb1_bin_path" << std::setw(wx) << mMB1BinPath.c_str() <<"\n";
+
+        alen = strlen(mTrnEstCsvPath.c_str());
+        wx = (alen > wval ? alen+1 : wval);
+        os << std::setw(wkey) << "trnest_csv_path" << std::setw(wx) << mTrnEstCsvPath.c_str() <<"\n";
 
         std::list<trn_host>::iterator hit;
         os << std::setw(wkey) << "MB1Servers" << std::setw(wval) << mMB1SvrList.size() <<"\n";
@@ -415,70 +452,327 @@ public:
     {
         return mVelInputKeys.size() > i ? &mVelInputKeys.at(i) : nullptr;
     }
-
-    void set_csv_path(const std::string &inp)
+////////////
+    void set_trnest_csv_path(const std::string &inp)
     {
-        mCsvPath = std::string(inp);
+        mTrnEstCsvPath = std::string(inp);
     }
 
-    std::string csv_path()
+    std::string trnest_csv_path()
     {
-        return mCsvPath;
+        return mTrnEstCsvPath;
     }
 
-    int init_csv_file(trnxpp_cfg *cfg)
+    int init_trnest_csv_file(trnxpp_cfg *cfg)
     {
         int retval = -1;
 
-        if(mCsvFile != NULL)
+        if(mTrnEstCsvFile != NULL)
         {
-            fclose(mCsvFile);
-            mCsvFile = nullptr;
+            fclose(mTrnEstCsvFile);
+            mTrnEstCsvFile = nullptr;
         }
 
-        set_csv_path(csv_path());
-        mCsvFile = csv_open();
+        set_trnest_csv_path(trnest_csv_path());
+        mTrnEstCsvFile = trnest_csv_open();
 
-        if(mCsvFile != nullptr){
-            fprintf(mCsvFile,"# trnxpp TRN session start %s\n", cfg->session_string().c_str());
+        if(mTrnEstCsvFile == nullptr){
+            LU_PERROR(cfg->mlog(), "TrnEst CSV file open failed");
+        }
+        return retval;
+    }
+
+    FILE *trnest_csv_open()
+    {
+        if(mTrnEstCsvFile == nullptr){
+
+            TRN_NDPRINT(2, "%s:%d - opening TrnEst CSV file[%s]\n", __func__, __LINE__, mTrnEstCsvPath.c_str());
+            if(logu::utils::open_file(&mTrnEstCsvFile, mTrnEstCsvPath, mTrnEstCsvPath, true) == 0)
+            {
+                TRN_NDPRINT(2, "%s:%d - opened TrnEst CSV file[%s]\n", __func__, __LINE__, mTrnEstCsvPath.c_str());
+
+            } else {
+                TRN_DPRINT("%s:%d - ERR open TrnEst CSV file[%s] failed\n", __func__, __LINE__, mTrnEstCsvPath.c_str());
+            }
+        }
+        return mTrnEstCsvFile;
+    }
+
+    FILE *trnest_csv_file()
+    {
+        return mTrnEstCsvFile;
+    }
+
+    int write_trnest_csv(double &stime, poseT &pt, poseT &mle, poseT &mmse)
+    {
+        int retval = 0;
+
+        // vi optional, valid if NULL
+        if(nullptr != mTrnEstCsvFile){
+
+            std::string ss = trnx_utils::trnest_tocsv(stime, pt, mle, mmse);
+
+            fprintf(mTrnEstCsvFile, "%s\n", ss.c_str());
+
+            //            TRN_NDPRINT(6, "%s\n", ss.c_str());
+
+            retval = ss.length();
+        } else {
+            TRN_DPRINT("%s:%d - invalid arg mTrnEstCsvFile[%p]\n", __func__, __LINE__, mTrnEstCsvFile);
+        }
+
+        return retval;
+    }
+/////////////////
+    void set_mbest_csv_path(const std::string &inp)
+    {
+        mMBEstCsvPath = std::string(inp);
+    }
+
+    std::string mbest_csv_path()
+    {
+        return mMBEstCsvPath;
+    }
+
+    int init_mbest_csv_file(trnxpp_cfg *cfg)
+    {
+        int retval = -1;
+
+        if(mMBEstCsvFile != NULL)
+        {
+            fclose(mMBEstCsvFile);
+            mMBEstCsvFile = nullptr;
+        }
+
+        set_mbest_csv_path(mbest_csv_path());
+        mMBEstCsvFile = mbest_csv_open();
+
+        if(mMBEstCsvFile == nullptr){
+            LU_PERROR(cfg->mlog(), "MBEst CSV file open failed");
+        }
+        return retval;
+    }
+
+    FILE *mbest_csv_open()
+    {
+        if(mMBEstCsvFile == nullptr){
+
+            TRN_NDPRINT(2, "%s:%d - opening MBEst CSV file[%s]\n", __func__, __LINE__, mTrnEstCsvPath.c_str());
+            if(logu::utils::open_file(&mMBEstCsvFile, mMBEstCsvPath, mMBEstCsvPath, true) == 0)
+            {
+                TRN_NDPRINT(2, "%s:%d - opened MBEst CSV file[%s]\n", __func__, __LINE__, mMBEstCsvPath.c_str());
+
+            } else {
+                TRN_DPRINT("%s:%d - ERR open MBEst CSV file[%s] failed\n", __func__, __LINE__, mMBEstCsvPath.c_str());
+            }
+        }
+        return mMBEstCsvFile;
+    }
+
+    FILE *mbest_csv_file()
+    {
+        return mMBEstCsvFile;
+    }
+
+    int write_mbest_csv(trnu_pub_t &mbest)
+    {
+        int retval = 0;
+
+        // vi optional, valid if NULL
+        if(nullptr != mMBEstCsvFile){
+
+            std::string ss = trnx_utils::mbest_tocsv(mbest);
+
+            fprintf(mMBEstCsvFile, "%s\n", ss.c_str());
+
+            //            TRN_NDPRINT(6, "%s\n", ss.c_str());
+
+            retval = ss.length();
+        } else {
+            TRN_DPRINT("%s:%d - invalid arg mMBEstCsvFile[%p]\n", __func__, __LINE__, mMBEstCsvFile);
+        }
+
+        return retval;
+    }
+
+//////////////////
+    void set_mb1_csv_path(const std::string &inp)
+    {
+        mMB1CsvPath = std::string(inp);
+    }
+
+    std::string mb1_csv_path()
+    {
+        return mMB1CsvPath;
+    }
+
+    int init_mb1_csv_file(trnxpp_cfg *cfg)
+    {
+        int retval = -1;
+
+        if(mMB1CsvFile != NULL)
+        {
+            fclose(mMB1CsvFile);
+            mMB1CsvFile = nullptr;
+        }
+
+        set_mb1_csv_path(mb1_csv_path());
+        mMB1CsvFile = mb1_csv_open();
+
+        if(mMB1CsvFile != nullptr){
+            fprintf(mMB1CsvFile,"# trnxpp TRN session start %s\n", cfg->session_string().c_str());
         } else {
             LU_PERROR(cfg->mlog(), "TRN CSV file open failed");
         }
         return retval;
     }
 
-    FILE *csv_open()
+    FILE *mb1_csv_open()
     {
-        if(mCsvFile == nullptr){
+        if(mMB1CsvFile == nullptr){
 
-            TRN_NDPRINT(2, "%s:%d - opening CSV file[%s]\n", __func__, __LINE__, mCsvPath.c_str());
-            if(logu::utils::open_file(&mCsvFile, mCsvPath, mCsvPath, true) == 0)
+            TRN_NDPRINT(2, "%s:%d - opening CSV file[%s]\n", __func__, __LINE__, mMB1CsvPath.c_str());
+            if(logu::utils::open_file(&mMB1CsvFile, mMB1CsvPath, mMB1CsvPath, true) == 0)
             {
-                TRN_NDPRINT(2, "%s:%d - opened CSV file[%s]\n", __func__, __LINE__, mCsvPath.c_str());
+                TRN_NDPRINT(2, "%s:%d - opened CSV file[%s]\n", __func__, __LINE__, mMB1CsvPath.c_str());
 
             } else {
-                TRN_DPRINT("%s:%d - ERR open CSV file[%s] failed\n", __func__, __LINE__, mCsvPath.c_str());
+                TRN_DPRINT("%s:%d - ERR open CSV file[%s] failed\n", __func__, __LINE__, mMB1CsvPath.c_str());
             }
         }
-        return mCsvFile;
+        return mMB1CsvFile;
     }
 
-    FILE *csv_file()
+    FILE *mb1_csv_file()
     {
-        return mCsvFile;
+        return mMB1CsvFile;
     }
 
-    int write_csv(trn::bath_info *bi, trn::att_info *ai, trn::nav_info *ni, trn::vel_info *vi=nullptr)
+    int write_mbest_csv(double &stime, trnu_pub_t &mbest)
     {
         int retval = 0;
 
         // vi optional, valid if NULL
-        if(nullptr != mCsvFile && nullptr != bi && nullptr != ni && nullptr != ai){
-            std::string ss = trnx_utils::lcm_to_csv(bi, ai, ni, vi);
-            fprintf(mCsvFile, "%s\n", ss.c_str());
+        if(nullptr != mMBEstCsvFile){
+
+            std::string ss = trnx_utils::mbest_tocsv(mbest);
+
+            fprintf(mMBEstCsvFile, "%s\n", ss.c_str());
+
+            //            TRN_NDPRINT(6, "%s\n", ss.c_str());
+
+            retval = ss.length();
+        } else {
+            TRN_DPRINT("%s:%d - invalid arg mMBEstCsvFile[%p]\n", __func__, __LINE__, mMBEstCsvFile);
+        }
+
+        return retval;
+    }
+
+    int write_mb1_csv(mb1_t *snd, trn::bath_info *bi, trn::att_info *ai, trn::vel_info *vi=nullptr)
+    {
+        int retval = 0;
+
+        // vi optional, valid if NULL
+        if(nullptr != mMB1CsvFile && nullptr != snd && nullptr != ai && nullptr != bi){
+
+            std::string ss = trnx_utils::mb1_to_csv(snd, bi, ai, vi);
+            if(ss.length() > 1){
+                fprintf(mMB1CsvFile, "%s\n", ss.c_str());
+            }
+
+            //            TRN_NDPRINT(6, "%s\n", ss.c_str());
+
+            retval = ss.length();
+        } else {
+            TRN_DPRINT("%s:%d - invalid arg snd[%p] ai[%p] mMB1CsvFile[%p]\n", __func__, __LINE__, snd, ai, mMB1CsvFile);
+        }
+
+        return retval;
+    }
+
+    int write_csv_orig(trn::bath_info *bi, trn::att_info *ai, trn::nav_info *ni, trn::vel_info *vi=nullptr)
+    {
+        int retval = 0;
+
+        // vi optional, valid if NULL
+        if(nullptr != mMB1CsvFile && nullptr != bi && nullptr != ni && nullptr != ai){
+
+            std::string ss = trnx_utils::lcm_to_csv_raw(bi, ai, ni, vi);
+
+            fprintf(mMB1CsvFile, "%s\n", ss.c_str());
+
+//            TRN_NDPRINT(6, "%s\n", ss.c_str());
+
             retval = ss.length();
         }
 
+        return retval;
+    }
+
+    void set_mb1_bin_path(const std::string &inp)
+    {
+        mMB1BinPath = std::string(inp);
+    }
+
+    std::string mb1_bin_path()
+    {
+        return mMB1BinPath;
+    }
+
+    int init_mb1_bin_file(trnxpp_cfg *cfg)
+    {
+        int retval = -1;
+
+        if(mMB1BinFile != NULL)
+        {
+            fclose(mMB1BinFile);
+            mMB1BinFile = nullptr;
+        }
+
+        set_mb1_bin_path(mb1_bin_path());
+        mMB1BinFile = mb1_bin_open();
+
+        if(mMB1BinFile == nullptr){
+            LU_PERROR(cfg->mlog(), "TRN MB1 file open failed");
+        }
+        return retval;
+    }
+
+    FILE *mb1_bin_open()
+    {
+        if(mMB1BinFile == nullptr){
+
+            TRN_NDPRINT(2, "%s:%d - opening MB1 file[%s]\n", __func__, __LINE__, mMB1BinPath.c_str());
+            if(logu::utils::open_file(&mMB1BinFile, mMB1BinPath, mMB1BinPath, true) == 0)
+            {
+                TRN_NDPRINT(2, "%s:%d - opened MB1 file[%s]\n", __func__, __LINE__, mMB1BinPath.c_str());
+
+            } else {
+                TRN_DPRINT("%s:%d - ERR open MB1 file[%s] failed\n", __func__, __LINE__, mMB1BinPath.c_str());
+            }
+        }
+        return mMB1BinFile;
+    }
+
+    FILE *mb1_bin_file()
+    {
+        return mMB1BinFile;
+    }
+
+    size_t write_mb1_bin(mb1_t *snd)
+    {
+        size_t retval = -1;
+
+        if(nullptr != snd && mMB1BinFile != nullptr){
+            retval = fwrite(snd, snd->size, 1, mMB1BinFile);
+            if(retval < 0){
+                fprintf(stderr, "%s:%d - MB1 write failed [%d/%s]\n", __func__, __LINE__, errno, strerror(errno));
+            }
+            else {
+                fprintf(stderr, "%s:%d - MB1 wrote [%lu] size[%u]\n", __func__, __LINE__, (unsigned long)retval, snd->size);
+            }
+        }
         return retval;
     }
 
@@ -778,9 +1072,23 @@ public:
                     TRN_NDPRINT(5, "%s:%d - UDPM update key[%s] vp[%p] update_bytes[%d]\n", __func__, __LINE__, key.c_str(), vp, update_bytes);
 
                     if(update_bytes > 0){
+
+                        trnu_pub_t *mbest = (trnu_pub_t *)iobuf;
+
+                        std::string est_str = trnx_utils::mbest_tostring(mbest);
+
+//                        LU_PEVENT(cfg->mlog(), "udpm est:\n%s\n", est_str.c_str());
+
+                        if(cfg->debug() >= 5 ){
+                            fprintf(stderr, "%s - udpm est:\n", __func__ );
+                            est_str.c_str();
+                        }
+
+                        // write TRN estimate CSV (compatible w/ tlp-plot)
+                        write_mbest_csv(*mbest);
+
                         TRN_NDPRINT(5, "%s:%d - pub MB1_EST\n", __func__, __LINE__);
                         trn::trnupub_t trnu_msg;
-                        trnu_pub_t *mbest = (trnu_pub_t *)iobuf;
                         trn::trn_msg_utils::trnupub_to_lcm(trnu_msg, mbest);
 
                         if(cfg != nullptr && mbest->success != 0){
@@ -1189,6 +1497,9 @@ public:
                 std::string est_str = trnx_utils::trnest_tostring(nav_time, *pt, mle, mmse);
                 LU_PEVENT(cfg->mlog(), "trn est:\n%s\n", est_str.c_str());
 
+                // write TRN estimate CSV (compatible w/ tlp-plot)
+                write_trnest_csv(nav_time, *pt, mle, mmse);
+
                 if(cfg->verbose()){
                     // output estimate to console
                     fprintf(stderr, "%s\n", est_str.c_str());
@@ -1334,12 +1645,18 @@ public:
 protected:
 private:
 
-    FILE *mCsvFile;
+    FILE *mMB1CsvFile;
+    FILE *mMB1BinFile;
+    FILE *mTrnEstCsvFile;
+    FILE *mMBEstCsvFile;
     long int mUtmZone;
     int mDecMod;
     int mCBCount;
     std::string mCtxKey;
-    std::string mCsvPath;
+    std::string mMB1CsvPath;
+    std::string mMB1BinPath;
+    std::string mTrnEstCsvPath;
+    std::string mMBEstCsvPath;
     uint32_t mLcmFlags;
 
     std::vector<std::string> mBathInputKeys;

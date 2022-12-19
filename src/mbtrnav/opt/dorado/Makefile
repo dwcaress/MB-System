@@ -81,7 +81,7 @@ MBARI_MAIN_LIBS = -ltnavc -ltrn  -lnewmat -lqnx -lnetcdf -lm -lpthread $(OS_LIBS
 REPLAY=trn-replay
 REPLAY_SRC=Replay.cpp trn_replay.cpp
 REPLAY_OBJ = $(REPLAY_SRC:%.cpp=$(BUILD_DIR)/%.o)
-REPLAY_LIBS = -ltrn  -lnewmat -lqnx -lnetcdf -lm -lpthread -lgeolib -ltnavc $(OS_LIBS)
+REPLAY_LIBS = -ltrn  -lnewmat -lqnx -lnetcdf -lm -lpthread -lgeolib -ltrncli $(OS_LIBS)
 
 ########################################
 # Build Files (mostly for cleanup)

@@ -372,10 +372,10 @@ public:
                             if(mConfig.trni_csv()){
                                 trni_csv_tofile(&mTrnInCsvFile, lastPT, *mt);
                                 this->stats().mTrniCsvWrite++;
-                                if(mConfig.oflag_set(TrnLogConfig::TRNI_CSV))
-                                {
-                                    show_trni_csv(lastPT, *mt);
-                                }
+                            }
+                            if(mConfig.oflag_set(TrnLogConfig::TRNI_CSV))
+                            {
+                                show_trni_csv(lastPT, *mt);
                             }
 
                             mTrn->measUpdate(mt, mConfig.trn_sensor());
@@ -401,10 +401,10 @@ public:
                                 if(mConfig.trno_csv()){
                                     trno_csv_tofile(&mTrnOutCsvFile, ts, lastPT, mle, mmse);
                                     this->stats().mTrnoCsvWrite++;
-                                    if(mConfig.oflag_set(TrnLogConfig::TRNO_CSV))
-                                    {
-                                        show_trno_csv(ts, lastPT, mle, mmse);
-                                    }
+                                }
+                                if(mConfig.oflag_set(TrnLogConfig::TRNO_CSV))
+                                {
+                                    show_trno_csv(ts, lastPT, mle, mmse);
                                 }
                             }else{
                                 fprintf(stderr,"%s:%d - last meas unsuccessful\n",__func__, __LINE__);
@@ -469,22 +469,22 @@ protected:
     void trni_csv_tostream(std::ostream &os, poseT &pt, measT &mt)
     {
         // Note that TRN uses N,E,D frame (i.e. N:x E:y D:z)
-        // time POSIX epoch sec
-        // northings
-        // eastings
-        // depth
-        // heading
-        // pitch
-        // roll
-        // flag (0)
-        // flag (0)
-        // flag (0)
-        // vx (0)
-        // vy (0)
-        // vz (0)
-        // sounding valid flag
-        // bottom lock valid flag
-        // number of beams
+        // [ 0] time POSIX epoch sec
+        // [ 1] northings
+        // [ 2] eastings
+        // [ 3] depth
+        // [ 4] heading
+        // [ 5] pitch
+        // [ 6] roll
+        // [ 7] flag (0)
+        // [ 8] flag (0)
+        // [ 9] flag (0)
+        // [10] vx (0)
+        // [11] xy (0)
+        // [12] vz (0)
+        // [13] sounding valid flag
+        // [14] bottom lock valid flag
+        // [15] number of beams
         // beam[i] number
         // beam[i] valid (1)
         // beam[i] range
@@ -556,7 +556,27 @@ protected:
 
     void trno_csv_tostream(std::ostream &os, double ts, poseT &pt, poseT &mle, poseT &mmse)
     {
-        // Format time,mmse.time,mmse.x,mmse.y,mmse.z,pos.time,ofs.x,ofs.y,ofs.z,cov.0,cov.2,cov.5,pos.time,pos.x,pos.y,pos.z,mle.time,mle.x,mle.y,mle.z
+        // Format (compatible with tlp-plot)
+        // session-time,
+        // mmse.time,
+        // mmse.x,
+        // mmse.y,
+        // mmse.z,
+        // pos.time,
+        // ofs.x,
+        // ofs.y,
+        // ofs.z,
+        // cov.0,
+        // cov.2,
+        // cov.5,
+        // pos.time,
+        // pos.x,
+        // pos.y,
+        // pos.z,
+        // mle.time,
+        // mle.x,
+        // mle.y,
+        // mle.z
 
         os << std::fixed << std::setprecision(3);
         os << ts << ",";
@@ -574,9 +594,9 @@ protected:
 
         // cov
         os << std::fixed << std::setprecision(3);
-        os << sqrt(mmse.covariance[0]) << ",";
-        os << sqrt(mmse.covariance[2]) << ",";
-        os << sqrt(mmse.covariance[5]) << ",";
+        os << (mmse.covariance[0]) << ",";
+        os << (mmse.covariance[2]) << ",";
+        os << (mmse.covariance[5]) << ",";
 
         // pos
         os << std::setprecision(3);
@@ -1324,7 +1344,9 @@ public:
                             int sensor=0;
                             if(sscanf(optarg,"%d", &sensor) == 1)
                                 mTBConfig.set_trn_sensor(sensor);
-                        } else if (strcmp("trn-cfg", options[option_index].name) == 0) {
+                        }
+                        // trn-cfg
+                        else if (strcmp("trn-cfg", options[option_index].name) == 0) {
                             mTBConfig.set_trn_cfg(std::string(optarg));
                         }
                         // input
@@ -1374,7 +1396,7 @@ public:
                             }
                             if(strstr(optarg,"*csv") != NULL){
                                 oflags |= TrnLogConfig::ALL_CSV;
-                            }
+                           }
                             if(oflags>0){
                                 mTBConfig.set_oflags(oflags);
                             }
@@ -1645,6 +1667,7 @@ public:
     int debug(){return mDebug;}
     bool verbose(){return mVerbose;}
     bool config_set(){return mConfigSet;}
+    void set_config_set(){mConfigSet =  true;}
 protected:
 private:
     int mDebug;
@@ -1703,6 +1726,8 @@ int main(int argc, char **argv)
     if(cfg.config_set() > 0){
         // parse config file
         cfg.parse_file(cfg.cfg());
+    } else {
+        cfg.set_config_set();
     }
     // reparse command line (should override config options)
     cfg.parse_args(argc, argv);

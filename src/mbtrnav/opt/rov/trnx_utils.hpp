@@ -82,51 +82,50 @@ public:
     static void trnest_tostream(std::ostream &os, double &ts, poseT &pt, poseT &mle, poseT &mmse, int wkey, int wval)
     {
         os << "--- TRN Estimate OK---" << "\n";
-        os << "MLE[t, tm, x, y, z]  ";
+        os << std::setw(5) << "MLE" << std::setw(21) << " [t, tm, x, y, z] ";
         os << std::fixed << std::setprecision(3);
-        os << ts << ", ";
-        os << std::setprecision(2);
-        os << mle.time << ", ";
-        os << std::setprecision(4);
-        os << mle.x << ", " << mle.y << ", " << mle.z << "\n";
+        os << std::setw(13) << ts << ", ";
+        os << std::setw(13) << mle.time << ", ";
+        os << std::setw(7) << mle.x << ", ";
+        os << std::setw(7) << mle.y << ", ";
+        os << std::setw(7) << mle.z << "\n";
 
-        os << "MMSE[t, tm, x, y, z] ";
+        os << std::setw(5) << "MMSE" << std::setw(21) << " [t, tm, x, y, z] ";
         os << std::fixed << std::setprecision(3);
-        os << ts << ", ";
-        os << std::setprecision(2);
-        os << mmse.time << ", ";
-        os << std::setprecision(4);
-        os << mmse.x << ", " << mmse.y << ", " << mmse.z << "\n";
+        os << std::setw(13) << ts << ", ";
+        os << std::setw(13) << mmse.time << ", ";
+        os << std::setw(7) << mmse.x << ", ";
+        os << std::setw(7) << mmse.y << ", ";
+        os << std::setw(7) << mmse.z << "\n";
 
-        os << "POS[t, tm, x, y, z]  ";
+        os << std::setw(5) << "POS" << std::setw(21) << " [t, tm, x, y, z] ";
         os << std::fixed << std::setprecision(3);
-        os << ts << ", ";
-        os << std::setprecision(2);
-        os << mmse.time << ", ";
-        os << std::setprecision(4);
-        os << pt.x << ", " << pt.y << ", " << pt.z << "\n";
+        os << std::setw(13) << ts << ", ";
+        os << std::setw(13) << mmse.time << ", ";
+        os << std::setw(7) << pt.x << ", ";
+        os << std::setw(7) << pt.y << ", ";
+        os << std::setw(7) << pt.z << "\n";
 
-        os << "OFS[t, tm, x, y, z]  ";
+        os << std::setw(5) << "OFS" << std::setw(21) << " [t, tm, x, y, z] ";
         os << std::fixed << std::setprecision(3);
-        os << ts << ", ";
-        os << std::setprecision(2);
-        os << mmse.time << ", ";
-        os << std::setprecision(4);
-        os << pt.x-mmse.x << ", " << pt.y-mmse.y << ", " << pt.z-mmse.z << "\n";
+        os << std::setw(13) << ts << ", ";
+        os << std::setw(13) << mmse.time << ", ";
+        os << std::setw(7) << mmse.x - pt.x << ", ";
+        os << std::setw(7) << mmse.y - pt.y << ", ";
+        os << std::setw(7) << mmse.z - pt.z << "\n";
 
-        os << "COV[t, x, y, z, m]   ";
+        os << std::setw(5) << "COV" << std::setw(21) << " [t, x, y, z, m] ";
         os << std::setprecision(3);
-        os << mmse.time << ", ";
-        os << std::setprecision(2);
-        os << mmse.covariance[0] << ", ";
-        os << mmse.covariance[2] << ", ";
-        os << mmse.covariance[5] << ", ";
+        os << std::setw(13) << mmse.time << ", ";
+        os << std::setw(7) << mmse.covariance[0] << ", ";
+        os << std::setw(7) << mmse.covariance[2] << ", ";
+        os << std::setw(7) << mmse.covariance[5] << ", ";
         double ss = mmse.covariance[0] * mmse.covariance[0];
         ss += mmse.covariance[2] * mmse.covariance[2];
         ss += mmse.covariance[5] * mmse.covariance[5];
-        os << sqrt(ss) << "\n";
+        os << std::setw(7) << sqrt(ss) << "\n";
 
-        os << "s[t, x, y, z]        ";
+        os << std::setw(5) << "s" << std::setw(21) << " [t, x, y, z] ";
         os << std::setprecision(3);
         os << mmse.time << ", ";
         os << std::setprecision(2);
@@ -134,6 +133,66 @@ public:
         os << sqrt(mmse.covariance[2]) << ", ";
         os << sqrt(mmse.covariance[5]) << "\n";
 
+    }
+
+    static std::string trnest_tocsv(double &stime, poseT &pt, poseT &mle, poseT &mmse)
+    {
+        // Format (compatible with tlp-plot)
+        // session-time,
+        // mmse.time,
+        // mmse.x,
+        // mmse.y,
+        // mmse.z,
+        // pos.time,
+        // ofs.x,
+        // ofs.y,
+        // ofs.z,
+        // cov.0,
+        // cov.2,
+        // cov.5,
+        // pos.time,
+        // pos.x,
+        // pos.y,
+        // pos.z,
+        // mle.time,
+        // mle.x,
+        // mle.y,
+        // mle.z
+
+        ostringstream os;
+        os << std::fixed << std::setprecision(3);
+        os << stime << ",";
+
+        // mmse
+        os << mmse.time << ",";
+        os << std::setprecision(4);
+        os << mmse.x << "," << mmse.y << "," << mmse.z << ",";
+
+        // ofs
+        os << std::fixed << std::setprecision(3);
+        os << pt.time << ",";
+        os << std::setprecision(4);
+        os << mmse.x - pt.x << "," << mmse.y - pt.y << "," << mmse.z - pt.z << ",";
+
+        // cov
+        os << std::fixed << std::setprecision(3);
+        os << (mmse.covariance[0]) << ",";
+        os << (mmse.covariance[2]) << ",";
+        os << (mmse.covariance[5]) << ",";
+
+        // pos
+        os << std::setprecision(3);
+        os << pt.time << ",";
+        os << std::setprecision(4);
+        os << pt.x << "," << pt.y << "," << pt.z << ",";
+
+        // mle
+        os << std::fixed << std::setprecision(3);
+        os << mle.time << ",";
+        os << std::setprecision(4);
+        os << mle.x << "," << mle.y << "," << mle.z << "\n";
+
+        return os.str();
     }
 
     static std::string  trnest_tostring(double &time, poseT &pt, poseT &mle, poseT &mmse, int wkey=15, int wval=18)
@@ -148,32 +207,121 @@ public:
         trnest_tostream(std::cerr, time, pt, mle, mmse, wkey, wval);
     }
 
+    static std::string mbest_tocsv(trnu_pub_t &mbest)
+    {
+        // Format (compatible with tlp-plot)
+        // session-time,
+        // mmse.time,
+        // mmse.x,
+        // mmse.y,
+        // mmse.z,
+        // pos.time,
+        // ofs.x,
+        // ofs.y,
+        // ofs.z,
+        // cov.0,
+        // cov.2,
+        // cov.5,
+        // pos.time,
+        // pos.x,
+        // pos.y,
+        // pos.z,
+        // mle.time,
+        // mle.x,
+        // mle.y,
+        // mle.z
+
+        if(mbest.mb1_time == 0.){
+            return std::string("");
+        }
+
+        ostringstream os;
+        os << std::fixed << std::setprecision(3);
+        os << mbest.mb1_time << ",";
+
+        // mmse
+        os << mbest.est[2].time << ",";
+        os << std::setprecision(4);
+        os << mbest.est[2].x << "," << mbest.est[2].y << "," << mbest.est[2].z << ",";
+
+        // ofs
+        os << std::fixed << std::setprecision(3);
+        os << mbest.est[3].time << ",";
+        os << std::setprecision(4);
+        os << mbest.est[3].x << "," << mbest.est[3].y << "," << mbest.est[3].z << ",";
+
+        // cov (mmse)
+        os << std::fixed << std::setprecision(3);
+        os << (mbest.est[2].cov[0]) << ",";
+        os << (mbest.est[2].cov[1]) << ",";
+        os << (mbest.est[2].cov[2]) << ",";
+
+        // pos
+        os << std::setprecision(3);
+        os << mbest.est[0].time << ",";
+        os << std::setprecision(4);
+        os << mbest.est[0].x << "," << mbest.est[0].y << "," << mbest.est[0].z << ",";
+
+        // mle (not in trnu_pub_t)
+        os << std::fixed << std::setprecision(3);
+        os << mbest.est[1].time << ",";
+        os << std::setprecision(4);
+        os << mbest.est[1].x << "," << mbest.est[1].y << "," << mbest.est[1].z << ",";
+
+        return os.str();
+    }
+
     static void mbest_tostream(std::ostream &os, trnu_pub_t *mbest, int wkey=15, int wval=18)
     {
         os << "--- MB Update OK---" << "\n";
 
         os << std::fixed << std::setprecision(3);
-        os << "POS [t, x, y, z, cov(0, 2, 5, 1)]:";
-        os << std::setprecision(3);
-        os << mbest->est[0].time << ", ";
-        os << mbest->est[0].x << ", " << mbest->est[0].y << ", " << mbest->est[0].z;
-        os << mbest->est[0].cov[0] << ", " << mbest->est[0].cov[1] << ", ";
-        os << mbest->est[0].cov[2] << ", " << mbest->est[0].cov[3] << "\n";
-
-        os << "MLE [t, x, y, z, cov(0, 2, 5, 1)]:";
+        os << std::setw(5) << "MLE" << std::setw(21) << " [t, x, y, z] ";
         os << std::setprecision(3);
         os << mbest->est[1].time << ", ";
-        os << mbest->est[1].x << ", " << mbest->est[1].y << ", " << mbest->est[0].z;
-        os << mbest->est[1].cov[0] << ", " << mbest->est[1].cov[1] << ", ";
-        os << mbest->est[1].cov[2] << ", " << mbest->est[1].cov[3] << "\n";
+        os << std::setw(7) << mbest->est[1].x << ", ";
+        os << std::setw(7) << mbest->est[1].y << ", ";
+        os << std::setw(7) << mbest->est[1].z << "\n";
 
-        os << std::fixed << std::setprecision(3);
-        os << "MMSE [t, x, y, z, cov(0, 2, 5, 1)]:";
+        os << std::setw(5) << "MMSE" << std::setw(21) << " [t, x, y, z] ";
         os << std::setprecision(3);
-        os << mbest->est[2].time << ", ";
-        os << mbest->est[2].x << ", " << mbest->est[2].y << ", " << mbest->est[0].z;
-        os << mbest->est[2].cov[0] << ", " << mbest->est[2].cov[1] << ", ";
-        os << mbest->est[2].cov[2] << ", " << mbest->est[2].cov[3] << "\n";
+        os << std::setw(13) << mbest->est[2].time << ", ";
+        os << std::setw(7) << mbest->est[2].x << ", ";
+        os << std::setw(7) << mbest->est[2].y << ", ";
+        os << std::setw(7) << mbest->est[0].z << "\n";
+
+        os << std::setw(5) << "POSE" << std::setw(21) << " [t, x, y, z] ";
+        os << std::setprecision(3);
+        os << std::setw(13) << mbest->est[0].time << ", ";
+        os << std::setw(7) << mbest->est[0].x << ", ";
+        os << std::setw(7) << mbest->est[0].y << ", ";
+        os << std::setw(7) << mbest->est[0].z << "\n";
+
+        os << std::setw(5) << "OFS" << std::setw(21) << " [t, x, y, z] ";
+        os << std::setprecision(3);
+        os << std::setw(13) << mbest->est[2].time << ", ";
+        os << std::setw(7) << mbest->est[2].x - mbest->est[0].x << ", ";
+        os << std::setw(7) << mbest->est[2].y - mbest->est[0].y << ", ";
+        os << std::setw(7) << mbest->est[2].z - mbest->est[0].z << "\n";
+
+        os << std::setw(5) << "COV" << std::setw(21) << " [t, x, y, z, xy, m] ";
+        os << std::setprecision(3);
+        os << std::setw(13) << mbest->est[2].time << ", ";
+        os << std::setw(7) << mbest->est[2].cov[0] << ", ";
+        os << std::setw(7) << mbest->est[2].cov[1] << ", ";
+        os << std::setw(7) << mbest->est[2].cov[2] << ", ";
+        os << std::setw(7) << mbest->est[2].cov[3] << ", ";
+        double ss = mbest->est[2].cov[0] * mbest->est[2].cov[0];
+        ss += mbest->est[2].cov[1] * mbest->est[2].cov[1];
+        ss += mbest->est[2].cov[2] * mbest->est[2].cov[2];
+        os << sqrt(ss) << "\n";
+
+        os << std::setw(5) << "s" << std::setw(21) << " [t, x, y, z] ";
+        os << std::setprecision(3);
+        os << std::setw(13) << mbest->est[2].time << ", ";
+        os << std::setw(7) << sqrt(mbest->est[2].cov[0]) << ", ";
+        os << std::setw(7) << sqrt(mbest->est[2].cov[1]) << ", ";
+        os << std::setw(7) << sqrt(mbest->est[2].cov[2]) << "\n";
 
         os << std::setw(wkey) << "reinit_count:" << std::setw(wkey) << mbest->reinit_count << "\n";
         os << std::setw(wkey) << "reinit_tlast:" << std::setw(wkey) << mbest->reinit_tlast << "\n";
@@ -199,75 +347,240 @@ public:
         mbest_tostream(std::cerr, mbest, wkey, wval);
     }
 
+    static void matrix_tostream(std::ostream &os, Matrix m, const char *name=nullptr, int width=7, int precision=3, int wkey=5)
+    {
+
+        std::ios_base::fmtflags orig_settings = std::cout.flags();
+
+        if(name != nullptr)
+            os << std::setw(wkey) << name << " [" << m.Nrows() << "r " << m.Ncols() << "c]" << std::endl;
+
+        os << std::fixed << std::setprecision(precision);
+
+        for(int i = 1 ; i <= m.Nrows() ; i++ ){
+            os << std::setw(wkey) << " [" << i << "] :";
+            for(int j = 1 ; j <= m.Ncols() ; j++ ){
+                os << " " << std::setw(width) << m(i, j);
+            }
+            os << std::endl;
+        }
+
+        std::cout.flags(orig_settings);
+    }
+
+    static std::string matrix_tostring(Matrix m, const char *name=nullptr, int width=7, int precision=3, int wkey=5)
+    {
+        ostringstream ss;
+        matrix_tostream(ss, m, name, precision, wkey);
+        return ss.str();
+    }
+
+    static void matrix_show(Matrix m, const char *name=nullptr, int width=7, int precision=3, int wkey=5)
+    {
+        matrix_tostream(std::cerr, m, name, width, precision, wkey);
+    }
+
+    static Matrix affineMultiply(const Matrix& A, const Matrix& B)
+    {
+        Matrix outMat = B;
+
+        for(int r = 1; r <= A.Nrows(); r++) {
+            outMat(r, 1) = A(r,1) * B(1, 1) + A(r,2) * B(2, 1) + A(r,3) * B(3, 1) + A(r,4) * B(4, 1);
+            outMat(r, 2) = A(r,1) * B(1, 2) + A(r,2) * B(2, 2) + A(r,3) * B(3, 2) + A(r,4) * B(4, 2);
+            outMat(r, 3) = A(r,1) * B(1, 3) + A(r,2) * B(2, 3) + A(r,3) * B(3, 3) + A(r,4) * B(4, 3);
+            outMat(r, 4) = A(r,1) * B(1, 4) + A(r,2) * B(2, 4) + A(r,3) * B(3, 4) + A(r,4) * B(4, 4);
+        }
+        return outMat;
+    }
+
     // 321 euler rotation R(phi, theta, psi)
     // where
-    // phi:roll (rotation about X)
-    // theta:pitch (rotation about Y)
-    // psi:yaw (rotation about Z)
+    // phi: roll (rotation about X)
+    // theta: pitch (rotation about Y)
+    // psi: yaw (rotation about Z)
     // expects
-    // attitude[0]: phi / roll (rad)
-    // attitude[1]: theta / pitch (rad)
-    // attitude[2]: psi / yaw (rad)
-    static Matrix applyRotation(const double* attitude,  const Matrix& beamsVF)
+    // rot_rad[0]: phi / roll (rad)
+    // rot_rad[1]: theta / pitch (rad)
+    // rot_rad[2]: psi / yaw (rad)
+    static Matrix affine321Rotation(double *rot_rad)
     {
-        Matrix beamsMF = beamsVF;
-        double cphi = cos(attitude[0]);
-        double sphi = sin(attitude[0]);
-        double ctheta = cos(attitude[1]);
-        double stheta = sin(attitude[1]);
-        double cpsi = cos(attitude[2]);
-        double spsi = sin(attitude[2]);
+        Matrix mat(4,4);
+
+        double cphi = cos(rot_rad[0]);
+        double sphi = sin(rot_rad[0]);
+        double ctheta = cos(rot_rad[1]);
+        double stheta = sin(rot_rad[1]);
+        double cpsi = cos(rot_rad[2]);
+        double spsi = sin(rot_rad[2]);
         double stheta_sphi = stheta * sphi;
         double stheta_cphi = stheta * cphi;
 
-        double R11 = cpsi * ctheta;
-        double R12 = spsi * ctheta;
-        double R13 = -stheta;
-        double R21 = -spsi * cphi + cpsi * stheta_sphi;
-        double R22 = cpsi * cphi + spsi * stheta_sphi;
-        double R23 = ctheta * sphi;
-        double R31 = spsi * sphi + cpsi * stheta_cphi;
-        double R32 = -cpsi * sphi + spsi * stheta_cphi;
-        double R33 = ctheta * cphi;
+        mat(1, 1) = cpsi * ctheta;
+        mat(1, 2) = spsi * ctheta;
+        mat(1, 3) = -stheta;
+        mat(1, 4) = 0.;
+        mat(2, 1) = -spsi * cphi + cpsi * stheta_sphi;
+        mat(2, 2) = cpsi * cphi + spsi * stheta_sphi;
+        mat(2, 3) = ctheta * sphi;
+        mat(2, 4) = 0.;
+        mat(3, 1) = spsi * sphi + cpsi * stheta_cphi;
+        mat(3, 2) = -cpsi * sphi + spsi * stheta_cphi;
+        mat(3, 3) = ctheta * cphi;
+        mat(3, 4) = 0.;
+        mat(4, 1) = 0.;
+        mat(4, 2) = 0.;
+        mat(4, 3) = 0.;
+        mat(4, 4) = 1.;
 
-        for(int i = 1; i <= beamsVF.Ncols(); i++) {
-            beamsMF(1, i) = R11 * beamsVF(1, i) + R21 * beamsVF(2, i) + R31 * beamsVF(3, i);
-
-            beamsMF(2, i) = R12 * beamsVF(1, i) + R22 * beamsVF(2, i) + R32 * beamsVF(3, i);
-
-            beamsMF(3, i) = R13 * beamsVF(1, i) + R23 * beamsVF(2, i) + R33 * beamsVF(3, i);
-        }
-
-        return beamsMF;
+        return mat;
     }
 
-    static Matrix applyTranslation(const double* translation,  const Matrix& beamsVF)
+    static Matrix affineTranslation(double *tran_m)
     {
-        Matrix beamsMF = beamsVF;
+        Matrix mat(4,4);
 
-        for(int i = 1; i <= beamsVF.Ncols(); i++) {
-            beamsMF(1, i) = beamsVF(1, i) + translation[0];
+        mat(1, 1) = 1.;
+        mat(1, 2) = 0.;
+        mat(1, 3) = 0.;
+        mat(1, 4) = tran_m[0];
+        mat(2, 1) = 0.;
+        mat(2, 2) = 1.;
+        mat(2, 3) = 0.;
+        mat(2, 4) = tran_m[1];
+        mat(3, 1) = 0.;
+        mat(3, 2) = 0.;
+        mat(3, 3) = 1.;
+        mat(3, 4) = tran_m[2];
+        mat(4, 1) = 0.;
+        mat(4, 2) = 0.;
+        mat(4, 3) = 0.;
+        mat(4, 4) = 1.;
 
-            beamsMF(2, i) = beamsVF(2, i) + translation[1];
-
-            beamsMF(3, i) = beamsVF(3, i) + translation[2];
-        }
-
-        return beamsMF;
-
+        return mat;
     }
 
-    static Matrix mb_vframe_components(trn::bath_info *bi, mbgeo *geo)
+    static int test_affine()
     {
+        // validate matrix geometry operations
+        // by rotating/translating a square
+        fprintf(stderr,"%s - entry\n", __func__);
+
+        // define vertices of 1x1 square centered on origin
+        Matrix square(4,4);
+        double lower_left[3] = {-0.5, -0.5, 0.};
+        square(1,1) = lower_left[0] + 0.;
+        square(2,1) = lower_left[1] + 0.;
+        square(3,1) = lower_left[2] + 0.;
+        square(4,1) = 1.;
+        square(1,2) = lower_left[0] + 1.;
+        square(2,2) = lower_left[1] + 0.;
+        square(3,2) = lower_left[2] + 0.;
+        square(4,2) = 1.;
+        square(1,3) = lower_left[0] + 1.;
+        square(2,3) = lower_left[1] + 1.;
+        square(3,3) = lower_left[2] + 0.;
+        square(4,3) = 1.;
+        square(1,4) = lower_left[0] + 0.;
+        square(2,4) = lower_left[1] + 1.;
+        square(3,4) = lower_left[2] + 0.;
+        square(4,4) = 1.;
+
+        // 90 deg CW rotation about Z (psi)
+        double rot[3] = {Math::degToRad(0.),Math::degToRad(0.),Math::degToRad(90.)};
+
+        // translation sequence
+        // X  1.5 Y  1.5
+        // X -1.0 Y  0.0
+        // X  0.0 Y -1.0
+        // X  1.0 Y  0.0
+        // X  0.0 Y  1.0
+        // X -1.5 Y -1.5
+        double trn[6][3] = {\
+            { 1.5,  1.5, 0.0},
+            {-1.0,  0.0, 0.0},
+            { 0.0, -1.0, 0.0},
+            { 1.0,  0.0, 0.0},
+            { 0.0,  1.0, 0.0},
+            {-1.5, -1.5, 0.0}
+        };
+
+        fprintf(stderr,"before TX\n");
+        matrix_show(square,"square");
+
+        // affine operation matrix
+        Matrix OP(4,4);
+        // current square vertices
+        Matrix X = square;
+
+        // run translation sequence
+        // should return to original position
+        for(int i=0; i<6; i++){
+            OP = affineTranslation(&trn[i][0]);
+            X = OP * X;
+            fprintf(stderr,"after TX[%d]\n",i);
+            matrix_show(square, "X");
+        }
+        fprintf(stderr,"\n");
+
+        int errors = 0;
+        double eps = 1.0e-6;
+
+        // check vertices (should be same as start position)
+        for(int r = 1; r<= 4; r++){
+            for(int c = 1; c<= 4; c++){
+                if(fabs(square(r,c) - X(r, c)) > eps){
+                    errors++;
+                    fprintf(stderr,"%s - tranlation err for element (%d, %d) delta[%.3g]\n", __func__, r, c, (square(r,c)-X(r,c)));
+                }
+            }
+        }
+
+        // position square w/ lower left at (1,1)
+        OP = affineTranslation(&trn[0][0]);
+        X = OP * square;
+        Matrix Xo = X;
+
+        fprintf(stderr,"before ROT\n");
+        matrix_show(square, "X");
+
+        // run rotation sequence 4 x 90 deg CW
+        // should match start location
+        OP = affine321Rotation(rot);
+        for(int i=0;i<4;i++){
+            X = OP * X;
+            fprintf(stderr,"after ROT[%d]\n",i);
+            matrix_show(square, "X");
+        }
+        fprintf(stderr,"\n");
+
+        for(int r = 1; r<= 4; r++){
+            for(int c = 1; c<= 4; c++){
+                if(fabs(Xo(r,c) - X(r, c)) > eps){
+                    errors++;
+                    fprintf(stderr,"%s - tranlation err for element (%d, %d) delta[%.3g]\n", __func__, r, c, (Xo(r,c)-X(r,c)));
+                }
+            }
+        }
+
+        fprintf(stderr,"%s - returning %d/%s\n", __func__, errors, (errors > 0 ? "ERR" : "OK"));
+
+        return errors;
+    }
+
+    static Matrix mb_sframe_components(trn::bath_info *bi, mbgeo *geo)
+    {
+        // set debug for this function
+        int FN_DEBUG_HI = 6;
+        int FN_DEBUG = 5;
 
         if(bi == nullptr || geo == NULL){
-            Matrix err_ret = Matrix(3,1);
+            Matrix err_ret = Matrix(4,1);
         }
 
         // number of beams read (<= nominal beams)
         int nbeams = bi->beam_count();
 
-        Matrix vf_comp = Matrix(3,nbeams);
+        Matrix sf_comp = Matrix(4,nbeams);
 
         // beam swath angle
         double S = geo->swath_deg;
@@ -284,8 +597,8 @@ public:
         // zero- and one-based indexs
         int idx[2] = {0, 1};
 
-        TRN_NDPRINT(5, "%s: --- \n",__func__);
-        TRN_NDPRINT(5, "S[%.3lf] K[%.3lf] e[%.3lf]\n", S, K, e);
+        TRN_NDPRINT(FN_DEBUG, "%s: --- \n",__func__);
+        TRN_NDPRINT(FN_DEBUG, "S[%.3lf] K[%.3lf] e[%.3lf]\n", S, K, e);
 
         for(it=beams.begin(); it!=beams.end(); it++)
         {
@@ -293,28 +606,53 @@ public:
             double range = std::get<1>(bt);
             // beam number (0-indexed)
             int b = std::get<0>(bt);
-            // ad : ith beam angle (deg)
-            double ad = K + S - b*e;
 
-            vf_comp(1, idx[1]) = 0;
-            vf_comp(2, idx[1]) = cos(DTR(ad));
-            vf_comp(3, idx[1]) = sin(DTR(ad));
+            // beam yaw, pitch angles (sensor frame)
+            double yd = 0;
+            double xd = (K + (b * e));
+            double pd = xd;
 
-            TRN_NDPRINT(5, "n[%3d] R[%7.2lf] X[%7.2lf] Y[%7.2lf] Z[%7.2lf] ad[%7.2lf] ar[%7.2lf]\n",
-                        b,range,
-                        vf_comp(1, idx[1]), vf_comp(2, idx[1]), vf_comp(3, idx[1]),
-                        ad,DTR(ad)
-                        );
+            if(xd > 90.) {
+                // normalize pitch to +/- 90 deg
+                yd = 180.;
+                pd = 180. - xd;
+            }
+
+            // psi (yaw), phi (pitch) to radians
+            double yr = DTR(yd);
+            double pr = DTR(pd);
+
+            // beam components (reference orientation, sensor frame)
+            // 1: along (x) 2: across (y) 3: down (z)
+            sf_comp(1, idx[1]) = cos(pr)*cos(yr);
+            sf_comp(2, idx[1]) = cos(pr)*sin(yr);
+            sf_comp(3, idx[1]) = sin(pr);
+            sf_comp(4, idx[1]) = 0.;
+
+            if(trn_debug::get()->debug() >= 5){
+                double rho[3] = {sf_comp(1,idx[1]), sf_comp(2,idx[1]), sf_comp(3,idx[1])};
+
+                double rhoNorm = vnorm(rho);
+
+                const char *sep = (b == 60 ? "****" : "    ");
+                TRN_NDPRINT(FN_DEBUG_HI, "%s - b[%3d] r[%7.2lf] R[%7.2lf] %s Rx[%7.2lf] Ry[%7.2lf] Rz[%7.2lf] %s yd[%7.2lf] pd[%7.2lf] %s cy[%7.2lf] sy[%7.2lf] cp[%7.2lf] sp[%7.2lf]\n",
+                            __func__, b, range, rhoNorm,
+                            sep, sf_comp(1,idx[1]), sf_comp(2,idx[1]), sf_comp(3,idx[1]),
+                            sep, yd, pd, cos(yr), sep, sin(yr), cos(pr), sin(pr));
+            }
+
             idx[0]++;
             idx[1]++;
         }
-        TRN_NDPRINT(5, "%s: --- \n",__func__);
+        TRN_NDPRINT(FN_DEBUG, "%s: --- \n\n",__func__);
 
-        return vf_comp;
+        return sf_comp;
     }
 
-    static Matrix dvl_vframe_components(trn::bath_info *bi, dvlgeo *geo)
+    static Matrix dvl_sframe_components(trn::bath_info *bi, dvlgeo *geo)
     {
+        int FN_DEBUG_HI = 6;
+        int FN_DEBUG = 5;
 
         if(bi == nullptr || geo == NULL){
             Matrix err_ret = Matrix(3,1);
@@ -323,7 +661,7 @@ public:
         // number of beams read (<= nominal beams)
         int nbeams = bi->beam_count();
 
-        Matrix vf_comp = Matrix(3,nbeams);
+        Matrix sf_comp = Matrix(4,nbeams);
 
         // beam components in reference sensor frame (mounted center, across track)
 
@@ -333,34 +671,47 @@ public:
         // zero- and one-based indexs
         int idx[2] = {0, 1};
 
+        TRN_NDPRINT(FN_DEBUG, "%s: --- \n",__func__);
+
         for(it=beams.begin(); it!=beams.end(); it++)
         {
             trn::beam_tup bt = static_cast<trn::beam_tup> (*it);
             double range = std::get<1>(bt);
             // beam number (0-indexed)
             int b = std::get<0>(bt);
-            // beam components SF x,y,z
-            // ad : ith beam angle (deg)
+
+            // beam yaw, pitch angles (sensor frame)
             double yd = geo->yaw_rf[idx[0]];
             double pd = geo->pitch_rf[idx[0]];
             double yr = DTR(yd);
             double pr = DTR(pd);
 
-            // beam components SF
-            // 1: along 2: across 3: down
-            vf_comp(1, idx[1]) = sin(pr)*cos(yr);
-            vf_comp(2, idx[1]) = sin(pr)*sin(yr);
-            vf_comp(3, idx[1]) = cos(pr);
+            // beam components (reference orientation, sensor frame)
+            // 1: along (x) 2: across (y) 3: down (z)
+            sf_comp(1, idx[1]) = cos(pr)*cos(yr);
+            sf_comp(2, idx[1]) = cos(pr)*sin(yr);
+            sf_comp(3, idx[1]) = sin(pr);
+            sf_comp(4, idx[1]) = 0.;
 
-            TRN_NDPRINT(5, "%s - b[%3d] R[%7.2lf] Rx[%7.2lf] Ry[%7.2lf] Rz[%7.2lf] y[%7.2lf/%7.2lf] p[%7.2lf/%7.2lf] cosy[%7.2lf] siny[%7.2lf] cosp[%7.2lf] sinp[%7.2lf]\n",
-                        __func__, b, range,
-                        vf_comp(1,idx[1]), vf_comp(2,idx[1]), vf_comp(3,idx[1]), yd, yr, pd, pr, cos(yr), sin(yr), cos(pr), sin(pr));
+            if(trn_debug::get()->debug() >= 5){
+
+                double rho[3] = {sf_comp(1,idx[1]), sf_comp(2,idx[1]), sf_comp(3,idx[1])};
+
+                double rhoNorm = vnorm(rho);
+
+                const char *sep = (b == 60 ? "****" : "    ");
+                TRN_NDPRINT(FN_DEBUG_HI, "%s - b[%3d] r[%7.2lf] R[%7.2lf] %s Rx[%7.2lf] Ry[%7.2lf] Rz[%7.2lf] %s yd[%7.2lf] pd[%7.2lf] %s cy[%7.2lf] sy[%7.2lf] cp[%7.2lf] sp[%7.2lf]\n",
+                            __func__, b, range, rhoNorm,
+                            sep, sf_comp(1,idx[1]), sf_comp(2,idx[1]), sf_comp(3,idx[1]),
+                            sep, yd, pd, cos(yr), sep, sin(yr), cos(pr), sin(pr));
+            }
 
             idx[0]++;
             idx[1]++;
         }
+        TRN_NDPRINT(FN_DEBUG, "%s: --- \n\n",__func__);
 
-        return vf_comp;
+        return sf_comp;
     }
 
     // process DVL sounding from ocean imaging toolsled (mounted on rotating arm)
@@ -369,6 +720,9 @@ public:
     // in a linear array.
     static void transform_oidvl(trn::bath_info **bi, trn::att_info **ai, dvlgeo **geo, mb1_t *r_snd)
     {
+        int FN_DEBUG_HI = 6;
+        int FN_DEBUG = 5;
+
         // validate inputs
         if(NULL == geo || geo[0] == nullptr || geo[1] == nullptr){
             fprintf(stderr, "%s - geometry error : NULL input geo[%p] {%p, %p} \n", __func__, geo, (geo?geo[0]:nullptr), (geo?geo[1]:nullptr));
@@ -388,125 +742,116 @@ public:
             return;
         }
 
-        // number of beams read (<= nominal beams)
-        int nbeams = bi[1]->beam_count();
-
         // vehicle attitude (relative to NED)
         // r/p/y (phi/theta/psi)
         // MB1 assumes vehicle frame, not world frame (i.e. exclude heading)
-        double VW[3] = {ai[1]->roll(), ai[1]->pitch(), 0.};
+        double VATT[3] = {ai[1]->roll(), ai[1]->pitch(), 0.};
 
         // sensor mounting angles (relative to vehicle, radians)
         // 3-2-1 euler angles, r/p/y  (phi/theta/psi)
         // wrt sensor mounted across track, b[0] port, downward facing
-        double RSV[3] = { 0., 0., 0.};
+        double SROT[3] = { DTR(geo[1]->svr_deg[0]), DTR(geo[1]->svr_deg[1]), DTR(geo[1]->svr_deg[2])};
 
         // sensor mounting translation offsets (relative to vehicle CRP, meters)
         // +x: fwd +y: stbd, +z:down (aka FSK, fwd,stbd,keel)
         // TODO T is for transform use rSV
-        double TSV[3] = {0., 0., 0.};
+        double STRN[3] = {geo[1]->svt_m[0], geo[1]->svt_m[1], geo[1]->svt_m[2]};
 
-        // measured vehicle pitch
-        double Pv = ai[0]->pitch();
-        // measured arm pitch
-        double Pa = ai[1]->pitch();
-        // vehicle att sensor mounting pitch offset
-        double Pov = geo[0]->svr_deg[2];
-        // arm att sensor mounting pitch offset
-        double Poa = geo[1]->svr_deg[2];
-
-        // arm att sensor mounting X offset
-        double xo = geo[1]->svt_m[0];
-        // arm att sensor mounting Y offset
-        double yo = geo[1]->svt_m[1];
-        // arm att sensor mounting Z offset
-        double zo = geo[1]->svt_m[2];
-
-        // arm att sensor mounting roll offset
-        double Ro = geo[1]->svr_deg[0];
-        // arm att sensor mounting pitch offset
-        double Po = geo[1]->svr_deg[1];
-        // arm att sensor mounting yaw offset
-        double Yo = geo[1]->svr_deg[2];
-
-        // X distance from arm att sensor to rotation axis
-        double D = geo[1]->rot_radius_m;
-
-        // find arm angle by differencing arm and vehicle attitudes,
-        // adjusted for fixed reference (geo) mounting pitch offsets
-        // Note: sign inverted since +Q is -pitch
-        double Qd = (Pv - Pov) - (Pa - Poa);
-        double Qr = DTR(Qd);
-
-        // The mounting offsets vary with arm angle
-        // translation offsets (m)
-        TSV[0] = xo - (D * (1 - cos(Qr)));
-        TSV[1] = yo;
-        TSV[2] = zo + (D * sin(Qr));
-
-        // rotation offsets (radians)
-        RSV[0] = DTR(Ro);
-        RSV[1] = DTR(Po - Qd);
-        RSV[2] = DTR(Yo);
-
-        if(trn_debug::get()->debug() >= 5){
-            fprintf(stderr, "%s:%d geo[0]:\n%s\n", __func__, __LINE__, geo[0]->tostring().c_str());
-            fprintf(stderr, "%s:%d geo[1]:\n%s\n", __func__, __LINE__, geo[1]->tostring().c_str());
-            fprintf(stderr, "%s:%d nbeams[%d]\n", __func__, __LINE__, nbeams);
-            fprintf(stderr, "%s:%d VW[%.2lf, %.2lf, %.2lf]\n", __func__, __LINE__, VW[0], VW[1], VW[2]);
-            fprintf(stderr, "%s:%d Pv[%.2lf] Pa[%.2lf]\n", __func__, __LINE__, Pv, Pa);
-            fprintf(stderr, "%s:%d Pov[%.2lf] Poa[%.2lf]\n", __func__, __LINE__, Pov, Poa);
-            fprintf(stderr, "%s:%d xo,yo,zo[%.2lf, %.2lf, %.2lf]\n", __func__, __LINE__, xo, yo, zo);
-            fprintf(stderr, "%s:%d Ro,Po,Yo[%.2lf, %.2lf, %.2lf]\n", __func__, __LINE__, Ro, Po, Yo);
-            fprintf(stderr, "%s:%d D[%.2lf]\n", __func__, __LINE__, D);
-            fprintf(stderr, "%s:%d Qd[%.2lf] Qr[%.2lf]\n", __func__, __LINE__, Qd, Qr);
-            fprintf(stderr, "%s:%d RSV[%.2lf, %.2lf, %.2lf]\n", __func__, __LINE__, RSV[0], RSV[1], RSV[2]);
-            fprintf(stderr, "%s:%d TSV[%.2lf, %.2lf, %.2lf]\n", __func__, __LINE__, TSV[0], TSV[1], TSV[2]);
-        }
+        double XTRN[3] = {geo[1]->rot_radius_m, 0., 0.};
+        double XR = ai[1]->pitch() - ai[0]->pitch();
+        double XROT[3] = {0., XR, 0.};
 
         // beam components in reference sensor frame (mounted center, across track)
-        Matrix comp_BVF = dvl_vframe_components(bi[1], geo[1]);
+        Matrix beams_SF = dvl_sframe_components(bi[1], geo[1]);
+
+        TRN_NDPRINT(FN_DEBUG, "%s: --- \n",__func__);
+
+        TRN_NDPRINT(FN_DEBUG, "VATT[%.3lf, %.3lf, %.3lf]\n", VATT[0], VATT[1], VATT[2]);
+        TRN_NDPRINT(FN_DEBUG, "SROT[%.3lf, %.3lf, %.3lf]\n", SROT[0], SROT[1], SROT[2]);
+        TRN_NDPRINT(FN_DEBUG, "STRN[%.3lf, %.3lf, %.3lf]\n", STRN[0], STRN[1], STRN[2]);
+
+        const char *pinv = (ai[0]->flags().is_set(trn::AF_INVERT_PITCH)? "(p-)" :"(p+)");
+
+        TRN_NDPRINT(FN_DEBUG, "VATT (deg) [%.2lf, %.2lf, %.2lf (%.2lf)] %s\n",
+                    Math::radToDeg(VATT[0]), Math::radToDeg(VATT[1]), Math::radToDeg(VATT[2]), Math::radToDeg(ai[0]->heading()), pinv);
+        TRN_NDPRINT(FN_DEBUG, "XTRN[%.3lf, %.3lf, %.3lf]\n", XTRN[0], XTRN[1], XTRN[2]);
+        TRN_NDPRINT(FN_DEBUG, "XROT[%.3lf, %.3lf, %.3lf]\n", XROT[0], XROT[1], XROT[2]);
+        TRN_NDPRINT(FN_DEBUG, "pitch (deg) veh[%.3lf] ois[%.3lf] angle[%.3lf]\n", Math::radToDeg(ai[0]->pitch()), Math::radToDeg(ai[1]->pitch()), Math::radToDeg(XR));
+        TRN_NDPRINT(FN_DEBUG, "\n");
+
+        // generate coordinate tranformation matrices
+
+        // translate arm rotation point to sled origin
+        Matrix mat_XTRN = affineTranslation(XTRN);
+        // sled arm rotation
+        Matrix mat_XROT = affine321Rotation(XROT);
+        // mounting rotation matrix
+        Matrix mat_SROT = affine321Rotation(SROT);
+        // mounting translation matrix
+        Matrix mat_STRN = affineTranslation(STRN);
+        // vehicle attitude (pitch, roll, heading)
+        Matrix mat_VATT = affine321Rotation(VATT);
+
+        // combine to get composite tranformation
+        // order is significant:
+        // mounting rotations, translate
+        Matrix S0 = mat_XTRN * mat_SROT;
+        // arm rotation
+        Matrix S1 = mat_XROT * S0;
+        // translate to position on arm
+        Matrix S2 = mat_STRN * S1;
+        // appy vehicle attitude
+        Matrix Q = mat_VATT * S2;
+
+        // apply coordinate transforms
+        Matrix beams_VF = Q * beams_SF;
 
         std::list<trn::beam_tup> beams = bi[1]->beams_raw();
         std::list<trn::beam_tup>::iterator it;
 
+        // fill in the MB1 record using transformed beams
         // zero- and one-based indexs
         int idx[2] = {0, 1};
-
-        // apply coordinate transforms; order is significant:
-        // apply mounting rotation
-        Matrix beams_VF = applyRotation(RSV, comp_BVF);
-        // apply mounting translation
-        Matrix beams_TF = applyTranslation(TSV, beams_VF);
-        // apply vehicle attitude (hdg, pitch, roll)
-        Matrix beams_WF = applyRotation(VW, beams_TF);
-
-        // fill in the MB1 record using transformed beams
-        int k=0;
-        idx[0] = 0;
-        idx[1] = 1;
-        for(it=beams.begin(); it!=beams.end(); it++,k++)
+        for(it=beams.begin(); it!=beams.end(); it++, idx[0]++, idx[1]++)
         {
+            // write beam data to MB1 sounding
             trn::beam_tup bt = static_cast<trn::beam_tup> (*it);
-            // beam number (1-indexed for RDI)
+
+            // beam number (0-indexed)
             int b = std::get<0>(bt);
             double range = std::get<1>(bt);
             // beam components WF x,y,z
+            // matrix row/col (1 indexed)
+            r_snd->beams[idx[0]].beam_num = b;
+            r_snd->beams[idx[0]].rhox = range * beams_VF(1, idx[1]);
+            r_snd->beams[idx[0]].rhoy = range * beams_VF(2, idx[1]);
+            r_snd->beams[idx[0]].rhoz = range * beams_VF(3, idx[1]);
 
-            r_snd->beams[k].beam_num = b;
-            r_snd->beams[k].rhox = range * beams_WF(1, idx[0]);
-            r_snd->beams[k].rhoy = range * beams_WF(2, idx[0]);
-            r_snd->beams[k].rhoz = range * beams_WF(3, idx[0]);
+            if(trn_debug::get()->debug() >= 5){
 
-            TRN_NDPRINT(5, "b[%3d] R[%7.2lf] rhox[%7.2lf] rhoy[%7.2lf] rhoz[%7.2lf] \n",
-                        b,sqrt(r_snd->beams[k].rhox*r_snd->beams[k].rhox + r_snd->beams[k].rhoy*r_snd->beams[k].rhoy + r_snd->beams[k].rhoz*r_snd->beams[k].rhoz),
-                        r_snd->beams[k].rhox,
-                        r_snd->beams[k].rhoy,
-                        r_snd->beams[k].rhoz
-                        );
-            idx[0]++;
-            idx[1]++;
-    }
+                // calculated beam range (should match measured range)
+                double rho[3] = {r_snd->beams[idx[0]].rhox, r_snd->beams[idx[0]].rhoy, r_snd->beams[idx[0]].rhoz};
+
+                double rhoNorm = vnorm( rho );
+
+                // calculate component angles wrt vehicle axes
+                double axr = (range==0. ? 0. :acos(r_snd->beams[idx[0]].rhox/range));
+                double ayr = (range==0. ? 0. :acos(r_snd->beams[idx[0]].rhoy/range));
+                double azr = (range==0. ? 0. :acos(r_snd->beams[idx[0]].rhoz/range));
+
+                TRN_NDPRINT(FN_DEBUG_HI, "%s: b[%3d] r[%7.2lf] R[%7.2lf]     rhox[%7.2lf] rhoy[%7.2lf] rhoz[%7.2lf]     ax[%6.2lf] ay[%6.2lf] az[%6.2lf]\n",
+                            __func__, b, range, rhoNorm,
+                            r_snd->beams[idx[0]].rhox,
+                            r_snd->beams[idx[0]].rhoy,
+                            r_snd->beams[idx[0]].rhoz,
+                            Math::radToDeg(axr),
+                            Math::radToDeg(ayr),
+                            Math::radToDeg(azr)
+                            );
+            }
+        }
+        TRN_NDPRINT(FN_DEBUG, "%s: --- \n\n",__func__);
+
         return;
     }
 
@@ -515,6 +860,9 @@ public:
     // in a linear array.
     static void transform_dvl(trn::bath_info *bi, trn::att_info *ai, dvlgeo *geo, mb1_t *r_snd)
     {
+        int FN_DEBUG_HI = 6;
+        int FN_DEBUG = 5;
+
         if(NULL == geo || geo->beam_count<=0){
             fprintf(stderr, "%s - geometry error : beams<=0\n", __func__);
             return;
@@ -527,31 +875,68 @@ public:
         // vehicle attitude (relative to NED)
         // r/p/y (phi/theta/psi)
         // MB1 assumes vehicle frame, not world frame (i.e. exclude heading)
-        double VW[3] = {ai->roll(), ai->pitch(), 0.};
+        double VATT[3] = {ai->roll(), ai->pitch(), 0.};
 
         // sensor mounting angles (relative to vehicle, radians)
         // 3-2-1 euler angles, r/p/y  (phi/theta/psi)
         // wrt sensor mounted across track, b[0] port, downward facing
-        double RSV[3] = { DTR(geo->svr_deg[0]), DTR(geo->svr_deg[1]), DTR(geo->svr_deg[2])};
+        double SROT[3] = { DTR(geo->svr_deg[0]), DTR(geo->svr_deg[1]), DTR(geo->svr_deg[2])};
 
         // sensor mounting translation offsets (relative to vehicle CRP, meters)
         // +x: fwd +y: stbd, +z:down (aka FSK, fwd,stbd,keel)
         // TODO T is for transform use rSV
-        double TSV[3] = {geo->svt_m[0], geo->svt_m[1], geo->svt_m[2]};
+        double STRN[3] = {geo->svt_m[0], geo->svt_m[1], geo->svt_m[2]};
 
-        // beam components (dir cosine) matrix in vehicle frame (across, along, down)
-        Matrix comp_BVF = dvl_vframe_components(bi, geo);
+        // beam components in sensor frame
+        Matrix beams_SF = dvl_sframe_components(bi, geo);
 
-        // apply coordinate transforms; order is significant:
-        // apply mounting rotation
-        Matrix beams_VF = applyRotation(RSV, comp_BVF);
-        // apply mounting translation
-        Matrix beams_TF = applyTranslation(TSV, beams_VF);
-        // apply vehicle attitude (hdg, pitch, roll)
-        Matrix beams_WF = applyRotation(VW, beams_TF);
+        TRN_NDPRINT(FN_DEBUG, "%s: --- \n",__func__);
+
+        TRN_NDPRINT(FN_DEBUG, "VATT[%.3lf, %.3lf, %.3lf]\n", VATT[0], VATT[1], VATT[2]);
+        TRN_NDPRINT(FN_DEBUG, "SROT[%.3lf, %.3lf, %.3lf]\n", SROT[0], SROT[1], SROT[2]);
+        TRN_NDPRINT(FN_DEBUG, "STRN[%.3lf, %.3lf, %.3lf]\n", STRN[0], STRN[1], STRN[2]);
+
+        const char *pinv = (ai->flags().is_set(trn::AF_INVERT_PITCH)? "(p-)" :"(p+)");
+
+        TRN_NDPRINT(FN_DEBUG, "VATT (deg) [%.2lf, %.2lf, %.2lf (%.2lf)] %s\n",
+                    Math::radToDeg(VATT[0]), Math::radToDeg(VATT[1]), Math::radToDeg(VATT[2]), Math::radToDeg(ai->heading()), pinv);
+        TRN_NDPRINT(FN_DEBUG,"\n");
+
+        // generate coordinate tranformation matrices
+        // mounting rotation matrix
+        Matrix mat_SROT = affine321Rotation(SROT);
+        // mounting translation matrix
+        Matrix mat_STRN = affineTranslation(STRN);
+        // vehicle attitude (pitch, roll, heading)
+        Matrix mat_VATT = affine321Rotation(VATT);
+
+        // combine to get composite tranformation
+        // order is significant:
+
+        // apply sensor rotation, translation
+        Matrix G = mat_SROT * mat_STRN;
+        // apply vehicle attitude
+        Matrix Q = mat_VATT * G;
+
+        // apply coordinate transforms
+        Matrix beams_VF = Q * beams_SF;
+
+        if(trn_debug::get()->debug() >= FN_DEBUG_HI){
+
+            TRN_NDPRINT(5, "\n");
+            matrix_show(mat_SROT, "mat_SROT");
+            TRN_NDPRINT(5, "\n");
+            matrix_show(mat_STRN, "mat_STRN");
+            TRN_NDPRINT(5, "\n");
+            matrix_show(mat_VATT, "mat_VATT");
+            TRN_NDPRINT(5, "\n");
+            matrix_show(G, "G");
+            TRN_NDPRINT(5, "\n");
+            matrix_show(Q, "Q");
+            TRN_NDPRINT(5, "\n");
+        }
 
         // fill in the MB1 record using transformed beams
-
         std::list<trn::beam_tup> beams = bi->beams_raw();
         std::list<trn::beam_tup>::iterator it;
 
@@ -559,6 +944,7 @@ public:
         int idx[2] = {0, 1};
         for(it=beams.begin(); it!=beams.end(); it++, idx[0]++, idx[1]++)
         {
+            // write beam data to MB1 sounding
             trn::beam_tup bt = static_cast<trn::beam_tup> (*it);
 
             // beam number (0-indexed)
@@ -567,34 +953,48 @@ public:
             // beam components WF x,y,z
             // matrix row/col (1 indexed)
             r_snd->beams[idx[0]].beam_num = b;
-            r_snd->beams[idx[0]].rhox = range * beams_WF(1, idx[1]);
-            r_snd->beams[idx[0]].rhoy = range * beams_WF(2, idx[1]);
-            r_snd->beams[idx[0]].rhoz = range * beams_WF(3, idx[1]);
+            r_snd->beams[idx[0]].rhox = range * beams_VF(1, idx[1]);
+            r_snd->beams[idx[0]].rhoy = range * beams_VF(2, idx[1]);
+            r_snd->beams[idx[0]].rhoz = range * beams_VF(3, idx[1]);
 
             if(trn_debug::get()->debug() >= 5){
 
-                double rho[3] = {r_snd->beams[idx[0]].rhox, r_snd->beams[idx[0]].rhoy, r_snd->beams[idx[0]].rhoz};
+                // calculated beam range (should match measured range)
+               double rho[3] = {r_snd->beams[idx[0]].rhox, r_snd->beams[idx[0]].rhoy, r_snd->beams[idx[0]].rhoz};
+
                 double rhoNorm = vnorm( rho );
 
-                TRN_NDPRINT(5, "%s: b[%3d] r[%7.2f] R[%7.2lf] rhox[%7.2lf] rhoy[%7.2lf] rhoz[%7.2lf] \n",
+                // calculate component angles wrt vehicle axes
+                double axr = (range==0. ? 0. :acos(r_snd->beams[idx[0]].rhox/range));
+                double ayr = (range==0. ? 0. :acos(r_snd->beams[idx[0]].rhoy/range));
+                double azr = (range==0. ? 0. :acos(r_snd->beams[idx[0]].rhoz/range));
+
+                TRN_NDPRINT(FN_DEBUG_HI, "%s: b[%3d] r[%7.2lf] R[%7.2lf]     rhox[%7.2lf] rhoy[%7.2lf] rhoz[%7.2lf]     ax[%6.2lf] ay[%6.2lf] az[%6.2lf]\n",
                             __func__, b, range, rhoNorm,
                             r_snd->beams[idx[0]].rhox,
                             r_snd->beams[idx[0]].rhoy,
-                            r_snd->beams[idx[0]].rhoz
+                            r_snd->beams[idx[0]].rhoz,
+                            Math::radToDeg(axr),
+                            Math::radToDeg(ayr),
+                            Math::radToDeg(azr)
                             );
             }
         }
+        TRN_NDPRINT(FN_DEBUG, "%s: --- \n\n",__func__);
 
         return;
     }
 
-    // This is only for inputs mapped to mbtrnpp output
     static void transform_deltat(trn::bath_info *bi, trn::att_info *ai, mbgeo *geo, mb1_t *r_snd)
     {
+        int FN_DEBUG_HI = 6;
+        int FN_DEBUG = 5;
+
         if(NULL == geo || geo->beam_count<=0){
             fprintf(stderr, "%s - geometry error : beams<=0\n", __func__);
             return;
         }
+
         if(NULL == r_snd || NULL == ai|| NULL == bi){
             fprintf(stderr, "%s - ERR invalid argument bi[%p] ai[%p] snd[%p]\n", __func__, bi, ai, r_snd);
             return;
@@ -603,76 +1003,115 @@ public:
         // vehicle attitude (relative to NED, radians)
         // r/p/y  (phi/theta/psi)
         // MB1 assumes vehicle frame, not world frame (i.e. exclude heading)
-        double VW[3] = {ai->roll(), ai->pitch(), 0.};
+        double VATT[3] = {ai->roll(), ai->pitch(), 0.};
 
         // sensor mounting angles (relative to vehicle, radians)
         // 3-2-1 euler angles, r/p/y  (phi/theta/psi)
         // wrt sensor mounted across track, b[0] port, downward facing
-        double RSV[3] = { DTR(geo->svr_deg[0]), DTR(geo->svr_deg[1]), DTR(geo->svr_deg[2])};
+        double SROT[3] = { DTR(geo->svr_deg[0]), DTR(geo->svr_deg[1]), DTR(geo->svr_deg[2])};
 
         // sensor mounting translation offsets (relative to vehicle CRP, meters)
         // +x: fwd +y: stbd, +z:down
-        double TSV[3] = {geo->svt_m[0], geo->svt_m[1], geo->svt_m[2]};
+        double STRN[3] = {geo->svt_m[0], geo->svt_m[1], geo->svt_m[2]};
 
-        // beam components in reference sensor frame
-        // (i.e., directional cosine unit vectors)
-        Matrix comp_BVF = mb_vframe_components(bi, geo);
+        Matrix beams_SF = mb_sframe_components(bi, geo);
 
+        TRN_NDPRINT(FN_DEBUG, "%s: --- \n",__func__);
+
+        TRN_NDPRINT(FN_DEBUG, "VATT[%.3lf, %.3lf, %.3lf]\n", VATT[0], VATT[1], VATT[2]);
+        TRN_NDPRINT(FN_DEBUG, "SROT[%.3lf, %.3lf, %.3lf]\n", SROT[0], SROT[1], SROT[2]);
+        TRN_NDPRINT(FN_DEBUG, "STRN[%.3lf, %.3lf, %.3lf]\n", STRN[0], STRN[1], STRN[2]);
+
+        const char *pinv = (ai->flags().is_set(trn::AF_INVERT_PITCH)? "(p-)" :"(p+)");
+
+        TRN_NDPRINT(FN_DEBUG, "VATT (deg) [%.2lf, %.2lf, %.2lf (%.2lf)] %s\n",
+                    Math::radToDeg(VATT[0]), Math::radToDeg(VATT[1]), Math::radToDeg(VATT[2]), Math::radToDeg(ai->heading()), pinv);
+        TRN_NDPRINT(5,"\n");
+
+        // generate coordinate tranformation matrices
+        // mounting rotation matrix
+        Matrix mat_SROT = affine321Rotation(SROT);
+        // mounting translation matrix
+        Matrix mat_STRN = affineTranslation(STRN);
+        // vehicle attitude (pitch, roll, heading)
+        Matrix mat_VATT = affine321Rotation(VATT);
+        // combine to get composite tranformation
+        // order is significant:
+
+        // apply sensor rotation, translation
+        Matrix G = mat_SROT * mat_STRN;
+        // apply vehicle attitude
+        Matrix Q = mat_VATT * G;
+
+        // apply coordinate transforms
+        Matrix beams_VF = Q * beams_SF;
+
+        if(trn_debug::get()->debug() >= FN_DEBUG_HI){
+
+            TRN_NDPRINT(5, "\n");
+            matrix_show(mat_SROT, "mat_SROT");
+            TRN_NDPRINT(5, "\n");
+            matrix_show(mat_STRN, "mat_STRN");
+            TRN_NDPRINT(5, "\n");
+            matrix_show(mat_VATT, "mat_VATT");
+            TRN_NDPRINT(5, "\n");
+            matrix_show(G, "G");
+            TRN_NDPRINT(5, "\n");
+            matrix_show(Q, "Q");
+            TRN_NDPRINT(5, "\n");
+
+        }
+
+        // fill in the MB1 record using transformed beams
         std::list<trn::beam_tup> beams = bi->beams_raw();
         std::list<trn::beam_tup>::iterator it;
-        TRN_NDPRINT(5, "%s: --- \n",__func__);
 
-        TRN_NDPRINT(5, "VW[%.3lf, %.3lf, %.3lf]\n", VW[0], VW[1], VW[2]);
-        TRN_NDPRINT(5, "RSV[%.3lf, %.3lf, %.3lf]\n", RSV[0], RSV[1], RSV[2]);
-        TRN_NDPRINT(5, "TSV[%.3lf, %.3lf, %.3lf]\n", TSV[0], TSV[1], TSV[2]);
-
-        TRN_NDPRINT(5, "VW roll[%.2lf] pitch[%.2lf%s] hdg[%.2lf (%.2lf)]\n",
-                    Math::radToDeg(VW[0]), Math::radToDeg(VW[1]), (ai->flags().is_set(trn::AF_INVERT_PITCH) ? " i" : " "), Math::radToDeg(VW[2]), Math::radToDeg(ai->heading()));
-
-        // apply coordinate transforms; order is significant:
-        // apply mounting rotation
-        Matrix beams_VF = applyRotation(RSV, comp_BVF);
-        // apply mounting translation
-        Matrix beams_TF = applyTranslation(TSV, beams_VF);
-        // apply vehicle attitude (hdg, pitch, roll)
-        Matrix beams_WF = applyRotation(VW, beams_TF);
-
-        // write beam data to MB1 sounding
         int idx[2] = {0, 1};
         for(it=beams.begin(); it!=beams.end(); it++, idx[0]++, idx[1]++)
         {
+            // write beam data to MB1 sounding
             trn::beam_tup bt = static_cast<trn::beam_tup> (*it);
+
             // beam number (0-indexed)
             int b = std::get<0>(bt);
             double range = std::get<1>(bt);
             // beam components WF x,y,z
             // matrix row/col (1 indexed)
-
             r_snd->beams[idx[0]].beam_num = b;
-            r_snd->beams[idx[0]].rhox = range * beams_WF(1, idx[1]);
-            r_snd->beams[idx[0]].rhoy = range * beams_WF(2, idx[1]);
-            r_snd->beams[idx[0]].rhoz = range * beams_WF(3, idx[1]);
+            r_snd->beams[idx[0]].rhox = range * beams_VF(1, idx[1]);
+            r_snd->beams[idx[0]].rhoy = range * beams_VF(2, idx[1]);
+            r_snd->beams[idx[0]].rhoz = range * beams_VF(3, idx[1]);
 
-            double rho[3] = {r_snd->beams[idx[0]].rhox, r_snd->beams[idx[0]].rhoy, r_snd->beams[idx[0]].rhoz};
-            double rhoNorm = vnorm( rho );
+            if(trn_debug::get()->debug() >= 5){
 
-            TRN_NDPRINT(5, "b[%3d] r[%7.2lf] R[%7.2lf] rhox[%7.2lf] rhoy[%7.2lf] rhoz[%7.2lf] ax[%6.2lf] ay[%6.2lf] az[%6.2lf]\n",
-                        b, range, rhoNorm,
-                        r_snd->beams[idx[0]].rhox,
-                        r_snd->beams[idx[0]].rhoy,
-                        r_snd->beams[idx[0]].rhoz,
-                        (range==0. ? 0. : Math::radToDeg(acos(r_snd->beams[idx[0]].rhox/range))),
-                        (range==0. ? 0. : Math::radToDeg(acos(r_snd->beams[idx[0]].rhoy/range))),
-                        (range==0. ? 0. : Math::radToDeg(acos(r_snd->beams[idx[0]].rhoz/range)))
-                        );
+                // calculated beam range (should match measured range)
+                double rho[3] = {r_snd->beams[idx[0]].rhox, r_snd->beams[idx[0]].rhoy, r_snd->beams[idx[0]].rhoz};
+
+                double rhoNorm = vnorm( rho );
+
+                // calculate component angles wrt vehicle axes
+                double axr = (range==0. ? 0. :acos(r_snd->beams[idx[0]].rhox/range));
+                double ayr = (range==0. ? 0. :acos(r_snd->beams[idx[0]].rhoy/range));
+                double azr = (range==0. ? 0. :acos(r_snd->beams[idx[0]].rhoz/range));
+
+                TRN_NDPRINT(FN_DEBUG_HI, "%s: b[%3d] r[%7.2lf] R[%7.2lf]     rhox[%7.2lf] rhoy[%7.2lf] rhoz[%7.2lf]     ax[%6.2lf] ay[%6.2lf] az[%6.2lf]\n",
+                            __func__, b, range, rhoNorm,
+                            r_snd->beams[idx[0]].rhox,
+                            r_snd->beams[idx[0]].rhoy,
+                            r_snd->beams[idx[0]].rhoz,
+                            Math::radToDeg(axr),
+                            Math::radToDeg(ayr),
+                            Math::radToDeg(azr)
+                            );
+            }
         }
-        TRN_NDPRINT(5, "%s: --- \n",__func__);
+        TRN_NDPRINT(FN_DEBUG, "%s: --- \n\n",__func__);
 
         return;
     }
 
     // returns allocated mb1_t; caller must release using mb1_destroy()
-    static mb1_t *lcm_to_mb1(trn::bath_info *bi, trn::nav_info *ni, trn::att_info *ai, uint32_t ping_number)
+    static mb1_t *lcm_to_mb1(trn::bath_info *bi, trn::nav_info *ni, trn::att_info *ai)
     {
         mb1_t *retval = nullptr;
 
@@ -695,7 +1134,7 @@ public:
         snd->type = MB1_TYPE_ID;
         snd->size = MB1_SOUNDING_BYTES(n_beams);
         snd->nbeams = n_beams;
-        snd->ping_number = ping_number;
+        snd->ping_number = bi->ping_number();//ping_number;
         snd->ts = ni->time_usec()/1e6;
         retval = snd;
 
@@ -710,8 +1149,7 @@ public:
         double lon = ni->lon();
         long int utm = NavUtils::geoToUtmZone(Math::degToRad(lat),
                                               Math::degToRad(lon));
-        ai->flags().set(trn::AF_INVERT_PITCH);
-        // ai->flags().set(trn::AF_INVERT_ROLL);
+
         double x = 0.;
         double y = 0.;
         double z = ni->depth();
@@ -735,7 +1173,10 @@ public:
                            utm, &x, &y);
 
         TRN_NDPRINT(2, "%s:%d lat[%.6lf] lon[%.6lf] utm[%ld]\n", __func__, __LINE__, lat, lon, utm);
-        TRN_NDPRINT(2, "%s:%d x[%.4lf] y[%.4lf] depth[%.1lf] r/p/y[%.2lf %.2lf, %.2lf]%c vx[%.2lf]\n", __func__, __LINE__, x, y, z, phi, theta, psi, (ai->flags().is_set(trn::AF_INVERT_PITCH)? '-' :'+'), vx);
+
+        const char *pinv = (ai->flags().is_set(trn::AF_INVERT_PITCH)? "p-" :"(p+)");
+
+        TRN_NDPRINT(2, "%s:%d x[%.4lf] y[%.4lf] depth[%.1lf] r/p/y[%.2lf %.2lf, %.2lf] %s vx[%.2lf]\n", __func__, __LINE__, x, y, z, phi, theta, psi, pinv, vx);
 
         poseT *pt = new poseT();
 
@@ -763,114 +1204,96 @@ public:
         pt->vz = vz;
 
         return pt;
-    }
+    }    
 
-    // returns new measT; caller must delete
-    static measT *lcm_to_meast(trn::bath_info *bi, trn::nav_info *ni, trn::att_info *ai, dvlgeo *geo, uint32_t ping_number)
+    static std::string mb1_to_csv(mb1_t *snd, trn::bath_info *bi, trn::att_info *ai, trn::vel_info *vi=nullptr)
     {
-        double lat = ni->lat();
-        double lon = ni->lon();
-        long int utm = NavUtils::geoToUtmZone(Math::degToRad(lat),
-                                              Math::degToRad(lon));
-        double x = 0.;
-        double y = 0.;
-        double z = ni->depth();
-        double psi = ai->heading();
-        double theta = ai->pitch();
-        double phi = ai->roll();
 
-        double time = ni->time_usec()/1e6;
-        size_t n_beams = bi->beam_count();
-
-        // NavUtils::geoToUtm(latitude, longitude, utmZone, *northing, *easting)
-        // Note that TRN uses N,E,D frame (i.e. N:x E:y D:z)
-        NavUtils::geoToUtm(Math::degToRad(lat),
-                           Math::degToRad(lon),
-                           utm, &x, &y);
-
-        measT *mt = new measT(n_beams,TRN_SENSOR_DVL);
-
-        mt->x = x;
-        mt->y = y;
-        mt->z = z;
-        mt->phi = phi;
-        mt->theta = theta;
-        mt->psi = psi;
-        mt->time = time;
-        mt->ping_number = ping_number;
-
-        // vehicle attitude (relative to NED)
-        // r/p/y (phi/theta/psi)
-        // MB1 assumes vehicle frame, not world frame (i.e. exclude heading)
-        double VW[3] = {ai->roll(), ai->pitch(), 0.};
-
-        // sensor mounting angles (relative to vehicle, radians)
-        // 3-2-1 euler angles, r/p/y  (phi/theta/psi)
-        // wrt sensor mounted across track, b[0] port, downward facing
-        double RSV[3] = { DTR(geo->svr_deg[0]), DTR(geo->svr_deg[1]), DTR(geo->svr_deg[2])};
-
-        // sensor mounting translation offsets (relative to vehicle CRP, meters)
-        // +x: fwd +y: stbd, +z:down (aka FSK, fwd,stbd,keel)
-        // TODO T is for transform use rSV
-        double TSV[3] = {geo->svt_m[0], geo->svt_m[1], geo->svt_m[2]};
-
-        // beam components (dir cosine) matrix in vehicle frame (across, along, down)
-        Matrix comp_BVF = dvl_vframe_components(bi, geo);
-
-        TRN_NDPRINT(5, "%s:%d VW[%.3lf, %.3lf, %.3lf]\n", __func__, __LINE__, VW[0], VW[1], VW[2]);
-        TRN_NDPRINT(5, "%s:%d RSV[%.3lf, %.3lf, %.3lf]\n", __func__, __LINE__, RSV[0], RSV[1], RSV[2]);
-        TRN_NDPRINT(5, "%s:%d TSV[%.3lf, %.3lf, %.3lf]\n", __func__, __LINE__, TSV[0], TSV[1], TSV[2]);
-
-        // apply coordinate transforms; order is significant:
-        // apply mounting rotation
-        Matrix beams_VF = applyRotation(RSV, comp_BVF);
-        // apply mounting translation
-        Matrix beams_TF = applyTranslation(TSV, beams_VF);
-        // apply vehicle attitude (hdg, pitch, roll)
-        Matrix beams_WF = applyRotation(VW, beams_TF);
-
-        std::list<trn::beam_tup> beams = bi->beams_raw();
-        std::list<trn::beam_tup>::iterator it;
-
-        // zero- and one-based indexs
-        int idx[2] = {0, 1};
-        for(it=beams.begin(); it!=beams.end(); it++, idx[0]++, idx[1]++)
+        std::ostringstream ss;
+        if(nullptr != snd && nullptr != ai)
         {
-            trn::beam_tup bt = static_cast<trn::beam_tup> (*it);
+            double lat = snd->lat;
+            double lon = snd->lon;
+            double pos_N=0;
+            double pos_E=0;
+            long int utm = NavUtils::geoToUtmZone(Math::degToRad(lat),
+                                                  Math::degToRad(lon));
 
-            // beam number (0-indexed)
-            int b = std::get<0>(bt);
-            double range = std::get<1>(bt);
+            // NavUtils::geoToUtm(latitude, longitude, utmZone, *northing, *easting)
+            NavUtils::geoToUtm(Math::degToRad(lat), Math::degToRad(lon), utm, &pos_N, &pos_E);
+            // Note that TRN uses N,E,D frame (i.e. N:x E:y D:z)
+            // [ 0] time POSIX epoch sec
+            // [ 1] northings
+            // [ 2] eastings
+            // [ 3] depth
+            // [ 4] heading
+            // [ 5] pitch
+            // [ 6] roll
+            // [ 7] flag (0)
+            // [ 8] flag (0)
+            // [ 9] flag (0)
+            // [10] vx (0)
+            // [11] xy (0)
+            // [12] vz (0)
+            // [13] sounding valid flag (1)
+            // [14] bottom lock valid flag (1)
+            // [15] number of beams
+            // beam[16 + i*3] number
+            // beam[17 + i*3] valid (always 1)
+            // beam[18 + i*3] range
+            // ...
+            // NEWLINE
 
-            mt->ranges[idx[0]] = range;
-            mt->measStatus[idx[0]] = (range > 1 ? true : false);
+            ss << std::dec << std::setfill(' ') << std::fixed << std::setprecision(7);
+            ss << snd->ts << ",";
+            ss << std::setprecision(7);
+            ss << pos_N << ",";
+            ss << pos_E << ",";
+            ss << snd->depth << ",";
+            ss << snd->hdg << ",";
+            ss << ai->pitch() << ",";
+            ss << ai->roll() << ",";
+            ss << 0 << ",";
+            ss << 0 << ",";
+            ss << 0 << ",";
+            if(vi != nullptr){
+                ss << vi->vx_ms() << ",";
+                ss << vi->vy_ms() << ",";
+                ss << vi->vz_ms() << ",";
+            }else{
+                ss << 0. << ",";
+                ss << 0. << ",";
+                ss << 0. << ",";
+            }
+            ss << std::setprecision(1);
+            // sounding valid flag
+            ss << (bi->flags().is_set(trn::BF_VALID)?1:0) << ",";
+            // bottom lock flag
+            ss << (bi->flags().is_set(trn::BF_BLOCK)?1:0) << ",";
+            ss << snd->nbeams << ",";
+            ss << std::setprecision(4);
 
-            mt->beamNums[idx[0]] = b;
-            mt->alongTrack[idx[0]] = range * beams_WF(1, idx[1]);
-            mt->crossTrack[idx[0]] = range * beams_WF(2, idx[1]);
-            mt->altitudes[idx[0]]  = range * beams_WF(3, idx[1]);
+            for(int i=0; i < snd->nbeams; i++)
+            {
+                // beam number
+                ss <<  snd->beams[i].beam_num << ",";
+                // valid (set to 1)
+                ss << 1 << ",";
+                // range
+                double comp[3] = {snd->beams[i].rhox, snd->beams[i].rhoz, snd->beams[i].rhoz};
+                double range = vnorm(comp);
 
-            if(trn_debug::get()->debug() >= 5){
-
-                double rho[3] = {mt->alongTrack[idx[0]], mt->crossTrack[idx[0]], mt->altitudes[idx[0]]};
-                double rhoNorm = vnorm( rho );
-
-                TRN_NDPRINT(5, "%s: b[%3d] r[%7.2f] R[%7.2lf] rhox[%7.2lf] rhoy[%7.2lf] rhoz[%7.2lf] \n",
-                            __func__, mt->beamNums[idx[0]],
-                            mt->ranges[idx[0]], rhoNorm,
-                            mt->alongTrack[idx[0]],
-                            mt->crossTrack[idx[0]],
-                            mt->altitudes[idx[0]]
-                            );
+                ss << range;
+                if(i < (snd->nbeams-1))
+                    ss << ",";
             }
         }
-
-        return mt;
+        return ss.str();
     }
 
-    static std::string lcm_to_csv(trn::bath_info *bi, trn::att_info *ai, trn::nav_info *ni, trn::vel_info *vi=nullptr)
+
+    static std::string lcm_to_csv_raw(trn::bath_info *bi, trn::att_info *ai, trn::nav_info *ni, trn::vel_info *vi=nullptr)
     {
-        // time, lat, lon, roll, pitch, hdg,valid,1,1,...nbeams,beamnum, range,...\n
         std::ostringstream ss;
         if(nullptr != bi && nullptr != ai && nullptr != ni)
         {
@@ -884,25 +1307,25 @@ public:
             // NavUtils::geoToUtm(latitude, longitude, utmZone, *northing, *easting)
             NavUtils::geoToUtm(Math::degToRad(lat), Math::degToRad(lon), utm, &pos_N, &pos_E);
             // Note that TRN uses N,E,D frame (i.e. N:x E:y D:z)
-            // time POSIX epoch sec
-            // northings
-            // eastings
-            // depth
-            // heading
-            // pitch
-            // roll
-            // flag (0)
-            // flag (0)
-            // flag (0)
-            // vx (0)
-            // xy (0)
-            // vz (0)
-            // sounding valid flag
-            // bottom lock valid flag
-            // number of beams
-            // beam[i] number
-            // beam[i] valid (1)
-            // beam[i] range
+            // [ 0] time POSIX epoch sec
+            // [ 1] northings
+            // [ 2] eastings
+            // [ 3] depth
+            // [ 4] heading
+            // [ 5] pitch
+            // [ 6] roll
+            // [ 7] flag (0)
+            // [ 8] flag (0)
+            // [ 9] flag (0)
+            // [10] vx (0)
+            // [11] xy (0)
+            // [12] vz (0)
+            // [13] sounding valid flag
+            // [14] bottom lock valid flag
+            // [15] number of beams
+            // beam[16 + i*3] number
+            // beam[17 + i*3] valid (always 1)
+            // beam[18 + i*3] range
             // ...
             // NEWLINE
 
@@ -938,8 +1361,11 @@ public:
             for(it=beam_list.begin(); it!=beam_list.end(); k++)
             {
                 trn::beam_tup bt = static_cast<trn::beam_tup> (*it);
+                // beam number
                 ss <<  std::get<0>(bt) << ",";
+                // valid (set to 1)
                 ss << 1 << ",";
+                // range
                 ss << std::get<1>(bt);
                 it++;
                 if(it != beam_list.end())
@@ -997,18 +1423,18 @@ public:
         os << std::setw(wkey) << "theta" << std::setw(wval) << src.theta <<"\n";
         os << std::setw(wkey) << "psi" << std::setw(wval) << src.psi <<"\n";
         os << std::setw(wkey) << "numMeas" << std::setw(wval) << src.numMeas <<"\n";
+        os << std::setw(wkey) << "beam range" << " [rx, ry, rz, val]" <<"\n";
 
         for(int i=0; i < src.numMeas; i++){
-            os << std::setw(wkey) << "b[" << src.beamNums[i] << "]";
+            os << std::setw(wkey) << " [" << setw(3) << src.beamNums[i] << "]";
             ostringstream ss;
-            ss << "r[";
-            ss << src.ranges[i];
-            ss << "] rx,ry,rz,v";
-            ss << "[";
-            ss << src.alongTrack[i] << ", ";
-            ss << src.crossTrack[i] << ", ";
-            ss << src.altitudes[i] << ", ";
-            ss << src.measStatus[i] << "]";
+            ss << std::fixed << std::setprecision(2);
+            ss << std::setw(7) << src.ranges[i];
+            ss << " [";
+            ss << std::setw(7) << src.alongTrack[i] << ", ";
+            ss << std::setw(7) << src.crossTrack[i] << ", ";
+            ss << std::setw(7) << src.altitudes[i] << ", ";
+            ss << std::setw(2) << src.measStatus[i] << "]";
             string bs = ss.str();
             int alen = ss.str().length();
             int wx = (alen >= wval ? alen + 1 : wval);
@@ -1046,9 +1472,9 @@ public:
                               utmZone, &(obj->x), &(obj->y));
 
            obj->z = src->depth;
-           obj->psi = src->hdg;
-           obj->theta = ai->pitch();
            obj->phi = ai->roll();
+           obj->theta = ai->pitch();
+           obj->psi = src->hdg;
            obj->gpsValid = (obj->z < 2 ? true : false);
            obj->bottomLock = true;
            obj->dvlValid = true;
@@ -1081,9 +1507,9 @@ public:
             obj->time = src->ts;
             obj->ping_number = src->ping_number;
             obj->dataType = data_type;
-            obj->psi = src->hdg;
-            obj->theta = ai->pitch();
             obj->phi = ai->roll();
+            obj->theta = ai->pitch();
+            obj->psi = src->hdg;
             obj->z = src->depth;
 
             NavUtils::geoToUtm( Math::degToRad(src->lat),

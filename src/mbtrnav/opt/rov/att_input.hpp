@@ -27,16 +27,28 @@ public:
         att_info *inf = nullptr;
         mDataInstMutex.lock();
         inf = new att_info(mAttInst);
+        inf->set_flags(mFlags);
         mDataInstMutex.unlock();
         return inf;
     }
     
     virtual bool provides_att() override {return true;}
 
+    void set_flags(const flag_var<att_flags_t> &flags)
+    {
+        mFlags = flags;
+    }
+
+    flag_var<att_flags_t> &flags()
+    {
+        return mFlags;
+    }
+
 protected:
     // instantaneous (latest) attitude
     att_info mAttInst;
     std::mutex mDataInstMutex;
+    flag_var<nav_flags_t>mFlags;
 
 private:
 

@@ -213,6 +213,13 @@ typedef struct app_cfg_s{
     /// @var app_cfg_s::eto_msec
     /// @brief TBD
     int eto_msec;
+    /// @var app_cfg_s::csv_path
+    /// @brief TBD
+    char *csv_path;
+    /// @var app_cfg_s::csv_file
+    /// @brief TBD
+    FILE *csv_file;
+
 }app_cfg_t;
 
 static void s_show_help();
@@ -221,11 +228,11 @@ static void s_termination_handler (int signum);
 static app_cfg_t *app_cfg_new();
 static void app_cfg_destroy(app_cfg_t **pself);
 static int s_dbg_printf(FILE *fp, bool debug, const char *fmt, ...);
-static int s_tokenize(char *src, char **dest, char *del, int ntok);
+static int s_tokenize(char *src, char ***dest, char *del, int ntok);
 
 static int s_csv_to_mb1(mb1_t **pdest, mfile_file_t *src);
 
-static int32_t s_read_mb1_csv(mfile_file_t *src, char *dest, uint32_t len);
+static int32_t s_read_csv_line(mfile_file_t *src, char *dest, uint32_t len);
 static int32_t s_read_mb1_bin( mb1_t **pdest, mfile_file_t *src, app_cfg_t *cfg);
 static int32_t s_trnc_read_mb1_rec( mb1_t **pdest, msock_socket_t *src, app_cfg_t *cfg);
 
@@ -312,6 +319,7 @@ static void s_show_help()
     " --trn-nerr     : TRN max northing error\n"
     " --trn-ecov     : TRN max easing covariance\n"
     " --trn-err      : TRN max easting error\n"
+    " --csv-path     : CSV file (compatible with tlp-plot)\n"
     "\n"
     " Notes:\n"
     "  Tests trn_cli API in one of two modes: MONITOR or UPDATE; uses MONITOR mode by default.\n"
@@ -350,8 +358,8 @@ static void s_show_help()
     "  # start TRN server"
     "  $ trn-server  -p 27001\n"
     "\n"
-    "  # run trn-cli"
-    "  trn-cli ./src/mbtrnav/trn-cli  ./src/mbtrnav/trn-cli --mb1-src=m:/path/to/data.mb1 \\\n"
+    "  # run trn-cli\n"
+    "  trn-cli --mb1-src=m:/path/to/data.mb1 \\\n"
     "  --host=$TRN_HOST:27001 --map=PortTiles --cfg=mappingAUV_specs.cfg --par=particles.cfg \\\n"
     "  --logdir=foo --mode=u --est-n=3 --state-n=3 --hbeat=10 \n"
     "\n";
@@ -399,6 +407,7 @@ static void parse_args(int argc, char **argv, app_cfg_t *cfg)
         {"trn-nerr", required_argument, NULL, 0},
         {"trn-ecov", required_argument, NULL, 0},
         {"trn-eerr", required_argument, NULL, 0},
+        {"csv-path", required_argument, NULL, 0},
         {NULL, 0, NULL, 0}};
 
     // process argument list
@@ -663,7 +672,7 @@ static void parse_args(int argc, char **argv, app_cfg_t *cfg)
                         fprintf(stderr, "ERR - invalid trn-eerr[%lf]\n", val);
                     }
                 }
-                // update
+                // est-n
                 else if (strcmp("est-n", options[option_index].name) == 0) {
                     sscanf(optarg,"%d",&cfg->est_n);
                 }
@@ -671,9 +680,15 @@ static void parse_args(int argc, char **argv, app_cfg_t *cfg)
                 else if (strcmp("hbeat", options[option_index].name) == 0) {
                     sscanf(optarg,"%d",&cfg->trnc_hbn);
                 }
-                // test-api
+                // state-n
                 else if (strcmp("state-n", options[option_index].name) == 0) {
                     sscanf(optarg,"%d",&cfg->state_n);
+                }
+                // csvFile
+                else if (strcmp("csv-path", options[option_index].name) == 0) {
+                    if(cfg->csv_path != NULL)
+                        free(cfg->csv_path);
+                    cfg->csv_path = strdup(optarg);
                 }
 
                 break;
@@ -791,6 +806,8 @@ static app_cfg_t *app_cfg_new()
         instance->trn_cfg->max_northing_err = TRN_MAX_NERR_DFL;
         instance->trn_cfg->max_easting_cov = TRN_MAX_ECOV_DFL;
         instance->trn_cfg->max_easting_err = TRN_MAX_EERR_DFL;
+        instance->csv_path = NULL;
+        instance->csv_file = NULL;
     }
     return instance;
 }
@@ -810,6 +827,10 @@ static void app_cfg_destroy(app_cfg_t **pself)
                 free(self->log_dir);
             if(NULL!=self->log_path)
                 free(self->log_path);
+            if(NULL!=self->csv_path)
+                free(self->csv_path);
+            if(NULL!=self->csv_file)
+                fclose(self->csv_file);
 
             trncfg_destroy(&self->trn_cfg);
             mlog_delete_instance(self->log_id);
@@ -833,17 +854,19 @@ static int s_dbg_printf(FILE *fp, bool debug, const char *fmt, ...)
     return retval;
 }
 
-static int s_tokenize(char *src, char **dest, char *del, int ntok)
+static int s_tokenize(char *src, char ***dest, char *del, int ntok)
 {
     int i=-1;
-    if(NULL!=src && NULL!=del){
-        if(dest==NULL){
-            dest = (char **)malloc(ntok*sizeof(char *));
+    if(NULL!=src && NULL!=del && dest != NULL){
+        char **wp = *dest;
+        if(*dest == NULL){
+            wp = (char **)malloc(ntok * sizeof(char *));
+            *dest = wp;
         }
         i=0;
         while(i<ntok){
-            dest[i]=strtok((i==0?src:NULL),del);
-            if(NULL==dest[i]){
+            wp[i] = strtok((i == 0 ? src : NULL), del);
+            if(NULL == wp[i]){
                 break;
             }
             i++;
@@ -860,10 +883,14 @@ static int s_csv_to_mb1(mb1_t **pdest, mfile_file_t *src)
         char line[TRNCLI_CSV_LINE_BYTES]={0};
         char **fields=NULL;
         int32_t test = 0;
-        if( (test=s_read_mb1_csv(src,line,TRNCLI_CSV_LINE_BYTES))>0){
+        if( (test = s_read_csv_line(src,line,TRNCLI_CSV_LINE_BYTES)) > 0){
             // tokenize assigns value to fields and returns number of entries
-            test=s_tokenize(line, fields, "\n", MB1_CSV_MAX_FIELDS);
-            if( fields!=NULL && test>=MB1_CSV_HEADER_FIELDS ){
+            test = s_tokenize(line, &fields, ",", MB1_CSV_MAX_FIELDS);
+
+            for(int i = 0; i < test; i++)
+            fprintf(stderr, "field[%d] : %s\n", i, fields[i]);
+
+            if( fields != NULL && test >= MB1_CSV_HEADER_FIELDS ){
 
                 //            sscanf(fields[0],"%u",&dest.type);
                 //            sscanf(fields[1],"%u",&dest.size);
@@ -886,8 +913,11 @@ static int s_csv_to_mb1(mb1_t **pdest, mfile_file_t *src)
                 mb1_set_checksum(dest);
                 retval=0;
                 free(fields);
+                fprintf(stderr,"%s:%d\n", __func__, __LINE__);
             }else{
-                fprintf(stderr, "ERR - tokenize failed [%d]\n", test);
+                fprintf(stderr, "ERR - tokenize failed [%d/%d] fields[%p] line[%s]\n", test, MB1_CSV_HEADER_FIELDS, fields, line);
+                if(test > 0)
+                retval=0;
             }
         }else{
             fprintf(stderr, "ERR - read_csv_rec failed [%d]\n", test);
@@ -898,7 +928,7 @@ static int s_csv_to_mb1(mb1_t **pdest, mfile_file_t *src)
     return retval;
 }
 
-static int32_t s_read_mb1_csv(mfile_file_t *src, char *dest, uint32_t len)
+static int32_t s_read_csv_line(mfile_file_t *src, char *dest, uint32_t len)
 {
     int32_t retval=-1;
 
@@ -1151,6 +1181,33 @@ static int s_trncli_show_trn_state(trncli_t *tcli, mb1_t *mb1, app_cfg_t *cfg)
     return retval;
 }
 
+static void s_est_csv_to_file(FILE *os, pt_cdata_t *pt_dat, pt_cdata_t *mle_dat, pt_cdata_t *mse_dat)
+{
+    // Format
+    // time,mmse.time,mmse.x,mmse.y,mmse.z,pos.time,ofs.x,ofs.y,ofs.z,cov.0,cov.2,cov.5,pos.time,pos.x,pos.y,pos.z,mle.time,mle.x,mle.y,mle.z
+    double ts = mtime_dtime();
+
+    // time
+    fprintf(os, "%.3lf",ts);
+    // mmse
+    fprintf(os, ",%.3lf", mse_dat->time);
+    fprintf(os, ",%.4lf,%.4lf,%.4lf", mse_dat->x, mse_dat->y, mse_dat->z);
+    // ofs
+    double ofsx = mse_dat->x - pt_dat->x;
+    double ofsy = mse_dat->y - pt_dat->y;
+    double ofsz = mse_dat->z - pt_dat->z;
+    fprintf(os, ",%.3lf", pt_dat->time);
+    fprintf(os, ",%.4lf,%.4lf,%.4lf", ofsx, ofsy, ofsz);
+    // cov
+    fprintf(os, ",%.3lf,%.3lf,%.3lf", mse_dat->covariance[0], mse_dat->covariance[2], mse_dat->covariance[5]);
+    // pos
+    fprintf(os, ",%.3lf,%.4lf,%.4lf,%.4lf", pt_dat->time, pt_dat->x, pt_dat->y, pt_dat->z);
+    // mle
+    fprintf(os, "%.3lf", mle_dat->time);
+    fprintf(os, ",%.4lf,%.4lf,%.4lf", mle_dat->x, mle_dat->y, mle_dat->z);
+    fprintf(os, "\n");
+}
+
 static int s_trncli_show_trn_update(trncli_t *tcli, mb1_t *mb1, app_cfg_t *cfg)
 {
     int retval=-1;
@@ -1183,6 +1240,15 @@ static int s_trncli_show_trn_update(trncli_t *tcli, mb1_t *mb1, app_cfg_t *cfg)
 
             if(NULL!=pt_dat &&  NULL!= mle_dat && NULL!=mse_dat ){
 
+                if(cfg->csv_path != NULL){
+                    if(cfg->csv_file == NULL){
+                        cfg->csv_file = fopen(cfg->csv_path, "a");
+                    }
+                    if(cfg->csv_file != NULL){
+                        s_est_csv_to_file(cfg->csv_file, pt_dat, mle_dat, mse_dat);
+                    }
+                }
+
                 mlog_oset_t log_dest = mlog_get_dest(cfg->log_id);
                 mlog_set_dest(cfg->log_id, (log_dest | ML_SERR));
 
@@ -1201,6 +1267,7 @@ static int s_trncli_show_trn_update(trncli_t *tcli, mb1_t *mb1, app_cfg_t *cfg)
                 mlog_tprintf(cfg->log_id, "ERR - pt[%p] pt_dat[%p] mle_dat[%p] mse_dat[%p]\n", pt, pt_dat, mle_dat, mse_dat);
                 mlog_tprintf(cfg->log_id, "ERR - ts[%.3lf] beams[%u] ping[%d] \n", mb1->ts, mb1->nbeams, mb1->ping_number);
                 mlog_tprintf(cfg->log_id, "ERR - lat[%.5lf] lon[%.5lf] hdg[%.2lf] sd[%.1lf]\n", mb1->lat, mb1->lon, mb1->hdg, mb1->depth);
+                fprintf(stderr,"\n");
             }
         } else {
             // check error, update trn cli connection status
@@ -1320,6 +1387,7 @@ static int s_trncli_test_csv(trncli_t *tcli, app_cfg_t *cfg)
 
             } else {
                 // error or end of file
+                if(test < 0)
                 break;
             }
             if(mb1_read_OK){

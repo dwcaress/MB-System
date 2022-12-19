@@ -96,7 +96,7 @@ public:
         // behavior, i.e. defer notification until processing
         // is complete
         if(mDelegateNotify){
-            TRN_NDPRINT(5, "DVL_STAT::%s:%d  NOTIFY SEM\n", __func__, __LINE__);
+            TRN_NDPRINT(6, "DVL_STAT::%s:%d  NOTIFY SEM\n", __func__, __LINE__);
             notify_sem_list();
         }
     }

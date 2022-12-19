@@ -156,7 +156,7 @@ public:
         // behavior, i.e. defer notification until processing
         // is complete
         if(mDelegateNotify){
-            TRN_NDPRINT(5, "RDI_PD4::%s:%d  NOTIFY SEM\n", __func__, __LINE__);
+            TRN_NDPRINT(6, "RDI_PD4::%s:%d  NOTIFY SEM\n", __func__, __LINE__);
             notify_sem_list();
         }
     }

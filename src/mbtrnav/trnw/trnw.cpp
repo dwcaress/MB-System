@@ -1440,6 +1440,7 @@ int wmeast_mb1_to_meas(wmeast_t **dest, mb1_t *src, long int utmZone)
             obj->ping_number = src->ping_number;
             obj->dataType=2;
             obj->z=src->depth;
+            
             NavUtils::geoToUtm( Math::degToRad(src->lat),
                                Math::degToRad(src->lon),
                                utmZone, &(obj->x), &(obj->y));
