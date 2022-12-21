@@ -307,6 +307,6 @@ function(buildConfigHeader buildGSF buildTRN buildMbTNav
 ]]
 
 # End header guard
-file(APPEND ${outfile} "#endif    // MB_CONFIG_H_\n")
+file(APPEND ${outfile} "#endif    // __MB_CONFIG_H_\n")
 
 endfunction()
