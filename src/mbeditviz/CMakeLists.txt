@@ -23,6 +23,7 @@ target_include_directories(mbeditviz
                            ${CMAKE_SOURCE_DIR}/src/mbaux
                            ${CMAKE_SOURCE_DIR}/src/gsf
 			   ${NETCDF_INCLUDE_DIRS}
+                           ${PROJ_INCLUDE_DIRS}
 			   ${X11_INCLUDE_DIRS})
 
 target_include_directories(mbev
@@ -32,6 +33,7 @@ target_include_directories(mbev
                            ${CMAKE_SOURCE_DIR}/src/mbaux
                            ${CMAKE_SOURCE_DIR}/src/gsf
                            ${CMAKE_SOURCE_DIR}/src/mbview
+                           ${PROJ_INCLUDE_DIRS}                           
 			   ${NETCDF_INCLUDE_DIRS}
 			   ${X11_INCLUDE_DIRS})
 
