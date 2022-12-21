@@ -35,7 +35,8 @@ target_link_libraries(qt-mbgrdviz-3
 		      mbxgr
                       mbview
                       mbbsio
-                      mbsapi                                            
+                      mbsapi
+                      ${GSF_LIB}
 		      ${GMT_LIBRARIES}
 		      ${NETCDF_LIBRARIES}
 		      ${MOTIF_LIBRARIES}
