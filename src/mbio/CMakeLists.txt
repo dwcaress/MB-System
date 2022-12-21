@@ -177,6 +177,7 @@ ENDIF (APPLE)
 target_include_directories(mbio
                            PUBLIC
 			   ${NETCDF_INCLUDE_DIRS}
+                           ${PROJ_INCLUDE_DIRS}
                            .
 			   ${CMAKE_SOURCE_DIR}/src/gsf
                            ${CMAKE_SOURCE_DIR}/src/bsio
