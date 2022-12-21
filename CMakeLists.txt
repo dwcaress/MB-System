@@ -29,7 +29,7 @@ option(buildPCL "build point-cloud-library" OFF)
 option(buildTRN "build MBTRN tools" OFF)
 option(buildTNav "build MBTNav tools" OFF)
 option(buildQt "build Qt tools" OFF)
-option(buildGSF "build GSF library" OFF)
+option(buildGSF "build GSF library" ON)
 option(buildTest "build test tools" OFF)
 
 
