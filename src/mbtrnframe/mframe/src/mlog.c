@@ -301,7 +301,7 @@ static int s_parse_path(const char *src, mlog_t *dest)
             }
             if (ppath==pathe) {
                 dest->path=(char *)malloc(2*sizeof(char));
-                sprintf(dest->path,"%c",ML_SYS_PATH_DEL);
+                snprintf(dest->path, 2, "%c",ML_SYS_PATH_DEL);
             }else{
                 if (strcmp(ppath,".")==0) {
                     dest->path = strdup("./");
@@ -565,19 +565,23 @@ static int s_log_set_seg(mlog_t *self, int16_t segno)
         
         memset(new_name,0,len);
         bp = new_name;
+        size_t rem = len;
 //        fprintf(stderr,"path[%s] name[%s] ext[%s] len[%d]\n",self->path,self->name,self->ext,len);
 
         // format new file path string
         if (NULL!=self->path) {
-            sprintf(bp,"%s",self->path);
-            bp = new_name+strlen(new_name);
+            int bw = snprintf(bp, len, "%s",self->path);
+            bp = new_name + strlen(new_name);
+            rem -= (bw > 0 ? bw : 0);
         }
-        sprintf(bp,"%s",self->name);
+        int bw = snprintf(bp, len, "%s", self->name);
+        bp = new_name + strlen(new_name);
+        rem -= (bw > 0 ? bw : 0);
+        bw = snprintf(bp, rem+1, ML_SEG_FMT, segno);
         bp = new_name+strlen(new_name);
-        sprintf(bp,ML_SEG_FMT,segno);
-        bp = new_name+strlen(new_name);
+        rem -= (bw > 0 ? bw : 0);
         if (NULL!=self->ext) {
-            sprintf(bp,"%c%s",ML_SYS_EXT_DEL,self->ext);
+            snprintf(bp, rem+1, "%c%s",ML_SYS_EXT_DEL,self->ext);
             bp = new_name+strlen(new_name);
         }
 //        fprintf(stderr,"new_name[%s] len[%d]\n",new_name,strlen(new_name));
@@ -713,12 +717,15 @@ size_t len =0;
         if (NULL!=retval) {
         char *op = NULL;
             memset(retval,0,len);
+            size_t rem = len;
             op = retval;
-            sprintf(op,"%s%s",(self->path==NULL?"":self->path),self->name);
+            int bw = snprintf(op, len, "%s%s",(self->path==NULL?"":self->path),self->name);
             op=retval+strlen(retval);
-            sprintf(op,ML_SEG_FMT,(short int)segno);
+            rem -= (bw > 0 ? bw : 0);
+            bw = snprintf(op, rem+1, ML_SEG_FMT,(short int)segno);
             op=retval+strlen(retval);
-            sprintf(op,"%s%s",(self->ext==NULL?"":"."),(self->ext==NULL?"":self->ext));
+            rem -= (bw > 0 ? bw : 0);
+            snprintf(op, rem+1, "%s%s",(self->ext==NULL?"":"."),(self->ext==NULL?"":self->ext));
         }
     }
     return retval;
@@ -2045,9 +2052,10 @@ static char *s_mlog_dfl_name(const char *channel)
 {
     char *retval=NULL;
     if(NULL!=channel){
-        char *str = (char *)malloc(strlen(channel)+strlen(ML_LOG_DFL_EXT)+1);
+        size_t len = strlen(channel)+strlen(ML_LOG_DFL_EXT) + 1;
+        char *str = (char *)malloc(len);
         if(str){
-            sprintf(str,"%s%s",channel,ML_LOG_DFL_EXT);
+            snprintf(str, len, "%s%s",channel,ML_LOG_DFL_EXT);
             retval=str;
         }
     }
@@ -2059,30 +2067,37 @@ const char *mlog_deststr(mlog_oset_t dest_set)
     static char buf[128]={0};
     char *cur=buf;
     size_t inc=0;
+    size_t rem = 128;
     memset(buf,0,128);
 
     if(dest_set==ML_NODEST){
-       inc=sprintf(cur,"NODEST");
+       inc=snprintf(cur, 128, "NODEST");
     }else{
         if( (dest_set&ML_SOUT) > 0){
           if(cur>buf)
-                inc=sprintf(cur,"|SOUT");
+                inc=snprintf(cur, rem, "|SOUT");
             else
-                inc=sprintf(cur,"SOUT");
+                inc=snprintf(cur, rem, "SOUT");
         }
-        cur+=(inc>0 ? inc : 0);
+
+        cur += (inc > 0 ? inc : 0);
+        rem -= (inc > 0 ? inc : 0);
+
         if( (dest_set&ML_SERR) > 0){
             if(cur>buf)
-                inc=sprintf(cur,"|SERR");
+                inc=snprintf(cur, rem, "|SERR");
             else
-                inc=sprintf(cur,"SERR");
+                inc=snprintf(cur, rem, "SERR");
         }
-        cur+=(inc>0 ? inc : 0);
+
+        cur += (inc > 0 ? inc : 0);
+        rem -= (inc > 0 ? inc : 0);
+
         if( (dest_set&ML_FILE) > 0){
             if(cur>buf)
-                inc=sprintf(cur,"|FILE");
+                inc=snprintf(cur, rem, "|FILE");
             else
-                inc=sprintf(cur,"FILE");
+                inc=snprintf(cur, rem, "FILE");
         }
     }
     return (const char *)buf;
@@ -2094,22 +2109,22 @@ const char *mlog_levelstr(int level)
     memset(buf,0,32);
     switch (level) {
         case ML_NONE:
-            sprintf(buf,"NONE");
+            snprintf(buf, 32, "NONE");
             break;
         case ML_ERR:
-            sprintf(buf,"ERR");
+            snprintf(buf, 32, "ERR");
             break;
         case ML_WARN:
-            sprintf(buf,"WARN");
+            snprintf(buf, 32, "WARN");
             break;
         case ML_INFO:
-            sprintf(buf,"INFO");
+            snprintf(buf, 32, "INFO");
             break;
         case ML_DEBUG:
-            sprintf(buf,"DEBUG");
+            snprintf(buf, 32, "DEBUG");
             break;
         default:
-            sprintf(buf,"USR.%d",level);
+            snprintf(buf, 32, "USR.%d",level);
             break;
     }
     return (const char *)buf;
@@ -2407,7 +2422,7 @@ int mlog_putc(mlog_id_t id, char data)
 /// @brief mlog unit test(s). may throw assertions.
 /// @param[in] verbose enable verbose output >=0
 /// @return 0 on success, -1 otherwise
-int mlog_test(int verbose)
+int mlog_test(int argc, char **argv)
 {
     int retval = -1;
 	

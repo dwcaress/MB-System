@@ -407,7 +407,7 @@ int msock_configure(msock_socket_t *s, const char *host, int port, msock_socket_
     s->addr->port=port;
 
     memset(s->addr->portstr,0,PORTSTR_BYTES*sizeof(char));
-    sprintf(s->addr->portstr,"%d",port);
+    snprintf(s->addr->portstr, PORTSTR_BYTES, "%d",port);
     
     memset(&s->addr->hints,0,sizeof(struct addrinfo));
     PDPRINT((stderr,"configuring type [%s]\n",(type==ST_TCP ? "SOCK_STREAM" : "SOCK_DGRAM")));

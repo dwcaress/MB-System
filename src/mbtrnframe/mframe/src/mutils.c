@@ -402,7 +402,8 @@ int mfu_test(int verbose)
     
     char buf[64]={0};
     char *bp=buf;
-    sprintf(buf,"ABCDEFGHIJK0123456789\n");
+
+    snprintf(buf, 64, "ABCDEFGHIJK0123456789\n");
     mfu_hex_show((byte *)buf,64,16,true,5);
 
     memset(buf,0x02,64);
@@ -421,7 +422,7 @@ int mfu_test(int verbose)
     if(strcmp(buf,"test vbprint")!=0)err_count|=(1<<3);
     fprintf(stderr,"trim[%s]\n",buf);
 
-    sprintf(buf,"<a> foo <b> bar <c>baz\n<\\c><\\b><\\a>\n");
+    snprintf(buf, 64, "<a> foo <b> bar <c>baz\n<\\c><\\b><\\a>\n");
      mfu_fmt_xml(1, buf,"\n", 5);
 
     retval=err_count;
