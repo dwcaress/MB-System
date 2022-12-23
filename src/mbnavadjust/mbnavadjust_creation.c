@@ -153,24 +153,25 @@ extern void do_fileselection_ok(Widget, XtPointer, XtPointer);
 extern void BxSetValuesCB(Widget, XtPointer, XtPointer);
 extern void do_file_close(Widget, XtPointer, XtPointer);
 extern void do_quit(Widget, XtPointer, XtPointer);
-extern void do_view_showsurveys(Widget, XtPointer, XtPointer);
-extern void do_view_showblocks(Widget, XtPointer, XtPointer);
-extern void do_view_showdata(Widget, XtPointer, XtPointer);
-extern void do_view_showsections(Widget, XtPointer, XtPointer);
-extern void do_view_showcrossings(Widget, XtPointer, XtPointer);
-extern void do_view_showmediocrecrossings(Widget, XtPointer, XtPointer);
-extern void do_view_showgoodcrossings(Widget, XtPointer, XtPointer);
-extern void do_view_showbettercrossings(Widget, XtPointer, XtPointer);
-extern void do_view_showtruecrossings(Widget, XtPointer, XtPointer);
-extern void do_view_showcrossingties(Widget, XtPointer, XtPointer);
-extern void do_view_showcrossingtiessorted(Widget, XtPointer, XtPointer);
-extern void do_view_showglobalties(Widget, XtPointer, XtPointer);
-extern void do_view_showglobaltiessorted(Widget, XtPointer, XtPointer);
+extern void do_list_showreferencegrids(Widget, XtPointer, XtPointer);
+extern void do_list_showsurveys(Widget, XtPointer, XtPointer);
+extern void do_list_showblocks(Widget, XtPointer, XtPointer);
+extern void do_list_showdata(Widget, XtPointer, XtPointer);
+extern void do_list_showsections(Widget, XtPointer, XtPointer);
+extern void do_list_showcrossings(Widget, XtPointer, XtPointer);
+extern void do_list_showmediocrecrossings(Widget, XtPointer, XtPointer);
+extern void do_list_showgoodcrossings(Widget, XtPointer, XtPointer);
+extern void do_list_showbettercrossings(Widget, XtPointer, XtPointer);
+extern void do_list_showtruecrossings(Widget, XtPointer, XtPointer);
+extern void do_list_showcrossingties(Widget, XtPointer, XtPointer);
+extern void do_list_showcrossingtiessorted(Widget, XtPointer, XtPointer);
+extern void do_list_showglobalties(Widget, XtPointer, XtPointer);
+extern void do_list_showglobaltiessorted(Widget, XtPointer, XtPointer);
 extern void do_view_showallsurveys(Widget, XtPointer, XtPointer);
-extern void do_view_showselectedsurveys(Widget, XtPointer, XtPointer);
+extern void do_view_showselectedsurvey(Widget, XtPointer, XtPointer);
 extern void do_view_showselectedblock(Widget, XtPointer, XtPointer);
 extern void do_view_showselectedfile(Widget, XtPointer, XtPointer);
-extern void do_view_showwithselectedsurveys(Widget, XtPointer, XtPointer);
+extern void do_view_showwithselectedsurvey(Widget, XtPointer, XtPointer);
 extern void do_view_showwithselectedfile(Widget, XtPointer, XtPointer);
 extern void do_view_showselectedsection(Widget, XtPointer, XtPointer);
 extern void do_visualize(Widget, XtPointer, XtPointer);
@@ -180,9 +181,11 @@ extern void do_action_goodnav(Widget, XtPointer, XtPointer);
 extern void do_action_fixednav(Widget, XtPointer, XtPointer);
 extern void do_action_fixedxynav(Widget, XtPointer, XtPointer);
 extern void do_action_fixedznav(Widget, XtPointer, XtPointer);
-extern void do_action_tie_xy(Widget, XtPointer, XtPointer);
-extern void do_action_z(Widget, XtPointer, XtPointer);
-extern void do_action_tie_xyz(Widget, XtPointer, XtPointer);
+extern void do_action_tie_xy(Widget w, XtPointer client_data, XtPointer call_data);
+extern void do_action_tie_z(Widget w, XtPointer client_data, XtPointer call_data);
+extern void do_action_tie_xyz(Widget w, XtPointer client_data, XtPointer call_data);
+extern void do_action_tie_unfixed(Widget w, XtPointer client_data, XtPointer call_data);
+extern void do_action_tie_fixed(Widget w, XtPointer client_data, XtPointer call_data);
 extern void do_action_autopick(Widget, XtPointer, XtPointer);
 extern void do_action_autopickhorizontal(Widget, XtPointer, XtPointer);
 extern void do_action_autosetsvsvertical(Widget, XtPointer, XtPointer);
@@ -265,9 +268,10 @@ Widget CreatemainWindow(Widget parent) {
 	Widget cascadeButton_option;
 	Widget pulldownMenu_option;
 	Widget pushButton_controls;
+	Widget cascadeButton_list;
+	Widget pulldownMenu_list;
 	Widget cascadeButton_view;
 	Widget pulldownMenu_view;
-	Widget separator13;
 	Widget separator15;
 	Widget cascadeButton_action;
 	Widget pulldownMenu_action;
@@ -620,6 +624,390 @@ Widget CreatemainWindow(Widget parent) {
 	{
 		XmString tmp0;
 
+		tmp0 = (XmString)BX_CONVERT(menuBar_mbnavadjust, (char *)"List", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNx, 96);
+		ac++;
+		XtSetArg(args[ac], XmNy, 5);
+		ac++;
+		XtSetArg(args[ac], XmNwidth, 45);
+		ac++;
+		XtSetArg(args[ac], XmNheight, 22);
+		ac++;
+		XtSetArg(
+		    args[ac], XmNfontList,
+		    BX_CONVERT(menuBar_mbnavadjust, (char *)"-*-" SANS "-bold-r-*-*-*-120-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		cascadeButton_list = XmCreateCascadeButton(menuBar_mbnavadjust, (char *)"cascadeButton_list", args, ac);
+		XtManageChild(cascadeButton_list);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	ac = 0;
+	XtSetArg(args[ac], XmNx, 0);
+	ac++;
+	XtSetArg(args[ac], XmNy, 0);
+	ac++;
+	XtSetArg(args[ac], XmNwidth, 225);
+	ac++;
+	XtSetArg(args[ac], XmNheight, 360);
+	ac++;
+	pulldownMenu_list = XmCreatePulldownMenu(XtParent(cascadeButton_list), (char *)"pulldownMenu_list", args, ac);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(pulldownMenu_list, (char *)"Show Reference Grids", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(
+		    args[ac], XmNfontList,
+		    BX_CONVERT(pulldownMenu_list, (char *)"-*-" SANS "-bold-r-*-*-*-120-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		pushButton_showreferencegrids = XmCreatePushButton(pulldownMenu_list, (char *)"pushButton_showreferencegrids", args, ac);
+		XtManageChild(pushButton_showreferencegrids);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(pushButton_showreferencegrids, XmNactivateCallback, do_list_showreferencegrids, (XtPointer)0);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(pulldownMenu_list, (char *)"Show Surveys", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(
+		    args[ac], XmNfontList,
+		    BX_CONVERT(pulldownMenu_list, (char *)"-*-" SANS "-bold-r-*-*-*-120-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		pushButton_showsurveys = XmCreatePushButton(pulldownMenu_list, (char *)"pushButton_showsurveys", args, ac);
+		XtManageChild(pushButton_showsurveys);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(pushButton_showsurveys, XmNactivateCallback, do_list_showsurveys, (XtPointer)0);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(pulldownMenu_list, (char *)"Show Survey-vs-Survey Blocks", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(
+		    args[ac], XmNfontList,
+		    BX_CONVERT(pulldownMenu_list, (char *)"-*-" SANS "-bold-r-*-*-*-120-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		pushButton_showblocks = XmCreatePushButton(pulldownMenu_list, (char *)"pushButton_showblocks", args, ac);
+		XtManageChild(pushButton_showblocks);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(pushButton_showblocks, XmNactivateCallback, do_list_showblocks, (XtPointer)0);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(pulldownMenu_list, (char *)"Show Data Files", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(
+		    args[ac], XmNfontList,
+		    BX_CONVERT(pulldownMenu_list, (char *)"-*-" SANS "-bold-r-*-*-*-120-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		pushButton_showdata = XmCreatePushButton(pulldownMenu_list, (char *)"pushButton_showdata", args, ac);
+		XtManageChild(pushButton_showdata);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(pushButton_showdata, XmNactivateCallback, do_list_showdata, (XtPointer)0);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(pulldownMenu_list, (char *)"Show Data File Sections", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(
+		    args[ac], XmNfontList,
+		    BX_CONVERT(pulldownMenu_list, (char *)"-*-" SANS "-bold-r-*-*-*-120-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		pushButton_showsections = XmCreatePushButton(pulldownMenu_list, (char *)"pushButton_showsections", args, ac);
+		XtManageChild(pushButton_showsections);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(pushButton_showsections, XmNactivateCallback, do_list_showsections, (XtPointer)0);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(pulldownMenu_list, (char *)"Show All Crossings", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(
+		    args[ac], XmNfontList,
+		    BX_CONVERT(pulldownMenu_list, (char *)"-*-" SANS "-bold-r-*-*-*-120-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		pushButton_showcrossings = XmCreatePushButton(pulldownMenu_list, (char *)"pushButton_showcrossings", args, ac);
+		XtManageChild(pushButton_showcrossings);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(pushButton_showcrossings, XmNactivateCallback, do_list_showcrossings, (XtPointer)0);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(pulldownMenu_list, (char *)"Show >10% Overlap Crossings", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(
+		    args[ac], XmNfontList,
+		    BX_CONVERT(pulldownMenu_list, (char *)"-*-" SANS "-bold-r-*-*-*-120-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		pushButton_showmediocrecrossings =
+		    XmCreatePushButton(pulldownMenu_list, (char *)"pushButton_showmediocrecrossings", args, ac);
+		XtManageChild(pushButton_showmediocrecrossings);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(pushButton_showmediocrecrossings, XmNactivateCallback, do_list_showmediocrecrossings, (XtPointer)0);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(pulldownMenu_list, (char *)"Show >25% Overlap Crossings", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(
+		    args[ac], XmNfontList,
+		    BX_CONVERT(pulldownMenu_list, (char *)"-*-" SANS "-bold-r-*-*-*-120-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		pushButton_showgoodcrossings = XmCreatePushButton(pulldownMenu_list, (char *)"pushButton_showgoodcrossings", args, ac);
+		XtManageChild(pushButton_showgoodcrossings);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(pushButton_showgoodcrossings, XmNactivateCallback, do_list_showgoodcrossings, (XtPointer)0);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(pulldownMenu_list, (char *)"Show >50% Overlap Crossings", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(
+		    args[ac], XmNfontList,
+		    BX_CONVERT(pulldownMenu_list, (char *)"-*-" SANS "-bold-r-*-*-*-120-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		pushButton_showbettercrossings =
+		    XmCreatePushButton(pulldownMenu_list, (char *)"pushButton_showbettercrossings", args, ac);
+		XtManageChild(pushButton_showbettercrossings);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(pushButton_showbettercrossings, XmNactivateCallback, do_list_showbettercrossings, (XtPointer)0);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(pulldownMenu_list, (char *)"Show True Crossings", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(
+		    args[ac], XmNfontList,
+		    BX_CONVERT(pulldownMenu_list, (char *)"-*-" SANS "-bold-r-*-*-*-120-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		pushButton_showtruecrossings = XmCreatePushButton(pulldownMenu_list, (char *)"pushButton_showtruecrossings", args, ac);
+		XtManageChild(pushButton_showtruecrossings);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(pushButton_showtruecrossings, XmNactivateCallback, do_list_showtruecrossings, (XtPointer)0);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(pulldownMenu_list, (char *)"Show Crossing Ties", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(
+		    args[ac], XmNfontList,
+		    BX_CONVERT(pulldownMenu_list, (char *)"-*-" SANS "-bold-r-*-*-*-120-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		pushButton_showcrossingties = XmCreatePushButton(pulldownMenu_list, (char *)"pushButton_showcrossingties", args, ac);
+		XtManageChild(pushButton_showcrossingties);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(pushButton_showcrossingties, XmNactivateCallback, do_list_showcrossingties, (XtPointer)0);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(pulldownMenu_list, (char *)"Show Crossing Ties Sorted", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(
+		    args[ac], XmNfontList,
+		    BX_CONVERT(pulldownMenu_list, (char *)"-*-" SANS "-bold-r-*-*-*-120-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		pushButton_showcrossingtiessorted = XmCreatePushButton(pulldownMenu_list, (char *)"pushButton_showcrossingtiessorted", args, ac);
+		XtManageChild(pushButton_showcrossingtiessorted);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(pushButton_showcrossingtiessorted, XmNactivateCallback, do_list_showcrossingtiessorted, (XtPointer)0);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(pulldownMenu_list, (char *)"Show Global Ties", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(
+		    args[ac], XmNfontList,
+		    BX_CONVERT(pulldownMenu_list, (char *)"-*-" SANS "-bold-r-*-*-*-120-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		pushButton_showglobalties = XmCreatePushButton(pulldownMenu_list, (char *)"pushButton_showglobalties", args, ac);
+		XtManageChild(pushButton_showglobalties);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(pushButton_showglobalties, XmNactivateCallback, do_list_showglobalties, (XtPointer)0);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(pulldownMenu_list, (char *)"Show Global Ties Sorted", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(
+		    args[ac], XmNfontList,
+		    BX_CONVERT(pulldownMenu_list, (char *)"-*-" SANS "-bold-r-*-*-*-120-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		pushButton_showglobaltiessorted = XmCreatePushButton(pulldownMenu_list, (char *)"pushButton_showglobaltiessorted", args, ac);
+		XtManageChild(pushButton_showglobaltiessorted);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(pushButton_showglobaltiessorted, XmNactivateCallback, do_list_showglobaltiessorted, (XtPointer)0);
+
+	ac = 0;
+	XtSetArg(args[ac], XmNsubMenuId, pulldownMenu_list);
+	ac++;
+	XtSetValues(cascadeButton_list, args, ac);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
 		tmp0 = (XmString)BX_CONVERT(menuBar_mbnavadjust, (char *)"View", XmRXmString, 0, &argok);
 		XtSetArg(args[ac], XmNlabelString, tmp0);
 		if (argok)
@@ -656,324 +1044,6 @@ Widget CreatemainWindow(Widget parent) {
 	XtSetArg(args[ac], XmNheight, 360);
 	ac++;
 	pulldownMenu_view = XmCreatePulldownMenu(XtParent(cascadeButton_view), (char *)"pulldownMenu_view", args, ac);
-
-	ac = 0;
-	{
-		XmString tmp0;
-
-		tmp0 = (XmString)BX_CONVERT(pulldownMenu_view, (char *)"Show Surveys", XmRXmString, 0, &argok);
-		XtSetArg(args[ac], XmNlabelString, tmp0);
-		if (argok)
-			ac++;
-		XtSetArg(
-		    args[ac], XmNfontList,
-		    BX_CONVERT(pulldownMenu_view, (char *)"-*-" SANS "-bold-r-*-*-*-120-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
-		if (argok)
-			ac++;
-		pushButton_showsurveys = XmCreatePushButton(pulldownMenu_view, (char *)"pushButton_showsurveys", args, ac);
-		XtManageChild(pushButton_showsurveys);
-
-		/**
-		 * Free any memory allocated for resources.
-		 */
-		XmStringFree((XmString)tmp0);
-	}
-
-	XtAddCallback(pushButton_showsurveys, XmNactivateCallback, do_view_showsurveys, (XtPointer)0);
-
-	ac = 0;
-	{
-		XmString tmp0;
-
-		tmp0 = (XmString)BX_CONVERT(pulldownMenu_view, (char *)"Show Survey-vs-Survey Blocks", XmRXmString, 0, &argok);
-		XtSetArg(args[ac], XmNlabelString, tmp0);
-		if (argok)
-			ac++;
-		XtSetArg(
-		    args[ac], XmNfontList,
-		    BX_CONVERT(pulldownMenu_view, (char *)"-*-" SANS "-bold-r-*-*-*-120-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
-		if (argok)
-			ac++;
-		pushButton_showblocks = XmCreatePushButton(pulldownMenu_view, (char *)"pushButton_showblocks", args, ac);
-		XtManageChild(pushButton_showblocks);
-
-		/**
-		 * Free any memory allocated for resources.
-		 */
-		XmStringFree((XmString)tmp0);
-	}
-
-	XtAddCallback(pushButton_showblocks, XmNactivateCallback, do_view_showblocks, (XtPointer)0);
-
-	ac = 0;
-	{
-		XmString tmp0;
-
-		tmp0 = (XmString)BX_CONVERT(pulldownMenu_view, (char *)"Show Data Files", XmRXmString, 0, &argok);
-		XtSetArg(args[ac], XmNlabelString, tmp0);
-		if (argok)
-			ac++;
-		XtSetArg(
-		    args[ac], XmNfontList,
-		    BX_CONVERT(pulldownMenu_view, (char *)"-*-" SANS "-bold-r-*-*-*-120-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
-		if (argok)
-			ac++;
-		pushButton_showdata = XmCreatePushButton(pulldownMenu_view, (char *)"pushButton_showdata", args, ac);
-		XtManageChild(pushButton_showdata);
-
-		/**
-		 * Free any memory allocated for resources.
-		 */
-		XmStringFree((XmString)tmp0);
-	}
-
-	XtAddCallback(pushButton_showdata, XmNactivateCallback, do_view_showdata, (XtPointer)0);
-
-	ac = 0;
-	{
-		XmString tmp0;
-
-		tmp0 = (XmString)BX_CONVERT(pulldownMenu_view, (char *)"Show Data File Sections", XmRXmString, 0, &argok);
-		XtSetArg(args[ac], XmNlabelString, tmp0);
-		if (argok)
-			ac++;
-		XtSetArg(
-		    args[ac], XmNfontList,
-		    BX_CONVERT(pulldownMenu_view, (char *)"-*-" SANS "-bold-r-*-*-*-120-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
-		if (argok)
-			ac++;
-		pushButton_showsections = XmCreatePushButton(pulldownMenu_view, (char *)"pushButton_showsections", args, ac);
-		XtManageChild(pushButton_showsections);
-
-		/**
-		 * Free any memory allocated for resources.
-		 */
-		XmStringFree((XmString)tmp0);
-	}
-
-	XtAddCallback(pushButton_showsections, XmNactivateCallback, do_view_showsections, (XtPointer)0);
-
-	ac = 0;
-	{
-		XmString tmp0;
-
-		tmp0 = (XmString)BX_CONVERT(pulldownMenu_view, (char *)"Show All Crossings", XmRXmString, 0, &argok);
-		XtSetArg(args[ac], XmNlabelString, tmp0);
-		if (argok)
-			ac++;
-		XtSetArg(
-		    args[ac], XmNfontList,
-		    BX_CONVERT(pulldownMenu_view, (char *)"-*-" SANS "-bold-r-*-*-*-120-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
-		if (argok)
-			ac++;
-		pushButton_showcrossings = XmCreatePushButton(pulldownMenu_view, (char *)"pushButton_showcrossings", args, ac);
-		XtManageChild(pushButton_showcrossings);
-
-		/**
-		 * Free any memory allocated for resources.
-		 */
-		XmStringFree((XmString)tmp0);
-	}
-
-	XtAddCallback(pushButton_showcrossings, XmNactivateCallback, do_view_showcrossings, (XtPointer)0);
-
-	ac = 0;
-	{
-		XmString tmp0;
-
-		tmp0 = (XmString)BX_CONVERT(pulldownMenu_view, (char *)"Show >10% Overlap Crossings", XmRXmString, 0, &argok);
-		XtSetArg(args[ac], XmNlabelString, tmp0);
-		if (argok)
-			ac++;
-		XtSetArg(
-		    args[ac], XmNfontList,
-		    BX_CONVERT(pulldownMenu_view, (char *)"-*-" SANS "-bold-r-*-*-*-120-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
-		if (argok)
-			ac++;
-		pushButton_showmediocrecrossings =
-		    XmCreatePushButton(pulldownMenu_view, (char *)"pushButton_showmediocrecrossings", args, ac);
-		XtManageChild(pushButton_showmediocrecrossings);
-
-		/**
-		 * Free any memory allocated for resources.
-		 */
-		XmStringFree((XmString)tmp0);
-	}
-
-	XtAddCallback(pushButton_showmediocrecrossings, XmNactivateCallback, do_view_showmediocrecrossings, (XtPointer)0);
-
-	ac = 0;
-	{
-		XmString tmp0;
-
-		tmp0 = (XmString)BX_CONVERT(pulldownMenu_view, (char *)"Show >25% Overlap Crossings", XmRXmString, 0, &argok);
-		XtSetArg(args[ac], XmNlabelString, tmp0);
-		if (argok)
-			ac++;
-		XtSetArg(
-		    args[ac], XmNfontList,
-		    BX_CONVERT(pulldownMenu_view, (char *)"-*-" SANS "-bold-r-*-*-*-120-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
-		if (argok)
-			ac++;
-		pushButton_showgoodcrossings = XmCreatePushButton(pulldownMenu_view, (char *)"pushButton_showgoodcrossings", args, ac);
-		XtManageChild(pushButton_showgoodcrossings);
-
-		/**
-		 * Free any memory allocated for resources.
-		 */
-		XmStringFree((XmString)tmp0);
-	}
-
-	XtAddCallback(pushButton_showgoodcrossings, XmNactivateCallback, do_view_showgoodcrossings, (XtPointer)0);
-
-	ac = 0;
-	{
-		XmString tmp0;
-
-		tmp0 = (XmString)BX_CONVERT(pulldownMenu_view, (char *)"Show >50% Overlap Crossings", XmRXmString, 0, &argok);
-		XtSetArg(args[ac], XmNlabelString, tmp0);
-		if (argok)
-			ac++;
-		XtSetArg(
-		    args[ac], XmNfontList,
-		    BX_CONVERT(pulldownMenu_view, (char *)"-*-" SANS "-bold-r-*-*-*-120-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
-		if (argok)
-			ac++;
-		pushButton_showbettercrossings =
-		    XmCreatePushButton(pulldownMenu_view, (char *)"pushButton_showbettercrossings", args, ac);
-		XtManageChild(pushButton_showbettercrossings);
-
-		/**
-		 * Free any memory allocated for resources.
-		 */
-		XmStringFree((XmString)tmp0);
-	}
-
-	XtAddCallback(pushButton_showbettercrossings, XmNactivateCallback, do_view_showbettercrossings, (XtPointer)0);
-
-	ac = 0;
-	{
-		XmString tmp0;
-
-		tmp0 = (XmString)BX_CONVERT(pulldownMenu_view, (char *)"Show True Crossings", XmRXmString, 0, &argok);
-		XtSetArg(args[ac], XmNlabelString, tmp0);
-		if (argok)
-			ac++;
-		XtSetArg(
-		    args[ac], XmNfontList,
-		    BX_CONVERT(pulldownMenu_view, (char *)"-*-" SANS "-bold-r-*-*-*-120-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
-		if (argok)
-			ac++;
-		pushButton_showtruecrossings = XmCreatePushButton(pulldownMenu_view, (char *)"pushButton_showtruecrossings", args, ac);
-		XtManageChild(pushButton_showtruecrossings);
-
-		/**
-		 * Free any memory allocated for resources.
-		 */
-		XmStringFree((XmString)tmp0);
-	}
-
-	XtAddCallback(pushButton_showtruecrossings, XmNactivateCallback, do_view_showtruecrossings, (XtPointer)0);
-
-	ac = 0;
-	{
-		XmString tmp0;
-
-		tmp0 = (XmString)BX_CONVERT(pulldownMenu_view, (char *)"Show Crossing Ties", XmRXmString, 0, &argok);
-		XtSetArg(args[ac], XmNlabelString, tmp0);
-		if (argok)
-			ac++;
-		XtSetArg(
-		    args[ac], XmNfontList,
-		    BX_CONVERT(pulldownMenu_view, (char *)"-*-" SANS "-bold-r-*-*-*-120-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
-		if (argok)
-			ac++;
-		pushButton_showcrossingties = XmCreatePushButton(pulldownMenu_view, (char *)"pushButton_showcrossingties", args, ac);
-		XtManageChild(pushButton_showcrossingties);
-
-		/**
-		 * Free any memory allocated for resources.
-		 */
-		XmStringFree((XmString)tmp0);
-	}
-
-	XtAddCallback(pushButton_showcrossingties, XmNactivateCallback, do_view_showcrossingties, (XtPointer)0);
-
-	ac = 0;
-	{
-		XmString tmp0;
-
-		tmp0 = (XmString)BX_CONVERT(pulldownMenu_view, (char *)"Show Crossing Ties Sorted", XmRXmString, 0, &argok);
-		XtSetArg(args[ac], XmNlabelString, tmp0);
-		if (argok)
-			ac++;
-		XtSetArg(
-		    args[ac], XmNfontList,
-		    BX_CONVERT(pulldownMenu_view, (char *)"-*-" SANS "-bold-r-*-*-*-120-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
-		if (argok)
-			ac++;
-		pushButton_showcrossingtiessorted = XmCreatePushButton(pulldownMenu_view, (char *)"pushButton_showcrossingtiessorted", args, ac);
-		XtManageChild(pushButton_showcrossingtiessorted);
-
-		/**
-		 * Free any memory allocated for resources.
-		 */
-		XmStringFree((XmString)tmp0);
-	}
-
-	XtAddCallback(pushButton_showcrossingtiessorted, XmNactivateCallback, do_view_showcrossingtiessorted, (XtPointer)0);
-
-	ac = 0;
-	{
-		XmString tmp0;
-
-		tmp0 = (XmString)BX_CONVERT(pulldownMenu_view, (char *)"Show Global Ties", XmRXmString, 0, &argok);
-		XtSetArg(args[ac], XmNlabelString, tmp0);
-		if (argok)
-			ac++;
-		XtSetArg(
-		    args[ac], XmNfontList,
-		    BX_CONVERT(pulldownMenu_view, (char *)"-*-" SANS "-bold-r-*-*-*-120-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
-		if (argok)
-			ac++;
-		pushButton_showglobalties = XmCreatePushButton(pulldownMenu_view, (char *)"pushButton_showglobalties", args, ac);
-		XtManageChild(pushButton_showglobalties);
-
-		/**
-		 * Free any memory allocated for resources.
-		 */
-		XmStringFree((XmString)tmp0);
-	}
-
-	XtAddCallback(pushButton_showglobalties, XmNactivateCallback, do_view_showglobalties, (XtPointer)0);
-
-	ac = 0;
-	{
-		XmString tmp0;
-
-		tmp0 = (XmString)BX_CONVERT(pulldownMenu_view, (char *)"Show Global Ties Sorted", XmRXmString, 0, &argok);
-		XtSetArg(args[ac], XmNlabelString, tmp0);
-		if (argok)
-			ac++;
-		XtSetArg(
-		    args[ac], XmNfontList,
-		    BX_CONVERT(pulldownMenu_view, (char *)"-*-" SANS "-bold-r-*-*-*-120-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
-		if (argok)
-			ac++;
-		pushButton_showglobaltiessorted = XmCreatePushButton(pulldownMenu_view, (char *)"pushButton_showglobaltiessorted", args, ac);
-		XtManageChild(pushButton_showglobaltiessorted);
-
-		/**
-		 * Free any memory allocated for resources.
-		 */
-		XmStringFree((XmString)tmp0);
-	}
-
-	XtAddCallback(pushButton_showglobaltiessorted, XmNactivateCallback, do_view_showglobaltiessorted, (XtPointer)0);
-
-	ac = 0;
-	separator13 = XmCreateSeparator(pulldownMenu_view, (char *)"separator13", args, ac);
-	XtManageChild(separator13);
 
 	ac = 0;
 	{
@@ -1022,7 +1092,7 @@ Widget CreatemainWindow(Widget parent) {
 		XmStringFree((XmString)tmp0);
 	}
 
-	XtAddCallback(toggleButton_showselectedsurvey, XmNvalueChangedCallback, do_view_showselectedsurveys, (XtPointer)0);
+	XtAddCallback(toggleButton_showselectedsurvey, XmNvalueChangedCallback, do_view_showselectedsurvey, (XtPointer)0);
 
 	ac = 0;
 	{
@@ -1098,7 +1168,7 @@ Widget CreatemainWindow(Widget parent) {
 		XmStringFree((XmString)tmp0);
 	}
 
-	XtAddCallback(toggleButton_showwithselectedsurvey, XmNvalueChangedCallback, do_view_showwithselectedsurveys, (XtPointer)0);
+	XtAddCallback(toggleButton_showwithselectedsurvey, XmNvalueChangedCallback, do_view_showwithselectedsurvey, (XtPointer)0);
 
 	ac = 0;
 	{
@@ -1415,7 +1485,7 @@ Widget CreatemainWindow(Widget parent) {
 		XmStringFree((XmString)tmp0);
 	}
 
-	XtAddCallback(pushButton_tie_z, XmNactivateCallback, do_action_z, (XtPointer)0);
+	XtAddCallback(pushButton_tie_z, XmNactivateCallback, do_action_tie_z, (XtPointer)0);
 
 	ac = 0;
 	{
@@ -1440,6 +1510,54 @@ Widget CreatemainWindow(Widget parent) {
 	}
 
 	XtAddCallback(pushButton_tie_xyz, XmNactivateCallback, do_action_tie_xyz, (XtPointer)0);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(pulldownMenu_action, (char *)"Set tie unfixed", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(
+		    args[ac], XmNfontList,
+		    BX_CONVERT(pulldownMenu_action, (char *)"-*-" SANS "-bold-r-*-*-*-120-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		pushButton_tie_unfixed = XmCreatePushButton(pulldownMenu_action, (char *)"pushButton_tie_unfixed", args, ac);
+		XtManageChild(pushButton_tie_unfixed);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(pushButton_tie_unfixed, XmNactivateCallback, do_action_tie_unfixed, (XtPointer)0);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(pulldownMenu_action, (char *)"Set tie fixed", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(
+		    args[ac], XmNfontList,
+		    BX_CONVERT(pulldownMenu_action, (char *)"-*-" SANS "-bold-r-*-*-*-120-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		pushButton_tie_fixed = XmCreatePushButton(pulldownMenu_action, (char *)"pushButton_tie_fixed", args, ac);
+		XtManageChild(pushButton_tie_fixed);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(pushButton_tie_fixed, XmNactivateCallback, do_action_tie_fixed, (XtPointer)0);
 
 	ac = 0;
 	separator7 = XmCreateSeparator(pulldownMenu_action, (char *)"separator7", args, ac);

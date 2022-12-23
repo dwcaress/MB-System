@@ -206,3 +206,6 @@ src/mbtrn/mb1r_test
 build/README.md
 src/mbtrn/mb1-cli
 src/mbtrnutils/mbgrdtilemaker
+src/mbio/mb_config.h
+src/mbtrnav/otree
+src/utilities/mbtransmitpattern

@@ -432,7 +432,7 @@ int mbprocess_save_edit(int verbose, FILE *esffp, double time_d, int beam, int a
   return (status);
 }
 /*--------------------------------------------------------------------*/
-void process_file(int verbose, struct mb_process_struct *process,
+void process_file(int verbose, int thread_id, struct mb_process_struct *process,
                   struct mbprocess_grid_struct *grid, int *status, int *error)
 {
 
@@ -2751,6 +2751,10 @@ void process_file(int verbose, struct mb_process_struct *process,
         exit(MB_ERROR_OPEN_FAIL);
     }
     make_fnv = true;
+    fprintf(nfp,  "## <yyyy mm dd hh mm ss.ssssss> <epoch seconds> "
+                  "<longitude (deg)> <latitude (deg)> <heading (deg)> <speed (km/hr)> "
+                  "<draft (m)> <roll (deg)> <pitch (deg)> <heave (m)> <portlon (deg)> "
+                  "<portlat (deg)> <stbdlon (deg)> <stbdlat (deg)>\n");
   }
 
   /* initialize bounds that will be used in call to mbinfo to generate the *.inf file */
@@ -2872,48 +2876,35 @@ void process_file(int verbose, struct mb_process_struct *process,
 
     /* reallocate memory for data arrays */
     if (*error == MB_ERROR_NO_ERROR)
-      /* status = */
-          mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(char), (void **)&beamflag, error);
+      /* status = */ mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(char), (void **)&beamflag, error);
     if (*error == MB_ERROR_NO_ERROR)
-      /* status = */
-          mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(char), (void **)&beamflagorg, error);
+      /* status = */ mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(char), (void **)&beamflagorg, error);
     if (*error == MB_ERROR_NO_ERROR)
-      /* status = */
-          mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double), (void **)&bath, error);
+      /* status = */ mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double), (void **)&bath, error);
     if (*error == MB_ERROR_NO_ERROR)
       /* status = */ mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_AMPLITUDE, sizeof(double), (void **)&amp, error);
     if (*error == MB_ERROR_NO_ERROR)
-      /* status = */ mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double),
-                                 (void **)&bathacrosstrack, error);
+      /* status = */ mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double), (void **)&bathacrosstrack, error);
     if (*error == MB_ERROR_NO_ERROR)
-      /* status = */ mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double),
-                                 (void **)&bathalongtrack, error);
+      /* status = */ mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double), (void **)&bathalongtrack, error);
     if (*error == MB_ERROR_NO_ERROR)
       /* status = */ mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double), (void **)&ss, error);
     if (*error == MB_ERROR_NO_ERROR)
-      /* status = */ mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double), (void **)&ssacrosstrack,
-                                 error);
+      /* status = */ mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double), (void **)&ssacrosstrack, error);
     if (*error == MB_ERROR_NO_ERROR)
-      /* status = */ mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double), (void **)&ssalongtrack,
-                                 error);
+      /* status = */ mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double), (void **)&ssalongtrack, error);
     if (*error == MB_ERROR_NO_ERROR)
-      /* status = */
-          mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double), (void **)&ttimes, error);
+      /* status = */ mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double), (void **)&ttimes, error);
     if (*error == MB_ERROR_NO_ERROR)
-      /* status = */
-          mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double), (void **)&angles, error);
+      /* status = */ mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double), (void **)&angles, error);
     if (*error == MB_ERROR_NO_ERROR)
-      /* status = */ mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double),
-                                 (void **)&angles_forward, error);
+      /* status = */ mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double), (void **)&angles_forward, error);
     if (*error == MB_ERROR_NO_ERROR)
-      /* status = */ mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double), (void **)&angles_null,
-                                 error);
+      /* status = */ mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double), (void **)&angles_null, error);
     if (*error == MB_ERROR_NO_ERROR)
-      /* status = */
-          mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double), (void **)&bheave, error);
+      /* status = */ mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double), (void **)&bheave, error);
     if (*error == MB_ERROR_NO_ERROR)
-      /* status = */ mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double),
-                                 (void **)&alongtrack_offset, error);
+      /* status = */ mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double), (void **)&alongtrack_offset, error);
 
     /* if error initializing memory then quit */
     if (*error != MB_ERROR_NO_ERROR) {
@@ -6215,7 +6206,7 @@ int main(int argc, char **argv) {
       thread_status[n_thread_set] = MB_SUCCESS;
       thread_error[n_thread_set] = MB_ERROR_NO_ERROR;
       mbprocessThreads[n_thread_set]
-          = std::thread(process_file, verbose, &processPars[n_thread_set], grid_use,
+          = std::thread(process_file, verbose, n_thread_set, &processPars[n_thread_set], grid_use,
                         &thread_status[n_thread_set], &thread_error[n_thread_set]);
       n_thread_set++;
 

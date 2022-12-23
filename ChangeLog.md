@@ -23,6 +23,13 @@ Distributions that do not include "beta" in the tag name correspond to the major
 announced releases. The source distributions associated with all releases, major
 or beta, are equally accessible as tarballs through the Github interface.
 
+- Version 5.7.9beta49    December 16, 2022
+- Version 5.7.9beta48    November 22, 2022
+- Version 5.7.9beta47    November 15, 2022
+- Version 5.7.9beta46    November 11, 2022
+- Version 5.7.9beta45    November 6, 2022
+- Version 5.7.9beta44    August 9, 2022
+- Version 5.7.9beta43    July 29, 2022
 - Version 5.7.9beta42    June 26, 2022
 - Version 5.7.9beta41    June 22, 2022
 - Version 5.7.9beta40    June 18, 2022
@@ -418,6 +425,115 @@ or beta, are equally accessible as tarballs through the Github interface.
 --
 ### MB-System Version 5.7 Release Notes:
 --
+
+#### 5.7.9beta48 (December 11, 2022)
+
+Mbmosaic: Fixed parsing of the -Ypriority_source option when priority_source is
+a filename.
+
+Mbm_grdplot: Fixed handling of image file min max when color_mode == 6.
+
+Mbnavadjust: Added controls allowing the mode of global ties to be changed
+interactively.
+
+Mbnavadjust: Changed project file format, adding the the id of the source
+reference grid used for each global tie.
+
+Mbview library: Fixed problem where mbview did not render the last row and
+column of a grid (the easternmost and northernmost data). Also attempted to
+make picking more robust.
+
+Mbnavadjust: Fixed interpolation of global ties to create the starting navigation
+model during inversions. Fixed several actions in section and reference grid mode.
+
+#### 5.7.9beta47 (November 15, 2022)
+
+Mbnavadjust: Individual survey grids are now sized to the region of those
+surveys rather than the entire project. When the individual surveys are
+visualized, only the navigation for that survey are loaded into the mbview
+2D/3D map instance. Also fixed picking of section navigation in both crossing
+and section (vs reference grid) modes.
+
+Mbnavadjustmerge: Added options set the mode (XYZ vs XY vs Z) of all global ties.
+
+#### 5.7.9beta46 (November 11, 2022)
+
+Mbnavadjust: Added ability to import and use multiple reference grids for picking
+global ties of individual swath data sections.
+
+#### 5.7.9beta45 (November 6, 2022)
+
+FNV files: The fast navigation or *.fnv files are created as ancillary files
+allowing navigation to be read without reading the full swath files. The *.fnv
+files are in the MBF_MBPRONAV (166) format. Format 166 has always supported
+comment records as lines beginning with the '#' character, but fnv files have
+always been created without any comment records. Many MB-System programs read
+fnv files directly without using the MBF_MBPRONAV i/o module. Now all format
+166 files will be written with a first record documenting the contents of the
+file:
+    fprintf(mb_io_ptr->mbfp,  "## <yyyy mm dd hh mm ss.ssssss> <epoch seconds> "
+                  "<longitude (deg)> <latitude (deg)> <heading (deg)> <speed (km/hr)> "
+                  "<draft (m)> <roll (deg)> <pitch (deg)> <heave (m)> <portlon (deg)> "
+                  "<portlat (deg)> <stbdlon (deg)> <stbdlat (deg)>\n");
+whether they are written by the MBF_MBPRONAV i/o module or by functions in
+applications like mbprocess or mbpreprocess. All instances reading these files
+will ignore these file header records.
+
+Mbgrdviz: augmented and corrected the headers of route and site files output by
+mbgrdviz, better self documenting the formats of these files.
+
+Mbnavadjust: Added ability to import a reference bathymetry grid that can be
+used to define global ties. Also modified so that when the main display list mode
+limits what is shown to "with selected survey" or other modifiers, these constraints
+also limit what navigation is shown in the project visualization. So, if one selects
+a survey and then sets the list mode to show only the selected survey, then the
+visualization will also only display the navigation from that survey, the crossing
+ties or global ties from that survey, and only allow picking on that survey's
+navigation.
+
+Mbareaclean: Fixed issue in which mbareaclean does not apply filters for files
+without pre-existing *.esf files.
+
+Mbbackangle: Plots of the backscatter vs grazing angle distribution are no longer
+histogram equalized.
+
+Mbprocess: Modified the threaded processing function process_file() so that each
+instance carries a thread id that can be checked during debugging.
+
+#### 5.7.9beta44 (August 9, 2022)
+
+Mbphotomosaic: Fixed problem in which an image correction model from mbgetphotocorrection
+was read but not applied.
+
+Mbeditviz: Fixed display of beam info when picking in info mode in the 3D
+soundings display.
+
+#### 5.7.9beta43 (July 29, 2022)
+
+Mblist and mbnavlist: Fixed failure to deallocate proj object.
+
+Mbtrnpp: Added UTM projection to top level using Proj, but this is not used yet.
+The UTM projection used within the TRN codebase remains defined in the very old
+GCTP package, which is embedded with TRN.
+
+TRN execution and plotting scripts (e.g. src/mbtrn/tools/mbtrnpp-plot/trnucli-plot.sh):
+Changed the shebang call from #!/usr/local/bin/bash to #!/usr/bin/env bash for
+portability.
+
+Mbnavadjust: Recast global ties to utilize a full 3D covariance model just like
+the crossing ties, in preparation for allowing graphical picking of global ties
+relative to a reference bathymetry model.
+
+Mbnavadjustmerge: Added ability to remove disconitinuities in mbnavadjust projects.
+Recast global ties to utilize a full 3D covariance model just like
+the crossing ties, in preparation for allowing graphical picking of global ties
+relative to a reference bathymetry model.
+
+Mbm_trnplot: Added mission names to mbtrnpp result plots.
+
+Cmake Build System: Incorporates an initial attempt at a cmake based build system
+that will provide an alternative to the existing AutoTools based build system.
+Updated documentation for both build systems is not included yet.
 
 #### 5.7.9beta42 (June 26, 2022)
 

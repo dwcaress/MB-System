@@ -2204,6 +2204,17 @@ int do_mbgrdviz_savesite(size_t instance, char *output_file_ptr) {
         status = mb_user_host_date(verbose, user, host, date, &error);
         fprintf(sfp, "## Run by user <%s> on cpu <%s> at <%s>\n", user, host, date);
         fprintf(sfp, "## Number of sites: %d\n", nsite);
+        fprintf(sfp, "## Site colors:\n");
+        fprintf(sfp, "##   COLOR_BLACK     0\n");
+        fprintf(sfp, "##   COLOR_WHITE     1\n");
+        fprintf(sfp, "##   COLOR_RED       2\n");
+        fprintf(sfp, "##   COLOR_YELLOW    3\n");
+        fprintf(sfp, "##   COLOR_GREEN     4\n");
+        fprintf(sfp, "##   COLOR_BLUEGREEN 5\n");
+        fprintf(sfp, "##   COLOR_BLUE      6\n");
+        fprintf(sfp, "##   COLOR_PURPLE    7\n");
+        fprintf(sfp, "## Site point format:\n");
+        fprintf(sfp, "##   <longitude (deg)> <latitude (deg)> <topography (m)> <color> <size> <name>\n");
 
         /* loop over the sites */
         for (i = 0; i < nsite; i++) {
@@ -2506,7 +2517,6 @@ int do_mbgrdviz_saveroute(size_t instance, char *output_file_ptr) {
 
   /* time, user, host variables */
   time_t right_now;
-  char date[32], *user_ptr, host[MB_PATH_MAXLINE];
   char *unknown = "Unknown";
 
   if (verbose >= 2) {
@@ -2544,10 +2554,24 @@ int do_mbgrdviz_saveroute(size_t instance, char *output_file_ptr) {
         fprintf(sfp, "## MB-System Version %s\n", MB_VERSION);
         char user[256], host[256], date[32];
         status = mb_user_host_date(verbose, user, host, date, &error);
-        fprintf(sfp, "## Run by user <%s> on cpu <%s> at <%s>\n", user_ptr, host, date);
+        fprintf(sfp, "## Run by user <%s> on cpu <%s> at <%s>\n", user, host, date);
         fprintf(sfp, "## Number of routes: %d\n", nroutewrite);
+        fprintf(sfp, "## Route waypoint type definitions:\n");
+        fprintf(sfp, "##   WAYPOINT_NONE         0  Defines topography between waypoints\n");
+        fprintf(sfp, "##   WAYPOINT_SIMPLE       1  Waypoint along survey line\n");
+        fprintf(sfp, "##   WAYPOINT_TRANSIT      2  Waypoint along survey line\n");
+        fprintf(sfp, "##   WAYPOINT_STARTLINE    3  Start survey line type 1\n");
+        fprintf(sfp, "##   WAYPOINT_ENDLINE      4  End survey line type 1\n");
+        fprintf(sfp, "##   WAYPOINT_STARTLINE2   5  Start survey line type 2\n");
+        fprintf(sfp, "##   WAYPOINT_ENDLINE2     6  End survey line type 2\n");
+        fprintf(sfp, "##   WAYPOINT_STARTLINE3   7  Start survey line type 3\n");
+        fprintf(sfp, "##   WAYPOINT_ENDLINE3     8  End survey line type 3\n");
+        fprintf(sfp, "##   WAYPOINT_STARTLINE4   9  Start survey line type 4\n");
+        fprintf(sfp, "##   WAYPOINT_ENDLINE4    10  End survey line type 4\n");
+        fprintf(sfp, "##   WAYPOINT_STARTLINE5  11  Start survey line type 5\n");
+        fprintf(sfp, "##   WAYPOINT_ENDLINE5    12  End survey line type 5\n");
         fprintf(sfp, "## Route point format:\n");
-        fprintf(sfp, "##   <longitude (deg)> <latitude (deg)> <topography (m)> <waypoint (boolean)> <bearing (deg)> "
+        fprintf(sfp, "##   <longitude (deg)> <latitude (deg)> <topography (m)> <waypoint type> <bearing (deg)> "
                      "<lateral distance (m)> <distance along topography (m)> <slope (m/m)>\n");
       }
 
@@ -2685,8 +2709,6 @@ int do_mbgrdviz_saveroutereversed(size_t instance, char *output_file_ptr) {
 
   /* time, user, host variables */
   time_t right_now;
-  char date[32], *user_ptr, host[MB_PATH_MAXLINE];
-  char *unknown = "Unknown";
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -2723,10 +2745,24 @@ int do_mbgrdviz_saveroutereversed(size_t instance, char *output_file_ptr) {
         fprintf(sfp, "## MB-System Version %s\n", MB_VERSION);
         char user[256], host[256], date[32];
         status = mb_user_host_date(verbose, user, host, date, &error);
-        fprintf(sfp, "## Run by user <%s> on cpu <%s> at <%s>\n", user_ptr, host, date);
+        fprintf(sfp, "## Run by user <%s> on cpu <%s> at <%s>\n", user, host, date);
         fprintf(sfp, "## Number of routes: %d\n", nroutewrite);
+        fprintf(sfp, "## Route waypoint type definitions:\n");
+        fprintf(sfp, "##   WAYPOINT_NONE         0  Defines topography between waypoints\n");
+        fprintf(sfp, "##   WAYPOINT_SIMPLE       1  Waypoint along survey line\n");
+        fprintf(sfp, "##   WAYPOINT_TRANSIT      2  Waypoint along survey line\n");
+        fprintf(sfp, "##   WAYPOINT_STARTLINE    3  Start survey line type 1\n");
+        fprintf(sfp, "##   WAYPOINT_ENDLINE      4  End survey line type 1\n");
+        fprintf(sfp, "##   WAYPOINT_STARTLINE2   5  Start survey line type 2\n");
+        fprintf(sfp, "##   WAYPOINT_ENDLINE2     6  End survey line type 2\n");
+        fprintf(sfp, "##   WAYPOINT_STARTLINE3   7  Start survey line type 3\n");
+        fprintf(sfp, "##   WAYPOINT_ENDLINE3     8  End survey line type 3\n");
+        fprintf(sfp, "##   WAYPOINT_STARTLINE4   9  Start survey line type 4\n");
+        fprintf(sfp, "##   WAYPOINT_ENDLINE4    10  End survey line type 4\n");
+        fprintf(sfp, "##   WAYPOINT_STARTLINE5  11  Start survey line type 5\n");
+        fprintf(sfp, "##   WAYPOINT_ENDLINE5    12  End survey line type 5\n");
         fprintf(sfp, "## Route point format:\n");
-        fprintf(sfp, "##   <longitude (deg)> <latitude (deg)> <topography (m)> <waypoint (boolean)> <bearing (deg)> "
+        fprintf(sfp, "##   <longitude (deg)> <latitude (deg)> <topography (m)> <waypoint type> <bearing (deg)> "
                      "<lateral distance (m)> <distance along topography (m)> <slope (m/m)>\n");
       }
 

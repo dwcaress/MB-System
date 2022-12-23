@@ -847,10 +847,13 @@ int mb3dsoundings_open(int verbose, struct mb3dsoundings_struct *soundingdata, i
     fprintf(stdout, "  Interpolated Flagged Soundings:   %d\n", num_soundings_flagged_interpolated);
   //}
 
-
   /* set the data pointer */
   mb3dsoundings.soundingdata = (struct mb3dsoundings_struct *)soundingdata;
   mb3dsoundings_scale(verbose, error);
+
+  /* reset info flag */
+  mb3dsoundings.last_sounding_defined = false;
+  mb3dsoundings.last_sounding_edited = 0;
 
   /* if not yet created then create the MB3DView class in
       a topLevelShell as a child of Widget parent */

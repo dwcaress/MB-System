@@ -32,10 +32,15 @@
 #include "mb_status.h"
 #endif
 
+/* Current MBnavadjust project file verion is 3.13 */
+#define MBNA_FILE_VERSION_MAJOR 3
+#define MBNA_FILE_VERSION_MINOR 14
+
 /* mbnavadjust global defines */
-#define STRING_MAX MB_PATH_MAXLINE
-#define BUFFER_MAX 1024
+#define STRING_MAX 10 * MB_PATH_MAXLINE
+#define BUFFER_MAX STRING_MAX
 #define ALLOC_NUM 10
+#define MBNA_REFGRID_NUM_MAX  25
 #define MBNA_SNAV_NUM 11
 #define MBNA_STATUS_GUI 0
 #define MBNA_STATUS_AUTOPICK 1
@@ -44,14 +49,12 @@
 #define MBNA_INVERSION_NONE 0
 #define MBNA_INVERSION_OLD 1
 #define MBNA_INVERSION_CURRENT 2
-#define MBNA_GRID_RAW 0
-#define MBNA_GRID_ADJUSTED 1
+#define MBNA_GRID_PROJECT -1
 #define MBNA_GRID_NONE 0
 #define MBNA_GRID_OLD 1
 #define MBNA_GRID_CURRENT 2
-#define MBNA_REFGRID_NONE 0
-#define MBNA_REFGRID_IMPORTED 1
-#define MBNA_REFGRID_LOADED 2
+#define MBNA_REFGRID_UNLOADED 0
+#define MBNA_REFGRID_LOADED 1
 #define MBNA_INVERT_ZFULL 0
 #define MBNA_INVERT_ZISOLATED 1
 #define MBNA_FILE_POORNAV 1
@@ -59,28 +62,33 @@
 #define MBNA_FILE_FIXEDNAV 3
 #define MBNA_FILE_FIXEDXYNAV 4
 #define MBNA_FILE_FIXEDZNAV 5
-#define MBNA_TIE_NONE 0
-#define MBNA_TIE_XYZ 1
-#define MBNA_TIE_XY 2
-#define MBNA_TIE_Z 3
+#define MBNA_TIE_NONE       0
+#define MBNA_TIE_XYZ        1
+#define MBNA_TIE_XY         2
+#define MBNA_TIE_Z          3
+#define MBNA_TIE_XYZ_FIXED  5
+#define MBNA_TIE_XY_FIXED   6
+#define MBNA_TIE_Z_FIXED    7
+
 #define MBNA_CROSSING_STATUS_NONE 0
 #define MBNA_CROSSING_STATUS_SET 1
 #define MBNA_CROSSING_STATUS_SKIP 2
 #define MBNA_TIME_GAP_MAX 120.0
 #define MBNA_TIME_DIFF_THRESHOLD 2.0
-#define MBNA_VIEW_LIST_SURVEYS 0
-#define MBNA_VIEW_LIST_BLOCKS 1
-#define MBNA_VIEW_LIST_FILES 2
-#define MBNA_VIEW_LIST_FILESECTIONS 3
-#define MBNA_VIEW_LIST_CROSSINGS 4
-#define MBNA_VIEW_LIST_MEDIOCRECROSSINGS 5
-#define MBNA_VIEW_LIST_GOODCROSSINGS 6
-#define MBNA_VIEW_LIST_BETTERCROSSINGS 7
-#define MBNA_VIEW_LIST_TRUECROSSINGS 8
-#define MBNA_VIEW_LIST_TIES 9
-#define MBNA_VIEW_LIST_TIESSORTED 10
-#define MBNA_VIEW_LIST_GLOBALTIES 11
-#define MBNA_VIEW_LIST_GLOBALTIESSORTED 12
+#define MBNA_VIEW_LIST_REFERENCEGRIDS 0
+#define MBNA_VIEW_LIST_SURVEYS 1
+#define MBNA_VIEW_LIST_BLOCKS 2
+#define MBNA_VIEW_LIST_FILES 3
+#define MBNA_VIEW_LIST_FILESECTIONS 4
+#define MBNA_VIEW_LIST_CROSSINGS 5
+#define MBNA_VIEW_LIST_MEDIOCRECROSSINGS 6
+#define MBNA_VIEW_LIST_GOODCROSSINGS 7
+#define MBNA_VIEW_LIST_BETTERCROSSINGS 8
+#define MBNA_VIEW_LIST_TRUECROSSINGS 9
+#define MBNA_VIEW_LIST_TIES 10
+#define MBNA_VIEW_LIST_TIESSORTED 11
+#define MBNA_VIEW_LIST_GLOBALTIES 12
+#define MBNA_VIEW_LIST_GLOBALTIESSORTED 13
 #define MBNA_VIEW_MODE_ALL 0
 #define MBNA_VIEW_MODE_SURVEY 1
 #define MBNA_VIEW_MODE_WITHSURVEY 2
@@ -168,6 +176,38 @@ struct mbna_block {
   double global_tie_offset_y_m;
   double global_tie_offset_z_m;
 };
+struct mbna_globaltie {
+  int status;
+  int snav;
+  int refgrid_id;
+  double snav_time_d;
+  double offset_x;
+  double offset_y;
+  double offset_x_m;
+  double offset_y_m;
+  double offset_z_m;
+  double sigmar1;
+  double sigmax1[3];
+  double sigmar2;
+  double sigmax2[3];
+  double sigmar3;
+  double sigmax3[3];
+  int inversion_status;
+  double inversion_offset_x;
+  double inversion_offset_y;
+  double inversion_offset_x_m;
+  double inversion_offset_y_m;
+  double inversion_offset_z_m;
+  double dx_m;
+  double dy_m;
+  double dz_m;
+  double sigma_m;
+  double dr1_m;
+  double dr2_m;
+  double dr3_m;
+  double rsigma_m;
+  int isurveyplotindex;
+};
 struct mbna_section {
   int file_id;
   int section_id;
@@ -202,30 +242,8 @@ struct mbna_section {
   int show_in_modelplot;
   int modelplot_start_count;
   int contoursuptodate;
-  int global_tie_status;
-  int global_tie_inversion_status;
-  int global_tie_snav;
-  double offset_x;
-  double offset_y;
-  double offset_x_m;
-  double offset_y_m;
-  double offset_z_m;
-  double xsigma;
-  double ysigma;
-  double zsigma;
-  double inversion_offset_x;
-  double inversion_offset_y;
-  double inversion_offset_x_m;
-  double inversion_offset_y_m;
-  double inversion_offset_z_m;
-  double dx_m;
-  double dy_m;
-  double dz_m;
-  double sigma_m;
-  double dr1_m;
-  double dr2_m;
-  double dr3_m;
-  double rsigma_m;
+  int status;
+  struct mbna_globaltie globaltie;
 };
 struct mbna_file {
   int status;
@@ -324,7 +342,6 @@ struct mbna_project {
   char path[STRING_MAX];
   char home[STRING_MAX];
   char datadir[STRING_MAX];
-  char refgrid_name[STRING_MAX];
   char logfile[STRING_MAX];
   FILE *logfp;
 
@@ -344,6 +361,10 @@ struct mbna_project {
   struct mbna_crossing *crossings;
   int num_ties;
   int num_globalties;
+  int num_globalties_analyzed;
+  int num_refgrids;
+  mb_path refgrid_names[MBNA_REFGRID_NUM_MAX];
+
   double section_length;
   int section_soundings;
   int bin_beams_bath;
@@ -370,7 +391,9 @@ struct mbna_project {
   int inversion_status;
 
   int refgrid_status;
+  int refgrid_select;
   struct mbna_grid refgrid;
+  struct mbna_section reference_section;
 
   int grid_status;
   struct mbna_grid grid;
@@ -433,10 +456,15 @@ int mbnavadjust_new_project(int verbose, char *projectpath, double section_lengt
                             double col_int, double tick_int, double label_int, int decimation, double smoothing,
                             double zoffsetwidth, struct mbna_project *project, int *error);
 int mbnavadjust_read_project(int verbose, char *projectpath, struct mbna_project *project, int *error);
-int mbnavadjust_write_project(int verbose, struct mbna_project *project, int *error);
+int mbnavadjust_write_project(int verbose, struct mbna_project *project,
+                              const char *calling_file, int calling_line, const char *calling_function,
+                              int *error);
 int mbnavadjust_close_project(int verbose, struct mbna_project *project, int *error);
 int mbnavadjust_crossing_overlap(int verbose, struct mbna_project *project, int crossing_id, int *error);
 int mbnavadjust_crossing_overlapbounds(int verbose, struct mbna_project *project, int crossing_id, double offset_x,
+                                       double offset_y, double *lonmin, double *lonmax, double *latmin, double *latmax,
+                                       int *error);
+int mbnavadjust_section_overlapbounds(int verbose, struct mbna_project *project, int file_id, int section_id, double offset_x,
                                        double offset_y, double *lonmin, double *lonmax, double *latmin, double *latmax,
                                        int *error);
 int mbnavadjust_crossing_focuspoint(int verbose, struct mbna_project *project, int crossing_id,
@@ -447,7 +475,7 @@ int mbnavadjust_set_plot_functions(int verbose, struct mbna_project *project,
                              void *justify_string, void *plot_string, int *error);
 int mbnavadjust_section_load(int verbose, struct mbna_project *project,
                              int file_id, int section_id,
-                             void **swathraw_ptr, void **swath_ptr, int num_pings, int *error);
+                             void **swathraw_ptr, void **swath_ptr, int *error);
 int mbnavadjust_section_unload(int verbose, void **swathraw_ptr, void **swath_ptr, int *error);
 int mbnavadjust_fix_section_sensordepth(int verbose, struct mbna_project *project, int *error);
 int mbnavadjust_section_translate(int verbose, struct mbna_project *project,
@@ -456,8 +484,10 @@ int mbnavadjust_section_translate(int verbose, struct mbna_project *project,
 int mbnavadjust_section_contour(int verbose, struct mbna_project *project,
                                 int fileid, int sectionid, struct swath *swath,
                                 struct mbna_contour_vector *contour, int *error);
-int mbnavadjust_referencesection_load();
-int mbnavadjust_referencesection_unload();
+int mbnavadjust_reference_load(int verbose, struct mbna_project *project, int refgrid_select,
+                                struct mbna_section *section, void **swath, int *error);
+int mbnavadjust_reference_unload(int verbose, void **swath, int *error);
+int mbnavadjust_refgrid_unload(int verbose, struct mbna_project *project, int *error);
 int mbnavadjust_import_data(int verbose, struct mbna_project *project, char *path, int format, int *error);
 int mbnavadjust_import_file(int verbose, struct mbna_project *project, char *path, int format, bool firstfile, int *error);
 int mbnavadjust_import_reference(int verbose, struct mbna_project *project, char *path, int *error);

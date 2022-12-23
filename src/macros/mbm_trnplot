@@ -10,7 +10,7 @@ import sys, getopt, os
 import glob, subprocess
 
 shortOpts = "hbi:dg:"
-longOpts = ["help", "display", "input=", "grid="]
+longOpts = ["help", "display", "input=", "grid=", "mission="]
 
 def usage():
   pname, sname = os.path.split(sys.argv[0])
@@ -20,6 +20,7 @@ def usage():
   -d --display                 Enable immediate display of the plots
   -g --grid=filepath           Path to background topography grid
   -i --input=directory         Path to mbtrnpp session logs and results
+  -m --mission                 Mission name for plot title
   """ )
   sys.exit()
 
@@ -31,6 +32,8 @@ def main (args, opts={}):
   inputset = False
   gridfile = ""
   gridset = False
+  mission = ""
+  missionset = False
   for o, a in opts:
     if o in ("-h", "--help"):
       usage()
@@ -42,6 +45,9 @@ def main (args, opts={}):
     elif o in ("-i", "--input"):
       inputdir = a
       inputset = True
+    elif o in ("-m", "--mission"):
+      mission = a
+      missionset = True
     else:
       assert False, "unhandled option: "+o+" "+a
 
@@ -153,9 +159,13 @@ def main (args, opts={}):
 
     # Create and execute an mbm_grdplot command to generate a map of the
     # TRN performance over the reference bathymetry
+    if missionset :
+        title = "\""+mission+" - Terrain Relative Navigation over Reference Bathymetry\":\"Topography (meters)\""
+    else :
+        title = "\""+sessionname+" - Terrain Relative Navigation over Reference Bathymetry\":\"Topography (meters)\""
     command = "cd "+inputdir+" ; mbm_grdplot -I "+gridfile+" -O "+sessionname+"-trn-plot"
     command = command+" -R"+str(xmin)+"/"+str(xmax)+"/"+str(ymin)+"/"+str(ymax)
-    command = command+" -G5 -D0/1 -A1.0 -L\"Terrain Relative Navigation over Reference Bathymetry\":\"Topography (meters)\""
+    command = command+" -G5 -D0/1 -A1.0 -L"+title
     command = command+" -MXW1p -MXI"+sessionname+"_trn_Nxy.txt"
     command = command+" -MXW1p,purple -MXI"+sessionname+"_trn_Txy.txt"
     command = command+" -MXW2p,purple -MXSc2p -MXI"+sessionname+"_trn_TxyC.txt"
@@ -180,9 +190,13 @@ def main (args, opts={}):
     command = "cd "+inputdir+" ; mbgrid -Idatalist_mb1.mb-1 -A2 -N -F5 -JU -C5 -V -O TopoMB1 ; cd .."
     print("Command: "+command+"\n")
     subprocess.run(command, shell=True)
+    if missionset :
+        title = "\""+mission+" - Terrain Relative Navigation over MB1 Bathymetry\":\"Topography (meters)\""
+    else :
+        title = "\""+sessionname+" - Terrain Relative Navigation over MB1 Bathymetry\":\"Topography (meters)\""
     command = "cd "+inputdir+" ; mbm_grdplot -I TopoMB1.grd -O "+sessionname+"-mb1-plot"
     command = command+" -R"+str(xmin)+"/"+str(xmax)+"/"+str(ymin)+"/"+str(ymax)
-    command = command+" -G5 -D0/1 -A1.0 -L\"Terrain Relative Navigation over MB1 Bathymetry\":\"Topography (meters)\""
+    command = command+" -G5 -D0/1 -A1.0 -L"+title
     command = command+" -MXW1p -MXI"+sessionname+"_trn_Nxy.txt"
     command = command+" -MXW1p,purple -MXI"+sessionname+"_trn_Txy.txt"
     command = command+" -MXW2p,purple -MXSc2p -MXI"+sessionname+"_trn_TxyC.txt"

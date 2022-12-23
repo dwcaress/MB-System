@@ -1,4 +1,4 @@
-#!/usr/local/bin/bash
+#!/usr/bin/env bash
 ##/bin/bash
 
 # Combine multiple plot images into PDF

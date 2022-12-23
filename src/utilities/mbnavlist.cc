@@ -932,6 +932,11 @@ int main(int argc, char **argv) {
 	if (read_datalist)
 		mb_datalist_close(verbose, &datalist, &error);
 
+  /* free projection */
+  if (use_projection && pjptr != NULL) {
+    mb_proj_free(verbose, &(pjptr), &error);
+  }
+
 	/* check memory */
 	if (verbose >= 4)
 		status = mb_memory_list(verbose, &error);

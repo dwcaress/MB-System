@@ -239,9 +239,14 @@ int mbr_mbpronav_rd_data(int verbose, void *mbio_ptr, int *error) {
 
 	int status = MB_SUCCESS;
 
-	/* read next record */
+	/* read next record - if fileheader encountered ignore it and read the next line */
 	char line[MBF_MBPRONAV_MAXLINE + 1] = "";
 	char *line_ptr = fgets(line, MBF_MBPRONAV_MAXLINE, mb_io_ptr->mbfp);
+  if (!mb_io_ptr->fileheader && line_ptr != NULL && strncmp(line_ptr, "## <yyyy mm dd hh mm ss.ssssss>", 31) == 0) {
+    mb_io_ptr->fileheader = true;
+		mb_io_ptr->file_bytes += strlen(line);
+    char *line_ptr = fgets(line, MBF_MBPRONAV_MAXLINE, mb_io_ptr->mbfp);
+  }
 	if (line_ptr != NULL) {
 		mb_io_ptr->file_bytes += strlen(line);
 		status = MB_SUCCESS;
@@ -465,6 +470,15 @@ int mbr_mbpronav_wr_data(int verbose, void *mbio_ptr, void *data_ptr, int *error
 	struct mbf_mbpronav_struct *data = (struct mbf_mbpronav_struct *)data_ptr;
 
 	char line[MBF_MBPRONAV_MAXLINE + 1];
+
+  /* if fileheader line has not been written, write it */
+  if (!mb_io_ptr->fileheader) {
+    mb_io_ptr->fileheader = true;
+    fprintf(mb_io_ptr->mbfp,  "## <yyyy mm dd hh mm ss.ssssss> <epoch seconds> "
+                  "<longitude (deg)> <latitude (deg)> <heading (deg)> <speed (km/hr)> "
+                  "<draft (m)> <roll (deg)> <pitch (deg)> <heave (m)> <portlon (deg)> "
+                  "<portlat (deg)> <stbdlon (deg)> <stbdlat (deg)>\n");
+  }
 
 	/* handle the data */
 	if (data->kind == MB_DATA_COMMENT) {

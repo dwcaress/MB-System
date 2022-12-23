@@ -6946,7 +6946,7 @@ int mbsys_reson7k3_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kin
       *draft = RawDetection->vehicle_depth;
 
       /* get travel times, angles */
-      *nbeams = BeamGeometry->number_beams;
+      *nbeams = RawDetection->number_beams;
       for (int i = 0; i < RawDetection->number_beams; i++) {
         rawdetectiondata = &(RawDetection->rawdetectiondata[i]);
         bathydata = &(RawDetection->bathydata[i]);
