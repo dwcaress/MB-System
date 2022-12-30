@@ -88,9 +88,9 @@ static const char usage_message[] = "mbnavadjust [-Iproject -V -H]";
 
 /* status variables */
 int error = MB_ERROR_NO_ERROR;
-char message[STRING_MAX];
+char message[(2*STRING_MAX)+200];
 char error1[STRING_MAX];
-char error2[STRING_MAX];
+char error2[STRING_MAX+100];
 char error3[STRING_MAX];
 
 /* route color defines (colors different in MBgrdviz than in MBnavadjust) */
@@ -797,7 +797,7 @@ int mbnavadjust_file_open(char *projectname) {
     }
 
     /* update topography grid if it does not exist */
-    char path[STRING_MAX];
+    char path[STRING_MAX+100];
     sprintf(path, "%s/ProjectTopoAdj.grd", project.datadir);
     struct stat file_status;
     if (stat(path, &file_status) != 0) {
@@ -16500,10 +16500,10 @@ int mbnavadjust_updategrid() {
   int status = MB_SUCCESS;
   struct mbna_file *file;
   struct mbna_section *section;
-  char npath[STRING_MAX];
-  char apath[STRING_MAX];
-  char spath[STRING_MAX];
-  char command[STRING_MAX];
+  char npath[STRING_MAX+100];
+  char apath[STRING_MAX+100];
+  char spath[STRING_MAX+100];
+  char command[STRING_MAX+100];
   FILE *nfp, *afp;
   char *result;
   char buffer[BUFFER_MAX];
@@ -16520,7 +16520,7 @@ int mbnavadjust_updategrid() {
   double heave;
   double factor;
   double zoffset;
-  char ostring[STRING_MAX];
+  char ostring[STRING_MAX+100];
   int isection, isnav;
   double seconds;
   double lon_min, lon_max, lat_min, lat_max;
@@ -16821,9 +16821,9 @@ int mbnavadjust_applynav() {
   int status = MB_SUCCESS;
   struct mbna_file *file;
   struct mbna_section *section;
-  char npath[STRING_MAX];
-  char apath[STRING_MAX];
-  char opath[STRING_MAX];
+  char npath[STRING_MAX+100];
+  char apath[STRING_MAX+100];
+  char opath[STRING_MAX+100];
   FILE *nfp, *afp, *ofp;
   char *result;
   char buffer[BUFFER_MAX];
@@ -16840,7 +16840,7 @@ int mbnavadjust_applynav() {
   double heave;
   double factor;
   double zoffset;
-  char ostring[STRING_MAX];
+  char ostring[STRING_MAX+100];
   int mbp_heading_mode;
   double mbp_headingbias;
   int mbp_rollbias_mode;
@@ -21264,8 +21264,8 @@ int mbnavadjust_open_visualization(int which_grid) {
   double reference_lon;
 
   /* mbview parameters */
-  char mbv_file_name[STRING_MAX];
-  char mbv_title[STRING_MAX];
+  char mbv_file_name[STRING_MAX+100];
+  char mbv_title[STRING_MAX+100];
   int mbv_xo;
   int mbv_yo;
   int mbv_width;
@@ -21349,8 +21349,8 @@ int mbnavadjust_open_visualization(int which_grid) {
   int mbv_navsize;
   mb_path mbv_navname;
   int mbv_navpathstatus;
-  mb_path mbv_navpathraw;
-  mb_path mbv_navpathprocessed;
+  char mbv_navpathraw[STRING_MAX+100];
+  char mbv_navpathprocessed[STRING_MAX+100];
   int mbv_navformatorg;
   int mbv_navswathbounds;
   unsigned int mbv_navline;
