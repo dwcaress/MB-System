@@ -2671,8 +2671,8 @@ int main(int argc, char **argv) {
 	/***** end of first pass gridding *****/
 
 	double clipvalue = NO_DATA_FLAG;
-	mb_path ofile = "";
-	char plot_cmd[MB_COMMENT_MAXLINE] = "";
+	char ofile[2*MB_PATH_MAXLINE+100] = "";
+	char plot_cmd[4*MB_COMMENT_MAXLINE] = "";
 	int plot_status;
 
 
@@ -2688,9 +2688,9 @@ int main(int argc, char **argv) {
 	int nbinset, nbinzero, nbinspline;
 
 	/* output char strings */
-	mb_path xlabel = "";
-	mb_path ylabel = "";
-	mb_path zlabel = "";
+	char xlabel[1050] = "";
+	char ylabel[1050] = "";
+	char zlabel[1050] = "";
 	mb_path title = "";
 	mb_path nlabel = "";
 	mb_path sdlabel = "";

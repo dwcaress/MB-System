@@ -188,7 +188,7 @@ int main(int argc, char **argv) {
   mb_path output_directory = "";
   memset(output_directory, 0, sizeof(mb_path));
   bool output_datalist_set = false;
-  mb_path output_datalist = "datalist.mb-1";
+  char output_datalist[MB_PATH_MAXLINE+100] = "datalist.mb-1";
   struct mb_preprocess_struct preprocess_pars;
   memset(&preprocess_pars, 0, sizeof(struct mb_preprocess_struct));
 
@@ -1095,7 +1095,7 @@ int main(int argc, char **argv) {
   memset(ifile, 0, sizeof(mb_path));
   mb_path dfile = "";
   memset(dfile, 0, sizeof(mb_path));
-  mb_path ofile = "";
+  char ofile[MB_PATH_MAXLINE+10] = "";
   memset(ofile, 0, sizeof(mb_path));
   mb_path fileroot = "";
   memset(fileroot, 0, sizeof(mb_path));
@@ -1184,7 +1184,7 @@ int main(int argc, char **argv) {
   int n_wt_att3 = 0;
   int n_wt_files = 0;
 
-  mb_path afile = "";
+  char afile[MB_PATH_MAXLINE+100] = "";
   FILE *afp = nullptr;
   struct stat file_status;
   double start_time_d;
@@ -2498,7 +2498,7 @@ int main(int argc, char **argv) {
       struct mb_io_struct *fmb_io_ptr = nullptr;
       struct mbsys_ldeoih_struct *fstore = nullptr;
       if (mb_should_make_fbt(verbose, oformat)) {
-        mb_path fbtfile;
+        char fbtfile[MB_PATH_MAXLINE+100];
 
         sprintf(fbtfile, "%s.fbt", ofile);
         int fbeams_bath = 0;
@@ -2525,7 +2525,7 @@ int main(int argc, char **argv) {
       bool make_fnv = false;
       FILE *nfp = nullptr;
       if (mb_should_make_fnv(verbose, oformat)) {
-        mb_path fnvfile;
+        char fnvfile[MB_PATH_MAXLINE+100];
         sprintf(fnvfile, "%s.fnv", ofile);
         if ((nfp = fopen(fnvfile, "w")) == nullptr) {
             fprintf(stderr, "\nUnable to open output *.fnv file <%s> for reading\n",
@@ -3283,7 +3283,7 @@ int main(int argc, char **argv) {
 
       // use mbinfo to generate the inf file - specify the mask bounds so that
       // only one read pass is necessary
-      char command[MB_PATH_MAXLINE];
+      char command[MB_PATH_MAXLINE+100];
       // TODO(schwehr): Is is possible to have mask_bounds[0] not set.
       sprintf(command, "mbinfo -F %d -I %s -G -N -O -M10/10/%.9f/%.9f/%.9f/%.9f",
               oformat, ofile,

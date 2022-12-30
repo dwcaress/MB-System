@@ -90,7 +90,7 @@ int main(int argc, char **argv) {
   double rangethreshold = 25.0;
   mb_path timelist_file = {0};
   bool timelist_file_set = false;
-  mb_path output_file = {0};
+  char output_file[MB_PATH_MAXLINE+100] = {0};
   bool output_file_set = false;
   waypoint_t waypoint;
 
@@ -297,7 +297,7 @@ int main(int argc, char **argv) {
 
   /* auto plotting */
   FILE *sfp = nullptr;
-  mb_path scriptfile = "";
+  char scriptfile[MB_PATH_MAXLINE+100] = "";
   double seafloordepthmin = -1.0;
   double seafloordepthmax = -1.0;
   double seafloordepthminplot[MBES_NUM_PLOT_MAX];

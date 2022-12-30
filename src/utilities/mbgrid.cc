@@ -810,9 +810,9 @@ int main(int argc, char **argv) {
   char ppath[MB_PATH_MAXLINE] = "";
   char dpath[MB_PATH_MAXLINE] = "";
   char rfile[MB_PATH_MAXLINE] = "";
-  char ofile[MB_PATH_MAXLINE] = "";
+  char ofile[2*MB_PATH_MAXLINE+100] = "";
   char dfile[MB_PATH_MAXLINE] = "";
-  char plot_cmd[MB_COMMENT_MAXLINE] = "";
+  char plot_cmd[(8*1024)] = "";
   int plot_status;
 
   /* mbio read values */
@@ -886,9 +886,9 @@ int main(int argc, char **argv) {
   double mtodeglon, mtodeglat;
 
   /* output char strings */
-  char xlabel[MB_PATH_MAXLINE] = "";
-  char ylabel[MB_PATH_MAXLINE] = "";
-  char zlabel[MB_PATH_MAXLINE] = "";
+  char xlabel[MB_PATH_MAXLINE+20] = "";
+  char ylabel[MB_PATH_MAXLINE+20] = "";
+  char zlabel[MB_PATH_MAXLINE+20] = "";
   char title[MB_PATH_MAXLINE] = "";
   char nlabel[MB_PATH_MAXLINE] = "";
   char sdlabel[MB_PATH_MAXLINE] = "";

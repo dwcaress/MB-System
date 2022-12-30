@@ -345,7 +345,7 @@ int main(int argc, char **argv) {
   svp_last.n = 0;
   int svp_save_alloc = 0;
   struct mbsvplist_svp_struct *svp_save = nullptr;
-  char svp_file[MB_PATH_MAXLINE];
+  char svp_file[MB_PATH_MAXLINE+10];
   int svp_read_tot = 0;
   int svp_written_tot = 0;
   int svp_repeat_in_file;

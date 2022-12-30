@@ -91,7 +91,7 @@ int main(int argc, char **argv) {
 	int tideformat = 2;
 	double interval = 300.0;
 	bool mbprocess_update = false;
-	mb_path tide_file;
+	char tide_file[MB_PATH_MAXLINE+10];
 	bool file_output = false;
 	double tide_offset = 0.0;
 	bool skip_existing = false;
@@ -457,11 +457,11 @@ int main(int argc, char **argv) {
 
 			/* get geoid corrections */
 			if (geoid_set) {
-				mb_path nav_file;
+				char nav_file[MB_PATH_MAXLINE+10];
 				sprintf(nav_file, "%s.fnv", swath_file);
 				struct stat file_status;
 				const int fstat = stat(nav_file, &file_status);
-				mb_path line = "";
+				char line[2*MB_PATH_MAXLINE+100] = "";
 				if (fstat == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR) {
 					sprintf(line, "awk '{ print $8 \" \" $9 \" \" $7 }' %s | grdtrack -G%s", nav_file, geoidgrid);
 				} else {

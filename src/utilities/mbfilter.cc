@@ -974,7 +974,7 @@ int main(int argc, char **argv) {
 	void *imbio_ptr = nullptr;
 
 	/* MBIO write control parameters */
-	char ofile[MB_PATH_MAXLINE];
+	char ofile[MB_PATH_MAXLINE+10];
 	void *ombio_ptr = nullptr;
 
 	/* mbio read and write values */

@@ -579,7 +579,7 @@ void process_file(int verbose, int thread_id, struct mb_process_struct *process,
   int neditused;
 
   /* output reverse edit save file control variables */
-  mb_path resf_file;
+  char resf_file[MB_PATH_MAXLINE+10];
   FILE *resf_fp = nullptr;
   mb_path resf_header;
   int action;
@@ -2716,7 +2716,7 @@ void process_file(int verbose, int thread_id, struct mb_process_struct *process,
   struct mb_io_struct *fmb_io_ptr = nullptr;
   struct mbsys_ldeoih_struct *fstore = nullptr;
   if (mb_should_make_fbt(verbose, process->mbp_format)) {
-    mb_path fbtfile;
+    char fbtfile[MB_PATH_MAXLINE+10];
 
     sprintf(fbtfile, "%s.fbt", process->mbp_ofile);
     int fbeams_bath = 0;
@@ -2742,7 +2742,7 @@ void process_file(int verbose, int thread_id, struct mb_process_struct *process,
   bool make_fnv = false;
   FILE *nfp = nullptr;
   if (mb_should_make_fnv(verbose, process->mbp_format)) {
-    mb_path fnvfile;
+    char fnvfile[MB_PATH_MAXLINE+10];
     sprintf(fnvfile, "%s.fnv", process->mbp_ofile);
     if ((nfp = fopen(fnvfile, "w")) == nullptr) {
         fprintf(stderr, "\nUnable to open output *.fnv file <%s> for reading\n",
@@ -5622,7 +5622,7 @@ int main(int argc, char **argv) {
   /* set default input and output */
   bool mbp_ifile_specified = false;
   char mbp_ifile[MBP_FILENAMESIZE] = "";
-  char mbp_pfile[MBP_FILENAMESIZE] = "";
+  char mbp_pfile[MBP_FILENAMESIZE+10] = "";
 
   bool mbp_ofile_specified = false;
   char mbp_ofile[MBP_FILENAMESIZE] = "";

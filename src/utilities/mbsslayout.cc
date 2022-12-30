@@ -1207,7 +1207,7 @@ int main(int argc, char **argv) {
 	}
 
 	/* set up plotting script file */
-	mb_path scriptfile = "";
+	char scriptfile[2*MB_PATH_MAXLINE+20] = "";
 	sprintf(scriptfile, "%s_%s_ssswathplot.cmd", line_name1, line_name2);
 	FILE *sfp = fopen(scriptfile, "w");
 	if (sfp == nullptr) {
@@ -1877,7 +1877,7 @@ int main(int argc, char **argv) {
 	int num_samples_port_alloc = 0;
 
 	/* MBIO read control parameters */
-	mb_path output_file = "";
+	char output_file[2*MB_PATH_MAXLINE+100] = "";
 	mb_path ifileroot;
 	mb_path ofile = "";
 
@@ -2621,7 +2621,7 @@ int main(int argc, char **argv) {
 
 	/* close plotting script file */
 	fclose(sfp);
-	mb_path command = "";
+	char command[2*MB_PATH_MAXLINE+50] = "";
 	sprintf(command, "chmod +x %s", scriptfile);
 	/* int shellstatus = */ system(command);
 

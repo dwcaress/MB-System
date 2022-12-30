@@ -741,7 +741,7 @@ int main(int argc, char **argv) {
 		strcpy(zlabel, "dB/Hz");
 	else
 		strcpy(zlabel, "Intensity/Hz");
-	char title[MB_PATH_MAXLINE] = "";
+	char title[MB_PATH_MAXLINE+50] = "";
 	sprintf(title, "Power Spectral Density Grid from %s", segyfile);
 	status &= mb_write_gmt_grd(
 		verbose, gridfile, grid, std::numeric_limits<float>::quiet_NaN(),
@@ -773,7 +773,7 @@ int main(int argc, char **argv) {
 	/* run mbm_grdplot */
 	double xwidth = std::min(0.01 * ngridx, 55.0);
 	double ywidth = std::min(0.01 * ngridy, 28.0);
-	char plot_cmd[MB_PATH_MAXLINE] = "";
+	char plot_cmd[(5*MB_PATH_MAXLINE)+100] = "";
 	sprintf(plot_cmd, "mbm_grdplot -I%s -JX%f/%f -G1 -S -V -L\"File %s - %s:%s\"", gridfile, xwidth, ywidth, gridfile, title,
 	        zlabel);
 	if (verbose) {

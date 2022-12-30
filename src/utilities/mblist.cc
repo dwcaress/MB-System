@@ -1231,7 +1231,7 @@ int main(int argc, char **argv) {
 
   int nbeams;
 
-  char output_file_temp[MB_PATH_MAXLINE] = "";
+  char output_file_temp[2*MB_PATH_MAXLINE+20] = "";
 
   /* netcdf variables */
   int lcount = 0;
