@@ -97,7 +97,7 @@ int main(int argc, char **argv) {
 	double etime_d;
 	char ifile[MB_PATH_MAXLINE] = "";
 	char dfile[MB_PATH_MAXLINE] = "";
-	char ofile[MB_PATH_MAXLINE] = "";
+	char ofile[MB_PATH_MAXLINE+50] = "";
 	int beams_bath;
 	int beams_amp;
 	int pixels_ss;
