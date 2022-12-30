@@ -304,7 +304,8 @@ int mbeditviz_init(int argc, char **argv,
   if (input_file_set) {
     mbev_status = mbeditviz_open_data(ifile, mbdef_format);
     if (delete_input_file) {
-      mb_path shell_command;
+      // mb_path shell_command;
+      char shell_command[MB_PATH_MAXLINE + 20];
       sprintf(shell_command, "rm %s &", ifile);
       /* const int shellstatus = */ system(shell_command);
     }
@@ -552,9 +553,11 @@ int mbeditviz_load_file(int ifile, bool assertLock) {
       /* turn off message */
       (*hideMessage)();
 
-      mb_path error1 = "";
-      mb_path error2 = "";
-      mb_path error3 = "";
+#define BUFSIZE (2*MB_PATH_MAXLINE + 50)
+      
+      char error1[BUFSIZE] = "";
+      char error2[BUFSIZE] = "";
+      char error3[BUFSIZE] = "";
 
       /* if locked get lock info */
       if (mbev_error == MB_ERROR_FILE_LOCKED) {
@@ -709,10 +712,10 @@ int mbeditviz_load_file(int ifile, bool assertLock) {
     struct stat file_status;
     FILE *afp;
     mb_path asyncfile = "";
-    mb_path resffile = "";
+    char resffile[MB_PATH_MAXLINE + 10] = "";
     char buffer[MBP_FILENAMESIZE] = "";
     char *result = NULL;
-    char command[MBP_FILENAMESIZE] = "";
+    char command[MBP_FILENAMESIZE+16] = "";
     int nread;
     int n_unused;
 

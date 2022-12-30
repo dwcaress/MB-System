@@ -1478,7 +1478,7 @@ void do_mbeditviz_update_filelist() {
 
   struct mbev_file_struct *file;
 
-  char string[MB_PATH_MAXLINE];
+  char string[MB_PATH_MAXLINE+20];
   int *position_list = NULL;
   int position_list_save[MB_PATH_MAXLINE];
   int position_count = 0;
@@ -1505,7 +1505,7 @@ void do_mbeditviz_update_filelist() {
   /* esf file checking variables */
   bool esf_exists = false;
   struct stat file_status;
-  char save_file[MB_PATH_MAXLINE];
+  char save_file[MB_PATH_MAXLINE+20];
 
   /* check to see if anything has changed */
   bool update_filelist = false;
