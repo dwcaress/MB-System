@@ -542,16 +542,16 @@ int mbnavedit_open_file(int useprevious) {
 		fprintf(stderr, "dbg2       useprevious: %d\n", useprevious);
 	}
 
-	char ifile_use[MB_PATH_MAXLINE];
-	char command[MB_PATH_MAXLINE];
+	char ifile_use[MB_PATH_MAXLINE+10];
+	char command[2*MB_PATH_MAXLINE+100];
 	int format_use;
 	int form;
 	int format_error;
 	struct stat file_status;
 	int fstat;
 	mb_path error1 = "";
-	mb_path error2 = "";
-	mb_path error3 = "";
+	char error2[2100] = "";
+	char error3[2100] = "";
 
 	/* swath file locking variables */
 	bool locked = false;
@@ -724,7 +724,7 @@ int mbnavedit_open_file(int useprevious) {
 		nfile_open = false;
 		if (status == MB_SUCCESS && output_mode != OUTPUT_MODE_BROWSE) {
 			/* get nav edit save file */
-			sprintf(nfile, "%s.nve", ifile);
+                        snprintf(nfile, sizeof(nfile), "%s.nve", ifile);
 
 			/* open the nav edit save file */
 			if ((nfp = fopen(nfile, "w")) != NULL) {
@@ -804,7 +804,7 @@ int mbnavedit_close_file() {
 			do_message_on("Navigation edits being applied using mbprocess...");
 
 			/* run mbprocess */
-			char command[MB_PATH_MAXLINE];
+			char command[MB_PATH_MAXLINE+100];
 			if (strip_comments)
 				sprintf(command, "mbprocess -I %s -N\n", ifile);
 			else
@@ -4268,7 +4268,7 @@ int mbnavedit_plot_all() {
 			const int center_y = (mbnavplot[iplot].iymin + mbnavplot[iplot].iymax) / 2;
 
 			/* plot filename */
-			char string[MB_PATH_MAXLINE];
+			char string[MB_PATH_MAXLINE+30];
 			sprintf(string, "Data File: %s", ifile);
 			int swidth;
 			int sascent;
