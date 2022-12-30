@@ -62,6 +62,7 @@ bool TopoColorMap::makeLUT(TopoColorMap::Scheme scheme,
     std::copy(std::begin(rgb), std::end(rgb), std::begin(rgbAlpha));
     lut->SetTableValue(static_cast<vtkIdType>(i), rgbAlpha.data());
   }
+  return true;
 }
 
 
