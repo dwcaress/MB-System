@@ -230,6 +230,13 @@ foreach(package ${packages})
        set(NETCDF_LIBRARIES ${${package}_LIBRARIES})
        set(NETCDF_VERSION ${${package}_VERSION})       
 
+    elseif (${package} STREQUAL "PROJ")
+       # Older PROJ versions set PROJ_LIBRARY but not PROJ_LIBRARIES
+       if (PROJ_LIBRARY AND NOT PROJ_LIBRARIES)
+         message("set PROJ_LIBRARIES to PROJ_LIBRARY")
+         set(PROJ_LIBRARIES ${PROJ_LIBRARY})
+       endif()
+       
     elseif (${package} STREQUAL "OpenGL")
       # find_package(OpenGL) returns variables in all upper case
       set(OPENGL_INCLUDE_DIRS ${${package}_INCLUDE_DIR})
@@ -242,7 +249,16 @@ foreach(package ${packages})
       # find_package(Motif) returns all upper case, MOTIF_INCLUDE_DIR
       message("package Motif: ${package}_INCLUDE_DIR: ${${package}_INCLUDE_DIR}")
       set(MOTIF_INCLUDE_DIRS ${MOTIF_INCLUDE_DIR})
-            
+
+    elseif (${package} STREQUAL "PROJ")
+      # Older versions of PROJ set PROJ_LIBRARY but not PROJ_LIBRARIES
+      # if PROJ_LIBRARY and not PROJ_LIBRARIES, set set PROJ_LIBRARIES=PROJ_LIBRARY
+      if (PROJ_LIBRARY)
+        message("PROJ_LIBRARY is ${PROJ_LIBRARY}")
+      else()
+        message("PROJ_LIBRARY is not set")
+      endif()
+
     endif()
 
 
