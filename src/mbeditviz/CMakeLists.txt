@@ -15,6 +15,12 @@ add_executable(mbeditviz
 add_library(mbev
             mbeditviz_prog.c)
 
+IF (APPLE)
+  # Resolve missing symbols at runtime
+  set_target_properties(mbev PROPERTIES LINK_FLAGS
+                  "-undefined dynamic_lookup -flat_namespace")
+ENDIF (APPLE)
+
 
 target_include_directories(mbeditviz
                            PUBLIC
