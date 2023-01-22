@@ -86,9 +86,11 @@
 #define MBNA_VIEW_LIST_BETTERCROSSINGS 8
 #define MBNA_VIEW_LIST_TRUECROSSINGS 9
 #define MBNA_VIEW_LIST_TIES 10
-#define MBNA_VIEW_LIST_TIESSORTED 11
-#define MBNA_VIEW_LIST_GLOBALTIES 12
-#define MBNA_VIEW_LIST_GLOBALTIESSORTED 13
+#define MBNA_VIEW_LIST_TIESSORTEDALL 11
+#define MBNA_VIEW_LIST_TIESSORTEDWORST 12
+#define MBNA_VIEW_LIST_TIESSORTEDBAD 13
+#define MBNA_VIEW_LIST_GLOBALTIES 14
+#define MBNA_VIEW_LIST_GLOBALTIESSORTED 15
 #define MBNA_VIEW_MODE_ALL 0
 #define MBNA_VIEW_MODE_SURVEY 1
 #define MBNA_VIEW_MODE_WITHSURVEY 2
@@ -244,6 +246,7 @@ struct mbna_section {
   int contoursuptodate;
   int status;
   struct mbna_globaltie globaltie;
+  struct mbna_globaltie fixedtie;
 };
 struct mbna_file {
   int status;
@@ -370,6 +373,7 @@ struct mbna_project {
   int bin_beams_bath;
   int bin_swathwidth;
   double bin_pseudobeamwidth;
+  double tiessortedthreshold;
   int save_count;
 
   double lon_min;

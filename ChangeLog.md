@@ -23,8 +23,8 @@ Distributions that do not include "beta" in the tag name correspond to the major
 announced releases. The source distributions associated with all releases, major
 or beta, are equally accessible as tarballs through the Github interface.
 
-- Version 5.7.9beta49    December 16, 2022
-- Version 5.7.9beta48    November 22, 2022
+- Version 5.7.9beta49    January 22, 2023
+- Version 5.7.9beta48    December 16, 2022
 - Version 5.7.9beta47    November 15, 2022
 - Version 5.7.9beta46    November 11, 2022
 - Version 5.7.9beta45    November 6, 2022
@@ -426,7 +426,41 @@ or beta, are equally accessible as tarballs through the Github interface.
 ### MB-System Version 5.7 Release Notes:
 --
 
-#### 5.7.9beta48 (December 11, 2022)
+#### 5.7.9beta49 (January 22, 2023)
+
+Mbm_grdplot, mbm_grd3dplot, mbm_histplot, mbm_plot, mbm_xyplot: Made evince one
+of the default Postscript viewers because it is commonly installed on Ubuntu
+machines.
+
+General: Addressed compiler warnings due to uninitialized variables, inconsistent
+variable typing, and other minor issues.
+
+MBnavadjust: Changed the solution algorithm so that the final stage of LSQR
+matrix inversion is done in several steps. As before, the first three stages are
+to construct an initial model by interpolating any global ties, then solve for
+and apply average offsets for each survey, then conduct an iterative relaxation
+towards an additional perturbation solution. Each stage produces a perturbation
+solution, that is, a solution to fit the navigation offsets remaining after
+applying the existing navigation model. Each perturbation is added to the
+navigation model, which is then the starting point for the next stage. These
+three stages build up an approximate navigation solution that solves most of the
+original mismatch between overlapping and crossing swathes. The final stage is
+to build and solve an overdetermined least squares matrix problem constrained by
+all crossing and global times, by any surveys with fixed navigation, and also
+constrained by a penalty against first and second derivatives of the perturbation.
+Now, for multi-survey projects the matrix solution stage consists of first
+solving the full matrix problem, then solving for a perturbation to satisfy
+the remaining misfit for each of the individual surveys in turn, and finally
+redoing the full matrix problem. Again, after each solution step the resulting
+perturbation is added to the navigation solution.
+
+Mbnavadjust: Added two new list options for sorted crossing ties. Now the sorted
+crossing tie list can be limited to the top 5% or 1% of ties.
+
+Format MBF_MBARIROV (165): Added recognition for new filenaming conventions for
+MBARI ROV navigation files.
+
+#### 5.7.9beta48 (December 16, 2022)
 
 Mbmosaic: Fixed parsing of the -Ypriority_source option when priority_source is
 a filename.

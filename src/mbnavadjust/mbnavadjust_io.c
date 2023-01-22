@@ -63,6 +63,7 @@ static const char program_name[] = "mbnavadjust i/o functions";
 int mbnavadjust_new_project(int verbose, char *projectpath, double section_length, int section_soundings, double cont_int,
           double col_int, double tick_int, double label_int, int decimation, double smoothing,
           double zoffsetwidth, struct mbna_project *project, int *error) {
+
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -86,6 +87,7 @@ int mbnavadjust_new_project(int verbose, char *projectpath, double section_lengt
     status = mbnavadjust_close_project(verbose, project, error);
 
   /* check path to see if new project can be created */
+  assert(projectpath != NULL && strlen(projectpath) > 0);
   char *nameptr = NULL;
   char *slashptr = strrchr(projectpath, '/');
   if (slashptr != NULL)
@@ -104,7 +106,7 @@ int mbnavadjust_new_project(int verbose, char *projectpath, double section_lengt
   if (status == MB_SUCCESS) {
     strcpy(project->name, nameptr);
     if (strlen(projectpath) == strlen(nameptr)) {
-      char *getcwd_result = getcwd(project->path, MB_PATH_MAXLINE);
+      assert(getcwd(project->path, MB_PATH_MAXLINE) != NULL);
       assert(strlen(project->path) > 0);
       strcat(project->path, "/");
     }
@@ -137,9 +139,13 @@ int mbnavadjust_new_project(int verbose, char *projectpath, double section_lengt
     if (status == MB_SUCCESS) {
       /* set values */
       project->open = true;
+
+      project->logfp = NULL;
+
       project->num_files = 0;
       project->num_files_alloc = 0;
       project->files = NULL;
+      project->num_surveys = 0;
       project->num_snavs = 0;
       project->num_pings = 0;
       project->num_beams = 0;
@@ -151,8 +157,24 @@ int mbnavadjust_new_project(int verbose, char *projectpath, double section_lengt
       project->num_truecrossings_analyzed = 0;
       project->crossings = NULL;
       project->num_ties = 0;
+      project->num_globalties = 0;
+      project->num_globalties_analyzed = 0;
+      project->num_refgrids = 0;
+
       project->section_length = section_length;
-      project->section_soundings = section_soundings;
+      project->bin_beams_bath = 0;
+      project->bin_swathwidth = 0;
+      project->bin_pseudobeamwidth = 0.0;
+      project->tiessortedthreshold = 0.0;
+      project->save_count = 0;
+
+      project->lon_min = 0.0;
+      project->lon_max = 0.0;
+      project->lat_min = 0.0;
+      project->lat_max = 0.0;
+      project->mtodeglon = 0.0;
+      project->mtodeglat = 0.0;
+
       project->cont_int = cont_int;
       project->col_int = col_int;
       project->tick_int = tick_int;
@@ -161,14 +183,14 @@ int mbnavadjust_new_project(int verbose, char *projectpath, double section_lengt
       project->precision = SIGMA_MINIMUM;
       project->smoothing = smoothing;
       project->zoffsetwidth = zoffsetwidth;
+      project->triangle_scale = 0.0;
       project->inversion_status = MBNA_INVERSION_NONE;
+      project->refgrid_status = MBNA_REFGRID_UNLOADED;
+      project->refgrid_select = 0;
       project->grid_status = MBNA_GRID_NONE;
       project->modelplot = false;
       project->modelplot_style = MBNA_MODELPLOT_TIMESERIES;
       project->modelplot_uptodate = false;
-      project->logfp = NULL;
-      project->precision = SIGMA_MINIMUM;
-      project->smoothing = MBNA_SMOOTHING_DEFAULT;
 
       /* create data directory */
 #ifdef _WIN32
@@ -1622,12 +1644,7 @@ int mbnavadjust_write_project(int verbose, struct mbna_project *project,
   int nties_fixed = 0;
   char status_char, truecrossing_char;
   int routecolor = 1;
-  char *unknown = "Unknown";
   double mtodeglon, mtodeglat;
-
-  /* time, user, host variables */
-  time_t right_now;
-  char date[32], user[MB_PATH_MAXLINE], host[MB_PATH_MAXLINE];
 
   int i, j, k, l;
 
@@ -2566,7 +2583,6 @@ int mbnavadjust_section_overlapbounds(int verbose, struct mbna_project *project,
   struct mbna_file *file = &project->files[file_id];
   struct mbna_section *section1 = &project->reference_section;
   struct mbna_section *section2 = &file->sections[section_id];
-  struct mbna_globaltie *globaltie = &section2->globaltie;
 
   /* get overlap region bounds and focus point */
   *lonmin = 0.0;
@@ -4693,7 +4709,6 @@ int mbnavadjust_reimport_file(int verbose, struct mbna_project *project,
     }
   }
 
-  struct stat file_status;
   char npath[STRING_MAX];
   char opath[STRING_MAX];
 
@@ -4707,6 +4722,7 @@ int mbnavadjust_reimport_file(int verbose, struct mbna_project *project,
   double etime_d;
   double speedmin;
   double timegap;
+  status = mb_defaults(verbose, &iformat, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
 
   /* mbio read and write values */
   void *imbio_ptr = NULL;
@@ -4748,12 +4764,9 @@ int mbnavadjust_reimport_file(int verbose, struct mbna_project *project,
   bool first;
   double headingx, headingy, mtodeglon, mtodeglat;
   double lon, lat;
-  double navlon_old, navlat_old, sensordepth_old;
   FILE *nfp;
   struct mbna_file *file = NULL;
   struct mbna_section *section = NULL;
-  struct mbna_file *cfile = NULL;
-  struct mbna_section *csection = NULL;
   struct mbsys_ldeoih_struct *ostore = NULL;
   struct mb_io_struct *omb_io_ptr = NULL;
   double dx1, dy1;
@@ -4765,7 +4778,6 @@ int mbnavadjust_reimport_file(int verbose, struct mbna_project *project,
   double mbp_rollbias_stbd;
   double depthmax, distmax, depthscale, distscale;
   int error_sensorhead = MB_ERROR_NO_ERROR;
-  void *tptr;
   int ii1, jj1;
 
   char *root = (char *)strrchr(ipath, '/');
@@ -5115,9 +5127,6 @@ int mbnavadjust_reimport_file(int verbose, struct mbna_project *project,
         mb_coor_scale(verbose, navlat, &mtodeglon, &mtodeglat);
         headingx = sin(DTR * heading);
         headingy = cos(DTR * heading);
-        navlon_old = navlon;
-        navlat_old = navlat;
-        sensordepth_old = draft - heave;
         section->num_pings++;
         file->num_pings++;
         new_pings++;
@@ -6293,6 +6302,8 @@ int mbnavadjust_globaltie_compare(const void *a, const void *b) {
 /*--------------------------------------------------------------------*/
 
 int mbnavadjust_info_add(int verbose, struct mbna_project *project, char *info, bool timetag, int *error) {
+  int status = MB_SUCCESS;
+
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
@@ -6311,7 +6322,7 @@ int mbnavadjust_info_add(int verbose, struct mbna_project *project, char *info, 
   if (timetag) {
     char user[256], host[256], date[32];
     int error = MB_ERROR_NO_ERROR;
-    int status = mb_user_host_date(verbose, user, host, date, &error);
+    status = mb_user_host_date(verbose, user, host, date, &error);
     char tag[STRING_MAX];
     sprintf(tag, " > User <%s> on cpu <%s> at <%s>\n", user, host, date);
     if (project->logfp != NULL)
@@ -6328,7 +6339,7 @@ int mbnavadjust_info_add(int verbose, struct mbna_project *project, char *info, 
     fprintf(stderr, "dbg2       status:      %d\n", MB_SUCCESS);
   }
 
-  return (MB_SUCCESS);
+  return (status);
 }
 
 /*--------------------------------------------------------------------*/
