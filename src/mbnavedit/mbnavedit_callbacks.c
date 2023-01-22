@@ -501,7 +501,8 @@ void do_parse_datalist(char *file, int form) {
 	int verbose = 0;
 	int format = form;
 	int error = MB_ERROR_NO_ERROR;
-	mb_get_format(verbose, file, NULL, &format, &error);
+  if (format == 0)
+	   mb_get_format(verbose, file, NULL, &format, &error);
 
 	/* read in a single file */
 	if (format > 0 && numfiles < NUM_FILES_MAX) {

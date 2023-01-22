@@ -537,15 +537,15 @@ int main(int argc, char **argv) {
   /* set up plotting script file */
   if ((route_file_set && nroutepoint > 1) || (timelist_file_set && nroutepoint > 1)) {
     assert(strlen(lineroot) < MB_PATH_MAXLINE - 12);
-    sprintf(scriptfile, "%s_section.cmd", lineroot);
+    snprintf(scriptfile, sizeof(mb_path), "%s_section.cmd", lineroot);
   }
   else if (!output_file_set || read_datalist) {
     assert(strlen(read_file) < MB_PATH_MAXLINE - 12);
-    sprintf(scriptfile, "%s_section.cmd", read_file);
+    snprintf(scriptfile, sizeof(mb_path), "%s_section.cmd", read_file);
   }
   else {
     assert(strlen(file) < MB_PATH_MAXLINE - 12);
-    sprintf(scriptfile, "%s_section.cmd", file);
+    snprintf(scriptfile, sizeof(mb_path), "%s_section.cmd", file);
   }
   if ((sfp = fopen(scriptfile, "w")) == nullptr) {
     error = MB_ERROR_OPEN_FAIL;

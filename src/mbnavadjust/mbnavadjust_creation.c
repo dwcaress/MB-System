@@ -164,7 +164,9 @@ extern void do_list_showgoodcrossings(Widget, XtPointer, XtPointer);
 extern void do_list_showbettercrossings(Widget, XtPointer, XtPointer);
 extern void do_list_showtruecrossings(Widget, XtPointer, XtPointer);
 extern void do_list_showcrossingties(Widget, XtPointer, XtPointer);
-extern void do_list_showcrossingtiessorted(Widget, XtPointer, XtPointer);
+extern void do_list_showcrossingtiessortedall(Widget, XtPointer, XtPointer);
+extern void do_list_showcrossingtiessortedworst(Widget, XtPointer, XtPointer);
+extern void do_list_showcrossingtiessortedbad(Widget, XtPointer, XtPointer);
 extern void do_list_showglobalties(Widget, XtPointer, XtPointer);
 extern void do_list_showglobaltiessorted(Widget, XtPointer, XtPointer);
 extern void do_view_showallsurveys(Widget, XtPointer, XtPointer);
@@ -931,7 +933,7 @@ Widget CreatemainWindow(Widget parent) {
 	{
 		XmString tmp0;
 
-		tmp0 = (XmString)BX_CONVERT(pulldownMenu_list, (char *)"Show Crossing Ties Sorted", XmRXmString, 0, &argok);
+		tmp0 = (XmString)BX_CONVERT(pulldownMenu_list, (char *)"Show All Crossing Ties Sorted", XmRXmString, 0, &argok);
 		XtSetArg(args[ac], XmNlabelString, tmp0);
 		if (argok)
 			ac++;
@@ -940,8 +942,8 @@ Widget CreatemainWindow(Widget parent) {
 		    BX_CONVERT(pulldownMenu_list, (char *)"-*-" SANS "-bold-r-*-*-*-120-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
 		if (argok)
 			ac++;
-		pushButton_showcrossingtiessorted = XmCreatePushButton(pulldownMenu_list, (char *)"pushButton_showcrossingtiessorted", args, ac);
-		XtManageChild(pushButton_showcrossingtiessorted);
+		pushButton_showcrossingtiessortedall = XmCreatePushButton(pulldownMenu_list, (char *)"pushButton_showcrossingtiessortedall", args, ac);
+		XtManageChild(pushButton_showcrossingtiessortedall);
 
 		/**
 		 * Free any memory allocated for resources.
@@ -949,7 +951,55 @@ Widget CreatemainWindow(Widget parent) {
 		XmStringFree((XmString)tmp0);
 	}
 
-	XtAddCallback(pushButton_showcrossingtiessorted, XmNactivateCallback, do_list_showcrossingtiessorted, (XtPointer)0);
+	XtAddCallback(pushButton_showcrossingtiessortedall, XmNactivateCallback, do_list_showcrossingtiessortedall, (XtPointer)0);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(pulldownMenu_list, (char *)"Show Crossing Ties Sorted (5% Worst Misfit)", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(
+		    args[ac], XmNfontList,
+		    BX_CONVERT(pulldownMenu_list, (char *)"-*-" SANS "-bold-r-*-*-*-120-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		pushButton_showcrossingtiessortedbad = XmCreatePushButton(pulldownMenu_list, (char *)"pushButton_showcrossingtiessortedbad", args, ac);
+		XtManageChild(pushButton_showcrossingtiessortedbad);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(pushButton_showcrossingtiessortedbad, XmNactivateCallback, do_list_showcrossingtiessortedbad, (XtPointer)0);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(pulldownMenu_list, (char *)"Show Crossing Ties Sorted (1% Worst Misfit)", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(
+		    args[ac], XmNfontList,
+		    BX_CONVERT(pulldownMenu_list, (char *)"-*-" SANS "-bold-r-*-*-*-120-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		pushButton_showcrossingtiessortedworst = XmCreatePushButton(pulldownMenu_list, (char *)"pushButton_showcrossingtiessortedworst", args, ac);
+		XtManageChild(pushButton_showcrossingtiessortedworst);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(pushButton_showcrossingtiessortedworst, XmNactivateCallback, do_list_showcrossingtiessortedworst, (XtPointer)0);
 
 	ac = 0;
 	{
