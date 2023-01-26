@@ -806,7 +806,7 @@ public:
 
                         if(nullptr != addr_s) {
                             // OK
-                            host = addr_s;
+                            host = strdup(addr_s);
                         } else {
                             TRN_TRACE();
                             parse_err = true;
@@ -835,6 +835,8 @@ public:
                 retval = 0;
             }
 
+            free(host);
+            host = nullptr;
             free(cpy);
         }  else {
             TRN_TRACE();

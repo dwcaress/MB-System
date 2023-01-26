@@ -128,6 +128,8 @@
 #define TRNCLI_CONNECT_RETRIES 5
 #define MB1_READ_RETRIES 50
 #define MB1_ETO_MSEC 250
+#define TRNCLI_CFG_LOG_PATH_BYTES 512
+#define TRNCLI_SESSION_DATE_BYTES 32
 
 /////////////////////////
 // Declarations
@@ -778,7 +780,9 @@ static app_cfg_t *app_cfg_new()
         instance->log_id=MLOG_ID_INVALID;
         instance->log_name=strdup(TRNCLI_TEST_LOG_NAME);
         instance->log_dir=strdup(TRNCLI_TEST_LOG_DIR);
-        instance->log_path=(char *)malloc(512);
+        instance->log_path=(char *)malloc(TRNCLI_CFG_LOG_PATH_BYTES);
+        memset(instance->log_path, 0, TRNCLI_CFG_LOG_PATH_BYTES);
+
         instance->utm=TRNCLI_UTM_DFL;
         instance->state_n=0;
         instance->tcli_connect_retries = TRNCLI_CONNECT_RETRIES;
@@ -1539,8 +1543,10 @@ static msock_socket_t **s_get_mb1_instance(app_cfg_t *cfg)
         mtime_delay_ms(250);
         if(test==0){
             s_dbg_printf(stderr,cfg->debug, "%s:%d mb1svr sending REQ %s:%d\n", __func__, __LINE__, cfg->mb1_host, cfg->mb1_port);
+
             byte req[4]={0};
-            sprintf((char *)req, "REQ");
+            snprintf((char *)req, 4, "REQ");
+
             int64_t st = msock_sendto(mb1_sock,NULL,req,4,0);
             if(st == (int64_t)4){
                 s_dbg_printf(stderr,cfg->debug, "%s:%d sendto ret[%"PRId64"]\n", __func__, __LINE__, st);
@@ -1631,7 +1637,7 @@ static trncli_t **s_get_trncli_instance(app_cfg_t *cfg, bool force_new)
 
 static void s_init_log(int argc, char **argv, app_cfg_t *cfg)
 {
-    char session_date[32] = {0};
+    char session_date[TRNCLI_SESSION_DATE_BYTES] = {0};
 
     // make session time string to use
     // in log file names
@@ -1642,11 +1648,11 @@ static void s_init_log(int argc, char **argv, app_cfg_t *cfg)
     // Get GMT time
     gmt = gmtime(&rawtime);
     // format YYYYMMDD-HHMMSS
-    sprintf(session_date, "%04d%02d%02d-%02d%02d%02d",
+    snprintf(session_date, TRNCLI_SESSION_DATE_BYTES, "%04d%02d%02d-%02d%02d%02d",
             (gmt->tm_year+1900),gmt->tm_mon+1,gmt->tm_mday,
             gmt->tm_hour,gmt->tm_min,gmt->tm_sec);
 
-    sprintf(cfg->log_path,"%s//%s-%s-%s",cfg->log_dir,cfg->log_name,session_date,TRNCLI_TEST_LOG_EXT);
+    snprintf(cfg->log_path, TRNCLI_CFG_LOG_PATH_BYTES, "%s//%s-%s-%s",cfg->log_dir,cfg->log_name,session_date,TRNCLI_TEST_LOG_EXT);
     cfg->log_id = mlog_get_instance(cfg->log_path, cfg->log_cfg, TRNCLI_TEST_LOG_NAME);
 
     if(!cfg->log_en){
@@ -1666,8 +1672,9 @@ static void s_init_log(int argc, char **argv, app_cfg_t *cfg)
             fprintf(stderr, "WARN - logged cmdline truncated\n");
             break;
         }
-        int ilen=sprintf(ip," %s",argv[x]);
-        ip+=ilen;
+        size_t wlen = TRN_CMD_LINE_BYTES - (ip - g_cmd_line);
+        int ilen = snprintf(ip, wlen, " %s",argv[x]);
+        ip += (ilen > 0 ? ilen : 0);
     }
     g_cmd_line[TRN_CMD_LINE_BYTES-1]='\0';
 

@@ -1541,12 +1541,13 @@ public:
     {
         char *retval = NULL;
 
-        if(NULL!=src && strlen(src)>0 ){
-            char *obuf=NULL;
-            char *wp = (char *)malloc(strlen(src)+1);
+        if(NULL != src && strlen(src) > 0 ){
+            char *obuf = NULL;
+            size_t wlen = strlen(src) + 1;
+            char *wp = (char *)malloc(wlen);
             char *sp = wp;
-            memset(wp,0,strlen(src)+1);
-            sprintf(wp,"%s",src);
+            memset(wp, 0, wlen);
+            snprintf(wp, wlen, "%s", src);
             char *pb;
 
             while( (pb = strstr(wp,"$")) != NULL)
@@ -1576,7 +1577,9 @@ public:
                     char *pecpy = strdup(pe);
                     char *rebuf = (char *)malloc(new_len);
                     memset(rebuf,0,new_len);
-                    sprintf(rebuf,"%s%s%s",wp,val,pecpy);
+
+                    snprintf(rebuf, new_len, "%s%s%s",wp,val,pecpy);
+
                     free(pecpy);
                     free(obuf);
                     obuf = rebuf;
@@ -1623,7 +1626,9 @@ public:
                             size_t cmd_len = strlen(key) + strlen(etval) + 4;
                             char *cmd_buf = (char *)malloc(cmd_len);
                             memset(cmd_buf,0,cmd_len);
-                            sprintf(cmd_buf, "--%s%s%s", key,(strlen(etval)>0?"=":""),etval);
+
+                            snprintf(cmd_buf, cmd_len, "--%s%s%s", key,(strlen(etval)>0?"=":""),etval);
+
                             char dummy[]={'f','o','o','\0'};
                             char *cmdv[2]={dummy,cmd_buf};
                             TRN_NDPRINT(4,">>> cmd_buf[%s] cmdv[%p]\n",cmd_buf,&cmdv[0]);

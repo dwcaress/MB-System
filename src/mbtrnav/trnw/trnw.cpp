@@ -99,6 +99,8 @@
 "GNU General Public License for more details (http://www.gnu.org/licenses/gpl-3.0.html)\n"
 */
 
+#define CT_NAME_BUF_SIZE 512
+
 /////////////////////////
 // Declarations
 /////////////////////////
@@ -821,9 +823,9 @@ void commst_initialize(wtnav_t *self, wcommst_t *msg)
         if(NULL!=ct && NULL!=trn){
 
             int errors=0;
-            char mapname[512]={0};
-            char cfgname[512]={0};
-            char particlename[512]={0};
+            char mapname[CT_NAME_BUF_SIZE]={0};
+            char cfgname[CT_NAME_BUF_SIZE]={0};
+            char particlename[CT_NAME_BUF_SIZE]={0};
 
             char* mapPath = getenv("TRN_MAPFILES");
             char* cfgPath = getenv("TRN_DATAFILES");
@@ -841,19 +843,19 @@ void commst_initialize(wtnav_t *self, wcommst_t *msg)
             }
 
             if(ct->mapname[0]=='/'){
-                sprintf(mapname, "%s", ct->mapname);
+                snprintf(mapname, CT_NAME_BUF_SIZE, "%s", ct->mapname);
             }else{
-                sprintf(mapname, "%s/%s", mapPath, ct->mapname);
+                snprintf(mapname, CT_NAME_BUF_SIZE, "%s/%s", mapPath, ct->mapname);
             }
             if(ct->cfgname[0]=='/'){
-                sprintf(cfgname, "%s", ct->cfgname);
+                snprintf(cfgname, CT_NAME_BUF_SIZE, "%s", ct->cfgname);
             }else{
-                sprintf(cfgname, "%s/%s", cfgPath, ct->mapname);
+                snprintf(cfgname, CT_NAME_BUF_SIZE, "%s/%s", cfgPath, ct->mapname);
             }
             if(ct->particlename[0]=='/'){
-                sprintf(particlename, "%s", ct->cfgname);
+                snprintf(particlename, CT_NAME_BUF_SIZE, "%s", ct->cfgname);
             }else{
-                sprintf(particlename, "%s/%s", cfgPath, ct->particlename);
+                snprintf(particlename, CT_NAME_BUF_SIZE, "%s/%s", cfgPath, ct->particlename);
             }
 
             // Let's see if these files exist right now as
