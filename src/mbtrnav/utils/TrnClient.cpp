@@ -161,7 +161,7 @@ TrnClient::~TrnClient()
 
 int TrnClient::loadCfgAttributes(const char *cfg_file)
 {
-    char cfg_buf[300];
+    char cfg_buf[512];
     char *cfg_path=NULL;
 
     if(NULL!=cfg_file){
@@ -173,7 +173,7 @@ int TrnClient::loadCfgAttributes(const char *cfg_file)
         // use default path ($TRN_CONFIGDIR/terrainAid.cfg or ./terrainAid.cfg)
         cfg_path=cfg_buf;
         const char *cfg_dir = getenv("TRN_DATAFILES");
-        sprintf(cfg_buf, "%s/terrainAid.cfg", (NULL!=cfg_dir ? cfg_dir : "."));
+        snprintf(cfg_buf, 512, "%s/terrainAid.cfg", (NULL!=cfg_dir ? cfg_dir : "."));
     }
 
     if (access(cfg_path, F_OK) < 0){
@@ -297,7 +297,7 @@ int TrnClient::loadCfgAttributes(const char *cfg_file)
 
 
         if(_trn_attr->_mapFileName != NULL){
-            sprintf(mapname, "%s/%s", mapPath, _trn_attr->_mapFileName);
+            snprintf(mapname, MAPNAME_BUF_BYTES, "%s/%s", mapPath, _trn_attr->_mapFileName);
             free(mapFile);
             this->mapFile = STRDUPNULL(mapname);
         }else{
@@ -305,7 +305,7 @@ int TrnClient::loadCfgAttributes(const char *cfg_file)
         }
 
         if(_trn_attr->_vehicleCfgName != NULL){
-            sprintf(vehiclename, "%s/%s", cfgPath, _trn_attr->_vehicleCfgName);
+            snprintf(vehiclename, VEHICLENAME_BUF_BYTES, "%s/%s", cfgPath, _trn_attr->_vehicleCfgName);
             free(vehicleSpecFile);
             this->vehicleSpecFile = STRDUPNULL(vehiclename);
         }else{
@@ -313,7 +313,7 @@ int TrnClient::loadCfgAttributes(const char *cfg_file)
         }
 
         if(_trn_attr->_particlesName!=NULL){
-            sprintf(particlename, "%s/%s", cfgPath, _trn_attr->_particlesName);
+            snprintf(particlename, PARTICLENAME_BUF_BYTES, "%s/%s", cfgPath, _trn_attr->_particlesName);
             free(particlesFile);
             this->particlesFile = STRDUPNULL(particlename);
         }else{
@@ -552,7 +552,7 @@ TerrainNav* TrnClient::connectTRN()
 
         if (this->saveDirectory && NULL != cfg_path)
         {
-            sprintf(copybuf, "cp %s %s/.", cfg_path,
+            snprintf(copybuf, 512, "cp %s %s/.", cfg_path,
                     this->saveDirectory);
             if (0 != system(copybuf))
                 fprintf(stderr, "%s: ERR - config copy [%s] failed [%d/%s]\n",

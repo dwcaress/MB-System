@@ -122,8 +122,8 @@ int main( int argc, char **argv )
    }
 	
    char inFile[128], outFile[128];
-   sprintf(inFile, "%s.grd",argv[1]);
-   sprintf(outFile,"%s.bo",argv[1]);
+   snprintf(inFile, 128, "%s.grd", argv[1]);
+   snprintf(outFile, 128, "%s.bo", argv[1]);
    
    //struct stat buf;
    //if( stat(inFile, &buf) == 0 )
@@ -156,7 +156,7 @@ int main( int argc, char **argv )
 	 {
 	    if( i < (argc - 1) )
 	    {
-	       sprintf(outFile,"%s.bo",argv[i+1]);
+	       snprintf(outFile, 128, "%s.bo", argv[i+1]);
 	    }
 	    else
 	    {

@@ -931,7 +931,7 @@ int netif_init_log(netif_t *self, char *log_name, char *log_dir, char *session_s
         }
 
         if(NULL!=session_str){
-            sprintf(session_date,"%s",session_str);
+            snprintf(session_date, 32, "%s",session_str);
         }else{
         // make session time string to use
         // in log file names
@@ -939,14 +939,15 @@ int netif_init_log(netif_t *self, char *log_name, char *log_dir, char *session_s
         // Get GMT time
         struct tm *gmt = gmtime(&rawtime);
         // format YYYYMMDD-HHMMSS
-        sprintf(session_date, "%04d%02d%02d-%02d%02d%02d",
+        snprintf(session_date, 32, "%04d%02d%02d-%02d%02d%02d",
                 (gmt->tm_year+1900),gmt->tm_mon+1,gmt->tm_mday,
                 gmt->tm_hour,gmt->tm_min,gmt->tm_sec);
 
         }
         self->mlog_path = (char *)malloc(NETIF_LOG_PATH_BYTES);
+        memset(self->mlog_path, 0 , NETIF_LOG_PATH_BYTES);
 
-        sprintf(self->mlog_path,"%s//%s-%s%s",self->log_dir,log_name,session_date,NETIF_LOG_EXT);
+        snprintf(self->mlog_path, NETIF_LOG_PATH_BYTES, "%s//%s-%s%s",self->log_dir,log_name,session_date,NETIF_LOG_EXT);
 
         self->mlog_id = mlog_get_instance(self->mlog_path,&mlog_conf, log_name);
         if(self->mlog_id!=MLOG_ID_INVALID){

@@ -197,7 +197,7 @@ void tl_new_logfile(const char* directory)
         
         for (int i = 0; true; i++)
         {
-            sprintf(buf, "%s%s.%04d", directory,fname, i);
+            snprintf(buf, 200, "%s%s.%04d", directory,fname, i);
             if (0 > access(buf, F_OK)) break;
         }
         
