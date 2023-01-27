@@ -365,7 +365,7 @@ int main(int argc, char *argv[])
 
         // prepare mcast message and address
         memset(txbuf,0,MAX_DATA_BYTES);
-        sprintf(txbuf,"MSG mid[%d]",msg_n++);
+        snprintf(txbuf, MAX_DATA_BYTES, "MSG mid[%d]",msg_n++);
         size_t tx_len=strlen(txbuf)+1;
 
         addrlen=sizeof(mcast_addr);
@@ -413,7 +413,8 @@ int main(int argc, char *argv[])
                     if( pids!=NULL){
                         sscanf(pids,"mid[%d",&mid);
                     }
-                    sprintf(txbuf,"ACK mid[%d] cid[%d] pid[%d] ",mid,cid,getpid());
+
+                    snprintf(txbuf, MSGBUFSIZE, "ACK mid[%d] cid[%d] pid[%d] ",mid,cid,getpid());
                     size_t tx_len = strlen(txbuf)+1;
 
                     ssize_t tx_bytes=0;
