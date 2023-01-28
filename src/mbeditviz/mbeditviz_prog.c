@@ -30,7 +30,6 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <unistd.h>
-#include <proj.h>
 
 #include "mb_aux.h"
 #include "mb_define.h"
@@ -68,9 +67,6 @@ void (*updateGui)(void);
 /// Show error dialog
 int (*showErrorDialog)(char *s1, char *s2, char *s3);
 
-/// Test proj functionality
-bool projTest(char *msg);
-
 /* id variables - set in mbeditviz_init() */
 char *program_name = NULL;
 char *help_message = NULL;
@@ -106,16 +102,15 @@ int mbeditviz_init(int argc, char **argv,
                    void (*updateGuiArg)(void),
                    int (*showErrorDialogArg)(char *, char *, char *)) {
 
-  projTest((char *)"from mbeditviz_init()");
   program_name = strdup(programName);
   help_message = strdup(helpMsg);
   usage_message = strdup(usageMsg);
-  
+
   showMessage = showMessageArg;
   hideMessage = hideMessageArg;
   updateGui = updateGuiArg;
   showErrorDialog = showErrorDialogArg;
-    
+
   mbev_status = MB_SUCCESS;
   mbev_error = MB_ERROR_NO_ERROR;
   mbev_verbose = 0;
@@ -554,7 +549,7 @@ int mbeditviz_load_file(int ifile, bool assertLock) {
       (*hideMessage)();
 
 #define BUFSIZE (2*MB_PATH_MAXLINE + 50)
-      
+
       char error1[BUFSIZE] = "";
       char error2[BUFSIZE] = "";
       char error3[BUFSIZE] = "";
@@ -2669,8 +2664,8 @@ int mbeditviz_make_grid() {
 
 /*--------------------------------------------------------------------*/
 int mbeditviz_grid_beam(struct mbev_file_struct *file, struct mbev_ping_struct *ping, int ibeam,
-                        bool beam_ok,  
-                        bool apply_now 
+                        bool beam_ok,
+                        bool apply_now
                         ) {
   if (mbev_verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -5139,42 +5134,3 @@ void mbeditviz_mb3dsoundings_getbiasvariance(double local_grid_xmin, double loca
   }
 }
 /*--------------------------------------------------------------------*/
-
-
-bool projTest(char *msg) {
-  fprintf(stderr, "mbeditviz_prog projTest: %s\n", msg);
-  
-  PJ_INFO projInfo = proj_info();
-  fprintf(stderr, "proj release: %s\n", projInfo.release);
-  
-  double xMin = 0.;
-  
-  // Get UTM zone of grid's W edge
-  int utmZone = ((xMin + 180)/6 + 0.5);
-
-  fprintf(stderr, "UTM zone: %d\n", utmZone);
-  
-  PJ_CONTEXT *projContext = proj_context_create();
-  if (projContext) {
-    fprintf(stderr, "Created projContext OK\n");
-  }
-  else {
-    fprintf(stderr, "Error creating projContext OK\n");
-    return false;
-  }
-
-  const char *srcCRS = "EPSG:4326";
-  char targCRS[64];
-  sprintf(targCRS, "+proj=utm +zone=%d +datum=WGS84", utmZone); 
-  fprintf(stderr, "targCRS: %s\n", targCRS);
-  PJ *proj = proj_create_crs_to_crs (projContext,
-                                     srcCRS,
-                                     targCRS,
-                                     NULL);
-  if (!proj) {
-    fprintf(stderr, "failed to create proj\n");
-  }
-  else {
-    fprintf(stderr, "created proj OK\n");
-  }
-}
