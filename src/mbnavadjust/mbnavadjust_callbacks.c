@@ -2128,6 +2128,7 @@ void do_update_status() {
   }
 
   if (project.open && project.num_files > 0) {
+    XtVaSetValues(pushButton_showreferencegrids, XmNsensitive, True, NULL);
     XtVaSetValues(pushButton_showsurveys, XmNsensitive, True, NULL);
     XtVaSetValues(pushButton_showblocks, XmNsensitive, True, NULL);
     XtVaSetValues(pushButton_showdata, XmNsensitive, True, NULL);

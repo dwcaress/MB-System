@@ -321,7 +321,8 @@ the prerequisite packages.
 # ------
 # MB-System depends on X11, OpenMotif, and OpenGL. These can be installed using:
         sudo apt-get install libx11-dev xorg-dev libmotif-dev libmotif4 \
-            libxp-dev mesa-common-dev libsdl1.2-dev libsdl-image1.2-dev
+            libxp-dev mesa-common-dev libsdl1.2-dev libsdl-image1.2-dev \
+            xfonts-75dpi xfonts-100dpi
 #
 # Other dependencies:
 # -------------------
