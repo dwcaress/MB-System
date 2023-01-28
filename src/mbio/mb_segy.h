@@ -171,14 +171,14 @@ struct mb_segytraceheader_struct {
 struct mb_segyio_struct {
 	FILE *fp;
 	char segyfile[MB_PATH_MAXLINE];
-	int bufferalloc;
+	size_t bufferalloc;
 	char *buffer;
 	int asciiheader_set;
 	int fileheader_set;
 	struct mb_segyasciiheader_struct asciiheader;
 	struct mb_segyfileheader_struct fileheader;
 	struct mb_segytraceheader_struct traceheader;
-	int tracealloc;
+	size_t tracealloc;
 	float *trace;
 };
 

@@ -393,7 +393,6 @@ int main(int argc, char **argv) {
       else if (strcmp("set-global-tie-relative", options[option_index].name) == 0) {
         if (num_mods < NUMBER_MODS_MAX) {
           int nscan;
-          double xoffset, yoffset, zoffset;
           if ((nscan = sscanf(optarg, "%d:%d:%d/%lf/%lf/%lf/%lf/%lf/%lf", &mods[num_mods].file1,
                               &mods[num_mods].section1, &mods[num_mods].snav1, &mods[num_mods].xoffset,
                               &mods[num_mods].yoffset, &mods[num_mods].zoffset, &mods[num_mods].xsigma,
@@ -1183,7 +1182,8 @@ int main(int argc, char **argv) {
       else if (strcmp("unset-skipped-crossings-by-block", options[option_index].name) == 0) {
         if (num_mods < NUMBER_MODS_MAX) {
           int nscan;
-          if ((nscan = sscanf(optarg, "%d:%d", &mods[num_mods].survey1, &mods[num_mods].survey2)) == 2) {
+          if ((nscan = sscanf(optarg, "%d:%d", &mods[num_mods].survey1, &mods[num_mods].survey2)) == 2
+              || (nscan = sscanf(optarg, "%d/%d", &mods[num_mods].survey1, &mods[num_mods].survey2)) == 2) {
             mods[num_mods].mode = MOD_MODE_UNSET_SKIPPED_CROSSINGS_BLOCK;
             num_mods++;
           }

@@ -1940,12 +1940,20 @@ int mb_pr_default_output(int verbose, struct mb_process_struct *process, int *er
 
 		/* set output file if needed */
 		if (!process->mbp_ofile_specified && process->mbp_format_specified) {
-			/* use .txt suffix if MBARI ROV navigation */
-			if (process->mbp_format == MBF_MBARIROV)
-				sprintf(process->mbp_ofile, "%sedited.txt", fileroot);
-			/* else use standard .mbXXX suffix */
-			else
+			/* use p.mbXXX suffix if already edited MBARI ROV navigation */
+			if (process->mbp_format == MBF_MBARIROV
+        && strlen(fileroot) > 6
+        && strncmp(&fileroot[strlen(fileroot)-6], "edited", 6) == 0) {
 				sprintf(process->mbp_ofile, "%sp.mb%d", fileroot, process->mbp_format);
+      }
+			/* else use .txt suffix if unedited MBARI ROV navigation */
+			else if (process->mbp_format == MBF_MBARIROV) {
+        sprintf(process->mbp_ofile, "%sedited.txt", fileroot);
+      }
+			/* else use standard .mbXXX suffix */
+			else {
+				sprintf(process->mbp_ofile, "%sp.mb%d", fileroot, process->mbp_format);
+      }
 			process->mbp_ofile_specified = true;
 		}
 	}
@@ -1994,13 +2002,22 @@ int mb_pr_get_output(int verbose, int *format, char *ifile, char *ofile, int *er
 		if (*format <= 0)
 			*format = tformat;
 
-		/* use .txt suffix if MBARI ROV navigation */
-		if (*format == MBF_MBARIROV)
-			sprintf(ofile, "%sedited.txt", fileroot);
+		/* use .txt suffix if unedited MBARI ROV navigation, p.mbXXX suffix
+        if already edited and processed */
+		if (*format == MBF_MBARIROV) {
+      if (strlen(fileroot) > 6
+          && strncmp(&fileroot[strlen(fileroot)-6], "edited", 6) == 0) {
+				sprintf(ofile, "%sp.mb%d", fileroot, *format);
+      }
+      else {
+			  sprintf(ofile, "%sedited.txt", fileroot);
+      }
+    }
 
 		/* else use standard .mbXXX suffix */
-		else
+		else {
 			sprintf(ofile, "%sp.mb%d", fileroot, *format);
+    }
 	}
 
 	/* else just add suffix */

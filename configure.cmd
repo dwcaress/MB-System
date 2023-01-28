@@ -61,31 +61,31 @@ make uninstall (to fully uninstall the installed libraries, headers, and program
 #------------------------
 #   MB-System configure options:
 #------------------------
-#    --prefix=install      - location for mbsystem (/usr/local/mbsystem) (optional)"])
-#    --enable-hardening    - Enable compiler and linker options to frustrate memory corruption exploits  (e.g. -fPIE and -pie) (optional)"])
-#    --enable-test         - Enable building unit tests in test/ and third-party/"])
-#    --with-netcdf-config  - location of NetCDF config script nc-config (optional)"])
-#    --with-gdal-config    - location of GDAL config script gdal-config (optional)"])
-#    --with-gmt-config     - location of GMT config script gmt-config (optional)"])
-#    --with-proj-lib       - location of PROJ libs (optional)"])
-#    --with-proj-include   - location of PROJ headers (optional)"])
-#    --with-fftw-lib       - location of FFTW3 libs (optional)"])
-#    --with-fftw-include   - location of FFTW3 headers (optional)"])
-#    --with-motif-lib      - location of Motif libs (optional)"])
-#    --with-motif-include  - location of Motif headers (optional)"])
-#    --with-opengl-lib     - location of OpenGL libs (optional)"])
-#    --with-opengl-include - location of OpenGL headers (optional)"])
-#    --with-otps-dir       - location of OTPS installation (optional)"])
-#    --with-opencv-lib     - location of OpenCV libs (optional)"])
-#    --with-opencv-include - location of OpenCV headers (optional)"])
-#    --enable-opencv       - enable building tools using OpenCV (optional)"])
-#    --enable-mbtrn        - enable building terrain relative navigation (TRN) tools (optional)"])
-#    --enable-mbtnav       - enable building terrain relative navigation (TRN) tools (optional)"])
-#    --disable-mbtools     - disable building graphical tools (use with --enable-mbtrn and --enable-mbtnav)"])
-#    --enable-qt           - Enable building graphical tools using the Qt5 framework"])
-#    --with-vtk-include    - location of VTK8.2+ headers (required if qt enabled)"])
-#    --with-vtk-lib        - location of VTK8.2+ libraries (required if qt enabled)"])
-#    --with-debug          - Set compiler flags to allow full debugging"])
+#    --prefix=install      - location for mbsystem (/usr/local/mbsystem) (optional)
+#    --enable-hardening    - Enable compiler and linker options to frustrate memory corruption exploits  (e.g. -fPIE and -pie) (optional)
+#    --enable-test         - Enable building unit tests in test/ and third-party/
+#    --with-netcdf-config  - location of NetCDF config script nc-config (optional)
+#    --with-gdal-config    - location of GDAL config script gdal-config (optional)
+#    --with-gmt-config     - location of GMT config script gmt-config (optional)
+#    --with-proj-lib       - location of PROJ libs (optional)
+#    --with-proj-include   - location of PROJ headers (optional)
+#    --with-fftw-lib       - location of FFTW3 libs (optional)
+#    --with-fftw-include   - location of FFTW3 headers (optional)
+#    --with-motif-lib      - location of Motif libs (optional)
+#    --with-motif-include  - location of Motif headers (optional)
+#    --with-opengl-lib     - location of OpenGL libs (optional)
+#    --with-opengl-include - location of OpenGL headers (optional)
+#    --with-otps-dir       - location of OTPS installation (optional)
+#    --with-opencv-lib     - location of OpenCV libs (optional)
+#    --with-opencv-include - location of OpenCV headers (optional)
+#    --enable-opencv       - enable building tools using OpenCV (optional)
+#    --enable-mbtrn        - enable building terrain relative navigation (TRN) tools (optional)
+#    --enable-mbtnav       - enable building terrain relative navigation (TRN) tools (optional)
+#    --disable-mbtools     - disable building graphical tools (use with --enable-mbtrn and --enable-mbtnav)
+#    --enable-qt           - Enable building graphical tools using the Qt5 framework
+#    --with-vtk-include    - location of VTK8.2+ headers (required if qt enabled)
+#    --with-vtk-lib        - location of VTK8.2+ libraries (required if qt enabled)
+#    --with-debug          - Set compiler flags to allow full debugging
 #
 #------------------------------------------------------------------------------
 # Setting X11 fonts used by mbgrdviz, mbeditviz, mbedit, mbnavedit, mbnavadjust
@@ -321,7 +321,8 @@ the prerequisite packages.
 # ------
 # MB-System depends on X11, OpenMotif, and OpenGL. These can be installed using:
         sudo apt-get install libx11-dev xorg-dev libmotif-dev libmotif4 \
-            libxp-dev mesa-common-dev libsdl1.2-dev libsdl-image1.2-dev
+            libxp-dev mesa-common-dev libsdl1.2-dev libsdl-image1.2-dev \
+            xfonts-75dpi xfonts-100dpi
 #
 # Other dependencies:
 # -------------------
@@ -465,7 +466,7 @@ autoreconf --force --install
 # Run the configure script - here the prerequisites have been installed with
 # MacPorts, and the experimental OpenCV based photomosaicing and Terrain relative
 # Navigation are all enabled
-CFLAGS="-g" CPPFLAGS="-g" ./configure \
+CFLAGS="-g -Wall -Wextra" CPPFLAGS="-g" ./configure \
   --prefix=/usr/local \
   --disable-static \
   --enable-shared \

@@ -1578,6 +1578,9 @@ int mbr_kemkmall_rd_mrz(int verbose, char *buffer, void *store_ptr, void *header
     fprintf(stderr, "dbg2       header_ptr: %p\n", (void *)header_ptr);
   }
 
+  int status = MB_SUCCESS;
+  *error = MB_ERROR_NO_ERROR;
+
   struct mbsys_kmbes_mrz *mrz = NULL;
   struct mbsys_kmbes_m_partition partition;
   struct mbsys_kmbes_m_body cmnPart;
@@ -1949,7 +1952,7 @@ int mbr_kemkmall_rd_mrz(int verbose, char *buffer, void *store_ptr, void *header
 
   if (verbose >= 5) {
     fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
-    fprintf(stderr, "dbg5       numBytesInfoData:           %d\n", mrz->rxInfo.numBytesRxInfo);
+    fprintf(stderr, "dbg5       numBytesRxInfo:             %d\n", mrz->rxInfo.numBytesRxInfo);
     fprintf(stderr, "dbg5       numSoundingsMaxMain:        %d\n", mrz->rxInfo.numSoundingsMaxMain);
     fprintf(stderr, "dbg5       numSoundingsValidMain:      %d\n", mrz->rxInfo.numSoundingsValidMain);
     fprintf(stderr, "dbg5       numBytesPerSounding:        %d\n", mrz->rxInfo.numBytesPerSounding);
@@ -1967,224 +1970,235 @@ int mbr_kemkmall_rd_mrz(int verbose, char *buffer, void *store_ptr, void *header
       - this avoids breaking the decoding if fields have been added to extraDetClassInfo */
   index_extraDetClassInfo = index_rxInfo + mrz->rxInfo.numBytesRxInfo;
 
-  /* EMdgmMRZ_extraDetClassInfo -  Extra detection class info */
-  for (int i = 0; i<(mrz->rxInfo.numExtraDetectionClasses); i++)
-  {
-  /* calculate index at start of of each extraDetClassInfo using pingInfo.numBytesPerTxSector
-      - this avoids breaking the decoding if fields have been added to txSectorInfo */
-    index = index_extraDetClassInfo + i * mrz->rxInfo.numBytesPerClass;
-
-    mb_get_binary_short(true, &buffer[index], &(mrz->extraDetClassInfo[i].numExtraDetInClass));
-    index += 2;
-    mrz->extraDetClassInfo[i].padding = buffer[index];
-    index++;
-    mrz->extraDetClassInfo[i].alarmFlag = buffer[index];
-    index++;
-
-    if (verbose >= 5) {
-      fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
-      fprintf(stderr, "dbg5       numExtraDetInClass:  %d\n", mrz->extraDetClassInfo[i].numExtraDetInClass);
-      fprintf(stderr, "dbg5       padding:             %d\n", mrz->extraDetClassInfo[i].padding);
-      fprintf(stderr, "dbg5       alarmFlag:           %d\n", mrz->extraDetClassInfo[i].alarmFlag);
+  /* check against corrupted data */
+  if (index_extraDetClassInfo + mrz->rxInfo.numExtraDetectionClasses * mrz->rxInfo.numBytesPerClass
+        > header->numBytesDgm) {
+    *error = MB_ERROR_BAD_DATA;
+    status = MB_FAILURE;
+    if (verbose > 0) {
+      fprintf(stderr, "\nCorrupted MRZ datagram dropped...\n");
     }
   }
 
-  /* calculate index at start of sounding using rxInfo.numExtraDetectionClasses & rxInfo.numBytesPerClass
-      - this avoids breaking the decoding if fields have been added to extraDetClassInfo */
-  index_sounding = index_extraDetClassInfo + mrz->rxInfo.numExtraDetectionClasses * mrz->rxInfo.numBytesPerClass;
-
-  /* EMdgmMRZ_sounding - Data for each sounding */
-  int numSidescanSamples = 0;
-  int numSoundings = mrz->rxInfo.numSoundingsMaxMain + mrz->rxInfo.numExtraDetections;
-  for (int i = 0; i<numSoundings; i++)
+  if (status == MB_SUCCESS)
   {
-  /* calculate index at start of of each sounding using pingInfo.numBytesPerTxSector
-      - this avoids breaking the decoding if fields have been added to sounding */
-    index = index_sounding + i * mrz->rxInfo.numBytesPerSounding;
+    /* EMdgmMRZ_extraDetClassInfo -  Extra detection class info */
+    for (int i = 0; i<(mrz->rxInfo.numExtraDetectionClasses); i++)
+    {
+    /* calculate index at start of of each extraDetClassInfo using pingInfo.numBytesPerTxSector
+        - this avoids breaking the decoding if fields have been added to txSectorInfo */
+      index = index_extraDetClassInfo + i * mrz->rxInfo.numBytesPerClass;
 
-    mb_get_binary_short(true, &buffer[index], &(mrz->sounding[i].soundingIndex));
-    index += 2;
-    mrz->sounding[i].txSectorNumb = buffer[index];
-    index++;
+      mb_get_binary_short(true, &buffer[index], &(mrz->extraDetClassInfo[i].numExtraDetInClass));
+      index += 2;
+      mrz->extraDetClassInfo[i].padding = buffer[index];
+      index++;
+      mrz->extraDetClassInfo[i].alarmFlag = buffer[index];
+      index++;
 
-    /* Detection info. */
-    mrz->sounding[i].detectionType = buffer[index];
-    index++;
-    mrz->sounding[i].detectionMethod = buffer[index];
-    index++;
-    mrz->sounding[i].rejectionInfo1 = buffer[index];
-    index++;
-    mrz->sounding[i].rejectionInfo2 = buffer[index];
-    index++;
-    mrz->sounding[i].postProcessingInfo = buffer[index];
-    index++;
-    mrz->sounding[i].detectionClass = buffer[index];
-    index++;
-    mrz->sounding[i].detectionConfidenceLevel = buffer[index];
-    index++;
-    /* These two bytes specified as padding in the Kongsberg specification but are
-       here used for the MB-System beam flag - if the first mb_u_char == 1 then the
-       second byte is an MB-System beamflag */
-    // mb_get_binary_short(true, &buffer[index], &(mrz->sounding[i].padding));
-    // index += 2;
-    mrz->sounding[i].beamflag_enabled = buffer[index];
-    index++;
-    mrz->sounding[i].beamflag = buffer[index];
-    index++;
-    mb_get_binary_float(true, &buffer[index], &(mrz->sounding[i].rangeFactor));
-    index += 4;
-    mb_get_binary_float(true, &buffer[index], &(mrz->sounding[i].qualityFactor));
-    index += 4;
-    mb_get_binary_float(true, &buffer[index], &(mrz->sounding[i].detectionUncertaintyVer_m));
-    index += 4;
-    mb_get_binary_float(true, &buffer[index], &(mrz->sounding[i].detectionUncertaintyHor_m));
-    index += 4;
-    mb_get_binary_float(true, &buffer[index], &(mrz->sounding[i].detectionWindowLength_sec));
-    index += 4;
-    mb_get_binary_float(true, &buffer[index], &(mrz->sounding[i].echoLength_sec));
-    index += 4;
-
-    /* Water column paramters. */
-    mb_get_binary_short(true, &buffer[index], &(mrz->sounding[i].WCBeamNumb));
-    index += 2;
-    mb_get_binary_short(true, &buffer[index], &(mrz->sounding[i].WCrange_samples));
-    index += 2;
-    mb_get_binary_float(true, &buffer[index], &(mrz->sounding[i].WCNomBeamAngleAcross_deg));
-    index += 4;
-
-    /* Reflectivity data (backscatter (BS) data). */
-    mb_get_binary_float(true, &buffer[index], &(mrz->sounding[i].meanAbsCoeff_dBPerkm));
-    index += 4;
-    mb_get_binary_float(true, &buffer[index], &(mrz->sounding[i].reflectivity1_dB));
-    index += 4;
-    mb_get_binary_float(true, &buffer[index], &(mrz->sounding[i].reflectivity2_dB));
-    index += 4;
-    mb_get_binary_float(true, &buffer[index], &(mrz->sounding[i].receiverSensitivityApplied_dB));
-    index += 4;
-    mb_get_binary_float(true, &buffer[index], &(mrz->sounding[i].sourceLevelApplied_dB));
-    index += 4;
-    mb_get_binary_float(true, &buffer[index], &(mrz->sounding[i].BScalibration_dB));
-    index += 4;
-    mb_get_binary_float(true, &buffer[index], &(mrz->sounding[i].TVG_dB));
-    index += 4;
-
-    /* Range and angle data. */
-    mb_get_binary_float(true, &buffer[index], &(mrz->sounding[i].beamAngleReRx_deg));
-    index += 4;
-    mb_get_binary_float(true, &buffer[index], &(mrz->sounding[i].beamAngleCorrection_deg));
-    index += 4;
-    mb_get_binary_float(true, &buffer[index], &(mrz->sounding[i].twoWayTravelTime_sec));
-    index += 4;
-    mb_get_binary_float(true, &buffer[index], &(mrz->sounding[i].twoWayTravelTimeCorrection_sec));
-    index += 4;
-
-    /* Georeferenced depth points. */
-    mb_get_binary_float(true, &buffer[index], &(mrz->sounding[i].deltaLatitude_deg));
-    index += 4;
-    mb_get_binary_float(true, &buffer[index], &(mrz->sounding[i].deltaLongitude_deg));
-    index += 4;
-    mb_get_binary_float(true, &buffer[index], &(mrz->sounding[i].z_reRefPoint_m));
-    index += 4;
-    mb_get_binary_float(true, &buffer[index], &(mrz->sounding[i].y_reRefPoint_m));
-    index += 4;
-    mb_get_binary_float(true, &buffer[index], &(mrz->sounding[i].x_reRefPoint_m));
-    index += 4;
-    mb_get_binary_float(true, &buffer[index], &(mrz->sounding[i].beamIncAngleAdj_deg));
-    index += 4;
-    mb_get_binary_short(true, &buffer[index], &(mrz->sounding[i].realTimeCleanInfo));
-    index += 2;
-
-    /* Seabed image. */
-    mb_get_binary_short(true, &buffer[index], &(mrz->sounding[i].SIstartRange_samples));
-    index += 2;
-    mb_get_binary_short(true, &buffer[index], &(mrz->sounding[i].SIcentreSample));
-    index += 2;
-    mb_get_binary_short(true, &buffer[index], &(mrz->sounding[i].SInumSamples));
-    index += 2;
-
-    numSidescanSamples += mrz->sounding[i].SInumSamples;
-
-    /* calculate beamflag */
-    if (mrz->sounding[i].beamflag_enabled != 1) {
-      if (mrz->sounding[i].detectionType >= 2) {
-        mrz->sounding[i].beamflag = MB_FLAG_NULL;
+      if (verbose >= 5) {
+        fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
+        fprintf(stderr, "dbg5       numExtraDetInClass:  %d\n", mrz->extraDetClassInfo[i].numExtraDetInClass);
+        fprintf(stderr, "dbg5       padding:             %d\n", mrz->extraDetClassInfo[i].padding);
+        fprintf(stderr, "dbg5       alarmFlag:           %d\n", mrz->extraDetClassInfo[i].alarmFlag);
       }
-      else if (mrz->sounding[i].detectionType == 1) {
-        mrz->sounding[i].beamflag = (char)(MB_FLAG_FLAG + MB_FLAG_SONAR);
-      }
-      else if (mrz->sounding[i].qualityFactor > MBSYS_KMBES_QUAL_FACTOR_THRESHOLD) {
+    }
+
+    /* calculate index at start of sounding using rxInfo.numExtraDetectionClasses & rxInfo.numBytesPerClass
+        - this avoids breaking the decoding if fields have been added to extraDetClassInfo */
+    index_sounding = index_extraDetClassInfo + mrz->rxInfo.numExtraDetectionClasses * mrz->rxInfo.numBytesPerClass;
+
+    /* EMdgmMRZ_sounding - Data for each sounding */
+    int numSidescanSamples = 0;
+    int numSoundings = mrz->rxInfo.numSoundingsMaxMain + mrz->rxInfo.numExtraDetections;
+    for (int i = 0; i<numSoundings; i++)
+    {
+    /* calculate index at start of of each sounding using pingInfo.numBytesPerTxSector
+        - this avoids breaking the decoding if fields have been added to sounding */
+      index = index_sounding + i * mrz->rxInfo.numBytesPerSounding;
+
+      mb_get_binary_short(true, &buffer[index], &(mrz->sounding[i].soundingIndex));
+      index += 2;
+      mrz->sounding[i].txSectorNumb = buffer[index];
+      index++;
+
+      /* Detection info. */
+      mrz->sounding[i].detectionType = buffer[index];
+      index++;
+      mrz->sounding[i].detectionMethod = buffer[index];
+      index++;
+      mrz->sounding[i].rejectionInfo1 = buffer[index];
+      index++;
+      mrz->sounding[i].rejectionInfo2 = buffer[index];
+      index++;
+      mrz->sounding[i].postProcessingInfo = buffer[index];
+      index++;
+      mrz->sounding[i].detectionClass = buffer[index];
+      index++;
+      mrz->sounding[i].detectionConfidenceLevel = buffer[index];
+      index++;
+      /* These two bytes specified as padding in the Kongsberg specification but are
+         here used for the MB-System beam flag - if the first mb_u_char == 1 then the
+         second byte is an MB-System beamflag */
+      // mb_get_binary_short(true, &buffer[index], &(mrz->sounding[i].padding));
+      // index += 2;
+      mrz->sounding[i].beamflag_enabled = buffer[index];
+      index++;
+      mrz->sounding[i].beamflag = buffer[index];
+      index++;
+      mb_get_binary_float(true, &buffer[index], &(mrz->sounding[i].rangeFactor));
+      index += 4;
+      mb_get_binary_float(true, &buffer[index], &(mrz->sounding[i].qualityFactor));
+      index += 4;
+      mb_get_binary_float(true, &buffer[index], &(mrz->sounding[i].detectionUncertaintyVer_m));
+      index += 4;
+      mb_get_binary_float(true, &buffer[index], &(mrz->sounding[i].detectionUncertaintyHor_m));
+      index += 4;
+      mb_get_binary_float(true, &buffer[index], &(mrz->sounding[i].detectionWindowLength_sec));
+      index += 4;
+      mb_get_binary_float(true, &buffer[index], &(mrz->sounding[i].echoLength_sec));
+      index += 4;
+
+      /* Water column paramters. */
+      mb_get_binary_short(true, &buffer[index], &(mrz->sounding[i].WCBeamNumb));
+      index += 2;
+      mb_get_binary_short(true, &buffer[index], &(mrz->sounding[i].WCrange_samples));
+      index += 2;
+      mb_get_binary_float(true, &buffer[index], &(mrz->sounding[i].WCNomBeamAngleAcross_deg));
+      index += 4;
+
+      /* Reflectivity data (backscatter (BS) data). */
+      mb_get_binary_float(true, &buffer[index], &(mrz->sounding[i].meanAbsCoeff_dBPerkm));
+      index += 4;
+      mb_get_binary_float(true, &buffer[index], &(mrz->sounding[i].reflectivity1_dB));
+      index += 4;
+      mb_get_binary_float(true, &buffer[index], &(mrz->sounding[i].reflectivity2_dB));
+      index += 4;
+      mb_get_binary_float(true, &buffer[index], &(mrz->sounding[i].receiverSensitivityApplied_dB));
+      index += 4;
+      mb_get_binary_float(true, &buffer[index], &(mrz->sounding[i].sourceLevelApplied_dB));
+      index += 4;
+      mb_get_binary_float(true, &buffer[index], &(mrz->sounding[i].BScalibration_dB));
+      index += 4;
+      mb_get_binary_float(true, &buffer[index], &(mrz->sounding[i].TVG_dB));
+      index += 4;
+
+      /* Range and angle data. */
+      mb_get_binary_float(true, &buffer[index], &(mrz->sounding[i].beamAngleReRx_deg));
+      index += 4;
+      mb_get_binary_float(true, &buffer[index], &(mrz->sounding[i].beamAngleCorrection_deg));
+      index += 4;
+      mb_get_binary_float(true, &buffer[index], &(mrz->sounding[i].twoWayTravelTime_sec));
+      index += 4;
+      mb_get_binary_float(true, &buffer[index], &(mrz->sounding[i].twoWayTravelTimeCorrection_sec));
+      index += 4;
+
+      /* Georeferenced depth points. */
+      mb_get_binary_float(true, &buffer[index], &(mrz->sounding[i].deltaLatitude_deg));
+      index += 4;
+      mb_get_binary_float(true, &buffer[index], &(mrz->sounding[i].deltaLongitude_deg));
+      index += 4;
+      mb_get_binary_float(true, &buffer[index], &(mrz->sounding[i].z_reRefPoint_m));
+      index += 4;
+      mb_get_binary_float(true, &buffer[index], &(mrz->sounding[i].y_reRefPoint_m));
+      index += 4;
+      mb_get_binary_float(true, &buffer[index], &(mrz->sounding[i].x_reRefPoint_m));
+      index += 4;
+      mb_get_binary_float(true, &buffer[index], &(mrz->sounding[i].beamIncAngleAdj_deg));
+      index += 4;
+      mb_get_binary_short(true, &buffer[index], &(mrz->sounding[i].realTimeCleanInfo));
+      index += 2;
+
+      /* Seabed image. */
+      mb_get_binary_short(true, &buffer[index], &(mrz->sounding[i].SIstartRange_samples));
+      index += 2;
+      mb_get_binary_short(true, &buffer[index], &(mrz->sounding[i].SIcentreSample));
+      index += 2;
+      mb_get_binary_short(true, &buffer[index], &(mrz->sounding[i].SInumSamples));
+      index += 2;
+
+      numSidescanSamples += mrz->sounding[i].SInumSamples;
+
+      /* calculate beamflag */
+      if (mrz->sounding[i].beamflag_enabled != 1) {
+        if (mrz->sounding[i].detectionType >= 2) {
+          mrz->sounding[i].beamflag = MB_FLAG_NULL;
+        }
+        else if (mrz->sounding[i].detectionType == 1) {
           mrz->sounding[i].beamflag = (char)(MB_FLAG_FLAG + MB_FLAG_SONAR);
+        }
+        else if (mrz->sounding[i].qualityFactor > MBSYS_KMBES_QUAL_FACTOR_THRESHOLD) {
+            mrz->sounding[i].beamflag = (char)(MB_FLAG_FLAG + MB_FLAG_SONAR);
+        }
+        else {
+            mrz->sounding[i].beamflag = MB_FLAG_NONE;
+        }
+        mrz->sounding[i].beamflag_enabled = 1;
       }
-      else {
-          mrz->sounding[i].beamflag = MB_FLAG_NONE;
+
+      if (verbose >= 5) {
+        fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
+        fprintf(stderr, "dbg5       soundingIndex:                   %d\n", mrz->sounding[i].soundingIndex);
+        fprintf(stderr, "dbg5       txSectorNumb:                    %d\n", mrz->sounding[i].txSectorNumb);
+        fprintf(stderr, "dbg5       detectionType:                   %d\n", mrz->sounding[i].detectionType);
+        fprintf(stderr, "dbg5       detectionMethod:                 %d\n", mrz->sounding[i].detectionMethod);
+        fprintf(stderr, "dbg5       rejectionInfo1:                  %d\n", mrz->sounding[i].rejectionInfo1);
+        fprintf(stderr, "dbg5       rejectionInfo2:                  %d\n", mrz->sounding[i].rejectionInfo2);
+        fprintf(stderr, "dbg5       postProcessingInfo:              %d\n", mrz->sounding[i].postProcessingInfo);
+        fprintf(stderr, "dbg5       detectionClass:                  %d\n", mrz->sounding[i].detectionClass);
+        fprintf(stderr, "dbg5       detectionConfidenceLevel:        %d\n", mrz->sounding[i].detectionConfidenceLevel);
+        // fprintf(stderr, "dbg5       padding:                        %d\n", mrz->sounding[i].padding);
+        fprintf(stderr, "dbg5       beamflag_enabled:                %d\n", mrz->sounding[i].beamflag_enabled);
+        fprintf(stderr, "dbg5       beamflag:                        %d\n", mrz->sounding[i].beamflag);
+        fprintf(stderr, "dbg5       rangeFactor:                     %f\n", mrz->sounding[i].rangeFactor);
+        fprintf(stderr, "dbg5       qualityFactor:                   %f\n", mrz->sounding[i].qualityFactor);
+        fprintf(stderr, "dbg5       detectionUncertaintyVer_m:       %f\n", mrz->sounding[i].detectionUncertaintyVer_m);
+        fprintf(stderr, "dbg5       detectionUncertaintyHor_m:       %f\n", mrz->sounding[i].detectionUncertaintyHor_m);
+        fprintf(stderr, "dbg5       detectionWindowLength_sec:       %f\n", mrz->sounding[i].detectionWindowLength_sec);
+        fprintf(stderr, "dbg5       echoLength_sec:                  %f\n", mrz->sounding[i].echoLength_sec);
+        fprintf(stderr, "dbg5       WCBeamNumb:                      %d\n", mrz->sounding[i].WCBeamNumb);
+        fprintf(stderr, "dbg5       WCrange_samples:                 %d\n", mrz->sounding[i].WCrange_samples);
+        fprintf(stderr, "dbg5       WCNomBeamAngleAcross_deg:        %f\n", mrz->sounding[i].WCNomBeamAngleAcross_deg);
+        fprintf(stderr, "dbg5       meanAbsCoeff_dBPerkm:            %f\n", mrz->sounding[i].meanAbsCoeff_dBPerkm);
+        fprintf(stderr, "dbg5       reflectivity1_dB:                %f\n", mrz->sounding[i].reflectivity1_dB);
+        fprintf(stderr, "dbg5       reflectivity2_dB:                %f\n", mrz->sounding[i].reflectivity2_dB);
+        fprintf(stderr, "dbg5       receiverSensitivityApplied_dB:   %f\n", mrz->sounding[i].receiverSensitivityApplied_dB);
+        fprintf(stderr, "dbg5       sourceLevelApplied_dB:           %f\n", mrz->sounding[i].sourceLevelApplied_dB);
+        fprintf(stderr, "dbg5       BScalibration_dB:                %f\n", mrz->sounding[i].BScalibration_dB);
+        fprintf(stderr, "dbg5       TVG_dB:                          %f\n", mrz->sounding[i].TVG_dB);
+        fprintf(stderr, "dbg5       beamAngleReRx_deg:               %f\n", mrz->sounding[i].beamAngleReRx_deg);
+        fprintf(stderr, "dbg5       beamAngleCorrection_deg:         %f\n", mrz->sounding[i].beamAngleCorrection_deg);
+        fprintf(stderr, "dbg5       twoWayTravelTime_sec:            %f\n", mrz->sounding[i].twoWayTravelTime_sec);
+        fprintf(stderr, "dbg5       twoWayTravelTimeCorrection_sec:  %f\n", mrz->sounding[i].twoWayTravelTimeCorrection_sec);
+        fprintf(stderr, "dbg5       deltaLatitude_deg:               %f\n", mrz->sounding[i].deltaLatitude_deg);
+        fprintf(stderr, "dbg5       deltaLongitude_deg:              %f\n", mrz->sounding[i].deltaLongitude_deg);
+        fprintf(stderr, "dbg5       z_reRefPoint_m:                  %f\n", mrz->sounding[i].z_reRefPoint_m);
+        fprintf(stderr, "dbg5       y_reRefPoint_m:                  %f\n", mrz->sounding[i].y_reRefPoint_m);
+        fprintf(stderr, "dbg5       x_reRefPoint_m:                  %f\n", mrz->sounding[i].x_reRefPoint_m);
+        fprintf(stderr, "dbg5       beamIncAngleAdj_deg:             %f\n", mrz->sounding[i].beamIncAngleAdj_deg);
+        fprintf(stderr, "dbg5       realTimeCleanInfo:               %d\n", mrz->sounding[i].realTimeCleanInfo);
+        fprintf(stderr, "dbg5       SIstartRange_samples:            %d\n", mrz->sounding[i].SIstartRange_samples);
+        fprintf(stderr, "dbg5       SIcentreSample:                  %d\n", mrz->sounding[i].SIcentreSample);
+        fprintf(stderr, "dbg5       SInumSamples:                    %d\n", mrz->sounding[i].SInumSamples);
       }
-      mrz->sounding[i].beamflag_enabled = 1;
     }
 
     if (verbose >= 5) {
       fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
-      fprintf(stderr, "dbg5       soundingIndex:                   %d\n", mrz->sounding[i].soundingIndex);
-      fprintf(stderr, "dbg5       txSectorNumb:                    %d\n", mrz->sounding[i].txSectorNumb);
-      fprintf(stderr, "dbg5       detectionType:                   %d\n", mrz->sounding[i].detectionType);
-      fprintf(stderr, "dbg5       detectionMethod:                 %d\n", mrz->sounding[i].detectionMethod);
-      fprintf(stderr, "dbg5       rejectionInfo1:                  %d\n", mrz->sounding[i].rejectionInfo1);
-      fprintf(stderr, "dbg5       rejectionInfo2:                  %d\n", mrz->sounding[i].rejectionInfo2);
-      fprintf(stderr, "dbg5       postProcessingInfo:              %d\n", mrz->sounding[i].postProcessingInfo);
-      fprintf(stderr, "dbg5       detectionClass:                  %d\n", mrz->sounding[i].detectionClass);
-      fprintf(stderr, "dbg5       detectionConfidenceLevel:        %d\n", mrz->sounding[i].detectionConfidenceLevel);
-      // fprintf(stderr, "dbg5       padding:                        %d\n", mrz->sounding[i].padding);
-      fprintf(stderr, "dbg5       beamflag_enabled:                %d\n", mrz->sounding[i].beamflag_enabled);
-      fprintf(stderr, "dbg5       beamflag:                        %d\n", mrz->sounding[i].beamflag);
-      fprintf(stderr, "dbg5       rangeFactor:                     %f\n", mrz->sounding[i].rangeFactor);
-      fprintf(stderr, "dbg5       qualityFactor:                   %f\n", mrz->sounding[i].qualityFactor);
-      fprintf(stderr, "dbg5       detectionUncertaintyVer_m:       %f\n", mrz->sounding[i].detectionUncertaintyVer_m);
-      fprintf(stderr, "dbg5       detectionUncertaintyHor_m:       %f\n", mrz->sounding[i].detectionUncertaintyHor_m);
-      fprintf(stderr, "dbg5       detectionWindowLength_sec:       %f\n", mrz->sounding[i].detectionWindowLength_sec);
-      fprintf(stderr, "dbg5       echoLength_sec:                  %f\n", mrz->sounding[i].echoLength_sec);
-      fprintf(stderr, "dbg5       WCBeamNumb:                      %d\n", mrz->sounding[i].WCBeamNumb);
-      fprintf(stderr, "dbg5       WCrange_samples:                 %d\n", mrz->sounding[i].WCrange_samples);
-      fprintf(stderr, "dbg5       WCNomBeamAngleAcross_deg:        %f\n", mrz->sounding[i].WCNomBeamAngleAcross_deg);
-      fprintf(stderr, "dbg5       meanAbsCoeff_dBPerkm:            %f\n", mrz->sounding[i].meanAbsCoeff_dBPerkm);
-      fprintf(stderr, "dbg5       reflectivity1_dB:                %f\n", mrz->sounding[i].reflectivity1_dB);
-      fprintf(stderr, "dbg5       reflectivity2_dB:                %f\n", mrz->sounding[i].reflectivity2_dB);
-      fprintf(stderr, "dbg5       receiverSensitivityApplied_dB:   %f\n", mrz->sounding[i].receiverSensitivityApplied_dB);
-      fprintf(stderr, "dbg5       sourceLevelApplied_dB:           %f\n", mrz->sounding[i].sourceLevelApplied_dB);
-      fprintf(stderr, "dbg5       BScalibration_dB:                %f\n", mrz->sounding[i].BScalibration_dB);
-      fprintf(stderr, "dbg5       TVG_dB:                          %f\n", mrz->sounding[i].TVG_dB);
-      fprintf(stderr, "dbg5       beamAngleReRx_deg:               %f\n", mrz->sounding[i].beamAngleReRx_deg);
-      fprintf(stderr, "dbg5       beamAngleCorrection_deg:         %f\n", mrz->sounding[i].beamAngleCorrection_deg);
-      fprintf(stderr, "dbg5       twoWayTravelTime_sec:            %f\n", mrz->sounding[i].twoWayTravelTime_sec);
-      fprintf(stderr, "dbg5       twoWayTravelTimeCorrection_sec:  %f\n", mrz->sounding[i].twoWayTravelTimeCorrection_sec);
-      fprintf(stderr, "dbg5       deltaLatitude_deg:               %f\n", mrz->sounding[i].deltaLatitude_deg);
-      fprintf(stderr, "dbg5       deltaLongitude_deg:              %f\n", mrz->sounding[i].deltaLongitude_deg);
-      fprintf(stderr, "dbg5       z_reRefPoint_m:                  %f\n", mrz->sounding[i].z_reRefPoint_m);
-      fprintf(stderr, "dbg5       y_reRefPoint_m:                  %f\n", mrz->sounding[i].y_reRefPoint_m);
-      fprintf(stderr, "dbg5       x_reRefPoint_m:                  %f\n", mrz->sounding[i].x_reRefPoint_m);
-      fprintf(stderr, "dbg5       beamIncAngleAdj_deg:             %f\n", mrz->sounding[i].beamIncAngleAdj_deg);
-      fprintf(stderr, "dbg5       realTimeCleanInfo:               %d\n", mrz->sounding[i].realTimeCleanInfo);
-      fprintf(stderr, "dbg5       SIstartRange_samples:            %d\n", mrz->sounding[i].SIstartRange_samples);
-      fprintf(stderr, "dbg5       SIcentreSample:                  %d\n", mrz->sounding[i].SIcentreSample);
-      fprintf(stderr, "dbg5       SInumSamples:                    %d\n", mrz->sounding[i].SInumSamples);
+      fprintf(stderr, "dbg5       numSidescanSamples:  %d\n", numSidescanSamples);
+    }
+
+    /* calculate index at start of SIsample_desidB using numSoundings and mrz->rxInfo.numBytesPerSounding
+        - this avoids breaking the decoding if fields have been added to sounding */
+    index_SIsample = index_sounding + numSoundings * mrz->rxInfo.numBytesPerSounding;
+    index = index_SIsample;
+
+    for (int i = 0; i < numSidescanSamples; i++)
+    {
+      mb_get_binary_short(true, &buffer[index], &(mrz->SIsample_desidB[i]));
+      index += 2;
     }
   }
-
-  if (verbose >= 5) {
-    fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
-    fprintf(stderr, "dbg5       numSidescanSamples:  %d\n", numSidescanSamples);
-  }
-
-  /* calculate index at start of SIsample_desidB using numSoundings and mrz->rxInfo.numBytesPerSounding
-      - this avoids breaking the decoding if fields have been added to sounding */
-  index_SIsample = index_sounding + numSoundings * mrz->rxInfo.numBytesPerSounding;
-  index = index_SIsample;
-
-  for (int i = 0; i<numSidescanSamples; i++)
-  {
-    mb_get_binary_short(true, &buffer[index], &(mrz->SIsample_desidB[i]));
-    index += 2;
-  }
-
-  int status = MB_SUCCESS;
 
   /* set kind */
   if (status == MB_SUCCESS) {
