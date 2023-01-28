@@ -160,6 +160,8 @@ int mbnavadjust_new_project(int verbose, char *projectpath, double section_lengt
       project->num_globalties = 0;
       project->num_globalties_analyzed = 0;
       project->num_refgrids = 0;
+      memset((void *)project->refgrid_names, 0, MBNA_REFGRID_NUM_MAX * sizeof(mb_path));
+      memset((void *)project->refgrid_bounds, 0, 4 * MBNA_REFGRID_NUM_MAX * sizeof(double));
 
       project->section_length = section_length;
       project->bin_beams_bath = 0;
@@ -418,35 +420,84 @@ int mbnavadjust_read_project(int verbose, char *projectpath, struct mbna_project
             exit(0);
           }
           for (int irefgrid=0; irefgrid < project->num_refgrids; irefgrid++) {
-            if (status == MB_SUCCESS &&
-                ((result = fgets(buffer, BUFFER_MAX, hfp)) != buffer ||
-                 (nscan = sscanf(buffer, "%s %s", label, obuffer)) < 1 || strcmp(label, "REFERENCEGRID") != 0))
-              status = MB_FAILURE;
-            if (status == MB_FAILURE) {
-              fprintf(stderr, "Die at line:%d file:%s buffer:%s\n", __LINE__, __FILE__, buffer);
-              exit(0);
+            if (status == MB_SUCCESS) {
+              if ((result = fgets(buffer, BUFFER_MAX, hfp)) == buffer
+                  && strncmp("REFERENCEGRID", buffer, 13) == 0) {
+                if (irefgrid < MBNA_REFGRID_NUM_MAX) {
+                  nscan = sscanf(buffer, "%s %s %lf %lf %lf %lf",
+                                  label, project->refgrid_names[irefgrid],
+                                  &project->refgrid_bounds[0][irefgrid],
+                                  &project->refgrid_bounds[1][irefgrid],
+                                  &project->refgrid_bounds[2][irefgrid],
+                                  &project->refgrid_bounds[3][irefgrid]);
+                  if (nscan == 6) {
+                  }
+                  else if (nscan >= 2) {
+                    struct mbna_grid refgrid;
+                    memset(&refgrid, 0, sizeof(refgrid));
+                    int grid_projection_mode;
+                    int nxy;
+                    mb_path path;
+                    snprintf(path, sizeof(mb_path), "%s/%s", project->datadir, project->refgrid_names[irefgrid]);
+                    status = mb_check_gmt_grd(verbose, path, &grid_projection_mode,
+                             refgrid.projection_id,
+                             &refgrid.nodatavalue, &nxy,
+                             &refgrid.nx, &refgrid.ny,
+                             &refgrid.min, &refgrid.max,
+                             &project->refgrid_bounds[0][irefgrid],
+                             &project->refgrid_bounds[1][irefgrid],
+                             &project->refgrid_bounds[2][irefgrid],
+                             &project->refgrid_bounds[3][irefgrid],
+                             &refgrid.dx, &refgrid.dy, error);
+                    if (status == MB_FAILURE) {
+                      fprintf(stderr, "Die at line:%d file:%s grid file:%s\n", __LINE__, __FILE__, project->refgrid_names[irefgrid]);
+                      exit(0);
+                    }
+                  }
+                }
+              }
+              else {
+                status = MB_FAILURE;
+                fprintf(stderr, "Die at line:%d file:%s grid file:%s\n", __LINE__, __FILE__, project->refgrid_names[irefgrid]);
+                exit(0);
+              }
             }
-            if (nscan > 1 && irefgrid < MBNA_REFGRID_NUM_MAX)
-              strcpy(project->refgrid_names[irefgrid], obuffer);
           }
           project->refgrid_status = MBNA_REFGRID_UNLOADED;
         }
         else if (version_id >= 310) {
-          if (status == MB_SUCCESS &&
-              ((result = fgets(buffer, BUFFER_MAX, hfp)) != buffer ||
-               (nscan = sscanf(buffer, "%s %s", label, obuffer)) < 1 || strcmp(label, "REFERENCEGRID") != 0))
-            status = MB_FAILURE;
-          if (status == MB_FAILURE) {
-            fprintf(stderr, "Die at line:%d file:%s buffer:%s\n", __LINE__, __FILE__, buffer);
-            exit(0);
-          }
-          if (nscan > 1 && strcmp(obuffer, "NONE")) {
-            strcpy(project->refgrid_names[0], obuffer);
-            project->num_refgrids = 1;
+          if ((result = fgets(buffer, BUFFER_MAX, hfp)) == buffer
+              && strncmp("REFERENCEGRID", buffer, 13) == 0) {
+            nscan = sscanf(buffer, "%s %s", label, project->refgrid_names[0]);
+            if (nscan == 2) {
+              struct mbna_grid refgrid;
+              memset(&refgrid, 0, sizeof(refgrid));
+              int grid_projection_mode;
+              int nxy;
+              mb_path path;
+              snprintf(path, sizeof(mb_path), "%s/%s", project->datadir, project->refgrid_names[0]);
+              status = mb_check_gmt_grd(verbose, path, &grid_projection_mode,
+                       refgrid.projection_id,
+                       &refgrid.nodatavalue, &nxy,
+                       &refgrid.nx, &refgrid.ny,
+                       &refgrid.min, &refgrid.max,
+                       &project->refgrid_bounds[0][0],
+                       &project->refgrid_bounds[1][0],
+                       &project->refgrid_bounds[2][0],
+                       &project->refgrid_bounds[3][0],
+                       &refgrid.dx, &refgrid.dy, error);
+              if (status == MB_FAILURE) {
+                fprintf(stderr, "Die at line:%d file:%s grid file:%s\n", __LINE__, __FILE__, project->refgrid_names[0]);
+                exit(0);
+              }
+            }
           }
           else {
-            project->num_refgrids = 0;
+            status = MB_FAILURE;
+            fprintf(stderr, "Die at line:%d file:%s grid file:%s\n", __LINE__, __FILE__, project->refgrid_names[0]);
+            exit(0);
           }
+          project->refgrid_status = MBNA_REFGRID_UNLOADED;
         } else {
           project->num_refgrids = 0;
         }
@@ -1664,7 +1715,12 @@ int mbnavadjust_write_project(int verbose, struct mbna_project *project,
     fprintf(hfp, "DATADIR\t%s\n", project->datadir);
     fprintf(hfp, "NUMREFERENCEGRIDS\t%d\n", project->num_refgrids);
     for (i = 0; i < project->num_refgrids; i++) {
-      fprintf(hfp, "REFERENCEGRID\t%s\n", project->refgrid_names[i]);
+      fprintf(hfp, "REFERENCEGRID\t%s  %.9f %.9f %.9f %.9f\n",
+              project->refgrid_names[i],
+              project->refgrid_bounds[0][i],
+              project->refgrid_bounds[1][i],
+              project->refgrid_bounds[2][i],
+              project->refgrid_bounds[3][i]);
     }
     fprintf(hfp, "NUMFILES\t%d\n", project->num_files);
     fprintf(hfp, "NUMBLOCKS\t%d\n", project->num_surveys);
@@ -5402,18 +5458,15 @@ int mbnavadjust_import_reference(int verbose, struct mbna_project *project, char
   memset(&refgrid, 0, sizeof(refgrid));
   int grid_projection_mode;
   int nxy;
-  int status = mb_read_gmt_grd(verbose, path, &grid_projection_mode,
+  int status = mb_check_gmt_grd(verbose, path, &grid_projection_mode,
              refgrid.projection_id,
              &refgrid.nodatavalue, &nxy,
              &refgrid.nx, &refgrid.ny,
              &refgrid.min, &refgrid.max,
              &refgrid.bounds[0], &refgrid.bounds[1],
-             &refgrid.bounds[2], &refgrid.bounds[2],
-             &refgrid.dx, &refgrid.dy,
-             &refgrid.val, NULL, NULL, error);
-  if (status == MB_SUCCESS && refgrid.val != NULL) {
-    free(refgrid.val);
-    refgrid.val = NULL;
+             &refgrid.bounds[2], &refgrid.bounds[3],
+             &refgrid.dx, &refgrid.dy, error);
+  if (status == MB_SUCCESS) {
     if (project->num_refgrids < MBNA_REFGRID_NUM_MAX) {
       char command[STRING_MAX], name[STRING_MAX];
       if (strrchr(path, '/') != NULL) {
@@ -5425,6 +5478,10 @@ int mbnavadjust_import_reference(int verbose, struct mbna_project *project, char
       system(command);
       fprintf(stderr, "Imported new reference grid: %s ==> %s/%s\n", path, project->datadir, name);
       strncpy(project->refgrid_names[project->num_refgrids], name, MB_PATH_MAXLINE);
+      project->refgrid_bounds[0][project->num_refgrids] = refgrid.bounds[0];
+      project->refgrid_bounds[1][project->num_refgrids] = refgrid.bounds[1];
+      project->refgrid_bounds[2][project->num_refgrids] = refgrid.bounds[2];
+      project->refgrid_bounds[3][project->num_refgrids] = refgrid.bounds[3];
       project->num_refgrids++;
     }
     else {

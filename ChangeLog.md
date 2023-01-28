@@ -23,6 +23,7 @@ Distributions that do not include "beta" in the tag name correspond to the major
 announced releases. The source distributions associated with all releases, major
 or beta, are equally accessible as tarballs through the Github interface.
 
+- Version 5.7.9beta50    January 28, 2023
 - Version 5.7.9beta49    January 22, 2023
 - Version 5.7.9beta48    December 16, 2022
 - Version 5.7.9beta47    November 15, 2022
@@ -425,6 +426,14 @@ or beta, are equally accessible as tarballs through the Github interface.
 --
 ### MB-System Version 5.7 Release Notes:
 --
+
+#### 5.7.9beta50 (January 28, 2023)
+
+MBnavadjust: Fixed interface issues for importing multiple reference grids and
+selecting those while makeing global ties.
+
+Format 261 (MBF_KEMKMALL): Added code to detect and handle gracefully some 
+instances of corruption of MRZ datagrams, particularly due to missing bytes.
 
 #### 5.7.9beta49 (January 22, 2023)
 

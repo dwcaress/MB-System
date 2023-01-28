@@ -367,6 +367,7 @@ struct mbna_project {
   int num_globalties_analyzed;
   int num_refgrids;
   mb_path refgrid_names[MBNA_REFGRID_NUM_MAX];
+  double refgrid_bounds[4][MBNA_REFGRID_NUM_MAX];
 
   double section_length;
   int section_soundings;
