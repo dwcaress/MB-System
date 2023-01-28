@@ -194,7 +194,7 @@ int main(int argc, char **argv) {
 	}
 
 	/* first get roll data from the entire swathdata (which can be a datalist ) */
-	char cmdfile[MB_PATH_MAXLINE];
+	char cmdfile[5*MB_PATH_MAXLINE+200];
 	if (kind > MB_DATA_NONE)
 		sprintf(cmdfile, "mbnavlist -I%s -F%d -K%d -OMR", swathdata, format, kind);
 	else
@@ -225,7 +225,7 @@ int main(int argc, char **argv) {
 	fprintf(stderr, "%d roll data read from %s\n", nroll, swathdata);
 
 	/* open total cross correlation file */
-	char xcorfiletot[MB_PATH_MAXLINE];
+	char xcorfiletot[MB_PATH_MAXLINE+10];
 	FILE *fpt = nullptr;
 	if (read_datalist) {
 		sprintf(xcorfiletot, "%s_xcorr.txt", outroot);
@@ -237,7 +237,7 @@ int main(int argc, char **argv) {
 	}
 
 	/* open time lag estimate file */
-	char estimatefile[MB_PATH_MAXLINE];
+	char estimatefile[MB_PATH_MAXLINE+20];
 	sprintf(estimatefile, "%s_timelagest.txt", outroot);
 	FILE *fpe = fopen(estimatefile, "w");
 	if (fpe == nullptr) {
@@ -247,7 +247,7 @@ int main(int argc, char **argv) {
 	}
 
 	/* open time lag histogram file */
-	char histfile[MB_PATH_MAXLINE];
+	char histfile[MB_PATH_MAXLINE+20];
 	sprintf(histfile, "%s_timelaghist.txt", outroot);
 	FILE *fph = fopen(histfile, "w");
 	if (fph == nullptr) {
@@ -257,7 +257,7 @@ int main(int argc, char **argv) {
 	}
 
 	/* open time lag model file */
-	char modelfile[MB_PATH_MAXLINE];
+	char modelfile[MB_PATH_MAXLINE+20];
 	sprintf(modelfile, "%s_timelagmodel.txt", outroot);
 	FILE *fpm = fopen(modelfile, "w");
 	if (fpm == nullptr) {
@@ -352,7 +352,7 @@ int main(int argc, char **argv) {
 		fprintf(stderr, "%d slope data read from %s\n", nslope, swathfile);
 
 		/* open time lag histogram file */
-		char fhistfile[MB_PATH_MAXLINE];
+		char fhistfile[MB_PATH_MAXLINE+20];
 		sprintf(fhistfile, "%s_timelaghist.txt", swathfile);
 		FILE *fpf = fopen(fhistfile, "w");
 		if (fpf == nullptr) {
@@ -362,7 +362,7 @@ int main(int argc, char **argv) {
 		}
 
 		/* open cross correlation file */
-		char xcorfile[MB_PATH_MAXLINE];
+		char xcorfile[MB_PATH_MAXLINE+20];
 		sprintf(xcorfile, "%s_xcorr.txt", swathfile);
 		FILE *fpx = fopen(xcorfile, "w");
 		if (fpx == nullptr) {

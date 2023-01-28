@@ -2966,7 +2966,7 @@ void do_mbview_set_projection_label(size_t instance) {
 	else if (data->primary_grid_projection_mode == MBV_PROJECTION_PROJECTED ||
 	         data->primary_grid_projection_mode == MBV_PROJECTION_ALREADYPROJECTED) {
 		int projectionid;
-		mb_path tmptext;
+		char tmptext[MB_PATH_MAXLINE*2];
 		if (sscanf(data->primary_grid_projection_id, "epsg%d", &projectionid) == 1 && projectionid == 32661) {
 			sprintf(tmptext, ":t\"  Projected: %s\":t\"    North Polar Steographic\"", data->secondary_grid_projection_id);
 			strcat(value_text, tmptext);
@@ -3024,7 +3024,7 @@ void do_mbview_set_projection_label(size_t instance) {
 		else if (data->secondary_grid_projection_mode == MBV_PROJECTION_PROJECTED ||
 		         data->secondary_grid_projection_mode == MBV_PROJECTION_ALREADYPROJECTED) {
 			int projectionid;
-			mb_path tmptext;
+			char tmptext[MB_PATH_MAXLINE*2];
 			if (sscanf(data->secondary_grid_projection_id, "epsg%d", &projectionid) == 1 && projectionid == 32661) {
 				sprintf(tmptext, ":t\"  Projected: %s\":t\"    North Polar Steographic\"", data->secondary_grid_projection_id);
 				strcat(value_text, tmptext);
@@ -3082,7 +3082,7 @@ void do_mbview_set_projection_label(size_t instance) {
 	else if (data->display_projection_mode == MBV_PROJECTION_PROJECTED ||
 	         data->display_projection_mode == MBV_PROJECTION_ALREADYPROJECTED) {
 		int projectionid;
-		mb_path tmptext;
+		char tmptext[MB_PATH_MAXLINE*2];
 		if (sscanf(data->display_projection_id, "epsg%d", &projectionid) == 1 && projectionid == 32661) {
 			sprintf(tmptext, ":t\"  Projected: %s\":t\"    North Polar Steographic\"", data->secondary_grid_projection_id);
 			strcat(value_text, tmptext);

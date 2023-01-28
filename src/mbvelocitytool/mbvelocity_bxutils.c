@@ -49,6 +49,8 @@
 #define XTPOINTER XtPointer
 #endif
 
+#define STRING_MAX (10 * 1024)
+
 /*
  * The following enum is used to support wide character sets.
  * Use this enum for references into the Common Wide Characters array.
@@ -3235,8 +3237,9 @@ void InitAppDefaults(Widget parent, UIAppDefault *defs) {
 void SetAppDefaults(Widget w, UIAppDefault *defs, char *inst_name, Boolean override_inst) {
 	Display *dpy = XtDisplay(w); /*  Retrieve the display */
 	XrmDatabase rdb = NULL;      /* A resource data base */
-	char lineage[1000];
-	char buf[1000];
+	char lineage[4200];
+	char buf[4096];
+        char bigbuf[STRING_MAX];
 	Widget parent;
 
 	/* Protect ourselves */
@@ -3259,7 +3262,7 @@ void SetAppDefaults(Widget w, UIAppDefault *defs, char *inst_name, Boolean overr
 		if (wclass == applicationShellWidgetClass)
 			break;
 
-		strcpy(buf, lineage);
+		strncpy(buf, lineage, sizeof(buf));
 		sprintf(lineage, "*%s%s", XtName(parent), buf);
 
 		parent = XtParent(parent);
@@ -3291,20 +3294,20 @@ void SetAppDefaults(Widget w, UIAppDefault *defs, char *inst_name, Boolean overr
 			/* being affected.  */
 
 			if (*defs->cInstName != '\0') {
-				sprintf(buf, "%s*%s*%s.%s: %s", lineage, defs->wName, defs->cInstName, defs->wRsc, defs->value);
+				sprintf(bigbuf, "%s*%s*%s.%s: %s", lineage, defs->wName, defs->cInstName, defs->wRsc, defs->value);
 			}
 			else {
-				sprintf(buf, "%s*%s.%s: %s", lineage, defs->wName, defs->wRsc, defs->value);
+				sprintf(bigbuf, "%s*%s.%s: %s", lineage, defs->wName, defs->wRsc, defs->value);
 			}
 		}
 		else if (*defs->wName != '\0') {
-			sprintf(buf, "%s*%s*%s.%s: %s", lineage, inst_name, defs->wName, defs->wRsc, defs->value);
+			sprintf(bigbuf, "%s*%s*%s.%s: %s", lineage, inst_name, defs->wName, defs->wRsc, defs->value);
 		}
 		else {
-			sprintf(buf, "%s*%s.%s: %s", lineage, inst_name, defs->wRsc, defs->value);
+			sprintf(bigbuf, "%s*%s.%s: %s", lineage, inst_name, defs->wRsc, defs->value);
 		}
 
-		XrmPutLineResource(&rdb, buf);
+		XrmPutLineResource(&rdb, bigbuf);
 		defs++;
 	}
 

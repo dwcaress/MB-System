@@ -4931,10 +4931,10 @@ void do_mbgrdviz_open_region(Widget w, XtPointer client_data, XtPointer call_dat
 
   /* new mbview instance */
   size_t instance;
-  char button_name[MB_PATH_MAXLINE];
+  char button_name[MB_PATH_MAXLINE+12];
 
   /* mbview parameters */
-  char mbv_title[MB_PATH_MAXLINE];
+  char mbv_title[MB_PATH_MAXLINE+25];
   int mbv_xo;
   int mbv_yo;
   int mbv_width;
@@ -5242,8 +5242,8 @@ void do_mbgrdviz_open_mbedit(Widget w, XtPointer client_data, XtPointer call_dat
   struct mbview_struct *data;
   struct mbview_shareddata_struct *shareddata;
   struct mbview_nav_struct *nav;
-  mb_path mbedit_cmd;
-  mb_path filearg;
+  char mbedit_cmd[1030];
+  char filearg[1050];
   int nselected;
   int i;
 
@@ -5308,7 +5308,7 @@ void do_mbgrdviz_open_mbeditviz(Widget w, XtPointer client_data, XtPointer call_
   struct mbview_struct *data;
   struct mbview_shareddata_struct *shareddata;
   struct mbview_nav_struct *nav;
-  mb_path mbeditviz_cmd;
+  char mbeditviz_cmd[1050];
   mb_path datalist_file;
   FILE *dfp;
   int nselected;
@@ -5379,8 +5379,8 @@ void do_mbgrdviz_open_mbnavedit(Widget w, XtPointer client_data, XtPointer call_
   struct mbview_struct *data;
   struct mbview_shareddata_struct *shareddata;
   struct mbview_nav_struct *nav;
-  mb_path mbnavedit_cmd;
-  mb_path filearg;
+  char mbnavedit_cmd[1050];
+  char filearg[1050];
   int nselected;
   int i;
 
@@ -5445,8 +5445,8 @@ void do_mbgrdviz_open_mbvelocitytool(Widget w, XtPointer client_data, XtPointer 
   struct mbview_struct *data;
   struct mbview_shareddata_struct *shareddata;
   struct mbview_nav_struct *nav;
-  mb_path mbvelocitytool_cmd;
-  mb_path filearg;
+  char mbvelocitytool_cmd[1050];
+  char filearg[1050];
   int nselected;
   int i;
 
@@ -6517,7 +6517,7 @@ void do_mbgrdviz_arearoute_info(size_t instance) {
   int status = mbview_getdataptr(verbose, instance, &data, &error);
 
   /* check if area is currently defined */
-  char info_text[MB_PATH_MAXLINE];
+  char info_text[2*MB_PATH_MAXLINE];
   if (status == MB_SUCCESS) {
     if (data->area_type != MBV_AREA_QUAD)
       status = MB_FAILURE;

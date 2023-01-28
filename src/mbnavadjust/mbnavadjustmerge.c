@@ -1670,13 +1670,13 @@ int main(int argc, char **argv) {
     /* now concatenate the log.txt from the input project with the log.txt for the new output project */
     // fprintf(stderr, "Executing in shell: %s\n", command);
     {
-      mb_path command = "";
+      char command[(2*STRING_MAX)+100] = "";
       sprintf(command, "mv %s/log.txt %s/logorg.txt", project_output.datadir, project_output.datadir);
       /* int shellstatus = */ system(command);
     }
     // fprintf(stderr, "Executing in shell: %s\n", command);
     {
-      mb_path command = "";
+      char command[(3*STRING_MAX)+100] = "";
       sprintf(command, "cat %s/log.txt %s/logorg.txt > %s/log.txt", project_inputbase.datadir, project_output.datadir,
               project_output.datadir);
       /* int shellstatus = */ system(command);
@@ -1692,7 +1692,7 @@ int main(int argc, char **argv) {
     for (int i = 0; i < project_output.num_files; i++) {
       /* copy the file navigation */
       {
-        mb_path command = "";
+        char command[2*STRING_MAX+100] = "";
         sprintf(command, "cp %s/nvs_%4.4d.mb166 %s", project_inputbase.datadir, i, project_output.datadir);
         // fprintf(stderr, "Executing in shell: %s\n", command);
         /* int shellstatus = */ system(command);
@@ -1701,7 +1701,7 @@ int main(int argc, char **argv) {
       /* copy all the section files */
       for (int j = 0; j < project_output.files[i].num_sections; j++) {
         /* copy the section file */
-        mb_path command = "";
+        char command[2*STRING_MAX+100] = "";
         sprintf(command, "cp %s/nvs_%4.4d_%4.4d.mb71* %s", project_inputbase.datadir, i, j, project_output.datadir);
         // fprintf(stderr, "Executing in shell: %s\n", command);
         /* int shellstatus = */ system(command);
@@ -1831,7 +1831,7 @@ int main(int argc, char **argv) {
 
     /* now concatenate the log.txt from the inputadd project with the log.txt for the new output project */
     {
-      mb_path command = "";
+      char command[3*STRING_MAX+100] = "";
       sprintf(command, "cat %s/log.txt %s/logorg.txt > %s/log.txt", project_inputadd.datadir, project_output.datadir,
               project_output.datadir);
       // fprintf(stderr, "Executing in shell: %s\n", command);
@@ -1851,7 +1851,7 @@ int main(int argc, char **argv) {
 
       /* copy the file navigation */
       {
-        mb_path command = "";
+        char command[2*STRING_MAX+100] = "";
         sprintf(command, "cp %s/nvs_%4.4d.mb166 %s/nvs_%4.4d.mb166", project_inputadd.datadir, i, project_output.datadir, k);
         // fprintf(stderr, "Executing in shell: %s\n", command);
         /* int shellstatus = */ system(command);
@@ -1860,7 +1860,7 @@ int main(int argc, char **argv) {
       /* copy all the section files */
       for (int j = 0; j < project_inputadd.files[i].num_sections; j++) {
         /* copy the section file */
-        mb_path command = "";
+        char command[2*STRING_MAX+100] = "";
         sprintf(command, "cp %s/nvs_%4.4d_%4.4d.mb71 %s/nvs_%4.4d_%4.4d.mb71", project_inputadd.datadir, i, j,
                 project_output.datadir, k, j);
         // fprintf(stderr, "Executing in shell: %s\n", command);
@@ -3301,7 +3301,7 @@ int main(int argc, char **argv) {
       // loop over all files and sections making the triangles for contouring
       project_output.triangle_scale = triangle_scale;
       for (int ifile = 0; ifile < project_output.num_files; ifile++) {
-        mb_path trianglefile;
+        char trianglefile[STRING_MAX+100];
         struct stat file_status;
         file = &(project_output.files[ifile]);
         for (int isection = 0; isection < file->num_sections; isection++) {
@@ -3395,8 +3395,8 @@ int main(int argc, char **argv) {
       // renaming them *.mb166 files
       for (int ifile = 0; ifile < project_output.num_files; ifile++) {
         file = &(project_output.files[ifile]);
-        mb_path fnvfile;
-        mb_path command;
+        char fnvfile[STRING_MAX+10];
+        char command[2*STRING_MAX+100];
         sprintf(fnvfile, "%s.fnv", file->path);
         struct stat file_status;
         if (stat(fnvfile, &file_status) == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR
@@ -3421,7 +3421,7 @@ int main(int argc, char **argv) {
       // reset S_NAV sensordepth values from the *.mb166 files
       for (int ifile = 0; ifile < project_output.num_files; ifile++) {
         file = &(project_output.files[ifile]);
-        mb_path npath;
+        char npath[STRING_MAX+100];
         FILE *nfp = NULL;
         sprintf(npath, "%s/nvs_%4.4d.mb166", project_output.datadir, ifile);
         struct stat file_status;
@@ -3540,7 +3540,7 @@ int main(int argc, char **argv) {
 
   char buffer[BUFFER_MAX];
   char *result = NULL;
-  mb_path filename = "";
+  char filename[2*STRING_MAX+100] = "";
   bool found = false;
   int itie_set, isnav;
   double timediff, timediffmin;

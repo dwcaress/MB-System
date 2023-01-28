@@ -903,7 +903,7 @@ static int process_output(int verbose, mbdefaults *mbdflts, options *opts, mb_pa
 					status = mb_write_init(opts->verbose, ofile[txidx], opts->format, &ombio_ptr[txidx], &obeams_bath,
 					                       &obeams_amp, &opixels_ss, error);
 					if (status != MB_SUCCESS) {
-						char message[MAX_ERROR_STRING] = {0};
+						char message[MAX_ERROR_STRING+50] = {0};
 						sprintf(message, "SWATHplus file <%s> not initialized for writing.\n", ofile[txidx]);
 						error_exit(verbose, *error, "mb_write_init", message);
 					}
@@ -932,7 +932,7 @@ static int process_output(int verbose, mbdefaults *mbdflts, options *opts, mb_pa
 
 				/* check for error writing here */
 				if (status != MB_SUCCESS) {
-					char message[MAX_ERROR_STRING] = {0};
+					char message[MAX_ERROR_STRING+50] = {0};
 					sprintf(message, "Data not written to file <%s>\n", ofile[txidx]);
 					error_exit(opts->verbose, *error, "mb_write_ping", message);
 				}
@@ -1168,7 +1168,7 @@ int main(int argc, char **argv) {
 	if (read_datalist) {
 		const int look_processed = MB_DATALIST_LOOK_UNSET;
 		if (mb_datalist_open(opts.verbose, &datalist, opts.read_file, look_processed, &error) != MB_SUCCESS) {
-			char message[MAX_ERROR_STRING];
+			char message[MAX_ERROR_STRING+50];
 			sprintf(message, "Unable to open data list file: %s\n", opts.read_file);
 			error_exit(opts.verbose, MB_ERROR_OPEN_FAIL, "mb_datalist_open", message);
 		}

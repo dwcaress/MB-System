@@ -76,7 +76,7 @@ extern XtAppContext app_context;
 extern struct mbview_world_struct mbviews[MBV_MAX_WINDOWS];
 extern char *mbsystem_library_name;
 
-static char value_string[MB_PATH_MAXLINE];
+static char value_string[2*MB_PATH_MAXLINE];
 
 
 /*------------------------------------------------------------------------------*/

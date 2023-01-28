@@ -2,7 +2,7 @@
 # Gets variables from root CMakeLists
 #
 
-message("in qt-mbgrdviz")
+message("in qt-mbgrdviz-3")
 
 
 # Run moc when needed
@@ -14,20 +14,19 @@ set(CMAKE_AUTORCC ON)
 # Run uic automatically when needed.
 set(CMAKE_AUTOUIC ON)
 
-
 # NOTE: add_executable() should not include auto-generated files
-add_executable(qt-mbgrdviz
-               BackEnd.cpp main.cpp qml.qrc)
+add_executable(qt-mbgrdviz-3
+               main.cpp qml.qrc)
 
-target_include_directories(qt-mbgrdviz
+
+target_include_directories(qt-mbgrdviz-3
                            PUBLIC
                            .
                            ${GMT_INCLUDE_DIRS}
                            ${GDAL_INCLUDE_DIRS}
-                           ${VTK_INCLUDE_DIR}
                            ${CMAKE_SOURCE_DIR}/src/qt-guilib)
 
-target_link_libraries(qt-mbgrdviz
+target_link_libraries(qt-mbgrdviz-3
                       PRIVATE
                       MBGui
                       mbev
@@ -52,5 +51,4 @@ target_link_libraries(qt-mbgrdviz
                       pthread)
                            
                            
-install(TARGETS qt-mbgrdviz
-	DESTINATION ${CMAKE_INSTALL_BINDIR})
+

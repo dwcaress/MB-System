@@ -290,7 +290,7 @@ int main(int argc, char **argv) {
 		char fileroot[MB_PATH_MAXLINE] = {0};
 		status = mb_get_format(verbose, read_file, fileroot, &format, &error);
     assert(strlen(fileroot) < MB_PATH_MAXLINE - 6);
-    char file[MB_PATH_MAXLINE];
+    char file[MB_PATH_MAXLINE+10];
 		sprintf(file, "%sp.mb-1", fileroot);
 
 		FILE *fp = fopen(file, "w");
@@ -331,7 +331,7 @@ int main(int argc, char **argv) {
 	mb_path lock_cpu = "";
 	mb_path lock_user = "";
 	char lock_date[25] = "";
-	mb_path lockfile = "";
+	char lockfile[MB_PATH_MAXLINE+10] = "";
 	bool file_in_bounds = false;
 	bool locked = false;
 

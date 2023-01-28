@@ -1046,7 +1046,7 @@ int main(int argc, char **argv) {
 
 	char zlabel[MB_PATH_MAXLINE] = "";
 	strcpy(zlabel, "Trace Signal");
-	char title[MB_PATH_MAXLINE] = "";
+	char title[MB_PATH_MAXLINE+100] = "";
 	sprintf(title, "Seismic Grid from %s", segyfile);
         const double NaN = std::numeric_limits<float>::quiet_NaN();
 	status &= mb_write_gmt_grd(verbose, gridfile, grid, NaN, ngridx, ngridy, xmin, xmax, ymin, ymax, gridmintot, gridmaxtot, dx,
@@ -1065,7 +1065,7 @@ int main(int argc, char **argv) {
 	/* run mbm_grdplot */
 	const double xwidth = std::min(0.01 * (double)ngridx, 55.0);
 	const double ywidth = std::min(0.01 * (double)ngridy, 28.0);
-	char plot_cmd[MB_PATH_MAXLINE] = "";
+	char plot_cmd[5*MB_PATH_MAXLINE] = "";
 	sprintf(plot_cmd, "mbm_grdplot -I%s -JX%f/%f -G1 -V -L\"File %s - %s:%s\"", gridfile, xwidth, ywidth, gridfile, title,
 	        zlabel);
 	if (verbose) {

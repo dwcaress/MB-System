@@ -13,9 +13,12 @@
 #include <vtkVectorText.h>
 #include <vtkAxes.h>
 #include <vtkFollower.h>
+#include <vtkParticleReader.h>
+#include <vtkAxisActor2D.h>
+#include <vtkProperty2D.h>
 #include "QVtkRenderer.h"
 #include "QVtkItem.h"
-#include "Utilities.h"
+#include "TopoColorMap.h"
 
 using namespace mb_system;
 
@@ -26,7 +29,8 @@ QVtkRenderer::QVtkRenderer() :
   wheelEvent_(nullptr),
   mouseButtonEvent_(nullptr),
   mouseMoveEvent_(nullptr),
-  prevZScale_(1.)
+  pointPicked_(false),
+  newPointPicked_(true)
 {
     worker_ = new LoadFileWorker(*this);
 
@@ -64,16 +68,19 @@ void QVtkRenderer::render() {
   renderWindow_->PushState(); 
   
   renderWindow_->OpenGLInitState();
+  bool show = displayProperties_->showAxes();
+  
+  axesActor_->SetVisibility(displayProperties_->showAxes());
 
-  axesActor_->SetVisibility(displayProperties_->showAxes);
-  
-  // User changed vertical scale - rebuild pipeline
-  if (displayProperties_->verticalExagg != prevZScale_) {
-    qDebug() << "QVtkRenderer::render() vert scale changed, assemblePipeline";
+  if (displayProperties_->changed()) {
+    // Some property changed - rebuild pipeline
+    qDebug() <<
+      "QVtkRenderer::render() displayProperties changed, assemblePipeline";
     assemblePipeline();
-    prevZScale_ = displayProperties_->verticalExagg;
+    item_->clearPropertyChangedFlag();
+    newPointPicked_ = false;
   }
-  
+
   if (wheelEvent_ && !wheelEvent_->isAccepted()) {
     // qDebug() << "render(): handle wheelEvent";
     if (wheelEvent_->delta() > 0) {
@@ -207,7 +214,7 @@ void QVtkRenderer::synchronize(QQuickFramebufferObject *item) {
   
   if (gridFilenameChanged(item_->getGridFilename())) {
 
-    gridReader_ = vtkSmartPointer<GmtGridReader>::New();
+    gridReader_ = vtkSmartPointer<TopoGridReader>::New();
     
     qDebug() << "synchronize(): change busy state to true";
     item_->setAppBusy(true);
@@ -259,9 +266,21 @@ bool QVtkRenderer::initializePipeline(const char *gridFilename) {
   elevColorizer_ =
     vtkSmartPointer<vtkElevationFilter>::New();
 
+  // Lookup table colorizing topo surface
   elevLookupTable_ =
     vtkSmartPointer<vtkLookupTable>::New();
-  
+
+  // Last selected point coordinates
+  pickedPoint_ =
+    vtkSmartPointer<vtkPolyData>::New();
+
+  // Allocate a single selected point
+  pickedPoint_->Allocate(1);
+  pickedPoint_->Reset();
+
+  // Point hasn't been picked yet
+  pointPicked_ = false;
+
   
   // Create VTK renderer (not the same as QT renderer)
   qDebug() << "create vtk renderer";
@@ -297,7 +316,8 @@ bool QVtkRenderer::initializePipeline(const char *gridFilename) {
   interactorStyle_->initialize(this, windowInteractor_);
 
   // Axes actor
-  axesActor_ = vtkSmartPointer<vtkCubeAxesActor>::New();
+  //  axesActor_ = vtkSmartPointer<vtkCubeAxesActor2D>::New();
+  axesActor_ = vtkSmartPointer<vtkCubeAxesActor>::New();  
 
   // Invoke callback when renderWindow_ is made current
   renderWindow_->AddObserver(vtkCommand::WindowMakeCurrentEvent,
@@ -306,8 +326,9 @@ bool QVtkRenderer::initializePipeline(const char *gridFilename) {
   return assemblePipeline();
 }
 
-void QVtkRenderer::setupAxes(vtkCubeAxesActor *axesActor,
-                             vtkColor3d &axisColor,
+// vtkCubeAxesActor2D version
+void QVtkRenderer::setupAxes(vtkCubeAxesActor2D *axesActor,
+                             vtkNamedColors *namedColors,
                              double *surfaceBounds,
                              double *gridBounds,
                              const char *xUnits, const char *yUnits,
@@ -317,15 +338,51 @@ void QVtkRenderer::setupAxes(vtkCubeAxesActor *axesActor,
     " xMin: " << surfaceBounds[0] << ", xMax: " << surfaceBounds[1] <<
     ", yMin: " << surfaceBounds[2] << ", yMax: " << surfaceBounds[3] <<
     ", zMin: " << surfaceBounds[4] << ", zMax: " << surfaceBounds[5];
+
+
+  vtkNew<vtkTextProperty> text;
+  text->SetColor(namedColors->GetColor3d("Black").GetData());
+  axesActor->SetAxisTitleTextProperty(text.GetPointer());
+  axesActor->SetAxisLabelTextProperty(text.GetPointer());
+
+  axesActor->GetProperty()->SetColor(0., 0., 0.);
   
-  axesActor->SetUseTextActor3D(0);
+  axesActor->SetBounds(surfaceBounds);
+
+  qDebug() << "setupAxes(): set X axis range "
+           << gridBounds[0] << " - " << gridBounds[1];
+  
+  axesActor->GetXAxisActor2D()->SetRange(gridBounds[0], gridBounds[1]);
+  axesActor->GetYAxisActor2D()->SetRange(gridBounds[2], gridBounds[3]);  
+  axesActor->GetZAxisActor2D()->SetRange(gridBounds[4], gridBounds[5]);
+
+  axesActor->SetXLabel(xUnits);  
+  axesActor->SetYLabel(yUnits);  
+  axesActor->SetZLabel(zUnits);
+
+  axesActor->SetLabelFormat("%.0f");
+}
 
 
+// vtkCubeAxesActor version
+void QVtkRenderer::setupAxes(vtkCubeAxesActor *axesActor,
+                             vtkNamedColors *namedColors,                                                    double *surfaceBounds,
+                             double *gridBounds,
+                             const char *xUnits, const char *yUnits,
+                             const char *zUnits) {
+
+  qDebug() << "setupAxes(): " <<
+    " xMin: " << surfaceBounds[0] << ", xMax: " << surfaceBounds[1] <<
+    ", yMin: " << surfaceBounds[2] << ", yMax: " << surfaceBounds[3] <<
+    ", zMin: " << surfaceBounds[4] << ", zMax: " << surfaceBounds[5];
+  
   axesActor->SetBounds(surfaceBounds);
   
   axesActor->SetXAxisRange(gridBounds[0], gridBounds[1]);
   axesActor->SetYAxisRange(gridBounds[2], gridBounds[3]);  
   axesActor->SetZAxisRange(gridBounds[4], gridBounds[5]);
+
+  vtkColor3d axisColor = namedColors->GetColor3d("Black");
   
   axesActor->GetTitleTextProperty(0)->SetColor(axisColor.GetData());
   axesActor->GetTitleTextProperty(0)->SetFontSize(48);
@@ -343,33 +400,44 @@ void QVtkRenderer::setupAxes(vtkCubeAxesActor *axesActor,
   
   axesActor->DrawXGridlinesOn();
   axesActor->DrawYGridlinesOn();
-  axesActor->DrawZGridlinesOn();
+  ///  axesActor->DrawZGridlinesOn();
   
   axesActor->SetXTitle(xUnits);
   axesActor->SetYTitle(yUnits);
   axesActor->SetZTitle(zUnits);
 
-#if VTK_MAJOR_VERSION == 6
-  axesActor->SetGridLineLocation(VTK_GRID_LINES_FURTHEST);
-#endif
-#if VTK_MAJOR_VERSION > 6
-  axesActor->SetGridLineLocation(
-				  axesActor->VTK_GRID_LINES_FURTHEST);
-#endif
+  axesActor->SetGridLineLocation(axesActor->VTK_GRID_LINES_FURTHEST);
   
   axesActor->XAxisMinorTickVisibilityOff();
   axesActor->YAxisMinorTickVisibilityOff();
   axesActor->ZAxisMinorTickVisibilityOff();
 
-  // axesActor->SetFlyModeToStaticEdges();
+  axesActor->SetLabelScaling(0, 0, 0, 0);
+  if (gridReader_->geographicCRS()) {
+    // Lat/lon in degrees
+    axesActor->SetXLabelFormat("%.2f");
+    axesActor->SetYLabelFormat("%.2f");
+  }
+  else {
+    // Projected CRS, in meters
+    axesActor->SetXLabelFormat("%.0f");
+    axesActor->SetYLabelFormat("%.0f");    
+  }
+
+  // Calling this sometimes results in no z-labels at all
+  // axesActor->SetZLabelFormat("%.0f");
   
 }
-
 
 bool QVtkRenderer::assemblePipeline() {
 
   qDebug() << "QVtkRenderer::assemblePipeline() for " << gridFilename_;
 
+  // Clear actor list
+  renderer_->RemoveAllViewProps();
+  
+  qDebug() << "renderer_ has " << renderer_->GetActors()->GetNumberOfItems() << " actors";
+    
   double gridBounds[6];
   gridReader_->gridBounds(&gridBounds[0], &gridBounds[1],
                           &gridBounds[2], &gridBounds[3],
@@ -391,15 +459,66 @@ bool QVtkRenderer::assemblePipeline() {
   elevColorizer_->SetLowPoint(0, 0, gridBounds[4]);
   elevColorizer_->SetHighPoint(0, 0, gridBounds[5]);
 
-  surfaceMapper_->SetInputConnection(elevColorizer_->GetOutputPort());    
+  /// Scale z axis based on 
+  float zScale = displayProperties_->verticalExagg() *
+    gridReader_->zScaleLatLon();
+  ;
+  transform_ = vtkSmartPointer<vtkTransform>::New();
+  transform_->Scale(1., 1., zScale);
+  transformFilter_->SetTransform(transform_);
+  transformFilter_->SetInputConnection(elevColorizer_->GetOutputPort());
+  surfaceMapper_->SetInputConnection(transformFilter_->GetOutputPort());
 
+  elevColorizer_->SetScalarRange(dBounds[4], dBounds[5]);
+  TopoColorMap::makeLUT(displayProperties_->colorMapScheme(),
+                        elevLookupTable_);
+    
+  surfaceMapper_->SetScalarRange(dBounds[4], dBounds[5]);
+  surfaceMapper_->ScalarVisibilityOn();
+  surfaceMapper_->SetLookupTable(elevLookupTable_);
+  
   // Assign surfaceMapper to actor
   qDebug() << "assign surfaceMapper to actor";
   surfaceActor_->SetMapper(surfaceMapper_);
-
+  
   // Add actor to renderer
   renderer_->AddActor(surfaceActor_);
 
+  if (displayProperties_->siteFile()) {
+    /// TEST TEST TEST SITE READER
+    vtkNew<vtkParticleReader> siteReader;
+    // siteReader->SetFileName("test-site.ste");
+    qDebug() << "open particle reader source file " <<
+      displayProperties_->siteFile();
+    
+    siteReader->SetFileName(displayProperties_->siteFile());
+    siteReader->Update();
+
+    vtkNew<vtkPolyDataMapper> siteMapper;
+    siteMapper->SetInputConnection(siteReader->GetOutputPort());
+    vtkNew<vtkActor> siteActor;
+    siteActor->SetMapper(siteMapper);
+    siteActor->GetProperty()->SetPointSize(25);
+    renderer_->AddActor(siteActor);
+  }
+  
+  /* ***
+  if (pointPicked_) {
+    std::cerr << "add picked point to scene" << std::endl;
+    vtkNew<vtkParticleReader> reader;
+    reader->SetFileName(SELECTED_POINT_FILE);
+    reader->Update();
+    
+    vtkNew<vtkPolyDataMapper> pickedPointMapper;
+    // pickedPointMapper->SetInputData(pickedPoint_);
+    pickedPointMapper->SetInputConnection(reader->GetOutputPort());
+    vtkNew<vtkActor> pickedPointActor;
+    pickedPointActor->SetMapper(pickedPointMapper);
+    pickedPointActor->GetProperty()->SetPointSize(25);
+    renderer_->AddActor(pickedPointActor);
+  }
+  *** */
+  
   // Add renderer to the renderWindow
   qDebug() << "add renderer to renderWindow";
   renderWindow_->AddRenderer(renderer_);
@@ -412,14 +531,26 @@ bool QVtkRenderer::assemblePipeline() {
   
   // Per QtVTK example
   windowInteractor_->EnableRenderOff();
-  qDebug() << "Keep windowActor enabled!!!";
   vtkColor3d axisColor = namedColors_->GetColor3d("black");
 
   // Set up axes
-  setupAxes(axesActor_, axisColor,
+  /* ***
+  // vtkCubeAxesActor2D version
+  setupAxes(axesActor_,
+            namedColors_,
             surfaceMapper_->GetBounds(),
             gridBounds,
-            gridReader_->xUnits(), gridReader_->yUnits(),
+            gridReader_->xUnits(), 
+            gridReader_->yUnits(),
+            gridReader_->zUnits());
+            *** */
+
+  setupAxes(axesActor_,
+            namedColors_,
+            surfaceMapper_->GetBounds(),
+            gridBounds,
+            gridReader_->xUnits(),
+            gridReader_->yUnits(),
             gridReader_->zUnits());
 
   axesActor_->SetCamera(renderer_->GetActiveCamera());
@@ -428,6 +559,10 @@ bool QVtkRenderer::assemblePipeline() {
 
   renderer_->ResetCamera();
 
+  // Initialize displayed picked coordinates to blank
+  QString msg("");
+  item_->setPickedPoint(msg);
+  
   qDebug() << "pipeline assembled";  
   return true;
 
@@ -494,6 +629,11 @@ void QVtkRenderer::LoadFileWorker::run() {
   qDebug() << "QVtkRenderer::LoadFileLoader::run()";
 
   parent_.gridReader_->SetFileName(parent_.gridFilename_);
+  TopoGridType gridType =
+    TopoGridReader::getGridType(parent_.gridFilename_);
+
+  parent_.gridReader_->setGridType(gridType);
+    
   parent_.gridReader_->Update();
 
   if (parent_.gridReader_->GetErrorCode()) {
@@ -520,8 +660,27 @@ void QVtkRenderer::LoadFileWorker::run() {
 void QVtkRenderer::makeCurrentCallback(vtkObject *, unsigned long eid,
                                        void *callData) {
 
-  std::cout << "makeCurrentCallback()!" << std::endl;
+  //  std::cout << "makeCurrentCallback()!" << std::endl;
 
   // Assert render window as current
   renderWindow_->SetIsCurrent(true);
 }
+
+
+void QVtkRenderer::setPickedPoint(double *worldCoords) {
+  std::cerr << "setPickedPoint(): x=" << worldCoords[0] << ", y=" << worldCoords[1] <<
+    ", z=" << worldCoords[2] << std::endl;
+
+  newPointPicked_ = true;
+  pointPicked_ = true;
+
+  vtkSmartPointer<vtkPoints> point = vtkSmartPointer<vtkPoints>::New();
+  point->Allocate(1);
+  vtkIdType pointId[1];
+  pointId[0] = point->InsertNextPoint(worldCoords[0], worldCoords[1],
+                                      worldCoords[2]);
+  
+  pickedPoint_->Reset();
+  pickedPoint_->InsertNextCell(VTK_VERTEX, 1, pointId);
+}
+

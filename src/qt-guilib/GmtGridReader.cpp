@@ -317,30 +317,30 @@ void GmtGridReader::SelectionModifiedCallback(vtkObject*, unsigned long,
 
 
 void GmtGridReader::zBounds(double *zMin, double *zMax) {
-  *zMin = gmtGrid_->header->z_min;
-  *zMax = gmtGrid_->header->z_max;
+  
+  double bounds[6];
+  gridPoints_->GetBounds(bounds);
+  *zMin = bounds[4];
+  *zMax = bounds[5];
 }
 
 
 void GmtGridReader::gridBounds(double *xMin, double *xMax,
                                double *yMin, double *yMax,
                                double *zMin, double *zMax) {
-  *xMin = gmtGrid_->header->wesn[0];
-  *xMax = gmtGrid_->header->wesn[1];
-  *yMin = gmtGrid_->header->wesn[2];
-  *yMax = gmtGrid_->header->wesn[3];
-  *zMin = gmtGrid_->header->z_min;
-  *zMax = gmtGrid_->header->z_max;
+  double bounds[6];
+  gridPoints_->GetBounds(bounds);
+  *xMin = bounds[0];
+  *xMax = bounds[1];
+  *yMin = bounds[2];
+  *yMax = bounds[3];
+  *zMin = bounds[4];
+  *zMax = bounds[5];
 }
 
 
 void GmtGridReader::gridBounds(double *bounds) {
-  bounds[0] = gmtGrid_->header->wesn[0];
-  bounds[1] = gmtGrid_->header->wesn[1];
-  bounds[2] = gmtGrid_->header->wesn[2];
-  bounds[3] = gmtGrid_->header->wesn[3];
-  bounds[4] = gmtGrid_->header->z_min;
-  bounds[5] = gmtGrid_->header->z_max;
+  gridPoints_->GetBounds(bounds);
 }
 
 

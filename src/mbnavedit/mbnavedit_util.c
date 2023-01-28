@@ -31,6 +31,8 @@
 
 #define XTPOINTER XtPointer
 
+#define STRING_MAX (10 * 1024)
+
 /*
  * The following enum is used to support wide character sets.
  * Use this enum for references into the Common Wide Characters array.
@@ -2941,7 +2943,7 @@ void SetAppDefaults(
 	XrmDatabase rdb = XrmGetStringDatabase("");
 
 	// Start the lineage with our name and then get our parents
-	char lineage[1000] = "";
+	char lineage[2048] = "";
 	Widget parent = w;
 	while (parent) {
 		WidgetClass wclass = XtClass(parent);
@@ -2976,7 +2978,7 @@ void SetAppDefaults(
 			continue;
 		}
 
-		char buf[1000];
+		char buf[STRING_MAX];
 		/* Build up string after lineage */
 		if (defs->cInstName != NULL) {
 			/* Don't include class instance name if it is also the instance */

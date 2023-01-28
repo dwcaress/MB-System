@@ -122,7 +122,7 @@ int main(int argc, char **argv) {
 	bool sonardepthlever = false;
 	double sonardepthoffset = 0.0; /* depth sensor offset (+ makes vehicle deeper) */
 	int klugemode;
-	char ofile[MB_PATH_MAXLINE] = "";
+	char ofile[MB_PATH_MAXLINE+50] = "";
 	bool ofile_set = false;
 	struct stat file_status;
 	char sonardepthfile[MB_PATH_MAXLINE] = "";
@@ -1766,7 +1766,7 @@ int main(int argc, char **argv) {
 				nfile_write++;
 
 				/* initialize synchronous attitude output file */
-				char stafile[MB_PATH_MAXLINE] = "";
+				char stafile[MB_PATH_MAXLINE+60] = "";
 				sprintf(stafile, "%s.sta", ofile);
 				if ((stafp = fopen(stafile, "w")) == nullptr) {
 					fprintf(stderr, "\nUnable to open synchronous attitude data file <%s> for writing\n", stafile);
@@ -2626,7 +2626,7 @@ int main(int argc, char **argv) {
 				end_time_d += 120.0;
 
 				/* output asynchronous heading output file */
-				char athfile[MB_PATH_MAXLINE] = "";
+				char athfile[MB_PATH_MAXLINE+60] = "";
 				sprintf(athfile, "%s.ath", ofile);
 				FILE *athfp = fopen(athfile, "w");
 				if (athfp == nullptr) {
@@ -2641,7 +2641,7 @@ int main(int argc, char **argv) {
 				fclose(athfp);
 
 				/* output asynchronous sonardepth output file */
-				char atsfile[MB_PATH_MAXLINE] = "";
+				char atsfile[MB_PATH_MAXLINE+60] = "";
 				sprintf(atsfile, "%s.ats", ofile);
 				FILE *atsfp = fopen(atsfile, "w");
 				if (atsfp == nullptr) {
@@ -2656,7 +2656,7 @@ int main(int argc, char **argv) {
 				fclose(atsfp);
 
 				/* output asynchronous attitude output file */
-				char atafile[MB_PATH_MAXLINE] = "";
+				char atafile[MB_PATH_MAXLINE+60] = "";
 				sprintf(atafile, "%s.ata", ofile);
 				FILE *atafp = fopen(atafile, "w");
 				if (atafp == nullptr) {

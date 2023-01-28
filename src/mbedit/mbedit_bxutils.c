@@ -2537,7 +2537,7 @@ void SetAppDefaults(
 	XrmDatabase rdb = XrmGetStringDatabase("");
 
 	/* Start the lineage with our name and then get our parents */
-	char lineage[1000] = "";
+	char lineage[2048] = "";
 	Widget parent = w;
 
 	while (parent) {
@@ -2571,7 +2571,7 @@ void SetAppDefaults(
 		}
 
 		/* Build up string after lineage */
-		char buf[1000];
+		char buf[3072];
 		if (defs->cInstName != NULL) {
 			// Don't include class instance name if it is also the instance being affected.
 			if (*defs->cInstName != '\0') {

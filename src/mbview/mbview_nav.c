@@ -63,7 +63,7 @@
 #include "mbview.h"
 #include "mbviewprivate.h"
 
-static char value_string[MB_PATH_MAXLINE];
+static char value_string[2*MB_PATH_MAXLINE];
 
 /*------------------------------------------------------------------------------*/
 int mbview_getnavcount(int verbose, size_t instance, int *nnav, int *error) {
