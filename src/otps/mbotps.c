@@ -71,8 +71,7 @@
 #include "mb_process.h"
 #include "mb_status.h"
 
-// OTPS installation location include
-#include "otps.h"
+const char *otps_location = otpsDir;
 
 #define MBOTPS_MODE_POSITION            0x00
 #define MBOTPS_MODE_NAVIGATION          0x01

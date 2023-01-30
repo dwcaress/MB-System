@@ -33,24 +33,25 @@
 #define __MBBS_DEFINES__
 
 #include <time.h>
-#ifndef _WIN32
+#ifdef _WIN32
+#include <winsock2.h>
+#else
 #include <sys/time.h>
 #endif
 
-#include <mb_config.h>
-
 /* XDR i/o include file */
-#ifdef HAVE_RPC_RPC_H
+
+ /* For XDR/RPC */
 #include <rpc/rpc.h>
-#endif
-#ifdef HAVE_RPC_TYPES_H
 #include <rpc/types.h>
 #include <rpc/xdr.h>
+
+#ifdef _WIN32
+# include "types_win32.h"
 #endif
 
 #ifdef _WIN32
 #include <float.h>
-#define isnan _isnan
 #endif
 
 /* Some type definitions given here are in a separate

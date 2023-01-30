@@ -29,27 +29,6 @@
 
 #include "mb_define.h"
 
-// include gmt_def.h but first undefine PACKAGE variables to prevent
-// warnings about name collision between GDAL's cpl_port.h and mb_config.h
-#ifdef PACKAGE_BUGREPORT
-#undef PACKAGE_BUGREPORT
-#endif
-#ifdef PACKAGE_NAME
-#undef PACKAGE_NAME
-#endif
-#ifdef PACKAGE_STRING
-#undef PACKAGE_STRING
-#endif
-#ifdef PACKAGE_TARNAME
-#undef PACKAGE_TARNAME
-#endif
-#ifdef PACKAGE_URL
-#undef PACKAGE_URL
-#endif
-#ifdef PACKAGE_VERSION
-#undef PACKAGE_VERSION
-#endif
-
 #include "gmt_dev.h"
 
 /*  Compatibility with old lower-function/macro names use prior to GMT 5.3.0 */

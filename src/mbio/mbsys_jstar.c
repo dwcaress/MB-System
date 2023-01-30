@@ -29,7 +29,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "mb_aux.h"
 #include "mb_define.h"
 #include "mb_format.h"
 #include "mb_io.h"

@@ -2,8 +2,8 @@
 //
 // See README file for copying and redistribution conditions.
 
-#include "mbio/mb_define.h"  // TODO(schwehr): Move prototypes to mb_format.h.
-#include "mbio/mb_format.h"
+#include "mb_define.h"  // TODO(schwehr): Move prototypes to mb_format.h.
+#include "mb_format.h"
 
 #include <cstdlib>
 #include <cstring>

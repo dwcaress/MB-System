@@ -1,0 +1,183 @@
+name: build
+on:
+  push:
+  pull_request:
+  schedule:
+    - cron: '0 2 * * 5'  # Every Friday at 2am
+jobs:
+  linux_ubuntu:
+    name: Linux (Ubuntu)
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-22.04
+          - os: ubuntu-20.04
+          - os: ubuntu-18.04
+      fail-fast: false
+    runs-on: "${{ matrix.os }}"
+    steps:
+      - uses: actions/checkout@v3
+      - name: Install build dependencies
+        run: |-
+          sudo apt-get update
+          if [ "${{ matrix.os }}" = 'ubuntu-22.04' ]; then
+              sudo apt-get install --yes --no-install-recommends libvtk9-dev libvtk9-qt-dev libgmock-dev
+          elif [ "${{ matrix.os }}" = 'ubuntu-20.04' ]; then
+              sudo apt-get install --yes --no-install-recommends libgmock-dev
+          fi
+          sudo apt-get install --yes --no-install-recommends \
+              cmake              \
+              libfftw3-dev       \
+              libgdal-dev        \
+              libgl1-mesa-dev    \
+              libglu1-mesa-dev   \
+              libgmt-dev         \
+              libmotif-dev       \
+              libnetcdf-dev      \
+              libopencv-dev      \
+              libpcl-dev         \
+              libproj-dev        \
+              libtirpc-dev       \
+              libxt-dev          \
+              qtbase5-dev        \
+              qtdeclarative5-dev \
+      - name: Configure CMake
+        run: |-
+          case "${{ matrix.os }}" in
+          ubuntu-22.04)
+             cmake -B ${{github.workspace}}/build -DbuildTRN=1 -DbuildPCL=1 -DBUILD_TESTING=1 -DbuildOpenCV=1 -DbuildQt=1;;
+          ubuntu-20.04)
+             cmake -B ${{github.workspace}}/build -DbuildTRN=1 -DbuildPCL=1 -DBUILD_TESTING=1 -DbuildOpenCV=1 -DbuildQt=0;;
+          ubuntu-18.04)
+             cmake -B ${{github.workspace}}/build -DbuildTRN=1 -DbuildPCL=1 -DBUILD_TESTING=0 -DbuildOpenCV=0 -DbuildQt=0;;
+          esac
+      - name: Build
+        run: cmake --build ${{github.workspace}}/build --verbose
+      - name: Test
+        working-directory: ${{github.workspace}}/build
+        run: ctest
+  macos_brew:
+    name: MacOS (brew)
+    strategy:
+      matrix:
+        include:
+          - os: macos-12
+          - os: macos-11
+      fail-fast: false
+    runs-on: "${{ matrix.os }}"
+    steps:
+      - uses: actions/checkout@v3
+      - name: Install build dependencies
+        run: |-
+          brew install proj gdal netcdf fftw gmt openmotif googletest
+          brew install --cask xquartz
+      - name: Configure CMake
+        run: |-
+          cmake -B ${{github.workspace}}/build \
+            -DCMAKE_PREFIX_PATH:PATH=/opt/X11 \
+            -DOPENGL_opengl_LIBRARY:FILEPATH=/opt/X11/lib/libGL.dylib \
+            -DOPENGL_gl_LIBRARY:FILEPATH=/opt/X11/lib/libGL.dylib \
+            -DOPENGL_glu_LIBRARY:FILEPATH=/opt/X11/lib/libGLU.dylib \
+            -DOPENGL_INCLUDE_DIR:PATH=/opt/X11/include \
+            -DbuildTRN=1 -DbuildPCL=0 -DBUILD_TESTING=1 -DbuildOpenCV=0 -DbuildQt=0
+      - name: Build
+        run: cmake --build ${{github.workspace}}/build --verbose
+      - name: Test
+        working-directory: ${{github.workspace}}/build
+        run: ctest
+  windows_vcpkg:
+    name: Windows (vcpkg)
+    if: ${{ false }} # no source for XDR, rpc/rpc.h, rpc/types.h
+    strategy:
+      matrix:
+        include:
+          #- os: windows-2022 # GMT fails to build because of an internal compiler error
+          - os: windows-2019
+      fail-fast: false
+    runs-on: "${{ matrix.os }}"
+    steps:
+      - uses: actions/checkout@v3
+      - name: Cache object files
+        id: cache-vcpkg
+        uses: actions/cache@v3
+        with:
+          path: vcpkg
+          key: vcpkg-cache-${{ matrix.os }}
+      - name: Download vcpkg
+        if: steps.cache-vcpkg.outputs.cache-hit != 'true'
+        uses: actions/checkout@v3
+        with:
+          #repository: microsoft/vcpkg
+          repository: josch/vcpkg
+          path: vcpkg
+      - name: 'Configure Dependencies'
+        if: steps.cache-vcpkg.outputs.cache-hit != 'true'
+        shell: pwsh
+        run: |
+          cd vcpkg
+          Copy-Item triplets/x64-windows.cmake triplets/x64-windows-release.cmake
+          Add-Content triplets/x64-windows-release.cmake -Value "set(VCPKG_BUILD_TYPE release)"
+          ./bootstrap-vcpkg.bat
+          ./vcpkg install --triplet x64-windows-release gdal[core,tools] gmt netcdf-c proj fftw3 gtest
+      - name: Configure CMake
+        shell: bash
+        run: cmake -B build -DVCPKG_TARGET_TRIPLET=x64-windows-release -DCMAKE_TOOLCHAIN_FILE=vcpkg/scripts/buildsystems/vcpkg.cmake -DbuildGUIs=0 -DbuildOpenCV=0 -DbuildQt=0 -DBUILD_TESTING=1 -DPKG_CONFIG_EXECUTABLE=D:/a/MB-System/MB-System/vcpkg/packages/pkgconf_x64-windows/tools/pkgconf/pkgconf.exe
+      - name: Build
+        run: cmake --build ${{github.workspace}}/build --verbose
+      - name: Test
+        working-directory: ${{github.workspace}}/build
+        run: ctest
+  windows_cygwin:
+    name: Windows (cygwin)
+    if: ${{ false }} # no GMT
+    strategy:
+      matrix:
+        include:
+          #- os: windows-2022 # GMT fails to build because of an internal compiler error
+          - os: windows-2019
+      fail-fast: false
+    runs-on: "${{ matrix.os }}"
+    steps:
+      - run: git config --global core.autocrlf input
+      - uses: actions/checkout@v3
+      - uses: cygwin/cygwin-install-action@master
+        with:
+          platform: x86_64
+          packages: cmake make gcc-g++ gdal gmt netcdf proj fftw3 gtest
+      - name: Configure CMake
+        run: cmake -B build -DbuildGUIs=0 -DbuildOpenCV=0 -DbuildQt=0 -DBUILD_TESTING=1
+      - name: Build
+        run: cmake --build ${{github.workspace}}/build --verbose
+      - name: Test
+        working-directory: ${{github.workspace}}/build
+        run: ctest
+  windows_msys2:
+    name: Windows (msys2)
+    if: ${{ false }} # no GMT
+    strategy:
+      matrix:
+        include:
+          #- os: windows-2022 # GMT fails to build because of an internal compiler error
+          - os: windows-2019
+      fail-fast: false
+    runs-on: "${{ matrix.os }}"
+    defaults:
+      run:
+        shell: msys2 {0}
+    steps:
+      - name: 'Disable git autocrlf'
+        shell: bash
+        run: git config --global core.autocrlf input
+      - uses: msys2/setup-msys2@v2
+        with:
+          msystem: mingw64
+          update: true
+          install: base-devel mingw-w64-x86_64-gdal mingw-w64-x86_64-gmt mingw-w64-x86_64-netcdf mingw-w64-x86_64-proj mingw-w64-x86_64-fftw mingw-w64-x86_64-gtest
+      - uses: actions/checkout@v3
+      - name: Configure CMake
+        run: cmake -B build -DbuildGUIs=0 -DbuildOpenCV=0 -DbuildQt=0 -DBUILD_TESTING=1
+      - name: Build
+        run: cmake --build ${{github.workspace}}/build --verbose
+      - name: Test
+        working-directory: ${{github.workspace}}/build
+        run: ctest

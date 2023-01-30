@@ -54,7 +54,7 @@
 #include "proj_api.h"
 
 #ifndef _WIN32
-#include "projections.h"
+char *projectionfile = PROJECTIONS_DAT;
 #else
 char *GMT_runtime_bindir_win32(char *result);
 #endif

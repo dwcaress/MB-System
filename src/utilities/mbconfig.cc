@@ -28,7 +28,9 @@
 #include <sys/types.h>
 #include <unistd.h>
 
-#include "levitus.h"
+const char *levitusfile = LevitusAnnual82;
+const char *otps_location = otpsDir;
+
 #include "mb_define.h"
 #include "mb_format.h"
 #include "mb_status.h"

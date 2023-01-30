@@ -31,21 +31,11 @@
    io.c --
    I/O routines for Hawaii Mapping Research Group BS files.
 */
-#ifdef HAVE_CONFIG_H
-#include <mb_config.h>
-#endif
-
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
 #include <stdlib.h>
-#ifdef _WIN32
 #include <stdint.h> /* To get INT32_MIN, INT32_MAX, etc ... */
-#else
-#ifdef HAVE_STDINT_H
-#include <stdint.h>
-#endif
-#endif
 
 #include "mbbs_defines.h"
 #include "mbbs_mem.h"

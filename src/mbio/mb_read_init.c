@@ -26,8 +26,6 @@
 #include <string.h>
 #include <sys/stat.h>
 
-#include "mb_config.h"
-
 #ifdef ENABLE_GSF
 #include "gsf.h"
 #endif

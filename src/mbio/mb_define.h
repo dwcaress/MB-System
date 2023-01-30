@@ -25,8 +25,6 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-#include <mb_config.h>
-
 #ifdef _WIN32
   /* https://www.zachburlingame.com/2011/05/resolving-redefinition-errors-betwen-ws2def-h-and-winsock-h/ */
 #  ifndef WIN32
@@ -38,19 +36,11 @@
 
 /* For XDR/RPC */
 #ifndef _WIN32
-# ifdef HAVE_RPC_RPC_H
-#  include <rpc/rpc.h>
-#  include <rpc/types.h>
-#  include <rpc/xdr.h>
-# else
-#  ifdef HAVE_TIRPC_RPC_RPC_H
-#   include <tirpc/rpc/rpc.h>
-#   include <tirpc/rpc/types.h>
-#   include <tirpc/rpc/xdr.h>
-#  endif
-# endif
+# include <rpc/rpc.h>
+# include <rpc/types.h>
+# include <rpc/xdr.h>
 #else
-#	include "types_win32.h"
+# include "types_win32.h"
 #endif
 
 #ifdef __cplusplus
@@ -85,8 +75,8 @@ extern "C" {
 #endif
 
 /* MB-system version id */
-#define MB_VERSION VERSION
-#define MB_BUILD_DATE VERSION_DATE
+#define MB_VERSION MB_PACKAGE_VERSION
+#define MB_BUILD_DATE MB_PACKAGE_DATE
 
 /* type definitions of signed and unsigned char */
 typedef unsigned char mb_u_char;

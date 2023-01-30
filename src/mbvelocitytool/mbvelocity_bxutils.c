@@ -6,8 +6,6 @@
 #include <strings.h>
 
 #include <Xm/Xm.h>
-#include <mb_config.h>
-
 #include <Xm/RowColumn.h>
 
 

@@ -24,8 +24,6 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "mb_config.h"
-
 #ifdef ENABLE_GSF
 #include "gsf.h"
 #endif

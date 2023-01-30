@@ -47,7 +47,7 @@ SwathGridData::SwathGridData() {
                  (char *)"this is a help message",
                  (char *)"swathReaderTest filename",
                  &SwathGridData::showMessage,
-                 &SwathGridData::hideMessage,
+                 (int (*)())&SwathGridData::hideMessage,
                  &SwathGridData::updateGui,
                  &SwathGridData::showErrorDialog);
   

@@ -1,5 +1,6 @@
 #include <math.h>
 #include <GL/gl.h>
+#include <limits>
 #include "Surface.h"
 
 using namespace mb_system;

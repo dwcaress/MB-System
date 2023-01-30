@@ -26,13 +26,6 @@
 #ifndef MB_AUX_H_
 #define MB_AUX_H_
 
-/* Avoid conflict with GDAL */
-#undef PACKAGE_BUGREPORT
-#undef PACKAGE_NAME
-#undef PACKAGE_STRING
-#undef PACKAGE_TARNAME
-#undef PACKAGE_URL
-#undef PACKAGE_VERSION
 #include "mb_io.h"
 
 /* contour algorithm defines */

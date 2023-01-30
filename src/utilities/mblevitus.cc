@@ -41,7 +41,7 @@
 #include <unistd.h>
 
 #ifndef _WIN32
-#include "levitus.h"
+const char *levitusfile = LevitusAnnual82;
 #endif
 #include "mb_define.h"
 #include "mb_status.h"

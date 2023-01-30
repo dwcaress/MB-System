@@ -1,0 +1,1 @@
+install(FILES mbio.3 DESTINATION ${CMAKE_INSTALL_PREFIX}/man/man3)

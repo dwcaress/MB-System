@@ -309,26 +309,6 @@ int tiff_offset[] = {
 #define THIS_MODULE_PURPOSE "Project grids or images and plot them on maps"
 #define THIS_MODULE_KEYS ""
 
-// Stop warnings about packaging collision between GDAL's cpl_port.h and mb_config.h
-#ifdef PACKAGE_BUGREPORT
-#undef PACKAGE_BUGREPORT
-#endif
-#ifdef PACKAGE_NAME
-#undef PACKAGE_NAME
-#endif
-#ifdef PACKAGE_STRING
-#undef PACKAGE_STRING
-#endif
-#ifdef PACKAGE_TARNAME
-#undef PACKAGE_TARNAME
-#endif
-#ifdef PACKAGE_URL
-#undef PACKAGE_URL
-#endif
-#ifdef PACKAGE_VERSION
-#undef PACKAGE_VERSION
-#endif
-
 #include "gmt_dev.h"
 /*  Compatibility with old lower-function/macro names use prior to GMT 5.3.0 */
 #if GMT_MAJOR_VERSION == 5 && GMT_MINOR_VERSION < 3

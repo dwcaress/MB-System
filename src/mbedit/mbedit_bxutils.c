@@ -7,7 +7,6 @@
 #include <strings.h>
 #include <wchar.h>
 
-#include <mb_config.h>
 #include <Xm/Xm.h>
 #include <Xm/RowColumn.h>
 

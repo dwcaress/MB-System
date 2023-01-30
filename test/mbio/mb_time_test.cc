@@ -2,9 +2,9 @@
 //
 // See README file for copying and redistribution conditions.
 
-#include "mbio/mb_define.h"
+#include "mb_define.h"
 
-#include "mbio/mb_status.h"
+#include "mb_status.h"
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 

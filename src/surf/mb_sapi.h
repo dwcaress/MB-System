@@ -11,19 +11,11 @@
 #ifndef __SAPI__
 
 #ifndef _WIN32
-# ifdef HAVE_RPC_RPC_H
-#  include <rpc/rpc.h>
-#  include <rpc/types.h>
-#  include <rpc/xdr.h>
-# else
-#  ifdef HAVE_TIRPC_RPC_RPC_H
-#   include <tirpc/rpc/rpc.h>
-#   include <tirpc/rpc/types.h>
-#   include <tirpc/rpc/xdr.h>
-#  endif
-# endif
+# include <rpc/rpc.h>
+# include <rpc/types.h>
+# include <rpc/xdr.h>
 #else
-#	include "types_win32.h"
+# include "types_win32.h"
 #endif
 
 #ifdef __LP64__

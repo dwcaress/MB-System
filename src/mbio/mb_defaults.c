@@ -47,7 +47,7 @@ int mb_version(int verbose, char *version_string, int *version_id, int *version_
   }
 
   /* get version string */
-  strcpy(version_string, PACKAGE_VERSION);
+  strcpy(version_string, MB_PACKAGE_VERSION);
 
   /* get version components */
   const int nscan = sscanf(version_string, "%d.%d.%d", version_major, version_minor, version_archive);

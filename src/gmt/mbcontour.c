@@ -97,26 +97,6 @@
 
 #define GMT_PROG_OPTIONS "->BJKOPRUVXY" GMT_OPT("S")
 
-// Stop warnings about packaging collision between GDAL's cpl_port.h and mb_config.h
-#ifdef PACKAGE_BUGREPORT
-#undef PACKAGE_BUGREPORT
-#endif
-#ifdef PACKAGE_NAME
-#undef PACKAGE_NAME
-#endif
-#ifdef PACKAGE_STRING
-#undef PACKAGE_STRING
-#endif
-#ifdef PACKAGE_TARNAME
-#undef PACKAGE_TARNAME
-#endif
-#ifdef PACKAGE_URL
-#undef PACKAGE_URL
-#endif
-#ifdef PACKAGE_VERSION
-#undef PACKAGE_VERSION
-#endif
-
 #include "mb_aux.h"
 #include "mb_define.h"
 #include "mb_format.h"
