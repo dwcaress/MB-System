@@ -56,7 +56,7 @@ static char temp[TL_RING_BYTES];
 static FILE* tlog=NULL;
 
 void tl_mconfig(TLModuleID id, TLStreams s_en, TLStreams s_di){
-    
+
     if (id>=0 && id<TL_N_MODULES) {
         switch (s_en) {
             case TL_NONE:
@@ -69,7 +69,7 @@ void tl_mconfig(TLModuleID id, TLStreams s_en, TLStreams s_di){
 //                fprintf(stderr,"tl_configure: enabling [%x]\n",s_en);
                 tl_modules[id].g_en=s_en;
                 break;
-                
+
             default:
                 // no change
 //                fprintf(stderr,"tl_configure: NC or invalid enable [%x]\n",s_en);
@@ -86,7 +86,7 @@ void tl_mconfig(TLModuleID id, TLStreams s_en, TLStreams s_di){
 //                fprintf(stderr,"tl_configure: disabling [%x]\n",s_di);
                 tl_modules[id].g_di=s_di;
                 break;
-                
+
             default:
                //  no change
 //                fprintf(stderr,"tl_configure: NC or invalid disable [%x]\n",s_di);
@@ -106,7 +106,7 @@ void trn_log(const char* log_msg) {
     char t_str[64]={0};
     time_t t=0;
     struct tm gt;
-    
+
     // get time and format timestamp
     time(&t);
     gmtime_r(&t,&gt);
@@ -116,7 +116,7 @@ void trn_log(const char* log_msg) {
     // "* " for ring buffered messages
     // "- " for regular log messages
     strcat(t_str,(tlog==NULL ? "* " : "- "));
-    
+
     // If the log file exists...
     if (tlog != NULL) {
         // If the ring buffer isn't empty,
@@ -126,7 +126,7 @@ void trn_log(const char* log_msg) {
             while (op<p_ringbuf) {
                 fputc(*op++, tlog);
             }
-            
+
             // empty/reset the ringbuffer
             memset(ringbuf,0,TL_RING_BYTES);
             p_ringbuf=ringbuf;
@@ -140,9 +140,9 @@ void trn_log(const char* log_msg) {
         }
         // flush log buffer every write
         fflush(tlog);
-        
+
     }else{ // log file doesn't exist...
-        
+
         // get msg length (including NULL)
         int len=strlen(log_msg)+1;
         char term=( (log_msg[len-2]=='\n') ? 0x00 : '\n');
@@ -152,7 +152,7 @@ void trn_log(const char* log_msg) {
         // space remaining
         int rem=ringbuf+TL_RING_BYTES-p_ringbuf;
         int wbytes=0;
-        
+
 		// compare message size with space remaining
         if ( wlen > rem ) {
             // if the message is larger than the ring buffer...
@@ -194,13 +194,13 @@ void tl_new_logfile(const char* directory)
     if(directory != NULL){
         char buf[200]={0};
        const char *fname=(directory[strlen(directory)-1]=='/' ? "trn.log" : "/trn.log" );
-        
+
         for (int i = 0; true; i++)
         {
-            sprintf(buf, "%s%s.%04d", directory,fname, i);
+            snprintf(buf, sizeof(buf), "%s%s.%04d", directory,fname, i);
             if (0 > access(buf, F_OK)) break;
         }
-        
+
         // Create a new log file and write a header
         //
         if (tlog)
@@ -208,7 +208,7 @@ void tl_new_logfile(const char* directory)
             fclose(tlog);
             tlog = NULL;
         }
-        
+
         fprintf(stderr,"Opening log %s\n", buf);
         tlog = fopen(buf, "a");
         // write message to log (which will trigger ring buffer
@@ -231,7 +231,7 @@ void logs(int strmask, const char* format, ...) {
     va_list args;
     va_list cargs;
     va_start(args, format);
-    
+
     char term=( (format!=NULL && format[strlen(format)-1]=='\n') ? 0x00 : '\n');
 //    fprintf(stderr,"mask[%x]&TL_LOG[%x]\n",strmask,(strmask&TL_LOG));
 //    fprintf(stderr,"mask[%x]&TL_SERR[%x]\n",strmask,(strmask&TL_SERR));
@@ -247,7 +247,7 @@ void logs(int strmask, const char* format, ...) {
         // may have previously been omitted for QNX
         va_end(cargs);
     }
-    
+
     // check tlog!=NULL and send to stderr
     //  when log file doesn't exist yet
     if( (tlog==NULL) || (strmask&TL_SERR) !=0 ){
@@ -270,6 +270,6 @@ void logs(int strmask, const char* format, ...) {
         // may have previously been omitted for QNX
         va_end(cargs);
     }
-    
+
    va_end(args);
 }

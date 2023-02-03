@@ -494,11 +494,11 @@ int mbr_rt_image83p(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
   }
 
   char buffer[MBF_IMAGE83P_BUFFER_SIZE] = "";
-  int index;
-  short short_val;
-  int int_val;
-  float float_val;
-  int numberbytes;
+  int index = 0;
+  short short_val = 0;
+  int int_val = 0;
+  float float_val = 0.0;
+  int numberbytes = 0;
 
   /* get pointer to mbio descriptor */
   struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
@@ -855,13 +855,13 @@ int mbr_rt_image83p(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
           order, in which case reverse the swap bool and recalculate the
           values for this ping */
       bool reverse_swap = false;
-      if (store->external_sensor_flags & 0x01 && store->heading_external < 0.0 || store->heading_external > 360.0)
+      if ((store->external_sensor_flags & 0x01 && store->heading_external < 0.0) || store->heading_external > 360.0)
         reverse_swap = true;
-      if (store->external_sensor_flags & 0x02 && store->roll_external < -90.0 || store->roll_external > 90.0)
+      if ((store->external_sensor_flags & 0x02 && store->roll_external < -90.0) || store->roll_external > 90.0)
         reverse_swap = true;
-      if (store->external_sensor_flags & 0x04 && store->pitch_external < 0.0 || store->pitch_external > 360.0)
+      if ((store->external_sensor_flags & 0x04 && store->pitch_external < 0.0) || store->pitch_external > 360.0)
         reverse_swap = true;
-      if (store->external_sensor_flags & 0x08 && store->heave_external < -1000.0 || store->heave_external > 1000.0)
+      if ((store->external_sensor_flags & 0x08 && store->heave_external < -1000.0) || store->heave_external > 1000.0)
         reverse_swap = true;
       if (reverse_swap) {
         if (swap_external)
@@ -941,13 +941,13 @@ int mbr_rt_image83p(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
     double heading = (double) store->heading_external;
     double roll = (double) store->roll_external;
     double pitch = (double) store->pitch_external;
-    mb_3D_orientation tx_align;
-    mb_3D_orientation tx_orientation;
-    double tx_steer;
-    mb_3D_orientation rx_align;
-    mb_3D_orientation rx_orientation;
-    double rx_steer;
-    int tx_sign = 1;
+
+    mb_3D_orientation tx_align = {0.0, 0.0, 0.0};
+    mb_3D_orientation tx_orientation = {0.0, 0.0, 0.0};
+    double tx_steer = 0.0;
+    mb_3D_orientation rx_align = {0.0, 0.0, 0.0};
+    mb_3D_orientation rx_orientation = {0.0, 0.0, 0.0};
+    double rx_steer = 0.0;
     int rx_sign = 1;
     store->num_proc_beams = store->num_beams;
     for (int i = 0; i < store->num_proc_beams; i++) {

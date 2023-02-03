@@ -4765,7 +4765,6 @@ int mbnavadjust_reimport_file(int verbose, struct mbna_project *project,
     }
   }
 
-  struct stat file_status;
   char npath[STRING_MAX+100];
   char opath[STRING_MAX+100];
 

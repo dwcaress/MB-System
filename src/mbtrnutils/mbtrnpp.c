@@ -713,12 +713,12 @@ mlog_id_t trnu_alog_id = MLOG_ID_INVALID;
 mlog_id_t trnu_blog_id = MLOG_ID_INVALID;
 mlog_id_t mb1r_blog_id = MLOG_ID_INVALID;
 
-mlog_config_t mb1_blog_conf = {100 * SZ_1M, ML_NOLIMIT, ML_NOLIMIT, ML_OSEG | ML_LIMLEN, ML_FILE, ML_TFMT_ISO1806};
-mlog_config_t mbtrnpp_mlog_conf = {ML_NOLIMIT, ML_NOLIMIT, ML_NOLIMIT, ML_MONO, ML_FILE, ML_TFMT_ISO1806};
-mlog_config_t reson_blog_conf = {ML_NOLIMIT, ML_NOLIMIT, ML_NOLIMIT, ML_MONO, ML_FILE, ML_TFMT_ISO1806};
-mlog_config_t trnu_alog_conf = {ML_NOLIMIT, ML_NOLIMIT, ML_NOLIMIT, ML_MONO, ML_FILE, ML_TFMT_ISO1806};
-mlog_config_t trnu_blog_conf = {100 * SZ_1M, ML_NOLIMIT, ML_NOLIMIT, ML_OSEG | ML_LIMLEN, ML_FILE, ML_TFMT_ISO1806};
-mlog_config_t mb1r_blog_conf = {ML_NOLIMIT, ML_NOLIMIT, ML_NOLIMIT, ML_MONO, ML_FILE, ML_TFMT_ISO1806};
+mlog_config_t mb1_blog_conf = {100 * SZ_1M, ML_NOLIMIT, ML_NOLIMIT, ML_OSEG | ML_LIMLEN, ML_FILE, ML_TFMT_ISO1806, NULL};
+mlog_config_t mbtrnpp_mlog_conf = {ML_NOLIMIT, ML_NOLIMIT, ML_NOLIMIT, ML_MONO, ML_FILE, ML_TFMT_ISO1806, NULL};
+mlog_config_t reson_blog_conf = {ML_NOLIMIT, ML_NOLIMIT, ML_NOLIMIT, ML_MONO, ML_FILE, ML_TFMT_ISO1806, NULL};
+mlog_config_t trnu_alog_conf = {ML_NOLIMIT, ML_NOLIMIT, ML_NOLIMIT, ML_MONO, ML_FILE, ML_TFMT_ISO1806, NULL};
+mlog_config_t trnu_blog_conf = {100 * SZ_1M, ML_NOLIMIT, ML_NOLIMIT, ML_OSEG | ML_LIMLEN, ML_FILE, ML_TFMT_ISO1806, NULL};
+mlog_config_t mb1r_blog_conf = {ML_NOLIMIT, ML_NOLIMIT, ML_NOLIMIT, ML_MONO, ML_FILE, ML_TFMT_ISO1806, NULL};
 
 char *mb1_blog_path = NULL;
 char *mbtrnpp_mlog_path = NULL;
@@ -875,6 +875,9 @@ int mbtrnpp_logparameters(int verbose, FILE *logfp, char *input, int format, cha
 int mbtrnpp_logstatistics(int verbose, FILE *logfp, int n_pings_read, int n_soundings_read, int n_soundings_valid_read,
                           int n_soundings_flagged_read, int n_soundings_null_read, int n_pings_written, int n_soundings_trimmed,
                           int n_soundings_decimated, int n_soundings_flagged, int n_soundings_written, int *error);
+int mbtrnpp_logtotstatistics(int verbose, FILE *logfp, int n_tot_pings_read, int n_tot_soundings_read, int n_tot_soundings_valid_read,
+                          int n_tot_soundings_flagged_read, int n_tot_soundings_null_read, int n_tot_pings_written, int n_tot_soundings_trimmed,
+                          int n_tot_soundings_decimated, int n_tot_soundings_flagged, int n_tot_soundings_written, int *error);
 int mbtrnpp_init_debug(int verbose);
 
 int mbtrnpp_reson7kr_input_open(int verbose, void *mbio_ptr, char *definition, int *error);
@@ -959,8 +962,8 @@ int mbtrnpp_process_mb1(char *mb1, size_t len, trn_config_t *cfg);
 int mbtrnpp_init_trn(wtnav_t **pdest, int verbose, trn_config_t *cfg);
 int mbtrnpp_init_trnsvr(netif_t **psvr, wtnav_t *trn, char *host, int port, bool verbose);
 int mbtrnpp_init_mb1svr(netif_t **psvr, char *host, int port, bool verbose);
-int mbtrnpp_init_trnusvr(netif_t **psvr, char *host, int port, wtnav_t *trn, bool verbose);
-int mbtrnpp_init_trnumsvr(netif_t **psvr, char *host, int port, wtnav_t *trn, bool verbose);
+int mbtrnpp_init_trnusvr(netif_t **psvr, char *host, int port, bool verbose);
+int mbtrnpp_init_trnumsvr(netif_t **psvr, char *host, int port, bool verbose);
 int mbtrnpp_trn_process_mb1(wtnav_t *tnav, mb1_t *mb1, trn_config_t *cfg);
 int mbtrnpp_trn_update(wtnav_t *self, mb1_t *src, wposet_t **pt_out, wmeast_t **mt_out, trn_config_t *cfg);
 int mbtrnpp_trn_get_bias_estimates(wtnav_t *self, wposet_t *pt, trn_update_t *pstate);
@@ -3023,15 +3026,15 @@ int main(int argc, char **argv) {
 
   /* platform definition file */
   struct mb_platform_struct *platform = NULL;
-  struct mb_sensor_struct *sensor_bathymetry = NULL;
-  struct mb_sensor_struct *sensor_backscatter = NULL;
-  struct mb_sensor_struct *sensor_position = NULL;
-  struct mb_sensor_struct *sensor_depth = NULL;
-  struct mb_sensor_struct *sensor_heading = NULL;
-  struct mb_sensor_struct *sensor_rollpitch = NULL;
-  struct mb_sensor_struct *sensor_heave = NULL;
-  struct mb_sensor_struct *sensor_target = NULL;
-//  int target_sensor = -1;
+  // struct mb_sensor_struct *sensor_bathymetry = NULL;
+  // struct mb_sensor_struct *sensor_backscatter = NULL;
+  // struct mb_sensor_struct *sensor_position = NULL;
+  // struct mb_sensor_struct *sensor_depth = NULL;
+  // struct mb_sensor_struct *sensor_heading = NULL;
+  // struct mb_sensor_struct *sensor_rollpitch = NULL;
+  // struct mb_sensor_struct *sensor_heave = NULL;
+  // struct mb_sensor_struct *sensor_target = NULL;
+  // int target_sensor = -1;
 
   /* tide model */
   int n_tide = 0;
@@ -3081,7 +3084,7 @@ int main(int argc, char **argv) {
   /* mb1 output write control parameters */
   FILE *output_mb1_fp = NULL;
   char *output_buffer = NULL;
-  int n_output_buffer_alloc = 0;
+  size_t n_output_buffer_alloc = 0;
   size_t mb1_size, index;
   unsigned int checksum;
 
@@ -3312,14 +3315,14 @@ int main(int argc, char **argv) {
             fprintf(stderr, "\nTRN server netif init failed [%d] [%d %s]\n",test,errno,strerror(errno));
         }
 
-        if( (test=mbtrnpp_init_trnusvr(&trnusvr, mbtrn_cfg->trnusvr_host,mbtrn_cfg->trnusvr_port, trn_instance, true))==0){
+        if( (test=mbtrnpp_init_trnusvr(&trnusvr, mbtrn_cfg->trnusvr_host,mbtrn_cfg->trnusvr_port, true))==0){
 //            PMPRINT(MOD_MBTRNPP,MM_DEBUG,(stderr,"TRNU server netif OK [%s:%d]\n",mbtrn_cfg->trnusvr_host,mbtrn_cfg-> trnusvr_port));
             fprintf(stderr,"TRNU server netif OK [%s:%d]\n",mbtrn_cfg->trnusvr_host,mbtrn_cfg->trnusvr_port);
         } else {
             fprintf(stderr, "TRNU server netif init failed [%d] [%d %s]\n",test,errno,strerror(errno));
         }
 
-        if( (test=mbtrnpp_init_trnumsvr(&trnumsvr, mbtrn_cfg->trnumsvr_group,mbtrn_cfg->trnumsvr_port, trn_instance, true))==0){
+        if( (test=mbtrnpp_init_trnumsvr(&trnumsvr, mbtrn_cfg->trnumsvr_group,mbtrn_cfg->trnumsvr_port, true))==0){
             //            PMPRINT(MOD_MBTRNPP,MM_DEBUG,(stderr,"TRNUM server netif OK [%s:%d]\n",mbtrn_cfg->trnumsvr_group,mbtrn_cfg-> trnumsvr_port));
             fprintf(stderr,"TRNUM server netif OK [%s:%d]\n",mbtrn_cfg->trnumsvr_group,mbtrn_cfg->trnumsvr_port);
         } else {
@@ -3368,24 +3371,24 @@ int main(int argc, char **argv) {
     }
 
     /* get sensor structures */
-    if (platform->source_bathymetry >= 0)
-      sensor_bathymetry = &(platform->sensors[platform->source_bathymetry]);
-    if (platform->source_backscatter >= 0)
-      sensor_backscatter = &(platform->sensors[platform->source_backscatter]);
-    if (platform->source_position >= 0)
-      sensor_position = &(platform->sensors[platform->source_position]);
-    if (platform->source_depth >= 0)
-      sensor_depth = &(platform->sensors[platform->source_depth]);
-    if (platform->source_heading >= 0)
-      sensor_heading = &(platform->sensors[platform->source_heading]);
-    if (platform->source_rollpitch >= 0)
-      sensor_rollpitch = &(platform->sensors[platform->source_rollpitch]);
-    if (platform->source_heave >= 0)
-      sensor_heave = &(platform->sensors[platform->source_heave]);
+    // if (platform->source_bathymetry >= 0)
+      // sensor_bathymetry = &(platform->sensors[platform->source_bathymetry]);
+    // if (platform->source_backscatter >= 0)
+      // sensor_backscatter = &(platform->sensors[platform->source_backscatter]);
+    // if (platform->source_position >= 0)
+      // sensor_position = &(platform->sensors[platform->source_position]);
+    // if (platform->source_depth >= 0)
+      // sensor_depth = &(platform->sensors[platform->source_depth]);
+    // if (platform->source_heading >= 0)
+      // sensor_heading = &(platform->sensors[platform->source_heading]);
+    // if (platform->source_rollpitch >= 0)
+      // sensor_rollpitch = &(platform->sensors[platform->source_rollpitch]);
+    // if (platform->source_heave >= 0)
+      // sensor_heave = &(platform->sensors[platform->source_heave]);
     if (mbtrn_cfg->target_sensor < 0)
       mbtrn_cfg->target_sensor = platform->source_bathymetry;
-    if (mbtrn_cfg->target_sensor >= 0)
-      sensor_target = &(platform->sensors[mbtrn_cfg->target_sensor]);
+    // if (mbtrn_cfg->target_sensor >= 0)
+      // sensor_target = &(platform->sensors[mbtrn_cfg->target_sensor]);
   }
 
   /* Initialize UTM projection for mbtrnpp main - the TRN codebase has its own
@@ -3397,7 +3400,7 @@ int main(int argc, char **argv) {
     sprintf(projection_id, "UTM%2.2ldN", mbtrn_cfg->trn_utm_zone);
   else
     sprintf(projection_id, "UTM%2.2ldS", mbtrn_cfg->trn_utm_zone);
-  int proj_status = mb_proj_init(mbtrn_cfg->verbose, projection_id, &(pjptr), &error);
+  mb_proj_init(mbtrn_cfg->verbose, projection_id, &(pjptr), &error);
 
   /* load tide model if specified */
   if (mbtrn_cfg->use_tide_model) {
@@ -3601,11 +3604,6 @@ int main(int argc, char **argv) {
   bool nav_offset_init = false;
   if (mbtrn_cfg->random_offset_enable) {
       srand(time(0) / getpid());
-      // TODO: what is the intent of this loop? (klh)
-      for (int i=0; i < 100; i++) {
-          int j = rand();
-          j+=1; // silence unused variable warning
-      }
       double nav_offset_mag = mbtrn_cfg->reinit_xyoffset_max * ((double)rand()) / ((double)RAND_MAX);
       double nav_offset_bearing = 2.0 * M_PI * ((double)rand()) / ((double)RAND_MAX);
       nav_offset_east = nav_offset_mag * sin(nav_offset_bearing);
@@ -4198,7 +4196,7 @@ int main(int argc, char **argv) {
             /* add the checksum */
             checksum = 0;
             unsigned char *cp = (unsigned char *)output_buffer;
-            for (int j = 0; j < index; j++) {
+            for (unsigned int j = 0; j < index; j++) {
               // checksum += (unsigned int) output_buffer[j];
               checksum += (unsigned int)(*cp++);
             }
@@ -4484,6 +4482,10 @@ int main(int argc, char **argv) {
     n_soundings_decimated = 0;
     n_soundings_flagged = 0;
     n_soundings_written = 0;
+
+    status = mbtrnpp_logtotstatistics(mbtrn_cfg->verbose, logfp, n_tot_pings_read, n_tot_soundings_read, n_tot_soundings_valid_read,
+                                         n_tot_soundings_flagged_read, n_tot_soundings_null_read, n_tot_pings_written, n_tot_soundings_trimmed,
+                                         n_tot_soundings_decimated, n_tot_soundings_flagged, n_tot_soundings_written, &error);
 
     status = mbtrnpp_closelog(mbtrn_cfg->verbose, &logfp, &error);
   }
@@ -4836,6 +4838,81 @@ int mbtrnpp_logstatistics(int verbose, FILE *logfp, int n_pings_read, int n_soun
     mbtrnpp_postlog(verbose, logfp, log_message, error);
 
     sprintf(log_message, "       n_soundings_written:          %d", n_soundings_written);
+    mbtrnpp_postlog(verbose, logfp, log_message, error);
+  }
+
+  /* print output debug statements */
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
+    fprintf(stderr, "dbg2  Return values:\n");
+    fprintf(stderr, "dbg2       error:              %d\n", *error);
+    fprintf(stderr, "dbg2  Return status:\n");
+    fprintf(stderr, "dbg2       status:             %d\n", status);
+  }
+
+  /* return */
+  return (status);
+}
+
+/*--------------------------------------------------------------------*/
+int mbtrnpp_logtotstatistics(int verbose, FILE *logfp, int n_tot_pings_read, int n_tot_soundings_read, int n_tot_soundings_valid_read,
+                          int n_tot_soundings_flagged_read, int n_tot_soundings_null_read, int n_tot_pings_written, int n_tot_soundings_trimmed,
+                          int n_tot_soundings_decimated, int n_tot_soundings_flagged, int n_tot_soundings_written, int *error) {
+  /* local variables */
+  int status = MB_SUCCESS;
+  mb_path log_message;
+
+  /* print input debug statements */
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+    fprintf(stderr, "dbg2  Input arguments:\n");
+    fprintf(stderr, "dbg2       verbose:                      %d\n", verbose);
+    fprintf(stderr, "dbg2       logfp:                        %p\n", logfp);
+    fprintf(stderr, "dbg2       n_tot_pings_read:             %d\n", n_tot_pings_read);
+    fprintf(stderr, "dbg2       n_tot_soundings_read:         %d\n", n_tot_soundings_read);
+    fprintf(stderr, "dbg2       n_tot_soundings_valid_read:   %d\n", n_tot_soundings_valid_read);
+    fprintf(stderr, "dbg2       n_tot_soundings_flagged_read: %d\n", n_tot_soundings_flagged_read);
+    fprintf(stderr, "dbg2       n_tot_soundings_null_read:    %d\n", n_tot_soundings_null_read);
+    fprintf(stderr, "dbg2       n_tot_pings_written:          %d\n", n_tot_pings_written);
+    fprintf(stderr, "dbg2       n_tot_soundings_trimmed:      %d\n", n_tot_soundings_trimmed);
+    fprintf(stderr, "dbg2       n_tot_soundings_decimated:    %d\n", n_tot_soundings_decimated);
+    fprintf(stderr, "dbg2       n_tot_soundings_flagged:      %d\n", n_tot_soundings_flagged);
+    fprintf(stderr, "dbg2       n_tot_soundings_written:      %d\n", n_tot_soundings_written);
+  }
+
+  /* post log_message */
+  if (logfp != NULL) {
+    sprintf(log_message, "Log File Statistics:");
+    mbtrnpp_postlog(verbose, logfp, log_message, error);
+
+    sprintf(log_message, "       n_tot_pings_read:             %d", n_tot_pings_read);
+    mbtrnpp_postlog(verbose, logfp, log_message, error);
+
+    sprintf(log_message, "       n_tot_soundings_read:         %d", n_tot_soundings_read);
+    mbtrnpp_postlog(verbose, logfp, log_message, error);
+
+    sprintf(log_message, "       n_tot_soundings_valid_read:   %d", n_tot_soundings_valid_read);
+    mbtrnpp_postlog(verbose, logfp, log_message, error);
+
+    sprintf(log_message, "       n_tot_soundings_flagged_read: %d", n_tot_soundings_flagged_read);
+    mbtrnpp_postlog(verbose, logfp, log_message, error);
+
+    sprintf(log_message, "       n_tot_soundings_null_read:    %d", n_tot_soundings_null_read);
+    mbtrnpp_postlog(verbose, logfp, log_message, error);
+
+    sprintf(log_message, "       n_tot_pings_written:          %d", n_tot_pings_written);
+    mbtrnpp_postlog(verbose, logfp, log_message, error);
+
+    sprintf(log_message, "       n_tot_soundings_trimmed:      %d", n_tot_pings_read);
+    mbtrnpp_postlog(verbose, logfp, log_message, error);
+
+    sprintf(log_message, "       n_tot_soundings_decimated:    %d", n_tot_soundings_decimated);
+    mbtrnpp_postlog(verbose, logfp, log_message, error);
+
+    sprintf(log_message, "       n_tot_soundings_flagged:      %d", n_tot_soundings_flagged);
+    mbtrnpp_postlog(verbose, logfp, log_message, error);
+
+    sprintf(log_message, "       n_tot_soundings_written:      %d", n_tot_soundings_written);
     mbtrnpp_postlog(verbose, logfp, log_message, error);
   }
 
@@ -5430,19 +5507,19 @@ int mbtrnpp_init_trn(wtnav_t **pdest, int verbose, trn_config_t *cfg)
             if (wtnav_initialized(instance)) {
                 *pdest = instance;
                 retval = 0;
-                fprintf(stderr, "%s : TRN initialize - OK\n",__FUNCTION__);
+                if (verbose) fprintf(stderr, "%s : TRN initialize - OK\n",__FUNCTION__);
             }
             else {
-                fprintf(stderr, "%s : ERR - TRN wtnav initialization failed\n",__FUNCTION__);
+                if (verbose) fprintf(stderr, "%s : ERR - TRN wtnav initialization failed\n",__FUNCTION__);
                 wtnav_destroy(instance);
             }
         }
         else {
-            fprintf(stderr, "%s : ERR - TRN new failed\n",__FUNCTION__);
+            if (verbose) fprintf(stderr, "%s : ERR - TRN new failed\n",__FUNCTION__);
         }
     }
     else {
-        fprintf(stderr, "%s : ERR - TRN config NULL\n",__FUNCTION__);
+        if (verbose) fprintf(stderr, "%s : ERR - TRN config NULL\n",__FUNCTION__);
     }
 
     return retval;
@@ -5466,17 +5543,18 @@ int mbtrnpp_init_trnsvr(netif_t **psvr, wtnav_t *trn, char *host, int port, bool
         if(NULL!=svr){
             *psvr = svr;
             netif_set_reqres_res(svr,trn);
-            fprintf(stderr,"trnsvr netif:\n");
+            if (verbose)
+                if (verbose) fprintf(stderr,"trnsvr netif:\n");
             netif_show(svr,true,5);
             netif_init_log(svr, "trnsvr", (NULL!=mbtrn_cfg->trn_log_dir?mbtrn_cfg->trn_log_dir:"."), s_mbtrnpp_session_str(NULL,0,RF_NONE));
             mlog_tprintf(svr->mlog_id,"*** trnsvr session start (TEST) ***\n");
             mlog_tprintf(svr->mlog_id,"libnetif v[%s] build[%s]\n",netif_get_version(),netif_get_build());
             retval = netif_connect(svr);
         } else {
-            fprintf(stderr,"%s:%d - ERR allocation\n",__FUNCTION__,__LINE__);
+            if (verbose) fprintf(stderr,"%s:%d - ERR allocation\n",__FUNCTION__,__LINE__);
         }
     } else {
-        fprintf(stderr,"%s:%d - ERR invalid args\n",__FUNCTION__,__LINE__);
+        if (verbose) fprintf(stderr,"%s:%d - ERR invalid args\n",__FUNCTION__,__LINE__);
     }
     return retval;
 }
@@ -5486,8 +5564,8 @@ int mbtrnpp_init_mb1svr(netif_t **psvr, char *host, int port, bool verbose)
     int retval = -1;
    if(NULL!=psvr && NULL!=host){
        PMPRINT(MOD_MBTRNPP,MM_DEBUG,(stderr,"configuring MB1 server socket using %s:%d\n",host,port));
-       fprintf(stderr,"configuring MB1 server socket using %s:%d hbto[%lf]\n",host,port,mbtrn_cfg->mbsvr_hbto);
-        netif_t *svr = netif_new("mb1svr",host,
+       if (verbose) fprintf(stderr,"configuring MB1 server socket using %s:%d hbto[%lf]\n",host,port,mbtrn_cfg->mbsvr_hbto);
+       netif_t *svr = netif_new("mb1svr",host,
                           port,
                           ST_UDP,
                           IFM_REQRES,
@@ -5498,18 +5576,18 @@ int mbtrnpp_init_mb1svr(netif_t **psvr, char *host, int port, bool verbose)
 
         if(NULL!=svr){
             *psvr = svr;
-//            netif_set_reqres_res(svr,trn);
-            fprintf(stderr,"mb1svr netif:\n");
+            // netif_set_reqres_res(svr,trn);
+            if (verbose) fprintf(stderr,"mb1svr netif:\n");
             netif_show(svr,true,5);
             netif_init_log(svr, "mb1svr", (NULL!=mbtrn_cfg->trn_log_dir?mbtrn_cfg->trn_log_dir:"."), s_mbtrnpp_session_str(NULL,0,RF_NONE));
             mlog_tprintf(svr->mlog_id,"*** mb1svr session start (TEST) ***\n");
             mlog_tprintf(svr->mlog_id,"libnetif v[%s] build[%s]\n",netif_get_version(),netif_get_build());
             retval = netif_connect(svr);
         } else {
-            fprintf(stderr,"%s:%d - ERR allocation\n",__FUNCTION__,__LINE__);
+            if (verbose) fprintf(stderr,"%s:%d - ERR allocation\n",__FUNCTION__,__LINE__);
         }
    } else {
-       fprintf(stderr,"%s:%d - ERR invalid args\n",__FUNCTION__,__LINE__);
+       if (verbose) fprintf(stderr,"%s:%d - ERR invalid args\n",__FUNCTION__,__LINE__);
    }
     return retval;
 }
@@ -5640,7 +5718,7 @@ int s_mbtrnpp_trnu_reset_box_callback(double ofs_x, double ofs_y, double ofs_z, 
     return retval;
 }
 
-int mbtrnpp_init_trnusvr(netif_t **psvr, char *host, int port, wtnav_t *trn, bool verbose)
+int mbtrnpp_init_trnusvr(netif_t **psvr, char *host, int port, bool verbose)
 {
     int retval = -1;
     PMPRINT(MOD_MBTRNPP,MM_DEBUG,(stderr,"configuring trnu (update) server socket using %s:%d\n",host,port));
@@ -5663,24 +5741,24 @@ int mbtrnpp_init_trnusvr(netif_t **psvr, char *host, int port, wtnav_t *trn, boo
             g_trnu_res->reset_box_callback = s_mbtrnpp_trnu_reset_box_callback;
 
             netif_set_reqres_res(svr,g_trnu_res);
-            //            trnif_res_t rr_resources={trn};
-            //netif_set_reqres_res(svr,trn);
-            fprintf(stderr,"trnusvr netif:\n");
+            // trnif_res_t rr_resources = {trn};
+            // netif_set_reqres_res(svr,trn);
+            if (verbose) fprintf(stderr,"trnusvr netif:\n");
             netif_show(svr,true,5);
             netif_init_log(svr, "trnusvr", (NULL!=mbtrn_cfg->trn_log_dir?mbtrn_cfg->trn_log_dir:"."), s_mbtrnpp_session_str(NULL,0,RF_NONE));
             mlog_tprintf(svr->mlog_id,"*** trnusvr session start (TEST) ***\n");
             mlog_tprintf(svr->mlog_id,"libnetif v[%s] build[%s]\n",netif_get_version(),netif_get_build());
             retval = netif_connect(svr);
         } else {
-            fprintf(stderr,"%s:%d - ERR allocation\n",__FUNCTION__,__LINE__);
+            if (verbose) fprintf(stderr,"%s:%d - ERR allocation\n",__FUNCTION__,__LINE__);
         }
     } else {
-        fprintf(stderr,"%s:%d - ERR invalid args\n",__FUNCTION__,__LINE__);
+        if (verbose) fprintf(stderr,"%s:%d - ERR invalid args\n",__FUNCTION__,__LINE__);
     }
     return retval;
 }
 
-int mbtrnpp_init_trnumsvr(netif_t **psvr, char *host, int port, wtnav_t *trn, bool verbose)
+int mbtrnpp_init_trnumsvr(netif_t **psvr, char *host, int port, bool verbose)
 {
     int retval = -1;
     PMPRINT(MOD_MBTRNPP,MM_DEBUG,(stderr,"configuring trnum (update) server socket using %s:%d\n",host,port));
@@ -5701,19 +5779,19 @@ int mbtrnpp_init_trnumsvr(netif_t **psvr, char *host, int port, wtnav_t *trn, bo
             g_trnu_res->reset_callback=s_mbtrnpp_trnu_reset_callback;
 
             netif_set_reqres_res(svr,g_trnu_res);
-            //            trnif_res_t rr_resources={trn};
-            //netif_set_reqres_res(svr,trn);
-            fprintf(stderr,"trnumsvr netif:\n");
+            // trnif_res_t rr_resources = {trn};
+            // netif_set_reqres_res(svr,trn);
+            if (verbose) fprintf(stderr,"trnumsvr netif:\n");
             netif_show(svr,true,5);
             netif_init_log(svr, "trnumsvr", (NULL!=mbtrn_cfg->trn_log_dir?mbtrn_cfg->trn_log_dir:"."), s_mbtrnpp_session_str(NULL,0,RF_NONE));
             mlog_tprintf(svr->mlog_id,"*** trnumsvr session start (TEST) ***\n");
             mlog_tprintf(svr->mlog_id,"libnetif v[%s] build[%s]\n",netif_get_version(),netif_get_build());
             retval = netif_connect(svr);
         } else {
-            fprintf(stderr,"%s:%d - ERR allocation\n",__FUNCTION__,__LINE__);
+            if (verbose) fprintf(stderr,"%s:%d - ERR allocation\n",__FUNCTION__,__LINE__);
         }
     } else {
-        fprintf(stderr,"%s:%d - ERR invalid args\n",__FUNCTION__,__LINE__);
+        if (verbose) fprintf(stderr,"%s:%d - ERR invalid args\n",__FUNCTION__,__LINE__);
     }
     return retval;
 }
@@ -6064,7 +6142,7 @@ int mbtrnpp_trn_process_mb1(wtnav_t *tnav, mb1_t *mb1, trn_config_t *cfg)
 
                 wmeast_t *mt = NULL;
                 wposet_t *pt = NULL;
-                trn_update_t trn_state={NULL,NULL,NULL,0,0,0,0,0.0,0.0},*pstate=&trn_state;
+                trn_update_t trn_state={NULL,NULL,NULL,0,0,0,0,0.0,0.0,0,0,0.0,0.0},*pstate=&trn_state;
 
                 // get TRN update
                 MST_METRIC_START(app_stats->stats->metrics[MBTPP_CH_TRN_UPDATE_XT], mtime_dtime());
@@ -6344,7 +6422,7 @@ int mbtrnpp_reson7kr_validate_nf(r7k_nf_t *pnf)
             }
         }
     }
-    return -1;
+    return retval;
 }
 
 int mbtrnpp_reson7kr_validate_drf(r7k_drf_t *pdrf)
@@ -6421,7 +6499,6 @@ int mbtrnpp_reson7kr_input_read(int verbose, void *mbio_ptr, size_t *size, char 
     static byte *frame_buf = NULL;
     static r7k_drf_t *fb_pdrf = NULL;
     static byte *fb_pread=NULL;
-    static size_t bytes_read=0;
     static bool read_frame=true;
     bool read_err = false;
 
@@ -6431,7 +6508,6 @@ int mbtrnpp_reson7kr_input_read(int verbose, void *mbio_ptr, size_t *size, char 
         memset(frame_buf, 0, R7K_MAX_FRAME_BYTES);
         fb_pread = frame_buf;
         fb_pdrf = (r7k_drf_t *)(frame_buf);
-        bytes_read = 0;
     }
 
     // if valid reader...
@@ -6483,7 +6559,7 @@ int mbtrnpp_reson7kr_input_read(int verbose, void *mbio_ptr, size_t *size, char 
             // return bytes requested:
             // smaller of bytes read and bytes remaining
             int64_t bytes_rem = (int64_t)(frame_buf + fb_pdrf->size - fb_pread);
-            size_t readlen = (*size <= bytes_rem ? *size : bytes_rem);
+            size_t readlen = (*size <= (size_t) bytes_rem ? *size : (size_t) bytes_rem);
             if(readlen > 0){
                 memcpy(buffer, fb_pread, readlen);
                 *size = (size_t)readlen;
@@ -7197,7 +7273,6 @@ int mbtrnpp_mb1r_input_read(int verbose, void *mbio_ptr, size_t *size, char *buf
     static byte *frame_buf = NULL;
     static mb1_t *fb_pmb1 = NULL;
     static byte *fb_pread=NULL;
-    static size_t bytes_read=0;
     static bool read_frame=true;
     bool read_err = false;
 
@@ -7207,7 +7282,6 @@ int mbtrnpp_mb1r_input_read(int verbose, void *mbio_ptr, size_t *size, char *buf
         memset(frame_buf, 0, MB1_MAX_SOUNDING_BYTES);
         fb_pread = frame_buf;
         fb_pmb1 = (mb1_t *)frame_buf;
-        bytes_read = 0;
     }
 
     // if valid reader...
@@ -7227,7 +7301,7 @@ int mbtrnpp_mb1r_input_read(int verbose, void *mbio_ptr, size_t *size, char *buf
                                            &sync_bytes)) >= 0)
             {
                 // validate
-                if(rbytes<=MB1_MAX_SOUNDING_BYTES &&
+                if(rbytes <= (int64_t) MB1_MAX_SOUNDING_BYTES &&
                    fb_pmb1->size == rbytes &&
                    fb_pmb1->nbeams<=MB1_MAX_BEAMS &&
                    mb1_validate_checksum(fb_pmb1)==0)
@@ -7260,7 +7334,7 @@ int mbtrnpp_mb1r_input_read(int verbose, void *mbio_ptr, size_t *size, char *buf
 
         if(!read_err){
             int64_t bytes_rem = frame_buf + fb_pmb1->size - fb_pread;
-            size_t readlen = (*size <= bytes_rem ? *size : bytes_rem);
+            size_t readlen = (*size <= (size_t) bytes_rem ? *size : (size_t) bytes_rem);
             if(readlen > 0){
                 memcpy(buffer, fb_pread, readlen);
                 *size = (size_t)readlen;

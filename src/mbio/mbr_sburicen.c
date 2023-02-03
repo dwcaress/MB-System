@@ -185,13 +185,14 @@ int mbr_rt_sburicen(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 
 	/* read next record from file */
 	mb_io_ptr->file_pos = mb_io_ptr->file_bytes;
-	if ((status = fread(data, 1, mb_io_ptr->data_structure_size, mb_io_ptr->mbfp)) == mb_io_ptr->data_structure_size) {
-		mb_io_ptr->file_bytes += status;
+  size_t read_len = 0;
+	if ((read_len = fread(data, 1, mb_io_ptr->data_structure_size, mb_io_ptr->mbfp)) == mb_io_ptr->data_structure_size) {
+		mb_io_ptr->file_bytes += read_len;
 		status = MB_SUCCESS;
 		*error = MB_ERROR_NO_ERROR;
 	}
 	else {
-		mb_io_ptr->file_bytes += status;
+		mb_io_ptr->file_bytes += read_len;
 		status = MB_FAILURE;
 		*error = MB_ERROR_EOF;
 	}
@@ -385,7 +386,8 @@ int mbr_wt_sburicen(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 
 	/* write next record to file */
 	if (dataplus->kind == MB_DATA_DATA || dataplus->kind == MB_DATA_COMMENT) {
-		if ((status = fwrite(data, 1, mb_io_ptr->data_structure_size, mb_io_ptr->mbfp)) == mb_io_ptr->data_structure_size) {
+    size_t write_len = 0;
+		if ((write_len = fwrite(data, 1, mb_io_ptr->data_structure_size, mb_io_ptr->mbfp)) == mb_io_ptr->data_structure_size) {
 			status = MB_SUCCESS;
 			*error = MB_ERROR_NO_ERROR;
 		}

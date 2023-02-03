@@ -1208,7 +1208,7 @@ int main(int argc, char **argv) {
 
 	/* set up plotting script file */
 	char scriptfile[2*MB_PATH_MAXLINE+20] = "";
-	sprintf(scriptfile, "%s_%s_ssswathplot.cmd", line_name1, line_name2);
+	snprintf(scriptfile, sizeof(scriptfile), "%s_%s_ssswathplot.cmd", line_name1, line_name2);
 	FILE *sfp = fopen(scriptfile, "w");
 	if (sfp == nullptr) {
 		error = MB_ERROR_OPEN_FAIL;
@@ -2144,9 +2144,9 @@ int main(int argc, char **argv) {
 
 					/* define the filename */
 					if (line_mode == MBSSLAYOUT_LINE_OFF)
-						sprintf(output_file, "%s_%s.mb%2.2d", ifileroot, line_name2, MBF_MBLDEOIH);
+						snprintf(output_file, sizeof(output_file), "%s_%s.mb%2.2d", ifileroot, line_name2, MBF_MBLDEOIH);
 					else
-						sprintf(output_file, "%s_%s_%4.4d.mb%2.2d", line_name1, line_name2, line_number, MBF_MBLDEOIH);
+						snprintf(output_file, sizeof(output_file), "%s_%s_%4.4d.mb%2.2d", line_name1, line_name2, line_number, MBF_MBLDEOIH);
 
 					/* open the new file */
 					if (verbose > 0)
@@ -2622,7 +2622,7 @@ int main(int argc, char **argv) {
 	/* close plotting script file */
 	fclose(sfp);
 	char command[2*MB_PATH_MAXLINE+50] = "";
-	sprintf(command, "chmod +x %s", scriptfile);
+	snprintf(command, sizeof(command), "chmod +x %s", scriptfile);
 	/* int shellstatus = */ system(command);
 
 	/* output data counts */

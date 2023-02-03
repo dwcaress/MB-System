@@ -988,7 +988,7 @@ int mbr_hsatlraw_read_line(int verbose, FILE *mbfp, int minimum_size, char *line
 	return (status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_hsatlraw_rd_ergnhydi(int verbose, FILE *mbfp, struct mbf_hsatlraw_struct *data, int shift, int *error) {
+int mbr_hsatlraw_rd_ergnhydi(int verbose, FILE *mbfp, struct mbf_hsatlraw_struct *data, size_t shift, int *error) {
 	char line[MBF_HSATLRAW_MAXLINE];
 
 	if (verbose >= 2) {
@@ -997,7 +997,7 @@ int mbr_hsatlraw_rd_ergnhydi(int verbose, FILE *mbfp, struct mbf_hsatlraw_struct
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbfp:       %p\n", (void *)mbfp);
 		fprintf(stderr, "dbg2       data:       %p\n", (void *)data);
-		fprintf(stderr, "dbg2       shift:      %d\n", shift);
+		fprintf(stderr, "dbg2       shift:      %zu\n", shift);
 	}
 
 	/* read event record from file */
@@ -1056,7 +1056,7 @@ int mbr_hsatlraw_rd_ergnhydi(int verbose, FILE *mbfp, struct mbf_hsatlraw_struct
 	return (status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_hsatlraw_rd_ergnpara(int verbose, FILE *mbfp, struct mbf_hsatlraw_struct *data, int shift, int *error) {
+int mbr_hsatlraw_rd_ergnpara(int verbose, FILE *mbfp, struct mbf_hsatlraw_struct *data, size_t shift, int *error) {
 	char line[MBF_HSATLRAW_MAXLINE];
 
 	if (verbose >= 2) {
@@ -1065,7 +1065,7 @@ int mbr_hsatlraw_rd_ergnpara(int verbose, FILE *mbfp, struct mbf_hsatlraw_struct
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbfp:       %p\n", (void *)mbfp);
 		fprintf(stderr, "dbg2       data:       %p\n", (void *)data);
-		fprintf(stderr, "dbg2       shift:      %d\n", shift);
+		fprintf(stderr, "dbg2       shift:      %zu\n", shift);
 	}
 
 	/* read event record from file */
@@ -1130,7 +1130,7 @@ int mbr_hsatlraw_rd_ergnpara(int verbose, FILE *mbfp, struct mbf_hsatlraw_struct
 	return (status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_hsatlraw_rd_ergnposi(int verbose, FILE *mbfp, struct mbf_hsatlraw_struct *data, int shift, int *error) {
+int mbr_hsatlraw_rd_ergnposi(int verbose, FILE *mbfp, struct mbf_hsatlraw_struct *data, size_t shift, int *error) {
 	char line[MBF_HSATLRAW_MAXLINE];
 
 	if (verbose >= 2) {
@@ -1139,7 +1139,7 @@ int mbr_hsatlraw_rd_ergnposi(int verbose, FILE *mbfp, struct mbf_hsatlraw_struct
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbfp:       %p\n", (void *)mbfp);
 		fprintf(stderr, "dbg2       data:       %p\n", (void *)data);
-		fprintf(stderr, "dbg2       shift:      %d\n", shift);
+		fprintf(stderr, "dbg2       shift:      %zu\n", shift);
 	}
 
 	/* read event record from file */
@@ -1196,7 +1196,7 @@ int mbr_hsatlraw_rd_ergnposi(int verbose, FILE *mbfp, struct mbf_hsatlraw_struct
 	return (status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_hsatlraw_rd_ergneich(int verbose, FILE *mbfp, struct mbf_hsatlraw_struct *data, int shift, int *error) {
+int mbr_hsatlraw_rd_ergneich(int verbose, FILE *mbfp, struct mbf_hsatlraw_struct *data, size_t shift, int *error) {
 	char line[MBF_HSATLRAW_MAXLINE];
 	int numvals;
 
@@ -1206,7 +1206,7 @@ int mbr_hsatlraw_rd_ergneich(int verbose, FILE *mbfp, struct mbf_hsatlraw_struct
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbfp:       %p\n", (void *)mbfp);
 		fprintf(stderr, "dbg2       data:       %p\n", (void *)data);
-		fprintf(stderr, "dbg2       shift:      %d\n", shift);
+		fprintf(stderr, "dbg2       shift:      %zu\n", shift);
 	}
 
 	/* read event record from file */
@@ -1333,7 +1333,7 @@ int mbr_hsatlraw_rd_ergneich(int verbose, FILE *mbfp, struct mbf_hsatlraw_struct
 	return (status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_hsatlraw_rd_ergnmess(int verbose, FILE *mbfp, struct mbf_hsatlraw_struct *data, int shift, int *error) {
+int mbr_hsatlraw_rd_ergnmess(int verbose, FILE *mbfp, struct mbf_hsatlraw_struct *data, size_t shift, int *error) {
 	char line[MBF_HSATLRAW_MAXLINE];
 	int numvals;
 
@@ -1343,7 +1343,7 @@ int mbr_hsatlraw_rd_ergnmess(int verbose, FILE *mbfp, struct mbf_hsatlraw_struct
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbfp:       %p\n", (void *)mbfp);
 		fprintf(stderr, "dbg2       data:       %p\n", (void *)data);
-		fprintf(stderr, "dbg2       shift:      %d\n", shift);
+		fprintf(stderr, "dbg2       shift:      %zu\n", shift);
 	}
 
 	/* read event record from file */
@@ -1472,7 +1472,7 @@ int mbr_hsatlraw_rd_ergnmess(int verbose, FILE *mbfp, struct mbf_hsatlraw_struct
 	return (status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_hsatlraw_rd_ergnslzt(int verbose, FILE *mbfp, struct mbf_hsatlraw_struct *data, int shift, int *error) {
+int mbr_hsatlraw_rd_ergnslzt(int verbose, FILE *mbfp, struct mbf_hsatlraw_struct *data, size_t shift, int *error) {
 	char line[MBF_HSATLRAW_MAXLINE];
 	int numvals;
 
@@ -1482,7 +1482,7 @@ int mbr_hsatlraw_rd_ergnslzt(int verbose, FILE *mbfp, struct mbf_hsatlraw_struct
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbfp:       %p\n", (void *)mbfp);
 		fprintf(stderr, "dbg2       data:       %p\n", (void *)data);
-		fprintf(stderr, "dbg2       shift:      %d\n", shift);
+		fprintf(stderr, "dbg2       shift:      %zu\n", shift);
 	}
 
 	/* read event record from file */
@@ -1582,7 +1582,7 @@ int mbr_hsatlraw_rd_ergnslzt(int verbose, FILE *mbfp, struct mbf_hsatlraw_struct
 	return (status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_hsatlraw_rd_ergnctds(int verbose, FILE *mbfp, struct mbf_hsatlraw_struct *data, int shift, int *error) {
+int mbr_hsatlraw_rd_ergnctds(int verbose, FILE *mbfp, struct mbf_hsatlraw_struct *data, size_t shift, int *error) {
 	char line[MBF_HSATLRAW_MAXLINE];
 	int nlines;
 	int numvals;
@@ -1593,7 +1593,7 @@ int mbr_hsatlraw_rd_ergnctds(int verbose, FILE *mbfp, struct mbf_hsatlraw_struct
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbfp:       %p\n", (void *)mbfp);
 		fprintf(stderr, "dbg2       data:       %p\n", (void *)data);
-		fprintf(stderr, "dbg2       shift:      %d\n", shift);
+		fprintf(stderr, "dbg2       shift:      %zu\n", shift);
 	}
 
 	/* read event record from file */
@@ -1669,7 +1669,7 @@ int mbr_hsatlraw_rd_ergnctds(int verbose, FILE *mbfp, struct mbf_hsatlraw_struct
 	return (status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_hsatlraw_rd_ergnampl(int verbose, FILE *mbfp, struct mbf_hsatlraw_struct *data, int shift, int *error) {
+int mbr_hsatlraw_rd_ergnampl(int verbose, FILE *mbfp, struct mbf_hsatlraw_struct *data, size_t shift, int *error) {
 	char line[MBF_HSATLRAW_MAXLINE];
 	int numvals;
 
@@ -1679,7 +1679,7 @@ int mbr_hsatlraw_rd_ergnampl(int verbose, FILE *mbfp, struct mbf_hsatlraw_struct
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbfp:       %p\n", (void *)mbfp);
 		fprintf(stderr, "dbg2       data:       %p\n", (void *)data);
-		fprintf(stderr, "dbg2       shift:      %d\n", shift);
+		fprintf(stderr, "dbg2       shift:      %zu\n", shift);
 	}
 
 	/* read event record from file */
@@ -1831,7 +1831,7 @@ int mbr_hsatlraw_rd_ergnampl(int verbose, FILE *mbfp, struct mbf_hsatlraw_struct
 	return (status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_hsatlraw_rd_ldeocmnt(int verbose, FILE *mbfp, struct mbf_hsatlraw_struct *data, int shift, int *error) {
+int mbr_hsatlraw_rd_ldeocmnt(int verbose, FILE *mbfp, struct mbf_hsatlraw_struct *data, size_t shift, int *error) {
 	char line[MBF_HSATLRAW_MAXLINE];
 
 	if (verbose >= 2) {
@@ -1840,7 +1840,7 @@ int mbr_hsatlraw_rd_ldeocmnt(int verbose, FILE *mbfp, struct mbf_hsatlraw_struct
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbfp:       %p\n", (void *)mbfp);
 		fprintf(stderr, "dbg2       data:       %p\n", (void *)data);
-		fprintf(stderr, "dbg2       shift:      %d\n", shift);
+		fprintf(stderr, "dbg2       shift:      %zu\n", shift);
 	}
 
 	/* read comment record from file */

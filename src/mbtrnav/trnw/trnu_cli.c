@@ -13,24 +13,24 @@
 /////////////////////////
 /*
  Copyright Information
- 
+
  Copyright 2002-2019 MBARI
  Monterey Bay Aquarium Research Institute, all rights reserved.
- 
+
  Terms of Use
- 
+
  This program is free software; you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
  the Free Software Foundation; either version 3 of the License, or
  (at your option) any later version. You can access the GPLv3 license at
  http://www.gnu.org/licenses/gpl-3.0.html
- 
+
  This program is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  GNU General Public License for more details
  (http://www.gnu.org/licenses/gpl-3.0.html)
- 
+
  MBARI provides the documentation and software code "as is", with no warranty,
  express or implied, as to the software, title, non-infringement of third party
  rights, merchantability, or fitness for any particular purpose, the accuracy of
@@ -38,7 +38,7 @@
  assume the entire risk associated with use of the code, and you agree to be
  responsible for the entire cost of repair or servicing of the program with
  which you are using the code.
- 
+
  In no event shall MBARI be liable for any damages, whether general, special,
  incidental or consequential damages, arising out of your use of the software,
  including, but not limited to, the loss or corruption of your data or damages
@@ -48,11 +48,11 @@
  liability or expense, including attorneys' fees, resulting from loss of or
  damage to property or the injury to or death of any person arising out of the
  use of the software.
- 
+
  The MBARI software is provided without obligation on the part of the
  Monterey Bay Aquarium Research Institute to assist in its use, correction,
  modification, or enhancement.
- 
+
  MBARI assumes no responsibility or liability for any third party and/or
  commercial software required for the database or applications. Licensee agrees
  to obtain and maintain valid licenses for any additional third party software
@@ -60,7 +60,7 @@
  */
 
 /////////////////////////
-// Headers 
+// Headers
 /////////////////////////
 #include "trnu_cli.h"
 #include "trnif_proto.h"
@@ -70,7 +70,7 @@
 // Macros
 /////////////////////////
 
-// These macros should only be defined for 
+// These macros should only be defined for
 // application main files rather than general C files
 /*
 /// @def PRODUCT
@@ -96,7 +96,7 @@
 #define TRNUCLI_SHOW_WVAL 16
 
 /////////////////////////
-// Declarations 
+// Declarations
 /////////////////////////
 
 /////////////////////////
@@ -209,7 +209,7 @@ trnucli_t *trnucli_new(update_callback_fn update_fn, trnucli_flags_t flags, doub
         instance->hbeat_to_sec = hbeat_to_sec;
         instance->flags = flags;
     }
-    
+
     return instance;
 }
 
@@ -306,7 +306,7 @@ int trnucli_mcast_connect(trnucli_t *self, char *host, int port, int ttl)
 
         // enable multiple clients on same host
         msock_set_opt(self->trnu->sock, SO_REUSEADDR, &so_reuse, sizeof(so_reuse));
-        
+
 #if !defined(__CYGWIN__)
         // Cygwin doesn't define SO_REUSEPORT
         // OSX requires this to reuse socket (linux optional)
@@ -685,7 +685,7 @@ static int s_update_hex(trnu_pub_t *update, char *dest, int len, bool pretty)
         int rem=len;
         byte *bp=(byte *)update;
         char *dp=dest;
-        int i=0;
+        unsigned int i=0;
         bool hdr=true;
         for(i=0;i<TRNU_PUB_BYTES;i++){
             if(pretty){

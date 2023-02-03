@@ -396,9 +396,9 @@ static Boolean extractSegment(
  */
 static XmString StringToXmString(char *str) {
 	static char *tagBuf = NULL;
-	static int tagBufLen = 0;
+	static unsigned int tagBufLen = 0;
 	static char *textBuf = NULL;
-	static int textBufLen = 0;
+	static unsigned int textBufLen = 0;
 
 	if (!str)
 		return (NULL);
@@ -953,7 +953,7 @@ void BX_MENU_POST(Widget p, XtPointer mw, XEvent *ev, Boolean *dispatch) {
 	XButtonEvent *e = (XButtonEvent *)ev;
 
 	int argcnt = 0;
-	int button;
+	unsigned int button;
 	Arg args[2];
 	XtSetArg(args[argcnt], XmNwhichButton, &button);
 	argcnt++;
@@ -992,7 +992,7 @@ void BX_SET_BACKGROUND_COLOR(Widget w, ArgList args, Cardinal *argcnt, Pixel bg_
 	int topShadowLoc= UNSET;
 	int bottomShadowLoc = UNSET;
 	int fgLoc = UNSET;
-	for (int i = 0; i < *argcnt; i++) {
+	for (unsigned int i = 0; i < *argcnt; i++) {
 		if (strcmp(args[i].name, XmNtopShadowColor) == 0 || strcmp(args[i].name, XmNtopShadowPixmap) == 0) {
 			topShadowLoc = i;
 		}
@@ -1454,7 +1454,7 @@ static unsigned int atoui(char *p, unsigned int l, unsigned int *ui_return);
 #define BXZINDEX1(x, y, img) ((y)*img->bytes_per_line) + ((x) >> 3)
 
 static unsigned int atoui(char *p, unsigned int l, unsigned int *ui_return) {
-	int i = 0;
+	unsigned int i = 0;
 	int n = 0;
 	for (; i < l; i++)
 		if (*p >= '0' && *p <= '9')
@@ -2467,11 +2467,11 @@ static void SetImagePixels(
     unsigned int *pixelindex, Pixel *pixels) {
 	unsigned int *iptr = pixelindex;
 	if (image->depth == 1) {
-		for (int y = 0; y < height; y++) {
-			for (int x = 0; x < width; x++, iptr++) {
+		for (unsigned int y = 0; y < height; y++) {
+			for (unsigned int x = 0; x < width; x++, iptr++) {
 				Pixel pixel = pixels[*iptr];
 				unsigned long px = pixel;
-				for (int i = 0; i < sizeof(unsigned long); i++, px >>= 8)
+				for (unsigned int i = 0; i < sizeof(unsigned long); i++, px >>= 8)
 					((unsigned char *)&pixel)[i] = (unsigned char)px;
 				char *src = &image->data[BXXYINDEX(x, y, image)];
 				char *dst = (char *)&px;
@@ -2490,12 +2490,12 @@ static void SetImagePixels(
 			}
 		}
 	} else {
-		for (int y = 0; y < height; y++) {
-			for (int x = 0; x < width; x++, iptr++) {
+		for (unsigned int y = 0; y < height; y++) {
+			for (unsigned int x = 0; x < width; x++, iptr++) {
 				Pixel pixel = pixels[*iptr];
 				if (image->depth == 4)
 					pixel &= 0xf;
-				for (int i = 0, px = pixel; i < sizeof(unsigned long); i++, px >>= 8)
+				for (unsigned int i = 0, px = pixel; i < sizeof(unsigned long); i++, px >>= 8)
 					((unsigned char *)&pixel)[i] = (unsigned char)px;
 				char *src = &image->data[BXZINDEX(x, y, image)];
 				unsigned long px = 0;
@@ -2526,8 +2526,8 @@ static void SetImagePixels32(
 	unsigned int *iptr = pixelindex;
 #ifndef WORD64
 	if (*((char *)&byteorderpixel) == image->byte_order) {
-		for (int y = 0; y < height; y++) {
-			for (int x = 0; x < width; x++, iptr++) {
+		for (unsigned int y = 0; y < height; y++) {
+			for (unsigned int x = 0; x < width; x++, iptr++) {
 				unsigned int *paddr = (unsigned int *)(&(image->data[BXZINDEX32(x, y, image)]));
 				*paddr = (unsigned int)pixels[*iptr];
 			}
@@ -2535,8 +2535,8 @@ static void SetImagePixels32(
 	} else
 #endif
 	    if (image->byte_order == MSBFirst)
-		for (int y = 0; y < height; y++)
-			for (int x = 0; x < width; x++, iptr++) {
+		for (unsigned int y = 0; y < height; y++)
+			for (unsigned int x = 0; x < width; x++, iptr++) {
 				unsigned char *addr = &((unsigned char *)image->data)[BXZINDEX32(x, y, image)];
 				addr[0] = (unsigned char)(pixels[*iptr] >> 24);
 				addr[1] = (unsigned char)(pixels[*iptr] >> 16);
@@ -2544,8 +2544,8 @@ static void SetImagePixels32(
 				addr[3] = (unsigned char)(pixels[*iptr]);
 			}
 	else
-		for (int y = 0; y < height; y++) {
-			for (int x = 0; x < width; x++, iptr++) {
+		for (unsigned int y = 0; y < height; y++) {
+			for (unsigned int x = 0; x < width; x++, iptr++) {
 				unsigned char *addr = &((unsigned char *)image->data)[BXZINDEX32(x, y, image)];
 				addr[3] = (unsigned char)(pixels[*iptr] >> 24);
 				addr[2] = (unsigned char)(pixels[*iptr] >> 16);
@@ -2561,16 +2561,16 @@ static void SetImagePixels16(
     unsigned int *pixelindex, Pixel *pixels) {
 	unsigned int *iptr = pixelindex;
 	if (image->byte_order == MSBFirst) {
-		for (int y = 0; y < height; y++) {
-			for (int x = 0; x < width; x++, iptr++) {
+		for (unsigned int y = 0; y < height; y++) {
+			for (unsigned int x = 0; x < width; x++, iptr++) {
 				unsigned char *addr = &((unsigned char *)image->data)[BXZINDEX16(x, y, image)];
 				addr[0] = (unsigned char)(pixels[*iptr] >> 8);
 				addr[1] = (unsigned char)(pixels[*iptr]);
 			}
 		}
 	} else {
-		for (int y = 0; y < height; y++) {
-			for (int x = 0; x < width; x++, iptr++) {
+		for (unsigned int y = 0; y < height; y++) {
+			for (unsigned int x = 0; x < width; x++, iptr++) {
 				unsigned char *addr = &((unsigned char *)image->data)[BXZINDEX16(x, y, image)];
 				addr[1] = (unsigned char)(pixels[*iptr] >> 8);
 				addr[0] = (unsigned char)(pixels[*iptr]);
@@ -2584,8 +2584,8 @@ static void SetImagePixels8(
     XImage *image, unsigned int width, unsigned int height,
     unsigned int *pixelindex, Pixel *pixels) {
 	unsigned int *iptr = pixelindex;
-	for (int y = 0; y < height; y++)
-		for (int x = 0; x < width; x++, iptr++)
+	for (unsigned int y = 0; y < height; y++)
+		for (unsigned int x = 0; x < width; x++, iptr++)
 			image->data[BXZINDEX8(x, y, image)] = (char)pixels[*iptr];
 }
 
@@ -2600,8 +2600,8 @@ static void SetImagePixels1(
 
 	unsigned int *iptr = pixelindex;
 	if (image->bitmap_bit_order == MSBFirst) {
-		for (int y = 0; y < height; y++) {
-			for (int x = 0; x < width; x++, iptr++) {
+		for (unsigned int y = 0; y < height; y++) {
+			for (unsigned int x = 0; x < width; x++, iptr++) {
 				const int yoff = BXZINDEX1(x, y, image);
 				const int xoff = x & 7;
 				unsigned char bit = 0x80 >> xoff;
@@ -2612,8 +2612,8 @@ static void SetImagePixels1(
 			}
 		}
 	} else {
-		for (int y = 0; y < height; y++) {
-			for (int x = 0; x < width; x++, iptr++) {
+		for (unsigned int y = 0; y < height; y++) {
+			for (unsigned int x = 0; x < width; x++, iptr++) {
 				const int yoff = BXZINDEX1(x, y, image);
 				const int xoff = x & 7;
 				unsigned char bit = 1 << xoff;

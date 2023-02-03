@@ -186,29 +186,29 @@ struct mbev_grid_struct {
 
         /// Grid northing increment (meters)
 	double dy;
-  
+
 	int n_columns;
 	int n_rows;
-  
+
         /// minimum depth
 	double min;
-  
-        /// maximum depth 
+
+        /// maximum depth
 	double max;
-  
+
 	double smin;
-  
+
 	double smax;
 
         /// Value denoting 'no data'
 	float nodatavalue;
-  
+
 	float *sum;
 	float *wgt;
-  
+
         /// Depth values
   	float *val;
-  
+
 	float *sgm;
 };
 
@@ -312,7 +312,7 @@ int mbeditviz_init(int argc, char **argv,
                    char *helpMsg,
                    char *usageMsg,
                    int (*showMessage)(char *),
-                   void (*hideMessage)(void),
+                   int (*hideMessage)(void),
                    void (*updateGui)(void),
                    int (*showErrorDialog)(char *, char *, char *));
 

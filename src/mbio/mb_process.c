@@ -874,6 +874,7 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles, struct mb_process_s
 	if (file[0] != '/' && file[1] != ':') {
     char *getcwd_result = getcwd(process->mbp_ifile, MB_PATH_MAXLINE);
     assert(strlen(process->mbp_ifile) > 0);
+    assert(getcwd_result != NULL);
 		strcat(process->mbp_ifile, "/");
 		strcat(process->mbp_ifile, file);
 	} else {
@@ -1441,6 +1442,7 @@ int mb_pr_writepar(int verbose, char *file, struct mb_process_struct *process, i
 	else {
     char *getcwd_result = getcwd(pwd, MB_PATH_MAXLINE);
     assert(strlen(pwd) > 0);
+    assert(getcwd_result != NULL);
 		if (lastslash != NULL) {
 			strcat(pwd, "/");
 			strcat(pwd, file);

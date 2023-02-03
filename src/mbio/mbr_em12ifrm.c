@@ -435,7 +435,7 @@ int mbr_em12ifrm_rd_data(int verbose, void *mbio_ptr, int *error) {
 	int read_status;
 	char line[MBF_EM12IFRM_RECORD_SIZE] = "";
 	int shift;
-	short short_value;
+	short short_value = 0;
 	int len;
 	int beamlist[MBF_EM12IFRM_MAXBEAMS];
 	mb_s_char *beam_ss;

@@ -655,14 +655,14 @@ int mbsys_3ddwissl_preprocess
   assert(preprocess_pars_ptr != NULL);
 
   /* get mbio descriptor */
-  struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+  //struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
   /* get preprocessing parameters */
   struct mb_preprocess_struct *pars = (struct mb_preprocess_struct *)preprocess_pars_ptr;
 
   /* get data structure pointers */
   struct mbsys_3ddwissl_struct *store = (struct mbsys_3ddwissl_struct *)store_ptr;
-  struct mb_platform_struct *platform = (struct mb_platform_struct *)platform_ptr;
+  //struct mb_platform_struct *platform = (struct mb_platform_struct *)platform_ptr;
 
   /* get kluges */
   bool kluge_beampatternsnell = false;
@@ -4088,10 +4088,11 @@ int mbsys_3ddwissl_indextableapply
 {
   int status = MB_SUCCESS;
   struct mb_io_indextable_struct *indextable;
-  int giindex, iindex;
+  int giindex;
+  unsigned int iindex;
   int giindex_a_begin, giindex_a_end;
   int giindex_b_begin, giindex_b_end;
-  int i;
+  unsigned int i;
 
   if (verbose >= 2)
     {

@@ -97,7 +97,7 @@ int get_segy_limits(int verbose, char *segyfile, int *tracemode, int *tracestart
 
 	/* set sinf filename */
 	char sinffile[MB_PATH_MAXLINE] = "";
-	sprintf(sinffile, "%s.sinf", segyfile);
+	snprintf(sinffile, sizeof(sinffile), "%s.sinf", segyfile);
 
 	/* check status of segy and sinf file */
 	int datmodtime = 0;
@@ -117,7 +117,7 @@ int get_segy_limits(int verbose, char *segyfile, int *tracemode, int *tracestart
 		if (verbose >= 1)
 			fprintf(stderr, "\nGenerating sinf file for %s\n", segyfile);
 		char command[MB_PATH_MAXLINE] = "";
-		sprintf(command, "mbsegyinfo -I %s -O", segyfile);
+		snprintf(command, sizeof(command), "mbsegyinfo -I %s -O", segyfile);
 		/* int shellstatus = */ system(command);
 	}
 
@@ -134,7 +134,7 @@ int get_segy_limits(int verbose, char *segyfile, int *tracemode, int *tracestart
 	int rptrace1;
 
 	/* read sinf file if possible */
-	sprintf(sinffile, "%s.sinf", segyfile);
+	snprintf(sinffile, sizeof(sinffile), "%s.sinf", segyfile);
 	FILE *sfp = fopen(sinffile, "r");
 	if (sfp != nullptr) {
 		/* read the sinf file */
@@ -1047,7 +1047,7 @@ int main(int argc, char **argv) {
 	char zlabel[MB_PATH_MAXLINE] = "";
 	strcpy(zlabel, "Trace Signal");
 	char title[MB_PATH_MAXLINE+100] = "";
-	sprintf(title, "Seismic Grid from %s", segyfile);
+	snprintf(title, sizeof(title), "Seismic Grid from %s", segyfile);
         const double NaN = std::numeric_limits<float>::quiet_NaN();
 	status &= mb_write_gmt_grd(verbose, gridfile, grid, NaN, ngridx, ngridy, xmin, xmax, ymin, ymax, gridmintot, gridmaxtot, dx,
 	                          dy, xlabel, ylabel, zlabel, title, projection, argc, argv, &error);
@@ -1066,7 +1066,7 @@ int main(int argc, char **argv) {
 	const double xwidth = std::min(0.01 * (double)ngridx, 55.0);
 	const double ywidth = std::min(0.01 * (double)ngridy, 28.0);
 	char plot_cmd[5*MB_PATH_MAXLINE] = "";
-	sprintf(plot_cmd, "mbm_grdplot -I%s -JX%f/%f -G1 -V -L\"File %s - %s:%s\"", gridfile, xwidth, ywidth, gridfile, title,
+	snprintf(plot_cmd, sizeof(plot_cmd), "mbm_grdplot -I%s -JX%f/%f -G1 -V -L\"File %s - %s:%s\"", gridfile, xwidth, ywidth, gridfile, title,
 	        zlabel);
 	if (verbose) {
 		fprintf(outfp, "\nexecuting mbm_grdplot...\n%s\n", plot_cmd);

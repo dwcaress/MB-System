@@ -263,13 +263,13 @@ int mbr_dem_photgram(int verbose, void *mbio_ptr, int *error) {
 /*--------------------------------------------------------------------*/
 int mbr_photgram_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	char buffer[MB_COMMENT_MAXLINE + 8];
-	size_t read_len;
-	int recordsize;
-	short checksum;
+	size_t read_len = 0;
+	int recordsize = 0;
+	short checksum = 0;
 	int *fileheader_initialized;
 	int *formatversion;
-	int index;
-	int skip;
+	int index = 0;
+	int skip = 0;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -608,9 +608,9 @@ int mbr_rt_photgram(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 /*--------------------------------------------------------------------*/
 int mbr_photgram_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	char buffer[MB_COMMENT_MAXLINE + 8];
-	size_t write_len;
+	size_t write_len = 0;
 	int checksum = 0;
-	int index;
+	int index = 0;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);

@@ -56,7 +56,7 @@ void IntegerData::read(ExternalData *externalData)
 
 const char *IntegerData::ascii()
 {
-  sprintf(_asciiBuffer, asciiFormat(), _value);
+  snprintf(_asciiBuffer, sizeof(_asciiBuffer), asciiFormat(), _value);
   return _asciiBuffer;
 }
 
@@ -71,4 +71,3 @@ const char *IntegerData::typeMnemonic()
 {
   return IntegerTypeMnem;
 }
-

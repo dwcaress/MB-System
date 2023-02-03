@@ -3901,7 +3901,7 @@ void do_mbview_glwda_input(Widget w, XtPointer client_data, XtPointer call_data)
 				/* handle shading */
 				else if (data->mouse_mode == MBV_MOUSE_SHADE) {
 					/* get shade mode */
-					int shade_mode;
+					int shade_mode = data->primary_shade_mode;
 					if (data->grid_mode == MBV_GRID_VIEW_PRIMARY)
 						shade_mode = data->primary_shade_mode;
 					else if (data->grid_mode == MBV_GRID_VIEW_PRIMARYSLOPE)
@@ -4101,7 +4101,7 @@ void do_mbview_glwda_input(Widget w, XtPointer client_data, XtPointer call_data)
 				/* handle shading */
 				else if (data->mouse_mode == MBV_MOUSE_SHADE) {
 					/* get shade mode */
-					int shade_mode;
+					int shade_mode = data->primary_shade_mode;
 					if (data->grid_mode == MBV_GRID_VIEW_PRIMARY)
 						shade_mode = data->primary_shade_mode;
 					else if (data->grid_mode == MBV_GRID_VIEW_PRIMARYSLOPE)

@@ -196,9 +196,9 @@ int main(int argc, char **argv) {
 	/* first get roll data from the entire swathdata (which can be a datalist ) */
 	char cmdfile[5*MB_PATH_MAXLINE+200];
 	if (kind > MB_DATA_NONE)
-		sprintf(cmdfile, "mbnavlist -I%s -F%d -K%d -OMR", swathdata, format, kind);
+		snprintf(cmdfile, sizeof(cmdfile), "mbnavlist -I%s -F%d -K%d -OMR", swathdata, format, kind);
 	else
-		sprintf(cmdfile, "mbnavlist -I%s -F%d -N%d -OMR", swathdata, format, navchannel);
+		snprintf(cmdfile, sizeof(cmdfile), "mbnavlist -I%s -F%d -N%d -OMR", swathdata, format, navchannel);
 	fprintf(stderr, "\nRunning %s...\n", cmdfile);
 
 	int nroll = 0;
@@ -228,7 +228,7 @@ int main(int argc, char **argv) {
 	char xcorfiletot[MB_PATH_MAXLINE+10];
 	FILE *fpt = nullptr;
 	if (read_datalist) {
-		sprintf(xcorfiletot, "%s_xcorr.txt", outroot);
+		snprintf(xcorfiletot, sizeof(xcorfiletot), "%s_xcorr.txt", outroot);
 		if ((fpt = fopen(xcorfiletot, "w")) == nullptr) {
 			fprintf(stderr, "\nUnable to open cross correlation output: %s\n", xcorfiletot);
 			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -238,7 +238,7 @@ int main(int argc, char **argv) {
 
 	/* open time lag estimate file */
 	char estimatefile[MB_PATH_MAXLINE+20];
-	sprintf(estimatefile, "%s_timelagest.txt", outroot);
+	snprintf(estimatefile, sizeof(estimatefile), "%s_timelagest.txt", outroot);
 	FILE *fpe = fopen(estimatefile, "w");
 	if (fpe == nullptr) {
 		fprintf(stderr, "\nUnable to open estimate output: %s\n", estimatefile);
@@ -248,7 +248,7 @@ int main(int argc, char **argv) {
 
 	/* open time lag histogram file */
 	char histfile[MB_PATH_MAXLINE+20];
-	sprintf(histfile, "%s_timelaghist.txt", outroot);
+	snprintf(histfile, sizeof(histfile), "%s_timelaghist.txt", outroot);
 	FILE *fph = fopen(histfile, "w");
 	if (fph == nullptr) {
 		fprintf(stderr, "\nUnable to open histogram output: %s\n", histfile);
@@ -258,7 +258,7 @@ int main(int argc, char **argv) {
 
 	/* open time lag model file */
 	char modelfile[MB_PATH_MAXLINE+20];
-	sprintf(modelfile, "%s_timelagmodel.txt", outroot);
+	snprintf(modelfile, sizeof(modelfile), "%s_timelagmodel.txt", outroot);
 	FILE *fpm = fopen(modelfile, "w");
 	if (fpm == nullptr) {
 		fprintf(stderr, "\nUnable to open time lag model output: %s\n", modelfile);
@@ -327,7 +327,7 @@ int main(int argc, char **argv) {
 		nestimate = 0;
 		int nslope = 0;
 		double time_d_avg = 0.0;
-		sprintf(cmdfile, "mblist -I%s -F%d -OMAR", swathfile, format);
+		snprintf(cmdfile, sizeof(cmdfile), "mblist -I%s -F%d -OMAR", swathfile, format);
 		fprintf(stderr, "\nRunning %s...\n", cmdfile);
 		fp = popen(cmdfile, "r");
 		while ((nscan = fscanf(fp, "%lf %lf %lf", &time_d, &slope, &roll)) == 3) {
@@ -353,7 +353,7 @@ int main(int argc, char **argv) {
 
 		/* open time lag histogram file */
 		char fhistfile[MB_PATH_MAXLINE+20];
-		sprintf(fhistfile, "%s_timelaghist.txt", swathfile);
+		snprintf(fhistfile, sizeof(fhistfile), "%s_timelaghist.txt", swathfile);
 		FILE *fpf = fopen(fhistfile, "w");
 		if (fpf == nullptr) {
 			fprintf(stderr, "\nUnable to open histogram output: %s\n", fhistfile);
@@ -363,7 +363,7 @@ int main(int argc, char **argv) {
 
 		/* open cross correlation file */
 		char xcorfile[MB_PATH_MAXLINE+20];
-		sprintf(xcorfile, "%s_xcorr.txt", swathfile);
+		snprintf(xcorfile, sizeof(xcorfile), "%s_xcorr.txt", swathfile);
 		FILE *fpx = fopen(xcorfile, "w");
 		if (fpx == nullptr) {
 			fprintf(stderr, "\nUnable to open cross correlation output: %s\n", xcorfile);
@@ -513,12 +513,12 @@ int main(int argc, char **argv) {
 		fclose(fpf);
 
 		/* generate plot shellscript for cross correlation file */
-		sprintf(cmdfile, "mbm_xyplot -I%s -N", xcorfile);
+		snprintf(cmdfile, sizeof(cmdfile), "mbm_xyplot -I%s -N", xcorfile);
 		fprintf(stderr, "Running: %s...\n", cmdfile);
 		/* int shellstatus = */ system(cmdfile);
 
 		/* generate plot shellscript for time lag histogram */
-		sprintf(cmdfile, "mbm_histplot -I%s -C%g -L\"Frequency Histogram of %s:Time Lag (sec):Frequency:\"", fhistfile, lagstep,
+		snprintf(cmdfile, sizeof(cmdfile), "mbm_histplot -I%s -C%g -L\"Frequency Histogram of %s:Time Lag (sec):Frequency:\"", fhistfile, lagstep,
 		        swathfile);
 		fprintf(stderr, "Running: %s...\n", cmdfile);
 		/* int shellstatus = */ system(cmdfile);
@@ -570,14 +570,14 @@ int main(int argc, char **argv) {
 
 	/* generate plot shellscript for cross correlation file */
 	if (read_datalist) {
-		sprintf(cmdfile, "mbm_xyplot -I%s -N -L\"Roll Correlation With Acrosstrack Slope:Time Lag (sec):Correlation:\"",
+		snprintf(cmdfile, sizeof(cmdfile), "mbm_xyplot -I%s -N -L\"Roll Correlation With Acrosstrack Slope:Time Lag (sec):Correlation:\"",
 		        xcorfiletot);
 		fprintf(stderr, "Running: %s...\n", cmdfile);
 		/* int shellstatus = */ system(cmdfile);
 	}
 
 	/* generate plot shellscript for time lag histogram */
-	sprintf(cmdfile, "mbm_histplot -I%s -C%g -L\"Frequency Histogram of %s:Time Lag (sec):Frequency:\"", histfile, lagstep,
+	snprintf(cmdfile, sizeof(cmdfile), "mbm_histplot -I%s -C%g -L\"Frequency Histogram of %s:Time Lag (sec):Frequency:\"", histfile, lagstep,
 	        swathdata);
 	fprintf(stderr, "Running: %s...\n", cmdfile);
 	/* int shellstatus = */ system(cmdfile);
@@ -587,7 +587,7 @@ int main(int argc, char **argv) {
 		// const double mmm = (nestimate * sum_xy - sum_x * sum_y) / (nestimate * sum_x2 - sum_x * sum_x);
 		// const double bbb = (sum_y - mmm * sum_x) / nestimate; */
 
-		sprintf(cmdfile, "mbm_xyplot -I%s -ISc0.05:%s -I%s -ISc0.1:%s -L\"Time lag model of %s:Time (sec):Time Lag (sec):\"",
+		snprintf(cmdfile, sizeof(cmdfile), "mbm_xyplot -I%s -ISc0.05:%s -I%s -ISc0.1:%s -L\"Time lag model of %s:Time (sec):Time Lag (sec):\"",
 		        modelfile, estimatefile, modelfile, modelfile, swathdata);
 		fprintf(stderr, "Running: %s...\n", cmdfile);
 		/* shellstatus = */ system(cmdfile);

@@ -591,9 +591,9 @@ static Boolean extractSegment(
  */
 static XmString StringToXmString(char *str) {
 	static char *tagBuf = NULL;
-	static int tagBufLen = 0;
+	static unsigned int tagBufLen = 0;
 	static char *textBuf = NULL;
-	static int textBufLen = 0;
+	static unsigned int textBufLen = 0;
 
 	wchar_t *ctx;
 	wchar_t *tag;
@@ -1186,7 +1186,7 @@ void BX_MENU_POST(Widget p, XtPointer mw, XEvent *ev, Boolean *dispatch) {
 	(void)dispatch;  // Unused parameter
 	Arg args[2];
 	int argcnt;
-	int button;
+	unsigned int button;
 	Widget m = (Widget)mw;
 	XButtonEvent *e = (XButtonEvent *)ev;
 
@@ -1764,7 +1764,8 @@ LFUNC(atoui, unsigned int, (char *p, unsigned int l, unsigned int *ui_return));
 #endif
 
 static unsigned int atoui(char *p, unsigned int l, unsigned int *ui_return) {
-	int n, i;
+	int n;
+  unsigned int i;
 
 	n = 0;
 	for (i = 0; i < l; i++)
@@ -2544,7 +2545,7 @@ static void SetImagePixels(
 	char *dst;
 	int nbytes;
 	unsigned int *iptr;
-	int x, y, i;
+	unsigned int x, y, i;
 
 	iptr = pixelindex;
 	if (image->depth == 1) {
@@ -2609,7 +2610,7 @@ static void SetImagePixels32(
 	unsigned char *addr;
 	unsigned int *paddr;
 	unsigned int *iptr;
-	int x, y;
+	unsigned int x, y;
 
 	iptr = pixelindex;
 #ifndef WORD64
@@ -2651,7 +2652,7 @@ static void SetImagePixels16(
     unsigned int *pixelindex, Pixel *pixels) {
 	unsigned char *addr;
 	unsigned int *iptr;
-	int x, y;
+	unsigned int x, y;
 
 	iptr = pixelindex;
 	if (image->byte_order == MSBFirst)
@@ -2678,7 +2679,7 @@ static void SetImagePixels8(
     XImage *image, unsigned int width, unsigned int height,
     unsigned int *pixelindex, Pixel * pixels) {
 	unsigned int *iptr;
-	int x, y;
+	unsigned int x, y;
 
 	iptr = pixelindex;
 	for (y = 0; y < height; y++)
@@ -2696,7 +2697,7 @@ static void SetImagePixels1(
 	unsigned char bit;
 	int xoff, yoff;
 	unsigned int *iptr;
-	int x, y;
+	unsigned int x, y;
 
 	if (image->byte_order != image->bitmap_bit_order)
 		SetImagePixels(image, width, height, pixelindex, pixels);

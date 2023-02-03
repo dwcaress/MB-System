@@ -1781,7 +1781,7 @@ int mbsys_netcdf_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, 
 		}
 
 		/* get stuff */
-		for (int i = 0; i < store->mbAntennaNbr; i++) {
+		for (unsigned int i = 0; i < store->mbAntennaNbr; i++) {
 			/* get time */
 			store->mbDate[i] = (int)(time_d / SECINDAY);
 			store->mbTime[i] = (int)(1000 * (time_d - store->mbDate[0] * SECINDAY));
@@ -1811,7 +1811,7 @@ int mbsys_netcdf_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, 
 		store->mbBeamNbr = nbath;
 		/* if (store->mbDepthScale[0] <= 0
 		    || (depthmax */
-		for (int i = 0; i < store->mbAntennaNbr; i++) {
+		for (unsigned int i = 0; i < store->mbAntennaNbr; i++) {
 			store->mbDepthScale[i] = 1 + (int)(depthscale / store->mbDepthScale_scale_factor);
 			store->mbDistanceScale[i] = 1 + (int)(distancescale / store->mbDistanceScale_scale_factor);
 		}
@@ -2055,7 +2055,7 @@ int mbsys_netcdf_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr, 
 			double vdepthbest = 0.0;
 			double xtrackmin = 10000000.0;
 			double vdepth = 0.0;
-			for (int i = 0; i < store->mbBeamNbr; i++) {
+			for (unsigned int i = 0; i < store->mbBeamNbr; i++) {
 				if (store->mbSFlag[i] == 2) {
 					if (fabs((double)store->mbAcrossDistance[i]) < xtrackminbest) {
 						xtrackminbest = (double)store->mbAcrossDistance[i];
@@ -2133,7 +2133,7 @@ int mbsys_netcdf_insert_altitude(int verbose, void *mbio_ptr, void *store_ptr, d
 	/* insert data into structure */
 	if (store->kind == MB_DATA_DATA) {
 		/* get stuff */
-		for (int i = 0; i < store->mbAntennaNbr; i++) {
+		for (unsigned int i = 0; i < store->mbAntennaNbr; i++) {
 			/* set draft */
 			store->mbDynamicDraught[i] = (int)(transducer_depth / store->mbDynamicDraught_scale_factor);
 
@@ -2362,7 +2362,7 @@ int mbsys_netcdf_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int ti
 		}
 
 		/* get stuff */
-		for (int i = 0; i < store->mbAntennaNbr; i++) {
+		for (unsigned int i = 0; i < store->mbAntennaNbr; i++) {
 			/* get time */
 			store->mbDate[i] = (int)(time_d / SECINDAY);
 			store->mbTime[i] = (int)(1000 * (time_d - store->mbDate[0] * SECINDAY));
@@ -2702,7 +2702,7 @@ int mbsys_netcdf_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_p
 		copy->mbVelProfilTime_id = store->mbVelProfilTime_id;
 
 		/* variable pointers */
-		for (int i = 0; i < copy->mbHistoryRecNbr; i++) {
+		for (unsigned int i = 0; i < copy->mbHistoryRecNbr; i++) {
 			copy->mbHistDate[i] = store->mbHistDate[i];
 			copy->mbHistTime[i] = store->mbHistTime[i];
 			copy->mbHistCode[i] = store->mbHistCode[i];
@@ -2710,7 +2710,7 @@ int mbsys_netcdf_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_p
 			copy->mbHistModule[i] = store->mbHistModule[i];
 			copy->mbHistComment[i] = store->mbHistComment[i];
 		}
-		for (int i = 0; i < copy->mbAntennaNbr; i++) {
+		for (unsigned int i = 0; i < copy->mbAntennaNbr; i++) {
 			copy->mbCycle[i] = store->mbCycle[i];
 			copy->mbDate[i] = store->mbDate[i];
 			copy->mbTime[i] = store->mbTime[i];
@@ -2734,7 +2734,7 @@ int mbsys_netcdf_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_p
 			copy->mbInterlacing[i] = store->mbInterlacing[i];
 			copy->mbSamplingRate[i] = store->mbSamplingRate[i];
 		}
-		for (int i = 0; i < copy->mbBeamNbr; i++) {
+		for (unsigned int i = 0; i < copy->mbBeamNbr; i++) {
 			copy->mbAlongDistance[i] = store->mbAlongDistance[i];
 			copy->mbAcrossDistance[i] = store->mbAcrossDistance[i];
 			copy->mbDepth[i] = store->mbDepth[i];
@@ -2744,11 +2744,11 @@ int mbsys_netcdf_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_p
 			copy->mbBeamBias[i] = store->mbBeamBias[i];
 			copy->mbBFlag[i] = store->mbBFlag[i];
 		}
-		for (int i = 0; i < copy->mbAntennaNbr; i++) {
+		for (unsigned int i = 0; i < copy->mbAntennaNbr; i++) {
 			copy->mbBeam[i] = store->mbBeam[i];
 			copy->mbAFlag[i] = store->mbAFlag[i];
 		}
-		for (int i = 0; i < copy->mbVelocityProfilNbr; i++) {
+		for (unsigned int i = 0; i < copy->mbVelocityProfilNbr; i++) {
 			copy->mbVelProfilRef[i] = store->mbVelProfilRef[i];
 			copy->mbVelProfilIdx[i] = store->mbVelProfilIdx[i];
 			copy->mbVelProfilDate[i] = store->mbVelProfilDate[i];

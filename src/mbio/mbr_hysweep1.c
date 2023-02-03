@@ -1322,7 +1322,6 @@ int mbr_hysweep1_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 				store->type = MBSYS_HYSWEEP_RECORDTYPE_DV2;
 
 				/* parse the first line */
-        char *saveptr;
 				nscan = sscanf(line + 4, "%d %x %d %d", &(DV2_device_number), &(DV2_device_capability), &(DV2_towfish),
 				               &(DV2_enabled));
 				if (nscan == 4) {

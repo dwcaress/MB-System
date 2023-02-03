@@ -611,7 +611,7 @@ static int remove_rejected_samps(int verbose, swpls_sxpping *ping, int *error) {
 	int status = mb_mallocd(verbose, __FILE__, __LINE__, valid * sizeof(swpls_point), (void **)&points, error);
 	if (status != MB_SUCCESS) {
 		char message[MAX_ERROR_STRING] = {0};
-		sprintf(message, "Failure to allocate memory for temporary array (%lu bytes)", valid * sizeof(swpls_point));
+		snprintf(message, sizeof(message), "Failure to allocate memory for temporary array (%lu bytes)", valid * sizeof(swpls_point));
 		error_exit(verbose, *error, "mb_mallocd", message);
 	}
 
@@ -667,57 +667,57 @@ static int set_outfile_names(int verbose, mb_path *ofile, mb_path ifile, mb_path
 
 	if (!ofile_set && !split_txers) {
 		if ((format == MBF_SWPLSSXP) && (strncmp(".sxp", &ifile[strlen(ifile) - 4], 4) == 0)) {
-			sprintf(ofile[0], "%s.mb%d", fileroot, format);
+			snprintf(ofile[0], sizeof(ofile[0]), "%s.mb%d", fileroot, format);
 		}
 		else if ((format == MBF_SWPLSSXI) && (strncmp(".sxi", &ifile[strlen(ifile) - 4], 4) == 0)) {
-			sprintf(ofile[0], "%s.mb%d", fileroot, format);
+			snprintf(ofile[0], sizeof(ofile[0]), "%s.mb%d", fileroot, format);
 		}
 		else {
-			sprintf(ofile[0], "%s.mb%d", ifile, format);
+			snprintf(ofile[0], sizeof(ofile[0]), "%s.mb%d", ifile, format);
 		}
 	}
 	else if (!ofile_set && split_txers) {
 		if ((format == MBF_SWPLSSXP) && (strncmp(".sxp", &ifile[strlen(ifile) - 4], 4) == 0)) {
 			for (int i = 0; i < SWPLS_MAX_TXERS; i++) {
-				sprintf(ofile[i], "%s_txer%d.mb%d", fileroot, i + 1, format);
+				snprintf(ofile[i], sizeof(ofile[i]), "%s_txer%d.mb%d", fileroot, i + 1, format);
 			}
 		}
 		else if ((format == MBF_SWPLSSXI) && (strncmp(".sxi", &ifile[strlen(ifile) - 4], 4) == 0)) {
 			for (int i = 0; i < SWPLS_MAX_TXERS; i++) {
-				sprintf(ofile[i], "%s_txer%d.mb%d", fileroot, i + 1, format);
+				snprintf(ofile[i], sizeof(ofile[i]), "%s_txer%d.mb%d", fileroot, i + 1, format);
 			}
 		}
 		else {
 			for (int i = 0; i < SWPLS_MAX_TXERS; i++) {
-				sprintf(ofile[i], "%s_txer%d.mb%d", ifile, i + 1, format);
+				snprintf(ofile[i], sizeof(ofile[i]), "%s_txer%d.mb%d", ifile, i + 1, format);
 			}
 		}
 	}
 	else if (ofile_set && !split_txers) {
 		if ((format == MBF_SWPLSSXP) && (strncmp(".sxp", &ifile[strlen(ifile) - 4], 4) == 0)) {
-			sprintf(ofile[0], "%s.mb%d", *basename, format);
+			snprintf(ofile[0], sizeof(ofile[0]), "%s.mb%d", *basename, format);
 		}
 		else if ((format == MBF_SWPLSSXI) && (strncmp(".sxi", &ifile[strlen(ifile) - 4], 4) == 0)) {
-			sprintf(ofile[0], "%s.mb%d", *basename, format);
+			snprintf(ofile[0], sizeof(ofile[0]), "%s.mb%d", *basename, format);
 		}
 		else {
-			sprintf(ofile[0], "%s.mb%d", ifile, format);
+			snprintf(ofile[0], sizeof(ofile[0]), "%s.mb%d", ifile, format);
 		}
 	}
 	else if (ofile_set && split_txers) {
 		if ((format == MBF_SWPLSSXP) && (strncmp(".sxp", &ifile[strlen(ifile) - 4], 4) == 0)) {
 			for (int i = 0; i < SWPLS_MAX_TXERS; i++) {
-				sprintf(ofile[i], "%s_txer%d.mb%d", *basename, i + 1, format);
+				snprintf(ofile[i], sizeof(ofile[i]), "%s_txer%d.mb%d", *basename, i + 1, format);
 			}
 		}
 		else if ((format == MBF_SWPLSSXI) && (strncmp(".sxi", &ifile[strlen(ifile) - 4], 4) == 0)) {
 			for (int i = 0; i < SWPLS_MAX_TXERS; i++) {
-				sprintf(ofile[i], "%s_txer%d.mb%d", *basename, i + 1, format);
+				snprintf(ofile[i], sizeof(ofile[i]), "%s_txer%d.mb%d", *basename, i + 1, format);
 			}
 		}
 		else {
 			for (int i = 0; i < SWPLS_MAX_TXERS; i++) {
-				sprintf(ofile[i], "%s_txer%d.mb%d", ifile, i + 1, format);
+				snprintf(ofile[i], sizeof(ofile[i]), "%s_txer%d.mb%d", ifile, i + 1, format);
 			}
 		}
 	}
@@ -823,7 +823,7 @@ static int process_output(int verbose, mbdefaults *mbdflts, options *opts, mb_pa
 	                           mbdflts->btime_i, mbdflts->etime_i, mbdflts->speedmin, mbdflts->timegap, &imbio_ptr, &btime_d,
 	                           &etime_d, &beams_bath_alloc, &beams_amp_alloc, &pixels_ss_alloc, error) != MB_SUCCESS) {
 		char message[MAX_ERROR_STRING] = {0};
-		sprintf(message, "Swath File <%s> not initialized for reading\n", ifile);
+		snprintf(message, sizeof(message), "Swath File <%s> not initialized for reading\n", ifile);
 		error_exit(opts->verbose, *error, "mb_read_init", message);
 	}
 
@@ -904,7 +904,7 @@ static int process_output(int verbose, mbdefaults *mbdflts, options *opts, mb_pa
 					                       &obeams_amp, &opixels_ss, error);
 					if (status != MB_SUCCESS) {
 						char message[MAX_ERROR_STRING+50] = {0};
-						sprintf(message, "SWATHplus file <%s> not initialized for writing.\n", ofile[txidx]);
+						snprintf(message, sizeof(message), "SWATHplus file <%s> not initialized for writing.\n", ofile[txidx]);
 						error_exit(verbose, *error, "mb_write_init", message);
 					}
 
@@ -933,7 +933,7 @@ static int process_output(int verbose, mbdefaults *mbdflts, options *opts, mb_pa
 				/* check for error writing here */
 				if (status != MB_SUCCESS) {
 					char message[MAX_ERROR_STRING+50] = {0};
-					sprintf(message, "Data not written to file <%s>\n", ofile[txidx]);
+					snprintf(message, sizeof(message), "Data not written to file <%s>\n", ofile[txidx]);
 					error_exit(opts->verbose, *error, "mb_write_ping", message);
 				}
 			} /* end write sxp data to file */
@@ -1169,7 +1169,7 @@ int main(int argc, char **argv) {
 		const int look_processed = MB_DATALIST_LOOK_UNSET;
 		if (mb_datalist_open(opts.verbose, &datalist, opts.read_file, look_processed, &error) != MB_SUCCESS) {
 			char message[MAX_ERROR_STRING+50];
-			sprintf(message, "Unable to open data list file: %s\n", opts.read_file);
+			snprintf(message, sizeof(message), "Unable to open data list file: %s\n", opts.read_file);
 			error_exit(opts.verbose, MB_ERROR_OPEN_FAIL, "mb_datalist_open", message);
 		}
 

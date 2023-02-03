@@ -83,7 +83,7 @@ TRN_attr::~TRN_attr()
 }
 
 // Common to QNX and NIX versions
-// 
+//
 TrnClient::TrnClient(const char *host, int port)
 : TerrainNavClient(),
     _cfg_file(NULL),
@@ -110,7 +110,7 @@ TrnClient::TrnClient(const char *host, int port)
     fprintf(stderr, "\nServer      : %s :%ld\n",_trn_attr->_terrainNavServer, _trn_attr->_terrainNavPort);
     fprintf(stderr,"Vehicle Cfg : %s\n\n", _trn_attr->_vehicleCfgName);
     _initialized = false;
-    
+
 }
 
 TrnClient::TrnClient(const char *svr_log_dir, const char *host, int port)
@@ -173,7 +173,7 @@ int TrnClient::loadCfgAttributes(const char *cfg_file)
         // use default path ($TRN_CONFIGDIR/terrainAid.cfg or ./terrainAid.cfg)
         cfg_path=cfg_buf;
         const char *cfg_dir = getenv("TRN_DATAFILES");
-        sprintf(cfg_buf, "%s/terrainAid.cfg", (NULL!=cfg_dir ? cfg_dir : "."));
+        snprintf(cfg_buf, sizeof(cfg_buf), "%s/terrainAid.cfg", (NULL!=cfg_dir ? cfg_dir : "."));
     }
 
     if (access(cfg_path, F_OK) < 0){
@@ -297,7 +297,7 @@ int TrnClient::loadCfgAttributes(const char *cfg_file)
 
 
         if(_trn_attr->_mapFileName != NULL){
-            sprintf(mapname, "%s/%s", mapPath, _trn_attr->_mapFileName);
+            snprintf(mapname, sizeof(mapname), "%s/%s", mapPath, _trn_attr->_mapFileName);
             free(mapFile);
             this->mapFile = STRDUPNULL(mapname);
         }else{
@@ -305,7 +305,7 @@ int TrnClient::loadCfgAttributes(const char *cfg_file)
         }
 
         if(_trn_attr->_vehicleCfgName != NULL){
-            sprintf(vehiclename, "%s/%s", cfgPath, _trn_attr->_vehicleCfgName);
+            snprintf(vehiclename, sizeof(vehiclename), "%s/%s", cfgPath, _trn_attr->_vehicleCfgName);
             free(vehicleSpecFile);
             this->vehicleSpecFile = STRDUPNULL(vehiclename);
         }else{
@@ -313,7 +313,7 @@ int TrnClient::loadCfgAttributes(const char *cfg_file)
         }
 
         if(_trn_attr->_particlesName!=NULL){
-            sprintf(particlename, "%s/%s", cfgPath, _trn_attr->_particlesName);
+            snprintf(particlename, sizeof(particlename), "%s/%s", cfgPath, _trn_attr->_particlesName);
             free(particlesFile);
             this->particlesFile = STRDUPNULL(particlename);
         }else{
@@ -386,16 +386,16 @@ static double degToRad(double deg)
 // Return the next key and value pair in the cfg file.
 // Function returns 0 if no key/value pair was found,
 // otherwise 1.
-// 
+//
 int TrnClient::getNextKeyValue(FILE *cfg, char key[], char value[])
 {
   // Continue reading from cfg skipping comment lines
-  // 
+  //
   char line[300]={0};
   while (fgets(line, sizeof(line), cfg))
   {
     // Chop off leading whitespace, then look for '//'
-    // 
+    //
     size_t i = 0;
     while(line[i] == ' ' || line[i] == '\t' || line[i] == '\n' || line[i] == '\r'
       || line[i] == '\f' || line[i] == '\v') i++;
@@ -404,8 +404,8 @@ int TrnClient::getNextKeyValue(FILE *cfg, char key[], char value[])
     {
       // If a non-comment line was read from the config file,
       // extract the key and value
-      // 
-      char *loc; 
+      //
+      char *loc;
       sscanf(line, "%s = %s", key, value);
       if ( (loc = strchr(value, ';')) ) *loc = '\0';  // Remove ';' from the value
       return 1;
@@ -500,14 +500,14 @@ int TrnClient::connectSocket()
 }
 
 // Common to QNX and NIX versions
-// 
+//
 TerrainNav* TrnClient::connectTRN()
 {
     TerrainNav *_tercom = NULL;
-    
+
     fprintf(stdout, "TrnClient - Using TerrainNav [%s:%ld]\n",
             _trn_attr->_terrainNavServer, _trn_attr->_terrainNavPort);
-    
+
     try
     {
         if(connectSocket()==0){
@@ -531,7 +531,7 @@ TerrainNav* TrnClient::connectTRN()
     {
         fprintf(stderr, "TrnClient - Failed TRN connection. Check TRN error messages...\n");
     }
-    
+
     if (NULL!=_tercom && _tercom->is_connected() && !_trn_attr->_skipInit){
         init_server();
 
@@ -550,7 +550,7 @@ TerrainNav* TrnClient::connectTRN()
     } else{
         fprintf(stderr, "TrnClient - Not initialized. skipInit(%c) See trn_server error messages...\n", _trn_attr->_skipInit ? 'Y' : 'N');
     }
-    
+
     return _tercom;
 }
 
@@ -565,4 +565,3 @@ void TrnClient::show(int indent, int wkey, int wval)
     fprintf(stderr,"%*s%*s %*c\n",indent,(indent>0?" ":""),wkey,"trn svr type",wval,_mbtrn_server_type?'1':'0');
 
 }
-

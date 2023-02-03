@@ -13,13 +13,13 @@
 //TODO this function fails to print which file or directory doesn't exist, making its error message near useless.
 int check_error(int status, struct mapsrc* src) {
 	int err;
-	
+
 	if(status != NC_NOERR) {
 		const char* status_tostring = nc_strerror(status);
 		//char *status_tostring = nc_strerror(status);
 
 		fprintf(stderr, "%s:%d %s\n", __func__,__LINE__, status_tostring);
-		
+
 		//free(status_tostring);
 		// TODO how do we want to handle this error gracefully?
 		src->status = src->status | MAPSRC_FILL_FAILURE;
@@ -201,22 +201,22 @@ char* mapsrc_tostring(struct mapsrc* src) {
 	char* str = (char*) malloc(180 * sizeof(char));
 	char buf[100];
 	//char *buf = malloc(100 * sizeof(char));
-	sprintf(str, "mapsrc {\n\tncid = %i\n", src->ncid);
-	sprintf(buf, "\txid = %i\n", src->xid);
+	snprintf(str, sizeof(str), "mapsrc {\n\tncid = %i\n", src->ncid);
+	snprintf(buf, sizeof(buf), "\txid = %i\n", src->xid);
 	strcat(str, buf);
-	sprintf(buf, "\txdimid = %i\n", src->xdimid);
+	snprintf(buf, sizeof(buf), "\txdimid = %i\n", src->xdimid);
 	strcat(str, buf);
-	sprintf(buf, "\txdimlen = %d\n", int(src->xdimlen));
+	snprintf(buf, sizeof(buf), "\txdimlen = %d\n", int(src->xdimlen));
 	strcat(str, buf);
-	sprintf(buf, "\tyid = %i\n", src->yid);
+	snprintf(buf, sizeof(buf), "\tyid = %i\n", src->yid);
 	strcat(str, buf);
-	sprintf(buf, "\tydimid = %i\n", src->ydimid);
+	snprintf(buf, sizeof(buf), "\tydimid = %i\n", src->ydimid);
 	strcat(str, buf);
-	sprintf(buf, "\tydimlen = %d\n", int(src->ydimlen));
+	snprintf(buf, sizeof(buf), "\tydimlen = %d\n", int(src->ydimlen));
 	strcat(str, buf);
-	sprintf(buf, "\tzid = %i\n", src->zid);
+	snprintf(buf, sizeof(buf), "\tzid = %i\n", src->zid);
 	strcat(str, buf);
-	sprintf(buf, "\tstatus = %i\n", src->status);
+	snprintf(buf, sizeof(buf), "\tstatus = %i\n", src->status);
 	strcat(str, buf);
 	strcat(str, "}");
 	return str;
@@ -224,9 +224,9 @@ char* mapsrc_tostring(struct mapsrc* src) {
 
 int mapdata_fill(struct mapsrc* src, struct mapdata* data, double x,
 				 double y, double xwidth, double ywidth) {
-				 
+
 	const char* pname = "mapdata_fill";
-	
+
 	double xmin, xmax, ymin, ymax;
 	// start = { x0, y0}, count = {xdimlen, ydimlen}
 	size_t start[2];        // For NetCDF access -> {x0, y0}
@@ -234,15 +234,15 @@ int mapdata_fill(struct mapsrc* src, struct mapdata* data, double x,
 	//int i;
 	int err, XI = 1, YI = 0;
 	float* array;
-	
-	
+
+
 	// Calculate the position of each corner of the submap
 	xmin = x - xwidth / 2;
 	xmax = x + xwidth / 2;
 	ymin = y - ywidth / 2;
 	ymax = y + ywidth / 2;
 	//fprintf(stdout, "xmin: %f, xmax: %f, ymin: %f, ymax, %f", xmin, xmax, ymin, ymax);
-	
+
 	if(MAPIO_DEBUG) {
 		fprintf(stdout, "MAPIO::%s: xmin: %f, xmax: %f, ymin: %f, ymax, %f", pname, xmin, xmax, ymin, ymax);
 		fprintf(stdout, "MAPIO::%s: Looking for nearest values\n", pname);
@@ -252,13 +252,13 @@ int mapdata_fill(struct mapsrc* src, struct mapdata* data, double x,
 	start[YI] = nearest(ymin, src->y, src->ydimlen);
 	count[XI] = nearest(xmax, src->x, src->xdimlen) - start[XI] + 1;
 	count[YI] = nearest(ymax, src->y, src->ydimlen) - start[YI] + 1;
-	
-	
+
+
 	// Assign values to 'data'
 	if(MAPIO_DEBUG) {
 		fprintf(stdout, "MAPIO::%s: Allocating x and y array memory\n", pname);
 	}
-	
+
 	data->xdimlen = count[XI];
 	data->ydimlen = count[YI];
 	data->xpts = (double*) malloc(data->xdimlen * sizeof(double));
@@ -267,7 +267,7 @@ int mapdata_fill(struct mapsrc* src, struct mapdata* data, double x,
 	memcpy(data->ypts, src->y + start[YI], count[YI] * sizeof(double));
 	data->xcenter = (data->xpts[data->xdimlen - 1] + data->xpts[0]) / 2.0;
 	data->ycenter = (data->ypts[data->ydimlen - 1] + data->ypts[0]) / 2.0;
-	
+
 	// Allocate memory for the arrays
 	if(MAPIO_DEBUG) {
 		fprintf(stdout, "MAPIO::%s: Allocating z array memory", pname);
@@ -277,7 +277,7 @@ int mapdata_fill(struct mapsrc* src, struct mapdata* data, double x,
 		fprintf(stderr, "MAPIO::%s: Out of memory. Failed to allocate memory for a mapdata structure\n", pname);
 		data->status = data->status | MAPDATA_FILL_FAILURE;
 	}
-	
+
 	//    if (MAPIO_DEBUG) {
 	//        fprintf(stdout, "MAPIO::%s: Allocating z subarry memory", pname);
 	//    }
@@ -290,11 +290,11 @@ int mapdata_fill(struct mapsrc* src, struct mapdata* data, double x,
 	//            return;
 	//        }
 	//    }
-	
-	
+
+
 	// TODO Is this right...how the heck do I pass in an array of arrays to netcdf?
 	data->z = array;
-	
+
 	// Extract the data from the netcdf source file.
 	if(MAPIO_DEBUG) {
 		fprintf(stdout, "MAPIO::%s: Reading z from netcdf", pname);
@@ -302,13 +302,13 @@ int mapdata_fill(struct mapsrc* src, struct mapdata* data, double x,
 	err = nc_get_vara_float(src->ncid, src->zid, start, count, (float*) data->z);
 	check_error(err, src);
 	data->status = MAPDATA_IS_FILLED;
-	
+
 	// Debug output used for compring results with matlab 'truth'
 	if(MAPIO_DEBUG) {
 		fprintf(stdout, "MAPIO::%s: ---- TEST REPORT ----\n", pname);
-		
+
 		fprintf(stdout, "Using data from %i\n", src->ncid);
-		
+
 		fprintf(stdout, "-- About X\n");
 		fprintf(stdout, "X contains %i elements.\nMin = %f, Max = %f\n",
 				int(src->xdimlen),
@@ -321,7 +321,7 @@ int mapdata_fill(struct mapsrc* src, struct mapdata* data, double x,
 				int(start[XI]) + int(data->xdimlen) - 1,
 				src->x[start[XI] + int(data->xdimlen) - 1],
 				int(data->xdimlen));
-				
+
 		fprintf(stdout, "-- About Y\n");
 		fprintf(stdout, "Y contains %i elements.\nMin = %f, Max = %f\n",
 				int(src->ydimlen),
@@ -337,7 +337,7 @@ int mapdata_fill(struct mapsrc* src, struct mapdata* data, double x,
 		fprintf(stdout, "\n");
 		z_print((float*) data->z, data->ydimlen, data->xdimlen);
 	}
-	
+
 	return mapdata_check(data, src, x, y, xwidth, ywidth);
 }
 
@@ -355,17 +355,17 @@ void mapdata_free(struct mapdata* data, int free_all) {
 		free(data->z);
 		data->z = NULL;
 	}
-	
+
 	if(data->xpts != NULL) {
 		free(data->xpts);
 		data->xpts = NULL;
 	}
-	
+
 	if(data->ypts != NULL) {
 		free(data->ypts);
 		data->ypts = NULL;
 	}
-	
+
 	if(free_all) {
 		free(data);
 	} else {
@@ -375,7 +375,7 @@ void mapdata_free(struct mapdata* data, int free_all) {
 		data->ydimlen = 0;
 		data->status = MAPDATA_IS_EMPTY;
 	}
-	
+
 }
 
 
@@ -387,23 +387,23 @@ char* mapdata_tostring(struct mapdata* data) {
             memset(str,0,180 * sizeof(char));
             char buf[100];
             strcpy(str, "mapdata {\n");
-            sprintf(buf, "\txcenter = %f\n", data->xcenter);
+            snprintf(buf, sizeof(buf), "\txcenter = %f\n", data->xcenter);
             strcat(str, buf);
-            sprintf(buf, "\tycenter = %f\n", data->ycenter);
+            snprintf(buf, sizeof(buf), "\tycenter = %f\n", data->ycenter);
             strcat(str, buf);
             if(data->xpts == NULL) {
-                sprintf(buf, "\tWARNING: x = NULL");
+                snprintf(buf, sizeof(buf), "\tWARNING: x = NULL");
                 strcat(str, buf);
             }
             if(data->ypts == NULL) {
-                sprintf(buf, "\tWARNING: y = NULL");
+                snprintf(buf, sizeof(buf), "\tWARNING: y = NULL");
                 strcat(str, buf);
             }
-            sprintf(buf, "\txdimlen = %zu\n", data->xdimlen);
+            snprintf(buf, sizeof(buf), "\txdimlen = %zu\n", data->xdimlen);
             strcat(str, buf);
-            sprintf(buf, "\tydimlen = %zu\n", data->ydimlen);
+            snprintf(buf, sizeof(buf), "\tydimlen = %zu\n", data->ydimlen);
             strcat(str, buf);
-            sprintf(buf, "\tstatus = %i\n", data->status);
+            snprintf(buf, sizeof(buf), "\tstatus = %i\n", data->status);
             strcat(str, buf);
             strcat(str, "}");
             retval = str;
@@ -418,7 +418,7 @@ int nearest(double key, const double* base, size_t nmemb) {
 	double a, dt, dt0;//, minval, maxval;
 	//maxval = *(base + (nmemb - 1));
 	//minval = *base;
-	
+
 	if(key > *(base + (nmemb - 1))) {
 		idx = nmemb - 1;
 		//fprintf(stderr, "MAPIO: Unable to find the nearest value to %f. It is more than the largest value, %f, in the array\n", key, maxval);
@@ -449,7 +449,7 @@ float getZ(const float* z, int row, int column, int columns) {
 void z_print(const float* z, int rows, int columns) {
 	float value;
 	int i, j;
-	
+
 	for(i = 0; i < rows; i++) {
 		for(j = 0; j < columns; j++) {
 			//value = z[i * columns + j];
@@ -458,13 +458,13 @@ void z_print(const float* z, int rows, int columns) {
 		}
 		fprintf(stdout, "\n");
 	}
-	
+
 }
 
 int mapdata_check(struct mapdata* data, struct mapsrc* src, double xcenter, double ycenter, double xwidth, double ywidth) {
 
 	int mapdata_code = MAPBOUNDS_OK;
-	
+
 	struct mapbounds* bounds = mapbounds_init();
 	mapbounds_fill1(src, bounds);
 	mapdata_code = mapbounds_contains(bounds, xcenter, ycenter);
@@ -504,19 +504,19 @@ char* mapbounds_tostring(struct mapbounds* bounds) {
 	char* str = (char*) malloc(256 * sizeof(char));
 	char buf[100];
 	strcpy(str, "mapbounds {\n");
-	sprintf(buf, "\tncid = %d\n", bounds->ncid);
+	snprintf(buf, sizeof(buf), "\tncid = %d\n", bounds->ncid);
 	strcat(str, buf);
-	sprintf(buf, "\txmin = %f\n", bounds->xmin);
+	snprintf(buf, sizeof(buf), "\txmin = %f\n", bounds->xmin);
 	strcat(str, buf);
-	sprintf(buf, "\txmax = %f\n", bounds->xmax);
+	snprintf(buf, sizeof(buf), "\txmax = %f\n", bounds->xmax);
 	strcat(str, buf);
-	sprintf(buf, "\tdx = %f\n", bounds->dx);
+	snprintf(buf, sizeof(buf), "\tdx = %f\n", bounds->dx);
 	strcat(str, buf);
-	sprintf(buf, "\tymin = %f\n", bounds->ymin);
+	snprintf(buf, sizeof(buf), "\tymin = %f\n", bounds->ymin);
 	strcat(str, buf);
-	sprintf(buf, "\tymax = %f\n", bounds->ymax);
+	snprintf(buf, sizeof(buf), "\tymax = %f\n", bounds->ymax);
 	strcat(str, buf);
-	sprintf(buf, "\tdy = %f\n", bounds->dy);
+	snprintf(buf, sizeof(buf), "\tdy = %f\n", bounds->dy);
 	strcat(str, buf);
 	strcat(str, "}");
 	return str;
@@ -534,25 +534,25 @@ int mapbounds_fill2(const char* file, struct mapbounds* bounds) {
 
 int mapbounds_contains(struct mapbounds* bounds, const double x, const double y) {
 	int contains = MAPBOUNDS_OUT_OF_BOUNDS; // Default is False
-	
+
 	if(((double) bounds->xmax > x) &&
 			((double) bounds->xmin < x) &&
 			((double) bounds->ymax > y) &&
 			((double) bounds->ymin < y)) {
 		contains = MAPBOUNDS_OK;
 	}
-	
+
 	return contains;
 }
 
 int mapdata_checksize(struct mapbounds* bounds, struct mapdata* data, const double xwidth, const double ywidth) {
 	double x_size, y_size; // Number of expected pixels
 	int size_is_ok = MAPBOUNDS_OK; // Default is True
-	
+
 	// Calculate expected size
 	x_size = xwidth / bounds->dx;
 	y_size = ywidth / bounds->dy;
-	
+
 	if(((double) data->xdimlen < (x_size - 1)) || ((double) data->ydimlen < (y_size - 1))) {
 		size_is_ok = MAPBOUNDS_NEAR_EDGE;
 	}

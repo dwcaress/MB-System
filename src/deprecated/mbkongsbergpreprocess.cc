@@ -1716,9 +1716,9 @@ int main(int argc, char **argv) {
 				char fileroot[MB_PATH_MAXLINE] = "";
 				status &= mb_get_format(verbose, ifile, fileroot, &testformat, &error);
 				if (format == MBF_EM710MBA && strncmp(".mb59", &ifile[strlen(ifile) - 5], 5) == 0)
-					sprintf(ofile, "%sf.mb%d", fileroot, MBF_EM710MBA);
+					snprintf(ofile, sizeof(ofile), "%sf.mb%d", fileroot, MBF_EM710MBA);
 				else
-					sprintf(ofile, "%s.mb%d", fileroot, MBF_EM710MBA);
+					snprintf(ofile, sizeof(ofile), "%s.mb%d", fileroot, MBF_EM710MBA);
 			}
 
 			/* if output directory was set by user, reset file path */
@@ -1767,7 +1767,7 @@ int main(int argc, char **argv) {
 
 				/* initialize synchronous attitude output file */
 				char stafile[MB_PATH_MAXLINE+60] = "";
-				sprintf(stafile, "%s.sta", ofile);
+				snprintf(stafile, sizeof(stafile), "%s.sta", ofile);
 				if ((stafp = fopen(stafile, "w")) == nullptr) {
 					fprintf(stderr, "\nUnable to open synchronous attitude data file <%s> for writing\n", stafile);
 					fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -2627,7 +2627,7 @@ int main(int argc, char **argv) {
 
 				/* output asynchronous heading output file */
 				char athfile[MB_PATH_MAXLINE+60] = "";
-				sprintf(athfile, "%s.ath", ofile);
+				snprintf(athfile, sizeof(athfile), "%s.ath", ofile);
 				FILE *athfp = fopen(athfile, "w");
 				if (athfp == nullptr) {
 					fprintf(stderr, "\nUnable to open asynchronous heading data file <%s> for writing\n", athfile);
@@ -2642,7 +2642,7 @@ int main(int argc, char **argv) {
 
 				/* output asynchronous sonardepth output file */
 				char atsfile[MB_PATH_MAXLINE+60] = "";
-				sprintf(atsfile, "%s.ats", ofile);
+				snprintf(atsfile, sizeof(atsfile), "%s.ats", ofile);
 				FILE *atsfp = fopen(atsfile, "w");
 				if (atsfp == nullptr) {
 					fprintf(stderr, "\nUnable to open asynchronous sonardepth data file <%s> for writing\n", atsfile);
@@ -2657,7 +2657,7 @@ int main(int argc, char **argv) {
 
 				/* output asynchronous attitude output file */
 				char atafile[MB_PATH_MAXLINE+60] = "";
-				sprintf(atafile, "%s.ata", ofile);
+				snprintf(atafile, sizeof(atafile), "%s.ata", ofile);
 				FILE *atafp = fopen(atafile, "w");
 				if (atafp == nullptr) {
 					fprintf(stderr, "\nUnable to open asynchronous attitude data file <%s> for writing\n", atafile);

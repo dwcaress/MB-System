@@ -717,7 +717,7 @@ int mbsys_hysweep_dimensions(int verbose, void *mbio_ptr, void *store_ptr, int *
 	if (*kind == MB_DATA_DATA) {
 		/* get beam and pixel numbers */
 		*nbath = store->RMB_num_beams;
-		if (store->RMB_beam_data_available | 0x0800)
+		if (store->RMB_beam_data_available & 0x0800)
 			*namp = store->RMB_num_beams;
 		else
 			*namp = 0;
@@ -1307,7 +1307,7 @@ int mbsys_hysweep_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kin
 
 		/* read distance and depth values into storage arrays */
 		*nbath = store->RMB_num_beams;
-		if (store->RMB_beam_data_available | 0x0800)
+		if (store->RMB_beam_data_available & 0x0800)
 			*namp = store->RMB_num_beams;
 		else
 			*namp = 0;

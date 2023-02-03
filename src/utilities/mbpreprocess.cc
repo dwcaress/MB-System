@@ -720,7 +720,7 @@ int main(int argc, char **argv) {
 
     /* be sure that output datalist name does not conflict with input datalist name */
     if (format < 0 && strcmp(read_file, output_datalist) == 0) {
-      sprintf(output_datalist, "%sr.mb-1", fileroot);
+      snprintf(output_datalist, sizeof(output_datalist), "%sr.mb-1", fileroot);
     }
   }
 
@@ -2343,7 +2343,7 @@ int main(int argc, char **argv) {
           fprintf(stderr, "Outputting sensor %d with capability %d\n", isensor, platform->sensors[isensor].capability2);
         for (ioffset = 0; ioffset < platform->sensors[isensor].num_offsets; ioffset++) {
           mb_path fnvfile = "";
-          sprintf(fnvfile, "sensor_%2.2d_%2.2d_%2.2d.fnv", isensor, ioffset, platform->sensors[isensor].type);
+          snprintf(fnvfile, sizeof(fnvfile), "sensor_%2.2d_%2.2d_%2.2d.fnv", isensor, ioffset, platform->sensors[isensor].type);
           if (verbose > 0)
             fprintf(stderr, "Outputting sensor %d offset %d in fnv file:%s\n", isensor, ioffset, fnvfile);
           if ((platform->sensors[isensor].offsets[ioffset].ofp = fopen(fnvfile, "wb")) == nullptr) {
@@ -2398,9 +2398,9 @@ int main(int argc, char **argv) {
 
     /* figure out the output file name */
     status = mb_get_format(verbose, ifile, fileroot, &testformat, &error);
-    sprintf(ofile, "%s.mb%d", fileroot, oformat);
+    snprintf(ofile, sizeof(ofile), "%s.mb%d", fileroot, oformat);
     if (strcmp(ifile, ofile) == 0)
-      sprintf(ofile, "%sr.mb%d", fileroot, oformat);
+      snprintf(ofile, sizeof(ofile), "%sr.mb%d", fileroot, oformat);
 
     /* if a different output directory was set by user, reset file path */
     if (output_directory_set) {
@@ -2500,7 +2500,7 @@ int main(int argc, char **argv) {
       if (mb_should_make_fbt(verbose, oformat)) {
         char fbtfile[MB_PATH_MAXLINE+100];
 
-        sprintf(fbtfile, "%s.fbt", ofile);
+        snprintf(fbtfile, sizeof(fbtfile), "%s.fbt", ofile);
         int fbeams_bath = 0;
         int fbeams_amp = 0;
         int fpixels_ss = 0;
@@ -2526,7 +2526,7 @@ int main(int argc, char **argv) {
       FILE *nfp = nullptr;
       if (mb_should_make_fnv(verbose, oformat)) {
         char fnvfile[MB_PATH_MAXLINE+100];
-        sprintf(fnvfile, "%s.fnv", ofile);
+        snprintf(fnvfile, sizeof(fnvfile), "%s.fnv", ofile);
         if ((nfp = fopen(fnvfile, "w")) == nullptr) {
             fprintf(stderr, "\nUnable to open output *.fnv file <%s> for reading\n",
             fnvfile);
@@ -2582,49 +2582,49 @@ int main(int argc, char **argv) {
       }
 
       /* delete old synchronous and synchronous files */
-      sprintf(afile, "%s.ata", ofile);
+      snprintf(afile, sizeof(afile), "%s.ata", ofile);
       if (stat(afile, &file_status) == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR) {
         if (verbose > 0)
           fprintf(stderr, "Deleting old ancillary file %s\n", afile);
         remove(afile);
       }
-      sprintf(afile, "%s.ath", ofile);
+      snprintf(afile, sizeof(afile), "%s.ath", ofile);
       if (stat(afile, &file_status) == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR) {
         if (verbose > 0)
           fprintf(stderr, "Deleting old ancillary file %s\n", afile);
         remove(afile);
       }
-      sprintf(afile, "%s.ats", ofile);
+      snprintf(afile, sizeof(afile), "%s.ats", ofile);
       if (stat(afile, &file_status) == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR) {
         if (verbose > 0)
           fprintf(stderr, "Deleting old ancillary file %s\n", afile);
         remove(afile);
       }
-      sprintf(afile, "%s.sta", ofile);
+      snprintf(afile, sizeof(afile), "%s.sta", ofile);
       if (stat(afile, &file_status) == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR) {
         if (verbose > 0)
           fprintf(stderr, "Deleting old ancillary file %s\n", afile);
         remove(afile);
       }
-      sprintf(afile, "%s.baa", ofile);
+      snprintf(afile, sizeof(afile), "%s.baa", ofile);
       if (stat(afile, &file_status) == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR) {
         if (verbose > 0)
           fprintf(stderr, "Deleting old ancillary file %s\n", afile);
         remove(afile);
       }
-      sprintf(afile, "%s.bah", ofile);
+      snprintf(afile, sizeof(afile), "%s.bah", ofile);
       if (stat(afile, &file_status) == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR) {
         if (verbose > 0)
           fprintf(stderr, "Deleting old ancillary file %s\n", afile);
         remove(afile);
       }
-      sprintf(afile, "%s.bas", ofile);
+      snprintf(afile, sizeof(afile), "%s.bas", ofile);
       if (stat(afile, &file_status) == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR) {
         if (verbose > 0)
           fprintf(stderr, "Deleting old ancillary file %s\n", afile);
         remove(afile);
       }
-      sprintf(afile, "%s.bsa", ofile);
+      snprintf(afile, sizeof(afile), "%s.bsa", ofile);
       if (stat(afile, &file_status) == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR) {
         if (verbose > 0)
           fprintf(stderr, "Deleting old ancillary file %s\n", afile);
@@ -2632,7 +2632,7 @@ int main(int argc, char **argv) {
       }
 
       /* open synchronous attitude file */
-      sprintf(afile, "%s.bsa", ofile);
+      snprintf(afile, sizeof(afile), "%s.bsa", ofile);
       if ((afp = fopen(afile, "wb")) == nullptr) {
         fprintf(stderr, "\nUnable to open synchronous attitude data file <%s> for writing\n", afile);
         fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -3285,7 +3285,7 @@ int main(int argc, char **argv) {
       // only one read pass is necessary
       char command[MB_PATH_MAXLINE+100];
       // TODO(schwehr): Is is possible to have mask_bounds[0] not set.
-      sprintf(command, "mbinfo -F %d -I %s -G -N -O -M10/10/%.9f/%.9f/%.9f/%.9f",
+      snprintf(command, sizeof(command), "mbinfo -F %d -I %s -G -N -O -M10/10/%.9f/%.9f/%.9f/%.9f",
               oformat, ofile,
               mask_bounds[0], mask_bounds[1], mask_bounds[2], mask_bounds[3]);
       system(command);
@@ -3312,7 +3312,7 @@ int main(int argc, char **argv) {
           if (iend < n_heading - 1)
             iend++;
           if (iend > istart) {
-            sprintf(afile, "%s.bah", ofile);
+            snprintf(afile, sizeof(afile), "%s.bah", ofile);
             if ((afp = fopen(afile, "wb")) == nullptr) {
               fprintf(stderr, "\nUnable to open asynchronous heading data file <%s> for writing\n", afile);
               fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -3348,7 +3348,7 @@ int main(int argc, char **argv) {
           if (iend < n_sensordepth - 1)
             iend++;
           if (iend > istart) {
-            sprintf(afile, "%s.bas", ofile);
+            snprintf(afile, sizeof(afile), "%s.bas", ofile);
             if ((afp = fopen(afile, "wb")) == nullptr) {
               fprintf(stderr, "\nUnable to open asynchronous sensordepth data file <%s> for writing\n", afile);
               fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -3385,7 +3385,7 @@ int main(int argc, char **argv) {
           if (iend < n_attitude - 1)
             iend++;
           if (iend > istart) {
-            sprintf(afile, "%s.baa", ofile);
+            snprintf(afile, sizeof(afile), "%s.baa", ofile);
             if ((afp = fopen(afile, "wb")) == nullptr) {
               fprintf(stderr, "\nUnable to open asynchronous attitude data file <%s> for writing\n", afile);
               fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);

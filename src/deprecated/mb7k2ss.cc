@@ -464,9 +464,9 @@ int main(int argc, char **argv) {
 	if (route_file_set || timelist_file_set) {
 		linenumber = startline;
 		if (extract_type == MB7K2SS_SSLOW)
-			sprintf(output_file, "%s_%4.4d_sslo.mb71", lineroot, linenumber);
+			snprintf(output_file, sizeof(output_file), "%s_%4.4d_sslo.mb71", lineroot, linenumber);
 		else if (extract_type == MB7K2SS_SSHIGH)
-			sprintf(output_file, "%s_%4.4d_sshi.mb71", lineroot, linenumber);
+			snprintf(output_file, sizeof(output_file), "%s_%4.4d_sshi.mb71", lineroot, linenumber);
 	}
 
 	/* new output file obviously needed */
@@ -663,13 +663,13 @@ int main(int argc, char **argv) {
 	/* set up plotting script file */
 	char scriptfile[MB_PATH_MAXLINE+20];
 	if ((route_file_set && nroutepoint > 1) || (timelist_file_set && ntimepoint > 1)) {
-		sprintf(scriptfile, "%s_ssswathplot.cmd", lineroot);
+		snprintf(scriptfile, sizeof(scriptfile), "%s_ssswathplot.cmd", lineroot);
 	}
 	else if (!output_file_set || read_datalist) {
-		sprintf(scriptfile, "%s_ssswathplot.cmd", read_file);
+		snprintf(scriptfile, sizeof(scriptfile), "%s_ssswathplot.cmd", read_file);
 	}
 	else {
-		sprintf(scriptfile, "%s_ssswathplot.cmd", file);
+		snprintf(scriptfile, sizeof(scriptfile), "%s_ssswathplot.cmd", file);
 	}
 	FILE *sfp = fopen(scriptfile, "w");
 	if (sfp == nullptr) {
@@ -1170,9 +1170,9 @@ int main(int argc, char **argv) {
 
 					/* set output file name */
 					if (extract_type == MB7K2SS_SSLOW)
-						sprintf(output_file, "%s_%4.4d_sslo.mb71", lineroot, linenumber);
+						snprintf(output_file, sizeof(output_file), "%s_%4.4d_sslo.mb71", lineroot, linenumber);
 					else if (extract_type == MB7K2SS_SSHIGH)
-						sprintf(output_file, "%s_%4.4d_sshi.mb71", lineroot, linenumber);
+						snprintf(output_file, sizeof(output_file), "%s_%4.4d_sshi.mb71", lineroot, linenumber);
 					// format_output = MBF_MBLDEOIH;
 
 					/* set to open new output file */
@@ -1981,7 +1981,7 @@ int main(int argc, char **argv) {
 	fclose(sfp);
 
 	char command[MB_PATH_MAXLINE+30];
-	sprintf(command, "chmod +x %s", scriptfile);
+	snprintf(command, sizeof(command), "chmod +x %s", scriptfile);
 	/* int shellstatus = */ system(command);
 
 	/* output counts */

@@ -730,11 +730,11 @@ int mbr_sb2100bi_rd_fh(int verbose, FILE *mbfp, char *buffer, int record_length,
 /*--------------------------------------------------------------------*/
 int mbr_sb2100bi_rd_pr(int verbose, FILE *mbfp, char *buffer, struct mbsys_sb2100_struct *store, short record_length, int *error) {
 	int status = MB_SUCCESS;
-	int read_length;
-	unsigned int checksum_read;
-	unsigned int checksum;
+	int read_length = 0;
+	unsigned int checksum_read = 0;
+	unsigned int checksum = 0;
 	char eor_read[6];
-	int index;
+	int index = 0;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -856,9 +856,9 @@ int mbr_sb2100bi_rd_pr(int verbose, FILE *mbfp, char *buffer, struct mbsys_sb210
 /*--------------------------------------------------------------------*/
 int mbr_sb2100bi_rd_tr(int verbose, FILE *mbfp, char *buffer, struct mbsys_sb2100_struct *store, short record_length, int *error) {
 	int status = MB_SUCCESS;
-	int read_length;
-	unsigned int checksum_read;
-	unsigned int checksum;
+	int read_length = 0;
+	unsigned int checksum_read = 0;
+	unsigned int checksum = 0;
 	char eor_read[6];
 
 	if (verbose >= 2) {
@@ -930,9 +930,9 @@ int mbr_sb2100bi_rd_tr(int verbose, FILE *mbfp, char *buffer, struct mbsys_sb210
 /*--------------------------------------------------------------------*/
 int mbr_sb2100bi_rd_dh(int verbose, FILE *mbfp, char *buffer, struct mbsys_sb2100_struct *store, short record_length, int *error) {
 	int status = MB_SUCCESS;
-	int read_length;
-	unsigned int checksum_read;
-	unsigned int checksum;
+	int read_length = 0;
+	unsigned int checksum_read = 0;
+	unsigned int checksum = 0;
 	char eor_read[6];
 	int index;
 
@@ -1098,9 +1098,9 @@ int mbr_sb2100bi_rd_dh(int verbose, FILE *mbfp, char *buffer, struct mbsys_sb210
 /*--------------------------------------------------------------------*/
 int mbr_sb2100bi_rd_br(int verbose, FILE *mbfp, char *buffer, struct mbsys_sb2100_struct *store, short record_length, int *error) {
 	int status = MB_SUCCESS;
-	int read_length;
-	unsigned int checksum_read;
-	unsigned int checksum;
+	int read_length = 0;
+	unsigned int checksum_read = 0;
+	unsigned int checksum = 0;
 	char eor_read[6];
 	int index;
 
@@ -1206,13 +1206,13 @@ int mbr_sb2100bi_rd_br(int verbose, FILE *mbfp, char *buffer, struct mbsys_sb210
 /*--------------------------------------------------------------------*/
 int mbr_sb2100bi_rd_sr(int verbose, FILE *mbfp, char *buffer, struct mbsys_sb2100_struct *store, short record_length, int *error) {
 	int status = MB_SUCCESS;
-	int read_length;
-	unsigned int checksum_read;
-	unsigned int checksum;
+	int read_length = 0;
+	unsigned int checksum_read = 0;
+	unsigned int checksum = 0;
 	char eor_read[6];
-	short amplitude_short;
-	short alongtrack_short;
-	int index;
+	short amplitude_short = 0;
+	short alongtrack_short = 0;
+	int index = 0;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -1297,10 +1297,10 @@ int mbr_sb2100bi_rd_sr(int verbose, FILE *mbfp, char *buffer, struct mbsys_sb210
 /*--------------------------------------------------------------------*/
 int mbr_sb2100bi_rd_data(int verbose, void *mbio_ptr, char *store_ptr, int *error) {
 	int status = MB_SUCCESS;
-	int type;
-	short record_length;
+	int type = 0;
+	short record_length = 0;
 	char record_length_fh_str[8];
-	int record_length_fh;
+	int record_length_fh = 0;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -1525,7 +1525,7 @@ int mbr_rt_sb2100bi(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 /*--------------------------------------------------------------------*/
 int mbr_sb2100bi_wr_fh(int verbose, FILE *mbfp, int *error) {
 	int status = MB_SUCCESS;
-	int record_length;
+	int record_length = 0;
 	char record_length_str[8];
 
 	if (verbose >= 2) {
@@ -1599,10 +1599,10 @@ int mbr_sb2100bi_wr_fh(int verbose, FILE *mbfp, int *error) {
 /*--------------------------------------------------------------------*/
 int mbr_sb2100bi_wr_pr(int verbose, FILE *mbfp, char *buffer, struct mbsys_sb2100_struct *store, int *error) {
 	int status = MB_SUCCESS;
-	short record_length;
-	int write_length;
-	unsigned int checksum;
-	int index;
+	short record_length = 0;
+	int write_length = 0;
+	unsigned int checksum = 0;
+	int index = 0;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -1733,10 +1733,10 @@ int mbr_sb2100bi_wr_pr(int verbose, FILE *mbfp, char *buffer, struct mbsys_sb210
 /*--------------------------------------------------------------------*/
 int mbr_sb2100bi_wr_tr(int verbose, FILE *mbfp, char *buffer, struct mbsys_sb2100_struct *store, int *error) {
 	int status = MB_SUCCESS;
-	short record_length;
-	int write_length;
-	unsigned int checksum;
-	int index;
+	short record_length = 0;
+	int write_length = 0;
+	unsigned int checksum = 0;
+	int index = 0;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -1822,10 +1822,10 @@ int mbr_sb2100bi_wr_tr(int verbose, FILE *mbfp, char *buffer, struct mbsys_sb210
 /*--------------------------------------------------------------------*/
 int mbr_sb2100bi_wr_dh(int verbose, FILE *mbfp, char *buffer, struct mbsys_sb2100_struct *store, int *error) {
 	int status = MB_SUCCESS;
-	short record_length;
-	int write_length;
-	unsigned int checksum;
-	int index;
+	short record_length = 0;
+	int write_length = 0;
+	unsigned int checksum = 0;
+	int index = 0;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -1998,10 +1998,10 @@ int mbr_sb2100bi_wr_dh(int verbose, FILE *mbfp, char *buffer, struct mbsys_sb210
 /*--------------------------------------------------------------------*/
 int mbr_sb2100bi_wr_br(int verbose, FILE *mbfp, char *buffer, struct mbsys_sb2100_struct *store, int *error) {
 	int status = MB_SUCCESS;
-	short record_length;
-	int write_length;
-	unsigned int checksum;
-	int index;
+	short record_length = 0;
+	int write_length = 0;
+	unsigned int checksum = 0;
+	int index = 0;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -2112,12 +2112,12 @@ int mbr_sb2100bi_wr_br(int verbose, FILE *mbfp, char *buffer, struct mbsys_sb210
 /*--------------------------------------------------------------------*/
 int mbr_sb2100bi_wr_sr(int verbose, FILE *mbfp, char *buffer, struct mbsys_sb2100_struct *store, int *error) {
 	int status = MB_SUCCESS;
-	short record_length;
-	int write_length;
-	unsigned int checksum;
-	short amplitude_short;
-	short alongtrack_short;
-	int index;
+	short record_length = 0;
+	int write_length = 0;
+	unsigned int checksum = 0;
+	short amplitude_short = 0;
+	short alongtrack_short = 0;
+	int index = 0;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);

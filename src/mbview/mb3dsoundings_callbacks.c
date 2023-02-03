@@ -809,13 +809,11 @@ int mb3dsoundings_open(int verbose, struct mb3dsoundings_struct *soundingdata, i
 
   /* print out some statistics of the selected soundings */
   struct mb3dsoundings_sounding_struct *soundings = soundingdata->soundings;
-  double bounds[4];
   int num_soundings = 0;
   int num_soundings_null = 0;
   int num_soundings_unflagged = 0;
   int num_soundings_flagged = 0;
   int num_soundings_flagged_manual = 0;
-  int num_soundings_flagged_flagged = 0;
   int num_soundings_flagged_sonar = 0;
   int num_soundings_flagged_filter = 0;
   int num_soundings_flagged_filter2 = 0;

@@ -1478,11 +1478,11 @@ int main(int argc, char **argv) {
 			char fileroot[MB_PATH_MAXLINE] = "";
 			status = mb_get_format(verbose, ifile, fileroot, &testformat, &error);
 			if (testformat == MBF_HYSWEEP1 && strncmp(".HSX", &ifile[strlen(ifile) - 4], 4) == 0)
-				sprintf(ofile, "%s.mb%d", fileroot, testformat);
+				snprintf(ofile, sizeof(ofile), "%s.mb%d", fileroot, testformat);
 			else if (testformat == MBF_HYSWEEP1 && strncmp(".hsx", &ifile[strlen(ifile) - 4], 4) == 0)
-				sprintf(ofile, "%s.mb%d", fileroot, testformat);
+				snprintf(ofile, sizeof(ofile), "%s.mb%d", fileroot, testformat);
 			else if (testformat == MBF_HYSWEEP1)
-				sprintf(ofile, "%s.mb%d", ifile, testformat);
+				snprintf(ofile, sizeof(ofile), "%s.mb%d", ifile, testformat);
 
 			/* initialize reading the input swath file */
 			if (mb_read_init(verbose, ifile, format, pings, lonflip, bounds, btime_i, etime_i, speedmin, timegap,

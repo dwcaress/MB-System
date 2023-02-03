@@ -625,7 +625,7 @@ int main(int argc, char **argv) {
           /* set the output */
           FILE *svp_fp = stdout;
           if (svp_file_output) {
-            sprintf(svp_file, "%s_%3.3d.svp", file, isvp);
+            snprintf(svp_file, sizeof(svp_file), "%s_%3.3d.svp", file, isvp);
             svp_fp = fopen(svp_file, "w");
           }
 

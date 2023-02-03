@@ -2597,8 +2597,8 @@ int main(int argc, char** argv)
         };
 
     /* set default imagelistfile name */
-    sprintf(ImageListFile, "imagelist.mb-1");
-    sprintf(ImageCorrectionFile, "imagelist_cameracorrection.yml");
+    snprintf(ImageListFile, sizeof(ImageListFile), "imagelist.mb-1");
+    snprintf(ImageCorrectionFile, sizeof(ImageCorrectionFile), "imagelist_cameracorrection.yml");
     control.OutputDim[0] = 1000;
     control.OutputDim[1] = 1000;
 
@@ -3191,9 +3191,9 @@ int main(int argc, char** argv)
                 / 6.0) + 0.5);
             reference_lat = 0.5 * (control.OutputBounds[2] + control.OutputBounds[3]);
             if (reference_lat >= 0.0)
-                sprintf(projection_id, "UTM%2.2dN", utm_zone);
+                snprintf(projection_id, sizeof(projection_id), "UTM%2.2dN", utm_zone);
             else
-                sprintf(projection_id, "UTM%2.2dS", utm_zone);
+                snprintf(projection_id, sizeof(projection_id), "UTM%2.2dS", utm_zone);
             }
         else
             strcpy(projection_id, projection_pars);
@@ -4387,8 +4387,8 @@ control.OutputBounds[0], control.OutputBounds[1], control.OutputBounds[2], contr
             mb_path zlabel;
             mb_path title;
             if (control.use_projection) {
-              sprintf(xlabel, "Easting (%s)", units);
-              sprintf(ylabel, "Northing (%s)", units);
+              snprintf(xlabel, sizeof(xlabel), "Easting (%s)", units);
+              snprintf(ylabel, sizeof(ylabel), "Northing (%s)", units);
             }
             else {
               strcpy(xlabel, "Longitude");

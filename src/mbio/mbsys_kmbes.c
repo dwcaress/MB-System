@@ -486,7 +486,7 @@ mb_get_date(verbose, time_d_old, time_i_old);
     int jheading = 0;
     int jattitude = 0;
     int jsoundspeed = 0;
-    double soundspeedsnellfactor;
+    double soundspeedsnellfactor = 1.0;
 
     for(int imrz = 0; imrz < store->n_mrz_read; imrz++) {
       struct mbsys_kmbes_mrz *mrz = (struct mbsys_kmbes_mrz *)&store->mrz[imrz];
@@ -661,9 +661,10 @@ mb_get_date(verbose, time_d_old, time_i_old);
       // loop over all soundings
       for (int i = 0; i < xmt->xmtPingInfo.numSoundings; i++) {
         /* variables for beam angle calculation */
-        mb_3D_orientation tx_align;
+        mb_3D_orientation tx_align = {0.0, 0.0, 0.0};
         mb_3D_orientation tx_orientation;
         double tx_steer;
+        mb_3D_orientation rx_align = {0.0, 0.0, 0.0};
         mb_3D_orientation rx_orientation;
         double rx_steer;
         double reference_heading;
@@ -692,7 +693,6 @@ mb_get_date(verbose, time_d_old, time_i_old);
 
         /* change the sound speed recorded for the current ping and
          * then use it to alter the beam angles and recalculate the Bathymetry */
-        const double soundspeedsnellfactor = 0.0;  // TODO(schwehr): Likely a bug
         if (pars->modify_soundspeed || kluge_soundspeedsnell) {
           mrz->sounding[i].beamAngleReRx_deg =
                 RTD * asin(MAX(-1.0, MIN(1.0, soundspeedsnellfactor
@@ -727,7 +727,6 @@ mb_get_date(verbose, time_d_old, time_i_old);
 //__FILE__, __LINE__, __func__, i, mrz->sounding[i].beamAngleReRx_deg, mrz->sounding[i].beamAngleCorrection_deg,
 //roll, beamroll, rx_steer);
 
-        mb_3D_orientation rx_align = {0.0, 0.0, 0.0};  // TODO(schwehr): Bug?
         status = mb_beaudoin(verbose, tx_align, tx_orientation, tx_steer, rx_align, rx_orientation, rx_steer,
                              reference_heading, &beamAzimuth, &beamDepression, error);
         const double theta = 90.0 - beamDepression;
@@ -822,8 +821,8 @@ if (verbose >= 2) {
   // struct mbsys_kmbes_mrz *mrz = (struct mbsys_kmbes_mrz *)&store->mrz[0];
   struct mbsys_kmbes_spo *spo = (struct mbsys_kmbes_spo *)&store->spo;
   struct mbsys_kmbes_skm *skm = (struct mbsys_kmbes_skm *)&store->skm;
-  struct mbsys_kmbes_sde *sde = (struct mbsys_kmbes_sde *)&store->sde;
-  struct mbsys_kmbes_shi *shi = (struct mbsys_kmbes_shi *)&store->shi;
+  // struct mbsys_kmbes_sde *sde = (struct mbsys_kmbes_sde *)&store->sde;
+  // struct mbsys_kmbes_shi *shi = (struct mbsys_kmbes_shi *)&store->shi;
   struct mbsys_kmbes_sha *sha = (struct mbsys_kmbes_sha *)&store->sha;
   struct mbsys_kmbes_cpo *cpo = (struct mbsys_kmbes_cpo *)&store->cpo;
   struct mbsys_kmbes_mrz *mrz = (struct mbsys_kmbes_mrz *)&store->mrz[0];
@@ -1328,7 +1327,7 @@ int mbsys_kmbes_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, i
 
   struct mbsys_kmbes_spo *spo = (struct mbsys_kmbes_spo *)&store->spo;
   struct mbsys_kmbes_skm *skm = (struct mbsys_kmbes_skm *)&store->skm;
-  struct mbsys_kmbes_sde *sde = (struct mbsys_kmbes_sde *)&store->sde;
+  // struct mbsys_kmbes_sde *sde = (struct mbsys_kmbes_sde *)&store->sde;
   struct mbsys_kmbes_sha *sha = (struct mbsys_kmbes_sha *)&store->sha;
   struct mbsys_kmbes_cpo *cpo = (struct mbsys_kmbes_cpo *)&store->cpo;
   struct mbsys_kmbes_xmc *xmc = (struct mbsys_kmbes_xmc *)&store->xmc;
@@ -2412,7 +2411,6 @@ int mbsys_kmbes_extract_nnav(int verbose, void *mbio_ptr, void *store_ptr, int n
     *n = sha->dataInfo.numSamplesArray;
 
     const double sha_time_d = sha->header.time_sec + 0.000000001 * sha->header.time_nanosec;
-    double sha_sample_time_d;
     for (int i=0; i<*n; i++) {
 
       /* get time */

@@ -59,7 +59,7 @@
 int (*showMessage)(char *message);
 
 /// Hide message
-void (*hideMessage)(void);
+int (*hideMessage)(void);
 
 /// Update GUI
 void (*updateGui)(void);
@@ -98,7 +98,7 @@ int mbeditviz_init(int argc, char **argv,
                    char *helpMsg,
                    char *usageMsg,
                    int (*showMessageArg)(char *),
-                   void (*hideMessageArg)(void),
+                   int (*hideMessageArg)(void),
                    void (*updateGuiArg)(void),
                    int (*showErrorDialogArg)(char *, char *, char *)) {
 
@@ -734,9 +734,9 @@ int mbeditviz_load_file(int ifile, bool assertLock) {
     int icenter, iport, istbd;
     double centerdistance, portdistance, stbddistance;
     int iping, ibeam, iedit;
-    float value_float;
-    int read_size;
-    int index;
+    float value_float = 0.0;
+    int read_size = 0;
+    int index = 0;
 
     /* read the data */
     if (mbev_status == MB_SUCCESS) {
@@ -4047,9 +4047,12 @@ void mbeditviz_mb3dsoundings_bias(double rollbias, double pitchbias, double head
     struct mbev_file_struct *file = &mbev_files[ifile];
     struct mbev_ping_struct *ping = &(file->pings[iping]);
 
-    double heading, sonardepth;
-    double rolldelta, pitchdelta;
-    double mtodeglon, mtodeglat;
+    double heading = 0.0;
+    double sonardepth = 0.0;
+    double rolldelta = 0.0;
+    double pitchdelta = 0.0;
+    double mtodeglon = 0.0;
+    double mtodeglat = 0.0;
     if (ifile != ifilelast || iping != ipinglast) {
       mbeditviz_apply_biasesandtimelag(file, ping, mbev_rollbias, mbev_pitchbias, mbev_headingbias,
                               mbev_timelag, &heading, &sonardepth, &rolldelta, &pitchdelta);
