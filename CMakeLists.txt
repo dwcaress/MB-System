@@ -8,6 +8,10 @@ and library location
 cmake_minimum_required(VERSION 3.18)
 project(MB-System)
 
+# MANUALLY SPECIFY MB-System VERSION AND DATE HERE
+set(mbVersion VersionGoesHere)
+set(mbVersionDate "1 January 1900")
+
 # Verify that OS is supported
 if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
   message("Building on LINUX")
@@ -25,7 +29,7 @@ option(buildPCL "build point-cloud-library" OFF)
 option(buildTRN "build MBTRN tools" OFF)
 option(buildTNav "build MBTNav tools" OFF)
 option(buildQt "build Qt tools" OFF)
-option(buildGSF "build GSF library" OFF)
+option(buildGSF "build GSF library" ON)
 option(buildTest "build test tools" OFF)
 
 
@@ -72,7 +76,7 @@ if (APPLE)
   # Must set PROJ_ROOT to point at directory containing proj-versionX
   # so that find_package() works
   # MacPorts puts projX files in /opt/local/lib/projX
-  set(PROJ_ROOT /opt/local/lib/proj9)
+  # On Apple, require GMT6 installed with MacPorts
   set(GMT_ROOT /opt/local/lib/gmt6) # Required for FindGMT()
 
 
@@ -124,7 +128,6 @@ file, which is .. in this case.
 
 # Add globally-needed compiler flags
 add_compile_options(-DUSE_DEFAULT_FILE_FUNCTIONS)
-
 if (CMAKE_COMPILER_IS_GNUCC)
   message("Using GNUCC")
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=gnu11")
@@ -136,6 +139,8 @@ else()
   set(CMAKE_C_STANDARD_REQUIRED ON)
   set(CMAKE_C_EXTENSIONS OFF)
 endif()
+
+message("CMAKE_C_FLAGS: ${CMAKE_C_FLAGS}")
 
 message("CMAKE_C_COMPILER_ID: ${CMAKE_C_COMPILER_ID}")
 
@@ -201,9 +206,9 @@ foreach(package ${packages})
   endif()
 
   if (${package} STREQUAL "VTK")
-    message("TRY find_package(VTK 8.2.0)")
-    find_package(VTK "8.2.0" EXACT REQUIRED)
-###    find_package(VTK REQUIRED)  # Find latest version
+##    message("TRY find_package(VTK 8.2.0)")
+##    find_package(VTK "8.2.0" EXACT REQUIRED)
+    find_package(VTK REQUIRED)  # Find latest version
     continue()    
   endif()
 
@@ -225,6 +230,13 @@ foreach(package ${packages})
        set(NETCDF_LIBRARIES ${${package}_LIBRARIES})
        set(NETCDF_VERSION ${${package}_VERSION})       
 
+    elseif (${package} STREQUAL "PROJ")
+       # Older PROJ versions set PROJ_LIBRARY but not PROJ_LIBRARIES
+       if (PROJ_LIBRARY AND NOT PROJ_LIBRARIES)
+         message("set PROJ_LIBRARIES to PROJ_LIBRARY")
+         set(PROJ_LIBRARIES ${PROJ_LIBRARY})
+       endif()
+       
     elseif (${package} STREQUAL "OpenGL")
       # find_package(OpenGL) returns variables in all upper case
       set(OPENGL_INCLUDE_DIRS ${${package}_INCLUDE_DIR})
@@ -237,7 +249,16 @@ foreach(package ${packages})
       # find_package(Motif) returns all upper case, MOTIF_INCLUDE_DIR
       message("package Motif: ${package}_INCLUDE_DIR: ${${package}_INCLUDE_DIR}")
       set(MOTIF_INCLUDE_DIRS ${MOTIF_INCLUDE_DIR})
-            
+
+    elseif (${package} STREQUAL "PROJ")
+      # Older versions of PROJ set PROJ_LIBRARY but not PROJ_LIBRARIES
+      # if PROJ_LIBRARY and not PROJ_LIBRARIES, set set PROJ_LIBRARIES=PROJ_LIBRARY
+      if (PROJ_LIBRARY)
+        message("PROJ_LIBRARY is ${PROJ_LIBRARY}")
+      else()
+        message("PROJ_LIBRARY is not set")
+      endif()
+
     endif()
 
 
@@ -389,16 +410,20 @@ if (buildGUIs)
 endif(buildGUIs)
 
 add_subdirectory(src/utilities)
+add_subdirectory(src/deprecated)
+add_subdirectory(src/macros)
 
 if (buildQt)
   add_subdirectory(src/qt-guilib)
   add_subdirectory(src/qt-mbgrdviz)
+  add_subdirectory(src/qt-mbgrdviz-3)  
 endif(buildQt)
 
-# TESTING
+# Build mbio/mb_config.h
 include(buildConfigHeader)
 
 buildConfigHeader(${buildGSF} ${buildTRN} ${buildTNav}
-                              ${buildGUIs} ${buildTest})
+                              ${buildGUIs} ${buildTest}
+                              ${mbVersion} ${mbVersionDate})
 
 message("DONE")

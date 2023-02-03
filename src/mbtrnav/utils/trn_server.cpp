@@ -130,13 +130,13 @@ int get_msg() {
 			}
 			sl = recv(_connfd, _sock_buf + sl, TRN_MSG_SIZE - sl, 0);
 			if(sl <= 0) {
-				sprintf(logbuf,
+				snprintf(logbuf, sizeof(logbuf),
 						"get_msg timeout, errno[%d] sl[%d] - %s", errno, sl,strerror(errno)); // or error
 				//perror(logbuf);
 				logs(TL_OMASK(TL_TRN_SERVER, TL_LOG|TL_SERR),"%s\n",logbuf);
 
 				if(errno == EINTR && ntries-- > 0) {  // try again
-					sprintf(logbuf,
+					snprintf(logbuf, sizeof(logbuf),
 							"%d: recv call interrupt after %d bytes.\n",
 							MAX_RECV_ATTEMPTS - ntries, len);
 					logs(TL_OMASK(TL_TRN_SERVER, TL_LOG),"%s",logbuf);
@@ -155,10 +155,10 @@ int get_msg() {
             char *bp=obuf;
             int wbytes=0;
 			for(int i = 0; i < 100; i++) {
-                if( (wbytes=sprintf(bp,"%x ", _sock_buf[i])) > 0){
+                if( (wbytes=snprintf(bp, sizeof(bp), "%x ", _sock_buf[i])) > 0){
                     bp+=wbytes;
                 }else{
-                    fprintf(stderr,"WARN: get_msg - debug sprintf failed\n");
+                    fprintf(stderr,"WARN: get_msg - debug snprintf failed\n");
                 }
 
                 if (bp>(obuf+DEBUG_BUF_BYTES)) {
@@ -177,7 +177,7 @@ int get_msg() {
 //
 size_t send_msg(commsT& msg) {
 	size_t sl = 0;
-	sprintf(logbuf, "Sending:%s", msg.to_s(_sock_buf, sizeof(_sock_buf)));
+	snprintf(logbuf, sizeof(logbuf), "Sending:%s", msg.to_s(_sock_buf, sizeof(_sock_buf)));
 	if (msg.msg_type == TRN_NACK) logs(TL_OMASK(TL_TRN_SERVER, TL_LOG),"%s",logbuf);
 	//logs(TL_OMASK(TL_TRN_SERVER, TL_LOG),"%s",logbuf);
 
@@ -230,9 +230,9 @@ int init() {
 		cfgPath = dotSlash;
 	}
 
-        sprintf(mapname, "%s/%s", mapPath, _ct.mapname);
-        sprintf(cfgname, "%s/%s", cfgPath, _ct.cfgname);
-        sprintf(particlename, "%s/%s", cfgPath, _ct.particlename);
+        snprintf(mapname, sizeof(mapname), "%s/%s", mapPath, _ct.mapname);
+        snprintf(cfgname, sizeof(cfgname), "%s/%s", cfgPath, _ct.cfgname);
+        snprintf(particlename, sizeof(particlename), "%s/%s", cfgPath, _ct.particlename);
 
         // Let's see if these files exist right now as
         // this will save headaaches later
@@ -286,13 +286,13 @@ int init() {
 
     if(_ct.logname == NULL)
     {
-        sprintf(logname, ".");
+        snprintf(logname, sizeof(logname), ".");
     }
     else
     {
       // Let's ensure that a unique log folder is created here
       //
-      sprintf(logname, "%s/%s",trnLogDir,_ct.logname);
+      snprintf(logname, sizeof(logname), "%s/%s",trnLogDir,_ct.logname);
       int n = 0;
 
       // mkdir() fails (!= 0) if the directory already exists
@@ -308,9 +308,9 @@ int init() {
             " [%d,%s]\n\n", logname, err,strerror(err));
             // if unable to create due to error,
             // just use current directory
-            sprintf(logname, ".");
+            snprintf(logname, sizeof(logname), ".");
          }
-         else sprintf(logname, "%s/%s-%02d", trnLogDir, _ct.logname, ++n);
+         else snprintf(logname, sizeof(logname), "%s/%s-%02d", trnLogDir, _ct.logname, ++n);
       }
     }
 #endif
@@ -647,16 +647,16 @@ int measure_update() {
 
             memset(obuf,0,256);
             bp=obuf;
-			sprintf(bp,"\nARL : Estimation Bias(Max. Likelihood): (t = %.2f)\n",
+			snprintf(bp, sizeof(bp), "\nARL : Estimation Bias(Max. Likelihood): (t = %.2f)\n",
 				mleEst.time);
             bp=obuf+strlen(obuf);
-			sprintf(bp,"ARL : North: %.4f, East: %.4f, Depth: %.4f\n",
+			snprintf(bp, sizeof(bp), "ARL : North: %.4f, East: %.4f, Depth: %.4f\n",
 				mleEst.x-_currEst.x, mleEst.y-_currEst.y, mleEst.z-_currEst.z);
             bp=obuf+strlen(obuf);
-			sprintf(bp,"ARL : Estimation Bias  (Mean)         : (t = %.2f)\n",
+			snprintf(bp, sizeof(bp), "ARL : Estimation Bias  (Mean)         : (t = %.2f)\n",
 				mmseEst.time);
             bp=obuf+strlen(obuf);
-			sprintf(bp,"ARL : North: %.4f, East: %.4f, Depth: %.4f\n",
+			snprintf(bp, sizeof(bp), "ARL : North: %.4f, East: %.4f, Depth: %.4f\n",
 				mmseEst.x-_currEst.x, mmseEst.y-_currEst.y, mmseEst.z-_currEst.z);
             bp=obuf+strlen(obuf);
             logs(TL_OMASK(TL_TRN_SERVER, TL_LOG),"%s",obuf);
@@ -1142,7 +1142,7 @@ int main(int argc, char** argv) {
             }
 			catch (Exception e)
 			{
-				sprintf(logbuf, "trn_server: Exception during %c msg: %s",
+				snprintf(logbuf, sizeof(logbuf), "trn_server: Exception during %c msg: %s",
 					_ct.msg_type, EXP_MSG);
 				fprintf(stderr, "%s\n", logbuf);
 				logs(TL_OMASK(TL_TRN_SERVER, TL_BOTH), "%s\n", logbuf);

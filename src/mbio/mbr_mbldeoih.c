@@ -225,18 +225,21 @@ int mbr_dem_mbldeoih(int verbose, void *mbio_ptr, int *error) {
 /*--------------------------------------------------------------------*/
 int mbr_rt_mbldeoih(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	struct mbsys_ldeoih_old_struct oldstore;
-	int read_size;
-	short *flag;
-	short short_transducer_depth;
-	short short_altitude;
-	short short_beams_bath, short_beams_amp, short_pixels_ss, short_sensorhead;
-	int header_length;
+	int read_size = 0;
+	short *flag = NULL;
+	short short_transducer_depth = 0;
+	short short_altitude = 0;
+	short short_beams_bath = 0;
+	short short_beams_amp = 0;
+	short short_pixels_ss = 0;
+	short short_sensorhead = 0;
+	int header_length = 0;
 	char buffer[MBF_MBLDEOIH_BUFFERSIZE];
-	int index;
+	int index = 0;
 	double newdepthscale = 1.0;
-	double depthmax;
+	double depthmax = 0.0;
 	int time_i[7], time_j[6];
-	int version;
+	int version = 0;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);

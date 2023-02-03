@@ -447,7 +447,7 @@ int Replay::openLogFiles()
   if (trn_attr->_lrauvDvlFilename)
   {
     // Open the dvl CSV file and prep for reading
-    sprintf(logfile, "%s/%s", logdir, trn_attr->_lrauvDvlFilename);
+    snprintf(logfile, sizeof(logfile), "%s/%s", logdir, trn_attr->_lrauvDvlFilename);
     fprintf(stdout, "replay - Loading CSV file %s...\n", logfile);
     dvl_csv = fopen(logfile, "r");
     if (dvl_csv)
@@ -458,13 +458,13 @@ int Replay::openLogFiles()
   else if (trn_attr->_useMbTrnData)
   {
     // Open the MbTrn file and prep for reading
-    sprintf(logfile, "%s/MbTrn.log", logdir);
+    snprintf(logfile, sizeof(logfile), "%s/MbTrn.log", logdir);
     fprintf(stdout, "replay - Loading MbTrn.log file %s...\n", logfile);
     mbtrn_log = new DataLogReader(logfile);
     return 0;
   }
 
-  sprintf(logfile, "%s/TerrainNav.log", logdir);
+  snprintf(logfile, sizeof(logfile), "%s/TerrainNav.log", logdir);
   if (access(logfile, R_OK) == 0)
   {
     // TerrainNav log files
@@ -474,14 +474,14 @@ int Replay::openLogFiles()
   else
   {
     // Default log files
-    sprintf(logfile, "%s/TerrainAid.log", logdir);
+    snprintf(logfile, sizeof(logfile), "%s/TerrainAid.log", logdir);
     fprintf(stdout, "Replay - Opening %s...\n", logfile);
     trn_log = new DataLogReader(logfile);
 
     if (trn_attr->_useDvlSide)
-      sprintf(logfile, "%s/dvlSide.log", logdir);
+      snprintf(logfile, sizeof(logfile), "%s/dvlSide.log", logdir);
     else
-      sprintf(logfile, "%s/navigation.log", logdir);
+      snprintf(logfile, sizeof(logfile), "%s/navigation.log", logdir);
     fprintf(stdout, "Replay - Opening %s...\n", logfile);
     nav_log = new DataLogReader(logfile);
   }
@@ -528,7 +528,7 @@ bool Replay::useLcmTrn()
 int Replay::loadCfgAttributes()
 {
   char cfgfile[300];
-  sprintf(cfgfile, "%s/terrainAid.cfg", logdir);
+  snprintf(cfgfile, sizeof(cfgfile), "%s/terrainAid.cfg", logdir);
   if (access(cfgfile, F_OK) < 0)
   {
     fprintf(stderr, "replay - Could not find %s", cfgfile);
@@ -682,17 +682,17 @@ TerrainNav* Replay::connectTRN()
         // set path names (only if configured in trn_attr)
         memset(buf,0,REPLAY_PATHNAME_LENGTH);
         if(NULL!=trn_attr->_mapFileName){
-            sprintf(buf, "%s/%s", mapdir, trn_attr->_mapFileName);
+            snprintf(buf, sizeof(buf), "%s/%s", mapdir, trn_attr->_mapFileName);
             free(trn_attr->_mapFileName); trn_attr->_mapFileName = strdup(buf);
         }
         memset(buf,0,REPLAY_PATHNAME_LENGTH);
         if(NULL!=trn_attr->_vehicleCfgName){
-            sprintf(buf, "%s/%s", datadir, trn_attr->_vehicleCfgName);
+            snprintf(buf, sizeof(buf), "%s/%s", datadir, trn_attr->_vehicleCfgName);
             free(trn_attr->_vehicleCfgName); trn_attr->_vehicleCfgName = strdup(buf);
         }
         memset(buf,0,REPLAY_PATHNAME_LENGTH);
         if(NULL!=trn_attr->_particlesName){
-            sprintf(buf, "%s/%s", datadir, trn_attr->_particlesName);
+            snprintf(buf, sizeof(buf), "%s/%s", datadir, trn_attr->_particlesName);
             free(trn_attr->_particlesName); trn_attr->_particlesName = strdup(buf);
         }
         fprintf(stdout, "%s:%d - %s\n%s\n%s\n", __FILE__,__LINE__,trn_attr->_mapFileName, trn_attr->_vehicleCfgName, trn_attr->_particlesName);

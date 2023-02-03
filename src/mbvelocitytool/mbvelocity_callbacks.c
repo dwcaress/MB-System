@@ -90,7 +90,7 @@ XFontStruct *fontStruct;
 
 int status;
 
-static mb_path message_str;
+static char message_str[2048];
 static mb_path input_file;
 int selected = 0; /* indicates an input file is selected */
 

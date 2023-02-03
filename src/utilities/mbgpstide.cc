@@ -91,7 +91,7 @@ int main(int argc, char **argv) {
 	int tideformat = 2;
 	double interval = 300.0;
 	bool mbprocess_update = false;
-	mb_path tide_file;
+	char tide_file[MB_PATH_MAXLINE+10];
 	bool file_output = false;
 	double tide_offset = 0.0;
 	bool skip_existing = false;
@@ -331,7 +331,7 @@ int main(int argc, char **argv) {
 			appropriate request has been made */
 		bool proceed = true;
 		if (!file_output) {
-			sprintf(tide_file, "%s.gps.tde", file);
+			snprintf(tide_file, sizeof(tide_file), "%s.gps.tde", file);
 			if (skip_existing) {
 				struct stat file_status;
 				int fstat = stat(file, &file_status);
@@ -457,15 +457,15 @@ int main(int argc, char **argv) {
 
 			/* get geoid corrections */
 			if (geoid_set) {
-				mb_path nav_file;
-				sprintf(nav_file, "%s.fnv", swath_file);
+				char nav_file[MB_PATH_MAXLINE+10];
+				snprintf(nav_file, sizeof(nav_file), "%s.fnv", swath_file);
 				struct stat file_status;
 				const int fstat = stat(nav_file, &file_status);
-				mb_path line = "";
+				char line[2*MB_PATH_MAXLINE+100] = "";
 				if (fstat == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR) {
-					sprintf(line, "awk '{ print $8 \" \" $9 \" \" $7 }' %s | grdtrack -G%s", nav_file, geoidgrid);
+					snprintf(line, sizeof(line), "awk '{ print $8 \" \" $9 \" \" $7 }' %s | grdtrack -G%s", nav_file, geoidgrid);
 				} else {
-					sprintf(line, "mblist -F%d -I%s -OXYU | grdtrack -G%s", format, file, geoidgrid);
+					snprintf(line, sizeof(line), "mblist -F%d -I%s -OXYU | grdtrack -G%s", format, file, geoidgrid);
 				}
 				if ((tfp = popen(line, "r")) != nullptr ) {
 					read_geoid = true;

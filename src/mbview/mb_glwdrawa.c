@@ -88,7 +88,6 @@
 
 #define mbGLwDrawingAreaWidget mbGLwMDrawingAreaWidget
 #define mbGLwDrawingAreaClassRec mbGLwMDrawingAreaClassRec
-#define mbglwDrawingAreaClassRec mbglwMDrawingAreaClassRec
 #define mbglwDrawingAreaWidgetClass mbglwMDrawingAreaWidgetClass
 #define mbGLwDrawingAreaRec mbGLwMDrawingAreaRec
 
@@ -302,7 +301,6 @@ mbGLwDrawingAreaClassRec mbglwDrawingAreaClassRec = {{/* core fields */
                                                      }};
 
 WidgetClass mbglwDrawingAreaWidgetClass = (WidgetClass)&mbglwDrawingAreaClassRec;
-
 static void error(Widget w, char *string) {
 	char buf[100];
 	sprintf(buf, "mbGLwMDrawingArea: %s\n", string);

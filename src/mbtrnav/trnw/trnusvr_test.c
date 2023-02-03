@@ -444,7 +444,7 @@ static void s_advance_update(trnu_pub_t *update)
 
     if(NULL!=update){
         static int count=0;
-        
+
         update->est[TRNU_EST_PT].time=mtime_etime();
         update->est[TRNU_EST_MLE].time=mtime_etime();
         update->est[TRNU_EST_MMSE].time=mtime_etime();

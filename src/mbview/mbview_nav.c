@@ -63,7 +63,7 @@
 #include "mbview.h"
 #include "mbviewprivate.h"
 
-static char value_string[MB_PATH_MAXLINE];
+static char value_string[2*MB_PATH_MAXLINE];
 
 /*------------------------------------------------------------------------------*/
 int mbview_getnavcount(int verbose, size_t instance, int *nnav, int *error) {
@@ -2596,11 +2596,9 @@ int mbview_setnavactivebyname(int verbose, size_t instance, char *name, bool act
 	/* find and select the navigation associated with name */
 	if (shared.shareddata.nav_mode != MBV_NAV_OFF && shared.shareddata.nnav > 0) {
 		bool found = false;
-    int inavfound = -1;
 		for (int inav = 0; inav < shared.shareddata.nnav && !found; inav++) {
 			if (strcmp(shared.shareddata.navs[inav].name, name) == 0) {
 				found = true;
-        inavfound = inav;
 				shared.shareddata.navs[inav].active = active;
 			}
 		}

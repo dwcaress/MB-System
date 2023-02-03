@@ -72,7 +72,7 @@ const char *TimeTag::ascii()
 
   double mantissa = _value - floor(_value);
 
-  sprintf(ptr, ".%02d", (int )(mantissa * 100));
+  snprintf(ptr, sizeof(ptr), ".%02d", (int )(mantissa * 100));
 
 
   return _asciiBuffer;
@@ -173,7 +173,7 @@ void TimeTag::parseValue(const char *stringRep)
       break;
 
     default:
-      snprintf(errorBuf, sizeof(errorBuf), 
+      snprintf(errorBuf, sizeof(errorBuf),
         "TimeTag::parseValue() - extra tokens in \"%s\"",
 	      stringRep);
 

@@ -209,11 +209,11 @@ int mbr_rt_imagemba(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
   }
 
   char buffer[MBF_IMAGEMBA_BUFFER_SIZE] = "";
-  int index;
-  short short_val;
-  int int_val;
-  float float_val;
-  int numberbytes;
+  int index = 0;
+  short short_val = 0;
+  int int_val = 0;
+  float float_val = 0.0;
+  int numberbytes = 0;
   bool obsolete_format = false;
 
   /* get pointer to mbio descriptor */
@@ -489,13 +489,12 @@ int mbr_rt_imagemba(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
     double heading = (double) store->heading_external;
     double roll = (double) store->roll_external;
     double pitch = (double) store->pitch_external;
-    mb_3D_orientation tx_align;
-    mb_3D_orientation tx_orientation;
-    double tx_steer;
-    mb_3D_orientation rx_align;
-    mb_3D_orientation rx_orientation;
-    double rx_steer;
-    int tx_sign = 1;
+    mb_3D_orientation tx_align = {0.0, 0.0, 0.0};
+    mb_3D_orientation tx_orientation = {0.0, 0.0, 0.0};
+    double tx_steer = 0.0;
+    mb_3D_orientation rx_align = {0.0, 0.0, 0.0};
+    mb_3D_orientation rx_orientation = {0.0, 0.0, 0.0};
+    double rx_steer = 0.0;
     int rx_sign = 1;
     for (int i = 0; i < store->num_proc_beams; i++) {
       if (store->range[i] > 0) {
@@ -536,6 +535,10 @@ int mbr_rt_imagemba(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
         store->beamrange[i] = rr;
         store->angles[i] = theta;
         store->angles_forward[i] = phi;
+        store->beamflag[i] = MB_FLAG_NONE;
+        store->bath[i] = zz + store->sonar_depth - store->heave_external;
+        store->bathacrosstrack[i] = xx * cos(DTR * phi);
+        store->bathalongtrack[i] = xx * sin(DTR * phi);
         store->amp[i] = (float) store->intensity[i];
       }
       else {

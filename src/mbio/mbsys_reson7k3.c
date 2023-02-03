@@ -866,7 +866,7 @@ int mbsys_reson7k3_print_SoundVelocityProfile(int verbose, s7k3_SoundVelocityPro
   fprintf(stderr, "%s     longitude:                  %f\n", first, SoundVelocityProfile->longitude);
   fprintf(stderr, "%s     n:                          %d\n", first, SoundVelocityProfile->n);
   fprintf(stderr, "%s     nalloc:                     %d\n", first, SoundVelocityProfile->nalloc);
-  for (int i = 0; i < SoundVelocityProfile->n; i++)
+  for (unsigned int i = 0; i < SoundVelocityProfile->n; i++)
     fprintf(stderr, "%s     i:%d depth:%f sound_velocity:%f\n", first, i, SoundVelocityProfile->depth[i], SoundVelocityProfile->sound_velocity[i]);
 
   int status = MB_SUCCESS;
@@ -916,7 +916,7 @@ int mbsys_reson7k3_print_CTD(int verbose, s7k3_CTD *CTD, int *error) {
   fprintf(stderr, "%s     sample_rate:                %f\n", first, CTD->sample_rate);
   fprintf(stderr, "%s     n:                          %d\n", first, CTD->n);
   fprintf(stderr, "%s     nalloc:                     %d\n", first, CTD->nalloc);
-  for (int i = 0; i < CTD->n; i++)
+  for (unsigned int i = 0; i < CTD->n; i++)
     fprintf(stderr, "%s     i:%d conductivity_salinity:%f temperature:%f pressure_depth:%f sound_velocity:%f absorption:%f\n",
             first, i, CTD->conductivity_salinity[i], CTD->temperature[i], CTD->pressure_depth[i], CTD->sound_velocity[i],
             CTD->absorption[i]);
@@ -1482,7 +1482,7 @@ int mbsys_reson7k3_print_ProcessedSideScan(int verbose, s7k3_ProcessedSideScan *
   fprintf(stderr, "%s     pixelwidth:                 %f\n", first, ProcessedSideScan->pixelwidth);
   fprintf(stderr, "%s     sonardepth:                 %f\n", first, ProcessedSideScan->sonardepth);
   fprintf(stderr, "%s     altitude:                   %f\n", first, ProcessedSideScan->altitude);
-  for (int i = 0; i < ProcessedSideScan->number_pixels; i++)
+  for (unsigned int i = 0; i < ProcessedSideScan->number_pixels; i++)
     fprintf(stderr, "%s     pixel[%d]:  sidescan:%f alongtrack:%f\n", first, i, ProcessedSideScan->sidescan[i],
             ProcessedSideScan->alongtrack[i]);
 
@@ -1635,7 +1635,7 @@ int mbsys_reson7k3_print_Configuration(int verbose, s7k3_Configuration *Configur
   fprintf(stderr, "%sStructure Contents:\n", first);
   fprintf(stderr, "%s     serial_number:              %llu\n", first, (long long unsigned) Configuration->serial_number);
   fprintf(stderr, "%s     number_devices:             %llu\n", first, (long long unsigned) Configuration->number_devices);
-  for (int i = 0; i < Configuration->number_devices; i++)
+  for (unsigned int i = 0; i < Configuration->number_devices; i++)
     mbsys_reson7k3_print_device(verbose, &Configuration->device[i], error);
 
   const int status = MB_SUCCESS;
@@ -1761,7 +1761,7 @@ int mbsys_reson7k3_print_BeamGeometry(int verbose, s7k3_BeamGeometry *BeamGeomet
   fprintf(stderr, "%sStructure Contents:\n", first);
   fprintf(stderr, "%s     serial_number:              %llu\n", first, (long long unsigned) BeamGeometry->serial_number);
   fprintf(stderr, "%s     number_beams:               %u\n", first, BeamGeometry->number_beams);
-  for (int i = 0; i < BeamGeometry->number_beams; i++)
+  for (unsigned int i = 0; i < BeamGeometry->number_beams; i++)
     fprintf(stderr,
             "%s     beam[%d]:  angle_alongtrack:%f angle_acrosstrack:%f beamwidth_alongtrack:%f beamwidth_acrosstrack:%f\n",
             first, i, BeamGeometry->angle_alongtrack[i], BeamGeometry->angle_acrosstrack[i],
@@ -1808,7 +1808,7 @@ int mbsys_reson7k3_print_Bathymetry(int verbose, s7k3_Bathymetry *Bathymetry, in
   fprintf(stderr, "%s     layer_comp_flag:            %d\n", first, Bathymetry->layer_comp_flag);
   fprintf(stderr, "%s     sound_vel_flag:             %d\n", first, Bathymetry->sound_vel_flag);
   fprintf(stderr, "%s     sound_velocity:             %f\n", first, Bathymetry->sound_velocity);
-  for (int i = 0; i < Bathymetry->number_beams; i++)
+  for (unsigned int i = 0; i < Bathymetry->number_beams; i++)
     fprintf(stderr, "%s     beam[%d]:  range:%f quality:%d intensity:%f min_depth_gate:%f min_depth_gate:%f\n", first, i,
             Bathymetry->range[i], Bathymetry->quality[i], Bathymetry->intensity[i], Bathymetry->min_depth_gate[i],
             Bathymetry->max_depth_gate[i]);
@@ -1823,7 +1823,7 @@ int mbsys_reson7k3_print_Bathymetry(int verbose, s7k3_Bathymetry *Bathymetry, in
   fprintf(stderr, "%s     pitch:                      %f\n", first, Bathymetry->pitch);
   fprintf(stderr, "%s     heave:                      %f\n", first, Bathymetry->heave);
   fprintf(stderr, "%s     vehicle_depth:              %f\n", first, Bathymetry->vehicle_depth);
-  for (int i = 0; i < Bathymetry->number_beams; i++)
+  for (unsigned int i = 0; i < Bathymetry->number_beams; i++)
     fprintf(stderr, "%s     beam[%d]:  depth:%f ltrack:%f xtrack:%f angles: %f %f\n", first, i, Bathymetry->depth[i],
             Bathymetry->alongtrack[i], Bathymetry->acrosstrack[i], Bathymetry->pointing_angle[i],
             Bathymetry->azimuth_angle[i]);
@@ -1880,24 +1880,24 @@ int mbsys_reson7k3_print_SideScan(int verbose, s7k3_SideScan *SideScan, int *err
 
   if (SideScan->sample_size == 1) {
     mb_s_char *charptr = (mb_s_char *)SideScan->port_data;
-    for (int i = 0; i < SideScan->number_samples; i++)
+    for (unsigned int i = 0; i < SideScan->number_samples; i++)
       fprintf(stderr, "%s     port SideScan[%d]:  %d\n", first, i, charptr[i]);
     charptr = (mb_s_char *)SideScan->stbd_data;
-    for (int i = 0; i < SideScan->number_samples; i++)
+    for (unsigned int i = 0; i < SideScan->number_samples; i++)
       fprintf(stderr, "%s     stbd SideScan[%d]:  %d\n", first, i, charptr[i]);
   } else if (SideScan->sample_size == 2) {
     short *shortptr = (short *)SideScan->port_data;
-    for (int i = 0; i < SideScan->number_samples; i++)
+    for (unsigned int i = 0; i < SideScan->number_samples; i++)
       fprintf(stderr, "%s     port SideScan[%d]:  %d\n", first, i, shortptr[i]);
     shortptr = (short *)SideScan->stbd_data;
-    for (int i = 0; i < SideScan->number_samples; i++)
+    for (unsigned int i = 0; i < SideScan->number_samples; i++)
       fprintf(stderr, "%s     stbd SideScan[%d]:  %d\n", first, i, shortptr[i]);
   } else if (SideScan->sample_size == 4) {
     int *intptr = (int *)SideScan->port_data;
-    for (int i = 0; i < SideScan->number_samples; i++)
+    for (unsigned int i = 0; i < SideScan->number_samples; i++)
       fprintf(stderr, "%s     port SideScan[%d]:  %d\n", first, i, intptr[i]);
     intptr = (int *)SideScan->stbd_data;
-    for (int i = 0; i < SideScan->number_samples; i++)
+    for (unsigned int i = 0; i < SideScan->number_samples; i++)
       fprintf(stderr, "%s     stbd SideScan[%d]:  %d\n", first, i, intptr[i]);
   }
 
@@ -1964,7 +1964,7 @@ int mbsys_reson7k3_print_WaterColumn(int verbose, s7k3_WaterColumn *WaterColumn,
   short *shortptrphase;
   int *intptramp;
   int *intptrphase;
-  for (int i = 0; i < WaterColumn->number_beams; i++) {
+  for (unsigned int i = 0; i < WaterColumn->number_beams; i++) {
     s7k3_wcd *wcd = &WaterColumn->wcd[i];
     fprintf(stderr, "%s     beam[%3d] # begin end:   %u   %u %u\n", first, i, wcd->beam_number,  wcd->begin_sample,  wcd->end_sample);
     int nsamples = wcd->end_sample - wcd->begin_sample + 1;
@@ -2092,7 +2092,7 @@ int mbsys_reson7k3_print_TVG(int verbose, s7k3_TVG *TVG, int *error) {
   fprintf(stderr, "%s     n:                          %d\n", first, TVG->n);
   for (int i = 0; i < 8; i++)
     fprintf(stderr, "%s     reserved[%d]:                %d\n", first, i, TVG->reserved[i]);
-  for (int i = 0; i < TVG->n; i++) {
+  for (unsigned int i = 0; i < TVG->n; i++) {
     float *tvg_float = (float *)TVG->tvg;
     fprintf(stderr, "%s     TVG[%d]:  %f\n", first, i, tvg_float[i]);
   }
@@ -2148,15 +2148,15 @@ int mbsys_reson7k3_print_Image(int verbose, s7k3_Image *Image, int *error) {
 
   if (Image->color_depth == 1) {
     mb_s_char *charptr = (mb_s_char *)Image->image;
-    for (int i = 0; i < Image->width * Image->height; i++)
+    for (unsigned int i = 0; i < Image->width * Image->height; i++)
       fprintf(stderr, "%s     Image[%d]:  %hhu\n", first, i, charptr[i]);
   } else if (Image->color_depth == 2) {
     short *shortptr = (short *)Image->image;
-    for (int i = 0; i < Image->width * Image->height; i++)
+    for (unsigned int i = 0; i < Image->width * Image->height; i++)
       fprintf(stderr, "%s     Image[%d]:  %hu\n", first, i, shortptr[i]);
   } else if (Image->color_depth == 4) {
     int *intptr = (int *)Image->image;
-    for (int i = 0; i < Image->width * Image->height; i++)
+    for (unsigned int i = 0; i < Image->width * Image->height; i++)
       fprintf(stderr, "%s     Image[%d]:  %u\n", first, i, intptr[i]);
   }
 
@@ -2205,7 +2205,7 @@ int mbsys_reson7k3_print_PingMotion(int verbose, s7k3_PingMotion *PingMotion, in
   fprintf(stderr, "%s     nalloc:                     %d\n", first, PingMotion->nalloc);
   fprintf(stderr, "%s     beam  roll    heading    heave\n", first);
   fprintf(stderr, "%s     ----  ----    -------    -----\n", first);
-  for (int i = 0; i < PingMotion->n; i++) {
+  for (unsigned int i = 0; i < PingMotion->n; i++) {
     fprintf(stderr, "%s     %3d  %10g  %10g  %10g\n", first, i, PingMotion->roll[i], PingMotion->heading[i],
             PingMotion->heave[i]);
   }
@@ -2253,7 +2253,7 @@ int mbsys_reson7k3_print_AdaptiveGate(int verbose, s7k3_AdaptiveGate *AdaptiveGa
   fprintf(stderr, "%s     gate_size:            %u\n", first, AdaptiveGate->gate_size);
   fprintf(stderr, "%s     beam   angle   min_limit    max_limit\n", first);
   fprintf(stderr, "%s     -------------------------------------\n", first);
-  for (int i = 0; i < AdaptiveGate->n; i++) {
+  for (unsigned int i = 0; i < AdaptiveGate->n; i++) {
     fprintf(stderr, "%s     %3d  %f   %f   %f\n", first,
             i, AdaptiveGate->angle[i], AdaptiveGate->min_limit[i],
             AdaptiveGate->max_limit[i]);
@@ -2315,7 +2315,7 @@ int mbsys_reson7k3_print_DetectionDataSetup(int verbose, s7k3_DetectionDataSetup
   }
   fprintf(stderr, "%s     beam  descriptor pick flag amin amax umin umax quality uncertainty\n", first);
   fprintf(stderr, "%s     ---------------------------------------------------------\n", first);
-  for (int i = 0; i < DetectionDataSetup->number_beams; i++) {
+  for (unsigned int i = 0; i < DetectionDataSetup->number_beams; i++) {
     fprintf(stderr, "%s     %3d %u %10.3f %u %f %f %f %f %u %f\n", first, i, DetectionDataSetup->beam_descriptor[i],
             DetectionDataSetup->detection_point[i], DetectionDataSetup->flags[i], DetectionDataSetup->auto_limits_min_sample[i],
             DetectionDataSetup->auto_limits_max_sample[i], DetectionDataSetup->user_limits_min_sample[i],
@@ -2370,7 +2370,7 @@ int mbsys_reson7k3_print_Beamformed(int verbose, s7k3_Beamformed *Beamformed, in
     s7k3_amplitudephase *amplitudephase = &(Beamformed->amplitudephase[i]);
     fprintf(stderr, "%s     beam_number:                %d\n", first, amplitudephase->beam_number);
     fprintf(stderr, "%s     number_samples:             %d\n", first, amplitudephase->number_samples);
-    for (int j = 0; j < amplitudephase->number_samples; j++) {
+    for (unsigned int j = 0; j < amplitudephase->number_samples; j++) {
       fprintf(stderr, "%s     beam[%d] sample[%d] amplitude:%u phase:%d\n", first, i, j, amplitudephase->amplitude[j],
               amplitudephase->phase[j]);
     }
@@ -2441,7 +2441,7 @@ int mbsys_reson7k3_print_VernierProcessingDataRaw(int verbose, s7k3_VernierProce
   fprintf(stderr, "%s     nalloc:                     %u\n", first, VernierProcessingDataRaw->nalloc);
   for (int i = 0; i < VernierProcessingDataRaw->beam_number; i++) {
     s7k3_anglemagnitude *anglemagnitude = &(VernierProcessingDataRaw->anglemagnitude[i]);
-    for (int j = 0; j < VernierProcessingDataRaw->decimated_samples; j++) {
+    for (unsigned int j = 0; j < VernierProcessingDataRaw->decimated_samples; j++) {
       fprintf(stderr, "%s     beam[%d] sample[%d] angle:%u magnitude:%u "
       "coherence:%u cross_power:%u quality_factor:%u reserved:%u\n",
       first, i, j, anglemagnitude->angle[j], anglemagnitude->magnitude[j],
@@ -2642,7 +2642,7 @@ int mbsys_reson7k3_print_RawDetection(int verbose, s7k3_RawDetection *RawDetecti
     fprintf(stderr, "%u ", RawDetection->reserved[i]);
   fprintf(stderr, "\n%s     beam  beam_descriptor detection_point rx_angle flags quality uncertainty intensity min max\n", first);
   fprintf(stderr, "%s     ----------------------------------------------------------------------\n", first);
-  for (int i = 0; i < RawDetection->number_beams; i++) {
+  for (unsigned int i = 0; i < RawDetection->number_beams; i++) {
     rawdetectiondata  = (s7k3_rawdetectiondata *) &RawDetection->rawdetectiondata[i];
     fprintf(stderr, "%s     %3d %3u %12.6f %10.6f %3u %11u %.6f %.6f %.6f %.6f\n", first, i, rawdetectiondata->beam_descriptor,
             rawdetectiondata->detection_point, rawdetectiondata->rx_angle, rawdetectiondata->flags,
@@ -2663,7 +2663,7 @@ int mbsys_reson7k3_print_RawDetection(int verbose, s7k3_RawDetection *RawDetecti
     fprintf(stderr, "%s     vehicle_depth:               %.6f\n", first, RawDetection->vehicle_depth);
     fprintf(stderr, "\n%s       sdg beam      depth     alongtrack  acrosstrack  pointing_angle  azimuth_angle\n", first);
     fprintf(stderr, "%s     ----------------------------------------------------------------------\n", first);
-    for (int i = 0; i < RawDetection->number_beams; i++) {
+    for (unsigned int i = 0; i < RawDetection->number_beams; i++) {
       rawdetectiondata  = (s7k3_rawdetectiondata *) &RawDetection->rawdetectiondata[i];
       s7k3_bathydata *bathydata = (s7k3_bathydata *)&RawDetection->bathydata[i];
       fprintf(stderr, "%s     %4d %4u %12.3f %12.3f %12.3f   %11.6f %11.6f\n",
@@ -2991,7 +2991,7 @@ int mbsys_reson7k3_print_CompressedWaterColumn(int verbose, s7k3_CompressedWater
     fprintf(stderr, "%s     beam_number:                %u\n", first, compressedwatercolumndata->beam_number);
     fprintf(stderr, "%s     segment_number:             %u\n", first, compressedwatercolumndata->segment_number);
     fprintf(stderr, "%s     samples:                    %u\n", first, compressedwatercolumndata->samples);
-    for (int j = 0;j<compressedwatercolumndata->samples;j++) {
+    for (unsigned int j = 0;j<compressedwatercolumndata->samples;j++) {
       const int k = j * samplesize;
       const int l = k + CompressedWaterColumn->magsamplesize;
       if (CompressedWaterColumn->magsamplesize == 1
@@ -3081,7 +3081,7 @@ int mbsys_reson7k3_print_SegmentedRawDetection(int verbose, s7k3_SegmentedRawDet
                   "pulseenvpar srclevel rxbeamwidth algorithm flags samplerate "
                   "tvg rxbandwidth\n", first);
   fprintf(stderr, "%s     ----------------------------------------------------------------------\n", first);
-  for (int i = 0; i < SegmentedRawDetection->n_segments; i++) {
+  for (unsigned int i = 0; i < SegmentedRawDetection->n_segments; i++) {
     s7k3_segmentedrawdetectiontxdata *segmentedrawdetectiontxdata =
         (s7k3_segmentedrawdetectiontxdata *)&SegmentedRawDetection->segmentedrawdetectiontxdata[i];
     fprintf(stderr, "%s     %3d %3u %f %f %f %f %d %f %f %f %f %d %f %f %f %d %d %f %d %f\n",
@@ -3108,7 +3108,7 @@ int mbsys_reson7k3_print_SegmentedRawDetection(int verbose, s7k3_SegmentedRawDet
   }
   fprintf(stderr, "\n%s   cnt bm_# seg detection rxacross flag quality uncert amp snrat\n", first);
   fprintf(stderr, "%s     ----------------------------------------------------------------------\n", first);
-  for (int i = 0;i<SegmentedRawDetection->n_rx;i++) {
+  for (unsigned int i = 0;i<SegmentedRawDetection->n_rx;i++) {
     s7k3_segmentedrawdetectionrxdata *segmentedrawdetectionrxdata =
         (s7k3_segmentedrawdetectionrxdata *)&(SegmentedRawDetection->segmentedrawdetectionrxdata[i]);
     fprintf(stderr, "%s     %4d %4u %2u %f %f %6u %6u %f %f %f\n",
@@ -3137,7 +3137,7 @@ int mbsys_reson7k3_print_SegmentedRawDetection(int verbose, s7k3_SegmentedRawDet
     fprintf(stderr, "%s     vehicle_depth:               %f\n", first, SegmentedRawDetection->vehicle_depth);
     fprintf(stderr, "\n%s   cnt bm_# depth ltrack xtrack ptgangle aziangle\n", first);
     fprintf(stderr, "%s     ------------------------------------------------\n", first);
-    for (int i = 0; i < SegmentedRawDetection->n_rx; i++) {
+    for (unsigned int i = 0; i < SegmentedRawDetection->n_rx; i++) {
       s7k3_segmentedrawdetectionrxdata *segmentedrawdetectionrxdata =
           (s7k3_segmentedrawdetectionrxdata *)&(SegmentedRawDetection->segmentedrawdetectionrxdata[i]);
       s7k3_bathydata *bathydata = (s7k3_bathydata *)&SegmentedRawDetection->bathydata[i];
@@ -3195,7 +3195,7 @@ int mbsys_reson7k3_print_CalibratedBeam(int verbose, s7k3_CalibratedBeam *Calibr
     fprintf(stderr, "%s     reserved[%d]:                %u\n", first, i, CalibratedBeam->reserved[i]);
   }
   fprintf(stderr, "%s     nalloc:         %u\n", first, CalibratedBeam->nalloc);
-  for (int i = 0;i<CalibratedBeam->total_samples;i++) {
+  for (unsigned int i = 0;i<CalibratedBeam->total_samples;i++) {
     fprintf(stderr, "%s     amplitude[%3d]:             %f\n", first, i, CalibratedBeam->samples[i]);
   }
 
@@ -3236,7 +3236,7 @@ int mbsys_reson7k3_print_SystemEvents(int verbose, s7k3_SystemEvents *SystemEven
   fprintf(stderr, "%s     serial_number:              %llu\n", first, (long long unsigned) SystemEvents->serial_number);
   fprintf(stderr, "%s     number_events:              %d\n", first, SystemEvents->number_events);
   fprintf(stderr, "%s     nalloc:                     %d\n", first, SystemEvents->nalloc);
-  for (int i = 0; i < SystemEvents->number_events; i++) {
+  for (unsigned int i = 0; i < SystemEvents->number_events; i++) {
     s7k3_systemeventsdata *systemeventsdata = &(SystemEvents->systemeventsdata[i]);
     fprintf(stderr, "%s     event_type:                 %d\n", first, systemeventsdata->event_type);
     fprintf(stderr, "%s     event_id:                   %d\n", first, systemeventsdata->event_id);
@@ -3457,10 +3457,10 @@ int mbsys_reson7k3_print_CalibratedSideScan(int verbose, s7k3_CalibratedSideScan
   fprintf(stderr, "%s     data_types:                 %u\n", first, CalibratedSideScan->data_types);
   fprintf(stderr, "%s     error_flag:                 %u\n", first, CalibratedSideScan->error_flag);
   fprintf(stderr, "%s     nalloc:                     %u\n", first, CalibratedSideScan->nalloc);
-  for (int i = 0; i < CalibratedSideScan->samples; i++) {
+  for (unsigned int i = 0; i < CalibratedSideScan->samples; i++) {
     fprintf(stderr, "%s     port[%d]: %10u from beam:%3u\n", first, i, CalibratedSideScan->port_data[i], CalibratedSideScan->port_beam[i]);
   }
-  for (int i = 0; i < CalibratedSideScan->samples; i++) {
+  for (unsigned int i = 0; i < CalibratedSideScan->samples; i++) {
     fprintf(stderr, "%s     stbd[%d]: %10u from beam:%3u\n", first, i, CalibratedSideScan->stbd_data[i], CalibratedSideScan->stbd_beam[i]);
   }
   fprintf(stderr, "%s     optionaldata:               %u\n", first, CalibratedSideScan->optionaldata);
@@ -3519,11 +3519,11 @@ int mbsys_reson7k3_print_SnippetBackscatteringStrength(int verbose, s7k3_Snippet
     fprintf(stderr, "%s     beam: %u begin:%u bottom:%u end:%u\n", first, snippetbackscatteringstrengthdata->beam_number,
             snippetbackscatteringstrengthdata->begin_sample, snippetbackscatteringstrengthdata->bottom_sample,
             snippetbackscatteringstrengthdata->end_sample);
-    for (int j = 0; j < snippetbackscatteringstrengthdata->end_sample - snippetbackscatteringstrengthdata->begin_sample + 1; j++)
+    for (unsigned int j = 0; j < snippetbackscatteringstrengthdata->end_sample - snippetbackscatteringstrengthdata->begin_sample + 1; j++)
       fprintf(stderr, "%s     bs[%d]:%f\n", first, snippetbackscatteringstrengthdata->begin_sample + j,
               snippetbackscatteringstrengthdata->bs[j]);
     if (SnippetBackscatteringStrength->control_flags & 0x40 && snippetbackscatteringstrengthdata->footprints != NULL) {
-      for (int j = 0; j < snippetbackscatteringstrengthdata->end_sample - snippetbackscatteringstrengthdata->begin_sample + 1; j++)
+      for (unsigned int j = 0; j < snippetbackscatteringstrengthdata->end_sample - snippetbackscatteringstrengthdata->begin_sample + 1; j++)
         fprintf(stderr, "%s     footprints[%d]:%f\n", first, snippetbackscatteringstrengthdata->begin_sample + j,
                 snippetbackscatteringstrengthdata->footprints[j]);
       }
@@ -3655,7 +3655,7 @@ int mbsys_reson7k3_print_FileHeader(int verbose, s7k3_FileHeader *FileHeader, in
   fprintf(stderr, "%s     recording_version:          %s\n", first, FileHeader->recording_version);
   fprintf(stderr, "%s     user_defined_name:          %s\n", first, FileHeader->user_defined_name);
   fprintf(stderr, "%s     notes:                      %s\n", first, FileHeader->notes);
-  for (int i = 0; i < FileHeader->number_devices; i++) {
+  for (unsigned int i = 0; i < FileHeader->number_devices; i++) {
     s7k3_subsystem *subsystem = &FileHeader->subsystem[i];
     fprintf(stderr, "%s     device_identifier:          %d\n", first, subsystem->device_identifier);
     fprintf(stderr, "%s     system_enumerator:          %d\n", first, subsystem->system_enumerator);
@@ -3705,7 +3705,7 @@ int mbsys_reson7k3_print_FileCatalog(int verbose, s7k3_FileCatalog *FileCatalog,
   fprintf(stderr, "%s     n:                            %d\n", first, FileCatalog->n);
   fprintf(stderr, "%s     reserved:                     %d\n", first, FileCatalog->reserved);
   fprintf(stderr, "%s     list of data records (size offset type device system time count 8*reserved):\n", first);
-  for (int i = 0; i < FileCatalog->n; i++) {
+  for (unsigned int i = 0; i < FileCatalog->n; i++) {
     filecatalogdata = &FileCatalog->filecatalogdata[i];
     fprintf(stderr, "%s     %7d %7d %8u %llu %5u %4u %2u %4u-%3.3u-%2.2u:%2.2u:%9.6f %.6f %u %u %u %u %u %u %u %u %u\n",
           first, i, filecatalogdata->sequence,
@@ -3803,7 +3803,7 @@ int mbsys_reson7k3_print_FileCatalog(int verbose, s7k3_FileCatalog *FileCatalog,
   int nrec_SpreadingLoss = 0;
   int nrec_ProfileAverageSalinity = 0;
   int nrec_ProfileAverageTemperature = 0;
-  for (int i = 0; i < FileCatalog->n; i++) {
+  for (unsigned int i = 0; i < FileCatalog->n; i++) {
     filecatalogdata = &FileCatalog->filecatalogdata[i];
 
     switch (filecatalogdata->record_type) {
@@ -5555,7 +5555,7 @@ int mbsys_reson7k3_preprocess(int verbose,     /* in: verbosity level set on com
 
       /* initialize all of the beams */
       if (store->read_RawDetection) {
-        for (int i = 0; i < RawDetection->number_beams; i++) {
+        for (unsigned int i = 0; i < RawDetection->number_beams; i++) {
           rawdetectiondata = &(RawDetection->rawdetectiondata[i]);
           bathydata = &(RawDetection->bathydata[i]);
           qualitycharptr = (mb_u_char *)&(rawdetectiondata->quality);
@@ -5567,7 +5567,7 @@ int mbsys_reson7k3_preprocess(int verbose,     /* in: verbosity level set on com
           bathydata->azimuth_angle = 0.0;
         }
       } else if (store->read_SegmentedRawDetection) {
-        for (int i = 0; i < SegmentedRawDetection->n_rx; i++) {
+        for (unsigned int i = 0; i < SegmentedRawDetection->n_rx; i++) {
           segmentedrawdetectionrxdata = &(SegmentedRawDetection->segmentedrawdetectionrxdata[i]);
           bathydata = &(SegmentedRawDetection->bathydata[i]);
           qualitycharptr = (mb_u_char *)&(segmentedrawdetectionrxdata->quality);
@@ -5631,7 +5631,7 @@ int mbsys_reson7k3_preprocess(int verbose,     /* in: verbosity level set on com
 
       /* zero alongtrack angles if requested */
       if (kluge_zeroalongtrackangles) {
-        for (int i = 0; i < RawDetection->number_beams; i++) {
+        for (unsigned int i = 0; i < RawDetection->number_beams; i++) {
           BeamGeometry->angle_alongtrack[i] = 0.0;
         }
       }
@@ -5642,7 +5642,7 @@ int mbsys_reson7k3_preprocess(int verbose,     /* in: verbosity level set on com
          * RawDetection record
          */
         if (store->read_RawDetection) {
-          for (int i = 0; i < RawDetection->number_beams; i++) {
+          for (unsigned int i = 0; i < RawDetection->number_beams; i++) {
             rawdetectiondata = &RawDetection->rawdetectiondata[i];
             rawdetectiondata->rx_angle
               = asin(MAX(-1.0, MIN(1.0, kluge_beampatternsnellfactor
@@ -5650,7 +5650,7 @@ int mbsys_reson7k3_preprocess(int verbose,     /* in: verbosity level set on com
           }
         }
         else if (store->read_SegmentedRawDetection) {
-          for (int i = 0; i < SegmentedRawDetection->n_rx; i++) {
+          for (unsigned int i = 0; i < SegmentedRawDetection->n_rx; i++) {
             segmentedrawdetectionrxdata = &(SegmentedRawDetection->segmentedrawdetectionrxdata[i]);
             segmentedrawdetectionrxdata->rx_angle_cross
               = asin(MAX(-1.0, MIN(1.0, kluge_beampatternsnellfactor
@@ -5687,7 +5687,7 @@ int mbsys_reson7k3_preprocess(int verbose,     /* in: verbosity level set on com
          * RawDetection record
          */
         if (store->read_RawDetection) {
-          for (int i = 0; i < RawDetection->number_beams; i++) {
+          for (unsigned int i = 0; i < RawDetection->number_beams; i++) {
             rawdetectiondata = &RawDetection->rawdetectiondata[i];
             rawdetectiondata->rx_angle =
                 asin(MAX(-1.0, MIN(1.0, soundspeedsnellfactor
@@ -5695,7 +5695,7 @@ int mbsys_reson7k3_preprocess(int verbose,     /* in: verbosity level set on com
           }
         }
         else if (store->read_SegmentedRawDetection) {
-          for (int i = 0; i < SegmentedRawDetection->n_rx; i++) {
+          for (unsigned int i = 0; i < SegmentedRawDetection->n_rx; i++) {
             segmentedrawdetectionrxdata = &(SegmentedRawDetection->segmentedrawdetectionrxdata[i]);
             segmentedrawdetectionrxdata->rx_angle_cross =
                 asin(MAX(-1.0, MIN(1.0, soundspeedsnellfactor
@@ -5737,7 +5737,7 @@ int mbsys_reson7k3_preprocess(int verbose,     /* in: verbosity level set on com
 
       /* calculate bathymetry from RawDetection record */
       if (store->read_RawDetection) {
-        for (int i = 0; i < RawDetection->number_beams; i++) {
+        for (unsigned int i = 0; i < RawDetection->number_beams; i++) {
           rawdetectiondata = &(RawDetection->rawdetectiondata[i]);
           bathydata = &(RawDetection->bathydata[i]);
 
@@ -5831,7 +5831,7 @@ int mbsys_reson7k3_preprocess(int verbose,     /* in: verbosity level set on com
       }
       /* calculate bathymetry from SegmentedRawDetection record */
       else if (store->read_SegmentedRawDetection) {
-        for (int i = 0; i < SegmentedRawDetection->n_rx; i++) {
+        for (unsigned int i = 0; i < SegmentedRawDetection->n_rx; i++) {
           segmentedrawdetectionrxdata = &(SegmentedRawDetection->segmentedrawdetectionrxdata[i]);
           s7k3_segmentedrawdetectiontxdata *segmentedrawdetectiontxdata =
               &(SegmentedRawDetection->segmentedrawdetectiontxdata[segmentedrawdetectionrxdata->used_segment-1]);
@@ -6266,7 +6266,7 @@ int mbsys_reson7k3_extract(int verbose, void *mbio_ptr, void *store_ptr, int *ki
       *nbath = RawDetection->number_beams;
       *namp = *nbath;
       *nss = 0;
-      for (int i = 0; i < RawDetection->number_beams; i++) {
+      for (unsigned int i = 0; i < RawDetection->number_beams; i++) {
         rawdetectiondata = &(RawDetection->rawdetectiondata[i]);
         bathydata = &(RawDetection->bathydata[i]);
         bath[i] = bathydata->depth;
@@ -6280,7 +6280,7 @@ int mbsys_reson7k3_extract(int verbose, void *mbio_ptr, void *store_ptr, int *ki
       // if multi-pick enabled make sure flagged secondary soundings are flagged for being secondary
       // do this check on insertion too
       if (RawDetection->flags & 0x10) {
-        for (int i = 0; i < RawDetection->number_beams; i++) {
+        for (unsigned int i = 0; i < RawDetection->number_beams; i++) {
           rawdetectiondata = &(RawDetection->rawdetectiondata[i]);
           if (mb_beam_check_flag_flagged(beamflag[i]) && rawdetectiondata->flags & 0x1E00) {
             beamflag[i] = MB_FLAG_FLAG + MB_FLAG_MULTIPICK;
@@ -6335,7 +6335,7 @@ int mbsys_reson7k3_extract(int verbose, void *mbio_ptr, void *store_ptr, int *ki
       *nbath = SegmentedRawDetection->n_rx;
       *namp = *nbath;
       *nss = 0;
-      for (int i = 0; i < SegmentedRawDetection->n_rx; i++) {
+      for (unsigned int i = 0; i < SegmentedRawDetection->n_rx; i++) {
         segmentedrawdetectionrxdata = &(SegmentedRawDetection->segmentedrawdetectionrxdata[i]);
         // s7k3_segmentedrawdetectiontxdata *segmentedrawdetectiontxdata =
         //     &(SegmentedRawDetection->segmentedrawdetectiontxdata[segmentedrawdetectionrxdata->used_segment - 1]);
@@ -6357,7 +6357,7 @@ int mbsys_reson7k3_extract(int verbose, void *mbio_ptr, void *store_ptr, int *ki
     // extract processed multibeam sidescan
     if (status == MB_SUCCESS && store->read_ProcessedSideScan) {
 			*nss = ProcessedSideScan->number_pixels;
-			for (int i = 0; i < ProcessedSideScan->number_pixels; i++) {
+			for (unsigned int i = 0; i < ProcessedSideScan->number_pixels; i++) {
 				ss[i] = ProcessedSideScan->sidescan[i];
 				ssacrosstrack[i] = ProcessedSideScan->pixelwidth * (i - (int)ProcessedSideScan->number_pixels / 2);
 				ssalongtrack[i] = ProcessedSideScan->alongtrack[i];
@@ -6652,7 +6652,7 @@ int mbsys_reson7k3_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind
   s7k3_bathydata *bathydata = NULL;
   // s7k3_segmentedrawdetectiontxdata *segmentedrawdetectiontxdata = NULL;
   s7k3_segmentedrawdetectionrxdata *segmentedrawdetectionrxdata = NULL;
-  int msglen;
+  unsigned int msglen;
   u32 quality;
 
   struct mbsys_reson7k3_struct *store = (struct mbsys_reson7k3_struct *)store_ptr;
@@ -6696,7 +6696,7 @@ int mbsys_reson7k3_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind
       // if multi-pick enabled make sure flagged secondary soundings are flagged for being secondary
       // do this check on extraction too
       if (RawDetection->flags & 0x10) {
-        for (int i = 0; i < RawDetection->number_beams; i++) {
+        for (unsigned int i = 0; i < RawDetection->number_beams; i++) {
           rawdetectiondata = &(RawDetection->rawdetectiondata[i]);
           if (mb_beam_check_flag_flagged(beamflag[i]) && rawdetectiondata->flags & 0x1E00) {
             beamflag[i] = MB_FLAG_FLAG + MB_FLAG_MULTIPICK;
@@ -6706,7 +6706,7 @@ int mbsys_reson7k3_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind
 
       /* read distance and depth values into storage arrays */
       for (int i = 0; i < nbath; i++) {
-        if (i < RawDetection->number_beams) {
+        if ((unsigned int) i < RawDetection->number_beams) {
           rawdetectiondata = &(RawDetection->rawdetectiondata[i]);
           bathydata = &(RawDetection->bathydata[i]);
           bathydata->depth = bath[i];
@@ -6741,7 +6741,7 @@ int mbsys_reson7k3_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind
 
       /* read distance and depth values into storage arrays */
       for (int i = 0; i < nbath; i++) {
-        if (i < SegmentedRawDetection->n_rx) {
+        if ((unsigned int) i < SegmentedRawDetection->n_rx) {
           segmentedrawdetectionrxdata = &(SegmentedRawDetection->segmentedrawdetectionrxdata[i]);
           bathydata = &(SegmentedRawDetection->bathydata[i]);
           bathydata->depth = bath[i];
@@ -6925,7 +6925,7 @@ int mbsys_reson7k3_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kin
 
   struct mbsys_reson7k3_struct *store = (struct mbsys_reson7k3_struct *)store_ptr;
   s7k3_SonarSettings *SonarSettings = (s7k3_SonarSettings *)&store->SonarSettings;
-  s7k3_BeamGeometry *BeamGeometry = (s7k3_BeamGeometry *)&store->BeamGeometry;
+  // s7k3_BeamGeometry *BeamGeometry = (s7k3_BeamGeometry *)&store->BeamGeometry;
   s7k3_RawDetection *RawDetection = (s7k3_RawDetection *)&store->RawDetection;
   s7k3_SegmentedRawDetection *SegmentedRawDetection = &store->SegmentedRawDetection;
 
@@ -6947,7 +6947,7 @@ int mbsys_reson7k3_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kin
 
       /* get travel times, angles */
       *nbeams = RawDetection->number_beams;
-      for (int i = 0; i < RawDetection->number_beams; i++) {
+      for (unsigned int i = 0; i < RawDetection->number_beams; i++) {
         rawdetectiondata = &(RawDetection->rawdetectiondata[i]);
         bathydata = &(RawDetection->bathydata[i]);
         ttimes[i] = rawdetectiondata->detection_point / RawDetection->sampling_rate;
@@ -7038,8 +7038,8 @@ int mbsys_reson7k3_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kin
 }
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k3_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbeams, int *detects, int *error) {
-  s7k3_rawdetectiondata *rawdetectiondata;
-  s7k3_segmentedrawdetectionrxdata *segmentedrawdetectionrxdata;
+  s7k3_rawdetectiondata *rawdetectiondata = NULL;
+  s7k3_segmentedrawdetectionrxdata *segmentedrawdetectionrxdata = NULL;
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -7066,7 +7066,7 @@ int mbsys_reson7k3_detects(int verbose, void *mbio_ptr, void *store_ptr, int *ki
         && store->read_RawDetection) {
       /* read beam detects into storage arrays */
       *nbeams = BeamGeometry->number_beams;
-      for (int i = 0; i < RawDetection->number_beams; i++) {
+      for (unsigned int i = 0; i < RawDetection->number_beams; i++) {
         rawdetectiondata = &(RawDetection->rawdetectiondata[i]);
 
         // Detect types are in bits 0-1
@@ -7092,7 +7092,7 @@ int mbsys_reson7k3_detects(int verbose, void *mbio_ptr, void *store_ptr, int *ki
         && SegmentedRawDetection->optionaldata) {
       /* read beam detects into storage arrays */
       *nbeams = SegmentedRawDetection->n_rx;
-      for (int i = 0; i < SegmentedRawDetection->n_rx; i++) {
+      for (unsigned int i = 0; i < SegmentedRawDetection->n_rx; i++) {
         segmentedrawdetectionrxdata = &(SegmentedRawDetection->segmentedrawdetectionrxdata[i]);
         // s7k3_segmentedrawdetectiontxdata *segmentedrawdetectiontxdata =
         //     &(SegmentedRawDetection->segmentedrawdetectiontxdata[segmentedrawdetectionrxdata->used_segment - 1]);
@@ -7291,7 +7291,7 @@ int mbsys_reson7k3_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr
       if (!altitude_found) {
         /* get depth closest to nadir */
         xtrackmin = 999999.9;
-        for (int i = 0; i < RawDetection->number_beams; i++) {
+        for (unsigned int i = 0; i < RawDetection->number_beams; i++) {
           rawdetectiondata = &(RawDetection->rawdetectiondata[i]);
           bathydata = &(RawDetection->bathydata[i]);
           qualitycharptr = (mb_u_char *)&(rawdetectiondata->quality);
@@ -7320,7 +7320,7 @@ int mbsys_reson7k3_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr
       if (!altitude_found) {
         /* get depth closest to nadir */
         xtrackmin = 999999.9;
-        for (int i = 0; i < SegmentedRawDetection->n_rx; i++) {
+        for (unsigned int i = 0; i < SegmentedRawDetection->n_rx; i++) {
           segmentedrawdetectionrxdata = &(SegmentedRawDetection->segmentedrawdetectionrxdata[i]);
           bathydata = &(SegmentedRawDetection->bathydata[i]);
           qualitycharptr = (mb_u_char *)&(segmentedrawdetectionrxdata->quality);
@@ -8158,7 +8158,7 @@ int mbsys_reson7k3_insert_svp(int verbose, void *mbio_ptr, void *store_ptr, int 
   /* insert data in structure */
   if (store->kind == MB_DATA_VELOCITY_PROFILE) {
     /* allocate memory if necessary */
-    if (SoundVelocityProfile->nalloc < nsvp) {
+    if (SoundVelocityProfile->nalloc < (unsigned int) nsvp) {
       status = mb_reallocd(verbose, __FILE__, __LINE__, nsvp * sizeof(float), (void **)&(SoundVelocityProfile->depth), error);
       status = mb_reallocd(verbose, __FILE__, __LINE__, nsvp * sizeof(float), (void **)&(SoundVelocityProfile->sound_velocity), error);
       if (status == MB_SUCCESS) {
@@ -8173,7 +8173,7 @@ int mbsys_reson7k3_insert_svp(int verbose, void *mbio_ptr, void *store_ptr, int 
     /* get profile */
     if (status == MB_SUCCESS) {
       SoundVelocityProfile->n = nsvp;
-      for (int i = 0; i < SoundVelocityProfile->n; i++) {
+      for (unsigned int i = 0; i < SoundVelocityProfile->n; i++) {
         SoundVelocityProfile->depth[i] = depth[i];
         SoundVelocityProfile->sound_velocity[i] = velocity[i];
       }
@@ -8496,7 +8496,7 @@ int mbsys_reson7k3_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy
     }
   }
   if (status == MB_SUCCESS) {
-    for (int i = 0;i<copy->SoundVelocityProfile.n;i++) {
+    for (unsigned int i = 0;i<copy->SoundVelocityProfile.n;i++) {
       copy->SoundVelocityProfile.depth[i] = store->SoundVelocityProfile.depth[i];
       copy->SoundVelocityProfile.sound_velocity[i] = store->SoundVelocityProfile.sound_velocity[i];
     }
@@ -8535,7 +8535,7 @@ int mbsys_reson7k3_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy
     }
   }
   if (status == MB_SUCCESS) {
-    for (int i = 0;i<copy->CTD.n;i++) {
+    for (unsigned int i = 0;i<copy->CTD.n;i++) {
       copy->CTD.conductivity_salinity[i] = store->CTD.conductivity_salinity[i];
       copy->CTD.temperature[i] = store->CTD.temperature[i];
       copy->CTD.pressure_depth[i] = store->CTD.pressure_depth[i];
@@ -8656,7 +8656,7 @@ int mbsys_reson7k3_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy
   copy->Configuration.header = store->Configuration.header;
   copy->Configuration.serial_number = store->Configuration.serial_number;
   copy->Configuration.number_devices = store->Configuration.number_devices;
-  for (int i = 0;i<copy->Configuration.number_devices;i++) {
+  for (unsigned int i = 0;i<copy->Configuration.number_devices;i++) {
     copy->Configuration.device[i].magic_number = store->Configuration.device[i].magic_number;
     memcpy(copy->Configuration.device[i].description, store->Configuration.device[i].description, 60);
     copy->Configuration.device[i].description[60] = '\0';
@@ -9107,7 +9107,7 @@ int mbsys_reson7k3_makess_source(
       maxxtrack = 0.0;
       iminxtrack = RawDetection->number_beams / 2;
       bool found = false;
-      for (int i = 0; i < RawDetection->number_beams; i++) {
+      for (unsigned int i = 0; i < RawDetection->number_beams; i++) {
         rawdetectiondata = &(RawDetection->rawdetectiondata[i]);
         bathydata = &(RawDetection->bathydata[i]);
         qualitycharptr = (mb_u_char *)&(rawdetectiondata->quality);
@@ -9163,7 +9163,7 @@ int mbsys_reson7k3_makess_source(
       maxxtrack = 0.0;
       iminxtrack = SegmentedRawDetection->n_rx / 2;
       bool found = false;
-      for (int i = 0; i < SegmentedRawDetection->n_rx; i++) {
+      for (unsigned int i = 0; i < SegmentedRawDetection->n_rx; i++) {
         segmentedrawdetectionrxdata = &(SegmentedRawDetection->segmentedrawdetectionrxdata[i]);
         bathydata = &(SegmentedRawDetection->bathydata[i]);
         qualitycharptr = (mb_u_char *)&(segmentedrawdetectionrxdata->quality);
@@ -9248,7 +9248,7 @@ int mbsys_reson7k3_makess_source(
 
           // search RawDetection record for the associated sounding
           bool found = false;
-          for (int j = ibeamdetectindex; j < RawDetection->number_beams && !found; j++) {
+          for (unsigned int j = ibeamdetectindex; j < RawDetection->number_beams && !found; j++) {
             if ((RawDetection->rawdetectiondata[j].beam_descriptor == snippetbackscatteringstrengthdata->beam_number)
                 && ((RawDetection->rawdetectiondata[j].flags & 0x40) == 0)) {
               ibeamdetectindex = j;
@@ -9273,7 +9273,7 @@ int mbsys_reson7k3_makess_source(
 
           // search SegmentedRawDetection record for the associated sounding
           bool found = false;
-          for (int j = ibeamdetectindex; j < SegmentedRawDetection->n_rx && !found; j++) {
+          for (unsigned int j = ibeamdetectindex; j < SegmentedRawDetection->n_rx && !found; j++) {
             if ((SegmentedRawDetection->segmentedrawdetectionrxdata[j].beam_number == snippetbackscatteringstrengthdata->beam_number)
                 && ((SegmentedRawDetection->segmentedrawdetectionrxdata[j].flags2 & 0x4000) == 0)) {
               ibeamdetectindex = j;
@@ -9347,7 +9347,7 @@ int mbsys_reson7k3_makess_source(
 
           // search RawDetection record for the associated sounding
           bool found = false;
-          for (int j = ibeamdetectindex; j < RawDetection->number_beams && !found; j++) {
+          for (unsigned int j = ibeamdetectindex; j < RawDetection->number_beams && !found; j++) {
             if (RawDetection->rawdetectiondata[j].beam_descriptor == snippetdata->beam_number) {
               ibeamdetectindex = j;
               found = true;
@@ -9372,7 +9372,7 @@ int mbsys_reson7k3_makess_source(
 
           // search SegmentedRawDetection record for the associated sounding
           bool found = false;
-          for (int j = ibeamdetectindex; j < SegmentedRawDetection->n_rx && !found; j++) {
+          for (unsigned int j = ibeamdetectindex; j < SegmentedRawDetection->n_rx && !found; j++) {
             if (SegmentedRawDetection->segmentedrawdetectionrxdata[j].beam_number == snippetdata->beam_number
                 && (SegmentedRawDetection->segmentedrawdetectionrxdata[j].flags2 & 0x4000) == 0) {
               ibeamdetectindex = j;
@@ -9437,7 +9437,7 @@ int mbsys_reson7k3_makess_source(
       nrangetable = 0;
       irangenadir = 0;
       if (store->read_RawDetection) {
-        for (int i = 0; i < RawDetection->number_beams; i++) {
+        for (unsigned int i = 0; i < RawDetection->number_beams; i++) {
           rawdetectiondata = &(RawDetection->rawdetectiondata[i]);
           bathydata = &(RawDetection->bathydata[i]);
           if (mb_beam_ok(beamflag[i])) {
@@ -9453,7 +9453,7 @@ int mbsys_reson7k3_makess_source(
           }
         }
       } else if (store->read_SegmentedRawDetection) {
-        for (int i = 0; i < SegmentedRawDetection->n_rx; i++) {
+        for (unsigned int i = 0; i < SegmentedRawDetection->n_rx; i++) {
           segmentedrawdetectionrxdata = &(SegmentedRawDetection->segmentedrawdetectionrxdata[i]);
           segmentedrawdetectiontxdata = &(SegmentedRawDetection->segmentedrawdetectiontxdata[segmentedrawdetectionrxdata->used_segment-1]);
           bathydata = &(SegmentedRawDetection->bathydata[i]);
@@ -9536,7 +9536,7 @@ int mbsys_reson7k3_makess_source(
       nrangetable = 0;
       irangenadir = 0;
       if (store->read_RawDetection) {
-        for (int i = 0; i < RawDetection->number_beams; i++) {
+        for (unsigned int i = 0; i < RawDetection->number_beams; i++) {
           rawdetectiondata = &(RawDetection->rawdetectiondata[i]);
           bathydata = &(RawDetection->bathydata[i]);
           if (mb_beam_ok(beamflag[i])) {
@@ -9552,7 +9552,7 @@ int mbsys_reson7k3_makess_source(
           }
         }
       } else if (store->read_SegmentedRawDetection) {
-        for (int i = 0; i < SegmentedRawDetection->n_rx; i++) {
+        for (unsigned int i = 0; i < SegmentedRawDetection->n_rx; i++) {
           segmentedrawdetectionrxdata = &(SegmentedRawDetection->segmentedrawdetectionrxdata[i]);
           segmentedrawdetectiontxdata = &(SegmentedRawDetection->segmentedrawdetectiontxdata[segmentedrawdetectionrxdata->used_segment-1]);
           bathydata = &(SegmentedRawDetection->bathydata[i]);
@@ -9732,7 +9732,7 @@ int mbsys_reson7k3_makess_source(
       minxtrack = 0.0;
       iminxtrack = RawDetection->number_beams / 2;
       bool found = false;
-      for (int i = 0; i < RawDetection->number_beams; i++) {
+      for (unsigned int i = 0; i < RawDetection->number_beams; i++) {
         rawdetectiondata = &(RawDetection->rawdetectiondata[i]);
         bathydata = &(RawDetection->bathydata[i]);
         qualitycharptr = (mb_u_char *)&(rawdetectiondata->quality);
@@ -9762,7 +9762,7 @@ int mbsys_reson7k3_makess_source(
       minxtrack = 0.0;
       iminxtrack = SegmentedRawDetection->n_rx / 2;
       bool found = false;
-      for (int i = 0; i < SegmentedRawDetection->n_rx; i++) {
+      for (unsigned int i = 0; i < SegmentedRawDetection->n_rx; i++) {
         segmentedrawdetectionrxdata = &(SegmentedRawDetection->segmentedrawdetectionrxdata[i]);
         bathydata = &(SegmentedRawDetection->bathydata[i]);
         qualitycharptr = (mb_u_char *)&(segmentedrawdetectionrxdata->quality);

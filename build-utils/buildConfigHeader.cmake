@@ -1,9 +1,11 @@
-# Generate src/mbio/mb_config.h 
+ # Generate src/mbio/mb_config.h 
 message("Now in buildConfigHeader")
 
 function(buildConfigHeader buildGSF buildTRN buildMbTNav
-                           buildGUIs buildTest)
+                           buildGUIs buildTest
+                           mbVersion mbVersionDate)
 
+   
    set(outfile ${CMAKE_SOURCE_DIR}/src/mbio/mb_config.h)
    
    file(WRITE ${outfile}
@@ -200,25 +202,14 @@ function(buildConfigHeader buildGSF buildTRN buildMbTNav
    file(APPEND ${outfile} "// Installation prefix\n")
    file(APPEND ${outfile} "#define MBSYSTEM_INSTALL_PREFIX \"${CMAKE_INSTALL_PREFIX}\"\n\n")   
 
-   execute_process(COMMAND git describe --tags --always
-                   OUTPUT_VARIABLE tmp)
-
-   string(STRIP ${tmp} gitVersion)
-
    file(APPEND ${outfile} "// Package version\n")
-   file(APPEND ${outfile} "#define PACKAGE_VERSION \"${gitVersion}\"\n\n")
+   file(APPEND ${outfile} "#define PACKAGE_VERSION \"${mbVersion}\"\n\n")
    file(APPEND ${outfile} "// Redundant to PACKAGE_VERSION?\n")
-   file(APPEND ${outfile} "#define VERSION \"${gitVersion}\"\n\n")
+   file(APPEND ${outfile} "#define VERSION \"${mbVersion}\"\n\n")
 
    # Get date that version was committed
-   execute_process(COMMAND git log -1 --format=%ai ${gitVersion}
-                   COMMAND awk "{print $1};" OUTPUT_VARIABLE tmp2)
-   
-   message("version date: ${tmp2}")
-   string(STRIP ${tmp2} gitVersionDate)   
    file(APPEND ${outfile} "// Package version date\n")
-   file(APPEND ${outfile} "#define VERSION_DATE \"${gitVersionDate}\"\n\n")
-   
+   file(APPEND ${outfile} "#define VERSION_DATE \"${mbVersionDate}\"\n\n")
 
    set(packageName "mbsystem")
    
@@ -316,6 +307,6 @@ function(buildConfigHeader buildGSF buildTRN buildMbTNav
 ]]
 
 # End header guard
-file(APPEND ${outfile} "#endif    // MB_CONFIG_H_\n")
+file(APPEND ${outfile} "#endif    // __MB_CONFIG_H_\n")
 
 endfunction()

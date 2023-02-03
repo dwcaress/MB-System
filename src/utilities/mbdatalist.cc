@@ -290,8 +290,8 @@ int main(int argc, char **argv) {
 		char fileroot[MB_PATH_MAXLINE] = {0};
 		status = mb_get_format(verbose, read_file, fileroot, &format, &error);
     assert(strlen(fileroot) < MB_PATH_MAXLINE - 6);
-    char file[MB_PATH_MAXLINE];
-		sprintf(file, "%sp.mb-1", fileroot);
+    char file[MB_PATH_MAXLINE+10];
+		snprintf(file, sizeof(file), "%sp.mb-1", fileroot);
 
 		FILE *fp = fopen(file, "w");
 		if (fp == nullptr) {
@@ -331,7 +331,7 @@ int main(int argc, char **argv) {
 	mb_path lock_cpu = "";
 	mb_path lock_user = "";
 	char lock_date[25] = "";
-	mb_path lockfile = "";
+	char lockfile[MB_PATH_MAXLINE+10] = "";
 	bool file_in_bounds = false;
 	bool locked = false;
 
@@ -405,7 +405,7 @@ int main(int argc, char **argv) {
 					}
 					if (locked && remove_locks) {
             assert(strlen(read_file) < MB_PATH_MAXLINE - 4);
-						sprintf(lockfile, "%s.lck", read_file);
+						snprintf(lockfile, sizeof(lockfile), "%s.lck", read_file);
             remove(lockfile);
 					}
 				}
@@ -462,7 +462,7 @@ int main(int argc, char **argv) {
 				/* copy file if no bounds checking or in bounds */
 				if (!look_bounds || file_in_bounds) {
 					fprintf(output, "Copying %s %d %f\n", file, format, file_weight);
-					sprintf(command, "cp %s* .", file);
+					snprintf(command, sizeof(command), "cp %s* .", file);
 					/* shellstatus = */ system(command);
 					char *filename = strrchr(file, '/');
 					if (filename != nullptr)
@@ -471,7 +471,7 @@ int main(int argc, char **argv) {
 						filename = file;
 					if (nfile == 1)
 						/* shellstatus = */ remove("datalist.mb-1");
-					sprintf(command, "echo %s %d %f >> datalist.mb-1", filename, format, file_weight);
+					snprintf(command, sizeof(command), "echo %s %d %f >> datalist.mb-1", filename, format, file_weight);
 					/* shellstatus = */ system(command);
 				}
 			}
@@ -541,7 +541,7 @@ int main(int argc, char **argv) {
 						}
 						if (locked && remove_locks) {
               assert(strlen(file) < MB_PATH_MAXLINE - 4);
-							sprintf(lockfile, "%s.lck", file);
+							snprintf(lockfile, sizeof(lockfile), "%s.lck", file);
 							fprintf(output, "\tRemoving lock file %s\n", lockfile);
               /* shellstatus = */ remove(lockfile);
 						}

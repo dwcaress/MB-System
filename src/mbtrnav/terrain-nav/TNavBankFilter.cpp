@@ -1911,7 +1911,7 @@ initParticleDist(const particleT& initialGuess) {
 
             }
         }else{
-            sprintf(temp,
+            snprintf(temp, sizeof(temp), 
                     "TNavBankFilter::initParticleDist() - Error opening file: %s\n",
                     (pfname?pfname:"NULL"));
             if(pfname!=NULL)free(pfname);

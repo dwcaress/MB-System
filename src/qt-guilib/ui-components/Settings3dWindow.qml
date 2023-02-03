@@ -30,7 +30,7 @@ Window {
             id: groupBox
             width: 200
             height: 200
-            title: qsTr("View orientation and zoom:")
+            title: qsTr("Camera:")
 
             Grid {
                 id: grid
@@ -41,7 +41,7 @@ Window {
 
                 Text {
                     id: element1
-                    text: qsTr("View azimuth")
+                    text: qsTr("Azimuth")
                     font.pixelSize: 18
                 }
 
@@ -54,7 +54,7 @@ Window {
 
                 Text {
                     id: element
-                    text: qsTr("View elevation")
+                    text: qsTr("Pitch")
                     font.pixelSize: 18
                 }
 
@@ -67,7 +67,7 @@ Window {
 
                 Text {
                     id: element5
-                    text: qsTr("View zoom")
+                    text: qsTr("Zoom")
                    font.pixelSize: 18
                 }
                 TextField {
@@ -83,7 +83,7 @@ Window {
             id: groupBox1
             width: 200
             height: 200
-            title: qsTr("Model orientation and zoom:")
+            title: qsTr("Model:")
 
             GridLayout {
                 id: gridLayout2
@@ -94,7 +94,7 @@ Window {
 
                 Text {
                     id: element3
-                    text: qsTr("Model azimuth")
+                    text: qsTr("Azimuth")
                     font.pixelSize: 18
                 }
 
@@ -107,7 +107,7 @@ Window {
 
                 Text {
                     id: element2
-                    text: qsTr("Model elevation")
+                    text: qsTr("Pitch")
                     font.pixelSize: 18
 
                 }
@@ -122,7 +122,7 @@ Window {
 
                 Text {
                     id: element6
-                    text: qsTr("Model zoom")
+                    text: qsTr("Zoom")
                     font.pixelSize: 18
                 }
 
@@ -163,12 +163,13 @@ Window {
                     id: zScale
                     Layout.fillWidth: true
                     from: 1
-                    to: 5
+                    to: 10
                     value: 1
-                    onValueChanged: mainWindow.qmlSignal("verticalExagg " + value)
+                    onValueChanged: mainWindow.qmlSignal("verticalExagg " +
+                           value)
                 }
                 // Set displayed decimal places on slider label
-                Label { text: "val: " + zScale.value }                
+                Label { text: "val: " + Math.round(zScale.value *100)/100 }                
             }
         }
 

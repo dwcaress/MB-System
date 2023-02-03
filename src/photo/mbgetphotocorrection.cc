@@ -754,8 +754,8 @@ int main(int argc, char** argv)
         };
 
     /* set default imagelistfile name */
-    sprintf(ImageListFile, "imagelist.mb-1");
-    sprintf(ImageCorrectionFile, "imagelist_cameracorrection.yml");
+    snprintf(ImageListFile, sizeof(ImageListFile), "imagelist.mb-1");
+    snprintf(ImageCorrectionFile, sizeof(ImageListFile), "imagelist_cameracorrection.yml");
 
     /* initialize some other things */
     memset(StereoCameraCalibrationFile, 0, sizeof(mb_path));

@@ -144,7 +144,7 @@ int mbr_alm_l3xseraw(int verbose, void *mbio_ptr, int *error) {
 	int *frame_usec_save = (int *)&mb_io_ptr->save6;
 	int *buffer_size_save = (int *)&mb_io_ptr->save7;
 	int *buffer_size_max = (int *)&mb_io_ptr->save8;
-	char *buffer = mb_io_ptr->hdr_comment;
+	//char *buffer = mb_io_ptr->hdr_comment;
   memset((void *)label, 0, 12);
   *frame_expect = MBSYS_XSE_NONE_FRAME;
   *frame_save = false;
@@ -193,10 +193,10 @@ int mbr_dem_l3xseraw(int verbose, void *mbio_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_l3xseraw_rd_svp(int verbose, int buffer_size, char *buffer, void *store_ptr, int *error) {
-	int byte_count;
-	int group_id;
-	int index;
-	int skip;
+	int byte_count = 0;
+	int group_id = 0;
+	int index = 0;
+	int skip = 0;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -447,11 +447,11 @@ int mbr_l3xseraw_rd_tide(int verbose, int buffer_size, char *buffer, void *store
 }
 /*--------------------------------------------------------------------*/
 int mbr_l3xseraw_rd_ship(int verbose, int buffer_size, char *buffer, void *store_ptr, int *error) {
-	int byte_count;
-	int group_id;
-	int index;
-	int skip;
-	int nchar;
+	int byte_count = 0;
+	int group_id = 0;
+	int index = 0;
+	int skip = 0;
+	int nchar = 0;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -788,12 +788,12 @@ int mbr_l3xseraw_rd_ship(int verbose, int buffer_size, char *buffer, void *store
 }
 /*--------------------------------------------------------------------*/
 int mbr_l3xseraw_rd_sidescan(int verbose, int buffer_size, char *buffer, void *store_ptr, int *error) {
-	int byte_count;
-	int group_id;
-	int index;
+	int byte_count = 0;
+	int group_id = 0;
+	int index = 0;
 	int ngoodss;
 	double xmin, xmax, binsize;
-	int skip;
+	int skip = 0;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -1225,14 +1225,14 @@ int mbr_l3xseraw_rd_sidescan(int verbose, int buffer_size, char *buffer, void *s
 }
 /*--------------------------------------------------------------------*/
 int mbr_l3xseraw_rd_multibeam(int verbose, int buffer_size, char *buffer, void *store_ptr, int *error) {
-	int byte_count;
-	int group_id;
-	int index;
+	int byte_count = 0;
+	int group_id = 0;
+	int index = 0;
 	double alpha, beta, theta, phi;
 	double rr, xx, zz;
 	double xmin, xmax, binsize;
 	int ngoodss;
-	int skip;
+	int skip = 0;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -2016,10 +2016,10 @@ int mbr_l3xseraw_rd_message(int verbose, int buffer_size, char *buffer, void *st
 }
 /*--------------------------------------------------------------------*/
 int mbr_l3xseraw_rd_seabeam(int verbose, int buffer_size, char *buffer, void *store_ptr, int *error) {
-int byte_count;
-	int group_id;
-	int index;
-	int skip;
+  int byte_count = 0;
+	int group_id = 0;
+	int index = 0;
+	int skip = 0;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -2417,10 +2417,10 @@ int mbr_l3xseraw_rd_control(int verbose, int buffer_size, char *buffer, void *st
 }
 /*--------------------------------------------------------------------*/
 int mbr_l3xseraw_rd_comment(int verbose, int buffer_size, char *buffer, void *store_ptr, int *error) {
-	int byte_count;
-	int group_id;
-	int index;
-	int skip;
+	int byte_count = 0;
+	int group_id = 0;
+	int index = 0;
+	int skip = 0;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -2520,10 +2520,10 @@ int mbr_l3xseraw_rd_comment(int verbose, int buffer_size, char *buffer, void *st
 }
 /*--------------------------------------------------------------------*/
 int mbr_l3xseraw_rd_nav(int verbose, int buffer_size, char *buffer, void *store_ptr, int *error) {
-	int byte_count;
-	int group_id;
-	int index;
-	int skip;
+	int byte_count = 0;
+	int group_id = 0;
+	int index = 0;
+	int skip = 0;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -2876,7 +2876,7 @@ int mbr_l3xseraw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	int frame_address;
 	int buffer_size;
 	int frame_size;
-	int index;
+	int index = 0;
 	int read_len;
 	int skip = 0;
 	int status = MB_SUCCESS;
@@ -3338,13 +3338,13 @@ int mbr_rt_l3xseraw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 
 /*--------------------------------------------------------------------*/
 int mbr_l3xseraw_wr_nav(int verbose, int *buffer_size, char *buffer, void *store_ptr, int *error) {
-	int index;
+	int index = 0;
 	int frame_count;
 	int group_count;
 	int frame_cnt_index;
 	int group_cnt_index;
 	int frame_id;
-	int group_id;
+	int group_id = 0;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -4008,13 +4008,13 @@ int mbr_l3xseraw_wr_nav(int verbose, int *buffer_size, char *buffer, void *store
 }
 /*--------------------------------------------------------------------*/
 int mbr_l3xseraw_wr_svp(int verbose, int *buffer_size, char *buffer, void *store_ptr, int *error) {
-	int index;
+	int index = 0;
 	int frame_count;
 	int group_count;
 	int frame_cnt_index;
 	int group_cnt_index;
 	int frame_id;
-	int group_id;
+	int group_id = 0;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -4419,13 +4419,13 @@ int mbr_l3xseraw_wr_svp(int verbose, int *buffer_size, char *buffer, void *store
 }
 /*--------------------------------------------------------------------*/
 int mbr_l3xseraw_wr_ship(int verbose, int *buffer_size, char *buffer, void *store_ptr, int *error) {
-	int index;
+	int index = 0;
 	int frame_count;
 	int group_count;
 	int frame_cnt_index;
 	int group_cnt_index;
 	int frame_id;
-	int group_id;
+	int group_id = 0;
 	int nchar;
 
 	if (verbose >= 2) {
@@ -4926,13 +4926,13 @@ int mbr_l3xseraw_wr_ship(int verbose, int *buffer_size, char *buffer, void *stor
 }
 /*--------------------------------------------------------------------*/
 int mbr_l3xseraw_wr_multibeam(int verbose, int *buffer_size, char *buffer, void *store_ptr, int *error) {
-	int index;
+	int index = 0;
 	int frame_count;
 	int group_count;
 	int frame_cnt_index;
 	int group_cnt_index;
 	int frame_id;
-	int group_id;
+	int group_id = 0;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -6042,13 +6042,13 @@ int mbr_l3xseraw_wr_multibeam(int verbose, int *buffer_size, char *buffer, void 
 }
 /*--------------------------------------------------------------------*/
 int mbr_l3xseraw_wr_sidescan(int verbose, int *buffer_size, char *buffer, void *store_ptr, int *error) {
-	int index;
+	int index = 0;
 	int frame_count;
 	int group_count;
 	int frame_cnt_index;
 	int group_cnt_index;
 	int frame_id;
-	int group_id;
+	int group_id = 0;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -6644,13 +6644,13 @@ int mbr_l3xseraw_wr_sidescan(int verbose, int *buffer_size, char *buffer, void *
 }
 /*--------------------------------------------------------------------*/
 int mbr_l3xseraw_wr_seabeam(int verbose, int *buffer_size, char *buffer, void *store_ptr, int *error) {
-	int index;
+	int index = 0;
 	int frame_count;
 	int group_count;
 	int frame_cnt_index;
 	int group_cnt_index;
 	int frame_id;
-	int group_id;
+	int group_id = 0;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -7076,11 +7076,11 @@ int mbr_l3xseraw_wr_seabeam(int verbose, int *buffer_size, char *buffer, void *s
 }
 /*--------------------------------------------------------------------*/
 int mbr_l3xseraw_wr_comment(int verbose, int *buffer_size, char *buffer, void *store_ptr, int *error) {
-	int index;
+	int index = 0;
 	int size;
 	int len;
 	int frame_id;
-	int group_id;
+	int group_id = 0;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);

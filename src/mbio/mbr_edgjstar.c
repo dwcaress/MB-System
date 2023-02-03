@@ -260,9 +260,12 @@ int mbr_rt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	int index;
 	int read_status;
 	int shortspersample;
-	int trace_size;
-	int testx1, testx2, testy1, testy2;
-        bool obsolete_header;
+	unsigned int trace_size;
+	int testx1 = 0;
+  int testx2 = 0;
+  int testy1 = 0;
+  int testy2 = 0;
+  bool obsolete_header = false;
 	double time_d;
 	double navlon, navlat, heading;
 	double speed, sonardepth, altitude;
@@ -1511,7 +1514,7 @@ __FILE__, __LINE__, __FUNCTION__, ftell(mb_io_ptr->mbfp));
 				index++;
 				nmea->reserve[2] = buffer[index];
 				index++;
-				for (int i = 0; i < message.size - 12; i++) {
+				for (unsigned int i = 0; i < message.size - 12; i++) {
 					nmea->nmea[i] = buffer[index];
 					index++;
 				}
@@ -1782,7 +1785,7 @@ __FILE__, __LINE__, __FUNCTION__, ftell(mb_io_ptr->mbfp));
 #ifdef MBF_EDGJSTAR_DEBUG
 			fprintf(stderr, "UNKNOWN: throwing away %d bytes\n", message.size);
 #endif
-			for (int i = 0; i < message.size; i++) {
+			for (unsigned int i = 0; i < message.size; i++) {
 				read_status = fread(buffer, 1, 1, mb_io_ptr->mbfp);
 			}
 			done = true;
@@ -2323,10 +2326,10 @@ int mbr_wt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	struct mbsys_jstar_sysinfo_struct *sysinfo;
 	struct mbsys_jstar_comment_struct *comment;
 	char buffer[MBSYS_JSTAR_SBPHEADER_SIZE];
-	int index;
-	int write_len;
-	int shortspersample;
-	int trace_size;
+	unsigned int index;
+	unsigned int write_len;
+	unsigned int shortspersample;
+	unsigned int trace_size;
 
 	if (verbose >= 3) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -3776,7 +3779,7 @@ int mbr_wt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		index++;
 		buffer[index] = nmea->reserve[2];
 		index++;
-		for (int i = 0; i < (nmea->message.size - 12); i++) {
+		for (unsigned int i = 0; i < (nmea->message.size - 12); i++) {
 			buffer[index] = nmea->nmea[i];
 			index++;
 		}

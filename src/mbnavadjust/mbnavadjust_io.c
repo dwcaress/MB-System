@@ -301,7 +301,7 @@ int mbnavadjust_read_project(int verbose, char *projectpath, struct mbna_project
     /* read the project */
     if (status == MB_SUCCESS) {
       /* first save copy of the project file */
-      char command[MB_PATH_MAXLINE];
+      char command[2*STRING_MAX+10];
       sprintf(command, "cp %s %s.save", project->home, project->home);
       /* const int shellstatus = */ system(command);
 
@@ -1678,10 +1678,10 @@ int mbnavadjust_write_project(int verbose, struct mbna_project *project,
   struct mbna_section *section, *section_1, *section_2;
   struct mbna_crossing *crossing;
   struct mbna_tie *tie;
-  char datalist[STRING_MAX];
-  char routefile[STRING_MAX];
+  char datalist[2*STRING_MAX+100];
+  char routefile[2*STRING_MAX+100];
   char routename[STRING_MAX];
-  char offsetfile[STRING_MAX];
+  char offsetfile[2*STRING_MAX+100];
   double navlon1, navlon2, navlat1, navlat2;
   int time_i[7];
   int nroute;
@@ -2822,7 +2822,7 @@ int mbnavadjust_read_triangles(int verbose, struct mbna_project *project,
   }
 
   // if all good then try to read existing triangularization
-  mb_path tpath;
+  char tpath[2*STRING_MAX];
   sprintf(tpath, "%s/nvs_%4.4d_%4.4d.mb71.tri", project->datadir, file_id, section_id);
 
   int status = MB_SUCCESS;
@@ -3003,7 +3003,7 @@ int mbnavadjust_write_triangles(int verbose, struct mbna_project *project,
   *error = MB_ERROR_NO_ERROR;
   // TODO(schwehr): Remove this redundant status chech
   if (status == MB_SUCCESS && swath->ntri > 0) {
-    mb_path tpath;
+    char tpath[2*STRING_MAX];
     sprintf(tpath, "%s/nvs_%4.4d_%4.4d.mb71.tri", project->datadir, file_id, section_id);
     FILE *tfp = fopen(tpath, "w");
     if (tfp != NULL) {
@@ -3103,9 +3103,9 @@ int mbnavadjust_section_load(int verbose, struct mbna_project *project,
   /* load specified section */
   if (project->open && project->num_crossings > 0) {
     /* set section format and path */
-    char path[STRING_MAX];
+    char path[2*STRING_MAX];
     sprintf(path, "%s/nvs_%4.4d_%4.4d.mb71", project->datadir, file_id, section_id);
-    char tpath[STRING_MAX];
+    char tpath[2*STRING_MAX];
     sprintf(tpath, "%s/nvs_%4.4d_%4.4d.mb71.tri", project->datadir, file_id, section_id);
     const int iformat = 71;
     struct mbna_file *file = &(project->files[file_id]);
@@ -3481,7 +3481,7 @@ int mbnavadjust_fix_section_sensordepth(int verbose, struct mbna_project *projec
       for (int isection = 0; isection<file->num_sections; isection++) {
 
         /* set section format and path */
-        char path[STRING_MAX];
+        char path[STRING_MAX+500];
         sprintf(path, "%s/nvs_%4.4d_%4.4d.mb71", project->datadir, ifile, isection);
         const int iformat = 71;
         file = &(project->files[ifile]);
@@ -3889,8 +3889,8 @@ int mbnavadjust_import_file(int verbose, struct mbna_project *project,
   strcat(ipath, mb_suffix);
 
   struct stat file_status;
-  char npath[STRING_MAX];
-  char opath[STRING_MAX];
+  char npath[STRING_MAX+100];
+  char opath[STRING_MAX+100];
 
   /* MBIO control parameters */
   const int pings = 1;
@@ -4765,8 +4765,8 @@ int mbnavadjust_reimport_file(int verbose, struct mbna_project *project,
     }
   }
 
-  char npath[STRING_MAX];
-  char opath[STRING_MAX];
+  char npath[STRING_MAX+100];
+  char opath[STRING_MAX+100];
 
   /* MBIO control parameters */
   int pings;
@@ -5468,7 +5468,7 @@ int mbnavadjust_import_reference(int verbose, struct mbna_project *project, char
              &refgrid.dx, &refgrid.dy, error);
   if (status == MB_SUCCESS) {
     if (project->num_refgrids < MBNA_REFGRID_NUM_MAX) {
-      char command[STRING_MAX], name[STRING_MAX];
+      char command[2*STRING_MAX+100], name[STRING_MAX];
       if (strrchr(path, '/') != NULL) {
         strncpy(name, strrchr(path, '/')+1, STRING_MAX);
       } else {
@@ -5531,7 +5531,7 @@ int mbnavadjust_reference_load(int verbose, struct mbna_project *project, int re
 
   /* load reference grid if needed */
   if (project->num_refgrids > 0 && refgrid_select < project->num_refgrids) {
-    mb_path path;
+    char path[2*STRING_MAX];
     int grid_projection_mode;
     int nxy;
     project->refgrid_select = refgrid_select;

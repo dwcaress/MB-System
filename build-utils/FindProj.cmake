@@ -20,10 +20,14 @@
 
 # try to use framework on mac
 # want clean framework path, not unix compatibility path
+message("In FindProj() module!")
 IF (APPLE)
   IF (CMAKE_FIND_FRAMEWORK MATCHES "FIRST"
       OR CMAKE_FRAMEWORK_PATH MATCHES "ONLY"
       OR NOT CMAKE_FIND_FRAMEWORK)
+      message("FindProj(): CMAKE_FIND_FRAMEWORK=${CMAKE_FIND_FRAMEWORK}")
+      message("FindProj(): CMAKE_FRAMEWORK_PATH=${CMAKE_RAMEWORK_PATH}")
+      
     SET (CMAKE_FIND_FRAMEWORK_save ${CMAKE_FIND_FRAMEWORK} CACHE STRING "" FORCE)
     SET (CMAKE_FIND_FRAMEWORK "ONLY" CACHE STRING "" FORCE)
     #FIND_PATH(PROJ_INCLUDE_DIR PROJ/proj.h)
@@ -34,18 +38,30 @@ IF (APPLE)
     ENDIF (PROJ_LIBRARY)
     SET (CMAKE_FIND_FRAMEWORK ${CMAKE_FIND_FRAMEWORK_save} CACHE STRING "" FORCE)
   ENDIF ()
+  
+  # Possible installed with MacPorts into /opt/local/lib
+  set(HINTS /opt/local/lib)
+  message("FindProj(): PATH_SUFFIXES=${PATH_SUFFIXES}")
 ENDIF (APPLE)
 
-FIND_PATH(PROJ_INCLUDE_DIR proj.h
-  "$ENV{INCLUDE}"
-  "$ENV{LIB_DIR}/include"
-  )
+message("FindProj(): starting PROJ_INCLUDE_DIR= ${PROJ_INCLUDE_DIR}")
 
+FIND_PATH(PROJ_INCLUDE_DIR proj.h
+  HINTS ${HINTS}
+  PATH_SUFFIXES proj8/include proj7/include proj6/include proj5/include proj4/include
+  )
+  message("FindProj(): PROJ_INCLUDE_DIR= ${PROJ_INCLUDE_DIR}")
+
+message("FindProj(): HINTS=${HINTS}")
 FIND_LIBRARY(PROJ_LIBRARY NAMES proj_i proj PATHS
   "$ENV{LIB}"
   "$ENV{LIB_DIR}/lib"
+  PATH_SUFFIXES proj8/lib proj7/lib proj6/lib proj5/lib proj4/lib
+  HINTS ${HINTS}
+  PATH_SUFFIXES ${PATH_SUFFIXES}
   )
 
+message("FindProj(): PROJ_LIBRARY=${PROJ_LIBRARY}")
 IF (PROJ_INCLUDE_DIR AND PROJ_LIBRARY)
    SET(PROJ_FOUND TRUE)
 ENDIF (PROJ_INCLUDE_DIR AND PROJ_LIBRARY)
@@ -61,6 +77,7 @@ IF (PROJ_FOUND)
        MESSAGE (FATAL_ERROR "Cannot build QGIS using Proj ${PROJ_VERSION_MAJOR}.${PROJ_VERSION_MINOR}.${PROJ_VERSION_PATCH} Use 6.3.1 or higher.")
      ENDIF ((PROJ_VERSION_MAJOR EQUAL 6) AND ((PROJ_VERSION_MINOR LESS 3) OR (PROJ_VERSION_MINOR EQUAL 3 AND PROJ_VERSION_PATCH LESS 1)))
    ELSE(EXISTS ${PROJ_INCLUDE_DIR}/proj.h AND EXISTS ${PROJ_INCLUDE_DIR}/proj_experimental.h)
+     message("FindProj(): PROJ_INCLUDE_DIR=${PROJ_INCLUDE_DIR}")
      FILE(READ ${PROJ_INCLUDE_DIR}/proj.h proj_version)
      STRING(REGEX REPLACE "^.*PJ_VERSION ([0-9]+).*$" "\\1" PJ_VERSION "${proj_version}")
 
@@ -89,3 +106,4 @@ ELSE (PROJ_FOUND)
    ENDIF (PROJ_FIND_REQUIRED)
 
 ENDIF (PROJ_FOUND)
+

@@ -405,7 +405,7 @@ int main(int argc, char** argv)
     int    istart, iend, jstart, jend;
 
     /* set default imagelistfile name */
-    sprintf(ImageListFile, "imagelist.txt");
+    snprintf(ImageListFile, sizeof(ImageListFile), "imagelist.txt");
 
     /* process argument list */
     while ((c = getopt_long(argc, argv, "", options, &option_index)) != -1)
@@ -1393,7 +1393,7 @@ int main(int argc, char** argv)
     /* Open output good imagelist including good disparity fraction values */
     mb_path OutputImagelist;
     FILE *oilfp = NULL;
-    sprintf(OutputImagelist, "%s_ImagePairs.mb-2", OutputFileRoot);
+    snprintf(OutputImagelist, sizeof(OutputImagelist), "%s_ImagePairs.mb-2", OutputFileRoot);
     if ((oilfp = fopen(OutputImagelist, "w")) == NULL)
             {
             error = MB_ERROR_OPEN_FAIL;
@@ -1783,20 +1783,20 @@ fprintf(stderr, "%s:%d:%s: no algorithm\n", __FILE__, __LINE__, __func__);
                 if ((time_d > routetime_d[waypoint] || waypoint == 0)
                     && waypoint < ntimepoint - 1) {
                     new_output_file = MB_YES;
-                    sprintf(OutputFile, "%s_%3.3d.mb251", OutputFileRoot, waypoint);
+                    snprintf(OutputFile, sizeof(OutputFile), "%s_%3.3d.mb251", OutputFileRoot, waypoint);
                     waypoint++;
                 }
             }
             else if (output_number_pairs > 0) {
                 if (mbio_ptr == NULL || output_count >= output_number_pairs) {
                     new_output_file = MB_YES;
-                    sprintf(OutputFile, "%s_%3.3d.mb251", OutputFileRoot, waypoint);
+                    snprintf(OutputFile, sizeof(OutputFile), "%s_%3.3d.mb251", OutputFileRoot, waypoint);
                     waypoint++;
                 }
             }
             else if (mbio_ptr == NULL) {
                 new_output_file = MB_YES;
-                sprintf(OutputFile, "%s.mb251", OutputFileRoot);
+                snprintf(OutputFile, sizeof(OutputFile), "%s.mb251", OutputFileRoot);
             }
 
             /* open output format *.mb251 file */

@@ -222,7 +222,7 @@ int mbsys_image83p_preprocess(int verbose,     /* in: verbosity level set on com
   assert(preprocess_pars_ptr != NULL);
 
   /* get mbio descriptor */
-  struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+  // struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
   /* get preprocessing parameters */
   struct mb_preprocess_struct *pars = (struct mb_preprocess_struct *)preprocess_pars_ptr;
@@ -230,10 +230,6 @@ int mbsys_image83p_preprocess(int verbose,     /* in: verbosity level set on com
   /* get data structure pointers */
   struct mbsys_image83p_struct *store = (struct mbsys_image83p_struct *)store_ptr;
   struct mb_platform_struct *platform = (struct mb_platform_struct *)platform_ptr;
-
-  /* get saved values */
-  double *pixel_size = (double *)&mb_io_ptr->saved1;
-  double *swath_width = (double *)&mb_io_ptr->saved2;
 
   /* kluge parameters */
   double kluge_beampatternsnellfactor = 1.0;
@@ -365,7 +361,6 @@ int mbsys_image83p_preprocess(int verbose,     /* in: verbosity level set on com
     double heave_org = heave;
     bool heave_change = false;
     double mtodeglon, mtodeglat;
-    int interp_status = MB_SUCCESS;
     int jnav = 0;
     int jsensordepth = 0;
     int jheading = 0;
@@ -392,12 +387,12 @@ int mbsys_image83p_preprocess(int verbose,     /* in: verbosity level set on com
 
     if (pars->n_nav > 0) {
 
-      interp_status = mb_linear_interp_longitude(verbose, pars->nav_time_d - 1, pars->nav_lon - 1, pars->n_nav, time_d,
+      mb_linear_interp_longitude(verbose, pars->nav_time_d - 1, pars->nav_lon - 1, pars->n_nav, time_d,
                                                &navlon, &jnav, &interp_error);
-      interp_status &= mb_linear_interp_latitude(verbose, pars->nav_time_d - 1, pars->nav_lat - 1, pars->n_nav, time_d,
+      mb_linear_interp_latitude(verbose, pars->nav_time_d - 1, pars->nav_lat - 1, pars->n_nav, time_d,
                                               &navlat, &jnav, &interp_error);
       if (pars->nav_speed != NULL) {
-        interp_status &= mb_linear_interp(verbose, pars->nav_time_d - 1, pars->nav_speed - 1, pars->n_nav, time_d, &speed,
+        mb_linear_interp(verbose, pars->nav_time_d - 1, pars->nav_speed - 1, pars->n_nav, time_d, &speed,
                                        &jnav, &interp_error);
       }
 
@@ -424,29 +419,29 @@ int mbsys_image83p_preprocess(int verbose,     /* in: verbosity level set on com
 
     /* interpolate sensordepth */
     if (pars->n_sensordepth > 0) {
-      interp_status &= mb_linear_interp(verbose, pars->sensordepth_time_d - 1, pars->sensordepth_sensordepth - 1,
+      mb_linear_interp(verbose, pars->sensordepth_time_d - 1, pars->sensordepth_sensordepth - 1,
                                      pars->n_sensordepth, time_d, &sensordepth, &jsensordepth, &interp_error);
     }
 
     /* interpolate heading */
     if (pars->n_heading > 0) {
-      interp_status &= mb_linear_interp_heading(verbose, pars->heading_time_d - 1, pars->heading_heading - 1,
+      mb_linear_interp_heading(verbose, pars->heading_time_d - 1, pars->heading_heading - 1,
                                              pars->n_heading, time_d, &heading, &jheading, &interp_error);
     }
 
     /* interpolate altitude */
     if (pars->n_altitude > 0) {
-      interp_status &= mb_linear_interp(verbose, pars->altitude_time_d - 1, pars->altitude_altitude - 1, pars->n_altitude,
+      mb_linear_interp(verbose, pars->altitude_time_d - 1, pars->altitude_altitude - 1, pars->n_altitude,
                                         time_d, &altitude, &jaltitude, &interp_error);
     }
 
     /* interpolate Attitude */
     if (pars->n_attitude > 0) {
-      interp_status &= mb_linear_interp(verbose, pars->attitude_time_d - 1, pars->attitude_roll - 1, pars->n_attitude,
+      mb_linear_interp(verbose, pars->attitude_time_d - 1, pars->attitude_roll - 1, pars->n_attitude,
                                        time_d, &roll, &jattitude, &interp_error);
-      interp_status &= mb_linear_interp(verbose, pars->attitude_time_d - 1, pars->attitude_pitch - 1, pars->n_attitude,
+      mb_linear_interp(verbose, pars->attitude_time_d - 1, pars->attitude_pitch - 1, pars->n_attitude,
                                        time_d, &pitch, &jattitude, &interp_error);
-      interp_status &= mb_linear_interp(verbose, pars->attitude_time_d - 1, pars->attitude_heave - 1, pars->n_attitude,
+      mb_linear_interp(verbose, pars->attitude_time_d - 1, pars->attitude_heave - 1, pars->n_attitude,
                                        time_d, &heave, &jattitude, &interp_error);
     }
 
@@ -485,14 +480,13 @@ int mbsys_image83p_preprocess(int verbose,     /* in: verbosity level set on com
 
     /* interpolate soundspeed */
     if (pars->n_soundspeed > 0 && (pars->modify_soundspeed || kluge_soundspeedsnell)) {
-      interp_status &= mb_linear_interp(verbose, pars->soundspeed_time_d - 1, pars->soundspeed_soundspeed - 1, pars->n_soundspeed,
+      mb_linear_interp(verbose, pars->soundspeed_time_d - 1, pars->soundspeed_soundspeed - 1, pars->n_soundspeed,
                                      time_d, &soundspeednew, &jsoundspeed, &interp_error);
     }
 
     /* Change the sound speed used to calculate Bathymetry */
     if (pars->modify_soundspeed) {
       soundspeedsnellfactor = soundspeednew / soundspeed;
-      soundspeed = soundspeednew;
     }
 
     /* if requested apply kluge scaling of sound speed - which means
@@ -500,16 +494,15 @@ int mbsys_image83p_preprocess(int verbose,     /* in: verbosity level set on com
         speed used to calculate Bathymetry */
     if (kluge_beampatternsnell) {
       soundspeedsnellfactor *= kluge_beampatternsnellfactor;
-      soundspeed *= kluge_beampatternsnellfactor;
     }
     if (kluge_soundspeedsnell) {
       soundspeedsnellfactor *= kluge_soundspeedsnellfactor;
-      soundspeed *= kluge_soundspeedsnellfactor;
     }
 
     /* change the sound speed recorded for the current ping and
        then use it to alter the beam angles and recalculated the Bathymetry */
-    if (pars->modify_soundspeed || kluge_soundspeedsnell) {
+    if (pars->modify_soundspeed || kluge_beampatternsnell || kluge_soundspeedsnell) {
+      soundspeed *= soundspeedsnellfactor;
       store->sound_velocity = (int)(10.0 * soundspeed);
     }
 
@@ -531,12 +524,12 @@ int mbsys_image83p_preprocess(int verbose,     /* in: verbosity level set on com
       }
 
       /* variables for beam angle calculation */
-      mb_3D_orientation tx_align;
-      mb_3D_orientation tx_orientation;
-      double tx_steer;
-      mb_3D_orientation rx_align;
-      mb_3D_orientation rx_orientation;
-      double rx_steer;
+      mb_3D_orientation tx_align = {0.0, 0.0, 0.0};
+      mb_3D_orientation tx_orientation = {0.0, 0.0, 0.0};
+      double tx_steer = 0.0;
+      mb_3D_orientation rx_align = {0.0, 0.0, 0.0};
+      mb_3D_orientation rx_orientation = {0.0, 0.0, 0.0};
+      double rx_steer = 0.0;
 
       /* get transducer angular offsets */
       int tx_sign = 1;
@@ -573,15 +566,15 @@ int mbsys_image83p_preprocess(int verbose,     /* in: verbosity level set on com
           double beampitch = pitch;
           double ttime = 0.001 * store->range_resolution * store->range[i] / 1500.0;
           if (pars->n_attitude > 0) {
-            interp_status &= mb_linear_interp(verbose, pars->attitude_time_d - 1, pars->attitude_roll - 1, pars->n_attitude,
+            mb_linear_interp(verbose, pars->attitude_time_d - 1, pars->attitude_roll - 1, pars->n_attitude,
                                              time_d + ttime, &beamroll, &jattitude, &interp_error);
-            interp_status &= mb_linear_interp(verbose, pars->attitude_time_d - 1, pars->attitude_pitch - 1, pars->n_attitude,
+            mb_linear_interp(verbose, pars->attitude_time_d - 1, pars->attitude_pitch - 1, pars->n_attitude,
                                              time_d + ttime, &beampitch, &jattitude, &interp_error);
-            interp_status &= mb_linear_interp(verbose, pars->attitude_time_d - 1, pars->attitude_roll - 1, pars->n_attitude,
+            mb_linear_interp(verbose, pars->attitude_time_d - 1, pars->attitude_roll - 1, pars->n_attitude,
                                time_d + ttime, &beamroll, &jattitude, error);
           }
           if (pars->n_heading > 0) {
-            interp_status &= mb_linear_interp_heading(verbose, pars->heading_time_d - 1, pars->heading_heading - 1,
+            mb_linear_interp_heading(verbose, pars->heading_time_d - 1, pars->heading_heading - 1,
                                                    pars->n_heading, time_d + ttime, &beamheading, &jheading, &interp_error);
           }
 
@@ -599,7 +592,7 @@ int mbsys_image83p_preprocess(int verbose,     /* in: verbosity level set on com
               3) flip the sign of the beam steering angle from that array
                   (reverse TX means flip sign of TX steer, reverse RX
                   means flip sign of RX steer) */
-          tx_steer = 0.0;
+          tx_steer = tx_sign * 0.0;
           tx_orientation.roll = roll;
           tx_orientation.pitch = pitch + ((double)store->profile_tilt_angle - 180.0);
           tx_orientation.heading = heading;

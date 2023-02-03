@@ -841,19 +841,19 @@ void commst_initialize(wtnav_t *self, wcommst_t *msg)
             }
 
             if(ct->mapname[0]=='/'){
-                sprintf(mapname, "%s", ct->mapname);
+                snprintf(mapname, sizeof(mapname), "%s", ct->mapname);
             }else{
-                sprintf(mapname, "%s/%s", mapPath, ct->mapname);
+                snprintf(mapname, sizeof(mapname), "%s/%s", mapPath, ct->mapname);
             }
             if(ct->cfgname[0]=='/'){
-                sprintf(cfgname, "%s", ct->cfgname);
+                snprintf(cfgname, sizeof(cfgname), "%s", ct->cfgname);
             }else{
-                sprintf(cfgname, "%s/%s", cfgPath, ct->mapname);
+                snprintf(cfgname, sizeof(cfgname), "%s/%s", cfgPath, ct->mapname);
             }
             if(ct->particlename[0]=='/'){
-                sprintf(particlename, "%s", ct->cfgname);
+                snprintf(particlename, sizeof(particlename), "%s", ct->cfgname);
             }else{
-                sprintf(particlename, "%s/%s", cfgPath, ct->particlename);
+                snprintf(particlename, sizeof(particlename), "%s/%s", cfgPath, ct->particlename);
             }
 
             // Let's see if these files exist right now as

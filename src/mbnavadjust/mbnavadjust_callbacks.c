@@ -128,7 +128,7 @@ static int loc_x;
 static int loc_y;
 
 int status;
-char string[STRING_MAX];
+char string[2*STRING_MAX];
 
 Cardinal ac = 0;
 Arg args[256];
@@ -4828,7 +4828,7 @@ void do_fileselection_ok(Widget w, XtPointer client_data, XtPointer call_data) {
 
   /* desl with selection */
   int error = MB_ERROR_NO_ERROR;
-  char message[STRING_MAX];
+  char message[STRING_MAX+100];
   if (file_mode == FILE_MODE_NEW) {
     sprintf(message, "Creating new MBnavadjust project %s", ifile);
     do_message_on(message);

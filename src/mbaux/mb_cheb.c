@@ -114,15 +114,6 @@ void lsqup(const double *a, const int *ia, const int *nia, int nnz, int nc, int 
            double *x, double *dx, const double *d, int nfix, const int *ifix,
            const double *fix, int ncycle, const double *sigma)
 {
-	// TODO(schwehr): Is this dead code?  s is not used outside of for.
-	for (int i = 0; i < nr; i++) {
-		double s = 0.0;
-		for (int j = 0; j < nia[i]; j++) {
-			const int k = nnz * i + j;
-			s += x[ia[k]] * a[k];
-		}
-	}
-
 	/* loop over all cycles */
 	for (int icyc = 0; icyc < ncycle; icyc++) {
 		/* initialize dx */

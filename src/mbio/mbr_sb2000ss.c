@@ -195,7 +195,8 @@ int mbr_rt_sb2000ss(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	int read_status;
 	char buffer[2 * MBSYS_SB2000_PIXELS + 4];
 	unsigned short *short_ptr;
-	short test_sensor_size, test_data_size;
+	short test_sensor_size = 0;
+  short test_data_size = 0;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);

@@ -2966,7 +2966,7 @@ void do_mbview_set_projection_label(size_t instance) {
 	else if (data->primary_grid_projection_mode == MBV_PROJECTION_PROJECTED ||
 	         data->primary_grid_projection_mode == MBV_PROJECTION_ALREADYPROJECTED) {
 		int projectionid;
-		mb_path tmptext;
+		char tmptext[MB_PATH_MAXLINE*2];
 		if (sscanf(data->primary_grid_projection_id, "epsg%d", &projectionid) == 1 && projectionid == 32661) {
 			sprintf(tmptext, ":t\"  Projected: %s\":t\"    North Polar Steographic\"", data->secondary_grid_projection_id);
 			strcat(value_text, tmptext);
@@ -3024,7 +3024,7 @@ void do_mbview_set_projection_label(size_t instance) {
 		else if (data->secondary_grid_projection_mode == MBV_PROJECTION_PROJECTED ||
 		         data->secondary_grid_projection_mode == MBV_PROJECTION_ALREADYPROJECTED) {
 			int projectionid;
-			mb_path tmptext;
+			char tmptext[MB_PATH_MAXLINE*2];
 			if (sscanf(data->secondary_grid_projection_id, "epsg%d", &projectionid) == 1 && projectionid == 32661) {
 				sprintf(tmptext, ":t\"  Projected: %s\":t\"    North Polar Steographic\"", data->secondary_grid_projection_id);
 				strcat(value_text, tmptext);
@@ -3082,7 +3082,7 @@ void do_mbview_set_projection_label(size_t instance) {
 	else if (data->display_projection_mode == MBV_PROJECTION_PROJECTED ||
 	         data->display_projection_mode == MBV_PROJECTION_ALREADYPROJECTED) {
 		int projectionid;
-		mb_path tmptext;
+		char tmptext[MB_PATH_MAXLINE*2];
 		if (sscanf(data->display_projection_id, "epsg%d", &projectionid) == 1 && projectionid == 32661) {
 			sprintf(tmptext, ":t\"  Projected: %s\":t\"    North Polar Steographic\"", data->secondary_grid_projection_id);
 			strcat(value_text, tmptext);
@@ -3901,7 +3901,7 @@ void do_mbview_glwda_input(Widget w, XtPointer client_data, XtPointer call_data)
 				/* handle shading */
 				else if (data->mouse_mode == MBV_MOUSE_SHADE) {
 					/* get shade mode */
-					int shade_mode;
+					int shade_mode = data->primary_shade_mode;
 					if (data->grid_mode == MBV_GRID_VIEW_PRIMARY)
 						shade_mode = data->primary_shade_mode;
 					else if (data->grid_mode == MBV_GRID_VIEW_PRIMARYSLOPE)
@@ -4101,7 +4101,7 @@ void do_mbview_glwda_input(Widget w, XtPointer client_data, XtPointer call_data)
 				/* handle shading */
 				else if (data->mouse_mode == MBV_MOUSE_SHADE) {
 					/* get shade mode */
-					int shade_mode;
+					int shade_mode = data->primary_shade_mode;
 					if (data->grid_mode == MBV_GRID_VIEW_PRIMARY)
 						shade_mode = data->primary_shade_mode;
 					else if (data->grid_mode == MBV_GRID_VIEW_PRIMARYSLOPE)

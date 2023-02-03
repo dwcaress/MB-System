@@ -515,10 +515,10 @@ struct mb_io_struct {
   void *xdrs3;                 /* XDR stream handle #2 */
 
 
-    /* file indexing (used by some formats) */
-    int num_indextable;
-    int num_indextable_alloc;
-    struct mb_io_indextable_struct *indextable;
+  /* file indexing (used by some formats) */
+  unsigned int num_indextable;
+  unsigned int num_indextable_alloc;
+  struct mb_io_indextable_struct *indextable;
 
   /* read or write history */
   bool fileheader;       /* indicates whether file header has
@@ -538,9 +538,9 @@ struct mb_io_struct {
                  bytes (e.g. sburivax format) */
 
   /* pointer to structure containing raw data (could be any format) */
-  int structure_size;
-  int data_structure_size;
-  int header_structure_size;
+  size_t structure_size;
+  size_t data_structure_size;
+  size_t header_structure_size;
   void *raw_data;
   void *store_data;
 

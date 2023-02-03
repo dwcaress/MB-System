@@ -557,7 +557,7 @@ int mbview_plotlowall(size_t instance) {
 
 	/* replot all active instances except for instance
 	    which should already be replotted */
-	for (int i = 0; i < MBV_MAX_WINDOWS; i++) {
+	for (unsigned int i = 0; i < MBV_MAX_WINDOWS; i++) {
 		if (i != instance && mbviews[i].data.active)
 			mbview_plotlow(i);
 	}
@@ -608,7 +608,7 @@ int mbview_plothighall(size_t instance) {
 
 	/* replot all active instances except for instance
 	    which should already be replotted */
-	for (int i = 0; i < MBV_MAX_WINDOWS; i++) {
+	for (unsigned int i = 0; i < MBV_MAX_WINDOWS; i++) {
 		if (i != instance && mbviews[i].data.active)
 			mbview_plothigh(i);
 	}

@@ -1425,7 +1425,7 @@ int mbr_mgd77tab_wr_data(int verbose, void *mbio_ptr, void *data_ptr, int *error
 		fprintf(stderr, "dbg5       data->comment:              %s\n", data->comment);
 	}
 
-	char line[MB_COMMENT_MAXLINE] = {0};
+	char line[MB_COMMENT_MAXLINE+5] = {0};
 
 	/* handle the data */
 	if (data->kind == MB_DATA_HEADER) {

@@ -37,7 +37,7 @@ const char *AngleData::typeMnemonic()
 const char *AngleData::ascii()
 {
   // Convert to degrees and print
-  sprintf(_asciiBuffer, asciiFormat(), _value / Math::RadsPerDeg);
+  snprintf(_asciiBuffer, sizeof(_asciiBuffer), asciiFormat(), _value / Math::RadsPerDeg);
   return _asciiBuffer;
 }
 
@@ -45,10 +45,9 @@ const char *AngleData::ascii()
 
 void AngleData::parseValue(const char *stringRep)
 {
-  // Parse value in degrees 
+  // Parse value in degrees
   DoubleData::parseValue(stringRep);
 
   // Convert to radians
   _value *= Math::RadsPerDeg;
 }
-

@@ -382,7 +382,7 @@ int main(int argc, char** argv)
 
     /* copy the input world file to the output world file */
     mb_path command;
-    sprintf(command, "cp %s %s", InputWorldFile, OutputWorldFile);
+    snprintf(command, sizeof(command), "cp %s %s", InputWorldFile, OutputWorldFile);
     system(command);
     fprintf(stream, "Wrote output BGRA png image %s\n", OutputImageFile);
     fprintf(stream, "Copied world file from %s to %s\n", InputWorldFile, OutputWorldFile);

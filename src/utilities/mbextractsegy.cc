@@ -90,7 +90,7 @@ int main(int argc, char **argv) {
   double rangethreshold = 25.0;
   mb_path timelist_file = {0};
   bool timelist_file_set = false;
-  mb_path output_file = {0};
+  char output_file[MB_PATH_MAXLINE+100] = {0};
   bool output_file_set = false;
   waypoint_t waypoint;
 
@@ -297,7 +297,7 @@ int main(int argc, char **argv) {
 
   /* auto plotting */
   FILE *sfp = nullptr;
-  mb_path scriptfile = "";
+  char scriptfile[MB_PATH_MAXLINE+100] = "";
   double seafloordepthmin = -1.0;
   double seafloordepthmax = -1.0;
   double seafloordepthminplot[MBES_NUM_PLOT_MAX];
@@ -511,9 +511,9 @@ int main(int argc, char **argv) {
 
   /* get plot zbounds from sampleformat */
   if (sampleformat == MB_SEGY_SAMPLEFORMAT_ENVELOPE)
-    sprintf(zbounds, "0/%f/1", zmax);
+    snprintf(zbounds, sizeof(zbounds), "0/%f/1", zmax);
   else
-    sprintf(zbounds, "-%f/%f", zmax, zmax);
+    snprintf(zbounds, sizeof(zbounds),  "-%f/%f", zmax, zmax);
 
   /* determine whether to read one file or a list of files */
   const bool read_datalist = format < 0;
@@ -711,7 +711,7 @@ int main(int argc, char **argv) {
               fprintf(stderr, "\n");
 
             /* use mbsegyinfo to generate a sinf file */
-            sprintf(command, "mbsegyinfo -I %s -O", output_file);
+            snprintf(command, sizeof(command),  "mbsegyinfo -I %s -O", output_file);
             fprintf(stderr, "Executing: %s\n", command);
             /* const int shellstatus = */ system(command);
             // TODO(schwehr): Check the shellstatus
@@ -724,9 +724,9 @@ int main(int argc, char **argv) {
             if (linebearing < 0.0)
               linebearing += 360.0;
             if (linebearing >= 45.0 && linebearing <= 225.0)
-              sprintf(scale, "-Jx%f/%f", xscale, yscale);
+              snprintf(scale, sizeof(scale), "-Jx%f/%f", xscale, yscale);
             else
-              sprintf(scale, "-Jx-%f/%f", xscale, yscale);
+              snprintf(scale, sizeof(scale), "-Jx-%f/%f", xscale, yscale);
 
             /* output commands to first cut plotting script file */
             /* The maximum useful plot length is about nshotmax shots, so
@@ -766,30 +766,30 @@ int main(int argc, char **argv) {
                 sweep = endofdata - delay;
               }
 
-              sprintf(command, "#   Section plot %d of %d\n", i + 1, nplot);
+              snprintf(command, sizeof(command), "#   Section plot %d of %d\n", i + 1, nplot);
               fprintf(stderr, "%s", command);
               fprintf(sfp, "%s", command);
-              sprintf(command, "#     Seafloor depth min: %f (m) %f (s)  max: %f (m) %f (s)\n", seafloordepthmin,
+              snprintf(command, sizeof(command), "#     Seafloor depth min: %f (m) %f (s)  max: %f (m) %f (s)\n", seafloordepthmin,
                       seafloordepthmin / 750.0, seafloordepthmax, seafloordepthmax / 750.0);
               fprintf(stderr, "%s", command);
               fprintf(sfp, "%s", command);
-              sprintf(command, "#     Trace length: %f (s)\n", linetracelength);
+              snprintf(command, sizeof(command), "#     Trace length: %f (s)\n", linetracelength);
               fprintf(stderr, "%s", command);
               fprintf(sfp, "%s", command);
-              sprintf(command, "#     Trace delay: %f (s)\n", delay);
+              snprintf(command, sizeof(command), "#     Trace delay: %f (s)\n", delay);
               fprintf(stderr, "%s", command);
               fprintf(sfp, "%s", command);
-              sprintf(command, "#     Trace sweep: %f (s)\n", sweep);
+              snprintf(command, sizeof(command), "#     Trace sweep: %f (s)\n", sweep);
               fprintf(stderr, "%s", command);
               fprintf(sfp, "%s", command);
 
-              sprintf(command, "mbsegygrid -I %s \\\n\t-S0/%d/%d -T%.2f/%.2f \\\n\t-O %s_%4.4d_%2.2d_section\n",
+              snprintf(command, sizeof(command), "mbsegygrid -I %s \\\n\t-S0/%d/%d -T%.2f/%.2f \\\n\t-O %s_%4.4d_%2.2d_section\n",
                       output_file, (startshot + i * nshotmax), std::min((startshot + (i + 1) * nshotmax - 1), endshot),
                       sweep, delay, lineroot, linenumber, i + 1);
               fprintf(stderr, "%s", command);
               fprintf(sfp, "%s", command);
 
-              sprintf(command,
+              snprintf(command, sizeof(command),
                       "mbm_grdplot -I %s_%4.4d_%2.2d_section.grd \\\n\t%s -MGO2/2 -Z%s \\\n\t-Ba250/a0.05g0.05 -G1 "
                       "-W1/4 -D -V \\\n\t-O %s_%4.4d_%2.2d_sectionplot \\\n\t-L\"%s Line %d Plot %d of %d\"\\\n\t-MIE300 -MITg\n",
                       lineroot, linenumber, i + 1, scale, zbounds, lineroot, linenumber, i + 1, lineroot,
@@ -797,7 +797,7 @@ int main(int argc, char **argv) {
               fprintf(stderr, "%s", command);
               fprintf(sfp, "%s", command);
 
-              sprintf(command, "%s_%4.4d_%2.2d_sectionplot.cmd $1\n\n", lineroot, linenumber, i + 1);
+              snprintf(command, sizeof(command), "%s_%4.4d_%2.2d_sectionplot.cmd $1\n\n", lineroot, linenumber, i + 1);
               fprintf(stderr, "%s", command);
               fprintf(sfp, "%s", command);
 
@@ -916,7 +916,7 @@ int main(int argc, char **argv) {
             memset(output_file, 0, MB_PATH_MAXLINE);
             if (nroutepoint > 1) {
               assert(strlen(lineroot) < MB_PATH_MAXLINE - 10);
-              sprintf(output_file, "%s_%4.4d.segy", lineroot, linenumber);
+              snprintf(output_file, sizeof(output_file), "%s_%4.4d.segy", lineroot, linenumber);
             }
             else {
               assert(strlen(file) < MB_PATH_MAXLINE - 5);
@@ -1303,7 +1303,7 @@ int main(int argc, char **argv) {
           fprintf(stderr, "\n");
 
         /* use mbsegyinfo to generate a sinf file */
-        sprintf(command, "mbsegyinfo -I %s -O", output_file);
+        snprintf(command, sizeof(command), "mbsegyinfo -I %s -O", output_file);
         fprintf(stderr, "Executing: %s\n", command);
         /* const int shellstatus = */ system(command);
         // TODO(schwehr): Check the shellstatus
@@ -1315,9 +1315,9 @@ int main(int argc, char **argv) {
         if (linebearing < 0.0)
           linebearing += 360.0;
         if (linebearing >= 45.0 && linebearing <= 225.0)
-          sprintf(scale, "-Jx%f/%f", xscale, yscale);
+          snprintf(scale, sizeof(scale), "-Jx%f/%f", xscale, yscale);
         else
-          sprintf(scale, "-Jx-%f/%f", xscale, yscale);
+          snprintf(scale, sizeof(scale), "-Jx-%f/%f", xscale, yscale);
 
         /* output commands to first cut plotting script file */
         /* The maximum useful plot length is about nshotmax shots, so
@@ -1357,30 +1357,30 @@ int main(int argc, char **argv) {
             sweep = endofdata - delay;
           }
 
-          sprintf(command, "#   Section plot %d of %d\n", i + 1, nplot);
+          snprintf(command, sizeof(command), "#   Section plot %d of %d\n", i + 1, nplot);
           fprintf(stderr, "%s", command);
           fprintf(sfp, "%s", command);
-          sprintf(command, "#     Seafloor depth min: %f (m) %f (s)  max: %f (m) %f (s)\n", seafloordepthmin,
+          snprintf(command, sizeof(command), "#     Seafloor depth min: %f (m) %f (s)  max: %f (m) %f (s)\n", seafloordepthmin,
                   seafloordepthmin / 750.0, seafloordepthmax, seafloordepthmax / 750.0);
           fprintf(stderr, "%s", command);
           fprintf(sfp, "%s", command);
-          sprintf(command, "#     Trace length: %f (s)\n", linetracelength);
+          snprintf(command, sizeof(command), "#     Trace length: %f (s)\n", linetracelength);
           fprintf(stderr, "%s", command);
           fprintf(sfp, "%s", command);
-          sprintf(command, "#     Trace delay: %f (s)\n", delay);
+          snprintf(command, sizeof(command), "#     Trace delay: %f (s)\n", delay);
           fprintf(stderr, "%s", command);
           fprintf(sfp, "%s", command);
-          sprintf(command, "#     Trace sweep: %f (s)\n", sweep);
+          snprintf(command, sizeof(command), "#     Trace sweep: %f (s)\n", sweep);
           fprintf(stderr, "%s", command);
           fprintf(sfp, "%s", command);
 
-          sprintf(command, "mbsegygrid -I %s \\\n\t-S0/%d/%d -T%.2f/%.2f \\\n\t-O %s_%4.4d_%2.2d_section\n",
+          snprintf(command, sizeof(command), "mbsegygrid -I %s \\\n\t-S0/%d/%d -T%.2f/%.2f \\\n\t-O %s_%4.4d_%2.2d_section\n",
                   output_file, (startshot + i * nshotmax), std::min((startshot + (i + 1) * nshotmax - 1), endshot), sweep,
                   delay, lineroot, linenumber, i + 1);
           fprintf(stderr, "%s", command);
           fprintf(sfp, "%s", command);
 
-          sprintf(command,
+          snprintf(command, sizeof(command), 
                   "mbm_grdplot -I %s_%4.4d_%2.2d_section.grd \\\n\t%s -MGO2/2 -Z%s \\\n\t-Ba250/a0.05g0.05 -G1 "
                   "-W1/4 -D -V \\\n\t-O %s_%4.4d_%2.2d_sectionplot \\\n\t-L\"%s Line %d Plot %d of %d\"\\\n\t-MIE300 -MITg\n",
                   lineroot, linenumber, i + 1, scale, zbounds, lineroot, linenumber, i + 1, lineroot,
@@ -1388,7 +1388,7 @@ int main(int argc, char **argv) {
           fprintf(stderr, "%s", command);
           fprintf(sfp, "%s", command);
 
-          sprintf(command, "%s_%4.4d_%2.2d_sectionplot.cmd $1\n\n", lineroot, linenumber, i + 1);
+          snprintf(command, sizeof(command), "%s_%4.4d_%2.2d_sectionplot.cmd $1\n\n", lineroot, linenumber, i + 1);
           fprintf(stderr, "%s", command);
           fprintf(sfp, "%s", command);
 
@@ -1407,7 +1407,7 @@ int main(int argc, char **argv) {
 
   /* close plotting script file */
   fclose(sfp);
-  sprintf(command, "chmod +x %s", scriptfile);
+  snprintf(command, sizeof(command), "chmod +x %s", scriptfile);
   /* const int shellstatus = */ system(command);
   // TODO(schwehr): Check the shellstatus
 

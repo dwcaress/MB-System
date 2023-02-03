@@ -1447,7 +1447,7 @@ int main(int argc, char **argv) {
 
 			/* run mbm_grdplot */
       memset(plot_cmd, 0, sizeof(plot_cmd));
-			sprintf(plot_cmd, "mbm_grdplot -I%s -JX9/5 -G1 -MGQ100 -MXI%s -L\"File %s - %s:%s\"", gridfile, amptablefile,
+			snprintf(plot_cmd, sizeof(plot_cmd), "mbm_grdplot -I%s -JX9/5 -G1 -MGQ100 -MXI%s -L\"File %s - %s:%s\"", gridfile, amptablefile,
 			        gridfile, title, zlabel);
 			if (verbose) {
 				fprintf(stderr, "\nexecuting mbm_grdplot...\n%s\n", plot_cmd);
@@ -1489,7 +1489,7 @@ int main(int argc, char **argv) {
 
 			/* run mbm_grdplot */
       memset(plot_cmd, 0, sizeof(plot_cmd));
-			sprintf(plot_cmd, "mbm_grdplot -I%s -JX9/5 -G1 -MGQ100 -MXI%s -L\"File %s - %s:%s\"", gridfile, sstablefile,
+			snprintf(plot_cmd, sizeof(plot_cmd), "mbm_grdplot -I%s -JX9/5 -G1 -MGQ100 -MXI%s -L\"File %s - %s:%s\"", gridfile, sstablefile,
 			        gridfile, title, zlabel);
 			if (verbose) {
 				fprintf(stderr, "\nexecuting mbm_grdplot...\n%s\n", plot_cmd);

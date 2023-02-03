@@ -245,7 +245,7 @@ int mbr_mbpronav_rd_data(int verbose, void *mbio_ptr, int *error) {
   if (!mb_io_ptr->fileheader && line_ptr != NULL && strncmp(line_ptr, "## <yyyy mm dd hh mm ss.ssssss>", 31) == 0) {
     mb_io_ptr->fileheader = true;
 		mb_io_ptr->file_bytes += strlen(line);
-    char *line_ptr = fgets(line, MBF_MBPRONAV_MAXLINE, mb_io_ptr->mbfp);
+    line_ptr = fgets(line, MBF_MBPRONAV_MAXLINE, mb_io_ptr->mbfp);
   }
 	if (line_ptr != NULL) {
 		mb_io_ptr->file_bytes += strlen(line);

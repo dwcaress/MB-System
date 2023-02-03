@@ -1065,7 +1065,7 @@ int GMT_mbgrdtiff(void *V_API, int mode, void *args) {
 	// normal_y = !(GMT->current.proj.projection == GMT_LINEAR && !GMT->current.proj.xyz_pos[1] && !resampled);
 	const bool normal_x = true;
 	const bool normal_y = true;
-	uint64_t node_RGBA = 0; /* uint64_t for the RGB(A) image array. */
+	// uint64_t node_RGBA = 0; /* uint64_t for the RGB(A) image array. */
 	int index = 0;
 	double rgb[4] = {0.0, 0.0, 0.0, 0.0};
 
@@ -1076,8 +1076,8 @@ int GMT_mbgrdtiff(void *V_API, int mode, void *args) {
 		for (unsigned int row = 0; row < ny; row++) {
 			const unsigned int actual_row = normal_y ? row : ny - row - 1;
 			const uint64_t kk = gmt_M_ijpgi(header_work, actual_row, 0);
-			if (Ctrl->D.active && row == 0)
-				node_RGBA = kk;                           /* First time per row equals 'node', after grows alone */
+			// if (Ctrl->D.active && row == 0)
+			// 	node_RGBA = kk;                           /* First time per row equals 'node', after grows alone */
 			for (unsigned int col = 0; col < nx; col++) { /* Compute rgb for each pixel */
 				uint64_t node = kk + (normal_x ? col : nx - col - 1);
 				if (Ctrl->I.do_rgb) {
@@ -1123,8 +1123,8 @@ int GMT_mbgrdtiff(void *V_API, int mode, void *args) {
 				}
 			}
 
-			if (!n_grids)
-				node_RGBA += header_work->n_bands * (header_work->pad[XLO] + header_work->pad[XHI]);
+			// if (!n_grids)
+			// 	node_RGBA += header_work->n_bands * (header_work->pad[XLO] + header_work->pad[XHI]);
 		}
 
 		if (P && Ctrl->Q.active) { /* Check that we found an unused r/g/b value so colormasking will work OK */
@@ -1180,12 +1180,12 @@ int GMT_mbgrdtiff(void *V_API, int mode, void *args) {
 
 	/* Set lower left position of image on map */
 
-	double x0 = header_work->wesn[XLO];
-	double y0 = header_work->wesn[YLO];
-	if (grid_registration == GMT_GRID_NODE_REG) { /* Grid registration, move 1/2 pixel down/left */
-		x0 -= 0.5 * dx;
-		y0 -= 0.5 * dy;
-	}
+	// double x0 = header_work->wesn[XLO];
+	// double y0 = header_work->wesn[YLO];
+	// if (grid_registration == GMT_GRID_NODE_REG) { /* Grid registration, move 1/2 pixel down/left */
+	// 	x0 -= 0.5 * dx;
+	// 	y0 -= 0.5 * dy;
+	// }
 
 	// double x_side = dx * header_work->n_columns;
 	// double y_side = dy * header_work->n_rows;

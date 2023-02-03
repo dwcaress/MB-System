@@ -134,7 +134,7 @@ int mbr_alm_kemkmall(int verbose, void *mbio_ptr, int *error) {
 
   /* allocate starting memory for data record buffer */
   char **bufferptr = (char **)&mb_io_ptr->raw_data;
-  int *bufferalloc = (int *)&mb_io_ptr->structure_size;
+  size_t *bufferalloc = (size_t *)&mb_io_ptr->structure_size;
 
   *bufferptr = NULL;
   *bufferalloc = 0;
@@ -1584,10 +1584,12 @@ int mbr_kemkmall_rd_mrz(int verbose, char *buffer, void *store_ptr, void *header
   struct mbsys_kmbes_mrz *mrz = NULL;
   struct mbsys_kmbes_m_partition partition;
   struct mbsys_kmbes_m_body cmnPart;
-  int index_EMdgmMbody, index_pingInfo, index_txSectorInfo = 0;
-  int index_rxInfo;
-  int index_extraDetClassInfo;
-  int index_sounding, index_SIsample = 0;
+  unsigned int index_EMdgmMbody = 0;
+  unsigned int index_pingInfo = 0;
+  unsigned int index_txSectorInfo = 0;
+  unsigned int index_rxInfo = 0;
+  unsigned int index_extraDetClassInfo = 0;
+  unsigned int index_sounding, index_SIsample = 0;
 
   /* get pointer to raw data structure */
   struct mbsys_kmbes_struct *store = (struct mbsys_kmbes_struct *)store_ptr;
@@ -1971,8 +1973,7 @@ int mbr_kemkmall_rd_mrz(int verbose, char *buffer, void *store_ptr, void *header
   index_extraDetClassInfo = index_rxInfo + mrz->rxInfo.numBytesRxInfo;
 
   /* check against corrupted data */
-  if (index_extraDetClassInfo + mrz->rxInfo.numExtraDetectionClasses * mrz->rxInfo.numBytesPerClass
-        > header->numBytesDgm) {
+  if (index_extraDetClassInfo + mrz->rxInfo.numExtraDetectionClasses * mrz->rxInfo.numBytesPerClass > header->numBytesDgm) {
     *error = MB_ERROR_BAD_DATA;
     status = MB_FAILURE;
     if (verbose > 0) {
@@ -3223,7 +3224,7 @@ int mbr_kemkmall_rd_fcf(int verbose, char *buffer, void *store_ptr, void *header
     fprintf(stderr, "dbg5       numBytesFile:               %u\n", fcf->cmnPart.numBytesFile);
     fprintf(stderr, "dbg5       fcf->fileName:              %s\n", fcf->cmnPart.fileName);
     fprintf(stderr, "dbg5       fcf->bsCalibrationFile:\n");
-    for (int i=0; i<cmnPart->numBytesFile; i++)
+    for (unsigned int i=0; i<cmnPart->numBytesFile; i++)
       fprintf(stderr, "%c", fcf->bsCalibrationFile[i]);
     fprintf(stderr,"\n");
   }
@@ -3765,12 +3766,14 @@ int mbr_kemkmall_index_data(int verbose, void *mbio_ptr, void *store_ptr, int *e
   int *file_indexed = NULL;
   int *dgm_id = NULL;
   char buffer[256];
-  size_t read_len, offset;
-  int index, skip;
-  int num_bytes_dgm_end;
+  size_t read_len = 0;
+  size_t offset = 0;
+  unsigned int index = 0;
+  unsigned int skip = 0;
+  unsigned int num_bytes_dgm_end = 0;
   int iip_location = -1;
   const int HEADER_SKIP = 8;
-  unsigned short pingCnt;
+  unsigned short pingCnt = 0;
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -4187,8 +4190,8 @@ int mbr_kemkmall_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
   size_t read_len = 0;
   char **bufferptr = NULL;
   char *buffer = NULL;
-  int *bufferalloc = NULL;
-  int *dgm_id = NULL;
+  size_t *bufferalloc = NULL;
+  unsigned int *dgm_id = NULL;
   int jmrz;
   int jmwc;
   int jxmt, isounding;
@@ -4199,13 +4202,13 @@ int mbr_kemkmall_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 
   /* get buffer and related vars from mbio saved values */
   bufferptr = (char **)&mb_io_ptr->raw_data;
-  bufferalloc = (int *)&mb_io_ptr->structure_size;
+  bufferalloc = (size_t *)&mb_io_ptr->structure_size;
   buffer = (char *)*bufferptr;
   mbsys_kmbes_emdgm_type emdgm_type;
 
   /* get the datagram index table */
   dgm_index_table = (struct mbsys_kmbes_index_table *)mb_io_ptr->saveptr1;
-  dgm_id = (int *)&mb_io_ptr->save1;
+  dgm_id = (unsigned int *)&mb_io_ptr->save1;
 
   /* get pointer to raw data structure */
   struct mbsys_kmbes_struct *store = (struct mbsys_kmbes_struct *)store_ptr;
@@ -4263,8 +4266,8 @@ int mbr_kemkmall_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
       if (status == MB_SUCCESS) {
         status = mbr_kemkmall_rd_hdr(verbose, buffer, (void *)&header, (void *)&emdgm_type, error);
         if (status == MB_SUCCESS && (emdgm_type == MRZ || emdgm_type == MWC)) {
-          unsigned short numOfDgms;
-          unsigned short dgmNum;
+          unsigned short numOfDgms = 0;
+          unsigned short dgmNum = 0;
           mb_get_binary_short(true, &buffer[MBSYS_KMBES_HEADER_SIZE], &numOfDgms);
           mb_get_binary_short(true, &buffer[MBSYS_KMBES_HEADER_SIZE+2], &dgmNum);
           if (numOfDgms != 1) {
@@ -4307,7 +4310,7 @@ numOfDgms, dgmNum, header.numBytesDgm, dgm_index->index_org, dgm_index->ping_num
         // check for partitioned datagrams (i.e. multiple UDP packets that have
         // not been concatenated) and ignore these
         if (status == MB_SUCCESS && (emdgm_type == MRZ || emdgm_type == MWC)) {
-          unsigned short numOfDgms;
+          unsigned short numOfDgms = -1;
           mb_get_binary_short(true, &buffer[MBSYS_KMBES_HEADER_SIZE], &numOfDgms);
           if (numOfDgms != 1) {
             *error = MB_ERROR_UNINTELLIGIBLE;
@@ -4942,16 +4945,16 @@ int mbr_kemkmall_wr_header(int verbose, char **bufferptr, void *header_ptr, int 
 
 /*--------------------------------------------------------------------*/
 
-int mbr_kemkmall_wr_spo(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, size_t *size, int *error){
+int mbr_kemkmall_wr_spo(int verbose, size_t *bufferalloc, char **bufferptr, void *store_ptr, size_t *size, int *error){
   size_t numBytesRawSensorData = 0;
   char *buffer = NULL;
-  int index = 0;
+  unsigned int index = 0;
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
-    fprintf(stderr, "dbg2       bufferalloc:%d\n", *bufferalloc);
+    fprintf(stderr, "dbg2       bufferalloc:%zu\n", *bufferalloc);
     fprintf(stderr, "dbg2       bufferptr:  %p\n", (void *)bufferptr);
     fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
   }
@@ -5072,7 +5075,7 @@ int mbr_kemkmall_wr_spo(int verbose, int *bufferalloc, char **bufferptr, void *s
 
 /*--------------------------------------------------------------------*/
 
-int mbr_kemkmall_wr_skm(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, size_t *size, int *error){
+int mbr_kemkmall_wr_skm(int verbose, size_t *bufferalloc, char **bufferptr, void *store_ptr, size_t *size, int *error){
   char *buffer = NULL;
   int index = 0;
 
@@ -5080,7 +5083,7 @@ int mbr_kemkmall_wr_skm(int verbose, int *bufferalloc, char **bufferptr, void *s
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
-    fprintf(stderr, "dbg2       bufferalloc:%d\n", *bufferalloc);
+    fprintf(stderr, "dbg2       bufferalloc:%zu\n", *bufferalloc);
     fprintf(stderr, "dbg2       bufferptr:  %p\n", (void *)bufferptr);
     fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
   }
@@ -5290,7 +5293,7 @@ int mbr_kemkmall_wr_skm(int verbose, int *bufferalloc, char **bufferptr, void *s
 
 /*--------------------------------------------------------------------*/
 
-int mbr_kemkmall_wr_svp(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, size_t *size, int *error) {
+int mbr_kemkmall_wr_svp(int verbose, size_t *bufferalloc, char **bufferptr, void *store_ptr, size_t *size, int *error) {
   char *buffer = NULL;
   int index = 0;
 
@@ -5298,7 +5301,7 @@ int mbr_kemkmall_wr_svp(int verbose, int *bufferalloc, char **bufferptr, void *s
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
-    fprintf(stderr, "dbg2       bufferalloc:%d\n", *bufferalloc);
+    fprintf(stderr, "dbg2       bufferalloc:%zu\n", *bufferalloc);
     fprintf(stderr, "dbg2       bufferptr:  %p\n", (void *)bufferptr);
     fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
   }
@@ -5412,7 +5415,7 @@ int mbr_kemkmall_wr_svp(int verbose, int *bufferalloc, char **bufferptr, void *s
 
 /*--------------------------------------------------------------------*/
 
-int mbr_kemkmall_wr_svt(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, size_t *size, int *error) {
+int mbr_kemkmall_wr_svt(int verbose, size_t *bufferalloc, char **bufferptr, void *store_ptr, size_t *size, int *error) {
   char *buffer = NULL;
   int index = 0;
 
@@ -5420,7 +5423,7 @@ int mbr_kemkmall_wr_svt(int verbose, int *bufferalloc, char **bufferptr, void *s
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
-    fprintf(stderr, "dbg2       bufferalloc:%d\n", *bufferalloc);
+    fprintf(stderr, "dbg2       bufferalloc:%zu\n", *bufferalloc);
     fprintf(stderr, "dbg2       bufferptr:  %p\n", (void *)bufferptr);
     fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
   }
@@ -5543,7 +5546,7 @@ int mbr_kemkmall_wr_svt(int verbose, int *bufferalloc, char **bufferptr, void *s
 
 /*--------------------------------------------------------------------*/
 
-int mbr_kemkmall_wr_scl(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, size_t *size, int *error) {
+int mbr_kemkmall_wr_scl(int verbose, size_t *bufferalloc, char **bufferptr, void *store_ptr, size_t *size, int *error) {
   size_t numBytesRawSensorData = 0;
   char *buffer = NULL;
   int index = 0;
@@ -5552,7 +5555,7 @@ int mbr_kemkmall_wr_scl(int verbose, int *bufferalloc, char **bufferptr, void *s
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
-    fprintf(stderr, "dbg2       bufferalloc:%d\n", *bufferalloc);
+    fprintf(stderr, "dbg2       bufferalloc:%zu\n", *bufferalloc);
     fprintf(stderr, "dbg2       bufferptr:  %p\n", (void *)bufferptr);
     fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
   }
@@ -5653,7 +5656,7 @@ int mbr_kemkmall_wr_scl(int verbose, int *bufferalloc, char **bufferptr, void *s
 
 /*--------------------------------------------------------------------*/
 
-int mbr_kemkmall_wr_sde(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, size_t *size, int *error){
+int mbr_kemkmall_wr_sde(int verbose, size_t *bufferalloc, char **bufferptr, void *store_ptr, size_t *size, int *error){
   size_t numBytesRawSensorData = 0;
   char *buffer = NULL;
   int index = 0;
@@ -5662,7 +5665,7 @@ int mbr_kemkmall_wr_sde(int verbose, int *bufferalloc, char **bufferptr, void *s
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
-    fprintf(stderr, "dbg2       bufferalloc:%d\n", *bufferalloc);
+    fprintf(stderr, "dbg2       bufferalloc:%zu\n", *bufferalloc);
     fprintf(stderr, "dbg2       bufferptr:  %p\n", (void *)bufferptr);
     fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
   }
@@ -5772,7 +5775,7 @@ int mbr_kemkmall_wr_sde(int verbose, int *bufferalloc, char **bufferptr, void *s
 
 /*--------------------------------------------------------------------*/
 
-int mbr_kemkmall_wr_shi(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, size_t *size, int *error){
+int mbr_kemkmall_wr_shi(int verbose, size_t *bufferalloc, char **bufferptr, void *store_ptr, size_t *size, int *error){
   size_t numBytesRawSensorData = 0;
   char *buffer = NULL;
   int index = 0;
@@ -5781,7 +5784,7 @@ int mbr_kemkmall_wr_shi(int verbose, int *bufferalloc, char **bufferptr, void *s
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
-    fprintf(stderr, "dbg2       bufferalloc:%d\n", *bufferalloc);
+    fprintf(stderr, "dbg2       bufferalloc:%zu\n", *bufferalloc);
     fprintf(stderr, "dbg2       bufferptr:  %p\n", (void *)bufferptr);
     fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
   }
@@ -5882,7 +5885,7 @@ int mbr_kemkmall_wr_shi(int verbose, int *bufferalloc, char **bufferptr, void *s
 
 /*--------------------------------------------------------------------*/
 
-int mbr_kemkmall_wr_sha(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, size_t *size, int *error) {
+int mbr_kemkmall_wr_sha(int verbose, size_t *bufferalloc, char **bufferptr, void *store_ptr, size_t *size, int *error) {
   char *buffer = NULL;
   int index = 0;
 
@@ -5890,7 +5893,7 @@ int mbr_kemkmall_wr_sha(int verbose, int *bufferalloc, char **bufferptr, void *s
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
-    fprintf(stderr, "dbg2       bufferalloc:%d\n", *bufferalloc);
+    fprintf(stderr, "dbg2       bufferalloc:%zu\n", *bufferalloc);
     fprintf(stderr, "dbg2       bufferptr:  %p\n", (void *)bufferptr);
     fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
   }
@@ -6007,7 +6010,7 @@ int mbr_kemkmall_wr_sha(int verbose, int *bufferalloc, char **bufferptr, void *s
 
 /*--------------------------------------------------------------------*/
 
-int mbr_kemkmall_wr_mrz(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int imrz, size_t *size, int *error) {
+int mbr_kemkmall_wr_mrz(int verbose, size_t *bufferalloc, char **bufferptr, void *store_ptr, int imrz, size_t *size, int *error) {
   char *buffer = NULL;
   int numSoundings = 0;
   int numSidescanSamples = 0;
@@ -6017,7 +6020,7 @@ int mbr_kemkmall_wr_mrz(int verbose, int *bufferalloc, char **bufferptr, void *s
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
-    fprintf(stderr, "dbg2       bufferalloc:%d\n", *bufferalloc);
+    fprintf(stderr, "dbg2       bufferalloc:%zu\n", *bufferalloc);
     fprintf(stderr, "dbg2       bufferptr:  %p\n", (void *)bufferptr);
     fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
     fprintf(stderr, "dbg2       imrz:       %d\n", imrz);
@@ -6615,12 +6618,12 @@ int mbr_kemkmall_wr_mrz(int verbose, int *bufferalloc, char **bufferptr, void *s
 
 /*--------------------------------------------------------------------*/
 
-int mbr_kemkmall_wr_mwc(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int imwc, size_t *size, int *error) {
+int mbr_kemkmall_wr_mwc(int verbose, size_t *bufferalloc, char **bufferptr, void *store_ptr, int imwc, size_t *size, int *error) {
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
-    fprintf(stderr, "dbg2       bufferalloc:%d\n", *bufferalloc);
+    fprintf(stderr, "dbg2       bufferalloc:%zu\n", *bufferalloc);
     fprintf(stderr, "dbg2       bufferptr:  %p\n", (void *)bufferptr);
     fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
     fprintf(stderr, "dbg2       imwcc:      %d\n", imwc);
@@ -6895,7 +6898,7 @@ int mbr_kemkmall_wr_mwc(int verbose, int *bufferalloc, char **bufferptr, void *s
 
 /*--------------------------------------------------------------------*/
 
-int mbr_kemkmall_wr_cpo(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, size_t *size, int *error) {
+int mbr_kemkmall_wr_cpo(int verbose, size_t *bufferalloc, char **bufferptr, void *store_ptr, size_t *size, int *error) {
   size_t numBytesRawSensorData = 0;
   char *buffer = NULL;
   int index = 0;
@@ -6904,7 +6907,7 @@ int mbr_kemkmall_wr_cpo(int verbose, int *bufferalloc, char **bufferptr, void *s
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
-    fprintf(stderr, "dbg2       bufferalloc:%d\n", *bufferalloc);
+    fprintf(stderr, "dbg2       bufferalloc:%zu\n", *bufferalloc);
     fprintf(stderr, "dbg2       bufferptr:  %p\n", (void *)bufferptr);
     fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
   }
@@ -7025,12 +7028,12 @@ int mbr_kemkmall_wr_cpo(int verbose, int *bufferalloc, char **bufferptr, void *s
 
 /*--------------------------------------------------------------------*/
 
-int mbr_kemkmall_wr_che(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, size_t *size, int *error) {
+int mbr_kemkmall_wr_che(int verbose, size_t *bufferalloc, char **bufferptr, void *store_ptr, size_t *size, int *error) {
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
-    fprintf(stderr, "dbg2       bufferalloc:%d\n", *bufferalloc);
+    fprintf(stderr, "dbg2       bufferalloc:%zu\n", *bufferalloc);
     fprintf(stderr, "dbg2       bufferptr:  %p\n", (void *)bufferptr);
     fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
   }
@@ -7150,7 +7153,7 @@ int mbr_kemkmall_wr_che(int verbose, int *bufferalloc, char **bufferptr, void *s
 
 /*--------------------------------------------------------------------*/
 
-int mbr_kemkmall_wr_iip(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, size_t *size, int *error) {
+int mbr_kemkmall_wr_iip(int verbose, size_t *bufferalloc, char **bufferptr, void *store_ptr, size_t *size, int *error) {
   size_t numBytesRawSensorData = 0;
   char *buffer = NULL;
   int index = 0;
@@ -7159,7 +7162,7 @@ int mbr_kemkmall_wr_iip(int verbose, int *bufferalloc, char **bufferptr, void *s
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
-    fprintf(stderr, "dbg2       bufferalloc:%d\n", *bufferalloc);
+    fprintf(stderr, "dbg2       bufferalloc:%zu\n", *bufferalloc);
     fprintf(stderr, "dbg2       bufferptr:  %p\n", (void *)bufferptr);
     fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
   }
@@ -7248,7 +7251,7 @@ int mbr_kemkmall_wr_iip(int verbose, int *bufferalloc, char **bufferptr, void *s
 
 /*--------------------------------------------------------------------*/
 
-int mbr_kemkmall_wr_iop(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, size_t *size, int *error) {
+int mbr_kemkmall_wr_iop(int verbose, size_t *bufferalloc, char **bufferptr, void *store_ptr, size_t *size, int *error) {
   size_t numBytesRawSensorData = 0;
   char *buffer = NULL;
   int index = 0;
@@ -7257,7 +7260,7 @@ int mbr_kemkmall_wr_iop(int verbose, int *bufferalloc, char **bufferptr, void *s
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
-    fprintf(stderr, "dbg2       bufferalloc:%d\n", *bufferalloc);
+    fprintf(stderr, "dbg2       bufferalloc:%zu\n", *bufferalloc);
     fprintf(stderr, "dbg2       bufferptr:  %p\n", (void *)bufferptr);
     fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
   }
@@ -7345,7 +7348,7 @@ int mbr_kemkmall_wr_iop(int verbose, int *bufferalloc, char **bufferptr, void *s
 
 /*--------------------------------------------------------------------*/
 
-int mbr_kemkmall_wr_ibe(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, size_t *size, int *error) {
+int mbr_kemkmall_wr_ibe(int verbose, size_t *bufferalloc, char **bufferptr, void *store_ptr, size_t *size, int *error) {
   char *buffer = NULL;
   int index = 0;
 
@@ -7353,7 +7356,7 @@ int mbr_kemkmall_wr_ibe(int verbose, int *bufferalloc, char **bufferptr, void *s
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
-    fprintf(stderr, "dbg2       bufferalloc:%d\n", *bufferalloc);
+    fprintf(stderr, "dbg2       bufferalloc:%zu\n", *bufferalloc);
     fprintf(stderr, "dbg2       bufferptr:  %p\n", (void *)bufferptr);
     fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
   }
@@ -7445,7 +7448,7 @@ int mbr_kemkmall_wr_ibe(int verbose, int *bufferalloc, char **bufferptr, void *s
 
 /*--------------------------------------------------------------------*/
 
-int mbr_kemkmall_wr_ibr(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, size_t *size, int *error) {
+int mbr_kemkmall_wr_ibr(int verbose, size_t *bufferalloc, char **bufferptr, void *store_ptr, size_t *size, int *error) {
   char *buffer = NULL;
   int index = 0;
 
@@ -7453,7 +7456,7 @@ int mbr_kemkmall_wr_ibr(int verbose, int *bufferalloc, char **bufferptr, void *s
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
-    fprintf(stderr, "dbg2       bufferalloc:%d\n", *bufferalloc);
+    fprintf(stderr, "dbg2       bufferalloc:%zu\n", *bufferalloc);
     fprintf(stderr, "dbg2       bufferptr:  %p\n", (void *)bufferptr);
     fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
   }
@@ -7545,7 +7548,7 @@ int mbr_kemkmall_wr_ibr(int verbose, int *bufferalloc, char **bufferptr, void *s
 
 /*--------------------------------------------------------------------*/
 
-int mbr_kemkmall_wr_ibs(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, size_t *size, int *error) {
+int mbr_kemkmall_wr_ibs(int verbose, size_t *bufferalloc, char **bufferptr, void *store_ptr, size_t *size, int *error) {
   char *buffer = NULL;
   int index = 0;
 
@@ -7553,7 +7556,7 @@ int mbr_kemkmall_wr_ibs(int verbose, int *bufferalloc, char **bufferptr, void *s
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
-    fprintf(stderr, "dbg2       bufferalloc:%d\n", *bufferalloc);
+    fprintf(stderr, "dbg2       bufferalloc:%zu\n", *bufferalloc);
     fprintf(stderr, "dbg2       bufferptr:  %p\n", (void *)bufferptr);
     fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
   }
@@ -7645,7 +7648,7 @@ int mbr_kemkmall_wr_ibs(int verbose, int *bufferalloc, char **bufferptr, void *s
 
 /*--------------------------------------------------------------------*/
 
-int mbr_kemkmall_wr_fcf(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, size_t *size, int *error) {
+int mbr_kemkmall_wr_fcf(int verbose, size_t *bufferalloc, char **bufferptr, void *store_ptr, size_t *size, int *error) {
   char *buffer = NULL;
   int index = 0;
 
@@ -7653,7 +7656,7 @@ int mbr_kemkmall_wr_fcf(int verbose, int *bufferalloc, char **bufferptr, void *s
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
-    fprintf(stderr, "dbg2       bufferalloc:%d\n", *bufferalloc);
+    fprintf(stderr, "dbg2       bufferalloc:%zu\n", *bufferalloc);
     fprintf(stderr, "dbg2       bufferptr:  %p\n", (void *)bufferptr);
     fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
   }
@@ -7670,11 +7673,11 @@ int mbr_kemkmall_wr_fcf(int verbose, int *bufferalloc, char **bufferptr, void *s
   /* size of output record and components thereof - set the size according to what
       we know about, as anything added by Kongsberg that we don't know about will
       have been skipped while reading */
-  fcf->cmnPart.numBytesCmnPart = 72;
+  cmnPart->numBytesCmnPart = 72;
   fcf->header.numBytesDgm = MBSYS_KMBES_HEADER_SIZE
-                            + fcf->cmnPart.numBytesCmnPart
+                            + cmnPart->numBytesCmnPart
                             + MBSYS_KMBES_PARITION_SIZE
-                            + fcf->cmnPart.numBytesFile
+                            + cmnPart->numBytesFile
                             + MBSYS_KMBES_END_SIZE;
 
   *size = (size_t) fcf->header.numBytesDgm;
@@ -7713,35 +7716,35 @@ int mbr_kemkmall_wr_fcf(int verbose, int *bufferalloc, char **bufferptr, void *s
 
     if (verbose >= 5) {
       fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
-      fprintf(stderr, "dbg5       numOfDgms:                 %d\n", fcf->partition.numOfDgms);
-      fprintf(stderr, "dbg5       dgmNum:                    %d\n", fcf->partition.dgmNum);
+      fprintf(stderr, "dbg5       numOfDgms:                 %d\n", partition->numOfDgms);
+      fprintf(stderr, "dbg5       dgmNum:                    %d\n", partition->dgmNum);
 
-      fprintf(stderr, "dbg5       numBytesCmnPart:            %u\n", fcf->cmnPart.numBytesCmnPart);
-      fprintf(stderr, "dbg5       fileStatus:                 %u\n", fcf->cmnPart.fileStatus);
-      fprintf(stderr, "dbg5       fileStatus:                 %u\n", fcf->cmnPart.padding1);
-      fprintf(stderr, "dbg5       numBytesFile:               %u\n", fcf->cmnPart.numBytesFile);
-      fprintf(stderr, "dbg5       fcf->fileName:              %s\n", fcf->cmnPart.fileName);
+      fprintf(stderr, "dbg5       numBytesCmnPart:            %u\n", cmnPart->numBytesCmnPart);
+      fprintf(stderr, "dbg5       fileStatus:                 %u\n", cmnPart->fileStatus);
+      fprintf(stderr, "dbg5       fileStatus:                 %u\n", cmnPart->padding1);
+      fprintf(stderr, "dbg5       numBytesFile:               %u\n", cmnPart->numBytesFile);
+      fprintf(stderr, "dbg5       fcf->fileName:              %s\n", cmnPart->fileName);
     }
 
     /* insert the data */
     index = MBSYS_KMBES_HEADER_SIZE;
 
     /* EMdgmMpartition - data partition information */
-    mb_put_binary_short(true, fcf->partition.numOfDgms, &buffer[index]);
+    mb_put_binary_short(true, partition->numOfDgms, &buffer[index]);
     index += 2;
-    mb_put_binary_short(true, fcf->partition.dgmNum, &buffer[index]);
+    mb_put_binary_short(true, partition->dgmNum, &buffer[index]);
     index += 2;
 
     /* EMdgmMbody - information of transmitter and receiver used to find data in datagram */
-    mb_put_binary_short(true, fcf->cmnPart.numBytesCmnPart, &buffer[index]);
+    mb_put_binary_short(true, cmnPart->numBytesCmnPart, &buffer[index]);
     index += 2;
-    buffer[index] = fcf->cmnPart.fileStatus;
+    buffer[index] = cmnPart->fileStatus;
     index++;
-    buffer[index] = fcf->cmnPart.padding1;
+    buffer[index] = cmnPart->padding1;
     index++;
-    mb_put_binary_int(true, fcf->cmnPart.numBytesFile, &buffer[index]);
+    mb_put_binary_int(true, cmnPart->numBytesFile, &buffer[index]);
     index += 4;
-    memcpy(&buffer[index], fcf->cmnPart.fileName, MBSYS_KMBES_MAX_F_FILENAME_LENGTH);
+    memcpy(&buffer[index], cmnPart->fileName, MBSYS_KMBES_MAX_F_FILENAME_LENGTH);
     index += MBSYS_KMBES_MAX_F_FILENAME_LENGTH;
     memcpy(&buffer[index], fcf->bsCalibrationFile, cmnPart->numBytesFile);
     index += cmnPart->numBytesFile;
@@ -7770,7 +7773,7 @@ int mbr_kemkmall_wr_fcf(int verbose, int *bufferalloc, char **bufferptr, void *s
 
 /*--------------------------------------------------------------------*/
 
-int mbr_kemkmall_wr_xmb(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, size_t *size, int *error) {
+int mbr_kemkmall_wr_xmb(int verbose, size_t *bufferalloc, char **bufferptr, void *store_ptr, size_t *size, int *error) {
   size_t numBytesVersion = 0;
   char *buffer = NULL;
   int index = 0;
@@ -7779,7 +7782,7 @@ int mbr_kemkmall_wr_xmb(int verbose, int *bufferalloc, char **bufferptr, void *s
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
-    fprintf(stderr, "dbg2       bufferalloc:%d\n", *bufferalloc);
+    fprintf(stderr, "dbg2       bufferalloc:%zu\n", *bufferalloc);
     fprintf(stderr, "dbg2       bufferptr:  %p\n", (void *)bufferptr);
     fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
   }
@@ -7880,7 +7883,7 @@ int mbr_kemkmall_wr_xmb(int verbose, int *bufferalloc, char **bufferptr, void *s
 
 /*--------------------------------------------------------------------*/
 
-int mbr_kemkmall_wr_xmc(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, size_t *size, int *error) {
+int mbr_kemkmall_wr_xmc(int verbose, size_t *bufferalloc, char **bufferptr, void *store_ptr, size_t *size, int *error) {
   size_t numBytesComment = 0;
   char *buffer = NULL;
   int index = 0;
@@ -7889,7 +7892,7 @@ int mbr_kemkmall_wr_xmc(int verbose, int *bufferalloc, char **bufferptr, void *s
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
-    fprintf(stderr, "dbg2       bufferalloc:%d\n", *bufferalloc);
+    fprintf(stderr, "dbg2       bufferalloc:%zu\n", *bufferalloc);
     fprintf(stderr, "dbg2       bufferptr:  %p\n", (void *)bufferptr);
     fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
   }
@@ -7974,12 +7977,12 @@ int mbr_kemkmall_wr_xmc(int verbose, int *bufferalloc, char **bufferptr, void *s
 };
 /*--------------------------------------------------------------------*/
 
-int mbr_kemkmall_wr_xmt(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int ixmt, size_t *size, int *error) {
+int mbr_kemkmall_wr_xmt(int verbose, size_t *bufferalloc, char **bufferptr, void *store_ptr, int ixmt, size_t *size, int *error) {
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
-    fprintf(stderr, "dbg2       bufferalloc:%d\n", *bufferalloc);
+    fprintf(stderr, "dbg2       bufferalloc:%zu\n", *bufferalloc);
     fprintf(stderr, "dbg2       bufferptr:  %p\n", (void *)bufferptr);
     fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
     fprintf(stderr, "dbg2       ixmt:       %d\n", ixmt);
@@ -8193,12 +8196,12 @@ int mbr_kemkmall_wr_xmt(int verbose, int *bufferalloc, char **bufferptr, void *s
 
 /*--------------------------------------------------------------------*/
 
-int mbr_kemkmall_wr_xms(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, size_t *size, int *error) {
+int mbr_kemkmall_wr_xms(int verbose, size_t *bufferalloc, char **bufferptr, void *store_ptr, size_t *size, int *error) {
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
-    fprintf(stderr, "dbg2       bufferalloc:%d\n", *bufferalloc);
+    fprintf(stderr, "dbg2       bufferalloc:%zu\n", *bufferalloc);
     fprintf(stderr, "dbg2       bufferptr:  %p\n", (void *)bufferptr);
     fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
   }
@@ -8306,14 +8309,14 @@ int mbr_kemkmall_wr_xms(int verbose, int *bufferalloc, char **bufferptr, void *s
 
 /*--------------------------------------------------------------------*/
 
-int mbr_kemkmall_wr_unknown(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, size_t *size, int *error) {
+int mbr_kemkmall_wr_unknown(int verbose, size_t *bufferalloc, char **bufferptr, void *store_ptr, size_t *size, int *error) {
   (void)size;  // unused
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
-    fprintf(stderr, "dbg2       bufferalloc:%d\n", *bufferalloc);
+    fprintf(stderr, "dbg2       bufferalloc:%zu\n", *bufferalloc);
     fprintf(stderr, "dbg2       bufferptr:  %p\n", (void *)bufferptr);
     fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
   }
@@ -8352,7 +8355,7 @@ int mbr_kemkmall_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 
   // size_t write_len = 0;
   char **bufferptr = NULL;
-  int *bufferalloc = NULL;
+  size_t *bufferalloc = NULL;
   size_t size = 0;
 
   /* get pointer to mbio descriptor */
@@ -8360,7 +8363,7 @@ int mbr_kemkmall_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 
   /* get buffer and related vars from mbio saved values */
   bufferptr = (char **)&mb_io_ptr->raw_data;
-  bufferalloc = (int *)&mb_io_ptr->structure_size;
+  bufferalloc = (size_t *)&mb_io_ptr->structure_size;
   // char *buffer = (char *)*bufferptr;
 
   /* get pointer to raw data structure */

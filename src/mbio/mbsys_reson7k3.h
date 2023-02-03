@@ -541,7 +541,7 @@ typedef struct s7k3_CustomAttitude_struct {
   u8 reserved;   // reserved field
   u16 n;         // number of fields
   f32 frequency; // sample rate (samples/second)
-  i32 nalloc;    // number of samples allocated
+  u32 nalloc;    // number of samples allocated
   f32 *pitch;
   f32 *roll;
   f32 *heading;
@@ -588,7 +588,7 @@ typedef struct s7k3_MotionOverGround_struct {
   u8 reserved;   // reserved field
   u16 n;         // number of fields
   f32 frequency; // sample rate (samples/second)
-  i32 nalloc;    // number of samples allocated
+  u32 nalloc;    // number of samples allocated
   f32 *x;          // Motion data x
   f32 *y;          // Motion data y
   f32 *z;          // Motion data z
@@ -621,7 +621,7 @@ typedef struct s7k3_SoundVelocityProfile_struct {
   f64 latitude;         // Latitude (radians)
   f64 longitude;        // Longitude (radians)
   u32 n;                // number of fields
-  i32 nalloc;           // number of samples allocated
+  u32 nalloc;           // number of samples allocated
   f32 *depth;           // depth (meters)
   f32 *sound_velocity;  // sound velocity (meters/second)
 } s7k3_SoundVelocityProfile;
@@ -658,7 +658,7 @@ typedef struct s7k3_CTD_struct {
   f64 longitude;               // Longitude (radians)
   f32 sample_rate;             // Sample rate
   u32 n;                       // Number of fields
-  i32 nalloc;                  // Number of samples allocated
+  u32 nalloc;                  // Number of samples allocated
   f32 *conductivity_salinity;  // Conductivity (s/m) or salinity (ppt)
   f32 *temperature;            // Temperature (degrees celcius)
   f32 *pressure_depth;         // Pressure (pascals) or depth (meters)
@@ -744,7 +744,7 @@ typedef struct s7k3_SurveyLine_struct {
   f32 turnradius;  // Turn radius between line segments
                 //    (meters, 0 = no curvature in turns)
   c8 name[64];     // Line name
-  i32 nalloc;      // Number of points allocated
+  u32 nalloc;      // Number of points allocated
   f64 *latitude_northing;   // Latitude (radians, -pi/2 to pi/2)
   f64 *longitude_easting;  // Longitude (radians -pi to pi)
 } s7k3_SurveyLine;
@@ -771,7 +771,7 @@ typedef struct s7k3_Navigation_struct {
 typedef struct s7k3_Attitude_struct {
   s7k3_header header;
   u8 n;            // number of datasets
-  i32 nalloc;                 // number of samples allocated
+  u32 nalloc;                 // number of samples allocated
   u16 *delta_time; // Time difference with record timestamp (msec)
   f32 *roll;                // Roll (radians)
   f32 *pitch;               // Pitch (radians)

@@ -1483,7 +1483,7 @@ static void *s_test_worker(void *pargs)
                             snd->nbeams = test_beams;
                             snd->ping_number = cx;
                             snd->ts = mtime_dtime();
-                            int k=0;
+                            unsigned int k=0;
                             for(k=0;k<test_beams;k++){
                                 snd->beams[k].beam_num=k;
                                 snd->beams[k].rhox = cx*1.;

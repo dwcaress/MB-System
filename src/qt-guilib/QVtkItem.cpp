@@ -1,5 +1,6 @@
 #include "QVtkItem.h"
 #include "QVtkRenderer.h"
+#include "TopoColorMap.h"
 
 using namespace mb_system;
 
@@ -11,7 +12,7 @@ QVtkItem::QVtkItem() :
     qDebug() << "mirrorVertically: " << mirrorVertically();
     // Qt and OpenGL apparently have opposite y-axis direction
     setMirrorVertically(true);
-    displayProperties_.verticalExagg = 1.;
+
 }
 
 QQuickFramebufferObject::Renderer *QVtkItem::createRenderer() const {
@@ -96,3 +97,20 @@ bool QVtkItem::getAppBusy() {
   return appTaskBusy_;
 }
 
+
+bool QVtkItem::setColorMapScheme(const char *colorMapName) {
+  qDebug() << "setColormap() " << colorMapName;
+  
+  // Check for valid colorMap name
+
+  TopoColorMap::Scheme scheme = TopoColorMap::schemeFromName(colorMapName);
+  if (scheme == TopoColorMap::Scheme::Unknown) {
+    return false;
+  }
+
+  displayProperties_.colorMapScheme(scheme);
+  displayProperties_.changed(true);
+  
+  return true;
+
+}

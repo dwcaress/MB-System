@@ -52,7 +52,7 @@ DataLogWriter::DataLogWriter(const char *objectName,
     trnLogDir = ".";
   }
 
-  sprintf(_fileName, "%s/%s/%s.log", trnLogDir, LatestLogDirName, name());
+  snprintf(_fileName, sizeof(_fileName), "%s/%s/%s.log", trnLogDir, LatestLogDirName, name());
 
   openFile();
 

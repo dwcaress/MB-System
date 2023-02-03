@@ -11,15 +11,18 @@
 #include <vtkRenderer.h>
 #include <vtkActor.h>
 #include <vtkCubeAxesActor.h>
+#include <vtkCubeAxesActor2D.h>
 #include <vtkSmartPointer.h>
 #include <vtkElevationFilter.h>
 #include <vtkTransform.h>
 #include <vtkTransformFilter.h>
 #include <vtkPolyDataMapper.h>
 #include <vtkNamedColors.h>
-#include "GmtGridReader.h"
+#include "TopoGridReader.h"
 #include "DisplayProperties.h"
 #include "PickerInteractorStyle.h"
+
+#define SELECTED_POINT_FILE "selectedPoint.txt"
 
 namespace mb_system {
 
@@ -74,8 +77,8 @@ namespace mb_system {
     }
 
     /// Return pointer to DisplayProperties member
-    const DisplayProperties* getDisplayProperties() {
-      return (const DisplayProperties *)displayProperties_;
+    DisplayProperties* getDisplayProperties() {
+      return displayProperties_;
     }
 
     /// Get item member
@@ -83,7 +86,14 @@ namespace mb_system {
       return item_;
     }
     
-                                                                 
+    /// Get grid reader
+    TopoGridReader *getGridReader() {
+      return gridReader_;
+    }
+
+    /// Set picked point coordinates
+    void setPickedPoint(double *worldXYZ);
+
   public slots:
 
     /// Called when worker thread finishes
@@ -93,7 +103,7 @@ namespace mb_system {
   protected:
 
     /// Display properties copied from QVtkItem
-    const DisplayProperties *displayProperties_;
+    mb_system::DisplayProperties *displayProperties_;
     
     /// Initilize VTK pipeline member objects, then assemble (connect) ; return
     /// false on error.
@@ -102,14 +112,23 @@ namespace mb_system {
     /// Connect pipeline components
     bool assemblePipeline();
 
-    /// Setup axes
-    static void setupAxes(vtkCubeAxesActor *axesActor,
-                          vtkColor3d &axisColor,
-                          double *surfaceBounds,
-                          double *gridBounds,
-                          const char *xUnits, const char *yUnits,
-                          const char *zUnits);
+    /// Setup axes, using vtkCubeAxesActor2D
+    void setupAxes(vtkCubeAxesActor2D *axesActor,
+                   vtkNamedColors *namedColors,
+                   double *surfaceBounds,
+                   double *gridBounds,
+                   const char *xUnits, const char *yUnits,
+                   const char *zUnits);
 
+    /// Setup axes, using vtkCubeAxesActor
+    void setupAxes(vtkCubeAxesActor *axesActor,
+                   vtkNamedColors *namedColors,
+                   double *surfaceBounds,
+                   double *gridBounds,
+                   const char *xUnits, const char *yUnits,
+                   const char *zUnits);
+
+    
     /// If item_ grid filename differs from gridFilename_, copy it and
     /// return true, else return false
     bool gridFilenameChanged(char *filename);
@@ -120,8 +139,8 @@ namespace mb_system {
     /// Item being rendered
     QVtkItem *item_;
     
-    /// GMT grid reader
-    vtkSmartPointer<GmtGridReader> gridReader_;
+    /// Topo grid reader
+    vtkSmartPointer<TopoGridReader> gridReader_;
 
     /// Elevation color filter
     vtkSmartPointer<vtkElevationFilter> elevColorizer_;
@@ -142,7 +161,7 @@ namespace mb_system {
     vtkSmartPointer<vtkActor> surfaceActor_;
 
     /// Grid axes actor
-    vtkSmartPointer<vtkCubeAxesActor> axesActor_;    
+    vtkSmartPointer<vtkCubeAxesActor> axesActor_;        
 
     /// VTK renderer
     vtkSmartPointer<vtkRenderer> renderer_;
@@ -171,8 +190,13 @@ namespace mb_system {
     /// Latest mouse move event
     std::shared_ptr<QMouseEvent> mouseMoveEvent_;
 
-    /// Most recent displayed z-scale
-    float prevZScale_;
+    /// Coordinates of latest selected point
+    vtkSmartPointer<vtkPolyData> pickedPoint_;
+
+    /// Indicate whether pickedPoint_ has been selected
+    bool pointPicked_;
+
+    bool newPointPicked_;
     
     /// Worker thread to load grid file
     class LoadFileWorker : public QThread {

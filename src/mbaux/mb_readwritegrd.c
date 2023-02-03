@@ -708,7 +708,7 @@ int mb_write_gmt_grd(int verbose, const char *grdfile, float *grid,
     strcpy(program_name, "");
   char user[256], host[256], date[32];
   status = mb_user_host_date(verbose, user, host, date, error);
-  mb_path remark = {0};
+  char remark[2048];
   sprintf(remark, "\n\tProjection: %s\n\tGrid created by %s\n\tMB-system Version %s\n\tRun by <%s> on <%s> at <%s>", projection,
           program_name, MB_VERSION, user, host, date);
 

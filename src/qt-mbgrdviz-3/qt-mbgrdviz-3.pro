@@ -51,7 +51,7 @@ INSTALLS += target
 
 QMAKE_RPATHDIR += $$(PWD)/../qt-guilib/
 
-LIBS += -L../qt-guilib -lMBGui
+LIBS += -L../../build/src/qt-guilib -lMBGui
 
 # GMT_LIBS may contain spaces, need to 'split'
 gmtLibs = $$getenv("GMT_LIBS")

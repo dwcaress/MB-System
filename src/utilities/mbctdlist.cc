@@ -72,9 +72,9 @@ int printsimplevalue(int verbose, double value, int width, int precision, bool a
 	if (*invert)
 		strcpy(format, "%g");
 	else if (width > 0)
-		sprintf(&format[1], "%d.%df", width, precision);
+		snprintf(&format[1], 23, "%d.%df", width, precision);
 	else
-		sprintf(&format[1], ".%df", precision);
+		snprintf(&format[1], 23, ".%df", precision);
 
 	/* invert value if desired */
 	if (*invert) {

@@ -350,7 +350,7 @@ int main(int argc, char **argv) {
 			esf_mode = MB_ESF_MODE_EXPLICIT;
     char user[256], host[256], date[32];
     status = mb_user_host_date(verbose, user, host, date, &error);
-		sprintf(esf_header,
+		snprintf(esf_header, sizeof(esf_header),
 				"ESFVERSION03\nESF Mode: %d\nMB-System Version %s\nProgram: %s\nUser: %s\nCPU: %s\nDate: %s\n",
 				esf_mode, MB_VERSION, program_name, user, host, date);
 		if (fwrite(esf_header, MB_PATH_MAXLINE, 1, sofp) != 1) {

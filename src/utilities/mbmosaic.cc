@@ -1169,7 +1169,7 @@ int main(int argc, char **argv) {
           } else if (optarg[0] == 'n' || optarg[0] == 'c' || optarg[0] == 'b'
                     || optarg[0] == 'r' || optarg[0] == 's' || optarg[0] == 'a'
                     || optarg[0] == 'e' || optarg[0] == 'g'){
-            sprintf(gridkindstring, "=%s", optarg);
+            snprintf(gridkindstring, sizeof(gridkindstring), "=%s", optarg);
             gridkind = MBMOSAIC_GMTGRD;
           } else {
             fprintf(stdout, "Invalid gridkind option: -G%s\n\n", optarg);
@@ -1514,9 +1514,9 @@ int main(int argc, char **argv) {
 			const int utm_zone = (int)(((reference_lon + 183.0) / 6.0) + 0.5);
 			reference_lat = 0.5 * (gbnd[2] + gbnd[3]);
 			if (reference_lat >= 0.0)
-				sprintf(projection_id, "UTM%2.2dN", utm_zone);
+				snprintf(projection_id, sizeof(projection_id), "UTM%2.2dN", utm_zone);
 			else
-				sprintf(projection_id, "UTM%2.2dS", utm_zone);
+				snprintf(projection_id, sizeof(projection_id), "UTM%2.2dS", utm_zone);
 		}
 		else
 			strcpy(projection_id, projection_pars);
@@ -2671,8 +2671,8 @@ int main(int argc, char **argv) {
 	/***** end of first pass gridding *****/
 
 	double clipvalue = NO_DATA_FLAG;
-	mb_path ofile = "";
-	char plot_cmd[MB_COMMENT_MAXLINE] = "";
+	char ofile[2*MB_PATH_MAXLINE+100] = "";
+	char plot_cmd[4*MB_COMMENT_MAXLINE] = "";
 	int plot_status;
 
 
@@ -2688,9 +2688,9 @@ int main(int argc, char **argv) {
 	int nbinset, nbinzero, nbinspline;
 
 	/* output char strings */
-	mb_path xlabel = "";
-	mb_path ylabel = "";
-	mb_path zlabel = "";
+	char xlabel[1050] = "";
+	char ylabel[1050] = "";
+	char zlabel[1050] = "";
 	mb_path title = "";
 	mb_path nlabel = "";
 	mb_path sdlabel = "";
@@ -3639,8 +3639,8 @@ int main(int argc, char **argv) {
 
 	/* set plot label strings */
 	if (use_projection) {
-		sprintf(xlabel, "Easting (%s)", units);
-		sprintf(ylabel, "Northing (%s)", units);
+		snprintf(xlabel, sizeof(xlabel), "Easting (%s)", units);
+		snprintf(ylabel, sizeof(ylabel), "Northing (%s)", units);
 	}
 	else {
 		strcpy(xlabel, "Longitude");
@@ -3712,7 +3712,7 @@ int main(int argc, char **argv) {
 		                          zmax, dx, dy, xlabel, ylabel, zlabel, title, projection_id, argc, argv, &error);
 	}
 	else if (gridkind == MBMOSAIC_GMTGRD) {
-		sprintf(ofile, "%s.grd%s", fileroot, gridkindstring);
+		snprintf(ofile, sizeof(ofile), "%s.grd%s", fileroot, gridkindstring);
 		status = mb_write_gmt_grd(verbose, ofile, output, outclipvalue, xdim, ydim, gbnd[0], gbnd[1], gbnd[2], gbnd[3], zmin,
 		                          zmax, dx, dy, xlabel, ylabel, zlabel, title, projection_id, argc, argv, &error);
 	}
@@ -3760,7 +3760,7 @@ int main(int argc, char **argv) {
 			                          zmax, dx, dy, xlabel, ylabel, zlabel, title, projection_id, argc, argv, &error);
 		}
 		else if (gridkind == MBMOSAIC_GMTGRD) {
-			sprintf(ofile, "%s_num.grd%s", fileroot, gridkindstring);
+			snprintf(ofile, sizeof(ofile), "%s_num.grd%s", fileroot, gridkindstring);
 			status = mb_write_gmt_grd(verbose, ofile, output, outclipvalue, xdim, ydim, gbnd[0], gbnd[1], gbnd[2], gbnd[3], zmin,
 			                          zmax, dx, dy, xlabel, ylabel, zlabel, title, projection_id, argc, argv, &error);
 		}
@@ -3807,7 +3807,7 @@ int main(int argc, char **argv) {
 			                          zmax, dx, dy, xlabel, ylabel, zlabel, title, projection_id, argc, argv, &error);
 		}
 		else if (gridkind == MBMOSAIC_GMTGRD) {
-			sprintf(ofile, "%s_sd.grd%s", fileroot, gridkindstring);
+			snprintf(ofile, sizeof(ofile), "%s_sd.grd%s", fileroot, gridkindstring);
 			status = mb_write_gmt_grd(verbose, ofile, output, outclipvalue, xdim, ydim, gbnd[0], gbnd[1], gbnd[2], gbnd[3], zmin,
 			                          zmax, dx, dy, xlabel, ylabel, zlabel, title, projection_id, argc, argv, &error);
 		}
@@ -3844,11 +3844,11 @@ int main(int argc, char **argv) {
 		strcpy(ofile, fileroot);
 		strcat(ofile, ".grd");
 		if (datatype == MBMOSAIC_DATA_AMPLITUDE) {
-			sprintf(plot_cmd, "mbm_grdplot -I%s%s -G1 -W1/4 -S -D -V -L\"File %s - %s:%s\"", ofile, gridkindstring, ofile, title,
+			snprintf(plot_cmd, sizeof(plot_cmd), "mbm_grdplot -I%s%s -G1 -W1/4 -S -D -V -L\"File %s - %s:%s\"", ofile, gridkindstring, ofile, title,
 			        zlabel);
 		}
 		else {
-			sprintf(plot_cmd, "mbm_grdplot -I%s%s -G1 -W1/4 -S -D -V -L\"File %s - %s:%s\"", ofile, gridkindstring, ofile, title,
+			snprintf(plot_cmd, sizeof(plot_cmd), "mbm_grdplot -I%s%s -G1 -W1/4 -S -D -V -L\"File %s - %s:%s\"", ofile, gridkindstring, ofile, title,
 			        zlabel);
 		}
 		if (verbose) {
@@ -3863,7 +3863,7 @@ int main(int argc, char **argv) {
 		/* execute mbm_grdplot */
 		strcpy(ofile, fileroot);
 		strcat(ofile, "_num.grd");
-		sprintf(plot_cmd, "mbm_grdplot -I%s%s -G1 -W1/2 -V -L\"File %s - %s:%s\"", ofile, gridkindstring, ofile, title, nlabel);
+		snprintf(plot_cmd, sizeof(plot_cmd), "mbm_grdplot -I%s%s -G1 -W1/2 -V -L\"File %s - %s:%s\"", ofile, gridkindstring, ofile, title, nlabel);
 		if (verbose) {
 			fprintf(stderr, "\nexecuting mbm_grdplot...\n%s\n", plot_cmd);
 		}
@@ -3875,7 +3875,7 @@ int main(int argc, char **argv) {
 		/* execute mbm_grdplot */
 		strcpy(ofile, fileroot);
 		strcat(ofile, "_sd.grd");
-		sprintf(plot_cmd, "mbm_grdplot -I%s%s -G1 -W1/2 -V -L\"File %s - %s:%s\"", ofile, gridkindstring, ofile, title, sdlabel);
+		snprintf(plot_cmd, sizeof(plot_cmd), "mbm_grdplot -I%s%s -G1 -W1/2 -V -L\"File %s - %s:%s\"", ofile, gridkindstring, ofile, title, sdlabel);
 		if (verbose) {
 			fprintf(stderr, "\nexecuting mbm_grdplot...\n%s\n", plot_cmd);
 		}

@@ -1240,7 +1240,7 @@ int mbsys_navnetcdf_copy(int verbose, void *mbio_ptr, void *store_ptr, void *cop
 		copy->mbPFlag_id = store->mbPFlag_id;
 
 		/* variable pointers */
-		for (int i = 0; i < copy->mbHistoryRecNbr; i++) {
+		for (unsigned int i = 0; i < copy->mbHistoryRecNbr; i++) {
 			copy->mbHistDate[i] = store->mbHistDate[i];
 			copy->mbHistTime[i] = store->mbHistTime[i];
 			copy->mbHistCode[i] = store->mbHistCode[i];

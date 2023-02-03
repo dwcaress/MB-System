@@ -572,8 +572,8 @@ int mbview_pick_text(size_t instance) {
 	struct mbview_struct *data = &(view->data);
 	// fprintf(stderr,"mbview_pick_text: instance:%zu pickinfo_mode:%d\n",instance,data->pickinfo_mode);
 
-  char value_text[MB_PATH_MAXLINE];
-  char value_list[MB_PATH_MAXLINE];
+  char value_text[3*MB_PATH_MAXLINE];
+  char value_list[5*MB_PATH_MAXLINE];
 
 	int time_i[7];
 	char londstr0[24], londstr1[24], lonmstr0[24], lonmstr1[24];

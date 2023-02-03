@@ -237,9 +237,9 @@ int trnif_msg_read_trnmsg(byte **pdest, uint32_t *len, netif_t *self, msock_conn
 
                 if(action==AC_SYNC){
                     // read byte by byte until sync pattern matched
-                    while( (cur-buf)<TRNIF_SYNC_LEN && action!=AC_ERR && !self->stop){
-                        if( (test=msock_recvfrom(peer->sock, peer->addr,cur,1,MSG_DONTWAIT))==1 && TRNIF_SYNC_CMP(*cur,(cur-buf))){
-                            PDPRINT((stderr,"SYNC - OK test[%d] cur[%p/x%02X] cur-buf[%ld] cmp[%d]\n",test,cur,*cur,(cur-buf),(TRNIF_SYNC_CMP(*cur,(cur-buf))?1:0)));
+                    while( (unsigned int)(cur-buf)<TRNIF_SYNC_LEN && action!=AC_ERR && !self->stop){
+                        if( (test=msock_recvfrom(peer->sock, peer->addr,cur,1,MSG_DONTWAIT))==1 && TRNIF_SYNC_CMP(*cur,(unsigned int)(cur-buf))){
+                            PDPRINT((stderr,"SYNC - OK test[%d] cur[%p/x%02X] cur-buf[%ld] cmp[%d]\n",test,cur,*cur,(cur-buf),(TRNIF_SYNC_CMP(*cur,(unsigned int)(cur-buf))?1:0)));
                             cur+=test;
                             msg_bytes+=test;
                             state=ST_SYNC_OK;
