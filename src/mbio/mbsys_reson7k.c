@@ -6034,7 +6034,7 @@ int mbsys_reson7k_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kin
     *nss = 0;
     if (store->read_processedsidescan) {
       *nss = processedsidescan->number_pixels;
-      for (unsigned int i = 0; i < processedsidescan->number_pixels; i++) {
+      for (int i = 0; i < processedsidescan->number_pixels; i++) {
         ss[i] = processedsidescan->sidescan[i];
         ssacrosstrack[i] = processedsidescan->pixelwidth * (i - (int)processedsidescan->number_pixels / 2);
         ssalongtrack[i] = processedsidescan->alongtrack[i];
