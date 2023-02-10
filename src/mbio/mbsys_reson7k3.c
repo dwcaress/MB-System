@@ -6357,7 +6357,7 @@ int mbsys_reson7k3_extract(int verbose, void *mbio_ptr, void *store_ptr, int *ki
     // extract processed multibeam sidescan
     if (status == MB_SUCCESS && store->read_ProcessedSideScan) {
 			*nss = ProcessedSideScan->number_pixels;
-			for (unsigned int i = 0; i < ProcessedSideScan->number_pixels; i++) {
+			for (int i = 0; i < (int)ProcessedSideScan->number_pixels; i++) {
 				ss[i] = ProcessedSideScan->sidescan[i];
 				ssacrosstrack[i] = ProcessedSideScan->pixelwidth * (i - (int)ProcessedSideScan->number_pixels / 2);
 				ssalongtrack[i] = ProcessedSideScan->alongtrack[i];
@@ -9216,7 +9216,7 @@ int mbsys_reson7k3_makess_source(
     for (int i = 0; i < nss; i++) {
       ssacrosstrack[i] = (*pixel_size) * (double)(i - (nss / 2));
     }
-
+    
     // Loop over raw backscatter or SideScan from the desired source,
     // putting each raw sample into the binning arrays. The possible
     // source records are:

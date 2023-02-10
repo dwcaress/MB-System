@@ -502,7 +502,7 @@ int main(int argc, char **argv) {
       case 'C':
       case 'c':
       {
-        const int n = sscanf(optarg, "%d/%d", &clip, &clipmode);
+        const int n = sscanf(optarg, "%d/%d", &clip, (int *)&clipmode);
         if (n < 1)
           clipmode = MBGRID_INTERP_NONE;
         else if (n == 1 && clip > 0)

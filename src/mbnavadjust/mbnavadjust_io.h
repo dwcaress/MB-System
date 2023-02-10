@@ -37,8 +37,6 @@
 #define MBNA_FILE_VERSION_MINOR 14
 
 /* mbnavadjust global defines */
-#define STRING_MAX 10 * MB_PATH_MAXLINE
-#define BUFFER_MAX STRING_MAX
 #define ALLOC_NUM 10
 #define MBNA_REFGRID_NUM_MAX  25
 #define MBNA_SNAV_NUM 11
@@ -252,8 +250,8 @@ struct mbna_file {
   int status;
   int id;
   int output_id;
-  char file[STRING_MAX];
-  char path[STRING_MAX];
+  mb_path file;
+  mb_path path;
   int format;
   double heading_bias_import;
   double roll_bias_import;
@@ -321,7 +319,7 @@ struct mbna_crossing {
 };
 struct mbna_grid {
   int status;
-  char projection_id[STRING_MAX];
+  mb_path projection_id;
   void *pjptr;
   double bounds[4];
   double boundsutm[4];
@@ -341,11 +339,11 @@ struct mbna_grid {
 };
 struct mbna_project {
   int open;
-  char name[STRING_MAX];
-  char path[STRING_MAX];
-  char home[STRING_MAX];
-  char datadir[STRING_MAX];
-  char logfile[STRING_MAX];
+  mb_path name;
+  mb_path path;
+  mb_path home;
+  mb_path datadir;
+  mb_path logfile;
   FILE *logfp;
 
   int num_files;

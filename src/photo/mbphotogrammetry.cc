@@ -228,7 +228,7 @@ int main(int argc, char** argv)
 
     /* Output bathymetry variables */
     mb_path OutputFileRoot;
-    mb_path OutputFile;
+    mb_pathplus OutputFile;
     int output_number_pairs = 0;
     void *mbio_ptr = NULL;
     void *store_ptr = NULL;
@@ -1391,7 +1391,7 @@ int main(int argc, char** argv)
         }
 
     /* Open output good imagelist including good disparity fraction values */
-    mb_path OutputImagelist;
+    mb_pathplus OutputImagelist;
     FILE *oilfp = NULL;
     snprintf(OutputImagelist, sizeof(OutputImagelist), "%s_ImagePairs.mb-2", OutputFileRoot);
     if ((oilfp = fopen(OutputImagelist, "w")) == NULL)

@@ -647,16 +647,16 @@ int measure_update() {
 
             memset(obuf,0,256);
             bp=obuf;
-			snprintf(bp, sizeof(bp), "\nARL : Estimation Bias(Max. Likelihood): (t = %.2f)\n",
+			snprintf(bp, sizeof(obuf), "\nARL : Estimation Bias(Max. Likelihood): (t = %.2f)\n",
 				mleEst.time);
             bp=obuf+strlen(obuf);
-			snprintf(bp, sizeof(bp), "ARL : North: %.4f, East: %.4f, Depth: %.4f\n",
+			snprintf(bp, sizeof(obuf)-strlen(obuf), "ARL : North: %.4f, East: %.4f, Depth: %.4f\n",
 				mleEst.x-_currEst.x, mleEst.y-_currEst.y, mleEst.z-_currEst.z);
             bp=obuf+strlen(obuf);
-			snprintf(bp, sizeof(bp), "ARL : Estimation Bias  (Mean)         : (t = %.2f)\n",
+			snprintf(bp, sizeof(obuf)-strlen(obuf), "ARL : Estimation Bias  (Mean)         : (t = %.2f)\n",
 				mmseEst.time);
             bp=obuf+strlen(obuf);
-			snprintf(bp, sizeof(bp), "ARL : North: %.4f, East: %.4f, Depth: %.4f\n",
+			snprintf(bp, sizeof(obuf)-strlen(obuf), "ARL : North: %.4f, East: %.4f, Depth: %.4f\n",
 				mmseEst.x-_currEst.x, mmseEst.y-_currEst.y, mmseEst.z-_currEst.z);
             bp=obuf+strlen(obuf);
             logs(TL_OMASK(TL_TRN_SERVER, TL_LOG),"%s",obuf);

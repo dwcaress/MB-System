@@ -397,7 +397,7 @@ int mbr_hysweep1_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 					status = mbr_hysweep1_rd_line(verbose, mb_io_ptr->mbfp, line, error);
 
 					/* parse the line */
-          char *saveptr;
+                    char *saveptr;
 					if (status == MB_SUCCESS && (token = strtok_r(line + 0, " ", &saveptr)) != NULL) {
 						nread = 0;
 						for (int i = 0; i < store->RMB_num_beams && token != NULL; i++) {
@@ -419,7 +419,7 @@ int mbr_hysweep1_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 					status = mbr_hysweep1_rd_line(verbose, mb_io_ptr->mbfp, line, error);
 
 					/* parse the line */
-          char *saveptr;
+                    char *saveptr;
 					if (status == MB_SUCCESS && (token = strtok_r(line + 0, " ", &saveptr)) != NULL) {
 						nread = 0;
 						for (int i = 0; i < store->RMB_num_beams && token != NULL; i++) {
@@ -441,7 +441,7 @@ int mbr_hysweep1_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 					status = mbr_hysweep1_rd_line(verbose, mb_io_ptr->mbfp, line, error);
 
 					/* parse the line */
-          char *saveptr;
+                    char *saveptr;
 					if (status == MB_SUCCESS && (token = strtok_r(line + 0, " ", &saveptr)) != NULL) {
 						nread = 0;
 						for (int i = 0; i < store->RMB_num_beams && token != NULL; i++) {
@@ -463,7 +463,7 @@ int mbr_hysweep1_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 					status = mbr_hysweep1_rd_line(verbose, mb_io_ptr->mbfp, line, error);
 
 					/* parse the line */
-          char *saveptr;
+                    char *saveptr;
 					if (status == MB_SUCCESS && (token = strtok_r(line + 0, " ", &saveptr)) != NULL) {
 						nread = 0;
 						for (int i = 0; i < store->RMB_num_beams && token != NULL; i++) {
@@ -485,7 +485,7 @@ int mbr_hysweep1_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 					status = mbr_hysweep1_rd_line(verbose, mb_io_ptr->mbfp, line, error);
 
 					/* parse the line */
-          char *saveptr;
+                    char *saveptr;
 					if (status == MB_SUCCESS && (token = strtok_r(line + 0, " ", &saveptr)) != NULL) {
 						nread = 0;
 						for (int i = 0; i < store->RMB_num_beams && token != NULL; i++) {
@@ -507,7 +507,7 @@ int mbr_hysweep1_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 					status = mbr_hysweep1_rd_line(verbose, mb_io_ptr->mbfp, line, error);
 
 					/* parse the line */
-          char *saveptr;
+                    char *saveptr;
 					if (status == MB_SUCCESS && (token = strtok_r(line + 0, " ", &saveptr)) != NULL) {
 						nread = 0;
 						for (int i = 0; i < store->RMB_num_beams && token != NULL; i++) {
@@ -529,7 +529,7 @@ int mbr_hysweep1_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 					status = mbr_hysweep1_rd_line(verbose, mb_io_ptr->mbfp, line, error);
 
 					/* parse the line */
-          char *saveptr;
+                    char *saveptr;
 					if (status == MB_SUCCESS && (token = strtok_r(line + 0, " ", &saveptr)) != NULL) {
 						nread = 0;
 						for (int i = 0; i < store->RMB_num_beams && token != NULL; i++) {
@@ -551,7 +551,7 @@ int mbr_hysweep1_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 					status = mbr_hysweep1_rd_line(verbose, mb_io_ptr->mbfp, line, error);
 
 					/* parse the line */
-          char *saveptr;
+                    char *saveptr;
 					if (status == MB_SUCCESS && (token = strtok_r(line + 0, " ", &saveptr)) != NULL) {
 						nread = 0;
 						for (int i = 0; i < store->RMB_num_beams && token != NULL; i++) {
@@ -573,7 +573,7 @@ int mbr_hysweep1_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 					status = mbr_hysweep1_rd_line(verbose, mb_io_ptr->mbfp, line, error);
 
 					/* parse the line */
-          char *saveptr;
+                    char *saveptr;
 					if (status == MB_SUCCESS && (token = strtok_r(line + 0, " ", &saveptr)) != NULL) {
 						nread = 0;
 						for (int i = 0; i < store->RMB_num_beams && token != NULL; i++) {
@@ -595,7 +595,7 @@ int mbr_hysweep1_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 					status = mbr_hysweep1_rd_line(verbose, mb_io_ptr->mbfp, line, error);
 
 					/* parse the line */
-          char *saveptr;
+                    char *saveptr;
 					if (status == MB_SUCCESS && (token = strtok_r(line + 0, " ", &saveptr)) != NULL) {
 						nread = 0;
 						for (int i = 0; i < store->RMB_num_beams && token != NULL; i++) {
@@ -617,7 +617,7 @@ int mbr_hysweep1_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 					status = mbr_hysweep1_rd_line(verbose, mb_io_ptr->mbfp, line, error);
 
 					/* parse the line */
-          char *saveptr;
+                    char *saveptr;
 					if (status == MB_SUCCESS && (token = strtok_r(line + 0, " ", &saveptr)) != NULL) {
 						nread = 0;
 						for (int i = 0; i < store->RMB_num_beams && token != NULL; i++) {
@@ -639,7 +639,7 @@ int mbr_hysweep1_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 					status = mbr_hysweep1_rd_line(verbose, mb_io_ptr->mbfp, line, error);
 
 					/* parse the line */
-          char *saveptr;
+          			char *saveptr;
 					if (status == MB_SUCCESS && (token = strtok_r(line + 0, " ", &saveptr)) != NULL) {
 						nread = 0;
 						for (int i = 0; i < store->RMB_num_beams && token != NULL; i++) {
@@ -661,7 +661,7 @@ int mbr_hysweep1_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 					status = mbr_hysweep1_rd_line(verbose, mb_io_ptr->mbfp, line, error);
 
 					/* parse the line */
-          char *saveptr;
+          			char *saveptr;
 					if (status == MB_SUCCESS && (token = strtok_r(line + 0, " ", &saveptr)) != NULL) {
 						nread = 0;
 						for (int i = 0; i < store->RMB_num_beams && token != NULL; i++) {
@@ -683,7 +683,7 @@ int mbr_hysweep1_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 					status = mbr_hysweep1_rd_line(verbose, mb_io_ptr->mbfp, line, error);
 
 					/* parse the line */
-          char *saveptr;
+          			char *saveptr;
 					if (status == MB_SUCCESS && (token = strtok_r(line + 0, " ", &saveptr)) != NULL) {
 						nread = 0;
 						for (int i = 0; i < store->RMB_num_beams && token != NULL; i++) {
@@ -705,7 +705,7 @@ int mbr_hysweep1_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 					status = mbr_hysweep1_rd_line(verbose, mb_io_ptr->mbfp, line, error);
 
 					/* parse the line */
-          char *saveptr;
+          			char *saveptr;
 					if (status == MB_SUCCESS && (token = strtok_r(line + 0, " ", &saveptr)) != NULL) {
 						nread = 0;
 						for (int i = 0; i < store->RMB_num_beams && token != NULL; i++) {
@@ -870,7 +870,7 @@ int mbr_hysweep1_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 					status = mbr_hysweep1_rd_line(verbose, mb_io_ptr->mbfp, line, error);
 
 					/* parse the line */
-          char *saveptr;
+          			char *saveptr;
 					if (status == MB_SUCCESS && (token = strtok_r(line + 0, " ", &saveptr)) != NULL) {
 						nread = 0;
 						for (int i = 0; i < store->RSS_port_num_samples && token != NULL; i++) {
@@ -892,7 +892,7 @@ int mbr_hysweep1_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 					status = mbr_hysweep1_rd_line(verbose, mb_io_ptr->mbfp, line, error);
 
 					/* parse the line */
-          char *saveptr;
+          			char *saveptr;
 					if (status == MB_SUCCESS && (token = strtok_r(line + 0, " ", &saveptr)) != NULL) {
 						nread = 0;
 						for (int i = 0; i < store->RSS_starboard_num_samples && token != NULL; i++) {
@@ -983,7 +983,7 @@ int mbr_hysweep1_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 					status = mbr_hysweep1_rd_line(verbose, mb_io_ptr->mbfp, line, error);
 
 					/* parse the line */
-          char *saveptr;
+          			char *saveptr;
 					if (status == MB_SUCCESS && (token = strtok_r(line + 0, " ", &saveptr)) != NULL) {
 						nread = 0;
 						for (int i = 0; i < store->MSS_num_pixels && token != NULL; i++) {
@@ -1005,7 +1005,7 @@ int mbr_hysweep1_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 					status = mbr_hysweep1_rd_line(verbose, mb_io_ptr->mbfp, line, error);
 
 					/* parse the line */
-          char *saveptr;
+          			char *saveptr;
 					if (status == MB_SUCCESS && (token = strtok_r(line + 0, " ", &saveptr)) != NULL) {
 						nread = 0;
 						for (int i = 0; i < store->MSS_num_pixels && token != NULL; i++) {
@@ -1285,7 +1285,7 @@ int mbr_hysweep1_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 				store->type = MBSYS_HYSWEEP_RECORDTYPE_DEV;
 
 				/* parse the first line */
-        char *saveptr;
+        		char *saveptr;
 				token = strtok_r(line + 4, " ", &saveptr);
 				nscan = sscanf(token, "%d", &(DEV_device_number));
 				if (nscan == 1) {
@@ -1533,7 +1533,7 @@ int mbr_hysweep1_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 						store->INF_tide_correction = 0.0;
 				}
 				else {
-          char *saveptr;
+          			char *saveptr;
 					if ((token = strtok_r(line + 3, "\"", &saveptr)) != NULL) {
 						token = strtok_r(NULL, "\"", &saveptr);
 						if (token != NULL && token[0] != ' ') {
@@ -2075,56 +2075,125 @@ int mbr_rt_hysweep1(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 
 	/* if survey data then calculate angles and bathymetry as necessary */
 	if (status == MB_SUCCESS && store->kind == MB_DATA_DATA) {
+	
 		/* get mapping sonar device pointer */
 		device = (struct mbsys_hysweep_device_struct *)&(store->devices[store->RMB_device_number]);
-
+		
+		/* set data content flags */
+		bool RMB_available_range = store->RMB_beam_data_available & 0x0001;
+		bool RMB_available_soundingcastings = store->RMB_beam_data_available & 0x0002;
+		bool RMB_available_northing = store->RMB_beam_data_available & 0x0004;
+		bool RMB_available_correcteddepth = store->RMB_beam_data_available & 0x0008;
+		bool RMB_available_along = store->RMB_beam_data_available & 0x0010;
+		bool RMB_available_across = store->RMB_beam_data_available & 0x0020;
+		bool RMB_available_bathymetry = RMB_available_correcteddepth
+												&& RMB_available_along
+												&& RMB_available_across;
+		bool RMB_available_rollangles = store->RMB_beam_data_available & 0x0040;
+		bool RMB_available_pitchangles = store->RMB_beam_data_available & 0x0080;
+		bool RMB_available_rollpitchangles = RMB_available_rollangles 
+												&& RMB_available_pitchangles;
+		bool RMB_available_takeoffangles = store->RMB_beam_data_available & 0x0100;
+		bool RMB_available_directionangles = store->RMB_beam_data_available & 0x0200;
+		bool RMB_available_sphericalangles = RMB_available_takeoffangles 
+												&& RMB_available_directionangles;
+		bool RMB_available_pingdelaytimes = store->RMB_beam_data_available & 0x0400;
+		bool RMB_available_beamintensity = store->RMB_beam_data_available & 0x0800;
+		bool RMB_available_beamquality = store->RMB_beam_data_available & 0x1000;
+		bool RMB_available_beamflags = store->RMB_beam_data_available & 0x2000;
+		bool recalculate_bathymetry = false;
+		
 		/* deal with case of multibeam sonar */
 		if (store->RMB_beam_data_available & 0x0001) {
-			/* handle data that starts with beam angles in roll and pitch coordinates */
+
+			/* handle multibeam data that starts with beam angles in roll and pitch coordinates */
 			if (store->RMB_sonar_type == 1 || store->RMB_sonar_type == 2) {
+			
 				/* get beam roll angles if necessary */
-				if (!(store->RMB_beam_data_available & 0x0080)) {
+				if (!RMB_available_pitchangles) {
 					for (int i = 0; i < store->RMB_num_beams; i++) {
 						store->RMB_sounding_rollangles[i] = device->MBI_first_beam_angle + i * device->MBI_angle_increment;
 					}
-					store->RMB_beam_data_available = store->RMB_beam_data_available | 0x0080;
+					RMB_available_pitchangles = true;
 				}
 
 				/* get beam pitch angles if necessary */
-				if (!(store->RMB_beam_data_available & 0x0040)) {
+				if (!RMB_available_rollangles) {
 					for (int i = 0; i < store->RMB_num_beams; i++) {
 						store->RMB_sounding_pitchangles[i] = 0.0;
 					}
-					store->RMB_beam_data_available = store->RMB_beam_data_available | 0x0040;
+					RMB_available_rollangles= true;
+				}
+				
+				/* reset roll pitch flag */
+				RMB_available_rollpitchangles = RMB_available_rollangles 
+												&& RMB_available_pitchangles;
+
+				/* get beam takeoff and azimuthal angles if necessary */
+				if (!RMB_available_sphericalangles) {
+					for (int i = 0; i < store->RMB_num_beams; i++) {
+						alpha = store->RMB_sounding_pitchangles[i];
+						beta = 90.0 + store->RMB_sounding_rollangles[i];
+
+						/* correct alpha for pitch if necessary */
+						if (!(device->MBI_sonar_flags & 0x0002))
+							alpha += store->RMBint_pitch;
+
+						/* correct beta for roll if necessary */
+						if (!(device->MBI_sonar_flags & 0x0001))
+							beta += store->RMBint_roll;
+
+						mb_rollpitch_to_takeoff(verbose, alpha, beta, &theta, &phi, error);
+						store->RMB_sounding_takeoffangles[i] = theta;
+						store->RMB_sounding_azimuthalangles[i] = 90.0 - phi;
+					}
+					RMB_available_takeoffangles = true;
+					RMB_available_directionangles = true;
+					RMB_available_sphericalangles = true;
 				}
 			}
 
-			/* get beam takeoff and azimuthal angles if necessary */
-			if (!(store->RMB_beam_data_available & 0x0100) || !(store->RMB_beam_data_available & 0x0200)) {
-				for (int i = 0; i < store->RMB_num_beams; i++) {
-					alpha = store->RMB_sounding_pitchangles[i];
-					beta = 90.0 + store->RMB_sounding_rollangles[i];
+			/* handle multibeam data that starts with beam angles in spherical takeoff coordinates */
+			else if (store->RMB_sonar_type == 3) {
+			
+				/* if beam angles are not already corrected for roll and pitch, translate
+					angles to roll and pitch, correct, and translate back to spherical */
+				if (RMB_available_sphericalangles 
+					&& (!(device->MBI_sonar_flags & 0x0002)
+						|| !(device->MBI_sonar_flags & 0x0001))) {
+					/* get roll pitch angles */
+					for (int i = 0; i < store->RMB_num_beams; i++) {
+						theta = store->RMB_sounding_takeoffangles[i];
+						phi = 90.0 - store->RMB_sounding_azimuthalangles[i];
+						
+						mb_takeoff_to_rollpitch(verbose, theta, phi, &alpha, &beta, error);
 
-					/* correct alpha for pitch if necessary */
-					if (!(device->MBI_sonar_flags & 0x0002))
-						alpha += store->RMBint_pitch;
+						/* correct alpha for pitch if necessary */
+						if (!(device->MBI_sonar_flags & 0x0002))
+							alpha += store->RMBint_pitch;
 
-					/* correct beta for roll if necessary */
-					if (!(device->MBI_sonar_flags & 0x0001))
-						beta += store->RMBint_roll;
+						/* correct beta for roll if necessary */
+						if (!(device->MBI_sonar_flags & 0x0001))
+							beta += store->RMBint_roll;
 
-					mb_rollpitch_to_takeoff(verbose, alpha, beta, &theta, &phi, error);
-					store->RMB_sounding_takeoffangles[i] = theta;
-					store->RMB_sounding_azimuthalangles[i] = 90.0 - phi;
+						mb_rollpitch_to_takeoff(verbose, alpha, beta, &theta, &phi, error);
+						store->RMB_sounding_takeoffangles[i] = theta;
+						store->RMB_sounding_azimuthalangles[i] = 90.0 - phi;
+					}
 				}
-				store->RMB_beam_data_available = store->RMB_beam_data_available | 0x0300;
 			}
 
 			/* get beam bathymetry if necessary */
-			if (!(store->RMB_beam_data_available & 0x0008) || !(store->RMB_beam_data_available & 0x0010) ||
-			    !(store->RMB_beam_data_available & 0x0020)) {
+			if (!RMB_available_bathymetry || recalculate_bathymetry) {
+				double range_scale = 1.0;
+				if (device->MBI_sonar_flags & 0x0010)
+					range_scale = 1.0;
+//fprintf(stderr, "%s%d:%s: store->RMB_sonar_flags: %d 0x%x device->MBI_sonar_flags: %d 0x%x  range_scale:%f\n", 
+//__FILE__, __LINE__, __FUNCTION__, 
+//store->RMB_sonar_flags, store->RMB_sonar_flags,
+//device->MBI_sonar_flags, device->MBI_sonar_flags, range_scale);
 				for (int i = 0; i < store->RMB_num_beams; i++) {
-					rr = store->RMB_beam_ranges[i];
+					rr = range_scale * store->RMB_beam_ranges[i];
 					theta = store->RMB_sounding_takeoffangles[i];
 					phi = 90.0 - store->RMB_sounding_azimuthalangles[i];
 					xx = rr * sin(DTR * theta);
@@ -2133,15 +2202,17 @@ int mbr_rt_hysweep1(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 					store->RMB_sounding_along[i] = xx * sin(DTR * phi);
 					store->RMB_sounding_depths[i] = zz + store->RMBint_draft + store->RMBint_heave;
 				}
-				store->RMB_beam_data_available = store->RMB_beam_data_available | 0x0038;
+				RMB_available_correcteddepth = true;
+				RMB_available_along = true;
+				RMB_available_across = true;
+				RMB_available_bathymetry = true;
 			}
 
 			/* get beam flags if necessary */
-			if (!(store->RMB_beam_data_available & 0x2000)) {
+			if (!RMB_available_beamflags) {
 				for (int i = 0; i < store->RMB_num_beams; i++) {
 					store->RMB_sounding_flags[i] = MB_FLAG_NONE;
 				}
-				store->RMB_beam_data_available = store->RMB_beam_data_available | 0x2000;
 
 				/* incorporate quality values */
 				if ((store->RMB_beam_data_available & 0x1000) && strncmp(device->DEV_device_name, "Reson Seabat 8", 14) == 0) {
@@ -2155,20 +2226,27 @@ int mbr_rt_hysweep1(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 				if ((store->RMB_beam_data_available & 0x0001)) {
 					for (int i = 0; i < store->RMB_num_beams; i++) {
 						if (store->RMB_beam_ranges[i] <= 0.0)
-							store->RMB_sounding_flags[i] = MB_FLAG_FLAG + MB_FLAG_SONAR;
+							store->RMB_sounding_flags[i] = MB_FLAG_NULL;
 					}
 				}
+				RMB_available_beamflags = true;
 			}
+//for (int i = 0; i < store->RMB_num_beams; i++) {
+//fprintf(stderr, "%s%d:%s: bath[%d]: %f %f %f %x\n",
+//__FILE__, __LINE__, __FUNCTION__, 
+//i, store->RMB_sounding_depths[i],store->RMB_sounding_across[i],
+//store->RMB_sounding_along[i],store->RMB_sounding_flags[i]);
+//}
 		}
 
 		/* deal with case of multiple transducer sonar */
-		if (store->RMB_beam_data_available & 0x0002) {
+		if (store->RMB_sonar_type == 3 || RMB_available_soundingcastings) {
 			/* get beam roll angles if necessary */
-			if (!(store->RMB_beam_data_available & 0x0080)) {
+			if (!RMB_available_rollangles) {
 				for (int i = 0; i < store->RMB_num_beams; i++) {
 					store->RMB_sounding_rollangles[i] = 0.0;
 				}
-				store->RMB_beam_data_available = store->RMB_beam_data_available | 0x0080;
+				RMB_available_rollangles = true;
 			}
 
 			/* correct beam roll angles for roll if necessary */
@@ -2179,22 +2257,22 @@ int mbr_rt_hysweep1(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			}
 
 			/* get beam pitch angles if necessary */
-			if (!(store->RMB_beam_data_available & 0x0040)) {
-				if (!(device->MBI_sonar_flags & 0x0002)) {
-					for (int i = 0; i < store->RMB_num_beams; i++) {
-						store->RMB_sounding_pitchangles[i] = store->RMBint_pitch;
-					}
+			if (!RMB_available_pitchangles) {
+				for (int i = 0; i < store->RMB_num_beams; i++) {
+					store->RMB_sounding_pitchangles[i] = 0.0;
 				}
-				else {
-					for (int i = 0; i < store->RMB_num_beams; i++) {
-						store->RMB_sounding_pitchangles[i] = 0.0;
-					}
+				RMB_available_pitchangles = true;
+			}
+
+			/* correct beam pitch angles for roll if necessary */
+			if (!(device->MBI_sonar_flags & 0x0002)) {
+				for (int i = 0; i < store->RMB_num_beams; i++) {
+					store->RMB_sounding_pitchangles[i] = store->RMBint_pitch;
 				}
-				store->RMB_beam_data_available = store->RMB_beam_data_available | 0x0040;
 			}
 
 			/* get beam takeoff and azimuthal angles if necessary */
-			if (!(store->RMB_beam_data_available & 0x0100) || !(store->RMB_beam_data_available & 0x0200)) {
+			if (!RMB_available_sphericalangles) {
 				for (int i = 0; i < store->RMB_num_beams; i++) {
 					alpha = store->RMB_sounding_pitchangles[i];
 					beta = 90.0 - store->RMB_sounding_rollangles[i];
@@ -2202,14 +2280,18 @@ int mbr_rt_hysweep1(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 					store->RMB_sounding_takeoffangles[i] = theta;
 					store->RMB_sounding_azimuthalangles[i] = 90.0 - phi;
 				}
-				store->RMB_beam_data_available = store->RMB_beam_data_available | 0x0300;
+				RMB_available_takeoffangles = true;
+				RMB_available_directionangles = true;
+				RMB_available_sphericalangles = true;
 			}
 
 			/* get beam bathymetry if necessary */
-			if (!(store->RMB_beam_data_available & 0x0004) || !(store->RMB_beam_data_available & 0x0008) ||
-			    !(store->RMB_beam_data_available & 0x0010) || !(store->RMB_beam_data_available & 0x0020)) {
+			if (!RMB_available_bathymetry || recalculate_bathymetry) {
+				double range_scale = 1.0;
+				if (store->RMB_sonar_flags &0x0010)
+					range_scale = 0.1;
 				for (int i = 0; i < store->RMB_num_beams; i++) {
-					rr = store->RMB_multi_ranges[i];
+					rr = range_scale *store->RMB_multi_ranges[i];
 					theta = store->RMB_sounding_takeoffangles[i];
 					phi = 90.0 - store->RMB_sounding_azimuthalangles[i];
 					xx = rr * sin(DTR * theta);
@@ -2218,17 +2300,60 @@ int mbr_rt_hysweep1(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 					store->RMB_sounding_along[i] = xx * sin(DTR * phi);
 					store->RMB_sounding_depths[i] = zz + store->RMBint_draft + store->RMBint_heave;
 				}
-				store->RMB_beam_data_available = store->RMB_beam_data_available | 0x003C;
+				RMB_available_bathymetry = true;
 			}
 
 			/* get beam flags if necessary */
-			if (!(store->RMB_beam_data_available & 0x2000)) {
+			if (!RMB_available_beamflags) {
 				for (int i = 0; i < store->RMB_num_beams; i++) {
 					store->RMB_sounding_flags[i] = MB_FLAG_NONE;
 				}
-				store->RMB_beam_data_available = store->RMB_beam_data_available | 0x2000;
+				RMB_available_beamflags = true;
 			}
 		}
+		
+		/* reset RMB flags */
+		if (RMB_available_range) 
+			store->RMB_beam_data_available = store->RMB_beam_data_available & 0x0001;
+		if (RMB_available_soundingcastings) 
+			store->RMB_beam_data_available = store->RMB_beam_data_available & 0x0002;
+		if (RMB_available_northing) 
+			store->RMB_beam_data_available = store->RMB_beam_data_available & 0x0004;
+		if (RMB_available_correcteddepth) 
+			store->RMB_beam_data_available = store->RMB_beam_data_available & 0x0008;
+		if (RMB_available_along) 
+			store->RMB_beam_data_available = store->RMB_beam_data_available & 0x0010;
+		if (RMB_available_across) 
+			store->RMB_beam_data_available = store->RMB_beam_data_available & 0x0020;
+		if (RMB_available_bathymetry)  {
+			store->RMB_beam_data_available = store->RMB_beam_data_available & 0x0008;
+			store->RMB_beam_data_available = store->RMB_beam_data_available & 0x0010;
+			store->RMB_beam_data_available = store->RMB_beam_data_available & 0x0020;
+		}
+		if (RMB_available_rollangles) 
+			store->RMB_beam_data_available = store->RMB_beam_data_available & 0x0040;
+		if (RMB_available_pitchangles) 
+			store->RMB_beam_data_available = store->RMB_beam_data_available & 0x0080;
+		if (RMB_available_rollpitchangles)  {
+			store->RMB_beam_data_available = store->RMB_beam_data_available & 0x0040;
+			store->RMB_beam_data_available = store->RMB_beam_data_available & 0x0080;
+		}
+		if (RMB_available_takeoffangles) 
+			store->RMB_beam_data_available = store->RMB_beam_data_available & 0x0100;
+		if (RMB_available_directionangles) 
+			store->RMB_beam_data_available = store->RMB_beam_data_available & 0x0200;
+		if (RMB_available_sphericalangles)  {
+			store->RMB_beam_data_available = store->RMB_beam_data_available & 0x0100;
+			store->RMB_beam_data_available = store->RMB_beam_data_available & 0x0200;
+		}
+		if (RMB_available_pingdelaytimes) 
+			store->RMB_beam_data_available = store->RMB_beam_data_available & 0x0400;
+		if (RMB_available_beamintensity) 
+			store->RMB_beam_data_available = store->RMB_beam_data_available & 0x0800;
+		if (RMB_available_beamquality) 
+			store->RMB_beam_data_available = store->RMB_beam_data_available & 0x1000;
+		if (RMB_available_beamflags) 
+			store->RMB_beam_data_available = store->RMB_beam_data_available & 0x2000;
 
 		/* generate processed sidescan if needed */
 		if (store->MSS_ping_number != store->RSS_ping_number &&
@@ -2499,7 +2624,7 @@ int mbr_hysweep1_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 			hysweeptmp.num_devices++;
 		}
 
-		if (verbose >= 4) {
+		if (verbose >= 0) {
 			fprintf(stderr, "\ndbg4  FTP data record to be written by MBIO function <%s>\n", __func__);
 			fprintf(stderr, "dbg4       FTP_record:                        %s\n", hysweeptmp.FTP_record);
 			fprintf(stderr, "\ndbg4  HSX data record to be written by MBIO function <%s>\n", __func__);

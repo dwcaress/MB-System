@@ -1670,13 +1670,13 @@ int main(int argc, char **argv) {
     /* now concatenate the log.txt from the input project with the log.txt for the new output project */
     // fprintf(stderr, "Executing in shell: %s\n", command);
     {
-      char command[(2*STRING_MAX)+100] = "";
+      mb_command command = "";
       sprintf(command, "mv %s/log.txt %s/logorg.txt", project_output.datadir, project_output.datadir);
       /* int shellstatus = */ system(command);
     }
     // fprintf(stderr, "Executing in shell: %s\n", command);
     {
-      char command[(3*STRING_MAX)+100] = "";
+      mb_command command = "";
       sprintf(command, "cat %s/log.txt %s/logorg.txt > %s/log.txt", project_inputbase.datadir, project_output.datadir,
               project_output.datadir);
       /* int shellstatus = */ system(command);
@@ -1692,7 +1692,7 @@ int main(int argc, char **argv) {
     for (int i = 0; i < project_output.num_files; i++) {
       /* copy the file navigation */
       {
-        char command[2*STRING_MAX+100] = "";
+        mb_command command = "";
         sprintf(command, "cp %s/nvs_%4.4d.mb166 %s", project_inputbase.datadir, i, project_output.datadir);
         // fprintf(stderr, "Executing in shell: %s\n", command);
         /* int shellstatus = */ system(command);
@@ -1701,7 +1701,7 @@ int main(int argc, char **argv) {
       /* copy all the section files */
       for (int j = 0; j < project_output.files[i].num_sections; j++) {
         /* copy the section file */
-        char command[2*STRING_MAX+100] = "";
+        mb_command command = "";
         sprintf(command, "cp %s/nvs_%4.4d_%4.4d.mb71* %s", project_inputbase.datadir, i, j, project_output.datadir);
         // fprintf(stderr, "Executing in shell: %s\n", command);
         /* int shellstatus = */ system(command);
@@ -1831,7 +1831,7 @@ int main(int argc, char **argv) {
 
     /* now concatenate the log.txt from the inputadd project with the log.txt for the new output project */
     {
-      char command[3*STRING_MAX+100] = "";
+      mb_command command = "";
       sprintf(command, "cat %s/log.txt %s/logorg.txt > %s/log.txt", project_inputadd.datadir, project_output.datadir,
               project_output.datadir);
       // fprintf(stderr, "Executing in shell: %s\n", command);
@@ -1851,7 +1851,7 @@ int main(int argc, char **argv) {
 
       /* copy the file navigation */
       {
-        char command[2*STRING_MAX+100] = "";
+        mb_command command = "";
         sprintf(command, "cp %s/nvs_%4.4d.mb166 %s/nvs_%4.4d.mb166", project_inputadd.datadir, i, project_output.datadir, k);
         // fprintf(stderr, "Executing in shell: %s\n", command);
         /* int shellstatus = */ system(command);
@@ -1860,7 +1860,7 @@ int main(int argc, char **argv) {
       /* copy all the section files */
       for (int j = 0; j < project_inputadd.files[i].num_sections; j++) {
         /* copy the section file */
-        char command[2*STRING_MAX+100] = "";
+        mb_command command = "";
         sprintf(command, "cp %s/nvs_%4.4d_%4.4d.mb71 %s/nvs_%4.4d_%4.4d.mb71", project_inputadd.datadir, i, j,
                 project_output.datadir, k, j);
         // fprintf(stderr, "Executing in shell: %s\n", command);
@@ -3301,7 +3301,7 @@ int main(int argc, char **argv) {
       // loop over all files and sections making the triangles for contouring
       project_output.triangle_scale = triangle_scale;
       for (int ifile = 0; ifile < project_output.num_files; ifile++) {
-        char trianglefile[STRING_MAX+100];
+        mb_pathplus trianglefile;
         struct stat file_status;
         file = &(project_output.files[ifile]);
         for (int isection = 0; isection < file->num_sections; isection++) {
@@ -3395,8 +3395,8 @@ int main(int argc, char **argv) {
       // renaming them *.mb166 files
       for (int ifile = 0; ifile < project_output.num_files; ifile++) {
         file = &(project_output.files[ifile]);
-        char fnvfile[STRING_MAX+10];
-        char command[2*STRING_MAX+100];
+        mb_pathplus fnvfile;
+        mb_pathplusplus command;
         sprintf(fnvfile, "%s.fnv", file->path);
         struct stat file_status;
         if (stat(fnvfile, &file_status) == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR
@@ -3421,19 +3421,19 @@ int main(int argc, char **argv) {
       // reset S_NAV sensordepth values from the *.mb166 files
       for (int ifile = 0; ifile < project_output.num_files; ifile++) {
         file = &(project_output.files[ifile]);
-        char npath[STRING_MAX+100];
+        mb_pathplus npath;
         FILE *nfp = NULL;
         sprintf(npath, "%s/nvs_%4.4d.mb166", project_output.datadir, ifile);
         struct stat file_status;
         if (stat(npath, &file_status) == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR
                       && file_status.st_size > 0 && (nfp = fopen(npath, "r")) != NULL) {
-          char buffer[BUFFER_MAX];
+          mb_command buffer;
           char *result;
           int time_i[7];
           double seconds, time_d, navlon, navlat, heading, speed, draft, roll, pitch, heave = 0.0;
           double *nav_time_d, *nav_lon, *nav_lat, *nav_sensordepth = NULL;
           int nnav_alloc = 0;
-          while ((result = fgets(buffer, BUFFER_MAX, nfp)) == buffer)
+          while ((result = fgets(buffer, sizeof(buffer), nfp)) == buffer)
             nnav_alloc++;
           rewind(nfp);
           if (nnav_alloc > 0) {
@@ -3452,7 +3452,7 @@ int main(int argc, char **argv) {
             int nnav = 0;
             while (!done) {
               int nscan = 0;
-              if ((result = fgets(buffer, BUFFER_MAX, nfp)) != buffer) {
+              if ((result = fgets(buffer, sizeof(buffer), nfp)) != buffer) {
                 done = true;
               }
               else if ((nscan = sscanf(buffer, "%d %d %d %d %d %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf", &time_i[0],
@@ -3538,9 +3538,9 @@ int main(int argc, char **argv) {
   double import_globaltie_offset_zsigma;
   FILE *tfp;
 
-  char buffer[BUFFER_MAX];
+  mb_command buffer;
   char *result = NULL;
-  char filename[2*STRING_MAX+100] = "";
+  mb_pathplusplus filename = "";
   bool found = false;
   int itie_set, isnav;
   double timediff, timediffmin;
@@ -3565,7 +3565,7 @@ int main(int argc, char **argv) {
       import_status = IMPORT_NONE;
 
       /* read the next line  */
-      if ((result = fgets(buffer, BUFFER_MAX, tfp)) != buffer) {
+      if ((result = fgets(buffer, sizeof(buffer), tfp)) != buffer) {
         done = true;
       }
       else if (strncmp(buffer, "TIE", 3) == 0) {
@@ -3575,7 +3575,7 @@ int main(int argc, char **argv) {
                             &import_tie_status, &import_tie_snav_1_time_d, &import_tie_snav_2_time_d,
                             &import_tie_offset_x_m, &import_tie_offset_y_m, &import_tie_offset_z_m)) == 8) {
           /* read the second line of the next tie */
-          if ((result = fgets(buffer, BUFFER_MAX, tfp)) != buffer) {
+          if ((result = fgets(buffer, sizeof(buffer), tfp)) != buffer) {
             done = true;
           }
           else if ((nscan = sscanf(buffer, "COV %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf", &import_tie_sigmar1,

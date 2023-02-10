@@ -120,6 +120,8 @@ typedef struct {
 
 /* maximum path length in characters */
 #define MB_PATH_MAXLINE 1024
+#define MB_PATHPLUS_MAXLINE 1152
+#define MB_PATHPLUSPLUS_MAXLINE 2304
 
 /* maximum comment length in characters */
 #define MB_COMMENT_MAXLINE 1944
@@ -135,6 +137,8 @@ typedef struct {
 
 /* typedef for path string */
 typedef char mb_path[MB_PATH_MAXLINE];
+typedef char mb_pathplus[MB_PATHPLUS_MAXLINE];
+typedef char mb_pathplusplus[MB_PATHPLUSPLUS_MAXLINE];
 typedef char mb_name[MB_NAME_LENGTH];
 typedef char mb_longname[MB_LONGNAME_LENGTH];
 typedef char mb_command[MB_COMMAND_LENGTH];

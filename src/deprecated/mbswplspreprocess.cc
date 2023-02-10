@@ -68,8 +68,6 @@
 #include "mb_status.h"
 #include "mbsys_swathplus.h"
 
-constexpr int MAX_ERROR_STRING = 1024;
-
 typedef struct mbdefaults_struct {
 	int verbose;
 	int format;
@@ -610,7 +608,7 @@ static int remove_rejected_samps(int verbose, swpls_sxpping *ping, int *error) {
 	swpls_point *points;
 	int status = mb_mallocd(verbose, __FILE__, __LINE__, valid * sizeof(swpls_point), (void **)&points, error);
 	if (status != MB_SUCCESS) {
-		char message[MAX_ERROR_STRING] = {0};
+		mb_path message = {0};
 		snprintf(message, sizeof(message), "Failure to allocate memory for temporary array (%lu bytes)", valid * sizeof(swpls_point));
 		error_exit(verbose, *error, "mb_mallocd", message);
 	}
@@ -645,7 +643,7 @@ static int remove_rejected_samps(int verbose, swpls_sxpping *ping, int *error) {
 } /* remove_rejected_samps */
 
 /*----------------------------------------------------------------------*/
-static int set_outfile_names(int verbose, mb_path *ofile, mb_path ifile, mb_path *basename, bool ofile_set, bool split_txers,
+static int set_outfile_names(int verbose, mb_pathplus *ofile, mb_path ifile, mb_path *basename, bool ofile_set, bool split_txers,
                              int *error) {
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  function <%s> called\n", __func__);
@@ -815,14 +813,14 @@ static int process_output(int verbose, mbdefaults *mbdflts, options *opts, mb_pa
 	int beams_bath_alloc;
 	int beams_amp_alloc;
 	int pixels_ss_alloc;
-	mb_path ofile[SWPLS_MAX_TXERS];
+	mb_pathplus ofile[SWPLS_MAX_TXERS];
 	struct mbsys_swathplus_struct *istore = nullptr;
 
 	/* open the input file */
 	if (mb_read_init(opts->verbose, ifile, opts->format, mbdflts->pings_get, mbdflts->lonflip, mbdflts->bounds,
 	                           mbdflts->btime_i, mbdflts->etime_i, mbdflts->speedmin, mbdflts->timegap, &imbio_ptr, &btime_d,
 	                           &etime_d, &beams_bath_alloc, &beams_amp_alloc, &pixels_ss_alloc, error) != MB_SUCCESS) {
-		char message[MAX_ERROR_STRING] = {0};
+		mb_pathplus message = "";
 		snprintf(message, sizeof(message), "Swath File <%s> not initialized for reading\n", ifile);
 		error_exit(opts->verbose, *error, "mb_read_init", message);
 	}
@@ -903,7 +901,7 @@ static int process_output(int verbose, mbdefaults *mbdflts, options *opts, mb_pa
 					status = mb_write_init(opts->verbose, ofile[txidx], opts->format, &ombio_ptr[txidx], &obeams_bath,
 					                       &obeams_amp, &opixels_ss, error);
 					if (status != MB_SUCCESS) {
-						char message[MAX_ERROR_STRING+50] = {0};
+						char message[MB_PATHPLUS_MAXLINE] = {0};
 						snprintf(message, sizeof(message), "SWATHplus file <%s> not initialized for writing.\n", ofile[txidx]);
 						error_exit(verbose, *error, "mb_write_init", message);
 					}
@@ -932,7 +930,7 @@ static int process_output(int verbose, mbdefaults *mbdflts, options *opts, mb_pa
 
 				/* check for error writing here */
 				if (status != MB_SUCCESS) {
-					char message[MAX_ERROR_STRING+50] = {0};
+					char message[MB_PATHPLUS_MAXLINE] = {0};
 					snprintf(message, sizeof(message), "Data not written to file <%s>\n", ofile[txidx]);
 					error_exit(opts->verbose, *error, "mb_write_ping", message);
 				}
@@ -1168,7 +1166,7 @@ int main(int argc, char **argv) {
 	if (read_datalist) {
 		const int look_processed = MB_DATALIST_LOOK_UNSET;
 		if (mb_datalist_open(opts.verbose, &datalist, opts.read_file, look_processed, &error) != MB_SUCCESS) {
-			char message[MAX_ERROR_STRING+50];
+			mb_pathplus message;
 			snprintf(message, sizeof(message), "Unable to open data list file: %s\n", opts.read_file);
 			error_exit(opts.verbose, MB_ERROR_OPEN_FAIL, "mb_datalist_open", message);
 		}

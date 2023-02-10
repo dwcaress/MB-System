@@ -90,7 +90,7 @@ int main(int argc, char **argv) {
   double rangethreshold = 25.0;
   mb_path timelist_file = {0};
   bool timelist_file_set = false;
-  char output_file[MB_PATH_MAXLINE+100] = {0};
+  mb_pathplus output_file = {0};
   bool output_file_set = false;
   waypoint_t waypoint;
 
@@ -297,7 +297,7 @@ int main(int argc, char **argv) {
 
   /* auto plotting */
   FILE *sfp = nullptr;
-  char scriptfile[MB_PATH_MAXLINE+100] = "";
+  mb_pathplus scriptfile = "";
   double seafloordepthmin = -1.0;
   double seafloordepthmax = -1.0;
   double seafloordepthminplot[MBES_NUM_PLOT_MAX];
@@ -536,16 +536,13 @@ int main(int argc, char **argv) {
 
   /* set up plotting script file */
   if ((route_file_set && nroutepoint > 1) || (timelist_file_set && nroutepoint > 1)) {
-    assert(strlen(lineroot) < MB_PATH_MAXLINE - 12);
-    snprintf(scriptfile, sizeof(mb_path), "%s_section.cmd", lineroot);
+    snprintf(scriptfile, sizeof(scriptfile), "%s_section.cmd", lineroot);
   }
   else if (!output_file_set || read_datalist) {
-    assert(strlen(read_file) < MB_PATH_MAXLINE - 12);
-    snprintf(scriptfile, sizeof(mb_path), "%s_section.cmd", read_file);
+    snprintf(scriptfile, sizeof(scriptfile), "%s_section.cmd", read_file);
   }
   else {
-    assert(strlen(file) < MB_PATH_MAXLINE - 12);
-    snprintf(scriptfile, sizeof(mb_path), "%s_section.cmd", file);
+    snprintf(scriptfile, sizeof(scriptfile), "%s_section.cmd", file);
   }
   if ((sfp = fopen(scriptfile, "w")) == nullptr) {
     error = MB_ERROR_OPEN_FAIL;
@@ -1380,7 +1377,7 @@ int main(int argc, char **argv) {
           fprintf(stderr, "%s", command);
           fprintf(sfp, "%s", command);
 
-          snprintf(command, sizeof(command), 
+          snprintf(command, sizeof(command),
                   "mbm_grdplot -I %s_%4.4d_%2.2d_section.grd \\\n\t%s -MGO2/2 -Z%s \\\n\t-Ba250/a0.05g0.05 -G1 "
                   "-W1/4 -D -V \\\n\t-O %s_%4.4d_%2.2d_sectionplot \\\n\t-L\"%s Line %d Plot %d of %d\"\\\n\t-MIE300 -MITg\n",
                   lineroot, linenumber, i + 1, scale, zbounds, lineroot, linenumber, i + 1, lineroot,

@@ -369,7 +369,7 @@ int main(int argc, char *argv[])
             uint32_t *plen = (uint32_t *)((byte *)pchannel + strlen(channel)+1);
             char *pdata = pchannel + strlen(channel)+1+sizeof(uint32_t);
             snprintf(pchannel, sizeof(pchannel), "%s",channel);
-            *plen = snprintf(pdata, sizeof(pdata), "mid[%3d]",msg_n++)+1;
+            *plen = snprintf(pdata, MSGBUFSIZE-strlen(txbuf), "mid[%3d]",msg_n++)+1;
             tx_len=sizeof(lcm_hdr_t) + strlen(channel) + strlen(pdata)+2+sizeof(uint32_t);
 
             fprintf(stderr, "msg bytes\n");

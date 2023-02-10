@@ -407,10 +407,10 @@ struct mbsys_hysweep_struct {
 	        sv: sound velocity
 	    Example:
 	    INF "" "" "" "" 0.00 0.00 1500.00 */
-	mb_name INF_surveyor;        /* INF: surveyor name */
-	mb_name INF_boat;            /* INF: boat name */
-	mb_name INF_project;         /* INF: project name */
-	mb_name INF_area;            /* INF: area name */
+	mb_longname INF_surveyor;        /* INF: surveyor name */
+	mb_longname INF_boat;            /* INF: boat name */
+	mb_longname INF_project;         /* INF: project name */
+	mb_longname INF_area;            /* INF: area name */
 	double INF_tide_correction;  /* INF: initial tide correction */
 	double INF_draft_correction; /* INF: initial draft correction */
 	double INF_sound_velocity;   /* INF: initial sound velocity */

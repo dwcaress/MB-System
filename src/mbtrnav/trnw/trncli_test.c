@@ -1578,7 +1578,7 @@ static void s_init_log(int argc, char **argv, app_cfg_t *cfg)
             (gmt->tm_year+1900),gmt->tm_mon+1,gmt->tm_mday,
             gmt->tm_hour,gmt->tm_min,gmt->tm_sec);
 
-    snprintf(cfg->log_path, sizeof(cfg->log_path), "%s//%s-%s-%s",cfg->log_dir,cfg->log_name,session_date,TRNCLI_TEST_LOG_EXT);
+    snprintf(cfg->log_path, 512, "%s//%s-%s-%s",cfg->log_dir,cfg->log_name,session_date,TRNCLI_TEST_LOG_EXT);
     cfg->log_id = mlog_get_instance(cfg->log_path, cfg->log_cfg, TRNCLI_TEST_LOG_NAME);
 
     if(!cfg->log_en){

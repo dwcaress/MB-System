@@ -1312,26 +1312,34 @@ int mbsys_hysweep_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kin
 		else
 			*namp = 0;
 		for (int i = 0; i < *nbath; i++) {
-			if (store->RMB_sounding_depths != NULL)
+			if (store->RMB_sounding_depths != NULL) {
 				bath[i] = store->RMB_sounding_depths[i];
-			else
+			}
+			else {
 				bath[i] = 0.0;
-			if (store->RMB_sounding_depths != NULL)
+			}
+			if (store->RMB_sounding_across != NULL) {
 				bathacrosstrack[i] = store->RMB_sounding_across[i];
-			else
+			}
+			else {
 				bathacrosstrack[i] = 0.0;
-			if (store->RMB_sounding_depths != NULL)
+			}
+			if (store->RMB_sounding_along != NULL) {
 				bathalongtrack[i] = store->RMB_sounding_along[i];
-			else
+			}
+			else {
 				bathalongtrack[i] = 0.0;
-			if (store->RMB_sounding_depths != NULL)
+			}
+			if (store->RMB_sounding_intensities != NULL) {
 				amp[i] = store->RMB_sounding_intensities[i];
-			else
+			}
+			else {
 				amp[i] = 0.0;
+			}
 			if (store->RMB_sounding_flags != NULL) {
 				beamflag[i] = store->RMB_sounding_flags[i];
 			}
-			else {
+			else if (store->RMB_sounding_quality != NULL) {
 				if (store->RMB_sounding_quality[i] >= store->HSP_high_beam_quality) {
 					beamflag[i] = MB_FLAG_NONE;
 				}
@@ -2331,6 +2339,58 @@ int mbsys_hysweep_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_
 	struct mbsys_hysweep_struct *store = (struct mbsys_hysweep_struct *)store_ptr;
 	struct mbsys_hysweep_struct *copy = (struct mbsys_hysweep_struct *)copy_ptr;
 
+		if (verbose >= 0) {
+			fprintf(stderr, "\ndbg4  FTP data record to be written by MBIO function <%s>\n", __func__);
+			fprintf(stderr, "dbg4       FTP_record:                        %s\n", store->FTP_record);
+			fprintf(stderr, "\ndbg4  HSX data record to be written by MBIO function <%s>\n", __func__);
+			fprintf(stderr, "dbg4       HSX_record:                        %d\n", store->HSX_record);
+			fprintf(stderr, "\ndbg4  VER data record to be written by MBIO function <%s>\n", __func__);
+			fprintf(stderr, "dbg4       VER_version:                       %s\n", store->VER_version);
+			fprintf(stderr, "\ndbg4  TND data record to be written by MBIO function <%s>\n", __func__);
+			fprintf(stderr, "dbg4       TND_survey_time_i[0]:              %d\n", store->TND_survey_time_i[0]);
+			fprintf(stderr, "dbg4       TND_survey_time_i[1]:              %d\n", store->TND_survey_time_i[1]);
+			fprintf(stderr, "dbg4       TND_survey_time_i[2]:              %d\n", store->TND_survey_time_i[2]);
+			fprintf(stderr, "dbg4       TND_survey_time_i[3]:              %d\n", store->TND_survey_time_i[3]);
+			fprintf(stderr, "dbg4       TND_survey_time_i[4]:              %d\n", store->TND_survey_time_i[4]);
+			fprintf(stderr, "dbg4       TND_survey_time_i[5]:              %d\n", store->TND_survey_time_i[5]);
+			fprintf(stderr, "dbg4       TND_survey_time_i[6]:              %d\n", store->TND_survey_time_i[6]);
+			fprintf(stderr, "dbg4       TND_survey_time_d:                 %f\n", store->TND_survey_time_d);
+			fprintf(stderr, "\ndbg4  INF data record to be written by MBIO function <%s>\n", __func__);
+			fprintf(stderr, "dbg4       INF_surveyor:                      %s\n", store->INF_surveyor);
+			fprintf(stderr, "dbg4       INF_boat:                          %s\n", store->INF_boat);
+			fprintf(stderr, "dbg4       INF_project:                       %s\n", store->INF_project);
+			fprintf(stderr, "dbg4       INF_area:                          %s\n", store->INF_area);
+			fprintf(stderr, "dbg4       INF_tide_correction:               %f\n", store->INF_tide_correction);
+			fprintf(stderr, "dbg4       INF_draft_correction:              %f\n", store->INF_draft_correction);
+			fprintf(stderr, "dbg4       INF_sound_velocity:                %f\n", store->INF_sound_velocity);
+			fprintf(stderr, "\ndbg4  HSP data record to be written by MBIO function <%s>\n", __func__);
+			fprintf(stderr, "dbg4       HSP_minimum_depth:                 %f\n", store->HSP_minimum_depth);
+			fprintf(stderr, "dbg4       HSP_maximum_depth:                 %f\n", store->HSP_maximum_depth);
+			fprintf(stderr, "dbg4       HSP_port_offset_limit:             %f\n", store->HSP_port_offset_limit);
+			fprintf(stderr, "dbg4       HSP_stbd_offset_limit:             %f\n", store->HSP_stbd_offset_limit);
+			fprintf(stderr, "dbg4       HSP_port_angle_limit:              %f\n", store->HSP_port_angle_limit);
+			fprintf(stderr, "dbg4       HSP_stbd_angle_limit:              %f\n", store->HSP_stbd_angle_limit);
+			fprintf(stderr, "dbg4       HSP_high_beam_quality:             %d\n", store->HSP_high_beam_quality);
+			fprintf(stderr, "dbg4       HSP_low_beam_quality:              %d\n", store->HSP_low_beam_quality);
+			fprintf(stderr, "dbg4       HSP_sonar_range:                   %f\n", store->HSP_sonar_range);
+			fprintf(stderr, "dbg4       HSP_towfish_layback:               %f\n", store->HSP_towfish_layback);
+			fprintf(stderr, "dbg4       HSP_units:                         %d\n", store->HSP_units);
+			fprintf(stderr, "dbg4       HSP_sonar_id:                      %d\n", store->HSP_sonar_id);
+			fprintf(stderr, "\ndbg4  EOH data record to be written by MBIO function <%s>\n", __func__);
+			fprintf(stderr, "\ndbg4  HVF data record to be written by MBIO function <%s>\n", __func__);
+			fprintf(stderr, "dbg4       HVF_time_after_midnight:           %f\n", store->HVF_time_after_midnight);
+			fprintf(stderr, "dbg4       HVF_minimum_depth:                 %f\n", store->HVF_minimum_depth);
+			fprintf(stderr, "dbg4       HVF_maximum_depth:                 %f\n", store->HVF_maximum_depth);
+			fprintf(stderr, "dbg4       HVF_port_offset_limit:             %f\n", store->HVF_port_offset_limit);
+			fprintf(stderr, "dbg4       HVF_starboard_offset_limit:        %f\n", store->HVF_starboard_offset_limit);
+			fprintf(stderr, "dbg4       HVF_minimum_angle_limit:           %f\n", store->HVF_minimum_angle_limit);
+			fprintf(stderr, "dbg4       HVF_maximum_angle_limit:           %f\n", store->HVF_maximum_angle_limit);
+			fprintf(stderr, "\ndbg4  FIX data record to be written by MBIO function <%s>\n", __func__);
+			fprintf(stderr, "dbg4       FIX_device_number:                 %d\n", store->FIX_device_number);
+			fprintf(stderr, "dbg4       FIX_time_after_midnight:           %f\n", store->FIX_time_after_midnight);
+			fprintf(stderr, "dbg4       FIX_event_number:                  %d\n", store->FIX_event_number);
+		}
+
 	/* copy over structures, allocating memory where necessary */
 	(*copy) = (*store);
 	copy->RMB_beam_ranges = NULL;              /* beam ranges (survey units) */
@@ -2352,51 +2412,81 @@ int mbsys_hysweep_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_
 	int status = MB_SUCCESS;
 
 	if (copy->RMB_num_beams > 0) {
-		if (store->RMB_beam_ranges != NULL)
+		if (store->RMB_beam_ranges != NULL) {
 			status = mb_mallocd(verbose, __FILE__, __LINE__, copy->RMB_num_beams * sizeof(double),
 			                    (void **)&(copy->RMB_beam_ranges), error);
-		if (store->RMB_multi_ranges != NULL)
+			memcpy(copy->RMB_beam_ranges, store->RMB_beam_ranges, copy->RMB_num_beams * sizeof(double));
+		}
+		if (store->RMB_multi_ranges != NULL) {
 			status = mb_mallocd(verbose, __FILE__, __LINE__, copy->RMB_num_beams * sizeof(double),
 			                    (void **)&(copy->RMB_multi_ranges), error);
-		if (store->RMB_sounding_eastings != NULL)
+			memcpy(copy->RMB_multi_ranges, store->RMB_multi_ranges, copy->RMB_num_beams * sizeof(double));
+		}
+		if (store->RMB_sounding_eastings != NULL) {
 			status = mb_mallocd(verbose, __FILE__, __LINE__, copy->RMB_num_beams * sizeof(double),
 			                    (void **)&(copy->RMB_sounding_eastings), error);
-		if (store->RMB_sounding_northings != NULL)
+			memcpy(copy->RMB_sounding_eastings, store->RMB_sounding_eastings, copy->RMB_num_beams * sizeof(double));
+		}
+		if (store->RMB_sounding_northings != NULL) {
 			status = mb_mallocd(verbose, __FILE__, __LINE__, copy->RMB_num_beams * sizeof(double),
 			                    (void **)&(copy->RMB_sounding_northings), error);
-		if (store->RMB_sounding_depths != NULL)
+			memcpy(copy->RMB_sounding_northings, store->RMB_sounding_northings, copy->RMB_num_beams * sizeof(double));
+		}
+		if (store->RMB_sounding_depths != NULL) {
 			status = mb_mallocd(verbose, __FILE__, __LINE__, copy->RMB_num_beams * sizeof(double),
 			                    (void **)&(copy->RMB_sounding_depths), error);
-		if (store->RMB_sounding_across != NULL)
+			memcpy(copy->RMB_sounding_depths, store->RMB_sounding_depths, copy->RMB_num_beams * sizeof(double));
+		}
+		if (store->RMB_sounding_across != NULL) {
 			status = mb_mallocd(verbose, __FILE__, __LINE__, copy->RMB_num_beams * sizeof(double),
 			                    (void **)&(copy->RMB_sounding_across), error);
-		if (store->RMB_sounding_along != NULL)
+			memcpy(copy->RMB_sounding_across, store->RMB_sounding_across, copy->RMB_num_beams * sizeof(double));
+		}
+		if (store->RMB_sounding_along != NULL) {
 			status = mb_mallocd(verbose, __FILE__, __LINE__, copy->RMB_num_beams * sizeof(double),
 			                    (void **)&(copy->RMB_sounding_along), error);
-		if (store->RMB_sounding_pitchangles != NULL)
+			memcpy(copy->RMB_sounding_along, store->RMB_sounding_along, copy->RMB_num_beams * sizeof(double));
+		}
+		if (store->RMB_sounding_pitchangles != NULL) {
 			status = mb_mallocd(verbose, __FILE__, __LINE__, copy->RMB_num_beams * sizeof(double),
 			                    (void **)&(copy->RMB_sounding_pitchangles), error);
-		if (store->RMB_sounding_rollangles != NULL)
+			memcpy(copy->RMB_sounding_pitchangles, store->RMB_sounding_pitchangles, copy->RMB_num_beams * sizeof(double));
+		}
+		if (store->RMB_sounding_rollangles != NULL) {
 			status = mb_mallocd(verbose, __FILE__, __LINE__, copy->RMB_num_beams * sizeof(double),
 			                    (void **)&(copy->RMB_sounding_rollangles), error);
-		if (store->RMB_sounding_takeoffangles != NULL)
+			memcpy(copy->RMB_sounding_rollangles, store->RMB_sounding_rollangles, copy->RMB_num_beams * sizeof(double));
+		}
+		if (store->RMB_sounding_takeoffangles != NULL) {
 			status = mb_mallocd(verbose, __FILE__, __LINE__, copy->RMB_num_beams * sizeof(double),
 			                    (void **)&(copy->RMB_sounding_takeoffangles), error);
-		if (store->RMB_sounding_azimuthalangles != NULL)
+			memcpy(copy->RMB_sounding_takeoffangles, store->RMB_sounding_takeoffangles, copy->RMB_num_beams * sizeof(double));
+		}
+		if (store->RMB_sounding_azimuthalangles != NULL) {
 			status = mb_mallocd(verbose, __FILE__, __LINE__, copy->RMB_num_beams * sizeof(double),
 			                    (void **)&(copy->RMB_sounding_azimuthalangles), error);
-		if (store->RMB_sounding_timedelays != NULL)
+			memcpy(copy->RMB_sounding_azimuthalangles, store->RMB_sounding_azimuthalangles, copy->RMB_num_beams * sizeof(double));
+		}
+		if (store->RMB_sounding_timedelays != NULL) {
 			status = mb_mallocd(verbose, __FILE__, __LINE__, copy->RMB_num_beams * sizeof(int),
 			                    (void **)&(copy->RMB_sounding_timedelays), error);
-		if (store->RMB_sounding_intensities != NULL)
+			memcpy(copy->RMB_sounding_timedelays, store->RMB_sounding_timedelays, copy->RMB_num_beams * sizeof(int));
+		}
+		if (store->RMB_sounding_intensities != NULL) {
 			status = mb_mallocd(verbose, __FILE__, __LINE__, copy->RMB_num_beams * sizeof(int),
 			                    (void **)&(copy->RMB_sounding_intensities), error);
-		if (store->RMB_sounding_quality != NULL)
+			memcpy(copy->RMB_sounding_intensities, store->RMB_sounding_intensities, copy->RMB_num_beams * sizeof(int));
+		}
+		if (store->RMB_sounding_quality != NULL) {
 			status = mb_mallocd(verbose, __FILE__, __LINE__, copy->RMB_num_beams * sizeof(int),
 			                    (void **)&(copy->RMB_sounding_quality), error);
-		if (store->RMB_sounding_flags != NULL)
+			memcpy(copy->RMB_sounding_quality, store->RMB_sounding_quality, copy->RMB_num_beams * sizeof(int));
+		}
+		if (store->RMB_sounding_flags != NULL) {
 			status = mb_mallocd(verbose, __FILE__, __LINE__, copy->RMB_num_beams * sizeof(int),
 			                    (void **)&(copy->RMB_sounding_flags), error);
+			memcpy(copy->RMB_sounding_flags, store->RMB_sounding_flags, copy->RMB_num_beams * sizeof(int));
+		}
 	}
 
 	if (verbose >= 2) {
