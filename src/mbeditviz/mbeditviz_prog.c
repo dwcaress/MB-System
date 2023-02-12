@@ -74,7 +74,7 @@ char *usage_message = NULL;
 
 /* status variables */
 char *error_message;
-char message[MB_PATH_MAXLINE] = "";
+mb_path message = "";
 
 /* data file parameters */
 void *datalist;
@@ -299,10 +299,9 @@ int mbeditviz_init(int argc, char **argv,
   if (input_file_set) {
     mbev_status = mbeditviz_open_data(ifile, mbdef_format);
     if (delete_input_file) {
-      // mb_path shell_command;
-      char shell_command[MB_PATH_MAXLINE + 20];
-      sprintf(shell_command, "rm %s &", ifile);
-      /* const int shellstatus = */ system(shell_command);
+      mb_pathplus shell_command;
+      snprintf(shell_command, sizeof(shell_command), "rm %s &", ifile);
+      system(shell_command);
     }
   }
 
@@ -414,7 +413,7 @@ int mbeditviz_import_file(char *path, int format) {
   else
     root++;
   if (mbev_num_files % 100 == 0) {
-    sprintf(message, "Importing format %d data from %s", format, root);
+    snprintf(message, sizeof(message), "Importing format %d data from %s", format, root);
     (*showMessage)(message);
   }
 
@@ -548,11 +547,9 @@ int mbeditviz_load_file(int ifile, bool assertLock) {
       /* turn off message */
       (*hideMessage)();
 
-#define BUFSIZE (2*MB_PATH_MAXLINE + 50)
-
-      char error1[BUFSIZE] = "";
-      char error2[BUFSIZE] = "";
-      char error3[BUFSIZE] = "";
+      mb_pathplusplus error1 = "";
+      mb_pathplusplus error2 = "";
+      mb_pathplusplus error3 = "";
 
       /* if locked get lock info */
       if (mbev_error == MB_ERROR_FILE_LOCKED) {
@@ -566,9 +563,9 @@ int mbeditviz_load_file(int ifile, bool assertLock) {
          mb_pr_lockinfo(mbev_verbose, file->path, &locked, &lock_purpose, lock_program, lock_user, lock_cpu,
                                      lock_date, &mbev_error);
 
-        sprintf(error1, "Unable to open input file:");
-        sprintf(error2, "File locked by <%s> running <%s>", lock_user, lock_program);
-        sprintf(error3, "on cpu <%s> at <%s>", lock_cpu, lock_date);
+        snprintf(error1, sizeof(error1), "Unable to open input file:");
+        snprintf(error2, sizeof(error1), "File locked by <%s> running <%s>", lock_user, lock_program);
+        snprintf(error3, sizeof(error1), "on cpu <%s> at <%s>", lock_cpu, lock_date);
         fprintf(stderr, "\nUnable to open input file:\n");
         fprintf(stderr, "  %s\n", file->path);
         fprintf(stderr, "File locked by <%s> running <%s>\n", lock_user, lock_program);
@@ -577,9 +574,9 @@ int mbeditviz_load_file(int ifile, bool assertLock) {
 
       /* else if unable to create lock file there is a permissions problem */
       else if (mbev_error == MB_ERROR_OPEN_FAIL) {
-        sprintf(error1, "Unable to create lock file");
-        sprintf(error2, "for intended input file:");
-        sprintf(error3, "-Likely permissions issue");
+        snprintf(error1, sizeof(error1), "Unable to create lock file");
+        snprintf(error2, sizeof(error1), "for intended input file:");
+        snprintf(error3, sizeof(error1), "-Likely permissions issue");
         fprintf(stderr, "Unable to create lock file\n");
         fprintf(stderr, "for intended input file:\n");
         fprintf(stderr, "  %s\n", file->path);
@@ -707,10 +704,10 @@ int mbeditviz_load_file(int ifile, bool assertLock) {
     struct stat file_status;
     FILE *afp;
     mb_path asyncfile = "";
-    char resffile[MB_PATH_MAXLINE + 10] = "";
-    char buffer[MBP_FILENAMESIZE] = "";
+    mb_pathplus resffile = "";
+    mb_path buffer = "";
     char *result = NULL;
-    char command[MBP_FILENAMESIZE+16] = "";
+    mb_pathplus command = "";
     int nread;
     int n_unused;
 
@@ -1033,13 +1030,13 @@ int mbeditviz_load_file(int ifile, bool assertLock) {
           rawmodtime = file_status.st_mtime;
         else
           rawmodtime = 0;
-        sprintf(resffile, "%s.resf", file->path);
+        snprintf(resffile, sizeof(resffile), "%s.resf", file->path);
         if (stat(resffile, &file_status) == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR)
           resfmodtime = file_status.st_mtime;
         else
           resfmodtime = 0;
         if (rawmodtime >= resfmodtime) {
-          sprintf(command, "mbprocess -I %s -P", file->path);
+          snprintf(command, sizeof(command), "mbprocess -I %s -P", file->path);
           fprintf(stderr, "Generating *.resf file by rerunning mbprocess:\n\t%s\n", command);
           /* const int shellstatus = */ system(command);
         }
@@ -1075,7 +1072,7 @@ int mbeditviz_load_file(int ifile, bool assertLock) {
 
             /* update message every 250 records */
             if (iping % 250 == 0) {
-              sprintf(message, "MBeditviz: reverse edits applied to %d of %d records so far...", iping,
+              snprintf(message, sizeof(message), "MBeditviz: reverse edits applied to %d of %d records so far...", iping,
                       file->num_pings);
               (*showMessage)(message);
             }
@@ -1119,7 +1116,7 @@ int mbeditviz_load_file(int ifile, bool assertLock) {
 
           /* update message every 250 records */
           if (iping % 250 == 0) {
-            sprintf(message, "MBeditviz: saved edits applied to %d of %d records so far...", iping, file->num_pings);
+            snprintf(message, sizeof(message), "MBeditviz: saved edits applied to %d of %d records so far...", iping, file->num_pings);
             (*showMessage)(message);
           }
         }
@@ -2310,11 +2307,11 @@ int mbeditviz_get_grid_bounds() {
     if (reference_lon >= 180.0)
       reference_lon -= 360.0;
     const int utm_zone = (int)(((reference_lon + 183.0) / 6.0) + 0.5);
-    char projection_id[MB_PATH_MAXLINE];
+    mb_path projection_id;
     if (reference_lat >= 0.0)
-      sprintf(projection_id, "UTM%2.2dN", utm_zone);
+      snprintf(projection_id, sizeof(projection_id), "UTM%2.2dN", utm_zone);
     else
-      sprintf(projection_id, "UTM%2.2dS", utm_zone);
+      snprintf(projection_id, sizeof(projection_id), "UTM%2.2dS", utm_zone);
     const int proj_status = mb_proj_init(mbev_verbose, projection_id, &(pjptr), &mbev_error);
     if (proj_status != MB_SUCCESS) {
       mbev_status = MB_FAILURE;
@@ -2443,9 +2440,9 @@ int mbeditviz_setup_grid() {
       reference_lon -= 360.0;
     int utm_zone = (int)(((reference_lon + 183.0) / 6.0) + 0.5);
     if (reference_lat >= 0.0)
-      sprintf(mbev_grid.projection_id, "UTM%2.2dN", utm_zone);
+      snprintf(mbev_grid.projection_id, sizeof(mb_path), "UTM%2.2dN", utm_zone);
     else
-      sprintf(mbev_grid.projection_id, "UTM%2.2dS", utm_zone);
+      snprintf(mbev_grid.projection_id, sizeof(mb_path), "UTM%2.2dS", utm_zone);
     const int proj_status = mb_proj_init(mbev_verbose, mbev_grid.projection_id, &(mbev_grid.pjptr), &mbev_error);
     if (proj_status != MB_SUCCESS) {
       mbev_status = MB_FAILURE;
@@ -2545,7 +2542,7 @@ int mbeditviz_project_soundings() {
       struct mbev_file_struct *file = &mbev_files[ifile];
       if (file->load_status) {
         filecount++;
-        sprintf(message, "Projecting file %d of %d...", filecount, mbev_num_files_loaded);
+        snprintf(message, sizeof(message), "Projecting file %d of %d...", filecount, mbev_num_files_loaded);
         (*showMessage)(message);
         for (int iping = 0; iping < file->num_pings; iping++) {
           struct mbev_ping_struct *ping = &(file->pings[iping]);
@@ -2609,7 +2606,7 @@ int mbeditviz_make_grid() {
     struct mbev_file_struct *file = &mbev_files[ifile];
     if (file->load_status) {
       filecount++;
-      sprintf(message, "Gridding file %d of %d...", filecount, mbev_num_files_loaded);
+      snprintf(message, sizeof(message), "Gridding file %d of %d...", filecount, mbev_num_files_loaded);
       (*showMessage)(message);
       for (int iping = 0; iping < file->num_pings; iping++) {
         struct mbev_ping_struct *ping = &(file->pings[iping]);
@@ -2989,9 +2986,9 @@ int mbeditviz_make_grid_simple() {
       reference_lon -= 360.0;
     int utm_zone = (int)(((reference_lon + 183.0) / 6.0) + 0.5);
     if (reference_lat >= 0.0)
-      sprintf(mbev_grid.projection_id, "UTM%2.2dN", utm_zone);
+      snprintf(mbev_grid.projection_id, sizeof(mb_path), "UTM%2.2dN", utm_zone);
     else
-      sprintf(mbev_grid.projection_id, "UTM%2.2dS", utm_zone);
+      snprintf(mbev_grid.projection_id, sizeof(mb_path), "UTM%2.2dS", utm_zone);
     const int proj_status = mb_proj_init(mbev_verbose, mbev_grid.projection_id, &(mbev_grid.pjptr), &mbev_error);
     if (proj_status != MB_SUCCESS) {
       mbev_status = MB_FAILURE;
@@ -3092,7 +3089,7 @@ int mbeditviz_make_grid_simple() {
       struct mbev_file_struct *file = &mbev_files[ifile];
       if (file->load_status) {
         filecount++;
-        sprintf(message, "Gridding file %d of %d...", filecount, mbev_num_files_loaded);
+        snprintf(message, sizeof(message), "Gridding file %d of %d...", filecount, mbev_num_files_loaded);
         (*showMessage)(message);
         for (iping = 0; iping < file->num_pings; iping++) {
           struct mbev_ping_struct *ping = &(file->pings[iping]);
@@ -3989,7 +3986,7 @@ void mbeditviz_mb3dsoundings_info(int ifile, int iping, int ibeam, char *infostr
   /* generate info string */
   struct mbev_file_struct *file = &mbev_files[ifile];
   struct mbev_ping_struct *ping = &(file->pings[iping]);
-  sprintf(infostring,
+  snprintf(infostring, sizeof(mb_path), 
           "Beam %d of %d   Ping %d of %d   File:%s\nPing Time: %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d %f\nLon:%.6f Lat:%.6f "
           "Depth:%.3f X:%.3f L:%.3f A:%.3f",
           ibeam, ping->beams_bath, iping, file->num_pings, file->name, ping->time_i[0], ping->time_i[1], ping->time_i[2],
@@ -4030,14 +4027,15 @@ void mbeditviz_mb3dsoundings_bias(double rollbias, double pitchbias, double head
   int ifilelast = -1;
   int ipinglast = -1;
 
-  // int ifile, iping, ibeam;
-  // double x, y, xx, yy;
-  double zmin;
-  double zmax;
-  // double heading, sonardepth;
-  // double rolldelta, pitchdelta;
-  // double mtodeglon, mtodeglat;
-  // double beam_xtrack, beam_ltrack, beam_z;
+  double zmin = 0.0;
+  double zmax = 0.0;
+
+  double heading = 0.0;
+  double sonardepth = 0.0;
+  double rolldelta = 0.0;
+  double pitchdelta = 0.0;
+  double mtodeglon = 0.0;
+  double mtodeglat = 0.0;
 
   /* apply bias parameters */
   for (int i = 0; i < mbev_selected.num_soundings; i++) {
@@ -4047,12 +4045,6 @@ void mbeditviz_mb3dsoundings_bias(double rollbias, double pitchbias, double head
     struct mbev_file_struct *file = &mbev_files[ifile];
     struct mbev_ping_struct *ping = &(file->pings[iping]);
 
-    double heading = 0.0;
-    double sonardepth = 0.0;
-    double rolldelta = 0.0;
-    double pitchdelta = 0.0;
-    double mtodeglon = 0.0;
-    double mtodeglat = 0.0;
     if (ifile != ifilelast || iping != ipinglast) {
       mbeditviz_apply_biasesandtimelag(file, ping, mbev_rollbias, mbev_pitchbias, mbev_headingbias,
                               mbev_timelag, &heading, &sonardepth, &rolldelta, &pitchdelta);
@@ -4137,7 +4129,7 @@ void mbeditviz_mb3dsoundings_biasapply(double rollbias, double pitchbias, double
   mbev_snell = snell;
 
   /* turn message on */
-  sprintf(message, "Regridding using new bias parameters %f %f %f %f %f\n", mbev_rollbias, mbev_pitchbias, mbev_headingbias,
+  snprintf(message, sizeof(message), "Regridding using new bias parameters %f %f %f %f %f\n", mbev_rollbias, mbev_pitchbias, mbev_headingbias,
           mbev_timelag, mbev_snell);
   (*showMessage)(message);
 
@@ -4224,7 +4216,7 @@ void mbeditviz_mb3dsoundings_flagsparsevoxels(int sizemultiplier, int nsoundingt
   mbev_nsoundingthreshold = nsoundingthreshold;
 
   /* turn message on */
-  sprintf(message, "Filtering sparse (n<%d) voxels (%dXcell)", nsoundingthreshold, sizemultiplier);
+  snprintf(message, sizeof(message), "Filtering sparse (n<%d) voxels (%dXcell)", nsoundingthreshold, sizemultiplier);
   (*showMessage)(message);
   fprintf(stderr, "\nFlagging soundings in sparse voxels:\n");
   fprintf(stderr, "\tvoxel size: %d x cell size = %f meters\n", sizemultiplier, sizemultiplier * mbev_grid_cellsize);
@@ -4372,7 +4364,7 @@ void mbeditviz_mb3dsoundings_flagsparsevoxels(int sizemultiplier, int nsoundingt
 
       if (isounding % 100000 == 0 && isounding > 0) {
         /* update message */
-        sprintf(message, "Processed %d of %d soundings, %d voxels occupied", isounding, mbev_selected.num_soundings,
+        snprintf(message, sizeof(message), "Processed %d of %d soundings, %d voxels occupied", isounding, mbev_selected.num_soundings,
                 (int)nvoxels_occupied);
         (*showMessage)(message);
         fprintf(stderr, "%s\n", message);
@@ -4381,7 +4373,7 @@ void mbeditviz_mb3dsoundings_flagsparsevoxels(int sizemultiplier, int nsoundingt
   }
 
   /* turn message on */
-  sprintf(message, "Filtering sparse (n<%d) voxels (%dXcell)", nsoundingthreshold, sizemultiplier);
+  snprintf(message, sizeof(message), "Filtering sparse (n<%d) voxels (%dXcell)", nsoundingthreshold, sizemultiplier);
   (*showMessage)(message);
   fprintf(stderr, "%s\n", message);
 
@@ -4433,7 +4425,7 @@ void mbeditviz_mb3dsoundings_flagsparsevoxels(int sizemultiplier, int nsoundingt
           nvoxels++;
         if (nvoxels % 10000 == 0) {
           /* update message */
-          sprintf(message, "Processed %d of %d occupied voxels, %d soundings flagged", (int)nvoxels,
+          snprintf(message, sizeof(message), "Processed %d of %d occupied voxels, %d soundings flagged", (int)nvoxels,
                   (int)nvoxels_occupied, nflagged);
           (*showMessage)(message);
           fprintf(stderr, "%s\n", message);
@@ -4622,7 +4614,7 @@ void mbeditviz_mb3dsoundings_optimizebiasvalues(int mode, double *rollbias_best,
       fprintf(stderr, "COARSE ROLLBIAS:    | Best: r:%5.2f p:%5.2f h:%5.2f t:%5.2f s:%5.3f  var:%12.5f | Test: r:%5.2f  N:%d Var:%12.5f %s\n",
             *rollbias_best, *pitchbias_best, *headingbias_best, *timelag_best, *snell_best, variance_total_best,
             rollbias, variance_total_num, variance_total, marker);
-      sprintf(message_string, "Optimizing Roll Bias:%.2f Variance: %.3f %.3f", rollbias, variance_total,
+      snprintf(message_string, sizeof(message_string), "Optimizing Roll Bias:%.2f Variance: %.3f %.3f", rollbias, variance_total,
               variance_total_best);
       (*showMessage)(message_string);
     }
@@ -4653,7 +4645,7 @@ void mbeditviz_mb3dsoundings_optimizebiasvalues(int mode, double *rollbias_best,
       fprintf(stderr, "FINE ROLLBIAS:      | Best: r:%5.2f p:%5.2f h:%5.2f t:%5.2f s:%5.3f  var:%12.5f | Test: r:%5.2f  N:%d Var:%12.5f %s\n",
             *rollbias_best, *pitchbias_best, *headingbias_best, *timelag_best, *snell_best, variance_total_best,
             rollbias, variance_total_num, variance_total, marker);
-      sprintf(message_string, "Optimizing biases: Roll Bias:%.2f Variance: %.3f %.3f", rollbias, variance_total,
+      snprintf(message_string, sizeof(message_string), "Optimizing biases: Roll Bias:%.2f Variance: %.3f %.3f", rollbias, variance_total,
               variance_total_best);
       (*showMessage)(message_string);
     }
@@ -4687,7 +4679,7 @@ void mbeditviz_mb3dsoundings_optimizebiasvalues(int mode, double *rollbias_best,
       fprintf(stderr, "COARSE PITCHBIAS:     | Best: r:%5.2f p:%5.2f h:%5.2f t:%5.2f s:%5.3f  var:%12.5f | Test: p:%5.2f  N:%d Var:%12.5f %s\n",
             *rollbias_best, *pitchbias_best, *headingbias_best, *timelag_best, *snell_best, variance_total_best,
             pitchbias, variance_total_num, variance_total, marker);
-      sprintf(message_string, "Optimizing biases: Pitch Bias:%.2f Variance: %.3f %.3f", pitchbias, variance_total,
+      snprintf(message_string, sizeof(message_string), "Optimizing biases: Pitch Bias:%.2f Variance: %.3f %.3f", pitchbias, variance_total,
               variance_total_best);
       (*showMessage)(message_string);
     }
@@ -4718,7 +4710,7 @@ void mbeditviz_mb3dsoundings_optimizebiasvalues(int mode, double *rollbias_best,
       fprintf(stderr, "FINE PITCHBIAS:     | Best: r:%5.2f p:%5.2f h:%5.2f t:%5.2f s:%5.3f  var:%12.5f | Test: p:%5.2f  N:%d Var:%12.5f %s\n",
             *rollbias_best, *pitchbias_best, *headingbias_best, *timelag_best, *snell_best, variance_total_best,
             pitchbias, variance_total_num, variance_total, marker);
-      sprintf(message_string, "Optimizing biases: Pitch Bias:%.2f Variance: %.3f %.3f", pitchbias, variance_total,
+      snprintf(message_string, sizeof(message_string), "Optimizing biases: Pitch Bias:%.2f Variance: %.3f %.3f", pitchbias, variance_total,
               variance_total_best);
       (*showMessage)(message_string);
     }
@@ -4752,7 +4744,7 @@ void mbeditviz_mb3dsoundings_optimizebiasvalues(int mode, double *rollbias_best,
       fprintf(stderr, "COARSE HEADINGBIAS: | Best: r:%5.2f p:%5.2f h:%5.2f t:%5.2f s:%5.3f  var:%12.5f | Test: h:%5.2f  N:%d Var:%12.5f %s\n",
             *rollbias_best, *pitchbias_best, *headingbias_best, *timelag_best, *snell_best, variance_total_best,
             headingbias, variance_total_num, variance_total, marker);
-      sprintf(message_string, "Optimizing Heading Bias:%.2f Variance: %.3f %.3f", headingbias, variance_total,
+      snprintf(message_string, sizeof(message_string), "Optimizing Heading Bias:%.2f Variance: %.3f %.3f", headingbias, variance_total,
               variance_total_best);
       (*showMessage)(message_string);
     }
@@ -4783,7 +4775,7 @@ void mbeditviz_mb3dsoundings_optimizebiasvalues(int mode, double *rollbias_best,
       fprintf(stderr, "FINE HEADINGBIAS:   | Best: r:%5.2f p:%5.2f h:%5.2f t:%5.2f s:%5.3f  var:%12.5f | Test: h:%5.2f  N:%d Var:%12.5f %s\n",
             *rollbias_best, *pitchbias_best, *headingbias_best, *timelag_best, *snell_best, variance_total_best,
             headingbias, variance_total_num, variance_total, marker);
-      sprintf(message_string, "Optimizing biases: Heading Bias:%.2f Variance: %.3f %.3f", headingbias, variance_total,
+      snprintf(message_string, sizeof(message_string), "Optimizing biases: Heading Bias:%.2f Variance: %.3f %.3f", headingbias, variance_total,
               variance_total_best);
       (*showMessage)(message_string);
     }
@@ -4817,7 +4809,7 @@ void mbeditviz_mb3dsoundings_optimizebiasvalues(int mode, double *rollbias_best,
       fprintf(stderr, "FINE ROLLBIAS:      | Best: r:%5.2f p:%5.2f h:%5.2f t:%5.2f s:%5.3f  var:%12.5f | Test: r:%5.2f  N:%d Var:%12.5f %s\n",
             *rollbias_best, *pitchbias_best, *headingbias_best, *timelag_best, *snell_best, variance_total_best,
             rollbias, variance_total_num, variance_total, marker);
-      sprintf(message_string, "Optimizing biases: Roll Bias:%.2f Variance: %.3f %.3f", rollbias, variance_total,
+      snprintf(message_string, sizeof(message_string), "Optimizing biases: Roll Bias:%.2f Variance: %.3f %.3f", rollbias, variance_total,
               variance_total_best);
       (*showMessage)(message_string);
     }
@@ -4851,7 +4843,7 @@ void mbeditviz_mb3dsoundings_optimizebiasvalues(int mode, double *rollbias_best,
       fprintf(stderr, "FINE PITCHBIAS:     | Best: r:%5.2f p:%5.2f h:%5.2f t:%5.2f s:%5.3f  var:%12.5f | Test: p:%5.2f  N:%d Var:%12.5f %s\n",
             *rollbias_best, *pitchbias_best, *headingbias_best, *timelag_best, *snell_best, variance_total_best,
             pitchbias, variance_total_num, variance_total, marker);
-      sprintf(message_string, "Optimizing biases: Pitch Bias:%.2f Variance: %.3f %.3f", pitchbias, variance_total,
+      snprintf(message_string, sizeof(message_string), "Optimizing biases: Pitch Bias:%.2f Variance: %.3f %.3f", pitchbias, variance_total,
               variance_total_best);
       (*showMessage)(message_string);
     }
@@ -4885,7 +4877,7 @@ void mbeditviz_mb3dsoundings_optimizebiasvalues(int mode, double *rollbias_best,
       fprintf(stderr, "FINE HEADINGBIAS:   | Best: r:%5.2f p:%5.2f h:%5.2f t:%5.2f s:%5.3f  var:%12.5f | Test: h:%5.2f  N:%d Var:%12.5f %s\n",
             *rollbias_best, *pitchbias_best, *headingbias_best, *timelag_best, *snell_best, variance_total_best,
             headingbias, variance_total_num, variance_total, marker);
-      sprintf(message_string, "Optimizing biases: Heading Bias:%.2f Variance: %.3f %.3f", headingbias, variance_total,
+      snprintf(message_string, sizeof(message_string), "Optimizing biases: Heading Bias:%.2f Variance: %.3f %.3f", headingbias, variance_total,
               variance_total_best);
       (*showMessage)(message_string);
     }
@@ -4920,7 +4912,7 @@ void mbeditviz_mb3dsoundings_optimizebiasvalues(int mode, double *rollbias_best,
       fprintf(stderr, "COARSE TIME LAG:    | Best: r:%5.2f p:%5.2f h:%5.2f t:%5.2f s:%5.3f  var:%12.5f | Test: t:%5.2f  N:%d Var:%12.5f %s\n",
             *rollbias_best, *pitchbias_best, *headingbias_best, *timelag_best, *snell_best, variance_total_best,
             timelag, variance_total_num, variance_total, marker);
-      sprintf(message_string, "Optimizing biases: Time Lag:%.2f Variance: %.3f %.3f", timelag, variance_total,
+      snprintf(message_string, sizeof(message_string), "Optimizing biases: Time Lag:%.2f Variance: %.3f %.3f", timelag, variance_total,
               variance_total_best);
       (*showMessage)(message_string);
     }
@@ -4952,7 +4944,7 @@ void mbeditviz_mb3dsoundings_optimizebiasvalues(int mode, double *rollbias_best,
       fprintf(stderr, "FINE TIME LAG:      | Best: r:%5.2f p:%5.2f h:%5.2f t:%5.2f s:%5.3f  var:%12.5f | Test: t:%5.2f  N:%d Var:%12.5f %s\n",
             *rollbias_best, *pitchbias_best, *headingbias_best, *timelag_best, *snell_best, variance_total_best,
             timelag, variance_total_num, variance_total, marker);
-      sprintf(message_string, "Optimizing biases: Time Lag:%.2f Variance: %.3f %.3f", timelag, variance_total,
+      snprintf(message_string, sizeof(message_string), "Optimizing biases: Time Lag:%.2f Variance: %.3f %.3f", timelag, variance_total,
               variance_total_best);
       (*showMessage)(message_string);
     }
@@ -4987,7 +4979,7 @@ void mbeditviz_mb3dsoundings_optimizebiasvalues(int mode, double *rollbias_best,
       fprintf(stderr, "COARSE SNELL:       | Best: r:%5.2f p:%5.2f h:%5.2f t:%5.2f s:%5.3f  var:%12.5f | Test: s:%5.3f  N:%d Var:%12.5f %s\n",
             *rollbias_best, *pitchbias_best, *headingbias_best, *timelag_best, *snell_best, variance_total_best,
             snell, variance_total_num, variance_total, marker);
-      sprintf(message_string, "Optimizing biases: Snell correction:%.4f Variance: %.3f %.3f", snell, variance_total,
+      snprintf(message_string, sizeof(message_string), "Optimizing biases: Snell correction:%.4f Variance: %.3f %.3f", snell, variance_total,
               variance_total_best);
       (*showMessage)(message_string);
     }
@@ -5019,7 +5011,7 @@ void mbeditviz_mb3dsoundings_optimizebiasvalues(int mode, double *rollbias_best,
       fprintf(stderr, "FINE SNELL:         | Best: r:%5.2f p:%5.2f h:%5.2f t:%5.2f s:%5.3f  var:%12.5f | Test: s:%5.3f  N:%d Var:%12.5f %s\n",
             *rollbias_best, *pitchbias_best, *headingbias_best, *timelag_best, *snell_best, variance_total_best,
             snell, variance_total_num, variance_total, marker);
-      sprintf(message_string, "Optimizing biases: Snell correction:%.4f Variance: %.3f %.3f", timelag, variance_total,
+      snprintf(message_string, sizeof(message_string), "Optimizing biases: Snell correction:%.4f Variance: %.3f %.3f", timelag, variance_total,
               variance_total_best);
       (*showMessage)(message_string);
     }

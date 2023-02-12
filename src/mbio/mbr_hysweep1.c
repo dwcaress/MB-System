@@ -389,6 +389,8 @@ int mbr_hysweep1_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 					                     (void **)&(store->RMB_sounding_quality), error);
 					status = mb_reallocd(verbose, __FILE__, __LINE__, store->RMB_num_beams * sizeof(int),
 					                     (void **)&(store->RMB_sounding_flags), error);
+					status = mb_reallocd(verbose, __FILE__, __LINE__, store->RMB_num_beams * sizeof(double),
+					                     (void **)&(store->RMB_sounding_uncertainties), error);
 				}
 
 				/* read and parse RMB_beam_ranges if included */
@@ -721,6 +723,28 @@ int mbr_hysweep1_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 					}
 				}
 
+				/* read and parse RMB_sounding_uncertainties if included */
+				if (status == MB_SUCCESS && store->RMB_beam_data_available & 0x4000) {
+					/* read the next line */
+					status = mbr_hysweep1_rd_line(verbose, mb_io_ptr->mbfp, line, error);
+
+					/* parse the line */
+          			char *saveptr;
+					if (status == MB_SUCCESS && (token = strtok_r(line + 0, " ", &saveptr)) != NULL) {
+						nread = 0;
+						for (int i = 0; i < store->RMB_num_beams && token != NULL; i++) {
+							nscan = sscanf(token, "%lf", &(store->RMB_sounding_uncertainties[i]));
+							if (nscan == 1)
+								nread++;
+							token = strtok_r(NULL, " ", &saveptr);
+						}
+						if (nread != store->RMB_num_beams) {
+							status = MB_FAILURE;
+							*error = MB_ERROR_UNINTELLIGIBLE;
+						}
+					}
+				}
+
 				if (verbose >= 4) {
 					fprintf(stderr, "\ndbg4  RMB data record read by MBIO function <%s>\n", __func__);
 					fprintf(stderr, "dbg4       RMB_device_number:                 %d\n", store->RMB_device_number);
@@ -779,6 +803,9 @@ int mbr_hysweep1_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 
 						if (store->RMB_beam_data_available & 0x2000)
 							fprintf(stderr, " %d", store->RMB_sounding_flags[i]);
+
+						if (store->RMB_beam_data_available & 0x4000)
+							fprintf(stderr, " %f", store->RMB_sounding_uncertainties[i]);
 
 						fprintf(stderr, "\n");
 					}
@@ -909,7 +936,7 @@ int mbr_hysweep1_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 				}
 
 				if (verbose >= 4) {
-					fprintf(stderr, "\ndbg4  RMB data record read by MBIO function <%s>\n", __func__);
+					fprintf(stderr, "\ndbg4  RSS data record read by MBIO function <%s>\n", __func__);
 					fprintf(stderr, "dbg4       RSS_device_number:                 %d\n", store->RSS_device_number);
 					fprintf(stderr, "dbg4       RSS_time:                          %f\n", store->RSS_time);
 					fprintf(stderr, "dbg4       RSS_sonar_flags:                   %x\n", store->RSS_sonar_flags);
@@ -1487,7 +1514,7 @@ int mbr_hysweep1_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 			/* HVF data record */
 			else if (strncmp(line, "HVF", 3) == 0) {
 				store->type = MBSYS_HYSWEEP_RECORDTYPE_HVF;
-
+				
 				/* parse the first line */
 				nscan = sscanf(line + 4, "%d %lf %lf %lf %lf %lf %lf %lf", &(HVF_device_number),
 				               &(store->HVF_time_after_midnight), &(store->HVF_minimum_depth), &(store->HVF_maximum_depth),
@@ -1508,6 +1535,14 @@ int mbr_hysweep1_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 					fprintf(stderr, "dbg4       HVF_starboard_offset_limit:        %f\n", store->HVF_starboard_offset_limit);
 					fprintf(stderr, "dbg4       HVF_minimum_angle_limit:           %f\n", store->HVF_minimum_angle_limit);
 					fprintf(stderr, "dbg4       HVF_maximum_angle_limit:           %f\n", store->HVF_maximum_angle_limit);
+				}
+
+				/* if successful this completes a parameter record */
+				if (status == MB_SUCCESS) {
+					done = true;
+					store->kind = MB_DATA_PARAMETER;
+					store->time_d = store->TND_survey_time_d + store->HVF_time_after_midnight;
+					mb_get_date(verbose, store->time_d, store->time_i);
 				}
 			}
 
@@ -1850,6 +1885,14 @@ int mbr_hysweep1_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 					fprintf(stderr, "dbg4       FIX_time_after_midnight:           %f\n", store->FIX_time_after_midnight);
 					fprintf(stderr, "dbg4       FIX_event_number:                  %d\n", store->FIX_event_number);
 				}
+
+				/* if successful this completes a parameter record */
+				if (status == MB_SUCCESS) {
+					done = true;
+					store->kind = MB_DATA_PARAMETER;
+					store->time_d = store->TND_survey_time_d;
+					mb_get_date(verbose, store->time_d, store->time_i);
+				}
 			}
 
 			/* PSA data record */
@@ -2052,7 +2095,7 @@ int mbr_rt_hysweep1(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 
 		interp_status = mb_attint_interp(verbose, mbio_ptr, store->time_d, &(store->RMBint_heave), &(roll),
 		                                 &(store->RMBint_pitch), &interp_error);
-		store->RMBint_roll = -roll;
+		store->RMBint_roll = roll;
 		interp_status = mb_navint_interp(verbose, mbio_ptr, store->time_d, store->RMBint_heading, speed, &(store->RMBint_lon),
 		                                 &(store->RMBint_lat), &speed, &interp_error);
 		if (interp_status == MB_SUCCESS) {
@@ -2110,19 +2153,19 @@ int mbr_rt_hysweep1(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			if (store->RMB_sonar_type == 1 || store->RMB_sonar_type == 2) {
 			
 				/* get beam roll angles if necessary */
-				if (!RMB_available_pitchangles) {
+				if (!RMB_available_rollangles) {
 					for (int i = 0; i < store->RMB_num_beams; i++) {
 						store->RMB_sounding_rollangles[i] = device->MBI_first_beam_angle + i * device->MBI_angle_increment;
 					}
-					RMB_available_pitchangles = true;
+					RMB_available_rollangles = true;
 				}
 
 				/* get beam pitch angles if necessary */
-				if (!RMB_available_rollangles) {
+				if (!RMB_available_pitchangles) {
 					for (int i = 0; i < store->RMB_num_beams; i++) {
 						store->RMB_sounding_pitchangles[i] = 0.0;
 					}
-					RMB_available_rollangles= true;
+					RMB_available_pitchangles= true;
 				}
 				
 				/* reset roll pitch flag */
@@ -2135,15 +2178,21 @@ int mbr_rt_hysweep1(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 						alpha = store->RMB_sounding_pitchangles[i];
 						beta = 90.0 + store->RMB_sounding_rollangles[i];
 
-						/* correct alpha for pitch if necessary */
-						if (!(device->MBI_sonar_flags & 0x0002))
-							alpha += store->RMBint_pitch;
-
-						/* correct beta for roll if necessary */
-						if (!(device->MBI_sonar_flags & 0x0001))
-							beta += store->RMBint_roll;
+						/* correct alpha for roll and pitch if necessary */
+						if (!(device->MBI_sonar_flags & 0x0001) || !(device->MBI_sonar_flags & 0x0002)) {
+							double ttime = 2.0 * store->RMB_beam_ranges[i] / store->RMB_sound_velocity;
+							double roll, pitch;
+							mb_attint_interp(verbose, mbio_ptr, store->time_d + ttime, 
+												&(store->RMBint_heave), &roll, &pitch, &interp_error);
+							if (!(device->MBI_sonar_flags & 0x0002))
+								alpha += pitch;
+							if (!(device->MBI_sonar_flags & 0x0001))
+								beta -= roll;
+						}
 
 						mb_rollpitch_to_takeoff(verbose, alpha, beta, &theta, &phi, error);
+						store->RMB_sounding_pitchangles[i] = alpha;
+						store->RMB_sounding_rollangles[i] = beta - 90.0;
 						store->RMB_sounding_takeoffangles[i] = theta;
 						store->RMB_sounding_azimuthalangles[i] = 90.0 - phi;
 					}
@@ -2168,15 +2217,21 @@ int mbr_rt_hysweep1(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 						
 						mb_takeoff_to_rollpitch(verbose, theta, phi, &alpha, &beta, error);
 
-						/* correct alpha for pitch if necessary */
-						if (!(device->MBI_sonar_flags & 0x0002))
-							alpha += store->RMBint_pitch;
-
-						/* correct beta for roll if necessary */
-						if (!(device->MBI_sonar_flags & 0x0001))
-							beta += store->RMBint_roll;
+						/* correct alpha for roll and pitch if necessary */
+						if (!(device->MBI_sonar_flags & 0x0001) || !(device->MBI_sonar_flags & 0x0002)) {
+							double ttime = 2.0 * store->RMB_beam_ranges[i] / store->RMB_sound_velocity;
+							double roll, pitch;
+							mb_attint_interp(verbose, mbio_ptr, store->time_d + ttime, 
+												&(store->RMBint_heave), &roll, &pitch, &interp_error);
+							if (!(device->MBI_sonar_flags & 0x0002))
+								alpha += pitch;
+							if (!(device->MBI_sonar_flags & 0x0001))
+								beta -= roll;
+						}
 
 						mb_rollpitch_to_takeoff(verbose, alpha, beta, &theta, &phi, error);
+						store->RMB_sounding_pitchangles[i] = alpha;
+						store->RMB_sounding_rollangles[i] = beta - 90.0;
 						store->RMB_sounding_takeoffangles[i] = theta;
 						store->RMB_sounding_azimuthalangles[i] = 90.0 - phi;
 					}
@@ -2185,19 +2240,15 @@ int mbr_rt_hysweep1(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 
 			/* get beam bathymetry if necessary */
 			if (!RMB_available_bathymetry || recalculate_bathymetry) {
-				double range_scale = 1.0;
-				if (device->MBI_sonar_flags & 0x0010)
-					range_scale = 1.0;
 //fprintf(stderr, "%s%d:%s: store->RMB_sonar_flags: %d 0x%x device->MBI_sonar_flags: %d 0x%x  range_scale:%f\n", 
 //__FILE__, __LINE__, __FUNCTION__, 
 //store->RMB_sonar_flags, store->RMB_sonar_flags,
 //device->MBI_sonar_flags, device->MBI_sonar_flags, range_scale);
 				for (int i = 0; i < store->RMB_num_beams; i++) {
-					rr = range_scale * store->RMB_beam_ranges[i];
 					theta = store->RMB_sounding_takeoffangles[i];
 					phi = 90.0 - store->RMB_sounding_azimuthalangles[i];
-					xx = rr * sin(DTR * theta);
-					zz = rr * cos(DTR * theta);
+					xx = store->RMB_beam_ranges[i] * sin(DTR * theta);
+					zz = store->RMB_beam_ranges[i] * cos(DTR * theta);
 					store->RMB_sounding_across[i] = xx * cos(DTR * phi);
 					store->RMB_sounding_along[i] = xx * sin(DTR * phi);
 					store->RMB_sounding_depths[i] = zz + store->RMBint_draft + store->RMBint_heave;
@@ -2215,7 +2266,7 @@ int mbr_rt_hysweep1(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 				}
 
 				/* incorporate quality values */
-				if ((store->RMB_beam_data_available & 0x1000) && strncmp(device->DEV_device_name, "Reson Seabat 8", 14) == 0) {
+				if ((store->RMB_beam_data_available & 0x1000) && strncmp(device->DEV_device_name, "Reson Seabat", 12) == 0) {
 					for (int i = 0; i < store->RMB_num_beams; i++) {
 						if (store->RMB_sounding_quality[i] < 2)
 							store->RMB_sounding_flags[i] = MB_FLAG_FLAG + MB_FLAG_SONAR;
@@ -2225,8 +2276,16 @@ int mbr_rt_hysweep1(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 				/* check for null ranges */
 				if ((store->RMB_beam_data_available & 0x0001)) {
 					for (int i = 0; i < store->RMB_num_beams; i++) {
-						if (store->RMB_beam_ranges[i] <= 0.0)
+						if (store->RMB_beam_ranges[i] <= 0.0) {
+							store->RMB_sounding_depths[i] = 0.0;
+							store->RMB_sounding_across[i] = 0.0;
+							store->RMB_sounding_along[i] = 0.0;
+							store->RMB_sounding_pitchangles[i] = 0.0;
+							store->RMB_sounding_rollangles[i] = 0.0;
+							store->RMB_sounding_takeoffangles[i] = 0.0;
+							store->RMB_sounding_azimuthalangles[i] = 0.0;
 							store->RMB_sounding_flags[i] = MB_FLAG_NULL;
+						}
 					}
 				}
 				RMB_available_beamflags = true;
@@ -2240,7 +2299,7 @@ int mbr_rt_hysweep1(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		}
 
 		/* deal with case of multiple transducer sonar */
-		if (store->RMB_sonar_type == 3 || RMB_available_soundingcastings) {
+		if (store->RMB_sonar_type == 4 || RMB_available_soundingcastings) {
 			/* get beam roll angles if necessary */
 			if (!RMB_available_rollangles) {
 				for (int i = 0; i < store->RMB_num_beams; i++) {
@@ -2287,15 +2346,11 @@ int mbr_rt_hysweep1(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 
 			/* get beam bathymetry if necessary */
 			if (!RMB_available_bathymetry || recalculate_bathymetry) {
-				double range_scale = 1.0;
-				if (store->RMB_sonar_flags &0x0010)
-					range_scale = 0.1;
 				for (int i = 0; i < store->RMB_num_beams; i++) {
-					rr = range_scale *store->RMB_multi_ranges[i];
 					theta = store->RMB_sounding_takeoffangles[i];
 					phi = 90.0 - store->RMB_sounding_azimuthalangles[i];
-					xx = rr * sin(DTR * theta);
-					zz = rr * cos(DTR * theta);
+					xx = store->RMB_beam_ranges[i] * sin(DTR * theta);
+					zz = store->RMB_beam_ranges[i] * cos(DTR * theta);
 					store->RMB_sounding_across[i] = xx * cos(DTR * phi);
 					store->RMB_sounding_along[i] = xx * sin(DTR * phi);
 					store->RMB_sounding_depths[i] = zz + store->RMBint_draft + store->RMBint_heave;
@@ -2311,49 +2366,49 @@ int mbr_rt_hysweep1(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 				RMB_available_beamflags = true;
 			}
 		}
-		
+
 		/* reset RMB flags */
 		if (RMB_available_range) 
-			store->RMB_beam_data_available = store->RMB_beam_data_available & 0x0001;
+			store->RMB_beam_data_available = store->RMB_beam_data_available | 0x0001;
 		if (RMB_available_soundingcastings) 
-			store->RMB_beam_data_available = store->RMB_beam_data_available & 0x0002;
+			store->RMB_beam_data_available = store->RMB_beam_data_available | 0x0002;
 		if (RMB_available_northing) 
-			store->RMB_beam_data_available = store->RMB_beam_data_available & 0x0004;
+			store->RMB_beam_data_available = store->RMB_beam_data_available | 0x0004;
 		if (RMB_available_correcteddepth) 
-			store->RMB_beam_data_available = store->RMB_beam_data_available & 0x0008;
+			store->RMB_beam_data_available = store->RMB_beam_data_available | 0x0008;
 		if (RMB_available_along) 
-			store->RMB_beam_data_available = store->RMB_beam_data_available & 0x0010;
+			store->RMB_beam_data_available = store->RMB_beam_data_available | 0x0010;
 		if (RMB_available_across) 
-			store->RMB_beam_data_available = store->RMB_beam_data_available & 0x0020;
+			store->RMB_beam_data_available = store->RMB_beam_data_available | 0x0020;
 		if (RMB_available_bathymetry)  {
-			store->RMB_beam_data_available = store->RMB_beam_data_available & 0x0008;
-			store->RMB_beam_data_available = store->RMB_beam_data_available & 0x0010;
-			store->RMB_beam_data_available = store->RMB_beam_data_available & 0x0020;
+			store->RMB_beam_data_available = store->RMB_beam_data_available | 0x0008;
+			store->RMB_beam_data_available = store->RMB_beam_data_available | 0x0010;
+			store->RMB_beam_data_available = store->RMB_beam_data_available | 0x0020;
 		}
 		if (RMB_available_rollangles) 
-			store->RMB_beam_data_available = store->RMB_beam_data_available & 0x0040;
+			store->RMB_beam_data_available = store->RMB_beam_data_available | 0x0040;
 		if (RMB_available_pitchangles) 
-			store->RMB_beam_data_available = store->RMB_beam_data_available & 0x0080;
+			store->RMB_beam_data_available = store->RMB_beam_data_available | 0x0080;
 		if (RMB_available_rollpitchangles)  {
-			store->RMB_beam_data_available = store->RMB_beam_data_available & 0x0040;
-			store->RMB_beam_data_available = store->RMB_beam_data_available & 0x0080;
+			store->RMB_beam_data_available = store->RMB_beam_data_available | 0x0040;
+			store->RMB_beam_data_available = store->RMB_beam_data_available | 0x0080;
 		}
 		if (RMB_available_takeoffangles) 
-			store->RMB_beam_data_available = store->RMB_beam_data_available & 0x0100;
+			store->RMB_beam_data_available = store->RMB_beam_data_available | 0x0100;
 		if (RMB_available_directionangles) 
-			store->RMB_beam_data_available = store->RMB_beam_data_available & 0x0200;
+			store->RMB_beam_data_available = store->RMB_beam_data_available | 0x0200;
 		if (RMB_available_sphericalangles)  {
-			store->RMB_beam_data_available = store->RMB_beam_data_available & 0x0100;
-			store->RMB_beam_data_available = store->RMB_beam_data_available & 0x0200;
+			store->RMB_beam_data_available = store->RMB_beam_data_available | 0x0100;
+			store->RMB_beam_data_available = store->RMB_beam_data_available | 0x0200;
 		}
 		if (RMB_available_pingdelaytimes) 
-			store->RMB_beam_data_available = store->RMB_beam_data_available & 0x0400;
+			store->RMB_beam_data_available = store->RMB_beam_data_available | 0x0400;
 		if (RMB_available_beamintensity) 
-			store->RMB_beam_data_available = store->RMB_beam_data_available & 0x0800;
+			store->RMB_beam_data_available = store->RMB_beam_data_available | 0x0800;
 		if (RMB_available_beamquality) 
-			store->RMB_beam_data_available = store->RMB_beam_data_available & 0x1000;
+			store->RMB_beam_data_available = store->RMB_beam_data_available | 0x1000;
 		if (RMB_available_beamflags) 
-			store->RMB_beam_data_available = store->RMB_beam_data_available & 0x2000;
+			store->RMB_beam_data_available = store->RMB_beam_data_available | 0x2000;
 
 		/* generate processed sidescan if needed */
 		if (store->MSS_ping_number != store->RSS_ping_number &&
@@ -2419,6 +2474,9 @@ int mbr_rt_hysweep1(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 
 				if (store->RMB_beam_data_available & 0x2000)
 					fprintf(stderr, " flg:%d", store->RMB_sounding_flags[i]);
+
+				if (store->RMB_beam_data_available & 0x4000)
+					fprintf(stderr, " unc:%f", store->RMB_sounding_uncertainties[i]);
 
 				fprintf(stderr, "\n");
 			}
@@ -2624,7 +2682,7 @@ int mbr_hysweep1_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 			hysweeptmp.num_devices++;
 		}
 
-		if (verbose >= 0) {
+		if (verbose >= 4) {
 			fprintf(stderr, "\ndbg4  FTP data record to be written by MBIO function <%s>\n", __func__);
 			fprintf(stderr, "dbg4       FTP_record:                        %s\n", hysweeptmp.FTP_record);
 			fprintf(stderr, "\ndbg4  HSX data record to be written by MBIO function <%s>\n", __func__);
@@ -2662,18 +2720,6 @@ int mbr_hysweep1_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 			fprintf(stderr, "dbg4       HSP_units:                         %d\n", hysweeptmp.HSP_units);
 			fprintf(stderr, "dbg4       HSP_sonar_id:                      %d\n", hysweeptmp.HSP_sonar_id);
 			fprintf(stderr, "\ndbg4  EOH data record to be written by MBIO function <%s>\n", __func__);
-			fprintf(stderr, "\ndbg4  HVF data record to be written by MBIO function <%s>\n", __func__);
-			fprintf(stderr, "dbg4       HVF_time_after_midnight:           %f\n", hysweeptmp.HVF_time_after_midnight);
-			fprintf(stderr, "dbg4       HVF_minimum_depth:                 %f\n", hysweeptmp.HVF_minimum_depth);
-			fprintf(stderr, "dbg4       HVF_maximum_depth:                 %f\n", hysweeptmp.HVF_maximum_depth);
-			fprintf(stderr, "dbg4       HVF_port_offset_limit:             %f\n", hysweeptmp.HVF_port_offset_limit);
-			fprintf(stderr, "dbg4       HVF_starboard_offset_limit:        %f\n", hysweeptmp.HVF_starboard_offset_limit);
-			fprintf(stderr, "dbg4       HVF_minimum_angle_limit:           %f\n", hysweeptmp.HVF_minimum_angle_limit);
-			fprintf(stderr, "dbg4       HVF_maximum_angle_limit:           %f\n", hysweeptmp.HVF_maximum_angle_limit);
-			fprintf(stderr, "\ndbg4  FIX data record to be written by MBIO function <%s>\n", __func__);
-			fprintf(stderr, "dbg4       FIX_device_number:                 %d\n", hysweeptmp.FIX_device_number);
-			fprintf(stderr, "dbg4       FIX_time_after_midnight:           %f\n", hysweeptmp.FIX_time_after_midnight);
-			fprintf(stderr, "dbg4       FIX_event_number:                  %d\n", hysweeptmp.FIX_event_number);
 		}
 
 		fprintf(mbfp, "FTP %s\r\n", hysweeptmp.FTP_record);
@@ -2718,11 +2764,6 @@ int mbr_hysweep1_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 
 		fprintf(mbfp, "PRJ %s\r\n", hysweeptmp.PRJ_proj4_command);
 		fprintf(mbfp, "EOH\r\n");
-		fprintf(mbfp, "HVF 99 %.3f %.1f %.1f %.1f %.1f %.1f %.1f\r\n", hysweeptmp.HVF_time_after_midnight,
-		        hysweeptmp.HVF_minimum_depth, hysweeptmp.HVF_maximum_depth, hysweeptmp.HVF_port_offset_limit,
-		        hysweeptmp.HVF_starboard_offset_limit, hysweeptmp.HVF_minimum_angle_limit, hysweeptmp.HVF_maximum_angle_limit);
-		fprintf(mbfp, "FIX %d %.3f %d\r\n", hysweeptmp.FIX_device_number, hysweeptmp.FIX_time_after_midnight,
-		        hysweeptmp.FIX_event_number);
 		*file_header_written = true;
 
 		/* initialize projection */
@@ -2735,7 +2776,7 @@ int mbr_hysweep1_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	/* call appropriate writing routines for ping data */
 	if (status == MB_SUCCESS && store->kind == MB_DATA_DATA) {
 		if (verbose >= 4) {
-			fprintf(stderr, "\ndbg4  RMB data record read by MBIO function <%s>\n", __func__);
+			fprintf(stderr, "\ndbg4  RMB data record to be written by MBIO function <%s>\n", __func__);
 			fprintf(stderr, "dbg4       RMB_device_number:                 %d\n", store->RMB_device_number);
 			fprintf(stderr, "dbg4       RMB_time:                          %f\n", store->RMB_time);
 			fprintf(stderr, "dbg4       RMB_sonar_type:                    %x\n", store->RMB_sonar_type);
@@ -2793,26 +2834,29 @@ int mbr_hysweep1_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 				if (store->RMB_beam_data_available & 0x2000)
 					fprintf(stderr, " %d", store->RMB_sounding_flags[i]);
 
+				if (store->RMB_beam_data_available & 0x4000)
+					fprintf(stderr, " %f", store->RMB_sounding_uncertainties[i]);
+
 				fprintf(stderr, "\n");
 			}
 		}
 
 		/* add desired interpolated data */
 		if (*add_MB_POS) {
-			sprintf(line, "POS %d %.3f %.2f %.2f\r\n", *device_number_MB_POS, store->RMB_time, store->RMBint_x, store->RMBint_y);
+			snprintf(line, MBSYS_HYSWEEP_MAXLINE, "POS %d %.3f %.2f %.2f\r\n", *device_number_MB_POS, store->RMB_time, store->RMBint_x, store->RMBint_y);
 			fputs(line, mbfp);
 		}
 		if (*add_MB_GYR) {
-			sprintf(line, "GYR %d %.3f %.2f\r\n", *device_number_MB_GYR, store->RMB_time, store->RMBint_heading);
+			snprintf(line, MBSYS_HYSWEEP_MAXLINE, "GYR %d %.3f %.2f\r\n", *device_number_MB_GYR, store->RMB_time, store->RMBint_heading);
 			fputs(line, mbfp);
 		}
 		if (*add_MB_HCP) {
-			sprintf(line, "HCP %d %.3f %.2f %.2f %.2f\r\n", *device_number_MB_HCP, store->RMB_time, (store->RMBint_heave),
+			snprintf(line, MBSYS_HYSWEEP_MAXLINE, "HCP %d %.3f %.2f %.2f %.2f\r\n", *device_number_MB_HCP, store->RMB_time, (store->RMBint_heave),
 			        (-store->RMBint_roll), store->RMBint_pitch);
 			fputs(line, mbfp);
 		}
 		if (*add_MB_DFT) {
-			sprintf(line, "DFT %d %.3f %.2f\r\n", *device_number_MB_DFT, store->RMB_time, store->RMBint_draft);
+			snprintf(line, MBSYS_HYSWEEP_MAXLINE, "DFT %d %.3f %.2f\r\n", *device_number_MB_DFT, store->RMB_time, store->RMBint_draft);
 			fputs(line, mbfp);
 		}
 
@@ -2820,7 +2864,7 @@ int mbr_hysweep1_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 		if ((store->RSS_ping_number == store->RMB_ping_number || 10 * store->RSS_ping_number == store->RMB_ping_number) &&
 		    store->RSS_port_num_samples + store->RSS_starboard_num_samples > 0) {
 			/* write first line */
-			sprintf(line, "RSS %d %.3f %x %d %d %.2f %d %.2f %f %d %d %d %d\r\n", store->RSS_device_number, store->RSS_time,
+			snprintf(line, MBSYS_HYSWEEP_MAXLINE, "RSS %d %.3f %x %d %d %.2f %d %.2f %f %d %d %d %d\r\n", store->RSS_device_number, store->RSS_time,
 			        store->RSS_sonar_flags, store->RSS_port_num_samples, store->RSS_starboard_num_samples,
 			        store->RSS_sound_velocity, store->RSS_ping_number, store->RSS_altitude, store->RSS_sample_rate,
 			        store->RSS_minimum_amplitude, store->RSS_maximum_amplitude, store->RSS_bit_shift, store->RSS_frequency);
@@ -2847,7 +2891,7 @@ int mbr_hysweep1_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 		if ((store->MSS_ping_number == store->RMB_ping_number || 10 * store->MSS_ping_number == store->RMB_ping_number) &&
 		    store->MSS_num_pixels > 0) {
 			/* write first line */
-			sprintf(line, "MSS %d %.3f %.2f %d %.3f %d\r\n", store->MSS_device_number, store->MSS_time, store->MSS_sound_velocity,
+			snprintf(line, MBSYS_HYSWEEP_MAXLINE, "MSS %d %.3f %.2f %d %.3f %d\r\n", store->MSS_device_number, store->MSS_time, store->MSS_sound_velocity,
 			        store->MSS_num_pixels, store->MSS_pixel_size, store->MSS_ping_number);
 			fputs(line, mbfp);
 
@@ -2870,7 +2914,7 @@ int mbr_hysweep1_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 
 		/* write SNR record if it exists */
 		if ((store->SNR_ping_number == store->RMB_ping_number || 10 * store->SNR_ping_number == store->RMB_ping_number)) {
-			sprintf(line, "SNR %d %.3f %d %d %d", store->SNR_device_number, store->SNR_time, store->SNR_ping_number,
+			snprintf(line, MBSYS_HYSWEEP_MAXLINE, "SNR %d %.3f %d %d %d", store->SNR_device_number, store->SNR_time, store->SNR_ping_number,
 			        store->SNR_sonar_id, store->SNR_num_settings);
 			for (int i = 0; i < store->SNR_num_settings; i++) {
 				kindex = strlen(line);
@@ -2882,7 +2926,7 @@ int mbr_hysweep1_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 		}
 
 		/* write first line */
-		sprintf(line, "RMB %d %.3f %x %x %x %d %.2f %d\r\n", store->RMB_device_number, store->RMB_time, store->RMB_sonar_type,
+		snprintf(line, MBSYS_HYSWEEP_MAXLINE, "RMB %d %.3f %x %x %x %d %.2f %d\r\n", store->RMB_device_number, store->RMB_time, store->RMB_sonar_type,
 		        store->RMB_sonar_flags, store->RMB_beam_data_available, store->RMB_num_beams, store->RMB_sound_velocity,
 		        store->RMB_ping_number);
 		fputs(line, mbfp);
@@ -3126,56 +3170,88 @@ int mbr_hysweep1_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 			sprintf(line + kindex, "\r\n");
 			fputs(line, mbfp);
 		}
+
+		/* write RMB_sounding_uncertainties if included */
+		if (store->RMB_beam_data_available & 0x4000) {
+			/* write the next line */
+			line[0] = '\0';
+			for (int i = 0; i < store->RMB_num_beams; i++) {
+				kindex = strlen(line);
+				if (i > 0)
+					sprintf(line + kindex, " %.2f", store->RMB_sounding_uncertainties[i]);
+				else
+					sprintf(line + kindex, "%.2ff", store->RMB_sounding_uncertainties[i]);
+			}
+			kindex = strlen(line);
+			sprintf(line + kindex, "\r\n");
+			fputs(line, mbfp);
+		}
 	}
 
 	/* call appropriate writing routine for other records */
 	else if (status == MB_SUCCESS) {
 		/* write HCP record */
 		if (store->kind == MB_DATA_ATTITUDE) {
-			sprintf(line, "HCP %d %.3f %.2f %.2f %.2f\r\n", store->HCP_device_number, store->HCP_time, store->HCP_heave,
+			snprintf(line, MBSYS_HYSWEEP_MAXLINE, "HCP %d %.3f %.2f %.2f %.2f\r\n", store->HCP_device_number, store->HCP_time, store->HCP_heave,
 			        store->HCP_roll, store->HCP_pitch);
 			fputs(line, mbfp);
 		}
 
 		/* write GYR record */
 		else if (store->kind == MB_DATA_HEADING) {
-			sprintf(line, "GYR %d %.3f %.2f\r\n", store->GYR_device_number, store->GYR_time, store->GYR_heading);
+			snprintf(line, MBSYS_HYSWEEP_MAXLINE, "GYR %d %.3f %.2f\r\n", store->GYR_device_number, store->GYR_time, store->GYR_heading);
 			fputs(line, mbfp);
 		}
 
 		/* write DFT record */
 		else if (store->kind == MB_DATA_SONARDEPTH) {
-			sprintf(line, "DFT %d %.3f %.2f\r\n", store->DFT_device_number, store->DFT_time, store->DFT_draft);
+			snprintf(line, MBSYS_HYSWEEP_MAXLINE, "DFT %d %.3f %.2f\r\n", store->DFT_device_number, store->DFT_time, store->DFT_draft);
 			fputs(line, mbfp);
 		}
 
 		/* write GPS and POS record */
 		else if (store->kind == MB_DATA_NAV || store->kind == MB_DATA_NAV1) {
 			if (store->GPS_device_number == store->POS_device_number) {
-				sprintf(line, "GPS %d %.3f %.2f %.2f %.2f %d %d\r\n", store->GPS_device_number, store->GPS_time, store->GPS_cog,
+				snprintf(line, MBSYS_HYSWEEP_MAXLINE, "GPS %d %.3f %.2f %.2f %.2f %d %d\r\n", store->GPS_device_number, store->GPS_time, store->GPS_cog,
 				        store->GPS_sog, store->GPS_hdop, store->GPS_mode, store->GPS_nsats);
 				fputs(line, mbfp);
 			}
 
-			sprintf(line, "POS %d %.3f %.2f %.2f\r\n", store->POS_device_number, store->POS_time, store->POS_x, store->POS_y);
+			snprintf(line, MBSYS_HYSWEEP_MAXLINE, "POS %d %.3f %.2f %.2f\r\n", store->POS_device_number, store->POS_time, store->POS_x, store->POS_y);
 			fputs(line, mbfp);
 		}
 
 		/* write EC1 record */
 		else if (store->kind == MB_DATA_ALTITUDE) {
-			sprintf(line, "EC1 %d %.3f %.2f\r\n", store->EC1_device_number, store->EC1_time, store->EC1_rawdepth);
+			snprintf(line, MBSYS_HYSWEEP_MAXLINE, "EC1 %d %.3f %.2f\r\n", store->EC1_device_number, store->EC1_time, store->EC1_rawdepth);
 			fputs(line, mbfp);
 		}
 
 		/* write TID record */
 		else if (store->kind == MB_DATA_TIDE) {
-			sprintf(line, "TID %d %.3f %.2f\r\n", store->TID_device_number, store->TID_time, store->TID_tide);
+			snprintf(line, MBSYS_HYSWEEP_MAXLINE, "TID %d %.3f %.2f\r\n", store->TID_device_number, store->TID_time, store->TID_tide);
+			fputs(line, mbfp);
+		}
+
+		/* write HVF record */
+		else if (store->kind == MB_DATA_PARAMETER && store->type == MBSYS_HYSWEEP_RECORDTYPE_HVF) {
+			fprintf(mbfp, "HVF 99 %.3f %.1f %.1f %.1f %.1f %.1f %.1f\r\n", store->HVF_time_after_midnight,
+		        	store->HVF_minimum_depth, store->HVF_maximum_depth, store->HVF_port_offset_limit,
+		        	store->HVF_starboard_offset_limit, store->HVF_minimum_angle_limit, store->HVF_maximum_angle_limit);
+			fputs(line, mbfp);
+		}
+
+		/* write FIX record */
+		else if (store->kind == MB_DATA_PARAMETER && store->type == MBSYS_HYSWEEP_RECORDTYPE_FIX) {
+			fprintf(mbfp, "FIX %d %.3f %d\r\n", store->FIX_device_number, store->FIX_time_after_midnight,
+		        	store->FIX_event_number);
 			fputs(line, mbfp);
 		}
 
 		/* write comment */
 		else if (store->kind == MB_DATA_COMMENT) {
-			sprintf(line, "COM %s\r\n", store->COM_comment);
+			snprintf(line, MBSYS_HYSWEEP_MAXLINE, "COM %s\r\n", store->COM_comment);
+			fputs(line, mbfp);
 		}
 	}
 

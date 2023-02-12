@@ -347,6 +347,7 @@ int mbsys_hysweep_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *erro
 	store->RMB_sounding_intensities = NULL;     /* beam intensities */
 	store->RMB_sounding_quality = NULL;         /* beam quality codes (from sonar unit) */
 	store->RMB_sounding_flags = NULL;           /* beam edit flags */
+	store->RMB_sounding_uncertainties = NULL;   /* beam uncertainties (survey units) */
 
 	/* RSS - Raw Sidescan
 	    RSS dn t sf np ns sv pn alt sr amin amax bs freq
@@ -661,6 +662,8 @@ int mbsys_hysweep_deall(int verbose, void *mbio_ptr, void **store_ptr, int *erro
 		                  error); /* beam quality codes (from sonar unit) */
 	if (store->RMB_sounding_flags != NULL)
 		status = mb_freed(verbose, __FILE__, __LINE__, (void **)(&store->RMB_sounding_flags), error); /* beam edit flags */
+	if (store->RMB_sounding_uncertainties != NULL)
+		status = mb_freed(verbose, __FILE__, __LINE__, (void **)(&store->RMB_sounding_uncertainties), error); /* beam uncertainties */
 	if (store->RSS_port != NULL)
 		status = mb_freed(verbose, __FILE__, __LINE__, (void **)(&store->RSS_port), error); /* port sidescan amplitude samples */
 	if (store->RSS_starboard != NULL)
@@ -1312,34 +1315,26 @@ int mbsys_hysweep_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kin
 		else
 			*namp = 0;
 		for (int i = 0; i < *nbath; i++) {
-			if (store->RMB_sounding_depths != NULL) {
+			if (store->RMB_sounding_depths != NULL)
 				bath[i] = store->RMB_sounding_depths[i];
-			}
-			else {
+			else
 				bath[i] = 0.0;
-			}
-			if (store->RMB_sounding_across != NULL) {
+			if (store->RMB_sounding_depths != NULL)
 				bathacrosstrack[i] = store->RMB_sounding_across[i];
-			}
-			else {
+			else
 				bathacrosstrack[i] = 0.0;
-			}
-			if (store->RMB_sounding_along != NULL) {
+			if (store->RMB_sounding_depths != NULL)
 				bathalongtrack[i] = store->RMB_sounding_along[i];
-			}
-			else {
+			else
 				bathalongtrack[i] = 0.0;
-			}
-			if (store->RMB_sounding_intensities != NULL) {
+			if (store->RMB_sounding_depths != NULL)
 				amp[i] = store->RMB_sounding_intensities[i];
-			}
-			else {
+			else
 				amp[i] = 0.0;
-			}
 			if (store->RMB_sounding_flags != NULL) {
 				beamflag[i] = store->RMB_sounding_flags[i];
 			}
-			else if (store->RMB_sounding_quality != NULL) {
+			else {
 				if (store->RMB_sounding_quality[i] >= store->HSP_high_beam_quality) {
 					beamflag[i] = MB_FLAG_NONE;
 				}
@@ -2339,58 +2334,6 @@ int mbsys_hysweep_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_
 	struct mbsys_hysweep_struct *store = (struct mbsys_hysweep_struct *)store_ptr;
 	struct mbsys_hysweep_struct *copy = (struct mbsys_hysweep_struct *)copy_ptr;
 
-		if (verbose >= 0) {
-			fprintf(stderr, "\ndbg4  FTP data record to be written by MBIO function <%s>\n", __func__);
-			fprintf(stderr, "dbg4       FTP_record:                        %s\n", store->FTP_record);
-			fprintf(stderr, "\ndbg4  HSX data record to be written by MBIO function <%s>\n", __func__);
-			fprintf(stderr, "dbg4       HSX_record:                        %d\n", store->HSX_record);
-			fprintf(stderr, "\ndbg4  VER data record to be written by MBIO function <%s>\n", __func__);
-			fprintf(stderr, "dbg4       VER_version:                       %s\n", store->VER_version);
-			fprintf(stderr, "\ndbg4  TND data record to be written by MBIO function <%s>\n", __func__);
-			fprintf(stderr, "dbg4       TND_survey_time_i[0]:              %d\n", store->TND_survey_time_i[0]);
-			fprintf(stderr, "dbg4       TND_survey_time_i[1]:              %d\n", store->TND_survey_time_i[1]);
-			fprintf(stderr, "dbg4       TND_survey_time_i[2]:              %d\n", store->TND_survey_time_i[2]);
-			fprintf(stderr, "dbg4       TND_survey_time_i[3]:              %d\n", store->TND_survey_time_i[3]);
-			fprintf(stderr, "dbg4       TND_survey_time_i[4]:              %d\n", store->TND_survey_time_i[4]);
-			fprintf(stderr, "dbg4       TND_survey_time_i[5]:              %d\n", store->TND_survey_time_i[5]);
-			fprintf(stderr, "dbg4       TND_survey_time_i[6]:              %d\n", store->TND_survey_time_i[6]);
-			fprintf(stderr, "dbg4       TND_survey_time_d:                 %f\n", store->TND_survey_time_d);
-			fprintf(stderr, "\ndbg4  INF data record to be written by MBIO function <%s>\n", __func__);
-			fprintf(stderr, "dbg4       INF_surveyor:                      %s\n", store->INF_surveyor);
-			fprintf(stderr, "dbg4       INF_boat:                          %s\n", store->INF_boat);
-			fprintf(stderr, "dbg4       INF_project:                       %s\n", store->INF_project);
-			fprintf(stderr, "dbg4       INF_area:                          %s\n", store->INF_area);
-			fprintf(stderr, "dbg4       INF_tide_correction:               %f\n", store->INF_tide_correction);
-			fprintf(stderr, "dbg4       INF_draft_correction:              %f\n", store->INF_draft_correction);
-			fprintf(stderr, "dbg4       INF_sound_velocity:                %f\n", store->INF_sound_velocity);
-			fprintf(stderr, "\ndbg4  HSP data record to be written by MBIO function <%s>\n", __func__);
-			fprintf(stderr, "dbg4       HSP_minimum_depth:                 %f\n", store->HSP_minimum_depth);
-			fprintf(stderr, "dbg4       HSP_maximum_depth:                 %f\n", store->HSP_maximum_depth);
-			fprintf(stderr, "dbg4       HSP_port_offset_limit:             %f\n", store->HSP_port_offset_limit);
-			fprintf(stderr, "dbg4       HSP_stbd_offset_limit:             %f\n", store->HSP_stbd_offset_limit);
-			fprintf(stderr, "dbg4       HSP_port_angle_limit:              %f\n", store->HSP_port_angle_limit);
-			fprintf(stderr, "dbg4       HSP_stbd_angle_limit:              %f\n", store->HSP_stbd_angle_limit);
-			fprintf(stderr, "dbg4       HSP_high_beam_quality:             %d\n", store->HSP_high_beam_quality);
-			fprintf(stderr, "dbg4       HSP_low_beam_quality:              %d\n", store->HSP_low_beam_quality);
-			fprintf(stderr, "dbg4       HSP_sonar_range:                   %f\n", store->HSP_sonar_range);
-			fprintf(stderr, "dbg4       HSP_towfish_layback:               %f\n", store->HSP_towfish_layback);
-			fprintf(stderr, "dbg4       HSP_units:                         %d\n", store->HSP_units);
-			fprintf(stderr, "dbg4       HSP_sonar_id:                      %d\n", store->HSP_sonar_id);
-			fprintf(stderr, "\ndbg4  EOH data record to be written by MBIO function <%s>\n", __func__);
-			fprintf(stderr, "\ndbg4  HVF data record to be written by MBIO function <%s>\n", __func__);
-			fprintf(stderr, "dbg4       HVF_time_after_midnight:           %f\n", store->HVF_time_after_midnight);
-			fprintf(stderr, "dbg4       HVF_minimum_depth:                 %f\n", store->HVF_minimum_depth);
-			fprintf(stderr, "dbg4       HVF_maximum_depth:                 %f\n", store->HVF_maximum_depth);
-			fprintf(stderr, "dbg4       HVF_port_offset_limit:             %f\n", store->HVF_port_offset_limit);
-			fprintf(stderr, "dbg4       HVF_starboard_offset_limit:        %f\n", store->HVF_starboard_offset_limit);
-			fprintf(stderr, "dbg4       HVF_minimum_angle_limit:           %f\n", store->HVF_minimum_angle_limit);
-			fprintf(stderr, "dbg4       HVF_maximum_angle_limit:           %f\n", store->HVF_maximum_angle_limit);
-			fprintf(stderr, "\ndbg4  FIX data record to be written by MBIO function <%s>\n", __func__);
-			fprintf(stderr, "dbg4       FIX_device_number:                 %d\n", store->FIX_device_number);
-			fprintf(stderr, "dbg4       FIX_time_after_midnight:           %f\n", store->FIX_time_after_midnight);
-			fprintf(stderr, "dbg4       FIX_event_number:                  %d\n", store->FIX_event_number);
-		}
-
 	/* copy over structures, allocating memory where necessary */
 	(*copy) = (*store);
 	copy->RMB_beam_ranges = NULL;              /* beam ranges (survey units) */
@@ -2408,6 +2351,7 @@ int mbsys_hysweep_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_
 	copy->RMB_sounding_intensities = NULL;     /* beam intensities */
 	copy->RMB_sounding_quality = NULL;         /* beam quality codes (from sonar unit) */
 	copy->RMB_sounding_flags = NULL;           /* beam edit flags */
+	copy->RMB_sounding_uncertainties = NULL;   /* beam uncertainties (survey units) */
 
 	int status = MB_SUCCESS;
 
@@ -2486,6 +2430,11 @@ int mbsys_hysweep_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_
 			status = mb_mallocd(verbose, __FILE__, __LINE__, copy->RMB_num_beams * sizeof(int),
 			                    (void **)&(copy->RMB_sounding_flags), error);
 			memcpy(copy->RMB_sounding_flags, store->RMB_sounding_flags, copy->RMB_num_beams * sizeof(int));
+		}
+		if (store->RMB_sounding_uncertainties != NULL) {
+			status = mb_mallocd(verbose, __FILE__, __LINE__, copy->RMB_num_beams * sizeof(double),
+			                    (void **)&(copy->RMB_sounding_uncertainties), error);
+			memcpy(copy->RMB_sounding_uncertainties, store->RMB_sounding_uncertainties, copy->RMB_num_beams * sizeof(double));
 		}
 	}
 
@@ -2576,7 +2525,7 @@ int mbsys_hysweep_makess(int verbose, void *mbio_ptr, void *store_ptr,
 		for (int i = 0; i < store->RMB_num_beams; i++) {
 			if (mb_beam_ok(store->RMB_sounding_flags[i])) {
 				store->MSS_table_altitude_sort[nbathsort] =
-				    store->RMB_sounding_depths[i] - store->RMBint_draft + store->RMBint_heave;
+				store->RMB_sounding_depths[i] - store->RMBint_draft + store->RMBint_heave;
 				nbathsort++;
 
 				if (!found || fabs(store->RMB_sounding_across[i]) < minxtrack) {

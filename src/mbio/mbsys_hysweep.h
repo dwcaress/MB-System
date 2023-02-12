@@ -184,6 +184,9 @@
 #define MBSYS_HYSWEEP_SONAR_SIMRAD_SM2000 42         /* Simrad SM2000 - 42 */
 #define MBSYS_HYSWEEP_SONAR_SIMRAD_EM710 43          /* Simrad EM710 - 43 */
 #define MBSYS_HYSWEEP_SONAR_SIMRAD_EM302 44          /* Simrad EM302 - 44 */
+#define MBSYS_HYSWEEP_SONAR_RESON_SEABATT51 51       /* Reson Seabat T51 - 26 */
+
+/* These codes were present in a Hypack spec circa 2010 but are not present in the spec 2020-2023 */
 #define MBSYS_HYSWEEP_SONAR_BLUEVIEW_MB1350_45 45    /* Blueview MB1350-45 - 45 */
 #define MBSYS_HYSWEEP_SONAR_BLUEVIEW_MB2250_45 46    /* Blueview MB2250-45 - 46 */
 #define MBSYS_HYSWEEP_SONAR_BLUEVIEW_MB1350_90 47    /* Blueview MB1350-90 - 47 */
@@ -332,7 +335,7 @@ struct mbsys_hysweep_device_struct {
 	                     0x0800 - beam intensity data available
 	                     0x1000 - beam quality codes (from sonar unit) available
 	                     0x2000 - sounding flags included
-	                     0x4000 - spare
+	                     0x4000 - beam uncertainty (survey units)
 	                     0x8000 - spare */
 	int MBI_num_beams_1; /* number of beams, head 1 (multibeam) or number of transducers
 	                 (multitransducer) */
@@ -564,7 +567,7 @@ struct mbsys_hysweep_struct {
 	                              0x0800 - beam intensity data available
 	                              0x1000 - beam quality codes (from sonar unit) available
 	                              0x2000 - sounding flags included
-	                              0x4000 - spare
+	                              0x4000 - beam uncertainty (survey units)
 	                              0x8000 - spare */
 	int RMB_num_beams;                    /* number of beams to follow */
 	int RMB_num_beams_alloc;              /* number of beams allocated to non-null arrays */
@@ -585,6 +588,7 @@ struct mbsys_hysweep_struct {
 	int *RMB_sounding_intensities;        /* beam intensities */
 	int *RMB_sounding_quality;            /* beam quality codes (from sonar unit) */
 	int *RMB_sounding_flags;              /* beam edit flags */
+	double *RMB_sounding_uncertainties;   /* beam uncertainties */
 
 	/* Interpolated position and attitude data for multibeam ping
 	    In the case of data previously handled by MB-System this

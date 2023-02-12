@@ -6275,6 +6275,10 @@ int mbsys_reson7k3_extract(int verbose, void *mbio_ptr, void *store_ptr, int *ki
         const u32 quality = (rawdetectiondata->quality & 0xFF000000);
         beamflag[i] = (u8)(quality >> 24);
         amp[i] = rawdetectiondata->signal_strength;
+fprintf(stderr, "%s:%d:%s: %d %d  ran:%f dep:%f ltr:%f atr:%f toa:%f azi:%f  flg:%d\n",
+__FILE__, __LINE__, __FUNCTION__, 
+i, rawdetectiondata->beam_descriptor, rawdetectiondata->detection_point / RawDetection->sampling_rate, bath[i], bathalongtrack[i], bathacrosstrack[i], 
+RTD*bathydata->pointing_angle, RTD*bathydata->azimuth_angle, beamflag[i]);
       }
 
       // if multi-pick enabled make sure flagged secondary soundings are flagged for being secondary
