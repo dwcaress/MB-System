@@ -301,18 +301,18 @@ int mbnavadjust_read_project(int verbose, char *projectpath, struct mbna_project
     /* read the project */
     if (status == MB_SUCCESS) {
       /* first save copy of the project file */
-      char command[2*STRING_MAX+10];
-      sprintf(command, "cp %s %s.save", project->home, project->home);
+      mb_command command;
+      snprintf(command, sizeof(command), "cp %s %s.save", project->home, project->home);
       /* const int shellstatus = */ system(command);
 
       /* open and read home file */
       status = MB_SUCCESS;
       FILE *hfp = fopen(project->home, "r");
       if (hfp != NULL) {
-        char buffer[BUFFER_MAX];
+        mb_command buffer;
 
         /* check for proper header */
-        if ((result = fgets(buffer, BUFFER_MAX, hfp)) != buffer || strncmp(buffer, "##MBNAVADJUST PROJECT", 21) != 0)
+        if ((result = fgets(buffer, sizeof(buffer), hfp)) != buffer || strncmp(buffer, "##MBNAVADJUST PROJECT", 21) != 0)
           status = MB_FAILURE;
         if (status == MB_FAILURE) {
           fprintf(stderr, "Die at line:%d file:%s buffer:%s\n", __LINE__, __FILE__, buffer);
@@ -321,10 +321,10 @@ int mbnavadjust_read_project(int verbose, char *projectpath, struct mbna_project
 
         /* read basic names and stats */
         int nscan;
-        char label[STRING_MAX];
-        char obuffer[BUFFER_MAX];
+        mb_path label;
+        mb_path obuffer;
         if (status == MB_SUCCESS &&
-            ((result = fgets(buffer, BUFFER_MAX, hfp)) != buffer ||
+            ((result = fgets(buffer, sizeof(buffer), hfp)) != buffer ||
              (nscan = sscanf(buffer, "%s %s", label, obuffer)) != 2 || strcmp(label, "MB-SYSTEM_VERSION") != 0))
           status = MB_FAILURE;
         if (status == MB_FAILURE) {
@@ -333,7 +333,7 @@ int mbnavadjust_read_project(int verbose, char *projectpath, struct mbna_project
         }
 
         if (status == MB_SUCCESS &&
-            ((result = fgets(buffer, BUFFER_MAX, hfp)) != buffer ||
+            ((result = fgets(buffer, sizeof(buffer), hfp)) != buffer ||
              (nscan = sscanf(buffer, "%s %s", label, obuffer)) != 2 || strcmp(label, "PROGRAM_VERSION") != 0))
           status = MB_FAILURE;
         if (status == MB_FAILURE) {
@@ -343,7 +343,7 @@ int mbnavadjust_read_project(int verbose, char *projectpath, struct mbna_project
 
         int versionmajor;
         int versionminor;
-        if (status == MB_SUCCESS && ((result = fgets(buffer, BUFFER_MAX, hfp)) != buffer ||
+        if (status == MB_SUCCESS && ((result = fgets(buffer, sizeof(buffer), hfp)) != buffer ||
                    (nscan = sscanf(buffer, "%s %d.%d", label, &versionmajor, &versionminor)) != 3 ||
                    strcmp(label, "FILE_VERSION") != 0))
           status = MB_FAILURE;
@@ -365,7 +365,7 @@ int mbnavadjust_read_project(int verbose, char *projectpath, struct mbna_project
 
         if (version_id >= 302) {
           if (status == MB_SUCCESS &&
-              ((result = fgets(buffer, BUFFER_MAX, hfp)) != buffer ||
+              ((result = fgets(buffer, sizeof(buffer), hfp)) != buffer ||
                (nscan = sscanf(buffer, "%s %s", label, obuffer)) != 2 || strcmp(label, "ORIGIN") != 0))
             status = MB_FAILURE;
         }
@@ -375,7 +375,7 @@ int mbnavadjust_read_project(int verbose, char *projectpath, struct mbna_project
         }
 
         if (status == MB_SUCCESS &&
-            ((result = fgets(buffer, BUFFER_MAX, hfp)) != buffer ||
+            ((result = fgets(buffer, sizeof(buffer), hfp)) != buffer ||
              (nscan = sscanf(buffer, "%s %s", label, obuffer)) != 2 || strcmp(label, "NAME") != 0))
           status = MB_FAILURE;
         if (status == MB_FAILURE) {
@@ -384,7 +384,7 @@ int mbnavadjust_read_project(int verbose, char *projectpath, struct mbna_project
         }
 
         if (status == MB_SUCCESS &&
-            ((result = fgets(buffer, BUFFER_MAX, hfp)) != buffer ||
+            ((result = fgets(buffer, sizeof(buffer), hfp)) != buffer ||
              (nscan = sscanf(buffer, "%s %s", label, obuffer)) != 2 || strcmp(label, "PATH") != 0))
           status = MB_FAILURE;
         if (status == MB_FAILURE) {
@@ -393,7 +393,7 @@ int mbnavadjust_read_project(int verbose, char *projectpath, struct mbna_project
         }
 
         if (status == MB_SUCCESS &&
-            ((result = fgets(buffer, BUFFER_MAX, hfp)) != buffer ||
+            ((result = fgets(buffer, sizeof(buffer), hfp)) != buffer ||
              (nscan = sscanf(buffer, "%s %s", label, obuffer)) != 2 || strcmp(label, "HOME") != 0))
           status = MB_FAILURE;
         if (status == MB_FAILURE) {
@@ -402,7 +402,7 @@ int mbnavadjust_read_project(int verbose, char *projectpath, struct mbna_project
         }
 
         if (status == MB_SUCCESS &&
-            ((result = fgets(buffer, BUFFER_MAX, hfp)) != buffer ||
+            ((result = fgets(buffer, sizeof(buffer), hfp)) != buffer ||
              (nscan = sscanf(buffer, "%s %s", label, obuffer)) != 2 || strcmp(label, "DATADIR") != 0))
           status = MB_FAILURE;
         if (status == MB_FAILURE) {
@@ -412,7 +412,7 @@ int mbnavadjust_read_project(int verbose, char *projectpath, struct mbna_project
 
         if (version_id >= 312) {
           if (status == MB_SUCCESS &&
-              ((result = fgets(buffer, BUFFER_MAX, hfp)) != buffer ||
+              ((result = fgets(buffer, sizeof(buffer), hfp)) != buffer ||
                (nscan = sscanf(buffer, "%s %d", label, &project->num_refgrids)) != 2 || strcmp(label, "NUMREFERENCEGRIDS") != 0))
             status = MB_FAILURE;
           if (status == MB_FAILURE) {
@@ -421,7 +421,7 @@ int mbnavadjust_read_project(int verbose, char *projectpath, struct mbna_project
           }
           for (int irefgrid=0; irefgrid < project->num_refgrids; irefgrid++) {
             if (status == MB_SUCCESS) {
-              if ((result = fgets(buffer, BUFFER_MAX, hfp)) == buffer
+              if ((result = fgets(buffer, sizeof(buffer), hfp)) == buffer
                   && strncmp("REFERENCEGRID", buffer, 13) == 0) {
                 if (irefgrid < MBNA_REFGRID_NUM_MAX) {
                   nscan = sscanf(buffer, "%s %s %lf %lf %lf %lf",
@@ -437,8 +437,8 @@ int mbnavadjust_read_project(int verbose, char *projectpath, struct mbna_project
                     memset(&refgrid, 0, sizeof(refgrid));
                     int grid_projection_mode;
                     int nxy;
-                    mb_path path;
-                    snprintf(path, sizeof(mb_path), "%s/%s", project->datadir, project->refgrid_names[irefgrid]);
+                    mb_command path;
+                    snprintf(path, sizeof(path), "%s/%s", project->datadir, project->refgrid_names[irefgrid]);
                     status = mb_check_gmt_grd(verbose, path, &grid_projection_mode,
                              refgrid.projection_id,
                              &refgrid.nodatavalue, &nxy,
@@ -466,7 +466,7 @@ int mbnavadjust_read_project(int verbose, char *projectpath, struct mbna_project
           project->refgrid_status = MBNA_REFGRID_UNLOADED;
         }
         else if (version_id >= 310) {
-          if ((result = fgets(buffer, BUFFER_MAX, hfp)) == buffer
+          if ((result = fgets(buffer, sizeof(buffer), hfp)) == buffer
               && strncmp("REFERENCEGRID", buffer, 13) == 0) {
             nscan = sscanf(buffer, "%s %s", label, project->refgrid_names[0]);
             if (nscan == 2) {
@@ -474,8 +474,8 @@ int mbnavadjust_read_project(int verbose, char *projectpath, struct mbna_project
               memset(&refgrid, 0, sizeof(refgrid));
               int grid_projection_mode;
               int nxy;
-              mb_path path;
-              snprintf(path, sizeof(mb_path), "%s/%s", project->datadir, project->refgrid_names[0]);
+              mb_pathplusplus path;
+              snprintf(path, sizeof(path), "%s/%s", project->datadir, project->refgrid_names[0]);
               status = mb_check_gmt_grd(verbose, path, &grid_projection_mode,
                        refgrid.projection_id,
                        &refgrid.nodatavalue, &nxy,
@@ -503,7 +503,7 @@ int mbnavadjust_read_project(int verbose, char *projectpath, struct mbna_project
         }
 
         if (status == MB_SUCCESS &&
-            ((result = fgets(buffer, BUFFER_MAX, hfp)) != buffer ||
+            ((result = fgets(buffer, sizeof(buffer), hfp)) != buffer ||
              (nscan = sscanf(buffer, "%s %d", label, &project->num_files)) != 2 || strcmp(label, "NUMFILES") != 0))
           status = MB_FAILURE;
         if (status == MB_FAILURE) {
@@ -513,7 +513,7 @@ int mbnavadjust_read_project(int verbose, char *projectpath, struct mbna_project
 
         if (version_id >= 306) {
           if (status == MB_SUCCESS &&
-              ((result = fgets(buffer, BUFFER_MAX, hfp)) != buffer ||
+              ((result = fgets(buffer, sizeof(buffer), hfp)) != buffer ||
                (nscan = sscanf(buffer, "%s %d", label, &project->num_surveys)) != 2 || strcmp(label, "NUMBLOCKS") != 0))
             status = MB_FAILURE;
         }
@@ -525,7 +525,7 @@ int mbnavadjust_read_project(int verbose, char *projectpath, struct mbna_project
           exit(0);
         }
 
-        if (status == MB_SUCCESS && ((result = fgets(buffer, BUFFER_MAX, hfp)) != buffer ||
+        if (status == MB_SUCCESS && ((result = fgets(buffer, sizeof(buffer), hfp)) != buffer ||
                    (nscan = sscanf(buffer, "%s %d", label, &project->num_crossings)) != 2 ||
                    strcmp(label, "NUMCROSSINGS") != 0))
           status = MB_FAILURE;
@@ -534,7 +534,7 @@ int mbnavadjust_read_project(int verbose, char *projectpath, struct mbna_project
           exit(0);
         }
 
-        if (status == MB_SUCCESS && ((result = fgets(buffer, BUFFER_MAX, hfp)) != buffer ||
+        if (status == MB_SUCCESS && ((result = fgets(buffer, sizeof(buffer), hfp)) != buffer ||
                    (nscan = sscanf(buffer, "%s %lf", label, &project->section_length)) != 2 ||
                    strcmp(label, "SECTIONLENGTH") != 0))
           status = MB_FAILURE;
@@ -544,7 +544,7 @@ int mbnavadjust_read_project(int verbose, char *projectpath, struct mbna_project
         }
 
         if (status == MB_SUCCESS && version_id >= 101 &&
-            ((result = fgets(buffer, BUFFER_MAX, hfp)) != buffer ||
+            ((result = fgets(buffer, sizeof(buffer), hfp)) != buffer ||
              (nscan = sscanf(buffer, "%s %d", label, &project->section_soundings)) != 2 ||
              strcmp(label, "SECTIONSOUNDINGS") != 0))
           status = MB_FAILURE;
@@ -554,7 +554,7 @@ int mbnavadjust_read_project(int verbose, char *projectpath, struct mbna_project
         }
 
         if (status == MB_SUCCESS &&
-            ((result = fgets(buffer, BUFFER_MAX, hfp)) != buffer ||
+            ((result = fgets(buffer, sizeof(buffer), hfp)) != buffer ||
              (nscan = sscanf(buffer, "%s %d", label, &project->decimation)) != 2 || strcmp(label, "DECIMATION") != 0))
           status = MB_FAILURE;
         if (status == MB_FAILURE) {
@@ -563,7 +563,7 @@ int mbnavadjust_read_project(int verbose, char *projectpath, struct mbna_project
         }
 
         if (status == MB_SUCCESS &&
-            ((result = fgets(buffer, BUFFER_MAX, hfp)) != buffer ||
+            ((result = fgets(buffer, sizeof(buffer), hfp)) != buffer ||
              (nscan = sscanf(buffer, "%s %lf", label, &project->cont_int)) != 2 || strcmp(label, "CONTOURINTERVAL") != 0))
           status = MB_FAILURE;
         if (status == MB_FAILURE) {
@@ -572,7 +572,7 @@ int mbnavadjust_read_project(int verbose, char *projectpath, struct mbna_project
         }
 
         if (status == MB_SUCCESS &&
-            ((result = fgets(buffer, BUFFER_MAX, hfp)) != buffer ||
+            ((result = fgets(buffer, sizeof(buffer), hfp)) != buffer ||
              (nscan = sscanf(buffer, "%s %lf", label, &project->col_int)) != 2 || strcmp(label, "COLORINTERVAL") != 0))
           status = MB_FAILURE;
         if (status == MB_FAILURE) {
@@ -581,7 +581,7 @@ int mbnavadjust_read_project(int verbose, char *projectpath, struct mbna_project
         }
 
         if (status == MB_SUCCESS &&
-            ((result = fgets(buffer, BUFFER_MAX, hfp)) != buffer ||
+            ((result = fgets(buffer, sizeof(buffer), hfp)) != buffer ||
              (nscan = sscanf(buffer, "%s %lf", label, &project->tick_int)) != 2 || strcmp(label, "TICKINTERVAL") != 0))
           status = MB_FAILURE;
         if (status == MB_FAILURE) {
@@ -589,7 +589,7 @@ int mbnavadjust_read_project(int verbose, char *projectpath, struct mbna_project
           exit(0);
         }
 
-        if (status == MB_SUCCESS && ((result = fgets(buffer, BUFFER_MAX, hfp)) != buffer ||
+        if (status == MB_SUCCESS && ((result = fgets(buffer, sizeof(buffer), hfp)) != buffer ||
                    (nscan = sscanf(buffer, "%s %d", label, &project->inversion_status)) != 2 ||
                    strcmp(label, "INVERSION") != 0))
           status = MB_FAILURE;
@@ -600,7 +600,7 @@ int mbnavadjust_read_project(int verbose, char *projectpath, struct mbna_project
 
         if (status == MB_SUCCESS) {
           if (version_id >= 307) {
-            if ((result = fgets(buffer, BUFFER_MAX, hfp)) != buffer ||
+            if ((result = fgets(buffer, sizeof(buffer), hfp)) != buffer ||
                 (nscan = sscanf(buffer, "%s %d", label, &project->grid_status)) != 2 ||
                 strcmp(label, "GRIDSTATUS") != 0)
               status = MB_FAILURE;
@@ -608,14 +608,14 @@ int mbnavadjust_read_project(int verbose, char *projectpath, struct mbna_project
         }
         if (status == MB_SUCCESS) {
           if (version_id >= 301) {
-            if ((result = fgets(buffer, BUFFER_MAX, hfp)) != buffer ||
+            if ((result = fgets(buffer, sizeof(buffer), hfp)) != buffer ||
                 (nscan = sscanf(buffer, "%s %lf", label, &project->smoothing)) != 2 ||
                 strcmp(label, "SMOOTHING") != 0)
               status = MB_FAILURE;
             project->precision = SIGMA_MINIMUM;
           }
           else if (version_id >= 103) {
-            if ((result = fgets(buffer, BUFFER_MAX, hfp)) != buffer ||
+            if ((result = fgets(buffer, sizeof(buffer), hfp)) != buffer ||
                 (nscan = sscanf(buffer, "%s %lf", label, &project->precision)) != 2 ||
                 strcmp(label, "PRECISION") != 0)
               status = MB_FAILURE;
@@ -633,7 +633,7 @@ int mbnavadjust_read_project(int verbose, char *projectpath, struct mbna_project
 
         if (status == MB_SUCCESS) {
           if (version_id >= 105) {
-            if ((result = fgets(buffer, BUFFER_MAX, hfp)) != buffer ||
+            if ((result = fgets(buffer, sizeof(buffer), hfp)) != buffer ||
                 (nscan = sscanf(buffer, "%s %lf", label, &project->zoffsetwidth)) != 2 ||
                 strcmp(label, "ZOFFSETWIDTH") != 0)
               status = MB_FAILURE;
@@ -699,7 +699,7 @@ int mbnavadjust_read_project(int verbose, char *projectpath, struct mbna_project
           file->num_beams = 0;
           if (version_id >= 306) {
             if (status == MB_SUCCESS &&
-                ((result = fgets(buffer, BUFFER_MAX, hfp)) != buffer ||
+                ((result = fgets(buffer, sizeof(buffer), hfp)) != buffer ||
                  (nscan = sscanf(buffer, "FILE %d %d %d %d %d %lf %lf %lf %lf %lf %lf %lf %d %d %s", &idummy,
                      &(file->status), &(file->id), &(file->format), &(file->block),
                      &(file->block_offset_x), &(file->block_offset_y), &(file->block_offset_z),
@@ -709,7 +709,7 @@ int mbnavadjust_read_project(int verbose, char *projectpath, struct mbna_project
           }
           else {
             if (status == MB_SUCCESS &&
-                ((result = fgets(buffer, BUFFER_MAX, hfp)) != buffer ||
+                ((result = fgets(buffer, sizeof(buffer), hfp)) != buffer ||
                  (nscan = sscanf(buffer, "FILE %d %d %d %d %lf %lf %lf %lf %d %d %s", &idummy, &(file->status),
                      &(file->id), &(file->format), &(file->heading_bias_import),
                      &(file->roll_bias_import), &(file->heading_bias), &(file->roll_bias),
@@ -753,7 +753,7 @@ int mbnavadjust_read_project(int verbose, char *projectpath, struct mbna_project
             section->file_id = ifile;
             section->section_id = isection;
             if (status == MB_SUCCESS)
-              result = fgets(buffer, BUFFER_MAX, hfp);
+              result = fgets(buffer, sizeof(buffer), hfp);
             if (status == MB_SUCCESS && result == buffer)
               nscan = sscanf(buffer, "SECTION %d %d %d %d %d %lf %lf %lf %lf %lf %lf %lf %lf %lf %d", &idummy,
                        &section->num_pings, &section->num_beams, &section->num_snav, &section->continuity,
@@ -770,7 +770,7 @@ __FILE__, __LINE__, __FUNCTION__, ifile, isection, buffer, result, nscan);
               section->contoursuptodate = false;
             for (k = MBNA_MASK_DIM - 1; k >= 0; k--) {
               if (status == MB_SUCCESS)
-                result = fgets(buffer, BUFFER_MAX, hfp);
+                result = fgets(buffer, sizeof(buffer), hfp);
               for (l = 0; l < MBNA_MASK_DIM; l++) {
                 sscanf(&buffer[l], "%1d", &section->coverage[l + k * MBNA_MASK_DIM]);
               }
@@ -791,7 +791,7 @@ __FILE__, __LINE__, __FUNCTION__, ifile, isection, buffer, result, nscan);
                }*/
             for (k = 0; k < section->num_snav; k++) {
               if (status == MB_SUCCESS) {
-                result = fgets(buffer, BUFFER_MAX, hfp);
+                result = fgets(buffer, sizeof(buffer), hfp);
                 if (version_id >= 308) {
                   if (status == MB_SUCCESS && result == buffer)
                     nscan = sscanf(buffer, "SNAV %d %d %lf %lf %lf %lf %lf %lf %lf %lf",
@@ -877,7 +877,7 @@ __FILE__, __LINE__, __FUNCTION__, ifile, isection, buffer, result, nscan);
 
             if (version_id >= 313) {
               if (status == MB_SUCCESS) {
-                if ((result = fgets(buffer, BUFFER_MAX, hfp)) != buffer
+                if ((result = fgets(buffer, sizeof(buffer), hfp)) != buffer
                     || sscanf(buffer, "GLOBALTIE %d %d %d %lf %lf %lf %lf %lf %lf %d %lf %lf %lf",
                         &section->globaltie.status,
                         &section->globaltie.snav,
@@ -899,7 +899,7 @@ __FILE__, __LINE__, __FUNCTION__, ifile, isection, buffer, result, nscan);
               }
               int nscan = 0;
               if (status == MB_SUCCESS) {
-                if ((result = fgets(buffer, BUFFER_MAX, hfp)) != buffer ||
+                if ((result = fgets(buffer, sizeof(buffer), hfp)) != buffer ||
                     (nscan = sscanf(buffer, "COV %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf",
                       &section->globaltie.sigmar1, &section->globaltie.sigmax1[0],
                       &section->globaltie.sigmax1[1], &section->globaltie.sigmax1[2],
@@ -950,7 +950,7 @@ __FILE__, __LINE__, __FUNCTION__, ifile, isection, buffer, result, nscan);
 
             else if (version_id >= 311) {
               if (status == MB_SUCCESS) {
-                if ((result = fgets(buffer, BUFFER_MAX, hfp)) != buffer
+                if ((result = fgets(buffer, sizeof(buffer), hfp)) != buffer
                     || sscanf(buffer, "GLOBALTIE %d %d %lf %lf %lf %lf %lf %lf %d %lf %lf %lf",
                         &section->globaltie.status,
                         &section->globaltie.snav,
@@ -972,7 +972,7 @@ __FILE__, __LINE__, __FUNCTION__, ifile, isection, buffer, result, nscan);
               }
               int nscan = 0;
               if (status == MB_SUCCESS) {
-                if ((result = fgets(buffer, BUFFER_MAX, hfp)) != buffer ||
+                if ((result = fgets(buffer, sizeof(buffer), hfp)) != buffer ||
                     (nscan = sscanf(buffer, "COV %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf",
                       &section->globaltie.sigmar1, &section->globaltie.sigmax1[0],
                       &section->globaltie.sigmax1[1], &section->globaltie.sigmax1[2],
@@ -1023,7 +1023,7 @@ __FILE__, __LINE__, __FUNCTION__, ifile, isection, buffer, result, nscan);
 
             else if (version_id >= 309) {
               if (status == MB_SUCCESS) {
-                if ((result = fgets(buffer, BUFFER_MAX, hfp)) != buffer
+                if ((result = fgets(buffer, sizeof(buffer), hfp)) != buffer
                     || sscanf(buffer, "GLOBALTIE %d %d %d %lf %lf %lf %lf %lf %lf",
                         &section->globaltie.status, &section->globaltie.snav,
                         &section->globaltie.inversion_status,
@@ -1053,7 +1053,7 @@ __FILE__, __LINE__, __FUNCTION__, ifile, isection, buffer, result, nscan);
 
             else if (version_id >= 305) {
               if (status == MB_SUCCESS) {
-                if ((result = fgets(buffer, BUFFER_MAX, hfp)) != buffer
+                if ((result = fgets(buffer, sizeof(buffer), hfp)) != buffer
                     || sscanf(buffer, "GLOBALTIE %d %d %lf %lf %lf %lf %lf %lf",
                         &section->globaltie.status, &section->globaltie.snav,
                         &section->globaltie.offset_x, &section->globaltie.offset_y, &section->globaltie.offset_z_m,
@@ -1084,7 +1084,7 @@ __FILE__, __LINE__, __FUNCTION__, ifile, isection, buffer, result, nscan);
 
             else if (version_id == 304) {
               if (status == MB_SUCCESS) {
-                if ((result = fgets(buffer, BUFFER_MAX, hfp)) != buffer
+                if ((result = fgets(buffer, sizeof(buffer), hfp)) != buffer
                     || sscanf(buffer, "GLOBALTIE %d %lf %lf %lf %lf %lf %lf",
                         &section->globaltie.snav,
                         &section->globaltie.offset_x, &section->globaltie.offset_y, &section->globaltie.offset_z_m,
@@ -1228,7 +1228,7 @@ __FILE__, __LINE__, __FUNCTION__, ifile, isection, buffer, result, nscan);
           struct mbna_crossing *crossing = &project->crossings[icrossing];
           if (status == MB_SUCCESS && version_id >= 106) {
             if (status == MB_SUCCESS &&
-                ((result = fgets(buffer, BUFFER_MAX, hfp)) != buffer ||
+                ((result = fgets(buffer, sizeof(buffer), hfp)) != buffer ||
                  (nscan =
                     sscanf(buffer, "CROSSING %d %d %d %d %d %d %d %d %d", &idummy, &crossing->status,
                      &crossing->truecrossing, &crossing->overlap, &crossing->file_id_1, &crossing->section_1,
@@ -1240,7 +1240,7 @@ __FILE__, __LINE__, __FUNCTION__, ifile, isection, buffer, result, nscan);
           else if (status == MB_SUCCESS && version_id >= 102) {
             crossing->overlap = 0;
             if (status == MB_SUCCESS &&
-                ((result = fgets(buffer, BUFFER_MAX, hfp)) != buffer ||
+                ((result = fgets(buffer, sizeof(buffer), hfp)) != buffer ||
                  (nscan = sscanf(buffer, "CROSSING %d %d %d %d %d %d %d %d", &idummy, &crossing->status,
                      &crossing->truecrossing, &crossing->file_id_1, &crossing->section_1,
                      &crossing->file_id_2, &crossing->section_2, &crossing->num_ties)) != 8)) {
@@ -1252,7 +1252,7 @@ __FILE__, __LINE__, __FUNCTION__, ifile, isection, buffer, result, nscan);
             crossing->truecrossing = false;
             crossing->overlap = 0;
             if (status == MB_SUCCESS &&
-                ((result = fgets(buffer, BUFFER_MAX, hfp)) != buffer ||
+                ((result = fgets(buffer, sizeof(buffer), hfp)) != buffer ||
                  (nscan = sscanf(buffer, "CROSSING %d %d %d %d %d %d %d", &idummy, &crossing->status,
                      &crossing->file_id_1, &crossing->section_1, &crossing->file_id_2,
                      &crossing->section_2, &crossing->num_ties)) != 7)) {
@@ -1287,7 +1287,7 @@ __FILE__, __LINE__, __FUNCTION__, ifile, isection, buffer, result, nscan);
               tie->icrossing = icrossing;
               tie->itie = itie;
               if (status == MB_SUCCESS && version_id >= 302) {
-                if ((result = fgets(buffer, BUFFER_MAX, hfp)) != buffer ||
+                if ((result = fgets(buffer, sizeof(buffer), hfp)) != buffer ||
                     (nscan = sscanf(buffer, "TIE %d %d %d %lf %d %lf %lf %lf %lf %d %lf %lf %lf", &idummy,
                         &tie->status, &tie->snav_1, &tie->snav_1_time_d, &tie->snav_2,
                         &tie->snav_2_time_d, &tie->offset_x, &tie->offset_y, &tie->offset_z_m,
@@ -1298,7 +1298,7 @@ __FILE__, __LINE__, __FUNCTION__, ifile, isection, buffer, result, nscan);
                 }
               }
               else if (status == MB_SUCCESS && version_id >= 104) {
-                if ((result = fgets(buffer, BUFFER_MAX, hfp)) != buffer ||
+                if ((result = fgets(buffer, sizeof(buffer), hfp)) != buffer ||
                     (nscan = sscanf(buffer, "TIE %d %d %lf %d %lf %lf %lf %lf %d %lf %lf %lf", &idummy,
                         &tie->snav_1, &tie->snav_1_time_d, &tie->snav_2, &tie->snav_2_time_d,
                         &tie->offset_x, &tie->offset_y, &tie->offset_z_m, &tie->inversion_status,
@@ -1310,7 +1310,7 @@ __FILE__, __LINE__, __FUNCTION__, ifile, isection, buffer, result, nscan);
                 tie->status = MBNA_TIE_XYZ;
               }
               else if (status == MB_SUCCESS) {
-                if ((result = fgets(buffer, BUFFER_MAX, hfp)) != buffer ||
+                if ((result = fgets(buffer, sizeof(buffer), hfp)) != buffer ||
                     (nscan = sscanf(buffer, "TIE %d %d %lf %d %lf %lf %lf %d %lf %lf", &idummy, &tie->snav_1,
                         &tie->snav_1_time_d, &tie->snav_2, &tie->snav_2_time_d, &tie->offset_x,
                         &tie->offset_y, &tie->inversion_status, &tie->inversion_offset_x,
@@ -1354,7 +1354,7 @@ __FILE__, __LINE__, __FUNCTION__, ifile, isection, buffer, result, nscan);
 
               /* for version 2.0 or later read covariance */
               if (status == MB_SUCCESS && version_id >= 200) {
-                if ((result = fgets(buffer, BUFFER_MAX, hfp)) != buffer ||
+                if ((result = fgets(buffer, sizeof(buffer), hfp)) != buffer ||
                     (nscan = sscanf(buffer, "COV %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf", &tie->sigmar1,
                         &(tie->sigmax1[0]), &(tie->sigmax1[1]), &(tie->sigmax1[2]), &tie->sigmar2,
                         &(tie->sigmax2[0]), &(tie->sigmax2[1]), &(tie->sigmax2[2]), &tie->sigmar3,
@@ -1519,10 +1519,10 @@ __FILE__, __LINE__, __FUNCTION__, ifile, isection, buffer, result, nscan);
           if (project->crossings != NULL)
             free(project->crossings);
           project->open = false;
-          memset(project->name, 0, STRING_MAX);
+          memset(project->name, 0, sizeof(project->name));
           strcpy(project->name, "None");
-          memset(project->path, 0, STRING_MAX);
-          memset(project->datadir, 0, STRING_MAX);
+          memset(project->path, 0, sizeof(project->path));
+          memset(project->datadir, 0, sizeof(project->datadir));
           project->num_files = 0;
           project->num_files_alloc = 0;
           project->num_snavs = 0;
@@ -1622,11 +1622,11 @@ int mbnavadjust_close_project(int verbose, struct mbna_project *project, int *er
 
   /* reset values */
   project->open = false;
-  memset(project->name, 0, STRING_MAX);
+  memset(project->name, 0, sizeof(project->name));
   strcpy(project->name, "None");
-  memset(project->path, 0, STRING_MAX);
-  memset(project->datadir, 0, STRING_MAX);
-  memset(project->logfile, 0, STRING_MAX);
+  memset(project->path, 0, sizeof(project->path));
+  memset(project->datadir, 0, sizeof(project->datadir));
+  memset(project->logfile, 0, sizeof(project->logfile));
   project->num_files = 0;
   project->num_snavs = 0;
   project->num_pings = 0;
@@ -1678,10 +1678,10 @@ int mbnavadjust_write_project(int verbose, struct mbna_project *project,
   struct mbna_section *section, *section_1, *section_2;
   struct mbna_crossing *crossing;
   struct mbna_tie *tie;
-  char datalist[2*STRING_MAX+100];
-  char routefile[2*STRING_MAX+100];
-  char routename[STRING_MAX];
-  char offsetfile[2*STRING_MAX+100];
+  mb_pathplusplus datalist;
+  mb_pathplusplus routefile;
+  mb_pathplus routename;
+  mb_pathplusplus offsetfile;
   double navlon1, navlon2, navlat1, navlat2;
   int time_i[7];
   int nroute;
@@ -1819,7 +1819,7 @@ int mbnavadjust_write_project(int verbose, struct mbna_project *project,
   }
 
   /* open and write datalist file */
-  sprintf(datalist, "%s%s.mb-1", project->path, project->name);
+  snprintf(datalist, sizeof(datalist), "%s%s.mb-1", project->path, project->name);
   if ((hfp = fopen(datalist, "w")) != NULL) {
     for (i = 0; i < project->num_files; i++) {
       /* write file entry */
@@ -1882,7 +1882,7 @@ int mbnavadjust_write_project(int verbose, struct mbna_project *project,
   }
 
   /* write mbgrdviz route file for all unfixed true crossings */
-  sprintf(routefile, "%s%s_truecrossing.rte", project->path, project->name);
+  snprintf(routefile,sizeof(routefile), "%s%s_truecrossing.rte", project->path, project->name);
   if ((hfp = fopen(routefile, "w")) == NULL) {
     fclose(hfp);
     status = MB_FAILURE;
@@ -1935,7 +1935,7 @@ int mbnavadjust_write_project(int verbose, struct mbna_project *project,
           truecrossing_char = ' ';
         else
           truecrossing_char = 'X';
-        sprintf(routename, "%c%c %4d %2.2d:%3.3d:%3.3d %2.2d:%3.3d:%3.3d %3d %2d", status_char, truecrossing_char, i,
+        snprintf(routename, sizeof(routename), "%c%c %4d %2.2d:%3.3d:%3.3d %2.2d:%3.3d:%3.3d %3d %2d", status_char, truecrossing_char, i,
           file_1->block, crossing->file_id_1, crossing->section_1, file_2->block, crossing->file_id_2,
           crossing->section_2, crossing->overlap, crossing->num_ties);
         fprintf(hfp, "## ROUTENAME %s\n", routename);
@@ -1953,7 +1953,7 @@ int mbnavadjust_write_project(int verbose, struct mbna_project *project,
   }
 
   /* write mbgrdviz route file for all unfixed >=50% crossings */
-  sprintf(routefile, "%s%s_gt50crossing.rte", project->path, project->name);
+  snprintf(routefile, sizeof(routefile), "%s%s_gt50crossing.rte", project->path, project->name);
   if ((hfp = fopen(routefile, "w")) == NULL) {
     fclose(hfp);
     status = MB_FAILURE;
@@ -2006,7 +2006,7 @@ int mbnavadjust_write_project(int verbose, struct mbna_project *project,
           truecrossing_char = ' ';
         else
           truecrossing_char = 'X';
-        sprintf(routename, "%c%c %4d %2.2d:%3.3d:%3.3d %2.2d:%3.3d:%3.3d %3d %2d", status_char, truecrossing_char, i,
+        snprintf(routename, sizeof(routename), "%c%c %4d %2.2d:%3.3d:%3.3d %2.2d:%3.3d:%3.3d %3d %2d", status_char, truecrossing_char, i,
           file_1->block, crossing->file_id_1, crossing->section_1, file_2->block, crossing->file_id_2,
           crossing->section_2, crossing->overlap, crossing->num_ties);
         fprintf(hfp, "## ROUTENAME %s\n", routename);
@@ -2025,7 +2025,7 @@ int mbnavadjust_write_project(int verbose, struct mbna_project *project,
   }
 
   /* write mbgrdviz route file for all unfixed >=25% but less than 50% crossings */
-  sprintf(routefile, "%s%s_gt25crossing.rte", project->path, project->name);
+  snprintf(routefile, sizeof(routefile), "%s%s_gt25crossing.rte", project->path, project->name);
   if ((hfp = fopen(routefile, "w")) == NULL) {
     fclose(hfp);
     status = MB_FAILURE;
@@ -2078,7 +2078,7 @@ int mbnavadjust_write_project(int verbose, struct mbna_project *project,
           truecrossing_char = ' ';
         else
           truecrossing_char = 'X';
-        sprintf(routename, "%c%c %4d %2.2d:%3.3d:%3.3d %2.2d:%3.3d:%3.3d %3d %2d", status_char, truecrossing_char, i,
+        snprintf(routename, sizeof(routename), "%c%c %4d %2.2d:%3.3d:%3.3d %2.2d:%3.3d:%3.3d %3d %2d", status_char, truecrossing_char, i,
           file_1->block, crossing->file_id_1, crossing->section_1, file_2->block, crossing->file_id_2,
           crossing->section_2, crossing->overlap, crossing->num_ties);
         fprintf(hfp, "## ROUTENAME %s\n", routename);
@@ -2097,7 +2097,7 @@ int mbnavadjust_write_project(int verbose, struct mbna_project *project,
   }
 
   /* write mbgrdviz route file for all unfixed <25% crossings */
-  sprintf(routefile, "%s%s_lt25crossing.rte", project->path, project->name);
+  snprintf(routefile, sizeof(routefile), "%s%s_lt25crossing.rte", project->path, project->name);
   if ((hfp = fopen(routefile, "w")) == NULL) {
     fclose(hfp);
     status = MB_FAILURE;
@@ -2150,7 +2150,7 @@ int mbnavadjust_write_project(int verbose, struct mbna_project *project,
           truecrossing_char = ' ';
         else
           truecrossing_char = 'X';
-        sprintf(routename, "%c%c %4d %2.2d:%3.3d:%3.3d %2.2d:%3.3d:%3.3d %3d %2d", status_char, truecrossing_char, i,
+        snprintf(routename, sizeof(routename), "%c%c %4d %2.2d:%3.3d:%3.3d %2.2d:%3.3d:%3.3d %3d %2d", status_char, truecrossing_char, i,
           file_1->block, crossing->file_id_1, crossing->section_1, file_2->block, crossing->file_id_2,
           crossing->section_2, crossing->overlap, crossing->num_ties);
         fprintf(hfp, "## ROUTENAME %s\n", routename);
@@ -2168,7 +2168,7 @@ int mbnavadjust_write_project(int verbose, struct mbna_project *project,
   }
 
   /* write mbgrdviz route file for all fixed crossings */
-  sprintf(routefile, "%s%s_fixedcrossing.rte", project->path, project->name);
+  snprintf(routefile, sizeof(routefile), "%s%s_fixedcrossing.rte", project->path, project->name);
   if ((hfp = fopen(routefile, "w")) == NULL) {
     fclose(hfp);
     status = MB_FAILURE;
@@ -2221,7 +2221,7 @@ int mbnavadjust_write_project(int verbose, struct mbna_project *project,
           truecrossing_char = ' ';
         else
           truecrossing_char = 'X';
-        sprintf(routename, "%c%c %4d %2.2d:%3.3d:%3.3d %2.2d:%3.3d:%3.3d %3d %2d", status_char, truecrossing_char, i,
+        snprintf(routename, sizeof(routename), "%c%c %4d %2.2d:%3.3d:%3.3d %2.2d:%3.3d:%3.3d %3d %2d", status_char, truecrossing_char, i,
           file_1->block, crossing->file_id_1, crossing->section_1, file_2->block, crossing->file_id_2,
           crossing->section_2, crossing->overlap, crossing->num_ties);
         fprintf(hfp, "## ROUTENAME %s\n", routename);
@@ -2239,7 +2239,7 @@ int mbnavadjust_write_project(int verbose, struct mbna_project *project,
   }
 
   /* write mbgrdviz route file for all unfixed ties */
-  sprintf(routefile, "%s%s_unfixedties.rte", project->path, project->name);
+  snprintf(routefile, sizeof(routefile), "%s%s_unfixedties.rte", project->path, project->name);
   if ((hfp = fopen(routefile, "w")) == NULL) {
     fclose(hfp);
     status = MB_FAILURE;
@@ -2290,7 +2290,7 @@ int mbnavadjust_write_project(int verbose, struct mbna_project *project,
             truecrossing_char = ' ';
           else
             truecrossing_char = 'X';
-          sprintf(routename, "Tie: %c%c %4d %2.2d:%3.3d:%3.3d %2.2d:%3.3d:%3.3d %3d %2d of %2d", status_char,
+          snprintf(routename, sizeof(routename), "Tie: %c%c %4d %2.2d:%3.3d:%3.3d %2.2d:%3.3d:%3.3d %3d %2d of %2d", status_char,
             truecrossing_char, i, file_1->block, crossing->file_id_1, crossing->section_1, file_2->block,
             crossing->file_id_2, crossing->section_2, crossing->overlap, j, crossing->num_ties);
           fprintf(hfp, "## ROUTENAME %s\n", routename);
@@ -2309,7 +2309,7 @@ int mbnavadjust_write_project(int verbose, struct mbna_project *project,
   }
 
   /* write mbgrdviz route file for all fixed ties */
-  sprintf(routefile, "%s%s_fixedties.rte", project->path, project->name);
+  snprintf(routefile, sizeof(routefile), "%s%s_fixedties.rte", project->path, project->name);
   if ((hfp = fopen(routefile, "w")) == NULL) {
     fclose(hfp);
     status = MB_FAILURE;
@@ -2360,7 +2360,7 @@ int mbnavadjust_write_project(int verbose, struct mbna_project *project,
             truecrossing_char = ' ';
           else
             truecrossing_char = 'X';
-          sprintf(routename, "Tie: %c%c %4d %2.2d:%3.3d:%3.3d %2.2d:%3.3d:%3.3d %3d %2d of %2d", status_char,
+          snprintf(routename, sizeof(routename), "Tie: %c%c %4d %2.2d:%3.3d:%3.3d %2.2d:%3.3d:%3.3d %3d %2d of %2d", status_char,
             truecrossing_char, i, file_1->block, crossing->file_id_1, crossing->section_1, file_2->block,
             crossing->file_id_2, crossing->section_2, crossing->overlap, j, crossing->num_ties);
           fprintf(hfp, "## ROUTENAME %s\n", routename);
@@ -2380,7 +2380,7 @@ int mbnavadjust_write_project(int verbose, struct mbna_project *project,
 
   /* output offset vectors */
   if (project->inversion_status == MBNA_INVERSION_CURRENT) {
-    sprintf(offsetfile, "%s%s_offset.txt", project->path, project->name);
+    snprintf(offsetfile, sizeof(offsetfile), "%s%s_offset.txt", project->path, project->name);
     if ((hfp = fopen(offsetfile, "w")) != NULL) {
       for (i = 0; i < project->num_files; i++) {
         file = &project->files[i];
@@ -2822,8 +2822,8 @@ int mbnavadjust_read_triangles(int verbose, struct mbna_project *project,
   }
 
   // if all good then try to read existing triangularization
-  char tpath[2*STRING_MAX];
-  sprintf(tpath, "%s/nvs_%4.4d_%4.4d.mb71.tri", project->datadir, file_id, section_id);
+  mb_pathplus tpath;
+  snprintf(tpath, sizeof(tpath), "%s/nvs_%4.4d_%4.4d.mb71.tri", project->datadir, file_id, section_id);
 
   int status = MB_SUCCESS;
   FILE *tfp = fopen(tpath, "r");
@@ -3001,10 +3001,9 @@ int mbnavadjust_write_triangles(int verbose, struct mbna_project *project,
   // if all good then try to read existing triangularization
   int status = MB_SUCCESS;
   *error = MB_ERROR_NO_ERROR;
-  // TODO(schwehr): Remove this redundant status chech
-  if (status == MB_SUCCESS && swath->ntri > 0) {
-    char tpath[2*STRING_MAX];
-    sprintf(tpath, "%s/nvs_%4.4d_%4.4d.mb71.tri", project->datadir, file_id, section_id);
+  if (swath->ntri > 0) {
+    mb_pathplus tpath;
+    snprintf(tpath, sizeof(tpath), "%s/nvs_%4.4d_%4.4d.mb71.tri", project->datadir, file_id, section_id);
     FILE *tfp = fopen(tpath, "w");
     if (tfp != NULL) {
       size_t write_size;
@@ -3103,10 +3102,10 @@ int mbnavadjust_section_load(int verbose, struct mbna_project *project,
   /* load specified section */
   if (project->open && project->num_crossings > 0) {
     /* set section format and path */
-    char path[2*STRING_MAX];
-    sprintf(path, "%s/nvs_%4.4d_%4.4d.mb71", project->datadir, file_id, section_id);
-    char tpath[2*STRING_MAX];
-    sprintf(tpath, "%s/nvs_%4.4d_%4.4d.mb71.tri", project->datadir, file_id, section_id);
+    mb_pathplus path;
+    snprintf(path, sizeof(path), "%s/nvs_%4.4d_%4.4d.mb71", project->datadir, file_id, section_id);
+    mb_pathplus tpath;
+    snprintf(tpath, sizeof(tpath), "%s/nvs_%4.4d_%4.4d.mb71.tri", project->datadir, file_id, section_id);
     const int iformat = 71;
     struct mbna_file *file = &(project->files[file_id]);
     struct mbna_section *section = &(file->sections[section_id]);
@@ -3481,8 +3480,8 @@ int mbnavadjust_fix_section_sensordepth(int verbose, struct mbna_project *projec
       for (int isection = 0; isection<file->num_sections; isection++) {
 
         /* set section format and path */
-        char path[STRING_MAX+500];
-        sprintf(path, "%s/nvs_%4.4d_%4.4d.mb71", project->datadir, ifile, isection);
+        mb_pathplus path;
+        snprintf(path, sizeof(path), "%s/nvs_%4.4d_%4.4d.mb71", project->datadir, ifile, isection);
         const int iformat = 71;
         file = &(project->files[ifile]);
         struct mbna_section *section = &(file->sections[isection]);
@@ -3779,8 +3778,8 @@ int mbnavadjust_import_data(int verbose, struct mbna_project *project,
   int status = MB_SUCCESS;
   struct mbna_file *file;
   struct mbna_section *section;
-  char filename[STRING_MAX];
-  char dfile[STRING_MAX];
+  mb_path filename;
+  mb_path dfile;
   double weight;
   int form;
   void *datalist;
@@ -3876,8 +3875,8 @@ int mbnavadjust_import_file(int verbose, struct mbna_project *project,
 
   int status = MB_SUCCESS;
   char *error_message;
-  char ipath[STRING_MAX];
-  char mb_suffix[STRING_MAX];
+  mb_pathplus ipath;
+  char mb_suffix[32];
   int iform;
   int format_error = MB_ERROR_NO_ERROR;
 
@@ -3885,12 +3884,12 @@ int mbnavadjust_import_file(int verbose, struct mbna_project *project,
   if (mb_get_format(verbose, path, ipath, &iform, &format_error) != MB_SUCCESS) {
     strcpy(ipath, path);
   }
-  sprintf(mb_suffix, "p.mb%d", iformat);
+  snprintf(mb_suffix, sizeof(mb_suffix), "p.mb%d", iformat);
   strcat(ipath, mb_suffix);
 
   struct stat file_status;
-  char npath[STRING_MAX+100];
-  char opath[STRING_MAX+100];
+  mb_pathplus npath;
+  mb_pathplus opath;
 
   /* MBIO control parameters */
   const int pings = 1;
@@ -3973,8 +3972,8 @@ int mbnavadjust_import_file(int verbose, struct mbna_project *project,
   char *root = (char *)strrchr(ipath, '/');
   if (root == NULL)
     root = ipath;
-  char message[STRING_MAX];
-  sprintf(message, "Importing format %d data from %s", iformat, root);
+  mb_pathplus message;
+  snprintf(message, sizeof(message), "Importing format %d data from %s", iformat, root);
   fprintf(stderr, "%s\n", message);
   bool output_open = false;
   project->inversion_status = MBNA_INVERSION_NONE;
@@ -4054,7 +4053,7 @@ int mbnavadjust_import_file(int verbose, struct mbna_project *project,
 
   /* open nav file */
   if (status == MB_SUCCESS) {
-    sprintf(npath, "%s/nvs_%4.4d.mb166", project->datadir, project->num_files);
+    snprintf(npath, sizeof(npath), "%s/nvs_%4.4d.mb166", project->datadir, project->num_files);
     if ((nfp = fopen(npath, "w")) == NULL) {
       status = MB_FAILURE;
       *error = MB_ERROR_OPEN_FAIL;
@@ -4404,7 +4403,7 @@ int mbnavadjust_import_file(int verbose, struct mbna_project *project,
         new_section = false;
 
         /* open output section file */
-        sprintf(opath, "%s/nvs_%4.4d_%4.4d.mb71", project->datadir, file->id, file->num_sections - 1);
+        snprintf(opath, sizeof(opath), "%s/nvs_%4.4d_%4.4d.mb71", project->datadir, file->id, file->num_sections - 1);
         if ((status = mb_write_init(verbose, opath, 71, &ombio_ptr, &obeams_bath, &obeams_amp, &opixels_ss,
                   error)) != MB_SUCCESS) {
           mb_error(verbose, *error, &error_message);
@@ -4603,7 +4602,7 @@ int mbnavadjust_import_file(int verbose, struct mbna_project *project,
       for (int k = 0; k < file->num_sections; k++) {
         /* set section data to be read */
         section = (struct mbna_section *)&file->sections[k];
-        sprintf(opath, "%s/nvs_%4.4d_%4.4d.mb71", project->datadir, file->id, k);
+        snprintf(opath, sizeof(opath), "%s/nvs_%4.4d_%4.4d.mb71", project->datadir, file->id, k);
 
         /* initialize reading the swath file */
         if ((status = mb_read_init(verbose, opath, 71, 1, lonflip, bounds, btime_i, etime_i, speedmin, timegap,
@@ -4702,12 +4701,12 @@ int mbnavadjust_import_file(int verbose, struct mbna_project *project,
 
   /* add info text */
   if (status == MB_SUCCESS && new_pings > 0) {
-    sprintf(message, "Imported format %d file: %s\n > Read %d pings\n > Added %d sections %d crossings\n", iformat, path,
+    snprintf(message, sizeof(message), "Imported format %d file: %s\n > Read %d pings\n > Added %d sections %d crossings\n", iformat, path,
       new_pings, new_sections, new_crossings);
     mbnavadjust_info_add(verbose, project, message, true, error);
   }
   else {
-    sprintf(message, "Unable to import format %d file: %s\n", iformat, path);
+    snprintf(message, sizeof(message), "Unable to import format %d file: %s\n", iformat, path);
     mbnavadjust_info_add(verbose, project, message, true, error);
   }
 
@@ -4765,8 +4764,8 @@ int mbnavadjust_reimport_file(int verbose, struct mbna_project *project,
     }
   }
 
-  char npath[STRING_MAX+100];
-  char opath[STRING_MAX+100];
+  mb_pathplus npath;
+  mb_pathplus opath;
 
   /* MBIO control parameters */
   int pings;
@@ -4839,8 +4838,8 @@ int mbnavadjust_reimport_file(int verbose, struct mbna_project *project,
   char *root = (char *)strrchr(ipath, '/');
   if (root == NULL)
     root = ipath;
-  char message[STRING_MAX];
-  sprintf(message, "Re-importing format %d data from %s in %d sections\n", iformat, root, project->files[ifile].num_sections);
+  mb_pathplus message;
+  snprintf(message, sizeof(message), "Re-importing format %d data from %s in %d sections\n", iformat, root, project->files[ifile].num_sections);
   fprintf(stderr, "%s\n", message);
   bool output_open = false;
   if (project->inversion_status == MBNA_INVERSION_CURRENT)
@@ -4903,7 +4902,7 @@ int mbnavadjust_reimport_file(int verbose, struct mbna_project *project,
 
   /* open nav file */
   if (status == MB_SUCCESS) {
-    sprintf(npath, "%s/nvs_%4.4d.mb166", project->datadir, ifile);
+    snprintf(npath, sizeof(npath), "%s/nvs_%4.4d.mb166", project->datadir, ifile);
     if ((nfp = fopen(npath, "w")) == NULL) {
       status = MB_FAILURE;
       *error = MB_ERROR_OPEN_FAIL;
@@ -5132,7 +5131,7 @@ int mbnavadjust_reimport_file(int verbose, struct mbna_project *project,
         section->globaltie.inversion_offset_z_m = 0.0;
 
         /* open output section file */
-        sprintf(opath, "%s/nvs_%4.4d_%4.4d.mb71", project->datadir, file->id, isection);
+        snprintf(opath, sizeof(opath), "%s/nvs_%4.4d_%4.4d.mb71", project->datadir, file->id, isection);
         if ((status = mb_write_init(verbose, opath, 71, &ombio_ptr, &obeams_bath, &obeams_amp, &opixels_ss,
                   error)) != MB_SUCCESS) {
           mb_error(verbose, *error, &error_message);
@@ -5326,7 +5325,7 @@ int mbnavadjust_reimport_file(int verbose, struct mbna_project *project,
       for (int k = 0; k < file->num_sections; k++) {
         /* set section data to be read */
         section = (struct mbna_section *)&file->sections[k];
-        sprintf(opath, "%s/nvs_%4.4d_%4.4d.mb71", project->datadir, file->id, k);
+        snprintf(opath, sizeof(opath), "%s/nvs_%4.4d_%4.4d.mb71", project->datadir, file->id, k);
 
         /* initialize reading the swath file */
         if ((status = mb_read_init(verbose, opath, 71, 1, lonflip, bounds, btime_i, etime_i, speedmin, timegap,
@@ -5425,12 +5424,12 @@ int mbnavadjust_reimport_file(int verbose, struct mbna_project *project,
 
   /* add info text */
   if (status == MB_SUCCESS && new_pings > 0) {
-    sprintf(message, "Imported format %d file: %s\n > Read %d pings\n > Added %d sections %d crossings\n", iformat, ipath,
+    snprintf(message, sizeof(message), "Imported format %d file: %s\n > Read %d pings\n > Added %d sections %d crossings\n", iformat, ipath,
       new_pings, new_sections, new_crossings);
     mbnavadjust_info_add(verbose, project, message, true, error);
   }
   else {
-    sprintf(message, "Unable to import format %d file: %s\n", iformat, ipath);
+    snprintf(message, sizeof(message), "Unable to import format %d file: %s\n", iformat, ipath);
     mbnavadjust_info_add(verbose, project, message, true, error);
   }
 
@@ -5468,13 +5467,14 @@ int mbnavadjust_import_reference(int verbose, struct mbna_project *project, char
              &refgrid.dx, &refgrid.dy, error);
   if (status == MB_SUCCESS) {
     if (project->num_refgrids < MBNA_REFGRID_NUM_MAX) {
-      char command[2*STRING_MAX+100], name[STRING_MAX];
+      mb_command command;
+      mb_path name;
       if (strrchr(path, '/') != NULL) {
-        strncpy(name, strrchr(path, '/')+1, STRING_MAX);
+        strncpy(name, strrchr(path, '/')+1, sizeof(name));
       } else {
-        strncpy(name, path, STRING_MAX);
+        strncpy(name, path, sizeof(name));
       }
-      sprintf(command, "cp %s %s/%s", path, project->datadir, name);
+      snprintf(command, sizeof(command), "cp %s %s/%s", path, project->datadir, name);
       system(command);
       fprintf(stderr, "Imported new reference grid: %s ==> %s/%s\n", path, project->datadir, name);
       strncpy(project->refgrid_names[project->num_refgrids], name, MB_PATH_MAXLINE);
@@ -5531,11 +5531,11 @@ int mbnavadjust_reference_load(int verbose, struct mbna_project *project, int re
 
   /* load reference grid if needed */
   if (project->num_refgrids > 0 && refgrid_select < project->num_refgrids) {
-    char path[2*STRING_MAX];
+    mb_pathplusplus path;
     int grid_projection_mode;
     int nxy;
     project->refgrid_select = refgrid_select;
-    sprintf(path, "%s/%s", project->datadir, project->refgrid_names[project->refgrid_select]);
+    snprintf(path, sizeof(path), "%s/%s", project->datadir, project->refgrid_names[project->refgrid_select]);
     status = mb_read_gmt_grd(verbose, path, &grid_projection_mode,
                project->refgrid.projection_id,
                &project->refgrid.nodatavalue, &nxy,
@@ -6380,8 +6380,8 @@ int mbnavadjust_info_add(int verbose, struct mbna_project *project, char *info, 
     char user[256], host[256], date[32];
     int error = MB_ERROR_NO_ERROR;
     status = mb_user_host_date(verbose, user, host, date, &error);
-    char tag[STRING_MAX];
-    sprintf(tag, " > User <%s> on cpu <%s> at <%s>\n", user, host, date);
+    mb_path tag;
+    snprintf(tag, sizeof(tag), " > User <%s> on cpu <%s> at <%s>\n", user, host, date);
     if (project->logfp != NULL)
       fputs(tag, project->logfp);
     if (verbose > 0)

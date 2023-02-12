@@ -297,6 +297,8 @@ mbGLwDrawingAreaClassRec mbglwDrawingAreaClassRec = {{/* core fields */
                                                          /* arm_and_activate          */ NULL,
                                                          /* get_resources             */ NULL,
                                                          /* num get_resources         */ 0,
+                                                         /* extension                 */ NULL},
+                                                     {
                                                          /* extension                 */ NULL,
                                                      }};
 

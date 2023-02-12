@@ -261,8 +261,8 @@ int main(int argc, char **argv) {
   int notpsmodels = 0;
 
   {
-    mb_path command = "";
-    sprintf(command, "/bin/ls -1 %s/DATA | grep Model_ | sed \"s/^Model_//\"", otps_location_use);
+    mb_command command = "";
+    snprintf(command, sizeof(command), "/bin/ls -1 %s/DATA | grep Model_ | sed \"s/^Model_//\"", otps_location_use);
 
     FILE *tfp = popen(command, "r");
     if (tfp == NULL) {
@@ -277,8 +277,8 @@ int main(int argc, char **argv) {
     while (fgets(line, sizeof(line), tfp)) {
       mb_path modelname = "";
       sscanf(line, "%s", modelname);
-      mb_path modelfile = "";
-      sprintf(modelfile, "%s/DATA/Model_%s", otps_location_use, modelname);
+      mb_command modelfile = "";
+      snprintf(modelfile, sizeof(modelfile), "%s/DATA/Model_%s", otps_location_use, modelname);
       fprintf(stderr, "    %s", modelname);
 
       /* check the files referenced in the model file */
@@ -287,14 +287,16 @@ int main(int argc, char **argv) {
       if (mfp != NULL) {
         /* stat the file referenced in each line */
         while (fgets(line, sizeof(line), mfp) != NULL) {
-          mb_path modeldatafile = "";
+          char modeldatafile[2*MB_PATHPLUS_MAXLINE] = "";
           sscanf(line, "%s", modeldatafile);
-          if (modeldatafile[0] != '/') {
-            sprintf(line, "%s/%s", otps_location_use, modeldatafile);
-            strcpy(modeldatafile, line);
+          if (line[0] == '/') {
+            strncpy(modeldatafile, line, sizeof(line));
+          }
+          else {
+            snprintf(modeldatafile, sizeof(modeldatafile), "%s/%s", otps_location_use, line);
           }
 
-          sprintf(command, "/bin/ls -1 %s 2>/dev/null", modeldatafile);
+          snprintf(command, sizeof(command), "/bin/ls -1 %s 2>/dev/null", modeldatafile);
           FILE *lfp = popen(command, "r");
           if (fgets(line, sizeof(line), lfp) != NULL
               && strlen(line) > 0) {
@@ -390,7 +392,7 @@ int main(int argc, char **argv) {
   double sec;
   double time_d;
   int ihr;
-  mb_path predict_tide = "";
+  mb_pathplus predict_tide = "";
   int ngood;
   double lon;
   double lat;
@@ -555,24 +557,21 @@ int main(int argc, char **argv) {
     }
     fclose(tfp);
 
-    /* now get time and tide model values at the tide station location
-       first open temporary file of lat lon time
-       - note: because predict_tide is a 1970's style Fortran batch program
-          that limits filenames to 80 (!) characters, we have to check the
-          string length of the filenames - if either filename is longer than
-          80 characters then we try to put the files in the user's home
-          directory, which hopefully leads to a shorter pathname. */
+    /* now get time and tide model values at the tide station location */
+
+    /* Note: because predict_tide is a 1970's style Fortran batch program
+          that limits filenames to 80 (!) characters, we put the temporary
+          files in the user's home directory, which hopefully leads to
+          adequately short pathnames. */
+
+    /* first open temporary file of lat lon time */
     int pid = getpid();
     mb_path wd = "";
     getcwd(wd, sizeof(wd));
-    mb_path lltfile = "";
-    mb_path otpsfile = "";
-    sprintf(lltfile, "%s/t%d.txt", wd, pid);
-    sprintf(otpsfile, "%s/u%d.txt", wd, pid);
-    if (strlen(lltfile) > 0 || strlen(otpsfile) > 0) {
-      sprintf(lltfile, "%s/t%d.txt", getenv("HOME"), pid);
-      sprintf(otpsfile, "%s/u%d.txt", getenv("HOME"), pid);
-    }
+    mb_pathplus lltfile = "";
+    mb_pathplus otpsfile = "";
+    snprintf(lltfile, sizeof(lltfile), "%s/t%d.txt", getenv("HOME"), pid);
+    snprintf(otpsfile, sizeof(otpsfile), "%s/u%d.txt", getenv("HOME"), pid);
     if ((tfp = fopen(lltfile, "w")) == NULL)
       {
       error = MB_ERROR_OPEN_FAIL;
@@ -593,7 +592,7 @@ int main(int argc, char **argv) {
     }
 
     /* call predict_tide with popen */
-    sprintf(predict_tide, "cd %s; ./predict_tide", otps_location_use);
+    snprintf(predict_tide, sizeof(predict_tide), "cd %s; ./predict_tide", otps_location_use);
     if ((tfp = popen(predict_tide, "w")) == NULL)
       {
       error = MB_ERROR_OPEN_FAIL;
@@ -767,20 +766,21 @@ int main(int argc, char **argv) {
    * -----------------------------------------------------------------------*/
   if (!(mbotps_mode & MBOTPS_MODE_NAVIGATION))
     {
+    /* Note: because predict_tide is a 1970's style Fortran batch program
+          that limits filenames to 80 (!) characters, we put the temporary
+          files in the user's home directory, which hopefully leads to
+          adequately short pathnames. */
+
     /* first open temporary file of lat lon time */
     int pid = getpid();
     mb_path wd = "";
     getcwd(wd, sizeof(wd));
     assert(strlen(wd) > 0);
-    mb_path lltfile = "";
-    mb_path otpsfile = "";
-    sprintf(lltfile, "%s/t%d.txt", wd, pid);
-    sprintf(otpsfile, "%s/u%d.txt", wd, pid);
+    mb_pathplus lltfile = "";
+    mb_pathplus otpsfile = "";
+    snprintf(lltfile, sizeof(lltfile), "%s/t%d.txt", getenv("HOME"), pid);
+    snprintf(otpsfile, sizeof(otpsfile), "%s/u%d.txt", getenv("HOME"), pid);
     FILE *tfp = NULL;
-    if (strlen(lltfile) > 0 || strlen(otpsfile) > 0) {
-      sprintf(lltfile, "%s/t%d.txt", getenv("HOME"), pid);
-      sprintf(otpsfile, "%s/u%d.txt", getenv("HOME"), pid);
-    }
     if ((tfp = fopen(lltfile, "w")) == NULL)
       {
       error = MB_ERROR_OPEN_FAIL;
@@ -819,7 +819,7 @@ int main(int argc, char **argv) {
     fclose(tfp);
 
     /* call predict_tide with popen */
-    sprintf(predict_tide, "cd %s; ./predict_tide", otps_location_use);
+    snprintf(predict_tide, sizeof(predict_tide), "cd %s; ./predict_tide", otps_location_use);
     fprintf(stderr, "Running: %s\n", predict_tide);
     if ((tfp = popen(predict_tide, "w")) == NULL) {
       // error = MB_ERROR_OPEN_FAIL;
@@ -997,19 +997,20 @@ int main(int argc, char **argv) {
       read_data = true;
       }
 
+    /* Note: because predict_tide is a 1970's style Fortran batch program
+          that limits filenames to 80 (!) characters, we put the temporary
+          files in the user's home directory, which hopefully leads to
+          adequately short pathnames. */
+
     /* first open temporary file of lat lon time */
     int pid = getpid();
     mb_path wd = "";
     getcwd(wd, sizeof(wd));
-    mb_path lltfile = "";
-    mb_path otpsfile = "";
-    sprintf(lltfile, "%s/t%d.txt", wd, pid);
-    sprintf(otpsfile, "%s/u%d.txt", wd, pid);
+    mb_pathplus lltfile = "";
+    mb_pathplus otpsfile = "";
+    snprintf(lltfile, sizeof(lltfile), "%s/t%d.txt", getenv("HOME"), pid);
+    snprintf(otpsfile, sizeof(otpsfile), "%s/u%d.txt", getenv("HOME"), pid);
     FILE *tfp = NULL;
-    if (strlen(lltfile) > 0 || strlen(otpsfile) > 0) {
-      sprintf(lltfile, "%s/t%d.txt", getenv("HOME"), pid);
-      sprintf(otpsfile, "%s/u%d.txt", getenv("HOME"), pid);
-    }
     if ((tfp = fopen(lltfile, "w")) == NULL)
       {
       fprintf(stderr,
@@ -1029,7 +1030,8 @@ int main(int argc, char **argv) {
          model if one was made previously and is up to date AND the
          appropriate request has been made */
       proceed = true;
-      sprintf(tide_file, "%s.tde", file);
+      mb_pathplus tides_file = "";
+      snprintf(tides_file, sizeof(tides_file), "%s.tde", file);
       if (skip_existing) {
         const int fstat1 = stat(file, &file_status);
         if (fstat1 == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR) {
@@ -1276,7 +1278,7 @@ int main(int argc, char **argv) {
     fprintf(stderr, "  Input llt file:   %s\n", lltfile);
     fprintf(stderr, "  Output otps file: %s\n", otpsfile);
     fprintf(stderr, "---------------------------------------\n");
-    sprintf(predict_tide, "cd %s; ./predict_tide", otps_location_use);
+    snprintf(predict_tide, sizeof(predict_tide), "cd %s; ./predict_tide", otps_location_use);
     tfp =  popen(predict_tide, "w");
     if (tfp == NULL) {
       // error = MB_ERROR_OPEN_FAIL;
@@ -1397,11 +1399,12 @@ int main(int argc, char **argv) {
             fclose(ofp);
           }
 
-          sprintf(tide_file, "%s.tde", swath_file);
-          fprintf(stderr, "Generating tide file %s\n", tide_file);
-          if ((ofp = fopen(tide_file, "w")) == NULL) {
+          mb_pathplus tides_file = "";
+          snprintf(tides_file, sizeof(tides_file), "%s.tde", swath_file);
+          fprintf(stderr, "Generating tide file %s\n", tides_file);
+          if ((ofp = fopen(tides_file, "w")) == NULL) {
             //error = MB_ERROR_OPEN_FAIL;
-            fprintf(stderr, "\nUnable to open tide output file <%s>\n", tide_file);
+            fprintf(stderr, "\nUnable to open tide output file <%s>\n", tides_file);
             fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
             exit(MB_FAILURE);
           }
@@ -1421,7 +1424,7 @@ int main(int argc, char **argv) {
             status = mb_pr_update_tide(verbose,
               swath_file,
               MBP_TIDE_ON,
-              tide_file,
+              tides_file,
               tideformat,
               &error);
           }

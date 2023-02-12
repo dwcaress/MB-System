@@ -220,13 +220,14 @@ int main(int argc, char **argv) {
 				    (char *)strstr(format_description, "Informal Description:");
 				const char *format_attributes_ptr =
 				    (char *)strstr(format_description, "Attributes:");
-				/* TODO(schwehr): These strncpy are not safe. */
 				char format_name[MB_DESCRIPTION_LENGTH];
-				strncpy(format_name, format_description, strlen(format_description) - strlen(format_informal_ptr));
-				format_name[strlen(format_description) - strlen(format_informal_ptr) - 1] = '\0';
+        		size_t format_name_len = MIN(MB_DESCRIPTION_LENGTH, strlen(format_description) - strlen(format_informal_ptr));
+				strncpy(format_name, format_description, MIN(format_name_len, sizeof(format_description)));
+				format_name[format_name_len - 1] = '\0';
 				char format_informal[MB_DESCRIPTION_LENGTH];
-				strncpy(format_informal, format_informal_ptr, strlen(format_informal_ptr) - strlen(format_attributes_ptr));
-				format_informal[strlen(format_informal_ptr) - strlen(format_attributes_ptr) - 1] = '\0';
+        		size_t format_informal_len = MIN(MB_DESCRIPTION_LENGTH, strlen(format_informal_ptr) - strlen(format_attributes_ptr));
+				strncpy(format_informal, format_informal_ptr, MIN(format_informal_len, sizeof(format_description)));
+				format_informal[format_informal_len - 1] = '\0';
 				char format_attributes[MB_DESCRIPTION_LENGTH];
 				strcpy(format_attributes, format_attributes_ptr);
 				format_attributes[strlen(format_attributes_ptr) - 1] = '\0';

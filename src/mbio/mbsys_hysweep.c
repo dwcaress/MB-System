@@ -347,6 +347,7 @@ int mbsys_hysweep_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *erro
 	store->RMB_sounding_intensities = NULL;     /* beam intensities */
 	store->RMB_sounding_quality = NULL;         /* beam quality codes (from sonar unit) */
 	store->RMB_sounding_flags = NULL;           /* beam edit flags */
+	store->RMB_sounding_uncertainties = NULL;   /* beam uncertainties (survey units) */
 
 	/* RSS - Raw Sidescan
 	    RSS dn t sf np ns sv pn alt sr amin amax bs freq
@@ -661,6 +662,8 @@ int mbsys_hysweep_deall(int verbose, void *mbio_ptr, void **store_ptr, int *erro
 		                  error); /* beam quality codes (from sonar unit) */
 	if (store->RMB_sounding_flags != NULL)
 		status = mb_freed(verbose, __FILE__, __LINE__, (void **)(&store->RMB_sounding_flags), error); /* beam edit flags */
+	if (store->RMB_sounding_uncertainties != NULL)
+		status = mb_freed(verbose, __FILE__, __LINE__, (void **)(&store->RMB_sounding_uncertainties), error); /* beam uncertainties */
 	if (store->RSS_port != NULL)
 		status = mb_freed(verbose, __FILE__, __LINE__, (void **)(&store->RSS_port), error); /* port sidescan amplitude samples */
 	if (store->RSS_starboard != NULL)
@@ -2348,55 +2351,91 @@ int mbsys_hysweep_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_
 	copy->RMB_sounding_intensities = NULL;     /* beam intensities */
 	copy->RMB_sounding_quality = NULL;         /* beam quality codes (from sonar unit) */
 	copy->RMB_sounding_flags = NULL;           /* beam edit flags */
+	copy->RMB_sounding_uncertainties = NULL;   /* beam uncertainties (survey units) */
 
 	int status = MB_SUCCESS;
 
 	if (copy->RMB_num_beams > 0) {
-		if (store->RMB_beam_ranges != NULL)
+		if (store->RMB_beam_ranges != NULL) {
 			status = mb_mallocd(verbose, __FILE__, __LINE__, copy->RMB_num_beams * sizeof(double),
 			                    (void **)&(copy->RMB_beam_ranges), error);
-		if (store->RMB_multi_ranges != NULL)
+			memcpy(copy->RMB_beam_ranges, store->RMB_beam_ranges, copy->RMB_num_beams * sizeof(double));
+		}
+		if (store->RMB_multi_ranges != NULL) {
 			status = mb_mallocd(verbose, __FILE__, __LINE__, copy->RMB_num_beams * sizeof(double),
 			                    (void **)&(copy->RMB_multi_ranges), error);
-		if (store->RMB_sounding_eastings != NULL)
+			memcpy(copy->RMB_multi_ranges, store->RMB_multi_ranges, copy->RMB_num_beams * sizeof(double));
+		}
+		if (store->RMB_sounding_eastings != NULL) {
 			status = mb_mallocd(verbose, __FILE__, __LINE__, copy->RMB_num_beams * sizeof(double),
 			                    (void **)&(copy->RMB_sounding_eastings), error);
-		if (store->RMB_sounding_northings != NULL)
+			memcpy(copy->RMB_sounding_eastings, store->RMB_sounding_eastings, copy->RMB_num_beams * sizeof(double));
+		}
+		if (store->RMB_sounding_northings != NULL) {
 			status = mb_mallocd(verbose, __FILE__, __LINE__, copy->RMB_num_beams * sizeof(double),
 			                    (void **)&(copy->RMB_sounding_northings), error);
-		if (store->RMB_sounding_depths != NULL)
+			memcpy(copy->RMB_sounding_northings, store->RMB_sounding_northings, copy->RMB_num_beams * sizeof(double));
+		}
+		if (store->RMB_sounding_depths != NULL) {
 			status = mb_mallocd(verbose, __FILE__, __LINE__, copy->RMB_num_beams * sizeof(double),
 			                    (void **)&(copy->RMB_sounding_depths), error);
-		if (store->RMB_sounding_across != NULL)
+			memcpy(copy->RMB_sounding_depths, store->RMB_sounding_depths, copy->RMB_num_beams * sizeof(double));
+		}
+		if (store->RMB_sounding_across != NULL) {
 			status = mb_mallocd(verbose, __FILE__, __LINE__, copy->RMB_num_beams * sizeof(double),
 			                    (void **)&(copy->RMB_sounding_across), error);
-		if (store->RMB_sounding_along != NULL)
+			memcpy(copy->RMB_sounding_across, store->RMB_sounding_across, copy->RMB_num_beams * sizeof(double));
+		}
+		if (store->RMB_sounding_along != NULL) {
 			status = mb_mallocd(verbose, __FILE__, __LINE__, copy->RMB_num_beams * sizeof(double),
 			                    (void **)&(copy->RMB_sounding_along), error);
-		if (store->RMB_sounding_pitchangles != NULL)
+			memcpy(copy->RMB_sounding_along, store->RMB_sounding_along, copy->RMB_num_beams * sizeof(double));
+		}
+		if (store->RMB_sounding_pitchangles != NULL) {
 			status = mb_mallocd(verbose, __FILE__, __LINE__, copy->RMB_num_beams * sizeof(double),
 			                    (void **)&(copy->RMB_sounding_pitchangles), error);
-		if (store->RMB_sounding_rollangles != NULL)
+			memcpy(copy->RMB_sounding_pitchangles, store->RMB_sounding_pitchangles, copy->RMB_num_beams * sizeof(double));
+		}
+		if (store->RMB_sounding_rollangles != NULL) {
 			status = mb_mallocd(verbose, __FILE__, __LINE__, copy->RMB_num_beams * sizeof(double),
 			                    (void **)&(copy->RMB_sounding_rollangles), error);
-		if (store->RMB_sounding_takeoffangles != NULL)
+			memcpy(copy->RMB_sounding_rollangles, store->RMB_sounding_rollangles, copy->RMB_num_beams * sizeof(double));
+		}
+		if (store->RMB_sounding_takeoffangles != NULL) {
 			status = mb_mallocd(verbose, __FILE__, __LINE__, copy->RMB_num_beams * sizeof(double),
 			                    (void **)&(copy->RMB_sounding_takeoffangles), error);
-		if (store->RMB_sounding_azimuthalangles != NULL)
+			memcpy(copy->RMB_sounding_takeoffangles, store->RMB_sounding_takeoffangles, copy->RMB_num_beams * sizeof(double));
+		}
+		if (store->RMB_sounding_azimuthalangles != NULL) {
 			status = mb_mallocd(verbose, __FILE__, __LINE__, copy->RMB_num_beams * sizeof(double),
 			                    (void **)&(copy->RMB_sounding_azimuthalangles), error);
-		if (store->RMB_sounding_timedelays != NULL)
+			memcpy(copy->RMB_sounding_azimuthalangles, store->RMB_sounding_azimuthalangles, copy->RMB_num_beams * sizeof(double));
+		}
+		if (store->RMB_sounding_timedelays != NULL) {
 			status = mb_mallocd(verbose, __FILE__, __LINE__, copy->RMB_num_beams * sizeof(int),
 			                    (void **)&(copy->RMB_sounding_timedelays), error);
-		if (store->RMB_sounding_intensities != NULL)
+			memcpy(copy->RMB_sounding_timedelays, store->RMB_sounding_timedelays, copy->RMB_num_beams * sizeof(int));
+		}
+		if (store->RMB_sounding_intensities != NULL) {
 			status = mb_mallocd(verbose, __FILE__, __LINE__, copy->RMB_num_beams * sizeof(int),
 			                    (void **)&(copy->RMB_sounding_intensities), error);
-		if (store->RMB_sounding_quality != NULL)
+			memcpy(copy->RMB_sounding_intensities, store->RMB_sounding_intensities, copy->RMB_num_beams * sizeof(int));
+		}
+		if (store->RMB_sounding_quality != NULL) {
 			status = mb_mallocd(verbose, __FILE__, __LINE__, copy->RMB_num_beams * sizeof(int),
 			                    (void **)&(copy->RMB_sounding_quality), error);
-		if (store->RMB_sounding_flags != NULL)
+			memcpy(copy->RMB_sounding_quality, store->RMB_sounding_quality, copy->RMB_num_beams * sizeof(int));
+		}
+		if (store->RMB_sounding_flags != NULL) {
 			status = mb_mallocd(verbose, __FILE__, __LINE__, copy->RMB_num_beams * sizeof(int),
 			                    (void **)&(copy->RMB_sounding_flags), error);
+			memcpy(copy->RMB_sounding_flags, store->RMB_sounding_flags, copy->RMB_num_beams * sizeof(int));
+		}
+		if (store->RMB_sounding_uncertainties != NULL) {
+			status = mb_mallocd(verbose, __FILE__, __LINE__, copy->RMB_num_beams * sizeof(double),
+			                    (void **)&(copy->RMB_sounding_uncertainties), error);
+			memcpy(copy->RMB_sounding_uncertainties, store->RMB_sounding_uncertainties, copy->RMB_num_beams * sizeof(double));
+		}
 	}
 
 	if (verbose >= 2) {
@@ -2486,7 +2525,7 @@ int mbsys_hysweep_makess(int verbose, void *mbio_ptr, void *store_ptr,
 		for (int i = 0; i < store->RMB_num_beams; i++) {
 			if (mb_beam_ok(store->RMB_sounding_flags[i])) {
 				store->MSS_table_altitude_sort[nbathsort] =
-				    store->RMB_sounding_depths[i] - store->RMBint_draft + store->RMBint_heave;
+				store->RMB_sounding_depths[i] - store->RMBint_draft + store->RMBint_heave;
 				nbathsort++;
 
 				if (!found || fabs(store->RMB_sounding_across[i]) < minxtrack) {

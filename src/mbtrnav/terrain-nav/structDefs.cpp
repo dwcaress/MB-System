@@ -1399,9 +1399,9 @@ void vehicleT::displayVehicleInfo() {
     char *bp=obuf;
     memset(obuf,0,1024);
 
-    snprintf(bp, sizeof(bp), "Vehicle name: %s\n", name);
+    snprintf(bp, sizeof(obuf), "Vehicle name: %s\n", name);
     bp=obuf+strlen(obuf);
-    snprintf(bp, sizeof(bp), "Number of sensors: %i\n\n", numSensors);
+    snprintf(bp, sizeof(obuf)-strlen(obuf), "Number of sensors: %i\n\n", numSensors);
     bp=obuf+strlen(obuf);
     LOGM(obuf);
 //	LOGM("Vehicle name: %s\n", name);
@@ -1821,7 +1821,7 @@ char* commsT::to_s(char* buf, int buflen) {
 				mapname = NULL;
 				cfgname = NULL;
 			}
-			snprintf(buf, sizeof(buf), "commsT {type:%c|parameter:%d|vdr:%f|map:%s|cfg:%s|poseT time:%.2f|measT time:%.2f|numMeas:%d|xyz:%lf,%lf,%lf|ofs:%lf,%lf,%lf}",
+			snprintf(buf, buflen, "commsT {type:%c|parameter:%d|vdr:%f|map:%s|cfg:%s|poseT time:%.2f|measT time:%.2f|numMeas:%d|xyz:%lf,%lf,%lf|ofs:%lf,%lf,%lf}",
 					msg_type, parameter, vdr, mapname, cfgname, pt.time, mt.time, mt.numMeas,xyz_sdev.x,xyz_sdev.y,xyz_sdev.z,est_nav_ofs.x,est_nav_ofs.y,est_nav_ofs.z);
 //			int len = snprintf(buf, sizeof(buf), "commsT {type:%c|parameter:%d|vdr:%f|map:%s|cfg:%s|poseT time:%.2f|measT time:%.2f|numMeas:%d}",
 //				msg_type, parameter, vdr, mapname, cfgname, pt.time, mt.time, mt.numMeas);

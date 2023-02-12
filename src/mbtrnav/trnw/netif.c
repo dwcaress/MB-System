@@ -947,7 +947,7 @@ int netif_init_log(netif_t *self, char *log_name, char *log_dir, char *session_s
         }
         self->mlog_path = (char *)malloc(NETIF_LOG_PATH_BYTES);
 
-        snprintf(self->mlog_path, sizeof(self->mlog_path), "%s//%s-%s%s",self->log_dir,log_name,session_date,NETIF_LOG_EXT);
+        snprintf(self->mlog_path, NETIF_LOG_PATH_BYTES, "%s//%s-%s%s",self->log_dir,log_name,session_date,NETIF_LOG_EXT);
 
         self->mlog_id = mlog_get_instance(self->mlog_path,&mlog_conf, log_name);
         if(self->mlog_id!=MLOG_ID_INVALID){

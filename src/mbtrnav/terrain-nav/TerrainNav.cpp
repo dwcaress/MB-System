@@ -1416,7 +1416,7 @@ char *TerrainNav::getSessionDir(char *dir_prefix, char *dest, size_t len, bool c
     }
     // check dest size and copy
     if(NULL!=dest && len>(strlen(sessiondir)+1)){
-        snprintf(dest, sizeof(dest), "%s/",sessiondir);
+        snprintf(dest, len, "%s/",sessiondir);
         retval=dest;
     }
 

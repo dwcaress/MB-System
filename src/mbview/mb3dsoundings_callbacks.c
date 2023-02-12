@@ -72,7 +72,7 @@
 /* local variables */
 static Cardinal ac;
 static Arg args[256];
-static char value_text[MB_PATH_MAXLINE];
+static mb_path value_text;
 
 /*------------------------------------------------------------------------------*/
 /* code below used for mb3dsoundings library                                           */

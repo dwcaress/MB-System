@@ -201,7 +201,7 @@ char* mapsrc_tostring(struct mapsrc* src) {
 	char* str = (char*) malloc(180 * sizeof(char));
 	char buf[100];
 	//char *buf = malloc(100 * sizeof(char));
-	snprintf(str, sizeof(str), "mapsrc {\n\tncid = %i\n", src->ncid);
+	snprintf(str, 180, "mapsrc {\n\tncid = %i\n", src->ncid);
 	snprintf(buf, sizeof(buf), "\txid = %i\n", src->xid);
 	strcat(str, buf);
 	snprintf(buf, sizeof(buf), "\txdimid = %i\n", src->xdimid);

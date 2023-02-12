@@ -125,7 +125,7 @@ void TimeP::secsToHourMinSec(double secs, char *timestring)
   }
   secs = isecs + (secs - (int )secs);
 
-  snprintf(timestring, sizeof(timestring), "%03d:%02d:%02d:%02.1f", days, hrs, min, secs);
+  snprintf(timestring, 128, "%03d:%02d:%02d:%02.1f", days, hrs, min, secs);
 
   return;
 }

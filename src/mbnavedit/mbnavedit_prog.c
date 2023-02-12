@@ -542,8 +542,8 @@ int mbnavedit_open_file(int useprevious) {
 		fprintf(stderr, "dbg2       useprevious: %d\n", useprevious);
 	}
 
-	char ifile_use[MB_PATH_MAXLINE+10];
-	char command[2*MB_PATH_MAXLINE+100];
+	mb_pathplusplus ifile_use;
+	mb_command command;
 	int format_use;
 	int form;
 	int format_error;
@@ -635,7 +635,7 @@ int mbnavedit_open_file(int useprevious) {
 		    input file */
 		if (useprevious && output_mode != OUTPUT_MODE_BROWSE) {
 			/* get temporary file name */
-			sprintf(ifile_use, "%s.tmp", nfile);
+			snprintf(ifile_use, sizeof(ifile_use), "%s.tmp", nfile);
 
 			/* copy old edit save file to tmp file */
 			sprintf(command, "cp %s %s\n", nfile, ifile_use);
@@ -653,7 +653,7 @@ int mbnavedit_open_file(int useprevious) {
 		/* if output off and using previously edited nav
 		    reset input names */
 		else if (useprevious) {
-			sprintf(ifile_use, "%s", nfile);
+			snprintf(ifile_use, sizeof(ifile_use), "%s", nfile);
 			format_use = MBF_MBPRONAV;
 		}
 
@@ -724,7 +724,7 @@ int mbnavedit_open_file(int useprevious) {
 		nfile_open = false;
 		if (status == MB_SUCCESS && output_mode != OUTPUT_MODE_BROWSE) {
 			/* get nav edit save file */
-                        snprintf(nfile, sizeof(nfile), "%s.nve", ifile);
+      snprintf(nfile, sizeof(nfile), "%s.nve", ifile);
 
 			/* open the nav edit save file */
 			if ((nfp = fopen(nfile, "w")) != NULL) {

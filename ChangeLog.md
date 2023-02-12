@@ -23,7 +23,7 @@ Distributions that do not include "beta" in the tag name correspond to the major
 announced releases. The source distributions associated with all releases, major
 or beta, are equally accessible as tarballs through the Github interface.
 
-- Version 5.7.9beta50    January 28, 2023
+- Version 5.7.9beta50    February 12, 2023
 - Version 5.7.9beta49    January 22, 2023
 - Version 5.7.9beta48    December 16, 2022
 - Version 5.7.9beta47    November 15, 2022
@@ -427,13 +427,24 @@ or beta, are equally accessible as tarballs through the Github interface.
 ### MB-System Version 5.7 Release Notes:
 --
 
-#### 5.7.9beta50 (January 28, 2023)
+#### 5.7.9beta50 (February 12, 2023)
+
+General: Changed many sprintf() calls to snprintf() calls. 
+
+General: Fixed many compiler warnings having to do with unused variables, unitialized 
+variables, and possible string overflows.
 
 MBnavadjust: Fixed interface issues for importing multiple reference grids and
 selecting those while makeing global ties.
 
 Format 261 (MBF_KEMKMALL): Added code to detect and handle gracefully some 
 instances of corruption of MRZ datagrams, particularly due to missing bytes.
+
+Format 201 (MBF_HYSWEEP1): Fixed reading of Hysweep multibeam in which beam angles are
+stored in spherical coordinates but are not corrected for roll and pitch. Updated 
+support to handle multibeam data with angles in spherical coordinates that have not
+been corrected for roll and pitch, and to be consistent with the most recent Hypack
+users manual released February 2023.
 
 #### 5.7.9beta49 (January 22, 2023)
 

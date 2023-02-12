@@ -6275,6 +6275,10 @@ int mbsys_reson7k3_extract(int verbose, void *mbio_ptr, void *store_ptr, int *ki
         const u32 quality = (rawdetectiondata->quality & 0xFF000000);
         beamflag[i] = (u8)(quality >> 24);
         amp[i] = rawdetectiondata->signal_strength;
+fprintf(stderr, "%s:%d:%s: %d %d  ran:%f dep:%f ltr:%f atr:%f toa:%f azi:%f  flg:%d\n",
+__FILE__, __LINE__, __FUNCTION__, 
+i, rawdetectiondata->beam_descriptor, rawdetectiondata->detection_point / RawDetection->sampling_rate, bath[i], bathalongtrack[i], bathacrosstrack[i], 
+RTD*bathydata->pointing_angle, RTD*bathydata->azimuth_angle, beamflag[i]);
       }
 
       // if multi-pick enabled make sure flagged secondary soundings are flagged for being secondary
@@ -6357,7 +6361,7 @@ int mbsys_reson7k3_extract(int verbose, void *mbio_ptr, void *store_ptr, int *ki
     // extract processed multibeam sidescan
     if (status == MB_SUCCESS && store->read_ProcessedSideScan) {
 			*nss = ProcessedSideScan->number_pixels;
-			for (unsigned int i = 0; i < ProcessedSideScan->number_pixels; i++) {
+			for (int i = 0; i < (int)ProcessedSideScan->number_pixels; i++) {
 				ss[i] = ProcessedSideScan->sidescan[i];
 				ssacrosstrack[i] = ProcessedSideScan->pixelwidth * (i - (int)ProcessedSideScan->number_pixels / 2);
 				ssalongtrack[i] = ProcessedSideScan->alongtrack[i];
@@ -9216,7 +9220,7 @@ int mbsys_reson7k3_makess_source(
     for (int i = 0; i < nss; i++) {
       ssacrosstrack[i] = (*pixel_size) * (double)(i - (nss / 2));
     }
-
+    
     // Loop over raw backscatter or SideScan from the desired source,
     // putting each raw sample into the binning arrays. The possible
     // source records are:

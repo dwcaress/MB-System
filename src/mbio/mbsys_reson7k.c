@@ -6034,7 +6034,7 @@ int mbsys_reson7k_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kin
     *nss = 0;
     if (store->read_processedsidescan) {
       *nss = processedsidescan->number_pixels;
-      for (int i = 0; i < processedsidescan->number_pixels; i++) {
+      for (int i = 0; i < (int)processedsidescan->number_pixels; i++) {
         ss[i] = processedsidescan->sidescan[i];
         ssacrosstrack[i] = processedsidescan->pixelwidth * (i - (int)processedsidescan->number_pixels / 2);
         ssalongtrack[i] = processedsidescan->alongtrack[i];
@@ -6539,10 +6539,21 @@ int mbsys_reson7k_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind,
 
     /* insert the sidescan */
     processedsidescan->number_pixels = nss;
+    int ixmin = nss - 1;
+    int ixmax = 0;
+    for (int i = 0; i < nss; i++) {
+      if (ss[i] != MB_SIDESCAN_NULL) {
+        if (i < ixmin) ixmin = i;
+        ixmax = i;
+      }
+    }
+    if (ixmax > ixmin)
+      processedsidescan->pixelwidth = (ssacrosstrack[ixmax] - ssacrosstrack[ixmin]) / (ixmax - ixmin);
+    else
+      processedsidescan->pixelwidth = 1.0;
     for (unsigned int i = 0; i < processedsidescan->number_pixels; i++) {
       processedsidescan->sidescan[i] = ss[i];
-      // TODO(schwehr): What was actually intended?
-      // processedsidescan->alongtrack[i] = processedsidescan->alongtrack[i];
+      processedsidescan->alongtrack[i] = ssalongtrack[i];
     }
     for (int i = processedsidescan->number_pixels; i < MBSYS_RESON7K_MAX_PIXELS; i++) {
       processedsidescan->sidescan[i] = 0.0;
