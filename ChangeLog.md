@@ -23,6 +23,7 @@ Distributions that do not include "beta" in the tag name correspond to the major
 announced releases. The source distributions associated with all releases, major
 or beta, are equally accessible as tarballs through the Github interface.
 
+- Version 5.7.9beta51    February 14, 2023
 - Version 5.7.9beta50    February 12, 2023
 - Version 5.7.9beta49    January 22, 2023
 - Version 5.7.9beta48    December 16, 2022
@@ -426,6 +427,10 @@ or beta, are equally accessible as tarballs through the Github interface.
 --
 ### MB-System Version 5.7 Release Notes:
 --
+
+#### 5.7.9beta51 (February 14
+
+Format 89 (MBF_RESON7k3): Removed debug message inadvertently left active in 5.7.9beta50.
 
 #### 5.7.9beta50 (February 12, 2023)
 
