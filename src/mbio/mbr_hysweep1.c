@@ -2002,7 +2002,7 @@ int mbr_rt_hysweep1(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	double navlon, navlat;
 	double roll, speed;
 	double alpha, beta, theta, phi;
-	double rr, xx, zz;
+	double xx, zz;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);

@@ -3353,15 +3353,6 @@ int mbeditviz_selectregion(size_t instance) {
     mbev_selected.num_soundings_unflagged = 0;
     mbev_selected.num_soundings_flagged = 0;
 
-    // double z;  // TODO(schwehr): Why did this become unused?
-    // double x, y;
-    // double heading;
-    // double sonardepth;
-    // double rolldelta;
-    // double pitchdelta;
-    // double mtodeglon, mtodeglat;
-    // double beam_xtrack, beam_ltrack, beam_z;
-
     /* loop over all files */
     for (int ifile = 0; ifile < mbev_num_files; ifile++) {
       struct mbev_file_struct *file = &mbev_files[ifile];

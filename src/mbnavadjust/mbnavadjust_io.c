@@ -466,10 +466,11 @@ int mbnavadjust_read_project(int verbose, char *projectpath, struct mbna_project
           project->refgrid_status = MBNA_REFGRID_UNLOADED;
         }
         else if (version_id >= 310) {
+          project->num_refgrids = 0;
           if ((result = fgets(buffer, sizeof(buffer), hfp)) == buffer
               && strncmp("REFERENCEGRID", buffer, 13) == 0) {
             nscan = sscanf(buffer, "%s %s", label, project->refgrid_names[0]);
-            if (nscan == 2) {
+            if (nscan == 2 && strncmp(project->refgrid_names[0], "NONE", 4) != 0) {
               struct mbna_grid refgrid;
               memset(&refgrid, 0, sizeof(refgrid));
               int grid_projection_mode;
@@ -486,7 +487,10 @@ int mbnavadjust_read_project(int verbose, char *projectpath, struct mbna_project
                        &project->refgrid_bounds[2][0],
                        &project->refgrid_bounds[3][0],
                        &refgrid.dx, &refgrid.dy, error);
-              if (status == MB_FAILURE) {
+              if (status == MB_SUCCESS) {
+                project->num_refgrids = 0;
+              }
+              else {
                 fprintf(stderr, "Die at line:%d file:%s grid file:%s\n", __LINE__, __FILE__, project->refgrid_names[0]);
                 exit(0);
               }
