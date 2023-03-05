@@ -283,7 +283,6 @@ $(OUTPUT_DIR)/$(LIBTRNW): $(LIBTRNW_OBJ)
 $(OUTPUT_DIR)/$(LIBTRNCLI): $(LIBTRNCLI_OBJ)
 	@echo building $@...
 	ar rcs $@ $(LIBTRNCLI_OBJ) $(BUILD_DIR)/*.o
-#	ar rcs $@ $(LIBTRNCLI_OBJ) $(MFRAME_LIB) $(BUILD_DIR)/*.o
 
 # build trncli-test utility
 $(OUTPUT_DIR)/$(TRNCLI_TEST): $(TRNCLI_TEST_OBJ) $(LIBTRNW_OBJ) $(LIBTRNCLI_OBJ)
@@ -295,7 +294,6 @@ $(OUTPUT_DIR)/$(TRNCLI_TEST): $(TRNCLI_TEST_OBJ) $(LIBTRNW_OBJ) $(LIBTRNCLI_OBJ)
 $(OUTPUT_DIR)/$(LIBTRNUCLI): $(LIBTRNUCLI_OBJ)
 	@echo building $@...
 	ar rcs $@  $(LIBTRNUCLI_OBJ)  $(BUILD_DIR)/*.o
-#	ar rcs $@  $(LIBTRNUCLI_OBJ)  $(MFRAME_LIB) $(BUILD_DIR)/*.o
 
 # build trnucli-test utility
 $(OUTPUT_DIR)/$(TRNUCLI_TEST): $(TRNUCLI_TEST_OBJ) $(LIBTRNUCLI_OBJ)
