@@ -227,7 +227,7 @@ int main(int argc, char **argv) {
 	char file[MB_PATH_MAXLINE] = "";
 	mb_path nav_file = "";
 	bool nav_merge = false;
-  bool nav_merge_clip = false;
+    bool nav_merge_clip = false;
 	output_t output_mode = OUTPUT_MODE_TAB;
 	int nprintfields = 0;
 	struct printfield printfields[NFIELDSMAX];
@@ -235,11 +235,11 @@ int main(int argc, char **argv) {
 	bool calc_soundspeed = false;
 	bool calc_density = false;
 	bool calc_ktime = false;
-  bool calc_kspeed = false;
+    bool calc_kspeed = false;
 	bool recalculate_ctd = false;
 	int ctd_calibration_id = 0;
 	bool angles_in_degrees = false;
-  bool calculate_time_interval  = false;
+    bool calculate_time_interval  = false;
 
 	{
 		bool errflg = false;
@@ -308,8 +308,8 @@ int main(int argc, char **argv) {
 					calc_ktime = true;
 				if (strcmp(printfields[nprintfields].name, "calcKSpeed") == 0)
 					calc_kspeed = true;
-        if (strcmp(printfields[nprintfields].name, "timeInterval") == 0)
-          calculate_time_interval = true;
+        		if (strcmp(printfields[nprintfields].name, "timeInterval") == 0)
+          			calculate_time_interval = true;
 				printfields[nprintfields].index = -1;
 				nprintfields++;
 				break;
@@ -655,11 +655,11 @@ int main(int argc, char **argv) {
 	    }
 	}
 
-  /* if calculating speed from Kearfott velocity vector check for available Kearfott data */
-  if (calc_kspeed && !kvelocity_available) {
+    /* if calculating speed from Kearfott velocity vector check for available Kearfott data */
+    if (calc_kspeed && !kvelocity_available) {
 		fprintf(stderr, "\nUnable to calculate speed from Kearfott data as requested, Kearfoot velocity data not in file <%s>\n", file);
 		exit(MB_ERROR_BAD_FORMAT);
-  }
+    }
 
 	/* check the fields to be printed */
 	for (int i = 0; i < nprintfields; i++) {
@@ -825,8 +825,8 @@ int main(int argc, char **argv) {
 	double soundspeed_calc = 0.0;
 	double potentialtemperature_calc = 0.0;
 	double density_calc = 0.0;
-  double time_interval = 0.0;
-  double prior_time_d = 0.0;
+    double time_interval = 0.0;
+    double prior_time_d = 0.0;
 
 	/* read the data records in the auv log file */
 	int nrecord = 0;

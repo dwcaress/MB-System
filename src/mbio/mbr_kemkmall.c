@@ -1002,13 +1002,13 @@ int mbr_kemkmall_rd_svp(int verbose, char *buffer, void *store_ptr, void *header
 
   if (verbose >= 5) {
     fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
-    fprintf(stderr, " dbg5       numBytesDgm:     %u\n", svp->header.numBytesDgm);
-    fprintf(stderr, " dbg5       dgmType:         %s\n", svp->header.dgmType);
-    fprintf(stderr, " dbg5       dgmVersion:      %u\n", svp->header.dgmVersion);
-    fprintf(stderr, " dbg5       systemID:        %u\n", svp->header.systemID);
-    fprintf(stderr, " dbg5       echoSounderID:   %u\n", svp->header.echoSounderID);
-    fprintf(stderr, " dbg5       time_sec:        %u\n", svp->header.time_sec);
-    fprintf(stderr, " dbg5       time_nanosec:    %u\n", svp->header.time_nanosec);
+    fprintf(stderr, "dbg5       numBytesDgm:     %u\n", svp->header.numBytesDgm);
+    fprintf(stderr, "dbg5       dgmType:         %.4s\n", svp->header.dgmType);
+    fprintf(stderr, "dbg5       dgmVersion:      %u\n", svp->header.dgmVersion);
+    fprintf(stderr, "dbg5       systemID:        %u\n", svp->header.systemID);
+    fprintf(stderr, "dbg5       echoSounderID:   %u\n", svp->header.echoSounderID);
+    fprintf(stderr, "dbg5       time_sec:        %u\n", svp->header.time_sec);
+    fprintf(stderr, "dbg5       time_nanosec:    %u\n", svp->header.time_nanosec);
 
     fprintf(stderr, "dbg5       numBytesCmnPart:  %u\n", svp->numBytesCmnPart);
     fprintf(stderr, "dbg5       numSamples:       %u\n", svp->numSamples);
@@ -4144,7 +4144,7 @@ int mbr_kemkmall_index_data(int verbose, void *mbio_ptr, void *store_ptr, int *e
 
 #ifdef MBR_KEMKMALL_DEBUG
   fprintf(stderr, "\n\nIndexed %ld valid EM datagrams:\n", dgm_index_table->dgm_count);
-  for (int i=0; i<dgm_index_table->dgm_count; i++)
+  for (unsigned int i=0; i<dgm_index_table->dgm_count; i++)
   {
     fprintf(stderr, "ID: %4d, ", i);
     fprintf(stderr, "file_pos: %8.zu, ", dgm_index_table->indextable[i].file_pos);
@@ -4385,7 +4385,7 @@ numOfDgms, dgmNum, header.numBytesDgm, dgm_index->index_org, dgm_index->ping_num
           break;
 
         case SVT:
-          /* #SVP - Sensor sound Velocity measured at Transducer */
+          /* #SVT - Sensor sound Velocity measured at Transducer */
           status = mbr_kemkmall_rd_svt(verbose, buffer, store_ptr, (void *)&header, error);
           if (status == MB_SUCCESS)
             done = true;
@@ -5065,7 +5065,7 @@ int mbr_kemkmall_wr_spo(int verbose, size_t *bufferalloc, char **bufferptr, void
   }
 
 #ifdef MBR_KEMKMALL_DEBUG
-  fprintf(stderr, "KEMKMALL datagram type %.4s read - time: %d.%9.9d status:%d error:%d\n",
+  fprintf(stderr, "KEMKMALL datagram type %.4s written - time: %d.%9.9d status:%d error:%d\n",
           spo->header.dgmType, spo->header.time_sec, spo->header.time_nanosec, status, *error);
 #endif
 
@@ -5283,7 +5283,7 @@ int mbr_kemkmall_wr_skm(int verbose, size_t *bufferalloc, char **bufferptr, void
   }
 
 #ifdef MBR_KEMKMALL_DEBUG
-  fprintf(stderr, "KEMKMALL datagram type %.4s read - time: %d.%9.9d status:%d error:%d\n",
+  fprintf(stderr, "KEMKMALL datagram type %.4s written - time: %d.%9.9d status:%d error:%d\n",
           skm->header.dgmType, skm->header.time_sec, skm->header.time_nanosec, status, *error);
 #endif
 
@@ -5312,16 +5312,18 @@ int mbr_kemkmall_wr_svp(int verbose, size_t *bufferalloc, char **bufferptr, void
 
   /* datagram version being written */
   svp->header.dgmVersion = MBSYS_KMBES_SVP_VERSION;
+  svp->numBytesCmnPart = 28;
+  svp->header.numBytesDgm = MBSYS_KMBES_HEADER_SIZE + svp->numBytesCmnPart + svp->numSamples * 20 + sizeof(int);
 
   if (verbose >= 5) {
     fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
-    fprintf(stderr, " dbg5       numBytesDgm:     %u\n", svp->header.numBytesDgm);
-    fprintf(stderr, " dbg5       dgmType:         %s\n", svp->header.dgmType);
-    fprintf(stderr, " dbg5       dgmVersion:      %u\n", svp->header.dgmVersion);
-    fprintf(stderr, " dbg5       systemID:        %u\n", svp->header.systemID);
-    fprintf(stderr, " dbg5       echoSounderID:   %u\n", svp->header.echoSounderID);
-    fprintf(stderr, " dbg5       time_sec:        %u\n", svp->header.time_sec);
-    fprintf(stderr, " dbg5       time_nanosec:    %u\n", svp->header.time_nanosec);
+    fprintf(stderr, "dbg5       numBytesDgm:     %u\n", svp->header.numBytesDgm);
+    fprintf(stderr, "dbg5       dgmType:         %.4s\n", svp->header.dgmType);
+    fprintf(stderr, "dbg5       dgmVersion:      %u\n", svp->header.dgmVersion);
+    fprintf(stderr, "dbg5       systemID:        %u\n", svp->header.systemID);
+    fprintf(stderr, "dbg5       echoSounderID:   %u\n", svp->header.echoSounderID);
+    fprintf(stderr, "dbg5       time_sec:        %u\n", svp->header.time_sec);
+    fprintf(stderr, "dbg5       time_nanosec:    %u\n", svp->header.time_nanosec);
 
     fprintf(stderr, "dbg5       numBytesCmnPart:  %u\n", svp->numBytesCmnPart);
     fprintf(stderr, "dbg5       numSamples:       %u\n", svp->numSamples);
@@ -5359,7 +5361,7 @@ int mbr_kemkmall_wr_svp(int verbose, size_t *bufferalloc, char **bufferptr, void
     buffer = (char *) *bufferptr;
 
     /* insert the header */
-        mbr_kemkmall_wr_header(verbose, bufferptr, (void *)&svp->header, error);
+    mbr_kemkmall_wr_header(verbose, bufferptr, (void *)&svp->header, error);
 
     /* insert the data */
     index = MBSYS_KMBES_HEADER_SIZE;
@@ -5405,7 +5407,7 @@ int mbr_kemkmall_wr_svp(int verbose, size_t *bufferalloc, char **bufferptr, void
   }
 
 #ifdef MBR_KEMKMALL_DEBUG
-  fprintf(stderr, "KEMKMALL datagram type %.4s read - time: %d.%9.9d status:%d error:%d\n",
+  fprintf(stderr, "KEMKMALL datagram type %.4s written - time: %d.%9.9d status:%d error:%d\n",
           svp->header.dgmType, svp->header.time_sec, svp->header.time_nanosec, status, *error);
 #endif
 
@@ -5536,7 +5538,7 @@ int mbr_kemkmall_wr_svt(int verbose, size_t *bufferalloc, char **bufferptr, void
   }
 
 #ifdef MBR_KEMKMALL_DEBUG
-  fprintf(stderr, "KEMKMALL datagram type %.4s read - time: %d.%9.9d status:%d error:%d\n",
+  fprintf(stderr, "KEMKMALL datagram type %.4s written - time: %d.%9.9d status:%d error:%d\n",
           svt->header.dgmType, svt->header.time_sec, svt->header.time_nanosec, status, *error);
 #endif
 
@@ -5646,7 +5648,7 @@ int mbr_kemkmall_wr_scl(int verbose, size_t *bufferalloc, char **bufferptr, void
   }
 
 #ifdef MBR_KEMKMALL_DEBUG
-  fprintf(stderr, "KEMKMALL datagram type %.4s read - time: %d.%9.9d status:%d error:%d\n",
+  fprintf(stderr, "KEMKMALL datagram type %.4s written - time: %d.%9.9d status:%d error:%d\n",
           scl->header.dgmType, scl->header.time_sec, scl->header.time_nanosec, status, *error);
 #endif
 
@@ -5765,7 +5767,7 @@ int mbr_kemkmall_wr_sde(int verbose, size_t *bufferalloc, char **bufferptr, void
   }
 
 #ifdef MBR_KEMKMALL_DEBUG
-  fprintf(stderr, "KEMKMALL datagram type %.4s read - time: %d.%9.9d status:%d error:%d\n",
+  fprintf(stderr, "KEMKMALL datagram type %.4s written - time: %d.%9.9d status:%d error:%d\n",
           sde->header.dgmType, sde->header.time_sec, sde->header.time_nanosec, status, *error);
 #endif
 
@@ -5875,7 +5877,7 @@ int mbr_kemkmall_wr_shi(int verbose, size_t *bufferalloc, char **bufferptr, void
   }
 
 #ifdef MBR_KEMKMALL_DEBUG
-  fprintf(stderr, "KEMKMALL datagram type %.4s read - time: %d.%9.9d status:%d error:%d\n",
+  fprintf(stderr, "KEMKMALL datagram type %.4s written - time: %d.%9.9d status:%d error:%d\n",
           shi->header.dgmType, shi->header.time_sec, shi->header.time_nanosec, status, *error);
 #endif
 
