@@ -151,6 +151,9 @@ $depthabort = 6000.0;
 $maxclimbslope = 0.5734;
 
 # spiral descent approach depth
+$spiraldescent = 0;
+$startsurvey = 0;
+$magcalibrate = 0;
 $approachdepth = 50.0;
 
 # assumed ascent and descent rate
@@ -407,21 +410,34 @@ elsif ($deltat)
 	}
 if ($spiraldescentarg =~ /\S+\/\S+/)
 	{
-	($spiraldescentaltitude, $startsurvey) = $spiraldescentarg =~ /(\S+)\/(\S+)/;
-  if ($startsurvey != 0)
-    {
-    $startsurvey = 1;
-    }
+	($spiraldescentaltitude, $spiraldescentmode) = $spiraldescentarg =~ /(\S+)\/(\S+)/;
+	if ($spiraldescentmode == 0)
+		{
+		$startsurvey = 0;
+		$magcalibrate = 0;
+		}
+  	elsif ($spiraldescentmode == 1)
+    	{
+    	$startsurvey = 1;
+		$magcalibrate = 0;
+    	}
+  	elsif ($spiraldescentmode == 2)
+    	{
+    	$startsurvey = 1;
+		$magcalibrate = 1;
+    	}
 	}
 elsif ($spiraldescentarg =~ /\S+/)
 	{
 	($spiraldescentaltitude) = $spiraldescentarg =~ /(\S+)/;
-  $startsurvey = 1;
+  	$startsurvey = 1;
+	$magcalibrate = 0;
 	}
 elsif ($spiraldescent)
 	{
 	$spiraldescentaltitude = $altitudedesired;
-  $startsurvey = 1;
+  	$startsurvey = 1;
+	$magcalibrate = 0;
 	}
 if ($multibeamsettings =~ /\S+\/\S+\/\S+\/\S+/)
 	{
@@ -1003,21 +1019,30 @@ elsif ($verbose)
 	printf "    Way Points:               $nwaypoints\r\n";
 	printf "    Route Points:             $nmissionpoints\r\n";
 	printf "    Survey Behaviors:\r\n";
-        for ($i = 0; $i < 5; $i++)
-                {
-                printf "         Behavior for waypoint mode $i:   $behaviorNames[$behaviorIDs[$i]]\r\n";
-                }
- 	if ($spiraldescent)
+    for ($i = 0; $i < 5; $i++)
+        {
+        printf "         Behavior for waypoint mode $i:   $behaviorNames[$behaviorIDs[$i]]\r\n";
+        }
+	if ($spiraldescent)
 		{
-    if ($startsurvey == 0)
-      {
-		  printf "    Descent style:            Spiral descent without StartSurvey behavior\r\n";
-      }
-    else
-      {
+    	if ($startsurvey == 0)
+      		{
+		  	printf "    Descent style:            Spiral descent without StartSurvey behavior\r\n";
+      		}
+    	else
+      		{
 			printf "    Descent style:            Spiral descent with StartSurvey behavior\r\n";
-      }
-		printf "    Descent altitude:         %f\r\n", $spiraldescentaltitude;
+      		}
+		printf "    Spiral descent depth:     $spiraldescentdepth m\r\n";
+		printf "    Spiral descent altitude:  $spiraldescentaltitude m\r\n";
+		if ($magcalibrate)
+			{
+			printf "    Magnetometer calibration maneuver midway through spiral descent\r\n";
+			}
+		else
+      		{
+		  	printf "    No Magnetometer Calibration\r\n";
+      		}
 		}
 	else
 		{
@@ -1091,16 +1116,24 @@ elsif ($verbose)
 	printf "    Descent Vehicle Depth:      $descentdepth (m)\r\n";
 	if ($spiraldescent)
 		{
-    if ($startsurvey == 0)
-      {
-		  printf "    Descent style:            Spiral descent without StartSurvey behavior\r\n";
-      }
-    else
-      {
+    	if ($startsurvey == 0)
+      		{
+		  	printf "    Descent style:            Spiral descent without StartSurvey behavior\r\n";
+      		}
+    	else
+      		{
 			printf "    Descent style:            Spiral descent with StartSurvey behavior\r\n";
-      }
+      		}
 		printf "    Spiral descent depth:     $spiraldescentdepth m\r\n";
 		printf "    Spiral descent altitude:  $spiraldescentaltitude m\r\n";
+		if ($magcalibrate)
+			{
+			printf "    Magnetometer calibration maneuver midway through spiral descent\r\n";
+			}
+		else
+      		{
+		  	printf "    No Magnetometer Calibration\r\n";
+      		}
 		}
 	if ($forwarddist)
 		{
@@ -1184,13 +1217,21 @@ if (!$outputoff)
 	if ($spiraldescent)
 		{
 		if ($startsurvey == 0)
-      {
-		  printf MFILE "#     Descent style:            Spiral descent without StartSurvey behavior\r\n";
-      }
-    else
-      {
+      		{
+		  	printf MFILE "#     Descent style:            Spiral descent without StartSurvey behavior\r\n";
+      		}
+    	else
+      		{
 			printf MFILE "#     Descent style:            Spiral descent with StartSurvey behavior\r\n";
-      }
+      		}
+		if ($magcalibrate)
+      		{
+		  	printf MFILE "#     Magnetometer Calibration: Magnetometer calibration maneuver midway during spiral descent\r\n";
+      		}
+		else
+      		{
+		  	printf MFILE "#     Magnetometer Calibration: None\r\n";
+      		}
 		}
 	else
 		{
@@ -1319,6 +1360,7 @@ if (!$outputoff)
 	printf MFILE "#define GPS_DURATION               %d\r\n", $gpsduration;
 	printf MFILE "#define DESCENT_DEPTH              %f\r\n", $descentdepth;
 	printf MFILE "#define SPIRAL_DESCENT_DEPTH       %f\r\n", $spiraldescentdepth;
+	printf MFILE "#define SPIRAL_DESCENT_DEPTH_HALF  %f\r\n", 0.5 * $spiraldescentdepth;
 	printf MFILE "#define SPIRAL_DESCENT_ALTITUDE    %f\r\n", $spiraldescentaltitude;
 	printf MFILE "#define DESCEND_DURATION           %d\r\n", $initialdescendtime;
 	printf MFILE "#define SETPOINT_DURATION          %d\r\n", $setpointtime;
@@ -1870,7 +1912,7 @@ print "Behavior: delta_t (startup, logMode = $logmode)\r\n";
 			print MFILE "speed        = ASCENTDESCENT_SPEED; \r\n";
 			print MFILE "} \r\n";
 print "Behavior: waypoint\n";
-  		print MFILE "# \r\n";
+  			print MFILE "# \r\n";
 			print MFILE "# Acoustic update 5 - sent status ping at end of startSurvey - Jordan's squawk \r\n";
 			print MFILE "# This modem squawk was added following the suggestion of Jordan Caress \r\n";
 			print MFILE "# (at the insistence of Eric Martin) \r\n";
@@ -1882,17 +1924,17 @@ print "Behavior: waypoint\n";
 			print MFILE "} \r\n";
 print "Behavior: acousticUpdate\n";
 			print MFILE "# \r\n";
-      if ($startsurvey == 1)
-        {
-  			print MFILE "# Zero speed hang to allow final nav updates over acoustic modem\r\n";
-  			print MFILE "# - must get start survey command over acoustic modem or mission aborts\r\n";
-  			print MFILE "behavior StartSurvey  \r\n";
-  			print MFILE "{ \r\n";
-  			print MFILE "duration     = 300; \r\n";
-  			print MFILE "} \r\n";
+      		if ($startsurvey == 1)
+        		{
+  				print MFILE "# Zero speed hang to allow final nav updates over acoustic modem\r\n";
+  				print MFILE "# - must get start survey command over acoustic modem or mission aborts\r\n";
+  				print MFILE "behavior StartSurvey  \r\n";
+  				print MFILE "{ \r\n";
+  				print MFILE "duration     = 300; \r\n";
+  				print MFILE "} \r\n";
 print "Behavior: startsurvey\n";
-        }
-  		print MFILE "# \r\n";
+        		}
+  			print MFILE "# \r\n";
 			print MFILE "# Acoustic update 4 - sent status ping at end of spiral descent \r\n";
 			print MFILE "# \r\n";
 			print MFILE "behavior acousticUpdate \r\n";
@@ -1901,8 +1943,8 @@ print "Behavior: startsurvey\n";
 			print MFILE "dummy  = 1; \r\n";
 			print MFILE "} \r\n";
 print "Behavior: acousticUpdate\n";
-  		print MFILE "# \r\n";
-  		print MFILE "# Spiral descend behavior to get to proper depth at start of line 1 \r\n";
+  			print MFILE "# \r\n";
+  			print MFILE "# Spiral descend behavior to get to proper depth at start of line 1 \r\n";
 			if ($maxdepthapplied == 0)
 				{
 				printf MFILE "#   Behavior depth of %f meters set by local depth and desired altitude\r\n", $mmissiondepths[$i];
@@ -1911,29 +1953,84 @@ print "Behavior: acousticUpdate\n";
 				{
 				printf MFILE "#   Behavior depth of %f meters set to maximum vehicle depth\r\n", $mmissiondepths[$i];
 				}
-			print MFILE "behavior descend  \r\n";
-			print MFILE "{ \r\n";
-			printf MFILE "duration         = %d; \r\n", $descendtimes[$i];
-			print MFILE "horizontalMode   = rudder; \r\n";
-			print MFILE "horizontal       = DESCENDRUDDER; \r\n";
-			print MFILE "pitch            = DESCENDPITCH; \r\n";
-			print MFILE "speed            = ASCENTDESCENT_SPEED; \r\n";
-			print MFILE "maxDepth         = SPIRAL_DESCENT_DEPTH; \r\n";
-			print MFILE "minAltitude      = SPIRAL_DESCENT_ALTITUDE; \r\n";
-			print MFILE "} \r\n";
-			print MFILE "# \r\n";
+			if (magcalibrate) 
+				{
+				print MFILE "behavior descend  \r\n";
+				print MFILE "{ \r\n";
+				printf MFILE "duration         = %d; \r\n", (0.5 * $descendtimes[$i]);
+				print MFILE "horizontalMode   = rudder; \r\n";
+				print MFILE "horizontal       = DESCENDRUDDER; \r\n";
+				print MFILE "pitch            = DESCENDPITCH; \r\n";
+				print MFILE "speed            = ASCENTDESCENT_SPEED; \r\n";
+				print MFILE "maxDepth         = SPIRAL_DESCENT_DEPTH; \r\n";
+				print MFILE "minAltitude      = SPIRAL_DESCENT_ALTITUDE; \r\n";
+				print MFILE "} \r\n";
+				print MFILE "# \r\n";
+				
+				print MFILE "behavior descend  \r\n";
+				print MFILE "{ \r\n";
+				printf MFILE "duration         = 240; \r\n";
+				print MFILE "horizontalMode   = rudder; \r\n";
+				print MFILE "horizontal       = -DESCENDRUDDER; \r\n";
+				print MFILE "pitch            = 0.0; \r\n";
+				print MFILE "speed            = ASCENTDESCENT_SPEED; \r\n";
+				print MFILE "maxDepth         = SPIRAL_DESCENT_DEPTH; \r\n";
+				print MFILE "minAltitude      = SPIRAL_DESCENT_ALTITUDE; \r\n";
+				print MFILE "} \r\n";
+				print MFILE "# \r\n";
+				
+				print MFILE "behavior descend  \r\n";
+				print MFILE "{ \r\n";
+				printf MFILE "duration         = 240; \r\n";
+				print MFILE "horizontalMode   = rudder; \r\n";
+				print MFILE "horizontal       = DESCENDRUDDER; \r\n";
+				print MFILE "pitch            = 0.0; \r\n";
+				print MFILE "speed            = ASCENTDESCENT_SPEED; \r\n";
+				print MFILE "maxDepth         = SPIRAL_DESCENT_DEPTH; \r\n";
+				print MFILE "minAltitude      = SPIRAL_DESCENT_ALTITUDE; \r\n";
+				print MFILE "} \r\n";
+				print MFILE "# \r\n";
+				
+				print MFILE "behavior descend  \r\n";
+				print MFILE "{ \r\n";
+				printf MFILE "duration         = %d; \r\n", (0.5 * $descendtimes[$i]);
+				print MFILE "horizontalMode   = rudder; \r\n";
+				print MFILE "horizontal       = DESCENDRUDDER; \r\n";
+				print MFILE "pitch            = DESCENDPITCH; \r\n";
+				print MFILE "speed            = ASCENTDESCENT_SPEED; \r\n";
+				print MFILE "maxDepth         = SPIRAL_DESCENT_DEPTH_HALF; \r\n";
+				print MFILE "minAltitude      = SPIRAL_DESCENT_ALTITUDE; \r\n";
+				print MFILE "} \r\n";
+				print MFILE "# \r\n";
+				
 print "Behavior: spiral descend\n";
-      if ($startsurvey == 1)
-        {
-  			print MFILE "# Kearfott behavior - turn DVL aiding off for descent \r\n";
-  			print MFILE "# \r\n";
-  			print MFILE "behavior kearfott \r\n";
-  			print MFILE "{ \r\n";
-  			print MFILE "duration  = 2; \r\n";
-  			print MFILE "enableDopAid = False; \r\n";
-  			print MFILE "} \r\n";
+				}
+			else 
+				{
+				print MFILE "behavior descend  \r\n";
+				print MFILE "{ \r\n";
+				printf MFILE "duration         = %d; \r\n", $descendtimes[$i];
+				print MFILE "horizontalMode   = rudder; \r\n";
+				print MFILE "horizontal       = DESCENDRUDDER; \r\n";
+				print MFILE "pitch            = DESCENDPITCH; \r\n";
+				print MFILE "speed            = ASCENTDESCENT_SPEED; \r\n";
+				print MFILE "maxDepth         = SPIRAL_DESCENT_DEPTH; \r\n";
+				print MFILE "minAltitude      = SPIRAL_DESCENT_ALTITUDE; \r\n";
+				print MFILE "} \r\n";
+				print MFILE "# \r\n";
+print "Behavior: spiral descend\n";
+				}
+      		if ($startsurvey == 1)
+        		{
+  				print MFILE "# Kearfott behavior - turn DVL aiding off for descent \r\n";
+  				print MFILE "# \r\n";
+  				print MFILE "behavior kearfott \r\n";
+  				print MFILE "{ \r\n";
+  				print MFILE "duration  = 2; \r\n";
+  				print MFILE "enableDopAid = False; \r\n";
+  				print MFILE "} \r\n";
 print "Behavior: kearfott (disable DVL aiding)\n";
-      }
+      			}
 			print MFILE "# Acoustic update 3 - sent status ping at start of descent \r\n";
 			print MFILE "# \r\n";
 			print MFILE "behavior acousticUpdate \r\n";

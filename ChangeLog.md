@@ -23,7 +23,7 @@ Distributions that do not include "beta" in the tag name correspond to the major
 announced releases. The source distributions associated with all releases, major
 or beta, are equally accessible as tarballs through the Github interface.
 
-- Version 5.7.9beta52    March 4, 2023
+- Version 5.7.9beta52    March 9, 2023
 - Version 5.7.9beta51    February 14, 2023
 - Version 5.7.9beta50    February 12, 2023
 - Version 5.7.9beta49    January 22, 2023
@@ -429,11 +429,23 @@ or beta, are equally accessible as tarballs through the Github interface.
 ### MB-System Version 5.7 Release Notes:
 --
 
-#### 5.7.9beta52 (March 4)
+#### 5.7.9beta52 (March 9)
+
+Formats 56 (MBF_EM300RAW) and 57 (MBF_EM300MBA): Fixed catastrophic bug introduced in 
+5.7.9beta50 that treated many signed values (like acrosstrack distance) as unsigned.
+
+MBgrdviz: Added ability to export routes as TECDIS LST files for display in a variety of
+marine chart display software. 
 
 Autotools build system: Altered Makefile.am files in third_party/googlemock and 
 third_party/googletest to eliminate benign but alarming error messages during make install 
 and make clean commands.
+
+Mbm_route2mission: Added ability to insert a magnetometer calibration maneuver into an
+AUV mission spiral descent using the -Naltitude/mode command, where altitude is the
+spiral descent termination altitude and mode = 0 for no start survey behavior, 1 for 
+start survey behavior alone, and 2 for start survey plus a magnetometer calibration 
+maneuver.
 
 #### 5.7.9beta51 (February 14)
 
