@@ -1,4 +1,4 @@
-#include <stoqs/options.h>
+#include "options.h"
 
 #include <vector>
 #include <stdexcept>
@@ -11,7 +11,7 @@
 #define OS_IS_WINDOWS false
 #endif
 
-const char * const usage_str =	  "usage: grd-to-gltf <filepath> [-b | --binary] [(-o | --output) <output folder>]"\
+const char * const usage_str =	  "usage: mbgrd2gltf <filepath> [-b | --binary] [(-o | --output) <output folder>]"\
 								"\n                              [(-e | --exaggeration) <vertical exaggeration>]"\
 								"\n                              [(-m | --max-size) <max size>]"\
 								"\n                              [(-c | --compression) <compression ratio>]";
@@ -36,7 +36,7 @@ const char * const help_str =	"\nvariables:"\
 								"\n                              output as a ratio of uncompressed size to"\
 								"\n                              compressed size";
 
-const char * const try_help_str = "try 'grd-to-gltf [-h | --help]' for more information";
+const char * const try_help_str = "try 'mbgrd2gltf [-h | --help]' for more information";
 
 #if OS_IS_WINDOWS
 const char dir_delim = '\\';

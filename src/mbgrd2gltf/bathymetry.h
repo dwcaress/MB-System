@@ -1,9 +1,9 @@
-#ifndef STOQS_BATHYMETRY_H
-#define STOQS_BATHYMETRY_H
+#ifndef BATHYMETRY_H
+#define BATHYMETRY_H
 
 // local includes
-#include <stoqs/matrix.h>
-#include <stoqs/options.h>
+#include "matrix.h"
+#include "options.h"
 
 // standard library
 #include <string>

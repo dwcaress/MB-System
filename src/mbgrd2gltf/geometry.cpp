@@ -1,4 +1,4 @@
-#include <stoqs/geometry.h>
+#include "geometry.h"
 
 // standard library
 #include <cmath>

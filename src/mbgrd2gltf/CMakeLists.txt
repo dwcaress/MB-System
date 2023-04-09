@@ -1,9 +1,5 @@
-# The only change from original has been netCDFCxx to netCDF
-
 cmake_minimum_required(VERSION 3.13)
-project("grd-to-gltf")
-
-list(APPEND CMAKE_PREFIX_PATH "/home/vagrant/Downloads/netcdf-cxx4/build")
+project("mbgrd2gltf") # Updated project name
 
 # getting libraries
 find_package(netCDF CONFIG REQUIRED)
@@ -23,19 +19,20 @@ else()
 endif()
 
 # getting sources & include dirs
-file(GLOB_RECURSE SOURCES "src/stoqs/*.cpp")
-set(INCLUDE_DIRS "include" "lib/tinygltf" ${netCDF_INCLUDE_DIR})
+set(SOURCES main.cpp bathymetry.cpp compression.cpp geometry.cpp model.cpp options.cpp)
+#file(GLOB_RECURSE SOURCES "*.cpp") # Not future proof for new .cpp files. Use set(manual file naming) later 
+set(INCLUDE_DIRS "include" "tinygltf" ${netCDF_INCLUDE_DIR}) #tinygltf directory updated
 
 # universal objects
-add_library(common_objects OBJECT ${SOURCES})
+add_library(common_objects OBJECT ${SOURCES}) # Must match the GLOB_RECURSE line. May have to change later
 target_include_directories(common_objects PRIVATE ${INCLUDE_DIRS})
 
 # main executable
-add_executable(${PROJECT_NAME} "src/main.cpp" $<TARGET_OBJECTS:common_objects>)
+add_executable(${PROJECT_NAME} "main.cpp" ${SOURCES}) # Works when I made it match the GLOB_RECURSE line. Change later.
 list(APPEND TARGETS ${PROJECT_NAME})
 
 # getting tests
-file(GLOB TEST_SRCS "src/test/*.cpp")
+file(GLOB TEST_SRCS "test/*.cpp")
 
 # creating executables for tests
 foreach(TEST ${TEST_SRCS})

@@ -1,5 +1,5 @@
-#ifndef STOQS_OPTIONS_H
-#define STOQS_OPTIONS_H
+#ifndef OPTIONS_H
+#define OPTIONS_H
 
 // standard library
 #include <string>

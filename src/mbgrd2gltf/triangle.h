@@ -1,5 +1,5 @@
-#ifndef STOQS_TRIANGLE_H
-#define STOQS_TRIANGLE_H
+#ifndef TRIANGLE_H
+#define TRIANGLE_H
 
 // standard library
 #include <cstdint>

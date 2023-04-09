@@ -1,9 +1,9 @@
-#ifndef STOQS_COMPRESSION_H
-#define STOQS_COMPRESSION_H
+#ifndef COMPRESSION_H
+#define COMPRESSION_H
 
 // local includes
-#include <stoqs/matrix.h>
-#include <stoqs/options.h>
+#include "matrix.h"
+#include "options.h"
 
 namespace stoqs
 {

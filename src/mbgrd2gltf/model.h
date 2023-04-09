@@ -1,9 +1,9 @@
-#ifndef STOQS_MODEL_H
-#define STOQS_MODEL_H
+#ifndef MODEL_H
+#define MODEL_H
 
 // local includes
-#include <stoqs/geometry.h>
-#include <stoqs/options.h>
+#include "geometry.h"
+#include "options.h"
 
 namespace stoqs
 {

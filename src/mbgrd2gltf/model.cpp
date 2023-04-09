@@ -1,4 +1,4 @@
-#include <stoqs/model.h>
+#include "model.h"
 
 // external libraries
 #define TINYGLTF_IMPLEMENTATION

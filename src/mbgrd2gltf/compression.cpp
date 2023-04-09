@@ -1,4 +1,4 @@
-#include <stoqs/compression.h>
+#include "compression.h"
 
 // standard library
 #include <cmath>

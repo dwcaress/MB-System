@@ -1,11 +1,11 @@
-#ifndef STOQS_GEOMETRY_H
-#define STOQS_GEOMETRY_H
+#ifndef GEOMETRY_H
+#define GEOMETRY_H
 
 // local includes
-#include <stoqs/vertex.h>
-#include <stoqs/triangle.h>
-#include <stoqs/matrix.h>
-#include <stoqs/bathymetry.h>
+#include "vertex.h"
+#include "triangle.h"
+#include "matrix.h"
+#include "bathymetry.h"
 
 // standard library
 #include <vector>

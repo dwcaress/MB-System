@@ -1,7 +1,7 @@
-#include <stoqs/bathymetry.h>
+#include "bathymetry.h"
 
 // local includes
-#include <stoqs/compression.h>
+#include "compression.h"
 
 // external libraries
 #include <netcdf.h>

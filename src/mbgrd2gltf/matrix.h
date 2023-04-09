@@ -1,5 +1,5 @@
-#ifndef STOQS_MATRIX_H
-#define STOQS_MATRIX_H
+#ifndef MATRIX_H
+#define MATRIX_H
 
 // standard library
 #include <cstddef>
