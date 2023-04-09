@@ -1,5 +1,5 @@
-#ifndef STOQS_POINT_H
-#define STOQS_POINT_H
+#ifndef POINT_H
+#define POINT_H
 
 // standard library
 #include <cstdint>
