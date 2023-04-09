@@ -1529,6 +1529,12 @@ if test "$build_test" = "yes" ; then
           ])
 fi
 
+dnl Build and install mbgrd2gltf???
+AS_ECHO(["Entering mbgrd2gltf..."])
+AS_ECHO(["Installing mbgrd2gltf using cmake..."])
+   `cd src/mbgrd2gltf; cmake .; make; cd ../..`
+AS_ECHO(["mbgrd2gltf successfully installed..."])
+
 AC_OUTPUT
 
 dnl--------------------------------------------------------------------
@@ -1651,12 +1657,6 @@ if test "$enable_gsf" = "yes" ; then
 else
     AS_ECHO(["Build driver gsf: Disabled"])
 fi
-
-dnl Build and install mbgrd2gltf???
-AS_ECHO(["Entering mbgrd2gltf..."])
-AS_ECHO(["Installing mbgrd2gltf using cmake..."])
-   `cd src/mbgrd2gltf; cmake .; make; cd ../..`
-AS_ECHO(["mbgrd2gltf successfully installed..."])
 
 AS_ECHO(["------------------------------------------------------------------------------"])
 AS_ECHO(["Key Variables:"])
