@@ -326,10 +326,10 @@ dnl HARDENING END
 dnl--------------------------------------------------------------------
 dnl Build mbgrd2gltf
 dnl--------------------------------------------------------------------
-AS_ECHO(["Entering mbgrd2gltf..."])
-AS_ECHO(["Installing mbgrd2gltf using cmake..."])
-   `cd src/mbgrd2gltf; cmake .; make; cd ../..`
-AS_ECHO(["mbgrd2gltf successfully installed..."])
+dnlAS_ECHO(["Entering mbgrd2gltf..."])
+dnlAS_ECHO(["Installing mbgrd2gltf using cmake..."])
+dnl`cd src/mbgrd2gltf; cmake .; make; cd ../..`
+dnlAS_ECHO(["mbgrd2gltf successfully installed..."])
 
 dnl--------------------------------------------------------------------
 dnl Shared Data Section
