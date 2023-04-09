@@ -21677,6 +21677,13 @@ libnetcdf_CPPFLAGS=$libnetcdf_CPPFLAGS
 
 
 
+printf "%s\n" "Entering mbgrd2gltf..."
+printf "%s\n" "Installing mbgrd2gltf using cmake..."
+   `cd src/mbgrd2gltf; cmake .; make; cd ../..`
+printf "%s\n" "mbgrd2gltf successfully installed..."
+
+
+
 if test "X$with_gdal_config" != "X" ; then
     GDAL_CONF="$with_gdal_config/gdal-config"
     { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for GDAL gdal-config using --with-gdal-config=$with_gdal_config " >&5
