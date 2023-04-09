@@ -324,6 +324,14 @@ LD="$saved_LD"
 dnl HARDENING END
 
 dnl--------------------------------------------------------------------
+dnl Build mbgrd2gltf
+dnl--------------------------------------------------------------------
+AS_ECHO(["Entering mbgrd2gltf..."])
+AS_ECHO(["Installing mbgrd2gltf using cmake..."])
+   `cd src/mbgrd2gltf; cmake .; make; cd ../..`
+AS_ECHO(["mbgrd2gltf successfully installed..."])
+
+dnl--------------------------------------------------------------------
 dnl Shared Data Section
 dnl--------------------------------------------------------------------
 
@@ -1433,14 +1441,6 @@ dnl--------------------------------------------------------------------
 AC_DEFINE_UNQUOTED(MBSYSTEM_CONFIG_DEFINED, 1, [Set MBSYSTEM_CONFIG_DEFINED define in mb_config.h])
 AC_DEFINE_UNQUOTED(MBSYSTEM_INSTALL_PREFIX, "$prefix", [Set MBSYSTEM_INSTALL_PREFIX define in mb_config.h])
 AC_DEFINE_UNQUOTED(MBSYSTEM_OTPS_LOCATION, "$OTPS_DIR", [Set MBSYSTEM_OTPS_LOCATION define in mb_config.h])
-
-dnl--------------------------------------------------------------------
-dnl Build mbgrd2gltf
-dnl--------------------------------------------------------------------
-AS_ECHO(["Entering mbgrd2gltf..."])
-AS_ECHO(["Installing mbgrd2gltf using cmake..."])
-   `cd src/mbgrd2gltf; cmake .; make; cd ../..`
-AS_ECHO(["mbgrd2gltf successfully installed..."])
 
 dnl--------------------------------------------------------------------
 dnl Generate Makefiles
