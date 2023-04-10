@@ -22,5 +22,4 @@ bin_SCRIPTS = \
 	mbm_trnplot \
 	mbm_utm \
 	mbm_xbt \
-	mbm_xyplot \
-	grd-to-gltf
+	mbm_xyplot
