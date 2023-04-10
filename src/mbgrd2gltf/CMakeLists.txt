@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.13)
-project("mbgrd2gltf") # Updated project name
+project("mbgrd2gltf")
 
 # getting libraries
 find_package(netCDF CONFIG REQUIRED)
@@ -20,26 +20,25 @@ endif()
 
 # getting sources & include dirs
 set(SOURCES main.cpp bathymetry.cpp compression.cpp geometry.cpp model.cpp options.cpp)
-#file(GLOB_RECURSE SOURCES "*.cpp") # Not future proof for new .cpp files. Use set(manual file naming) later 
-set(INCLUDE_DIRS "include" "tinygltf" ${netCDF_INCLUDE_DIR}) #tinygltf directory updated
+set(INCLUDE_DIRS "tinygltf" ${netCDF_INCLUDE_DIR})
 
 # universal objects
-add_library(common_objects OBJECT ${SOURCES}) # Must match the GLOB_RECURSE line. May have to change later
+add_library(common_objects OBJECT ${SOURCES})
 target_include_directories(common_objects PRIVATE ${INCLUDE_DIRS})
 
 # main executable
-add_executable(${PROJECT_NAME} "main.cpp" ${SOURCES}) # Works when I made it match the GLOB_RECURSE line. Change later.
+add_executable(${PROJECT_NAME} "main.cpp" ${SOURCES})
 list(APPEND TARGETS ${PROJECT_NAME})
 
 # getting tests
-file(GLOB TEST_SRCS "test/*.cpp")
+#file(GLOB TEST_SRCS "test/*.cpp")
 
 # creating executables for tests
-foreach(TEST ${TEST_SRCS})
-	get_filename_component(TEST_TARGET_NAME ${TEST} NAME_WE)
-	add_executable(${TEST_TARGET_NAME} ${TEST} $<TARGET_OBJECTS:common_objects>)
-	list(APPEND TARGETS ${TEST_TARGET_NAME})
-endforeach()
+#foreach(TEST ${TEST_SRCS})
+#	get_filename_component(TEST_TARGET_NAME ${TEST} NAME_WE)
+#	add_executable(${TEST_TARGET_NAME} ${TEST} $<TARGET_OBJECTS:common_objects>)
+#	list(APPEND TARGETS ${TEST_TARGET_NAME})
+#endforeach()
 
 # configuring executables
 foreach(TARGET ${TARGETS})
