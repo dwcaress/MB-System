@@ -53,7 +53,7 @@ AS_ECHO([" "])
 AS_ECHO(["        # To update configure files use the following:"])
 AS_ECHO(["        autoupdate"])
 AS_ECHO(["        autoreconf --force --install --warnings=all"])
-AS_ECHO([" libtoolize --force --copy && aclocal && autoheader && automake --add-missing --include-deps && autoconf && autoupdate && autoreconf --force --install --warnings=all"])
+AS_ECHO([" sudo libtoolize --force --copy && sudo aclocal && sudo autoheader && sudo automake --add-missing --include-deps && sudo autoconf && sudo autoupdate && sudo autoreconf --force --install --warnings=all"])
 AS_ECHO([" "])
 AS_ECHO(["    When you run ./configure, a number of configure options are saved to a"])
 AS_ECHO(["    header file:"])
@@ -323,14 +323,6 @@ CC="$saved_CC"
 CXX="$saved_CXX"
 LD="$saved_LD"
 dnl HARDENING END
-
-dnl--------------------------------------------------------------------
-dnl Build mbgrd2gltf
-dnl--------------------------------------------------------------------
-dnlAS_ECHO(["Entering mbgrd2gltf..."])
-dnlAS_ECHO(["Installing mbgrd2gltf using cmake..."])
-dnl`cd src/mbgrd2gltf; cmake .; make; cd ../..`
-dnlAS_ECHO(["mbgrd2gltf successfully installed..."])
 
 dnl--------------------------------------------------------------------
 dnl Shared Data Section
@@ -1660,6 +1652,13 @@ if test "$enable_gsf" = "yes" ; then
 else
     AS_ECHO(["Build driver gsf: Disabled"])
 fi
+
+dnl--------------------------------------------------------------------
+dnl Build mbgrd2gltf
+dnl--------------------------------------------------------------------
+dnl AS_ECHO(["Building mbgrd2gltf..."])
+dnl `cd src/mbgrd2gltf; cmake .; make; cd ../..`
+dnl AS_ECHO(["mbgrd2gltf successful"])
 
 AS_ECHO(["------------------------------------------------------------------------------"])
 AS_ECHO(["Key Variables:"])
