@@ -10,7 +10,7 @@ set(executables mbm_arc2grd mbm_bpr mbm_copy
     mbm_grid mbm_histplot mbm_makedatalist mbm_makesvp
     mbm_multicopy mbm_multidatalist mbm_multiprocess
     mbm_plot mbm_rollerror mbm_route2mission mbm_stat
-    mbm_trnplot mbm_utm mbm_xbt mbm_xyplot)
+    mbm_trnplot mbm_utm mbm_xbt mbm_xyplot grd-to-gltf)
 
 
 ## foreach(executable ${executables})
