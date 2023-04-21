@@ -1655,9 +1655,9 @@ fi
 dnl--------------------------------------------------------------------
 dnl Build mbgrd2gltf
 dnl--------------------------------------------------------------------
-dnl AS_ECHO(["Building mbgrd2gltf..."])
-dnl `cd src/mbgrd2gltf; cmake .; make; cd ../..`
-dnl AS_ECHO(["mbgrd2gltf successful"])
+AS_ECHO(["Building mbgrd2gltf..."])
+`cd src/mbgrd2gltf; cmake .; make; cd ../..;`
+AS_ECHO(["mbgrd2gltf successful"])
 
 AS_ECHO(["------------------------------------------------------------------------------"])
 AS_ECHO(["Key Variables:"])
