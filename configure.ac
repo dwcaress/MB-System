@@ -1470,7 +1470,7 @@ AC_CONFIG_FILES([\
     src/ps/Makefile \
     src/share/Makefile \
     src/mbgrd2gltf/Makefile \
-])
+    ])
 if test "$enable_gsf" = "yes" ; then
     AC_CONFIG_FILES([\
         src/gsf/Makefile \
@@ -1662,7 +1662,7 @@ if test "$enable_gsf" = "yes" ; then
 else
     AS_ECHO(["Build driver gsf: Disabled"])
 fi
- 
+
 AS_ECHO(["------------------------------------------------------------------------------"])
 AS_ECHO(["Key Variables:"])
 AS_ECHO(["    prefix:                   ${prefix}"])
