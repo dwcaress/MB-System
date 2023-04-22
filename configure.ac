@@ -1435,13 +1435,6 @@ AC_DEFINE_UNQUOTED(MBSYSTEM_INSTALL_PREFIX, "$prefix", [Set MBSYSTEM_INSTALL_PRE
 AC_DEFINE_UNQUOTED(MBSYSTEM_OTPS_LOCATION, "$OTPS_DIR", [Set MBSYSTEM_OTPS_LOCATION define in mb_config.h])
 
 dnl--------------------------------------------------------------------
-dnl Build mbgrd2gltf
-dnl--------------------------------------------------------------------
-AS_ECHO(["Building mbgrd2gltf..."])
-`mkdir src/mbgrd2gltf/build; cd src/mbgrd2gltf/build; cmake ..; make; make install; cd ../../..;`
-AS_ECHO(["mbgrd2gltf successful"])
-
-dnl--------------------------------------------------------------------
 dnl Generate Makefiles
 dnl--------------------------------------------------------------------
 
