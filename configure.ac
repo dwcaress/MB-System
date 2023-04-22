@@ -1435,6 +1435,13 @@ AC_DEFINE_UNQUOTED(MBSYSTEM_INSTALL_PREFIX, "$prefix", [Set MBSYSTEM_INSTALL_PRE
 AC_DEFINE_UNQUOTED(MBSYSTEM_OTPS_LOCATION, "$OTPS_DIR", [Set MBSYSTEM_OTPS_LOCATION define in mb_config.h])
 
 dnl--------------------------------------------------------------------
+dnl Build mbgrd2gltf
+dnl--------------------------------------------------------------------
+AS_ECHO(["Building mbgrd2gltf..."])
+`mkdir src/mbgrd2gltf/build; cd src/mbgrd2gltf/build; cmake ..; make; make install; cd ../../..;`
+AS_ECHO(["mbgrd2gltf successful"])
+
+dnl--------------------------------------------------------------------
 dnl Generate Makefiles
 dnl--------------------------------------------------------------------
 
@@ -1459,6 +1466,7 @@ AC_CONFIG_FILES([\
     src/html/Makefile \
     src/ps/Makefile \
     src/share/Makefile \
+    src/mbgrd2gltf/Makefile \
     ])
 if test "$enable_gsf" = "yes" ; then
     AC_CONFIG_FILES([\
@@ -1651,13 +1659,6 @@ if test "$enable_gsf" = "yes" ; then
 else
     AS_ECHO(["Build driver gsf: Disabled"])
 fi
-
-dnl--------------------------------------------------------------------
-dnl Build mbgrd2gltf
-dnl--------------------------------------------------------------------
-AS_ECHO(["Building mbgrd2gltf..."])
-`cd src/mbgrd2gltf; cmake .; make; make install; cd ../..;`
-AS_ECHO(["mbgrd2gltf successful"])
 
 AS_ECHO(["------------------------------------------------------------------------------"])
 AS_ECHO(["Key Variables:"])
