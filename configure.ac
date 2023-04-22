@@ -1656,7 +1656,7 @@ dnl--------------------------------------------------------------------
 dnl Build mbgrd2gltf
 dnl--------------------------------------------------------------------
 AS_ECHO(["Building mbgrd2gltf..."])
-`cd src/mbgrd2gltf; cmake .; make; cd ../..;`
+`cd src/mbgrd2gltf; cmake .; make; make install; cd ../..;`
 AS_ECHO(["mbgrd2gltf successful"])
 
 AS_ECHO(["------------------------------------------------------------------------------"])
