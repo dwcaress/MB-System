@@ -48,3 +48,6 @@ foreach(TARGET ${TARGETS})
 	target_include_directories(${TARGET} PRIVATE ${INCLUDE_DIRS})
 	target_link_libraries(${TARGET} ${LIBRARIES})
 endforeach()
+
+install(TARGETS ${PROJECT_NAME}
+  DESTINATION ${CMAKE_INSTALL_BINDIR})
