@@ -4,15 +4,13 @@
 
 message("in mbgrd2gltf")
 
-# list(APPEND CMAKE_PREFIX_PATH "/home/vagrant/Downloads/netcdf-cxx4/build")
-
 add_executable(mbgrd2gltf
 	bathymetry.cpp compression.cpp geometry.cpp main.cpp model.cpp options.cpp)
 
 target_include_directories(mbgrd2gltf
 	PUBLIC
 	.
-	${CMAKE_SOURCE_DIR}/src/${PROJECT_NAME}/tinygltf
+	${CMAKE_SOURCE_DIR}/src/mbgrd2gltf/tinygltf
 	${NETCDF_INCLUDE_DIRS})
 
 target_link_libraries(mbgrd2gltf
