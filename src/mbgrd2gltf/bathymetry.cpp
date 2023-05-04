@@ -6,7 +6,7 @@
 // external libraries
 #include <netcdf.h>
 
-namespace stoqs
+namespace mbgrd2gltf
 {
 	Bathymetry::Bathymetry(const Options& options)
 	{

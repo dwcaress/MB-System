@@ -6,7 +6,7 @@
 #include <stdexcept>
 #include <string>
 
-namespace stoqs
+namespace mbgrd2gltf
 {
 	template <typename T>
 	class Matrix

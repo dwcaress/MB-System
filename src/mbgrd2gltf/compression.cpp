@@ -4,7 +4,7 @@
 #include <cmath>
 #include <cstdint>
 
-namespace stoqs
+namespace mbgrd2gltf
 {
 	namespace compression
 	{

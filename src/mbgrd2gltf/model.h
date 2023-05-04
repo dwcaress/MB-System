@@ -5,7 +5,7 @@
 #include "geometry.h"
 #include "options.h"
 
-namespace stoqs
+namespace mbgrd2gltf
 {
 	namespace model
 	{

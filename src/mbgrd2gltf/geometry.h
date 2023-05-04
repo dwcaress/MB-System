@@ -10,7 +10,7 @@
 // standard library
 #include <vector>
 
-namespace stoqs
+namespace mbgrd2gltf
 {
 	class Geometry
 	{

@@ -5,7 +5,7 @@
 #include "matrix.h"
 #include "options.h"
 
-namespace stoqs
+namespace mbgrd2gltf
 {
 	namespace compression
 	{
