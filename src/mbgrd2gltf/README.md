@@ -1,4 +1,3 @@
-
 # Source Directory: src/mbgrd2gltf/
 
 This directory contains the source files for the program mbgrd2gltf, a 2D/3D grd to gltf conversion program.
