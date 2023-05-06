@@ -4,7 +4,7 @@
 // standard library
 #include <cstdint>
 
-namespace stoqs
+namespace mbgrd2gltf
 {
 	class Triangle
 	{

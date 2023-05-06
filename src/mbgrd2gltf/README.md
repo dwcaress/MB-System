@@ -1,29 +1,25 @@
-# GLTF Generator
+# Source Directory: src/mbgrd2gltf/
 
-This is a program made to replace the current 3d geometry generation pipeline used in STOQS. This project was done for CSUMB capstone in fall 2021 to solve the following issue: https://github.com/stoqs/stoqs/issues/1093
+This directory contains the source files for the program mbgrd2gltf, a 2D/3D grd to gltf conversion program.
+This program was contributed to MB-System as part of the CSUMB Capstone in Spring 2023. 
 
 # Team
 
-* Isaac Hirzel
-* Oliver Stringer
-* Zachary Abbett
+* Nicolas Porras Falconio
+* Kyle Dowling
+* Jesse Benavides
+* Julian Fortin
+
 # Dependencies
 
-* netCDF4 C libary
-	* For linux, this can be gotten from the system package manager. On ubuntu, the package is **libnetcdf-dev**
-	* For Windows, this can be downloaded from https://www.unidata.ucar.edu/downloads/netcdf/
+* netCDF
 * TinyGLTF
 	* This is in the project files as a single-header library. No futher action is needed for this dependency.
 
-# How to Build
 
-This project uses CMake as the build-system generator, and running cmake with the CMakeLists.txt file in the gltf-generator folder should be enough to generate the build files.
 
-More specifically, on linux, one can enter the following commands in terminal:
-```
-	$ cd $STOQS_HOME/stoqs/contrib/gltf-generator/build	
-	$ cmake ..	
-	$ make
-```
+# Previous Work
 
-As long as all the required packages/dependencies are installed, this should work.
+* mbgrd2gltf (originally gltf-generator) was made to replace the current 3d geometry generation pipeline used in STOQS. 
+* This project was done for CSUMB capstone in fall 2021 to solve the following issue: https://github.com/stoqs/stoqs/issues/1093
+* https://github.com/stoqs/stoqs/blob/master/stoqs/contrib/gltf-generator/README.md

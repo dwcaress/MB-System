@@ -5,7 +5,7 @@
 #include <string>
 #include <unordered_map>
 
-namespace stoqs
+namespace mbgrd2gltf
 {	
 	class Options
 	{

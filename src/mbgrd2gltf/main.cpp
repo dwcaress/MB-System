@@ -10,7 +10,7 @@
 // external libraries
 #include <netcdf.h>
 
-using namespace stoqs;
+using namespace mbgrd2gltf;
 
 int main(int argc, char *argv[])
 {

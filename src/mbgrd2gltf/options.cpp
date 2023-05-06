@@ -44,7 +44,7 @@ const char dir_delim = '\\';
 const char dir_delim = '/';
 #endif
 
-namespace stoqs
+namespace mbgrd2gltf
 {	
 	struct PathInfo
 	{

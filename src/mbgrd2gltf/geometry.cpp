@@ -8,7 +8,7 @@
 #define WGS_84_SEMI_MAJOR_AXIS 6378137.0
 #define WGS_84_INVERSE_FLATTENING 298.257223563
 
-namespace stoqs
+namespace mbgrd2gltf
 {
 	Geometry::Geometry(const Bathymetry& bathymetry, const Options& options) :
 	_vertices(get_vertices(bathymetry, options.exaggeration())),
