@@ -162,8 +162,8 @@ namespace mbgrd2gltf
 		_xysize = _z.count();
 		_dimension[0] = _z.size_x();
 		_dimension[1] = _z.size_y();
-		_spacing[0] = std::labs(_x_range[1] - _x_range[0]) / (double)(_dimension[0] - 1);
-		_spacing[1] = std::labs(_y_range[1] - _y_range[0]) / (double)(_dimension[1] - 1);
+		_spacing[0] = std::abs(_x_range[1] - _x_range[0]) / (double)(_dimension[0] - 1);
+		_spacing[1] = std::abs(_y_range[1] - _y_range[0]) / (double)(_dimension[1] - 1);
 	}
 
 	std::string Bathymetry::to_string() const
