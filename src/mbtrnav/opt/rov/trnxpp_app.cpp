@@ -332,6 +332,8 @@ static mb1_t *s_get_test_sounding(mb1_t *dest, int beams)
 }
 #endif
 
+// input: OI sled DVL
+// publish to: mbtrnpp , TRN server
 // expects:
 // b[0]   : vehicle DVL
 // b[1]   : sled DVL
@@ -339,7 +341,200 @@ static mb1_t *s_get_test_sounding(mb1_t *dest, int beams)
 // a[1]   : sled attitude
 // geo[0] : dvlgeo
 // geo[1] : oigeo
-int cb_proto_oisled(void *pargs)
+int cb_proto_oisled2(void *pargs)
+{
+    int retval=-1;
+
+    TRN_NDPRINT(3, "%s:%d >>> Callback triggered <<<\n", __func__, __LINE__);
+
+    trn::trnxpp::callback_res_t *cb_res = static_cast<trn::trnxpp::callback_res_t *>(pargs);
+    trn::trnxpp *xpp = cb_res->xpp;
+    trnxpp_cfg *cfg = cb_res->cfg;
+
+    cfg->stats().trn_cb_n++;
+
+    // iterate over contexts
+    std::vector<trn::trnxpp_ctx *>::iterator it;
+    for(it = xpp->ctx_list_begin(); it != xpp->ctx_list_end(); it++)
+    {
+
+        trn::trnxpp_ctx *ctx = (*it);
+        // if context defined for this callback
+        if(ctx == nullptr || !ctx->has_callback("cb_proto_oisled2"))
+        {
+            TRN_TRACE();
+            // skip invalid context
+            continue;
+        }
+
+        TRN_NDPRINT(5, "%s:%d processing ctx[%s]\n", __func__, __LINE__, ctx->ctx_key().c_str());
+
+        int err_count = 0;
+
+        std::string *bkey[2] = {ctx->bath_input_chan(0), ctx->bath_input_chan(1)};
+        std::string *nkey = ctx->nav_input_chan(0);
+        std::string *akey[2] = {ctx->att_input_chan(0), ctx->att_input_chan(1)};
+        std::string *vkey = ctx->vel_input_chan(0);
+
+        // vi is optional
+        // bi[0] optional
+        if(bkey[1] == nullptr || nkey == nullptr || akey[0] == nullptr || akey[1] == nullptr)
+        {
+            ostringstream ss;
+            ss << (bkey[0]==nullptr ? " bkey[0]" : "");
+            ss << (bkey[1]==nullptr ? " bkey[1]" : "");
+            ss << (akey[0]==nullptr ? " akey[0]" : "");
+            ss << (akey[1]==nullptr ? " akey[1]" : "");
+            ss << (nkey==nullptr ? " nkey" : "");
+            TRN_NDPRINT(5, "%s:%d WARN - NULL input key: %s\n", __func__, __LINE__, ss.str().c_str());
+            err_count++;
+            continue;
+        }
+
+        trn::bath_info *bi[2] = {xpp->get_bath_info(*bkey[0]), xpp->get_bath_info(*bkey[1])};
+        trn::nav_info *ni = xpp->get_nav_info(*nkey);
+        trn::att_info *ai[2] = {xpp->get_att_info(*akey[0]), xpp->get_att_info(*akey[1])};
+        trn::vel_info *vi = (vkey == nullptr ? nullptr : xpp->get_vel_info(*vkey));
+
+        // vi optional
+        // bi[0] optional
+        if(bi[0] == nullptr || bi[1] == nullptr || ni == nullptr || ai[1] == nullptr || ai[1] == nullptr || vi == nullptr)
+        {
+            ostringstream ss;
+            ss << (bi[0]==nullptr ? " bi[0]" : "");
+            ss << (bi[1]==nullptr ? " bi[1]" : "");
+            ss << (ai[0]==nullptr ? " ai[0]" : "");
+            ss << (ai[1]==nullptr ? " ai[1]" : "");
+            ss << (ni==nullptr ? " ni" : "");
+            ss << (vi==nullptr ? " vi" : "");
+            TRN_NDPRINT(5, "%s:%d WARN - NULL info instance: %s\n", __func__, __LINE__, ss.str().c_str());
+            err_count++;
+        }
+
+        if(bkey[0] != nullptr && bi[0] != nullptr)
+        TRN_NDPRINT(6, "BATHINST.%s : %s\n",bkey[0]->c_str(), bi[0]->bathstr());
+        if(bkey[1] != nullptr && bi[1] != nullptr)
+        TRN_NDPRINT(6, "BATHINST.%s : %s\n",bkey[1]->c_str(), bi[1]->bathstr());
+
+        // sled DVL beam count
+        size_t n_beams = bi[1]->beam_count();
+
+        if(n_beams > 0){
+
+            // use sled bathy, vehicle attitude
+            mb1_t *snd = trnx_utils::lcm_to_mb1(bi[1], ni, ai[0]);
+
+            std::list<trn::beam_tup> beams = bi[1]->beams_raw();
+            std::list<trn::beam_tup>::iterator it;
+
+            // if streams_ok, bs/bp pointers have been validated
+            trn::bath_input *bp[2] = {xpp->get_bath_input(*bkey[0]), xpp->get_bath_input(*bkey[1])};
+            int trn_type[2] = {-1, -1};
+
+            if(bp[0] != nullptr){
+                trn_type[0] = bp[0]->bath_input_type();
+            }
+            if(bp[1] != nullptr){
+                trn_type[1] = bp[1]->bath_input_type();
+            }
+
+            // TODO: include multibeam (MB) and/or DVL (pub only MB to mbtrnpp)
+            // bp[0] optional
+            if(nullptr != bp[1]) {
+
+                dvlgeo *geo[2] = {nullptr, nullptr};
+                beam_geometry *bgeo[2] = {nullptr, nullptr};
+
+                if(nullptr != bp[0]){
+                    bgeo[0] = xpp->lookup_geo(*bkey[0], trn_type[0]);
+                    geo[0] = static_cast<dvlgeo *>(bgeo[0]);
+                }
+
+                bgeo[1] = xpp->lookup_geo(*bkey[1], trn_type[1]);
+                geo[1] = static_cast<dvlgeo *>(bgeo[1]);
+
+                // tranform oisled DVL beams
+                trnx_utils::transform_oidvl2(bi, ai, geo, snd);
+            } else {
+                fprintf(stderr,"%s:%d ERR - NULL bath input; skipping transforms\n", __func__, __LINE__);
+            }
+
+            mb1_set_checksum(snd);
+
+            // check modulus
+            if(ctx->decmod() <= 0 || (ctx->cbcount() % ctx->decmod()) == 0){
+
+                if(cfg->debug() >=4 ){
+                    mb1_show(snd, (cfg->debug()>=5 ? true: false), 5);
+                }
+
+                // publish MB1 to mbtrnpp
+                ctx->pub_mb1(snd, xpp->pub_list(), cfg);
+
+
+                if(ctx->trncli_count() > 0){
+
+                    // publish poseT/measT to trn-server
+                    poseT *pt = trnx_utils::mb1_to_pose(snd, ai[0], (long)ctx->utm_zone());
+                    measT *mt = trnx_utils::mb1_to_meas(snd, ai[0], trn_type[1], (long)ctx->utm_zone());
+
+                    if(pt != nullptr && mt != nullptr){
+
+                        double nav_time = ni->time_usec()/1e6;
+
+                        // publish update TRN, publish estimate to TRN, LCM
+                        ctx->pub_trn(nav_time, pt, mt, trn_type[1], xpp->pub_list(), cfg);
+                    }
+
+                    if(pt != nullptr)
+                        delete pt;
+                    if(mt != nullptr)
+                        delete mt;
+                }
+            } else {
+                TRN_NDPRINT(5, "%s:%d WARN - not ready count/mod[%d/%d]\n", __func__, __LINE__,ctx->cbcount(), ctx->decmod());
+            }
+            ctx->inc_cbcount();
+
+            // write CSV
+            // use sled bathy, vehicle attitude
+            if(ctx->write_mb1_csv(snd, bi[1], ai[0], vi) > 0){
+                cfg->stats().mb_csv_n++;
+            }
+
+
+            // release sounding memory
+            mb1_destroy(&snd);
+            retval=0;
+        }
+
+        if(bi[0] != nullptr)
+            delete bi[0];
+        if(bi[1] != nullptr)
+            delete bi[1];
+        if(ai[0] != nullptr)
+            delete ai[0];
+        if(ai[1] != nullptr)
+            delete ai[1];
+        if(ni != nullptr)
+            delete ni;
+        if(vi != nullptr)
+            delete vi;
+    }
+
+    return retval;
+}
+
+// input: OI sled DVL
+// publish to: mbtrnpp, TRN server
+// expects:
+// b[0]   : vehicle DVL
+// b[1]   : sled DVL
+// a[0]   : vehicle attitude
+// a[1]   : sled attitude
+// geo[0] : dvlgeo
+// geo[1] : oigeo
+int cb_proto_oisled(void *pargs) // dec 2022
 {
     int retval=-1;
 
@@ -406,8 +601,10 @@ int cb_proto_oisled(void *pargs)
             err_count++;
         }
 
-        TRN_NDPRINT(6, "BATHINST.%s : %s\n",bkey[0]->c_str(), bi[0]->bathstr());
-        TRN_NDPRINT(6, "BATHINST.%s : %s\n",bkey[1]->c_str(), bi[1]->bathstr());
+        if(bkey[0] != nullptr && bi[0]!=nullptr)
+            TRN_NDPRINT(6, "BATHINST.%s : %s\n",bkey[0]->c_str(), bi[0]->bathstr());
+        if(bkey[1] != nullptr && bi[1]!=nullptr)
+            TRN_NDPRINT(6, "BATHINST.%s : %s\n",bkey[1]->c_str(), bi[1]->bathstr());
 
         size_t n_beams = bi[0]->beam_count();
 
@@ -508,6 +705,14 @@ int cb_proto_oisled(void *pargs)
     return retval;
 }
 
+
+// input: DeltaT or DVL
+// publish to: mbtrnpp, TRN server
+// expects:
+// bi     : bathymetry, DVL or deltaT (on vehicle frame)
+// ni     : navigation (on vehicle frame)
+// ai     : attitude (on vehicle frame)
+// vi     : velocity (optional, may be NULL)
 int cb_proto_deltat(void *pargs)
 {
     int retval=-1;
@@ -680,6 +885,13 @@ int cb_proto_deltat(void *pargs)
     return retval;
 }
 
+// input: DVL
+// publish to: TRN server
+// expects:
+// bi     : bathymetry, DVL or deltaT (on vehicle frame)
+// ni     : navigation (on vehicle frame)
+// ai     : attitude (on vehicle frame)
+// vi     : velocity (optional, may be NULL)
 int cb_proto_dvl(void *pargs)
 {
     int retval=-1;
@@ -844,6 +1056,7 @@ void app_main(trnxpp_cfg &cfg)
     xpp.register_callback("cb_proto_dvl", cb_proto_dvl);
     xpp.register_callback("cb_proto_deltat", cb_proto_deltat);
     xpp.register_callback("cb_proto_oisled", cb_proto_oisled);
+    xpp.register_callback("cb_proto_oisled2", cb_proto_oisled2);
 
     xpp.parse_config(&cfg);
     s_copy_config(cfg, xpp);

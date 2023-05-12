@@ -308,8 +308,10 @@ public:
         memset(svt_m, 0, asz);
     }
 
-    mbgeo(uint16_t nbeams, double swath, double *rot, double *tran)
-    :beam_count(nbeams),swath_deg(swath)
+    mbgeo(uint16_t nbeams, double swath, double *rot, double *tran, double rrot=0.)
+    : beam_count(nbeams)
+    , swath_deg(swath)
+    , rot_radius_m(rrot)
     {
         for(int i=0; i<3; i++)
         {
@@ -333,14 +335,18 @@ public:
         char *sswath = strtok(NULL,":");
         char *srot = strtok(NULL,":");
         char *strn = strtok(NULL,":");
-        TRN_NDPRINT(5,  "%s:%d - parsing mbgeo spec[%s] sbeams[%s] sswath[%s] srot[%s] stx[%s] \n", __func__, __LINE__, spec,
-                    sbeams, sswath, srot, strn);
+        char *srrot = strtok(NULL,":");
+
+       TRN_NDPRINT(5,  "%s:%d - parsing mbgeo spec[%s] sbeams[%s] sswath[%s] srot[%s] stx[%s] srrot[%s]\n", __func__, __LINE__, spec,
+                    sbeams, sswath, srot, strn, srrot);
 
         double svr[3] = {0};
         double svt[3] = {0};
         uint16_t beams=0;
         double swath=0;
-        if(NULL!=sbeams)
+        double rrot = 0.;
+
+       if(NULL!=sbeams)
             sscanf(sbeams,"%hu",&beams);
         if(NULL!=sswath)
             sscanf(sswath,"%lf",&swath);
@@ -348,8 +354,10 @@ public:
             sscanf(srot,"%lf,%lf,%lf",&svr[0],&svr[1],&svr[2]);
         if(NULL!=strn)
             sscanf(strn,"%lf,%lf,%lf",&svt[0],&svt[1],&svt[2]);
+        if(NULL!=srrot)
+           sscanf(srrot, "%lf", &rrot);
 
-        retval = new mbgeo(beams, swath, &svr[0], &svt[0]);
+        retval = new mbgeo(beams, swath, &svr[0], &svt[0], rrot);
 
         free(acpy);
 
@@ -368,6 +376,8 @@ public:
         os << std::setw(wkey) << "translation";
         os << std::setw(wval) << "[";
         os << svt_m[0] << "," << svt_m[1] << "," << svt_m[2] << "]\n";
+        os << std::setw(wkey) << "rot_radius_m";
+        os << std::setw(wval) << rot_radius_m << "\n";
         os << "\n";
     }
 
@@ -392,6 +402,8 @@ public:
     // sensor translation relative to vehicle CRP (x/y/z m)
     // +x: fwd +y: stbd, +z:down
     double svt_m[3];
+    // device rotation radius (OI toolsled)
+    double rot_radius_m;
 
 };
 

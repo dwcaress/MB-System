@@ -54,9 +54,9 @@ public:
             att_input::mDataInstMutex.lock();
 
             // set (Instantaneous) nav values
-            double pitch = msg.pitch_deg;
-            double roll = msg.roll_deg;
-            double heading = msg.heading_deg;
+            double pitch = Math::degToRad(msg.pitch_deg);
+            double roll = Math::degToRad(msg.roll_deg);
+            double heading = Math::degToRad(msg.heading_deg);
 
             // TODO: check status byte (undocumented...)
             att_flags_t aflags = 0;

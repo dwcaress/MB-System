@@ -718,6 +718,166 @@ public:
     // It probably doesn't make sense to filter DVL beams
     // using mbtrnpp, since it assumes they are distributed
     // in a linear array.
+    // expects:
+    // bi[0] - vehicle bath (DVL) OPTIONAL
+    // bi[1] - oi sled bath (DVL)
+    // ai[0] - vehicle att
+    // ai[0] - sled att
+    // geo[0] - vehicle bath geometry OPTIONAL
+    // geo[1] - oi sled bath geometry
+    // snd - sounding (w. navigation in vehicle frame)
+    static void transform_oidvl2(trn::bath_info **bi, trn::att_info **ai, dvlgeo **geo, mb1_t *r_snd)
+    {
+        int FN_DEBUG_HI = 6;
+        int FN_DEBUG = 5;
+
+        // validate inputs
+        if(NULL == geo || geo[1] == nullptr){
+            fprintf(stderr, "%s - geometry error : NULL input geo[%p] {%p, %p} \n", __func__, geo, (geo?geo[0]:nullptr), (geo?geo[1]:nullptr));
+            return;
+        }
+        if(geo[0] && geo[0]->beam_count <= 0){
+            fprintf(stderr, "%s - geometry warning : geo[0] beams <= 0 {%u}\n", __func__, geo[0]->beam_count);
+        }
+        if(geo[1] && geo[1]->beam_count <= 0){
+            fprintf(stderr, "%s - geometry error : geo[1] beams <= 0 {%u}\n", __func__, geo[1]->beam_count);
+            return;
+        }
+        if(NULL == r_snd || NULL == ai|| NULL == bi){
+            fprintf(stderr, "%s - ERR invalid argument bi[%p] ai[%p] snd[%p]\n", __func__, bi, ai, r_snd);
+            return;
+        }
+
+        if(NULL == ai[0] || NULL == ai[1] || NULL == bi[1]){
+            fprintf(stderr, "%s - ERR invalid info ai[0][%p] ai[1][%p] bi[0][%p] bi[1][%p] \n", __func__, ai[0], ai[1], bi[0], bi[1]);
+            return;
+        }
+
+        // vehicle attitude (relative to NED)
+        // r/p/y (phi/theta/psi)
+        // MB1 assumes vehicle frame, not world frame (i.e. exclude heading)
+        double VATT[3] = {ai[1]->roll(), ai[1]->pitch(), 0.};
+
+        // sensor mounting angles (relative to vehicle, radians)
+        // 3-2-1 euler angles, r/p/y  (phi/theta/psi)
+        // wrt sensor mounted across track, b[0] port, downward facing
+        double SROT[3] = { DTR(geo[1]->svr_deg[0]), DTR(geo[1]->svr_deg[1]), DTR(geo[1]->svr_deg[2])};
+
+        // sensor mounting translation offsets (relative to vehicle CRP, meters)
+        // +x: fwd +y: stbd, +z:down (aka FSK, fwd,stbd,keel)
+        // TODO T is for transform use rSV
+        double STRN[3] = {geo[1]->svt_m[0], geo[1]->svt_m[1], geo[1]->svt_m[2]};
+
+        double XTRN[3] = {geo[1]->rot_radius_m, 0., 0.};
+        double XR = ai[1]->pitch() - ai[0]->pitch();
+        double XROT[3] = {0., XR, 0.};
+
+        // beam components in reference sensor frame (mounted center, across track)
+        Matrix beams_SF = dvl_sframe_components(bi[1], geo[1]);
+
+        TRN_NDPRINT(FN_DEBUG, "%s: --- \n",__func__);
+
+        TRN_NDPRINT(FN_DEBUG, "VATT[%.3lf, %.3lf, %.3lf]\n", VATT[0], VATT[1], VATT[2]);
+        TRN_NDPRINT(FN_DEBUG, "SROT[%.3lf, %.3lf, %.3lf]\n", SROT[0], SROT[1], SROT[2]);
+        TRN_NDPRINT(FN_DEBUG, "STRN[%.3lf, %.3lf, %.3lf]\n", STRN[0], STRN[1], STRN[2]);
+
+        const char *pinv = (ai[0]->flags().is_set(trn::AF_INVERT_PITCH)? "(p-)" :"(p+)");
+
+        TRN_NDPRINT(FN_DEBUG, "VATT (deg) [%.2lf, %.2lf, %.2lf (%.2lf)] %s\n",
+                    Math::radToDeg(VATT[0]), Math::radToDeg(VATT[1]), Math::radToDeg(VATT[2]), Math::radToDeg(ai[0]->heading()), pinv);
+        TRN_NDPRINT(FN_DEBUG, "XTRN[%.3lf, %.3lf, %.3lf]\n", XTRN[0], XTRN[1], XTRN[2]);
+        TRN_NDPRINT(FN_DEBUG, "XROT[%.3lf, %.3lf, %.3lf]\n", XROT[0], XROT[1], XROT[2]);
+        TRN_NDPRINT(FN_DEBUG, "pitch (deg) veh[%.3lf] ois[%.3lf] angle[%.3lf]\n", Math::radToDeg(ai[0]->pitch()), Math::radToDeg(ai[1]->pitch()), Math::radToDeg(XR));
+        TRN_NDPRINT(FN_DEBUG, "\n");
+
+        // generate coordinate tranformation matrices
+
+        // translate arm rotation point to sled origin
+        Matrix mat_XTRN = affineTranslation(XTRN);
+        // sled arm rotation
+        Matrix mat_XROT = affine321Rotation(XROT);
+        // mounting rotation matrix
+        Matrix mat_SROT = affine321Rotation(SROT);
+        // mounting translation matrix
+        Matrix mat_STRN = affineTranslation(STRN);
+        // vehicle attitude (pitch, roll, heading)
+        Matrix mat_VATT = affine321Rotation(VATT);
+
+        // combine to get composite tranformation
+        // order is significant:
+        // mounting rotations, translate
+        Matrix S0 = mat_XTRN * mat_SROT;
+        // arm rotation
+        Matrix S1 = mat_XROT * S0;
+        // translate to position on arm
+        Matrix S2 = mat_STRN * S1;
+        // appy vehicle attitude
+        Matrix Q = mat_VATT * S2;
+
+        // apply coordinate transforms
+        Matrix beams_VF = Q * beams_SF;
+
+        std::list<trn::beam_tup> beams = bi[1]->beams_raw();
+        std::list<trn::beam_tup>::iterator it;
+
+        // fill in the MB1 record using transformed beams
+        // zero- and one-based indexs
+        int idx[2] = {0, 1};
+        for(it=beams.begin(); it!=beams.end(); it++, idx[0]++, idx[1]++)
+        {
+            // write beam data to MB1 sounding
+            trn::beam_tup bt = static_cast<trn::beam_tup> (*it);
+
+            // beam number (0-indexed)
+            int b = std::get<0>(bt);
+            double range = std::get<1>(bt);
+            // beam components WF x,y,z
+            // matrix row/col (1 indexed)
+            r_snd->beams[idx[0]].beam_num = b;
+            r_snd->beams[idx[0]].rhox = range * beams_VF(1, idx[1]);
+            r_snd->beams[idx[0]].rhoy = range * beams_VF(2, idx[1]);
+            r_snd->beams[idx[0]].rhoz = range * beams_VF(3, idx[1]);
+
+            if(trn_debug::get()->debug() >= 5){
+
+                // calculated beam range (should match measured range)
+                double rho[3] = {r_snd->beams[idx[0]].rhox, r_snd->beams[idx[0]].rhoy, r_snd->beams[idx[0]].rhoz};
+
+                double rhoNorm = vnorm( rho );
+
+                // calculate component angles wrt vehicle axes
+                double axr = (range==0. ? 0. :acos(r_snd->beams[idx[0]].rhox/range));
+                double ayr = (range==0. ? 0. :acos(r_snd->beams[idx[0]].rhoy/range));
+                double azr = (range==0. ? 0. :acos(r_snd->beams[idx[0]].rhoz/range));
+
+                TRN_NDPRINT(FN_DEBUG_HI, "%s: b[%3d] r[%7.2lf] R[%7.2lf]     rhox[%7.2lf] rhoy[%7.2lf] rhoz[%7.2lf]     ax[%6.2lf] ay[%6.2lf] az[%6.2lf]\n",
+                            __func__, b, range, rhoNorm,
+                            r_snd->beams[idx[0]].rhox,
+                            r_snd->beams[idx[0]].rhoy,
+                            r_snd->beams[idx[0]].rhoz,
+                            Math::radToDeg(axr),
+                            Math::radToDeg(ayr),
+                            Math::radToDeg(azr)
+                            );
+            }
+        }
+        TRN_NDPRINT(FN_DEBUG, "%s: --- \n\n",__func__);
+
+        return;
+    }
+
+    // process DVL sounding from ocean imaging toolsled (mounted on rotating arm)
+    // It probably doesn't make sense to filter DVL beams
+    // using mbtrnpp, since it assumes they are distributed
+    // in a linear array.
+    // expects:
+    // bi[0] - vehicle bath (DVL) OPTIONAL
+    // bi[1] - oi sled bath (DVL)
+    // ai[0] - vehicle att
+    // ai[0] - sled att
+    // geo[0] - vehicle bath geometry OPTIONAL
+    // geo[1] - oi sled bath geometry
+    // snd - sounding (w. navigation in vehicle frame)
     static void transform_oidvl(trn::bath_info **bi, trn::att_info **ai, dvlgeo **geo, mb1_t *r_snd)
     {
         int FN_DEBUG_HI = 6;
@@ -854,6 +1014,304 @@ public:
 
         return;
     }
+
+    // process Delta-T sounding where
+    // Delta-T mounded on vehicle frame
+    // vehcle attitude
+    // oisled nav (mounted on rotating arm)
+    // oisled attitude (mounted on rotating arm)
+    // expects:
+    // bi[0] - vehicle bath (deltaT)
+    // ai[0] - vehicle att
+    // ai[1] - sled att
+    // geo[0] - DeltaT geometry
+    // xgeo[0] - DVL/Kearfott geometry
+    // snd - sounding (w. navigation in vehicle frame)
+    static void transform_oi_deltat(trn::bath_info **bi, trn::att_info **ai, dvlgeo **xgeo, mbgeo **geo, mb1_t *r_snd)
+    {
+        int FN_DEBUG_HI = 6;
+        int FN_DEBUG = 5;
+
+        // validate inputs
+        if(NULL == geo || geo[0] == nullptr || xgeo[0] ==  nullptr){
+            fprintf(stderr, "%s - geometry error : NULL input geo[%p] {%p} xgeo[%p] {%p}\n", __func__, geo, (geo?geo[0]:nullptr), xgeo, (xgeo?xgeo[0]:nullptr));
+            return;
+        }
+        if(geo[0]->beam_count <= 0){
+            fprintf(stderr, "%s - geometry error : beams <= 0 {%u}\n", __func__, geo[0]->beam_count);
+            return;
+        }
+        if(NULL == r_snd || NULL == ai|| NULL == bi){
+            fprintf(stderr, "%s - ERR invalid argument bi[%p] ai[%p] snd[%p]\n", __func__, bi, ai, r_snd);
+            return;
+        }
+
+        if(NULL == ai[0] || NULL == ai[1] || NULL == bi[0] ){
+            fprintf(stderr, "%s - ERR invalid info ai[0][%p] ai[1][%p] bi[0][%p]\n", __func__, ai[0], ai[1], bi[0]);
+            return;
+        }
+
+        // vehicle attitude (relative to NED)
+        // r/p/y (phi/theta/psi)
+        // MB1 assumes vehicle frame, not world frame (i.e. exclude heading)
+        double VATT[3] = {ai[1]->roll(), ai[1]->pitch(), 0.};
+
+        // sensor mounting angles (relative to vehicle, radians)
+        // 3-2-1 euler angles, r/p/y  (phi/theta/psi)
+        // wrt sensor mounted across track, b[0] port, downward facing
+        double SROT[3] = { DTR(geo[0]->svr_deg[0]), DTR(geo[0]->svr_deg[1]), DTR(geo[0]->svr_deg[2])};
+
+        // sensor mounting translation offsets (relative to vehicle CRP, meters)
+        // +x: fwd +y: stbd, +z:down (aka FSK, fwd,stbd,keel)
+        // TODO T is for transform use rSV
+        double STRN[3] = {geo[0]->svt_m[0], geo[0]->svt_m[1], geo[0]->svt_m[2]};
+
+        double XTRN[3] = {xgeo[0]->rot_radius_m, 0., 0.};
+        double XR = ai[1]->pitch() - ai[0]->pitch();
+        double XROT[3] = {0., XR, 0.};
+
+        // beam components in reference sensor frame (mounted center, across track)
+        Matrix beams_SF = dvl_sframe_components(bi[1], xgeo[0]);
+
+        TRN_NDPRINT(FN_DEBUG, "%s: --- \n",__func__);
+
+        TRN_NDPRINT(FN_DEBUG, "VATT[%.3lf, %.3lf, %.3lf]\n", VATT[0], VATT[1], VATT[2]);
+        TRN_NDPRINT(FN_DEBUG, "SROT[%.3lf, %.3lf, %.3lf]\n", SROT[0], SROT[1], SROT[2]);
+        TRN_NDPRINT(FN_DEBUG, "STRN[%.3lf, %.3lf, %.3lf]\n", STRN[0], STRN[1], STRN[2]);
+
+        const char *pinv = (ai[0]->flags().is_set(trn::AF_INVERT_PITCH)? "(p-)" :"(p+)");
+
+        TRN_NDPRINT(FN_DEBUG, "VATT (deg) [%.2lf, %.2lf, %.2lf (%.2lf)] %s\n",
+                    Math::radToDeg(VATT[0]), Math::radToDeg(VATT[1]), Math::radToDeg(VATT[2]), Math::radToDeg(ai[0]->heading()), pinv);
+        TRN_NDPRINT(FN_DEBUG, "XTRN[%.3lf, %.3lf, %.3lf]\n", XTRN[0], XTRN[1], XTRN[2]);
+        TRN_NDPRINT(FN_DEBUG, "XROT[%.3lf, %.3lf, %.3lf]\n", XROT[0], XROT[1], XROT[2]);
+        TRN_NDPRINT(FN_DEBUG, "pitch (deg) veh[%.3lf] ois[%.3lf] angle[%.3lf]\n", Math::radToDeg(ai[0]->pitch()), Math::radToDeg(ai[1]->pitch()), Math::radToDeg(XR));
+        TRN_NDPRINT(FN_DEBUG, "\n");
+
+        // generate coordinate tranformation matrices
+
+        // translate arm rotation point to sled origin
+        Matrix mat_XTRN = affineTranslation(XTRN);
+        // sled arm rotation
+        Matrix mat_XROT = affine321Rotation(XROT);
+        // mounting rotation matrix
+        Matrix mat_SROT = affine321Rotation(SROT);
+        // mounting translation matrix
+        Matrix mat_STRN = affineTranslation(STRN);
+        // vehicle attitude (pitch, roll, heading)
+        Matrix mat_VATT = affine321Rotation(VATT);
+
+        // combine to get composite tranformation
+        // order is significant:
+        // mounting rotations, translate
+        Matrix S0 = mat_XTRN * mat_SROT;
+        // arm rotation
+        Matrix S1 = mat_XROT * S0;
+        // translate to position on arm
+        Matrix S2 = mat_STRN * S1;
+        // appy vehicle attitude
+        Matrix Q = mat_VATT * S2;
+
+        // apply coordinate transforms
+        Matrix beams_VF = Q * beams_SF;
+
+        std::list<trn::beam_tup> beams = bi[1]->beams_raw();
+        std::list<trn::beam_tup>::iterator it;
+
+        // fill in the MB1 record using transformed beams
+        // zero- and one-based indexs
+        int idx[2] = {0, 1};
+        for(it=beams.begin(); it!=beams.end(); it++, idx[0]++, idx[1]++)
+        {
+            // write beam data to MB1 sounding
+            trn::beam_tup bt = static_cast<trn::beam_tup> (*it);
+
+            // beam number (0-indexed)
+            int b = std::get<0>(bt);
+            double range = std::get<1>(bt);
+            // beam components WF x,y,z
+            // matrix row/col (1 indexed)
+            r_snd->beams[idx[0]].beam_num = b;
+            r_snd->beams[idx[0]].rhox = range * beams_VF(1, idx[1]);
+            r_snd->beams[idx[0]].rhoy = range * beams_VF(2, idx[1]);
+            r_snd->beams[idx[0]].rhoz = range * beams_VF(3, idx[1]);
+
+            if(trn_debug::get()->debug() >= 5){
+
+                // calculated beam range (should match measured range)
+                double rho[3] = {r_snd->beams[idx[0]].rhox, r_snd->beams[idx[0]].rhoy, r_snd->beams[idx[0]].rhoz};
+
+                double rhoNorm = vnorm( rho );
+
+                // calculate component angles wrt vehicle axes
+                double axr = (range==0. ? 0. :acos(r_snd->beams[idx[0]].rhox/range));
+                double ayr = (range==0. ? 0. :acos(r_snd->beams[idx[0]].rhoy/range));
+                double azr = (range==0. ? 0. :acos(r_snd->beams[idx[0]].rhoz/range));
+
+                TRN_NDPRINT(FN_DEBUG_HI, "%s: b[%3d] r[%7.2lf] R[%7.2lf]     rhox[%7.2lf] rhoy[%7.2lf] rhoz[%7.2lf]     ax[%6.2lf] ay[%6.2lf] az[%6.2lf]\n",
+                            __func__, b, range, rhoNorm,
+                            r_snd->beams[idx[0]].rhox,
+                            r_snd->beams[idx[0]].rhoy,
+                            r_snd->beams[idx[0]].rhoz,
+                            Math::radToDeg(axr),
+                            Math::radToDeg(ayr),
+                            Math::radToDeg(azr)
+                            );
+            }
+        }
+        TRN_NDPRINT(FN_DEBUG, "%s: --- \n\n",__func__);
+
+        return;
+    }
+
+    // process Delta-T sounding where
+    // Delta-T mounded on vehicle frame
+    // vehcle attitude
+    // oisled nav (mounted on rotating arm)
+    // oisled attitude (mounted on rotating arm)
+    // expects:
+    // bi[0] - vehicle bath (deltaT)
+    // ai[0] - vehicle att
+    // ai[1] - sled att
+    // geo[0] - DeltaT geometry
+    // xgeo[0] - DVL/Kearfott geometry
+    // snd - sounding (w. navigation in vehicle frame)
+//    static void transform_oi_deltat_orig(trn::bath_info **bi, trn::att_info **ai, dvlgeo **xgeo, mbgeo **geo, mb1_t *r_snd)
+//    {
+//        int FN_DEBUG_HI = 6;
+//        int FN_DEBUG = 5;
+//
+//        // validate inputs
+//        if(NULL == geo || geo[0] == nullptr || xgeo[0] ==  nullptr){
+//            fprintf(stderr, "%s - geometry error : NULL input geo[%p] {%p} xgeo[%p] {%p}\n", __func__, geo, (geo?geo[0]:nullptr), xgeo, (xgeo?xgeo[0]:nullptr));
+//            return;
+//        }
+//        if(geo[0]->beam_count <= 0){
+//            fprintf(stderr, "%s - geometry error : beams <= 0 {%u}\n", __func__, geo[0]->beam_count);
+//            return;
+//        }
+//        if(NULL == r_snd || NULL == ai|| NULL == bi){
+//            fprintf(stderr, "%s - ERR invalid argument bi[%p] ai[%p] snd[%p]\n", __func__, bi, ai, r_snd);
+//            return;
+//        }
+//
+//        if(NULL == ai[0] || NULL == ai[1] || NULL == bi[0] ){
+//            fprintf(stderr, "%s - ERR invalid info ai[0][%p] ai[1][%p] bi[0][%p]\n", __func__, ai[0], ai[1], bi[0]);
+//            return;
+//        }
+//
+//        // vehicle attitude (relative to NED)
+//        // r/p/y (phi/theta/psi)
+//        // MB1 assumes vehicle frame, not world frame (i.e. exclude heading)
+//        double VATT[3] = {ai[1]->roll(), ai[1]->pitch(), 0.};
+//
+//        // sensor mounting angles (relative to vehicle, radians)
+//        // 3-2-1 euler angles, r/p/y  (phi/theta/psi)
+//        // wrt sensor mounted across track, b[0] port, downward facing
+//        double SROT[3] = { DTR(geo[0]->svr_deg[0]), DTR(geo[0]->svr_deg[1]), DTR(geo[0]->svr_deg[2])};
+//
+//        // sensor mounting translation offsets (relative to vehicle CRP, meters)
+//        // +x: fwd +y: stbd, +z:down (aka FSK, fwd,stbd,keel)
+//        // TODO T is for transform use rSV
+//        double STRN[3] = {geo[0]->svt_m[0], geo[0]->svt_m[1], geo[0]->svt_m[2]};
+//
+//        double XTRN[3] = {xgeo[0]->rot_radius_m, 0., 0.};
+//        double XR = ai[1]->pitch() - ai[0]->pitch();
+//        double XROT[3] = {0., XR, 0.};
+//
+//        // beam components in reference sensor frame (mounted center, across track)
+//        Matrix beams_SF = dvl_sframe_components(bi[1], xgeo[0]);
+//
+//        TRN_NDPRINT(FN_DEBUG, "%s: --- \n",__func__);
+//
+//        TRN_NDPRINT(FN_DEBUG, "VATT[%.3lf, %.3lf, %.3lf]\n", VATT[0], VATT[1], VATT[2]);
+//        TRN_NDPRINT(FN_DEBUG, "SROT[%.3lf, %.3lf, %.3lf]\n", SROT[0], SROT[1], SROT[2]);
+//        TRN_NDPRINT(FN_DEBUG, "STRN[%.3lf, %.3lf, %.3lf]\n", STRN[0], STRN[1], STRN[2]);
+//
+//        const char *pinv = (ai[0]->flags().is_set(trn::AF_INVERT_PITCH)? "(p-)" :"(p+)");
+//
+//        TRN_NDPRINT(FN_DEBUG, "VATT (deg) [%.2lf, %.2lf, %.2lf (%.2lf)] %s\n",
+//                    Math::radToDeg(VATT[0]), Math::radToDeg(VATT[1]), Math::radToDeg(VATT[2]), Math::radToDeg(ai[0]->heading()), pinv);
+//        TRN_NDPRINT(FN_DEBUG, "XTRN[%.3lf, %.3lf, %.3lf]\n", XTRN[0], XTRN[1], XTRN[2]);
+//        TRN_NDPRINT(FN_DEBUG, "XROT[%.3lf, %.3lf, %.3lf]\n", XROT[0], XROT[1], XROT[2]);
+//        TRN_NDPRINT(FN_DEBUG, "pitch (deg) veh[%.3lf] ois[%.3lf] angle[%.3lf]\n", Math::radToDeg(ai[0]->pitch()), Math::radToDeg(ai[1]->pitch()), Math::radToDeg(XR));
+//        TRN_NDPRINT(FN_DEBUG, "\n");
+//
+//        // generate coordinate tranformation matrices
+//
+//        // translate arm rotation point to sled origin
+//        Matrix mat_XTRN = affineTranslation(XTRN);
+//        // sled arm rotation
+//        Matrix mat_XROT = affine321Rotation(XROT);
+//        // mounting rotation matrix
+//        Matrix mat_SROT = affine321Rotation(SROT);
+//        // mounting translation matrix
+//        Matrix mat_STRN = affineTranslation(STRN);
+//        // vehicle attitude (pitch, roll, heading)
+//        Matrix mat_VATT = affine321Rotation(VATT);
+//
+//        // combine to get composite tranformation
+//        // order is significant:
+//        // mounting rotations, translate
+//        Matrix S0 = mat_XTRN * mat_SROT;
+//        // arm rotation
+//        Matrix S1 = mat_XROT * S0;
+//        // translate to position on arm
+//        Matrix S2 = mat_STRN * S1;
+//        // appy vehicle attitude
+//        Matrix Q = mat_VATT * S2;
+//
+//        // apply coordinate transforms
+//        Matrix beams_VF = Q * beams_SF;
+//
+//        std::list<trn::beam_tup> beams = bi[1]->beams_raw();
+//        std::list<trn::beam_tup>::iterator it;
+//
+//        // fill in the MB1 record using transformed beams
+//        // zero- and one-based indexs
+//        int idx[2] = {0, 1};
+//        for(it=beams.begin(); it!=beams.end(); it++, idx[0]++, idx[1]++)
+//        {
+//            // write beam data to MB1 sounding
+//            trn::beam_tup bt = static_cast<trn::beam_tup> (*it);
+//
+//            // beam number (0-indexed)
+//            int b = std::get<0>(bt);
+//            double range = std::get<1>(bt);
+//            // beam components WF x,y,z
+//            // matrix row/col (1 indexed)
+//            r_snd->beams[idx[0]].beam_num = b;
+//            r_snd->beams[idx[0]].rhox = range * beams_VF(1, idx[1]);
+//            r_snd->beams[idx[0]].rhoy = range * beams_VF(2, idx[1]);
+//            r_snd->beams[idx[0]].rhoz = range * beams_VF(3, idx[1]);
+//
+//            if(trn_debug::get()->debug() >= 5){
+//
+//                // calculated beam range (should match measured range)
+//                double rho[3] = {r_snd->beams[idx[0]].rhox, r_snd->beams[idx[0]].rhoy, r_snd->beams[idx[0]].rhoz};
+//
+//                double rhoNorm = vnorm( rho );
+//
+//                // calculate component angles wrt vehicle axes
+//                double axr = (range==0. ? 0. :acos(r_snd->beams[idx[0]].rhox/range));
+//                double ayr = (range==0. ? 0. :acos(r_snd->beams[idx[0]].rhoy/range));
+//                double azr = (range==0. ? 0. :acos(r_snd->beams[idx[0]].rhoz/range));
+//
+//                TRN_NDPRINT(FN_DEBUG_HI, "%s: b[%3d] r[%7.2lf] R[%7.2lf]     rhox[%7.2lf] rhoy[%7.2lf] rhoz[%7.2lf]     ax[%6.2lf] ay[%6.2lf] az[%6.2lf]\n",
+//                            __func__, b, range, rhoNorm,
+//                            r_snd->beams[idx[0]].rhox,
+//                            r_snd->beams[idx[0]].rhoy,
+//                            r_snd->beams[idx[0]].rhoz,
+//                            Math::radToDeg(axr),
+//                            Math::radToDeg(ayr),
+//                            Math::radToDeg(azr)
+//                            );
+//            }
+//        }
+//        TRN_NDPRINT(FN_DEBUG, "%s: --- \n\n",__func__);
+//
+//        return;
+//    }
 
     // It probably doesn't make sense to filter DVL beams
     // using mbtrnpp, since it assumes they are distributed
