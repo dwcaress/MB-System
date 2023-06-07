@@ -46,24 +46,25 @@ typedef enum {
 
 typedef enum {
     INDEX_ZERO = -1,
-    INDEX_MERGE_LON = -2,
-    INDEX_MERGE_LAT = -3,
-    INDEX_MERGE_HEADING = -4,
-    INDEX_MERGE_SPEED = -5,
-    INDEX_MERGE_SENSORDEPTH = -6,
-    INDEX_MERGE_ROLL = -7,
-    INDEX_MERGE_PITCH = -8,
-    INDEX_MERGE_HEAVE = -9,
-    INDEX_CALC_CONDUCTIVITY = -10,
-    INDEX_CALC_TEMPERATURE = -11,
-    INDEX_CALC_PRESSURE = -12,
-    INDEX_CALC_SALINITY = -13,
-    INDEX_CALC_SOUNDSPEED = -14,
-    INDEX_CALC_POTENTIALTEMP = -15,
-    INDEX_CALC_DENSITY = -16,
-    INDEX_CALC_KTIME = -17,
-    INDEX_CALC_KSPEED = -18,
-    INDEX_TIME_INTERVAL = -19,
+    INDEX_MERGE_ALTITUDE = -2,
+    INDEX_MERGE_LON = -3,
+    INDEX_MERGE_LAT = -4,
+    INDEX_MERGE_HEADING = -5,
+    INDEX_MERGE_SPEED = -6,
+    INDEX_MERGE_SENSORDEPTH = -7,
+    INDEX_MERGE_ROLL = -8,
+    INDEX_MERGE_PITCH = -9,
+    INDEX_MERGE_HEAVE = -10,
+    INDEX_CALC_CONDUCTIVITY = -11,
+    INDEX_CALC_TEMPERATURE = -12,
+    INDEX_CALC_PRESSURE = -13,
+    INDEX_CALC_SALINITY = -14,
+    INDEX_CALC_SOUNDSPEED = -15,
+    INDEX_CALC_POTENTIALTEMP = -16,
+    INDEX_CALC_DENSITY = -17,
+    INDEX_CALC_KTIME = -18,
+    INDEX_CALC_KSPEED = -19,
+    INDEX_TIME_INTERVAL = -20,
 } index_t;
 
 typedef enum {
@@ -225,9 +226,12 @@ int main(int argc, char **argv) {
 
 	bool printheader = false;
 	char file[MB_PATH_MAXLINE] = "";
+	mb_path altitude_file = "";
+	bool altitude_merge = false;
 	mb_path nav_file = "";
 	bool nav_merge = false;
-    bool nav_merge_clip = false;
+    bool merge_clip = false;
+    int decimate = 1;
 	output_t output_mode = OUTPUT_MODE_TAB;
 	int nprintfields = 0;
 	struct printfield printfields[NFIELDSMAX];
@@ -246,7 +250,7 @@ int main(int argc, char **argv) {
 		int c;
 		bool help = false;
 		char printformat[MB_PATH_MAXLINE] = "default";  // TODO(schwehr): Is this used correctly?
-		while ((c = getopt(argc, argv, "CcF:f:I:i:L:l:M:m:N:n:O:o:PpR:r:SsVvWwHh")) != -1)
+		while ((c = getopt(argc, argv, "A:a:CcD:d:F:f:I:i:L:l:M:m:N:n:O:o:PpR:r:SsVvWwHh")) != -1)
 		{
 			switch (c) {
 			case 'H':
@@ -257,9 +261,18 @@ int main(int argc, char **argv) {
 			case 'v':
 				verbose++;
 				break;
+			case 'A':
+			case 'a':
+				sscanf(optarg, "%1023s", altitude_file);
+				altitude_merge = true;
+				break;
 			case 'C':
 			case 'c':
-				nav_merge_clip = true;
+				merge_clip = true;
+				break;
+			case 'D':
+			case 'd':
+				sscanf(optarg, "%d", &decimate);
 				break;
 			case 'F':
 			case 'f':
@@ -371,8 +384,12 @@ int main(int argc, char **argv) {
 			fprintf(stderr, "dbg2       speedmin:                 %f\n", speedmin);
 			fprintf(stderr, "dbg2       timegap:                  %f\n", timegap);
 			fprintf(stderr, "dbg2       file:                     %s\n", file);
+			fprintf(stderr, "dbg2       altitude_merge:           %d\n", altitude_merge);
+			fprintf(stderr, "dbg2       altitude_file:            %s\n", altitude_file);
 			fprintf(stderr, "dbg2       nav_merge:                %d\n", nav_merge);
-			fprintf(stderr, "dbg2       nav_merge_clip:           %d\n", nav_merge_clip);
+			fprintf(stderr, "dbg2       nav_file:                 %s\n", nav_file);
+			fprintf(stderr, "dbg2       merge_clip:               %d\n", merge_clip);
+			fprintf(stderr, "dbg2       decimate:                 %d\n", decimate);
 			fprintf(stderr, "dbg2       nav_file:                 %s\n", nav_file);
 			fprintf(stderr, "dbg2       output_mode:              %d\n", output_mode);
 			fprintf(stderr, "dbg2       printheader:              %d\n", printheader);
@@ -396,11 +413,17 @@ int main(int argc, char **argv) {
 	}
 
 	int error = MB_ERROR_NO_ERROR;
-	int nav_num = 0;
 	char buffer[MB_PATH_MAXLINE];
-	int nav_alloc = 0;
+
+	/* altitude data for merging */
+	int alt_alloc = 0;
+	int alt_num = 0;
+	double *alt_time_d = nullptr;
+	double *alt_altitude = nullptr;
 
 	/* navigation, heading, attitude data for merging in fnv format */
+	int nav_alloc = 0;
+	int nav_num = 0;
 	double *nav_time_d = nullptr;
 	double *nav_navlon = nullptr;
 	double *nav_navlat = nullptr;
@@ -412,6 +435,70 @@ int main(int argc, char **argv) {
 	double *nav_heave = nullptr;
 
 	int time_i[7];
+
+	/* if altitude merging to be done get altitude */
+	if (altitude_merge && strlen(altitude_file) > 0) {
+		/* count the data points in the altitude file */
+		alt_num = 0;
+		const int nchar = MB_PATH_MAXLINE - 1;
+		FILE *fp = fopen(altitude_file, "r");
+		if (fp == nullptr) {
+			fprintf(stderr, "\nUnable to Open Altitude File <%s> for reading\n", altitude_file);
+			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
+			exit(MB_ERROR_OPEN_FAIL);
+		}
+		char *result;
+		while ((result = fgets(buffer, nchar, fp)) == buffer)
+			alt_num++;
+		fclose(fp);
+
+		/* allocate arrays for nav */
+		if (alt_num > 0) {
+			alt_alloc = alt_num;
+			/* status = */ mb_mallocd(verbose, __FILE__, __LINE__, alt_num * sizeof(double), (void **)&alt_time_d, &error);
+			/* status = */ mb_mallocd(verbose, __FILE__, __LINE__, alt_num * sizeof(double), (void **)&alt_altitude, &error);
+
+			/* if error initializing memory then quit */
+			if (error != MB_ERROR_NO_ERROR) {
+				char *message = nullptr;
+				mb_error(verbose, error, &message);
+				fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
+				fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
+				exit(error);
+			}
+		}
+
+		/* read the data points in the altitude file */
+		alt_num = 0;
+		if ((fp = fopen(altitude_file, "r")) == nullptr) {
+			fprintf(stderr, "\nUnable to open altitude file <%s> for reading\n", altitude_file);
+			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
+			exit(MB_ERROR_OPEN_FAIL);
+		}
+    if (fp != NULL) {
+      bool done = false;
+      while (!done) {
+        memset(buffer, 0, MB_PATH_MAXLINE);
+      	char *line_ptr = fgets(buffer, MB_PATH_MAXLINE, fp);
+      	if (line_ptr == NULL) {
+          done = true;
+        }
+        else if (buffer[0] != '#') {
+    			double sec;
+    			const int nget = sscanf(
+    				buffer, "%lf %lf", &alt_time_d[alt_num], &alt_altitude[alt_num]);
+    			bool alt_ok = nget >= 2;
+    			if (alt_num > 0 && alt_time_d[alt_num] <= alt_time_d[alt_num - 1])
+    				alt_ok = false;
+    			if (alt_ok)
+    				alt_num++;
+        }
+      }
+		  fclose(fp);
+    }
+	}
+  if (altitude_merge)
+		fprintf(stderr, "%d %d records read from altitude file %s\n", alt_alloc, alt_num, altitude_file);
 
 	/* if nav merging to be done get nav */
 	if (nav_merge && strlen(nav_file) > 0) {
@@ -675,6 +762,12 @@ int main(int argc, char **argv) {
 				strcpy(printfields[i].format, "%.8f");
 			}
 		}
+		else if (strcmp(printfields[i].name, "mergeAltitude") == 0) {
+			printfields[i].index = INDEX_MERGE_ALTITUDE;
+			if (!printfields[i].formatset) {
+				strcpy(printfields[i].format, "%.3f");
+			}
+		}
 		else if (strcmp(printfields[i].name, "mergeLon") == 0) {
 			printfields[i].index = INDEX_MERGE_LON;
 			if (!printfields[i].formatset) {
@@ -829,13 +922,19 @@ int main(int argc, char **argv) {
     double prior_time_d = 0.0;
 
 	/* read the data records in the auv log file */
+	int decimate_count = 0;
 	int nrecord = 0;
 	while (fread(buffer, recordsize, 1, fp) == 1) {
         bool output_ok = true;
+        decimate_count++;
+	    double time_d = 0.0;
+        for (int ii = 0; ii < nfields; ii++) {
+          if (strcmp(fields[ii].name, "time") == 0)
+            mb_get_binary_double(true, &buffer[fields[ii].index], &time_d);
+        }
 
         /* if needed check timestamp */
-        if (nav_merge && nav_merge_clip) {
-          double time_d = 0.0;
+        if (nav_merge && merge_clip) {
           for (int ii = 0; ii < nfields; ii++) {
             if (strcmp(fields[ii].name, "time") == 0)
               mb_get_binary_double(true, &buffer[fields[ii].index], &time_d);
@@ -846,11 +945,6 @@ int main(int argc, char **argv) {
 
         /* calculate timeInterval */
         if (calculate_time_interval) {
-          double time_d = 0.0;
-          for (int ii = 0; ii < nfields; ii++) {
-            if (strcmp(fields[ii].name, "time") == 0)
-              mb_get_binary_double(true, &buffer[fields[ii].index], &time_d);
-          }
           if (prior_time_d > 0.0) {
             time_interval = time_d - prior_time_d;
           }
@@ -904,8 +998,7 @@ int main(int argc, char **argv) {
 
         /* calculate timestamp by adding Kearfott second-of-day value (utcTime) to seconds to the start of day
          * from the overall timestamp (time) */
-	      double ktime_calc = 0.0;
-	      double time_d = 0.0;
+	    double ktime_calc = 0.0;
         if (ktime_available && calc_ktime) {
             /* else deal with existing values if available */
             double startofday_time_d = 0.0;
@@ -939,12 +1032,32 @@ int main(int argc, char **argv) {
         }
 
 		/* loop over the printfields */
-    if (output_ok) {
-  		for (int i = 0; i < nprintfields; i++) {
+		if (decimate > 1) {
+			if (decimate_count >= decimate) {
+				decimate_count = 0;
+			}
+			else {
+				output_ok = false;
+			}
+		}
+    	if (output_ok) {
+  		  for (int i = 0; i < nprintfields; i++) {
   			const index_t index = static_cast<index_t>(printfields[i].index);
   			// TODO(schwehr): Make this a switch.
   			if (index == INDEX_ZERO) {
   				double dvalue = 0.0;
+  				if (output_mode == OUTPUT_MODE_BINARY)
+  					fwrite(&dvalue, sizeof(double), 1, stdout);
+  				else
+  					fprintf(stdout, printfields[i].format, dvalue);
+  			}
+  			else if (index == INDEX_MERGE_ALTITUDE) {
+  				double dvalue = 0.0;
+  				int jinterp = 0;
+  				mb_linear_interp(verbose, alt_time_d - 1, alt_altitude - 1, alt_num, time_d, &dvalue,
+  				                                           &jinterp, &error);
+  				if (jinterp < 2 || jinterp > nav_num - 2)
+  					dvalue = 0.0;
   				if (output_mode == OUTPUT_MODE_BINARY)
   					fwrite(&dvalue, sizeof(double), 1, stdout);
   				else

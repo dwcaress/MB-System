@@ -1,2 +1,2 @@
-MB-System Version:  "5.7.9beta52"
-MB-System Release Date:  "4 March 2023"
+MB-System Version:  "5.7.9beta53"
+MB-System Release Date:  "7 June 2023"

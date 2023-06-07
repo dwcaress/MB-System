@@ -209,7 +209,7 @@ int mbview_freevectorarrays(int verbose, double **veclon, double **veclat, doubl
 /*------------------------------------------------------------------------------*/
 int mbview_addvector(int verbose, size_t instance, int npoint, double *veclon, double *veclat, double *vecz, double *vecdata,
                      int veccolor, int vecsize, mb_path vecname, double vecdatamin, double vecdatamax, int *error) {
-	if (verbose >= 2) {
+	if (verbose >= 0) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -710,8 +710,8 @@ int mbview_drawvector(size_t instance, int rez) {
   				float red;
   				float green;
   				float blue;
-  				mbview_getcolor(shared.shareddata.vectors[ivec].vectorpts[jpoint].data, shared.shareddata.vectors[ivec].datamax,
-  				                shared.shareddata.vectors[ivec].datamin, MBV_COLORTABLE_NORMAL, (float)0.0, (float)0.0,
+  				mbview_getcolor(shared.shareddata.vectors[ivec].vectorpts[jpoint].data, shared.shareddata.vectors[ivec].datamin,
+  				                shared.shareddata.vectors[ivec].datamax, MBV_COLORTABLE_NORMAL, (float)0.0, (float)0.0,
   				                (float)1.0, (float)0.0, (float)0.0, (float)0.0, colortable_bright_red, colortable_bright_green,
   				                colortable_bright_blue, &red, &green, &blue);
   				if (shared.shareddata.vectors[ivec].vectorpts[jpoint].selected ||

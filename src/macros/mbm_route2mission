@@ -24,7 +24,7 @@
 # Usage:
 #   mbm_route2mission -Iroutefile [-Aaltitudemin/altitudeabort[/altitudedesired]
 #                     -Bbehavior1/behavior2/behavior3/behavior4
-#                     -Ddepthmax/depthabort[/depthdescent]
+#                     -Ddepthconstant[/depthconstant2[/depthlimit]]
 #                     -Fforwarddistance -Ggpsmode -M[sensors]
 #                     -N[spiraldescentaltitude[/startsurvey]] -Omissionfile
 #                     -P[startdistance | startlon/startlat] -Sspeed -Tstarttime -Wwaypointspacing -V -H]
@@ -149,6 +149,7 @@ $behaviorWaypointBottomID = 3;
 $depthmax = 5900.0;
 $depthabort = 6000.0;
 $maxclimbslope = 0.5734;
+$depthlimit = 5900.0;
 
 # spiral descent approach depth
 $spiraldescent = 0;
@@ -334,7 +335,12 @@ if ($speedarg)
 
 if ($deptharg)
 	{
-	if ($deptharg =~ /^(\S+)\/(\S+)/)
+	if ($deptharg =~ /^(\S+)\/(\S+)\/(\S+)/)
+		{
+		($depthconstant, $depthconstant2, $depthlimit)
+			= $deptharg =~ /^(\S+)\/(\S+)\/(\S+)/;
+		}
+	elsif ($deptharg =~ /^(\S+)\/(\S+)/)
 		{
 		($depthconstant, $depthconstant2)
 			= $deptharg =~ /^(\S+)\/(\S+)/;
@@ -894,6 +900,10 @@ for ($i = 0; $i < $nmissionpoints; $i++)
 			die "Mission will fail due to altitude abort at mission point $i\r\n\tTopo:$mtopomaxs[$i]\r\nAbort Altitude:$altitudeabort\r\n";
 			}
 		}
+	if ($mmissiondepths[$i] > $depthlimit)
+		{
+		$mmissiondepths[$i] = $depthlimit;
+		}
 	if ($mmissiondepths[$i] > $depthabort)
 		{
 		$depthabort = $mmissiondepths[$i];
@@ -1140,6 +1150,7 @@ elsif ($verbose)
 		printf "    Forward Looking Distance: $forwarddist (m)\r\n";
 		}
 	printf "    Waypoint Spacing:         $waypointdist (m)\r\n";
+	printf "    Commanded depth limit:    $depthlimit (m)\r\n";
 	printf "    Maximum climb rate:       %f degrees  %f ratio\r\n", $maxclimbrate, $maxslope;
 	if ($startposition)
 		{
@@ -1395,6 +1406,16 @@ if (!$outputoff)
 	print MFILE "# Set End-of-Mission Behaviors\r\n";
 	print MFILE "# \r\n";
 	print MFILE "# \r\n";
+	print MFILE "# zero speed setpoint on surface\r\n";
+	print MFILE "behavior setpoint \r\n";
+	print MFILE "{ \r\n";
+	print MFILE "duration     = 3600; \r\n";
+	print MFILE "heading      = 0.0; \r\n";
+	print MFILE "speed        = 0.0; \r\n";
+	print MFILE "verticalMode = pitch; \r\n";
+	print MFILE "pitch        = 0; \r\n";
+	print MFILE "} \r\n";
+	print MFILE "# \r\n";
 	print MFILE "# acquire gps fix \r\n";
 	print MFILE "behavior getgps  \r\n";
 	print MFILE "{ \r\n";
@@ -1434,6 +1455,17 @@ print "Behavior: acousticUpdate\r\n";
 		print MFILE "	duration = 10; \r\n";
 		print MFILE "	disableAuxLoads = 1; \r\n";
 		print MFILE "} \r\n";
+		print MFILE "# ascend behavior for 30 seconds to give time for sonars to stop logging \r\n";
+		print MFILE "behavior ascend  \r\n";
+		print MFILE "{ \r\n";
+		printf MFILE "duration  = 30; \r\n", $ascendtimes[$i];
+		print MFILE "horizontalMode   = rudder; \r\n";
+		print MFILE "horizontal       = ASCENDRUDDER; \r\n";
+		print MFILE "pitch            = ASCENDPITCH; \r\n";
+		print MFILE "speed            = ASCENTDESCENT_SPEED; \r\n";
+		print MFILE "endDepth         = ASCENDENDDEPTH; \r\n";
+		print MFILE "} \r\n";
+print "Behavior: ascend\r\n";
 		print MFILE "behavior edgetech \r\n";
 		print MFILE "{ \r\n";
 		print MFILE "duration  = RESON_DURATION; \r\n";
@@ -1710,31 +1742,42 @@ print "Behavior: acousticUpdate\n";
 			print MFILE "# \r\n";
 			if ($mappingsonar)
 				{
-    		print MFILE "# Stop data logging on sonars and then turn off power to sonars\r\n";
-    		print MFILE "behavior battery \r\n";
-    		print MFILE "{ \r\n";
-    		print MFILE "	duration = 10; \r\n";
-    		print MFILE "	disableAuxLoads = 1; \r\n";
-    		print MFILE "} \r\n";
-        if ($subbottom || $sidescanlo || $sidescanhi)
-          {
-  				print MFILE "behavior edgetech \r\n";
-  				print MFILE "{ \r\n";
-  				print MFILE "duration  = RESON_DURATION; \r\n";
-  				if ($subbottom)
-  					{
-  					print MFILE "SBP_Power = 0.0; \r\n";
-  					}
-  				if ($sidescanlo)
-  					{
-  					print MFILE "LoSS_Power = 0.0; \r\n";
-  					}
-  				if ($sidescanhi)
-  					{
-  					print MFILE "HiSS_Power = 0.0; \r\n";
-  					}
-  				print MFILE "} \r\n";
-          }
+    			print MFILE "# Stop data logging on sonars and then turn off power to sonars\r\n";
+    			print MFILE "behavior battery \r\n";
+    			print MFILE "{ \r\n";
+    			print MFILE "	duration = 10; \r\n";
+    			print MFILE "	disableAuxLoads = 1; \r\n";
+    			print MFILE "} \r\n";
+				print MFILE "# ascend behavior for 30 seconds to give time for sonars to stop logging \r\n";
+				print MFILE "behavior ascend  \r\n";
+				print MFILE "{ \r\n";
+				printf MFILE "duration  = 30; \r\n", $ascendtimes[$i];
+				print MFILE "horizontalMode   = rudder; \r\n";
+				print MFILE "horizontal       = ASCENDRUDDER; \r\n";
+				print MFILE "pitch            = ASCENDPITCH; \r\n";
+				print MFILE "speed            = ASCENTDESCENT_SPEED; \r\n";
+				print MFILE "endDepth         = ASCENDENDDEPTH; \r\n";
+				print MFILE "} \r\n";
+print "Behavior: ascend\r\n";
+        		if ($subbottom || $sidescanlo || $sidescanhi)
+          			{
+  					print MFILE "behavior edgetech \r\n";
+  					print MFILE "{ \r\n";
+  					print MFILE "duration  = RESON_DURATION; \r\n";
+  					if ($subbottom)
+  						{
+  						print MFILE "SBP_Power = 0.0; \r\n";
+  						}
+  					if ($sidescanlo)
+  						{
+  						print MFILE "LoSS_Power = 0.0; \r\n";
+  						}
+  					if ($sidescanhi)
+  						{
+  						print MFILE "HiSS_Power = 0.0; \r\n";
+  						}
+  					print MFILE "} \r\n";
+          			}
 				print MFILE "behavior reson \r\n";
 				print MFILE "{ \r\n";
 				print MFILE "duration  = RESON_DURATION; \r\n";
@@ -1933,6 +1976,21 @@ print "Behavior: acousticUpdate\n";
   				print MFILE "duration     = 300; \r\n";
   				print MFILE "} \r\n";
 print "Behavior: startsurvey\n";
+				print MFILE "# \r\n";
+				print MFILE "# Waypoint behavior to get back to start of line 1\r\n";
+				printf MFILE "#   Segment length %f meters\r\n", $distance;
+				printf MFILE "#   Minimum depth: %f meters looking forward %f meters along route\r\n", -$mtopomaxs[$i], $forwarddist;
+				printf MFILE "#   Maximum depth: %f meters looking forward %f meters along route\r\n", -$mtopomins[$i], $forwarddist;
+				printf MFILE "#   Vehicle depth: %f meters\r\n", $mmissiondepths[$i];
+				print MFILE "behavior waypoint  \r\n";
+				print MFILE "{ \r\n";
+				printf MFILE "latitude     = %f; \r\n", $mlats[$i];
+				printf MFILE "longitude    = %f; \r\n", $mlons[$i];
+				printf MFILE "duration     = 120; \r\n";
+				printf MFILE "depth        = %f; \r\n", $mmissiondepths[$i];
+				print MFILE "speed        = ASCENTDESCENT_SPEED; \r\n";
+				print MFILE "} \r\n";
+print "Behavior: waypoint\n";
         		}
   			print MFILE "# \r\n";
 			print MFILE "# Acoustic update 4 - sent status ping at end of spiral descent \r\n";

@@ -64,12 +64,13 @@ int mb_navint_add(int verbose, void *mbio_ptr, double time_d, double lon_easting
 	if (mb_io_ptr->nfix == 0 || (time_d > mb_io_ptr->fix_time_d[mb_io_ptr->nfix - 1])) {
 		/* if list if full make room for another nav fix */
 		if (mb_io_ptr->nfix >= MB_ASYNCH_SAVE_MAX) {
-			mb_io_ptr->nfix = MB_ASYNCH_SAVE_MAX - 1;
-			for (int i = 0; i < mb_io_ptr->nfix; i++) {
-				mb_io_ptr->fix_time_d[i] = mb_io_ptr->fix_time_d[i + 1];
-				mb_io_ptr->fix_lon[i] = mb_io_ptr->fix_lon[i + 1];
-				mb_io_ptr->fix_lat[i] = mb_io_ptr->fix_lat[i + 1];
+			int shift = MB_ASYNCH_SAVE_MAX / 2;
+			for (int i = 0; i < mb_io_ptr->nfix - shift; i++) {
+				mb_io_ptr->fix_time_d[i] = mb_io_ptr->fix_time_d[i + shift];
+				mb_io_ptr->fix_lon[i] = mb_io_ptr->fix_lon[i + shift];
+				mb_io_ptr->fix_lat[i] = mb_io_ptr->fix_lat[i + shift];
 			}
+			mb_io_ptr->nfix -= shift;
 		}
 
 		/* add new fix to list */
@@ -426,17 +427,18 @@ int mb_attint_add(int verbose, void *mbio_ptr, double time_d, double heave, doub
 	/* get pointers to mbio descriptor and data structures */
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
-	/* add another fix only if time stamp has changed */
+	/* add another attitude fix only if time stamp has changed */
 	if (mb_io_ptr->nattitude == 0 || (time_d > mb_io_ptr->attitude_time_d[mb_io_ptr->nattitude - 1])) {
 		/* if list if full make room for another attitude fix */
 		if (mb_io_ptr->nattitude >= MB_ASYNCH_SAVE_MAX) {
-			mb_io_ptr->nattitude = MB_ASYNCH_SAVE_MAX - 1;
-			for (int i = 0; i < mb_io_ptr->nattitude; i++) {
-				mb_io_ptr->attitude_time_d[i] = mb_io_ptr->attitude_time_d[i + 1];
-				mb_io_ptr->attitude_heave[i] = mb_io_ptr->attitude_heave[i + 1];
-				mb_io_ptr->attitude_roll[i] = mb_io_ptr->attitude_roll[i + 1];
-				mb_io_ptr->attitude_pitch[i] = mb_io_ptr->attitude_pitch[i + 1];
+			int shift = MB_ASYNCH_SAVE_MAX / 2;
+			for (int i = 0; i < mb_io_ptr->nattitude - shift; i++) {
+				mb_io_ptr->attitude_time_d[i] = mb_io_ptr->attitude_time_d[i  + shift];
+				mb_io_ptr->attitude_heave[i] = mb_io_ptr->attitude_heave[i  + shift];
+				mb_io_ptr->attitude_roll[i] = mb_io_ptr->attitude_roll[i  + shift];
+				mb_io_ptr->attitude_pitch[i] = mb_io_ptr->attitude_pitch[i  + shift];
 			}
+			mb_io_ptr->nattitude -= shift;
 		}
 
 		/* add new fix to list */
@@ -480,7 +482,6 @@ int mb_attint_add(int verbose, void *mbio_ptr, double time_d, double heave, doub
         list used for interpolation/extrapolation. */
 int mb_attint_nadd(int verbose, void *mbio_ptr, int nsamples, double *time_d, double *heave, double *roll, double *pitch,
                    int *error) {
-	int shift;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -498,7 +499,9 @@ int mb_attint_nadd(int verbose, void *mbio_ptr, int nsamples, double *time_d, do
 
 	/* if necessary make room for attitude fixes */
 	if (mb_io_ptr->nattitude + nsamples >= MB_ASYNCH_SAVE_MAX) {
-		shift = mb_io_ptr->nattitude + nsamples - MB_ASYNCH_SAVE_MAX;
+		int shift = MB_ASYNCH_SAVE_MAX / 2;
+		if (mb_io_ptr->nattitude - shift + nsamples >= MB_ASYNCH_SAVE_MAX)
+			shift = mb_io_ptr->nattitude + nsamples - MB_ASYNCH_SAVE_MAX;
 		for (int i = 0; i < mb_io_ptr->nattitude - shift; i++) {
 			mb_io_ptr->attitude_time_d[i] = mb_io_ptr->attitude_time_d[i + shift];
 			mb_io_ptr->attitude_heave[i] = mb_io_ptr->attitude_heave[i + shift];
@@ -664,11 +667,12 @@ int mb_hedint_add(int verbose, void *mbio_ptr, double time_d, double heading, in
 	if (mb_io_ptr->nheading == 0 || (time_d > mb_io_ptr->heading_time_d[mb_io_ptr->nheading - 1])) {
 		/* if list if full make room for another heading fix */
 		if (mb_io_ptr->nheading >= MB_ASYNCH_SAVE_MAX) {
-			mb_io_ptr->nheading = MB_ASYNCH_SAVE_MAX - 1;
-			for (int i = 0; i < mb_io_ptr->nheading; i++) {
-				mb_io_ptr->heading_time_d[i] = mb_io_ptr->heading_time_d[i + 1];
-				mb_io_ptr->heading_heading[i] = mb_io_ptr->heading_heading[i + 1];
+			int shift = MB_ASYNCH_SAVE_MAX / 2;
+			for (int i = 0; i < mb_io_ptr->nheading - shift; i++) {
+				mb_io_ptr->heading_time_d[i] = mb_io_ptr->heading_time_d[i + shift];
+				mb_io_ptr->heading_heading[i] = mb_io_ptr->heading_heading[i + shift];
 			}
+			mb_io_ptr->nheading -= shift;
 		}
 
 		/* add new fix to list */
@@ -706,7 +710,6 @@ int mb_hedint_add(int verbose, void *mbio_ptr, double time_d, double heading, in
 /* 	function mb_hedint_nadd adds multiple heading fixes to the internal
         list used for interpolation/extrapolation. */
 int mb_hedint_nadd(int verbose, void *mbio_ptr, int nsamples, double *time_d, double *heading, int *error) {
-	int shift;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -724,7 +727,9 @@ int mb_hedint_nadd(int verbose, void *mbio_ptr, int nsamples, double *time_d, do
 
 	/* if necessary make room for heading fixes */
 	if (mb_io_ptr->nheading + nsamples >= MB_ASYNCH_SAVE_MAX) {
-		shift = mb_io_ptr->nheading + nsamples - MB_ASYNCH_SAVE_MAX;
+		int shift = MB_ASYNCH_SAVE_MAX / 2;
+		if (mb_io_ptr->nheading - shift + nsamples >= MB_ASYNCH_SAVE_MAX)
+			shift = mb_io_ptr->nheading + nsamples - MB_ASYNCH_SAVE_MAX;
 		for (int i = 0; i < mb_io_ptr->nheading - shift; i++) {
 			mb_io_ptr->heading_time_d[i] = mb_io_ptr->heading_time_d[i + shift];
 			mb_io_ptr->heading_heading[i] = mb_io_ptr->heading_heading[i + shift];
@@ -878,11 +883,12 @@ int mb_depint_add(int verbose, void *mbio_ptr, double time_d, double sonardepth,
 	if (mb_io_ptr->nsonardepth == 0 || (time_d > mb_io_ptr->sonardepth_time_d[mb_io_ptr->nsonardepth - 1])) {
 		/* if list if full make room for another sonardepth fix */
 		if (mb_io_ptr->nsonardepth >= MB_ASYNCH_SAVE_MAX) {
-			mb_io_ptr->nsonardepth = MB_ASYNCH_SAVE_MAX - 1;
-			for (int i = 0; i < mb_io_ptr->nsonardepth; i++) {
-				mb_io_ptr->sonardepth_time_d[i] = mb_io_ptr->sonardepth_time_d[i + 1];
-				mb_io_ptr->sonardepth_sonardepth[i] = mb_io_ptr->sonardepth_sonardepth[i + 1];
+			int shift = MB_ASYNCH_SAVE_MAX / 2;
+			for (int i = 0; i < mb_io_ptr->nsonardepth - shift; i++) {
+				mb_io_ptr->sonardepth_time_d[i] = mb_io_ptr->sonardepth_time_d[i + shift];
+				mb_io_ptr->sonardepth_sonardepth[i] = mb_io_ptr->sonardepth_sonardepth[i + shift];
 			}
+			mb_io_ptr->nsonardepth -= shift;
 		}
 
 		/* add new fix to list */
@@ -1022,11 +1028,12 @@ int mb_altint_add(int verbose, void *mbio_ptr, double time_d, double altitude, i
 	if (mb_io_ptr->naltitude == 0 || (time_d > mb_io_ptr->altitude_time_d[mb_io_ptr->naltitude - 1])) {
 		/* if list if full make room for another altitude fix */
 		if (mb_io_ptr->naltitude >= MB_ASYNCH_SAVE_MAX) {
-			mb_io_ptr->naltitude = MB_ASYNCH_SAVE_MAX - 1;
-			for (int i = 0; i < mb_io_ptr->naltitude; i++) {
-				mb_io_ptr->altitude_time_d[i] = mb_io_ptr->altitude_time_d[i + 1];
-				mb_io_ptr->altitude_altitude[i] = mb_io_ptr->altitude_altitude[i + 1];
+			int shift = MB_ASYNCH_SAVE_MAX / 2;
+			for (int i = 0; i < mb_io_ptr->naltitude - shift; i++) {
+				mb_io_ptr->altitude_time_d[i] = mb_io_ptr->altitude_time_d[i + shift];
+				mb_io_ptr->altitude_altitude[i] = mb_io_ptr->altitude_altitude[i + shift];
 			}
+			mb_io_ptr->naltitude -= shift;
 		}
 
 		/* add new fix to list */

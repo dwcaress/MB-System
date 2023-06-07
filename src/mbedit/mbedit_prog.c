@@ -3224,8 +3224,6 @@ int mbedit_filter_ping(int iping) {
 					/* calculate median if beam not flagged */
 					if (mb_beam_ok(ping[iping].beamflag[jbeam])) {
 						int nbathlist = 0;
-						int nbathsum = 0;
-						// bathsum = 0.0;
 						double bathmedian = 0.0;
 						const int istart = MAX(iping - filter_medianspike_ltrack / 2, 0);
 						const int iend = MIN(iping + filter_medianspike_ltrack / 2, nbuff - 1);
@@ -3234,8 +3232,6 @@ int mbedit_filter_ping(int iping) {
 							const int jend = MIN(jbeam + filter_medianspike_xtrack / 2, ping[iping].beams_bath - 1);
 							for (int j = jstart; j <= jend; j++) {
 								if (mb_beam_ok(ping[i].beamflag[j])) {
-									// bathsum += ping[i].bath[j];
-									nbathsum++;
 									bathlist[nbathlist] = ping[i].bath[j];
 									nbathlist++;
 								}
