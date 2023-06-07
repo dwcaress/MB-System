@@ -25423,7 +25423,7 @@ printf "%s\n" "#define MBSYSTEM_OTPS_LOCATION \"$OTPS_DIR\"" >>confdefs.h
 printf "%s\n" " "
 printf "%s\n" "About to create Makefiles..."
 
-ac_config_files="$ac_config_files Makefile src/Makefile src/mbio/Makefile src/surf/Makefile src/bsio/Makefile src/mbaux/Makefile src/utilities/Makefile src/deprecated/Makefile src/gmt/Makefile src/macros/Makefile src/otps/Makefile src/man/Makefile src/man/man1/Makefile src/man/man3/Makefile src/html/Makefile src/ps/Makefile src/share/Makefile"
+ac_config_files="$ac_config_files Makefile src/Makefile src/mbio/Makefile src/surf/Makefile src/bsio/Makefile src/mbaux/Makefile src/utilities/Makefile src/deprecated/Makefile src/gmt/Makefile src/macros/Makefile src/otps/Makefile src/man/Makefile src/man/man1/Makefile src/man/man3/Makefile src/html/Makefile src/ps/Makefile src/share/Makefile src/mbgrd2gltf/Makefile"
 
 if test "$enable_gsf" = "yes" ; then
     ac_config_files="$ac_config_files src/gsf/Makefile"
@@ -26588,6 +26588,7 @@ do
     "src/html/Makefile") CONFIG_FILES="$CONFIG_FILES src/html/Makefile" ;;
     "src/ps/Makefile") CONFIG_FILES="$CONFIG_FILES src/ps/Makefile" ;;
     "src/share/Makefile") CONFIG_FILES="$CONFIG_FILES src/share/Makefile" ;;
+    "src/mbgrd2gltf/Makefile") CONFIG_FILES="$CONFIG_FILES src/mbgrd2gltf/Makefile" ;;
     "src/gsf/Makefile") CONFIG_FILES="$CONFIG_FILES src/gsf/Makefile" ;;
     "src/mbedit/Makefile") CONFIG_FILES="$CONFIG_FILES src/mbedit/Makefile" ;;
     "src/mbnavedit/Makefile") CONFIG_FILES="$CONFIG_FILES src/mbnavedit/Makefile" ;;
