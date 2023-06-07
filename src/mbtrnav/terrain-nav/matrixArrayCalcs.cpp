@@ -732,7 +732,7 @@ double randn(double mean, double stddev) {
 
 
 char* charCat(char* dest, const char* front, const char* back) {
-	sprintf(dest, "%s%s", front, back);
+	snprintf(dest, strlen(front)+strlen(back)+1, "%s%s", front, back);
 	
 	return dest;
 }

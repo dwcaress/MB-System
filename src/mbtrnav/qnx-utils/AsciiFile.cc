@@ -49,7 +49,7 @@ void AsciiFile::set(CharData *charData)
   char errorBuf[MAX_EXC_STRING_LEN];
 
   if (fprintf(_file, "%s%c", charData->ascii(), _delimiter) < 0) {
-    sprintf(errorBuf, "AsciiFile::set(CharData) - %s", strerror(errno));
+    snprintf(errorBuf, MAX_EXC_STRING_LEN, "AsciiFile::set(CharData) - %s", strerror(errno));
     throw Exception(errorBuf);
   }
 }
@@ -60,7 +60,7 @@ void AsciiFile::set(ShortData *shortData)
   char errorBuf[MAX_EXC_STRING_LEN];
 
   if (fprintf(_file, "%s%c", shortData->ascii(), _delimiter) < 0) {
-    sprintf(errorBuf, "AsciiFile::set(ShortData) - %s", strerror(errno));
+    snprintf(errorBuf, MAX_EXC_STRING_LEN, "AsciiFile::set(ShortData) - %s", strerror(errno));
     throw Exception(errorBuf);
   }
 }
@@ -71,7 +71,7 @@ void AsciiFile::set(IntegerData *integerData)
   char errorBuf[MAX_EXC_STRING_LEN];
 
   if (fprintf(_file, "%s%c", integerData->ascii(), _delimiter) < 0) {
-    sprintf(errorBuf, "AsciiFile::set(IntegerData) - %s", strerror(errno));
+    snprintf(errorBuf, MAX_EXC_STRING_LEN, "AsciiFile::set(IntegerData) - %s", strerror(errno));
     throw Exception(errorBuf);
   }
 }
@@ -82,7 +82,7 @@ void AsciiFile::set(FloatData *floatData)
   char errorBuf[MAX_EXC_STRING_LEN];
 
   if (fprintf(_file, "%s%c", floatData->ascii(), _delimiter) < 0) {
-    sprintf(errorBuf, "AsciiFile::set(FloatData) - %s", strerror(errno));
+    snprintf(errorBuf, MAX_EXC_STRING_LEN, "AsciiFile::set(FloatData) - %s", strerror(errno));
     throw Exception(errorBuf);
   }
 }
@@ -93,7 +93,7 @@ void AsciiFile::set(DoubleData *doubleData)
   char errorBuf[MAX_EXC_STRING_LEN];
 
   if (fprintf(_file, "%s%c", doubleData->ascii(), _delimiter) < 0) {
-    sprintf(errorBuf, "AsciiFile::set(double) - %s", strerror(errno));
+    snprintf(errorBuf, MAX_EXC_STRING_LEN, "AsciiFile::set(double) - %s", strerror(errno));
     throw Exception(errorBuf);
   }
 }
@@ -106,7 +106,7 @@ void AsciiFile::set(StringData *stringData)
   // Make sure string does not contain delimiter character
   if (strchr(stringData->ascii(), _delimiter) != 0) {
 
-    sprintf(errorBuf, 
+    snprintf(errorBuf, MAX_EXC_STRING_LEN,
 	    "AsciiFile::set(string) - string \"%s\" contains delimiter",
 	    stringData->ascii());
 
@@ -114,7 +114,7 @@ void AsciiFile::set(StringData *stringData)
   }
 
   if (fprintf(_file, "%s%c", stringData->ascii(), _delimiter) < 0) {
-    sprintf(errorBuf, "AsciiFile::set(string) - %s", strerror(errno));
+    snprintf(errorBuf, MAX_EXC_STRING_LEN, "AsciiFile::set(string) - %s", strerror(errno));
     throw Exception(errorBuf);
   }
 }
@@ -161,7 +161,7 @@ void AsciiFile::endRecord()
   char errorBuf[MAX_EXC_STRING_LEN];
 
   if (fprintf(_file, "\n") < 0) {
-    sprintf(errorBuf, "AsciiFile::endRecord() - %s", strerror(errno));
+    snprintf(errorBuf, MAX_EXC_STRING_LEN, "AsciiFile::endRecord() - %s", strerror(errno));
     throw Exception(errorBuf);
   }
 }

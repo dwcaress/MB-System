@@ -23,6 +23,7 @@
 #endif
 
 #define BEAM_DEBUG 0
+#define TEMP_BUF_BYTES 512
 
 /*----------------------------------------------------------------------------
  /InitVars member functions
@@ -1260,7 +1261,7 @@ void sensorT::parseSensorSpecs(char* fileName) {
 
 	} else {
       // Throw exception on file open error rather than exit
-      sprintf(temp, "Error opening sensor file %s...\n", fileName);
+      snprintf(temp, 512, "Error opening sensor file %s...\n", fileName);
       fprintf(stderr, "%s: %s", __func__, temp);
       throw Exception(temp);
 	}
@@ -1315,10 +1316,10 @@ void vehicleT::parseVehicleSpecs(char* fileName){
     fstream vehicleFile;
 
     try {
-        char temp[512]={0};
+        char temp[TEMP_BUF_BYTES]={0};
         vehicleFile.open(fileName);
         if(vehicleFile.is_open()) {
-            char temp2[512]={0};
+            char temp2[TEMP_BUF_BYTES]={0};
             char sensorFile[1024]={0};
             //read in vehicleName
             vehicleFile.ignore(256, ':');
@@ -1366,7 +1367,7 @@ void vehicleT::parseVehicleSpecs(char* fileName){
                 char *sensorPath = strstr(sensorFile, name);
 
                 //determine sensor file name
-                sprintf(temp2, "%s%s", sensors[i].name, "_specs.cfg\0");
+                snprintf(temp2, TEMP_BUF_BYTES, "%s%s", sensors[i].name, "_specs.cfg\0");
                 strcpy(sensorPath, temp2);
 
                 //parse sensor file
@@ -1377,7 +1378,7 @@ void vehicleT::parseVehicleSpecs(char* fileName){
 
             vehicleFile.close();
         } else {
-            sprintf(temp,"Error opening file %s...\n", fileName);
+            snprintf(temp,TEMP_BUF_BYTES, "Error opening file %s...\n", fileName);
             fprintf(stderr, "%s: %s", __func__, temp);
             throw Exception(temp);
         }
@@ -1399,9 +1400,9 @@ void vehicleT::displayVehicleInfo() {
     char *bp=obuf;
     memset(obuf,0,1024);
 
-    sprintf(bp,"Vehicle name: %s\n", name);
+    snprintf(bp, 1024, "Vehicle name: %s\n", name);
     bp=obuf+strlen(obuf);
-    sprintf(bp,"Number of sensors: %i\n\n", numSensors);
+    snprintf(bp, 1024-(bp-obuf+1), "Number of sensors: %i\n\n", numSensors);
     bp=obuf+strlen(obuf);
     LOGM(obuf);
 //	LOGM("Vehicle name: %s\n", name);
@@ -1821,9 +1822,9 @@ char* commsT::to_s(char* buf, int buflen) {
 				mapname = NULL;
 				cfgname = NULL;
 			}
-			sprintf(buf, "commsT {type:%c|parameter:%d|vdr:%f|map:%s|cfg:%s|poseT time:%.2f|measT time:%.2f|numMeas:%d|xyz:%lf,%lf,%lf|ofs:%lf,%lf,%lf}",
+			snprintf(buf, buflen, "commsT {type:%c|parameter:%d|vdr:%f|map:%s|cfg:%s|poseT time:%.2f|measT time:%.2f|numMeas:%d|xyz:%lf,%lf,%lf|ofs:%lf,%lf,%lf}",
 					msg_type, parameter, vdr, mapname, cfgname, pt.time, mt.time, mt.numMeas,xyz_sdev.x,xyz_sdev.y,xyz_sdev.z,est_nav_ofs.x,est_nav_ofs.y,est_nav_ofs.z);
-//			int len = sprintf(buf, "commsT {type:%c|parameter:%d|vdr:%f|map:%s|cfg:%s|poseT time:%.2f|measT time:%.2f|numMeas:%d}",
+//			int len = snprintf(buf, buflen, "commsT {type:%c|parameter:%d|vdr:%f|map:%s|cfg:%s|poseT time:%.2f|measT time:%.2f|numMeas:%d}",
 //				msg_type, parameter, vdr, mapname, cfgname, pt.time, mt.time, mt.numMeas);
 //			printf("%d\n", len);
 //			if (msg_type == TRN_MEAS) printf("alphas[0] = %f\n", mt.alphas[0]);

@@ -1483,7 +1483,7 @@ char *TerrainNav::getSessionDir(char *dir_prefix, char *dest, size_t len, bool c
     char dot[]=".";
     char* logPath = getenv("TRN_LOGFILES");
     char dir_base[128] = {0};
-    sprintf(dir_base, "%s",dir_prefix!=NULL ? dir_prefix : LOGDIR_DFL);
+    snprintf(dir_base, 128, "%s",dir_prefix!=NULL ? dir_prefix : LOGDIR_DFL);
     if(NULL==logPath){
         logPath=dot;
     }
@@ -1492,11 +1492,11 @@ char *TerrainNav::getSessionDir(char *dir_prefix, char *dest, size_t len, bool c
     // Note that sequence skips index zero:
     //  <dir_base>-TRN, <dir_base>-TRN.01...
 
-    sprintf(sessiondir, "%s/%s-TRN", logPath, dir_base);
+    snprintf(sessiondir, 512, "%s/%s-TRN", logPath, dir_base);
 //    fprintf(stderr, "%s - trying session directory [%s]\n",__func__, sessiondir);
 
     while(stat(sessiondir, &sb)==0 && S_ISDIR(sb.st_mode)){
-        sprintf(sessiondir, "%s/%s-TRN.%02d", logPath, dir_base, dir_count++);
+        snprintf(sessiondir, 512, "%s/%s-TRN.%02d", logPath, dir_base, dir_count++);
 //        fprintf(stderr,"%s - trying session directory [%s]\n",__func__, sessiondir);
     }
 
@@ -1507,12 +1507,12 @@ char *TerrainNav::getSessionDir(char *dir_prefix, char *dest, size_t len, bool c
     }else{
         // return last tried (even if it doesn't exist)
         if(dir_count>1){
-            sprintf(sessiondir, "%s/%s-TRN.%02d", logPath, dir_base, --dir_count);
+            snprintf(sessiondir, 512, "%s/%s-TRN.%02d", logPath, dir_base, --dir_count);
         }
     }
     // check dest size and copy
     if(NULL!=dest && len>(strlen(sessiondir)+1)){
-        sprintf(dest,"%s/",sessiondir);
+        snprintf(dest, strlen(sessiondir)+2, "%s/",sessiondir);
         retval=dest;
     }
 
@@ -1560,7 +1560,7 @@ void TerrainNav::copyToLogDir()
         
         // Create a latest link that points to the log directory
         //
-        sprintf(dir_spec, "%s/%s", trnLogDir, LatestLogDirName);
+        snprintf(dir_spec, 512, "%s/%s", trnLogDir, LatestLogDirName);
         remove(dir_spec);
         
         strncpy(dir_spec2, this->saveDirectory, 511);
@@ -1597,7 +1597,7 @@ void TerrainNav::copyToLogDir()
     char copybuf[320];
     if (NULL != this->vehicleSpecFile)
     {
-        sprintf(copybuf, "cp %s %s/.", this->vehicleSpecFile,
+        snprintf(copybuf, 320, "cp %s %s/.", this->vehicleSpecFile,
                 this->saveDirectory);
         if (0 != system(copybuf))
             logs(TL_OMASK(TL_TERRAIN_NAV, TL_LOG), "command \'%s\' failed:%s\n",
@@ -1606,7 +1606,7 @@ void TerrainNav::copyToLogDir()
     
     if (NULL != this->particlesFile)
     {
-        sprintf(copybuf, "cp %s %s/.", this->particlesFile,
+        snprintf(copybuf, 320, "cp %s %s/.", this->particlesFile,
                 this->saveDirectory);
         if (0 != system(copybuf))
             logs(TL_OMASK(TL_TERRAIN_NAV, TL_LOG), "command \'%s\' failed:%s\n",
@@ -1618,7 +1618,7 @@ void TerrainNav::copyToLogDir()
     vehicleT *v = new vehicleT(vehicleSpecFile);
     for (int i = 0; i < v->numSensors; i++)
     {
-        sprintf(copybuf, "cp %s %s/.", v->sensors[i].filename,
+        snprintf(copybuf, 320, "cp %s %s/.", v->sensors[i].filename,
                 this->saveDirectory);
         if (0 != system(copybuf))
             logs(TL_OMASK(TL_TERRAIN_NAV, TL_LOG), "command \'%s\' failed:%s\n",

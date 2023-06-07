@@ -55,7 +55,7 @@ void BinaryFile::set(CharData *charData)
   char errorBuf[MAX_EXC_STRING_LEN];
 
   if (fwrite((void *)&value, sizeof(char), 1, _file) < 1) {
-    sprintf(errorBuf, "BinaryFile::set(CharData) - %s", strerror(errno));
+    snprintf(errorBuf, MAX_EXC_STRING_LEN, "BinaryFile::set(CharData) - %s", strerror(errno));
     throw Exception(errorBuf);
   }
 */
@@ -77,7 +77,7 @@ void BinaryFile::set(ShortData *shortData)
   char errorBuf[MAX_EXC_STRING_LEN];
 
   if (fwrite((void *)&value, sizeof(short), 1, _file) < 1) {
-    sprintf(errorBuf, "BinaryFile::set(ShortData) - %s", strerror(errno));
+    snprintf(errorBuf, MAX_EXC_STRING_LEN, "BinaryFile::set(ShortData) - %s", strerror(errno));
     throw Exception(errorBuf);
   }
 */
@@ -99,7 +99,7 @@ void BinaryFile::set(IntegerData *integerData)
   char errorBuf[MAX_EXC_STRING_LEN];
 
   if (fwrite((void *)&value, sizeof(int), 1, _file) < 1) {
-    sprintf(errorBuf, "BinaryFile::set(IntegerData) - %s", strerror(errno));
+    snprintf(errorBuf, MAX_EXC_STRING_LEN, "BinaryFile::set(IntegerData) - %s", strerror(errno));
     throw Exception(errorBuf);
   }
 */
@@ -121,7 +121,7 @@ void BinaryFile::set(FloatData *floatData)
   char errorBuf[MAX_EXC_STRING_LEN];
 
   if (fwrite((void *)&value, sizeof(float), 1, _file) < 1) {
-    sprintf(errorBuf, "BinaryFile::set(FloatData) - %s", strerror(errno));
+    snprintf(errorBuf, MAX_EXC_STRING_LEN, "BinaryFile::set(FloatData) - %s", strerror(errno));
     throw Exception(errorBuf);
   }
 */
@@ -143,7 +143,7 @@ void BinaryFile::set(DoubleData *doubleData)
   char errorBuf[MAX_EXC_STRING_LEN];
 
   if (fwrite((void *)&value, sizeof(double), 1, _file) < 1) {
-    sprintf(errorBuf, "BinaryFile::set(DoubleData) - %s", strerror(errno));
+    snprintf(errorBuf, MAX_EXC_STRING_LEN, "BinaryFile::set(DoubleData) - %s", strerror(errno));
     throw Exception(errorBuf);
   }
 */
@@ -160,7 +160,7 @@ void BinaryFile::set(StringData *stringData)
 
   if (fwrite((void *)value, strlen(value), 1, _file) < 1 ||
       fwrite((void *)&nullChar, sizeof(nullChar), 1, _file) < 1) {
-    sprintf(errorBuf, "BinaryFile::set(StringData) - %s", strerror(errno));
+      snprintf(errorBuf, MAX_EXC_STRING_LEN, "BinaryFile::set(StringData) - %s", strerror(errno));
     throw Exception(errorBuf);
   }
 }
@@ -176,7 +176,7 @@ void BinaryFile::get(CharData *charData)
       throw Exception("eof");
     }
     else {
-      sprintf(errorBuf, "BinaryFile::get(CharData) - %s", strerror(errno));
+        snprintf(errorBuf, MAX_EXC_STRING_LEN, "BinaryFile::get(CharData) - %s", strerror(errno));
       throw Exception(errorBuf);
     }
   }
@@ -196,7 +196,7 @@ void BinaryFile::get(ShortData *shortData)
       throw Exception("eof");
     }
     else {
-      sprintf(errorBuf, "BinaryFile::get(ShortData) - %s", strerror(errno));
+        snprintf(errorBuf, MAX_EXC_STRING_LEN, "BinaryFile::get(ShortData) - %s", strerror(errno));
       throw Exception(errorBuf);
     }
   }
@@ -215,7 +215,7 @@ void BinaryFile::get(IntegerData *integerData)
       throw Exception("eof");
     }
     else {
-      sprintf(errorBuf, "BinaryFile::get(IntegerData) - %s", strerror(errno));
+        snprintf(errorBuf, MAX_EXC_STRING_LEN, "BinaryFile::get(IntegerData) - %s", strerror(errno));
       throw Exception(errorBuf);
     }
   }
@@ -234,7 +234,7 @@ void BinaryFile::get(FloatData *floatData)
       throw Exception("eof");
     }
     else {
-      sprintf(errorBuf, "BinaryFile::get(FloatData) - %s", strerror(errno));
+        snprintf(errorBuf, MAX_EXC_STRING_LEN, "BinaryFile::get(FloatData) - %s", strerror(errno));
       throw Exception(errorBuf);
     }
   }
@@ -254,7 +254,7 @@ void BinaryFile::get(DoubleData *doubleData)
       throw Exception("eof");
     }
     else {
-      sprintf(errorBuf, "BinaryFile::get(DoubleData) - %s", strerror(errno));
+        snprintf(errorBuf, MAX_EXC_STRING_LEN, "BinaryFile::get(DoubleData) - %s", strerror(errno));
       throw Exception(errorBuf);
     }
   }
@@ -278,7 +278,7 @@ void BinaryFile::get(StringData *stringData)
     int c;
     if ((c = getc(_file)) == -1) {
       // File ended before string retrieved
-      sprintf(errorBuf, "BinaryFile::get(StringData) - EOF");
+        snprintf(errorBuf, MAX_EXC_STRING_LEN, "BinaryFile::get(StringData) - EOF");
       throw Exception(errorBuf);
     }
 
@@ -292,7 +292,7 @@ void BinaryFile::get(StringData *stringData)
 
   if (!stringFinished) {
     // File data too big to fit in string
-    sprintf(errorBuf, "BinaryFile::get(StringData) - too many bytes");
+      snprintf(errorBuf, MAX_EXC_STRING_LEN, "BinaryFile::get(StringData) - too many bytes");
     throw Exception(errorBuf);
   }
 
