@@ -72,7 +72,7 @@ const char *TimeTag::ascii()
 
   double mantissa = _value - floor(_value);
 
-  sprintf(ptr, ".%02d", (int )(mantissa * 100));
+  snprintf(ptr, 4, ".%02d", (int )(mantissa * 100));
 
 
   return _asciiBuffer;

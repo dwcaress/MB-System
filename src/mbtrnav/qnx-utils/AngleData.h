@@ -21,7 +21,6 @@
 
 #define AngleTypeMnem "angle"
 
-
 /*
 CLASS 
 AngleData

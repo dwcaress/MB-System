@@ -59,7 +59,7 @@ bool DataLog::newJulianDayLogDirName(std::string& dirName,
   // Test dirnames until one pops
   uint32_t dirs = 0;
   for (dirs = 0; dirs < max_dirs; dirs++) {
-    sprintf(name, "%s/%4d.%03d.%03d", homeDir.c_str(),
+    snprintf(name,homeDir.length(), "%s/%4d.%03d.%03d", homeDir.c_str(),
             st.tm_year+1900, st.tm_yday+1, dirs);
     // We're done if the pathname does not exist
     if (stat(name, &sb) != 0) {
@@ -155,7 +155,7 @@ DataLog::DataLog(const char *name, DataLog::Access access,
     exit(1);
   }
 
-  sprintf(_fileName, "%s/%s.log", auvLogDir, _name);
+  snprintf(_fileName, DLOG_FILENAME_BYTES, "%s/%s.log", auvLogDir, _name);
 
   openFile();
   ************* */
@@ -192,7 +192,7 @@ void DataLog::openFile()
 
   FILE *logfile;
   char origName[100];
-  sprintf(origName,"%s", "");
+  snprintf(origName, 100, "%s", "");
   strcpy(origName, _fileName);
 
   // only do this check if access mode is write
@@ -203,7 +203,7 @@ void DataLog::openFile()
     while ((logfile = fopen(_fileName, "r")) != NULL) {
       //printf("logfile already exists!\n");
       //printf("I will try to append a %d to your file\n", numtries);
-      sprintf(_fileName, "%s.%d",origName,numtries);
+      snprintf(_fileName, DLOG_FILENAME_BYTES, "%s.%d",origName,numtries);
       fclose(logfile);
       numtries++;
       // exit(1);

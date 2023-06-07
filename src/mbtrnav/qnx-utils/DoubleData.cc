@@ -64,7 +64,7 @@ void DoubleData::read(ExternalData *externalData)
 
 const char *DoubleData::ascii()
 {
-  sprintf(_asciiBuffer, asciiFormat(), _value);
+  snprintf(_asciiBuffer, DBLDATA_ASCII_BUFFER_BYTES, asciiFormat(), _value);
   return _asciiBuffer;
 }
 

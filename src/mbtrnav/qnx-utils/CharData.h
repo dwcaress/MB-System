@@ -19,6 +19,7 @@
 #include "DataField.h"
 
 #define CharTypeMnem "char"
+#define ASCII_BUFFER_BYTES 32
 
 /*
 CLASS 
@@ -70,7 +71,7 @@ public:
 protected:
 
   char _value;
-  char _asciiBuffer[32];
+  char _asciiBuffer[ASCII_BUFFER_BYTES];
 };
 
 

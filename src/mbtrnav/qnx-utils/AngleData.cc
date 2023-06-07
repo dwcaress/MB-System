@@ -37,7 +37,7 @@ const char *AngleData::typeMnemonic()
 const char *AngleData::ascii()
 {
   // Convert to degrees and print
-  sprintf(_asciiBuffer, asciiFormat(), _value / Math::RadsPerDeg);
+  snprintf(_asciiBuffer, DBLDATA_ASCII_BUFFER_BYTES, asciiFormat(), _value / Math::RadsPerDeg);
   return _asciiBuffer;
 }
 
