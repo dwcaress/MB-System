@@ -308,14 +308,20 @@ int mb_format_register(int verbose, int *format, void *mbio_ptr, int *error) {
   else if (*format == MBF_HS10JAMS) {
     status = mbr_register_hs10jams(verbose, mbio_ptr, error);
   }
+  else if (*format == MBF_SOIROVNV) {
+    status = mbr_register_soirovnv(verbose, mbio_ptr, error);
+  }
+  else if (*format == MBF_SOIUSBLN) {
+    status = mbr_register_soiusbln(verbose, mbio_ptr, error);
+  }
+  else if (*format == MBF_SAMESURF) {
+    status = mbr_register_samesurf(verbose, mbio_ptr, error);
+  }
   else if (*format == MBF_HSDS2RAW) {
     status = mbr_register_hsds2raw(verbose, mbio_ptr, error);
   }
   else if (*format == MBF_HSDS2LAM) {
     status = mbr_register_hsds2lam(verbose, mbio_ptr, error);
-  }
-  else if (*format == MBF_SAMESURF) {
-    status = mbr_register_samesurf(verbose, mbio_ptr, error);
   }
   else if (*format == MBF_IMAGE83P) {
     status = mbr_register_image83p(verbose, mbio_ptr, error);
@@ -859,6 +865,24 @@ int mb_format_info(int verbose, int *format, int *system, int *beams_bath_max, i
                                platform_source, nav_source, sensordepth_source, heading_source, attitude_source, svp_source,
                                beamwidth_xtrack, beamwidth_ltrack, error);
   }
+  else if (*format == MBF_SOIROVNV) {
+    status = mbr_info_soirovnv(verbose, system, beams_bath_max, beams_amp_max, pixels_ss_max, format_name, system_name,
+                               format_description, numfile, filetype, variable_beams, traveltime, beam_flagging,
+                               platform_source, nav_source, sensordepth_source, heading_source, attitude_source, svp_source,
+                               beamwidth_xtrack, beamwidth_ltrack, error);
+  }
+  else if (*format == MBF_SOIUSBLN) {
+    status = mbr_info_soiusbln(verbose, system, beams_bath_max, beams_amp_max, pixels_ss_max, format_name, system_name,
+                               format_description, numfile, filetype, variable_beams, traveltime, beam_flagging,
+                               platform_source, nav_source, sensordepth_source, heading_source, attitude_source, svp_source,
+                               beamwidth_xtrack, beamwidth_ltrack, error);
+  }
+  else if (*format == MBF_SAMESURF) {
+    status = mbr_info_samesurf(verbose, system, beams_bath_max, beams_amp_max, pixels_ss_max, format_name, system_name,
+                               format_description, numfile, filetype, variable_beams, traveltime, beam_flagging,
+                               platform_source, nav_source, sensordepth_source, heading_source, attitude_source, svp_source,
+                               beamwidth_xtrack, beamwidth_ltrack, error);
+  }
   else if (*format == MBF_HSDS2RAW) {
     status = mbr_info_hsds2raw(verbose, system, beams_bath_max, beams_amp_max, pixels_ss_max, format_name, system_name,
                                format_description, numfile, filetype, variable_beams, traveltime, beam_flagging,
@@ -867,12 +891,6 @@ int mb_format_info(int verbose, int *format, int *system, int *beams_bath_max, i
   }
   else if (*format == MBF_HSDS2LAM) {
     status = mbr_info_hsds2lam(verbose, system, beams_bath_max, beams_amp_max, pixels_ss_max, format_name, system_name,
-                               format_description, numfile, filetype, variable_beams, traveltime, beam_flagging,
-                               platform_source, nav_source, sensordepth_source, heading_source, attitude_source, svp_source,
-                               beamwidth_xtrack, beamwidth_ltrack, error);
-  }
-  else if (*format == MBF_SAMESURF) {
-    status = mbr_info_samesurf(verbose, system, beams_bath_max, beams_amp_max, pixels_ss_max, format_name, system_name,
                                format_description, numfile, filetype, variable_beams, traveltime, beam_flagging,
                                platform_source, nav_source, sensordepth_source, heading_source, attitude_source, svp_source,
                                beamwidth_xtrack, beamwidth_ltrack, error);
@@ -2380,6 +2398,52 @@ int mb_get_format(int verbose, char *filename, char *fileroot, int *format, int 
       found = true;
     }
   }
+  
+  /* look for SOI ROV nav format with filenames of form: EEEEEEEE_sb_sprint_RRRRR.txt
+     where EEEEEEEE is an expedition name like FKt2303030 and RRRRR is an ROV dive id
+     like S0496 */
+  if (!found) {
+    int i;
+    if (strlen(filename) >= 5)
+      i = strlen(filename) - 4;
+    else
+      i = 0;
+    if ((suffix = strstr(&filename[i], ".txt")) != NULL)
+      suffix_len = 4;
+    else
+      suffix_len = 0;
+  	if (suffix_len == 4 && strstr(filename, "_sb_sprint_") != NULL) {
+      if (fileroot != NULL) {
+        strncpy(fileroot, filename, strlen(filename) - suffix_len);
+        fileroot[strlen(filename) - suffix_len] = '\0';
+      }
+      *format = MBF_SOIROVNV;
+      found = true;
+  	}
+  }
+  
+  /* look for SOI USBL nav format with filenames of form: EEEEEEEE_usbl_gga_alpha_RRRRR.txt
+     where EEEEEEEE is an expedition name like FKt2303030 and RRRRR is an ROV dive id
+     like S0496 */
+  if (!found) {
+    int i;
+    if (strlen(filename) >= 5)
+      i = strlen(filename) - 4;
+    else
+      i = 0;
+    if ((suffix = strstr(&filename[i], ".txt")) != NULL)
+      suffix_len = 4;
+    else
+      suffix_len = 0;
+  	if (suffix_len == 4 && strstr(filename, "_usbl_gga_") != NULL) {
+      if (fileroot != NULL) {
+        strncpy(fileroot, filename, strlen(filename) - suffix_len);
+        fileroot[strlen(filename) - suffix_len] = '\0';
+      }
+      *format = MBF_SOIUSBLN;
+      found = true;
+  	}
+  }
 
   /* look for SIO SB2000 prefix convention */
   if (!found) {
@@ -3601,12 +3665,21 @@ int mb_imagelist_read(int verbose, void *imagelist_ptr, int *imagestatus,
                   imagelist->leftrightstereo = MB_IMAGESTATUS_STEREO;
               }
 
-              /* Check for special tags $PARAMETER or #PARAMETER */
+              /* Check for special tags $PARAMETER or #PARAMETER 
+              		- return the entire mbphotomosaic command in string path0
+              		- return the directory path of the imagelist file containing this command 
+              			as string path1 */
               else if (strncmp(buffer, "$PARAMETER", 8) == 0
                   || strncmp(buffer, "#PARAMETER", 8) == 0) {
                   mb_path tmp;
                   int n = sscanf(buffer, "%s %s", tmp, path0);
                   if (n == 2) {
+                  	  strcpy(path1, imagelist->path);
+                  	  char *slash = strrchr(path1, '/');
+                  	  if (slash != NULL)
+                  	  	slash[0] = 0;
+                  	  else
+                  	  	path1[0] = 0;
                       *imagestatus = MB_IMAGESTATUS_PARAMETER;
                       done = true;
                       rdone = true;

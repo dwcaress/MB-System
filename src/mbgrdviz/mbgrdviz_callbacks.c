@@ -2935,7 +2935,6 @@ int do_mbgrdviz_saverisiscriptheading(size_t instance, char *output_file_ptr) {
   int iroute, j;
   void *pjptr = NULL;
   double origin_x, origin_y;
-  int iscript;
   double vvspeed = 0.2;
   double settlingtime = 3.0;
   double altitude = 3.0;
@@ -3038,14 +3037,8 @@ int do_mbgrdviz_saverisiscriptheading(size_t instance, char *output_file_ptr) {
 
           /* if this the first route define the projection */
           if (pjptr == NULL && npointtotal > 0) {
-            double reference_lon = 0.0;
-            double reference_lat = 0.0;
-            for (j = 0; j < npointtotal; j++) {
-              reference_lon += routelon[j];
-              reference_lat += routelat[j];
-            }
-            reference_lon = reference_lon / npointtotal;
-            reference_lat = reference_lat / npointtotal;
+            double reference_lon = routelon[0];
+            double reference_lat = routelat[0];
 
             /* calculate eastings and northings using the appropriate UTM projection */
             int projectionid;
@@ -3097,7 +3090,6 @@ int do_mbgrdviz_saverisiscriptheading(size_t instance, char *output_file_ptr) {
             fprintf(sfp, "## STARTROUTE\r\n");
 
             /* write the route points */
-            iscript = 0;
             vvspeed = 0.20;
             settlingtime = 3.0;
             altitude = 3.0;
@@ -3121,9 +3113,8 @@ int do_mbgrdviz_saverisiscriptheading(size_t instance, char *output_file_ptr) {
             fprintf(sfp, "HDG, %.3f, %d, 6, %.3f\r\n", heading, turndirection, settlingtime);
             headinglast = heading;
             for (j = 0; j < npointtotal; j++) {
-              if (j > 0 && routewaypoint[j] > MBV_ROUTE_WAYPOINT_NONE) {
+              if (j >= 0 && routewaypoint[j] > MBV_ROUTE_WAYPOINT_NONE) {
                 double xxxx, yyyy, zz;
-                iscript++;
                 mb_proj_forward(verbose, pjptr, routelon[j], routelat[j], &xxxx, &yyyy, &error);
                 xxxx = xxxx - origin_x;
                 yyyy = yyyy - origin_y;
@@ -3199,7 +3190,6 @@ int do_mbgrdviz_saverisiscriptnoheading(size_t instance, char *output_file_ptr) 
   int iroute, j;
   void *pjptr = NULL;
   double origin_x, origin_y;
-  int iscript;
   double vvspeed = 0.2;
   double settlingtime = 3.0;
   double altitude = 3.0;
@@ -3300,16 +3290,10 @@ int do_mbgrdviz_saverisiscriptnoheading(size_t instance, char *output_file_ptr) 
                                    routetopo, routebearing, distlateral, distovertopo, slope, &routecolor, &routesize,
                                    routename, &error);
 
-          /* if this the first route define the projection */
+          /* if this the first route define the projection using the starting point */
           if (pjptr == NULL && npointtotal > 0) {
-            double reference_lon = 0.0;
-            double reference_lat = 0.0;
-            for (j = 0; j < npointtotal; j++) {
-              reference_lon += routelon[j];
-              reference_lat += routelat[j];
-            }
-            reference_lon = reference_lon / npointtotal;
-            reference_lat = reference_lat / npointtotal;
+            double reference_lon = routelon[0];
+            double reference_lat = routelat[0];
 
             /* calculate eastings and northings using the appropriate UTM projection */
             int projectionid;
@@ -3361,7 +3345,6 @@ int do_mbgrdviz_saverisiscriptnoheading(size_t instance, char *output_file_ptr) 
             fprintf(sfp, "## STARTROUTE\r\n");
 
             /* write the route points */
-            iscript = 0;
             vvspeed = 0.20;
             settlingtime = 3.0;
             altitude = 3.0;
@@ -3385,9 +3368,8 @@ int do_mbgrdviz_saverisiscriptnoheading(size_t instance, char *output_file_ptr) 
             fprintf(sfp, "HDG, %.3f, %d, 6, %.3f\r\n", heading, turndirection, settlingtime);
             headinglast = heading;
             for (j = 0; j < npointtotal; j++) {
-              if (j > 0 && routewaypoint[j] > MBV_ROUTE_WAYPOINT_NONE) {
+              if (j >= 0 && routewaypoint[j] > MBV_ROUTE_WAYPOINT_NONE) {
                 double xxxx, yyyy, zz;
-                iscript++;
                 mb_proj_forward(verbose, pjptr, routelon[j], routelat[j], &xxxx, &yyyy, &error);
                 xxxx = xxxx - origin_x;
                 yyyy = yyyy - origin_y;
@@ -4404,7 +4386,7 @@ int do_mbgrdviz_openvector(size_t instance, char *input_file_ptr) {
 
       /* add last vector if not already handled */
       if (npoint > 0) {
-        fprintf(stderr, "Adding vector npoints:%d\n", npoint);
+        fprintf(stderr, "Adding vector npoints:%d value min max: %f %f\n", npoint, vectordatamin, vectordatamax);
         status = mbview_addvector(verbose, instance, npoint, vectorlon, vectorlat, vectorz, vectordata, vectorcolor,
                                   vectorsize, vectorname, vectordatamin, vectordatamax, &error);
         npoint = 0;

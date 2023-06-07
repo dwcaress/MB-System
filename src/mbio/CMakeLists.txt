@@ -108,6 +108,8 @@ mbr_sbsiocen.c
 mbr_sbsiolsi.c
 mbr_sbsiomrg.c
 mbr_sbsioswb.c
+mbr_soirovnv.c
+mbr_soiusbln.c
 mbr_sburicen.c
 mbr_sburivax.c
 mbr_segysegy.c

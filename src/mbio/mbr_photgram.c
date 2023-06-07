@@ -269,7 +269,6 @@ int mbr_photgram_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	int *fileheader_initialized;
 	int *formatversion;
 	int index = 0;
-	int skip = 0;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -314,13 +313,11 @@ int mbr_photgram_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 
 	/* check for valid record, loop over reading bytes until a valid
 	    record label is found or the read fails */
-	skip = 0;
 	while (status == MB_SUCCESS && strncmp(&buffer[4], "DD", 2) != 0) {
 		for (int i = 0; i < 7; i++)
 			buffer[i] = buffer[i + 1];
 		read_len = 1;
 		status = mb_fileio_get(verbose, mbio_ptr, (char *)&buffer[7], &read_len, error);
-		skip++;
 	}
 
 

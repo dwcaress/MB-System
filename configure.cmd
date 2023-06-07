@@ -113,8 +113,8 @@ make uninstall (to fully uninstall the installed libraries, headers, and program
 # confining the MB-System compiliation and linking to headers and libraries
 # within the MacPorts structure avoids several issues.
 #
-# This example is relevant for MacOs 10.13 High Sierra to the current MacOs 12
-# Monterey on both Intel and ARM (Apple Silicon) architecture computers.
+# This example is relevant for MacOs 10.13 High Sierra to the current MacOs 13
+# Ventura on both Intel and ARM (Apple Silicon) architecture computers.
 #
 # Install Xcode and the Xcode command line tools, which includes the LLVM
 # compiler suite.

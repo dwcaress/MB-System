@@ -2473,51 +2473,84 @@ int mbsys_reson7k3_print_BITE(int verbose, s7k3_BITE *BITE, int *error) {
   }
 
   /* print Reson 7k data record header information */
-  mbsys_reson7k3_print_header(verbose, &BITE->header, error);
+  if (verbose > 0)
+  	mbsys_reson7k3_print_header(verbose, &BITE->header, error);
 
   /* Reson 7k BITE (record 7021) */
   const char *first;
-  if (verbose >= 2)
+  if (verbose >= 2) {
     first = debug_str;
-  else {
+  }
+  else if (verbose == 1) {
     first = nodebug_str;
     fprintf(stderr, "\n%sMBIO function <%s> called\n", first, __func__);
+  	fprintf(stderr, "%sBITE Structure Contents:\n", first);
+  	fprintf(stderr, "%s     number_reports:             %u\n", first, BITE->number_reports);
+  	for (int i = 0; i < BITE->number_reports; i++) {
+    	s7k3_bitereport *bitereport = &(BITE->bitereports[i]);
+    	fprintf(stderr, "%s     source_name:                %s\n", first, bitereport->source_name);
+    	fprintf(stderr, "%s     source_address:             %u\n", first, bitereport->source_address);
+    	fprintf(stderr, "%s     frequency:                  %f\n", first, bitereport->reserved);
+    	fprintf(stderr, "%s     enumerator:                 %u\n", first, bitereport->reserved2);
+    	s7k3_time *s7kTime = &(bitereport->downlink_time);
+    	fprintf(stderr, "%s     downlink_time:              %4.4d/%3.3d %2.2d:%2.2d:%9.6f\n",
+            first, s7kTime->Year, s7kTime->Day,
+            s7kTime->Hours, s7kTime->Minutes, s7kTime->Seconds);
+    	s7kTime = &(bitereport->uplink_time);
+    	fprintf(stderr, "%s     uplink_time:                %4.4d/%3.3d %2.2d:%2.2d:%9.6f\n",
+            first, s7kTime->Year, s7kTime->Day,
+            s7kTime->Hours, s7kTime->Minutes, s7kTime->Seconds);
+    	s7kTime = &(bitereport->bite_time);
+    	fprintf(stderr, "%s     bite_time:                  %4.4d/%3.3d %2.2d:%2.2d:%9.6f\n",
+            first, s7kTime->Year, s7kTime->Day,
+            s7kTime->Hours, s7kTime->Minutes, s7kTime->Seconds);
+    	fprintf(stderr, "%s     status:                     %u\n", first, bitereport->status);
+    	fprintf(stderr, "%s     number_bite:                %u\n", first, bitereport->number_bite);
+    	fprintf(stderr, "%s     bite_status:                ", first);
+    	for (int j = 0; j < 4; j++)
+      	  fprintf(stderr, "%llu ", (long long unsigned) bitereport->bite_status[j]);
+    	  fprintf(stderr, "\n");
+    	  for (int j = 0; j < bitereport->number_bite; j++) {
+      		s7k3_bitefield *bitefield = &(bitereport->bitefield[j]);
+      		fprintf(stderr, "%s     field[%2d]:                  %u\n", first, j, bitefield->field);
+      		fprintf(stderr, "%s     name[%2d]:                   %s\n", first, j, bitefield->name);
+      		fprintf(stderr, "%s     device_type[%2d]:            %d\n", first, j, bitefield->device_type);
+      		fprintf(stderr, "%s     minimum[%2d]:                %f\n", first, j, bitefield->minimum);
+      		fprintf(stderr, "%s     maximum[%2d]:                %f\n", first, j, bitefield->maximum);
+      		fprintf(stderr, "%s     value[%2d]:                  %f\n", first, j, bitefield->value);
+    	  }
+  	  }
   }
-  fprintf(stderr, "%sStructure Contents:\n", first);
-  fprintf(stderr, "%s     number_reports:             %u\n", first, BITE->number_reports);
-  for (int i = 0; i < BITE->number_reports; i++) {
-    s7k3_bitereport *bitereport = &(BITE->bitereports[i]);
-    fprintf(stderr, "%s     source_name:                %s\n", first, bitereport->source_name);
-    fprintf(stderr, "%s     source_address:             %u\n", first, bitereport->source_address);
-    fprintf(stderr, "%s     frequency:                  %f\n", first, bitereport->reserved);
-    fprintf(stderr, "%s     enumerator:                 %u\n", first, bitereport->reserved2);
-    s7k3_time *s7kTime = &(bitereport->downlink_time);
-    fprintf(stderr, "%s     downlink_time:              %4.4d/%3.3d %2.2d:%2.2d:%9.6f\n",
-            first, s7kTime->Year, s7kTime->Day,
+  else {
+  	fprintf(stdout, "\n");
+  	for (int i = 0; i < BITE->number_reports; i++) {
+    	s7k3_bitereport *bitereport = &(BITE->bitereports[i]);
+    	s7k3_time *s7kTime = &(bitereport->bite_time);
+  		fprintf(stdout, "BITE %d of %d: %2u %16s  %4.4d/%3.3d %2.2d:%2.2d:%9.6f ",
+  			i, BITE->number_reports, bitereport->source_address, bitereport->source_name, 
+            s7kTime->Year, s7kTime->Day,
             s7kTime->Hours, s7kTime->Minutes, s7kTime->Seconds);
-    s7kTime = &(bitereport->uplink_time);
-    fprintf(stderr, "%s     uplink_time:                %4.4d/%3.3d %2.2d:%2.2d:%9.6f\n",
-            first, s7kTime->Year, s7kTime->Day,
-            s7kTime->Hours, s7kTime->Minutes, s7kTime->Seconds);
-    s7kTime = &(bitereport->bite_time);
-    fprintf(stderr, "%s     bite_time:                  %4.4d/%3.3d %2.2d:%2.2d:%9.6f\n",
-            first, s7kTime->Year, s7kTime->Day,
-            s7kTime->Hours, s7kTime->Minutes, s7kTime->Seconds);
-    fprintf(stderr, "%s     status:                     %u\n", first, bitereport->status);
-    fprintf(stderr, "%s     number_bite:                %u\n", first, bitereport->number_bite);
-    fprintf(stderr, "%s     bite_status:                ", first);
-    for (int j = 0; j < 4; j++)
-      fprintf(stderr, "%llu ", (long long unsigned) bitereport->bite_status[j]);
-    fprintf(stderr, "\n");
-    for (int j = 0; j < bitereport->number_bite; j++) {
-      s7k3_bitefield *bitefield = &(bitereport->bitefield[j]);
-      fprintf(stderr, "%s     field[%2d]:                  %u\n", first, j, bitefield->field);
-      fprintf(stderr, "%s     name[%2d]:                   %s\n", first, j, bitefield->name);
-      fprintf(stderr, "%s     device_type[%2d]:            %d\n", first, j, bitefield->device_type);
-      fprintf(stderr, "%s     minimum[%2d]:                %f\n", first, j, bitefield->minimum);
-      fprintf(stderr, "%s     maximum[%2d]:                %f\n", first, j, bitefield->maximum);
-      fprintf(stderr, "%s     value[%2d]:                  %f\n", first, j, bitefield->value);
-    }
+        if (bitereport->status & 0x01)
+        	fprintf(stdout, "Uplink Error   ");
+        else
+        	fprintf(stdout, "Uplink Ok      ");
+        if (bitereport->status & 0x02)
+        	fprintf(stdout, "Downlink Error ");
+        else
+        	fprintf(stdout, "Downlink Ok    ");
+        if (bitereport->status & 0x04)
+        	fprintf(stdout, "BITE Error     ");
+        else
+        	fprintf(stdout, "BITE Ok        ");
+        if ((bitereport->status & 0x18) == 0)
+        	fprintf(stdout, "-Status Ok\n");
+        else if ((bitereport->status & 0x18) == 0x8)
+        	fprintf(stdout, "-Status Warning\n");
+        else if ((bitereport->status & 0x18) == 0x10)
+        	fprintf(stdout, "-Status Error\n");
+        else if ((bitereport->status & 0x18) == 0x18)
+        	fprintf(stdout, "-Status Fatal\n");
+    	}
   }
 
   const int status = MB_SUCCESS;
@@ -5337,8 +5370,11 @@ int mbsys_reson7k3_preprocess(int verbose,     /* in: verbosity level set on com
     /* if requested ignore water column data
      * (will not be included in any output file) */
     if (pars->ignore_water_column) {
+      store->read_WaterColumn = false;
+      store->read_Image = false;
       store->read_Beamformed = false;
       store->read_CompressedBeamformedMagnitude = false;
+      store->read_CompressedWaterColumn = false;
     }
 
     /*--------------------------------------------------------------*/
@@ -5405,6 +5441,11 @@ int mbsys_reson7k3_preprocess(int verbose,     /* in: verbosity level set on com
     /*--------------------------------------------------------------*/
     /* interpolate ancillary values  */
     /*--------------------------------------------------------------*/
+bool dprint = false;
+if (store->time_i[2]== 12 && store->time_i[3]==16 && store->time_i[4]==0 && store->time_i[5]==17)
+	dprint = true;
+if (store->time_i[2]== 12 && store->time_i[3]==16 && store->time_i[4]==3 && store->time_i[5]==45)
+	dprint = true;
 
     int interp_status = mb_linear_interp_longitude(verbose, pars->nav_time_d - 1, pars->nav_lon - 1, pars->n_nav, time_d,
                                                &navlon, &jnav, &interp_error);
@@ -5821,6 +5862,14 @@ int mbsys_reson7k3_preprocess(int verbose,     /* in: verbosity level set on com
           bathydata->depth = zz + sensordepth - heave;
           bathydata->pointing_angle = DTR * theta;
           bathydata->azimuth_angle = DTR * beamAzimuth;
+if (dprint && i == RawDetection->number_beams/2) {
+fprintf(stderr, "\nPing time: %d/%2.2d/%2.2d-%2.2d:%2.2d:%2.2d.%6.6d\n", 
+store->time_i[0], store->time_i[1], store->time_i[2], store->time_i[3], store->time_i[4], store->time_i[5], store->time_i[6]);
+fprintf(stderr, "Heading:%f Roll:%f Pitch:%f Heave:%f Sensordepth:%f\n",
+heading, roll, pitch, heave, sensordepth);
+fprintf(stderr, "Bathy calc: rx_sign:%d tx_sign:%d beamAzimuth:%f beamDepression:%f rr:%f zz:%f xt:%f lt:%f  depth:%f\n",
+rx_sign, tx_sign, beamAzimuth, beamDepression, rr, zz, bathydata->acrosstrack, bathydata->alongtrack, bathydata->depth);
+}
         }
 
         /* set flag */

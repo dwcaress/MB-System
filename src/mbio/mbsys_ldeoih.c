@@ -710,13 +710,11 @@ int mbsys_ldeoih_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, 
       }
     }
     store->pixels_ss = nss;
-    int ngood = 0;
     for (int i = 0; i < nss; i++) {
       if (ss[i] > MB_SIDESCAN_NULL) {
         store->ss[i] = (short)(ss[i] / ss_scale);
         if (store->ss[i] == 0)
           store->ss[i] = 1; //making sure only flagged ss values are exactly zero.
-        ngood++;
       } else{
         store->ss[i] = 0;
       }

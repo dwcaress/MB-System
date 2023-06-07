@@ -45,7 +45,7 @@
 #endif
 
 /* turn on debug statements here */
-//#define MBR_RESON7K3_DEBUG 1
+// #define MBR_RESON7K3_DEBUG 1
 //#define MBR_RESON7K3_DEBUG2 1
 //#define MBR_RESON7K3_DEBUG3 1
 
@@ -8376,9 +8376,10 @@ int mbr_reson7k3_rd_FileCatalog(int verbose, char *buffer, void *store_ptr, int 
     }
   }
 
+  int catalog_count = 0;
   for (unsigned int i = 0; i < FileCatalog->n; i++) {
-    filecatalogdata = &(FileCatalog->filecatalogdata[i]);
-    filecatalogdata->sequence = i;
+    filecatalogdata = &(FileCatalog->filecatalogdata[catalog_count]);
+    filecatalogdata->sequence = catalog_count;
     mb_get_binary_int(true, &buffer[index], &(filecatalogdata->size));
     index += 4;
     mb_get_binary_long(true, &buffer[index], &(filecatalogdata->offset));
@@ -8404,7 +8405,7 @@ int mbr_reson7k3_rd_FileCatalog(int verbose, char *buffer, void *store_ptr, int 
     for (int j = 0;j<8;j++) {
       mb_get_binary_short(true, &buffer[index], &(filecatalogdata->reserved[j]));
       index += 2;
-    }
+    }    
 
     // store time_d for sorting
     time_j[0] = filecatalogdata->s7kTime.Year;
@@ -8417,7 +8418,16 @@ int mbr_reson7k3_rd_FileCatalog(int verbose, char *buffer, void *store_ptr, int 
 
     // store ping_number for sorting
     status = mbr_reson7k3_chk_pingrecord(verbose, filecatalogdata->record_type, &filecatalogdata->pingrecord);
+    
+    // check for unreasonable time stamps, ignore them
+    if (time_i[0] == 2014 || time_i[0] < 2030) {
+    	catalog_count++;
+    }
+    
   }
+  
+  // reset catalog n to good entries only
+  FileCatalog->n = catalog_count;
 
   // sort the data records, leaving the FileHeader record in place at the start
   // of the file, any comments just after the FileHeadeer, and then ordering by
