@@ -412,6 +412,7 @@ endif(buildGUIs)
 add_subdirectory(src/utilities)
 add_subdirectory(src/deprecated)
 add_subdirectory(src/macros)
+add_subdirectory(src/mbgrd2gltf)
 
 if (buildQt)
   add_subdirectory(src/qt-guilib)

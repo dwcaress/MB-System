@@ -17,6 +17,7 @@ src/**/*.jar
 src/gsf/dump_gsf
 src/mbedit/mbedit
 src/mbeditviz/mbeditviz
+src/mbgrd2gltf/mbgrd2gltf
 src/mbgrdviz/mbgrdviz
 src/mbio/stamp-h1
 src/mbio/projections.h

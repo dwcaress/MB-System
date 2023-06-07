@@ -1459,6 +1459,7 @@ AC_CONFIG_FILES([\
     src/html/Makefile \
     src/ps/Makefile \
     src/share/Makefile \
+    src/mbgrd2gltf/Makefile \
     ])
 if test "$enable_gsf" = "yes" ; then
     AC_CONFIG_FILES([\
