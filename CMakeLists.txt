@@ -76,6 +76,8 @@ if (APPLE)
   # Must set PROJ_ROOT to point at directory containing proj-versionX
   # so that find_package() works
   # MacPorts puts projX files in /opt/local/lib/projX
+  ###  set(PROJ_ROOT /opt/local/lib/proj9)
+
   # On Apple, require GMT6 installed with MacPorts
   set(GMT_ROOT /opt/local/lib/gmt6) # Required for FindGMT()
 
